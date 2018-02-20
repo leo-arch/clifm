@@ -1,6 +1,8 @@
 # CLiFM (C version)
 A simple CLI file manager written in C
-Compile with the readline and cap libraries: 
+
+Compile with readline and cap libraries: 
+
 Example:
 $ gcc -g -O2 -mtune=native -lcap -lreadline -o clifm clifm.c
 
