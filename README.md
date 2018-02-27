@@ -1,6 +1,8 @@
 # CLiFM
 > A simple CLI, KISS file manager written in C
 
+![alt_tag](https://github.com/leo-arch/clifm/blob/master/clifm.png)
+
 CliFM is a completely text-based file manager able to perform all the basic operations you may expect from any other FM. Besides these common operations, such as copy, move, remove, etc, CLiFM most distinctive features are:
 
 * Bookmarks: Let's suppose you constantly need to access `/media/data/misc/iso_images`. With CLiFM bookmarks function, to access this location could be as easy as this: `bm`, to call the bookmarks function, and then `1`, provided `/media/data/misc/iso_images` is your first bookmark. 
