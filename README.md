@@ -27,7 +27,7 @@ you can just type:
 Because inspired in Arch Linux and its KISS principle, it is fundamentally aimed to be lightweight, fast, and simple. Weightng approximately 5 MB (!), it is the most lightweight and fastest file manager out there. 
 On Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity
 
-## Running CliFM:
+## Compiling and Running CliFM:
 
 1. Use the `gcc` to compile the program. Don't forget to add the readline and cap libraries: 
 
