@@ -1,5 +1,5 @@
 # CLiFM
-> A simple CLI file manager written in C
+> A simple CLI, KISS file manager written in C
 
 CliFM is a completely text-based file manager able to perform all the basic operations you may expect from any other FM. Because inspired in Arch Linux and its KISS principle, it is fundamentally aimed to be lightweight, fast, and simple. On Arch's notion of 
 simplcity see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity
