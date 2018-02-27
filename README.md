@@ -1,7 +1,7 @@
 # CLiFM
 > A simple CLI, KISS file manager written in C
 
-![alt_tag](https://github.com/leo-arch/clifm/blob/master/clifm.png)
+![alt_tag](https://github.com/leo-arch/clifm/blob/master/images/clifm.png)
 
 CliFM is a completely text-based file manager able to perform all the basic operations you may expect from any other FM. Besides these common operations, such as copy, move, remove, etc, CLiFM most distinctive features are:
 
@@ -23,6 +23,8 @@ you can just type:
       $ mv 12 1 
 
 * Quick search: type `/string` and CliFM will list of the files containing `string` in its name. This function also support wildcards. Example: `/*.png` will list all the .png files.
+
+![alt_tag](https://github.com/leo-arch/clifm/blob/master/images/quick_search.png)
 
 * Just as the `ls` command, CLiFM uses color codes to identify file types. However, and unlike `ls`, CLiFM is also able to distinguish between empty and non-empty files. Once in CliFM, type `colors` to see the entire list of color codes.
 
