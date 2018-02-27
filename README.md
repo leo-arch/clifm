@@ -13,6 +13,8 @@ CliFM is a completely text-based file manager able to perform all the basic oper
  individually, you just select the files and then tell the `paste` command where to paste them:
  
 `sel 1 2 3 6` (or `sel 1-3 6`) and then `paste /media/data/misc`
+
+![alt_tag](https://github.com/leo-arch/clifm/blob/master/images/sel_box.png)
  
  * Open files without the need to specify any program. Via `xdg-open`, if no program was specified, CLiFM will open the file with the deafult program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it
 running in the background.
