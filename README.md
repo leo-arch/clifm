@@ -38,6 +38,14 @@ you can just type:
 
 ![alt_tag](https://github.com/leo-arch/clifm/blob/master/images/dirs.png)
 
+Because half file manager and half terminal emulator, CLiFM also offers the following features:
+
+* Auto-completion
+* History function
+* The ability to run any command just as if you were using your preferred terminal emulator
+* Aliases
+* Logs
+
 Because inspired in Arch Linux and its KISS principle, it is fundamentally aimed to be lightweight, fast, and simple. Weightng approximately 5 MB (!), it is the most lightweight and fastest file manager out there. 
 On Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity
 
