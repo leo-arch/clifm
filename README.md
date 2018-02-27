@@ -1,5 +1,5 @@
 # CLiFM
-> A simple CLI, KISS file manager written in C
+> A simple CLI, KISS, and completely keyboard-driven file manager written in C
 
 ![alt_tag](https://github.com/leo-arch/clifm/blob/master/images/clifm.png)
 
