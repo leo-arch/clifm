@@ -5,7 +5,9 @@
 
 CliFM is a completely text-based file manager able to perform all the basic operations you may expect from any other FM. Besides these common operations, such as copy, move, remove, etc, CLiFM most distinctive features are:
 
-* Bookmarks: Let's suppose you constantly need to access `/media/data/misc/iso_images`. With CLiFM bookmarks function, to access this location could be as easy as this: `bm`, to call the bookmarks function, and then `1`, provided `/media/data/misc/iso_images` is your first bookmark. 
+* Bookmarks: Let's suppose you constantly need to access `/media/data/misc/iso_images`. With CLiFM bookmarks function, to access this location could be as easy as this: `bm`, to call the bookmarks function, and then `1`, provided `/media/data/misc/iso_images` is your first bookmark.
+
+![alt_tag](https://github.com/leo-arch/clifm/blob/master/images/bookmarks.png)
 
 * Files selection: the ability to select file from here and there, even in different instances of the program, and then operate on them as you whish via the Selection Box. Example: `sel 1 4 56 33` will send the files corresponding to these element list numbers to the Selection Box. Then, by typing `sb` you can check the contents of the Selection Box. Let's suppose you want to copy a couple of files from you home directory to some distant path, say `/media/data/misc`. Instead of copying all these files
  individually, you just select the files and then tell the `paste` command where to paste them:
