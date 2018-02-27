@@ -5,6 +5,7 @@ CliFM is a completely text-based file manager able to perform all the basic oper
 
 * Bookmarks
 * Files selection: the ability to select file from here and there, even in different instances of the program, and then operate on them as you whish through the Selection Box.
+* Open files witout the need to specify any program. Via `xdg-open`, if no program was specified, CLiFM will open the file with the deafult program associated to that kind of files. To open a file may be as simple as this: `o 12`
 * The use of list numbers instead of file names. So, instead of:
 
       $ mv file1 dir1
