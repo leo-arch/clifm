@@ -9,8 +9,7 @@ CliFM is a completely text-based file manager able to perform all the basic oper
 
 ![alt_tag](https://github.com/leo-arch/clifm/blob/master/images/bookmarks.png)
 
-* Files selection: the ability to select (and deselect) files from here and there, even in different instances of the program, and then operate on them as you whish via the Selection Box. Example: `sel 1 4 56 33` will send the files corresponding to these element list numbers to the Selection Box. Then, by typing `sb` you can check the contents of the Selection Box. Let's suppose you want to copy a couple of files from you home directory to some distant path, say `/media/data/misc`. Instead of copying all these files
- individually, you just select the files and then tell the `paste` command where to paste them:
+* Files selection: the ability to select (and deselect) files from here and there, even in different instances of the program, and then operate on them as you whish via the Selection Box. Example: `sel 1 4 56 33` will send the files corresponding to these element list numbers to the Selection Box. Then, by typing `sb` you can check the contents of the Selection Box. Let's suppose you want to copy a couple of files from you home directory to some distant path, say `/media/data/misc`. Instead of copying all these files individually, you just select the files and then tell the `paste` command where to paste them:
  
 `sel 1 2 3 6` (or `sel 1-3 6`) and then `paste /media/data/misc`
 
@@ -42,10 +41,13 @@ Because half file manager and half terminal emulator, CLiFM also offers the foll
 
 * Auto-completion
 * History function
-* The ability to run any command just as if you were using your preferred terminal emulator (which makes it a very basic shell)
+* The ability to run any command just as if you were using your preferred terminal emulator (which makes it a basic shell)
 * Aliases
 * Logs
 * Prompt and profile commands
+
+Finally, all CLiFM options could be handled directly by command line, by passing parameters to the program, or via plain
+text configuration files, located in `~/.config/clifm`.
 
 Insofar as it is heavily inspired in Arch Linux and its KISS principle, CLiFM is fundamentally aimed to be lightweight, fast, and simple. Weighing approximately 5 MB (!), it is the most lightweight and fastest file manager out there. 
 On Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity
