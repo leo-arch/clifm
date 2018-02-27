@@ -9,7 +9,7 @@ CliFM is a completely text-based file manager able to perform all the basic oper
 
 ![alt_tag](https://github.com/leo-arch/clifm/blob/master/images/bookmarks.png)
 
-* Files selection: the ability to select file from here and there, even in different instances of the program, and then operate on them as you whish via the Selection Box. Example: `sel 1 4 56 33` will send the files corresponding to these element list numbers to the Selection Box. Then, by typing `sb` you can check the contents of the Selection Box. Let's suppose you want to copy a couple of files from you home directory to some distant path, say `/media/data/misc`. Instead of copying all these files
+* Files selection: the ability to select (and deselect) files from here and there, even in different instances of the program, and then operate on them as you whish via the Selection Box. Example: `sel 1 4 56 33` will send the files corresponding to these element list numbers to the Selection Box. Then, by typing `sb` you can check the contents of the Selection Box. Let's suppose you want to copy a couple of files from you home directory to some distant path, say `/media/data/misc`. Instead of copying all these files
  individually, you just select the files and then tell the `paste` command where to paste them:
  
 `sel 1 2 3 6` (or `sel 1-3 6`) and then `paste /media/data/misc`
