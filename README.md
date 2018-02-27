@@ -54,7 +54,7 @@ On Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Lin
 
 ## Compiling and Running CliFM:
 
-1. Use the `gcc` to compile the program. Don't forget to add the readline and cap libraries: 
+1. Use `gcc` to compile the program. Don't forget to add the readline and cap libraries: 
 
        $ gcc -g -O2 -mtune=native -lcap -lreadline -o clifm clifm.c
 
