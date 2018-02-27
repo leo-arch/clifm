@@ -3,8 +3,9 @@
 
 CliFM is a completely text-based file manager able to perform all the basic operations you may expect from any other FM. Besides these common operations, such as copy, move, remove, etc, CLiFM most distinctive features are:
 
-* Bookmarks
-* Files selection: the ability to select file from here and there, even in different instances of the program, and then operate on them as you whish through the Selection Box. Example: `sel 1 4 56 33` will send the files corresponding to these element list numners to the Selection Box. Then, by typing `sb` you can check the contents of the Selection Box. Let's suppose you want to copy a couple of files from you home directory to some distant path, say /media/data/misc. Instead of copying all these files
+* Bookmarks: Let's suppose you constantly need to access `/media/data/misc/iso_images`. With CLiFM bookmarks function, to access this location could be as easy as this: `bm`, to call the bookmarks function, and then `1`, provided `/media/data/misc/iso_images` is your first bookmark. 
+
+* Files selection: the ability to select file from here and there, even in different instances of the program, and then operate on them as you whish via the Selection Box. Example: `sel 1 4 56 33` will send the files corresponding to these element list numbers to the Selection Box. Then, by typing `sb` you can check the contents of the Selection Box. Let's suppose you want to copy a couple of files from you home directory to some distant path, say `/media/data/misc`. Instead of copying all these files
  individually, you just select the files and then tell the `paste` command where to paste them:
  
 `sel 1 2 3 6` (or `sel 1-3 6`) and then `paste /media/data/misc`
@@ -19,8 +20,10 @@ you can just type:
 
       $ mv 12 1 
 
->
-Because inspired in Arch Linux and its KISS principle, it is fundamentally aimed to be lightweight, fast, and simple. On Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity
+* Quick search: type `/string` and CliFM will list of the files containing `string` in its name. This function also support wildcards. Example: `/*.png` will list all the .png files.
+
+Because inspired in Arch Linux and its KISS principle, it is fundamentally aimed to be lightweight, fast, and simple. Weightng approximately 5 MB (!), it is the most lightweight and fastest file manager out there. 
+On Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity
 
 ## Running CliFM:
 
