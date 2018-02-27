@@ -45,6 +45,7 @@ Because half file manager and half terminal emulator, CLiFM also offers the foll
 * The ability to run any command just as if you were using your preferred terminal emulator (which makes it a very basic shell)
 * Aliases
 * Logs
+* Prompt and profile commands
 
 Insofar as it is heavily inspired in Arch Linux and its KISS principle, CLiFM is fundamentally aimed to be lightweight, fast, and simple. Weighing approximately 5 MB (!), it is the most lightweight and fastest file manager out there. 
 On Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity
