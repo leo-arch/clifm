@@ -47,7 +47,7 @@ Because half file manager and half terminal emulator, CLiFM also offers the foll
 * Prompt and profile commands
 
 Finally, all CLiFM options could be handled directly by command line, by passing parameters to the program, or via plain
-text configuration files, located in `~/.config/clifm`.
+text configuration files, located in `~/.config/clifm/`.
 
 Insofar as it is heavily inspired in Arch Linux and its KISS principle, CLiFM is fundamentally aimed to be lightweight, fast, and simple. Weighing approximately 5 MB (!), it is the most lightweight and fastest file manager out there. 
 On Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity
