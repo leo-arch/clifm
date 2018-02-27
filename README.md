@@ -32,6 +32,8 @@ you can just type:
 
 * Just as the `ls` command, CLiFM uses color codes to identify file types. However, and unlike `ls`, CLiFM is also able to distinguish between empty and non-empty files. Once in CliFM, type `colors` to see the entire list of color codes.
 
+![alt_tag](https://github.com/leo-arch/clifm/blob/master/images/colors.png)
+
 Because inspired in Arch Linux and its KISS principle, it is fundamentally aimed to be lightweight, fast, and simple. Weightng approximately 5 MB (!), it is the most lightweight and fastest file manager out there. 
 On Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity
 
