@@ -70,5 +70,4 @@ Just try it and run the `help` command to learn more about CliFM. Once in the Cl
 
       [user@hostname:S] ~/ $ help
 
-I you find some bug, and you will, try to fix it. It basically works, howerver; I myself use it as my main, and only, file manager;
-I couldn't be so bad, isn't it?
+I you find some bug, and you will, try to fix it. It basically works, howerver; I myself use it as my main, and indeed only, file manager; it couldn't be so bad, isn't it?
