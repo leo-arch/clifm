@@ -56,7 +56,7 @@ On Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Lin
 
 1. Use `gcc` to compile the program. Don't forget to add the readline and cap libraries: 
 
-       $ gcc -g -O2 -mtune=native -lcap -lreadline -o clifm clifm.c
+       $ gcc -O2 -march=native -lcap -lreadline -o clifm clifm.c
 
 2. Run the binary file produced by `gcc`:
 
