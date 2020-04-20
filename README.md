@@ -56,13 +56,13 @@ On Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Lin
 
 ## Dependencies:
 
-`glibc`, `ncurses`, `libcap`, `readline`, `coreutils` (providing basic programs such as rm, cp, mkdir, etc). For Archers: all these deps are part of the `core` repo, and `glibc` is also part of the `base` metapackage. In Debian systems two packages must be installed before compilation: `libcap-dev` and `libreadline-dev`. Otional dependencies: `du` (to check directory sizes), `xdg-utils` and `which` (without `which`, `xdg-open` will fail to get the default application for files).
+`glibc`, `ncurses`, `libcap`, `readline`, `coreutils` (providing basic programs such as rm, cp, mkdir, etc). For Archers: All these deps are part of the `core` repo, and `glibc` is also part of the `base` metapackage. In Debian systems two packages must be installed before compilation: `libcap-dev` and `libreadline-dev`. Otional dependencies: `du` (to check directory sizes), `xdg-utils` and `which` (without `which`, `xdg-open` will fail to get the default application for files).
 
 ## Compiling and Running CliFM:
 
 1. Use `gcc` to compile the program. Don't forget to link the readline and cap libraries: 
 
-       $ gcc -O2 -march=native -fstack-protector-string -s -lcap -lreadline -o clifm clifm.c
+       $ gcc -O2 -march=native -fstack-protector-strong -s -lcap -lreadline -o clifm clifm.c
 
 2. Run the binary file produced by `gcc`:
 
