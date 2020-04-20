@@ -1,7 +1,7 @@
 # CLiFM
 > A simple CLI, KISS, and completely keyboard-driven file manager written in C
 
-This new version (0.11.6-2) brings a lot (really, a lot) of bug fixes and some new features like: a trash system (following the freedesktop specification), keyboard shorcuts (very handy), a little messages system to keep track of important messages and errors, "sel" keyword expansion and ranges expansion (use the help function for more information).
+This new version (0.11.6-2) brings a lot (really, a lot) of bug fixes and some new features like: a trash system (following the freedesktop specification), keyboard shorcuts (very handy), a little messages system to keep track of important messages and errors, "sel" keyword expansion and ranges expansion (use the help function for more information). I also added support for translations (using gettext).
 
 ![alt_tag](https://github.com/leo-arch/clifm/blob/master/images/clifm.png)
 
@@ -54,11 +54,15 @@ text configuration files, located in `~/.config/clifm/`.
 Insofar as it is heavily inspired in Arch Linux and its KISS principle, CLiFM is fundamentally aimed to be lightweight, fast, and simple. Weighing approximately 5 MB (!), it is the most lightweight and fastest file manager out there. 
 On Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity
 
+## Dependencies:
+
+'glibc', 'ncurses', 'libcap', 'readline', 'coreutils' (providing basic programs such as rm, cp, mkdir, etc). For Archers: all these deps are part of the 'core' repo, and 'glibc' is also part of the 'base' metapackage. In Debian systems two packages must be installed: 'libcap-dev' and 'libreadline-dev'. Otional dependencies: 'du' (to check directory sizes), 'xdg-utils' and 'which' (without 'which' 'xdg-open' will fail to get the default application for files).
+
 ## Compiling and Running CliFM:
 
 1. Use `gcc` to compile the program. Don't forget to link the readline and cap libraries: 
 
-       $ gcc -O2 -march=native -lcap -lreadline -o clifm clifm.c
+       $ gcc -O2 -march=native -fstack-protector-string -s -lcap -lreadline -o clifm clifm.c
 
 2. Run the binary file produced by `gcc`:
 
@@ -72,4 +76,9 @@ Just try it and run the `help` command to learn more about CliFM. Once in the Cl
 
       [user@hostname:S] ~/ $ help
 
+## Translating CliFM
+
+This last version includes a spanish translation. To use it, simply copy 'translations/spanish/clifm.mo' to
+ '/usr/share/locale/es/LC_MESSAGES/'. New translations are welcome. You can dinf the .pot file in 'translations/clifm.pot'.
+ 
 I you find some bug, and you will, try to fix it. It basically works, howerver; I myself use it as my main, and indeed only, file manager; it couldn't be so bad, isn't it?
