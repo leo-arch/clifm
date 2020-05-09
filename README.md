@@ -1,7 +1,7 @@
 # CLiFM
 > A simple CLI, KISS, and completely keyboard-driven file manager written in C
 
-This new version (0.11.6-2) brings a lot (really, a lot) of bug fixes and some new features like: a trash system (following the freedesktop specification), keyboard shorcuts (very handy), a little messages system to keep track of important messages and errors, "sel" keyword expansion and ranges expansion (use the help function for more information). I also added support for translations (using `gettext`).
+This new version (0.11.6-3) brings a lot (really, a lot) of bug fixes and some new features like: a trash system (following the freedesktop specification), keyboard shorcuts (very handy), a little messages system to keep track of important messages and errors, "sel" keyword expansion and ranges expansion (use the help function for more information). I also added support for translations (using `gettext`).
 
 ![alt_tag](https://github.com/leo-arch/clifm/blob/master/images/clifm.png)
 
