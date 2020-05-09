@@ -56,7 +56,7 @@ On Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Lin
 
 ## Dependencies:
 
-`glibc`, `ncurses`, `libcap`, `readline`, `coreutils` (providing basic programs such as rm, cp, mkdir, etc). For Archers: All these deps are part of the `core` repo, and `glibc` is also part of the `base` metapackage. In Debian systems two packages must be installed before compilation: `libcap-dev` and `libreadline-dev`. Otional dependencies: `du` (to check directory sizes), `xdg-utils` and `which` (without `which`, `xdg-open` will fail to get the default application for files).
+`glibc`, `ncurses`, `libcap`, `readline`, `coreutils` (providing basic programs such as rm, cp, mkdir, etc). For Archers: All these deps are part of the `core` repo, and `glibc` is also part of the `base` metapackage. In Debian systems two packages must be installed before compilation: `libcap-dev` and `libreadline-dev`. In Fedora you need `libcap-devel` and `readline-devel`. Otional dependencies: `du` (to check directory sizes), `xdg-utils` and `which` (without `which`, `xdg-open` will fail to get the default application for files).
 
 ## Compiling and Running CliFM:
 
