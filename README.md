@@ -56,19 +56,32 @@ On Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Lin
 
 ## Dependencies:
 
-`glibc`, `ncurses`, `libcap`, `readline`, `coreutils` (providing basic programs such as rm, cp, mkdir, etc). For Archers: All these deps are part of the `core` repo, and `glibc` is also part of the `base` metapackage. In Debian systems two packages must be installed before compilation: `libcap-dev` and `libreadline-dev`. In Fedora you need `libcap-devel` and `readline-devel`. Otional dependencies: `du` (to check directory sizes), `xdg-utils` and `which` (without `which`, `xdg-open` will fail to get the default application for files).
+`glibc`, `ncurses`, `libcap`, `readline`, `coreutils` (providing basic programs such as rm, cp, mkdir, etc). For Archers: All these deps are part of the `core` repo, and `glibc` is also part of the `base` metapackage. In Debian systems two packages must be installed before compilation: `libcap-dev` and `libreadline-dev`. In Fedora you need `libcap-devel` and `readline-devel`. Otional dependencies: `xdg-utils` and `which` (without `which`, `xdg-open` will fail to get the default application for files).
 
 ## Compiling and Running CliFM:
 
-1. Use `gcc` to compile the program. Don't forget to link the readline and cap libraries: 
+If using Arch, just clone, build, and install the package issuing the following commands:
+
+       $ git clone https://github.com/leo-arch/clifm.git
+       $ cd clifm
+       $ makepkg --install
+
+If using another distro:
+
+1. Clone the repository
+
+       $ git clone https://github.com/leo-arch/clifm.git
+       $ cd clifm
+
+2. Use `gcc` to compile the program. Don't forget to link the readline and cap libraries: 
 
        $ gcc -O2 -march=native -fstack-protector-strong -s -lcap -lreadline -o clifm clifm.c
 
-2. Run the binary file produced by `gcc`:
+3. Run the binary file produced by `gcc`:
 
        $ ./clifm`
 
-Of course, you can copy this binary to `/usr/bin` or `/usr/local/bin` and then run the program as follows:
+Of course, you can copy this binary to `/usr/bin` or `/usr/local/bin`, or anywhere in your PATH, and then run the program as always:
 
        $ clifm
 
