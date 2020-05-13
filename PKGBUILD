@@ -9,7 +9,7 @@ url="https://github.com/leo-arch/clifm"
 license=(GPL2)
 depends=('glibc' 'ncurses' 'libcap' 'readline' 'coreutils')
 makedepends=('git')
-optdepends=('xdg-utils: automatically open files via their default associated program' 'du: Get directories size')
+optdepends=('xdg-utils: Automatically open files via their default associated program' 'du: Get directories size')
 source=("git+${url}.git")
 sha256sums=('SKIP')
 
