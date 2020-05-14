@@ -75,7 +75,7 @@ If using another distro:
 
 2. Use `gcc` to compile the program. Don't forget to link the readline and cap libraries: 
 
-       $ gcc -O2 -march=native -fstack-protector-strong -s -lcap -lreadline -o clifm clifm.c
+       $ gcc -O3 -march=native -fstack-protector-strong -s -lcap -lreadline -o clifm clifm.c
 
 3. Run the binary file produced by `gcc`:
 
