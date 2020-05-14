@@ -15,7 +15,7 @@ sha256sums=('SKIP')
 
 build() {
   cd "${srcdir}/${pkgname}"
-  gcc -O2 -mtune=native -s -fstack-protector-strong -lcap -lreadline -o clifm clifm.c 
+  gcc -O3 -mtune=native -s -fstack-protector-strong -lcap -lreadline -o clifm clifm.c 
 }
 
 package() {
