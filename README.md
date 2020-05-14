@@ -94,4 +94,4 @@ Just try it and run the `help` command to learn more about CliFM. Once in the Cl
 This last version includes a spanish translation. To use it, simply copy `translations/spanish/clifm.mo` to
  `/usr/share/locale/es/LC_MESSAGES/` in your local machine. New translations are welcome. You can find the .pot file in `translations/clifm.pot`.
  
-I you find some bug, and you will, try to fix it. It basically works, howerver; I myself use it as my main, and indeed only, file manager; it couldn't be so bad, isn't it?
+I you find some bug, and you will, please let me know it. It basically works, however; I myself use it as my main, and indeed only, file manager; it couldn't be so bad, isn't it?
