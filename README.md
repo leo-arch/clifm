@@ -87,7 +87,7 @@ Of course, you can copy this binary to `/usr/bin` or `/usr/local/bin`, or anywhe
 
 Just try it and run the `help` command to learn more about CliFM. Once in the CliFM prompt, which looks like any terminal prompt, type `help` or `?`:
 
-      [user@hostname:S] ~/ $ help
+      [user@hostname] ~/ $ help
 
 ## Translating CliFM
 
