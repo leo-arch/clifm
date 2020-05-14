@@ -20,6 +20,6 @@ build() {
 
 package() {
   cd "${srcdir}/${pkgname}"
-  install -D -m755 $pkgname "${pkgdir}/usr/bin/$pkgname"
+  install -Dm755 $pkgname "${pkgdir}/usr/bin/$pkgname"
 }
 
