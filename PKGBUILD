@@ -1,7 +1,7 @@
 # Maintainer: archcrack <johndoe.arch@outlook.com>
 
 pkgname=clifm
-pkgver=0.11.6.3
+pkgver=0.11.6.4
 pkgrel=1
 pkgdesc="The KISS file manager: text-based, ultra-lightweight, lightning fast, and written in C"
 arch=(any)
@@ -15,7 +15,7 @@ sha256sums=('SKIP')
 
 build() {
   cd "${srcdir}/${pkgname}"
-  gcc -O3 -mtune=native -s -fstack-protector-strong -lcap -lreadline -o clifm clifm.c 
+  gcc -O3 -march=native -s -fstack-protector-strong -lcap -lreadline -o clifm clifm.c 
 }
 
 package() {
