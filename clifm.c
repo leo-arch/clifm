@@ -336,6 +336,7 @@ of course you can grep it to find, say, linux' macros, as here. */
 	it will never leave the beta state.
 
 
+ * (DONE) Add ELN auto-expansion. Great!!!!
  * (DONE) Fix file sizes (from MB to MiB)
  * (DONE) The properties function prints "linkname: No such file or directory"
 	in case of a broken symlink, which is vague: the link does exists; what 
@@ -1153,10 +1154,10 @@ program_invocation_short_name variable and asprintf() */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\033c")
 /* #define CLEAR write(STDOUT_FILENO, "\033c", 3) */
-#define VERSION "0.11.6-4"
+#define VERSION "0.12.1"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "May 14, 2020"
+#define DATE "May 18, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -1914,6 +1915,7 @@ char **get_substr(char *str, const char ifs)
 
 /* ###FUNCTIONS PROTOTYPES### */
 
+void signal_handler(int sig_num);
 void *xcalloc(void *ptr, size_t nmemb, size_t size);
 void *xrealloc(void *ptr, size_t size);
 void free_stuff(void);
@@ -1923,6 +1925,7 @@ void init_shell(void);
 void xdg_open_check(void);
 void splash(void);
 char **my_rl_completion(const char *text, int start, int end);
+char *filenames_generator(const char *text, int state);
 char *bin_cmd_generator(const char *text, int state);
 void get_path_programs(void);
 int get_path_env(void);
@@ -4498,6 +4501,7 @@ will always need to specify an application when opening files.\n"),
 void
 set_signals_to_ignore(void)
 {
+//	signal(SIGINT, signal_handler); /* C-c */
 	signal(SIGINT, SIG_IGN); /* C-c */
 	signal(SIGQUIT, SIG_IGN); /* C-\ */
 	signal(SIGTSTP, SIG_IGN); /* C-z */
@@ -4575,20 +4579,31 @@ init_shell(void)
 	}
 }
 
-/*void signal_handler(int sig_num)
+/*
+void signal_handler(int sig_num)
 //handle signals catched by the signal function. In this case, the function 
 //just prompts a new line. If trap signals are not enabled, kill the current 
 //foreground process (pid)
 {
+//	if (sig_num == SIGINT) {
+//		printf("Content of rl_line_buffer: %s\n", rl_line_buffer);
+//		if (is_number(rl_line_buffer) && atoi(rl_line_buffer) > 0 &&
+//			atoi(rl_line_buffer) < files) {
+//			printf("%s\n", dirlist[atoi(rl_line_buffer)-1]->d_name);
+//		}
+//		memset(rl_line_buffer, 0x00, strlen(rl_line_buffer));
+//		rl_reset_line_state();
+//		rl_on_new_line();
+//	}
 	//if Ctrl-C and pid is not ClifM's pid, kill the current foreground 
 	//process AND its childs (-pid).
-	if (sig_num == SIGINT && pid != own_pid) {
-		if (kill(-pid, SIGTERM) != -1)
-			printf("CliFM: %d: Terminated\n", pid);
-		else
-			perror("CliFM: kill");
-	}
-}*/
+//	if (sig_num == SIGINT && pid != own_pid) {
+//		if (kill(-pid, SIGTERM) != -1)
+//			printf("CliFM: %d: Terminated\n", pid);
+//		else
+//			perror("CliFM: kill");
+//	}
+} */
 
 void
 get_path_programs(void)
@@ -4634,16 +4649,36 @@ get_path_programs(void)
 char **
 my_rl_completion(const char *text, int start, int end)
 {
-	
 	char **matches=NULL;
 	/* This line only prevents a Valgrind warning about unused variables */
 	if (end) {}
-	/* Only for the first word entered in the path */
-	if (start == 0) {
-/*		rl_attempted_completion_over=1; */
+	if (start == 0) { /* Only for the first word entered in the prompt */
+		/* rl_attempted_completion_over=1; */
+		/* Commands auto-completion */
 		matches=rl_completion_matches(text, &bin_cmd_generator);
 	}
+	else { /* ELN auto-expansion !!! */
+		int num_text=atoi(text);
+		if (is_number(text) && num_text > 0 && num_text <= files)
+			matches=rl_completion_matches(text, &filenames_generator);
+	}
+	/* If none of the above, this function performs filename auto-completion */
 	return matches;
+}
+
+char *
+filenames_generator(const char *text, int state)
+{
+	static int i;
+	char *name;
+	if (!state)
+		i=0;
+	int num_text=atoi(text);
+	while (i < files && (name=dirlist[i++]->d_name) != NULL) {
+		if (strcmp(name, dirlist[num_text-1]->d_name) == 0)
+			return strdup(name);
+	}
+	return NULL;
 }
 
 char *
@@ -9668,14 +9703,15 @@ see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity\n"),
 \n  1) Trash system\
 \n  2) History function\
 \n  3) TAB completion\
-\n  4) Keyboard shortcuts\
-\n  5) Wildcards expansion\
-\n  6) Braces expansion\
-\n  7) ELN's expansion\
-\n  8) 'sel' keyword expansion\
-\n  9) Ranges expansion\
-\n  10) Quoted strings\
-\n  11) Aliases\n"), PROGRAM_NAME);
+\n	4) TAB ELN-expansion\
+\n  5) Keyboard shortcuts\
+\n  6) Wildcards expansion\
+\n  7) Braces expansion\
+\n  8) ELN's expansion\
+\n  9) 'sel' keyword expansion\
+\n  10) Ranges expansion\
+\n  11) Quoted strings\
+\n  12) Aliases\n"), PROGRAM_NAME);
 	printf(_("\nUsage: %s [-aAfFgGhiIlLoOsuUvx] [-p path]\n\
 \n -a, --no-hidden\t\t do not show hidden files\
 \n -A, --show-hidden\t\t show hidden files (default)\
@@ -9722,6 +9758,8 @@ tell %s not to parse the input string, but instead letting this task to the \
 system shell, say bash. However, bear in mind that %s is not intended to be \
 used as a shell, but as the file manager it is.\n"), PROGRAM_NAME, 
 	PROGRAM_NAME, PROGRAM_NAME);
+	printf(_("\nBesides the default TAB completion for paths, you can also \
+expand ELN's using the TAB key.\n"));
 	printf(_("\n%s will automatically expand the 'sel' keyword: 'sel' indeed \
 amounts to 'file1 file2 file3 ...' In this way, you can use the 'sel' keyword \
 with any command. If you want to set the executable bit on several files, for \
