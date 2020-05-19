@@ -715,6 +715,10 @@ of course you can grep it to find, say, linux' macros, as here. */
 	will be set, and CliFM will become very usntable. In this case I should 
 	prevent the program from writing or reading anything and simply set the
 	defaults.
+ ** 5 - When TAB expanding the same ELN more than once, and if that ELN
+	corresponds to a directory, one slash is added to the expanded string
+	each time, resulting in something like: "path////". Of course, this 
+	shouldn't happen.
 
  * (SOLVED) When wrongly removing selected directories ("r sel" instead of
 	"r -r sel"), nothing is removed, but files are deselected anyway.
@@ -6073,10 +6077,15 @@ prompt(void)
 /* Print the prompt and return the string entered by the user (to be parsed 
  * later by parse_input_str()) */
 {
-	/* Remove final slash from path, if any */
-	if (path[strlen(path)-1] == '/')
-		path[strlen(path)-1] = 0x00;
-
+	/* Remove final slash(s) from path, if any */
+	size_t path_len=strlen(path);
+	for (size_t i=path_len-1;path[i] && i>0;i--) {
+		if (path[i] != '/')
+			break;
+		else
+			path[i] = 0x00;
+	}
+	
 	if (welcome_message) {
 		printf(_("%sCliFM, the anti-eye-candy, KISS file manager%s\n"), 
 			   magenta, NC);
