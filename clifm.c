@@ -4665,7 +4665,7 @@ my_rl_completion(const char *text, int start, int end)
 			 * the readline buffer, so that the cursor will be next to
 			 * the final slash */
 			if (matches[0] && matches[0][strlen(matches[0])-1] == '/') {
-				rl_point=--end;
+				rl_point=end-1;
 				rl_line_buffer[rl_point]=0x20;			
 			}
 		}
@@ -4687,10 +4687,9 @@ filenames_generator(const char *text, int state)
 		if (strcmp(name, dirlist[num_text-1]->d_name) == 0) {
 			/* If there is a match, and match is dir, add a final slash */
 			struct stat file_attrib;
-			lstat(name, &file_attrib);			
+			lstat(name, &file_attrib);
 			switch (file_attrib.st_mode & S_IFMT) {
-				case S_IFDIR: 
-					name[strlen(name)]='/';
+				case S_IFDIR: name[strlen(name)]='/';
 				break;
 			}
 			return strdup(name);
@@ -6074,6 +6073,10 @@ prompt(void)
 /* Print the prompt and return the string entered by the user (to be parsed 
  * later by parse_input_str()) */
 {
+	/* Remove final slash from path, if any */
+	if (path[strlen(path)-1] == '/')
+		path[strlen(path)-1] = 0x00;
+
 	if (welcome_message) {
 		printf(_("%sCliFM, the anti-eye-candy, KISS file manager%s\n"), 
 			   magenta, NC);
