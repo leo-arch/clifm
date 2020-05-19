@@ -1154,7 +1154,7 @@ program_invocation_short_name variable and asprintf() */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\033c")
 /* #define CLEAR write(STDOUT_FILENO, "\033c", 3) */
-#define VERSION "0.12.1"
+#define VERSION "0.12.1.2"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define DATE "May 18, 2020"
@@ -4659,8 +4659,16 @@ my_rl_completion(const char *text, int start, int end)
 	}
 	else { /* ELN auto-expansion !!! */
 		int num_text=atoi(text);
-		if (is_number(text) && num_text > 0 && num_text <= files)
+		if (is_number(text) && num_text > 0 && num_text <= files) {
 			matches=rl_completion_matches(text, &filenames_generator);
+			/* If match is dir (ends in slash), remove final space from
+			 * the readline buffer, so that the cursor will be next to
+			 * the final slash */
+			if (matches[0] && matches[0][strlen(matches[0])-1] == '/') {
+				rl_point=--end;
+				rl_line_buffer[rl_point]=0x20;			
+			}
+		}
 	}
 	/* If none of the above, this function performs filename auto-completion */
 	return matches;
@@ -4674,9 +4682,19 @@ filenames_generator(const char *text, int state)
 	if (!state)
 		i=0;
 	int num_text=atoi(text);
+	/* Check list of currently displayed files for a match */
 	while (i < files && (name=dirlist[i++]->d_name) != NULL) {
-		if (strcmp(name, dirlist[num_text-1]->d_name) == 0)
+		if (strcmp(name, dirlist[num_text-1]->d_name) == 0) {
+			/* If there is a match, and match is dir, add a final slash */
+			struct stat file_attrib;
+			lstat(name, &file_attrib);			
+			switch (file_attrib.st_mode & S_IFMT) {
+				case S_IFDIR: 
+					name[strlen(name)]='/';
+				break;
+			}
 			return strdup(name);
+		}
 	}
 	return NULL;
 }
