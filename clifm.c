@@ -9703,7 +9703,7 @@ see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity\n"),
 \n  1) Trash system\
 \n  2) History function\
 \n  3) TAB completion\
-\n	4) TAB ELN-expansion\
+\n  4) TAB ELN-expansion\
 \n  5) Keyboard shortcuts\
 \n  6) Wildcards expansion\
 \n  7) Braces expansion\
