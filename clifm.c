@@ -6059,8 +6059,8 @@ prompt(void)
 	if (welcome_message) {
 		printf(_("%sCliFM, the anti-eye-candy, KISS file manager%s\n"), 
 			   magenta, NC);
-		printf(_("Type '%shelp%s%s' or '%s?%s%s' for instructions.%s%s\n"), 
-			   white_b, white, NC, white_b, white, NC, white_b, NC);
+		printf(_("%sType 'help' or '?' for instructions.%s\n"), 
+			   white_b, NC);
 		welcome_message=0;
 	}
 	/* Execute prompt commands, if any, only if external commands are 
@@ -9630,30 +9630,44 @@ written by Richard Stallman.\n"), white, NC,
 	printf(_("\n%sq, quit, exit, zz%s%s: Safely quit %s.\n"), white, NC, 
 			white_b, PROGRAM_NAME);
 	printf(_("%s  \nKeyboard shortcuts%s%s:\n\
-%s  A-f%s:	Toggle list-folders-first on/off\n\
-%s  C-r%s:	Refresh the screen\n\
-%s  A-l%s:	Toggle long view mode on/off\n\
-%s  A-m%s:	List mountpoints\n\
-%s  A-b%s:	Launch the Bookmarks Manager\n\
-%s  A-i%s:	Toggle hidden files on/off\n\
-%s  A-s%s:	Open the Selection Box\n\
-%s  A-a%s:	Select all files in the current working directory\n\
-%s  A-d%s:	Deselect all selected files\n\
-%s  A-r%s:	Go to the root directory\n\
-%s  A-e%s:	Go to the home directory\n\
-%s  A-u%s:	Go up to the parent directory of the current working directory\n\
-%s  A-h/A-j%s:	Go to the previous directory in the directory history \
+%s  A-f%s%s:	Toggle list-folders-first on/off\n\
+%s  C-r%s%s:	Refresh the screen\n\
+%s  A-l%s%s:	Toggle long view mode on/off\n\
+%s  A-m%s%s:	List mountpoints\n\
+%s  A-b%s%s:	Launch the Bookmarks Manager\n\
+%s  A-i%s%s:	Toggle hidden files on/off\n\
+%s  A-s%s%s:	Open the Selection Box\n\
+%s  A-a%s%s:	Select all files in the current working directory\n\
+%s  A-d%s%s:	Deselect all selected files\n\
+%s  A-r%s%s:	Go to the root directory\n\
+%s  A-e%s%s:	Go to the home directory\n\
+%s  A-u%s%s:	Go up to the parent directory of the current working directory\n\
+%s  A-h/A-j%s%s:	Go to the previous directory in the directory history \
 list\n\
-%s  A-k%s:	Go to the next directory in the directory history list\n\
-%s  F10%s:	Open the configuration file\n\
+%s  A-k%s%s:	Go to the next directory in the directory history list\n\
+%s  F10%s%s:	Open the configuration file\n\
   Some (and even all) of these keybindings might not work in some terminals, \
 though they do work fine in the Linux built-in console, xvt-like terminal \
 emulators like Urxvt and Aterm, and xterm-like ones.\n\
   %s will create HOME/.Xresources, if it doesn't already exist, \
 for these keybindings to work correctly.\n"), 
-		white, NC, white_b, white, NC, white, NC, white, NC, white, NC,
-		white, NC, white, NC, white, NC, white, NC, white, NC, white, NC,
-		white, NC, white, NC, white, NC, white, NC, white, NC, PROGRAM_NAME);
+		white, NC, white_b, 
+		white, NC, white_b,
+		white, NC, white_b,
+		white, NC, white_b,
+		white, NC, white_b,
+		white, NC, white_b,
+		white, NC, white_b,
+		white, NC, white_b,
+		white, NC, white_b,
+		white, NC, white_b,
+		white, NC, white_b,
+		white, NC, white_b,
+		white, NC, white_b,
+		white, NC, white_b,
+		white, NC, white_b,
+		white, NC, white_b,
+		PROGRAM_NAME);
 }
 
 void
@@ -9740,9 +9754,9 @@ configuration file and the default options, whereas the configuration file \
 takes precedence only over default options.\n"));
 	printf(_("\n%sColor codes:%s%s\n\n"), white, NC, white_b);
 	color_codes();
-	printf(_("%sCommands:\n%sNote: ELN = Element List Number. Example: In the \
+	printf(_("%sCommands:\n%s%sNote: ELN = Element List Number. Example: In the \
 line \"12 openbox\", 12 is the ELN corresponding to the 'openbox' file.\n%s"), 
-	white, NC, white_b);
+	white, NC, white_b, NC);
 	list_commands();
 	printf(_("\n%sNotes%s%s:\n"), white, NC, white_b);
 	printf(_("\nIt depends on the terminal emulator you use to correctly \
