@@ -21,7 +21,7 @@ build() {
 package() {
   cd "${srcdir}/${pkgname}"
   install -Dm755 $pkgname "${pkgdir}/usr/bin/$pkgname"
-  install -g 0 -o 0 -Dm644 manpage "${pkgdir}/usr/local/man/man1/${pkgname}.1"
-  gzip "${pkgdir}/usr/local/man/man1/clifm.1"
+  install -g 0 -o 0 -Dm644 manpage "${pkgdir}/usr/share/man/man1/${pkgname}.1"
+  gzip "${pkgdir}/usr/share/man/man1/${pkgname}.1"
 }
 
