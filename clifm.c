@@ -9711,7 +9711,9 @@ all the basic operations you may expect from any other FM. However, the most \
 salient features of %s are: \
 \n  a) The use of short commands and numbers (ELN's), instead of \
 filenames. Type 'o 12', for instance, to open a file with your default text \
-editor or to change to the desired directory. With the automatic ELN's \
+editor or to change to the desired directory. Since numbers could be a bit \
+tricky when it comes to listed files, you can use the TAB key to expand the \
+filename corresponding to the required ELN. With the automatic ELN's \
 expansion feature you can use ELN's with external commands as well. \
 'diff 12 5', for example, will run 'diff' over the files corresponding to \
 ELN's 12 and 5. Ranges are also accepted, for example: rm 1-12.\
@@ -9719,9 +9721,9 @@ ELN's 12 and 5. Ranges are also accepted, for example: rm 1-12.\
 easy access to them. Example: type 'bm' (or Alt-b) to open the bookmarks \
 screen and then simply type a number or a hotkey to access the desired \
 bookmark.\
-\n  c) The Selection Box allows you to select files and directories from \
-different parts of your filesystem and then operate on them with just one \
-command. \
+\n  c) The Selection Box (easily accessible via the 'sb' command) allows you \
+to select files and directories from different parts of your filesystem and \
+then operate on them with just one command. \
 \n  d) The back and forth functions keep track of all the paths visited by \
 you, so that you can go back and forth to any of them by just typing 'b' or \
 'f' (Alt-h, Alt-k).\
@@ -9730,7 +9732,7 @@ operate on your files. For example, instead of typing 'cd ..' to go back to \
 the parent directory, or 'sel *' to select all files in the current directory, \
 you can simply press Alt-u and Alt-a respectivelly.\
 \n  f) The quick search function makes it really easy to quickly find the \
-files you are looking for.\
+files you are looking for: just type '/search_string', that's all.\
 \n  g) It is blazing fast and incredibly lightweigth. With a memory footprint \
 below 5Mb, it can run on really old hardware.\
 \n  h) It is so simple that it doesn't require an X session nor any \
@@ -9751,9 +9753,9 @@ see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity\n"),
 \n  5) Keyboard shortcuts\
 \n  6) Wildcards expansion\
 \n  7) Braces expansion\
-\n  8) ELN's expansion\
-\n  9) 'sel' keyword expansion\
-\n  10) Ranges expansion\
+\n  8) ELN's auto-expansion\
+\n  9) 'sel' keyword auto-expansion\
+\n  10) Ranges auto-expansion\
 \n  11) Quoted strings\
 \n  12) Aliases\n"), PROGRAM_NAME);
 	printf(_("\nUsage: %s [-aAfFgGhiIlLoOsuUvx] [-p path]\n\
@@ -9795,15 +9797,16 @@ If, for example, you create a file named \"nandu\" (the spanish word for \
 'rhea'), it will be correctly displayed by the Linux console, Lxterminal, and Urxvt, but not thus \
 by Xterm or Aterm.\n"));
 	printf(_("\n%s is not limited to its own set of internal commands, like \
-open, sel, trash, etc, but it can run any external command as well, provided \
+open, sel, trash, etc., but it can run any external command as well, provided \
 external commands are allowed (use the -x option or the configuration file). \
 By beginning the external command by a colon or a semicolon (':', ';') you \
 tell %s not to parse the input string, but instead letting this task to the \
-system shell, say bash. However, bear in mind that %s is not intended to be \
+system shell, say Bash. However, bear in mind that %s is not intended to be \
 used as a shell, but as the file manager it is.\n"), PROGRAM_NAME, 
 	PROGRAM_NAME, PROGRAM_NAME);
 	printf(_("\nBesides the default TAB completion for paths, you can also \
-expand ELN's using the TAB key.\n"));
+expand ELN's using the TAB key. Example: 'o 12', press TAB, and it becomes \
+'o filename ', or, if 12 refers to a directory, 'o dir/'.\n"));
 	printf(_("\n%s will automatically expand the 'sel' keyword: 'sel' indeed \
 amounts to 'file1 file2 file3 ...' In this way, you can use the 'sel' keyword \
 with any command. If you want to set the executable bit on several files, for \
@@ -9826,23 +9829,23 @@ expand '1', but not '118', if there is no ELN 118. In the same way, the range \
 the screen. If this feature somehow conflicts with the command you want to \
 run, say, 'chmod 644 ...', because the current amount of files is equal or \
 larger than 644 (in which case %s will expand that number), then you can \
-simply run the command as external: ';chmod ...'\n\
+simply run the command as external: ';chmod 644...'\n\
 \nOf course, combinations of all these features is also possbile. \
-Example: 'cp sel file* 2 23-31 .' will copy all the selected files, plus all \
+Example: 'cp sel file* 2 23-31 .' will copy all selected files, plus all \
 files whose name starts with \"file\", plus those files corresponding to the \
 ELN's 2 and 23 through 31, into the current working directory.\n"), 
 		   PROGRAM_NAME, PROGRAM_NAME);
 	printf(_("\nWhen dealing with filenames containing spaces, you can use both \
 single and double quotes (ex: \"this file\" or 'this file') plus escape \
 sequences (ex: this\\ file)."));
-	printf(_("\n\nBy default, %s starts in your home directory. However, you \
-can always specify a different path by passing it as an argument. Ex: %s -p \
-/home/user/misc. You can also permanently set up the starting path in the %s \
-configuration file.\n"), PROGRAM_NAME, PNL, PROGRAM_NAME);
+	printf(_("\n\nBy default, %s starts in the current working directory. \
+However, you can always specify a different path by passing it as an argument. \
+Ex: %s -p /home/user/misc. You can also permanently set up the starting path \
+in the %s configuration file.\n"), PROGRAM_NAME, PNL, PROGRAM_NAME);
 	printf(_("\n%sConfiguration file%s%s: ~/.config/%s/%src\n"), white, NC, 
 		   white_b, PNL, PNL);
 	printf(_("Here you can permanently set up %s options, add aliases and some \
-prompt commands (which will be executed imediately before each new prompt \
+prompt commands (which will be executed immediately before each new prompt \
 line). Just recall that in order to use prompt commands you must allow the \
 use of external commands. See the 'ext' command above.\n"), PROGRAM_NAME);
 	printf(_("\n%sProfile file%s%s: ~/.config/%s/%s_profile\n"), white, NC, 
@@ -9855,7 +9858,7 @@ defined via the command prompt: Ex: user@hostname ~ $ var=\"This is a test\". \
 Temporary variables will be removed at program exit.\n\n"));
 	printf(_("%sLog file%s%s: ~/.config/%s/log.cfm\n"), white, NC, white_b, 
 		   PNL);
-	printf(_("The file contains a series of fields separated by a colon in \
+	printf(_("This file contains a series of fields separated by a colon in \
 the following way: 'date:user:cwd:cmd. All commands executed as \
 external will be logged.\n\n"));
 	printf(_("%sMessages log file%s%s: ~/.config/%s/messages.cfm\n"), white, 
