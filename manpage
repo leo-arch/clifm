@@ -4,8 +4,6 @@
 .SH NAME
 CLIFM - A completely text-based file manager inspired in Arch Linux KISS principle 
 .SH SYNOPSIS
-aAfFgGhiIlLoOpsuUvx
-
 \fBclifm\fR [-aAfFgGhiIlLoOpsuUvx] [-p path]
 .SH DESCRIPTION
 CliFM is a completely text-based file manager able to perform all the basic operations you may expect from any other FM. However, the most salient features of CliFM are: 
