@@ -2505,7 +2505,9 @@ working directory\n"), PROGRAM_NAME);
 
 void print_license(void)
 {
-	printf(_("%s, 2017-19, %s\n\n\
+	time_t rawtime=time(NULL);
+	struct tm *tm=localtime(&rawtime);
+	printf(_("%s, 2017-%d, %s\n\n\
 This program is free software; you can redistribute it and/or modify \
 it under the terms of the GNU General Public License (version 2 or later) \
 as published by the Free Software Foundation.\n\n\
@@ -2518,7 +2520,7 @@ along with this program. If not, write to the Free Software \
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA \
 02110-1301, USA, or visit <http://www.gnu.org/licenses/>\n\n\
 NOTE: For more information about the meaning of 'free software' run 'fs'.\n"), 
-		   PROGRAM_NAME, AUTHOR);
+		   PROGRAM_NAME, tm->tm_year+1900, AUTHOR);
 }
 
 size_t

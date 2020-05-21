@@ -1923,10 +1923,10 @@ msgstr "socket"
 msgid "unknown file type"
 msgstr "tipo de archivo desconocido"
 
-#: 0_11_6_2_test.c:2449
+#: ../0_12_1_3.c:2510
 #, c-format
 msgid ""
-"%s, 2017-19, %s\n"
+"%s, 2017-%d, %s\n"
 "\n"
 "This program is free software; you can redistribute it and/or modify it "
 "under the terms of the GNU General Public License (version 2 or later) as "
@@ -1945,7 +1945,7 @@ msgid ""
 "NOTE: For more information about the meaning of 'free software' run 'fs'.\n"
 
 msgstr ""
-"%s, 2017-19, %s\n"
+"%s, 2017-%d, %s\n"
 "\n"
 "Este programa es software libre; puedes redistribuirlo y/o modificarlo "
 "bajo los términos de la GNU General Public License (versión 2 o posterior) tal "
