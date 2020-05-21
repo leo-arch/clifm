@@ -720,6 +720,11 @@ of course you can grep it to find, say, linux' macros, as here. */
 	each time, resulting in something like: "path////". Of course, this 
 	shouldn't happen.
 
+ * (SOLVED) Type this: '[[ $(whoami) ]] && echo Yes || echo No', and the
+	program crashes. The problem was that parse_input_string() was taken '[' 
+	as part of a glob pattern. SOLUTION: Simply add a new check to 
+	parse_input_string() to avoid taking '[' followed by a space as a glob 
+	pattern. 
  * (SOLVED) When wrongly removing selected directories ("r sel" instead of
 	"r -r sel"), nothing is removed, but files are deselected anyway.
 	SOLUTION: Simply check rm exit status before deselecting files.
@@ -1158,7 +1163,7 @@ program_invocation_short_name variable and asprintf() */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\033c")
 /* #define CLEAR write(STDOUT_FILENO, "\033c", 3) */
-#define VERSION "0.12.1.2"
+#define VERSION "0.12.1.3"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define DATE "May 18, 2020"
@@ -5725,7 +5730,8 @@ parse_input_str(const char *str)
 			if (braces_n < int_array_max)
 				braces_array[braces_n++]=args_n;
 
-		if (string_b[i] == '*' || string_b[i] == '?' || string_b[i] == '[')
+		if (string_b[i] == '*' || string_b[i] == '?' 
+		|| (string_b[i] == '[' && string_b[i+1] != 0x20))
 		/* Strings containing these characters are taken as wildacard patterns 
 		 * and are expanded by the glob function. See man (7) glob */
 			if (glob_n < int_array_max)
