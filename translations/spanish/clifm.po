@@ -663,22 +663,16 @@ msgstr ""
 "las opciones por defecto, mientras que el archivo de configuración sólo tiene precedencia "
 "sobre las opciones por defecto.\n"
 
-#: 0_11_5_3_test.c:9576
+#: 0_12_1_2.c:9794
 #, c-format
 msgid ""
 "\n"
 "It depends on the terminal emulator you use to correctly display non-ASCII "
-"characters and characters from the extended ASCII charset. If, for example, "
-"you create a file named \"nandu\" (the spanish word for 'rhea'), it will be "
-"correctly displayed by the Linux console, Lxterminal, and Urxvt, but not "
-"thus by Xterm or Aterm.\n"
+"characters and characters from the extended ASCII charset.\n"
 msgstr ""
 "\n"
 "Depende del emulador de terminal en uso mostrar correctamente caracteres no ASCII "
-"o pertenecientes a la tabla ASCII extendida. Si, por ejemplo, "
-"creas un archivo llamado \"ñandú\", será "
-"correctamente mostrado por la consola integrada de Linux, Lxterminal, y Urxvt, pero "
-"no así por Xterm o Aterm.\n"
+"o pertenecientes a la tabla ASCII extendida.\n"
 
 #: 0_11_5_3_test.c:9654
 #, c-format

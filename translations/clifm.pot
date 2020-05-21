@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-20 21:35-0300\n"
+"POT-Creation-Date: 2020-05-20 23:44-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,7 +42,7 @@ msgstr ""
 msgid "\tUid: %d (%s)"
 msgstr ""
 
-#: 0_12_1_2.c:9841
+#: 0_12_1_2.c:9838
 #, c-format
 msgid ""
 "\n"
@@ -53,14 +53,14 @@ msgid ""
 "configuration file.\n"
 msgstr ""
 
-#: 0_12_1_2.c:9945
+#: 0_12_1_2.c:9942
 #, c-format
 msgid ""
 "\n"
 "                       Press any key to continue... "
 msgstr ""
 
-#: 0_12_1_2.c:9944
+#: 0_12_1_2.c:9941
 #, c-format
 msgid ""
 "\n"
@@ -87,7 +87,7 @@ msgid ""
 "  12) Aliases\n"
 msgstr ""
 
-#: 0_12_1_2.c:9799
+#: 0_12_1_2.c:9796
 #, c-format
 msgid ""
 "\n"
@@ -100,7 +100,7 @@ msgid ""
 "used as a shell, but as the file manager it is.\n"
 msgstr ""
 
-#: 0_12_1_2.c:9810
+#: 0_12_1_2.c:9807
 #, c-format
 msgid ""
 "\n"
@@ -160,7 +160,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: 0_12_1_2.c:9845
+#: 0_12_1_2.c:9842
 #, c-format
 msgid ""
 "\n"
@@ -174,7 +174,7 @@ msgid ""
 "%sNotes%s%s:\n"
 msgstr ""
 
-#: 0_12_1_2.c:9851
+#: 0_12_1_2.c:9848
 #, c-format
 msgid ""
 "\n"
@@ -487,7 +487,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: 0_12_1_2.c:9807
+#: 0_12_1_2.c:9804
 #, c-format
 msgid ""
 "\n"
@@ -516,13 +516,10 @@ msgstr ""
 msgid ""
 "\n"
 "It depends on the terminal emulator you use to correctly display non-ASCII "
-"characters and characters from the extended ASCII charset. If, for example, "
-"you create a file named \"nandu\" (the spanish word for 'rhea'), it will be "
-"correctly displayed by the Linux console, Lxterminal, and Urxvt, but not "
-"thus by Xterm or Aterm.\n"
+"characters and characters from the extended ASCII charset.\n"
 msgstr ""
 
-#: 0_12_1_2.c:9876
+#: 0_12_1_2.c:9873
 #, c-format
 msgid ""
 "\n"
@@ -558,7 +555,7 @@ msgid ""
 " -x, --ext-cmds\t\t\t allow the use of external commands\n"
 msgstr ""
 
-#: 0_12_1_2.c:9838
+#: 0_12_1_2.c:9835
 #, c-format
 msgid ""
 "\n"
@@ -657,7 +654,7 @@ msgid ""
 "keybindings to work correctly.\n"
 msgstr ""
 
-#: 0_12_1_2.c:9922
+#: 0_12_1_2.c:9919
 #, c-format
 msgid ""
 "%s %s (%s), by %s\n"
@@ -1232,12 +1229,12 @@ msgid ""
 "%s"
 msgstr ""
 
-#: 0_12_1_2.c:9859
+#: 0_12_1_2.c:9856
 #, c-format
 msgid "%sLog file%s%s: ~/.config/%s/log.cfm\n"
 msgstr ""
 
-#: 0_12_1_2.c:9864
+#: 0_12_1_2.c:9861
 #, c-format
 msgid "%sMessages log file%s%s: ~/.config/%s/messages.cfm\n"
 msgstr ""
@@ -1291,7 +1288,7 @@ msgstr ""
 msgid "('du': not found)"
 msgstr ""
 
-#: 0_12_1_2.c:9868
+#: 0_12_1_2.c:9865
 #, c-format
 msgid ""
 "A bold green asterisk at the left of the prompt indicates that there are "
@@ -1301,7 +1298,7 @@ msgid ""
 "yellow 'W'), and simple notices (a green 'N').\n"
 msgstr ""
 
-#: 0_12_1_2.c:9866
+#: 0_12_1_2.c:9863
 #, c-format
 msgid ""
 "A file containing a list of system messages, either errors, warnings, or "
@@ -1369,7 +1366,7 @@ msgstr ""
 msgid "Error: %s: %d: %s: %s\n"
 msgstr ""
 
-#: 0_12_1_2.c:9887
+#: 0_12_1_2.c:9884
 #, c-format
 msgid ""
 "Excerpt from 'What is Free Software?', by Richard Stallman. Source: https://"
@@ -1419,7 +1416,7 @@ msgstr ""
 msgid "Fifo"
 msgstr ""
 
-#: 0_12_1_2.c:9847
+#: 0_12_1_2.c:9844
 #, c-format
 msgid ""
 "Here you can permanently set up %s options, add aliases and some prompt "
@@ -1428,7 +1425,7 @@ msgid ""
 "external commands. See the 'ext' command above.\n"
 msgstr ""
 
-#: 0_12_1_2.c:9853
+#: 0_12_1_2.c:9850
 #, c-format
 msgid ""
 "In this file you can add those commands you want to be executed at startup. "
@@ -1480,7 +1477,7 @@ msgid ""
 "Do you want to edit the bookmarks file? [Y/n] "
 msgstr ""
 
-#: 0_12_1_2.c:9861
+#: 0_12_1_2.c:9858
 #, c-format
 msgid ""
 "This file contains a series of fields separated by a colon in the following "
