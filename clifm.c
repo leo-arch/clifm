@@ -9792,10 +9792,7 @@ line \"12 openbox\", 12 is the ELN corresponding to the 'openbox' file.\n%s"),
 	list_commands();
 	printf(_("\n%sNotes%s%s:\n"), white, NC, white_b);
 	printf(_("\nIt depends on the terminal emulator you use to correctly \
-display non-ASCII characters and characters from the extended ASCII charset. \
-If, for example, you create a file named \"ñañdú\" (the spanish word for \
-'rhea'), it will be correctly displayed by the Linux console, Lxterminal, and Urxvt, but not thus \
-by Xterm or Aterm.\n"));
+display non-ASCII characters and characters from the extended ASCII charset.\n"));
 	printf(_("\n%s is not limited to its own set of internal commands, like \
 open, sel, trash, etc., but it can run any external command as well, provided \
 external commands are allowed (use the -x option or the configuration file). \
