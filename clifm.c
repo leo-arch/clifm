@@ -1166,7 +1166,7 @@ program_invocation_short_name variable and asprintf() */
 #define VERSION "0.12.1.3"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "May 18, 2020"
+#define DATE "May 21, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -7123,7 +7123,9 @@ exec_cmd(char **comm)
 	else if (comm[0][0] == '/' && access(comm[0], F_OK) != 0)
 		search_function(comm);
 	/* History function: if '!number' or '!-number' or '!!' */
-	else if (comm[0][0] == '!') run_history_cmd(comm[0]+1);
+	else if (comm[0][0] == '!' && comm[0][1] != 0x20
+	&& comm[0][1] != 0x00)
+		run_history_cmd(comm[0]+1);
 	else if (strcmp(comm[0], "ls") == 0 && !cd_lists_on_the_fly) {
 		while (files--) free(dirlist[files]);
 		list_dir();
