@@ -1172,7 +1172,7 @@ program_invocation_short_name variable and asprintf() */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\033c")
 /* #define CLEAR write(STDOUT_FILENO, "\033c", 3) */
-#define VERSION "0.12.3b"
+#define VERSION "0.12.4"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define DATE "May 22, 2020"
