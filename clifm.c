@@ -138,6 +138,7 @@ of course you can grep it to find, say, linux' macros, as here. */
 							###############
 */
 /*
+ ** Handle filenames with spaces in TAB ELN expansion
  ** Add ranges to deselect and undel functions.
  ** Check compatibility with BSD Unixes.
  ** Add a help option for each internal command. Make sure this help system is
@@ -720,6 +721,11 @@ of course you can grep it to find, say, linux' macros, as here. */
 	each time, resulting in something like: "path////". Of course, this 
 	shouldn't happen.
 
+ * (SOLVED) TMP_DIR will be created by the first user who launched the
+	program, so that remaining users won't be able to write in here, that is
+	to say, they won't be able to select any file, since TMP_DIR is not
+	accessible. SOLUTION: Create TMP_DIR with 1777 permissions, that is, 
+	world writable and with the sticky bit set.
  * (SOLVED) Type this: '[[ $(whoami) ]] && echo Yes || echo No', and the
 	program crashes. The problem was that parse_input_string() was taken '[' 
 	as part of a glob pattern. SOLUTION: Simply add a new check to 
@@ -1163,10 +1169,10 @@ program_invocation_short_name variable and asprintf() */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\033c")
 /* #define CLEAR write(STDOUT_FILENO, "\033c", 3) */
-#define VERSION "0.12.2"
+#define VERSION "0.12.3"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "May 21, 2020"
+#define DATE "May 22, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -4567,7 +4573,11 @@ init_shell(void)
 		/* The lines below prevent CliFM from being called as argument for a 
 		 * terminal, ex: xterm -e /path/to/clifm. However, without them input 
 		 * freezes when running as root */
-		if (flags & ROOT_USR) {
+		 /* NOTE: Not sure why, but the above doesn't happen anymore. This
+		  * if block seems not to be necessary anymore. Indeed setpgid() 
+		  * fails when the program runs as follows: "sudo xterm -e clifm",
+		  * but not as this: "xterm -e sudo clifm" */
+/*		if (flags & ROOT_USR) {
 			if (setpgid(own_pid, own_pid) < 0) {
 				asprintf(&msg, "%s: setpgid: %s\n", PROGRAM_NAME, 
 						strerror(errno));
@@ -4580,8 +4590,8 @@ init_shell(void)
 							strerror(errno));
 				atexit(free_stuff);
 			}
-		}
-
+		} */
+		
 		/* Grab control of the terminal */
 		tcsetpgrp(shell_terminal, own_pid);
 
@@ -4703,6 +4713,7 @@ filenames_generator(const char *text, int state)
 				case S_IFDIR: name[strlen(name)]='/';
 				break;
 			}
+			/* Add some lines to handle filenames with spaces */
 			return strdup(name);
 		}
 	}
@@ -4856,9 +4867,19 @@ directory\n"), PROGRAM_NAME, CONFIG_DIR);
 		}
 	}
 
-	/* If the temporary directory doesn't exist, create it */
+	/* If the temporary directory doesn't exist, create it. I Use 1777 
+	 * permissions, that is, world writable, but with sticky bit set:
+	 * everyone can create files in here, but only the file's owner can remove
+	 * or modify the file. I store here the list of selected files per user
+	 * (TMP_DIR/sel_file_username), so that all users need to be able to
+	 * create files here, but only the user who created it is able
+	 * to delete it or modify it */
 	if (stat(TMP_DIR, &file_attrib) == -1) {
-		if (mkdir(TMP_DIR, S_IRWXU) == -1) { /* 700 */
+/*		if (mkdir(TMP_DIR, 1777) == -1) { */
+		char cmd[PATH_MAX]="";
+		snprintf(cmd, PATH_MAX, "mkdir -m1777 %s", TMP_DIR);
+		int ret=launch_execle(cmd);
+		if (ret != 0) {
 			asprintf(&msg, "%s: mkdir: '%s': %s\n", PROGRAM_NAME, TMP_DIR, 
 					 strerror(errno));
 			if (msg) {
