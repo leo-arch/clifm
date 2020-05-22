@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-21 06:16-0300\n"
+"POT-Creation-Date: 2020-05-22 14:04-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,32 +17,32 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../0_12_1_3.c:9023
+#: 0_12_3_test.c:9056
 #, c-format
 msgid "\tBlocks: %lld"
 msgstr ""
 
-#: ../0_12_1_3.c:9030
+#: 0_12_3_test.c:9063
 #, c-format
 msgid "\tGid: %d (%s)\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9024
+#: 0_12_3_test.c:9057
 #, c-format
 msgid "\tIO Block: %d"
 msgstr ""
 
-#: ../0_12_1_3.c:9025
+#: 0_12_3_test.c:9058
 #, c-format
 msgid "\tInode: %lld\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9028
+#: 0_12_3_test.c:9061
 #, c-format
 msgid "\tUid: %d (%s)"
 msgstr ""
 
-#: ../0_12_1_3.c:9848
+#: 0_12_3_test.c:9881
 #, c-format
 msgid ""
 "\n"
@@ -53,14 +53,14 @@ msgid ""
 "configuration file.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9952
+#: 0_12_3_test.c:9985
 #, c-format
 msgid ""
 "\n"
 "                       Press any key to continue... "
 msgstr ""
 
-#: ../0_12_1_3.c:9951
+#: 0_12_3_test.c:9984
 #, c-format
 msgid ""
 "\n"
@@ -68,7 +68,7 @@ msgid ""
 "%s"
 msgstr ""
 
-#: ../0_12_1_3.c:9758
+#: 0_12_3_test.c:9791
 #, c-format
 msgid ""
 "\n"
@@ -87,7 +87,7 @@ msgid ""
 "  12) Aliases\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9806
+#: 0_12_3_test.c:9839
 #, c-format
 msgid ""
 "\n"
@@ -100,7 +100,7 @@ msgid ""
 "used as a shell, but as the file manager it is.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9817
+#: 0_12_3_test.c:9850
 #, c-format
 msgid ""
 "\n"
@@ -134,14 +134,14 @@ msgid ""
 "through 31, into the current working directory.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3432 ../0_12_1_3.c:3712 ../0_12_1_3.c:7864
+#: 0_12_3_test.c:3441 0_12_3_test.c:3721 0_12_3_test.c:7897
 #, c-format
 msgid ""
 "\n"
 "%s%sEnter 'q' to quit.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9541
+#: 0_12_3_test.c:9574
 #, c-format
 msgid ""
 "\n"
@@ -152,7 +152,7 @@ msgid ""
 "(dir) could be an absolute path, a relative path, or an ELN.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9797
+#: 0_12_3_test.c:9830
 #, c-format
 msgid ""
 "\n"
@@ -160,28 +160,28 @@ msgid ""
 "\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9852
+#: 0_12_3_test.c:9885
 #, c-format
 msgid ""
 "\n"
 "%sConfiguration file%s%s: ~/.config/%s/%src\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9803
+#: 0_12_3_test.c:9836
 #, c-format
 msgid ""
 "\n"
 "%sNotes%s%s:\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9858
+#: 0_12_3_test.c:9891
 #, c-format
 msgid ""
 "\n"
 "%sProfile file%s%s: ~/.config/%s/%s_profile\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9643
+#: 0_12_3_test.c:9676
 #, c-format
 msgid ""
 "\n"
@@ -190,7 +190,7 @@ msgid ""
 "alias_name='command_name args...'\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9569
+#: 0_12_3_test.c:9602
 #, c-format
 msgid ""
 "\n"
@@ -212,7 +212,7 @@ msgid ""
 "Finally, you can also clear this history list by typing 'b clear'.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9547
+#: 0_12_3_test.c:9580
 #, c-format
 msgid ""
 "\n"
@@ -222,7 +222,7 @@ msgid ""
 "ELN or its hotkey.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9588
+#: 0_12_3_test.c:9621
 #, c-format
 msgid ""
 "\n"
@@ -230,7 +230,7 @@ msgid ""
 "respectivelly.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9559
+#: 0_12_3_test.c:9592
 #, c-format
 msgid ""
 "\n"
@@ -246,21 +246,21 @@ msgid ""
 "--group-directories-first\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9539
+#: 0_12_3_test.c:9572
 #, c-format
 msgid ""
 "\n"
 "%scmd, commands%s%s: Show this list of commands.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9651
+#: 0_12_3_test.c:9684
 #, c-format
 msgid ""
 "\n"
 "%scolors%s%s: Show the color codes used in the elements list.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9600
+#: 0_12_3_test.c:9633
 #, c-format
 msgid ""
 "\n"
@@ -268,21 +268,21 @@ msgid ""
 "also deselect all selected elements by typing 'ds a' or 'ds all'.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9641
+#: 0_12_3_test.c:9674
 #, c-format
 msgid ""
 "\n"
 "%sedit%s%s: Edit the configuration file.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9661
+#: 0_12_3_test.c:9694
 #, c-format
 msgid ""
 "\n"
 "%sext%s%s [on/off/status]: Toggle external commands on/off.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9585
+#: 0_12_3_test.c:9618
 #, c-format
 msgid ""
 "\n"
@@ -291,14 +291,14 @@ msgid ""
 "'f hist', 'f h', 'fh', and 'f !ELN'\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9655
+#: 0_12_3_test.c:9688
 #, c-format
 msgid ""
 "\n"
 "%sff, folders first%s%s [on/off/status]: Toggle list folders first on/off.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9667
+#: 0_12_3_test.c:9700
 #, c-format
 msgid ""
 "\n"
@@ -306,39 +306,39 @@ msgid ""
 "Stallman.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9653
+#: 0_12_3_test.c:9686
 #, c-format
 msgid ""
 "\n"
 "%shf, hidden%s%s [on/off/status]: Toggle hidden files on/off.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9632
+#: 0_12_3_test.c:9665
 #, c-format
 msgid ""
 "\n"
-"%shistory%s%s [clean] [-n]: With no arguments, it shows the history list. If "
-"'clean' is passed as argument, it will delete all the entries in the history "
+"%shistory%s%s [clear] [-n]: With no arguments, it shows the history list. If "
+"'clear' is passed as argument, it will delete all the entries in the history "
 "file. Finally, '-n' tells the history command to list only the last 'n' "
 "commands in the history list.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9665
+#: 0_12_3_test.c:9698
 #, c-format
 msgid ""
 "\n"
 "%slicense%s%s: Display the license notice.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9626
+#: 0_12_3_test.c:9659
 #, c-format
 msgid ""
 "\n"
-"%slog%s%s [clean]: With no arguments, it shows the log file. If clean is "
+"%slog%s%s [clear]: With no arguments, it shows the log file. If clear is "
 "passed as argument, it will delete all the logs.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9617
+#: 0_12_3_test.c:9650
 #, c-format
 msgid ""
 "\n"
@@ -346,16 +346,16 @@ msgid ""
 "working directory into the selected mountpoint.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9629
+#: 0_12_3_test.c:9662
 #, c-format
 msgid ""
 "\n"
-"%smsg, messages%s%s [clean]: With no arguments, prints the list of messages "
-"in the current session. The 'clean' option tells %s to empty the messages "
+"%smsg, messages%s%s [clear]: With no arguments, prints the list of messages "
+"in the current session. The 'clear' option tells %s to empty the messages "
 "list.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9551
+#: 0_12_3_test.c:9584
 #, c-format
 msgid ""
 "\n"
@@ -369,7 +369,7 @@ msgid ""
 "'open' works just like the 'cd' command.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9590
+#: 0_12_3_test.c:9623
 #, c-format
 msgid ""
 "\n"
@@ -378,35 +378,35 @@ msgid ""
 "working directory, and 'size' to list their corresponding sizes.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9647
+#: 0_12_3_test.c:9680
 #, c-format
 msgid ""
 "\n"
 "%spath, cwd%s%s: Print the current working directory.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9657
+#: 0_12_3_test.c:9690
 #, c-format
 msgid ""
 "\n"
 "%spg, pager%s%s [on/off/status]: Toggle the pager on/off.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9670
+#: 0_12_3_test.c:9703
 #, c-format
 msgid ""
 "\n"
 "%sq, quit, exit, zz%s%s: Safely quit %s.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9649
+#: 0_12_3_test.c:9682
 #, c-format
 msgid ""
 "\n"
 "%srf, refresh%s%s: Refresh the screen.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9594
+#: 0_12_3_test.c:9627
 #, c-format
 msgid ""
 "\n"
@@ -416,27 +416,27 @@ msgid ""
 "filename /path/to/filename\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9598
+#: 0_12_3_test.c:9631
 #, c-format
 msgid ""
 "\n"
 "%ssb, selbox%s%s: Show the elements contained in the Selection Box.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9646
+#: 0_12_3_test.c:9679
 #, c-format
 msgid ""
 "\n"
 "%ssplash%s%s: Show the splash screen.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9604
+#: 0_12_3_test.c:9637
 #, c-format
 msgid ""
 "\n"
-"%st, tr, trash%s%s  [ELN's, file(s)] [ls, list] [clean] [del, rm]: With no "
+"%st, tr, trash%s%s  [ELN's, file(s)] [ls, list] [clear] [del, rm]: With no "
 "argument (or by passing the 'ls' option), it prints a list of currently "
-"trashed files. The 'clean' option removes all files from the trash can, "
+"trashed files. The 'clear' option removes all files from the trash can, "
 "while the 'del' option lists trashed files allowing you to remove one or "
 "more of them. The trash directory is $XDG_DATA_HOME/Trash, that is, '~/."
 "local/share/Trash'. Since this trash system follows the freedesktop "
@@ -444,7 +444,7 @@ msgid ""
 "implementations.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9612
+#: 0_12_3_test.c:9645
 #, c-format
 msgid ""
 "\n"
@@ -454,14 +454,14 @@ msgid ""
 "trashed files at once using the 'a' or 'all' option.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9659
+#: 0_12_3_test.c:9692
 #, c-format
 msgid ""
 "\n"
 "%suc, unicode%s%s [on/off/status]: Toggle unicode on/off.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9620
+#: 0_12_3_test.c:9653
 #, c-format
 msgid ""
 "\n"
@@ -471,14 +471,14 @@ msgid ""
 "tell 'paste' where to copy these files. Ex: paste sel /path/to/directory\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9663
+#: 0_12_3_test.c:9696
 #, c-format
 msgid ""
 "\n"
 "%sver, version%s%s: Show %s version details.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9532
+#: 0_12_3_test.c:9565
 #, c-format
 msgid ""
 "\n"
@@ -487,7 +487,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9814
+#: 0_12_3_test.c:9847
 #, c-format
 msgid ""
 "\n"
@@ -496,13 +496,13 @@ msgid ""
 "or, if 12 refers to a directory, 'o dir/'.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:2910
+#: 0_12_3_test.c:2919
 msgid ""
 "\n"
 "Choose a mountpoint ('q' to quit): "
 msgstr ""
 
-#: ../0_12_1_3.c:9794
+#: 0_12_3_test.c:9827
 #, c-format
 msgid ""
 "\n"
@@ -511,7 +511,7 @@ msgid ""
 "over default options.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9804
+#: 0_12_3_test.c:9837
 #, c-format
 msgid ""
 "\n"
@@ -519,14 +519,14 @@ msgid ""
 "characters and characters from the extended ASCII charset.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9883
+#: 0_12_3_test.c:9916
 #, c-format
 msgid ""
 "\n"
 "Press any key to exit help..."
 msgstr ""
 
-#: ../0_12_1_3.c:9771
+#: 0_12_3_test.c:9804
 #, c-format
 msgid ""
 "\n"
@@ -555,7 +555,7 @@ msgid ""
 " -x, --ext-cmds\t\t\t allow the use of external commands\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9845
+#: 0_12_3_test.c:9878
 #, c-format
 msgid ""
 "\n"
@@ -564,37 +564,37 @@ msgid ""
 "this\\ file)."
 msgstr ""
 
-#: ../0_12_1_3.c:9528
+#: 0_12_3_test.c:9561
 #, c-format
 msgid " %s%sfile name%s%s: Other-writable and NOT sticky directory*\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9522
+#: 0_12_3_test.c:9555
 #, c-format
 msgid " %s%sfile name%s%s: SGID file\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9520
+#: 0_12_3_test.c:9553
 #, c-format
 msgid " %s%sfile name%s%s: SUID file\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9524
+#: 0_12_3_test.c:9557
 #, c-format
 msgid " %s%sfile name%s%s: Sticky and NOT other-writable directory*\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9526
+#: 0_12_3_test.c:9559
 #, c-format
 msgid " %s%sfile name%s%s: Sticky and other-writable directory*\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9530
+#: 0_12_3_test.c:9563
 #, c-format
 msgid " %s%sfile name%s%s: Unknown file type\n"
 msgstr ""
 
-#: ../0_12_1_3.c:4953
+#: 0_12_3_test.c:4977
 #, c-format
 msgid ""
 "#%s profile\n"
@@ -603,29 +603,29 @@ msgid ""
 "#echo -e \"%s, the anti-eye-candy/KISS file manager\"\n"
 msgstr ""
 
-#: ../0_12_1_3.c:5002
+#: 0_12_3_test.c:5026
 #, c-format
 msgid "#Default starting path is HOME\n"
 msgstr ""
 
-#: ../0_12_1_3.c:5006
+#: 0_12_3_test.c:5030
 #, c-format
 msgid ""
 "#Write below the commands you want to be executed before the prompt\n"
 "#Ex:\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7773
+#: 0_12_3_test.c:7798
 #, c-format
 msgid "%d elements are now in the Selection Box\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7775
+#: 0_12_3_test.c:7800
 #, c-format
 msgid "%d selected %s:\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9672
+#: 0_12_3_test.c:9705
 #, c-format
 msgid ""
 "%s  \n"
@@ -654,14 +654,14 @@ msgid ""
 "keybindings to work correctly.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9929
+#: 0_12_3_test.c:9962
 #, c-format
 msgid ""
 "%s %s (%s), by %s\n"
 "Contact: %s\n"
 msgstr ""
 
-#: ../0_12_1_3.c:4978
+#: 0_12_3_test.c:5002
 #, c-format
 msgid ""
 "%s configuration file\n"
@@ -669,77 +669,77 @@ msgid ""
 "\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9510
+#: 0_12_3_test.c:9543
 #, c-format
 msgid "%s file name%s%s: Block special file\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9514
+#: 0_12_3_test.c:9547
 #, c-format
 msgid "%s file name%s%s: Broken symbolic link\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9518
+#: 0_12_3_test.c:9551
 #, c-format
 msgid "%s file name%s%s: Character special file\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9502
+#: 0_12_3_test.c:9535
 #, c-format
 msgid "%s file name%s%s: Directory with no read permission\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9506
+#: 0_12_3_test.c:9539
 #, c-format
 msgid "%s file name%s%s: Directory*\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9507
+#: 0_12_3_test.c:9540
 #, c-format
 msgid "%s file name%s%s: EMPTY directory\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9511
+#: 0_12_3_test.c:9544
 #, c-format
 msgid "%s file name%s%s: Empty (zero-lenght) file\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9509
+#: 0_12_3_test.c:9542
 #, c-format
 msgid "%s file name%s%s: Empty executable file\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9508
+#: 0_12_3_test.c:9541
 #, c-format
 msgid "%s file name%s%s: Executable file\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9504
+#: 0_12_3_test.c:9537
 #, c-format
 msgid "%s file name%s%s: File with no read permission\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9516
+#: 0_12_3_test.c:9549
 #, c-format
 msgid "%s file name%s%s: Pipe or FIFO special file\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9519
+#: 0_12_3_test.c:9552
 #, c-format
 msgid "%s file name%s%s: Regular file\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9515
+#: 0_12_3_test.c:9548
 #, c-format
 msgid "%s file name%s%s: Socket file\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9513
+#: 0_12_3_test.c:9546
 #, c-format
 msgid "%s file name%s%s: Symbolic link\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9719
+#: 0_12_3_test.c:9752
 #, c-format
 msgid ""
 "%s is a completely text-based, KISS file manager able to perform all the "
@@ -781,14 +781,14 @@ msgid ""
 "see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9717
+#: 0_12_3_test.c:9750
 #, c-format
 msgid ""
 "%s%s %s%s %s(%s), by %s\n"
 "\n"
 msgstr ""
 
-#: ../0_12_1_3.c:2510
+#: 0_12_3_test.c:2519
 #, c-format
 msgid ""
 "%s, 2017-%d, %s\n"
@@ -810,248 +810,248 @@ msgid ""
 "NOTE: For more information about the meaning of 'free software' run 'fs'.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9348
+#: 0_12_3_test.c:9381
 #, c-format
 msgid "%s: !%d: event not found\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9368
+#: 0_12_3_test.c:9401
 #, c-format
 msgid "%s: !%s: event not found\n"
 msgstr ""
 
-#: ../0_12_1_3.c:4435 ../0_12_1_3.c:4442 ../0_12_1_3.c:4472 ../0_12_1_3.c:4479
+#: 0_12_3_test.c:4444 0_12_3_test.c:4451 0_12_3_test.c:4481 0_12_3_test.c:4488
 #, c-format
 msgid "%s: %s failed to allocate %zu bytes\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7766
+#: 0_12_3_test.c:7790
 #, c-format
 msgid "%s: %s: '%s': Already selected\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7737
+#: 0_12_3_test.c:7761
 #, c-format
 msgid "%s: %s: '%s': No such file or directory\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9422
+#: 0_12_3_test.c:9455
 #, c-format
 msgid "%s: %s: Command not found\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7034
+#: 0_12_3_test.c:7058
 #, c-format
 msgid "%s: '%.2s': Syntax error\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7364
+#: 0_12_3_test.c:7388
 #, c-format
 msgid "%s: '%c': Syntax error\n"
 msgstr ""
 
-#: ../0_12_1_3.c:2656
+#: 0_12_3_test.c:2665
 #, c-format
 msgid "%s: '%s -> %s' (%s): Cannot open file. Try 'application filename'.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:2660
+#: 0_12_3_test.c:2669
 #, c-format
 msgid "%s: '%s' (%s): Cannot open file. Try 'application filename'.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7598
+#: 0_12_3_test.c:7622
 #, c-format
 msgid "%s: '%s': Command not found\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3134
+#: 0_12_3_test.c:3143
 #, c-format
 msgid "%s: '%s': Error getting parent directory\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7307
+#: 0_12_3_test.c:7331
 #, c-format
 msgid "%s: '%s': Is a directory\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7595
+#: 0_12_3_test.c:7619
 #, c-format
 msgid "%s: '%s': Permission denied\n"
 msgstr ""
 
-#: ../0_12_1_3.c:2271 ../0_12_1_3.c:2280
+#: 0_12_3_test.c:2280 0_12_3_test.c:2289
 #, c-format
 msgid ""
 "%s: '%s': Warning! Failure getting the home directory. Using '%s' as an "
 "emergency home\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9431
+#: 0_12_3_test.c:9464
 #, c-format
 msgid "%s: 'xdg-open' not found. Try 'edit application_name'\n"
 msgstr ""
 
-#: ../0_12_1_3.c:4495 ../0_12_1_3.c:4504
+#: 0_12_3_test.c:4504 0_12_3_test.c:4513
 #, c-format
 msgid ""
 "%s: 'xdg-open' not found. Without this program you will always need to "
 "specify an application when opening files.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7639
+#: 0_12_3_test.c:7663
 #, c-format
 msgid "%s: Command not found\n"
 msgstr ""
 
-#: ../0_12_1_3.c:2324 ../0_12_1_3.c:2331
+#: 0_12_3_test.c:2333 0_12_3_test.c:2340
 #, c-format
 msgid "%s: Error getting hostname\n"
 msgstr ""
 
-#: ../0_12_1_3.c:2291 ../0_12_1_3.c:2298
+#: 0_12_3_test.c:2300 0_12_3_test.c:2307
 #, c-format
 msgid "%s: Error getting username\n"
 msgstr ""
 
-#: ../0_12_1_3.c:4302
+#: 0_12_3_test.c:4311
 #, c-format
 msgid "%s: Error getting variable name\n"
 msgstr ""
 
-#: ../0_12_1_3.c:4307
+#: 0_12_3_test.c:4316
 #, c-format
 msgid "%s: Error getting variable value\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7145
+#: 0_12_3_test.c:7169
 #, c-format
 msgid "%s: External commands %s\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7342
+#: 0_12_3_test.c:7366
 #, c-format
 msgid "%s: External commands are not allowed\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7153
+#: 0_12_3_test.c:7177
 #, c-format
 msgid "%s: External commands disabled\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7149
+#: 0_12_3_test.c:7173
 #, c-format
 msgid "%s: External commands enabled\n"
 msgstr ""
 
-#: ../0_12_1_3.c:2441 ../0_12_1_3.c:2448
+#: 0_12_3_test.c:2450 0_12_3_test.c:2457
 #, c-format
 msgid "%s: Fatal error! Failed retrieving current working directory\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7210
+#: 0_12_3_test.c:7234
 #, c-format
 msgid "%s: Folders first %s\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9061
+#: 0_12_3_test.c:9094
 #, c-format
 msgid "%s: Hidden files %s\n"
 msgstr ""
 
-#: ../0_12_1_3.c:5709
+#: 0_12_3_test.c:5733
 #, c-format
 msgid "%s: Missing quote\n"
 msgstr ""
 
-#: ../0_12_1_3.c:8075 ../0_12_1_3.c:8133
+#: 0_12_3_test.c:8108 0_12_3_test.c:8166
 #, c-format
 msgid "%s: No matches found\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7165
+#: 0_12_3_test.c:7189
 #, c-format
 msgid "%s: Pager %s\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7173
+#: 0_12_3_test.c:7197
 #, c-format
 msgid "%s: Pager disabled\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7169
+#: 0_12_3_test.c:7193
 #, c-format
 msgid "%s: Pager enabled\n"
 msgstr ""
 
-#: ../0_12_1_3.c:6495
+#: 0_12_3_test.c:6519
 #, c-format
 msgid "%s: Path variable is NULL or empty\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7636
+#: 0_12_3_test.c:7660
 #, c-format
 msgid "%s: Permission denied\n"
 msgstr ""
 
-#: ../0_12_1_3.c:4900 ../0_12_1_3.c:4911
+#: 0_12_3_test.c:4924 0_12_3_test.c:4935
 #, c-format
 msgid ""
 "%s: Restart your %s for changes to ~/.Xresources to take effect. Otherwise, "
 "%s keybindings might not work as expected.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7244 ../0_12_1_3.c:7258
+#: 0_12_3_test.c:7268 0_12_3_test.c:7282
 #, c-format
 msgid "%s: There are no messages\n"
 msgstr ""
 
-#: ../0_12_1_3.c:6036
+#: 0_12_3_test.c:6060
 #, c-format
 msgid "%s: There are no selected files\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7333
+#: 0_12_3_test.c:7357
 #, c-format
 msgid "%s: To gracefully quit type 'quit'\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7185
+#: 0_12_3_test.c:7209
 #, c-format
 msgid "%s: Unicode %s\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7193
+#: 0_12_3_test.c:7217
 #, c-format
 msgid "%s: Unicode disabled\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7189
+#: 0_12_3_test.c:7213
 #, c-format
 msgid "%s: Unicode enabled\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7141 ../0_12_1_3.c:7156
+#: 0_12_3_test.c:7165 0_12_3_test.c:7180
 #, c-format
 msgid "%s: Usage: ext [on, off, status]\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7162 ../0_12_1_3.c:7176
+#: 0_12_3_test.c:7186 0_12_3_test.c:7200
 #, c-format
 msgid "%s: Usage: pager [on, off, status]\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7182 ../0_12_1_3.c:7196
+#: 0_12_3_test.c:7206 0_12_3_test.c:7220
 #, c-format
 msgid "%s: Usage: unicode [on, off, status]\n"
 msgstr ""
 
-#: ../0_12_1_3.c:5017 ../0_12_1_3.c:5025
+#: 0_12_3_test.c:5041 0_12_3_test.c:5049
 #, c-format
 msgid "%s: fopen: '%s': %s. Using default values.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:5485
+#: 0_12_3_test.c:5509
 #, c-format
 msgid ""
 "%s: invalid option -- '%c'\n"
@@ -1059,168 +1059,168 @@ msgid ""
 "Try '%s --help' for more information.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:4845 ../0_12_1_3.c:4854
+#: 0_12_3_test.c:4859 0_12_3_test.c:4868
 #, c-format
 msgid "%s: mkdir: '%s': Error creating configuration directory\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3854 ../0_12_1_3.c:3862 ../0_12_1_3.c:4821 ../0_12_1_3.c:4831
+#: 0_12_3_test.c:3863 0_12_3_test.c:3871 0_12_3_test.c:4835 0_12_3_test.c:4845
 #, c-format
 msgid "%s: mkdir: '%s': Error creating trash directory\n"
 msgstr ""
 
-#: ../0_12_1_3.c:2597
+#: 0_12_3_test.c:2606
 #, c-format
 msgid "%s: open: '%s': Broken link\n"
 msgstr ""
 
-#: ../0_12_1_3.c:2713
+#: 0_12_3_test.c:2722
 #, c-format
 msgid "%s: open: '%s': Command not found\n"
 msgstr ""
 
-#: ../0_12_1_3.c:5481
+#: 0_12_3_test.c:5505
 #, c-format
 msgid ""
 "%s: option requires an argument -- '%c'\n"
 "Try '%s --help' for more information.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3505 ../0_12_1_3.c:3767
+#: 0_12_3_test.c:3514 0_12_3_test.c:3776
 #, c-format
 msgid "%s: trash: '%d': Invalid ELN\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3274
+#: 0_12_3_test.c:3283
 #, c-format
 msgid "%s: trash: '%s': Error getting filename\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3824
+#: 0_12_3_test.c:3833
 #, c-format
 msgid "%s: trash: '%s': Error removing trashed file\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3303
+#: 0_12_3_test.c:3312
 #, c-format
 msgid "%s: trash: '%s': Failed copying file to Trash\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3336
+#: 0_12_3_test.c:3345
 #, c-format
 msgid "%s: trash: '%s': Failed encoding path\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3356
+#: 0_12_3_test.c:3365
 #, c-format
 msgid "%s: trash: '%s': Failed removing file\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3488
+#: 0_12_3_test.c:3497
 #, c-format
 msgid "%s: trash: '%s': Invalid ELN\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3229
+#: 0_12_3_test.c:3238
 #, c-format
 msgid "%s: trash: '%s': Unsuported file type\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3323
+#: 0_12_3_test.c:3332
 #, c-format
 msgid ""
 "%s: trash: '%s/%s': Failed removing trash file\n"
 "Try removing it manually\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3474 ../0_12_1_3.c:3519
+#: 0_12_3_test.c:3483 0_12_3_test.c:3528
 #, c-format
 msgid "%s: trash: Error trashing %s\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3363
+#: 0_12_3_test.c:3372
 #, c-format
 msgid ""
 "%s: trash: Failed removing temporary files from Trash.\n"
 "Try removing them manually\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3562
+#: 0_12_3_test.c:3571
 #, c-format
 msgid "%s: undel: '%s': Failed decoding path\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3612
+#: 0_12_3_test.c:3621
 #, c-format
 msgid "%s: undel: '%s': Failed removing info file\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3617
+#: 0_12_3_test.c:3626
 #, c-format
 msgid "%s: undel: '%s': Failed restoring trashed file\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3586
+#: 0_12_3_test.c:3595
 #, c-format
 msgid "%s: undel: '%s': No such file or directory\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3593
+#: 0_12_3_test.c:3602
 #, c-format
 msgid "%s: undel: '%s': Permission denied\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3622
+#: 0_12_3_test.c:3631
 #, c-format
 msgid ""
 "%s: undel: Info file for '%s' not found. Try restoring the file manually\n"
 msgstr ""
 
-#: ../0_12_1_3.c:5488
+#: 0_12_3_test.c:5512
 #, c-format
 msgid "%s: unknown option character '\\%x'\n"
 msgstr ""
 
-#: ../0_12_1_3.c:2673
+#: 0_12_3_test.c:2682
 #, c-format
 msgid ""
 "%s: xdg-open not found. Specify an application to open the file\n"
 "Usage: open ELN/filename [application] [&]\n"
 msgstr ""
 
-#: ../0_12_1_3.c:8613
+#: 0_12_3_test.c:8646
 #, c-format
 msgid "%s: xdg-open not found. Try 'ELN/hot-key application'\n"
 msgstr ""
 
-#: ../0_12_1_3.c:8468
+#: 0_12_3_test.c:8501
 #, c-format
 msgid "%s: xdg-open not found. Try 'e application'\n"
 msgstr ""
 
-#: ../0_12_1_3.c:8555
+#: 0_12_3_test.c:8588
 #, c-format
 msgid "%s: xdg-open not found. Try 'hotkey application'\n"
 msgstr ""
 
-#: ../0_12_1_3.c:8310
+#: 0_12_3_test.c:8343
 #, c-format
 msgid "%s: xdg-open: Command not found\n"
 msgstr ""
 
-#: ../0_12_1_3.c:8262
+#: 0_12_3_test.c:8295
 #, c-format
 msgid ""
 "%sBookmarks Manager%s\n"
 "\n"
 msgstr ""
 
-#: ../0_12_1_3.c:6098
+#: 0_12_3_test.c:6122
 #, c-format
 msgid "%sCliFM, the anti-eye-candy, KISS file manager%s\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9799
+#: 0_12_3_test.c:9832
 #, c-format
 msgid ""
 "%sCommands:\n"
@@ -1229,66 +1229,66 @@ msgid ""
 "%s"
 msgstr ""
 
-#: ../0_12_1_3.c:9866
+#: 0_12_3_test.c:9899
 #, c-format
 msgid "%sLog file%s%s: ~/.config/%s/log.cfm\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9871
+#: 0_12_3_test.c:9904
 #, c-format
 msgid "%sMessages log file%s%s: ~/.config/%s/messages.cfm\n"
 msgstr ""
 
-#: ../0_12_1_3.c:2861
+#: 0_12_3_test.c:2870
 #, c-format
 msgid ""
 "%sMountpoints%s\n"
 "\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7787 ../0_12_1_3.c:7855
+#: 0_12_3_test.c:7820 0_12_3_test.c:7888
 #, c-format
 msgid "%sSelection Box%s%s\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3394 ../0_12_1_3.c:3693
+#: 0_12_3_test.c:3403 0_12_3_test.c:3702
 #, c-format
 msgid ""
 "%sTrashed files%s%s\n"
 "\n"
 msgstr ""
 
-#: ../0_12_1_3.c:6100
+#: 0_12_3_test.c:6124
 #, c-format
 msgid "%sType 'help' or '?' for instructions.%s\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3149
+#: 0_12_3_test.c:3158
 #, c-format
 msgid "'%s': Directory is immutable\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3201
+#: 0_12_3_test.c:3210
 #, c-format
 msgid "'%s': File is immutable\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3121
+#: 0_12_3_test.c:3130
 #, c-format
 msgid "'%s': No such file or directory\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3092 ../0_12_1_3.c:3180 ../0_12_1_3.c:3188 ../0_12_1_3.c:3208
-#: ../0_12_1_3.c:3221
+#: 0_12_3_test.c:3101 0_12_3_test.c:3189 0_12_3_test.c:3197 0_12_3_test.c:3217
+#: 0_12_3_test.c:3230
 #, c-format
 msgid "'%s': Permission denied\n"
 msgstr ""
 
-#: ../0_12_1_3.c:8705
+#: 0_12_3_test.c:8738
 msgid "('du': not found)"
 msgstr ""
 
-#: ../0_12_1_3.c:9875
+#: 0_12_3_test.c:9908
 #, c-format
 msgid ""
 "A bold green asterisk at the left of the prompt indicates that there are "
@@ -1298,7 +1298,7 @@ msgid ""
 "yellow 'W'), and simple notices (a green 'N').\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9873
+#: 0_12_3_test.c:9906
 #, c-format
 msgid ""
 "A file containing a list of system messages, either errors, warnings, or "
@@ -1306,67 +1306,67 @@ msgid ""
 "\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9034
+#: 0_12_3_test.c:9067
 #, c-format
 msgid "Access: \t%s\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9037
+#: 0_12_3_test.c:9070
 #, c-format
 msgid "Birth: \t\t%s\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9018
+#: 0_12_3_test.c:9051
 #, c-format
 msgid "Block special file"
 msgstr ""
 
-#: ../0_12_1_3.c:9036
+#: 0_12_3_test.c:9069
 #, c-format
 msgid "Change: \t%s\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9019
+#: 0_12_3_test.c:9052
 #, c-format
 msgid "Character special file"
 msgstr ""
 
-#: ../0_12_1_3.c:8241
+#: 0_12_3_test.c:8274
 msgid "Choose a bookmark ([e]dit, [q]uit): "
 msgstr ""
 
-#: ../0_12_1_3.c:9026
+#: 0_12_3_test.c:9059
 #, c-format
 msgid "Device: %d:%d"
 msgstr ""
 
-#: ../0_12_1_3.c:9015
+#: 0_12_3_test.c:9048
 #, c-format
 msgid "Directory"
 msgstr ""
 
-#: ../0_12_1_3.c:7868
+#: 0_12_3_test.c:7901
 msgid "Elements to be deselected (ex: 1 2 6, or *)? "
 msgstr ""
 
-#: ../0_12_1_3.c:3433
+#: 0_12_3_test.c:3442
 msgid "Elements to be removed (ex: 1 2 6, or *)? "
 msgstr ""
 
-#: ../0_12_1_3.c:3716
+#: 0_12_3_test.c:3725
 msgid "Elements to be undeleted (ex: 1 2 6, or *)? "
 msgstr ""
 
-#: ../0_12_1_3.c:7790 ../0_12_1_3.c:7857
+#: 0_12_3_test.c:7823 0_12_3_test.c:7890
 msgid "Empty"
 msgstr ""
 
-#: ../0_12_1_3.c:6660
+#: 0_12_3_test.c:6684
 #, c-format
 msgid "Error: %s: %d: %s: %s\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9894
+#: 0_12_3_test.c:9927
 #, c-format
 msgid ""
 "Excerpt from 'What is Free Software?', by Richard Stallman. Source: https://"
@@ -1407,16 +1407,16 @@ msgid ""
 "consider them all equally unethical (...)\"\n"
 msgstr ""
 
-#: ../0_12_1_3.c:2584 ../0_12_1_3.c:2626
+#: 0_12_3_test.c:2593 0_12_3_test.c:2635
 msgid "FIFO/pipe"
 msgstr ""
 
-#: ../0_12_1_3.c:9020
+#: 0_12_3_test.c:9053
 #, c-format
 msgid "Fifo"
 msgstr ""
 
-#: ../0_12_1_3.c:9854
+#: 0_12_3_test.c:9887
 #, c-format
 msgid ""
 "Here you can permanently set up %s options, add aliases and some prompt "
@@ -1425,7 +1425,7 @@ msgid ""
 "external commands. See the 'ext' command above.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9860
+#: 0_12_3_test.c:9893
 #, c-format
 msgid ""
 "In this file you can add those commands you want to be executed at startup. "
@@ -1437,47 +1437,47 @@ msgid ""
 "\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9035
+#: 0_12_3_test.c:9068
 #, c-format
 msgid "Modify: \t%s\n"
 msgstr ""
 
-#: ../0_12_1_3.c:4916
+#: 0_12_3_test.c:4940
 #, c-format
 msgid "Press any key to continue... "
 msgstr ""
 
-#: ../0_12_1_3.c:9021
+#: 0_12_3_test.c:9054
 #, c-format
 msgid "Regular file"
 msgstr ""
 
-#: ../0_12_1_3.c:9045
+#: 0_12_3_test.c:9078
 #, c-format
 msgid "Size: \t\t%s\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9016
+#: 0_12_3_test.c:9049
 #, c-format
 msgid "Socket"
 msgstr ""
 
-#: ../0_12_1_3.c:9017
+#: 0_12_3_test.c:9050
 #, c-format
 msgid "Symbolic link"
 msgstr ""
 
-#: ../0_12_1_3.c:8311
+#: 0_12_3_test.c:8344
 msgid "Text editor: "
 msgstr ""
 
-#: ../0_12_1_3.c:8296
+#: 0_12_3_test.c:8329
 msgid ""
 "There are no bookmarks.\n"
 "Do you want to edit the bookmarks file? [Y/n] "
 msgstr ""
 
-#: ../0_12_1_3.c:9868
+#: 0_12_3_test.c:9901
 #, c-format
 msgid ""
 "This file contains a series of fields separated by a colon in the following "
@@ -1485,11 +1485,11 @@ msgid ""
 "\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9041
+#: 0_12_3_test.c:9074
 msgid "Total size: \t"
 msgstr ""
 
-#: ../0_12_1_3.c:9382
+#: 0_12_3_test.c:9415
 #, c-format
 msgid ""
 "Usage:\n"
@@ -1498,60 +1498,60 @@ msgid ""
 "!-n: Execute the last-n command in the history list.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:2790
+#: 0_12_3_test.c:2799
 msgid "Usage: back [h, hist] [clear] [!ELN]"
 msgstr ""
 
-#: ../0_12_1_3.c:2734
+#: 0_12_3_test.c:2743
 msgid "Usage: cd [ELN/directory]"
 msgstr ""
 
-#: ../0_12_1_3.c:7217 ../0_12_1_3.c:7228
+#: 0_12_3_test.c:7241 0_12_3_test.c:7252
 msgid "Usage: folders first [on, off, status]\n"
 msgstr ""
 
-#: ../0_12_1_3.c:2823
+#: 0_12_3_test.c:2832
 msgid "Usage: forth [h, hist] [clear] [!ELN]"
 msgstr ""
 
-#: ../0_12_1_3.c:9057
+#: 0_12_3_test.c:9090
 msgid "Usage: hidden [on, off, status]"
 msgstr ""
 
-#: ../0_12_1_3.c:9082
+#: 0_12_3_test.c:9115
 #, c-format
 msgid "Usage: hidden [on, off, status]\n"
 msgstr ""
 
-#: ../0_12_1_3.c:9326
-msgid "Usage: history [clean] [-n]"
+#: 0_12_3_test.c:9359
+msgid "Usage: history [clear] [-n]"
 msgstr ""
 
-#: ../0_12_1_3.c:2553
+#: 0_12_3_test.c:2562
 msgid "Usage: open ELN/filename [application] [&]"
 msgstr ""
 
-#: ../0_12_1_3.c:8753
+#: 0_12_3_test.c:8786
 msgid "Usage: pr [ELN/filename(s)] [a, all] [s, size]"
 msgstr ""
 
-#: ../0_12_1_3.c:7707
+#: 0_12_3_test.c:7731
 msgid "Usage: sel [ELN ELN-ELN filename path... n]"
 msgstr ""
 
-#: ../0_12_1_3.c:3869
-msgid "Usage: trash ELN/filename... [ls, list] [clean] [del, rm]"
+#: 0_12_3_test.c:3878
+msgid "Usage: trash ELN/filename... [ls, list] [clear] [del, rm]"
 msgstr ""
 
-#: ../0_12_1_3.c:3631
+#: 0_12_3_test.c:3640
 msgid "Usage: undel"
 msgstr ""
 
-#: ../0_12_1_3.c:4904 ../0_12_1_3.c:4915
+#: 0_12_3_test.c:4928 0_12_3_test.c:4939
 msgid "X session"
 msgstr ""
 
-#: ../0_12_1_3.c:9636
+#: 0_12_3_test.c:9669
 #, c-format
 msgid ""
 "You can use the exclamation character (!) to perform some history commands:\n"
@@ -1560,128 +1560,128 @@ msgid ""
 "  !-n: Execute the last-n command in the history list.\n"
 msgstr ""
 
-#: ../0_12_1_3.c:2575 ../0_12_1_3.c:2617
+#: 0_12_3_test.c:2584 0_12_3_test.c:2626
 msgid "block device"
 msgstr ""
 
-#: ../0_12_1_3.c:8518
+#: 0_12_3_test.c:8551
 #, c-format
 msgid "bookmarks: %d: No such bookmark\n"
 msgstr ""
 
-#: ../0_12_1_3.c:8572 ../0_12_1_3.c:8640
+#: 0_12_3_test.c:8605 0_12_3_test.c:8673
 #, c-format
 msgid "bookmarks: %s: Application not found\n"
 msgstr ""
 
-#: ../0_12_1_3.c:8520 ../0_12_1_3.c:8654
+#: 0_12_3_test.c:8553 0_12_3_test.c:8687
 #, c-format
 msgid "bookmarks: %s: No such bookmark\n"
 msgstr ""
 
-#: ../0_12_1_3.c:8485
+#: 0_12_3_test.c:8518
 #, c-format
 msgid "bookmarks: '%s': Application not found\n"
 msgstr ""
 
-#: ../0_12_1_3.c:8579 ../0_12_1_3.c:8650
+#: 0_12_3_test.c:8612 0_12_3_test.c:8683
 #, c-format
 msgid "bookmarks: '%s': Cannot open file\n"
 msgstr ""
 
-#: ../0_12_1_3.c:8326
+#: 0_12_3_test.c:8359
 #, c-format
 msgid "bookmarks: '%s': Wrong answer\n"
 msgstr ""
 
-#: ../0_12_1_3.c:2578 ../0_12_1_3.c:2620
+#: 0_12_3_test.c:2587 0_12_3_test.c:2629
 msgid "character device"
 msgstr ""
 
-#: ../0_12_1_3.c:7911
+#: 0_12_3_test.c:7944
 #, c-format
 msgid "desel: '%s': Invalid element\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7847
+#: 0_12_3_test.c:7880
 msgid "desel: There are no selected files"
 msgstr ""
 
-#: ../0_12_1_3.c:7146 ../0_12_1_3.c:7166 ../0_12_1_3.c:7186 ../0_12_1_3.c:7211
-#: ../0_12_1_3.c:9062
+#: 0_12_3_test.c:7170 0_12_3_test.c:7190 0_12_3_test.c:7210 0_12_3_test.c:7235
+#: 0_12_3_test.c:9095
 msgid "disabled"
 msgstr ""
 
-#: ../0_12_1_3.c:7775
+#: 0_12_3_test.c:7800
 msgid "element"
 msgstr ""
 
-#: ../0_12_1_3.c:7776
+#: 0_12_3_test.c:7801
 msgid "elements"
 msgstr ""
 
-#: ../0_12_1_3.c:7146 ../0_12_1_3.c:7166 ../0_12_1_3.c:7186 ../0_12_1_3.c:7211
-#: ../0_12_1_3.c:9062
+#: 0_12_3_test.c:7170 0_12_3_test.c:7190 0_12_3_test.c:7210 0_12_3_test.c:7235
+#: 0_12_3_test.c:9095
 msgid "enabled"
 msgstr ""
 
-#: ../0_12_1_3.c:7453
+#: 0_12_3_test.c:7477
 #, c-format
 msgid "history: '%d': No such ELN\n"
 msgstr ""
 
-#: ../0_12_1_3.c:7457
+#: 0_12_3_test.c:7481
 msgid "history: Usage: b/f [hist] [clear] [!ELN]\n"
 msgstr ""
 
-#: ../0_12_1_3.c:2931
+#: 0_12_3_test.c:2940
 #, c-format
 msgid "mp: '%s': Invalid mountpoint\n"
 msgstr ""
 
-#: ../0_12_1_3.c:2905
+#: 0_12_3_test.c:2914
 #, c-format
 msgid "mp: There are no available mountpoints\n"
 msgstr ""
 
-#: ../0_12_1_3.c:2581 ../0_12_1_3.c:2623
+#: 0_12_3_test.c:2590 0_12_3_test.c:2632
 msgid "socket"
 msgstr ""
 
-#: ../0_12_1_3.c:6313
+#: 0_12_3_test.c:6337
 #, c-format
 msgid "stat: cannot access '%s': %s\n"
 msgstr ""
 
-#: ../0_12_1_3.c:4903 ../0_12_1_3.c:4914
+#: 0_12_3_test.c:4927 0_12_3_test.c:4938
 msgid "terminal"
 msgstr ""
 
-#: ../0_12_1_3.c:3944
+#: 0_12_3_test.c:3953
 #, c-format
 msgid "trash: Cannot trash '%s'\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3399 ../0_12_1_3.c:3655 ../0_12_1_3.c:3810 ../0_12_1_3.c:3902
+#: 0_12_3_test.c:3408 0_12_3_test.c:3664 0_12_3_test.c:3819 0_12_3_test.c:3911
 #, c-format
 msgid "trash: There are no trashed files\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3951
+#: 0_12_3_test.c:3960
 #, c-format
 msgid "trash: Use 'trash del' to remove trashed files\n"
 msgstr ""
 
-#: ../0_12_1_3.c:3745
+#: 0_12_3_test.c:3754
 #, c-format
 msgid "undel: '%s': Invalid ELN\n"
 msgstr ""
 
-#: ../0_12_1_3.c:8743 ../0_12_1_3.c:8746 ../0_12_1_3.c:8959 ../0_12_1_3.c:8960
-#: ../0_12_1_3.c:8981 ../0_12_1_3.c:8982 ../0_12_1_3.c:9028 ../0_12_1_3.c:9030
+#: 0_12_3_test.c:8776 0_12_3_test.c:8779 0_12_3_test.c:8992 0_12_3_test.c:8993
+#: 0_12_3_test.c:9014 0_12_3_test.c:9015 0_12_3_test.c:9061 0_12_3_test.c:9063
 msgid "unknown"
 msgstr ""
 
-#: ../0_12_1_3.c:2638 ../0_12_1_3.c:2648
+#: 0_12_3_test.c:2647 0_12_3_test.c:2657
 msgid "unknown file type"
 msgstr ""

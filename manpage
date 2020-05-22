@@ -145,8 +145,8 @@ show the elements contained in the Selection Box.
 .B ds, desel [a, all]
 deselect one or more selected elements. You can also deselect all selected elements by typing 'ds a' or 'ds all'.
 .TP
-.B t, tr, trash  [ELN's, file(s)] [ls, list] [clean] [del, rm]
-with no argument (or by passing the 'ls' option), it prints a list of currently trashed files. The 'clean' option removes all files from the trash can, while the 'del' option lists trashed files allowing you to remove one or more of them. The trash directory is $XDG_DATA_HOME/Trash, that is, '~/.local/share/Trash'. Since this trash system follows the freedesktop specification, it is able to handle files trashed by different Trash implementations.
+.B t, tr, trash  [ELN's, file(s)] [ls, list] [clear] [del, rm]
+with no argument (or by passing the 'ls' option), it prints a list of currently trashed files. The 'clear' option removes all files from the trash can, while the 'del' option lists trashed files allowing you to remove one or more of them. The trash directory is $XDG_DATA_HOME/Trash, that is, '~/.local/share/Trash'. Since this trash system follows the freedesktop specification, it is able to handle files trashed by different Trash implementations.
 .TP
 .B u, undel, untrash [a, all]
 print a list of currently trashed files allowing you to choose one or more of these files to be undeleted, that is to say, restored to their original location. You can also undelete all trashed files at once using the 'a' or 'all' option.
@@ -157,14 +157,14 @@ list available mountpoints and change the current working directory into the sel
 .B v, paste [sel] [destiny]
 he 'paste sel' command will copy the currently selected elements, if any, into the current working directory. If you want to copy these elements into another directory, you only need to tell 'paste' where to copy these files. Ex: paste sel /path/to/directory
 .TP
-.B log [clean]
-with no arguments, it shows the log file. If clean is passed as argument, it will delete all the logs.
+.B log [clear]
+with no arguments, it shows the log file. If clear is passed as argument, it will delete all the logs.
 .TP
-.B msg, messages [clean]
-with no arguments, prints the list of messages in the current session. The 'clean' option tells CliFM to empty the messages list.
+.B msg, messages [clear]
+with no arguments, prints the list of messages in the current session. The 'clear' option tells CliFM to empty the messages list.
 .TP
-.B history [clean] [-n]
-with no arguments, it shows the history list. If 'clean' is passed as argument, it will delete all the entries in the history file. Finally, '-n' tells the history command to list only the last 'n' commands in the history list.
+.B history [clear] [-n]
+with no arguments, it shows the history list. If 'clear' is passed as argument, it will delete all the entries in the history file. Finally, '-n' tells the history command to list only the last 'n' commands in the history list.
 You can use the exclamation character (!) to perform some history commands:
   !!: Execute the last command.
   !n: Execute the command number 'n' in the history list.
@@ -302,7 +302,7 @@ To see a colored list of these color codes run the 'help' command in CliFM.
 
 .SH NOTES
 .TP
-It depends on the terminal emulator you use to correctly display non-ASCII characters and characters from the extended ASCII charset. If, for example, you create a file named "ñañdú" (the spanish word for 'rhea'), it will be correctly displayed by the Linux console, Lxterminal, and Urxvt, but not thus by Xterm or Aterm.
+It depends on the terminal emulator you use to correctly display non-ASCII characters and characters from the extended ASCII charset. If, for example, you create a file named "nandu" (the spanish word for 'rhea'), it will be correctly displayed by the Linux console, Lxterminal, and Urxvt, but not thus by Xterm or Aterm.
 .TP
 CliFM is not limited to its own set of internal commands, like open, sel, trash, etc., but it can run any external command as well, provided external commands are allowed (use the -x option or the configuration file). By beginning the external command by a colon or a semicolon (':', ';') you tell CliFM not to parse the input string, but instead letting this task to the system shell, say Bash. However, bear in mind that CliFM is not intended to be used as a shell, but as the file manager it is.
 .TP

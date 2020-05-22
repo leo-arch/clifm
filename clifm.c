@@ -138,6 +138,9 @@ of course you can grep it to find, say, linux' macros, as here. */
 							###############
 */
 /*
+ ** The "clean" option (taken by history, log, trash, and msg commands) should 
+	be reanamed to "clear". Besides, back and forths commands already use 
+	"clear".
  ** Handle filenames with spaces in TAB ELN expansion
  ** Add ranges to deselect and undel functions.
  ** Check compatibility with BSD Unixes.
@@ -2004,7 +2007,7 @@ int wx_parent_check(char *file);
 void remove_from_trash (void);
 void untrash_function(char **comm);
 void untrash_element(char *file);
-void trash_clean(void);
+void trash_clear(void);
 int recur_perm_check(const char *dirname);
 int *expand_range(char *str);
 void log_msg(char *msg, int print);
@@ -3794,7 +3797,7 @@ untrash_function(char **comm)
 }
 
 void
-trash_clean(void)
+trash_clear(void)
 {
 	struct dirent **trash_files=NULL;
 	int files_n=-1;
@@ -3872,7 +3875,7 @@ trash_function(char **comm)
 	}
 
 	if (comm[1] && strcmp(comm[1], "--help") == 0) {
-		puts(_("Usage: trash ELN/filename... [ls, list] [clean] [del, rm]"));
+		puts(_("Usage: trash ELN/filename... [ls, list] [clear] [del, rm]"));
 		return;
 	}
 
@@ -3932,8 +3935,8 @@ trash_function(char **comm)
 		
 		if (strcmp(comm[1], "del") == 0 || strcmp(comm[1], "rm") == 0)
 			remove_from_trash();
-		else if (strcmp(comm[1], "clean") == 0)
-			trash_clean();
+		else if (strcmp(comm[1], "clear") == 0)
+			trash_clear();
 		else {
 			/* Trash files passed as arguments */
 			for (size_t i=1;comm[i];i++) {
@@ -5770,7 +5773,7 @@ parse_input_str(const char *str)
 			comm_array[args_n]=xcalloc(comm_array[args_n], length+1, 
 									   sizeof(char *));
 			strncpy(comm_array[args_n], buf, length);
-			/* Clean the buffer (0x00 == \0 == null char) */
+			/* Clear the buffer (0x00 == \0 == null char) */
 			memset(buf, 0x00, length);
 			length=0; /* Reset length for the next argument */
 			if (string_b[i] == '\0') 
@@ -7260,7 +7263,7 @@ exec_cmd(char **comm)
 		}
 	}*/
 	else if (strcmp(comm[0], "msg") == 0 || strcmp(comm[0], "messages") == 0) {
-		if (comm[1] && strcmp(comm[1], "clean") == 0) {
+		if (comm[1] && strcmp(comm[1], "clear") == 0) {
 			if (!msgs_n) {
 				printf(_("%s: There are no messages\n"), PROGRAM_NAME);
 				return;
@@ -7789,14 +7792,23 @@ sel_function(char **comm)
 		free(sel_tmp);
 		continue;
 	}
-	save_sel();
-	if (sel_n > 10)
-		printf(_("%d elements are now in the Selection Box\n"), sel_n);
-	else if (sel_n > 0) {
-		printf(_("%d selected %s:\n"), sel_n, (sel_n == 1) ? _("element") : 
-			_("elements"));
-		for (i=0;i<sel_n;i++)
-			printf("  %s\n", sel_elements[i]);
+	if (save_sel()) { /* If selected files were successfully written to
+		sel file */
+		if (sel_n > 10)
+			printf(_("%d elements are now in the Selection Box\n"), sel_n);
+		else if (sel_n > 0) {
+			printf(_("%d selected %s:\n"), sel_n, (sel_n == 1) ? _("element") : 
+				_("elements"));
+			for (i=0;i<sel_n;i++)
+				printf("  %s\n", sel_elements[i]);
+		}
+	}
+	else if (sel_n > 0) { /* In case of error, remove sel files from memory */
+		for (int i=0;i<sel_n;i++)
+			free(sel_elements[i]);
+		sel_n=0;
+		save_sel();
+		return;
 	}
 }
 
@@ -7914,7 +7926,7 @@ deselect (char **comm)
 				return;
 			}
 			else if (strcmp(desel_elements[i], "*") == 0) {
-				/* Clean the sel array */
+				/* Clear the sel array */
 				for (i=0;i<sel_n;i++)
 					free(sel_elements[i]);
 				sel_n=0;
@@ -9107,7 +9119,7 @@ void
 log_function(char **comm)
 /* Log 'comm' into LOG_FILE */
 {
-	int clean_log=0;
+	int clear_log=0;
 	/* If the command was just 'log' */
 	if (strcmp(comm[0], "log") == 0 && args_n == 0) {
 		FILE *log_fp;
@@ -9133,10 +9145,10 @@ log_function(char **comm)
 		}
 	}
 	
-	/* If 'log clean' */
+	/* If 'log clear' */
 	else if (strcmp(comm[0], "log") == 0 && args_n == 1) {
-		if (strcmp(comm[1], "clean") == 0) {
-			clean_log=1;
+		if (strcmp(comm[1], "clear") == 0) {
+			clear_log=1;
 		}
 	}
 
@@ -9165,10 +9177,10 @@ log_function(char **comm)
 	
 	/* Write the log into LOG_FILE */
 	FILE *log_fp;
-	/* If not 'log clean', append the log to the existing logs */
-	if (!clean_log)
+	/* If not 'log clear', append the log to the existing logs */
+	if (!clear_log)
 		log_fp=fopen(LOG_FILE, "a");
-	/* Else, overwrite the log file leaving only the 'log clean' command */
+	/* Else, overwrite the log file leaving only the 'log clear' command */
 	else 
 		log_fp=fopen(LOG_FILE, "w+");
 	if (!log_fp) {
@@ -9268,7 +9280,7 @@ get_history(void)
 	FILE *hist_fp=fopen(HIST_FILE, "r");
 	if (current_hist_n == 0) /* Coming from main() */
 		history=xcalloc(history, 1, sizeof(char **));
-	else { /* Only true when comming from 'history clean' */
+	else { /* Only true when comming from 'history clear' */
 		for (size_t i=0;i<current_hist_n;i++)
 			free(history[i]);
 		history=xrealloc(history, 1*sizeof(char **));
@@ -9310,8 +9322,8 @@ history_function(char **comm)
 			printf("%d %s\n", i+1, history[i]);
 	}
 
-	/* If 'history clean', guess what, clean the history list! */
-	else if (args_n == 1 && strcmp(comm[1], "clean") == 0) {
+	/* If 'history clear', guess what, clear the history list! */
+	else if (args_n == 1 && strcmp(comm[1], "clear") == 0) {
 		FILE *hist_fp=fopen(HIST_FILE, "w+");
 		if (!hist_fp) {
 			asprintf(&msg, "%s: history: %s: %s\n", PROGRAM_NAME, 
@@ -9344,7 +9356,7 @@ history_function(char **comm)
 	}
 	
 	else
-		puts(_("Usage: history [clean] [-n]"));
+		puts(_("Usage: history [clear] [-n]"));
 }
 
 void
@@ -9622,9 +9634,9 @@ Selection Box.\n"), white, NC, white_b);
 elements. You can also deselect all selected elements by typing 'ds a' or \
 'ds all'.\n"), white, 
 		   NC, white_b);
-	printf(_("\n%st, tr, trash%s%s  [ELN's, file(s)] [ls, list] [clean] \
+	printf(_("\n%st, tr, trash%s%s  [ELN's, file(s)] [ls, list] [clear] \
 [del, rm]: With no argument (or by passing the 'ls' option), it prints a list \
-of currently trashed files. The 'clean' option removes all files from the \
+of currently trashed files. The 'clear' option removes all files from the \
 trash can, while the 'del' option lists trashed files allowing you to remove \
 one or more of them. The trash directory is $XDG_DATA_HOME/Trash, that is, \
 '~/.local/share/Trash'. Since this trash system follows the freedesktop \
@@ -9644,14 +9656,14 @@ directory. If you want to copy these elements into another directory, you \
 only need to tell 'paste' where to copy these files. Ex: paste sel \
 /path/to/directory\n"), 
 		   white, NC, white_b);
-	printf(_("\n%slog%s%s [clean]: With no arguments, it shows the log file. \
-If clean is passed as argument, it will delete all the logs.\n"), white, NC, 
+	printf(_("\n%slog%s%s [clear]: With no arguments, it shows the log file. \
+If clear is passed as argument, it will delete all the logs.\n"), white, NC, 
 		   white_b);
-	printf(_("\n%smsg, messages%s%s [clean]: With no arguments, prints the \
-list of messages in the current session. The 'clean' option tells %s to \
+	printf(_("\n%smsg, messages%s%s [clear]: With no arguments, prints the \
+list of messages in the current session. The 'clear' option tells %s to \
 empty the messages list.\n"), white, NC, white_b, PROGRAM_NAME);
-	printf(_("\n%shistory%s%s [clean] [-n]: With no arguments, it shows the \
-history list. If 'clean' is passed as argument, it will delete all the entries \
+	printf(_("\n%shistory%s%s [clear] [-n]: With no arguments, it shows the \
+history list. If 'clear' is passed as argument, it will delete all the entries \
 in the history file. Finally, '-n' tells the history command to list only the \
 last 'n' commands in the history list.\n"), white, NC, white_b);
 	printf(_("You can use the exclamation character (!) to perform some \
