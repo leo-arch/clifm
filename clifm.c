@@ -138,9 +138,6 @@ of course you can grep it to find, say, linux' macros, as here. */
 							###############
 */
 /*
- ** The "clean" option (taken by history, log, trash, and msg commands) should 
-	be reanamed to "clear". Besides, back and forths commands already use 
-	"clear".
  ** Handle filenames with spaces in TAB ELN expansion
  ** Add ranges to deselect and undel functions.
  ** Check compatibility with BSD Unixes.
@@ -340,6 +337,9 @@ of course you can grep it to find, say, linux' macros, as here. */
 	it will never leave the beta state.
 
 
+ * (DONE) The "clean" option (taken by history, log, trash, and msg commands) 
+	should be reanamed to "clear". Besides, back and forths commands already 
+	use "clear".
  * (DONE) Add ELN auto-expansion. Great!!!!
  * (DONE) Fix file sizes (from MB to MiB)
  * (DONE) The properties function prints "linkname: No such file or directory"
@@ -709,21 +709,28 @@ of course you can grep it to find, say, linux' macros, as here. */
 	for example, from 1 to 4 in the directories list, 'back' does not go back
 	to 1, but to 3. This is not really a bug, but it feels ugly and 
 	unintuitive.
- ** 3 - I'm using MAX_LINE (255) length for getting lines from files with 
-	fgets(). A log line, for example, could perfectly contain a PATH_MAX (4096) 
-	path, plus misc stuff, so that MAX_LINE is clearly not enough. I should 
-	try the GNU getline() instead, which takes care itself of allocating 
-	enough bytes to hold the entire line.
- ** 4 - If the user's home cannot be found, CliFM will attempt to create its
+ ** 3 - If the user's home cannot be found, CliFM will attempt to create its
 	config files in PWD/clifm_emergency. Now, if CWD is not writable, no option
 	will be set, and CliFM will become very usntable. In this case I should 
 	prevent the program from writing or reading anything and simply set the
 	defaults.
- ** 5 - When TAB expanding the same ELN more than once, and if that ELN
+ ** 4 - When TAB expanding the same ELN more than once, and if that ELN
 	corresponds to a directory, one slash is added to the expanded string
 	each time, resulting in something like: "path////". Of course, this 
 	shouldn't happen.
 
+ ** (SOLVED) GETT RID OF MAX_LINE COMPLETELY!! It doesn't exist and could 
+	only break things. No more MAX_LINE anymore!
+ ** (SOLVED) I'm using MAX_LINE (255) length for getting lines from files with 
+	fgets(). A log line, for example, could perfectly contain a PATH_MAX (4096) 
+	path, plus misc stuff, so that MAX_LINE is clearly not enough. I should 
+	try the GNU getline() instead, which takes care itself of allocating 
+	enough bytes to hold the entire line. Done. I keep fgets only when I known 
+	which is the max valid length for each line of the file.
+ * (SOLVED) The log gets screwed whenever it is reconstructed deleting oldest
+	entries. SOLUTION: Use getline to get log lines.
+ * (SOLVED) Log lines are truncated. Problem: The function to get the 
+	command's full length was wrong.
  * (SOLVED) TMP_DIR will be created by the first user who launched the
 	program, so that remaining users won't be able to write in here, that is
 	to say, they won't be able to select any file, since TMP_DIR is not
@@ -1122,7 +1129,7 @@ program_invocation_short_name variable and asprintf() */
 
 /* The following C libraries are located in /usr/include */
 #include <stdio.h> /* (f)printf, s(n)printf, scanf, fopen, fclose, remove, 
-					fgetc, fputc, perror, rename, sscanf */
+					fgetc, fputc, perror, rename, sscanf, getline */
 #include <string.h> /* str(n)cpy, str(n)cat, str(n)cmp, strlen, strstr, memset */
 #include <stdlib.h> /* getenv, malloc, calloc, free, atoi, realpath, 
 					EXIT_FAILURE and EXIT_SUCCESS macros */
@@ -1167,12 +1174,11 @@ program_invocation_short_name variable and asprintf() */
  * "/home/" (6) + 32 + "/.config/clifm/bookmarks.cfm" (28) + terminating 
  * null byte (1) == 67. This is then the max length I need for config dirs 
  * and files */
-#define MAX_LINE 256
 #define TMP_DIR "/tmp/clifm"
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\033c")
 /* #define CLEAR write(STDOUT_FILENO, "\033c", 3) */
-#define VERSION "0.12.4"
+#define VERSION "0.12.5"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define DATE "May 22, 2020"
@@ -2869,11 +2875,15 @@ void list_mountpoints(void)
 	if (mp_fp) {
 		printf(_("%sMountpoints%s\n\n"), white, NC);
 		/* The line variable should be able to store the device name,
-		 * the mount point (PATH_MAX) and mount options. It should be 
-		 * therefore at least PATH_MAX*2 */
-		char line[PATH_MAX]="", **mountpoints=NULL;
+		 * the mount point (PATH_MAX) and mount options. PATH_MAX*2 
+		 * should be more than enough */
+		char **mountpoints=NULL;
 		int mp_n=0;
-		while (fgets(line, sizeof(line), mp_fp)) {
+
+		size_t line_size=0;
+		char *line=NULL;
+		ssize_t line_len=0;
+		while ((line_len=getline(&line, &line_size, mp_fp)) > 0) {
 			/* Do not list all mountpoints, but only those corresponding to 
 			 * a block device (/dev) */
 			if (strncmp(line, "/dev/", 5) == 0) {
@@ -2906,7 +2916,15 @@ void list_mountpoints(void)
 				}
 			}
 		}
+		free(line);
+		line=NULL;
 		fclose(mp_fp);
+
+/*		char line[PATH_MAX]="";
+		while (fgets(line, sizeof(line), mp_fp)) {
+
+		} */
+
 		
 		/* This should never happen: There should always be a mountpoint,
 		 * at least "/" */
@@ -3546,7 +3564,9 @@ untrash_element(char *file)
 	if (info_fp) {
 		/* (PATH_MAX*2)+14 = two paths plus 14 extra bytes for command */
 		char *orig_path=NULL, cmd[(PATH_MAX*2)+14]="";
-		char line[MAX_LINE]="";
+		/* The max length for line is Path=(5) + PATH_MAX + \n(1) */
+		char line[PATH_MAX+6];
+		memset(line, 0x00, PATH_MAX+6);
 		while (fgets(line, sizeof(line), info_fp))
 			if (strncmp(line, "Path=", 5) == 0)
 				orig_path=straft(line, '=');
@@ -4908,11 +4928,13 @@ directory\n"), PROGRAM_NAME, CONFIG_DIR);
 		sprintf(xresources, "%s/.Xresources", user_home);
 		FILE *xresources_fp=fopen(xresources, "a+");
 		if (xresources_fp) {
-			char line[MAX_LINE]="", eight_bit_ok=0;
-			while (fgets(line, sizeof(line), xresources_fp)) {
+			/* Since I'm looking for a very specific line, which is a fixed
+			 * line far below MAX_LINE, I don't care to get any of the 
+			 * remaining lines truncated */
+			char line[32]="", eight_bit_ok=0;
+			while (fgets(line, sizeof(line), xresources_fp))
 				if (strncmp(line, "XTerm*eightBitInput: false", 26) == 0)
 					eight_bit_ok=1;
-			}
 			if (!eight_bit_ok) {
 				/* Set the file position indicator at the end of the file */
 				fseek(xresources_fp, 0L, SEEK_END);
@@ -4999,9 +5021,9 @@ expected.\n"),
 						CONFIG_FILE, strerror(errno));
 		}
 		else {
-			fprintf(config_fp, _("%s configuration file\n\
-########################\n\n"), PROGRAM_NAME);
-			/* Do not translate config options */
+			/* Do not translate anything in the config file */
+			fprintf(config_fp, "%s configuration file\n\
+########################\n\n", PROGRAM_NAME);
 			fprintf(config_fp, "Splash screen=false\n\
 Welcome message=true\n\
 Show hidden files=true\n\
@@ -5023,12 +5045,12 @@ Max history=500\n\
 Max log=1000\n\
 Clear screen=false\n\
 Starting path=default\n");
-			fprintf(config_fp, _("#Default starting path is HOME\n"));
+			fprintf(config_fp, "#Default starting path is CWD\n");
 			fprintf(config_fp, "#END OF OPTIONS\n\
 \n###Aliases###\nalias ls='ls --color=auto -A'\n\
 \n#PROMPT\n");
-			fprintf(config_fp, _("#Write below the commands you want to be \
-executed before the prompt\n#Ex:\n"));
+			fprintf(config_fp, "#Write below the commands you want to be \
+executed before the prompt\n#Ex:\n");
 			fprintf(config_fp, "#date | awk '{print $1\", \"$2,$3\", \"$4}'\n\n#END OF PROMPT\n"); 
 			fclose(config_fp);
 		}
@@ -5050,12 +5072,14 @@ executed before the prompt\n#Ex:\n"));
 					PROGRAM_NAME, CONFIG_FILE, strerror(errno));
 	}
 	else {
-		char line[MAX_LINE]="";
+		#define MAX_BOOL 6
+		char line[PATH_MAX+15]; /* starting path(14) + PATH_MAX + \n(1)*/
+		memset(line, 0x00, PATH_MAX+15);
 		while (fgets(line, sizeof(line), config_fp)) {
 			if (strncmp(line, "#END OF OPTIONS", 15) == 0)
 				break;
 			else if (strncmp(line, "Splash screen=", 14) == 0) {
-				char opt_str[MAX_LINE+1]="";
+				char opt_str[MAX_BOOL]=""; /* false (5) + 1 */
 				ret=sscanf(line, "Splash screen=%5s\n", opt_str);
 				/* According to cppcheck: "sscanf() without field width limits can crash with 
 				huge input data". Field width limits = %5s */
@@ -5071,7 +5095,7 @@ executed before the prompt\n#Ex:\n"));
 					splash_screen=0;
 			}
 			else if (strncmp(line, "Welcome message=", 16) == 0) {
-				char opt_str[MAX_LINE+1]="";
+				char opt_str[MAX_BOOL]="";
 				ret=sscanf(line, "Welcome message=%5s\n", opt_str);
 				if (ret == -1)
 					continue;
@@ -5083,7 +5107,7 @@ executed before the prompt\n#Ex:\n"));
 					welcome_message=1;
 			}
 			else if (strncmp(line, "Clear screen=", 13) == 0) {
-				char opt_str[MAX_LINE+1]="";
+				char opt_str[MAX_BOOL]="";
 				ret=sscanf(line, "Clear screen=%5s\n", opt_str);
 				if (ret == -1)
 					continue;
@@ -5095,7 +5119,7 @@ executed before the prompt\n#Ex:\n"));
 					clear_screen=0;
 			}
 			else if (strncmp(line, "Show hidden files=", 18) == 0) {
-				char opt_str[MAX_LINE+1]="";
+				char opt_str[MAX_BOOL]="";
 				ret=sscanf(line, "Show hidden files=%5s\n", opt_str);
 				if (ret == -1)
 					continue;
@@ -5107,7 +5131,7 @@ executed before the prompt\n#Ex:\n"));
 					show_hidden=1;
 			}
 			else if (strncmp(line, "Long view mode=", 15) == 0) {
-				char opt_str[MAX_LINE+1]="";
+				char opt_str[MAX_BOOL]="";
 				ret=sscanf(line, "Long view mode=%5s\n", opt_str);
 				if (ret == -1)
 					continue;
@@ -5119,7 +5143,7 @@ executed before the prompt\n#Ex:\n"));
 					long_view=0;
 			}
 			else if (strncmp(line, "External commands=", 18) == 0) {
-				char opt_str[MAX_LINE+1]="";
+				char opt_str[MAX_BOOL]="";
 				ret=sscanf(line, "External commands=%5s\n", opt_str);
 				if (ret == -1)
 					continue;
@@ -5131,7 +5155,7 @@ executed before the prompt\n#Ex:\n"));
 					ext_cmd_ok=0;
 			}
 			else if (strncmp(line, "List folders first=", 19) == 0) {
-				char opt_str[MAX_LINE+1]="";
+				char opt_str[MAX_BOOL]="";
 				ret=sscanf(line, "List folders first=%5s\n", opt_str);
 				if (ret == -1)
 					continue;
@@ -5143,7 +5167,7 @@ executed before the prompt\n#Ex:\n"));
 					list_folders_first=1;
 			}
 			else if (strncmp(line, "cd lists automatically=", 23) == 0) {
-				char opt_str[MAX_LINE+1]="";
+				char opt_str[MAX_BOOL]="";
 				ret=sscanf(line, "cd lists automatically=%5s\n", opt_str);
 				if (ret == -1)
 					continue;
@@ -5155,7 +5179,7 @@ executed before the prompt\n#Ex:\n"));
 					cd_lists_on_the_fly=1;
 			}
 			else if (strncmp(line, "Case sensitive list=", 20) == 0) {
-				char opt_str[MAX_LINE+1]="";
+				char opt_str[MAX_BOOL]="";
 				ret=sscanf(line, "Case sensitive list=%5s\n", opt_str);
 				if (ret == -1)
 					continue;
@@ -5167,7 +5191,7 @@ executed before the prompt\n#Ex:\n"));
 					case_sensitive=0;
 			}
 			else if (strncmp(line, "Unicode=", 8) == 0) {
-				char opt_str[MAX_LINE+1]="";
+				char opt_str[MAX_BOOL]="";
 				ret=sscanf(line, "Unicode=%5s\n", opt_str);
 				if (ret == -1)
 					continue;
@@ -5179,7 +5203,7 @@ executed before the prompt\n#Ex:\n"));
 					unicode=0;
 			}
 			else if (strncmp(line, "Pager=", 6) == 0) {
-				char opt_str[MAX_LINE+1]="";
+				char opt_str[MAX_BOOL]="";
 				ret=sscanf(line, "Pager=%5s\n", opt_str);
 				if (ret == -1)
 					continue;
@@ -5261,14 +5285,14 @@ executed before the prompt\n#Ex:\n"));
 				max_log=opt_num;
 			}
 			else if (strncmp(line, "Starting path=", 14) == 0) {
-				char opt_str[PATH_MAX+1]="";
+				char opt_str[PATH_MAX]="";
 				ret=sscanf(line, "Starting path=%4096s\n", opt_str);				
 				if (ret == -1)
 					continue;
 				/* If starting path is not "default", and exists, and is a 
 				 * directory, and the user has appropriate permissions, set 
 				 * path to starting path. If any of these conditions is false, 
-				 * path will be set to default, that is, HOME */
+				 * path will be set to default, that is, CWD */
 				if (strncmp(opt_str, "default", 7) != 0) {
 					if (chdir(opt_str) == 0) {
 						free(path);
@@ -5345,8 +5369,11 @@ exec_profile(void)
 	if (stat(PROFILE_FILE, &file_attrib) == 0) {
 		FILE *fp=fopen(PROFILE_FILE, "r");
 		if (fp) {
-			char line[MAX_LINE]="";
-			while(fgets(line, sizeof(line), fp)) {
+
+			size_t line_size=0;
+			char *line=NULL;
+			ssize_t line_len=0;
+			while ((line_len=getline(&line, &line_size, fp)) > 0) {
 				if (strcntchr(line, '=') != -1 && !isdigit(line[0])) {
 					create_usr_var(line);
 				}
@@ -5364,7 +5391,13 @@ exec_profile(void)
 					args_n=0;
 				}
 			}
+			free(line);
+			line=NULL;
 			fclose(fp);
+/*			char line[MAX_LINE]="";
+			while(fgets(line, sizeof(line), fp)) {
+
+			} */
 		}
 	}
 }
@@ -6091,6 +6124,8 @@ get_sel_files(void)
 	FILE *sel_fp=fopen(sel_file_user, "r");
 /*	sel_elements=xcalloc(sel_elements, 1, sizeof(char *)); */
 	if (sel_fp) {
+		/* Since this file contains only paths, I can be sure no line length 
+		 * will larger than PATH_MAX*/
 		char sel_line[PATH_MAX]="";
 		while (fgets(sel_line, sizeof(sel_line), sel_fp)) {
 			size_t line_len=strlen(sel_line);
@@ -6963,9 +6998,15 @@ get_aliases_n_prompt_cmds(void)
 					CONFIG_FILE, strerror(errno));
 		return;
 	}
-	char line[MAX_LINE]="";
-	int prompt_line_found=0;
+/*	char line[MAX_LINE]="";
 	while (fgets(line, sizeof(line), config_file_fp)) {
+	} */
+
+	int prompt_line_found=0;
+	char *line=NULL;
+	size_t line_size=0;
+	ssize_t line_len=0;
+	while ((line_len=getline(&line, &line_size, config_file_fp)) > 0) {
 		if (strncmp(line, "alias", 5) == 0) {
 			char *alias_line=straft(line, ' ');	
 			aliases=xrealloc(aliases, sizeof(char **)*(aliases_n+1));
@@ -6987,6 +7028,8 @@ get_aliases_n_prompt_cmds(void)
 		else if (strncmp(line, "#PROMPT", 7) == 0) 
 			prompt_line_found=1;
 	}
+	free(line);
+	line=NULL;
 	fclose(config_file_fp);
 }
 
@@ -6996,16 +7039,17 @@ check_for_alias(char **comm)
  * exists. Returns one if matching alias is found, zero if not. */
 {
 	char *aliased_cmd=NULL;
-	char comm_tmp[MAX_LINE]="";
-	/* Look for this string: "command=", in the aliases file */
-	snprintf(comm_tmp, MAX_LINE, "%s=", comm[0]);
 	size_t comm_len=strlen(comm[0]);
+	char comm_tmp[comm_len+2];
+	memset(comm_tmp, 0x00, comm_len+2);
+	/* Look for this string: "command=", in the aliases file */
+	snprintf(comm_tmp, sizeof(comm_tmp), "%s=", comm[0]);
 	for (size_t i=0;i<aliases_n;i++) {
 		if (strncmp(aliases[i], comm_tmp, comm_len+1) == 0) {
 			/* Get the aliased command */
 			aliased_cmd=strbtw(aliases[i], '\'', '\'');
 			if (!aliased_cmd) return NULL;
-			if (aliased_cmd[0] == '\0') { // zero length
+			if (aliased_cmd[0] == '\0') { /* zero length */
 				free(aliased_cmd);
 				return NULL;
 			}
@@ -8228,7 +8272,6 @@ get_bookmarks(char *bookmarks_file)
 	bm_n=-1; /* This global variable stores the total amount of bookmarks */
 	char **bookmarks=NULL;
 	FILE *bm_fp;
-	char line[MAX_LINE]="";
 	bm_fp=fopen(bookmarks_file, "r");
 	if (!bm_fp) {
 		asprintf(&msg, "%s: bookmarks: %s: %s\n", PROGRAM_NAME, 
@@ -8246,7 +8289,15 @@ get_bookmarks(char *bookmarks_file)
 	bm_n=0; /* bm_n is only zero if no file error. Otherwise, it is -1 */
 	int ret_nl;
 	/* Get bookmarks from the bookmarks file */
+
+/*	char line[PATH_MAX]="";
 	while (fgets(line, sizeof(line), bm_fp)) {
+	} */
+
+	char *line=NULL;
+	size_t line_size=0;
+	ssize_t line_len=0;
+	while ((line_len=getline(&line, &line_size, bm_fp)) > 0) {
 		if (line[0] != '#') { /* If not a comment */
 			/* Allocate memory to store the bookmark */
 			bookmarks=xrealloc(bookmarks, (bm_n+1)*sizeof(char **));
@@ -8261,7 +8312,10 @@ get_bookmarks(char *bookmarks_file)
 			bm_n++;
 		}
 	}
+	free(line);
+	line=NULL;
 	fclose(bm_fp);
+
 	return bookmarks;
 }
 
@@ -8764,7 +8818,10 @@ dir_size(char *dir)
 	if (access(DU_TMP_FILE, F_OK) == 0) {
 		du_fp=fopen(DU_TMP_FILE, "r");
 		if (du_fp) {
-			char line[MAX_LINE]="";
+			/* I only need here the first field of the line, which is a file
+			 * size and could only take a few bytes, so that 32 bytes is
+			 * more than enough */
+			char line[32]="";
 			fgets(line, sizeof(line), du_fp);
 			char *file_size=strbfr(line, '\t');
 			if (file_size)
@@ -9137,9 +9194,18 @@ log_function(char **comm)
 			return;
 		}
 		else {
-			char line[MAX_LINE]="";	
+			size_t line_size=0;
+			char *line_buff=NULL;
+			ssize_t line_len=0;
+			while ((line_len=getline(&line_buff, &line_size, log_fp)) > 0)
+				printf("%s", line_buff);
+			free(line_buff);
+			line_buff=NULL;
+
+/*			char line[MAX_LINE]="";	
 			while (fgets(line, sizeof(line), log_fp))
-				printf("%s", line);
+				printf("%s", line); */
+
 			fclose(log_fp);
 			return;
 		}
@@ -9156,7 +9222,7 @@ log_function(char **comm)
 	/* Create a buffer big enough to hold the entire command */
 	size_t com_len=0;
 	int i=0;
-	for (i=args_n;i--;)
+	for (i=args_n;i>=0;i--)
 		/* Argument length plus space plus null byte terminator */
 		com_len+=(strlen(comm[i])+1);
 	char full_comm[com_len];
@@ -9230,11 +9296,15 @@ check_log_file_size(char *log_file)
 	/* Truncate the file, if needed */
 	log_fp=fopen(log_file, "r");
 	if (log_fp != NULL) {
-		char line[MAX_LINE]="";
 		int logs_num=0;
-		while (fgets(line, sizeof(line), log_fp))
-			logs_num++;
+
+		/* Count newline chars to get amount of lines in file */
+		char c;
+		for (c=getc(log_fp);c != EOF;c=getc(log_fp))
+			if (c == '\n') 
+				logs_num++;
 		fclose(log_fp);
+
 		if (logs_num > max_log) {
 			log_fp=fopen(log_file, "r");
 			if (log_fp == NULL) {
@@ -9247,14 +9317,16 @@ check_log_file_size(char *log_file)
 				fclose(log_fp);
 				return;
 			}
+
 			int i=1;
-			while (fgets(line, sizeof(line), log_fp)) {
-				if (i++ >= logs_num-(max_log-1)) { /* Delete old entries */
-					line[strlen(line)-1]='\0';
-					fprintf(log_fp_tmp, "%s", line);
-					fprintf(log_fp_tmp, "\n");
-				}
-			}
+			size_t line_size=0;
+			char *line_buff=NULL;
+			ssize_t line_len=0;
+			while ((line_len=getline(&line_buff, &line_size, log_fp)) > 0)
+				if (i++ >= logs_num-(max_log-1)) /* Delete oldest entries */
+					fprintf(log_fp_tmp, "%s", line_buff);
+			free(line_buff);
+			line_buff=NULL;
 			fclose(log_fp_tmp);
 			fclose(log_fp);
 			remove(log_file);
@@ -9287,7 +9359,21 @@ get_history(void)
 		current_hist_n=0;
 	}
 	if (hist_fp != NULL) {
-		char line[MAX_LINE]="";
+
+		size_t line_size=0;
+		char *line_buff=NULL;
+		ssize_t line_len=0;
+		while ((line_len=getline(&line_buff, &line_size, hist_fp)) > 0) {
+			line_buff[line_len-1]='\0';
+			history=xrealloc(history, (current_hist_n+1)*sizeof(char **));
+			history[current_hist_n]=xcalloc(history[current_hist_n], 
+											line_len, sizeof(char *));
+			strncpy(history[current_hist_n++], line_buff, line_len);
+		}
+		free(line_buff);
+		line_buff=NULL;
+
+/*		char line[MAX_LINE]="";
 		size_t line_len=0;
 		while (fgets(line, sizeof(line), hist_fp)) {
 			line_len=strlen(line);
@@ -9296,7 +9382,8 @@ get_history(void)
 			history[current_hist_n]=xcalloc(history[current_hist_n], 
 											line_len, sizeof(char *));
 			strncpy(history[current_hist_n++], line, line_len);
-		}
+		} */
+
 		fclose(hist_fp);
 	}
 	else {
