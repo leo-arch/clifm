@@ -138,7 +138,6 @@ of course you can grep it to find, say, linux' macros, as here. */
 							###############
 */
 /*
- ** Handle filenames with spaces in TAB ELN expansion
  ** Add ranges to deselect and undel functions.
  ** Check compatibility with BSD Unixes.
  ** Add a help option for each internal command. Make sure this help system is
@@ -336,7 +335,8 @@ of course you can grep it to find, say, linux' macros, as here. */
  ** Destructive testing: Try running wrong commands, MAKE IT FAIL! Otherwise, 
 	it will never leave the beta state.
 
-
+ * (DONE) Handle filenames with spaces and special chars in TAB expansion, 
+	both for ELN's and filenames.
  * (DONE) The "clean" option (taken by history, log, trash, and msg commands) 
 	should be reanamed to "clear". Besides, back and forths commands already 
 	use "clear".
@@ -1178,10 +1178,10 @@ program_invocation_short_name variable and asprintf() */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\033c")
 /* #define CLEAR write(STDOUT_FILENO, "\033c", 3) */
-#define VERSION "0.12.5"
+#define VERSION "0.13.1"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "May 22, 2020"
+#define DATE "May 24, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -1949,6 +1949,9 @@ void init_shell(void);
 void xdg_open_check(void);
 void splash(void);
 char **my_rl_completion(const char *text, int start, int end);
+
+char *my_rl_quote(char *text, int m_t, char *qp);
+
 char *filenames_generator(const char *text, int state);
 char *bin_cmd_generator(const char *text, int state);
 void get_path_programs(void);
@@ -2404,10 +2407,23 @@ directory. Using '%s' as an emergency home\n"), PROGRAM_NAME, __func__,
 	/* Check whether xdg-open is available */
 	xdg_open_check();
 
-	/* Enable tab auto-completion for commands (in PATH) in case of first 
+	/* INITIALIZE READLINE
+	 * Enable tab auto-completion for commands (in PATH) in case of first 
 	 * entered string. The second and later entered string will be 
-	 * autocompleted with filenames instead, just like in Bash */
+	 * autocompleted with filenames instead, just like in Bash, or with
+	 *  listed elements, in case of ELN's */
 	rl_attempted_completion_function=my_rl_completion;
+	/* Though the readline documentation doesn't say this crearly, the
+	 * quoting function won't work at all if you don't use a custom quoting
+	 * mechanism */
+	rl_filename_quoting_function=my_rl_quote;
+	/* Tell readline what char to use for quoting */
+	rl_completer_quote_characters="'";
+	/* Tell readline what chars needs to be quoted. Probably incomplete: */
+	rl_filename_quote_characters=" `'=[]{}()<>|&\\\t";
+	/* In this way, if a filename is "me=very ugly [filename]", the returned
+	 * quoted string will be: "'me'=very ugly'[filename']'" */
+
 	if (splash_screen) {
 		splash();
 		CLEAR;
@@ -4690,6 +4706,45 @@ get_path_programs(void)
 	}
 }
 
+char
+*my_rl_quote(char *text, int m_t, char *qp)
+/* Performs rc-style filename quoting for readline (put a ' at the front and 
+ * end and escape every ' with a second ')
+ * Taken from:
+ * https://utcc.utoronto.ca/~cks/space/blog/programming/ReadlineQuotingExample*/
+{
+	/* 
+	 * How it works: p and r and pointers to the same memory location 
+	 * initialized (malloced) twice as big as the line that needs to be 
+	 * quoted (in case all chars in the line need to be quoted); tp is a 
+	 * pointer to text, which contains the string to be quoted. We write an
+	 * initial ' to p, and then move through tp to find some ' that needs
+	 * to be quoted (a's become a''s), and finally add an ending ' to p. At 
+	 * this point we cannot return p, since this pointer is at the end of the 
+	 * string, so that we return r instead, which is at the beginning of the 
+	 * same string pointed by p. 
+	 * */
+	char *r, *p, *tp;
+
+	/* The worst case is that every character of text needs to be escaped; 
+	 * at that point we need 2x its space plus the ' at the start and end 
+	 * and a NULL byte. */
+	p = r = malloc(strlen(text)*2 + 3);
+	if (r == NULL)
+		return NULL;
+
+	*p++='\''; /* Add a starting ' */
+	for (tp=text; *tp; tp++) {
+		if (*tp == '\'')
+			*p++='\''; /* Quote internal '. Eg: "ELN's" becomes "ELN''s" */
+		*p++=*tp;
+	}
+	if (m_t == SINGLE_MATCH)
+		*p++='\''; /* Add an ending ' */
+	*p++=0;
+	return r;
+}
+
 char **
 my_rl_completion(const char *text, int start, int end)
 {
@@ -4697,24 +4752,16 @@ my_rl_completion(const char *text, int start, int end)
 	/* This line only prevents a Valgrind warning about unused variables */
 	if (end) {}
 	if (start == 0) { /* Only for the first word entered in the prompt */
-		/* rl_attempted_completion_over=1; */
 		/* Commands auto-completion */
 		matches=rl_completion_matches(text, &bin_cmd_generator);
 	}
 	else { /* ELN auto-expansion !!! */
 		int num_text=atoi(text);
-		if (is_number(text) && num_text > 0 && num_text <= files) {
+		if (is_number(text) && num_text > 0 && num_text <= files)
 			matches=rl_completion_matches(text, &filenames_generator);
-			/* If match is dir (ends in slash), remove final space from
-			 * the readline buffer, so that the cursor will be next to
-			 * the final slash */
-			if (matches[0] && matches[0][strlen(matches[0])-1] == '/') {
-				rl_point=end-1;
-				rl_line_buffer[rl_point]=0x20;			
-			}
-		}
 	}
-	/* If none of the above, this function performs filename auto-completion */
+	/* If none of the above, that is, if matches is NULL, readline will do 
+	 * filename completion by default */
 	return matches;
 }
 
@@ -4723,23 +4770,20 @@ filenames_generator(const char *text, int state)
 {
 	static int i;
 	char *name;
+	rl_filename_completion_desired=1;
+	/* According to the GNU readline documention: "If it is set to a non-zero 
+	 * value, directory names have a slash appended and Readline attempts to 
+	 * quote completed filenames if they contain any embedded word break 
+	 * characters." To make the quoting part work I had to specify a custom
+	 * quoting function (my_rl_quote) */
 	if (!state)
 		i=0;
 	int num_text=atoi(text);
 	/* Check list of currently displayed files for a match */
-	while (i < files && (name=dirlist[i++]->d_name) != NULL) {
-		if (strcmp(name, dirlist[num_text-1]->d_name) == 0) {
-			/* If there is a match, and match is dir, add a final slash */
-			struct stat file_attrib;
-			lstat(name, &file_attrib);
-			switch (file_attrib.st_mode & S_IFMT) {
-				case S_IFDIR: name[strlen(name)]='/';
-				break;
-			}
-			/* Add some lines to handle filenames with spaces */
+	while (i < files && (name=dirlist[i++]->d_name) != NULL)
+		if (strcmp(name, dirlist[num_text-1]->d_name) == 0)
 			return strdup(name);
-		}
-	}
+
 	return NULL;
 }
 
