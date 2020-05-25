@@ -1178,10 +1178,10 @@ program_invocation_short_name variable and asprintf() */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\033c")
 /* #define CLEAR write(STDOUT_FILENO, "\033c", 3) */
-#define VERSION "0.13.1"
+#define VERSION "0.13.2"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "May 24, 2020"
+#define DATE "May 25, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -2414,15 +2414,18 @@ directory. Using '%s' as an emergency home\n"), PROGRAM_NAME, __func__,
 	 *  listed elements, in case of ELN's */
 	rl_attempted_completion_function=my_rl_completion;
 	/* Though the readline documentation doesn't say this crearly, the
-	 * quoting function won't work at all if you don't use a custom quoting
+	 * quoting function won't work if you don't use a custom quoting
 	 * mechanism */
 	rl_filename_quoting_function=my_rl_quote;
 	/* Tell readline what char to use for quoting */
-	rl_completer_quote_characters="'";
-	/* Tell readline what chars needs to be quoted. Probably incomplete: */
-	rl_filename_quote_characters=" `'=[]{}()<>|&\\\t";
+	rl_completer_quote_characters="'\"";
+	/* Whenever readline finds any of these chars, it will call the
+	 * quoting function */
+	rl_filename_quote_characters=" \t\n\"\\'`@$><=;|&{[()]}";
+	/* According to readline documentation, the following string is
+	 * the default, the one used by Bash: " \t\n\"\\'`@$><=;|&{(" */
 	/* In this way, if a filename is "me=very ugly [filename]", the returned
-	 * quoted string will be: "'me'=very ugly'[filename']'" */
+	 * quoted string will be: "'me=very ugly[filename]'" */
 
 	if (splash_screen) {
 		splash();
@@ -4729,18 +4732,33 @@ char
 	/* The worst case is that every character of text needs to be escaped; 
 	 * at that point we need 2x its space plus the ' at the start and end 
 	 * and a NULL byte. */
-	p = r = malloc(strlen(text)*2 + 3);
+	size_t text_len=strlen(text);
+/*	p = r = malloc(text_len*2 + 3); */
+	p = r = malloc(text_len+3);
 	if (r == NULL)
 		return NULL;
 
-	*p++='\''; /* Add a starting ' */
+	char quote=0;
+	for (size_t i=0;i<text_len;i++) {
+		/* If text contains a single quote, use double quote for 
+		 * quoting */
+		if (text[i] == '\'') {
+			quote='"';
+			break;
+		}
+	}
+	/* If no single quote found in text, use single for quoting */
+	if (quote == 0)
+		quote='\'';
+
+	*p++=quote; /* Add a starting quote */
 	for (tp=text; *tp; tp++) {
-		if (*tp == '\'')
-			*p++='\''; /* Quote internal '. Eg: "ELN's" becomes "ELN''s" */
+/*		if (*tp == '\'')
+			*p++='\\'; */
 		*p++=*tp;
 	}
 	if (m_t == SINGLE_MATCH)
-		*p++='\''; /* Add an ending ' */
+		*p++=quote; /* Add an ending quote */
 	*p++=0;
 	return r;
 }
