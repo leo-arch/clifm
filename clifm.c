@@ -1178,7 +1178,7 @@ program_invocation_short_name variable and asprintf() */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\033c")
 /* #define CLEAR write(STDOUT_FILENO, "\033c", 3) */
-#define VERSION "0.13.2"
+#define VERSION "0.13.3"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define DATE "May 25, 2020"
@@ -2413,9 +2413,8 @@ directory. Using '%s' as an emergency home\n"), PROGRAM_NAME, __func__,
 	 * autocompleted with filenames instead, just like in Bash, or with
 	 *  listed elements, in case of ELN's */
 	rl_attempted_completion_function=my_rl_completion;
-	/* Though the readline documentation doesn't say this crearly, the
-	 * quoting function won't work if you don't use a custom quoting
-	 * mechanism */
+	/* I'm using here a custom quoting function. If not specified, readline
+	 * uses the default internal function. */
 	rl_filename_quoting_function=my_rl_quote;
 	/* Tell readline what char to use for quoting */
 	rl_completer_quote_characters="'\"";
@@ -4047,6 +4046,7 @@ readline_kbinds(void)
  * terminator, and st (with some patches, however, they might stop working in
  * st) */
 
+	rl_bind_keyseq("\\M-c", readline_kbind_action); //key: 99
 	rl_bind_keyseq("\\M-u", readline_kbind_action); //key: 117
 	rl_bind_keyseq("\\M-j", readline_kbind_action); //key: 106
 	rl_bind_keyseq("\\M-h", readline_kbind_action); //key: 104
@@ -4176,6 +4176,16 @@ readline_kbind_action (int count, int key) {
 	if (kbind_busy)
 		return 0;
 	switch (key) {
+		/* A-c: Clear the current command line (== C-a, C-k). Very handy, 
+		 * since C-c is currently disabled */
+		case 99:
+			puts("");
+			rl_replace_line("", 0);
+/*			puts("");
+			rl_delete_text(0, rl_end);
+			rl_end = rl_point = 0;
+			rl_on_new_line(); */
+		break;
 		/* A-l: Toggle long view mode on/off */
 		case 108:
 			if(!long_status)
@@ -4757,8 +4767,22 @@ char
 			*p++='\\'; */
 		*p++=*tp;
 	}
+
+	/* Add an ending quote only if text is not a directory. Otherwise
+	 * if I add a closing quote to a dir name, TAB completion will take 
+	 * the final slash of dir name as the root directory, and thereby, it 
+	 * will not list further files within dir name itself */
+	char is_dir=0;
+	struct stat file_attrib;
+	if (lstat(text, &file_attrib) != -1)
+		switch (file_attrib.st_mode & S_IFMT) {
+			case S_IFDIR:
+				is_dir=1;
+			break;
+	}
 	if (m_t == SINGLE_MATCH)
-		*p++=quote; /* Add an ending quote */
+		if (!is_dir)
+			*p++=quote;
 	*p++=0;
 	return r;
 }
@@ -4794,7 +4818,7 @@ filenames_generator(const char *text, int state)
 	 * quote completed filenames if they contain any embedded word break 
 	 * characters." To make the quoting part work I had to specify a custom
 	 * quoting function (my_rl_quote) */
-	if (!state)
+	if (!state) /* state is zero only the first time readline is executed */
 		i=0;
 	int num_text=atoi(text);
 	/* Check list of currently displayed files for a match */
@@ -5782,6 +5806,42 @@ parse_input_str(const char *str)
 		return comm_array;
 	}
 
+	/* INSERT ENDING MISSING QUOTE IF DIRECTORY
+	 * The following block is just a workaround, but it works. If a dir
+	 * name is quoted when TAB completed, no ending quote will be added,
+	 * since otherwise TAB completion won't display files in this dir. 
+	 * However, since there's no ending quote, CliFM will complain about 
+	 * it. To solve this situation, I check here for incomplete quotes 
+	 * (an odd number of quotes) in case of strings ending with slash (/).
+	 * Only in these cases I automatically add the missing quote at the end
+	 * of the string. It works for both single and double quotes */
+	/* Only do this check if the string ends with a slash, that is, if a
+	 * directory is (seemingly) involved */
+	if (string_b[str_len-1] == '/') {
+		int quote_counter=0;
+		char dir_quote=0;
+		for (i=0;i<str_len;i++) {
+			if ((string_b[i] == '\'' || string_b[i] == '"') 
+			&& i > 0 && string_b[i-1] == 0x20) {
+				quote_counter++;
+				dir_quote=string_b[i];
+				for (++i;string_b[i];i++)
+					if (string_b[i] == dir_quote)
+						quote_counter++;
+			}
+		}
+		/* If there are quotes, and their number is odd, add the missing 
+		 * ending quote */
+		if (quote_counter != 0 && quote_counter % 2 != 0) {
+			char *dir_buf=xcalloc(dir_buf, str_len+1, sizeof(char *));
+			strcpy(dir_buf, string_b);
+			dir_buf[str_len]=dir_quote;
+			string_b=xrealloc(string_b, (str_len+1)*sizeof(char *));
+			strcpy(string_b, dir_buf);
+			free(dir_buf);
+		}
+	}
+	
 	/* #### 3) GET SUBSTRINGS #### */
 	char buf[PATH_MAX]="";
 	int int_array_max=10, glob_array[int_array_max], 
