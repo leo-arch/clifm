@@ -714,11 +714,35 @@ of course you can grep it to find, say, linux' macros, as here. */
 	will be set, and CliFM will become very usntable. In this case I should 
 	prevent the program from writing or reading anything and simply set the
 	defaults.
- ** 4 - When TAB expanding the same ELN more than once, and if that ELN
+ **	4 - Whenever I use the system shell to run commands (execle()), this shell
+	tries to deescape and dequote what was already deescaped and dequoted by
+	CliFM itself. So, for instance, if the original	string was "'user\\123'", 
+	CliFM sends it to the system shell already dequoted and deescaped: 
+	"user\123". It works perfect for execve(), because it does not call any 
+	shell, but just executes the command with the given parameters literally. 
+	However, execle() calls the system shell, which tries to dequote and 
+	deescape the string again, resuting in "user123", which is a non-existent 
+	filename. If I want, and I want, to keep some features like pipes and 
+	stream redirection, I need the system shell. But if I use the system 
+	shell, the quoting and escaping thing gets broken. The ideal solution
+	would be to be able to USE THE SYSTEM SHELL BUT DISABLING THE DEQUOTING 
+	AND DEESCAPING FUNCTIONS.
+
+ ** (SOLVED) When launch_execve() tries to run a non-existent command, it 
+	displays the error message fine, but after that I have to exit CliFM 
+	one more time per failed command. SOLUTION: After running exec() via 
+	fork() use exit() and not return in case of error.
+ ** (SOLVED) Readline TAB completion stops working when it gets to a quoted 
+	directory name, for example: "/home/user/dir\ name/". After this point,
+	there's no more TAB completion. SOLUTION: Wrote two functions: one for
+	rl_char_is_quoted_p (to tell readline that "dir\ name" is just one name), 
+	and another one for rl_filename_dequoting_function (to remove the 
+	backslash from the filename, so that it can be correctly compared to
+	available system filenames).
+ ** (SOLVED) When TAB expanding the same ELN more than once, and if that ELN
 	corresponds to a directory, one slash is added to the expanded string
 	each time, resulting in something like: "path////". Of course, this 
 	shouldn't happen.
-
  ** (SOLVED) GETT RID OF MAX_LINE COMPLETELY!! It doesn't exist and could 
 	only break things. No more MAX_LINE anymore!
  ** (SOLVED) I'm using MAX_LINE (255) length for getting lines from files with 
@@ -888,10 +912,10 @@ of course you can grep it to find, say, linux' macros, as here. */
 	question won't be seen on the screen (I guess the same happens with cp and 
 	mv, at least). The problem is check_cmd_stderr(). The solution was to write 
 	an exec function (launch_execle()), able to handle errors.
- * (SOLVED) Do "cd path/to/dir/*" and CRASH!
+ * (SOLVED) Do "cd path/to/dir/\*" and CRASH!
  * (SOLVED) Specify a file (not a dir) as destiny of the 'paste sel' command, 
 	and CRASH!!! 
- * (SOLVED) This command: "sel /usr/local/sbin/*" doesn't work, for it produces 
+ * (SOLVED) This command: "sel /usr/local/sbin/\*" doesn't work, for it produces 
    these wrong paths: "/home/leo//usr/local/sbin/{filenames}". It only happens
    when using the wildcard.
  * (UNNEDED) 'sel *' doesn't select hidden files. This is not a bug, but the 
@@ -1178,10 +1202,10 @@ program_invocation_short_name variable and asprintf() */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\033c")
 /* #define CLEAR write(STDOUT_FILENO, "\033c", 3) */
-#define VERSION "0.13.3"
+#define VERSION "0.14.1_test"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "May 25, 2020"
+#define DATE "May 28, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -1553,44 +1577,6 @@ alphasort_insensitive(const struct dirent **a, const struct dirent **b)
 					(*b)->d_name);
 }
 
-char *
-handle_spaces(const char *str)
-/* Remove leading, terminating, and double spaces from str. Returns NULL if 
- * str: a) is NULL; b) contains only spaces; c) is empty; d) there was a 
- * memory allocation failure */
-{
-	/* If str is NULL or zero length */
-	if (!str || strlen(str) == 0) return NULL;
-	char *f_str=NULL;
-	int first_non_space=0, counter=0;
-	/* if I use while(*str), I need to increment str at the end of the loop */
-	for (;*str;str++) {
-		if (*str != 0x20)
-			first_non_space=1;
-		if (first_non_space) {
-			if (*str != 0x20 || (*str == 0x20 && *(str+1) != 0x20 && 
-			*(str+1) != 0x00)) {
-				counter++;
-				char *p=realloc(f_str, counter*sizeof(char *));
-				if (p) {
-					f_str=p;
-					p=NULL;
-					f_str[counter-1]=*str;
-				}
-				else { /* If memory allocation failure */
-					if (f_str)
-						free(f_str);
-					return NULL;
-				}
-			}
-		}
-	}
-	if (!counter) /* If only spaces */
-		return NULL;
-	f_str[counter]=0x00; /* Add a terminating null char */
-	return f_str;
-}
-
 int
 strcntchr(const char *str, const char c)
 /* Returns the index of the first appearance of c in str, if any, and -1 if c 
@@ -1949,8 +1935,10 @@ void init_shell(void);
 void xdg_open_check(void);
 void splash(void);
 char **my_rl_completion(const char *text, int start, int end);
-
 char *my_rl_quote(char *text, int m_t, char *qp);
+
+char *my_rl_dequote(char *text, int m_t);
+int quote_detector(char *line, int index);
 
 char *filenames_generator(const char *text, int state);
 char *bin_cmd_generator(const char *text, int state);
@@ -1966,7 +1954,7 @@ char **check_for_alias(char **comm);
 void get_history(void);
 void add_to_dirhist(const char *dir_path);
 char *home_tilde(const char *new_path);
-char **parse_input_str(const char *str);
+char **parse_input_str(char *str);
 void list_dir(void);
 char *prompt(void);
 void exec_cmd(char **comm);
@@ -2030,6 +2018,11 @@ void open_function(char **cmd);
 size_t u8_xstrlen(const char *str);
 void print_license(void);
 void free_sotware(void);
+char **split_str(char *str);
+int is_quote_char(char c);
+
+//char *get_input_cmd(char *str);
+//int cmd_need_esc(const char *cmd);
 
 /* Some notes on memory:
 * If a variable is declared OUTSIDE of a function, it is typically considered 
@@ -2208,7 +2201,7 @@ struct termios shell_tmodes;
 pid_t own_pid=0;
 struct dirent **dirlist=NULL;
 struct usrvar_t *usr_var=NULL;
-char *user=NULL, *path=NULL, **old_pwd=NULL, **sel_elements=NULL, 
+char *user=NULL, *path=NULL, **old_pwd=NULL, **sel_elements=NULL, *qc=NULL,
 	*sel_file_user=NULL, **paths=NULL, **bin_commands=NULL, **history=NULL, 
 	*xdg_open_path=NULL, **braces=NULL, prompt_color[19]="", white_b[23]="", 
 	text_color[23]="", **prompt_cmds=NULL, **aliases=NULL, **argv_bk=NULL, 
@@ -2407,24 +2400,51 @@ directory. Using '%s' as an emergency home\n"), PROGRAM_NAME, __func__,
 	/* Check whether xdg-open is available */
 	xdg_open_check();
 
-	/* INITIALIZE READLINE
+	/* INITIALIZE READLINE (what a hard beast to tackle!!)
 	 * Enable tab auto-completion for commands (in PATH) in case of first 
 	 * entered string. The second and later entered string will be 
-	 * autocompleted with filenames instead, just like in Bash, or with
-	 *  listed elements, in case of ELN's */
+	 * autocompleted with paths instead, just like in Bash, or with
+	 * listed filenames, in case of ELN's. I use a custom completion
+	 * function to add command and ELN completion, since readline's 
+	 * internal completer only performs path completion */
 	rl_attempted_completion_function=my_rl_completion;
 	/* I'm using here a custom quoting function. If not specified, readline
 	 * uses the default internal function. */
 	rl_filename_quoting_function=my_rl_quote;
-	/* Tell readline what char to use for quoting */
-	rl_completer_quote_characters="'\"";
+	/* Tell readline what char to use for quoting. This is only the the
+	 * readline internal quoting function, and for custom ones, like the one 
+	 * I use above. However, custom quoting functions, though they need to
+	 * define their own quoting chars, won't be called at all if this
+	 * variable isn't set. */
+	rl_completer_quote_characters="\"'";
+	rl_completer_word_break_characters=" ";
 	/* Whenever readline finds any of these chars, it will call the
 	 * quoting function */
-	rl_filename_quote_characters=" \t\n\"\\'`@$><=;|&{[()]}";
+	rl_filename_quote_characters=" \t\n\"\\'`@$><=;|&{[()]}?!*";
 	/* According to readline documentation, the following string is
-	 * the default, the one used by Bash: " \t\n\"\\'`@$><=;|&{(" */
-	/* In this way, if a filename is "me=very ugly [filename]", the returned
-	 * quoted string will be: "'me=very ugly[filename]'" */
+	 * the default and the one used by Bash: " \t\n\"\\'`@$><=;|&{(" */
+	
+	/* Copy this list of quote chars to a global variable to be used
+	 * later by some of the program functions like split_str(), my_rl_quote(), 
+	 * is_quote_char(), and my_rl_dequote() */
+	qc=xcalloc(qc, strlen(rl_filename_quote_characters), sizeof(char *));
+	strcpy(qc, rl_filename_quote_characters);
+	/* Executed immediately before calling the completer function, it tells
+	 * readline if a space char, which is a word break character (see the 
+	 * above rl_completer_word_break_characters variable) is quoted or not. 
+	 * If it is, readline then passes the whole string to the completer 
+	 * function (ex: "user\ file"), and if not, only wathever it found after 
+	 * the space char (ex: "file") 
+	 * Thanks to George Brocklehurst for pointing out this function:
+	 * https://thoughtbot.com/blog/tab-completion-in-gnu-readline*/
+	rl_char_is_quoted_p=quote_detector;
+	/* This function is executed inmediately before path completion. So,
+	 * if the string to be completed is, for instance, "user\ file" (see the 
+	 * above comment), this function should return the dequoted string so
+	 * it won't conflict with system filenames: you want "user file",
+	 * because "user\ file" does not exist, and, in this latter case,
+	 * readline won't find any matches */
+	rl_filename_dequoting_function=my_rl_dequote;
 
 	if (splash_screen) {
 		splash();
@@ -2442,15 +2462,16 @@ directory. Using '%s' as an emergency home\n"), PROGRAM_NAME, __func__,
 	 * will read its config file. Now, if this config file changes the PWD, 
 	 * this will the PWD for CliFM */
 	if (!path) {
-		char pwd[PATH_MAX];
-		memset(pwd, 0x00, PATH_MAX);
+		char pwd[PATH_MAX]="";
 		strncpy(pwd, getenv("PWD"), PATH_MAX);
-		if (!pwd || strlen(pwd) == 0) {
-			path=xcalloc(path, strlen(user_home)+1, sizeof(char *));
+		/* getenv() returns an address, so that pwd is this address and
+		 * *pwd is its value */
+		if (!*pwd || strlen(pwd) == 0) {
+			path=xcalloc(path, strlen(user_home), sizeof(char *));
 			strcpy(path, user_home);
 		}
 		else {
-			path=xcalloc(path, strlen(pwd)+1, sizeof(char *));
+			path=xcalloc(path, strlen(pwd), sizeof(char *));
 			strcpy(path, pwd);		
 		}
 	}
@@ -2536,7 +2557,195 @@ working directory\n"), PROGRAM_NAME);
 
 /* ###FUNCTIONS DEFINITIONS### */
 
-void print_license(void)
+int
+quote_detector(char *line, int index)
+{
+	if (index > 0 && line[index-1] == '\\' 
+	&& !quote_detector(line, index-1))
+		return 1;
+
+	return 0;
+/*	return (
+		index > 0 &&
+        line[index-1] == '\\' &&
+        !quote_detector(line, index-1)
+	); */
+}
+
+/*
+int
+cmd_need_esc(const char *cmd)
+{
+	char *int_cmds[]={ "cd", "o", "open", "p", "pr", "prop", "t", "tr", 
+					"trash", "s", "sel", "m", "mv", "c", "cp", "paste",
+					"r", "rm", "l", "ln", "md", "mkdir", NULL };
+	for (size_t i=0;int_cmds[i];i++)
+		if (strcmp(cmd, int_cmds[i]) == 0)
+			return 1;
+	return 0;
+}
+
+char
+*get_input_cmd(char *str)
+{
+	if (!str)
+		return NULL;
+	char *p=str;
+	char *buf=NULL;
+	size_t len=0;
+	while (*p != 0x20 && *p != 0x00 && *p != '\t' && *p != '\n') {
+		len++;
+		p++;
+	}
+	if (len) {
+		buf=calloc(len, sizeof(char *));
+		strncpy(buf, str, len);
+		return(buf);
+	}
+	else
+		return NULL;
+}
+*/
+
+int
+is_quote_char(char c)
+{
+	char *p=qc;
+	while (*p) {
+		if (c == *p)
+			return 1;
+		p++;
+	}
+	return 0;
+}
+
+char **
+split_str(char *str)
+/* This function takes a string as argument and split it into substrings 
+ * taking tab, new line char, and space as word delimiters, except when they
+ * are preceded by a quote char (single or double quotes), in which case 
+ * eveything after the quote char is taken as one single string. It also 
+ * allows escaping space to prevent word spliting. It returns an array of 
+ * splitted strings (without leading and terminating spaces) or NULL if str 
+ * is NULL or if no substring was found, e.g., if str contains only spaces. */
+{
+	if (!str)
+		return NULL;
+
+	size_t buf_len=0, words=0, str_index=0;
+	char *buf=NULL;
+	buf=xcalloc(buf, 1, sizeof(char *));;
+	char **substr=NULL;
+	char is_null=0;
+	while (*str) {
+		switch (*str) {
+			case '\'':
+				/* If ' is the first byte of str, I should not check for
+				 * the previous byte. That's why I need an variable to track
+				 * the current index number of str */
+				if (str_index == 0 || (str_index > 0 && *(str-1) != '\\'))
+					str++;
+				while (*str != '\'') {
+					if (!*str) {
+						is_null=1;
+						break;
+					}
+					buf=xrealloc(buf, (buf_len+1)*sizeof(char *));
+					buf[buf_len++]=*(str++);
+				}
+			break;
+			case '"':
+				if (str_index == 0 || (str_index > 0 && *(str-1) != '\\'))
+					str++;
+				while (*str != '"') {
+					if (!*str) {
+						is_null=1;
+						break;
+					}
+					buf=xrealloc(buf, (buf_len+1)*sizeof(char *));
+					buf[buf_len++]=*(str++);
+				}
+			break;
+			case '\t': /* TAB, new line char, and space are taken as word
+			breaking characters */
+			case '\n':
+			case 0x20:
+					/* Add a terminating null byte */
+					buf[buf_len]=0x00;
+					if (buf_len > 0) {
+						substr=xrealloc(substr, (words+1)*sizeof(char **));
+						substr[words]=xcalloc(substr[words], buf_len, 
+											  sizeof(char *));
+						strcpy(substr[words], buf);
+						words++;
+					}
+					/* Clear te buffer to get a new string */
+					memset(buf, 0x00, buf_len);
+					buf_len=0;
+			break;
+			case '\\':
+				/* If preceded by '\', space is not a word breaking char,
+				 * single and double quotes are not quoting, and '\' is not 
+				 * escaping anything. Everything else will be deescaped.
+				 * This last statement is the whole point: I think I should
+				 * let the programs themselves to unescape whatever they
+				 * need or want to unescape. Example: if there is a file
+				 * named "abc\123", you need to escape \, so that you call it
+				 * "abc\\123". But since I unescape it HERE, resulting thus
+				 * in "abc\123", the 'mv' command, for example, will take
+				 * \ as an escaping char, which is not, and then it will see
+				 * this: "abc123" instead of "abc\123" */
+//				if (int_cmd) {
+					buf=xrealloc(buf, (buf_len+1)*sizeof(char *));
+					if (is_quote_char(*(str+1)))
+						buf[buf_len++]=*(++str);
+					else
+						buf[buf_len++]=*str;
+//				}
+			break;
+			default:
+				buf=xrealloc(buf, (buf_len+1)*sizeof(char *));
+				buf[buf_len++]=*str;
+			break;
+		}
+		if (!is_null) {
+			str++;
+			str_index++; 
+		}
+		else
+			break;
+	}
+	
+	/* The while loop stops when the null byte is reached, so that the last
+	 * substring is not printed, but still stored in the buffer. Therefore,
+	 * we need to add it, if not empty, to our subtrings array */
+	buf[buf_len]=0x00;
+	if (buf_len > 0) {
+		if (!words)
+			substr=xcalloc(substr, words+1, sizeof(char **));
+		else
+			substr=xrealloc(substr, (words+1)*sizeof(char **));
+		substr[words]=xcalloc(substr[words], buf_len, sizeof(char *));
+		strcpy(substr[words], buf);
+		words++;
+	}
+	free(buf);
+
+	if (words) {
+		/* Add a final null string to the array */
+		substr=xrealloc(substr, (words+1)*sizeof(char **));
+		substr[words]=NULL;
+		args_n=words-1;
+		return(substr);
+	}
+	else {
+		args_n=0; /* Just in case, but I think it's not needed */
+		return NULL;
+	}
+}
+
+void
+print_license(void)
 {
 	time_t rawtime=time(NULL);
 	struct tm *tm=localtime(&rawtime);
@@ -2577,7 +2786,8 @@ u8_xstrlen(const char *str)
 	return len;
 }
 
-void open_function(char **cmd)
+void
+open_function(char **cmd)
 {
 	if (!cmd)
 		return;
@@ -2751,7 +2961,8 @@ application to open the file\nUsage: open ELN/filename [application] [&]\n"),
 	}
 }
 
-void cd_function(char *new_path)
+void
+cd_function(char *new_path)
 {
 	int ret=-1;
 	char buf[PATH_MAX]=""; /* Temporary store new_path */
@@ -2815,7 +3026,8 @@ void cd_function(char *new_path)
 				strerror(errno));
 }
 
-void back_function(char **comm)
+void
+back_function(char **comm)
 /* Go back one element in dir hist */
 {
 	if (comm[1]) {
@@ -2848,7 +3060,8 @@ void back_function(char **comm)
 				old_pwd[dirhist_cur_index-1], strerror(errno));
 }
 
-void forth_function(char **comm)
+void
+forth_function(char **comm)
 /* Go forth one element in dir hist */
 {
 	if (comm[1]) {
@@ -2880,7 +3093,8 @@ void forth_function(char **comm)
 				old_pwd[dirhist_cur_index], strerror(errno));
 }
 
-void list_mountpoints(void)
+void
+list_mountpoints(void)
 /* List available mountpoints and chdir into one of them */
 {
 	if (access("/proc/mounts", F_OK) != 0) {
@@ -2989,7 +3203,8 @@ void list_mountpoints(void)
 				strerror(errno));
 }
 
-int get_max_long_view(void)
+int
+get_max_long_view(void)
 /* Returns the max length a filename can have in long view mode */
 {
 	/* 70 is approx the length of the properties string (less filename). So, 
@@ -3006,7 +3221,8 @@ int get_max_long_view(void)
 	return max;
 }
 
-void log_msg(char *_msg, int print)
+void
+log_msg(char *_msg, int print)
 /* Handle the error message 'msg'. Store 'msg' in an array of error messages, 
  * write it into an error log file, and print it immediately (if print is 
  * zero (NOPRINT_PROMPT) or tell the next prompt, if print is one to do it 
@@ -3305,7 +3521,6 @@ trash_element (const char *suffix, struct tm *tm, char *file)
 	else if (wx_parent_check(file) != 0)
 		return EXIT_FAILURE;
 	
-	char cmd[(PATH_MAX*2)+14]="";
 	int ret=-1;
 
 	/* Create the trashed file name: orig_filename.suffix, where SUFFIX is
@@ -3340,10 +3555,14 @@ trash_element (const char *suffix, struct tm *tm, char *file)
 	snprintf(file_suffix, file_suffix_len, "%s.%s", filename, suffix);
 
 	/* Copy the original file into the trash files directory */
-	snprintf(cmd, sizeof(cmd), "cp -ra '%s' '%s/%s'", file, TRASH_FILES_DIR, 
-		   	 file_suffix);
+	char *dest=NULL;
+	dest=xcalloc(dest, strlen(TRASH_FILES_DIR)+strlen(file_suffix)+2, 
+					   sizeof(char *));
+	sprintf(dest, "%s/%s", TRASH_FILES_DIR, file_suffix);
+	char *tmp_cmd[]={ "cp", "-ra", file, dest, NULL };
 	free(filename);
-	ret=launch_execle(cmd);
+	ret=launch_execve(tmp_cmd);
+	free(dest);
 	if (ret != 0) {
 		fprintf(stderr, _("%s: trash: '%s': Failed copying file to Trash\n"), 
 				PROGRAM_NAME, file);
@@ -3361,9 +3580,14 @@ trash_element (const char *suffix, struct tm *tm, char *file)
 		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, info_file, 
 				strerror(errno));
 		/* Remove the trash file */
-		snprintf(cmd, sizeof(cmd), "rm -r '%s/%s'", TRASH_FILES_DIR, 
-				 file_suffix);
-		ret=launch_execle(cmd);
+		char *trash_file=NULL;
+		trash_file=xcalloc(trash_file, 
+						   strlen(TRASH_FILES_DIR)+strlen(file_suffix)+2,
+						   sizeof(char *));
+		sprintf(trash_file, "%s/%s", TRASH_FILES_DIR, file_suffix);
+		char *tmp_cmd2[]={ "rm", "-r", trash_file, NULL };
+		ret=launch_execve(tmp_cmd2);
+		free(trash_file);
 		if (ret != 0)
 			fprintf(stderr, _("%s: trash: '%s/%s': Failed removing trash \
 file\nTry removing it manually\n"), PROGRAM_NAME, TRASH_FILES_DIR, 
@@ -3393,17 +3617,20 @@ file\nTry removing it manually\n"), PROGRAM_NAME, TRASH_FILES_DIR,
 	}
 
 	/* Remove the file to be trashed */
-	memset(cmd, 0x00, sizeof(cmd));
-	snprintf(cmd, sizeof(cmd), "rm -r '%s'", file);
-	ret=launch_execle(cmd);
+	char *tmp_cmd3[]={ "rm", "-r", file, NULL };
+	ret=launch_execve(tmp_cmd3);
 	/* If remove fails, remove trash and info files */
 	if (ret != 0) {
 		fprintf(stderr, _("%s: trash: '%s': Failed removing file\n"), 
 				PROGRAM_NAME, file);
-		memset(cmd, 0x00, sizeof(cmd));
-		snprintf(cmd, sizeof(cmd), "rm -r '%s/%s' '%s'", TRASH_FILES_DIR, 
-				 file_suffix, info_file);
-		ret=launch_execle(cmd);
+		char *trash_file=NULL;
+		trash_file=xcalloc(trash_file, 
+						   strlen(TRASH_FILES_DIR)+strlen(file_suffix)+2,
+						   sizeof(char *));
+		sprintf(trash_file, "%s/%s", TRASH_FILES_DIR, file_suffix);
+		char *tmp_cmd4[]={ "rm", "-r", trash_file, info_file, NULL };
+		ret=launch_execve(tmp_cmd4);
+		free(trash_file);
 		if (ret != 0) {
 			fprintf(stderr, _("%s: trash: Failed removing temporary files \
 from Trash.\nTry removing them manually\n"), PROGRAM_NAME);
@@ -3492,11 +3719,10 @@ remove_from_trash (void)
 	rm_elements=xrealloc(rm_elements, sizeof(char **)*rm_n);
 
 	/* Remove files */
-	char rm_file[PATH_MAX]="", rm_info[PATH_MAX]="", cmd[(PATH_MAX*2)+12]="";
-	/* (PATH_MAX*2)+12 = two paths and chars for command */
+	char rm_file[PATH_MAX]="", rm_info[PATH_MAX]="";
 	int ret=-1;
 	
-	/* First check for exit, wildcard and non-number args */
+	/* First check for exit, wildcard, and non-number args */
 	for (i=0;i<rm_n;i++) {
 		if (strcmp(rm_elements[i], "q") == 0) {
 			for (size_t j=0; j<rm_n;j++)
@@ -3513,8 +3739,8 @@ remove_from_trash (void)
 						trash_files[j]->d_name);
 				snprintf(rm_info, PATH_MAX, "%s/%s.trashinfo", TRASH_INFO_DIR, 
 						trash_files[j]->d_name);
-				snprintf(cmd, sizeof(cmd), "rm -r '%s' '%s'", rm_file, rm_info);
-				ret=launch_execle(cmd);
+				char *tmp_cmd[]={ "rm", "-r", rm_file, rm_info, NULL };
+				ret=launch_execve(tmp_cmd);
 				if (ret != 0) {
 					fprintf(stderr, _("%s: trash: Error trashing %s\n"), 
 							PROGRAM_NAME, trash_files[j]->d_name);
@@ -3556,10 +3782,8 @@ remove_from_trash (void)
 				 trash_files[rm_num-1]->d_name);
 		snprintf(rm_info, PATH_MAX, "%s/%s.trashinfo", TRASH_INFO_DIR, 
 				 trash_files[rm_num-1]->d_name);
-		/* Since it was used before, clean the cmd variable */
-		memset(cmd, 0x00, sizeof(cmd));
-		snprintf(cmd, sizeof(cmd), "rm -r '%s' '%s'", rm_file, rm_info);
-		ret=launch_execle(cmd);
+		char *tmp_cmd2[]={ "rm", "-r", rm_file, rm_info, NULL };
+		ret=launch_execve(tmp_cmd2);
 		if (ret != 0) {
 			fprintf(stderr, _("%s: trash: Error trashing %s\n"), PROGRAM_NAME, 
 					trash_files[rm_num-1]->d_name);
@@ -3581,7 +3805,7 @@ untrash_element(char *file)
 	info_fp=fopen(undel_info, "r");
 	if (info_fp) {
 		/* (PATH_MAX*2)+14 = two paths plus 14 extra bytes for command */
-		char *orig_path=NULL, cmd[(PATH_MAX*2)+14]="";
+		char *orig_path=NULL; //cmd[(PATH_MAX*2)+14]="";
 		/* The max length for line is Path=(5) + PATH_MAX + \n(1) */
 		char line[PATH_MAX+6];
 		memset(line, 0x00, PATH_MAX+6);
@@ -3644,17 +3868,13 @@ untrash_element(char *file)
 			return;
 		}
 		free(parent);
-		snprintf(cmd, sizeof(cmd), "cp -ra '%s' '%s'", undel_file, 
-				 url_decoded);
-		free(url_decoded);
+		char *tmp_cmd[]={ "cp", "-ra", undel_file, url_decoded, NULL };
 		int ret=-1;
-		ret=launch_execle(cmd);
+		ret=launch_execve(tmp_cmd);
+		free(url_decoded);
 		if (ret == 0) {
-			/* Clean the cmd variable: it was used above */
-			memset(cmd, 0x00, sizeof(cmd));
-			snprintf(cmd, sizeof(cmd), "rm -r '%s' '%s'", undel_file, 
-					undel_info);
-			ret=launch_execle(cmd);
+			char *tmp_cmd2[]={ "rm", "-r", undel_file, undel_info, NULL };
+			ret=launch_execve(tmp_cmd2);
 			if (ret != 0) {
 				fprintf(stderr, _("%s: undel: '%s': Failed removing info \
 file\n"), PROGRAM_NAME, undel_info);
@@ -3857,16 +4077,24 @@ trash_clear(void)
 		printf(_("trash: There are no trashed files\n"));
 		return;
 	}
-	char cmd[(PATH_MAX*2)+14]="";
+
 	for (size_t i=0;i<files_n;i++) {
 		size_t info_file_len=strlen(trash_files[i]->d_name)+11;
 		char info_file[info_file_len];
 		memset(info_file, 0x00, info_file_len);
 		snprintf(info_file, info_file_len, "%s.trashinfo", 
 				trash_files[i]->d_name);
-		snprintf(cmd, sizeof(cmd), "rm -r '%s/%s' '%s/%s'", TRASH_FILES_DIR, 
-				trash_files[i]->d_name, TRASH_INFO_DIR, info_file);
-		int ret=launch_execle(cmd);
+		char *file1=xcalloc(file1, strlen(TRASH_FILES_DIR)+
+							strlen(trash_files[i]->d_name)+2, 
+							sizeof(char *));
+		sprintf(file1, "%s/%s", TRASH_FILES_DIR, trash_files[i]->d_name);
+		char *file2=xcalloc(file2, strlen(TRASH_INFO_DIR)+
+							strlen(info_file)+2, sizeof(char *));
+		sprintf(file2, "%s/%s", TRASH_INFO_DIR, info_file);
+		char *tmp_cmd[]={ "rm", "-r", file1, file2, NULL };
+		int ret=launch_execve(tmp_cmd);
+		free(file1);
+		free(file2);
 		if (ret != 0) {
 			fprintf(stderr, _("%s: trash: '%s': Error removing trashed \
 file\n"), PROGRAM_NAME, trash_files[i]->d_name);
@@ -3893,9 +4121,16 @@ trash_function(char **comm)
 	/* Create trash dirs, if necessary */
 	struct stat file_attrib;
 	if (stat(TRASH_DIR, &file_attrib) == -1) {
-		char cmd[PATH_MAX]="";
-		snprintf(cmd, PATH_MAX, "mkdir -p %s/{files,info}", TRASH_DIR);
-		int ret=launch_execle(cmd);
+		char *trash_files=NULL;
+		trash_files=xcalloc(trash_files, strlen(TRASH_DIR)+6, sizeof(char *));
+		sprintf(trash_files, "%s/files", TRASH_DIR);
+		char *trash_info=NULL;
+		trash_info=xcalloc(trash_info, strlen(TRASH_DIR)+5, sizeof(char *));
+		sprintf(trash_info, "%s/info", TRASH_DIR);		
+		char *cmd[]={ "mkdir", "-p", trash_files, trash_info, NULL };
+		int ret=launch_execve(cmd);
+		free(trash_files);
+		free(trash_info);
 		if (ret != 0) {
 			asprintf(&msg, 
 					_("%s: mkdir: '%s': Error creating trash directory\n"), 
@@ -4721,70 +4956,75 @@ get_path_programs(void)
 
 char
 *my_rl_quote(char *text, int m_t, char *qp)
-/* Performs rc-style filename quoting for readline (put a ' at the front and 
- * end and escape every ' with a second ')
- * Taken from:
+/* Performs bash-style filename quoting for readline (put a backslash before
+ * any char listed in rl_filename_quote_characters.
+ * Modified version of:
  * https://utcc.utoronto.ca/~cks/space/blog/programming/ReadlineQuotingExample*/
 {
 	/* 
 	 * How it works: p and r and pointers to the same memory location 
-	 * initialized (malloced) twice as big as the line that needs to be 
+	 * initialized (calloced) twice as big as the line that needs to be 
 	 * quoted (in case all chars in the line need to be quoted); tp is a 
-	 * pointer to text, which contains the string to be quoted. We write an
-	 * initial ' to p, and then move through tp to find some ' that needs
-	 * to be quoted (a's become a''s), and finally add an ending ' to p. At 
-	 * this point we cannot return p, since this pointer is at the end of the 
-	 * string, so that we return r instead, which is at the beginning of the 
-	 * same string pointed by p. 
+	 * pointer to text, which contains the string to be quoted. We move 
+	 * through tp to find all chars that need to be quoted ("a's" becomes 
+	 * "a\'s", for example). At this point we cannot return p, since this 
+	 * pointer is at the end of the string, so that we return r instead, 
+	 * which is at the beginning of the same string pointed by p. 
 	 * */
-	char *r, *p, *tp;
+	char *r=NULL, *p=NULL, *tp=NULL;
 
-	/* The worst case is that every character of text needs to be escaped; 
-	 * at that point we need 2x its space plus the ' at the start and end 
-	 * and a NULL byte. */
 	size_t text_len=strlen(text);
-/*	p = r = malloc(text_len*2 + 3); */
-	p = r = malloc(text_len+3);
+	/* Worst case: every character of text needs to be escaped. In this 
+	 * case we need 2x text's bytes plus the NULL byte. */
+	p=xcalloc(p, ((text_len*2)+1), sizeof(char *));
+	r=p;
 	if (r == NULL)
 		return NULL;
 
-	char quote=0;
-	for (size_t i=0;i<text_len;i++) {
-		/* If text contains a single quote, use double quote for 
-		 * quoting */
-		if (text[i] == '\'') {
-			quote='"';
-			break;
-		}
-	}
-	/* If no single quote found in text, use single for quoting */
-	if (quote == 0)
-		quote='\'';
-
-	*p++=quote; /* Add a starting quote */
+	/* Escape whatever char that needs to be escaped */
 	for (tp=text; *tp; tp++) {
-/*		if (*tp == '\'')
-			*p++='\\'; */
+		if (is_quote_char(*tp))
+			*p++='\\';
 		*p++=*tp;
 	}
 
-	/* Add an ending quote only if text is not a directory. Otherwise
-	 * if I add a closing quote to a dir name, TAB completion will take 
-	 * the final slash of dir name as the root directory, and thereby, it 
-	 * will not list further files within dir name itself */
-	char is_dir=0;
-	struct stat file_attrib;
-	if (lstat(text, &file_attrib) != -1)
-		switch (file_attrib.st_mode & S_IFMT) {
-			case S_IFDIR:
-				is_dir=1;
-			break;
-	}
-	if (m_t == SINGLE_MATCH)
-		if (!is_dir)
-			*p++=quote;
-	*p++=0;
+	/* Add a final null byte to the string */
+	*p++=0x00;
 	return r;
+}
+
+char *
+my_rl_dequote(char *text, int m_t)
+/* This function simply deescapes whatever escaped chars it founds in text,
+ * so that readline can compare it to system filenames when completing paths. 
+ * Returns a string containing text without escape sequences */
+{
+	if (!text)
+		return NULL;
+	
+	/* At most, we need as many bytes as text (in case no escape sequence
+	 * is found)*/
+	char *buf=NULL;
+	buf=xcalloc(buf, strlen(text), sizeof(char *));
+	size_t len=0;
+
+	while(*text) {
+		switch (*text) {
+			case '\\':
+				if (*(text+1) && is_quote_char(*(text+1)))
+					buf[len++]=*(++text);
+				else
+					buf[len++]=*text;
+			break;
+			default:
+				buf[len++]=*text;
+			break;
+		}
+		text++;
+	}
+
+	buf[len]=0x00;
+	return buf;
 }
 
 char **
@@ -4792,9 +5032,12 @@ my_rl_completion(const char *text, int start, int end)
 {
 	char **matches=NULL;
 	/* This line only prevents a Valgrind warning about unused variables */
-	if (end) {}
+//	if (end) {}
 	if (start == 0) { /* Only for the first word entered in the prompt */
 		/* Commands auto-completion */
+		/* Prevent readline from attempting path completion if 
+		 * rl_completion matches returns NULL */
+		rl_attempted_completion_over=1;
 		matches=rl_completion_matches(text, &bin_cmd_generator);
 	}
 	else { /* ELN auto-expansion !!! */
@@ -4802,8 +5045,8 @@ my_rl_completion(const char *text, int start, int end)
 		if (is_number(text) && num_text > 0 && num_text <= files)
 			matches=rl_completion_matches(text, &filenames_generator);
 	}
-	/* If none of the above, that is, if matches is NULL, readline will do 
-	 * filename completion by default */
+	/* If not first word and not a number, readline will attempt 
+	 * path completion instead */
 	return matches;
 }
 
@@ -4927,39 +5170,41 @@ init_config(void)
 						  sizeof(char *));
 	sprintf(sel_file_user, "%s/.%s_sel_%s", TMP_DIR, PNL, user);
 
-	/* Create trash dirs if necessary */
+	/* Create trash dirs, if necessary */
 	int ret=-1;
 	struct stat file_attrib;
 	if (stat(TRASH_DIR, &file_attrib) == -1) {
-		char cmd[trash_len+23];
-		memset(cmd, 0x00, trash_len+23);
-		snprintf(cmd, sizeof(cmd), "mkdir -p %s/{files,info}", 
-				 TRASH_DIR);
-		ret=launch_execle(cmd);
+		char *trash_files=NULL;
+		trash_files=xcalloc(trash_files, strlen(TRASH_DIR)+6, sizeof(char *));
+		sprintf(trash_files, "%s/files", TRASH_DIR);
+		char *trash_info=NULL;
+		trash_info=xcalloc(trash_info, strlen(TRASH_DIR)+5, sizeof(char *));
+		sprintf(trash_info, "%s/info", TRASH_DIR);		
+		char *cmd[]={ "mkdir", "-p", trash_files, trash_info, NULL };
+		int ret=launch_execve(cmd);
+		free(trash_files);
+		free(trash_info);
 		if (ret != 0) {
 			asprintf(&msg, 
-					 _("%s: mkdir: '%s': Error creating trash directory\n"), 
-					 PROGRAM_NAME, TRASH_DIR);
+					_("%s: mkdir: '%s': Error creating trash directory\n"), 
+					PROGRAM_NAME, TRASH_DIR);
 			if (msg) {
-				error_msg=1; /* Specify the kind of message, but only if
-				if needs to be printed by prompt() */
-				log_msg(msg, PRINT_PROMPT);
+				log_msg(msg, NOPRINT_PROMPT);
 				free(msg);
 			}
 			else
-				fprintf(stderr, 
-						_("%s: mkdir: '%s': Error creating trash directory\n"), 
-						PROGRAM_NAME, TRASH_DIR);
+			fprintf(stderr,
+					_("%s: mkdir: '%s': Error creating trash directory\n"), 
+					PROGRAM_NAME, TRASH_DIR);
+			return;
 		}
 	}
 
 	/* If the config directory doesn't exist, create it */
 	/* Use the GNU mkdir to let it handle parent directories */
 	if (stat(CONFIG_DIR, &file_attrib) == -1) {
-		char cmd[config_len+10];
-		memset(cmd, 0x00, config_len+10);
-		snprintf(cmd, sizeof(cmd), "mkdir -p %s", CONFIG_DIR);
-		ret=launch_execle(cmd);
+		char *tmp_cmd[]={ "mkdir", "-p", CONFIG_DIR, NULL }; 
+		ret=launch_execve(tmp_cmd);
 		if (ret != 0) {
 			asprintf(&msg, 
 					 _("%s: mkdir: '%s': Error creating configuration \
@@ -4985,9 +5230,8 @@ directory\n"), PROGRAM_NAME, CONFIG_DIR);
 	 * to delete it or modify it */
 	if (stat(TMP_DIR, &file_attrib) == -1) {
 /*		if (mkdir(TMP_DIR, 1777) == -1) { */
-		char cmd[PATH_MAX]="";
-		snprintf(cmd, PATH_MAX, "mkdir -m1777 %s", TMP_DIR);
-		int ret=launch_execle(cmd);
+		char *tmp_cmd2[]={ "mkdir", "-m1777", TMP_DIR, NULL };
+		ret=launch_execve(tmp_cmd2);
 		if (ret != 0) {
 			asprintf(&msg, "%s: mkdir: '%s': %s\n", PROGRAM_NAME, TMP_DIR, 
 					 strerror(errno));
@@ -5741,7 +5985,7 @@ brace_expansion(const char *str)
 }
 
 char **
-parse_input_str(const char *str)
+parse_input_str(char *str)
 /* 
  * This function is one of the keys of CliFM. It will perform a series of 
  * actions:
@@ -5750,7 +5994,7 @@ parse_input_str(const char *str)
  * spaces: it stores the quoted file name in one single variable;
  * 3) In case of user defined variable (var=value), it will pass the whole 
  * string to exec_cmd(), which will take care of storing the variable;
- * 4) If the input string begins by ';' or ':' the whole string is send to 
+ * 4) If the input string begins with ';' or ':' the whole string is send to 
  * exec_cmd(), where it will be executed by launch_execle();
  * 5) The following expansions are performed here: ELN's, wildcards, ranges of 
  * numbers (ELN's), braces, tilde, user defined variables, and 'sel'. These 
@@ -5760,191 +6004,96 @@ parse_input_str(const char *str)
 /* NOTE: Though filenames could consist of everything except of slash and null 
  * characters, POSIX.1 recommends restricting filenames to consist of the 
  * following characters: letters (a-z, A-Z), numbers (0-9), period (.), 
- * dash (-), and underscore ( _ ).*/
+ * dash (-), and underscore ( _ ).
+
+ * NOTE 2: There is no any need to pass anything to this function, since the
+ * input string I need here is already in the readline buffer. So, instead of
+ * taking the buffer from a function parameter (str) I could simply use 
+ * rl_line_buffer. However, since I use this function to parse other strings, 
+ * like history lines, I need to keep the str argument */
 
 {
-	/* #### 1) HANDLE SPACES #### */
-	/* handle_spaces() removes leading, terminating, and double 
-	* spaces from str. It will return NULL if str: a) contains only spaces; 
-	* b) is NULL; c) is empty; d) memory allocation error */
-	char *string_b=handle_spaces(str); //Remove isspace from here too.
-	/* NOTE: isspace() not only checks for space, but also for new line, 
-	 * carriage return, vertical and horizontal TAB. Be careful when replacing 
-	 * this function. */
-	if (!string_b)
-		return NULL;
-	size_t str_len=strlen(string_b); /* Run strlen just once in order not to 
-	do it once and again, possibily hundreds of times, in a loop */
-	char **comm_array=NULL;
-
-	/* #### 2) CHECK FOR SPECIAL FUNCTIONS #### */
+	/* #### 1) CHECK FOR SPECIAL FUNCTIONS #### */
 	size_t i=0;
 	/* If user defined variable or if invoking a command via ';' or ':' send 
 	 * the whole string to exec_cmd() */
-	short space_found=0;
-	for (i=0;i<str_len;i++) {
-		if (string_b[i] == '=') {
+	char space_found=0;
+	for (i=0;str[i];i++) {
+		if (str[i] == '=' && i > 0 && str[i-1] != '\\') {
 			for (size_t j=0;j<i;j++) {
 				/* If there are no spaces before '=', take it as a variable. 
 				 * This check is done in order to avoid taking as a variable 
 				 * things like: 'ls -color=auto'*/
-				if (string_b[j] == 0x20)
+				if (str[j] == 0x20)
 					space_found=1;
 			}
-			if (!space_found && !isdigit(string_b[0]))
+			if (!space_found && !isdigit(str[0]))
 				flags |= IS_USRVAR_DEF;
 			break;
 		}
 	}
-	if (flags & IS_USRVAR_DEF || string_b[0] == ':' || string_b[0] == ';') {
-		comm_array=xcalloc(comm_array, 1, sizeof(char **));
-		comm_array[args_n]=xcalloc(comm_array[args_n], str_len+1, 
-			sizeof(char *));
-		/* args_n is here always zero */
-		strncpy(comm_array[args_n], string_b, str_len);
-		free(string_b);
-		return comm_array;
-	}
-
-	/* INSERT ENDING MISSING QUOTE IF DIRECTORY
-	 * The following block is just a workaround, but it works. If a dir
-	 * name is quoted when TAB completed, no ending quote will be added,
-	 * since otherwise TAB completion won't display files in this dir. 
-	 * However, since there's no ending quote, CliFM will complain about 
-	 * it. To solve this situation, I check here for incomplete quotes 
-	 * (an odd number of quotes) in case of strings ending with slash (/).
-	 * Only in these cases I automatically add the missing quote at the end
-	 * of the string. It works for both single and double quotes */
-	/* Only do this check if the string ends with a slash, that is, if a
-	 * directory is (seemingly) involved */
-	if (string_b[str_len-1] == '/') {
-		int quote_counter=0;
-		char dir_quote=0;
-		for (i=0;i<str_len;i++) {
-			if ((string_b[i] == '\'' || string_b[i] == '"') 
-			&& i > 0 && string_b[i-1] == 0x20) {
-				quote_counter++;
-				dir_quote=string_b[i];
-				for (++i;string_b[i];i++)
-					if (string_b[i] == dir_quote)
-						quote_counter++;
-			}
-		}
-		/* If there are quotes, and their number is odd, add the missing 
-		 * ending quote */
-		if (quote_counter != 0 && quote_counter % 2 != 0) {
-			char *dir_buf=xcalloc(dir_buf, str_len+1, sizeof(char *));
-			strcpy(dir_buf, string_b);
-			dir_buf[str_len]=dir_quote;
-			string_b=xrealloc(string_b, (str_len+1)*sizeof(char *));
-			strcpy(string_b, dir_buf);
-			free(dir_buf);
-		}
+	
+	if (flags & IS_USRVAR_DEF || str[0] == ':' 
+	|| str[0] == ';') {
+	/* If ";cmd" or ":cmd" the whole input line will be send to exec_cmd()
+	 * and will be executed by the system shell via execle() */
+		args_n=0;
+		char **cmd=NULL;
+		cmd=xcalloc(cmd, 2, sizeof(char **));
+		cmd[0]=xcalloc(cmd[0], strlen(str), sizeof(char *));
+		strcpy(cmd[0], str);
+		cmd[1]=NULL;
+		return cmd;
+		/* Since we don't run split_str() here, dequoting and deescaping
+		 * is performed directly by the system shell */
 	}
 	
-	/* #### 3) GET SUBSTRINGS #### */
-	char buf[PATH_MAX]="";
+	/* #### 2) SPLIT INPUT STRING INTO SUBSTRINGS #### */
+	/* split_str() returns an array of strings without leading, terminating
+	 * or double spaces. It can handle escaped spaces and quotes */
+	char **substr=split_str(str);
+	/* NOTE: isspace() not only checks for space, but also for new line, 
+	 * carriage return, vertical and horizontal TAB. Be careful when replacing 
+	 * this function. */
+
+	if (!substr)
+		return NULL;
+
 	int int_array_max=10, glob_array[int_array_max], 
 		braces_array[int_array_max], range_array[int_array_max], 
 		glob_n=0, braces_n=0, ranges_ok=0;
-	size_t length=0;
-	for (i=0;i<=str_len;i++) {
-		/* ## HANDLE BACKSLASHED STRINGS ## */
-		if (string_b[i]=='\\' && string_b[i+1] == 0x20)	{
-			size_t j=0;
-			for (j=i+1;j<=str_len;j++) {
-				if ((string_b[j] == 0x20 && string_b[j-1] != '\\') 
-				|| string_b[j] == '\0')
-					break;
-				if (!(string_b[j] == '\\' && string_b[j+1] == 0x20) 
-				&& length < sizeof(buf)) 
-					/* 'length < sizeof(buff)' is aimed to prevent a buffer 
-					 * overflow */
-					buf[length++]=string_b[j];
-			}
-			i=j;
-		}
-		/* ## HANDLE QUOTED STRINGS ## */
-		if (string_b[i] == '"' || string_b[i] == '\'') {
-			char quotes;
-			if (string_b[i] == '"') quotes='"';
-			else quotes='\'';
-			int j=0, end_quote=0;
-			/* Decrementing loops won't work when index is size_t (use int 
-			 * instead) Look for the terminating quote */
-			for (j=str_len;j>i;j--) {
-				if (string_b[j] == quotes)
-					end_quote=j;
-			}
-			if (end_quote) {
-				//dump everything between the quotes into the buffer
-				for (j=i+1;j<end_quote;j++) {
-					if (length < sizeof(buf))
-						buf[length++]=string_b[j];
-				}
-				i=end_quote+1;
-			}
-			else {
-				fprintf(stderr, _("%s: Missing quote\n"), PROGRAM_NAME);
-				/* In case something has been already dumped into comm_array */
-				if (comm_array) {
-					/* Do not take the last argument into account (i<args_n, 
-					 * and not i<=args_m), for this argument will not be 
-					 * copied precisely because some quote is missing */
-					for (j=0;j<args_n;j++)
-						free(comm_array[j]);
-					free(comm_array);
-				}
-				free(string_b);
-				return NULL;
-			}
-		}
 
-		/* If a range is found, store its index */
-		if (i > 0 && i < str_len && string_b[i] == '-' && 
-		isdigit(string_b[i-1]) && isdigit(string_b[i+1]))
-			if (ranges_ok < int_array_max)
-				range_array[ranges_ok++]=args_n;
+	/* #### 3) CHECK FOR WILDCARDS, BRACES, AND RANGES #### */
+	for (i=0;substr[i];i++) {
+		size_t substr_len=strlen(substr[i]);
+		for (size_t j=0;substr[i][j];j++) {
+			/* If a range is found, store its index */
+			if (j > 0 && j < substr_len && substr[i][j] == '-' && 
+			isdigit(substr[i][j-1]) && isdigit(substr[i][j+1]))
+				if (ranges_ok < int_array_max)
+					range_array[ranges_ok++]=i;
 
-		/* If a brace is found, store its index */
-		if (string_b[i] == '{')
-			if (braces_n < int_array_max)
-				braces_array[braces_n++]=args_n;
+			/* If a brace is found, store its index */
+			if (substr[i][j] == '{' && substr[i][j+1] 
+			&& substr[i][j+1] != '}')
+				if (braces_n < int_array_max)
+					braces_array[braces_n++]=i;
 
-		if (string_b[i] == '*' || string_b[i] == '?' 
-		|| (string_b[i] == '[' && string_b[i+1] != 0x20))
-		/* Strings containing these characters are taken as wildacard patterns 
-		 * and are expanded by the glob function. See man (7) glob */
-			if (glob_n < int_array_max)
-				glob_array[glob_n++]=args_n;
-
-		/* The only stored spaces are those of quoted and backslahed strings */
-		if (string_b[i] != 0x20 && length < sizeof(buf))
-			buf[length++]=string_b[i];
-
-		/* ## STORE THE SUBSTRING IN THE INPUT ARRAY ## */
-		if (string_b[i] == 0x20 || string_b[i] == '\0') {
-			comm_array=xrealloc(comm_array, sizeof(char **)*(args_n+1));
-			comm_array[args_n]=xcalloc(comm_array[args_n], length+1, 
-									   sizeof(char *));
-			strncpy(comm_array[args_n], buf, length);
-			/* Clear the buffer (0x00 == \0 == null char) */
-			memset(buf, 0x00, length);
-			length=0; /* Reset length for the next argument */
-			if (string_b[i] == '\0') 
-				break; /* End of input */
-			else 
-				args_n++;
+			if (substr[i][j] == '*' || substr[i][j] == '?' 
+			|| (substr[i][j] == '[' && substr[i][j+1] != 0x20))
+			/* Strings containing these characters are taken as wildacard patterns 
+			 * and are expanded by the glob function. See man (7) glob */
+				if (glob_n < int_array_max)
+					glob_array[glob_n++]=i;
 		}
 	}
-	free(string_b);
 
-	/* ### RANGES EXPANSION ### */
+	/* ### 4) RANGES EXPANSION ### */
 	if (ranges_ok) {
 		int old_ranges_n=0;
 		for (size_t r=0;r<ranges_ok;r++) {
 			int ranges_n=0;
-			int *ranges=expand_range(comm_array[range_array[r]+old_ranges_n]);
+			int *ranges=expand_range(substr[range_array[r]+old_ranges_n]);
 			if (ranges) {
 				size_t j=0;
 				for (ranges_n=0;ranges[ranges_n];ranges_n++);
@@ -5952,28 +6101,28 @@ parse_input_str(const char *str)
 				ranges_cmd=xcalloc(ranges_cmd, args_n+ranges_n+2, 
 								   sizeof(char **));
 				for (i=0;i<range_array[r]+old_ranges_n;i++) {
-					ranges_cmd[j]=xcalloc(ranges_cmd[j], strlen(comm_array[i]), 
+					ranges_cmd[j]=xcalloc(ranges_cmd[j], strlen(substr[i]), 
 										  sizeof(char *));
-					strcpy(ranges_cmd[j++], comm_array[i]);
+					strcpy(ranges_cmd[j++], substr[i]);
 				}
 				for (i=0;i<ranges_n;i++) {
 					ranges_cmd[j]=xcalloc(ranges_cmd[j], 1, sizeof(char *));
 					sprintf(ranges_cmd[j++], "%d", ranges[i]);
 				}
 				for (i=range_array[r]+old_ranges_n+1;i<=args_n;i++) {
-					ranges_cmd[j]=xcalloc(ranges_cmd[j], strlen(comm_array[i]), 
+					ranges_cmd[j]=xcalloc(ranges_cmd[j], strlen(substr[i]), 
 										  sizeof(char *));
-					strcpy(ranges_cmd[j++], comm_array[i]);
+					strcpy(ranges_cmd[j++], substr[i]);
 				}
 				ranges_cmd[j]=NULL;
 				free(ranges);
-				for (i=0;i<=args_n;i++) free(comm_array[i]);
-				comm_array=xrealloc(comm_array, 
+				for (i=0;i<=args_n;i++) free(substr[i]);
+				substr=xrealloc(substr, 
 									(args_n+ranges_n+2)*sizeof(char **));
 				for (i=0;i<j;i++) {
-					comm_array[i]=xcalloc(comm_array[i], strlen(ranges_cmd[i]), 
+					substr[i]=xcalloc(substr[i], strlen(ranges_cmd[i]), 
 										  sizeof(char *));
-					strcpy(comm_array[i], ranges_cmd[i]);
+					strcpy(substr[i], ranges_cmd[i]);
 					free(ranges_cmd[i]);
 				}
 				free(ranges_cmd);
@@ -5983,7 +6132,7 @@ parse_input_str(const char *str)
 		}
 	}
 	
-	/* #### GLOB EXPANSION #### */
+	/* #### 5) GLOB EXPANSION #### */
 	if (glob_n) {
 	 /*	1) Expand glob
 		2) Create a new array, say comm_array_glob, large enough to store the 
@@ -6008,16 +6157,16 @@ parse_input_str(const char *str)
 		*/
 		for (size_t g=0;g<glob_n;g++){
 			glob_t globbuf;
-			glob(comm_array[glob_array[g]+old_pathc], 0, NULL, &globbuf);
+			glob(substr[glob_array[g]+old_pathc], 0, NULL, &globbuf);
 			if (globbuf.gl_pathc) {
 				size_t j=0;
 				char **glob_cmd=NULL;
 				glob_cmd=xcalloc(glob_cmd, args_n+globbuf.gl_pathc+1, 
 								 sizeof(char *));			
 				for (i=0;i<(glob_array[g]+old_pathc);i++) {
-					glob_cmd[j]=xcalloc(glob_cmd[j], strlen(comm_array[i]), 
+					glob_cmd[j]=xcalloc(glob_cmd[j], strlen(substr[i]), 
 										sizeof(char *));
-					strcpy(glob_cmd[j++], comm_array[i]);
+					strcpy(glob_cmd[j++], substr[i]);
 				}
 				for (i=0;i<globbuf.gl_pathc;i++) {
 					glob_cmd[j]=xcalloc(glob_cmd[j], 
@@ -6025,19 +6174,19 @@ parse_input_str(const char *str)
 					strcpy(glob_cmd[j++], globbuf.gl_pathv[i]);
 				}
 				for (i=glob_array[g]+old_pathc+1;i<=args_n;i++) {
-					glob_cmd[j]=xcalloc(glob_cmd[j], strlen(comm_array[i]), 
+					glob_cmd[j]=xcalloc(glob_cmd[j], strlen(substr[i]), 
 										sizeof(char *));
-					strcpy(glob_cmd[j++], comm_array[i]);
+					strcpy(glob_cmd[j++], substr[i]);
 				}
 				glob_cmd[j]=NULL;
 
-				for (i=0;i<=args_n;i++) free(comm_array[i]);
-				comm_array=xrealloc(comm_array, 
+				for (i=0;i<=args_n;i++) free(substr[i]);
+				substr=xrealloc(substr, 
 					(args_n+globbuf.gl_pathc+1)*sizeof(char **));
 				for (i=0;i<j;i++) {
-					comm_array[i]=xcalloc(comm_array[i], strlen(glob_cmd[i]), 
+					substr[i]=xcalloc(substr[i], strlen(glob_cmd[i]), 
 										  sizeof(char *));
-					strcpy(comm_array[i], glob_cmd[i]);
+					strcpy(substr[i], glob_cmd[i]);
 					free(glob_cmd[i]);
 				}
 				args_n=j-1;
@@ -6048,13 +6197,13 @@ parse_input_str(const char *str)
 		}
 	}
 	
-	/* #### 4) BRACES EXPANSION #### */
+	/* #### 6) BRACES EXPANSION #### */
 	if (braces_n) { /* If there is some braced parameter... */
 		/* We already know the indexes of braced strings (braces_array[]) */
 		int old_braces_arg=0;
 		for (size_t b=0;b<braces_n;b++) {
 			/* Expand the braced parameter and store it into a new array */
-			int braced_args=brace_expansion(comm_array[braces_array[b]
+			int braced_args=brace_expansion(substr[braces_array[b]
 				+old_braces_arg]);
 			/* Now we also know how many elements the expanded braced 
 			 * parameter has */
@@ -6069,9 +6218,9 @@ parse_input_str(const char *str)
 				 * braces */
 				for (i=0;i<(braces_array[b]+old_braces_arg);i++) {
 					comm_array_braces[i]=xcalloc(comm_array_braces[i], 
-												 strlen(comm_array[i]), 
+												 strlen(substr[i]), 
 												 sizeof(char *));
-					strcpy(comm_array_braces[i], comm_array[i]);
+					strcpy(comm_array_braces[i], substr[i]);
 				}
 				/* Now, add the expanded braces to the same array */
 				for (size_t j=0;j<braced_args;j++) {
@@ -6086,23 +6235,23 @@ parse_input_str(const char *str)
 				 * braces */
 				for (size_t j=braces_array[b]+old_braces_arg+1;j<=args_n;j++) {
 					comm_array_braces[i]=xcalloc(comm_array_braces[i], 
-												 strlen(comm_array[j]), 
+												 strlen(substr[j]), 
 												 sizeof(char *));
-					strcpy(comm_array_braces[i++], comm_array[j]);				
+					strcpy(comm_array_braces[i++], substr[j]);				
 				}
 				/* Now, free the old comm_array and copy to it our new array 
 				 * containing all the parameters, including the expanded 
 				 * braces */
 				for (size_t j=0;j<=args_n;j++)
-					free(comm_array[j]);
-				comm_array=xrealloc(comm_array, 
+					free(substr[j]);
+				substr=xrealloc(substr, 
 					(args_n+braced_args+1)*sizeof(char **));			
 				args_n=i-1;
 				for (int j=0;j<i;j++) {
-					comm_array[j]=xcalloc(comm_array[j], 
+					substr[j]=xcalloc(substr[j], 
 										  strlen(comm_array_braces[j]), 
 										  sizeof(char *));
-					strcpy(comm_array[j], comm_array_braces[j]);
+					strcpy(substr[j], comm_array_braces[j]);
 					free(comm_array_braces[j]);
 				}
 				old_braces_arg+=(braced_args-1);
@@ -6111,16 +6260,16 @@ parse_input_str(const char *str)
 		}
 	}
 
-	/* #### 5) NULL TERMINATE THE INPUT STRING ARRAY #### */
-	comm_array=xrealloc(comm_array, sizeof(char **)*(args_n+2));	
-	comm_array[args_n+1]=NULL;
+	/* #### 7) NULL TERMINATE THE INPUT STRING ARRAY #### */
+	substr=xrealloc(substr, sizeof(char **)*(args_n+2));	
+	substr[args_n+1]=NULL;
 
-	/* #### 6) FURTHER EXPANSIONS #### */
+	/* #### 7) FURTHER EXPANSIONS #### */
 	is_sel=0, sel_is_last=0, sel_no_sel=0;
 	for (i=0;i<=(size_t)args_n;i++) {
 		
 		/* Expand 'sel' only as an argument, not as command */
-		if (i > 0 && strcmp(comm_array[i], "sel") == 0)
+		if (i > 0 && strcmp(substr[i], "sel") == 0)
 			is_sel=i;
 		
 		/* ELN EXPANSION */
@@ -6129,43 +6278,39 @@ parse_input_str(const char *str)
 		 * Otherwise, if the expanded ELN happens to be a program name as 
 		 * well, this program will be executed, and this, for sure, is to be 
 		 * avoided */
-		if (i > 0 && is_number(comm_array[i])) {
-			int num=atoi(comm_array[i]);
+		if (i > 0 && is_number(substr[i])) {
+			int num=atoi(substr[i]);
 			/* Expand numbers only if there is a corresponding ELN */
 			if (num > 0 && num <= files) {
 				size_t file_len=strlen(dirlist[num-1]->d_name);
-				comm_array[i]=xrealloc(comm_array[i], 
+				substr[i]=xrealloc(substr[i], 
 									   (file_len+1)*sizeof(char *));
-				memset(comm_array[i], 0x00, file_len+1);
-				strcpy(comm_array[i], dirlist[num-1]->d_name);
+				memset(substr[i], 0x00, file_len+1);
+				strcpy(substr[i], dirlist[num-1]->d_name);
 			}
 		}
 		
 		/* TILDE EXPANSION (replace "~/" by "/home/user") */
-		if (strncmp(comm_array[i], "~/", 2) == 0) {
-			char *path_no_tilde=straft(comm_array[i], '/');
-			if (path_no_tilde) {
-				comm_array[i]=xrealloc(comm_array[i], (user_home_len+
-									  strlen(path_no_tilde)+2)*sizeof(char *));
-				sprintf(comm_array[i], "%s/%s", user_home, path_no_tilde);
+		if (strncmp(substr[i], "~/", 2) == 0) {
+			/* tilde_expansion() is provided by the readline lib */
+			char *exp_path=tilde_expand(substr[i]);
+			if (exp_path) {
+				substr[i]=xrealloc(substr[i], 
+									   strlen(exp_path)*sizeof(char *));
+				strcpy(substr[i], exp_path);
 			}
-			else {
-				comm_array[i]=xrealloc(comm_array[i], 
-									   (user_home_len+2)*sizeof(char *));
-				sprintf(comm_array[i], "%s/", user_home);
-			}
-			free(path_no_tilde);
+			free(exp_path);
 		}
 		
 		/* USER DEFINED VARIABLES EXPANSION */
-		if (comm_array[i][0] == '$' && comm_array[i][1] != '(') {
-			char *var_name=straft(comm_array[i], '$');
+		if (substr[i][0] == '$' && substr[i][1] != '(') {
+			char *var_name=straft(substr[i], '$');
 			if (var_name) {
 				for (unsigned j=0;(int)j<usrvar_n;j++) {
 					if (strcmp(var_name, usr_var[j].name) == 0) {
-						comm_array[i]=xrealloc(comm_array[i], 
+						substr[i]=xrealloc(substr[i], 
 								(strlen(usr_var[j].value)+1)*sizeof(char *));
-						strcpy(comm_array[i], usr_var[j].value);
+						strcpy(substr[i], usr_var[j].value);
 					}
 				}
 				free(var_name);
@@ -6181,9 +6326,9 @@ parse_input_str(const char *str)
 			char **sel_array=NULL;
 			sel_array=xcalloc(sel_array, args_n+sel_n+2, sizeof(char **));
 			for (i=0;i<is_sel;i++) {
-				sel_array[j]=xcalloc(sel_array[j], strlen(comm_array[i]), 
+				sel_array[j]=xcalloc(sel_array[j], strlen(substr[i]), 
 									 sizeof(char *));
-				strcpy(sel_array[j++], comm_array[i]);
+				strcpy(sel_array[j++], substr[i]);
 			}
 			for (i=0;i<sel_n;i++) {
 				sel_array[j]=xcalloc(sel_array[j], strlen(sel_elements[i]), 
@@ -6191,21 +6336,21 @@ parse_input_str(const char *str)
 				strcpy(sel_array[j++], sel_elements[i]);
 			}
 			for (i=is_sel+1;i<=args_n;i++) {
-				sel_array[j]=xcalloc(sel_array[j], strlen(comm_array[i]), 
+				sel_array[j]=xcalloc(sel_array[j], strlen(substr[i]), 
 									 sizeof(char *));
-				strcpy(sel_array[j++], comm_array[i]);
+				strcpy(sel_array[j++], substr[i]);
 			}
 			for (i=0;i<=args_n;i++)
-				free(comm_array[i]);
-			comm_array=xrealloc(comm_array, (args_n+sel_n+2)*sizeof(char **));
+				free(substr[i]);
+			substr=xrealloc(substr, (args_n+sel_n+2)*sizeof(char **));
 			for (i=0;i<j;i++) {
-				comm_array[i]=xcalloc(comm_array[i], strlen(sel_array[i]), 
+				substr[i]=xcalloc(substr[i], strlen(sel_array[i]), 
 									  sizeof(char *));
-				strcpy(comm_array[i], sel_array[i]);
+				strcpy(substr[i], sel_array[i]);
 				free(sel_array[i]);
 			}
 			free(sel_array);
-			comm_array[i]=NULL;
+			substr[i]=NULL;
 			args_n=j-1;
 		}
 		else {
@@ -6217,7 +6362,7 @@ parse_input_str(const char *str)
 			sel_no_sel=1;
 		}
 	}
-	return comm_array;
+	return substr;
 }
 
 char *
@@ -7488,7 +7633,6 @@ exec_cmd(char **comm)
 	
 	/* #### EXTERNAL COMMANDS #### */
 	else {
-		
 		/* IF NOT A COMMAND, BUT A DIRECTORY... */
 		if (comm[0][0] == '/') {
 			struct stat file_attrib;
@@ -7529,7 +7673,8 @@ exec_cmd(char **comm)
 		
 		/* CHECK WHETHER EXTERNAL COMMANDS ARE ALLOWED */
 		if (!ext_cmd_ok) {
-			fprintf(stderr, _("%s: External commands are not allowed\n"), 
+			fprintf(stderr, _("%s: External commands are not allowed. \
+Run 'ext on' to enable them.\n"), 
 					PROGRAM_NAME);
 			return;
 		}
@@ -7537,19 +7682,21 @@ exec_cmd(char **comm)
 		/*
 		 * By making precede the command by a colon or a semicolon, the user
 		 * can BYPASS CliFM parsing, expansions, and checks to be executed 
-		 * DIRECTLY by the system shell (execle). For example: if the amount 
-		 * of files listed on the screen (ELN's) is larger or equal than 644 
-		 * and the user tries to issue this command: "chmod 644 filename", 
-		 * CLIFM will take 644 to be an ELN, and will thereby try to expand it 
-		 * into the corresponding filename, which is not what the user wants. 
-		 * To prevent this, simply run the command as follows: 
-		 * ";chmod 644 filename" */
+		 * DIRECTLY by the system shell (via execle). For example: if the 
+		 * amount of files listed on the screen (ELN's) is larger or equal 
+		 * than 644 and the user tries to issue this command: "chmod 644 
+		 * filename", CLIFM will take 644 to be an ELN, and will thereby try 
+		 * to expand it into the corresponding filename, which is not what 
+		 * the user wants. To prevent this, simply run the command as 
+		 * follows: ";chmod 644 filename" */
 
+		char needs_shell=0;
 		if (comm[0][0] == ':' || comm[0][0] == ';') {
 			/* Remove the colon from the beginning of the first argument,
 			 * that is, move the pointer to the next (second) position */
 			char *comm_tmp=comm[0]+1;
-			/* If string == ":" or ";" */
+			needs_shell=1;
+			/* If string was just ":" or ";" */
 			if (!comm_tmp || comm_tmp[0] == '\0') {
 				fprintf(stderr, _("%s: '%c': Syntax error\n"), PROGRAM_NAME, 
 						comm[0][0]);
@@ -7559,44 +7706,47 @@ exec_cmd(char **comm)
 				strcpy(comm[0], comm_tmp);
 		}
 		
-		/* External command are always executed by execle, that is to say, by
-		 * the system shell, because in this way the user can make use of all 
-		 * the shell features, like pipes, stream redirection and so on */
+		/* RUN THE EXTERNAL COMMAND */
 		
-		/* Store the cmd and each argument into a single array to be executed 
-		 * by execle() */
-		char *ext_cmd=NULL;
-		size_t ext_cmd_len=strlen(comm[0]);
-		ext_cmd=xcalloc(ext_cmd, ext_cmd_len+1, sizeof(char *));
-		strcpy(ext_cmd, comm[0]);
-		if (args_n) { /* This will be false in case of ";cmd" or ":cmd" */
-			for (size_t i=1;i<=(size_t)args_n;i++) {
-				/* If some argument contains spaces, quote the whole argument.
-				* In this way, the system shell will be able to run the command 
-				* correctly. This is just a workaround, but it works most of 
-				* the times */
-				char *comm_tmp=quote_str(comm[i]);
-				if (comm_tmp) {
-					ext_cmd_len+=strlen(comm_tmp)+1;
-					ext_cmd=xrealloc(ext_cmd, (ext_cmd_len+1)*sizeof(char *));
-					strcat(ext_cmd, " ");
-					strcat(ext_cmd, comm_tmp);
-					free(comm_tmp);
-				}
-				else {
-					ext_cmd_len+=strlen(comm[i])+1;
-					ext_cmd=xrealloc(ext_cmd, (ext_cmd_len+1)*sizeof(char *));
-					strcat(ext_cmd, " ");
-					strcat(ext_cmd, comm[i]);
+		if (!needs_shell)
+			/* The command is just executed: no shell feature available */
+			launch_execve(comm);
+		
+		else { /* Execute the command via the systemd shell (/bin/sh) */
+			/* Store the cmd and each argument into a single array to be 
+			 * executed by execle() using the system shell */
+			char *ext_cmd=NULL;
+			size_t ext_cmd_len=strlen(comm[0]);
+			ext_cmd=xcalloc(ext_cmd, ext_cmd_len+1, sizeof(char *));
+			strcpy(ext_cmd, comm[0]);
+			if (args_n) { /* This will be false in case of ";cmd" or ":cmd" */
+				for (size_t i=1;i<=(size_t)args_n;i++) {
+					/* If some argument contains spaces, quote the whole argument.
+					* In this way, the system shell will be able to run the command 
+					* correctly. This is just a workaround, but it works most of 
+					* the times */
+					char *comm_tmp=quote_str(comm[i]);
+					if (comm_tmp) {
+						ext_cmd_len+=strlen(comm_tmp)+1;
+						ext_cmd=xrealloc(ext_cmd, (ext_cmd_len+1)*sizeof(char *));
+						strcat(ext_cmd, " ");
+						strcat(ext_cmd, comm_tmp);
+						free(comm_tmp);
+					}
+					else {
+						ext_cmd_len+=strlen(comm[i])+1;
+						ext_cmd=xrealloc(ext_cmd, (ext_cmd_len+1)*sizeof(char *));
+						strcat(ext_cmd, " ");
+						strcat(ext_cmd, comm[i]);
+					}
 				}
 			}
+			launch_execle(ext_cmd);
+			free(ext_cmd);
+//			needs_shell=0;
 		}
-
-		/* Run the command */
-		launch_execle(ext_cmd);
-		free(ext_cmd);
-		return;
 	}
+	return;
 }
 
 void
@@ -7650,6 +7800,10 @@ surf_hist(char **comm)
 
 int
 launch_execle (const char *cmd)
+/* Execute a command using the system shell (/bin/sh), which takes care of
+ * special functions such as pipes and stream redirection, and special chars
+ * like wildcards, quotes, and escape sequences. Use only when the shell is
+ * needed; otherwise, launch_execve() should be used instead. */
 {
 	/* Error codes
 	#define EXNULLERR 79
@@ -7681,10 +7835,9 @@ launch_execle (const char *cmd)
 		signal(SIGQUIT, SIG_DFL);
 		signal(SIGTERM, SIG_DFL);
 		/* This is basically what the system() function does: */
-		if (execle("/bin/sh", "sh", "-c", cmd, NULL, __environ) == -1) {
-			fprintf(stderr, "%s: execle: %s\n", PROGRAM_NAME, strerror(errno));
-			return EXEXECERR;
-		}
+		execle("/bin/sh", "sh", "-c", cmd, NULL, __environ);
+		fprintf(stderr, "%s: execle: %s\n", PROGRAM_NAME, strerror(errno));
+		exit(errno);
 	}
 	/* Get command status */
 	else if (pid > 0) {
@@ -7711,7 +7864,7 @@ launch_execle (const char *cmd)
 			/* Waitpid() failed */
 			fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME, 
 					strerror(errno));
-			return EXWAITERR;
+			return errno;
 		}
 	}
 
@@ -7722,9 +7875,9 @@ launch_execle (const char *cmd)
 int
 launch_execve(char **cmd)
 /* Execute a command and return the corresponding exit status. The exit status
-* could be: zero, if everything went fine or a non-zero value in case of error. 
-* The function takes as only arguement an array of strings containing the 
-* command name to be executed and its arguments (cmd) */
+* could be: zero, if everything went fine, or a non-zero value in case of 
+* error. The function takes as only arguement an array of strings containing 
+* the command name to be executed and its arguments (cmd) */
 {
 	/* Error codes
 	#define EXNULLERR 79
@@ -7752,12 +7905,27 @@ launch_execve(char **cmd)
 	 * able to catch error codes coming from the child. */
 	signal(SIGCHLD, SIG_DFL);
 
-	int status;
+	/* Check if program is to be backgrounded. In that case, remove the
+	 * final ampersand from the string */
+	char is_bg=0;
+	if (strcmp(cmd[args_n], "&") == 0) {
+		free(cmd[args_n]);
+		cmd[args_n]=NULL;
+		is_bg=1;
+	}
+	else {
+		size_t last_len=strlen(cmd[args_n]);
+		if (cmd[args_n][last_len-1] == '&') {
+			cmd[args_n][last_len-1]=0x00;
+			is_bg=1;
+		}
+	}
+
 	/* Create a new process via fork() */
 	pid_t pid=fork();
 	if (pid < 0) {
 		fprintf(stderr, "%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
-		return EXFORKERR;
+		return errno;
 	}
 	/* Run the command via execvpe */
 	else if (pid == 0) {
@@ -7767,44 +7935,21 @@ launch_execve(char **cmd)
 		signal(SIGINT, SIG_DFL);
 		signal(SIGQUIT, SIG_DFL);
 		signal(SIGTERM, SIG_DFL);
-		if (execvpe(cmd[0], cmd, __environ) == -1) {
-			fprintf(stderr, "%s: execle: %s\n", PROGRAM_NAME, strerror(errno));
-			return EXEXECERR;
-		}
+		execvpe(cmd[0], cmd, __environ);
+		/* This will only be reached is execvpe() fails, because the exec
+		 * family of functions only returns on error */
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, cmd[0], 
+				strerror(errno));
+		exit(errno);
 	}
 	/* Get the command status */
-	else if (pid > 0) {
-		/* The parent process calls waitpid() on the child */
-		if (waitpid(pid, &status, 0) > 0) {
-			if (WIFEXITED(status) && !WEXITSTATUS(status)) {
-				/* The program terminated normally and executed successfully */
-				return EXIT_SUCCESS;
-			}
-			else if (WIFEXITED(status) && WEXITSTATUS(status)) {
-				switch (WEXITSTATUS(status)) {
-					case 126: fprintf(stderr, _("%s: '%s': Permission \
-denied\n"), PROGRAM_NAME, cmd[0]);
-						break;
-					case 127: fprintf(stderr, _("%s: '%s': Command not \
-found\n"), PROGRAM_NAME, cmd[0]);
-						break;
-					default: /* Program terminated normally, but returned a 
-					non-zero status */
-						break;
-				}
-				return WEXITSTATUS(status);
-			}
-			else {
-				/* The program didn't terminate normally */
-				return EXCRASHERR;
-			}
+	else { /* pid > 0 */
+		if (is_bg) {
+			run_in_background(pid);
+			return EXIT_SUCCESS;
 		}
-		else {
-			/* waitpid() failed */
-			fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME, 
-					strerror(errno));
-			return EXWAITERR;
-		}
+		else
+			return run_in_foreground(pid);
 	}
 	
 	/* Never reached */
@@ -7814,36 +7959,30 @@ found\n"), PROGRAM_NAME, cmd[0]);
 int
 run_in_foreground(pid_t pid)
 {
-	int status;
+	int status=0;
 	/* The parent process calls waitpid() on the child */
 	if (waitpid(pid, &status, 0) > 0) {
 		if (WIFEXITED(status) && !WEXITSTATUS(status)) {
-			/* The program terminated normally and executed successfully */
+			/* The program terminated normally and executed successfully 
+			 * (WEXITSTATUS(status) == 0) */
 			return EXIT_SUCCESS;
 		}
 		else if (WIFEXITED(status) && WEXITSTATUS(status)) {
-			switch (WEXITSTATUS(status)) {
-				case 126: fprintf(stderr, _("%s: Permission denied\n"), 
-								PROGRAM_NAME);
-					break;
-				case 127: fprintf(stderr, _("%s: Command not found\n"), 
-								PROGRAM_NAME);
-					break;
-				default: /* Program terminated normally, but returned a 
-				non-zero status */
-					break;
-			}
+			/* Program terminated normally, but returned a 
+			 * non-zero status. Error codes should be printed by the 
+			 * program itself */
 			return WEXITSTATUS(status);
 		}
 		else {
-			/* The program didn't terminate normally */
+			/* The program didn't terminate normally. In this case too,
+			 * error codes should be printed by the program */
 			return EXCRASHERR;
 		}
 	}
 	else {
 		/* waitpid() failed */
 		fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
-		return EXWAITERR;
+		return errno;
 	}
 	return EXIT_FAILURE; /* Never reached */
 }
@@ -8187,21 +8326,7 @@ run_and_refresh(char **comm)
 		return;
 	log_function(comm);
 
-	char cmd[PATH_MAX]="";
-	strcat(cmd, comm[0]);
-	for (size_t i=1;i<=args_n;i++) {
-		strcat(cmd, " ");
-		/* If string contains spaces, quote it */
-		char *str=quote_str(comm[i]);
-		if (str) {
-			strcat(cmd, str);
-			free(str);
-		}
-		else
-			strcat(cmd, comm[i]);
-	}
-
-	int ret=launch_execle(cmd);
+	int ret=launch_execve(comm);
 	if (ret == 0) {
 		/* If 'rm sel' and command is successful, deselect everything */
 		if (is_sel && strcmp(comm[0], "rm") == 0) {
@@ -8471,7 +8596,7 @@ bookmarks_function(void)
 	printf(_("%sBookmarks Manager%s\n\n"), white, NC);
 	struct stat file_attrib;
 
-	// If the bookmarks file doesn't exist, create it
+	/* If the bookmarks file doesn't exist, create it */
 	if (stat(BM_FILE, &file_attrib) == -1) {
 		FILE *fp;
 		fp=fopen(BM_FILE, "w+");
@@ -8493,13 +8618,13 @@ bookmarks_function(void)
 		}
 	}
 
-	// Get bookmarks
+	/* Get bookmarks */
 	char **bookmarks=get_bookmarks(BM_FILE);
-	// get_bookmarks not only returns an array containing the actual bookmarks,
-	// but the total amount of bookmarks as well via the global variable bm_n
-	if (bm_n == -1) // Error opening BM_FILE
-		return; // Errors are printed by get_bookmarks() itself
-	// If no bookmarks
+	/* get_bookmarks() not only returns an array containing the actual bookmarks,
+	* but the total amount of bookmarks as well via the global variable bm_n */
+	if (bm_n == -1) /* Error opening BM_FILE */
+		return; /* Errors are printed by get_bookmarks() itself */
+	/* If no bookmarks */
 	if (bm_n == 0) {
 		printf("%s%s%s: ", NC_b, white_b, PROGRAM_NAME);
 		char *answer=rl_no_hist(_("There are no bookmarks.\nDo you want to \
@@ -8512,23 +8637,28 @@ edit the bookmarks file? [Y/n] "));
 		else if (strcmp(answer, "y") == 0 || strcmp(answer, "Y") == 0 
 					|| strcmp(answer, "") == 0) {
 			free(answer);
-			char edit_cmd[150]="";
-			if (flags & XDG_OPEN_OK)
-				snprintf(edit_cmd, 150, "xdg-open '%s'", BM_FILE);
+			char *edit_cmd=NULL;
+			if (flags & XDG_OPEN_OK) {
+				edit_cmd=xcalloc(edit_cmd, 9, sizeof(char *));
+				strcpy(edit_cmd, "xdg-open");
+			}
 			else {
 				printf(_("%s: xdg-open: Command not found\n"), PROGRAM_NAME);
 				char *editor=rl_no_hist(_("Text editor: "));
 				if (!editor)
 					return;
-				if (editor[0] == '\0') { // If the user just pressed Enter
+				if (editor[0] == '\0') { /* If the user just pressed Enter */
 					free(editor);
 					return;
 				}
-				snprintf(edit_cmd, 150, "%s '%s'", editor, BM_FILE);
+				edit_cmd=xcalloc(edit_cmd, strlen(editor), sizeof(char *));
+				strcpy(edit_cmd, editor);
 				free(editor);
 			}
-			if (launch_execle(edit_cmd) == 0)
+			char *tmp_cmd[]={ edit_cmd, BM_FILE, NULL };
+			if (launch_execve(tmp_cmd) == 0)
 				bookmarks_function();
+			free(edit_cmd);
 			return;
 		}
 		else {
@@ -8538,7 +8668,7 @@ edit the bookmarks file? [Y/n] "));
 		}	
 	}
 
-	// If there are bookmarks...
+	/* If there are bookmarks... */
 	char **bm_paths=NULL;
 	bm_paths=xcalloc(bm_paths, bm_n, sizeof(char **));
 	char **hot_keys=NULL;
@@ -8547,7 +8677,7 @@ edit the bookmarks file? [Y/n] "));
 	bm_names=xcalloc(bm_names, bm_n, sizeof(char **));
 	int i;
 
-	// Get bookmarks paths
+	/* Get bookmarks paths */
 	for(i=0;i<bm_n;i++) {
 		char *str;
 		str=straft(bookmarks[i], ':');
@@ -8571,7 +8701,7 @@ edit the bookmarks file? [Y/n] "));
 		}
 	}
 
-	// Get bookmarks hot keys
+	/* Get bookmarks hot keys */
 	for (i=0;i<bm_n;i++) {
 		char *str_b=strbtw(bookmarks[i], '[', ']');
 		if (str_b) {
@@ -8583,7 +8713,7 @@ edit the bookmarks file? [Y/n] "));
 			hot_keys[i]=NULL;
 	}
 
-	// Get bookmarks names
+	/* Get bookmarks names */
 	for (i=0;i<bm_n;i++) {
 		char *str_name=strbtw(bookmarks[i], ']', ':');
 		if (str_name) {
@@ -8603,7 +8733,7 @@ edit the bookmarks file? [Y/n] "));
 		}
 	}
 
-	// Print results
+	/* Print results */
 	for (i=0;i<bm_n;i++) {
 		int path_ok=stat(bm_paths[i], &file_attrib);
 		if (hot_keys[i]) {
@@ -8662,17 +8792,18 @@ edit the bookmarks file? [Y/n] "));
 		}
 	}
 
-	// Display the prompt
+	/* Display the prompt */
 	int args_n_old=args_n, reload_bm=0, go_dirlist=0; //, go_back_prompt=0;
 	args_n=0;
 	char **comm_bm=bm_prompt();
 
-	// User selection
-	// If string...
+	/* User selection */
+	/* If string... */
 	if (!is_number(comm_bm[0])) {
 		int valid_hk=0, eln=0;
 		if (strcmp(comm_bm[0], "e") == 0) {
-			//if no application has been specified and xdg-open doesn't exist...
+			/* If no application has been specified and xdg-open doesn't 
+			 * exist... */
 			if (args_n == 0 && !(flags & XDG_OPEN_OK))
 				fprintf(stderr, _("%s: xdg-open not found. Try \
 'e application'\n"), PROGRAM_NAME);
@@ -8712,7 +8843,7 @@ found\n"), comm_bm[1]);
 			go_dirlist=1;
 		}
 		
-		else { //if neither 'e' nor 'q'...
+		else { /* If neither 'e' nor 'q'... */
 			for (i=0;i<bm_n;i++) {
 				if (hot_keys[i] != NULL) {
 					if (strcmp(hot_keys[i], comm_bm[0]) == 0) {
@@ -8728,11 +8859,11 @@ found\n"), comm_bm[1]);
 							bm_n);
 				else fprintf(stderr, _("bookmarks: %s: No such bookmark\n"), 
 							 comm_bm[0]);
-//				go_back_prompt=1;
+/*				go_back_prompt=1; */
 			}
-			else { //if a valid hotkey...
+			else { /* If a valid hotkey... */
 				if (stat(bm_paths[eln], &file_attrib) == 0) {
-					// If a directory
+					/* If a directory */
 					if ((file_attrib.st_mode & S_IFMT) == S_IFDIR) {
 						int ret=chdir(bm_paths[eln]);
 						if (ret == 0) {
@@ -8748,9 +8879,10 @@ found\n"), comm_bm[1]);
 									bm_paths[eln], strerror(errno));
 						}
 					}
-					// If a regular file...
+					/* If a regular file... */
 					else if ((file_attrib.st_mode & S_IFMT) == S_IFREG) {
-						if (args_n == 0) { //if no opening application has been passed...
+						/* If no opening application has been passed... */
+						if (args_n == 0) { 
 							if (flags & XDG_OPEN_OK) {
 								pid_t pid_bm=fork();
 								if (pid_bm == 0) {
@@ -8764,9 +8896,11 @@ found\n"), comm_bm[1]);
 							else fprintf(stderr, _("%s: xdg-open not found. \
 Try 'hotkey application'\n"), PROGRAM_NAME);
 						}
-						else { //if application has been passed (as 2nd arg)...
+						/* If application has been passed (as 2nd arg)... */
+						else {
 							char *cmd_path=NULL;
-							if ((cmd_path=get_cmd_path(comm_bm[1])) != NULL) { //check if application exists
+							/* Check if application exists */
+							if ((cmd_path=get_cmd_path(comm_bm[1])) != NULL) {
 								pid_t pid_bm=fork();
 								if (pid_bm == 0) {
 									set_signals_to_default();
@@ -8784,7 +8918,7 @@ not found\n"), comm_bm[1]);
 							free(cmd_path);
 						}
 					}
-					else // If neither dir nor regular file
+					else /* If neither dir nor regular file */
 						fprintf(stderr, _("bookmarks: '%s': Cannot open \
 file\n"), bm_paths[eln]);
 				}
@@ -8796,11 +8930,11 @@ file\n"), bm_paths[eln]);
 		}
 	}
 	
-	// If digit
+	/* If digit */
 	else {
 		size_t atoi_comm_bm=atoi(comm_bm[0]);
 		if (atoi_comm_bm > 0 && atoi_comm_bm <= bm_n) {
-			// CHECK FILE EXISTENCE!!
+			/* CHECK FILE EXISTENCE!! */
 			stat(bm_paths[atoi_comm_bm-1], &file_attrib);
 			if ((file_attrib.st_mode & S_IFMT) == S_IFDIR) { //if a directory...
 				int ret=chdir(bm_paths[atoi_comm_bm-1]);
@@ -8816,8 +8950,10 @@ file\n"), bm_paths[eln]);
 					fprintf(stderr, "bookmarks: '%s': %s\n",  
 							bm_paths[atoi_comm_bm-1], strerror(errno));
 			}
-			else if ((file_attrib.st_mode & S_IFMT) == S_IFREG) { //if a file...
-				if (args_n == 0) { //if no opening application has been passed...
+			/* If a file... */
+			else if ((file_attrib.st_mode & S_IFMT) == S_IFREG) {
+				/* If no opening application has been passed... */
+				if (args_n == 0) {
 					if (!(flags & XDG_OPEN_OK))
 						fprintf(stderr, _("%s: xdg-open not found. Try \
 'ELN/hot-key application'\n"), PROGRAM_NAME);
@@ -8832,8 +8968,8 @@ file\n"), bm_paths[eln]);
 						else waitpid(pid_bm, NULL, 0);
 					}
 				}
-				else { //if application has been passed (as 2nd arg)...
-					// Check if application exists
+				else { /* If application has been passed (as 2nd arg)... */
+					/* Check if application exists */
 					char *cmd_path=NULL;
 					if ((cmd_path=get_cmd_path(comm_bm[1])) != NULL) {
 						pid_t pid_bm=fork();
@@ -8923,12 +9059,8 @@ dir_size(char *dir)
 	dup2(fileno(du_fp_err), STDERR_FILENO); /* Redirect stderr to /dev/null */
 	fclose(du_fp);
 	fclose(du_fp_err);
-	size_t dir_len=strlen(dir);
-	char cmd[dir_len+10];
-	memset(cmd, 0x00, dir_len+10);
-	snprintf(cmd, dir_len+10, "du -sh \"%s\"", dir);
-/*	int ret=launch_execle(cmd); */
-	launch_execle(cmd);
+	char *cmd[]={ "du", "-sh", dir, NULL };
+	launch_execve(cmd);
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
 	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
 	close(stdout_bk);
@@ -9863,8 +9995,11 @@ the current working directory into the selected mountpoint.\n"), white, NC,
 copy the currently selected elements, if any, into the current working \
 directory. If you want to copy these elements into another directory, you \
 only need to tell 'paste' where to copy these files. Ex: paste sel \
-/path/to/directory\n"), 
-		   white, NC, white_b);
+/path/to/directory\n"), white, NC, white_b);
+	printf(_("\n%s;, :%s%s[cmd]: Run an external command via the system \
+shell. Use this whenever you need some shell feature, like pipes, command \
+substitution or stream redirection. Ex: ;ls | grep file\n"), 
+			white, NC, white_b);
 	printf(_("\n%slog%s%s [clear]: With no arguments, it shows the log file. \
 If clear is passed as argument, it will delete all the logs.\n"), white, NC, 
 		   white_b);
@@ -10048,11 +10183,11 @@ display non-ASCII characters and characters from the extended ASCII charset.\n")
 	printf(_("\n%s is not limited to its own set of internal commands, like \
 open, sel, trash, etc., but it can run any external command as well, provided \
 external commands are allowed (use the -x option or the configuration file). \
-By beginning the external command by a colon or a semicolon (':', ';') you \
-tell %s not to parse the input string, but instead letting this task to the \
-system shell, say Bash. However, bear in mind that %s is not intended to be \
-used as a shell, but as the file manager it is.\n"), PROGRAM_NAME, 
-	PROGRAM_NAME, PROGRAM_NAME);
+If you need some shell function like pipes or stream redirection, run the \
+command preceded by a colon or a semicolon (':', ';') so that it \
+will be executed via the system shell (/bin/sh -c). Bear in mind, however, \
+that %s is not intended to be used as a shell, but as the file manager it \
+is.\n"), PROGRAM_NAME, PROGRAM_NAME);
 	printf(_("\nBesides the default TAB completion for paths, you can also \
 expand ELN's using the TAB key. Example: 'o 12', press TAB, and it becomes \
 'o filename ', or, if 12 refers to a directory, 'o dir/'.\n"));
