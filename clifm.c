@@ -335,6 +335,8 @@ of course you can grep it to find, say, linux' macros, as here. */
  ** Destructive testing: Try running wrong commands, MAKE IT FAIL! Otherwise, 
 	it will never leave the beta state.
 
+ * (DONE) Replace single and double quotes for completion and use instead
+	bash-style quoting via escape char: Not "'file name'", but "file\ name".
  * (DONE) Handle filenames with spaces and special chars in TAB expansion, 
 	both for ELN's and filenames.
  * (DONE) The "clean" option (taken by history, log, trash, and msg commands) 
@@ -704,30 +706,47 @@ of course you can grep it to find, say, linux' macros, as here. */
  ** 1 - Piping doesn't work as it should. Try this command: 
     'pacman -Sii systemd systemd-libs | grep "Required By"'. Now run the same 
     command outside CliFM. The output in CliFM is reduced to only the first 
-    line.
+    line of each "Required by" line.
  ** 2 - When jumping from one directory to another with the 'b/f !ELN' command,
 	for example, from 1 to 4 in the directories list, 'back' does not go back
 	to 1, but to 3. This is not really a bug, but it feels ugly and 
 	unintuitive.
  ** 3 - If the user's home cannot be found, CliFM will attempt to create its
-	config files in PWD/clifm_emergency. Now, if CWD is not writable, no option
-	will be set, and CliFM will become very usntable. In this case I should 
+	config files in CWD/clifm_emergency. Now, if CWD is not writable, no option
+	will be set, and CliFM will become very unstable. In this case I should 
 	prevent the program from writing or reading anything and simply set the
-	defaults.
- **	4 - Whenever I use the system shell to run commands (execle()), this shell
-	tries to deescape and dequote what was already deescaped and dequoted by
-	CliFM itself. So, for instance, if the original	string was "'user\\123'", 
-	CliFM sends it to the system shell already dequoted and deescaped: 
-	"user\123". It works perfect for execve(), because it does not call any 
-	shell, but just executes the command with the given parameters literally. 
-	However, execle() calls the system shell, which tries to dequote and 
-	deescape the string again, resuting in "user123", which is a non-existent 
-	filename. If I want, and I want, to keep some features like pipes and 
-	stream redirection, I need the system shell. But if I use the system 
-	shell, the quoting and escaping thing gets broken. The ideal solution
-	would be to be able to USE THE SYSTEM SHELL BUT DISABLING THE DEQUOTING 
-	AND DEESCAPING FUNCTIONS.
+	defaults, or just exit the program completely and print the corresponding
+	error message.
 
+ * 	(SOLVED) I cannot create this file: "abc{1,2,3}". When I type 
+	"touch abc\{1\,2\,3\}", everything is dequoted by split_str(), 
+	interpreted as a valid braces expression by parse_input_str(), and then
+	send to the touch command, who creates three files: abc1, abc2, and abc3.
+	The problem is step two: parse_input_str() should not take the string
+	as a braces expression. The same happens with, for example: "touch
+	\*". NOTE: I wrote a very ugly workaround that partially works (check
+	the dequoted global variable). FIX!!! SOLUTION: Got rid of the distinction
+	between internal and external commands: parse_input_str() is not
+	dequoting strings anymore; it's always done now by the system shell,
+	except for functions like sel and prop where the shell is not involved:
+	I dequote strings here, but locally, in the function itself. 
+ * (SOLVED) Whenever I use the system shell to run commands (execle()), this 
+	shell tries to deescape and dequote what was already deescaped and 
+	dequoted by CliFM itself. So, for instance, if the original	string was 
+	"'user\\123'", CliFM sends it to the system shell already dequoted and 
+	deescaped: "user\123". It works perfect for execve(), because it does not 
+	call any shell, but just executes the command with the given parameters 
+	literally. However, launch_execle() calls the system shell, which tries 
+	to dequote and deescape the string again, resuting in "user123", which is 
+	a non-existent filename. If I want, and I want, to keep some features 
+	like pipes and stream redirection, I need the system shell. But if I use 
+	the system shell, the quoting and escaping thing gets broken. 
+	SOLUTION: Keep launch_execle() for all external commands; add a check
+	for external commands in parse_input_str(), and, if the command is 
+	external, tell split_str() not to dequote anything (let the system shell
+	do it). In case of ELN's and sel keyword, in which case filenames won't
+	be quoted, always check if the command to be run is external, and in that
+	case, return the quoted filename.
  ** (SOLVED) When launch_execve() tries to run a non-existent command, it 
 	displays the error message fine, but after that I have to exit CliFM 
 	one more time per failed command. SOLUTION: After running exec() via 
@@ -1202,10 +1221,10 @@ program_invocation_short_name variable and asprintf() */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\033c")
 /* #define CLEAR write(STDOUT_FILENO, "\033c", 3) */
-#define VERSION "0.14.1_test"
+#define VERSION "0.14.2_test"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "May 28, 2020"
+#define DATE "May 31, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -1431,42 +1450,41 @@ xatoi(const char *str)
 	return ret;
 }
 
+/*
 char *
 quote_str(char *str)
-/* Quote a given string if it contains spaces. Use double quotes if no double
- * quote is found in STR, or single quotes otherwise. Returns the quoted
- * string or NULL if str is NULL, empty, contains no spaces, or in case of 
- * memory allocation error (calloc) */
+// Quote a given string if it contains spaces. Use double quotes if no double
+// quote is found in STR, or single quotes otherwise. Returns the quoted
+// string or NULL if str is NULL, empty, contains no spaces, or in case of 
+// memory allocation error (calloc)
 {
 	if (!str || str[0] == '\0') 
 		return NULL;
 
-	char *str_b=str, is_space=0, double_quote=0;
-	/* Check for spaces and double quotes */
+	char *str_b=str, single_quote=0;
+	// Check for single quotes
 	while (*str_b) {
-		if (*str_b == 0x20) /* space */
-			is_space=1;
-		else if (*str_b == 0x22) /* double quote */
-			double_quote=1;
+		if (*str_b == '\'')
+			single_quote=1;
+//		if (*str_b == '\\')
+//			return NULL;
 		str_b++;
 	}
 	str_b=NULL;
 	
-	if (!is_space)
-		return NULL;
-
 	size_t str_len=strlen(str);
 	char *buf=NULL, *p=calloc(str_len+3, sizeof(char *));
 	if (!p)
 		return NULL;
 	buf=p;
 	p=NULL;
-	if (double_quote)
-		sprintf(buf, "'%s'", str);
-	else
+
+	if (single_quote)
 		sprintf(buf, "\"%s\"", str);
+	else
+		sprintf(buf, "'%s'", str);
 	return buf;
-}
+} */
 
 pid_t
 get_own_pid(void)
@@ -1936,10 +1954,9 @@ void xdg_open_check(void);
 void splash(void);
 char **my_rl_completion(const char *text, int start, int end);
 char *my_rl_quote(char *text, int m_t, char *qp);
-
-char *my_rl_dequote(char *text, int m_t);
+char *dequote_str(char *text, int m_t);
 int quote_detector(char *line, int index);
-
+int is_quote_char(char c);
 char *filenames_generator(const char *text, int state);
 char *bin_cmd_generator(const char *text, int state);
 void get_path_programs(void);
@@ -2019,10 +2036,8 @@ size_t u8_xstrlen(const char *str);
 void print_license(void);
 void free_sotware(void);
 char **split_str(char *str);
-int is_quote_char(char c);
-
-//char *get_input_cmd(char *str);
-//int cmd_need_esc(const char *cmd);
+int is_internal(const char *cmd);
+char *escape_str(char *str);
 
 /* Some notes on memory:
 * If a variable is declared OUTSIDE of a function, it is typically considered 
@@ -2177,11 +2192,11 @@ struct usrvar_t {
  * automatically initialized by the compiler */
 
 char splash_screen=-1, welcome_message=-1, ext_cmd_ok=-1, show_hidden=-1, 
-	clear_screen=-1, shell_terminal=0, pager=-1, no_log=0, 
+	clear_screen=-1, shell_terminal=0, pager=-1, no_log=0, internal_cmd=0, 
 	shell_is_interactive=0, list_folders_first=-1, case_sensitive=-1, 
 	cd_lists_on_the_fly=-1, recur_perm_error_flag=0, is_sel=0, sel_is_last=0, 
 	sel_no_sel=0, print_msg=0, long_view=-1, kbind_busy=0, error_msg=0, 
-	warning_msg=0, notice_msg=0, unicode=-1, cont_bt=0;
+	warning_msg=0, notice_msg=0, unicode=-1, cont_bt=0, dequoted=0;
 /* A short int accepts values from -32,768 to 32,767, and since all these 
  * variables will take -1, 0, and 1 as values, a short int is more than 
  * enough. Now, since short takes 2 bytes of memory, using int for these 
@@ -2420,7 +2435,7 @@ directory. Using '%s' as an emergency home\n"), PROGRAM_NAME, __func__,
 	rl_completer_word_break_characters=" ";
 	/* Whenever readline finds any of these chars, it will call the
 	 * quoting function */
-	rl_filename_quote_characters=" \t\n\"\\'`@$><=;|&{[()]}?!*";
+	rl_filename_quote_characters=" \t\n\"\\'`@$><=,;|&{[()]}?!*";
 	/* According to readline documentation, the following string is
 	 * the default and the one used by Bash: " \t\n\"\\'`@$><=;|&{(" */
 	
@@ -2444,7 +2459,7 @@ directory. Using '%s' as an emergency home\n"), PROGRAM_NAME, __func__,
 	 * it won't conflict with system filenames: you want "user file",
 	 * because "user\ file" does not exist, and, in this latter case,
 	 * readline won't find any matches */
-	rl_filename_dequoting_function=my_rl_dequote;
+	rl_filename_dequoting_function=dequote_str;
 
 	if (splash_screen) {
 		splash();
@@ -2557,6 +2572,35 @@ working directory\n"), PROGRAM_NAME);
 
 /* ###FUNCTIONS DEFINITIONS### */
 
+char *
+escape_str(char *str)
+{
+	if (!str)
+		return NULL;
+	size_t len=0;
+	char *buf=NULL;
+	buf=xcalloc(buf, strlen(str)*2, sizeof(char *));
+	while(*str) {
+		if (is_quote_char(*str))
+			buf[len++]='\\';
+		buf[len++]=*(str++);
+	}
+	if (buf)
+		return(buf);
+	return NULL;
+}
+
+int
+is_internal(const char *cmd)
+{
+	char *int_cmds[]={ "p", "pr", "prop", "t", "tr", "trash", "s", 
+					   "sel", NULL };
+	for (size_t i=0;int_cmds[i];i++)
+		if (strcmp(cmd, int_cmds[i]) == 0)
+			return 1;
+	return 0;
+}
+
 int
 quote_detector(char *line, int index)
 {
@@ -2565,47 +2609,7 @@ quote_detector(char *line, int index)
 		return 1;
 
 	return 0;
-/*	return (
-		index > 0 &&
-        line[index-1] == '\\' &&
-        !quote_detector(line, index-1)
-	); */
 }
-
-/*
-int
-cmd_need_esc(const char *cmd)
-{
-	char *int_cmds[]={ "cd", "o", "open", "p", "pr", "prop", "t", "tr", 
-					"trash", "s", "sel", "m", "mv", "c", "cp", "paste",
-					"r", "rm", "l", "ln", "md", "mkdir", NULL };
-	for (size_t i=0;int_cmds[i];i++)
-		if (strcmp(cmd, int_cmds[i]) == 0)
-			return 1;
-	return 0;
-}
-
-char
-*get_input_cmd(char *str)
-{
-	if (!str)
-		return NULL;
-	char *p=str;
-	char *buf=NULL;
-	size_t len=0;
-	while (*p != 0x20 && *p != 0x00 && *p != '\t' && *p != '\n') {
-		len++;
-		p++;
-	}
-	if (len) {
-		buf=calloc(len, sizeof(char *));
-		strncpy(buf, str, len);
-		return(buf);
-	}
-	else
-		return NULL;
-}
-*/
 
 int
 is_quote_char(char c)
@@ -2632,88 +2636,72 @@ split_str(char *str)
 	if (!str)
 		return NULL;
 
-	size_t buf_len=0, words=0, str_index=0;
+	size_t buf_len=0, words=0, str_len=0;
 	char *buf=NULL;
 	buf=xcalloc(buf, 1, sizeof(char *));;
+	char quote=0;
 	char **substr=NULL;
-	char is_null=0;
 	while (*str) {
 		switch (*str) {
 			case '\'':
-				/* If ' is the first byte of str, I should not check for
-				 * the previous byte. That's why I need an variable to track
-				 * the current index number of str */
-				if (str_index == 0 || (str_index > 0 && *(str-1) != '\\'))
-					str++;
-				while (*str != '\'') {
-					if (!*str) {
-						is_null=1;
-						break;
+			case '"':
+				if (str_len > 0 && *(str-1) == '\\') {
+					buf=xrealloc(buf, (buf_len+1)*sizeof(char *));
+					buf[buf_len++]=*str;
+					break;					
+				}
+				quote=*str;
+				str++;
+				while (*str && *str != quote) {
+					if (is_quote_char(*str)) {
+						buf=xrealloc(buf, (buf_len+1)*sizeof(char *));
+						buf[buf_len++]='\\';
 					}
 					buf=xrealloc(buf, (buf_len+1)*sizeof(char *));
 					buf[buf_len++]=*(str++);
 				}
-			break;
-			case '"':
-				if (str_index == 0 || (str_index > 0 && *(str-1) != '\\'))
-					str++;
-				while (*str != '"') {
-					if (!*str) {
-						is_null=1;
-						break;
-					}
-					buf=xrealloc(buf, (buf_len+1)*sizeof(char *));
-					buf[buf_len++]=*(str++);
+				if (!*str) {
+					fprintf(stderr, _("%s: Missing '%c'\n"), PROGRAM_NAME, 
+							quote);
+					/* Free the current buffer and whatever was already
+					 * allocated */
+					free(buf);
+					for (size_t i=0;i<words;i++)
+						free(substr[i]);
+					free(substr);
+					return NULL;
 				}
 			break;
 			case '\t': /* TAB, new line char, and space are taken as word
 			breaking characters */
 			case '\n':
 			case 0x20:
+				if (*(str-1) && *(str-1) == '\\') {
+					buf=xrealloc(buf, (buf_len+1)*sizeof(char *));
+					buf[buf_len++]=*str;
+				}
+				else {
 					/* Add a terminating null byte */
 					buf[buf_len]=0x00;
 					if (buf_len > 0) {
 						substr=xrealloc(substr, (words+1)*sizeof(char **));
 						substr[words]=xcalloc(substr[words], buf_len, 
-											  sizeof(char *));
+											  sizeof(char **));
 						strcpy(substr[words], buf);
 						words++;
 					}
 					/* Clear te buffer to get a new string */
 					memset(buf, 0x00, buf_len);
 					buf_len=0;
-			break;
-			case '\\':
-				/* If preceded by '\', space is not a word breaking char,
-				 * single and double quotes are not quoting, and '\' is not 
-				 * escaping anything. Everything else will be deescaped.
-				 * This last statement is the whole point: I think I should
-				 * let the programs themselves to unescape whatever they
-				 * need or want to unescape. Example: if there is a file
-				 * named "abc\123", you need to escape \, so that you call it
-				 * "abc\\123". But since I unescape it HERE, resulting thus
-				 * in "abc\123", the 'mv' command, for example, will take
-				 * \ as an escaping char, which is not, and then it will see
-				 * this: "abc123" instead of "abc\123" */
-//				if (int_cmd) {
-					buf=xrealloc(buf, (buf_len+1)*sizeof(char *));
-					if (is_quote_char(*(str+1)))
-						buf[buf_len++]=*(++str);
-					else
-						buf[buf_len++]=*str;
-//				}
+				}
 			break;
 			default:
 				buf=xrealloc(buf, (buf_len+1)*sizeof(char *));
 				buf[buf_len++]=*str;
 			break;
 		}
-		if (!is_null) {
-			str++;
-			str_index++; 
-		}
-		else
-			break;
+		str++;
+		str_len++;
 	}
 	
 	/* The while loop stops when the null byte is reached, so that the last
@@ -2796,12 +2784,15 @@ open_function(char **cmd)
 		puts(_("Usage: open ELN/filename [application] [&]"));
 		return;
 	}
+
+	char *deq_path=dequote_str(cmd[1], 0);
 	
 	/* Check file existence */
 	struct stat file_attrib;
-	if (lstat(cmd[1], &file_attrib) == -1) {
-		fprintf(stderr, "%s: open: '%s': %s\n", PROGRAM_NAME, cmd[1], 
+	if (lstat(deq_path, &file_attrib) == -1) {
+		fprintf(stderr, "%s: open: '%s': %s\n", PROGRAM_NAME, deq_path, 
 				strerror(errno));
+		free(deq_path);
 		return;
 	}
 	
@@ -2834,22 +2825,25 @@ open_function(char **cmd)
 		break;
 		/* If a symlink, find out whether it is a symlink to dir or to file */
 		case S_IFLNK:
-			linkname=realpath(cmd[1], NULL);
+			linkname=realpath(deq_path, NULL);
 			if (!linkname) {
 				if (errno == ENOENT)
 					fprintf(stderr, _("%s: open: '%s': Broken link\n"), 
-							PROGRAM_NAME, cmd[1]);
+							PROGRAM_NAME, deq_path);
 				else
 					fprintf(stderr, "%s: open: '%s': %s\n", PROGRAM_NAME,
-							cmd[1], strerror(errno));
+							deq_path, strerror(errno));
+
+				free(deq_path);
 				return;
 			}
 			if (stat(linkname, &file_attrib) == -1) {
 				/* Never reached: if linked file does not exist, realpath()
 				 * returns NULL */
 				fprintf(stderr, "%s: open: '%s -> %s': %s\n", PROGRAM_NAME, 
-						cmd[1], linkname, strerror(errno));
+						deq_path, linkname, strerror(errno));
 				free(linkname);
+				free(deq_path);
 				return;
 			}
 			is_link=1;
@@ -2897,11 +2891,11 @@ open_function(char **cmd)
 	if (no_open_file) {
 		if (is_link)
 			fprintf(stderr, _("%s: '%s -> %s' (%s): \
-Cannot open file. Try 'application filename'.\n"), PROGRAM_NAME, cmd[1], 
+Cannot open file. Try 'application filename'.\n"), PROGRAM_NAME, deq_path, 
 					linkname, filetype);
 		else
 			fprintf(stderr, _("%s: '%s' (%s): Cannot open file. Try \
-'application filename'.\n"), PROGRAM_NAME, cmd[1], filetype);
+'application filename'.\n"), PROGRAM_NAME, deq_path, filetype);
 	}
 	if (linkname)
 		free(linkname);
@@ -2916,14 +2910,15 @@ Cannot open file. Try 'application filename'.\n"), PROGRAM_NAME, cmd[1],
 				fprintf(stderr, _("%s: xdg-open not found. Specify an \
 application to open the file\nUsage: open ELN/filename [application] [&]\n"), 
 						PROGRAM_NAME);
-				return;				
+				free(deq_path);
+				return;
 			}
 			/* If xdg-open exists */
 			pid_t pid_open=fork();
 			if (pid_open == 0) {
 				set_signals_to_default();
 				execle(xdg_open_path, "xdg-open", 
-					   (is_link) ? file_tmp : cmd[1], NULL, __environ);
+					   (is_link) ? file_tmp : deq_path, NULL, __environ);
 			}
 			else {
 				if (cmd[2] && strcmp(cmd[2], "&") == 0)
@@ -2941,7 +2936,7 @@ application to open the file\nUsage: open ELN/filename [application] [&]\n"),
 				if (pid_open == 0) {
 					set_signals_to_default();
 					execle(cmd_path, cmd[2], 
-						   (is_link) ? file_tmp : cmd[1], NULL, __environ);
+						   (is_link) ? file_tmp : deq_path, NULL, __environ);
 				}
 				else {
 					/* If last argument is "&", run in background */
@@ -2955,35 +2950,42 @@ application to open the file\nUsage: open ELN/filename [application] [&]\n"),
 			else { /* If application not found */
 				fprintf(stderr, _("%s: open: '%s': Command not found\n"), 
 						PROGRAM_NAME, cmd[2]);
+				free(deq_path);
 				return;
 			}
 		}
 	}
+	free(deq_path);
 }
 
 void
 cd_function(char *new_path)
 {
 	int ret=-1;
-	char buf[PATH_MAX]=""; /* Temporary store new_path */
+
+	char *deq_path=dequote_str(new_path, 0);
+
+	char buf[PATH_MAX]=""; /* Temporarily store new_path */
 	/* If "cd" */
-	if (!new_path || new_path[0] == '\0') {
+	if (!deq_path || deq_path[0] == '\0') {
 		ret=chdir(user_home);
 		if (ret == 0)
 			strncpy(buf, user_home, PATH_MAX);
 	}
 	else {
 		/* If "cd --help" */
-		if (strcmp(new_path, "--help") == 0) {
+		if (strcmp(deq_path, "--help") == 0) {
 			puts(_("Usage: cd [ELN/directory]"));
+			free(deq_path);
 			return;
 		}
 		/* If "cd ." or "cd .." or "cd ../..", etc */
-		if (strcmp(new_path, ".") == 0 || strncmp(new_path, "..", 2) == 0) {
-			char *real_path=realpath(new_path, NULL);
+		if (strcmp(deq_path, ".") == 0 || strncmp(deq_path, "..", 2) == 0) {
+			char *real_path=realpath(deq_path, NULL);
 			if (!real_path) {
-				fprintf(stderr, "%s: cd: '%s': %s\n", PROGRAM_NAME, new_path,
+				fprintf(stderr, "%s: cd: '%s': %s\n", PROGRAM_NAME, deq_path,
 						strerror(errno));
+				free(deq_path);
 				return;
 			}
 			ret=chdir(real_path);
@@ -2992,10 +2994,10 @@ cd_function(char *new_path)
 			free(real_path);
 		}
 		/* If absolute path */
-		else if (new_path[0] == '/') {
-			ret=chdir(new_path);
+		else if (deq_path[0] == '/') {
+			ret=chdir(deq_path);
 			if (ret == 0)
-				strncpy(buf, new_path, PATH_MAX);
+				strncpy(buf, deq_path, PATH_MAX);
 		}
 		/* If relative path, add CWD to the beginning of new_path, except if 
 		 * CWD is root (/). Otherwise, the resulting path would be "//path" */
@@ -3003,7 +3005,7 @@ cd_function(char *new_path)
 			char tmp_path[PATH_MAX]="";
 			snprintf(tmp_path, PATH_MAX, "%s/%s", 
 					 (path[0] == '/' && path[1] == '\0') ? "" : path, 
-					 new_path);
+					 deq_path);
 			ret=chdir(tmp_path);
 			if (ret == 0)
 				strncpy(buf, tmp_path, PATH_MAX);
@@ -3022,8 +3024,9 @@ cd_function(char *new_path)
 		}
 	}
 	else /* If chdir() failed */
-		fprintf(stderr, "%s: cd: '%s': %s\n", PROGRAM_NAME, new_path, 
+		fprintf(stderr, "%s: cd: '%s': %s\n", PROGRAM_NAME, deq_path, 
 				strerror(errno));
+	free(deq_path);
 }
 
 void
@@ -4213,12 +4216,13 @@ trash_function(char **comm)
 		else {
 			/* Trash files passed as arguments */
 			for (size_t i=1;comm[i];i++) {
+				char *deq_file=dequote_str(comm[i], 0);
 				char tmp_comm[PATH_MAX]="";
-				if (comm[i][0] == '/') /* If absolute path */
-					strcpy(tmp_comm, comm[i]);
+				if (deq_file[0] == '/') /* If absolute path */
+					strcpy(tmp_comm, deq_file);
 				else { /* If relative path, add path to check against 
 					TRASH_DIR */
-					snprintf(tmp_comm, PATH_MAX, "%s/%s", path, comm[i]);
+					snprintf(tmp_comm, PATH_MAX, "%s/%s", path, deq_file);
 				}
 				/* Do not trash any of the parent directories of TRASH_DIR,
 				 * that is, /, /home, ~/, ~/.local, ~/.local/share */
@@ -4234,9 +4238,10 @@ trash_function(char **comm)
 files\n"));
 					continue;
 				}
-				trash_element(suffix, tm, comm[i]);
+				trash_element(suffix, tm, deq_file);
 				/* The trash_element() function will take care of printing
 				 * error messages, if any */
+				free(deq_file);
 			}
 		}
 	}
@@ -4994,7 +4999,7 @@ char
 }
 
 char *
-my_rl_dequote(char *text, int m_t)
+dequote_str(char *text, int m_t)
 /* This function simply deescapes whatever escaped chars it founds in text,
  * so that readline can compare it to system filenames when completing paths. 
  * Returns a string containing text without escape sequences */
@@ -5990,15 +5995,15 @@ parse_input_str(char *str)
  * This function is one of the keys of CliFM. It will perform a series of 
  * actions:
  * 1) Take the string stored by readline and get its substrings without spaces. 
- * 2) Handle single and double quotes, just as '\' for file names containing 
- * spaces: it stores the quoted file name in one single variable;
- * 3) In case of user defined variable (var=value), it will pass the whole 
+ * 2) In case of user defined variable (var=value), it will pass the whole 
  * string to exec_cmd(), which will take care of storing the variable;
- * 4) If the input string begins with ';' or ':' the whole string is send to 
- * exec_cmd(), where it will be executed by launch_execle();
- * 5) The following expansions are performed here: ELN's, wildcards, ranges of 
- * numbers (ELN's), braces, tilde, user defined variables, and 'sel'. These 
- * expansions are the most import part of this function.
+ * 3) If the input string begins with ';' or ':' the whole string is send to 
+ * exec_cmd(), where it will be directly executed by the system shell 
+ * (via launch_execle()) to prevent all of the expansions made here.
+ * 4) The following expansions (especific to CLiFM) are performed here: ELN's, 
+ * "sel" keyword, and ranges of numbers (ELN's). For CliFM internal commands, 
+ * braces, tilde, and wildarcards expansions are performed here as well.
+ * These expansions are the most import part of this function.
  */
 
 /* NOTE: Though filenames could consist of everything except of slash and null 
@@ -6016,7 +6021,8 @@ parse_input_str(char *str)
 	/* #### 1) CHECK FOR SPECIAL FUNCTIONS #### */
 	size_t i=0;
 	/* If user defined variable or if invoking a command via ';' or ':' send 
-	 * the whole string to exec_cmd() */
+	 * the whole string to exec_cmd(), in which case no expansion is made: 
+	 * the command is literally send to the system shell. */
 	char space_found=0;
 	for (i=0;str[i];i++) {
 		if (str[i] == '=' && i > 0 && str[i-1] != '\\') {
@@ -6047,11 +6053,12 @@ parse_input_str(char *str)
 		/* Since we don't run split_str() here, dequoting and deescaping
 		 * is performed directly by the system shell */
 	}
-	
+
 	/* #### 2) SPLIT INPUT STRING INTO SUBSTRINGS #### */
 	/* split_str() returns an array of strings without leading, terminating
-	 * or double spaces. It can handle escaped spaces and quotes */
+	 * and double spaces. */
 	char **substr=split_str(str);
+
 	/* NOTE: isspace() not only checks for space, but also for new line, 
 	 * carriage return, vertical and horizontal TAB. Be careful when replacing 
 	 * this function. */
@@ -6059,36 +6066,38 @@ parse_input_str(char *str)
 	if (!substr)
 		return NULL;
 
-	int int_array_max=10, glob_array[int_array_max], 
-		braces_array[int_array_max], range_array[int_array_max], 
-		glob_n=0, braces_n=0, ranges_ok=0;
+	/* #### 3) CLIFM EXPANSIONS #### 
+	 * Ranges, sel, ELN, and internal variables. 
+	 * These expansions are specific to CliFM. To be able to use them even
+	 * with external commands, they must be expanded here, before sending
+	 * the input string, in case the command is external, to the system
+	 * shell */
+	is_sel=0, sel_is_last=0, sel_no_sel=0;
 
-	/* #### 3) CHECK FOR WILDCARDS, BRACES, AND RANGES #### */
-	for (i=0;substr[i];i++) {
+	int int_array_max=10, range_array[int_array_max], ranges_ok=0;
+
+	for (i=0;i<=(size_t)args_n;i++) {
+		
 		size_t substr_len=strlen(substr[i]);
+		
+		/* Get ranges index */
 		for (size_t j=0;substr[i][j];j++) {
 			/* If a range is found, store its index */
 			if (j > 0 && j < substr_len && substr[i][j] == '-' && 
 			isdigit(substr[i][j-1]) && isdigit(substr[i][j+1]))
 				if (ranges_ok < int_array_max)
 					range_array[ranges_ok++]=i;
-
-			/* If a brace is found, store its index */
-			if (substr[i][j] == '{' && substr[i][j+1] 
-			&& substr[i][j+1] != '}')
-				if (braces_n < int_array_max)
-					braces_array[braces_n++]=i;
-
-			if (substr[i][j] == '*' || substr[i][j] == '?' 
-			|| (substr[i][j] == '[' && substr[i][j+1] != 0x20))
-			/* Strings containing these characters are taken as wildacard patterns 
-			 * and are expanded by the glob function. See man (7) glob */
-				if (glob_n < int_array_max)
-					glob_array[glob_n++]=i;
 		}
+	
+		/* Expand 'sel' only as an argument, not as command */
+		if (i > 0 && strcmp(substr[i], "sel") == 0)
+			is_sel=i;
 	}
 
-	/* ### 4) RANGES EXPANSION ### */
+	/* ### 3.a) RANGES EXPANSION ### 
+	 * Expand expressions like "1-3" to "1 2 3" if all the numbers in the
+	 * range correspond to an ELN */
+
 	if (ranges_ok) {
 		int old_ranges_n=0;
 		for (size_t r=0;r<ranges_ok;r++) {
@@ -6132,7 +6141,167 @@ parse_input_str(char *str)
 		}
 	}
 	
-	/* #### 5) GLOB EXPANSION #### */
+	/* ### 3.b) SEL EXPANSION ### */
+	if (is_sel) {
+		if (is_sel == args_n) sel_is_last=1;
+		if (sel_n) {
+			size_t j=0;
+			char **sel_array=NULL;
+			sel_array=xcalloc(sel_array, args_n+sel_n+2, sizeof(char **));
+			for (i=0;i<is_sel;i++) {
+				sel_array[j]=xcalloc(sel_array[j], strlen(substr[i]), 
+									 sizeof(char *));
+				strcpy(sel_array[j++], substr[i]);
+			}
+			for (i=0;i<sel_n;i++) {
+				sel_array[j]=xcalloc(sel_array[j], strlen(sel_elements[i]), 
+									 sizeof(char *));
+				strcpy(sel_array[j++], sel_elements[i]);
+			}
+			for (i=is_sel+1;i<=args_n;i++) {
+				sel_array[j]=xcalloc(sel_array[j], strlen(substr[i]), 
+									 sizeof(char *));
+				strcpy(sel_array[j++], substr[i]);
+			}
+			for (i=0;i<=args_n;i++)
+				free(substr[i]);
+			substr=xrealloc(substr, (args_n+sel_n+2)*sizeof(char **));
+			for (i=0;i<j;i++) {
+				/* Escape the filename */
+				char *esc_str=escape_str(sel_array[i]);
+				if (esc_str) {
+					substr[i]=xcalloc(substr[i], strlen(esc_str), 
+									  sizeof(char *));
+					strcpy(substr[i], esc_str);
+					free(esc_str);
+				}
+				else {
+					fprintf(stderr, _("%s: Error getting filename\n"), 
+							PROGRAM_NAME);
+					substr[i]=NULL;
+				}
+				free(sel_array[i]);
+			}
+			free(sel_array);
+			substr[i]=NULL;
+			args_n=j-1;
+		}
+		else {
+			/* 'sel' is an argument, but there are no selected files. 
+			exec_cmd() will check this flag, and will do nothing if true.
+			*/
+			fprintf(stderr, _("%s: There are no selected files\n"), 
+					PROGRAM_NAME);
+			sel_no_sel=1;
+		}
+	}
+
+	for (i=0;i<=(size_t)args_n;i++) {
+
+		/* ### 3.c) ELN EXPANSION ### */
+		/* i must be bigger than zero because the first string in comm_array, 
+		 * the command name, should NOT be expanded, but only arguments. 
+		 * Otherwise, if the expanded ELN happens to be a program name as 
+		 * well, this program will be executed, and this, for sure, is to be 
+		 * avoided */
+		if (i > 0 && is_number(substr[i])) {
+			int num=atoi(substr[i]);
+			/* Expand numbers only if there is a corresponding ELN */
+			if (num > 0 && num <= files) {
+				/* Replace the ELN by the corresponding escaped filename */
+				char *esc_str=escape_str(dirlist[num-1]->d_name);
+				if (esc_str) {
+					substr[i]=xrealloc(substr[i], 
+									   strlen(esc_str)*sizeof(char *));
+					strcpy(substr[i], esc_str);
+					free(esc_str);
+				}
+				else {
+					fprintf(stderr, _("%s: Error getting filename\n"), 
+							PROGRAM_NAME);
+					substr[i]=NULL;
+				}
+			}
+		}
+		
+		/* ### 3.d) USER DEFINED VARIABLES EXPANSION ### */
+		if (substr[i][0] == '$' && substr[i][1] != '(') {
+			char *var_name=straft(substr[i], '$');
+			if (var_name) {
+				for (unsigned j=0;(int)j<usrvar_n;j++) {
+					if (strcmp(var_name, usr_var[j].name) == 0) {
+						substr[i]=xrealloc(substr[i], 
+								(strlen(usr_var[j].value)+1)*sizeof(char *));
+						strcpy(substr[i], usr_var[j].value);
+					}
+				}
+				free(var_name);
+			}
+		}
+	}
+	
+	/* #### 4) NULL TERMINATE THE INPUT STRING ARRAY #### */
+	substr=xrealloc(substr, sizeof(char **)*(args_n+2));	
+	substr[args_n+1]=NULL;
+
+	/* If the command is internal, go on for more expansions; else, just
+	 * return the input string array */
+	if(!is_internal(substr[0]))
+		return substr;
+
+	/* ############## ONLY FOR PURELY INTERNAL COMMANDS ################## */
+
+	/* Some functions of CliFM are purely internal, that is, they are not
+	 * wrappers of a shell command and do not call the system shell at all.
+	 * For this reason, some expansions normally made by the system shell
+	 * must be made here (in the lobby [got it?]) in order to be able to 
+	 * understand these expansions at all. These functions are properties,
+	 * selection, and trash.
+	 *  */
+
+	int glob_array[int_array_max], braces_array[int_array_max], 
+		glob_n=0, braces_n=0;
+
+	for (i=0;substr[i];i++) {
+
+		/* 5) TILDE EXPANSION (replace "~/" by "/home/user") */
+		if (strncmp(substr[i], "~/", 2) == 0) {
+			/* tilde_expansion() is provided by the readline lib */
+			char *exp_path=tilde_expand(substr[i]);
+			if (exp_path) {
+				substr[i]=xrealloc(substr[i], 
+									   strlen(exp_path)*sizeof(char *));
+				strcpy(substr[i], exp_path);
+			}
+			free(exp_path);
+		}
+
+		for (size_t j=0;substr[i][j];j++) {
+
+			/* If a brace is found, store its index */
+			if (substr[i][j] == '{' && substr[i][j+1] != 0x00
+			&& substr[i][j+1] != '}' && substr[i][j-1] != 0x00
+			&& substr[i][j-1] != '\\') {
+				for (size_t k=j+1;substr[i][k] && substr[i][k]!='}';k++) {
+					if (substr[i][k] == ',' && substr[i][k-1] != '\\'
+					&& braces_n < int_array_max) {
+						braces_array[braces_n++]=i;
+						break;
+					}
+				}
+			}
+
+			/* Check for glob chars */
+			if (substr[i][j] == '*' || substr[i][j] == '?' 
+			|| (substr[i][j] == '[' && substr[i][j+1] != 0x20))
+			/* Strings containing these characters are taken as wildacard 
+			 * patterns and are expanded by the glob function. See man (7) glob */
+				if (glob_n < int_array_max)
+					glob_array[glob_n++]=i;
+		}
+	}
+
+	/* #### 6) GLOB EXPANSION #### */
 	if (glob_n) {
 	 /*	1) Expand glob
 		2) Create a new array, say comm_array_glob, large enough to store the 
@@ -6184,9 +6353,18 @@ parse_input_str(char *str)
 				substr=xrealloc(substr, 
 					(args_n+globbuf.gl_pathc+1)*sizeof(char **));
 				for (i=0;i<j;i++) {
-					substr[i]=xcalloc(substr[i], strlen(glob_cmd[i]), 
+					char *esc_str=escape_str(glob_cmd[i]);
+					if (esc_str) {
+						substr[i]=xcalloc(substr[i], strlen(esc_str),
 										  sizeof(char *));
-					strcpy(substr[i], glob_cmd[i]);
+						strcpy(substr[i], esc_str);
+						free(esc_str);
+					}
+					else {
+						fprintf(stderr, _("%s: Error getting filename\n"), 
+								PROGRAM_NAME);
+						substr[i]=NULL;
+					}
 					free(glob_cmd[i]);
 				}
 				args_n=j-1;
@@ -6197,7 +6375,7 @@ parse_input_str(char *str)
 		}
 	}
 	
-	/* #### 6) BRACES EXPANSION #### */
+	/* #### 7) BRACES EXPANSION #### */
 	if (braces_n) { /* If there is some braced parameter... */
 		/* We already know the indexes of braced strings (braces_array[]) */
 		int old_braces_arg=0;
@@ -6224,10 +6402,20 @@ parse_input_str(char *str)
 				}
 				/* Now, add the expanded braces to the same array */
 				for (size_t j=0;j<braced_args;j++) {
-					comm_array_braces[i]=xcalloc(comm_array_braces[i], 
-												 strlen(braces[j]), 
-												 sizeof(char *));
-					strcpy(comm_array_braces[i++], braces[j]);
+					/* Escape the filename and copy it */
+					char *esc_str=escape_str(braces[j]);
+					if (esc_str) {
+						comm_array_braces[i]=xcalloc(comm_array_braces[i],
+												strlen(esc_str),
+												sizeof(char *));
+						strcpy(comm_array_braces[i++], esc_str);
+						free(esc_str);
+					}
+					else {
+						fprintf(stderr, _("%s: Error getting filename\n"), 
+								PROGRAM_NAME);
+						comm_array_braces[i]=NULL;
+					}
 					free(braces[j]);
 				}
 				free(braces);
@@ -6260,108 +6448,10 @@ parse_input_str(char *str)
 		}
 	}
 
-	/* #### 7) NULL TERMINATE THE INPUT STRING ARRAY #### */
+	/* #### 8) NULL TERMINATE THE INPUT STRING ARRAY (again) #### */
 	substr=xrealloc(substr, sizeof(char **)*(args_n+2));	
 	substr[args_n+1]=NULL;
 
-	/* #### 7) FURTHER EXPANSIONS #### */
-	is_sel=0, sel_is_last=0, sel_no_sel=0;
-	for (i=0;i<=(size_t)args_n;i++) {
-		
-		/* Expand 'sel' only as an argument, not as command */
-		if (i > 0 && strcmp(substr[i], "sel") == 0)
-			is_sel=i;
-		
-		/* ELN EXPANSION */
-		/* i must be bigger than zero because the first string in comm_array, 
-		 * the command name, should NOT be expanded, but only arguments. 
-		 * Otherwise, if the expanded ELN happens to be a program name as 
-		 * well, this program will be executed, and this, for sure, is to be 
-		 * avoided */
-		if (i > 0 && is_number(substr[i])) {
-			int num=atoi(substr[i]);
-			/* Expand numbers only if there is a corresponding ELN */
-			if (num > 0 && num <= files) {
-				size_t file_len=strlen(dirlist[num-1]->d_name);
-				substr[i]=xrealloc(substr[i], 
-									   (file_len+1)*sizeof(char *));
-				memset(substr[i], 0x00, file_len+1);
-				strcpy(substr[i], dirlist[num-1]->d_name);
-			}
-		}
-		
-		/* TILDE EXPANSION (replace "~/" by "/home/user") */
-		if (strncmp(substr[i], "~/", 2) == 0) {
-			/* tilde_expansion() is provided by the readline lib */
-			char *exp_path=tilde_expand(substr[i]);
-			if (exp_path) {
-				substr[i]=xrealloc(substr[i], 
-									   strlen(exp_path)*sizeof(char *));
-				strcpy(substr[i], exp_path);
-			}
-			free(exp_path);
-		}
-		
-		/* USER DEFINED VARIABLES EXPANSION */
-		if (substr[i][0] == '$' && substr[i][1] != '(') {
-			char *var_name=straft(substr[i], '$');
-			if (var_name) {
-				for (unsigned j=0;(int)j<usrvar_n;j++) {
-					if (strcmp(var_name, usr_var[j].name) == 0) {
-						substr[i]=xrealloc(substr[i], 
-								(strlen(usr_var[j].value)+1)*sizeof(char *));
-						strcpy(substr[i], usr_var[j].value);
-					}
-				}
-				free(var_name);
-			}
-		}
-	}
-	
-	/* SEL EXPANSION */
-	if (is_sel) {
-		if (is_sel == args_n) sel_is_last=1;
-		if (sel_n) {
-			size_t j=0;
-			char **sel_array=NULL;
-			sel_array=xcalloc(sel_array, args_n+sel_n+2, sizeof(char **));
-			for (i=0;i<is_sel;i++) {
-				sel_array[j]=xcalloc(sel_array[j], strlen(substr[i]), 
-									 sizeof(char *));
-				strcpy(sel_array[j++], substr[i]);
-			}
-			for (i=0;i<sel_n;i++) {
-				sel_array[j]=xcalloc(sel_array[j], strlen(sel_elements[i]), 
-									 sizeof(char *));
-				strcpy(sel_array[j++], sel_elements[i]);
-			}
-			for (i=is_sel+1;i<=args_n;i++) {
-				sel_array[j]=xcalloc(sel_array[j], strlen(substr[i]), 
-									 sizeof(char *));
-				strcpy(sel_array[j++], substr[i]);
-			}
-			for (i=0;i<=args_n;i++)
-				free(substr[i]);
-			substr=xrealloc(substr, (args_n+sel_n+2)*sizeof(char **));
-			for (i=0;i<j;i++) {
-				substr[i]=xcalloc(substr[i], strlen(sel_array[i]), 
-									  sizeof(char *));
-				strcpy(substr[i], sel_array[i]);
-				free(sel_array[i]);
-			}
-			free(sel_array);
-			substr[i]=NULL;
-			args_n=j-1;
-		}
-		else {
-			/* 'sel' is an argument, but there are no selected files. 
-			exec_cmd() will check this flag, and will do nothing if true.
-			*/
-			fprintf(stderr, _("%s: There are no selected files\n"), 
-					PROGRAM_NAME);
-			sel_no_sel=1;
-		}
-	}
 	return substr;
 }
 
@@ -7644,7 +7734,7 @@ exec_cmd(char **comm)
 				}
 			}
 		}
-		
+
 		/* LOG EXTERNAL COMMANDS 
 		* 'no_log' will be true when running profile or prompt commands */
 		if (!no_log)
@@ -7682,21 +7772,19 @@ Run 'ext on' to enable them.\n"),
 		/*
 		 * By making precede the command by a colon or a semicolon, the user
 		 * can BYPASS CliFM parsing, expansions, and checks to be executed 
-		 * DIRECTLY by the system shell (via execle). For example: if the 
-		 * amount of files listed on the screen (ELN's) is larger or equal 
-		 * than 644 and the user tries to issue this command: "chmod 644 
-		 * filename", CLIFM will take 644 to be an ELN, and will thereby try 
-		 * to expand it into the corresponding filename, which is not what 
-		 * the user wants. To prevent this, simply run the command as 
-		 * follows: ";chmod 644 filename" */
+		 * DIRECTLY by the system shell (execle). For example: if the amount 
+		 * of files listed on the screen (ELN's) is larger or equal than 644 
+		 * and the user tries to issue this command: "chmod 644 filename", 
+		 * CLIFM will take 644 to be an ELN, and will thereby try to expand it 
+		 * into the corresponding filename, which is not what the user wants. 
+		 * To prevent this, simply run the command as follows: 
+		 * ";chmod 644 filename" */
 
-		char needs_shell=0;
 		if (comm[0][0] == ':' || comm[0][0] == ';') {
 			/* Remove the colon from the beginning of the first argument,
 			 * that is, move the pointer to the next (second) position */
 			char *comm_tmp=comm[0]+1;
-			needs_shell=1;
-			/* If string was just ":" or ";" */
+			/* If string == ":" or ";" */
 			if (!comm_tmp || comm_tmp[0] == '\0') {
 				fprintf(stderr, _("%s: '%c': Syntax error\n"), PROGRAM_NAME, 
 						comm[0][0]);
@@ -7706,45 +7794,24 @@ Run 'ext on' to enable them.\n"),
 				strcpy(comm[0], comm_tmp);
 		}
 		
-		/* RUN THE EXTERNAL COMMAND */
+		/* #### RUN THE EXTERNAL COMMAND #### */
 		
-		if (!needs_shell)
-			/* The command is just executed: no shell feature available */
-			launch_execve(comm);
-		
-		else { /* Execute the command via the systemd shell (/bin/sh) */
-			/* Store the cmd and each argument into a single array to be 
-			 * executed by execle() using the system shell */
-			char *ext_cmd=NULL;
-			size_t ext_cmd_len=strlen(comm[0]);
-			ext_cmd=xcalloc(ext_cmd, ext_cmd_len+1, sizeof(char *));
-			strcpy(ext_cmd, comm[0]);
-			if (args_n) { /* This will be false in case of ";cmd" or ":cmd" */
-				for (size_t i=1;i<=(size_t)args_n;i++) {
-					/* If some argument contains spaces, quote the whole argument.
-					* In this way, the system shell will be able to run the command 
-					* correctly. This is just a workaround, but it works most of 
-					* the times */
-					char *comm_tmp=quote_str(comm[i]);
-					if (comm_tmp) {
-						ext_cmd_len+=strlen(comm_tmp)+1;
-						ext_cmd=xrealloc(ext_cmd, (ext_cmd_len+1)*sizeof(char *));
-						strcat(ext_cmd, " ");
-						strcat(ext_cmd, comm_tmp);
-						free(comm_tmp);
-					}
-					else {
-						ext_cmd_len+=strlen(comm[i])+1;
-						ext_cmd=xrealloc(ext_cmd, (ext_cmd_len+1)*sizeof(char *));
-						strcat(ext_cmd, " ");
-						strcat(ext_cmd, comm[i]);
-					}
-				}
+		/* Store the command and each argument into a single array to be 
+		 * executed by execle() using the system shell (/bin/sh -c) */
+		char *ext_cmd=NULL;
+		size_t ext_cmd_len=strlen(comm[0]);
+		ext_cmd=xcalloc(ext_cmd, ext_cmd_len+1, sizeof(char *));
+		strcpy(ext_cmd, comm[0]);
+		if (args_n) { /* This will be false in case of ";cmd" or ":cmd" */
+			for (size_t i=1;i<=(size_t)args_n;i++) {
+				ext_cmd_len+=strlen(comm[i])+1;
+				ext_cmd=xrealloc(ext_cmd, (ext_cmd_len+1)*sizeof(char *));
+				strcat(ext_cmd, " ");
+				strcat(ext_cmd, comm[i]);
 			}
-			launch_execle(ext_cmd);
-			free(ext_cmd);
-//			needs_shell=0;
 		}
+		launch_execle(ext_cmd);
+		free(ext_cmd);
 	}
 	return;
 }
@@ -8040,44 +8107,56 @@ sel_function(char **comm)
 	int i=0, j=0, exists=0;
 
 	for (i=1;i<=args_n;i++) {
-		if (strcmp(comm[i], ".") == 0 || strcmp(comm[i], "..") == 0)
+		char *deq_file=dequote_str(comm[i], 0);
+		size_t file_len=strlen(deq_file);
+		/* Remove final slash from directories. No need to check if file is
+		 * a directory, since in Linux only directories can contain a
+		 * slash in its name */
+		if (deq_file[file_len-1] == '/')
+			deq_file[file_len-1]=0x00;
+		if (strcmp(deq_file, ".") == 0 || strcmp(deq_file, "..") == 0) {
+			free(deq_file);
 			continue;
+		}
 		/* If a filename in the current directory... */
 		int sel_is_filename=0, sel_is_relative_path=0;
 		for (j=0;j<files;j++) {
-			if (strcmp(dirlist[j]->d_name, comm[i]) == 0) {
+			if (strcmp(dirlist[j]->d_name, deq_file) == 0) {
 				sel_is_filename=1;
 				break;
 			}
 		}
 		if (!sel_is_filename) {
 			/* If a path (contains a slash)... */
-			if (strcntchr(comm[i], '/') != -1) {
-				if (comm[i][0] != '/') /* If relative path */
+			if (strcntchr(deq_file, '/') != -1) {
+				if (deq_file[0] != '/') /* If relative path */
 					sel_is_relative_path=1;
 				struct stat file_attrib;
-				if (stat(comm[i], &file_attrib) != 0) {
+				if (stat(deq_file, &file_attrib) != 0) {
 					fprintf(stderr, "%s: %s: '%s': %s\n", PROGRAM_NAME, 
-							comm[0], comm[i], strerror(errno));
+							comm[0], deq_file, strerror(errno));
+					free(deq_file);
 					continue;
 				}
 			}
 			else { /* If neither a filename nor a valid path... */
 				fprintf(stderr, _("%s: %s: '%s': No such file or directory\n"), 
-						PROGRAM_NAME, comm[0], comm[i]);
+						PROGRAM_NAME, comm[0], deq_file);
+				free(deq_file);
 				continue;
 			}
 		}
 		if (sel_is_filename || sel_is_relative_path) { 
 			/* Add path to filename or relative path */
-			sel_tmp=xcalloc(sel_tmp, strlen(path)+strlen(comm[i])+2, 
+			sel_tmp=xcalloc(sel_tmp, strlen(path)+strlen(deq_file)+2, 
 				sizeof(char *));
-			sprintf(sel_tmp, "%s/%s", path, comm[i]);
+			sprintf(sel_tmp, "%s/%s", path, deq_file);
 		}
 		else { /* If absolute path... */
-			sel_tmp=xcalloc(sel_tmp, strlen(comm[i])+1, sizeof(char *));		
-			strcpy(sel_tmp, comm[i]);
+			sel_tmp=xcalloc(sel_tmp, strlen(deq_file)+1, sizeof(char *));		
+			strcpy(sel_tmp, deq_file);
 		}
+		free(deq_file);
 		/* Check whether the selected element is already in the selection 
 		 * box */
 		for (j=0;j<sel_n;j++) {
@@ -8326,7 +8405,19 @@ run_and_refresh(char **comm)
 		return;
 	log_function(comm);
 
-	int ret=launch_execve(comm);
+	size_t i=0, total_len=0;
+	for (i=0;i<=args_n;i++)
+		total_len+=strlen(comm[i]);
+		
+	char *tmp_cmd=NULL;
+	tmp_cmd=xcalloc(tmp_cmd, total_len+(i+1)+1, sizeof(char *));
+	for (i=0;i<=args_n;i++) {
+		strcat(tmp_cmd, comm[i]);
+		strcat(tmp_cmd, " ");
+	}
+	
+	int ret=launch_execle(tmp_cmd);
+	free(tmp_cmd);
 	if (ret == 0) {
 		/* If 'rm sel' and command is successful, deselect everything */
 		if (is_sel && strcmp(comm[0], "rm") == 0) {
@@ -8468,23 +8559,35 @@ copy_function(char **comm)
 
 	/* #####If SEL###### */
 	if (is_sel) {
-		char **cmd=NULL;
-		if (sel_is_last) { /* IF "cmd sel", add "." to copy files into CWD */
-			cmd=xcalloc(cmd, args_n+3, sizeof(char **));
-			for (size_t i=0;i<=args_n;i++) {
-				cmd[i]=xcalloc(cmd[i], strlen(comm[i]), sizeof(char *));
-				strcpy(cmd[i], comm[i]);
+//		char **cmd=NULL;
+		char *tmp_cmd=NULL;
+//		if (sel_is_last) { /* IF "cmd sel", add "." to copy files into CWD */
+//			cmd=xcalloc(cmd, args_n+3, sizeof(char **));
+			size_t total_len=0, i=0;
+			for (i=0;i<=args_n;i++) {
+				total_len+=strlen(comm[i]);
+//				cmd[i]=xcalloc(cmd[i], strlen(comm[i]), sizeof(char *));
+//				strcpy(cmd[i], comm[i]);
 			}
-			cmd[args_n+1]=xcalloc(cmd[args_n+1], 2, sizeof(char *));
-			strcpy(cmd[args_n+1], ".");
-			cmd[args_n+2]=NULL;
-		}
-
+//			cmd[args_n+1]=xcalloc(cmd[args_n+1], 2, sizeof(char *));
+//			strcpy(cmd[args_n+1], ".");
+//			cmd[args_n+2]=NULL; 
+			tmp_cmd=xcalloc(tmp_cmd, total_len+(i+1)+2, sizeof(char *));
+			for (size_t i=0;i<=args_n;i++) {			
+				strcat(tmp_cmd, comm[i]);
+				strcat(tmp_cmd, " ");
+			}
+			if (sel_is_last)
+				strcat(tmp_cmd, ".");
+//		}
+		
 		int ret=0;
-		if (sel_is_last)
-			ret=launch_execve(cmd);
-		else
-			ret=launch_execve(comm);
+//		if (sel_is_last)
+			ret=launch_execle(tmp_cmd);
+		free(tmp_cmd);
+//		else
+//			ret=launch_execve(comm);
+		
 		if (ret == 0) {
 			/* If 'mv sel' and command is successful deselect everything,
 			 * since sel files are note there anymore */
@@ -8499,11 +8602,11 @@ copy_function(char **comm)
 				list_dir();
 			}
 		}
-		if (cmd) { /* Or if (sel_is_last) */
-			for (size_t i=0;cmd[i];i++)
-				free(cmd[i]);
-			free(cmd);
-		}		
+//		if (cmd) { /* Or if (sel_is_last) */
+//			for (size_t i=0;cmd[i];i++)
+//				free(cmd[i]);
+//			free(cmd);
+//		}		
 		return;
 	}
 	
@@ -9141,26 +9244,34 @@ properties_function(char **comm)
 	
 	/* If "pr file file..." */
 	for (size_t i=1;i<=args_n;i++) {
-		if (access(comm[i], F_OK) == 0)
-			get_properties(comm[i], 0, 0);
+		char *deq_file=dequote_str(comm[i], 0);
+		if (access(deq_file, F_OK) == 0)
+			get_properties(deq_file, 0, 0);
 		else {
 			struct stat file_attrib;
-			lstat(comm[1], &file_attrib);
+			if (lstat(deq_file, &file_attrib) == -1) {
+				fprintf(stderr, "%s: pr: %s: %s\n", PROGRAM_NAME, deq_file,
+						strerror(errno));
+				free(deq_file);
+				return;
+			}
 			if ((file_attrib.st_mode & S_IFMT) == S_IFLNK) {
 				char linkname[PATH_MAX]="";
 				ssize_t ret=readlink(comm[1], linkname, PATH_MAX);
 				if (ret)
 					fprintf(stderr, "%s: pr: '%s -> %s': %s\n", PROGRAM_NAME, 
-							comm[1], linkname, strerror(errno));
+							deq_file, linkname, strerror(errno));
 				else
 					fprintf(stderr, "%s: pr: '%s': %s\n", PROGRAM_NAME, 
-							comm[1], strerror(errno));
+							deq_file, strerror(errno));
 			}
 			else
-				fprintf(stderr, "%s: pr: %s: %s\n", PROGRAM_NAME, comm[i], 
+				fprintf(stderr, "%s: pr: %s: %s\n", PROGRAM_NAME, deq_file, 
 						strerror(errno));
+			free(deq_file);
 			continue;
 		}
+		free(deq_file);
 	}
 }
 
@@ -9326,7 +9437,7 @@ get_properties(char *filename, int _long, int max)
 							(!group) ? _("unknown") : group->gr_name, 
 							(size_type) ? size_type : "??", 
 							(mod_time[0] != '\0') ? mod_time : "??");
-	if (file_type != 'l')
+	if (file_type && file_type != 'l')
 		printf("%s%s%s%s\n", color, filename, NC, white_b);
 	else {
 		printf("%s%s%s%s -> %s\n", color, filename, NC, white_b,
@@ -9988,6 +10099,9 @@ trashed files allowing you to choose one or more of these files to be \
 undeleted, that is to say, restored to their original location. You can also \
 undelete all trashed files at once using the 'a' or 'all' option.\n"), white, 
 		   NC, white_b);
+	printf(_("\n%s;%s%scmd, %s:%s%scmd: Skip all %s expansions and send the \
+input string (cmd) as it is to the system shell.\n"), white, NC, white_b, 
+			white, NC, white_b, PROGRAM_NAME);
 	printf(_("\n%smp, mountpoints%s%s: List available mountpoints and change \
 the current working directory into the selected mountpoint.\n"), white, NC, 
 		   white_b);
@@ -9996,10 +10110,6 @@ copy the currently selected elements, if any, into the current working \
 directory. If you want to copy these elements into another directory, you \
 only need to tell 'paste' where to copy these files. Ex: paste sel \
 /path/to/directory\n"), white, NC, white_b);
-	printf(_("\n%s;, :%s%s[cmd]: Run an external command via the system \
-shell. Use this whenever you need some shell feature, like pipes, command \
-substitution or stream redirection. Ex: ;ls | grep file\n"), 
-			white, NC, white_b);
 	printf(_("\n%slog%s%s [clear]: With no arguments, it shows the log file. \
 If clear is passed as argument, it will delete all the logs.\n"), white, NC, 
 		   white_b);
@@ -10118,10 +10228,11 @@ you, so that you can go back and forth to any of them by just typing 'b' or \
 operate on your files. For example, instead of typing 'cd ..' to go back to \
 the parent directory, or 'sel *' to select all files in the current directory, \
 you can simply press Alt-u and Alt-a respectivelly.\
-\n  f) The quick search function makes it really easy to quickly find the \
-files you are looking for: just type '/search_string', that's all.\
+\n  f) The quick search function allows you to quickly find files \
+in your current working directory: just type '/search_string', that's all. \
+Wildcards are allowed.\
 \n  g) It is blazing fast and incredibly lightweigth. With a memory footprint \
-below 5Mb, it can run on really old hardware.\
+below 5MiB, it can run on really old hardware.\
 \n  h) It is so simple that it doesn't require an X session nor any \
 graphical environment at all, being able thus to perfectly run on the linux \
 built-in console and even on a headless machine via a SSH or a telnet \
@@ -10135,15 +10246,15 @@ see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity\n"),
 	printf(_("\n%s also offers the following features:\
 \n  1) Trash system\
 \n  2) History function\
-\n  3) TAB completion\
-\n  4) TAB ELN-expansion\
+\n  3) TAB completion for filenames\
+\n  4) TAB completion for ELN's\
 \n  5) Keyboard shortcuts\
 \n  6) Wildcards expansion\
 \n  7) Braces expansion\
-\n  8) ELN's auto-expansion\
-\n  9) 'sel' keyword auto-expansion\
-\n  10) Ranges auto-expansion\
-\n  11) Quoted strings\
+\n  8) ELN's expansion\
+\n  9) 'sel' keyword expansion\
+\n  10) Ranges expansion\
+\n  11) Bash-like quoted filenames\
 \n  12) Aliases\n"), PROGRAM_NAME);
 	printf(_("\nUsage: %s [-aAfFgGhiIlLoOsuUvx] [-p path]\n\
 \n -a, --no-hidden\t\t do not show hidden files\
@@ -10168,9 +10279,8 @@ default for non-english locales\
 \n -v, --version\t\t\t show version details and exit\
 \n -x, --ext-cmds\t\t\t allow the use of external commands\n"), PNL, 
 		PROGRAM_NAME);
-	printf(_("\nCommand line arguments take precedence over both the \
-configuration file and the default options, whereas the configuration file \
-takes precedence only over default options.\n"));
+	printf(_("\nArguments precedence order: 1) command line; 2) configuration \
+file; 3) default options.\n"));
 	printf(_("\n%sColor codes:%s%s\n\n"), white, NC, white_b);
 	color_codes();
 	printf(_("%sCommands:\n%s%sNote: ELN = Element List Number. Example: In the \
@@ -10182,12 +10292,10 @@ line \"12 openbox\", 12 is the ELN corresponding to the 'openbox' file.\n%s"),
 display non-ASCII characters and characters from the extended ASCII charset.\n"));
 	printf(_("\n%s is not limited to its own set of internal commands, like \
 open, sel, trash, etc., but it can run any external command as well, provided \
-external commands are allowed (use the -x option or the configuration file). \
-If you need some shell function like pipes or stream redirection, run the \
-command preceded by a colon or a semicolon (':', ';') so that it \
-will be executed via the system shell (/bin/sh -c). Bear in mind, however, \
-that %s is not intended to be used as a shell, but as the file manager it \
-is.\n"), PROGRAM_NAME, PROGRAM_NAME);
+external commands are allowed (use the -x option, 'ext on' while running the \
+program, or the configuration file). Bear in mind, however, that %s is not \
+intended to be used as a shell, but as the file manager it is.\n"), 
+		PROGRAM_NAME, PROGRAM_NAME);
 	printf(_("\nBesides the default TAB completion for paths, you can also \
 expand ELN's using the TAB key. Example: 'o 12', press TAB, and it becomes \
 'o filename ', or, if 12 refers to a directory, 'o dir/'.\n"));
@@ -10201,10 +10309,6 @@ a directory), respectivelly. If the destiny directory is ommited, selected \
 files are copied into the current working directory, that is to say, \
 'mv sel' amounts to 'mv sel .'. To trash or remove selected files, simply \
 run 'tr sel' or 'rm sel' respectivelly.\
-The same goes for wildcards and braces: 'chmod +x *', for example, \
-will set the excutable bit on all files in the current working directory, \
-while 'chmod +x file{1,2,3}' will do it for file1, file2, and file3 \
-respectivelly.\
 \n\nELN's and ELN ranges will be also automatically expanded, provided the \
 corresponding ELN's actually exist, that is to say, provided some filename is \
 listed on the screen under those numbers. For example: 'diff 1 118' will only \
@@ -10213,7 +10317,8 @@ expand '1', but not '118', if there is no ELN 118. In the same way, the range \
 the screen. If this feature somehow conflicts with the command you want to \
 run, say, 'chmod 644 ...', because the current amount of files is equal or \
 larger than 644 (in which case %s will expand that number), then you can \
-simply run the command as external: ';chmod 644...'\n\
+simply run the command as external or quote the conflicting number: \
+';chmod 644 ...' or 'chmod \\644 ...'\n\
 \nOf course, combinations of all these features is also possbile. \
 Example: 'cp sel file* 2 23-31 .' will copy all selected files, plus all \
 files whose name starts with \"file\", plus those files corresponding to the \
