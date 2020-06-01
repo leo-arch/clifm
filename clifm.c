@@ -1304,8 +1304,8 @@ static int flags;
 
 /* Replace some functions by my custom (faster, I think: NO!!) 
  * implementations. */
-#define strlen xstrlen /* All calls to strlen will be replaced by a call to 
-xstrlen */
+//#define strlen xstrlen /* All calls to strlen will be replaced by a call to 
+//xstrlen */
 #define strcpy xstrcpy
 #define strncpy xstrncpy 
 #define strcmp xstrcmp  
@@ -6154,9 +6154,19 @@ parse_input_str(char *str)
 				strcpy(sel_array[j++], substr[i]);
 			}
 			for (i=0;i<sel_n;i++) {
-				sel_array[j]=xcalloc(sel_array[j], strlen(sel_elements[i]), 
-									 sizeof(char *));
-				strcpy(sel_array[j++], sel_elements[i]);
+				/* Escape selected filenames and copy them into tmp array */
+				char *esc_str=escape_str(sel_elements[i]);
+				if (esc_str) {
+					sel_array[j]=xcalloc(sel_array[j], strlen(esc_str),
+										 sizeof(char *));
+					strcpy(sel_array[j++], esc_str);
+					free(esc_str);
+				}
+				else {
+					fprintf(stderr, _("%s: Error getting filename\n"), 
+							PROGRAM_NAME);
+					sel_array[j++]=NULL;
+				}
 			}
 			for (i=is_sel+1;i<=args_n;i++) {
 				sel_array[j]=xcalloc(sel_array[j], strlen(substr[i]), 
@@ -6167,19 +6177,9 @@ parse_input_str(char *str)
 				free(substr[i]);
 			substr=xrealloc(substr, (args_n+sel_n+2)*sizeof(char **));
 			for (i=0;i<j;i++) {
-				/* Escape the filename */
-				char *esc_str=escape_str(sel_array[i]);
-				if (esc_str) {
-					substr[i]=xcalloc(substr[i], strlen(esc_str), 
+				substr[i]=xcalloc(substr[i], strlen(sel_array[i]), 
 									  sizeof(char *));
-					strcpy(substr[i], esc_str);
-					free(esc_str);
-				}
-				else {
-					fprintf(stderr, _("%s: Error getting filename\n"), 
-							PROGRAM_NAME);
-					substr[i]=NULL;
-				}
+				strcpy(substr[i], sel_array[i]);
 				free(sel_array[i]);
 			}
 			free(sel_array);
@@ -6249,7 +6249,7 @@ parse_input_str(char *str)
 	if(!is_internal(substr[0]))
 		return substr;
 
-	/* ############## ONLY FOR PURELY INTERNAL COMMANDS ################## */
+	/* ############## ONLY FOR INTERNAL COMMANDS ################## */
 
 	/* Some functions of CliFM are purely internal, that is, they are not
 	 * wrappers of a shell command and do not call the system shell at all.
@@ -6264,6 +6264,16 @@ parse_input_str(char *str)
 
 	for (i=0;substr[i];i++) {
 
+		/* Do not perform any of the expansions below for selected elements: 
+		 * they are full path filenames that, as such, do not need any 
+		 * expansion */
+		if (is_sel) { /* is_sel is true only for the current input and if
+			there was some "sel" keyword in it */
+			/* Strings between is_sel and sel_n are selected filenames */
+			if (i >= is_sel && i <= sel_n)
+				continue;
+		}
+
 		/* 5) TILDE EXPANSION (replace "~/" by "/home/user") */
 		if (strncmp(substr[i], "~/", 2) == 0) {
 			/* tilde_expansion() is provided by the readline lib */
@@ -6277,7 +6287,7 @@ parse_input_str(char *str)
 		}
 
 		for (size_t j=0;substr[i][j];j++) {
-
+			
 			/* If a brace is found, store its index */
 			if (substr[i][j] == '{' && substr[i][j+1] != 0x00
 			&& substr[i][j+1] != '}' && substr[i][j-1] != 0x00
@@ -6295,7 +6305,8 @@ parse_input_str(char *str)
 			if (substr[i][j] == '*' || substr[i][j] == '?' 
 			|| (substr[i][j] == '[' && substr[i][j+1] != 0x20))
 			/* Strings containing these characters are taken as wildacard 
-			 * patterns and are expanded by the glob function. See man (7) glob */
+			 * patterns and are expanded by the glob function. See man (7) 
+			 * glob */
 				if (glob_n < int_array_max)
 					glob_array[glob_n++]=i;
 		}
@@ -6338,9 +6349,19 @@ parse_input_str(char *str)
 					strcpy(glob_cmd[j++], substr[i]);
 				}
 				for (i=0;i<globbuf.gl_pathc;i++) {
-					glob_cmd[j]=xcalloc(glob_cmd[j], 
-						strlen(globbuf.gl_pathv[i]), sizeof(char *));
-					strcpy(glob_cmd[j++], globbuf.gl_pathv[i]);
+					/* Escape the globbed filename and copy it*/
+					char *esc_str=escape_str(globbuf.gl_pathv[i]);
+					if (esc_str) {
+						glob_cmd[j]=xcalloc(glob_cmd[j], strlen(esc_str),
+										    sizeof(char *));
+						strcpy(glob_cmd[j++], esc_str);
+						free(esc_str);
+					}
+					else {
+						fprintf(stderr, _("%s: Error getting filename\n"), 
+								PROGRAM_NAME);
+						glob_cmd[j++]=NULL;
+					}
 				}
 				for (i=glob_array[g]+old_pathc+1;i<=args_n;i++) {
 					glob_cmd[j]=xcalloc(glob_cmd[j], strlen(substr[i]), 
@@ -6353,18 +6374,9 @@ parse_input_str(char *str)
 				substr=xrealloc(substr, 
 					(args_n+globbuf.gl_pathc+1)*sizeof(char **));
 				for (i=0;i<j;i++) {
-					char *esc_str=escape_str(glob_cmd[i]);
-					if (esc_str) {
-						substr[i]=xcalloc(substr[i], strlen(esc_str),
+					substr[i]=xcalloc(substr[i], strlen(glob_cmd[i]), 
 										  sizeof(char *));
-						strcpy(substr[i], esc_str);
-						free(esc_str);
-					}
-					else {
-						fprintf(stderr, _("%s: Error getting filename\n"), 
-								PROGRAM_NAME);
-						substr[i]=NULL;
-					}
+					strcpy(substr[i], glob_cmd[i]);
 					free(glob_cmd[i]);
 				}
 				args_n=j-1;
@@ -7966,7 +7978,8 @@ launch_execve(char **cmd)
 		#define _GNU_SOURCE /* Needed by execvpe() */
 	#endif
 	
-	if (cmd == NULL) return EXNULLERR;
+	if (!cmd)
+		return EXNULLERR;
 
 	/* Reenable SIGCHLD, in case it was disabled. Otherwise, waitpid won't be 
 	 * able to catch error codes coming from the child. */
@@ -7975,6 +7988,7 @@ launch_execve(char **cmd)
 	/* Check if program is to be backgrounded. In that case, remove the
 	 * final ampersand from the string */
 	char is_bg=0;
+
 	if (strcmp(cmd[args_n], "&") == 0) {
 		free(cmd[args_n]);
 		cmd[args_n]=NULL;
@@ -7987,7 +8001,6 @@ launch_execve(char **cmd)
 			is_bg=1;
 		}
 	}
-
 	/* Create a new process via fork() */
 	pid_t pid=fork();
 	if (pid < 0) {
@@ -9139,6 +9152,10 @@ dir_size(char *dir)
 	#ifndef DU_TMP_FILE
 		#define DU_TMP_FILE "/tmp/.du_size"
 	#endif
+
+	if (!dir)
+		return;
+
 	/* Check for 'du' existence just once (the first time the function is 
 	 * called) by storing the result in a static variable (whose value will 
 	 * survive the function) */
@@ -9162,16 +9179,29 @@ dir_size(char *dir)
 	dup2(fileno(du_fp_err), STDERR_FILENO); /* Redirect stderr to /dev/null */
 	fclose(du_fp);
 	fclose(du_fp_err);
-	char *cmd[]={ "du", "-sh", dir, NULL };
-	launch_execve(cmd);
+
+/*	char *tmp_dir=NULL;
+	tmp_dir=xcalloc(tmp_dir, strlen(dir)+2, sizeof(char *));
+	sprintf(tmp_dir, "'%s'", dir);
+	char *cmd[]={ "du", "-sh", tmp_dir, NULL };
+	int ret=launch_execve(cmd);
+	free(tmp_dir); */
+
+	char *cmd=NULL;
+	cmd=xcalloc(cmd, strlen(dir)+10, sizeof(char *));
+	sprintf(cmd, "du -sh '%s'", dir);
+	int ret=launch_execle(cmd);
+	free(cmd);
+	
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
 	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
 	close(stdout_bk);
 	close(stderr_bk);
-/*	if (ret != 0) {
-		puts("error");
+
+	if (ret != 0) {
+		printf("??? (ret: %d)\n", ret);
 		return;
-	}*/
+	}
 	if (access(DU_TMP_FILE, F_OK) == 0) {
 		du_fp=fopen(DU_TMP_FILE, "r");
 		if (du_fp) {
@@ -9200,7 +9230,7 @@ properties_function(char **comm)
 		puts(_("Usage: pr [ELN/filename(s)] [a, all] [s, size]"));
 		return;
 	}
-	
+
 	if (comm[1] && (strcmp(comm[1], "all") == 0
 	|| strcmp(comm[1], "a") == 0)) {
 		int status=long_view;
@@ -9245,6 +9275,10 @@ properties_function(char **comm)
 	/* If "pr file file..." */
 	for (size_t i=1;i<=args_n;i++) {
 		char *deq_file=dequote_str(comm[i], 0);
+		if (!deq_file) {
+			fprintf(stderr, _("%s: Error getting filename\n"), PROGRAM_NAME);
+			continue;
+		}
 		if (access(deq_file, F_OK) == 0)
 			get_properties(deq_file, 0, 0);
 		else {
