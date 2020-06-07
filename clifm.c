@@ -2687,7 +2687,7 @@ set_colors(void)
 		ssize_t line_len=0;
 		size_t line_size=0;
 		while ((line_len=getline(&line, &line_size, fp_colors)) > 0) {
-			if (strncmp(line, "Filetypes color=", 16) == 0) {
+			if (strncmp(line, "Filetype colors=", 16) == 0) {
 				char *opt_str=straft(line, '=');
 				if (!opt_str)
 					continue;
@@ -5707,7 +5707,7 @@ messages won't be persistent. Using default options\n"),
 				/* Do not translate anything in the config file */
 				fprintf(config_fp, "%s configuration file\n\
 	########################\n\n", PROGRAM_NAME);
-				fprintf(config_fp, "Filetypes color=\"di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;97:ef=00;33:nf=00;31:ln=01;36:or=00;36:pi=40;33:so=01;35:bd=01;33;01:cd=01;37;01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:ee=00;32:ca=00;30;41:no=00;47;31\"\n\
+				fprintf(config_fp, "Filetype colors=\"di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;97:ef=00;33:nf=00;31:ln=01;36:or=00;36:pi=40;33:so=01;35:bd=01;33;01:cd=01;37;01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:ee=00;32:ca=00;30;41:no=00;47;31\"\n\
 Prompt color=6\n\
 #0=black; 1=red; 2=green; 3=yellow; 4=blue;\n\
 #5=magenta; 6=cyan; 7=white\n\
