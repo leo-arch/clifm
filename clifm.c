@@ -1271,7 +1271,7 @@ program_invocation_short_name variable and asprintf() */
 #define VERSION "0.15.1"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "June 7, 2020"
+#define DATE "June 8, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -8285,7 +8285,7 @@ exec_cmd(char **comm)
 		print_license();
 	else if (strcmp(comm[0], "fs") == 0)
 		free_sotware();
-	else if (strcmp(comm[0], "bonus") == 0 || strcmp(comm[0], "boca") == 0)
+	else if (strcmp(comm[0], "bonus") == 0)
 		bonus_function();
 	else if (strcmp(comm[0], "splash") == 0) splash();
 	else if (strcmp(comm[0], "q") == 0 || strcmp(comm[0], "quit") == 0 
@@ -10690,6 +10690,9 @@ use 256 and RGB colors as well.\n\n"), PROGRAM_NAME);
 void
 list_commands(void)
 {
+	printf(_("\nNOTE: ELN = Element List Number. Example: In \
+the line \"12 openbox\", 12 is the ELN corresponding to the 'openbox' \
+file.\n"));
 	printf(_("\n%scmd, commands%s%s: Show this list of commands.\n"), white, 
 		   NC, white_b);
 	printf(_("\n%s/%s%s* [dir]: This is the quick search function. Just type '/' \
@@ -10826,6 +10829,7 @@ written by Richard Stallman.\n"), white, NC,
 	printf(_("\n%sq, quit, exit, zz%s%s: Safely quit %s.\n"), white, NC, 
 			white_b, PROGRAM_NAME);
 	printf(_("%s  \nKeyboard shortcuts%s%s:\n\
+%s  A-c%s%s:	Reset the current command line\n\
 %s  A-f%s%s:	Toggle list-folders-first on/off\n\
 %s  C-r%s%s:	Refresh the screen\n\
 %s  A-l%s%s:	Toggle long view mode on/off\n\
@@ -10841,12 +10845,11 @@ written by Richard Stallman.\n"), white, NC,
 %s  A-h/A-j%s%s:	Go to the previous directory in the directory history \
 list\n\
 %s  A-k%s%s:	Go to the next directory in the directory history list\n\
-%s  F10%s%s:	Open the configuration file\n\
-  Some (and even all) of these keybindings might not work in some terminals, \
-though they do work fine in the Linux built-in console, xvt-like terminal \
-emulators like Urxvt and Aterm, and xterm-like ones.\n\
-  %s will create HOME/.Xresources, if it doesn't already exist, \
-for these keybindings to work correctly.\n"), 
+%s  F10%s%s:	Open the configuration file\n\n\
+NOTE: Depending on the terminal emulator being used, some of these \
+keybindings, like A-e and A-f, might conflict with some of the terminal \
+keybindings.\n"), 
+		white, NC, white_b, 
 		white, NC, white_b, 
 		white, NC, white_b,
 		white, NC, white_b,
@@ -10862,69 +10865,17 @@ for these keybindings to work correctly.\n"),
 		white, NC, white_b,
 		white, NC, white_b,
 		white, NC, white_b,
-		white, NC, white_b,
-		PROGRAM_NAME);
+		white, NC, white_b);
 }
 
 void
 help_function (void)
 {
-	if (clear_screen) CLEAR;
-	printf(_("%s%s %s%s %s(%s), by %s\n\n"), white, PROGRAM_NAME, VERSION, 
-			NC, white_b, DATE, AUTHOR);
-	printf(_("%s is a completely text-based, KISS file manager able to perform \
-all the basic operations you may expect from any other FM. However, the most \
-salient features of %s are: \
-\n  a) The use of short commands and numbers (ELN's), instead of \
-filenames. Type 'o 12', for instance, to open a file with your default text \
-editor or to change to the desired directory. Since numbers could be a bit \
-tricky when it comes to listed files, you can use the TAB key to expand the \
-filename corresponding to the required ELN. With the automatic ELN's \
-expansion feature you can use ELN's with external commands as well. \
-'diff 12 5', for example, will run 'diff' over the files corresponding to \
-ELN's 12 and 5. Ranges are also accepted, for example: rm 1-12.\
-\n  b) Bookmarks: bookmark your favorite directories, and even files, to get \
-easy access to them. Example: type 'bm' (or Alt-b) to open the bookmarks \
-screen and then simply type a number or a hotkey to access the desired \
-bookmark.\
-\n  c) The Selection Box (easily accessible via the 'sb' command) allows you \
-to select files and directories from different parts of your filesystem and \
-then operate on them with just one command. \
-\n  d) The back and forth functions keep track of all the paths visited by \
-you, so that you can go back and forth to any of them by just typing 'b' or \
-'f' (Alt-h, Alt-k).\
-\n  e) Keyboard shortcuts make it even easier and faster to navigate and \
-operate on your files. For example, instead of typing 'cd ..' to go back to \
-the parent directory, or 'sel *' to select all files in the current directory, \
-you can simply press Alt-u and Alt-a respectivelly.\
-\n  f) The quick search function allows you to quickly find files \
-in your current working directory: just type '/search_string', that's all. \
-Wildcards are allowed.\
-\n  g) It is blazing fast and incredibly lightweigth. With a memory footprint \
-below 5MiB, it can run on really old hardware.\
-\n  h) It is so simple that it doesn't require an X session nor any \
-graphical environment at all, being able thus to perfectly run on the linux \
-built-in console and even on a headless machine via a SSH or a telnet \
-session. \
-\nAll of these features (described in more detail below) are aimed to make \
-easier and faster to move through and to operate on your files.\n\
-Because inspired in Arch Linux and its KISS principle, %s is fundamentally \
-aimed to be lightweight, fast, and simple. On Arch's notion of simplcity \
-see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity\n"), 
-	PROGRAM_NAME, PROGRAM_NAME, PROGRAM_NAME);
-	printf(_("\n%s also offers the following features:\
-\n  1) Trash system\
-\n  2) History function\
-\n  3) TAB completion for filenames\
-\n  4) TAB completion for ELN's\
-\n  5) Keyboard shortcuts\
-\n  6) Wildcards expansion\
-\n  7) Braces expansion\
-\n  8) ELN's expansion\
-\n  9) 'sel' keyword expansion\
-\n  10) Ranges expansion\
-\n  11) Bash-like quoted filenames\
-\n  12) Aliases\n"), PROGRAM_NAME);
+	if (clear_screen)
+		CLEAR;
+
+	printf(_("%s %s (%s), by %s\n"), PROGRAM_NAME, VERSION, DATE, AUTHOR);
+
 	printf(_("\nUsage: %s [-aAfFgGhiIlLoOsuUvx] [-p path]\n\
 \n -a, --no-hidden\t\t do not show hidden files\
 \n -A, --show-hidden\t\t show hidden files (default)\
@@ -10948,95 +10899,16 @@ default for non-english locales\
 \n -v, --version\t\t\t show version details and exit\
 \n -x, --ext-cmds\t\t\t allow the use of external commands\n"), PNL, 
 		PROGRAM_NAME);
-	printf(_("\nArguments precedence order: 1) command line; 2) configuration \
-file; 3) default options.\n"));
-	printf(_("\n%sColor codes:%s%s\n\n"), white, NC, white_b);
-	color_codes();
-	printf(_("%sCommands:\n%s%sNote: ELN = Element List Number. Example: In the \
-line \"12 openbox\", 12 is the ELN corresponding to the 'openbox' file.\n%s"), 
-	white, NC, white_b, NC);
-	list_commands();
-	printf(_("\n%sNotes%s%s:\n"), white, NC, white_b);
-	printf(_("\nIt depends on the terminal emulator you use to correctly \
-display non-ASCII characters and characters from the extended ASCII charset.\n"));
-	printf(_("\n%s is not limited to its own set of internal commands, like \
-open, sel, trash, etc., but it can run any external command as well, provided \
-external commands are allowed (use the -x option, 'ext on' while running the \
-program, or the configuration file). Bear in mind, however, that %s is not \
-intended to be used as a shell, but as the file manager it is.\n"), 
-		PROGRAM_NAME, PROGRAM_NAME);
-	printf(_("\nBesides the default TAB completion for paths, you can also \
-expand ELN's using the TAB key. Example: 'o 12', press TAB, and it becomes \
-'o filename ', or, if 12 refers to a directory, 'o dir/'.\n"));
-	printf(_("\n%s will automatically expand the 'sel' keyword: 'sel' indeed \
-amounts to 'file1 file2 file3 ...' In this way, you can use the 'sel' keyword \
-with any command. If you want to set the executable bit on several files, for \
-instance, simply select the files you want and then run this command: \
-'chmod +x sel'. Or, if you want to copy or move several files into some \
-directory: 'cp sel 12', or 'mv sel 12' (provided the ELN 12 corresponds to \
-a directory), respectivelly. If the destiny directory is ommited, selected \
-files are copied into the current working directory, that is to say, \
-'mv sel' amounts to 'mv sel .'. To trash or remove selected files, simply \
-run 'tr sel' or 'rm sel' respectivelly.\
-\n\nELN's and ELN ranges will be also automatically expanded, provided the \
-corresponding ELN's actually exist, that is to say, provided some filename is \
-listed on the screen under those numbers. For example: 'diff 1 118' will only \
-expand '1', but not '118', if there is no ELN 118. In the same way, the range \
-1-118 will only be expanded provided there are 118 or more elements listed on \
-the screen. If this feature somehow conflicts with the command you want to \
-run, say, 'chmod 644 ...', because the current amount of files is equal or \
-larger than 644 (in which case %s will expand that number), then you can \
-simply run the command as external or quote the conflicting number: \
-';chmod 644 ...' or 'chmod \\644 ...'\n\
-\nOf course, combinations of all these features is also possbile. \
-Example: 'cp sel file* 2 23-31 .' will copy all selected files, plus all \
-files whose name starts with \"file\", plus those files corresponding to the \
-ELN's 2 and 23 through 31, into the current working directory.\n"), 
-		   PROGRAM_NAME, PROGRAM_NAME);
-	printf(_("\nWhen dealing with filenames containing spaces, you can use both \
-single and double quotes (ex: \"this file\" or 'this file') plus escape \
-sequences (ex: this\\ file)."));
-	printf(_("\n\nBy default, %s starts in the current working directory. \
-However, you can always specify a different path by passing it as an argument. \
-Ex: %s -p /home/user/misc. You can also permanently set up the starting path \
-in the %s configuration file.\n"), PROGRAM_NAME, PNL, PROGRAM_NAME);
-	printf(_("\n%sConfiguration file%s%s: ~/.config/%s/%src\n"), white, NC, 
-		   white_b, PNL, PNL);
-	printf(_("Here you can permanently set up %s options, add aliases and some \
-prompt commands (which will be executed immediately before each new prompt \
-line). Just recall that in order to use prompt commands you must allow the \
-use of external commands. See the 'ext' command above.\n"), PROGRAM_NAME);
-	printf(_("\n%sProfile file%s%s: ~/.config/%s/%s_profile\n"), white, NC, 
-		   white_b, PNL, PNL);
-	printf(_("In this file you can add those commands you want to be executed \
-at startup. You can also permanently set here some custom variables, ex: \
-'dir=\"/path/to/folder\"'. This variable may be used as a shorcut to that \
-folder, for instance: 'cd $dir'. Custom variables could also be temporarily \
-defined via the command prompt: Ex: user@hostname ~ $ var=\"This is a test\". \
-Temporary variables will be removed at program exit.\n\n"));
-	printf(_("%sLog file%s%s: ~/.config/%s/log.cfm\n"), white, NC, white_b, 
-		   PNL);
-	printf(_("This file contains a series of fields separated by a colon in \
-the following way: 'date:user:cwd:cmd. All commands executed as \
-external will be logged.\n\n"));
-	printf(_("%sMessages log file%s%s: ~/.config/%s/messages.cfm\n"), white, 
-		   NC, white_b, PNL);
-	printf(_("A file containing a list of system messages, either errors, \
-warnings, or simple notices. The messages log format is: [date] message.\n\n"));
-	printf(_("A bold green asterisk at the left of the prompt indicates that \
-there are elements in the Selection Box. In the same way, a yellow 'T' \
-notices that there are currently files in the trash can. Finally, %s makes \
-use of three kind of messages: errors (a red 'E' at the left of the prompt), \
-warnings (a yellow 'W'), and simple notices (a green 'N').\n"), PROGRAM_NAME);
 
-	if (flags & EXT_HELP) /* If called as external argument... */
-		return;
-	printf(_("\nPress any key to exit help..."));
-	xgetchar();	puts("");
-	if (cd_lists_on_the_fly) {
-		while (files--) free(dirlist[files]);
-		list_dir();
-	}
+	printf(_("\nColor codes: Run the 'colors' command to see the list \
+of currently used color codes.\n\n"));
+
+	printf(_("Commands: Run the 'commands' command to see the list \
+of commands and the corresponding description.\n\n"));
+
+	printf(_("The configuration and profile files allow you to customize \
+colors, define some prompt commands and aliases, and more. For a full \
+description consult the man page.\n"));
 }
 
 void
@@ -11107,6 +10979,45 @@ splash(void)
 void
 bonus_function()
 {
-	printf("%sVamos %sBoca %sJuniors %sCarajo%s! %s*%s*%s*\n", blue, yellow, 
-		   blue, yellow, blue, blue, yellow, blue);
+	static char state=0;
+	if (state > 9)
+		state=0;
+	switch (state) {
+		case 0:
+			printf("Vamos Boca Juniors Carajo! %s*%s*%s*\n", blue, yellow, 
+				   blue);
+		break;
+		case 1:
+			printf("Hey! Look behind you! A three-headed monkey!\n");
+		break;
+		case 2:
+			printf("Luke, I'm your father\n");
+		break;
+		case 3:
+			printf("\"Nothing great has been made in the world without "
+				   "passion\" (Hegel)\n");
+		break;
+		case 4:
+			printf("\"Simplicity is the ultimate sophistication\" "
+				  "(Leo Da Vinci)\n");
+		break;
+		case 5:
+			printf("Yo vendi semillas de alambre de pua, al contado, y "
+				   "me lo agradecieron\n");
+		break;
+		case 6:
+			printf("I'm so happy, because today I've found my friends, "
+				   "they're in my head\n");
+		break;
+		case 7:
+			printf("The best code is written with the delete key\n");
+		break;
+		case 8:
+			printf("I'm selling these fine leather jackets\n");
+		break;
+		case 9:
+			printf("Truco y quiero retruco mierda!\n");
+		break;
+	}
+	state++;
 }
