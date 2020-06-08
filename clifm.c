@@ -218,6 +218,27 @@ of course you can grep it to find, say, linux' macros, as here. */
     handling, large amount of files, heavy load/usage, etc. 
  ** Destructive testing: Try running wrong commands, MAKE IT FAIL! Otherwise, 
 	it will never leave the beta state.
+ ** The __func__ variable returns the name of the current function. It could 
+	be useful to compose error logs.
+ ** Take a look at the OFM (Orthodox File Manager) specification:
+	http://www.softpanorama.org/OFM/Standards/ofm_standard1999.shtml
+	The Midnight Commander could be a good source of ideas.
+ ** When using strncpy(dest, n, src), pay attention to this: if there is no 
+	null byte among the 'n' bytes of 'src', the string placed in 'dest' won't 
+	be null terminated. To avoid this problem, always initialize 'dest' as 
+	follows: 
+		dest=calloc(strlen(src)+1, sizeof(char))
+	In this way, 'dest' always have a terminating null byte.
+ ** Check all the 'n' functions, like strncpy or snprintf, for buffer limit 
+	being correctly set. The whole point of the 'n' option is to protect the 
+	buffer against being overflowed.
+      char buf[MAX_STR]="";
+      snprintf(buf, strlen(str), "%s", str);
+    This code is wrong for, though you might assume that str will never be 
+    larger than MAX_STR, you cannot be sure. The right way would be rather:
+      snprintf(buf, MAX_STR, "%s", str);
+    In this way, no matter how long is STR, at most MAX_STR bytes will be 
+    copied into buf, and thus no buffer overflow is possible.
 */
 
 /** 
@@ -237,9 +258,6 @@ of course you can grep it to find, say, linux' macros, as here. */
 	separate function.
  ** A pager for displaying help would be great.
  ** Customizable keybindings would be a great feature too!
- ** Take a look at the OFM (Orthodox File Manager) specification:
-	http://www.softpanorama.org/OFM/Standards/ofm_standard1999.shtml
-	The Midnight Commander could be a good source of ideas.
  ** Pay attention to the construction of error messages: they should be enough
 	informative to allow the user/developer to track the origin of the error.
 	This line, for example, is vague: 
@@ -248,10 +266,6 @@ of course you can grep it to find, say, linux' macros, as here. */
 	  fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, __func__, strerror(errno));
 	If a file or path is involved, add it to the message as well. If possible,
 	follow this pattern: program: function: sub-function: file/path: message
- ** Make sure all error messages are visible: some of them will be quickly left
-	behind by files listing. Pay special attention to errors in main() and 
-	init_config(). Adding a "Press any key to continue" after 
-	error messages will do the job.
  ** The screen refresh check is really weak: 
 	1) The screen is refreshed only for a few commands (rm, mkdir, mv, cp, and 
 	   ln), but there are for sure more commands able to modify the filesystem. 
@@ -273,24 +287,8 @@ of course you can grep it to find, say, linux' macros, as here. */
 	same, and, nonetheless, the screen should be refreshed). The second case, 
 	however, is quite harder/expensive to solve than the first one.
  ** When jumping from one directory to another with the 'b/f !ELN' command,
-	for example, from 1 to 4 in the directories list, 'back' does not go back
+	for example from 1 to 4 in the directories list, 'back' does not go back
 	to 1, but to 3. It feels ugly and unintuitive.
- ** When using strncpy(dest, n, src), pay attention to this: if there is no 
-	null byte among the 'n' bytes of 'src', the string placed in 'dest' won't 
-	be null terminated. To avoid this problem, always initialize 'dest' as 
-	follows: 
-		dest=calloc(strlen(src)+1, sizeof(char))
-	In this way, 'dest' always have a terminating null byte.
- ** Check all the 'n' functions, like strncpy or snprintf, for buffer limit 
-	being correctly set. The whole point of the 'n' option is to protect the 
-	buffer against being overflowed.
-      char buf[MAX_STR]="";
-      snprintf(buf, strlen(str), "%s", str);
-    This code is wrong for, though you might assume that str will never be 
-    larger than MAX_STR, you cannot be sure. The right way would be rather:
-      snprintf(buf, MAX_STR, "%s", str);
-    In this way, no matter how long is STR, at most MAX_STR bytes will be 
-    copied into buf, and thus no buffer overflow is possible.
  ** The glob, range, and braces expansion functions will expand a fixed amount 
 	of non-expanded strings (10). I should use a dynamic array of integers 
 	instead. However, 10 should be more than enough: this is not a shell!
@@ -298,7 +296,8 @@ of course you can grep it to find, say, linux' macros, as here. */
  ** Check all functions for error, for example, chdir().
  ** run_in_foreground() returns now the exit status of the child. Use this 
     whenever needed.
- ** There's a function for tilde expansion called wordexp().
+ ** There's a function for tilde expansion called wordexp(). Currently using
+	tilde_expand(), provided by the readline library.
  ** The list-on-the-fly check is not elegant at all! It's spread all around 
 	the code. I'm not sure if there's an alternative to this: I have to 
 	prevent listdir() from running, and it is this function itself which is 
@@ -309,18 +308,12 @@ of course you can grep it to find, say, linux' macros, as here. */
     previous to the call to listdir().
  ** Set a limit, say 100, to how much directories will the back function 
 	recall.
- ** When refreshing the screen, there's no need to reload the whole array of 
-    elements. Instead, I should simply print those elements again, without 
-    wasting resources in reloading them as if the array were empty. Perhaps I 
-    could use some flag to do this.
  ** When creating a variable, make sure the new variable name doesn't exist. 
 	If it does, replace the old position of the variable in the array of user 
     variables by the new one in order not to unnecessarily take more memory 
     for it.
  ** Add an unset function to remove user defined variables. The entire array 
 	of user variables should be reordered every time a vairable is unset.
- ** The __func__ variable returns the name of the current function. It could 
-	be useful to compose error logs.
  ** At the end of prompt() I have 7 strcmp. Try to reduce all this to just one 
     operation.
  **	Add support for wildcards and nested braces to the BRACE EXPANSION function, 
@@ -335,6 +328,11 @@ of course you can grep it to find, say, linux' macros, as here. */
 
 ###################################
 
+ * (DONE) Allow the use of ANSI color codes for prompt, ELN's and text color, 
+	just as I did with filetypes. The only issue here is that when I use some 
+	background color for the prompt, this same color is somehow transferred 
+	to the command line (text) background color (after running list_dir()).
+	SOLUTION: added a printf() at the beginning of prompt().
  * (DONE) Add the possibility to customize filetypes colors, just like 'ls' 
 	does via the LS_COLORS environment variable. Add ELN color customization
 	too.
@@ -375,10 +373,18 @@ of course you can grep it to find, say, linux' macros, as here. */
 	use "clear".
  * (DONE) Add ELN auto-expansion. Great!!!!
  * (DONE) Fix file sizes (from MB to MiB)
+ * (UNNEEDED) When refreshing the screen, there's no need to reload the whole 
+	array of elements. Instead, I should simply print those elements again, 
+	without wasting resources in reloading them as if the array were empty. 
+	Perhaps I could use some flag to do this. Or perhaps it's a better idea 
+	to keep it as it is: if something was modified in the current list of 
+	files, I want the refresh function to print the updated data.
  * (DONE) The properties function prints "linkname: No such file or directory"
 	in case of a broken symlink, which is vague: the link does exists; what 
 	does not is the linked file. So, It would be better to write the error
 	message as follows: "linkname -> linked_filename: No such file..."
+	Currently properties for the broken symlink are shown, plus a text next to
+	the filename: "broken symlink".
  * (DONE) Get rid of the get_bm_n() function. It's redundat, since 
 	get_bookmarks() can do what it does (to get the amount of bookmarks) via a 
 	global variable (bm_n) without the need to open the bookmarks file once 
@@ -740,7 +746,8 @@ of course you can grep it to find, say, linux' macros, as here. */
  ** 1 - Piping doesn't work as it should. Try this command: 
     'pacman -Sii systemd systemd-libs | grep "Required By"'. Now run the same 
     command outside CliFM. The output in CliFM is reduced to only the first 
-    line of each "Required by" line.
+    line of each "Required by" line. This makes running shell commands in
+    CliFM unreliable.
 
 ###########################################
 
@@ -861,7 +868,7 @@ of course you can grep it to find, say, linux' macros, as here. */
 	ASCII chars (both in normal and long view mode). This is because printf() 
 	does not correctly count chars in this kind of strings.
  * (SOLVED) When trashing a file, if the trash file name length is at least
-	NAME_MAX-(suffix+1), adding the suffix to it will produce a filename 
+	NAME_MAX-suffix+1, adding the suffix to it will produce a filename 
 	longer than NAME_MAX (255).
  * (SOLVED) Run 'cd /dev/sda1' and CRASH!!
  * (SOLVED) If not cd_list_on_the_fly and the user runs 'open dir', the 
@@ -887,8 +894,8 @@ of course you can grep it to find, say, linux' macros, as here. */
 	elements in the history list.
  * (SOLVED) Memory error with Valgrind when running a history command with 
 	more than 1 argument. SOLUTION: Backup the args_n variable and restore it
-	after running the history command. Otherwise, the comm array, which depends
-	args_n, won't be correctly freed.
+	after running the history command. Otherwise, the comm array, which 
+	depends on args_n, won't be correctly freed.
  * (SOLVED) When using the 'b/f !ELN' command the CWD is not updated in the
 	history list: it still shows the previous path as current (highlighted 
 	in green).
@@ -923,7 +930,8 @@ of course you can grep it to find, say, linux' macros, as here. */
  * (SOLVED) If get_user_home() fails (in main()), list_dir() will crash. 
 	Solution: If get_user_home() fails, set home as 'cwd/clifm_emergency' (all
 	config dirs and files will be created here), and if getcwd() also fails, 
-	exit.
+	exit. Currently, if no user home is found, no config file is created and
+	all options are set to default.
  * (SOLVED) The 'b ELN' function is broken because of automatic ELN expansion. 
 	ELN does not refer here to files listed on the screen, but to visited 
 	directories. Solution: modified surf_hist() to use "!ELN" instead of just 
@@ -2259,18 +2267,17 @@ struct termios shell_tmodes;
 pid_t own_pid=0;
 char **dirlist=NULL;
 struct usrvar_t *usr_var=NULL;
-#define MAX_COLOR 25 
-/* 22 == \e[00;00;00;000;000;000m (24bit, RGB true color format) */
+/* 25 == \e[00;00;00;000;000;000m (24bit, RGB true color format) */
 char *user=NULL, *path=NULL, **old_pwd=NULL, **sel_elements=NULL, *qc=NULL,
 	*sel_file_user=NULL, **paths=NULL, **bin_commands=NULL, **history=NULL, 
-	*xdg_open_path=NULL, **braces=NULL, prompt_color[19]="", white_b[23]="", 
-	text_color[23]="", eln_color[MAX_COLOR]="", **prompt_cmds=NULL, 
-	**aliases=NULL, **argv_bk=NULL, *user_home=NULL, **messages=NULL, 
-	*msg=NULL, *CONFIG_DIR=NULL, *CONFIG_FILE=NULL, *BM_FILE=NULL, 
-	hostname[HOST_NAME_MAX]="", *LOG_FILE=NULL, *LOG_FILE_TMP=NULL, 
-	*HIST_FILE=NULL, *MSG_LOG_FILE=NULL, *PROFILE_FILE=NULL, *TRASH_DIR=NULL, 
-	*TRASH_FILES_DIR=NULL, *TRASH_INFO_DIR=NULL, *sys_shell=NULL,
-	/* This is not a copmprehensive list of commands. It only lists commands
+	*xdg_open_path=NULL, **braces=NULL, white_b[23]="", 
+	**prompt_cmds=NULL, **aliases=NULL, **argv_bk=NULL, *user_home=NULL, 
+	**messages=NULL, *msg=NULL, *CONFIG_DIR=NULL, *CONFIG_FILE=NULL, 
+	*BM_FILE=NULL, hostname[HOST_NAME_MAX]="", *LOG_FILE=NULL, 
+	*LOG_FILE_TMP=NULL, *HIST_FILE=NULL, *MSG_LOG_FILE=NULL, 
+	*PROFILE_FILE=NULL, *TRASH_DIR=NULL, *TRASH_FILES_DIR=NULL, 
+	*TRASH_INFO_DIR=NULL, *sys_shell=NULL,
+	/* This is not a comprehensive list of commands. It only lists commands
 	 * long version for TAB completion */
 	*INTERNAL_CMDS[]={ "alias", "open", "prop", "back", "forth",
 		"move", "paste", "sel", "selbox", "desel", "refresh", 
@@ -2278,6 +2285,10 @@ char *user=NULL, *path=NULL, **old_pwd=NULL, **sel_elements=NULL, *qc=NULL,
 		"colors", "version", "license", "splash", "folders first", 
 		"exit", "quit", "pager", "trash", "undel", "messages", 
 		"mountpoints", "bookmarks", "log", "untrash", "unicode", NULL };
+
+#define MAX_COLOR 25 
+char text_color[MAX_COLOR]="", eln_color[MAX_COLOR]="", 
+	 prompt_color[MAX_COLOR]="";
 
 /* Filetypes colors */
 char di_c[MAX_COLOR]="", /* Directory */
@@ -2864,15 +2875,10 @@ set_default_options (void)
 	cd_lists_on_the_fly=1;	
 	case_sensitive=0;
 	unicode=0;
-	strcpy(prompt_color, "\001\033[00;36m\002");
-	strcpy(text_color, "white");
-	strcpy(eln_color, "\e[01;33m");
-	if (sys_shell)
-		free(sys_shell);
-	sys_shell=NULL;
-	sys_shell=xcalloc(sys_shell, 8, sizeof(char));
-	strcpy(sys_shell, "/bin/sh");
 
+	strcpy(prompt_color, "\001\e[00;36m\002");
+	strcpy(text_color, "\001\e[00;39m\002");
+	strcpy(eln_color, "\e[01;33m");
 	sprintf(di_c, "\e[01;34m");
 	sprintf(nd_c, "\e[01;31m");
 	sprintf(ed_c, "\e[00;34m");
@@ -2895,30 +2901,36 @@ set_default_options (void)
 	sprintf(ee_c, "\e[00;32m");
 	sprintf(ca_c, "\e[30;41m");
 	sprintf(no_c, "\e[31;47m");
+
+	if (sys_shell)
+		free(sys_shell);
+	sys_shell=NULL;
+	sys_shell=xcalloc(sys_shell, 8, sizeof(char));
+	strcpy(sys_shell, "/bin/sh");
 			
 	/* Handle white color for different kinds of terminals: linux (8 colors), 
 	 * (r)xvt (88 colors), and the rest (256 colors). This block is completely 
 	 * subjective: in my opinion, some white colors that do look good on some 
 	 * terminals, look bad on others */
-	/* 88 colors terminal */
-	if (strcmp(getenv("TERM"), "xvt") == 0 
+	// 88 colors terminal //
+/*	if (strcmp(getenv("TERM"), "xvt") == 0 
 	|| strcmp(getenv("TERM"), "rxvt") == 0) {
 		strcpy(white_b, "\001\e[97m\002");
 		if (strcmp(text_color, "white") == 0)
 			strcpy(text_color, "\001\e[97m\002");
 	}
-	/* 8 colors terminal */
+	// 8 colors terminal
 	else if (strcmp(getenv("TERM"), "linux") == 0) {
 		strcpy(white_b, "\001\e[37m\002");
 		if (strcmp(text_color, "white") == 0)
 			strcpy(text_color, "\001\e[37m\002");
 	}
-	/* 256 colors terminal */
+	// 256 colors terminal
 	else {
 		strcpy(white_b, "\001\033[38;5;253m\002");
 		if (strcmp(text_color, "white") == 0)
 			strcpy(text_color, "\001\033[38;5;253m\002");
-	}
+	} */
 }
 
 char *
@@ -5708,14 +5720,9 @@ messages won't be persistent. Using default options\n"),
 				fprintf(config_fp, "%s configuration file\n\
 	########################\n\n", PROGRAM_NAME);
 				fprintf(config_fp, "Filetype colors=\"di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;97:ef=00;33:nf=00;31:ln=01;36:or=00;36:pi=40;33:so=01;35:bd=01;33;01:cd=01;37;01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:ee=00;32:ca=00;30;41:no=00;47;31\"\n\
-Prompt color=6\n\
-#0=black; 1=red; 2=green; 3=yellow; 4=blue;\n\
-#5=magenta; 6=cyan; 7=white\n\
-#Bold:\n\
-#10=black; 11=red; 12=green; 13=yellow; 14=blue;\n\
-#15=magenta; 16=cyan; 17=white; 18=default terminal color\n\
-Text color=7\n\
-ELN color=13\n\
+Prompt color=00;36\n\
+Text color=00;39\n\
+ELN color=01;33\n\
 Splash screen=false\n\
 Welcome message=true\n\
 Show hidden files=true\n\
@@ -5927,144 +5934,43 @@ values.\n"),
 							pager=0;
 					}
 					else if (strncmp(line, "Prompt color=", 13) == 0) {
-						int opt_num=0;
-						sscanf(line, "Prompt color=%d\n", &opt_num);
-						if (opt_num <= 0)
+						char *opt_str=NULL;
+						opt_str=straft(line, '=');
+						if (!opt_str)
 							continue;
+						size_t opt_len=strlen(opt_str);
+						if (opt_str[opt_len-1] == '\n')
+							opt_str[opt_len-1]=0x00;
 						prompt_color_set=1;
-						switch (opt_num) {
-							case 0: strcpy(prompt_color, 
-										   "\001\e[0;30m\002"); 
-							break;
-							case 1: strcpy(prompt_color, 
-										   "\001\e[0;31m\002"); 
-							break;
-							case 2: strcpy(prompt_color, 
-										   "\001\e[0;32m\002"); 
-							break;
-							case 3: strcpy(prompt_color, 
-										   "\001\e[0;33m\002"); 
-							break;
-							case 4: strcpy(prompt_color, 
-										   "\001\e[0;34m\002"); 
-							break;
-							case 5: strcpy(prompt_color, 
-										   "\001\e[0;35m\002");	
-							break;
-							case 6: strcpy(prompt_color, 
-										   "\001\e[0;36m\002");	
-							break;
-							case 7: strcpy(prompt_color, 
-										   "\001\e[0;37m\002");	
-							break;
-							case 8: strcpy(prompt_color, 
-										   "\001\e[0;39m\002"); 
-							break;
-							case 10: strcpy(prompt_color, 
-										    "\001\e[1;30m\002"); 
-							break;
-							case 11: strcpy(prompt_color, 
-										    "\001\e[1;31m\002"); 
-							break;
-							case 12: strcpy(prompt_color, 
-										    "\001\e[1;32m\002"); 
-							break;
-							case 13: strcpy(prompt_color, 
-										    "\001\e[1;33m\002"); 
-							break;
-							case 14: strcpy(prompt_color, 
-										    "\001\e[1;34m\002"); 
-							break;
-							case 15: strcpy(prompt_color, 
-										    "\001\e[1;35m\002"); 
-							break;
-							case 16: strcpy(prompt_color, 
-										    "\001\e[1;36m\002"); 
-							break;
-							case 17: strcpy(prompt_color, 
-										    "\001\e[1;37m\002"); 
-							break;
-							case 18: strcpy(prompt_color, 
-										    "\001\e[1;39m\002"); 
-							break;
-							default: strcpy(prompt_color, 
-										    "\001\e[0;36m\002");
-						}
+						snprintf(prompt_color, MAX_COLOR, "\001\e[%sm\002",
+								 opt_str);
+						free(opt_str);
 					}
 					else if (strncmp(line, "Text color=", 11) == 0) {
-						int opt_num=0;
-						sscanf(line, "Text color=%d\n", &opt_num);
-						if (opt_num <= 0)
+						char *opt_str=NULL;
+						opt_str=straft(line, '=');
+						if (!opt_str)
 							continue;
+						size_t opt_len=strlen(opt_str);
+						if (opt_str[opt_len-1] == '\n')
+							opt_str[opt_len-1]=0x00;
 						text_color_set=1;
-						switch (opt_num) {
-							case 0: strcpy(text_color, "\001\e[0;30m\002"); 
-							break;
-							case 1: strcpy(text_color, "\001\e[0;31m\002"); 
-							break;
-							case 2: strcpy(text_color, "\001\e[0;32m\002"); 
-							break;
-							case 3: strcpy(text_color, "\001\e[0;33m\002"); 
-							break;
-							case 4: strcpy(text_color, "\001\e[0;34m\002"); 
-							break;
-							case 5: strcpy(text_color, "\001\e[0;35m\002"); 
-							break;
-							case 6: strcpy(text_color, "\001\e[0;36m\002"); 
-							break;
-							case 7: strcpy(text_color, "white"); 
-							break;
-							case 8: strcpy(text_color, "\001\e[0;39m\002"); 
-							break;
-							case 10: strcpy(text_color, "\001\e[1;30m\002"); 
-							break;
-							case 11: strcpy(text_color, "\001\e[1;31m\002"); 
-							break;
-							case 12: strcpy(text_color, "\001\e[1;32m\002"); 
-							break;
-							case 13: strcpy(text_color, "\001\e[1;33m\002"); 
-							break;
-							case 14: strcpy(text_color, "\001\e[1;34m\002"); 
-							break;
-							case 15: strcpy(text_color, "\001\e[1;35m\002"); 
-							break;
-							case 16: strcpy(text_color, "\001\e[1;36m\002"); 
-							break;
-							case 17: strcpy(text_color, "\001\e[1;37m\002"); 
-							break;
-							case 18: strcpy(text_color, "\001\e[1;39m\002"); 
-							break;
-							default: strcpy(text_color, "white");
-						}
+						snprintf(text_color, MAX_COLOR, "\001\e[%sm\002",
+								opt_str);
+						free(opt_str);
 					}
 
 					else if (strncmp(line, "ELN color=", 10) == 0) {
-						int opt_num=0;
-						sscanf(line, "ELN color=%d\n", &opt_num);
-						if (opt_num < 0)
+						char *opt_str=NULL;
+						opt_str=straft(line, '=');
+						if (!opt_str)
 							continue;
+						size_t opt_len=strlen(opt_str);
+						if (opt_str[opt_len-1] == '\n')
+							opt_str[opt_len-1]=0x00;
 						eln_color_set=1;
-						switch (opt_num) {
-							case 0: strcpy(eln_color, "\e[0;30m"); break; 
-							case 1: strcpy(eln_color, "\e[0;31m"); break; 
-							case 2: strcpy(eln_color, "\e[0;32m"); break; 
-							case 3: strcpy(eln_color, "\e[0;33m"); break; 
-							case 4: strcpy(eln_color, "\e[0;34m"); break; 
-							case 5: strcpy(eln_color, "\e[0;35m"); break; 
-							case 6: strcpy(eln_color, "\e[0;36m"); break; 
-							case 7: strcpy(eln_color, "\e[0;37m"); break; 
-							case 8: strcpy(eln_color, "\e[0;38m"); break; 
-							case 10: strcpy(eln_color, "\e[1;30m"); break; 
-							case 11: strcpy(eln_color, "\e[1;31m"); break; 
-							case 12: strcpy(eln_color, "\e[1;32m"); break; 
-							case 13: strcpy(eln_color, "\e[1;33m"); break; 
-							case 14: strcpy(eln_color, "\e[1;34m"); break; 
-							case 15: strcpy(eln_color, "\e[1;35m"); break; 
-							case 16: strcpy(eln_color, "\e[1;36m"); break; 
-							case 17: strcpy(eln_color, "\e[1;37m"); break; 
-							case 18: strcpy(eln_color, "\e[1;38m"); break; 
-							default: strcpy(eln_color, "\e[1;33m"); break;
-						}
+						snprintf(eln_color, MAX_COLOR, "\e[%sm", opt_str);
+						free(opt_str);
 					}
 					else if (strncmp(line, "Max history=", 12) == 0) {
 						int opt_num=0;
@@ -6137,7 +6043,7 @@ values.\n"),
 			if (prompt_color_set == -1)
 				strcpy(prompt_color, "\001\033[0;36m\002");
 			if (text_color_set == -1)
-				strcpy(text_color, "white");
+				strcpy(text_color, "\001\e[00;39m\002");
 			if (eln_color_set == -1)
 				strcpy(eln_color, "\e[1;33m");
 			
@@ -6146,25 +6052,25 @@ values.\n"),
 			 * This block is completely subjective: in my opinion, some 
 			 * white colors that do look good on some terminals, look bad 
 			 * on others */
-			/* 88 colors terminal */
-			if (strcmp(getenv("TERM"), "xvt") == 0 
+			// 88 colors terminal
+/*			if (strcmp(getenv("TERM"), "xvt") == 0 
 						|| strcmp(getenv("TERM"), "rxvt") == 0) {
 				strcpy(white_b, "\001\e[97m\002");
 				if (strcmp(text_color, "white") == 0)
 					strcpy(text_color, "\001\e[97m\002");
 			}
-			/* 8 colors terminal */
+			// 8 colors terminal
 			else if (strcmp(getenv("TERM"), "linux") == 0) {
 				strcpy(white_b, "\001\e[37m\002");
 				if (strcmp(text_color, "white") == 0)
 					strcpy(text_color, "\001\e[37m\002");
 			}
-			/* 256 colors terminal */
+			// 256 colors terminal
 			else {
 				strcpy(white_b, "\001\033[38;5;253m\002");
 				if (strcmp(text_color, "white") == 0)
 					strcpy(text_color, "\001\033[38;5;253m\002");
-			}
+			} */
 		}
 		
 		/* "XTerm*eightBitInput: false" must be set in HOME/.Xresources to 
@@ -6793,15 +6699,12 @@ parse_input_str(char *str)
 		}
 		else {
 			/* 'sel' is an argument, but there are no selected files. */ 
-//			exec_cmd() will check this flag, and will do nothing if true.
-
 			fprintf(stderr, _("%s: There are no selected files\n"), 
 					PROGRAM_NAME);
 			for (size_t j=0;j<=args_n;j++)
 				free(substr[j]);
 			free(substr);
 			return NULL;
-//			sel_no_sel=1;
 		}
 	}
 
@@ -7161,6 +7064,11 @@ prompt(void)
 /* Print the prompt and return the string entered by the user (to be parsed 
  * later by parse_input_str()) */
 {
+	/* I'm not sure why this works, but this line prevents the prompt 
+	 * background color, if set, to become the background color of the
+	 * command line text after running list_dir() */
+	printf("\e[0m \r");
+
 	/* Remove final slash(s) from path, if any */
 	size_t path_len=strlen(path);
 	for (size_t i=path_len-1;path[i] && i>0;i--) {
@@ -8115,7 +8023,7 @@ exec_cmd(char **comm)
 
 //	if (sel_no_sel)
 //		return;
-		
+
 	/* If a user defined variable */
 	if (flags & IS_USRVAR_DEF) {
 		flags &= ~IS_USRVAR_DEF;
@@ -10774,8 +10682,9 @@ indicates the amount of files contained by the corresponding directory.\n"));
 	printf(_("\nThe value in parentheses is the code to use to modify \
 the color of the corresponding filetype in the configuration file \
 (in the \"Filetypes colors\" line), using the same ANSI style color format \
-used by dircolors. By default, %s uses only 8 colors, but you can use 256 \
-and RGB colors as well.\n\n"), PROGRAM_NAME);
+used by dircolors. The same color code format is used for prompt, ELN, and \
+command line text colors. By default, %s uses only 8 colors, but you can \
+use 256 and RGB colors as well.\n\n"), PROGRAM_NAME);
 }
 
 void

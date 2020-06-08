@@ -1,6 +1,6 @@
 ./" Manpage for CliFM
 ./"COMPLETE COLOR CODES!!!
-.TH man 1 "20 May 2020" "1.0" "CliFM man page"
+.TH man 1 "June 8, 2020" "1.0" "CliFM man page"
 .SH NAME
 CLIFM - A completely text-based file manager inspired in Arch Linux KISS principle 
 .SH SYNOPSIS
@@ -29,8 +29,10 @@ CliFM also offers the following features:
   8) ELN's auto-expansion
   9) 'sel' keyword auto-expansion
   10) Ranges auto-expansion
-  11) Quoted strings
-  12) Aliases
+  11) Bash-like quoted filenames
+  12) Custom aliases and variables
+  13) Customizable colors
+  14) Shell commands execution
 
 .SH OPTIONS
 .TP
@@ -95,7 +97,7 @@ show version details and exit
 .B -x, --ext-cmds
 allow the use of external commands
 
-Command line arguments take precedence over both the configuration file and the default options, whereas the configuration file takes precedence only over default options.
+Arguments precedence order: 1) command line; 2) configuration file; 3) default options.
 
 .SH COMMANDS
 \fBNote:\fR ELN = Element List Number. Example: in the line "12 openbox" (when listing files), 12 is the ELN corresponding to the file named "openbox".
@@ -110,7 +112,7 @@ this is the quick search function. Just type '/' followed by the string you are 
 open the bookmarks menu. Here you can add, remove or edit your bookmarks to your liking, or simply cd into the desired bookmark by entering either its ELN or its hotkey.
 .TP
 .B o, open ELN (or path or filename) [application name]
-pen either a directory or a file. For example: 'o 12' or 'o filename'. By default, the 'open' function will open files with the default application associated to them (if xdg-open command is found). However, if you want to open a file with a different application, just add the application name as second argument, e.g. 'o 12 leafpad'. If you want to run the program in the background, simply add the ampersand character (&): 'o 12 &'. When it comes to directories, 'open' works just like the 'cd' command.
+open either a directory or a file. For example: 'o 12' or 'o filename'. By default, the 'open' function will open files with the default application associated to them (if xdg-open command is found). However, if you want to open a file with a different application, just add the application name as second argument, e.g. 'o 12 leafpad'. If you want to run the program in the background, simply add the ampersand character (&): 'o 12 &'. When it comes to directories, 'open' works just like the 'cd' command.
 .TP
 .B cd [ELN/dir]
 when used with no argument, it changes the current directory to the default directory (HOME). Otherwise, 'cd' changes the current directory to the one specified by the first argument. You can use either ELN's or a string to indicate the directory you want. Ex: 'cd 12' or 'cd ~/media'. Unlike the shell 'cd' command, CliFM's built-in 'cd' function doesn not only changes the current directory, but also lists its content (provided the option "cd lists automatically" is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of 'cd' is much like this shell command: cd DIR && ls -A --color=auto --group-directories-first
@@ -155,7 +157,7 @@ print a list of currently trashed files allowing you to choose one or more of th
 list available mountpoints and change the current working directory into the selected mountpoint.
 .TP
 .B v, paste [sel] [destiny]
-he 'paste sel' command will copy the currently selected elements, if any, into the current working directory. If you want to copy these elements into another directory, you only need to tell 'paste' where to copy these files. Ex: paste sel /path/to/directory
+the 'paste sel' command will copy the currently selected elements, if any, into the current working directory. If you want to copy these elements into another directory, you only need to tell 'paste' where to copy these files. Ex: paste sel /path/to/directory
 .TP
 .B log [clear]
 with no arguments, it shows the log file. If clear is passed as argument, it will delete all the logs.
@@ -170,8 +172,8 @@ You can use the exclamation character (!) to perform some history commands:
   !n: Execute the command number 'n' in the history list.
   !-n: Execute the last-n command in the history list.
 .TP
-.B edit
-edit the configuration file.
+.B edit [application]
+edit the configuration file. If an application is specified, it will be sued to open the configuration file.
 .TP
 .B alias
 show aliases, if any. To write a new alias simpy type 'edit' to open the configuration file and add a line like this: alias alias_name='command_name args...'
@@ -186,7 +188,7 @@ print the current working directory.
 refresh the screen.
 .TP
 .B colors
-show the color codes used in the elements list.
+show the color codes used to list files.
 .TP
 .B hf, hidden [on/off/status]
 toggle hidden files on/off.
@@ -256,49 +258,39 @@ CliFM will create HOME/.Xresources, if it doesn't already exist, for these keybi
 
 .SH COLOR CODES
 .TP
-Bold red: Directory with no read permission
+Filetype colors are specified using the same format used by dircolors and the LS_COLORS environment variable, namely, a colon separated list of codes with this format: filetype=color. This is the list of filetype codes:
+ di = directory
+ ed = empty directory
+ nd = directory with no read permission
+ ne = empty directory with no read permission
+ fi = regular file
+ ef = empty regular file
+ nf = file with no access permission
+ ln = symlink
+ or = orphaned or broken symlink
+ bd = block device
+ cd = character device
+ pi = FIFO, pipe
+ so = socket
+ su = SUID file
+ sg = SGID file
+ tw = sticky and other writable directory
+ st = sticky and not other writable directory
+ ow = other writable directory
+ ex = executable file
+ ee = empty executable file
+ ca = file with capabilites
+ no = unknown filetype
 .TP
-Red: File with no read permission
+Color codes are just traditional ANSI color codes less the escape character and the final 'm'. Thus, for instance, if you want non-empty directories to be bold blue, the complete code is this: di=01;34
 .TP
-Bold blue: Directory*
+Though by default CliFM uses only 8 colors, you can use 256 and RGB colors as well. Example: fi=04;38;02;245;76;00 will print regular files underlined and using a bold orange RGB or 24-bit true color.
 .TP
-Blue: EMPTY directory
+Filetype colors are defined in the configuration file and can be modified as you wish. Prompt, ELN, and command line text colors are defined using these color codes as well.
 .TP
-Bold green: Executable file
+To see a colored list of the currently used color codes run the 'colors' command in CliFM. 
 .TP
-Green: Empty executable file
-.TP
-Bold yellow: Block special file
-.TP
-Yellow: Empty (zero-lenght) file
-.TP
-Bold Cyan: Symbolic link
-.TP
-Cyan: Broken symbolic link
-.TP
-Bold magenta: Socket file
-.TP
-Magenta: Pipe or FIFO special file
-.TP
-Bold white: Character special file
-.TP
-White: Regular file
-.TP
-White on red: SUID file
-.TP
-Black on yellow: SGID file
-.TP
-White on blue: Sticky and NOT other-writable directory*
-.TP
-Blue on green: Sticky and other-writable directory*
-.TP
-Black on green: Other-writable and NOT sticky directory*
-.TP
-Red on white: Unknown file type
-.TP
-*The slash followed by a number (/xx) after directory names indicates the amount of files contained by the corresponding directory.
-.TP
-To see a colored list of these color codes run the 'help' command in CliFM. 
+The slash followed by a number (/xx) after directory names indicates the amount of files contained by the corresponding directory.
 
 .SH NOTES
 .TP
@@ -306,7 +298,7 @@ It depends on the terminal emulator you use to correctly display non-ASCII chara
 .TP
 CliFM is not limited to its own set of internal commands, like open, sel, trash, etc., but it can run any external command as well, provided external commands are allowed (use the -x option or the configuration file). By beginning the external command by a colon or a semicolon (':', ';') you tell CliFM not to parse the input string, but instead letting this task to the system shell, say Bash. However, bear in mind that CliFM is not intended to be used as a shell, but as the file manager it is.
 .TP
-Besides the default TAB completion for paths, you can also expand ELN's using the TAB key. Example: 'o 12', press TAB, and it becomes 'o filename ', or, if 12 refers to a directory, 'o dir/'.
+Besides the default TAB completion for command names and paths, you can also expand ELN's using the TAB key. Example: type 'o 12', press TAB, and it becomes 'o filename ', or, if 12 refers to a directory, 'o dir/'. CliFM uses a Bash-style quoting system, so that this filename: "this is a test@version{1}" is expanded as follows: this\\ is\\ a\\ test\\@version\\{1\\}
 .TP
 CliFM will automatically expand the 'sel' keyword: 'sel' indeed amounts to 'file1 file2 file3 ...' In this way, you can use the 'sel' keyword with any command. If you want to set the executable bit on several files, for instance, simply select the files you want and then run this command: 'chmod +x sel'. Or, if you want to copy or move several files into some directory: 'cp sel 12', or 'mv sel 12' (provided the ELN 12 corresponds to a directory), respectivelly. If the destiny directory is ommited, selected files are copied into the current working directory, that is to say, 'mv sel' amounts to 'mv sel .'. To trash or remove selected files, simply run 'tr sel' or 'rm sel' respectivelly.The same goes for wildcards and braces: 'chmod +x *', for example, will set the excutable bit on all files in the current working directory, while 'chmod +x file{1,2,3}' will do it for file1, file2, and file3 respectivelly.
 .TP
@@ -314,7 +306,7 @@ ELN's and ELN ranges will be also automatically expanded, provided the correspon
 .TP
 Of course, combinations of all these features is also possbile. Example: 'cp sel file* 2 23-31 .' will copy all selected files, plus all files whose name starts with "file", plus those files corresponding to the ELN's 2 and 23 through 31, into the current working directory.
 .TP
-When dealing with filenames containing spaces, you can use both single and double quotes (ex: "this file" or 'this file') plus escape sequences (ex: this\ file).
+When dealing with filenames containing spaces, you can use both single and double quotes (ex: "this file" or 'this file') plus escape sequences (ex: this\\ file).
 .TP
 By default, CliFM starts in the current working directory. However, you can always specify a different path by passing it as an argument. Ex: clifm -p /home/user/misc. You can also permanently set up the starting path in the CliFM configuration file.
 
