@@ -10980,43 +10980,55 @@ void
 bonus_function()
 {
 	static char state=0;
-	if (state > 9)
+	if (state > 12)
 		state=0;
 	switch (state) {
 		case 0:
-			printf("Vamos Boca Juniors Carajo! %s*%s*%s*\n", blue, yellow, 
-				   blue);
+			printf("\"Vamos Boca Juniors Carajo!\" (La mitad+1) \n");
 		break;
 		case 1:
-			printf("Hey! Look behind you! A three-headed monkey!\n");
+			printf("\"Hey! Look behind you! A three-headed monkey!\" "
+				   "(G. Threepweed)\n");
 		break;
 		case 2:
-			printf("Luke, I'm your father\n");
+			printf("\"Free as in free speech, not as in free beer\" "
+			"(R. M. S)\n");
 		break;
 		case 3:
 			printf("\"Nothing great has been made in the world without "
-				   "passion\" (Hegel)\n");
+				   "passion\" (G. W. F. Hegel)\n");
 		break;
 		case 4:
 			printf("\"Simplicity is the ultimate sophistication\" "
 				  "(Leo Da Vinci)\n");
 		break;
 		case 5:
-			printf("Yo vendi semillas de alambre de pua, al contado, y "
-				   "me lo agradecieron\n");
+			printf("\"Yo vendí semillas de alambre de púa, al contado, y "
+				   "me lo agradecieron\" (Marquitos, 9 Reinas)\n");
 		break;
 		case 6:
-			printf("I'm so happy, because today I've found my friends, "
-				   "they're in my head\n");
+			printf("\"I'm so happy, because today I've found my friends, "
+				   "they're in my head\" (K. D. Cobain)\n");
 		break;
 		case 7:
-			printf("The best code is written with the delete key\n");
+			printf("\"The best code is written with the delete key\" "
+				   "(Someone, somewhere, sometime)\n");
 		break;
 		case 8:
-			printf("I'm selling these fine leather jackets\n");
+			printf("\"I'm selling these fine leather jackets\" (Indy)\n");
 		break;
 		case 9:
+			printf("\"I pray to God to make me free of God\" "
+				   "(Meister Eckhart)\n");
+		break;
+		case 10:
 			printf("Truco y quiero retruco mierda!\n");
+		break;
+		case 11:
+			printf("The only truth is that there is no truth\n");
+		break;
+		case 12:
+			printf("\"This is a lie\" (The liar paradox)\n");
 		break;
 	}
 	state++;
