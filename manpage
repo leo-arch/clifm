@@ -4,7 +4,7 @@
 .SH NAME
 CLIFM - A completely text-based file manager inspired in Arch Linux KISS principle 
 .SH SYNOPSIS
-\fBclifm\fR [-aAfFgGhiIlLoOpsuUvx] [-p path]
+\fBclifm\fR [-aAfFgGhiIlLoOpsuUvx] [-p path] [-P profile]
 .SH DESCRIPTION
 CliFM is a completely text-based file manager able to perform all the basic operations you may expect from any other FM. However, the most salient features of CliFM are: 
   a) The use of short commands and numbers (ELN's), instead of filenames. Type 'o 12', for instance, to open a file with your default text editor or to change to the desired directory. Since numbers could be a bit tricky when it comes to listed files, you can use the TAB key to expand the filename corresponding to the required ELN. With the automatic ELN's expansion feature you can use ELN's with external commands as well. 'diff 12 5', for example, will run 'diff' over the files corresponding to ELN's 12 and 5. Ranges are also accepted, for example: rm 1-12.
@@ -29,7 +29,7 @@ CliFM also offers the following features:
   8) ELN's auto-expansion
   9) 'sel' keyword auto-expansion
   10) Ranges auto-expansion
-  11) Bash-like quoted filenames
+  11) Bash-like quoting system
   12) Custom aliases and variables
   13) Customizable colors
   14) Shell commands execution
@@ -78,6 +78,9 @@ enable long view mode
 .TP
 .B -p, --path /starting/path
 use /starting/path as CliFM starting path
+.TP
+.B -P, --alt-profile profile_name
+use profile_name as an alternative profile
 .TP
 .B -i, --no-case-sensitive
 no case-sensitive files listing (default)
@@ -152,6 +155,9 @@ with no argument (or by passing the 'ls' option), it prints a list of currently 
 .TP
 .B u, undel, untrash [a, all]
 print a list of currently trashed files allowing you to choose one or more of these files to be undeleted, that is to say, restored to their original location. You can also undelete all trashed files at once using the 'a' or 'all' option.
+.TP
+.B pf, prof, profile
+print the currently used profile.
 .TP
 .B mp, mountpoints
 list available mountpoints and change the current working directory into the selected mountpoint.
