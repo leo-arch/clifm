@@ -248,8 +248,7 @@ of course you can grep it to find, say, linux' macros, as here. */
 							###############
 */
 /*
- ** Add an argument, -c, to specify an alternative configuration file.
- ** Add ranges to deselect and undel functions.
+ ** Add ranges to deselect and undel functions. Use expand_range().
  ** Check compatibility with BSD Unixes.
  ** Add a help option for each internal command. Make sure this help system is
 	consistent accross all commands: if you call help via the --help option, 
@@ -329,6 +328,9 @@ of course you can grep it to find, say, linux' macros, as here. */
 
 ###################################
 
+ * (DONE) Stop TAB completion when in bookmarks, mountpoints, undel or desel 
+	functions.
+ * (DONE) Add an argument, -P, to use an alternative profile.
  * (DONE) Allow the use of ANSI color codes for prompt, ELN's and text color, 
 	just as I did with filetypes. The only issue here is that when I use some 
 	background color for the prompt, this same color is somehow transferred 
@@ -2708,7 +2710,9 @@ is_color_code(char *str)
 /* A really weak color codes test, true, but handles the most common input 
  * errors, like empty string, only spaces, and invalid chars. Returns zero 
  * if the string contains some char that is not a number or a semicolon. 
- * Otherwise returns 1. */
+ * Otherwise returns 1. 
+ * It will accept this: 110;;;;;;;;00, which is not a valid color code, and 
+ * willreject this: 34, that is valid */
 {
 	while (*str) {
 		if ((*str < 48 || *str > 57) && *str != ';' && *str != '\n')
@@ -6864,7 +6868,9 @@ parse_input_str(char *str)
 					strcpy(ranges_cmd[j++], substr[i]);
 				}
 				for (i=0;i<ranges_n;i++) {
-					ranges_cmd[j]=xcalloc(ranges_cmd[j], 2, sizeof(char));
+					ranges_cmd[j]=xcalloc(ranges_cmd[j], 
+										  digits_in_num(ranges[i])+1, 
+										  sizeof(int));
 					sprintf(ranges_cmd[j++], "%d", ranges[i]);
 				}
 				for (i=range_array[r]+old_ranges_n+1;i<=args_n;i++) {
@@ -8301,8 +8307,14 @@ exec_cmd(char **comm)
 			list_dir();
 		}
 	}
-	else if (strcmp(comm[0], "bm") == 0 || strcmp(comm[0], "bookmarks") == 0)
+	else if (strcmp(comm[0], "bm") == 0 
+	|| strcmp(comm[0], "bookmarks") == 0) {
+		/* Disable TAB completion while in Bookmarks */
+		rl_attempted_completion_function=NULL;
 		bookmarks_function();
+		/* Reenable TAB completion */
+		rl_attempted_completion_function=my_rl_completion;
+	}
 	else if (strcmp(comm[0], "b") == 0 || strcmp(comm[0], "back") == 0)
 		back_function(comm);
 	else if (strcmp(comm[0], "f") == 0 || strcmp(comm[0], "forth") == 0)
@@ -8343,14 +8355,20 @@ exec_cmd(char **comm)
 		}
 	}
 	else if (strcmp(comm[0], "undel") == 0 || strcmp(comm[0], "u") == 0
-	|| strcmp(comm[0], "untrash") == 0)
+	|| strcmp(comm[0], "untrash") == 0) {
+		rl_attempted_completion_function=NULL;
 		untrash_function(comm);
+		rl_attempted_completion_function=my_rl_completion;	
+	}
 	else if (strcmp(comm[0], "s") == 0 || strcmp(comm[0], "sel") == 0)
 		sel_function(comm);
 	else if (strcmp(comm[0], "sb") == 0 || strcmp(comm[0], "selbox") == 0)
 		show_sel_files();
-	else if (strcmp(comm[0], "ds") == 0 || strcmp(comm[0], "desel") == 0)
+	else if (strcmp(comm[0], "ds") == 0 || strcmp(comm[0], "desel") == 0) {
+		rl_attempted_completion_function=NULL;
 		deselect(comm);
+		rl_attempted_completion_function=my_rl_completion;
+	}
 	else if (strcmp(comm[0], "rm") == 0 || strcmp(comm[0], "mkdir") == 0 
 	|| strcmp(comm[0], "touch") == 0 || strcmp(comm[0], "ln") == 0 
 	|| strcmp(comm[0], "unlink") == 0 || strcmp(comm[0], "r") == 0
@@ -8387,13 +8405,16 @@ exec_cmd(char **comm)
 	else if (strcmp(comm[0], "pf") == 0 || strcmp(comm[0], "prof") == 0 
 	|| strcmp(comm[0], "profile") == 0) {
 		if (!alt_profile)
-			printf("%s: Using default profile\n", PROGRAM_NAME);
+			printf("%s: profile: default\n", PROGRAM_NAME);
 		else
-			printf("%s: Using profile '%s'\n", PROGRAM_NAME, alt_profile);
+			printf("%s: profile: '%s'\n", PROGRAM_NAME, alt_profile);
 	}
 	else if (strcmp(comm[0], "mp") == 0 
-	|| (strcmp(comm[0], "mountpoints") == 0))
+	|| (strcmp(comm[0], "mountpoints") == 0)) {
+		rl_attempted_completion_function=NULL;
 		list_mountpoints();
+		rl_attempted_completion_function=my_rl_completion;
+	}
 	else if (strcmp(comm[0], "ext") == 0) {
 		if (!comm[1] || strcmp(comm[1], "--help") == 0) 
 			fprintf(stderr, _("%s: Usage: ext [on, off, status]\n"), 
@@ -8841,16 +8862,18 @@ launch_execve(char **cmd)
 	 * final ampersand from the string */
 	char is_bg=0;
 
-	if (strcmp(cmd[args_n], "&") == 0) {
-		free(cmd[args_n]);
-		cmd[args_n]=NULL;
-		is_bg=1;
-	}
-	else {
-		size_t last_len=strlen(cmd[args_n]);
-		if (cmd[args_n][last_len-1] == '&') {
-			cmd[args_n][last_len-1]=0x00;
+	if (cmd[args_n]) {
+		if (strcmp(cmd[args_n], "&") == 0) {
+			free(cmd[args_n]);
+			cmd[args_n]=NULL;
 			is_bg=1;
+		}
+		else {
+			size_t last_len=strlen(cmd[args_n]);
+			if (cmd[args_n][last_len-1] == '&') {
+				cmd[args_n][last_len-1]=0x00;
+				is_bg=1;
+			}
 		}
 	}
 	/* Create a new process via fork() */
@@ -9159,7 +9182,8 @@ deselect (char **comm)
 	char *line=NULL, **desel_elements=NULL;
 	while (!line) {
 		line=rl_no_hist(_("Elements to be deselected (ex: 1 2 6, or *)? "));
-		if (!line) continue;
+		if (!line)
+			continue;
 		for (i=0;line[i];i++)
 			if (line[i] != 0x20)
 				no_space=1;
