@@ -5388,15 +5388,10 @@ init_shell(void)
 		/* Put ourselves in our own process group */
 		own_pid=get_own_pid();
 
-		/* Make the shell pgid (process group id) equal to its pid */
-		/* The lines below prevent CliFM from being called as argument for a 
-		 * terminal, ex: xterm -e /path/to/clifm. However, without them input 
-		 * freezes when running as root */
-		 /* NOTE: Not sure why, but the above doesn't happen anymore. This
-		  * if block seems not to be necessary anymore. Indeed setpgid() 
-		  * fails when the program runs as follows: "sudo xterm -e clifm",
-		  * but not as this: "xterm -e sudo clifm" */
-/*		if (flags & ROOT_USR) {
+		if (flags & ROOT_USR) {
+			/* Make the shell pgid (process group id) equal to its pid */
+			/* Without the setpgid line below, the program cannot be run with 
+			* sudo, but it can be run nonetheless by the root user */
 			if (setpgid(own_pid, own_pid) < 0) {
 				asprintf(&msg, "%s: setpgid: %s\n", PROGRAM_NAME, 
 						strerror(errno));
@@ -5409,7 +5404,7 @@ init_shell(void)
 							strerror(errno));
 				exit(EXIT_FAILURE);
 			}
-		} */
+		}
 		
 		/* Grab control of the terminal */
 		tcsetpgrp(shell_terminal, own_pid);
