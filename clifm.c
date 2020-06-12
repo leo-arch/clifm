@@ -327,6 +327,8 @@ of course you can grep it to find, say, linux' macros, as here. */
 
 ###################################
 
+ * (DONE) Check for the system shell. If it doesn't exist, print a warning 
+	message.
  * (DONE) Add ranges to deselect and undel functions. get_substr() is only 
 	used by these two functions, so that I can modify it to return the 
 	substrings including the expanded ranges.
@@ -2401,6 +2403,22 @@ main(int argc, char **argv)
 	if (!config_ok)
 		set_default_options();
 
+	/* Check whether we have a working shell */
+	if (access(sys_shell, X_OK) == -1) {
+		asprintf(&msg, _("%s: %s: System shell not found. Please edit the "
+						 "configuration file to specify a working shell.\n"),
+						 PROGRAM_NAME, sys_shell);
+		if (msg) {
+			warning_msg=1;
+			log_msg(msg, PRINT_PROMPT);
+			free(msg);
+		}
+		else
+		fprintf(stderr, _("%s: %s: System shell not found. Please edit the "
+						 "configuration file to specify a working shell.\n"),
+						 PROGRAM_NAME, sys_shell);
+	}
+
 	get_aliases_n_prompt_cmds();
 
 	get_sel_files();
@@ -2716,7 +2734,7 @@ get_substr(char *str, const char ifs)
 	p=NULL;
 	substr[substr_n]=NULL;
 
-	/* ################### GET RANGES ######################*/
+	/* ################### EXPAND RANGES ######################*/
 	
 	int rsize=0, afirst=0, asecond=0, ranges_ok=0;
 	
@@ -2840,6 +2858,7 @@ get_substr(char *str, const char ifs)
 	
 	if (dstr)
 		return dstr;
+
 	return NULL;
 }
 
@@ -2850,7 +2869,7 @@ is_color_code(char *str)
  * if the string contains some char that is not a number or a semicolon. 
  * Otherwise returns 1. 
  * It will accept this: 110;;;;;;;;00, which is not a valid color code, and 
- * willreject this: 34, that is valid */
+ * will reject this: 34, which is valid */
 {
 	while (*str) {
 		if ((*str < 48 || *str > 57) && *str != ';' && *str != '\n')
