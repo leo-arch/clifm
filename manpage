@@ -32,6 +32,7 @@ CliFM also offers the following features:
   12) Custom aliases and variables
   13) Customizable colors
   14) Shell commands execution
+  15) User profiles
 
 .SH OPTIONS
 .TP
