@@ -248,7 +248,6 @@ of course you can grep it to find, say, linux' macros, as here. */
 							###############
 */
 /*
- ** Add ranges to deselect and undel functions. Use expand_range().
  ** Check compatibility with BSD Unixes.
  ** Add a help option for each internal command. Make sure this help system is
 	consistent accross all commands: if you call help via the --help option, 
@@ -328,6 +327,9 @@ of course you can grep it to find, say, linux' macros, as here. */
 
 ###################################
 
+ * (DONE) Add ranges to deselect and undel functions. get_substr() is only 
+	used by these two functions, so that I can modify it to return the 
+	substrings including the expanded ranges.
  * (DONE) Stop TAB completion when in bookmarks, mountpoints, undel or desel 
 	functions.
  * (DONE) Add an argument, -P, to use an alternative profile.
@@ -1930,63 +1932,6 @@ get_size_unit(off_t file_size)
 	return size_type;
 }
 
-char **get_substr(char *str, const char ifs)
-/* Get all substrings from str using IFS as substring separator. Returns an 
- * array containing all substrings in STR or NULL if: STR is NULL or empty, 
- * STR contains only IFS(s), or in case of memory allocation error */
-{
-	if (!str || *str == '\0')
-		return NULL;
-	char **substr=NULL;
-	void *p=NULL;
-	size_t str_len=strlen(str);
-	char buf[str_len+1];
-	memset(buf, 0x00, str_len+1);
-	size_t length=0, substr_n=0;
-	while (*str) {
-		while (*str != ifs && *str != '\0' && length < sizeof(buf))
-			buf[length++]=*(str++);
-		if (length) {
-			buf[length]='\0';
-			p=realloc(substr, (substr_n+1)*sizeof(char *));
-			if (!p) {
-				/* Free whatever was allocated so far */
-				for (size_t i=0;i<substr_n;i++)
-					free(substr[i]);
-				free(substr);
-				return NULL;
-			}
-			substr=p;
-			p=calloc(length+1, sizeof(char));
-			if (!p) {
-				for (size_t i=0;i<substr_n;i++)
-					free(substr[i]);
-				free(substr);
-				return NULL;
-			}
-			substr[substr_n]=p;
-			p=NULL;
-			strncpy(substr[substr_n++], buf, length);
-			length=0;
-		}
-		else
-			str++;
-	}
-	if (!substr_n)
-		return NULL;
-	p=realloc(substr, (substr_n+1)*sizeof(char *));
-	if (!p) {
-		for (size_t i=0;i<substr_n;i++)
-			free(substr[i]);
-		free(substr);
-		return NULL;
-	}
-	substr=p;
-	p=NULL;
-	substr[substr_n]=NULL;
-	return substr;
-}
-
 /* ###FUNCTIONS PROTOTYPES### */
 
 void signal_handler(int sig_num);
@@ -2069,7 +2014,7 @@ void untrash_function(char **comm);
 void untrash_element(char *file);
 void trash_clear(void);
 int recur_perm_check(const char *dirname);
-int *expand_range(char *str);
+int *expand_range(char *str, int listdir);
 void log_msg(char *msg, int print);
 void keybind_exec_cmd(char *str);
 int get_max_long_view(void);
@@ -2087,6 +2032,7 @@ char *escape_str(char *str);
 void set_default_options(void);
 void set_colors(void);
 int is_color_code(char *str);
+char **get_substr(char *str, const char ifs);
 
 /* Some notes on memory:
 * If a variable is declared OUTSIDE of a function, it is typically considered 
@@ -2704,6 +2650,167 @@ main(int argc, char **argv)
 }
 
 /* ###FUNCTIONS DEFINITIONS### */
+
+char **
+get_substr(char *str, const char ifs)
+/* Get all substrings from STR using IFS as substring separator, and, if there
+ * is a range, expand it. Returns an array containing all substrings in STR 
+ * plus expandes ranges or NULL if: STR is NULL or empty, STR contains only 
+ * IFS(s), or in case of memory allocation error */
+{
+	if (!str || *str == '\0')
+		return NULL;
+	
+	/* ############## SPLIT THE STRING #######################*/
+	
+	char **substr=NULL;
+	void *p=NULL;
+	size_t str_len=strlen(str);
+	char buf[str_len+1];
+	memset(buf, 0x00, str_len+1);
+	size_t length=0, substr_n=0;
+	while (*str) {
+		while (*str != ifs && *str != '\0' && length < sizeof(buf))
+			buf[length++]=*(str++);
+		if (length) {
+			buf[length]='\0';
+			p=realloc(substr, (substr_n+1)*sizeof(char *));
+			if (!p) {
+				/* Free whatever was allocated so far */
+				for (size_t i=0;i<substr_n;i++)
+					free(substr[i]);
+				free(substr);
+				return NULL;
+			}
+			substr=p;
+			p=calloc(length+1, sizeof(char));
+			if (!p) {
+				for (size_t i=0;i<substr_n;i++)
+					free(substr[i]);
+				free(substr);
+				return NULL;
+			}
+			substr[substr_n]=p;
+			p=NULL;
+			strncpy(substr[substr_n++], buf, length);
+			length=0;
+		}
+		else
+			str++;
+	}
+	if (!substr_n)
+		return NULL;
+
+	size_t i=0, j=0;
+	p=realloc(substr, (substr_n+1)*sizeof(char *));
+	if (!p) {
+		for (i=0;i<substr_n;i++)
+			free(substr[i]);
+		free(substr);
+		return NULL;
+	}
+	substr=p;
+	p=NULL;
+	substr[substr_n]=NULL;
+
+	/* ################### GET RANGES ######################*/
+	
+	int rsize=0, afirst=0, asecond=0, ranges_ok=0;
+	
+	for (i=0;substr[i];i++) {
+		/* Check if substr is a valid range */
+		ranges_ok=0;
+		/* If range, get both extremes of it */
+		for (j=1;substr[i][j];j++) {
+			if (substr[i][j] == '-') {
+				/* Get strings before and after the dash */
+				char *first=strbfr(substr[i], '-');
+				if (!first)
+					break;
+				char *second=straft(substr[i], '-');
+				if (!second) {
+					free(first);
+					break;
+				}
+				/* Make sure it is a valid range */
+				if (is_number(first) && is_number(second)) {
+					afirst=atoi(first), asecond=atoi(second);
+					if (asecond <= afirst) {
+						free(first);
+						free(second);
+						break;
+					}
+					/* We have a valid range */
+					ranges_ok=1;
+					free(first);
+					free(second);
+				}
+				else {
+					free(first);
+					free(second);
+					break;
+				}
+			}
+		}
+
+		if (!ranges_ok)
+			continue;
+
+		/* If a valid range */
+		size_t k=0, next=0;
+		char **rbuf=NULL;
+		rbuf=xcalloc(rbuf, (substr_n + (asecond-afirst) 
+					 + 1), sizeof(char *));
+		/* Copy everything before the range expression
+		 * into the buffer */
+		for (j=0;j<i;j++) {
+			rbuf[k]=xcalloc(rbuf[k], strlen(substr[j])+1,
+							sizeof(char));
+			strcpy(rbuf[k++], substr[j]);
+		}
+		/* Copy the expanded range into the buffer */
+		for (j=afirst;j<=asecond;j++) {
+			rbuf[k]=xcalloc(rbuf[k], digits_in_num(j) + 1, sizeof(char));
+			sprintf(rbuf[k++], "%d", j);
+		}
+		/* Copy everything after the range expression into 
+		 * the buffer, if anything */
+		if (substr[i+1]) {
+			next=k;
+			for (j=i+1;substr[j];j++) {
+				rbuf[k]=xcalloc(rbuf[k], strlen(substr[j]) + 1,
+								sizeof(char));
+				strcpy(rbuf[k++], substr[j]);
+			}
+		}
+		else /* If there's nothing after last range, there's no next either */
+			next=0;
+
+		/* Repopulate the original array with the expanded range and
+		 * remaining strings */
+		substr_n=k;
+		for (j=0;substr[j];j++)
+			free(substr[j]);
+		substr=xrealloc(substr, (substr_n + 1) * sizeof(char *));
+		for (j=0;j<substr_n;j++) {
+			substr[j]=xcalloc(substr[j], strlen(rbuf[j]) + 1, 
+							  sizeof(char));
+			strcpy(substr[j], rbuf[j]);
+			free(rbuf[j]);
+		}
+		free(rbuf);
+
+		substr[j]=NULL;
+
+		/* Proceede only if there's something after the last range */
+		if (next)
+			i=next;
+		else
+			break;
+	}
+	
+	return substr;
+}
 
 int
 is_color_code(char *str)
@@ -3785,7 +3892,7 @@ log_msg(char *_msg, int print)
 }
 
 int *
-expand_range(char *str)
+expand_range(char *str, int listdir)
 /* Expand a range of numbers given by str. It will expand the range provided 
  * that both extremes are numbers, bigger than zero, equal or smaller than the 
  * amount of files currently listed on the screen, and the second (right) 
@@ -3816,9 +3923,15 @@ expand_range(char *str)
 	int afirst=atoi(first), asecond=atoi(second);
 	free(first);
 	free(second);
-	if (afirst <= 0 || afirst > files || asecond <= 0 || asecond > files
-			|| afirst >= asecond)
-		return NULL;
+
+	if (listdir)
+		if (afirst <= 0 || afirst > files || asecond <= 0 || asecond > files
+		|| afirst >= asecond)
+			return NULL;
+	else
+		if (afirst >= asecond)
+			return NULL;
+			
 	int *buf=NULL;
 	buf=xcalloc(buf, (asecond-afirst)+2, sizeof(int));
 	size_t j=0;
@@ -4409,6 +4522,11 @@ untrash_function(char **comm)
 		return;
 	}
 
+	if (!trash_ok) {
+		fprintf(stderr, _("%s: Trash function disabled\n"), PROGRAM_NAME);
+		return;
+	}
+
 	/* Change CWD to the trash directory to make scandir() work */
 	if (chdir(TRASH_FILES_DIR) == -1) {
 		asprintf(&msg, "%s: undel: '%s': %s\n", PROGRAM_NAME, 
@@ -4490,7 +4608,7 @@ untrash_function(char **comm)
 	int no_space=0, undel_n=0;
 	char *line=NULL, **undel_elements=NULL;
 	while (!line) {
-		line=rl_no_hist(_("Elements to be undeleted (ex: 1 2 6, or *)? "));
+		line=rl_no_hist(_("Elements to be undeleted (ex: 1 2-6, or *)? "));
 		if (!line) continue;
 		for (size_t i=0;line[i];i++)
 			if (line[i] != 0x20)
@@ -4541,11 +4659,25 @@ untrash_function(char **comm)
 	for(size_t i=0;i<undel_n;i++) {
 		undel_num=atoi(undel_elements[i]);
 		if (undel_num <= 0 || undel_num > trash_files_n) {
-			fprintf(stderr, _("%s: trash: '%d': Invalid ELN\n"), PROGRAM_NAME, 
+			fprintf(stderr, _("%s: undel: '%d': Invalid ELN\n"), PROGRAM_NAME, 
 					undel_num);
 			free(undel_elements[i]);
 			continue;
 		}
+		
+		/* Make sure there are no duplicated elements */
+		char duplicated=0;
+		for (size_t j=i+1;j<undel_n;j++) {
+			if (strcmp(undel_elements[i], undel_elements[j]) == 0) {
+				duplicated=1;
+				break;
+			}
+		}
+		if (duplicated) {
+			free(undel_elements[i]);
+			continue;
+		}
+		
 		/* If valid ELN */
 		untrash_element(trash_files[undel_num-1]->d_name);
 		free(undel_elements[i]);
@@ -4630,11 +4762,6 @@ file\n"), PROGRAM_NAME, trash_files[i]->d_name);
 void
 trash_function(char **comm)
 {
-	if (!trash_ok) {
-		fprintf(stderr, _("%s: Trash function disabled\n"), PROGRAM_NAME);
-		return;
-	}
-
 	/* Create trash dirs, if necessary */
 /*	struct stat file_attrib;
 	if (stat(TRASH_DIR, &file_attrib) == -1) {
@@ -4666,6 +4793,11 @@ trash_function(char **comm)
 
 	if (comm[1] && strcmp(comm[1], "--help") == 0) {
 		puts(_("Usage: trash ELN/filename... [ls, list] [clear] [del, rm]"));
+		return;
+	}
+
+	if (!trash_ok) {
+		fprintf(stderr, _("%s: Trash function disabled\n"), PROGRAM_NAME);
 		return;
 	}
 
@@ -6850,7 +6982,7 @@ parse_input_str(char *str)
 		int old_ranges_n=0;
 		for (size_t r=0;r<ranges_ok;r++) {
 			int ranges_n=0;
-			int *ranges=expand_range(substr[range_array[r]+old_ranges_n]);
+			int *ranges=expand_range(substr[range_array[r]+old_ranges_n], 1);
 			if (ranges) {
 				size_t j=0;
 				for (ranges_n=0;ranges[ranges_n];ranges_n++);
@@ -8857,16 +8989,21 @@ launch_execve(char **cmd)
 	 * final ampersand from the string */
 	char is_bg=0;
 
-	if (cmd[args_n]) {
-		if (strcmp(cmd[args_n], "&") == 0) {
-			free(cmd[args_n]);
-			cmd[args_n]=NULL;
+	/* Get last argument's index */
+	size_t last=0;
+	for (last=0;cmd[last];last++);
+	last--;
+	
+	if (cmd[last]) {
+		if (strcmp(cmd[last], "&") == 0) {
+			free(cmd[last]);
+			cmd[last]=NULL;
 			is_bg=1;
 		}
 		else {
-			size_t last_len=strlen(cmd[args_n]);
-			if (cmd[args_n][last_len-1] == '&') {
-				cmd[args_n][last_len-1]=0x00;
+			size_t last_len=strlen(cmd[last]);
+			if (cmd[last][last_len-1] == '&') {
+				cmd[last][last_len-1]=0x00;
 				is_bg=1;
 			}
 		}
@@ -8992,7 +9129,7 @@ sel_function(char **comm)
 		return;
 	}
 	char *sel_tmp=NULL;
-	int i=0, j=0, exists=0;
+	int i=0, j=0, exists=0, new_sel=0;
 
 	for (i=1;i<=args_n;i++) {
 		char *deq_file=dequote_str(comm[i], 0);
@@ -9006,7 +9143,7 @@ sel_function(char **comm)
 			free(deq_file);
 			continue;
 		}
-		/* If a filename in the current directory... */
+		/* If a filename in CWD... */
 		int sel_is_filename=0, sel_is_relative_path=0;
 		for (j=0;j<files;j++) {
 			if (strcmp(dirlist[j], deq_file) == 0) {
@@ -9021,15 +9158,16 @@ sel_function(char **comm)
 					sel_is_relative_path=1;
 				struct stat file_attrib;
 				if (stat(deq_file, &file_attrib) != 0) {
-					fprintf(stderr, "%s: %s: '%s': %s\n", PROGRAM_NAME, 
-							comm[0], deq_file, strerror(errno));
+					fprintf(stderr, "%s: sel: '%s': %s\n", PROGRAM_NAME, 
+							deq_file, strerror(errno));
 					free(deq_file);
 					continue;
 				}
 			}
-			else { /* If neither a filename nor a valid path... */
-				fprintf(stderr, _("%s: %s: '%s': No such file or directory\n"), 
-						PROGRAM_NAME, comm[0], deq_file);
+			else { /* If neither a filename in CWD nor a path... */
+				fprintf(stderr, _("%s: sel: '%s': No such %s\n"), 
+						PROGRAM_NAME, deq_file, 
+						(is_number(deq_file)) ? "ELN" : "file or directory");
 				free(deq_file);
 				continue;
 			}
@@ -9037,7 +9175,7 @@ sel_function(char **comm)
 		if (sel_is_filename || sel_is_relative_path) { 
 			/* Add path to filename or relative path */
 			sel_tmp=xcalloc(sel_tmp, strlen(path)+strlen(deq_file)+2, 
-				sizeof(char));
+							sizeof(char));
 			sprintf(sel_tmp, "%s/%s", path, deq_file);
 		}
 		else { /* If absolute path... */
@@ -9045,8 +9183,9 @@ sel_function(char **comm)
 			strcpy(sel_tmp, deq_file);
 		}
 		free(deq_file);
-		/* Check whether the selected element is already in the selection 
+		/* Check if the selected element is already in the selection 
 		 * box */
+		exists=0; 
 		for (j=0;j<sel_n;j++) {
 			if (strcmp(sel_elements[j], sel_tmp) == 0) {
 				exists=1;
@@ -9056,18 +9195,22 @@ sel_function(char **comm)
 		if (!exists) {
 			sel_elements=xrealloc(sel_elements, (sel_n+1)*sizeof(char *));
 			sel_elements[sel_n]=xcalloc(sel_elements[sel_n], 
-				strlen(sel_tmp)+1, sizeof(char));
+										strlen(sel_tmp)+1, sizeof(char));
 			strcpy(sel_elements[sel_n++], sel_tmp);
+			new_sel++;
 		}
-		else fprintf(stderr, _("%s: %s: '%s': Already selected\n"), 
-					 PROGRAM_NAME, comm[0], sel_tmp);
+		else fprintf(stderr, _("%s: sel: '%s': Already selected\n"), 
+					 PROGRAM_NAME, sel_tmp);
 		free(sel_tmp);
 		continue;
 	}
 
-	if (!selfile_ok)
+	if (!selfile_ok || !new_sel)
 		return;
 
+	/* At this point, we know there are new selected files and that the
+	 * selection file is OK. So, write new selections into the selection 
+	 * file*/
 	if (save_sel()) { /* If selected files were successfully written to
 		sel file */
 		if (sel_n > 10)
@@ -9081,7 +9224,7 @@ sel_function(char **comm)
 	}
 	else {
 		if (sel_n > 0) { /* In case of error, remove sel files from memory */
-			for (int i=0;i<sel_n;i++)
+			for (i=0;i<sel_n;i++)
 				free(sel_elements[i]);
 			sel_n=0;
 		}
@@ -9176,7 +9319,7 @@ deselect (char **comm)
 	int no_space=0, desel_n=0;
 	char *line=NULL, **desel_elements=NULL;
 	while (!line) {
-		line=rl_no_hist(_("Elements to be deselected (ex: 1 2 6, or *)? "));
+		line=rl_no_hist(_("Elements to be deselected (ex: 1 2-6, or *)? "));
 		if (!line)
 			continue;
 		for (i=0;line[i];i++)
@@ -9189,11 +9332,11 @@ deselect (char **comm)
 	}
 	desel_elements=get_substr(line, ' ');
 	free(line);
-	if (desel_elements)
-		for (i=0;desel_elements[i];i++)
-			desel_n++;
-	else
+	if (!desel_elements)
 		return;
+
+	for (i=0;desel_elements[i];i++)
+		desel_n++;
 
 	for (i=0;i<desel_n;i++) { /* Validation */
 		int atoi_desel=atoi(desel_elements[i]);
@@ -9268,11 +9411,14 @@ deselect (char **comm)
 	/* Free the last DESEL_N elements from the old sel array. They won't be 
 	 * used anymore, for they contain the same value as the last non-deselected 
 	 * element due to the above array rearrangement */
-	for (i=1;i<=desel_n;i++)
-		free(sel_elements[sel_n-i]);
-
+	for (i=1;i<=desel_n;i++) {
+		if ((sel_n-i) >= 0 && sel_elements[sel_n-i])
+			free(sel_elements[sel_n-i]);
+	}
 	/* Reallocate the sel array according to the new size */
 	sel_n=sel_n-desel_n;
+	if (sel_n < 0)
+		sel_n=0;
 	if (sel_n)
 		sel_elements=xrealloc(sel_elements, sel_n*sizeof(char *));
 
@@ -10098,7 +10244,7 @@ dir_size(char *dir)
 	close(stderr_bk);
 
 	if (ret != 0) {
-		printf("??? (ret: %d)\n", ret);
+		puts("???");
 		return;
 	}
 	if (access(DU_TMP_FILE, F_OK) == 0) {
@@ -10112,14 +10258,17 @@ dir_size(char *dir)
 			char *file_size=strbfr(line, '\t');
 			if (file_size)
 				printf("%siB\n", file_size);
-			else puts("strbfr: error");
+			else 
+				puts("strbfr: error");
 			free(file_size);
 			fclose(du_fp);
 		}
-		else puts(_("unknown"));
+		else
+			puts(_("unknown"));
 		remove(DU_TMP_FILE);
 	}
-	else puts(_("unknown"));
+	else 
+		puts(_("unknown"));
 }
 
 void
