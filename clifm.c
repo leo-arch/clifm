@@ -756,6 +756,9 @@ of course you can grep it to find, say, linux' macros, as here. */
 
 ###########################################
 
+ * (SOLVED) Select some files, say 5. Then pass this to the deselect 
+	function: '1-3 1 1'. All the 5 files are deselected, and it shouldn't. 
+	SOLUTION: Remove duplicates directly from get_substr().
  * (SOLVED) If the user's home cannot be found, CliFM will attempt to create 
 	its config files in CWD/clifm_emergency. Now, if CWD is not writable, no 
 	option will be set, and CliFM will become very unstable. SOLUTION: In 
@@ -2809,7 +2812,35 @@ get_substr(char *str, const char ifs)
 			break;
 	}
 	
-	return substr;
+	/* ############## REMOVE DUPLICATES ###############*/
+
+	char **dstr=NULL;
+	size_t len=0;
+	for (i=0;i<substr_n;i++) {
+		int duplicate=0;
+		for (size_t d=i+1;d<substr_n;d++) {
+			if (strcmp(substr[i], substr[d]) == 0) {
+				duplicate=1;
+				break;
+			}
+		}
+		if (duplicate) {
+			free(substr[i]);
+			continue;
+		}
+		dstr=xrealloc(dstr, (len+1)*sizeof(char *));
+		dstr[len]=xcalloc(dstr[len], strlen(substr[i])+1, sizeof(char));
+		strcpy(dstr[len++], substr[i]);
+		free(substr[i]);
+	}
+	free(substr);
+
+	dstr=xrealloc(dstr, (len+1)*sizeof(char *));
+	dstr[len]=NULL;
+	
+	if (dstr)
+		return dstr;
+	return NULL;
 }
 
 int
@@ -3781,6 +3812,7 @@ list_mountpoints(void)
 		
 		/* Ask the user and chdir into the selected mountpoint */
 		char *input=rl_no_hist(_("\nChoose a mountpoint ('q' to quit): "));
+			
 		if (input && input[0] != '\0' && strcmp(input, "q") != 0) {
 			int atoi_num=atoi(input);
 			if (atoi_num > 0 && atoi_num <= mp_n) {
@@ -4666,7 +4698,7 @@ untrash_function(char **comm)
 		}
 		
 		/* Make sure there are no duplicated elements */
-		char duplicated=0;
+/*		char duplicated=0;
 		for (size_t j=i+1;j<undel_n;j++) {
 			if (strcmp(undel_elements[i], undel_elements[j]) == 0) {
 				duplicated=1;
@@ -4676,7 +4708,7 @@ untrash_function(char **comm)
 		if (duplicated) {
 			free(undel_elements[i]);
 			continue;
-		}
+		} */
 		
 		/* If valid ELN */
 		untrash_element(trash_files[undel_num-1]->d_name);
@@ -9339,8 +9371,8 @@ deselect (char **comm)
 		desel_n++;
 
 	for (i=0;i<desel_n;i++) { /* Validation */
-		int atoi_desel=atoi(desel_elements[i]);
-		if (atoi_desel == 0 || atoi_desel > sel_n) {
+		/* If not a number */
+		if (!is_number(desel_elements[i])) {
 			if (strcmp(desel_elements[i], "q") == 0) {
 				for (i=0;i<desel_n;i++)
 					free(desel_elements[i]);
@@ -9364,10 +9396,21 @@ deselect (char **comm)
 			}
 			else {
 				printf(_("desel: '%s': Invalid element\n"), desel_elements[i]);
-				for (i=0;i<desel_n;i++)
-					free(desel_elements[i]);
+				for (size_t j=0;j<desel_n;j++)
+					free(desel_elements[j]);
 				free(desel_elements);
 				return;
+			}
+		}
+		/* If a number, check it's a valid ELN */
+		else {
+			int atoi_desel=atoi(desel_elements[i]);
+			if (atoi_desel == 0 || atoi_desel > sel_n) {
+				printf(_("desel: '%s': Invalid ELN\n"), desel_elements[i]);
+				for (size_t j=0;j<desel_n;j++)
+					free(desel_elements[j]);
+				free(desel_elements);
+				return;				
 			}
 		}
 	}
