@@ -2038,6 +2038,8 @@ void set_default_options(void);
 void set_colors(void);
 int is_color_code(char *str);
 char **get_substr(char *str, const char ifs);
+char *get_sys_shell(void);
+void set_shell(const char *str);
 
 /* Some notes on memory:
 * If a variable is declared OUTSIDE of a function, it is typically considered 
@@ -2238,7 +2240,7 @@ char *user=NULL, *path=NULL, **old_pwd=NULL, **sel_elements=NULL, *qc=NULL,
 		"colors", "version", "license", "splash", "folders first", 
 		"exit", "quit", "pager", "trash", "undel", "messages", 
 		"mountpoints", "bookmarks", "log", "untrash", "unicode", 
-		"profile", NULL };
+		"profile", "shell", NULL };
 
 #define MAX_COLOR 43 
 /* 43 == \e[00;00;00;000;000;000;00;00;000;000;000m (24bit, RGB true color 
@@ -2671,6 +2673,67 @@ main(int argc, char **argv)
 }
 
 /* ###FUNCTIONS DEFINITIONS### */
+
+void
+set_shell(const char *str)
+{
+	if (!*str)
+		return;
+	
+	if (access(str, X_OK) == -1) {
+		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, str, strerror(errno));
+		return;
+	}
+	if (sys_shell)
+		free(sys_shell);
+	sys_shell=xcalloc(sys_shell, strlen(str)+1, sizeof(char));
+	strcpy(sys_shell, str);
+	printf(_("Successfully set '%s' as %s default shell\n"), sys_shell, 
+		   PROGRAM_NAME);
+}
+
+char *
+get_sys_shell(void)
+/* Returns the user's default shell (from /etc/passwd) or NULL if not found */
+
+{
+	if (!user)
+		return NULL;
+
+	FILE *fp;
+	fp=fopen("/etc/passwd", "r");
+	if (!fp)
+		return NULL;
+
+	size_t user_len=strlen(user);
+	char *userline=xcalloc(userline, user_len+2, sizeof(char));
+	sprintf(userline, "%s=", user);
+
+	char *line=NULL, *shellpath=NULL;
+	size_t line_size=0;
+	ssize_t line_len=0;
+	while ((line_len=getline(&line, &line_size, fp)) > 0) {
+		if (strncmp(line, userline, user_len+1)) {
+			shellpath=straftlst(line, ':');
+			break;
+		}
+	}
+
+	free(userline);
+	userline=NULL;
+	free(line);
+	line=NULL;
+	fclose(fp);
+
+	if (shellpath) {
+		size_t shell_len=strlen(shellpath);
+		if (shellpath[shell_len-1] == '\n')
+			shellpath[shell_len-1] = 0x00;
+		return shellpath;
+	}
+
+	return NULL;
+}
 
 char **
 get_substr(char *str, const char ifs)
@@ -3175,8 +3238,11 @@ set_default_options (void)
 	if (sys_shell)
 		free(sys_shell);
 	sys_shell=NULL;
-	sys_shell=xcalloc(sys_shell, 8, sizeof(char));
-	strcpy(sys_shell, "/bin/sh");
+	sys_shell=get_sys_shell();
+	if (!sys_shell) {
+		sys_shell=xcalloc(sys_shell, 8, sizeof(char));
+		strcpy(sys_shell, "/bin/sh");
+	}
 			
 	/* Handle white color for different kinds of terminals: linux (8 colors), 
 	 * (r)xvt (88 colors), and the rest (256 colors). This block is completely 
@@ -6038,7 +6104,7 @@ Splash screen=false\n\
 Show hidden files=true\n\
 Long view mode=false\n\
 External commands=false\n\
-System shell=/bin/sh\n\
+System shell=\n\
 List folders first=true\n\
 cd lists automatically=true\n\
 Case sensitive list=false\n\
@@ -6176,14 +6242,14 @@ values.\n"),
 							ext_cmd_ok=0;
 					}
 					else if (strncmp(line, "System shell=", 13) == 0) {
-						char opt_str[PATH_MAX]="";
-						ret=sscanf(line, "System shell=%4095s\n", opt_str);
-						if (ret == -1)
-							continue;
 						if (sys_shell) {
 							free(sys_shell);
 							sys_shell=NULL;
 						}
+						char opt_str[PATH_MAX]="";
+						ret=sscanf(line, "System shell=%4095s\n", opt_str);
+						if (ret == -1)
+							continue;
 						sys_shell=xcalloc(sys_shell, strlen(opt_str)+1, 
 										  sizeof(char));
 						strcpy(sys_shell, opt_str);
@@ -6437,8 +6503,13 @@ values.\n"),
 			if (long_view == -1) long_view=0;
 			if (ext_cmd_ok == -1) ext_cmd_ok=0;
 			if (!sys_shell) {
+				/* Get user's default shell */
+				sys_shell=get_sys_shell();
+				if (!sys_shell) { 
+				/* Fallback to /bin/sh */
 				sys_shell=xcalloc(sys_shell, 8, sizeof(char));
 				strcpy(sys_shell, "/bin/sh");
+				}
 			}
 			if (pager == -1) pager=0;
 			if (max_hist == -1) max_hist=500;
@@ -6692,8 +6763,8 @@ external_arguments(int argc, char **argv)
 		{"long-view", no_argument, 0, 'L'},
 		{"no-list-on-the-fly", no_argument, 0, 'o'},
 		{"list-on-the-fly", no_argument, 0, 'O'},
-		{"starting-path", required_argument, 0, 'p'},
-		{"alt-profile", required_argument, 0, 'P'},
+		{"path", required_argument, 0, 'p'},
+		{"profile", required_argument, 0, 'P'},
 		{"unicode", no_argument, 0, 'U'},
 		{"no-unicode", no_argument, 0, 'u'},
 		{"version", no_argument, 0, 'v'},
@@ -8720,6 +8791,16 @@ exec_cmd(char **comm)
 			return;
 		for (size_t i=0;i<(size_t)aliases_n;i++)
 			printf("%s", aliases[i]);	
+	}
+	else if (strcmp(comm[0], "shell") == 0) {
+		if (!comm[1]) {
+			if (sys_shell)
+				printf("%s: shell: %s\n", PROGRAM_NAME, sys_shell);
+			else
+				printf("%s: shell: unknown\n", PROGRAM_NAME);
+		}
+		else
+			set_shell(comm[1]);
 	}
 	else if (strcmp(comm[0], "edit") == 0) edit_function(comm);
 	else if (strcmp(comm[0], "history") == 0) history_function(comm);
@@ -11197,17 +11278,17 @@ the line \"12 openbox\", 12 is the ELN corresponding to the 'openbox' \
 file.\n"));
 	printf(_("\n%scmd, commands%s%s: Show this list of commands.\n"), white, 
 		   NC, default_color);
-	printf(_("\n%s/%s%s* [dir]: This is the quick search function. Just type '/' \
+	printf(_("\n%s/%s%s* [DIR]: This is the quick search function. Just type '/' \
 followed by the string you are looking for (you can use wildcards), and %s \
 will list all matches in the current working directory. To search for files \
 in any other directory, specify the directory name as second argument. This \
-argument (dir) could be an absolute path, a relative path, or an ELN.\n"), 
+argument (DIR) could be an absolute path, a relative path, or an ELN.\n"), 
 		   white, NC, default_color, PROGRAM_NAME);
 	printf(_("\n%sbm, bookmarks%s%s: Open the bookmarks menu. Here you can add, \
 remove or edit your bookmarks to your liking, or simply change the current \
 directory to that specified by the corresponding bookmark by just typing \
 either its ELN or its hotkey.\n"), white, NC, default_color);
-	printf(_("\n%so, open%s%s ELN/dir/filename [application name]: Open \
+	printf(_("\n%so, open%s%s ELN/DIR/FILENAME [APPLICATION]: Open \
 either a directory or a file. For example: 'o 12' or 'o filename'. By default, \
 the 'open' function will open files with the default application associated to \
 them (if xdg-open command is found). However, if you want to open a file with \
@@ -11215,7 +11296,7 @@ a different application, just add the application name as second argument, \
 e.g. 'o 12 leafpad'. If you want to run the program in the background, simply \
 add the ampersand character (&): 'o 12 &'. When it comes to directories, \
 'open' works just like the 'cd' command.\n"), white, NC, default_color);
-	printf(_("\n%scd%s%s [ELN/dir]: When used with no argument, it changes the \
+	printf(_("\n%scd%s%s [ELN/DIR]: When used with no argument, it changes the \
 current directory to the default directory (HOME). Otherwise, 'cd' changes \
 the current directory to the one specified by the first argument. You can use \
 either ELN's or a string to indicate the directory you want. Ex: 'cd 12' or \
@@ -11246,11 +11327,11 @@ the back function, but it goes forward in the history record. Of course, you \
 can use 'f hist', 'f h', 'fh', and 'f !ELN'\n"), white, NC, default_color);
 	printf(_("\n%sc, l, m, md, r%s%s: short for 'cp', 'ln', 'mv', 'mkdir', and \
 'rm' commands respectivelly.\n"), white, NC, default_color);
-	printf(_("\n%sp, pr, prop%s%s ELN/filename(s) [a, all] [s, size]: Print \
+	printf(_("\n%sp, pr, prop%s%s ELN/FILENAME(s) [a, all] [s, size]: Print \
 file properties of FILENAME(s). Use 'all' to list properties of all files in \
 the current working directory, and 'size' to list their corresponding \
 sizes.\n"), white, NC, default_color);
-	printf(_("\n%ss, sel%s%s ELN ELN-ELN filename path... n: Send one or \
+	printf(_("\n%ss, sel%s%s ELN ELN-ELN FILENAME PATH... n: Send one or \
 multiple elements to the Selection Box. 'Sel' accepts individual elements, \
 range of elements, say 1-6, filenames and paths, just as wildcards. Ex: sel \
 1 4-10 file* filename /path/to/filename\n"), white, NC, default_color);
@@ -11260,7 +11341,7 @@ Selection Box.\n"), white, NC, default_color);
 elements. You can also deselect all selected elements by typing 'ds a' or \
 'ds all'.\n"), white, 
 		   NC, default_color);
-	printf(_("\n%st, tr, trash%s%s  [ELN's, file(s)] [ls, list] [clear] \
+	printf(_("\n%st, tr, trash%s%s  [ELN's, FILE(s)] [ls, list] [clear] \
 [del, rm]: With no argument (or by passing the 'ls' option), it prints a list \
 of currently trashed files. The 'clear' option removes all files from the \
 trash can, while the 'del' option lists trashed files allowing you to remove \
@@ -11279,13 +11360,15 @@ input string (cmd) as it is to the system shell.\n"), white, NC, default_color,
 	printf(_("\n%smp, mountpoints%s%s: List available mountpoints and change \
 the current working directory into the selected mountpoint.\n"), white, NC, 
 		   default_color);
-	printf(_("\n%sv, paste%s%s [sel] [destiny]: The 'paste sel' command will \
+	printf(_("\n%sv, paste%s%s [sel] [DESTINY]: The 'paste sel' command will \
 copy the currently selected elements, if any, into the current working \
 directory. If you want to copy these elements into another directory, you \
 only need to tell 'paste' where to copy these files. Ex: paste sel \
 /path/to/directory\n"), white, NC, default_color);
 	printf(_("\n%spf, prof, profile%s%s: Print the currently used \
 profile.\n"), white, NC, default_color);
+	printf(_("\n%sshell%s%s [SHELL]: Print the current default shell for \
+%s or set SHELL as the new default shell.\n"), white, NC, default_color);
 	printf(_("\n%slog%s%s [clear]: With no arguments, it shows the log file. \
 If clear is passed as argument, it will delete all the logs.\n"), white, NC, 
 		   default_color);
@@ -11301,8 +11384,8 @@ history commands:\n\
   !!: Execute the last command.\n\
   !n: Execute the command number 'n' in the history list.\n\
   !-n: Execute the last-n command in the history list.\n"));
-	printf(_("\n%sedit%s%s [editor]: Edit the configuration file. If \
-specified, use editor, if available.\n"), white, NC, default_color);
+	printf(_("\n%sedit%s%s [EDITOR]: Edit the configuration file. If \
+specified, use EDITOR, if available.\n"), white, NC, default_color);
 	printf(_("\n%salias%s%s: Show aliases, if any. To write a new alias simpy \
 type 'edit' to open the configuration file and add a line like this: \
 alias alias_name='command_name args...'\n"), white, NC, default_color);
@@ -11394,9 +11477,8 @@ help_function (void)
 \n -L, --long-view\t\t enable long view mode\
 \n -o, --no-list-on-the-fly\t 'cd' works as the shell 'cd' command\
 \n -O, --list-on-the-fly\t\t 'cd' lists files on the fly (default)\
-\n -p, --path /starting/path\t use /starting/path as %s starting path\
-\n -P, --alt-profile profile_name\t use profile_name as an alternative \
-profile\
+\n -p, --path PATH\t\t use PATH as %s starting path\
+\n -P, --profile PROFILE\t use (or create) PROFILE as profile\
 \n -s, --splash \t\t\t enable the splash screen\
 \n -u, --no-unicode \t\t disable unicode\
 \n -U, --unicode \t\t\t enable unicode to correctly list filenames containing \

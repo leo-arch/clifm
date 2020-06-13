@@ -76,11 +76,11 @@ enable long view mode
 .B -L, --list-on-the-fly
 'cd' lists files on the fly (default)
 .TP
-.B -p, --path /starting/path
-use /starting/path as CliFM starting path
+.B -p, --path PATH
+use PATH as CliFM starting path
 .TP
-.B -P, --alt-profile name
-use name as an alternative profile
+.B -P, --profile PROFILE
+use (or create) PROFILE as profile
 .TP
 .B -i, --no-case-sensitive
 no case-sensitive files listing (default)
@@ -114,10 +114,10 @@ this is the quick search function. Just type '/' followed by the string you are 
 .B bm, bookmarks
 open the bookmarks menu. Here you can add, remove or edit your bookmarks to your liking, or simply cd into the desired bookmark by entering either its ELN or its hotkey.
 .TP
-.B o, open ELN (or path or filename) [application name]
-open either a directory or a file. For example: 'o 12' or 'o filename'. By default, the 'open' function will open files with the default application associated to them (if xdg-open command is found). However, if you want to open a file with a different application, just add the application name as second argument, e.g. 'o 12 leafpad'. If you want to run the program in the background, simply add the ampersand character (&): 'o 12 &'. When it comes to directories, 'open' works just like the 'cd' command.
+.B o, open ELN (or PATH or FILENAME) [APPLICATION]
+open either a directory or a file. For example: 'o 12' or 'o filename'. By default, the 'open' function will open files with the default application associated to them (if xdg-open command is found). However, if you want to open a file with a different application, just add the application name as second argument, e.g. 'o 12 leafpad'. If you want to run the program in the background, simply add the ampersand character: 'o 12 &'. When it comes to directories, 'open' works just like the 'cd' command.
 .TP
-.B cd [ELN/dir]
+.B cd [ELN/DIR]
 when used with no argument, it changes the current directory to the default directory (HOME). Otherwise, 'cd' changes the current directory to the one specified by the first argument. You can use either ELN's or a string to indicate the directory you want. Ex: 'cd 12' or 'cd ~/media'. Unlike the shell 'cd' command, CliFM's built-in 'cd' function doesn not only changes the current directory, but also lists its content (provided the option "cd lists automatically" is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of 'cd' is much like this shell command: cd DIR && ls -A --color=auto --group-directories-first
 .TP
 .B b, back [h, hist] [clear] [ELN]
@@ -138,10 +138,10 @@ it works just like the back function, but it goes forward in the history record.
 .B c, l, m, md, r
 short for 'cp', 'ln', 'mv', 'mkdir', and 'rm' commands respectivelly.
 .TP
-.B pr, prop, ELN/filename(s) [a, all] [s, size]
+.B pr, prop, ELN/FILENAME(s) [a, all] [s, size]
 print file properties of FILENAME(s). Use 'all' to list properties of all files in the current working directory, and 'size' to list their corresponding sizes.
 .TP
-.B s, sel ELN ELN-ELN filename path... n
+.B s, sel ELN ELN-ELN FILENAME PATH... n
 send one or multiple elements (either files or directories) to the Selection Box. 'Sel' accepts individual elements, range of elements, say 1-6, filenames and paths, just as wildcards. Ex: sel 1 4-10 file* filename /path/to/filename.
 .TP
 .B sb, selbox
@@ -150,7 +150,7 @@ show the elements contained in the Selection Box.
 .B ds, desel [a, all]
 deselect one or more selected elements. You can also deselect all selected elements by typing 'ds a' or 'ds all'.
 .TP
-.B t, tr, trash  [ELN's, file(s)] [ls, list] [clear] [del, rm]
+.B t, tr, trash  [ELN's, FILE(s)] [ls, list] [clear] [del, rm]
 with no argument (or by passing the 'ls' option), it prints a list of currently trashed files. The 'clear' option removes all files from the trash can, while the 'del' option lists trashed files allowing you to remove one or more of them. The trash directory is $XDG_DATA_HOME/Trash, that is, '~/.local/share/Trash'. Since this trash system follows the freedesktop specification, it is able to handle files trashed by different Trash implementations.
 .TP
 .B u, undel, untrash [a, all]
@@ -159,10 +159,13 @@ print a list of currently trashed files allowing you to choose one or more of th
 .B pf, prof, profile
 print the currently used profile.
 .TP
+.B shell [SHELL]
+print the current default shell for CliFM or set SHELL as the new default shell.
+.TP
 .B mp, mountpoints
 list available mountpoints and change the current working directory into the selected mountpoint.
 .TP
-.B v, paste [sel] [destiny]
+.B v, paste [sel] [DESTINY]
 the 'paste sel' command will copy the currently selected elements, if any, into the current working directory. If you want to copy these elements into another directory, you only need to tell 'paste' where to copy these files. Ex: paste sel /path/to/directory
 .TP
 .B log [clear]
@@ -178,7 +181,7 @@ You can use the exclamation character (!) to perform some history commands:
   !n: Execute the command number 'n' in the history list.
   !-n: Execute the last-n command in the history list.
 .TP
-.B edit [application]
+.B edit [APPLICATION]
 edit the configuration file. If an application is specified, it will be used to open the configuration file.
 .TP
 .B alias
