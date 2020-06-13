@@ -11368,7 +11368,8 @@ only need to tell 'paste' where to copy these files. Ex: paste sel \
 	printf(_("\n%spf, prof, profile%s%s: Print the currently used \
 profile.\n"), white, NC, default_color);
 	printf(_("\n%sshell%s%s [SHELL]: Print the current default shell for \
-%s or set SHELL as the new default shell.\n"), white, NC, default_color);
+%s or set SHELL as the new default shell.\n"), white, NC, default_color, 
+		   PROGRAM_NAME);
 	printf(_("\n%slog%s%s [clear]: With no arguments, it shows the log file. \
 If clear is passed as argument, it will delete all the logs.\n"), white, NC, 
 		   default_color);
@@ -11416,7 +11417,7 @@ written by Richard Stallman.\n"), white, NC,
 	printf(_("\n%sq, quit, exit, zz%s%s: Safely quit %s.\n"), white, NC, 
 			default_color, PROGRAM_NAME);
 	printf(_("%s  \nKeyboard shortcuts%s%s:\n\
-%s  A-c%s%s:	Reset the current command line\n\
+%s  A-c%s%s:	Clear the current command line\n\
 %s  A-f%s%s:	Toggle list-folders-first on/off\n\
 %s  C-r%s%s:	Refresh the screen\n\
 %s  A-l%s%s:	Toggle long view mode on/off\n\
@@ -11478,7 +11479,7 @@ help_function (void)
 \n -o, --no-list-on-the-fly\t 'cd' works as the shell 'cd' command\
 \n -O, --list-on-the-fly\t\t 'cd' lists files on the fly (default)\
 \n -p, --path PATH\t\t use PATH as %s starting path\
-\n -P, --profile PROFILE\t use (or create) PROFILE as profile\
+\n -P, --profile PROFILE\t\t use (or create) PROFILE as profile\
 \n -s, --splash \t\t\t enable the splash screen\
 \n -u, --no-unicode \t\t disable unicode\
 \n -U, --unicode \t\t\t enable unicode to correctly list filenames containing \
