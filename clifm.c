@@ -11430,13 +11430,13 @@ written by Richard Stallman.\n"), white, NC,
 %s  A-r%s%s:	Go to the root directory\n\
 %s  A-e%s%s:	Go to the home directory\n\
 %s  A-u%s%s:	Go up to the parent directory of the current working directory\n\
-%s  A-h/A-j%s%s:	Go to the previous directory in the directory history \
+%s  A-j%s%s:	Go to the previous directory in the directory history \
 list\n\
 %s  A-k%s%s:	Go to the next directory in the directory history list\n\
 %s  F10%s%s:	Open the configuration file\n\n\
 NOTE: Depending on the terminal emulator being used, some of these \
-keybindings, like A-e and A-f, might conflict with some of the terminal \
-keybindings.\n"), 
+keybindings, like A-e, A-f, and F10, might conflict with some of the \
+terminal keybindings.\n"), 
 		white, NC, default_color, 
 		white, NC, default_color, 
 		white, NC, default_color,
@@ -11464,7 +11464,7 @@ help_function (void)
 
 	printf(_("%s %s (%s), by %s\n"), PROGRAM_NAME, VERSION, DATE, AUTHOR);
 
-	printf(_("\nUsage: %s [-aAfFgGhiIlLoOsuUvx] [-p path] [-P profile]\n\
+	printf(_("\nUsage: %s [-aAfFgGhiIlLoOsuUvx] [-p PATH] [-P PROFILE]\n\
 \n -a, --no-hidden\t\t do not show hidden files\
 \n -A, --show-hidden\t\t show hidden files (default)\
 \n -f, --no-folders-first\t\t do not list folders first\
