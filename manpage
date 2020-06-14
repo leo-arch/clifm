@@ -33,7 +33,7 @@ CliFM also offers the following features:
   13) Customizable colors
   14) Shell commands execution
   15) User profiles
-  16) Commands sequential execution
+  16) Commands sequential and conditional execution
 
 .SH OPTIONS
 .TP
@@ -105,7 +105,7 @@ Arguments precedence order: 1) command line; 2) configuration file; 3) default o
 
 .SH COMMANDS
 \fBNOTE:\fR ELN = Element List Number. Example: in the line "12 openbox" (when listing files), 12 is the ELN corresponding to the file named "openbox".
-\fBNOTE 2:\fR For each of the below commands you can use the semicolon to execute them sequentially. Ex: cmd1;cmd2
+\fBNOTE 2:\fR For each of the below commands you can use the semicolon to execute them sequentially or the double ampersand to execute them conditionally. Example: 'cmd1; cmd2', or 'cmd1 && cmd 2'
 
 .TP
 .B cmd, commands 
