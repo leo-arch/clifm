@@ -248,7 +248,11 @@ of course you can grep it to find, say, linux' macros, as here. */
 							###############
 */
 /*
- ** Check compatibility with BSD Unixes.
+ ** Add support for commands conditional execution (cmd1 && cmd2). I should
+	modify exec_cmd(), and each function called by it, to return a value. 
+	It's not hard but time consuming. For the rest, it's basically the same
+	as sequential execution.
+ ** Check compatibility with BSD Unices.
  ** Add a help option for each internal command. Make sure this help system is
 	consistent accross all commands: if you call help via the --help option, 
 	do it this way for all commands. Try to unify the usage and description
@@ -327,6 +331,7 @@ of course you can grep it to find, say, linux' macros, as here. */
 
 ###################################
 
+ * (DONE) Add support for commands sequential execution (cmd1;cmd2).
  * (DONE) Check for the system shell. If it doesn't exist, print a warning 
 	message.
  * (DONE) Add ranges to deselect and undel functions. get_substr() is only 
@@ -628,7 +633,7 @@ of course you can grep it to find, say, linux' macros, as here. */
 	nonetheless whenever I don't need this index.
  * (DONE) Use getopt_long function to parse external arguments.
  * (DONE) Update colors in properties_function and colors_list.
- * (DONE) Add color for 'file with capability' (???) (\033[0;30;41). Some 
+ * (DONE) Add color for 'file with capability' (???) (\e[0;30;41). Some 
 	files with capabilities: /bin/{rsh,rlogin,rcp,ping}
  * (DONE) Add different color (green bg, like 'ls') for sticky directories.
  * (DONE) Replace all calls to calloc and realloc by my custom functions 
@@ -1226,6 +1231,14 @@ while 'linux' is deprecated, '__linux__' is recommended */
 #define _GNU_SOURCE /* I need this macro to enable 
 program_invocation_short_name variable and asprintf() */
 
+#ifndef EXIT_SUCCESS
+	#define EXIT_SUCCESS 0
+#endif
+
+#ifndef EXIT_FAILURE
+	#define EXIT_FAILURE 1
+#endif
+
 #ifndef PATH_MAX
 	#define PATH_MAX 4096
 #endif
@@ -1288,8 +1301,8 @@ program_invocation_short_name variable and asprintf() */
  * and files. Currently, config dirs and files are dinamically allocated */
 #define TMP_DIR "/tmp/clifm"
 /* If no formatting, puts (or write) is faster than printf */
-#define CLEAR puts("\033c")
-/* #define CLEAR write(STDOUT_FILENO, "\033c", 3) */
+#define CLEAR puts("\ec")
+/* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
 #define VERSION "0.15.4"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
@@ -1334,23 +1347,23 @@ static int flags;
 /* These are just a fixed color stuff in the interface. Remaining colors 
  * are customizable and set via the config file */
 
-#define blue "\033[1;34m" 
-#define green "\033[1;32m"
-#define gray "\033[1;30m"
-#define white "\033[1;37m"
-#define red "\033[1;31m"
-#define cyan "\033[1;36m"
-#define d_cyan "\033[0;36m"
-#define NC "\033[0m"
+#define blue "\e[1;34m" 
+#define green "\e[1;32m"
+#define gray "\e[1;30m"
+#define white "\e[1;37m"
+#define red "\e[1;31m"
+#define cyan "\e[1;36m"
+#define d_cyan "\e[0;36m"
+#define NC "\e[0m"
 
 /* Colors for the prompt: */
 /* \001 and \002 tell readline that color codes between them are non-printing 
  * chars. This is specially useful for the prompt, i.e., when passing color 
  * codes to readline */
-#define red_b "\001\033[1;31m\002" /* error log indicator */
-#define green_b "\001\033[1;32m\002" /* sel indicator */
-#define yellow_b "\001\033[0;33m\002" /* trash indicator */
-#define NC_b "\001\033[0m\002"
+#define red_b "\001\e[1;31m\002" /* error log indicator */
+#define green_b "\001\e[1;32m\002" /* sel indicator */
+#define yellow_b "\001\e[0;33m\002" /* trash indicator */
+#define NC_b "\001\e[0m\002"
 /* NOTE: Do not use \001 prefix and \002 suffix for colors list: they produce 
  * a displaying problem in lxterminal (though not in aterm and xterm). */
 
@@ -2041,6 +2054,9 @@ char **get_substr(char *str, const char ifs);
 char *get_sys_shell(void);
 void set_shell(const char *str);
 
+void exec_chained_cmds(char *cmd);
+int is_internal_c(const char *cmd);
+
 /* Some notes on memory:
 * If a variable is declared OUTSIDE of a function, it is typically considered 
 * "GLOBAL," meaning that any function can access it. Global variables are 
@@ -2674,6 +2690,76 @@ main(int argc, char **argv)
 
 /* ###FUNCTIONS DEFINITIONS### */
 
+int
+is_internal_c(const char *cmd)
+/* Check cmd against a list of internal commands. Used by parse_input_str()
+ * when running chained commands */
+{
+	char *int_cmds[]={ "o", "open", "cd", "p", "pr", "prop", "t", "tr", 
+					   "trash", "s", "sel", "rf", "refresh", "c", "cp",
+					   "m", "mv", "bm", "bookmarks", "b", "back",
+					   "f", "forth", "bh", "fh", "u", "undel", "untrash",
+					   "s", "sel", "sb", "selbox", "ds", "desel", "rm",
+					   "mkdir", "ln", "unlink", "touch", "r", "md", "l",
+					   "p", "pr", "prop", "pf", "prof", "profile",
+					   "mp", "mountpoints", "ext", "pg", "pager", "uc",
+					   "unicode", "folders", "ff", "log", "msg", "messages",
+					   "alias", "shell", "edit", "history", "hf", "hidden",
+					   "path", "cwd", "splash", "ver", "version", "?",
+					   "help", "cmd", "commands", "colors", "license",
+					   "fs", NULL };
+	char found=0;
+	for (size_t i=0;int_cmds[i];i++) {
+		if (strcmp(cmd, int_cmds[i]) == 0) {
+			found=1;
+			break;
+		}
+	}
+	if (found) /* Check for the search and history functions as well */
+		return 1;
+	else if ((cmd[0] == '/' && access(cmd, F_OK) != 0) || cmd[0] == '!')
+		return 1;
+	return 0;
+}
+
+void
+exec_chained_cmds(char *cmd)
+/* Execute chained commands (cmd1;cmd2). The function is called by 
+ * parse_input_str() if both some non-quoted semicolon is found in the input
+ * string and the first command is internal. */
+{
+	if (!cmd)
+		return;
+	size_t i=0, cmd_len=strlen(cmd);
+	for (i=0;i<cmd_len;i++) {
+		char *str=NULL;
+		size_t len=0;
+		str=xcalloc(str, strlen(cmd)+1, sizeof(char));
+		while (cmd[i] && cmd[i] != ';') {
+			str[len++]=cmd[i++];
+		}
+		if (str) {
+			char **tmp_cmd=parse_input_str(str);
+			free(str);
+			if (tmp_cmd) {
+				char **alias_cmd=check_for_alias(tmp_cmd);
+				if (alias_cmd) {
+					exec_cmd(alias_cmd);
+					for (int i=0;alias_cmd[i];i++)
+						free(alias_cmd[i]);
+					free(alias_cmd);
+				}
+				else {
+					exec_cmd(tmp_cmd);
+					for (size_t j=0;j<=args_n;j++) 
+						free(tmp_cmd[j]);
+					free(tmp_cmd);
+				}
+			}
+		}
+	}
+}
+
 void
 set_shell(const char *str)
 {
@@ -3263,9 +3349,9 @@ set_default_options (void)
 	}
 	// 256 colors terminal
 	else {
-		strcpy(default_color, "\001\033[38;5;253m\002");
+		strcpy(default_color, "\001\e[38;5;253m\002");
 		if (strcmp(text_color, "white") == 0)
-			strcpy(text_color, "\001\033[38;5;253m\002");
+			strcpy(text_color, "\001\e[38;5;253m\002");
 	} */
 }
 
@@ -3360,7 +3446,7 @@ split_str(char *str)
 		switch (*str) {
 			case '\'':
 			case '"':
-				if (str_len > 0 && *(str-1) == '\\') {
+				if (str_len && *(str-1) == '\\') {
 					buf=xrealloc(buf, (buf_len+1)*sizeof(char *));
 					buf[buf_len++]=*str;
 					break;					
@@ -3391,7 +3477,7 @@ split_str(char *str)
 			breaking characters */
 			case '\n':
 			case 0x20:
-				if (*(str-1) && *(str-1) == '\\') {
+				if (str_len && *(str-1) == '\\') {
 					buf=xrealloc(buf, (buf_len+1)*sizeof(char *));
 					buf[buf_len++]=*str;
 				}
@@ -6554,9 +6640,9 @@ values.\n"),
 			}
 			// 256 colors terminal
 			else {
-				strcpy(default_color, "\001\033[38;5;253m\002");
+				strcpy(default_color, "\001\e[38;5;253m\002");
 				if (strcmp(text_color, "white") == 0)
-					strcpy(text_color, "\001\033[38;5;253m\002");
+					strcpy(text_color, "\001\e[38;5;253m\002");
 			} */
 		}
 		
@@ -7022,12 +7108,17 @@ parse_input_str(char *str)
 {
 	/* #### 1) CHECK FOR SPECIAL FUNCTIONS #### */
 	size_t i=0;
-	/* If user defined variable or if invoking a command via ';' or ':' send 
-	 * the whole string to exec_cmd(), in which case no expansion is made: 
-	 * the command is literally send to the system shell. */
-	char space_found=0;
+	char space_found=0, chaining=0;
 	for (i=0;str[i];i++) {
-		if (str[i] == '=' && i > 0 && str[i-1] != '\\') {
+		/* Check for chained commands (cmd1;cmd2) */
+		if (str[i] == ';' && i > 0 && str[i-1] != '\\') {
+			chaining=1;
+			break;
+		}
+		/* If user defined variable or if invoking a command via ';' or ':' 
+		 * send the whole string to exec_cmd(), in which case no expansion 
+		 * is made: the command is literally send to the system shell. */
+		else if (str[i] == '=' && i > 0 && str[i-1] != '\\') {
 			for (size_t j=0;j<i;j++) {
 				/* If there are no spaces before '=', take it as a variable. 
 				 * This check is done in order to avoid taking as a variable 
@@ -7038,6 +7129,28 @@ parse_input_str(char *str)
 			if (!space_found && !isdigit(str[0]))
 				flags |= IS_USRVAR_DEF;
 			break;
+		}
+	}
+
+	if (chaining) {
+		size_t j=0, str_len=strlen(str), len=0;
+		char *buf=NULL;
+		/* Get first word (cmd) to check if its internal. If the command is
+		 * not internal, let the system shell do the work */
+		buf=xcalloc(buf, str_len+1, sizeof(char));
+		while (str[j] && str[j] != 0x20 && str[j] != ';') {
+			buf[len++]=str[j++];
+		}
+		if (buf) {
+			if (is_internal_c(buf)) {
+				free(buf);
+				/* exec_chained_cmds() will split the string into the
+				 * corresponding subcommands and execute each of them
+				 * calling parse_input_str() and then exec_cmd() */
+				exec_chained_cmds(str);
+				return NULL;
+			}
+			free(buf);
 		}
 	}
 	
@@ -7082,7 +7195,7 @@ parse_input_str(char *str)
 		
 		size_t substr_len=strlen(substr[i]);
 		
-		/* Get ranges index */
+		/* Check for ranges */
 		for (size_t j=0;substr[i][j];j++) {
 			/* If a range is found, store its index */
 			if (j > 0 && j < substr_len && substr[i][j] == '-' && 
@@ -7095,7 +7208,7 @@ parse_input_str(char *str)
 		if (i > 0 && strcmp(substr[i], "sel") == 0)
 			is_sel=i;
 	}
-
+	
 	/* ### 3.a) RANGES EXPANSION ### 
 	 * Expand expressions like "1-3" to "1 2 3" if all the numbers in the
 	 * range correspond to an ELN */

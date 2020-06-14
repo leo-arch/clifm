@@ -33,6 +33,7 @@ CliFM also offers the following features:
   13) Customizable colors
   14) Shell commands execution
   15) User profiles
+  16) Commands sequential execution
 
 .SH OPTIONS
 .TP
@@ -103,7 +104,9 @@ allow the use of external commands
 Arguments precedence order: 1) command line; 2) configuration file; 3) default options.
 
 .SH COMMANDS
-\fBNote:\fR ELN = Element List Number. Example: in the line "12 openbox" (when listing files), 12 is the ELN corresponding to the file named "openbox".
+\fBNOTE:\fR ELN = Element List Number. Example: in the line "12 openbox" (when listing files), 12 is the ELN corresponding to the file named "openbox".
+\fBNOTE 2:\fR For each of the below commands you can use the semicolon to execute them sequentially. Ex: cmd1;cmd2
+
 .TP
 .B cmd, commands 
 show this list of commands
