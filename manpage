@@ -155,14 +155,14 @@ send one or multiple elements (either files or directories) to the Selection Box
 .B sb, selbox
 show the elements contained in the Selection Box.
 .TP
-.B ds, desel [a, all]
-deselect one or more selected elements. You can also deselect all selected elements by typing 'ds a' or 'ds all'.
+.B ds, desel [*, a, all]
+deselect one or more selected elements. You can also deselect all selected elements at once by passing '*', 'a' or 'all' to the function.
 .TP
 .B t, tr, trash  [ELN/FILE ... n] [ls, list] [clear] [del, rm]
 with no argument (or by passing the 'ls' option), it prints a list of currently trashed files. The 'clear' option removes all files from the trash can, while the 'del' option lists trashed files allowing you to remove one or more of them. The trash directory is $XDG_DATA_HOME/Trash, that is, '~/.local/share/Trash'. Since this trash system follows the freedesktop specification, it is able to handle files trashed by different Trash implementations.
 .TP
-.B u, undel, untrash [a, all]
-print a list of currently trashed files allowing you to choose one or more of these files to be undeleted, that is to say, restored to their original location. You can also undelete all trashed files at once using the 'a' or 'all' option.
+.B u, undel, untrash [*, a, all]
+print a list of currently trashed files allowing you to choose one or more of these files to be undeleted, that is to say, restored to their original location. You can also undelete all trashed files at once using the '*', 'a' or 'all' option.
 .TP
 .B pf, prof, profile
 print the currently used profile.

@@ -4794,8 +4794,8 @@ untrash_function(char **comm)
 	}
 
 	int exit_code=0;
-	/* if "undel all" (or "u a") */
-	if (comm[1] && (strcmp(comm[1], "a") == 0 
+	/* if "undel all" (or "u a" or "u *") */
+	if (comm[1] && (strcmp(comm[1], "*") == 0|| strcmp(comm[1], "a") == 0 
 	|| strcmp(comm[1], "all") == 0)) {
 		for (size_t j=0;j<trash_files_n;j++) {
 			if (untrash_element(trash_files[j]->d_name) != 0)
@@ -7516,7 +7516,13 @@ parse_input_str(char *str)
 	}
 
 	/* #### 6) GLOB EXPANSION #### */
-	if (glob_n) {
+	/* Do not expand if command is deselect or untrash, just to allow the
+	 * use of "*" for both commands: "ds *" and "u *" */
+	if (glob_n && strcmp(substr[0], "ds") != 0 
+	&& strcmp(substr[0], "desel") != 0 
+	&& strcmp(substr[0], "u") != 0
+	&& strcmp(substr[0], "undel") != 0 
+	&& strcmp(substr[0], "untrash") != 0) {
 	 /*	1) Expand glob
 		2) Create a new array, say comm_array_glob, large enough to store the 
 		   expanded glob and the remaining (non-glob) arguments 
@@ -9489,10 +9495,13 @@ save_sel(void)
 		return EXIT_FAILURE;
 		
 	if (sel_n == 0) {
-		if (remove(sel_file_user) == -1)
+		if (remove(sel_file_user) == -1) {
 			fprintf(stderr, "%s: sel: '%s': %s\n", PROGRAM_NAME, 
 					sel_file_user, strerror(errno));
-		return EXIT_FAILURE;
+			return EXIT_FAILURE;
+		}
+		else
+			return EXIT_SUCCESS;
 	}
 
 	FILE *sel_fp=fopen(sel_file_user, "w");
@@ -9514,6 +9523,7 @@ save_sel(void)
 		fprintf(sel_fp, "\n");
 	}
 	fclose(sel_fp);
+
 	return EXIT_SUCCESS;
 }
 
@@ -9698,16 +9708,16 @@ deselect (char **comm)
 	if (!comm)
 		return EXIT_FAILURE;
 
-	/* This is the old 'ds *', not working now because of the autotamic 
-	 * wildacards expansion */
-	if (comm[1] && (strcmp(comm[1], "a") == 0 || strcmp(comm[1], "all") == 0)) {
+	if (comm[1] && (strcmp(comm[1], "*") == 0 || strcmp(comm[1], "a") == 0 
+	|| strcmp(comm[1], "all") == 0)) {
 		if (sel_n > 0) {
 			for (int i=0;i<sel_n;i++)
 				free(sel_elements[i]);
 			sel_n=0;
 			if (save_sel() != 0)
 				return EXIT_FAILURE;
-			return EXIT_SUCCESS;
+			else
+				return EXIT_SUCCESS;
 		}
 		else {
 			puts(_("desel: There are no selected files"));
@@ -11685,9 +11695,9 @@ range of elements, say 1-6, filenames and paths, just as wildcards. Ex: sel \
 1 4-10 file* filename /path/to/filename\n"), white, NC, default_color);
 	printf(_("\n%ssb, selbox%s%s: Show the elements contained in the \
 Selection Box.\n"), white, NC, default_color);
-	printf(_("\n%sds, desel%s%s [a, all]: Deselect one or more selected \
-elements. You can also deselect all selected elements by typing 'ds a' or \
-'ds all'.\n"), white, 
+	printf(_("\n%sds, desel%s%s [*, a, all]: Deselect one or more selected \
+elements. You can also deselect all selected elements by typing 'ds *', \
+'ds a' or 'ds all'.\n"), white, 
 		   NC, default_color);
 	printf(_("\n%st, tr, trash%s%s  [ELN's, FILE(s)] [ls, list] [clear] \
 [del, rm]: With no argument (or by passing the 'ls' option), it prints a list \
@@ -11697,14 +11707,14 @@ one or more of them. The trash directory is $XDG_DATA_HOME/Trash, that is, \
 '~/.local/share/Trash'. Since this trash system follows the freedesktop \
 specification, it is able to handle files trashed by different Trash \
 implementations.\n"), white, NC, default_color);
-	printf(_("\n%su, undel, untrash%s%s [a, all]: Print a list of currently \
+	printf(_("\n%su, undel, untrash%s%s [*, a, all]: Print a list of currently \
 trashed files allowing you to choose one or more of these files to be \
 undeleted, that is to say, restored to their original location. You can also \
-undelete all trashed files at once using the 'a' or 'all' option.\n"), white, 
-		   NC, default_color);
+undelete all trashed files at once passing the '*', 'a' or 'all' option.\n"), 
+		   white, NC, default_color);
 	printf(_("\n%s;%s%scmd, %s:%s%scmd: Skip all %s expansions and send the \
 input string (cmd) as it is to the system shell.\n"), white, NC, default_color, 
-			white, NC, default_color, PROGRAM_NAME);
+		   white, NC, default_color, PROGRAM_NAME);
 	printf(_("\n%smp, mountpoints%s%s: List available mountpoints and change \
 the current working directory into the selected mountpoint.\n"), white, NC, 
 		   default_color);
