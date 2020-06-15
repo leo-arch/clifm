@@ -9073,8 +9073,16 @@ exec_cmd(char **comm)
 	else if (strcmp(comm[0], "history") == 0) 
 		exit_code=history_function(comm);
 	else if (strcmp(comm[0], "hf") == 0 
-	|| strcmp(comm[0], "hidden") == 0)
-		exit_code=hidden_function(comm);
+	|| strcmp(comm[0], "hidden") == 0) {
+		if (!comm[1] || strcmp(comm[1], "--help") == 0) {
+			/* The same message is in hidden_function(), and printed
+			 * whenever an invalid argument is entered */
+			puts(_("Usage: hidden, hf [on, off, status]")); 
+			return EXIT_SUCCESS;
+		}
+		else
+			exit_code=hidden_function(comm);
+	}
 
 	else if (strcmp(comm[0], "path") == 0 || strcmp(comm[0], "cwd") == 0) 
 		printf("%s\n", path);
@@ -11045,11 +11053,6 @@ hidden_function(char **comm)
 {
 	int exit_code=0;
 
-	if (!comm[1] || strcmp(comm[1], "--help") == 0) {
-		puts(_("Usage: hidden [on, off, status]")); 
-		return exit_code;
-	}
-	
 	if (strcmp (comm[1], "status") == 0)
 		printf(_("%s: Hidden files %s\n"), PROGRAM_NAME, 
 			   (show_hidden) ? _("enabled") : _("disabled"));
@@ -11077,7 +11080,7 @@ hidden_function(char **comm)
 	}
 
 	else 
-		fprintf(stderr, _("Usage: hidden [on, off, status]\n"));
+		fputs(_("Usage: hidden, hf [on, off, status]\n"), stderr);
 	
 	return exit_code;
 }
@@ -11091,7 +11094,7 @@ log_function(char **comm)
 	
 	int clear_log=0;
 	/* If the command was just 'log' */
-	if (strcmp(comm[0], "log") == 0 && args_n == 0) {
+	if (strcmp(comm[0], "log") == 0 && !comm[1]) {
 		FILE *log_fp;
 		log_fp=fopen(LOG_FILE, "r");
 		if (!log_fp) {
