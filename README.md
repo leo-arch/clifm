@@ -94,6 +94,13 @@ Just try it and run the `help` command to learn more about CliFM. Once in the Cl
 
       [user@hostname] ~/ $ help
 
+Do not forget to install the manpage as well (the full help is in here):
+
+`sudo cp manpage /usr/share/man/man1/clifm.1 `
+`sudo gzip /usr/share/man/man1/clifm.1`
+
+Then you can access the manpage as always: `man clifm`
+
 ## Translating CliFM
 
 This last version includes a spanish translation. To use it, simply copy `translations/spanish/clifm.mo` to
