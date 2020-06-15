@@ -7,13 +7,17 @@ This new version (0.16.2) brings a lot (really, a lot) of bug fixes and some new
 
 CliFM is a completely text-based file manager able to perform all the basic operations you may expect from any other FM. Besides these common operations, such as copy, move, remove, etc, CLiFM most distinctive features are:
 
-* The use of short (and even one-letter) commands, and list numbers (ELN's) for filenames. For example, instead of typing: `cp file1 file2 file3 file4 dir/`, you can do this: `c 1-4 7`. Shorter and quicker. As a plus, ELN's can also be used with external commands. Example: `diff 1 5` or `ls -l 12 14`. If numbers are a bit tricky to you, as they are to me, you can use the TAB key to expand the ELN to the corresponding filename. So, type `r 56`, then TAB, and it becomes `r filename`.
+* It is REALLY text-based. No GUI (like Thunar and the like) nor TUI or curses (like Ranger) at all, just text. Since it does not need any GUI, it can run on the Linux built-in console and even on a SSH or telnet session.
 
-* Bookmarks: Let's suppose you constantly need to access `/media/data/misc/iso_images`. With CLiFM bookmarks function, to access this location could be as easy as this: `bm` (or `Alt-b`), to call the bookmarks function, and then `1`, provided `/media/data/misc/iso_images` is your first bookmark.
+* With a memory footprint below 5 MiB and a disk usage of 0.25 MiB, it is incredibly lightweight and fast, and as such, able to run on really old hardware. It is probabily the most lightweight and fastest file manager out there.
+
+* The use of short (and even one-character) commands, and list numbers (ELN's) for filenames. For example, instead of typing: `cp file1 file2 file3 file4 dir/`, you can do this: `c 1-4 7`. Shorter and quicker. As a plus, ELN's can also be used with external commands. Example: `diff 1 5` or `ls -l 12 14`. If numbers are a bit tricky to you, as they are to me, you can use the TAB key to expand the ELN to the corresponding filename. So, type `r 56`, then TAB, and it becomes `r filename`.
+
+* Bookmarks: Let's suppose you constantly need to access `/media/data/misc/iso_images`. With CLiFM bookmarks function, accessing this location could be as easy as this: `bm` (or `Alt-b`), to call the bookmarks function, and then `1`, provided `/media/data/misc/iso_images` is your first bookmark.
 
 ![alt_tag](https://github.com/leo-arch/clifm/blob/master/images/bookmarks.png)
 
-* Files selection: the ability to select (and deselect) files from here and there, even in different instances of the program, and then operate on them as you whish via the Selection Box or the `sel` keyword. Example: `s 1 4 56 33` will send the files corresponding to these element list numbers to the Selection Box. Then, by typing `sb` you can check the contents of the Selection Box. Let's suppose you want to copy a couple of files from your home directory to some distant path, say `/media/data/misc`. Instead of copying all these files individually, you just select the files and then tell the `paste` command where to copy them:
+* Files selection: the ability to select (and deselect) files from here and there, even in different instances of the program, and then operate on them as you whish via the Selection Box or the `sel` keyword. Example: `s 1 4 56 33` will send the files corresponding to these ELN's to the Selection Box. Then, by typing `sb` you can check the contents of the Selection Box. Let's suppose you want to copy a couple of files from your home directory to some distant path, say `/media/data/misc`. Instead of copying all these files individually, you just select the files and then tell the `paste` command where to copy them:
  
 `s 1 2 3 6` (or `s 1-3 6`) and then `paste sel /media/data/misc`
 
@@ -29,7 +33,7 @@ You can also use the 'sel' keyword with external commands. Example: `s 1-4 7 10 
 
 * A `trash system` to be able to recover deleted files.
 
-* Just like the `ls` command, CLiFM uses (customizable) color codes to identify file types. However, and unlike `ls`, CLiFM is also able to distinguish between empty and non-empty files. Once in CliFM, type `colors` to see the entire list of color codes.
+* Just like the `ls` command, CLiFM uses (customizable) color codes to identify file types. However, and unlike `ls`, CLiFM is also able to distinguish between empty and non-empty files or directories. Once in CliFM, type `colors` to see the entire list of color codes.
 
 ![alt_tag](https://github.com/leo-arch/clifm/blob/master/images/colors.png)
 
@@ -53,8 +57,7 @@ Because file manager, but also half shell, CLiFM also offers the following featu
 Finally, all CLiFM options could be handled directly by command line, by passing parameters to the program, or via plain
 text configuration files, located in `~/.config/clifm/`.
 
-Insofar as it is heavily inspired in Arch Linux and its KISS principle, CLiFM is fundamentally aimed to be lightweight, fast, and simple. Weighing approximately 5 MB (!), it is the most lightweight and fastest file manager out there. 
-On Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity
+Insofar as it is heavily inspired by Arch Linux and its KISS principle, CLiFM is fundamentally aimed to be lightweight, fast, and simple. On Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity
 
 ## Dependencies:
 
