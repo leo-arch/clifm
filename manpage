@@ -105,7 +105,12 @@ Arguments precedence order: 1) command line; 2) configuration file; 3) default o
 
 .SH COMMANDS
 \fBNOTE:\fR ELN = Element List Number. Example: in the line "12 openbox" (when listing files), 12 is the ELN corresponding to the file named "openbox".
-\fBNOTE 2:\fR For each of the below commands you can use the semicolon to execute them sequentially or the double ampersand to execute them conditionally. Example: 'cmd1; cmd2', or 'cmd1 && cmd 2'
+.TP
+\fBNOTE 2:\fR For each of the commands below (internal commands) you can use the semicolon to execute them sequentially and/or the double ampersand to execute them conditionally. Example: 'cmd1; cmd2 && cmd3'. 
+.TP
+Bear in mind that, whenever at least one internal command is involved in a chained list of commands, CliFM will take care of executing them (simply because the system shell isn't able to understand any of these commands), so that no shell inter-process function (like pipes), nor any stream redirection or shell expression (like IF blocks or FOR loops) will be available. However, the shell is still used to run single external commands found in the chained list, but in isolation from the remaining commands in this list.
+.TP
+As a rule of thumb, when using chained commands make sure to always expand ELN's to avoid undesired consequences. If, for instance, you issue this command: 'touch aaa && r 3', you will end up deleting a file you were not intended to delete, simple because after the successfull execution of the first command, the ELN 3 corresponds now to a different file.
 
 .TP
 .B cmd, commands 
