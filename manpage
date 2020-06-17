@@ -119,8 +119,8 @@ show this list of commands
 .B /* [DIR]
 this is the quick search function. Just type '/' followed by the string you are looking for (you can use wildcards), and CliFM will list all the matches in the current working directory. To search for files in any other directory, specify the directory name as second argument. This argument (DIR) could be an absolute path, a relative path, or an ELN.
 .TP
-.B bm, bookmarks
-open the bookmarks menu. Here you can add, remove or edit your bookmarks to your liking, or simply cd into the desired bookmark by entering either its ELN or its hotkey.
+.B bm, bookmarks [a, add PATH] [d, del]
+with no argument, open the bookmarks menu. Here you cd into the desired bookmark by entering either its ELN or its shortcut. In this screen you can also add, remove or edit your bookmarks by simply typing 'e' to edit the bookmarks file. If you want to add or remove a bookmark directly from the command line, use the 'a' and 'd' arguments respectivelly. Example: 'bm a /media/misc' or 'bm d'. 
 .TP
 .B o, open ELN/FILE [APPLICATION]
 open either a directory or a file. For example: 'o 12' or 'o filename'. By default, the 'open' function will open files with the default application associated to them (if xdg-open command is found). However, if you want to open a file with a different application, just add the application name as second argument, e.g. 'o 12 leafpad'. If you want to run the program in the background, simply add the ampersand character: 'o 12 &'. When it comes to directories, 'open' works just like the 'cd' command.

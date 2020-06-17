@@ -248,6 +248,10 @@ of course you can grep it to find, say, linux' macros, as here. */
 							###############
 */
 /*
+ ** Bookmarks: I don't think "hotkey" is the right word. "Shortcut" looks
+	better.
+ ** It would be nice to add TAB completion for bookmarks, untrash and unsel
+	functions. Use my_rl_path_completion().
  ** Check compatibility with BSD Unices.
  ** Add a help option for each internal command. Make sure this help system is
 	consistent accross all commands: if you call help via the --help option, 
@@ -326,6 +330,8 @@ of course you can grep it to find, say, linux' macros, as here. */
 
 ###################################
 
+ * (DONE) Allow the bookmarks function to add or remove bookmarks from the
+	command line, something like "bm add PATH".
  * (DONE) Conditional and sequential commands cannot be mixed: chained cmds 
 	are either sequential or conditional. This cannot be done: 
 	cmd1 && cmd2 ; cmd3. SOLUTION: Mix both in one function and make a test 
@@ -772,6 +778,8 @@ of course you can grep it to find, say, linux' macros, as here. */
 
 ###########################################
 
+ * (SOLVED) "cd [TAB]" shows only dirs, but "cd .[TAB]" shows all files.
+ * (SOLVED) TAB path completion not working with local executables: "./file" 
  * (SOLVED) Select some files, say 5. Then pass this to the deselect 
 	function: '1-3 1 1'. All the 5 files are deselected, and it shouldn't. 
 	SOLUTION: Remove duplicates directly from get_substr().
@@ -1312,10 +1320,10 @@ program_invocation_short_name variable and asprintf() */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.16.2"
+#define VERSION "0.16.3"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "June 15, 2020"
+#define DATE "June 17, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -1483,7 +1491,7 @@ xstrcpy(char *buf, const char *str)
 		buf++;
 		str++;
 	}
-	*buf='\0';
+	*buf=0x00;
 	return buf;
 }
 
@@ -1498,7 +1506,7 @@ xstrncpy(char *buf, const char *str, size_t n)
 		str++;
 		counter++;
 	}
-	*buf='\0';
+	*buf=0x00;
 	return buf;
 }
 
@@ -1506,7 +1514,7 @@ size_t
 xstrlen(const char *str)
 {
 	size_t len=0;
-	while (*(str++)) /* Same as: str[len] != '\0' */
+	while (*(str++)) /* Same as: str[len] != 0x00 */
 		len++;
 	return len;
 }
@@ -1767,7 +1775,7 @@ strbfrlst(char *str, char c)
 	p=NULL;
 	strcpy(buf, str);
 /*	if (index != str_len-1) // Why? This check shouldn't be here */
-		buf[index]='\0';
+		buf[index]=0x00;
 	return buf;
 }
 
@@ -1808,7 +1816,7 @@ strbtw(const char *str, const char a, const char b)
 	}	
 	for(int i=ch_from+1;i<ch_to;i++)
 		f_str[j++]=str[i];
-	f_str[j]='\0';
+	f_str[j]=0x00;
 	return f_str;
 }
 
@@ -1835,7 +1843,7 @@ char *
 url_encode(char *str)
 /* Returns a url-encoded version of str */
 {
-	if (!str || str[0] == '\0')
+	if (!str || str[0] == 0x00)
 		return NULL;
 	char *p=calloc((strlen(str)*3)+1, sizeof(char));
 	/* The max lenght of our buffer is 3 times the length of srt plus 1 extra 
@@ -1868,7 +1876,7 @@ char *
 url_decode(char *str)
 /* Returns a url-decoded version of str */
 {
-	if (!str || str[0] == '\0')
+	if (!str || str[0] == 0x00)
 		return NULL;
 	char *p=calloc(strlen(str)+1, sizeof(char));
 	/* The decoded string will be at most as long as the encoded string */
@@ -1984,7 +1992,7 @@ int sel_function(char **comm);
 void show_sel_files(void);
 int deselect(char **comm);
 int search_function(char **comm);
-int bookmarks_function(void);
+int bookmarks_function(char **cmd);
 char **get_bookmarks(char *bookmarks_file);
 char **bm_prompt(void);
 int count_dir(const char *dir_path);
@@ -2041,6 +2049,12 @@ int set_shell(const char *str);
 
 void exec_chained_cmds(char *cmd);
 int is_internal_c(const char *cmd);
+
+int del_bookmark(void);
+int add_bookmark(char *file);
+char *savestring (const char *str, size_t size);
+char *my_rl_path_completion(const char *text, int state);
+int is_link_to_dir(const char *link);
 
 /* Some notes on memory:
 * If a variable is declared OUTSIDE of a function, it is typically considered 
@@ -2509,7 +2523,21 @@ main(int argc, char **argv)
 	 * listed filenames, in case of ELN's. I use a custom completion
 	 * function to add command and ELN completion, since readline's 
 	 * internal completer only performs path completion */
+
+	/* Define a function for path completion.
+	 * NULL means to use filename_entry_function (), the default filename
+	 * completer. */
+	rl_completion_entry_function=my_rl_path_completion;
+
+	/* Pointer to alternative function to create matches.
+	 * Function is called with TEXT, START, and END.
+	 * START and END are indices in RL_LINE_BUFFER saying what the boundaries
+	 * of TEXT are.
+	 * If this function exists and returns NULL then call the value of
+	 * rl_completion_entry_function to try to match, otherwise use the
+	 * array of strings returned. */
 	rl_attempted_completion_function=my_rl_completion;
+	rl_ignore_completion_duplicates=1;
 	/* I'm using here a custom quoting function. If not specified, readline
 	 * uses the default internal function. */
 	rl_filename_quoting_function=my_rl_quote;
@@ -2676,6 +2704,27 @@ main(int argc, char **argv)
 /* ###FUNCTIONS DEFINITIONS### */
 
 int
+is_link_to_dir(const char *link)
+/* Check if symlink (LINK) is link to dir. Returns zero if true and one if
+ * false */
+{
+	if (!link)
+		return EXIT_FAILURE;
+
+	char *linkname=realpath(link, NULL);
+	if (linkname) {
+		struct stat file_attrib;
+		stat(linkname, &file_attrib);
+		free(linkname);
+		linkname=NULL;
+		if ((file_attrib.st_mode & S_IFMT) == S_IFDIR)
+			return EXIT_SUCCESS;
+	}
+
+	return EXIT_FAILURE;
+}
+
+int
 is_internal_c(const char *cmd)
 /* Check cmd against a list of internal commands. Used by parse_input_str()
  * when running chained commands */
@@ -2834,7 +2883,7 @@ get_substr(char *str, const char ifs)
  * plus expandes ranges or NULL if: STR is NULL or empty, STR contains only 
  * IFS(s), or in case of memory allocation error */
 {
-	if (!str || *str == '\0')
+	if (!str || *str == 0x00)
 		return NULL;
 	
 	/* ############## SPLIT THE STRING #######################*/
@@ -2846,10 +2895,10 @@ get_substr(char *str, const char ifs)
 	memset(buf, 0x00, str_len+1);
 	size_t length=0, substr_n=0;
 	while (*str) {
-		while (*str != ifs && *str != '\0' && length < sizeof(buf))
+		while (*str != ifs && *str != 0x00 && length < sizeof(buf))
 			buf[length++]=*(str++);
 		if (length) {
-			buf[length]='\0';
+			buf[length]=0x00;
 			p=realloc(substr, (substr_n+1)*sizeof(char *));
 			if (!p) {
 				/* Free whatever was allocated so far */
@@ -3776,7 +3825,7 @@ cd_function(char *new_path)
 
 	char buf[PATH_MAX]=""; /* Temporarily store new_path */
 	/* If "cd" */
-	if (!deq_path || deq_path[0] == '\0') {
+	if (!deq_path || deq_path[0] == 0x00) {
 		if (user_home) {
 			ret=chdir(user_home);
 			if (ret == 0)
@@ -3814,7 +3863,7 @@ cd_function(char *new_path)
 		else {
 			char tmp_path[PATH_MAX]="";
 			snprintf(tmp_path, PATH_MAX, "%s/%s", 
-					 (path[0] == '/' && path[1] == '\0') ? "" : path, 
+					 (path[0] == '/' && path[1] == 0x00) ? "" : path, 
 					 deq_path);
 			ret=chdir(tmp_path);
 			if (ret == 0)
@@ -3989,7 +4038,7 @@ list_mountpoints(void)
 		/* Ask the user and chdir into the selected mountpoint */
 		char *input=rl_no_hist(_("\nChoose a mountpoint ('q' to quit): "));
 			
-		if (input && input[0] != '\0' && strcmp(input, "q") != 0) {
+		if (input && input[0] != 0x00 && strcmp(input, "q") != 0) {
 			int atoi_num=atoi(input);
 			if (atoi_num > 0 && atoi_num <= mp_n) {
 				int ret=chdir(mountpoints[atoi_num-1]);
@@ -4086,7 +4135,7 @@ log_msg(char *_msg, int print)
 	/* If msg log file isn't set yet... This will happen if an error occurs
 	 * before running init_config(), for example, if the user's home cannot be
 	 * found */
-	if (MSG_LOG_FILE && MSG_LOG_FILE[0] == '\0') 
+	if (MSG_LOG_FILE && MSG_LOG_FILE[0] == 0x00) 
 		return;
 
 	FILE *msg_fp=fopen(MSG_LOG_FILE, "a");
@@ -4221,7 +4270,7 @@ wx_parent_check(char *file)
 	int ret=-1;
 	size_t file_len=strlen(file);
 	if (file[file_len-1] == '/')
-		file[file_len-1]='\0';
+		file[file_len-1]=0x00;
 	if (lstat(file, &file_attrib) == -1) {
 		fprintf(stderr, _("'%s': No such file or directory\n"), file);
 		return EXIT_FAILURE;
@@ -4391,7 +4440,7 @@ trash_element (const char *suffix, struct tm *tm, char *file)
 		 * SIZE bytes. Terminate the original file name (FILENAME) with a
 		 * tilde (~), to let the user know it is trimmed */
 		filename[filename_len-size-1]='~';
-		filename[filename_len-size]='\0';
+		filename[filename_len-size]=0x00;
 	}
 	size_t file_suffix_len=filename_len+suffix_len+2; /* 2 = dot + null byte */
 	char file_suffix[file_suffix_len];
@@ -4557,7 +4606,7 @@ remove_from_trash (void)
 		while (!isspace(c=getchar())) 
 			rm_elements[rm_n][length++]=c;
 		/* Add end of string char to the last position */
-		rm_elements[rm_n++][length]='\0';
+		rm_elements[rm_n++][length]=0x00;
 		length=0;
 	}
 	rm_elements=xrealloc(rm_elements, sizeof(char **)*rm_n);
@@ -4777,7 +4826,7 @@ untrash_function(char **comm)
 							(unicode) ? alphasort : (case_sensitive) 
 							? xalphasort : alphasort_insensitive);
 	if (trash_files_n == 0) {
-		printf(_("trash: There are no trashed files\n"));
+		puts(_("trash: There are no trashed files"));
 		if (chdir(path) == -1) {
 			asprintf(&msg, "%s: undel: '%s': %s\n", PROGRAM_NAME, path, 
 					 strerror(errno));
@@ -4842,13 +4891,13 @@ untrash_function(char **comm)
 	int no_space=0, undel_n=0;
 	char *line=NULL, **undel_elements=NULL;
 	while (!line) {
-		line=rl_no_hist(_("Elements to be undeleted (ex: 1 2-6, or *)? "));
+		line=rl_no_hist(_("Element(s) to be undeleted (ex: 1 2-6, or *): "));
 		if (!line)
 			continue;
 		for (size_t i=0;line[i];i++)
 			if (line[i] != 0x20)
 				no_space=1;
-		if (line[0] == '\0' || !no_space) {
+		if (line[0] == 0x00 || !no_space) {
 			free(line);
 			line=NULL;
 		}
@@ -5453,7 +5502,7 @@ readline_kbind_action (int count, int key) {
 char *
 parse_usrvar_value(const char *str, const char c)
 {
-	if (c == '\0' || !str) 
+	if (c == 0x00 || !str) 
 		return NULL;
 	size_t str_len=strlen(str);
 	for (size_t i=0;i<str_len;i++) {
@@ -5465,11 +5514,11 @@ parse_usrvar_value(const char *str, const char c)
 			buf=xcalloc(buf, (str_len-index)+1, sizeof(char));	
 			for (i=index;i<str_len;i++) {
 				if (str[i] != '"' && str[i] != '\'' && str[i] != '\\' 
-				&& str[i] != '\0') {
+				&& str[i] != 0x00) {
 					buf[j++]=str[i];
 				}
 			}
-			buf[j]='\0';
+			buf[j]=0x00;
 			return buf;
 		}
 	}
@@ -5612,7 +5661,7 @@ Usage example:
 	char **str=NULL; 
 	str=xcalloc(str, 1, sizeof(char *));
 	for (int i=0;i<10;i++)
-		str=xrealloc(str, sizeof(char **)*(i+1));
+		str=xrealloc(str, sizeof(char)*(i+1));
 */
 {
 	/* According to realloc manpage: "If ptr is NULL, then the call is 
@@ -5625,7 +5674,7 @@ Usage example:
 	if (!new_ptr) {
 		new_ptr=realloc(ptr, size);
 		if (!new_ptr) {
-			free(ptr);
+//			free(ptr);
 			/* cppcheck complains about a double free here. However, the 
 			 * realloc documentation says: "If realloc() fails, the original 
 			 * block is left untouched; it is not freed or moved." */
@@ -5641,8 +5690,21 @@ Usage example:
 			exit(EXIT_FAILURE);
 		}
 	}
-	ptr=new_ptr;
-	new_ptr=NULL;
+//	ptr=new_ptr;
+//	new_ptr=NULL;
+	return new_ptr;
+}
+
+char *
+savestring (const char *str, size_t size)
+{
+	if (!str)
+		return NULL;
+
+	char *ptr=NULL;
+	ptr=xcalloc(ptr, size+1, sizeof(char));
+	strcpy(ptr, str);
+
 	return ptr;
 }
 
@@ -5678,9 +5740,9 @@ Usage example:
 			exit(EXIT_FAILURE);
 		}
 	}
-	ptr=new_ptr;
-	new_ptr=NULL;
-	return ptr;
+//	ptr=new_ptr;
+//	new_ptr=NULL;
+	return new_ptr;
 }
 
 void
@@ -5928,17 +5990,205 @@ dequote_str(char *text, int m_t)
 	return buf;
 }
 
+char *
+my_rl_path_completion(const char *text, int state)
+/* Modified version of filename_completion_function() of an old Bash 
+ * release (1.14.7) */
+{
+	/* state is zero before completion, and 1 ... n after getting possible
+	 * completions. Example: 
+	 * cd Do[TAB] -> state 0
+	 * cuments/ -> state 1
+	 * wnloads/ -> state 2 
+	 * */
+
+/*	if (strncmp(rl_line_buffer, "bm ", 3) == 0
+	|| strncmp(rl_line_buffer, "bookmarks ", 10) == 0) {
+		printf("\nBookmarks completion!\n");
+		return NULL;
+	} */
+
+	int rl_complete_with_tilde_expansion=0;
+	/* ~/Doc -> /home/user/Doc */
+
+	static DIR *directory;
+	static char *filename=(char *)NULL;
+	static char *dirname=(char *)NULL;
+	static char *users_dirname=(char *)NULL;
+	static int filename_len;
+
+	struct dirent *entry=(struct dirent *)NULL;
+
+	/* If we don't have any state, then do some initialization. */
+	if (!state) {
+		char *temp;
+
+		if (dirname)
+			free(dirname);
+		if (filename)
+			free(filename);
+		if (users_dirname)
+			free(users_dirname);
+
+		size_t text_len=strlen(text);
+		if (text_len)
+			filename=savestring(text, text_len);
+		else
+			filename=savestring("", 1);
+		if (!*text)
+			text = ".";
+		if (text_len)
+			dirname=savestring(text, text_len);
+		else
+			dirname=savestring("", 1);
+
+		/* Get everything after last slash */
+		temp=strrchr(dirname, '/');
+
+		if (temp) { 
+		  strcpy(filename, ++temp);
+		  *temp=0x00;
+		}
+		else
+			strcpy(dirname, ".");
+
+		/* We aren't done yet.  We also support the "~user" syntax. */
+
+		/* Save the version of the directory that the user typed. */
+		size_t dirname_len=strlen(dirname);
+		users_dirname=savestring(dirname, dirname_len);
+//		{
+			char *temp_dirname;
+			int replace_dirname;
+
+			temp_dirname=tilde_expand(dirname);
+			free(dirname);
+			dirname=temp_dirname;
+
+			replace_dirname=0;
+			if (rl_directory_completion_hook)
+				replace_dirname=(*rl_directory_completion_hook) (&dirname);
+			if (replace_dirname) {
+				free(users_dirname);
+				users_dirname=savestring(dirname, dirname_len);
+			}
+//		}
+		directory=opendir(dirname);
+		filename_len=strlen(filename);
+
+		rl_filename_completion_desired=1;
+    }
+
+	/* At this point we should entertain the possibility of hacking wildcarded
+	filenames, like /usr/man/man<WILD>/te<TAB>.  If the directory name
+	contains globbing characters, then build an array of directories, and
+	then map over that list while completing. */
+	/* *** UNIMPLEMENTED *** */
+
+	/* Now that we have some state, we can read the directory. */
+
+	while (directory && (entry=readdir(directory))) {
+		/* If the user entered nothing before TAB (ex: "cd [TAB]") */
+		if (!filename_len) {
+			/* If cmd is 'cd', match only dirs or symlinks to dir */
+			if (strncmp(rl_line_buffer, "cd ", 3) == 0) {
+				if (entry->d_type == DT_LNK) {
+					if (is_link_to_dir(entry->d_name) == 0)
+						break; /* Match */
+				}
+				else if (entry->d_type != DT_DIR)
+					continue; /* No match */
+			}
+			/* All entries except "." and ".." are possible
+			 * completions */
+			if ((strcmp(entry->d_name, ".") != 0)
+			&& (strcmp(entry->d_name, "..") != 0))
+				break;
+		}
+		/* If there is at least one char to complete (ex: "cd .[TAB]")*/
+		else {
+			if (strncmp(rl_line_buffer, "cd ", 3) == 0) {
+				if (entry->d_type == DT_LNK) {
+					if (is_link_to_dir(entry->d_name) == 0)
+						break;
+				}
+				if (entry->d_type != DT_DIR)
+					continue;
+			}
+			/* Otherwise, if these match up to the length of filename, then
+			it is a match. */
+			if ((entry->d_name[0] == filename[0])
+			&& (((int)strlen(entry->d_name)) >= filename_len)
+			&& (strncmp(filename, entry->d_name, filename_len) == 0))
+				break;
+		}
+	}
+
+	if (!entry) {
+		if (directory) {
+			closedir(directory);
+			directory=(DIR *)NULL;
+		}
+		if (dirname) {
+			free(dirname);
+			dirname=(char *)NULL;
+		}
+		if (filename) {
+			free(filename);
+			filename=(char *)NULL;
+		}
+		if (users_dirname) {
+			free(users_dirname);
+			users_dirname=(char *)NULL;
+		}
+
+		return (char *)NULL;
+	}
+
+	else {
+		char *temp=NULL;
+
+		/* dirname && (strcmp (dirname, ".") != 0) */
+		if (dirname && (dirname[0] != '.' || dirname[1])) {
+			if (rl_complete_with_tilde_expansion && *users_dirname == '~') {
+				int dirlen=strlen(dirname);
+				temp=xcalloc(temp, 2 + dirlen + strlen(entry->d_name), 
+							 sizeof(char));
+				strcpy(temp, dirname);
+				/* Canonicalization cuts off any final slash present.  We 
+				 * need to add it back. */
+				if (dirname[dirlen-1] != '/') {
+					temp[dirlen]='/';
+					temp[dirlen+1]=0x00;
+				}
+			}
+			else {
+				  temp=xcalloc(temp, 1 + strlen(users_dirname)
+							   + strlen(entry->d_name), sizeof(char));
+				  strcpy(temp, users_dirname);
+			}
+
+			strcat(temp, entry->d_name);
+		}
+		else
+			temp=savestring(entry->d_name, strlen(entry->d_name));
+
+		return(temp);
+	}
+}
+
 char **
 my_rl_completion(const char *text, int start, int end)
 {
 	char **matches=NULL;
-	/* This line only prevents a Valgrind warning about unused variables */
-//	if (end) {}
 	if (start == 0) { /* Only for the first word entered in the prompt */
 		/* Commands auto-completion */
-		/* Prevent readline from attempting path completion if 
-		 * rl_completion matches returns NULL */
-		rl_attempted_completion_over=1;
+		if (end == 0) { /* If text is empty, do nothing */
+			/* Prevent readline from attempting path completion if 
+			* rl_completion matches returns NULL */
+			rl_attempted_completion_over=1;
+			return NULL;
+		}
 		matches=rl_completion_matches(text, &bin_cmd_generator);
 	}
 	else { /* ELN auto-expansion !!! */
@@ -5947,7 +6197,7 @@ my_rl_completion(const char *text, int start, int end)
 			matches=rl_completion_matches(text, &filenames_generator);
 	}
 	/* If not first word and not a number, readline will attempt 
-	 * path completion instead */
+	 * path completion instead via my custom my_rl_path_completion () */
 	return matches;
 }
 
@@ -7073,7 +7323,7 @@ brace_expansion(const char *str)
 			if ((str_len-1)-closing_brace > 0) {
 				braces_end=xcalloc(braces_end, str_len-closing_brace, 
 								   sizeof(char));
-				for (k=closing_brace+1;str[k]!='\0';k++)
+				for (k=closing_brace+1;str[k]!=0x00;k++)
 					braces_end[l++]=str[k];
 			}
 		break;
@@ -7089,8 +7339,8 @@ brace_expansion(const char *str)
 	braces=xcalloc(braces, braces_n+1, sizeof(char *));
 	for (int i=(int)j+1;i<closing_brace;i++) {
 		char brace_tmp[closing_brace-initial_brace];
-		memset(brace_tmp, '\0', closing_brace-initial_brace+1);
-		while (str[i] != '}' && str[i] != ',' && str[i] != '\0')
+		memset(brace_tmp, 0x00, closing_brace-initial_brace+1);
+		while (str[i] != '}' && str[i] != ',' && str[i] != 0x00)
 			brace_tmp[k++]=str[i++];
 		if (braces_end) {
 			braces[braces_n]=xcalloc(braces[braces_n], strlen(braces_root)
@@ -7727,7 +7977,7 @@ get_sel_files(void)
 		char sel_line[PATH_MAX]="";
 		while (fgets(sel_line, sizeof(sel_line), sel_fp)) {
 			size_t line_len=strlen(sel_line);
-			sel_line[line_len-1]='\0';
+			sel_line[line_len-1]=0x00;
 			sel_elements=xrealloc(sel_elements, (sel_n+1)*sizeof(char *));
 			sel_elements[sel_n]=xcalloc(sel_elements[sel_n], line_len+1, 
 										sizeof(char));
@@ -7871,20 +8121,26 @@ prompt(void)
 
 	/* Enable commands history only if the input line is not void */
 	if (input) {
-		/* Do not record exit, history commands, or consecutively equal 
-		* inputs */
+		/* Do not record empty lines, exit, history commands, or 
+		 * consecutively equal inputs */
+		char no_space=0;
+		size_t input_len=strlen(input);
+		for (size_t i=0;i<input_len;i++)
+			if (input[i] != 0x00 && input[i] != 0x20)
+				no_space=1;
 		if (strcmp(input, "q") != 0 && strcmp(input, "quit") != 0 
 		&& strcmp(input, "exit") != 0 && strcmp(input, "zz") != 0
 		&& strcmp(input, "salir") != 0 && strcmp(input, "chau") != 0
 		&& input[0] != '!' && history && history[current_hist_n-1] 
-		&& (strcmp(input, history[current_hist_n-1]) != 0)) {
+		&& (strcmp(input, history[current_hist_n-1]) != 0)
+		&& no_space) {
 			add_history(input);
 			if (config_ok)
 				append_history(1, HIST_FILE);
 			/* Add the new input to the history array */
 			history=xrealloc(history, (current_hist_n+1)*sizeof(char *));
 			history[current_hist_n]=xcalloc(history[current_hist_n], 
-				strlen(input)+1, sizeof(char));
+										    input_len+1, sizeof(char));
 			strcpy(history[current_hist_n++], input);
 		}
 	}
@@ -8163,7 +8419,7 @@ $ dircolors --print-database */
 	/* This function lists files in the current working directory, that is, 
 	 * the global variable 'path', that SHOULD be set before calling this
 	 * function */
-	if (!path || path[0] == '\0') {
+	if (!path || path[0] == 0x00) {
 		fprintf(stderr, _("%s: Path variable is NULL or empty\n"), 
 				PROGRAM_NAME);
 		return EXIT_FAILURE;
@@ -8175,7 +8431,7 @@ $ dircolors --print-database */
 	/* Remove final slash from path, if any */
 	size_t strlen_path=strlen(path);
 	if (path[strlen_path-1] == '/' && strcmp(path, "/") != 0)
-		path[strlen_path-1]='\0';
+		path[strlen_path-1]=0x00;
 	
 	/* If list directories first, first store directories, then files, and 
 	 * finally copy everything into one single array (dirlist) */
@@ -8666,7 +8922,7 @@ check_for_alias(char **comm)
 			/* Get the aliased command */
 			aliased_cmd=strbtw(aliases[i], '\'', '\'');
 			if (!aliased_cmd) return NULL;
-			if (aliased_cmd[0] == '\0') { /* zero length */
+			if (aliased_cmd[0] == 0x00) { /* zero length */
 				free(aliased_cmd);
 				return NULL;
 			}
@@ -8764,7 +9020,7 @@ exec_cmd(char **comm)
 		kbind_busy=1;
 		/* Disable TAB completion while in Bookmarks */
 		rl_attempted_completion_function=NULL;
-		exit_code=bookmarks_function();
+		exit_code=bookmarks_function(comm);
 		/* Reenable TAB completion */
 		rl_attempted_completion_function=my_rl_completion;
 		/* Reenable keyboard shortcuts */
@@ -9174,7 +9430,7 @@ Run 'ext on' to enable them.\n"),
 			 * that is, move the pointer to the next (second) position */
 			char *comm_tmp=comm[0]+1;
 			/* If string == ":" or ";" */
-			if (!comm_tmp || comm_tmp[0] == '\0') {
+			if (!comm_tmp || comm_tmp[0] == 0x00) {
 				fprintf(stderr, _("%s: '%c': Syntax error\n"), PROGRAM_NAME, 
 						comm[0][0]);
 				return EXIT_FAILURE;
@@ -9749,13 +10005,13 @@ deselect (char **comm)
 	int no_space=0, desel_n=0;
 	char *line=NULL, **desel_elements=NULL;
 	while (!line) {
-		line=rl_no_hist(_("Elements to be deselected (ex: 1 2-6, or *)? "));
+		line=rl_no_hist(_("Element(s) to be deselected (ex: 1 2-6, or *): "));
 		if (!line)
 			continue;
 		for (i=0;line[i];i++)
 			if (line[i] != 0x20)
 				no_space=1;
-		if (line[0] == '\0' || !no_space) {
+		if (line[0] == 0x00 || !no_space) {
 			free(line);
 			line=NULL;
 		}
@@ -9953,7 +10209,7 @@ search_function(char **comm)
 
 		/* If second argument ("/search_str /path"), chdir into it, since 
 		 * glob() works on CWD */
-		if (comm[1] && comm[1][0] != '\0') {
+		if (comm[1] && comm[1][0] != 0x00) {
 			deq_dir=dequote_str(comm[1], 0);
 			if (!deq_dir) {
 				fprintf(stderr, _("%s: %s: Error dequoting filename\n"),
@@ -10015,7 +10271,7 @@ search_function(char **comm)
 	else {
 		char found=0;
 		/* If /search_str /path */
-		if (comm[1] && comm[1][0] != '\0') {
+		if (comm[1] && comm[1][0] != 0x00) {
 			deq_dir=dequote_str(comm[1], 0);
 			if (!deq_dir) {
 				fprintf(stderr, _("%s: %s: Error dequoting filename\n"), 
@@ -10130,7 +10386,8 @@ copy_function(char **comm)
 char **
 get_bookmarks(char *bookmarks_file)
 /* Get bookmarks from BOOKMARKS_FILE, store them in the bookmarks array and
- * the amount of bookmarks in the global variable bm_n */
+ * the amount of bookmarks in the global variable bm_n, used later by 
+ * bookmarks_function() */
 {
 	bm_n=-1; /* This global variable stores the total amount of bookmarks */
 	char **bookmarks=NULL;
@@ -10150,30 +10407,36 @@ get_bookmarks(char *bookmarks_file)
 	}
 
 	bm_n=0; /* bm_n is only zero if no file error. Otherwise, it is -1 */
-	int ret_nl;
-	/* Get bookmarks from the bookmarks file */
 
-/*	char line[PATH_MAX]="";
-	while (fgets(line, sizeof(line), bm_fp)) {
-	} */
+	/* Get bookmarks from the bookmarks file */
 
 	char *line=NULL;
 	size_t line_size=0;
 	ssize_t line_len=0;
 	while ((line_len=getline(&line, &line_size, bm_fp)) > 0) {
-		if (line[0] != '#') { /* If not a comment */
-			/* Allocate memory to store the bookmark */
-			bookmarks=xrealloc(bookmarks, (bm_n+1)*sizeof(char *));
-			bookmarks[bm_n]=xcalloc(bookmarks[bm_n], strlen(line)+1, 
-									sizeof(char));
-			/* Store the entire line */
-			strcpy(bookmarks[bm_n], line);
-			/* Remove new line char from bookmark line, if any */
-			ret_nl=strcntchr(bookmarks[bm_n], '\n');
-			if (ret_nl != -1)
-				bookmarks[bm_n][ret_nl]='\0';
-			bm_n++;
+		/* If a comment or empty line */
+		if (*line == '#' || *line == '\n')
+			continue;
+		/* Since bookmarks are shortcuts to paths, there must be at least
+		 * one slash */
+		int slash=0;
+		for (size_t i=0;i<line_len;i++) {
+			if (line[i] == '/') {
+				slash=1;
+				break;
+			}
 		}
+		if (!slash)
+			continue;
+		/* Allocate memory to store the bookmark */
+		bookmarks=xrealloc(bookmarks, (bm_n+1)*sizeof(char *));
+		bookmarks[bm_n]=xcalloc(bookmarks[bm_n], line_len+1, 
+								sizeof(char));
+		/* Remove terminating new line char and copy the entire line */
+		if (line[line_len-1] == '\n')
+			line[line_len-1] = 0x00;
+		strcpy(bookmarks[bm_n], line);
+		bm_n++;
 	}
 	free(line);
 	line=NULL;
@@ -10186,50 +10449,413 @@ char **
 bm_prompt(void)
 {
 	char *bm_sel=NULL;
-	printf("%s%s\n", NC_b, default_color);
+	printf("%s%s\nEnter 'e' to edit your bookmarks or 'q' to quit.\n", NC_b, 
+		   default_color);
 	while (!bm_sel) {
-		bm_sel=rl_no_hist(_("Choose a bookmark ([e]dit, [q]uit): "));
+		bm_sel=rl_no_hist(_("Choose a bookmark: "));
 		int no_space=0;
 		for (size_t i=0;bm_sel[i];i++)
 			if (bm_sel[i] != 0x20)
 				no_space=1;
 		/* If empty or only spaces */
-		if (bm_sel[0] == '\0' || !no_space) {
+		if (bm_sel[0] == 0x00 || !no_space) {
 			free(bm_sel);
 			bm_sel=NULL;
 		}
 	}
-	char **comm_bm=parse_input_str(bm_sel);
+	char **comm_bm=get_substr(bm_sel, ' ');
 	free(bm_sel);
 	return comm_bm;	
 }
 
 int
-bookmarks_function(void)
+del_bookmark(void)
+{
+	FILE *bm_fp=NULL;
+	bm_fp=fopen(BM_FILE, "r");
+	if (!bm_fp)
+		return EXIT_FAILURE;
+	
+	size_t i=0;	
+	
+	/* Get bookmarks from file */
+	size_t line_size=0;
+	char *line=NULL, **bms=NULL;
+	int bmn=0;
+	ssize_t line_len=0;
+	while ((line_len=getline(&line, &line_size, bm_fp)) > 0) {
+		if (*line == '#' || *line == '\n')
+			continue;
+		int slash=0;
+		for (i=0;i<line_len;i++) {
+			if (line[i] == '/') {
+				slash=1;
+				break;
+			}
+		}
+		if (!slash)
+			continue;
+		if (line[line_len-1] == '\n')
+			line[line_len-1] = 0x00;
+		bms=xrealloc(bms, (bmn+1)*sizeof(char *));
+		bms[bmn]=xcalloc(bms[bmn], line_len+1, sizeof(char));
+		strcpy(bms[bmn++], line);
+	}
+	free(line);
+
+	if (!bmn) {
+		puts(_("bookmarks: There are no bookmarks"));
+		for (i=0;i<bmn;i++)
+			free(bms[i]);
+		free(bms);
+		fclose(bm_fp);
+		return EXIT_SUCCESS;
+	}
+	
+	/* List bookmarks */
+	printf("\033[1;37mBookmarks\033[0m\n\n");
+	for (i=0;i<bmn;i++)
+		printf("%s%ld \033[1;36m%s\033[0m\n", eln_color, i+1, bms[i]);
+
+	/* Get user input */
+	printf(_("\n%s%sEnter 'q' to quit.\n"), NC, default_color);
+	char *input=NULL;
+	while (!input) {
+		input=rl_no_hist("Bookmark(s) to be deleted (ex: 1 2-6, or *): ");
+		if (input) {
+			int no_space=0;
+			for (i=0;input[i];i++) {
+				if (input[i] != 0x20)
+					no_space=1;
+			}
+			if (input[0] == 0x00 || !no_space) {
+				free(input);
+				input=NULL;
+			}
+		}
+	}
+
+	char **del_elements=get_substr(input, ' ');
+	free(input);
+	if (!del_elements) {
+		for (i=0;i<bmn;i++)
+			free(bms[i]);
+		free(bms);
+		fclose(bm_fp);
+		fprintf(stderr, _("bookmarks: Error parsing input\n"));
+		return EXIT_FAILURE;
+	}
+
+	/* We have input */
+	/* If quit */
+	/* I inspect all substrings entered by the user for "q" before any
+	 * other value to prevent some accidental deletion, like "1 q", or 
+	 * worst, "* q" */
+	for (i=0;del_elements[i];i++) {
+		int quit=0;
+		if (strcmp(del_elements[i], "q") == 0)
+			quit=1;
+		else if (is_number(del_elements[i]) 
+		&& (atoi(del_elements[i]) <= 0 || atoi(del_elements[i]) > bmn)) {
+			fprintf(stderr, "bookmarks: '%s': No such bookmark\n", 
+					del_elements[i]);
+			quit=1;
+		}
+		if (quit) {
+			for (i=0;i<bmn;i++)
+				free(bms[i]);
+			free(bms);
+			for (i=0;del_elements[i];i++)
+				free(del_elements[i]);
+			free(del_elements);
+			fclose(bm_fp);
+			return EXIT_SUCCESS;
+		}
+	}
+	
+	/* If "*", simply remove the bookmarks file */
+	/* If there is some "*" in the input line (like "1 5 6-9 *"), it makes 
+	 * no sense to remove singles bookmarks: Just delete all of them at 
+	 * once */
+	for (i=0;del_elements[i];i++) {
+		if (strcmp(del_elements[i], "*") == 0) {
+			/* Create a backup copy of the bookmarks file, just in case */
+			char *bk_file=NULL;
+			bk_file=xcalloc(bk_file, strlen(CONFIG_DIR)+14, sizeof(char));
+			sprintf(bk_file, "%s/bookmarks.bk", CONFIG_DIR);
+			char *tmp_cmd[]={ "cp", BM_FILE, bk_file, NULL };
+			int ret=launch_execve(tmp_cmd);
+			/* Remove the bookmarks file, free stuff, and exit */
+			if (ret == 0) {
+				remove(BM_FILE);
+				printf(_("bookmarks: All bookmarks were deleted\n "
+						 "However, a backup copy was created (%s)\n"),
+						 bk_file);
+				free(bk_file);
+			}
+			else
+				printf(_("bookmarks: Error creating backup file. No "
+						 "bookmark was deleted\n"));
+			for (i=0;i<bmn;i++)
+				free(bms[i]);
+			free(bms);
+			for (i=0;del_elements[i];i++)
+				free(del_elements[i]);
+			free(del_elements);
+			fclose(bm_fp);
+			return EXIT_SUCCESS;
+		}
+	}
+	
+	/* Remove single bookmarks */
+	/* Open a temporary file */
+	char *tmp_file=NULL;
+	tmp_file=xcalloc(tmp_file, strlen(CONFIG_DIR)+8, sizeof(char));
+	sprintf(tmp_file, "%s/bm_tmp", CONFIG_DIR);
+
+	FILE *tmp_fp=fopen(tmp_file, "w+");
+	if (!tmp_fp) {
+		for (i=0;i<bmn;i++)
+			free(bms[i]);
+		free(bms);
+		fclose(bm_fp);
+		fprintf(stderr, _("bookmarks: Error creating temporary file\n"));
+		return EXIT_FAILURE;	
+	}
+	
+	/* Go back to the beginning of the bookmarks file */
+	fseek(bm_fp, 0, SEEK_SET);
+
+	/* Dump into the tmp file everything except bookmarks marked for 
+	 * deletion */
+	
+	line_len = line_size = 0;
+	char *lineb=NULL;
+	while ((line_len=getline(&lineb, &line_size, bm_fp)) > 0) {
+		if (lineb[line_len-1] == '\n')
+			lineb[line_len-1] = 0x00;
+		int found=0;
+		for (size_t j=0;del_elements[j];j++) {
+			if (!is_number(del_elements[j]))
+				continue;
+			if (strcmp(bms[atoi(del_elements[j])-1], lineb) == 0)
+				found=1;
+		}
+		if (found)
+			continue;
+		fprintf(tmp_fp, "%s\n", lineb);
+	}
+	free(lineb);
+
+	/* Free stuff */
+	for (i=0;del_elements[i];i++)
+		free(del_elements[i]);
+	free(del_elements);
+
+	for (i=0;i<bmn;i++)
+		free(bms[i]);
+	free(bms);
+
+	/* Close files */
+	fclose(bm_fp);
+	fclose(tmp_fp);
+
+	/* Remove the old bookmarks file and make the tmp file the new 
+	 * bookmarks file*/
+	remove(BM_FILE);
+	rename(tmp_file, BM_FILE);
+	free(tmp_file);
+
+	return EXIT_SUCCESS;
+}
+
+int
+add_bookmark(char *file)
+{
+	if (!file)
+		return EXIT_FAILURE;
+
+	int mod_file=0;
+	/* If not absolute path, prepend current path to file */
+	if (*file != '/') {
+		char *tmp_file=NULL;
+		tmp_file=xcalloc(tmp_file, (strlen(path) + strlen(file) + 2), 
+						 sizeof(char));
+		sprintf(tmp_file, "%s/%s", path, file);
+		file=tmp_file;
+		tmp_file=NULL;
+		mod_file=1;
+	}
+
+	/* Check if FILE is an available path */
+	
+	FILE *bm_fp=fopen(BM_FILE, "r");	
+	if (!bm_fp) {
+		fprintf(stderr, _("bookmarks: Error opening the bookmarks file\n"));
+		if (mod_file)
+			free(file);
+		return EXIT_FAILURE;
+	}
+	int bmn=0, dup=0;
+	char **bms=NULL;
+	size_t line_size=0;
+	char *line=NULL;
+	ssize_t line_len=0;
+	while ((line_len=getline(&line, &line_size, bm_fp)) > 0) {
+		if (*line == '#')
+			continue;
+		
+		char *tmp_line=NULL;
+		tmp_line=strchr(line, '/');
+		if (tmp_line) {
+			size_t tmp_line_len=strlen(tmp_line);
+			if (tmp_line_len && tmp_line[tmp_line_len-1] == '\n')
+				tmp_line[tmp_line_len-1] = 0x00;
+			if (strcmp(tmp_line, file) == 0) {
+				fprintf(stderr, _("bookmarks: '%s': Path already "
+								  "bookmarked\n"), file);
+				dup=1;
+				break;
+			}
+			tmp_line=NULL;
+		}
+		/* Store lines: used later to check hotkeys */		
+		bms=xrealloc(bms, (bmn+1)*sizeof(char *));
+		bms[bmn]=xcalloc(bms[bmn], strlen(line)+1, sizeof(char));
+		strcpy(bms[bmn++], line);
+		
+	}
+	free(line);
+	fclose(bm_fp);
+
+	if (dup) {
+		for (size_t i=0;i<bmn;i++)
+			free(bms[i]);
+		free(bms);
+		return EXIT_FAILURE;
+	}
+	
+	/* If path is available */	
+
+	char *name=NULL, *hk=NULL, *tmp=NULL;
+
+	/* Ask for data to construct the bookmark line. Both values could be
+	 * NULL */
+	puts("Bookmark line example: [sc]name:path");
+	hk=rl_no_hist("Shortcut: ");
+
+	/* Check if hotkey is available */
+	if (hk) {
+		char *tmp_line=NULL;
+		for (size_t i=0;i<bmn;i++) {
+			tmp_line=strbtw(bms[i], '[', ']');
+			if (tmp_line) {
+				if (strcmp(hk, tmp_line) == 0) {
+					fprintf(stderr, _("bookmarks: '%s': This shortcut is "
+									  "already assigned\n"), hk);					
+					dup=1;
+				}
+				free(tmp_line);
+				tmp_line=NULL;
+			}
+		}
+	}
+	if (dup) {
+		if (hk)
+			free(hk);
+		return EXIT_FAILURE;
+	}
+	
+	for (size_t i=0;i<bmn;i++)
+		free(bms[i]);
+	free(bms);
+
+	/* Both path and hotkey are available */
+
+	/* There is no need to check names for duplicates. The bookmarks
+	 * function only uses ELN's and hotkeys to open bookmarked files */
+	name=rl_no_hist("Name: ");
+
+	/* Generate the bookmark line */
+	if (name) {
+		if (hk) { /* name AND hk */
+			tmp=xcalloc(tmp, strlen(hk) + strlen(name) + strlen(file) + 5, 
+						sizeof(char));
+			sprintf(tmp, "[%s]%s:%s\n", hk, name, file);
+			free(hk);
+		}
+		else { /* Only name */
+			tmp=xcalloc(tmp, strlen(name) + strlen(file) + 3, sizeof(char));
+			sprintf(tmp, "%s:%s\n", name, file);
+		}
+		free(name);
+	}
+	else if (hk) { /* Only hk */
+		tmp=xcalloc(tmp, strlen(hk) + strlen(file) + 4, 
+					sizeof(char));
+		sprintf(tmp, "[%s]%s\n", hk, file);
+		free(hk);
+	}
+	else /* None */
+		tmp=file;
+	
+	if (!tmp) {
+		fprintf(stderr, "bookmarks: Error generating the bookmark line\n");
+		return EXIT_FAILURE;
+	}
+
+	/* Once we have the bookmark line, write it to the bookmarks file */
+
+	bm_fp=fopen(BM_FILE, "a+");
+	if (!bm_fp) {
+		fprintf(stderr, _("bookmarks: Error opening the bookmarks file\n"));
+		free(tmp);
+		return EXIT_FAILURE;
+	}
+
+	if (mod_file) {
+		free(file);
+		file=NULL;
+	}
+
+	if (fseek(bm_fp, 0L, SEEK_END) == -1) {
+		fprintf(stderr, _("bookmarks: Error opening the bookmarks file\n"));
+		free(tmp);
+		fclose(bm_fp);
+		return EXIT_FAILURE;
+	}
+	
+	/* Everything is fine: add the new bookmark to the bookmarks file */
+	fprintf(bm_fp, tmp);
+	fclose(bm_fp);
+	printf(_("File succesfully bookmarked\n"));
+	free(tmp);
+
+	return EXIT_SUCCESS;
+}
+
+int
+bookmarks_function(char **cmd)
 {
 	if (!config_ok) {
 		fprintf(stderr, _("Bookmarks function disabled\n"));
 		return EXIT_FAILURE;
 	}
 
-	if (clear_screen)
-		CLEAR;
-	printf(_("%sBookmarks Manager%s\n\n"), white, NC);
-	struct stat file_attrib;
-
 	/* If the bookmarks file doesn't exist, create it */
+	struct stat file_attrib;
 	if (stat(BM_FILE, &file_attrib) == -1) {
 		FILE *fp;
 		fp=fopen(BM_FILE, "w+");
 		if (!fp) {
-			asprintf(&msg, "%s: bookmarks: '%s': %s\n", PROGRAM_NAME, 
+			asprintf(&msg, "bookmarks: '%s': %s\n", 
 					 BM_FILE, strerror(errno));
 			if (msg) {
 				log_msg(msg, NOPRINT_PROMPT);
 				free(msg);
 			}
 			else
-				fprintf(stderr, "%s: bookmarks: '%s': %s\n", PROGRAM_NAME, 
+				fprintf(stderr, "bookmarks: '%s': %s\n", 
 						BM_FILE, strerror(errno));
 			return EXIT_FAILURE;
 		}
@@ -10238,6 +10864,31 @@ bookmarks_function(void)
 			fclose(fp);
 		}
 	}
+
+	/* Check arguments */
+	if (cmd[1]) {
+		/* Add a bookmark */
+		if (strcmp(cmd[1], "a") == 0 || strcmp(cmd[1], "add") == 0) {
+			if (!cmd[2]) {
+				printf(_("Usage: bookmarks, bm [a, add PATH]\n"));
+				return EXIT_SUCCESS;
+			}
+			if (access(cmd[2], F_OK) != 0) {
+				fprintf(stderr, "bookmarks: %s: %s\n", cmd[2], strerror(errno));
+				return EXIT_FAILURE;
+			}
+			return (add_bookmark(cmd[2]));
+		}
+		/* Delete bookmarks */
+		else if (strcmp(cmd[1], "d") == 0 || strcmp(cmd[1], "del") == 0)
+			return (del_bookmark());
+	}
+	
+	/* If no arguments */
+
+	if (clear_screen)
+		CLEAR;
+	printf(_("%sBookmarks Manager%s\n\n"), white, NC);
 
 	/* Get bookmarks */
 	char **bookmarks=get_bookmarks(BM_FILE);
@@ -10249,8 +10900,8 @@ bookmarks_function(void)
 	/* If no bookmarks */
 	if (bm_n == 0) {
 		printf("%s%s%s: ", NC_b, default_color, PROGRAM_NAME);
-		char *answer=rl_no_hist(_("There are no bookmarks.\nDo you want to \
-edit the bookmarks file? [Y/n] "));
+		char *answer=rl_no_hist(_("There are no bookmarks.\nDo you want to "
+								  "edit the bookmarks file? [Y/n] "));
 		if (!answer)
 			return EXIT_FAILURE;
 		if (strcmp(answer, "n") == 0 || strcmp(answer, "N") == 0) {
@@ -10270,7 +10921,7 @@ edit the bookmarks file? [Y/n] "));
 				char *editor=rl_no_hist(_("Text editor: "));
 				if (!editor)
 					return EXIT_FAILURE;
-				if (editor[0] == '\0') { /* If the user just pressed Enter */
+				if (editor[0] == 0x00) { /* If the user just pressed Enter */
 					free(editor);
 					return EXIT_SUCCESS;
 				}
@@ -10280,7 +10931,7 @@ edit the bookmarks file? [Y/n] "));
 			}
 			char *tmp_cmd[]={ edit_cmd, BM_FILE, NULL };
 			if (launch_execve(tmp_cmd) == 0)
-				bookmarks_function();
+				bookmarks_function(cmd);
 			free(edit_cmd);
 			return EXIT_SUCCESS;
 		}
@@ -10340,7 +10991,8 @@ edit the bookmarks file? [Y/n] "));
 	for (i=0;i<bm_n;i++) {
 		char *str_name=strbtw(bookmarks[i], ']', ':');
 		if (str_name) {
-			bm_names[i]=xcalloc(bm_names[i], strlen(str_name)+1, sizeof(char));
+			bm_names[i]=xcalloc(bm_names[i], strlen(str_name)+1, 
+								sizeof(char));
 			strcpy(bm_names[i], str_name);
 			free(str_name);
 		}
@@ -10364,7 +11016,8 @@ edit the bookmarks file? [Y/n] "));
 				if (path_ok == 0) {
 					if ((file_attrib.st_mode & S_IFMT) == S_IFDIR)
 						printf("%s%d %s[%s]%s %s%s%s\n", eln_color, i+1, 
-							   white, hot_keys[i], NC, cyan, bm_names[i], NC);
+							   white, hot_keys[i], NC, cyan, 
+							   bm_names[i], NC);
 					else
 						printf("%s%d %s[%s]%s %s%s%s\n", eln_color, i+1, 
 							   white, hot_keys[i], NC, default_color, 
@@ -10378,7 +11031,8 @@ edit the bookmarks file? [Y/n] "));
 				if (path_ok == 0) {
 					if ((file_attrib.st_mode & S_IFMT) == S_IFDIR)
 						printf("%s%d %s[%s]%s %s%s%s\n", eln_color, i+1, 
-							   white, hot_keys[i], NC, cyan, bm_paths[i], NC);
+							   white, hot_keys[i], NC, cyan, 
+							   bm_paths[i], NC);
 					else
 						printf("%s%d %s[%s]%s %s%s%s\n", eln_color, i+1, 
 							   white, hot_keys[i], NC, default_color, 
@@ -10418,8 +11072,7 @@ edit the bookmarks file? [Y/n] "));
 	}
 
 	/* Display the prompt */
-	int args_n_old=args_n, reload_bm=0, go_dirlist=0; //, go_back_prompt=0;
-	args_n=0;
+	int reload_bm=0, go_dirlist=0; //, go_back_prompt=0;
 	char **comm_bm=bm_prompt();
 	if (!comm_bm)
 		return EXIT_FAILURE;
@@ -10432,8 +11085,8 @@ edit the bookmarks file? [Y/n] "));
 			/* If no application has been specified and xdg-open doesn't 
 			 * exist... */
 			if (args_n == 0 && !(flags & XDG_OPEN_OK))
-				fprintf(stderr, _("%s: xdg-open not found. Try \
-'e application'\n"), PROGRAM_NAME);
+				fprintf(stderr, _("%s: xdg-open not found. Try "
+								  "'e APPLICATION'\n"), PROGRAM_NAME);
 			else {
 				if (args_n > 0) {
 					char *bm_comm_path=NULL;
@@ -10451,8 +11104,8 @@ edit the bookmarks file? [Y/n] "));
 						reload_bm=1;
 						free(bm_comm_path);
 					}
-					else fprintf(stderr, _("bookmarks: '%s': Application not \
-found\n"), comm_bm[1]);
+					else fprintf(stderr, _("bookmarks: '%s': Application "
+										   "not found\n"), comm_bm[1]);
 				}
 				else {
 					pid_t pid_edit_bm=fork();
@@ -10526,8 +11179,9 @@ found\n"), comm_bm[1]);
 								}
 								else waitpid(pid_bm, NULL, 0);
 							}
-							else fprintf(stderr, _("%s: xdg-open not found. \
-Try 'hotkey application'\n"), PROGRAM_NAME);
+							else fprintf(stderr, _("%s: xdg-open not found. "
+											"Try 'shortcut APPLICATION'\n"), 
+											PROGRAM_NAME);
 						}
 						/* If application has been passed (as 2nd arg)... */
 						else {
@@ -10537,8 +11191,8 @@ Try 'hotkey application'\n"), PROGRAM_NAME);
 								pid_t pid_bm=fork();
 								if (pid_bm == 0) {
 									set_signals_to_default();
-									execle(cmd_path, comm_bm[1], bm_paths[eln], 
-										   NULL, __environ);
+									execle(cmd_path, comm_bm[1], 
+										   bm_paths[eln], NULL, __environ);
 									fprintf(stderr, "%s: bookmarks: %s\n", 
 											PROGRAM_NAME, strerror(errno));
 									exit(EXIT_FAILURE);
@@ -10547,15 +11201,15 @@ Try 'hotkey application'\n"), PROGRAM_NAME);
 									waitpid(pid_bm, NULL, 0);
 							}
 							else {
-								fprintf(stderr, _("bookmarks: %s: Application \
-not found\n"), comm_bm[1]);
+								fprintf(stderr, _("bookmarks: %s: Application "
+												  "not found\n"), comm_bm[1]);
 							}
 							free(cmd_path);
 						}
 					}
 					else /* If neither dir nor regular file */
-						fprintf(stderr, _("bookmarks: '%s': Cannot open \
-file\n"), bm_paths[eln]);
+						fprintf(stderr, _("bookmarks: '%s': Cannot open "
+										  "file\n"), bm_paths[eln]);
 				}
 				else {
 					fprintf(stderr, "bookmarks: '%s': %s\n",
@@ -10590,16 +11244,16 @@ file\n"), bm_paths[eln]);
 				/* If no opening application has been passed... */
 				if (args_n == 0) {
 					if (!(flags & XDG_OPEN_OK))
-						fprintf(stderr, _("%s: xdg-open not found. Try \
-'ELN/hot-key application'\n"), PROGRAM_NAME);
+						fprintf(stderr, _("bookmarks: xdg-open not found. Try "
+										  "'ELN/hot-key application'\n"));
 					else {
 						pid_t pid_bm=fork();
 						if (pid_bm == 0) {
 							set_signals_to_default();
 							execle(xdg_open_path, "xdg-open", 
 								bm_paths[atoi_comm_bm-1], NULL, __environ);
-							fprintf(stderr, "%s: bookmarks: %s\n",
-									PROGRAM_NAME, strerror(errno));
+							fprintf(stderr, "bookmarks: %s\n",
+									strerror(errno));
 							exit(EXIT_FAILURE);
 						}
 						else waitpid(pid_bm, NULL, 0);
@@ -10614,14 +11268,14 @@ file\n"), bm_paths[eln]);
 							set_signals_to_default();
 							execle(cmd_path, comm_bm[1], 
 								   bm_paths[atoi_comm_bm-1], NULL, __environ);
-							fprintf(stderr, "%s: bookmarks: %s\n",
-									PROGRAM_NAME, strerror(errno));
+							fprintf(stderr, "bookmarks: %s\n",
+									strerror(errno));
 						}
 						else waitpid(pid_bm, NULL, 0);
 					}
 					else {
-						fprintf(stderr, _("bookmarks: %s: Application not \
-found\n"), comm_bm[1]);
+						fprintf(stderr, _("bookmarks: '%s': Application not "
+										  "found\n"), comm_bm[1]);
 /*						puts("Press Enter key to continue... ");
 						getchar();
 						bookmarks_function(); */
@@ -10634,7 +11288,7 @@ found\n"), comm_bm[1]);
 						bm_paths[atoi_comm_bm-1]);
 		}
 		else {
-			fprintf(stderr, _("bookmarks: %s: No such bookmark\n"), 
+			fprintf(stderr, _("bookmarks: '%s': No such bookmark\n"), 
 					comm_bm[0]);
 		}
 	}
@@ -10659,13 +11313,14 @@ found\n"), comm_bm[1]);
 		free(bm_paths);
 		free(bm_names);
 		free(hot_keys);
-		args_n=args_n_old;
-		if (reload_bm) bookmarks_function();
+		if (reload_bm)
+			bookmarks_function(cmd);
 
 		if (go_dirlist && cd_lists_on_the_fly) {
 			while (files--) free(dirlist[files]);
 			list_dir();
 		}
+
 	return EXIT_SUCCESS;
 }
 
@@ -10683,7 +11338,7 @@ dir_size(char *dir)
 	 * called) by storing the result in a static variable (whose value will 
 	 * survive the function) */
 	static char du_path[PATH_MAX]="";
-	if (du_path[0] == '\0') {
+	if (du_path[0] == 0x00) {
 		char *du_path_tmp=NULL;
 		if ((du_path_tmp=get_cmd_path("du")) != NULL) {
 			strncpy(du_path, du_path_tmp, PATH_MAX);
@@ -10777,7 +11432,7 @@ properties_function(char **comm)
 		int largest=0;
 		for (int i=files;i--;) {
 			size_t file_len=(unicode) ? u8_xstrlen(dirlist[i])
-									  : strlen(dirlist[i]);
+							: strlen(dirlist[i]);
 			if (file_len > largest)
 				largest=file_len+1;
 		}
@@ -10941,7 +11596,7 @@ get_properties(char *filename, int _long, int max)
 			trim=1;
 			strcpy(trim_filename, filename);
 			trim_filename[(max+cont_bt)-1]='~';
-			trim_filename[max+cont_bt]='\0';
+			trim_filename[max+cont_bt]=0x00;
 		}
 		printf("%s%-*s %s%s (%04o) %c/%c%c%c/%c%c%c/%c%c%c %s %s %s %s\n", 
 				color, max+cont_bt, (!trim) ? filename : trim_filename, NC, 
@@ -10953,7 +11608,7 @@ get_properties(char *filename, int _long, int max)
 				(!owner) ? _("unknown") : owner->pw_name, 
 				(!group) ? _("unknown") : group->gr_name,
 				(size_type) ? size_type : "??", 
-				(mod_time[0] != '\0') ? mod_time : "??");
+				(mod_time[0] != 0x00) ? mod_time : "??");
 		if (linkname)
 			free(linkname);
 		if (size_type) 
@@ -10971,7 +11626,7 @@ get_properties(char *filename, int _long, int max)
 							(!owner) ? _("unknown") : owner->pw_name, 
 							(!group) ? _("unknown") : group->gr_name, 
 							(size_type) ? size_type : "??", 
-							(mod_time[0] != '\0') ? mod_time : "??");
+							(mod_time[0] != 0x00) ? mod_time : "??");
 	if (file_type && file_type != 'l')
 		printf("%s%s%s%s\n", color, filename, NC, default_color);
 	else if (linkname) {
@@ -11285,7 +11940,7 @@ get_history(void)
 		char *line_buff=NULL;
 		ssize_t line_len=0;
 		while ((line_len=getline(&line_buff, &line_size, hist_fp)) > 0) {
-			line_buff[line_len-1]='\0';
+			line_buff[line_len-1]=0x00;
 			history=xrealloc(history, (current_hist_n+1)*sizeof(char *));
 			history[current_hist_n]=xcalloc(history[current_hist_n], 
 											line_len+1, sizeof(char));
@@ -11298,7 +11953,7 @@ get_history(void)
 		size_t line_len=0;
 		while (fgets(line, sizeof(line), hist_fp)) {
 			line_len=strlen(line);
-			line[line_len-1]='\0';
+			line[line_len-1]=0x00;
 			history=xrealloc(history, (current_hist_n+1)*sizeof(char **));
 			history[current_hist_n]=xcalloc(history[current_hist_n], 
 											line_len, sizeof(char *));
@@ -11645,10 +12300,14 @@ will list all matches in the current working directory. To search for files \
 in any other directory, specify the directory name as second argument. This \
 argument (DIR) could be an absolute path, a relative path, or an ELN.\n"), 
 		   white, NC, default_color, PROGRAM_NAME);
-	printf(_("\n%sbm, bookmarks%s%s: Open the bookmarks menu. Here you can add, \
-remove or edit your bookmarks to your liking, or simply change the current \
-directory to that specified by the corresponding bookmark by just typing \
-either its ELN or its hotkey.\n"), white, NC, default_color);
+	printf(_("\n%sbm, bookmarks%s%s [a, add PATH] [d, del]: With no argument, \
+open the bookmarks menu. Here you can change the current directory to that \
+specified by the corresponding bookmark by just typing either its ELN or \
+its shortcut. In this screen you can also add, remove or edit your bookmarks \
+by simply typing 'e' to edit the bookmarks file. To add or remove a bookmark \
+directly from the command line, you can us the 'a' and 'd' arguments as \
+follows: \"bm a PATH\" or \"bm d\" respectively.\n"), white, NC, 
+		   default_color);
 	printf(_("\n%so, open%s%s ELN/DIR/FILENAME [APPLICATION]: Open \
 either a directory or a file. For example: 'o 12' or 'o filename'. By default, \
 the 'open' function will open files with the default application associated to \
@@ -11927,7 +12586,7 @@ splash(void)
 }
 
 void
-bonus_function()
+bonus_function(void)
 {
 	static char state=0;
 	if (state > 12)
