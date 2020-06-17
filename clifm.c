@@ -773,11 +773,12 @@ of course you can grep it to find, say, linux' macros, as here. */
  ** 1 - Piping doesn't work as it should. Try this command: 
     'pacman -Sii systemd systemd-libs | grep "Required By"'. Now run the same 
     command outside CliFM. The output in CliFM is reduced to only the first 
-    line of each "Required by" line. This makes running shell commands in
+    line of each "Required by" line. This makes running shell commands on
     CliFM unreliable.
 
 ###########################################
 
+ * (SOLVED) TAB completion still not working with cd and symlinks.
  * (SOLVED) "cd [TAB]" shows only dirs, but "cd .[TAB]" shows all files.
  * (SOLVED) TAB path completion not working with local executables: "./file" 
  * (SOLVED) Select some files, say 5. Then pass this to the deselect 
@@ -2706,7 +2707,7 @@ main(int argc, char **argv)
 int
 is_link_to_dir(const char *link)
 /* Check if symlink (LINK) is link to dir. Returns zero if true and one if
- * false */
+ * false or in case of error */
 {
 	if (!link)
 		return EXIT_FAILURE;
@@ -6093,11 +6094,11 @@ my_rl_path_completion(const char *text, int state)
 			/* If cmd is 'cd', match only dirs or symlinks to dir */
 			if (strncmp(rl_line_buffer, "cd ", 3) == 0) {
 				if (entry->d_type == DT_LNK) {
-					if (is_link_to_dir(entry->d_name) == 0)
-						break; /* Match */
+					if (is_link_to_dir(entry->d_name) != 0)
+						continue; /* No match */
 				}
 				else if (entry->d_type != DT_DIR)
-					continue; /* No match */
+					continue;
 			}
 			/* All entries except "." and ".." are possible
 			 * completions */
@@ -6107,20 +6108,25 @@ my_rl_path_completion(const char *text, int state)
 		}
 		/* If there is at least one char to complete (ex: "cd .[TAB]")*/
 		else {
-			if (strncmp(rl_line_buffer, "cd ", 3) == 0) {
-				if (entry->d_type == DT_LNK) {
-					if (is_link_to_dir(entry->d_name) == 0)
-						break;
-				}
-				if (entry->d_type != DT_DIR)
-					continue;
-			}
 			/* Otherwise, if these match up to the length of filename, then
 			it is a match. */
 			if ((entry->d_name[0] == filename[0])
 			&& (((int)strlen(entry->d_name)) >= filename_len)
-			&& (strncmp(filename, entry->d_name, filename_len) == 0))
-				break;
+			&& (strncmp(filename, entry->d_name, filename_len) == 0)) {
+				/* If there is a match, and if the command is 'cd' list 
+				 * only dirs and symlinks to dir */
+				if (strncmp(rl_line_buffer, "cd ", 3) == 0) {
+					if (entry->d_type == DT_LNK) {
+						if (is_link_to_dir(entry->d_name) == 0) {
+							break;
+						}
+					}
+					if (entry->d_type == DT_DIR)
+						break;
+				}
+				else
+					break;
+			}
 		}
 	}
 
@@ -12437,7 +12443,7 @@ written by Richard Stallman.\n"), white, NC,
 	printf(_("\n%sq, quit, exit, zz%s%s: Safely quit %s.\n"), white, NC, 
 			default_color, PROGRAM_NAME);
 	printf(_("%s  \nKeyboard shortcuts%s%s:\n\
-%s  A-c%s%s:	Clear the current command line\n\
+%s  A-c%s%s:	Clear the current command line buffer\n\
 %s  A-f%s%s:	Toggle list-folders-first on/off\n\
 %s  C-r%s%s:	Refresh the screen\n\
 %s  A-l%s%s:	Toggle long view mode on/off\n\
@@ -12447,12 +12453,12 @@ written by Richard Stallman.\n"), white, NC,
 %s  A-s%s%s:	Open the Selection Box\n\
 %s  A-a%s%s:	Select all files in the current working directory\n\
 %s  A-d%s%s:	Deselect all selected files\n\
-%s  A-r%s%s:	Go to the root directory\n\
-%s  A-e%s%s:	Go to the home directory\n\
-%s  A-u%s%s:	Go up to the parent directory of the current working directory\n\
-%s  A-j%s%s:	Go to the previous directory in the directory history \
+%s  A-r%s%s:	Change to the root directory\n\
+%s  A-e%s%s:	Change to the home directory\n\
+%s  A-u%s%s:	Cahnge up to the parent directory of the current working directory\n\
+%s  A-j%s%s:	Change to the previous directory in the directory history \
 list\n\
-%s  A-k%s%s:	Go to the next directory in the directory history list\n\
+%s  A-k%s%s:	Change to the next directory in the directory history list\n\
 %s  F10%s%s:	Open the configuration file\n\n\
 NOTE: Depending on the terminal emulator being used, some of these \
 keybindings, like A-e, A-f, and F10, might conflict with some of the \
