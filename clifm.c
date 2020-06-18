@@ -248,10 +248,12 @@ of course you can grep it to find, say, linux' macros, as here. */
 							###############
 */
 /*
- ** Bookmarks: I don't think "hotkey" is the right word. "Shortcut" looks
-	better.
- ** It would be nice to add TAB completion for bookmarks, untrash and unsel
-	functions. Use my_rl_path_completion().
+ ** When changing filetype colors on the fly, that is, editing the config
+	file while running CliFM, readline colors won't get updated until
+	next start. I guess I should find a way to reinitialize readline without
+	restarting the program.
+ ** It would be nice to add TAB completion for bookmarks, and perhaps, for
+	untrash and unsel functions. Use my_rl_path_completion().
  ** Check compatibility with BSD Unices.
  ** Add a help option for each internal command. Make sure this help system is
 	consistent accross all commands: if you call help via the --help option, 
@@ -330,6 +332,13 @@ of course you can grep it to find, say, linux' macros, as here. */
 
 ###################################
 
+ * (DONE) Files listed for TAB completion use system defined colors instead 
+	of CliFM own colors. I only need to set the LS_COLORS environment 
+	variable using CliFM colors.
+ * (DONE) Do not allow the user to trash some stupid thing like a block or a 
+	character device.
+ * (DONE) Bookmarks: I don't think "hotkey" is the right word. "Shortcut" 
+	looks better.
  * (DONE) Allow the bookmarks function to add or remove bookmarks from the
 	command line, something like "bm add PATH".
  * (DONE) Conditional and sequential commands cannot be mixed: chained cmds 
@@ -1321,10 +1330,10 @@ program_invocation_short_name variable and asprintf() */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.16.3"
+#define VERSION "0.16.4"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "June 17, 2020"
+#define DATE "June 18, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -2051,6 +2060,7 @@ int set_shell(const char *str);
 void exec_chained_cmds(char *cmd);
 int is_internal_c(const char *cmd);
 
+int initialize_readline(void);
 int del_bookmark(void);
 int add_bookmark(char *file);
 char *savestring (const char *str, size_t size);
@@ -2516,68 +2526,14 @@ main(int argc, char **argv)
 	/* Check if xdg-open is available */
 	xdg_open_check();
 
-	/* ###### INITIALIZE READLINE (what a hard beast to tackle!!) #### */
+	/* ##### READLINE ##### */
 
-	 /* Enable tab auto-completion for commands (in PATH) in case of first 
-	 * entered string. The second and later entered string will be 
-	 * autocompleted with paths instead, just like in Bash, or with
-	 * listed filenames, in case of ELN's. I use a custom completion
-	 * function to add command and ELN completion, since readline's 
-	 * internal completer only performs path completion */
-
-	/* Define a function for path completion.
-	 * NULL means to use filename_entry_function (), the default filename
-	 * completer. */
-	rl_completion_entry_function=my_rl_path_completion;
-
-	/* Pointer to alternative function to create matches.
-	 * Function is called with TEXT, START, and END.
-	 * START and END are indices in RL_LINE_BUFFER saying what the boundaries
-	 * of TEXT are.
-	 * If this function exists and returns NULL then call the value of
-	 * rl_completion_entry_function to try to match, otherwise use the
-	 * array of strings returned. */
-	rl_attempted_completion_function=my_rl_completion;
-	rl_ignore_completion_duplicates=1;
-	/* I'm using here a custom quoting function. If not specified, readline
-	 * uses the default internal function. */
-	rl_filename_quoting_function=my_rl_quote;
-	/* Tell readline what char to use for quoting. This is only the the
-	 * readline internal quoting function, and for custom ones, like the one 
-	 * I use above. However, custom quoting functions, though they need to
-	 * define their own quoting chars, won't be called at all if this
-	 * variable isn't set. */
-	rl_completer_quote_characters="\"'";
-	rl_completer_word_break_characters=" ";
-	/* Whenever readline finds any of these chars, it will call the
-	 * quoting function */
-	rl_filename_quote_characters=" \t\n\"\\'`@$><=,;|&{[()]}?!*^";
-	/* According to readline documentation, the following string is
-	 * the default and the one used by Bash: " \t\n\"\\'`@$><=;|&{(" */
-	
+	initialize_readline();
 	/* Copy this list of quote chars to a global variable to be used
 	 * later by some of the program functions like split_str(), my_rl_quote(), 
 	 * is_quote_char(), and my_rl_dequote() */
 	qc=xcalloc(qc, strlen(rl_filename_quote_characters)+1, sizeof(char));
 	strcpy(qc, rl_filename_quote_characters);
-	/* Executed immediately before calling the completer function, it tells
-	 * readline if a space char, which is a word break character (see the 
-	 * above rl_completer_word_break_characters variable) is quoted or not. 
-	 * If it is, readline then passes the whole string to the completer 
-	 * function (ex: "user\ file"), and if not, only wathever it found after 
-	 * the space char (ex: "file") 
-	 * Thanks to George Brocklehurst for pointing out this function:
-	 * https://thoughtbot.com/blog/tab-completion-in-gnu-readline*/
-	rl_char_is_quoted_p=quote_detector;
-	/* This function is executed inmediately before path completion. So,
-	 * if the string to be completed is, for instance, "user\ file" (see the 
-	 * above comment), this function should return the dequoted string so
-	 * it won't conflict with system filenames: you want "user file",
-	 * because "user\ file" does not exist, and, in this latter case,
-	 * readline won't find any matches */
-	rl_filename_dequoting_function=dequote_str;
-	/* Initialize the keyboard bindings function */
-	readline_kbinds();
 
 	if (splash_screen) {
 		splash();
@@ -2703,6 +2659,70 @@ main(int argc, char **argv)
 }
 
 /* ###FUNCTIONS DEFINITIONS### */
+
+int
+initialize_readline(void)
+{
+	/* ###### INITIALIZE READLINE (what a hard beast to tackle!!) #### */
+
+	 /* Enable tab auto-completion for commands (in PATH) in case of first 
+	 * entered string. The second and later entered string will be 
+	 * autocompleted with paths instead, just like in Bash, or with
+	 * listed filenames, in case of ELN's. I use a custom completion
+	 * function to add command and ELN completion, since readline's 
+	 * internal completer only performs path completion */
+
+	/* Define a function for path completion.
+	 * NULL means to use filename_entry_function (), the default filename
+	 * completer. */
+	rl_completion_entry_function=my_rl_path_completion;
+
+	/* Pointer to alternative function to create matches.
+	 * Function is called with TEXT, START, and END.
+	 * START and END are indices in RL_LINE_BUFFER saying what the boundaries
+	 * of TEXT are.
+	 * If this function exists and returns NULL then call the value of
+	 * rl_completion_entry_function to try to match, otherwise use the
+	 * array of strings returned. */
+	rl_attempted_completion_function=my_rl_completion;
+	rl_ignore_completion_duplicates=1;
+	/* I'm using here a custom quoting function. If not specified, readline
+	 * uses the default internal function. */
+	rl_filename_quoting_function=my_rl_quote;
+	/* Tell readline what char to use for quoting. This is only the the
+	 * readline internal quoting function, and for custom ones, like the one 
+	 * I use above. However, custom quoting functions, though they need to
+	 * define their own quoting chars, won't be called at all if this
+	 * variable isn't set. */
+	rl_completer_quote_characters="\"'";
+	rl_completer_word_break_characters=" ";
+	/* Whenever readline finds any of these chars, it will call the
+	 * quoting function */
+	rl_filename_quote_characters=" \t\n\"\\'`@$><=,;|&{[()]}?!*^";
+	/* According to readline documentation, the following string is
+	 * the default and the one used by Bash: " \t\n\"\\'`@$><=;|&{(" */
+	
+	/* Executed immediately before calling the completer function, it tells
+	 * readline if a space char, which is a word break character (see the 
+	 * above rl_completer_word_break_characters variable) is quoted or not. 
+	 * If it is, readline then passes the whole string to the completer 
+	 * function (ex: "user\ file"), and if not, only wathever it found after 
+	 * the space char (ex: "file") 
+	 * Thanks to George Brocklehurst for pointing out this function:
+	 * https://thoughtbot.com/blog/tab-completion-in-gnu-readline*/
+	rl_char_is_quoted_p=quote_detector;
+	/* This function is executed inmediately before path completion. So,
+	 * if the string to be completed is, for instance, "user\ file" (see the 
+	 * above comment), this function should return the dequoted string so
+	 * it won't conflict with system filenames: you want "user file",
+	 * because "user\ file" does not exist, and, in this latter case,
+	 * readline won't find any matches */
+	rl_filename_dequoting_function=dequote_str;
+	/* Initialize the keyboard bindings function */
+	readline_kbinds();
+	
+	return EXIT_SUCCESS;
+}
 
 int
 is_link_to_dir(const char *link)
@@ -3116,6 +3136,43 @@ set_colors(void)
 	}
 
 	if (dircolors) {
+		
+		/* Set the LS_COLORS environment variable to use CliFM own
+		 * colors. In this way, files listed for TAB completion will use
+		 * CliFM colors instead of system colors */
+		 
+		/* Strip CLiFM custom filetypes (nd, ne, nf, ed, ef, ee, and ca), 
+		 * from dircolors to construct a valid value for LS_COLORS */
+		size_t i=0, buflen=0, linec_len=strlen(dircolors);
+		char *ls_buf=NULL;
+		ls_buf=xcalloc(ls_buf, linec_len+1, sizeof(char));
+		while (dircolors[i]) {
+
+			int rem=0;
+			if ( i < linec_len-3 && ( 
+			(dircolors[i] == 'n' && (dircolors[i+1] == 'd' 
+			|| dircolors[i+1] == 'e' || dircolors[i+1] == 'f')) 
+			|| (dircolors[i] == 'e' && (dircolors[i+1] == 'd'
+			|| dircolors[i+1] == 'f' || dircolors[i+1] == 'e'))
+			|| (dircolors[i] == 'c' && dircolors[i+1] == 'a') )
+			&& dircolors[i+2] == '=') {
+				rem=1;
+				for (i+=3;dircolors[i] && dircolors[i] != ':';i++);
+			}
+			
+			if (dircolors[i] && !rem && dircolors[i] != '"')
+				ls_buf[buflen++]=dircolors[i];
+			i++;
+		}
+		
+		ls_buf[buflen]=0x00;
+		if (ls_buf) {
+			if (setenv("LS_COLORS", ls_buf, 1) == -1)
+				fprintf(stderr, _("%s: Error registering environment "
+								  "colors\n"), PROGRAM_NAME);
+			free(ls_buf);
+		}
+		
 		/* Split the colors line into substrings (one per color) */
 		char *p=dircolors, *buf=NULL, **colors=NULL;
 		int len=0, words=0;
@@ -3278,6 +3335,17 @@ set_colors(void)
 		}
 		free(colors);
 	}
+
+	/* If not dircolors */
+	else {
+		/* Set the LS_COLORS environment variable with default values */
+		char lsc[]="di=01;34:fi=00;97:ln=01;36:or=00;36:pi=00;35:"
+				   "so=01;35:bd=01;33:cd=01;37:su=37;41:sg=30;43:"
+				   "st=37;44:tw=30;42:ow=34;42:ex=01;32:no=31;47";
+		if (setenv("LS_COLORS", lsc, 1) == -1) 
+			fprintf(stderr, _("%s: Error registering environment colors\n"), 
+					PROGRAM_NAME);
+	}
 	
 	/* If some color was not set or it was a wrong color code, set the
 	 * default */
@@ -3325,6 +3393,8 @@ set_colors(void)
 		sprintf(ca_c, "\x1b[30;41m");
 	if (!*no_c)
 		sprintf(no_c, "\x1b[31;47m");
+		
+	
 }
 
 void
@@ -3374,6 +3444,14 @@ set_default_options (void)
 	sprintf(ee_c, "\x1b[00;32m");
 	sprintf(ca_c, "\x1b[30;41m");
 	sprintf(no_c, "\x1b[31;47m");
+
+	/* Set the LS_COLORS environment variable */
+	char lsc[]="di=01;34:fi=00;97:ln=01;36:or=00;36:pi=00;35:"
+			   "so=01;35:bd=01;33:cd=01;37:su=37;41:sg=30;43:"
+			   "st=37;44:tw=30;42:ow=34;42:ex=01;32:no=31;47";
+	if (setenv("LS_COLORS", lsc, 1) == -1) 
+		fprintf(stderr, _("%s: Error registering environment colors\n"), 
+				PROGRAM_NAME);
 	
 	if (sys_shell)
 		free(sys_shell);
@@ -5120,16 +5198,17 @@ trash_function(char **comm)
 				free(msg);
 			}
 			else
-				fprintf(stderr, "%s: trash: '%s': %s\n", PROGRAM_NAME, path, 
-						strerror(errno));
+				fprintf(stderr, "%s: trash: '%s': %s\n", PROGRAM_NAME, 
+						path, strerror(errno));
 			return EXIT_FAILURE;
 		}
 		else
 			return EXIT_SUCCESS;
 	}
+
 	else {
-		/* Create suffix from current date and time to create unique filenames 
-		 * for trashed files */
+		/* Create suffix from current date and time to create unique 
+		 * filenames for trashed files */
 		int exit_code=0;
 		time_t rawtime=time(NULL);
 		struct tm *tm=localtime(&rawtime);
@@ -5139,11 +5218,13 @@ trash_function(char **comm)
 		snprintf(suffix, 67, "%d%d%d%d%d%d", tm->tm_year+1900, tm->tm_mon+1, 
 				 tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
 		
+		/* Remove file(s) from Trash */
 		if (strcmp(comm[1], "del") == 0 || strcmp(comm[1], "rm") == 0)
 			remove_from_trash();
 		else if (strcmp(comm[1], "clear") == 0)
 			trash_clear();
 		else {
+
 			/* Trash files passed as arguments */
 			for (size_t i=1;comm[i];i++) {
 				char *deq_file=dequote_str(comm[i], 0);
@@ -5154,21 +5235,54 @@ trash_function(char **comm)
 					TRASH_DIR */
 					snprintf(tmp_comm, PATH_MAX, "%s/%s", path, deq_file);
 				}
+
+				/* Some filters: you cannot trash wathever you want */
 				/* Do not trash any of the parent directories of TRASH_DIR,
 				 * that is, /, /home, ~/, ~/.local, ~/.local/share */
 				if (strncmp(tmp_comm, TRASH_DIR, strlen(tmp_comm)) == 0) {
-					fprintf(stderr, _("trash: Cannot trash '%s'\n"), tmp_comm);
+					fprintf(stderr, _("trash: Cannot trash '%s'\n"), 
+							tmp_comm);
 					exit_code=1;
+					free(deq_file);
 					continue;
 				}
 				/* Do no trash TRASH_DIR itself nor anything inside it, that 
 				 * is, already trashed files */
 				else if (strncmp(tmp_comm, TRASH_DIR, 
 						 strlen(TRASH_DIR)) == 0) {
-					printf(_("trash: Use 'trash del' to remove trashed \
-files\n"));
+					printf(_("trash: Use 'trash del' to remove trashed "
+							 "files\n"));
+					exit_code=1;
+					free(deq_file);
 					continue;
 				}
+				struct stat file_attrib;
+				if (lstat(deq_file, &file_attrib) == -1) {
+					fprintf(stderr, _("trash: '%s': %s\n"), deq_file, 
+							strerror(errno));
+					exit_code=1;
+					free(deq_file);
+					continue;
+				}
+				/* Do not trash block or character devices */
+				else {
+					if ((file_attrib.st_mode & S_IFMT) == S_IFBLK) {
+						fprintf(stderr, _("trash: '%s': Cannot trash a "
+								"block device\n"), deq_file);
+						exit_code=1;
+						free(deq_file);
+						continue;
+					}
+					else if ((file_attrib.st_mode & S_IFMT) == S_IFCHR) {
+						fprintf(stderr, _("trash: '%s': Cannot trash a "
+								"character device\n"), deq_file);
+						exit_code=1;
+						free(deq_file);
+						continue;
+					}
+				}
+				
+				/* Once here, everything is fine: trash the file */
 				if (trash_element(suffix, tm, deq_file) != 0)
 					exit_code=1;
 				/* The trash_element() function will take care of printing
@@ -6091,7 +6205,8 @@ my_rl_path_completion(const char *text, int state)
 	while (directory && (entry=readdir(directory))) {
 		/* If the user entered nothing before TAB (ex: "cd [TAB]") */
 		if (!filename_len) {
-			/* If cmd is 'cd', match only dirs or symlinks to dir */
+			/* If 'cd' */
+			/* Match only dirs or symlinks to dir */
 			if (strncmp(rl_line_buffer, "cd ", 3) == 0) {
 				if (entry->d_type == DT_LNK) {
 					if (is_link_to_dir(entry->d_name) != 0)
@@ -6100,16 +6215,34 @@ my_rl_path_completion(const char *text, int state)
 				else if (entry->d_type != DT_DIR)
 					continue;
 			}
+			/* If 'open', allow only reg files, dirs, 
+			 * and symlinks */
+			else if (strncmp(rl_line_buffer, "o ", 2) == 0 
+			|| strncmp(rl_line_buffer, "open ", 5) == 0) {
+				if (entry->d_type != DT_REG && entry->d_type != DT_DIR
+				&& entry->d_type != DT_LNK)
+					continue;
+			}
+			/* If 'trash' allow only reg files, dirs, 
+			 * symlinks, pipes and sockets. You should not trash a block or
+			 * a character device */
+			else if (strncmp(rl_line_buffer, "t ", 2) == 0
+			|| strncmp(rl_line_buffer, "tr ", 2) == 0
+			|| strncmp(rl_line_buffer, "trash ", 6) == 0) {
+				if (entry->d_type == DT_BLK || entry->d_type == DT_CHR)
+					continue;		
+			}
+			
 			/* All entries except "." and ".." are possible
 			 * completions */
 			if ((strcmp(entry->d_name, ".") != 0)
 			&& (strcmp(entry->d_name, "..") != 0))
-				break;
+				break; /* Match */
 		}
 		/* If there is at least one char to complete (ex: "cd .[TAB]")*/
 		else {
-			/* Otherwise, if these match up to the length of filename, then
-			it is a match. */
+			/* Check if possible completion match up to the length of 
+			 * filename. */
 			if ((entry->d_name[0] == filename[0])
 			&& (((int)strlen(entry->d_name)) >= filename_len)
 			&& (strncmp(filename, entry->d_name, filename_len) == 0)) {
@@ -6124,12 +6257,28 @@ my_rl_path_completion(const char *text, int state)
 					if (entry->d_type == DT_DIR)
 						break;
 				}
+				else if (strncmp(rl_line_buffer, "o ", 2) == 0
+				|| strncmp(rl_line_buffer, "open ", 5) == 0) {
+					if (entry->d_type == DT_REG || entry->d_type == DT_DIR
+					|| entry->d_type == DT_LNK)
+						break;
+				}
+				else if (strncmp(rl_line_buffer, "t ", 2) == 0
+				|| strncmp(rl_line_buffer, "tr ", 3) == 0
+				|| strncmp(rl_line_buffer, "trash ", 6) == 0) {
+					if (entry->d_type == DT_BLK || entry->d_type == DT_CHR)
+						continue;
+					else
+						break;
+				}
 				else
 					break;
 			}
 		}
 	}
 
+	/* readdir() returns NULL on reaching the end of directory stream. So
+	 * that if entry is NULL, we have no matches */
 	if (!entry) {
 		if (directory) {
 			closedir(directory);
@@ -6151,6 +6300,7 @@ my_rl_path_completion(const char *text, int state)
 		return (char *)NULL;
 	}
 
+	/* We have a match */
 	else {
 		char *temp=NULL;
 
@@ -6352,29 +6502,32 @@ init_config(void)
 			free(trash_info);
 			if (ret != 0) {
 				trash_ok=0;
-				asprintf(&msg, _("%s: mkdir: '%s': Error creating trash \
-directory. Trash function disabled\n"), PROGRAM_NAME, TRASH_DIR);
+				asprintf(&msg, _("%s: mkdir: '%s': Error creating trash "
+								 "directory. Trash function disabled\n"), 
+								 PROGRAM_NAME, TRASH_DIR);
 				if (msg) {
 					log_msg(msg, PRINT_PROMPT);
 					free(msg);
 				}
 				else
-					fprintf(stderr,	_("%s: mkdir: '%s': Error creating trash \
-directory. Trash function disabled\n"), PROGRAM_NAME, TRASH_DIR);
+					fprintf(stderr,	_("%s: mkdir: '%s': Error creating "
+									  "trash directory. Trash function "
+									  "disabled\n"), PROGRAM_NAME, TRASH_DIR);
 			}
 		}
 		/* If it exists, check it is writable */
 		else if (access(TRASH_DIR, W_OK) == -1) {
 			trash_ok=0;
-			asprintf(&msg, _("%s: '%s': Directory not writable. Trash \
-function disabled\n"), PROGRAM_NAME, TRASH_DIR);
+			asprintf(&msg, _("%s: '%s': Directory not writable. Trash "
+							 "function disabled\n"), PROGRAM_NAME, TRASH_DIR);
 			if (msg) {
 				log_msg(msg, PRINT_PROMPT);
 				free(msg);
 			}
 			else
-				fprintf(stderr, _("%s: '%s': Directory not writable. Trash \
-function disabled\n"), PROGRAM_NAME, TRASH_DIR);
+				fprintf(stderr, _("%s: '%s': Directory not writable. Trash "
+								  "function disabled\n"), PROGRAM_NAME, 
+								  TRASH_DIR);
 		}
 
 		/* #### CHECK THE CONFIG DIR #### */
@@ -6386,9 +6539,10 @@ function disabled\n"), PROGRAM_NAME, TRASH_DIR);
 			if (ret != 0) {
 				config_ok=0;
 				asprintf(&msg, 
-						 _("%s: mkdir: '%s': Error creating configuration \
-directory. Bookmarks, commands logs, and command history are disabled. \
-Program messages won't be persistent. Using default options\n"), 
+						 _("%s: mkdir: '%s': Error creating configuration "
+						   "directory. Bookmarks, commands logs, and "
+						   "command history are disabled. Program messages "
+						   "won't be persistent. Using default options\n"), 
 						 PROGRAM_NAME, CONFIG_DIR);
 				if (msg) {
 					error_msg=1;
@@ -6397,18 +6551,20 @@ Program messages won't be persistent. Using default options\n"),
 				}
 				else
 					fprintf(stderr, 
-							_("%s: mkdir: '%s': Error creating configuration \
-directory. Bookmarks, commands logs, and command history are disabled. \
-Program messages won't be persistent. Using default options\n"), 
-							PROGRAM_NAME, CONFIG_DIR);
+							_("%s: mkdir: '%s': Error creating configuration "
+							  "directory. Bookmarks, commands logs, and "
+							  "command history are disabled. Program "
+							  "messages won't be persistent. Using default "
+							  "options\n"), PROGRAM_NAME, CONFIG_DIR);
 			}
 		}
 		/* If it exists, check it is writable */
 		else if (access(CONFIG_DIR, W_OK) == -1) {
 			config_ok=0;
-			asprintf(&msg, _("%s: '%s': Directory not writable. \
-Bookmarks, commands logs, and commands history are disabled. Program \
-messages won't be persistent. Using default options\n"), 
+			asprintf(&msg, _("%s: '%s': Directory not writable. "
+							 "Bookmarks, commands logs, and commands "
+							 "history are disabled. Program messages won't "
+							 "be persistent. Using default options\n"), 
 					 PROGRAM_NAME, CONFIG_DIR);
 			if (msg) {
 				error_msg=1;
@@ -6416,10 +6572,11 @@ messages won't be persistent. Using default options\n"),
 				free(msg);
 			}
 			else
-				fprintf(stderr, _("%s: '%s': Directory not writable. \
-Bookmarks, commands logs, and commands history are disabled. Program \
-messages won't be persistent. Using default options\n"), 
-						PROGRAM_NAME, CONFIG_DIR);			
+				fprintf(stderr, _("%s: '%s': Directory not writable. "
+								  "Bookmarks, commands logs, and commands "
+								  "history are disabled. Program messages "
+								  "won't be persistent. Using default "
+								  "options\n"), PROGRAM_NAME, CONFIG_DIR);			
 		}
 
 		/* #### CHECK THE PROFILE FILE #### */
@@ -6470,7 +6627,10 @@ messages won't be persistent. Using default options\n"),
 				fprintf(config_fp, "%s configuration file\n\
 	########################\n\n", PROGRAM_NAME);
 				fprintf(config_fp, "\
-Filetype colors=\"di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;39:ef=00;33:nf=00;31:ln=01;36:or=00;36:pi=40;33:so=01;35:bd=01;33;01:cd=01;37;01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:ee=00;32:ca=00;30;41:no=00;47;31\"\n\
+Filetype colors=\"di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;39:\
+ef=00;33:nf=00;31:ln=01;36:or=00;36:pi=40;33:so=01;35:bd=01;33;01:\
+cd=01;37;01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:\
+ex=01;32:ee=00;32:ca=00;30;41:no=00;47;31\"\n\
 Prompt color=00;36\n\
 Text color=00;39;49\n\
 ELN color=01;33\n\
@@ -6516,8 +6676,8 @@ OF PROMPT\n");
 				 div_line_color_set=-1, welcome_msg_color_set=-1;
 			config_fp=fopen(CONFIG_FILE, "r");
 			if (!config_fp) {
-				asprintf(&msg, _("%s: fopen: '%s': %s. Using default \
-values.\n"), 
+				asprintf(&msg, _("%s: fopen: '%s': %s. Using default "
+								 "values.\n"), 
 						 PROGRAM_NAME, CONFIG_FILE, strerror(errno));
 				if (msg) {
 					error_msg=1;
@@ -6525,8 +6685,8 @@ values.\n"),
 					free(msg);
 				}
 				else
-					fprintf(stderr, _("%s: fopen: '%s': %s. Using default \
-values.\n"), 
+					fprintf(stderr, _("%s: fopen: '%s': %s. Using default "
+									  "values.\n"), 
 							PROGRAM_NAME, CONFIG_FILE, strerror(errno));
 			}
 			else {
@@ -6968,9 +7128,10 @@ values.\n"),
 					char *xrdb_path=get_cmd_path("xrdb");
 					if (xrdb_path)
 						launch_execle("xrdb -merge ~/.Xresources");
-					asprintf(&msg, _("%s: Restart your %s for changes to \
-~/.Xresources to take effect. Otherwise, %s keybindings might not work as \
-expected.\n"), 
+					asprintf(&msg, _("%s: Restart your %s for changes to "
+									 "~/.Xresources to take effect. "
+									 "Otherwise, %s keybindings might not "
+									 "work as expected.\n"), 
 							 PROGRAM_NAME, (xrdb_path) ? _("terminal") 
 							 : _("X session"), PROGRAM_NAME);
 					if (msg) {
@@ -6979,11 +7140,12 @@ expected.\n"),
 						free(msg);
 					}
 					else {
-						printf(_("%s: Restart your %s for changes to \
-~/.Xresources to take effect. Otherwise, %s keybindings might not work as \
-expected.\n"), 
-							   PROGRAM_NAME, (xrdb_path) ? _("terminal") 
-							   : _("X session"), PROGRAM_NAME);
+						printf(_("%s: Restart your %s for changes to "
+								 "~/.Xresources to take effect. Otherwise, "
+								 "%s keybindings might not work as "
+								 "expected.\n"), PROGRAM_NAME, 
+								 (xrdb_path) ? _("terminal") 
+							     : _("X session"), PROGRAM_NAME);
 						printf(_("Press any key to continue... "));
 						xgetchar(); puts("");
 					}
@@ -7037,16 +7199,16 @@ expected.\n"),
 	/* If the directory exists, check it is writable */
 	else if (access(TMP_DIR, W_OK) == -1) {
 		selfile_ok=0;
-		asprintf(&msg, "%s: '%s': Directory not writable. Selected files \
-won't be persistent\n", PROGRAM_NAME, TMP_DIR);
+		asprintf(&msg, "%s: '%s': Directory not writable. Selected files "
+						"won't be persistent\n", PROGRAM_NAME, TMP_DIR);
 		if (msg) {
 			error_msg=1;
 			log_msg(msg, PRINT_PROMPT);
 			free(msg);
 		}
 		else
-			fprintf(stderr, "%s: '%s': Directory not writable. Selected \
-files won't be persistent\n", PROGRAM_NAME, TMP_DIR);
+			fprintf(stderr, "%s: '%s': Directory not writable. Selected "
+					"files won't be persistent\n", PROGRAM_NAME, TMP_DIR);
 	}
 
 	if (selfile_ok) {
@@ -7434,6 +7596,21 @@ parse_input_str(char *str)
 		}
 	}
 
+	if (flags & IS_USRVAR_DEF || str[0] == ':' 
+	|| str[0] == ';') {
+	/* If ";cmd" or ":cmd" the whole input line will be send to exec_cmd()
+	 * and will be executed by the system shell via execle() */
+		args_n=0;
+		char **cmd=NULL;
+		cmd=xcalloc(cmd, 2, sizeof(char *));
+		cmd[0]=xcalloc(cmd[0], strlen(str)+1, sizeof(char));
+		strcpy(cmd[0], str);
+		cmd[1]=NULL;
+		return cmd;
+		/* Since we don't run split_str() here, dequoting and deescaping
+		 * is performed directly by the system shell */
+	}
+
 	/* If chained commands, check each of them. If at least one of them is
 	 * internal, take care of the job (the system shell does not know our 
 	 * internal commands and therefore cannot execute them); else, if no 
@@ -7465,21 +7642,6 @@ parse_input_str(char *str)
 			exec_chained_cmds(str);
 			return NULL;
 		}
-	}
-	
-	if (flags & IS_USRVAR_DEF || str[0] == ':' 
-	|| str[0] == ';') {
-	/* If ";cmd" or ":cmd" the whole input line will be send to exec_cmd()
-	 * and will be executed by the system shell via execle() */
-		args_n=0;
-		char **cmd=NULL;
-		cmd=xcalloc(cmd, 2, sizeof(char *));
-		cmd[0]=xcalloc(cmd[0], strlen(str)+1, sizeof(char));
-		strcpy(cmd[0], str);
-		cmd[1]=NULL;
-		return cmd;
-		/* Since we don't run split_str() here, dequoting and deescaping
-		 * is performed directly by the system shell */
 	}
 
 	/* #### 2) SPLIT INPUT STRING INTO SUBSTRINGS #### */
@@ -8124,7 +8286,7 @@ prompt(void)
 	}
 
 	input=readline(shell_prompt);
-
+	
 	/* Enable commands history only if the input line is not void */
 	if (input) {
 		/* Do not record empty lines, exit, history commands, or 
@@ -12148,6 +12310,7 @@ edit_function(char **comm)
 		/* Rerun external_arguments */
 		if (argc_bk > 1)
 			external_arguments(argc_bk, argv_bk);
+/*		initialize_readline(); */
 		init_config();
 		stat(CONFIG_FILE, &file_attrib);
 	}
