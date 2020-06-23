@@ -2892,7 +2892,7 @@ get_link_ref(const char *link, int filetype)
 		struct stat file_attrib;
 		stat(linkname, &file_attrib);
 		free(linkname);
-		linkname = NULL;
+		linkname = (char *)NULL;
 		if ((file_attrib.st_mode & S_IFMT) == filetype)
 			return EXIT_SUCCESS;
 	}
@@ -6366,7 +6366,12 @@ my_rl_path_completion(const char *text, int state)
 			/* Match only dirs or symlinks to dir */
 			if (strncmp(rl_line_buffer, "cd ", 3) == 0) {
 				if (entry->d_type == DT_LNK) {
-					if (get_link_ref(entry->d_name, S_IFDIR) != 0)
+					char *tmp = xcalloc(strlen(entry->d_name) + strlen(dirname)
+										+ 1, sizeof(char));
+					sprintf(tmp, "%s%s", dirname, entry->d_name);
+					int ret = get_link_ref(tmp, S_IFDIR);
+					free(tmp);
+					if (ret != 0)
 						continue; /* No match */
 				}
 				else if (entry->d_type != DT_DIR)
@@ -6404,7 +6409,7 @@ my_rl_path_completion(const char *text, int state)
 		else {
 			/* Check if possible completion match up to the length of 
 			 * filename. */
-
+			
 			if ((entry->d_name[0] == filename[0])
 			&& (((int)strlen(entry->d_name)) >= filename_len)
 			&& (strncmp(filename, entry->d_name, filename_len) == 0)) {
@@ -6413,9 +6418,13 @@ my_rl_path_completion(const char *text, int state)
 				 * only dirs and symlinks to dir */
 				if (strncmp(rl_line_buffer, "cd ", 3) == 0) {
 					if (entry->d_type == DT_LNK) {
-						if (get_link_ref(entry->d_name, S_IFDIR) == 0) {
+						char *tmp = xcalloc(strlen(entry->d_name) + strlen(dirname)
+											+ 1, sizeof(char));
+						sprintf(tmp, "%s%s", dirname, entry->d_name);
+						int ret = get_link_ref(tmp, S_IFDIR);
+						free(tmp);
+						if (ret == 0)
 							break;
-						}
 					}
 					if (entry->d_type == DT_DIR)
 						break;
