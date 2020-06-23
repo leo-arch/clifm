@@ -1786,7 +1786,7 @@ straftlst(const char *str, const char c)
 /* Returns the string after the last appearance of a given char, NULL if no 
  * matches */
 {
-	char *f_str = NULL;
+	char *buf = NULL;
 	size_t str_len = strlen(str);
 	register size_t i = 0;
 	for (i = str_len; i--; ) {
@@ -1795,11 +1795,11 @@ straftlst(const char *str, const char c)
 				return NULL; /* There's nothing after C */
 			char *p = calloc(str_len - i, sizeof(char));
 			if (p) {
-				f_str = p;
+				buf = p;
 				p = NULL;
 				/* copy STR beginning one char after C */
-				strcpy(f_str, str + i + 1);
-				return f_str;
+				strcpy(buf, str + i + 1);
+				return buf;
 			}
 			else
 				return NULL;
@@ -1813,7 +1813,7 @@ strbfr(char *str, const char c)
 /* Returns the substring in str before the first appearance of c. If not 
  * found, or C is the first char in STR, returns NULL */
 {
-	char *start = str, *f_str = NULL;
+	char *start = str, *buf = NULL;
 	register int counter = 0;
 	while(*str) {
 		if (*str == c) {
@@ -1821,13 +1821,13 @@ strbfr(char *str, const char c)
 			the first char */
 			char *p = calloc(counter + 1, sizeof(char));
 			if (p) {
-				f_str = p;
+				buf = p;
 				p = NULL;
-				strncpy(f_str, start, counter);
-				return f_str;
-				/*NOTE: f_str is null terminated because calloc allocated 
-				 * and zeroed count+1 bytes, whereas strcpy copied the first 
-				 * 'counter' bytes of start into f_str. */
+				strncpy(buf, start, counter);
+				return buf;
+				/*NOTE: buf is null terminated because calloc allocated 
+				 * and zeroed count + 1 bytes, whereas strcpy copied the first 
+				 * 'counter' bytes of start into buf */
 			}
 			else
 				return NULL;
@@ -1846,6 +1846,7 @@ strbfrlst (char *str, char c)
 	/* Get the index in str of the last appearance of c */
 	char *buf = str;
 	unsigned int index = 0, counter = 0;
+
 	while (*buf) {
 		if (*buf == c)
 			index=counter;
@@ -1856,17 +1857,20 @@ strbfrlst (char *str, char c)
 	 * which case there is nothing before it) */
 	if (index == 0)
 		return NULL; 
+
 	/* Else, copy str into buf, replace C by null char, and return buf */
 	size_t str_len = strlen(str);
-	buf=NULL;
+	buf = NULL;
 	char *p = calloc(str_len + 1, sizeof(char));
+
 	if (!p)
 		return NULL;
+
 	buf = p;
 	p = NULL;
 	strcpy(buf, str);
-/*	if (index != str_len-1) // Why? This check shouldn't be here */
-		buf[index] = 0x00;
+	buf[index] = 0x00;
+
 	return buf;
 }
 
@@ -1877,8 +1881,10 @@ strbtw(const char *str, const char a, const char b)
  * between them */
 {
 	size_t str_len = strlen(str);
+
 	if (str_len == 0)
 		return NULL;
+
 	register int i = 0;
 	int ch_from = -1;
 
@@ -1889,7 +1895,9 @@ strbtw(const char *str, const char a, const char b)
 		}
 	}
 
-	if (ch_from == -1) return NULL;
+	if (ch_from == -1)
+		return NULL;
+	
 	int ch_to = -1;
 	for (i = ((int)str_len - 1); i > ch_from; i--) {
 		if (str[i] == b) {
@@ -1898,11 +1906,13 @@ strbtw(const char *str, const char a, const char b)
 		}
 	}
 
-	if (ch_to == -1) return NULL;
+	if (ch_to == -1)
+		return NULL;
+
 	int j = 0;
-	char *p = calloc((ch_to - ch_from) + 1, sizeof(char)), *f_str = NULL;
+	char *buf = NULL, *p = calloc((ch_to - ch_from) + 1, sizeof(char));
 	if (p) {
-		f_str = p;
+		buf = p;
 		p = NULL;
 	}
 	else {
@@ -1912,10 +1922,10 @@ strbtw(const char *str, const char a, const char b)
 	}
 
 	for(i = ch_from + 1; i < ch_to; i++)
-		f_str[j++] = str[i];
-	f_str[j] = 0x00;
+		buf[j++] = str[i];
+	buf[j] = 0x00;
 
-	return f_str;
+	return buf;
 }
 
 /* The following four functions (from_hex, to_hex, url_encode, and
@@ -1943,6 +1953,7 @@ url_encode(char *str)
 {
 	if (!str || str[0] == 0x00)
 		return NULL;
+
 	char *p;
 	p = calloc((strlen(str) * 3) + 1, sizeof(char));
 	/* The max lenght of our buffer is 3 times the length of srt plus 1 extra 
@@ -1950,6 +1961,7 @@ url_encode(char *str)
 	 * %XX (3 chars) */
 	if (!p)
 		return NULL;
+
 	char *buf;
 	buf = p;
 	p = NULL;
@@ -1983,11 +1995,13 @@ url_decode(char *str)
 {
 	if (!str || str[0] == 0x00)
 		return NULL;
+
 	char *p;
 	p = calloc(strlen(str) + 1, sizeof(char));
 	/* The decoded string will be at most as long as the encoded string */
 	if (!p)
 		return NULL;
+
 	char *buf;
 	buf = p;
 	p = NULL;
@@ -2355,7 +2369,6 @@ int files = 0, args_n = 0, sel_n = 0, max_hist = -1, max_log = -1,
 size_t user_home_len = 0;
 struct termios shell_tmodes;
 pid_t own_pid = 0;
-char **dirlist = NULL;
 struct usrvar_t *usr_var = NULL;
 char *user = NULL, *path = NULL, **old_pwd = NULL, **sel_elements = NULL, 
 	*qc = NULL,	*sel_file_user = NULL, **paths = NULL, **bin_commands = NULL, 
@@ -2366,7 +2379,7 @@ char *user = NULL, *path = NULL, **old_pwd = NULL, **sel_elements = NULL,
 	hostname[HOST_NAME_MAX] = "", *LOG_FILE = NULL, *LOG_FILE_TMP = NULL, 
 	*HIST_FILE = NULL, *MSG_LOG_FILE = NULL, *PROFILE_FILE = NULL, 
 	*TRASH_DIR = NULL, *TRASH_FILES_DIR = NULL, *TRASH_INFO_DIR = NULL, 
-	*sys_shell = NULL,
+	*sys_shell = NULL, **dirlist = NULL,
 	/* This is not a comprehensive list of commands. It only lists commands
 	 * long version for TAB completion */
 	*INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
@@ -2429,7 +2442,12 @@ char di_c[MAX_COLOR] = "", /* Directory */
 int
 main(int argc, char **argv)
 {
-	/* Make sure we are running some GNU/Linux OS */
+	/* Make sure we are running some GNU/Linux OS on x86 CPU */
+
+	#if defined (__X86_64__) || defined(__i386__)
+		fprintf(stderr, "Unsupported CPU architecture\n");
+		exit(EXIT_FAILURE);
+	#endif /* __x86 */
 
 	#if !defined(__linux__) && !defined(linux) && !defined(__linux) 
 	&& !defined(__gnu_linux__)
@@ -2437,7 +2455,7 @@ main(int argc, char **argv)
 		fprintf(stderr, "%s: This program runs only on GNU/Linux\n", 
 				PROGRAM_NAME);
 		exit(EXIT_FAILURE);
-	#endif
+	#endif /* __linux__ */
 
 	/* What about unices like BSD, Android and even MacOS? 
 	* unix || __unix || __unix__
@@ -2451,7 +2469,7 @@ main(int argc, char **argv)
 	#ifndef __GLIBC__
 		fprintf(stderr, "%s: GNU C libraries not found\n", PROGRAM_NAME);
 		exit(EXIT_FAILURE);
-	#endif
+	#endif /* __GLIBC__ */
 
 	/* ##### BASIC CONFIG AND VARIABLES ###### */
 
@@ -2699,7 +2717,7 @@ main(int argc, char **argv)
 			else {
 				if (access("/", R_OK|X_OK) == -1) {
 					fprintf(stderr, "%s: '/': %s\n", PROGRAM_NAME, 
-							 strerror(errno));
+							strerror(errno));
 					exit(EXIT_FAILURE);
 				}
 				else {
@@ -2715,8 +2733,8 @@ main(int argc, char **argv)
 	}
 
 	/* Make path the CWD */
-	/* If chdir() fails, set path to cwd, list files and print the error 
-	 * message. If not access to cwd dir either, exit */
+	/* If chdir(path) fails, set path to cwd, list files and print the error 
+	 * message. If no access to CWD either, exit */
 	if (chdir(path) == -1) {
 		asprintf(&msg, "%s: chdir: '%s': %s\n", PROGRAM_NAME, path, 
 				 strerror(errno));
@@ -2908,6 +2926,7 @@ is_internal_c(const char *cmd)
 			break;
 		}
 	}
+
 	if (found)
 		return 1;
 	/* Check for the search and history functions as well */	
@@ -2947,27 +2966,26 @@ exec_chained_cmds(char *cmd)
 			char **tmp_cmd = parse_input_str(str);
 			free(str);
 			if (tmp_cmd) {
-				int exit_code = 0;
+				int error_code = 0;
+				size_t j;
 				char **alias_cmd = check_for_alias(tmp_cmd);
 				if (alias_cmd) {
 					if (exec_cmd(alias_cmd) != 0)
-						exit_code = 1;
-					size_t j;
+						error_code = 1;
 					for (j = 0; alias_cmd[j]; j++)
 						free(alias_cmd[j]);
 					free(alias_cmd);
 				}
 				else {
 					if (exec_cmd(tmp_cmd) != 0)
-						exit_code = 1;
-					size_t j;
+						error_code = 1;
 					for (j = 0; j <= args_n; j++) 
 						free(tmp_cmd[j]);
 					free(tmp_cmd);
 				}
 				/* Do not continue if the execution was condtional and
 				 * the previous command failed */
-				if (cond_exec && exit_code)
+				if (cond_exec && error_code)
 					break;
 			}
 		}
@@ -3062,7 +3080,6 @@ get_substr(char *str, const char ifs)
 	/* ################### EXPAND RANGES ######################*/
 	
 	int afirst = 0, asecond = 0, ranges_ok = 0;
-	/* rsize=0 */
 
 	for (i = 0; substr[i]; i++) {
 		/* Check if substr is a valid range */
@@ -3594,8 +3611,10 @@ escape_str(char *str)
 {
 	if (!str)
 		return NULL;
+
 	size_t len = 0;
 	char *buf = NULL;
+
 	buf = xcalloc(strlen(str) * 2 + 1, sizeof(char));
 	while(*str) {
 		if (is_quote_char(*str))
@@ -3604,6 +3623,7 @@ escape_str(char *str)
 	}
 	if (buf)
 		return (buf);
+
 	return NULL;
 }
 
@@ -3616,16 +3636,19 @@ is_internal(const char *cmd)
 					     "trash", "s", "sel", NULL };
 	char found = 0;
 	size_t i;
+
 	for (i = 0; int_cmds[i]; i++) {
 		if (strcmp(cmd, int_cmds[i]) == 0) {
 			found = 1;
 			break;
 		}
 	}
+
 	if (found) /* Check for the search function as well */
 		return 1;
 	else if (cmd[0] == '/' && access(cmd, F_OK) != 0)
 		return 1;
+
 	return 0;
 }
 
@@ -3648,11 +3671,13 @@ is_quote_char(char c)
  * rl_filename_quote_characters */
 {
 	char *p = qc;
+
 	while (*p) {
 		if (c == *p)
 			return 1;
 		p++;
 	}
+
 	return 0;
 }
 
@@ -3675,6 +3700,7 @@ split_str(char *str)
 	buf = xcalloc(1, sizeof(char));;
 	char quote = 0;
 	char **substr = NULL;
+
 	while (*str) {
 		switch (*str) {
 		case '\'':
@@ -3707,6 +3733,7 @@ split_str(char *str)
 				return NULL;
 			}
 			break;
+
 		case '\t': /* TAB, new line char, and space are taken as word
 		breaking characters */
 		case '\n':
@@ -3729,6 +3756,7 @@ split_str(char *str)
 				buf_len = 0;
 			}
 			break;
+
 		default:
 			buf = xrealloc(buf, (buf_len + 1) * sizeof(char *));
 			buf[buf_len++] = *str;
@@ -3771,6 +3799,7 @@ print_license(void)
 {
 	time_t rawtime = time(NULL);
 	struct tm *tm = localtime(&rawtime);
+
 	printf(_("%s, 2017-%d, %s\n\n\
 This program is free software; you can redistribute it and/or modify \
 it under the terms of the GNU General Public License (version 2 or later) \
@@ -3799,12 +3828,14 @@ u8_xstrlen(const char *str)
 {
 	size_t len = 0;
 	cont_bt = 0;
+
 	while (*(str++))
 		if ((*str & 0xc0) != 0x80) /* Do not count continuation bytes (used 
 		by multibyte, that is, non-ASCII characters) */
 			len++;
 		else
 			cont_bt++;
+
 	return len;
 }
 
@@ -3833,90 +3864,97 @@ open_function(char **cmd)
 	/* Check file type: only directories, symlinks, and regular files will
 	 * be opened */
 	char *linkname = NULL, file_tmp[PATH_MAX] = "", is_reg = 0, 
-		is_link = 0, no_open_file = 1, filetype[128] = "";
+		 is_link = 0, no_open_file = 1, filetype[128] = "";
 		 /* Reserve a good amount of bytes for filetype: it cannot be known
 		  * beforehand how many bytes the translated string will need */
+
 	switch (file_attrib.st_mode & S_IFMT) {
-		case S_IFBLK:
-			/* Store file type to compose and print the error message, if 
-			 * necessary */
-			strcpy(filetype, _("block device"));
+	case S_IFBLK:
+		/* Store file type to compose and print the error message, if 
+		 * necessary */
+		strcpy(filetype, _("block device"));
 		break;
+
+	case S_IFCHR:
+		strcpy(filetype, _("character device"));
+		break;
+
+	case S_IFSOCK:
+		strcpy(filetype, _("socket"));
+		break;
+
+	case S_IFIFO:
+		strcpy(filetype, _("FIFO/pipe"));
+		break;
+
+	case S_IFDIR:
+		/* Set the no_open_file flag to false, since dirs (and regular
+		 * files) will be opened */
+		no_open_file = 0;
+		cd_function(cmd[1]);
+		break;
+
+		/* If a symlink, find out whether it is a symlink to dir or to file */
+	case S_IFLNK:
+		linkname = realpath(deq_path, NULL);
+		if (!linkname) {
+			if (errno == ENOENT)
+				fprintf(stderr, _("%s: open: '%s': Broken link\n"), 
+							PROGRAM_NAME, deq_path);
+			else
+				fprintf(stderr, "%s: open: '%s': %s\n", PROGRAM_NAME,
+						deq_path, strerror(errno));
+
+			free(deq_path);
+			return EXIT_FAILURE;
+		}
+		if (stat(linkname, &file_attrib) == -1) {
+			/* Never reached: if linked file does not exist, realpath()
+			 * returns NULL */
+			fprintf(stderr, "%s: open: '%s -> %s': %s\n", PROGRAM_NAME, 
+					deq_path, linkname, strerror(errno));
+			free(linkname);
+			free(deq_path);
+			return EXIT_FAILURE;
+		}
+		is_link = 1;
+		switch (file_attrib.st_mode & S_IFMT) {
+		/* Realpath() will never return a symlink, but an absolute 
+		 * path, so that there is no need to check for symlinks */
+		case S_IFBLK:
+			strcpy(filetype, _("block device"));
+			break;
 		case S_IFCHR:
 			strcpy(filetype, _("character device"));
-		break;
+			break;
 		case S_IFSOCK:
 			strcpy(filetype, _("socket"));
-		break;
+			break;
 		case S_IFIFO:
 			strcpy(filetype, _("FIFO/pipe"));
-		break;
+			break;
 		case S_IFDIR:
-			/* Set the no_open_file flag to false, since dirs (and regular
-			 * files) will be opened */
 			no_open_file = 0;
-			cd_function(cmd[1]);
-		break;
-		/* If a symlink, find out whether it is a symlink to dir or to file */
-		case S_IFLNK:
-			linkname = realpath(deq_path, NULL);
-			if (!linkname) {
-				if (errno == ENOENT)
-					fprintf(stderr, _("%s: open: '%s': Broken link\n"), 
-							PROGRAM_NAME, deq_path);
-				else
-					fprintf(stderr, "%s: open: '%s': %s\n", PROGRAM_NAME,
-							deq_path, strerror(errno));
-
-				free(deq_path);
-				return EXIT_FAILURE;
-			}
-			if (stat(linkname, &file_attrib) == -1) {
-				/* Never reached: if linked file does not exist, realpath()
-				 * returns NULL */
-				fprintf(stderr, "%s: open: '%s -> %s': %s\n", PROGRAM_NAME, 
-						deq_path, linkname, strerror(errno));
-				free(linkname);
-				free(deq_path);
-				return EXIT_FAILURE;
-			}
-			is_link = 1;
-			switch (file_attrib.st_mode & S_IFMT) {
-				/* Realpath() will never return a symlink, but an absolute 
-				 * path, so that there is no need to check for symlinks */
-				case S_IFBLK:
-					strcpy(filetype, _("block device"));
-				break;
-				case S_IFCHR:
-					strcpy(filetype, _("character device"));
-				break;
-				case S_IFSOCK:
-					strcpy(filetype, _("socket"));
-				break;
-				case S_IFIFO:
-					strcpy(filetype, _("FIFO/pipe"));
-				break;
-				case S_IFDIR:
-					no_open_file = 0;
-					cd_function(linkname);
-				break;
-				case S_IFREG:
-					no_open_file = 0;
-					is_reg = 1;
-					strncpy(file_tmp, linkname, PATH_MAX);
-				break;
-				default:
-					strcpy(filetype, _("unknown file type"));
-				break;
-			}
-		break;
-
+			cd_function(linkname);
+			break;
 		case S_IFREG:
 			no_open_file = 0;
 			is_reg = 1;
-		break;
+			strncpy(file_tmp, linkname, PATH_MAX);
+			break;
 		default:
 			strcpy(filetype, _("unknown file type"));
+				break;
+		}
+		break;
+
+	case S_IFREG:
+		no_open_file = 0;
+		is_reg = 1;
+		break;
+	
+	default:
+		strcpy(filetype, _("unknown file type"));
 		break;
 	}
 
@@ -3934,8 +3972,8 @@ Cannot open file. Try 'application filename'.\n"), PROGRAM_NAME, deq_path,
 	if (linkname)
 		free(linkname);
 
-	/* At this point we know the first argument is a regular file or a symlink
-	 * to a regular file */
+	/* At this point we know the first argument is either  a regular file or a 
+	 * symlink to a regular file */
 	/* Open the file */
 	if (is_reg) {
 		/* If no application was specified as second argument, use xdg-open */
@@ -6179,7 +6217,7 @@ dequote_str(char *text, int m_t)
 {
 	if (!text)
 		return NULL;
-	
+
 	/* At most, we need as many bytes as text (in case no escape sequence
 	 * is found)*/
 	char *buf = NULL;
@@ -6202,6 +6240,7 @@ dequote_str(char *text, int m_t)
 	}
 
 	buf[len] = 0x00;
+
 	return buf;
 }
 
@@ -6223,6 +6262,18 @@ my_rl_path_completion(const char *text, int state)
 		return NULL;
 	} */
 
+	/* Dequote string to be completed (text), if necessary */
+	static char *tmp_text = NULL;
+
+	if (strcntchr(text, '\\') != -1) {
+		char *p = savestring(text, strlen(text));
+		tmp_text = dequote_str(p, 0);
+		free(p);
+		p = (char *)NULL;
+		if (!tmp_text)
+			return (char *)NULL;
+	}
+	
 	int rl_complete_with_tilde_expansion = 0;
 	/* ~/Doc -> /home/user/Doc */
 
@@ -6245,24 +6296,25 @@ my_rl_path_completion(const char *text, int state)
 		if (users_dirname)
 			free(users_dirname);
 
-		size_t text_len = strlen(text);
+							/* tmp_text is true whenver text was dequoted */
+		size_t text_len = strlen((tmp_text) ? tmp_text : text);
 		if (text_len)
-			filename = savestring(text, text_len);
+			filename = savestring((tmp_text) ? tmp_text : text, text_len);
 		else
 			filename = savestring("", 1);
 		if (!*text)
 			text = ".";
 		if (text_len)
-			dirname = savestring(text, text_len);
+			dirname = savestring((tmp_text) ? tmp_text : text, text_len);
 		else
 			dirname = savestring("", 1);
 
 		/* Get everything after last slash */
 		temp = strrchr(dirname, '/');
 
-		if (temp) { 
-		  strcpy(filename, ++temp);
-		  *temp = 0x00;
+		if (temp) {
+			strcpy(filename, ++temp);
+			*temp = 0x00;
 		}
 		else
 			strcpy(dirname, ".");
@@ -6293,6 +6345,11 @@ my_rl_path_completion(const char *text, int state)
 
 		rl_filename_completion_desired = 1;
     }
+    
+    if (tmp_text) {
+		free(tmp_text);
+		tmp_text = (char *)NULL;
+	}
 
 	/* At this point we should entertain the possibility of hacking wildcarded
 	filenames, like /usr/man/man<WILD>/te<TAB>.  If the directory name
@@ -6347,6 +6404,7 @@ my_rl_path_completion(const char *text, int state)
 		else {
 			/* Check if possible completion match up to the length of 
 			 * filename. */
+
 			if ((entry->d_name[0] == filename[0])
 			&& (((int)strlen(entry->d_name)) >= filename_len)
 			&& (strncmp(filename, entry->d_name, filename_len) == 0)) {
@@ -6431,8 +6489,8 @@ my_rl_path_completion(const char *text, int state)
 				}
 			}
 			else {
-				  temp = xcalloc(1 + strlen( users_dirname)
-							   + strlen(entry->d_name), sizeof(char));
+				  temp = xcalloc(1 + strlen(users_dirname)
+							     + strlen(entry->d_name), sizeof(char));
 				  strcpy(temp, users_dirname);
 			}
 
@@ -6464,6 +6522,7 @@ my_rl_completion(const char *text, int start, int end)
 		if (is_number(text) && num_text > 0 && num_text <= files)
 			matches = rl_completion_matches(text, &filenames_generator);
 	}
+
 	/* If not first word and not a number, readline will attempt 
 	 * path completion instead via my custom my_rl_path_completion() */
 	return matches;
