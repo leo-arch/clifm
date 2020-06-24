@@ -20,7 +20,7 @@ CliFM is a completely text-based file manager able to perform all the basic oper
 CliFM also offers the following features:
   1) FreeDesktop compliant Trash system
   2) History function
-  3) TAB completion
+  3) TAB completion for commands, paths, and bookmarks
   4) TAB ELN-expansion
   5) Keyboard shortcuts
   6) Wildcards auto-expansion
@@ -119,8 +119,8 @@ show this list of commands
 .B /* [DIR]
 this is the quick search function. Just type '/' followed by the string you are looking for (you can use wildcards), and CliFM will list all the matches in the current working directory. To search for files in any other directory, specify the directory name as second argument. This argument (DIR) could be an absolute path, a relative path, or an ELN.
 .TP
-.B bm, bookmarks [a, add PATH] [d, del]
-with no argument, open the bookmarks menu. Here you cd into the desired bookmark by entering either its ELN or its shortcut. In this screen you can also add, remove or edit your bookmarks by simply typing 'e' to edit the bookmarks file. If you want to add or remove a bookmark directly from the command line, use the 'a' and 'd' arguments respectivelly. Example: 'bm a /media/misc' or 'bm d'. 
+.B bm, bookmarks [a, add PATH] [d, del] [edit] [shortcut, name]
+with no argument, open the bookmarks menu. Here you cd into the desired bookmark by entering either its ELN, its shortcut, or its name. In this screen you can also add, remove or edit your bookmarks by simply typing 'e' to edit the bookmarks file (which is simply a list of lines with this format: [shortcut]name:path. Ex: [d]documents:/home/user/documents). If you want to add or remove a bookmark directly from the command line, use the 'a' and 'd' arguments respectivelly. Example: 'bm a /media/misc' or 'bm d'. You can also open a bookmark by typing 'bm shortcut' or 'bm name' (in which case TAB completion is available).
 .TP
 .B o, open ELN/FILE [APPLICATION]
 open either a directory or a file. For example: 'o 12' or 'o filename'. By default, the 'open' function will open files with the default application associated to them (if xdg-open command is found). However, if you want to open a file with a different application, just add the application name as second argument, e.g. 'o 12 leafpad'. If you want to run the program in the background, simply add the ampersand character: 'o 12 &'. When it comes to directories, 'open' works just like the 'cd' command.
@@ -130,12 +130,12 @@ when used with no argument, it changes the current directory to the default dire
 .TP
 .B b, back [h, hist] [clear] [ELN]
 unlike 'cd ..', which will send you to the parent directory of the current directory, this command (with no argument) will send you back to the previously visited directory. CliFM keeps a record of all the visited directories. You can see this list by typing 'b hist', 'b h' or 'bh', and you can access any element in this list by simply passing the corresponding ELN in this list to the 'back' command. Example:
-        [user@hostname:S] ~ $ bh
+        [user@hostname] ~ $ bh
         1 /home/user
         2 /etc
         3 /proc
-        [user@hostname:S] ~ $ b 3
-        [user@hostname:S] /proc $ 
+        [user@hostname] ~ $ b 3
+        [user@hostname] /proc $ 
 
 \fBNote:\fR the line printed in green indicates the current position of the back function in the directory history list.
   Finally, you can also clear this history list by typing 'b clear'.
@@ -236,7 +236,7 @@ safely quit CliFM.
 
 .SH KEYBOARD SHORTCUTS
 .TP
-\fBA-c:\fR Clear the current command line
+\fBA-c:\fR Clear the current command line buffer
 .TP
 \fBA-f:\fR Toggle list-folders-first on/off
 .TP
@@ -256,15 +256,15 @@ safely quit CliFM.
 .TP
 \fBA-d:\fR Deselect all selected files
 .TP
-\fBA-r:\fR Go to the root directory
+\fBA-r:\fR Change to the root directory
 .TP
-\fBA-e:\fR Go to the home directory
+\fBA-e:\fR Change to the home directory
 .TP
-\fBA-u:\fR Go up to the parent directory of the current working directory
+\fBA-u:\fR Change up to the parent directory of the current working directory
 .TP
-\fBA-h/A-j:\fR Go to the previous directory in the directory history list
+\fBA-h/A-j:\fR Change to the previous directory in the directory history list
 .TP
-\fBA-k:\fR Go to the next directory in the directory history list
+\fBA-k:\fR Change to the next directory in the directory history list
 .TP
 \fBF10:\fR Open the configuration file
 .TP
