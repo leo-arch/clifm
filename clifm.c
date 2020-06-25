@@ -1,4 +1,21 @@
 /** CliFM, the anti-eye-candy/KISS file manager */
+/*
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA 02110-1301, USA.
+ * 
+ */
 
 /* Compile as follows:
  * $ gcc -O3 -march=native -s -fstack-protector-strong -lreadline -lcap -o 
@@ -1267,7 +1284,6 @@ http://pubs.opengroup.org/onlinepubs/9699919799/nframe.html */
 					#	 THE PROGRAM BEGINS		  # 
 					############################### */	
 
-
 /* #define _POSIX_C_SOURCE 200809L  */
 /* "if you define _GNU_SOURCE, then defining either _POSIX_SOURCE or 
  * _POSIX_C_SOURCE as well has no effect". If I define this macro without 
@@ -1341,11 +1357,6 @@ program_invocation_short_name variable and asprintf() */
 
 #define PROGRAM_NAME "CliFM"
 #define PNL "clifm" /* Program name lowercase */
-/* #define CONF_PATHS_MAX 68
- * According to useradd manpage, the max lenght of a username is 32. So, 
- * "/home/" (6) + 32 + "/.config/clifm/bookmarks.cfm" (28) + terminating 
- * null byte (1) == 67. This is then the max length I need for config dirs 
- * and files. Currently, config dirs and files are dinamically allocated */
 #define TMP_DIR "/tmp/clifm"
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
@@ -1454,6 +1465,7 @@ check_immutable_bit(char *file)
 		fprintf(stderr, "'%s': %s\n", file, strerror(errno));
 		return -1;
 	}
+
 	ioctl(fd, FS_IOC_GETFLAGS, &attr);
 	if (attr & FS_IMMUTABLE_FL)
 		immut_flag = 1;
@@ -3821,20 +3833,20 @@ print_license(void)
 	time_t rawtime = time(NULL);
 	struct tm *tm = localtime(&rawtime);
 
-	printf(_("%s, 2017-%d, %s\n\n\
-This program is free software; you can redistribute it and/or modify \
-it under the terms of the GNU General Public License (version 2 or later) \
-as published by the Free Software Foundation.\n\n\
-This program is distributed in the hope that it will be useful, but \
-WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY \
-or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License \
-for more details.\n\n\
-You should have received a copy of the GNU General Public License \
-along with this program. If not, write to the Free Software \
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA \
-02110-1301, USA, or visit <http://www.gnu.org/licenses/>\n\n\
-NOTE: For more information about the meaning of 'free software' run 'fs'.\n"), 
-		   PROGRAM_NAME, tm->tm_year + 1900, AUTHOR);
+	printf(_("%s, 2017-%d, %s\n\n"
+			 "This program is free software; you can redistribute it "
+			 "and/or modify it under the terms of the GNU General Public "
+			 "License (version 2 or later) as published by the Free Software "
+			 "Foundation.\n\nThis program is distributed in the hope that it "
+			 "will be useful, but WITHOUT ANY WARRANTY; without even the "
+			 "implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR "
+			 "PURPOSE. See the GNU General Public License for more details.\n\n"
+			 "You should have received a copy of the GNU General Public License "
+			 "along with this program. If not, write to the Free Software "
+			 "Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA "
+			 "02110-1301, USA, or visit <http://www.gnu.org/licenses/>\n\n"
+			 "NOTE: For more information about the meaning of 'free software' "
+			 "run 'fs'.\n"), PROGRAM_NAME, tm->tm_year + 1900, AUTHOR);
 }
 
 size_t
@@ -4037,14 +4049,14 @@ int
 cd_function(char *new_path)
 /* Change CliFM working dirctory to new_path */
 {
-	int ret = -1, dequoted = 0;
+	int ret = -1, dequoted_p = 0;
 	char *deq_path = NULL;
 	char buf[PATH_MAX] = ""; /* Temporarily store new_path */
 
 	/* dequote new_path, if necessary */
 	if (strcntchr(new_path, '\\') != -1) {
 		deq_path = dequote_str(new_path, 0);
-		dequoted = 1; /* Only in this case deq_path should be freed */
+		dequoted_p = 1; /* Only in this case deq_path should be freed */
 	}
 	else {
 		deq_path = new_path;
@@ -4053,7 +4065,7 @@ cd_function(char *new_path)
 
 	/* If no argument, change to home */
 	if (!deq_path || deq_path[0] == 0x00) {
-		if (dequoted)
+		if (dequoted_p)
 			free(deq_path);
 		if (user_home) {
 			ret = chdir(user_home);
@@ -4079,7 +4091,7 @@ cd_function(char *new_path)
 		if (!real_path) {
 			fprintf(stderr, "%s: cd: '%s': %s\n", PROGRAM_NAME, deq_path,
 					strerror(errno));
-			if (dequoted)
+			if (dequoted_p)
 				free(deq_path);
 			return EXIT_FAILURE;
 		}
@@ -4088,7 +4100,7 @@ cd_function(char *new_path)
 		if (ret != 0) {
 			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, real_path, 
 					strerror(errno));
-			if (dequoted)
+			if (dequoted_p)
 				free(deq_path);
 			free(real_path);
 			return EXIT_FAILURE;
@@ -4098,7 +4110,7 @@ cd_function(char *new_path)
 		free(real_path);
 	}
 
-	if (dequoted)
+	if (dequoted_p)
 		free(deq_path);		
 	
 	/* If chdir() was successful */
@@ -4417,8 +4429,8 @@ expand_range(char *str, int listdir)
 	free(second);
 
 	if (listdir) {
-		if (afirst <= 0 || afirst > files || asecond <= 0 || asecond > files
-		|| afirst >= asecond)
+		if (afirst <= 0 || afirst > files || asecond <= 0 
+		|| asecond > files || afirst >= asecond)
 			return NULL;
 	}
 	else
@@ -4705,8 +4717,9 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 		ret = launch_execve (tmp_cmd2);
 		free(trash_file);
 		if (ret != 0)
-			fprintf(stderr, _("%s: trash: '%s/%s': Failed removing trash \
-file\nTry removing it manually\n"), PROGRAM_NAME, TRASH_FILES_DIR, 
+			fprintf(stderr, _("%s: trash: '%s/%s': Failed removing trash "
+							  "file\nTry removing it manually\n"), 
+							  PROGRAM_NAME, TRASH_FILES_DIR, 
 					file_suffix);
 		return EXIT_FAILURE;
 	}
@@ -4747,8 +4760,9 @@ file\nTry removing it manually\n"), PROGRAM_NAME, TRASH_FILES_DIR,
 		ret = launch_execve(tmp_cmd4);
 		free(trash_file);
 		if (ret != 0) {
-			fprintf(stderr, _("%s: trash: Failed removing temporary files \
-from Trash.\nTry removing them manually\n"), PROGRAM_NAME);
+			fprintf(stderr, _("%s: trash: Failed removing temporary files "
+							  "from Trash.\nTry removing them manually\n"), 
+							  PROGRAM_NAME);
 			return EXIT_FAILURE;
 		}
 	}
@@ -4998,22 +5012,23 @@ untrash_element(char *file)
 			char *tmp_cmd2[] = { "rm", "-r", undel_file, undel_info, NULL };
 			ret = launch_execve(tmp_cmd2);
 			if (ret != 0) {
-				fprintf(stderr, _("%s: undel: '%s': Failed removing info \
-file\n"), PROGRAM_NAME, undel_info);
+				fprintf(stderr, _("%s: undel: '%s': Failed removing info "
+								  "file\n"), PROGRAM_NAME, undel_info);
 				return EXIT_FAILURE;
 			}
 			else
 				return EXIT_SUCCESS;
 		}
 		else {
-			fprintf(stderr, _("%s: undel: '%s': Failed restoring trashed \
-file\n"), PROGRAM_NAME, undel_file);
+			fprintf(stderr, _("%s: undel: '%s': Failed restoring trashed "
+							  "file\n"), PROGRAM_NAME, undel_file);
 			return EXIT_FAILURE;
 		}
 	}
 	else { /* !info_fp */
-		fprintf(stderr, _("%s: undel: Info file for '%s' not found. \
-Try restoring the file manually\n"), PROGRAM_NAME, file);
+		fprintf(stderr, _("%s: undel: Info file for '%s' not found. "
+						  "Try restoring the file manually\n"), PROGRAM_NAME, 
+						  file);
 		return EXIT_FAILURE;
 	}
 	
@@ -6013,18 +6028,18 @@ xdg_open_check(void)
 	xdg_open_path = get_cmd_path("xdg-open");
 	if (!xdg_open_path) {
 		flags &= ~XDG_OPEN_OK;
-		asprintf(&msg, _("%s: 'xdg-open' not found. Without this program you \
-will always need to specify an application when opening files.\n"), 
-				 PROGRAM_NAME);
+		asprintf(&msg, _("%s: 'xdg-open' not found. Without this program you "
+						 "will always need to specify an application when "
+						 "opening files.\n"), PROGRAM_NAME);
 		if (msg) {
 		warning_msg = 1;
 		log_msg(msg, PRINT_PROMPT);
 		free(msg);
 		}
 		else
-			printf(_("%s: 'xdg-open' not found. Without this program you \
-will always need to specify an application when opening files.\n"), 
-				    PROGRAM_NAME);
+			printf(_("%s: 'xdg-open' not found. Without this program you "
+					 "will always need to specify an application when "
+					 "opening files.\n"), PROGRAM_NAME);
 	}
 	else
 		flags |= XDG_OPEN_OK;
@@ -6254,8 +6269,8 @@ dequote_str(char *text, int m_t)
 
 char *
 my_rl_path_completion(const char *text, int state)
-/* Modified version of filename_completion_function() of an old Bash 
- * release (1.14.7) */
+/* This is the filename_completion_function() function of an old Bash 
+ * release (1.14.7) modified to fit CliFM needs */
 {
 	/* state is zero before completion, and 1 ... n after getting possible
 	 * completions. Example: 
@@ -6263,12 +6278,6 @@ my_rl_path_completion(const char *text, int state)
 	 * cuments/ -> state 1
 	 * wnloads/ -> state 2 
 	 * */
-
-/*	if (strncmp(rl_line_buffer, "bm ", 3) == 0
-	|| strncmp(rl_line_buffer, "bookmarks ", 10) == 0) {
-		printf("\nBookmarks completion!\n");
-		return NULL;
-	} */
 
 	/* Dequote string to be completed (text), if necessary */
 	static char *tmp_text = NULL;
@@ -6292,6 +6301,8 @@ my_rl_path_completion(const char *text, int state)
 	static int filename_len;
 
 	struct dirent *entry = (struct dirent *)NULL;
+
+	static int exec = 0;
 
 	/* If we don't have any state, then do some initialization. */
 	if (!state) {
@@ -6317,6 +6328,9 @@ my_rl_path_completion(const char *text, int state)
 		else
 			dirname = savestring("", 1);
 
+		if (dirname[0] == '.' && dirname[1] == '/')
+			exec = 1;
+
 		/* Get everything after last slash */
 		temp = strrchr(dirname, '/');
 
@@ -6331,6 +6345,7 @@ my_rl_path_completion(const char *text, int state)
 
 		/* Save the version of the directory that the user typed. */
 		size_t dirname_len = strlen(dirname);
+
 		users_dirname = savestring(dirname, dirname_len);
 /*		{ */
 			char *temp_dirname;
@@ -6359,96 +6374,31 @@ my_rl_path_completion(const char *text, int state)
 		tmp_text = (char *)NULL;
 	}
 
-	/* At this point we should entertain the possibility of hacking wildcarded
-	filenames, like /usr/man/man<WILD>/te<TAB>.  If the directory name
-	contains globbing characters, then build an array of directories, and
-	then map over that list while completing. */
-	/* *** UNIMPLEMENTED *** */
+	/* Now that we have some state, we can read the directory. If we found
+	 * a match among files in dir, break the loop and print the match */
 
-	/* Now that we have some state, we can read the directory. */
+	static int match, ret, reta, retb;
+	match = 0;
+/*	
+	size_t dirname_len = strlen(dirname);
+	if (dirname_len > 2)
+		printf("%c%c\n", dirname[dirname_len - 2], dirname[dirname_len - 1]);
+*/
 
 	while (directory && (entry = readdir (directory))) {
 		/* If the user entered nothing before TAB (ex: "cd [TAB]") */
 		if (!filename_len) {
-			/* If 'cd' */
-			/* Match only dirs or symlinks to dir */
-			if (strncmp(rl_line_buffer, "cd ", 3) == 0) {
-				int ret = -1;
-				switch (entry->d_type) {
-				
-				case DT_LNK:
-					if (dirname[0] == '.' && !dirname[1])
-						ret = get_link_ref(entry->d_name, S_IFDIR);
-					else {
-						char tmp[PATH_MAX] = "";
-						snprintf(tmp, PATH_MAX, "%s%s", dirname, entry->d_name);
-						ret = get_link_ref(tmp, S_IFDIR);
-					}
-					if (ret != 0) continue; /* No match */
-					else break; /* Match */
-				
-				case DT_DIR: break;
-				
-				default: continue;
-				}
-			}
-			/* If 'open', allow only reg files, dirs, 
-			 * and symlinks */
-			else if (strncmp(rl_line_buffer, "o ", 2) == 0 
-			|| strncmp(rl_line_buffer, "open ", 5) == 0) {
-				int reta = -1, retb = -1;
-				switch (entry->d_type) {
-				
-				case DT_LNK:
-					if (dirname[0] == '.' && !dirname[1]) {
-						reta = get_link_ref(entry->d_name, S_IFDIR);
-						retb = get_link_ref(entry->d_name, S_IFREG);
-					}
-					else {
-						char tmp[PATH_MAX] = "";
-						snprintf(tmp, PATH_MAX, "%s%s", dirname, entry->d_name);
-						reta = get_link_ref(tmp, S_IFDIR);
-						retb = get_link_ref(tmp, S_IFREG);
-					}
-					if (reta != 0 && retb != 0) continue;
-					else break;
-				
-				case DT_REG:
-				case DT_DIR: break;
-				
-				default: continue;
-				}
-			}
-			/* If 'trash' allow only reg files, dirs, 
-			 * symlinks, pipes and sockets. You should not trash a block or
-			 * a character device */
-			else if (strncmp(rl_line_buffer, "t ", 2) == 0
-			|| strncmp(rl_line_buffer, "tr ", 2) == 0
-			|| strncmp(rl_line_buffer, "trash ", 6) == 0) {
-				if (entry->d_type == DT_BLK || entry->d_type == DT_CHR)
-					continue;		
-			}
-			
-			/* All entries except "." and ".." are possible
-			 * completions */
-			if ((strcmp(entry->d_name, ".") != 0)
-			&& (strcmp(entry->d_name, "..") != 0))
-				break; /* Match */
-		}
-		/* If there is at least one char to complete (ex: "cd .[TAB]")*/
-		else {
-			/* Check if possible completion match up to the length of 
-			 * filename. */
-			
-			if ((entry->d_name[0] == filename[0])
-			&& (((int)strlen(entry->d_name)) >= filename_len)
-			&& (strncmp(filename, entry->d_name, filename_len) == 0)) {
 
-				/* If there is a match, and if the command is 'cd' list 
-				 * only dirs and symlinks to dir */
+			/* Exclude "." and ".." as possible completions */
+			if ((strcmp(entry->d_name, ".") != 0)
+			&& (strcmp(entry->d_name, "..") != 0)) {
+
+				/* If 'cd' */
+				/* Match only dirs or symlinks to dir */
 				if (strncmp(rl_line_buffer, "cd ", 3) == 0) {
-					if (entry->d_type == DT_LNK) {
-						int ret = -1;
+					ret = -1;
+					switch (entry->d_type) {
+					case DT_LNK:
 						if (dirname[0] == '.' && !dirname[1])
 							ret = get_link_ref(entry->d_name, S_IFDIR);
 						else {
@@ -6458,20 +6408,118 @@ my_rl_path_completion(const char *text, int state)
 							ret = get_link_ref(tmp, S_IFDIR);
 						}
 						if (ret == 0)
-							break;
-					}
-					else if (entry->d_type == DT_DIR)
+							match = 1;
 						break;
+					
+					case DT_DIR: 
+						match = 1;
+						break;
+					
+					default:
+						break;
+					}
 				}
 
-				/* Filter files for the open function */
+				/* If 'open', allow only reg files, dirs, 
+				 * and symlinks */
+				else if (strncmp(rl_line_buffer, "o ", 2) == 0 
+				|| strncmp(rl_line_buffer, "open ", 5) == 0) {
+					reta = -1, retb = -1;
+					switch (entry->d_type) {
+					
+					case DT_LNK:
+						if (dirname[0] == '.' && !dirname[1]) {
+							reta = get_link_ref(entry->d_name, S_IFDIR);
+							retb = get_link_ref(entry->d_name, S_IFREG);
+						}
+						else {
+							char tmp[PATH_MAX] = "";
+							snprintf(tmp, PATH_MAX, "%s%s", dirname, 
+									 entry->d_name);
+							reta = get_link_ref(tmp, S_IFDIR);
+							retb = get_link_ref(tmp, S_IFREG);
+						}
+						if (reta == 0 || retb == 0) 
+							match = 1;
+						break;
+					
+					case DT_REG:
+					case DT_DIR: 
+						match = 1;
+						break;
+					
+					default: 
+						break;
+					}
+				}
+
+				/* If 'trash' allow only reg files, dirs, symlinks, pipes 
+				 * and sockets. You should not trash a block or a character 
+				 * device */
+				else if (strncmp(rl_line_buffer, "t ", 2) == 0
+				|| strncmp(rl_line_buffer, "tr ", 2) == 0
+				|| strncmp(rl_line_buffer, "trash ", 6) == 0) {
+					if (entry->d_type != DT_BLK && entry->d_type != DT_CHR)
+						match = 1;
+				}
+				
+				/* If "./", list only executable files */
+				else if (exec) {
+					if (entry->d_type == DT_REG 
+					&& access(entry->d_name, X_OK) == 0)
+						match = 1;
+				}
+
+				/* No filter for everything else. Just print whatever is 
+				 * there */
+				else
+					match = 1;
+			}
+		}
+
+		/* If there is at least one char to complete (ex: "cd .[TAB]")*/
+		else {
+			/* Check if possible completion match up to the length of 
+			 * filename. */
+			if ((entry->d_name[0] == filename[0])
+			&& (((int)strlen(entry->d_name)) >= filename_len)
+			&& (strncmp(filename, entry->d_name, filename_len) == 0)) {
+
+				if (strncmp(rl_line_buffer, "cd ", 3) == 0) {
+					ret = -1;
+					switch (entry->d_type) {
+					case DT_LNK:
+						if (dirname[0] == '.' && !dirname[1])
+							ret = get_link_ref(entry->d_name, S_IFDIR);
+						else {
+							char tmp[PATH_MAX] = "";
+							snprintf(tmp, PATH_MAX, "%s%s", dirname, 
+									 entry->d_name);
+							ret = get_link_ref(tmp, S_IFDIR);
+						}
+						if (ret == 0) 
+							match = 1;
+						break;
+					
+					case DT_DIR:
+						match = 1;
+						break;
+					
+					default:
+						break;
+					}
+				}
+				
 				else if (strncmp(rl_line_buffer, "o ", 2) == 0
 				|| strncmp(rl_line_buffer, "open ", 5) == 0) {
-					
-					if (entry->d_type == DT_REG || entry->d_type == DT_DIR)
+					reta = -1, retb = -1;
+					switch (entry->d_type) {
+					case DT_REG:
+					case DT_DIR:
+						match = 1;
 						break;
-					else if (entry->d_type == DT_LNK) {
-						int reta = -1, retb = -1;
+
+					case DT_LNK:
 						if (dirname[0] == '.' && !dirname [1]) {
 							reta = get_link_ref(entry->d_name, S_IFDIR);
 							retb = get_link_ref(entry->d_name, S_IFREG);
@@ -6484,25 +6532,39 @@ my_rl_path_completion(const char *text, int state)
 							retb = get_link_ref(tmp, S_IFREG);
 						}
 						if (reta == 0 || retb == 0)
-							break;
+							match = 1;
+						break;
+					
+					default:
+						break;				
 					}
 				}
 
-				/* Filter files for the trash function */				
 				else if (strncmp(rl_line_buffer, "t ", 2) == 0
 				|| strncmp(rl_line_buffer, "tr ", 3) == 0
 				|| strncmp(rl_line_buffer, "trash ", 6) == 0) {
 					if (entry->d_type != DT_BLK && entry->d_type != DT_CHR)
-						break;
+						match = 1;
 				}
+				
+				else if (exec) {
+					if (entry->d_type == DT_REG
+					&& access(entry->d_name, X_OK) == 0)
+						match = 1;
+				}
+				
 				else
-					break;
+					match = 1;
 			}
 		}
+		
+		if (match)
+			break;		
 	}
 
 	/* readdir() returns NULL on reaching the end of directory stream. So
 	 * that if entry is NULL, we have no matches */
+
 	if (!entry) {
 		if (directory) {
 			closedir(directory);
@@ -6547,7 +6609,6 @@ my_rl_path_completion(const char *text, int state)
 								 + 1, sizeof(char));
 				  strcpy(temp, users_dirname);
 			}
-
 			strcat(temp, entry->d_name);
 		}
 		else
@@ -7750,15 +7811,16 @@ external_arguments(int argc, char **argv)
 		case '?': /* If some unrecognized option was found... */
 			/* Options that require an argument */
 			if (optopt == 'p')
-				fprintf(stderr, _("%s: option requires an argument -- \
-'%c'\nTry '%s --help' for more information.\n"), PROGRAM_NAME, optopt, PNL);
+				fprintf(stderr, _("%s: option requires an argument -- "
+						"'%c'\nTry '%s --help' for more information.\n"), 
+						PROGRAM_NAME, optopt, PNL);
 			/* If unknown option is printable... */
 			else if (isprint(optopt))
-				fprintf(stderr, _("%s: invalid option -- '%c'\nUsage: %s \
-[-aAfFgGhiIlLoOsuUvx] [-p path]\nTry '%s --help' for more information.\n"), 
-						PROGRAM_NAME, optopt, PNL, PNL);
-			else fprintf(stderr, _("%s: unknown option character \
-'\\%x'\n"), PROGRAM_NAME, optopt);
+				fprintf(stderr, _("%s: invalid option -- '%c'\nUsage: %s "
+						"[-aAfFgGhiIlLoOsuUvx] [-p path]\nTry '%s --help' for "
+						"more information.\n"), PROGRAM_NAME, optopt, PNL, PNL);
+			else fprintf(stderr, _("%s: unknown option character '\\%x'\n"), 
+						 PROGRAM_NAME, optopt);
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -8627,7 +8689,6 @@ prompt(void)
 	 * printed in place by log_msg() itself, without waiting for the next 
 	 * prompt */
 	if (print_msg) {
-		size_t i;
 		for (i = 0; i < msgs_n; i++)
 			fprintf(stderr, "%s", messages[i]);
 		print_msg = 0;
@@ -8640,7 +8701,7 @@ prompt(void)
 		/* Do not record empty lines, exit, history commands, or 
 		 * consecutively equal inputs */
 		char no_space = 0;
-		size_t input_len = strlen(input), i;
+		size_t input_len = strlen(input);
 		for (i = 0;i < input_len; i++)
 			if (input[i] != 0x00 && input[i] != 0x20)
 				no_space = 1;
@@ -9639,7 +9700,7 @@ exec_cmd(char **comm)
 		kbind_busy = 0;
 	}
 	else if (strcmp(comm[0], "s") == 0 || strcmp(comm[0], "sel") == 0) {
-		if (!comm[1] || (comm[1] && strcmp(comm[1], "--help") == 0)) {
+		if (!comm[1] || strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: sel, s [ELN ELN-ELN FILE ... n]"));
 			return EXIT_SUCCESS;
 		}
@@ -9967,9 +10028,8 @@ exec_cmd(char **comm)
 		
 		/* CHECK WHETHER EXTERNAL COMMANDS ARE ALLOWED */
 		if (!ext_cmd_ok) {
-			fprintf(stderr, _("%s: External commands are not allowed. \
-Run 'ext on' to enable them.\n"), 
-					 PROGRAM_NAME);
+			fprintf(stderr, _("%s: External commands are not allowed. "
+					"Run 'ext on' to enable them.\n"), PROGRAM_NAME);
 			return EXIT_FAILURE;
 		}
 		
@@ -13312,12 +13372,12 @@ bonus_function (void)
 
 	case 1:
 		printf("\"Hey! Look behind you! A three-headed monkey!\" "
-				    "(G. Threepweed)\n");
+			   "(G. Threepweed)\n");
 		break;
 
 	case 2:
 		printf("\"Free as in free speech, not as in free beer\" "
-		"(R. M. S)\n");
+			   "(R. M. S)\n");
 		break;
 
 	case 3:
@@ -13327,7 +13387,7 @@ bonus_function (void)
 
 	case 4:
 		printf("\"Simplicity is the ultimate sophistication\" "
-			  "(Leo Da Vinci)\n");
+			   "(Leo Da Vinci)\n");
 		break;
 
 	case 5:
