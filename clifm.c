@@ -801,14 +801,16 @@ of course you can grep it to find, say, linux' macros, as here. */
     command outside CliFM. The output in CliFM is reduced to only the first 
     line of each "Required by" line. This makes running shell commands on
     CliFM unreliable.
- ** 2 - Cannot use slash as boomark shortcut (whatever from slash onwards is
-	taken as the bookmark path, which in this case is wrong).
+ ** 2 - Cannot use slash in bookmark shortcuts or names (whatever from slash 
+	onwards is taken as the bookmark's path, which in this case is wrong).
  ** 3 - When TAB completing bookmarks, if there is a file named as one of the
 	possible bookmark names in the CWD, this bookmark name will be printed in
 	the color corresponding to the filetype of the file in the CWD.
 
 ###########################################
 
+ * (SOLVED) Ctrl-c kills backgrounded jobs. SOLUTION: Use launch_execle() for
+	the open function and let the system shell handle backgrounded jobs.
  * (SOLVED) The program won't compile if statx is not found, that is, whenever
 	the linux kernel is not 4.11 or greater and glibc version is not 2.28 or
 	greater. SOLUTION: Use some #define to check both kernel and glib versions,
@@ -1426,7 +1428,8 @@ xstrlen */
 /*#define alphasort xalphasort */
 #define _(String) gettext (String)
 
-/* Use statx () only if glibc version is >= 2.28 and the kernel is >= 4.11 */
+/* Use statx () only if glibc version is >= 2.28 and the kernel is >= 4.11.
+ * Else, use stat() */
 #undef _STATX
 #if (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 28))
 	#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,11,0)
@@ -1444,6 +1447,7 @@ check_immutable_bit(char *file)
  * -1 in case of error */
 {
 	int attr, fd, immut_flag = -1;
+
 	fd = open(file, O_RDONLY);
 	if (fd == -1) {
 		fprintf(stderr, "'%s': %s\n", file, strerror(errno));
@@ -1455,6 +1459,7 @@ check_immutable_bit(char *file)
 	else
 		immut_flag = 0;
 	close(fd);
+
 	if (immut_flag) 
 		return 1;
 	else 
@@ -1565,8 +1570,10 @@ size_t
 xstrlen(const char *str)
 {
 	size_t len = 0;
+
 	while (*(str++)) /* Same as: str[len] != 0x00 */
 		len++;
+
 	return len;
 }
 
@@ -1594,8 +1601,10 @@ pid_t
 get_own_pid(void)
 {
 	pid_t pid;
+
 	/* Get the process id */
 	pid = getpid();
+
 	if (pid < 0)
 		return 0;
 	else
@@ -3858,7 +3867,7 @@ open_function(char **cmd)
 
 	char *deq_path = dequote_str(cmd[1], 0);
 	if (!deq_path) {
-		fprintf(stderr, _("%s: %s: Error dequoting filename\n"), 
+		fprintf(stderr, _("%s: '%s': Error dequoting filename\n"), 
 				PROGRAM_NAME, cmd[1]);
 		return EXIT_FAILURE;
 	}
@@ -3874,14 +3883,15 @@ open_function(char **cmd)
 	
 	/* Check file type: only directories, symlinks, and regular files will
 	 * be opened */
-	char *linkname = NULL, file_tmp[PATH_MAX] = "", is_reg = 0, 
-		 is_link = 0, no_open_file = 1, filetype[128] = "";
+
+	char *linkname = NULL, file_tmp[PATH_MAX] = "", is_link = 0, 
+		  no_open_file = 1, filetype[128] = "";
 		 /* Reserve a good amount of bytes for filetype: it cannot be known
-		  * beforehand how many bytes the translated string will need */
+		  * beforehand how many bytes the TRANSLATED string will need */
 
 	switch (file_attrib.st_mode & S_IFMT) {
 	case S_IFBLK:
-		/* Store file type to compose and print the error message, if 
+		/* Store filetype to compose and print the error message, if 
 		 * necessary */
 		strcpy(filetype, _("block device"));
 		break;
@@ -3899,13 +3909,10 @@ open_function(char **cmd)
 		break;
 
 	case S_IFDIR:
-		/* Set the no_open_file flag to false, since dirs (and regular
-		 * files) will be opened */
-		no_open_file = 0;
-		cd_function(cmd[1]);
-		break;
+		free(deq_path);
+		return (cd_function(cmd[1]));
 
-		/* If a symlink, find out whether it is a symlink to dir or to file */
+	/* If a symlink, find out whether it is a symlink to dir or to file */
 	case S_IFLNK:
 		linkname = realpath(deq_path, NULL);
 		if (!linkname) {
@@ -3919,16 +3926,7 @@ open_function(char **cmd)
 			free(deq_path);
 			return EXIT_FAILURE;
 		}
-		if (stat(linkname, &file_attrib) == -1) {
-			/* Never reached: if linked file does not exist, realpath()
-			 * returns NULL */
-			fprintf(stderr, "%s: open: '%s -> %s': %s\n", PROGRAM_NAME, 
-					deq_path, linkname, strerror(errno));
-			free(linkname);
-			free(deq_path);
-			return EXIT_FAILURE;
-		}
-		is_link = 1;
+		stat(linkname, &file_attrib);
 		switch (file_attrib.st_mode & S_IFMT) {
 		/* Realpath() will never return a symlink, but an absolute 
 		 * path, so that there is no need to check for symlinks */
@@ -3945,12 +3943,14 @@ open_function(char **cmd)
 			strcpy(filetype, _("FIFO/pipe"));
 			break;
 		case S_IFDIR:
-			no_open_file = 0;
-			cd_function(linkname);
-			break;
+			free(deq_path);
+			int ret = cd_function(linkname);
+			free(linkname);
+			return ret;
 		case S_IFREG:
+		/* Set the no_open_file flag to false, since regular files) will 
+		 * be opened */
 			no_open_file = 0;
-			is_reg = 1;
 			strncpy(file_tmp, linkname, PATH_MAX);
 			break;
 		default:
@@ -3961,7 +3961,6 @@ open_function(char **cmd)
 
 	case S_IFREG:
 		no_open_file = 0;
-		is_reg = 1;
 		break;
 	
 	default:
@@ -3970,80 +3969,67 @@ open_function(char **cmd)
 	}
 
 	/* If neither directory nor regular file nor symlink (to directory or 
-	 * regular file), print the corresponding error message */
+	 * regular file), print the corresponding error message and exit */
 	if (no_open_file) {
-		if (is_link)
-			fprintf(stderr, _("%s: '%s -> %s' (%s): \
-Cannot open file. Try 'application filename'.\n"), PROGRAM_NAME, deq_path, 
-					linkname, filetype);
+		if (linkname) {
+			fprintf(stderr, _("%s: %s -> '%s' (%s): Cannot open file. Try "
+							  "'APPLICATION FILENAME'.\n"), PROGRAM_NAME, 
+							  deq_path, linkname, filetype);
+			free(linkname);
+		}
 		else
-			fprintf(stderr, _("%s: '%s' (%s): Cannot open file. Try \
-'application filename'.\n"), PROGRAM_NAME, deq_path, filetype);
+			fprintf(stderr, _("%s: '%s' (%s): Cannot open file. Try "
+					"'APPLICATION FILENAME'.\n"), PROGRAM_NAME, deq_path, 
+					filetype);
+		free(deq_path);
+		return EXIT_FAILURE;
 	}
+	
 	if (linkname)
 		free(linkname);
 
-	/* At this point we know the first argument is either  a regular file or a 
-	 * symlink to a regular file */
-	/* Open the file */
-	if (is_reg) {
-		/* If no application was specified as second argument, use xdg-open */
-		if (!cmd[2] || strcmp(cmd[2], "&") == 0) {
-			if (!(flags & XDG_OPEN_OK)) {
-				fprintf(stderr, _("%s: xdg-open not found. Specify an \
-application to open the file\nUsage: open ELN/filename [application] [&]\n"), 
-						 PROGRAM_NAME);
-				free(deq_path);
-				return EXIT_FAILURE;
-			}
-			/* If xdg-open exists */
-			pid_t pid_open = fork();
-			if (pid_open == 0) {
-				set_signals_to_default();
-				execle(xdg_open_path, "xdg-open", 
-					   (is_link) ? file_tmp : deq_path, NULL, __environ);
-				fprintf(stderr, "%s: open: %s\n", PROGRAM_NAME, 
-						strerror(errno));
-				exit(EXIT_FAILURE);
-			}
-			else {
-				if (cmd[2] && strcmp(cmd[2], "&") == 0)
-					run_in_background(pid_open);
-				else
-					run_in_foreground(pid_open);
-			}		
-		}
-		/* If application has been passed as second argument */
-		else {
-			/* Check that application exists */
-			char *cmd_path = get_cmd_path(cmd[2]);
-			if (cmd_path) {
-				pid_t pid_open = fork();
-				if (pid_open == 0) {
-					set_signals_to_default();
-					execle(cmd_path, cmd[2], 
-						   (is_link) ? file_tmp : deq_path, NULL, __environ);
-				}
-				else {
-					/* If last argument is "&", run in background */
-					if (cmd[args_n] && strcmp(cmd[args_n], "&") == 0)
-						run_in_background(pid_open);
-					else
-						run_in_foreground(pid_open);
-				}
-				free(cmd_path);
-			}
-			else { /* If application not found */
-				fprintf(stderr, _("%s: open: '%s': Command not found\n"), 
-						PROGRAM_NAME, cmd[2]);
-				free(deq_path);
-				return EXIT_FAILURE;
-			}
-		}
-	}
-	free(deq_path);
+	/* At this point we know the file to be openend is either a regular file 
+	 * or a symlink to a regular file. So, just open the file */
 
-	return EXIT_SUCCESS;
+	char *tmp_cmd = NULL;
+
+	if (!cmd[2] || strcmp(cmd[2], "&") == 0) {
+
+		/* If not xdg-open, print error message and exit */
+		if (!(flags & XDG_OPEN_OK)) {
+			fprintf(stderr, _("%s: xdg-open not found. Specify an "
+							  "application to open the file\nUsage: "
+							  "open ELN/FILENAME [APPLICATION]\n"), 
+							  PROGRAM_NAME);
+			free(deq_path);
+			return EXIT_FAILURE;
+		}
+		
+		/* Else, construct the cmd to be executed by execle() */
+		tmp_cmd = xcalloc(((is_link) ? strlen(file_tmp) : strlen(deq_path))
+						  + 14, sizeof(char));
+		sprintf(tmp_cmd, "xdg-open '%s' %s", (is_link) ? file_tmp 
+				: deq_path, (cmd[2] && strcmp(cmd[2], "&") == 0) ? "&" 
+				: "");
+	}
+	
+	/* If some application was specified to open the file */
+	else {
+		tmp_cmd = xcalloc(strlen(cmd[2]) + ((is_link) ? strlen(file_tmp) 
+						  : strlen(deq_path)) + 6, sizeof(char));
+		sprintf(tmp_cmd, "%s '%s' %s", cmd[2], (is_link) ? file_tmp 
+				: deq_path,(cmd[args_n] && strcmp(cmd[args_n], "&") == 0) 
+				? "&" : "");
+	}
+
+	free(deq_path);
+	int ret = launch_execle(tmp_cmd);
+	free(tmp_cmd);
+
+	if (ret != 0)
+		return EXIT_FAILURE;
+	else
+		return EXIT_SUCCESS;
 }
 
 int
@@ -6571,6 +6557,7 @@ my_rl_completion(const char *text, int start, int end)
 
 void
 get_bm_names(void)
+/* Get bookmark names for bookmarks TAB completion */
 {
 	FILE *fp;
 
@@ -6581,6 +6568,7 @@ get_bm_names(void)
 		if (!fp) {
 			asprintf(&msg, "bookmarks: '%s': %s\n", BM_FILE, strerror(errno));
 			if (msg) {
+				error_msg = 1;
 				log_msg(msg, PRINT_PROMPT);
 				free(msg);
 			}
@@ -6597,8 +6585,16 @@ get_bm_names(void)
 
 	fp = fopen(BM_FILE, "r");
 	if (!fp) {
-		fprintf(stderr, "%s: Error reading the bookmarks file\n", 
-				PROGRAM_NAME);
+		asprintf(&msg, "%s: '%s': Error reading the bookmarks file\n", 
+				 PROGRAM_NAME, BM_FILE);
+		if (msg) {
+			error_msg = 1;
+			log_msg(msg, PRINT_PROMPT);
+			free(msg);
+		}
+		else
+			fprintf(stderr, "%s: '%s': Error reading the bookmarks file\n", 
+				 PROGRAM_NAME, BM_FILE);
 		return;
 	}
 
@@ -6625,7 +6621,7 @@ get_bm_names(void)
 			if (ret != -1)
 				/* Now name is everthing after ']', that is, "name" */
 				name = line + ret + 1;
-			else /* if no shortcut, name is line in its entirity */
+			else /* If no shortcut, name is line in its entirety */
 				name = line;
 			if (!name || *name == 0x00)
 				continue;
@@ -6649,10 +6645,12 @@ get_bm_names(void)
 
 char *
 bookmarks_generator(const char *text, int state) 
+/* Used by bookmarks completion */
 {
 	static int i;
 	static size_t len;
 	char *name;
+
 	if (!state) {
 		i = 0;
 		len = strlen(text);
@@ -6660,15 +6658,18 @@ bookmarks_generator(const char *text, int state)
 	called, and a non-zero positive in later calls. This means that i and len 
 	will be necessarilly initialized the first time */
 	/* Look for files in PATH for a match */
+
 	while ((name = bookmark_names[i++]) != NULL) {
 		if (strncmp(name, text, len) == 0)
 			return strdup(name);
 	}
+	
 	return NULL;
 }
 
 char *
 filenames_generator(const char *text, int state)
+/* Used by ELN expansion */
 {
 	static int i;
 	char *name;
@@ -6691,21 +6692,22 @@ filenames_generator(const char *text, int state)
 
 char *
 bin_cmd_generator(const char *text, int state)
+/* Used by commands completion */
 {
 	static int i;
 	static size_t len;
 	char *name;
+	
 	if (!state) {
 		i = 0;
 		len = strlen(text);
-	} /* The state variable is zero only the first time the function is 
-	called, and a non-zero positive in later calls. This means that i and len 
-	will be necessarilly initialized the first time */
-	/* Look for files in PATH for a match */
+	} 
+	
 	while ((name = bin_commands[i++]) != NULL) {
 		if (strncmp(name, text, len) == 0)
 			return strdup(name);
 	}
+	
 	return NULL;
 }
 
@@ -7567,10 +7569,6 @@ exec_profile(void)
 			free(line);
 			line = NULL;
 			fclose(fp);
-/*			char line[MAX_LINE]="";
-			while(fgets(line, sizeof(line), fp)) {
-
-			} */
 		}
 	}
 }
@@ -9410,7 +9408,7 @@ get_aliases_n_prompt_cmds (void)
 			prompt_line_found = 1;
 	}
 	free(line);
-	line = NULL;
+	line = (char *)NULL;
 	fclose(config_file_fp);
 }
 
@@ -9880,7 +9878,7 @@ exec_cmd(char **comm)
 	else if (strcmp(comm[0], "q") == 0 || strcmp(comm[0], "quit") == 0 
 	|| strcmp(comm[0], "exit") == 0 || strcmp(comm[0], "zz") == 0 
 	|| strcmp(comm[0], "salir") == 0 || strcmp(comm[0], "chau") == 0) {
-		/* #####free everything##### */
+		/* ##### free everything and exit ##### */
 		size_t i;
 		for (i = 0; i <= (size_t)args_n; i++)
 			free(comm[i]);
@@ -11394,7 +11392,7 @@ open_bookmark(char **cmd)
 
 	/* If there are bookmarks... */
 
-	/* Store shortcut, name, and path of each bookmark in different arrays 
+	/* Store shortcut, name, and path of each bookmark into different arrays 
 	 * but linked by the array index */
 
 	char **bm_paths = NULL, **hot_keys = NULL, **bm_names = NULL;
@@ -11409,8 +11407,8 @@ open_bookmark(char **cmd)
 		/* Get paths */
 		int ret = strcntchr(bookmarks[i], '/');
 		if (ret != -1) {
-			/* If there is some slash in the shortcut or in the name, the
-			 * bookmark path will be wrong. FIX! */
+			/* If there is some slash in the shortcut or in the name string, 
+			 * the bookmark path will be wrong. FIX! */
 			bm_paths[i] = xcalloc(strlen(bookmarks[i] + ret) + 1, sizeof(char));
 			strcpy(bm_paths[i], bookmarks[i] + ret);
 		}
@@ -11448,9 +11446,8 @@ open_bookmark(char **cmd)
 	/* Once we have all bookmarks data loaded, there are two alternatives:
 	 * either to display the bookmarks screen and let the use enter the
 	 * bookmark she wants (that is, in case the command is just "bm"), or
-	 * the user entered "bm name", in which case we need just need to load
-	 * the bookmark named "name". Use one variable (arg) to handle both 
-	 * cases: "bm", and "bm name" */
+	 * the user entered "bm argument", in which case we just need to 
+	 * execute the bookmarks function with the corresponding argument */
  
 	struct stat file_attrib;
 	char **arg = NULL;
@@ -11641,7 +11638,6 @@ open_bookmark(char **cmd)
 			int ret = -1;
 			if ((ret = launch_execve(tmp_cmd)) != 0)
 				error_code = 1;
-			goto free_and_exit;
 		}
 		else {
 			if (flags & XDG_OPEN_OK) {
@@ -11649,15 +11645,14 @@ open_bookmark(char **cmd)
 				int ret = -1;
 				if ((ret = launch_execve(tmp_cmd)) != 0)
 					error_code = 1;
-				goto free_and_exit;				
 			}
 			else {
 				fprintf(stderr, _("Bookmarks: xdg-open not found. "
 								  "Try 'bookmark APPLICATION'\n"));
 				error_code = 1;
-				goto free_and_exit;			
 			}
 		}
+		goto free_and_exit;
 	}
 
 	/* If neither directory nor regular file */
@@ -11752,10 +11747,8 @@ bookmarks_function(char **cmd)
 			return (del_bookmark());
 	}
 	
-	/* If no arguments or "bm name" */
-
+	/* If no arguments or "bm [edit] [shortcut, name]" */
 	return (open_bookmark(cmd));
-
 }
 
 void
