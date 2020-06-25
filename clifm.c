@@ -1318,6 +1318,7 @@ program_invocation_short_name variable and asprintf() */
 #include <linux/limits.h> /* PATH_MAX (4096), NAME_MAX (255) macros */
 #include <linux/version.h> /* LINUX_VERSION_CODE && KERNEL_VERSION macros */
 #include <readline/history.h> /* for commands history: add_history(buf); */
+#include <readline/rlconf.h>
 #include <readline/readline.h> /* readline */
 /* Readline: This function allows the user to move back and forth with the 
  * arrow keys in the prompt. I've tried scanf, getchar, getline, fscanf, fgets, 
@@ -6372,29 +6373,51 @@ my_rl_path_completion(const char *text, int state)
 			/* If 'cd' */
 			/* Match only dirs or symlinks to dir */
 			if (strncmp(rl_line_buffer, "cd ", 3) == 0) {
-				if (entry->d_type == DT_LNK) {
-					char tmp[PATH_MAX] = "";
-					snprintf(tmp, PATH_MAX, "%s%s", dirname, entry->d_name);
-					int ret = get_link_ref(tmp, S_IFDIR);
-					if (ret != 0)
-						continue; /* No match */
+				int ret = -1;
+				switch (entry->d_type) {
+				
+				case DT_LNK:
+					if (dirname[0] == '.' && !dirname[1])
+						ret = get_link_ref(entry->d_name, S_IFDIR);
+					else {
+						char tmp[PATH_MAX] = "";
+						snprintf(tmp, PATH_MAX, "%s%s", dirname, entry->d_name);
+						ret = get_link_ref(tmp, S_IFDIR);
+					}
+					if (ret != 0) continue; /* No match */
+					else break; /* Match */
+				
+				case DT_DIR: break;
+				
+				default: continue;
 				}
-				else if (entry->d_type != DT_DIR)
-					continue;
 			}
 			/* If 'open', allow only reg files, dirs, 
 			 * and symlinks */
 			else if (strncmp(rl_line_buffer, "o ", 2) == 0 
 			|| strncmp(rl_line_buffer, "open ", 5) == 0) {
-				if (entry->d_type == DT_LNK) {
-					char tmp[PATH_MAX] = "";
-					snprintf(tmp, PATH_MAX, "%s%s", dirname, entry->d_name);
-					if (get_link_ref(tmp, S_IFDIR) != 0
-					&& get_link_ref(tmp, S_IFREG) != 0)
-						continue;
+				int reta = -1, retb = -1;
+				switch (entry->d_type) {
+				
+				case DT_LNK:
+					if (dirname[0] == '.' && !dirname[1]) {
+						reta = get_link_ref(entry->d_name, S_IFDIR);
+						retb = get_link_ref(entry->d_name, S_IFREG);
+					}
+					else {
+						char tmp[PATH_MAX] = "";
+						snprintf(tmp, PATH_MAX, "%s%s", dirname, entry->d_name);
+						reta = get_link_ref(tmp, S_IFDIR);
+						retb = get_link_ref(tmp, S_IFREG);
+					}
+					if (reta != 0 && retb != 0) continue;
+					else break;
+				
+				case DT_REG:
+				case DT_DIR: break;
+				
+				default: continue;
 				}
-				else if (entry->d_type != DT_REG && entry->d_type != DT_DIR)
-					continue;
 			}
 			/* If 'trash' allow only reg files, dirs, 
 			 * symlinks, pipes and sockets. You should not trash a block or
@@ -6425,13 +6448,19 @@ my_rl_path_completion(const char *text, int state)
 				 * only dirs and symlinks to dir */
 				if (strncmp(rl_line_buffer, "cd ", 3) == 0) {
 					if (entry->d_type == DT_LNK) {
-						char tmp[PATH_MAX] = "";
-						snprintf(tmp, PATH_MAX, "%s%s", dirname, entry->d_name);
-						int ret = get_link_ref(tmp, S_IFDIR);
+						int ret = -1;
+						if (dirname[0] == '.' && !dirname[1])
+							ret = get_link_ref(entry->d_name, S_IFDIR);
+						else {
+							char tmp[PATH_MAX] = "";
+							snprintf(tmp, PATH_MAX, "%s%s", dirname, 
+									 entry->d_name);
+							ret = get_link_ref(tmp, S_IFDIR);
+						}
 						if (ret == 0)
 							break;
 					}
-					if (entry->d_type == DT_DIR)
+					else if (entry->d_type == DT_DIR)
 						break;
 				}
 
@@ -6442,10 +6471,19 @@ my_rl_path_completion(const char *text, int state)
 					if (entry->d_type == DT_REG || entry->d_type == DT_DIR)
 						break;
 					else if (entry->d_type == DT_LNK) {
-						char tmp[PATH_MAX] = "";
-						snprintf(tmp, PATH_MAX, "%s%s", dirname, entry->d_name);
-						if (get_link_ref(tmp, S_IFDIR) == 0
-						|| get_link_ref(tmp, S_IFREG) == 0)
+						int reta = -1, retb = -1;
+						if (dirname[0] == '.' && !dirname [1]) {
+							reta = get_link_ref(entry->d_name, S_IFDIR);
+							retb = get_link_ref(entry->d_name, S_IFREG);
+						}
+						else {
+							char tmp[PATH_MAX] = "";
+							snprintf(tmp, PATH_MAX, "%s%s", dirname, 
+									 entry->d_name);
+							reta = get_link_ref(tmp, S_IFDIR);
+							retb = get_link_ref(tmp, S_IFREG);
+						}
+						if (reta == 0 || retb == 0)
 							break;
 					}
 				}
