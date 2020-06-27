@@ -1,7 +1,7 @@
 # CLiFM
 > The KISS file manager: text-based, ultra-lightweight, lightning fast, and written in C
 
-This new version (0.16.2) brings a lot (really, a lot) of bug fixes and some new features like: a trash system (freedesktop compliant), keyboard shorcuts (very handy), a little messages system to keep track of important messages and errors, "sel" keyword auto-expansion and ranges auto-expansion, ELN expansion with the TAB key, including a Bash-like quoting system (absolutely great), colors customization, and commands sequential and conditional execution (very useful). Consult the manpage for more information). I also added support for translations (using `gettext`).
+This new version (0.17.2) brings a lot (really, a lot) of bug fixes and some new features like: a trash system (freedesktop compliant), keyboard shorcuts (very handy), a little messages system to keep track of important messages and errors, "sel" keyword auto-expansion and ranges auto-expansion, ELN expansion with the TAB key, including a Bash-like quoting system (absolutely great), colors customization, and commands sequential and conditional execution (very useful). Consult the manpage for more information). I also added support for translations (using `gettext`).
 
 ![alt_tag](https://github.com/leo-arch/clifm/blob/master/images/clifm.png)
 
