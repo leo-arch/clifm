@@ -1,4 +1,9 @@
-/** CliFM, the anti-eye-candy/KISS file manager */
+
+/* ########################################
+ * #			   CliFM			      #
+ * # The anti-eye-candy/KISS file manager # 
+ * ######################################## */
+
 /*
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1449,8 +1454,12 @@ xstrlen */
 	#endif /* LINUX_VERSION */
 #endif /* GLIBC */
 
-/* ###CUSTOM FUNCTIONS### 
-They all work independently of this program and its variables */
+
+				/* ######################
+				 * #  CUSTOM FUNCTIONS  # 
+				 * ######################*/
+
+/* They all work independently of this program and its variables */
 
 int
 check_immutable_bit(char *file)
@@ -2074,7 +2083,9 @@ get_size_unit(off_t file_size)
 	return size_type;
 }
 
-/* ###FUNCTIONS PROTOTYPES### */
+				/* ##########################
+				 * #  FUNCTIONS PROTOTYPES  # 
+				 * ##########################*/
 
 void signal_handler(int sig_num);
 void *xcalloc(size_t nmemb, size_t size);
@@ -2299,7 +2310,9 @@ POINTERS: Ex: char *p; pointers, unlike common variables which stores data,
 
 */
 
-/* ################## GLOBAL VARIABLES ##################### */
+				/* ##########################
+				 * #    GLOBAL VARIABLES    # 
+				 * ##########################*/
 
 /* These variables, unlike local or automatic variables, are accessible to any 
  * part of the program and hold their values throughout the entire lifetime of 
@@ -2444,11 +2457,12 @@ char di_c[MAX_COLOR] = "", /* Directory */
 	ca_c[MAX_COLOR] = "", /* Cap file */
 	no_c[MAX_COLOR] = ""; /* Unknown */
 
-/** 
- * #############################
- * #           MAIN            # 
- * #############################
- * */
+
+				/** 
+				 * #############################
+				 * #           MAIN            # 
+				 * #############################
+				 * */
 
 int
 main(int argc, char **argv)
@@ -2458,7 +2472,7 @@ main(int argc, char **argv)
 	 * # Make sure we are running some GNU/Linux OS on x86 CPU #
 	 * #########################################################*/
 
-	#if defined (__X86_64__) || defined(__i386__)
+	#if !defined(__x86_64__) && !defined(__i386__)
 		fprintf(stderr, "Unsupported CPU architecture\n");
 		exit(EXIT_FAILURE);
 	#endif /* __x86 */
