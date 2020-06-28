@@ -13013,12 +13013,12 @@ check_log_file_size(char *log_file)
 	/* Truncate the file, if needed */
 	log_fp = fopen (log_file, "r");
 	if (log_fp != NULL) {
-		int logs_num = 0;
+		int logs_num = 0, c;
 
 		/* Count newline chars to get amount of lines in file */
-		char line[PATH_MAX] = "";
-		while (fgets(line, sizeof(line), log_fp))
-			logs_num++;
+		while ((c = fgetc(log_fp)) != EOF)
+			if (c == '\n')
+				logs_num++;
 		fclose(log_fp);
 
 		if (logs_num > max_log) {
