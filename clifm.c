@@ -277,6 +277,9 @@ of course you can grep it to find, say, linux' macros, as here. */
  ** When compiling with -ansi (and -Wpedantic) I get a bunch of two kinds of 
 	errors: 1) mixed declaration and code (int i=0); b) length of string literal
 	is larger than 509 bytes (printf("blablabla......"));
+ ** ALWAYS use the appropriate data types. For example, DO NOT use char for a
+	flag just in order to save a few bytes. This might work in x86 machines, but
+	it will probably fail in ARM machines, for instance.
 */
 
 /** 
@@ -290,8 +293,7 @@ of course you can grep it to find, say, linux' macros, as here. */
 	and each call to these functions is casted to the corresponding variable 
 	type. Ex: char *var; var=(char *)xcalloc(1, sizeof(char)). Though a void
 	pointer might work, casting is done to ensure portability, for example,
-	in the case of ARM architectures. Btw, test the program in an ARM
-	machine, like the RPi.
+	in the case of ARM architectures.
  ** The color of files listed for possible completions depends on readline,
 	which takes the color values from LS_COLORS. I can modify this variable
 	to use CliFM color scheme, but I cannot make it use colors for filetypes
@@ -369,6 +371,8 @@ of course you can grep it to find, say, linux' macros, as here. */
 
 ###################################
 
+ * (DONE) Test the program in an ARM machine, like the Raspberry Pi. Done and
+	working, at least by now.
  * (DONE) The logic of bookmarks and copy functions is crap! Rewrite it.
  * (DONE) Add TAB completion for bookmarks.
  * (DONE) Files listed for TAB completion use system defined colors instead 
@@ -1555,7 +1559,7 @@ char *
 xstrcpy(char *buf, const char *str)
 {
 	if (!str)
-		return NULL;
+		return (char *)NULL;
 
 	while (*str) {
 		*buf=*str;
@@ -1572,7 +1576,7 @@ char *
 xstrncpy(char *buf, const char *str, size_t n)
 {
 	if (!str)
-		return NULL;
+		return (char *)NULL;
 
 	size_t counter = 0;
 	while (*str && counter < n) {
@@ -1767,28 +1771,28 @@ straft(const char *str, const char c)
 /* Returns the string after the first appearance of a given char, or returns 
  * NULL if C is not found in STR or C is the last char in STR. */
 {
-	char *buf = NULL;
+	char *buf = (char *)NULL;
 	register int counter = 0;
 	size_t str_len = strlen(str);
 	while (*str) {
 		if ((str_len - 1) == counter)
 			/* There's no string after last char */
-			return NULL;
+			return (char *)NULL;
 		if (*str == c) {
 			/* If C is found, copy everything after C into buf */
 			char *p = calloc((str_len - counter) + 1, sizeof(char));
 			if (p) {
 				buf = p;
-				p = NULL;
+				p = (char *)NULL;
 				strcpy(buf, str+1);
 				return buf;
 			}
-			else return NULL;
+			else return (char *)NULL;
 		}
 		str++;
 		counter++;
 	}
-	return NULL; /* No matches */
+	return (char *)NULL; /* No matches */
 }
 
 char *
@@ -1893,7 +1897,7 @@ strbtw(const char *str, const char a, const char b)
 	size_t str_len = strlen(str);
 
 	if (str_len == 0)
-		return NULL;
+		return (char *)NULL;
 
 	register int i = 0;
 	int ch_from = -1;
@@ -1906,7 +1910,7 @@ strbtw(const char *str, const char a, const char b)
 	}
 
 	if (ch_from == -1)
-		return NULL;
+		return (char *)NULL;
 	
 	int ch_to = -1;
 	for (i = ((int)str_len - 1); i > ch_from; i--) {
@@ -1917,18 +1921,18 @@ strbtw(const char *str, const char a, const char b)
 	}
 
 	if (ch_to == -1)
-		return NULL;
+		return (char *)NULL;
 
 	int j = 0;
-	char *buf = NULL, *p = calloc((ch_to - ch_from) + 1, sizeof(char));
+	char *buf = (char *)NULL, *p = calloc((ch_to - ch_from) + 1, sizeof(char));
 	if (p) {
 		buf = p;
-		p = NULL;
+		p = (char *)NULL;
 	}
 	else {
 		fprintf(stderr, "%s: %s: Memory allocation failure\n", PROGRAM_NAME, 
 				__func__);
-		return NULL;
+		return (char *)NULL;
 	}
 
 	for(i = ch_from + 1; i < ch_to; i++)
@@ -1962,7 +1966,7 @@ url_encode(char *str)
 /* Returns a url-encoded version of str */
 {
 	if (!str || str[0] == 0x00)
-		return NULL;
+		return (char *)NULL;
 
 	char *p;
 	p = calloc((strlen(str) * 3) + 1, sizeof(char));
@@ -1970,11 +1974,11 @@ url_encode(char *str)
 	 * byte for the null byte terminator: each char in str will be, if encoded, 
 	 * %XX (3 chars) */
 	if (!p)
-		return NULL;
+		return (char *)NULL;
 
 	char *buf;
 	buf = p;
-	p = NULL;
+	p = (char *)NULL;
 
 	/* Copies of str and buf pointers to be able
 	* to increase and/or decrease them without loosing the original memory 
@@ -2004,17 +2008,17 @@ url_decode(char *str)
 /* Returns a url-decoded version of str */
 {
 	if (!str || str[0] == 0x00)
-		return NULL;
+		return (char *)NULL;
 
-	char *p;
+	char *p = (char *)NULL;
 	p = calloc(strlen(str) + 1, sizeof(char));
 	/* The decoded string will be at most as long as the encoded string */
 	if (!p)
-		return NULL;
+		return (char *)NULL;
 
 	char *buf;
 	buf = p;
-	p = NULL;
+	p = (char *)NULL;
 	
 	char *pstr, *pbuf;
 	pstr = str; 
@@ -2045,10 +2049,10 @@ get_date (void)
 	char *p = calloc(date_max + 1, sizeof(char)), *date;
 	if (p) {
 		date = p;
-		p = NULL;
+		p = (char *)NULL;
 	}
 	else
-		return NULL;
+		return (char *)NULL;
 
 	strftime(date, date_max, "%a, %b %d, %Y, %T", tm);
 
@@ -2357,7 +2361,7 @@ struct usrvar_t {
  * some invalid data being read. However, non-initialized variables are 
  * automatically initialized by the compiler */
 
-char splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1, 
+short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1, 
 	show_hidden = -1, clear_screen = -1, shell_terminal = 0, pager = -1, 
 	no_log = 0, internal_cmd = 0, shell_is_interactive = 0, 
 	list_folders_first = -1, case_sensitive = -1, cd_lists_on_the_fly = -1, 
@@ -2472,7 +2476,7 @@ main(int argc, char **argv)
 	 * # Make sure we are running some GNU/Linux OS on x86 CPU #
 	 * #########################################################*/
 
-	#if !defined(__x86_64__) && !defined(__i386__)
+	#if !defined(__x86_64__) && !defined(__i386__) && !defined(__ARM_ARCH)
 		fprintf(stderr, "Unsupported CPU architecture\n");
 		exit(EXIT_FAILURE);
 	#endif /* __x86 */
@@ -2953,7 +2957,7 @@ is_internal_c(const char *cmd)
 					     "path", "cwd", "splash", "ver", "version", "?",
 					     "help", "cmd", "commands", "colors", "license",
 					     "fs", NULL };
-	char found = 0;
+	short found = 0;
 	size_t i;
 	for (i = 0; int_cmds[i]; i++) {
 		if (strcmp(cmd, int_cmds[i]) == 0) {
@@ -3213,7 +3217,7 @@ get_substr(char *str, const char ifs)
 	char **dstr = (char **)NULL;
 	size_t len = 0, d;
 	for (i = 0;i < substr_n; i++) {
-		int duplicate = 0;
+		short duplicate = 0;
 		
 		for (d = (i + 1);d < substr_n; d++) {
 			if (strcmp(substr[i], substr[d]) == 0) {
@@ -3670,7 +3674,7 @@ is_internal(const char *cmd)
 {
 	char *int_cmds[] = { "o", "open", "cd", "p", "pr", "prop", "t", "tr", 
 					     "trash", "s", "sel", NULL };
-	char found = 0;
+	short found = 0;
 	size_t i;
 
 	for (i = 0; int_cmds[i]; i++) {
@@ -3734,7 +3738,7 @@ split_str(char *str)
 	size_t buf_len = 0, words = 0, str_len = 0;
 	char *buf = (char *)NULL;
 	buf = xcalloc(1, sizeof(char));;
-	char quote = 0;
+	short quote = 0;
 	char **substr = (char **)NULL;
 
 	while (*str) {
@@ -4224,7 +4228,7 @@ list_mountpoints(void)
 		/* The line variable should be able to store the device name,
 		 * the mount point (PATH_MAX) and mount options. PATH_MAX*2 
 		 * should be more than enough */
-		char **mountpoints = NULL;
+		char **mountpoints = (char **)NULL;
 		int mp_n = 0, exit_code = 0;
 
 		size_t line_size = 0;
@@ -4836,10 +4840,11 @@ remove_from_trash(void)
 	rm_elements = xcalloc(files_n, sizeof(char *));
 	while (c != '\n') { /* Exit loop when Enter is pressed */
 		/* Do not allow more removes than trashed files are */
-		if (rm_n == files_n) break;
+		if (rm_n == files_n)
+			break;
 		rm_elements[rm_n] = xcalloc(5, sizeof(char)); 
 		/* 4 = 4 digits num (max 9,999) */
-		while (!isspace (c = getchar ())) 
+		while (!isspace (c = getchar())) 
 			rm_elements[rm_n][length++] = c;
 		/* Add end of string char to the last position */
 		rm_elements[rm_n++][length] = 0x00;
@@ -5153,7 +5158,7 @@ untrash_function(char **comm)
 		return EXIT_FAILURE;
 
 	/* First check for quit, *, and non-number args */
-	char free_and_return = 0;
+	short free_and_return = 0;
 	for(i = 0; i < undel_n; i++) {
 		if (strcmp(undel_elements[i], "q") == 0)
 			free_and_return = 1;
@@ -5628,7 +5633,7 @@ readline_kbind_action(int count, int key) {
 	if (count) {}
 /*	printf("Key: %d\n", key); */
 	int status = 0;
-	static char long_status = 0;
+	static short long_status = 0;
 
 	/* Disable all keybindings while in the bookmarks or mountpoints screen */
 	if (kbind_busy)
@@ -7102,7 +7107,7 @@ init_config(void)
 Filetype colors=\"di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;39:\
 ef=00;33:nf=00;31:ln=01;36:or=00;36:pi=40;33:so=01;35:bd=01;33;01:\
 cd=01;37;01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:\
-ex=01;32:ee=00;32:ca=00;30;41:no=00;47;31\"\n\
+ex=01;32:ee=00;32:no=00;47;31\"\n\
 Prompt color=00;36\n\
 Text color=00;39;49\n\
 ELN color=01;33\n\
@@ -7143,9 +7148,10 @@ OF PROMPT\n");
 
 			set_colors();
 
-			char prompt_color_set = -1, text_color_set = -1, eln_color_set = -1, 
-				 default_color_set = -1, dir_count_color_set = -1,
-				 div_line_color_set = -1, welcome_msg_color_set = -1;
+			short prompt_color_set = -1, text_color_set = -1, 
+				  eln_color_set = -1, default_color_set = -1, 
+				  dir_count_color_set = -1, div_line_color_set = -1, 
+				  welcome_msg_color_set = -1;
 			config_fp = fopen(CONFIG_FILE, "r");
 			if (!config_fp) {
 				asprintf(&msg, _("%s: fopen: '%s': %s. Using default "
@@ -8857,7 +8863,7 @@ prompt(void)
 	}
 	
 	/* Unisgned char (0 to 255), max hostname 64 or 255, max username 32 */
-	static char first_time = 1; 
+	static short first_time = 1; 
 	static size_t user_len = 0, hostname_len = 0; 
 
 	/* Get the length of these variables just once. In Bash, even if 
@@ -9458,7 +9464,8 @@ $ dircolors --print-database */
 	term_cols = w.ws_col; /* This one is global */
 	short term_rows = w.ws_row;
 
-	char reset_pager = 0, c;
+	short reset_pager = 0;
+	char c;
 
 	/* Long view mode */
 	if (long_view) {
@@ -9514,7 +9521,7 @@ $ dircolors --print-database */
 	if (clear_screen)
 		CLEAR;
 	
-	char last_column = 0; /* c, reset_pager=0; */
+	short last_column = 0; /* c, reset_pager=0; */
 	register size_t counter = 0;
 	
 	for (i = 0; i < files; i++) {
@@ -10638,7 +10645,7 @@ launch_execve(char **cmd)
 
 	/* Check if program is to be backgrounded. In that case, remove the
 	 * final ampersand from the string */
-	char is_bg = 0;
+	short is_bg = 0;
 
 	/* Get last argument's index */
 	size_t last = 0;
@@ -10906,21 +10913,22 @@ show_sel_files(void)
 	if (clear_screen)
 		CLEAR;
 	printf(_("%sSelection Box%s%s\n"), white, NC, default_color);
-	char reset_pager = 0;
+	short reset_pager = 0;
 	if (sel_n == 0)
 		puts(_("Empty"));
 	else {
 		puts("");
 		struct winsize w;
 		ioctl (STDOUT_FILENO, TIOCGWINSZ, &w);
-		char c, counter = 0;
+		char c;
+		size_t counter = 0;
 		short term_rows = w.ws_row;
 		term_rows -= 2;
 		int i;
 		for(i = 0; i < sel_n; i++) {
 /*			if (pager && counter > (term_rows-2)) { */
 			if (pager && counter > term_rows) {
-				switch(c=xgetchar()) {
+				switch(c = xgetchar()) {
 				/* Advance one line at a time */
 				case 66: /* Down arrow */
 				case 10: /* Enter */
@@ -11257,7 +11265,7 @@ search_function(char **comm)
 	
 	/* If no wildcards */
 	else {
-		char found = 0;
+		short found = 0;
 		size_t i = 0;
 		/* If /search_str /path */
 		if (comm[1] && comm[1][0] != 0x00) {
@@ -12378,7 +12386,7 @@ get_properties_nox (char *filename, int _long, int max)
 
 	/* Get file type (and color): */
 	int sticky = 0;
-	char file_type = 0, color[15]= "";
+	char file_type = 0, color[MAX_COLOR]= "";
 	char *linkname = (char *)NULL;
 	switch (file_attrib.st_mode & S_IFMT) {
 	case S_IFREG:
@@ -12483,7 +12491,7 @@ get_properties_nox (char *filename, int _long, int max)
 		 /* The value of max (global) is (or should be) already calculated by 
 		  * get_max_long_view() before calling this function */
 		char trim_filename[NAME_MAX] = "";
-		char trim = 0;
+		short trim = 0;
 		if (filename_len > max) {
 			trim = 1;
 			strcpy(trim_filename, filename);
@@ -12617,7 +12625,7 @@ get_properties (char *filename, int _long, int max)
 
 	/* Get file type (and color): */
 	int sticky = 0;
-	char file_type = 0, color[15]= "";
+	char file_type = 0, color[MAX_COLOR]= "";
 	char *linkname = (char *)NULL;
 	switch (file_attrib.stx_mode & S_IFMT) {
 	case S_IFREG:
@@ -12722,7 +12730,7 @@ get_properties (char *filename, int _long, int max)
 		 /* The value of max (global) is (or should be) already calculated by 
 		  * get_max_long_view() before calling this function */
 		char trim_filename[NAME_MAX] = "";
-		char trim = 0;
+		short trim = 0;
 		if (filename_len > max) {
 			trim = 1;
 			strcpy(trim_filename, filename);
@@ -12982,7 +12990,7 @@ check_log_file_size(char *log_file)
 {
 	/* Create the file, if it doesn't exist */
 	struct stat file_attrib;
-	FILE *log_fp = NULL;
+	FILE *log_fp = (FILE *)NULL;
 	if (stat(log_file, &file_attrib) == -1) {
 		log_fp = fopen(log_file, "w");
 		if (!log_fp) {
@@ -13008,10 +13016,9 @@ check_log_file_size(char *log_file)
 		int logs_num = 0;
 
 		/* Count newline chars to get amount of lines in file */
-		char c;
-		for (c = getc(log_fp); c != EOF; c = getc(log_fp))
-			if (c == '\n') 
-				logs_num++;
+		char line[PATH_MAX] = "";
+		while (fgets(line, sizeof(line), log_fp))
+			logs_num++;
 		fclose(log_fp);
 
 		if (logs_num > max_log) {
@@ -13730,7 +13737,7 @@ splash(void)
 void
 bonus_function (void)
 {
-	static char state = 0;
+	static short state = 0;
 	if (state > 12)
 		state = 0;
 	switch (state) {
