@@ -2,7 +2,9 @@
 > The KISS file manager: text-based, ultra-lightweight, lightning fast, and written in C
 
 Latest version: 0.18.0. This is the first POSIX-2008 compliant and FreeBSD compatible version.
+
 Version 0.17.2 is the first one to work on ARM machines.
+
 Since version 0.16.0 a lot (really, a lot) of bug fixes and some new features were added: a trash system (freedesktop compliant), keyboard shorcuts (very handy), a little messages system to keep track of important messages and errors, "sel" keyword and ranges auto-expansion, ELN expansion with the TAB key, including a Bash-like quoting system (absolutely great), colors customization, and commands sequential and conditional execution (very useful). Consult the manpage for more information). I also added support for translations (using `gettext`).
 
 ![alt_tag](https://github.com/leo-arch/clifm/blob/master/images/clifm.png)
@@ -84,6 +86,7 @@ If using another distro:
 
 On Linux:
        $ gcc -O3 -march=native -fstack-protector-strong -s -lcap -lreadline -o clifm clifm.c
+To enable POSIX compliance, pass this option to the compiler: `-D_BE_POSIX.` The only feature disabled in this way is files birth time, only available on Linux via statx(), which is Linux-specific and thereby not POSIX compliant.
 
 On FreeBSD:
        $ gcc -O3 -march=native -fstack-protector-strong -s -lintl -lreadline -o clifm clifm.c
