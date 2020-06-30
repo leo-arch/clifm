@@ -23,7 +23,15 @@
  */
 
 /* Compile as follows:
+
+ * On Linux
  * $ gcc -O3 -march=native -s -fstack-protector-strong -lreadline -lcap -o 
+ * clifm clifm.c
+ * To be fully POSIX-2008 compliant pass the _BE_POSIX option to the compiler,
+ * that is, -D_BE_POSIX
+
+ * On FreeBSD:
+ * gcc -O3 -march=native -s -fstack-protector-strong -lreadline -lintl -o
  * clifm clifm.c
  * You can also use tcc instead of gcc.
  *  */
@@ -280,6 +288,17 @@ of course you can grep it to find, say, linux' macros, as here. */
  ** ALWAYS use the appropriate data types. For example, DO NOT use char for a
 	flag just in order to save a few bytes. This might work in x86 machines, but
 	it will probably fail in ARM machines, for instance.
+ ** PORTABILITY. From more to less portable: standard (c89-90), POSIX, GNU 
+	extensions. Stick to the standard as much as possible. For example, 
+	asprintf() and execvpe() are GNU extensions, statx() is Linux specific 
+	and getline() is POSIX since 2008. To test the program for portability, 
+	define one of the following, compile and check compilation errors and 
+	warnings:
+	_POSIX_C_SOURCE 200112L
+	_POSIX_C_SOURCE 200809L
+	_GNU_SOURCE
+	You can also check the manpage for each function, specially the "Conform to" 
+	or "Attributes" section.  
 */
 
 /** 
@@ -303,7 +322,6 @@ of course you can grep it to find, say, linux' macros, as here. */
 	file while running CliFM, readline colors won't get updated until
 	next start. I guess I should find a way to reinitialize readline without
 	restarting the program.
- ** Check compatibility with BSD Unices.
  ** Add a help option for each internal command. Make sure this help system is
 	consistent accross all commands: if you call help via the --help option, 
 	do it this way for all commands. Try to unify the usage and description
@@ -370,7 +388,7 @@ of course you can grep it to find, say, linux' macros, as here. */
     pid, but the program's instead. Drawback: xdg-open would remain alive.
 
 ###################################
-
+ * (DONE) Check compatibility with BSD Unices. Working fine in FreeBSD.
  * (DONE) Test the program in an ARM machine, like the Raspberry Pi. Done and
 	working, at least by now.
  * (DONE) The logic of bookmarks and copy functions is crap! Rewrite it.
@@ -835,6 +853,11 @@ of course you can grep it to find, say, linux' macros, as here. */
 
 ###########################################
 
+ * (SOLVED) Type this: "p /etc/pacman.conf" and then "cd". The user_home 
+	variable is now 'in/bash' and the user is root!!! SOLUTION: The pointer
+	returned by get_user(), which makes use of getpwuid() is overriden by the
+	properties function, which uses the same function. So, make get_user() 
+	return a string, and not a pointer.
  * (SOLVED) Ctrl-c kills backgrounded jobs. SOLUTION: Use launch_execle() for
 	the open function and let the system shell handle backgrounded jobs.
  * (SOLVED) The program won't compile if statx is not found, that is, whenever
@@ -1293,33 +1316,32 @@ http://pubs.opengroup.org/onlinepubs/9699919799/nframe.html */
 					#	 THE PROGRAM BEGINS		  # 
 					############################### */	
 
-/* #define _POSIX_C_SOURCE 200809L  */
-/* "if you define _GNU_SOURCE, then defining either _POSIX_SOURCE or 
- * _POSIX_C_SOURCE as well has no effect". If I define this macro without 
- * defining _GNU_SOURCE macro as well, the macros 'S_IFDIR' and the others 
- * cannot be used */
-#define _GNU_SOURCE /* I need this macro to enable 
-program_invocation_short_name variable and asprintf() */
-
-#ifndef EXIT_SUCCESS
-	#define EXIT_SUCCESS 0
+#if defined(__linux__) && !defined(_BE_POSIX)
+#  define _GNU_SOURCE
+#else
+#  define _POSIX_C_SOURCE 200809L
+#  define _DEFAULT_SOURCE
+#  if __FreeBSD__
+#    define __XSI_VISIBLE 1
+#    define __BSD_VISIBLE 1
+#  endif
 #endif
 
-#ifndef EXIT_FAILURE
-	#define EXIT_FAILURE 1
-#endif
+/* Linux */
+/* The only Linux-specific function I use, and the only function requiring
+ * _GNU_SOURCE, is statx(), and only to get files creation (birth) date in the
+ * properties function. 
+ * However, the statx() is conditionally added at compile time, so that, if
+ * _BE_POSIX is defined (pass the -D_BE_POSIX option to the compiler), the 
+ * program will just ommit the call to the function, being thus completely 
+ * POSIX-2008 compliant. */
 
-#ifndef PATH_MAX
-	#define PATH_MAX 4096
-#endif
+/* DEFAULT_SOURCE enables strcasecmp() and realpath() functions, 
+and DT_DIR (and company) and S_ISVTX macros */
 
-#ifndef HOST_NAME_MAX
-	#define HOST_NAME_MAX 64
-#endif
-
-#ifndef NAME_MAX
-	#define NAME_MAX 255
-#endif
+/* FreeBSD*/
+/* Up tp now, two features are disabled in FreeBSD: file capabilities and 
+ * immutable bit checks */
 
 /* The following C libraries are located in /usr/include */
 #include <stdio.h> /* (f)printf, s(n)printf, scanf, fopen, fclose, remove, 
@@ -1327,10 +1349,11 @@ program_invocation_short_name variable and asprintf() */
 #include <string.h> /* str(n)cpy, str(n)cat, str(n)cmp, strlen, strstr, memset */
 #include <stdlib.h> /* getenv, malloc, calloc, free, atoi, realpath, 
 					EXIT_FAILURE and EXIT_SUCCESS macros */
+#include <stdarg.h> /* va_list */
 #include <dirent.h> /* scandir */
 #include <unistd.h> /* sleep, readlink, chdir, symlink, access, exec, isatty, 
 					* setpgid, getpid, getuid, gethostname, tcsetpgrp, 
-					* tcgetattr, char **__environ, STDIN_FILENO, STDOUT_FILENO, 
+					* tcgetattr, __environ, STDIN_FILENO, STDOUT_FILENO, 
 					* and STDERR_FILENO macros */
 #include <sys/stat.h> /* stat, lstat, mkdir */
 #include <sys/wait.h> /* waitpid, wait */
@@ -1339,29 +1362,64 @@ program_invocation_short_name variable and asprintf() */
 #include <grp.h> /* getgrgid */
 #include <signal.h> /* trap signals */
 #include <pwd.h> /* getcwd, getpid, geteuid, getpwuid */
-#include <linux/limits.h> /* PATH_MAX (4096), NAME_MAX (255) macros */
-#include <linux/version.h> /* LINUX_VERSION_CODE && KERNEL_VERSION macros */
-#include <readline/history.h> /* for commands history: add_history(buf); */
-#include <readline/rlconf.h>
-#include <readline/readline.h> /* readline */
-/* Readline: This function allows the user to move back and forth with the 
- * arrow keys in the prompt. I've tried scanf, getchar, getline, fscanf, fgets, 
- * and none of them does the trick. Besides, readline provides TAB completion 
- * and history. Btw, readline is what Bash uses for its prompt */
 #include <glob.h> /* glob */
 #include <termios.h> /* struct termios */
 #include <locale.h> /* setlocale */
 #include <errno.h>
-#include <sys/capability.h> /* cap_get_file */
 #include <getopt.h> /* getopt_long */
 #include <fcntl.h> /* O_RDONLY, O_DIRECTORY, and AT_* macros */
-#include <sys/syscall.h> /* SYS_* and __NR_* macros for syscall() */
-#include <linux/fs.h> /* FS_IOC_GETFLAGS, S_IMMUTABLE_FL macros */
+#include <readline/history.h>
+#include <readline/readline.h> 
+/* Readline: This function allows the user to move back and forth with the 
+ * arrow keys in the prompt. I've tried scanf, getchar, getline, fscanf, fgets, 
+ * and none of them does the trick. Besides, readline provides TAB completion 
+ * and history. Btw, readline is what Bash uses for its prompt */
 #include <libintl.h> /* gettext */
+
+#if __linux__
+#  include <sys/capability.h> /* cap_get_file. NOTE: This header exists
+in FreeBSD, but is deprecated */
+#  include <linux/limits.h> /* PATH_MAX (4096), NAME_MAX (255) macros */
+#  include <linux/version.h> /* LINUX_VERSION_CODE && KERNEL_VERSION macros */
+#  include <linux/fs.h> /* FS_IOC_GETFLAGS, S_IMMUTABLE_FL macros */
+#elif __FreeBSD__
+#  include <limits.h>
+/*#  include <strings.h> Enables strcasecmp() */
+#endif
 
 /* #include <bsd/string.h> // strlcpy, strlcat */
 /* #include "clifm.h" */
 /* #include <sys/types.h> */
+
+#ifndef EXIT_SUCCESS
+# define EXIT_SUCCESS 0
+#endif
+
+#ifndef EXIT_FAILURE
+	#define EXIT_FAILURE 1
+#endif
+
+#ifndef PATH_MAX
+# define PATH_MAX 4096
+#endif
+
+#ifndef HOST_NAME_MAX
+# define HOST_NAME_MAX 64
+#endif
+
+#ifndef NAME_MAX
+# define NAME_MAX 255
+#endif
+
+/* _GNU_SOURCE is only defined if __linux__ is defined and _BE_POSIX
+ * is not defined */
+#ifdef _GNU_SOURCE
+#  if (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 28))
+#    if LINUX_VERSION_CODE >= KERNEL_VERSION(4,11,0)
+#      define _STATX
+#    endif /* LINUX_VERSION */
+#  endif /* __GLIBC__ */
+#endif /* _GNU_SOURCE */
 
 #define PROGRAM_NAME "CliFM"
 #define PNL "clifm" /* Program name lowercase */
@@ -1369,10 +1427,10 @@ program_invocation_short_name variable and asprintf() */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.17.2"
+#define VERSION "0.18.0"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "June 24, 2020"
+#define DATE "June 30, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -1404,10 +1462,8 @@ static int flags;
 
 /* Error codes, to be used by launch_exec functions */
 #define EXNULLERR 79
-/*#define EXEXECERR 80 */
 #define EXFORKERR 81
 #define EXCRASHERR 82
-/*#define EXWAITERR 83 */
 
 /* ###COLORS### */
 /* These are just a fixed color stuff in the interface. Remaining colors 
@@ -1429,9 +1485,9 @@ static int flags;
 /* \001 and \002 tell readline that color codes between them are non-printing 
  * chars. This is specially useful for the prompt, i.e., when passing color 
  * codes to readline */
-#define red_b "\001\x1b[1;31m\002" /* error log indicator */
-#define green_b "\001\x1b[1;32m\002" /* sel indicator */
-#define yellow_b "\001\x1b[0;33m\002" /* trash indicator */
+#define red_b "\001\x1b[1;31m\002" /* error message indicator */
+#define green_b "\001\x1b[1;32m\002" /* sel, notice message indicator */
+#define yellow_b "\001\x1b[0;33m\002" /* trash, warning message indicator */
 #define NC_b "\001\x1b[0m\002"
 /* NOTE: Do not use \001 prefix and \002 suffix for colors list: they produce 
  * a displaying problem in lxterminal (though not in aterm and xterm). */
@@ -1448,16 +1504,6 @@ xstrlen */
 /*#define alphasort xalphasort */
 #define _(String) gettext (String)
 
-/* Use statx () only if glibc version is >= 2.28 and the kernel is >= 4.11.
- * Else, use stat() */
-#undef _STATX
-#if (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 28))
-	#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,11,0)
-		#define statx(a,b,c,d,e) syscall(__NR_statx,(a),(b),(c),(d),(e))
-		#define _STATX 1
-	#endif /* LINUX_VERSION */
-#endif /* GLIBC */
-
 
 				/* ######################
 				 * #  CUSTOM FUNCTIONS  # 
@@ -1470,6 +1516,10 @@ check_immutable_bit(char *file)
 /* Check a file's immutable bit. Returns 1 if true, zero if false, and
  * -1 in case of error */
 {
+	#if !defined(FS_IOC_GETFLAGS) || !defined(FS_IMMUTABLE_FL)
+	return 0;
+	#else
+
 	int attr, fd, immut_flag = -1;
 
 	fd = open(file, O_RDONLY);
@@ -1489,6 +1539,8 @@ check_immutable_bit(char *file)
 		return 1;
 	else 
 		return 0;
+
+	#endif
 }
 
 int
@@ -1638,7 +1690,8 @@ get_own_pid(void)
 
 char *
 get_user(void)
-/* Returns a pointer to the username field in the passwd struct */
+/* Returns a pointer to a new string containing the current user's name, or
+ * NULL if not found */
 {
 	struct passwd *pw;
 	uid_t uid = 0;
@@ -1659,14 +1712,32 @@ get_user(void)
 */
 
 	if (!pw)
-		return NULL;
-		
-	return pw->pw_name;
+		return (char *)NULL;
+
+	/* Why we don't just return a pointer to the field of the passwd struct
+	 * we need? Because this struct will be overwritten by subsequent calls to
+	 * getpwuid(), for example, in the properties function, in which case
+	 * our pointer will point to a wrong string. So, to avoid this, we just
+	 * copy the string we need into a new variable. The same applies to the
+	 * following functions, get_user_home() and get_sys_shell() */
+	char *p = (char *)NULL;
+	p = (char *)calloc(strlen(pw->pw_name) + 1, sizeof(char));
+
+	if (!p)
+		return (char *)NULL;
+	
+	char *user = p;
+	p = (char *)NULL;
+
+	strcpy(user, pw->pw_name);
+	
+	return user;
 }
 
 char *
 get_user_home(void)
-/* Returns a pointer to the user's home field in the passwd struct */
+/* Returns a pointer to a string containing the user's home directory, or NULL
+ * if not found */
 {
 	struct passwd *pw;
 	
@@ -1675,12 +1746,24 @@ get_user_home(void)
 	if (!pw)
 		return NULL;
 
-	return pw->pw_dir;
+	char *p = (char *)NULL;
+	p = (char *)calloc(strlen(pw->pw_dir) + 1, sizeof(char));
+
+	if (!p)
+		return (char *)NULL;
+	
+	char *home = p;
+	p = (char *)NULL;
+
+	strcpy(home, pw->pw_dir);
+
+	return home;
 }
 
 char *
 get_sys_shell(void)
-/* Returns a pointer to the user's default shell or NULL if not found */
+/* Returns a pointer to a string containing the user's default shell or NULL 
+ * if not found */
 {
 	struct passwd *pw;
 
@@ -1688,8 +1771,19 @@ get_sys_shell(void)
 
 	if (!pw)
 		return NULL;
+
+	char *p = (char *)NULL;
+	p = (char *)calloc(strlen(pw->pw_shell) + 1, sizeof(char));
+
+	if (!p)
+		return (char *)NULL;
 	
-	return pw->pw_shell;
+	char *shell = p;
+	p = (char *)NULL;
+
+	strcpy(shell, pw->pw_shell);
+	
+	return shell;
 }
 
 int
@@ -1741,8 +1835,8 @@ alphasort_insensitive(const struct dirent **a, const struct dirent **b)
  * only with C and english locales */
 {
 	return strcasecmp(((*a)->d_name[0] == '.') ? (*a)->d_name+1 : 
-					(*a)->d_name, ((*b)->d_name[0] == '.') ? (*b)->d_name+1 : 
-					(*b)->d_name);
+					(*a)->d_name, ((*b)->d_name[0] == '.') ? 
+					(*b)->d_name + 1 : (*b)->d_name);
 }
 
 int
@@ -1800,26 +1894,26 @@ straftlst(const char *str, const char c)
 /* Returns the string after the last appearance of a given char, NULL if no 
  * matches */
 {
-	char *buf = NULL;
+	char *buf = (char *)NULL;
 	size_t str_len = strlen(str);
 	register size_t i = 0;
 	for (i = str_len; i--; ) {
 		if (str[i] == c) {
 			if (i == (str_len - 1))
-				return NULL; /* There's nothing after C */
+				return (char *)NULL; /* There's nothing after C */
 			char *p = calloc(str_len - i, sizeof(char));
 			if (p) {
 				buf = p;
-				p = NULL;
+				p = (char *)NULL;
 				/* copy STR beginning one char after C */
 				strcpy(buf, str + i + 1);
 				return buf;
 			}
 			else
-				return NULL;
+				return (char *)NULL;
 		}
 	}
-	return NULL;
+	return (char *)NULL;
 }
 
 char *
@@ -1827,16 +1921,17 @@ strbfr(char *str, const char c)
 /* Returns the substring in str before the first appearance of c. If not 
  * found, or C is the first char in STR, returns NULL */
 {
-	char *start = str, *buf = NULL;
+	char *start = str, *buf = (char *)NULL;
 	register int counter = 0;
 	while(*str) {
 		if (*str == c) {
-			if (counter == 0) return NULL; /* There's no substring before 
+			if (counter == 0)
+				return (char *)NULL; /* There's no substring before 
 			the first char */
 			char *p = calloc(counter + 1, sizeof(char));
 			if (p) {
 				buf = p;
-				p = NULL;
+				p = (char *)NULL;
 				strncpy(buf, start, counter);
 				return buf;
 				/*NOTE: buf is null terminated because calloc allocated 
@@ -1844,12 +1939,12 @@ strbfr(char *str, const char c)
 				 * 'counter' bytes of start into buf */
 			}
 			else
-				return NULL;
+				return (char *)NULL;
 		}
 		counter++;
 		str++;
 	}
-	return NULL;
+	return (char *)NULL;
 }
 
 char *
@@ -1870,18 +1965,18 @@ strbfrlst (char *str, char c)
 	/* If C was not found (or it was the first char in STR (index=0), in 
 	 * which case there is nothing before it) */
 	if (index == 0)
-		return NULL; 
+		return (char *)NULL; 
 
 	/* Else, copy str into buf, replace C by null char, and return buf */
 	size_t str_len = strlen(str);
-	buf = NULL;
+	buf = (char *)NULL;
 	char *p = calloc(str_len + 1, sizeof(char));
 
 	if (!p)
-		return NULL;
+		return (char *)NULL;
 
 	buf = p;
-	p = NULL;
+	p = (char *)NULL;
 	strcpy(buf, str);
 	buf[index] = 0x00;
 
@@ -2087,6 +2182,7 @@ get_size_unit(off_t file_size)
 	return size_type;
 }
 
+
 				/* ##########################
 				 * #  FUNCTIONS PROTOTYPES  # 
 				 * ##########################*/
@@ -2195,10 +2291,10 @@ int set_shell(const char *str);
 void exec_chained_cmds(char *cmd);
 int is_internal_c(const char *cmd);
 
+char *xasprintf(const char *format, ...);
 int open_bookmark(char **cmd);
 void get_bm_names(void);
 char *bookmarks_generator(const char *text, int state);
-int get_properties_nox(char *filename, int _long, int max);
 int initialize_readline(void);
 int del_bookmark(void);
 int add_bookmark(char *file);
@@ -2384,8 +2480,7 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 int files = 0, args_n = 0, sel_n = 0, max_hist = -1, max_log = -1, 
 	path_n = 0, current_hist_n = 0, dirhist_total_index = 0, 
 	dirhist_cur_index = 0, argc_bk = 0, usrvar_n = 0, aliases_n = 0, 
-	prompt_cmds_n = 0, trash_n = 0, msgs_n = 0, longest = 0, term_cols = 0,
-	free_user = 0, free_shell = 0; 
+	prompt_cmds_n = 0, trash_n = 0, msgs_n = 0, longest = 0, term_cols = 0;
 
 size_t user_home_len = 0;
 struct termios shell_tmodes;
@@ -2473,40 +2568,60 @@ main(int argc, char **argv)
 {
 	/* #########################################################
 	 * #			0) INITIAL CONDITIONS					   #
-	 * # Make sure we are running some GNU/Linux OS on x86 CPU #
 	 * #########################################################*/
 
-	#if !defined(__x86_64__) && !defined(__i386__) && !defined(__ARM_ARCH)
+	/* Though this program might perfectly work on other architectures,
+	 * I just didn't test anything beyond x86 and ARM */
+	#if !defined __x86_64__ && !defined __i386__ && !defined __ARM_ARCH
 		fprintf(stderr, "Unsupported CPU architecture\n");
 		exit(EXIT_FAILURE);
-	#endif /* __x86 */
+	#endif /* __x86_64__ */
 
-	#if !defined(__linux__) && !defined(linux) && !defined(__linux) 
-	&& !defined(__gnu_linux__)
-	/*	While 'linux' is deprecated, '__linux__' is recommended */
-		fprintf(stderr, "%s: This program runs only on GNU/Linux\n", 
+	/* Though this program might perfectly work on other OSes, especially 
+	 * Unices, I just didn't make any test */
+	#if !defined __linux__  && !defined linux && !defined __linux \
+	&& !defined __gnu_linux__ && !defined __FreeBSD__
+		fprintf(stderr, "%s: Unsupported operating system\n", 
 				PROGRAM_NAME);
 		exit(EXIT_FAILURE);
-	#endif /* __linux__ */
+	#endif
 
 	/* What about unices like BSD, Android and even MacOS? 
 	* unix || __unix || __unix__
 	* __FreeBSD___, __NetBSD__, __OpenBSD__, __bdsi__, __DragonFly__
-	* __APPLE__ && __MACH__ 
+	* __APPLE__ && __MACH__
 	* sun || __sun
 	* __ANDROID__ 
 	* __CYGWIN__
 	* MSDOS, _MSDOS, __MSDOS__, __DOS__, _WIN16, _WIN32, _WIN64 */
 
-	#ifndef __GLIBC__
+/*	#ifndef __GLIBC__
 		fprintf(stderr, "%s: GNU C libraries not found\n", PROGRAM_NAME);
 		exit(EXIT_FAILURE);
-	#endif /* __GLIBC__ */
+	#endif */
+
+/*	printf("Linux: %d\n", LINUX_VERSION_CODE);
+	printf("GLIBC: %d.%d\n", __GLIBC__, __GLIBC_MINOR__);
+
+	#ifndef _GNU_SOURCE
+		puts("Not GNU source");
+		printf("POSIX: %ld\n", _POSIX_C_SOURCE);
+	#endif
+
+	# ifndef _POSIX_C_SOURCE
+		puts("Not POSIX: Using GNU extensions");
+	#endif */
+
 
 				/* #################################
 				 * #     1) INITIALIZATION		   #
 				 * #  Basic config and variables   # 
 				 * #################################*/
+
+	/* If running the program locally, that is, not from a path in PATH,
+	 * remove the leading "./" to get the correct program invocation name */
+	if (*argv[0] == '.' && *(argv[0] + 1) == '/')
+		argv[0] += 2;
 
 	/* Use the locale specified by the environment. By default (ANSI C), 
 	 * all programs start in the standard 'C' (== 'POSIX') locale. This 
@@ -2556,10 +2671,10 @@ main(int argc, char **argv)
 		home_ok = config_ok = trash_ok = 0;
 		/* Print message: trash, bookmarks, command logs, commands history and 
 		 * program messages won't be stored */
-		asprintf(&msg, _("%s: Cannot access the home directory. Trash, "
-						 "bookmarks, commands logs, and commands history are "
-						 "disabled. Program messages and selected files "
-						 "won't be persistent. Using default options\n"), 
+		msg = xasprintf(_("%s: Cannot access the home directory. Trash, "
+						"bookmarks, commands logs, and commands history are "
+						"disabled. Program messages and selected files "
+						"won't be persistent. Using default options\n"), 
 				 PROGRAM_NAME);
 		if (msg) {
 			error_msg = 1;
@@ -2571,8 +2686,7 @@ main(int argc, char **argv)
 							  "bookmarks, commands logs, and commands "
 							  "history are disabled. Program messages and "
 							  "selected files won't be persistent. Using "
-							  "default options\n"), 
-					PROGRAM_NAME);
+							  "default options\n"), PROGRAM_NAME);
 	}
 	else
 		user_home_len = strlen(user_home);
@@ -2582,8 +2696,7 @@ main(int argc, char **argv)
 	if (!user) {
 		user = xcalloc(4, sizeof(char));
 		strcpy(user, "???");
-		free_user = 1;
-		asprintf(&msg, _("%s: Error getting username\n"), PROGRAM_NAME);
+		msg = xasprintf(_("%s: Error getting username\n"), PROGRAM_NAME);
 		if (msg) {
 			warning_msg = 1;
 			log_msg(msg, PRINT_PROMPT);
@@ -2622,9 +2735,9 @@ main(int argc, char **argv)
 
 	/* Check whether we have a working shell */
 	if (access(sys_shell, X_OK) == -1) {
-		asprintf(&msg, _("%s: %s: System shell not found. Please edit the "
-						 "configuration file to specify a working shell.\n"),
-						 PROGRAM_NAME, sys_shell);
+		msg = xasprintf(_("%s: %s: System shell not found. Please edit the "
+						"configuration file to specify a working shell.\n"),
+						PROGRAM_NAME, sys_shell);
 		if (msg) {
 			warning_msg = 1;
 			log_msg(msg, PRINT_PROMPT);
@@ -2649,7 +2762,7 @@ main(int argc, char **argv)
 	/* Get hostname */
 	if (gethostname(hostname, sizeof(hostname)) == -1) {
 		strcpy(hostname, "???");
-		asprintf(&msg, _("%s: Error getting hostname\n"), PROGRAM_NAME);
+		msg = xasprintf(_("%s: Error getting hostname\n"), PROGRAM_NAME);
 		if (msg) {
 			warning_msg = 1;
 			log_msg(msg, PRINT_PROMPT);
@@ -2689,8 +2802,8 @@ main(int argc, char **argv)
 		else { /* If the history file doesn't exist, create it */
 			FILE *hist_fp = fopen(HIST_FILE, "w+");
 			if (!hist_fp) {
-				asprintf(&msg, "%s: fopen: '%s': %s\n", PROGRAM_NAME, 
-						 HIST_FILE, strerror(errno));
+				msg = xasprintf("%s: fopen: '%s': %s\n", PROGRAM_NAME, 
+								HIST_FILE, strerror(errno));
 				if (msg) {
 					warning_msg = 1;
 					log_msg(msg, PRINT_PROMPT);
@@ -2720,7 +2833,7 @@ main(int argc, char **argv)
 	/* ##### READLINE ##### */
 
 	initialize_readline();
-	/* Copy this list of quote chars to a global variable to be used
+	/* Copy the list of quote chars to a global variable to be used
 	 * later by some of the program functions like split_str(), my_rl_quote(), 
 	 * is_quote_char(), and my_rl_dequote() */
 	qc = xcalloc(strlen(rl_filename_quote_characters) + 1, sizeof(char));
@@ -2772,8 +2885,8 @@ main(int argc, char **argv)
 	/* If chdir(path) fails, set path to cwd, list files and print the error 
 	 * message. If no access to CWD either, exit */
 	if (chdir(path) == -1) {
-		asprintf(&msg, "%s: chdir: '%s': %s\n", PROGRAM_NAME, path, 
-				 strerror(errno));
+		msg = xasprintf("%s: chdir: '%s': %s\n", PROGRAM_NAME, path, 
+						strerror(errno));
 		if (msg) {
 			error_msg = 1;
 			log_msg(msg, PRINT_PROMPT);
@@ -2784,16 +2897,16 @@ main(int argc, char **argv)
 					strerror(errno));
 		char cwd[PATH_MAX] = "";
 		if (getcwd(cwd, sizeof(cwd)) == NULL) {
-			asprintf(&msg, _("%s: Fatal error! Failed retrieving current "
-							 "working directory\n"), PROGRAM_NAME);
+			msg = xasprintf(_("%s: Fatal error! Failed retrieving current "
+							"working directory\n"), PROGRAM_NAME);
 			if (msg) {
 				log_msg(msg, NOPRINT_PROMPT);
 				free(msg);
 			}
 			else
 				fprintf(stderr, _("%s: Fatal error! Failed retrieving "
-								  "current working directory\n"), 
-								  PROGRAM_NAME);
+								"current working directory\n"), 
+								PROGRAM_NAME);
 			exit(EXIT_FAILURE);
 		}
 		if (path)
@@ -2855,6 +2968,33 @@ main(int argc, char **argv)
 
 /* ###FUNCTIONS DEFINITIONS### */
 
+char *
+xasprintf(const char *format, ...)
+/* Custom POSIX implementation of GNU asprintf() 
+ * Modified version of littlstar's one:
+ * https://github.com/littlstar/asprintf.c/blob/master/asprintf.c*/
+{
+	va_list arglist, tmp_list;
+	size_t size = 0;
+
+	va_start(arglist, format);
+	va_copy(tmp_list, arglist);
+	size = vsnprintf(NULL, 0, format, tmp_list);
+	va_end(tmp_list);
+	
+	if (size < 0) {
+		va_end(arglist);
+		return (char *)NULL;
+	}
+
+	char *buf = (char *)xcalloc(size + 1, sizeof(char));
+
+	vsprintf(buf, format, arglist);
+	va_end(arglist);
+
+	return buf;
+}
+
 int
 initialize_readline(void)
 {
@@ -2891,7 +3031,7 @@ initialize_readline(void)
 	 * variable isn't set. */
 	rl_completer_quote_characters = "\"'";
 	rl_completer_word_break_characters = " ";
-	/* Whenever readline finds any of these chars, it will call the
+	/* Whenever readline finds any of the following chars, it will call the
 	 * quoting function */
 	rl_filename_quote_characters = " \t\n\"\\'`@$><=,;|&{[()]}?!*^";
 	/* According to readline documentation, the following string is
@@ -2922,7 +3062,15 @@ initialize_readline(void)
 int
 get_link_ref(const char *link)
 /* Return the filetype of the file pointed to by LINK, or -1 in case of 
- * error */
+ * error. Possible return values: 
+	S_IFDIR: 40000 (octal) / 16384 (decimal, integer)
+	S_IFREG: 100000 / 32768
+	S_IFLNK: 120000 / 40960
+	S_IFSOCK: 140000 / 49152
+	S_IFBLK: 60000 / 24576
+	S_IFCHR: 20000 / 8192
+	S_IFIFO: 10000 / 4096
+* See the inode manpage */
 {
 	if (!link)
 		return (-1);
@@ -3616,7 +3764,6 @@ set_default_options(void)
 	if (!sys_shell) {
 		sys_shell = xcalloc(8, sizeof(char));
 		strcpy(sys_shell, "/bin/sh");
-		free_shell = 1;
 	}
 			
 	/* Handle white color for different kinds of terminals: linux (8 colors), 
@@ -4025,7 +4172,7 @@ open_function(char **cmd)
 			return EXIT_FAILURE;
 		}
 		
-		/* Else, construct the cmd to be executed by execle() */
+		/* Else, construct the cmd to be executed by execl() */
 		tmp_cmd = xcalloc(((is_link) ? strlen(file_tmp) : strlen(deq_path))
 						  + 14, sizeof(char));
 		sprintf(tmp_cmd, "xdg-open '%s' %s", (is_link) ? file_tmp 
@@ -4779,8 +4926,8 @@ remove_from_trash(void)
 	/* List trashed files */
 	/* Change CWD to the trash directory. Otherwise, scandir() will fail */
 	if (chdir(TRASH_FILES_DIR) == -1) {
-		asprintf(&msg, "%s: trash: '%s': %s\n", PROGRAM_NAME, 
-				 TRASH_FILES_DIR, strerror(errno));
+		msg = xasprintf("%s: trash: '%s': %s\n", PROGRAM_NAME, 
+						TRASH_FILES_DIR, strerror(errno));
 		if (msg) {
 			log_msg(msg, NOPRINT_PROMPT);
 			free(msg);
@@ -4806,8 +4953,8 @@ remove_from_trash(void)
 		 * the argument passed to it, but it happens that, here, both are 
 		 * the same */
 		if (chdir(path) == -1) { /* Restore CWD and return */
-			asprintf(&msg, "%s: trash: '%s': %s\n", PROGRAM_NAME, 
-					path, strerror(errno));
+			msg = xasprintf("%s: trash: '%s': %s\n", PROGRAM_NAME, 
+							path, strerror(errno));
 			if (msg) {
 				log_msg(msg, NOPRINT_PROMPT);
 				free(msg);
@@ -4819,8 +4966,8 @@ remove_from_trash(void)
 		return;
 	}
 	if (chdir(path) == -1) { /* Restore CWD and continue */
-		asprintf(&msg, "%s: trash: '%s': %s\n", PROGRAM_NAME, 
-				 path, strerror(errno));
+		msg = xasprintf("%s: trash: '%s': %s\n", PROGRAM_NAME, 
+						path, strerror(errno));
 		if (msg) {
 			log_msg(msg, NOPRINT_PROMPT);
 			free(msg);
@@ -5053,8 +5200,8 @@ untrash_function(char **comm)
 
 	/* Change CWD to the trash directory to make scandir() work */
 	if (chdir(TRASH_FILES_DIR) == -1) {
-		asprintf(&msg, "%s: undel: '%s': %s\n", PROGRAM_NAME, 
-				 TRASH_FILES_DIR, strerror(errno));
+		msg = xasprintf("%s: undel: '%s': %s\n", PROGRAM_NAME, 
+						TRASH_FILES_DIR, strerror(errno));
 		if (msg) {
 			log_msg(msg, NOPRINT_PROMPT);
 			free(msg);
@@ -5073,8 +5220,8 @@ untrash_function(char **comm)
 	if (trash_files_n == 0) {
 		puts(_("trash: There are no trashed files"));
 		if (chdir(path) == -1) {
-			asprintf(&msg, "%s: undel: '%s': %s\n", PROGRAM_NAME, path, 
-					 strerror(errno));
+			msg = xasprintf("%s: undel: '%s': %s\n", PROGRAM_NAME, path, 
+							strerror(errno));
 			if (msg) {
 				log_msg(msg, NOPRINT_PROMPT);
 				free(msg);
@@ -5099,8 +5246,8 @@ untrash_function(char **comm)
 		}
 		free(trash_files);
 		if (chdir(path) == -1) {
-			asprintf(&msg, "%s: undel: '%s': %s\n", PROGRAM_NAME, path, 
-					 strerror(errno));
+			msg = xasprintf("%s: undel: '%s': %s\n", PROGRAM_NAME, path, 
+							strerror(errno));
 			if (msg) {
 				log_msg(msg, NOPRINT_PROMPT);
 				free(msg);
@@ -5121,8 +5268,8 @@ untrash_function(char **comm)
 
 	/* Go back to previous path */
 	if (chdir(path) == -1) {
-		asprintf(&msg, "%s: undel: '%s': %s\n", PROGRAM_NAME, path, 
-				 strerror(errno));
+		msg = xasprintf("%s: undel: '%s': %s\n", PROGRAM_NAME, path, 
+						strerror(errno));
 		if (msg) {
 			log_msg(msg, NOPRINT_PROMPT);
 			free(msg);
@@ -5227,8 +5374,8 @@ trash_clear(void)
 	struct dirent **trash_files = (struct dirent **)NULL;
 	int files_n = -1, exit_code = 0;
 	if (chdir(TRASH_FILES_DIR) == -1) {
-		asprintf(&msg, "%s: trash: '%s': %s\n", PROGRAM_NAME, 
-				 TRASH_FILES_DIR, strerror(errno));
+		msg = xasprintf("%s: trash: '%s': %s\n", PROGRAM_NAME, 
+						TRASH_FILES_DIR, strerror(errno));
 		if (msg) {
 			log_msg(msg, NOPRINT_PROMPT);
 			free(msg);
@@ -5274,8 +5421,8 @@ file\n"), PROGRAM_NAME, trash_files[i]->d_name);
 	free(trash_files);
 
 	if (chdir(path) == -1) {
-		asprintf(&msg, "%s: trash: '%s': %s\n", PROGRAM_NAME, path, 
-				 strerror(errno));
+		msg = xasprintf("%s: trash: '%s': %s\n", PROGRAM_NAME, path, 
+						strerror(errno));
 			if (msg) {
 				log_msg(msg, NOPRINT_PROMPT);
 				free(msg);
@@ -5305,7 +5452,7 @@ trash_function (char **comm)
 		free(trash_files);
 		free(trash_info);
 		if (ret != 0) {
-			asprintf(&msg, 
+			msg = xasprintf( 
 					 _("%s: mkdir: '%s': Error creating trash directory\n"), 
 					 PROGRAM_NAME, TRASH_DIR);
 			if (msg) {
@@ -5333,8 +5480,8 @@ trash_function (char **comm)
 			|| strcmp(comm[1], "list") == 0) {
 		/* List files in the Trash/files dir */
 		if (chdir(TRASH_FILES_DIR) == -1) {
-			asprintf(&msg, "%s: trash: '%s': %s\n", PROGRAM_NAME, 
-					 TRASH_FILES_DIR, strerror(errno));
+			msg = xasprintf("%s: trash: '%s': %s\n", PROGRAM_NAME, 
+							TRASH_FILES_DIR, strerror(errno));
 			if (msg) {
 				log_msg(msg, NOPRINT_PROMPT);
 				free(msg);
@@ -5361,8 +5508,8 @@ trash_function (char **comm)
 			puts(_("trash: There are no trashed files"));
 
 		if (chdir(path) == -1) {
-			asprintf(&msg, "%s: trash: '%s': %s\n", PROGRAM_NAME, path, 
-					strerror(errno));
+			msg = xasprintf("%s: trash: '%s': %s\n", PROGRAM_NAME, path, 
+							strerror(errno));
 			if (msg) {
 				log_msg(msg, NOPRINT_PROMPT);
 				free(msg);
@@ -5927,11 +6074,10 @@ free_stuff (void)
 		free(messages);
 	}
 
-	if (free_user)
-		free(user);
+	free(user);
+	free(user_home);
 
-	if (free_shell)
-		free(sys_shell);
+	free(sys_shell);
 
 	free(path);
 	free(CONFIG_DIR);
@@ -5983,8 +6129,8 @@ Usage example:
 	if (!new_ptr) {
 		new_ptr = realloc(ptr, size);
 		if (!new_ptr) {
-			asprintf(&msg, _("%s: %s failed to allocate %zu bytes\n"), 
-					 PROGRAM_NAME, __func__, size);
+			msg = xasprintf(_("%s: %s failed to allocate %zu bytes\n"), 
+							PROGRAM_NAME, __func__, size);
 			if (msg) {
 				log_msg(msg, NOPRINT_PROMPT);
 				free(msg);
@@ -6022,8 +6168,8 @@ Usage example:
 	if (!new_ptr) {
 		new_ptr = calloc(nmemb, size);
 		if (!new_ptr) {
-			asprintf(&msg, _("%s: %s failed to allocate %zu bytes\n"), 
-					PROGRAM_NAME, __func__, nmemb*size);
+			msg = xasprintf(_("%s: %s failed to allocate %zu bytes\n"), 
+							PROGRAM_NAME, __func__, nmemb*size);
 			if (msg) {
 				log_msg(msg, NOPRINT_PROMPT);
 				free(msg);
@@ -6044,7 +6190,7 @@ xdg_open_check(void)
 	xdg_open_path = get_cmd_path("xdg-open");
 	if (!xdg_open_path) {
 		flags &= ~XDG_OPEN_OK;
-		asprintf(&msg, _("%s: 'xdg-open' not found. Without this program you "
+		msg = xasprintf(_("%s: 'xdg-open' not found. Without this program you "
 						 "will always need to specify an application when "
 						 "opening files.\n"), PROGRAM_NAME);
 		if (msg) {
@@ -6120,8 +6266,8 @@ init_shell(void)
 			/* Without the setpgid line below, the program cannot be run with 
 			* sudo, but it can be run nonetheless by the root user */
 			if (setpgid(own_pid, own_pid) < 0) {
-				asprintf(&msg, "%s: setpgid: %s\n", PROGRAM_NAME, 
-						strerror(errno));
+				msg = xasprintf("%s: setpgid: %s\n", PROGRAM_NAME, 
+								strerror(errno));
 				if (msg) {
 					log_msg(msg, NOPRINT_PROMPT);
 					free(msg);
@@ -6721,7 +6867,7 @@ get_bm_names(void)
 	if (stat(BM_FILE, &file_attrib) == -1) {
 		fp = fopen(BM_FILE, "w+");
 		if (!fp) {
-			asprintf(&msg, "bookmarks: '%s': %s\n", BM_FILE, strerror(errno));
+			msg = xasprintf("bookmarks: '%s': %s\n", BM_FILE, strerror(errno));
 			if (msg) {
 				error_msg = 1;
 				log_msg(msg, PRINT_PROMPT);
@@ -6740,8 +6886,8 @@ get_bm_names(void)
 
 	fp = fopen(BM_FILE, "r");
 	if (!fp) {
-		asprintf(&msg, "%s: '%s': Error reading the bookmarks file\n", 
-				 PROGRAM_NAME, BM_FILE);
+		msg = xasprintf("%s: '%s': Error reading the bookmarks file\n", 
+						PROGRAM_NAME, BM_FILE);
 		if (msg) {
 			error_msg = 1;
 			log_msg(msg, PRINT_PROMPT);
@@ -6877,12 +7023,18 @@ get_path_env(void)
 
 	/* Get the value of the PATH env variable */
 	char *path_tmp = (char *)NULL;
+	#if __linux__
 	for (i = 0; __environ[i]; i++) {
 		if (strncmp(__environ[i], "PATH", 4) == 0) {
 			path_tmp = straft(__environ[i], '=');
 			break;
 		}
 	}
+	#else
+	path_tmp = (char *)xcalloc(strlen(getenv("PATH")) + 1, sizeof(char));
+	strcpy(path_tmp, getenv("PATH"));
+	#endif
+
 	if (!path_tmp)
 		return 0;
 
@@ -6977,9 +7129,9 @@ init_config(void)
 			free(trash_info);
 			if (ret != 0) {
 				trash_ok = 0;
-				asprintf(&msg, _("%s: mkdir: '%s': Error creating trash "
-								 "directory. Trash function disabled\n"), 
-								 PROGRAM_NAME, TRASH_DIR);
+				msg = xasprintf(_("%s: mkdir: '%s': Error creating trash "
+								"directory. Trash function disabled\n"), 
+								PROGRAM_NAME, TRASH_DIR);
 				if (msg) {
 					log_msg(msg, PRINT_PROMPT);
 					free(msg);
@@ -6994,7 +7146,7 @@ init_config(void)
 		/* If it exists, check it is writable */
 		else if (access (TRASH_DIR, W_OK) == -1) {
 			trash_ok = 0;
-			asprintf(&msg, _("%s: '%s': Directory not writable. Trash "
+			msg = xasprintf(_("%s: '%s': Directory not writable. Trash "
 							 "function disabled\n"), PROGRAM_NAME, TRASH_DIR);
 			if (msg) {
 				log_msg(msg, PRINT_PROMPT);
@@ -7014,7 +7166,7 @@ init_config(void)
 			ret=launch_execve(tmp_cmd);
 			if (ret != 0) {
 				config_ok = 0;
-				asprintf(&msg, 
+				msg = xasprintf( 
 						 _("%s: mkdir: '%s': Error creating configuration "
 						   "directory. Bookmarks, commands logs, and "
 						   "command history are disabled. Program messages "
@@ -7038,11 +7190,11 @@ init_config(void)
 		/* If it exists, check it is writable */
 		else if (access(CONFIG_DIR, W_OK) == -1) {
 			config_ok = 0;
-			asprintf(&msg, _("%s: '%s': Directory not writable. "
-							 "Bookmarks, commands logs, and commands "
-							 "history are disabled. Program messages won't "
-							 "be persistent. Using default options\n"), 
-					 PROGRAM_NAME, CONFIG_DIR);
+			msg = xasprintf(_("%s: '%s': Directory not writable. "
+							"Bookmarks, commands logs, and commands "
+							"history are disabled. Program messages won't "
+							"be persistent. Using default options\n"), 
+							PROGRAM_NAME, CONFIG_DIR);
 			if (msg) {
 				error_msg = 1;
 				log_msg(msg, PRINT_PROMPT);
@@ -7061,8 +7213,8 @@ init_config(void)
 		if (config_ok && stat(PROFILE_FILE, &file_attrib) == -1) {
 			FILE *profile_fp = fopen(PROFILE_FILE, "w");
 			if (!profile_fp) {
-				asprintf(&msg, "%s: fopen: '%s': %s\n", PROGRAM_NAME, 
-						 PROFILE_FILE, strerror(errno));
+				msg = xasprintf("%s: fopen: '%s': %s\n", PROGRAM_NAME, 
+								PROFILE_FILE, strerror(errno));
 				if (msg) {
 					error_msg = 1;
 					log_msg(msg, PRINT_PROMPT);
@@ -7087,8 +7239,8 @@ init_config(void)
 		if (config_ok && stat(CONFIG_FILE, &file_attrib) == -1) {
 			config_fp = fopen(CONFIG_FILE, "w");
 			if (!config_fp) {
-				asprintf(&msg, "%s: fopen: '%s': %s\n", PROGRAM_NAME, 
-						 CONFIG_FILE, strerror(errno));
+				msg = xasprintf("%s: fopen: '%s': %s\n", PROGRAM_NAME, 
+								CONFIG_FILE, strerror(errno));
 				if (msg) {
 					error_msg = 1;
 					log_msg(msg, PRINT_PROMPT);
@@ -7154,8 +7306,8 @@ OF PROMPT\n");
 				  welcome_msg_color_set = -1;
 			config_fp = fopen(CONFIG_FILE, "r");
 			if (!config_fp) {
-				asprintf(&msg, _("%s: fopen: '%s': %s. Using default "
-								 "values.\n"), 
+				msg = xasprintf(_("%s: fopen: '%s': %s. Using default "
+								"values.\n"), 
 						 PROGRAM_NAME, CONFIG_FILE, strerror(errno));
 				if (msg) {
 					error_msg = 1;
@@ -7259,7 +7411,7 @@ OF PROMPT\n");
 							ext_cmd_ok = 0;
 					}
 					else if (strncmp (line, "System shell=", 13) == 0) {
-						if (free_shell) {
+						if (sys_shell) {
 							free(sys_shell);
 							sys_shell = (char *)NULL;
 						}
@@ -7269,7 +7421,6 @@ OF PROMPT\n");
 							continue;
 						sys_shell = xcalloc(strlen(opt_str) + 1, sizeof(char));
 						strcpy(sys_shell, opt_str);
-						free_shell = 1;
 					}
 					else if (list_folders_first == -1 
 					&& strncmp(line, "List folders first=", 19) == 0) {
@@ -7495,8 +7646,8 @@ OF PROMPT\n");
 								strcpy(path, opt_str);
 							}
 							else {
-								asprintf(&msg, "%s: '%s': %s\n", PROGRAM_NAME, 
-										 opt_str, strerror(errno));
+								msg = xasprintf("%s: '%s': %s\n", PROGRAM_NAME, 
+												opt_str, strerror(errno));
 								if (msg) {
 									warning_msg=1;
 									log_msg(msg, PRINT_PROMPT);
@@ -7527,7 +7678,6 @@ OF PROMPT\n");
 				/* Fallback to /bin/sh */
 				sys_shell = xcalloc(8, sizeof(char));
 				strcpy(sys_shell, "/bin/sh");
-				free_shell = 1;
 				}
 			}
 			if (pager == -1) pager = 0;
@@ -7608,12 +7758,12 @@ OF PROMPT\n");
 					char *xrdb_path = get_cmd_path("xrdb");
 					if (xrdb_path)
 						launch_execle("xrdb -merge ~/.Xresources");
-					asprintf(&msg, _("%s: Restart your %s for changes to "
-							 		  "~/.Xresources to take effect. "
-									  "Otherwise, %s keybindings might not "
-									  "work as expected.\n"), 
-							  PROGRAM_NAME, (xrdb_path) ? _("terminal") 
-							  : _("X session"), PROGRAM_NAME);
+					msg = xasprintf(_("%s: Restart your %s for changes to "
+							 		"~/.Xresources to take effect. "
+									"Otherwise, %s keybindings might not "
+									"work as expected.\n"), 
+									PROGRAM_NAME, (xrdb_path) ? _("terminal") 
+									: _("X session"), PROGRAM_NAME);
 					if (msg) {
 						warning_msg = 1; /* Specify the kind of message */
 						log_msg(msg, PRINT_PROMPT);
@@ -7634,8 +7784,8 @@ OF PROMPT\n");
 				}
 			}
 			else {
-				asprintf(&msg, "%s: fopen: '%s': %s\n", PROGRAM_NAME, 
-						 xresources, strerror(errno));
+				msg = xasprintf("%s: fopen: '%s': %s\n", PROGRAM_NAME, 
+								xresources, strerror(errno));
 				if (msg) {
 					error_msg = 1;
 					log_msg(msg, PRINT_PROMPT);
@@ -7664,8 +7814,8 @@ OF PROMPT\n");
 		int ret = launch_execve(tmp_cmd2);
 		if (ret != 0) {
 			selfile_ok = 0;
-			asprintf(&msg, "%s: mkdir: '%s': %s\n", PROGRAM_NAME, TMP_DIR, 
-					 strerror(errno));
+			msg = xasprintf("%s: mkdir: '%s': %s\n", PROGRAM_NAME, TMP_DIR, 
+							strerror(errno));
 			if (msg) {
 				error_msg = 1;
 				log_msg(msg, PRINT_PROMPT);
@@ -7680,7 +7830,7 @@ OF PROMPT\n");
 	/* If the directory exists, check it is writable */
 	else if (access(TMP_DIR, W_OK) == -1) {
 		selfile_ok = 0;
-		asprintf(&msg, "%s: '%s': Directory not writable. Selected files "
+		msg = xasprintf("%s: '%s': Directory not writable. Selected files "
 						"won't be persistent\n", PROGRAM_NAME, TMP_DIR);
 		if (msg) {
 			error_msg = 1;
@@ -7930,8 +8080,8 @@ external_arguments(int argc, char **argv)
 			strcpy(path, path_value);
 		}
 		else { /* Error changing directory */
-			asprintf(&msg, "%s: '%s': %s\n", PROGRAM_NAME, path_value, 
-					 strerror(errno));
+			msg = xasprintf("%s: '%s': %s\n", PROGRAM_NAME, path_value, 
+							strerror(errno));
 			if (msg) {
 				warning_msg = 1;
 				log_msg(msg, PRINT_PROMPT);
@@ -9005,8 +9155,8 @@ count_dir(const char *dir_path) /* Readdir version */
 	DIR *dir_p;
 	struct dirent *entry;
 	if ((dir_p = opendir(dir_path)) == NULL) {
-		asprintf(&msg, "%s: opendir: '%s': %s\n", PROGRAM_NAME, 
-				 dir_path, strerror(errno));
+		msg = xasprintf("%s: opendir: '%s': %s\n", PROGRAM_NAME, 
+						dir_path, strerror(errno));
 		if (msg) {
 			error_msg = 1;
 			log_msg(msg, PRINT_PROMPT);
@@ -9106,6 +9256,8 @@ folder_select(const struct dirent *entry)
 	}
 	else
 		return 0; 
+
+	return 0; /* Never reached */
 }
 
 int
@@ -9123,6 +9275,8 @@ file_select(const struct dirent *entry)
 	}
 	else
 		return 0;
+		
+	return 0; /* Never reached */
 }
 
 void
@@ -9152,7 +9306,9 @@ colors_list(const char *entry, const int i, const int pad,
 		return;
 	}
 	char *linkname = (char *)NULL;
+	#if __linux__
 	cap_t cap;
+	#endif
 	switch (file_attrib.st_mode & S_IFMT) {
 	case S_IFREG:
 		if (!(file_attrib.st_mode & S_IRUSR))
@@ -9165,6 +9321,7 @@ colors_list(const char *entry, const int i, const int pad,
 			printf("%s%s%s%s%-*s%s%s", eln_color, index, NC, sg_c, 
 					pad, entry, NC, new_line ? "\n" : "");
 		else {
+			#if __linux__
 			cap = cap_get_file(entry);
 			if (cap) {
 				printf("%s%s%s%s%-*s%s%s", eln_color, index, NC, ca_c, 
@@ -9172,6 +9329,9 @@ colors_list(const char *entry, const int i, const int pad,
 				cap_free(cap);
 			}
 			else if (file_attrib.st_mode & S_IXUSR) {
+			#else
+			if (file_attrib.st_mode & S_IXUSR) {
+			#endif
 				if (file_attrib.st_size == 0)
 					printf("%s%s%s%s%-*s%s%s", eln_color, index, NC, ee_c, 
 						    pad, entry, NC, new_line ? "\n" : "");
@@ -9299,8 +9459,8 @@ $ dircolors --print-database */
 		 * uses strcoll(), which, unlike strcmp() (used by my xalphasort()), 
 		 * is locale aware */
 		if (files_folders == -1) {
-			asprintf(&msg, "%s: scandir: '%s': %s\n", PROGRAM_NAME, 
-					 path, strerror(errno));
+			msg = xasprintf("%s: scandir: '%s': %s\n", PROGRAM_NAME, 
+							path, strerror(errno));
 			if (msg) {
 				error_msg = 1;
 				log_msg(msg, PRINT_PROMPT);
@@ -9320,8 +9480,8 @@ $ dircolors --print-database */
 							  (case_sensitive) ? xalphasort : 
 							  alphasort_insensitive);
 		if (files_files == -1) {
-			asprintf(&msg, "%s: scandir: '%s': %s\n", PROGRAM_NAME, 
-					 path, strerror(errno));
+			msg = xasprintf("%s: scandir: '%s': %s\n", PROGRAM_NAME, 
+							path, strerror(errno));
 			if (msg) {
 				error_msg = 1;
 				log_msg(msg, PRINT_PROMPT);
@@ -9391,8 +9551,8 @@ $ dircolors --print-database */
 					    (unicode) ? alphasort : (case_sensitive) 
 					    ? xalphasort : alphasort_insensitive);
 		if (files == -1) {
-			asprintf(&msg, "%s: scandir: '%s': %s\n", PROGRAM_NAME, 
-					 path, strerror(errno));
+			msg = xasprintf("%s: scandir: '%s': %s\n", PROGRAM_NAME, 
+							path, strerror(errno));
 			if (msg) {
 				error_msg = 1;
 				log_msg(msg, PRINT_PROMPT);
@@ -9562,7 +9722,9 @@ $ dircolors --print-database */
 		}
 		int is_dir = 0, files_dir = 0;
 		char *linkname = (char *)NULL;
+		#if __linux__
 		cap_t cap;
+		#endif
 		if ((i + 1) % columns_n == 0)
 			last_column = 1;
 		else
@@ -9641,11 +9803,13 @@ $ dircolors --print-database */
 			else if (file_attrib.st_mode & S_ISGID) /* set gid file */
 				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, sg_c, 
 					dirlist[i], NC, (last_column) ? "\n" : "");
+			#if __linux__
 			else if ((cap = cap_get_file (dirlist[i]))) {
 				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, ca_c, 
 						dirlist[i], NC, (last_column) ? "\n" : "");				
 				cap_free(cap);
 			}
+			#endif
 			else if (file_attrib.st_mode & S_IXUSR)
 				if (file_attrib.st_size == 0)
 					printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, ee_c, 
@@ -9720,8 +9884,8 @@ get_aliases_n_prompt_cmds(void)
 	FILE *config_file_fp;
 	config_file_fp = fopen(CONFIG_FILE, "r");
 	if (!config_file_fp) {
-		asprintf(&msg, "%s: alias: '%s': %s\n", PROGRAM_NAME, 
-				 CONFIG_FILE, strerror(errno));
+		msg = xasprintf("%s: alias: '%s': %s\n", PROGRAM_NAME, 
+						CONFIG_FILE, strerror(errno));
 		if (msg) {
 			error_msg = 1;
 			log_msg(msg, PRINT_PROMPT);
@@ -10369,7 +10533,7 @@ exec_cmd(char **comm)
 				&& atoi(comm[i]) == get_own_pid()) 
 				|| ((strcmp(comm[0], "killall") == 0 
 				|| strcmp(comm[0], "pkill") == 0) 
-				&& strcmp(comm[i], program_invocation_short_name) == 0)) {
+				&& strcmp(comm[i], argv_bk[0]) == 0)) {
 					fprintf(stderr, _("%s: To gracefully quit type 'quit'\n"), 
 							PROGRAM_NAME);
 					return exit_code;
@@ -10569,9 +10733,9 @@ launch_execle(const char *cmd)
 			}
 		}
 		if (!index)
-			execle(sys_shell, sys_shell, "-c", cmd, NULL, __environ);
+			execl(sys_shell, sys_shell, "-c", cmd, NULL);
 		else
-			execle(sys_shell, sys_shell + index, "-c", cmd, NULL, __environ);
+			execl(sys_shell, sys_shell + index, "-c", cmd, NULL);
 		fprintf(stderr, "%s: '%s': execle: %s\n", PROGRAM_NAME, sys_shell, 
 				strerror(errno));
 		exit(errno);
@@ -10631,10 +10795,6 @@ launch_execve(char **cmd)
 	 * See: http://www.tldp.org/LDP/abs/html/exitcodes.html and
 	 * https://www.gnu.org/software/libc/manual/html_node/Exit-Status.html 
 	*/
-
-	#ifndef _GNU_SOURCE
-		#define _GNU_SOURCE /* Needed by execvpe() */
-	#endif
 	
 	if (!cmd)
 		return EXNULLERR;
@@ -10680,9 +10840,9 @@ launch_execve(char **cmd)
 		signal(SIGINT, SIG_DFL);
 		signal(SIGQUIT, SIG_DFL);
 		signal(SIGTERM, SIG_DFL);
-		execvpe(cmd[0], cmd, __environ);
-		/* This will only be reached is execvpe() fails, because the exec
-		 * family of functions only returns on error */
+		execvp(cmd[0], cmd);
+		/* This will only be reached is execvp() fails, because the exec
+		 * family of functions returns only on error */
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, cmd[0], 
 				strerror(errno));
 		exit(errno);
@@ -10762,8 +10922,8 @@ save_sel(void)
 
 	FILE *sel_fp = fopen(sel_file_user, "w");
 	if (!sel_fp) {
-		asprintf(&msg, "%s: sel: '%s': %s\n", PROGRAM_NAME, 
-				 sel_file_user, strerror(errno));
+		msg = xasprintf("%s: sel: '%s': %s\n", PROGRAM_NAME, 
+						sel_file_user, strerror(errno));
 		if (msg) {
 			log_msg(msg, NOPRINT_PROMPT);
 			free(msg);
@@ -11391,8 +11551,8 @@ get_bookmarks(char *bookmarks_file)
 	FILE *bm_fp;
 	bm_fp = fopen(bookmarks_file, "r");
 	if (!bm_fp) {
-		asprintf(&msg, "%s: bookmarks: %s: %s\n", PROGRAM_NAME, 
-				 bookmarks_file, strerror(errno));
+		msg = xasprintf("%s: bookmarks: %s: %s\n", PROGRAM_NAME, 
+						bookmarks_file, strerror(errno));
 		if (msg) {
 			log_msg(msg, NOPRINT_PROMPT);
 			free(msg);
@@ -11686,7 +11846,8 @@ add_bookmark(char *file)
 	/* If not absolute path, prepend current path to file */
 	if (*file != '/') {
 		char *tmp_file = (char *)NULL;
-		tmp_file = xcalloc((strlen(path) + strlen(file) + 2), sizeof(char));
+		tmp_file = (char *)xcalloc((strlen(path) + strlen(file) + 2), 
+								   sizeof(char));
 		sprintf(tmp_file, "%s/%s", path, file);
 		file = tmp_file;
 		tmp_file = (char *)NULL;
@@ -11727,7 +11888,7 @@ add_bookmark(char *file)
 		}
 		/* Store lines: used later to check hotkeys */		
 		bms = xrealloc(bms, (bmn + 1) * sizeof(char *));
-		bms[bmn] = xcalloc(strlen(line) + 1, sizeof(char));
+		bms[bmn] = (char *)xcalloc(strlen(line) + 1, sizeof(char));
 		strcpy(bms[bmn++], line);
 		
 	}
@@ -11788,19 +11949,20 @@ add_bookmark(char *file)
 	/* Generate the bookmark line */
 	if (name) {
 		if (hk) { /* name AND hk */
-			tmp = xcalloc(strlen(hk) + strlen(name) + strlen(file) + 5, 
-						  sizeof(char));
+			tmp = (char *)xcalloc(strlen(hk) + strlen(name) + strlen(file) + 5, 
+								  sizeof(char));
 			sprintf(tmp, "[%s]%s:%s\n", hk, name, file);
 			free(hk);
 		}
 		else { /* Only name */
-			tmp = xcalloc(strlen(name) + strlen(file) + 3, sizeof(char));
+			tmp = (char *)xcalloc(strlen(name) + strlen(file) + 3, 
+								  sizeof(char));
 			sprintf(tmp, "%s:%s\n", name, file);
 		}
 		free(name);
 	}
 	else if (hk) { /* Only hk */
-		tmp = xcalloc(strlen(hk) + strlen(file) + 4, sizeof(char));
+		tmp = (char *)xcalloc(strlen(hk) + strlen(file) + 4, sizeof(char));
 		sprintf(tmp, "[%s]%s\n", hk, file);
 		free(hk);
 	}
@@ -11832,7 +11994,7 @@ add_bookmark(char *file)
 	}
 	
 	/* Everything is fine: add the new bookmark to the bookmarks file */
-	fprintf(bm_fp, tmp);
+	fprintf(bm_fp, "%s", tmp);
 	fclose(bm_fp);
 	printf(_("File succesfully bookmarked\n"));
 	free(tmp);
@@ -12182,8 +12344,8 @@ bookmarks_function(char **cmd)
 		FILE *fp;
 		fp = fopen(BM_FILE, "w+");
 		if (!fp) {
-			asprintf(&msg, "bookmarks: '%s': %s\n", 
-					 BM_FILE, strerror(errno));
+			msg = xasprintf("bookmarks: '%s': %s\n", 
+							BM_FILE, strerror(errno));
 			if (msg) {
 				log_msg(msg, NOPRINT_PROMPT);
 				free(msg);
@@ -12371,8 +12533,7 @@ properties_function(char **comm)
 }
 
 int
-get_properties_nox (char *filename, int _long, int max)
-/* get_properties(), stat() version */
+get_properties (char *filename, int _long, int max)
 {
 	struct stat file_attrib;
 	/* Check file existence */
@@ -12397,12 +12558,16 @@ get_properties_nox (char *filename, int _long, int max)
 		else if (file_attrib.st_mode & S_ISGID)
 			strcpy(color, sg_c);
 		else {
+			#if __linux__
 			cap_t cap = cap_get_file(filename);
 			if (cap) {
 				strcpy(color, ca_c);
 				cap_free(cap);
 			}
 			else if (file_attrib.st_mode & S_IXUSR) {
+			#else
+			if (file_attrib.st_mode & S_IXUSR) {
+			#endif
 				if (file_attrib.st_size == 0) strcpy(color, ee_c);
 				else strcpy(color, ex_c);
 			}
@@ -12560,6 +12725,24 @@ get_properties_nox (char *filename, int _long, int max)
 	char change_time[128] = "";
 	strftime(change_time, sizeof(change_time), "%b %d %H:%M:%S %Y", tm);
 
+	/* Get creation (birth) time */
+	#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
+		time = file_attrib.st_birthtime;
+		tm = localtime(&time);
+		char creation_time[128] = "";
+		strftime(creation_time, sizeof(creation_time), "%b %d %H:%M:%S %Y", 
+				 tm);
+	#elif defined(_STATX)
+		struct statx xfile_attrib;
+		statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, 
+			  &xfile_attrib);
+		time = xfile_attrib.stx_btime.tv_sec;
+		tm = localtime(&time);
+		char creation_time[128] = "";
+		strftime(creation_time, sizeof(creation_time), "%b %d %H:%M:%S %Y", 
+				 tm);
+	#endif
+
 	switch (file_type) {
 		case 'd': printf(_("Directory")); break;
 		case 's': printf(_("Socket")); break;
@@ -12584,6 +12767,11 @@ get_properties_nox (char *filename, int _long, int max)
 	printf(_("Modify: \t%s\n"), mod_time);
 	printf(_("Change: \t%s\n"), change_time);
 
+	#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) \
+	|| defined(_STATX)
+		printf(_("Birth: \t\t%s\n"), creation_time);
+	#endif
+
 	/* Print file size */
 	if ((file_attrib.st_mode & S_IFMT) == S_IFDIR) {
 		fputs(_("Total size: \t"), stdout);
@@ -12594,257 +12782,8 @@ get_properties_nox (char *filename, int _long, int max)
 
 	if (size_type) 
 		free(size_type);
-		
+
 	return EXIT_SUCCESS;
-}
-
-int
-get_properties (char *filename, int _long, int max)
-/* This is my humble version of 'ls -hl' command plus most of the info from 
- * 'stat' command */
-{
-	/* If statx() is not available, just use stat() */
-	#ifndef _STATX
-
-	return get_properties_nox(filename, _long, max);
-
-	#else
-
-	struct statx file_attrib;
-	/* Check file existence */
-	/* statx(), introduced since kernel 4.11 and glibc 2.28, is the improved 
-	 * version of stat(): it's able to get creation time, unlike stat() */
-	if (statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW, STATX_ALL, 
-			  &file_attrib) == -1) {
-		fprintf(stderr, "%s: pr: '%s': %s\n", PROGRAM_NAME, filename, 
-				strerror(errno));
-		return EXIT_FAILURE;
-	}
-	/* Get file size */
-	char *size_type = get_size_unit(file_attrib.stx_size);
-
-	/* Get file type (and color): */
-	int sticky = 0;
-	char file_type = 0, color[MAX_COLOR]= "";
-	char *linkname = (char *)NULL;
-	switch (file_attrib.stx_mode & S_IFMT) {
-	case S_IFREG:
-		file_type='-';
-		if (!(file_attrib.stx_mode & S_IRUSR)) strcpy(color, nf_c);
-		else if (file_attrib.stx_mode & S_ISUID)
-			strcpy(color, su_c);
-		else if (file_attrib.stx_mode & S_ISGID)
-			strcpy(color, sg_c);
-		else {
-			cap_t cap = cap_get_file(filename);
-			if (cap) {
-				strcpy(color, ca_c);
-				cap_free(cap);
-			}
-			else if (file_attrib.stx_mode & S_IXUSR) {
-				if (file_attrib.stx_size == 0) strcpy(color, ee_c);
-				else strcpy(color, ex_c);
-			}
-			else if (file_attrib.stx_size == 0) strcpy(color, ef_c);
-			else strcpy(color, fi_c);
-		}
-		break;
-
-	case S_IFDIR:
-		file_type='d';
-		if (access(filename, R_OK|X_OK) != 0)
-			strcpy(color, nd_c);
-		else {
-			int is_oth_w = 0;
-			if (file_attrib.stx_mode & S_ISVTX) sticky = 1;
-			if (file_attrib.stx_mode & S_IWOTH) is_oth_w = 1;
-			int files_dir = count_dir(filename);
-			strcpy(color, (sticky) ? ((is_oth_w) ? tw_c : 
-				   st_c) : ((is_oth_w) ? ow_c : 
-				   ((files_dir == 2 || files_dir == 0) ? ed_c : di_c)));
-		}
-		break;
-
-	case S_IFLNK:
-		file_type = 'l';
-		linkname = realpath(filename, NULL);
-		if (linkname)
-			strcpy(color, ln_c);
-		else
-			strcpy(color, or_c);
-		break;
-	case S_IFSOCK: file_type = 's'; strcpy(color, so_c); break;
-	case S_IFBLK: file_type = 'b'; strcpy(color, bd_c); break;
-	case S_IFCHR: file_type = 'c'; strcpy(color, cd_c); break;
-	case S_IFIFO: file_type = 'p'; strcpy(color, pi_c); break;
-	default: file_type = '?'; strcpy(color, no_c);
-	}
-	
-	/* Get file permissions */
-	char read_usr = '-', write_usr = '-', exec_usr = '-', 
-		 read_grp = '-', write_grp = '-', exec_grp = '-',
-		 read_others = '-', write_others = '-', exec_others = '-';
-
-	mode_t val=(file_attrib.stx_mode & ~S_IFMT);
-	if (val & S_IRUSR) read_usr = 'r';
-	if (val & S_IWUSR) write_usr = 'w'; 
-	if (val & S_IXUSR) exec_usr = 'x';
-
-	if (val & S_IRGRP) read_grp = 'r';
-	if (val & S_IWGRP) write_grp = 'w';
-	if (val & S_IXGRP) exec_grp = 'x';
-
-	if (val & S_IROTH) read_others = 'r';
-	if (val & S_IWOTH) write_others = 'w';
-	if (val & S_IXOTH) exec_others = 'x';
-
-	if (file_attrib.stx_mode & S_ISUID) 
-		(val & S_IXUSR) ? (exec_usr = 's') : (exec_usr = 'S');
-	if (file_attrib.stx_mode & S_ISGID) 
-		(val & S_IXGRP) ? (exec_grp = 's') : (exec_grp = 'S');
-
-	/* Get number of links to the file */
-	nlink_t link_n = file_attrib.stx_nlink;
-
-	/* Get modification time */
-	time_t time = file_attrib.stx_mtime.tv_sec;
-	struct tm *tm = localtime(&time);
-	char mod_time[128] = "";
-	/* Store formatted (and localized) date-time string into mod_time */
-	strftime(mod_time, sizeof(mod_time), "%b %d %H:%M:%S %Y", tm);
-
-	/* Get owner and group names */
-	uid_t owner_id = file_attrib.stx_uid; /* owner ID */
-	gid_t group_id = file_attrib.stx_gid; /* group ID */
-	struct group *group;
-	struct passwd *owner;
-	group = getgrgid(group_id);
-	owner = getpwuid(owner_id); 
-	
-	/* Print file properties for long view mode */
-	if (_long) {
-		size_t filename_len = ((unicode) ? u8_xstrlen(filename) : 
-								strlen(filename));
-		/*	If filename length is greater than max, truncate it (max-1 = '~')
-		 * to let the user know the filename isn't complete */
-		 /* The value of max (global) is (or should be) already calculated by 
-		  * get_max_long_view() before calling this function */
-		char trim_filename[NAME_MAX] = "";
-		short trim = 0;
-		if (filename_len > max) {
-			trim = 1;
-			strcpy(trim_filename, filename);
-			trim_filename[(max + cont_bt) - 1] = '~';
-			trim_filename[max + cont_bt] = 0x00;
-		}
-		printf("%s%-*s %s%s (%04o) %c/%c%c%c/%c%c%c/%c%c%c %s %s %s %s\n", 
-				color, max + cont_bt, (!trim) ? filename : trim_filename, NC, 
-				default_color, file_attrib.stx_mode & 07777,
-				file_type,
-				read_usr, write_usr, exec_usr, 
-				read_grp, write_grp, exec_grp,
-				read_others, write_others, (sticky) ? 't' : exec_others,
-				(!owner) ? _("unknown") : owner->pw_name, 
-				(!group) ? _("unknown") : group->gr_name,
-				(size_type) ? size_type : "??", 
-				(mod_time[0] != 0x00) ? mod_time : "??");
-		if (linkname)
-			free(linkname);
-		if (size_type) 
-			free(size_type);
-		return EXIT_SUCCESS;
-	}
-
-	/* Print file properties for normal mode */
-	printf("(%04o)%c/%c%c%c/%c%c%c/%c%c%c %ld %s %s %s %s ", 
-							file_attrib.stx_mode & 07777, file_type, 
-							read_usr, write_usr, exec_usr, 
-							read_grp, write_grp, exec_grp,
-							read_others, write_others, (sticky) ? 't' 
-							: exec_others, link_n, 
-							(!owner) ? _("unknown") : owner->pw_name, 
-							(!group) ? _("unknown") : group->gr_name, 
-							(size_type) ? size_type : "??", 
-							(mod_time[0] != 0x00) ? mod_time : "??");
-	if (file_type && file_type != 'l')
-		printf("%s%s%s%s\n", color, filename, NC, default_color);
-	else if (linkname) {
-		printf("%s%s%s%s -> %s\n", color, filename, NC, default_color, 
-				linkname);
-		free(linkname);
-	}
-	else { /* Broken link */
-		char link[PATH_MAX] = "";
-		ssize_t ret = readlink(filename, link, PATH_MAX);		
-		if (ret) {
-			printf("%s%s%s%s -> %s (broken link)\n", color, filename, NC, 
-				    default_color, link);
-		}
-		else
-			printf("%s%s%s%s -> ???\n", color, filename, NC, default_color);
-	}
-	
-	/* Stat information */
-
-	/* Last access time */
-	time = file_attrib.stx_atime.tv_sec;
-	tm = localtime(&time);
-	char access_time[128] = "";
-	/* Store formatted (and localized) date-time string into access_time */
-	strftime(access_time, sizeof(access_time), "%b %d %H:%M:%S %Y", tm);
-
-	/* Creation time */
-	time = file_attrib.stx_btime.tv_sec;
-	tm = localtime(&time);
-	char creation_time[128] = "";
-	strftime(creation_time, sizeof(creation_time), "%b %d %H:%M:%S %Y", tm);
-
-	/* Last properties change time */
-	time = file_attrib.stx_ctime.tv_sec;
-	tm = localtime(&time);
-	char change_time[128] = "";
-	strftime(change_time, sizeof(change_time), "%b %d %H:%M:%S %Y", tm);
-
-	switch (file_type) {
-		case 'd': printf(_("Directory")); break;
-		case 's': printf(_("Socket")); break;
-		case 'l': printf(_("Symbolic link")); break;
-		case 'b': printf(_("Block special file")); break;
-		case 'c': printf(_("Character special file")); break;
-		case 'p': printf(_("Fifo")); break;
-		case '-': printf(_("Regular file")); break;
-	}
-
-	printf(_("\tBlocks: %lld"), file_attrib.stx_blocks);
-	printf(_("\tIO Block: %d"), file_attrib.stx_blksize);
-	printf(_("\tInode: %lld\n"), file_attrib.stx_ino);
-	printf(_("Device: %d:%d"), file_attrib.stx_dev_major, 
-		      file_attrib.stx_dev_minor);
-	printf(_("\tUid: %d (%s)"), file_attrib.stx_uid, (!owner) ? _("unknown") 
-		   : owner->pw_name);
-	printf(_("\tGid: %d (%s)\n"), file_attrib.stx_gid, (!group) ? _("unknown") 
-		   : group->gr_name);
-
-	/* Print file timestamps */
-	printf(_("Access: \t%s\n"), access_time);
-	printf(_("Modify: \t%s\n"), mod_time);
-	printf(_("Change: \t%s\n"), change_time);
-	printf(_("Birth: \t\t%s\n"), creation_time);
-
-	/* Print file size */
-	if ((file_attrib.stx_mode & S_IFMT) == S_IFDIR) {
-		fputs(_("Total size: \t"), stdout);
-		dir_size(filename);
-	}
-	else
-		printf(_("Size: \t\t%s\n"), (size_type) ? size_type : "??");
-
-	if (size_type) 
-		free(size_type);
-		
-	return EXIT_SUCCESS;
-
-	#endif /* _STATX */
 }
 
 int
@@ -12897,8 +12836,8 @@ log_function(char **comm)
 		FILE *log_fp;
 		log_fp = fopen(LOG_FILE, "r");
 		if (!log_fp) {
-			asprintf(&msg, "%s: log: '%s': %s\n", PROGRAM_NAME, 
-					 LOG_FILE, strerror(errno));
+			msg = xasprintf("%s: log: '%s': %s\n", PROGRAM_NAME, 
+							LOG_FILE, strerror(errno));
 			if (msg) {
 				log_msg(msg, NOPRINT_PROMPT);
 				free(msg);
@@ -12965,8 +12904,8 @@ log_function(char **comm)
 	else 
 		log_fp = fopen(LOG_FILE, "w+");
 	if (!log_fp) {
-		asprintf(&msg, "%s: log: '%s': %s\n", PROGRAM_NAME, LOG_FILE,
-				 strerror(errno));
+		msg = xasprintf("%s: log: '%s': %s\n", PROGRAM_NAME, LOG_FILE,
+						strerror(errno));
 		if (msg) {
 			error_msg = 1;
 			log_msg(msg, PRINT_PROMPT);
@@ -12994,8 +12933,8 @@ check_log_file_size(char *log_file)
 	if (stat(log_file, &file_attrib) == -1) {
 		log_fp = fopen(log_file, "w");
 		if (!log_fp) {
-			asprintf(&msg, "%s: '%s': %s\n", PROGRAM_NAME, log_file, 
-					strerror(errno));
+			msg = xasprintf("%s: '%s': %s\n", PROGRAM_NAME, log_file, 
+							strerror(errno));
 			if (msg) {
 				log_msg(msg, NOPRINT_PROMPT);
 				free(msg);
@@ -13012,28 +12951,25 @@ check_log_file_size(char *log_file)
 	
 	/* Truncate the file, if needed */
 	log_fp = fopen (log_file, "r");
-	if (log_fp != NULL) {
+	if (log_fp) {
 		int logs_num = 0, c;
 
 		/* Count newline chars to get amount of lines in file */
-		while ((c = fgetc(log_fp)) != EOF)
+		while ((c = fgetc(log_fp)) != EOF) {
 			if (c == '\n')
 				logs_num++;
-		fclose(log_fp);
+		}
 
 		if (logs_num > max_log) {
-			log_fp = fopen(log_file, "r");
-			if (log_fp == NULL) {
-				perror("log");
-				return;
-			}
+			/* Go back to the beginning of the log file */
+			fseek(log_fp, 0, SEEK_SET);
+			/* Create a temp file to store only newest logs */
 			FILE *log_fp_tmp = fopen(LOG_FILE_TMP, "w+");
-			if (log_fp_tmp == NULL) {
+			if (!log_fp_tmp) {
 				perror("log");
 				fclose(log_fp);
 				return;
 			}
-
 			int i = 1;
 			size_t line_size = 0;
 			char *line_buff = (char *)NULL;
@@ -13043,7 +12979,7 @@ check_log_file_size(char *log_file)
 				if (i++ >= logs_num - (max_log - 1))
 					fprintf(log_fp_tmp, "%s", line_buff);
 			free(line_buff);
-			line_buff = NULL;
+			line_buff = (char *)NULL;
 			fclose(log_fp_tmp);
 			fclose(log_fp);
 			remove(log_file);
@@ -13051,8 +12987,9 @@ check_log_file_size(char *log_file)
 		}
 	}
 	else {
-		asprintf(&msg, "%s: log: %s: %s\n", PROGRAM_NAME, log_file, 
-				strerror(errno));
+		fclose(log_fp);
+		msg = xasprintf("%s: log: %s: %s\n", PROGRAM_NAME, log_file, 
+						strerror(errno));
 		if (msg) {
 			log_msg(msg, NOPRINT_PROMPT);
 			free(msg);
@@ -13107,8 +13044,8 @@ get_history(void)
 		return EXIT_SUCCESS;
 	}
 	else {
-		asprintf(&msg, "%s: history: '%s': %s\n", PROGRAM_NAME, 
-				 HIST_FILE,  strerror(errno));
+		msg = xasprintf("%s: history: '%s': %s\n", PROGRAM_NAME, 
+						HIST_FILE,  strerror(errno));
 		if (msg) {
 			error_msg = 1;
 			log_msg(msg, PRINT_PROMPT);
@@ -13141,8 +13078,8 @@ history_function(char **comm)
 	if (args_n == 1 && strcmp(comm[1], "clear") == 0) {
 		FILE *hist_fp = fopen(HIST_FILE, "w+");
 		if (!hist_fp) {
-			asprintf(&msg, "%s: history: %s: %s\n", PROGRAM_NAME, 
-					 HIST_FILE, strerror(errno));
+			msg = xasprintf("%s: history: %s: %s\n", PROGRAM_NAME, 
+							HIST_FILE, strerror(errno));
 			if (msg) {
 				log_msg(msg, NOPRINT_PROMPT);
 				free(msg);
@@ -13324,12 +13261,12 @@ edit_function (char **comm)
 		set_signals_to_default();
 		/* If application has been passed */
 		if (args_n > 0)
-			execle(cmd_path, comm[1], CONFIG_FILE, NULL, __environ);		
+			execl(cmd_path, comm[1], CONFIG_FILE, NULL);		
 		/* No application passed and xdg-open exists */
 		else
-			execle(xdg_open_path, "xdg-open", CONFIG_FILE, NULL, __environ);
+			execl(xdg_open_path, "xdg-open", CONFIG_FILE, NULL);
 		/* The program failed to start */
-		fprintf(stderr, "%s: execle: %s: %s\n", PROGRAM_NAME, (cmd_path)
+		fprintf(stderr, "%s: execl: %s: %s\n", PROGRAM_NAME, (cmd_path)
 				? cmd_path : xdg_open_path, strerror(errno));
 		exit(EXIT_FAILURE);
 	}
@@ -13738,7 +13675,7 @@ void
 bonus_function (void)
 {
 	static short state = 0;
-	if (state > 12)
+	if (state > 13)
 		state = 0;
 	switch (state) {
 	case 0:
@@ -13799,6 +13736,10 @@ bonus_function (void)
 
 	case 12:
 		printf("\"This is a lie\" (The liar paradox)\n");
+		break;
+	case 13:
+		printf("There are two ways to write error-free programs; only the "
+			   "third one works (Alan J. Perlis)\n");
 		break;
 	}
 	state++;

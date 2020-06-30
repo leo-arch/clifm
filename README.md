@@ -1,7 +1,9 @@
 # CLiFM
 > The KISS file manager: text-based, ultra-lightweight, lightning fast, and written in C
 
-This new version (0.17.2) brings a lot (really, a lot) of bug fixes and some new features like: a trash system (freedesktop compliant), keyboard shorcuts (very handy), a little messages system to keep track of important messages and errors, "sel" keyword and ranges auto-expansion, ELN expansion with the TAB key, including a Bash-like quoting system (absolutely great), colors customization, and commands sequential and conditional execution (very useful). Consult the manpage for more information). I also added support for translations (using `gettext`). This is besides the first version to work on ARM machines.
+Latest version: 0.18.0. This is the first POSIX-2008 compliant and FreeBSD compatible version.
+Version 0.17.2 is the first one to work on ARM machines.
+Since version 0.16.0 a lot (really, a lot) of bug fixes and some new features were added: a trash system (freedesktop compliant), keyboard shorcuts (very handy), a little messages system to keep track of important messages and errors, "sel" keyword and ranges auto-expansion, ELN expansion with the TAB key, including a Bash-like quoting system (absolutely great), colors customization, and commands sequential and conditional execution (very useful). Consult the manpage for more information). I also added support for translations (using `gettext`).
 
 ![alt_tag](https://github.com/leo-arch/clifm/blob/master/images/clifm.png)
 
@@ -78,9 +80,13 @@ If using another distro:
        $ git clone https://github.com/leo-arch/clifm.git
        $ cd clifm
 
-2. Use `gcc` to compile the program. Don't forget to link the readline and cap libraries: 
+2. Use `gcc` (`tcc` and `clang` also work) to compile the program. 
 
+On Linux:
        $ gcc -O3 -march=native -fstack-protector-strong -s -lcap -lreadline -o clifm clifm.c
+
+On FreeBSD:
+       $ gcc -O3 -march=native -fstack-protector-strong -s -lintl -lreadline -o clifm clifm.c
 
 3. Run the binary file produced by `gcc`:
 
