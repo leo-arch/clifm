@@ -308,6 +308,11 @@ of course you can grep it to find, say, linux' macros, as here. */
 							###############
 */
 /*
+ **	Take a look at the FreeDesktop specification for MIME apps:
+	https://specifications.freedesktop.org/mime-apps-spec/mime-apps-spec-1.0.1.html
+ ** Add regex to the mime file (or at least *.ext).
+ ** If the MIME file doesn't exist, do not create an empty one, but try to
+	import the values from the 'mimeapps.list' file.
  ** Bash implementations of xmalloc and xrealloc return a char pointer(char *)
 	and each call to these functions is casted to the corresponding variable 
 	type. Ex: char *var; var=(char *)xcalloc(1, sizeof(char)). Though a void
@@ -1437,7 +1442,7 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.18.1"
+#define VERSION "0.18.2"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define DATE "July 1, 2020"
@@ -2313,9 +2318,10 @@ char *my_rl_path_completion(const char *text, int state);
 int get_link_ref(const char *link);
 
 int mime_open(char **args);
+int mime_import(void);
 int mime_edit(char **args);
 char *get_mime(char *file);
-char *get_app(char *mime);
+char *get_app(char *mime, char *ext);
 
 /* Some notes on memory:
 * If a variable is declared OUTSIDE of a function, it is typically considered 
@@ -3011,7 +3017,7 @@ int mime_open(char **args)
 
 	else if (strcmp(args[1], "info") == 0) {
 		if (!args[2]) {
-			fprintf(stderr, _("Usage: mm, mime info FILENAME\n"));
+			fputs(_("Usage: mm, mime info FILENAME\n"), stderr);
 			return EXIT_FAILURE;
 		}
 		if (strcntchr(args[2], '\\')) {
@@ -3044,48 +3050,170 @@ int mime_open(char **args)
 	/* Get file's mime-type */
 	char *mime = get_mime(path);
 	if (!mime) {
-		fprintf(stderr, _("Error getting mime-type\n"));
+		fprintf(stderr, _("%s: Error getting mime-type\n"), PROGRAM_NAME);
 		free(path);
+		path = (char *)NULL;
 		return EXIT_FAILURE;
 	}
 	
 	if (info)
 		printf("MIME type: %s\n", mime);
 
-	/* Get default application for mime */
-	char *app = get_app(mime);
+	/* Get file extension, if any */
+	char *ext = (char *)NULL;
+	char *filename = strrchr(path, '/');
+	if (filename) {
+		char *ext_tmp = strrchr(filename, '.');
+		if (ext_tmp) {
+			ext = (char *)xcalloc(strlen(ext_tmp) + 1, sizeof(char));
+			strcpy(ext, ext_tmp + 1);
+			ext_tmp = (char *)NULL;
+		}
+		filename = (char *)NULL;
+	}
+
+	if (info) {
+		if (ext)
+			printf("Extension: %s\n", ext);
+		else
+			puts("Extension: None");
+	}
+
+	/* Get default application for mime or extension */
+	char *app = get_app(mime, ext);
 	if (!app) {
 		if (info)
-			fprintf(stderr, _("Associated application: None\n"));			
+			fputs(_("Associated application: None\n"), stderr);			
 		else
-			fprintf(stderr, _("No associated application found\n"));
+			fprintf(stderr, _("%s: No associated application found\n"), 
+							PROGRAM_NAME);
 		free(path);
+		path = (char *)NULL;
 		free(mime);
+		mime = (char *)NULL;
+		if (ext) {
+			free(ext);
+			ext = (char *)NULL;
+		}
 		return EXIT_FAILURE;
 	}
 	
 	if (info) {
 		printf(_("Associated application: %s\n"), app);
 		free(path);
+		path = (char *)NULL;
 		free(mime);
+		mime = (char *)NULL;
 		free(app);
+		app = (char *)NULL;
+		if (ext) {
+			free(ext);
+			ext = (char *)NULL;
+		}
 		return EXIT_SUCCESS;
 	}
 	
-	/* If not info, open the file with the associated application */
 	free(mime);
+	mime = (char *)NULL;
+	if (ext) {
+		free(ext);
+		ext = (char *)NULL;
+	}
 
+	/* If not info, open the file with the associated application */
+
+	/* Get number of arguments to check for final ampersand */
 	int args_num = 0;
 	for (args_num = 0; args[args_num]; args_num++);
+	
+	/* Construct the command */
 	char *cmd = (char *)xcalloc((strlen(app) + strlen(path) + 6), sizeof(char));
 	sprintf(cmd, "%s '%s' %s", app, path, strcmp(args[args_num - 1], "&") == 0
 			? "&" : "");
-	int ret = launch_execle(cmd);
-	free(cmd);
-	free(path);
-	free(app);
 	
+	/* Run the command */
+	int ret = launch_execle(cmd);
+
+	free(cmd);
+	cmd = (char *)NULL;
+	free(path);
+	path = (char *)NULL;	
+	free(app);
+	app = (char *)NULL;	
+
 	return ret;
+}
+
+int
+mime_import(void)
+/* Import MIME definitions from the system and store them in the MIME file.
+ * This function will only be executed if the MIME file is not found. Returns
+ * zero if some association is found in the system mimeapps.list files, or one 
+ * in case of error or no association found */
+{
+	if (!user_home)
+		return EXIT_FAILURE;
+
+	/* Create a list of possible paths for the 'mimeapps.list' file */
+	size_t home_len = strlen(user_home);
+	char *config_path = (char *)NULL, *local_path = (char *)NULL;
+	config_path = (char *)xcalloc(home_len + 23, sizeof(char));
+	local_path = (char *)xcalloc(home_len + 41, sizeof(char));
+	sprintf(config_path, "%s/.config/mimeapps.list", user_home);
+	sprintf(local_path, "%s/.local/share/applications/mimeapps.list", 
+			user_home);
+	
+	char *mime_paths[] = { config_path, local_path,
+						   "/usr/local/share/applications/mimeapps.list",
+						   "/usr/share/applications/mimeapps.list",
+						   "/etc/xdg/mimeapps.list",
+						   NULL };
+	
+	/* Open the internal MIME file */
+	FILE *mime_fp = fopen(MIME_FILE, "a+");
+	if (!mime_fp)
+		return EXIT_FAILURE;
+
+	/* Check each mimeapps.list file and store its associations in the
+	 * internal MIME file */
+	size_t i, mime_lines = 0;
+	for (i = 0; mime_paths[i]; i++) {
+		if (access(mime_paths[i], F_OK|R_OK) != 0)
+			continue;
+		
+		FILE *sys_mime_fp = fopen(mime_paths[i], "r");
+		if (!sys_mime_fp)
+			continue;
+		
+		size_t line_size = 0;
+		char *line = (char *)NULL;
+		ssize_t line_len = 0;
+		while ((line_len = getline(&line, &line_size, sys_mime_fp)) > 0) {
+			/* Do not store comments, headers, and empty lines */
+			if (*line == '#' || *line == '[' || *line == '\n')
+				continue;
+			/* Copy only up to the first dot */
+			int index = strcntchr(line, '.');
+			if (index != -1)
+				line[index] = 0x00;
+			fprintf(mime_fp, "%s\n", line);
+			mime_lines++;
+		}
+		free(line);
+		
+		fclose(sys_mime_fp);
+	}
+	
+	fclose(mime_fp);
+	
+	free(config_path);
+	free(local_path);
+	
+	/* If something were written */
+	if (mime_lines > 0)
+		return EXIT_SUCCESS;
+	
+	return EXIT_FAILURE;
 }
 
 int
@@ -3094,7 +3222,7 @@ mime_edit(char **args)
 	if (!args[2]) {
 		char *cmd[] = { "mime", MIME_FILE, NULL };
 		if (mime_open(cmd) != 0) {
-			fprintf(stderr, _("Try 'op edit APPLICATION'\n"));
+			fprintf(stderr, _("Try 'mm, mime edit APPLICATION'\n"));
 			return EXIT_FAILURE;
 		}
 		return EXIT_SUCCESS;
@@ -3106,25 +3234,43 @@ mime_edit(char **args)
 }
 
 char *
-get_app(char *mime)
+get_app(char *mime, char *ext)
+/* Get application associated to a given MIME filetype or file extension.
+ * Returns the first matching line in the MIME file or NULL if none is found */
 {
 	if (!mime)
 		return (char *)NULL;
 	
 	FILE *defs_fp = fopen(MIME_FILE, "r");
 	if (!defs_fp) {
-		fprintf(stderr, _("'%s': Error opening file\n"), MIME_FILE);
+		fprintf(stderr, _("%s: '%s': Error opening file\n"), PROGRAM_NAME,
+				MIME_FILE);
 		return (char *)NULL;
 	}
-	
+
+	size_t ext_len = 0;
+	if (ext)
+		ext_len = strlen(ext);
+	int found = 0;
 	size_t line_size = 0, mime_len = strlen(mime);
 	char *line = (char *)NULL, *app = (char *)NULL;
 	ssize_t line_len = 0;
 
 	while ((line_len = getline(&line, &line_size, defs_fp)) > 0) {
-		if (*line == '#')
+		if (*line == '#' || *line == '[' || *line == '\n')
 			continue;
-		if (strncmp(mime, line, mime_len) == 0) {
+		
+		if (ext) {
+			if (*line == '*') {
+				if (strncmp(line + 2, ext, ext_len) == 0)
+					found = 1;
+			}
+		}
+		
+		if (strncmp(mime, line, mime_len) == 0) 
+			found = 1;
+
+		if (found) {
 			char *tmp = strchr(line, '=');
 			if (tmp) {
 				size_t tmp_len = strlen(tmp);
@@ -3133,11 +3279,12 @@ get_app(char *mime)
 				app = (char *)xcalloc(tmp_len, sizeof(char));
 				strcpy(app, tmp + 1);
 			}
-			 break;
+			break;
 		}
 	}
 	
 	free(line);
+	line = (char *)NULL;
 	fclose(defs_fp);
 	
 	if (app)
@@ -7440,22 +7587,28 @@ init_config(void)
 		/* #### CHECK THE MIME CONFIG FILE #### */
 		/* Open the mime file or create it, if it doesn't exist */
 		if (config_ok && stat(MIME_FILE, &file_attrib) == -1) {
-			FILE *mime_fp = fopen(MIME_FILE, "w");
-			if (!mime_fp) {
-				msg = xasprintf("%s: fopen: '%s': %s\n", PROGRAM_NAME, 
-								MIME_FILE, strerror(errno));
-				if (msg) {
-					error_msg = 1;
-					log_msg(msg, PRINT_PROMPT);
-					free(msg);
+			/* Try importing MIME associations from the system, and in case 
+			 * nothing can be imported, create an empty MIME associations
+			 * file */
+			int ret = mime_import();
+			if (ret != 0) {
+				FILE *mime_fp = fopen(MIME_FILE, "w");
+				if (!mime_fp) {
+					msg = xasprintf("%s: fopen: '%s': %s\n", PROGRAM_NAME, 
+									MIME_FILE, strerror(errno));
+					if (msg) {
+						error_msg = 1;
+						log_msg(msg, PRINT_PROMPT);
+						free(msg);
+					}
+					else
+						fprintf(stderr, "%s: fopen: '%s': %s\n", PROGRAM_NAME, 
+								 MIME_FILE, strerror(errno));
 				}
-				else
-					fprintf(stderr, "%s: fopen: '%s': %s\n", PROGRAM_NAME, 
-							 MIME_FILE, strerror(errno));
-			}
-			else {
-				fprintf(mime_fp, "#text/plain=nano\n");
-				fclose(mime_fp);
+				else {
+					fprintf(mime_fp, "#text/plain=nano\n");
+					fclose(mime_fp);
+				}
 			}
 		}
 
@@ -13647,12 +13800,14 @@ to directories, 'open' works just like the 'cd' command.\n"), white, NC,
 		   default_color);
 	printf(_("\n%smm, mime%s%s [info ELN/FILENAME] [edit]: This is %s's \
 built-in resource opener. The 'info' option prints the MIME information \
-about ELN/FILENAME, both its MIME type and the application associated to this \
-type. The 'edit' option allows you to edit and customize the MIME list file. \
-So, if a file has no default associated application, first get its \
-MIME info and then add a value for it to the MIME list using the 'edit' \
-option. Each value in the MIME list file has this format: \
-mime_type=application. Example: plain/text=nano \n"), white, NC, default_color, PROGRAM_NAME);
+about ELN/FILENAME, its MIME type, its extension, and the application \
+associated to FILENAME. The 'edit' option allows you to edit and customize the \
+MIME list file. So, if a file has no default associated application, first get \
+its MIME info (you can use its file extension as well) and then add a value for \
+it to the MIME list using the 'edit' option. Each value in the MIME list file \
+has this format: 'mime_type=application' or '*.ext=application'. Example: \
+'plain/text=nano' or '*.c'. The first matching association will be used.\n"), 
+		   white, NC, default_color, PROGRAM_NAME);
 	printf(_("\n%scd%s%s [ELN/DIR]: When used with no argument, it changes the \
 current directory to the default directory (HOME). Otherwise, 'cd' changes \
 the current directory to the one specified by the first argument. You can use \

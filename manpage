@@ -1,6 +1,6 @@
 ./" Manpage for CliFM
 ./"COMPLETE COLOR CODES!!!
-.TH man 1 "July 1, 2020" "1.0" "CliFM man page"
+.TH man 1 "June 8, 2020" "1.0" "CliFM man page"
 .SH NAME
 CLIFM - A completely text-based file manager inspired in Arch Linux' KISS principle 
 .SH SYNOPSIS
@@ -127,7 +127,7 @@ with no argument, open the bookmarks menu. Here you cd into the desired bookmark
 open either a directory or a file. For example: 'o 12' or 'o filename'. By default, the 'open' function will open files with the default application associated to them (via the mime built-in function). However, if you want to open a file with a different application, just add the application name as second argument, e.g. 'o 12 leafpad'. If you want to run the program in the background, simply add the ampersand character: 'o 12 &'. When it comes to directories, 'open' works just like the 'cd' command.
 .TP
 .B mm, mime [info ELN/FILENAME] [edit]
-This is CliFM's resource opener. The 'info' option prints the MIME information about ELN/FILENAME, both its MIME type and the application associated to this type. The 'edit' option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info and then add a value for it to the MIME list file using the 'edit'option. Each value in the MIME list file has this format: mime_type=application. Example: plain/text=nano
+This is CliFM's resource opener. The 'info' option prints the MIME information about ELN/FILENAME: its MIME type, its file extension, if any, and the application associated to this MIME type or file extension. The 'edit' option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension, and then add a value for it to the MIME list file using the 'edit' option. Each value in the MIME list file has this format: 'mime_type=application' or '*.c=appplication'. Example: 'plain/text=nano' or '*.c=geany'. The first matching association will be used.
 .TP
 .B cd [ELN/DIR]
 when used with no argument, it changes the current directory to the default directory (HOME). Otherwise, 'cd' changes the current directory to the one specified by the first argument. You can use either ELN's or a string to indicate the directory you want. Ex: 'cd 12' or 'cd ~/media'. Unlike the shell 'cd' command, CliFM's built-in 'cd' function doesn not only changes the current directory, but also lists its content (provided the option "cd lists automatically" is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of 'cd' is much like this shell command: cd DIR && ls -A --color=auto --group-directories-first
