@@ -1,7 +1,7 @@
 # Maintainer: archcrack <johndoe.arch@outlook.com>
 
 pkgname=clifm
-pkgver=0.18.0
+pkgver=0.18.1
 pkgrel=1
 pkgdesc="The KISS file manager: text-based, ultra-lightweight, lightning fast, and written in C"
 arch=(any)
@@ -9,7 +9,7 @@ url="https://github.com/leo-arch/clifm"
 license=(GPL2)
 depends=('glibc' 'ncurses' 'libcap' 'readline' 'coreutils')
 makedepends=('git')
-optdepends=('xdg-utils: Automatically open files via their default associated program')
+optdepends=('file: Get files MIME type and open them via their default associated program')
 source=("git+${url}.git")
 sha256sums=('SKIP')
 

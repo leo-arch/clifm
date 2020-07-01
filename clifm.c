@@ -90,9 +90,9 @@
 * # pmap pid_running_program
 * Once you get the library, get its full path with 'find', and find which 
 * package owns that file with 'pacman -Qo full_path'
-* OPTIONAL DEPENDENCIES: 'du' (to check dir sizes), 'xdg-utils' and 'which' 
-* (without 'which' 'xdg-open' will fail to get the default application for 
-* files)
+* OPTIONAL DEPENDENCIES: 'du' (to check dir sizes), and 'file', to check files
+* MIME types and open the file with the associated appplication (via my mime
+* function).
 * */
 
 /* On code optimization see:
@@ -381,13 +381,16 @@ of course you can grep it to find, say, linux' macros, as here. */
     operation.
  **	Add support for wildcards and nested braces to the BRACE EXPANSION function, 
     like in Bash. 
- ** Add the possibility to open files in the background when no application has 
-    been passed (ex: o xx &). DONE, but now the pid shown is that of xdg-open, 
-    so that when the user tries to kill that pid only xdg-open will be killed. 
-    Find a way to kill xdg-open AND its child, OR make it show not xdg-open's 
-    pid, but the program's instead. Drawback: xdg-open would remain alive.
 
 ###################################
+ * (DONE) Replace the xdg_open_check to check now for the 'file' command and 
+	set the corresponding flag. Recall to check this flag every time the mime 
+	function is called. 
+ * (DONE) Add the possibility to open files in the background when no 
+	application has been passed (ex: o xx &). DONE, but now the pid shown is 
+	that of xdg-open, so that when the user tries to kill that pid only 
+	xdg-open will be killed. SOLVED: Not using xdg-open anymore, but my 
+	own resource opener: mime.
  * (DONE) Check compatibility with BSD Unices. Working fine in FreeBSD.
  * (DONE) Test the program in an ARM machine, like the Raspberry Pi. Done and
 	working, at least by now.
@@ -1180,7 +1183,8 @@ of course you can grep it to find, say, linux' macros, as here. */
  * (SOLVED) xdg-open is not installed by default in every Linux system. Fix it. 
 	Perhaps, xdg-open should be installed as a requirement of CliFM. SOLUTION: 
 	Added a check for xdg-open at startup, so that it won't be called if it's 
-	not installed.
+	not installed. xdg-open is not used anymore, but the same thing goes now
+	for the 'file' command, used by my mime function.
  * (SOLVED) When it comes to optical drives (CD-ROM) files color is always 
 	default, i.e., its file type isn't recognized. It doesn't happen with USB 
 	drives though. The problem seems to be scandir's st_type. the stat function 
@@ -1396,7 +1400,7 @@ in FreeBSD, but is deprecated */
 #endif
 
 #ifndef EXIT_FAILURE
-	#define EXIT_FAILURE 1
+#  define EXIT_FAILURE 1
 #endif
 
 #ifndef PATH_MAX
@@ -1417,9 +1421,15 @@ in FreeBSD, but is deprecated */
 #  if (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 28))
 #    if LINUX_VERSION_CODE >= KERNEL_VERSION(4,11,0)
 #      define _STATX
-#    endif /* LINUX_VERSION */
+#    endif /* LINUX_VERSION (4.11) */
 #  endif /* __GLIBC__ */
 #endif /* _GNU_SOURCE */
+
+#if __linux__
+#  if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24)
+#    define _LINUX_CAP
+#  endif /* LINUX_VERSION (2.6.24)*/
+#endif /* __linux__ */
 
 #define PROGRAM_NAME "CliFM"
 #define PNL "clifm" /* Program name lowercase */
@@ -1427,10 +1437,10 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.18.0"
+#define VERSION "0.18.1"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "June 30, 2020"
+#define DATE "July 1, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -1451,7 +1461,7 @@ static int flags;
 /* Internal flags */
 #define ROOT_USR		(1 << 10)
 #define EXT_HELP		(1 << 11)
-#define XDG_OPEN_OK		(1 << 12)
+#define FILE_CMD_OK		(1 << 12)
 #define GRAPHICAL		(1 << 13)
 #define IS_USRVAR_DEF	(1 << 14) /* 18 dec, 0x12 hex, 00010010 binary */
 
@@ -2194,7 +2204,7 @@ void free_stuff(void);
 void set_signals_to_ignore(void);
 void set_signals_to_default(void);
 void init_shell(void);
-void xdg_open_check(void);
+void file_cmd_check(void);
 void splash(void);
 char **my_rl_completion(const char *text, int start, int end);
 char *my_rl_quote(char *text, int m_t, char *qp);
@@ -2301,6 +2311,11 @@ int add_bookmark(char *file);
 char *savestring(const char *str, size_t size);
 char *my_rl_path_completion(const char *text, int state);
 int get_link_ref(const char *link);
+
+int mime_open(char **args);
+int mime_edit(char **args);
+char *get_mime(char *file);
+char *get_app(char *mime);
 
 /* Some notes on memory:
 * If a variable is declared OUTSIDE of a function, it is typically considered 
@@ -2443,9 +2458,11 @@ POINTERS: Ex: char *p; pointers, unlike common variables which stores data,
 * string.
 */
 
-/* Uncomment this line for TCC compilation: without this variable, TCC 
- * complains that __dso_handle is an undefined symbol and won't compile */
-/* void* __dso_handle; */
+/* Without this variable, TCC complains that __dso_handle is an undefined 
+ * symbol and won't compile */
+#if __TINYC__
+void* __dso_handle;
+#endif
 
 /* Struct to store user defined variables */
 struct usrvar_t {
@@ -2490,7 +2507,7 @@ char *user = (char *)NULL, *path = (char *)NULL, **old_pwd = (char **)NULL,
 	**sel_elements = (char **)NULL, *qc = (char *)NULL,	
 	*sel_file_user = (char *)NULL, **paths = (char **)NULL, 
 	**bin_commands = (char **)NULL, **history = (char **)NULL, 
-	*xdg_open_path = (char *)NULL, **braces = (char **)NULL,
+	*file_cmd_path = (char *)NULL, **braces = (char **)NULL,
 	*alt_profile = (char *)NULL, **prompt_cmds = (char **)NULL, 
 	**aliases = (char **)NULL, **argv_bk = (char **)NULL, 
 	*user_home = (char *)NULL, **messages = (char **)NULL, 
@@ -2502,7 +2519,7 @@ char *user = (char *)NULL, *path = (char *)NULL, **old_pwd = (char **)NULL,
 	*TRASH_DIR = (char *)NULL, *TRASH_FILES_DIR = (char *)NULL, 
 	*TRASH_INFO_DIR = (char *)NULL, *sys_shell = (char *)NULL, 
 	**dirlist = (char **)NULL, **bookmark_names = (char **)NULL,
-	*ls_colors_bk = (char *)NULL,
+	*ls_colors_bk = (char *)NULL, *MIME_FILE = (char *)NULL,
 	/* This is not a comprehensive list of commands. It only lists commands
 	 * long version for TAB completion */
 	*INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
@@ -2511,7 +2528,7 @@ char *user = (char *)NULL, *path = (char *)NULL, **old_pwd = (char **)NULL,
 		"colors", "version", "license", "splash", "folders first", 
 		"exit", "quit", "pager", "trash", "undel", "messages", 
 		"mountpoints", "bookmarks", "log", "untrash", "unicode", 
-		"profile", "shell", NULL };
+		"profile", "shell", "mime", NULL };
 
 #define MAX_COLOR 46
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\n (24bit, RGB true color 
@@ -2827,8 +2844,8 @@ main(int argc, char **argv)
 	/* Store history into an array to be able to manipulate it */
 	get_history();
 
-	/* Check if xdg-open is available */
-	xdg_open_check();
+	/* Check if the 'file' command is available */
+	file_cmd_check();
 
 	/* ##### READLINE ##### */
 
@@ -2968,6 +2985,223 @@ main(int argc, char **argv)
 
 /* ###FUNCTIONS DEFINITIONS### */
 
+int mime_open(char **args)
+{
+	/* Check arguments */
+	if (!args[1]) {
+		puts(_("Usage: mm, mime [info ELN/FILENAME] [edit]"));
+		return EXIT_SUCCESS;
+	}
+
+	/* Check the existence of the 'file' command. */
+
+	char *file_path_tmp = (char *)NULL;
+	if ((file_path_tmp = get_cmd_path("file")) == NULL) {
+		fprintf(stderr, _("%s: 'file' command not found\n"), PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+	free(file_path_tmp);
+
+	char *path = (char *)NULL, *deq_file = (char *)NULL;
+	int info = 0, file_index = 0;
+
+	if (strcmp(args[1], "edit") == 0) {	
+		return mime_edit(args);
+	}
+
+	else if (strcmp(args[1], "info") == 0) {
+		if (!args[2]) {
+			fprintf(stderr, _("Usage: mm, mime info FILENAME\n"));
+			return EXIT_FAILURE;
+		}
+		if (strcntchr(args[2], '\\')) {
+			deq_file = dequote_str(args[2], 0);
+			path = realpath(deq_file, NULL);
+			free(deq_file);
+		}
+		else
+			path = realpath(args[2], NULL);
+		info = 1;
+		file_index = 2;
+	}
+
+	else {
+		if (strcntchr(args[1], '\\')) {
+			deq_file = dequote_str(args[1], 0);
+			path = realpath(deq_file, NULL);
+			free(deq_file);
+		}
+		else
+			path = realpath(args[1], NULL);
+		file_index = 1;
+	}
+
+	if (!path) {
+		fprintf(stderr, "'%s': %s\n", args[file_index], strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	/* Get file's mime-type */
+	char *mime = get_mime(path);
+	if (!mime) {
+		fprintf(stderr, _("Error getting mime-type\n"));
+		free(path);
+		return EXIT_FAILURE;
+	}
+	
+	if (info)
+		printf("MIME type: %s\n", mime);
+
+	/* Get default application for mime */
+	char *app = get_app(mime);
+	if (!app) {
+		if (info)
+			fprintf(stderr, _("Associated application: None\n"));			
+		else
+			fprintf(stderr, _("No associated application found\n"));
+		free(path);
+		free(mime);
+		return EXIT_FAILURE;
+	}
+	
+	if (info) {
+		printf(_("Associated application: %s\n"), app);
+		free(path);
+		free(mime);
+		free(app);
+		return EXIT_SUCCESS;
+	}
+	
+	/* If not info, open the file with the associated application */
+	free(mime);
+
+	int args_num = 0;
+	for (args_num = 0; args[args_num]; args_num++);
+	char *cmd = (char *)xcalloc((strlen(app) + strlen(path) + 6), sizeof(char));
+	sprintf(cmd, "%s '%s' %s", app, path, strcmp(args[args_num - 1], "&") == 0
+			? "&" : "");
+	int ret = launch_execle(cmd);
+	free(cmd);
+	free(path);
+	free(app);
+	
+	return ret;
+}
+
+int
+mime_edit(char **args)
+{
+	if (!args[2]) {
+		char *cmd[] = { "mime", MIME_FILE, NULL };
+		if (mime_open(cmd) != 0) {
+			fprintf(stderr, _("Try 'op edit APPLICATION'\n"));
+			return EXIT_FAILURE;
+		}
+		return EXIT_SUCCESS;
+	}
+	else {
+		char *cmd[] = { args[2], MIME_FILE, NULL };
+		return launch_execve(cmd);
+	}
+}
+
+char *
+get_app(char *mime)
+{
+	if (!mime)
+		return (char *)NULL;
+	
+	FILE *defs_fp = fopen(MIME_FILE, "r");
+	if (!defs_fp) {
+		fprintf(stderr, _("'%s': Error opening file\n"), MIME_FILE);
+		return (char *)NULL;
+	}
+	
+	size_t line_size = 0, mime_len = strlen(mime);
+	char *line = (char *)NULL, *app = (char *)NULL;
+	ssize_t line_len = 0;
+
+	while ((line_len = getline(&line, &line_size, defs_fp)) > 0) {
+		if (*line == '#')
+			continue;
+		if (strncmp(mime, line, mime_len) == 0) {
+			char *tmp = strchr(line, '=');
+			if (tmp) {
+				size_t tmp_len = strlen(tmp);
+				if (tmp[tmp_len - 1] == '\n')
+					tmp[tmp_len - 1] = 0x00;
+				app = (char *)xcalloc(tmp_len, sizeof(char));
+				strcpy(app, tmp + 1);
+			}
+			 break;
+		}
+	}
+	
+	free(line);
+	fclose(defs_fp);
+	
+	if (app)
+		return app;
+
+	return (char *)NULL;
+}
+
+char *
+get_mime(char *file)
+{
+	#define MIME_TMP_FILE "/tmp/mime_tmp"
+	
+	if (!file) {
+		fprintf(stderr, _("Error opening temporary file\n"));
+		return (char *)NULL;
+	}
+	
+	FILE *file_fp = fopen(MIME_TMP_FILE, "w");
+	FILE *file_fp_err = fopen("/dev/null", "w");
+	int stdout_bk = dup(STDOUT_FILENO); /* Store original stdout */
+	int stderr_bk = dup(STDERR_FILENO); /* Store original stderr */
+	dup2(fileno(file_fp), STDOUT_FILENO); /* Redirect stdout to the desired file */	
+	dup2(fileno(file_fp_err), STDERR_FILENO); /* Redirect stderr to /dev/null */
+	fclose(file_fp);
+	fclose(file_fp_err);
+
+	char *cmd[] = { "file", "--mime-type", file, NULL };
+	int ret = launch_execve(cmd);
+	
+	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
+	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
+	close(stdout_bk);
+	close(stderr_bk);
+
+	if (ret != 0)
+		return (char *)NULL;
+
+	char *mime_type = (char *)NULL;
+
+	if (access(MIME_TMP_FILE, F_OK) == 0) {
+		file_fp = fopen(MIME_TMP_FILE, "r");
+		if (file_fp) {
+			char line[255] = "";
+			fgets(line, sizeof(line), file_fp);
+			char *tmp = strrchr(line, 0x20);
+			if (tmp) {
+				size_t len = strlen(tmp);
+				if (tmp[len - 1] == '\n')
+					tmp[len - 1] = 0x00;
+				mime_type = (char *)xcalloc(strlen(tmp), sizeof(char));
+				strcpy(mime_type, tmp + 1);
+			}
+			fclose(file_fp);
+		}
+		remove(MIME_TMP_FILE);
+	}
+
+	if (mime_type)
+		return mime_type;
+
+	return (char *)NULL;
+}
+
 char *
 xasprintf(const char *format, ...)
 /* Custom POSIX implementation of GNU asprintf() 
@@ -3104,7 +3338,7 @@ is_internal_c(const char *cmd)
 					     "alias", "shell", "edit", "history", "hf", "hidden",
 					     "path", "cwd", "splash", "ver", "version", "?",
 					     "help", "cmd", "commands", "colors", "license",
-					     "fs", NULL };
+					     "fs", "mm", "mime", NULL };
 	short found = 0;
 	size_t i;
 	for (i = 0; int_cmds[i]; i++) {
@@ -3820,7 +4054,7 @@ is_internal(const char *cmd)
  * to know if it should perform additional expansions */
 {
 	char *int_cmds[] = { "o", "open", "cd", "p", "pr", "prop", "t", "tr", 
-					     "trash", "s", "sel", NULL };
+					     "trash", "s", "sel", "mm", "mime", NULL };
 	short found = 0;
 	size_t i;
 
@@ -4161,25 +4395,17 @@ open_function(char **cmd)
 	char *tmp_cmd = (char *)NULL;
 
 	if (!cmd[2] || strcmp(cmd[2], "&") == 0) {
-
-		/* If not xdg-open, print error message and exit */
-		if (!(flags & XDG_OPEN_OK)) {
-			fprintf(stderr, _("%s: xdg-open not found. Specify an "
+		if (!(flags & FILE_CMD_OK)) {
+			fprintf(stderr, _("%s: 'file' command not found. Specify an "
 							  "application to open the file\nUsage: "
 							  "open ELN/FILENAME [APPLICATION]\n"), 
 							  PROGRAM_NAME);
 			free(deq_path);
 			return EXIT_FAILURE;
 		}
-		
-		/* Else, construct the cmd to be executed by execl() */
-		tmp_cmd = xcalloc(((is_link) ? strlen(file_tmp) : strlen(deq_path))
-						  + 14, sizeof(char));
-		sprintf(tmp_cmd, "xdg-open '%s' %s", (is_link) ? file_tmp 
-				: deq_path, (cmd[2] && strcmp(cmd[2], "&") == 0) ? "&" 
-				: "");
+		else
+			mime_open(cmd);
 	}
-	
 	/* If some application was specified to open the file */
 	else {
 		tmp_cmd = xcalloc(strlen(cmd[2]) + ((is_link) ? strlen(file_tmp) 
@@ -6065,8 +6291,8 @@ free_stuff (void)
 		free(prompt_cmds[i]);
 	free(prompt_cmds);
 
-	if (flags & XDG_OPEN_OK)
-		free(xdg_open_path);
+	if (flags & FILE_CMD_OK)
+		free(file_cmd_path);
 	
 	if (msgs_n) {
 		for (i = 0; i < (size_t)msgs_n; i++)
@@ -6092,6 +6318,7 @@ free_stuff (void)
 	free(PROFILE_FILE);
 	free(MSG_LOG_FILE);
 	free(sel_file_user);
+	free(MIME_FILE);
 
 	/* Restore the foreground color of the running terminal */
 	printf("%s", NC);
@@ -6185,26 +6412,26 @@ Usage example:
 }
 
 void
-xdg_open_check(void)
+file_cmd_check(void)
 {
-	xdg_open_path = get_cmd_path("xdg-open");
-	if (!xdg_open_path) {
-		flags &= ~XDG_OPEN_OK;
-		msg = xasprintf(_("%s: 'xdg-open' not found. Without this program you "
-						 "will always need to specify an application when "
-						 "opening files.\n"), PROGRAM_NAME);
+	file_cmd_path = get_cmd_path("file");
+	if (!file_cmd_path) {
+		flags &= ~FILE_CMD_OK;
+		msg = xasprintf(_("%s: 'file' command not found. Specify an application "
+						  "when opening files. Ex: 'o 12 nano' or just 'nano "
+						  "12'\n"), PROGRAM_NAME);
 		if (msg) {
-		warning_msg = 1;
+		notice_msg = 1;
 		log_msg(msg, PRINT_PROMPT);
 		free(msg);
 		}
 		else
-			printf(_("%s: 'xdg-open' not found. Without this program you "
-					 "will always need to specify an application when "
-					 "opening files.\n"), PROGRAM_NAME);
+			printf(_("%s: 'file' command not found. Specify an application when "
+					 "opening files. Ex: 'o 12 nano' or just 'nano 12'\n"), 
+					 PROGRAM_NAME);
 	}
 	else
-		flags |= XDG_OPEN_OK;
+		flags |= FILE_CMD_OK;
 }
 
 void
@@ -7111,6 +7338,8 @@ init_config(void)
 		sprintf(PROFILE_FILE, "%s/%s_profile", CONFIG_DIR, PNL);
 		MSG_LOG_FILE = xcalloc(config_len + 14, sizeof(char));
 		sprintf(MSG_LOG_FILE, "%s/messages.cfm", CONFIG_DIR);
+		MIME_FILE = xcalloc(config_len + 14, sizeof(char));
+		sprintf(MIME_FILE, "%s/mimelist.cfm", CONFIG_DIR);
 
 		/* #### CHECK THE TRASH DIR #### */
 		/* Create trash dirs, if necessary */
@@ -7206,6 +7435,28 @@ init_config(void)
 								  "history are disabled. Program messages "
 								  "won't be persistent. Using default "
 								  "options\n"), PROGRAM_NAME, CONFIG_DIR);			
+		}
+
+		/* #### CHECK THE MIME CONFIG FILE #### */
+		/* Open the mime file or create it, if it doesn't exist */
+		if (config_ok && stat(MIME_FILE, &file_attrib) == -1) {
+			FILE *mime_fp = fopen(MIME_FILE, "w");
+			if (!mime_fp) {
+				msg = xasprintf("%s: fopen: '%s': %s\n", PROGRAM_NAME, 
+								MIME_FILE, strerror(errno));
+				if (msg) {
+					error_msg = 1;
+					log_msg(msg, PRINT_PROMPT);
+					free(msg);
+				}
+				else
+					fprintf(stderr, "%s: fopen: '%s': %s\n", PROGRAM_NAME, 
+							 MIME_FILE, strerror(errno));
+			}
+			else {
+				fprintf(mime_fp, "#text/plain=nano\n");
+				fclose(mime_fp);
+			}
 		}
 
 		/* #### CHECK THE PROFILE FILE #### */
@@ -7896,7 +8147,7 @@ exec_profile(void)
 char *
 get_cmd_path(const char *cmd)
 /* Get the path of a given command from the PATH environment variable. It 
- * basically does the same as the 'which' Linux command */
+ * basically does the same as the 'which' Unix command */
 {
 	char *cmd_path = (char *)NULL;
 	int i;
@@ -9321,7 +9572,7 @@ colors_list(const char *entry, const int i, const int pad,
 			printf("%s%s%s%s%-*s%s%s", eln_color, index, NC, sg_c, 
 					pad, entry, NC, new_line ? "\n" : "");
 		else {
-			#if __linux__
+			#ifdef _LINUX_CAP
 			cap = cap_get_file(entry);
 			if (cap) {
 				printf("%s%s%s%s%-*s%s%s", eln_color, index, NC, ca_c, 
@@ -9803,7 +10054,7 @@ $ dircolors --print-database */
 			else if (file_attrib.st_mode & S_ISGID) /* set gid file */
 				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, sg_c, 
 					dirlist[i], NC, (last_column) ? "\n" : "");
-			#if __linux__
+			#ifdef _LINUX_CAP
 			else if ((cap = cap_get_file (dirlist[i]))) {
 				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, ca_c, 
 						dirlist[i], NC, (last_column) ? "\n" : "");				
@@ -10227,6 +10478,10 @@ exec_cmd(char **comm)
 	
 
 	/*     ############### MINOR FUNCTIONS ##################     */
+
+	else if (strcmp(comm[0], "mm") == 0 || strcmp(comm[0], "mime") == 0) {
+		mime_open(comm);
+	}
 
 	else if (strcmp(comm[0], "ls") == 0 && !cd_lists_on_the_fly) {
 		while (files--)
@@ -12182,21 +12437,24 @@ open_bookmark(char **cmd)
 
 	/* Case "edit" */
 	if (strcmp(arg[0], "e") == 0 || strcmp(arg[0], "edit") == 0) {
-		if (!arg[1]) {
-			if (!(flags & XDG_OPEN_OK)) {
-				fprintf(stderr, _("Bookmarks: xdg-open not found. Try "
+		if (!arg[1]) { /* If no application specified */
+			if (!(flags & FILE_CMD_OK)) {
+				fprintf(stderr, _("Bookmarks: 'file' command not found. Try "
 								  "'e APPLICATION'\n"));
 				error_code = 1;
 			}
 			else {
-				char *tmp_cmd[] = { "xdg-open", BM_FILE, NULL };
-				int ret = -1;
-				if ((ret = launch_execve(tmp_cmd)) != 0)
-					error_code = 1;
+				char *cmd[] = { "mime", BM_FILE, NULL };
+				int ret = mime_open(cmd);
+				if (ret != 0) {
+					fprintf(stderr, _("Bookmarks: Try 'e APPLICATION'\n"));
+					error_code = 1;				
+				}
 				else
 					reload_bm = 1;
 			}
 		}
+		/* If application was specified */
 		else {
 			char *tmp_cmd[] = { arg[1], BM_FILE, NULL };
 			int ret = -1;
@@ -12274,16 +12532,16 @@ open_bookmark(char **cmd)
 				error_code = 1;
 		}
 		else {
-			if (flags & XDG_OPEN_OK) {
-				char *tmp_cmd[] = { "xdg-open", tmp_path, NULL };
-				int ret = -1;
-				if ((ret = launch_execve(tmp_cmd)) != 0)
-					error_code = 1;
-			}
-			else {
-				fprintf(stderr, _("Bookmarks: xdg-open not found. "
+			if (!(flags & FILE_CMD_OK)) {
+				fprintf(stderr, _("Bookmarks: 'file' command not found. "
 								  "Try 'bookmark APPLICATION'\n"));
 				error_code = 1;
+			}
+			else {
+				char *tmp_cmd[] = { "mime", tmp_path, NULL };
+				int ret = mime_open(tmp_cmd);
+				if (ret != 0)
+					error_code = 1;
 			}
 		}
 		goto free_and_exit;
@@ -12395,21 +12653,6 @@ dir_size(char *dir)
 	if (!dir)
 		return;
 
-	/* Check for 'du' existence just once (the first time the function is 
-	 * called) by storing the result in a static variable (whose value will 
-	 * survive the function) */
-	static char du_path[PATH_MAX] = "";
-	if (du_path[0] == 0x00) {
-		char *du_path_tmp = (char *)NULL;
-		if ((du_path_tmp = get_cmd_path("du")) != NULL) {
-			strncpy(du_path, du_path_tmp, PATH_MAX);
-			free(du_path_tmp);
-		}
-		else {
-			puts(_("('du': not found)"));
-			return;
-		}
-	}
 	FILE *du_fp = fopen(DU_TMP_FILE, "w");
 	FILE *du_fp_err = fopen("/dev/null", "w");
 	int stdout_bk = dup(STDOUT_FILENO); /* Save original stdout */
@@ -12558,7 +12801,7 @@ get_properties (char *filename, int _long, int max)
 		else if (file_attrib.st_mode & S_ISGID)
 			strcpy(color, sg_c);
 		else {
-			#if __linux__
+			#ifdef _LINUX_CAP
 			cap_t cap = cap_get_file(filename);
 			if (cap) {
 				strcpy(color, ca_c);
@@ -13191,8 +13434,8 @@ run_history_cmd(const char *cmd)
 
 int
 edit_function (char **comm)
-/* Edit the config file, either via xdg-open or via the first passed argument,
- * Ex: 'edit nano' */
+/* Edit the config file, either via my mime function or via the first passed 
+ * argument (Ex: 'edit nano') */
 {
 	if (!config_ok) {
 		fprintf(stderr, _("%s: Cannot access configuration file\n"), 
@@ -13231,50 +13474,49 @@ edit_function (char **comm)
 	}
 	time_t mtime_bfr = file_attrib.st_mtime;
 
-	char *cmd_path = (char *)NULL;
+
 	if (args_n > 0) { /* If there is an argument... */
 		/* Check it is a valid program */
+		char *cmd_path = (char *)NULL;
 		if ((cmd_path = get_cmd_path(comm[1])) == NULL) {
 			fprintf(stderr, _("%s: %s: Command not found\n"), PROGRAM_NAME, 
 					comm[1]);
 			return EXIT_FAILURE;
 		}
+		pid_t pid_edit = fork();
+		if (pid_edit < 0) {
+			fprintf(stderr, "%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
+			if (cmd_path) 
+				free(cmd_path);
+			return EXIT_FAILURE;
+		}
+		else if (pid_edit == 0) {
+			set_signals_to_default();
+			execl(cmd_path, comm[1], CONFIG_FILE, NULL);		
+			/* The program failed to start */
+			fprintf(stderr, "%s: execl: %s: %s\n", PROGRAM_NAME, cmd_path, 
+					strerror(errno));
+			exit(EXIT_FAILURE);
+		}
+		else
+			run_in_foreground(pid_edit);
+		free(cmd_path);	
 	}
-	/* If no application has been passed as 2nd argument, and if xdg-open 
-	 * not found... */
-	else if (!(flags & XDG_OPEN_OK)) {
-		fprintf(stderr, 
-				_("%s: 'xdg-open' not found. Try 'edit application_name'\n"), 
-				PROGRAM_NAME);
-		return EXIT_FAILURE;
+	/* If no application has been passed as 2nd argument */
+	else {
+		if (!(flags & FILE_CMD_OK)) {
+			fprintf(stderr, _("%s: 'file' command not found. Try "
+					"'edit APPLICATION'\n"), PROGRAM_NAME);
+			return EXIT_FAILURE;
+		}
+		else {
+			char *cmd[] = { "mime", CONFIG_FILE, NULL };
+			int ret = mime_open(cmd);
+			if (ret != 0)
+				return EXIT_FAILURE;
+		}
 	}
 
-	/* Either a valid program has been passed or xdg-open exists */
-	pid_t pid_edit = fork();
-	if (pid_edit < 0) {
-		fprintf(stderr, "%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
-		if (cmd_path) 
-			free(cmd_path);
-		return EXIT_FAILURE;
-	}
-	else if (pid_edit == 0) {
-		set_signals_to_default();
-		/* If application has been passed */
-		if (args_n > 0)
-			execl(cmd_path, comm[1], CONFIG_FILE, NULL);		
-		/* No application passed and xdg-open exists */
-		else
-			execl(xdg_open_path, "xdg-open", CONFIG_FILE, NULL);
-		/* The program failed to start */
-		fprintf(stderr, "%s: execl: %s: %s\n", PROGRAM_NAME, (cmd_path)
-				? cmd_path : xdg_open_path, strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-	else
-		run_in_foreground(pid_edit);
-	
-	if (cmd_path)
-		free(cmd_path);
 	/* Get modification time after opening the config file */
 	stat(CONFIG_FILE, &file_attrib);
 	/* If modification times differ, the file was modified after being 
@@ -13397,11 +13639,20 @@ completion is available).\n"), white, NC, default_color);
 	printf(_("\n%so, open%s%s ELN/DIR/FILENAME [APPLICATION]: Open \
 either a directory or a file. For example: 'o 12' or 'o filename'. By default, \
 the 'open' function will open files with the default application associated to \
-them (if xdg-open command is found). However, if you want to open a file with \
-a different application, just add the application name as second argument, \
-e.g. 'o 12 leafpad'. If you want to run the program in the background, simply \
-add the ampersand character (&): 'o 12 &'. When it comes to directories, \
-'open' works just like the 'cd' command.\n"), white, NC, default_color);
+them (via the built-in resource opener (mime)). However, if you want to open \
+a file with a different application, just add the application name as second \
+argument, e.g. 'o 12 leafpad'. If you want to run the program in the \
+background, simply add the ampersand character (&): 'o 12 &'. When it comes \
+to directories, 'open' works just like the 'cd' command.\n"), white, NC, 
+		   default_color);
+	printf(_("\n%smm, mime%s%s [info ELN/FILENAME] [edit]: This is %s's \
+built-in resource opener. The 'info' option prints the MIME information \
+about ELN/FILENAME, both its MIME type and the application associated to this \
+type. The 'edit' option allows you to edit and customize the MIME list file. \
+So, if a file has no default associated application, first get its \
+MIME info and then add a value for it to the MIME list using the 'edit' \
+option. Each value in the MIME list file has this format: \
+mime_type=application. Example: plain/text=nano \n"), white, NC, default_color, PROGRAM_NAME);
 	printf(_("\n%scd%s%s [ELN/DIR]: When used with no argument, it changes the \
 current directory to the default directory (HOME). Otherwise, 'cd' changes \
 the current directory to the one specified by the first argument. You can use \

@@ -29,7 +29,7 @@ You can also use the 'sel' keyword with external commands. Example: `s 1-4 7 10 
 
 ![alt_tag](https://github.com/leo-arch/clifm/blob/master/images/sel_box.png)
  
- * Open files without the need to specify any program. Via `xdg-open`, if no program was specified, CLiFM will open the file with the deafult program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background.
+ * Open files without the need to specify any program. Via `mime` (the built-in resource opener), if no program was specified, CLiFM will open the file with the deafult program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background.
 
 * Quick search: type `/string` and CliFM will list all the files containing `string` in its name. This function also support wildcards. Example: `/*.png` will list all the .png files in the current directory. If you want to search for files in another directory, just tell the search function where to search: `/*.png /media/images`. Of course, you can deselect some or all selected files whenever you want with the `desel` or `ds` command.
 
@@ -57,6 +57,7 @@ Because file manager, but also half shell, CLiFM also offers the following featu
 * Sequential and conditional execution of commands 
 * User profiles
 * Keyboard shortcuts
+* Resource opener
 
 Finally, all CLiFM options could be handled directly by command line, by passing parameters to the program, or via plain
 text configuration files, located in `~/.config/clifm/`.
@@ -65,7 +66,7 @@ Insofar as it is heavily inspired by Arch Linux and its KISS principle, CLiFM is
 
 ## Dependencies:
 
-`glibc`, `ncurses`, `libcap`, `readline`, `coreutils` (providing basic programs such as rm, cp, mkdir, etc). For Archers: All these deps are part of the `core` repo, and `glibc` is also part of the `base` metapackage. In Debian systems two packages must be installed before compilation: `libcap-dev` and `libreadline-dev`. In Fedora based systems you need `libcap-devel` and `readline-devel`. Optional dependencies: `xdg-utils`.
+`glibc`, `ncurses`, `libcap`, `readline`, `coreutils` (providing basic programs such as rm, cp, mkdir, etc). For Archers: All these deps are part of the `core` repo, and `glibc` is also part of the `base` metapackage. In Debian systems two packages must be installed before compilation: `libcap-dev` and `libreadline-dev`. In Fedora based systems you need `libcap-devel` and `readline-devel`. Optional dependencies: `file`.
 
 ## Compiling and Running CliFM:
 

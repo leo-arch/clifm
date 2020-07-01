@@ -1,6 +1,6 @@
 ./" Manpage for CliFM
 ./"COMPLETE COLOR CODES!!!
-.TH man 1 "June 8, 2020" "1.0" "CliFM man page"
+.TH man 1 "July 1, 2020" "1.0" "CliFM man page"
 .SH NAME
 CLIFM - A completely text-based file manager inspired in Arch Linux' KISS principle 
 .SH SYNOPSIS
@@ -34,6 +34,7 @@ CliFM also offers the following features:
   14) Shell commands execution
   15) User profiles
   16) Commands sequential and conditional execution
+  17) Built-in resource opener
 
 .SH OPTIONS
 .TP
@@ -123,7 +124,10 @@ this is the quick search function. Just type '/' followed by the string you are 
 with no argument, open the bookmarks menu. Here you cd into the desired bookmark by entering either its ELN, its shortcut, or its name. In this screen you can also add, remove or edit your bookmarks by simply typing 'e' to edit the bookmarks file (which is simply a list of lines with this format: [shortcut]name:path. Ex: [d]documents:/home/user/documents). If you want to add or remove a bookmark directly from the command line, use the 'a' and 'd' arguments respectivelly. Example: 'bm a /media/misc' or 'bm d'. You can also open a bookmark by typing 'bm shortcut' or 'bm name' (in which case TAB completion is available).
 .TP
 .B o, open ELN/FILE [APPLICATION]
-open either a directory or a file. For example: 'o 12' or 'o filename'. By default, the 'open' function will open files with the default application associated to them (if xdg-open command is found). However, if you want to open a file with a different application, just add the application name as second argument, e.g. 'o 12 leafpad'. If you want to run the program in the background, simply add the ampersand character: 'o 12 &'. When it comes to directories, 'open' works just like the 'cd' command.
+open either a directory or a file. For example: 'o 12' or 'o filename'. By default, the 'open' function will open files with the default application associated to them (via the mime built-in function). However, if you want to open a file with a different application, just add the application name as second argument, e.g. 'o 12 leafpad'. If you want to run the program in the background, simply add the ampersand character: 'o 12 &'. When it comes to directories, 'open' works just like the 'cd' command.
+.TP
+.B mm, mime [info ELN/FILENAME] [edit]
+This is CliFM's resource opener. The 'info' option prints the MIME information about ELN/FILENAME, both its MIME type and the application associated to this type. The 'edit' option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info and then add a value for it to the MIME list file using the 'edit'option. Each value in the MIME list file has this format: mime_type=application. Example: plain/text=nano
 .TP
 .B cd [ELN/DIR]
 when used with no argument, it changes the current directory to the default directory (HOME). Otherwise, 'cd' changes the current directory to the one specified by the first argument. You can use either ELN's or a string to indicate the directory you want. Ex: 'cd 12' or 'cd ~/media'. Unlike the shell 'cd' command, CliFM's built-in 'cd' function doesn not only changes the current directory, but also lists its content (provided the option "cd lists automatically" is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of 'cd' is much like this shell command: cd DIR && ls -A --color=auto --group-directories-first
