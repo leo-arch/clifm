@@ -3447,7 +3447,7 @@ profile_set(char *prof)
 		check_log_file_size(MSG_LOG_FILE);
 
 		/* Reset history */
-		if (access(HIST_FILE, F_OK|W_OK)) {
+		if (access(HIST_FILE, F_OK|W_OK) == 0) {
 			clear_history(); /* This is for readline */
 			read_history(HIST_FILE); 
 			history_truncate_file(HIST_FILE, max_hist);
