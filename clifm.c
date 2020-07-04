@@ -861,7 +861,7 @@ of course you can grep it to find, say, linux' macros, as here. */
 
 ###########################################
 
- * (SOLVED) Type this: "p /etc/pacman.conf" and then "cd". The user_home 
+ * (SOLVED) Enter this: "p /etc/pacman.conf" and then "cd". The user_home 
 	variable is now 'in/bash' and the user is root!!! SOLUTION: The pointer
 	returned by get_user(), which makes use of getpwuid() is overriden by the
 	properties function, which uses the same function. So, make get_user() 
@@ -958,7 +958,7 @@ of course you can grep it to find, say, linux' macros, as here. */
 	to say, they won't be able to select any file, since TMP_DIR is not
 	accessible. SOLUTION: Create TMP_DIR with 1777 permissions, that is, 
 	world writable and with the sticky bit set.
- * (SOLVED) Type this: '[[ $(whoami) ]] && echo Yes || echo No', and the
+ * (SOLVED) Enter this: '[[ $(whoami) ]] && echo Yes || echo No', and the
 	program crashes. The problem was that parse_input_string() was taken '[' 
 	as part of a glob pattern. SOLUTION: Simply add a new check to 
 	parse_input_string() to avoid taking '[' followed by a space as a glob 
@@ -1130,7 +1130,7 @@ of course you can grep it to find, say, linux' macros, as here. */
 	The program crashes. Problem: my xatoi() returns decimal values for 
 	alphabetical chars. Solution: add a conditional statement to check for 
 	these chars.
- * (SOLVED) Type "slaby", press Enter, and bang!, the program crashes. Problem 
+ * (SOLVED) Enter "slaby", press Enter, and bang!, the program crashes. Problem 
 	was: I'm not sure. Perhaps it only happens when using the CLiFM shell.
  * (SOLVED) When not listing files automatically, the bookmarks function 
 	doesn't update the prompt. Solved by simply adding a 'chdir(path)' in case 
@@ -1158,7 +1158,7 @@ of course you can grep it to find, say, linux' macros, as here. */
 	statement in parse_input_str(). The condition to evaluate user variables 
 	should be more restricted. SOLUTION: check for spaces before '=' in order 
 	to avoid taking as variables things like: 'ls -color=auto'.
- * (SOLVED) Search for a file (/x) and then type this: 
+ * (SOLVED) Search for a file (/x) and then enter this: 
 	'cp 1 ~/scripts/test/empty_folder/': ERRORS!!!
  * (SOLVED) Errors in folder_select and file_select when trying to access to 
 	a failed mountpoint. SOLUTION: add an existence check at the beginning of 
@@ -3318,7 +3318,7 @@ profile_del(char *prof)
 
 int
 profile_set(char *prof)
-/* Change profile or create a new one */
+/* Switch to another profile */
 {
 	if (!prof)
 		return EXIT_FAILURE;
@@ -3460,7 +3460,7 @@ profile_set(char *prof)
 			}
 			else {
 				msg = xasprintf(_("%s: Error opening the history file\n"),
-								PROGRAM_NAME, sys_shell);
+								PROGRAM_NAME);
 				if (msg) {
 					warning_msg = 1;
 					log_msg(msg, PRINT_PROMPT);
@@ -3468,7 +3468,7 @@ profile_set(char *prof)
 				}
 				else
 				fprintf(stderr, _("%s: Error opening the history file\n"),
-						PROGRAM_NAME, sys_shell);
+						PROGRAM_NAME);
 			}
 		}
 		get_history(); /* This is only for us */
@@ -3549,7 +3549,7 @@ int mime_open(char **args)
 	}
 	
 	if (info)
-		printf("MIME type: %s\n", mime);
+		printf(_("MIME type: %s\n"), mime);
 
 	/* Get file extension, if any */
 	char *ext = (char *)NULL;
@@ -3570,9 +3570,9 @@ int mime_open(char **args)
 
 	if (info) {
 		if (ext)
-			printf("Extension: %s\n", ext);
+			printf(_("Extension: %s\n"), ext);
 		else
-			puts("Extension: None");
+			puts(_("Extension: None"));
 	}
 
 	/* Get default application for MIME or extension */
@@ -10089,7 +10089,7 @@ prompt(void)
 	if (welcome_message) {
 		printf(_("%sCliFM, the anti-eye-candy, KISS file manager%s\n"), 
 			   welcome_msg_color, NC);
-		printf(_("%sType 'help' or '?' for instructions.%s\n"), 
+		printf(_("%sEnter 'help' or '?' for instructions.%s\n"), 
 			   default_color, NC);
 		welcome_message = 0;
 	}
@@ -11654,7 +11654,7 @@ exec_cmd(char **comm)
 				|| ((strcmp(comm[0], "killall") == 0 
 				|| strcmp(comm[0], "pkill") == 0) 
 				&& strcmp(comm[i], argv_bk[0]) == 0)) {
-					fprintf(stderr, _("%s: To gracefully quit type 'quit'\n"), 
+					fprintf(stderr, _("%s: To gracefully quit enter 'quit'\n"), 
 							PROGRAM_NAME);
 					return exit_code;
 				}
@@ -14482,7 +14482,7 @@ the line \"12 openbox\", 12 is the ELN corresponding to the 'openbox' \
 file.\n"));
 	printf(_("\n%scmd, commands%s%s: Show this list of commands.\n"), white, 
 		   NC, default_color);
-	printf(_("\n%s/%s%s* [DIR]: This is the quick search function. Just type '/' \
+	printf(_("\n%s/%s%s* [DIR]: This is the quick search function. Just enter '/' \
 followed by the string you are looking for (you can use wildcards), and %s \
 will list all matches in the current working directory. To search for files \
 in any other directory, specify the directory name as second argument. This \
@@ -14614,7 +14614,7 @@ history commands:\n\
 	printf(_("\n%sedit%s%s [EDITOR]: Edit the configuration file. If \
 specified, use EDITOR, if available.\n"), white, NC, default_color);
 	printf(_("\n%salias%s%s: Show aliases, if any. To write a new alias simpy \
-type 'edit' to open the configuration file and add a line like this: \
+enter 'edit' to open the configuration file and add a line like this: \
 alias alias_name='command_name args...'\n"), white, NC, default_color);
 	printf(_("\n%ssplash%s%s: Show the splash screen.\n"), white, NC, default_color);
 	printf(_("\n%spath, cwd%s%s: Print the current working directory.\n"), 
