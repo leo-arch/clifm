@@ -1,6 +1,6 @@
 pkgbase = clifm
 	pkgdesc = The KISS file manager: text-based, ultra-lightweight, lightning fast, and written in C
-	pkgver = 0.18.2
+	pkgver = 0.18.3
 	pkgrel = 1
 	url = https://github.com/leo-arch/clifm
 	arch = any
@@ -12,6 +12,7 @@ pkgbase = clifm
 	depends = readline
 	depends = coreutils
 	optdepends = file: Get files MIME type and open them via their default associated program
+	optdepends = fbida: View pictures on the console
 	source = git+https://github.com/leo-arch/clifm.git
 	sha256sums = SKIP
 

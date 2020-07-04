@@ -1,6 +1,5 @@
 ./" Manpage for CliFM
-./"COMPLETE COLOR CODES!!!
-.TH man 1 "June 8, 2020" "1.0" "CliFM man page"
+.TH man 1 "July 4, 2020" "1.0" "CliFM man page"
 .SH NAME
 CLIFM - A completely text-based file manager inspired in Arch Linux' KISS principle 
 .SH SYNOPSIS
@@ -127,7 +126,7 @@ with no argument, open the bookmarks menu. Here you cd into the desired bookmark
 open either a directory or a file. For example: 'o 12' or 'o filename'. By default, the 'open' function will open files with the default application associated to them (via the mime built-in function). However, if you want to open a file with a different application, just add the application name as second argument, e.g. 'o 12 leafpad'. If you want to run the program in the background, simply add the ampersand character: 'o 12 &'. When it comes to directories, 'open' works just like the 'cd' command.
 .TP
 .B mm, mime [info ELN/FILENAME] [edit]
-This is CliFM's resource opener. The 'info' option prints the MIME information about ELN/FILENAME: its MIME type, its file extension, if any, and the application associated to this MIME type or file extension. The 'edit' option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension, and then add a value for it to the MIME list file using the 'edit' option. Each value in the MIME list file has this format: 'mime_type=application' or '*.c=appplication'. Example: 'plain/text=nano' or '*.c=geany'. The first matching association will be used.
+This is CliFM's resource opener. The 'info' option prints the MIME information about ELN/FILENAME: its MIME type, its file extension, if any, and the application associated to this MIME type or file extension. The 'edit' option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension, and then add a value for it to the MIME list file using the 'edit' option. Each value in the MIME list file has this format: 'mime_type=application args;application args; ... n' or '*.c=application args;application args; ... n'. Example: 'plain/text=nano' or '*.c=geany -p;leafpad;nano'. CliFM will check the first matching line, and if at least one of the specified applications exists, this one will be used to open the corresponding associated filed. Else, the next matching line will be checked.
 .TP
 .B cd [ELN/DIR]
 when used with no argument, it changes the current directory to the default directory (HOME). Otherwise, 'cd' changes the current directory to the one specified by the first argument. You can use either ELN's or a string to indicate the directory you want. Ex: 'cd 12' or 'cd ~/media'. Unlike the shell 'cd' command, CliFM's built-in 'cd' function doesn not only changes the current directory, but also lists its content (provided the option "cd lists automatically" is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of 'cd' is much like this shell command: cd DIR && ls -A --color=auto --group-directories-first
@@ -168,8 +167,8 @@ with no argument (or by passing the 'ls' option), it prints a list of currently 
 .B u, undel, untrash [*, a, all]
 print a list of currently trashed files allowing you to choose one or more of these files to be undeleted, that is to say, restored to their original location. You can also undelete all trashed files at once using the '*', 'a' or 'all' option.
 .TP
-.B pf, prof, profile
-print the currently used profile.
+.B pf, prof, profile [set, add, del PROFILE]
+with no arguments, prints the name of the currently used profile. To switch, add or delete a profile, use the 'set', 'add', and 'del' options respectivelly followed by the corresponding profile name.
 .TP
 .B shell [SHELL]
 print the current default shell for CliFM or set SHELL as the new default shell. 
@@ -211,19 +210,19 @@ refresh the screen.
 .B colors
 show the color codes used to list files.
 .TP
-.B hf, hidden [on/off/status]
+.B hf, hidden [on, off, status]
 toggle hidden files on/off.
 .TP
-.B ff, folders first [on/off/status]
+.B ff, folders first [on, off, status]
 toggle list folders first on/off.
 .TP
-.B pg, pager [on/off/status]
+.B pg, pager [on, off, status]
 toggle the pager on/off. Once in the pager, press the Down arrow key or Enter to move downwards one file, or PageDown to move downwards an entire page. To go upwards, use the shortcuts provided by your terminal emulator, for example, A-PageUp or A-Up.
 .TP
-.B uc, unicode [on/off/status]
+.B uc, unicode [on, off, status]
 toggle unicode on/off.
 .TP
-.B ext [on/off/status]
+.B ext [on, off, status]
 toggle external commands on/off.
 .TP
 .B ver, version

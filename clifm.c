@@ -2308,7 +2308,7 @@ int is_internal_c(const char *cmd);
 
 char *xasprintf(const char *format, ...);
 int open_bookmark(char **cmd);
-void get_bm_names(void);
+int get_bm_names(void);
 char *bookmarks_generator(const char *text, int state);
 int initialize_readline(void);
 int del_bookmark(void);
@@ -2318,10 +2318,17 @@ char *my_rl_path_completion(const char *text, int state);
 int get_link_ref(const char *link);
 
 int mime_open(char **args);
-int mime_import(void);
+int mime_import(char *file);
 int mime_edit(char **args);
 char *get_mime(char *file);
 char *get_app(char *mime, char *ext);
+
+int profile_function(char ** comm);
+int profile_add(char *prof);
+int profile_del(char *prof);
+int profile_set(char *prof);
+int get_profile_names(void);
+char *profiles_generator(const char *text, int state);
 
 /* Some notes on memory:
 * If a variable is declared OUTSIDE of a function, it is typically considered 
@@ -2487,7 +2494,7 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 	recur_perm_error_flag = 0, is_sel = 0, sel_is_last = 0, print_msg = 0, 
 	long_view = -1, kbind_busy = 0, error_msg = 0, warning_msg = 0, 
 	notice_msg = 0, unicode = -1, cont_bt = 0, dequoted = 0, home_ok = 1, 
-	config_ok = 1, trash_ok = 1, selfile_ok = 1;
+	config_ok = 1, trash_ok = 1, selfile_ok = 1, mime_match = 0;
 	/* -1 means non-initialized or unset. Once initialized, these variables
 	 * are either zero or one */
 /*	sel_no_sel=0 */
@@ -2526,6 +2533,7 @@ char *user = (char *)NULL, *path = (char *)NULL, **old_pwd = (char **)NULL,
 	*TRASH_INFO_DIR = (char *)NULL, *sys_shell = (char *)NULL, 
 	**dirlist = (char **)NULL, **bookmark_names = (char **)NULL,
 	*ls_colors_bk = (char *)NULL, *MIME_FILE = (char *)NULL,
+	**profile_names = (char **)NULL,
 	/* This is not a comprehensive list of commands. It only lists commands
 	 * long version for TAB completion */
 	*INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
@@ -2947,6 +2955,8 @@ main(int argc, char **argv)
 	}
 
 	get_bm_names();
+	
+	get_profile_names();
 
 				/* ###########################
 				 * #   2) MAIN PROGRAM LOOP  # 
@@ -2991,6 +3001,477 @@ main(int argc, char **argv)
 
 /* ###FUNCTIONS DEFINITIONS### */
 
+int
+profile_function(char **comm)
+{
+	int exit_code = EXIT_SUCCESS;
+
+	if (comm[1]) {
+		if (strcmp(comm[1], "--help") == 0)
+			puts(_("Usage: pf, prof, profile [set, add, del PROFILE]"));
+		
+		/* Create a new profile */
+		else if (strcmp(comm[1], "add") == 0)
+			if (comm[2]) {
+				exit_code = profile_add(comm[2]);
+			}
+			else {
+				fputs("Usage: pf, prof, profile add PROFILE", stderr);
+				exit_code = EXIT_FAILURE;
+			}
+		
+		/* Delete a profile */
+		else if (strcmp(comm[1], "del") == 0)
+			if (comm[2])
+				exit_code = profile_del(comm[2]);
+			else {
+				fputs("Usage: pf, prof, profile del PROFILE", stderr);
+				exit_code = EXIT_FAILURE;
+		}
+		
+		/* Switch to another profile */
+		else if (strcmp(comm[1], "set") == 0) {
+			if (comm[2])
+				exit_code = profile_set(comm[2]);
+			else {
+				fputs("Usage: pf, prof, profile set PROFILE", stderr);
+				exit_code = EXIT_FAILURE;
+			}
+		}
+		
+		/* None of the above == error */
+		else {
+			fputs(_("Usage: pf, prof, profile [set, add, del PROFILE]"), stderr);
+			exit_code = EXIT_FAILURE;
+		}
+	}
+	
+	/* If only "pr" print the current profile name */
+	else if (!alt_profile)
+		printf("%s: profile: default\n", PROGRAM_NAME);
+	else
+		printf("%s: profile: '%s'\n", PROGRAM_NAME, alt_profile);
+
+	return exit_code;
+}
+
+int
+profile_add(char *prof)
+{
+	if (!prof)
+		return EXIT_FAILURE;
+		
+	int found = 0;
+	size_t i;
+	for (i = 0; profile_names[i]; i++) {
+		if (strcmp(prof, profile_names[i]) == 0) {
+			found = 1;
+			break;
+		}
+	}
+	
+	if (found) {
+		fprintf(stderr, _("%s: '%s': Profile already exists\n"), PROGRAM_NAME, 
+				prof);
+		return EXIT_FAILURE;
+	}
+	
+	if (!home_ok) {
+		fprintf(stderr, _("%s: '%s': Error creating profile: Home directory "
+		"not found\n"), PROGRAM_NAME, prof);
+		return EXIT_FAILURE;
+	}
+	
+	size_t pnl_len = strlen(PNL);
+	/* ### GENERATE PROGRAM'S CONFIG DIRECTORY NAME ### */
+	char *NCONFIG_DIR = (char *)xcalloc(user_home_len + pnl_len 
+										+ strlen(prof) + 11, sizeof(char));
+	sprintf(NCONFIG_DIR, "%s/.config/%s/%s", user_home, PNL, prof);
+
+	/* #### CREATE THE CONFIG DIR #### */
+	char *tmp_cmd[] = { "mkdir", "-p", NCONFIG_DIR, NULL }; 
+	int ret = launch_execve(tmp_cmd);
+	if (ret != 0) {
+		fprintf(stderr, _("%s: mkdir: '%s': Error creating configuration "
+				"directory\n"), PROGRAM_NAME, NCONFIG_DIR);
+		free(NCONFIG_DIR);
+		return EXIT_FAILURE;
+	}
+
+	/* If the config dir is fine, generate config file names */
+	int error_code = 0;
+	size_t config_len = strlen(NCONFIG_DIR);
+
+	char *NCONFIG_FILE = (char *)xcalloc(config_len + pnl_len + 4, 
+										 sizeof(char));
+	sprintf(NCONFIG_FILE, "%s/%src", NCONFIG_DIR, PNL);	
+	char *NHIST_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
+	sprintf(NHIST_FILE, "%s/history.cfm", NCONFIG_DIR);
+	char *NPROFILE_FILE = (char *)xcalloc(config_len + pnl_len + 10, 
+										  sizeof(char));
+	sprintf(NPROFILE_FILE, "%s/%s_profile", NCONFIG_DIR, PNL);
+	char *NMIME_FILE = (char *)xcalloc(config_len + 14, sizeof(char));
+	sprintf(NMIME_FILE, "%s/mimelist.cfm", NCONFIG_DIR);
+
+/*	char *NMSG_LOG_FILE = (char *)xcalloc(config_len + 14, sizeof(char));
+	sprintf(NMSG_LOG_FILE, "%s/messages.cfm", NCONFIG_DIR);	
+	char *NBM_FILE = (char *)xcalloc(config_len + 15, sizeof(char));
+	sprintf(NBM_FILE, "%s/bookmarks.cfm", NCONFIG_DIR);
+	char *NLOG_FILE = (char *)xcalloc(config_len + 9, sizeof(char));
+	sprintf(NLOG_FILE, "%s/log.cfm", NCONFIG_DIR);
+	char *NLOG_FILE_TMP = (char *)xcalloc(config_len + 13, sizeof(char));
+	sprintf(NLOG_FILE_TMP, "%s/log_tmp.cfm", NCONFIG_DIR); */
+
+	/* Create config files */
+
+	/* #### CREATE THE HISTORY FILE #### */
+	FILE *hist_fp = fopen(NHIST_FILE, "w+");
+	if (!hist_fp) {
+		fprintf(stderr, "%s: fopen: '%s': %s\n", PROGRAM_NAME, 
+				NHIST_FILE, strerror(errno));
+		error_code = 1;
+	}
+	else {
+		/* To avoid malloc errors in read_history(), do not create 
+		 * an empty file */
+		fprintf(hist_fp, "edit\n");
+		fclose(hist_fp);
+	}
+
+	/* #### CREATE THE MIME CONFIG FILE #### */
+	/* Try importing MIME associations from the system, and in case 
+	 * nothing can be imported, create an empty MIME associations
+	 * file */
+	ret = mime_import(NMIME_FILE);
+	if (ret != 0) {
+		FILE *mime_fp = fopen(NMIME_FILE, "w");
+		if (!mime_fp) {
+			fprintf(stderr, "%s: fopen: '%s': %s\n", PROGRAM_NAME, 
+					NMIME_FILE, strerror(errno));
+			error_code = 1;
+		}
+		else {
+			if ((flags & GRAPHICAL))
+				fprintf(mime_fp, "text/plain=gedit;kate;pluma;mousepad;"
+						"leafpad;nano;vim;vi;emacs;ed\n"
+						"*.cfm=gedit;kate;pluma;mousepad;leafpad;nano;vim;"
+						"vi;emacs;ed\n");
+			else
+				fprintf(mime_fp, "text/plain=nano;vim;vi;emacs\n"
+						"*.cfm=nano;vim;vi;emacs;ed");
+			fclose(mime_fp);
+		}
+	}
+
+	/* #### CREATE THE PROFILE FILE #### */
+	FILE *profile_fp = fopen(NPROFILE_FILE, "w");
+	if (!profile_fp) {
+		fprintf(stderr, _("%s: Error creating the profile file\n"), 
+				PROGRAM_NAME);
+		error_code = 1;
+	}
+	else {
+		fprintf(profile_fp, _("#%s profile\n"
+				"#Write here the commands you want to be executed at "
+				"startup\n#Ex:\n#echo -e \"%s, the anti-eye-candy/KISS file"
+				"manager\"\n"), PROGRAM_NAME, PROGRAM_NAME);
+		fclose(profile_fp);
+	}
+		
+	/* #### CREATE THE CONFIG FILE #### */
+	FILE *config_fp = fopen(NCONFIG_FILE, "w");
+	if (!config_fp) {
+		fprintf(stderr, "%s: fopen: '%s': %s\n", PROGRAM_NAME, 
+				NCONFIG_FILE, strerror(errno));
+		error_code = 1;
+	}
+	else {
+		/* Do not translate anything in the config file */
+		fprintf(config_fp, "%s configuration file\n\
+########################\n\n", PROGRAM_NAME);
+		fprintf(config_fp, "\
+Filetype colors=\"di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;39:\
+ef=00;33:nf=00;31:ln=01;36:or=00;36:pi=40;33:so=01;35:bd=01;33;01:\
+cd=01;37;01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:\
+ex=01;32:ee=00;32:no=00;47;31\"\n\
+Prompt color=00;36\n\
+Text color=00;39;49\n\
+ELN color=01;33\n\
+Default color=00;39;49\n\
+Dir counter color=00;39;49\n\
+Dividing line color=00;34\n\
+Welcome message color=01;35\n\
+Welcome message=true\n\
+Splash screen=false\n\
+Show hidden files=true\n\
+Long view mode=false\n\
+External commands=false\n\
+System shell=\n\
+List folders first=true\n\
+cd lists automatically=true\n\
+Case sensitive list=false\n\
+Unicode=false\n\
+Pager=false\n\
+Max history=500\n\
+Max log=1000\n\
+Clear screen=false\n\
+Starting path=default\n");
+		fprintf(config_fp, "#Default starting path is CWD\n");
+		fprintf(config_fp, "#END OF OPTIONS\n\
+\n###Aliases###\nalias ls='ls --color=auto -A'\n\
+\n#PROMPT\n");
+		fprintf(config_fp, "#Write below the commands you want to be \
+executed before the prompt\n#Ex:\n");
+		fprintf(config_fp, 
+					"#date | awk '{print $1\", \"$2,$3\", \"$4}'\n\n#END \
+OF PROMPT\n"); 
+		fclose(config_fp);
+	}
+	
+	/* Free stuff */
+	
+	free(NCONFIG_DIR);
+	NCONFIG_DIR = (char *)NULL;
+
+	free(NCONFIG_FILE);
+	NCONFIG_FILE= (char *)NULL;
+
+/*	free(NBM_FILE);
+	NBM_FILE = (char *)NULL;
+
+	free(NLOG_FILE);
+	NLOG_FILE = (char *)NULL;
+
+	free(NMSG_LOG_FILE);
+	NMSG_LOG_FILE= (char *)NULL;
+
+	free(NLOG_FILE_TMP);
+	NLOG_FILE_TMP = (char *)NULL; */
+
+	free(NHIST_FILE);
+	NHIST_FILE= (char *)NULL;
+
+	free(NPROFILE_FILE);
+	NPROFILE_FILE = (char *)NULL;
+
+	free(NMIME_FILE);
+	NMIME_FILE = (char *)NULL;
+
+	if (error_code == EXIT_SUCCESS) {
+		printf(_("%s: '%s': Profile succesfully created\n"), PROGRAM_NAME, 
+			   prof);
+		for (i = 0; profile_names[i]; i++)
+			free(profile_names[i]);
+		get_profile_names();
+	}
+	else
+		fprintf(stderr, _("%s: '%s': Error creating profile\n"), 
+				PROGRAM_NAME, prof);
+
+	return error_code;
+}
+
+int
+profile_del(char *prof)
+{
+	if (!prof)
+		return EXIT_FAILURE;
+
+	/* Check if prof is a valid profile */
+	int found = 0;
+	size_t i;
+	for (i = 0; profile_names[i]; i++) {
+		if (strcmp(prof, profile_names[i]) == 0) {
+			found = 1;
+			break;
+		}
+	}
+	
+	if (!found) {
+		fprintf(stderr, _("%s: %s: No such profile\n"), PROGRAM_NAME, prof);
+		return EXIT_FAILURE;
+	}
+	
+	char *tmp = (char *)xcalloc(user_home_len + strlen(PNL) + strlen(prof)
+								+ 11, sizeof(char));
+	sprintf(tmp, "%s/.config/%s/%s", user_home, PNL, prof);
+	
+	char *cmd[] = { "rm", "-r", tmp, NULL };
+	int ret = launch_execve(cmd);
+	free(tmp);
+	tmp = (char *)NULL;
+
+	if (ret == 0) {
+		printf(_("%s: '%s': Profile successfully removed\n"), PROGRAM_NAME,
+			   prof);
+		size_t i;
+		for (i = 0; profile_names[i]; i++)
+			free(profile_names[i]);
+		get_profile_names();
+		return EXIT_SUCCESS;
+	}
+	
+	fprintf(stderr, _("%s: '%s': Error removing profile\n"), PROGRAM_NAME,
+			prof);
+	return EXIT_FAILURE;
+}
+
+int
+profile_set(char *prof)
+/* Change profile or create a new one */
+{
+	if (!prof)
+		return EXIT_FAILURE;
+
+	/* Check if prof is a valid profile */
+	int found = 0;
+	size_t i;
+	for (i = 0; profile_names[i]; i++) {
+		if (strcmp(prof, profile_names[i]) == 0) {
+			found = 1;
+			break;
+		}
+	}
+	if (!found) {
+		fprintf(stderr, _("%s: '%s': No such profile\nTo add a new profile "
+				"enter 'pf add PROFILE'\n"), PROGRAM_NAME, prof);
+		return EXIT_FAILURE;
+	}
+	
+	/* Reset everything */
+	free(CONFIG_DIR);
+	CONFIG_DIR = (char *)NULL;
+	free(TRASH_DIR);
+	TRASH_DIR = (char *)NULL;
+	free(TRASH_FILES_DIR);
+	TRASH_FILES_DIR = (char *)NULL;
+	free(TRASH_INFO_DIR);
+	TRASH_INFO_DIR = (char *)NULL;
+	free(BM_FILE);
+	BM_FILE = (char *)NULL;
+	free(LOG_FILE);
+	LOG_FILE = (char *)NULL;
+	free(LOG_FILE_TMP);
+	LOG_FILE_TMP = (char *)NULL;
+	free(HIST_FILE);
+	HIST_FILE = (char *)NULL;
+	free(CONFIG_FILE);
+	CONFIG_FILE = (char *)NULL;
+	free(PROFILE_FILE);
+	PROFILE_FILE = (char *)NULL;
+	free(MSG_LOG_FILE);
+	MSG_LOG_FILE = (char *)NULL;
+	free(MIME_FILE);
+	MIME_FILE = (char *)NULL;
+	
+	free(sel_file_user);
+	sel_file_user = (char *)NULL;
+	
+	if (alt_profile) {
+		free(alt_profile);
+		alt_profile = (char *)NULL;
+	}
+
+	splash_screen = welcome_message = ext_cmd_ok = show_hidden = -1;
+	clear_screen = pager = list_folders_first = long_view = -1;
+	case_sensitive = cd_lists_on_the_fly = unicode = -1;
+
+	shell_terminal = no_log = internal_cmd = cont_bt = dequoted = 0;
+	shell_is_interactive = recur_perm_error_flag = mime_match = 0;
+	recur_perm_error_flag = is_sel = sel_is_last = print_msg = 0; 
+	kbind_busy = error_msg = warning_msg = notice_msg = 0;
+
+	home_ok = config_ok = trash_ok = selfile_ok = 1;
+
+	/* Set the new profile value */
+	/* Default profile == (alt_profile = NULL) */
+	if (strcmp(prof, "default") != 0) {
+		alt_profile = xcalloc(strlen(prof) + 1, sizeof(char));
+		strcpy(alt_profile, prof);
+	}
+
+	/* Rerun external_arguments */
+	if (argc_bk > 1)
+		external_arguments(argc_bk, argv_bk);
+	
+	/* Set up config files and variables */
+	init_config();
+	
+	if (!config_ok)
+		set_default_options();
+
+	/* Check whether we have a working shell */
+	if (access(sys_shell, X_OK) == -1) {
+		msg = xasprintf(_("%s: %s: System shell not found. Please edit the "
+						"configuration file to specify a working shell.\n"),
+						PROGRAM_NAME, sys_shell);
+		if (msg) {
+			warning_msg = 1;
+			log_msg(msg, PRINT_PROMPT);
+			free(msg);
+		}
+		else
+		fprintf(stderr, _("%s: %s: System shell not found. Please edit the "
+						 "configuration file to specify a working shell.\n"),
+						 PROGRAM_NAME, sys_shell);
+	}
+
+	for (i = 0; i < (size_t)usrvar_n; i++) {
+		free(usr_var[i].name);
+		free(usr_var[i].value);
+	}
+	usrvar_n = 0;
+
+	for (i = 0; i < (size_t)aliases_n; i++)
+		free(aliases[i]);
+	free(aliases);
+	aliases = (char **)NULL;
+	for (i = 0; i < (size_t)prompt_cmds_n; i++)
+		free(prompt_cmds[i]);
+	free(prompt_cmds);
+	prompt_cmds = (char **)NULL;
+	aliases_n = prompt_cmds_n = 0; /* Reset counters */
+	get_aliases_n_prompt_cmds();
+		
+	exec_profile();		
+
+	if (msgs_n) {
+		for (i = 0; i < (size_t)msgs_n; i++)
+			free(messages[i]);
+	}
+	msgs_n = 0;
+
+	if (config_ok) {
+		/* Limit the log files size */
+		check_log_file_size(LOG_FILE);
+		check_log_file_size(MSG_LOG_FILE);
+
+		/* Reset history */
+		if (access(HIST_FILE, F_OK|W_OK)) {
+			clear_history(); /* This is for readline */
+			read_history(HIST_FILE); 
+			history_truncate_file(HIST_FILE, max_hist);
+		}
+		else {
+			FILE *hist_fp = fopen(HIST_FILE, "w");
+			if (hist_fp) {
+				fprintf(hist_fp, "edit\n");
+				fclose(hist_fp);
+			}
+		}
+		get_history(); /* This is only for us */
+	}
+
+	get_bm_names();
+
+	if (cd_lists_on_the_fly) {
+		while (files--) free(dirlist[files]);
+		list_dir();
+	}
+
+	return EXIT_SUCCESS;
+}
+
 int mime_open(char **args)
 {
 	/* Check arguments */
@@ -3000,7 +3481,6 @@ int mime_open(char **args)
 	}
 
 	/* Check the existence of the 'file' command. */
-
 	char *file_path_tmp = (char *)NULL;
 	if ((file_path_tmp = get_cmd_path("file")) == NULL) {
 		fprintf(stderr, _("%s: 'file' command not found\n"), PROGRAM_NAME);
@@ -3063,10 +3543,14 @@ int mime_open(char **args)
 	char *ext = (char *)NULL;
 	char *filename = strrchr(path, '/');
 	if (filename) {
+		filename++; /* Remove leading slash */
+		if (*filename == '.')
+			filename++; /* Remove leading dot if hidden */
 		char *ext_tmp = strrchr(filename, '.');
 		if (ext_tmp) {
+			ext_tmp++; /* Remove dot from extension */
 			ext = (char *)xcalloc(strlen(ext_tmp) + 1, sizeof(char));
-			strcpy(ext, ext_tmp + 1);
+			strcpy(ext, ext_tmp);
 			ext_tmp = (char *)NULL;
 		}
 		filename = (char *)NULL;
@@ -3079,7 +3563,7 @@ int mime_open(char **args)
 			puts("Extension: None");
 	}
 
-	/* Get default application for mime or extension */
+	/* Get default application for MIME or extension */
 	char *app = get_app(mime, ext);
 	if (!app) {
 		if (info)
@@ -3099,7 +3583,12 @@ int mime_open(char **args)
 	}
 	
 	if (info) {
-		printf(_("Associated application: %s\n"), app);
+		/* In case of "cmd args" print only cmd */
+		int ret = strcntchr(app, 0x20);
+		if (ret != -1)
+			app[ret] = 0x00;
+		printf(_("Associated application: %s (%s)\n"), app, 
+			   (mime_match) ? "MIME" : "ext");
 		free(path);
 		path = (char *)NULL;
 		free(mime);
@@ -3145,14 +3634,32 @@ int mime_open(char **args)
 }
 
 int
-mime_import(void)
+mime_import(char *file)
 /* Import MIME definitions from the system and store them in the MIME file.
  * This function will only be executed if the MIME file is not found. Returns
  * zero if some association is found in the system mimeapps.list files, or one 
  * in case of error or no association found */
 {
-	if (!user_home)
+
+	/* Open the internal MIME file */
+	FILE *mime_fp = fopen(file, "w");
+	if (!mime_fp)
 		return EXIT_FAILURE;
+		
+	/* If not in X, just specify a few basic associations to make sure that
+	 * at least 'mm edit' will work ('vi' should be installed in almost any 
+	 * Unix computer) */
+	if (!(flags & GRAPHICAL)) {
+		fprintf(mime_fp, "text/plain=nano;vim;vi;emacs;ed\n" 
+						  "*.cfm=nano;vim;vi;emacs;ed\n");
+		fclose(mime_fp);
+		return EXIT_SUCCESS;
+	}
+
+	if (!user_home) {
+		fclose(mime_fp);
+		return EXIT_FAILURE;
+	}
 
 	/* Create a list of possible paths for the 'mimeapps.list' file */
 	size_t home_len = strlen(user_home);
@@ -3169,18 +3676,11 @@ mime_import(void)
 						   "/etc/xdg/mimeapps.list",
 						   NULL };
 	
-	/* Open the internal MIME file */
-	FILE *mime_fp = fopen(MIME_FILE, "a+");
-	if (!mime_fp)
-		return EXIT_FAILURE;
-
 	/* Check each mimeapps.list file and store its associations in the
 	 * internal MIME file */
 	size_t i, mime_lines = 0;
 	for (i = 0; mime_paths[i]; i++) {
-		if (access(mime_paths[i], F_OK|R_OK) != 0)
-			continue;
-		
+
 		FILE *sys_mime_fp = fopen(mime_paths[i], "r");
 		if (!sys_mime_fp)
 			continue;
@@ -3188,21 +3688,39 @@ mime_import(void)
 		size_t line_size = 0;
 		char *line = (char *)NULL;
 		ssize_t line_len = 0;
+
+		/* Only store associations in the "Default Applications" section */
+		int da_found = 0;
 		while ((line_len = getline(&line, &line_size, sys_mime_fp)) > 0) {
-			/* Do not store comments, headers, and empty lines */
-			if (*line == '#' || *line == '[' || *line == '\n')
+			if (!da_found && strncmp(line, "[Default Applications]", 22) == 0) {
+				da_found = 1;
 				continue;
-			/* Copy only up to the first dot */
-			int index = strcntchr(line, '.');
-			if (index != -1)
-				line[index] = 0x00;
-			fprintf(mime_fp, "%s\n", line);
-			mime_lines++;
+			}
+			if (da_found) {
+				if (*line == '[')
+					break;
+				if (*line == '#' || *line == '\n')
+					continue;
+				int index = strcntchr(line, '.');
+				if (index != -1)
+					line[index] = 0x00;
+				fprintf(mime_fp, "%s\n", line);
+				mime_lines++;
+			}
 		}
 		free(line);
 		
 		fclose(sys_mime_fp);
 	}
+	
+	/* Make sure there is an entry for text/plain and *.cfm files, so that at 
+	 * least 'mm edit' will work. Gedit, kate, pluma, mousepad, and leafpad, 
+	 * arethe default text editors of Gnome, KDE, Mate, XFCE, and LXDE 
+	 * respectivelly */
+	fprintf(mime_fp, "text/plain=gedit;kate;pluma;mousepad;leafpad;nano;vim;"
+					 "vi;emacs;ed\n"
+					 "*.cfm=gedit;kate;pluma;mousepad;leafpad;nano;vim;vi;"
+					 "emacs;ed\n");
 	
 	fclose(mime_fp);
 	
@@ -3248,47 +3766,112 @@ get_app(char *mime, char *ext)
 		return (char *)NULL;
 	}
 
-	size_t ext_len = 0;
-	if (ext)
-		ext_len = strlen(ext);
-	int found = 0;
+	int found = 0, cmd_ok = 0;
 	size_t line_size = 0, mime_len = strlen(mime);
 	char *line = (char *)NULL, *app = (char *)NULL;
 	ssize_t line_len = 0;
 
+	char mime_tmp[mime_len + 1];
+	sprintf(mime_tmp, "%s=", mime);
+
+	size_t ext_len = 0;
+	char *ext_tmp = (char *)NULL;
+	if (ext) {
+		ext_len = strlen(ext);
+		ext_tmp = (char *)xcalloc(ext_len + 2, sizeof(char));
+		sprintf(ext_tmp, "%s=", ext);
+	}
+
 	while ((line_len = getline(&line, &line_size, defs_fp)) > 0) {
+		found = mime_match = 0; /* Global variable to tell mime_open() if the 
+		application is associated to the file's extension or MIME type*/
 		if (*line == '#' || *line == '[' || *line == '\n')
 			continue;
-		
+
 		if (ext) {
 			if (*line == '*') {
-				if (strncmp(line + 2, ext, ext_len) == 0)
+				if (strncmp(line + 2, ext_tmp, ext_len + 1) == 0)
 					found = 1;
 			}
 		}
-		
-		if (strncmp(mime, line, mime_len) == 0) 
-			found = 1;
+
+		if (strncmp(line, mime_tmp, mime_len + 1) == 0)
+				found = mime_match = 1;
 
 		if (found) {
-			char *tmp = strchr(line, '=');
-			if (tmp) {
-				size_t tmp_len = strlen(tmp);
-				if (tmp[tmp_len - 1] == '\n')
-					tmp[tmp_len - 1] = 0x00;
-				app = (char *)xcalloc(tmp_len, sizeof(char));
-				strcpy(app, tmp + 1);
+			/* Get associated applications */
+			char *tmp = strrchr(line, '=');
+			if (!tmp)
+				continue;
+
+			tmp++; /* We don't want the '=' char */
+
+			size_t tmp_len = strlen(tmp);
+			app = xrealloc(app, (tmp_len + 1) * sizeof(char));
+			size_t app_len = 0;
+			while (*tmp) {
+				app_len = 0;
+				/* Split the appplications line into substrings, if any */
+				while (*tmp != 0x00 && *tmp != ';' && *tmp != '\n' 
+				&& *tmp != '\'' && *tmp != '"')
+					app[app_len++] = *(tmp++);
+				
+				while (*tmp == 0x20) /* Remove leading spaces */
+					tmp++;
+				if (app_len) {
+					app[app_len] = 0x00;
+					/* Check each application existence */
+					char *path = (char *)NULL;
+					/* If app contains spaces, the command to check is the
+					 * string before the first space */
+					int ret = strcntchr(app, 0x20);
+					if (ret != -1) {
+						char *app_tmp = (char *)xcalloc(app_len + 1, 
+														sizeof(char));
+						strcpy(app_tmp, app);
+						app_tmp[ret] = 0x00;
+						path = get_cmd_path(app_tmp);
+						free(app_tmp);
+					}
+					else
+						path = get_cmd_path(app);
+					if (path) {
+						/* If the app exists, break the loops and return it */
+						free(path);
+						path = (char *)NULL;
+						cmd_ok = 1;
+					}
+					else
+						continue;
+				}
+
+				if (cmd_ok)
+					break;
+				tmp++;
 			}
-			break;
+			
+			if (cmd_ok)
+				break;
 		}
 	}
+	
+	free(ext_tmp);
+	ext_tmp = (char *)NULL;
 	
 	free(line);
 	line = (char *)NULL;
 	fclose(defs_fp);
 	
-	if (app)
-		return app;
+	if (found) {
+		if (app)
+			return app;
+	}
+	else {
+		if (app) {
+			free(app);
+			app = (char *)NULL;
+		}
+	}
 
 	return (char *)NULL;
 }
@@ -4550,8 +5133,10 @@ open_function(char **cmd)
 			free(deq_path);
 			return EXIT_FAILURE;
 		}
-		else
-			mime_open(cmd);
+		else {
+			if (mime_open(cmd) != 0)
+				fputs("Try 'open FILE APPLICATION'\n", stderr);
+		}
 	}
 	/* If some application was specified to open the file */
 	else {
@@ -4903,6 +5488,7 @@ log_msg(char *_msg, int print)
 		 * trying to access a file that cannot be accessed */
 		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, MSG_LOG_FILE, 
 				strerror(errno));
+		printf("Press any key to continue... ");
 		xgetchar(); puts("");
 	}
 	else {
@@ -6014,10 +6600,10 @@ void
 readline_kbinds(void)
 {
 /*	rl_command_func_t readline_kbind_action; */
-/* To get the keyseq value for a given key do this in an terminal:
+/* To get the keyseq value for a given key do this in an Xterm terminal:
  * C-v and then press the key (or the key combination). So, for example, 
  * C-v, C-right arrow gives "[[1;5C", which here should be written like this:
- * "\\e[1;5A" */
+ * "\\x1b[1;5C" */
 
 /* These keybindings work on all the terminals I tried: the linux built-in
  * console, aterm, urxvt, xterm, lxterminal, xfce4-terminal, gnome-terminal,
@@ -6160,6 +6746,32 @@ readline_kbind_action(int count, int key) {
 		return 0;
 
 	switch (key) {
+
+	/* C-r: Refresh the screen */
+	case 18:
+		keybind_exec_cmd("rf");
+		break;
+
+	/* A-a: Select all files in CWD */
+	case 97:
+		keybind_exec_cmd("sel * .*");
+		break;
+
+	/* A-b: Run the bookmarks manager */
+	case 98:
+		/* Call the function only if it is not already running */
+		if (!kbind_busy) {
+/*				if (!config_ok) {
+				fprintf(stderr, "%s: Trash disabled\n", PROGRAM_NAME);
+				return 0;
+			} */
+			kbind_busy=1;
+			keybind_exec_cmd("bm");
+		}
+		else
+			return 0;
+		break;
+
 	/* A-c: Clear the current command line (== C-a, C-k). Very handy, 
 	 * since C-c is currently disabled */
 	case 99:
@@ -6169,6 +6781,69 @@ readline_kbind_action(int count, int key) {
 		rl_delete_text(0, rl_end);
 		rl_end = rl_point = 0;
 		rl_on_new_line(); */
+		break;
+
+	/* A-d: Deselect all selected files */		
+	case 100:
+		keybind_exec_cmd("ds a");
+		break;
+
+	/* A-e: Change CWD to the HOME directory */
+	case 101:
+		/* If already in the home dir, do nothing */
+		if (strcmp(path, user_home) == 0)
+			return 0;
+		keybind_exec_cmd("cd");
+		break;
+		
+	/* A-f: Toggle folders first on/off */
+	case 102:
+		status = list_folders_first;
+		if (list_folders_first) list_folders_first = 0;
+		else list_folders_first = 1;
+		if (status != list_folders_first) {
+			while (files--) free(dirlist[files]);
+			/* Without this puts(), the first entries of the directories
+			 * list are printed in the prompt line */
+			puts("");
+			list_dir();
+		}
+		break;
+
+	/* A-h: Change CWD to PREVIOUS directoy in history */
+	case 104: /* Same as C-Down arrow (66) */
+		/* If at the beginning of dir hist, do nothing */
+		if (dirhist_cur_index == 0)
+			return 0;
+		keybind_exec_cmd("back");
+		break;
+	
+	/* A-i: Toggle hidden files on/off */
+	case 105:
+		status = show_hidden;
+		if (show_hidden) show_hidden = 0;
+		else show_hidden = 1;
+		if (status != show_hidden) {
+			while (files--) free(dirlist[files]);
+			puts("");
+			list_dir();
+		}
+		break;
+
+	/* A-j: Change CWD to PREVIOUS directoy in history */
+	case 106: 
+		/* If already at the beginning of dir hist, do nothing */
+		if (dirhist_cur_index == 0)
+			return 0;
+		keybind_exec_cmd("back");
+		break;
+		
+	/* A-k: Change CWD to NEXT directory in history */
+	case 107:
+		/* If already at the end of dir hist, do nothing */
+		if (dirhist_cur_index + 1 == dirhist_total_index)
+			return 0;
+		keybind_exec_cmd("forth");
 		break;
 
 	/* A-l: Toggle long view mode on/off */
@@ -6194,100 +6869,6 @@ readline_kbind_action(int count, int key) {
 			return 0;
 		break;
 
-	/* A-a: Select all files in CWD */
-	case 97:
-		keybind_exec_cmd("sel * .*");
-		break;
-		/* A-d: Deselect all selected files */		
-	case 100:
-		keybind_exec_cmd("ds a");
-		break;
-		/* A-b: Run the bookmarks manager */
-	case 98:
-		/* Call the function only if it is not already running */
-		if (!kbind_busy) {
-/*				if (!config_ok) {
-				fprintf(stderr, "%s: Trash disabled\n", PROGRAM_NAME);
-				return 0;
-			} */
-			kbind_busy=1;
-			keybind_exec_cmd("bm");
-		}
-		else
-			return 0;
-		break;
-
-	/* A-f: Toggle folders first on/off */
-	case 102:
-		status = list_folders_first;
-		if (list_folders_first) list_folders_first = 0;
-		else list_folders_first = 1;
-		if (status != list_folders_first) {
-			while (files--) free(dirlist[files]);
-			/* Without this puts(), the first entries of the directories
-			 * list are printed in the prompt line */
-			puts("");
-			list_dir();
-		}
-		break;
-	
-	/* A-i: Toggle hidden files on/off */
-	case 105:
-		status = show_hidden;
-		if (show_hidden) show_hidden = 0;
-		else show_hidden = 1;
-		if (status != show_hidden) {
-			while (files--) free(dirlist[files]);
-			puts("");
-			list_dir();
-		}
-		break;
-
-	/* C-r: Refresh the screen */
-	case 18:
-		keybind_exec_cmd("rf");
-		break;
-
-	/* A-u: Change CWD to PARENT directory */
-	case 117:
-		/* If already root dir, do nothing */
-		if (strcmp(path, "/") == 0)
-			return 0;
-		keybind_exec_cmd("cd ..");
-		break;
-
-	/* A-j: Change CWD to PREVIOUS directoy in history */
-	case 106: 
-		/* If already at the beginning of dir hist, do nothing */
-		if (dirhist_cur_index == 0)
-			return 0;
-		keybind_exec_cmd("back");
-		break;
-		
-	/* A-k: Change CWD to NEXT directory in history */
-	case 107:
-		/* If already at the end of dir hist, do nothing */
-		if (dirhist_cur_index + 1 == dirhist_total_index)
-			return 0;
-		keybind_exec_cmd("forth");
-		break;
-
-	/* A-h: Change CWD to PREVIOUS directoy in history */
-	case 104: /* Same as C-Down arrow (66) */
-		/* If at the beginning of dir hist, do nothing */
-		if (dirhist_cur_index == 0)
-			return 0;
-		keybind_exec_cmd("back");
-		break;
-		
-	/* A-e: Change CWD to the HOME directory */
-	case 101:
-		/* If already in the home dir, do nothing */
-		if (strcmp(path, user_home) == 0)
-			return 0;
-		keybind_exec_cmd("cd");
-		break;
-
 	/* A-r: Change CWD to the ROOT directory */		
 	case 114:
 		/* If already in the root dir, do nothing */
@@ -6300,7 +6881,15 @@ readline_kbind_action(int count, int key) {
 	case 115:
 		keybind_exec_cmd("sb");
 		break;
-		
+
+	/* A-u: Change CWD to PARENT directory */
+	case 117:
+		/* If already root dir, do nothing */
+		if (strcmp(path, "/") == 0)
+			return 0;
+		keybind_exec_cmd("cd ..");
+		break;
+
 	/* F10: Open the config file */
 	case 126:
 		keybind_exec_cmd("edit");
@@ -6379,6 +6968,12 @@ free_stuff (void)
 		for (i = 0; bookmark_names[i]; i++)
 			free(bookmark_names[i]);
 		free(bookmark_names);
+	}
+
+	if (profile_names) {
+		for (i = 0; profile_names[i]; i++)
+			free(profile_names[i]);
+		free(profile_names);
 	}
 
 	if (alt_profile)
@@ -7208,31 +7803,114 @@ my_rl_completion(const char *text, int start, int end)
 	}
 	else {
 		 
-		/* Bookmarks completion */
-		if (strncmp(rl_line_buffer, "bm ", 3) == 0 
-		|| strncmp(rl_line_buffer, "bookmarks ", 10) == 0) {
+				/* #### ELN EXPANSION ### */
+		
+		/* Perform this check only if the first char of the string to be 
+		 * completed is a number in order to prevent an unnecessary call to 
+		 * atoi */
+		if (*text >= 0x31 && *text <= 0x39) {
+			int num_text = atoi(text);
+			if (is_number(text) && num_text > 0 && num_text <= files)
+					matches = rl_completion_matches(text, &filenames_generator);
+		}
+				/* ### BOOKMARKS COMPLETION ### */
+		
+		else if (*rl_line_buffer == 'b' 
+		/* Why to compare the first char of the line buffer? Simply to
+		 * prevent unnecessary calls to strncmp(). For instance, if the user
+		 * typed "cd ", there is no need to compare the line against "bm"
+		 * or "bookmarks" */
+		&& (strncmp(rl_line_buffer, "bm ", 3) == 0 
+		|| strncmp(rl_line_buffer, "bookmarks ", 10) == 0)) {
 			rl_attempted_completion_over = 1;
 			matches = rl_completion_matches(text, &bookmarks_generator);
 		}
-			
-		/* ELN expansion */
-		int num_text = atoi(text);
-		if (is_number(text) && num_text > 0 && num_text <= files)
-			matches = rl_completion_matches(text, &filenames_generator);
+
+				/* ### PROFILES COMPLETION ### */		
+
+		else if (*rl_line_buffer == 'p' 
+		&& (strncmp(rl_line_buffer, "pf set ", 7) == 0 
+		|| strncmp(rl_line_buffer, "profile set ", 12) == 0
+		|| strncmp(rl_line_buffer, "pf del ", 7) == 0
+		|| strncmp(rl_line_buffer, "profile del ", 12) == 0)) {
+			rl_attempted_completion_over = 1;
+			matches = rl_completion_matches(text, &profiles_generator);
+		}
 	}
 
-	/* Path completion */
+				/* ### PATH COMPLETION ### */
+
 	/* If not first word and not a number, readline will attempt 
 	 * path completion instead via my custom my_rl_path_completion() */
 	return matches;
 }
 
-void
+int
+get_profile_names(void)
+{
+	char *pf_dir = (char *)xcalloc(user_home_len + strlen(PNL) + 10, 
+								   sizeof(char));
+	sprintf(pf_dir, "%s/.config/%s", user_home, PNL);
+
+	struct dirent **profs = (struct dirent **)NULL;
+	int files_n = scandir(pf_dir, &profs, NULL, xalphasort);
+	free(pf_dir);
+	pf_dir = (char *)NULL;
+
+	if (files_n == -1)
+		return EXIT_FAILURE;
+	
+	size_t i, pf_n = 0;
+	for (i = 0; i < files_n; i++) {
+		if (profs[i]->d_type == DT_DIR
+		/* Discard ".", "..", and hidden dirs */
+		&& strncmp(profs[i]->d_name, ".", 1) != 0) {
+			profile_names = xrealloc(profile_names, (pf_n + 1) * 
+									 sizeof(char *));
+			profile_names[pf_n] = (char *)xcalloc(strlen(profs[i]->d_name) 
+											+ 1, sizeof(char));
+			strcpy(profile_names[pf_n++], profs[i]->d_name);
+		}
+		free(profs[i]);
+	}
+	free(profs);
+	
+	profile_names = xrealloc(profile_names, (pf_n + 1) * sizeof(char *));
+	profile_names[pf_n] = NULL;
+	
+	return EXIT_SUCCESS;	
+}
+
+char *
+profiles_generator(const char *text, int state) 
+/* Used by profiles completion */
+{
+	static int i;
+	static size_t len;
+	char *name;
+
+	if (!state) {
+		i = 0;
+		len = strlen(text);
+	} /* The state variable is zero only the first time the function is 
+	called, and a non-zero positive in later calls. This means that i and len 
+	will be necessarilly initialized the first time */
+
+	/* Look for profiles in profile_names for a match */
+	while ((name = profile_names[i++]) != NULL) {
+		if (strncmp(name, text, len) == 0)
+			return strdup(name);
+	}
+	
+	return (char *)NULL;
+}
+
+int
 get_bm_names(void)
 /* Get bookmark names for bookmarks TAB completion */
 {
 	if (!config_ok)
-		return;
+		return EXIT_FAILURE;
 	
 	FILE *fp;
 
@@ -7250,7 +7928,7 @@ get_bm_names(void)
 			else
 				fprintf(stderr, "bookmarks: '%s': %s\n", BM_FILE, 
 						strerror(errno));
-			return;
+			return EXIT_FAILURE;
 		}
 		else {
 			fprintf(fp, "#Example: [t]test:/path/to/test\n");
@@ -7270,7 +7948,7 @@ get_bm_names(void)
 		else
 			fprintf(stderr, "%s: '%s': Error reading the bookmarks file\n", 
 				 PROGRAM_NAME, BM_FILE);
-		return;
+		return EXIT_FAILURE;
 	}
 
 	size_t i = 0;
@@ -7316,6 +7994,8 @@ get_bm_names(void)
 	line = (char *)NULL;
 
 	fclose(fp);
+	
+	return EXIT_SUCCESS;
 }
 
 char *
@@ -7329,11 +8009,9 @@ bookmarks_generator(const char *text, int state)
 	if (!state) {
 		i = 0;
 		len = strlen(text);
-	} /* The state variable is zero only the first time the function is 
-	called, and a non-zero positive in later calls. This means that i and len 
-	will be necessarilly initialized the first time */
-	/* Look for files in PATH for a match */
+	} 
 
+	/* Look for bookmarks in bookmark_names for a match */
 	while ((name = bookmark_names[i++]) != NULL) {
 		if (strncmp(name, text, len) == 0)
 			return strdup(name);
@@ -7587,10 +8265,29 @@ init_config(void)
 		/* #### CHECK THE MIME CONFIG FILE #### */
 		/* Open the mime file or create it, if it doesn't exist */
 		if (config_ok && stat(MIME_FILE, &file_attrib) == -1) {
+
+			msg = xasprintf(_("%s created a new MIME list file (%s). It is "
+							"recommended to edit this file (typing 'mm edit' or "
+							"however you want) to add the programs you use and "
+							"remove those you don't. This will make the process "
+							"of opening files faster and smoother\n"), 
+							PROGRAM_NAME, MIME_FILE);
+			if (msg) {
+				notice_msg = 1;
+				log_msg(msg, PRINT_PROMPT);
+				free(msg);
+			}
+			else
+				printf(_("%s created a new MIME list file (%s). It is "
+					   "recommended to edit this file (typing 'mm edit' or "
+					   "however you want) to add the programs you use and "
+					   "remove those you don't. This will make the process of "
+					   "opening files faster and smoother\n"), PROGRAM_NAME, 
+					   MIME_FILE);
+
 			/* Try importing MIME associations from the system, and in case 
-			 * nothing can be imported, create an empty MIME associations
-			 * file */
-			int ret = mime_import();
+			 * nothing can be imported, create an empty MIME list file */
+			int ret = mime_import(MIME_FILE);
 			if (ret != 0) {
 				FILE *mime_fp = fopen(MIME_FILE, "w");
 				if (!mime_fp) {
@@ -7606,7 +8303,15 @@ init_config(void)
 								 MIME_FILE, strerror(errno));
 				}
 				else {
-					fprintf(mime_fp, "#text/plain=nano\n");
+					if (!(flags & GRAPHICAL))
+						fprintf(mime_fp, "text/plain=nano;vim;vi;emacs;ed\n"
+										 "*.cfm=nano;vim;vi;emacs;ed\n");
+					else
+						fprintf(mime_fp, 
+								"text/plain=gedit;kate;pluma;mousepad;leafpad;"
+								"nano;vim;vi;emacs;ed\n"
+								"*.cfm=gedit;kate;pluma;mousepad;leafpad;"
+								"nano;vim;vi;emacs;ed\n");
 					fclose(mime_fp);
 				}
 			}
@@ -10456,7 +11161,7 @@ exec_cmd(char **comm)
 	/*         ############### OPEN ##################     */
 	else if (strcmp(comm[0], "o") == 0	|| strcmp(comm[0], "open") == 0) {
 		if (!comm[1] || strcmp(comm[1], "--help") == 0) {
-			puts(_("Usage: open ELN/FILE [APPLICATION]"));
+			puts(_("Usage: o, open ELN/FILE [APPLICATION]"));
 		}
 		else
 			exit_code = open_function (comm);
@@ -10474,7 +11179,7 @@ exec_cmd(char **comm)
 	else if (strcmp(comm[0], "bm") == 0 
 	|| strcmp(comm[0], "bookmarks") == 0) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
-			puts(_("Usage: bookmarks, bm"));
+			puts(_("Usage: bm, bookmarks [a, add FILE] [d, del] [edit]"));
 			return EXIT_SUCCESS;
 		}
 		/* Disable keyboard shortcuts. Otherwise, the function will still
@@ -10533,7 +11238,7 @@ exec_cmd(char **comm)
 	else if (strcmp(comm[0], "tr") == 0 || strcmp(comm[0], "t") == 0 
 	|| strcmp(comm[0], "trash") == 0) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
-			puts(_("Usage: trash, tr, t ELN/FILE ... n "
+			puts(_("Usage: t, tr, trash [ELN/FILE ... n] "
 				 "[ls, list] [clear] [del, rm]"));
 			return EXIT_SUCCESS;
 		}
@@ -10552,7 +11257,7 @@ exec_cmd(char **comm)
 	else if (strcmp(comm[0], "undel") == 0 || strcmp(comm[0], "u") == 0
 	|| strcmp(comm[0], "untrash") == 0) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
-			puts(_("Usage: undel, untrash, u"));
+			puts(_("Usage: u, undel, untrash [*, a, all]"));
 			return EXIT_SUCCESS;
 		}
 		kbind_busy = 1;
@@ -10565,7 +11270,7 @@ exec_cmd(char **comm)
 	/*         ############### SELECTION ##################     */
 	else if (strcmp(comm[0], "s") == 0 || strcmp(comm[0], "sel") == 0) {
 		if (!comm[1] || strcmp(comm[1], "--help") == 0) {
-			puts(_("Usage: sel, s [ELN ELN-ELN FILE ... n]"));
+			puts(_("Usage: s, sel ELN ELN-ELN FILE ... n"));
 			return EXIT_SUCCESS;
 		}
 		exit_code = sel_function(comm);
@@ -10576,7 +11281,7 @@ exec_cmd(char **comm)
 	
 	else if (strcmp(comm[0], "ds") == 0 || strcmp(comm[0], "desel") == 0) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
-			puts(_("Usage: desel, ds"));
+			puts(_("Usage: desel, ds [*, a, all]"));
 			return EXIT_SUCCESS;
 		}
 		kbind_busy = 1;
@@ -10648,12 +11353,7 @@ exec_cmd(char **comm)
 				/* #### PROFILE #### */
 	else if (strcmp(comm[0], "pf") == 0 || strcmp(comm[0], "prof") == 0 
 	|| strcmp(comm[0], "profile") == 0) {
-		if (comm[1] && strcmp(comm[1], "--help") == 0)
-			puts(_("Usage: profile, prof, pf"));
-		else if (!alt_profile)
-			printf("%s: profile: default\n", PROGRAM_NAME);
-		else
-			printf("%s: profile: '%s'\n", PROGRAM_NAME, alt_profile);
+		return profile_function(comm);
 	}
 	
 				/* #### MOUNTPOINTS #### */
@@ -13403,8 +14103,9 @@ get_history(void)
 		return EXIT_FAILURE;
 
 	FILE *hist_fp = fopen(HIST_FILE, "r");
-	if (current_hist_n == 0) /* Coming from main() */
+	if (current_hist_n == 0) { /* Coming from main() */
 		history = xcalloc(1, sizeof(char *));
+	}
 	else { /* Only true when comming from 'history clear' */
 		size_t i;
 		for (i = 0; i < current_hist_n; i++)
@@ -13412,33 +14113,28 @@ get_history(void)
 		history = xrealloc(history, 1 * sizeof(char *));
 		current_hist_n = 0;
 	}
+	
 	if (hist_fp) {
 
 		size_t line_size = 0;
 		char *line_buff = (char *)NULL;
 		ssize_t line_len = 0;
+		
 		while ((line_len = getline(&line_buff, &line_size, hist_fp)) > 0) {
-			line_buff[line_len-1] = 0x00;
+			line_buff[line_len - 1] = 0x00;
 			history = xrealloc(history, (current_hist_n + 1) * sizeof(char *));
 			history[current_hist_n] = xcalloc(line_len + 1, sizeof(char));
-			strncpy(history[current_hist_n++], line_buff, line_len);
+			strcpy(history[current_hist_n++], line_buff);
 		}
+		
 		free(line_buff);
 		line_buff = (char *)NULL;
 
-/*		char line[MAX_LINE] = "";
-		size_t line_len = 0;
-		while (fgets(line, sizeof(line), hist_fp)) {
-			line_len = strlen(line);
-			line[line_len-1] = 0x00;
-			history = xrealloc(history, (current_hist_n+1)*sizeof(char **));
-			history[current_hist_n] = xcalloc(line_len, sizeof(char *));
-			strncpy(history[current_hist_n++], line, line_len);
-		} */
-
 		fclose (hist_fp);
+
 		return EXIT_SUCCESS;
 	}
+	
 	else {
 		msg = xasprintf("%s: history: '%s': %s\n", PROGRAM_NAME, 
 						HIST_FILE,  strerror(errno));
@@ -13780,7 +14476,7 @@ will list all matches in the current working directory. To search for files \
 in any other directory, specify the directory name as second argument. This \
 argument (DIR) could be an absolute path, a relative path, or an ELN.\n"), 
 		   white, NC, default_color, PROGRAM_NAME);
-	printf(_("\n%sbm, bookmarks%s%s [a, add PATH] [d, del] [edit] [shortcut, \
+	printf(_("\n%sbm, bookmarks%s%s [a, add FILE] [d, del] [edit] [shortcut, \
 name]: With no argument, open the bookmarks menu. Here you can change the \
 current directory to that specified by the corresponding bookmark by just \
 typing its ELN, its shortcut, or its name. In this screen you can also add, \
@@ -13789,7 +14485,7 @@ To add or remove a bookmark directly from the command line, you can us the 'a' \
 and 'd' arguments as follows: \"bm a PATH\" or \"bm d\" respectively. You can \
 also open a bookmark by typing 'bm shortcut' or 'bm name' (in which case TAB \
 completion is available).\n"), white, NC, default_color);
-	printf(_("\n%so, open%s%s ELN/DIR/FILENAME [APPLICATION]: Open \
+	printf(_("\n%so, open%s%s ELN/DIR/FILE [APPLICATION]: Open \
 either a directory or a file. For example: 'o 12' or 'o filename'. By default, \
 the 'open' function will open files with the default application associated to \
 them (via the built-in resource opener (mime)). However, if you want to open \
@@ -13798,16 +14494,20 @@ argument, e.g. 'o 12 leafpad'. If you want to run the program in the \
 background, simply add the ampersand character (&): 'o 12 &'. When it comes \
 to directories, 'open' works just like the 'cd' command.\n"), white, NC, 
 		   default_color);
-	printf(_("\n%smm, mime%s%s [info ELN/FILENAME] [edit]: This is %s's \
+	printf(_("\n%smm, mime%s%s [info ELN/FILE] [edit]: This is %s's \
 built-in resource opener. The 'info' option prints the MIME information \
-about ELN/FILENAME, its MIME type, its extension, and the application \
+about ELN/FILENAME: its MIME type, its extension, and the application \
 associated to FILENAME. The 'edit' option allows you to edit and customize the \
 MIME list file. So, if a file has no default associated application, first get \
 its MIME info (you can use its file extension as well) and then add a value for \
 it to the MIME list using the 'edit' option. Each value in the MIME list file \
-has this format: 'mime_type=application' or '*.ext=application'. Example: \
-'plain/text=nano' or '*.c'. The first matching association will be used.\n"), 
-		   white, NC, default_color, PROGRAM_NAME);
+has this format: 'mime_type=application args;application args; ... n' or \
+'*.ext=application args;application args; ... n'. Example: 'plain/text=nano' \
+or '*.c=geany -p;leafpad;nano'. %s will use the first matching line in the \
+list, and if at least one of the specified applications exists, this one will \
+used to open associated files. In case none of the specified applications \
+exists, the next matching line will be checked.\n"), 
+		   white, NC, default_color, PROGRAM_NAME, PROGRAM_NAME);
 	printf(_("\n%scd%s%s [ELN/DIR]: When used with no argument, it changes the \
 current directory to the default directory (HOME). Otherwise, 'cd' changes \
 the current directory to the one specified by the first argument. You can use \
@@ -13839,11 +14539,11 @@ the back function, but it goes forward in the history record. Of course, you \
 can use 'f hist', 'f h', 'fh', and 'f !ELN'\n"), white, NC, default_color);
 	printf(_("\n%sc, l, m, md, r%s%s: short for 'cp', 'ln', 'mv', 'mkdir', and \
 'rm' commands respectivelly.\n"), white, NC, default_color);
-	printf(_("\n%sp, pr, prop%s%s ELN/FILENAME(s) [a, all] [s, size]: Print \
+	printf(_("\n%sp, pr, prop%s%s ELN/FILE ... n [a, all] [s, size]: Print \
 file properties of FILENAME(s). Use 'all' to list properties of all files in \
 the current working directory, and 'size' to list their corresponding \
 sizes.\n"), white, NC, default_color);
-	printf(_("\n%ss, sel%s%s ELN ELN-ELN FILENAME PATH... n: Send one or \
+	printf(_("\n%ss, sel%s%s ELN ELN-ELN FILE ... n: Send one or \
 multiple elements to the Selection Box. 'Sel' accepts individual elements, \
 range of elements, say 1-6, filenames and paths, just as wildcards. Ex: sel \
 1 4-10 file* filename /path/to/filename\n"), white, NC, default_color);
@@ -13853,7 +14553,7 @@ Selection Box.\n"), white, NC, default_color);
 elements. You can also deselect all selected elements by typing 'ds *', \
 'ds a' or 'ds all'.\n"), white, 
 		   NC, default_color);
-	printf(_("\n%st, tr, trash%s%s  [ELN's, FILE(s)] [ls, list] [clear] \
+	printf(_("\n%st, tr, trash%s%s  [ELN, FILE ... n] [ls, list] [clear] \
 [del, rm]: With no argument (or by passing the 'ls' option), it prints a list \
 of currently trashed files. The 'clear' option removes all files from the \
 trash can, while the 'del' option lists trashed files allowing you to remove \
@@ -13877,8 +14577,10 @@ copy the currently selected elements, if any, into the current working \
 directory. If you want to copy these elements into another directory, you \
 only need to tell 'paste' where to copy these files. Ex: paste sel \
 /path/to/directory\n"), white, NC, default_color);
-	printf(_("\n%spf, prof, profile%s%s: Print the currently used \
-profile.\n"), white, NC, default_color);
+	printf(_("\n%spf, prof, profile%s%s [set, add, del PROFILE]: With no \
+arguments, print the currently used profile. To switch, add o remove a profile \
+use the 'set', 'add', and 'del' options respectivelly followed by the profile \
+name\n"), white, NC, default_color);
 	printf(_("\n%sshell%s%s [SHELL]: Print the current default shell for \
 %s or set SHELL as the new default shell.\n"), white, NC, default_color, 
 		   PROGRAM_NAME);
@@ -14133,7 +14835,7 @@ bonus_function (void)
 		break;
 
 	case 10:
-		printf("Truco y quiero retruco mierda!\n");
+		printf("¡Truco y quiero retruco mierda!\n");
 		break;
 
 	case 11:
@@ -14144,8 +14846,8 @@ bonus_function (void)
 		printf("\"This is a lie\" (The liar paradox)\n");
 		break;
 	case 13:
-		printf("There are two ways to write error-free programs; only the "
-			   "third one works (Alan J. Perlis)\n");
+		printf("\"There are two ways to write error-free programs; only the "
+			   "third one works\" (Alan J. Perlis)\n");
 		break;
 	}
 	state++;
