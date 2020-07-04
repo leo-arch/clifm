@@ -3384,7 +3384,7 @@ profile_set(char *prof)
 	home_ok = config_ok = trash_ok = selfile_ok = 1;
 
 	/* Set the new profile value */
-	/* Default profile == (alt_profile = NULL) */
+	/* Default profile == (alt_profile == NULL) */
 	if (strcmp(prof, "default") != 0) {
 		alt_profile = xcalloc(strlen(prof) + 1, sizeof(char));
 		strcpy(alt_profile, prof);
@@ -3457,6 +3457,18 @@ profile_set(char *prof)
 			if (hist_fp) {
 				fprintf(hist_fp, "edit\n");
 				fclose(hist_fp);
+			}
+			else {
+				msg = xasprintf(_("%s: Error opening the history file\n"),
+								PROGRAM_NAME, sys_shell);
+				if (msg) {
+					warning_msg = 1;
+					log_msg(msg, PRINT_PROMPT);
+					free(msg);
+				}
+				else
+				fprintf(stderr, _("%s: Error opening the history file\n"),
+						PROGRAM_NAME, sys_shell);
 			}
 		}
 		get_history(); /* This is only for us */
