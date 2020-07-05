@@ -10227,11 +10227,12 @@ prompt(void)
 	memset(shell_prompt, 0x00, prompt_length);
 
 	snprintf(shell_prompt, prompt_length, 
-		"%s%s%s%s%s%s[%s@%s] %s $%s%s ", 
+		"%s%s%s%s%s%s[%s@%s] %s %s%s%s ", 
 		(msgs_n) ? msg_str : "", (trash_n) ? 
 		yellow_b : "", (trash_n) ? "T" : "", (sel_n) ? green_b : "", (sel_n) ? 
 		"*" : "", prompt_color, user, hostname, (path_too_long) ? short_path : 
-		(home) ? path_tilde : path, NC_b, text_color);
+		(home) ? path_tilde : path, ((flags & ROOT_USR)) ? "#" : "$", 
+		NC_b, text_color);
 
 
 	if (home)
