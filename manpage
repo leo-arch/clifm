@@ -314,6 +314,12 @@ To see a colored list of the currently used color codes run the 'colors' command
 .TP
 The slash followed by a number (/xx) after directory names indicates the amount of files contained by the corresponding directory.
 
+.SH THE PROMPT
+.TP
+CLiFM's prompt is just like any other standard terminal prompt, displaying the username, the hostname, and the current working directory, ending with a dollar sign ($) if the current user is a normal user, and with a hash sign (#) if it is rather the root user. 
+.TP
+A bold green asterisk at the left of the prompt indicates that there are elements in the Selection Box. In the same way, a yellow 'T' notices that there are currently files in the trash can. Finally, CliFM makes use of three kind of messages: errors (a red 'E' at the left of the prompt), warnings (a yellow 'W'), and simple notices (a green 'N').
+
 .SH NOTES
 .TP
 It depends on the terminal emulator you use to correctly display non-ASCII characters and characters from the extended ASCII charset. If, for example, you create a file named "ñandú" (the spanish word for 'rhea'), it will be correctly displayed by the Linux console, Lxterminal, and Urxvt, but not thus by Xterm or Aterm.
@@ -334,19 +340,26 @@ By default, CliFM starts in the current working directory. However, you can alwa
 
 .SH FILES
 .TP
-\fBMain configuration file:\fR \fI~/.config/clifm/clifmrc\fR
+\fBMain configuration file:\fR \fI~/.config/clifm/profile_name/clifmrc\fR
 Here you can permanently set up CliFM options, add aliases and some prompt commands (which will be executed imediately before each new prompt line). Just recall that in order to use prompt commands you must allow the use of external commands. See the 'ext' command above.
 .TP
-\fBProfile file:\fR \fI~/.config/clifm/clifm_profile\fR
+\fBProfile file:\fR \fI~/.config/clifm/profile_name/clifm_profile\fR
 In this file you can add those commands you want to be executed at startup. You can also permanently set here some custom variables, ex: 'dir="/path/to/folder"'. This variable may be used as a shorcut to that folder, for instance: 'cd $dir'. Custom variables could also be temporarily defined via the command prompt: Ex: user@hostname ~ $ var="This is a test". Temporary variables will be removed at program exit.
 .TP
-\fBLog file:\fR \fI~/.config/clifm/log.cfm\fR
+\fBMIME list file:\fR \fI~/.config/clifm/profile_name/mimelist.cfm\fR
+A list of filetypes and file extensions and their associated applications used by CliFM built-in resource opener.
+.TP
+\fBBookmarks file:\fR \fI~/.config/clifm/profile_name/bookmarks.cfm\fR
+Just the list of the user's bookmarks used by the bookmarks function.
+.TP
+\fBHistory file:\fR \fI~/.config/clifm/profile_name/history.cfm\fR
+A list of commands entered by the user and used by the history function.
+.TP
+\fBCommands log file:\fR \fI~/.config/clifm/profile_name/log.cfm\fR
 The file contains a series of fields separated by a colon in the following way: 'date:user:current_dir:command. All commands executed as external will be logged.
 .TP
-\fBMessages log file:\fR \fI~/.config.clifm/messages.cfm\fR
+\fBMessages log file:\fR \fI~/.config.clifm/profile_name/messages.cfm\fR
 A file containing a list of system messages, either errors, warnings, or simple notices. The messages log format is: [date] message.
-.TP
-A bold green asterisk at the left of the prompt indicates that there are elements in the Selection Box. In the same way, a yellow 'T' notices that there are currently files in the trash can. Finally, CliFM makes use of three kind of messages: errors (a red 'E' at the left of the prompt), warnings (a yellow 'W'), and simple notices (a green 'N').
 
 .SH AUTHOR
 L.M. Abramovich (https://github.com/leo-arch)
