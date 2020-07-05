@@ -18,8 +18,8 @@ CliFM is a completely text-based file manager able to perform all the basic oper
 
 CliFM also offers the following features:
   1) FreeDesktop compliant Trash system
-  2) History function
-  3) TAB completion for commands, paths, and bookmarks
+  2) Command and directory history function
+  3) TAB completion for commands, paths, bookmarks, and profiles
   4) TAB ELN-expansion
   5) Keyboard shortcuts
   6) Wildcards auto-expansion
@@ -33,7 +33,7 @@ CliFM also offers the following features:
   14) Shell commands execution
   15) User profiles
   16) Commands sequential and conditional execution
-  17) Built-in resource opener
+  17) Resource opener
 
 .SH OPTIONS
 .TP
@@ -113,46 +113,19 @@ Bear in mind that, whenever at least one internal command is involved in a chain
 As a rule of thumb, when using chained commands make sure to always expand ELN's to avoid undesired consequences. If, for instance, you issue this command: 'touch aaa && r 3', you will end up deleting a file you were not intended to delete, simple because after the successfull execution of the first command, the ELN 3 corresponds now to a different file.
 
 .TP
-.B cmd, commands 
-show this list of commands
-.TP
 .B /* [DIR]
 this is the quick search function. Just type '/' followed by the string you are looking for (you can use wildcards), and CliFM will list all the matches in the current working directory. To search for files in any other directory, specify the directory name as second argument. This argument (DIR) could be an absolute path, a relative path, or an ELN.
 .TP
 .B bm, bookmarks [a, add PATH] [d, del] [edit] [shortcut, name]
 with no argument, open the bookmarks menu. Here you cd into the desired bookmark by entering either its ELN, its shortcut, or its name. In this screen you can also add, remove or edit your bookmarks by simply typing 'e' to edit the bookmarks file (which is simply a list of lines with this format: [shortcut]name:path. Ex: [d]documents:/home/user/documents). If you want to add or remove a bookmark directly from the command line, use the 'a' and 'd' arguments respectivelly. Example: 'bm a /media/misc' or 'bm d'. You can also open a bookmark by typing 'bm shortcut' or 'bm name' (in which case TAB completion is available).
 .TP
-.B o, open ELN/FILE [APPLICATION]
+.B o, open [ELN/FILE] [APPLICATION]
 open either a directory or a file. For example: 'o 12' or 'o filename'. By default, the 'open' function will open files with the default application associated to them (via the mime built-in function). However, if you want to open a file with a different application, just add the application name as second argument, e.g. 'o 12 leafpad'. If you want to run the program in the background, simply add the ampersand character: 'o 12 &'. When it comes to directories, 'open' works just like the 'cd' command.
-.TP
-.B mm, mime [info ELN/FILENAME] [edit]
-This is CliFM's resource opener. The 'info' option prints the MIME information about ELN/FILENAME: its MIME type, its file extension, if any, and the application associated to this MIME type or file extension. The 'edit' option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension, and then add a value for it to the MIME list file using the 'edit' option. Each value in the MIME list file has this format: 'mime_type=application args;application args; ... n' or '*.c=application args;application args; ... n'. Example: 'plain/text=nano' or '*.c=geany -p;leafpad;nano'. CliFM will check the first matching line, and if at least one of the specified applications exists, this one will be used to open the corresponding associated filed. Else, the next matching line will be checked.
 .TP
 .B cd [ELN/DIR]
 when used with no argument, it changes the current directory to the default directory (HOME). Otherwise, 'cd' changes the current directory to the one specified by the first argument. You can use either ELN's or a string to indicate the directory you want. Ex: 'cd 12' or 'cd ~/media'. Unlike the shell 'cd' command, CliFM's built-in 'cd' function doesn not only changes the current directory, but also lists its content (provided the option "cd lists automatically" is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of 'cd' is much like this shell command: cd DIR && ls -A --color=auto --group-directories-first
 .TP
-.B b, back [h, hist] [clear] [ELN]
-unlike 'cd ..', which will send you to the parent directory of the current directory, this command (with no argument) will send you back to the previously visited directory. CliFM keeps a record of all the visited directories. You can see this list by typing 'b hist', 'b h' or 'bh', and you can access any element in this list by simply passing the corresponding ELN in this list to the 'back' command. Example:
-        [user@hostname] ~ $ bh
-        1 /home/user
-        2 /etc
-        3 /proc
-        [user@hostname] ~ $ b 3
-        [user@hostname] /proc $ 
-
-\fBNote:\fR the line printed in green indicates the current position of the back function in the directory history list.
-  Finally, you can also clear this history list by typing 'b clear'.
-.TP
-.B f, forth [h, hist] [clear] [!ELN]
-it works just like the back function, but it goes forward in the history record. Of course, you can use 'f hist', 'f h', 'fh', and 'f !ELN'.
-.TP
-.B c, l, m, md, r
-short for 'cp', 'ln', 'mv', 'mkdir', and 'rm' commands respectivelly.
-.TP
-.B pr, prop, ELN/FILE ... n [a, all] [s, size]
-print file properties of FILENAME(s). Use 'all' to list properties of all files in the current working directory, and 'size' to list their corresponding sizes.
-.TP
-.B s, sel ELN ELN-ELN FILE ... n
+.B s, sel [ELN ELN-ELN FILE ... n]
 send one or multiple elements (either files or directories) to the Selection Box. 'Sel' accepts individual elements, range of elements, say 1-6, filenames and paths, just as wildcards. Ex: sel 1 4-10 file* filename /path/to/filename.
 .TP
 .B sb, selbox
@@ -167,11 +140,32 @@ with no argument (or by passing the 'ls' option), it prints a list of currently 
 .B u, undel, untrash [*, a, all]
 print a list of currently trashed files allowing you to choose one or more of these files to be undeleted, that is to say, restored to their original location. You can also undelete all trashed files at once using the '*', 'a' or 'all' option.
 .TP
-.B pf, prof, profile [set, add, del PROFILE]
-with no arguments, prints the name of the currently used profile. To switch, add or delete a profile, use the 'set', 'add', and 'del' options respectivelly followed by the corresponding profile name.
+.B b, back [h, hist] [clear] [!ELN]
+unlike 'cd ..', which will send you to the parent directory of the current directory, this command (with no argument) will send you back to the previously visited directory. CliFM keeps a record of all the visited directories. You can see this list by typing 'b hist', 'b h' or 'bh', and you can access any element in this list by simply passing the corresponding ELN in this list to the 'back' command. Example:
+        [user@hostname] ~ $ bh
+        1 /home/user
+        2 /etc
+        3 /proc
+        [user@hostname] ~ $ b !3
+        [user@hostname] /proc $ 
+
+\fBNote:\fR the line printed in green indicates the current position of the back function in the directory history list.
+  Finally, you can also clear this history list by typing 'b clear'.
 .TP
-.B shell [SHELL]
-print the current default shell for CliFM or set SHELL as the new default shell. 
+.B f, forth [h, hist] [clear] [!ELN]
+it works just like the back function, but it goes forward in the history record. Of course, you can use 'f hist', 'f h', 'fh', and 'f !ELN'.
+.TP
+.B c, l, m, md, r
+short for 'cp', 'ln', 'mv', 'mkdir', and 'rm' commands respectivelly.
+.TP
+.B pr, prop, ELN/FILE ... n [a, all] [s, size]
+print file properties of FILENAME(s). Use 'all' to list properties of all files in the current working directory, and 'size' to list their corresponding sizes.
+.TP
+.B mm, mime [info ELN/FILENAME] [edit]
+This is CliFM's resource opener. The 'info' option prints the MIME information about ELN/FILENAME: its MIME type, its file extension, if any, and the application associated to this MIME type or file extension. The 'edit' option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension, and then add a value for it to the MIME list file using the 'edit' option. Each value in the MIME list file has this format: 'mime_type=application args;application args; ... n' or '*.c=application args;application args; ... n'. Example: 'plain/text=nano' or '*.c=geany -p;leafpad;nano'. CliFM will check the first matching line, and if at least one of the specified applications exists, this one will be used to open the corresponding associated filed. Else, the next matching line will be checked.
+.TP
+.B ;cmd, :cmd
+Skip all CLiFM expansions and send the input string (cmd) as it is to the system shell.
 .TP
 .B mp, mountpoints
 list available mountpoints and change the current working directory into the selected mountpoint.
@@ -179,11 +173,17 @@ list available mountpoints and change the current working directory into the sel
 .B v, paste [sel] [DESTINY]
 the 'paste sel' command will copy the currently selected elements, if any, into the current working directory. If you want to copy these elements into another directory, you only need to tell 'paste' where to copy these files. Ex: paste sel /path/to/directory
 .TP
-.B log [clear]
-with no arguments, it shows the log file. If 'clear' is passed as argument, it will delete all the logs.
+.B pf, prof, profile [set, add, del PROFILE]
+with no arguments, prints the name of the currently used profile. To switch, add or delete a profile, use the 'set', 'add', and 'del' options respectivelly followed by the corresponding profile name.
+.TP
+.B shell [SHELL]
+print the current default shell for CliFM or set SHELL as the new default shell. 
 .TP
 .B msg, messages [clear]
 with no arguments, prints the list of messages in the current session. The 'clear' option tells CliFM to empty the messages list.
+.TP
+.B log [clear]
+with no arguments, it shows the log file. If 'clear' is passed as argument, it will delete all the logs.
 .TP
 .B history [clear] [-n]
 with no arguments, it shows the history list. If 'clear' is passed as argument, it will delete all the entries in the history file. Finally, '-n' tells the history command to list only the last 'n' commands in the history list.
@@ -209,6 +209,9 @@ refresh the screen.
 .TP
 .B colors
 show the color codes used to list files.
+.TP
+.B cmd, commands 
+show this list of commands
 .TP
 .B hf, hidden [on, off, status]
 toggle hidden files on/off.
@@ -265,13 +268,13 @@ safely quit CliFM.
 .TP
 \fBA-u:\fR Change up to the parent directory of the current working directory
 .TP
-\fBA-h/A-j:\fR Change to the previous directory in the directory history list
+\fBA-j:\fR Change to the previous directory in the directory history list
 .TP
 \fBA-k:\fR Change to the next directory in the directory history list
 .TP
 \fBF10:\fR Open the configuration file
 .TP
-Some (and even all) of these keybindings might not work in some terminals, though they do work fine in the Linux built-in console, xvt-like terminal emulators like Urxvt and Aterm, and xterm-like ones.
+Some (and even all) of these keybindings might not work in some terminals, though they do work fine on the console (TTY), xvt-like terminal emulators like Urxvt and Aterm, and xterm-like ones.
 .TP
 CliFM will create HOME/.Xresources, if it doesn't already exist, for these keybindings to work correctly.
 
