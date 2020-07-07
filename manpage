@@ -1,5 +1,5 @@
 ./" Manpage for CliFM
-.TH man 1 "July 5, 2020" "1.0" "CliFM man page"
+.TH man 1 "July 6, 2020" "1.0" "CliFM man page"
 .SH NAME
 CLIFM - A completely text-based file manager inspired in Arch Linux' KISS principle 
 .SH SYNOPSIS
@@ -30,12 +30,13 @@ CliFM's features:
   11) Ranges auto-expansion
   12) Bash-like quoting system
   13) Custom aliases and variables
-  14) Customizable colors
-  15) Shell commands execution
-  16) Startup and prompt commands
-  17) User profiles
-  18) Commands sequential and conditional execution
-  19) Resource opener
+  14) Customizable filetype colors
+  15) Customizable prompt
+  16) Shell commands execution
+  17) Startup and prompt commands
+  18) User profiles
+  19) Commands sequential and conditional execution
+  20) Resource opener
 
 .SH OPTIONS
 .TP
@@ -306,7 +307,53 @@ To see a colored list of the currently used color codes run the 'colors' command
 
 .SH THE PROMPT
 .TP
-CLiFM's prompt is just like any other standard terminal prompt, displaying the username, the hostname, and the current working directory, ending with a dollar sign ($) if the current user is a normal user, and with a hash sign (#) if the user is rather the root user. 
+The CLiFM prompt is build from the "Prompt" line in the configuration file following almost the same escape codes and rules used by the Bash prompt, except that it does not perform command substitution nor accepts any of the Bash functions. You can use string literals and escape codes to build the prompt line and its colors. This is a list of avaialable escape codes:
+.TP
+\\e: Escape character
+.TP
+\\h: The hostname, up to the first ‘.’
+.TP
+\\u: The username
+.TP
+\\H: The full hostname
+.TP
+\\n: A newline character
+.TP
+\\r: A carriage return
+.TP
+\\a: A bell character
+.TP
+\\d: The date, in abbrevieted form (ex: “Tue May 26”)
+.TP
+\\s: The name of the shell (everything after the last slash) currently used by CliFM
+.TP
+\\t: The time, in 24-hour HH:MM:SS format
+.TP
+\\T: The time, in 12-hour HH:MM:SS format
+.TP
+\\@: The time, in 12-hour am/pm format
+.TP
+\\A: The time, in 24-hour HH:MM format
+.TP
+\\w: The full current working directory, with $HOME abbreviated with a tilde
+.TP
+\\W: The basename of $PWD, with $HOME abbreviated with a tilde
+.TP
+\\p: A mix of the two above, it abbreviates the current working directory only if longer than PathMax (a value defined in the configuration file).
+.TP
+\\$ '#', if the effective user ID is 0, and '$' otherwise
+.TP
+\\nnn: The character whose ASCII code is the octal value nnn
+.TP
+\\\\: A backslash
+.TP
+\\[: Begin a sequence of non-printing characters. This is mostly used to add color to the prompt line
+.TP
+\\]: End a sequence of non-printing characters
+
+.TP
+By default, for example, CliFM's prompt line is this: "\\[\\e[0;36m\\][\\u@\\H] \\W \\$ \\[\\e[0m\\\]", which once decoded should be something like this: "[user@hostname] /my/path $ ", printed in cyan color.
+
 .TP
 A bold green asterisk at the left of the prompt indicates that there are elements in the Selection Box. In the same way, a yellow 'T' means that there are currently files in the trash can. Finally, CliFM makes use of three kind of messages: errors (a red 'E' at the left of the prompt), warnings (a yellow 'W'), and simple notices (a green 'N').
 

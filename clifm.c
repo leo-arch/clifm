@@ -388,6 +388,7 @@ of course you can grep it to find, say, linux' macros, as here. */
     like in Bash. 
 
 ###################################
+ * (DONE) Add prompt customization. Take a look at the Bash code.
  * (DONE) Bash implementations of xmalloc and xrealloc return a char 
 	pointer (char *) and each call to these functions is casted to the 
 	corresponding variable type. Ex: char *var; var=(char *)xcalloc(1, sizeof(char)). Though a void
@@ -1448,10 +1449,10 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.18.4"
+#define VERSION "0.19.0"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "July 5, 2020"
+#define DATE "July 6, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -1490,7 +1491,7 @@ static int flags;
 /* These are just a fixed color stuff in the interface. Remaining colors 
  * are customizable and set via the config file */
 
-/* \x1b: hex value for escape char (alternative: ^[) 
+/* \x1b: hex value for escape char (alternative: ^[), dec == 27
  * \033: octal value for escape char 
  * \e is non-standard */
 #define blue "\x1b[1;34m" 
@@ -2204,6 +2205,39 @@ get_size_unit(off_t file_size)
 	return size_type;
 }
 
+int
+read_octal(char *str)
+/* Convert octal string into integer. 
+ * Taken from: https://www.geeksforgeeks.org/program-octal-decimal-conversion/ 
+ * Used by parse_prompt_line() to make things like this work: \033[1;34m */
+{
+	if (!str)
+		return -1;
+	
+	int n = atoi(str);
+	int num = n; 
+	int dec_value = 0; 
+
+	/* Initializing base value to 1, i.e 8^0 */
+	int base = 1; 
+
+	int temp = num; 
+	while (temp) { 
+
+		/* Extracting last digit */
+		int last_digit = temp % 10; 
+		temp = temp / 10; 
+
+		/* Multiplying last digit with appropriate 
+		 * base value and adding it to dec_value */
+		dec_value += last_digit * base; 
+
+		base = base * 8; 
+	}
+
+	return dec_value; 
+}
+
 
 				/* ##########################
 				 * #  FUNCTIONS PROTOTYPES  # 
@@ -2336,6 +2370,8 @@ int profile_del(char *prof);
 int profile_set(char *prof);
 int get_profile_names(void);
 char *profiles_generator(const char *text, int state);
+
+char *parse_prompt_line(char *line);
 
 /* Some notes on memory:
 * If a variable is declared OUTSIDE of a function, it is typically considered 
@@ -2517,7 +2553,8 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 int files = 0, args_n = 0, sel_n = 0, max_hist = -1, max_log = -1, 
 	path_n = 0, current_hist_n = 0, dirhist_total_index = 0, 
 	dirhist_cur_index = 0, argc_bk = 0, usrvar_n = 0, aliases_n = 0, 
-	prompt_cmds_n = 0, trash_n = 0, msgs_n = 0, longest = 0, term_cols = 0;
+	prompt_cmds_n = 0, trash_n = 0, msgs_n = 0, longest = 0, term_cols = 0,
+	max_path = -1;
 
 size_t user_home_len = 0;
 struct termios shell_tmodes;
@@ -2540,7 +2577,7 @@ char *user = (char *)NULL, *path = (char *)NULL, **old_pwd = (char **)NULL,
 	*TRASH_INFO_DIR = (char *)NULL, *sys_shell = (char *)NULL, 
 	**dirlist = (char **)NULL, **bookmark_names = (char **)NULL,
 	*ls_colors_bk = (char *)NULL, *MIME_FILE = (char *)NULL,
-	**profile_names = (char **)NULL,
+	**profile_names = (char **)NULL, *tmp_prompt_line = (char *)NULL,
 	/* This is not a comprehensive list of commands. It only lists commands
 	 * long version for TAB completion */
 	*INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
@@ -2649,7 +2686,6 @@ main(int argc, char **argv)
 	# ifndef _POSIX_C_SOURCE
 		puts("Not POSIX: Using GNU extensions");
 	#endif */
-
 
 				/* #################################
 				 * #     1) INITIALIZATION		   #
@@ -3019,6 +3055,264 @@ main(int argc, char **argv)
 
 /* ###FUNCTIONS DEFINITIONS### */
 
+char *
+parse_prompt_line(char *line)
+/* Decode the prompt string of the configuration file. Modified version of 
+ * the decode_prompt_string() function of an old bash release (1.14.7) */
+{
+	if(!line)
+		return (char *)NULL;
+
+	#define CTLESC '\001'
+	#define CTLNUL '\177'
+	
+	char *temp = (char *)NULL, *result = (char *)NULL;
+	size_t result_len = 0;
+	int c;
+	
+	while((c = *line++)) {
+		/* We have a escape char */
+		if (c == '\\') {
+			
+			/* Now move on to the next char */
+			c = *line;
+
+			switch (c) {
+
+			case 'e':
+				temp = xcalloc(3, sizeof(char));
+				line ++;
+				temp[0] = CTLESC;
+				/* 27 (dec) == 033 (octal) == 0x1b (hex) == \e */
+				temp[1] = 27;
+				temp[2] = 0x00;
+				c = 0;
+				goto add_string;
+
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			{
+				char octal_string[4];
+				int n;
+
+				strncpy(octal_string, line, 3);
+				octal_string[3] = '\0';
+
+				n = read_octal(octal_string);
+				temp = xcalloc(3, sizeof(char));
+
+				if (n == CTLESC || n == CTLNUL) {
+					line += 3;
+					temp[0] = CTLESC;
+					temp[1] = n;
+					temp[2] = 0x00;
+				}
+				else if (n == -1) {
+					temp[0] = '\\';
+					temp[1] = 0x00;
+				}
+				else {
+					line += 3;
+					temp[0] = n;
+					temp[1] = 0x00;
+				}
+
+				c = 0;
+				goto add_string;
+			}
+
+			case 'c': /* Program name */
+				temp = savestring(PNL, strlen(PNL));
+				goto add_string;
+
+			case 't': /* Time: 24-hour HH:MM:SS format */
+			case 'T': /* 12-hour HH:MM:SS format */
+			case 'A': /* 24-hour HH:MM format */
+			case '@': /* 12-hour HH:MM:SS am/pm format */
+			case 'd': /* Date: abrev_weak_day, abrev_month_day month_num */
+				{
+				time_t rawtime = time(NULL);
+				struct tm *tm = localtime(&rawtime);
+				if (c == 't') {
+					char time[9] = "";
+					strftime(time, sizeof(time), "%H:%M:%S", tm);
+					temp = savestring(time, sizeof(time));
+				}
+				else if (c == 'T') {
+					char time[9] = "";
+					strftime(time, sizeof(time), "%I:%M:%S", tm);
+					temp = savestring(time, sizeof(time));
+				}
+				else if (c == 'A') {
+					char time[6] = "";
+					strftime(time, sizeof(time), "%H:%M", tm);
+					temp = savestring(time, sizeof(time));
+				}
+				else if (c == '@') {
+					char time[12] = "";
+					strftime(time, sizeof(time), "%I:%M:%S %p", tm);
+					temp = savestring(time, sizeof(time));
+				}
+				else { /* c == 'd' */
+					char time[12] = "";
+					strftime(time, sizeof(time), "%a %b %d", tm);
+					temp = savestring(time, sizeof(time));
+				}
+				goto add_string;
+				}
+
+			case 'u': /* User name */
+				temp = savestring(user, strlen(user));
+				goto add_string;
+
+			case 'h': /* Hostname up to first '.' */
+			case 'H': /* Full hostname */
+				temp = savestring(hostname, strlen(hostname));
+				if (c == 'h') {
+					int ret = strcntchr(hostname, '.');
+					if (ret != -1) {
+						temp[ret] = 0x00;
+					}
+				}
+				goto add_string;
+
+			case 's': /* Shell name (after last slash)*/
+				{
+				if (!sys_shell) {
+					line++;
+					break;
+				}
+				char *shell_name = strrchr(sys_shell, '/');
+				temp = savestring(shell_name + 1, strlen(shell_name) - 1);
+				goto add_string;
+				}
+
+			case 'p':
+			case 'w': /* Full PWD */
+			case 'W': /* Short PWD */
+				{
+				if (!path) {
+					line++;
+					break;
+				}
+
+				/* Reduce HOME to "~" */
+				int free_tmp_path = 0;
+				char *tmp_path = (char *)NULL;
+				if (strncmp(path, user_home, user_home_len) == 0)
+					tmp_path = home_tilde(path);
+				if (!tmp_path) {
+					tmp_path = path;
+				}
+				else
+					free_tmp_path = 1;
+
+				if (c == 'W') {
+					char *ret = (char *)NULL;
+					/* If not root dir (/), get last dir name */
+					if (!(*tmp_path == '/' && !*(tmp_path + 1)))
+						ret = strrchr(tmp_path, '/');
+					
+					if (!ret)
+						temp = savestring(tmp_path, strlen(tmp_path));
+					else
+						temp = savestring(ret + 1, strlen(ret) - 1);
+				}
+
+				/* Reduce path only if longer than max_path */
+				else if (c == 'p') {
+					if (strlen(tmp_path) > max_path) {
+						char *ret = (char *)NULL;
+						ret = strrchr(tmp_path, '/');
+						if (!ret)
+							temp = savestring(tmp_path, strlen(tmp_path));
+						else
+							temp = savestring(ret + 1, strlen(ret) - 1);
+					}
+					else
+						temp = savestring(tmp_path, strlen(tmp_path));
+				}
+
+				else /* If c == 'w' */
+					temp = savestring(tmp_path, strlen(tmp_path));
+
+				if (free_tmp_path)
+					free(tmp_path);
+
+				goto add_string;
+				}
+				
+			case '$': /* '$' or '#' for normal and root user */
+				if ((flags & ROOT_USR))
+					temp = savestring("#", 1);
+				else
+					temp = savestring("$", 1);
+				goto add_string;
+
+			case 'a': /* Bell character */
+			case 'r': /* Carriage return */
+			case 'n': /* New line char */
+				temp = savestring(" ", 1);
+				if (c == 'n')
+					temp[0] = '\n';
+				else if (c == 'r')
+					temp[0] = '\r';
+				else
+					temp[0] = '\a';
+				goto add_string;
+
+			case '[': /* Begin a sequence of non-printing characters */
+			case ']': /* End the sequence */
+				temp = xcalloc(3, sizeof(char));
+				temp[0] = '\001';
+				temp[1] = (c == '[') ? RL_PROMPT_START_IGNORE
+						  : RL_PROMPT_END_IGNORE;
+				temp[2] = 0x00;
+				goto add_string;
+
+			case '\\': /* Literal backslash */
+				temp = savestring ("\\", 1);
+				goto add_string;
+			
+			default:
+				temp = savestring("\\ ", 2);
+				temp[1] = c;
+			
+			add_string:
+				if (c)
+					line++;
+				result_len += strlen(temp);
+				if (!result)
+					result = (char *)xcalloc(result_len + 1, sizeof(char));
+				else
+					result = (char *)xrealloc(result, (result_len + 1) 
+											  * sizeof(char));
+				strcat(result, temp);
+				free(temp);
+				break;
+			}
+		}
+		
+		/* If not escape code, just add whatever char is there */
+		else {
+			/* Remove non-escaped quotes */
+			if (c == '\'' || c == '"')
+				continue;
+			result = (char *)xrealloc(result, (result_len + 2) * sizeof(char));
+			result[result_len++] = c;
+			result[result_len] = 0x00;
+		}
+	}
+	
+	return result;
+}
+
 int
 profile_function(char **comm)
 {
@@ -3208,32 +3502,34 @@ profile_add(char *prof)
 		fprintf(config_fp, "%s configuration file\n\
 ########################\n\n", PROGRAM_NAME);
 		fprintf(config_fp, "\
-Filetype colors=\"di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;39:\
+FiletypeColors=\"di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;39:\
 ef=00;33:nf=00;31:ln=01;36:or=00;36:pi=40;33:so=01;35:bd=01;33;01:\
 cd=01;37;01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:\
 ex=01;32:ee=00;32:no=00;47;31\"\n\
-Prompt color=00;36\n\
-Text color=00;39;49\n\
-ELN color=01;33\n\
-Default color=00;39;49\n\
-Dir counter color=00;39;49\n\
-Dividing line color=00;34\n\
-Welcome message color=01;35\n\
-Welcome message=true\n\
-Splash screen=false\n\
-Show hidden files=true\n\
-Long view mode=false\n\
-External commands=false\n\
-System shell=\n\
-List folders first=true\n\
-cd lists automatically=true\n\
-Case sensitive list=false\n\
+PromptColor=00;36\n\
+TextColor=00;39;49\n\
+ELNColor=01;33\n\
+DefaultColor=00;39;49\n\
+DirCounterColor=00;39;49\n\
+DividingLineColor=00;34\n\
+Prompt=\"\\[\\e[0;36m\\][\\u@\\H] \\W \\$ \\[\\e[0m\\]\"\n\
+MaxPath=40\n\
+WelcomeMessageColor=01;36\n\
+WelcomeMessage=true\n\
+SplashScreen=false\n\
+ShowHiddenFiles=true\n\
+LongViewMode=false\n\
+ExternalCommands=false\n\
+SystemShell=\n\
+ListFoldersFirst=true\n\
+CdListsAutomatically=true\n\
+CaseSensitiveList=false\n\
 Unicode=false\n\
 Pager=false\n\
-Max history=500\n\
-Max log=1000\n\
-Clear screen=false\n\
-Starting path=default\n");
+MaxHistory=500\n\
+MaxLog=1000\n\
+ClearScreen=false\n\
+StartingPath=\n");
 		fprintf(config_fp, "#Default starting path is CWD\n");
 		fprintf(config_fp, "#END OF OPTIONS\n\
 \n###Aliases###\nalias ls='ls --color=auto -A'\n\
@@ -3338,6 +3634,11 @@ profile_set(char *prof)
 		return EXIT_FAILURE;
 	}
 	
+	/* If changing to the current profile, do nothing */
+	if ((strcmp(prof, "default") == 0 && !alt_profile)
+	|| (alt_profile && strcmp(prof, alt_profile) == 0))
+		return EXIT_SUCCESS;
+	
 	/* Reset everything */
 	free(CONFIG_DIR);
 	CONFIG_DIR = (char *)NULL;
@@ -3370,6 +3671,11 @@ profile_set(char *prof)
 	if (alt_profile) {
 		free(alt_profile);
 		alt_profile = (char *)NULL;
+	}
+
+	if (tmp_prompt_line) {
+		free(tmp_prompt_line);
+		tmp_prompt_line = (char *)NULL;
 	}
 
 	splash_screen = welcome_message = ext_cmd_ok = show_hidden = -1;
@@ -4390,7 +4696,7 @@ set_colors(void)
 		size_t line_size = 0;
 
 		while ((line_len = getline(&line, &line_size, fp_colors)) > 0) {
-			if (strncmp(line, "Filetype colors=", 16) == 0) {
+			if (strncmp(line, "FiletypeColors=", 15) == 0) {
 				char *opt_str = straft(line, '=');
 				if (!opt_str)
 					continue;
@@ -4694,6 +5000,7 @@ set_default_options(void)
 	cd_lists_on_the_fly = 1;	
 	case_sensitive = 0;
 	unicode = 0;
+	max_path = 40;
 
 	strcpy(prompt_color, "\001\x1b[00;36m\002");
 	strcpy(text_color, "\001\x1b[00;39m\002");
@@ -4701,7 +5008,7 @@ set_default_options(void)
 	strcpy(dir_count_color, "\x1b[00;97m");
 	strcpy(default_color, "\x1b[00;39;49m");
 	strcpy(div_line_color, "\x1b[00;34m");
-	strcpy(welcome_msg_color, "\x1b[01;35m");
+	strcpy(welcome_msg_color, "\x1b[01;36m");
 	sprintf(di_c, "\x1b[01;34m");
 	sprintf(nd_c, "\x1b[01;31m");
 	sprintf(ed_c, "\x1b[00;34m");
@@ -4742,6 +5049,11 @@ set_default_options(void)
 		sys_shell = (char *)xcalloc(8, sizeof(char));
 		strcpy(sys_shell, "/bin/sh");
 	}
+	
+	if (tmp_prompt_line)
+		free(tmp_prompt_line);
+	tmp_prompt_line = (char *)xcalloc(36, sizeof(char));
+	strcpy(tmp_prompt_line, "\\[\\e[0;36m\\][\\u@\\H] \\W \\$ \\[\\e[0m\\]");
 }
 
 char *
@@ -6988,7 +7300,10 @@ void
 free_stuff (void)
 {
 	size_t i = 0;
-	
+
+	if (tmp_prompt_line)
+		free(tmp_prompt_line);
+
 	if (bookmark_names) {
 		for (i = 0; bookmark_names[i]; i++)
 			free(bookmark_names[i]);
@@ -8408,32 +8723,34 @@ init_config(void)
 				fprintf(config_fp, "%s configuration file\n\
 	########################\n\n", PROGRAM_NAME);
 				fprintf(config_fp, "\
-Filetype colors=\"di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;39:\
+FiletypeColors=\"di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;39:\
 ef=00;33:nf=00;31:ln=01;36:or=00;36:pi=40;33:so=01;35:bd=01;33;01:\
 cd=01;37;01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:\
 ex=01;32:ee=00;32:no=00;47;31\"\n\
-Prompt color=00;36\n\
-Text color=00;39;49\n\
-ELN color=01;33\n\
-Default color=00;39;49\n\
-Dir counter color=00;39;49\n\
-Dividing line color=00;34\n\
-Welcome message color=01;35\n\
-Welcome message=true\n\
-Splash screen=false\n\
-Show hidden files=true\n\
-Long view mode=false\n\
-External commands=false\n\
-System shell=\n\
-List folders first=true\n\
-cd lists automatically=true\n\
-Case sensitive list=false\n\
+PromptColor=00;36\n\
+TextColor=00;39;49\n\
+ELNColor=01;33\n\
+DefaultColor=00;39;49\n\
+DirCounterColor=00;39;49\n\
+DividingLineColor=00;34\n\
+Prompt=\"\\[\\e[0;36m\\][\\u@\\H] \\W \\$ \\[\\e[0m\\]\"\n\
+MaxPath=40\n\
+WelcomeMessageColor=01;36\n\
+WelcomeMessage=true\n\
+SplashScreen=false\n\
+ShowHiddenFiles=true\n\
+LongViewMode=false\n\
+ExternalCommands=false\n\
+SystemShell=\n\
+ListFoldersFirst=true\n\
+CdListsAutomatically=true\n\
+CaseSensitiveList=false\n\
 Unicode=false\n\
 Pager=false\n\
-Max history=500\n\
-Max log=1000\n\
-Clear screen=false\n\
-Starting path=default\n");
+MaxHistory=500\n\
+MaxLog=1000\n\
+ClearScreen=false\n\
+StartingPath=\n");
 			fprintf(config_fp, "#Default starting path is CWD\n");
 			fprintf(config_fp, "#END OF OPTIONS\n\
 \n###Aliases###\nalias ls='ls --color=auto -A'\n\
@@ -8483,9 +8800,9 @@ OF PROMPT\n");
 					/* Check for the splas_screen flag. If -1, it was not
 					 * set via command line, so that it must be set here */
 					else if (splash_screen == -1 
-					&& strncmp(line, "Splash screen=", 14) == 0) {
+					&& strncmp(line, "SplashScreen=", 13) == 0) {
 						char opt_str[MAX_BOOL] = ""; /* false (5) + 1 */
-						ret = sscanf(line, "Splash screen=%5s\n", opt_str);
+						ret = sscanf(line, "SplashScreen=%5s\n", opt_str);
 						/* According to cppcheck: "sscanf() without field 
 						 * width limits can crash with huge input data". 
 						 * Field width limits = %5s */
@@ -8500,9 +8817,9 @@ OF PROMPT\n");
 						else
 							splash_screen = 0;
 					}
-					else if (strncmp(line, "Welcome message=", 16) == 0) {
+					else if (strncmp(line, "WelcomeMessage=", 15) == 0) {
 						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "Welcome message=%5s\n", opt_str);
+						ret = sscanf(line, "WelcomeMessage=%5s\n", opt_str);
 						if (ret == -1)
 							continue;
 						if (strncmp(opt_str, "true", 4) == 0)
@@ -8512,9 +8829,9 @@ OF PROMPT\n");
 						else /* default */
 							welcome_message = 1;
 					}
-					else if (strncmp(line, "Clear screen=", 13) == 0) {
+					else if (strncmp(line, "ClearScreen=", 12) == 0) {
 						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "Clear screen=%5s\n", opt_str);
+						ret = sscanf(line, "ClearScreen=%5s\n", opt_str);
 						if (ret == -1)
 							continue;
 						if (strncmp(opt_str, "true", 4) == 0)
@@ -8525,9 +8842,9 @@ OF PROMPT\n");
 							clear_screen = 0;
 					}
 					else if (show_hidden == -1 
-					&& strncmp(line, "Show hidden files=", 18) == 0) {
+					&& strncmp(line, "ShowHiddenFiles=", 16) == 0) {
 						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "Show hidden files=%5s\n", opt_str);
+						ret = sscanf(line, "ShowHiddenFiles=%5s\n", opt_str);
 						if (ret == -1)
 							continue;
 						if (strncmp(opt_str, "true", 4) == 0)
@@ -8538,9 +8855,9 @@ OF PROMPT\n");
 							show_hidden = 1;
 					}
 					else if (long_view == -1 
-					&& strncmp(line, "Long view mode=", 15) == 0) {
+					&& strncmp(line, "LongViewMode=", 13) == 0) {
 						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "Long view mode=%5s\n", opt_str);
+						ret = sscanf(line, "LongViewMode=%5s\n", opt_str);
 						if (ret == -1)
 							continue;
 						if (strncmp (opt_str, "true", 4) == 0)
@@ -8551,9 +8868,9 @@ OF PROMPT\n");
 							long_view = 0;
 					}
 					else if (ext_cmd_ok == -1 
-					&& strncmp(line, "External commands=", 18) == 0) {
+					&& strncmp(line, "ExternalCommands=", 17) == 0) {
 						char opt_str[MAX_BOOL] = "";
-						ret=sscanf(line, "External commands=%5s\n", opt_str);
+						ret=sscanf(line, "ExternalCommands=%5s\n", opt_str);
 						if (ret == -1)
 							continue;
 						if (strncmp(opt_str, "true", 4) == 0)
@@ -8563,13 +8880,13 @@ OF PROMPT\n");
 						else /* default */
 							ext_cmd_ok = 0;
 					}
-					else if (strncmp (line, "System shell=", 13) == 0) {
+					else if (strncmp (line, "SystemShell=", 12) == 0) {
 						if (sys_shell) {
 							free(sys_shell);
 							sys_shell = (char *)NULL;
 						}
 						char opt_str[PATH_MAX] = "";
-						ret = sscanf(line, "System shell=%4095s\n", opt_str);
+						ret = sscanf(line, "SystemShell=%4095s\n", opt_str);
 						if (ret == -1)
 							continue;
 						sys_shell = (char *)xcalloc(strlen(opt_str) + 1, 
@@ -8577,9 +8894,9 @@ OF PROMPT\n");
 						strcpy(sys_shell, opt_str);
 					}
 					else if (list_folders_first == -1 
-					&& strncmp(line, "List folders first=", 19) == 0) {
+					&& strncmp(line, "ListFoldersFirst=", 17) == 0) {
 						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "List folders first=%5s\n", opt_str);
+						ret = sscanf(line, "ListFoldersFirst=%5s\n", opt_str);
 						if (ret == -1)
 							continue;
 						if (strncmp (opt_str, "true",4) == 0)
@@ -8590,9 +8907,9 @@ OF PROMPT\n");
 							list_folders_first = 1;
 					}
 					else if (cd_lists_on_the_fly == -1 
-					&& strncmp(line, "cd lists automatically=", 23) == 0) {
+					&& strncmp(line, "CdListsAutomatically=", 21) == 0) {
 						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "cd lists automatically=%5s\n", 
+						ret = sscanf(line, "CdListsAutomatically=%5s\n", 
 									 opt_str);
 						if (ret == -1)
 							continue;
@@ -8604,9 +8921,9 @@ OF PROMPT\n");
 							cd_lists_on_the_fly = 1;
 					}
 					else if (case_sensitive == -1 
-					&& strncmp(line, "Case sensitive list=", 20) == 0) {
+					&& strncmp(line, "CaseSensitiveList=", 18) == 0) {
 						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "Case sensitive list=%5s\n", 
+						ret = sscanf(line, "CaseSensitiveList=%5s\n", 
 								   opt_str);
 						if (ret == -1)
 							continue;
@@ -8643,7 +8960,19 @@ OF PROMPT\n");
 						else /* Default */
 							pager = 0;
 					}
-					else if (strncmp(line, "Prompt color=", 13) == 0) {
+					else if (strncmp (line, "Prompt=", 7) == 0) {
+						if (tmp_prompt_line)
+							free(tmp_prompt_line);
+						tmp_prompt_line = straft(line, '=');
+					}
+					else if (strncmp(line, "MaxPath=", 8) == 0) {
+						int opt_num = 0;
+						sscanf(line, "MaxPath=%d\n", &opt_num);
+						if (opt_num <= 0)
+							continue;
+						max_path = opt_num;
+					}
+					else if (strncmp(line, "PromptColor=", 12) == 0) {
 						char *opt_str = (char *)NULL;
 						opt_str = straft(line, '=');
 						if (!opt_str)
@@ -8663,7 +8992,7 @@ OF PROMPT\n");
 								  "\001\x1b[%sm\002", opt_str);
 						free(opt_str);
 					}
-					else if (strncmp (line, "Text color=", 11) == 0) {
+					else if (strncmp (line, "TextColor=", 10) == 0) {
 						char *opt_str = (char *)NULL;
 						opt_str = straft(line, '=');
 						if (!opt_str)
@@ -8681,7 +9010,7 @@ OF PROMPT\n");
 						free(opt_str);
 					}
 
-					else if (strncmp(line, "ELN color=", 10) == 0) {
+					else if (strncmp(line, "ELNColor=", 9) == 0) {
 						char *opt_str = (char *)NULL;
 						opt_str = straft(line, '=');
 						if (!opt_str)
@@ -8698,7 +9027,7 @@ OF PROMPT\n");
 						free(opt_str);
 					}
 
-					else if (strncmp(line, "Default color=", 14) == 0) {
+					else if (strncmp(line, "DefaultColor=", 13) == 0) {
 						char *opt_str = (char *)NULL;
 						opt_str = straft(line, '=');
 						if (!opt_str)
@@ -8715,7 +9044,7 @@ OF PROMPT\n");
 								 opt_str);
 						free(opt_str);
 					}
-					else if (strncmp (line, "Dir counter color=", 18) == 0) {
+					else if (strncmp (line, "DirCounterColor=", 16) == 0) {
 						char *opt_str = (char *)NULL;
 						opt_str = straft(line, '=');
 						if (!opt_str)
@@ -8733,8 +9062,7 @@ OF PROMPT\n");
 						free(opt_str);
 						opt_str = (char *)NULL;
 					}
-					else if (strncmp(line, "Welcome message color=", 
-									 22) == 0) {
+					else if (strncmp(line, "WelcomeMessageColor=", 20) == 0) {
 						char *opt_str = (char *)NULL;
 						opt_str=straft(line, '=');
 						if (!opt_str)
@@ -8751,7 +9079,7 @@ OF PROMPT\n");
 								 opt_str);
 						free(opt_str);
 					}
-					else if (strncmp(line, "Dividing line color=", 20) == 0) {
+					else if (strncmp(line, "DividingLineColor=", 18) == 0) {
 						char *opt_str = (char *)NULL;
 						opt_str = straft(line, '=');
 						if (!opt_str)
@@ -8768,24 +9096,24 @@ OF PROMPT\n");
 								 opt_str);
 						free(opt_str);
 					}
-					else if (strncmp(line, "Max history=", 12) == 0) {
+					else if (strncmp(line, "MaxHistory=", 11) == 0) {
 						int opt_num = 0;
-						sscanf(line, "Max history=%d\n", &opt_num);
+						sscanf(line, "MaxHistory=%d\n", &opt_num);
 						if (opt_num <= 0)
 							continue;
 						max_hist = opt_num;
 					}
-					else if (strncmp(line, "Max log=", 8) == 0) {
+					else if (strncmp(line, "MaxLog=", 7) == 0) {
 						int opt_num = 0;
-						sscanf (line, "Max log=%d\n", &opt_num);
+						sscanf (line, "MaxLog=%d\n", &opt_num);
 						if (opt_num <= 0)
 							continue;
 						max_log = opt_num;
 					}
 					else if (!path 
-					&& strncmp(line, "Starting path=", 14) == 0) {
+					&& strncmp(line, "StartingPath=", 13) == 0) {
 						char opt_str[PATH_MAX] = "";
-						ret = sscanf(line, "Starting path=%4095s\n", opt_str);				
+						ret = sscanf(line, "StartingPath=%4095s\n", opt_str);				
 						if (ret == -1)
 							continue;
 						/* If starting path is not "default", and exists, and 
@@ -8793,26 +9121,24 @@ OF PROMPT\n");
 						 * permissions, set path to starting path. If any of 
 						 * these conditions is false, path will be set to 
 						 * default, that is, CWD */
-						if (strncmp(opt_str, "default", 7) != 0) {
-							if (chdir(opt_str) == 0) {
-								free(path);
-								path = (char *)xcalloc(strlen(opt_str) + 1, 
-													   sizeof(char));
-								strcpy(path, opt_str);
+						if (chdir(opt_str) == 0) {
+							free(path);
+							path = (char *)xcalloc(strlen(opt_str) + 1, 
+												   sizeof(char));
+							strcpy(path, opt_str);
+						}
+						else {
+							msg = xasprintf("%s: '%s': %s\n", PROGRAM_NAME, 
+											opt_str, strerror(errno));
+							if (msg) {
+								warning_msg=1;
+								log_msg(msg, PRINT_PROMPT);
+								free(msg);
+								msg = (char *)NULL;
 							}
-							else {
-								msg = xasprintf("%s: '%s': %s\n", PROGRAM_NAME, 
-												opt_str, strerror(errno));
-								if (msg) {
-									warning_msg=1;
-									log_msg(msg, PRINT_PROMPT);
-									free(msg);
-									msg = (char *)NULL;
-								}
-								else
-									printf("%s: '%s': %s\n", PROGRAM_NAME, 
-										   opt_str, strerror(errno));
-							}
+							else
+								printf("%s: '%s': %s\n", PROGRAM_NAME, 
+									   opt_str, strerror(errno));
 						}
 					}
 				}
@@ -8827,6 +9153,7 @@ OF PROMPT\n");
 			if (show_hidden == -1) show_hidden = 1;
 			if (long_view == -1) long_view = 0;
 			if (ext_cmd_ok == -1) ext_cmd_ok = 0;
+			if (max_path == -1) max_path = 40;
 			if (!sys_shell) {
 				/* Get user's default shell */
 				sys_shell = get_sys_shell();
@@ -8857,7 +9184,12 @@ OF PROMPT\n");
 			if (div_line_color_set == -1)
 				strcpy(div_line_color, "\x1b[00;34m");
 			if (welcome_msg_color_set == -1)
-				strcpy(welcome_msg_color, "\x1b[01;35");
+				strcpy(welcome_msg_color, "\x1b[01;36m");
+			if (!tmp_prompt_line) {
+				tmp_prompt_line = (char *)xcalloc(36, sizeof(char));
+				strcpy(tmp_prompt_line, 
+					   "\\[\\e[0;36m\\][\\u@\\H] \\W \\$ \\[\\e[0m\\]");
+			}
 		}
 		
 		/* "XTerm*eightBitInput: false" must be set in HOME/.Xresources to 
@@ -9255,7 +9587,7 @@ home_tilde (const char *new_path)
 	else {
 		path_tilde = (char *)xcalloc(strlen(new_path + user_home_len + 1) + 3, 
 						     sizeof(char));
-		sprintf(path_tilde, "~/%s", new_path+user_home_len+1);
+		sprintf(path_tilde, "~/%s", new_path + user_home_len + 1);
 	}
 	
 	return path_tilde;
@@ -10149,43 +10481,21 @@ prompt(void)
 	
 	get_sel_files();
 
-	size_t max_prompt_path = 40, home = 0, path_too_long = 0;
-	char *input = (char *)NULL, *path_tilde = (char *)NULL, 
-		 *short_path = (char *)NULL;
+	args_n = 0;
 
-	args_n = 0; /* Reset value */
+	char *input = (char *)NULL;
 
-	/* Reduce "/home/user/..." to "~/..." */
+/*	size_t home = 0;
+	char *input = (char *)NULL, *path_tilde = (char *)NULL;
+
 	if (strncmp(path, user_home, user_home_len) == 0) {
 		home = 1;
 		if ((path_tilde = home_tilde(path)) == NULL) {
 			path_tilde = (char *)xcalloc(4, sizeof(char));
 			strcpy(path_tilde, "???");
 		}
-	}
+	} */
 
-	/* Shorten path, if necessary */
-	if (strlen(path) > max_prompt_path) {
-		path_too_long = 1;
-		if ((short_path = straftlst(path, '/')) == NULL) {
-			short_path = (char *)xcalloc(4, sizeof(char));
-			strcpy(short_path, "???");
-		}
-	}
-	
-	/* Unisgned char (0 to 255), max hostname 64 or 255, max username 32 */
-	static short first_time = 1; 
-	static size_t user_len = 0, hostname_len = 0; 
-
-	/* Get the length of these variables just once. In Bash, even if 
-	 * the user changes her user or host name, the prompt will not be 
-	 * updated until next login */
-	if (first_time) {
-		user_len = strlen(user);
-		hostname_len = strlen(hostname);
-		first_time = 0;
-	}
-	
 	/* Messages are categorized in three groups: errors, warnings, and notices.
 	 * The kind of message should be specified by the function printing
 	 * the message itself via a global variable: error_msg, warning_msg, and
@@ -10213,11 +10523,16 @@ prompt(void)
 	/* unsigned short : 0 to 65535 (Max theoretical prompt length: PATH_MAX 
 	 * (4096) + 32 (max user name) + 64 to 255 (max hostname) + 100 (colors) + 
 	 * a few more bytes = 4500 bytes more or less )*/
-	size_t prompt_length = (size_t)(((path_too_long) ? 
-		strlen(short_path) : (home) ? strlen(path_tilde)  
-		: strlen(path))	+ sizeof(prompt_color) + 6 + 7 + 
-		((sel_n) ? 9 : 0) + ((trash_n) ? 9 : 0) + ((msgs_n) ? 9: 0) 
-		+ user_len + hostname_len + sizeof(text_color) + 3);
+
+	char *prompt_line = parse_prompt_line(tmp_prompt_line);
+	size_t prompt_line_len = strlen(prompt_line);
+	if (prompt_line[prompt_line_len - 1] == '\n')
+		prompt_line[prompt_line_len - 1] = 0x00;
+
+	size_t prompt_length = (size_t)(strlen(prompt_line)
+		+ 6 + 7 + ((sel_n) ? 9 : 0) + ((trash_n) ? 9 : 0) + ((msgs_n) ? 9: 0) 
+		+ sizeof(text_color) + 3);
+
 	/* 6 = length of NC_b
 	 * 7 = chars in the prompt: '[]', '@', '$' plus 3 spaces
 	 * 9 = length of color_b ({red,green,yellow}_b); 
@@ -10225,21 +10540,16 @@ prompt(void)
 
 	char shell_prompt[prompt_length];
 	memset(shell_prompt, 0x00, prompt_length);
+	
+	snprintf(shell_prompt, prompt_length, "%s%s%s%s%s%s%s%s", 
+		(msgs_n) ? msg_str : "", (trash_n) ? yellow_b : "", 
+		(trash_n) ? "T" : "", (sel_n) ? green_b : "", (sel_n) ? 
+		"*" : "", prompt_line, NC_b, text_color);
 
-	snprintf(shell_prompt, prompt_length, 
-		"%s%s%s%s%s%s[%s@%s] %s %s%s%s ", 
-		(msgs_n) ? msg_str : "", (trash_n) ? 
-		yellow_b : "", (trash_n) ? "T" : "", (sel_n) ? green_b : "", (sel_n) ? 
-		"*" : "", prompt_color, user, hostname, (path_too_long) ? short_path : 
-		(home) ? path_tilde : path, ((flags & ROOT_USR)) ? "#" : "$", 
-		NC_b, text_color);
-
-
-	if (home)
-		free(path_tilde);
-
-	if (path_too_long)
-		free(short_path);
+	free(prompt_line);
+	
+/*	if (home)
+		free(path_tilde); */
 
 	/* Print error messages, if any. 'print_errors' is set to true by 
 	 * log_msg() with the PRINT_PROMPT flag. If NOPRINT_PROMPT is passed
@@ -10257,20 +10567,23 @@ prompt(void)
 	
 	/* Enable commands history only if the input line is not void */
 	if (input) {
-		/* Do not record empty lines, exit, history commands, or 
-		 * consecutively equal inputs */
+		/* Do not record empty lines, exit, history commands, consecutively 
+		 * equal inputs, or lines starting with space */
 		int no_space = 0;
 		size_t input_len = strlen(input);
-		for (i = 0; i < input_len; i++)
-			if (input[i] != 0x00 && input[i] != 0x20)
+		for (i = 0; i < input_len; i++) {
+			if (input[i] != 0x00 && input[i] != 0x20) {
 				no_space = 1;
+				break;
+			}
+		}
 
 		if (strcmp(input, "q") != 0 && strcmp(input, "quit") != 0 
 		&& strcmp(input, "exit") != 0 && strcmp(input, "zz") != 0
 		&& strcmp(input, "salir") != 0 && strcmp(input, "chau") != 0
 		&& input[0] != '!' && history && history[current_hist_n - 1] 
 		&& (strcmp(input, history[current_hist_n - 1]) != 0)
-		&& no_space) {
+		&& no_space && *input != 0x20) {
 			add_history(input);
 			
 			if (config_ok)
@@ -14419,10 +14732,20 @@ edit_function (char **comm)
 		free(sel_file_user);
 		CONFIG_FILE = PROFILE_FILE = MSG_LOG_FILE = sel_file_user = (char *)NULL;
 
+		free(MIME_FILE);
+		MIME_FILE = (char *)NULL;
+
 		if (alt_profile) {
 			free(alt_profile);
 			alt_profile = (char *)NULL;
 		}
+		
+		if (tmp_prompt_line) {
+			free(tmp_prompt_line);
+			tmp_prompt_line = (char *)NULL;
+		}
+			
+		
 		/* Rerun external_arguments */
 		if (argc_bk > 1)
 			external_arguments(argc_bk, argv_bk);
@@ -14499,6 +14822,9 @@ edit_function (char **comm)
 		free(MSG_LOG_FILE);
 		free(sel_file_user);
 		CONFIG_FILE = PROFILE_FILE = MSG_LOG_FILE = sel_file_user = (char *)NULL;
+
+		free(MIME_FILE);
+		MIME_FILE = (char *)NULL;
 
 		if (alt_profile) {
 			free(alt_profile);
