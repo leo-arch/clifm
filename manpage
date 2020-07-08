@@ -301,14 +301,15 @@ Color codes are just traditional ANSI color codes less the escape character and 
 .TP
 Though by default CliFM uses only 8 colors, you can use 256 and RGB colors as well. Example: fi=04;38;02;245;76;00 will print regular files underlined and using a bold orange RGB or 24-bit true color. In this case, just make sure to use a terminal supporting RGB colors.
 .TP
-Filetype colors are defined in the configuration file and can be modified as you wish. Prompt, ELN, and command line text colors are defined using these color codes as well.
+Filetype colors are defined in the configuration file and can be modified as you wish. ELN and command line text colors are defined using these color codes as well.
 .TP
 To see a colored list of the currently used color codes run the 'colors' command in CliFM.
 
 .SH THE PROMPT
 .TP
-The CLiFM prompt is build from the "Prompt" line in the configuration file following almost the same escape codes and rules used by the Bash prompt, except that it does not perform command substitution nor accepts any of the Bash functions. You can use string literals and escape codes to build the prompt line and its colors. This is a list of avaialable escape codes:
+CLiFM's prompt is build from the "Prompt" line in the configuration file following almost the same escape codes and rules used by the Bash prompt, except that it does not perform command substitution nor accepts any of the Bash functions. String literals and escape codes can be used to build the prompt line and its colors. This is a list of supported escape codes:
 .TP
+\\xnn: The character whose hexadecimal code is nn.
 \\e: Escape character
 .TP
 \\h: The hostname, up to the first ‘.’

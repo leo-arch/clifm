@@ -388,6 +388,7 @@ of course you can grep it to find, say, linux' macros, as here. */
     like in Bash. 
 
 ###################################
+ * (DONE) Use CamelCase for option names in the config file.
  * (DONE) Add prompt customization. Take a look at the Bash code.
  * (DONE) Bash implementations of xmalloc and xrealloc return a char 
 	pointer (char *) and each call to these functions is casted to the 
@@ -1449,10 +1450,10 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.19.0"
+#define VERSION "0.19.1"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "July 6, 2020"
+#define DATE "July 8, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -2236,6 +2237,58 @@ read_octal(char *str)
 	}
 
 	return dec_value; 
+}
+
+int
+hex2int(char *str)
+{
+	int i, n[2];
+	for (i = 1; i >= 0; i--) {
+		if (str[i] >= '0' && str[i] <= '9')
+			n[i] = str[i] - 0x30;
+		else {
+			switch(str[i]) {
+			case 'A': case 'a': n[i] = 10; break;
+			case 'B': case 'b': n[i] = 11; break;
+			case 'C': case 'c': n[i] = 12; break;
+			case 'D': case 'd': n[i] = 13; break;
+			case 'E': case 'e': n[i] = 14; break;
+			case 'F': case 'f': n[i] = 15; break;
+			}
+		}
+	}
+
+	return ((n[0] * 16) + n[1]);
+}
+
+int
+*get_hex_num(char *str)
+/* Given this value: \xA0\xA1\xA1, return an array of integers with the 
+ * integer values for A0, A1, and A2 respectivelly */
+{
+	int i = 0, *hex_n = calloc(3, sizeof(int *));
+	
+	while (*str) {
+		if (*str == '\\') {
+			if (*(str + 1) == 'x') {
+				str += 2;
+				char *tmp = calloc(3, sizeof(char));
+				strncpy(tmp, str, 2);
+				if (i >= 3)
+					hex_n = realloc(hex_n, (i + 1) * sizeof(int *));
+				hex_n[i++] = hex2int(tmp);
+				free(tmp);
+			}
+			else
+				break;
+		}
+		str++;
+	}
+	
+	hex_n = realloc(hex_n, (i + 1) * sizeof(int));
+	hex_n[i] = -1; /* -1 marks the end of the int array */
+	
+	return hex_n;
 }
 
 
@@ -3057,8 +3110,9 @@ main(int argc, char **argv)
 
 char *
 parse_prompt_line(char *line)
-/* Decode the prompt string of the configuration file. Modified version of 
- * the decode_prompt_string() function of an old bash release (1.14.7) */
+/* Decode the prompt string (tmp_prompt_line global variable) taken from the 
+ * configuration file. Based on the decode_prompt_string function found in an 
+ * old bash release (1.14.7). */
 {
 	if(!line)
 		return (char *)NULL;
@@ -3078,8 +3132,36 @@ parse_prompt_line(char *line)
 			c = *line;
 
 			switch (c) {
-
-			case 'e':
+			
+			case 'x': /* Hex numbers */
+			{
+				/* Go back one char, so that we have "\x ... n", which is what
+				 * the get_hex_num() requires */
+				line--;
+				/* get_hex_num returns an array on integers corresponding to
+				 * the hex codes found in line up to the fisrt non-hex 
+				 * expression */
+				int *hex = get_hex_num(line);
+				int n = 0, i = 0, j;
+				/* Count how many hex expressions were found */
+				while (hex[n++] != -1);
+				n--;
+				/* 2 + n == CTLEST + 0x00 + amount of hex numbers*/
+				temp = xcalloc(2 + n, sizeof(char));
+				/* Construct the line: "\001hex1hex2...n0x00"*/
+				temp[0] = CTLESC;
+				for (j = 1; j < (1 + n); j++)
+					temp[j] = (char)hex[i++];
+				temp[1 + n] = 0x00;
+				/* Set the line pointer after the first non-hex expression to
+				 * continue processing */
+				line += (i * 4);
+				c = 0;
+				free(hex);
+				goto add_string;
+			}
+			
+			case 'e': /* Escape char */
 				temp = xcalloc(3, sizeof(char));
 				line ++;
 				temp[0] = CTLESC;
@@ -3089,7 +3171,7 @@ parse_prompt_line(char *line)
 				c = 0;
 				goto add_string;
 
-			case '0':
+			case '0': /* Octal char */
 			case '1':
 			case '2':
 			case '3':
@@ -3267,7 +3349,8 @@ parse_prompt_line(char *line)
 					temp[0] = '\a';
 				goto add_string;
 
-			case '[': /* Begin a sequence of non-printing characters */
+			case '[': /* Begin a sequence of non-printing characters. Mostly
+			used to add color sequences. Ex: \[\033[1;34m\] */
 			case ']': /* End the sequence */
 				temp = xcalloc(3, sizeof(char));
 				temp[0] = '\001';
@@ -3309,6 +3392,10 @@ parse_prompt_line(char *line)
 			result[result_len] = 0x00;
 		}
 	}
+	
+	/* Remove trailing new line char, if any */
+	if (result[result_len - 1] == '\n')
+		result[result_len - 1] = 0x00;
 	
 	return result;
 }
@@ -8727,7 +8814,6 @@ FiletypeColors=\"di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;39:\
 ef=00;33:nf=00;31:ln=01;36:or=00;36:pi=40;33:so=01;35:bd=01;33;01:\
 cd=01;37;01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:\
 ex=01;32:ee=00;32:no=00;47;31\"\n\
-PromptColor=00;36\n\
 TextColor=00;39;49\n\
 ELNColor=01;33\n\
 DefaultColor=00;39;49\n\
@@ -8971,26 +9057,6 @@ OF PROMPT\n");
 						if (opt_num <= 0)
 							continue;
 						max_path = opt_num;
-					}
-					else if (strncmp(line, "PromptColor=", 12) == 0) {
-						char *opt_str = (char *)NULL;
-						opt_str = straft(line, '=');
-						if (!opt_str)
-							continue;
-						if (!is_color_code(opt_str)) {
-							free(opt_str);
-							continue;
-						}
-						size_t opt_len = strlen(opt_str);
-						/* Lines in files usually ends with a new line char.
-						 * But this char brakes the color code, and 
-						 * therefore needs to be removed */
-						if (opt_str[opt_len - 1] == '\n')
-							opt_str[opt_len - 1] = 0x00;
-						prompt_color_set = 1;
-						snprintf(prompt_color, sizeof(prompt_color), 
-								  "\001\x1b[%sm\002", opt_str);
-						free(opt_str);
 					}
 					else if (strncmp (line, "TextColor=", 10) == 0) {
 						char *opt_str = (char *)NULL;
@@ -10485,17 +10551,6 @@ prompt(void)
 
 	char *input = (char *)NULL;
 
-/*	size_t home = 0;
-	char *input = (char *)NULL, *path_tilde = (char *)NULL;
-
-	if (strncmp(path, user_home, user_home_len) == 0) {
-		home = 1;
-		if ((path_tilde = home_tilde(path)) == NULL) {
-			path_tilde = (char *)xcalloc(4, sizeof(char));
-			strcpy(path_tilde, "???");
-		}
-	} */
-
 	/* Messages are categorized in three groups: errors, warnings, and notices.
 	 * The kind of message should be specified by the function printing
 	 * the message itself via a global variable: error_msg, warning_msg, and
@@ -10524,13 +10579,14 @@ prompt(void)
 	 * (4096) + 32 (max user name) + 64 to 255 (max hostname) + 100 (colors) + 
 	 * a few more bytes = 4500 bytes more or less )*/
 
+	/* First, grab and decode the prompt line of the config file (stored in
+	 * tmp_prompt_line at startup) */
 	char *prompt_line = parse_prompt_line(tmp_prompt_line);
-	size_t prompt_line_len = strlen(prompt_line);
-	if (prompt_line[prompt_line_len - 1] == '\n')
-		prompt_line[prompt_line_len - 1] = 0x00;
 
-	size_t prompt_length = (size_t)(strlen(prompt_line)
-		+ 6 + 7 + ((sel_n) ? 9 : 0) + ((trash_n) ? 9 : 0) + ((msgs_n) ? 9: 0) 
+	size_t prompt_line_len = strlen(prompt_line);
+
+	size_t prompt_length = (size_t)(prompt_line_len	+ 6 + 7 
+		+ ((sel_n) ? 9 : 0) + ((trash_n) ? 9 : 0) + ((msgs_n) ? 9: 0) 
 		+ sizeof(text_color) + 3);
 
 	/* 6 = length of NC_b
@@ -10548,9 +10604,6 @@ prompt(void)
 
 	free(prompt_line);
 	
-/*	if (home)
-		free(path_tilde); */
-
 	/* Print error messages, if any. 'print_errors' is set to true by 
 	 * log_msg() with the PRINT_PROMPT flag. If NOPRINT_PROMPT is passed
 	 * instead, 'print_msg' will be false and the message will be
@@ -14744,8 +14797,7 @@ edit_function (char **comm)
 			free(tmp_prompt_line);
 			tmp_prompt_line = (char *)NULL;
 		}
-			
-		
+	
 		/* Rerun external_arguments */
 		if (argc_bk > 1)
 			external_arguments(argc_bk, argv_bk);
@@ -14820,19 +14872,25 @@ edit_function (char **comm)
 		free(CONFIG_FILE);
 		free(PROFILE_FILE);
 		free(MSG_LOG_FILE);
-		free(sel_file_user);
-		CONFIG_FILE = PROFILE_FILE = MSG_LOG_FILE = sel_file_user = (char *)NULL;
+		CONFIG_FILE = PROFILE_FILE = MSG_LOG_FILE = (char *)NULL;
 
 		free(MIME_FILE);
-		MIME_FILE = (char *)NULL;
+		free(sel_file_user);
+		MIME_FILE = sel_file_user = (char *)NULL;
 
 		if (alt_profile) {
 			free(alt_profile);
 			alt_profile = (char *)NULL;
 		}
 
+		if (tmp_prompt_line) {
+			free(tmp_prompt_line);
+			tmp_prompt_line = (char *)NULL;
+		}
+
 		if (argc_bk > 1)
 			external_arguments(argc_bk, argv_bk);
+
 		init_config();
 		/* Free the aliases and prompt_cmds arrays to be allocated again */
 		size_t i = 0;
