@@ -342,6 +342,8 @@ CLiFM's prompt is build from the "Prompt" line in the configuration file followi
 .TP
 \\p: A mix of the two above, it abbreviates the current working directory only if longer than PathMax (a value defined in the configuration file).
 .TP
+\\z: Exit code of the last executed command. :) if success and :( in case of error
+.TP
 \\$ '#', if the effective user ID is 0, and '$' otherwise
 .TP
 \\nnn: The character whose ASCII code is the octal value nnn

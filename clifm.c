@@ -2590,7 +2590,8 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 	recur_perm_error_flag = 0, is_sel = 0, sel_is_last = 0, print_msg = 0, 
 	long_view = -1, kbind_busy = 0, error_msg = 0, warning_msg = 0, 
 	notice_msg = 0, unicode = -1, cont_bt = 0, dequoted = 0, home_ok = 1, 
-	config_ok = 1, trash_ok = 1, selfile_ok = 1, mime_match = 0;
+	config_ok = 1, trash_ok = 1, selfile_ok = 1, mime_match = 0,
+	exit_code = 0;
 	/* -1 means non-initialized or unset. Once initialized, these variables
 	 * are either zero or one */
 /*	sel_no_sel=0 */
@@ -3132,6 +3133,13 @@ parse_prompt_line(char *line)
 			c = *line;
 
 			switch (c) {
+			
+			case 'z': /* Exit status of last executed command */
+				temp = (char *)xcalloc(3, sizeof(char));
+				temp[0] = ':';
+				temp[1] = (exit_code) ? '(' : ')';
+				temp[2] = 0x00;
+				goto add_string;
 			
 			case 'x': /* Hex numbers */
 			{
@@ -11553,7 +11561,7 @@ exec_cmd(char **comm)
 	/* Exit flag. exit_code is zero (sucess) by default. In case of error
 	 * in any of the functions below, it will be set to one (failure).
 	 * This will be the value returned by this function */
-	int exit_code = 0;
+	exit_code = 0;
 
 	/* If a user defined variable */
 	if (flags & IS_USRVAR_DEF) {
@@ -11568,6 +11576,7 @@ exec_cmd(char **comm)
 		if (comm[0][1] == ';' || comm[0][1] == ':') {
 			fprintf(stderr, _("%s: '%.2s': Syntax error\n"), PROGRAM_NAME, 
 					comm[0]);
+			exit_code = 1;
 			return EXIT_FAILURE;
 		}
 	}
@@ -11816,8 +11825,10 @@ exec_cmd(char **comm)
 				ext_cmd_ok = 0;
 				printf(_("%s: External commands disabled\n"), PROGRAM_NAME);
 			}
-			else
+			else {
 				fputs(_("Usage: ext [on, off, status]"), stderr);
+				exit_code = 1;
+			}
 		}
 	}
 	
@@ -11837,8 +11848,10 @@ exec_cmd(char **comm)
 				pager = 0;
 				printf(_("%s: Pager disabled\n"), PROGRAM_NAME);
 			}
-			else
+			else {
 				fputs(_("Usage: pager, pg [on, off, status]"), stderr);
+				exit_code = 1;
+			}
 		}
 	}
 	
@@ -11858,8 +11871,10 @@ exec_cmd(char **comm)
 				unicode = 0;
 				printf(_("%s: Unicode disabled\n"), PROGRAM_NAME);
 			}
-			else
+			else {
 				fputs(_("Usage: unicode, uc [on, off, status]"), stderr);
+				exit_code = 1;
+			}
 		}
 	}
 	
@@ -11889,7 +11904,8 @@ exec_cmd(char **comm)
 			else {
 				fputs(_("Usage: folders first, ff [on, off, status]\n"), 
 					    stderr);
-				return EXIT_SUCCESS;			
+				exit_code = 1;
+				return EXIT_FAILURE;			
 			}
 			if (list_folders_first != status) {
 				if (cd_lists_on_the_fly) {
@@ -11901,6 +11917,7 @@ exec_cmd(char **comm)
 		}
 		else {
 			fputs(_("Usage: folders first, ff [on, off, status]\n"), stderr);
+			exit_code = 1;
 		}
 	}
 	
@@ -11915,6 +11932,7 @@ exec_cmd(char **comm)
 		 * where no message should be printed */
 		if (!config_ok) {
 			fprintf(stderr, _("%s: Log function disabled\n"), PROGRAM_NAME);
+			exit_code = 1;
 			return EXIT_FAILURE;
 		}
 		exit_code = log_function(comm);
@@ -11997,6 +12015,8 @@ exec_cmd(char **comm)
 	}
 
 			  /* #### ANS THESE ONES TOO #### */
+	/* These functions just print stuff, so that the value of exit_code is 
+	 * always zero, that is to say, success */
 	else if (strcmp(comm[0], "path") == 0 || strcmp(comm[0], "cwd") == 0) 
 		printf("%s\n", path);
 	
@@ -12006,7 +12026,8 @@ exec_cmd(char **comm)
 	else if (strcmp(comm[0], "cmd") == 0 || strcmp(comm[0], "commands") == 0) 
 		list_commands();
 	
-	else if (strcmp(comm[0], "colors") == 0) color_codes();
+	else if (strcmp(comm[0], "colors") == 0)
+		color_codes();
 	
 	else if (strcmp(comm[0], "ver") == 0 || strcmp(comm[0], "version") == 0)
 		version_function();
@@ -12020,7 +12041,8 @@ exec_cmd(char **comm)
 	else if (strcmp(comm[0], "bonus") == 0)
 		bonus_function();
 	
-	else if (strcmp(comm[0], "splash") == 0) splash();
+	else if (strcmp(comm[0], "splash") == 0)
+		splash();
 	
 				/* #### QUIT #### */
 	else if (strcmp(comm[0], "q") == 0 || strcmp(comm[0], "quit") == 0 
@@ -12048,6 +12070,7 @@ exec_cmd(char **comm)
 				if ((file_attrib.st_mode & S_IFMT) == S_IFDIR ) {
 					fprintf(stderr, _("%s: '%s': Is a directory\n"), 
 							PROGRAM_NAME, comm[0]);
+					exit_code = 1;
 					return EXIT_FAILURE;
 				}
 			}
@@ -12084,6 +12107,7 @@ exec_cmd(char **comm)
 		if (!ext_cmd_ok) {
 			fprintf(stderr, _("%s: External commands are not allowed. "
 					"Run 'ext on' to enable them.\n"), PROGRAM_NAME);
+			exit_code = 1;
 			return EXIT_FAILURE;
 		}
 		
@@ -12106,6 +12130,7 @@ exec_cmd(char **comm)
 			if (!comm_tmp || comm_tmp[0] == 0x00) {
 				fprintf(stderr, _("%s: '%c': Syntax error\n"), PROGRAM_NAME, 
 						 comm[0][0]);
+				exit_code = 1;
 				return EXIT_FAILURE;
 			}
 			else
