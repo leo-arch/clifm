@@ -868,6 +868,10 @@ of course you can grep it to find, say, linux' macros, as here. */
 
 ###########################################
 
+ * (SOLVED) I'm having Valgrind errors when listing unicode filenames. SOLUTION:
+	Whenever finalenames have at least one unicode char (in which case cont_bt
+	is true), use char32_t (4 bytes) instead of simply char (1 byte) to allocate 
+	memory to store the filename (in list_dir).
  * (SOLVED) Enter this: "p /etc/pacman.conf" and then "cd". The user_home 
 	variable is now 'in/bash' and the user is root!!! SOLUTION: The pointer
 	returned by get_user(), which makes use of getpwuid() is overriden by the
@@ -1343,6 +1347,8 @@ http://pubs.opengroup.org/onlinepubs/9699919799/nframe.html */
 #  endif
 #endif
 
+/* #define __SIZEOF_WCHAR_T__ 4 */
+
 /* Linux */
 /* The only Linux-specific function I use, and the only function requiring
  * _GNU_SOURCE, is statx(), and only to get files creation (birth) date in the
@@ -1403,6 +1409,7 @@ in FreeBSD, but is deprecated */
 /*#  include <strings.h> Enables strcasecmp() */
 #endif
 
+#include <uchar.h> /* char32_t and char16_t types */
 /* #include <bsd/string.h> // strlcpy, strlcat */
 /* #include "clifm.h" */
 /* #include <sys/types.h> */
@@ -1453,7 +1460,7 @@ in FreeBSD, but is deprecated */
 #define VERSION "0.19.1"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "July 8, 2020"
+#define DATE "July 9, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -2622,7 +2629,7 @@ char *user = (char *)NULL, *path = (char *)NULL, **old_pwd = (char **)NULL,
 	*alt_profile = (char *)NULL, **prompt_cmds = (char **)NULL, 
 	**aliases = (char **)NULL, **argv_bk = (char **)NULL, 
 	*user_home = (char *)NULL, **messages = (char **)NULL, 
-	*msg = (char *)NULL, *CONFIG_DIR = (char *)NULL, 
+	*msg = (char *)NULL, *CONFIG_DIR = (char *)NULL, div_line_char = -1,
 	*CONFIG_FILE = (char *)NULL, *BM_FILE = (char *)NULL, 
 	hostname[HOST_NAME_MAX] = "", *LOG_FILE = (char *)NULL, 
 	*LOG_FILE_TMP = (char *)NULL, *HIST_FILE = (char *)NULL, 
@@ -2740,6 +2747,7 @@ main(int argc, char **argv)
 	# ifndef _POSIX_C_SOURCE
 		puts("Not POSIX: Using GNU extensions");
 	#endif */
+
 
 				/* #################################
 				 * #     1) INITIALIZATION		   #
@@ -3607,6 +3615,7 @@ ELNColor=01;33\n\
 DefaultColor=00;39;49\n\
 DirCounterColor=00;39;49\n\
 DividingLineColor=00;34\n\
+DividingLineChar='='\n\
 Prompt=\"\\[\\e[0;36m\\][\\u@\\H] \\W \\$ \\[\\e[0m\\]\"\n\
 MaxPath=40\n\
 WelcomeMessageColor=01;36\n\
@@ -5366,22 +5375,23 @@ print_license(void)
 			 "run 'fs'.\n"), PROGRAM_NAME, tm->tm_year + 1900, AUTHOR);
 }
 
+
 size_t
 u8_xstrlen(const char *str)
 /* An strlen implementation able to handle unicode characters. Taken from: 
- * https://stackoverflow.com/questions/5117393/number-of-character-cells-used-by-string
- * Explanation: strlen() counts bytes, not chars. Now, since ASCII chars take 
- * each 1 byte, the amount of bytes equals the amount of chars. However, 
- * non-ASCII chars are multibyte chars, that is, one char takes more than 1 
- * byte, and this is why strlen() does not work as expected for this kind of 
- * chars: a 6 chars string might take 12 or more bytes */
+* https://stackoverflow.com/questions/5117393/number-of-character-cells-used-by-string
+* Explanation: strlen() counts bytes, not chars. Now, since ASCII chars take 
+* each 1 byte, the amount of bytes equals the amount of chars. However, 
+* non-ASCII or wide chars are multibyte chars, that is, one char takes more than 
+* 1 byte, and this is why strlen() does not work as expected for this kind of 
+* chars: a 6 chars string might take 12 or more bytes */
 {
 	size_t len = 0;
 	cont_bt = 0;
 
 	while (*(str++))
 		if ((*str & 0xc0) != 0x80) /* Do not count continuation bytes (used 
-		by multibyte, that is, non-ASCII characters) */
+		* by multibyte, that is, wide or non-ASCII characters) */
 			len++;
 		else
 			cont_bt++;
@@ -8827,6 +8837,7 @@ ELNColor=01;33\n\
 DefaultColor=00;39;49\n\
 DirCounterColor=00;39;49\n\
 DividingLineColor=00;34\n\
+DividingLineChar='='\n\
 Prompt=\"\\[\\e[0;36m\\][\\u@\\H] \\W \\$ \\[\\e[0m\\]\"\n\
 MaxPath=40\n\
 WelcomeMessageColor=01;36\n\
@@ -8884,6 +8895,7 @@ OF PROMPT\n");
 							 PROGRAM_NAME, CONFIG_FILE, strerror(errno));
 			}
 			else {
+				div_line_char = -1;
 				#define MAX_BOOL 6
 				/* starting path(14) + PATH_MAX + \n(1)*/
 				char line[PATH_MAX + 15];
@@ -9170,6 +9182,13 @@ OF PROMPT\n");
 								 opt_str);
 						free(opt_str);
 					}
+					else if (strncmp(line, "DividingLineChar=", 17) == 0) {
+						char opt_c = -1;
+						sscanf(line, "DividingLineChar='%c'", &opt_c);
+						if (opt_c == -1)
+							div_line_char = '=';
+						div_line_char = opt_c;
+					}
 					else if (strncmp(line, "MaxHistory=", 11) == 0) {
 						int opt_num = 0;
 						sscanf(line, "MaxHistory=%d\n", &opt_num);
@@ -9255,6 +9274,8 @@ OF PROMPT\n");
 				strcpy(default_color, "\x1b[00;39;49m");
 			if (dir_count_color_set == -1)
 				strcpy(dir_count_color, "\x1b[00;97m");
+			if (div_line_char == -1)
+				div_line_char = '=';
 			if (div_line_color_set == -1)
 				strcpy(div_line_color, "\x1b[00;34m");
 			if (welcome_msg_color_set == -1)
@@ -11061,7 +11082,14 @@ $ dircolors --print-database */
 			for(i = 0;i < files_folders; i++) {
 				str_len = (unicode) ? u8_xstrlen(dirlist_folders[i]->d_name)
 						  : strlen(dirlist_folders[i]->d_name);
-				dirlist[files] = (char *)xcalloc(str_len + 1, sizeof(char));
+				/* cont_bt is a global variable set by u8_xstrlen if any
+				 * continuation byte is found, and thereby, only if the file
+				 * has unicode chars, in which case we need to use a wider
+				 * size for each char. Whereas char is 1 byte, char32_t is
+				 * 4 bytes long. I use char32_t since wchar_t is 
+				 * compiler-dependent and might vary from 1 to 4 bytes */
+				dirlist[files] = (char *)xcalloc(str_len + 1, 
+								 (cont_bt) ? sizeof(char32_t) : sizeof(char));
 				strcpy(dirlist[files++], dirlist_folders[i]->d_name);
 				free(dirlist_folders[i]);
 			}
@@ -11072,7 +11100,8 @@ $ dircolors --print-database */
 			for(i = 0; i < files_files; i++) {
 				str_len = (unicode) ? u8_xstrlen(dirlist_files[i]->d_name)
 						  : strlen(dirlist_files[i]->d_name);
-				dirlist[files] = (char *)xcalloc(str_len + 1, sizeof(char));
+				dirlist[files] = (char *)xcalloc(str_len + 1, 
+								 (cont_bt) ? sizeof(char32_t): sizeof(char));
 				strcpy(dirlist[files++], dirlist_files[i]->d_name);
 				free(dirlist_files[i]);
 			}
@@ -11408,8 +11437,9 @@ $ dircolors --print-database */
 	printf("%s", (last_column) ? "" : "\n");
 
 	/* Print a dividing line between the files list and the prompt */
+	printf("%s", div_line_color);
 	for (i = term_cols; i--; )
-		printf("%s=", div_line_color);
+		printf("%c", div_line_char);
 	printf("%s%s", NC, default_color);
 	fflush(stdout);
 
@@ -11560,7 +11590,9 @@ exec_cmd(char **comm)
 
 	/* Exit flag. exit_code is zero (sucess) by default. In case of error
 	 * in any of the functions below, it will be set to one (failure).
-	 * This will be the value returned by this function */
+	 * This will be the value returned by this function. Used by the \z
+	 * escape code in the prompt to print the exit status of the last executed
+	 * command */
 	exit_code = 0;
 
 	/* If a user defined variable */
