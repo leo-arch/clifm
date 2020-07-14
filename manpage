@@ -1,5 +1,5 @@
 ./" Manpage for CliFM
-.TH man 1 "July 6, 2020" "1.0" "CliFM man page"
+.TH man 1 "July 14, 2020" "1.0" "CliFM man page"
 .SH NAME
 CLIFM - A completely text-based file manager inspired in Arch Linux' KISS principle 
 .SH SYNOPSIS
@@ -110,8 +110,8 @@ Arguments precedence order: 1) command line; 2) configuration file; 3) default o
 \fBNOTE:\fR ELN = Element List Number. Example: in the line "12 openbox" (when listing files), 12 is the ELN corresponding to the file named "openbox". The slash followed by a number (/xx) after directory names indicates the amount of files contained by the corresponding directory, excluding current and parent directories ("." and ".." respectivelly).
 
 .TP
-.B /* [DIR]
-this is the quick search function. Just type '/' followed by the string you are looking for (you can use wildcards), and CliFM will list all the matches in the current working directory. To search for files in any other directory, specify the directory name as second argument. This argument (DIR) could be an absolute path, a relative path, or an ELN.
+.B /* [-filetype] [DIR]
+this is the quick search function. Just type '/' followed by the string you are looking for (you can use wildcards), and CliFM will list all the matches in the current working directory. To search for files in any other directory, specify the directory name as another argument. This argument (DIR) could be an absolute path, a relative path, or an ELN. The result of the search can be further filtered by specifying a filetype: -d, -r, -l, -s, -f, -b, and -c (directory, regular file, symlink, socket, FIFO/pipe, block device, and character device respectivelly). For example, '/*x -d Documents/' will list all directories ending with 'x' in the directory named "Documents".
 .TP
 .B bm, bookmarks [a, add PATH] [d, del] [edit] [shortcut, name]
 with no argument, open the bookmarks menu. Here you cd into the desired bookmark by entering either its ELN, its shortcut, or its name. In this screen you can also add, remove or edit your bookmarks by simply typing 'e' to edit the bookmarks file (which is simply a list of lines with this format: [shortcut]name:path. Ex: [d]documents:/home/user/documents). If you want to add or remove a bookmark directly from the command line, use the 'a' and 'd' arguments respectivelly. Example: 'bm a /media/misc' or 'bm d'. You can also open a bookmark by typing 'bm shortcut' or 'bm name' (in which latter case TAB completion is available).

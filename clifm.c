@@ -313,6 +313,8 @@ of course you can grep it to find, say, linux' macros, as here. */
 							###############
 */
 /*
+ ** Take a look at the 'ls' source and look for columned listing and strlen
+	for UTF-8 strings.
  **	Take a look at the FreeDesktop specification for MIME apps:
 	https://specifications.freedesktop.org/mime-apps-spec/mime-apps-spec-1.0.1.html
  ** Add regex to the mime file (or at least *.ext).
@@ -1457,10 +1459,10 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.19.1"
+#define VERSION "0.19.2"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "July 9, 2020"
+#define DATE "July 14, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -2304,6 +2306,7 @@ int
 				 * ##########################*/
 
 void signal_handler(int sig_num);
+char *xnmalloc(size_t nmemb, size_t size);
 void *xcalloc(size_t nmemb, size_t size);
 void *xrealloc(void *ptr, size_t size);
 void free_stuff(void);
@@ -2550,7 +2553,7 @@ POINTERS: Ex: char *p; pointers, unlike common variables which stores data,
  * the program. If not initialized, they're initialized automatically by the 
  * compiler in the following way:
  int 		0
- char 		'\0'
+ char 		'\0' or 0x00 (hex)
  float	 	0
  double 	0
  pointer 	NULL
@@ -2585,6 +2588,17 @@ struct usrvar_t {
 	char *name;
 	char *value;
 };
+
+/* Struct to store file information */
+struct fileinfo
+{
+	size_t len;
+	size_t filesn; /* Number of files in subdir */
+	int exists;
+	mode_t type;
+	off_t size;
+};
+
 /* Always initialize variables, to NULL if string, to zero if int; otherwise 
  * they may contain garbage, and an access to them may result in a crash or 
  * some invalid data being read. However, non-initialized variables are 
@@ -2614,8 +2628,9 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 int files = 0, args_n = 0, sel_n = 0, max_hist = -1, max_log = -1, 
 	path_n = 0, current_hist_n = 0, dirhist_total_index = 0, 
 	dirhist_cur_index = 0, argc_bk = 0, usrvar_n = 0, aliases_n = 0, 
-	prompt_cmds_n = 0, trash_n = 0, msgs_n = 0, longest = 0, term_cols = 0,
-	max_path = -1;
+	prompt_cmds_n = 0, trash_n = 0, msgs_n = 0, longest = 0, max_path = -1;
+
+unsigned short term_cols = 0;
 
 size_t user_home_len = 0;
 struct termios shell_tmodes;
@@ -2668,7 +2683,7 @@ char text_color[MAX_COLOR+2] = "", eln_color[MAX_COLOR] = "",
  * to add "\001" at the beginning of the color code and "\002" at the end.
  * So, we need 2 more bytes */
 
-/* Filetypes colors */
+/* Filetype colors */
 char di_c[MAX_COLOR] = "", /* Directory */
 	nd_c[MAX_COLOR] = "", /* No read directory */
 	ed_c[MAX_COLOR] = "", /* Empty dir */
@@ -3897,6 +3912,10 @@ profile_set(char *prof)
 }
 
 int mime_open(char **args)
+/* Open a file according to the application associated to its MIME type or
+ * extension. It also accepts the 'info' and 'edit' arguments, the former
+ * providing MIME info about the corresponding file and the latter opening
+ * the MIME list file */
 {
 	/* Check arguments */
 	if (!args[1]) {
@@ -3927,12 +3946,20 @@ int mime_open(char **args)
 		}
 		if (strcntchr(args[2], '\\')) {
 			deq_file = dequote_str(args[2], 0);
-			path = realpath(deq_file, NULL);
+			path = realpath(deq_file, (char *)NULL);
 			free(deq_file);
 			deq_file = (char *)NULL;
 		}
 		else
-			path = realpath(args[2], NULL);
+			path = realpath(args[2], (char *)NULL);
+		
+		if (access(path, R_OK) == -1) {
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, path, 
+					strerror(errno));
+			free(path);
+			return EXIT_FAILURE;
+		}	
+		
 		info = 1;
 		file_index = 2;
 	}
@@ -3940,12 +3967,25 @@ int mime_open(char **args)
 	else {
 		if (strcntchr(args[1], '\\')) {
 			deq_file = dequote_str(args[1], 0);
-			path = realpath(deq_file, NULL);
+			path = realpath(deq_file, (char *)NULL);
 			free(deq_file);
 			deq_file = (char *)NULL;
 		}
 		else
-			path = realpath(args[1], NULL);
+			path = realpath(args[1], (char *)NULL);
+
+		if (access(path, R_OK) == -1) {
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, path, 
+					strerror(errno));
+			free(path);
+			/* Since this function is called by open_function, and since this
+			 * latter prints an error message itself whenever the exit code
+			 * of mime_open is EXIT_FAILURE, and since we don't want that
+			 * message in this case, return -1 instead to prevent that
+			 * message from being printed */
+			return -1;
+		}
+
 		file_index = 1;
 	}
 
@@ -4356,7 +4396,7 @@ xasprintf(const char *format, ...)
 
 	va_start(arglist, format);
 	va_copy(tmp_list, arglist);
-	size = vsnprintf(NULL, 0, format, tmp_list);
+	size = vsnprintf((char *)NULL, 0, format, tmp_list);
 	va_end(tmp_list);
 	
 	if (size < 0) {
@@ -4452,7 +4492,7 @@ get_link_ref(const char *link)
 	if (!link)
 		return (-1);
 
-	char *linkname = realpath(link, NULL);
+	char *linkname = realpath(link, (char *)NULL);
 	if (linkname) {
 		struct stat file_attrib;
 		stat(linkname, &file_attrib);
@@ -5425,7 +5465,7 @@ open_function(char **cmd)
 	 * be opened */
 
 	char *linkname = (char *)NULL, file_tmp[PATH_MAX] = "", is_link = 0, 
-		  no_open_file = 1, filetype[128] = "";
+		  no_open_file = 1, file_type[128] = "";
 		 /* Reserve a good amount of bytes for filetype: it cannot be known
 		  * beforehand how many bytes the TRANSLATED string will need */
 
@@ -5433,19 +5473,19 @@ open_function(char **cmd)
 	case S_IFBLK:
 		/* Store filetype to compose and print the error message, if 
 		 * necessary */
-		strcpy(filetype, _("block device"));
+		strcpy(file_type, _("block device"));
 		break;
 
 	case S_IFCHR:
-		strcpy(filetype, _("character device"));
+		strcpy(file_type, _("character device"));
 		break;
 
 	case S_IFSOCK:
-		strcpy(filetype, _("socket"));
+		strcpy(file_type, _("socket"));
 		break;
 
 	case S_IFIFO:
-		strcpy(filetype, _("FIFO/pipe"));
+		strcpy(file_type, _("FIFO/pipe"));
 		break;
 
 	case S_IFDIR:
@@ -5471,16 +5511,16 @@ open_function(char **cmd)
 		/* Realpath() will never return a symlink, but an absolute 
 		 * path, so that there is no need to check for symlinks */
 		case S_IFBLK:
-			strcpy(filetype, _("block device"));
+			strcpy(file_type, _("block device"));
 			break;
 		case S_IFCHR:
-			strcpy(filetype, _("character device"));
+			strcpy(file_type, _("character device"));
 			break;
 		case S_IFSOCK:
-			strcpy(filetype, _("socket"));
+			strcpy(file_type, _("socket"));
 			break;
 		case S_IFIFO:
-			strcpy(filetype, _("FIFO/pipe"));
+			strcpy(file_type, _("FIFO/pipe"));
 			break;
 		case S_IFDIR:
 			free(deq_path);
@@ -5494,7 +5534,7 @@ open_function(char **cmd)
 			strncpy(file_tmp, linkname, PATH_MAX);
 			break;
 		default:
-			strcpy(filetype, _("unknown file type"));
+			strcpy(file_type, _("unknown file type"));
 				break;
 		}
 		break;
@@ -5504,7 +5544,7 @@ open_function(char **cmd)
 		break;
 	
 	default:
-		strcpy(filetype, _("unknown file type"));
+		strcpy(file_type, _("unknown file type"));
 		break;
 	}
 
@@ -5514,14 +5554,14 @@ open_function(char **cmd)
 		if (linkname) {
 			fprintf(stderr, _("%s: %s -> '%s' (%s): Cannot open file. Try "
 							  "'APPLICATION FILENAME'.\n"), PROGRAM_NAME, 
-							  deq_path, linkname, filetype);
+							  deq_path, linkname, file_type);
 			free(linkname);
 			linkname = (char *)NULL;
 		}
 		else
 			fprintf(stderr, _("%s: '%s' (%s): Cannot open file. Try "
 					"'APPLICATION FILENAME'.\n"), PROGRAM_NAME, deq_path, 
-					filetype);
+					file_type);
 		free(deq_path);
 		return EXIT_FAILURE;
 	}
@@ -5546,7 +5586,13 @@ open_function(char **cmd)
 			return EXIT_FAILURE;
 		}
 		else {
-			if (mime_open(cmd) != 0)
+			int ret = mime_open(cmd);
+			/* The return value of mime_open could be zero (EXIT_SUCCESS), if 
+			 * success, one (EXIT_FAILURE) if error (in which case the following 
+			 * error message should be printed), and -1 if no access permission, 
+			 * in which case no error message should be printed, since 
+			 * the corresponding message is printed by mime_open itself */
+			if (ret == EXIT_FAILURE)
 				fputs("Try 'open FILE APPLICATION'\n", stderr);
 		}
 	}
@@ -5613,7 +5659,7 @@ cd_function(char *new_path)
 	/* If we have some argument, resolve it with realpath(), cd into the
 	 * resolved path, and set the path variable to this latter */
 	else {
-		char *real_path = realpath(deq_path, NULL);
+		char *real_path = realpath(deq_path, (char *)NULL);
 		if (!real_path) {
 			fprintf(stderr, "%s: cd: '%s': %s\n", PROGRAM_NAME, deq_path,
 					strerror(errno));
@@ -6808,8 +6854,8 @@ trash_clear(void)
 		free(file2);
 
 		if (ret != 0) {
-			fprintf(stderr, _("%s: trash: '%s': Error removing trashed \
-file\n"), PROGRAM_NAME, trash_files[i]->d_name);
+			fprintf(stderr, _("%s: trash: '%s': Error removing trashed file\n"), 
+					PROGRAM_NAME, trash_files[i]->d_name);
 			exit_code = 1; /* If there is at least one error, return error */
 		}
 		free(trash_files[i]);
@@ -7593,6 +7639,31 @@ Usage example:
 						PROGRAM_NAME, __func__, nmemb*size);
 			exit(EXIT_FAILURE);
 		}
+	}
+
+	return new_ptr;
+}
+
+char *
+xnmalloc(size_t nmemb, size_t size)
+{
+	if (nmemb == 0) ++nmemb;
+	if (size == 0) ++size;
+
+	char *new_ptr = (char *)malloc(nmemb * size);
+
+	if (!new_ptr) {
+		msg = xasprintf(_("%s: %s failed to allocate %zu bytes\n"), 
+						PROGRAM_NAME, __func__, nmemb*size);
+		if (msg) {
+			log_msg(msg, NOPRINT_PROMPT);
+			free(msg);
+			msg = (char *)NULL;
+		}
+		else
+			fprintf(stderr, _("%s: %s failed to allocate %zu bytes\n"), 
+					PROGRAM_NAME, __func__, nmemb*size);
+		exit(EXIT_FAILURE);
 	}
 
 	return new_ptr;
@@ -10866,7 +10937,7 @@ colors_list(const char *entry, const int i, const int pad,
 		return;
 	}
 	char *linkname = (char *)NULL;
-	#if __linux__
+	#ifdef _LINUX_CAP
 	cap_t cap;
 	#endif
 	switch (file_attrib.st_mode & S_IFMT) {
@@ -10936,7 +11007,7 @@ colors_list(const char *entry, const int i, const int pad,
 		break;
 
 	case S_IFLNK:
-		linkname = realpath(entry, NULL);
+		linkname = realpath(entry, (char *)NULL);
 		if (linkname) {
 			printf("%s%s%s%s%-*s%s%s", eln_color, index, NC, ln_c, pad, 
 				    entry, NC, new_line ? "\n" : "");
@@ -10987,7 +11058,7 @@ $ dircolors --print-database */
 		return EXIT_FAILURE;
 	}
 	
-	files=0; /* Reset the files counter */
+	files = 0; /* Reset the files counter */
 
 	/* CPU Registers are faster than memory to access, so the variables 
 	 * which are most frequently used in a C program can be put in registers 
@@ -11000,21 +11071,22 @@ $ dircolors --print-database */
 	register int i = 0;
 
 	/* Remove final slash from path, if any */
-	size_t strlen_path = strlen(path);
-	if (path[strlen_path - 1] == '/' && strcmp(path, "/") != 0)
-		path[strlen_path - 1] = 0x00;
-	
-	/* If list directories first, first store directories, then files, and 
+/*	size_t path_len = strlen(path);
+	if (path[path_len - 1] == '/' && !(*path == '/' && *(path + 1) == 0x00))
+		path[path_len - 1] = 0x00; */
+
+	/* If list directories first, store directories first, then files, and 
 	 * finally copy everything into one single array (dirlist) */
 	if (list_folders_first) {
 		register int files_files = 0, files_folders = 0;
 		struct dirent **dirlist_folders = (struct dirent **)NULL, 
 					  **dirlist_files = (struct dirent **)NULL;
+		
 		/* Store folders */
 		files_folders = scandir(path, &dirlist_folders, folder_select, 
-							   (unicode) ? alphasort : 
-							   (case_sensitive) ? xalphasort : 
-							   alphasort_insensitive);
+							    (unicode) ? alphasort : 
+							    (case_sensitive) ? xalphasort : 
+							    alphasort_insensitive);
 		/* If unicode is set to true, use the standard alphasort(), since it
 		 * uses strcoll(), which, unlike strcmp() (used by my xalphasort()), 
 		 * is locale aware */
@@ -11035,6 +11107,7 @@ $ dircolors --print-database */
 			else
 				return EXIT_FAILURE;
 		}
+		
 		/* Store files */
 		files_files = scandir(path, &dirlist_files, file_select, 
   						      (unicode) ? alphasort : 
@@ -11079,7 +11152,7 @@ $ dircolors --print-database */
 		/* Store both files and folders into the dirlist array */
 		size_t str_len = 0;
 		if (files_folders > 0) {
-			for(i = 0;i < files_folders; i++) {
+			for (i = 0; i < files_folders; i++) {
 				str_len = (unicode) ? u8_xstrlen(dirlist_folders[i]->d_name)
 						  : strlen(dirlist_folders[i]->d_name);
 				/* cont_bt is a global variable set by u8_xstrlen if any
@@ -11088,19 +11161,22 @@ $ dircolors --print-database */
 				 * size for each char. Whereas char is 1 byte, char32_t is
 				 * 4 bytes long. I use char32_t since wchar_t is 
 				 * compiler-dependent and might vary from 1 to 4 bytes */
-				dirlist[files] = (char *)xcalloc(str_len + 1, 
+				dirlist[files] = xnmalloc(str_len + 1, 
 								 (cont_bt) ? sizeof(char32_t) : sizeof(char));
 				strcpy(dirlist[files++], dirlist_folders[i]->d_name);
+				/* The d_name member of the dirent struct is a null-terminated
+				 * string (see readdir man page), so that we don't need to use 
+				 * calloc nor to manually add the null byte, since strcpy copies
+				 * source into dest including the null byte */
 				free(dirlist_folders[i]);
 			}
 			free(dirlist_folders);
-			dirlist_folders = (struct dirent **)NULL;
 		}
 		if (files_files > 0) {
 			for(i = 0; i < files_files; i++) {
 				str_len = (unicode) ? u8_xstrlen(dirlist_files[i]->d_name)
 						  : strlen(dirlist_files[i]->d_name);
-				dirlist[files] = (char *)xcalloc(str_len + 1, 
+				dirlist[files] = xnmalloc(str_len + 1, 
 								 (cont_bt) ? sizeof(char32_t): sizeof(char));
 				strcpy(dirlist[files++], dirlist_files[i]->d_name);
 				free(dirlist_files[i]);
@@ -11138,19 +11214,18 @@ $ dircolors --print-database */
 				exit(EXIT_FAILURE);
 			else
 				return EXIT_FAILURE;
-		} 
+		}
 		else {
-			dirlist = (char **)xcalloc(files + 1, sizeof(char *));
+			dirlist = (char **)xnmalloc(files + 1, sizeof(char *));
 			size_t str_len = 0;
 			for (i = 0; i < files; i++) {
 				str_len = strlen(list[i]->d_name);
-				dirlist[i] = (char *)xcalloc(str_len + 1, sizeof(char));
+				dirlist[i] = xnmalloc(str_len + 1, sizeof(char));
 				strcpy(dirlist[i], list[i]->d_name);
 				free(list[i]);
 			}
 			free(list);
 		}
-		
 	}
 	
 	if (files == 0) {
@@ -11160,32 +11235,41 @@ $ dircolors --print-database */
 		return EXIT_SUCCESS;
 	}
 
-	register int files_num = 0;
+	/* Struct to store information about each file, so that we don't need
+	 * to run stat() again later, perhaps hundreds of times */
+	struct fileinfo file_info[files];
+
 	/* Get the longest element */
 	longest = 0; /* Global */
 	struct stat file_attrib;
-	for (i = files; i--; ) {
+	for (i = files; i--;) {
 		int ret = lstat(dirlist[i], &file_attrib);
 		if (ret == -1) {
+			file_info[i].exists = 0;
 /*			printf(_("%s: %s: %s\n"), PROGRAM_NAME, dirlist[i], 
 				   strerror(errno)); */
 			continue;
 		}
-		/* file_name_width contains: ELN's number of digits + one space 
-		 * between ELN and file name + filename length. Ex: '12 name' contains 
+		file_info[i].exists = 1;
+		file_info[i].type = file_attrib.st_mode;
+		file_info[i].size = file_attrib.st_size;
+		/* file_name_width contains: ELN's amount of digits + one space 
+		 * between ELN and filename + filename length. Ex: '12 name' contains 
 		 * 7 chars */
-		int file_name_width = digits_in_num(i + 1) + 1 +(
-							  (unicode) ? u8_xstrlen(dirlist[i]) 
-							  : strlen(dirlist[i]));
+		file_info[i].len = (unicode) ? u8_xstrlen(dirlist[i]) : 
+						   strlen(dirlist[i]);
+		int file_name_width = digits_in_num(i + 1) + 1 + file_info[i].len;
 		/* If the file is a non-empty directory and the user has access 
 		 * permision to it, add to file_name_width the number of digits of the 
 		 * amount of files this directory contains (ex: 123 (files) contains 3 
 		 * digits) + 2 for space and slash between the directory name and the 
 		 * amount of files it contains. Ex: '12 name /45' contains 11 chars */
-		if ((file_attrib.st_mode & S_IFMT) == S_IFDIR
-		&& access(dirlist[i], R_OK|X_OK) == 0)
-			if ((files_num = count_dir (dirlist[i])) > 2)
-				file_name_width += digits_in_num(files_num) + 2;
+		if ((file_info[i].type & S_IFMT) == S_IFDIR
+		&& access(dirlist[i], R_OK|X_OK) == 0) {
+			file_info[i].filesn = count_dir(dirlist[i]);
+			if (file_info[i].filesn > 2)
+				file_name_width += digits_in_num(file_info[i].filesn) + 2;
+		}
 		if (file_name_width > longest) {
 			longest = file_name_width;
 		}
@@ -11194,8 +11278,10 @@ $ dircolors --print-database */
 	/* Get terminal current amount of rows and columns */
 	struct winsize w;
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+	/* ws_col and ws_row are both unsigned short int according to 
+	 * /bits/ioctl-types.h */
 	term_cols = w.ws_col; /* This one is global */
-	short term_rows = w.ws_row;
+	unsigned short term_rows = w.ws_row;
 
 	short reset_pager = 0;
 	char c;
@@ -11233,7 +11319,7 @@ $ dircolors --print-database */
 				}
 				counter++;
 			}
-			printf("%s%d%s ", eln_color, i+1, NC);
+			printf("%s%d%s ", eln_color, i + 1, NC);
 			get_properties(dirlist[i], (int)long_view, max);
 		}
 		if (reset_pager)
@@ -11251,6 +11337,11 @@ $ dircolors --print-database */
 	 * negative or zero. To avoid this: */
 	if (columns_n < 1)
 		columns_n = 1;
+	
+	/* If we have only three files, we don't want four columns */	
+	if (columns_n > files)
+		columns_n = files;
+
 	if (clear_screen)
 		CLEAR;
 	
@@ -11258,8 +11349,10 @@ $ dircolors --print-database */
 	register size_t counter = 0;
 	
 	for (i = 0; i < files; i++) {
-		if (lstat(dirlist[i], &file_attrib) == -1)
+
+		if (file_info[i].exists == 0)
 			continue;
+
 		/* A basic pager for directories containing large amount of files
 		* What's missing? It only goes downwards. To go backwards, use the 
 		* terminal scrollback function */
@@ -11293,42 +11386,44 @@ $ dircolors --print-database */
 			}
 			counter++;
 		}
-		int is_dir = 0, files_dir = 0;
-		char *linkname = (char *)NULL;
-		#if __linux__
+
+		int is_dir = 0;
+
+		#ifdef _LINUX_CAP
 		cap_t cap;
 		#endif
+
 		if ((i + 1) % columns_n == 0)
 			last_column = 1;
 		else
 			last_column = 0;
 
-		switch (file_attrib.st_mode & S_IFMT) {
+		switch (file_info[i].type & S_IFMT) {
 		case S_IFDIR:
 			if (access(dirlist[i], R_OK|X_OK) != 0)
-				printf("%s%d%s %s%s%s%s", eln_color, i+1, NC, nd_c, 
+				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, nd_c, 
 					   dirlist[i], NC, (last_column) ? "\n" : "");
 			else {
 				int is_oth_w = 0;
-				if (file_attrib.st_mode & S_IWOTH) is_oth_w = 1;
-				files_dir = count_dir (dirlist[i]);
-				if (files_dir == 2 || files_dir == 0) { /* If folder is 
-				* empty, it contains only "." and ".." (2 elements). If 
-				* not mounted (ex: /media/usb) the result will be zero */
-					/* If sticky bit dir: green bg */
+				if (file_info[i].type & S_IWOTH) is_oth_w = 1;
+				/* If folder is empty, it contains only "." and ".." 
+				 * (2 elements). If not mounted (ex: /media/usb) the result 
+				 * will be zero */
+				if (file_info[i].filesn == 2 || file_info[i].filesn == 0) {
+					/* If sticky bit dir */
 					printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC,
-						 (file_attrib.st_mode & S_ISVTX) ? ((is_oth_w) ? 
+						 (file_info[i].type & S_ISVTX) ? ((is_oth_w) ? 
 						 tw_c : st_c) : ((is_oth_w) 
 						 ? ow_c : ed_c), dirlist[i], 
 						 NC, (last_column) ? "\n" : "");
 				}
 				else {
-					printf("%s%d%s %s%s%s%s /%d%s%s", eln_color, i + 1, NC,
-						 (file_attrib.st_mode & S_ISVTX) ? ((is_oth_w) ? 
+					printf("%s%d%s %s%s%s%s /%ld%s%s", eln_color, i + 1, NC,
+						 (file_info[i].type & S_ISVTX) ? ((is_oth_w) ? 
 						 tw_c : st_c) : ((is_oth_w) 
 						 ? ow_c : di_c), dirlist[i], 
-						 NC, dir_count_color, files_dir - 2, NC, (last_column) 
-						 ? "\n" : "");
+						 NC, dir_count_color, file_info[i].filesn - 2, NC, 
+						 (last_column) ? "\n" : "");
 					is_dir = 1;
 				}
 			}
@@ -11340,15 +11435,17 @@ $ dircolors --print-database */
 			break;
 
 		case S_IFLNK:
-			linkname = realpath(dirlist[i], NULL);
-			if (linkname) {
-				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, ln_c, 
-						dirlist[i], NC, (last_column) ? "\n" : "");
-				free(linkname);
+			{
+				char *linkname = realpath(dirlist[i], (char *)NULL);
+				if (linkname) {
+					printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, ln_c, 
+							dirlist[i], NC, (last_column) ? "\n" : "");
+					free(linkname);
+				}
+				else
+					printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, or_c, 
+							dirlist[i], NC, (last_column) ? "\n" : "");
 			}
-			else
-				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, or_c, 
-						dirlist[i], NC, (last_column) ? "\n" : "");
 			break;
 
 		case S_IFBLK:
@@ -11367,13 +11464,13 @@ $ dircolors --print-database */
 			break;
 
 		case S_IFREG:
-			if (!(file_attrib.st_mode & S_IRUSR))
+			if (!(file_info[i].type & S_IRUSR))
 				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, nf_c, 
 						dirlist[i], NC, (last_column) ? "\n" : "");
-			else if (file_attrib.st_mode & S_ISUID) /* set uid file */
+			else if (file_info[i].type & S_ISUID) /* set uid file */
 				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, su_c, 
 						dirlist[i], NC, (last_column) ? "\n" : "");
-			else if (file_attrib.st_mode & S_ISGID) /* set gid file */
+			else if (file_info[i].type & S_ISGID) /* set gid file */
 				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, sg_c, 
 					dirlist[i], NC, (last_column) ? "\n" : "");
 			#ifdef _LINUX_CAP
@@ -11383,8 +11480,8 @@ $ dircolors --print-database */
 				cap_free(cap);
 			}
 			#endif
-			else if (file_attrib.st_mode & S_IXUSR)
-				if (file_attrib.st_size == 0)
+			else if (file_info[i].type & S_IXUSR)
+				if (file_info[i].size == 0)
 					printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, ee_c, 
 							dirlist[i], NC, (last_column) 
 							? "\n" : "");
@@ -11392,7 +11489,7 @@ $ dircolors --print-database */
 					printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, ex_c, 
 							dirlist[i], NC, (last_column) 
 							? "\n" : "");
-			else if (file_attrib.st_size == 0)
+			else if (file_info[i].size == 0)
 				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, ef_c, 
 						dirlist[i], NC, (last_column) ? "\n" : "");
 			else
@@ -11409,20 +11506,21 @@ $ dircolors --print-database */
 		if (!last_column) {
 			/* Get the difference between the length of longest and the 
 			 * current element */
-			int diff = longest - (digits_in_num(i + 1) + 1 +
-							     ((unicode) ? u8_xstrlen(dirlist[i]) 
-							     : strlen(dirlist[i])));
+			int diff = longest - (digits_in_num(i + 1) + 1 + file_info[i].len);
 			if (is_dir) { /* If a directory, make room for displaying the 
 				* amount of files it contains */
-				/* Get the amount of digits of files_dir */
-				int dig_num = digits_in_num(files_dir - 2);
+				/* Get the amount of digits in the number of files contained
+				 * by the listed directory */
+				int dig_num = digits_in_num(file_info[i].filesn - 2);
 				/* The amount of digits plus 2 chars for " /" */
 				diff = diff - (dig_num + 2);
 			}
-			/* Print the spaces needded to equate the length of the lines */
+			/* Print the spaces needed to equate the length of the lines */
+			/* +1 is for the space between filenames */
 			register int j;
-			for (j = diff + 1; j; j--) /* +1 is for the space between file names */
-				printf(" ");
+			for (j = diff + 1; j--;)
+				putchar(' ');
+/*			printf("%-*c", diff + 2, '\0'); */
 		}
 	}
 	/* If the pager was disabled during listing (by pressing 'c', 'p' or 'q'),
@@ -11434,13 +11532,15 @@ $ dircolors --print-database */
 	 * anything, since it already has a new line char at the end. Otherwise, 
 	 * if not modulo (not in the last column), print a new line, for it has 
 	 * none */
-	printf("%s", (last_column) ? "" : "\n");
+	 if (!last_column)
+		putchar('\n');
 
 	/* Print a dividing line between the files list and the prompt */
 	printf("%s", div_line_color);
 	for (i = term_cols; i--; )
-		printf("%c", div_line_char);
+		putchar(div_line_char);
 	printf("%s%s", NC, default_color);
+
 	fflush(stdout);
 
 /*	clock_t end=clock();
@@ -12953,22 +13053,64 @@ run_and_refresh(char **comm)
 
 int
 search_function(char **comm)
+/* List matching filenames in the specified directory */
 {
 	if (!comm || !comm[0])
 		return EXIT_FAILURE;
 
 	/* If search string (comm[0]) is "/search", comm[0]+1 returns "search" */
-	char *search_str = comm[0] + 1, *deq_dir = (char *)NULL;
+	char *search_str = comm[0] + 1, *deq_dir = (char *)NULL, 
+		 *search_path = (char *)NULL;
+	int file_type = 0;
+	struct stat file_attrib;
 	
+	/* If there are two arguments, the one starting with '-' is the filetype 
+	 * and the other is the path */
+	if (comm[1] && comm[2]) {
+		if (comm[1][0] == '-') {
+			file_type = comm[1][1];
+			search_path = comm[2];
+		}
+		else if (comm[2][0] == '-') {
+			file_type = comm[2][1];
+			search_path = comm[1];
+		}
+		else
+			search_path = comm[1];
+	}
+
+	/* If just one argument, '-' indicates filetype. Else, we have a path */
+	else if (comm[1]) {
+		if (comm[1][0] == '-')
+			file_type = comm[1][1];
+		else
+			search_path = comm[1];
+	}
+	/* If no arguments, search_path will be NULL and file_type zero */
+	
+	/* Convert filetype into a macro that can be decoded by stat() */
+	if (file_type) {
+		switch (file_type) {
+		case 'd': file_type = S_IFDIR; break;
+		case 'r': file_type = S_IFREG; break;
+		case 'l': file_type = S_IFLNK; break;
+		case 's': file_type = S_IFSOCK; break;
+		case 'f': file_type = S_IFIFO; break;
+		case 'b': file_type = S_IFBLK; break;
+		case 'c': file_type = S_IFCHR; break;
+		default: file_type = 0;
+		}
+	}
+
 	/* If wildcards, use glob() */
 	if (strcntchr(search_str, '*') != -1 
 	|| strcntchr(search_str, '?') != -1 
 	|| strcntchr(search_str, '[') != -1) {
 
-		/* If second argument ("/search_str /path"), chdir into it, since 
+		/* If we have a path ("/search_str /path"), chdir into it, since 
 		 * glob() works on CWD */
-		if (comm[1] && comm[1][0] != 0x00) {
-			deq_dir = dequote_str(comm[1], 0);
+		if (search_path && *search_path != 0x00) {
+			deq_dir = dequote_str(search_path, 0);
 			if (!deq_dir) {
 				fprintf(stderr, _("%s: %s: Error dequoting filename\n"),
 						PROGRAM_NAME, comm[1]);
@@ -12983,41 +13125,77 @@ search_function(char **comm)
 		}
 		
 		/* Get globbed files */
-		glob_t globbed_files;		
+		glob_t globbed_files;	
 		int ret = glob(search_str, 0, NULL, &globbed_files);
 		if (ret == 0) {
+
+			short found = 0;
+
+			/* If we have a path */
 			if (deq_dir) {
 				size_t i;
-				for (i = 0; globbed_files.gl_pathv[i]; i++)
+				for (i = 0; globbed_files.gl_pathv[i]; i++) {
+					if (strcmp(globbed_files.gl_pathv[i], ".") == 0
+					|| strcmp(globbed_files.gl_pathv[i], "..") == 0)
+						continue;
+					if (file_type) {
+						/* Simply skip all files not matching file_type */
+						if (lstat(globbed_files.gl_pathv[i], &file_attrib) == -1)
+							continue;
+						if ((file_attrib.st_mode & S_IFMT) != file_type)
+							continue;
+					}
+					found = 1;
 					colors_list(globbed_files.gl_pathv[i], 0, 0, 1);
 					/* Second argument to colors_list() is:
 					 * 0: Do not print any ELN 
 					 * Positive number: Print positive number as ELN
 					 * -1: Print "?" instead of an ELN */
+				}
 			}
+
+			/* If no path was specified */
 			else {
-				size_t index=0, i, j;
+				size_t i, j;
+				int index = -1;
 				for (i = 0; globbed_files.gl_pathv[i]; i++) {
+					if (strcmp(globbed_files.gl_pathv[i], ".") == 0
+					|| strcmp(globbed_files.gl_pathv[i], "..") == 0)
+						continue;
+					if (file_type) {
+						if (lstat(globbed_files.gl_pathv[i], 
+						&file_attrib) == -1)
+							continue;
+						if ((file_attrib.st_mode & S_IFMT) != file_type)
+							continue;
+					}
+					found = 1;
 					/* In case 'index' is not found in the next for loop, that 
 					 * is, if the globbed file is not found in the current dir 
 					 * list, 'index' value would be that of the previous file 
 					 * if 'index' is not set to zero in each for iteration */
-					index=0;
-					for (j = 0; j < (size_t)files; j++)
-						if (strcmp(globbed_files.gl_pathv[i], 
-								   dirlist[j]) == 0)
+					index = -1;
+					for (j = 0; j < (size_t)files; j++) {
+						if (strcmp(globbed_files.gl_pathv[i], dirlist[j]) == 0) {
 							index = j;
+							break;
+						}
+					}
 					colors_list(globbed_files.gl_pathv[i], 
-								(index) ? index + 1 : -1, 0, 1);
+								(index != -1) ? index + 1 : -1, 0, 1);
 				}
 			}
+			if (!found) 
+				printf(_("%s: No matches found\n"), PROGRAM_NAME);
 		}
 		else 
 			printf(_("%s: No matches found\n"), PROGRAM_NAME);
+
 		globfree(&globbed_files);
 
 		/* Go back to the directory we came from */
 		if (deq_dir) {
+			free(deq_dir);
 			if (chdir(path) == -1) {
 				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, path, 
 						strerror(errno));
@@ -13031,9 +13209,10 @@ search_function(char **comm)
 	else {
 		short found = 0;
 		size_t i = 0;
+
 		/* If /search_str /path */
-		if (comm[1] && comm[1][0] != 0x00) {
-			deq_dir = dequote_str(comm[1], 0);
+		if (search_path && *search_path != 0x00) {
+			deq_dir = dequote_str(search_path, 0);
 			if (!deq_dir) {
 				fprintf(stderr, _("%s: %s: Error dequoting filename\n"), 
 						PROGRAM_NAME, comm[1]);
@@ -13041,6 +13220,7 @@ search_function(char **comm)
 			}
 			struct dirent **search_list;
 			int search_files = 0;
+			
 			search_files = scandir(deq_dir, &search_list, NULL, alphasort);
 			if (search_files == -1) {
 				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, deq_dir, 
@@ -13048,6 +13228,7 @@ search_function(char **comm)
 				free(deq_dir);
 				return EXIT_FAILURE;
 			}
+			
 			if (chdir(deq_dir) == -1) {
 				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, deq_dir, 
 						strerror(errno));
@@ -13057,13 +13238,25 @@ search_function(char **comm)
 				free(deq_dir);
 				return EXIT_FAILURE;
 			}
+			
 			for (i = 0; i < search_files; i++) {
 				if (strstr(search_list[i]->d_name, search_str)) {
-					colors_list(search_list[i]->d_name, 0, 0, 1);
-					found = 1;
+					if (file_type) {
+						if (lstat(search_list[i]->d_name, &file_attrib) == -1)
+							continue;
+						if ((file_attrib.st_mode & S_IFMT) == file_type) {
+							colors_list(search_list[i]->d_name, 0, 0, 1);
+							found = 1;
+						}
+					}
+					else {
+						colors_list(search_list[i]->d_name, 0, 0, 1);
+						found = 1;
+					}
 				}
 				free(search_list[i]);
 			}
+			
 			free(search_list);
 			search_list = (struct dirent **)NULL;
 			if (chdir(path) == -1) {
@@ -13079,8 +13272,19 @@ search_function(char **comm)
 			for (i = 0; i < (size_t)files; i++) {
 				/* strstr finds substr in STR, as if STR where "*substr*" */
 				if (strstr(dirlist[i], search_str)) {
-					colors_list(dirlist[i], i + 1, 0, 1);
-					found = 1;
+					if (file_type) {
+						struct stat file_attrib;
+						if (lstat(dirlist[i], &file_attrib) == -1)
+							continue;
+						if ((file_attrib.st_mode & S_IFMT) == file_type) {
+							colors_list(dirlist[i], i + 1, 0, 1);
+							found = 1;
+						}
+					}
+					else {
+						colors_list(dirlist[i], i + 1, 0, 1);
+						found = 1;
+					}
 				}
 			}
 		}
@@ -14205,7 +14409,7 @@ get_properties (char *filename, int _long, int max)
 
 	case S_IFLNK:
 		file_type = 'l';
-		linkname = realpath(filename, NULL);
+		linkname = realpath(filename, (char *)NULL);
 		if (linkname)
 			strcpy(color, ln_c);
 		else
@@ -15030,11 +15234,16 @@ the line \"12 openbox\", 12 is the ELN corresponding to the 'openbox' \
 file.\n"));
 
 	/* ### SEARCH ### */
-	printf(_("\n%s/%s%s* [DIR]: This is the quick search function. Just type '/' \
-followed by the string you are looking for (you can use wildcards), and %s \
-will list all matches in the current working directory. To search for files \
-in any other directory, specify the directory name as second argument. This \
-argument (DIR) could be an absolute path, a relative path, or an ELN.\n"), 
+	printf(_("\n%s/%s%s* [-filetype] [DIR]: This is the quick search function. \
+Just type '/' followed by the string you are looking for (you can use \
+wildcards), and %s will list all matches in the current working directory. \
+To search for files in any other directory, specify the directory name as \
+another argument. This argument (DIR) could be an absolute path, a relative \
+path, or an ELN. It is also possible to further filter the results of the \
+search by filetype, specifying it as follows: -d, -r, -l, -f, -s, -b, -c \
+(directory, regular file, symlink, FIFO/pipe, socket, block device, and \
+character device respectivelly). Example: '/*x -d /Documents' will list all \
+directories in the directory \"Documents\" ending with 'x'\n"), 
 		   white, NC, default_color, PROGRAM_NAME);
 
 	/* ### BOOKMARKS ### */
