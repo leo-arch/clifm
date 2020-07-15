@@ -1459,10 +1459,10 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.19.2"
+#define VERSION "0.19.3"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "July 14, 2020"
+#define DATE "July 15, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -2328,7 +2328,8 @@ int get_sel_files(void);
 void init_config(void);
 void exec_profile(void);
 void external_arguments(int argc, char **argv);
-void get_aliases_n_prompt_cmds(void);
+void get_aliases(void);
+void get_prompt_cmds(void);
 void check_log_file_size(char *log_file);
 char **check_for_alias(char **comm);
 int get_history(void);
@@ -2435,6 +2436,8 @@ int get_profile_names(void);
 char *profiles_generator(const char *text, int state);
 
 char *parse_prompt_line(char *line);
+
+int alias_import(char *file);
 
 /* Some notes on memory:
 * If a variable is declared OUTSIDE of a function, it is typically considered 
@@ -2903,7 +2906,8 @@ main(int argc, char **argv)
 						 PROGRAM_NAME, sys_shell);
 	}
 
-	get_aliases_n_prompt_cmds();
+	get_aliases();
+	get_prompt_cmds();
 
 	get_sel_files();
 
@@ -3131,6 +3135,87 @@ main(int argc, char **argv)
 }
 
 /* ###FUNCTIONS DEFINITIONS### */
+
+int
+alias_import(char *file)
+{
+	if (!file)
+		return EXIT_FAILURE;
+
+	char rfile[PATH_MAX] = "";
+	rfile[0] = 0x00;
+
+	if (*file == '~' && *(file + 1) == '/') {
+		char *file_exp = tilde_expand(file);
+		if (!file_exp) {
+			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, file, 
+					strerror(errno));
+			return EXIT_FAILURE;
+		}
+		realpath(file_exp, rfile);
+		free(file_exp);
+	}
+	else
+		realpath(file, rfile);
+
+	if (rfile[0] == 0x00) {
+		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, file, strerror(errno));
+		return EXIT_FAILURE;
+	}
+	
+	if (access(rfile, F_OK|R_OK) != 0) {
+		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, rfile, strerror(errno));
+		return EXIT_FAILURE;
+	}
+	
+	FILE *fp = fopen(rfile, "r");
+	if (!fp) {
+		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, rfile, strerror(errno));
+		return EXIT_FAILURE;
+	}
+	
+	FILE *config_fp = fopen(CONFIG_FILE, "a");
+	if (!config_fp) {
+		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, CONFIG_FILE, 
+				strerror(errno));
+		fclose(fp);
+		return EXIT_FAILURE;
+	}
+	
+	size_t line_size = 0;
+	char *line = (char *)NULL;
+	ssize_t line_len = 0;
+	int found = 0;
+
+	while ((line_len = getline(&line, &line_size, fp)) > 0) {
+		if (strncmp(line, "alias ", 6) == 0) {
+			/* If alias name conflicts with some internal command, skip it */
+			char *alias_name = strbtw(line, ' ', '=');
+			if (!alias_name)
+				continue;
+			if (is_internal_c(alias_name)) {
+				free(alias_name);
+				continue;
+			}
+			free(alias_name);
+			found = 1;
+			fprintf(config_fp, line);
+		}
+	}
+
+	free(line);
+
+	fclose(fp);
+	fclose(config_fp);
+	
+	if (!found)
+		fprintf(stderr, _("%s: '%s': No aliases found\n"), PROGRAM_NAME, rfile);
+	else
+		/* If some alias was found, update the aliases array */
+		get_aliases();
+	
+	return EXIT_SUCCESS;
+}
 
 char *
 parse_prompt_line(char *line)
@@ -3857,7 +3942,8 @@ profile_set(char *prof)
 	free(prompt_cmds);
 	prompt_cmds = (char **)NULL;
 	aliases_n = prompt_cmds_n = 0; /* Reset counters */
-	get_aliases_n_prompt_cmds();
+	get_aliases();
+	get_prompt_cmds();
 		
 	exec_profile();		
 
@@ -8897,7 +8983,7 @@ init_config(void)
 			else {
 				/* Do not translate anything in the config file */
 				fprintf(config_fp, "%s configuration file\n\
-	########################\n\n", PROGRAM_NAME);
+########################\n\n", PROGRAM_NAME);
 				fprintf(config_fp, "\
 FiletypeColors=\"di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;39:\
 ef=00;33:nf=00;31:ln=01;36:or=00;36:pi=40;33:so=01;35:bd=01;33;01:\
@@ -11550,7 +11636,68 @@ $ dircolors --print-database */
 }
 
 void
-get_aliases_n_prompt_cmds(void)
+get_prompt_cmds(void)
+{
+	if (!config_ok)
+		return;
+
+	FILE *config_file_fp;
+	config_file_fp = fopen(CONFIG_FILE, "r");
+	if (!config_file_fp) {
+		msg = xasprintf("%s: prompt: '%s': %s\n", PROGRAM_NAME, 
+						CONFIG_FILE, strerror(errno));
+		if (msg) {
+			error_msg = 1;
+			log_msg(msg, PRINT_PROMPT);
+			free(msg);
+			msg = (char *)NULL;
+		}
+		else
+			fprintf(stderr, "%s: prompt: '%s': %s\n", PROGRAM_NAME, 
+					CONFIG_FILE, strerror(errno));
+		return;
+	}
+
+	size_t i;
+
+	if (prompt_cmds_n) {
+		for (i = 0; i < prompt_cmds_n; i++)
+			free(prompt_cmds[i]);
+		free(prompt_cmds);
+		prompt_cmds = (char **)NULL;
+		prompt_cmds_n = 0;
+	}
+
+	int prompt_line_found = 0;
+	char *line = (char *)NULL;
+	size_t line_size = 0;
+	ssize_t line_len = 0;
+
+	while ((line_len = getline(&line, &line_size, config_file_fp)) > 0) {
+		
+		if (prompt_line_found) {
+			if (strncmp(line, "#END OF PROMPT", 14) == 0)
+				break;
+			if (*line != '#') {
+				prompt_cmds = (char **)xrealloc(prompt_cmds, (prompt_cmds_n + 1) 
+												* sizeof(char *));
+				prompt_cmds[prompt_cmds_n] = (char *)xcalloc(strlen(line) + 1, 
+															 sizeof(char));
+				strcpy(prompt_cmds[prompt_cmds_n++], line);
+			}
+		}
+		
+		else if (strncmp(line, "#PROMPT", 7) == 0) 
+			prompt_line_found = 1;
+	}
+	
+	free(line);
+
+	fclose(config_file_fp);
+}
+
+void
+get_aliases(void)
 {
 	if (!config_ok)
 		return;
@@ -11572,40 +11719,34 @@ get_aliases_n_prompt_cmds(void)
 		return;
 	}
 
-	int prompt_line_found = 0;
+	size_t i;
+	if (aliases_n) {
+		for (i = 0; i < aliases_n; i++)
+			free(aliases[i]);
+		free(aliases);
+		aliases = (char **)NULL;
+		aliases_n = 0;
+	}
+
+	
 	char *line = (char *)NULL;
 	size_t line_size = 0;
 	ssize_t line_len = 0;
 
 	while ((line_len = getline(&line, &line_size, config_file_fp)) > 0) {
 		
-		if (strncmp(line, "alias", 5) == 0) {
-			char *alias_line = straft(line, ' ');	
+		if (strncmp(line, "alias ", 6) == 0) {
+			char *alias_line = strchr(line, ' ');	
 			if (alias_line) {
+				alias_line++;
 				aliases = (char **)xrealloc(aliases, (aliases_n + 1)
 											* sizeof(char *));
 				aliases[aliases_n] = (char *)xcalloc(strlen(alias_line) + 1, 
 													 sizeof(char));
 				strcpy(aliases[aliases_n++], alias_line);
-				free(alias_line);
 				alias_line = (char *)NULL;
 			}
 		}
-		
-		else if (prompt_line_found) {
-			if (strncmp(line, "#END OF PROMPT", 14) == 0)
-				break;
-			if (*line != '#') {
-				prompt_cmds = (char **)xrealloc(prompt_cmds, (prompt_cmds_n + 1) 
-												* sizeof(char *));
-				prompt_cmds[prompt_cmds_n] = (char *)xcalloc(strlen(line) + 1, 
-															 sizeof(char));
-				strcpy(prompt_cmds[prompt_cmds_n++], line);
-			}
-		}
-		
-		else if (strncmp(line, "#PROMPT", 7) == 0) 
-			prompt_line_found = 1;
 	}
 	
 	free(line);
@@ -12100,10 +12241,20 @@ exec_cmd(char **comm)
 	
 				/* #### ALIASES #### */
 	else if (strcmp(comm[0], "alias") == 0) {
-		if (comm[1] && strcmp(comm[1], "--help") == 0) {
-			puts(_("Usage: alias"));
-			return EXIT_SUCCESS;
+		if (comm[1]) {
+			if (strcmp(comm[1], "--help") == 0) {
+				puts(_("Usage: alias"));
+				return EXIT_SUCCESS;
+			}
+			else if (strcmp(comm[1], "import") == 0) {
+				if (!comm[2]) {
+					fprintf(stderr, _("Usage: alias import FILE\n"));
+					return EXIT_FAILURE;
+				}
+				return alias_import(comm[2]);
+			}
 		}
+		
 		if (aliases_n) {
 			size_t i;
 			for (i = 0; i < (size_t)aliases_n; i++)
@@ -15160,7 +15311,8 @@ edit_function (char **comm)
 		for (i = 0; i < prompt_cmds_n; i++)
 			free(prompt_cmds[i]);
 		aliases_n = prompt_cmds_n = 0; /* Reset counters */
-		get_aliases_n_prompt_cmds();
+		get_aliases();
+		get_prompt_cmds();
 		if (cd_lists_on_the_fly) {
 			while (files--) free(dirlist[files]);
 			list_dir();
@@ -15391,7 +15543,7 @@ arguments to switch, add or remove a profile\n"), white, NC, default_color);
 
 	/* ### LOG ### */
 	printf(_("\n%slog%s%s [clear]: With no arguments, it shows the log file. \
-If clear is passed as argument, it will delete all the logs.\n"), white, NC, 
+If clear is passed as argument, all the logs will be deleted.\n"), white, NC, 
 		   default_color);
 
 	/* ### MESSAGES ### */
@@ -15415,9 +15567,12 @@ history commands:\n\
 specified, use EDITOR, if available.\n"), white, NC, default_color);
 
 	/* ### ALIAS ### */
-	printf(_("\n%salias%s%s: Show aliases, if any. To write a new alias simpy \
-type 'edit' to open the configuration file and add a line like this: \
-alias alias_name='command_name args...'\n"), white, NC, default_color);
+	printf(_("\n%salias [import FILE]%s%s: With no arguments, prints a list of \
+avaialble aliases, if any. To write a new alias simpy enter 'edit' to open the \
+configuration file and add a line like this one: alias name='command args ...' \
+To import aliases from a file, provided it contains aliases in the specified \
+form, use the 'import' option. Aliases conflicting with some of the internal \
+commands won't be imported.\n"), white, NC, default_color);
 
 	/* ### SPLASH ### */
 	printf(_("\n%ssplash%s%s: Show the splash screen.\n"), white, NC, default_color);

@@ -155,8 +155,8 @@ it works just like the back function, but it goes forward in the history record.
 .B c, l, m, md, r
 short for 'cp', 'ln', 'mv', 'mkdir', and 'rm' commands respectivelly.
 .TP
-.B pr, prop, ELN/FILE ... n [a, all] [s, size]
-print file properties of FILENAME(s). Use 'all' to list properties of all files in the current working directory, and 'size' to list their corresponding sizes.
+.B p, pr, prop, ELN/FILE ... n [a, all] [s, size]
+print file properties for FILE. Use 'all' to list properties of all files in the current working directory, and 'size' to list them by size.
 .TP
 .B mm, mime [info ELN/FILENAME] [edit]
 This is CliFM's resource opener. The 'info' option prints the MIME information about ELN/FILENAME: its MIME type, its file extension, if any, and the application associated to this MIME type or file extension. The 'edit' option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension, and then add a value for it to the MIME list file using the 'edit' option. Each value in the MIME list file has this format: 'mime_type=application args;application args; ... n' or '*.c=application args;application args; ... n'. Example: 'plain/text=nano' or '*.c=geany -p;leafpad;nano'. CliFM will check the first matching line, and if at least one of the specified applications exists, this one will be used to open the corresponding associated filed. Else, the next matching line will be checked.
@@ -192,8 +192,8 @@ You can use the exclamation character (!) to perform some history commands:
 .B edit [APPLICATION]
 edit the configuration file. If an application is specified, it will be used to open the configuration file.
 .TP
-.B alias
-show aliases, if any. To write a new alias simpy type 'edit' to open the configuration file and add a line like this: alias alias_name='command_name args...'
+.B alias [import FILE]
+with no argument, it prints the list of available  aliases, if any. To write a new alias simpy enter 'edit' to open the configuration file and add a line like this one: alias name='command args...' To import aliases from a file, provided it contains aliases in the specified form, use the 'import' option. Aliases conflicting with some of the internal commands won't be imported.
 .TP
 .B splash
 show the splash screen.
