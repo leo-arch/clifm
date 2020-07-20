@@ -1466,10 +1466,10 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.19.4"
+#define VERSION "0.19.5"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "July 18, 2020"
+#define DATE "July 19, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -2590,6 +2590,19 @@ struct fileinfo
 	off_t size;
 };
 
+/* A list of possible program messages. Each value tells the prompt what to do
+ * with error messages: either to print an E, W, or N char at the beginning of 
+ * the prompt, or nothing (nomsg) */
+enum prog_msg {
+	nomsg = 0,
+	error = 1,
+	warning = 2,
+	notice = 4
+};
+
+/* pmsg holds the current program message type */
+enum prog_msg pmsg = nomsg;
+
 /* Always initialize variables, to NULL if string, to zero if int; otherwise 
  * they may contain garbage, and an access to them may result in a crash or 
  * some invalid data being read. However, non-initialized variables are 
@@ -2600,9 +2613,8 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 	no_log = 0, internal_cmd = 0, shell_is_interactive = 0, 
 	list_folders_first = -1, case_sensitive = -1, cd_lists_on_the_fly = -1, 
 	recur_perm_error_flag = 0, is_sel = 0, sel_is_last = 0, print_msg = 0, 
-	long_view = -1, kbind_busy = 0, error_msg = 0, warning_msg = 0, 
-	notice_msg = 0, unicode = -1, cont_bt = 0, dequoted = 0, home_ok = 1, 
-	config_ok = 1, trash_ok = 1, selfile_ok = 1, mime_match = 0,
+	long_view = -1, kbind_busy = 0, unicode = -1, cont_bt = 0, dequoted = 0, 
+	home_ok = 1, config_ok = 1, trash_ok = 1, selfile_ok = 1, mime_match = 0,
 	exit_code = 0;
 	/* -1 means non-initialized or unset. Once initialized, these variables
 	 * are either zero or one */
@@ -2794,10 +2806,10 @@ main(int argc, char **argv)
 	 * rerun init_config(), get_aliases_n_prompt_cmds(), and then 
 	 * external_arguments() */
 	argc_bk = argc;
-	argv_bk = (char **)xcalloc((size_t)argc, sizeof(char *));
+	argv_bk = (char **)xnmalloc((size_t)argc, sizeof(char *));
 	register size_t i = 0;
 	for (i = 0; i < (size_t)argc; i++) {
-		argv_bk[i] = (char *)xcalloc(strlen(argv[i]) + 1, sizeof(char));
+		argv_bk[i] = (char *)xnmalloc(strlen(argv[i]) + 1, sizeof(char));
 		strcpy(argv_bk[i], argv[i]);
 	}
 
@@ -3216,9 +3228,20 @@ alias_import(char *file)
 				continue;
 			}
 			
-			/* If alias already exists, skip it too */
 			char *p = line + 6; /* p points now to the beginning of the 
-			alias name */
+			alias name (because "alias " == 6) */
+			
+			/* Only accept single quoted aliases commands */
+			char *tmp = strchr(p, '=');
+			if (!tmp)
+				continue; 
+
+			if (*(++tmp) != '\'') {
+				free(alias_name);
+				continue;
+			}
+
+			/* If alias already exists, skip it too */			
 			int exists = 0;
 			for (i = 0; i < aliases_n; i++) {
 				int alias_len = strcntchr(aliases[i], '=');
@@ -3234,6 +3257,7 @@ alias_import(char *file)
 					first = 0;
 					fputs("\n\n", config_fp);
 				}
+				
 				alias_imported++;
 				fprintf(config_fp, line);
 			}
@@ -3270,7 +3294,18 @@ alias_import(char *file)
 	else
 		printf(_("%s: 1 alias was successfully imported\n"), PROGRAM_NAME);
 
+	/* Add new aliases to the internal list of aliases */
 	get_aliases();
+
+	/* Add new aliases to the commands list for TAB completion */
+	if (bin_commands) {
+		for (i = 0; bin_commands[i]; i++)
+			free(bin_commands[i]);
+		free(bin_commands);
+		bin_commands = (char  **)NULL;
+	}
+	
+	get_path_programs();
 		
 	return EXIT_SUCCESS;
 }
@@ -3976,7 +4011,8 @@ profile_set(char *prof)
 	shell_terminal = no_log = internal_cmd = cont_bt = dequoted = 0;
 	shell_is_interactive = recur_perm_error_flag = mime_match = 0;
 	recur_perm_error_flag = is_sel = sel_is_last = print_msg = 0; 
-	kbind_busy = error_msg = warning_msg = notice_msg = 0;
+	kbind_busy = 0;
+	pmsg = nomsg;
 
 	home_ok = config_ok = trash_ok = selfile_ok = 1;
 
@@ -4549,8 +4585,9 @@ get_mime(char *file)
 int
 _err(int msg_type, int prompt, const char *format, ...)
 /* Custom POSIX implementation of GNU asprintf() modified to log program 
- * messages. msg_type is one of: 'e', 'w', or 'n'. prompt tells wether to print 
- * the message before prompt or rather in place.
+ * messages. MSG_TYPE is one of: 'e', 'w', 'n', or zero (meaning this latter 
+ * that no message mark (E, W, or N) will be added to the prompt). PROMPT tells 
+ * wether to print the message immediately before the prompt or rather in place.
  * Based on littlstar's xasprintf implementation:
  * https://github.com/littlstar/asprintf.c/blob/master/asprintf.c*/
 {
@@ -4576,9 +4613,10 @@ _err(int msg_type, int prompt, const char *format, ...)
 
 		if (msg_type) {
 			switch (msg_type) {
-			case 'e': error_msg = 1; break;
-			case 'w': warning_msg = 1; break;
-			case 'n': notice_msg = 1; break;
+			case 'e': pmsg = error; break;
+			case 'w': pmsg = warning; break;
+			case 'n': pmsg = notice; break;
+			default: pmsg = nomsg;
 			}
 		}
 
@@ -10626,25 +10664,19 @@ prompt(void)
 
 	/* Messages are categorized in three groups: errors, warnings, and notices.
 	 * The kind of message should be specified by the function printing
-	 * the message itself via a global variable: error_msg, warning_msg, and
-	 * notice_msg */
+	 * the message itself via a global enum: pmsg, with the following values:
+	 * nomsg, error, warning, and notice. */
 	char msg_str[11] = ""; /* 11 == length of color_b + letter + null */
 	if (msgs_n) {
 		/* Errors take precedence over warnings, and warnings over notices.
 		 * That is to say, if there is an error message AND a warning message,
 		 * the prompt will always display the error message sign: a red 'E'. */
-		if (error_msg)
-			sprintf(msg_str, "%sE", red_b);
-		else if (warning_msg)
-			sprintf(msg_str, "%sW", yellow_b);
-		else if (notice_msg)
-			sprintf(msg_str, "%sN", green_b);
-		/* In case none of the above is set, which shouldn't happen, use
-		 * the error indicator: Suppose the message is just a warning, but
-		 * the warning flag has not been set. In this case, it's better to
-		 * fail with an error than with a mere notice indicator */
-		else
-			sprintf(msg_str, "%sE", red_b);			
+		switch (pmsg) {
+		case nomsg: break;
+		case error: sprintf(msg_str, "%sE", red_b); break;
+		case warning: sprintf(msg_str, "%sW", yellow_b); break;
+		case notice: sprintf(msg_str, "%sN", green_b); break;
+		}
 	}
 
 	/* Generate the prompt string */
@@ -10664,7 +10696,7 @@ prompt(void)
 	size_t decoded_prompt_len = strlen(decoded_prompt);
 
 	size_t prompt_length = (size_t)(decoded_prompt_len
-		+ (sel_n ? 10 : 0) + (trash_n ? 10 : 0) + (msgs_n ? 10: 0) 
+		+ (sel_n ? 10 : 0) + (trash_n ? 10 : 0) + ((msgs_n && pmsg) ? 10: 0) 
 		+ 6 + sizeof(text_color) + 1);
 
 	/* 10 = length of color_b ({red,green,yellow}_b) + letter (sel, trash, msg); 
@@ -10674,7 +10706,7 @@ prompt(void)
 	char the_prompt[prompt_length];
 	
 	snprintf(the_prompt, prompt_length, "%s%s%s%s%s%s%s%s", 
-		(msgs_n) ? msg_str : "", (trash_n) ? yellow_b : "", 
+		(msgs_n && pmsg) ? msg_str : "", (trash_n) ? yellow_b : "", 
 		(trash_n) ? "T" : "", (sel_n) ? green_b : "", (sel_n) ? 
 		"*" : "", decoded_prompt, NC_b, text_color);
 
@@ -10688,7 +10720,7 @@ prompt(void)
 	if (print_msg) {
 		for (i = 0; i < msgs_n; i++)
 			fputs(messages[i], stderr);
-		print_msg = 0;
+		print_msg = 0; /* Print messages only once */
 	}
 
 	args_n = 0;
@@ -11610,8 +11642,10 @@ check_for_alias(char **comm)
 		
 			/* Get the aliased command */
 			aliased_cmd = strbtw(aliases[i], '\'', '\'');
+			
 			if (!aliased_cmd)
 				return (char **)NULL;
+			
 			if (*aliased_cmd == 0x00) { /* zero length */
 				free(aliased_cmd);
 				return (char **)NULL;
@@ -12074,7 +12108,7 @@ exec_cmd(char **comm)
 			for (i = 0; i < msgs_n; i++)
 				free(messages[i]);
 			msgs_n = 0;
-			error_msg = warning_msg = notice_msg = 0;
+			pmsg = nomsg;
 		}
 		else {
 			if (msgs_n) {
@@ -12622,6 +12656,7 @@ save_sel(void)
 	}
 
 	FILE *sel_fp = fopen(sel_file_user, "w");
+
 	if (!sel_fp) {
 		_err(0, NOPRINT_PROMPT, "%s: sel: '%s': %s\n", PROGRAM_NAME, 
 			 sel_file_user, strerror(errno));
@@ -14173,24 +14208,27 @@ bookmarks_function(char **cmd)
 	if (cmd[1]) {
 		/* Add a bookmark */
 		if (strcmp(cmd[1], "a") == 0 || strcmp(cmd[1], "add") == 0) {
+
 			if (!cmd[2]) {
 				printf(_("Usage: bookmarks, bm [a, add PATH]\n"));
 				return EXIT_SUCCESS;
 			}
+
 			if (access(cmd[2], F_OK) != 0) {
 				fprintf(stderr, "bookmarks: %s: %s\n", cmd[2], 
 						strerror(errno));
 				return EXIT_FAILURE;
 			}
-			return (add_bookmark(cmd[2]));
+
+			return add_bookmark(cmd[2]);
 		}
 		/* Delete bookmarks */
 		else if (strcmp(cmd[1], "d") == 0 || strcmp(cmd[1], "del") == 0)
-			return (del_bookmark());
+			return del_bookmark();
 	}
 	
 	/* If no arguments or "bm [edit] [shortcut, name]" */
-	return (open_bookmark(cmd));
+	return open_bookmark(cmd);
 }
 
 void
@@ -14243,11 +14281,14 @@ dir_size(char *dir)
 			 * more than enough */
 			char line[32] = "";
 			fgets(line, sizeof(line), du_fp);
+			
 			char *file_size = strbfr(line, '\t');
+			
 			if (file_size)
 				printf("%siB\n", file_size);
 			else 
 				puts("???");
+			
 			free(file_size);
 			fclose(du_fp);
 		}
@@ -14266,17 +14307,21 @@ properties_function(char **comm)
 		return EXIT_FAILURE;
 
 	int exit_status = 0;
+
 	if (comm[1] && (strcmp(comm[1], "all") == 0
 	|| strcmp(comm[1], "a") == 0)) {
 		int status = long_view;
 		long_view = 1;
 		int max, i;
+
 		max = get_max_long_view();
+
 		for (i = 0; i < files; i++) {
 			printf("%s%d%s ", eln_color, i + 1, NC);
 			if (get_properties(dirlist[i], (int)long_view, max) != 0)
 				exit_status = 1;
 		}
+
 		long_view = status;
 		return exit_status;
 	}
@@ -14284,45 +14329,55 @@ properties_function(char **comm)
 	register int i;
 	if (comm[1] && (strcmp(comm[1], "size") == 0
 	|| strcmp(comm[1], "s") == 0)) { /* List files size */
+
 		struct stat file_attrib;
 		/* Get largest filename to format the output */
 		int largest = 0;
+
 		for (i = files; i--; ) {
 			size_t file_len = (unicode) ? u8_xstrlen(dirlist[i])
 							  : strlen(dirlist[i]);
 			if (file_len > largest)
 				largest = file_len + 1;
 		}
+
 		for (i = 0; i < files; i++) {
+
 			/* Get the amount of continuation bytes for each filename. This
 			 * is necessary to properly format the output in case of non-ASCII
 			 * strings */
-			(unicode) ? u8_xstrlen(dirlist[i]) 
-					  : strlen(dirlist[i]);
+			(unicode) ? u8_xstrlen(dirlist[i]) : strlen(dirlist[i]);
+
 			lstat(dirlist[i], &file_attrib);
 			char *size = get_size_unit(file_attrib.st_size);
 			/* Print: 		filename		ELN		Padding		no new line*/
 			colors_list(dirlist[i], i + 1, largest + cont_bt, 0);
 			printf("%s%s%s\n", NC, default_color, (size) ? size : "??");
+		
 			if (size)
 				free(size);
 		}
+		
 		return EXIT_SUCCESS;
 	}
 	
 	/* If "pr file file..." */
 	for (i = 1; i <= args_n; i++) {
+
 		char *deq_file = dequote_str(comm[i], 0);
+
 		if (!deq_file) {
 			fprintf(stderr, _("%s: '%s': Error dequoting filename\n"), 
 					PROGRAM_NAME, comm[i]);
 			exit_status = 1;
 			continue;
 		}
+
 		if (get_properties(deq_file, 0, 0) != 0)
 			exit_status = 1;
 		free(deq_file);
 	}
+	
 	return exit_status;
 }
 
@@ -14595,9 +14650,9 @@ hidden_function(char **comm)
 		if (show_hidden == 1) {
 			show_hidden = 0;
 			if (cd_lists_on_the_fly) {
-				while (files--) free(dirlist[files]);
-				if (list_dir() != 0)
-					exit_status = 1;
+				while (files--)
+					free(dirlist[files]);
+				exit_status = list_dir();
 			}
 		}
 	}
@@ -14606,9 +14661,9 @@ hidden_function(char **comm)
 		if (show_hidden == 0) {
 			show_hidden = 1;
 			if (cd_lists_on_the_fly) {
-				while (files--) free(dirlist[files]);
-				if (list_dir() != 0)
-					exit_status = 1;
+				while (files--)
+					free(dirlist[files]);
+				exit_status = list_dir();
 			}
 		}
 	}
@@ -14640,14 +14695,11 @@ log_function(char **comm)
 			size_t line_size = 0;
 			char *line_buff = (char *)NULL;
 			ssize_t line_len = 0;
+			
 			while ((line_len = getline(&line_buff, &line_size, log_fp)) > 0)
-				printf("%s", line_buff);
+				fputs(line_buff, stdout);
+			
 			free(line_buff);
-			line_buff = (char *)NULL;
-
-/*			char line[MAX_LINE]="";	
-			while (fgets(line, sizeof(line), log_fp))
-				printf("%s", line); */
 
 			fclose(log_fp);
 			return EXIT_SUCCESS;
@@ -14665,19 +14717,19 @@ log_function(char **comm)
 	/* Create a buffer big enough to hold the entire command */
 	size_t com_len = 0;
 	int i = 0;
-//	for (i = args_n; i >= 0; i--) {
 	for (i = 0; comm[i]; i++) {
 		/* Argument length plus space plus null byte terminator */
 		com_len += (strlen(comm[i]) + 1);
 	}
+
 	char full_comm[com_len];
 	memset(full_comm, 0x00, com_len);
 	strncpy(full_comm, comm[0], com_len);
-//	for (i = 1; i <= args_n; i++) {
 	for (i = 1; comm[i]; i++) {
 		strncat(full_comm, " ", com_len);
 		strncat(full_comm, comm[i], com_len);
 	}
+
 	/* And now a buffer for the whole log line */
 	char *date = get_date();
 	size_t log_len = strlen(date) + strlen(user) + strlen(path) + com_len + 7;
@@ -14695,13 +14747,14 @@ log_function(char **comm)
 	/* Else, overwrite the log file leaving only the 'log clear' command */
 	else 
 		log_fp = fopen(LOG_FILE, "w+");
+
 	if (!log_fp) {
 		_err('e', PRINT_PROMPT, "%s: log: '%s': %s\n", PROGRAM_NAME, LOG_FILE,
 			 strerror(errno));
 		return EXIT_FAILURE;
 	}
 	else { /* If LOG_FILE was correctly opened, write the log */
-		fprintf(log_fp, "%s", full_log);
+		fputs(full_log, log_fp);
 		fclose(log_fp);
 		return EXIT_SUCCESS;
 	}
