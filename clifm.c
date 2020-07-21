@@ -1466,10 +1466,10 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.19.5"
+#define VERSION "0.19.6"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "July 19, 2020"
+#define DATE "July 20, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -11031,7 +11031,7 @@ list_dir(void)
 	 * function */
 
 	/* "!path" means that the pointer 'path' points to no memory address 
-	 * (NULL), while "path[0] == 0x00 means" means that the first byte of 
+	 * (NULL), while "*path == 0x00 means" means that the first byte of 
 	 * the memory block pointed to by the pointer 'path' is a null char */
 	if (!path || *path == 0x00) {
 		fprintf(stderr, _("%s: Path is NULL or empty\n"), PROGRAM_NAME);
@@ -11050,152 +11050,101 @@ list_dir(void)
 	 * decide themselves what should be put into registers and what not */
 	register int i = 0;
 
-	/* Remove final slash from path, if any */
-/*	size_t path_len = strlen(path);
-	if (path[path_len - 1] == '/' && !(*path == '/' && *(path + 1) == 0x00))
-		path[path_len - 1] = 0x00; */
+	/* Get the list of files in CWD */
+	struct dirent **list = (struct dirent **)NULL;
+	int total = scandir(path, &list, skip_implied_dot, (unicode) ? alphasort : 
+						(case_sensitive) ? xalphasort : 
+						alphasort_insensitive);
 
-	/* If list directories first, store directories first, then files, and 
-	 * finally copy everything into one single array (dirlist) */
+	if (total == -1) {
+		_err('e', PRINT_PROMPT, "%s: scandir: '%s': %s\n", PROGRAM_NAME, 
+			 path, strerror(errno));
+		if (errno == ENOMEM)
+			exit(EXIT_FAILURE);
+		else
+			return EXIT_FAILURE;
+	}
+
+	/* Struct to store information about each file, so that we don't need
+	 * to run stat() and strlen() again later, perhaps hundreds of times */
+	struct fileinfo file_info[total];
+
 	if (list_folders_first) {
-		register int files_files = 0, files_folders = 0;
-		struct dirent **dirlist_folders = (struct dirent **)NULL, 
-					  **dirlist_files = (struct dirent **)NULL;
+
+		/* Store indices of dirs and files into different int arrays, counting
+		 * the number of elements for each array too */
+		int tmp_files[total], tmp_dirs[total], filesn = 0, dirsn = 0;
 		
-		/* Store folders */
-		/* If unicode is set to true, use the standard alphasort(), since it
-		 * uses strcoll(), which, unlike strcmp() (used by my xalphasort()), 
-		 * is locale aware */
-		files_folders = scandir(path, &dirlist_folders, folder_select, 
-							    (unicode) ? alphasort : 
-							    (case_sensitive) ? xalphasort : 
-							    alphasort_insensitive);
-		
-		if (files_folders == -1) {
-			_err('e', PRINT_PROMPT, "%s: scandir: '%s': %s\n", PROGRAM_NAME, 
-				 path, strerror(errno));
-			if (errno == ENOMEM)
-				exit(EXIT_FAILURE);
+		for (i = 0; i < total; i++) {
+			if (list[i]->d_type == DT_DIR)
+				tmp_dirs[dirsn++] = i;
 			else
-				return EXIT_FAILURE;
+				tmp_files[filesn++] = i;
 		}
 		
-		/* Store files */
-		files_files = scandir(path, &dirlist_files, file_select, 
-  						      (unicode) ? alphasort : 
-							  (case_sensitive) ? xalphasort : 
-							  alphasort_insensitive);
-		
-		if (files_files == -1) {
-			_err('e', PRINT_PROMPT, "%s: scandir: '%s': %s\n", PROGRAM_NAME, 
-				 path, strerror(errno));
-			if (errno == ENOMEM)
-				exit(EXIT_FAILURE);
-			else
-				return EXIT_FAILURE;
-		}
-
-		/* Reallocate the dirlist array (global) according to the amount 
-		 * of folders and files found */
-
-		/* If empty folder... Note: realloc(ptr, 0) acts like free(ptr) */
-		if (!files_folders && !files_files) /* If neither files nor folders */
+		/* Allocate enough space to store all dirs and file names in 
+		 * the dirlist array */
+		if (!filesn && !dirsn)
 			dirlist = (char **)xrealloc(dirlist, sizeof(char *));
-		else if (files_folders > 0) {
-			if (files_files > 0) { /* If files and folders */
-				dirlist = (char **)xrealloc(dirlist, sizeof(char *) *
-										(files_folders + files_files));
-			}
-			else /* If only folders */
-				dirlist = (char **)xrealloc(dirlist, 
-									sizeof(char *) * files_folders);
+		else
+			dirlist = (char **)xrealloc(dirlist, (filesn + dirsn + 1) 
+										* sizeof(char *));
+
+		/* First copy dir names into the dirlist array */
+		size_t len;
+		for (i = 0; i < dirsn; i++) {
+			len = (unicode) ? u8_xstrlen(list[tmp_dirs[i]]->d_name)
+				  : strlen(list[tmp_dirs[i]]->d_name);
+			/* Store the filename length here, so that we don't need to run
+			 * strlen() again later on the same file */
+			file_info[i].len = len;
+			dirlist[i] = (char *)xnmalloc(len + 1, (cont_bt) ? sizeof(char32_t) 
+										  : sizeof(char));
+			strcpy(dirlist[i], list[tmp_dirs[i]]->d_name);
 		}
-		else if (files_files > 0) /* If only files */
-			dirlist = (char **)xrealloc(dirlist, sizeof(char *) * files_files);
 		
-		/* Store both files and folders into the dirlist array */
-		size_t str_len = 0;
-		if (files_folders > 0) {
-
-			for (i = 0; i < files_folders; i++) {
-				str_len = (unicode) ? u8_xstrlen(dirlist_folders[i]->d_name)
-						  : strlen(dirlist_folders[i]->d_name);
-				/* cont_bt is a global variable set by u8_xstrlen if any
-				 * continuation byte is found, and thereby, only if the file
-				 * has unicode chars, in which case we need to use a wider
-				 * size for each char. Whereas char is 1 byte, char32_t is
-				 * 4 bytes long. I use char32_t since wchar_t is 
-				 * compiler-dependent and might vary from 1 to 4 bytes */
-				dirlist[files] = xnmalloc(str_len + 1, 
-								 (cont_bt) ? sizeof(char32_t) : sizeof(char));
-				strcpy(dirlist[files++], dirlist_folders[i]->d_name);
-				/* The d_name member of the dirent struct is a null-terminated
-				 * string (see readdir man page), so that we don't need to use 
-				 * calloc nor to manually add the null byte, since strcpy copies
-				 * source into dest including the null byte */
-				free(dirlist_folders[i]);
-			}
-			free(dirlist_folders);
+		/* Now copy file names */
+		register int j;
+		for (j = 0; j < filesn; j++) {
+			len = (unicode) ? u8_xstrlen(list[tmp_files[j]]->d_name)
+				  : strlen(list[tmp_files[j]]->d_name);
+			file_info[i].len = len;
+			dirlist[i] = (char *)xnmalloc(len + 1, (cont_bt) ? sizeof(char32_t)
+										  : sizeof(char));
+			strcpy(dirlist[i++], list[tmp_files[j]]->d_name);
 		}
+		
+		dirlist[i] = (char *)NULL;
 
-		if (files_files > 0) {
-			for(i = 0; i < files_files; i++) {
-				str_len = (unicode) ? u8_xstrlen(dirlist_files[i]->d_name)
-						  : strlen(dirlist_files[i]->d_name);
-				dirlist[files] = xnmalloc(str_len + 1, 
-								 (cont_bt) ? sizeof(char32_t): sizeof(char));
-				strcpy(dirlist[files++], dirlist_files[i]->d_name);
-				free(dirlist_files[i]);
-			}
-			free(dirlist_files);
-		}
+		/* This global variable keeps a record of the amounf of files in the
+		 * CWD */
+		files = i;
 	}
 	
 	/* If no list_folders_first */
 	else {
-		/* Completely free the dirlist array and copy the results of
-		 * scandir into it */
-		while (files--)
-			free(dirlist[files]);
-		free(dirlist);
-		dirlist = (char **)NULL;
 
-		struct dirent **list = (struct dirent **)NULL;
-		files = scandir(path, &list, skip_implied_dot, 
-					    (unicode) ? alphasort : (case_sensitive) 
-					    ? xalphasort : alphasort_insensitive);
+		files = total;
+
+		dirlist = (char **)xrealloc(dirlist, (files + 1) * sizeof(char *));
+
+		size_t len;
+		for (i = files; i >= 0; i--) {
+			len = strlen(list[i]->d_name);
+			file_info[i].len = len;
+			dirlist[i] = xnmalloc(len + 1, sizeof(char));
+			strcpy(dirlist[i], list[i]->d_name);
+		}
 		
-		if (files == -1) {
-			_err('e', PRINT_PROMPT, "%s: scandir: '%s': %s\n", PROGRAM_NAME, 
-				 path, strerror(errno));
-			if (errno == ENOMEM)
-				exit(EXIT_FAILURE);
-			else
-				return EXIT_FAILURE;
-		}
-		else {
-			dirlist = (char **)xnmalloc(files + 1, sizeof(char *));
-			size_t str_len = 0;
-			for (i = 0; i < files; i++) {
-				str_len = strlen(list[i]->d_name);
-				dirlist[i] = xnmalloc(str_len + 1, sizeof(char));
-				strcpy(dirlist[i], list[i]->d_name);
-				free(list[i]);
-			}
-			free(list);
-		}
+		dirlist[files] = (char *)NULL;
 	}
-	
+
 	if (files == 0) {
 		if (clear_screen)
 			CLEAR;
 		printf("%s. ..%s\n", blue, NC);
 		return EXIT_SUCCESS;
 	}
-
-	/* Struct to store information about each file, so that we don't need
-	 * to run stat() again later, perhaps hundreds of times */
-	struct fileinfo file_info[files];
 
 	/* Get the longest element */
 	longest = 0; /* Global */
@@ -11211,12 +11160,10 @@ list_dir(void)
 		file_info[i].exists = 1;
 		file_info[i].type = file_attrib.st_mode;
 		file_info[i].size = file_attrib.st_size;
+
 		/* file_name_width contains: ELN's amount of digits + one space 
 		 * between ELN and filename + filename length. Ex: '12 name' contains 
 		 * 7 chars */
-		file_info[i].len = (unicode) ? u8_xstrlen(dirlist[i]) : 
-						   strlen(dirlist[i]);
-
 		int file_name_width = digits_in_num(i + 1) + 1 + file_info[i].len;
 
 		/* If the file is a non-empty directory and the user has access 
@@ -11315,6 +11262,7 @@ list_dir(void)
 	short last_column = 0; /* c, reset_pager=0; */
 	register size_t counter = 0;
 	
+	/* Now we can do the listing */
 	for (i = 0; i < files; i++) {
 
 		if (file_info[i].exists == 0)
@@ -11489,7 +11437,6 @@ list_dir(void)
 			register int j;
 			for (j = diff + 1; j--;)
 				putchar(' ');
-/*			printf("%-*c", diff + 2, '\0'); */
 		}
 	}
 	/* If the pager was disabled during listing (by pressing 'c', 'p' or 'q'),
@@ -11512,9 +11459,15 @@ list_dir(void)
 
 	fflush(stdout);
 
+	/* Free the scandir array */
+	/* Whatever time it takes to free this array, it will be faster to do it 
+	 * after listing files than before (at least theoretically) */
+	while (total--)
+		free(list[total]);
+	free(list);
+
 /*	clock_t end = clock();
-	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC);
-	getchar(); */
+	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC); */
 
 	return EXIT_SUCCESS;
 }
