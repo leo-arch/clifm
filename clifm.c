@@ -874,8 +874,14 @@ of course you can grep it to find, say, linux' macros, as here. */
  ** 3 - When TAB completing bookmarks, if there is a file named as one of the
 	possible bookmark names in the CWD, this bookmark name will be printed in
 	the color corresponding to the filetype of the file in the CWD.
+ ** 4 - Filenames background color takes the whole line in search and properties
+	functions. The problem is that colors_list inserts the pad before the 
+	filename, when it should be inserted after it.
 
 ###########################################
+ * (SOLVED) The exec check in list_dir checks the executable bit only for the
+	owner of the file, and not for group and others. Change S_IXUSR by 
+	(S_IXUSR|S_IXGRP|S_IXOTH).
  * (SOLVED) History does not execute aliases.
  * (SOLVED) I'm having Valgrind errors when listing unicode filenames. SOLUTION:
 	Whenever finale names have at least one unicode char (in which case cont_bt
@@ -1466,10 +1472,10 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.19.6"
+#define VERSION "0.19.7"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "July 20, 2020"
+#define DATE "July 23, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -1621,6 +1627,11 @@ xstrcmp(const char *str1, const char *str2)
 		return (0 - *str2);
 
 	return 0;
+	
+/*	for (; *str1 == *str2; str1++, str2++)
+		if (*str1 == 0x00)
+			return 0;
+	return *str1 - *str2; */
 }
 
 int
@@ -1653,12 +1664,14 @@ xstrcpy(char *buf, const char *str)
 		return (char *)NULL;
 
 	while (*str) {
-		*buf=*str;
+		*buf = *str;
 		buf++;
 		str++;
 	}
 
 	*buf = 0x00;
+
+/*	while ((*buf++ = *str++)); */
 
 	return buf;
 }
@@ -1678,6 +1691,9 @@ xstrncpy(char *buf, const char *str, size_t n)
 	}
 
 	*buf = 0x00;
+
+/*	size_t counter = 0;
+	while ((*buf++ = *str++) && counter++ < n); */
 
 	return buf;
 }
@@ -2588,6 +2604,7 @@ struct fileinfo
 	int exists;
 	mode_t type;
 	off_t size;
+	int ruser; /* User read permission for dir */
 };
 
 /* A list of possible program messages. Each value tells the prompt what to do
@@ -10900,7 +10917,7 @@ colors_list(const char *entry, const int i, const int pad,
  * and terminating ENTRY with or without a new line char (NEW_LINE 1 or 0
  * respectivelly) */
 {
-	int i_digits = digits_in_num (i);
+	int i_digits = digits_in_num(i);
 	char index[i_digits + 2]; /* Num (i) + space + null byte */
 	memset(index, 0x00, i_digits + 2);
 	if (i > 0) /* When listing files in CWD */
@@ -10927,47 +10944,48 @@ colors_list(const char *entry, const int i, const int pad,
 	#endif
 	switch (file_attrib.st_mode & S_IFMT) {
 	case S_IFREG:
-		if (!(file_attrib.st_mode & S_IRUSR))
-			printf("%s%s%s%s%-*s%s%s", eln_color, index, NC, nf_c, pad, 
-				   entry, NC, new_line ? "\n" : "");
+/*		if (!(file_attrib.st_mode & S_IRUSR)) */
+		if (access(entry, R_OK) == -1)
+			printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, nf_c,
+				   entry, pad, NC, new_line ? "\n" : "");
 		else if (file_attrib.st_mode & S_ISUID) /* set uid file */
-			printf("%s%s%s%s%-*s%s%s", eln_color, index, NC, su_c, pad, 
-				   entry, NC, new_line ? "\n" : "");
+			printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, su_c, 
+				   entry, pad, NC, new_line ? "\n" : "");
 		else if (file_attrib.st_mode & S_ISGID) /* set gid file */
-			printf("%s%s%s%s%-*s%s%s", eln_color, index, NC, sg_c, 
-				   pad, entry, NC, new_line ? "\n" : "");
+			printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, sg_c, 
+				   entry, pad, NC, new_line ? "\n" : "");
 		else {
 			#ifdef _LINUX_CAP
 			cap = cap_get_file(entry);
 			if (cap) {
-				printf("%s%s%s%s%-*s%s%s", eln_color, index, NC, ca_c, 
-					   pad, entry, NC, new_line ? "\n" : "");
+				printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, ca_c, 
+					   entry, pad, NC, new_line ? "\n" : "");
 				cap_free(cap);
 			}
-			else if (file_attrib.st_mode & S_IXUSR) {
+			else if (file_attrib.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH)) {
 			#else
-			if (file_attrib.st_mode & S_IXUSR) {
+			if (file_attrib.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH)) {
 			#endif
 				if (file_attrib.st_size == 0)
-					printf("%s%s%s%s%-*s%s%s", eln_color, index, NC, ee_c, 
-						   pad, entry, NC, new_line ? "\n" : "");
+					printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, ee_c, 
+						   entry, pad, NC, new_line ? "\n" : "");
 				else 
-					printf("%s%s%s%s%-*s%s%s", eln_color, index, NC, ex_c, 
-						   pad, entry, NC, new_line ? "\n" : "");
+					printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, ex_c, 
+						   entry, pad, NC, new_line ? "\n" : "");
 			}
 			else if (file_attrib.st_size == 0)
-				printf("%s%s%s%s%-*s%s%s", eln_color, index, NC, ef_c, 
-					   pad, entry, NC, new_line ? "\n" : "");
+				printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, ef_c, 
+					   entry, pad, NC, new_line ? "\n" : "");
 			else
-				printf("%s%s%s%s%-*s%s%s", eln_color, index, NC, fi_c, 
-					   pad, entry, NC, new_line ? "\n" : "");
+				printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, fi_c, 
+					   entry, pad, NC, new_line ? "\n" : "");
 		}
 			break;
 
 	case S_IFDIR:
 		if (access(entry, R_OK|X_OK) != 0)
-			printf("%s%s%s%s%-*s%s%s", eln_color, index, NC, nd_c, pad, 
-				   entry, NC, new_line ? "\n" : "");
+			printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, nd_c, 
+				   entry, pad, NC, new_line ? "\n" : "");
 		else {
 			int is_oth_w = 0;
 			if (file_attrib.st_mode & S_IWOTH) is_oth_w = 1;
@@ -10976,47 +10994,47 @@ colors_list(const char *entry, const int i, const int pad,
 				contains only "." and ".." (2 elements). If not mounted 
 				(ex: /media/usb) the result will be zero.*/
 				/* If sticky bit dir: green bg. */
-				printf("%s%s%s%s%-*s%s%s", eln_color, index, NC, 
-					(file_attrib.st_mode & S_ISVTX) ? ((is_oth_w) ? 
-					tw_c : st_c) : ((is_oth_w) ? 
-					ow_c : ed_c), pad, entry, NC, 
-					new_line ? "\n" : "");
+				printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, 
+					   (file_attrib.st_mode & S_ISVTX) ? ((is_oth_w) ? 
+					   tw_c : st_c) : ((is_oth_w) ? 
+					   ow_c : ed_c), entry, pad, NC, 
+					   new_line ? "\n" : "");
 			}
 			else
-				printf("%s%s%s%s%-*s%s%s", eln_color, index, NC,
-					(file_attrib.st_mode & S_ISVTX) ? ((is_oth_w) ? 
-					tw_c : st_c) : ((is_oth_w) ? 
-					ow_c : di_c), pad, entry, NC, 
-					new_line ? "\n" : "");
+				printf("%s%s%s%s%s%-*s%s", eln_color, index, NC,
+					   (file_attrib.st_mode & S_ISVTX) ? ((is_oth_w) ? 
+					   tw_c : st_c) : ((is_oth_w) ? 
+					   ow_c : di_c), entry, pad, NC, 
+					   new_line ? "\n" : "");
 	}
 		break;
 
 	case S_IFLNK:
 		linkname = realpath(entry, (char *)NULL);
 		if (linkname) {
-			printf("%s%s%s%s%-*s%s%s", eln_color, index, NC, ln_c, pad, 
-				   entry, NC, new_line ? "\n" : "");
+			printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, ln_c, 
+				   entry, pad, NC, new_line ? "\n" : "");
 			free(linkname);
 		}
-		else printf("%s%s%s%s%-*s%s%s", eln_color, index, NC, or_c, pad, 
-					entry, NC, new_line ? "\n" : "");
+		else printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, or_c, 
+					entry, pad, NC, new_line ? "\n" : "");
 		break;
 
-	case S_IFIFO: printf("%s%s%s%s%-*s%s%s", eln_color, index, NC, pi_c, 
-						 pad, entry, NC, new_line ? "\n" : ""); break;
+	case S_IFIFO: printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, pi_c, 
+						 entry, pad, NC, new_line ? "\n" : ""); break;
 
-	case S_IFBLK: printf("%s%s%s%s%-*s%s%s", eln_color, index, NC, bd_c, 
-						 pad, entry, NC, new_line ? "\n" : ""); break;
+	case S_IFBLK: printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, bd_c, 
+						 entry, pad, NC, new_line ? "\n" : ""); break;
 
-	case S_IFCHR: printf("%s%s%s%s%-*s%s%s", eln_color, index, NC, cd_c, 
-						 pad, entry, NC, new_line ? "\n" : ""); break;
+	case S_IFCHR: printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, cd_c, 
+						 entry, pad, NC, new_line ? "\n" : ""); break;
 
-	case S_IFSOCK: printf("%s%s%s%s%-*s%s%s", eln_color, index, NC, so_c, 
-						  pad, entry, NC, new_line ? "\n" : ""); break;
+	case S_IFSOCK: printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, so_c, 
+						  entry, pad, NC, new_line ? "\n" : ""); break;
 
 	/* In case all of the above conditions are false... */
-	default: printf("%s%s%s%s%-*s%s%s", eln_color, index, NC, no_c, 
-				    pad, entry, NC, new_line ? "\n" : "");
+	default: printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, no_c, 
+				    entry, pad, NC, new_line ? "\n" : "");
 	}
 }
 
@@ -11171,11 +11189,15 @@ list_dir(void)
 		 * amount of files this directory contains (ex: 123 (files) contains 3 
 		 * digits) + 2 for space and slash between the directory name and the 
 		 * amount of files it contains. Ex: '12 name /45' contains 11 chars */
-		if ((file_info[i].type & S_IFMT) == S_IFDIR
-		&& access(dirlist[i], R_OK|X_OK) == 0) {
-			file_info[i].filesn = count_dir(dirlist[i]);
-			if (file_info[i].filesn > 2)
-				file_name_width += digits_in_num(file_info[i].filesn) + 2;
+		if ((file_info[i].type & S_IFMT) == S_IFDIR) {
+			if (access(dirlist[i], R_OK) == 0) {
+				file_info[i].filesn = count_dir(dirlist[i]);
+				file_info[i].ruser = 1;
+				if (file_info[i].filesn > 2)
+					file_name_width += digits_in_num(file_info[i].filesn) + 2;
+			}
+			else
+				file_info[i].ruser = 0;
 		}
 
 		if (file_name_width > longest)
@@ -11315,7 +11337,7 @@ list_dir(void)
 
 		switch (file_info[i].type & S_IFMT) {
 		case S_IFDIR:
-			if (access(dirlist[i], R_OK|X_OK) != 0)
+			if (!file_info[i].ruser)
 				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, nd_c, 
 					   dirlist[i], NC, (last_column) ? "\n" : "");
 			else {
@@ -11379,7 +11401,9 @@ list_dir(void)
 			break;
 
 		case S_IFREG:
-			if (!(file_info[i].type & S_IRUSR))
+			/* WARNING: S_IRUSR refers to owner, not current user */
+/*			if (!(file_info[i].type & S_IRUSR)) */
+			if (access(dirlist[i], R_OK) == -1)
 				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, nf_c, 
 						dirlist[i], NC, (last_column) ? "\n" : "");
 			else if (file_info[i].type & S_ISUID) /* set uid file */
@@ -11389,13 +11413,13 @@ list_dir(void)
 				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, sg_c, 
 					dirlist[i], NC, (last_column) ? "\n" : "");
 			#ifdef _LINUX_CAP
-			else if ((cap = cap_get_file (dirlist[i]))) {
+			else if ((cap = cap_get_file(dirlist[i]))) {
 				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, ca_c, 
 						dirlist[i], NC, (last_column) ? "\n" : "");				
 				cap_free(cap);
 			}
 			#endif
-			else if (file_info[i].type & S_IXUSR)
+			else if (file_info[i].type & (S_IXUSR|S_IXGRP|S_IXOTH))
 				if (file_info[i].size == 0)
 					printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, ee_c, 
 							dirlist[i], NC, (last_column) 
@@ -13084,7 +13108,19 @@ search_function(char **comm)
 		}
 	}
 
-	/* If wildcards, use glob() */
+	struct winsize w;
+	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+	/* ws_col and ws_row are both unsigned short int according to 
+	 * /bits/ioctl-types.h */
+	unsigned short tcols = w.ws_col; /* This one is global */
+
+	/* We will store here pointers to file names to be printed */
+	char **pfiles = (char **)NULL;
+
+				/* #############################
+				 * #         WILDACRDS         #
+				 * #############################*/
+	
 	if (strcntchr(search_str, '*') != -1 
 	|| strcntchr(search_str, '?') != -1 
 	|| strcntchr(search_str, '[') != -1) {
@@ -13093,11 +13129,13 @@ search_function(char **comm)
 		 * glob() works on CWD */
 		if (search_path && *search_path != 0x00) {
 			deq_dir = dequote_str(search_path, 0);
+
 			if (!deq_dir) {
 				fprintf(stderr, _("%s: %s: Error dequoting filename\n"),
 						PROGRAM_NAME, comm[1]);
 				return EXIT_FAILURE;
 			}
+
 			if (chdir(deq_dir) == -1) {
 				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, deq_dir, 
 						strerror(errno));
@@ -13111,7 +13149,12 @@ search_function(char **comm)
 		int ret = glob(search_str, 0, NULL, &globbed_files);
 		if (ret == 0) {
 
+			int last_column = 0, columns_n = 0;
 			short found = 0;
+			size_t len = 0, longest = 0;
+			pfiles = (char **)xnmalloc(globbed_files.gl_pathc + 1, 
+									   sizeof(char *));
+			size_t files_len[globbed_files.gl_pathc];
 
 			/* If we have a path */
 			if (deq_dir) {
@@ -13127,8 +13170,29 @@ search_function(char **comm)
 						if ((file_attrib.st_mode & S_IFMT) != file_type)
 							continue;
 					}
-					found = 1;
-					colors_list(globbed_files.gl_pathv[i], 0, 0, 1);
+					/* Store pointer to maching filename in array of pointers */
+					pfiles[found] = globbed_files.gl_pathv[i];
+					
+					/* Get the longest filename in the list */
+					len = strlen(pfiles[found]);
+					files_len[found++] = len;
+					if (len > longest)
+						longest = len + 1;
+				}
+				
+				/* Print the result */
+				columns_n = tcols / longest;
+				if (columns_n <= 0)
+					columns_n = 1;
+				
+				for (i = 0; i < found; i++) {
+					if ((i + 1) % columns_n == 0)
+						last_column = 1;
+					else
+						last_column = 0;
+					colors_list(pfiles[i], 0, (last_column) ? 0 : 
+								longest - files_len[i], 
+								(last_column || i == found - 1) ? 1 : 0);
 					/* Second argument to colors_list() is:
 					 * 0: Do not print any ELN 
 					 * Positive number: Print positive number as ELN
@@ -13139,7 +13203,7 @@ search_function(char **comm)
 			/* If no path was specified */
 			else {
 				size_t i, j;
-				int index = -1;
+				int index[globbed_files.gl_pathc];
 				for (i = 0; globbed_files.gl_pathv[i]; i++) {
 					if (strcmp(globbed_files.gl_pathv[i], ".") == 0
 					|| strcmp(globbed_files.gl_pathv[i], "..") == 0)
@@ -13151,22 +13215,52 @@ search_function(char **comm)
 						if ((file_attrib.st_mode & S_IFMT) != file_type)
 							continue;
 					}
-					found = 1;
+					pfiles[found] = globbed_files.gl_pathv[i];
+
 					/* In case 'index' is not found in the next for loop, that 
 					 * is, if the globbed file is not found in the current dir 
 					 * list, 'index' value would be that of the previous file 
 					 * if 'index' is not set to zero in each for iteration */
-					index = -1;
+					index[found] = -1;
 					for (j = 0; j < (size_t)files; j++) {
 						if (strcmp(globbed_files.gl_pathv[i], dirlist[j]) == 0) {
-							index = j;
+							index[found] = j;
 							break;
 						}
 					}
-					colors_list(globbed_files.gl_pathv[i], 
-								(index != -1) ? index + 1 : -1, 0, 1);
+					
+					len = strlen(pfiles[found]);
+					files_len[found] = len;
+					if (len > longest) {
+						longest = len + ((index[found] != -1) 
+								  ? digits_in_num(index[found]) + 1 : 2) + 1;
+					}
+					found++;
+				}
+
+				if (found) {
+
+					columns_n = tcols / longest;
+					if (columns_n <= 0)
+						columns_n = 1;
+					
+					for (i = 0; i < found; i++) {
+						if ((i + 1) % columns_n == 0)
+							last_column = 1;
+						else
+							last_column = 0;
+					
+						colors_list(pfiles[i], (index[i] != -1) 
+									? index[i] + 1 : -1, (last_column) ? 0
+									: longest - files_len[i] - 
+									digits_in_num(index[i] + 1) + 3, 
+									(last_column || i == found - 1) ? 1 : 0);
+					}
 				}
 			}
+			
+			free(pfiles);
+			
 			if (!found) 
 				printf(_("%s: No matches found\n"), PROGRAM_NAME);
 		}
@@ -13187,8 +13281,13 @@ search_function(char **comm)
 		}
 	}
 	
-	/* If no wildcards */
+				/* #####################
+				 * #    NO WILDCARDS   # 
+				 * #####################*/
+
 	else {
+		int last_column = 0, columns_n = 0;
+		size_t len = 0, longest = 0;
 		short found = 0;
 		size_t i = 0;
 
@@ -13200,6 +13299,7 @@ search_function(char **comm)
 						PROGRAM_NAME, comm[1]);
 				return EXIT_FAILURE;
 			}
+
 			struct dirent **search_list;
 			int search_files = 0;
 			
@@ -13214,43 +13314,83 @@ search_function(char **comm)
 			if (chdir(deq_dir) == -1) {
 				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, deq_dir, 
 						strerror(errno));
+
 				for (i = 0; i < search_files; i++)
 					free(search_list[i]);
 				free(search_list);
 				free(deq_dir);
+
 				return EXIT_FAILURE;
 			}
 			
+			pfiles = (char **)xnmalloc(search_files + 1, sizeof(char *));
+			size_t files_len[search_files]; 
+
 			for (i = 0; i < search_files; i++) {
 				if (strstr(search_list[i]->d_name, search_str)) {
 					if (file_type) {
+
 						if (lstat(search_list[i]->d_name, &file_attrib) == -1)
 							continue;
+
 						if ((file_attrib.st_mode & S_IFMT) == file_type) {
-							colors_list(search_list[i]->d_name, 0, 0, 1);
-							found = 1;
+							pfiles[found] = search_list[i]->d_name;
+							len = strlen(search_list[i]->d_name);
+							files_len[found++] = len;
+							if (len > longest)
+								longest = len;
 						}
 					}
 					else {
-						colors_list(search_list[i]->d_name, 0, 0, 1);
-						found = 1;
+						pfiles[found] = search_list[i]->d_name;
+						len = strlen(search_list[i]->d_name);
+						files_len[found++] = len;
+						if (len > longest)
+							longest = len + 1;
 					}
 				}
-				free(search_list[i]);
 			}
 			
+			if (found) {
+				columns_n = tcols / longest;
+				if (columns_n <= 0)
+					columns_n = 1;
+
+				for (i = 0; i < found; i++) {
+					
+					if ((i + 1) % columns_n == 0)
+						last_column = 1;
+					else
+						last_column = 0;
+					
+					colors_list(pfiles[i], 0, (last_column) ? 0 : 
+								longest - files_len[i] + 1, 
+								(last_column || i == found - 1) ? 1 : 0);
+				}
+			}
+			
+			for (i = 0; i< search_files; i++)
+				free(search_list[i]);
 			free(search_list);
-			search_list = (struct dirent **)NULL;
+			
+			free(pfiles);
+
 			if (chdir(path) == -1) {
 				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, path, 
 						strerror(errno));
+
 				free(deq_dir);
+
 				return EXIT_FAILURE;
 			}
 		}
 		
 		/* If /search_str */
 		else {
+			int index[files];
+			pfiles = (char **)xnmalloc(files + 1, sizeof(char *));
+			size_t files_len[files];
+
 			for (i = 0; i < (size_t)files; i++) {
 				/* strstr finds substr in STR, as if STR where "*substr*" */
 				if (strstr(dirlist[i], search_str)) {
@@ -13258,16 +13398,57 @@ search_function(char **comm)
 						if (lstat(dirlist[i], &file_attrib) == -1)
 							continue;
 						if ((file_attrib.st_mode & S_IFMT) == file_type) {
-							colors_list(dirlist[i], i + 1, 0, 1);
-							found = 1;
+							index[found] = i;
+							pfiles[found] = dirlist[i];
+
+							len = strlen(pfiles[found]);
+							files_len[found] = len;
+							if (len > longest) {
+							longest = len + ((index[found] != -1) 
+								  ? digits_in_num(index[found]) + 1 : 2) + 1;
+							}
+
+							found++;
 						}
 					}
 					else {
-						colors_list(dirlist[i], i + 1, 0, 1);
-						found = 1;
+
+						index[found] = i;
+						pfiles[found] = dirlist[i];
+						
+						len = strlen(pfiles[found]);
+						files_len[found] = len;
+						if (len > longest) {
+						longest = len + ((index[found] != -1) 
+							  ? digits_in_num(index[found]) + 1 : 2) + 1;
+						}
+
+						found++;
 					}
 				}
 			}
+
+			if (found) {
+				columns_n = tcols / longest;
+				if (columns_n <= 0)
+					columns_n = 1;
+			
+				for (i = 0; i < found; i++) {
+
+					if ((i + 1) % columns_n == 0)
+						last_column = 1;
+					else
+						last_column = 0;
+
+					colors_list(pfiles[i], (index[i] != -1) 
+								? index[i] + 1 : -1, (last_column) ? 0 
+								: longest - files_len[i] - 
+								digits_in_num(index[i] + 1) + 3, 
+								(last_column || i == found - 1) ? 1 : 0);
+				}
+			}
+			
+			free(pfiles);
 		}
 
 		if (!found)
