@@ -13191,7 +13191,7 @@ search_function(char **comm)
 					else
 						last_column = 0;
 					colors_list(pfiles[i], 0, (last_column) ? 0 : 
-								longest - files_len[i], 
+								longest - files_len[i] + 4, 
 								(last_column || i == found - 1) ? 1 : 0);
 					/* Second argument to colors_list() is:
 					 * 0: Do not print any ELN 
@@ -13364,7 +13364,7 @@ search_function(char **comm)
 						last_column = 0;
 					
 					colors_list(pfiles[i], 0, (last_column) ? 0 : 
-								longest - files_len[i] + 1, 
+								longest - files_len[i] + 5, 
 								(last_column || i == found - 1) ? 1 : 0);
 				}
 			}
