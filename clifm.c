@@ -874,11 +874,11 @@ of course you can grep it to find, say, linux' macros, as here. */
  ** 3 - When TAB completing bookmarks, if there is a file named as one of the
 	possible bookmark names in the CWD, this bookmark name will be printed in
 	the color corresponding to the filetype of the file in the CWD.
- ** 4 - Filenames background color takes the whole line in search and properties
-	functions. The problem is that colors_list inserts the pad before the 
-	filename, when it should be inserted after it.
 
 ###########################################
+ * (SOLVED) Filenames background color continues to the end of line in search 
+	and properties functions. The problem was that colors_list inserted the pad 
+	before the filename, when it should be inserted after it.
  * (SOLVED) The exec check in list_dir checks the executable bit only for the
 	owner of the file, and not for group and others. Change S_IXUSR by 
 	(S_IXUSR|S_IXGRP|S_IXOTH).
@@ -10946,20 +10946,20 @@ colors_list(const char *entry, const int i, const int pad,
 	case S_IFREG:
 /*		if (!(file_attrib.st_mode & S_IRUSR)) */
 		if (access(entry, R_OK) == -1)
-			printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, nf_c,
-				   entry, pad, NC, new_line ? "\n" : "");
+			printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC, nf_c,
+				   entry, NC, new_line ? "\n" : "", pad, "");
 		else if (file_attrib.st_mode & S_ISUID) /* set uid file */
-			printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, su_c, 
-				   entry, pad, NC, new_line ? "\n" : "");
+			printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC, su_c, 
+				   entry, NC, new_line ? "\n" : "", pad, "");
 		else if (file_attrib.st_mode & S_ISGID) /* set gid file */
-			printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, sg_c, 
-				   entry, pad, NC, new_line ? "\n" : "");
+			printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC, sg_c, 
+				   entry, NC, new_line ? "\n" : "", pad, "");
 		else {
 			#ifdef _LINUX_CAP
 			cap = cap_get_file(entry);
 			if (cap) {
-				printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, ca_c, 
-					   entry, pad, NC, new_line ? "\n" : "");
+				printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC, ca_c, 
+					   entry, NC, new_line ? "\n" : "", pad, "");
 				cap_free(cap);
 			}
 			else if (file_attrib.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH)) {
@@ -10967,25 +10967,25 @@ colors_list(const char *entry, const int i, const int pad,
 			if (file_attrib.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH)) {
 			#endif
 				if (file_attrib.st_size == 0)
-					printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, ee_c, 
-						   entry, pad, NC, new_line ? "\n" : "");
+					printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC, ee_c, 
+						   entry, NC, new_line ? "\n" : "", pad, "");
 				else 
-					printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, ex_c, 
-						   entry, pad, NC, new_line ? "\n" : "");
+					printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC, ex_c, 
+						   entry, NC, new_line ? "\n" : "", pad, "");
 			}
 			else if (file_attrib.st_size == 0)
-				printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, ef_c, 
-					   entry, pad, NC, new_line ? "\n" : "");
+				printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC, ef_c, 
+					   entry, NC, new_line ? "\n" : "", pad, "");
 			else
-				printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, fi_c, 
-					   entry, pad, NC, new_line ? "\n" : "");
+				printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC, fi_c, 
+					   entry, NC, new_line ? "\n" : "", pad, "");
 		}
 			break;
 
 	case S_IFDIR:
 		if (access(entry, R_OK|X_OK) != 0)
-			printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, nd_c, 
-				   entry, pad, NC, new_line ? "\n" : "");
+			printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC, nd_c, 
+				   entry, NC, new_line ? "\n" : "", pad, "");
 		else {
 			int is_oth_w = 0;
 			if (file_attrib.st_mode & S_IWOTH) is_oth_w = 1;
@@ -10994,47 +10994,47 @@ colors_list(const char *entry, const int i, const int pad,
 				contains only "." and ".." (2 elements). If not mounted 
 				(ex: /media/usb) the result will be zero.*/
 				/* If sticky bit dir: green bg. */
-				printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, 
+				printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC, 
 					   (file_attrib.st_mode & S_ISVTX) ? ((is_oth_w) ? 
 					   tw_c : st_c) : ((is_oth_w) ? 
-					   ow_c : ed_c), entry, pad, NC, 
-					   new_line ? "\n" : "");
+					   ow_c : ed_c), entry, NC, 
+					   new_line ? "\n" : "", pad, "");
 			}
 			else
-				printf("%s%s%s%s%s%-*s%s", eln_color, index, NC,
+				printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC,
 					   (file_attrib.st_mode & S_ISVTX) ? ((is_oth_w) ? 
 					   tw_c : st_c) : ((is_oth_w) ? 
-					   ow_c : di_c), entry, pad, NC, 
-					   new_line ? "\n" : "");
+					   ow_c : di_c), entry, NC, 
+					   new_line ? "\n" : "", pad, "");
 	}
 		break;
 
 	case S_IFLNK:
 		linkname = realpath(entry, (char *)NULL);
 		if (linkname) {
-			printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, ln_c, 
-				   entry, pad, NC, new_line ? "\n" : "");
+			printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC, ln_c, 
+				   entry, NC, new_line ? "\n" : "", pad, "");
 			free(linkname);
 		}
-		else printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, or_c, 
-					entry, pad, NC, new_line ? "\n" : "");
+		else printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC, or_c, 
+					entry, NC, new_line ? "\n" : "", pad, "");
 		break;
 
-	case S_IFIFO: printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, pi_c, 
-						 entry, pad, NC, new_line ? "\n" : ""); break;
+	case S_IFIFO: printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC, pi_c, 
+						 entry, NC, new_line ? "\n" : "", pad, ""); break;
 
-	case S_IFBLK: printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, bd_c, 
-						 entry, pad, NC, new_line ? "\n" : ""); break;
+	case S_IFBLK: printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC, bd_c, 
+						 entry, NC, new_line ? "\n" : "", pad, ""); break;
 
-	case S_IFCHR: printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, cd_c, 
-						 entry, pad, NC, new_line ? "\n" : ""); break;
+	case S_IFCHR: printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC, cd_c, 
+						 entry, NC, new_line ? "\n" : "", pad, ""); break;
 
-	case S_IFSOCK: printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, so_c, 
-						  entry, pad, NC, new_line ? "\n" : ""); break;
+	case S_IFSOCK: printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC, so_c, 
+						  entry, NC, new_line ? "\n" : "", pad, ""); break;
 
 	/* In case all of the above conditions are false... */
-	default: printf("%s%s%s%s%s%-*s%s", eln_color, index, NC, no_c, 
-				    entry, pad, NC, new_line ? "\n" : "");
+	default: printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC, no_c, 
+				    entry, NC, new_line ? "\n" : "", pad, "");
 	}
 }
 
@@ -13177,26 +13177,33 @@ search_function(char **comm)
 					len = strlen(pfiles[found]);
 					files_len[found++] = len;
 					if (len > longest)
-						longest = len + 1;
+						longest = len;
 				}
 				
 				/* Print the result */
-				columns_n = tcols / longest;
-				if (columns_n <= 0)
-					columns_n = 1;
-				
-				for (i = 0; i < found; i++) {
-					if ((i + 1) % columns_n == 0)
-						last_column = 1;
+				if (found) {
+
+					if (longest <= 0 || longest > tcols)
+						columns_n = 1;
 					else
-						last_column = 0;
-					colors_list(pfiles[i], 0, (last_column) ? 0 : 
-								longest - files_len[i] + 4, 
-								(last_column || i == found - 1) ? 1 : 0);
-					/* Second argument to colors_list() is:
-					 * 0: Do not print any ELN 
-					 * Positive number: Print positive number as ELN
-					 * -1: Print "?" instead of an ELN */
+						columns_n = tcols / (longest + 1);
+					
+					if (columns_n > found)
+						columns_n = found;
+					
+					for (i = 0; i < found; i++) {
+						if ((i + 1) % columns_n == 0)
+							last_column = 1;
+						else
+							last_column = 0;
+						colors_list(pfiles[i], 0, (last_column) ? 0 : 
+									longest - files_len[i] + 1, 
+									(last_column || i == found - 1) ? 1 : 0);
+						/* Second argument to colors_list() is:
+						 * 0: Do not print any ELN 
+						 * Positive number: Print positive number as ELN
+						 * -1: Print "?" instead of an ELN */
+					}
 				}
 			}
 
@@ -13229,20 +13236,26 @@ search_function(char **comm)
 						}
 					}
 					
-					len = strlen(pfiles[found]);
+					size_t elnn = (index[found] != -1 ) ? 
+								  (size_t)digits_in_num(index[found] + 1) : 1;
+					len = strlen(pfiles[found]) + elnn + 1;
 					files_len[found] = len;
 					if (len > longest) {
-						longest = len + ((index[found] != -1) 
-								  ? digits_in_num(index[found]) + 1 : 2) + 1;
+						longest = len;
+						/* ELN + space + filename */
 					}
 					found++;
 				}
 
 				if (found) {
 
-					columns_n = tcols / longest;
-					if (columns_n <= 0)
+					if (longest <= 0 || longest > tcols)
 						columns_n = 1;
+					else
+						columns_n = tcols / (longest + 1);
+					
+					if (columns_n > found)
+						columns_n = found;
 					
 					for (i = 0; i < found; i++) {
 						if ((i + 1) % columns_n == 0)
@@ -13250,10 +13263,10 @@ search_function(char **comm)
 						else
 							last_column = 0;
 					
+//						printf("%s: %ld\n", pfiles[i], longest - files_len[i]);
 						colors_list(pfiles[i], (index[i] != -1) 
 									? index[i] + 1 : -1, (last_column) ? 0
-									: longest - files_len[i] - 
-									digits_in_num(index[i] + 1) + 3, 
+									: longest - files_len[i] + 1, 
 									(last_column || i == found - 1) ? 1 : 0);
 					}
 				}
@@ -13346,15 +13359,20 @@ search_function(char **comm)
 						len = strlen(search_list[i]->d_name);
 						files_len[found++] = len;
 						if (len > longest)
-							longest = len + 1;
+							longest = len;
 					}
 				}
 			}
 			
 			if (found) {
-				columns_n = tcols / longest;
-				if (columns_n <= 0)
-					columns_n = 1;
+
+					if (longest <= 0 || longest > tcols)
+						columns_n = 1;
+					else
+						columns_n = tcols / (longest + 1);
+					
+					if (columns_n > found)
+						columns_n = found;
 
 				for (i = 0; i < found; i++) {
 					
@@ -13364,7 +13382,7 @@ search_function(char **comm)
 						last_column = 0;
 					
 					colors_list(pfiles[i], 0, (last_column) ? 0 : 
-								longest - files_len[i] + 5, 
+								longest - files_len[i] + 1, 
 								(last_column || i == found - 1) ? 1 : 0);
 				}
 			}
@@ -13401,11 +13419,11 @@ search_function(char **comm)
 							index[found] = i;
 							pfiles[found] = dirlist[i];
 
-							len = strlen(pfiles[found]);
+							len = strlen(pfiles[found]) + ((index[found] != -1) 
+								  ? digits_in_num(index[found]) + 1 : 2);
 							files_len[found] = len;
 							if (len > longest) {
-							longest = len + ((index[found] != -1) 
-								  ? digits_in_num(index[found]) + 1 : 2) + 1;
+							longest = len;
 							}
 
 							found++;
@@ -13416,11 +13434,11 @@ search_function(char **comm)
 						index[found] = i;
 						pfiles[found] = dirlist[i];
 						
-						len = strlen(pfiles[found]);
+						len = strlen(pfiles[found]) + ((index[found] != -1) 
+							  ? digits_in_num(index[found]) + 1 : 2);
 						files_len[found] = len;
 						if (len > longest) {
-						longest = len + ((index[found] != -1) 
-							  ? digits_in_num(index[found]) + 1 : 2) + 1;
+						longest = len;
 						}
 
 						found++;
@@ -13429,9 +13447,14 @@ search_function(char **comm)
 			}
 
 			if (found) {
-				columns_n = tcols / longest;
-				if (columns_n <= 0)
-					columns_n = 1;
+
+					if (longest <= 0 || longest > tcols)
+						columns_n = 1;
+					else
+						columns_n = tcols / (longest + 1);
+					
+					if (columns_n > found)
+						columns_n = found;
 			
 				for (i = 0; i < found; i++) {
 
@@ -13442,8 +13465,7 @@ search_function(char **comm)
 
 					colors_list(pfiles[i], (index[i] != -1) 
 								? index[i] + 1 : -1, (last_column) ? 0 
-								: longest - files_len[i] - 
-								digits_in_num(index[i] + 1) + 3, 
+								: longest - files_len[i] + 1, 
 								(last_column || i == found - 1) ? 1 : 0);
 				}
 			}
@@ -14646,8 +14668,8 @@ get_properties (char *filename, int _long, int max)
 			trim_filename[(max + cont_bt) - 1] = '~';
 			trim_filename[max + cont_bt] = 0x00;
 		}
-		printf("%s%-*s %s%s (%04o) %c/%c%c%c/%c%c%c/%c%c%c %s %s %s %s\n", 
-				color, max + cont_bt, (!trim) ? filename : trim_filename, NC, 
+		printf("%s%s %-*s%s (%04o) %c/%c%c%c/%c%c%c/%c%c%c %s %s %s %s\n", 
+				color, (!trim) ? filename : trim_filename, max + cont_bt, NC, 
 				default_color, file_attrib.st_mode & 07777,
 				file_type,
 				read_usr, write_usr, exec_usr, 
