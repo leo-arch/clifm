@@ -1,8 +1,8 @@
 
-/* ########################################
- * #			   CliFM			      #
- * # The anti-eye-candy/KISS file manager # 
- * ######################################## */
+			/** ########################################
+			 *  #			    CliFM			       #
+			 *  # The anti-eye-candy/KISS file manager # 
+			 *  ######################################## */
 
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -1585,7 +1585,7 @@ check_immutable_bit(char *file)
 	else 
 		return 0;
 
-	#endif
+	#endif /* !defined(FS_IOC_GETFLAGS) || !defined(FS_IMMUTABLE_FL) */
 }
 
 int
@@ -1857,11 +1857,13 @@ is_number(const char *str)
 int
 digits_in_num(int num) {
 /* Return the amount of digits in a given number */
-	int count=0; /* VERSION 2: neither printf nor any function call at all */
+	int count = 0; /* VERSION 2: neither printf nor any function call at all */
+
 	while (num != 0) {
 		num /= 10; /* n = n/10 */
 		++count;
 	}
+
 	return count;
 }
 
@@ -1896,7 +1898,7 @@ alphasort_insensitive(const struct dirent **a, const struct dirent **b)
 }
 
 int
-strcntchr (const char *str, const char c)
+strcntchr(const char *str, const char c)
 /* Returns the index of the first appearance of c in str, if any, and -1 if c 
  * was not found or if no str. NOTE: Same thing as strchr () */
 {
@@ -13060,6 +13062,7 @@ run_and_refresh(char **comm)
 int
 search_function(char **comm)
 /* List matching filenames in the specified directory */
+/* This function just works, but its logic is crap */
 {
 	if (!comm || !comm[0])
 		return EXIT_FAILURE;
@@ -13116,6 +13119,7 @@ search_function(char **comm)
 
 	/* We will store here pointers to file names to be printed */
 	char **pfiles = (char **)NULL;
+	size_t found = 0;
 
 				/* #############################
 				 * #         WILDACRDS         #
@@ -13150,7 +13154,6 @@ search_function(char **comm)
 		if (ret == 0) {
 
 			int last_column = 0, columns_n = 0;
-			short found = 0;
 			size_t len = 0, longest = 0;
 			pfiles = (char **)xnmalloc(globbed_files.gl_pathc + 1, 
 									   sizeof(char *));
@@ -13165,16 +13168,19 @@ search_function(char **comm)
 						continue;
 					if (file_type) {
 						/* Simply skip all files not matching file_type */
-						if (lstat(globbed_files.gl_pathv[i], &file_attrib) == -1)
+						if (lstat(globbed_files.gl_pathv[i], 
+								  &file_attrib) == -1)
 							continue;
 						if ((file_attrib.st_mode & S_IFMT) != file_type)
 							continue;
 					}
-					/* Store pointer to maching filename in array of pointers */
+					/* Store pointer to maching filename in array of 
+					 * pointers */
 					pfiles[found] = globbed_files.gl_pathv[i];
 					
 					/* Get the longest filename in the list */
-					len = strlen(pfiles[found]);
+					len = (unicode) ? u8_xstrlen(pfiles[found])
+						  : strlen(pfiles[found]);
 					files_len[found++] = len;
 					if (len > longest)
 						longest = len;
@@ -13196,7 +13202,8 @@ search_function(char **comm)
 							last_column = 1;
 						else
 							last_column = 0;
-						colors_list(pfiles[i], 0, (last_column) ? 0 : 
+						colors_list(pfiles[i], 0, (last_column 
+									|| i == found - 1) ? 0 : 
 									longest - files_len[i] + 1, 
 									(last_column || i == found - 1) ? 1 : 0);
 						/* Second argument to colors_list() is:
@@ -13238,12 +13245,12 @@ search_function(char **comm)
 					
 					size_t elnn = (index[found] != -1 ) ? 
 								  (size_t)digits_in_num(index[found] + 1) : 1;
-					len = strlen(pfiles[found]) + elnn + 1;
+					len = ((unicode) ? u8_xstrlen(pfiles[found]) 
+						  : strlen(pfiles[found])) + elnn + 1;
+					/* len == ELN + space + filename */
 					files_len[found] = len;
-					if (len > longest) {
+					if (len > longest)
 						longest = len;
-						/* ELN + space + filename */
-					}
 					found++;
 				}
 
@@ -13263,9 +13270,9 @@ search_function(char **comm)
 						else
 							last_column = 0;
 					
-//						printf("%s: %ld\n", pfiles[i], longest - files_len[i]);
 						colors_list(pfiles[i], (index[i] != -1) 
-									? index[i] + 1 : -1, (last_column) ? 0
+									? index[i] + 1 : -1, (last_column
+									|| i == found - 1) ? 0
 									: longest - files_len[i] + 1, 
 									(last_column || i == found - 1) ? 1 : 0);
 					}
@@ -13285,11 +13292,13 @@ search_function(char **comm)
 		/* Go back to the directory we came from */
 		if (deq_dir) {
 			free(deq_dir);
+
 			if (chdir(path) == -1) {
 				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, path, 
 						strerror(errno));
 				return EXIT_FAILURE;
 			}
+
 			return EXIT_SUCCESS;
 		}
 	}
@@ -13300,9 +13309,7 @@ search_function(char **comm)
 
 	else {
 		int last_column = 0, columns_n = 0;
-		size_t len = 0, longest = 0;
-		short found = 0;
-		size_t i = 0;
+		size_t len = 0, longest = 0, i = 0;
 
 		/* If /search_str /path */
 		if (search_path && *search_path != 0x00) {
@@ -13348,7 +13355,8 @@ search_function(char **comm)
 
 						if ((file_attrib.st_mode & S_IFMT) == file_type) {
 							pfiles[found] = search_list[i]->d_name;
-							len = strlen(search_list[i]->d_name);
+							len = (unicode) ? u8_xstrlen(search_list[i]->d_name) 
+								  : strlen(search_list[i]->d_name);
 							files_len[found++] = len;
 							if (len > longest)
 								longest = len;
@@ -13356,7 +13364,8 @@ search_function(char **comm)
 					}
 					else {
 						pfiles[found] = search_list[i]->d_name;
-						len = strlen(search_list[i]->d_name);
+						len = (unicode) ? u8_xstrlen(search_list[i]->d_name) 
+							: strlen(search_list[i]->d_name);
 						files_len[found++] = len;
 						if (len > longest)
 							longest = len;
@@ -13381,8 +13390,8 @@ search_function(char **comm)
 					else
 						last_column = 0;
 					
-					colors_list(pfiles[i], 0, (last_column) ? 0 : 
-								longest - files_len[i] + 1, 
+					colors_list(pfiles[i], 0, (last_column || i == found - 1) 
+								? 0 : longest - files_len[i] + 1, 
 								(last_column || i == found - 1) ? 1 : 0);
 				}
 			}
@@ -13419,7 +13428,9 @@ search_function(char **comm)
 							index[found] = i;
 							pfiles[found] = dirlist[i];
 
-							len = strlen(pfiles[found]) + ((index[found] != -1) 
+							len = ((unicode) ? u8_xstrlen(pfiles[found]) 
+								  : strlen(pfiles[found])) 
+								  + ((index[found] != -1) 
 								  ? digits_in_num(index[found]) + 1 : 2);
 							files_len[found] = len;
 							if (len > longest) {
@@ -13434,7 +13445,8 @@ search_function(char **comm)
 						index[found] = i;
 						pfiles[found] = dirlist[i];
 						
-						len = strlen(pfiles[found]) + ((index[found] != -1) 
+						len = ((unicode) ? u8_xstrlen(pfiles[found]) 
+							  : strlen(pfiles[found])) + ((index[found] != -1) 
 							  ? digits_in_num(index[found]) + 1 : 2);
 						files_len[found] = len;
 						if (len > longest) {
@@ -13464,7 +13476,8 @@ search_function(char **comm)
 						last_column = 0;
 
 					colors_list(pfiles[i], (index[i] != -1) 
-								? index[i] + 1 : -1, (last_column) ? 0 
+								? index[i] + 1 : -1, (last_column 
+								|| i == found - 1) ? 0 
 								: longest - files_len[i] + 1, 
 								(last_column || i == found - 1) ? 1 : 0);
 				}
@@ -13479,6 +13492,9 @@ search_function(char **comm)
 	
 	if (deq_dir)
 		free(deq_dir);
+		
+	if (!found)
+		return EXIT_FAILURE;
 	
 	return EXIT_SUCCESS;
 }
@@ -14047,9 +14063,7 @@ open_bookmark(char **cmd)
 			bm_paths[i] = (char *)NULL;
 
 		/* Get shortcuts */
-		printf("1: %s\n", bookmarks[i]);
 		char *str_b = strbtw(bookmarks[i], '[', ']');
-		printf("2: %s\n", bookmarks[i]);
 		if (str_b) {
 			hot_keys[i] = (char *)xcalloc(strlen(str_b) + 1, sizeof(char));
 			strcpy(hot_keys[i], str_b);
@@ -14557,7 +14571,8 @@ get_properties (char *filename, int _long, int max)
 	switch (file_attrib.st_mode & S_IFMT) {
 	case S_IFREG:
 		file_type='-';
-		if (!(file_attrib.st_mode & S_IRUSR)) strcpy(color, nf_c);
+/*		if (!(file_attrib.st_mode & S_IRUSR)) strcpy(color, nf_c); */
+		if (access(filename, R_OK) == -1) strcpy(color, nf_c);
 		else if (file_attrib.st_mode & S_ISUID)
 			strcpy(color, su_c);
 		else if (file_attrib.st_mode & S_ISGID)
@@ -14569,9 +14584,9 @@ get_properties (char *filename, int _long, int max)
 				strcpy(color, ca_c);
 				cap_free(cap);
 			}
-			else if (file_attrib.st_mode & S_IXUSR) {
+			else if (file_attrib.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH)) {
 			#else
-			if (file_attrib.st_mode & S_IXUSR) {
+			if (file_attrib.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH)) {
 			#endif
 				if (file_attrib.st_size == 0) strcpy(color, ee_c);
 				else strcpy(color, ex_c);
