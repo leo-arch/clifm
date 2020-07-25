@@ -2642,9 +2642,9 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 	recur_perm_error_flag = 0, is_sel = 0, sel_is_last = 0, print_msg = 0, 
 	long_view = -1, kbind_busy = 0, unicode = -1, cont_bt = 0, dequoted = 0, 
 	home_ok = 1, config_ok = 1, trash_ok = 1, selfile_ok = 1, mime_match = 0,
-	exit_code = 0, logs_disabled = -1;
+	exit_code = 0, logs_enabled = -1;
 	/* -1 means non-initialized or unset. Once initialized, these variables
-	 * are either zero or one */
+	 * are always either zero or one */
 /*	sel_no_sel=0 */
 /* A short int accepts values from -32,768 to 32,767, and since all the 
  * above variables will take -1, 0, and 1 as values, a short int is more 
@@ -3876,7 +3876,7 @@ SplashScreen=false\n\
 ShowHiddenFiles=true\n\
 LongViewMode=false\n\
 ExternalCommands=false\n\
-DisableCmdLogs=true\n\
+LogCmds=false\n\
 SystemShell=\n\
 ListFoldersFirst=true\n\
 CdListsAutomatically=true\n\
@@ -4164,16 +4164,16 @@ int mime_open(char **args)
 			fputs(_("Usage: mm, mime info FILENAME\n"), stderr);
 			return EXIT_FAILURE;
 		}
-		if (strcntchr(args[2], '\\')) {
+		if (strcntchr(args[2], '\\') != -1) {
 			deq_file = dequote_str(args[2], 0);
-			file_path = realpath(deq_file, (char *)NULL);
+			file_path = realpath(deq_file, NULL);
 			free(deq_file);
 			deq_file = (char *)NULL;
 		}
 		else
-			path = realpath(args[2], (char *)NULL);
+			file_path = realpath(args[2], NULL);
 		
-		if (access(path, R_OK) == -1) {
+		if (access(file_path, R_OK) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_path, 
 					strerror(errno));
 			free(file_path);
@@ -4187,14 +4187,14 @@ int mime_open(char **args)
 	else {
 		if (strcntchr(args[1], '\\')) {
 			deq_file = dequote_str(args[1], 0);
-			file_path = realpath(deq_file, (char *)NULL);
+			file_path = realpath(deq_file, NULL);
 			free(deq_file);
 			deq_file = (char *)NULL;
 		}
 		else
-			file_path = realpath(args[1], (char *)NULL);
+			file_path = realpath(args[1], NULL);
 
-		if (access(path, R_OK) == -1) {
+		if (access(file_path, R_OK) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_path, 
 					strerror(errno));
 			free(file_path);
@@ -4209,7 +4209,7 @@ int mime_open(char **args)
 		file_index = 1;
 	}
 
-	if (!path) {
+	if (!file_path) {
 		fprintf(stderr, "'%s': %s\n", args[file_index], strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -4219,7 +4219,6 @@ int mime_open(char **args)
 	if (!mime) {
 		fprintf(stderr, _("%s: Error getting mime-type\n"), PROGRAM_NAME);
 		free(file_path);
-		file_path = (char *)NULL;
 		return EXIT_FAILURE;
 	}
 	
@@ -4228,7 +4227,7 @@ int mime_open(char **args)
 
 	/* Get file extension, if any */
 	char *ext = (char *)NULL;
-	char *filename = strrchr(path, '/');
+	char *filename = strrchr(file_path, '/');
 	if (filename) {
 		filename++; /* Remove leading slash */
 		if (*filename == '.')
@@ -4259,13 +4258,9 @@ int mime_open(char **args)
 			fprintf(stderr, _("%s: No associated application found\n"), 
 					PROGRAM_NAME);
 		free(file_path);
-		file_path = (char *)NULL;
 		free(mime);
-		mime = (char *)NULL;
-		if (ext) {
+		if (ext)
 			free(ext);
-			ext = (char *)NULL;
-		}
 		return EXIT_FAILURE;
 	}
 	
@@ -5384,7 +5379,7 @@ void
 set_default_options(void)
 /* Set the default options. Used when the config file isn't accessible */
 {
-	splash_screen = 0; /* -1 means not set */
+	splash_screen = 0;
 	welcome_message = 1;
 	show_hidden = 1;
 	long_view = 0;
@@ -5398,7 +5393,7 @@ set_default_options(void)
 	case_sensitive = 0;
 	unicode = 0;
 	max_path = 40;
-	logs_disabled = 1;
+	logs_enabled = 0;
 
 	strcpy(text_color, "\001\x1b[00;39m\002");
 	strcpy(eln_color, "\x1b[01;33m");
@@ -9039,7 +9034,7 @@ SplashScreen=false\n\
 ShowHiddenFiles=true\n\
 LongViewMode=false\n\
 ExternalCommands=false\n\
-DisableCmdLogs=true\n\
+LogCmds=false\n\
 SystemShell=\n\
 ListFoldersFirst=true\n\
 CdListsAutomatically=true\n\
@@ -9166,17 +9161,17 @@ OF PROMPT\n", config_fp);
 						else /* default */
 							ext_cmd_ok = 0;
 					}
-					else if (strncmp(line, "DisableCmdLogs=", 15) == 0) {
+					else if (strncmp(line, "LogCmds=", 8) == 0) {
 						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "DisableCmdLogs=%5s\n", opt_str);
+						ret = sscanf(line, "LogCmds=%5s\n", opt_str);
 						if (ret == -1)
 							continue;
 						if (strncmp(opt_str, "true", 4) == 0)
-							logs_disabled = 1;
+							logs_enabled = 1;
 						else if (strncmp(opt_str, "false", 5) == 0)
-							logs_disabled = 0;
+							logs_enabled = 0;
 						else /* default */
-							logs_disabled = 1;
+							logs_enabled = 0;
 					}
 					else if (strncmp (line, "SystemShell=", 12) == 0) {
 						if (sys_shell) {
@@ -9440,7 +9435,7 @@ OF PROMPT\n", config_fp);
 				strcpy(sys_shell, "/bin/sh\0");
 				}
 			}
-			if (logs_disabled == -1) logs_disabled = 1;
+			if (logs_enabled == -1) logs_enabled = 0;
 			if (pager == -1) pager = 0;
 			if (max_hist == -1) max_hist = 500;
 			if (max_log == -1) max_log = 1000;
@@ -9498,11 +9493,13 @@ OF PROMPT\n", config_fp);
 					char *xrdb_path = get_cmd_path("xrdb");
 					if (xrdb_path)
 						launch_execle("xrdb -merge ~/.Xresources");
-					_err('w', PRINT_PROMPT, _("%s: Restart your %s for changes "
-						 "to ~/.Xresources to take effect. Otherwise, %s "
-						 "keybindings might not work as expected.\n"), 
-						 PROGRAM_NAME, (xrdb_path) ? _("terminal") 
-						 : _("X session"), PROGRAM_NAME);
+
+					_err('w', PRINT_PROMPT, _("%s: Restart your %s for "
+						 "changes to ~/.Xresources to take effect. "
+						 "Otherwise, %s keybindings might not work as "
+						 "expected.\n"), PROGRAM_NAME, (xrdb_path) 
+						 ? _("terminal") : _("X session"), PROGRAM_NAME);
+						
 					if (xrdb_path)
 						free(xrdb_path);
 				}
@@ -9547,7 +9544,7 @@ OF PROMPT\n", config_fp);
 		 * (/tmp/clifm/sel_file_username) */
 		size_t user_len = strlen(user);
 		size_t tmp_dir_len = strlen(TMP_DIR);
-		sel_file_user = (char *)xcalloc(tmp_dir_len + pnl_len + user_len + 8, 
+		sel_file_user = (char *)xnmalloc(tmp_dir_len + pnl_len + user_len + 8, 
 										sizeof(char));
 		sprintf(sel_file_user, "%s/.%s_sel_%s", TMP_DIR, PNL, user);
 	}
@@ -10778,7 +10775,7 @@ prompt(void)
 
 		/* Keep a literal copy of the last entered command to compose the
 		 * commands log, if needed and enabled */
-		if (!logs_disabled) {
+		if (logs_enabled) {
 			if (last_cmd)
 				free(last_cmd);
 			last_cmd = (char *)xnmalloc(strlen(input) + 1, sizeof(char));
@@ -14885,8 +14882,8 @@ int
 log_function(char **comm)
 /* Log 'comm' into LOG_FILE */
 {
-	/* If cmd logs are disabled, allow only "log" and "log clear" commands */
-	if (logs_disabled) {
+	/* If cmd logs are disabled, allow only "log" commands */
+	if (!logs_enabled) {
 		if (strcmp(comm[0], "log") != 0)
 			return EXIT_SUCCESS;
 	}
@@ -14895,6 +14892,7 @@ log_function(char **comm)
 		return EXIT_FAILURE;
 	
 	int clear_log = 0;
+
 	/* If the command was just 'log' */
 	if (strcmp(comm[0], "log") == 0 && !comm[1]) {
 		FILE *log_fp;
@@ -14919,20 +14917,55 @@ log_function(char **comm)
 		}
 	}
 	
-	/* If 'log clear' */
-	else if (strcmp(comm[0], "log") == 0 && args_n == 1) {
-		if (strcmp(comm[1], "clear") == 0) {
+	else if (strcmp(comm[0], "log") == 0 && comm[1]) {
+		if (strcmp(comm[1], "clear") == 0)
 			clear_log = 1;
+		else if (strcmp(comm[1], "status") == 0) {
+			printf(_("Logs %s\n"), (logs_enabled) ? _("enabled") 
+				   : _("disabled"));
+			return EXIT_SUCCESS;
+		}
+		else if (strcmp(comm[1], "on") == 0) {
+			if (logs_enabled)
+				puts(_("Logs already enabled"));
+			else {
+				logs_enabled = 1;
+				puts(_("Logs successfully enabled"));
+			}
+			return EXIT_SUCCESS;
+		}
+		else if (strcmp(comm[1], "off") == 0) {
+			/* If logs were already disabled, just exit. Otherwise, log the
+			 * "log off" command */
+			if (!logs_enabled) {
+				puts(_("Logs already disabled"));
+				return EXIT_SUCCESS;
+			}
+			else {
+				puts(_("Logs succesfully disabled"));
+				logs_enabled = 0;
+			}
 		}
 	}
 
 	/* Construct the log line */
 
 	if (!last_cmd) {
-		if (logs_disabled) {
-			last_cmd = (char *)xnmalloc(10, sizeof(char));
-			strcpy(last_cmd, "log clear\0");
+		if (!logs_enabled) {
+			/* When cmd logs are disabled, "log clear" and "log off" are 
+			 * the only commands that can reach this code */
+			if (clear_log) {
+				last_cmd = (char *)xnmalloc(10, sizeof(char));
+				strcpy(last_cmd, "log clear\0");
+			}
+			else {
+				last_cmd = (char *)xnmalloc(8, sizeof(char));
+				strcpy(last_cmd, "log off\0");
+			}
 		}
+		/* last_cmd should never be NULL if logs are enabled (this variable is
+		 * set immediately after taking valid user input in the prompt function). 
+		 * However ... */
 		else {
 			last_cmd = (char *)xnmalloc(23, sizeof(char));
 			strcpy(last_cmd, "Error getting command!\0");
@@ -15657,8 +15690,10 @@ arguments to switch, add or remove a profile\n"), white, NC, default_color);
 		   PROGRAM_NAME);
 
 	/* ### LOG ### */
-	printf(_("\n%slog%s%s [clear]: With no arguments, it shows the log file. \
-If clear is passed as argument, all the logs will be deleted.\n"), white, NC, 
+	printf(_("\n%slog%s%s [clear] [on, off, status]: With no arguments, it \
+prints the contents of the log file. If 'clear' is passed as argument, all the \
+logs will be deleted. 'on', 'off', and 'status' enable, disable, and check the \
+status of the log function for the current session.\n"), white, NC, 
 		   default_color);
 
 	/* ### MESSAGES ### */
