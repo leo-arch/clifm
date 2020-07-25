@@ -10666,11 +10666,6 @@ prompt(void)
 /* Print the prompt and return the string entered by the user (to be parsed 
  * later by parse_input_str()) */
 {
-	/* I'm not sure why this works, but this line prevents the prompt 
-	 * background color, if set, to become the background color of the
-	 * command line text after running list_dir() */
-	printf("\x1b[0m \r");
-
 	/* Remove all final slash(es) from path, if any */
 	size_t path_len = strlen(path), i;
 	for (i = path_len - 1; path[i] && i > 0; i--) {
