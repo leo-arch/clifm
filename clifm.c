@@ -385,6 +385,14 @@ of course you can grep it to find, say, linux' macros, as here. */
     like in Bash. 
 
 ###################################
+ * (DONE) By default, the commands log function should be disabled. Add an 
+	option to the config file (DisableCmdLogs) and a check before calling 
+	log_function() (or at the beginning of the function itself) and before 
+	storing the last command in the prompt.
+ * (DONE) Find a way to log the literal command entered by the user, and not 
+	the expanded version. I guess a global variable, say last_cmd, will do 
+	the job.
+ * (DONE) Remove user from the logs line: it's redundant.
  * (DONE) 'trash del' still do not accepts ranges! Fix it.
  * (DONE) Inlcude all the xasprintf block into a new function, say _err(), so
 	that only one line of code is needed to handle error logs and messages
@@ -1472,10 +1480,10 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.19.7"
+#define VERSION "0.19.8"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "July 23, 2020"
+#define DATE "July 24, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -2634,7 +2642,7 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 	recur_perm_error_flag = 0, is_sel = 0, sel_is_last = 0, print_msg = 0, 
 	long_view = -1, kbind_busy = 0, unicode = -1, cont_bt = 0, dequoted = 0, 
 	home_ok = 1, config_ok = 1, trash_ok = 1, selfile_ok = 1, mime_match = 0,
-	exit_code = 0;
+	exit_code = 0, logs_disabled = -1;
 	/* -1 means non-initialized or unset. Once initialized, these variables
 	 * are either zero or one */
 /*	sel_no_sel=0 */
@@ -2676,6 +2684,7 @@ char *user = (char *)NULL, *path = (char *)NULL, **old_pwd = (char **)NULL,
 	**dirlist = (char **)NULL, **bookmark_names = (char **)NULL,
 	*ls_colors_bk = (char *)NULL, *MIME_FILE = (char *)NULL,
 	**profile_names = (char **)NULL, *encoded_prompt = (char *)NULL,
+	*last_cmd = (char *)NULL,
 	/* This is not a comprehensive list of commands. It only lists commands
 	 * long version for TAB completion */
 	*INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
@@ -3867,6 +3876,7 @@ SplashScreen=false\n\
 ShowHiddenFiles=true\n\
 LongViewMode=false\n\
 ExternalCommands=false\n\
+DisableCmdLogs=true\n\
 SystemShell=\n\
 ListFoldersFirst=true\n\
 CdListsAutomatically=true\n\
@@ -5388,6 +5398,7 @@ set_default_options(void)
 	case_sensitive = 0;
 	unicode = 0;
 	max_path = 40;
+	logs_disabled = 1;
 
 	strcpy(text_color, "\001\x1b[00;39m\002");
 	strcpy(eln_color, "\x1b[01;33m");
@@ -9028,6 +9039,7 @@ SplashScreen=false\n\
 ShowHiddenFiles=true\n\
 LongViewMode=false\n\
 ExternalCommands=false\n\
+DisableCmdLogs=true\n\
 SystemShell=\n\
 ListFoldersFirst=true\n\
 CdListsAutomatically=true\n\
@@ -9144,7 +9156,7 @@ OF PROMPT\n", config_fp);
 					else if (ext_cmd_ok == -1 
 					&& strncmp(line, "ExternalCommands=", 17) == 0) {
 						char opt_str[MAX_BOOL] = "";
-						ret=sscanf(line, "ExternalCommands=%5s\n", opt_str);
+						ret = sscanf(line, "ExternalCommands=%5s\n", opt_str);
 						if (ret == -1)
 							continue;
 						if (strncmp(opt_str, "true", 4) == 0)
@@ -9153,6 +9165,18 @@ OF PROMPT\n", config_fp);
 							ext_cmd_ok = 0;
 						else /* default */
 							ext_cmd_ok = 0;
+					}
+					else if (strncmp(line, "DisableCmdLogs=", 15) == 0) {
+						char opt_str[MAX_BOOL] = "";
+						ret = sscanf(line, "DisableCmdLogs=%5s\n", opt_str);
+						if (ret == -1)
+							continue;
+						if (strncmp(opt_str, "true", 4) == 0)
+							logs_disabled = 1;
+						else if (strncmp(opt_str, "false", 5) == 0)
+							logs_disabled = 0;
+						else /* default */
+							logs_disabled = 1;
 					}
 					else if (strncmp (line, "SystemShell=", 12) == 0) {
 						if (sys_shell) {
@@ -9416,6 +9440,7 @@ OF PROMPT\n", config_fp);
 				strcpy(sys_shell, "/bin/sh\0");
 				}
 			}
+			if (logs_disabled == -1) logs_disabled = 1;
 			if (pager == -1) pager = 0;
 			if (max_hist == -1) max_hist = 500;
 			if (max_log == -1) max_log = 1000;
@@ -10750,6 +10775,15 @@ prompt(void)
 	
 	/* Enable commands history only if the input line is not void */
 	if (input) {
+
+		/* Keep a literal copy of the last entered command to compose the
+		 * commands log, if needed and enabled */
+		if (!logs_disabled) {
+			if (last_cmd)
+				free(last_cmd);
+			last_cmd = (char *)xnmalloc(strlen(input) + 1, sizeof(char));
+			strcpy(last_cmd, input);
+		}
 
 		/* Do not record empty lines, exit, history commands, consecutively 
 		 * equal inputs, or lines starting with space */
@@ -14030,7 +14064,7 @@ open_bookmark(char **cmd)
 		bookmarks = (char **)NULL;
 		printf(_("Bookmarks: There are no bookmarks\nEnter 'bm edit' to edit "
 				 "the bookmarks file or 'bm add PATH' to add a new "
-				 "bookamrk\n"));
+				 "bookmark\n"));
 		return EXIT_SUCCESS;
 	}
 
@@ -14042,9 +14076,9 @@ open_bookmark(char **cmd)
 
 	char **bm_paths = (char **)NULL, **hot_keys = (char **)NULL, 
 		 **bm_names = (char **)NULL;
-	bm_paths = (char **)xcalloc(bm_n, sizeof(char *));
-	hot_keys = (char **)xcalloc(bm_n, sizeof(char *));
-	bm_names = (char **)xcalloc(bm_n, sizeof(char *));
+	bm_paths = (char **)xnmalloc(bm_n, sizeof(char *));
+	hot_keys = (char **)xnmalloc(bm_n, sizeof(char *));
+	bm_names = (char **)xnmalloc(bm_n, sizeof(char *));
 
 	register int i;
 
@@ -14054,8 +14088,9 @@ open_bookmark(char **cmd)
 		int ret = strcntchr(bookmarks[i], '/');
 		if (ret != -1) {
 			/* If there is some slash in the shortcut or in the name string, 
-			 * the bookmark path will be wrong. FIX! */
-			bm_paths[i] = (char *)xcalloc(strlen(bookmarks[i] + ret) + 1,
+			 * the bookmark path will be wrong. FIX! Or just disallow the use
+			 * of slashes for bookmark names and shortcuts */
+			bm_paths[i] = (char *)xnmalloc(strlen(bookmarks[i] + ret) + 1,
 										  sizeof(char));
 			strcpy(bm_paths[i], bookmarks[i] + ret);
 		}
@@ -14065,7 +14100,7 @@ open_bookmark(char **cmd)
 		/* Get shortcuts */
 		char *str_b = strbtw(bookmarks[i], '[', ']');
 		if (str_b) {
-			hot_keys[i] = (char *)xcalloc(strlen(str_b) + 1, sizeof(char));
+			hot_keys[i] = (char *)xnmalloc(strlen(str_b) + 1, sizeof(char));
 			strcpy(hot_keys[i], str_b);
 			free(str_b);
 			str_b = (char *)NULL;
@@ -14076,14 +14111,14 @@ open_bookmark(char **cmd)
 		/* Get names */
 		char *str_name = strbtw(bookmarks[i], ']', ':');
 		if (str_name) {
-			bm_names[i] = (char *)xcalloc(strlen(str_name) + 1, sizeof(char));
+			bm_names[i] = (char *)xnmalloc(strlen(str_name) + 1, sizeof(char));
 			strcpy(bm_names[i], str_name);
 			free(str_name);
 		}
 		else {
 			str_name = strbfr(bookmarks[i], ':');
 			if (str_name) {
-				bm_names[i] = (char *)xcalloc(strlen(str_name) + 1, 
+				bm_names[i] = (char *)xnmalloc(strlen(str_name) + 1, 
 											  sizeof(char));
 				strcpy(bm_names[i], str_name);
 				free(str_name);
@@ -14186,7 +14221,7 @@ open_bookmark(char **cmd)
 		size_t len = 0;
 		for (i = 1; cmd[i]; i++) {
 			arg = (char **)xrealloc(arg, (len + 1) * sizeof(char *));
-			arg[len] = (char *)xcalloc(strlen(cmd[i]) + 1, sizeof(char));
+			arg[len] = (char *)xnmalloc(strlen(cmd[i]) + 1, sizeof(char));
 			strcpy(arg[len++], cmd[i]);
 		}
 		arg = (char **)xrealloc(arg, (len + 1) * sizeof(char *));
@@ -14271,7 +14306,7 @@ open_bookmark(char **cmd)
 		int ret = chdir(tmp_path);
 		if (ret == 0) {
 			free(path);
-			path = (char *)xcalloc(strlen(tmp_path) + 1, sizeof(char));
+			path = (char *)xnmalloc(strlen(tmp_path) + 1, sizeof(char));
 			strcpy(path, tmp_path);
 			add_to_dirhist(path);
 			go_dirlist = 1;
@@ -14572,7 +14607,8 @@ get_properties (char *filename, int _long, int max)
 	case S_IFREG:
 		file_type='-';
 /*		if (!(file_attrib.st_mode & S_IRUSR)) strcpy(color, nf_c); */
-		if (access(filename, R_OK) == -1) strcpy(color, nf_c);
+		if (access(filename, R_OK) == -1)
+			strcpy(color, nf_c);
 		else if (file_attrib.st_mode & S_ISUID)
 			strcpy(color, su_c);
 		else if (file_attrib.st_mode & S_ISGID)
@@ -14849,6 +14885,12 @@ int
 log_function(char **comm)
 /* Log 'comm' into LOG_FILE */
 {
+	/* If cmd logs are disabled, allow only "log" and "log clear" commands */
+	if (logs_disabled) {
+		if (strcmp(comm[0], "log") != 0)
+			return EXIT_SUCCESS;
+	}
+	
 	if (!config_ok)
 		return EXIT_FAILURE;
 	
@@ -14884,31 +14926,27 @@ log_function(char **comm)
 		}
 	}
 
-	/* Construct the log */
-	/* Create a buffer big enough to hold the entire command */
-	size_t com_len = 0;
-	int i = 0;
-	for (i = 0; comm[i]; i++) {
-		/* Argument length plus space plus null byte terminator */
-		com_len += (strlen(comm[i]) + 1);
+	/* Construct the log line */
+
+	if (!last_cmd) {
+		if (logs_disabled) {
+			last_cmd = (char *)xnmalloc(10, sizeof(char));
+			strcpy(last_cmd, "log clear\0");
+		}
+		else {
+			last_cmd = (char *)xnmalloc(23, sizeof(char));
+			strcpy(last_cmd, "Error getting command!\0");
+		}
 	}
 
-	char full_comm[com_len];
-	memset(full_comm, 0x00, com_len);
-	strncpy(full_comm, comm[0], com_len);
-	for (i = 1; comm[i]; i++) {
-		strncat(full_comm, " ", com_len);
-		strncat(full_comm, comm[i], com_len);
-	}
-
-	/* And now a buffer for the whole log line */
 	char *date = get_date();
-	size_t log_len = strlen(date) + strlen(user) + strlen(path) + com_len + 7;
+	size_t log_len = strlen(date) + strlen(path) + strlen(last_cmd) + 6;
 	char full_log[log_len];
-	memset(full_log, 0x00, log_len);
-	snprintf(full_log, log_len, "[%s] %s:%s:%s\n", date, user, path, 
-			 full_comm);
+	snprintf(full_log, log_len, "[%s] %s:%s\n", date, path, last_cmd);
 	free(date);
+	
+	free(last_cmd);
+	last_cmd = (char *)NULL;
 	
 	/* Write the log into LOG_FILE */
 	FILE *log_fp;
@@ -15057,14 +15095,17 @@ history_function(char **comm)
 	/* If 'history clear', guess what, clear the history list! */
 	if (args_n == 1 && strcmp(comm[1], "clear") == 0) {
 		FILE *hist_fp = fopen(HIST_FILE, "w+");
+
 		if (!hist_fp) {
 			_err(0, NOPRINT_PROMPT, "%s: history: %s: %s\n", PROGRAM_NAME, 
 				 HIST_FILE, strerror(errno));
 			return EXIT_FAILURE;
 		}
+
 		/* Do not create an empty file */
 		fprintf(hist_fp, "%s %s\n", comm[0], comm[1]);
 		fclose(hist_fp);
+
 		/* Update the history array */
 		int exit_status = 0;
 		if (get_history() != 0)
