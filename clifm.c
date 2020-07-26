@@ -385,6 +385,8 @@ of course you can grep it to find, say, linux' macros, as here. */
     like in Bash. 
 
 ###################################
+ * (DONE) Add to "bm del" the possibility to specify the bookmark name to be
+	deleted directly from the command line ("bm del name").
  * (DONE) By default, the commands log function should be disabled. Add an 
 	option to the config file (DisableCmdLogs) and a check before calling 
 	log_function() (or at the beginning of the function itself) and before 
@@ -1480,10 +1482,10 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.19.8"
+#define VERSION "0.19.9"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "July 24, 2020"
+#define DATE "July 26, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -1724,7 +1726,7 @@ xatoi(const char *str)
  * negative values */
 {
 	int ret = 0; /*, neg = 0; */
-/*	if (*str == '-') { // same as: str[0] == '-'
+/*	if (*str == '-') {
 		str++;
 		neg = 1;
 	}*/
@@ -1734,7 +1736,8 @@ xatoi(const char *str)
 			return ret;
 		ret = (ret * 10) + (str[i] - '0');
 	}
-/*	if (neg) ret = ret - (ret * 2); */
+/*	if (neg)
+ * 		ret = ret - (ret * 2); */
 	return ret;
 }
 
@@ -1908,7 +1911,8 @@ alphasort_insensitive(const struct dirent **a, const struct dirent **b)
 int
 strcntchr(const char *str, const char c)
 /* Returns the index of the first appearance of c in str, if any, and -1 if c 
- * was not found or if no str. NOTE: Same thing as strchr () */
+ * was not found or if no str. NOTE: Same thing as strchr(), except that 
+ * returns an index, not a pointer */
 {
 /*	size_t str_len=strlen(str);
 	for (size_t i=str_len;i--;) { */
@@ -1942,11 +1946,12 @@ straft(const char *str, const char c)
 			return (char *)NULL;
 		if (*str == c) {
 			/* If C is found, copy everything after C into buf */
-			char *p = (char *)calloc((str_len - counter) + 1, sizeof(char));
+			char *p = (char *)malloc((str_len - counter + 1) * sizeof(char));
 			if (p) {
 				buf = p;
 				p = (char *)NULL;
 				strcpy(buf, str + 1);
+				*(buf + (str_len - counter)) = 0x00;
 				return buf;
 			}
 			else
@@ -1972,7 +1977,7 @@ straftlst(const char *str, const char c)
 		if (str[i] == c) {
 			if (i == (str_len - 1))
 				return (char *)NULL; /* There's nothing after C */
-			char *p = (char *)calloc(str_len - i, sizeof(char));
+			char *p = (char *)malloc((str_len - i) * sizeof(char));
 			if (p) {
 				buf = p;
 				p = (char *)NULL;
@@ -2001,15 +2006,13 @@ strbfr(char *str, const char c)
 			if (counter == 0)
 				return (char *)NULL; /* There's no substring before 
 			the first char */
-			char *p = (char *)calloc(counter + 1, sizeof(char));
+			char *p = (char *)malloc((counter + 1) * sizeof(char));
 			if (p) {
 				buf = p;
 				p = (char *)NULL;
 				strncpy(buf, start, counter);
+				*(buf + counter) = 0x00;
 				return buf;
-				/*NOTE: buf is null terminated because calloc allocated 
-				 * and zeroed count + 1 bytes, whereas strcpy copied the first 
-				 * 'counter' bytes of start into buf */
 			}
 			else
 				return (char *)NULL;
@@ -2022,7 +2025,7 @@ strbfr(char *str, const char c)
 }
 
 char *
-strbfrlst (char *str, char c)
+strbfrlst(char *str, char c)
 /* Get substring in STR before the last appearance of C. Returns substring 
  * if C is found and NULL if not (or if C was the first char in STR). */
 {
@@ -2045,7 +2048,7 @@ strbfrlst (char *str, char c)
 	/* Else, copy STR into buf, replace C by null char, and return buf */
 	size_t str_len = strlen(str);
 	buf = (char *)NULL;
-	char *p = (char *)calloc(str_len + 1, sizeof(char));
+	char *p = (char *)malloc((str_len + 1) * sizeof(char));
 
 	if (!p)
 		return (char *)NULL;
@@ -2053,7 +2056,7 @@ strbfrlst (char *str, char c)
 	buf = p;
 	p = (char *)NULL;
 	strcpy(buf, str);
-	buf[index] = 0x00;
+	*(buf + index) = 0x00;
 
 	return buf;
 }
@@ -2110,7 +2113,7 @@ strbtw(char *str, const char a, const char b)
 	q += (a_index + 1);
 	size_t bytes =  b_index - a_index - 1;
 	strncpy(buf, q, bytes);
-	buf[bytes] = 0x00;
+	*(buf + bytes) = 0x00;
 	
 	return buf;
 }
@@ -2429,7 +2432,7 @@ int open_bookmark(char **cmd);
 int get_bm_names(void);
 char *bookmarks_generator(const char *text, int state);
 int initialize_readline(void);
-int del_bookmark(void);
+int del_bookmark(char *name);
 int add_bookmark(char *file);
 char *savestring(const char *str, size_t size);
 char *my_rl_path_completion(const char *text, int state);
@@ -11614,7 +11617,6 @@ get_aliases(void)
 				aliases[aliases_n] = (char *)xcalloc(strlen(alias_line) + 1, 
 													 sizeof(char));
 				strcpy(aliases[aliases_n++], alias_line);
-				alias_line = (char *)NULL;
 			}
 		}
 	}
@@ -11798,10 +11800,10 @@ exec_cmd(char **comm)
 		int i;
 		for (i = 0; i < dirhist_total_index; i++) {
 			if (i == dirhist_cur_index)
-				printf("%d %s%s%s%s\n", i+1, green, old_pwd[i], NC, 
+				printf("%d %s%s%s%s\n", i + 1, green, old_pwd[i], NC, 
 						default_color);
 			else 
-				printf("%d %s\n", i+1, old_pwd[i]);	
+				printf("%d %s\n", i + 1, old_pwd[i]);	
 		}
 	}
 
@@ -12972,12 +12974,12 @@ deselect(char **comm)
 	 * by their index. The only way to find them is to compare string by 
 	 * string */
 	char **desel_path = (char **)NULL;
-	desel_path = (char **)xcalloc(desel_n, sizeof(char **));
+	desel_path = (char **)xnmalloc(desel_n, sizeof(char *));
 	for (i = 0; i < desel_n; i++) {
 		int desel_int = atoi(desel_elements[i]);
-		desel_path[i] = (char *)xcalloc(strlen(sel_elements[desel_int - 1]) 
-										+ 1, sizeof(char));
-		strcpy(desel_path[i], sel_elements[desel_int-1]);
+		desel_path[i] = (char *)xnmalloc(strlen(sel_elements[desel_int - 1]) 
+										 + 1, sizeof(char));
+		strcpy(desel_path[i], sel_elements[desel_int - 1]);
 	}
 	/* Search the sel array for the path of the element to deselect and store 
 	its index */
@@ -13658,7 +13660,7 @@ bm_prompt(void)
 }
 
 int
-del_bookmark(void)
+del_bookmark(char *name)
 {
 	FILE *bm_fp = NULL;
 	bm_fp = fopen(BM_FILE, "r");
@@ -13698,40 +13700,82 @@ del_bookmark(void)
 		fclose(bm_fp);
 		return EXIT_SUCCESS;
 	}
-	
-	/* List bookmarks */
-	printf("\033[1;37mBookmarks\033[0m\n\n");
-	for (i = 0; i < bmn; i++)
-		printf("%s%zu \033[1;36m%s\033[0m\n", eln_color, i + 1, bms[i]);
 
-	/* Get user input */
-	printf(_("\n%s%sEnter 'q' to quit.\n"), NC, default_color);
-	char *input = (char *)NULL;
-	while (!input) {
-		input = rl_no_hist("Bookmark(s) to be deleted (ex: 1 2-6, or *): ");
-		if (input) {
-			int no_space = 0;
-			for (i = 0; input[i]; i++) {
-				if (input[i] != 0x20)
-					no_space = 1;
+	char **del_elements = (char **)NULL;
+	int cmd_line = -1; 
+	/* This variable let us know two things: a) bookmark name was specified 
+	 * in command line; b) the index of this name in the bookmarks array. It is
+	 * initialized as -1 since the index name could be zero */
+	if (name) {
+		for (i = 0; i < bmn; i++) {
+			char *bm_name = strbtw(bms[i], ']', ':');
+			if (!bm_name)
+				continue;
+			if (strcmp(name, bm_name) == 0) {
+				free(bm_name);
+				cmd_line = i;
+				break;
 			}
-			if (input[0] == 0x00 || !no_space) {
-				free(input);
-				input = (char *)NULL;
-			}
+			free(bm_name);
 		}
 	}
+	
+	/* If a valid bookmark name was passed in command line, copy the 
+	 * corresponding bookmark index (plus 1, as if it were typed in the 
+	 * bookmarks screen) to the del_elements array */
+	if (cmd_line != -1) {
+		del_elements = (char **)xnmalloc(2, sizeof(char *));
+		del_elements[0] = (char *)xnmalloc(digits_in_num(cmd_line + 1) + 1, 
+										   sizeof(char));
+		sprintf(del_elements[0], "%d", cmd_line + 1);
+		del_elements[1] = (char *)NULL;
+	}
 
-	char **del_elements = get_substr(input, ' ');
-	free(input);
-	input = (char *)NULL;
-	if (!del_elements) {
+	/* If bookmark name was passed but it is not a valid bookmark */
+	else if (name) {
+		fprintf(stderr, "bookmarks: '%s': No such bookmark\n", name);
 		for (i = 0; i < bmn; i++)
 			free(bms[i]);
 		free(bms);
 		fclose(bm_fp);
-		fprintf(stderr, _("bookmarks: Error parsing input\n"));
 		return EXIT_FAILURE;
+	}
+	
+	/* If not name, list bookmarks and get user input */
+	else {
+		printf("\033[1;37mBookmarks\033[0m\n\n");
+		for (i = 0; i < bmn; i++)
+			printf("%s%zu \033[1;36m%s\033[0m\n", eln_color, i + 1, bms[i]);
+
+		/* Get user input */
+		printf(_("\n%s%sEnter 'q' to quit.\n"), NC, default_color);
+		char *input = (char *)NULL;
+		while (!input) {
+			input = rl_no_hist("Bookmark(s) to be deleted (ex: 1 2-6, or *): ");
+			if (input) {
+				int no_space = 0;
+				for (i = 0; input[i]; i++) {
+					if (input[i] != 0x20)
+						no_space = 1;
+				}
+				if (input[0] == 0x00 || !no_space) {
+					free(input);
+					input = (char *)NULL;
+				}
+			}
+		}
+
+		del_elements = get_substr(input, ' ');
+		free(input);
+		input = (char *)NULL;
+		if (!del_elements) {
+			for (i = 0; i < bmn; i++)
+				free(bms[i]);
+			free(bms);
+			fclose(bm_fp);
+			fprintf(stderr, _("bookmarks: Error parsing input\n"));
+			return EXIT_FAILURE;
+		}
 	}
 
 	/* We have input */
@@ -13795,6 +13839,10 @@ del_bookmark(void)
 
 			/* Update bookmark names for TAB completion */
 			get_bm_names();
+			
+			/* If the argument "*" was specified in command line */
+			if (cmd_line != -1)
+				fputs("All bookmarks succesfully removed\n", stdout);
 
 			return EXIT_SUCCESS;
 		}
@@ -13827,15 +13875,15 @@ del_bookmark(void)
 	while ((line_len = getline(&lineb, &line_size, bm_fp)) > 0) {
 		if (lineb[line_len - 1] == '\n')
 			lineb[line_len - 1] = 0x00;
-		int found = 0;
+		int bm_found = 0;
 		size_t j;
 		for (j = 0; del_elements[j]; j++) {
 			if (!is_number(del_elements[j]))
 				continue;
 			if (strcmp(bms[atoi(del_elements[j]) - 1], lineb) == 0)
-				found = 1;
+				bm_found = 1;
 		}
-		if (found)
+		if (bm_found)
 			continue;
 		fprintf(tmp_fp, "%s\n", lineb);
 	}
@@ -13864,6 +13912,10 @@ del_bookmark(void)
 
 	/* Update bookmark names for TAB completion */
 	get_bm_names();
+	
+	/* If the bookmark to be removed was specified in command line */
+	if (cmd_line != -1)
+		printf("Successfully removed '%s'\n", name);
 
 	return EXIT_SUCCESS;
 }
@@ -13878,8 +13930,8 @@ add_bookmark(char *file)
 	/* If not absolute path, prepend current path to file */
 	if (*file != '/') {
 		char *tmp_file = (char *)NULL;
-		tmp_file = (char *)xcalloc((strlen(path) + strlen(file) + 2), 
-								   sizeof(char));
+		tmp_file = (char *)xnmalloc((strlen(path) + strlen(file) + 2), 
+								    sizeof(char));
 		sprintf(tmp_file, "%s/%s", path, file);
 		file = tmp_file;
 		tmp_file = (char *)NULL;
@@ -14420,8 +14472,12 @@ bookmarks_function(char **cmd)
 			return add_bookmark(cmd[2]);
 		}
 		/* Delete bookmarks */
-		else if (strcmp(cmd[1], "d") == 0 || strcmp(cmd[1], "del") == 0)
-			return del_bookmark();
+		else if (strcmp(cmd[1], "d") == 0 || strcmp(cmd[1], "del") == 0) {
+			if (cmd[2])
+				return del_bookmark(cmd[2]);
+			else
+				return del_bookmark(NULL);
+		}
 	}
 	
 	/* If no arguments or "bm [edit] [shortcut, name]" */
