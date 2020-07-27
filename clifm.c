@@ -2702,7 +2702,7 @@ char *user = (char *)NULL, *path = (char *)NULL, **old_pwd = (char **)NULL,
 #define DEFAULT_PROMPT "\\[\\e[0m\\]\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\
 \\[\\e[0m\\]\\z\\[\\e[0;34m\\] \\$ \\[\\e[0m\\]"
 
-#define DEFAULT_TERM "xterm -e"
+#define DEFAULT_TERM_CMD "xterm -e"
 
 #define FALLBACK_SHELL "/bin/sh"
 
@@ -3117,16 +3117,18 @@ main(int argc, char **argv)
 
 int
 new_instance(char *dir)
+/* Open DIR in a new instance of the program (using TERM, set in the config 
+ * file, as terminal emulator) */
 {
 	if (!term) {
-		fprintf(stderr, "%s: Default terminal not set. Use the configuration "
-				"file to set one\n", PROGRAM_NAME);
+		fprintf(stderr, _("%s: Default terminal not set. Use the configuration "
+				"file to set one\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
 	if (!(flags & GRAPHICAL)) {
-		fprintf(stderr, "%s: Function available only in graphical "
-				"environment\n", PROGRAM_NAME);
+		fprintf(stderr, _("%s: Function only available for graphical "
+				"environments\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
@@ -3141,48 +3143,57 @@ new_instance(char *dir)
 		free(self);
 		return EXIT_FAILURE;
 	}
+
+	char *deq_dir = dequote_str(dir, 0);
+	if (!deq_dir) {
+		fprintf(stderr, _("%s: '%s': Error dequoting filename\n"), PROGRAM_NAME,
+				dir);
+		free(self);
+		return EXIT_FAILURE;
+	}
 		
 	struct stat file_attrib;
-	if (stat(dir, &file_attrib) == -1) {
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, dir, strerror(errno));
+	if (stat(deq_dir, &file_attrib) == -1) {
+		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, deq_dir, 
+				strerror(errno));
 		free(self);
 		return EXIT_FAILURE;
 	}
 	
 	if ((file_attrib.st_mode & S_IFMT) != S_IFDIR) {
-		fprintf(stderr, "%s: '%s': Not a directory\n", PROGRAM_NAME, dir);
+		fprintf(stderr, _("%s: '%s': Not a directory\n"), PROGRAM_NAME, 
+				deq_dir);
 		free(self);
 		return EXIT_FAILURE;
 	}
 
 	char *path_dir = (char *)NULL;
 	
-	if (*dir != '/') {
-		path_dir = (char *)xnmalloc(strlen(path) + strlen(dir) + 2, 
+	if (*deq_dir != '/') {
+		path_dir = (char *)xnmalloc(strlen(path) + strlen(deq_dir) + 2, 
 									sizeof(char));
-		sprintf(path_dir, "%s/%s", path, dir);
+		sprintf(path_dir, "%s/%s", path, deq_dir);
 	}
 	else
-		path_dir = dir;
+		path_dir = deq_dir;
 
 	char *cmd = (char *)xnmalloc(strlen(term) + strlen(self) 
-								 + strlen(path_dir) + 11, sizeof(char));
-	sprintf(cmd, "%s %s -p %s &", term, self, path_dir);
+								 + strlen(path_dir) + 13, sizeof(char));
+	sprintf(cmd, "%s %s -p \"%s\" &", term, self, path_dir);
 	
-	if (*dir != '/')
-		free(path_dir);
-
-	free(self);
-
-//	printf("%s\n", cmd);
+/*	char *cmd[] = { term, "-e", self, "-p", path_dir, "&", NULL }; */
 
 	int ret = launch_execle(cmd);
-//	int ret = 0;
+
+	if (*deq_dir != '/')
+		free(path_dir);
+	free(deq_dir);
+	free(self);
 
 	free(cmd);
 	
 	if (ret != 0)
-		fprintf(stderr, "%s: Undefined error lauching new instance\n", 
+		fprintf(stderr, _("%s: Undefined error lauching new instance\n"), 
 				PROGRAM_NAME);
 
 	return ret;
@@ -3959,7 +3970,7 @@ LongViewMode=false\n\
 ExternalCommands=false\n\
 LogCmds=false\n\
 SystemShell=\n\
-TerminalCmd=%s\n\
+TerminalCmd='%s'\n\
 ListFoldersFirst=true\n\
 CdListsAutomatically=true\n\
 CaseSensitiveList=false\n\
@@ -3968,7 +3979,7 @@ Pager=false\n\
 MaxHistory=500\n\
 MaxLog=1000\n\
 ClearScreen=false\n\
-StartingPath=\n", DEFAULT_PROMPT, DEFAULT_TERM);
+StartingPath=\n", DEFAULT_PROMPT, DEFAULT_TERM_CMD);
 		fputs("#Default starting path is CWD\n", config_fp);
 		fputs("#END OF OPTIONS\n\
 \n###Aliases###\nalias ls='ls --color=auto -A'\n\
@@ -5529,8 +5540,8 @@ set_default_options(void)
 	if (term)
 		free(term);
 
-	term = (char *)xcalloc(strlen(DEFAULT_TERM) + 1, sizeof(char));
-	strcpy(term, DEFAULT_TERM);
+	term = (char *)xcalloc(strlen(DEFAULT_TERM_CMD) + 1, sizeof(char));
+	strcpy(term, DEFAULT_TERM_CMD);
 	
 	if (encoded_prompt)
 		free(encoded_prompt);
@@ -9106,7 +9117,7 @@ LongViewMode=false\n\
 ExternalCommands=false\n\
 LogCmds=false\n\
 SystemShell=\n\
-TerminalCmd=%s\n\
+TerminalCmd='%s'\n\
 ListFoldersFirst=true\n\
 CdListsAutomatically=true\n\
 CaseSensitiveList=false\n\
@@ -9115,7 +9126,7 @@ Pager=false\n\
 MaxHistory=500\n\
 MaxLog=1000\n\
 ClearScreen=false\n\
-StartingPath=\n", DEFAULT_PROMPT, DEFAULT_TERM);
+StartingPath=\n", DEFAULT_PROMPT, DEFAULT_TERM_CMD);
 			fputs("#Default starting path is CWD\n", config_fp);
 			fputs("#END OF OPTIONS\n\
 \n###Aliases###\nalias ls='ls --color=auto -A'\n\
@@ -9580,8 +9591,9 @@ OF PROMPT\n", config_fp);
 				strcpy(encoded_prompt, DEFAULT_PROMPT);
 			}
 			if (!term) {
-				term = (char *)xcalloc(strlen(DEFAULT_TERM) + 1, sizeof(char));
-				strcpy(term, DEFAULT_TERM);
+				term = (char *)xcalloc(strlen(DEFAULT_TERM_CMD) + 1, 
+									   sizeof(char));
+				strcpy(term, DEFAULT_TERM_CMD);
 			}
 		}
 		
@@ -12704,14 +12716,14 @@ launch_execve(char **cmd)
 	
 	if (cmd[last]) {
 		if (strcmp(cmd[last], "&") == 0) {
-			free(cmd[last]);
+/*			free(cmd[last]); */
 			cmd[last] = (char *)NULL;
 			is_bg = 1;
 		}
 		else {
 			size_t last_len = strlen(cmd[last]);
-			if (cmd[last][last_len-1] == '&') {
-				cmd[last][last_len-1] = 0x00;
+			if (cmd[last][last_len - 1] == '&') {
+				cmd[last][last_len - 1] = 0x00;
 				is_bg = 1;
 			}
 		}
