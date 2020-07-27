@@ -1482,10 +1482,10 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.19.9"
+#define VERSION "0.20.0"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "July 26, 2020"
+#define DATE "July 27, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -2432,8 +2432,8 @@ int open_bookmark(char **cmd);
 int get_bm_names(void);
 char *bookmarks_generator(const char *text, int state);
 int initialize_readline(void);
-int del_bookmark(char *name);
-int add_bookmark(char *file);
+int bookmark_del(char *name);
+int bookmark_add(char *file);
 char *savestring(const char *str, size_t size);
 char *my_rl_path_completion(const char *text, int state);
 int get_link_ref(const char *link);
@@ -2453,6 +2453,7 @@ int alias_import(char *file);
 int record_cmd(char *input);
 void add_to_cmdhist(char *cmd);
 int _err(int msg_type, int prompt, const char *format, ...);
+int new_instance(char *dir);
 
 int *get_hex_num(char *str);
 
@@ -2687,7 +2688,7 @@ char *user = (char *)NULL, *path = (char *)NULL, **old_pwd = (char **)NULL,
 	**dirlist = (char **)NULL, **bookmark_names = (char **)NULL,
 	*ls_colors_bk = (char *)NULL, *MIME_FILE = (char *)NULL,
 	**profile_names = (char **)NULL, *encoded_prompt = (char *)NULL,
-	*last_cmd = (char *)NULL,
+	*last_cmd = (char *)NULL, *term = (char *)NULL,
 	/* This is not a comprehensive list of commands. It only lists commands
 	 * long version for TAB completion */
 	*INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
@@ -2700,6 +2701,10 @@ char *user = (char *)NULL, *path = (char *)NULL, **old_pwd = (char **)NULL,
 
 #define DEFAULT_PROMPT "\\[\\e[0m\\]\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\
 \\[\\e[0m\\]\\z\\[\\e[0;34m\\] \\$ \\[\\e[0m\\]"
+
+#define DEFAULT_TERM "xterm -e"
+
+#define FALLBACK_SHELL "/bin/sh"
 
 #define MAX_COLOR 46
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\n (24bit, RGB true 
@@ -3109,6 +3114,79 @@ main(int argc, char **argv)
 }
 
 /* ###FUNCTIONS DEFINITIONS### */
+
+int
+new_instance(char *dir)
+{
+	if (!term) {
+		fprintf(stderr, "%s: Default terminal not set. Use the configuration "
+				"file to set one\n", PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	if (!(flags & GRAPHICAL)) {
+		fprintf(stderr, "%s: Function available only in graphical "
+				"environment\n", PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	/* Get absolute path of executable name of itself */
+	char *self = realpath("/proc/self/exe", NULL);
+	if (!self) {
+		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	if (!dir) {
+		free(self);
+		return EXIT_FAILURE;
+	}
+		
+	struct stat file_attrib;
+	if (stat(dir, &file_attrib) == -1) {
+		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, dir, strerror(errno));
+		free(self);
+		return EXIT_FAILURE;
+	}
+	
+	if ((file_attrib.st_mode & S_IFMT) != S_IFDIR) {
+		fprintf(stderr, "%s: '%s': Not a directory\n", PROGRAM_NAME, dir);
+		free(self);
+		return EXIT_FAILURE;
+	}
+
+	char *path_dir = (char *)NULL;
+	
+	if (*dir != '/') {
+		path_dir = (char *)xnmalloc(strlen(path) + strlen(dir) + 2, 
+									sizeof(char));
+		sprintf(path_dir, "%s/%s", path, dir);
+	}
+	else
+		path_dir = dir;
+
+	char *cmd = (char *)xnmalloc(strlen(term) + strlen(self) 
+								 + strlen(path_dir) + 11, sizeof(char));
+	sprintf(cmd, "%s %s -p %s &", term, self, path_dir);
+	
+	if (*dir != '/')
+		free(path_dir);
+
+	free(self);
+
+//	printf("%s\n", cmd);
+
+	int ret = launch_execle(cmd);
+//	int ret = 0;
+
+	free(cmd);
+	
+	if (ret != 0)
+		fprintf(stderr, "%s: Undefined error lauching new instance\n", 
+				PROGRAM_NAME);
+
+	return ret;
+}
 
 void
 add_to_cmdhist(char *cmd)
@@ -3881,6 +3959,7 @@ LongViewMode=false\n\
 ExternalCommands=false\n\
 LogCmds=false\n\
 SystemShell=\n\
+TerminalCmd=%s\n\
 ListFoldersFirst=true\n\
 CdListsAutomatically=true\n\
 CaseSensitiveList=false\n\
@@ -3889,7 +3968,7 @@ Pager=false\n\
 MaxHistory=500\n\
 MaxLog=1000\n\
 ClearScreen=false\n\
-StartingPath=\n", DEFAULT_PROMPT);
+StartingPath=\n", DEFAULT_PROMPT, DEFAULT_TERM);
 		fputs("#Default starting path is CWD\n", config_fp);
 		fputs("#END OF OPTIONS\n\
 \n###Aliases###\nalias ls='ls --color=auto -A'\n\
@@ -5443,9 +5522,15 @@ set_default_options(void)
 	sys_shell = get_sys_shell();
 
 	if (!sys_shell) {
-		sys_shell = (char *)xnmalloc(8, sizeof(char));
-		strcpy(sys_shell, "/bin/sh\0");
+		sys_shell = (char *)xcalloc(strlen(FALLBACK_SHELL) + 1, sizeof(char));
+		strcpy(sys_shell, FALLBACK_SHELL);
 	}
+
+	if (term)
+		free(term);
+
+	term = (char *)xcalloc(strlen(DEFAULT_TERM) + 1, sizeof(char));
+	strcpy(term, DEFAULT_TERM);
 	
 	if (encoded_prompt)
 		free(encoded_prompt);
@@ -6109,10 +6194,13 @@ list_mountpoints(void)
 			return EXIT_SUCCESS;
 		}
 		
+		puts("");
 		/* Ask the user and chdir into the selected mountpoint */
-		char *input = rl_no_hist(_("\nChoose a mountpoint ('q' to quit): "));
-			
-		if (input && input[0] != 0x00 && strcmp(input, "q") != 0) {
+		char *input = (char *)NULL;
+		while (!input)
+			input = rl_no_hist(_("Choose a mountpoint ('q' to quit): "));
+
+		if (!(*input == 'q' && *(input + 1) == 0x00)) {
 			int atoi_num = atoi (input);
 			if (atoi_num > 0 && atoi_num <= mp_n) {
 				int ret = chdir(mountpoints[atoi_num-1]);
@@ -6147,7 +6235,9 @@ list_mountpoints(void)
 		for (i = 0; i < mp_n; i++) {
 			free(mountpoints[i]);
 		}
+
 		free(mountpoints);
+
 		return exit_status;
 	}
 	else { /* If fopen failed */
@@ -6682,26 +6772,12 @@ remove_from_trash(void)
 	
 	/* Get user input */
 	printf(_("\n%s%sEnter 'q' to quit.\n"), NC, default_color);
-	int no_space = 0;
 	char *line = (char *)NULL, **rm_elements = (char **)NULL;
 
-	while (!line) {
+	while (!line)
 		line = rl_no_hist(_("Element(s) to be removed (ex: 1 2-6, or *): "));
 
-		if (!line)
-			continue;
-
-		for (i = 0; line[i]; i++)
-			if (line[i] != 0x20)
-				no_space = 1;
-
-		if (line[0] == 0x00 || !no_space) {
-			free(line);
-			line = (char *)NULL;
-		}
-	}
-
-	rm_elements = get_substr(line, ' ');
+	rm_elements = get_substr(line, 0x20);
 	free(line);
 
 	if (!rm_elements)
@@ -7003,21 +7079,12 @@ untrash_function(char **comm)
 
 	/* Get user input */
 	printf(_("\n%s%sEnter 'q' to quit.\n"), NC, default_color);
-	int no_space = 0, undel_n = 0;
+	int undel_n = 0;
 	char *line = (char *)NULL, **undel_elements = (char **)NULL;
-	while (!line) {
+	while (!line)
 		line = rl_no_hist(_("Element(s) to be undeleted (ex: 1 2-6, or *): "));
-		if (!line)
-			continue;
-		for (i = 0; line[i]; i++)
-			if (line[i] != 0x20)
-				no_space = 1;
-		if (line[0] == 0x00 || !no_space) {
-			free(line);
-			line = (char *)NULL;
-		}
-	}
-	undel_elements = get_substr(line, ' ');
+
+	undel_elements = get_substr(line, 0x20);
 	free(line);
 	line = (char *)NULL;
 	if (undel_elements)
@@ -9039,6 +9106,7 @@ LongViewMode=false\n\
 ExternalCommands=false\n\
 LogCmds=false\n\
 SystemShell=\n\
+TerminalCmd=%s\n\
 ListFoldersFirst=true\n\
 CdListsAutomatically=true\n\
 CaseSensitiveList=false\n\
@@ -9047,7 +9115,7 @@ Pager=false\n\
 MaxHistory=500\n\
 MaxLog=1000\n\
 ClearScreen=false\n\
-StartingPath=\n", DEFAULT_PROMPT);
+StartingPath=\n", DEFAULT_PROMPT, DEFAULT_TERM);
 			fputs("#Default starting path is CWD\n", config_fp);
 			fputs("#END OF OPTIONS\n\
 \n###Aliases###\nalias ls='ls --color=auto -A'\n\
@@ -9068,6 +9136,22 @@ OF PROMPT\n", config_fp);
 			short text_color_set = -1, eln_color_set = -1, 
 				  default_color_set = -1, dir_count_color_set = -1, 
 				  div_line_color_set = -1, welcome_msg_color_set = -1;
+
+			if (encoded_prompt) {
+				free(encoded_prompt);
+				encoded_prompt = (char *)NULL;
+			}
+
+			if (sys_shell) {
+				free(sys_shell);
+				sys_shell = (char *)NULL;
+			}
+			
+			if (term) {
+				free(term);
+				term = (char *)NULL;
+			}
+
 			config_fp = fopen(CONFIG_FILE, "r");
 			if (!config_fp) {
 				_err('e', PRINT_PROMPT, _("%s: fopen: '%s': %s. Using default "
@@ -9188,6 +9272,34 @@ OF PROMPT\n", config_fp);
 						sys_shell = (char *)xcalloc(strlen(opt_str) + 1, 
 													sizeof(char));
 						strcpy(sys_shell, opt_str);
+					}
+					else if (strncmp (line, "TerminalCmd=", 12) == 0) {
+
+						if (term) {
+							free(term);
+							term = (char *)NULL;
+						}
+
+						char *opt_str = straft(line, '=');
+						if (!opt_str)
+							continue;
+	
+						/* Remove new line char */
+						size_t len = strlen(opt_str);
+						if (opt_str[len - 1] == '\n')
+							opt_str[len - 1] = 0x00;
+	
+						/* Unquote */
+						len = strlen(opt_str);
+						if (opt_str[0] == '\'' || opt_str[0] == '"')
+							opt_str[0] = 0x20;
+						if (opt_str[len - 1] == '\'' || opt_str[len - 1] == '"')
+							opt_str[len - 1] = 0x00;
+	
+						term = (char *)xcalloc(strlen(opt_str) + 1, 
+											   sizeof(char));
+						strcpy(term, opt_str);
+						free(opt_str);
 					}
 					else if (list_folders_first == -1 
 					&& strncmp(line, "ListFoldersFirst=", 17) == 0) {
@@ -9429,15 +9541,6 @@ OF PROMPT\n", config_fp);
 			if (long_view == -1) long_view = 0;
 			if (ext_cmd_ok == -1) ext_cmd_ok = 0;
 			if (max_path == -1) max_path = 40;
-			if (!sys_shell) {
-				/* Get user's default shell */
-				sys_shell = get_sys_shell();
-				if (!sys_shell) { 
-				/* Fallback to /bin/sh */
-				sys_shell = (char *)xnmalloc(8, sizeof(char));
-				strcpy(sys_shell, "/bin/sh\0");
-				}
-			}
 			if (logs_enabled == -1) logs_enabled = 0;
 			if (pager == -1) pager = 0;
 			if (max_hist == -1) max_hist = 500;
@@ -9461,10 +9564,24 @@ OF PROMPT\n", config_fp);
 				strcpy(div_line_color, "\x1b[00;34m");
 			if (welcome_msg_color_set == -1)
 				strcpy(welcome_msg_color, "\x1b[01;36m");
+			if (!sys_shell) {
+				/* Get user's default shell */
+				sys_shell = get_sys_shell();
+				if (!sys_shell) {
+					/* Fallback to FALLBACK_SHELL */
+					sys_shell = (char *)xcalloc(strlen(FALLBACK_SHELL), 
+												sizeof(char));
+					strcpy(sys_shell, FALLBACK_SHELL);
+				}
+			}
 			if (!encoded_prompt) {
 				encoded_prompt = (char *)xcalloc(strlen(DEFAULT_PROMPT) + 1, 
 												 sizeof(char));
 				strcpy(encoded_prompt, DEFAULT_PROMPT);
+			}
+			if (!term) {
+				term = (char *)xcalloc(strlen(DEFAULT_TERM) + 1, sizeof(char));
+				strcpy(term, DEFAULT_TERM);
 			}
 		}
 		
@@ -10614,15 +10731,39 @@ parse_input_str (char *str)
 }
 
 char *
-rl_no_hist (const char *prompt)
+rl_no_hist(const char *prompt)
 {
 	stifle_history(0); /* Prevent readline from using the history setting */
 	char *input = readline(prompt);
 	unstifle_history(); /* Reenable history */
 	read_history(HIST_FILE); /* Reload history lines from file */
 
-	if (input)
+	if (input) {
+
+		/* Make sure input isn't empty string */
+		if (!*input) {
+			free(input);
+			return (char *)NULL;
+		}
+
+		/* Check we have some non-blank char */
+		int no_blank = 0;
+		char *p = input;
+		while (*p) {
+			if (*p != 0x20 && *p != '\n' && *p != '\t') {
+				no_blank = 1;
+				break;
+			}
+			p++;
+		}
+
+		if (!no_blank) {
+			free(input);
+			return (char *)NULL;
+		}
+	
 		return input;
+	}
 
 	return (char *)NULL;
 }
@@ -11936,6 +12077,13 @@ exec_cmd(char **comm)
 
 	/*     ############### MINOR FUNCTIONS ##################     */
 
+	else if (strcmp(comm[0], "x") == 0) {
+		if (comm[1])
+			exit_code = new_instance(comm[1]);
+		else
+			puts("Usage: x DIR\n");
+	}
+
 	else if (strcmp(comm[0], "mm") == 0 || strcmp(comm[0], "mime") == 0) {
 		exit_code = mime_open(comm);
 	}
@@ -12893,23 +13041,15 @@ deselect(char **comm)
 		colors_list(sel_elements[i], i + 1, 0, 1);
 
 	printf(_("\n%s%sEnter 'q' to quit.\n"), NC, default_color);
-	int no_space = 0, desel_n = 0;
+	int desel_n = 0;
 	char *line = NULL, **desel_elements = (char **)NULL;
 
-	while (!line) {
+	while (!line)
 		line = rl_no_hist(_("Element(s) to be deselected (ex: 1 2-6, or *): "));
-		if (!line)
-			continue;
-		for (i = 0; line[i]; i++)
-			if (line[i] != 0x20)
-				no_space = 1;
-		if (line[0] == 0x00 || !no_space) {
-			free(line);
-			line = (char *)NULL;
-		}
-	}
+
 	desel_elements = get_substr(line, ' ');
 	free(line);
+
 	if (!desel_elements)
 		return EXIT_FAILURE;
 
@@ -13637,21 +13777,10 @@ bm_prompt(void)
 {
 	char *bm_sel = (char *)NULL;
 	printf("%s%s\nEnter 'e' to edit your bookmarks or 'q' to quit.\n", NC_b, 
-		    default_color);
+		   default_color);
 
-	while (!bm_sel) {
+	while (!bm_sel)
 		bm_sel = rl_no_hist(_("Choose a bookmark: "));
-		int no_space = 0;
-		size_t i;
-		for (i = 0; bm_sel[i]; i++)
-			if (bm_sel[i] != 0x20)
-				no_space = 1;
-		/* If empty or only spaces */
-		if (bm_sel[0] == 0x00 || !no_space) {
-			free(bm_sel);
-			bm_sel = (char *)NULL;
-		}
-	}
 	
 	char **comm_bm = get_substr(bm_sel, ' ');
 	free(bm_sel);
@@ -13660,7 +13789,7 @@ bm_prompt(void)
 }
 
 int
-del_bookmark(char *name)
+bookmark_del(char *name)
 {
 	FILE *bm_fp = NULL;
 	bm_fp = fopen(BM_FILE, "r");
@@ -13743,27 +13872,15 @@ del_bookmark(char *name)
 	
 	/* If not name, list bookmarks and get user input */
 	else {
-		printf("\033[1;37mBookmarks\033[0m\n\n");
+		printf("%sBookmarks%s\n\n", white, NC);
 		for (i = 0; i < bmn; i++)
-			printf("%s%zu \033[1;36m%s\033[0m\n", eln_color, i + 1, bms[i]);
+			printf("%s%zu %s%s%s\n", eln_color, i + 1, d_cyan, bms[i], NC);
 
 		/* Get user input */
 		printf(_("\n%s%sEnter 'q' to quit.\n"), NC, default_color);
 		char *input = (char *)NULL;
-		while (!input) {
+		while (!input)
 			input = rl_no_hist("Bookmark(s) to be deleted (ex: 1 2-6, or *): ");
-			if (input) {
-				int no_space = 0;
-				for (i = 0; input[i]; i++) {
-					if (input[i] != 0x20)
-						no_space = 1;
-				}
-				if (input[0] == 0x00 || !no_space) {
-					free(input);
-					input = (char *)NULL;
-				}
-			}
-		}
 
 		del_elements = get_substr(input, ' ');
 		free(input);
@@ -13921,7 +14038,7 @@ del_bookmark(char *name)
 }
 
 int
-add_bookmark(char *file)
+bookmark_add(char *file)
 {
 	if (!file)
 		return EXIT_FAILURE;
@@ -13950,7 +14067,7 @@ add_bookmark(char *file)
 	}
 	int bmn = 0, dup = 0;
 	char **bms = (char **)NULL;
-	size_t line_size = 0;
+	size_t line_size = 0, i;
 	char *line = (char *)NULL;
 	ssize_t line_len = 0;
 	while ((line_len = getline(&line, &line_size, bm_fp)) > 0) {
@@ -13977,15 +14094,17 @@ add_bookmark(char *file)
 		strcpy(bms[bmn++], line);
 		
 	}
+
 	free(line);
 	line = (char *)NULL;
 	fclose(bm_fp);
 
 	if (dup) {
-		size_t i;
 		for (i = 0; i < bmn; i++)
 			free(bms[i]);
 		free(bms);
+		if (mod_file)
+			free(file);
 		return EXIT_FAILURE;
 	}
 	
@@ -13997,43 +14116,69 @@ add_bookmark(char *file)
 	 * NULL */
 	puts("Bookmark line example: [sc]name:path");
 	hk = rl_no_hist("Shortcut: ");
-
+	
 	/* Check if hotkey is available */
 	if (hk) {
 		char *tmp_line = (char *)NULL;
-		size_t i;
 		for (i = 0; i < bmn; i++) {
 			tmp_line = strbtw(bms[i], '[', ']');
 			if (tmp_line) {
 				if (strcmp(hk, tmp_line) == 0) {
 					fprintf(stderr, _("bookmarks: '%s': This shortcut is "
-								 	  "already assigned\n"), hk);					
+								 	  "already in use\n"), hk);					
 					dup = 1;
+					free(tmp_line);
+					break;
 				}
 				free(tmp_line);
 			}
 		}
 	}
+
 	if (dup) {
 		if (hk)
 			free(hk);
+		for (i = 0; i < bmn; i++)
+			free(bms[i]);
+		free(bms);
+		if (mod_file)
+			free(file);
 		return EXIT_FAILURE;
 	}
 	
-	size_t i;
-	for (i = 0; i < bmn; i++)
-		free(bms[i]);
-	free(bms);
-	bms = (char **)NULL;
-
-	/* Both path and hotkey are available */
-
-	/* There is no need to check names for duplicates. The bookmarks
-	 * function only uses ELN's and hotkeys to open bookmarked files */
 	name = rl_no_hist("Name: ");
 
-	/* Generate the bookmark line */
 	if (name) {
+		/* Check name is not duplicated */
+
+		char *tmp_line = (char *)NULL;
+		for (i = 0; i < bmn; i++) {
+			tmp_line = strbtw(bms[i], ']', ':');
+			if (tmp_line) {
+				if (strcmp(name, tmp_line) == 0) {
+					fprintf(stderr, _("bookmarks: '%s': This name is "
+								 	  "already in use\n"), name);					
+					dup = 1;
+					free(tmp_line);
+					break;
+				}
+				free(tmp_line);
+			}
+		}		
+
+		if (dup) {
+			free(name);
+			if (hk)
+				free(hk);
+			for (i = 0; i < bmn; i++)
+				free(bms[i]);
+			free(bms);
+			if (mod_file)
+				free(file);
+			return EXIT_FAILURE;
+		}
+		
+		/* Generate the bookmark line */
 		if (hk) { /* name AND hk */
 			tmp = (char *)xcalloc(strlen(hk) + strlen(name) + strlen(file) + 5, 
 								  sizeof(char));
@@ -14048,14 +14193,23 @@ add_bookmark(char *file)
 		free(name);
 		name = (char *)NULL;
 	}
+
 	else if (hk) { /* Only hk */
 		tmp = (char *)xcalloc(strlen(hk) + strlen(file) + 4, sizeof(char));
 		sprintf(tmp, "[%s]%s\n", hk, file);
 		free(hk);
 		hk = (char *)NULL;
 	}
-	else /* None */
-		tmp = file;
+
+	else { /* Neither shortcut nor name: only path */
+		tmp = (char *)xnmalloc(strlen(file) + 2, sizeof(char));
+		sprintf(tmp, "%s\n", file);
+	}
+
+	for (i = 0; i < bmn; i++)
+		free(bms[i]);
+	free(bms);
+	bms = (char **)NULL;
 	
 	if (!tmp) {
 		fprintf(stderr, "bookmarks: Error generating the bookmark line\n");
@@ -14089,6 +14243,7 @@ add_bookmark(char *file)
 
 	/* Update bookmark names for TAB completion */
 	get_bm_names();
+
 	return EXIT_SUCCESS;
 }
 
@@ -14469,14 +14624,14 @@ bookmarks_function(char **cmd)
 				return EXIT_FAILURE;
 			}
 
-			return add_bookmark(cmd[2]);
+			return bookmark_add(cmd[2]);
 		}
 		/* Delete bookmarks */
 		else if (strcmp(cmd[1], "d") == 0 || strcmp(cmd[1], "del") == 0) {
 			if (cmd[2])
-				return del_bookmark(cmd[2]);
+				return bookmark_del(cmd[2]);
 			else
-				return del_bookmark(NULL);
+				return bookmark_del(NULL);
 		}
 	}
 	
@@ -15712,6 +15867,13 @@ exists, the next matching line will be checked. If the MIME file is not found, \
 %s will try to import MIME definitions from the default locations for the \
 'mimeapps.list' file as specified by the Freedesktop specification.\n"), 
 		   white, NC, default_color, PROGRAM_NAME, PROGRAM_NAME, PROGRAM_NAME);
+
+	/* ### NEW INSTANCE ### */	
+	printf(_("\n%sx%s%s DIR: Open DIR in a new instance of %s using the value \
+of TerminalCmd (from the configuration file) as terminal emulator. If this \
+value is not set, 'xterm' will be used as fallback terminal emulator. This \
+function is only available for graphical environments.\n"), 
+		   white, NC, default_color, PROGRAM_NAME);
 
 	/* ### EXTERNAL COMMANDS ### */
 	printf(_("\n%s;%s%scmd, %s:%s%scmd: Skip all %s expansions and send the \

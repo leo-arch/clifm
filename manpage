@@ -161,6 +161,9 @@ print file properties for FILE. Use 'all' to list properties of all files in the
 .B mm, mime [info ELN/FILENAME] [edit]
 This is CliFM's resource opener. The 'info' option prints the MIME information about ELN/FILENAME: its MIME type, its file extension, if any, and the application associated to this MIME type or file extension. The 'edit' option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension, and then add a value for it to the MIME list file using the 'edit' option. Each value in the MIME list file has this format: 'mime_type=application args;application args; ... n' or '*.c=application args;application args; ... n'. Example: 'plain/text=nano' or '*.c=geany -p;leafpad;nano'. CliFM will check the first matching line, and if at least one of the specified applications exists, this one will be used to open the corresponding associated filed. Else, the next matching line will be checked. If the MIME file is not found, CliFM will try to import MIME definitions from the default locations for the 'mimeapps.list' file as specified by the Freedesktop specification.
 .TP
+.B x DIR                   
+open DIR in a new instance of CliFM using the value of TerminalCmd (from the configuration file) as terminal emulator. If this value is not set, 'xterm' will be used as fallback terminal emulator. This function is only available for graphical environments.
+.TP
 .B ;cmd, :cmd
 Skip all CLiFM expansions and send the input string (cmd) as it is to the system shell.
 .TP
