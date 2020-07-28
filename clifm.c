@@ -385,6 +385,10 @@ of course you can grep it to find, say, linux' macros, as here. */
     like in Bash. 
 
 ###################################
+ * (DONE) Write one function to create the config file and use it for both
+	init_config() and profile_add()
+ * (DONE) Comment the config file to explain the meaning of each option and 
+	value, something like the SSH and Samba config files.
  * (DONE) Add to "bm del" the possibility to specify the bookmark name to be
 	deleted directly from the command line ("bm del name").
  * (DONE) By default, the commands log function should be disabled. Add an 
@@ -1482,7 +1486,7 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.20.0"
+#define VERSION "0.20.1"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define DATE "July 27, 2020"
@@ -2502,6 +2506,8 @@ int new_instance(char *dir);
 
 int *get_hex_num(char *str);
 
+int create_config(char *file);
+
 /* Some notes on memory:
 * If a variable is declared OUTSIDE of a function, it is typically considered 
 * "GLOBAL," meaning that any function can access it. Global variables are 
@@ -3159,6 +3165,111 @@ main(int argc, char **argv)
 }
 
 /* ###FUNCTIONS DEFINITIONS### */
+
+int
+create_config(char *file)
+{
+	FILE *config_fp = fopen(file, "w");
+
+	if (!config_fp) {
+		fprintf(stderr, "%s: fopen: '%s': %s\n", PROGRAM_NAME, 
+				file, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	else {
+		/* Do not translate anything in the config file */
+		fprintf(config_fp,
+
+"\t\t###########################################\n\
+\t\t#                  CLIFM                  #\n\
+\t\t#  The anti-eye-candy, KISS file manager  #\n\
+\t\t###########################################\n\n"
+
+"# This is the configuration file for CLiFM\n\n"
+
+"# FiletypeColors define the color used for filetypes when listing files. It \n\
+# uses the same format used by the LS_COLORS environment variable. Thus, \n\
+# \"di=01;34\" means that directories will be listed in bold blue. Color \n\
+# codes are traditional ANSI escape sequences less the escape char and the \n\
+# final 'm'. 8 bit, 256 colors and RGB colors are supported.\n\n"
+
+"FiletypeColors=\"di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;39:\
+ef=00;33:nf=00;31:ln=01;36:or=00;36:pi=33;40:so=01;35:bd=01;33:\
+cd=01;37:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:\
+ex=01;32:ee=00;32:no=00;31;47\"\n\n"
+
+"# All the color lines below use the same color codes as FiletypeColors.\n"
+"# TextColor specifies the color of the text typed in the command line.\n\n"
+"TextColor=00;39;49\n\n"
+
+"ELNColor=01;33\n\n"
+
+"# DefaultColor is the color used when no color is specified, neither by the \n\
+# user nor by CliFM itself, for a given ouput.\n\n\
+DefaultColor=00;39;49\n\
+DirCounterColor=00;39;49\n\
+DividingLineColor=00;34\n\
+WelcomeMessageColor=01;36\n\n"
+
+"DividingLineChar='='\n\n"
+
+"# For a detailed explanation on how to build the prompt, including all the \n\
+# available escape sequences, consult the man page.\n\n\
+Prompt=\"%s\"\n\n"
+
+"# MaxPath is only used for the /p option of the prompt: the current working \n\
+# directory will be abbreviated to its basename (everything after last slash)\n\
+# whenever the current path is longer than MaxPath.\n\n\
+MaxPath=40\n\n"
+
+"WelcomeMessage=true\n\
+SplashScreen=false\n\
+ShowHiddenFiles=true\n\
+LongViewMode=false\n\
+ExternalCommands=false\n\
+LogCmds=false\n\n"
+
+"# Set the shell to be used when running external commands. Defaults to the \n\
+# user's shell as is specified in '/etc/passwd'.\n\n\
+SystemShell=\n\n"
+
+"# Only used when opening a directory via a new CliFM instance (with the 'x' \n\
+# command), this option specifies the command to be used to launch a \n\
+# terminal emulator to run CliFM on it.\n\n\
+TerminalCmd='%s'\n\n"
+
+"ListFoldersFirst=true\n\
+CdListsAutomatically=true\n\
+CaseSensitiveList=false\n\
+Unicode=false\n\
+Pager=false\n\
+MaxHistory=500\n\
+MaxLog=1000\n\
+ClearScreen=false\n\n"
+
+"# If not specified, StartingPath defaults to the current working directory\n\n\
+StartingPath=\n\n"
+"#END OF OPTIONS\n\n", 
+
+			DEFAULT_PROMPT, DEFAULT_TERM_CMD);
+
+		fputs(
+
+"#ALIASES\n\
+#alias ls='ls --color=auto -A'\n\n"
+
+"#PROMPT COMMANDS\n\n"
+"# Write below the commands you want to be executed before the prompt\n\
+# Ex:\n\
+#date | awk '{print $1\", \"$2,$3\", \"$4}'\n\n"
+"#END OF PROMPT COMMANDS\n\n", config_fp);
+
+		fclose(config_fp);
+	}
+	
+	return EXIT_SUCCESS;
+}
 
 int
 new_instance(char *dir)
@@ -4037,58 +4148,7 @@ profile_add(char *prof)
 	}
 		
 	/* #### CREATE THE CONFIG FILE #### */
-	FILE *config_fp = fopen(NCONFIG_FILE, "w");
-	if (!config_fp) {
-		fprintf(stderr, "%s: fopen: '%s': %s\n", PROGRAM_NAME, 
-				NCONFIG_FILE, strerror(errno));
-		error_code = 1;
-	}
-	else {
-		/* Do not translate anything in the config file */
-		fprintf(config_fp, "%s configuration file\n\
-########################\n\n", PROGRAM_NAME);
-		fprintf(config_fp, "\
-FiletypeColors=\"di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;39:\
-ef=00;33:nf=00;31:ln=01;36:or=00;36:pi=40;33:so=01;35:bd=01;33;01:\
-cd=01;37;01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:\
-ex=01;32:ee=00;32:no=00;47;31\"\n\
-PromptColor=00;36\n\
-TextColor=00;39;49\n\
-ELNColor=01;33\n\
-DefaultColor=00;39;49\n\
-DirCounterColor=00;39;49\n\
-DividingLineColor=00;34\n\
-DividingLineChar='='\n\
-Prompt=\"%s\"\n\
-MaxPath=40\n\
-WelcomeMessageColor=01;36\n\
-WelcomeMessage=true\n\
-SplashScreen=false\n\
-ShowHiddenFiles=true\n\
-LongViewMode=false\n\
-ExternalCommands=false\n\
-LogCmds=false\n\
-SystemShell=\n\
-TerminalCmd='%s'\n\
-ListFoldersFirst=true\n\
-CdListsAutomatically=true\n\
-CaseSensitiveList=false\n\
-Unicode=false\n\
-Pager=false\n\
-MaxHistory=500\n\
-MaxLog=1000\n\
-ClearScreen=false\n\
-StartingPath=\n", DEFAULT_PROMPT, DEFAULT_TERM_CMD);
-		fputs("#Default starting path is CWD\n", config_fp);
-		fputs("#END OF OPTIONS\n\
-\n###Aliases###\nalias ls='ls --color=auto -A'\n\
-\n#PROMPT\n", config_fp);
-		fputs("#Write below the commands you want to be \
-executed before the prompt\n#Ex:\n", config_fp);
-		fputs("#date | awk '{print $1\", \"$2,$3\", \"$4}'\n\n#END \
-OF PROMPT\n", config_fp); 
-		fclose(config_fp);
-	}
+		error_code = create_config(NCONFIG_FILE);
 	
 	/* Free stuff */
 	
@@ -9060,7 +9120,7 @@ init_config(void)
 		HIST_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
 		sprintf(HIST_FILE, "%s/history.cfm", CONFIG_DIR);
 		CONFIG_FILE = (char *)xcalloc(config_len + pnl_len + 4, sizeof(char));
-		sprintf(CONFIG_FILE, "%s/%src", CONFIG_DIR, PNL);	
+		sprintf(CONFIG_FILE, "%s/%src", CONFIG_DIR, PNL);
 		PROFILE_FILE = (char *)xcalloc(config_len + pnl_len + 10, 
 							   sizeof(char));
 		sprintf(PROFILE_FILE, "%s/%s_profile", CONFIG_DIR, PNL);
@@ -9177,70 +9237,24 @@ init_config(void)
 		
 		/* #### CHECK THE CONFIG FILE #### */
 		/* Open the config file or create it, if it doesn't exist */
-		FILE *config_fp;
 		if (config_ok && stat(CONFIG_FILE, &file_attrib) == -1) {
-			config_fp = fopen(CONFIG_FILE, "w");
-			if (!config_fp) {
-				_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n", PROGRAM_NAME, 
-					 CONFIG_FILE, strerror(errno));
+			int ret = create_config(CONFIG_FILE);
+			if (ret == EXIT_SUCCESS)
+				config_ok = 1;
+			else
 				config_ok = 0;
-			}
-			else {
-				/* Do not translate anything in the config file */
-				fprintf(config_fp, "%s configuration file\n\
-########################\n\n", PROGRAM_NAME);
-				fprintf(config_fp, "\
-FiletypeColors=\"di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;39:\
-ef=00;33:nf=00;31:ln=01;36:or=00;36:pi=40;33:so=01;35:bd=01;33;01:\
-cd=01;37;01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:\
-ex=01;32:ee=00;32:no=00;47;31\"\n\
-TextColor=00;39;49\n\
-ELNColor=01;33\n\
-DefaultColor=00;39;49\n\
-DirCounterColor=00;39;49\n\
-DividingLineColor=00;34\n\
-DividingLineChar='='\n\
-Prompt=\"%s\"\n\
-MaxPath=40\n\
-WelcomeMessageColor=01;36\n\
-WelcomeMessage=true\n\
-SplashScreen=false\n\
-ShowHiddenFiles=true\n\
-LongViewMode=false\n\
-ExternalCommands=false\n\
-LogCmds=false\n\
-SystemShell=\n\
-TerminalCmd='%s'\n\
-ListFoldersFirst=true\n\
-CdListsAutomatically=true\n\
-CaseSensitiveList=false\n\
-Unicode=false\n\
-Pager=false\n\
-MaxHistory=500\n\
-MaxLog=1000\n\
-ClearScreen=false\n\
-StartingPath=\n", DEFAULT_PROMPT, DEFAULT_TERM_CMD);
-			fputs("#Default starting path is CWD\n", config_fp);
-			fputs("#END OF OPTIONS\n\
-\n###Aliases###\nalias ls='ls --color=auto -A'\n\
-\n#PROMPT\n", config_fp);
-			fputs("#Write below the commands you want to be \
-executed before the prompt\n#Ex:\n", config_fp);
-			fputs("#date | awk '{print $1\", \"$2,$3\", \"$4}'\n\n#END \
-OF PROMPT\n", config_fp); 
-			fclose(config_fp);
-			}
 		}
 
 				/* #### READ THE CONFIG FILE ##### */
 		if (config_ok) {
-
+			
 			set_colors();
 
 			short text_color_set = -1, eln_color_set = -1, 
 				  default_color_set = -1, dir_count_color_set = -1, 
 				  div_line_color_set = -1, welcome_msg_color_set = -1;
 
+			FILE *config_fp;
 			config_fp = fopen(CONFIG_FILE, "r");
 			if (!config_fp) {
 				_err('e', PRINT_PROMPT, _("%s: fopen: '%s': %s. Using default "
@@ -15784,11 +15798,6 @@ edit_function (char **comm)
 		free(sel_file_user);
 		MIME_FILE = sel_file_user = (char *)NULL;
 
-		if (alt_profile) {
-			free(alt_profile);
-			alt_profile = (char *)NULL;
-		}
-
 		if (encoded_prompt) {
 			free(encoded_prompt);
 			encoded_prompt = (char *)NULL;
@@ -15808,6 +15817,7 @@ edit_function (char **comm)
 			external_arguments(argc_bk, argv_bk);
 
 		init_config();
+
 		/* Free the aliases and prompt_cmds arrays to be allocated again */
 		size_t i = 0;
 		for (i = 0; i < aliases_n; i++)
@@ -15817,6 +15827,7 @@ edit_function (char **comm)
 		aliases_n = prompt_cmds_n = 0; /* Reset counters */
 		get_aliases();
 		get_prompt_cmds();
+
 		if (cd_lists_on_the_fly) {
 			while (files--) free(dirlist[files]);
 			list_dir();
