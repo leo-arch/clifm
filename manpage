@@ -358,7 +358,12 @@ CLiFM's prompt is build from the "Prompt" line in the configuration file followi
 \\]: End a sequence of non-printing characters
 
 .TP
-By default, for example, CliFM's prompt line is this: "\\[\\e[0;36m\\][\\u@\\H] \\W \\$ \\[\\e[0m\\\]", which once decoded should be something like this: "[user@hostname] /my/path $ ", printed in cyan color.
+By default, for example, CliFM's prompt line is this: "\\[\\e[0m\\]\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\\z\\[\\e[0;34m\\] \\$ \\[\\e[0m\\]", which once decoded should be something like this: 
+
+ 13:45 user:hostname /my/path
+ :) $ 
+
+with the path printed in cyan and the dollar sign in blue.
 
 .TP
 A bold green asterisk at the left of the prompt indicates that there are elements in the Selection Box. In the same way, a yellow 'T' means that there are currently files in the trash can. Finally, CliFM makes use of three kind of messages: errors (a red 'E' at the left of the prompt), warnings (a yellow 'W'), and simple notices (a green 'N').

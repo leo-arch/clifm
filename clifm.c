@@ -890,6 +890,9 @@ of course you can grep it to find, say, linux' macros, as here. */
 	the color corresponding to the filetype of the file in the CWD.
 
 ###########################################
+ * (SOLVED) Some files are displaying the wrong birthtime. Whenever there is
+	no birthtime, statx returns 0, which strftime() translates to dec 31,
+	1969. SOLUTION: Check birthtime for zero.
  * (SOLVED) Filenames background color continues to the end of line in search 
 	and properties functions. The problem was that colors_list inserted the pad 
 	before the filename, when it should be inserted after it.
@@ -2474,7 +2477,7 @@ void set_default_options(void);
 void set_colors (void);
 int is_color_code(char *str);
 char **get_substr(char *str, const char ifs);
-int set_shell(const char *str);
+int set_shell(char *str);
 void exec_chained_cmds(char *cmd);
 int is_internal_c(const char *cmd);
 int open_bookmark(char **cmd);
@@ -2751,7 +2754,7 @@ char *user = (char *)NULL, *path = (char *)NULL, **old_pwd = (char **)NULL,
 		"profile", "shell", "mime", NULL };
 
 #define DEFAULT_PROMPT "\\[\\e[0m\\]\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\
-\\[\\e[0m\\]\\z\\[\\e[0;34m\\] \\$ \\[\\e[0m\\]"
+\\[\\e[0m\\]\\z\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
 
 #define DEFAULT_TERM_CMD "xterm -e"
 
@@ -3190,9 +3193,9 @@ create_config(char *file)
 
 "# FiletypeColors define the color used for filetypes when listing files. It \n\
 # uses the same format used by the LS_COLORS environment variable. Thus, \n\
-# \"di=01;34\" means that directories will be listed in bold blue. Color \n\
-# codes are traditional ANSI escape sequences less the escape char and the \n\
-# final 'm'. 8 bit, 256 colors and RGB colors are supported.\n\n"
+# \"di=01;34\" means that (non-empty) directories will be listed in bold blue.\n\
+# Color codes are traditional ANSI escape sequences less the escape char and \n\
+# the final 'm'. 8 bit, 256 colors, and RGB colors are supported.\n"
 
 "FiletypeColors=\"di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;39:\
 ef=00;33:nf=00;31:ln=01;36:or=00;36:pi=33;40:so=01;35:bd=01;33:\
@@ -3200,27 +3203,57 @@ cd=01;37:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:\
 ex=01;32:ee=00;32:no=00;31;47\"\n\n"
 
 "# All the color lines below use the same color codes as FiletypeColors.\n"
-"# TextColor specifies the color of the text typed in the command line.\n\n"
+"# TextColor specifies the color of the text typed in the command line.\n"
 "TextColor=00;39;49\n\n"
 
 "ELNColor=01;33\n\n"
 
 "# DefaultColor is the color used when no color is specified, neither by the \n\
-# user nor by CliFM itself, for a given ouput.\n\n\
+# user nor by CliFM itself, for a given ouput.\n\
 DefaultColor=00;39;49\n\
 DirCounterColor=00;39;49\n\
 DividingLineColor=00;34\n\
 WelcomeMessageColor=01;36\n\n"
 
-"DividingLineChar='='\n\n"
+"# DividingLineChar accepts both literal characters (in single quotes) and \n\
+# decimal numbers\n\
+DividingLineChar='='\n\n"
 
-"# For a detailed explanation on how to build the prompt, including all the \n\
-# available escape sequences, consult the man page.\n\n\
-Prompt=\"%s\"\n\n"
+"# The prompt line is build using string literals and/or the following escape\n\
+# sequences:\n"
+"# \\xnn: The character whose hexadecimal code is nn.\n\
+# \\e: Escape character\n\
+# \\h: The hostname, up to the first ‘.’\n\
+# \\u: The username\n\
+# \\H: The full hostname\n\
+# \\n: A newline character\n\
+# \\r: A carriage return\n\
+# \\a: A bell character\n\
+# \\d: The date, in abbrevieted form (ex: “Tue May 26”)\n\
+# \\s: The name of the shell (everything after the last slash) currently used\n\
+# by CliFM\n\
+# \\t: The time, in 24-hour HH:MM:SS format\n\
+# \\T: The time, in 12-hour HH:MM:SS format\n\
+# \\@: The time, in 12-hour am/pm format\n\
+# \\A: The time, in 24-hour HH:MM format\n\
+# \\w: The full current working directory, with $HOME abbreviated with a tilde\n\
+# \\W: The basename of $PWD, with $HOME abbreviated with a tilde\n\
+# \\p: A mix of the two above, it abbreviates the current working directory \n\
+# only if longer than PathMax (a value defined in the configuration file).\n\
+# \\z: Exit code of the last executed command. :) if success and :( in case of \n\
+# error\n\
+# \\$ '#', if the effective user ID is 0, and '$' otherwise\n\
+# \\nnn: The character whose ASCII code is the octal value nnn\n\
+# \\\\: A backslash\n\
+# \\[: Begin a sequence of non-printing characters. This is mostly used to \n\
+# add color to the prompt line\n\
+# \\]: End a sequence of non-printing characters\n\n"
+
+"Prompt=\"%s\"\n\n"
 
 "# MaxPath is only used for the /p option of the prompt: the current working \n\
 # directory will be abbreviated to its basename (everything after last slash)\n\
-# whenever the current path is longer than MaxPath.\n\n\
+# whenever the current path is longer than MaxPath.\n\
 MaxPath=40\n\n"
 
 "WelcomeMessage=true\n\
@@ -3231,12 +3264,12 @@ ExternalCommands=false\n\
 LogCmds=false\n\n"
 
 "# Set the shell to be used when running external commands. Defaults to the \n\
-# user's shell as is specified in '/etc/passwd'.\n\n\
+# user's shell as is specified in '/etc/passwd'.\n\
 SystemShell=\n\n"
 
 "# Only used when opening a directory via a new CliFM instance (with the 'x' \n\
 # command), this option specifies the command to be used to launch a \n\
-# terminal emulator to run CliFM on it.\n\n\
+# terminal emulator to run CliFM on it.\n\
 TerminalCmd='%s'\n\n"
 
 "ListFoldersFirst=true\n\
@@ -3248,7 +3281,7 @@ MaxHistory=500\n\
 MaxLog=1000\n\
 ClearScreen=false\n\n"
 
-"# If not specified, StartingPath defaults to the current working directory\n\n\
+"# If not specified, StartingPath defaults to the current working directory\n\
 StartingPath=\n\n"
 "#END OF OPTIONS\n\n", 
 
@@ -5087,23 +5120,39 @@ exec_chained_cmds(char *cmd)
 }
 
 int
-set_shell(const char *str)
+set_shell(char *str)
+/* Set STR as the program current shell */
 {
-	if (!*str)
+	if (!str || !*str)
 		return EXIT_FAILURE;
 	
-	if (access(str, X_OK) == -1) {
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, str, strerror(errno));
+	/* IF no slash in STR, check PATH env variable for a file named STR 
+	 * and get its full path*/
+	char *full_path = (char *)NULL;
+	if (strcntchr(str, '/') == -1)
+		full_path = get_cmd_path(str);
+
+	char *tmp = (char *)NULL;
+	if (full_path)
+		tmp = full_path;
+	else
+		tmp = str;
+	
+	if (access(tmp, X_OK) == -1) {
+		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, tmp, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	if (sys_shell)
 		free(sys_shell);
 
-	sys_shell = (char *)xcalloc(strlen(str) + 1, sizeof(char));
-	strcpy(sys_shell, str);
+	sys_shell = (char *)xnmalloc(strlen(tmp) + 1, sizeof(char));
+	strcpy(sys_shell, tmp);
 	printf(_("Successfully set '%s' as %s default shell\n"), sys_shell, 
 		   PROGRAM_NAME);
+	
+	if (full_path)
+		free(full_path);
 
 	return EXIT_SUCCESS;
 }
@@ -5112,7 +5161,7 @@ char **
 get_substr(char *str, const char ifs)
 /* Get all substrings from STR using IFS as substring separator, and, if there
  * is a range, expand it. Returns an array containing all substrings in STR 
- * plus expandes ranges or NULL if: STR is NULL or empty, STR contains only 
+ * plus expandes ranges, or NULL if: STR is NULL or empty, STR contains only 
  * IFS(s), or in case of memory allocation error */
 {
 	if (!str || *str == 0x00)
@@ -5278,7 +5327,7 @@ get_substr(char *str, const char ifs)
 	for (i = 0;i < substr_n; i++) {
 		short duplicate = 0;
 		
-		for (d = (i + 1);d < substr_n; d++) {
+		for (d = (i + 1); d < substr_n; d++) {
 			if (strcmp(substr[i], substr[d]) == 0) {
 				duplicate = 1;
 				break;
@@ -5311,7 +5360,7 @@ is_color_code(char *str)
  * will reject this: 34, which is valid */
 {
 	while (*str) {
-		if ((*str < 48 || *str > 57) && *str != ';' && *str != '\n')
+		if ((*str < 0x30 || *str > 0x39) && *str != ';' && *str != '\n')
 			return 0;
 		str++;
 	}
@@ -9653,10 +9702,17 @@ init_config(void)
 						free(opt_str);
 					}
 					else if (strncmp(line, "DividingLineChar=", 17) == 0) {
+						/* Accepts both chars and decimal integers */
 						char opt_c = -1;
 						sscanf(line, "DividingLineChar='%c'", &opt_c);
-						if (opt_c == -1)
-							div_line_char = '=';
+						if (opt_c == -1) {
+							int num = -1;
+							sscanf(line, "DividingLineChar=%d", &num);
+							if (num == -1)
+								div_line_char = '=';
+							else
+								div_line_char = num;
+						}
 						else
 							div_line_char = opt_c;
 					}
@@ -12800,20 +12856,13 @@ launch_execle(const char *cmd)
 		signal (SIGINT, SIG_DFL);
 		signal (SIGQUIT, SIG_DFL);
 		signal (SIGTERM, SIG_DFL);
-		/* This is basically what the system() function does: */
-		int i = 0, index = 0;
-		/* Get shell filename */
-		size_t shell_len = strlen(sys_shell);
-		for (i = shell_len - 1; i >= 0; i--) {
-			if (sys_shell[i] == '/') {
-				index = i;
-				break;
-			}
-		}
-		if (!index)
-			execl(sys_shell, sys_shell, "-c", cmd, NULL);
-		else
-			execl(sys_shell, sys_shell + index, "-c", cmd, NULL);
+
+		/* Get shell base name */
+		char *name = strrchr(sys_shell, '/');
+
+		/* This is basically what the system() function does: running a command
+		 * via the system shell */
+		execl(sys_shell, name ? name + 1 : sys_shell, "-c", cmd, NULL);
 		fprintf(stderr, "%s: '%s': execle: %s\n", PROGRAM_NAME, sys_shell, 
 				strerror(errno));
 		exit(errno);
@@ -12897,7 +12946,7 @@ launch_execve(char **cmd, int bg)
 		signal(SIGQUIT, SIG_DFL);
 		signal(SIGTERM, SIG_DFL);
 		execvp(cmd[0], cmd);
-		/* This will only be reached is execvp() fails, because the exec
+		/* This will only be reached if execvp() fails, because the exec
 		 * family of functions returns only on error */
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, cmd[0], 
 				strerror(errno));
@@ -15060,8 +15109,11 @@ get_properties (char *filename, int _long, int max)
 	time_t time = file_attrib.st_mtim.tv_sec;
 	struct tm *tm = localtime(&time);
 	char mod_time[128] = "";
-	/* Store formatted (and localized) date-time string into mod_time */
-	strftime(mod_time, sizeof(mod_time), "%b %d %H:%M:%S %Y", tm);
+	if (time)
+		/* Store formatted (and localized) date-time string into mod_time */
+		strftime(mod_time, sizeof(mod_time), "%b %d %H:%M:%S %Y", tm);
+	else
+		mod_time[0] = '-';
 
 	/* Get owner and group names */
 	uid_t owner_id = file_attrib.st_uid; /* owner ID */
@@ -15142,22 +15194,31 @@ get_properties (char *filename, int _long, int max)
 	time = file_attrib.st_atim.tv_sec;
 	tm = localtime(&time);
 	char access_time[128] = "";
-	/* Store formatted (and localized) date-time string into access_time */
-	strftime(access_time, sizeof(access_time), "%b %d %H:%M:%S %Y", tm);
+	if (time)
+		/* Store formatted (and localized) date-time string into access_time */
+		strftime(access_time, sizeof(access_time), "%b %d %H:%M:%S %Y", tm);
+	else
+		access_time[0] = '-';
 
 	/* Last properties change time */
 	time = file_attrib.st_ctim.tv_sec;
 	tm = localtime(&time);
 	char change_time[128] = "";
-	strftime(change_time, sizeof(change_time), "%b %d %H:%M:%S %Y", tm);
+	if (time)
+		strftime(change_time, sizeof(change_time), "%b %d %H:%M:%S %Y", tm);
+	else
+		change_time[0] = '-';
 
 	/* Get creation (birth) time */
 	#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
 		time = file_attrib.st_birthtime;
 		tm = localtime(&time);
 		char creation_time[128] = "";
-		strftime(creation_time, sizeof(creation_time), "%b %d %H:%M:%S %Y", 
-				 tm);
+		if (!time)
+			creation_time[0] = '-';
+		else
+			strftime(creation_time, sizeof(creation_time), "%b %d %H:%M:%S %Y", 
+					 tm);
 	#elif defined(_STATX)
 		struct statx xfile_attrib;
 		statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, 
@@ -15165,8 +15226,11 @@ get_properties (char *filename, int _long, int max)
 		time = xfile_attrib.stx_btime.tv_sec;
 		tm = localtime(&time);
 		char creation_time[128] = "";
-		strftime(creation_time, sizeof(creation_time), "%b %d %H:%M:%S %Y", 
-				 tm);
+		if (!time)
+			creation_time[0] = '-';
+		else
+			strftime(creation_time, sizeof(creation_time), "%b %d %H:%M:%S %Y", 
+					 tm);
 	#endif
 
 	switch (file_type) {
@@ -15684,7 +15748,7 @@ edit_function (char **comm)
  * argument (Ex: 'edit nano') */
 {
 	if (!config_ok) {
-		fprintf(stderr, _("%s: Cannot access configuration file\n"), 
+		fprintf(stderr, _("%s: Cannot access the configuration file\n"), 
 				PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
@@ -15718,11 +15782,6 @@ edit_function (char **comm)
 		free(MIME_FILE);
 		MIME_FILE = (char *)NULL;
 
-		if (alt_profile) {
-			free(alt_profile);
-			alt_profile = (char *)NULL;
-		}
-		
 		if (encoded_prompt) {
 			free(encoded_prompt);
 			encoded_prompt = (char *)NULL;
@@ -15745,8 +15804,8 @@ edit_function (char **comm)
 		init_config();
 		stat(CONFIG_FILE, &file_attrib);
 	}
+	
 	time_t mtime_bfr = file_attrib.st_mtime;
-
 
 	if (comm[1]) { /* If there is an argument... */
 		char *cmd[] = { comm[1], CONFIG_FILE, NULL };
@@ -15888,9 +15947,8 @@ color_codes (void)
 indicates the amount of files contained by the corresponding directory.\n"));
 	printf(_("\nThe value in parentheses is the code to use to modify \
 the color of the corresponding filetype in the configuration file \
-(in the \"Filetypes colors\" line), using the same ANSI style color format \
-used by dircolors. The same color code format is used for prompt, ELN, and \
-command line text colors. By default, %s uses only 8 colors, but you can \
+(in the \"FiletypeColors\" line), using the same ANSI style color format \
+used by dircolors. By default, %s uses only 8 colors, but you can \
 use 256 and RGB colors as well.\n\n"), PROGRAM_NAME);
 }
 
