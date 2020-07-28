@@ -1519,6 +1519,8 @@ static int flags;
 #define EXNULLERR 79
 #define EXFORKERR 81
 #define EXCRASHERR 82
+#define BACKGROUND 1
+#define FOREGROUND 0
 
 /* ###COLORS### */
 /* These are just a fixed color stuff in the interface. Remaining colors 
@@ -2319,6 +2321,49 @@ hex2int(char *str)
 	return ((n[0] * 16) + n[1]);
 }
 
+char *
+remove_quotes(char *str)
+/* Removes end of line char and quotes (single and double) from STR. Returns a
+ * pointer to the modified STR if the result is non-blank or NULL */
+{
+	if (!str || !*str)
+		return (char *)NULL;
+	
+	char *p = str;
+	size_t len = strlen(p);
+	
+	if (len > 0 && p[len - 1] == '\n') {
+		p[len - 1] = 0x00;
+		len--;
+	}
+	
+	if (len > 0 && (p[len - 1] == '\'' || p[len - 1] == '"'))
+		p[len - 1] = 0x00;
+
+	if (*p == '\'' || *p == '"')
+		p++;
+	
+	if (!*p)
+		return (char *)NULL;
+	
+	char *q = p;
+	int blank = 1;
+
+	while(*q) {
+		if (*q != 0x20 && *q != '\n' && *q != '\t') {
+			blank = 0;
+			break;
+		}
+		q++;
+	}
+	
+	if (!blank)
+		return p;
+	
+	return (char *)NULL;
+}
+
+
 
 				/* ##########################
 				 * #  FUNCTIONS PROTOTYPES  # 
@@ -2358,7 +2403,7 @@ char **parse_input_str(char *str);
 int list_dir(void);
 char *prompt(void);
 int exec_cmd(char **comm);
-int launch_execve(char **cmd);
+int launch_execve(char **cmd, int bg);
 int launch_execle(const char *cmd);
 char *get_cmd_path(const char *cmd);
 int brace_expansion(const char *str);
@@ -3126,6 +3171,17 @@ new_instance(char *dir)
 		return EXIT_FAILURE;
 	}
 
+	/* When the term line in the config file is quoted, the first quote is
+	 * replaced by a space. So, if that space is there, remove it */
+	char *t_term = (char *)NULL;
+	if (*term == 0x20) {
+		t_term = term + 1;
+		if (!*t_term)
+			return EXIT_FAILURE;
+	}
+	else
+		t_term = term;
+
 	if (!(flags & GRAPHICAL)) {
 		fprintf(stderr, _("%s: Function only available for graphical "
 				"environments\n"), PROGRAM_NAME);
@@ -3157,6 +3213,7 @@ new_instance(char *dir)
 		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, deq_dir, 
 				strerror(errno));
 		free(self);
+		free(deq_dir);
 		return EXIT_FAILURE;
 	}
 	
@@ -3164,11 +3221,12 @@ new_instance(char *dir)
 		fprintf(stderr, _("%s: '%s': Not a directory\n"), PROGRAM_NAME, 
 				deq_dir);
 		free(self);
+		free(deq_dir);
 		return EXIT_FAILURE;
 	}
 
 	char *path_dir = (char *)NULL;
-	
+
 	if (*deq_dir != '/') {
 		path_dir = (char *)xnmalloc(strlen(path) + strlen(deq_dir) + 2, 
 									sizeof(char));
@@ -3177,21 +3235,62 @@ new_instance(char *dir)
 	else
 		path_dir = deq_dir;
 
-	char *cmd = (char *)xnmalloc(strlen(term) + strlen(self) 
+/*	char *cmd = (char *)xnmalloc(strlen(term) + strlen(self) 
 								 + strlen(path_dir) + 13, sizeof(char));
-	sprintf(cmd, "%s %s -p \"%s\" &", term, self, path_dir);
-	
-/*	char *cmd[] = { term, "-e", self, "-p", path_dir, "&", NULL }; */
+	sprintf(cmd, "%s %s -p \"%s\" &", term, self, path_dir); 
 
 	int ret = launch_execle(cmd);
+	free(cmd); */
+
+	char **tmp_term = (char **)NULL, **tmp_cmd = (char **)NULL;
+	if (strcntchr(t_term, 0x20) != -1) {
+		tmp_term = get_substr(t_term, 0x20);
+		if (tmp_term) {
+			size_t i;
+
+			for (i = 0; tmp_term[i]; i++); 
+
+			int num = i;
+			tmp_cmd = (char **)xrealloc(tmp_cmd, (i + 4) * sizeof(char *));
+			for (i = 0; tmp_term[i]; i++) {
+				tmp_cmd[i] = (char *)xnmalloc(strlen(tmp_term[i]) + 1, 
+											  sizeof(char));
+				strcpy(tmp_cmd[i], tmp_term[i]);
+				free(tmp_term[i]);
+			}
+			free(tmp_term);
+
+			i = num - 1;
+			tmp_cmd[i + 1] = (char *)xnmalloc(strlen(self) + 1, sizeof(char));
+			strcpy(tmp_cmd[i + 1], self);
+			tmp_cmd[i + 2] = (char *)xnmalloc(3, sizeof(char));
+			strcpy(tmp_cmd[i + 2], "-p\0");
+			tmp_cmd[i + 3] = (char *)xnmalloc(strlen(path_dir) + 1, 
+											  sizeof(char));
+			strcpy(tmp_cmd[i + 3], path_dir);
+			tmp_cmd[i + 4] = (char *)NULL;
+		}
+	}
+
+	int ret = -1;
+
+	if (tmp_cmd) {
+		ret = launch_execve(tmp_cmd, BACKGROUND);
+		for (size_t i = 0; tmp_cmd[i]; i++)
+			free(tmp_cmd[i]);
+		free(tmp_cmd);
+	}
+
+	else {
+		char *cmd[] = { t_term, "-e", self, "-p", path_dir, NULL };
+		ret = launch_execve(cmd, BACKGROUND);
+	}
 
 	if (*deq_dir != '/')
 		free(path_dir);
 	free(deq_dir);
 	free(self);
 
-	free(cmd);
-	
 	if (ret != 0)
 		fprintf(stderr, _("%s: Undefined error lauching new instance\n"), 
 				PROGRAM_NAME);
@@ -3849,7 +3948,7 @@ profile_add(char *prof)
 
 	/* #### CREATE THE CONFIG DIR #### */
 	char *tmp_cmd[] = { "mkdir", "-p", NCONFIG_DIR, NULL }; 
-	int ret = launch_execve(tmp_cmd);
+	int ret = launch_execve(tmp_cmd, FOREGROUND);
 	if (ret != 0) {
 		fprintf(stderr, _("%s: mkdir: '%s': Error creating configuration "
 				"directory\n"), PROGRAM_NAME, NCONFIG_DIR);
@@ -4043,7 +4142,7 @@ profile_del(char *prof)
 	sprintf(tmp, "%s/.config/%s/%s", user_home, PNL, prof);
 	
 	char *cmd[] = { "rm", "-r", tmp, NULL };
-	int ret = launch_execve(cmd);
+	int ret = launch_execve(cmd, FOREGROUND);
 	free(tmp);
 
 	if (ret == 0) {
@@ -4385,16 +4484,11 @@ int mime_open(char **args)
 	int args_num = 0;
 	for (args_num = 0; args[args_num]; args_num++);
 	
-	/* Construct the command */
-	char *cmd = (char *)xcalloc((strlen(app) + strlen(file_path) + 6), 
-								sizeof(char));
-	sprintf(cmd, "%s '%s' %s", app, file_path, 
-			strcmp(args[args_num - 1], "&") == 0 ? "&" : "");
+	/* Construct the command and run it */
+	char *cmd[] = { app, file_path, NULL };
+	int ret = launch_execve(cmd, strcmp(args[args_num - 1], "&") == 0 
+							? BACKGROUND : FOREGROUND);
 	
-	/* Run the command */
-	int ret = launch_execle(cmd);
-
-	free(cmd);
 	free(file_path);
 	free(app);
 
@@ -4514,7 +4608,7 @@ mime_edit(char **args)
 
 	else {
 		char *cmd[] = { args[2], MIME_FILE, NULL };
-		return launch_execve(cmd);
+		return launch_execve(cmd, FOREGROUND);
 	}
 }
 
@@ -4663,7 +4757,7 @@ get_mime(char *file)
 	fclose(file_fp_err);
 
 	char *cmd[] = { "file", "--mime-type", file, NULL };
-	int ret = launch_execve(cmd);
+	int ret = launch_execve(cmd, FOREGROUND);
 	
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
 	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
@@ -5929,15 +6023,13 @@ open_function(char **cmd)
 	/* At this point we know the file to be openend is either a regular file 
 	 * or a symlink to a regular file. So, just open the file */
 
-	char *tmp_cmd = (char *)NULL;
-
 	if (!cmd[2] || strcmp(cmd[2], "&") == 0) {
+		free(deq_path);
 		if (!(flags & FILE_CMD_OK)) {
 			fprintf(stderr, _("%s: 'file' command not found. Specify an "
 							  "application to open the file\nUsage: "
 							  "open ELN/FILENAME [APPLICATION]\n"), 
 							  PROGRAM_NAME);
-			free(deq_path);
 			return EXIT_FAILURE;
 		}
 		else {
@@ -5947,22 +6039,22 @@ open_function(char **cmd)
 			 * error message should be printed), and -1 if no access permission, 
 			 * in which case no error message should be printed, since 
 			 * the corresponding message is printed by mime_open itself */
-			if (ret == EXIT_FAILURE)
+			if (ret == EXIT_FAILURE) {
 				fputs("Try 'open FILE APPLICATION'\n", stderr);
+				return EXIT_FAILURE;
+			}
+			return EXIT_SUCCESS;
 		}
 	}
+
 	/* If some application was specified to open the file */
-	else {
-		tmp_cmd = (char *)xcalloc(strlen(cmd[2]) + ((is_link) ? strlen(file_tmp) 
-								  : strlen(deq_path)) + 6, sizeof(char));
-		sprintf(tmp_cmd, "%s '%s' %s", cmd[2], (is_link) ? file_tmp 
-				: deq_path,(cmd[args_n] && strcmp(cmd[args_n], "&") == 0) 
-				? "&" : "");
-	}
+	char *tmp_cmd[] = { cmd[2], (is_link) ? file_tmp : deq_path, NULL };
+
+	int ret = launch_execve(tmp_cmd, (cmd[args_n] 
+							&& strcmp(cmd[args_n], "&") == 0) ? BACKGROUND 
+							: FOREGROUND);
 
 	free(deq_path);
-	int ret = launch_execle(tmp_cmd);
-	free(tmp_cmd);
 
 	if (ret != 0)
 		return EXIT_FAILURE;
@@ -6017,7 +6109,7 @@ cd_function(char *new_path)
 	 * resolved path, and set the path variable to this latter */
 	else {
 		
-		char *real_path = realpath(deq_path, (char *)NULL);
+		char *real_path = realpath(deq_path, NULL);
 		
 		if (!real_path) {
 			fprintf(stderr, "%s: cd: '%s': %s\n", PROGRAM_NAME, deq_path,
@@ -6656,7 +6748,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 	char *tmp_cmd[] = { "cp", "-ra", file, dest, NULL };
 	free(filename);
 
-	ret = launch_execve(tmp_cmd);
+	ret = launch_execve(tmp_cmd, FOREGROUND);
 	free(dest);
 	dest = (char *)NULL;
 
@@ -6682,7 +6774,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 									  + strlen(file_suffix) + 2, sizeof(char));
 		sprintf(trash_file, "%s/%s", TRASH_FILES_DIR, file_suffix);
 		char *tmp_cmd2[] = { "rm", "-r", trash_file, NULL };
-		ret = launch_execve (tmp_cmd2);
+		ret = launch_execve (tmp_cmd2, FOREGROUND);
 		free(trash_file);
 		if (ret != 0)
 			fprintf(stderr, _("%s: trash: '%s/%s': Failed removing trash "
@@ -6719,7 +6811,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 
 	/* Remove the file to be trashed */
 	char *tmp_cmd3[] = { "rm", "-r", file, NULL };
-	ret = launch_execve(tmp_cmd3);
+	ret = launch_execve(tmp_cmd3, FOREGROUND);
 	/* If remove fails, remove trash and info files */
 	if (ret != 0) {
 		fprintf(stderr, _("%s: trash: '%s': Failed removing file\n"), 
@@ -6730,7 +6822,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 		sprintf(trash_file, "%s/%s", TRASH_FILES_DIR, file_suffix);
 
 		char *tmp_cmd4[] = { "rm", "-r", trash_file, info_file, NULL };
-		ret = launch_execve(tmp_cmd4);
+		ret = launch_execve(tmp_cmd4, FOREGROUND);
 		free(trash_file);
 
 		if (ret != 0) {
@@ -6826,7 +6918,7 @@ remove_from_trash(void)
 				snprintf(rm_info, PATH_MAX, "%s/%s.trashinfo", TRASH_INFO_DIR, 
 						 trash_files[j]->d_name);
 				char *tmp_cmd[] = { "rm", "-r", rm_file, rm_info, NULL };
-				ret = launch_execve(tmp_cmd);
+				ret = launch_execve(tmp_cmd, FOREGROUND);
 				
 				if (ret != 0) {
 					fprintf(stderr, _("%s: trash: Error trashing %s\n"), 
@@ -6884,7 +6976,7 @@ remove_from_trash(void)
 		snprintf(rm_info, PATH_MAX, "%s/%s.trashinfo", TRASH_INFO_DIR, 
 				 trash_files[rm_num - 1]->d_name);
 		char *tmp_cmd2[] = { "rm", "-r", rm_file, rm_info, NULL };
-		ret = launch_execve(tmp_cmd2);
+		ret = launch_execve(tmp_cmd2, FOREGROUND);
 		
 		if (ret != 0) {
 			fprintf(stderr, _("%s: trash: Error trashing %s\n"), PROGRAM_NAME, 
@@ -6913,6 +7005,7 @@ untrash_element(char *file)
 	char undel_file[PATH_MAX] = "", undel_info[PATH_MAX] = "";
 	snprintf(undel_file, PATH_MAX, "%s/%s", TRASH_FILES_DIR, file);
 	snprintf(undel_info, PATH_MAX, "%s/%s.trashinfo", TRASH_INFO_DIR, file);
+
 	FILE *info_fp;
 	info_fp = fopen(undel_info, "r");
 	if (info_fp) {
@@ -6990,12 +7083,12 @@ untrash_element(char *file)
 		free(parent);
 		char *tmp_cmd[] = { "cp", "-ra", undel_file, url_decoded, NULL };
 		int ret = -1;
-		ret = launch_execve(tmp_cmd);
+		ret = launch_execve(tmp_cmd, FOREGROUND);
 		free(url_decoded);
 
 		if (ret == 0) {
 			char *tmp_cmd2[] = { "rm", "-r", undel_file, undel_info, NULL };
-			ret = launch_execve(tmp_cmd2);
+			ret = launch_execve(tmp_cmd2, FOREGROUND);
 			if (ret != 0) {
 				fprintf(stderr, _("%s: undel: '%s': Failed removing info "
 								  "file\n"), PROGRAM_NAME, undel_info);
@@ -7205,7 +7298,7 @@ trash_clear(void)
 		sprintf(file2, "%s/%s", TRASH_INFO_DIR, info_file);
 
 		char *tmp_cmd[] = { "rm", "-r", file1, file2, NULL };
-		int ret = launch_execve(tmp_cmd);
+		int ret = launch_execve(tmp_cmd, FOREGROUND);
 		free(file1);
 		free(file2);
 
@@ -7241,7 +7334,7 @@ trash_function (char **comm)
 		trash_info = xcalloc(strlen(TRASH_DIR) + 6, sizeof(char));
 		sprintf(trash_info, "%s/info", TRASH_DIR);		
 		char *cmd[] = { "mkdir", "-p", trash_files, trash_info, NULL };
-		int ret = launch_execve (cmd);
+		int ret = launch_execve (cmd, FOREGROUND);
 		free(trash_files);
 		free(trash_info);
 		if (ret != 0) {
@@ -8988,7 +9081,7 @@ init_config(void)
 			trash_info = (char *)xcalloc(strlen(TRASH_DIR) + 6, sizeof(char));
 			sprintf(trash_info, "%s/info", TRASH_DIR);		
 			char *cmd[] = { "mkdir", "-p", trash_files, trash_info, NULL };
-			ret = launch_execve(cmd);
+			ret = launch_execve(cmd, FOREGROUND);
 			free(trash_files);
 			free(trash_info);
 			if (ret != 0) {
@@ -9011,7 +9104,7 @@ init_config(void)
 		/* Use the GNU mkdir to let it handle parent directories */
 		if (stat(CONFIG_DIR, &file_attrib) == -1) {
 			char *tmp_cmd[] = { "mkdir", "-p", CONFIG_DIR, NULL }; 
-			ret = launch_execve(tmp_cmd);
+			ret = launch_execve(tmp_cmd, FOREGROUND);
 			if (ret != 0) {
 				config_ok = 0;
 				_err('e', PRINT_PROMPT, _("%s: mkdir: '%s': Error creating "
@@ -9148,21 +9241,6 @@ OF PROMPT\n", config_fp);
 				  default_color_set = -1, dir_count_color_set = -1, 
 				  div_line_color_set = -1, welcome_msg_color_set = -1;
 
-			if (encoded_prompt) {
-				free(encoded_prompt);
-				encoded_prompt = (char *)NULL;
-			}
-
-			if (sys_shell) {
-				free(sys_shell);
-				sys_shell = (char *)NULL;
-			}
-			
-			if (term) {
-				free(term);
-				term = (char *)NULL;
-			}
-
 			config_fp = fopen(CONFIG_FILE, "r");
 			if (!config_fp) {
 				_err('e', PRINT_PROMPT, _("%s: fopen: '%s': %s. Using default "
@@ -9176,6 +9254,7 @@ OF PROMPT\n", config_fp);
 				while (fgets(line, sizeof(line), config_fp)) {
 					if (strncmp(line, "#END OF OPTIONS", 15) == 0)
 						break;
+
 					/* Check for the splas_screen flag. If -1, it was not
 					 * set via command line, so that it must be set here */
 					else if (splash_screen == -1 
@@ -9196,6 +9275,7 @@ OF PROMPT\n", config_fp);
 						else
 							splash_screen = 0;
 					}
+
 					else if (strncmp(line, "WelcomeMessage=", 15) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "WelcomeMessage=%5s\n", opt_str);
@@ -9208,6 +9288,7 @@ OF PROMPT\n", config_fp);
 						else /* default */
 							welcome_message = 1;
 					}
+
 					else if (strncmp(line, "ClearScreen=", 12) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "ClearScreen=%5s\n", opt_str);
@@ -9220,6 +9301,7 @@ OF PROMPT\n", config_fp);
 						else /* default */
 							clear_screen = 0;
 					}
+
 					else if (show_hidden == -1 
 					&& strncmp(line, "ShowHiddenFiles=", 16) == 0) {
 						char opt_str[MAX_BOOL] = "";
@@ -9233,6 +9315,7 @@ OF PROMPT\n", config_fp);
 						else /* default */
 							show_hidden = 1;
 					}
+
 					else if (long_view == -1 
 					&& strncmp(line, "LongViewMode=", 13) == 0) {
 						char opt_str[MAX_BOOL] = "";
@@ -9246,6 +9329,7 @@ OF PROMPT\n", config_fp);
 						else /* default */
 							long_view = 0;
 					}
+
 					else if (ext_cmd_ok == -1 
 					&& strncmp(line, "ExternalCommands=", 17) == 0) {
 						char opt_str[MAX_BOOL] = "";
@@ -9259,6 +9343,7 @@ OF PROMPT\n", config_fp);
 						else /* default */
 							ext_cmd_ok = 0;
 					}
+
 					else if (strncmp(line, "LogCmds=", 8) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "LogCmds=%5s\n", opt_str);
@@ -9271,19 +9356,47 @@ OF PROMPT\n", config_fp);
 						else /* default */
 							logs_enabled = 0;
 					}
+
 					else if (strncmp (line, "SystemShell=", 12) == 0) {
 						if (sys_shell) {
 							free(sys_shell);
 							sys_shell = (char *)NULL;
 						}
-						char opt_str[PATH_MAX] = "";
-						ret = sscanf(line, "SystemShell=%4095s\n", opt_str);
-						if (ret == -1)
+						char *opt_str = straft(line, '=');
+						if (!opt_str)
 							continue;
-						sys_shell = (char *)xcalloc(strlen(opt_str) + 1, 
-													sizeof(char));
-						strcpy(sys_shell, opt_str);
+						
+						char *tmp = remove_quotes(opt_str);
+						if (!tmp) {
+							free(opt_str);
+							continue;
+						}
+						
+						if (*tmp == '/') {
+							if (access(tmp, F_OK|X_OK) != 0) {
+								free(opt_str);
+								continue;
+							}
+							sys_shell = (char *)xnmalloc(strlen(tmp) + 1, 
+														 sizeof(char));
+							strcpy(sys_shell, tmp);
+						}
+						
+						else {
+							char *shell_path = get_cmd_path(tmp);
+							if (!shell_path) {
+								free(opt_str);
+								continue;
+							}
+							sys_shell = (char *)xnmalloc(strlen(shell_path) + 1, 
+														 sizeof(char));
+							strcpy(sys_shell, shell_path);
+							free(shell_path);
+						}
+						
+						free(opt_str);
 					}
+
 					else if (strncmp (line, "TerminalCmd=", 12) == 0) {
 
 						if (term) {
@@ -9294,24 +9407,18 @@ OF PROMPT\n", config_fp);
 						char *opt_str = straft(line, '=');
 						if (!opt_str)
 							continue;
-	
-						/* Remove new line char */
-						size_t len = strlen(opt_str);
-						if (opt_str[len - 1] == '\n')
-							opt_str[len - 1] = 0x00;
-	
-						/* Unquote */
-						len = strlen(opt_str);
-						if (opt_str[0] == '\'' || opt_str[0] == '"')
-							opt_str[0] = 0x20;
-						if (opt_str[len - 1] == '\'' || opt_str[len - 1] == '"')
-							opt_str[len - 1] = 0x00;
-	
-						term = (char *)xcalloc(strlen(opt_str) + 1, 
-											   sizeof(char));
-						strcpy(term, opt_str);
+
+						char *tmp = remove_quotes(opt_str);
+						if (!tmp) {
+							free(opt_str);
+							continue;
+						}
+
+						term = (char *)xnmalloc(strlen(tmp) + 1, sizeof(char));
+						strcpy(term, tmp);
 						free(opt_str);
 					}
+
 					else if (list_folders_first == -1 
 					&& strncmp(line, "ListFoldersFirst=", 17) == 0) {
 						char opt_str[MAX_BOOL] = "";
@@ -9325,6 +9432,7 @@ OF PROMPT\n", config_fp);
 						else /* default */
 							list_folders_first = 1;
 					}
+
 					else if (cd_lists_on_the_fly == -1 
 					&& strncmp(line, "CdListsAutomatically=", 21) == 0) {
 						char opt_str[MAX_BOOL] = "";
@@ -9339,6 +9447,7 @@ OF PROMPT\n", config_fp);
 						else /* default */
 							cd_lists_on_the_fly = 1;
 					}
+
 					else if (case_sensitive == -1 
 					&& strncmp(line, "CaseSensitiveList=", 18) == 0) {
 						char opt_str[MAX_BOOL] = "";
@@ -9353,10 +9462,11 @@ OF PROMPT\n", config_fp);
 						else /* default */
 							case_sensitive = 0;
 					}
+
 					else if (unicode == -1 
 					&& strncmp(line, "Unicode=", 8) == 0) {
 						char opt_str[MAX_BOOL] = "";
-						ret=sscanf(line, "Unicode=%5s\n", opt_str);
+						ret = sscanf(line, "Unicode=%5s\n", opt_str);
 						if (ret == -1)
 							continue;
 						if (strncmp(opt_str, "true", 4) == 0)
@@ -9366,6 +9476,7 @@ OF PROMPT\n", config_fp);
 						else /* default */
 							unicode = 0;
 					}
+
 					else if (pager == -1 
 					&& strncmp(line, "Pager=", 6) == 0) {
 						char opt_str[MAX_BOOL] = "";
@@ -9379,11 +9490,13 @@ OF PROMPT\n", config_fp);
 						else /* Default */
 							pager = 0;
 					}
-					else if (strncmp (line, "Prompt=", 7) == 0) {
+
+					else if (strncmp(line, "Prompt=", 7) == 0) {
 						if (encoded_prompt)
 							free(encoded_prompt);
 						encoded_prompt = straft(line, '=');
 					}
+
 					else if (strncmp(line, "MaxPath=", 8) == 0) {
 						int opt_num = 0;
 						sscanf(line, "MaxPath=%d\n", &opt_num);
@@ -9391,21 +9504,27 @@ OF PROMPT\n", config_fp);
 							continue;
 						max_path = opt_num;
 					}
-					else if (strncmp (line, "TextColor=", 10) == 0) {
+
+					else if (strncmp(line, "TextColor=", 10) == 0) {
 						char *opt_str = (char *)NULL;
 						opt_str = straft(line, '=');
 						if (!opt_str)
 							continue;
-						if (!is_color_code(opt_str)) {
+
+						char *tmp = remove_quotes(opt_str);
+						if (!tmp) {
 							free(opt_str);
 							continue;
 						}
-						size_t opt_len = strlen(opt_str);
-						if (opt_str[opt_len - 1] == '\n')
-							opt_str[opt_len - 1] = 0x00;
+
+						if (!is_color_code(tmp)) {
+							free(opt_str);
+							continue;
+						}
+
 						text_color_set = 1;
 						snprintf(text_color, sizeof(text_color), 
-								 "\001\x1b[%sm\002", opt_str);
+								 "\001\x1b[%sm\002", tmp);
 						free(opt_str);
 					}
 
@@ -9414,15 +9533,20 @@ OF PROMPT\n", config_fp);
 						opt_str = straft(line, '=');
 						if (!opt_str)
 							continue;
-						if (!is_color_code(opt_str)) {
+
+						char *tmp = remove_quotes(opt_str);
+						if (!tmp) {
 							free(opt_str);
 							continue;
 						}
-						size_t opt_len = strlen(opt_str);
-						if (opt_str[opt_len - 1] == '\n')
-							opt_str[opt_len - 1] = 0x00;
+
+						if (!is_color_code(tmp)) {
+							free(opt_str);
+							continue;
+						}
+
 						eln_color_set = 1;
-						snprintf(eln_color, MAX_COLOR, "\x1b[%sm", opt_str);
+						snprintf(eln_color, MAX_COLOR, "\x1b[%sm", tmp);
 						free(opt_str);
 					}
 
@@ -9431,68 +9555,87 @@ OF PROMPT\n", config_fp);
 						opt_str = straft(line, '=');
 						if (!opt_str)
 							continue;
-						if (!is_color_code(opt_str)) {
+
+						char *tmp = remove_quotes(opt_str);
+						if (!tmp) {
 							free(opt_str);
 							continue;
 						}
-						size_t opt_len = strlen(opt_str);
-						if (opt_str[opt_len - 1] == '\n')
-							opt_str[opt_len - 1] = 0x00;
+
+						if (!is_color_code(tmp)) {
+							free(opt_str);
+							continue;
+						}
+
 						default_color_set = 1;
-						snprintf(default_color, MAX_COLOR, "\x1b[%sm", 
-								 opt_str);
+						snprintf(default_color, MAX_COLOR, "\x1b[%sm", tmp);
 						free(opt_str);
 					}
+
 					else if (strncmp (line, "DirCounterColor=", 16) == 0) {
 						char *opt_str = (char *)NULL;
 						opt_str = straft(line, '=');
 						if (!opt_str)
 							continue;
-						if (!is_color_code(opt_str)) {
+
+						char *tmp = remove_quotes(opt_str);
+						if (!tmp) {
 							free(opt_str);
 							continue;
 						}
-						size_t opt_len = strlen(opt_str);
-						if (opt_str[opt_len - 1] == '\n')
-							opt_str[opt_len - 1] = 0x00;
-						dir_count_color_set=1;
-						snprintf(dir_count_color, MAX_COLOR, "\x1b[%sm", 
-								 opt_str);
+
+						if (!is_color_code(tmp)) {
+							free(opt_str);
+							continue;
+						}
+
+						dir_count_color_set = 1;
+						snprintf(dir_count_color, MAX_COLOR, "\x1b[%sm", tmp);
 						free(opt_str);
-						opt_str = (char *)NULL;
 					}
+
 					else if (strncmp(line, "WelcomeMessageColor=", 20) == 0) {
 						char *opt_str = (char *)NULL;
 						opt_str=straft(line, '=');
 						if (!opt_str)
 							continue;
-						if (!is_color_code(opt_str)) {
+
+						char *tmp = remove_quotes(opt_str);
+						if (!tmp) {
 							free(opt_str);
 							continue;
 						}
-						size_t opt_len = strlen(opt_str);
-						if (opt_str[opt_len - 1] == '\n')
-							opt_str[opt_len - 1] = 0x00;
+
+						if (!is_color_code(tmp)) {
+							free(opt_str);
+							continue;
+						}
+
 						welcome_msg_color_set = 1;
 						snprintf(welcome_msg_color, MAX_COLOR, "\x1b[%sm", 
-								 opt_str);
+								 tmp);
 						free(opt_str);
 					}
+
 					else if (strncmp(line, "DividingLineColor=", 18) == 0) {
 						char *opt_str = (char *)NULL;
 						opt_str = straft(line, '=');
 						if (!opt_str)
 							continue;
-						if (!is_color_code(opt_str)) {
+							
+						char *tmp = remove_quotes(opt_str);
+						if (!tmp) {
 							free(opt_str);
 							continue;
 						}
-						size_t opt_len = strlen(opt_str);
-						if (opt_str[opt_len - 1] == '\n')
-							opt_str[opt_len - 1] = 0x00;
+						
+						if (!is_color_code(tmp)) {
+							free(opt_str);
+							continue;
+						}
+
 						div_line_color_set = 1;
-						snprintf(div_line_color, MAX_COLOR, "\x1b[%sm", 
-								 opt_str);
+						snprintf(div_line_color, MAX_COLOR, "\x1b[%sm", tmp);
 						free(opt_str);
 					}
 					else if (strncmp(line, "DividingLineChar=", 17) == 0) {
@@ -9503,6 +9646,7 @@ OF PROMPT\n", config_fp);
 						else
 							div_line_char = opt_c;
 					}
+
 					else if (strncmp(line, "MaxHistory=", 11) == 0) {
 						int opt_num = 0;
 						sscanf(line, "MaxHistory=%d\n", &opt_num);
@@ -9510,6 +9654,7 @@ OF PROMPT\n", config_fp);
 							continue;
 						max_hist = opt_num;
 					}
+
 					else if (strncmp(line, "MaxLog=", 7) == 0) {
 						int opt_num = 0;
 						sscanf (line, "MaxLog=%d\n", &opt_num);
@@ -9517,29 +9662,39 @@ OF PROMPT\n", config_fp);
 							continue;
 						max_log = opt_num;
 					}
+
 					else if (!path 
 					&& strncmp(line, "StartingPath=", 13) == 0) {
-						char opt_str[PATH_MAX] = "";
-						ret = sscanf(line, "StartingPath=%4095s\n", opt_str);				
-						if (ret == -1)
+						char *opt_str = straft(line, '=');
+						if (!opt_str)
 							continue;
-						/* If starting path is not "default", and exists, and 
+
+						char *tmp = remove_quotes(opt_str);
+						if (!tmp) {
+							free(opt_str);
+							continue;
+						}
+						
+						/* If starting path is not NULL, and exists, and 
 						 * is a directory, and the user has appropriate 
 						 * permissions, set path to starting path. If any of 
 						 * these conditions is false, path will be set to 
 						 * default, that is, CWD */
-						if (chdir(opt_str) == 0) {
+						if (chdir(tmp) == 0) {
 							free(path);
-							path = (char *)xcalloc(strlen(opt_str) + 1, 
-												   sizeof(char));
-							strcpy(path, opt_str);
+							path = (char *)xnmalloc(strlen(tmp) + 1, 
+												    sizeof(char));
+							strcpy(path, tmp);
 						}
 						else {
-							_err('w', PRINT_PROMPT, "%s: '%s': %s\n", 
-								 PROGRAM_NAME, opt_str, strerror(errno));
+							_err('w', PRINT_PROMPT, _("%s: '%s': %s. Using "
+								 "the current working directory as starting "
+								 "path\n"), PROGRAM_NAME, tmp, strerror(errno));
 						}
+						free(opt_str);
 					}
 				}
+
 				fclose(config_fp);
 			}
 
@@ -9621,10 +9776,15 @@ OF PROMPT\n", config_fp);
 					 * file */
 					fseek(xresources_fp, 0L, SEEK_END);
 					fputs("\nXTerm*eightBitInput: false\n", xresources_fp);
-					fclose(xresources_fp);
 					char *xrdb_path = get_cmd_path("xrdb");
-					if (xrdb_path)
-						launch_execle("xrdb -merge ~/.Xresources");
+					if (xrdb_path) {
+						char *res_file = (char *)xnmalloc(strlen(user_home) 
+														+ 13, sizeof(char));
+						sprintf(res_file, "%s/.Xresources", user_home); 
+						char *cmd[] = { "xrdb", "merge", res_file, NULL };
+						launch_execve(cmd, FOREGROUND);
+						free(res_file);
+					}
 
 					_err('w', PRINT_PROMPT, _("%s: Restart your %s for "
 						 "changes to ~/.Xresources to take effect. "
@@ -9635,6 +9795,8 @@ OF PROMPT\n", config_fp);
 					if (xrdb_path)
 						free(xrdb_path);
 				}
+
+				fclose(xresources_fp);
 			}
 			else {
 				_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n", PROGRAM_NAME, 
@@ -9656,7 +9818,7 @@ OF PROMPT\n", config_fp);
 	if (stat(TMP_DIR, &file_attrib) == -1) {
 /*		if (mkdir(TMP_DIR, 1777) == -1) { */
 		char *tmp_cmd2[] = { "mkdir", "-m1777", TMP_DIR, NULL };
-		int ret = launch_execve(tmp_cmd2);
+		int ret = launch_execve(tmp_cmd2, FOREGROUND);
 		if (ret != 0) {
 			selfile_ok = 0;
 			_err('e', PRINT_PROMPT, "%s: mkdir: '%s': %s\n", PROGRAM_NAME, 
@@ -12676,11 +12838,12 @@ launch_execle(const char *cmd)
 }
 
 int
-launch_execve(char **cmd)
+launch_execve(char **cmd, int bg)
 /* Execute a command and return the corresponding exit status. The exit status
 * could be: zero, if everything went fine, or a non-zero value in case of 
-* error. The function takes as only arguement an array of strings containing 
-* the command name to be executed and its arguments (cmd) */
+* error. The function takes as first arguement an array of strings containing 
+* the command name to be executed and its arguments (cmd), and an integer (bg)
+* specifying if the command should be backgrounded (1) or not (0) */
 {
 	/* Error codes
 	#define EXNULLERR 79
@@ -12705,36 +12868,13 @@ launch_execve(char **cmd)
 	 * able to catch error codes coming from the child. */
 	signal(SIGCHLD, SIG_DFL);
 
-	/* Check if program is to be backgrounded. In that case, remove the
-	 * final ampersand from the string */
-	short is_bg = 0;
-
-	/* Get last argument's index */
-	size_t last = 0;
-	for (last = 0; cmd[last]; last++);
-	last--;
-	
-	if (cmd[last]) {
-		if (strcmp(cmd[last], "&") == 0) {
-/*			free(cmd[last]); */
-			cmd[last] = (char *)NULL;
-			is_bg = 1;
-		}
-		else {
-			size_t last_len = strlen(cmd[last]);
-			if (cmd[last][last_len - 1] == '&') {
-				cmd[last][last_len - 1] = 0x00;
-				is_bg = 1;
-			}
-		}
-	}
 	/* Create a new process via fork() */
 	pid_t pid = fork();
 	if (pid < 0) {
 		fprintf(stderr, "%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
 		return errno;
 	}
-	/* Run the command via execvpe */
+	/* Run the command via execvp */
 	else if (pid == 0) {
 		/* Reenable signals only for the child, in case they were disabled for
 		the parent */
@@ -12751,7 +12891,7 @@ launch_execve(char **cmd)
 	}
 	/* Get the command status */
 	else { /* pid > 0 */
-		if (is_bg) {
+		if (bg) {
 			run_in_background(pid);
 			return EXIT_SUCCESS;
 		}
@@ -12767,6 +12907,7 @@ int
 run_in_foreground (pid_t pid)
 {
 	int status = 0;
+
 	/* The parent process calls waitpid() on the child */
 	if (waitpid(pid, &status, 0) > 0) {
 		if (WIFEXITED(status) && !WEXITSTATUS(status)) {
@@ -12791,6 +12932,7 @@ run_in_foreground (pid_t pid)
 		fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME, strerror(errno));
 		return errno;
 	}
+
 	return EXIT_FAILURE; /* Never reached */
 }
 
@@ -13945,7 +14087,7 @@ bookmark_del(char *name)
 			bk_file = (char *)xcalloc(strlen(CONFIG_DIR) + 14, sizeof(char));
 			sprintf(bk_file, "%s/bookmarks.bk", CONFIG_DIR);
 			char *tmp_cmd[] = { "cp", BM_FILE, bk_file, NULL };
-			int ret = launch_execve(tmp_cmd);
+			int ret = launch_execve(tmp_cmd, FOREGROUND);
 			/* Remove the bookmarks file, free stuff, and exit */
 			if (ret == 0) {
 				remove(BM_FILE);
@@ -14465,7 +14607,7 @@ open_bookmark(char **cmd)
 		else {
 			char *tmp_cmd[] = { arg[1], BM_FILE, NULL };
 			int ret = -1;
-			if ((ret = launch_execve(tmp_cmd)) != 0)
+			if ((ret = launch_execve(tmp_cmd, FOREGROUND)) != 0)
 				error_code = 1;
 			else
 				reload_bm = 1;
@@ -14535,7 +14677,7 @@ open_bookmark(char **cmd)
 		if (arg[1]) {
 			char *tmp_cmd[] = { arg[1], tmp_path, NULL };
 			int ret = -1;
-			if ((ret = launch_execve(tmp_cmd)) != 0)
+			if ((ret = launch_execve(tmp_cmd, FOREGROUND)) != 0)
 				error_code = 1;
 		}
 		else {
@@ -14670,18 +14812,15 @@ dir_size(char *dir)
 	fclose(du_fp);
 	fclose(du_fp_err);
 
-/*	char *tmp_dir = (char *)xcalloc(strlen(dir) + 3, sizeof(char));
-	sprintf(tmp_dir, "'%s'", dir);
-	char *cmd[] = { "du", "-sh", tmp_dir, NULL };
-	launch_execve(cmd);
-	free(tmp_dir); */
-
-	char *cmd = (char *)NULL;
+/*	char *cmd = (char *)NULL;
 	cmd = (char *)xcalloc(strlen(dir) + 10, sizeof(char));
 	sprintf(cmd, "du -sh '%s'", dir);
-/*	int ret = launch_execle(cmd); */
+	//int ret = launch_execle(cmd);
 	launch_execle(cmd);
-	free(cmd);
+	free(cmd); */
+
+	char *cmd[] = { "du", "-sh", dir, NULL };
+	launch_execve(cmd, FOREGROUND);
 	
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
 	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
@@ -15574,6 +15713,16 @@ edit_function (char **comm)
 			free(encoded_prompt);
 			encoded_prompt = (char *)NULL;
 		}
+
+		if (sys_shell) {
+			free(sys_shell);
+			sys_shell = (char *)NULL;
+		}
+			
+		if (term) {
+			free(term);
+			term = (char *)NULL;
+		}
 	
 		/* Rerun external_arguments */
 		if (argc_bk > 1)
@@ -15585,32 +15734,13 @@ edit_function (char **comm)
 	time_t mtime_bfr = file_attrib.st_mtime;
 
 
-	if (args_n > 0) { /* If there is an argument... */
-		/* Check it is a valid program */
-		char *cmd_path = (char *)NULL;
-		if ((cmd_path = get_cmd_path(comm[1])) == NULL) {
-			fprintf(stderr, _("%s: %s: Command not found\n"), PROGRAM_NAME, 
-					comm[1]);
+	if (comm[1]) { /* If there is an argument... */
+		char *cmd[] = { comm[1], CONFIG_FILE, NULL };
+		int ret = launch_execve(cmd, FOREGROUND);
+		if (ret != 0)
 			return EXIT_FAILURE;
-		}
-		pid_t pid_edit = fork();
-		if (pid_edit < 0) {
-			fprintf(stderr, "%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
-			free(cmd_path);
-			return EXIT_FAILURE;
-		}
-		else if (pid_edit == 0) {
-			set_signals_to_default();
-			execl(cmd_path, comm[1], CONFIG_FILE, NULL);		
-			/* The program failed to start */
-			fprintf(stderr, "%s: execl: %s: %s\n", PROGRAM_NAME, cmd_path, 
-					strerror(errno));
-			exit(EXIT_FAILURE);
-		}
-		else
-			run_in_foreground(pid_edit);
-		free(cmd_path);
 	}
+
 	/* If no application has been passed as 2nd argument */
 	else {
 		if (!(flags & FILE_CMD_OK)) {
@@ -15662,6 +15792,16 @@ edit_function (char **comm)
 		if (encoded_prompt) {
 			free(encoded_prompt);
 			encoded_prompt = (char *)NULL;
+		}
+
+		if (sys_shell) {
+			free(sys_shell);
+			sys_shell = (char *)NULL;
+		}
+			
+		if (term) {
+			free(term);
+			term = (char *)NULL;
 		}
 
 		if (argc_bk > 1)
