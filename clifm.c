@@ -1489,10 +1489,10 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.20.1"
+#define VERSION "0.20.2"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "July 27, 2020"
+#define DATE "July 28, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -2506,9 +2506,7 @@ int record_cmd(char *input);
 void add_to_cmdhist(char *cmd);
 int _err(int msg_type, int prompt, const char *format, ...);
 int new_instance(char *dir);
-
 int *get_hex_num(char *str);
-
 int create_config(char *file);
 
 /* Some notes on memory:
@@ -2675,6 +2673,24 @@ struct fileinfo
 	int ruser; /* User read permission for dir */
 };
 
+/* Struct to specify which parameters have been set from the command line,
+ * to avoid overriding them with init_config(). While no command line parameter
+ * will be overriden, the user still can modifiy on the fly (editing the config
+ * file) any option not specified in the command line */
+struct param
+{
+	int splash;
+	int hidden;
+	int longview;
+	int cdauto;
+	int ext;
+	int ffirst;
+	int sensitive;
+	int unicode;
+	int pager;
+	int path;
+};
+
 /* A list of possible program messages. Each value tells the prompt what to do
  * with error messages: either to print an E, W, or N char at the beginning of 
  * the prompt, or nothing (nomsg) */
@@ -2724,6 +2740,7 @@ size_t user_home_len = 0;
 struct termios shell_tmodes;
 pid_t own_pid = 0;
 struct usrvar_t *usr_var = (struct usrvar_t *)NULL;
+struct param xargs;
 char *user = (char *)NULL, *path = (char *)NULL, **old_pwd = (char **)NULL, 
 	**sel_elements = (char **)NULL, *qc = (char *)NULL,	
 	*sel_file_user = (char *)NULL, **paths = (char **)NULL, 
@@ -2953,6 +2970,9 @@ main(int argc, char **argv)
 	 * arguments will override initialization values (init_config) */
 	if (argc > 1)
 		external_arguments(argc, argv);
+		/* external_arguments is executed before init_config because, if
+		 * specified (-P option), it sets the value of alt_profile, which
+		 * is then checked by init_config */
 
 	/* Initialize program paths and files, set options from the config file, 
 	 * if they were not already set via external arguments, and load sel 
@@ -9318,9 +9338,9 @@ init_config(void)
 					if (strncmp(line, "#END OF OPTIONS", 15) == 0)
 						break;
 
-					/* Check for the splas_screen flag. If -1, it was not
+					/* Check for the xargs.splash flag. If -1, it was not
 					 * set via command line, so that it must be set here */
-					else if (splash_screen == -1 
+					else if (xargs.splash == -1 
 					&& strncmp(line, "SplashScreen=", 13) == 0) {
 						char opt_str[MAX_BOOL] = ""; /* false (5) + 1 */
 						ret = sscanf(line, "SplashScreen=%5s\n", opt_str);
@@ -9365,7 +9385,7 @@ init_config(void)
 							clear_screen = 0;
 					}
 
-					else if (show_hidden == -1 
+					else if (xargs.hidden == -1 
 					&& strncmp(line, "ShowHiddenFiles=", 16) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "ShowHiddenFiles=%5s\n", opt_str);
@@ -9379,7 +9399,7 @@ init_config(void)
 							show_hidden = 1;
 					}
 
-					else if (long_view == -1 
+					else if (xargs.longview == -1 
 					&& strncmp(line, "LongViewMode=", 13) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "LongViewMode=%5s\n", opt_str);
@@ -9393,7 +9413,7 @@ init_config(void)
 							long_view = 0;
 					}
 
-					else if (ext_cmd_ok == -1 
+					else if (xargs.ext == -1 
 					&& strncmp(line, "ExternalCommands=", 17) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "ExternalCommands=%5s\n", opt_str);
@@ -9420,7 +9440,7 @@ init_config(void)
 							logs_enabled = 0;
 					}
 
-					else if (strncmp (line, "SystemShell=", 12) == 0) {
+					else if (strncmp(line, "SystemShell=", 12) == 0) {
 						if (sys_shell) {
 							free(sys_shell);
 							sys_shell = (char *)NULL;
@@ -9460,7 +9480,7 @@ init_config(void)
 						free(opt_str);
 					}
 
-					else if (strncmp (line, "TerminalCmd=", 12) == 0) {
+					else if (strncmp(line, "TerminalCmd=", 12) == 0) {
 
 						if (term) {
 							free(term);
@@ -9482,7 +9502,7 @@ init_config(void)
 						free(opt_str);
 					}
 
-					else if (list_folders_first == -1 
+					else if (xargs.ffirst == -1 
 					&& strncmp(line, "ListFoldersFirst=", 17) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "ListFoldersFirst=%5s\n", opt_str);
@@ -9496,7 +9516,7 @@ init_config(void)
 							list_folders_first = 1;
 					}
 
-					else if (cd_lists_on_the_fly == -1 
+					else if (xargs.cdauto == -1 
 					&& strncmp(line, "CdListsAutomatically=", 21) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "CdListsAutomatically=%5s\n", 
@@ -9511,7 +9531,7 @@ init_config(void)
 							cd_lists_on_the_fly = 1;
 					}
 
-					else if (case_sensitive == -1 
+					else if (xargs.sensitive == -1 
 					&& strncmp(line, "CaseSensitiveList=", 18) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "CaseSensitiveList=%5s\n", 
@@ -9526,7 +9546,7 @@ init_config(void)
 							case_sensitive = 0;
 					}
 
-					else if (unicode == -1 
+					else if (xargs.unicode == -1 
 					&& strncmp(line, "Unicode=", 8) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "Unicode=%5s\n", opt_str);
@@ -9540,7 +9560,7 @@ init_config(void)
 							unicode = 0;
 					}
 
-					else if (pager == -1 
+					else if (xargs.pager == -1 
 					&& strncmp(line, "Pager=", 6) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "Pager=%5s\n", opt_str);
@@ -9635,7 +9655,7 @@ init_config(void)
 						free(opt_str);
 					}
 
-					else if (strncmp (line, "DirCounterColor=", 16) == 0) {
+					else if (strncmp(line, "DirCounterColor=", 16) == 0) {
 						char *opt_str = (char *)NULL;
 						opt_str = straft(line, '=');
 						if (!opt_str)
@@ -9733,7 +9753,7 @@ init_config(void)
 						max_log = opt_num;
 					}
 
-					else if (!path 
+					else if (xargs.path == -1 && !path 
 					&& strncmp(line, "StartingPath=", 13) == 0) {
 						char *opt_str = straft(line, '=');
 						if (!opt_str)
@@ -9821,6 +9841,20 @@ init_config(void)
 				strcpy(term, DEFAULT_TERM_CMD);
 			}
 		}
+
+		/* If we reset all these values, a) the user will be able to modify 
+		 * them while in the program via the edit command. However, this means
+		 * that b) any edit, to whichever option, will override the values for 
+		 * ALL options, including those set in the command line. Example: if the
+		 * user pass the -A option to show hidden files (while it is disabled
+		 * in the config file), and she edits the config file to, say, change
+		 * the prompt, hidden files will be disabled, which is not what the 
+		 * user wanted */
+
+/*		xargs.splash = xargs.hidden = xargs.longview = xargs.ext = -1;
+		xargs.ffirst = xargs.sensitive = xargs.unicode = xargs.pager = -1;
+		xargs.path = xargs.cdauto = -1; */
+
 		
 		/* "XTerm*eightBitInput: false" must be set in HOME/.Xresources to 
 		 * make some keybindings like Alt+letter work correctly in xterm-like 
@@ -9962,11 +9996,11 @@ get_cmd_path(const char *cmd)
 	char *cmd_path = (char *)NULL;
 	int i;
 	
-	cmd_path = (char *)xcalloc(PATH_MAX + 1, sizeof(char));
+	cmd_path = (char *)xnmalloc(PATH_MAX + 1, sizeof(char));
 	
 	for (i = 0; i < path_n; i++) { /* Get the path from PATH env variable */
 		snprintf(cmd_path, PATH_MAX, "%s/%s", paths[i], cmd);
-		if (access(cmd_path, F_OK) == 0)
+		if (access(cmd_path, X_OK) == 0)
 			return cmd_path;
 	}
 	
@@ -10008,6 +10042,12 @@ external_arguments(int argc, char **argv)
 		{"ext-cmds", no_argument, 0, 'x'},
 		{0, 0, 0, 0}
 	};
+
+	/* Set all external arguments flags to uninitialized state */
+	xargs.splash = xargs.hidden = xargs.longview = xargs.ext = -1;
+	xargs.ffirst = xargs.sensitive = xargs.unicode = xargs.pager = -1;
+	xargs.path = xargs.cdauto = -1;
+
 	int optc;
 	/* Variables to store arguments to options (-p and -P) */
 	char *path_value = (char *)NULL, *alt_profile_value = (char *)NULL;
@@ -10023,29 +10063,35 @@ external_arguments(int argc, char **argv)
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
 			show_hidden = 0;
+			xargs.hidden = 0;
 			break;
 
 		case 'A':
 			flags |= HIDDEN; /* Add flag HIDDEN to 'flags' */
 			show_hidden = 1;
+			xargs.hidden = 1;
 			break;
 
 		case 'f':
 			flags &= ~FOLDERS_FIRST;
 			list_folders_first = 0;
+			xargs.ffirst = 0;
 			break;
 
 		case 'F':
 			flags |= FOLDERS_FIRST;
 			list_folders_first = 1;
+			xargs.ffirst = 1;
 			break;
 
 		case 'g':
 			pager = 1;
+			xargs.pager = 1;
 			break;
 
 		case 'G':
 			pager = 0;
+			xargs.pager = 0;
 			break;
 
 		case 'h':
@@ -10058,34 +10104,41 @@ external_arguments(int argc, char **argv)
 		case 'i':
 			flags &= ~CASE_SENS;
 			case_sensitive = 0;
+			xargs.sensitive = 0;
 			break;
 
 		case 'I':
 			flags |= CASE_SENS;
 			case_sensitive = 1;
+			xargs.sensitive = 1;
 			break;
 
 		case 'l':
 			long_view = 0;
+			xargs.longview = 0;
 			break;
 
 		case 'L':
 			long_view = 1;
+			xargs.longview = 1;
 			break;
 
 		case 'o':
 			flags &= ~ON_THE_FLY;
 			cd_lists_on_the_fly = 0;
+			xargs.cdauto = 0;
 			break;
 
 		case 'O':
 			flags |= ON_THE_FLY;
 			cd_lists_on_the_fly = 1;
+			xargs.cdauto = 1;
 			break;
 
 		case 'p':
 			flags |= START_PATH;
 			path_value = optarg;
+			xargs.path = 1;			
 			break;
 
 		case 'P':
@@ -10096,14 +10149,17 @@ external_arguments(int argc, char **argv)
 		case 's':
 			flags |= SPLASH;
 			splash_screen = 1;
+			xargs.splash = 1;
 			break;
 
 		case 'u':
 			unicode = 0;
+			xargs.unicode = 0;
 			break;
 
 		case 'U':
 			unicode = 1;
+			xargs.unicode = 1;
 			break;
 
 		case 'v':
@@ -10114,6 +10170,7 @@ external_arguments(int argc, char **argv)
 
 		case 'x':
 			ext_cmd_ok = 1;
+			xargs.ext = 1;
 			break;
 
 		case '?': /* If some unrecognized option was found... */
