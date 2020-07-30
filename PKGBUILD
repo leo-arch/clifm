@@ -8,7 +8,7 @@ arch=(any)
 url="https://github.com/leo-arch/clifm"
 license=(GPL2)
 depends=('glibc' 'ncurses' 'libcap' 'readline' 'coreutils' 'file')
-makedepends=('git')
+makedepends=('gcc' 'git')
 source=("git+${url}.git")
 sha256sums=('SKIP')
 
