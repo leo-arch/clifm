@@ -4514,7 +4514,7 @@ int mime_open(char **args)
 	}
 
 	else {
-		if (strcntchr(args[1], '\\')) {
+		if (strcntchr(args[1], '\\') != -1) {
 			deq_file = dequote_str(args[1], 0);
 			file_path = realpath(deq_file, NULL);
 			free(deq_file);
