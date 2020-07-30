@@ -56,7 +56,7 @@
  * -performance). NOTE: Since 2014, Arch Linux packages are compiled with 
  * -fstack-protector-strong. For debugging purposes, you can also add some 
  * debugging flags (optimization is not necessary here):
- * $ gcc -g -Wall -Wextra -Wstack-protector -pedantic -lreadline -lcap -o 
+ * $ gcc -g -Wall -Wextra -Wstack-protector -Wpedantic -lreadline -lcap -o 
  * clifm clifm.c
  * Note: -g adds debugging symbols (readable by Valgrind and GDB, for example) 
  * to the code, but it makes the executable two or three times bigger.
@@ -304,7 +304,14 @@ of course you can grep it to find, say, linux' macros, as here. */
 	later. Ex: in this block "char *ptr ... free(ptr); ptr = NULL; return" 
 	setting the pointer to NULL makes no sense, since the function finishes,
 	discarding all local variables, after using the pointer without never
-	using it again. 
+	using it again.
+ ** When testing keep GCC warning flags enabled: Wall, Wpedantic, Wextra, 
+	Wstack-protector, Wshadow, Wconversion
+ ** Be careful when substrcting from an unsigned int, like size_t, since the
+	result will always be positive, which is not the expected result: give two
+	size_t values, say, 0 and 1, substracting the second form the first results
+	in UINT_MAX (a very large positive value), and not -1. Casting to int seems
+	a good solution. Example: (int)(a - b);
 */
 
 /** 
@@ -1495,10 +1502,10 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.20.3"
+#define VERSION "0.20.4"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "July 29, 2020"
+#define DATE "July 30, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -1952,7 +1959,7 @@ straft(const char *str, const char c)
  * NULL if C is not found in STR or C is the last char in STR. */
 {
 	char *buf = (char *)NULL;
-	register int counter = 0;
+	register size_t counter = 0;
 	size_t str_len = strlen(str);
 
 	while (*str) {
@@ -2014,7 +2021,7 @@ strbfr(char *str, const char c)
  * found, or C is the first char in STR, returns NULL */
 {
 	char *start = str, *buf = (char *)NULL;
-	register int counter = 0;
+	register size_t counter = 0;
 
 	while (*str) {
 		if (*str == c) {
@@ -2111,14 +2118,14 @@ strbtw(char *str, const char a, const char b)
 	
 	p = (char *)NULL;
 	
-	/* Just in case, make sure B comes after A */
+	/* Just in case, make sure B comes after (is bigger than) A */
 	if (b_index <= (a_index + 1))
 		return (char *)NULL;
 	
 	char *buf = (char *)NULL;
 
 	/* Now copy everything between A and B into BUF */
-	buf = (char *)malloc(((b_index - a_index) + 1) * sizeof(char));
+	buf = (char *)malloc((size_t)((b_index - a_index) + 1) * sizeof(char));
 
 	if (!buf) {
 		fprintf(stderr, "%s: Memory allocation failure\n", __func__);
@@ -2126,7 +2133,7 @@ strbtw(char *str, const char a, const char b)
 	}
 	
 	q += (a_index + 1);
-	size_t bytes =  b_index - a_index - 1;
+	size_t bytes =  (size_t)(b_index - a_index - 1);
 	strncpy(buf, q, bytes);
 	*(buf + bytes) = 0x00;
 	
@@ -2260,7 +2267,7 @@ get_size_unit(off_t file_size)
 	 * or 11 == "1023 bytes\0" */
 	char *size_type = calloc(max_size_type_len + 1, sizeof(char));
 	short units_n = 0;
-	float size=file_size;
+	float size = (float)file_size;
 
 	while (size > 1024) {
 		size = size/1024;
@@ -2269,10 +2276,10 @@ get_size_unit(off_t file_size)
 
 	/* If bytes */
 	if (!units_n)
-		snprintf(size_type, max_size_type_len, "%.0f bytes", size);
+		snprintf(size_type, max_size_type_len, "%.0f bytes", (double)size);
 	else {
 		static char units[] = { 'b', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y' };		
-		snprintf(size_type, max_size_type_len, "%.1f%ciB", size, 
+		snprintf(size_type, max_size_type_len, "%.1f%ciB", (double)size, 
 				 units[units_n]);
 	}
 
@@ -2327,6 +2334,7 @@ hex2int(char *str)
 			case 'D': case 'd': n[i] = 13; break;
 			case 'E': case 'e': n[i] = 14; break;
 			case 'F': case 'f': n[i] = 15; break;
+			default: break;
 			}
 		}
 	}
@@ -2400,7 +2408,7 @@ int is_quote_char(char c);
 char *filenames_generator(const char *text, int state);
 char *bin_cmd_generator(const char *text, int state);
 void get_path_programs(void);
-int get_path_env(void);
+size_t get_path_env(void);
 int get_sel_files(void);
 void init_config(void);
 void exec_profile(void);
@@ -2425,7 +2433,7 @@ void run_in_background(pid_t pid);
 int copy_function(char **comm);
 int run_and_refresh(char **comm);
 int properties_function(char **comm);
-int get_properties(char *filename, int _long, int max);
+int get_properties(char *filename, int _long, int max, size_t filename_len);
 int save_sel(void);
 int sel_function(char **comm);
 void show_sel_files(void);
@@ -2434,7 +2442,7 @@ int search_function(char **comm);
 int bookmarks_function(char **cmd);
 char **get_bookmarks(char *bookmarks_file);
 char **bm_prompt(void);
-int count_dir(const char *dir_path);
+size_t count_dir(const char *dir_path);
 char *rl_no_hist(const char *prompt);
 int log_function(char **comm);
 int history_function(char **comm);
@@ -2717,12 +2725,11 @@ enum prog_msg pmsg = nomsg;
 
 short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1, 
 	show_hidden = -1, clear_screen = -1, shell_terminal = 0, pager = -1, 
-	no_log = 0, internal_cmd = 0, shell_is_interactive = 0, 
-	list_folders_first = -1, case_sensitive = -1, cd_lists_on_the_fly = -1, 
-	recur_perm_error_flag = 0, is_sel = 0, sel_is_last = 0, print_msg = 0, 
-	long_view = -1, kbind_busy = 0, unicode = -1, cont_bt = 0, dequoted = 0, 
-	home_ok = 1, config_ok = 1, trash_ok = 1, selfile_ok = 1, mime_match = 0,
-	exit_code = 0, logs_enabled = -1;
+	no_log = 0, internal_cmd = 0, list_folders_first = -1, case_sensitive = -1, 
+	cd_lists_on_the_fly = -1, recur_perm_error_flag = 0, is_sel = 0, 
+	sel_is_last = 0, print_msg = 0, long_view = -1, kbind_busy = 0, 
+	unicode = -1, cont_bt = 0, dequoted = 0, home_ok = 1, config_ok = 1, 
+	trash_ok = 1, selfile_ok = 1, mime_match = 0, logs_enabled = -1;
 	/* -1 means non-initialized or unset. Once initialized, these variables
 	 * are always either zero or one */
 /*	sel_no_sel=0 */
@@ -2735,14 +2742,16 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 * NOTE: If the value passed to a variable is bigger than what the variable can 
 * hold, the result of a comparison with this variable will always be true */
 
-int files = 0, args_n = 0, sel_n = 0, max_hist = -1, max_log = -1, 
-	path_n = 0, current_hist_n = 0, dirhist_total_index = 0, 
-	dirhist_cur_index = 0, argc_bk = 0, usrvar_n = 0, aliases_n = 0, 
-	prompt_cmds_n = 0, trash_n = 0, msgs_n = 0, longest = 0, max_path = -1;
+int max_hist = -1, max_log = -1, dirhist_total_index = 0, 
+	dirhist_cur_index = 0, argc_bk = 0, max_path = -1, exit_code = 0, 
+	shell_is_interactive = 0;
 
 unsigned short term_cols = 0;
 
-size_t user_home_len = 0;
+size_t user_home_len = 0, args_n = 0, sel_n = 0, trash_n = 0, msgs_n = 0, 
+	   prompt_cmds_n = 0, path_n = 0, current_hist_n = 0, usrvar_n = 0, 
+	   aliases_n = 0, longest = 0, files = 0, eln_len = 0;
+
 struct termios shell_tmodes;
 pid_t own_pid = 0;
 struct usrvar_t *usr_var = (struct usrvar_t *)NULL;
@@ -2765,10 +2774,11 @@ char *user = (char *)NULL, *path = (char *)NULL, **old_pwd = (char **)NULL,
 	**dirlist = (char **)NULL, **bookmark_names = (char **)NULL,
 	*ls_colors_bk = (char *)NULL, *MIME_FILE = (char *)NULL,
 	**profile_names = (char **)NULL, *encoded_prompt = (char *)NULL,
-	*last_cmd = (char *)NULL, *term = (char *)NULL,
+	*last_cmd = (char *)NULL, *term = (char *)NULL;
+
 	/* This is not a comprehensive list of commands. It only lists commands
 	 * long version for TAB completion */
-	*INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
+const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
 		"move", "paste", "sel", "selbox", "desel", "refresh", 
 		"edit", "history", "hidden", "path", "help", "commands", 
 		"colors", "version", "license", "splash", "folders first", 
@@ -2969,7 +2979,7 @@ main(int argc, char **argv)
 	/* Get paths from PATH environment variable. These paths will be used 
 	 * later by get_path_programs (for the autocomplete function) and 
 	 * get_cmd_path() */
-	path_n = get_path_env();
+	path_n = (size_t)get_path_env();
 
 	/* Manage external arguments, but only if any: argc == 1 equates to no 
 	 * argument, since this '1' is just the program invokation name. External 
@@ -3181,7 +3191,7 @@ main(int argc, char **argv)
 				}
 				else {
 					exec_cmd(cmd); /* Execute command */
-					for (i = 0; i <= (size_t)args_n; i++) 
+					for (i = 0; i <= args_n; i++) 
 						free(cmd[i]);
 					free(cmd);
 					cmd = (char **)NULL;
@@ -3418,9 +3428,9 @@ new_instance(char *dir)
 		if (tmp_term) {
 			size_t i;
 
-			for (i = 0; tmp_term[i]; i++); 
+			for (i = 0; tmp_term[i]; i++);
 
-			int num = i;
+			size_t num = i;
 			tmp_cmd = (char **)xrealloc(tmp_cmd, (i + 4) * sizeof(char *));
 			for (i = 0; tmp_term[i]; i++) {
 				tmp_cmd[i] = (char *)xnmalloc(strlen(tmp_term[i]) + 1, 
@@ -3482,7 +3492,8 @@ add_to_cmdhist(char *cmd)
 	/* For us */
 	/* Add the new input to the history array */
 	size_t cmd_len = strlen(cmd);
-	history = (char **)xrealloc(history, (current_hist_n + 1) * sizeof(char *));
+	history = (char **)xrealloc(history, (size_t)(current_hist_n + 1) 
+								* sizeof(char *));
 	history[current_hist_n] = (char *)xcalloc(cmd_len + 1, sizeof(char));
 	strcpy(history[current_hist_n++], cmd);
 }
@@ -3521,18 +3532,24 @@ record_cmd(char *input)
 	case 'q': 
 		if (*(p + 1) == 0x00 || strcmp(p, "quit") == 0)
 			return 0;
+		break;
 	case 'e':
 		if (strcmp(p, "exit") == 0)
 			return 0;
+		break;
 	case 'z':
 		if (*(p + 1) == 'z' && *(p + 2) == 0x00)
 			return 0;
+		break;
 	case 's':
 		if (strcmp(p, "salir") == 0)
 			return 0;
+		break;
 	case 'c':
 		if (strcmp(p, "chau") == 0)
 			return 0;
+		break;
+	default: break;
 	}
 
 	/* History */
@@ -3635,7 +3652,7 @@ alias_import(char *file)
 			for (i = 0; i < aliases_n; i++) {
 				int alias_len = strcntchr(aliases[i], '=');
 				if (alias_len != -1 
-				&& strncmp(aliases[i], p, alias_len + 1) == 0) {
+				&& strncmp(aliases[i], p, (size_t)alias_len + 1) == 0) {
 					exists = 1;
 					break;
 				}
@@ -3648,7 +3665,7 @@ alias_import(char *file)
 				}
 				
 				alias_imported++;
-				fprintf(config_fp, line);
+				fputs(line, config_fp);
 			}
 			else
 				fprintf(stderr, _("'%s': Alias already exists\n"), alias_name);
@@ -3678,7 +3695,7 @@ alias_import(char *file)
 	/* If some alias was found and imported, print the corresponding message 
 	 * and update the aliases array */
 	if (alias_imported > 1)
-		printf(_("%s: %ld aliases were successfully imported\n"), PROGRAM_NAME, 
+		printf(_("%s: %zu aliases were successfully imported\n"), PROGRAM_NAME, 
 			   alias_imported);
 	else
 		printf(_("%s: 1 alias was successfully imported\n"), PROGRAM_NAME);
@@ -3704,7 +3721,8 @@ get_hex_num(char *str)
 /* Given this value: \xA0\xA1\xA1, return an array of integers with the 
  * integer values for A0, A1, and A2 respectivelly */
 {
-	int i = 0, *hex_n = (int *)calloc(3, sizeof(int));
+	size_t i = 0; 
+	int *hex_n = (int *)calloc(3, sizeof(int));
 	
 	while (*str) {
 		if (*str == '\\') {
@@ -3775,7 +3793,7 @@ decode_prompt(char *line)
 				while (hex[n++] != -1);
 				n--;
 				/* 2 + n == CTLEST + 0x00 + amount of hex numbers*/
-				temp = xnmalloc(2 + n, sizeof(char));
+				temp = xnmalloc(2 + (size_t)n, sizeof(char));
 				/* Construct the line: "\001hex1hex2...n0x00"*/
 				temp[0] = CTLESC;
 				for (j = 1; j < (1 + n); j++)
@@ -3820,7 +3838,7 @@ decode_prompt(char *line)
 				if (n == CTLESC || n == CTLNUL) {
 					line += 3;
 					temp[0] = CTLESC;
-					temp[1] = n;
+					temp[1] = (char)n;
 					temp[2] = 0x00;
 				}
 				else if (n == -1) {
@@ -3829,7 +3847,7 @@ decode_prompt(char *line)
 				}
 				else {
 					line += 3;
-					temp[0] = n;
+					temp[0] = (char)n;
 					temp[1] = 0x00;
 				}
 
@@ -3937,7 +3955,7 @@ decode_prompt(char *line)
 
 				/* Reduce path only if longer than max_path */
 				else if (c == 'p') {
-					if (strlen(tmp_path) > max_path) {
+					if (strlen(tmp_path) > (size_t)max_path) {
 						char *ret = (char *)NULL;
 						ret = strrchr(tmp_path, '/');
 						if (!ret)
@@ -3993,7 +4011,7 @@ decode_prompt(char *line)
 			
 			default:
 				temp = savestring("\\ ", 2);
-				temp[1] = c;
+				temp[1] = (char)c;
 			
 			add_string:
 				if (c)
@@ -4016,7 +4034,7 @@ decode_prompt(char *line)
 			if (c == '\'' || c == '"')
 				continue;
 			result = (char *)xrealloc(result, (result_len + 2) * sizeof(char));
-			result[result_len++] = c;
+			result[result_len++] = (char)c;
 			result[result_len] = 0x00;
 		}
 	}
@@ -4380,17 +4398,17 @@ profile_set(char *prof)
 			 PROGRAM_NAME, sys_shell);
 	}
 
-	for (i = 0; i < (size_t)usrvar_n; i++) {
+	for (i = 0; i < usrvar_n; i++) {
 		free(usr_var[i].name);
 		free(usr_var[i].value);
 	}
 	usrvar_n = 0;
 
-	for (i = 0; i < (size_t)aliases_n; i++)
+	for (i = 0; i < aliases_n; i++)
 		free(aliases[i]);
 	free(aliases);
 	aliases = (char **)NULL;
-	for (i = 0; i < (size_t)prompt_cmds_n; i++)
+	for (i = 0; i < prompt_cmds_n; i++)
 		free(prompt_cmds[i]);
 	free(prompt_cmds);
 	prompt_cmds = (char **)NULL;
@@ -4932,7 +4950,7 @@ _err(int msg_type, int prompt, const char *format, ...)
 		return EXIT_FAILURE;
 	}
 
-	char *buf = (char *)xcalloc(size + 1, sizeof(char));
+	char *buf = (char *)xcalloc((size_t)size + 1, sizeof(char));
 
 	vsprintf(buf, format, arglist);
 	va_end(arglist);
@@ -5053,7 +5071,7 @@ is_internal_c(const char *cmd)
 /* Check cmd against a list of internal commands. Used by parse_input_str()
  * when running chained commands */
 {
-	char *int_cmds[] = { "o", "open", "cd", "p", "pr", "prop", "t", "tr", 
+	const char *int_cmds[] = { "o", "open", "cd", "p", "pr", "prop", "t", "tr", 
 						 "trash", "s", "sel", "rf", "refresh", "c", "cp",
 					     "m", "mv", "bm", "bookmarks", "b", "back",
 					     "f", "forth", "bh", "fh", "u", "undel", "untrash",
@@ -5297,7 +5315,7 @@ get_substr(char *str, const char ifs)
 		/* If a valid range */
 		size_t k = 0, next = 0;
 		char **rbuf = (char **)NULL;
-		rbuf = (char **)xcalloc((substr_n + (asecond - afirst) 
+		rbuf = (char **)xcalloc((substr_n + (size_t)(asecond - afirst) 
 								+ 1), sizeof(char *));
 		/* Copy everything before the range expression
 		 * into the buffer */
@@ -5307,8 +5325,9 @@ get_substr(char *str, const char ifs)
 			strcpy(rbuf[k++], substr[j]);
 		}
 		/* Copy the expanded range into the buffer */
-		for (j = afirst; j <= asecond; j++) {
-			rbuf[k] = (char *)xcalloc(digits_in_num(j) + 1, sizeof(char));
+		for (j = (size_t)afirst; j <= (size_t)asecond; j++) {
+			rbuf[k] = (char *)xcalloc((size_t)digits_in_num((int)j) + 1, 
+									  sizeof(char));
 			sprintf(rbuf[k++], "%zu", j);
 		}
 		/* Copy everything after the range expression into 
@@ -5446,7 +5465,7 @@ set_colors(void)
 		while (dircolors[i]) {
 
 			int rem = 0;
-			if ( i < (linec_len - 3) && ( 
+			if ((int)i < (int)(linec_len - 3) && ( 
 			(dircolors[i] == 'n' && (dircolors[i+1] == 'd' 
 			|| dircolors[i+1] == 'e' || dircolors[i+1] == 'f')) 
 			|| (dircolors[i] == 'e' && (dircolors[i+1] == 'd'
@@ -5474,7 +5493,7 @@ set_colors(void)
 		
 		/* Split the colors line into substrings (one per color) */
 		char *p = dircolors, *buf = (char *)NULL, **colors = (char **)NULL;
-		int len = 0, words = 0;
+		size_t len = 0, words = 0;
 		while(*p) {
 			switch (*p) {
 			case '\'':
@@ -5810,8 +5829,8 @@ is_internal(const char *cmd)
 /* Check cmd against a list of internal commands. Used by parse_input_str()
  * to know if it should perform additional expansions */
 {
-	char *int_cmds[] = { "o", "open", "cd", "p", "pr", "prop", "t", "tr", 
-					     "trash", "s", "sel", "mm", "mime", NULL };
+	const char *int_cmds[] = { "o", "open", "cd", "p", "pr", "prop", "t", "tr", 
+							   "trash", "s", "sel", "mm", "mime", NULL };
 	short found = 0;
 	size_t i;
 
@@ -5967,7 +5986,7 @@ split_str(char *str)
 		/* Add a final null string to the array */
 		substr = (char **)xrealloc(substr, (words + 1) * sizeof(char *));
 		substr[words] = (char *)NULL;
-		args_n = (words - 1);
+		args_n = words - 1;
 		return substr;
 	}
 	else {
@@ -6383,7 +6402,8 @@ list_mountpoints(void)
 		 * the mount point (PATH_MAX) and mount options. PATH_MAX*2 
 		 * should be more than enough */
 		char **mountpoints = (char **)NULL;
-		int mp_n = 0, exit_status = 0;
+		size_t mp_n = 0; 
+		int exit_status = 0;
 
 		size_t line_size = 0;
 		char *line = (char *)NULL;
@@ -6404,7 +6424,7 @@ list_mountpoints(void)
 				/* Print only the first two fileds of each /proc/mounts line */
 				while (str && counter < 2) {
 					if (counter == 1) { /* 1 == second field */
-						printf("%s%d%s %s%s%s (%s)\n", eln_color, mp_n + 1, NC, 
+						printf("%s%ld%s %s%s%s (%s)\n", eln_color, mp_n + 1, NC, 
 							   (access(str, R_OK|X_OK) == 0) ? blue : red, 
 							   str, default_color, device);
 						/* Store the second field (mountpoint) into an
@@ -6429,7 +6449,7 @@ list_mountpoints(void)
 
 		/* This should never happen: There should always be a mountpoint,
 		 * at least "/" */
-		if (mp_n == 0) {
+		if (mp_n <= 0) {
 			fputs(_("mp: There are no available mountpoints\n"), stdout);
 			return EXIT_SUCCESS;
 		}
@@ -6441,9 +6461,9 @@ list_mountpoints(void)
 			input = rl_no_hist(_("Choose a mountpoint ('q' to quit): "));
 
 		if (!(*input == 'q' && *(input + 1) == 0x00)) {
-			int atoi_num = atoi (input);
-			if (atoi_num > 0 && atoi_num <= mp_n) {
-				int ret = chdir(mountpoints[atoi_num-1]);
+			int atoi_num = atoi(input);
+			if (atoi_num > 0 && atoi_num <= (int)mp_n) {
+				int ret = chdir(mountpoints[atoi_num - 1]);
 				if (ret == 0) {
 					free(path);
 					path = (char *)xcalloc(strlen(mountpoints[atoi_num - 1]) 
@@ -6451,7 +6471,8 @@ list_mountpoints(void)
 					strcpy(path, mountpoints[atoi_num - 1]);
 					add_to_dirhist(path);
 					if (cd_lists_on_the_fly) {
-						while (files--) free(dirlist[files]);
+						while (files--)
+							free(dirlist[files]);
 						list_dir();						
 					}
 				}
@@ -6472,7 +6493,7 @@ list_mountpoints(void)
 			free(input);
 
 		size_t i;
-		for (i = 0; i < mp_n; i++) {
+		for (i = 0; i < (size_t)mp_n; i++) {
 			free(mountpoints[i]);
 		}
 
@@ -6502,7 +6523,8 @@ get_max_long_view(void)
 	 * negative */
 	if (max < 20) max = 20;
 
-	if (longest < max) max = longest;
+	if ((int)longest < max)
+		max = (int)longest;
 	/* Should I specify a max length for trimmed filenames ?
 	if (max > 50) max=50; */
 
@@ -6527,7 +6549,8 @@ log_msg(char *_msg, int print)
 	/* Store messages (for current session only) in an array, so that
 	 * the user can check them via the 'msg' command */
 	msgs_n++;
-	messages = (char **)xrealloc(messages, (msgs_n + 1) * sizeof(char *));
+	messages = (char **)xrealloc(messages, (size_t)(msgs_n + 1)
+								 * sizeof(char *));
 	messages[msgs_n - 1] = (char *)xcalloc(msg_len + 1, sizeof(char));
 	strcpy(messages[msgs_n - 1], _msg);
 	messages[msgs_n] = (char *)NULL;
@@ -6609,8 +6632,8 @@ expand_range(char *str, int listdir)
 	free(second);
 
 	if (listdir) {
-		if (afirst <= 0 || afirst > files || asecond <= 0 
-		|| asecond > files || afirst >= asecond)
+		if (afirst <= 0 || afirst > (int)files || asecond <= 0 
+		|| asecond > (int)files || afirst >= asecond)
 			return (int *)NULL;
 	}
 	else
@@ -6618,11 +6641,11 @@ expand_range(char *str, int listdir)
 			return (int *)NULL;
 
 	int *buf = (int *)NULL;
-	buf = (int *)xcalloc((asecond - afirst) + 2, sizeof(int));
+	buf = (int *)xcalloc((size_t)(asecond - afirst) + 2, sizeof(int));
 	
 	size_t i, j = 0;
-	for (i = afirst; i <= asecond; i++)
-		buf[j++] = i;
+	for (i = (size_t)afirst; i <= (size_t)asecond; i++)
+		buf[j++] = (int)i;
 
 	return buf;
 }
@@ -6721,7 +6744,7 @@ wx_parent_check(char *file)
 		}
 		/* Check the parent for appropriate permissions */
 		else if (access(parent, W_OK|X_OK) == 0) {
-			int files_n = count_dir(parent);
+			size_t files_n = count_dir(parent);
 			if (files_n > 2) {
 				/* I manually check here subdir because recur_perm_check() 
 				 * will only check the contents of subdir, but not subdir 
@@ -6860,15 +6883,15 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 	 * (original_filename_len + 1 (dot) + suffix_len) won't be longer than
 	 * NAME_MAX */
 	size_t filename_len = strlen(filename), suffix_len = strlen(suffix);
-	int size = (filename_len + suffix_len + 1) - NAME_MAX;
+	int size = (int)(filename_len + suffix_len + 1) - NAME_MAX;
 
 	if (size > 0) {
 		/* If SIZE is a positive value, that is, the trashed file name 
 		 * exceeds NAME_MAX by SIZE bytes, reduce the original file name 
 		 * SIZE bytes. Terminate the original file name (FILENAME) with a
 		 * tilde (~), to let the user know it is trimmed */
-		filename[filename_len - size - 1] = '~';
-		filename[filename_len - size] = 0x00;
+		filename[filename_len - (size_t)size - 1] = '~';
+		filename[filename_len - (size_t)size] = 0x00;
 	}
 
 											/* 2 = dot + null byte */
@@ -7001,8 +7024,8 @@ remove_from_trash(void)
 	
 	if (files_n) {
 		printf(_("%sTrashed files%s%s\n\n"), white, NC, default_color);
-		for (i = 0; i < files_n; i++)
-			colors_list(trash_files[i]->d_name, i + 1, 0, 1);
+		for (i = 0; i < (size_t)files_n; i++)
+			colors_list(trash_files[i]->d_name, (int)i + 1, 0, 1);
 	}
 	else {
 		puts(_("trash: There are no trashed files"));
@@ -7048,7 +7071,7 @@ remove_from_trash(void)
 				free(rm_elements[j]);
 			free(rm_elements);
 			
-			for (j = 0; j < files_n; j++)
+			for (j = 0; j < (size_t)files_n; j++)
 				free(trash_files[j]);
 			free(trash_files);
 			
@@ -7058,7 +7081,7 @@ remove_from_trash(void)
 		/* Asterisk */
 		else if (strcmp(rm_elements[i], "*") == 0) {
 			size_t j;
-			for (j = 0; j < files_n; j++) {
+			for (j = 0; j < (size_t)files_n; j++) {
 				
 				snprintf(rm_file, PATH_MAX, "%s/%s", TRASH_FILES_DIR, 
 						 trash_files[j]->d_name);
@@ -7097,7 +7120,7 @@ remove_from_trash(void)
 				free(rm_elements[j]);
 			free(rm_elements);
 
-			for (j = 0; j < files_n; j++)
+			for (j = 0; j < (size_t)files_n; j++)
 				free(trash_files[j]);
 			free(trash_files);
 
@@ -7136,7 +7159,7 @@ remove_from_trash(void)
 
 	free(rm_elements);
 
-	for (i = 0; i < files_n; i++)
+	for (i = 0; i < (size_t)files_n; i++)
 		free(trash_files[i]);
 	free(trash_files);
 
@@ -7284,7 +7307,7 @@ untrash_function(char **comm)
 	int trash_files_n = scandir(TRASH_FILES_DIR, &trash_files, skip_implied_dot, 
 							    (unicode) ? alphasort : (case_sensitive) 
 							     ? xalphasort : alphasort_insensitive);
-	if (trash_files_n == 0) {
+	if (trash_files_n <= 0) {
 		puts(_("trash: There are no trashed files"));
 		if (chdir(path) == -1) {
 			_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n", PROGRAM_NAME, path, 
@@ -7299,7 +7322,7 @@ untrash_function(char **comm)
 	if (comm[1] && (strcmp(comm[1], "*") == 0|| strcmp(comm[1], "a") == 0 
 	|| strcmp(comm[1], "all") == 0)) {
 		size_t j;
-		for (j = 0; j < trash_files_n; j++) {
+		for (j = 0; j < (size_t)trash_files_n; j++) {
 			if (untrash_element(trash_files[j]->d_name) != 0)
 				exit_status = 1;
 			free(trash_files[j]);
@@ -7318,8 +7341,8 @@ untrash_function(char **comm)
 	/* List trashed files */
 	printf(_("%sTrashed files%s%s\n\n"), white, NC, default_color);
 	size_t i;
-	for (i = 0; i < trash_files_n; i++)
-		colors_list(trash_files[i]->d_name, i + 1, 0, 1);
+	for (i = 0; i < (size_t)trash_files_n; i++)
+		colors_list(trash_files[i]->d_name, (int)i + 1, 0, 1);
 
 	/* Go back to previous path */
 	if (chdir(path) == -1) {
@@ -7346,12 +7369,12 @@ untrash_function(char **comm)
 
 	/* First check for quit, *, and non-number args */
 	short free_and_return = 0;
-	for(i = 0; i < undel_n; i++) {
+	for(i = 0; i < (size_t)undel_n; i++) {
 		if (strcmp(undel_elements[i], "q") == 0)
 			free_and_return = 1;
 		else if (strcmp(undel_elements[i], "*") == 0) {
 			size_t j;
-			for (j = 0; j < trash_files_n; j++)
+			for (j = 0; j < (size_t)trash_files_n; j++)
 				if (untrash_element(trash_files[j]->d_name) != 0)
 					exit_status = 1;
 			free_and_return = 1;
@@ -7366,10 +7389,10 @@ untrash_function(char **comm)
 	/* Free and return if any of the above conditions is true */
 	if (free_and_return) {
 		size_t j = 0;
-		for (j = 0; j < undel_n; j++)
+		for (j = 0; j < (size_t)undel_n; j++)
 			free(undel_elements[j]);
 		free(undel_elements);
-		for (j = 0; j < trash_files_n; j++)
+		for (j = 0; j < (size_t)trash_files_n; j++)
 			free(trash_files[j]);
 		free(trash_files);
 		return exit_status;
@@ -7377,7 +7400,7 @@ untrash_function(char **comm)
 
 	/* Undelete trashed files */
 	int undel_num;
-	for(i = 0; i < undel_n; i++) {
+	for(i = 0; i < (size_t)undel_n; i++) {
 		undel_num = atoi(undel_elements[i]);
 		if (undel_num <= 0 || undel_num > trash_files_n) {
 			fprintf(stderr, _("%s: undel: '%d': Invalid ELN\n"), PROGRAM_NAME, 
@@ -7394,7 +7417,7 @@ untrash_function(char **comm)
 	free(undel_elements);
 	
 	/* Free trashed files list */
-	for (i = 0; i < trash_files_n; i++)
+	for (i = 0; i < (size_t)trash_files_n; i++)
 		free(trash_files[i]);
 	free(trash_files);
 	
@@ -7429,7 +7452,7 @@ trash_clear(void)
 	}
 
 	size_t i;
-	for (i = 0; i < files_n; i++) {
+	for (i = 0; i < (size_t)files_n; i++) {
 		size_t info_file_len = strlen(trash_files[i]->d_name) + 11;
 		char *info_file = (char *)xnmalloc(info_file_len, sizeof(char));
 		sprintf(info_file, "%s.trashinfo", trash_files[i]->d_name);
@@ -7518,8 +7541,8 @@ trash_function (char **comm)
 							  alphasort_insensitive);
 		if (files_n) {
 			size_t i;
-			for (i = 0; i < files_n; i++) {
-				colors_list(trash_files[i]->d_name, i + 1, 0, 1);
+			for (i = 0; i < (size_t)files_n; i++) {
+				colors_list(trash_files[i]->d_name, (int)i + 1, 0, 1);
 				free(trash_files[i]);
 			}
 			free(trash_files);
@@ -7645,7 +7668,7 @@ add_to_dirhist(const char *dir_path)
 		}
 	}
 
-	old_pwd = (char **)xrealloc(old_pwd, (dirhist_total_index + 1) 
+	old_pwd = (char **)xrealloc(old_pwd, (size_t)(dirhist_total_index + 1) 
 								* sizeof(char *));
 	old_pwd[dirhist_total_index] = (char *)xcalloc(strlen(dir_path) + 1, 
 												   sizeof(char));
@@ -7762,7 +7785,7 @@ keybind_exec_cmd(char *str)
 /* Runs any command recognized by CliFM via a keybind. Example:
  * keybind_exec_cmd("sel *") */
 {
-	int old_args = args_n;
+	size_t old_args = args_n;
 	args_n = 0;
 
 	char **cmd = parse_input_str(str);
@@ -7951,7 +7974,10 @@ readline_kbind_action(int count, int key) {
 	case 126:
 		keybind_exec_cmd("edit");
 		break;
+		
+	default: break;
 	}
+
 	rl_on_new_line();
 
 	return 0;
@@ -7971,7 +7997,7 @@ parse_usrvar_value(const char *str, const char c)
 			if (i == (str_len - 1))
 				return NULL;
 			char *buf = (char *)NULL;
-			buf = (char *)xcalloc((str_len - index) + 1, sizeof(char));	
+			buf = (char *)xnmalloc((str_len - index) + 1, sizeof(char));	
 			for (i = index; i < str_len; i++) {
 				if (str[i] != '"' && str[i] != '\'' && str[i] != '\\' 
 				&& str[i] != 0x00) {
@@ -8005,7 +8031,8 @@ create_usr_var(char *str)
 		return EXIT_FAILURE;
 	}
 	
-	usr_var = xrealloc(usr_var, (usrvar_n + 1) * sizeof(struct usrvar_t));
+	usr_var = xrealloc(usr_var, (size_t)(usrvar_n + 1)
+					   * sizeof(struct usrvar_t));
 	usr_var[usrvar_n].name = xcalloc(strlen(name) + 1, sizeof(char));
 	usr_var[usrvar_n].value = xcalloc(strlen(value) + 1, sizeof(char));
 	strcpy(usr_var[usrvar_n].name, name);
@@ -8044,7 +8071,7 @@ free_stuff (void)
 	free(dirlist);
 	
 	if (sel_n > 0) {
-		for (i = 0; i < (size_t)sel_n; i++)
+		for (i = 0; i < sel_n; i++)
 			free(sel_elements[i]);
 		free(sel_elements);
 	}
@@ -8056,13 +8083,13 @@ free_stuff (void)
 	}
 	
 	if (paths) {
-		for (i = 0; i < (size_t)path_n; i++)
+		for (i = 0; i < path_n; i++)
 			free(paths[i]);
 		free(paths);
 	}
 
 	if (history) {
-		for (i = 0; i < (size_t)current_hist_n; i++)
+		for (i = 0; i < current_hist_n; i++)
 			free(history[i]);
 		free(history);
 	}
@@ -8079,17 +8106,17 @@ free_stuff (void)
 		free(old_pwd);
 	}
 	
-	for (i = 0; i < (size_t)usrvar_n; i++) {
+	for (i = 0; i < usrvar_n; i++) {
 		free(usr_var[i].name);
 		free(usr_var[i].value);
 	}
 	free(usr_var);
 
-	for (i = 0; i < (size_t)aliases_n; i++)
+	for (i = 0; i < aliases_n; i++)
 		free(aliases[i]);
 	free(aliases);
 
-	for (i = 0; i < (size_t)prompt_cmds_n; i++)
+	for (i = 0; i < prompt_cmds_n; i++)
 		free(prompt_cmds[i]);
 	free(prompt_cmds);
 
@@ -8335,7 +8362,7 @@ get_path_programs(void)
 {
 	struct dirent ***commands_bin = (struct dirent ***)xnmalloc(path_n, 
 													sizeof(struct dirent));
-	int	i, j, k, l = 0, total_cmd = 0;
+	size_t i, j, k, l = 0, total_cmd = 0;
 	int *cmd_n = (int *)xnmalloc(path_n, sizeof(int));
 
 	for (k = 0; k < path_n; k++) {
@@ -8345,12 +8372,12 @@ get_path_programs(void)
 		 * if they exist or not. If paths[k] dir is empty do not use it 
 		 * either */
 		if (cmd_n[k] > 0)
-			total_cmd += cmd_n[k];
+			total_cmd += (size_t)cmd_n[k];
 	}
 
 	/* Add internal commands */
 	/* Get amount of internal cmds (elements in INTERNAL_CMDS array) */
-	int internal_cmd_n = (sizeof(INTERNAL_CMDS) / 
+	size_t internal_cmd_n = (sizeof(INTERNAL_CMDS) / 
 						  sizeof(INTERNAL_CMDS[0])) - 1;
 	bin_commands = (char **)xcalloc(total_cmd + internal_cmd_n + 
 									aliases_n + 2, 
@@ -8364,7 +8391,7 @@ get_path_programs(void)
 	/* Add commands in PATH */
 	for (i = 0; i < path_n; i++) {
 		if (cmd_n[i] > 0) {
-			for (j = 0; j < cmd_n[i]; j++) {
+			for (j = 0; j < (size_t)cmd_n[i]; j++) {
 				bin_commands[l] = (char *)xnmalloc(
 											strlen(commands_bin[i][j]->d_name) 
 											+ 1, sizeof(char));
@@ -8385,8 +8412,8 @@ get_path_programs(void)
 	for (i = 0; i < aliases_n; i++) {
 		int index = strcntchr(aliases[i], '=');
 		if (index != -1) {
-			bin_commands[l] = (char *)xnmalloc(index + 1, sizeof(char));
-			strncpy(bin_commands[l++], aliases[i], index);
+			bin_commands[l] = (char *)xnmalloc((size_t)index + 1, sizeof(char));
+			strncpy(bin_commands[l++], aliases[i], (size_t)index);
 		}
 	}
 
@@ -8400,8 +8427,11 @@ my_rl_quote(char *text, int m_t, char *qp)
  * Modified version of:
  * https://utcc.utoronto.ca/~cks/space/blog/programming/ReadlineQuotingExample*/
 {
+	/* NOTE: m_t and qp arguments are not used here, but are required by
+	 * rl_filename_quoting_function */
+
 	/* 
-	 * How it works: p and r and pointers to the same memory location 
+	 * How it works: p and r are pointers to the same memory location 
 	 * initialized (calloced) twice as big as the line that needs to be 
 	 * quoted (in case all chars in the line need to be quoted); tp is a 
 	 * pointer to text, which contains the string to be quoted. We move 
@@ -8500,7 +8530,8 @@ my_rl_path_completion(const char *text, int state)
 	static char *filename = (char *)NULL;
 	static char *dirname = (char *)NULL;
 	static char *users_dirname = (char *)NULL;
-	static int filename_len, match, ret;
+	static size_t filename_len;
+	static int match, ret;
 	struct dirent *entry = (struct dirent *)NULL;
 	static int exec = 0, exec_path = 0;
 	static char *dir_tmp = (char *)NULL;
@@ -8706,7 +8737,7 @@ my_rl_path_completion(const char *text, int state)
 			/* Check if possible completion match up to the length of 
 			 * filename. */
 			if ((entry->d_name[0] == filename[0])
-			&& (((int)strlen(entry->d_name)) >= filename_len)
+			&& ((strlen(entry->d_name)) >= filename_len)
 			&& (strncmp(filename, entry->d_name, filename_len) == 0)) {
 
 				if (strncmp(rl_line_buffer, "cd ", 3) == 0) {
@@ -8826,7 +8857,7 @@ my_rl_path_completion(const char *text, int state)
 		/* dirname && (strcmp(dirname, ".") != 0) */
 		if (dirname && (dirname[0] != '.' || dirname[1])) {
 			if (rl_complete_with_tilde_expansion && *users_dirname == '~') {
-				int dirlen = strlen(dirname);
+				size_t dirlen = strlen(dirname);
 				temp = (char *)xcalloc(dirlen + strlen(entry->d_name) + 2, 
 									   sizeof(char));
 				strcpy(temp, dirname);
@@ -8877,7 +8908,7 @@ my_rl_completion(const char *text, int start, int end)
 		 * atoi */
 		if (*text >= 0x31 && *text <= 0x39) {
 			int num_text = atoi(text);
-			if (is_number(text) && num_text > 0 && num_text <= files)
+			if (is_number(text) && num_text > 0 && num_text <= (int)files)
 					matches = rl_completion_matches(text, &filenames_generator);
 		}
 				/* ### BOOKMARKS COMPLETION ### */
@@ -8928,7 +8959,7 @@ get_profile_names(void)
 		return EXIT_FAILURE;
 	
 	size_t i, pf_n = 0;
-	for (i = 0; i < files_n; i++) {
+	for (i = 0; i < (size_t)files_n; i++) {
 		if (profs[i]->d_type == DT_DIR
 		/* Discard ".", "..", and hidden dirs */
 		&& strncmp(profs[i]->d_name, ".", 1) != 0) {
@@ -9078,7 +9109,7 @@ char *
 filenames_generator(const char *text, int state)
 /* Used by ELN expansion */
 {
-	static int i;
+	static size_t i;
 	char *name;
 	rl_filename_completion_desired=1;
 	/* According to the GNU readline documention: "If it is set to a non-zero 
@@ -9120,7 +9151,7 @@ bin_cmd_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
-int
+size_t
 get_path_env(void)
 /* Store all paths in the PATH environment variable into a globally declared 
  * array (paths) */
@@ -9147,7 +9178,7 @@ get_path_env(void)
 		return 0;
 
 	/* Get each path in PATH */
-	int path_num = 0, length = 0;
+	size_t path_num = 0, length = 0;
 	for (i = 0; path_tmp[i]; i++) {
 		/* Store path in PATH in a tmp buffer */
 		char buf[PATH_MAX] = "";
@@ -9331,7 +9362,7 @@ init_config(void)
 		/* #### CHECK THE CONFIG FILE #### */
 		/* Open the config file or create it, if it doesn't exist */
 		if (config_ok && stat(CONFIG_FILE, &file_attrib) == -1) {
-			int ret = create_config(CONFIG_FILE);
+			ret = create_config(CONFIG_FILE);
 			if (ret == EXIT_SUCCESS)
 				config_ok = 1;
 			else
@@ -9375,11 +9406,7 @@ init_config(void)
 							continue;
 						if (strncmp(opt_str, "true", 4) == 0)
 							splash_screen = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							splash_screen = 0;
-						/* Default value (if option was found but value is 
-						 * neither true nor false) */
-						else
+						else /* False and default */
 							splash_screen = 0;
 					}
 
@@ -9403,9 +9430,7 @@ init_config(void)
 							continue;
 						if (strncmp(opt_str, "true", 4) == 0)
 							clear_screen = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							clear_screen = 0;
-						else /* default */
+						else /* False and default */
 							clear_screen = 0;
 					}
 
@@ -9431,9 +9456,7 @@ init_config(void)
 							continue;
 						if (strncmp (opt_str, "true", 4) == 0)
 							long_view = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							long_view = 0;
-						else /* default */
+						else /* False and default */
 							long_view = 0;
 					}
 
@@ -9445,9 +9468,7 @@ init_config(void)
 							continue;
 						if (strncmp(opt_str, "true", 4) == 0)
 							ext_cmd_ok = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							ext_cmd_ok = 0;
-						else /* default */
+						else /* False and default */
 							ext_cmd_ok = 0;
 					}
 
@@ -9458,9 +9479,7 @@ init_config(void)
 							continue;
 						if (strncmp(opt_str, "true", 4) == 0)
 							logs_enabled = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							logs_enabled = 0;
-						else /* default */
+						else /* False and default */
 							logs_enabled = 0;
 					}
 
@@ -9564,9 +9583,7 @@ init_config(void)
 							continue;
 						if (strncmp(opt_str, "true", 4) == 0)
 							case_sensitive = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							case_sensitive = 0;
-						else /* default */
+						else /* False and default */
 							case_sensitive = 0;
 					}
 
@@ -9578,9 +9595,7 @@ init_config(void)
 							continue;
 						if (strncmp(opt_str, "true", 4) == 0)
 							unicode = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							unicode = 0;
-						else /* default */
+						else /* False and default */
 							unicode = 0;
 					}
 
@@ -9592,9 +9607,7 @@ init_config(void)
 							continue;
 						if (strncmp(opt_str, "true", 4) == 0)
 							pager = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							pager = 0;
-						else /* Default */
+						else /* False and default */
 							pager = 0;
 					}
 
@@ -9755,7 +9768,7 @@ init_config(void)
 							if (num == -1)
 								div_line_char = '=';
 							else
-								div_line_char = num;
+								div_line_char = (char)num;
 						}
 						else
 							div_line_char = opt_c;
@@ -9998,7 +10011,7 @@ exec_profile(void)
 						exec_cmd(cmds);
 						no_log = 0;
 						size_t i;
-						for (i = 0; i <= (size_t)args_n; i++)
+						for (i = 0; i <= args_n; i++)
 							free(cmds[i]);
 						free(cmds);
 						cmds = (char **)NULL;
@@ -10018,7 +10031,7 @@ get_cmd_path(const char *cmd)
  * basically does the same as the 'which' Unix command */
 {
 	char *cmd_path = (char *)NULL;
-	int i;
+	size_t i;
 	
 	cmd_path = (char *)xnmalloc(PATH_MAX + 1, sizeof(char));
 	
@@ -10209,8 +10222,10 @@ external_arguments(int argc, char **argv)
 						"[-aAfFgGhiIlLoOsuUvx] [-p path]\nTry '%s --help' for "
 						"more information.\n"), PROGRAM_NAME, optopt, PNL, PNL);
 			else fprintf(stderr, _("%s: unknown option character '\\%x'\n"), 
-						 PROGRAM_NAME, optopt);
+						 PROGRAM_NAME, (unsigned int)optopt);
 			exit(EXIT_FAILURE);
+		
+		default: break;
 		}
 	}
 
@@ -10264,12 +10279,13 @@ int
 brace_expansion(const char *str)
 {
 	size_t str_len = strlen(str);
-	int i = 0, j = 0, k = 0, l = 0, initial_brace = 0, closing_brace = -1;
+	size_t i = 0, j = 0, k = 0, l = 0;
+	int initial_brace = 0, closing_brace = -1;
 	char *braces_root = (char *)NULL, *braces_end = (char *)NULL;
 
-	for (i = 0; i < (int)str_len; i++) {
+	for (i = 0; i < str_len; i++) {
 		if (str[i] == '{') {
-			initial_brace = i;
+			initial_brace = (int)i;
 			braces_root = (char *)xcalloc(i + 2, sizeof(char));
 
 			/* If any, store the string before the beginning of the braces */
@@ -10279,11 +10295,11 @@ brace_expansion(const char *str)
 
 		/* If any, store the string after the closing brace */
 		if (initial_brace && str[i] == '}') {
-			closing_brace = i;
-			if ((str_len - 1) - closing_brace > 0) {
-				braces_end = (char *)xcalloc(str_len - closing_brace, 
+			closing_brace = (int)i;
+			if ((str_len - 1) - (size_t)closing_brace > 0) {
+				braces_end = (char *)xcalloc(str_len - (size_t)closing_brace, 
 											 sizeof(char));
-				for (k = closing_brace + 1; str[k] != 0x00; k++)
+				for (k = (size_t)closing_brace + 1; str[k] != 0x00; k++)
 					braces_end[l++] = str[k];
 			}
 		break;
@@ -10299,12 +10315,13 @@ brace_expansion(const char *str)
 	}
 
 	k=0;
-	int braces_n = 0;
+	size_t braces_n = 0;
 
 	braces = (char **)xnmalloc(braces_n + 1, sizeof(char *));
 
-	for (i = (int)j + 1; i < closing_brace; i++) {
-		char *brace_tmp = (char *)xnmalloc(closing_brace - initial_brace,
+	for (i = j + 1; i < (size_t)closing_brace; i++) {
+		char *brace_tmp = (char *)xnmalloc((size_t)
+										   (closing_brace - initial_brace),
 										   sizeof(char));
 		
 		while (str[i] != '}' && str[i] != ',' && str[i] != 0x00)
@@ -10340,7 +10357,7 @@ brace_expansion(const char *str)
 	if (braces_end)
 		free(braces_end);
 
-	return braces_n + 1;
+	return (int)braces_n + 1;
 }
 
 char **
@@ -10536,10 +10553,10 @@ parse_input_str (char *str)
 
 	is_sel = 0, sel_is_last = 0;
 
-	int int_array_max = 10, ranges_ok = 0;
+	size_t int_array_max = 10, ranges_ok = 0;
 	int *range_array = (int *)xnmalloc(int_array_max, sizeof(int));
 
-	for (i = 0; i <= (size_t)args_n; i++) {
+	for (i = 0; i <= args_n; i++) {
 		
 		size_t substr_len = strlen(substr[i]);
 		
@@ -10550,12 +10567,12 @@ parse_input_str (char *str)
 			if (j > 0 && j < substr_len && substr[i][j] == '-' && 
 			isdigit(substr[i][j - 1]) && isdigit(substr[i][j + 1]))
 				if (ranges_ok < int_array_max)
-					range_array[ranges_ok++] = i;
+					range_array[ranges_ok++] = (int)i;
 		}
 	
 		/* Expand 'sel' only as an argument, not as command */
 		if (i > 0 && strcmp(substr[i], "sel") == 0)
-			is_sel = i;
+			is_sel = (short)i;
 	}
 	
 			/* ####################################
@@ -10566,12 +10583,13 @@ parse_input_str (char *str)
 	 * range correspond to an ELN */
 
 	if (ranges_ok) {
-		int old_ranges_n = 0;
+		size_t old_ranges_n = 0;
 		register size_t r = 0;
 		
 		for (r = 0; r < ranges_ok; r++) {
-			int ranges_n = 0;
-			int *ranges = expand_range(substr[range_array[r] + old_ranges_n], 1);
+			size_t ranges_n = 0;
+			int *ranges = expand_range(substr[range_array[r] + 
+									   (int)old_ranges_n], 1);
 			if (ranges) {
 				register size_t j = 0;
 				
@@ -10579,19 +10597,21 @@ parse_input_str (char *str)
 				char **ranges_cmd = (char **)NULL;
 				ranges_cmd = (char **)xcalloc(args_n + ranges_n + 2, 
 											  sizeof(char *));
-				for (i = 0;i < range_array[r] + old_ranges_n; i++) {
+				for (i = 0; i < (size_t)range_array[r] + old_ranges_n; i++) {
 					ranges_cmd[j] = (char *)xcalloc(strlen(substr[i]) + 1, 
 													sizeof(char));
 					strcpy(ranges_cmd[j++], substr[i]);
 				}
 				
 				for (i = 0; i < ranges_n; i++) {
-					ranges_cmd[j] = (char *)xcalloc(digits_in_num(ranges[i])
+					ranges_cmd[j] = (char *)xcalloc((size_t)
+													digits_in_num(ranges[i])
 													+ 1, sizeof(int));
 					sprintf(ranges_cmd[j++], "%d", ranges[i]);
 				}
 				
-				for (i = range_array[r] + old_ranges_n + 1; i <= args_n; i++) {
+				for (i = (size_t)range_array[r] + old_ranges_n + 1; 
+				i <= args_n; i++) {
 					ranges_cmd[j] = (char *)xcalloc(strlen(substr[i]) + 1, 
 													sizeof(char));
 					strcpy(ranges_cmd[j++], substr[i]);
@@ -10599,7 +10619,7 @@ parse_input_str (char *str)
 				ranges_cmd[j] = NULL;
 				free(ranges);
 				
-				for (i = 0;i <= args_n; i++) 
+				for (i = 0; i <= args_n; i++) 
 					free(substr[i]);
 				
 				substr = (char **)xrealloc(substr, (args_n + ranges_n + 2) * 
@@ -10625,13 +10645,16 @@ parse_input_str (char *str)
 				 * ##########################*/
 
 	if (is_sel) {
-		if (is_sel == args_n) sel_is_last = 1;
+
+		if ((size_t)is_sel == args_n)
+			sel_is_last = 1;
+
 		if (sel_n) {
 			register size_t j = 0;
 			char **sel_array = (char **)NULL;
 			sel_array = (char **)xcalloc(args_n + sel_n + 2, sizeof(char *));
 			
-			for (i = 0; i < is_sel; i++) {
+			for (i = 0; i < (size_t)is_sel; i++) {
 				sel_array[j] = (char *)xcalloc(strlen(substr[i]) + 1, 
 											   sizeof(char));
 				strcpy(sel_array[j++], substr[i]);
@@ -10663,7 +10686,7 @@ parse_input_str (char *str)
 				}
 			}
 			
-			for (i = is_sel + 1; i <= args_n; i++) {
+			for (i = (size_t)is_sel + 1; i <= args_n; i++) {
 				sel_array[j] = (char *)xcalloc(strlen(substr[i]) + 1, 
 											   sizeof(char));
 				strcpy(sel_array[j++], substr[i]);
@@ -10699,7 +10722,7 @@ parse_input_str (char *str)
 		}
 	}
 
-	for (i = 0; i <= (size_t)args_n; i++) {
+	for (i = 0; i <= args_n; i++) {
 
 				/* ##########################
 				 * #   2.c) ELN EXPANSION   # 
@@ -10713,7 +10736,7 @@ parse_input_str (char *str)
 		if (i > 0 && is_number(substr[i])) {
 			int num = atoi(substr[i]);
 			/* Expand numbers only if there is a corresponding ELN */
-			if (num > 0 && num <= files) {
+			if (num > 0 && num <= (int)files) {
 				/* Replace the ELN by the corresponding escaped filename */
 				char *esc_str = escape_str(dirlist[num - 1]);
 				if (esc_str) {
@@ -10744,9 +10767,9 @@ parse_input_str (char *str)
 		if (substr[i][0] == '$' && substr[i][1] != '(') {
 			char *var_name = straft(substr[i], '$');
 			if (var_name) {
-				unsigned j;
+				size_t j;
 				
-				for (j = 0; (int)j < usrvar_n; j++) {
+				for (j = 0; j < usrvar_n; j++) {
 					if (strcmp(var_name, usr_var[j].name) == 0) {
 						substr[i] = (char *)xrealloc(substr[i], 
 							    (strlen(usr_var[j].value) + 1) * sizeof(char));
@@ -10793,7 +10816,7 @@ parse_input_str (char *str)
 
 	int *glob_array = (int *)xnmalloc(int_array_max, sizeof(int)); 
 	int *braces_array = (int *)xnmalloc(int_array_max, sizeof(int)); 
-	int	glob_n = 0, braces_n = 0;
+	size_t glob_n = 0, braces_n = 0;
 
 	for (i = 0; substr[i]; i++) {
 
@@ -10803,7 +10826,7 @@ parse_input_str (char *str)
 		if (is_sel) { /* is_sel is true only for the current input and if
 			there was some "sel" keyword in it */
 			/* Strings between is_sel and sel_n are selected filenames */
-			if (i >= is_sel && i <= sel_n)
+			if (i >= (size_t)is_sel && i <= sel_n)
 				continue;
 		}
 		
@@ -10831,7 +10854,7 @@ parse_input_str (char *str)
 			exp_path = (char *)NULL;
 		}
 
-		register size_t j=0;
+		register size_t j = 0;
 		for (j = 0; substr[i][j]; j++) {
 			
 			/* If a brace is found, store its index */
@@ -10843,7 +10866,7 @@ parse_input_str (char *str)
 				for (k = j + 1; substr[i][k] && substr[i][k]!='}'; k++) {
 					if (substr[i][k] == ',' && substr[i][k - 1] != '\\'
 					&& braces_n < int_array_max) {
-						braces_array[braces_n++] = i;
+						braces_array[braces_n++] = (int)i;
 						break;
 					}
 				}
@@ -10856,7 +10879,7 @@ parse_input_str (char *str)
 			 * patterns and are expanded by the glob function. See man (7) 
 			 * glob */
 				if (glob_n < int_array_max)
-					glob_array[glob_n++] = i;
+					glob_array[glob_n++] = (int)i;
 		}
 	}
 
@@ -10882,7 +10905,7 @@ parse_input_str (char *str)
 		5) Copy the remaining elements (i=glob_char+1;i<=args_n;i++)
 		6) Free the old comm_array and fill it with comm_array_glob 
 	  */
-		int old_pathc = 0;
+		size_t old_pathc = 0;
 		/* glob_array stores the index of the globbed strings. However, once 
 		 * the first expansion is done, the index of the next globbed string 
 		 * has changed. To recover the next globbed string, and more precisely, 
@@ -10893,22 +10916,23 @@ parse_input_str (char *str)
 		 * (gl_pathc), we get now the original globbed string pointed by 4.
 		*/
 		register size_t g = 0;
-		for (g = 0; g < glob_n; g++){
+		for (g = 0; g < (size_t)glob_n; g++){
 			glob_t globbuf;
-			glob (substr[glob_array[g] + old_pathc], 0, NULL, &globbuf);
+			glob(substr[glob_array[g] + (int)old_pathc], 0, NULL, &globbuf);
+
 			if (globbuf.gl_pathc) {
-				register size_t j=0;
+				register size_t j = 0;
 				char **glob_cmd = (char **)NULL;
 				glob_cmd = (char **)xcalloc(args_n + globbuf.gl_pathc + 1, 
 											sizeof(char *));			
 				
-				for (i = 0; i < (glob_array[g] + old_pathc); i++) {
+				for (i = 0; i < ((size_t)glob_array[g] + old_pathc); i++) {
 					glob_cmd[j] = (char *)xcalloc(strlen(substr[i]) + 1, 
 												  sizeof(char));
 					strcpy(glob_cmd[j++], substr[i]);
 				}
 				
-				for (i = 0;i < globbuf.gl_pathc; i++) {
+				for (i = 0; i < globbuf.gl_pathc; i++) {
 					/* Escape the globbed filename and copy it*/
 					char *esc_str = escape_str(globbuf.gl_pathv[i]);
 					if (esc_str) {
@@ -10932,14 +10956,15 @@ parse_input_str (char *str)
 					}
 				}
 				
-				for (i = glob_array[g] + old_pathc + 1; i <= args_n; i++) {
+				for (i = (size_t)glob_array[g] + old_pathc + 1; i <= args_n; 
+				i++) {
 					glob_cmd[j] = (char *)xcalloc(strlen(substr[i]) + 1, 
 												  sizeof(char));
 					strcpy(glob_cmd[j++], substr[i]);
 				}
 				glob_cmd[j] = (char *)NULL;
 
-				for (i = 0;i <= args_n; i++) 
+				for (i = 0; i <= args_n; i++) 
 					free(substr[i]);
 				substr = (char **)xrealloc(substr, 
 										(args_n+globbuf.gl_pathc + 1)
@@ -10979,21 +11004,23 @@ parse_input_str (char *str)
 				/* Create an array large enough to store parameters plus 
 				 * expanded braces */
 				char **comm_array_braces = (char **)NULL;
-				comm_array_braces = (char **)xcalloc(args_n + braced_args, 
+				comm_array_braces = (char **)xcalloc(args_n + 
+													 (size_t)braced_args, 
 													 sizeof(char *));
 				/* First, add to the new array the paramenters coming before 
 				 * braces */
 				
-				for (i = 0;i < (braces_array[b] + old_braces_arg); i++) {
+				for (i = 0; i < (size_t)(braces_array[b] + old_braces_arg); 
+				i++) {
 					comm_array_braces[i] = (char *)xcalloc(strlen(substr[i])
 														+ 1, sizeof(char));
 					strcpy(comm_array_braces[i], substr[i]);
 				}
+
 				/* Now, add the expanded braces to the same array */
-				
 				register size_t j = 0;
 				
-				for (j = 0; j < braced_args; j++) {
+				for (j = 0; j < (size_t)braced_args; j++) {
 					/* Escape each filename and copy it */
 					char *esc_str = escape_str(braces[j]);
 					if (esc_str) {
@@ -11030,7 +11057,8 @@ parse_input_str (char *str)
 				/* Finally, add, if any, those parameters coming after the 
 				 * braces */
 				
-				for (j = braces_array[b] + old_braces_arg + 1; j <= args_n; j++) {
+				for (j = (size_t)(braces_array[b] + old_braces_arg) + 1;
+				j <= args_n; j++) {
 					comm_array_braces[i] = (char *)xcalloc(strlen(substr[j])
 													+ 1, sizeof(char));
 					strcpy(comm_array_braces[i++], substr[j]);				
@@ -11040,7 +11068,8 @@ parse_input_str (char *str)
 				 * braces */
 				for (j = 0; j <= args_n; j++)
 					free(substr[j]);
-				substr = (char **)xrealloc(substr, (args_n + braced_args + 1) * 
+				substr = (char **)xrealloc(substr, (args_n + 
+										   (size_t)braced_args + 1) * 
 										   sizeof(char *));			
 				
 				args_n = i - 1;
@@ -11114,7 +11143,7 @@ get_sel_files(void)
 
 	/* First, clear the sel array, in case it was already used */
 	if (sel_n > 0) {
-		int i;
+		size_t i;
 		for (i = 0; i < sel_n; i++)
 			free(sel_elements[i]);
 	}
@@ -11167,12 +11196,12 @@ prompt(void)
 	/* Execute prompt commands, if any, and only if external commands are 
 	 * allowed */
 	if (ext_cmd_ok && prompt_cmds_n > 0) 
-		for (i = 0; i < (size_t)prompt_cmds_n; i++)
+		for (i = 0; i < prompt_cmds_n; i++)
 			launch_execle(prompt_cmds[i]);
 
 	/* Update trash and sel file indicator on every prompt call */
 	if (trash_ok) {
-		trash_n = count_dir(TRASH_FILES_DIR);
+		trash_n = (size_t)count_dir(TRASH_FILES_DIR);
 		if (trash_n <= 2)
 			trash_n = 0;
 	}
@@ -11193,6 +11222,7 @@ prompt(void)
 		case error: sprintf(msg_str, "%sE", red_b); break;
 		case warning: sprintf(msg_str, "%sW", yellow_b); break;
 		case notice: sprintf(msg_str, "%sN", green_b); break;
+		default: break;
 		}
 	}
 
@@ -11235,7 +11265,7 @@ prompt(void)
 	 * printed in place by log_msg() itself, without waiting for the next 
 	 * prompt */
 	if (print_msg) {
-		for (i = 0; i < msgs_n; i++)
+		for (i = 0; i < (size_t)msgs_n; i++)
 			fputs(messages[i], stderr);
 		print_msg = 0; /* Print messages only once */
 	}
@@ -11290,7 +11320,7 @@ prompt(void)
 	return files_n;
 }*/
 
-int
+size_t
 count_dir(const char *dir_path) /* Readdir version */
 {
 	struct stat file_attrib;
@@ -11298,7 +11328,7 @@ count_dir(const char *dir_path) /* Readdir version */
 	if (lstat (dir_path, &file_attrib) == -1)
 		return 0;
 
-	int file_count = 0;
+	size_t file_count = 0;
 	DIR *dir_p;
 	struct dirent *entry;
 
@@ -11430,7 +11460,7 @@ colors_list(const char *entry, const int i, const int pad,
 {
 	int i_digits = digits_in_num(i);
 							/* Num (i) + space + null byte */
-	char *index = (char *)xnmalloc(i_digits + 2, sizeof(char));
+	char *index = (char *)xnmalloc((size_t)i_digits + 2, sizeof(char));
 	if (i > 0) /* When listing files in CWD */
 		sprintf(index, "%d ", i);
 	else if (i == -1) /* ELN for entry could not be found */
@@ -11500,7 +11530,7 @@ colors_list(const char *entry, const int i, const int pad,
 		else {
 			int is_oth_w = 0;
 			if (file_attrib.st_mode & S_IWOTH) is_oth_w = 1;
-			int files_dir = count_dir (entry);
+			size_t files_dir = count_dir(entry);
 			if (files_dir == 2 || files_dir == 0) { /* If folder is empty, it 
 				contains only "." and ".." (2 elements). If not mounted 
 				(ex: /media/usb) the result will be zero.*/
@@ -11599,15 +11629,15 @@ list_dir(void)
 	/* Struct to store information about each file, so that we don't need
 	 * to run stat() and strlen() again later, perhaps hundreds of times */
 	struct fileinfo *file_info = (struct fileinfo *)xnmalloc(
-									total + 1, sizeof(struct fileinfo));
+									(size_t)total + 1, sizeof(struct fileinfo));
 
 	if (list_folders_first) {
 
 		/* Store indices of dirs and files into different int arrays, counting
 		 * the number of elements for each array too */
-		int *tmp_files = (int *)xnmalloc(total + 1, sizeof(int)); 
-		int *tmp_dirs = (int *)xnmalloc(total + 1, sizeof(int));
-		int filesn = 0, dirsn = 0;
+		int *tmp_files = (int *)xnmalloc((size_t)total + 1, sizeof(int)); 
+		int *tmp_dirs = (int *)xnmalloc((size_t)total + 1, sizeof(int));
+		size_t filesn = 0, dirsn = 0;
 		
 		for (i = 0; i < total; i++) {
 			if (list[i]->d_type == DT_DIR)
@@ -11626,7 +11656,7 @@ list_dir(void)
 
 		/* First copy dir names into the dirlist array */
 		size_t len;
-		for (i = 0; i < dirsn; i++) {
+		for (i = 0; i < (int)dirsn; i++) {
 			len = (unicode) ? u8_xstrlen(list[tmp_dirs[i]]->d_name)
 				  : strlen(list[tmp_dirs[i]]->d_name);
 			/* Store the filename length here, so that we don't need to run
@@ -11639,7 +11669,7 @@ list_dir(void)
 		
 		/* Now copy file names */
 		register int j;
-		for (j = 0; j < filesn; j++) {
+		for (j = 0; j < (int)filesn; j++) {
 			len = (unicode) ? u8_xstrlen(list[tmp_files[j]]->d_name)
 				  : strlen(list[tmp_files[j]]->d_name);
 			file_info[i].len = len;
@@ -11654,18 +11684,19 @@ list_dir(void)
 
 		/* This global variable keeps a record of the amounf of files in the
 		 * CWD */
-		files = i;
+		files = (size_t)i;
 	}
 	
 	/* If no list_folders_first */
 	else {
 
-		files = total;
+		files = (size_t)total;
 
-		dirlist = (char **)xrealloc(dirlist, (files + 1) * sizeof(char *));
+		dirlist = (char **)xrealloc(dirlist, (size_t)(files + 1)
+									* sizeof(char *));
 
 		size_t len;
-		for (i = files; i >= 0; i--) {
+		for (i = (int)files; i >= 0; i--) {
 			len = strlen(list[i]->d_name);
 			file_info[i].len = len;
 			dirlist[i] = xnmalloc(len + 1, sizeof(char));
@@ -11686,7 +11717,7 @@ list_dir(void)
 	/* Get the longest element */
 	longest = 0; /* Global */
 	struct stat file_attrib;
-	for (i = files; i--;) {
+	for (i = (int)files; i--;) {
 		int ret = lstat(dirlist[i], &file_attrib);
 
 		if (ret == -1) {
@@ -11701,7 +11732,8 @@ list_dir(void)
 		/* file_name_width contains: ELN's amount of digits + one space 
 		 * between ELN and filename + filename length. Ex: '12 name' contains 
 		 * 7 chars */
-		int file_name_width = digits_in_num(i + 1) + 1 + file_info[i].len;
+		size_t file_name_width = (size_t)digits_in_num(i + 1) + 1 + 
+								 file_info[i].len;
 
 		/* If the file is a non-empty directory and the user has access 
 		 * permision to it, add to file_name_width the number of digits of the 
@@ -11713,7 +11745,8 @@ list_dir(void)
 				file_info[i].filesn = count_dir(dirlist[i]);
 				file_info[i].ruser = 1;
 				if (file_info[i].filesn > 2)
-					file_name_width += digits_in_num(file_info[i].filesn) + 2;
+					file_name_width += 
+						(size_t)digits_in_num((int)file_info[i].filesn) + 2;
 			}
 			else
 				file_info[i].ruser = 0;
@@ -11732,21 +11765,23 @@ list_dir(void)
 	unsigned short term_rows = w.ws_row;
 
 	short reset_pager = 0;
-	char c;
+	int c;
 
 	/* Long view mode */
 	if (long_view) {
 		register size_t counter = 0;
 
 		int max = get_max_long_view();
+		
+		eln_len = digits_in_num(files);
 
-		for (i = 0; i < files; i++) {
+		for (i = 0; i < (int)files; i++) {
 
 			if (pager) {
 				/*	Check terminal amount of rows: if as many filenames as 
 				 * the amount of available terminal rows has been printed, 
 				 * stop */
-				if (counter > (term_rows - 2)) {
+				if ((int)counter > (int)(term_rows - 2)) {
 					switch(c = xgetchar()) {
 					/* Advance one line at a time */
 					case 66: /* Down arrow */
@@ -11773,20 +11808,25 @@ list_dir(void)
 
 			printf("%s%d%s ", eln_color, i + 1, NC);
 
-			get_properties(dirlist[i], (int)long_view, max);
+			get_properties(dirlist[i], (int)long_view, max, file_info[i].len);
 		}
 
 		if (reset_pager)
 			pager = 1;
 
 		free(file_info);
+		
+		while (total--)
+			free(list[total]);
+		free(list);
+		
 		return EXIT_SUCCESS;
 	}
 	
 	/* Normal view mode */
 	
 	/* Get possible amount of columns for the dirlist screen */
-	int columns_n = term_cols / (longest + 1); /* +1 for the space 
+	size_t columns_n = (size_t)term_cols / (longest + 1); /* +1 for the space 
 	between file names */
 	
 	/* If longest is bigger than terminal columns, columns_n will be 
@@ -11805,7 +11845,7 @@ list_dir(void)
 	register size_t counter = 0;
 	
 	/* Now we can do the listing */
-	for (i = 0; i < files; i++) {
+	for (i = 0; i < (int)files; i++) {
 
 		if (file_info[i].exists == 0)
 			continue;
@@ -11817,7 +11857,8 @@ list_dir(void)
 			/* Run the pager only once all columns and rows fitting in the 
 			 * screen are filled with the corresponding filenames */
 			/*			Check rows					Check columns */
-			if ((counter / columns_n) > (term_rows - 2) && last_column) {
+			if ((counter / columns_n) > (size_t)(term_rows - 2) 
+			&& last_column) {
 /*				printf("--Mas--"); */
 				switch (c = xgetchar()) {
 				/* Advance one line at a time */
@@ -11850,7 +11891,7 @@ list_dir(void)
 		cap_t cap;
 		#endif
 
-		if ((i + 1) % columns_n == 0)
+		if (((size_t)i + 1) % columns_n == 0)
 			last_column = 1;
 		else
 			last_column = 0;
@@ -11875,12 +11916,12 @@ list_dir(void)
 						 NC, (last_column) ? "\n" : "");
 				}
 				else {
-					printf("%s%d%s %s%s%s%s /%ld%s%s", eln_color, i + 1, NC,
+					printf("%s%d%s %s%s%s%s /%zu%s%s", eln_color, i + 1, NC,
 						 (file_info[i].type & S_ISVTX) ? ((is_oth_w) ? 
 						 tw_c : st_c) : ((is_oth_w) 
 						 ? ow_c : di_c), dirlist[i], 
-						 NC, dir_count_color, file_info[i].filesn - 2, NC, 
-						 (last_column) ? "\n" : "");
+						 NC, dir_count_color, file_info[i].filesn - 2, 
+						 NC, (last_column) ? "\n" : "");
 					is_dir = 1;
 				}
 			}
@@ -11965,21 +12006,22 @@ list_dir(void)
 		if (!last_column) {
 			/* Get the difference between the length of longest and the 
 			 * current element */
-			int diff = longest - (digits_in_num(i + 1) + 1 + file_info[i].len);
+			size_t diff = longest - ((size_t)digits_in_num(i + 1) + 1 + 
+					   file_info[i].len);
 			
 			if (is_dir) { /* If a directory, make room for displaying the 
 				* amount of files it contains */
 				/* Get the amount of digits in the number of files contained
 				 * by the listed directory */
-				int dig_num = digits_in_num(file_info[i].filesn - 2);
+				int dig_num = digits_in_num((int)file_info[i].filesn - 2);
 				/* The amount of digits plus 2 chars for " /" */
-				diff = diff - (dig_num + 2);
+				diff -= ((size_t)dig_num + 2);
 			}
 
 			/* Print the spaces needed to equate the length of the lines */
 			/* +1 is for the space between filenames */
 			register int j;
-			for (j = diff + 1; j--;)
+			for (j = (int)diff + 1; j--;)
 				putchar(' ');
 		}
 	}
@@ -12257,7 +12299,7 @@ exec_cmd(char **comm)
 		if (!comm[1] || strcmp(comm[1], "--help") == 0)
 			puts(_("Usage: o, open ELN/FILE [APPLICATION]"));
 		else
-			exit_code = open_function (comm);
+			exit_code = open_function(comm);
 	}
 	
 	else if (strcmp(comm[0], "rf") == 0 || strcmp(comm[0], "refresh") == 0) {
@@ -12618,7 +12660,7 @@ exec_cmd(char **comm)
 				return EXIT_SUCCESS;
 			}
 			size_t i;
-			for (i = 0; i < msgs_n; i++)
+			for (i = 0; i < (size_t)msgs_n; i++)
 				free(messages[i]);
 			msgs_n = 0;
 			pmsg = nomsg;
@@ -12626,7 +12668,7 @@ exec_cmd(char **comm)
 		else {
 			if (msgs_n) {
 				size_t i;
-				for (i = 0; i < msgs_n; i++)
+				for (i = 0; i < (size_t)msgs_n; i++)
 					printf("%s", messages[i]);
 			}
 			else
@@ -12654,7 +12696,7 @@ exec_cmd(char **comm)
 		
 		if (aliases_n) {
 			size_t i;
-			for (i = 0; i < (size_t)aliases_n; i++)
+			for (i = 0; i < aliases_n; i++)
 				printf("%s", aliases[i]);	
 		}
 	}
@@ -12731,7 +12773,7 @@ exec_cmd(char **comm)
 
 		/* Free everything and exit */
 		size_t i;
-		for (i = 0; i <= (size_t)args_n; i++)
+		for (i = 0; i <= args_n; i++)
 			free(comm[i]);
 		free(comm);
 
@@ -12769,7 +12811,7 @@ exec_cmd(char **comm)
 		if (strcmp(comm[0], "kill") == 0 
 		|| strcmp(comm[0], "killall") == 0 
 		|| strcmp(comm[0], "pkill") == 0) {
-			int i;
+			size_t i;
 			for (i = 1; i <= args_n; i++) {
 				if ((strcmp(comm[0], "kill") == 0 
 				&& atoi(comm[i]) == (int)own_pid) 
@@ -12829,7 +12871,7 @@ exec_cmd(char **comm)
 
 		register size_t i;
 		if (args_n) { /* This will be false in case of ";cmd" or ":cmd" */
-			for (i = 1; i <= (size_t)args_n; i++) {
+			for (i = 1; i <= args_n; i++) {
 				ext_cmd_len += strlen(comm[i]) + 1;
 				ext_cmd = (char *)xrealloc(ext_cmd, (ext_cmd_len + 1)
 										   * sizeof(char));
@@ -12871,10 +12913,10 @@ exec_cmd(char **comm)
 		}
 
 		if (paths)
-			for (i = 0; i < (size_t)path_n; i++)
+			for (i = 0; i < path_n; i++)
 				free(paths[i]);
 
-		path_n = get_path_env();
+		path_n = (size_t)get_path_env();
 		get_path_programs();
 	}
 
@@ -13149,11 +13191,12 @@ save_sel(void)
 		return EXIT_FAILURE;
 	}
 	
-	int i;
+	size_t i;
 	for (i = 0; i < sel_n; i++) {
 		fputs(sel_elements[i], sel_fp);
 		fputc('\n', sel_fp);
 	}
+
 	fclose(sel_fp);
 
 	return EXIT_SUCCESS;
@@ -13166,7 +13209,8 @@ sel_function (char **comm)
 		return EXIT_FAILURE;
 
 	char *sel_tmp = (char *)NULL;
-	int i = 0, j = 0, exists = 0, new_sel = 0, exit_status = 0;
+	size_t i = 0, j = 0;
+	int exists = 0, new_sel = 0, exit_status = 0;
 
 	for (i = 1; i <= args_n; i++) {
 		char *deq_file = dequote_str(comm[i], 0);
@@ -13265,9 +13309,9 @@ sel_function (char **comm)
 	if (save_sel() == 0) { /* If selected files were successfully written to
 		sel file */
 		if (sel_n > 10)
-			printf(_("%d elements are now in the Selection Box\n"), sel_n);
+			printf(_("%zu elements are now in the Selection Box\n"), sel_n);
 		else if (sel_n > 0) {
-			printf(_("%d selected %s:\n"), sel_n, (sel_n == 1) ? _("element") : 
+			printf(_("%zu selected %s:\n"), sel_n, (sel_n == 1) ? _("element") : 
 				_("elements"));
 			for (i = 0; i < sel_n; i++)
 				printf("  %s\n", sel_elements[i]);
@@ -13298,14 +13342,14 @@ show_sel_files(void)
 		puts("");
 		struct winsize w;
 		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-		char c;
+		int c;
 		size_t counter = 0;
-		short term_rows = w.ws_row;
+		unsigned short term_rows = w.ws_row;
 		term_rows -= 2;
-		int i;
+		size_t i;
 		for(i = 0; i < sel_n; i++) {
 /*			if (pager && counter > (term_rows-2)) { */
-			if (pager && counter > term_rows) {
+			if (pager && counter > (size_t)term_rows) {
 				switch(c = xgetchar()) {
 				/* Advance one line at a time */
 				case 66: /* Down arrow */
@@ -13328,7 +13372,7 @@ show_sel_files(void)
 				}
 			}
 			counter++;
-			colors_list(sel_elements[i], i + 1, 0, 1);
+			colors_list(sel_elements[i], (int)i + 1, 0, 1);
 		}
 	}
 	if (reset_pager)
@@ -13344,7 +13388,7 @@ deselect(char **comm)
 	if (comm[1] && (strcmp(comm[1], "*") == 0 || strcmp(comm[1], "a") == 0 
 	|| strcmp(comm[1], "all") == 0)) {
 		if (sel_n > 0) {
-			int i;
+			size_t i;
 			for (i = 0; i < sel_n; i++)
 				free(sel_elements[i]);
 			sel_n = 0;
@@ -13359,7 +13403,7 @@ deselect(char **comm)
 		}
 	}
 	
-	register int i; 
+	register size_t i; 
 	if (clear_screen)
 		CLEAR;
 	printf(_("%sSelection Box%s%s\n"), white, NC, default_color);
@@ -13369,10 +13413,10 @@ deselect(char **comm)
 	}
 	puts("");
 	for (i = 0; i < sel_n; i++)
-		colors_list(sel_elements[i], i + 1, 0, 1);
+		colors_list(sel_elements[i], (int)i + 1, 0, 1);
 
 	printf(_("\n%s%sEnter 'q' to quit.\n"), NC, default_color);
-	int desel_n = 0;
+	size_t desel_n = 0;
 	char *line = NULL, **desel_elements = (char **)NULL;
 
 	while (!line)
@@ -13387,7 +13431,8 @@ deselect(char **comm)
 	for (i = 0; desel_elements[i]; i++)
 		desel_n++;
 
-	for (i = 0;i < desel_n; i++) { /* Validation */
+	for (i = 0; i < desel_n; i++) { /* Validation */
+		
 		/* If not a number */
 		if (!is_number(desel_elements[i])) {
 			if (strcmp(desel_elements[i], "q") == 0) {
@@ -13400,7 +13445,7 @@ deselect(char **comm)
 				/* Clear the sel array */
 				for (i = 0; i < sel_n; i++)
 					free(sel_elements[i]);
-				sel_n=0;
+				sel_n = 0;
 				for (i = 0; i < desel_n; i++)
 					free(desel_elements[i]);
 				int exit_status = 0;
@@ -13408,7 +13453,8 @@ deselect(char **comm)
 					exit_status = 1;
 				free(desel_elements);
 				if (cd_lists_on_the_fly) {
-					while (files--) free(dirlist[files]);
+					while (files--)
+						free(dirlist[files]);
 					if (list_dir() != 0)
 						exit_status = 1;
 				}
@@ -13423,10 +13469,11 @@ deselect(char **comm)
 				return EXIT_FAILURE;
 			}
 		}
+
 		/* If a number, check it's a valid ELN */
 		else {
 			int atoi_desel = atoi(desel_elements[i]);
-			if (atoi_desel == 0 || atoi_desel > sel_n) {
+			if (atoi_desel == 0 || (size_t)atoi_desel > sel_n) {
 				printf(_("desel: '%s': Invalid ELN\n"), desel_elements[i]);
 				size_t j;
 				for (j = 0; j < desel_n; j++)
@@ -13446,22 +13493,25 @@ deselect(char **comm)
 	 * string */
 	char **desel_path = (char **)NULL;
 	desel_path = (char **)xnmalloc(desel_n, sizeof(char *));
+
 	for (i = 0; i < desel_n; i++) {
 		int desel_int = atoi(desel_elements[i]);
 		desel_path[i] = (char *)xnmalloc(strlen(sel_elements[desel_int - 1]) 
 										 + 1, sizeof(char));
 		strcpy(desel_path[i], sel_elements[desel_int - 1]);
 	}
+
 	/* Search the sel array for the path of the element to deselect and store 
 	its index */
 	for (i = 0; i < desel_n; i++) {
-		int desel_index = 0, j, k;
+		size_t j, k, desel_index = 0;
 		for (k = 0; k < sel_n; k++) {
 			if (strcmp(sel_elements[k], desel_path[i]) == 0) {
 				desel_index = k;
 				break;
 			}
 		}
+		
 		/* Once the index was found, rearrange the sel array removing the 
 		 * deselected element (actually, moving each string after it to the 
 		 * previous position) */
@@ -13472,27 +13522,31 @@ deselect(char **comm)
 			strcpy(sel_elements[j], sel_elements[j + 1]);
 		}
 	}
+
 	/* Free the last DESEL_N elements from the old sel array. They won't be 
 	 * used anymore, for they contain the same value as the last non-deselected 
 	 * element due to the above array rearrangement */
-	for (i = 1; i <= desel_n; i++) {
-		if ((sel_n - i) >= 0 && sel_elements[sel_n - i])
+	for (i = 1; i <= desel_n; i++)
+		if ((int)(sel_n - i) >= 0 && sel_elements[sel_n - i])
 			free(sel_elements[sel_n - i]);
-	}
+
 	/* Reallocate the sel array according to the new size */
 	sel_n = (sel_n - desel_n);
-	if (sel_n < 0)
+
+	if ((int)sel_n < 0)
 		sel_n = 0;
+
 	if (sel_n)
 		sel_elements = (char **)xrealloc(sel_elements, sel_n * sizeof(char *));
 
 	/* Deallocate local arrays */
-	for (i = 0;i < desel_n; i++) {
+	for (i = 0; i < desel_n; i++) {
 		free(desel_path[i]);
 		free(desel_elements[i]);
 	}
 	free(desel_path);
 	free(desel_elements);
+
 	if (args_n > 0) {
 		for (i = 1; i <= args_n; i++)
 			free(comm[i]);
@@ -13501,6 +13555,7 @@ deselect(char **comm)
 	}
 
 	int exit_status = 0;
+
 	if (save_sel() != 0)
 		exit_status = 1;
 	
@@ -13569,18 +13624,18 @@ search_function(char **comm)
 	/* If search string (comm[0]) is "/search", comm[0]+1 returns "search" */
 	char *search_str = comm[0] + 1, *deq_dir = (char *)NULL, 
 		 *search_path = (char *)NULL;
-	int file_type = 0;
+	mode_t file_type = 0;
 	struct stat file_attrib;
 	
 	/* If there are two arguments, the one starting with '-' is the filetype 
 	 * and the other is the path */
 	if (comm[1] && comm[2]) {
 		if (comm[1][0] == '-') {
-			file_type = comm[1][1];
+			file_type = (mode_t)comm[1][1];
 			search_path = comm[2];
 		}
 		else if (comm[2][0] == '-') {
-			file_type = comm[2][1];
+			file_type = (mode_t)comm[2][1];
 			search_path = comm[1];
 		}
 		else
@@ -13590,7 +13645,7 @@ search_function(char **comm)
 	/* If just one argument, '-' indicates filetype. Else, we have a path */
 	else if (comm[1]) {
 		if (comm[1][0] == '-')
-			file_type = comm[1][1];
+			file_type = (mode_t)comm[1][1];
 		else
 			search_path = comm[1];
 	}
@@ -13652,8 +13707,8 @@ search_function(char **comm)
 		int ret = glob(search_str, 0, NULL, &globbed_files);
 		if (ret == 0) {
 
-			int last_column = 0, columns_n = 0;
-			size_t len = 0, longest = 0;
+			int last_column = 0;
+			size_t len = 0, flongest = 0, columns_n = 0;
 			pfiles = (char **)xnmalloc(globbed_files.gl_pathc + 1, 
 									   sizeof(char *));
 			size_t *files_len = (size_t *)xnmalloc(globbed_files.gl_pathc + 1,
@@ -13682,17 +13737,17 @@ search_function(char **comm)
 					len = (unicode) ? u8_xstrlen(pfiles[found])
 						  : strlen(pfiles[found]);
 					files_len[found++] = len;
-					if (len > longest)
-						longest = len;
+					if (len > flongest)
+						flongest = len;
 				}
 				
 				/* Print the result */
 				if (found) {
 
-					if (longest <= 0 || longest > tcols)
+					if (flongest <= 0 || flongest > tcols)
 						columns_n = 1;
 					else
-						columns_n = tcols / (longest + 1);
+						columns_n = (size_t)tcols / (flongest + 1);
 					
 					if (columns_n > found)
 						columns_n = found;
@@ -13704,7 +13759,7 @@ search_function(char **comm)
 							last_column = 0;
 						colors_list(pfiles[i], 0, (last_column 
 									|| i == found - 1) ? 0 : 
-									longest - files_len[i] + 1, 
+									(int)(flongest - files_len[i]) + 1, 
 									(last_column || i == found - 1) ? 1 : 0);
 						/* Second argument to colors_list() is:
 						 * 0: Do not print any ELN 
@@ -13737,9 +13792,9 @@ search_function(char **comm)
 					 * list, 'index' value would be that of the previous file 
 					 * if 'index' is not set to zero in each for iteration */
 					index[found] = -1;
-					for (j = 0; j < (size_t)files; j++) {
+					for (j = 0; j < files; j++) {
 						if (strcmp(globbed_files.gl_pathv[i], dirlist[j]) == 0) {
-							index[found] = j;
+							index[found] = (int)j;
 							break;
 						}
 					}
@@ -13750,19 +13805,19 @@ search_function(char **comm)
 						  : strlen(pfiles[found])) + elnn + 1;
 					/* len == ELN + space + filename */
 					files_len[found] = len;
-					if (len > longest)
-						longest = len;
+					if (len > flongest)
+						flongest = len;
 					found++;
 				}
 
 				if (found) {
 
-					if (longest <= 0 || longest > tcols)
+					if (flongest <= 0 || flongest > tcols)
 						columns_n = 1;
 					else
-						columns_n = tcols / (longest + 1);
+						columns_n = tcols / (flongest + 1);
 					
-					if (columns_n > found)
+					if ((size_t)columns_n > found)
 						columns_n = found;
 					
 					for (i = 0; i < found; i++) {
@@ -13774,7 +13829,7 @@ search_function(char **comm)
 						colors_list(pfiles[i], (index[i] != -1) 
 									? index[i] + 1 : -1, (last_column
 									|| i == found - 1) ? 0
-									: longest - files_len[i] + 1, 
+									: (int)(flongest - files_len[i]) + 1, 
 									(last_column || i == found - 1) ? 1 : 0);
 					}
 				}
@@ -13812,8 +13867,8 @@ search_function(char **comm)
 				 * #####################*/
 
 	else {
-		int last_column = 0, columns_n = 0;
-		size_t len = 0, longest = 0, i = 0;
+		int last_column = 0;
+		size_t len = 0, flongest = 0, i = 0, columns_n = 0;
 
 		/* If /search_str /path */
 		if (search_path && *search_path != 0x00) {
@@ -13839,7 +13894,7 @@ search_function(char **comm)
 				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, deq_dir, 
 						strerror(errno));
 
-				for (i = 0; i < search_files; i++)
+				for (i = 0; i < (size_t)search_files; i++)
 					free(search_list[i]);
 				free(search_list);
 				free(deq_dir);
@@ -13847,11 +13902,11 @@ search_function(char **comm)
 				return EXIT_FAILURE;
 			}
 			
-			pfiles = (char **)xnmalloc(search_files + 1, sizeof(char *));
-			size_t *files_len = (size_t *)xnmalloc(search_files + 1, 
+			pfiles = (char **)xnmalloc((size_t)search_files + 1, sizeof(char *));
+			size_t *files_len = (size_t *)xnmalloc((size_t)search_files + 1, 
 												   sizeof(size_t)); 
 
-			for (i = 0; i < search_files; i++) {
+			for (i = 0; i < (size_t)search_files; i++) {
 				if (strstr(search_list[i]->d_name, search_str)) {
 					if (file_type) {
 
@@ -13863,8 +13918,8 @@ search_function(char **comm)
 							len = (unicode) ? u8_xstrlen(search_list[i]->d_name) 
 								  : strlen(search_list[i]->d_name);
 							files_len[found++] = len;
-							if (len > longest)
-								longest = len;
+							if (len > flongest)
+								flongest = len;
 						}
 					}
 					else {
@@ -13872,18 +13927,18 @@ search_function(char **comm)
 						len = (unicode) ? u8_xstrlen(search_list[i]->d_name) 
 							: strlen(search_list[i]->d_name);
 						files_len[found++] = len;
-						if (len > longest)
-							longest = len;
+						if (len > flongest)
+							flongest = len;
 					}
 				}
 			}
 			
 			if (found) {
 
-					if (longest <= 0 || longest > tcols)
+					if (flongest <= 0 || flongest > tcols)
 						columns_n = 1;
 					else
-						columns_n = tcols / (longest + 1);
+						columns_n = (size_t)tcols / (flongest + 1);
 					
 					if (columns_n > found)
 						columns_n = found;
@@ -13896,12 +13951,12 @@ search_function(char **comm)
 						last_column = 0;
 					
 					colors_list(pfiles[i], 0, (last_column || i == found - 1) 
-								? 0 : longest - files_len[i] + 1, 
+								? 0 : (int)(flongest - files_len[i]) + 1, 
 								(last_column || i == found - 1) ? 1 : 0);
 				}
 			}
 			
-			for (i = 0; i< search_files; i++)
+			for (i = 0; i < (size_t)search_files; i++)
 				free(search_list[i]);
 			free(search_list);
 			
@@ -13924,23 +13979,23 @@ search_function(char **comm)
 			pfiles = (char **)xnmalloc(files + 1, sizeof(char *));
 			size_t *files_len = (size_t *)xnmalloc(files + 1, sizeof(size_t));
 
-			for (i = 0; i < (size_t)files; i++) {
+			for (i = 0; i < files; i++) {
 				/* strstr finds substr in STR, as if STR where "*substr*" */
 				if (strstr(dirlist[i], search_str)) {
 					if (file_type) {
 						if (lstat(dirlist[i], &file_attrib) == -1)
 							continue;
 						if ((file_attrib.st_mode & S_IFMT) == file_type) {
-							index[found] = i;
+							index[found] = (int)i;
 							pfiles[found] = dirlist[i];
 
 							len = ((unicode) ? u8_xstrlen(pfiles[found]) 
 								  : strlen(pfiles[found])) 
-								  + ((index[found] != -1) 
-								  ? digits_in_num(index[found]) + 1 : 2);
+								  + (size_t)((index[found] != -1) 
+								  ? (size_t)digits_in_num(index[found]) + 1 : 2);
 							files_len[found] = len;
-							if (len > longest) {
-							longest = len;
+							if (len > flongest) {
+							flongest = len;
 							}
 
 							found++;
@@ -13948,15 +14003,16 @@ search_function(char **comm)
 					}
 					else {
 
-						index[found] = i;
+						index[found] = (int)i;
 						pfiles[found] = dirlist[i];
 						
 						len = ((unicode) ? u8_xstrlen(pfiles[found]) 
-							  : strlen(pfiles[found])) + ((index[found] != -1) 
-							  ? digits_in_num(index[found]) + 1 : 2);
+							  : strlen(pfiles[found])) + 
+							  (size_t)((index[found] != -1) 
+							  ? (size_t)digits_in_num(index[found]) + 1 : 2);
 						files_len[found] = len;
-						if (len > longest) {
-						longest = len;
+						if (len > flongest) {
+						flongest = len;
 						}
 
 						found++;
@@ -13966,12 +14022,12 @@ search_function(char **comm)
 
 			if (found) {
 
-					if (longest <= 0 || longest > tcols)
+					if (flongest <= 0 || flongest > tcols)
 						columns_n = 1;
 					else
-						columns_n = tcols / (longest + 1);
+						columns_n = tcols / (flongest + 1);
 					
-					if (columns_n > found)
+					if ((size_t)columns_n > found)
 						columns_n = found;
 			
 				for (i = 0; i < found; i++) {
@@ -13984,7 +14040,7 @@ search_function(char **comm)
 					colors_list(pfiles[i], (index[i] != -1) 
 								? index[i] + 1 : -1, (last_column 
 								|| i == found - 1) ? 0 
-								: longest - files_len[i] + 1, 
+								: (int)(flongest - files_len[i]) + 1, 
 								(last_column || i == found - 1) ? 1 : 0);
 				}
 			}
@@ -14019,7 +14075,7 @@ copy_function(char **comm)
 	if (is_sel) {
 		char *tmp_cmd = (char *)NULL;
 		size_t total_len = 0, i = 0;
-		for (i = 0;i <= args_n; i++) {
+		for (i = 0; i <= args_n; i++) {
 			total_len += strlen(comm[i]);
 		}
 		tmp_cmd = (char *)xcalloc(total_len + (i + 1) + 2, sizeof(char));
@@ -14038,7 +14094,7 @@ copy_function(char **comm)
 			/* If 'mv sel' and command is successful deselect everything,
 			 * since sel files are note there anymore */
 			if (strcmp(comm[0], "mv") == 0) {
-				for (i = 0;i < sel_n; i++)
+				for (i = 0; i < sel_n; i++)
 					free(sel_elements[i]);
 				sel_n = 0;
 				save_sel();
@@ -14063,7 +14119,7 @@ get_bookmarks(char *bookmarks_file)
  * the amount of bookmarks in the global variable bm_n, used later by 
  * bookmarks_function() */
 {
-	int bm_n = 0;
+	size_t bm_n = 0;
 	char **bookmarks = (char **)NULL;
 	FILE *bm_fp;
 	bm_fp = fopen(bookmarks_file, "r");
@@ -14086,7 +14142,7 @@ get_bookmarks(char *bookmarks_file)
 		 * one slash */
 		int slash = 0;
 		size_t i;
-		for (i = 0; i < line_len; i++) {
+		for (i = 0; i < (size_t)line_len; i++) {
 			if (line[i] == '/') {
 				slash = 1;
 				break;
@@ -14096,7 +14152,7 @@ get_bookmarks(char *bookmarks_file)
 			continue;
 		/* Allocate memory to store the bookmark */
 		bookmarks = (char **)xrealloc(bookmarks, (bm_n + 1) * sizeof(char *));
-		bookmarks[bm_n] = (char *)xcalloc(line_len + 1, sizeof(char));
+		bookmarks[bm_n] = (char *)xcalloc((size_t)line_len + 1, sizeof(char));
 		/* Remove terminating new line char and copy the entire line */
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = 0x00;
@@ -14141,13 +14197,13 @@ bookmark_del(char *name)
 	/* Get bookmarks from file */
 	size_t line_size = 0;
 	char *line = (char *)NULL, **bms = (char **)NULL;
-	int bmn = 0;
+	size_t bmn = 0;
 	ssize_t line_len = 0;
 	while ((line_len = getline(&line, &line_size, bm_fp)) > 0) {
 		if (*line == '#' || *line == '\n')
 			continue;
 		int slash = 0;
-		for (i = 0; i < line_len; i++) {
+		for (i = 0; i < (size_t)line_len; i++) {
 			if (line[i] == '/') {
 				slash = 1;
 				break;
@@ -14158,7 +14214,7 @@ bookmark_del(char *name)
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = 0x00;
 		bms = (char **)xrealloc(bms, (bmn + 1) * sizeof(char *));
-		bms[bmn] = (char *)xcalloc(line_len + 1, sizeof(char));
+		bms[bmn] = (char *)xcalloc((size_t)line_len + 1, sizeof(char));
 		strcpy(bms[bmn++], line);
 	}
 	free(line);
@@ -14182,7 +14238,7 @@ bookmark_del(char *name)
 				continue;
 			if (strcmp(name, bm_name) == 0) {
 				free(bm_name);
-				cmd_line = i;
+				cmd_line = (int)i;
 				break;
 			}
 			free(bm_name);
@@ -14194,8 +14250,8 @@ bookmark_del(char *name)
 	 * bookmarks screen) to the del_elements array */
 	if (cmd_line != -1) {
 		del_elements = (char **)xnmalloc(2, sizeof(char *));
-		del_elements[0] = (char *)xnmalloc(digits_in_num(cmd_line + 1) + 1, 
-										   sizeof(char));
+		del_elements[0] = (char *)xnmalloc((size_t)digits_in_num(cmd_line + 1) 
+										   + 1, sizeof(char));
 		sprintf(del_elements[0], "%d", cmd_line + 1);
 		del_elements[1] = (char *)NULL;
 	}
@@ -14245,7 +14301,7 @@ bookmark_del(char *name)
 		if (strcmp(del_elements[i], "q") == 0)
 			quit = 1;
 		else if (is_number(del_elements[i]) 
-		&& (atoi(del_elements[i]) <= 0 || atoi(del_elements[i]) > bmn)) {
+		&& (atoi(del_elements[i]) <= 0 || atoi(del_elements[i]) > (int)bmn)) {
 			fprintf(stderr, "bookmarks: '%s': No such bookmark\n", 
 					del_elements[i]);
 			quit = 1;
@@ -14327,7 +14383,8 @@ bookmark_del(char *name)
 	/* Dump into the tmp file everything except bookmarks marked for 
 	 * deletion */
 	
-	line_len = line_size = 0;
+	line_len = 0;
+	line_size = 0;
 	char *lineb = (char *)NULL;
 	while ((line_len = getline(&lineb, &line_size, bm_fp)) > 0) {
 		if (lineb[line_len - 1] == '\n')
@@ -14405,9 +14462,9 @@ bookmark_add(char *file)
 		}
 		return EXIT_FAILURE;
 	}
-	int bmn = 0, dup = 0;
+	int dup = 0;
 	char **bms = (char **)NULL;
-	size_t line_size = 0, i;
+	size_t line_size = 0, i, bmn = 0;
 	char *line = (char *)NULL;
 	ssize_t line_len = 0;
 	while ((line_len = getline(&line, &line_size, bm_fp)) > 0) {
@@ -14594,7 +14651,7 @@ open_bookmark(char **cmd)
 	char **bookmarks = get_bookmarks(BM_FILE);
 
 	/* Get the amount of available bookmarks */
-	int bm_n = 0;
+	size_t bm_n = 0;
 	for (bm_n = 0; bookmarks[bm_n]; bm_n++);
 
 	/* If no bookmarks */
@@ -14619,7 +14676,7 @@ open_bookmark(char **cmd)
 	hot_keys = (char **)xnmalloc(bm_n, sizeof(char *));
 	bm_names = (char **)xnmalloc(bm_n, sizeof(char *));
 
-	register int i;
+	register size_t i;
 
 	for (i = 0; i < bm_n; i++) {
 
@@ -14692,31 +14749,31 @@ open_bookmark(char **cmd)
 						/* Shortcut, name, and path OK */
 						/* Directory or symlink to directory */
 						if ((file_attrib.st_mode & S_IFMT) == S_IFDIR)
-							printf("%s%d %s[%s]%s %s%s%s\n", eln_color, i + 1, 
+							printf("%s%zu %s[%s]%s %s%s%s\n", eln_color, i + 1, 
 									white, hot_keys[i], NC, cyan, 
 									bm_names[i], NC);
 						else /* No directory */
-							printf("%s%d %s[%s]%s %s%s%s\n", eln_color, i + 1, 
+							printf("%s%zu %s[%s]%s %s%s%s\n", eln_color, i + 1, 
 									white, hot_keys[i], NC, default_color, 
 									bm_names[i], NC);					
 					}
 					else /* Invalid path */
-						printf("%s%d [%s] %s%s\n", gray, i + 1, hot_keys[i], 
+						printf("%s%zu [%s] %s%s\n", gray, i + 1, hot_keys[i], 
 								bm_names[i], NC);
 				}
 				else {
 					if (path_ok == 0) { /* Shortcut and path OK */
 						if ((file_attrib.st_mode & S_IFMT) == S_IFDIR)
-							printf("%s%d %s[%s]%s %s%s%s\n", eln_color, i + 1, 
+							printf("%s%zu %s[%s]%s %s%s%s\n", eln_color, i + 1, 
 									white, hot_keys[i], NC, cyan, 
 									bm_paths[i], NC);
 						else
-							printf("%s%d %s[%s]%s %s%s%s\n", eln_color, i + 1, 
+							printf("%s%zu %s[%s]%s %s%s%s\n", eln_color, i + 1, 
 									white, hot_keys[i], NC, default_color, 
 									bm_paths[i], NC);		
 					}
 					else
-						printf("%s%d [%s] %s%s\n", gray, i + 1, hot_keys[i], 
+						printf("%s%zu [%s] %s%s\n", gray, i + 1, hot_keys[i], 
 								bm_paths[i], NC);
 				}
 			}
@@ -14724,26 +14781,26 @@ open_bookmark(char **cmd)
 				if (bm_names[i]) {
 					if (path_ok == 0) { /* Name and path OK */
 						if ((file_attrib.st_mode & S_IFMT) == S_IFDIR)
-							printf("%s%d %s%s%s\n", eln_color, i + 1, cyan, 
+							printf("%s%zu %s%s%s\n", eln_color, i + 1, cyan, 
 									bm_names[i], NC);
 						else
-							printf("%s%d %s%s%s%s\n", eln_color, i + 1, NC, 
+							printf("%s%zu %s%s%s%s\n", eln_color, i + 1, NC, 
 									default_color, bm_names[i], NC);				
 					}
 					else
-						printf("%s%d %s%s\n", gray, i + 1, bm_names[i], NC);
+						printf("%s%zu %s%s\n", gray, i + 1, bm_names[i], NC);
 				}
 				else {
 					if (path_ok == 0) { /* Only path OK */
 						if ((file_attrib.st_mode & S_IFMT) == S_IFDIR)
-							printf("%s%d %s%s%s\n", eln_color, i + 1, cyan, 
+							printf("%s%zu %s%s%s\n", eln_color, i + 1, cyan, 
 									bm_paths[i], NC);
 						else
-							printf("%s%d %s%s%s%s\n", eln_color, i + 1, NC, 
+							printf("%s%zu %s%s%s%s\n", eln_color, i + 1, NC, 
 									default_color, bm_paths[i], NC);	
 					}
 					else
-						printf("%s%d %s%s\n", gray, i + 1, bm_paths[i], NC);
+						printf("%s%zu %s%s\n", gray, i + 1, bm_paths[i], NC);
 				}
 			}
 		}
@@ -14808,7 +14865,7 @@ open_bookmark(char **cmd)
 	/* Get the corresponding bookmark path */
 	if (is_number(arg[0])) {
 		int eln = atoi(arg[0]);
-		if (eln <= 0 || eln > bm_n) {
+		if (eln <= 0 || (size_t)eln > bm_n) {
 			fprintf(stderr, _("Bookmarks: '%d': No such ELN\n"), eln);
 			error_code = 1;
 			goto free_and_exit;
@@ -15053,40 +15110,46 @@ properties_function(char **comm)
 
 	int exit_status = 0;
 
+	/* Same thing as long view mode */
 	if (comm[1] && (strcmp(comm[1], "all") == 0
 	|| strcmp(comm[1], "a") == 0)) {
-		int status = long_view;
+
+		short status = long_view;
 		long_view = 1;
 		int max, i;
 
 		max = get_max_long_view();
 
-		for (i = 0; i < files; i++) {
+		for (i = 0; i < (int)files; i++) {
 			printf("%s%d%s ", eln_color, i + 1, NC);
-			if (get_properties(dirlist[i], (int)long_view, max) != 0)
+			if (get_properties(dirlist[i], (int)long_view, max, 
+							   (unicode) ? u8_xstrlen(dirlist[i]) 
+							   : strlen(dirlist[i])) != 0)
 				exit_status = 1;
 		}
 
 		long_view = status;
+
 		return exit_status;
 	}
 	
+	/* List files by size */
 	register int i;
 	if (comm[1] && (strcmp(comm[1], "size") == 0
-	|| strcmp(comm[1], "s") == 0)) { /* List files size */
+	|| strcmp(comm[1], "s") == 0)) {
 
 		struct stat file_attrib;
 		/* Get largest filename to format the output */
-		int largest = 0;
+		size_t largest = 0;
 
-		for (i = files; i--; ) {
+		for (i = (int)files; i--; ) {
 			size_t file_len = (unicode) ? u8_xstrlen(dirlist[i])
 							  : strlen(dirlist[i]);
 			if (file_len > largest)
 				largest = file_len + 1;
 		}
 
-		for (i = 0; i < files; i++) {
+		for (i = 0; i < (int)files; i++) {
 
 			/* Get the amount of continuation bytes for each filename. This
 			 * is necessary to properly format the output in case of non-ASCII
@@ -15096,7 +15159,7 @@ properties_function(char **comm)
 			lstat(dirlist[i], &file_attrib);
 			char *size = get_size_unit(file_attrib.st_size);
 			/* Print: 		filename		ELN		Padding		no new line*/
-			colors_list(dirlist[i], i + 1, largest + cont_bt, 0);
+			colors_list(dirlist[i], i + 1, (int)largest + cont_bt, 0);
 			printf("%s%s%s\n", NC, default_color, (size) ? size : "??");
 		
 			if (size)
@@ -15107,7 +15170,7 @@ properties_function(char **comm)
 	}
 	
 	/* If "pr file file..." */
-	for (i = 1; i <= args_n; i++) {
+	for (i = 1; i <= (int)args_n; i++) {
 
 		char *deq_file = dequote_str(comm[i], 0);
 
@@ -15118,7 +15181,7 @@ properties_function(char **comm)
 			continue;
 		}
 
-		if (get_properties(deq_file, 0, 0) != 0)
+		if (get_properties(deq_file, 0, 0, 0) != 0)
 			exit_status = 1;
 		free(deq_file);
 	}
@@ -15127,7 +15190,7 @@ properties_function(char **comm)
 }
 
 int
-get_properties (char *filename, int _long, int max)
+get_properties (char *filename, int _long, int max, size_t filename_len)
 {
 	struct stat file_attrib;
 	/* Check file existence */
@@ -15180,7 +15243,7 @@ get_properties (char *filename, int _long, int max)
 			int is_oth_w = 0;
 			if (file_attrib.st_mode & S_ISVTX) sticky = 1;
 			if (file_attrib.st_mode & S_IWOTH) is_oth_w = 1;
-			int files_dir = count_dir(filename);
+			size_t files_dir = count_dir(filename);
 			strcpy(color, (sticky) ? ((is_oth_w) ? tw_c : 
 				st_c) : ((is_oth_w) ? ow_c : 
 				((files_dir == 2 || files_dir == 0) ? ed_c : di_c)));
@@ -15248,22 +15311,37 @@ get_properties (char *filename, int _long, int max)
 	
 	/* Print file properties for long view mode */
 	if (_long) {
-		size_t filename_len = ((unicode) ? u8_xstrlen(filename) : 
-								strlen(filename));
+
+/*		size_t filename_len = ((unicode) ? u8_xstrlen(filename) : 
+								strlen(filename)); */
+								
 		/*	If filename length is greater than max, truncate it (max-1 = '~')
 		 * to let the user know the filename isn't complete */
 		 /* The value of max (global) is (or should be) already calculated by 
 		  * get_max_long_view() before calling this function */
 		char trim_filename[NAME_MAX] = "";
 		short trim = 0;
-		if (filename_len > max) {
+		if (filename_len > (size_t)max) {
 			trim = 1;
 			strcpy(trim_filename, filename);
 			trim_filename[(max + cont_bt) - 1] = '~';
 			trim_filename[max + cont_bt] = 0x00;
 		}
-		printf("%s%s %-*s%s (%04o) %c/%c%c%c/%c%c%c/%c%c%c %s %s %s %s\n", 
-				color, (!trim) ? filename : trim_filename, max + cont_bt, NC, 
+		
+		/* Calculate pad for each file (not perfect, but almost) */
+		int pad;
+
+		if (longest > max) /* Long files are trimmed */
+			pad = (max + cont_bt) - ((!trim) ? filename_len : max + cont_bt);
+
+		else /* No trimmed files */
+			pad = longest - (eln_len + 1 + filename_len);
+			
+		if (pad < 0)
+			pad = 0;
+		
+		printf("%s%s%s%-*s%s (%04o) %c/%c%c%c/%c%c%c/%c%c%c %s %s %s %s\n", 
+				color, (!trim) ? filename : trim_filename, NC, pad, "", 
 				default_color, file_attrib.st_mode & 07777,
 				file_type,
 				read_usr, write_usr, exec_usr, 
@@ -15283,7 +15361,7 @@ get_properties (char *filename, int _long, int max)
 	}
 
 	/* Print file properties for normal mode */
-	printf("(%04o)%c/%c%c%c/%c%c%c/%c%c%c %ld %s %s %s %s ", 
+	printf("(%04o)%c/%c%c%c/%c%c%c/%c%c%c %zu %s %s %s %s ", 
 							file_attrib.st_mode & 07777, file_type, 
 							read_usr, write_usr, exec_usr, 
 							read_grp, write_grp, exec_grp,
@@ -15293,16 +15371,19 @@ get_properties (char *filename, int _long, int max)
 							(!group) ? _("unknown") : group->gr_name, 
 							(size_type) ? size_type : "??", 
 							(mod_time[0] != 0x00) ? mod_time : "??");
+
 	if (file_type && file_type != 'l')
 		printf("%s%s%s%s\n", color, filename, NC, default_color);
+
 	else if (linkname) {
 		printf("%s%s%s%s -> %s\n", color, filename, NC, default_color, 
 			   linkname);
 		free(linkname);
 	}
+
 	else { /* Broken link */
 		char link[PATH_MAX] = "";
-		ssize_t ret = readlink (filename, link, PATH_MAX);		
+		ssize_t ret = readlink(filename, link, PATH_MAX);		
 		if (ret) {
 			printf("%s%s%s%s -> %s (broken link)\n", color, filename, NC, 
 				   default_color, link);
@@ -15364,15 +15445,16 @@ get_properties (char *filename, int _long, int max)
 		case 'c': printf(_("Character special file")); break;
 		case 'p': printf(_("Fifo")); break;
 		case '-': printf(_("Regular file")); break;
+		default: break;
 	}
 
 	printf(_("\tBlocks: %ld"), file_attrib.st_blocks);
 	printf(_("\tIO Block: %ld"), file_attrib.st_blksize);
-	printf(_("\tInode: %ld\n"), file_attrib.st_ino);
-	printf(_("Device: %ld"), file_attrib.st_dev);
-	printf(_("\tUid: %d (%s)"), file_attrib.st_uid, (!owner) ? _("unknown") 
+	printf(_("\tInode: %zu\n"), file_attrib.st_ino);
+	printf(_("Device: %zu"), file_attrib.st_dev);
+	printf(_("\tUid: %u (%s)"), file_attrib.st_uid, (!owner) ? _("unknown") 
 		    : owner->pw_name);
-	printf(_("\tGid: %d (%s)\n"), file_attrib.st_gid, (!group) ? _("unknown") 
+	printf(_("\tGid: %u (%s)\n"), file_attrib.st_gid, (!group) ? _("unknown") 
 		   : group->gr_name);
 
 	/* Print file timestamps */
@@ -15650,7 +15732,7 @@ get_history(void)
 			line_buff[line_len - 1] = 0x00;
 			history = (char **)xrealloc(history, (current_hist_n + 1)
 										* sizeof(char *));
-			history[current_hist_n] = (char *)xcalloc(line_len + 1, 
+			history[current_hist_n] = (char *)xcalloc((size_t)line_len + 1, 
 													  sizeof(char));
 			strcpy(history[current_hist_n++], line_buff);
 		}
@@ -15679,9 +15761,9 @@ history_function(char **comm)
 	
 	/* If no arguments, print the history list */
 	if (args_n == 0) {
-		int i;
+		size_t i;
 		for (i = 0; i < current_hist_n; i++)
-			printf("%d %s\n", i + 1, history[i]);
+			printf("%zu %s\n", i + 1, history[i]);
 		return EXIT_SUCCESS;
 	}
 
@@ -15710,12 +15792,14 @@ history_function(char **comm)
 
 	/* If 'history -n', print the last -n elements */
 	if (args_n == 1 && comm[1][0] == '-' && is_number(comm[1]+1)) {
-		int num = atoi(comm[1] + 1), i;
-		if (num < 0 || num > current_hist_n) {
-			num = current_hist_n;
+		int num = atoi(comm[1] + 1);
+		if (num < 0 || num > (int)current_hist_n) {
+			num = (int)current_hist_n;
 		}
-		for (i = current_hist_n - num; i < current_hist_n; i++)
-			printf("%d %s\n", i + 1, history[i]);
+		
+		size_t i;
+		for (i = current_hist_n - (size_t)num; i < current_hist_n; i++)
+			printf("%zu %s\n", i + 1, history[i]);
 		return EXIT_SUCCESS;
 	}
 	
@@ -15732,12 +15816,13 @@ run_history_cmd(const char *cmd)
  * is, comm+1 */
 {
 	/* If "!n" */
-	int i, exit_status = 0;
+	int exit_status = 0;
+	size_t i;
 
 	if (is_number(cmd)) {
 		int num = atoi(cmd);
-		if (num > 0 && num < current_hist_n) {
-			int old_args = args_n;
+		if (num > 0 && num < (int)current_hist_n) {
+			size_t old_args = args_n;
 			if (record_cmd(history[num - 1]))
 				add_to_cmdhist(history[num - 1]);
 			char **cmd_hist = parse_input_str(history[num - 1]);
@@ -15780,7 +15865,7 @@ run_history_cmd(const char *cmd)
 
 	/* If "!!", execute the last command */
 	else if (strcmp(cmd, "!") == 0) {
-		int old_args = args_n;
+		size_t old_args = args_n;
 		if (record_cmd(history[current_hist_n - 1]))
 			add_to_cmdhist(history[current_hist_n - 1]);
 		char **cmd_hist = parse_input_str(history[current_hist_n - 1]);
@@ -15816,14 +15901,15 @@ run_history_cmd(const char *cmd)
 	else if (cmd[0] == '-') {
 		/* If not number or zero or bigger than max... */
 		int acmd = atoi(cmd + 1);
-		if (!is_number(cmd + 1) || acmd == 0 || acmd > current_hist_n - 1) {
+		if (!is_number(cmd + 1) || acmd == 0 
+		|| acmd > (int)current_hist_n - 1) {
 			fprintf(stderr, _("%s: !%s: event not found\n"), 
 					PROGRAM_NAME, cmd);
 			return EXIT_FAILURE;
 		}
-		int old_args = args_n;
-		char **cmd_hist = parse_input_str(
-						  history[current_hist_n - acmd - 1]);
+		size_t old_args = args_n;
+		char **cmd_hist = parse_input_str(history[current_hist_n - (size_t)acmd 
+												  - 1]);
 		if (cmd_hist) {
 			
 			char **alias_cmd = check_for_alias(cmd_hist);
@@ -15844,15 +15930,15 @@ run_history_cmd(const char *cmd)
 				free(cmd_hist);
 			}
 
-			if (record_cmd(history[current_hist_n - acmd - 1]))
-				add_to_cmdhist(history[current_hist_n - acmd - 1]);
+			if (record_cmd(history[current_hist_n - (size_t)acmd - 1]))
+				add_to_cmdhist(history[current_hist_n - (size_t)acmd - 1]);
 
 			args_n = old_args;
 			return exit_status;
 		}
 
-		if (record_cmd(history[current_hist_n - acmd - 1]))
-			add_to_cmdhist(history[current_hist_n - acmd - 1]);
+		if (record_cmd(history[current_hist_n - (size_t)acmd - 1]))
+			add_to_cmdhist(history[current_hist_n - (size_t)acmd - 1]);
 
 		fprintf(stderr, _("%s: Error parsing history command\n"), 
 				PROGRAM_NAME);
@@ -16580,6 +16666,7 @@ bonus_function (void)
 		puts("\"There are two ways to write error-free programs; only the "
 			 "third one works\" (Alan J. Perlis)");
 		break;
+	default: break;
 	}
 	state++;
 }
