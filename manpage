@@ -358,11 +358,12 @@ CLiFM's prompt is build from the "Prompt" line in the configuration file followi
 \\]: End a sequence of non-printing characters
 
 .TP
-By default, for example, CliFM's prompt line is this: "\\[\\e[0m\\]\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\\z\\[\\e[0;34m\\] \\$ \\[\\e[0m\\]", which once decoded should be something like this: 
+By default, for example, CliFM's prompt line is this: "\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\\z\\[\\e[0;34m\\] \\$ \\[\\e[0m\\]", which once decoded should be something like this: 
 
  13:45 user:hostname /my/path
  :) $ 
 
+.TP
 with the path printed in cyan and the dollar sign in blue.
 
 .TP

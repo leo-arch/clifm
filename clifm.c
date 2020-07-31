@@ -903,6 +903,10 @@ of course you can grep it to find, say, linux' macros, as here. */
 	the color corresponding to the filetype of the file in the CWD.
 
 ###########################################
+ ** (SOLVED) Trash is not working in Free-BSD: its 'cp' implementation does not 
+	allow the use of -r and -a simultaneously. So, replace -ra by -a if using 
+	Free-BSD. NOTE: -ra is redundant; -a already implies -R, which is the same
+	as -r. So, just use -a for both Linux and Free-BSD.
  * (SOLVED) Some files are displaying the wrong birthtime. Whenever there is
 	no birthtime, statx returns 0, which strftime() translates to dec 31,
 	1969. SOLUTION: Check birthtime for zero.
@@ -2786,17 +2790,17 @@ const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
 		"mountpoints", "bookmarks", "log", "untrash", "unicode", 
 		"profile", "shell", "mime", NULL };
 
-#define DEFAULT_PROMPT "\\[\\e[0m\\]\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\
-\\[\\e[0m\\]\\z\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
+#define DEFAULT_PROMPT "\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\
+\\z\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
 
 #define DEFAULT_TERM_CMD "xterm -e"
 
 #define FALLBACK_SHELL "/bin/sh"
 
 #define MAX_COLOR 46
-/* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\n (24bit, RGB true 
+/* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB true 
  * color format including foreground and background colors, the SGR (Select 
- * Graphic Rendition) parameter, and, of course, the terminating null char.
+ * Graphic Rendition) parameter, and, of course, the terminating null byte.
 
  * To store all the 29 color variables I use, with 46 bytes each, I need a 
  * total of 1,3Kb. It's not much but it could be less if I'd use dynamically 
@@ -2806,10 +2810,10 @@ const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
 char text_color[MAX_COLOR + 2] = "", eln_color[MAX_COLOR] = "", 
 	 default_color[MAX_COLOR] = "", dir_count_color[MAX_COLOR] = "", 
 	 div_line_color[MAX_COLOR] = "", welcome_msg_color[MAX_COLOR] = "";
-/* text_color and prompt_color are used in the command line, and readline
- * needs to know that color codes are not printable chars. For this we need
- * to add "\001" at the beginning of the color code and "\002" at the end.
- * So, we need 2 more bytes */
+/* text_color is used in the command line, and readline needs to know that 
+ * color codes are not printable chars. For this we need to add "\001" at 
+ * the beginning of the color code and "\002" at the end. We need thereby 2 
+ * more bytes */
 
 /* Filetype colors */
 char di_c[MAX_COLOR] = "", /* Directory */
@@ -6906,7 +6910,8 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 					       sizeof(char));
 	sprintf(dest, "%s/%s", TRASH_FILES_DIR, file_suffix);
 
-	char *tmp_cmd[] = { "cp", "-ra", file, dest, NULL };
+	char *tmp_cmd[] = { "cp", "-a", file, dest, NULL };
+
 	free(filename);
 
 	ret = launch_execve(tmp_cmd, FOREGROUND);
@@ -7251,7 +7256,9 @@ untrash_element(char *file)
 		}
 
 		free(parent);
-		char *tmp_cmd[] = { "cp", "-ra", undel_file, url_decoded, NULL };
+
+		char *tmp_cmd[] = { "cp", "-a", undel_file, url_decoded, NULL };
+
 		int ret = -1;
 		ret = launch_execve(tmp_cmd, FOREGROUND);
 		free(url_decoded);
@@ -11212,16 +11219,16 @@ prompt(void)
 	 * The kind of message should be specified by the function printing
 	 * the message itself via a global enum: pmsg, with the following values:
 	 * nomsg, error, warning, and notice. */
-	char msg_str[11] = ""; /* 11 == length of color_b + letter + null */
+	char msg_str[17] = ""; /* 11 == length of color_b + letter + NC_b + null */
 	if (msgs_n) {
 		/* Errors take precedence over warnings, and warnings over notices.
 		 * That is to say, if there is an error message AND a warning message,
 		 * the prompt will always display the error message sign: a red 'E'. */
 		switch (pmsg) {
 		case nomsg: break;
-		case error: sprintf(msg_str, "%sE", red_b); break;
-		case warning: sprintf(msg_str, "%sW", yellow_b); break;
-		case notice: sprintf(msg_str, "%sN", green_b); break;
+		case error: sprintf(msg_str, "%sE%s", red_b, NC_b); break;
+		case warning: sprintf(msg_str, "%sW%s", yellow_b, NC_b); break;
+		case notice: sprintf(msg_str, "%sN%s", green_b, NC_b); break;
 		default: break;
 		}
 	}
@@ -11243,22 +11250,22 @@ prompt(void)
 	size_t decoded_prompt_len = strlen(decoded_prompt);
 
 	size_t prompt_length = (size_t)(decoded_prompt_len
-		+ (sel_n ? 10 : 0) + (trash_n ? 10 : 0) + ((msgs_n && pmsg) ? 10: 0) 
+		+ (sel_n ? 16 : 0) + (trash_n ? 16 : 0) + ((msgs_n && pmsg) ? 16: 0) 
 		+ 6 + sizeof(text_color) + 1);
 
-	/* 10 = length of color_b ({red,green,yellow}_b) + letter (sel, trash, msg); 
-	 * 6 = length of NC_b
+	/* 16 = color_b ({red,green,yellow}_b) + letter (sel, trash, msg) + NC_b; 
+	 * 6 = NC_b
 	 * 1 = null terminating char */
 
 	char *the_prompt = (char *)xnmalloc(prompt_length, sizeof(char));
 	
 	snprintf(the_prompt, prompt_length, "%s%s%s%s%s%s%s%s", 
 		(msgs_n && pmsg) ? msg_str : "", (trash_n) ? yellow_b : "", 
-		(trash_n) ? "T" : "", (sel_n) ? green_b : "", (sel_n) ? 
-		"*" : "", decoded_prompt, NC_b, text_color);
+		(trash_n) ? "T\001\x1b[0m\002" : "", (sel_n) ? green_b : "", 
+		(sel_n) ? "*\001\x1b[0m\002" : "", decoded_prompt, NC_b, text_color);
 
 	free(decoded_prompt);
-	
+
 	/* Print error messages, if any. 'print_errors' is set to true by 
 	 * log_msg() with the PRINT_PROMPT flag. If NOPRINT_PROMPT is passed
 	 * instead, 'print_msg' will be false and the message will be
