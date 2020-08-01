@@ -307,7 +307,7 @@ of course you can grep it to find, say, linux' macros, as here. */
 	using it again.
  ** When testing keep GCC warning flags enabled: Wall, Wpedantic, Wextra, 
 	Wstack-protector, Wshadow, Wconversion
- ** Be careful when substrcting from an unsigned int, like size_t, since the
+ ** Be careful when substracting from an unsigned int, like size_t, since the
 	result will always be positive, which is not the expected result: give two
 	size_t values, say, 0 and 1, substracting the second form the first results
 	in UINT_MAX (a very large positive value), and not -1. Casting to int seems
@@ -393,6 +393,8 @@ of course you can grep it to find, say, linux' macros, as here. */
     like in Bash. 
 
 ###################################
+ * (DONE) Add an option to disable files sorting.
+ * (DONE) Write a better color code check (is_color()).
  * (DONE) Be careful with variable length arrays (VLA), since they might smash 
 	the stack. Compile with the -Wvla option to list VLA's. A VLA is like this:
 	"size_t len = strlen(str); char array[len];" Though VLA's are allowed by
@@ -903,6 +905,7 @@ of course you can grep it to find, say, linux' macros, as here. */
 	the color corresponding to the filetype of the file in the CWD.
 
 ###########################################
+ ** (SOLVED) The no list folders first code is broken.
  ** (SOLVED) Trash is not working in Free-BSD: its 'cp' implementation does not 
 	allow the use of -r and -a simultaneously. So, replace -ra by -a if using 
 	Free-BSD. NOTE: -ra is redundant; -a already implies -R, which is the same
@@ -1506,10 +1509,10 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.20.4"
+#define VERSION "0.20.5"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "July 30, 2020"
+#define DATE "July 31, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -2733,7 +2736,7 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 	cd_lists_on_the_fly = -1, recur_perm_error_flag = 0, is_sel = 0, 
 	sel_is_last = 0, print_msg = 0, long_view = -1, kbind_busy = 0, 
 	unicode = -1, cont_bt = 0, dequoted = 0, home_ok = 1, config_ok = 1, 
-	trash_ok = 1, selfile_ok = 1, mime_match = 0, logs_enabled = -1;
+	trash_ok = 1, selfile_ok = 1, mime_match = 0, logs_enabled = -1, sort = -1;
 	/* -1 means non-initialized or unset. Once initialized, these variables
 	 * are always either zero or one */
 /*	sel_no_sel=0 */
@@ -2930,7 +2933,7 @@ main(int argc, char **argv)
 
 	/* Store external arguments to be able to rerun external_arguments() in 
 	 * case the user edits the config file, in which case the program must 
-	 * rerun init_config(), get_aliases_n_prompt_cmds(), and then 
+	 * rerun init_config(), get_aliases(), get_prompt_cmds(), and then 
 	 * external_arguments() */
 	argc_bk = argc;
 	argv_bk = (char **)xnmalloc((size_t)argc, sizeof(char *));
@@ -2949,7 +2952,7 @@ main(int argc, char **argv)
 	user_home = get_user_home();
 	if (!user_home || access(user_home, W_OK) == -1) {
 		/* If no user's home, or if it's not writable, there won't be any 
-		 * config nor trash directory either. These flags are used to prevent 
+		 * config nor trash directory. These flags are used to prevent 
 		 * functions from trying to access any of these directories */
 		home_ok = config_ok = trash_ok = 0;
 		/* Print message: trash, bookmarks, command logs, commands history and 
@@ -3312,7 +3315,8 @@ SystemShell=\n\n"
 # terminal emulator to run CliFM on it.\n\
 TerminalCmd='%s'\n\n"
 
-"ListFoldersFirst=true\n\
+"SortList=true\n\
+ListFoldersFirst=true\n\
 CdListsAutomatically=true\n\
 CaseSensitiveList=false\n\
 Unicode=false\n\
@@ -3354,17 +3358,6 @@ new_instance(char *dir)
 				"file to set one\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
-
-	/* When the term line in the config file is quoted, the first quote is
-	 * replaced by a space. So, if that space is there, remove it */
-	char *t_term = (char *)NULL;
-	if (*term == 0x20) {
-		t_term = term + 1;
-		if (!*t_term)
-			return EXIT_FAILURE;
-	}
-	else
-		t_term = term;
 
 	if (!(flags & GRAPHICAL)) {
 		fprintf(stderr, _("%s: Function only available for graphical "
@@ -3427,8 +3420,8 @@ new_instance(char *dir)
 	free(cmd); */
 
 	char **tmp_term = (char **)NULL, **tmp_cmd = (char **)NULL;
-	if (strcntchr(t_term, 0x20) != -1) {
-		tmp_term = get_substr(t_term, 0x20);
+	if (strcntchr(term, 0x20) != -1) {
+		tmp_term = get_substr(term, 0x20);
 		if (tmp_term) {
 			size_t i;
 
@@ -3466,7 +3459,7 @@ new_instance(char *dir)
 	}
 
 	else {
-		char *cmd[] = { t_term, "-e", self, "-p", path_dir, NULL };
+		char *cmd[] = { term, "-e", self, "-p", path_dir, NULL };
 		ret = launch_execve(cmd, BACKGROUND);
 	}
 
@@ -3476,7 +3469,7 @@ new_instance(char *dir)
 	free(self);
 
 	if (ret != 0)
-		fprintf(stderr, _("%s: Undefined error lauching new instance\n"), 
+		fprintf(stderr, _("%s: Error lauching new instance\n"), 
 				PROGRAM_NAME);
 
 	return ret;
@@ -5087,7 +5080,7 @@ is_internal_c(const char *cmd)
 					     "alias", "shell", "edit", "history", "hf", "hidden",
 					     "path", "cwd", "splash", "ver", "version", "?",
 					     "help", "cmd", "commands", "colors", "license",
-					     "fs", "mm", "mime", NULL };
+					     "fs", "mm", "mime", "x", NULL };
 	short found = 0;
 	size_t i;
 	for (i = 0; int_cmds[i]; i++) {
@@ -5402,18 +5395,43 @@ get_substr(char *str, const char ifs)
 
 int
 is_color_code(char *str)
-/* A really weak color codes test, true, but handles the most common input 
- * errors, like empty string, only spaces, and invalid chars. Returns zero 
- * if the string contains some char that is not a number or a semicolon. 
- * Otherwise returns 1. 
- * It will accept this: 110;;;;;;;;00, which is not a valid color code, and 
- * will reject this: 34, which is valid */
+/* Check if STR has the format of a color code string (a number or a semicolon
+ * list (max 12 fields) of numbers of at most 3 digits each). Returns 1 if true 
+ * and 0 if false. */
 {
-	while (*str) {
-		if ((*str < 0x30 || *str > 0x39) && *str != ';' && *str != '\n')
+	if(!str || !*str)
+		return 0;
+	
+	size_t digits = 0, semicolon = 0;
+	
+	while(*str) {
+
+		if (*str >= 0x30 && *str <= 0x39)
+			digits++;
+
+		else if (*str == ';') {
+			if (*(str + 1) == ';') /* Consecutive semicolons */
+				return 0;
+			digits = 0;
+			semicolon++;
+		}
+
+		else if (*str == '\n');
+
+		else /* Neither digit nor semicolon */
 			return 0;
+
 		str++;
 	}
+	
+	/* No digits at all, ending semicolon, more than eleven fields, or more 
+	 * than three consecutive digits */
+	if (!digits || digits > 3 || semicolon > 11)
+		return 0;
+		
+	/* At this point, we have a semicolon separated string of digits (3
+	 * consecutive max) with at most 12 fields. The only thing not validated 
+	 * here are numbers themselves */
 
 	return 1;
 }
@@ -5542,8 +5560,8 @@ set_colors(void)
 
 		/* Set the color variables */
 		for (i = 0; colors[i]; i++) {
-			if (strncmp (colors[i], "di=", 3) == 0)
-				if (!is_color_code (colors[i] + 3))
+			if (strncmp(colors[i], "di=", 3) == 0)
+				if (!is_color_code(colors[i] + 3))
 					/* zero the corresponding variable as a flag for the
 					 * check after this for loop and to prepare the variable
 					 * to hold the default color */
@@ -5668,7 +5686,7 @@ set_colors(void)
 		char lsc[] = "di=01;34:fi=00;97:ln=01;36:or=00;36:pi=00;35:"
 				     "so=01;35:bd=01;33:cd=01;37:su=37;41:sg=30;43:"
 				     "st=37;44:tw=30;42:ow=34;42:ex=01;32:no=31;47";
-		if (setenv("LS_COLORS", lsc, 1) == -1) 
+		if (setenv("LS_COLORS", lsc, 1) == -1)
 			fprintf(stderr, _("%s: Error registering environment colors\n"), 
 				 	PROGRAM_NAME);
 	}
@@ -5728,6 +5746,7 @@ set_default_options(void)
 	splash_screen = 0;
 	welcome_message = 1;
 	show_hidden = 1;
+	sort = 1;
 	long_view = 0;
 	ext_cmd_ok = 0;
 	pager = 0;
@@ -7886,10 +7905,14 @@ readline_kbind_action(int count, int key) {
 	/* A-f: Toggle folders first on/off */
 	case 102:
 		status = list_folders_first;
-		if (list_folders_first) list_folders_first = 0;
-		else list_folders_first = 1;
+		if (list_folders_first)
+			list_folders_first = 0;
+		else
+			list_folders_first = 1;
+		
 		if (status != list_folders_first) {
-			while (files--) free(dirlist[files]);
+			while (files--)
+				free(dirlist[files]);
 			/* Without this puts(), the first entries of the directories
 			 * list are printed in the prompt line */
 			puts("");
@@ -7908,10 +7931,14 @@ readline_kbind_action(int count, int key) {
 	/* A-i: Toggle hidden files on/off */
 	case 105:
 		status = show_hidden;
-		if (show_hidden) show_hidden = 0;
-		else show_hidden = 1;
+		if (show_hidden)
+			show_hidden = 0;
+		else
+			show_hidden = 1;
+		
 		if (status != show_hidden) {
-			while (files--) free(dirlist[files]);
+			while (files--)
+				free(dirlist[files]);
 			puts("");
 			list_dir();
 		}
@@ -7941,7 +7968,7 @@ readline_kbind_action(int count, int key) {
 			 * clause will be executed instead */
 			long_view=long_status = 1;
 		else
-		long_view = long_status = 0;
+			long_view = long_status = 0;
 		keybind_exec_cmd("rf");
 		break;
 
@@ -9417,16 +9444,24 @@ init_config(void)
 							splash_screen = 0;
 					}
 
+					else if (strncmp(line, "SortList=", 9) == 0) {
+						char opt_str[MAX_BOOL] = "";
+						ret = sscanf(line, "SortList=%5s\n", opt_str);
+						if (ret == -1)
+							continue;
+						if (strncmp(opt_str, "false", 5) == 0)
+							sort = 0;
+						else /* True and default */
+							sort = 1;
+					}
 					else if (strncmp(line, "WelcomeMessage=", 15) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "WelcomeMessage=%5s\n", opt_str);
 						if (ret == -1)
 							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							welcome_message = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
+						if (strncmp(opt_str, "false", 5) == 0)
 							welcome_message = 0;
-						else /* default */
+						else /* True and default */
 							welcome_message = 1;
 					}
 
@@ -9447,11 +9482,9 @@ init_config(void)
 						ret = sscanf(line, "ShowHiddenFiles=%5s\n", opt_str);
 						if (ret == -1)
 							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							show_hidden = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
+						if (strncmp(opt_str, "false", 5) == 0)
 							show_hidden = 0;
-						else /* default */
+						else /* True and default */
 							show_hidden = 1;
 					}
 
@@ -9558,11 +9591,9 @@ init_config(void)
 						ret = sscanf(line, "ListFoldersFirst=%5s\n", opt_str);
 						if (ret == -1)
 							continue;
-						if (strncmp (opt_str, "true",4) == 0)
-							list_folders_first = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
+						if (strncmp(opt_str, "false", 5) == 0)
 							list_folders_first = 0;
-						else /* default */
+						else /* True and default */
 							list_folders_first = 1;
 					}
 
@@ -9573,11 +9604,9 @@ init_config(void)
 									 opt_str);
 						if (ret == -1)
 							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							cd_lists_on_the_fly = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
+						if (strncmp(opt_str, "false", 5) == 0)
 							cd_lists_on_the_fly = 0;
-						else /* default */
+						else /* True and default */
 							cd_lists_on_the_fly = 1;
 					}
 
@@ -9838,6 +9867,7 @@ init_config(void)
 			if (splash_screen == -1) splash_screen = 0; /* -1 means not set */
 			if (welcome_message == -1) welcome_message = 1;
 			if (show_hidden == -1) show_hidden = 1;
+			if (sort == -1) sort = 1;
 			if (long_view == -1) long_view = 0;
 			if (ext_cmd_ok == -1) ext_cmd_ok = 0;
 			if (max_path == -1) max_path = 40;
@@ -11193,10 +11223,9 @@ prompt(void)
 	}
 	
 	if (welcome_message) {
-		printf(_("%sCliFM, the anti-eye-candy, KISS file manager%s\n"), 
-			   welcome_msg_color, NC);
-		printf(_("%sEnter 'help' or '?' for instructions.%s\n"), 
-			   default_color, NC);
+		printf(_("%sCliFM, the anti-eye-candy, KISS file manager%s\n"
+			   "%sEnter 'help' or '?' for instructions.%s\n"), 
+			   welcome_msg_color, NC, default_color, NC);
 		welcome_message = 0;
 	}
 
@@ -11620,9 +11649,9 @@ list_dir(void)
 
 	/* Get the list of files in CWD */
 	struct dirent **list = (struct dirent **)NULL;
-	int total = scandir(path, &list, skip_implied_dot, (unicode) ? alphasort : 
-						(case_sensitive) ? xalphasort : 
-						alphasort_insensitive);
+	int total = scandir(path, &list, skip_implied_dot, (sort) ? ((unicode) 
+						? alphasort : (case_sensitive) ? xalphasort : 
+						alphasort_insensitive) : NULL);
 
 	if (total == -1) {
 		_err('e', PRINT_PROMPT, "%s: scandir: '%s': %s\n", PROGRAM_NAME, 
@@ -11703,7 +11732,7 @@ list_dir(void)
 									* sizeof(char *));
 
 		size_t len;
-		for (i = (int)files; i >= 0; i--) {
+		for (i = 0; i < (int)files; i++) {
 			len = strlen(list[i]->d_name);
 			file_info[i].len = len;
 			dirlist[i] = xnmalloc(len + 1, sizeof(char));
