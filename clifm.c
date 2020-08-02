@@ -16605,8 +16605,7 @@ will be used. To access the remote file system via SMB, this format should be \
 used instead: smb://[USER@]HOST[/SHARE][/REMOTE-DIR] [OPTIONS]. Network \
 resources are mounted in '%s/remote_dir', replacing all slashes in remote_dir \
 by underscores. To disconnect from the remote machine, use 'fusermount3' for \
-SMB, the shell command 'umount' should be used. \
-Examples: \n\n\t\
+SSH, and 'umount' for SMB. Examples: \n\n\t\
 net sftp://john@192.168.0.25:Documents/misc port=2222\n\t\
 fusermount3 -u %s/remote/john@192.168.0.25:Documents_misc\n\n\t\
 net smb://192.168.1.34/share username=laura,password=my_pass\n\t\
