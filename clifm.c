@@ -1509,10 +1509,10 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.20.5"
+#define VERSION "0.20.6"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "July 31, 2020"
+#define DATE "August 1, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -1894,10 +1894,10 @@ is_number(const char *str)
 	return 1;
 }
 
-int
+size_t
 digits_in_num(int num) {
 /* Return the amount of digits in a given number */
-	int count = 0; /* VERSION 2: neither printf nor any function call at all */
+	size_t count = 0; /* VERSION 2: neither printf nor any function call at all */
 
 	while (num != 0) {
 		num /= 10; /* n = n/10 */
@@ -2530,6 +2530,9 @@ int new_instance(char *dir);
 int *get_hex_num(char *str);
 int create_config(char *file);
 
+int remote_ssh(char *address, char *options);
+int remote_smb(char *address, char *options);
+
 /* Some notes on memory:
 * If a variable is declared OUTSIDE of a function, it is typically considered 
 * "GLOBAL," meaning that any function can access it. Global variables are 
@@ -2735,8 +2738,8 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 	no_log = 0, internal_cmd = 0, list_folders_first = -1, case_sensitive = -1, 
 	cd_lists_on_the_fly = -1, recur_perm_error_flag = 0, is_sel = 0, 
 	sel_is_last = 0, print_msg = 0, long_view = -1, kbind_busy = 0, 
-	unicode = -1, cont_bt = 0, dequoted = 0, home_ok = 1, config_ok = 1, 
-	trash_ok = 1, selfile_ok = 1, mime_match = 0, logs_enabled = -1, sort = -1;
+	unicode = -1, dequoted = 0, home_ok = 1, config_ok = 1, trash_ok = 1, 
+	selfile_ok = 1, mime_match = 0, logs_enabled = -1, sort = -1;
 	/* -1 means non-initialized or unset. Once initialized, these variables
 	 * are always either zero or one */
 /*	sel_no_sel=0 */
@@ -2751,7 +2754,7 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 
 int max_hist = -1, max_log = -1, dirhist_total_index = 0, 
 	dirhist_cur_index = 0, argc_bk = 0, max_path = -1, exit_code = 0, 
-	shell_is_interactive = 0;
+	shell_is_interactive = 0, cont_bt = 0;
 
 unsigned short term_cols = 0;
 
@@ -3211,6 +3214,249 @@ main(int argc, char **argv)
 }
 
 /* ###FUNCTIONS DEFINITIONS### */
+
+int
+remote_smb(char *address, char *options)
+{
+	#if __FreeBSD__
+	fprintf(stderr, _("%s: SMB is not yet supported on FreeBSD\n"),
+			PROGRAM_NAME);
+	return EXIT_FAILURE;
+	#endif
+
+	/* smb://[USER@]HOST[/SERVICE][/REMOTE-DIR] */
+
+	if (!address || !*address)
+		return EXIT_FAILURE;
+	
+	int free_address = 0;
+	char *ruser = (char *)NULL, *raddress = (char *)NULL;
+	char *tmp = strchr(address, '@');
+	if (tmp) {
+		*tmp = 0x00;
+		ruser = (char *)xnmalloc(strlen(address) + 1, sizeof(char));
+		strcpy(ruser, address);
+		
+		raddress = (char *)xnmalloc(strlen(tmp + 1) + 1, sizeof(char));
+		strcpy(raddress, tmp + 1);
+		free_address = 1;
+	}
+	else
+		raddress = address;
+
+	char *addr_tmp = (char *)xnmalloc(strlen(raddress) + 3, sizeof(char));
+	sprintf(addr_tmp, "//%s", raddress);
+
+	char *p = raddress;
+	while (*p) {
+		if (*p == '/')
+			*p = '_';
+		p++;
+	}
+
+	char *rmountpoint = (char *)xnmalloc(strlen(raddress) + strlen(TMP_DIR)
+										 + 9, sizeof(char));
+	sprintf(rmountpoint, "%s/remote/%s", TMP_DIR, raddress);
+	
+	int free_options = 0;
+	char *roptions = (char *)NULL;
+	if (ruser) {
+		roptions = (char *)xnmalloc(strlen(ruser) + strlen(options) + 11,
+									sizeof(char));
+		sprintf(roptions, "username=%s,%s", ruser, options);
+		free_options = 1;
+	}
+	else
+		roptions = options;
+
+	/* Create the mountpoint, if it doesn't exist */
+	struct stat file_attrib;
+	if (stat(rmountpoint, &file_attrib) == -1) {
+		char *mkdir_cmd[] = { "mkdir", "-p", rmountpoint, NULL };
+		if (launch_execve(mkdir_cmd, FOREGROUND) != 0) {
+			if (free_options)
+				free(roptions);
+			if (ruser)
+				free(ruser);
+			if (free_address)
+				free(raddress);
+			free(rmountpoint);
+			free(addr_tmp);
+			fprintf(stderr, "%s: '%s': Cannot create mountpoint\n",
+					PROGRAM_NAME, rmountpoint);
+			return EXIT_FAILURE;
+		}
+	}
+
+	/* If the mountpoint already exists, check it is empty */
+	else if (count_dir(rmountpoint) > 2) {
+		fprintf(stderr, "%s: '%s': Mountpoint already populated\n", 
+				PROGRAM_NAME, rmountpoint);
+		if (free_options)
+			free(roptions);
+		if (ruser)
+			free(ruser);
+		if (free_address)
+			free(raddress);
+		free(rmountpoint);
+		free(addr_tmp);
+		return EXIT_FAILURE;
+	}
+
+	int error_code = 1;
+	/* Create and execute the SMB command */
+	if (!(flags & ROOT_USR)) {
+		char *cmd[] = { "sudo", "-u", "root", "mount.cifs", addr_tmp, 
+						rmountpoint, (roptions) ? "-o" : NULL, 
+						(roptions) ? roptions : NULL, NULL };
+		error_code = launch_execve(cmd, FOREGROUND);
+	}
+	else {
+		char *cmd[] = { "mount.cifs", addr_tmp, rmountpoint, (roptions) ? "-o"
+						: NULL, (roptions) ? roptions : NULL, NULL };
+		error_code = launch_execve(cmd, FOREGROUND);
+	}
+
+	if (free_options)
+		free(roptions);
+	if (ruser)
+		free(ruser);
+	if (free_address)
+		free(raddress);
+	free(addr_tmp);	
+
+	if (error_code) {
+		free(rmountpoint);
+		return EXIT_FAILURE;
+	}
+
+	/* If successfully mounted, chdir into mountpoint */
+	if (chdir(rmountpoint) != 0) {
+		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, rmountpoint,
+				strerror(errno));
+		free(rmountpoint);
+		return EXIT_FAILURE;
+	}
+
+	free(path);
+	path = (char *)xnmalloc(strlen(rmountpoint) + 1, sizeof(char));
+	strcpy(path, rmountpoint);
+	
+	free(rmountpoint);
+	
+	if (cd_lists_on_the_fly) {
+		while (files--)
+			free(dirlist[files]);
+		if (list_dir() != 0)
+			error_code = 1;
+	}
+
+	return error_code;
+}
+
+int
+remote_ssh(char *address, char *options)
+{
+	#if __FreeBSD__
+	fprintf(stderr, _("%s: SFTP is not yet supported on FreeBSD"), PROGRAM_NAME);
+	return EXIT_FAILURE;
+	#endif
+	
+	if (!config_ok)
+		return EXIT_FAILURE;
+
+/*	char *sshfs_path = get_cmd_path("sshfs");
+	if (!sshfs_path) {
+		fprintf(stderr, _("%s: sshfs: Program not found.\n"), PROGRAM_NAME);
+		return EXIT_FAILURE;
+	} */
+
+	if(!address || !*address)
+		return EXIT_FAILURE;
+
+	/* Create mountpoint */
+	char *rname = (char *)xnmalloc(strlen(address) + 1, sizeof(char));
+	strcpy(rname, address);
+
+	/* Replace all slashes in address by underscore to construct the mounpoint
+	 * name */
+	char *p = rname;
+	while (*p) {
+		if (*p == '/')
+			*p = '_';
+		p++;
+	}
+
+	char *rmountpoint = (char *)xnmalloc(strlen(TMP_DIR) + strlen(rname) 
+										 + 9, sizeof(char));
+	sprintf(rmountpoint, "%s/remote/%s", TMP_DIR, rname);
+	free(rname);
+	
+	/* If the mountpoint doesn't exist, create it */
+	struct stat file_attrib;
+	if (stat(rmountpoint, &file_attrib) == -1) {
+		char *mkdir_cmd[] = { "mkdir", "-p", rmountpoint, NULL };
+
+		if (launch_execve(mkdir_cmd, FOREGROUND) != 0) {
+			fprintf(stderr, "%s: '%s': Cannot create mountpoint\n", 
+					PROGRAM_NAME, rmountpoint);
+			free(rmountpoint);
+			return EXIT_FAILURE;
+		}
+	}
+
+	/* If it exists, make sure it is not populated */
+	else if (count_dir(rmountpoint) > 2) {
+		fprintf(stderr, "%s: '%s': Mounpoint already populated.\n", 
+				PROGRAM_NAME, rmountpoint);
+		free(rmountpoint);
+		return EXIT_FAILURE;
+	}
+	
+	/* Construct the command */
+	
+	int error_code = 1;
+
+	if ((flags & ROOT_USR)) {
+		char *cmd[] = { "sshfs", address, rmountpoint, (options) ? "-o" : NULL, 
+						(options) ? options: NULL, NULL };
+		error_code = launch_execve(cmd, FOREGROUND);
+	}
+	else {
+		char *cmd[] = { "sudo", "sshfs", address, rmountpoint, "-o", 
+						"allow_other", (options) ? "-o" : NULL, (options) ? 
+						options : NULL, NULL};
+		error_code = launch_execve(cmd, FOREGROUND);
+	}
+	
+	if (error_code != 0) {
+		free(rmountpoint);
+		return EXIT_FAILURE;
+	}
+
+	/* If successfully mounted, chdir into mountpoint */
+	if (chdir(rmountpoint) != 0) {
+		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, rmountpoint,
+				strerror(errno));
+		free(rmountpoint);
+		return EXIT_FAILURE;
+	}
+
+	free(path);
+	path = (char *)xnmalloc(strlen(rmountpoint) + 1, sizeof(char));
+	strcpy(path, rmountpoint);
+	free(rmountpoint);
+
+	if (cd_lists_on_the_fly) {
+		while (files--)
+			free(dirlist[files]);
+		if (list_dir() != 0)
+			error_code = 1;
+	}
+
+	return error_code;
+}
+
 
 int
 create_config(char *file)
@@ -4363,10 +4609,11 @@ profile_set(char *prof)
 	clear_screen = pager = list_folders_first = long_view = -1;
 	case_sensitive = cd_lists_on_the_fly = unicode = -1;
 
-	shell_terminal = no_log = internal_cmd = cont_bt = dequoted = 0;
+	shell_terminal = no_log = internal_cmd = dequoted = 0;
 	shell_is_interactive = recur_perm_error_flag = mime_match = 0;
 	recur_perm_error_flag = is_sel = sel_is_last = print_msg = 0; 
 	kbind_busy = 0;
+	cont_bt = 0;
 	pmsg = nomsg;
 
 	home_ok = config_ok = trash_ok = selfile_ok = 1;
@@ -5080,7 +5327,7 @@ is_internal_c(const char *cmd)
 					     "alias", "shell", "edit", "history", "hf", "hidden",
 					     "path", "cwd", "splash", "ver", "version", "?",
 					     "help", "cmd", "commands", "colors", "license",
-					     "fs", "mm", "mime", "x", NULL };
+					     "fs", "mm", "mime", "x", "n", "net", NULL };
 	short found = 0;
 	size_t i;
 	for (i = 0; int_cmds[i]; i++) {
@@ -5323,7 +5570,7 @@ get_substr(char *str, const char ifs)
 		}
 		/* Copy the expanded range into the buffer */
 		for (j = (size_t)afirst; j <= (size_t)asecond; j++) {
-			rbuf[k] = (char *)xcalloc((size_t)digits_in_num((int)j) + 1, 
+			rbuf[k] = (char *)xcalloc(digits_in_num((int)j) + 1, 
 									  sizeof(char));
 			sprintf(rbuf[k++], "%zu", j);
 		}
@@ -6242,7 +6489,7 @@ open_function(char **cmd)
 
 int
 cd_function(char *new_path)
-/* Change CliFM working dirctory to new_path */
+/* Change CliFM working directory to NEW_PATH */
 {
 	int dequoted_p = 0;
 	char *deq_path = (char *)NULL;
@@ -10641,8 +10888,7 @@ parse_input_str (char *str)
 				}
 				
 				for (i = 0; i < ranges_n; i++) {
-					ranges_cmd[j] = (char *)xcalloc((size_t)
-													digits_in_num(ranges[i])
+					ranges_cmd[j] = (char *)xcalloc(digits_in_num(ranges[i])
 													+ 1, sizeof(int));
 					sprintf(ranges_cmd[j++], "%d", ranges[i]);
 				}
@@ -11494,9 +11740,9 @@ colors_list(const char *entry, const int i, const int pad,
  * and terminating ENTRY with or without a new line char (NEW_LINE 1 or 0
  * respectivelly) */
 {
-	int i_digits = digits_in_num(i);
+	size_t i_digits = digits_in_num(i);
 							/* Num (i) + space + null byte */
-	char *index = (char *)xnmalloc((size_t)i_digits + 2, sizeof(char));
+	char *index = (char *)xnmalloc(i_digits + 2, sizeof(char));
 	if (i > 0) /* When listing files in CWD */
 		sprintf(index, "%d ", i);
 	else if (i == -1) /* ELN for entry could not be found */
@@ -11768,8 +12014,7 @@ list_dir(void)
 		/* file_name_width contains: ELN's amount of digits + one space 
 		 * between ELN and filename + filename length. Ex: '12 name' contains 
 		 * 7 chars */
-		size_t file_name_width = (size_t)digits_in_num(i + 1) + 1 + 
-								 file_info[i].len;
+		size_t file_name_width = digits_in_num(i + 1) + 1 + file_info[i].len;
 
 		/* If the file is a non-empty directory and the user has access 
 		 * permision to it, add to file_name_width the number of digits of the 
@@ -11782,7 +12027,7 @@ list_dir(void)
 				file_info[i].ruser = 1;
 				if (file_info[i].filesn > 2)
 					file_name_width += 
-						(size_t)digits_in_num((int)file_info[i].filesn) + 2;
+						digits_in_num((int)file_info[i].filesn) + 2;
 			}
 			else
 				file_info[i].ruser = 0;
@@ -11809,7 +12054,7 @@ list_dir(void)
 
 		int max = get_max_long_view();
 		
-		eln_len = digits_in_num(files);
+		eln_len = digits_in_num((int)files);
 
 		for (i = 0; i < (int)files; i++) {
 
@@ -12042,16 +12287,16 @@ list_dir(void)
 		if (!last_column) {
 			/* Get the difference between the length of longest and the 
 			 * current element */
-			size_t diff = longest - ((size_t)digits_in_num(i + 1) + 1 + 
-					   file_info[i].len);
+			size_t diff = longest - (digits_in_num(i + 1) + 1 + 
+						  file_info[i].len);
 			
 			if (is_dir) { /* If a directory, make room for displaying the 
 				* amount of files it contains */
 				/* Get the amount of digits in the number of files contained
 				 * by the listed directory */
-				int dig_num = digits_in_num((int)file_info[i].filesn - 2);
+				size_t dig_num = digits_in_num((int)file_info[i].filesn - 2);
 				/* The amount of digits plus 2 chars for " /" */
-				diff -= ((size_t)dig_num + 2);
+				diff -= (dig_num + 2);
 			}
 
 			/* Print the spaces needed to equate the length of the lines */
@@ -12326,6 +12571,11 @@ exec_cmd(char **comm)
 	if (strcmp(comm[0], "cd") == 0) {
 		if (strcmp(comm[1], "--help") == 0)
 			puts(_("Usage: cd [ELN/DIR]"));
+
+		else if (strncmp(comm[1], "sftp://", 7) == 0)
+			exit_code = remote_ssh(comm[1] + 7, (comm[2]) ? comm[2] : NULL);
+		else if (strncmp(comm[1], "smb://", 6) == 0)
+			exit_code = remote_smb(comm[1] + 6, (comm[2]) ? comm[2] : NULL);
 		else
 			exit_code = cd_function(comm[1]);
 	}
@@ -12334,6 +12584,10 @@ exec_cmd(char **comm)
 	else if (strcmp(comm[0], "o") == 0	|| strcmp(comm[0], "open") == 0) {
 		if (!comm[1] || strcmp(comm[1], "--help") == 0)
 			puts(_("Usage: o, open ELN/FILE [APPLICATION]"));
+		else if (strncmp(comm[1], "sftp://", 7) == 0)
+			exit_code = remote_ssh(comm[1] + 7, (comm[2]) ? comm[2] : NULL);
+		else if (strncmp(comm[1], "smb://", 6) == 0)
+			exit_code = remote_smb(comm[1] + 6, (comm[2]) ? comm[2] : NULL);
 		else
 			exit_code = open_function(comm);
 	}
@@ -12518,6 +12772,22 @@ exec_cmd(char **comm)
 			exit_code = new_instance(comm[1]);
 		else
 			puts("Usage: x DIR\n");
+	}
+	
+	else if (strcmp(comm[0], "n") == 0 || strcmp(comm[0], "net") == 0) {
+		if (!comm[1]) {
+			puts(_("Usage: n, net [sftp, smb]://ADDRESS [OPTIONS]"));
+			return EXIT_SUCCESS;
+		}
+		if (strncmp(comm[1], "sftp://", 7) == 0)
+			exit_code = remote_ssh(comm[1] + 6, (comm[2]) ? comm[2] : NULL);
+		else if (strncmp(comm[1], "smb://", 6) == 0)
+			exit_code = remote_smb(comm[1] + 6, (comm[2]) ? comm[2] : NULL);
+		else {
+			fputs(_("Usage: n, net [sftp, smb]://ADDRESS [OPTIONS]"),
+				  stderr);
+			return EXIT_FAILURE;
+		}
 	}
 
 	else if (strcmp(comm[0], "mm") == 0 || strcmp(comm[0], "mime") == 0) {
@@ -13836,7 +14106,7 @@ search_function(char **comm)
 					}
 					
 					size_t elnn = (index[found] != -1 ) ? 
-								  (size_t)digits_in_num(index[found] + 1) : 1;
+								  digits_in_num(index[found] + 1) : 1;
 					len = ((unicode) ? u8_xstrlen(pfiles[found]) 
 						  : strlen(pfiles[found])) + elnn + 1;
 					/* len == ELN + space + filename */
@@ -14028,7 +14298,7 @@ search_function(char **comm)
 							len = ((unicode) ? u8_xstrlen(pfiles[found]) 
 								  : strlen(pfiles[found])) 
 								  + (size_t)((index[found] != -1) 
-								  ? (size_t)digits_in_num(index[found]) + 1 : 2);
+								  ? digits_in_num(index[found]) + 1 : 2);
 							files_len[found] = len;
 							if (len > flongest) {
 							flongest = len;
@@ -14045,7 +14315,7 @@ search_function(char **comm)
 						len = ((unicode) ? u8_xstrlen(pfiles[found]) 
 							  : strlen(pfiles[found])) + 
 							  (size_t)((index[found] != -1) 
-							  ? (size_t)digits_in_num(index[found]) + 1 : 2);
+							  ? digits_in_num(index[found]) + 1 : 2);
 						files_len[found] = len;
 						if (len > flongest) {
 						flongest = len;
@@ -14286,7 +14556,7 @@ bookmark_del(char *name)
 	 * bookmarks screen) to the del_elements array */
 	if (cmd_line != -1) {
 		del_elements = (char **)xnmalloc(2, sizeof(char *));
-		del_elements[0] = (char *)xnmalloc((size_t)digits_in_num(cmd_line + 1) 
+		del_elements[0] = (char *)xnmalloc(digits_in_num(cmd_line + 1) 
 										   + 1, sizeof(char));
 		sprintf(del_elements[0], "%d", cmd_line + 1);
 		del_elements[1] = (char *)NULL;
@@ -15367,11 +15637,12 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 		/* Calculate pad for each file (not perfect, but almost) */
 		int pad;
 
-		if (longest > max) /* Long files are trimmed */
-			pad = (max + cont_bt) - ((!trim) ? filename_len : max + cont_bt);
+		if (longest > (size_t)max) /* Long files are trimmed */
+			pad = (max + cont_bt) - ((!trim) ? (int)filename_len
+				  : (max + cont_bt));
 
 		else /* No trimmed files */
-			pad = longest - (eln_len + 1 + filename_len);
+			pad = (int)(longest - (eln_len + 1 + filename_len));
 			
 		if (pad < 0)
 			pad = 0;
@@ -16238,7 +16509,9 @@ them (via the built-in resource opener (mime)). However, if you want to open \
 a file with a different application, just add the application name as second \
 argument, e.g. 'o 12 leafpad'. If you want to run the program in the \
 background, simply add the ampersand character (&): 'o 12 &'. When it comes \
-to directories, 'open' works just like the 'cd' command.\n"), white, NC, 
+to directories, 'open' works just like the 'cd' command. Remote file systems \
+are also supported: just enter 'o ADDRESS [OPTIONS]'. For more information \
+about this syntax see the description of 'net' command below.\n"), white, NC,
 		   default_color);
 
 	/* ### CD ### */
@@ -16251,7 +16524,10 @@ not only changes the current directory, but also lists its content \
 (provided the option \"cd lists automatically\" is enabled, which is the \
 default) according to a comprehensive list of color codes. By default, the \
 output of 'cd' is much like this shell command: 'cd DIR && ls -A --color=auto \
---group-directories-first'.\n"), white, NC, default_color, PROGRAM_NAME);
+--group-directories-first'. Remote file systems are also supported. Just \
+enter 'cd ADDRESS [OPTIONS]'. For more information about this syntax see the \
+description of the 'net' command below.\n"), white, NC, default_color, 
+		   PROGRAM_NAME);
 
 	/* ### SELECTION ### */
 	printf(_("\n%ss, sel%s%s [ELN ELN-ELN FILE ... n]: Send one or \
@@ -16318,6 +16594,24 @@ can use 'f hist', 'f h', 'fh', and 'f !ELN'\n"), white, NC, default_color);
 file properties for FILE. Use 'all' to list the properties of all files in \
 the current working directory, and 'size' to list them size.\n"), 
 		   white, NC, default_color);
+
+	/* ### NET ### */
+	printf(_("\n%sn, net%s%s ADDRESS [OPTIONS]: Access a remote file system, \
+either via the SSH or the SMB protocol. To access a machine via SSH, use the \
+following format: sftp://[USER@]HOST:[/REMOTE-DIR] [PORT]. User, remote-dir, \
+and port are optional. If no user is specified, %s will attempt to login using \
+the current local username. If no port is specified, the default SSH port (22) \
+will be used. To access the remote file system via SMB, this format should be \
+used instead: smb://[USER@]HOST[/SHARE][/REMOTE-DIR] [OPTIONS]. Network \
+resources are mounted in '%s/remote_dir', replacing all slashes in remote_dir \
+by underscores. To disconnect from the remote machine, use 'fusermount3' for \
+SMB, the shell command 'umount' should be used. \
+Examples: \n\n\t\
+net sftp://john@192.168.0.25:Documents/misc port=2222\n\t\
+fusermount3 -u %s/remote/john@192.168.0.25:Documents_misc\n\n\t\
+net smb://192.168.1.34/share username=laura,password=my_pass\n\t\
+umount %s/remote/192.168.0.34_share\n"), white, NC, default_color, PROGRAM_NAME, TMP_DIR, TMP_DIR, TMP_DIR);
+/* NOTE: fusermount3 is Linux-specific. On FreeBSD 'umount' should be used */
 
 	/* ### MIME ### */
 	printf(_("\n%smm, mime%s%s [info ELN/FILE] [edit]: This is %s's \
