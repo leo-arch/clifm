@@ -159,12 +159,18 @@ short for 'cp', 'ln', 'mv', 'mkdir', and 'rm' commands respectivelly.
 print file properties for FILE. Use 'all' to list properties of all files in the current working directory, and 'size' to list them by size.
 .TP
 .B n, net [smb, sftp]://ADDRESS [OPTIONS]
-Access a remote file system, either via the SSH or the SMB protocol. To access a machine via SSH, use the following format: sftp://[USER@]HOST:[/REMOTE-DIR] [PORT]. User, remote-dir, and port are optional. If no user is specified, CliFM will attempt to login using the current local username. If no port is specified, the default SSH port (22) will be used. To access the remote file system via SMB, this format should be used instead: smb://[USER@]HOST[/SHARE][/REMOTE-DIR] [OPTIONS]. Network resources are mounted in 'tmp/clifm/remote_dir', replacing all slashes in remote_dir by underscores. To disconnect from the remote machine, use 'fusermount3' for SSH and 'umount' for SMB. Examples:
+Access a remote file system, either via SSH, FTP, or SMB protocols. To access the file system of a machine via SSH, use the following URI scheme: sftp://[USER@]HOST:[/REMOTE-DIR] [PORT]. Bracketed elements are optional. If no user is specified, CliFM will attempt to login using the current local username. If no port is specified, the default port (22, if SSH) will be used. To access the remote file system via SMB, this scheme should be used instead: smb://[USER@]HOST[/SHARE][/REMOTE-DIR] [OPTIONS]. The URI scheme for FTP connections is this: ftp://HOST[:PORT] [OPTIONS]. Network resources are mounted in '/tmp/clifm/remote_dir', replacing all slashes in remote_dir by underscores. To disconnect from the remote machine, use 'fusermount3 -u' for SSH, 'fusermount -u' for FTP, and 'umount' for SMB, followd by the corresponding mountpoint. Examples:
 
      net sftp://john@192.168.0.25:Documents/misc port=2222
-     fusermount3 -u %s/remote/john@192.168.0.25:Documents_misc
+     fusermount3 -u /tmp/clifm/remote/john@192.168.0.25:Documents_misc
+
      net smb://192.168.1.34/share username=laura,password=my_pass
-     umount %s/remote/192.168.0.34_share
+     umount /tmp/clifm/remote/192.168.0.34_share
+
+     net ftp://192.168.0.123:2121 user=me:mypass
+     fusermount -u /tmp/clifm/remote/192.168.0.123:2121
+
+The underlying programs used here to mount these remote file systems are: 'sshfs' for SFTP, 'mount.cifs' for SMB, and 'curlftpfs' for FTP. For more information regarding the options supported by each of them, consult the correposponding documentation.
 .TP
 .B mm, mime [info ELN/FILENAME] [edit]
 This is CliFM's resource opener. The 'info' option prints the MIME information about ELN/FILENAME: its MIME type, its file extension, if any, and the application associated to this MIME type or file extension. The 'edit' option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension, and then add a value for it to the MIME list file using the 'edit' option. Each value in the MIME list file has this format: 'mime_type=application args;application args; ... n' or '*.c=application args;application args; ... n'. Example: 'plain/text=nano' or '*.c=geany -p;leafpad;nano'. CliFM will check the first matching line, and if at least one of the specified applications exists, this one will be used to open the corresponding associated filed. Else, the next matching line will be checked. If the MIME file is not found, CliFM will try to import MIME definitions from the default locations for the 'mimeapps.list' file as specified by the Freedesktop specification.

@@ -1,6 +1,6 @@
 pkgbase = clifm
 	pkgdesc = The KISS file manager: text-based, ultra-lightweight, lightning fast, and written in C
-	pkgver = 0.20.6
+	pkgver = 0.20.7
 	pkgrel = 1
 	url = https://github.com/leo-arch/clifm
 	arch = any
@@ -15,6 +15,7 @@ pkgbase = clifm
 	depends = file
 	optdepends = sshfs: SFTP support
 	optdepends = cifs-utils: Samba support
+	optdepends = curlftpfs: FTPFS support
 	source = git+https://github.com/leo-arch/clifm.git
 	sha256sums = SKIP
 

@@ -1509,10 +1509,10 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.20.6"
+#define VERSION "0.20.7"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "August 1, 2020"
+#define DATE "August 3, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -2532,6 +2532,7 @@ int create_config(char *file);
 
 int remote_ssh(char *address, char *options);
 int remote_smb(char *address, char *options);
+int remote_ftp(char *address, char *options);
 
 /* Some notes on memory:
 * If a variable is declared OUTSIDE of a function, it is typically considered 
@@ -2733,13 +2734,14 @@ enum prog_msg pmsg = nomsg;
  * some invalid data being read. However, non-initialized variables are 
  * automatically initialized by the compiler */
 
-short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1, 
+short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 	show_hidden = -1, clear_screen = -1, shell_terminal = 0, pager = -1, 
 	no_log = 0, internal_cmd = 0, list_folders_first = -1, case_sensitive = -1, 
 	cd_lists_on_the_fly = -1, recur_perm_error_flag = 0, is_sel = 0, 
 	sel_is_last = 0, print_msg = 0, long_view = -1, kbind_busy = 0, 
 	unicode = -1, dequoted = 0, home_ok = 1, config_ok = 1, trash_ok = 1, 
-	selfile_ok = 1, mime_match = 0, logs_enabled = -1, sort = -1;
+	selfile_ok = 1, mime_match = 0, logs_enabled = -1, sort = -1,
+	dir_counter = -1;
 	/* -1 means non-initialized or unset. Once initialized, these variables
 	 * are always either zero or one */
 /*	sel_no_sel=0 */
@@ -3216,6 +3218,85 @@ main(int argc, char **argv)
 /* ###FUNCTIONS DEFINITIONS### */
 
 int
+remote_ftp(char *address, char *options)
+{
+	#if __FreeBSD__
+	fprintf(stderr, _("%s: FTP is not yet supported on FreeBSD\n"),
+			PROGRAM_NAME);
+	return EXIT_FAILURE;
+	#endif
+
+	if (!address || !*address)
+		return EXIT_FAILURE;
+	
+	char *tmp_addr = (char *)xnmalloc(strlen(address) + 1, sizeof(char));
+	strcpy(tmp_addr, address);
+	
+	char *p = tmp_addr;
+	while (*p) {
+		if (*p == '/')
+			*p = '_';
+		p++;
+	}
+
+	char *rmountpoint = (char *)xnmalloc(strlen(TMP_DIR) + strlen(tmp_addr) + 9,
+										 sizeof(char));
+	sprintf(rmountpoint, "%s/remote/%s", TMP_DIR, tmp_addr);
+	free(tmp_addr);
+
+	struct stat file_attrib;
+	if (stat(rmountpoint, &file_attrib) == -1) {
+		char *mkdir_cmd[] = { "mkdir", "-p", rmountpoint, NULL };
+		if (launch_execve(mkdir_cmd, FOREGROUND) != 0) {
+			fprintf(stderr, _("%s: '%s': Cannot create mountpoint\n"),
+					PROGRAM_NAME, rmountpoint);
+			free(rmountpoint);
+			return EXIT_FAILURE;
+		}
+	}
+
+	else if (count_dir(rmountpoint) > 2) {
+		fprintf(stderr, _("%s: '%s': Mounpoint is not empty\n"), PROGRAM_NAME,
+				rmountpoint);
+		free(rmountpoint);
+		return EXIT_FAILURE;
+	}
+	
+	/* CurlFTPFS does not require sudo */
+	char *cmd[] = { "curlftpfs", address, rmountpoint, (options) ? "-o" : NULL,
+					(options) ? options: NULL, NULL };
+	int error_code = launch_execve(cmd, FOREGROUND);
+	
+	if (error_code) {
+		free(rmountpoint);
+		return EXIT_FAILURE;
+	}
+	
+	if (chdir(rmountpoint) != 0) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rmountpoint,
+				strerror(errno));
+		free(rmountpoint);
+		return EXIT_FAILURE;
+	}
+	
+	free(path);
+	path = (char *)xnmalloc(strlen(rmountpoint) + 1, sizeof(char));
+	strcpy(path, rmountpoint);
+	
+	free(rmountpoint);
+	
+	if (cd_lists_on_the_fly) {
+		while (files--)
+			free(dirlist[files]);
+		if (list_dir() != 0)
+			error_code = 1;
+	}
+
+	return error_code;
+	
+}
+
+int
 remote_smb(char *address, char *options)
 {
 	#if __FreeBSD__
@@ -3290,7 +3371,7 @@ remote_smb(char *address, char *options)
 
 	/* If the mountpoint already exists, check it is empty */
 	else if (count_dir(rmountpoint) > 2) {
-		fprintf(stderr, "%s: '%s': Mountpoint already populated\n", 
+		fprintf(stderr, "%s: '%s': Mountpoint is not empty\n", 
 				PROGRAM_NAME, rmountpoint);
 		if (free_options)
 			free(roptions);
@@ -3407,7 +3488,7 @@ remote_ssh(char *address, char *options)
 
 	/* If it exists, make sure it is not populated */
 	else if (count_dir(rmountpoint) > 2) {
-		fprintf(stderr, "%s: '%s': Mounpoint already populated.\n", 
+		fprintf(stderr, "%s: '%s': Mounpoint is not empty\n", 
 				PROGRAM_NAME, rmountpoint);
 		free(rmountpoint);
 		return EXIT_FAILURE;
@@ -3504,8 +3585,14 @@ DirCounterColor=00;39;49\n\
 DividingLineColor=00;34\n\
 WelcomeMessageColor=01;36\n\n"
 
+"# By default, the amount of files contained by a directory is informed next\n\
+# to the directory name. However, this feature might slow things down when, \n\
+# for example, listing files on a remote server. The dircounter can be \n\
+# disabled here or using the 'dc' command while in the program itself.\n\
+DirCounter=true\n\n"
+
 "# DividingLineChar accepts both literal characters (in single quotes) and \n\
-# decimal numbers\n\
+# decimal numbers.\n\
 DividingLineChar='='\n\n"
 
 "# The prompt line is build using string literals and/or the following escape\n\
@@ -3571,7 +3658,7 @@ MaxHistory=500\n\
 MaxLog=1000\n\
 ClearScreen=false\n\n"
 
-"# If not specified, StartingPath defaults to the current working directory\n\
+"# If not specified, StartingPath defaults to the current working directory.\n\
 StartingPath=\n\n"
 "#END OF OPTIONS\n\n", 
 
@@ -3583,7 +3670,7 @@ StartingPath=\n\n"
 #alias ls='ls --color=auto -A'\n\n"
 
 "#PROMPT COMMANDS\n\n"
-"# Write below the commands you want to be executed before the prompt\n\
+"# Write below the commands you want to be executed before the prompt.\n\
 # Ex:\n\
 #date | awk '{print $1\", \"$2,$3\", \"$4}'\n\n"
 "#END OF PROMPT COMMANDS\n\n", config_fp);
@@ -5994,6 +6081,7 @@ set_default_options(void)
 	welcome_message = 1;
 	show_hidden = 1;
 	sort = 1;
+	dir_counter = 1;
 	long_view = 0;
 	ext_cmd_ok = 0;
 	pager = 0;
@@ -6006,6 +6094,7 @@ set_default_options(void)
 	unicode = 0;
 	max_path = 40;
 	logs_enabled = 0;
+	div_line_char = '=';
 
 	strcpy(text_color, "\001\x1b[00;39m\002");
 	strcpy(eln_color, "\x1b[01;33m");
@@ -9701,6 +9790,16 @@ init_config(void)
 						else /* True and default */
 							sort = 1;
 					}
+					else if (strncmp(line, "DirCounter=", 11) == 0) {
+						char opt_str[MAX_BOOL] = "";
+						ret = sscanf(line, "DirCounter=%5s\n", opt_str);
+						if (ret == -1)
+							continue;
+						if (strncmp(opt_str, "false", 5) == 0)
+							dir_counter = 0;
+						else /* True and default */
+							dir_counter = 1;
+					}
 					else if (strncmp(line, "WelcomeMessage=", 15) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "WelcomeMessage=%5s\n", opt_str);
@@ -10115,6 +10214,7 @@ init_config(void)
 			if (welcome_message == -1) welcome_message = 1;
 			if (show_hidden == -1) show_hidden = 1;
 			if (sort == -1) sort = 1;
+			if (dir_counter == -1) dir_counter = 1;
 			if (long_view == -1) long_view = 0;
 			if (ext_cmd_ok == -1) ext_cmd_ok = 0;
 			if (max_path == -1) max_path = 40;
@@ -12022,15 +12122,26 @@ list_dir(void)
 		 * digits) + 2 for space and slash between the directory name and the 
 		 * amount of files it contains. Ex: '12 name /45' contains 11 chars */
 		if ((file_info[i].type & S_IFMT) == S_IFDIR) {
-			if (access(dirlist[i], R_OK) == 0) {
-				file_info[i].filesn = count_dir(dirlist[i]);
+			if (!dir_counter) {
+				/* All dirs will be printed as having read access and being 
+				 * not empty (bold blue by default), no matter if they're empty 
+				 * or not or if the user has read access or not. Otherwise, the
+				 * listing process could be really slow, for example, when 
+				 * listing files on a remote server */
 				file_info[i].ruser = 1;
-				if (file_info[i].filesn > 2)
-					file_name_width += 
-						digits_in_num((int)file_info[i].filesn) + 2;
+				file_info[i].filesn = 3;
 			}
-			else
-				file_info[i].ruser = 0;
+			else {
+				if (access(dirlist[i], R_OK) == 0) {
+					file_info[i].filesn = count_dir(dirlist[i]);
+					file_info[i].ruser = 1;
+					if (file_info[i].filesn > 2)
+						file_name_width += 
+							digits_in_num((int)file_info[i].filesn) + 2;
+				}
+				else
+					file_info[i].ruser = 0;
+			}
 		}
 
 		if (file_name_width > longest)
@@ -12197,13 +12308,23 @@ list_dir(void)
 						 NC, (last_column) ? "\n" : "");
 				}
 				else {
-					printf("%s%d%s %s%s%s%s /%zu%s%s", eln_color, i + 1, NC,
-						 (file_info[i].type & S_ISVTX) ? ((is_oth_w) ? 
-						 tw_c : st_c) : ((is_oth_w) 
-						 ? ow_c : di_c), dirlist[i], 
-						 NC, dir_count_color, file_info[i].filesn - 2, 
-						 NC, (last_column) ? "\n" : "");
-					is_dir = 1;
+					if (dir_counter) {
+						printf("%s%d%s %s%s%s%s /%zu%s%s", eln_color, i + 1, 
+							 NC, (file_info[i].type & S_ISVTX) ? ((is_oth_w) ? 
+							 tw_c : st_c) : ((is_oth_w) 
+							 ? ow_c : di_c), dirlist[i], 
+							 NC, dir_count_color, file_info[i].filesn - 2, 
+							 NC, (last_column) ? "\n" : "");
+						is_dir = 1;
+					}
+					else {
+						printf("%s%d%s %s%s%s%s", eln_color, i + 1, 
+							 NC, (file_info[i].type & S_ISVTX) ? ((is_oth_w) ? 
+							 tw_c : st_c) : ((is_oth_w) 
+							 ? ow_c : di_c), dirlist[i], 
+							 NC, (last_column) ? "\n" : "");
+
+					}
 				}
 			}
 			break;
@@ -12576,6 +12697,8 @@ exec_cmd(char **comm)
 			exit_code = remote_ssh(comm[1] + 7, (comm[2]) ? comm[2] : NULL);
 		else if (strncmp(comm[1], "smb://", 6) == 0)
 			exit_code = remote_smb(comm[1] + 6, (comm[2]) ? comm[2] : NULL);
+		else if (strncmp(comm[1], "ftp://", 6) == 0) 
+			exit_code = remote_ftp(comm[1] + 6, (comm[2]) ? comm[2] : NULL);
 		else
 			exit_code = cd_function(comm[1]);
 	}
@@ -12588,6 +12711,8 @@ exec_cmd(char **comm)
 			exit_code = remote_ssh(comm[1] + 7, (comm[2]) ? comm[2] : NULL);
 		else if (strncmp(comm[1], "smb://", 6) == 0)
 			exit_code = remote_smb(comm[1] + 6, (comm[2]) ? comm[2] : NULL);
+		else if (strncmp(comm[1], "ftp://", 6) == 0)
+			exit_code = remote_ftp(comm[1] + 6, (comm[2]) ? comm[2] : NULL);
 		else
 			exit_code = open_function(comm);
 	}
@@ -12767,6 +12892,7 @@ exec_cmd(char **comm)
 
 	/*     ############### MINOR FUNCTIONS ##################     */
 
+					/* #### NEW INSTANCE #### */
 	else if (strcmp(comm[0], "x") == 0) {
 		if (comm[1])
 			exit_code = new_instance(comm[1]);
@@ -12774,15 +12900,18 @@ exec_cmd(char **comm)
 			puts("Usage: x DIR\n");
 	}
 	
+						/* #### NET #### */
 	else if (strcmp(comm[0], "n") == 0 || strcmp(comm[0], "net") == 0) {
 		if (!comm[1]) {
 			puts(_("Usage: n, net [sftp, smb]://ADDRESS [OPTIONS]"));
 			return EXIT_SUCCESS;
 		}
 		if (strncmp(comm[1], "sftp://", 7) == 0)
-			exit_code = remote_ssh(comm[1] + 6, (comm[2]) ? comm[2] : NULL);
+			exit_code = remote_ssh(comm[1] + 7, (comm[2]) ? comm[2] : NULL);
 		else if (strncmp(comm[1], "smb://", 6) == 0)
 			exit_code = remote_smb(comm[1] + 6, (comm[2]) ? comm[2] : NULL);
+		else if (strncmp(comm[1], "ftp://", 6) == 0)
+			exit_code = remote_ftp(comm[1] + 6, (comm[2]) ? comm[2] : NULL);
 		else {
 			fputs(_("Usage: n, net [sftp, smb]://ADDRESS [OPTIONS]"),
 				  stderr);
@@ -12790,6 +12919,7 @@ exec_cmd(char **comm)
 		}
 	}
 
+						/* #### MIME #### */
 	else if (strcmp(comm[0], "mm") == 0 || strcmp(comm[0], "mime") == 0) {
 		exit_code = mime_open(comm);
 	}
@@ -12867,7 +12997,40 @@ exec_cmd(char **comm)
 			}
 		}
 	}
-	
+
+					/* #### DIR COUNTER #### */
+	else if (strcmp(comm[0], "dc") == 0 || strcmp(comm[0], "dircounter") == 0) {
+		if (!comm[1]) {
+			puts("Usage: dc, dircounter [on, off, status]");
+			return EXIT_SUCCESS;
+		}
+		
+		if (strcmp(comm[1], "on") == 0) {
+			if (dir_counter == 1) {
+				puts("Dircounter is already enabled");
+				return EXIT_SUCCESS;
+			}
+			dir_counter = 1;
+		}
+		else if (strcmp(comm[1], "off") == 0) {
+			if (dir_counter == 0) {
+				puts("Dircounter is already disabled");
+				return EXIT_SUCCESS;
+			}
+			dir_counter = 0;
+		}
+		else if (strcmp(comm[1], "status") == 0) {
+			if (dir_counter)
+				puts("Dircounter is enabled");
+			else
+				puts("Dircounter is disabled");
+		}
+		else {
+			fputs("Usage: dc, dircounter [on, off, status]\n", stderr);
+			return EXIT_FAILURE;
+		}
+	}
+
 				    /* #### UNICODE #### */
 	else if (strcmp(comm[0], "uc") == 0 || strcmp(comm[0], "unicode") == 0) {
 		if (!comm[1] || strcmp(comm[1], "--help") == 0)
@@ -16597,19 +16760,24 @@ the current working directory, and 'size' to list them size.\n"),
 
 	/* ### NET ### */
 	printf(_("\n%sn, net%s%s ADDRESS [OPTIONS]: Access a remote file system, \
-either via the SSH or the SMB protocol. To access a machine via SSH, use the \
-following format: sftp://[USER@]HOST:[/REMOTE-DIR] [PORT]. User, remote-dir, \
-and port are optional. If no user is specified, %s will attempt to login using \
-the current local username. If no port is specified, the default SSH port (22) \
-will be used. To access the remote file system via SMB, this format should be \
-used instead: smb://[USER@]HOST[/SHARE][/REMOTE-DIR] [OPTIONS]. Network \
+either via the SSH, the FTP, or the SMB protocol. To access a machine via SSH, \
+use the following URI scheme: sftp://[USER@]HOST:[/REMOTE-DIR] [PORT]. Bracketed \
+elements are optional. If no user is specified, %s will attempt to \
+login using the current local username. If no port is specified, the default \
+port (22, if SSH) will be used. To access the remote file system via SMB, this \
+scheme should be used instead: smb://[USER@]HOST[/SHARE][/REMOTE-DIR] [OPTIONS]. \
+The URI scheme for FTP connections is this: ftp://HOST[:PORT] [OPTIONS]. Network \
 resources are mounted in '%s/remote_dir', replacing all slashes in remote_dir \
-by underscores. To disconnect from the remote machine, use 'fusermount3' for \
-SSH, and 'umount' for SMB. Examples: \n\n\t\
+by underscores. To disconnect from the remote machine, use 'fusermount3 -u' for \
+SSH, 'fusermount -u' for FTP, and 'umount' for SMB, followd by the corresponding \
+mountpoint. Examples: \n\n\t\
 net sftp://john@192.168.0.25:Documents/misc port=2222\n\t\
 fusermount3 -u %s/remote/john@192.168.0.25:Documents_misc\n\n\t\
 net smb://192.168.1.34/share username=laura,password=my_pass\n\t\
-umount %s/remote/192.168.0.34_share\n"), white, NC, default_color, PROGRAM_NAME, TMP_DIR, TMP_DIR, TMP_DIR);
+umount %s/remote/192.168.0.34_share\n\n\t\
+net ftp://192.168.0.123:2121 user=me:mypass\n\t\
+fusermount -u %s/remote/192.168.0.123:2121\n"), white, NC, default_color, 
+		   PROGRAM_NAME, TMP_DIR, TMP_DIR, TMP_DIR, TMP_DIR);
 /* NOTE: fusermount3 is Linux-specific. On FreeBSD 'umount' should be used */
 
 	/* ### MIME ### */
@@ -16717,6 +16885,9 @@ list.\n"), white, NC, default_color);
 	printf(_("\n%scmd, commands%s%s: Show this list of commands.\n"), white, 
 		   NC, default_color);
 
+	/* ### DIR COUNTER ### */
+	printf(_("\n%shdc, dircounter%s%s [on, off, status]: Toggle the dircounter \
+on/off.\n"), white, NC, default_color);
 
 	/* ### HIDDEN FILES ### */
 	printf(_("\n%shf, hidden%s%s [on, off, status]: Toggle hidden files \
