@@ -321,6 +321,7 @@ of course you can grep it to find, say, linux' macros, as here. */
 							###############
 */
 /*
+ ** I could use the _err function to print some tip at startup, like MC does.
  ** Take a look at the 'ls' source and look for columned listing and strlen
 	for UTF-8 strings.
  **	Take a look at the FreeDesktop specification for MIME apps:
@@ -393,6 +394,13 @@ of course you can grep it to find, say, linux' macros, as here. */
     like in Bash. 
 
 ###################################
+ * (DONE) TMP_DIR shoould not be /tmp/clifm, since this is common to all users, 
+	in which case network mounpoint could be overwritten. It should be rather
+	/tmp/clifm/user.
+ * (DONE) Add an option to disable the dir counter, since this feature could
+	slow things down too much when listing files on a remote server.
+ * (DONE) Add network support for SSH, SMB, and FTP mounts. Use sshfs, 
+	mount.cifs, and curlftpfs, for SSH, SMB, and FTP respectivelly.
  * (DONE) Add an option to disable files sorting.
  * (DONE) Write a better color code check (is_color()).
  * (DONE) Be careful with variable length arrays (VLA), since they might smash 
@@ -1505,7 +1513,7 @@ in FreeBSD, but is deprecated */
 
 #define PROGRAM_NAME "CliFM"
 #define PNL "clifm" /* Program name lowercase */
-#define TMP_DIR "/tmp/clifm"
+/* #define TMP_DIR "/tmp/clifm" */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
@@ -1887,10 +1895,10 @@ is_number(const char *str)
 /* Check whether a given string contains only digits. Returns 1 if true and 0 
  * if false. Does not work with negative numbers */
 {
-/* VERSION 3: NO isdigit, NO strlen, and NO extra variables at all! */
 	for (; *str ; str++)
 		if (*str < 0x30 || *str > 0x39)
 			return 0;
+
 	return 1;
 }
 
@@ -1919,8 +1927,10 @@ xalphasort(const struct dirent **a, const struct dirent **b)
 	 * function faster */
 	if ((*a)->d_name[0] > (*b)->d_name[0])
 		return 1;
+
 	else if ((*a)->d_name[0] < (*b)->d_name[0])
 		return -1;
+
 	else
 		return strcmp((*a)->d_name, (*b)->d_name);
 }
@@ -1943,17 +1953,15 @@ strcntchr(const char *str, const char c)
  * was not found or if no str. NOTE: Same thing as strchr(), except that 
  * returns an index, not a pointer */
 {
-/*	size_t str_len=strlen(str);
-	for (size_t i=str_len;i--;) { */
-	
 	if (!str)
 		return -1;
 	
-	register int counter = 0;
-	while (*str) { /* VERSION 2: NO strlen */
+	register int i = 0;
+
+	while (*str) {
 		if (*str == c)
-			return counter;
-		counter++;
+			return i;
+		i++;
 		str++;
 	}
 
@@ -1961,65 +1969,64 @@ strcntchr(const char *str, const char c)
 }
 
 char *
-straft(const char *str, const char c)
+straft(char *str, const char c)
 /* Returns the string after the first appearance of a given char, or returns 
  * NULL if C is not found in STR or C is the last char in STR. */
 {
-	char *buf = (char *)NULL;
-	register size_t counter = 0;
-	size_t str_len = strlen(str);
+	if (!str || !*str || !c)
+		return (char *)NULL;
+	
+	char *p = str, *q = (char *)NULL;
 
-	while (*str) {
-		if ((str_len - 1) == counter)
-			/* There's no string after last char */
-			return (char *)NULL;
-		if (*str == c) {
-			/* If C is found, copy everything after C into buf */
-			char *p = (char *)malloc((str_len - counter + 1) * sizeof(char));
-			if (p) {
-				buf = p;
-				p = (char *)NULL;
-				strcpy(buf, str + 1);
-				*(buf + (str_len - counter)) = 0x00;
-				return buf;
-			}
-			else
-				return (char *)NULL;
+	while (*p) {
+		if (*p == c) {
+			q = p;
+			break;
 		}
-		str++;
-		counter++;
+		p++;
 	}
 	
-	return (char *)NULL; /* No matches */
+	/* If C was not found or there is nothing after C */
+	if (!q || !*(q + 1))
+		return (char *)NULL;
+
+	char *buf = (char *)malloc(strlen(q));
+
+	if (!buf)
+		return (char *)NULL;
+
+	strcpy(buf, q + 1);
+
+	return buf;
 }
 
 char *
-straftlst(const char *str, const char c)
-/* Returns the string after the last appearance of a given char, NULL if no 
- * matches */
+straftlst(char *str, const char c)
+/* Returns the string after the last appearance of a given char, or NULL if no 
+ * match */
 {
-	char *buf = (char *)NULL;
-	size_t str_len = strlen(str);
-	register size_t i = 0;
-
-	for (i = str_len; i--;) {
-		if (str[i] == c) {
-			if (i == (str_len - 1))
-				return (char *)NULL; /* There's nothing after C */
-			char *p = (char *)malloc((str_len - i) * sizeof(char));
-			if (p) {
-				buf = p;
-				p = (char *)NULL;
-				/* Copy STR beginning one char after C */
-				strcpy(buf, str + i + 1);
-				return buf;
-			}
-			else
-				return (char *)NULL;
-		}
+	if (!str || !*str || !c)
+		return (char *)NULL;
+	
+	char *p = str, *q = (char *)NULL;
+	
+	while (*p) {
+		if (*p == c)
+			q = p;
+		p++;
 	}
+	
+	if (!q || !*(q + 1))
+		return (char *)NULL;
+	
+	char *buf = (char *)malloc(strlen(q));
+	
+	if (!buf)
+		return (char *)NULL;
 
-	return (char *)NULL;
+	strcpy(buf, q + 1);
+	
+	return buf;
 }
 
 char *
@@ -2027,122 +2034,115 @@ strbfr(char *str, const char c)
 /* Returns the substring in str before the first appearance of c. If not 
  * found, or C is the first char in STR, returns NULL */
 {
-	char *start = str, *buf = (char *)NULL;
-	register size_t counter = 0;
+	if (!str || !*str || !c)
+		return (char *)NULL;
 
-	while (*str) {
-		if (*str == c) {
-			if (counter == 0)
-				return (char *)NULL; /* There's no substring before 
-			the first char */
-			char *p = (char *)malloc((counter + 1) * sizeof(char));
-			if (p) {
-				buf = p;
-				p = (char *)NULL;
-				strncpy(buf, start, counter);
-				*(buf + counter) = 0x00;
-				return buf;
-			}
-			else
-				return (char *)NULL;
+	char *p = str, *q = (char *)NULL;
+	while (*p) {
+		if (*p == c) {
+			q = p; /* q is now a pointer to C */
+			break;
 		}
-		counter++;
-		str++;
+		p++;
+	}
+	
+	/* C was not found or it was the first char in STR */
+	if (!q || q == str)
+		return (char *)NULL;
+
+	*q = 0x00; 
+	/* Now C (because q points to C) is the null byte and STR ends in C, which 
+	 * is what we want */
+
+	char *buf = (char *)malloc((size_t)(q - str + 1));
+
+	if (!buf) { /* Memory allocation error */
+		/* Give back to C its original value, so that STR is not modified in 
+		 * the process */
+		*q = c;
+		return (char *)NULL;
 	}
 
-	return (char *)NULL;
+	strcpy(buf, str);
+	
+	*q = c;
+	
+	return buf;
 }
 
 char *
-strbfrlst(char *str, char c)
+strbfrlst(char *str, const char c)
 /* Get substring in STR before the last appearance of C. Returns substring 
  * if C is found and NULL if not (or if C was the first char in STR). */
 {
-	/* Get the index in str of the last appearance of c */
-	char *buf = str;
-	unsigned int index = 0, counter = 0;
-
-	while (*buf) {
-		if (*buf == c)
-			index = counter;
-		counter++;
-		buf++;
-	}
-
-	/* If C was not found (or it was the first char in STR (index=0), in 
-	 * which case there is nothing before it) */
-	if (index == 0)
-		return (char *)NULL; 
-
-	/* Else, copy STR into buf, replace C by null char, and return buf */
-	size_t str_len = strlen(str);
-	buf = (char *)NULL;
-	char *p = (char *)malloc((str_len + 1) * sizeof(char));
-
-	if (!p)
+	if (!str || !*str || !c)
 		return (char *)NULL;
 
-	buf = p;
-	p = (char *)NULL;
-	strcpy(buf, str);
-	*(buf + index) = 0x00;
+	char *p = str, *q = (char *)NULL;
 
+	while (*p) {
+		if (*p == c)
+			q = p;
+		p++;
+	}
+	
+	if (!q || q == str)
+		return (char *)NULL;
+	
+	*q = 0x00;
+
+	char *buf = (char *)malloc((size_t)(q - str + 1));
+
+	if (!buf) {
+		*q = c;
+		return (char *)NULL;
+	}
+
+	strcpy(buf, str);
+	
+	*q = c;
+	
 	return buf;
 }
 
 char *
 strbtw(char *str, const char a, const char b)
 /* Returns the string between first ocurrence of A and the first ocurrence of B 
- * in STR or NULL if: there is nothing between A and B, or A and/or B are not 
+ * in STR, or NULL if: there is nothing between A and B, or A and/or B are not 
  * found */
 {
-	if (!str || *str == 0x00)
+	if (!str || !*str || !a || !b)
 		return (char *)NULL;
 
-	int a_index = -1, b_index = -1, i = 0;
+	char *p = str, *pa = (char *)NULL, *pb = (char *)NULL;
 
-	/* Look for A and B in STR and store their index values */
-	char *p = str, *q = str;
 	while (*p) {
-		if (a_index == -1) {
+		if (!pa) {
 			if (*p == a)
-				a_index = i;
+				pa = p;
 		}
-		/* Once A was found, look for B */		
 		else if (*p == b) {
-			b_index = i;
+			pb = p;
 			break;
 		}
-		
-		i++;
 		p++;
 	}
-
-	/* If A and/or B was not found */
-	/* b_index won't be -1 only if both A and B were found */
-	if (b_index == -1)
+	
+	if (!pb)
 		return (char *)NULL;
+		
+	*pb = 0x00;
 	
-	p = (char *)NULL;
+	char *buf = (char *)malloc((size_t)(pb - pa));
 	
-	/* Just in case, make sure B comes after (is bigger than) A */
-	if (b_index <= (a_index + 1))
-		return (char *)NULL;
-	
-	char *buf = (char *)NULL;
-
-	/* Now copy everything between A and B into BUF */
-	buf = (char *)malloc((size_t)((b_index - a_index) + 1) * sizeof(char));
-
 	if (!buf) {
-		fprintf(stderr, "%s: Memory allocation failure\n", __func__);
+		*pb = b;
 		return (char *)NULL;
 	}
 	
-	q += (a_index + 1);
-	size_t bytes =  (size_t)(b_index - a_index - 1);
-	strncpy(buf, q, bytes);
-	*(buf + bytes) = 0x00;
+	strcpy(buf, pa + 1);
+	
+	*pb = b;
 	
 	return buf;
 }
@@ -2155,7 +2155,7 @@ char
 from_hex(char c)
 /* Converts a hex char to its integer value */
 {
-	return isdigit(c) ? c-'0' : tolower(c)-'a'+10;
+	return isdigit(c) ? c - '0' : tolower(c) - 'a' + 10;
 }
 
 char
@@ -2786,7 +2786,7 @@ char *user = (char *)NULL, *path = (char *)NULL, **old_pwd = (char **)NULL,
 	**dirlist = (char **)NULL, **bookmark_names = (char **)NULL,
 	*ls_colors_bk = (char *)NULL, *MIME_FILE = (char *)NULL,
 	**profile_names = (char **)NULL, *encoded_prompt = (char *)NULL,
-	*last_cmd = (char *)NULL, *term = (char *)NULL;
+	*last_cmd = (char *)NULL, *term = (char *)NULL, *TMP_DIR = (char *)NULL;
 
 	/* This is not a comprehensive list of commands. It only lists commands
 	 * long version for TAB completion */
@@ -2984,8 +2984,12 @@ main(int argc, char **argv)
 		flags |= ROOT_USR;
 
 	/* Running in X? */
+	#if __linux__
 	if (getenv("DISPLAY") != NULL 
-	&& strncmp(getenv ("TERM"), "linux", 5) != 0)
+	&& strncmp(getenv("TERM"), "linux", 5) != 0)
+	#else
+	if (getenv("DISPLAY") != NULL)
+	#endif
 		flags |= GRAPHICAL;
 
 	/* Get paths from PATH environment variable. These paths will be used 
@@ -4679,6 +4683,8 @@ profile_set(char *prof)
 	free(MIME_FILE);
 	MIME_FILE = (char *)NULL;
 	
+	free(TMP_DIR);
+	TMP_DIR = (char *)NULL;	
 	free(sel_file_user);
 	sel_file_user = (char *)NULL;
 	
@@ -6962,7 +6968,7 @@ expand_range(char *str, int listdir)
 		return (int *)NULL;
 
 	char *first = (char *)NULL;
-	first=strbfr(str, '-');
+	first = strbfr(str, '-');
 
 	if (!first) 
 		return (int *)NULL;
@@ -6973,7 +6979,7 @@ expand_range(char *str, int listdir)
 	}
 
 	char *second = (char *)NULL;
-	second=straft(str, '-');
+	second = straft(str, '-');
 
 	if (!second) {
 		free(first);
@@ -8418,6 +8424,8 @@ free_stuff (void)
 {
 	size_t i = 0;
 
+	free(TMP_DIR);
+	
 	if (encoded_prompt)
 		free(encoded_prompt);
 
@@ -9562,6 +9570,8 @@ get_path_env(void)
 		strcpy(paths[path_num], buf);
 		path_num++;
 		length = 0;
+		if (!path_tmp[i])
+			break;
 	}
 	
 	free(path_tmp);
@@ -10340,6 +10350,10 @@ init_config(void)
 	 * (TMP_DIR/sel_file_username), so that all users need to be able to
 	 * create files here, but only the user who created it is able
 	 * to delete it or modify it */
+
+	TMP_DIR = (char *)xnmalloc(strlen(user) + pnl_len + 7, sizeof(char));
+	sprintf(TMP_DIR, "/tmp/%s/%s", PNL, user);
+
 	if (stat(TMP_DIR, &file_attrib) == -1) {
 /*		if (mkdir(TMP_DIR, 1777) == -1) { */
 		char *tmp_cmd2[] = { "mkdir", "-m1777", TMP_DIR, NULL };
@@ -11574,6 +11588,16 @@ prompt(void)
 			   welcome_msg_color, NC, default_color, NC);
 		welcome_message = 0;
 	}
+	
+	/* Print the tip of the day (only on first run) */
+/*	static int first_run = 1;
+	if (first_run) {
+//		srand(time(NULL));
+//		printf("TIP: %s\n", tips[rand() % tipsn]);
+		puts(_("TIP: Use a short alias to access remote file systems. "
+				"Example: alias ssh_work='some long command'"));	
+		first_run = 0;
+	} */
 
 	/* Execute prompt commands, if any, and only if external commands are 
 	 * allowed */
@@ -16477,6 +16501,9 @@ edit_function (char **comm)
 			free(term);
 			term = (char *)NULL;
 		}
+		
+		free(TMP_DIR);
+		TMP_DIR = (char *)NULL;
 	
 		/* Rerun external_arguments */
 		if (argc_bk > 1)
@@ -16552,6 +16579,9 @@ edit_function (char **comm)
 			free(term);
 			term = (char *)NULL;
 		}
+
+		free(TMP_DIR);
+		TMP_DIR = (char *)NULL;
 
 		if (argc_bk > 1)
 			external_arguments(argc_bk, argv_bk);
