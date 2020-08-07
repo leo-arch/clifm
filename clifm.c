@@ -5212,19 +5212,52 @@ get_app(char *mime, char *ext)
 char *
 get_mime(char *file)
 {
-	#define MIME_TMP_FILE "/tmp/mime_tmp"
-	
-	if (!file) {
+	if (!file || !*file) {
 		fputs(_("Error opening temporary file\n"), stderr);
 		return (char *)NULL;
 	}
 	
+	char MIME_TMP_FILE[PATH_MAX] = "";
+	sprintf(MIME_TMP_FILE, "%s/mime_tmp", TMP_DIR);
+
+	if (access(MIME_TMP_FILE, F_OK) == 0)
+		remove(MIME_TMP_FILE);
+	
 	FILE *file_fp = fopen(MIME_TMP_FILE, "w");
+
+	if (!file_fp) {
+		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, MIME_TMP_FILE, 
+				strerror(errno));
+		return (char *)NULL;
+	}
+
 	FILE *file_fp_err = fopen("/dev/null", "w");
+
+	if (!file_fp_err) {
+		fprintf(stderr, "%s: '/dev/null': %s\n", PROGRAM_NAME, strerror(errno));
+		fclose(file_fp);
+		return (char *)NULL;
+	}
+
 	int stdout_bk = dup(STDOUT_FILENO); /* Store original stdout */
 	int stderr_bk = dup(STDERR_FILENO); /* Store original stderr */
-	dup2(fileno(file_fp), STDOUT_FILENO); /* Redirect stdout to the desired file */	
-	dup2(fileno(file_fp_err), STDERR_FILENO); /* Redirect stderr to /dev/null */
+
+	/* Redirect stdout to the desired file */
+	if (dup2(fileno(file_fp), STDOUT_FILENO) == -1 ) {
+		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+		fclose(file_fp);
+		fclose(file_fp_err);
+		return (char *)NULL;
+	}
+	
+	/* Redirect stderr to /dev/null */
+	if (dup2(fileno(file_fp_err), STDERR_FILENO) == -1) {
+		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+		fclose(file_fp);
+		fclose(file_fp_err);
+		return (char *)NULL;
+	}
+	
 	fclose(file_fp);
 	fclose(file_fp_err);
 
@@ -5251,7 +5284,7 @@ get_mime(char *file)
 				size_t len = strlen(tmp);
 				if (tmp[len - 1] == '\n')
 					tmp[len - 1] = 0x00;
-				mime_type = (char *)xcalloc(strlen(tmp), sizeof(char));
+				mime_type = (char *)xnmalloc(strlen(tmp), sizeof(char));
 				strcpy(mime_type, tmp + 1);
 			}
 			fclose(file_fp);
@@ -5270,7 +5303,7 @@ _err(int msg_type, int prompt, const char *format, ...)
 /* Custom POSIX implementation of GNU asprintf() modified to log program 
  * messages. MSG_TYPE is one of: 'e', 'w', 'n', or zero (meaning this latter 
  * that no message mark (E, W, or N) will be added to the prompt). PROMPT tells 
- * wether to print the message immediately before the prompt or rather in place.
+ * whether to print the message immediately before the prompt or rather in place.
  * Based on littlstar's xasprintf implementation:
  * https://github.com/littlstar/asprintf.c/blob/master/asprintf.c*/
 {
@@ -10356,7 +10389,7 @@ init_config(void)
 
 	if (stat(TMP_DIR, &file_attrib) == -1) {
 /*		if (mkdir(TMP_DIR, 1777) == -1) { */
-		char *tmp_cmd2[] = { "mkdir", "-m1777", TMP_DIR, NULL };
+		char *tmp_cmd2[] = { "mkdir", "-pm1777", TMP_DIR, NULL };
 		int ret = launch_execve(tmp_cmd2, FOREGROUND);
 		if (ret != 0) {
 			selfile_ok = 0;
@@ -12927,7 +12960,7 @@ exec_cmd(char **comm)
 						/* #### NET #### */
 	else if (strcmp(comm[0], "n") == 0 || strcmp(comm[0], "net") == 0) {
 		if (!comm[1]) {
-			puts(_("Usage: n, net [sftp, smb]://ADDRESS [OPTIONS]"));
+			puts(_("Usage: n, net [sftp, smb, ftp]://ADDRESS [OPTIONS]"));
 			return EXIT_SUCCESS;
 		}
 		if (strncmp(comm[1], "sftp://", 7) == 0)
@@ -12937,7 +12970,7 @@ exec_cmd(char **comm)
 		else if (strncmp(comm[1], "ftp://", 6) == 0)
 			exit_code = remote_ftp(comm[1] + 6, (comm[2]) ? comm[2] : NULL);
 		else {
-			fputs(_("Usage: n, net [sftp, smb]://ADDRESS [OPTIONS]"),
+			fputs(_("Usage: n, net [sftp, smb, ftp]://ADDRESS [OPTIONS]\n"),
 				  stderr);
 			return EXIT_FAILURE;
 		}
