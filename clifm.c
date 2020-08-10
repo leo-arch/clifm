@@ -1458,6 +1458,8 @@ and DT_DIR (and company) and S_ISVTX macros */
  * and history. Btw, readline is what Bash uses for its prompt */
 #include <libintl.h> /* gettext */
 
+#include <limits.h>
+
 #if __linux__
 #  include <sys/capability.h> /* cap_get_file. NOTE: This header exists
 in FreeBSD, but is deprecated */
@@ -1465,7 +1467,6 @@ in FreeBSD, but is deprecated */
 #  include <linux/version.h> /* LINUX_VERSION_CODE && KERNEL_VERSION macros */
 #  include <linux/fs.h> /* FS_IOC_GETFLAGS, S_IMMUTABLE_FL macros */
 #elif __FreeBSD__
-#  include <limits.h>
 /*#  include <strings.h> Enables strcasecmp() */
 #endif
 
@@ -1592,7 +1593,7 @@ xstrlen */
 #define strncpy xstrncpy 
 #define strcmp xstrcmp  
 #define strncmp xstrncmp
-#define atoi xatoi
+/* #define atoi xatoi */
 /*#define alphasort xalphasort */
 #define _(String) gettext (String)
 
@@ -1757,26 +1758,54 @@ xstrlen(const char *str)
 	return len;
 } */
 
+/*
 int
 xatoi(const char *str)
-/* 2 times faster than atoi. The commented lines make xatoi able to handle 
- * negative values */
+// 2 times faster than atoi. Cannot handle negative number (See xnatoi below)
 {
-	int ret = 0; /*, neg = 0; */
-/*	if (*str == '-') {
-		str++;
-		neg = 1;
-	}*/
-	size_t len = strlen(str), i = 0;
-	for(i = 0; i < len; i++) {
-		if (str[i] < 0x30 || str[i] > 0x39)
+	int ret = 0; 
+	
+	while (*str) {
+		if (*str < 0x30 || *str > 0x39)
 			return ret;
-		ret = (ret * 10) + (str[i] - '0');
+		ret = (ret * 10) + (*str - '0');
+		str++;
 	}
-/*	if (neg)
- * 		ret = ret - (ret * 2); */
+
+	if (ret > INT_MAX)
+		return INT_MAX;
+	
+	if (ret < INT_MIN)
+		return INT_MIN;
+
 	return ret;
 }
+
+int
+xnatoi(const char *str)
+// 2 times faster than atoi. The commented lines make xatoi able to handle 
+// negative values
+{
+	int ret = 0, neg = 0;
+
+	while (*str) {
+		if (*str < 0x30 || *str > 0x39)
+			return ret;
+		ret = (ret * 10) + (*str - '0');
+		str++;
+	}
+
+	if (neg)
+		ret = ret - (ret * 2);
+
+	if (ret > INT_MAX)
+		return INT_MAX;
+	
+	if (ret < INT_MIN)
+		return INT_MIN;
+
+	return ret;
+} */
 
 pid_t
 get_own_pid(void)
@@ -10960,7 +10989,7 @@ parse_input_str (char *str)
 		/* ################################################
 		 * #     1) SPLIT INPUT STRING INTO SUBSTRINGS    # 
 		 * ################################################*/
-	
+
 	/* split_str() returns an array of strings without leading, terminating
 	 * and double spaces. */
 	char **substr = split_str(str);
@@ -11163,9 +11192,11 @@ parse_input_str (char *str)
 		 * Otherwise, if the expanded ELN happens to be a program name as 
 		 * well, this program will be executed, and this, for sure, is to be 
 		 * avoided */
+
 		if (i > 0 && is_number(substr[i])) {
 			int num = atoi(substr[i]);
 			/* Expand numbers only if there is a corresponding ELN */
+
 			if (num > 0 && num <= (int)files) {
 				/* Replace the ELN by the corresponding escaped filename */
 				char *esc_str = escape_str(dirlist[num - 1]);
@@ -11222,7 +11253,7 @@ parse_input_str (char *str)
 			}
 		}
 	}
-	
+
 	/* #### 3) NULL TERMINATE THE INPUT STRING ARRAY #### */
 	substr = (char **)xrealloc(substr, sizeof(char *) * (args_n + 2));	
 	substr[args_n + 1] = (char *)NULL;
