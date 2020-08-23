@@ -15749,6 +15749,13 @@ properties_function(char **comm)
 int
 get_properties (char *filename, int _long, int max, size_t filename_len)
 {
+	if (!filename || !*filename)
+		return EXIT_FAILURE;
+	
+	size_t len = strlen(filename);
+	if (filename[len - 1] == '/')
+		filename[len - 1] = 0x00;
+	
 	struct stat file_attrib;
 	/* Check file existence */
 	if (lstat(filename, &file_attrib) == -1) {
