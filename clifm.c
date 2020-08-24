@@ -14218,7 +14218,10 @@ search_function(char **comm)
 		case 'f': file_type = S_IFIFO; break;
 		case 'b': file_type = S_IFBLK; break;
 		case 'c': file_type = S_IFCHR; break;
-		default: file_type = 0;
+		default: 
+			fprintf(stderr, "%s: '%c': Unrecognized filetype\n", PROGRAM_NAME,
+					file_type);
+			return EXIT_FAILURE;
 		}
 	}
 
