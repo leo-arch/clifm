@@ -25,7 +25,7 @@
 /* Compile as follows:
 
  * On Linux
- * $ gcc -O3 -march=native -s -fstack-protector-strong -lreadline -lcap -o 
+ * $ gcc -O3 -march=native -s -fstack-protector-strong -lreadline -lcap -acl -o 
  * clifm clifm.c
  * To be fully POSIX-2008 compliant pass the _BE_POSIX option to the compiler,
  * that is, -D_BE_POSIX
@@ -1440,6 +1440,7 @@ and DT_DIR (and company) and S_ISVTX macros */
 #include <sys/stat.h> /* stat, lstat, mkdir */
 #include <sys/wait.h> /* waitpid, wait */
 #include <sys/ioctl.h> /* ioctl */
+#include <sys/acl.h> /* acl_get_file(), acl_get_entry() */
 #include <time.h> /* localtime, strftime, clock (to time functions) */
 #include <grp.h> /* getgrgid */
 #include <signal.h> /* trap signals */
@@ -1518,10 +1519,10 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.20.7"
+#define VERSION "0.20.8"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "August 3, 2020"
+#define DATE "September 18, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -2420,6 +2421,41 @@ remove_quotes(char *str)
 	return (char *)NULL;
 }
 
+int
+is_acl(char *file)
+/* Return 1 if FILE has some ACL property and zero if none */
+{
+	if (!file || !*file)
+		return 0;
+
+	acl_t acl;
+	int entryid, num = 0;
+	acl = acl_get_file(file, ACL_TYPE_ACCESS);
+
+	if (acl) {
+		acl_entry_t entry;
+
+		for (entryid = ACL_FIRST_ENTRY; ; entryid = ACL_NEXT_ENTRY) {
+			if (acl_get_entry(acl, entryid, &entry) != 1)
+				break;
+			num++;
+		}
+
+		acl_free(acl);
+
+		if (num > 3)
+			/* We have something else besides owner, group, and others, that is,
+			 * we have an ACL property */
+			return 1;
+		else
+			return 0;
+	}
+
+	else /* Error */
+		fprintf(stderr, "%s\n", strerror(errno));
+	
+	return 0;
+}
 
 
 				/* ##########################
@@ -14218,7 +14254,7 @@ search_function(char **comm)
 		case 'f': file_type = S_IFIFO; break;
 		case 'b': file_type = S_IFBLK; break;
 		case 'c': file_type = S_IFCHR; break;
-		default: 
+		default:
 			fprintf(stderr, "%s: '%c': Unrecognized filetype\n", PROGRAM_NAME,
 					file_type);
 			return EXIT_FAILURE;
@@ -15929,12 +15965,12 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 	}
 
 	/* Print file properties for normal mode */
-	printf("(%04o)%c/%c%c%c/%c%c%c/%c%c%c %zu %s %s %s %s ", 
+	printf("(%04o)%c/%c%c%c/%c%c%c/%c%c%c%s %zu %s %s %s %s ", 
 							file_attrib.st_mode & 07777, file_type, 
-							read_usr, write_usr, exec_usr, 
-							read_grp, write_grp, exec_grp,
-							read_others, write_others, (sticky) ? 't' 
-							: exec_others, link_n, 
+							read_usr, write_usr, exec_usr, read_grp, 
+							write_grp, exec_grp, read_others, write_others, 
+							(sticky) ? 't' : exec_others, 
+							is_acl(filename) ? "+" : "", link_n, 
 							(!owner) ? _("unknown") : owner->pw_name, 
 							(!group) ? _("unknown") : group->gr_name, 
 							(size_type) ? size_type : "??", 
