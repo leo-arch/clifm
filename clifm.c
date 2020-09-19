@@ -915,8 +915,10 @@ of course you can grep it to find, say, linux' macros, as here. */
 	the color corresponding to the filetype of the file in the CWD.
 
 ###########################################
- ** (SOLVED) The no list folders first code is broken.
- ** (SOLVED) Trash is not working in Free-BSD: its 'cp' implementation does not 
+ * (SOLVED) Path completion when double dot is involved stopped working (since
+	version 0.17.2). Ex: 'c file ../..[TAB]'
+ * (SOLVED) The no list folders first code is broken.
+ * (SOLVED) Trash is not working in Free-BSD: its 'cp' implementation does not 
 	allow the use of -r and -a simultaneously. So, replace -ra by -a if using 
 	Free-BSD. NOTE: -ra is redundant; -a already implies -R, which is the same
 	as -r. So, just use -a for both Linux and Free-BSD.
@@ -9103,7 +9105,8 @@ my_rl_path_completion(const char *text, int state)
 	 * access() */
 	exec_path = 0;
 	if (dirname_len > 2) {
-		if (dirname[dirname_len - 2] == '.' 
+		if (dirname[dirname_len - 3] == '/'
+		&& dirname[dirname_len - 2] == '.' 
 		&& dirname[dirname_len - 1] == '/') {
 			dir_tmp = savestring(dirname, dirname_len);
 			if (dir_tmp) {
@@ -9116,7 +9119,7 @@ my_rl_path_completion(const char *text, int state)
 	/* ############### COMPLETION FILTER ################## */
 	/*         This is the heart of the function           */
 	 
-	while (directory && (entry = readdir (directory))) {
+	while (directory && (entry = readdir(directory))) {
 		/* If the user entered nothing before TAB (ex: "cd [TAB]") */
 		if (!filename_len) {
 			/* Exclude "." and ".." as possible completions */
@@ -9212,7 +9215,7 @@ my_rl_path_completion(const char *text, int state)
 			}
 		}
 
-		/* If there is at least one char to complete (ex: "cd .[TAB]")*/
+		/* If there is at least one char to complete (ex: "cd .[TAB]") */
 		else {
 			/* Check if possible completion match up to the length of 
 			 * filename. */
@@ -9298,7 +9301,7 @@ my_rl_path_completion(const char *text, int state)
 		}
 		
 		if (match)
-			break;		
+			break;
 	}
 
 	if (dir_tmp) { /* == exec_path */
