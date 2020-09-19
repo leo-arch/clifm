@@ -394,7 +394,9 @@ of course you can grep it to find, say, linux' macros, as here. */
     like in Bash. 
 
 ###################################
- * (DONE) TMP_DIR shoould not be /tmp/clifm, since this is common to all users, 
+ * (DONE) Allow get_properties() to recognize the existence of ACL properties,
+	like 'ls -l' does via the plus sign.
+ * (DONE) TMP_DIR should not be /tmp/clifm, since this is common to all users, 
 	in which case network mounpoint could be overwritten. It should be rather
 	/tmp/clifm/user.
  * (DONE) Add an option to disable the dir counter, since this feature could
@@ -2423,7 +2425,8 @@ remove_quotes(char *str)
 
 int
 is_acl(char *file)
-/* Return 1 if FILE has some ACL property and zero if none */
+/* Return 1 if FILE has some ACL property and zero if none
+ * See: https://man7.org/tlpi/code/online/diff/acl/acl_view.c.html */
 {
 	if (!file || !*file)
 		return 0;
@@ -2445,15 +2448,16 @@ is_acl(char *file)
 
 		if (num > 3)
 			/* We have something else besides owner, group, and others, that is,
-			 * we have an ACL property */
+			 * we have at least one ACL property */
 			return 1;
 		else
 			return 0;
 	}
 
 	else /* Error */
-		fprintf(stderr, "%s\n", strerror(errno));
-	
+		/* fprintf(stderr, "%s\n", strerror(errno)); */
+		return 0;
+
 	return 0;
 }
 
@@ -15944,13 +15948,14 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 		if (pad < 0)
 			pad = 0;
 		
-		printf("%s%s%s%-*s%s (%04o) %c/%c%c%c/%c%c%c/%c%c%c %s %s %s %s\n", 
+		printf("%s%s%s%-*s%s (%04o) %c/%c%c%c/%c%c%c/%c%c%c%s %s %s %s %s\n", 
 				color, (!trim) ? filename : trim_filename, NC, pad, "", 
 				default_color, file_attrib.st_mode & 07777,
 				file_type,
 				read_usr, write_usr, exec_usr, 
 				read_grp, write_grp, exec_grp,
 				read_others, write_others, (sticky) ? 't' : exec_others,
+				is_acl(filename) ? "+" : "",
 				(!owner) ? _("unknown") : owner->pw_name, 
 				(!group) ? _("unknown") : group->gr_name,
 				(size_type) ? size_type : "??", 
