@@ -917,11 +917,11 @@ of course you can grep it to find, say, linux' macros, as here. */
  ** 3 - When TAB completing bookmarks, if there is a file named as one of the
 	possible bookmark names in the CWD, this bookmark name will be printed in
 	the color corresponding to the filetype of the file in the CWD.
- ** 4 - chdir() succees if the user has at least execute permission on the
-	directory. However, since CliFM wants to list files in dir as well, we also 
-	need read permission. Add this check to cd_function()!!
 
 ###########################################
+ * (SOLVED) chdir() succees if the user has at least execute permission on the
+	directory. However, since CliFM wants to list files in dir as well, we also 
+	need read permission. Add this check to cd_function()!!
  * (SOLVED) Path completion when double dot is involved stopped working (since
 	version 0.17.2). Ex: 'c file ../..[TAB]'
  * (SOLVED) The no list folders first code is broken.
@@ -1530,10 +1530,10 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.20.9"
+#define VERSION "0.20.10"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "September 19, 2020"
+#define DATE "September 25, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
