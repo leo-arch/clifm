@@ -33,6 +33,7 @@
  * On FreeBSD:
  * gcc -O3 -march=native -s -fstack-protector-strong -lreadline -lintl -o
  * clifm clifm.c
+ * NOTE: I still didn't checked the acl library on FreeBSD
 
  * You can also use tcc instead of gcc.
  *  */
@@ -80,8 +81,11 @@
 * DEPENDENCIES: 'glibc', 'ncurses', 'libcap', 'readline', 'coreutils' 
 * (providing basic programs such as rm, cp, mkdir, etc). For Archers: all 
 * these deps are part of the 'core' repo, and 'glibc' is also part of the 
-* 'base' metapackage. In Debian two packages must be installed: 'libcap-dev'
-* and 'libreadline-dev'. In Fedora/redhat: 'libcap-devel' and 'readline-devel'
+* 'base' metapackage. In Debian three packages must be installed: 'libcap-dev'
+* , 'libreadline-dev', and 'libacl1-dev'. In Fedora/redhat: 'libcap-devel', 
+* 'readline-devel', and 'libacl-devel'. In Slackware: 'readline', 'acl', 
+* 'libcap', and 'libtermcap' (and then compile adding -ltermcap to gcc).
+
 * Getting dependencies:
 * $ ldd /path/to/program
 * $ objdump -p /path/to/program | grep NEEDED
@@ -913,6 +917,9 @@ of course you can grep it to find, say, linux' macros, as here. */
  ** 3 - When TAB completing bookmarks, if there is a file named as one of the
 	possible bookmark names in the CWD, this bookmark name will be printed in
 	the color corresponding to the filetype of the file in the CWD.
+ ** 4 - chdir() succees if the user has at least execute permission on the
+	directory. However, since CliFM wants to list files in dir as well, we also 
+	need read permission. Add this check to cd_function()!!
 
 ###########################################
  * (SOLVED) Path completion when double dot is involved stopped working (since
@@ -6743,6 +6750,20 @@ cd_function(char *new_path)
 			return EXIT_FAILURE;
 		}
 		
+		/* Execute permission is enough to access a directory, but not to
+		 * list its content; for this we need read permission as well. So,
+		 * without the read permission check, chdir() below will be successfull,
+		 * but CliFM will be nonetheless unable to list the content of the
+		 * directory */
+		if (access(real_path, R_OK) != 0) {
+			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, real_path, 
+					strerror(errno));
+			if (dequoted_p)
+				free(deq_path);
+			free(real_path);
+			return EXIT_FAILURE;			
+		}
+
 		int ret = chdir(real_path);
 		if (ret != 0) {
 			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, real_path, 
