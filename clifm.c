@@ -10432,7 +10432,9 @@ init_config(void)
 				/* Since I'm looking for a very specific line, which is a 
 				 * fixed line far below MAX_LINE, I don't care to get any 
 				 * of the remaining lines truncated */
-				fseek(xresources_fp, 0, SEEK_SET);
+				#if __FreeBSD__
+					fseek(xresources_fp, 0, SEEK_SET);
+				#endif
 				char line[256] = "";
 				int eight_bit_ok = 0;
 				while (fgets(line, sizeof(line), xresources_fp))
