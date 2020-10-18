@@ -25,7 +25,7 @@
 /* Compile as follows:
 
  * On Linux
- * $ gcc -O3 -march=native -s -fstack-protector-strong -lreadline -lcap -acl -o 
+ * $ gcc -O3 -march=native -s -fstack-protector-strong -lreadline -lcap -lacl -o 
  * clifm clifm.c
  * To be fully POSIX-2008 compliant pass the _BE_POSIX option to the compiler,
  * that is, -D_BE_POSIX
@@ -33,7 +33,8 @@
  * On FreeBSD:
  * gcc -O3 -march=native -s -fstack-protector-strong -lreadline -lintl -o
  * clifm clifm.c
- * NOTE: I still didn't checked the acl library on FreeBSD
+ * NOTE: I still didn't checked the acl library on FreeBSD. It works 
+ * without the need of -lacl.
 
  * You can also use tcc instead of gcc.
  *  */
@@ -919,6 +920,9 @@ of course you can grep it to find, say, linux' macros, as here. */
 	the color corresponding to the filetype of the file in the CWD.
 
 ###########################################
+ * (SOLVED) In FreeBSD, the line "XTerm*eightBitInput" is always added to
+	.Xresources file, no matter what. SOLUTION: Rewind the file to the beginning
+	before doing any check.
  * (SOLVED) chdir() succees if the user has at least execute permission on the
 	directory. However, since CliFM wants to list files in dir as well, we also 
 	need read permission. Add this check to cd_function()!!
@@ -1530,10 +1534,10 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.20.10"
+#define VERSION "0.21.0"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "September 25, 2020"
+#define DATE "October 17, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -10428,7 +10432,9 @@ init_config(void)
 				/* Since I'm looking for a very specific line, which is a 
 				 * fixed line far below MAX_LINE, I don't care to get any 
 				 * of the remaining lines truncated */
-				char line[32] = "", eight_bit_ok = 0;
+				fseek(xresources_fp, 0, SEEK_SET);
+				char line[256] = "";
+				int eight_bit_ok = 0;
 				while (fgets(line, sizeof(line), xresources_fp))
 					if (strncmp(line, "XTerm*eightBitInput: false", 26) == 0)
 						eight_bit_ok = 1;
