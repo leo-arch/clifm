@@ -70,6 +70,11 @@
  * $ gcc -O3 -march=native -s -fstack-protector-strong -lreadline -lcap -o 
  * clifm clifm.c
  *
+ * NOTE: In Debian Bullseye (gcc 10.2.0) I got undefined reference error when
+ * compiling using the above command. The solution was simply to alter the
+ * order of the parameters: gcc -o clifm clifm.c -O3 -march=native -s
+ * -fstack-protector-strong -lreadline -lcap -lacl
+ * 
  * The -s option generates a stripped (and thereby smaller, if not faster) 
  * binary (by removing debugging symbols)
  * tcc (the Tiny C Compiler) can also be used by simply replacing "gcc"
@@ -920,6 +925,9 @@ of course you can grep it to find, say, linux' macros, as here. */
 	the color corresponding to the filetype of the file in the CWD.
 
 ###########################################
+ * (SOLVED) When searching for files not in CWD (/string dir), we get a 
+	corrupted ELN (it prints garbage). I just needed to set the 'index' string 
+	to NULL in colors_list() whenever no ELN was found.
  * (SOLVED) In FreeBSD, the line "XTerm*eightBitInput" is always added to
 	.Xresources file, no matter what. SOLUTION: Rewind the file to the beginning
 	before doing any check.
@@ -12010,6 +12018,8 @@ colors_list(const char *entry, const int i, const int pad,
 	/* When listing files NOT in CWD (called from search_function() and first
 	 * argument is a path: "/search_str /path") 'i' is zero. In this case, no 
 	 * index should be shown at all */
+	else
+		index[0] = 0x00;
 
 	struct stat file_attrib;
 	int ret = 0;
