@@ -925,6 +925,10 @@ of course you can grep it to find, say, linux' macros, as here. */
 	the color corresponding to the filetype of the file in the CWD.
 
 ###########################################
+ * (SOLVED) The program crashes whenever the search function finds filenames
+	containing aplphabetic chars AND a range. Example "abc1-2". SOLUTION: Check
+	there are no alphabetic chars in ranges. NOTE: PAY ATTENTION! THE LOGIC
+	OF THIS BLOCK (the range check in parse_input_str()) MIGHT NOT BE FLAWLESS.
  * (SOLVED) When searching for files not in CWD (/string dir), we get a 
 	corrupted ELN (it prints garbage). I just needed to set the 'index' string 
 	to NULL in colors_list() whenever no ELN was found.
@@ -11103,6 +11107,15 @@ parse_input_str (char *str)
 		/* Check for ranges */
 		register size_t j = 0;
 		for (j = 0; substr[i][j]; j++) {
+			/* If some alphabetic char, besides '-', is found in the string, we 
+			 * have no range */
+			if (substr[i][j] != '-' && (substr[i][j] < 48
+			|| substr[i][j] > 57)) {
+				if (ranges_ok)
+					free(range_array);
+				ranges_ok = 0;
+				break;
+			}
 			/* If a range is found, store its index */
 			if (j > 0 && j < substr_len && substr[i][j] == '-' && 
 			isdigit(substr[i][j - 1]) && isdigit(substr[i][j + 1]))
