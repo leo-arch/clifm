@@ -10502,7 +10502,7 @@ init_config(void)
 
 	if (stat(TMP_DIR, &file_attrib) == -1) {
 /*		if (mkdir(TMP_DIR, 1777) == -1) { */
-		char *tmp_cmd2[] = { "mkdir", "-pm1777", TMP_DIR, NULL };
+		char *tmp_cmd2[] = { "mkdir", "-pm700", TMP_DIR, NULL };
 		int ret = launch_execve(tmp_cmd2, FOREGROUND);
 		if (ret != 0) {
 			selfile_ok = 0;
