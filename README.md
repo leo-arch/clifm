@@ -1,7 +1,7 @@
 # CLiFM
 > The KISS file manager: text-based, ultra-lightweight, lightning fast, and written in C
 
-0.20.8 is the latest version.
+0.21.1 is the latest version.
 
 0.18.0. This is the first POSIX-2008 compliant and FreeBSD compatible version.
 
@@ -29,11 +29,13 @@ CliFM is a completely text-based file manager able to perform all the basic oper
 
 You can also use the 'sel' keyword with external commands. Example: `s 1-4 7 10 && file sel`.
 
+Of course, you can deselect some or all selected files whenever you want with the `desel` or `ds` command.
+
 ![alt_tag](https://github.com/leo-arch/clifm/blob/master/images/sel_box.png)
  
  * Open files without the need to specify any program. Via `mime` (the built-in resource opener), if no program was specified, CLiFM will open the file with the deafult program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background.
 
-* Quick search: type `/string` and CliFM will list all the files containing `string` in its name. This function also support wildcards. Example: `/*.png` will list all the .png files in the current directory. If you want to search for files in another directory, just tell the search function where to search: `/*.png /media/images`. Of course, you can deselect some or all selected files whenever you want with the `desel` or `ds` command.
+* Quick search: type `/string` and CliFM will list all the files containing `string` in its name. This function also support wildcards. Example: `/*.png` will list all the .png files in the current directory. If you want to search for files in another directory, just tell the search function where to search: `/*.png /media/images`.
 
 ![alt_tag](https://github.com/leo-arch/clifm/blob/master/images/quick_search.png)
 
@@ -88,7 +90,7 @@ If using another distro:
 2. Use `gcc` (`tcc` and `clang` also work) to compile the program. 
 
 On Linux:
-       $ gcc -O3 -march=native -fstack-protector-strong -s -lcap -lreadline -o clifm clifm.c
+       $ gcc -O3 -march=native -fstack-protector-strong -s -lcap -lreadline -lacl -o clifm clifm.c
 To enable POSIX compliance, pass this option to the compiler: `-D_BE_POSIX.` The only feature disabled in this way is files birth time, only available on Linux via statx(), which is Linux-specific and thereby not POSIX compliant.
 
 On FreeBSD:
