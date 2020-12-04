@@ -10489,21 +10489,37 @@ init_config(void)
 	/* ################## END OF IF HOME ########################### */
 
 	/* #### CHECK THE TMP DIR #### */
-	/* If the temporary directory doesn't exist, create it. I Use 1777 
-	 * permissions, that is, world writable, but with sticky bit set:
-	 * everyone can create files in here, but only the file's owner can remove
-	 * or modify the file. I store here the list of selected files per user
-	 * (TMP_DIR/sel_file_username), so that all users need to be able to
-	 * create files here, but only the user who created it is able
-	 * to delete it or modify it */
+
+	/* If the temporary directory doesn't exist, create it. I create the 
+	 * parent directory (/tmp/clifm) with 1777 permissions (world writable 
+	 * with the sticky bit set), so that every user is able to create files
+	 * in here, but only the file's owner can remove or modify them */
 
 	TMP_DIR = (char *)xnmalloc(strlen(user) + pnl_len + 7, sizeof(char));
+	sprintf(TMP_DIR, "/tmp/%s", PNL);
+
+	if (stat(TMP_DIR, &file_attrib) == -1) {
+/*		if (mkdir(TMP_DIR, 1777) == -1) { */
+		char *tmp_cmd2[] = { "mkdir", "-pm1777", TMP_DIR, NULL };
+		int ret = launch_execve(tmp_cmd2, FOREGROUND);
+		if (ret != 0) {
+			_err('e', PRINT_PROMPT, "%s: mkdir: '%s': %s\n", PROGRAM_NAME, 
+				 TMP_DIR, strerror(errno));
+		}
+	}
+
+	/* Once the parent directory exists, create the user's directory to 
+	 * store the list of selected files: 
+	 * TMP_DIR/clifm/username/.clifm_sel_username. I use here very
+	 * restrictive permissions (700), since only the corresponding user must
+	 * be able to read and/or modify this list */
+
 	sprintf(TMP_DIR, "/tmp/%s/%s", PNL, user);
 
 	if (stat(TMP_DIR, &file_attrib) == -1) {
 /*		if (mkdir(TMP_DIR, 1777) == -1) { */
-		char *tmp_cmd2[] = { "mkdir", "-pm700", TMP_DIR, NULL };
-		int ret = launch_execve(tmp_cmd2, FOREGROUND);
+		char *tmp_cmd3[] = { "mkdir", "-pm700", TMP_DIR, NULL };
+		int ret = launch_execve(tmp_cmd3, FOREGROUND);
 		if (ret != 0) {
 			selfile_ok = 0;
 			_err('e', PRINT_PROMPT, "%s: mkdir: '%s': %s\n", PROGRAM_NAME, 
@@ -10520,7 +10536,7 @@ init_config(void)
 
 	if (selfile_ok) {
 		/* Define the user's sel file. There will be one per user 
-		 * (/tmp/clifm/sel_file_username) */
+		 * (/tmp/clifm/username/sel_file_username) */
 		size_t user_len = strlen(user);
 		size_t tmp_dir_len = strlen(TMP_DIR);
 		sel_file_user = (char *)xnmalloc(tmp_dir_len + pnl_len + user_len + 8, 
