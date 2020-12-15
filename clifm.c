@@ -11132,9 +11132,9 @@ parse_input_str (char *str)
 			 * have no range */
 			if (substr[i][j] != '-' && (substr[i][j] < 48
 			|| substr[i][j] > 57)) {
-				if (ranges_ok)
+/*				if (ranges_ok)
 					free(range_array);
-				ranges_ok = 0;
+				ranges_ok = 0; */
 				break;
 			}
 			/* If a range is found, store its index */
