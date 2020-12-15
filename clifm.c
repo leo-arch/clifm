@@ -923,6 +923,11 @@ of course you can grep it to find, say, linux' macros, as here. */
  ** 3 - When TAB completing bookmarks, if there is a file named as one of the
 	possible bookmark names in the CWD, this bookmark name will be printed in
 	the color corresponding to the filetype of the file in the CWD.
+ ** 4 - Whenever a range is followed by a non-range expresion (example: 
+	c 10-12 dir/), the range is not expanded and the program crashes due to
+	a double free(). SOLUTION: Do not free range_array when a non-range
+	expression is found, just break the for loop. The thing works now, but
+	needs more testing.
 
 ###########################################
  * (SOLVED) The program crashes whenever the search function finds filenames
@@ -1546,10 +1551,10 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.21.1"
+#define VERSION "0.21.2"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "November 27, 2020"
+#define DATE "December 15, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In

@@ -1,7 +1,7 @@
 # CLiFM
 > The KISS file manager: text-based, ultra-lightweight, lightning fast, and written in C
 
-0.21.1 is the latest version.
+0.21.2 is the latest version.
 
 0.18.0. This is the first POSIX-2008 compliant and FreeBSD compatible version.
 
