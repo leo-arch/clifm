@@ -930,6 +930,8 @@ of course you can grep it to find, say, linux' macros, as here. */
 	needs more testing.
 
 ###########################################
+ * (SOLVED) Error in 'mm info' command when ELN/file does not exist. SOLUTION:
+	Just check the return value of realpath().
  * (SOLVED) The program crashes whenever the search function finds filenames
 	containing aplphabetic chars AND a range. Example "abc1-2". SOLUTION: Check
 	there are no alphabetic chars in ranges. NOTE: PAY ATTENTION! THE LOGIC
@@ -1551,10 +1553,10 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.21.2"
+#define VERSION "0.21.3"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "December 15, 2020"
+#define DATE "December 16, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -4937,6 +4939,13 @@ int mime_open(char **args)
 		}
 		else
 			file_path = realpath(args[2], NULL);
+		
+		if (!file_path) {
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[2], 
+					(is_number(args[2]) == 1) ? "No such ELN" 
+					: strerror(errno));
+			return EXIT_FAILURE;
+		}
 		
 		if (access(file_path, R_OK) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_path, 
