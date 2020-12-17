@@ -10803,6 +10803,11 @@ external_arguments(int argc, char **argv)
 	}
 
 	if ((flags & START_PATH) && path_value) {
+		char *path_exp = (char *)NULL;
+		if (*path_value == '~') {
+			path_exp = tilde_expand(path_value);
+			path_value = path_exp;
+		}
 		if (chdir(path_value) == 0) {
 			if (path)
 				free(path);
@@ -10813,6 +10818,8 @@ external_arguments(int argc, char **argv)
 			_err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, path_value, 
 				 strerror(errno));
 		}
+		if (path_exp)
+			free(path_exp);
 	}
 	
 	if ((flags & ALT_PROFILE) && alt_profile_value) {
