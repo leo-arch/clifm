@@ -33,10 +33,8 @@
  * On FreeBSD:
  * gcc -O3 -march=native -s -fstack-protector-strong -lreadline -lintl -o
  * clifm clifm.c
- * NOTE: I still didn't checked the acl library on FreeBSD. It works 
- * without the need of -lacl.
 
- * You can also use tcc instead of gcc.
+ * You can also use tcc or clang instead of gcc.
  *  */
 
 /* Notes about compilation:
@@ -1553,10 +1551,10 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.21.3"
+#define VERSION "0.21.4"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
-#define DATE "December 16, 2020"
+#define DATE "December 17, 2020"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -4010,7 +4008,8 @@ alias_import(char *file)
 	char rfile[PATH_MAX] = "";
 	rfile[0] = 0x00;
 
-	if (*file == '~' && *(file + 1) == '/') {
+/*	if (*file == '~' && *(file + 1) == '/') { */
+	if (*file == '~') {
 		char *file_exp = tilde_expand(file);
 		if (!file_exp) {
 			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, file, 
@@ -11425,8 +11424,8 @@ parse_input_str (char *str)
 				 * #    4) TILDE EXPANSION    # 
 				 * ###########################*/
 
-		 /* (replace "~/" by "/home/user") */
-		if (strncmp (substr[i], "~/", 2) == 0) {
+		 /* (replace "~" by "/home/user") */
+		if (strncmp (substr[i], "~", 1) == 0) {
 			/* tilde_expansion() is provided by the readline lib */
 			char *exp_path = tilde_expand(substr[i]);
 			if (exp_path) {
