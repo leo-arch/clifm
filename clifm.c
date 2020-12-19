@@ -928,6 +928,9 @@ of course you can grep it to find, say, linux' macros, as here. */
 	needs more testing.
 
 ###########################################
+ * (SOLVED) Tilde expansion works neither for external argument (-p) nor for
+	cd or open when the tilde is alone ("~"). SOLUTION: Do not check for this
+	"~/" but for this "~".
  * (SOLVED) Error in 'mm info' command when ELN/file does not exist. SOLUTION:
 	Just check the return value of realpath().
  * (SOLVED) The program crashes whenever the search function finds filenames
@@ -1554,6 +1557,7 @@ in FreeBSD, but is deprecated */
 #define VERSION "0.21.4"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
+#define WEBSITE "https://github.com/leo-arch/clifm"
 #define DATE "December 17, 2020"
 
 /* Define flags for program options and internal use */
@@ -17307,8 +17311,8 @@ consider them all equally unethical (...)\""));
 void
 version_function(void)
 {
-	printf(_("%s %s (%s), by %s\nContact: %s\n"), PROGRAM_NAME, VERSION, DATE, 
-		   AUTHOR, CONTACT);
+	printf(_("%s %s (%s), by %s\nContact: %s\nWebsite: %s\n"), PROGRAM_NAME, VERSION, DATE, 
+		   AUTHOR, CONTACT, WEBSITE);
 }
 
 void
