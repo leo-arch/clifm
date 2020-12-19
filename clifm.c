@@ -1559,6 +1559,7 @@ in FreeBSD, but is deprecated */
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
 #define DATE "December 17, 2020"
+#define LICENSE "GPL2"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags). In
@@ -17311,8 +17312,8 @@ consider them all equally unethical (...)\""));
 void
 version_function(void)
 {
-	printf(_("%s %s (%s), by %s\nContact: %s\nWebsite: %s\n"), PROGRAM_NAME, VERSION, DATE, 
-		   AUTHOR, CONTACT, WEBSITE);
+	printf(_("%s %s (%s), by %s\nContact: %s\nWebsite: %s\nLicense: %s\n"), 
+		   PROGRAM_NAME, VERSION, DATE, AUTHOR, CONTACT, WEBSITE, LICENSE);
 }
 
 void
