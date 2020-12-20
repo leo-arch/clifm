@@ -928,6 +928,9 @@ of course you can grep it to find, say, linux' macros, as here. */
 	needs more testing.
 
 ###########################################
+ * (SOLVED) Backgrounded applications are killed by Ctrl-c. SOLUTION: Do not
+	reenable signals if the application launched by execve is to be
+	backgrounded.
  * (SOLVED) Tilde expansion works neither for external argument (-p) nor for
 	cd or open when the tilde is alone ("~"). SOLUTION: Do not check for this
 	"~/" but for this "~".
@@ -13788,12 +13791,14 @@ launch_execve(char **cmd, int bg)
 	}
 	/* Run the command via execvp */
 	else if (pid == 0) {
-		/* Reenable signals only for the child, in case they were disabled for
-		the parent */
-		signal(SIGHUP, SIG_DFL);
-		signal(SIGINT, SIG_DFL);
-		signal(SIGQUIT, SIG_DFL);
-		signal(SIGTERM, SIG_DFL);
+		if (!bg) {
+			/* If the program runs in the foreground, reenable signals only 
+			 * for the child, in case they were disabled for the parent */
+			signal(SIGHUP, SIG_DFL);
+			signal(SIGINT, SIG_DFL);
+			signal(SIGQUIT, SIG_DFL);
+			signal(SIGTERM, SIG_DFL);
+		}
 		execvp(cmd[0], cmd);
 		/* This will only be reached if execvp() fails, because the exec
 		 * family of functions returns only on error */
