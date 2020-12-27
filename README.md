@@ -1,15 +1,13 @@
 # CLiFM
 > The KISS file manager: text-based, ultra-lightweight, lightning fast, and written in C
 
-0.21.2 is the latest version.
-
 0.18.0. This is the first POSIX-2008 compliant and FreeBSD compatible version.
 
 Version 0.17.2 is the first one to work on ARM machines.
 
 Since version 0.16.0 a lot (really, a lot) of bug fixes and some new features were added: a trash system (freedesktop compliant), keyboard shorcuts (very handy), a little messages system to keep track of important messages and errors, "sel" keyword and ranges auto-expansion, ELN expansion with the TAB key, including a Bash-like quoting system (absolutely great), colors customization, and commands sequential and conditional execution (very useful). Consult the manpage for more information). I also added support for translations (using `gettext`).
 
-![alt_tag](https://github.com/leo-arch/clifm/blob/master/images/clifm.png)
+![clifm](images/clifm.png)
 
 CliFM is a completely text-based file manager able to perform all the basic operations you may expect from any other FM. Besides these common operations, such as copy, move, remove, etc, CLiFM most distinctive features are:
 
@@ -21,7 +19,7 @@ CliFM is a completely text-based file manager able to perform all the basic oper
 
 * Bookmarks: Let's suppose you constantly need to access `/media/data/misc/iso_images`. With CLiFM bookmarks function, accessing this location could be as easy as this: `bm` (or `Alt-b`), to call the bookmarks function, and then `1`, provided `/media/data/misc/iso_images` is your first bookmark.
 
-![alt_tag](https://github.com/leo-arch/clifm/blob/master/images/bookmarks.png)
+![bookmarks](images/bookmarks.png)
 
 * Files selection: the ability to select (and deselect) files from here and there, even in different instances of the program, and then operate on them as you whish via the Selection Box or the `sel` keyword. Example: `s 1 4 56 33` will send the files corresponding to these ELN's to the Selection Box. Then, by typing `sb` you can check the contents of the Selection Box. Let's suppose you want to copy a couple of files from your home directory to some distant path, say `/media/data/misc`. Instead of copying all these files individually, you just select the files and then tell the `paste` command where to copy them:
  
@@ -31,23 +29,23 @@ You can also use the 'sel' keyword with external commands. Example: `s 1-4 7 10 
 
 Of course, you can deselect some or all selected files whenever you want with the `desel` or `ds` command.
 
-![alt_tag](https://github.com/leo-arch/clifm/blob/master/images/sel_box.png)
+![selection box](images/sel_box.png)
  
  * Open files without the need to specify any program. Via `mime` (the built-in resource opener), if no program was specified, CLiFM will open the file with the deafult program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background.
 
 * Quick search: type `/string` and CliFM will list all the files containing `string` in its name. This function also support wildcards. Example: `/*.png` will list all the .png files in the current directory. If you want to search for files in another directory, just tell the search function where to search: `/*.png /media/images`.
 
-![alt_tag](https://github.com/leo-arch/clifm/blob/master/images/quick_search.png)
+![quick search](images/quick_search.png)
 
 * A `trash system` to be able to recover deleted files.
 
 * Just like the `ls` command, CLiFM uses (customizable) color codes to identify file types. However, and unlike `ls`, CLiFM is also able to distinguish between empty and non-empty files or directories. Once in CliFM, type `colors` to see the entire list of color codes.
 
-![alt_tag](https://github.com/leo-arch/clifm/blob/master/images/colors.png)
+![colors](images/colors.png)
 
 * It also displays the amount of files contained by listed directories.
 
-![alt_tag](https://github.com/leo-arch/clifm/blob/master/images/dirs.png)
+![dirs](images/dirs.png)
 
 Because file manager, but also half shell, CLiFM also offers the following features:
 
