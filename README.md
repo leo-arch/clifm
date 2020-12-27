@@ -106,9 +106,10 @@ Of course, you can copy this binary to `/usr/bin` or `/usr/local/bin`, or anywhe
 
 	$ clifm
 
-Just try it and run the `help` command to learn more about CliFM. Once in the CliFM prompt, which looks like any terminal prompt, type `help` or `?`:
+Just try it and run the `help` command to learn more about CliFM. Once in the CliFM prompt, type `help` or `?`:
 
-	[user@hostname] ~/ $ help
+	16:23 user:hostname /etc
+	:) $ help
 
 Do not forget to install the manpage as well (the full help is in here):
 
