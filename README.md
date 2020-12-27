@@ -1,4 +1,4 @@
-# CLiFM
+# CliFM
 > The KISS file manager: text-based, ultra-lightweight, lightning fast, and written in C
 
 0.18.0. This is the first POSIX-2008 compliant and FreeBSD compatible version.
@@ -31,7 +31,7 @@ Of course, you can deselect some or all selected files whenever you want with th
 
 ![selection box](images/sel_box.png)
  
- * Open files without the need to specify any program. Via `mime` (the built-in resource opener), if no program was specified, CLiFM will open the file with the deafult program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background.
+ * Open files without the need to specify any program. Via `mime` (the built-in resource opener), if no program was specified, CliFM will open the file with the deafult program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background.
 
 * Quick search: type `/string` and CliFM will list all the files containing `string` in its name. This function also support wildcards. Example: `/*.png` will list all the .png files in the current directory. If you want to search for files in another directory, just tell the search function where to search: `/*.png /media/images`.
 
@@ -56,6 +56,7 @@ Because file manager, but also half shell, CLiFM also offers the following featu
 * Aliases
 * Logs
 * Prompt and profile commands
+* Bash-like prompt customization
 * Sequential and conditional execution of commands 
 * User profiles
 * Keyboard shortcuts
@@ -74,42 +75,45 @@ Insofar as it is heavily inspired by Arch Linux and its KISS principle, CLiFM is
 
 If using Arch, just clone, build, and install the package using the PKGBUILD file:
 
-       $ git clone https://github.com/leo-arch/clifm.git
-       $ cd clifm
-       $ makepkg --install
+	$ git clone https://github.com/leo-arch/clifm.git
+	$ cd clifm
+	$ makepkg -si
 
 If using another distro:
 
 1. Clone the repository
 
-       $ git clone https://github.com/leo-arch/clifm.git
-       $ cd clifm
+	$ git clone https://github.com/leo-arch/clifm.git
+	$ cd clifm
 
 2. Use `gcc` (`tcc` and `clang` also work) to compile the program. 
 
 On Linux:
-       $ gcc -O3 -march=native -fstack-protector-strong -s -lcap -lreadline -lacl -o clifm clifm.c
+
+	$ gcc -O3 -march=native -fstack-protector-strong -s -lcap -lreadline -lacl -o clifm clifm.c
+
 To enable POSIX compliance, pass this option to the compiler: `-D_BE_POSIX.` The only feature disabled in this way is files birth time, only available on Linux via statx(), which is Linux-specific and thereby not POSIX compliant.
 
 On FreeBSD:
-       $ gcc -O3 -march=native -fstack-protector-strong -s -lintl -lreadline -o clifm clifm.c
+
+	$ gcc -O3 -march=native -fstack-protector-strong -s -lintl -lreadline -o clifm clifm.c
 
 3. Run the binary file produced by `gcc`:
 
-       $ ./clifm`
+	$ ./clifm`
 
 Of course, you can copy this binary to `/usr/bin` or `/usr/local/bin`, or anywhere in your PATH, and then run the program as always:
 
-       $ clifm
+	$ clifm
 
 Just try it and run the `help` command to learn more about CliFM. Once in the CliFM prompt, which looks like any terminal prompt, type `help` or `?`:
 
-      [user@hostname] ~/ $ help
+	[user@hostname] ~/ $ help
 
 Do not forget to install the manpage as well (the full help is in here):
 
-       $ sudo cp manpage /usr/share/man/man1/clifm.1
-       $ sudo gzip /usr/share/man/man1/clifm.1
+	$ sudo cp manpage /usr/share/man/man1/clifm.1
+	$ sudo gzip /usr/share/man/man1/clifm.1
 
 Then you can access the manpage as always: `man clifm`
 
