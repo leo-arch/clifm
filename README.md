@@ -100,7 +100,7 @@ On FreeBSD:
 
 3. Run the binary file produced by `gcc`:
 
-	$ ./clifm`
+	$ ./clifm
 
 Of course, you can copy this binary to `/usr/bin` or `/usr/local/bin`, or anywhere in your PATH, and then run the program as always:
 
