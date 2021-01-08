@@ -15,12 +15,12 @@ build:
 	@echo -n "Checking operating system... "
 	@case $$(uname -s) in \
 		Linux) \
-			printf "GNU/Linux\nCompiling $(PROG)... "; \
-			$(CC) $(CFLAGS_LINUX) -o $(PROG) $(OBJS) ; \
+			printf "GNU/Linux\nCompiling $(PROG)...\n"; \
+			$(CC) $(CFLAGS_LINUX) -o $(PROG) $(OBJS); \
 			printf "Done\n" ;; \
 		FreeBSD) \
-			printf "FreeBSD\nCompiling $(PROG)... "; \
-			$(CC) $(CFLAGS_FREEBSD) -o $(PROG) $(OBJS) ; \
+			printf "FreeBSD\nCompiling $(PROG)...\n"; \
+			$(CC) $(CFLAGS_FREEBSD) -o $(PROG) $(OBJS); \
 			printf "Done\n" ;; \
 		*) \
 			printf "\n'$(UNAME)': Operating system not supported" >&2 ;; \
