@@ -12,8 +12,9 @@ CFLAGS_LINUX = -O3 -s -fstack-protector-strong -march=native -lreadline -lcap -l
 CFLAGS_FREEBSD = -O3 -s -fstack-protector-strong -march=native -lreadline -lintl
 
 build:
-	@echo -n "Checking operating system... "
-	@case $$(uname -s) in \
+	@printf "Checking operating system... "; \
+	UNAME=$$(uname -s); \
+	case $${UNAME} in \
 		Linux) \
 			printf "GNU/Linux\nCompiling $(PROG)... "; \
 			$(CC) $(CFLAGS_LINUX) -o $(PROG) $(OBJS); \
@@ -23,7 +24,7 @@ build:
 			$(CC) $(CFLAGS_FREEBSD) -o $(PROG) $(OBJS); \
 			printf "Done\n" ;; \
 		*) \
-			printf "\n'$$(uname -s)': Operating system not supported\n" >&2 ;; \
+			printf "\n'$${UNAME}': Operating system not supported\n" >&2 ;; \
 	esac
 
 install:
@@ -35,10 +36,10 @@ install:
 	@mkdir -p /usr/share/locale/{es}/LC_MESSAGES 2>/dev/null
 	@install -g 0 -o 0 -Dm644 translations/spanish/"${PROG}".mo \
 	/usr/share/locale/es/LC_MESSAGES/"${PROG}".mo
-	@echo "Successfully installed ${PROG}"
+	@printf "Successfully installed ${PROG}\n"
 
 uninstall:
 	@rm "${PREFIX}/${PROG}"
 	@rm /usr/share/man/man1/"${PROG}".1.gz
 	@rm /usr/share/locale/*/LC_MESSAGES/"${PROG}".mo
-	@echo "Successfully uninstalled ${PROG}"
+	@printf "Successfully uninstalled ${PROG}\n"
