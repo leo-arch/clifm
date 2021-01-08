@@ -86,7 +86,21 @@ If using another distro:
 	$ git clone https://github.com/leo-arch/clifm.git
 	$ cd clifm
 
-2. Use `gcc` (`tcc` and `clang` also work) to compile the program. 
+2. You have two options here:
+
+a) Run `make` as follows:
+
+	$ make build && sudo make install
+
+You should find the binary file in `/usr/bin`, so that you can run it as any other program:
+
+	$ clifm
+
+To uninstall `clifm` issue this command where the Makefile is located:
+
+	$ sudo make uninstall
+
+b) Compile the program manually via `gcc` (`tcc` and `clang` also work) to compile the program. 
 
 On Linux:
 
@@ -98,7 +112,7 @@ On FreeBSD:
 
 	$ gcc -O3 -march=native -fstack-protector-strong -s -lintl -lreadline -o clifm clifm.c
 
-3. Run the binary file produced by `gcc`:
+Run the binary file produced by `gcc`:
 
 	$ ./clifm
 
