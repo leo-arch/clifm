@@ -2,7 +2,7 @@
 
 pkgname=clifm
 pkgver=0.21.4
-pkgrel=1
+pkgrel=2
 pkgdesc="The KISS file manager: text-based, ultra-lightweight, lightning fast, and written in C"
 arch=(any)
 url="https://github.com/leo-arch/clifm"
@@ -15,7 +15,7 @@ sha256sums=('SKIP')
 
 build() {
   cd "${srcdir}/${pkgname}"
-  gcc -O3 -march=native -s -fstack-protector-strong -lcap -lreadline -lacl -o clifm clifm.c 
+  gcc -v -O3 -march=native -s -fstack-protector-strong -lcap -lreadline -lacl -o clifm clifm.c 
 }
 
 package() {

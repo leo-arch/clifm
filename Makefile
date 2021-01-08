@@ -8,18 +8,18 @@ PROG = clifm
 OBJS = clifm.c
 
 CC = gcc
-CFLAGS_LINUX = -O3 -s -fstack-protector-strong -march=native -lreadline -lcap -lacl
-CFLAGS_FREEBSD = -O3 -s -fstack-protector-strong -march=native -lreadline -lintl
+CFLAGS_LINUX = -O3 -v -s -fstack-protector-strong -march=native -lreadline -lcap -lacl
+CFLAGS_FREEBSD = -O3 -v -s -fstack-protector-strong -march=native -lreadline -lintl
 
 build:
 	@echo -n "Checking operating system... "
 	@case $$(uname -s) in \
 		Linux) \
-			printf "GNU/Linux\nBuilding $(PROG)... "; \
+			printf "GNU/Linux\nCompiling $(PROG)... "; \
 			$(CC) $(CFLAGS_LINUX) -o $(PROG) $(OBJS) ; \
 			printf "Done\n" ;; \
 		FreeBSD) \
-			printf "FreeBSD\nBuilding $(PROG)... "; \
+			printf "FreeBSD\nCompiling $(PROG)... "; \
 			$(CC) $(CFLAGS_FREEBSD) -o $(PROG) $(OBJS) ; \
 			printf "Done\n" ;; \
 		*) \
