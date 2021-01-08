@@ -23,7 +23,7 @@ build:
 			$(CC) $(CFLAGS_FREEBSD) -o $(PROG) $(OBJS); \
 			printf "Done\n" ;; \
 		*) \
-			printf "\n'$(UNAME)': Operating system not supported" >&2 ;; \
+			printf "'$$(uname -s)': Operating system not supported\n" >&2 ;; \
 	esac
 
 install:
