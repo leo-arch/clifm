@@ -2,7 +2,7 @@
 
 pkgname=clifm
 pkgver=0.21.4
-pkgrel=2
+pkgrel=1
 pkgdesc="The KISS file manager: text-based, ultra-lightweight, lightning fast, and written in C"
 arch=(any)
 url="https://github.com/leo-arch/clifm"
