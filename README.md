@@ -73,7 +73,9 @@ Insofar as it is heavily inspired by Arch Linux and its KISS principle, CLiFM is
 
 ## Compiling and Running CliFM:
 
-If using Arch, just clone, build, and install the package using the PKGBUILD file:
+If using Arch, you'll find it on the AUR (https://aur.archlinux.org/packages/clifm). 
+
+Of course, you can also clone, build, and install the package using the PKGBUILD file:
 
 	$ git clone https://github.com/leo-arch/clifm.git
 	$ cd clifm
