@@ -90,7 +90,7 @@ If using another distro (or FreeBSD):
 
 **a)** Run `make` (*this is the recommended procedure*) as follows:
 
-       $ make build && sudo make install
+	$ make build && sudo make install
 
 You should find the binary file in `/usr/bin`, so that you can run it as any other program:
 
