@@ -31,7 +31,7 @@ Of course, you can deselect some or all selected files whenever you want with th
 
 ![selection box](images/sel_box.png)
  
- * Open files without the need to specify any program. Via `mime` (the built-in resource opener), if no program was specified, CliFM will open the file with the deafult program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background.
+ * Open files without the need to specify any program. Via `mime` (the built-in resource opener), if no program was specified, CliFM will open the file with the default program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background.
 
 * Quick search: type `/string` and CliFM will list all the files containing `string` in its name. This function also support wildcards. Example: `/*.png` will list all the .png files in the current directory. If you want to search for files in another directory, just tell the search function where to search: `/*.png /media/images`.
 
@@ -79,7 +79,7 @@ If using Arch, just clone, build, and install the package using the PKGBUILD fil
 	$ cd clifm
 	$ makepkg -si
 
-If using another distro:
+If using another distro (or FreeBSD):
 
 1. Clone the repository
 
@@ -88,7 +88,7 @@ If using another distro:
 
 2. You have two options here:
 
-a) Run `make` as follows:
+a) Run `make` (this is the recommended procedure) as follows:
 
 	$ make build && sudo make install
 
@@ -96,11 +96,11 @@ You should find the binary file in `/usr/bin`, so that you can run it as any oth
 
 	$ clifm
 
-To uninstall `clifm` issue this command where the Makefile is located:
+To uninstall `clifm` issue this command wherever the Makefile is located:
 
 	$ sudo make uninstall
 
-b) Compile the program manually via `gcc` (`tcc` and `clang` also work) to compile the program. 
+b) Compile the program manually via `gcc` (`tcc` and `clang` also work). 
 
 On Linux:
 
@@ -122,7 +122,7 @@ Of course, you can copy this binary to `/usr/bin` or `/usr/local/bin`, or anywhe
 
 Just try it and run the `help` command to learn more about CliFM. Once in the CliFM prompt, type `help` or `?`:
 
-	16:23 user:hostname /etc
+	12:12 user:hostname /etc
 	:) $ help
 
 Do not forget to install the manpage as well (the full help is in here):
