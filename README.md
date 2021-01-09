@@ -88,7 +88,7 @@ If using another distro (or FreeBSD):
 
 2. You have two options here:
 
-*a)* Run `make` (this is the recommended procedure) as follows:
+**a)** Run `make` (this is the recommended procedure) as follows:
 
        $ make build && sudo make install
 
@@ -100,7 +100,7 @@ To uninstall `clifm` issue this command wherever the Makefile is located:
 
 	$ sudo make uninstall
 
-*b)* Compile the program manually via `gcc` (`tcc` and `clang` also work). 
+**b)** Compile the program manually via `gcc` (`tcc` and `clang` also work). 
 
 On Linux:
 
