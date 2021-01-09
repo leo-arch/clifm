@@ -83,14 +83,14 @@ If using another distro (or FreeBSD):
 
 1. Clone the repository
 
-	$ git clone https://github.com/leo-arch/clifm.git
-	$ cd clifm
+        $ git clone https://github.com/leo-arch/clifm.git
+        $ cd clifm
 
 2. You have two options here:
 
-a) Run `make` (this is the recommended procedure) as follows:
+* Run `make` (this is the recommended procedure) as follows:
 
-	$ make build && sudo make install
+       $ make build && sudo make install
 
 You should find the binary file in `/usr/bin`, so that you can run it as any other program:
 
@@ -100,7 +100,7 @@ To uninstall `clifm` issue this command wherever the Makefile is located:
 
 	$ sudo make uninstall
 
-b) Compile the program manually via `gcc` (`tcc` and `clang` also work). 
+* Compile the program manually via `gcc` (`tcc` and `clang` also work). 
 
 On Linux:
 
