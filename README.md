@@ -88,7 +88,7 @@ If using another distro (or FreeBSD):
 
 2. You have two options here:
 
-**a)** Run `make` (this is the recommended procedure) as follows:
+**a)** Run `make` (*this is the recommended procedure*) as follows:
 
        $ make build && sudo make install
 
