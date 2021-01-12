@@ -1,5 +1,5 @@
 ./" Manpage for CliFM
-.TH "CLIFM" "1" "July 14, 2020" "CliFM 0.24+" "CliFM Manual"
+.TH "CLIFM" "1" "July 14, 2020" "CliFM 0.21+" "CliFM Manual"
 
 .SH NAME
 CLIFM - A completely text-based file manager inspired in Arch Linux' KISS principle 
