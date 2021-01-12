@@ -1,9 +1,12 @@
 ./" Manpage for CliFM
-.TH "CLIFM" "1" "July 14, 2020" "1.0" "CliFM Manual"
+.TH "CLIFM" "1" "July 14, 2020" "CliFM 0.24+" "CliFM Manual"
+
 .SH NAME
 CLIFM - A completely text-based file manager inspired in Arch Linux' KISS principle 
+
 .SH SYNOPSIS
 \fIclifm\fR [-aAfFgGhiIlLoOpsuUvx] [-p PATH] [-P PROFILE]
+
 .SH DESCRIPTION
 CliFM is a completely text-based file manager (no GUI nor curses at all) able to perform all the basic operations you may expect from any other FM. However, its most distinguishing features are: 
   a) The use of short (and even one-character commands) and numbers (ELN's) instead of filenames. Enter 'o 12', for instance, to open a file with your default text editor or to change to the desired directory. With the automatic ELN's expansion feature you can use ELN's with external commands as well. 'diff 12 5', for example, will run 'diff' over the files corresponding to ELN's 12 and 5. Ranges are also accepted, for example: 'rm 1-12' or 'r 1-12'. Since numbers could be a bit tricky when it comes to listed files, you can use the TAB key to expand the filename corresponding to the required ELN.
@@ -67,7 +70,6 @@ no case-sensitive files listing (default)
 .B -I, --case-sensitive
 case-sensitive files listing
 .TP
-
 .B -l, --no-long-view
 disable long view mode (default)
 .TP
