@@ -103,7 +103,7 @@ in FreeBSD, but is deprecated */
 /* #include "clifm.h" */
 /* #include <sys/types.h> */
 
-#include "clifm.h"
+#include "clifm.h" /* A few custom functions */
 
 
 #ifndef EXIT_SUCCESS
@@ -1428,7 +1428,7 @@ new_instance(char *dir)
 		free(self);
 		return EXIT_FAILURE;
 	}
-		
+
 	struct stat file_attrib;
 	if (stat(deq_dir, &file_attrib) == -1) {
 		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, deq_dir, 
@@ -1437,7 +1437,7 @@ new_instance(char *dir)
 		free(deq_dir);
 		return EXIT_FAILURE;
 	}
-	
+
 	if ((file_attrib.st_mode & S_IFMT) != S_IFDIR) {
 		fprintf(stderr, _("%s: '%s': Not a directory\n"), PROGRAM_NAME, 
 				deq_dir);
@@ -1456,14 +1456,16 @@ new_instance(char *dir)
 	else
 		path_dir = deq_dir;
 
-/*	char *cmd = (char *)xnmalloc(strlen(term) + strlen(self) 
+	char *cmd = (char *)xnmalloc(strlen(term) + strlen(self) 
 								 + strlen(path_dir) + 13, sizeof(char));
 	sprintf(cmd, "%s %s -p \"%s\" &", term, self, path_dir); 
 
 	int ret = launch_execle(cmd);
-	free(cmd); */
+	free(cmd);
 
-	char **tmp_term = (char **)NULL, **tmp_cmd = (char **)NULL;
+/* This block doesn't work when term is set to "terminator -x". Not sure
+ * why.
+ * 	char **tmp_term = (char **)NULL, **tmp_cmd = (char **)NULL;
 	if (strcntchr(term, 0x20) != -1) {
 		tmp_term = get_substr(term, 0x20);
 		if (tmp_term) {
@@ -1505,7 +1507,7 @@ new_instance(char *dir)
 	else {
 		char *cmd[] = { term, "-e", self, "-p", path_dir, NULL };
 		ret = launch_execve(cmd, BACKGROUND);
-	}
+	} */
 
 	if (*deq_dir != '/')
 		free(path_dir);
@@ -11079,7 +11081,8 @@ exec_cmd(char **comm)
 
 	/* ####################################################   
 	 * #				 EXTERNAL COMMANDS 				  #     
-	 * ####################################################*/	
+	 * ####################################################*/
+
 	else {
 		/* IF NOT A COMMAND, BUT A DIRECTORY... */
 		if (*comm[0] == '/') {
@@ -14955,8 +14958,10 @@ void
 bonus_function (void)
 {
 	static short state = 0;
+
 	if (state > 13)
 		state = 0;
+
 	switch (state) {
 	case 0:
 		puts("\"Vamos Boca Juniors Carajo!\" (La mitad + 1)");
@@ -15021,5 +15026,6 @@ bonus_function (void)
 		break;
 	default: break;
 	}
+
 	state++;
 }
