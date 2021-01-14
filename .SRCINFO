@@ -1,6 +1,6 @@
 pkgbase = clifm
 	pkgdesc = The KISS file manager: cli-based, ultra-lightweight, and lightning fast
-	pkgver = 0.21.6
+	pkgver = 0.21.7
 	pkgrel = 1
 	url = https://github.com/leo-arch/clifm
 	arch = any

@@ -149,11 +149,11 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 /* #define CLEAR puts("\x1b[c") */
 #define CLEAR write(STDOUT_FILENO, "\ec", 3)
-#define VERSION "0.21.6"
+#define VERSION "0.21.7"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "January 13, 2021"
+#define DATE "January 14, 2021"
 #define LICENSE "GPL2+"
 
 /* Define flags for program options and internal use */
@@ -704,6 +704,12 @@ main(int argc, char **argv)
 	/* Manage external arguments, but only if any: argc == 1 equates to no 
 	 * argument, since this '1' is just the program invokation name. External 
 	 * arguments will override initialization values (init_config) */
+
+	/* Set all external arguments flags to uninitialized state */
+	xargs.splash = xargs.hidden = xargs.longview = xargs.ext = -1;
+	xargs.ffirst = xargs.sensitive = xargs.unicode = xargs.pager = -1;
+	xargs.path = xargs.cdauto = -1;
+
 	if (argc > 1)
 		external_arguments(argc, argv);
 		/* external_arguments is executed before init_config because, if
