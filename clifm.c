@@ -1398,8 +1398,8 @@ new_instance(char *dir)
  * file, as terminal emulator) */
 {
 	if (!term) {
-		fprintf(stderr, _("%s: Default terminal not set. Use the configuration "
-				"file to set one\n"), PROGRAM_NAME);
+		fprintf(stderr, _("%s: Default terminal not set. Use the "
+				"configuration file to set one\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
@@ -1423,8 +1423,8 @@ new_instance(char *dir)
 
 	char *deq_dir = dequote_str(dir, 0);
 	if (!deq_dir) {
-		fprintf(stderr, _("%s: '%s': Error dequoting filename\n"), PROGRAM_NAME,
-				dir);
+		fprintf(stderr, _("%s: '%s': Error dequoting filename\n"),
+				PROGRAM_NAME, dir);
 		free(self);
 		return EXIT_FAILURE;
 	}
@@ -1503,6 +1503,10 @@ new_instance(char *dir)
 	}
 
 	else {
+		fprintf(stderr, _("%s: No argument specified for '%s'\n"
+				"Trying '%s -e %s -p %s'\n"), PROGRAM_NAME, term, term,
+				self, path);
+
 		char *cmd[] = { term, "-e", self, "-p", path_dir, NULL };
 		ret = launch_execve(cmd, BACKGROUND);
 	}
