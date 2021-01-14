@@ -147,8 +147,8 @@ in FreeBSD, but is deprecated */
 #define PNL "clifm" /* Program name lowercase */
 /* #define TMP_DIR "/tmp/clifm" */
 /* If no formatting, puts (or write) is faster than printf */
-#define CLEAR puts("\x1b[c")
-/* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
+/* #define CLEAR puts("\x1b[c") */
+#define CLEAR write(STDOUT_FILENO, "\ec", 3)
 #define VERSION "0.21.6"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
@@ -5959,6 +5959,7 @@ readline_kbind_action(int count, int key) {
 
 	/* C-r: Refresh the screen */
 	case 18:
+		CLEAR;
 		keybind_exec_cmd("rf");
 		break;
 
@@ -6015,6 +6016,7 @@ readline_kbind_action(int count, int key) {
 			list_folders_first = 1;
 		
 		if (status != list_folders_first) {
+			CLEAR;
 			while (files--)
 				free(dirlist[files]);
 			/* Without this puts(), the first entries of the directories
@@ -6041,6 +6043,7 @@ readline_kbind_action(int count, int key) {
 			show_hidden = 1;
 		
 		if (status != show_hidden) {
+			CLEAR;
 			while (files--)
 				free(dirlist[files]);
 			puts("");
@@ -6073,6 +6076,7 @@ readline_kbind_action(int count, int key) {
 			long_view=long_status = 1;
 		else
 			long_view = long_status = 0;
+		CLEAR;
 		keybind_exec_cmd("rf");
 		break;
 
