@@ -1503,7 +1503,7 @@ new_instance(char *dir)
 	}
 
 	else {
-		fprintf(stderr, _("%s: No argument specified for '%s'\n"
+		fprintf(stderr, _("%s: No option specified for '%s'\n"
 				"Trying '%s -e %s -p %s'\n"), PROGRAM_NAME, term, term,
 				self, path);
 
