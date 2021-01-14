@@ -149,11 +149,11 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR puts("\x1b[c")
 /* #define CLEAR write(STDOUT_FILENO, "\ec", 3) */
-#define VERSION "0.21.5"
+#define VERSION "0.21.6"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "January 12, 2021"
+#define DATE "January 13, 2021"
 #define LICENSE "GPL2+"
 
 /* Define flags for program options and internal use */
@@ -373,6 +373,7 @@ int remote_ssh(char *address, char *options);
 int remote_smb(char *address, char *options);
 int remote_ftp(char *address, char *options);
 
+char **get_substr2(char *str, const char ifs);
 
 				/** ##########################
 				 * #    GLOBAL VARIABLES    # 
@@ -1456,16 +1457,14 @@ new_instance(char *dir)
 	else
 		path_dir = deq_dir;
 
-	char *cmd = (char *)xnmalloc(strlen(term) + strlen(self) 
+/*	char *cmd = (char *)xnmalloc(strlen(term) + strlen(self) 
 								 + strlen(path_dir) + 13, sizeof(char));
 	sprintf(cmd, "%s %s -p \"%s\" &", term, self, path_dir); 
 
 	int ret = launch_execle(cmd);
-	free(cmd);
+	free(cmd); */
 
-/* This block doesn't work when term is set to "terminator -x". Not sure
- * why.
- * 	char **tmp_term = (char **)NULL, **tmp_cmd = (char **)NULL;
+ 	char **tmp_term = (char **)NULL, **tmp_cmd = (char **)NULL;
 	if (strcntchr(term, 0x20) != -1) {
 		tmp_term = get_substr(term, 0x20);
 		if (tmp_term) {
@@ -1507,7 +1506,7 @@ new_instance(char *dir)
 	else {
 		char *cmd[] = { term, "-e", self, "-p", path_dir, NULL };
 		ret = launch_execve(cmd, BACKGROUND);
-	} */
+	}
 
 	if (*deq_dir != '/')
 		free(path_dir);
@@ -3306,7 +3305,7 @@ get_substr(char *str, const char ifs)
 	char *buf = (char *)xnmalloc(str_len + 1, sizeof(char));
 
 	while (*str) {
-		while (*str != ifs && *str != 0x00 && length < sizeof(buf))
+		while (*str != ifs && *str != 0x00 && length < (str_len + 1))
 			buf[length++] = *(str++);
 		if (length) {
 			buf[length] = 0x00;
