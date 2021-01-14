@@ -373,7 +373,6 @@ int remote_ssh(char *address, char *options);
 int remote_smb(char *address, char *options);
 int remote_ftp(char *address, char *options);
 
-char **get_substr2(char *str, const char ifs);
 
 				/** ##########################
 				 * #    GLOBAL VARIABLES    # 
