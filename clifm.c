@@ -149,11 +149,11 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 /* #define CLEAR puts("\x1b[c") */
 #define CLEAR write(STDOUT_FILENO, "\ec", 3)
-#define VERSION "0.21.7"
+#define VERSION "0.21.8"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "January 14, 2021"
+#define DATE "January 16, 2021"
 #define LICENSE "GPL2+"
 
 /* Define flags for program options and internal use */
@@ -328,7 +328,7 @@ int cd_function(char *new_path);
 int open_function(char **cmd);
 size_t u8_xstrlen(const char *str);
 void print_license(void);
-void free_sotware(void);
+void free_software(void);
 char **split_str(char *str);
 int is_internal(const char *cmd);
 char *escape_str(char *str);
@@ -9054,8 +9054,9 @@ parse_input_str (char *str)
 				 * ###########################*/
 
 		 /* (replace "~" by "/home/user") */
-		if (strncmp (substr[i], "~", 1) == 0) {
-			/* tilde_expansion() is provided by the readline lib */
+/*		if (strncmp (substr[i], "~", 1) == 0) { */
+		if (*substr[i] == '~') {
+			/* tilde_expand() is provided by the readline lib */
 			char *exp_path = tilde_expand(substr[i]);
 			if (exp_path) {
 				substr[i] = (char *)xrealloc(substr[i], 
@@ -10687,11 +10688,13 @@ exec_cmd(char **comm)
 		kbind_busy = 0;
 	}
 	
-	/*  ############### SOME SHELL CMDS WRAPPERS ##################  */
+	/*  ############### SOME SHELL CMD WRAPPERS ##################  */
 	else if (strcmp(comm[0], "rm") == 0 || strcmp(comm[0], "mkdir") == 0 
-	|| strcmp(comm[0], "touch") == 0 || strcmp(comm[0], "ln") == 0 
-	|| strcmp(comm[0], "unlink") == 0 || strcmp(comm[0], "r") == 0
-	|| strcmp(comm[0], "l") == 0 || strcmp(comm[0], "md") == 0) {
+	|| strcmp(comm[0], "touch") == 0 || strcmp(comm[0], "ln") == 0
+	|| strcmp(comm[0], "chmod") == 0 || strcmp(comm[0], "unlink") == 0
+	|| strcmp(comm[0], "r") == 0 || strcmp(comm[0], "l") == 0
+	|| strcmp(comm[0], "md") == 0) {
+
 		if (strcmp(comm[0], "l") == 0) {
 			comm[0] = (char *)xrealloc(comm[0], 3 * sizeof(char *));
 			strncpy(comm[0], "ln", 3);
@@ -10704,6 +10707,7 @@ exec_cmd(char **comm)
 			comm[0] = (char *)xrealloc(comm[0], 6 * sizeof(char *));
 			strncpy(comm[0], "mkdir", 6);
 		}
+
 		kbind_busy = 1;
 		exit_code = run_and_refresh(comm);
 		kbind_busy = 0;
@@ -10774,12 +10778,12 @@ exec_cmd(char **comm)
 			exit_code = 1;
 	}
 				
-				/* #### PROFILE #### */
+					/* #### PROFILE #### */
 	else if (strcmp(comm[0], "pf") == 0 || strcmp(comm[0], "prof") == 0 
 	|| strcmp(comm[0], "profile") == 0)
 		exit_code = profile_function(comm);
 	
-				/* #### MOUNTPOINTS #### */
+					/* #### MOUNTPOINTS #### */
 	else if (strcmp(comm[0], "mp") == 0 
 	|| (strcmp(comm[0], "mountpoints") == 0)) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0)
@@ -10793,7 +10797,7 @@ exec_cmd(char **comm)
 		}
 	}
 	
-				/* #### EXT #### */
+					/* #### EXT #### */
 	else if (strcmp(comm[0], "ext") == 0) {
 		if (!comm[1] || strcmp(comm[1], "--help") == 0) 
 			puts(_("Usage: ext [on, off, status]"));					
@@ -10816,7 +10820,7 @@ exec_cmd(char **comm)
 		}
 	}
 	
-				/* #### PAGER #### */
+					/* #### PAGER #### */
 	else if (strcmp(comm[0], "pg") == 0 || strcmp(comm[0], "pager") == 0) {
 		if (!comm[1] || strcmp(comm[1], "--help") == 0) 
 			puts(_("Usage: pager, pg [on, off, status]"));
@@ -11046,7 +11050,7 @@ exec_cmd(char **comm)
 			exit_code = hidden_function(comm);
 	}
 
-			  /* #### ANS THESE ONES TOO #### */
+			  /* #### AND THESE ONES TOO #### */
 	/* These functions just print stuff, so that the value of exit_code is 
 	 * always zero, that is to say, success */
 	else if (strcmp(comm[0], "path") == 0 || strcmp(comm[0], "cwd") == 0) 
@@ -11068,7 +11072,7 @@ exec_cmd(char **comm)
 		print_license();
 	
 	else if (strcmp(comm[0], "fs") == 0)
-		free_sotware();
+		free_software();
 	
 	else if (strcmp(comm[0], "bonus") == 0)
 		bonus_function();
@@ -14884,7 +14888,7 @@ commands.\n"));
  A-d:	Deselect all selected files\n\
  A-r:	Change to the root directory\n\
  A-e:	Change to the home directory\n\
- A-u:	Cahnge up to the parent directory of the current working directory\n\
+ A-u:	Change up to the parent directory of the current working directory\n\
  A-j:	Change to the previous directory in the directory history \
 list\n\
  A-k:	Change to the next directory in the directory history list\n\
@@ -14902,7 +14906,7 @@ description consult the man page."));
 }
 
 void
-free_sotware (void)
+free_software (void)
 {
 	puts(_("Excerpt from 'What is Free Software?', by Richard Stallman. \
 Source: https://www.gnu.org/philosophy/free-sw.html\n \
