@@ -1,9 +1,8 @@
 
-				/** ######################
-				 * #  CLIFM CUSTOM LIBS  # 
-				 * ######################*/
+				/** #######################
+				 *  #  CLIFM CUSTOM LIB   # 
+				 *  ######################*/
 
-/* They all work independently of this program and its variables */
 
 int
 check_immutable_bit(char *file)

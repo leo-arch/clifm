@@ -149,7 +149,7 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 /* #define CLEAR puts("\x1b[c") */
 #define CLEAR write(STDOUT_FILENO, "\ec", 3)
-#define VERSION "0.21.8"
+#define VERSION "0.21.9"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
@@ -696,6 +696,16 @@ main(int argc, char **argv)
 	#endif
 		flags |= GRAPHICAL;
 
+	/* ##### READLINE ##### */
+
+	initialize_readline();
+	/* Copy the list of quote chars to a global variable to be used
+	 * later by some of the program functions like split_str(), my_rl_quote(), 
+	 * is_quote_char(), and my_rl_dequote() */
+	qc = (char *)xcalloc(strlen(rl_filename_quote_characters) + 1, 
+						 sizeof(char));
+	strcpy(qc, rl_filename_quote_characters);
+
 	/* Get paths from PATH environment variable. These paths will be used 
 	 * later by get_path_programs (for the autocomplete function) and 
 	 * get_cmd_path() */
@@ -799,16 +809,6 @@ main(int argc, char **argv)
 
 	/* Check if the 'file' command is available */
 	file_cmd_check();
-
-	/* ##### READLINE ##### */
-
-	initialize_readline();
-	/* Copy the list of quote chars to a global variable to be used
-	 * later by some of the program functions like split_str(), my_rl_quote(), 
-	 * is_quote_char(), and my_rl_dequote() */
-	qc = (char *)xcalloc(strlen(rl_filename_quote_characters) + 1, 
-						 sizeof(char));
-	strcpy(qc, rl_filename_quote_characters);
 
 	if (splash_screen) {
 		splash();
@@ -3990,6 +3990,9 @@ is_quote_char(char c)
  * defined in the qc global array (which takes its values from 
  * rl_filename_quote_characters */
 {
+	if (c == 0x00 || !qc) 
+		return -1;
+
 	char *p = qc;
 
 	while (*p) {
@@ -6141,25 +6144,42 @@ parse_usrvar_value(const char *str, const char c)
 	if (c == 0x00 || !str) 
 		return (char *)NULL;
 
-	size_t str_len = strlen(str), i;
+	/* Get whatever comes after c */
+	char *tmp = (char *)NULL;
+	tmp = strchr(str, c);
 
-	for (i = 0; i < str_len; i++) {
-		if (str[i] == c) {
-			size_t index = i + 1, j = 0;
-			if (i == (str_len - 1))
-				return NULL;
-			char *buf = (char *)NULL;
-			buf = (char *)xnmalloc((str_len - index) + 1, sizeof(char));	
-			for (i = index; i < str_len; i++) {
-				if (str[i] != '"' && str[i] != '\'' && str[i] != '\\' 
-				&& str[i] != 0x00) {
-					buf[j++] = str[i];
-				}
-			}
-			buf[j] = 0x00;
-			return buf;
-		}
+	/* Since we don't want c in our string, move on to the next char */
+	tmp++;
+
+	/* If nothing remains */
+	if (!tmp)
+		return (char *)NULL;
+
+	/* Remove leading quotes */
+	if ( *tmp == '"' || *tmp == '\'' )
+		tmp++;
+
+	/* Remove trailing spaces, tabs, and quotes */
+	size_t tmp_len = strlen(tmp), i;
+	for (i = tmp_len - 1; tmp[i] && i > 0; i--) {
+		if (tmp[i] != 0x20 && tmp[i] != '\t' && tmp[i] != '"'
+		&& tmp[i] != '\'')
+			break;
+		else
+			tmp[i] = 0x00;
 	}
+
+	if (!tmp)
+		return (char *)NULL;
+
+	/* Copy the result string into a buffer and return it */
+	char *buf = (char *)NULL;
+	buf = (char *)xnmalloc((strlen(tmp)) + 1, sizeof(char));
+	strcpy(buf, tmp);
+	tmp=(char *)NULL;
+
+	if (buf)
+		return buf;
 	
 	return (char *)NULL;
 }
@@ -8195,7 +8215,7 @@ exec_profile(void)
 			char *line = (char *)NULL;
 			ssize_t line_len = 0;
 			while ((line_len = getline(&line, &line_size, fp)) > 0) {
-				if (strcntchr(line, '=') != -1 && !isdigit (line[0])) {
+				if (strcntchr(line, '=') != -1 && !isdigit(line[0])) {
 					create_usr_var(line);
 				}
 				if (strlen(line) != 0 && line[0] != '#') {
@@ -8706,7 +8726,7 @@ parse_input_str (char *str)
 	}
 
 	if (flags & IS_USRVAR_DEF || send_shell) {
-		/* Remove leading sapces, again */
+		/* Remove leading spaces, again */
 		char *p = str;
 		while (*p == 0x20 || *p == '\t')
 			p++;
@@ -8717,7 +8737,10 @@ parse_input_str (char *str)
 		cmd = (char **)xnmalloc(2, sizeof(char *));
 		cmd[0] = (char *)xcalloc(strlen(p) + 1, sizeof(char));
 		strcpy(cmd[0], p);
-		cmd[1] = (char *)NULL;
+		if (cmd[1]) {
+			free(cmd[1]);
+			cmd[1] = (char *)NULL;
+		}
 
 		p = (char *)NULL;
 
