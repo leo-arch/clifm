@@ -6159,11 +6159,11 @@ parse_usrvar_value(const char *str, const char c)
 	if ( *tmp == '"' || *tmp == '\'' )
 		tmp++;
 
-	/* Remove trailing spaces, tabs, and quotes */
+	/* Remove trailing spaces, tabs, new line chars, and quotes */
 	size_t tmp_len = strlen(tmp), i;
 	for (i = tmp_len - 1; tmp[i] && i > 0; i--) {
 		if (tmp[i] != 0x20 && tmp[i] != '\t' && tmp[i] != '"'
-		&& tmp[i] != '\'')
+		&& tmp[i] != '\'' && tmp[i] != '\n')
 			break;
 		else
 			tmp[i] = 0x00;
@@ -8208,17 +8208,29 @@ exec_profile(void)
 
 	struct stat file_attrib;
 	if (stat(PROFILE_FILE, &file_attrib) == 0) {
+
 		FILE *fp = fopen(PROFILE_FILE, "r");
 		if (fp) {
 
 			size_t line_size = 0;
 			char *line = (char *)NULL;
 			ssize_t line_len = 0;
+
 			while ((line_len = getline(&line, &line_size, fp)) > 0) {
-				if (strcntchr(line, '=') != -1 && !isdigit(line[0])) {
+
+				/* Skip empty and commented lines */
+				if (*line == 0x00 || *line == '\n' || *line == '#')
+					continue;
+
+				/* Remove trailing new line char */
+				if (line[line_len - 1] == '\n')
+					line[line_len - 1] = 0x00;
+
+				if (strcntchr(line, '=') != -1 && !isdigit(*line))
 					create_usr_var(line);
-				}
-				if (strlen(line) != 0 && line[0] != '#') {
+
+				/* Parse line and execute it */
+				else if (strlen(line) != 0) {
 					args_n = 0;
 					char **cmds = parse_input_str(line);
 					if (cmds) {
@@ -8737,10 +8749,7 @@ parse_input_str (char *str)
 		cmd = (char **)xnmalloc(2, sizeof(char *));
 		cmd[0] = (char *)xcalloc(strlen(p) + 1, sizeof(char));
 		strcpy(cmd[0], p);
-		if (cmd[1]) {
-			free(cmd[1]);
-			cmd[1] = (char *)NULL;
-		}
+		cmd[1] = (char *)NULL;
 
 		p = (char *)NULL;
 
