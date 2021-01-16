@@ -2,12 +2,12 @@
 
 pkgname=clifm
 pkgver=0.21.8
-pkgrel=1
+pkgrel=2
 pkgdesc="The KISS file manager: cli-based, ultra-lightweight, and lightning fast"
 arch=(any)
 url="https://github.com/leo-arch/clifm"
 license=(GPL2)
-depends=('glibc' 'ncurses' 'libcap' 'readline' 'coreutils' 'file')
+depends=('ncurses' 'libcap' 'readline' 'file')
 makedepends=('git')
 optdepends=('sshfs: SFTP support' 'cifs-utils: Samba support' 'curlftpfs: FTPFS support')
 source=("git+${url}.git")
