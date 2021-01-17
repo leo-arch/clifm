@@ -1,5 +1,5 @@
 ./" Manpage for CliFM
-.TH "CLIFM" "1" "July 14, 2020" "CliFM 0.21+" "CliFM Manual"
+.TH "CLIFM" "1" "January 17, 2021" "CliFM 0.22+" "CliFM Manual"
 
 .SH NAME
 CLIFM - A completely CLI-based file manager inspired in Arch Linux' KISS principle
@@ -8,18 +8,28 @@ CLIFM - A completely CLI-based file manager inspired in Arch Linux' KISS princip
 \fIclifm\fR [-aAfFgGhiIlLoOpsuUvx] [-p PATH] [-P PROFILE]
 
 .SH DESCRIPTION
-CliFM is a completely text-based file manager (no GUI nor curses at all) able to perform all the basic operations you may expect from any other FM. However, its most distinguishing features are: 
-  a) The use of short (and even one-character commands) and numbers (ELN's) instead of filenames. Enter 'o 12', for instance, to open a file with your default text editor or to change to the desired directory. With the automatic ELN's expansion feature you can use ELN's with external commands as well. 'diff 12 5', for example, will run 'diff' over the files corresponding to ELN's 12 and 5. Ranges are also accepted, for example: 'rm 1-12' or 'r 1-12'. Since numbers could be a bit tricky when it comes to listed files, you can use the TAB key to expand the filename corresponding to the required ELN.
-  b) Automatic files listing: Unlike the shell 'cd' command, CliFM's built-in 'cd' function automatically lists files in the new directory.
-  c) Bookmarks: keep a list of your favorite directories, and even files, to get easy access to them. Example: enter 'bm' (or press Alt-b) to open the bookmarks screen and then simply type a number or a shortcut name to access the desired bookmark. 
-  d) The Selection Box allows you to drop files and directories from different parts of your filesystem (even from different instances of CliFM) and then operate on them with just one command. Example: select a few files in one instance of the program (say 's 12; cd /media; s 2 5-6') and then paste them somewhere else using a second instance ('v sel' or 'paste sel').
-  e) The directory history function (back and forth) keeps track of all the directories visited by you in the current session, so that you can go back and forth to any of them by just entering 'b' or 'f' (or just pressing A-j and A-k respectivelly).
-  f) Keyboard shortcuts make it even easier and faster to navigate and operate on your files. For example, instead of typing 'cd ..' to go back to the parent directory, or 's *' to select all files in the current directory, you can simply press A-u and A-a respectivelly.
-  g) The quick search function makes it really easy to quickly find the files you are looking for: just enter a slash followed by the string or pattern you want (ex: '/*.png'), that's all.
-  h) It is blazing fast and incredibly lightweigth. With a memory footprint below 5 MiB and a disk usage of 300 KiB, it can run on really old hardware. It is so simple that it doesn't require an X session nor any graphical environment at all, being able thus to perfectly run on the console (TTY) and even on a headless machine via a SSH or a telnet session. 
- Because inspired in Arch Linux and its KISS principle, CliFM is fundamentally aimed to be lightweight, fast, and simple. On Arch's notion of simplcity see: \fIhttps://wiki.archlinux.org/index.php/Arch_Linux#Simplicity\fR
+CliFM is a completely text-based file manager (no GUI nor curses at all) able to perform all the basic operations you may expect from any other FM. However, its most distinguishing characteristics are:
+.sp
+  \fBa)\fR The use of short (and even one-character commands) and numbers (ELN's) instead of filenames. Enter 'o 12', for instance, to open a file with your default text editor or to change to the desired directory. With the automatic ELN's expansion feature you can use ELN's with external commands as well. 'diff 12 5', for example, will run 'diff' over the files corresponding to ELN's 12 and 5. Ranges are also accepted, for example: 'rm 1-12' or 'r 1-12'. Since numbers could be a bit tricky when it comes to listed files, you can use the TAB key to expand the filename corresponding to the required ELN.
+.sp
+  \fBb)\fR Automatic files listing: Unlike the shell 'cd' command, CliFM's built-in 'cd' function automatically lists files in the new directory.
+.sp
+  \fBc)\fR Bookmarks: keep a list of your favorite directories, and even files, to get easy access to them. Example: enter 'bm' (or press Alt-b) to open the bookmarks screen and then simply type a number or a shortcut name to access the desired bookmark. 
+.sp
+  \fBd)\fR The Selection Box allows you to drop files and directories from different parts of your filesystem (even from different instances of CliFM) and then operate on them with just one command. Example: select a few files in one instance of the program (say 's 12; cd /media; s 2 5-6') and then paste them somewhere else using a second instance ('v sel' or 'paste sel').
+.sp
+  \fBe)\fR The directory history function (back and forth) keeps track of all the directories visited by you in the current session, so that you can go back and forth to any of them by just entering 'b' or 'f' (or just pressing A-j and A-k respectivelly).
+.sp
+  \fBf)\fR Keyboard shortcuts make it even easier and faster to navigate and operate on your files. For example, instead of typing 'cd ..' to go back to the parent directory, or 's *' to select all files in the current directory, you can simply press A-u and A-a respectivelly.
+.sp
+  \fBg)\fR The quick search function makes it really easy to quickly find the files you are looking for: just enter a slash followed by the string or pattern you want (ex: '/*.png'), that's all.
+.sp
+  \fBh)\fR It is blazing fast and incredibly lightweigth. With a memory footprint below 5 MiB and a disk usage of 300 KiB, it can run on really old hardware. It is so simple that it doesn't require an X session nor any graphical environment at all, being able thus to perfectly run on the console (TTY) and even on a headless machine via a SSH or a telnet session. 
+.sp
+Because inspired in Arch Linux and its KISS principle, CliFM is fundamentally aimed to be lightweight, fast, and simple. On Arch's notion of simplcity see: \fIhttps://wiki.archlinux.org/index.php/Arch_Linux#Simplicity\fR
 
-CliFM's features:
+List of CliFM features:
+
   1) FreeDesktop compliant Trash system
   2) Automatic files listing
   3) Command and directory history function
@@ -290,6 +300,7 @@ safely quit CliFM.
 .SH COLOR CODES
 .TP
 Filetype colors are specified using the same format used by dircolors and the LS_COLORS environment variable, namely, a colon separated list of codes with this format: filetype=color. This is the list of filetype codes:
+
  di = directory
  ed = empty directory
  nd = directory with no read permission
