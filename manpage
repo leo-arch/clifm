@@ -212,7 +212,7 @@ You can use the exclamation character (!) to perform some history commands:
 edit the configuration file. If an application is specified, it will be used to open the configuration file.
 .TP
 .B alias [import FILE]
-with no argument, it prints the list of available  aliases, if any. To write a new alias simpy enter 'edit' to open the configuration file and add a line like this one: alias name='command args...' To import aliases from a file, provided it contains aliases in the specified form, use the 'import' option. Aliases conflicting with some of the internal commands won't be imported.
+with no argument, it prints the list of available  aliases, if any. To write a new alias simply enter 'edit' to open the configuration file and add a line like this one: alias name='command args...' To import aliases from a file, provided it contains aliases in the specified form, use the 'import' option. Aliases conflicting with some of the internal commands won't be imported.
 .TP
 .B splash
 show the splash screen.
