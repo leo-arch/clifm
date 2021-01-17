@@ -100,7 +100,6 @@ in FreeBSD, but is deprecated */
 
 #include <uchar.h> /* char32_t and char16_t types */
 /* #include <bsd/string.h> // strlcpy, strlcat */
-/* #include "clifm.h" */
 /* #include <sys/types.h> */
 
 #include "clifm.h" /* A few custom functions */
@@ -149,11 +148,11 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 /* #define CLEAR puts("\x1b[c") */
 #define CLEAR write(STDOUT_FILENO, "\ec", 3)
-#define VERSION "0.21.9"
+#define VERSION "0.22.0"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "January 16, 2021"
+#define DATE "January 17, 2021"
 #define LICENSE "GPL2+"
 
 /* Define flags for program options and internal use */
@@ -372,6 +371,9 @@ int create_config(char *file);
 int remote_ssh(char *address, char *options);
 int remote_smb(char *address, char *options);
 int remote_ftp(char *address, char *options);
+
+/* Test */
+int skip_nonexec(const struct dirent *entry);
 
 
 				/** ##########################
@@ -763,10 +765,6 @@ main(int argc, char **argv)
 	/* Initialize the shell */
 	init_shell();
 
-	/* Get the list of available applications in PATH to be used by my
-	 * custom autocomplete function */
-	get_path_programs();
-	
 	exec_profile();	
 	
 	if (config_ok) {
@@ -823,7 +821,7 @@ main(int argc, char **argv)
 	 * Bear in mind that if you launch CliFM through a terminal emulator, 
 	 * say xterm (xterm -e clifm), xterm will run a shell, say bash, and 
 	 * the shell will read its config file. Now, if this config file changes 
-	 * the CWD, this will the CWD for CliFM */
+	 * the CWD, this will be the CWD for CliFM */
 	if (!path) {
 		char cwd[PATH_MAX] = "";
 		getcwd(cwd, sizeof(cwd));
@@ -881,6 +879,10 @@ main(int argc, char **argv)
 			list_dir();
 	}
 
+	/* Get the list of available applications in PATH to be used by my
+	 * custom TAB-completion function */
+	get_path_programs();
+
 	get_bm_names();
 	
 	get_profile_names();
@@ -896,33 +898,44 @@ main(int argc, char **argv)
 	4 - Execute command
 	See https://brennan.io/2015/01/16/write-a-shell-in-c/
 	*/
-	while (1) { /* Or: for (;;) --> Infinite loop to keep the program 
-		running */
-		char *input = prompt(); /* Get input string from the prompt */
-		if (input) {
-			char **cmd = parse_input_str(input); /* Parse input string */
-			free(input);
-			input = (char *)NULL;
-			if (cmd) {
-				char **alias_cmd = check_for_alias(cmd);
-				if (alias_cmd) {
-					/* If an alias is found, the function frees cmd and 
-					 * returns alias_cmd in its place to be executed by 
-					 * exec_cmd() */
-					exec_cmd(alias_cmd);
-					for (i = 0; alias_cmd[i]; i++)
-						free(alias_cmd[i]);
-					free(alias_cmd);
-					alias_cmd = (char **)NULL;
-				}
-				else {
-					exec_cmd(cmd); /* Execute command */
-					for (i = 0; i <= args_n; i++) 
-						free(cmd[i]);
-					free(cmd);
-					cmd = (char **)NULL;
-				}
-			}
+
+	/* 1) Infinite loop to keep the program running */
+	while (1) { /* Or: for (;;) */
+
+		/* 2) Grab input string from the prompt */
+		char *input = prompt();
+
+		if (!input)
+			continue;
+
+		/* 3) Parse input string */
+		char **cmd = parse_input_str(input);
+		free(input);
+		input = (char *)NULL;
+
+		if (!cmd)
+			continue;
+
+		/* 4) Execute input string */
+		char **alias_cmd = check_for_alias(cmd);
+
+		if (alias_cmd) {
+			/* If an alias is found, check_for_alias() frees cmd
+			 * and returns alias_cmd in its place to be executed by 
+			 * exec_cmd() */
+			exec_cmd(alias_cmd);
+			for (i = 0; alias_cmd[i]; i++)
+				free(alias_cmd[i]);
+			free(alias_cmd);
+			alias_cmd = (char **)NULL;
+		}
+
+		else {
+			exec_cmd(cmd); /* Execute command */
+			for (i = 0; i <= args_n; i++) 
+				free(cmd[i]);
+			free(cmd);
+			cmd = (char **)NULL;
 		}
 	}
 	
@@ -1086,7 +1099,7 @@ remote_smb(char *address, char *options)
 		}
 	}
 
-	/* If the mountpoint already exists, check it is empty */
+	/* If the mountpoint already exists, check if it is empty */
 	else if (count_dir(rmountpoint) > 2) {
 		fprintf(stderr, "%s: '%s': Mountpoint is not empty\n", 
 				PROGRAM_NAME, rmountpoint);
@@ -1176,8 +1189,8 @@ remote_ssh(char *address, char *options)
 	char *rname = (char *)xnmalloc(strlen(address) + 1, sizeof(char));
 	strcpy(rname, address);
 
-	/* Replace all slashes in address by underscore to construct the mounpoint
-	 * name */
+	/* Replace all slashes in address by underscore to construct the
+	 * mounpoint name */
 	char *p = rname;
 	while (*p) {
 		if (*p == '/')
@@ -1267,9 +1280,8 @@ create_config(char *file)
 		return EXIT_FAILURE;
 	}
 
-	else {
-		/* Do not translate anything in the config file */
-		fprintf(config_fp,
+	/* Do not translate anything in the config file */
+	fprintf(config_fp,
 
 "\t\t###########################################\n\
 \t\t#                  CLIFM                  #\n\
@@ -1381,7 +1393,7 @@ StartingPath=\n\n"
 
 			DEFAULT_PROMPT, DEFAULT_TERM_CMD);
 
-		fputs(
+	fputs(
 
 "#ALIASES\n\
 #alias ls='ls --color=auto -A'\n\n"
@@ -1392,8 +1404,7 @@ StartingPath=\n\n"
 #date | awk '{print $1\", \"$2,$3\", \"$4}'\n\n"
 "#END OF PROMPT COMMANDS\n\n", config_fp);
 
-		fclose(config_fp);
-	}
+	fclose(config_fp);
 	
 	return EXIT_SUCCESS;
 }
@@ -1650,12 +1661,14 @@ alias_import(char *file)
 		return EXIT_FAILURE;
 	}
 	
+	/* Open the file to import aliases from */
 	FILE *fp = fopen(rfile, "r");
 	if (!fp) {
 		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, rfile, strerror(errno));
 		return EXIT_FAILURE;
 	}
 	
+	/* Open CLiFM config file as well */
 	FILE *config_fp = fopen(CONFIG_FILE, "a");
 	if (!config_fp) {
 		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, CONFIG_FILE, 
@@ -1717,10 +1730,13 @@ alias_import(char *file)
 				}
 				
 				alias_imported++;
+
+				/* Write the new alias into CLiFM config file */
 				fputs(line, config_fp);
 			}
 			else
-				fprintf(stderr, _("'%s': Alias already exists\n"), alias_name);
+				fprintf(stderr, _("'%s': Alias already exists\n"),
+						alias_name);
 			
 			free(alias_name);
 		}
@@ -1747,8 +1763,8 @@ alias_import(char *file)
 	/* If some alias was found and imported, print the corresponding message 
 	 * and update the aliases array */
 	if (alias_imported > 1)
-		printf(_("%s: %zu aliases were successfully imported\n"), PROGRAM_NAME, 
-			   alias_imported);
+		printf(_("%s: %zu aliases were successfully imported\n"),
+				PROGRAM_NAME, alias_imported);
 	else
 		printf(_("%s: 1 alias was successfully imported\n"), PROGRAM_NAME);
 
@@ -4028,24 +4044,34 @@ split_str(char *str)
 		switch (*str) {
 		case '\'':
 		case '"':
+			/* If the quote is escaped, copy it into the buffer */
 			if (str_len && *(str - 1) == '\\') {
 				buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
 				buf[buf_len++] = *str;
 				break;
 			}
+
+			/* If not escaped, move on to the next char */
 			quote = *str;
 			str++;
+
+			/* Copy into the buffer whatever is after the first quote
+			 * up to the last quote or NULL */
 			while (*str && *str != quote) {
 				if (is_quote_char(*str)) {
 					buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
-					buf[buf_len++] ='\\';
+					buf[buf_len++] = '\\';
 				}
 				buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
 				buf[buf_len++] = *(str++);
 			}
+
+			/* The above while breaks with NULL or quote, so that if *str
+			 * is NULL there was not terminating quote */
 			if (!*str) {
 				fprintf(stderr, _("%s: Missing '%c'\n"), PROGRAM_NAME, 
 						quote);
+
 				/* Free the current buffer and whatever was already
 				 * allocated */
 				free(buf);
@@ -4054,20 +4080,27 @@ split_str(char *str)
 				for (i = 0;i < words; i++)
 					free(substr[i]);
 				free(substr);
+
 				return (char **)NULL;
 			}
 			break;
 
-		case '\t': /* TAB, new line char, and space are taken as word
-		breaking characters */
+		/* TAB, new line char, and space are taken as word breaking
+		 * characters */
+		case '\t':
 		case '\n':
 		case 0x20:
+
+			/* If escaped, just copy it into the buffer */
 			if (str_len && *(str - 1) == '\\') {
 				buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
 				buf[buf_len++] = *str;
 			}
+
+			/* If not escaped, break the string */
 			else {
-				/* Add a terminating null byte */
+				/* Add a terminating null byte to the buffer, and, if
+				 * not empty, dump the buffer into the substrings array */
 				buf[buf_len] = 0x00;
 				if (buf_len > 0) {
 					substr = (char **)xrealloc(substr, (words + 1) 
@@ -4076,12 +4109,15 @@ split_str(char *str)
 					strcpy(substr[words], buf);
 					words++;
 				}
+
 				/* Clear te buffer to get a new string */
 				memset(buf, 0x00, buf_len);
 				buf_len = 0;
 			}
 			break;
 
+		/* If neither a quote nor a breaking word char, just dump it into
+		 * the buffer */
 		default:
 			buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
 			buf[buf_len++] = *str;
@@ -4158,8 +4194,9 @@ u8_xstrlen(const char *str)
 	cont_bt = 0;
 
 	while (*(str++))
-		if ((*str & 0xc0) != 0x80) /* Do not count continuation bytes (used 
-		* by multibyte, that is, wide or non-ASCII characters) */
+		if ((*str & 0xc0) != 0x80)
+		/* Do not count continuation bytes (used by multibyte, that is,
+		 * wide or non-ASCII characters) */
 			len++;
 		else
 			cont_bt++;
@@ -4536,117 +4573,113 @@ list_mountpoints(void)
 	}
 	
 	FILE *mp_fp = fopen("/proc/mounts", "r");
-	if (mp_fp) {
-		printf(_("%sMountpoints%s\n\n"), white, NC);
-		/* The line variable should be able to store the device name,
-		 * the mount point (PATH_MAX) and mount options. PATH_MAX*2 
-		 * should be more than enough */
-		char **mountpoints = (char **)NULL;
-		size_t mp_n = 0; 
-		int exit_status = 0;
 
-		size_t line_size = 0;
-		char *line = (char *)NULL;
-		ssize_t line_len = 0;
-		
-		while ((line_len = getline(&line, &line_size, mp_fp)) > 0) {
-			/* Do not list all mountpoints, but only those corresponding to 
-			 * a block device (/dev) */
-			if (strncmp (line, "/dev/", 5) == 0) {
-				char *str = (char *)NULL;
-				size_t counter = 0;
-				/* use strtok() to split LINE into tokens using space as
-				 * IFS */
-				str = strtok(line, " ");
-				size_t dev_len = strlen(str);
-				char *device = (char *)xnmalloc(dev_len + 1, sizeof(char));
-				strcpy(device, str);
-				/* Print only the first two fileds of each /proc/mounts line */
-				while (str && counter < 2) {
-					if (counter == 1) { /* 1 == second field */
-						printf("%s%ld%s %s%s%s (%s)\n", eln_color, mp_n + 1, NC, 
-							   (access(str, R_OK|X_OK) == 0) ? blue : red, 
-							   str, default_color, device);
-						/* Store the second field (mountpoint) into an
-						 * array */
-						mountpoints = (char **)xrealloc(mountpoints, 
-											   (mp_n + 1) * sizeof(char *));
-						mountpoints[mp_n] = (char *)xcalloc(strlen(str) + 1, 
-												    sizeof(char));					
-						strcpy(mountpoints[mp_n++], str);
-					}
-					str = strtok(NULL, " ,");
-					counter++;
-				}
-				
-				free(device);
-			}
-		}
-		
-		free(line);
-		line = (char *)NULL;
-		fclose(mp_fp);
-
-		/* This should never happen: There should always be a mountpoint,
-		 * at least "/" */
-		if (mp_n <= 0) {
-			fputs(_("mp: There are no available mountpoints\n"), stdout);
-			return EXIT_SUCCESS;
-		}
-		
-		puts("");
-		/* Ask the user and chdir into the selected mountpoint */
-		char *input = (char *)NULL;
-		while (!input)
-			input = rl_no_hist(_("Choose a mountpoint ('q' to quit): "));
-
-		if (!(*input == 'q' && *(input + 1) == 0x00)) {
-			int atoi_num = atoi(input);
-			if (atoi_num > 0 && atoi_num <= (int)mp_n) {
-				int ret = chdir(mountpoints[atoi_num - 1]);
-				if (ret == 0) {
-					free(path);
-					path = (char *)xcalloc(strlen(mountpoints[atoi_num - 1]) 
-										   + 1, sizeof(char));
-					strcpy(path, mountpoints[atoi_num - 1]);
-					add_to_dirhist(path);
-					if (cd_lists_on_the_fly) {
-						while (files--)
-							free(dirlist[files]);
-						list_dir();						
-					}
-				}
-				else {
-					fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, 
-							mountpoints[atoi_num - 1], strerror(errno));
-					exit_status = 1;
-				}
-			}
-			else {
-				printf(_("mp: '%s': Invalid mountpoint\n"), input);
-				exit_status = 1;
-			}
-		}
-		
-		/* Free stuff and exit */
-		if (input)
-			free(input);
-
-		size_t i;
-		for (i = 0; i < (size_t)mp_n; i++) {
-			free(mountpoints[i]);
-		}
-
-		free(mountpoints);
-
-		return exit_status;
-	}
-
-	else { /* If fopen failed */
+	if (!mp_fp) {
 		fprintf(stderr, "%s: mp: fopen: '/proc/mounts': %s\n", PROGRAM_NAME, 
 				strerror(errno));
 		return EXIT_FAILURE;
 	}
+
+	printf(_("%sMountpoints%s\n\n"), white, NC);
+
+	char **mountpoints = (char **)NULL;
+	size_t mp_n = 0; 
+	int exit_status = 0;
+
+	size_t line_size = 0;
+	char *line = (char *)NULL;
+	ssize_t line_len = 0;
+		
+	while ((line_len = getline(&line, &line_size, mp_fp)) > 0) {
+		/* Do not list all mountpoints, but only those corresponding to 
+		 * a block device (/dev) */
+		if (strncmp(line, "/dev/", 5) == 0) {
+			char *str = (char *)NULL;
+			size_t counter = 0;
+			/* use strtok() to split LINE into tokens using space as
+			 * IFS */
+			str = strtok(line, " ");
+			size_t dev_len = strlen(str);
+			char *device = (char *)xnmalloc(dev_len + 1, sizeof(char));
+			strcpy(device, str);
+			/* Print only the first two fileds of each /proc/mounts line */
+			while (str && counter < 2) {
+				if (counter == 1) { /* 1 == second field */
+					printf("%s%ld%s %s%s%s (%s)\n", eln_color, mp_n + 1, NC, 
+						   (access(str, R_OK|X_OK) == 0) ? blue : red, 
+						   str, default_color, device);
+					/* Store the second field (mountpoint) into an
+					 * array */
+					mountpoints = (char **)xrealloc(mountpoints, 
+										   (mp_n + 1) * sizeof(char *));
+					mountpoints[mp_n] = (char *)xcalloc(strlen(str) + 1, 
+											    sizeof(char));					
+					strcpy(mountpoints[mp_n++], str);
+				}
+				str = strtok(NULL, " ,");
+				counter++;
+			}
+				
+			free(device);
+		}
+	}
+		
+	free(line);
+	line = (char *)NULL;
+	fclose(mp_fp);
+
+	/* This should never happen: There should always be a mountpoint,
+	 * at least "/" */
+	if (mp_n <= 0) {
+		fputs(_("mp: There are no available mountpoints\n"), stdout);
+		return EXIT_SUCCESS;
+	}
+		
+	puts("");
+	/* Ask the user and chdir into the selected mountpoint */
+	char *input = (char *)NULL;
+	while (!input)
+		input = rl_no_hist(_("Choose a mountpoint ('q' to quit): "));
+
+	if (!(*input == 'q' && *(input + 1) == 0x00)) {
+		int atoi_num = atoi(input);
+		if (atoi_num > 0 && atoi_num <= (int)mp_n) {
+			int ret = chdir(mountpoints[atoi_num - 1]);
+			if (ret == 0) {
+				free(path);
+				path = (char *)xcalloc(strlen(mountpoints[atoi_num - 1]) 
+									   + 1, sizeof(char));
+				strcpy(path, mountpoints[atoi_num - 1]);
+				add_to_dirhist(path);
+				if (cd_lists_on_the_fly) {
+					while (files--)
+						free(dirlist[files]);
+					list_dir();						
+				}
+			}
+			else {
+				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, 
+						mountpoints[atoi_num - 1], strerror(errno));
+				exit_status = 1;
+			}
+		}
+		else {
+			printf(_("mp: '%s': Invalid mountpoint\n"), input);
+			exit_status = 1;
+		}
+	}
+		
+	/* Free stuff and exit */
+	if (input)
+		free(input);
+
+	size_t i;
+	for (i = 0; i < (size_t)mp_n; i++)
+		free(mountpoints[i]);
+
+	free(mountpoints);
+
+	return exit_status;
 }
 
 int
@@ -4888,7 +4921,7 @@ wx_parent_check(char *file)
 			if (files_n > 2) {
 				/* I manually check here subdir because recur_perm_check() 
 				 * will only check the contents of subdir, but not subdir 
-				 * itself*/
+				 * itself */
 				/* If the parent is ok and not empty, check subdir */
 				if (access(file, W_OK|X_OK) == 0) {
 					/* If subdir is ok and not empty, recusivelly check 
@@ -5935,17 +5968,21 @@ keybind_exec_cmd(char *str)
 	puts("");
 	
 	if (cmd) {
+
 		exec_cmd(cmd);
+
 		/* While in the bookmarks or mountpoints screen, the kbind_busy 
 		 * flag will be set to 1 and no keybinding will work. Once the 
 		 * corresponding function exited, set the kbind_busy flag to zero, 
 		 * so that keybindings work again */
 		if (kbind_busy)
 			kbind_busy = 0;
+
 		size_t i;
 		for (i = 0; i <= args_n; i++)
 			free(cmd[i]);
 		free(cmd);
+
 		/* This call to prompt() just updates the prompt in case it was 
 		 * modified, for example, in case of chdir, files selection, and 
 		 * so on */
@@ -6207,8 +6244,10 @@ create_usr_var(char *str)
 					   * sizeof(struct usrvar_t));
 	usr_var[usrvar_n].name = xcalloc(strlen(name) + 1, sizeof(char));
 	usr_var[usrvar_n].value = xcalloc(strlen(value) + 1, sizeof(char));
+
 	strcpy(usr_var[usrvar_n].name, name);
 	strcpy(usr_var[usrvar_n++].value, value);
+
 	free(name);
 	free(value);
 	
@@ -6216,7 +6255,9 @@ create_usr_var(char *str)
 }
 
 void
-free_stuff (void)
+free_stuff(void)
+/* This function is called by atexit() to clear whatever is there at exit
+ * time and avoid thus memory leaks */
 {
 	size_t i = 0;
 
@@ -6417,6 +6458,8 @@ xnmalloc(size_t nmemb, size_t size)
 
 void
 file_cmd_check(void)
+/* Check if the 'file' command is available: it is needed by the mime
+ * function */
 {
 	file_cmd_path = get_cmd_path("file");
 	if (!file_cmd_path) {
@@ -6540,7 +6583,9 @@ get_path_programs(void)
 	int *cmd_n = (int *)xnmalloc(path_n, sizeof(int));
 
 	for (k = 0; k < path_n; k++) {
-		cmd_n[k] = scandir(paths[k], &commands_bin[k], NULL, xalphasort);
+		if (chdir(paths[k]) == -1)
+			continue;
+		cmd_n[k] = scandir(paths[k], &commands_bin[k], skip_nonexec, xalphasort);
 		/* If paths[k] directory does not exist, scandir returns -1. Fedora,
 		 * for example, adds $HOME/bin and $HOME/.local/bin to PATH disregarding
 		 * if they exist or not. If paths[k] dir is empty do not use it 
@@ -6548,6 +6593,8 @@ get_path_programs(void)
 		if (cmd_n[k] > 0)
 			total_cmd += (size_t)cmd_n[k];
 	}
+
+	chdir(path);
 
 	/* Add internal commands */
 	/* Get amount of internal cmds (elements in INTERNAL_CMDS array) */
@@ -7355,16 +7402,22 @@ get_path_env(void)
 	/* Get each path in PATH */
 	size_t path_num = 0, length = 0;
 	for (i = 0; path_tmp[i]; i++) {
+
 		/* Store path in PATH in a tmp buffer */
 		char buf[PATH_MAX] = "";
+
 		while (path_tmp[i] && path_tmp[i] != ':')
 			buf[length++] = path_tmp[i++];
+
 		/* Make room in paths for a new path */
 		paths = (char **)xrealloc(paths, (path_num + 1) * sizeof(char *));
+
 		/* Allocate space (buf length) for the new path */
 		paths[path_num] = (char *)xcalloc(length + 1, sizeof(char));
+
 		/* Dump the buffer into the global paths array */
 		strcpy(paths[path_num], buf);
+
 		path_num++;
 		length = 0;
 		if (!path_tmp[i])
@@ -8207,49 +8260,49 @@ exec_profile(void)
 		return;
 
 	struct stat file_attrib;
-	if (stat(PROFILE_FILE, &file_attrib) == 0) {
+	if (stat(PROFILE_FILE, &file_attrib) == -1)
+		return;
 
-		FILE *fp = fopen(PROFILE_FILE, "r");
-		if (fp) {
+	FILE *fp = fopen(PROFILE_FILE, "r");
+	if (!fp)
+		return;
 
-			size_t line_size = 0;
-			char *line = (char *)NULL;
-			ssize_t line_len = 0;
+	size_t line_size = 0;
+	char *line = (char *)NULL;
+	ssize_t line_len = 0;
 
-			while ((line_len = getline(&line, &line_size, fp)) > 0) {
+	while ((line_len = getline(&line, &line_size, fp)) > 0) {
 
-				/* Skip empty and commented lines */
-				if (*line == 0x00 || *line == '\n' || *line == '#')
-					continue;
+		/* Skip empty and commented lines */
+		if (*line == 0x00 || *line == '\n' || *line == '#')
+			continue;
 
-				/* Remove trailing new line char */
-				if (line[line_len - 1] == '\n')
-					line[line_len - 1] = 0x00;
+		/* Remove trailing new line char */
+		if (line[line_len - 1] == '\n')
+			line[line_len - 1] = 0x00;
 
-				if (strcntchr(line, '=') != -1 && !isdigit(*line))
-					create_usr_var(line);
+		if (strcntchr(line, '=') != -1 && !isdigit(*line))
+			create_usr_var(line);
 
-				/* Parse line and execute it */
-				else if (strlen(line) != 0) {
-					args_n = 0;
-					char **cmds = parse_input_str(line);
-					if (cmds) {
-						no_log = 1;
-						exec_cmd(cmds);
-						no_log = 0;
-						size_t i;
-						for (i = 0; i <= args_n; i++)
-							free(cmds[i]);
-						free(cmds);
-						cmds = (char **)NULL;
-					}
-					args_n = 0;
-				}
+		/* Parse line and execute it */
+		else if (strlen(line) != 0) {
+			args_n = 0;
+			char **cmds = parse_input_str(line);
+			if (cmds) {
+				no_log = 1;
+				exec_cmd(cmds);
+				no_log = 0;
+				size_t i;
+				for (i = 0; i <= args_n; i++)
+					free(cmds[i]);
+				free(cmds);
+				cmds = (char **)NULL;
 			}
-			free(line);
-			fclose(fp);
+			args_n = 0;
 		}
 	}
+	free(line);
+	fclose(fp);
 }
 
 char *
@@ -8261,14 +8314,16 @@ get_cmd_path(const char *cmd)
 	size_t i;
 	
 	cmd_path = (char *)xnmalloc(PATH_MAX + 1, sizeof(char));
-	
-	for (i = 0; i < path_n; i++) { /* Get the path from PATH env variable */
+
+	for (i = 0; i < path_n; i++) { /* Get each path from PATH */
+		/* Append cmd to each path and check if it exists and is
+		 * executable */
 		snprintf(cmd_path, PATH_MAX, "%s/%s", paths[i], cmd);
 		if (access(cmd_path, X_OK) == 0)
 			return cmd_path;
 	}
 	
-	/* If path was not found */
+	/* If cmd was not found */
 	free(cmd_path);
 	
 	return (char *)NULL;
@@ -8484,7 +8539,7 @@ external_arguments(int argc, char **argv)
 }
 
 char *
-home_tilde (const char *new_path)
+home_tilde(const char *new_path)
 /* Reduce "HOME" to tilde ("~"). The new_path variable is always either 
  * "HOME" or "HOME/file", that's why there's no need to check for "/file" */
 {
@@ -8595,7 +8650,7 @@ brace_expansion(const char *str)
 }
 
 char **
-parse_input_str (char *str)
+parse_input_str(char *str)
 /* 
  * This function is one of the keys of CliFM. It will perform a series of 
  * actions:
@@ -8635,9 +8690,9 @@ parse_input_str (char *str)
 					 * #  0.a) RUN AS EXTERNAL   # 
 					 * ###########################*/
 
-	/* If invoking a command via ';' or ':' set the send_shell flag to tru and 
-	 * send the whole string to exec_cmd(), in which case no expansion is made: 
-	 * the command is literally send to the system shell. */
+	/* If invoking a command via ';' or ':' set the send_shell flag to true
+	 * and send the whole string to exec_cmd(), in which case no expansion
+	 * is made: the command is send to the system shell as is. */
 	if (*str == ';' || *str == ':')
 		send_shell = 1;
 
@@ -9532,27 +9587,35 @@ prompt(void)
 
 	free(the_prompt);
 	
-	/* Enable commands history only if the input line is not void */
-	if (input) {
+	if (!input)
+	/* Same as 'input == NULL': input is a pointer poiting to no
+	 * memory address whatsover */
+		return (char *)NULL;
 
-		/* Keep a literal copy of the last entered command to compose the
-		 * commands log, if needed and enabled */
-		if (logs_enabled) {
-			if (last_cmd)
-				free(last_cmd);
-			last_cmd = (char *)xnmalloc(strlen(input) + 1, sizeof(char));
-			strcpy(last_cmd, input);
-		}
-
-		/* Do not record empty lines, exit, history commands, consecutively 
-		 * equal inputs, or lines starting with space */
-		if (record_cmd(input))
-			add_to_cmdhist(input);
-		
-		return input;
+	if (!*input) {
+	/* input is not NULL, but a pointer poiting to a memory address
+	 * whose first byte is the null byte (\0). In other words, it is
+	 * an empty string */
+		free(input);
+		input = (char *)NULL;
+		return (char *)NULL;
 	}
-	
-	return (char *)NULL;
+
+	/* Keep a literal copy of the last entered command to compose the
+	 * commands log, if needed and enabled */
+	if (logs_enabled) {
+		if (last_cmd)
+			free(last_cmd);
+		last_cmd = (char *)xnmalloc(strlen(input) + 1, sizeof(char));
+		strcpy(last_cmd, input);
+	}
+
+	/* Do not record empty lines, exit, history commands, consecutively 
+	 * equal inputs, or lines starting with space */
+	if (record_cmd(input))
+		add_to_cmdhist(input);
+		
+	return input;
 }
 
 /*
@@ -9636,6 +9699,15 @@ int count_dir(const char *dir_path) //Getdents version
 	close(fd);
 	return files_n;
 }*/
+
+int
+skip_nonexec(const struct dirent *entry)
+{
+	if (access(entry->d_name, R_OK) == -1)
+		return 0;
+
+	return 1;
+}
 
 int
 skip_implied_dot(const struct dirent *entry)
@@ -11252,6 +11324,7 @@ exec_cmd(char **comm)
  		 * installed or simply a new executable is added to some of the paths 
  		 * in PATH while in CliFM, this latter needs to be restarted in order 
  		 * to be able to recognize the new program for TAB completion */
+
 		if (bin_commands) {
 			for (i = 0; bin_commands[i]; i++)
 				free(bin_commands[i]);
@@ -14077,10 +14150,9 @@ get_history(void)
 	if (!config_ok)
 		return EXIT_FAILURE;
 
-	FILE *hist_fp = fopen(HIST_FILE, "r");
-	if (current_hist_n == 0) { /* Coming from main() */
+	if (current_hist_n == 0) /* Coming from main() */
 		history = (char **)xcalloc(1, sizeof(char *));
-	}
+
 	else { /* Only true when comming from 'history clear' */
 		size_t i;
 		for (i = 0; i < current_hist_n; i++)
@@ -14088,34 +14160,32 @@ get_history(void)
 		history = (char **)xrealloc(history, 1 * sizeof(char *));
 		current_hist_n = 0;
 	}
+
+	FILE *hist_fp = fopen(HIST_FILE, "r");
 	
-	if (hist_fp) {
-
-		size_t line_size = 0;
-		char *line_buff = (char *)NULL;
-		ssize_t line_len = 0;
-		
-		while ((line_len = getline(&line_buff, &line_size, hist_fp)) > 0) {
-			line_buff[line_len - 1] = 0x00;
-			history = (char **)xrealloc(history, (current_hist_n + 1)
-										* sizeof(char *));
-			history[current_hist_n] = (char *)xcalloc((size_t)line_len + 1, 
-													  sizeof(char));
-			strcpy(history[current_hist_n++], line_buff);
-		}
-		
-		free(line_buff);
-
-		fclose (hist_fp);
-
-		return EXIT_SUCCESS;
-	}
-	
-	else {
+	if (!hist_fp) {
 		_err('e', PRINT_PROMPT, "%s: history: '%s': %s\n", PROGRAM_NAME, 
 			 HIST_FILE,  strerror(errno));
 		return EXIT_FAILURE;
 	}
+
+	size_t line_size = 0;
+	char *line_buff = (char *)NULL;
+	ssize_t line_len = 0;
+		
+	while ((line_len = getline(&line_buff, &line_size, hist_fp)) > 0) {
+		line_buff[line_len - 1] = 0x00;
+		history = (char **)xrealloc(history, (current_hist_n + 1)
+									* sizeof(char *));
+		history[current_hist_n] = (char *)xcalloc((size_t)line_len + 1, 
+												  sizeof(char));
+		strcpy(history[current_hist_n++], line_buff);
+	}
+		
+	free(line_buff);
+	fclose (hist_fp);
+
+	return EXIT_SUCCESS;
 }
 
 int
@@ -14180,7 +14250,7 @@ int
 run_history_cmd(const char *cmd)
 /* Takes as argument the history cmd less the first exclamation mark. 
  * Example: if exec_cmd() gets "!-10" it pass to this function "-10", that 
- * is, comm+1 */
+ * is, comm + 1 */
 {
 	/* If "!n" */
 	int exit_status = 0;
@@ -14888,7 +14958,7 @@ default for non-english locales\
  log [clear]\n\
  history [clear] [-n]\n\
  edit [APPLICATION]\n\
- alias\n\
+ alias [import FILE]\n\
  splash\n\
  path, cwd\n\
  rf, refresh\n\
