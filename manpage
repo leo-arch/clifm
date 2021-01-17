@@ -2,7 +2,7 @@
 .TH "CLIFM" "1" "July 14, 2020" "CliFM 0.21+" "CliFM Manual"
 
 .SH NAME
-CLIFM - A completely text-based file manager inspired in Arch Linux' KISS principle 
+CLIFM - A completely CLI-based file manager inspired in Arch Linux' KISS principle
 
 .SH SYNOPSIS
 \fIclifm\fR [-aAfFgGhiIlLoOpsuUvx] [-p PATH] [-P PROFILE]
@@ -88,9 +88,6 @@ use PATH as CliFM starting path. Default starting path is current working direct
 .B -P, --profile PROFILE
 use (or create) PROFILE as profile. Default profile is 'default'
 .TP
-.B -i, --no-case-sensitive
-no case-sensitive files listing (default)
-.TP
 .B -s, --splash
 enable the splash screen
 .TP
@@ -113,22 +110,22 @@ Arguments precedence order: 1) command line; 2) configuration file; 3) default o
 
 .TP
 .B /* [-filetype] [DIR]
-this is the quick search function. Just type '/' followed by the string you are looking for (you can use wildcards), and CliFM will list all the matches in the current working directory. To search for files in any other directory, specify the directory name as another argument. This argument (DIR) could be an absolute path, a relative path, or an ELN. The result of the search can be further filtered by specifying a filetype: -d, -r, -l, -s, -f, -b, and -c (directory, regular file, symlink, socket, FIFO/pipe, block device, and character device respectivelly). For example, '/*x -d Documents/' will list all directories ending with 'x' in the directory named "Documents".
+this is the quick search function. Just type '/' followed by the string you are looking for (you can use wildcards), and CliFM will list all the matches in the current working directory. To search for files in any other directory, specify the directory name as a further argument. This argument (DIR) could be an absolute path, a relative path, or an ELN. The result of the search can be further filtered by specifying a filetype: -d, -r, -l, -s, -f, -b, and -c (directory, regular file, symlink, socket, FIFO/pipe, block device, and character device respectivelly). For example, '/*x -d Documents/' will list all directories ending with 'x' in the directory named "Documents".
 .TP
 .B bm, bookmarks [a, add PATH] [d, del] [edit] [shortcut, name]
 with no argument, open the bookmarks menu. Here you cd into the desired bookmark by entering either its ELN, its shortcut, or its name. In this screen you can also add, remove or edit your bookmarks by simply typing 'e' to edit the bookmarks file (which is simply a list of lines with this format: [shortcut]name:path. Ex: [d]documents:/home/user/documents). If you want to add or remove a bookmark directly from the command line, use the 'a' and 'd' arguments respectivelly. Example: 'bm a /media/misc' or 'bm d'. You can also open a bookmark by typing 'bm shortcut' or 'bm name' (in which latter case TAB completion is available).
 .TP
 .B o, open [ELN/FILE] [APPLICATION]
-open either a directory or a file. For example: 'o 12' or 'o filename'. By default, the 'open' function will open files with the default application associated to them (via the mime built-in function). However, if you want to open a file with a different application, just add the application name as second argument, e.g. 'o 12 leafpad'. If you want to run the program in the background, simply add the ampersand character: 'o 12 &'. When it comes to directories, 'open' works just like the 'cd' command. Remote file systems are also supported: just enter 'o ADDRESS [OPTIONS]'. For more information about this syntax see the description of the 'net' command below.
+open either a directory, in which case it works just like the 'cd' command (see below), or a file. For example: 'o 12', 'o filename', 'o /path/to/filename'. By default, the 'open' function will open files with the default application associated to them via the mime built-in function (see the 'mime' command below). However, if you want to open a file with a different application, just add the application name as second argument, e.g. 'o 12 leafpad'. If you want to run the program in the background, simply add the ampersand character: 'o 12 &'.
 .TP
 .B cd [ELN/DIR]
-when used with no argument, it changes the current directory to the default directory (HOME). Otherwise, 'cd' changes the current directory to the one specified by the first argument. You can use either ELN's or a string to indicate the directory you want. Ex: 'cd 12' or 'cd ~/media'. Unlike the shell 'cd' command, CliFM's built-in 'cd' function doesn not only changes the current directory, but also lists its content (provided the option "cd lists automatically" is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of 'cd' is much like this shell command: cd DIR && ls -A --color=auto --group-directories-first. Remote file systems are also supported:just enter 'cd ADDRESS [OPTIONS]'. For more information about this syntax see the description of the 'net' command below.
+when used with no argument, it changes the current directory to the default directory (HOME). Otherwise, 'cd' changes the current directory to the one specified by the first argument. You can use either ELN's or a string to indicate the directory you want. Ex: 'cd 12' or 'cd ~/media'. Unlike the shell 'cd' command, CliFM's built-in 'cd' function not only changes the current directory, but also lists its content (provided the option "cd lists automatically" is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of 'cd' is much like this shell command: cd DIR && ls -A --color=auto --group-directories-first. Remote file systems are also supported: just enter 'cd ADDRESS [OPTIONS]'. For more information about this syntax see the description of the 'net' command below.
 .TP
 .B s, sel [ELN ELN-ELN FILE ... n]
 send one or multiple elements (either files or directories) to the Selection Box. 'Sel' accepts individual elements, range of elements, say 1-6, filenames and paths, just as wildcards. Ex: sel 1 4-10 file* filename /path/to/filename.
 .TP
 .B sb, selbox
-show the elements contained in the Selection Box.
+show the elements currently contained in the Selection Box.
 .TP
 .B ds, desel [*, a, all]
 deselect one or more selected elements. You can also deselect all selected elements at once by passing '*', 'a' or 'all' to the function.
@@ -160,7 +157,7 @@ short for 'cp', 'ln', 'mv', 'mkdir', and 'rm' commands respectivelly.
 .B p, pr, prop, ELN/FILE ... n [a, all] [s, size]
 print file properties for FILE. Use 'all' to list properties of all files in the current working directory, and 'size' to list them by size.
 .TP
-.B n, net [smb, sftp]://ADDRESS [OPTIONS]
+.B n, net [smb, ftp, sftp]://ADDRESS [OPTIONS]
 Access a remote file system, either via SSH, FTP, or SMB protocols. To access the file system of a machine via SSH, use the following URI scheme: sftp://[USER@]HOST:[/REMOTE-DIR] [PORT]. Bracketed elements are optional. If no user is specified, CliFM will attempt to login using the current local username. If no port is specified, the default port (22, if SSH) will be used. To access the remote file system via SMB, this scheme should be used instead: smb://[USER@]HOST[/SHARE][/REMOTE-DIR] [OPTIONS]. The URI scheme for FTP connections is this: ftp://HOST[:PORT] [OPTIONS]. Network resources are mounted in '/tmp/clifm/remote_dir', replacing all slashes in remote_dir by underscores. To disconnect from the remote machine, use 'fusermount3 -u' for SSH, 'fusermount -u' for FTP, and 'umount' for SMB, followd by the corresponding mountpoint. Examples:
 
      net sftp://john@192.168.0.25:Documents/misc port=2222
@@ -177,7 +174,7 @@ The underlying programs used here to mount these remote file systems are: 'sshfs
 .B mm, mime [info ELN/FILENAME] [edit]
 This is CliFM's resource opener. The 'info' option prints the MIME information about ELN/FILENAME: its MIME type, its file extension, if any, and the application associated to this MIME type or file extension. The 'edit' option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension, and then add a value for it to the MIME list file using the 'edit' option. Each value in the MIME list file has this format: 'mime_type=application args;application args; ... n' or '*.c=application args;application args; ... n'. Example: 'plain/text=nano' or '*.c=geany -p;leafpad;nano'. CliFM will check the first matching line, and if at least one of the specified applications exists, this one will be used to open the corresponding associated filed. Else, the next matching line will be checked. If the MIME file is not found, CliFM will try to import MIME definitions from the default locations for the 'mimeapps.list' file as specified by the Freedesktop specification.
 .TP
-.B x DIR                   
+.B x DIR
 open DIR in a new instance of CliFM using the value of TerminalCmd (from the configuration file) as terminal emulator. If this value is not set, 'xterm' will be used as fallback terminal emulator. This function is only available for graphical environments.
 .TP
 .B ;cmd, :cmd
