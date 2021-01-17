@@ -317,7 +317,7 @@ Color codes are just traditional ANSI color codes less the escape character and 
 .TP
 Though by default CliFM uses only 8 colors, you can use 256 and RGB colors as well. Example: fi=04;38;02;245;76;00 will print regular files underlined and using a bold orange RGB or 24-bit true color. In this case, just make sure to use a terminal supporting RGB colors.
 .TP
-Filetype colors are defined in the configuration file and can be modified as you wish. ELN and command line text colors are defined using these color codes as well.
+Filetype colors are defined in the configuration file and can be modified as you wish. ELN's and command line text colors are defined using these color codes as well.
 .TP
 To see a colored list of the currently used color codes run the 'colors' command in CliFM.
 
@@ -358,7 +358,7 @@ CLiFM's prompt is build from the "Prompt" line in the configuration file followi
 .TP
 \\p: A mix of the two above, it abbreviates the current working directory only if longer than PathMax (a value defined in the configuration file).
 .TP
-\\z: Exit code of the last executed command. :) if success and :( in case of error
+\\z: Exit code of the last executed command. It prints ":)" if success and ":(" in case of error
 .TP
 \\$ '#', if the effective user ID is 0, and '$' otherwise
 .TP
@@ -374,7 +374,7 @@ CLiFM's prompt is build from the "Prompt" line in the configuration file followi
 By default, for example, CliFM's prompt line is this: "\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\\z\\[\\e[0;34m\\] \\$ \\[\\e[0m\\]", which once decoded should be something like this: 
 
  13:45 user:hostname /my/path
- :) $ 
+ :) $
 
 .TP
 with the path printed in cyan and the dollar sign in blue.
