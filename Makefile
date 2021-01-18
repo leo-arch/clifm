@@ -17,15 +17,17 @@ build:
 	UNAME=$$(uname -s); \
 	case $${UNAME} in \
 		Linux) \
-			printf "GNU/Linux\nCompiling $(PROG)... "; \
+			printf "GNU/Linux\nCompiling $(PROG)...\n"; \
+			printf "Running '$(CC) $(CFLAGS) -o $(PROG) $(OBJS) $(LIBS_LINUX)'... "; \
 			$(CC) $(CFLAGS) -o $(PROG) $(OBJS) $(LIBS_LINUX); \
 			printf "Done\n"; ;; \
 		FreeBSD) \
-			printf "FreeBSD\nCompiling $(PROG)... "; \
+			printf "FreeBSD\nCompiling $(PROG)...\n"; \
+			printf "Running '$(CC) $(CFLAGS) -o $(PROG) $(OBJS) $(LIBS_FREEBSD)'... "; \
 			$(CC) $(CFLAGS) -o $(PROG) $(OBJS) $(LIBS_FREEBSD); \
 			printf "Done\n"; ;; \
 		*) \
-			printf "\n'$${UNAME}': Operating system not supported\n" >&2 ;; \
+			printf "\n'$${UNAME}': Operating system not supported\n" >&2; ;; \
 	esac
 
 install:
