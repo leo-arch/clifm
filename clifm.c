@@ -148,11 +148,11 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 /* #define CLEAR puts("\x1b[c") */
 #define CLEAR write(STDOUT_FILENO, "\ec", 3)
-#define VERSION "0.22.0"
+#define VERSION "0.22.1"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "January 17, 2021"
+#define DATE "January 18, 2021"
 #define LICENSE "GPL2+"
 
 /* Define flags for program options and internal use */
@@ -6579,19 +6579,24 @@ get_path_programs(void)
 {
 	struct dirent ***commands_bin = (struct dirent ***)xnmalloc(path_n, 
 													sizeof(struct dirent));
-	size_t i, j, k, l = 0, total_cmd = 0;
+	size_t i, j, l = 0, total_cmd = 0;
 	int *cmd_n = (int *)xnmalloc(path_n, sizeof(int));
 
-	for (k = 0; k < path_n; k++) {
-		if (chdir(paths[k]) == -1)
+	for (i = 0; i < path_n; i++) {
+
+		if (!paths[i] || *paths[i] == 0x00 || chdir(paths[i]) == -1) {
+			cmd_n[i] = 0;
 			continue;
-		cmd_n[k] = scandir(paths[k], &commands_bin[k], skip_nonexec, xalphasort);
-		/* If paths[k] directory does not exist, scandir returns -1. Fedora,
-		 * for example, adds $HOME/bin and $HOME/.local/bin to PATH disregarding
-		 * if they exist or not. If paths[k] dir is empty do not use it 
-		 * either */
-		if (cmd_n[k] > 0)
-			total_cmd += (size_t)cmd_n[k];
+		}
+
+		cmd_n[i] = scandir(paths[i], &commands_bin[i], skip_nonexec,
+						   xalphasort);
+		/* If paths[i] directory does not exist, scandir returns -1. Fedora,
+		 * for example, adds $HOME/bin and $HOME/.local/bin to PATH
+		 * disregarding if they exist or not. If paths[i] dir is empty
+		 * do not use it either */
+		if (cmd_n[i] > 0)
+			total_cmd += (size_t)cmd_n[i];
 	}
 
 	chdir(path);
@@ -6611,16 +6616,18 @@ get_path_programs(void)
 
 	/* Add commands in PATH */
 	for (i = 0; i < path_n; i++) {
-		if (cmd_n[i] > 0) {
-			for (j = 0; j < (size_t)cmd_n[i]; j++) {
-				bin_commands[l] = (char *)xnmalloc(
-											strlen(commands_bin[i][j]->d_name) 
-											+ 1, sizeof(char));
-				strcpy(bin_commands[l++], commands_bin[i][j]->d_name);
-				free(commands_bin[i][j]);
-			}
-			free(commands_bin[i]);
+		
+		if (cmd_n[i] <= 0)
+			continue;
+		
+		for (j = 0; j < (size_t)cmd_n[i]; j++) {
+			bin_commands[l] = (char *)xnmalloc(
+									strlen(commands_bin[i][j]->d_name) 
+									+ 1, sizeof(char));
+			strcpy(bin_commands[l++], commands_bin[i][j]->d_name);
+			free(commands_bin[i][j]);
 		}
+		free(commands_bin[i]);
 	}
 	
 	free(commands_bin);
@@ -7246,7 +7253,11 @@ get_bm_names(void)
 			return EXIT_FAILURE;
 		}
 		else {
-			fputs("#Example: [t]test:/path/to/test\n", fp);
+			fprintf(fp, "### This is %s bookmarks file ###\n\n"
+					"# Empty and commented lines are ommited\n"
+					"# The bookmarks syntax is: [hotkey]name:path\n"
+					"# Example:\n"
+					"# [t]test:/path/to/test\n", PROGRAM_NAME);
 			fclose(fp);
 		}
 	}
@@ -11184,7 +11195,7 @@ exec_cmd(char **comm)
 	else if (strcmp(comm[0], "splash") == 0)
 		splash();
 	
-				/* #### QUIT #### */
+					/* #### QUIT #### */
 	else if (strcmp(comm[0], "q") == 0 || strcmp(comm[0], "quit") == 0 
 	|| strcmp(comm[0], "exit") == 0 || strcmp(comm[0], "zz") == 0 
 	|| strcmp(comm[0], "salir") == 0 || strcmp(comm[0], "chau") == 0) {
@@ -11200,7 +11211,7 @@ exec_cmd(char **comm)
 
 
 	/* ####################################################   
-	 * #				 EXTERNAL COMMANDS 				  #     
+	 * #				EXTERNAL/SHELL COMMANDS			  #     
 	 * ####################################################*/
 
 	else {
@@ -11306,8 +11317,23 @@ exec_cmd(char **comm)
 		 * The disadvantage of this procedure is that if the user uses a 
 		 * customized LS_COLORS, unsetting it set its value to default, and the
 		 * customization is lost. */
+
+		#if __FreeBSD__
+		char *my_ls_colors = (char *)NULL, *p = (char *)NULL;
+		/* For some reason, when running on FreeBSD Valgrind complains
+		 * about overlapping source and destiny in setenv() if I just
+		 * copy the address returned by getenv() instead of the string
+		 * itself. Not sure why, but this makes the error go away */
+		p = getenv("LS_COLORS");
+		my_ls_colors = (char *)xcalloc(strlen(p) + 1, sizeof(char *));
+		strcpy(my_ls_colors, p);
+		p = (char *)NULL;
+
+		#else
 		static char *my_ls_colors = (char *)NULL;
 		my_ls_colors = getenv("LS_COLORS");
+		#endif
+
 		if (ls_colors_bk && *ls_colors_bk != 0x00)
 			setenv("LS_COLORS", ls_colors_bk, 1);
 		else
@@ -11319,10 +11345,14 @@ exec_cmd(char **comm)
 		/* Restore LS_COLORS value to use CliFM colors */
 		setenv("LS_COLORS", my_ls_colors, 1);
 
+		#if __FreeBSD__
+		free(my_ls_colors);
+		#endif
+
  		/* Reload the list of available commands in PATH for TAB completion.
  		 * Why? If this list is not updated, whenever some new program is 
- 		 * installed or simply a new executable is added to some of the paths 
- 		 * in PATH while in CliFM, this latter needs to be restarted in order 
+ 		 * installed, renamed, or removed from some of the pathsin PATH
+ 		 * while in CliFM, this latter needs to be restarted in order 
  		 * to be able to recognize the new program for TAB completion */
 
 		if (bin_commands) {
@@ -13431,7 +13461,11 @@ bookmarks_function(char **cmd)
 			return EXIT_FAILURE;
 		}
 		else {
-			fprintf(fp, "#Example: [t]test:/path/to/test\n");
+			fprintf(fp, "### This is %s bookmarks file ###\n\n"
+					"# Empty and commented lines are ommited\n"
+					"# The bookmarks syntax is: [hotkey]name:path\n"
+					"# Example:\n"
+					"# [t]test:/path/to/test\n", PROGRAM_NAME);
 			fclose(fp);
 		}
 	}
