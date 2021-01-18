@@ -5,11 +5,15 @@
 
 [![clifm](https://img.shields.io/aur/version/clifm?color=1793d1&label=clifm&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/clifm/)
 
+## Version notes
+
 0.18.0. This is the first POSIX-2008 compliant and FreeBSD compatible version.
 
 Version 0.17.2 is the first one to work on ARM machines.
 
 Since version 0.16.0 a lot (really, a lot) of bug fixes and some new features were added: a trash system (freedesktop compliant), keyboard shorcuts (very handy), a little messages system to keep track of important messages and errors, "sel" keyword and ranges auto-expansion, ELN expansion with the TAB key, including a Bash-like quoting system (absolutely great), colors customization, and commands sequential and conditional execution (very useful). Consult the manpage for more information). I also added support for translations (using `gettext`).
+
+## Description
 
 ![clifm](images/clifm.png)
 
