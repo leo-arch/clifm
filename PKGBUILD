@@ -15,7 +15,7 @@ sha256sums=('d6cae72041303351a5b2655a707a0d81a75b52eb936590c75a7dac691ba65f93')
 
 build() {
   cd "$srcdir/${pkgname}-${pkgver}"
-  gcc -O3 -march=native -s -fstack-protector-strong -lcap -lreadline -lacl -o "$pkgname" "${pkgname}.c"
+  gcc -O3 -march=native -s -fstack-protector-strong -o "$pkgname" "${pkgname}.c" -lreadline -lacl -lcap
 }
 
 package() {
