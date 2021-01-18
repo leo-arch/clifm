@@ -8,8 +8,9 @@ PROG = clifm
 OBJS = clifm.c
 
 CC = gcc
-CFLAGS_LINUX = -O3 -s -fstack-protector-strong -march=native -lreadline -lcap -lacl
-CFLAGS_FREEBSD = -O3 -s -fstack-protector-strong -march=native -lreadline -lintl
+CFLAGS = -O3 -s -fstack-protector-strong -march=native
+LIBS_LINUX = -lreadline -lacl -lcap
+LIBS_FREEBSD = -lreadline -lintl
 
 build:
 	@printf "Checking operating system... "; \
@@ -17,11 +18,11 @@ build:
 	case $${UNAME} in \
 		Linux) \
 			printf "GNU/Linux\nCompiling $(PROG)... "; \
-			$(CC) $(CFLAGS_LINUX) -o $(PROG) $(OBJS); \
+			$(CC) $(CFLAGS) -o $(PROG) $(OBJS) $(LIBS_LINUX); \
 			printf "Done\n" ;; \
 		FreeBSD) \
 			printf "FreeBSD\nCompiling $(PROG)... "; \
-			$(CC) $(CFLAGS_FREEBSD) -o $(PROG) $(OBJS); \
+			$(CC) $(CFLAGS) -o $(PROG) $(OBJS) $(LIBS_FREEBSD); \
 			printf "Done\n" ;; \
 		*) \
 			printf "\n'$${UNAME}': Operating system not supported\n" >&2 ;; \
