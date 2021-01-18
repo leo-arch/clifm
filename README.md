@@ -106,13 +106,13 @@ To uninstall `clifm` issue this command wherever the Makefile is located:
 
 On Linux:
 
-	$ gcc -O3 -march=native -fstack-protector-strong -s -lcap -lreadline -lacl -o clifm clifm.c
+	$ gcc -O3 -march=native -fstack-protector-strong -s -o clifm clifm.c -lcap -lreadline -lacl
 
 To enable POSIX compliance, pass this option to the compiler: `-D_BE_POSIX.` The only feature disabled in this way is files birth time, only available on Linux via statx(), which is Linux-specific and thereby not POSIX compliant.
 
 On FreeBSD:
 
-	$ gcc -O3 -march=native -fstack-protector-strong -s -lintl -lreadline -o clifm clifm.c
+	$ gcc -O3 -march=native -fstack-protector-strong -s -o clifm clifm.c -lintl -lreadline
 
 Run the binary file produced by `gcc`:
 
