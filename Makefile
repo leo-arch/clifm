@@ -17,13 +17,13 @@ build:
 	UNAME=$$(uname -s); \
 	case $${UNAME} in \
 		Linux) \
-			printf "GNU/Linux\nCompiling $(PROG)... "; \
-			echo "Running '$(CC) $(CFLAGS) -o $(PROG) $(OBJS) $(LIBS_LINUX)'..." \
+			printf "GNU/Linux\nCompiling $(PROG)...\n"; \
+			echo "Running '$(CC) $(CFLAGS) -o $(PROG) $(OBJS) $(LIBS_LINUX)'..."; \
 			$(CC) $(CFLAGS) -o $(PROG) $(OBJS) $(LIBS_LINUX); \
 			printf "Done\n" ;; \
 		FreeBSD) \
 			printf "FreeBSD\nCompiling $(PROG)... "; \
-			echo "Running '$(CC) $(CFLAGS) -o $(PROG) $(OBJS) $(LIBS_LINUX)'..." \
+			echo "Running '$(CC) $(CFLAGS) -o $(PROG) $(OBJS) $(LIBS_FREEBSD)'..."; \
 			$(CC) $(CFLAGS) -o $(PROG) $(OBJS) $(LIBS_FREEBSD); \
 			printf "Done\n" ;; \
 		*) \
