@@ -1,6 +1,10 @@
 # CliFM
 > The KISS file manager: text-based, ultra-lightweight, lightning fast, and written in C
 
+#### Packages
+
+[![clifm](https://img.shields.io/aur/version/clifm?color=1793d1&label=clifm&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/clifm/)
+
 0.18.0. This is the first POSIX-2008 compliant and FreeBSD compatible version.
 
 Version 0.17.2 is the first one to work on ARM machines.
