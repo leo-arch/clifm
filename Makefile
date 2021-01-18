@@ -18,10 +18,12 @@ build:
 	case $${UNAME} in \
 		Linux) \
 			printf "GNU/Linux\nCompiling $(PROG)... "; \
+			echo "Running '$(CC) $(CFLAGS) -o $(PROG) $(OBJS) $(LIBS_LINUX)'..."
 			$(CC) $(CFLAGS) -o $(PROG) $(OBJS) $(LIBS_LINUX); \
 			printf "Done\n" ;; \
 		FreeBSD) \
 			printf "FreeBSD\nCompiling $(PROG)... "; \
+			echo "Running '$(CC) $(CFLAGS) -o $(PROG) $(OBJS) $(LIBS_LINUX)'..."
 			$(CC) $(CFLAGS) -o $(PROG) $(OBJS) $(LIBS_FREEBSD); \
 			printf "Done\n" ;; \
 		*) \
@@ -29,7 +31,8 @@ build:
 	esac
 
 install:
-	@install -Dm755 "${PROG}" "${PREFIX}"/
+	@install -Dm755 -- "${PROG}" "${PREFIX}"/
+	@rm -- ${PROG}
 	@mkdir -p /usr/share/man/man1
 	@install -g 0 -o 0 -Dm644 manpage /usr/share/man/man1/"${PROG}".1
 	@gzip /usr/share/man/man1/"${PROG}".1
@@ -39,7 +42,7 @@ install:
 	@printf "Successfully installed ${PROG}\n"
 
 uninstall:
-	@rm "${PREFIX}/${PROG}"
+	@rm -- "${PREFIX}/${PROG}"
 	@rm /usr/share/man/man1/"${PROG}".1.gz
 	@rm /usr/share/locale/*/LC_MESSAGES/"${PROG}".mo
 	@printf "Successfully uninstalled ${PROG}\n"
