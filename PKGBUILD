@@ -1,8 +1,8 @@
 # Maintainer: archcrack <johndoe.arch@outlook.com>
 
 pkgname=clifm
-pkgver=0.22.1
-pkgrel=2
+pkgver=0.22.2
+pkgrel=1
 pkgdesc="The KISS file manager: cli-based, ultra-lightweight, and lightning fast"
 arch=(any)
 url="https://github.com/leo-arch/clifm"

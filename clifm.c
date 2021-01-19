@@ -148,11 +148,11 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 /* #define CLEAR puts("\x1b[c") */
 #define CLEAR write(STDOUT_FILENO, "\ec", 3)
-#define VERSION "0.22.1"
+#define VERSION "0.22.2"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "January 18, 2021"
+#define DATE "January 19, 2021"
 #define LICENSE "GPL2+"
 
 /* Define flags for program options and internal use */
@@ -10120,12 +10120,20 @@ list_dir(void)
 	if (long_view) {
 		register size_t counter = 0;
 
-		int max = get_max_long_view();
+		int max = get_max_long_view(), eln_len_cur = 0, eln_len_bk = 0;
 		
-		eln_len = digits_in_num((int)files);
+		eln_len = digits_in_num((int)files); /* This is max ELN length */
+		eln_len_bk = eln_len;
 
 		for (i = 0; i < (int)files; i++) {
 
+			/* Correct padding, if necessary */
+			eln_len_cur = digits_in_num(i + 1);
+			if (eln_len_bk > eln_len_cur)
+				eln_len = eln_len_bk - (eln_len_bk - eln_len_cur);
+			else
+				eln_len = eln_len_bk;
+					
 			if (pager) {
 				/*	Check terminal amount of rows: if as many filenames as 
 				 * the amount of available terminal rows has been printed, 
@@ -13809,7 +13817,7 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 
 		else /* No trimmed files */
 			pad = (int)(longest - (eln_len + 1 + filename_len));
-			
+
 		if (pad < 0)
 			pad = 0;
 		
