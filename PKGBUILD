@@ -10,8 +10,10 @@ license=(GPL2)
 depends=('ncurses' 'libcap' 'file')
 makedepends=('git')
 optdepends=('sshfs: SFTP support' 'cifs-utils: Samba support' 'curlftpfs: FTPFS support')
-source=("${pkgname}-${pkgver}.tar.gz::https://github.com/leo-arch/clifm/archive/v${pkgver}.tar.gz")
-sha256sums=('d6cae72041303351a5b2655a707a0d81a75b52eb936590c75a7dac691ba65f93')
+source=("git+${url}.git")
+sha256sums=('SKIP')
+#source=("${pkgname}-${pkgver}.tar.gz::https://github.com/leo-arch/clifm/archive/v${pkgver}.tar.gz")
+#sha256sums=('d6cae72041303351a5b2655a707a0d81a75b52eb936590c75a7dac691ba65f93')
 
 build() {
   cd "$srcdir/${pkgname}-${pkgver}"
