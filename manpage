@@ -1,5 +1,4 @@
-./" Manpage for CliFM
-.TH "CLIFM" "1" "January 17, 2021" "CliFM 0.22+" "CliFM Manual"
+.TH "CLIFM" "1" "January 20, 2021" "CliFM 0.22+" "CliFM Manual"
 
 .SH NAME
 CLIFM - A completely CLI-based file manager inspired in Arch Linux' KISS principle
@@ -204,8 +203,8 @@ list available mountpoints and change the current working directory into the sel
 .B v, paste \fR[sel] [DESTINY]
 the 'paste sel' command will copy the currently selected elements, if any, into the current working directory. To copy these elements into another directory, tell 'paste' where to copy these files. Ex: 'paste sel /path/to/directory'. The 'copy' command (cp, p) could be used in the same way.
 .TP
-.B pf, prof, profile \fR[set, add, del PROFILE]
-with no arguments, prints the name of the currently used profile. To switch, add or delete a profile, use the 'set', 'add', and 'del' options respectivelly followed by the corresponding profile name.
+.B pf, prof, profile \fR[ls, list] [set, add, del PROFILE]
+with no arguments, prints the name of the currently used profile. Use the 'ls' or 'list' option to list available profiles. To switch, add or delete a profile, use the 'set', 'add', and 'del' options respectivelly followed by the corresponding profile name. Bear in mind that, when switching profiles, command line arguments will be ignored.
 .TP
 .B shell \fR[SHELL]
 print the current default shell for CliFM or set SHELL as the new default shell. 
