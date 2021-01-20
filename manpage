@@ -139,7 +139,7 @@ open either a directory, in which case it works just like the 'cd' command (see 
 when used with no argument, it changes the current directory to the default directory (HOME). Otherwise, 'cd' changes the current directory to the one specified by the first argument. You can use either ELN's or a string to indicate the directory you want. Ex: 'cd 12' or 'cd ~/media'. Unlike the shell 'cd' command, CliFM's built-in 'cd' function not only changes the current directory, but also lists its content (provided the option "cd lists automatically" is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of 'cd' is much like this shell command: cd DIR && ls -A --color=auto --group-directories-first. Remote file systems are also supported: just enter 'cd ADDRESS [OPTIONS]'. For more information about this syntax see the description of the 'net' command below.
 .TP
 .B s, sel \fR[ELN ELN-ELN FILE ... n]
-send one or multiple elements (either files or directories) to the Selection Box. 'Sel' accepts individual elements, range of elements, say 1-6, filenames and paths, just as wildcards. Example: 'sel 1 4-10 file* filename /path/to/filename'.
+send one or multiple elements (either files or directories) to the Selection Box. 'Sel' accepts individual elements, range of elements, say 1-6, filenames and paths, just as wildcards. Example: 'sel 1 4-10 file* filename /path/to/filename'. If the ShareSelbox option is enabled (see the configuration file), selected files are stored in \fI/tmp/clifm/username/.selbox\fR. Otherwise, \fI/tmp/clifm/username/.selbox_profilename\fR is used (this is the default).
 .TP
 .B sb, selbox
 show the elements currently contained in the Selection Box.

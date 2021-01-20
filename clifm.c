@@ -151,7 +151,7 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 /* #define CLEAR puts("\x1b[c") */
 #define CLEAR write(STDOUT_FILENO, "\ec", 3)
-#define VERSION "0.22.3"
+#define VERSION "0.22.4"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
@@ -448,7 +448,7 @@ enum prog_msg pmsg = nomsg;
 short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 	show_hidden = -1, clear_screen = -1, shell_terminal = 0, pager = -1, 
 	no_log = 0, internal_cmd = 0, list_folders_first = -1,
-	case_sensitive = -1, cd_lists_on_the_fly = -1,
+	case_sensitive = -1, cd_lists_on_the_fly = -1, share_selbox = -1,
 	recur_perm_error_flag = 0, is_sel = 0, sel_is_last = 0, print_msg = 0,
 	long_view = -1, kbind_busy = 0, unicode = -1, dequoted = 0,
 	home_ok = 1, config_ok = 1, trash_ok = 1, selfile_ok = 1,
@@ -1390,6 +1390,9 @@ ShowHiddenFiles=true\n\
 LongViewMode=false\n\
 ExternalCommands=false\n\
 LogCmds=false\n\n"
+
+"# Should the Selection Box be shared among different profiles?\n\
+ShareSelbox=false\n\n"
 
 "# Set the shell to be used when running external commands. Defaults to the \n\
 # user's shell as is specified in '/etc/passwd'.\n\
@@ -7809,6 +7812,17 @@ init_config(void)
 							splash_screen = 0;
 					}
 
+					else if (strncmp(line, "ShareSelbox=", 12) == 0) {
+						char opt_str[MAX_BOOL] = "";
+						ret = sscanf(line, "ShareSelbox=%5s\n", opt_str);
+						if (ret == -1)
+							continue;
+						if (strncmp(opt_str, "true", 4) == 0)
+							share_selbox = 1;
+						else /* False and default */
+							share_selbox = 0;
+					}
+
 					else if (strncmp(line, "SortList=", 9) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "SortList=%5s\n", opt_str);
@@ -7819,6 +7833,7 @@ init_config(void)
 						else /* True and default */
 							sort = 1;
 					}
+
 					else if (strncmp(line, "DirCounter=", 11) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "DirCounter=%5s\n", opt_str);
@@ -7829,6 +7844,7 @@ init_config(void)
 						else /* True and default */
 							dir_counter = 1;
 					}
+
 					else if (strncmp(line, "WelcomeMessage=",
 					15) == 0) {
 						char opt_str[MAX_BOOL] = "";
@@ -8258,6 +8274,7 @@ init_config(void)
 			 * via the config file, or if this latter could not be read
 			 * for any reason, set the defaults */
 			/* -1 means not set */
+			if (share_selbox == -1) share_selbox = 0;
 			if (splash_screen == -1) splash_screen = 0;
 			if (welcome_message == -1) welcome_message = 1;
 			if (show_hidden == -1) show_hidden = 1;
@@ -8414,7 +8431,7 @@ init_config(void)
 
 	/* Once the parent directory exists, create the user's directory to 
 	 * store the list of selected files: 
-	 * TMP_DIR/clifm/username/.clifm_sel_username. I use here very
+	 * TMP_DIR/clifm/username/.selbox_PROFILE. I use here very
 	 * restrictive permissions (700), since only the corresponding user
 	 * must be able to read and/or modify this list */
 
@@ -8440,14 +8457,32 @@ init_config(void)
 	}
 
 	if (selfile_ok) {
-		/* Define the user's sel file. There will be one per user 
-		 * (/tmp/clifm/username/sel_file_username) */
-		size_t user_len = strlen(user);
+		/* Define the user's sel file. There will be one per
+		 * user-profile (/tmp/clifm/username/.selbox_PROFILE) */
+
+		if (sel_file_user)
+			free(sel_file_user);
+
 		size_t tmp_dir_len = strlen(TMP_DIR);
-		sel_file_user = (char *)xnmalloc(tmp_dir_len + pnl_len
-										+ user_len + 8,
-										sizeof(char));
-		sprintf(sel_file_user, "%s/.%s_sel_%s", TMP_DIR, PNL, user);
+
+		if (!share_selbox) {
+			size_t prof_len = 0;
+
+			if (alt_profile)
+				prof_len = strlen(alt_profile);
+			else
+				prof_len = 7; /* Lenght of "default" */
+
+			sel_file_user = (char *)xcalloc(tmp_dir_len + prof_len
+											+ 10, sizeof(char));
+			sprintf(sel_file_user, "%s/.selbox_%s", TMP_DIR,
+					(alt_profile) ? alt_profile : "default");
+		}
+		else {
+			sel_file_user = (char *)xcalloc(tmp_dir_len + 9,
+											sizeof(char));
+			sprintf(sel_file_user, "%s/.selbox", TMP_DIR);
+		}
 	}
 }
 
@@ -8585,7 +8620,7 @@ external_arguments(int argc, char **argv)
 			break;
 
 		case 'A':
-			flags |= HIDDEN; /* Add flag HIDDEN to 'flags' */
+			flags |= HIDDEN; /* Add HIDDEN to 'flags' */
 			show_hidden = 1;
 			xargs.hidden = 1;
 			break;
@@ -8732,6 +8767,9 @@ external_arguments(int argc, char **argv)
 	}
 	
 	if ((flags & ALT_PROFILE) && alt_profile_value) {
+		if (alt_profile)
+			free(alt_profile);
+
 		alt_profile = (char *)xcalloc(strlen(alt_profile_value) + 1, 
 									  sizeof(char));
 		strcpy(alt_profile, alt_profile_value);
@@ -11982,7 +12020,7 @@ save_sel(void)
 {
 	if (!selfile_ok)
 		return EXIT_FAILURE;
-		
+
 	if (sel_n == 0) {
 		if (remove(sel_file_user) == -1) {
 			fprintf(stderr, "%s: sel: '%s': %s\n", PROGRAM_NAME, 
@@ -13501,7 +13539,7 @@ open_bookmark(char **cmd)
 	if (bm_n == 0 && !cmd[1]) {
 		free(bookmarks);
 		bookmarks = (char **)NULL;
-		printf(_("Bookmarks: There are no bookmarks\nEnter 'bm edit' to"
+		printf(_("Bookmarks: There are no bookmarks\nEnter 'bm edit' to "
 				 "edit the bookmarks file or 'bm add PATH' to add a new "
 				 "bookmark\n"));
 		return EXIT_SUCCESS;
