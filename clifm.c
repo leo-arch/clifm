@@ -2158,8 +2158,17 @@ profile_function(char **comm)
 
 	if (comm[1]) {
 		if (strcmp(comm[1], "--help") == 0)
-			puts(_("Usage: pf, prof, profile [set, add, del PROFILE]"));
+			puts(_("Usage: pf, prof, profile [ls, list] [set, add, "
+				   "del PROFILE]"));
 		
+		/* List profiles */
+		else if (comm[1] && (strcmp(comm[1], "ls") == 0
+		|| strcmp(comm[1], "list") == 0)) {
+			size_t i;
+			for (i = 0; profile_names[i]; i++)
+				printf("%s\n", profile_names[i]);
+		}
+
 		/* Create a new profile */
 		else if (strcmp(comm[1], "add") == 0)
 			if (comm[2]) {
@@ -2428,9 +2437,11 @@ profile_set(char *prof)
 	
 	/* If changing to the current profile, do nothing */
 	if ((strcmp(prof, "default") == 0 && !alt_profile)
-	|| (alt_profile && strcmp(prof, alt_profile) == 0))
+	|| (alt_profile && strcmp(prof, alt_profile) == 0)) {
+		printf("%s: '%s' is the current profile\n", PROGRAM_NAME, prof);
 		return EXIT_SUCCESS;
-	
+	}
+
 	/* Reset everything */
 	free(CONFIG_DIR);
 	CONFIG_DIR = (char *)NULL;
@@ -2493,9 +2504,12 @@ profile_set(char *prof)
 	}
 
 	/* Rerun external_arguments */
-	if (argc_bk > 1)
-		external_arguments(argc_bk, argv_bk);
-	
+/*	if (argc_bk > 1)
+		external_arguments(argc_bk, argv_bk); */
+	/* If command line arguments are re-processed, and if the user
+	 * used the profile option (-P), the new profile won't be set,
+	 * because it will be overriden by the command line value */
+
 	/* Set up config files and variables */
 	init_config();
 	
@@ -15382,7 +15396,7 @@ is enabled by default for non-english locales\
  ;cmd, :cmd\n\
  mp, mountpoints\n\
  v, paste [sel] [DESTINY]\n\
- pf, prof, profile [set, add, del PROFILE]\n\
+ pf, prof, profile [ls, list] [set, add, del PROFILE]\n\
  shell [SHELL]\n\
  msg, messages [clear]\n\
  log [clear]\n\
