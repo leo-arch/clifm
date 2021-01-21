@@ -151,11 +151,11 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 /* #define CLEAR puts("\x1b[c") */
 #define CLEAR write(STDOUT_FILENO, "\ec", 3)
-#define VERSION "0.22.4"
+#define VERSION "0.23.0"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "January 20, 2021"
+#define DATE "January 21, 2021"
 #define LICENSE "GPL2+"
 
 /* Define flags for program options and internal use */
@@ -331,7 +331,6 @@ int forth_function(char **comm);
 int cd_function(char *new_path);
 int open_function(char **cmd);
 size_t u8_xstrlen(const char *str);
-void print_license(void);
 void free_software(void);
 char **split_str(char *str);
 int is_internal(const char *cmd);
@@ -507,7 +506,7 @@ char *user = (char *)NULL, *path = (char *)NULL,
 const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
 		"move", "paste", "sel", "selbox", "desel", "refresh", 
 		"edit", "history", "hidden", "path", "help", "commands", 
-		"colors", "version", "license", "splash", "folders first", 
+		"colors", "version", "splash", "folders first", 
 		"exit", "quit", "pager", "trash", "undel", "messages", 
 		"mountpoints", "bookmarks", "log", "untrash", "unicode", 
 		"profile", "shell", "mime", NULL };
@@ -3263,8 +3262,8 @@ is_internal_c(const char *cmd)
 					     "messages", "alias", "shell", "edit", "history",
 					     "hf", "hidden", "path", "cwd", "splash", "ver",
 					     "version", "?", "help", "cmd", "commands",
-					     "colors", "license", "fs", "mm", "mime", "x",
-					     "n", "net", NULL };
+					     "colors", "fs", "mm", "mime", "x", "n", "net",
+					     NULL };
 	short found = 0;
 	size_t i;
 	for (i = 0; int_cmds[i]; i++) {
@@ -4268,29 +4267,6 @@ split_str(char *str)
 		return (char **)NULL;
 	}
 }
-
-void
-print_license(void)
-{
-	time_t rawtime = time(NULL);
-	struct tm *tm = localtime(&rawtime);
-
-	printf(_("%s, 2017-%d, %s\n\n"
-			 "This program is free software; you can redistribute it "
-			 "and/or modify it under the terms of the GNU General Public "
-			 "License (version 2 or later) as published by the Free Software "
-			 "Foundation.\n\nThis program is distributed in the hope that it "
-			 "will be useful, but WITHOUT ANY WARRANTY; without even the "
-			 "implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR "
-			 "PURPOSE. See the GNU General Public License for more details.\n\n"
-			 "You should have received a copy of the GNU General Public License "
-			 "along with this program. If not, write to the Free Software "
-			 "Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA "
-			 "02110-1301, USA, or visit <http://www.gnu.org/licenses/>\n\n"
-			 "NOTE: For more information about the meaning of 'free software' "
-			 "run 'fs'.\n"), PROGRAM_NAME, tm->tm_year + 1900, AUTHOR);
-}
-
 
 size_t
 u8_xstrlen(const char *str)
@@ -8718,7 +8694,6 @@ external_arguments(int argc, char **argv)
 		case 'v':
 			flags |= PRINT_VERSION;
 			version_function();
-			print_license();
 			exit(EXIT_SUCCESS);
 
 		case 'x':
@@ -10247,16 +10222,29 @@ list_dir(void)
 	if (list_folders_first) {
 
 		/* Store indices of dirs and files into different int arrays,
-		 * counting the number of elements for each array too */
+		 * counting the number of elements for each array too. Symlinks
+		 * to directories are counted as directories. */
 		int *tmp_files = (int *)xnmalloc((size_t)total + 1, sizeof(int)); 
 		int *tmp_dirs = (int *)xnmalloc((size_t)total + 1, sizeof(int));
 		size_t filesn = 0, dirsn = 0;
 		
 		for (i = 0; i < total; i++) {
-			if (list[i]->d_type == DT_DIR)
-				tmp_dirs[dirsn++] = i;
-			else
-				tmp_files[filesn++] = i;
+			switch (list[i]->d_type) {
+				case DT_DIR:
+					tmp_dirs[dirsn++] = i;
+					break;
+
+				case DT_LNK:
+					if (get_link_ref(list[i]->d_name) == S_IFDIR)
+						tmp_dirs[dirsn++] = i;
+					else
+						tmp_files[filesn++] = i;
+					break;
+
+				default:
+					tmp_files[filesn++] = i;
+					break;
+			}
 		}
 		
 		/* Allocate enough space to store all dirs and file names in 
@@ -10330,7 +10318,7 @@ list_dir(void)
 		return EXIT_SUCCESS;
 	}
 
-	/* Get the longest element */
+	/* Get the longest element and a few more things */
 	longest = 0; /* Global */
 	struct stat file_attrib;
 	for (i = (int)files; i--;) {
@@ -10351,36 +10339,83 @@ list_dir(void)
 		size_t file_name_width = digits_in_num(i + 1) + 1
 								 + file_info[i].len;
 
-		/* If the file is a non-empty directory and the user has access 
-		 * permision to it, add to file_name_width the number of digits
-		 * of the amount of files this directory contains (ex: 123
-		 * (files) contains 3 digits) + 2 for space and slash between
-		 * the directory name and the amount of files it contains. Ex:
+		/* If the file is a non-empty directory or a symlink to a
+		 * non-emtpy directory, and the user has access permision to
+		 * it, add to file_name_width the number of digits of the
+		 * amount of files this directory contains (ex: 123 (files)
+		 * contains 3 digits) + 2 for space and slash between the
+		 * directory name and the amount of files it contains. Ex:
 		 * '12 name /45' contains 11 chars */
-		if ((file_info[i].type & S_IFMT) == S_IFDIR) {
-			if (!dir_counter) {
+
+		switch((file_info[i].type & S_IFMT)) {
+
+		case S_IFDIR:
+		case S_IFLNK:
+			{
+			char *linkname = (char *)NULL;
+			int link_to_dir = -1;
+
+			if ((file_info[i].type & S_IFMT) == S_IFLNK) {
+				linkname = realpath(dirlist[i], (char *)NULL);
+
+				if (linkname) {
+					struct stat link_attrib;
+					stat(linkname, &link_attrib);
+
+					if ((link_attrib.st_mode & S_IFMT) != S_IFDIR) {
+						free(linkname);
+						linkname = (char *)NULL;
+						link_to_dir = 0;
+					}
+					else
+						link_to_dir = 1;
+				}
+				else
+					link_to_dir = 0;
+			}
+
+			/* If dir counter is disabled or the file is a symlink
+			 * to a non-directory */
+			if (!dir_counter || link_to_dir == 0) {
 				/* All dirs will be printed as having read access and
-				 * being not empty (bold blue by default), no matter
-				 * if they are empty or not or if the user has read
-				 * access or not. Otherwise, the listing process could
-				 * be really slow, for example, when listing files on
-				 * a remote server */
+				 * being not empty (bold blue by default, or bold cyan
+				 * if a symlink), no matter if they are empty or not or
+				 * if the user has read access or not. Otherwise, the
+				 * listing process could be really slow, for example,
+				 * when listing files on a remote server */
 				file_info[i].ruser = 1;
-				file_info[i].filesn = 3;
+
+				if (link_to_dir == 0)
+					file_info[i].filesn = 0;
+				else
+					file_info[i].filesn = 3;
 			}
 			else {
-				if (access(dirlist[i], R_OK) == 0) {
-					file_info[i].filesn = count_dir(dirlist[i]);
+				/* linkname is not null only if the file is a symlink
+				 * to an existent directory */
+				if (access((linkname) ? linkname
+				: dirlist[i], R_OK) == 0) {
+
+					file_info[i].filesn = count_dir((linkname)
+										? linkname : dirlist[i]);
 					file_info[i].ruser = 1;
+
 					if (file_info[i].filesn > 2)
 						/* Add dir counter lenght (" /num") to
 						 * file_name_with */
 						file_name_width += 
-							digits_in_num((int)file_info[i].filesn) + 2;
+							digits_in_num((int)file_info[i].filesn)
+							+ 2;
 				}
 				else
 					file_info[i].ruser = 0;
 			}
+
+			if (linkname)
+				free(linkname);
+
+			}
+			break;
 		}
 
 		if (file_name_width > longest)
@@ -10598,8 +10633,17 @@ list_dir(void)
 			{
 				char *linkname = realpath(dirlist[i], (char *)NULL);
 				if (linkname) {
-					printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, ln_c, 
-							dirlist[i], NC, (last_column) ? "\n" : "");
+					if (dir_counter && file_info[i].filesn > 2) {
+						is_dir = 1;
+						printf("%s%d%s %s%s%s%s /%zu%s%s", eln_color,
+							i + 1, NC, ln_c, dirlist[i], NC,
+							dir_count_color, file_info[i].filesn -2,
+							NC, (last_column) ? "\n" : "");
+					}
+					else
+						printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC,
+								ln_c, dirlist[i], NC, (last_column)
+								? "\n" : "");
 					free(linkname);
 				}
 				else
@@ -11559,15 +11603,13 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "commands") == 0) 
 		list_commands();
 	
-	else if (strcmp(comm[0], "colors") == 0)
+	else if (strcmp(comm[0], "colors") == 0
+	|| strcmp(comm[0], "cc") == 0)
 		color_codes();
 	
 	else if (strcmp(comm[0], "ver") == 0
 	|| strcmp(comm[0], "version") == 0)
 		version_function();
-	
-	else if (strcmp(comm[0], "license") == 0)
-		print_license();
 	
 	else if (strcmp(comm[0], "fs") == 0)
 		free_software();
@@ -15040,15 +15082,15 @@ color_codes (void)
 		   default_color);
 	printf(_("%s file name%s%s: EMPTY directory (ed)\n"), ed_c, NC, 
 		   default_color);
-	printf(_("%s file name%s%s: EMPTY directory with no read permission \
-(ne)\n"), ne_c, NC, default_color);
+	printf(_("%s file name%s%s: EMPTY directory with no read "
+			 "permission (ne)\n"), ne_c, NC, default_color);
 	printf(_("%s file name%s%s: Executable file (ex)\n"), ex_c, NC, 
 		   default_color);
 	printf(_("%s file name%s%s: Empty executable file (ee)\n"), ee_c, NC, 
 		   default_color);
 	printf(_("%s file name%s%s: Block special file (bd)\n"), bd_c, NC, 
 		   default_color);	
-	printf(_("%s file name%s%s: Symbolic link (ln)\n"), ln_c, NC, 
+	printf(_("%s file name%s%s: Symbolic link* (ln)\n"), ln_c, NC, 
 		   default_color);	
 	printf(_("%s file name%s%s: Broken symbolic link (or)\n"), or_c, NC, 
 		   default_color);
@@ -15068,21 +15110,24 @@ color_codes (void)
 		   default_color);
 	printf(_(" %s%sfile name%s%s: File with capabilities (ca)\n"), NC, ca_c, 
 		   NC, default_color);
-	printf(_(" %s%sfile name%s%s: Sticky and NOT other-writable directory* \
-(st)\n"),  NC, st_c, NC, default_color);
-	printf(_(" %s%sfile name%s%s: Sticky and other-writable directory* \
-(tw)\n"),  NC, tw_c, NC, default_color);
-	printf(_(" %s%sfile name%s%s: Other-writable and NOT sticky directory* \
-(ow)\n"),  NC, ow_c, NC, default_color);
+	printf(_(" %s%sfile name%s%s: Sticky and NOT other-writable "
+			 "directory* (st)\n"),  NC, st_c, NC, default_color);
+	printf(_(" %s%sfile name%s%s: Sticky and other-writable "
+			 "directory* (tw)\n"),  NC, tw_c, NC, default_color);
+	printf(_(" %s%sfile name%s%s: Other-writable and NOT sticky "
+			 "directory* (ow)\n"),  NC, ow_c, NC, default_color);
 	printf(_(" %s%sfile name%s%s: Unknown file type (no)\n"), NC, no_c, 
 		   NC, default_color);
-	printf(_("\n*The slash followed by a number (/xx) after directory names \
-indicates the amount of files contained by the corresponding directory.\n"));
-	printf(_("\nThe value in parentheses is the code to use to modify \
-the color of the corresponding filetype in the configuration file \
-(in the \"FiletypeColors\" line), using the same ANSI style color format \
-used by dircolors. By default, %s uses only 8 colors, but you can \
-use 256 and RGB colors as well.\n\n"), PROGRAM_NAME);
+	printf(_("\n*The slash followed by a number (/xx) after directories "
+			 "or symbolic links to directories indicates the amount of "
+			 "files contained by the corresponding directory, excluding "
+			 "self (.) and parent (..) directories.\n"));
+	printf(_("\nThe value in parentheses is the code that must be used "
+			 "modify the color of the corresponding filetype in the "
+			 "configuration file (in the \"FiletypeColors\" line), "
+			 "using the same ANSI style color format used by dircolors. "
+			 "By default, %s uses only 8 colors, but you can use 256 and "
+			 "RGB colors as well.\n\n"), PROGRAM_NAME);
 }
 
 void
@@ -15276,9 +15321,10 @@ where to copy these files. Ex: paste sel /path/to/directory\n"),
 		   white, NC, default_color);
 
 	/* ### PROFILE ### */
-	printf(_("\n%spf, prof, profile%s%s [set, add, del PROFILE] [edit]: With \
-no argument, print the currently used profile. Use the 'set', 'add', and 'del' \
-arguments to switch, add or remove a profile\n"), white, NC, default_color);
+	printf(_("\n%spf, prof, profile%s%s [ls, list] [set, add, del PROFILE]: \
+With no argument, print the currently used profile. Use the 'set', 'add', \
+and 'del' arguments to switch, add or remove a profile\n"), white, NC,
+		   default_color);
 
 	/* ### SHELL ### */
 	printf(_("\n%sshell%s%s [SHELL]: Print the current default shell for \
@@ -15368,10 +15414,6 @@ on/off.\n"), white, NC, default_color);
 	printf(_("\n%sver, version%s%s: Show %s version details.\n"), white,
 			NC, default_color, PROGRAM_NAME);
 
-	/* ### LICENSE ### */
-	printf(_("\n%slicense%s%s: Display the license notice.\n"), white, NC, 
-			default_color);
-
 	/* ### FREE SOFTWARE ### */
 	printf(_("\n%sfs%s%s: Print an extract from 'What is Free "
 			 "Software?', written by Richard Stallman.\n"), white, NC, 
@@ -15418,7 +15460,7 @@ is enabled by default for non-english locales\
 
 	puts(_("\nBUILT-IN COMMANDS:\n\n\
  /* [DIR]\n\
- bm, bookmarks [a, add PATH] [d, del] [edit] [shortcut, name]\n\
+ bm, bookmarks [a, add PATH] [d, del] [edit] [SHORTCUT or NAME]\n\
  o, open [ELN/FILE] [APPLICATION]\n\
  cd [ELN/DIR]\n\
  s, sel [ELN ELN-ELN FILE ... n]\n\
@@ -15430,8 +15472,8 @@ is enabled by default for non-english locales\
  f, forth [h, hist] [clear] [!ELN]\n\
  c, l, m, md, r\n\
  p, pr, prop [ELN/FILE ... n] [s, size] [a, all]\n\
- mm, mime [info ELN/FILENAME] [edit]\n\
- ;cmd, :cmd\n\
+ mm, mime [info ELN/FILE] [edit]\n\
+ ;CMD, :CMD\n\
  mp, mountpoints\n\
  v, paste [sel] [DESTINY]\n\
  pf, prof, profile [ls, list] [set, add, del PROFILE]\n\
@@ -15443,21 +15485,20 @@ is enabled by default for non-english locales\
  alias [import FILE]\n\
  splash\n\
  path, cwd\n\
+ cmd, commands\n\
  rf, refresh\n\
- colors\n\
- commands\n\
+ cc, colors\n\
  hf, hidden [on, off, status]\n\
  ff, folders first [on, off, status]\n\
  pg, pager [on, off, status]\n\
  uc, unicode [on, off, status]\n\
  ext [on, off, status]\n\
  ver, version\n\
- license\n\
  fs\n\
  q, quit, exit, zz\n"));
 
-	puts(_("Enter 'commands' to find out more about each of these \
-commands.\n"));
+	puts(_("Run 'cmd' or consult the manpage for more information about "
+		   "each of these commands.\n"));
 
 	puts(_("KEYBOARD SHORTCUTS:\n\n\
  A-c:	Clear the current command line buffer\n\
@@ -15481,12 +15522,12 @@ NOTE: Depending on the terminal emulator being used, some of these \
 keybindings, like A-e, A-f, and F10, might conflict with some of the \
 terminal keybindings.\n"));
 
-	puts(_("Color codes: Run the 'colors' command to see the list \
-of currently used color codes.\n"));
+	puts(_("Color codes: Run the 'colors' or 'cc' command to see the list "
+		   "of currently used color codes.\n"));
 
-	puts(_("The configuration and profile files allow you to customize \
-colors, define some prompt commands and aliases, and more. For a full \
-description consult the man page."));
+	puts(_("The configuration and profile files allow you to customize "
+		   "colors, define some prompt commands and aliases, and more. "
+		   "For a full description consult the manpage."));
 }
 
 void

@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "January 20, 2021" "CliFM 0.22+" "CliFM Manual"
+.TH "CLIFM" "1" "January 21, 2021" "CliFM 0.23+" "CliFM Manual"
 
 .SH NAME
 CLIFM - A completely CLI-based file manager inspired in Arch Linux' KISS principle
@@ -260,9 +260,6 @@ toggle external commands on/off.
 .TP
 .B ver, version
 show CliFM version details.
-.TP
-.B license
-Display the license notice.
 .TP
 .B fs
 Print an extract from 'What is Free Software?', written by Richard Stallman.
