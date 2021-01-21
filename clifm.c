@@ -391,7 +391,8 @@ void* __dso_handle;
 #endif
 
 /* Struct to store user defined variables */
-struct usrvar_t {
+struct usrvar_t
+{
 	char *name;
 	char *value;
 };
@@ -402,6 +403,7 @@ struct fileinfo
 	size_t len;
 	size_t filesn; /* Number of files in subdir */
 	int exists;
+	int brokenlink;
 	mode_t type;
 	off_t size;
 	int ruser; /* User read permission for dir */
@@ -429,7 +431,8 @@ struct param
 /* A list of possible program messages. Each value tells the prompt what
  * to do with error messages: either to print an E, W, or N char at the
  * beginning of the prompt, or nothing (nomsg) */
-enum prog_msg {
+enum prog_msg
+{
 	nomsg = 0,
 	error = 1,
 	warning = 2,
@@ -10318,7 +10321,8 @@ list_dir(void)
 		return EXIT_SUCCESS;
 	}
 
-	/* Get the longest element and a few more things */
+	/* Get the longest element and a few more things about file
+	 * information */
 	longest = 0; /* Global */
 	struct stat file_attrib;
 	for (i = (int)files; i--;) {
@@ -10355,10 +10359,12 @@ list_dir(void)
 			char *linkname = (char *)NULL;
 			int link_to_dir = -1;
 
+			/* In case of symlink, check if it points to a directory */
 			if ((file_info[i].type & S_IFMT) == S_IFLNK) {
 				linkname = realpath(dirlist[i], (char *)NULL);
 
 				if (linkname) {
+					file_info[i].brokenlink = 0;
 					struct stat link_attrib;
 					stat(linkname, &link_attrib);
 
@@ -10367,22 +10373,24 @@ list_dir(void)
 						linkname = (char *)NULL;
 						link_to_dir = 0;
 					}
-					else
+					else /* We have a symlink to a valid directory */
 						link_to_dir = 1;
 				}
-				else
+				else {
 					link_to_dir = 0;
+					file_info[i].brokenlink = 1;
+				}
 			}
 
-			/* If dir counter is disabled or the file is a symlink
+			/* If dir counter is disabled and/or the file is a symlink
 			 * to a non-directory */
 			if (!dir_counter || link_to_dir == 0) {
 				/* All dirs will be printed as having read access and
-				 * being not empty (bold blue by default, or bold cyan
-				 * if a symlink), no matter if they are empty or not or
-				 * if the user has read access or not. Otherwise, the
-				 * listing process could be really slow, for example,
-				 * when listing files on a remote server */
+				 * being not empty, no matter if they are empty or not or
+				 * if the user has read access or not. Disabling the
+				 * dir counter could be useful when listing files on a
+				 * remote server (or fi the hardware is too old), where
+				 * the listing process could become really slow */
 				file_info[i].ruser = 1;
 
 				if (link_to_dir == 0)
@@ -10390,6 +10398,9 @@ list_dir(void)
 				else
 					file_info[i].filesn = 3;
 			}
+
+			/* Dir counter is enabled, and the file is either a
+			 * directory or a symlink to a directory */
 			else {
 				/* linkname is not null only if the file is a symlink
 				 * to an existent directory */
@@ -10445,7 +10456,7 @@ list_dir(void)
 		for (i = 0; i < (int)files; i++) {
 
 			/* Correct padding, if necessary. Without this correction,
-			 * padding for files with different eln lengths differs.
+			 * padding for files with different ELN lengths differs.
 			 * Ex:
 			 * 1) filename (prop)
 			 * 12) filename (prop)
@@ -10631,22 +10642,21 @@ list_dir(void)
 
 		case S_IFLNK:
 			{
-				char *linkname = realpath(dirlist[i], (char *)NULL);
-				if (linkname) {
+				if (!file_info[i].brokenlink) {
 					if (dir_counter && file_info[i].filesn > 2) {
+						/* Symlink to dir */
 						is_dir = 1;
 						printf("%s%d%s %s%s%s%s /%zu%s%s", eln_color,
 							i + 1, NC, ln_c, dirlist[i], NC,
 							dir_count_color, file_info[i].filesn -2,
 							NC, (last_column) ? "\n" : "");
 					}
-					else
+					else /* Symlink to file */
 						printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC,
 								ln_c, dirlist[i], NC, (last_column)
 								? "\n" : "");
-					free(linkname);
 				}
-				else
+				else /* Oops, broken symlink */
 					printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, or_c, 
 							dirlist[i], NC, (last_column) ? "\n" : "");
 			}
