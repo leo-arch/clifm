@@ -74,7 +74,7 @@ Because file manager, but also half shell, CLiFM also offers the following featu
 Finally, all CLiFM options could be handled directly by command line, by passing parameters to the program, or via plain
 text configuration files, located in `~/.config/clifm/`.
 
-Insofar as it is heavily inspired by Arch Linux and its KISS principle, CLiFM is fundamentally aimed to be lightweight, fast, and simple. And if it's not fast enough, you can always try the light mode to make it even faster.
+Insofar as it is heavily inspired by Arch Linux and its KISS principle, CLiFM is fundamentally aimed to be lightweight, fast, and simple. And if it's not fast enough, you can always try the **light mode** to make it even faster.
 
 On Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity
 
