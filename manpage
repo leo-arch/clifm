@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "January 21, 2021" "CliFM 0.24+" "CliFM Manual"
+.TH "CLIFM" "1" "January 22, 2021" "CliFM 0.24.1+" "CliFM Manual"
 
 .SH NAME
 CLIFM - A completely CLI-based file manager inspired by Arch Linux' KISS principle
@@ -125,7 +125,7 @@ enable the light mode to speed up CliFM
 Options precedence order: 1) command line; 2) configuration file; 3) default values.
 
 .SH COMMANDS
-\fBNOTE:\fR ELN = Element List Number. Example: in the line "12 openbox" (when listing files), 12 is the ELN corresponding to the file named "openbox". The slash followed by a number (/xx) after directories and symbolic links to directories (the files counter) indicates the amount of files contained by the corresponding directory, excluding current and parent directories ("." and ".." respectivelly).
+\fBNOTE:\fR ELN = Entry List Number. Example: in the line "12 openbox" (when listing files), 12 is the ELN corresponding to the file named "openbox". The slash followed by a number (/xx) after directories and symbolic links to directories (the files counter) indicates the amount of files contained by the corresponding directory, excluding current and parent directories ("." and ".." respectivelly).
 
 .TP
 
@@ -219,7 +219,7 @@ The underlying programs used here to mount these remote file systems are: 'sshfs
 .TP
 
 .B lm \fR[on, off]
-Toggle the light mode on/off. When listing files in this mode, colors codes are disabled, every call to \fBstat(3)\fR is omitted, and the files counter function is also disabled. This is especially usefull for really old hardware or when working on remote machines. For maximum speed see the NOTES section below.
+Toggle the light mode on/off. This option, aimed to make files listing faster than the default mode, is especially usefull for really old hardware or when working on remote machines. For more details see the NOTE ON SPEED section below.
 
 .B mm, mime \fR[info ELN/FILENAME] [edit]
 This is CliFM's resource opener. The 'info' option prints the MIME information about ELN/FILENAME: its MIME type, its file extension, if any, and the application associated to this MIME type or file extension. The 'edit' option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension, and then add a value for it to the MIME list file using the 'edit' option.
@@ -476,9 +476,9 @@ TAB completion for bookmarks and profiles is also available. To make use of the 
 .TP
 Of course, combinations of all these features is also possbile. Example: 'cp sel file* 2 23-31 .' will copy all selected files, plus all files whose name starts with "file", plus those files corresponding to the ELN's 2 and 23 through 31, into the current working directory.
 
-.SH NOTES
+.SH MISCELLANEOUS NOTES
 .TP
-For each of the internal commands (those listed under the "COMMANDS" header) you can use the semicolon to execute them sequentially and/or the double ampersand to execute them conditionally. Example: 'cmd1; cmd2 && cmd3'. 
+For each of the internal commands (see the COMMANDS section above) you can use the semicolon to execute them sequentially and/or the double ampersand to execute them conditionally. Example: 'cmd1; cmd2 && cmd3'. 
 .TP
 Though you can use here external commands as well, bear in mind that, whenever at least one internal command is involved in a chained list of commands, CliFM will take care of executing this list (simply because the system shell isn't able to understand any of these commands), so that no shell inter-process function (like pipes), nor any stream redirection or shell expression (like IF blocks or FOR loops) will be available. However, the shell is still used to run single external commands found in the chained list, but in isolation from the remaining commands in this list.
 .TP
@@ -495,8 +495,24 @@ When dealing with filenames containing spaces, you can use both single and doubl
 By default, CliFM starts in the current working directory. However, you can always specify a different path by passing it as an argument. Ex: clifm -p /home/user/misc. You can also permanently set up the starting path in the CliFM configuration file.
 .TP
 CliFM's default profile is "default". To create alternative profiles use the -P option or the 'pf' command. See above.
+
+.SH NOTE ON SPEED
+If speed is still an issue, try one of the setups below (listed from slower to faster):
 .TP
-If speed is still an issue, there are a few things to do in order to speed up CliFM even more. First, disable the files counter, and, if this is still not enough, try running the program in light mode and disabling both "DirIndicator" and "Classify" options in the configuration file.
+\fBa)\fR Default mode (all listing features enabled)
+.TP
+\fBb)\fR Default mode with FilesCounter option disabled (the files counter function could be quite time consuming, since every directory needs to be accessed via \fBreaddir(3)\fR to get the amount of files it contains)
+.TP
+\fBc)\fR Default mode with FilesCounter and ListFoldersFisrt options disabled (this latter needs to reorder the list of files provided by \fBscandir(3)\fR in order to place directories first, which of course is slower)
+.TP
+\fBd)\fR Light mode with ClassifyExec option enabled. In light mode, colors and FilesCounter are disabled, while every call to \fBstat(3)\fR, which could be quite time consuming, is omitted.
+.TP
+\fBe)\fR Light mode with Classify enabled and ClassifyExec disabled (this latter needs to call \fBaccess(3)\fR for every regular file to find out whether it is executable or not, which slows things down)
+.TP
+\fBf)\fR Light mode with only DirIndicator enabled
+.TP
+\fBg)\fR Light mode with all the four options disabled (ListFoldersFirst, DirIndicator, Classify, and ClassifyExec).
+
 .SH FILES
 .TP
 \fBMain configuration file:\fR \fI~/.config/clifm/profile_name/clifmrc\fR

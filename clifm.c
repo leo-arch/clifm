@@ -151,11 +151,11 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 /* #define CLEAR puts("\x1b[c") */
 #define CLEAR write(STDOUT_FILENO, "\ec", 3)
-#define VERSION "0.24.0"
+#define VERSION "0.24.1"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "January 21, 2021"
+#define DATE "January 22, 2021"
 #define LICENSE "GPL2+"
 
 /* Define flags for program options and internal use */
@@ -405,6 +405,7 @@ struct fileinfo
 	size_t filesn; /* Number of files in subdir */
 	int exists;
 	int brokenlink;
+	int exec;
 	mode_t type;
 	off_t size;
 	int ruser; /* User read permission for dir */
@@ -1396,18 +1397,23 @@ LongViewMode=false\n\
 ExternalCommands=false\n\
 LogCmds=false\n\n"
 
-"# In light mode, colors and filetype checks (except the directory check, \n\
-# which is enabled by default) are disabled to speed up the listing \n\
+"# In light mode, colors and filetype checks (except the directory check,\n\
+# which is enabled by default) are disabled to speed up the listing\n\
 # process.\n\
 LightMode=false\n\n"
 
-"# The following two options are only valid when running in light mode.\n\
-# Perform a directory check appending a slash at the end of directory \n\
+"# The following three options are only valid when running in light mode:\n\
+# Perform a directory check appending a slash at the end of directory\n\
 # names.\n\
 DirIndicator=true\n"
-"# Append one of /@=| at the end of some filetypes. This option \n\
-# overrides DirIndicator.\n\
-Classify=false\n\n"
+"# Append filetype indicator at the end of filenames: '/' for directories,\n\
+# '@' for symbolic links, '=' for sockets, and '|' for FIFO/pipes. This\n\
+# option implies DirIndicator.\n\
+Classify=false\n"
+"# Same as Classify, but append '*' to executable files as well. This\n\
+# option implies Classify, but is slower, since access(3) needs to be\n\
+# called for every regular file.\n\
+ClassifyExec=false\n\n"
 
 "# Should the Selection Box be shared among different profiles?\n\
 ShareSelbox=false\n\n"
@@ -6140,7 +6146,7 @@ readline_kbind_action(int count, int key) {
 	/* Prevent Valgrind from complaining about unused variable */
 	if (count) {}
 /*	printf("Key: %d\n", key); */
-	int status = 0;
+/*	int status = 0; */
 
 	/* Disable all keybindings while in the bookmarks or mountpoints
 	 * screen */
@@ -6201,7 +6207,6 @@ readline_kbind_action(int count, int key) {
 		
 	/* A-f: Toggle folders first on/off */
 	case 102:
-		status = list_folders_first;
 		/* If status == 0 set it to 1. In this way, the next time
 		 * this function is called it will not be true, and the else
 		 * clause will be executed instead */
@@ -6210,32 +6215,29 @@ readline_kbind_action(int count, int key) {
 		else
 			list_folders_first = 1;
 		
-		if (status != list_folders_first) {
-			CLEAR;
-			while (files--)
-				free(dirlist[files]);
-			/* Without this puts(), the first entries of the directories
-			 * list are printed in the prompt line */
-			puts("");
-			list_dir();
-		}
+		CLEAR;
+		while (files--)
+			free(dirlist[files]);
+		/* Without this puts(), the first entries of the directories
+		 * list are printed in the prompt line */
+		puts("");
+		list_dir();
+
 		break;
 
 	/* A-i: Toggle hidden files on/off */
 	case 105:
-		status = show_hidden;
 		if (show_hidden)
 			show_hidden = 0;
 		else
 			show_hidden = 1;
 		
-		if (status != show_hidden) {
-			CLEAR;
-			while (files--)
-				free(dirlist[files]);
-			puts("");
-			list_dir();
-		}
+		CLEAR;
+		while (files--)
+			free(dirlist[files]);
+		puts("");
+		list_dir();
+
 		break;
 
 	/* A-j: Change CWD to PREVIOUS directoy in history */
@@ -6256,8 +6258,7 @@ readline_kbind_action(int count, int key) {
 
 	/* A-l: Toggle long view mode on/off */
 	case 108:
-		status = long_view;
-		if (status)
+		if (long_view)
 			long_view = 0;
 		else
 			long_view = 1;
@@ -6297,20 +6298,19 @@ readline_kbind_action(int count, int key) {
 		keybind_exec_cmd("cd ..");
 		break;
 
+	/* A-y: Toggle light mode on/off */
 	case 121:
-		status = light_mode;
 		if (light_mode)
 			light_mode = 0;
 		else
 			light_mode = 1;
 		
-		if (status != light_mode) {
-			CLEAR;
-			while (files--)
-				free(dirlist[files]);
-			puts("");
-			list_dir();
-		}
+		CLEAR;
+		while (files--)
+			free(dirlist[files]);
+		puts("");
+		list_dir();
+
 		break;
 
 	/* F10: Open the config file */
@@ -7856,6 +7856,15 @@ init_config(void)
 							classify = 1;
 						else /* False and default */
 							classify = 0;
+					}
+
+					else if (strncmp(line, "ClassifyExec=", 13) == 0) {
+						char opt_str[MAX_BOOL] = "";
+						ret = sscanf(line, "ClassifyExec=%5s\n", opt_str);
+						if (ret == -1)
+							continue;
+						if (strncmp(opt_str, "true", 4) == 0)
+							classify = 2;
 					}
 
 					else if (strncmp(line, "ShareSelbox=", 12) == 0) {
@@ -10311,6 +10320,7 @@ list_dir(void)
 		size_t filesn = 0, dirsn = 0;
 		
 		for (i = 0; i < total; i++) {
+
 			switch (list[i]->d_type) {
 				case DT_DIR:
 					tmp_dirs[dirsn++] = i;
@@ -10338,27 +10348,29 @@ list_dir(void)
 										* sizeof(char *));
 
 		/* First copy dir names into the dirlist array */
-		size_t len;
 		for (i = 0; i < (int)dirsn; i++) {
-			len = (unicode) ? u8_xstrlen(list[tmp_dirs[i]]->d_name)
-				  : strlen(list[tmp_dirs[i]]->d_name);
+			file_info[i].len = (unicode)
+					? u8_xstrlen(list[tmp_dirs[i]]->d_name)
+					: strlen(list[tmp_dirs[i]]->d_name);
 			/* Store the filename length here, so that we don't need to
 			 * run strlen() again later on the same file */
-			file_info[i].len = len;
-			dirlist[i] = (char *)xnmalloc(len + 1, (cont_bt)
-						 ? sizeof(char32_t) : sizeof(char));
+			dirlist[i] = (char *)xnmalloc(file_info[i].len + 1,
+							(cont_bt) ? sizeof(char32_t)
+							: sizeof(char));
 			strcpy(dirlist[i], list[tmp_dirs[i]]->d_name);
 		}
 		
 		/* Now copy file names */
 		register int j;
 		for (j = 0; j < (int)filesn; j++) {
-			len = (unicode) ? u8_xstrlen(list[tmp_files[j]]->d_name)
+			file_info[i].len = (unicode)
+				  ? u8_xstrlen(list[tmp_files[j]]->d_name)
 				  : strlen(list[tmp_files[j]]->d_name);
-			file_info[i].len = len;
+//			file_info[i].len = len;
 			/* cont_bt value is set by u8_xstrlen() */
-			dirlist[i] = (char *)xnmalloc(len + 1, (cont_bt)
-							? sizeof(char32_t) : sizeof(char));
+			dirlist[i] = (char *)xnmalloc(file_info[i].len + 1,
+							(cont_bt) ? sizeof(char32_t)
+							: sizeof(char));
 			strcpy(dirlist[i++], list[tmp_files[j]]->d_name);
 		}
 		
@@ -10379,13 +10391,11 @@ list_dir(void)
 		dirlist = (char **)xrealloc(dirlist, (size_t)(files + 1)
 									* sizeof(char *));
 
-		size_t len;
 		for (i = 0; i < (int)files; i++) {
-			len = (unicode) ? u8_xstrlen(list[i]->d_name)
+			file_info[i].len = (unicode) ? u8_xstrlen(list[i]->d_name)
 				  : strlen(list[i]->d_name);
-			file_info[i].len = len;
-			dirlist[i] = xnmalloc(len + 1, (cont_bt) ? sizeof(char32_t)
-								  : sizeof(char));
+			dirlist[i] = xnmalloc(file_info[i].len + 1, (cont_bt)
+								? sizeof(char32_t) : sizeof(char));
 			strcpy(dirlist[i], list[i]->d_name);
 		}
 		
@@ -10484,7 +10494,7 @@ list_dir(void)
 				/* linkname is not null only if the file is a symlink
 				 * to an existent directory */
 				if (access((linkname) ? linkname
-				: dirlist[i], R_OK) == 0) {
+				: dirlist[i], F_OK) == 0) {
 
 					file_info[i].filesn = count_dir((linkname)
 										? linkname : dirlist[i]);
@@ -10861,9 +10871,9 @@ list_dir(void)
 int
 list_dir_light(void)
 /* List files in the current working directory (global variable 'path'). 
- * Unlike list_dir(), however, this function uses no color and never runs
- * stat() nor count_dir(), which makes it quite faster. Return zero if
- * success or one on error */
+ * Unlike list_dir(), however, this function uses no color and runs
+ * neither stat() nor count_dir(), which makes it quite faster. Return
+ * zero if success or one on error */
 {
 /*	clock_t start = clock(); */
 
@@ -10902,8 +10912,7 @@ list_dir_light(void)
 	if (list_folders_first) {
 
 		/* Store indices of dirs and files into different int arrays,
-		 * counting the number of elements for each array too. Symlinks
-		 * to directories are counted as directories. */
+		 * counting the number of elements for each array too. */
 		int *tmp_files = (int *)xnmalloc((size_t)total + 1, sizeof(int)); 
 		int *tmp_dirs = (int *)xnmalloc((size_t)total + 1, sizeof(int));
 		size_t filesn = 0, dirsn = 0;
@@ -10929,30 +10938,31 @@ list_dir_light(void)
 										* sizeof(char *));
 
 		/* First copy dir names into the dirlist array */
-		size_t len;
 		for (i = 0; i < (int)dirsn; i++) {
-			len = (unicode) ? u8_xstrlen(list[tmp_dirs[i]]->d_name)
-				  : strlen(list[tmp_dirs[i]]->d_name);
-			/* Store the filename length and filetype here, so that
+			/* Store the filename length (and filetype) here, so that
 			 * we don't need to run strlen() again later on the same
 			 * file */
-			file_info[i].len = len;
+			file_info[i].len = (unicode)
+					? u8_xstrlen(list[tmp_dirs[i]]->d_name)
+					: strlen(list[tmp_dirs[i]]->d_name);
 			file_info[i].type = list[tmp_dirs[i]]->d_type;
 			/* cont_bt value is set by u8_xstrlen() */
-			dirlist[i] = (char *)xnmalloc(len + 1, (cont_bt)
-						 ? sizeof(char32_t) : sizeof(char));
+			dirlist[i] = (char *)xnmalloc(file_info[i].len + 1,
+							(cont_bt) ? sizeof(char32_t)
+							: sizeof(char));
 			strcpy(dirlist[i], list[tmp_dirs[i]]->d_name);
 		}
 		
 		/* Now copy file names */
 		register int j;
 		for (j = 0; j < (int)filesn; j++) {
-			len = (unicode) ? u8_xstrlen(list[tmp_files[j]]->d_name)
-				  : strlen(list[tmp_files[j]]->d_name);
-			file_info[i].len = len;
+			file_info[i].len = (unicode)
+					? u8_xstrlen(list[tmp_files[j]]->d_name)
+					: strlen(list[tmp_files[j]]->d_name);
 			file_info[i].type = list[tmp_files[j]]->d_type;
-			dirlist[i] = (char *)xnmalloc(len + 1, (cont_bt)
-							? sizeof(char32_t) : sizeof(char));
+			dirlist[i] = (char *)xnmalloc(file_info[i].len + 1,
+								(cont_bt) ? sizeof(char32_t)
+								: sizeof(char));
 			strcpy(dirlist[i++], list[tmp_files[j]]->d_name);
 		}
 		
@@ -10970,14 +10980,12 @@ list_dir_light(void)
 		dirlist = (char **)xrealloc(dirlist, (size_t)(files + 1)
 										* sizeof(char *));
 
-		size_t len;
 		for (i = 0; i < (int)files; i++) {
-			len = (unicode) ? u8_xstrlen(list[i]->d_name)
-				  : strlen(list[i]->d_name);
-			file_info[i].len = len;
+			file_info[i].len = (unicode) ? u8_xstrlen(list[i]->d_name)
+							   : strlen(list[i]->d_name);
 			file_info[i].type = list[i]->d_type;
-			dirlist[i] = xnmalloc(len + 1, (cont_bt) ? sizeof(char32_t)
-								  : sizeof(char));
+			dirlist[i] = xnmalloc(file_info[i].len + 1, (cont_bt)
+								  ? sizeof(char32_t) : sizeof(char));
 			strcpy(dirlist[i], list[i]->d_name);
 		}
 	}
@@ -10993,6 +11001,8 @@ list_dir_light(void)
 								 + file_info[i].len;
 
 		if (classify) {
+			/* Increase filename width in one to include the ending
+			 * classification char */
 			switch (file_info[i].type) {
 				case DT_DIR:
 				case DT_LNK:
@@ -11000,15 +11010,20 @@ list_dir_light(void)
 				case DT_SOCK:
 					file_name_width++;
 					break;
-			}
-		}
-		else if (dir_indicator) {
-			switch (file_info[i].type) {
-				case DT_DIR:
-					file_name_width++;
+
+				case DT_REG:
+					if (classify > 1 && access(dirlist[i], X_OK) == 0) {
+						file_info[i].exec = 1;
+						file_name_width++;
+					}
+					else
+						file_info[i].exec = 0;
 					break;
 			}
 		}
+
+		else if (dir_indicator && file_info[i].type == DT_DIR)
+			file_name_width++;
 
 		if (file_name_width > longest)
 			longest = file_name_width;
@@ -11163,7 +11178,7 @@ list_dir_light(void)
 		else
 			last_column = 0;
 
-		/* Print the corresponding file line */
+		/* Print the corresponding entry */
 		if (!dir_indicator && !classify)
 			printf("%s%d%s %s%s", eln_color, i + 1, NC, dirlist[i],
 				   (last_column) ? "\n" : "");
@@ -11192,10 +11207,10 @@ list_dir_light(void)
 				break;
 
 				case DT_REG:
-/*					if (access(dirlist[i]), X_OK) == 0)
+					if (file_info[i].exec)
 						printf("%s%d%s %s*%s", eln_color, i + 1, NC,
 						 		dirlist[i], (last_column) ? "\n" : "");
-					else */
+					else
 						printf("%s%d%s %s%s", eln_color, i + 1, NC,
 								dirlist[i], (last_column) ? "\n" : "");
 				break;
@@ -11237,6 +11252,11 @@ list_dir_light(void)
 					case DT_SOCK:
 						break;
 
+					case DT_REG:
+						if (!file_info[i].exec)
+							putchar(' ');
+						break;
+
 					default:
 						putchar(' ');
 						break;
@@ -11244,14 +11264,8 @@ list_dir_light(void)
 			}
 
 			else if (dir_indicator) {
-				switch (file_info[i].type) {
-					case DT_DIR:
-						break;
-
-					default:
-						putchar(' ');
-						break;
-				}
+				if (file_info[i].type != DT_DIR)
+					putchar(' ');
 			}
 			else
 				putchar(' ');
