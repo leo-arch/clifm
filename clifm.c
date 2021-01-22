@@ -151,7 +151,7 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 /* #define CLEAR puts("\x1b[c") */
 #define CLEAR write(STDOUT_FILENO, "\ec", 3)
-#define VERSION "0.23.0"
+#define VERSION "0.24.0"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
@@ -270,6 +270,7 @@ void add_to_dirhist(const char *dir_path);
 char *home_tilde(const char *new_path);
 char **parse_input_str(char *str);
 int list_dir(void);
+int list_dir_light(void);
 char *prompt(void);
 int exec_cmd(char **comm);
 int launch_execve(char **cmd, int bg);
@@ -302,7 +303,7 @@ void colors_list(const char *entry, const int i, const int pad,
 int hidden_function(char **comm);
 void help_function(void);
 void color_codes(void);
-void list_commands(void);
+int list_commands(void);
 int folder_select(const struct dirent *entry);
 int file_select(const struct dirent *entry);
 int skip_implied_dot(const struct dirent *entry);
@@ -426,6 +427,7 @@ struct param
 	int unicode;
 	int pager;
 	int path;
+	int light;
 };
 
 /* A list of possible program messages. Each value tells the prompt what
@@ -454,7 +456,8 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 	recur_perm_error_flag = 0, is_sel = 0, sel_is_last = 0, print_msg = 0,
 	long_view = -1, kbind_busy = 0, unicode = -1, dequoted = 0,
 	home_ok = 1, config_ok = 1, trash_ok = 1, selfile_ok = 1,
-	mime_match = 0, logs_enabled = -1, sort = -1, dir_counter = -1;
+	mime_match = 0, logs_enabled = -1, sort = -1, files_counter = -1,
+	light_mode = -1, dir_indicator = -1, classify = -1;
 	/* -1 means non-initialized or unset. Once initialized, these variables
 	 * are always either zero or one */
 /*	sel_no_sel=0 */
@@ -737,7 +740,7 @@ main(int argc, char **argv)
 	/* Set all external arguments flags to uninitialized state */
 	xargs.splash = xargs.hidden = xargs.longview = xargs.ext = -1;
 	xargs.ffirst = xargs.sensitive = xargs.unicode = xargs.pager = -1;
-	xargs.path = xargs.cdauto = -1;
+	xargs.path = xargs.cdauto = -1, xargs.light = -1;
 
 	if (argc > 1)
 		external_arguments(argc, argv);
@@ -1341,9 +1344,9 @@ WelcomeMessageColor=01;36\n\n"
 
 "# By default, the amount of files contained by a directory is informed next\n\
 # to the directory name. However, this feature might slow things down when, \n\
-# for example, listing files on a remote server. The dircounter can be \n\
-# disabled here or using the 'dc' command while in the program itself.\n\
-DirCounter=true\n\n"
+# for example, listing files on a remote server. The filescounter can be \n\
+# disabled here or using the 'fc' command while in the program itself.\n\
+FilesCounter=true\n\n"
 
 "# DividingLineChar accepts both literal characters (in single quotes) and \n\
 # decimal numbers.\n\
@@ -1392,6 +1395,19 @@ ShowHiddenFiles=true\n\
 LongViewMode=false\n\
 ExternalCommands=false\n\
 LogCmds=false\n\n"
+
+"# In light mode, colors and filetype checks (except the directory check, \n\
+# which is enabled by default) are disabled to speed up the listing \n\
+# process.\n\
+LightMode=false\n\n"
+
+"# The following two options are only valid when running in light mode.\n\
+# Perform a directory check appending a slash at the end of directory \n\
+# names.\n\
+DirIndicator=true\n"
+"# Append one of /@=| at the end of some filetypes. This option \n\
+# overrides DirIndicator.\n\
+Classify=false\n\n"
 
 "# Should the Selection Box be shared among different profiles?\n\
 ShareSelbox=false\n\n"
@@ -3266,7 +3282,7 @@ is_internal_c(const char *cmd)
 					     "hf", "hidden", "path", "cwd", "splash", "ver",
 					     "version", "?", "help", "cmd", "commands",
 					     "colors", "fs", "mm", "mime", "x", "n", "net",
-					     NULL };
+					     "lm", NULL };
 	short found = 0;
 	size_t i;
 	for (i = 0; int_cmds[i]; i++) {
@@ -3963,7 +3979,7 @@ set_default_options(void)
 	welcome_message = 1;
 	show_hidden = 1;
 	sort = 1;
-	dir_counter = 1;
+	files_counter = 1;
 	long_view = 0;
 	ext_cmd_ok = 0;
 	pager = 0;
@@ -6007,6 +6023,7 @@ readline_kbinds(void)
 	rl_bind_keyseq("\\M-d", readline_kbind_action); /* key: 100 */
 	rl_bind_keyseq("\\M-r", readline_kbind_action); /* key: 114 */
 	rl_bind_keyseq("\\M-s", readline_kbind_action); /* key: 115 */
+	rl_bind_keyseq("\\M-y", readline_kbind_action); /* key: 115 */
 	rl_bind_keyseq("\\C-r", readline_kbind_action); /* key: 18 */
 
 /*
@@ -6278,6 +6295,18 @@ readline_kbind_action(int count, int key) {
 		if (strcmp(path, "/") == 0)
 			return 0;
 		keybind_exec_cmd("cd ..");
+		break;
+
+	case 121:
+		status = light_mode;
+		if (status)
+			light_mode = 0;
+		else
+			light_mode = 1;
+		if (cd_lists_on_the_fly) {
+			while (files--) free(dirlist[files]);
+				list_dir();
+		}
 		break;
 
 	/* F10: Open the config file */
@@ -7791,6 +7820,40 @@ init_config(void)
 							splash_screen = 0;
 					}
 
+					else if (xargs.light == -1 
+					&& strncmp(line, "LightMode=", 10) == 0) {
+						char opt_str[MAX_BOOL] = "";
+						ret = sscanf(line, "LightMode=%5s\n", opt_str);
+						if (ret == -1)
+							continue;
+						if (strncmp(opt_str, "true", 4) == 0)
+							light_mode = 1;
+						else /* False and default */
+							light_mode = 0;
+					}
+
+					else if (strncmp(line, "DirIndicator=", 13) == 0) {
+						char opt_str[MAX_BOOL] = "";
+						ret = sscanf(line, "DirIndicator=%5s\n", opt_str);
+						if (ret == -1)
+							continue;
+						if (strncmp(opt_str, "false", 5) == 0)
+							dir_indicator = 0;
+						else /* True and default */
+							dir_indicator = 1;
+					}
+
+					else if (strncmp(line, "Classify=", 9) == 0) {
+						char opt_str[MAX_BOOL] = "";
+						ret = sscanf(line, "Classify=%5s\n", opt_str);
+						if (ret == -1)
+							continue;
+						if (strncmp(opt_str, "true", 4) == 0)
+							classify = 1;
+						else /* False and default */
+							classify = 0;
+					}
+
 					else if (strncmp(line, "ShareSelbox=", 12) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "ShareSelbox=%5s\n", opt_str);
@@ -7813,15 +7876,15 @@ init_config(void)
 							sort = 1;
 					}
 
-					else if (strncmp(line, "DirCounter=", 11) == 0) {
+					else if (strncmp(line, "FilesCounter=", 13) == 0) {
 						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "DirCounter=%5s\n", opt_str);
+						ret = sscanf(line, "FilesCounter=%5s\n", opt_str);
 						if (ret == -1)
 							continue;
 						if (strncmp(opt_str, "false", 5) == 0)
-							dir_counter = 0;
+							files_counter = 0;
 						else /* True and default */
-							dir_counter = 1;
+							files_counter = 1;
 					}
 
 					else if (strncmp(line, "WelcomeMessage=",
@@ -8253,12 +8316,15 @@ init_config(void)
 			 * via the config file, or if this latter could not be read
 			 * for any reason, set the defaults */
 			/* -1 means not set */
+			if (light_mode == -1) light_mode = 0;
+			if (dir_indicator == -1) dir_indicator = 1;
+			if (classify == -1) classify = 0;
 			if (share_selbox == -1) share_selbox = 0;
 			if (splash_screen == -1) splash_screen = 0;
 			if (welcome_message == -1) welcome_message = 1;
 			if (show_hidden == -1) show_hidden = 1;
 			if (sort == -1) sort = 1;
-			if (dir_counter == -1) dir_counter = 1;
+			if (files_counter == -1) files_counter = 1;
 			if (long_view == -1) long_view = 0;
 			if (ext_cmd_ok == -1) ext_cmd_ok = 0;
 			if (max_path == -1) max_path = 40;
@@ -8572,19 +8638,20 @@ external_arguments(int argc, char **argv)
 		{"version", no_argument, 0, 'v'},
 		{"splash", no_argument, 0, 's'},
 		{"ext-cmds", no_argument, 0, 'x'},
+		{"light", no_argument, 0, 'y'},
 		{0, 0, 0, 0}
 	};
 
 	/* Set all external arguments flags to uninitialized state */
 	xargs.splash = xargs.hidden = xargs.longview = xargs.ext = -1;
 	xargs.ffirst = xargs.sensitive = xargs.unicode = xargs.pager = -1;
-	xargs.path = xargs.cdauto = -1;
+	xargs.path = xargs.cdauto = -1, xargs.light = -1;
 
 	int optc;
 	/* Variables to store arguments to options (-p and -P) */
 	char *path_value = (char *)NULL, *alt_profile_value = (char *)NULL;
 
-	while ((optc = getopt_long(argc, argv, "+aAfFgGhiIlLoOp:P:sUuvx",
+	while ((optc = getopt_long(argc, argv, "+aAfFgGhiIlLoOp:P:sUuvxy",
 							   longopts, (int *)0)) != EOF) {
 		/* ':' and '::' in the short options string means 'required' and 
 		 * 'optional argument' respectivelly. Thus, 'p' and 'P' require
@@ -8702,6 +8769,11 @@ external_arguments(int argc, char **argv)
 		case 'x':
 			ext_cmd_ok = 1;
 			xargs.ext = 1;
+			break;
+
+		case 'y':
+			light_mode = 1;
+			xargs.light = 1;
 			break;
 
 		case '?': /* If some unrecognized option was found... */
@@ -10186,6 +10258,9 @@ list_dir(void)
 		fprintf(stderr, _("%s: Path is NULL or empty\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
+
+	if (light_mode)
+		return list_dir_light();
 	
 	files = 0; /* Reset the files counter */
 
@@ -10384,7 +10459,7 @@ list_dir(void)
 
 			/* If dir counter is disabled and/or the file is a symlink
 			 * to a non-directory */
-			if (!dir_counter || link_to_dir == 0) {
+			if (!files_counter || link_to_dir == 0) {
 				/* All dirs will be printed as having read access and
 				 * being not empty, no matter if they are empty or not or
 				 * if the user has read access or not. Disabling the
@@ -10615,7 +10690,7 @@ list_dir(void)
 						 NC, (last_column) ? "\n" : "");
 				}
 				else {
-					if (dir_counter) {
+					if (files_counter) {
 						printf("%s%d%s %s%s%s%s /%zu%s%s", eln_color,
 							 i + 1, NC, (file_info[i].type & S_ISVTX)
 							 ? ((is_oth_w) ? tw_c : st_c) : ((is_oth_w) 
@@ -10643,7 +10718,7 @@ list_dir(void)
 		case S_IFLNK:
 			{
 				if (!file_info[i].brokenlink) {
-					if (dir_counter && file_info[i].filesn > 2) {
+					if (files_counter && file_info[i].filesn > 2) {
 						/* Symlink to dir */
 						is_dir = 1;
 						printf("%s%d%s %s%s%s%s /%zu%s%s", eln_color,
@@ -10769,6 +10844,439 @@ list_dir(void)
 	/* Free the scandir array */
 	/* Whatever time it takes to free this array, it will be faster to
 	 * do it after listing files than before (at least theoretically) */
+	while (total--)
+		free(list[total]);
+	free(list);
+
+/*	clock_t end = clock();
+	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC); */
+
+	return EXIT_SUCCESS;
+}
+
+int
+list_dir_light(void)
+/* List files in the current working directory (global variable 'path'). 
+ * Unlike list_dir(), however, this function uses no color and never runs
+ * stat() nor count_dir(), which makes it quite faster. Return zero if
+ * success or one on error */
+{
+/*	clock_t start = clock(); */
+
+	files = 0; /* Reset the files counter */
+
+	register int i = 0;
+
+	/* Get the list of files in CWD */
+	struct dirent **list = (struct dirent **)NULL;
+	int total = scandir(path, &list, skip_implied_dot, (sort)
+						? ((unicode) ? alphasort : (case_sensitive)
+						? xalphasort : alphasort_insensitive)
+						: NULL);
+
+	if (total == -1) {
+		_err('e', PRINT_PROMPT, "%s: scandir: '%s': %s\n",
+			 PROGRAM_NAME, path, strerror(errno));
+		if (errno == ENOMEM)
+			exit(EXIT_FAILURE);
+		else
+			return EXIT_FAILURE;
+	}
+
+	struct fileinfo *file_info = (struct fileinfo *)xnmalloc(
+					(size_t)total + 1, sizeof(struct fileinfo));
+
+	files = (size_t)total;
+
+	if (files == 0) {
+		if (clear_screen)
+			CLEAR;
+		puts(". ..\n");
+		return EXIT_SUCCESS;
+	}
+
+	if (list_folders_first) {
+
+		/* Store indices of dirs and files into different int arrays,
+		 * counting the number of elements for each array too. Symlinks
+		 * to directories are counted as directories. */
+		int *tmp_files = (int *)xnmalloc((size_t)total + 1, sizeof(int)); 
+		int *tmp_dirs = (int *)xnmalloc((size_t)total + 1, sizeof(int));
+		size_t filesn = 0, dirsn = 0;
+		
+		for (i = 0; i < total; i++) {
+			switch (list[i]->d_type) {
+				case DT_DIR:
+					tmp_dirs[dirsn++] = i;
+					break;
+
+				default:
+					tmp_files[filesn++] = i;
+					break;
+			}
+		}
+		
+		/* Allocate enough space to store all dirs and file names in 
+		 * the dirlist array */
+		if (!filesn && !dirsn)
+			dirlist = (char **)xrealloc(dirlist, sizeof(char *));
+		else
+			dirlist = (char **)xrealloc(dirlist, (filesn + dirsn + 1) 
+										* sizeof(char *));
+
+		/* First copy dir names into the dirlist array */
+		size_t len;
+		for (i = 0; i < (int)dirsn; i++) {
+			len = (unicode) ? u8_xstrlen(list[tmp_dirs[i]]->d_name)
+				  : strlen(list[tmp_dirs[i]]->d_name);
+			/* Store the filename length and filetype here, so that
+			 * we don't need to run strlen() again later on the same
+			 * file */
+			file_info[i].len = len;
+			file_info[i].type = list[tmp_dirs[i]]->d_type;
+			/* cont_bt value is set by u8_xstrlen() */
+			dirlist[i] = (char *)xnmalloc(len + 1, (cont_bt)
+						 ? sizeof(char32_t) : sizeof(char));
+			strcpy(dirlist[i], list[tmp_dirs[i]]->d_name);
+		}
+		
+		/* Now copy file names */
+		register int j;
+		for (j = 0; j < (int)filesn; j++) {
+			len = (unicode) ? u8_xstrlen(list[tmp_files[j]]->d_name)
+				  : strlen(list[tmp_files[j]]->d_name);
+			file_info[i].len = len;
+			file_info[i].type = list[tmp_files[j]]->d_type;
+			dirlist[i] = (char *)xnmalloc(len + 1, (cont_bt)
+							? sizeof(char32_t) : sizeof(char));
+			strcpy(dirlist[i++], list[tmp_files[j]]->d_name);
+		}
+		
+		free(tmp_files);
+		free(tmp_dirs);
+		dirlist[i] = (char *)NULL;
+
+		/* This global variable keeps a record of the amounf of files
+		 * in the CWD */
+		files = (size_t)i;
+	}
+
+	/* If no list_folders_first */
+	else {
+		dirlist = (char **)xrealloc(dirlist, (size_t)(files + 1)
+										* sizeof(char *));
+
+		size_t len;
+		for (i = 0; i < (int)files; i++) {
+			len = (unicode) ? u8_xstrlen(list[i]->d_name)
+				  : strlen(list[i]->d_name);
+			file_info[i].len = len;
+			file_info[i].type = list[i]->d_type;
+			dirlist[i] = xnmalloc(len + 1, (cont_bt) ? sizeof(char32_t)
+								  : sizeof(char));
+			strcpy(dirlist[i], list[i]->d_name);
+		}
+	}
+
+	dirlist[files] = (char *)NULL;
+
+	/* Get the longest element */
+	longest = 0; /* Global */
+
+	for (i = (int)files; i--;) {
+
+		size_t file_name_width = digits_in_num(i + 1) + 1
+								 + file_info[i].len;
+
+		if (classify) {
+			switch (file_info[i].type) {
+				case DT_DIR:
+				case DT_LNK:
+				case DT_FIFO:
+				case DT_SOCK:
+					file_name_width++;
+					break;
+			}
+		}
+		else if (dir_indicator) {
+			switch (file_info[i].type) {
+				case DT_DIR:
+					file_name_width++;
+					break;
+			}
+		}
+
+		if (file_name_width > longest)
+			longest = file_name_width;
+	}
+
+	/* Get terminal current amount of rows and columns */
+	struct winsize w;
+	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+	term_cols = w.ws_col; /* This one is global */
+	unsigned short term_rows = w.ws_row;
+
+	short reset_pager = 0;
+	int c;
+
+	/* Long view mode */
+	if (long_view) {
+		register size_t counter = 0;
+
+		int max = get_max_long_view(), eln_len_cur = 0, eln_len_bk = 0;
+		
+		eln_len = digits_in_num((int)files); /* This is max ELN length */
+		eln_len_bk = eln_len;
+
+		for (i = 0; i < (int)files; i++) {
+
+			/* Correct padding, if necessary. Without this correction,
+			 * padding for files with different ELN lengths differs.
+			 * Ex:
+			 * 1) filename (prop)
+			 * 12) filename (prop)
+			 * But it should be:
+			 * 1) filename  (prop)
+			 * 12) filename (prop)
+			 * */
+			eln_len_cur = digits_in_num(i + 1);
+			if (eln_len_bk > eln_len_cur)
+				eln_len = eln_len_bk - (eln_len_bk - eln_len_cur);
+			else
+				eln_len = eln_len_bk;
+					
+			if (pager) {
+				/*	Check terminal amount of rows: if as many filenames
+				 * as the amount of available terminal rows has been
+				 * printed, stop */
+
+				 /* NOTE: No need to disable keybinds, since every
+				  * keystroke is filtered here */
+				if ((int)counter > (int)(term_rows - 2)) {
+					switch(c = xgetchar()) {
+					/* Advance one line at a time */
+					case 66: /* Down arrow */
+					case 10: /* Enter */
+					case 32: /* Space */
+						break;
+					/* Advance one page at a time */
+					case 126: counter = 0; /* Page Down */
+						break;
+					/* Stop paging (and set a flag to reenable the pager 
+					 * later) */
+					case 99: /* 'c' */
+					case 112: /* 'p' */
+					case 113: pager = 0, reset_pager = 1; /* 'q' */
+						break;
+					/* If another key is pressed, go back one position. 
+					 * Otherwise, some filenames won't be listed */
+					default: i--; continue;
+						break;
+					}
+				}
+				counter++;
+			}
+
+			/* Print ELN. The remaining part of the line will be printed
+			 * by get_properties() */
+			printf("%s%d%s ", eln_color, i + 1, NC);
+
+			get_properties(dirlist[i], (int)long_view, max,
+						   file_info[i].len);
+		}
+
+		if (reset_pager)
+			pager = 1;
+
+		free(file_info);
+
+		while (total--)
+			free(list[total]);
+		free(list);
+		
+		return EXIT_SUCCESS;
+	}
+	
+	/* Normal view mode */
+	
+	/* Get possible amount of columns for the dirlist screen */
+	size_t columns_n = (size_t)term_cols / (longest + 1); /* +1 for the
+	space between file names */
+	
+	/* If longest is bigger than terminal columns, columns_n will be 
+	 * negative or zero. To avoid this: */
+	if (columns_n < 1)
+		columns_n = 1;
+	
+	/* If we have only three files, we don't want four columns */	
+	if (columns_n > files)
+		columns_n = files;
+
+	if (clear_screen)
+		CLEAR;
+	
+	short last_column = 0; /* c, reset_pager=0; */
+	register size_t counter = 0;
+	
+	/* Now we can do the listing */
+	for (i = 0; i < (int)files; i++) {
+
+		if (pager) {
+
+			if ((counter / columns_n) > (size_t)(term_rows - 2) 
+			&& last_column) {
+
+				switch (c = xgetchar()) {
+
+				/* Advance one line at a time */
+				case 66: /* Down arrow */
+				case 10: /* Enter */
+				case 32: /* Space */
+					break;
+
+				/* Advance one page at a time */
+				case 126: counter = 0; /* Page Down */
+					break;
+				/* Stop paging (and set a flag to reenable the pager 
+				 * later) */
+				case 99:  /* 'c' */
+				case 112: /* 'p' */
+				case 113: pager = 0, reset_pager = 1; /* 'q' */
+					break;
+
+				/* If another key is pressed, go back one position. 
+				 * Otherwise, some filenames won't be listed.*/
+				default: i--; continue;
+					break;
+				}
+/*				printf("\r\r\r\r\r\r\r\r"); */
+			}
+			counter++;
+		}
+
+		if (((size_t)i + 1) % columns_n == 0)
+			last_column = 1;
+		else
+			last_column = 0;
+
+		/* Print the corresponding file line */
+		if (!dir_indicator && !classify)
+			printf("%s%d%s %s%s", eln_color, i + 1, NC, dirlist[i],
+				   (last_column) ? "\n" : "");
+
+		else if (classify) {
+
+			switch(file_info[i].type) {
+				case DT_DIR:
+					printf("%s%d%s %s/%s", eln_color, i + 1, NC,
+							dirlist[i], (last_column) ? "\n" : "");
+				break;
+
+				case DT_LNK:
+					printf("%s%d%s %s@%s", eln_color, i + 1, NC,
+							dirlist[i], (last_column) ? "\n" : "");
+				break;
+
+				case DT_FIFO:
+					printf("%s%d%s %s|%s", eln_color, i + 1, NC,
+							dirlist[i], (last_column) ? "\n" : "");
+				break;
+
+				case DT_SOCK:
+					printf("%s%d%s %s=%s", eln_color, i + 1, NC,
+							dirlist[i], (last_column) ? "\n" : "");
+				break;
+
+				case DT_REG:
+/*					if (access(dirlist[i]), X_OK) == 0)
+						printf("%s%d%s %s*%s", eln_color, i + 1, NC,
+						 		dirlist[i], (last_column) ? "\n" : "");
+					else */
+						printf("%s%d%s %s%s", eln_color, i + 1, NC,
+								dirlist[i], (last_column) ? "\n" : "");
+				break;
+
+				default:
+						printf("%s%d%s %s%s", eln_color, i + 1, NC,
+							   dirlist[i], (last_column) ? "\n" : "");
+				break;
+			}
+		} 
+
+		else { /* Only dirs */
+			if (file_info[i].type == DT_DIR)
+				printf("%s%d%s %s/%s", eln_color, i + 1, NC, dirlist[i],
+					   (last_column) ? "\n" : "");
+			else
+				printf("%s%d%s %s%s", eln_color, i + 1, NC, dirlist[i],
+					   (last_column) ? "\n" : "");
+		}
+
+		if (!last_column) {
+			/* Get the difference between the length of longest and the 
+			 * current element */
+			size_t diff = longest - (digits_in_num(i + 1) + 1 + 
+						  file_info[i].len);
+			
+			/* Print the spaces needed to equate the length of the
+			 * lines */
+
+			register int j;
+			for (j = (int)diff; j--;)
+				putchar(' ');
+
+			if (classify) {
+				switch (file_info[i].type) {
+					case DT_DIR:
+					case DT_LNK:
+					case DT_FIFO:
+					case DT_SOCK:
+						break;
+
+					default:
+						putchar(' ');
+						break;
+				}
+			}
+
+			else if (dir_indicator) {
+				switch (file_info[i].type) {
+					case DT_DIR:
+						break;
+
+					default:
+						putchar(' ');
+						break;
+				}
+			}
+			else
+				putchar(' ');
+		}
+	}
+
+	free(file_info);
+	
+	/* If the pager was disabled during listing (by pressing 'c', 'p' or
+	 * 'q'), reenable it */
+	if (reset_pager)
+		pager = 1;
+
+	/* If the last listed element was modulo (in the last column), don't
+	 * print anything, since it already has a new line char at the end.
+	 * Otherwise, if not modulo (not in the last column), print a new
+	 * line, for it has none */
+	 if (!last_column)
+		putchar('\n');
+
+	/* Print a dividing line between the files list and the prompt */
+	fputs(div_line_color, stdout);
+	for (i = term_cols; i--; )
+		putchar(div_line_char);
+	printf("%s%s", NC, default_color);
+
+	fflush(stdout);
+
+	/* Free the scandir array */
 	while (total--)
 		free(list[total]);
 	free(list);
@@ -11244,6 +11752,28 @@ exec_cmd(char **comm)
 
 	/*     ############### MINOR FUNCTIONS ##################     */
 
+					/* #### LIGHT MODE #### */
+	else if (strcmp(comm[0], "lm") == 0) {
+		if (comm[1]) {
+			if (strcmp(comm[1], "on") == 0) {
+				light_mode = 1;
+				puts("Light mode is on");
+			}
+			else if (strcmp(comm[1], "off") == 0) {
+				light_mode = 0;
+				puts("Light mode is off");
+			}
+			else {
+				puts("Usage: lm [on, off]");
+				exit_code = EXIT_FAILURE;
+			}
+		}
+		else {
+			puts("Usage: lm [on, off]");
+			exit_code = EXIT_FAILURE;
+		}
+	}
+
 					/* #### NEW INSTANCE #### */
 	else if (strcmp(comm[0], "x") == 0) {
 		if (comm[1])
@@ -11374,36 +11904,35 @@ exec_cmd(char **comm)
 	}
 
 					/* #### DIR COUNTER #### */
-	else if (strcmp(comm[0], "dc") == 0
-	|| strcmp(comm[0], "dircounter") == 0) {
+	else if (strcmp(comm[0], "fc") == 0
+	|| strcmp(comm[0], "filescounter") == 0) {
 		if (!comm[1]) {
-			puts("Usage: dc, dircounter [on, off, status]");
+			fputs(_("Usage: fc, filescounter [on, off, status]"), stderr);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
 		
 		if (strcmp(comm[1], "on") == 0) {
-			if (dir_counter == 1) {
-				puts("Dircounter is already enabled");
-				return EXIT_SUCCESS;
-			}
-			dir_counter = 1;
+			files_counter = 1;
+			puts(_("Filescounter is enabled"));
+			return EXIT_SUCCESS;
 		}
-		else if (strcmp(comm[1], "off") == 0) {
-			if (dir_counter == 0) {
-				puts("Dircounter is already disabled");
-				return EXIT_SUCCESS;
-			}
-			dir_counter = 0;
+
+		if (strcmp(comm[1], "off") == 0) {
+			files_counter = 0;
+			puts(_("Filescounter is disabled"));
+			return EXIT_SUCCESS;
 		}
-		else if (strcmp(comm[1], "status") == 0) {
-			if (dir_counter)
-				puts("Dircounter is enabled");
+
+		if (strcmp(comm[1], "status") == 0) {
+			if (files_counter)
+				puts(_("Filescounter is enabled"));
 			else
-				puts("Dircounter is disabled");
+				puts(_("Filescounter is disabled"));
+			return EXIT_SUCCESS;
 		}
 		else {
-			fputs("Usage: dc, dircounter [on, off, status]\n", stderr);
+			fputs(_("Usage: fc, filescounter [on, off, status]\n"), stderr);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
@@ -11413,7 +11942,7 @@ exec_cmd(char **comm)
 	else if (strcmp(comm[0], "uc") == 0
 	|| strcmp(comm[0], "unicode") == 0) {
 		if (!comm[1]) {
-			puts(_("Usage: unicode, uc [on, off, status]"));
+			fputs(_("Usage: unicode, uc [on, off, status]"), stderr);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
@@ -11489,7 +12018,7 @@ exec_cmd(char **comm)
 				/* #### LOG #### */
 	else if (strcmp(comm[0], "log") == 0) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
-			puts("Usage: log [clear]");
+			puts(_("Usage: log [clear]"));
 			return EXIT_SUCCESS;
 		}
 
@@ -11539,7 +12068,7 @@ exec_cmd(char **comm)
 	else if (strcmp(comm[0], "alias") == 0) {
 		if (comm[1]) {
 			if (strcmp(comm[1], "--help") == 0) {
-				puts(_("Usage: alias"));
+				puts(_("Usage: alias [import FILE]"));
 				return EXIT_SUCCESS;
 			}
 			else if (strcmp(comm[1], "import") == 0) {
@@ -11600,6 +12129,10 @@ exec_cmd(char **comm)
 			exit_code = hidden_function(comm);
 	}
 
+	else if (strcmp(comm[0], "cmd") == 0
+	|| strcmp(comm[0], "commands") == 0) 
+		exit_code = list_commands();
+
 			  /* #### AND THESE ONES TOO #### */
 	/* These functions just print stuff, so that the value of exit_code
 	 * is always zero, that is to say, success */
@@ -11608,10 +12141,6 @@ exec_cmd(char **comm)
 	
 	else if (strcmp(comm[0], "help") == 0 || strcmp(comm[0], "?") == 0)
 		help_function();
-	
-	else if (strcmp(comm[0], "cmd") == 0
-	|| strcmp(comm[0], "commands") == 0) 
-		list_commands();
 	
 	else if (strcmp(comm[0], "colors") == 0
 	|| strcmp(comm[0], "cc") == 0)
@@ -14300,8 +14829,9 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 			pad = 0;
 		
 		printf("%s%s%s%-*s%s (%04o) %c/%c%c%c/%c%c%c/%c%c%c%s %s %s %s %s\n", 
-				color, (!trim) ? filename : trim_filename, NC, pad, "", 
-				default_color, file_attrib.st_mode & 07777,
+				(light_mode) ? "" : color, (!trim) ? filename
+				: trim_filename, (light_mode) ? "" : NC,
+				pad, "", default_color, file_attrib.st_mode & 07777,
 				file_type,
 				read_usr, write_usr, exec_usr, 
 				read_grp, write_grp, exec_grp,
@@ -15084,6 +15614,12 @@ void
 color_codes (void)
 /* List color codes for file types used by the program */
 {
+	if (light_mode) {
+		printf("%s: Currently running in light mode (no colors)\n",
+			   PROGRAM_NAME);
+		return;
+	}
+
 	printf(_("%s file name%s%s: Directory with no read permission (nd)\n"), 
 		   nd_c, NC, default_color);
 	printf(_("%s file name%s%s: File with no read permission (nf)\n"), 
@@ -15140,305 +15676,19 @@ color_codes (void)
 			 "RGB colors as well.\n\n"), PROGRAM_NAME);
 }
 
-void
+int
 list_commands (void)
+/* Instead of recreating here the commands description, just jump to the
+ * corresponding section in the manpage */
 {
-	printf(_("\nNOTE: ELN = Element List Number. Example: In \
-the line \"12 openbox\", 12 is the ELN corresponding to the 'openbox' \
-file.\n"));
-
-	/* ### SEARCH ### */
-	printf(_("\n%s/%s%s* [-filetype] [DIR]: This is the quick search function. \
-Just type '/' followed by the string you are looking for (you can use \
-wildcards), and %s will list all matches in the current working directory. \
-To search for files in any other directory, specify the directory name as \
-another argument. This argument (DIR) could be an absolute path, a relative \
-path, or an ELN. It is also possible to further filter the results of the \
-search by filetype, specifying it as follows: -d, -r, -l, -f, -s, -b, -c \
-(directory, regular file, symlink, FIFO/pipe, socket, block device, and \
-character device respectivelly). Example: '/*x -d /Documents' will list all \
-directories in the directory \"Documents\" ending with 'x'\n"), 
-		   white, NC, default_color, PROGRAM_NAME);
-
-	/* ### BOOKMARKS ### */
-	printf(_("\n%sbm, bookmarks%s%s [a, add PATH] [d, del] [edit] [shortcut, \
-name]: With no argument, open the bookmarks menu. Here you can change the \
-current directory to that specified by the corresponding bookmark by just \
-typing its ELN, its shortcut, or its name. In this screen you can also add, \
-remove or edit your bookmarks by simply typing 'e' to edit the bookmarks file. \
-To add or remove a bookmark directly from the command line, you can us the 'a' \
-and 'd' arguments as follows: \"bm a PATH\" or \"bm d\" respectively. You can \
-also open a bookmark by typing 'bm shortcut' or 'bm name' (in which case TAB \
-completion is available).\n"), white, NC, default_color);
-
-	/* ### OPEN ### */
-	printf(_("\n%so, open%s%s [ELN/FILE] [APPLICATION]: Open \
-either a directory or a file. For example: 'o 12' or 'o filename'. By default, \
-the 'open' function will open files with the default application associated to \
-them (via the built-in resource opener (mime)). However, if you want to open \
-a file with a different application, just add the application name as second \
-argument, e.g. 'o 12 leafpad'. If you want to run the program in the \
-background, simply add the ampersand character (&): 'o 12 &'. When it comes \
-to directories, 'open' works just like the 'cd' command. Remote file systems \
-are also supported: just enter 'o ADDRESS [OPTIONS]'. For more information \
-about this syntax see the description of 'net' command below.\n"), white,
-		   NC, default_color);
-
-	/* ### CD ### */
-	printf(_("\n%scd%s%s [ELN/DIR]: When used with no argument, it changes the \
-current directory to the default directory (HOME). Otherwise, 'cd' changes \
-the current directory to the one specified by the first argument. You can use \
-either ELN's or a string to indicate the directory you want. Ex: 'cd 12' or \
-'cd ~/media'. Unlike the shell 'cd' command, %s's built-in 'cd' function does \
-not only changes the current directory, but also lists its content \
-(provided the option \"cd lists automatically\" is enabled, which is the \
-default) according to a comprehensive list of color codes. By default, the \
-output of 'cd' is much like this shell command: 'cd DIR && ls -A --color=auto \
---group-directories-first'. Remote file systems are also supported. Just \
-enter 'cd ADDRESS [OPTIONS]'. For more information about this syntax see the \
-description of the 'net' command below.\n"), white, NC, default_color, 
-		   PROGRAM_NAME);
-
-	/* ### SELECTION ### */
-	printf(_("\n%ss, sel%s%s [ELN ELN-ELN FILE ... n]: Send one or \
-multiple elements to the Selection Box. 'Sel' accepts individual elements, \
-range of elements, say 1-6, filenames and paths, just as wildcards. Ex: sel \
-1 4-10 file* filename /path/to/filename\n"), white, NC, default_color);
-
-	/* ### SELBOX ### */
-	printf(_("\n%ssb, selbox%s%s: Show the elements contained in the \
-Selection Box.\n"), white, NC, default_color);
-
-	/* ### DESELECT ### */
-	printf(_("\n%sds, desel%s%s [*, a, all]: Deselect one or more selected \
-elements. You can also deselect all selected elements by typing 'ds *', \
-'ds a' or 'ds all'.\n"), white, 
-		   NC, default_color);
-
-	/* ### TRASH ### */
-	printf(_("\n%st, tr, trash%s%s  [ELN, FILE ... n] [ls, list] [clear] \
-[del, rm]: With no argument (or by passing the 'ls' option), it prints a list \
-of currently trashed files. The 'clear' option removes all files from the \
-trash can, while the 'del' option lists trashed files allowing you to remove \
-one or more of them. The trash directory is $XDG_DATA_HOME/Trash, that is, \
-'~/.local/share/Trash'. Since this trash system follows the Freedesktop \
-specification, it is able to handle files trashed by different Trash \
-implementations.\n"), white, NC, default_color);
-
-	/* ### UNTRASH ### */
-	printf(_("\n%su, undel, untrash%s%s [*, a, all]: Print a list of currently \
-trashed files allowing you to choose one or more of these files to be \
-undeleted, that is to say, restored to their original location. You can also \
-undelete all trashed files at once using the 'all' argument.\n"), 
-		   white, NC, default_color);
-
-	/* ### BACK ### */
-	printf(_("\n%sb, back%s%s [h, hist] [clear] [!ELN]: Unlike 'cd ..', which \
-will send you to the parent directory of the current directory, this command \
-(with no argument) will send you back to the previously visited directory. %s \
-keeps a record of all the visited directories. You can see this list by typing \
-'b hist', 'b h' or 'bh', and you can access any element in this list by simply \
-passing the corresponding ELN in this list (preceded by the exclamation mark) \
-to the 'back' command. Example:\n\
-	[user@hostname] ~ $ bh\n\
-	1 /home/user\n\
-	2 /etc\n\
-	3 /proc\n\
-	[user@hostname] ~ $ b !3\n\
-	[user@hostname] /proc $ \n\
-  Note: The line printed in green indicates the current position of the back \
-function in the directory history list.\nFinally, you can also clear this \
-history list by typing 'b clear'.\n"),
-		   white, NC, default_color, PROGRAM_NAME);
-
-	/* ### FORTH ### */
-	printf(_("\n%sf, forth%s%s [h, hist] [clear] [!ELN]: It works just like \
-the back function, but it goes forward in the history record. Of course, you \
-can use 'f hist', 'f h', 'fh', and 'f !ELN'\n"), white, NC, default_color);
-
-	/* ### SHORTS ### */
-	printf(_("\n%sc, l, m, md, r%s%s: short for 'cp', 'ln', 'mv', 'mkdir', and \
-'rm' shell commands respectivelly.\n"), white, NC, default_color);
-
-	/* ### PROPERTIES ### */
-	printf(_("\n%sp, pr, prop%s%s [ELN/FILE ... n] [a, all] [s, size]: Print \
-file properties for FILE. Use 'all' to list the properties of all files in \
-the current working directory, and 'size' to list them size.\n"), 
-		   white, NC, default_color);
-
-	/* ### NET ### */
-	printf(_("\n%sn, net%s%s ADDRESS [OPTIONS]: Access a remote file system, \
-either via the SSH, the FTP, or the SMB protocol. To access a machine via SSH, \
-use the following URI scheme: sftp://[USER@]HOST:[/REMOTE-DIR] [PORT]. Bracketed \
-elements are optional. If no user is specified, %s will attempt to \
-login using the current local username. If no port is specified, the default \
-port (22, if SSH) will be used. To access the remote file system via SMB, this \
-scheme should be used instead: smb://[USER@]HOST[/SHARE][/REMOTE-DIR] [OPTIONS]. \
-The URI scheme for FTP connections is this: ftp://HOST[:PORT] [OPTIONS]. Network \
-resources are mounted in '%s/remote_dir', replacing all slashes in remote_dir \
-by underscores. To disconnect from the remote machine, use 'fusermount3 -u' for \
-SSH, 'fusermount -u' for FTP, and 'umount' for SMB, followd by the corresponding \
-mountpoint. Examples: \n\n\t\
-net sftp://john@192.168.0.25:Documents/misc port=2222\n\t\
-fusermount3 -u %s/remote/john@192.168.0.25:Documents_misc\n\n\t\
-net smb://192.168.1.34/share username=laura,password=my_pass\n\t\
-umount %s/remote/192.168.0.34_share\n\n\t\
-net ftp://192.168.0.123:2121 user=me:mypass\n\t\
-fusermount -u %s/remote/192.168.0.123:2121\n"), white, NC, default_color, 
-		   PROGRAM_NAME, TMP_DIR, TMP_DIR, TMP_DIR, TMP_DIR);
-/* NOTE: fusermount3 is Linux-specific. On FreeBSD 'umount' should be used */
-
-	/* ### MIME ### */
-	printf(_("\n%smm, mime%s%s [info ELN/FILE] [edit]: This is %s's \
-built-in resource opener. The 'info' option prints the MIME information \
-about ELN/FILE: its MIME type, its extension, and the application \
-associated to FILENAME. The 'edit' option allows you to edit and customize the \
-MIME list file. So, if a file has no default associated application, first get \
-its MIME info (you can use its file extension as well) and then add a value for \
-it to the MIME list. Each value in the MIME list file has this format: \
-'mime_type=application args;application args; ... n' or '*.ext=application args;application args; ... n'. Example: 'plain/text=nano' \
-or '*.c=geany -p;leafpad;nano'. %s will use the first matching line in the \
-list, and if at least one of the specified applications exists, this one will \
-used to open associated files. In case none of the specified applications \
-exists, the next matching line will be checked. If the MIME file is not found, \
-%s will try to import MIME definitions from the default locations for the \
-'mimeapps.list' file as specified by the Freedesktop specification.\n"), 
-		   white, NC, default_color, PROGRAM_NAME, PROGRAM_NAME,
-		   PROGRAM_NAME);
-
-	/* ### NEW INSTANCE ### */	
-	printf(_("\n%sx%s%s DIR: Open DIR in a new instance of %s using the value \
-of TerminalCmd (from the configuration file) as terminal emulator. If this \
-value is not set, 'xterm' will be used as fallback terminal emulator. This \
-function is only available for graphical environments.\n"), 
-		   white, NC, default_color, PROGRAM_NAME);
-
-	/* ### EXTERNAL COMMANDS ### */
-	printf(_("\n%s;%s%scmd, %s:%s%scmd: Skip all %s expansions and send the \
-input string (cmd) as it is to the system shell.\n"), white, NC,
-		   default_color, white, NC, default_color, PROGRAM_NAME);
-
-	/* ### MOUNTPOINTS ### */
-	printf(_("\n%smp, mountpoints%s%s: List available mountpoints and change \
-the current working directory into the selected mountpoint.\n"), white, NC, 
-		   default_color);
-
-	/* ### PASTE ### */
-	printf(_("\n%sv, paste%s%s [sel] [DESTINY]: The 'paste sel' command will \
-copy the currently selected elements, if any, into the current working \
-directory. To copy these elements into another directory, just tell 'paste' \
-where to copy these files. Ex: paste sel /path/to/directory\n"), 
-		   white, NC, default_color);
-
-	/* ### PROFILE ### */
-	printf(_("\n%spf, prof, profile%s%s [ls, list] [set, add, del PROFILE]: \
-With no argument, print the currently used profile. Use the 'set', 'add', \
-and 'del' arguments to switch, add or remove a profile\n"), white, NC,
-		   default_color);
-
-	/* ### SHELL ### */
-	printf(_("\n%sshell%s%s [SHELL]: Print the current default shell for \
-%s or set SHELL as the new default shell.\n"), white, NC, default_color, 
-		   PROGRAM_NAME);
-
-	/* ### LOG ### */
-	printf(_("\n%slog%s%s [clear] [on, off, status]: With no arguments, it \
-prints the contents of the log file. If 'clear' is passed as argument, all the \
-logs will be deleted. 'on', 'off', and 'status' enable, disable, and check the \
-status of the log function for the current session.\n"), white, NC, 
-		   default_color);
-
-	/* ### MESSAGES ### */
-	printf(_("\n%smsg, messages%s%s [clear]: With no arguments, prints the \
-list of messages in the current session. The 'clear' option tells %s to \
-empty the messages list.\n"), white, NC, default_color, PROGRAM_NAME);
-
-	/* ### HISTORY ### */
-	printf(_("\n%shistory%s%s [clear] [-n]: With no arguments, it shows the \
-history list. If 'clear' is passed as argument, it will delete all the entries \
-in the history file. Finally, '-n' tells the history command to list only the \
-last 'n' commands in the history list.\n"), white, NC, default_color);
-	printf(_("You can use the exclamation character (!) to perform some \
-history commands:\n\
-  !!: Execute the last command.\n\
-  !n: Execute the command number 'n' in the history list.\n\
-  !-n: Execute the last-n command in the history list.\n"));
-
-	/* ### EDIT ### */
-	printf(_("\n%sedit%s%s [EDITOR]: Edit the configuration file. If \
-specified, use EDITOR, if available.\n"), white, NC, default_color);
-
-	/* ### ALIAS ### */
-	printf(_("\n%salias [import FILE]%s%s: With no arguments, prints a list of \
-avaialble aliases, if any. To write a new alias simpy enter 'edit' to open the \
-configuration file and add a line like this one: alias name='command args ...' \
-To import aliases from a file, provided it contains aliases in the specified \
-form, use the 'import' option. Aliases conflicting with some of the internal \
-commands won't be imported.\n"), white, NC, default_color);
-
-	/* ### SPLASH ### */
-	printf(_("\n%ssplash%s%s: Show the splash screen.\n"), white, NC,
-		   default_color);
-
-	/* ### PATH ### */
-	printf(_("\n%spath, cwd%s%s: Print the current working directory.\n"), 
-		   white, NC, default_color);
-
-	/* ### REFRESH ### */
-	printf(_("\n%srf, refresh%s%s: Refresh the screen.\n"), white, NC, 
-		   default_color);
-
-	/* ### COLORS ### */
-	printf(_("\n%scolors%s%s: Show the color codes used in the "
-			 "elements list.\n"), white, NC, default_color);
-
-	/* ### COMMANDS ### */
-	printf(_("\n%scmd, commands%s%s: Show this list of commands.\n"),
-		   white, NC, default_color);
-
-	/* ### DIR COUNTER ### */
-	printf(_("\n%shdc, dircounter%s%s [on, off, status]: Toggle the "
-			 "dircounter on/off.\n"), white, NC, default_color);
-
-	/* ### HIDDEN FILES ### */
-	printf(_("\n%shf, hidden%s%s [on, off, status]: Toggle hidden files \
-on/off.\n"), white, NC, default_color);
-
-	/* ### FOLDERS FIRST ### */
-	printf(_("\n%sff, folders first%s%s [on, off, status]: Toggle list "
-			 "folders first on/off.\n"), white, NC, default_color);
-
-	/* ### PAGER ### */
-	printf(_("\n%spg, pager%s%s [on, off, status]: Toggle the pager "
-			"on/off.\n"), white, NC, default_color);
-
-	/* ### UNICODE ### */
-	printf(_("\n%suc, unicode%s%s [on, off, status]: Toggle unicode "
-			"on/off.\n"), white, NC, default_color);
-
-	/* ### EXT ### */
-	printf(_("\n%sext%s%s [on, off, status]: Toggle external commands "
-			 "on/off.\n"), white, NC, default_color);
-
-	/* ### VERSION ### */
-	printf(_("\n%sver, version%s%s: Show %s version details.\n"), white,
-			NC, default_color, PROGRAM_NAME);
-
-	/* ### FREE SOFTWARE ### */
-	printf(_("\n%sfs%s%s: Print an extract from 'What is Free "
-			 "Software?', written by Richard Stallman.\n"), white, NC, 
-			 default_color);
-
-	/* ### QUIT ### */
-	printf(_("\n%sq, quit, exit, zz%s%s: Safely quit %s.\n"), white, NC, 
-			default_color, PROGRAM_NAME);
+	char *cmd[] = { "man", "-P", "less -p ^COMMANDS", PNL, NULL };
+	return launch_execve(cmd, FOREGROUND);
 }
 
 void
 help_function (void)
 {
-/* This line produces some gibberish when running clifm -h
- * if (clear_screen)
+/*	if (clear_screen)
 		CLEAR; */
 
 	printf(_("%s %s (%s), by %s\n"), PROGRAM_NAME, VERSION, DATE, AUTHOR);
@@ -15465,7 +15715,8 @@ help_function (void)
 containing accents, tildes, umlauts, non-latin letters, etc. This option \
 is enabled by default for non-english locales\
 \n -v, --version\t\t\t show version details and exit\
-\n -x, --ext-cmds\t\t\t allow the use of external commands\n"), PNL, 
+\n -x, --ext-cmds\t\t\t allow the use of external commands\
+\n -y, --light-mode\t\t enable the light mode\n"), PNL, 
 		PROGRAM_NAME);
 
 	puts(_("\nBUILT-IN COMMANDS:\n\n\
@@ -15496,10 +15747,12 @@ is enabled by default for non-english locales\
  splash\n\
  path, cwd\n\
  cmd, commands\n\
+ lm [on, off]\n\
  rf, refresh\n\
  cc, colors\n\
  hf, hidden [on, off, status]\n\
  ff, folders first [on, off, status]\n\
+ fc, filescounter [on, off, status]\n\
  pg, pager [on, off, status]\n\
  uc, unicode [on, off, status]\n\
  ext [on, off, status]\n\
@@ -15527,6 +15780,7 @@ is enabled by default for non-english locales\
  A-j:	Change to the previous directory in the directory history \
 list\n\
  A-k:	Change to the next directory in the directory history list\n\
+ A-y:	Toggle light mode on/off\n\
  F10:	Open the configuration file\n\n\
 NOTE: Depending on the terminal emulator being used, some of these \
 keybindings, like A-e, A-f, and F10, might conflict with some of the \
