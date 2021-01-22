@@ -6299,13 +6299,17 @@ readline_kbind_action(int count, int key) {
 
 	case 121:
 		status = light_mode;
-		if (status)
+		if (light_mode)
 			light_mode = 0;
 		else
 			light_mode = 1;
-		if (cd_lists_on_the_fly) {
-			while (files--) free(dirlist[files]);
-				list_dir();
+		
+		if (status != light_mode) {
+			CLEAR;
+			while (files--)
+				free(dirlist[files]);
+			puts("");
+			list_dir();
 		}
 		break;
 
