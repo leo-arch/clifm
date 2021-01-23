@@ -9984,13 +9984,10 @@ count_dir(const char *dir_path) /* Readdir version */
 	struct dirent *entry;
 
 	if ((dir_p = opendir(dir_path)) == NULL) {
-		_err('e', PRINT_PROMPT, "%s: opendir: '%s': %s\n",
-			 PROGRAM_NAME, dir_path, strerror(errno));
-
 		if (errno == ENOMEM)
 			exit(EXIT_FAILURE);
 		else
-			return 0;
+			return -1;
 	}
 
 	while ((entry = readdir(dir_p))) 
@@ -10493,11 +10490,11 @@ list_dir(void)
 			else {
 				/* linkname is not null only if the file is a symlink
 				 * to an existent directory */
-				if (access((linkname) ? linkname
-				: dirlist[i], F_OK) == 0) {
+				int ret = count_dir((linkname) ? linkname
+									: dirlist[i]);
+				if (ret != -1) {
 
-					file_info[i].filesn = count_dir((linkname)
-										? linkname : dirlist[i]);
+					file_info[i].filesn = ret;
 					file_info[i].ruser = 1;
 
 					if (file_info[i].filesn > 2)
@@ -10992,7 +10989,7 @@ list_dir_light(void)
 
 	dirlist[files] = (char *)NULL;
 
-	/* Get the longest element */
+	/* Get the longest filename */
 	longest = 0; /* Global */
 
 	for (i = (int)files; i--;) {
@@ -11002,7 +10999,7 @@ list_dir_light(void)
 
 		if (classify) {
 			/* Increase filename width in one to include the ending
-			 * classification char */
+			 * classification char ( one of *@/=| ) */
 			switch (file_info[i].type) {
 				case DT_DIR:
 				case DT_LNK:
@@ -11012,6 +11009,9 @@ list_dir_light(void)
 					break;
 
 				case DT_REG:
+					/* classify is greater than 1 only if the
+					 * ClassifyExec option is enabled, in which case
+					 * executable files must be classified as well */
 					if (classify > 1 && access(dirlist[i], X_OK) == 0) {
 						file_info[i].exec = 1;
 						file_name_width++;
@@ -11024,6 +11024,8 @@ list_dir_light(void)
 
 		else if (dir_indicator && file_info[i].type == DT_DIR)
 			file_name_width++;
+
+		/* Else, there is no filetype indicator at all */
 
 		if (file_name_width > longest)
 			longest = file_name_width;
@@ -11180,6 +11182,7 @@ list_dir_light(void)
 
 		/* Print the corresponding entry */
 		if (!dir_indicator && !classify)
+			/* No filetype indicator at all */
 			printf("%s%d%s %s%s", eln_color, i + 1, NC, dirlist[i],
 				   (last_column) ? "\n" : "");
 
