@@ -365,6 +365,44 @@ xalphasort(const struct dirent **a, const struct dirent **b)
 }
 
 int
+time_sort(const struct dirent **a, const struct dirent **b)
+/* Sort files by size */
+{
+	struct stat atta, attb;
+
+	lstat((*a)->d_name, &atta);
+	lstat((*b)->d_name, &attb);
+	
+	if (atta.st_ctime > attb.st_ctime)
+		return 1;
+
+	else if (atta.st_ctime < attb.st_ctime)
+		return -1;
+
+	else
+		return 0;
+}
+
+int
+size_sort(const struct dirent **a, const struct dirent **b)
+/* Sort files by size */
+{
+	struct stat atta, attb;
+
+	lstat((*a)->d_name, &atta);
+	lstat((*b)->d_name, &attb);
+	
+	if (atta.st_size > attb.st_size)
+		return 1;
+
+	else if (atta.st_size < attb.st_size)
+		return -1;
+
+	else
+		return 0;
+}
+
+int
 alphasort_insensitive(const struct dirent **a, const struct dirent **b)
 /* This is a modification of the alphasort function that makes it case 
  * insensitive. It also sorts without taking the initial dot of hidden 

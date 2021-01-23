@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "January 22, 2021" "CliFM 0.24.1+" "CliFM Manual"
+.TH "CLIFM" "1" "January 23, 2021" "CliFM 0.25.0+" "CliFM Manual"
 
 .SH NAME
 CLIFM - A completely CLI-based file manager inspired by Arch Linux' KISS principle
@@ -49,6 +49,7 @@ List of CliFM features:
   18) User profiles
   19) Commands sequential and conditional execution
   20) Resource opener
+  21) Sorting methods
 
 .SH RATIONALE
 When it comes to software, Unix/GNU-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the Linux built-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There is no two without three".
@@ -98,10 +99,10 @@ enable long view mode: list files and their properties
 .B -L, --list-on-the-fly
 \'cd\' lists files on the fly (default)
 .TP
-.B -p, --path PATH
+.B -p, --path \fRPATH
 use PATH as CliFM starting path. Default starting path is current working directory
 .TP
-.B -P, --profile PROFILE
+.B -P, --profile \fRPROFILE
 use (or create) PROFILE as profile. Default profile is 'default'
 .TP
 .B -s, --splash
@@ -122,6 +123,10 @@ allow the use of external commands
 .B -y, --light-mode
 enable the light mode to speed up CliFM
 .TP
+.B -z, --sort \fR0-3
+choose sorting method: 0 = none, 1 = name, 2 = size, 3 = ctime
+.TP
+
 Options precedence order: 1) command line; 2) configuration file; 3) default values.
 
 .SH COMMANDS
@@ -199,6 +204,10 @@ short for 'cp', 'ln', 'mv', 'mkdir', and 'rm' commands respectivelly.
 print file properties for ELN/FILE. Use 'all' to list properties of all files in the current working directory, and 'size' to list them by size.
 .TP
 
+.B st, sort \fR0-3
+Switch sorting methods: 0 = none, 1 = name, 2 = size, 3 = ctime
+.TP
+
 .B n, net \fR[smb, ftp, sftp]://ADDRESS [OPTIONS]
 Access a remote file system, either via SSH, FTP, or SMB protocols. To access the file system of a machine via SSH, use the following URI scheme: sftp://[USER@]HOST:[/REMOTE-DIR] [PORT]. Bracketed elements are optional. If no user is specified, CliFM will attempt to login using the current local username. If no port is specified, the default port (22, if SSH) will be used.
 .sp
@@ -220,6 +229,7 @@ The underlying programs used here to mount these remote file systems are: 'sshfs
 
 .B lm \fR[on, off]
 Toggle the light mode on/off. This option, aimed to make files listing faster than the default mode, is especially usefull for really old hardware or when working on remote machines. For more details see the NOTE ON SPEED section below.
+.TP
 
 .B mm, mime \fR[info ELN/FILENAME] [edit]
 This is CliFM's resource opener. The 'info' option prints the MIME information about ELN/FILENAME: its MIME type, its file extension, if any, and the application associated to this MIME type or file extension. The 'edit' option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension, and then add a value for it to the MIME list file using the 'edit' option.
@@ -366,6 +376,8 @@ safely quit CliFM.
 .TP
 \fBA-y:\fR Toggle light mode on/off
 .TP
+\fBA-z:\fR Switch sorting methods
+.TP
 \fBF10:\fR Open the configuration file
 
 .SH COLOR CODES
@@ -501,17 +513,19 @@ If speed is still an issue, try one of the setups below (listed from slower to f
 .TP
 \fBa)\fR Default mode (all listing features enabled)
 .TP
-\fBb)\fR Default mode with FilesCounter option disabled (the files counter function could be quite time consuming, since every directory needs to be accessed via \fBreaddir(3)\fR to get the amount of files it contains)
+\fBb)\fR Default mode with sorting method set to none (sorting files could be expensive).
 .TP
-\fBc)\fR Default mode with FilesCounter and ListFoldersFisrt options disabled (this latter needs to reorder the list of files provided by \fBscandir(3)\fR in order to place directories first, which of course is slower)
+\fBc)\fR Default mode with FilesCounter option disabled (the files counter function could be quite time consuming, since every directory needs to be accessed via \fBreaddir(3)\fR to get the amount of files it contains)
 .TP
-\fBd)\fR Light mode with ClassifyExec option enabled. In light mode, colors and FilesCounter are disabled, while every call to \fBstat(3)\fR, which could be quite time consuming, is omitted.
+\fBd)\fR Default mode with FilesCounter and ListFoldersFisrt options disabled (this latter needs to reorder the list of files provided by \fBscandir(3)\fR in order to place directories first, which of course is slower)
 .TP
-\fBe)\fR Light mode with Classify enabled and ClassifyExec disabled (this latter needs to call \fBaccess(3)\fR for every regular file to find out whether it is executable or not, which slows things down)
+\fBe)\fR Light mode with ClassifyExec option enabled. In light mode, colors and FilesCounter are disabled, while every call to \fBstat(3)\fR, which could be quite time consuming, is omitted.
 .TP
-\fBf)\fR Light mode with only DirIndicator enabled
+\fBf)\fR Light mode with Classify enabled and ClassifyExec disabled (this latter needs to call \fBaccess(3)\fR for every regular file to find out whether it is executable or not, which slows things down)
 .TP
-\fBg)\fR Light mode with all the four options disabled (ListFoldersFirst, DirIndicator, Classify, and ClassifyExec).
+\fBg)\fR Light mode with only DirIndicator enabled
+.TP
+\fBh)\fR Light mode with all the four options disabled (ListFoldersFirst, DirIndicator, Classify, and ClassifyExec). The sorting method should also be set to "none" to go full speed.
 
 .SH FILES
 .TP

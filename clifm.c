@@ -151,11 +151,11 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 /* #define CLEAR puts("\x1b[c") */
 #define CLEAR write(STDOUT_FILENO, "\ec", 3)
-#define VERSION "0.24.1"
+#define VERSION "0.25.0"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "January 22, 2021"
+#define DATE "January 23, 2021"
 #define LICENSE "GPL2+"
 
 /* Define flags for program options and internal use */
@@ -208,6 +208,7 @@ static int flags;
 #define cyan "\x1b[1;36m"
 #define d_cyan "\x1b[0;36m"
 #define NC "\x1b[0m"
+#define bold "\x1b[1m"
 
 /* Colors for the prompt: */
 /* \001 and \002 tell readline that color codes between them are
@@ -429,6 +430,7 @@ struct param
 	int pager;
 	int path;
 	int light;
+	int sort;
 };
 
 /* A list of possible program messages. Each value tells the prompt what
@@ -456,9 +458,9 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 	case_sensitive = -1, cd_lists_on_the_fly = -1, share_selbox = -1,
 	recur_perm_error_flag = 0, is_sel = 0, sel_is_last = 0, print_msg = 0,
 	long_view = -1, kbind_busy = 0, unicode = -1, dequoted = 0,
-	home_ok = 1, config_ok = 1, trash_ok = 1, selfile_ok = 1,
+	home_ok = 1, config_ok = 1, trash_ok = 1, selfile_ok = 1, tips = -1,
 	mime_match = 0, logs_enabled = -1, sort = -1, files_counter = -1,
-	light_mode = -1, dir_indicator = -1, classify = -1;
+	light_mode = -1, dir_indicator = -1, classify = -1, sort_switch = 0;
 	/* -1 means non-initialized or unset. Once initialized, these variables
 	 * are always either zero or one */
 /*	sel_no_sel=0 */
@@ -474,7 +476,7 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 
 int max_hist = -1, max_log = -1, dirhist_total_index = 0, 
 	dirhist_cur_index = 0, argc_bk = 0, max_path = -1, exit_code = 0, 
-	shell_is_interactive = 0, cont_bt = 0;
+	shell_is_interactive = 0, cont_bt = 0, sort_types = 3;
 
 unsigned short term_cols = 0;
 
@@ -507,6 +509,69 @@ char *user = (char *)NULL, *path = (char *)NULL,
 	*last_cmd = (char *)NULL, *term = (char *)NULL,
 	*TMP_DIR = (char *)NULL, div_line_char = -1,
 	**old_pwd = (char **)NULL;
+
+const char *TIPS[] = {
+	"If need more speed, try the light mode (A-y)",
+	"The Selection Box is shared among different instances of CliFM",
+	"Select files here and there with the 's' command",
+	"Use wildcards with the 's' command: 's *.c'"
+	"ELN's and the 'sel' keyword work for shell commands as well: 'file 1 sel'",
+	"Press TAB to automatically expand an ELN: 'o 2' -> TAB -> 'o FILENAME'",
+	"Easily copy everything in CWD into another directory: 's * && c sel ELN/DIR'",
+	"Use ranges (ELN-ELN) to easily move multiple files: 'm 3-12 ELN/DIR'",
+	"Trash files with a simple 't ELN'",
+	"Get mime information for a file: 'mm info ELN'",
+	"Edit the mime list file with 'mm edit'",
+	"If too many files are listed, try enabling the pager ('pg on')",
+	"Once in the pager, go backwards pressing the keyboard shortcut provided by your terminal emulator",
+	"Press 'q' to stop the pager",
+	"Press 'A-l' to switch to long view mode",
+	"Search for files using the slash command: '/*.png'",
+	"Add a new bookmark by just entering 'bm ELN'",
+	"Use c, l, m, md, and r instead of cp, ln, mv, mkdir, and rm",
+	"Access a remote file system using the 'net' command",
+	"Manage default associated applications with the 'mime' command",
+	"Go back and forth in the directory history with 'A-j' and 'A-k'",
+	"Open a new instance of CliFM with the 'x' command: 'x ELN/DIR'",
+	"Send a command directly to the system shell with ';CMD'",
+	"Run the last executed command by just typing '!!'",
+	"Import aliases from file using 'alias import FILE'",
+	"Open and edit the configuration file with 'edit'",
+	"Find a description for each CLiFM command running 'cmd'",
+	"Print the color codes list typing 'cc'",
+	"Press 'A-i' to toggle hidden files on/off",
+	"List mountpoints by pressing 'A-m'",
+	"Allow the use of shell commands with the -x option: 'clifm -x'"
+	"Go to the root directory by just pressing 'A-r'",
+	"Go to the home directory by just pressing 'A-e'",
+	"Press 'F10' to open and edit the configuration file",
+	"Customize the starting using the -p option: 'clifm -p PATH'",
+	"Use the 'o' command to open files and directories: 'o 12'",
+	"Bypass the resource opener specifying an application: 'o 12 leafpad'",
+	"Open a file and send it to the background running 'o 24 &'",
+	"Create a custom prompt editing the configuration file",
+	"Customize color codes using the configuration file",
+	"Open the bookmarks manager by just pressing 'A-b'",
+	"Chain commands using ; and &&: 's 2 7-10; r sel'",
+	"Add emojis to the prompt copying them to the Prompt line in the configuration file",
+	"Create a new profile running 'pf add PROFILE'",
+	"Switch between profiles using 'pf set PROFILE'",
+	"Delete a profile using 'pf del PROFILE'",
+	"Copy selected files into CWD by just typing 'v sel'",
+	"Use 'p ELN' to print file properties for ELN",
+	"Deselect all selected files pressing 'A-d'",
+	"Select all files in CWD pressing 'A-a'",
+	"Jump to the Selection Box pressing 'A-s'",
+	"Restore trashed files using the 'u' command",
+	"Empty the trash bin running 't clear'",
+	"Press A-f to toggle list-folders-first on/off",
+	"Use the 'fc' command to disable the files counter",
+	"Take a look at the splash screen with the 'splash' command",
+	"Have some fun trying the 'bonus' command",
+	NULL
+};
+
+size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
 
 	/* This is not a comprehensive list of commands. It only lists
 	 * commands long version for TAB completion */
@@ -741,7 +806,7 @@ main(int argc, char **argv)
 	/* Set all external arguments flags to uninitialized state */
 	xargs.splash = xargs.hidden = xargs.longview = xargs.ext = -1;
 	xargs.ffirst = xargs.sensitive = xargs.unicode = xargs.pager = -1;
-	xargs.path = xargs.cdauto = -1, xargs.light = -1;
+	xargs.path = xargs.cdauto = -1, xargs.light = -1, xargs.sort = -1;
 
 	if (argc > 1)
 		external_arguments(argc, argv);
@@ -1427,7 +1492,10 @@ SystemShell=\n\n"
 # terminal emulator to run CliFM on it.\n\
 TerminalCmd='%s'\n\n"
 
-"SortList=true\n\
+"# Choose sorting method: 0 = none, 1 = name, 2 = size, 3 = ctime\n\
+Sort=1\n\n"
+
+"Tips=true\n\
 ListFoldersFirst=true\n\
 CdListsAutomatically=true\n\
 CaseSensitiveList=false\n\
@@ -3159,8 +3227,13 @@ _err(int msg_type, int prompt, const char *format, ...)
 	vsprintf(buf, format, arglist);
 	va_end(arglist);
 
-	if (buf) {
+	/* If the new message is the same as the last message, skip it */
+	if (msgs_n && strcmp(messages[msgs_n - 1], buf) == 0) {
+		free(buf);
+		return EXIT_SUCCESS;
+	}
 
+	if (buf) {
 		if (msg_type) {
 			switch (msg_type) {
 			case 'e': pmsg = error; break;
@@ -6029,7 +6102,8 @@ readline_kbinds(void)
 	rl_bind_keyseq("\\M-d", readline_kbind_action); /* key: 100 */
 	rl_bind_keyseq("\\M-r", readline_kbind_action); /* key: 114 */
 	rl_bind_keyseq("\\M-s", readline_kbind_action); /* key: 115 */
-	rl_bind_keyseq("\\M-y", readline_kbind_action); /* key: 115 */
+	rl_bind_keyseq("\\M-y", readline_kbind_action); /* key: 121 */
+	rl_bind_keyseq("\\M-z", readline_kbind_action); /* key: 122 */
 	rl_bind_keyseq("\\C-r", readline_kbind_action); /* key: 18 */
 
 /*
@@ -6163,7 +6237,7 @@ readline_kbind_action(int count, int key) {
 
 	/* A-a: Select all files in CWD */
 	case 97:
-		keybind_exec_cmd("sel * .*");
+		keybind_exec_cmd("sel .* *");
 		break;
 
 	/* A-b: Run the bookmarks manager */
@@ -6215,13 +6289,15 @@ readline_kbind_action(int count, int key) {
 		else
 			list_folders_first = 1;
 		
-		CLEAR;
-		while (files--)
-			free(dirlist[files]);
-		/* Without this puts(), the first entries of the directories
-		 * list are printed in the prompt line */
-		puts("");
-		list_dir();
+		if (cd_lists_on_the_fly) {
+			CLEAR;
+			while (files--)
+				free(dirlist[files]);
+			/* Without this puts(), the first entries of the directories
+			 * list are printed in the prompt line */
+			puts("");
+			list_dir();
+		}
 
 		break;
 
@@ -6232,11 +6308,13 @@ readline_kbind_action(int count, int key) {
 		else
 			show_hidden = 1;
 		
-		CLEAR;
-		while (files--)
-			free(dirlist[files]);
-		puts("");
-		list_dir();
+		if (cd_lists_on_the_fly) {
+			CLEAR;
+			while (files--)
+				free(dirlist[files]);
+			puts("");
+			list_dir();
+		}
 
 		break;
 
@@ -6304,12 +6382,32 @@ readline_kbind_action(int count, int key) {
 			light_mode = 0;
 		else
 			light_mode = 1;
+
+		if (cd_lists_on_the_fly) {
+			CLEAR;
+			while (files--)
+				free(dirlist[files]);
+			puts("");
+			list_dir();
+		}
 		
-		CLEAR;
-		while (files--)
-			free(dirlist[files]);
-		puts("");
-		list_dir();
+		break;
+
+	/* A-z: Toggle sorting methods */
+	case 122:
+		sort++;
+		if (sort > sort_types)
+			sort = 0;
+
+		if (cd_lists_on_the_fly) {
+			CLEAR;
+			sort_switch = 1;
+			while (files--)
+				free(dirlist[files]);
+			puts("");
+			list_dir();
+			sort_switch = 0;
+		}
 
 		break;
 
@@ -7836,6 +7934,17 @@ init_config(void)
 							light_mode = 0;
 					}
 
+					else if (strncmp(line, "Tips=", 5) == 0) {
+						char opt_str[MAX_BOOL] = "";
+						ret = sscanf(line, "Tips=%5s\n", opt_str);
+						if (ret == -1)
+							continue;
+						if (strncmp(opt_str, "false", 5) == 0)
+							tips = 0;
+						else /* True and default */
+							tips = 1;
+					}
+
 					else if (strncmp(line, "DirIndicator=", 13) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "DirIndicator=%5s\n", opt_str);
@@ -7878,14 +7987,15 @@ init_config(void)
 							share_selbox = 0;
 					}
 
-					else if (strncmp(line, "SortList=", 9) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "SortList=%5s\n", opt_str);
+					else if (xargs.sort == -1
+					&& strncmp(line, "Sort=", 5) == 0) {
+						int opt_num = 0;
+						ret = sscanf(line, "Sort=%d\n", &opt_num);
 						if (ret == -1)
 							continue;
-						if (strncmp(opt_str, "false", 5) == 0)
-							sort = 0;
-						else /* True and default */
+						if (opt_num >= 0 && opt_num <= sort_types)
+							sort = opt_num;
+						else /* default (sort by name) */
 							sort = 1;
 					}
 
@@ -8337,6 +8447,7 @@ init_config(void)
 			if (welcome_message == -1) welcome_message = 1;
 			if (show_hidden == -1) show_hidden = 1;
 			if (sort == -1) sort = 1;
+			if (tips == -1) tips = 1;
 			if (files_counter == -1) files_counter = 1;
 			if (long_view == -1) long_view = 0;
 			if (ext_cmd_ok == -1) ext_cmd_ok = 0;
@@ -8652,19 +8763,20 @@ external_arguments(int argc, char **argv)
 		{"splash", no_argument, 0, 's'},
 		{"ext-cmds", no_argument, 0, 'x'},
 		{"light", no_argument, 0, 'y'},
+		{"sort", required_argument, 0, 'z'},
 		{0, 0, 0, 0}
 	};
 
 	/* Set all external arguments flags to uninitialized state */
 	xargs.splash = xargs.hidden = xargs.longview = xargs.ext = -1;
 	xargs.ffirst = xargs.sensitive = xargs.unicode = xargs.pager = -1;
-	xargs.path = xargs.cdauto = -1, xargs.light = -1;
+	xargs.path = xargs.cdauto = -1, xargs.light = -1, xargs.sort = -1;
 
 	int optc;
 	/* Variables to store arguments to options (-p and -P) */
 	char *path_value = (char *)NULL, *alt_profile_value = (char *)NULL;
 
-	while ((optc = getopt_long(argc, argv, "+aAfFgGhiIlLoOp:P:sUuvxy",
+	while ((optc = getopt_long(argc, argv, "+aAfFgGhiIlLoOp:P:sUuvxyz:",
 							   longopts, (int *)0)) != EOF) {
 		/* ':' and '::' in the short options string means 'required' and 
 		 * 'optional argument' respectivelly. Thus, 'p' and 'P' require
@@ -8787,6 +8899,19 @@ external_arguments(int argc, char **argv)
 		case 'y':
 			light_mode = 1;
 			xargs.light = 1;
+			break;
+
+		case 'z':
+			{
+				int arg = atoi(optarg);
+				if (!is_number(optarg))
+					sort = 1;
+				else if (arg < 0 || arg > sort_types)
+					sort = 1;
+				else
+					sort = arg;
+				xargs.sort = 1;
+			}
 			break;
 
 		case '?': /* If some unrecognized option was found... */
@@ -9351,30 +9476,37 @@ parse_input_str(char *str)
 		 * program name as well, this program will be executed, and this,
 		 * for sure, is to be avoided */
 
-		if (i > 0 && is_number(substr[i])) {
-			int num = atoi(substr[i]);
-			/* Expand numbers only if there is a corresponding ELN */
+		/* The 'sort' command take digits as arguments. So, do not expand
+		 * ELN's in this case */
+		if (strcmp(substr[0], "st") != 0
+		&& strcmp(substr[0], "sort") == 0) {
+			if (i > 0 && is_number(substr[i])) {
+				int num = atoi(substr[i]);
+				/* Expand numbers only if there is a corresponding ELN */
 
-			if (num > 0 && num <= (int)files) {
-				/* Replace the ELN by the corresponding escaped filename */
-				char *esc_str = escape_str(dirlist[num - 1]);
-				if (esc_str) {
-					substr[i] = (char *)xrealloc(substr[i], 
+				if (num > 0 && num <= (int)files) {
+					/* Replace the ELN by the corresponding escaped
+					 * filename */
+					char *esc_str = escape_str(dirlist[num - 1]);
+					if (esc_str) {
+						substr[i] = (char *)xrealloc(substr[i], 
 												(strlen(esc_str) + 1) * 
 												 sizeof(char));
-					strcpy(substr[i], esc_str);
-					free(esc_str);
-					esc_str = (char *)NULL;
-				}
-				else {
-					fprintf(stderr, _("%s: %s: Error quoting filename\n"), 
-							PROGRAM_NAME, dirlist[num-1]);
-					/* Free whatever was allocated thus far */
-					size_t j;
-					for (j = 0; j <= args_n; j++)
-						free(substr[j]);
-					free(substr);
-					return (char **)NULL;
+						strcpy(substr[i], esc_str);
+						free(esc_str);
+						esc_str = (char *)NULL;
+					}
+					else {
+						fprintf(stderr, _("%s: %s: Error quoting "
+								"filename\n"), PROGRAM_NAME,
+								dirlist[num-1]);
+						/* Free whatever was allocated thus far */
+						size_t j;
+						for (j = 0; j <= args_n; j++)
+							free(substr[j]);
+						free(substr);
+						return (char **)NULL;
+					}
 				}
 			}
 		}
@@ -9824,14 +9956,14 @@ prompt(void)
 	}
 	
 	/* Print the tip of the day (only on first run) */
-/*	static int first_run = 1;
-	if (first_run) {
-//		srand(time(NULL));
-//		printf("TIP: %s\n", tips[rand() % tipsn]);
-		puts(_("TIP: Use a short alias to access remote file systems. "
-				"Example: alias ssh_work='some long command'"));	
-		first_run = 0;
-	} */
+	if (tips) {
+		static int first_run = 1;
+		if (first_run) {
+			srand(time(NULL));
+			printf("%sTIP%s: %s\n", bold, NC, TIPS[rand() % tipsn]);
+			first_run = 0;
+		}
+	}
 
 	/* Execute prompt commands, if any, and only if external commands
 	 * are allowed */
@@ -10285,12 +10417,30 @@ list_dir(void)
 	 * be put into registers and what not */
 	register int i = 0;
 
-	/* Get the list of files in CWD */
 	struct dirent **list = (struct dirent **)NULL;
-	int total = scandir(path, &list, skip_implied_dot, (sort)
-						? ((unicode) ? alphasort : (case_sensitive)
-						? xalphasort : alphasort_insensitive)
-						: NULL);
+	int total = -1;
+
+	/* Get the list of files in CWD according to sorting method
+	 * 0 = none, 1 = name, 2 = size, 3 = ctime */
+	switch(sort) {
+		case 0:
+			total = scandir(path, &list, skip_implied_dot, NULL);
+		break;
+
+		case 1:
+			total = scandir(path, &list, skip_implied_dot, (unicode)
+							? alphasort : (case_sensitive)
+							? xalphasort : alphasort_insensitive);
+		break;
+
+		case 2:
+			total = scandir(path, &list, skip_implied_dot, size_sort);
+		break;
+
+		case 3:
+			total = scandir(path, &list, skip_implied_dot, time_sort);
+		break;
+	}
 
 	if (total == -1) {
 		_err('e', PRINT_PROMPT, "%s: scandir: '%s': %s\n",
@@ -10363,7 +10513,6 @@ list_dir(void)
 			file_info[i].len = (unicode)
 				  ? u8_xstrlen(list[tmp_files[j]]->d_name)
 				  : strlen(list[tmp_files[j]]->d_name);
-//			file_info[i].len = len;
 			/* cont_bt value is set by u8_xstrlen() */
 			dirlist[i] = (char *)xnmalloc(file_info[i].len + 1,
 							(cont_bt) ? sizeof(char32_t)
@@ -10859,6 +11008,18 @@ list_dir(void)
 		free(list[total]);
 	free(list);
 
+	/* If changing sorting method, inform the user about the current
+	 * method */
+	if (sort_switch) {
+		printf("%s*%sSorted by: ", green_b, NC);
+		switch(sort) {
+			case 0: puts("none"); break;
+			case 1: puts("name"); break;
+			case 2: puts("size"); break;
+			case 3: puts("ctime"); break;
+		}
+	}
+
 /*	clock_t end = clock();
 	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC); */
 
@@ -10878,12 +11039,30 @@ list_dir_light(void)
 
 	register int i = 0;
 
-	/* Get the list of files in CWD */
 	struct dirent **list = (struct dirent **)NULL;
-	int total = scandir(path, &list, skip_implied_dot, (sort)
-						? ((unicode) ? alphasort : (case_sensitive)
-						? xalphasort : alphasort_insensitive)
-						: NULL);
+	int total = -1;
+
+	/* Get the list of files in CWD according to sorting method
+	 * 0 = none, 1 = name, 2 = size, 3 = ctime */
+	switch(sort) {
+		case 0:
+			total = scandir(path, &list, skip_implied_dot, NULL);
+		break;
+
+		case 1:
+			total = scandir(path, &list, skip_implied_dot, (unicode)
+							? alphasort : (case_sensitive)
+							? xalphasort : alphasort_insensitive);
+		break;
+
+		case 2:
+			total = scandir(path, &list, skip_implied_dot, size_sort);
+		break;
+
+		case 3:
+			total = scandir(path, &list, skip_implied_dot, time_sort);
+		break;
+	}
 
 	if (total == -1) {
 		_err('e', PRINT_PROMPT, "%s: scandir: '%s': %s\n",
@@ -11242,11 +11421,12 @@ list_dir_light(void)
 			
 			/* Print the spaces needed to equate the length of the
 			 * lines */
-
 			register int j;
 			for (j = (int)diff; j--;)
 				putchar(' ');
 
+			/* A final space is only needed if no filetype indicator
+			 * has been added to the filename */
 			if (classify) {
 				switch (file_info[i].type) {
 					case DT_DIR:
@@ -11301,6 +11481,18 @@ list_dir_light(void)
 	while (total--)
 		free(list[total]);
 	free(list);
+
+	/* If changing sorting method, inform the user about the current
+	 * method */
+	if (sort_switch) {
+		printf("%s*%sSorted by: ", green_b, NC);
+		switch(sort) {
+			case 0: puts("none"); break;
+			case 1: puts("name"); break;
+			case 2: puts("size"); break;
+			case 3: puts("ctime"); break;
+		}
+	}
 
 /*	clock_t end = clock();
 	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC); */
@@ -11772,6 +11964,28 @@ exec_cmd(char **comm)
 	
 
 	/*     ############### MINOR FUNCTIONS ##################     */
+
+					/* #### SORT #### */
+
+	else if (strcmp(comm[0], "st") == 0 || strcmp(comm[0], "sort") == 0) {
+		if (!comm[1] || !is_number(comm[1]) || atoi(comm[1]) < 0
+		|| atoi(comm[1]) > sort_types) {
+			puts(_("Usage: st 0-3\n0 = none, 1 = name, "
+				   "2 = size, 3 = ctime"));
+			exit_code = EXIT_FAILURE;
+			return EXIT_FAILURE;
+		}
+
+		sort = atoi(comm[1]);
+
+		if (cd_lists_on_the_fly) {
+			sort_switch = 1;
+			while (files--)
+				free(dirlist[files]);
+			exit_code = list_dir();
+			sort_switch = 0;
+		}
+	}
 
 					/* #### LIGHT MODE #### */
 	else if (strcmp(comm[0], "lm") == 0) {
@@ -12663,6 +12877,12 @@ sel_function (char **comm)
 	int exists = 0, new_sel = 0, exit_status = EXIT_SUCCESS;
 
 	for (i = 1; i <= args_n; i++) {
+		/* If string is "*" or ".*", the wildcards expansion function
+		 * found no match, in which case the string must be skipped.
+		 * Exclude self and parent directories (. and ..) as well */
+		if (strcmp(comm[i], "*") == 0 || strcmp(comm[i], ".*") == 0
+		|| strcmp(comm[i], ".") == 0 || strcmp(comm[i], "..") == 0)
+			continue;
 		char *deq_file = dequote_str(comm[i], 0);
 		if (!deq_file) {
 			for (j = 0; j < sel_n; j++)
@@ -15737,8 +15957,9 @@ containing accents, tildes, umlauts, non-latin letters, etc. This option \
 is enabled by default for non-english locales\
 \n -v, --version\t\t\t show version details and exit\
 \n -x, --ext-cmds\t\t\t allow the use of external commands\
-\n -y, --light-mode\t\t enable the light mode\n"), PNL, 
-		PROGRAM_NAME);
+\n -y, --light-mode\t\t enable the light mode\
+\n -z, --sort 0-%d\t\t choose sorting method\n"), PNL, 
+		PROGRAM_NAME, sort_types);
 
 	puts(_("\nBUILT-IN COMMANDS:\n\n\
  /* [DIR]\n\
@@ -15760,6 +15981,7 @@ is enabled by default for non-english locales\
  v, paste [sel] [DESTINY]\n\
  pf, prof, profile [ls, list] [set, add, del PROFILE]\n\
  shell [SHELL]\n\
+ st, sort 0-3\n\
  msg, messages [clear]\n\
  log [clear]\n\
  history [clear] [-n]\n\
@@ -15802,6 +16024,7 @@ is enabled by default for non-english locales\
 list\n\
  A-k:	Change to the next directory in the directory history list\n\
  A-y:	Toggle light mode on/off\n\
+ A-z:	Toggle sorting methods\n\
  F10:	Open the configuration file\n\n\
 NOTE: Depending on the terminal emulator being used, some of these \
 keybindings, like A-e, A-f, and F10, might conflict with some of the \
