@@ -1495,7 +1495,7 @@ SystemShell=\n\n"
 TerminalCmd='%s'\n\n"
 
 "# Choose sorting method: 0 = none, 1 = name, 2 = size, 3 = atime\n\
-# 4 = btime (ctime if not avaiable), 5 = ctime, 6 = mtime\n\
+# 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version\n\
 Sort=1\n\n"
 
 "Tips=true\n\
