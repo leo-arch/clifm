@@ -56,6 +56,8 @@ Of course, you can deselect some or all selected files whenever you want with th
 
 ![dirs](images/dirs.png)
 
+* Sort files by name, size or last modification time.
+
 Because file manager, but also half shell, CLiFM also offers the following features:
 
 * TAB-completion for commands, paths, and ELN's
