@@ -514,7 +514,7 @@ const char *TIPS[] = {
 	"If need more speed, try the light mode (A-y)",
 	"The Selection Box is shared among different instances of CliFM",
 	"Select files here and there with the 's' command",
-	"Use wildcards with the 's' command: 's *.c'"
+	"Use wildcards with the 's' command: 's *.c'",
 	"ELN's and the 'sel' keyword work for shell commands as well: 'file 1 sel'",
 	"Press TAB to automatically expand an ELN: 'o 2' -> TAB -> 'o FILENAME'",
 	"Easily copy everything in CWD into another directory: 's * && c sel ELN/DIR'",
@@ -541,7 +541,7 @@ const char *TIPS[] = {
 	"Print the color codes list typing 'cc'",
 	"Press 'A-i' to toggle hidden files on/off",
 	"List mountpoints by pressing 'A-m'",
-	"Allow the use of shell commands with the -x option: 'clifm -x'"
+	"Allow the use of shell commands with the -x option: 'clifm -x'",
 	"Go to the root directory by just pressing 'A-r'",
 	"Go to the home directory by just pressing 'A-e'",
 	"Press 'F10' to open and edit the configuration file",
@@ -9479,7 +9479,7 @@ parse_input_str(char *str)
 		/* The 'sort' command take digits as arguments. So, do not expand
 		 * ELN's in this case */
 		if (strcmp(substr[0], "st") != 0
-		&& strcmp(substr[0], "sort") == 0) {
+		&& strcmp(substr[0], "sort") != 0) {
 			if (i > 0 && is_number(substr[i])) {
 				int num = atoi(substr[i]);
 				/* Expand numbers only if there is a corresponding ELN */
