@@ -151,7 +151,7 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 /* #define CLEAR puts("\x1b[c") */
 #define CLEAR write(STDOUT_FILENO, "\ec", 3)
-#define VERSION "0.25.0"
+#define VERSION "0.25.1"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
