@@ -365,18 +365,95 @@ xalphasort(const struct dirent **a, const struct dirent **b)
 }
 
 int
-time_sort(const struct dirent **a, const struct dirent **b)
-/* Sort files by size */
+atime_sort(const struct dirent **a, const struct dirent **b)
+/* Sort files by atime */
 {
 	struct stat atta, attb;
 
 	lstat((*a)->d_name, &atta);
 	lstat((*b)->d_name, &attb);
 	
-	if (atta.st_ctime > attb.st_ctime)
+	if (atta.st_atim.tv_sec > attb.st_atim.tv_sec)
 		return 1;
 
-	else if (atta.st_ctime < attb.st_ctime)
+	else if (atta.st_atim.tv_sec < attb.st_atim.tv_sec)
+		return -1;
+
+	else
+		return 0;
+}
+
+int
+btime_sort(const struct dirent **a, const struct dirent **b)
+/* Sort files by btime */
+{
+	#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
+		struct stat atta, attb;
+
+		lstat((*a)->d_name, &atta);
+		lstat((*b)->d_name, &attb);
+
+		if (atta.st_birthtime > attb.st_birthtime)
+			return 1;
+
+		else if (atta.st_birthtime < attb.st_birthtime)
+			return -1;
+		else
+			return 0;
+
+	#elif defined(_STATX)
+		struct statx atta, attb;
+
+		statx(AT_FDCWD, (*a)->d_name, AT_SYMLINK_NOFOLLOW, STATX_BTIME,
+			  &atta);
+		statx(AT_FDCWD, (*b)->d_name, AT_SYMLINK_NOFOLLOW, STATX_BTIME,
+			  &attb);
+
+		if (atta.stx_btime.tv_sec > attb.stx_btime.tv_sec)
+			return 1;
+
+		else if (atta.stx_btime.tv_sec < attb.stx_btime.tv_sec)
+			return -1;
+		else
+			return 0;
+	#else
+		return 0;
+
+	#endif
+}
+
+int
+ctime_sort(const struct dirent **a, const struct dirent **b)
+/* Sort files by ctime */
+{
+	struct stat atta, attb;
+
+	lstat((*a)->d_name, &atta);
+	lstat((*b)->d_name, &attb);
+	
+	if (atta.st_ctim.tv_sec > attb.st_ctim.tv_sec)
+		return 1;
+
+	else if (atta.st_ctim.tv_sec < attb.st_ctim.tv_sec)
+		return -1;
+
+	else
+		return 0;
+}
+
+int
+mtime_sort(const struct dirent **a, const struct dirent **b)
+/* Sort files by mtime */
+{
+	struct stat atta, attb;
+
+	lstat((*a)->d_name, &atta);
+	lstat((*b)->d_name, &attb);
+	
+	if (atta.st_mtim.tv_sec > attb.st_mtim.tv_sec)
+		return 1;
+
+	else if (atta.st_mtim.tv_sec < attb.st_mtim.tv_sec)
 		return -1;
 
 	else

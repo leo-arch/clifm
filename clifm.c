@@ -476,7 +476,7 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 
 int max_hist = -1, max_log = -1, dirhist_total_index = 0, 
 	dirhist_cur_index = 0, argc_bk = 0, max_path = -1, exit_code = 0, 
-	shell_is_interactive = 0, cont_bt = 0, sort_types = 3;
+	shell_is_interactive = 0, cont_bt = 0, sort_types = 7;
 
 unsigned short term_cols = 0;
 
@@ -555,7 +555,7 @@ const char *TIPS[] = {
 	"Chain commands using ; and &&: 's 2 7-10; r sel'",
 	"Add emojis to the prompt copying them to the Prompt line in the configuration file",
 	"Create a new profile running 'pf add PROFILE'",
-	"Switch between profiles using 'pf set PROFILE'",
+	"Switch profiles using 'pf set PROFILE'",
 	"Delete a profile using 'pf del PROFILE'",
 	"Copy selected files into CWD by just typing 'v sel'",
 	"Use 'p ELN' to print file properties for ELN",
@@ -568,6 +568,7 @@ const char *TIPS[] = {
 	"Use the 'fc' command to disable the files counter",
 	"Take a look at the splash screen with the 'splash' command",
 	"Have some fun trying the 'bonus' command",
+	"Use 'A-z' to switch sotring methods",
 	NULL
 };
 
@@ -581,7 +582,7 @@ const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
 		"colors", "version", "splash", "folders first", 
 		"exit", "quit", "pager", "trash", "undel", "messages", 
 		"mountpoints", "bookmarks", "log", "untrash", "unicode", 
-		"profile", "shell", "mime", NULL };
+		"profile", "shell", "mime", "sort", NULL };
 
 #define DEFAULT_PROMPT "\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\
 \\z\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
@@ -896,6 +897,7 @@ main(int argc, char **argv)
 
 	if (splash_screen) {
 		splash();
+		splash_screen = 0;
 		CLEAR;
 	}
 
@@ -1492,7 +1494,8 @@ SystemShell=\n\n"
 # terminal emulator to run CliFM on it.\n\
 TerminalCmd='%s'\n\n"
 
-"# Choose sorting method: 0 = none, 1 = name, 2 = size, 3 = ctime\n\
+"# Choose sorting method: 0 = none, 1 = name, 2 = size, 3 = atime\n\
+# 4 = btime (ctime if not avaiable), 5 = ctime, 6 = mtime\n\
 Sort=1\n\n"
 
 "Tips=true\n\
@@ -3361,7 +3364,7 @@ is_internal_c(const char *cmd)
 					     "hf", "hidden", "path", "cwd", "splash", "ver",
 					     "version", "?", "help", "cmd", "commands",
 					     "colors", "fs", "mm", "mime", "x", "n", "net",
-					     "lm", NULL };
+					     "lm", "st", "sort", "fc", NULL };
 	short found = 0;
 	size_t i;
 	for (i = 0; int_cmds[i]; i++) {
@@ -10385,7 +10388,7 @@ colors_list(const char *entry, const int i, const int pad,
 int
 list_dir(void)
 /* List files in the current working directory (global variable 'path'). 
- * Uses filetype colors and columns. Return zero if success or one on
+ * Uses filetype colors and columns. Return zero on success or one on
  * error */
 {
 /*	clock_t start = clock(); */
@@ -10421,7 +10424,8 @@ list_dir(void)
 	int total = -1;
 
 	/* Get the list of files in CWD according to sorting method
-	 * 0 = none, 1 = name, 2 = size, 3 = ctime */
+	 * 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime,
+	 * 5 = ctime, 6 = mtime, 7 = version */
 	switch(sort) {
 		case 0:
 			total = scandir(path, &list, skip_implied_dot, NULL);
@@ -10438,7 +10442,28 @@ list_dir(void)
 		break;
 
 		case 3:
-			total = scandir(path, &list, skip_implied_dot, time_sort);
+			total = scandir(path, &list, skip_implied_dot, atime_sort);
+		break;
+
+		case 4:
+		#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) \
+		|| defined(_STATX)
+			total = scandir(path, &list, skip_implied_dot, btime_sort);
+		#else
+			total = scandir(path, &list, skip_implied_dot, ctime_sort);
+		#endif
+		break;
+
+		case 5:
+			total = scandir(path, &list, skip_implied_dot, ctime_sort);
+		break;
+
+		case 6:
+			total = scandir(path, &list, skip_implied_dot, mtime_sort);
+		break;
+
+		case 7:
+			total = scandir(path, &list, skip_implied_dot, versionsort);
 		break;
 	}
 
@@ -11016,7 +11041,17 @@ list_dir(void)
 			case 0: puts("none"); break;
 			case 1: puts("name"); break;
 			case 2: puts("size"); break;
-			case 3: puts("ctime"); break;
+			case 3: puts("atime"); break;
+			case 4:
+				#if defined(HAVE_ST_BIRTHTIME) \
+				|| defined(__BSD_VISIBLE) || defined(_STATX)
+					puts("btime"); break;
+				#else
+					puts("btime (not found: using ctime)"); break;
+				#endif
+			case 5: puts("ctime"); break;
+			case 6: puts("mtime"); break;
+			case 7: puts("version"); break;
 		}
 	}
 
@@ -11031,7 +11066,7 @@ list_dir_light(void)
 /* List files in the current working directory (global variable 'path'). 
  * Unlike list_dir(), however, this function uses no color and runs
  * neither stat() nor count_dir(), which makes it quite faster. Return
- * zero if success or one on error */
+ * zero on success or one on error */
 {
 /*	clock_t start = clock(); */
 
@@ -11043,7 +11078,8 @@ list_dir_light(void)
 	int total = -1;
 
 	/* Get the list of files in CWD according to sorting method
-	 * 0 = none, 1 = name, 2 = size, 3 = ctime */
+	 * 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime,
+	 * 5 = ctime, 6 = mtime, 7 = version */
 	switch(sort) {
 		case 0:
 			total = scandir(path, &list, skip_implied_dot, NULL);
@@ -11060,7 +11096,28 @@ list_dir_light(void)
 		break;
 
 		case 3:
-			total = scandir(path, &list, skip_implied_dot, time_sort);
+			total = scandir(path, &list, skip_implied_dot, atime_sort);
+		break;
+
+		case 4:
+		#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) \
+		|| defined(_STATX)
+			total = scandir(path, &list, skip_implied_dot, btime_sort);
+		#else
+			total = scandir(path, &list, skip_implied_dot, ctime_sort);
+		#endif
+		break;
+
+		case 5:
+			total = scandir(path, &list, skip_implied_dot, ctime_sort);
+		break;
+
+		case 6:
+			total = scandir(path, &list, skip_implied_dot, mtime_sort);
+		break;
+
+		case 7:
+			total = scandir(path, &list, skip_implied_dot, versionsort);
 		break;
 	}
 
@@ -11490,7 +11547,17 @@ list_dir_light(void)
 			case 0: puts("none"); break;
 			case 1: puts("name"); break;
 			case 2: puts("size"); break;
-			case 3: puts("ctime"); break;
+			case 3: puts("atime"); break;
+			case 4:
+				#if defined(HAVE_ST_BIRTHTIME) \
+				|| defined(__BSD_VISIBLE) || defined(_STATX)
+					puts("btime"); break;
+				#else
+					puts("btime (not found: using ctime)"); break;
+				#endif
+			case 5: puts("ctime"); break;
+			case 6: puts("mtime"); break;
+			case 7: puts("version"); break;
 		}
 	}
 
@@ -11970,8 +12037,9 @@ exec_cmd(char **comm)
 	else if (strcmp(comm[0], "st") == 0 || strcmp(comm[0], "sort") == 0) {
 		if (!comm[1] || !is_number(comm[1]) || atoi(comm[1]) < 0
 		|| atoi(comm[1]) > sort_types) {
-			puts(_("Usage: st 0-3\n0 = none, 1 = name, "
-				   "2 = size, 3 = ctime"));
+			puts(_("Usage: st 0-6\n0 = none, 1 = name, "
+				   "2 = size, 3 = atime, 4 = btime, "
+				   "5 = ctime, 6 = mtime"));
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
@@ -15958,10 +16026,10 @@ is enabled by default for non-english locales\
 \n -v, --version\t\t\t show version details and exit\
 \n -x, --ext-cmds\t\t\t allow the use of external commands\
 \n -y, --light-mode\t\t enable the light mode\
-\n -z, --sort 0-%d\t\t choose sorting method\n"), PNL, 
+\n -z, --sort METHOD\t\t sort files by METHOD (0-%d)\n"), PNL, 
 		PROGRAM_NAME, sort_types);
 
-	puts(_("\nBUILT-IN COMMANDS:\n\n\
+	printf(_("\nBUILT-IN COMMANDS:\n\n\
  /* [DIR]\n\
  bm, bookmarks [a, add PATH] [d, del] [edit] [SHORTCUT or NAME]\n\
  o, open [ELN/FILE] [APPLICATION]\n\
@@ -15981,7 +16049,7 @@ is enabled by default for non-english locales\
  v, paste [sel] [DESTINY]\n\
  pf, prof, profile [ls, list] [set, add, del PROFILE]\n\
  shell [SHELL]\n\
- st, sort 0-3\n\
+ st, sort 0-%d\n\
  msg, messages [clear]\n\
  log [clear]\n\
  history [clear] [-n]\n\
@@ -16001,7 +16069,7 @@ is enabled by default for non-english locales\
  ext [on, off, status]\n\
  ver, version\n\
  fs\n\
- q, quit, exit, zz\n"));
+ q, quit, exit, zz\n"), sort_types);
 
 	puts(_("Run 'cmd' or consult the manpage for more information about "
 		   "each of these commands.\n"));
@@ -16019,7 +16087,8 @@ is enabled by default for non-english locales\
  A-d:	Deselect all selected files\n\
  A-r:	Change to the root directory\n\
  A-e:	Change to the home directory\n\
- A-u:	Change up to the parent directory of the current working directory\n\
+ A-u:	Change up to the parent directory of the current working \
+directory\n\
  A-j:	Change to the previous directory in the directory history \
 list\n\
  A-k:	Change to the next directory in the directory history list\n\
@@ -16044,40 +16113,44 @@ free_software (void)
 	puts(_("Excerpt from 'What is Free Software?', by Richard Stallman. \
 Source: https://www.gnu.org/philosophy/free-sw.html\n \
 \n\"'Free software' means software that respects users' freedom and \
-community. Roughly, it means that the users have the freedom to run, copy, \
-distribute, study, change and improve the software. Thus, 'free software' is \
-a matter of liberty, not price. To understand the concept, you should think \
-of 'free' as in 'free speech', not as in 'free beer'. We sometimes call \
-it 'libre software', borrowing the French or Spanish word for 'free' \
-as in freedom, to show we do not mean the software is gratis.\n\
-\nWe campaign for these freedoms because everyone deserves them. With these \
-freedoms, the users (both individually and collectively) control the program \
-and what it does for them. When users don't control the program, we call it \
-a 'nonfree' or proprietary program. The nonfree program controls the users, \
-and the developer controls the program; this makes the program an instrument \
-of unjust power. \n\
+community. Roughly, it means that the users have the freedom to run, \
+copy, distribute, study, change and improve the software. Thus, 'free \
+software' is a matter of liberty, not price. To understand the concept, \
+you should think of 'free' as in 'free speech', not as in 'free beer'. \
+We sometimes call it 'libre software', borrowing the French or Spanish \
+word for 'free' as in freedom, to show we do not mean the software is \
+gratis.\n\
+\nWe campaign for these freedoms because everyone deserves them. With \
+these freedoms, the users (both individually and collectively) control \
+the program and what it does for them. When users don't control the \
+program, we call it a 'nonfree' or proprietary program. The nonfree \
+program controls the users, and the developer controls the program; \
+this makes the program an instrument of unjust power. \n\
 \nA program is free software if the program's users have the four \
 essential freedoms:\n\n\
-- The freedom to run the program as you wish, for any purpose (freedom 0).\n\
-- The freedom to study how the program works, and change it so it does your \
-computing as you wish (freedom 1). Access to the source code is a \
+- The freedom to run the program as you wish, for any purpose \
+(freedom 0).\n\
+- The freedom to study how the program works, and change it so it does \
+your computing as you wish (freedom 1). Access to the source code is a \
 precondition for this.\n\
-- The freedom to redistribute copies so you can help your neighbor (freedom 2).\n\
+- The freedom to redistribute copies so you can help your neighbor \
+(freedom 2).\n\
 - The freedom to distribute copies of your modified versions to others \
 (freedom 3). By doing this you can give the whole community a chance to \
-benefit from your changes. Access to the source code is a precondition for \
-this. \n\
+benefit from your changes. Access to the source code is a precondition \
+for this. \n\
 \nA program is free software if it gives users adequately all of these \
-freedoms. Otherwise, it is nonfree. While we can distinguish various nonfree \
-distribution schemes in terms of how far they fall short of being free, we \
-consider them all equally unethical (...)\""));
+freedoms. Otherwise, it is nonfree. While we can distinguish various \
+nonfree distribution schemes in terms of how far they fall short of \
+being free, we consider them all equally unethical (...)\""));
 }
 
 void
 version_function(void)
 {
-	printf(_("%s %s (%s), by %s\nContact: %s\nWebsite: %s\nLicense: %s\n"), 
-		   PROGRAM_NAME, VERSION, DATE, AUTHOR, CONTACT, WEBSITE, LICENSE);
+	printf(_("%s %s (%s), by %s\nContact: %s\nWebsite: "
+		   "%s\nLicense: %s\n"), PROGRAM_NAME, VERSION, DATE,
+		   AUTHOR, CONTACT, WEBSITE, LICENSE);
 }
 
 void
@@ -16098,9 +16171,16 @@ splash(void)
 	"     ;l@@@@#lnuxxi@@@i#@@@##@@@@@#;...xlln.         :.                ;:.\n"
 	"      :xil@@@@@@@@@@l:u@@@@##lnx;.\n"
 	"         .:xuuuunnu;...;ux;.", d_cyan);
-	printf(_("\n                     The anti-eye-candy/KISS file manager\n%s"), NC);
-	printf(_("\n                       Press any key to continue... "));
-	xgetchar(); puts("");
+
+	printf(_("\n\t\t   %sThe anti-eye-candy/KISS file manager\n%s"),
+		   white, NC);
+
+	if (splash_screen) {
+		printf(_("\n\t\t\tPress any key to continue... "));
+		xgetchar(); puts("");
+	}
+	else
+		puts("");
 }
 
 void
@@ -16108,7 +16188,7 @@ bonus_function (void)
 {
 	static short state = 0;
 
-	if (state > 13)
+	if (state > 14)
 		state = 0;
 
 	switch (state) {
@@ -16169,10 +16249,16 @@ bonus_function (void)
 	case 12:
 		puts("\"This is a lie\" (The liar paradox)");
 		break;
+
 	case 13:
 		puts("\"There are two ways to write error-free programs; only the "
 			 "third one works\" (Alan J. Perlis)");
 		break;
+
+	case 14:
+		puts("The man who sold the world was later sold by the big G");
+		break;
+
 	default: break;
 	}
 
