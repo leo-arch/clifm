@@ -6512,6 +6512,7 @@ readline_kbinds(void)
 	rl_bind_keyseq("\\M-d", readline_kbind_action); /* key: 100 */
 	rl_bind_keyseq("\\M-r", readline_kbind_action); /* key: 114 */
 	rl_bind_keyseq("\\M-s", readline_kbind_action); /* key: 115 */
+	rl_bind_keyseq("\\M-x", readline_kbind_action); /* key: 120 */
 	rl_bind_keyseq("\\M-y", readline_kbind_action); /* key: 121 */
 	rl_bind_keyseq("\\M-z", readline_kbind_action); /* key: 122 */
 	rl_bind_keyseq("\\C-r", readline_kbind_action); /* key: 18 */
@@ -6629,7 +6630,6 @@ int
 readline_kbind_action(int count, int key) {
 	/* Prevent Valgrind from complaining about unused variable */
 	if (count) {}
-/*	printf("Key: %d\n", key); */
 /*	int status = 0; */
 
 	/* Disable all keybindings while in the bookmarks or mountpoints
@@ -6803,8 +6803,26 @@ readline_kbind_action(int count, int key) {
 		
 		break;
 
-	/* A-z: Toggle sorting methods */
+	/* A-z: Change to previous sorting method */
 	case 122:
+		sort--;
+		if (sort < 0)
+			sort = sort_types;
+
+		if (cd_lists_on_the_fly) {
+			CLEAR;
+			sort_switch = 1;
+			while (files--)
+				free(dirlist[files]);
+			puts("");
+			list_dir();
+			sort_switch = 0;
+		}
+
+		break;
+
+	/* A-x: Change to next sorting method */
+	case 120:
 		sort++;
 		if (sort > sort_types)
 			sort = 0;
@@ -16478,7 +16496,8 @@ directory\n\
 list\n\
  A-k:	Change to the next directory in the directory history list\n\
  A-y:	Toggle light mode on/off\n\
- A-z:	Toggle sorting methods\n\
+ A-z:	Change to previous sorting method\n\
+ A-x:	Change to next sorting method\n\
  F10:	Open the configuration file\n\n\
 NOTE: Depending on the terminal emulator being used, some of these \
 keybindings, like A-e, A-f, and F10, might conflict with some of the \
