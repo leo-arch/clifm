@@ -151,11 +151,11 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 /* #define CLEAR puts("\x1b[c") */
 #define CLEAR write(STDOUT_FILENO, "\ec", 3)
-#define VERSION "0.25.1"
+#define VERSION "0.25.2"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "January 23, 2021"
+#define DATE "January 24, 2021"
 #define LICENSE "GPL2+"
 
 /* Define flags for program options and internal use */
@@ -372,14 +372,26 @@ int _err(int msg_type, int prompt, const char *format, ...);
 int new_instance(char *dir);
 int *get_hex_num(char *str);
 int create_config(char *file);
+int skip_nonexec(const struct dirent *entry);
+
+/* Sorting functions */
+int sort_function(char **arg);
+void print_sort_method(void);
+int m_versionsort(const struct dirent **a, const struct dirent **b);
+int m_alphasort(const struct dirent **a, const struct dirent **b);
+int alphasort_insensitive(const struct dirent **a,
+						  const struct dirent **b);
+int xalphasort(const struct dirent **a, const struct dirent **b);
+int size_sort(const struct dirent **a, const struct dirent **b);
+int atime_sort(const struct dirent **a, const struct dirent **b);
+int btime_sort(const struct dirent **a, const struct dirent **b);
+int ctime_sort(const struct dirent **a, const struct dirent **b);
+int mtime_sort(const struct dirent **a, const struct dirent **b);
 
 /* Still under development */
 int remote_ssh(char *address, char *options);
 int remote_smb(char *address, char *options);
 int remote_ftp(char *address, char *options);
-
-/* Test */
-int skip_nonexec(const struct dirent *entry);
 
 
 				/** ##########################
@@ -460,7 +472,8 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 	long_view = -1, kbind_busy = 0, unicode = -1, dequoted = 0,
 	home_ok = 1, config_ok = 1, trash_ok = 1, selfile_ok = 1, tips = -1,
 	mime_match = 0, logs_enabled = -1, sort = -1, files_counter = -1,
-	light_mode = -1, dir_indicator = -1, classify = -1, sort_switch = 0;
+	light_mode = -1, dir_indicator = -1, classify = -1, sort_switch = 0,
+	sort_reverse = 0;
 	/* -1 means non-initialized or unset. Once initialized, these variables
 	 * are always either zero or one */
 /*	sel_no_sel=0 */
@@ -807,7 +820,7 @@ main(int argc, char **argv)
 	/* Set all external arguments flags to uninitialized state */
 	xargs.splash = xargs.hidden = xargs.longview = xargs.ext = -1;
 	xargs.ffirst = xargs.sensitive = xargs.unicode = xargs.pager = -1;
-	xargs.path = xargs.cdauto = -1, xargs.light = -1, xargs.sort = -1;
+	xargs.path = xargs.cdauto = xargs.light = xargs.sort = -1;
 
 	if (argc > 1)
 		external_arguments(argc, argv);
@@ -1036,6 +1049,396 @@ main(int argc, char **argv)
 			/** #################################
 			 * #     FUNCTIONS DEFINITIONS     #
 			 * ################################# */
+
+void
+print_sort_method(void)
+{
+	printf("%s->%s Sorted by: ", cyan, NC);
+	switch(sort) {
+		case 0: puts("none"); break;
+		case 1: printf("name %s\n", (sort_reverse) ? "[rev]" : "");
+			break;
+		case 2: printf("size %s\n", (sort_reverse) ? "[rev]" : "");
+			break;
+		case 3: printf("atime %s\n", (sort_reverse) ? "[rev]" : "");
+			break;
+		case 4:
+		#if defined(HAVE_ST_BIRTHTIME) \
+			|| defined(__BSD_VISIBLE) || defined(_STATX)
+				printf("btime %s\n", (sort_reverse) ? "[rev]" : "");
+			#else
+				printf("btime (not found: using ctime) %s\n",
+					   (sort_reverse) ? "[rev]" : "");
+			#endif
+			break;
+		case 5: printf("ctime %s\n", (sort_reverse) ? "[rev]" : "");
+			break;
+		case 6: printf("mtime %s\n", (sort_reverse) ? "[rev]" : "");
+			break;
+		case 7: printf("version %s\n", (sort_reverse) ? "[rev]" : "");
+			break;
+	}
+}
+
+int
+sort_function(char **arg)
+{
+	int exit_status = EXIT_FAILURE;
+
+	if (!arg[1]) {
+		printf("Sorting method: ");
+		switch(sort) {
+			case 0:
+				printf("none %s\n", (sort_reverse) ? "[rev]": "");
+				break;
+			case 1:
+				printf("name %s\n", (sort_reverse) ? "[rev]": "");
+				break;
+			case 2:
+				printf("size %s\n", (sort_reverse) ? "[rev]": "");
+				break;
+			case 3:
+				printf("atime %s\n", (sort_reverse) ? "[rev]": "");
+				break;
+			case 4:
+				printf("btime %s\n", (sort_reverse) ? "[rev]": "");
+				break;
+			case 5:
+				printf("ctime %s\n", (sort_reverse) ? "[rev]": "");
+				break;
+			case 6:
+				printf("mtime %s\n", (sort_reverse) ? "[rev]": "");
+				break;
+			case 7:
+				printf("version %s\n", (sort_reverse) ? "[rev]": "");
+				break;
+		}
+		return EXIT_SUCCESS;
+	}
+
+	else if (!is_number(arg[1])) {
+		if (strcmp(arg[1], "rev") == 0) {
+
+			if (sort_reverse)
+				sort_reverse = 0;
+			else
+				sort_reverse = 1;
+
+			if (cd_lists_on_the_fly) {
+				/* sort_switch just tells list_dir() to print a line
+				 * with the current sorting method at the end of the
+				 * files list */
+				sort_switch = 1;
+				while (files--)
+					free(dirlist[files]);
+				exit_status = list_dir();
+				sort_switch = 0;
+			}
+
+			return exit_status;
+		}
+		/* If arg1 is not a number and is not "rev", the fputs()
+		 * above is executed */
+	}
+
+	else if (atoi(arg[1]) >= 0 && atoi(arg[1]) <= sort_types) {
+		sort = atoi(arg[1]);
+
+		if (arg[2] && strcmp(arg[2], "rev") == 0) {
+			if (sort_reverse)
+				sort_reverse = 0;
+			else
+				sort_reverse = 1;			
+		}
+
+		if (cd_lists_on_the_fly) {
+			sort_switch = 1;
+			while (files--)
+				free(dirlist[files]);
+			exit_status = list_dir();
+			sort_switch = 0;
+		}
+
+		return exit_status;
+	}
+	/* If arg1 is a number but is not in the range 0-sort_types,
+	 * error */
+
+	fputs(_("Usage: st [METHOD] [rev]\nMETHOD: 0 = none, "
+			"1 = name, 2 = size, 3 = atime, 4 = btime, "
+		    "5 = ctime, 6 = mtime, 7 = version\n"), stderr);
+	return EXIT_FAILURE;
+}
+
+int
+xalphasort(const struct dirent **a, const struct dirent **b)
+/* Same as alphasort, but is uses strcmp instead of sctroll, which is 
+ * slower. However, bear in mind that, unlike strcmp(), strcoll() is locale 
+ * aware. Use only with C and english locales */
+{
+	int ret = 0;
+
+	/* The if statements prevent strcmp from running in every 
+	 * call to the function (it will be called only if the first 
+	 * character of the two strings is the same), which makes the 
+	 * function faster */
+	if ((*a)->d_name[0] > (*b)->d_name[0])
+		ret = 1;
+
+	else if ((*a)->d_name[0] < (*b)->d_name[0])
+		ret = -1;
+
+	else
+		ret = strcmp((*a)->d_name, (*b)->d_name);
+
+	if (!sort_reverse)
+		return ret;
+
+	/* If sort_reverse, return the opposite value */
+	return (ret - (ret * 2));
+}
+
+int
+atime_sort(const struct dirent **a, const struct dirent **b)
+/* Sort files by last access time */
+{
+	int ret = 0;
+	struct stat atta, attb;
+
+	if (lstat((*a)->d_name, &atta) == -1) {
+		fprintf(stderr, _("stat: cannot access '%s': %s\n"),
+				(*a)->d_name, strerror(errno));
+		return 0;
+	}
+
+	if (lstat((*b)->d_name, &attb) == -1) {
+		fprintf(stderr, _("stat: cannot access '%s': %s\n"),
+				(*b)->d_name, strerror(errno));
+		return 0;
+	}
+
+	if (atta.st_atim.tv_sec > attb.st_atim.tv_sec)
+		ret = 1;
+
+	else if (atta.st_atim.tv_sec < attb.st_atim.tv_sec)
+		ret = -1;
+
+	else
+		return 0;
+
+	if (!sort_reverse)
+		return ret;
+
+	return (ret - (ret * 2));	
+}
+
+int
+btime_sort(const struct dirent **a, const struct dirent **b)
+/* Sort files by birthtime */
+{
+	int ret = 0;
+
+	#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
+		struct stat atta, attb;
+
+		if (lstat((*a)->d_name, &atta) == -1) {
+			fprintf(stderr, _("stat: cannot access '%s': %s\n"),
+					(*a)->d_name, strerror(errno));
+			return 0;
+		}
+
+		if (lstat((*b)->d_name, &attb) == -1) {
+			fprintf(stderr, _("stat: cannot access '%s': %s\n"),
+					(*b)->d_name, strerror(errno));
+			return 0;
+		}
+		
+		if (atta.st_birthtime > attb.st_birthtime)
+			ret = 1;
+
+		else if (atta.st_birthtime < attb.st_birthtime)
+			ret = -1;
+
+		else
+			return 0;
+
+	#elif defined(_STATX)
+		struct statx atta, attb;
+
+		if (statx(AT_FDCWD, (*a)->d_name, AT_SYMLINK_NOFOLLOW,
+		STATX_BTIME, &atta) == -1) {
+			fprintf(stderr, _("stat: cannot access '%s': %s\n"),
+					(*a)->d_name, strerror(errno));
+			return 0;
+		}
+
+		if (statx(AT_FDCWD, (*b)->d_name, AT_SYMLINK_NOFOLLOW,
+		STATX_BTIME, &attb) == -1) {
+			fprintf(stderr, _("stat: cannot access '%s': %s\n"),
+					(*b)->d_name, strerror(errno));
+			return 0;
+		}
+
+		if (atta.stx_btime.tv_sec > attb.stx_btime.tv_sec)
+			ret = 1;
+
+		else if (atta.stx_btime.tv_sec < attb.stx_btime.tv_sec)
+			ret = -1;
+
+		else
+			return 0;
+
+	#else
+		return 0;
+
+	#endif
+
+	if (!sort_reverse)
+		return ret;
+
+	return (ret - (ret * 2));
+}
+
+int
+ctime_sort(const struct dirent **a, const struct dirent **b)
+/* Sort files by last status change time */
+{
+	int ret = 0;
+	struct stat atta, attb;
+
+	if (lstat((*a)->d_name, &atta) == -1) {
+		fprintf(stderr, _("stat: cannot access '%s': %s\n"),
+				(*a)->d_name, strerror(errno));
+		return 0;
+	}
+
+	if (lstat((*b)->d_name, &attb) == -1) {
+		fprintf(stderr, _("stat: cannot access '%s': %s\n"),
+				(*b)->d_name, strerror(errno));
+		return 0;
+	}	
+	if (atta.st_ctim.tv_sec > attb.st_ctim.tv_sec)
+		ret = 1;
+
+	else if (atta.st_ctim.tv_sec < attb.st_ctim.tv_sec)
+		ret = -1;
+
+	else
+		return 0;
+
+	if (!sort_reverse)
+		return ret;
+
+	return (ret - (ret * 2));
+}
+
+int
+mtime_sort(const struct dirent **a, const struct dirent **b)
+/* Sort files by last modification time */
+{
+	int ret = 0;
+	struct stat atta, attb;
+
+	if (lstat((*a)->d_name, &atta) == -1) {
+		fprintf(stderr, _("stat: cannot access '%s': %s\n"),
+				(*a)->d_name, strerror(errno));
+		return 0;
+	}
+
+	if (lstat((*b)->d_name, &attb) == -1) {
+		fprintf(stderr, _("stat: cannot access '%s': %s\n"),
+				(*b)->d_name, strerror(errno));
+		return 0;
+	}	
+	if (atta.st_mtim.tv_sec > attb.st_mtim.tv_sec)
+		ret = 1;
+
+	else if (atta.st_mtim.tv_sec < attb.st_mtim.tv_sec)
+		ret = -1;
+
+	else
+		return 0;
+
+	if (!sort_reverse)
+		return ret;
+
+	return (ret - (ret * 2));
+}
+
+int
+size_sort(const struct dirent **a, const struct dirent **b)
+/* Sort files by size */
+{
+	int ret = 0;
+	struct stat atta, attb;
+
+	if (lstat((*a)->d_name, &atta) == -1) {
+		fprintf(stderr, _("stat: cannot access '%s': %s\n"),
+				(*a)->d_name, strerror(errno));
+		return 0;
+	}
+
+	if (lstat((*b)->d_name, &attb) == -1) {
+		fprintf(stderr, _("stat: cannot access '%s': %s\n"),
+				(*b)->d_name, strerror(errno));
+		return 0;
+	}
+
+	if (atta.st_size > attb.st_size)
+		ret = 1;
+
+	else if (atta.st_size < attb.st_size)
+		ret = -1;
+
+	else
+		return 0;
+
+	if (!sort_reverse)
+		return ret;
+
+	return (ret - (ret * 2));
+}
+
+int
+alphasort_insensitive(const struct dirent **a, const struct dirent **b)
+/* This is a modification of the alphasort function that makes it case 
+ * insensitive. It also sorts without taking the initial dot of hidden 
+ * files into account. Note that strcasecmp() isn't locale aware. Use
+ * only with C and english locales */
+{
+	int ret = strcasecmp(((*a)->d_name[0] == '.') ? (*a)->d_name + 1 : 
+						(*a)->d_name, ((*b)->d_name[0] == '.') ? 
+						(*b)->d_name + 1 : (*b)->d_name);
+
+	if (!sort_reverse)
+		return ret;
+
+	return (ret - (ret * 2));
+}
+
+int
+m_alphasort(const struct dirent **a, const struct dirent **b)
+/* Just a reverse sorting capable alphasort */
+{
+	int ret = strcoll((*a)->d_name, (*b)->d_name);
+
+	if (!sort_reverse)
+		return ret;
+
+	return (ret - (ret * 2));
+}
+
+int
+m_versionsort(const struct dirent **a, const struct dirent **b)
+/* Just a reverse sorting capable versionsort */
+{
+	int ret = strverscmp((*a)->d_name, (*b)->d_name);
+
+	if (!sort_reverse)
+		return ret;
+
+	return (ret - (ret * 2));
+}
 
 int
 remote_ftp(char *address, char *options)
@@ -1496,7 +1899,11 @@ TerminalCmd='%s'\n\n"
 
 "# Choose sorting method: 0 = none, 1 = name, 2 = size, 3 = atime\n\
 # 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version\n\
-Sort=1\n\n"
+Sort=1\n\
+# By default, CliFM sorts files from less to more (ex: from 'a' to 'z' if\n\
+# using the \"name\" method). To invert this ordering, set SortReverse to\n\
+# true\n\
+SortReverse=false\n\n"
 
 "Tips=true\n\
 ListFoldersFirst=true\n\
@@ -3258,7 +3665,7 @@ _err(int msg_type, int prompt, const char *format, ...)
 int
 initialize_readline(void)
 {
-	/* ###### INITIALIZE READLINE (what a hard beast to tackle!!) #### */
+	/* #### INITIALIZE READLINE (what a hard beast to tackle!!) #### */
 
 	 /* Enable tab auto-completion for commands (in PATH) in case of
 	  * first entered string. The second and later entered string will
@@ -3348,23 +3755,23 @@ get_link_ref(const char *link)
 
 int
 is_internal_c(const char *cmd)
-/* Check cmd against a list of internal commands. Used by parse_input_str()
- * when running chained commands */
+/* Check cmd against a list of internal commands. Used by
+ * parse_input_str() when running chained commands */
 {
-	const char *int_cmds[] = { "o", "open", "cd", "p", "pr", "prop", "t",
-						 "tr", "trash", "s", "sel", "rf", "refresh", "c",
-						 "cp", "m", "mv", "bm", "bookmarks", "b", "back",
-					     "f", "forth", "bh", "fh", "u", "undel", "untrash",
-					     "s", "sel", "sb", "selbox", "ds", "desel", "rm",
-					     "mkdir", "ln", "unlink", "touch", "r", "md", "l",
-					     "p", "pr", "prop", "pf", "prof", "profile",
-					     "mp", "mountpoints", "ext", "pg", "pager", "uc",
-					     "unicode", "folders", "ff", "log", "msg",
-					     "messages", "alias", "shell", "edit", "history",
-					     "hf", "hidden", "path", "cwd", "splash", "ver",
-					     "version", "?", "help", "cmd", "commands",
-					     "colors", "fs", "mm", "mime", "x", "n", "net",
-					     "lm", "st", "sort", "fc", NULL };
+	const char *int_cmds[] = { "o", "open", "cd", "p", "pr", "prop",
+					"t", "tr", "trash", "s", "sel", "rf", "refresh",
+					"c", "cp", "m", "mv", "bm", "bookmarks", "b",
+					"back", "f", "forth", "bh", "fh", "u", "undel",
+					"untrash", "s", "sel", "sb", "selbox", "ds",
+					"desel", "rm", "mkdir", "ln", "unlink", "touch",
+					"r", "md", "l", "p", "pr", "prop", "pf", "prof",
+					"profile", "mp", "mountpoints", "ext", "pg",
+					"pager", "uc", "unicode", "folders", "ff", "log",
+					"msg", "messages", "alias", "shell", "edit",
+					"history", "hf", "hidden", "path", "cwd", "splash",
+					"ver", "version", "?", "help", "cmd", "commands",
+					"colors", "cc", "fs", "mm", "mime", "x", "n",
+					"net", "lm", "st", "sort", "fc", NULL };
 	short found = 0;
 	size_t i;
 	for (i = 0; int_cmds[i]; i++) {
@@ -8002,6 +8409,17 @@ init_config(void)
 							sort = 1;
 					}
 
+					else if (strncmp(line, "SortReverse=", 12) == 0) {
+						char opt_str[MAX_BOOL] = "";
+						ret = sscanf(line, "SortReverse=%5s\n", opt_str);
+						if (ret == -1)
+							continue;
+						if (strncmp(opt_str, "false", 5) == 0)
+							sort_reverse = 0;
+						else /* True and default */
+							sort_reverse = 1;
+					}
+
 					else if (strncmp(line, "FilesCounter=", 13) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "FilesCounter=%5s\n", opt_str);
@@ -8450,6 +8868,7 @@ init_config(void)
 			if (welcome_message == -1) welcome_message = 1;
 			if (show_hidden == -1) show_hidden = 1;
 			if (sort == -1) sort = 1;
+			if (sort_reverse == -1) sort_reverse = 0;
 			if (tips == -1) tips = 1;
 			if (files_counter == -1) files_counter = 1;
 			if (long_view == -1) long_view = 0;
@@ -8510,11 +8929,6 @@ init_config(void)
 		 * the prompt, hidden files will be disabled, which is not what
 		 * the user wanted */
 
-/*		xargs.splash = xargs.hidden = xargs.longview = xargs.ext = -1;
-		xargs.ffirst = xargs.sensitive = xargs.unicode = xargs.pager = -1;
-		xargs.path = xargs.cdauto = -1; */
-
-		
 		/* "XTerm*eightBitInput: false" must be set in HOME/.Xresources
 		 * to make some keybindings like Alt+letter work correctly in
 		 * xterm-like terminal emulators */
@@ -8773,7 +9187,7 @@ external_arguments(int argc, char **argv)
 	/* Set all external arguments flags to uninitialized state */
 	xargs.splash = xargs.hidden = xargs.longview = xargs.ext = -1;
 	xargs.ffirst = xargs.sensitive = xargs.unicode = xargs.pager = -1;
-	xargs.path = xargs.cdauto = -1, xargs.light = -1, xargs.sort = -1;
+	xargs.path = xargs.cdauto = xargs.light = xargs.sort = -1;
 
 	int optc;
 	/* Variables to store arguments to options (-p and -P) */
@@ -10433,7 +10847,7 @@ list_dir(void)
 
 		case 1:
 			total = scandir(path, &list, skip_implied_dot, (unicode)
-							? alphasort : (case_sensitive)
+							? m_alphasort : (case_sensitive)
 							? xalphasort : alphasort_insensitive);
 		break;
 
@@ -10463,7 +10877,7 @@ list_dir(void)
 		break;
 
 		case 7:
-			total = scandir(path, &list, skip_implied_dot, versionsort);
+			total = scandir(path, &list, skip_implied_dot, m_versionsort);
 		break;
 	}
 
@@ -10775,6 +11189,16 @@ list_dir(void)
 
 		free(file_info);
 		
+		/* Print a dividing line between the files list and the
+		 * prompt */
+		fputs(div_line_color, stdout);
+		for (i = term_cols; i--; )
+			putchar(div_line_char);
+		printf("%s%s", NC, default_color);
+
+		if (sort_switch)
+			print_sort_method();
+
 		while (total--)
 			free(list[total]);
 		free(list);
@@ -11026,34 +11450,17 @@ list_dir(void)
 
 	fflush(stdout);
 
+	/* If changing sorting method, inform the user about the current
+	 * method */
+	if (sort_switch)
+		print_sort_method();
+
 	/* Free the scandir array */
 	/* Whatever time it takes to free this array, it will be faster to
 	 * do it after listing files than before (at least theoretically) */
 	while (total--)
 		free(list[total]);
 	free(list);
-
-	/* If changing sorting method, inform the user about the current
-	 * method */
-	if (sort_switch) {
-		printf("%s*%sSorted by: ", green_b, NC);
-		switch(sort) {
-			case 0: puts("none"); break;
-			case 1: puts("name"); break;
-			case 2: puts("size"); break;
-			case 3: puts("atime"); break;
-			case 4:
-				#if defined(HAVE_ST_BIRTHTIME) \
-				|| defined(__BSD_VISIBLE) || defined(_STATX)
-					puts("btime"); break;
-				#else
-					puts("btime (not found: using ctime)"); break;
-				#endif
-			case 5: puts("ctime"); break;
-			case 6: puts("mtime"); break;
-			case 7: puts("version"); break;
-		}
-	}
 
 /*	clock_t end = clock();
 	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC); */
@@ -11087,7 +11494,7 @@ list_dir_light(void)
 
 		case 1:
 			total = scandir(path, &list, skip_implied_dot, (unicode)
-							? alphasort : (case_sensitive)
+							? m_alphasort : (case_sensitive)
 							? xalphasort : alphasort_insensitive);
 		break;
 
@@ -11117,7 +11524,7 @@ list_dir_light(void)
 		break;
 
 		case 7:
-			total = scandir(path, &list, skip_implied_dot, versionsort);
+			total = scandir(path, &list, skip_implied_dot, m_versionsort);
 		break;
 	}
 
@@ -11347,6 +11754,16 @@ list_dir_light(void)
 
 		free(file_info);
 
+		/* Print a dividing line between the files list and the
+		 * prompt */
+		fputs(div_line_color, stdout);
+		for (i = term_cols; i--; )
+			putchar(div_line_char);
+		printf("%s%s", NC, default_color);
+
+		if (sort_switch)
+			print_sort_method();
+
 		while (total--)
 			free(list[total]);
 		free(list);
@@ -11534,32 +11951,15 @@ list_dir_light(void)
 
 	fflush(stdout);
 
+	/* If changing sorting method, inform the user about the current
+	 * method */
+	if (sort_switch)
+		print_sort_method();
+
 	/* Free the scandir array */
 	while (total--)
 		free(list[total]);
 	free(list);
-
-	/* If changing sorting method, inform the user about the current
-	 * method */
-	if (sort_switch) {
-		printf("%s*%sSorted by: ", green_b, NC);
-		switch(sort) {
-			case 0: puts("none"); break;
-			case 1: puts("name"); break;
-			case 2: puts("size"); break;
-			case 3: puts("atime"); break;
-			case 4:
-				#if defined(HAVE_ST_BIRTHTIME) \
-				|| defined(__BSD_VISIBLE) || defined(_STATX)
-					puts("btime"); break;
-				#else
-					puts("btime (not found: using ctime)"); break;
-				#endif
-			case 5: puts("ctime"); break;
-			case 6: puts("mtime"); break;
-			case 7: puts("version"); break;
-		}
-	}
 
 /*	clock_t end = clock();
 	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC); */
@@ -12007,7 +12407,8 @@ exec_cmd(char **comm)
 	else if (strcmp(comm[0], "pr") == 0 || strcmp(comm[0], "prop") == 0 
 	|| strcmp(comm[0], "p") == 0) {
 		if (!comm[1]) {
-			puts(_("Usage: pr [ELN/FILE ... n] [a, all] [s, size]"));
+			fputs(_("Usage: pr [ELN/FILE ... n] [a, all] [s, size]\n"),
+				  stderr);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
@@ -12034,26 +12435,8 @@ exec_cmd(char **comm)
 
 					/* #### SORT #### */
 
-	else if (strcmp(comm[0], "st") == 0 || strcmp(comm[0], "sort") == 0) {
-		if (!comm[1] || !is_number(comm[1]) || atoi(comm[1]) < 0
-		|| atoi(comm[1]) > sort_types) {
-			puts(_("Usage: st 0-6\n0 = none, 1 = name, "
-				   "2 = size, 3 = atime, 4 = btime, "
-				   "5 = ctime, 6 = mtime"));
-			exit_code = EXIT_FAILURE;
-			return EXIT_FAILURE;
-		}
-
-		sort = atoi(comm[1]);
-
-		if (cd_lists_on_the_fly) {
-			sort_switch = 1;
-			while (files--)
-				free(dirlist[files]);
-			exit_code = list_dir();
-			sort_switch = 0;
-		}
-	}
+	else if (strcmp(comm[0], "st") == 0 || strcmp(comm[0], "sort") == 0)
+		exit_code = sort_function(comm);
 
 					/* #### LIGHT MODE #### */
 	else if (strcmp(comm[0], "lm") == 0) {
@@ -12072,7 +12455,7 @@ exec_cmd(char **comm)
 			}
 		}
 		else {
-			puts("Usage: lm [on, off]");
+			fputs("Usage: lm [on, off]\n", stderr);
 			exit_code = EXIT_FAILURE;
 		}
 	}
@@ -12082,7 +12465,7 @@ exec_cmd(char **comm)
 		if (comm[1])
 			exit_code = new_instance(comm[1]);
 		else {
-			puts("Usage: x DIR");
+			fputs("Usage: x DIR\n", stderr);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
@@ -16026,10 +16409,12 @@ is enabled by default for non-english locales\
 \n -v, --version\t\t\t show version details and exit\
 \n -x, --ext-cmds\t\t\t allow the use of external commands\
 \n -y, --light-mode\t\t enable the light mode\
-\n -z, --sort METHOD\t\t sort files by METHOD (0-%d)\n"), PNL, 
-		PROGRAM_NAME, sort_types);
+\n -z, --sort METHOD\t\t sort files by METHOD, where METHOD could \
+be: 0 = none, 1 = name, 2 = size, 3 = atime, \
+4 = btime, 5 = ctime, 6 = mtime, 7 = version\n"), PNL, 
+		PROGRAM_NAME);
 
-	printf(_("\nBUILT-IN COMMANDS:\n\n\
+	puts(_("\nBUILT-IN COMMANDS:\n\n\
  /* [DIR]\n\
  bm, bookmarks [a, add PATH] [d, del] [edit] [SHORTCUT or NAME]\n\
  o, open [ELN/FILE] [APPLICATION]\n\
@@ -16049,7 +16434,7 @@ is enabled by default for non-english locales\
  v, paste [sel] [DESTINY]\n\
  pf, prof, profile [ls, list] [set, add, del PROFILE]\n\
  shell [SHELL]\n\
- st, sort 0-%d\n\
+ st, sort [METHOD] [rev]\n\
  msg, messages [clear]\n\
  log [clear]\n\
  history [clear] [-n]\n\
@@ -16069,7 +16454,7 @@ is enabled by default for non-english locales\
  ext [on, off, status]\n\
  ver, version\n\
  fs\n\
- q, quit, exit, zz\n"), sort_types);
+ q, quit, exit, zz\n"));
 
 	puts(_("Run 'cmd' or consult the manpage for more information about "
 		   "each of these commands.\n"));

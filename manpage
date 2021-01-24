@@ -123,8 +123,8 @@ allow the use of external commands
 .B -y, --light-mode
 enable the light mode to speed up CliFM
 .TP
-.B -z, --sort \fR0-7
-choose sorting method (always sorted from less to more): 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version
+.B -z, --sort \fRMETHOD
+sort files by METHOD, where METHOD could be: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version.
 .TP
 
 Options precedence order: 1) command line; 2) configuration file; 3) default values.
@@ -204,8 +204,8 @@ short for 'cp', 'ln', 'mv', 'mkdir', and 'rm' commands respectivelly.
 print file properties for ELN/FILE. Use 'all' to list properties of all files in the current working directory, and 'size' to list them by size.
 .TP
 
-.B st, sort \fR0-7
-Switch sorting methods (always sorted from less to more): 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version
+.B st, sort \fR[METHOD] [rev]
+with no argument, print the current sorting method, else, set sorting method to METHOD, where METHOD is one of: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version. By default, files are sorted from less to more (ex: from 'a' to 'z' if using the "name" method). Use the 'rev' option to invert this ordering. Ex: 'st rev' or 'st 3 rev'. Switch back to the previous ordering running 'st rev' again.
 .TP
 
 .B n, net \fR[smb, ftp, sftp]://ADDRESS [OPTIONS]
