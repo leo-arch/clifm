@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "January 23, 2021" "CliFM 0.25.0+" "CliFM Manual"
+.TH "CLIFM" "1" "January 23, 2021" "CliFM 0.26.0+" "CliFM Manual"
 
 .SH NAME
 CLIFM - A completely CLI-based file manager inspired by Arch Linux' KISS principle
@@ -50,6 +50,7 @@ List of CliFM features:
   19) Commands sequential and conditional execution
   20) Resource opener
   21) Sorting methods
+  22) Bulk rename
 
 .SH RATIONALE
 When it comes to software, Unix/GNU-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the Linux built-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There is no two without three".
@@ -176,6 +177,10 @@ The trash directory is \fI$XDG_DATA_HOME/Trash\fR, usually \fI~/.local/share/Tra
 print a list of currently trashed files allowing you to choose one or more of these files to be undeleted, that is to say, restored to their original location. You can also undelete all trashed files at once using the '*', 'a' or 'all' option.
 .TP
 
+.B br, bulk \fRELN/FILE ...
+rename at once all files passed as arguments to the function. It accepts single and multiple filenames, wildcards, ELN ranges, and the 'sel' keyword. Example: 'br myfile 4-10 sel'. Each filename will be copied into a temporary file, which will be opened with the default text editor (via the \fBmime\fR function), letting the user modify it. Once the file has been modified and saved, the modifications are printed on the screeen and the user is asked whether to proceed with the actual bulk renaming or not.
+.TP
+
 .B b, back \fR[h, hist] [clear] [!ELN]
 unlike 'cd ..', which will send you to the parent directory of the current directory, this command (with no argument) will send you back to the previously visited directory. 
 .sp
@@ -237,12 +242,16 @@ This is CliFM's resource opener. The 'info' option prints the MIME information a
 Each value in the MIME list file has this format: 'mime_type=application args;application args; ... n' or '*.c=application args;application args; ... n'. Example: 'plain/text=nano' or '*.c=geany -p;leafpad;nano'. CliFM will check the first matching line, and if at least one of the specified applications exists, this one will be used to open the corresponding associated filed. Else, the next matching line will be checked. If the MIME file is not found, CliFM will try to import MIME definitions from the default locations for the 'mimeapps.list' file as specified by the Freedesktop specification.
 .TP
 
+.B tips
+print the list of CLiFM tips
+.TP
+
 .B x \fRDIR
 open DIR in a new instance of CliFM using the value of TerminalCmd (from the configuration file) as terminal emulator. If this value is not set, 'xterm' will be used as fallback terminal emulator. This function is only available for graphical environments.
 .TP
 
-.B ;\fRCMD, \fB:\fRCMD
-Skip all CLiFM expansions (see the Built-in Expansions section below) and send the input string (CMD) as is to the system shell.
+.B ;\fR[CMD], \fB:\fR[CMD]
+If no CMD, run the default shell (see below the 'shell' command) in the current working directory. If CMD is specified, skip all CLiFM expansions (see the Built-in Expansions section below) and run the input string (CMD) as is via the default system shell.
 .TP
 
 .B mp, mountpoints
@@ -368,7 +377,7 @@ safely quit CliFM.
 .TP
 \fBA-e:\fR Change to the home directory
 .TP
-\fBA-u:\fR Change up to the parent directory of the current working directory
+\fBA-u:\fR Change to the parent directory
 .TP
 \fBA-j:\fR Change to the previous directory in the directory history list
 .TP
@@ -376,7 +385,9 @@ safely quit CliFM.
 .TP
 \fBA-y:\fR Toggle light mode on/off
 .TP
-\fBA-z:\fR Switch sorting methods
+\fBA-z:\fR Switch to previous sorting method
+.TP
+\fBA-x:\fR Switch to next sorting method
 .TP
 \fBF10:\fR Open the configuration file
 

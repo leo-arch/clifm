@@ -151,11 +151,11 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 /* #define CLEAR puts("\x1b[c") */
 #define CLEAR write(STDOUT_FILENO, "\ec", 3)
-#define VERSION "0.25.2"
+#define VERSION "0.26.0"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "January 24, 2021"
+#define DATE "January 25, 2021"
 #define LICENSE "GPL2+"
 
 /* Define flags for program options and internal use */
@@ -388,6 +388,8 @@ int btime_sort(const struct dirent **a, const struct dirent **b);
 int ctime_sort(const struct dirent **a, const struct dirent **b);
 int mtime_sort(const struct dirent **a, const struct dirent **b);
 
+int bulk_rename(char **args);
+
 /* Still under development */
 int remote_ssh(char *address, char *options);
 int remote_smb(char *address, char *options);
@@ -521,7 +523,7 @@ char *user = (char *)NULL, *path = (char *)NULL,
 	**profile_names = (char **)NULL, *encoded_prompt = (char *)NULL,
 	*last_cmd = (char *)NULL, *term = (char *)NULL,
 	*TMP_DIR = (char *)NULL, div_line_char = -1,
-	**old_pwd = (char **)NULL;
+	**old_pwd = (char **)NULL, *BULK_FILE = (char *)NULL;
 
 const char *TIPS[] = {
 	"If need more speed, try the light mode (A-y)",
@@ -570,6 +572,7 @@ const char *TIPS[] = {
 	"Create a new profile running 'pf add PROFILE'",
 	"Switch profiles using 'pf set PROFILE'",
 	"Delete a profile using 'pf del PROFILE'",
+	"Rename multiple files at once with the bulk rename function: 'br *.txt'",
 	"Copy selected files into CWD by just typing 'v sel'",
 	"Use 'p ELN' to print file properties for ELN",
 	"Deselect all selected files pressing 'A-d'",
@@ -582,6 +585,7 @@ const char *TIPS[] = {
 	"Take a look at the splash screen with the 'splash' command",
 	"Have some fun trying the 'bonus' command",
 	"Use 'A-z' to switch sotring methods",
+	"Launch the default system shell in CWD using ':' or ';'",
 	NULL
 };
 
@@ -595,7 +599,7 @@ const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
 		"colors", "version", "splash", "folders first", 
 		"exit", "quit", "pager", "trash", "undel", "messages", 
 		"mountpoints", "bookmarks", "log", "untrash", "unicode", 
-		"profile", "shell", "mime", "sort", NULL };
+		"profile", "shell", "mime", "sort", "tips", NULL };
 
 #define DEFAULT_PROMPT "\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\
 \\z\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
@@ -1049,6 +1053,199 @@ main(int argc, char **argv)
 			/** #################################
 			 * #     FUNCTIONS DEFINITIONS     #
 			 * ################################# */
+
+int
+bulk_rename(char **args)
+{
+	if (!args[1])
+		return EXIT_FAILURE;
+
+	int exit_status = EXIT_SUCCESS;
+
+	FILE *bulk_fp;
+
+	bulk_fp = fopen(BULK_FILE, "w+");
+	if (!bulk_fp) {
+		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", BULK_FILE, 
+			 strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	/* Copy all files to be renamed to the bulk file */
+	size_t i, arg_total = 0;
+	for (i = 1; args[i]; i++)
+		fprintf(bulk_fp, "%s\n", args[i]);
+
+	arg_total = i;
+
+	fclose(bulk_fp);
+
+	/* Store the last modification time of the bulk file. This time
+	 * will be later comapred to the modification time of the same
+	 * file after shown to the user */
+	struct stat file_attrib;
+	stat(BULK_FILE, &file_attrib);
+	time_t mtime_bfr = file_attrib.st_mtime;
+
+	/* The application opening the bulk file could print some stuff to
+	 * stderr. Silence it */
+	FILE *fp_out = fopen("/dev/null", "w");
+	/* Store stderr current value */
+	int stderr_bk = dup(STDERR_FILENO);
+
+	/* Redirect stderr to /dev/null */
+	dup2(fileno(fp_out), STDERR_FILENO);
+
+	fclose(fp_out);
+
+	/* Open the bulk file via the mime function */
+	char *cmd[] = { "mm", BULK_FILE, NULL };
+	mime_open(cmd);
+	
+	/* Restore stderr to previous value */
+	dup2(stderr_bk, STDERR_FILENO);
+	close(stderr_bk);
+
+	/* Compare the new modification time to the stored one: if they
+	 * match, nothing was modified */
+	stat(BULK_FILE, &file_attrib);
+	if (mtime_bfr == file_attrib.st_mtime) {
+		printf("bulk: Nothing to do\n");
+		if (remove(BULK_FILE) == -1) {
+			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+				 BULK_FILE, strerror(errno));
+			exit_status = EXIT_FAILURE;
+		}
+		return exit_status;
+	}
+
+	bulk_fp = fopen(BULK_FILE, "r");
+	if (!bulk_fp) {
+		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", BULK_FILE, 
+			 strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	/* Go back to the beginning of the bulk file */
+	fseek(bulk_fp, 0, SEEK_SET);
+
+	/* Make sure there are as many lines in the bulk file as files
+	 * to be renamed */
+	size_t file_total = 1;
+	char tmp_line[256];
+	while (fgets(tmp_line, sizeof(tmp_line), bulk_fp)) {
+		file_total++;
+	}
+
+	if (arg_total != file_total) {
+		fprintf(stderr, "bulk: Line mismatch in rename file\n");
+		fclose(bulk_fp);
+		if (remove(BULK_FILE) == -1)
+			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+				 BULK_FILE, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	/* Go back to the beginning of the bulk file, again */
+	fseek(bulk_fp, 0L, SEEK_SET);
+
+	size_t line_size = 0;
+	char *line = (char *)NULL;
+	ssize_t line_len = 0;
+	int modified = 0;
+
+	i = 1;
+
+	/* Print what would be done */
+	while ((line_len = getline(&line, &line_size, bulk_fp)) > 0) {
+		if (line[line_len - 1] == '\n')
+			line[line_len - 1] = 0x00;
+		if (strcmp(args[i], line) != 0) {
+			printf("%s %s->%s %s\n", args[i], cyan, NC, line);
+			modified++;
+		}
+		i++;
+	}
+
+	/* If no filename was modified */
+	if (!modified) {
+		printf("bulk: Nothing to do\n");
+		if (remove(BULK_FILE) == -1) {
+			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+				 BULK_FILE, strerror(errno));
+			exit_status = EXIT_FAILURE;
+		}
+		free(line);
+		fclose(bulk_fp);
+		return exit_status;
+	}
+
+	/* Ask the user for confirmation */
+	char *answer = (char *)NULL;
+	while (!answer) {
+		answer = readline("Continue? [y/N] ");
+
+		if (strlen(answer) > 1) {
+			free(answer);
+			answer = (char *)NULL;
+			continue;
+		}
+
+		switch(*answer) {
+			case 'y':
+			case 'Y': break;
+
+			case 'n':
+			case 'N':
+			case '\0':
+				free(answer);
+				free(line);
+				fclose(bulk_fp);
+				return EXIT_SUCCESS; 
+
+			default:
+				free(answer);
+				answer = (char *)NULL;
+				break;
+		}
+	}
+
+	free(answer);
+
+	/* Once again */
+	fseek(bulk_fp, 0L, SEEK_SET);
+
+	i = 1;
+
+	/* Compose the mv commands and execute them */
+	while ((line_len = getline(&line, &line_size, bulk_fp)) > 0) {
+		if (line[line_len - 1] == '\n')
+			line[line_len - 1] = 0x00;
+		if (strcmp(args[i], line) != 0) {
+			char *cmd[] = { "mv", args[i], line, NULL };
+			exit_status = launch_execve(cmd, FOREGROUND);
+		}
+		i++;
+	}
+
+	free(line);
+
+	fclose(bulk_fp);
+
+	if (remove(BULK_FILE) == -1) {
+		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+			 BULK_FILE, strerror(errno));
+		exit_status = EXIT_FAILURE;
+	}
+
+	if (cd_lists_on_the_fly) {
+		while (files--)
+			free(dirlist[files]);
+		exit_status = list_dir();
+	}
+
+	return exit_status;
+}
 
 void
 print_sort_method(void)
@@ -3771,7 +3968,9 @@ is_internal_c(const char *cmd)
 					"history", "hf", "hidden", "path", "cwd", "splash",
 					"ver", "version", "?", "help", "cmd", "commands",
 					"colors", "cc", "fs", "mm", "mime", "x", "n",
-					"net", "lm", "st", "sort", "fc", NULL };
+					"net", "lm", "st", "sort", "fc", "tips", "br",
+					"bulk", NULL };
+
 	short found = 0;
 	size_t i;
 	for (i = 0; int_cmds[i]; i++) {
@@ -4575,11 +4774,12 @@ escape_str(char *str)
 int
 is_internal(const char *cmd)
 /* Check cmd against a list of internal commands. Used by parse_input_str()
- * to know if it should perform additional expansions */
+ * to know if it should perform additional expansions. Only commands
+ * dealing with filenames should be here */
 {
 	const char *int_cmds[] = { "o", "open", "cd", "p", "pr", "prop", "t",
 							   "tr", "trash", "s", "sel", "mm", "mime",
-							   NULL };
+							   "bm", "bookmarks", "br", "bulk", NULL };
 	short found = 0;
 	size_t i;
 
@@ -6941,6 +7141,8 @@ free_stuff(void)
 	size_t i = 0;
 
 	free(TMP_DIR);
+
+	free(BULK_FILE);
 	
 	if (encoded_prompt)
 		free(encoded_prompt);
@@ -8920,8 +9122,8 @@ init_config(void)
 				sys_shell = get_sys_shell();
 				if (!sys_shell) {
 					/* Fallback to FALLBACK_SHELL */
-					sys_shell = (char *)xcalloc(strlen(FALLBACK_SHELL), 
-												sizeof(char));
+					sys_shell = (char *)xcalloc(strlen(FALLBACK_SHELL)
+												+ 1, sizeof(char));
 					strcpy(sys_shell, FALLBACK_SHELL);
 				}
 			}
@@ -9061,13 +9263,17 @@ init_config(void)
 	}
 
 	if (selfile_ok) {
+
+		size_t tmp_dir_len = strlen(TMP_DIR);
+
+		BULK_FILE = (char *)xcalloc(tmp_dir_len + 14, sizeof(char));
+		sprintf(BULK_FILE, "%s/.bulk_rename", TMP_DIR);
+
 		/* Define the user's sel file. There will be one per
 		 * user-profile (/tmp/clifm/username/.selbox_PROFILE) */
 
 		if (sel_file_user)
 			free(sel_file_user);
-
-		size_t tmp_dir_len = strlen(TMP_DIR);
 
 		if (!share_selbox) {
 			size_t prof_len = 0;
@@ -9986,9 +10192,10 @@ parse_input_str(char *str)
 
 	/* If the command is internal, go on for more expansions; else, just
 	 * return the input string array */
+
 	if(!is_internal(substr[0]))
 		return substr;
-
+	
 	/* #############################################################
 	 * #			   ONLY FOR INTERNAL COMMANDS 				   # 
 	 * #############################################################*/
@@ -10857,7 +11064,8 @@ list_dir(void)
 
 	/* Get the list of files in CWD according to sorting method
 	 * 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime,
-	 * 5 = ctime, 6 = mtime, 7 = version */
+	 * 5 = ctime, 6 = mtime, 7 = version. Reverse sorting is handled
+	 * by the sorting fuctions themselves */
 	switch(sort) {
 		case 0:
 			total = scandir(path, &list, skip_implied_dot, NULL);
@@ -12197,10 +12405,16 @@ exec_cmd(char **comm)
 		return exit_code;
 	}
 
-	/* If double semi colon or colon (or ";:" or ":;") */
 	if (comm[0][0] == ';' || comm[0][0] == ':') {
-		if (comm[0][1] == ';' || comm[0][1] == ':') {
-			fprintf(stderr, _("%s: '%.2s': Syntax error\n"),
+		if (!comm[0][1]) {
+			/* If just ":" or ";", launch the default shell */
+			char *cmd[] = { sys_shell, NULL };
+			exit_code = launch_execve(cmd, FOREGROUND);
+			return exit_code;
+		}
+		/* If double semi colon or colon (or ";:" or ":;") */
+		else if (comm[0][1] == ';' || comm[0][1] == ':') {
+			fprintf(stderr, _("%s: '%s': Syntax error\n"),
 					PROGRAM_NAME, comm[0]);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
@@ -12447,14 +12661,44 @@ exec_cmd(char **comm)
 	else if (comm[0][0] == '!' && (isdigit(comm[0][1]) 
 	|| (comm[0][1] == '-' && isdigit(comm[0][2])) || comm[0][1] == '!'))
 		exit_code = run_history_cmd(comm[0] + 1);
-	
 
-	/*     ############### MINOR FUNCTIONS ##################     */
+	/*    ############### BULK RENAME ##################     */
+	else if (strcmp(comm[0], "br") == 0
+	|| strcmp(comm[0], "bulk") == 0) {
+		if (!comm[1]) {
+			fputs(_("Usage: br, bulk ELN/FILE ...\n"), stderr);
+			exit_code = EXIT_FAILURE;
+			return EXIT_FAILURE;
+		}
+		if (strcmp(comm[1], "--help") == 0) {
+			puts(_("Usage: br, bulk ELN/FILE ...\n"));
+			return EXIT_SUCCESS;
+		}
+		exit_code = bulk_rename(comm);
+	}
 
-					/* #### SORT #### */
-
-	else if (strcmp(comm[0], "st") == 0 || strcmp(comm[0], "sort") == 0)
+	/*      ################ SORT ##################     */
+	else if (strcmp(comm[0], "st") == 0 || strcmp(comm[0], "sort") == 0) {
+		if (comm[1] && strcmp(comm[1], "--help") == 0) {
+			puts(_("Usage: st [METHOD] [rev]\nMETHOD: 0 = none, "
+				   "1 = name, 2 = size, 3 = atime, 4 = btime, "
+				   "5 = ctime, 6 = mtime, 7 = version"));
+		    return EXIT_SUCCESS;
+		}
 		exit_code = sort_function(comm);
+	}
+
+	/* ##################################################
+	 * #			     MINOR FUNCTIONS 				#
+	 * ##################################################*/
+
+					/* #### TIPS #### */
+	else if (strcmp(comm[0], "tips") == 0) {
+		size_t i;
+		for (i = 0; i < tipsn; i++)
+			printf("%sTIP %d%s: %s\n", bold, i, NC, TIPS[i]);
+		return EXIT_SUCCESS;
+	}
 
 					/* #### LIGHT MODE #### */
 	else if (strcmp(comm[0], "lm") == 0) {
@@ -15224,9 +15468,7 @@ bookmarks_function(char **cmd)
 void
 dir_size(char *dir)
 {
-	#ifndef DU_TMP_FILE
-		#define DU_TMP_FILE "/tmp/.du_size"
-	#endif
+	#define DU_TMP_FILE "/tmp/.du_size"
 
 	if (!dir)
 		return;
@@ -16447,10 +16689,11 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
  c, l, m, md, r\n\
  p, pr, prop [ELN/FILE ... n] [s, size] [a, all]\n\
  mm, mime [info ELN/FILE] [edit]\n\
- ;CMD, :CMD\n\
+ ;[CMD], :[CMD]\n\
  mp, mountpoints\n\
  v, paste [sel] [DESTINY]\n\
  pf, prof, profile [ls, list] [set, add, del PROFILE]\n\
+ br, bulk ELN/FILE ...\n\
  shell [SHELL]\n\
  st, sort [METHOD] [rev]\n\
  msg, messages [clear]\n\
@@ -16459,6 +16702,7 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
  edit [APPLICATION]\n\
  alias [import FILE]\n\
  splash\n\
+ tips\n\
  path, cwd\n\
  cmd, commands\n\
  lm [on, off]\n\
@@ -16490,8 +16734,7 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
  A-d:	Deselect all selected files\n\
  A-r:	Change to the root directory\n\
  A-e:	Change to the home directory\n\
- A-u:	Change up to the parent directory of the current working \
-directory\n\
+ A-u:	Change to the parent directory\n\
  A-j:	Change to the previous directory in the directory history \
 list\n\
  A-k:	Change to the next directory in the directory history list\n\
