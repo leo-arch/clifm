@@ -1056,6 +1056,15 @@ main(int argc, char **argv)
 
 int
 bulk_rename(char **args)
+/* Rename a bulk of files at once. Takes files to be renamed as
+ * arguments, and returns zero on success and one on error. The
+ * procedude is quite simple: filenames to be renamed are copied into
+ * a temporary file, which is opened via the mime function and shown
+ * to the user to modify it. Once the filenames have been modified and
+ * saved, modifications are printed on the screen and the user is
+ * asked whether to perform the actual bulk renaming (via mv) or not
+ * I took this bulk rename method, just because it is quite simple and
+ * KISS, from the fff filemanager. So, thanks fff! */
 {
 	if (!args[1])
 		return EXIT_FAILURE;
@@ -1071,10 +1080,25 @@ bulk_rename(char **args)
 		return EXIT_FAILURE;
 	}
 
-	/* Copy all files to be renamed to the bulk file */
 	size_t i, arg_total = 0;
-	for (i = 1; args[i]; i++)
+
+	/* Copy all files to be renamed to the bulk file */
+	for (i = 1; args[i]; i++) {
+
+		/* Dequote filename, if necessary */
+		if (strchr(args[i], '\\')) {
+			char *deq_file = dequote_str(args[i], 0);
+			if (!deq_file) {
+				fprintf(stderr, "bulk: '%s': Error dequoting filename\n",
+						args[i]);
+				continue;
+			}
+			strcpy(args[i], deq_file);
+			free(deq_file);
+		}
+
 		fprintf(bulk_fp, "%s\n", args[i]);
+	}
 
 	arg_total = i;
 
