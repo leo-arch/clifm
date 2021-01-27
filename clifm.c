@@ -151,11 +151,11 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 /* #define CLEAR puts("\x1b[c") */
 #define CLEAR write(STDOUT_FILENO, "\ec", 3)
-#define VERSION "0.26.0"
+#define VERSION "0.27.0"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "January 25, 2021"
+#define DATE "January 27, 2021"
 #define LICENSE "GPL2+"
 
 /* Define flags for program options and internal use */
@@ -389,6 +389,8 @@ int ctime_sort(const struct dirent **a, const struct dirent **b);
 int mtime_sort(const struct dirent **a, const struct dirent **b);
 
 int bulk_rename(char **args);
+int archiver(char **args, char mode);
+int is_compressed(char *file);
 
 /* Still under development */
 int remote_ssh(char *address, char *options);
@@ -522,8 +524,8 @@ char *user = (char *)NULL, *path = (char *)NULL,
 	*ls_colors_bk = (char *)NULL, *MIME_FILE = (char *)NULL,
 	**profile_names = (char **)NULL, *encoded_prompt = (char *)NULL,
 	*last_cmd = (char *)NULL, *term = (char *)NULL,
-	*TMP_DIR = (char *)NULL, div_line_char = -1,
-	**old_pwd = (char **)NULL, *BULK_FILE = (char *)NULL;
+	*TMP_DIR = (char *)NULL, div_line_char = -1, *opener = (char *)NULL,
+	**old_pwd = (char **)NULL;
 
 const char *TIPS[] = {
 	"If need more speed, try the light mode (A-y)",
@@ -536,24 +538,25 @@ const char *TIPS[] = {
 	"Use ranges (ELN-ELN) to easily move multiple files: 'm 3-12 ELN/DIR'",
 	"Trash files with a simple 't ELN'",
 	"Get mime information for a file: 'mm info ELN'",
-	"Edit the mime list file with 'mm edit'",
+	"Edit the mimelist file with 'mm edit'",
 	"If too many files are listed, try enabling the pager ('pg on')",
 	"Once in the pager, go backwards pressing the keyboard shortcut provided by your terminal emulator",
 	"Press 'q' to stop the pager",
 	"Press 'A-l' to switch to long view mode",
 	"Search for files using the slash command: '/*.png'",
-	"Add a new bookmark by just entering 'bm ELN'",
+	"Add a new bookmark by just entering 'bm ELN/FILE'",
 	"Use c, l, m, md, and r instead of cp, ln, mv, mkdir, and rm",
 	"Access a remote file system using the 'net' command",
 	"Manage default associated applications with the 'mime' command",
 	"Go back and forth in the directory history with 'A-j' and 'A-k'",
 	"Open a new instance of CliFM with the 'x' command: 'x ELN/DIR'",
 	"Send a command directly to the system shell with ';CMD'",
-	"Run the last executed command by just typing '!!'",
+	"Run the last executed command by just running '!!'",
 	"Import aliases from file using 'alias import FILE'",
+	"List available aliases by running 'alias'",
 	"Open and edit the configuration file with 'edit'",
 	"Find a description for each CLiFM command running 'cmd'",
-	"Print the color codes list typing 'cc'",
+	"Print the color codes list entering 'cc'",
 	"Press 'A-i' to toggle hidden files on/off",
 	"List mountpoints by pressing 'A-m'",
 	"Allow the use of shell commands with the -x option: 'clifm -x'",
@@ -568,24 +571,26 @@ const char *TIPS[] = {
 	"Customize color codes using the configuration file",
 	"Open the bookmarks manager by just pressing 'A-b'",
 	"Chain commands using ; and &&: 's 2 7-10; r sel'",
-	"Add emojis to the prompt copying them to the Prompt line in the configuration file",
-	"Create a new profile running 'pf add PROFILE'",
+	"Add emojis to the prompt by copying them to the Prompt line in the configuration file",
+	"Create a new profile running 'pf add PROFILE' or 'clifm -P PROFILE'",
 	"Switch profiles using 'pf set PROFILE'",
 	"Delete a profile using 'pf del PROFILE'",
-	"Rename multiple files at once with the bulk rename function: 'br *.txt'",
-	"Copy selected files into CWD by just typing 'v sel'",
+	"Copy selected files into CWD by just running 'v sel'",
 	"Use 'p ELN' to print file properties for ELN",
-	"Deselect all selected files pressing 'A-d'",
-	"Select all files in CWD pressing 'A-a'",
-	"Jump to the Selection Box pressing 'A-s'",
+	"Deselect all selected files by pressing 'A-d'",
+	"Select all files in CWD by pressing 'A-a'",
+	"Jump to the Selection Box by pressing 'A-s'",
 	"Restore trashed files using the 'u' command",
 	"Empty the trash bin running 't clear'",
 	"Press A-f to toggle list-folders-first on/off",
 	"Use the 'fc' command to disable the files counter",
 	"Take a look at the splash screen with the 'splash' command",
 	"Have some fun trying the 'bonus' command",
-	"Use 'A-z' to switch sotring methods",
 	"Launch the default system shell in CWD using ':' or ';'",
+	"Use 'A-z' and 'A-x' to switch sorting methods",
+	"Reverse sorting order using the 'rev' option: 'st rev'",
+	"Compress and decompress files using the 'ac' and 'ad' commands respectivelly",
+	"Rename multiple files at once with the bulk rename function: 'br *.txt'",
 	NULL
 };
 
@@ -596,7 +601,7 @@ size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
 const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
 		"move", "paste", "sel", "selbox", "desel", "refresh", 
 		"edit", "history", "hidden", "path", "help", "commands", 
-		"colors", "version", "splash", "folders first", 
+		"colors", "version", "splash", "folders first", "opener", 
 		"exit", "quit", "pager", "trash", "undel", "messages", 
 		"mountpoints", "bookmarks", "log", "untrash", "unicode", 
 		"profile", "shell", "mime", "sort", "tips", NULL };
@@ -1055,9 +1060,512 @@ main(int argc, char **argv)
 			 * ################################# */
 
 int
+is_compressed(char *file)
+/* Run the 'file' command on FILE and look for "archive" and
+ * "compressed" strings in its output. Returns zero if compressed,
+ * one if not, and -1 in case of error */
+{
+	if (!file || !*file) {
+		fputs(_("Error opening temporary file\n"), stderr);
+		return -1;
+	}
+	
+	char ARCHIVER_TMP_FILE[PATH_MAX] = "";
+	sprintf(ARCHIVER_TMP_FILE, "%s/archiver_tmp", TMP_DIR);
+
+	if (access(ARCHIVER_TMP_FILE, F_OK) == 0)
+		remove(ARCHIVER_TMP_FILE);
+	
+	FILE *file_fp = fopen(ARCHIVER_TMP_FILE, "w");
+
+	if (!file_fp) {
+		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+				ARCHIVER_TMP_FILE, strerror(errno));
+		return -1;
+	}
+
+	FILE *file_fp_err = fopen("/dev/null", "w");
+
+	if (!file_fp_err) {
+		fprintf(stderr, "%s: '/dev/null': %s\n", PROGRAM_NAME,
+				strerror(errno));
+		fclose(file_fp);
+		return -1;
+	}
+
+	int stdout_bk = dup(STDOUT_FILENO); /* Store original stdout */
+	int stderr_bk = dup(STDERR_FILENO); /* Store original stderr */
+
+	/* Redirect stdout to the desired file */
+	if (dup2(fileno(file_fp), STDOUT_FILENO) == -1 ) {
+		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+		fclose(file_fp);
+		fclose(file_fp_err);
+		return -1;
+	}
+	
+	/* Redirect stderr to /dev/null */
+	if (dup2(fileno(file_fp_err), STDERR_FILENO) == -1) {
+		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+		fclose(file_fp);
+		fclose(file_fp_err);
+		return -1;
+	}
+	
+	fclose(file_fp);
+	fclose(file_fp_err);
+
+	char *cmd[] = { "file", "-b", file, NULL };
+	int ret = launch_execve(cmd, FOREGROUND);
+	
+	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
+	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
+	close(stdout_bk);
+	close(stderr_bk);
+
+	if (ret != EXIT_SUCCESS)
+		return -1;
+
+	int compressed = 0;
+	if (access(ARCHIVER_TMP_FILE, F_OK) == 0) {
+		file_fp = fopen(ARCHIVER_TMP_FILE, "r");
+		if (file_fp) {
+			char line[255] = "";
+			fgets(line, sizeof(line), file_fp);
+			char *ret = strstr(line, "archive");
+			if (ret)
+				compressed = 1;
+			else {
+				ret = strstr(line, "compressed");
+				if (ret)
+					compressed = 1;
+			}
+			fclose(file_fp);
+		}
+		remove(ARCHIVER_TMP_FILE);
+	}
+
+	if (compressed)
+		return EXIT_SUCCESS;
+
+	return EXIT_FAILURE;
+}
+
+int
+archiver(char **args, char mode)
+/* Handle archives or compressed files (ARGS) according to MODE: 'c'
+ * for compression and 'd' for decompression (including listing,
+ * extracting, repacking, and mounting). Returns zero on success and
+ * one on error */
+{
+	size_t i;
+	int uncompressed = 0, exit_status = EXIT_SUCCESS;
+
+	if (!args[1])
+		return EXIT_FAILURE;
+
+	if (mode == 'c') {
+
+			/* ##################################
+			 * #          COMPRESSION		    #
+			 * ##################################*/
+
+		/* Ask for archive name */
+		puts(_("Use extension to specify archive type.\n"
+			   "Defaults to .tar.gz"));
+		char *name = (char *)NULL;
+		while (!name) {
+			name = rl_no_hist(_("Archive name ('q' to quit): "));
+
+			if (!name)
+				continue;
+
+			if (!*name) {
+				free(name);
+				name = (char *)NULL;
+				continue;
+			}
+
+			if (*name == 'q' && name[1] == 0x00) {
+				free(name);
+				return EXIT_SUCCESS;
+			}
+		}
+
+		/* Escape the string, if needed */
+		char *esc_name = escape_str(name);
+		free(name);
+
+		if (!esc_name) {
+			fprintf(stderr, _("archiver: '%s': Error escaping "
+					"string\n"), name);
+			return EXIT_FAILURE;
+		}
+
+		/* Construct the command */
+		char *cmd = (char *)NULL;
+		char *ext_ok = strchr(esc_name, '.');
+		size_t cmd_len = strlen(esc_name) + 10 + ((!ext_ok) ? 8 : 0);
+
+		cmd = (char *)xcalloc(cmd_len, sizeof(char));
+		/* If name has no extension, add the default */
+		sprintf(cmd, "atool -a %s%s", esc_name, (!ext_ok)
+									  ? ".tar.gz" : "");
+
+		for (i = 1; args[i]; i++) {
+			cmd_len += strlen(args[i]) + 1;
+			cmd = (char *)xrealloc(cmd, (cmd_len + 1) * sizeof(char));
+			strcat(cmd, " ");
+			strcat(cmd, args[i]);
+		}
+
+		if (launch_execle(cmd) != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
+
+		free(cmd);
+		free(esc_name);
+
+		return exit_status;
+	}
+
+	/* mode == 'd' */
+
+			/* ##################################
+			 * #         DECOMPRESSION		    #
+			 * ##################################*/
+
+	/* 1) Get operation to be performed */
+	printf(_("%s[e]%sxtract %s[E]%sxtract-to-dir %s[l]%sist "
+		  "%s[m]%sount %s[r]%sepack %s[q]%suit\n"), bold, NC, bold,
+		  NC, bold, NC, bold, NC, bold, NC, bold, NC);
+
+	char *operation = (char *)NULL;
+	char sel_op = 0;
+	size_t files_num = 0;
+
+	while (!operation) {
+		operation = rl_no_hist(_("Operation: "));
+
+		if (!operation)
+			continue;
+
+		if (operation && (!operation[0] || operation[1] != '\0')) {
+			free(operation);
+			operation = (char *)NULL;
+			continue;
+		}
+
+		switch(*operation) {
+			case 'e':
+			case 'E':
+			case 'l':
+			case 'm':
+			case 'r':
+				sel_op = *operation;
+				free(operation);
+			break;
+
+			case 'q':
+				free(operation);
+				return EXIT_SUCCESS;
+
+			default:
+				free(operation);
+				operation = (char *)NULL;
+			break;
+		}
+
+		if (sel_op)
+			break;
+	}
+
+	/* 2) Prepare files based on operation */
+	char *dec_files = (char *)NULL;
+
+	switch(sel_op) {
+		case 'e':
+		case 'r': {
+
+			/* Store all filenames in one single variable */
+			size_t len = 1;
+			dec_files = (char *)xnmalloc(len, sizeof(char));
+			*dec_files = 0x00;
+
+			for (i = 1; args[i]; i++) {
+
+				/* Deescape string, if necessary */
+				char *deq_str = (char *)NULL;
+				char *tmp = strchr(args[i], '\\');
+
+				if (tmp) {
+					deq_str = dequote_str(args[i], 0);
+					tmp = (char *)NULL;
+				}
+				
+				/* Do not add a file to the list of files if not
+				 * compressed */
+				int ret = is_compressed((deq_str) ? deq_str : args[i]);
+
+				if (deq_str)
+					free(deq_str);
+
+				if (ret == -1) {
+				/* Error message is printed by is_compressed() itself */
+					free(dec_files);
+					return EXIT_FAILURE;
+				}
+
+				if (ret == 1) {
+					fprintf(stderr, _("archiver: '%s': Not an "
+							"archive\n"), args[i]);
+					continue;
+				}
+
+				len += strlen(args[i]) + 1;
+				dec_files = (char *)xrealloc(dec_files, (len + 1)
+											 * sizeof(char));
+				strcat(dec_files, " ");
+				strcat(dec_files, args[i]);
+			}
+		}
+		break;
+
+		case 'E':
+		case 'l':
+		case 'm': {
+
+			/* Dequote filenames, if neccessary */
+			for (i = 1; args[i]; i++) {
+
+				files_num++;
+
+				 if (strchr(args[i], '\\')) {
+					char *deq_name = dequote_str(args[i], 0);
+
+					if (!deq_name) {
+						fprintf(stderr, _("archiver: '%s': Error "
+								"dequoting filename\n"), args[i]);
+						return EXIT_FAILURE;
+					}
+
+					strcpy(args[i], deq_name);
+					free(deq_name);
+					deq_name = (char *)NULL;
+				}
+			}
+		}
+		break;
+	}
+
+	/* 3) Construct the corresponding commands */
+
+	switch(sel_op) {
+
+			/* ########## EXTRACT ############## */
+
+		case 'e': {
+			char *cmd = (char *)NULL;
+			cmd = (char *)xnmalloc(strlen(dec_files) + 13,
+								   sizeof(char));
+
+			sprintf(cmd, "atool -x -e %s", dec_files);
+
+			if (launch_execle(cmd) != EXIT_SUCCESS)
+				exit_status = EXIT_FAILURE;
+
+			free(cmd);
+			free(dec_files);
+		}
+		break;
+
+		/* ########## EXTRACT TO DIR ############## */
+
+		case 'E':
+			for (i = 1; args[i]; i++) {
+
+				/* Do not attempt to extract a file that is not
+				 * an archive */
+				int ret = is_compressed(args[i]);
+
+				if (ret == -1)
+					return EXIT_FAILURE;
+
+				if (ret == 1) {
+					fprintf(stderr, _("archiver: '%s': Not an "
+							"archive\n"), args[i]);
+					continue;
+				}
+
+				/* Ask for extraction path */
+				printf("%sFile%s: %s\n", bold, NC, args[i]);
+
+				char *ext_path = (char *)NULL;
+
+				while (!ext_path) {
+					ext_path = rl_no_hist("Path: ");
+
+					if (!ext_path)
+						continue;
+
+					if (ext_path && !*ext_path) {
+						free(ext_path);
+						ext_path = (char *)NULL;
+						continue;
+					}
+				}
+
+				/* Construct and execute cmd */
+				char *cmd[] = { "atool", "-X", ext_path, args[i],
+								NULL };
+
+				if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+					exit_status = EXIT_FAILURE;
+
+				free(ext_path);
+				ext_path = (char *)NULL;
+			}
+		break;
+
+			/* ########## LIST ############## */
+
+		case 'l':
+			for (i = 1; args[i]; i++) {
+
+				printf("%s%sFile%s: %s\n", (i > 1) ? "\n" : "",
+					   bold, NC, args[i]);
+
+				char *cmd[] = { "atool", "-l", args[i], NULL };
+
+				if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+					exit_status = EXIT_FAILURE;
+			}
+		break;
+
+			/* ########## MOUNT ############## */
+
+		case 'm':
+			for (i = 1; args[i]; i++) {
+
+				/* Do not attempt to mount a file that is not
+				 * an archive */
+				int ret = is_compressed(args[i]);
+
+				if (ret == -1)
+					return EXIT_FAILURE;
+
+				if (ret == 1) {
+					fprintf(stderr, _("archiver: '%s': Not an "
+							"archive\n"), args[i]);
+					continue;
+				}
+
+				/* Create mountpoint */
+				char *mountpoint = (char *)NULL;
+				mountpoint = (char *)xnmalloc(strlen(CONFIG_DIR)
+									+ strlen(args[i]) + 9,
+									sizeof(char));
+
+				sprintf(mountpoint, "%s/mounts/%s", CONFIG_DIR,
+						args[i]);
+
+				char *dir_cmd[] = { "mkdir", "-pm700", mountpoint,
+									NULL };
+
+				if (launch_execve(dir_cmd, FOREGROUND) != EXIT_SUCCESS) {
+					free(mountpoint);
+					return EXIT_FAILURE;
+				}
+
+				/* Construct and execute cmd */
+				char *cmd[] = { "archivemount", args[i], mountpoint,
+								NULL };
+
+				if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS) {
+					free(mountpoint);
+					continue;
+				}
+
+				/* List content of mountpoint if there is only
+				 * one archive */
+				if (files_num > 1) {
+					printf(_("%s%s%s: Succesfully mounted "
+							"on %s\n"), bold, args[i], NC, mountpoint);
+					free(mountpoint);
+					continue;
+				}
+
+				if (chdir(mountpoint) == -1) {
+					fprintf(stderr, "archiver: %s: %s\n", mountpoint,
+							strerror(errno));
+					free(mountpoint);
+					return EXIT_FAILURE;
+				}
+
+				free(path);
+				path = (char *)xcalloc(strlen(mountpoint) + 1,
+									   sizeof(char));
+				strcpy(path, mountpoint);
+				free(mountpoint);
+
+				if (cd_lists_on_the_fly) {
+					while(files--)
+						free(dirlist[files]);
+					if (list_dir() != EXIT_SUCCESS)
+						exit_status = EXIT_FAILURE;
+					add_to_dirhist(path);
+				}
+			}
+		break;
+
+			/* ########## REPACK ############## */
+
+		case 'r': {
+			/* Ask for new archive format */
+			puts("Enter 'q' to quit");
+
+			char *format = (char *)NULL;
+			while (!format) {
+				format = rl_no_hist(_("New archive format "
+									"(Ex: .tar.xz): "));
+				if (!format)
+					continue;
+
+				if (!*format || (*format != '.' && *format != 'q')) {
+					free(format);
+					format = (char *)NULL;
+					continue;
+				}
+
+				if (*format == 'q' && format[1] == 0x00) {
+					free(format);
+					free(dec_files);
+					return EXIT_SUCCESS;
+				}
+			}
+
+			/* Construct and execute cmd */
+			char *cmd = (char *)NULL;
+			cmd = (char *)xnmalloc(strlen(format) + strlen(dec_files)
+								   + 16, sizeof(char));
+			sprintf(cmd, "arepack -F %s -e %s", format, dec_files);
+
+			if (launch_execle(cmd) != EXIT_SUCCESS)
+				exit_status = EXIT_FAILURE;
+
+			free(format);
+			free(dec_files);
+			free(cmd);
+		}
+		break;
+	}
+
+	return exit_status;
+}
+
+int
 bulk_rename(char **args)
-/* Rename a bulk of files at once. Takes files to be renamed as
- * arguments, and returns zero on success and one on error. The
+/* Rename a bulk of files (ARGS) at once. Takes files to be renamed
+ * as arguments, and returns zero on success and one on error. The
  * procedude is quite simple: filenames to be renamed are copied into
  * a temporary file, which is opened via the mime function and shown
  * to the user to modify it. Once the filenames have been modified and
@@ -1070,6 +1578,9 @@ bulk_rename(char **args)
 		return EXIT_FAILURE;
 
 	int exit_status = EXIT_SUCCESS;
+
+	char BULK_FILE[PATH_MAX] = "";
+	sprintf(BULK_FILE, "%s/.bulk_rename", TMP_DIR);
 
 	FILE *bulk_fp;
 
@@ -1105,7 +1616,7 @@ bulk_rename(char **args)
 	fclose(bulk_fp);
 
 	/* Store the last modification time of the bulk file. This time
-	 * will be later comapred to the modification time of the same
+	 * will be later compared to the modification time of the same
 	 * file after shown to the user */
 	struct stat file_attrib;
 	stat(BULK_FILE, &file_attrib);
@@ -1247,7 +1758,8 @@ bulk_rename(char **args)
 			line[line_len - 1] = 0x00;
 		if (strcmp(args[i], line) != 0) {
 			char *cmd[] = { "mv", args[i], line, NULL };
-			exit_status = launch_execve(cmd, FOREGROUND);
+			if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+				exit_status = EXIT_FAILURE;
 		}
 		i++;
 	}
@@ -1265,7 +1777,8 @@ bulk_rename(char **args)
 	if (cd_lists_on_the_fly) {
 		while (files--)
 			free(dirlist[files]);
-		exit_status = list_dir();
+		if (list_dir() != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
 	}
 
 	return exit_status;
@@ -1692,7 +2205,7 @@ remote_ftp(char *address, char *options)
 	struct stat file_attrib;
 	if (stat(rmountpoint, &file_attrib) == -1) {
 		char *mkdir_cmd[] = { "mkdir", "-p", rmountpoint, NULL };
-		if (launch_execve(mkdir_cmd, FOREGROUND) != 0) {
+		if (launch_execve(mkdir_cmd, FOREGROUND) != EXIT_SUCCESS) {
 			fprintf(stderr, _("%s: '%s': Cannot create mountpoint\n"),
 					PROGRAM_NAME, rmountpoint);
 			free(rmountpoint);
@@ -1701,7 +2214,7 @@ remote_ftp(char *address, char *options)
 	}
 
 	else if (count_dir(rmountpoint) > 2) {
-		fprintf(stderr, _("%s: '%s': Mounpoint is not empty\n"),
+		fprintf(stderr, _("%s: '%s': Mounpoint not empty\n"),
 				PROGRAM_NAME, rmountpoint);
 		free(rmountpoint);
 		return EXIT_FAILURE;
@@ -1801,7 +2314,7 @@ remote_smb(char *address, char *options)
 	struct stat file_attrib;
 	if (stat(rmountpoint, &file_attrib) == -1) {
 		char *mkdir_cmd[] = { "mkdir", "-p", rmountpoint, NULL };
-		if (launch_execve(mkdir_cmd, FOREGROUND) != 0) {
+		if (launch_execve(mkdir_cmd, FOREGROUND) != EXIT_SUCCESS) {
 			if (free_options)
 				free(roptions);
 			if (ruser)
@@ -1810,7 +2323,7 @@ remote_smb(char *address, char *options)
 				free(raddress);
 			free(rmountpoint);
 			free(addr_tmp);
-			fprintf(stderr, "%s: '%s': Cannot create mountpoint\n",
+			fprintf(stderr, _("%s: '%s': Cannot create mountpoint\n"),
 					PROGRAM_NAME, rmountpoint);
 			return EXIT_FAILURE;
 		}
@@ -1818,7 +2331,7 @@ remote_smb(char *address, char *options)
 
 	/* If the mountpoint already exists, check if it is empty */
 	else if (count_dir(rmountpoint) > 2) {
-		fprintf(stderr, "%s: '%s': Mountpoint is not empty\n", 
+		fprintf(stderr, _("%s: '%s': Mountpoint not empty\n"), 
 				PROGRAM_NAME, rmountpoint);
 		if (free_options)
 			free(roptions);
@@ -1928,8 +2441,8 @@ remote_ssh(char *address, char *options)
 	if (stat(rmountpoint, &file_attrib) == -1) {
 		char *mkdir_cmd[] = { "mkdir", "-p", rmountpoint, NULL };
 
-		if (launch_execve(mkdir_cmd, FOREGROUND) != 0) {
-			fprintf(stderr, "%s: '%s': Cannot create mountpoint\n", 
+		if (launch_execve(mkdir_cmd, FOREGROUND) != EXIT_SUCCESS) {
+			fprintf(stderr, _("%s: '%s': Cannot create mountpoint\n"), 
 					PROGRAM_NAME, rmountpoint);
 			free(rmountpoint);
 			return EXIT_FAILURE;
@@ -1938,7 +2451,7 @@ remote_ssh(char *address, char *options)
 
 	/* If it exists, make sure it is not populated */
 	else if (count_dir(rmountpoint) > 2) {
-		fprintf(stderr, "%s: '%s': Mounpoint is not empty\n", 
+		fprintf(stderr, _("%s: '%s': Mounpoint not empty\n"), 
 				PROGRAM_NAME, rmountpoint);
 		free(rmountpoint);
 		return EXIT_FAILURE;
@@ -1960,7 +2473,7 @@ remote_ssh(char *address, char *options)
 		error_code = launch_execve(cmd, FOREGROUND);
 	}
 	
-	if (error_code != 0) {
+	if (error_code != EXIT_SUCCESS) {
 		free(rmountpoint);
 		return EXIT_FAILURE;
 	}
@@ -2108,6 +2621,10 @@ ClassifyExec=false\n\n"
 
 "# Should the Selection Box be shared among different profiles?\n\
 ShareSelbox=false\n\n"
+
+"# Choose the resource opener to open files with their default associated\n\
+# application. If not set, CLiFM built-in opener is used\n\
+Opener=\n\n"
 
 "# Set the shell to be used when running external commands. Defaults to the \n\
 # user's shell as is specified in '/etc/passwd'.\n\
@@ -2284,7 +2801,7 @@ new_instance(char *dir)
 	free(deq_dir);
 	free(self);
 
-	if (ret != 0)
+	if (ret != EXIT_SUCCESS)
 		fprintf(stderr, _("%s: Error lauching new instance\n"), 
 				PROGRAM_NAME);
 
@@ -2978,7 +3495,7 @@ profile_add(char *prof)
 	/* #### CREATE THE CONFIG DIR #### */
 	char *tmp_cmd[] = { "mkdir", "-p", NCONFIG_DIR, NULL }; 
 	int ret = launch_execve(tmp_cmd, FOREGROUND);
-	if (ret != 0) {
+	if (ret != EXIT_SUCCESS) {
 		fprintf(stderr, _("%s: mkdir: '%s': Error creating "
 				"configuration directory\n"), PROGRAM_NAME,
 				NCONFIG_DIR);
@@ -3125,7 +3642,7 @@ profile_del(char *prof)
 	int ret = launch_execve(cmd, FOREGROUND);
 	free(tmp);
 
-	if (ret == 0) {
+	if (ret == EXIT_SUCCESS) {
 		printf(_("%s: '%s': Profile successfully removed\n"),
 				PROGRAM_NAME, prof);
 		for (i = 0; profile_names[i]; i++)
@@ -3193,6 +3710,11 @@ profile_set(char *prof)
 	MSG_LOG_FILE = (char *)NULL;
 	free(MIME_FILE);
 	MIME_FILE = (char *)NULL;
+
+	if (opener) {
+		free(opener);
+		opener = (char *)NULL;
+	}
 	
 	free(TMP_DIR);
 	TMP_DIR = (char *)NULL;	
@@ -3482,14 +4004,17 @@ int mime_open(char **args)
 	for (args_num = 0; args[args_num]; args_num++);
 	
 	/* Construct the command and run it */
-	char *cmd[] = { app, file_path, NULL };
+	char *cmd[] = { (opener) ? opener : app, file_path, NULL };
 	int ret = launch_execve(cmd, strcmp(args[args_num - 1], "&") == 0 
 							? BACKGROUND : FOREGROUND);
 	
 	free(file_path);
 	free(app);
 
-	return ret;
+	if (ret != EXIT_SUCCESS)
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
 }
 
 int
@@ -3609,7 +4134,9 @@ mime_edit(char **args)
 
 	else {
 		char *cmd[] = { args[2], MIME_FILE, NULL };
-		return launch_execve(cmd, FOREGROUND);
+		if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+			return EXIT_FAILURE;
+		return EXIT_SUCCESS;
 	}
 }
 
@@ -3801,7 +4328,7 @@ get_mime(char *file)
 	close(stdout_bk);
 	close(stderr_bk);
 
-	if (ret != 0)
+	if (ret != EXIT_SUCCESS)
 		return (char *)NULL;
 
 	char *mime_type = (char *)NULL;
@@ -3993,7 +4520,7 @@ is_internal_c(const char *cmd)
 					"ver", "version", "?", "help", "cmd", "commands",
 					"colors", "cc", "fs", "mm", "mime", "x", "n",
 					"net", "lm", "st", "sort", "fc", "tips", "br",
-					"bulk", NULL };
+					"bulk", "opener", "ac", "ad", NULL };
 
 	short found = 0;
 	size_t i;
@@ -4772,8 +5299,8 @@ set_default_options(void)
 
 char *
 escape_str(char *str)
-/* Take a string, supposedly a path or a filename, and returns the same
- * string escaped */
+/* Take a string and returns the same string escaped. If nothing to be
+ * escaped, the original string is returned */
 {
 	if (!str)
 		return (char *)NULL;
@@ -4803,7 +5330,8 @@ is_internal(const char *cmd)
 {
 	const char *int_cmds[] = { "o", "open", "cd", "p", "pr", "prop", "t",
 							   "tr", "trash", "s", "sel", "mm", "mime",
-							   "bm", "bookmarks", "br", "bulk", NULL };
+							   "bm", "bookmarks", "br", "bulk", "ac",
+							   "ad", NULL };
 	short found = 0;
 	size_t i;
 
@@ -4827,8 +5355,8 @@ quote_detector(char *line, int index)
 /* Used by readline to check if a char in the string being completed is
  * quoted or not */
 {
-	if (index > 0 && line[index-1] == '\\' 
-	&& !quote_detector(line, index-1))
+	if (index > 0 && line[index - 1] == '\\' 
+	&& !quote_detector(line, index - 1))
 		return 1;
 
 	return 0;
@@ -5200,7 +5728,7 @@ open_function(char **cmd)
 
 	free(deq_path);
 
-	if (ret != 0)
+	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 	else
 		return EXIT_SUCCESS;
@@ -5923,7 +6451,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 	free(dest);
 	dest = (char *)NULL;
 
-	if (ret != 0) {
+	if (ret != EXIT_SUCCESS) {
 		fprintf(stderr, _("%s: trash: '%s': Failed copying file to "
 				"Trash\n"), PROGRAM_NAME, file);
 		free(file_suffix);
@@ -5950,7 +6478,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 		char *tmp_cmd2[] = { "rm", "-r", trash_file, NULL };
 		ret = launch_execve (tmp_cmd2, FOREGROUND);
 		free(trash_file);
-		if (ret != 0)
+		if (ret != EXIT_SUCCESS)
 			fprintf(stderr, _("%s: trash: '%s/%s': Failed removing trash "
 					"file\nTry removing it manually\n"), PROGRAM_NAME, 
 					TRASH_FILES_DIR, file_suffix);
@@ -5991,7 +6519,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 	char *tmp_cmd3[] = { "rm", "-r", file, NULL };
 	ret = launch_execve(tmp_cmd3, FOREGROUND);
 	/* If remove fails, remove trash and info files */
-	if (ret != 0) {
+	if (ret != EXIT_SUCCESS) {
 		fprintf(stderr, _("%s: trash: '%s': Failed removing file\n"), 
 				PROGRAM_NAME, file);
 		char *trash_file = (char *)NULL;
@@ -6004,7 +6532,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 		ret = launch_execve(tmp_cmd4, FOREGROUND);
 		free(trash_file);
 
-		if (ret != 0) {
+		if (ret != EXIT_SUCCESS) {
 			fprintf(stderr, _("%s: trash: Failed removing temporary "
 							  "files from Trash.\nTry removing them "
 							  "manually\n"), PROGRAM_NAME);
@@ -6106,7 +6634,7 @@ remove_from_trash(void)
 				char *tmp_cmd[] = { "rm", "-r", rm_file, rm_info, NULL };
 				ret = launch_execve(tmp_cmd, FOREGROUND);
 				
-				if (ret != 0) {
+				if (ret != EXIT_SUCCESS) {
 					fprintf(stderr, _("%s: trash: Error trashing %s\n"), 
 							 PROGRAM_NAME, trash_files[j]->d_name);
 					exit_status = EXIT_FAILURE;
@@ -6164,7 +6692,7 @@ remove_from_trash(void)
 		char *tmp_cmd2[] = { "rm", "-r", rm_file, rm_info, NULL };
 		ret = launch_execve(tmp_cmd2, FOREGROUND);
 		
-		if (ret != 0) {
+		if (ret != EXIT_SUCCESS) {
 			fprintf(stderr, _("%s: trash: Error trashing %s\n"),
 					PROGRAM_NAME, trash_files[rm_num - 1]->d_name);
 			exit_status = EXIT_FAILURE;
@@ -6276,11 +6804,11 @@ untrash_element(char *file)
 		ret = launch_execve(tmp_cmd, FOREGROUND);
 		free(url_decoded);
 
-		if (ret == 0) {
+		if (ret == EXIT_SUCCESS) {
 			char *tmp_cmd2[] = { "rm", "-r", undel_file, undel_info,
 								  NULL };
 			ret = launch_execve(tmp_cmd2, FOREGROUND);
-			if (ret != 0) {
+			if (ret != EXIT_SUCCESS) {
 				fprintf(stderr, _("%s: undel: '%s': Failed removing "
 								  "info file\n"), PROGRAM_NAME,
 								  undel_info);
@@ -6496,7 +7024,7 @@ trash_clear(void)
 		free(file1);
 		free(file2);
 
-		if (ret != 0) {
+		if (ret != EXIT_SUCCESS) {
 			fprintf(stderr, _("%s: trash: '%s': Error removing "
 					"trashed file\n"), PROGRAM_NAME,
 					trash_files[i]->d_name);
@@ -6534,7 +7062,7 @@ trash_function (char **comm)
 		int ret = launch_execve (cmd, FOREGROUND);
 		free(trash_files);
 		free(trash_info);
-		if (ret != 0) {
+		if (ret != EXIT_SUCCESS) {
 			_err(0, NOPRINT_PROMPT, _("%s: mkdir: '%s': Error creating "
 			 	 "trash directory\n"), PROGRAM_NAME, TRASH_DIR);
 			return;
@@ -7166,7 +7694,8 @@ free_stuff(void)
 
 	free(TMP_DIR);
 
-	free(BULK_FILE);
+	if (opener)
+		free(opener);
 	
 	if (encoded_prompt)
 		free(encoded_prompt);
@@ -8412,9 +8941,10 @@ init_config(void)
 		MIME_FILE = (char *)xcalloc(config_len + 14, sizeof(char));
 		sprintf(MIME_FILE, "%s/mimelist.cfm", CONFIG_DIR);
 
+		int ret = -1;
+
 		/* #### CHECK THE TRASH DIR #### */
 		/* Create trash dirs, if necessary */
-		int ret = -1;
 		
 		if (stat(TRASH_DIR, &file_attrib) == -1) {
 			char *trash_files = (char *)NULL;
@@ -8430,7 +8960,7 @@ init_config(void)
 			ret = launch_execve(cmd, FOREGROUND);
 			free(trash_files);
 			free(trash_info);
-			if (ret != 0) {
+			if (ret != EXIT_SUCCESS) {
 				trash_ok = 0;
 				_err('w', PRINT_PROMPT, _("%s: mkdir: '%s': Error "
 					 "creating trash directory. Trash function "
@@ -8451,7 +8981,7 @@ init_config(void)
 		if (stat(CONFIG_DIR, &file_attrib) == -1) {
 			char *tmp_cmd[] = { "mkdir", "-p", CONFIG_DIR, NULL }; 
 			ret = launch_execve(tmp_cmd, FOREGROUND);
-			if (ret != 0) {
+			if (ret != EXIT_SUCCESS) {
 				config_ok = 0;
 				_err('e', PRINT_PROMPT, _("%s: mkdir: '%s': Error "
 					 "creating configuration directory. Bookmarks, "
@@ -8586,6 +9116,24 @@ init_config(void)
 							light_mode = 1;
 						else /* False and default */
 							light_mode = 0;
+					}
+
+					else if (strncmp(line, "Opener=", 7) == 0) {
+						char *opt_str = (char *)NULL;
+						opt_str = straft(line, '=');
+						if (!opt_str)
+							continue;
+
+						char *tmp = remove_quotes(opt_str);
+						if (!tmp) {
+							free(opt_str);
+							continue;
+						}
+							
+						opener = (char *)xcalloc(strlen(tmp) + 1,
+										sizeof(char));
+						strcpy(opener, tmp);
+						free(opt_str);
 					}
 
 					else if (strncmp(line, "Tips=", 5) == 0) {
@@ -9253,7 +9801,7 @@ init_config(void)
 /*		if (mkdir(TMP_DIR, 1777) == -1) { */
 		char *tmp_cmd2[] = { "mkdir", "-pm1777", TMP_DIR, NULL };
 		int ret = launch_execve(tmp_cmd2, FOREGROUND);
-		if (ret != 0) {
+		if (ret != EXIT_SUCCESS) {
 			_err('e', PRINT_PROMPT, "%s: mkdir: '%s': %s\n",
 				 PROGRAM_NAME, TMP_DIR, strerror(errno));
 		}
@@ -9271,7 +9819,7 @@ init_config(void)
 /*		if (mkdir(TMP_DIR, 1777) == -1) { */
 		char *tmp_cmd3[] = { "mkdir", "-pm700", TMP_DIR, NULL };
 		int ret = launch_execve(tmp_cmd3, FOREGROUND);
-		if (ret != 0) {
+		if (ret != EXIT_SUCCESS) {
 			selfile_ok = 0;
 			_err('e', PRINT_PROMPT, "%s: mkdir: '%s': %s\n",
 				 PROGRAM_NAME, TMP_DIR, strerror(errno));
@@ -9289,9 +9837,6 @@ init_config(void)
 	if (selfile_ok) {
 
 		size_t tmp_dir_len = strlen(TMP_DIR);
-
-		BULK_FILE = (char *)xcalloc(tmp_dir_len + 14, sizeof(char));
-		sprintf(BULK_FILE, "%s/.bulk_rename", TMP_DIR);
 
 		/* Define the user's sel file. There will be one per
 		 * user-profile (/tmp/clifm/username/.selbox_PROFILE) */
@@ -12433,7 +12978,8 @@ exec_cmd(char **comm)
 		if (!comm[0][1]) {
 			/* If just ":" or ";", launch the default shell */
 			char *cmd[] = { sys_shell, NULL };
-			exit_code = launch_execve(cmd, FOREGROUND);
+			if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+				exit_code = EXIT_FAILURE;
 			return exit_code;
 		}
 		/* If double semi colon or colon (or ";:" or ":;") */
@@ -12702,7 +13248,8 @@ exec_cmd(char **comm)
 	}
 
 	/*      ################ SORT ##################     */
-	else if (strcmp(comm[0], "st") == 0 || strcmp(comm[0], "sort") == 0) {
+	else if (strcmp(comm[0], "st") == 0
+	|| strcmp(comm[0], "sort") == 0) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: st [METHOD] [rev]\nMETHOD: 0 = none, "
 				   "1 = name, 2 = size, 3 = atime, 4 = btime, "
@@ -12712,9 +13259,46 @@ exec_cmd(char **comm)
 		exit_code = sort_function(comm);
 	}
 
+	/*   ################ ARCHIVER ##################     */
+	else if (strcmp(comm[0], "ac") == 0
+	|| strcmp(comm[0], "ad") == 0) {
+		if (!comm[1] || strcmp(comm[1], "--help") == 0) {
+			puts(_("Usage: ac, ad ELN/FILE ..."));
+			return EXIT_SUCCESS;
+		}
+
+		if (comm[0][1] == 'c')
+			exit_code = archiver(comm, 'c');
+		else
+			exit_code = archiver(comm, 'd');
+
+		return exit_code;
+	}
+
 	/* ##################################################
 	 * #			     MINOR FUNCTIONS 				#
 	 * ##################################################*/
+
+	else if (strcmp(comm[0], "opener") == 0) {
+		if (!comm[1]) {
+			printf("opener: %s\n", (opener) ? opener : "mime (built-in)");
+			return EXIT_SUCCESS;
+		}
+		if (comm[1] && strcmp(comm[1], "--help") == 0) {
+			puts(_("Usage: opener APPLICATION\n"));
+			return EXIT_SUCCESS;
+		}
+		if (opener) {
+			free(opener);
+			opener = (char *)NULL;
+		}
+		if (strcmp(comm[1], "default") != 0) {
+			opener = (char *)xcalloc(strlen(comm[1]) + 1, sizeof(char));
+			strcpy(opener, comm[1]);
+		}
+		printf(_("opener: Opener set to '%s'\n"), (opener) ? opener
+			   : "mime (built-in)");
+	}
 
 					/* #### TIPS #### */
 	else if (strcmp(comm[0], "tips") == 0) {
@@ -13275,7 +13859,8 @@ exec_cmd(char **comm)
 		else
 			unsetenv("LS_COLORS");
 		
-		exit_code = launch_execle(ext_cmd);
+		if (launch_execle(ext_cmd) != EXIT_SUCCESS)
+			exit_code = EXIT_FAILURE;
 		free(ext_cmd);
 
 		/* Restore LS_COLORS value to use CliFM colors */
@@ -14004,7 +14589,7 @@ run_and_refresh(char **comm)
 	int ret = launch_execle(tmp_cmd);
 	free(tmp_cmd);
 	tmp_cmd = (char *)NULL;
-	if (ret == 0) {
+	if (ret == EXIT_SUCCESS) {
 		/* If 'rm sel' and command is successful, deselect everything */
 		if (is_sel && strcmp(comm[0], "rm") == 0) {
 			for (i = 0; i < sel_n; i++)
@@ -14522,7 +15107,7 @@ copy_function(char **comm)
 		ret = launch_execle(tmp_cmd);
 		free(tmp_cmd);
 		
-		if (ret == 0) {
+		if (ret == EXIT_SUCCESS) {
 			/* If 'mv sel' and command is successful deselect everything,
 			 * since sel files are note there anymore */
 			if (strcmp(comm[0], "mv") == 0) {
@@ -14770,7 +15355,7 @@ bookmark_del(char *name)
 			char *tmp_cmd[] = { "cp", BM_FILE, bk_file, NULL };
 			int ret = launch_execve(tmp_cmd, FOREGROUND);
 			/* Remove the bookmarks file, free stuff, and exit */
-			if (ret == 0) {
+			if (ret == EXIT_SUCCESS) {
 				remove(BM_FILE);
 				printf(_("bookmarks: All bookmarks were deleted\n "
 						 "However, a backup copy was created (%s)\n"),
@@ -15295,7 +15880,7 @@ open_bookmark(char **cmd)
 		else {
 			char *tmp_cmd[] = { arg[1], BM_FILE, NULL };
 			int ret = -1;
-			if ((ret = launch_execve(tmp_cmd, FOREGROUND)) != 0)
+			if ((ret = launch_execve(tmp_cmd, FOREGROUND)) != EXIT_SUCCESS)
 				error_code = 1;
 			else
 				reload_bm = 1;
@@ -15367,7 +15952,7 @@ open_bookmark(char **cmd)
 		if (arg[1]) {
 			char *tmp_cmd[] = { arg[1], tmp_path, NULL };
 			int ret = -1;
-			if ((ret = launch_execve(tmp_cmd, FOREGROUND)) != 0)
+			if ((ret = launch_execve(tmp_cmd, FOREGROUND)) != EXIT_SUCCESS)
 				error_code = 1;
 		}
 		else {
@@ -16479,6 +17064,11 @@ edit_function (char **comm)
 			free(term);
 			term = (char *)NULL;
 		}
+
+		if (opener) {
+			free(opener);
+			opener = (char *)NULL;
+		}
 		
 		free(TMP_DIR);
 		TMP_DIR = (char *)NULL;
@@ -16496,7 +17086,7 @@ edit_function (char **comm)
 	if (comm[1]) { /* If there is an argument... */
 		char *cmd[] = { comm[1], CONFIG_FILE, NULL };
 		int ret = launch_execve(cmd, FOREGROUND);
-		if (ret != 0)
+		if (ret != EXIT_SUCCESS)
 			return EXIT_FAILURE;
 	}
 
@@ -16544,6 +17134,7 @@ edit_function (char **comm)
 		free(sel_file_user);
 		MIME_FILE = sel_file_user = (char *)NULL;
 
+
 		if (encoded_prompt) {
 			free(encoded_prompt);
 			encoded_prompt = (char *)NULL;
@@ -16557,6 +17148,11 @@ edit_function (char **comm)
 		if (term) {
 			free(term);
 			term = (char *)NULL;
+		}
+
+		if (opener) {
+			free(opener);
+			opener = (char *)NULL;
 		}
 
 		free(TMP_DIR);
@@ -16658,7 +17254,10 @@ list_commands (void)
  * corresponding section in the manpage */
 {
 	char *cmd[] = { "man", "-P", "less -p ^COMMANDS", PNL, NULL };
-	return launch_execve(cmd, FOREGROUND);
+	if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
 }
 
 void
@@ -16718,8 +17317,10 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
  v, paste [sel] [DESTINY]\n\
  pf, prof, profile [ls, list] [set, add, del PROFILE]\n\
  br, bulk ELN/FILE ...\n\
+ ac, ad ELN/FILE ...\n\
  shell [SHELL]\n\
  st, sort [METHOD] [rev]\n\
+ opener [default] [APPLICATION]\n\
  msg, messages [clear]\n\
  log [clear]\n\
  history [clear] [-n]\n\

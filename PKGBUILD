@@ -1,15 +1,15 @@
 # Maintainer: archcrack <johndoe.arch@outlook.com>
 
 pkgname=clifm
-pkgver=0.26.0
-pkgrel=1
+pkgver=0.27.0
+pkgrel=2
 pkgdesc="The KISS file manager: cli-based, ultra-lightweight, and lightning fast"
 arch=(any)
 url="https://github.com/leo-arch/clifm"
 license=(GPL2)
 depends=('ncurses' 'libcap' 'file')
 makedepends=('git')
-optdepends=('sshfs: SFTP support' 'cifs-utils: Samba support' 'curlftpfs: FTPFS support')
+optdepends=('sshfs: SFTP support' 'cifs-utils: Samba support' 'curlftpfs: FTPFS support' 'archivemount: Archives mount' 'atool: Archives support')
 source=("git+${url}.git")
 sha256sums=('SKIP')
 

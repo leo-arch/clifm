@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "January 23, 2021" "CliFM 0.26.0+" "CliFM Manual"
+.TH "CLIFM" "1" "January 25, 2021" "CliFM 0.26.0+" "CliFM Manual"
 
 .SH NAME
 CLIFM - A completely CLI-based file manager inspired by Arch Linux' KISS principle
@@ -49,8 +49,9 @@ List of CliFM features:
   18) User profiles
   19) Commands sequential and conditional execution
   20) Resource opener
-  21) Sorting methods
+  21) Multiple sorting methods and reverse sorting
   22) Bulk rename
+  23) Archives support
 
 .SH RATIONALE
 When it comes to software, Unix/GNU-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the Linux built-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There is no two without three".
@@ -132,18 +133,17 @@ Options precedence order: 1) command line; 2) configuration file; 3) default val
 
 .SH COMMANDS
 \fBNOTE:\fR ELN = Entry List Number. Example: in the line "12 openbox" (when listing files), 12 is the ELN corresponding to the file named "openbox". The slash followed by a number (/xx) after directories and symbolic links to directories (the files counter) indicates the amount of files contained by the corresponding directory, excluding current and parent directories ("." and ".." respectivelly).
-
 .TP
 
-.B /* \fR[-filetype] [DIR]
+.B /\fRSTRING [-filetype] [DIR]
 this is the quick search function. Just type '/' followed by the string you are looking for (you can use wildcards), and CliFM will list all the matches in the current working directory. To search for files in any other directory, specify the directory name as a further argument. This argument (DIR) could be an absolute path, a relative path, or an ELN. The result of the search can be further filtered by specifying a filetype: -d, -r, -l, -s, -f, -b, and -c (directory, regular file, symlink, socket, FIFO/pipe, block device, and character device respectivelly). For example, '/*x -d Documents/' will list all directories ending with 'x' in the directory named "Documents".
 .TP
 
-.B bm, bookmarks \fR[a, add PATH] [d, del] [edit] [shortcut, name]
+.B bm, bookmarks \fR[a, add PATH] [d, del] [edit] [SHORTCUT, NAME]
 with no argument, open the bookmarks menu. Here you cd into the desired bookmark by entering either its ELN, its shortcut, or its name. In this screen you can also add, remove or edit your bookmarks by simply typing 'e' to edit the bookmarks file (which is simply a list of lines with this format: [shortcut]name:path. Ex: [d]documents:/home/user/documents). If you want to add or remove a bookmark directly from the command line, use the 'a' and 'd' arguments respectivelly. Example: 'bm a /media/misc' or 'bm d'. You can also open a bookmark by typing 'bm shortcut' or 'bm name' (in which latter case TAB completion is available).
 .TP
 
-.B o, open \fR[ELN/FILE] [APPLICATION]
+.B o, open \fRELN/FILE [APPLICATION]
 open either a directory, in which case it works just like the 'cd' command (see below), or a file. For example: 'o 12', 'o filename', 'o /path/to/filename'. By default, the 'open' function will open files with the default application associated to them via the mime built-in function (see the 'mime' command below). However, if you want to open a file with a different application, just add the application name as second argument, e.g. 'o 12 leafpad'. If you want to run the program in the background, simply add the ampersand character: 'o 12 &'.
 .TP
 
@@ -153,7 +153,7 @@ when used with no argument, it changes the current directory to the default dire
 Unlike the shell 'cd' command, CliFM's built-in 'cd' function not only changes the current directory, but also lists its content (provided the option "cd lists automatically" is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of 'cd' is much like this shell command: cd DIR && ls -A --color=auto --group-directories-first. Remote file systems are also supported: just enter 'cd ADDRESS [OPTIONS]'. For more information about this syntax see the description of the 'net' command below.
 .TP
 
-.B s, sel \fR[ELN ELN-ELN FILE ... n]
+.B s, sel \fRELN/FILE ... n
 send one or multiple elements (either files or directories) to the Selection Box. 'Sel' accepts individual elements, range of elements, say 1-6, filenames and paths, just as wildcards. Example: 'sel 1 4-10 file* filename /path/to/filename'.
 .sp
 The Selection Box is accessible to different instances of the program, provided they use the same profile (see the 'profile' command below). By default, indeed, each profile keeps a private Selection Box, being thus not accessible to other profiles. You can nonetheless modify this behaviour via the ShareSelbox option in the configuration file. If the ShareSelbox option is enabled (see the configuration file), selected files are stored in \fI/tmp/clifm/username/.selbox\fR. Otherwise, \fI/tmp/clifm/username/.selbox_profilename\fR is used (this is the default). 
@@ -177,12 +177,18 @@ The trash directory is \fI$XDG_DATA_HOME/Trash\fR, usually \fI~/.local/share/Tra
 print a list of currently trashed files allowing you to choose one or more of these files to be undeleted, that is to say, restored to their original location. You can also undelete all trashed files at once using the '*', 'a' or 'all' option.
 .TP
 
-.B br, bulk \fRELN/FILE ...
+.B br, bulk \fRELN/FILE ... n
 rename at once all files passed as arguments to the function. It accepts single and multiple filenames, wildcards, ELN ranges, and the 'sel' keyword. Example: 'br myfile 4-10 sel'. Each filename will be copied into a temporary file, which will be opened with the default text editor (via the \fBmime\fR function), letting the user modify it. Once the file has been modified and saved, the modifications are printed on the screeen and the user is asked whether to proceed with the actual bulk renaming or not.
 .TP
 
+.B ac, ad \fRELN/FILE ... n
+compress and decompress one or multiple files and/or directories. The archiver function brings two modes: \fBac\fR, to generate archives or compressed files, and \fBad\fR, to decompress archives, either just listing, extracting, recompressing, or mounting their content. In this latter case, the mountpoint used automatically is \fI$HOME/.config/clifm/PROFILE/mounts/ARCHIVE_NAME\fR. The function accepts single and multiple filenames, wildcards, ELN ranges, and the 'sel' keyword. For example: 'ac sel', 'ac 4-25 myfile', or 'ad *.tar.gz'.
+.sp
+The archive mount function depends on \fBarchivemount\fR, while the remaining functions depend on \fBatool\fR and other third-party utilities for achive formats support, for example, \fBp7zip\fR. For more information consult \fBatool(1)\fR and \fBarchivemount(1)\fR.
+.TP
+
 .B b, back \fR[h, hist] [clear] [!ELN]
-unlike 'cd ..', which will send you to the parent directory of the current directory, this command (with no argument) will send you back to the previously visited directory. 
+unlike 'cd ..', which sends you to the parent directory of the current directory, this command (with no argument) sends you back to the previously visited directory.
 .sp
 CliFM keeps a record of all the visited directories. You can see this list by typing 'b hist', 'b h' or 'bh', and you can access any element in this list by simply passing the corresponding ELN in this list to the 'back' command. Example:
         [user@hostname] ~ $ bh
@@ -264,6 +270,10 @@ the 'paste sel' command will copy the currently selected elements, if any, into 
 
 .B pf, prof, profile \fR[ls, list] [set, add, del PROFILE]
 with no arguments, prints the name of the currently used profile. Use the 'ls' or 'list' option to list available profiles. To switch, add or delete a profile, use the 'set', 'add', and 'del' options respectivelly followed by the corresponding profile name. Bear in mind that, when switching profiles, command line arguments will be ignored.
+.TP
+
+.B opener \fR[default] [APPLICATION]
+with no argument, prints the currently used resource opener (by default, \fBmime\fR, CliFM's built-in opener). Otherwise, set APPLICATION as opener or, if 'default' is passed instead, use the built-in opener. 
 .TP
 
 .B shell \fR[SHELL]
