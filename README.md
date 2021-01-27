@@ -56,7 +56,7 @@ Of course, you can deselect some or all selected files whenever you want with th
 
 ![dirs](images/dirs.png)
 
-* Sort files by name, size or last modification time.
+* Sort files by name, size, atime, btime, ctime, mtime, and version. Also supports reverse sorting.
 
 Because file manager, but also half shell, CLiFM also offers the following features:
 
@@ -72,6 +72,8 @@ Because file manager, but also half shell, CLiFM also offers the following featu
 * User profiles
 * Keyboard shortcuts
 * Resource opener
+* Bulk rename
+* Archives management
 
 Finally, all CLiFM options could be handled directly by command line, by passing parameters to the program, or via plain
 text configuration files, located in `~/.config/clifm/`.
@@ -82,7 +84,7 @@ On Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Lin
 
 ## Dependencies:
 
-`glibc`, `ncurses`, `libcap`, `readline`, `coreutils` (providing basic programs such as rm, cp, mkdir, etc). For Archers: All these deps are part of the `core` repo, and `glibc` is also part of the `base` metapackage. In Debian systems two packages must be installed before compilation: `libcap-dev` and `libreadline-dev`. In Fedora based systems you need `libcap-devel` and `readline-devel`. Optional dependencies: `file`.
+`glibc`, `ncurses`, `libcap`, `readline`, `coreutils` (providing basic programs such as rm, cp, mkdir, etc). For Archers: All these deps are part of the `core` repo, and `glibc` is also part of the `base` metapackage. In Debian systems two packages must be installed before compilation: `libcap-dev` and `libreadline-dev`. In Fedora based systems you need `libcap-devel` and `readline-devel`. Optional dependencies: `file`, `atool`, and `archivemount`.
 
 ## Compiling and Running CliFM:
 
