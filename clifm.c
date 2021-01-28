@@ -151,7 +151,7 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 /* #define CLEAR puts("\x1b[c") */
 #define CLEAR write(STDOUT_FILENO, "\ec", 3)
-#define VERSION "0.27.0"
+#define VERSION "0.27.1"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
@@ -390,6 +390,7 @@ int mtime_sort(const struct dirent **a, const struct dirent **b);
 
 int bulk_rename(char **args);
 int archiver(char **args, char mode);
+int zstandard(char *in_file, char *out_file, char mode, char op);
 int is_compressed(char *file);
 
 /* Still under development */
@@ -1128,7 +1129,9 @@ is_compressed(char *file)
 
 	int compressed = 0;
 	if (access(ARCHIVER_TMP_FILE, F_OK) == 0) {
+
 		file_fp = fopen(ARCHIVER_TMP_FILE, "r");
+
 		if (file_fp) {
 			char line[255] = "";
 			fgets(line, sizeof(line), file_fp);
@@ -1152,11 +1155,129 @@ is_compressed(char *file)
 }
 
 int
+zstandard(char *in_file, char *out_file, char mode, char op)
+/* If MODE is 'c', compress IN_FILE producing a zstandard compressed
+ * file named OUT_FILE. If MODE is 'd', extract, test or get
+ * information about IN_FILE. Returns zero on success and one on
+ * error */
+{
+	int exit_status = EXIT_SUCCESS;
+
+	char *deq_file = dequote_str(in_file, 0);
+
+	if (!deq_file) {
+		fprintf(stderr, "archiver: '%s': Error dequoting file\n",
+				in_file);
+		return EXIT_FAILURE;
+	}
+
+	if (mode == 'c') {
+
+		if (out_file) {
+			char *cmd[] = { "zstd", "-zo", out_file, deq_file, NULL };
+			if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+				exit_status = EXIT_FAILURE;
+		}
+
+		else {
+			char *cmd[] = { "zstd", "-z", deq_file, NULL };
+			if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+				exit_status = EXIT_FAILURE;
+		}
+
+		free(deq_file);
+		return exit_status;
+	}
+
+	/* mode == 'd' */
+
+	/* op is non-zero when multiple files, including at least one
+	 * zst file, are passed to the archiver function */
+	if (op != 0) {
+		char option[3] = "";
+
+		switch(op) {
+			case 'e': strcpy(option, "-d"); break;
+			case 't': strcpy(option, "-t"); break;
+			case 'i': strcpy(option, "-l"); break;
+		}
+
+		char *cmd[] = { "zstd", option, deq_file, NULL };
+
+		exit_status = launch_execve(cmd, FOREGROUND);
+
+		free(deq_file);
+
+		if (exit_status != EXIT_SUCCESS)
+			return EXIT_FAILURE;
+
+		return EXIT_SUCCESS;
+	}
+
+
+	printf("%s[e]%sxtract %s[t]%sest %s[i]%snfo %s[q]%suit\n",
+		   bold, NC, bold, NC, bold, NC, bold, NC);
+
+	char *operation = (char *)NULL;
+
+	while (!operation) {
+		operation = rl_no_hist(_("Operation: "));
+
+		if (!operation)
+			continue;
+
+		if (operation && (!operation[0] || operation[1] != '\0')) {
+			free(operation);
+			operation = (char *)NULL;
+			continue;
+		}
+
+		switch(*operation) {
+			case 'e': {
+				char *cmd[] = { "zstd", "-d", deq_file, NULL };
+				if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+					exit_status = EXIT_FAILURE;
+			}
+			break;
+
+			case 't': {
+				char *cmd[] = { "zstd", "-t", deq_file, NULL };
+				if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+					exit_status = EXIT_FAILURE;
+			}
+			break;
+			
+			case 'i': {
+				char *cmd[] = { "zstd", "-l", deq_file, NULL };
+				if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+					exit_status = EXIT_FAILURE;
+			}
+			break;
+
+			case 'q':
+				free(operation);
+				free(deq_file);
+				return EXIT_SUCCESS;
+
+			default:
+				free(operation);
+				operation = (char *)NULL;
+			break;
+		}
+	}	
+
+	free(operation);
+	free(deq_file);
+
+	return exit_status;
+}
+
+int
 archiver(char **args, char mode)
-/* Handle archives or compressed files (ARGS) according to MODE: 'c'
- * for compression and 'd' for decompression (including listing,
- * extracting, repacking, and mounting). Returns zero on success and
- * one on error */
+/* Handle archives and/or compressed files (ARGS) according to MODE:
+ * 'c' for archiving/compression, and 'd' for dearchiving/decompression
+ * (including listing, extracting, repacking, and mounting). Returns
+ * zero on success and one on error */
 {
 	size_t i;
 	int uncompressed = 0, exit_status = EXIT_SUCCESS;
@@ -1167,15 +1288,16 @@ archiver(char **args, char mode)
 	if (mode == 'c') {
 
 			/* ##################################
-			 * #          COMPRESSION		    #
+			 * #        1 - COMPRESSION		    #
 			 * ##################################*/
 
-		/* Ask for archive name */
-		puts(_("Use extension to specify archive type.\n"
+		/* Get archive name/type */
+
+		puts(_("Use extension to specify archive/compression type.\n"
 			   "Defaults to .tar.gz"));
 		char *name = (char *)NULL;
 		while (!name) {
-			name = rl_no_hist(_("Archive name ('q' to quit): "));
+			name = rl_no_hist(_("Filename ('q' to quit): "));
 
 			if (!name)
 				continue;
@@ -1191,6 +1313,43 @@ archiver(char **args, char mode)
 				return EXIT_SUCCESS;
 			}
 		}
+
+				/* ##########################
+				 * #		ZSTANDARD		#
+				 * ########################## */
+
+		char *ret = strrchr(name, '.');
+		if (strcmp(ret, ".zst") == 0) {
+
+			/* Multiple files */
+			if (args[2]) {
+
+				printf("\n%sNOTE%s: Zstandard does not support "
+					   "compression of multiple files into one single "
+					   "compressed file. Files will be compressed rather "
+					   "into multiple compressed files using original "
+					   "filenames\n", bold, NC);
+
+				for (i = 1; args[i]; i++) {
+					if (zstandard(args[i], NULL, 'c', 0)
+					!= EXIT_SUCCESS)
+						exit_status = EXIT_FAILURE;
+				}
+			}
+
+			/* Only one file */
+			else
+				exit_status = zstandard(args[1], name, 'c', 0);
+
+			free(name);
+
+			return exit_status;
+		}
+
+
+				/* ##########################
+				 * #	NO ZSTANDARD		#
+				 * ########################## */
 
 		/* Escape the string, if needed */
 		char *esc_name = escape_str(name);
@@ -1208,6 +1367,7 @@ archiver(char **args, char mode)
 		size_t cmd_len = strlen(esc_name) + 10 + ((!ext_ok) ? 8 : 0);
 
 		cmd = (char *)xcalloc(cmd_len, sizeof(char));
+
 		/* If name has no extension, add the default */
 		sprintf(cmd, "atool -a %s%s", esc_name, (!ext_ok)
 									  ? ".tar.gz" : "");
@@ -1228,11 +1388,98 @@ archiver(char **args, char mode)
 		return exit_status;
 	}
 
+
 	/* mode == 'd' */
 
 			/* ##################################
-			 * #         DECOMPRESSION		    #
+			 * #      2 - DECOMPRESSION		    #
 			 * ##################################*/
+
+	/* Check if we have at least one Zstandard file */
+
+	int zst_index = -1;
+	size_t files_num = 0;
+
+	for (i = 1; args[i]; i++) {
+		files_num++;
+		if (args[i][strlen(args[i]) -1] == 't') {
+			char *ret = strrchr(args[i], '.');
+			if (ret) {
+				if (strcmp(ret, ".zst") == 0)
+					zst_index = i;
+			}
+		}
+	}
+
+				/* ##########################
+				 * #		ZSTANDARD		#
+				 * ########################## */
+
+	if (zst_index != -1) {
+
+		/* Multiple files */
+		if (files_num > 1) {
+
+			printf("%sNOTE%s: Using Zstandard\n", bold, NC);
+			printf("%s[e]%sxtract %s[t]%sest %s[i]%snfo %s[q]%suit\n",
+				   bold, NC, bold, NC, bold, NC, bold, NC);
+
+			char *operation = (char *)NULL;
+			char sel_op = 0;
+			while(!operation) {
+				operation = rl_no_hist("Operation: ");
+
+				if (!operation)
+					continue;
+
+				if (operation && (!operation[0]
+				|| operation[1] != '\0')) {
+					free(operation);
+					operation = (char *)NULL;
+					continue;
+				}
+
+				switch(*operation) {
+					case 'e':
+					case 't':
+					case 'i':
+						sel_op = *operation;
+					break;
+
+					case 'q':
+						free(operation);
+						return EXIT_SUCCESS;
+
+					default:
+						free(operation);
+						operation = (char *)NULL;
+					break;
+				}
+			}
+
+			for (i = 1; args[i]; i++) {
+				if (zstandard(args[i], NULL, 'd', sel_op)
+				!= EXIT_SUCCESS);
+					exit_status = EXIT_FAILURE;
+			}
+
+			free(operation);
+			return exit_status;
+		}
+
+		/* Just one file */
+		else {
+			if (zstandard(args[zst_index], NULL, 'd', 0) != EXIT_SUCCESS)
+				exit_status = EXIT_FAILURE;
+
+			return exit_status;
+		}
+	}
+
+
+				/* ##########################
+				 * #	NO ZSTANDARD		#
+				 * ########################## */
 
 	/* 1) Get operation to be performed */
 	printf(_("%s[e]%sxtract %s[E]%sxtract-to-dir %s[l]%sist "
@@ -1241,7 +1488,6 @@ archiver(char **args, char mode)
 
 	char *operation = (char *)NULL;
 	char sel_op = 0;
-	size_t files_num = 0;
 
 	while (!operation) {
 		operation = rl_no_hist(_("Operation: "));
@@ -1317,7 +1563,7 @@ archiver(char **args, char mode)
 
 				if (ret == 1) {
 					fprintf(stderr, _("archiver: '%s': Not an "
-							"archive\n"), args[i]);
+							"archive/compressed file\n"), args[i]);
 					continue;
 				}
 
@@ -1336,8 +1582,6 @@ archiver(char **args, char mode)
 
 			/* Dequote filenames, if neccessary */
 			for (i = 1; args[i]; i++) {
-
-				files_num++;
 
 				 if (strchr(args[i], '\\')) {
 					char *deq_name = dequote_str(args[i], 0);
@@ -1392,7 +1636,7 @@ archiver(char **args, char mode)
 
 				if (ret == 1) {
 					fprintf(stderr, _("archiver: '%s': Not an "
-							"archive\n"), args[i]);
+							"archive/compressed file\n"), args[i]);
 					continue;
 				}
 
@@ -1455,7 +1699,7 @@ archiver(char **args, char mode)
 
 				if (ret == 1) {
 					fprintf(stderr, _("archiver: '%s': Not an "
-							"archive\n"), args[i]);
+							"archive/compressed file\n"), args[i]);
 					continue;
 				}
 
@@ -1520,12 +1764,12 @@ archiver(char **args, char mode)
 			/* ########## REPACK ############## */
 
 		case 'r': {
-			/* Ask for new archive format */
+			/* Ask for new archive/compression format */
 			puts("Enter 'q' to quit");
 
 			char *format = (char *)NULL;
 			while (!format) {
-				format = rl_no_hist(_("New archive format "
+				format = rl_no_hist(_("New format "
 									"(Ex: .tar.xz): "));
 				if (!format)
 					continue;

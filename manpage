@@ -51,7 +51,7 @@ List of CliFM features:
   20) Resource opener
   21) Multiple sorting methods and reverse sorting
   22) Bulk rename
-  23) Archives support
+  23) Archiving and compression support
 
 .SH RATIONALE
 When it comes to software, Unix/GNU-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the Linux built-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There is no two without three".
@@ -182,9 +182,9 @@ rename at once all files passed as arguments to the function. It accepts single 
 .TP
 
 .B ac, ad \fRELN/FILE ... n
-compress and decompress one or multiple files and/or directories. The archiver function brings two modes: \fBac\fR, to generate archives or compressed files, and \fBad\fR, to decompress archives, either just listing, extracting, recompressing, or mounting their content. In this latter case, the mountpoint used automatically is \fI$HOME/.config/clifm/PROFILE/mounts/ARCHIVE_NAME\fR. The function accepts single and multiple filenames, wildcards, ELN ranges, and the 'sel' keyword. For example: 'ac sel', 'ac 4-25 myfile', or 'ad *.tar.gz'.
+archive/compress and dearchive/decompress one or multiple files and/or directories. The archiver function brings two modes: \fBac\fR, to generate archives or compressed files, and \fBad\fR, to decompress or dearchive files, either just listing, extracting, recompressing, or mounting their content. In this latter case, the mountpoint used automatically is \fI$HOME/.config/clifm/PROFILE/mounts/ARCHIVE_NAME\fR. The function accepts single and multiple filenames, wildcards, ELN ranges, and the 'sel' keyword. For example: 'ac sel', 'ac 4-25 myfile', or 'ad *.tar.gz'.Multiple archive/compression formats are supported, including Zstandard.
 .sp
-The archive mount function depends on \fBarchivemount\fR, while the remaining functions depend on \fBatool\fR and other third-party utilities for achive formats support, for example, \fBp7zip\fR. For more information consult \fBatool(1)\fR and \fBarchivemount(1)\fR.
+The archive mount function depends on \fBarchivemount\fR, while the remaining functions depend on \fBatool\fR and other third-party utilities for achive formats support, for example, \fBp7zip\fR. For more information consult \fBatool(1)\fR, \fBarchivemount(1)\fR, and \fBzstd(1)\fR.
 .TP
 
 .B b, back \fR[h, hist] [clear] [!ELN]
@@ -573,8 +573,8 @@ The file contains a series of fields separated by a colon in the following way: 
 \fBMessages log file:\fR \fI~/.config.clifm/profile_name/messages.cfm\fR
 A file containing a list of system messages, either errors, warnings, or simple notices. The messages log format is: [date] message.
 
-.SH AUTHOR
-L.M. Abramovich (https://github.com/leo-arch)
+.SH BUGS AND FEATURE REQUESTS
+Report at: https://github.com/leo-arch/clifm/issues
 
-.SH BUG REPORTS
-johndoe.arch@outlook.com
+.SH AUTHOR
+L. M. Abramovich
