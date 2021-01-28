@@ -17,7 +17,7 @@ Since version 0.16.0 a lot (really, a lot) of bug fixes and some new features we
 
 ## Rationale
 
-Why in this world do we need another file manager? In the first place, just because I can do it, write it, and learn (a lot) in the process, because this is a free world, and very specially, a free community; and, needless to say, alternatives are at the heart of freedom. Secondly, because I'm sure I'm not the only person in this world looking for a non-bloated, KISS file manager: it just does whatever needs to be done using as little resources as possible. No GUI, no curses, but just a command line file manager: 5MiB of RAM and 250KiB of disk space is all you need. Finally, because it is certainly a file manager, but also half-shell: almost everything you do on your shell can be done in this file manager as well. Search for files, copy, rename, and remove some of them, but, at the same time, update/upgrade your system, add some cronjob, or stop a service.
+Why in this world do we need another file manager? In the first place, just because I can do it, write it, and learn (a lot) in the process, just because this is a free world, and very specially, a free community; and, needless to say, alternatives are at the heart of freedom. Secondly, because I'm sure I'm not the only person in this world looking for a non-bloated, KISS file manager: it just does whatever needs to be done using as little resources as possible. No GUI, no curses, but just a command line file manager: 5MiB of RAM and 250KiB of disk space is all you need. Finally, because it is certainly a file manager, but also a shell extension. Almost everything you do on your shell can be done in this file manager as well: search for files, copy, rename, and trash some of them, but, at the same time, update/upgrade your system, add some cronjob, stop a service, and run Vi.
 
 ## Description
 
@@ -155,8 +155,7 @@ Just try it and run the `help` command to learn more about CliFM. Once in the Cl
 
 ## Translating CliFM
 
-This last version includes a spanish translation. To use it, simply copy `translations/spanish/clifm.mo` to
- `/usr/share/locale/es/LC_MESSAGES/` in your local machine. New translations are welcome. You can find the .pot file in `translations/clifm.pot`.
+This last version includes a spanish translation. New translations are welcome. You can find the .pot file in `translations/clifm.pot`.
  
 ## Contributing
 
