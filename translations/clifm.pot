@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-22 14:04-0300\n"
+"POT-Creation-Date: 2021-01-28 05:18-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,520 +17,129 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: 0_12_3_test.c:9056
+#: ../0_27_1.c:16749
 #, c-format
-msgid "\tBlocks: %lld"
+msgid "\tBlocks: %ld"
 msgstr ""
 
-#: 0_12_3_test.c:9063
+#: ../0_27_1.c:16755
 #, c-format
-msgid "\tGid: %d (%s)\n"
+msgid "\tGid: %u (%s)\n"
 msgstr ""
 
-#: 0_12_3_test.c:9057
+#: ../0_27_1.c:16750
 #, c-format
-msgid "\tIO Block: %d"
+msgid "\tIO Block: %ld"
 msgstr ""
 
-#: 0_12_3_test.c:9058
+#: ../0_27_1.c:16751
 #, c-format
-msgid "\tInode: %lld\n"
+msgid "\tInode: %zu\n"
 msgstr ""
 
-#: 0_12_3_test.c:9061
+#: ../0_27_1.c:16753
 #, c-format
-msgid "\tUid: %d (%s)"
+msgid "\tUid: %u (%s)"
 msgstr ""
 
-#: 0_12_3_test.c:9881
+#: ../0_27_1.c:17695
 #, c-format
 msgid ""
 "\n"
-"\n"
-"By default, %s starts in the current working directory. However, you can "
-"always specify a different path by passing it as an argument. Ex: %s -p /"
-"home/user/misc. You can also permanently set up the starting path in the %s "
-"configuration file.\n"
+"\t\t\tPress any key to continue... "
 msgstr ""
 
-#: 0_12_3_test.c:9985
+#: ../0_27_1.c:17691
 #, c-format
 msgid ""
 "\n"
-"                       Press any key to continue... "
-msgstr ""
-
-#: 0_12_3_test.c:9984
-#, c-format
-msgid ""
-"\n"
-"                     The anti-eye-candy/KISS file manager\n"
+"\t\t   %sThe anti-eye-candy/KISS file manager\n"
 "%s"
 msgstr ""
 
-#: 0_12_3_test.c:9791
-#, c-format
-msgid ""
-"\n"
-"%s also offers the following features:\n"
-"  1) Trash system\n"
-"  2) History function\n"
-"  3) TAB completion\n"
-"  4) TAB ELN-expansion\n"
-"  5) Keyboard shortcuts\n"
-"  6) Wildcards expansion\n"
-"  7) Braces expansion\n"
-"  8) ELN's auto-expansion\n"
-"  9) 'sel' keyword auto-expansion\n"
-"  10) Ranges auto-expansion\n"
-"  11) Quoted strings\n"
-"  12) Aliases\n"
-msgstr ""
-
-#: 0_12_3_test.c:9839
-#, c-format
-msgid ""
-"\n"
-"%s is not limited to its own set of internal commands, like open, sel, "
-"trash, etc., but it can run any external command as well, provided external "
-"commands are allowed (use the -x option or the configuration file). By "
-"beginning the external command by a colon or a semicolon (':', ';') you tell "
-"%s not to parse the input string, but instead letting this task to the "
-"system shell, say Bash. However, bear in mind that %s is not intended to be "
-"used as a shell, but as the file manager it is.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9850
-#, c-format
-msgid ""
-"\n"
-"%s will automatically expand the 'sel' keyword: 'sel' indeed amounts to "
-"'file1 file2 file3 ...' In this way, you can use the 'sel' keyword with any "
-"command. If you want to set the executable bit on several files, for "
-"instance, simply select the files you want and then run this command: 'chmod "
-"+x sel'. Or, if you want to copy or move several files into some directory: "
-"'cp sel 12', or 'mv sel 12' (provided the ELN 12 corresponds to a "
-"directory), respectivelly. If the destiny directory is ommited, selected "
-"files are copied into the current working directory, that is to say, 'mv "
-"sel' amounts to 'mv sel .'. To trash or remove selected files, simply run "
-"'tr sel' or 'rm sel' respectivelly.The same goes for wildcards and braces: "
-"'chmod +x *', for example, will set the excutable bit on all files in the "
-"current working directory, while 'chmod +x file{1,2,3}' will do it for "
-"file1, file2, and file3 respectivelly.\n"
-"\n"
-"ELN's and ELN ranges will be also automatically expanded, provided the "
-"corresponding ELN's actually exist, that is to say, provided some filename "
-"is listed on the screen under those numbers. For example: 'diff 1 118' will "
-"only expand '1', but not '118', if there is no ELN 118. In the same way, the "
-"range 1-118 will only be expanded provided there are 118 or more elements "
-"listed on the screen. If this feature somehow conflicts with the command you "
-"want to run, say, 'chmod 644 ...', because the current amount of files is "
-"equal or larger than 644 (in which case %s will expand that number), then "
-"you can simply run the command as external: ';chmod 644...'\n"
-"\n"
-"Of course, combinations of all these features is also possbile. Example: 'cp "
-"sel file* 2 23-31 .' will copy all selected files, plus all files whose name "
-"starts with \"file\", plus those files corresponding to the ELN's 2 and 23 "
-"through 31, into the current working directory.\n"
-msgstr ""
-
-#: 0_12_3_test.c:3441 0_12_3_test.c:3721 0_12_3_test.c:7897
+#: ../0_27_1.c:6834 ../0_27_1.c:7150 ../0_27_1.c:14656 ../0_27_1.c:15541
 #, c-format
 msgid ""
 "\n"
 "%s%sEnter 'q' to quit.\n"
 msgstr ""
 
-#: 0_12_3_test.c:9574
+#: ../0_27_1.c:17483
 #, c-format
 msgid ""
 "\n"
-"%s/%s%s* [dir]: This is the quick search function. Just type '/' followed by "
-"the string you are looking for (you can use wildcards), and %s will list all "
-"matches in the current working directory. To search for files in any other "
-"directory, specify the directory name as second argument. This argument "
-"(dir) could be an absolute path, a relative path, or an ELN.\n"
+"*The slash followed by a number (/xx) after directories or symbolic links to "
+"directories indicates the amount of files contained by the corresponding "
+"directory, excluding self (.) and parent (..) directories.\n"
 msgstr ""
 
-#: 0_12_3_test.c:9830
+#: ../0_27_1.c:17544
+msgid ""
+"\n"
+"BUILT-IN COMMANDS:\n"
+"\n"
+" /* [DIR]\n"
+" bm, bookmarks [a, add PATH] [d, del] [edit] [SHORTCUT or NAME]\n"
+" o, open [ELN/FILE] [APPLICATION]\n"
+" cd [ELN/DIR]\n"
+" s, sel [ELN ELN-ELN FILE ... n]\n"
+" sb, selbox\n"
+" ds, desel [*, a, all]\n"
+" t, tr, trash [ELN/FILE ... n] [ls, list] [clear] [del, rm]\n"
+" u, undel, untrash [*, a, all]\n"
+" b, back [h, hist] [clear] [!ELN]\n"
+" f, forth [h, hist] [clear] [!ELN]\n"
+" c, l, m, md, r\n"
+" p, pr, prop [ELN/FILE ... n] [s, size] [a, all]\n"
+" mm, mime [info ELN/FILE] [edit]\n"
+" ;[CMD], :[CMD]\n"
+" mp, mountpoints\n"
+" v, paste [sel] [DESTINY]\n"
+" pf, prof, profile [ls, list] [set, add, del PROFILE]\n"
+" br, bulk ELN/FILE ...\n"
+" ac, ad ELN/FILE ...\n"
+" shell [SHELL]\n"
+" st, sort [METHOD] [rev]\n"
+" opener [default] [APPLICATION]\n"
+" msg, messages [clear]\n"
+" log [clear]\n"
+" history [clear] [-n]\n"
+" edit [APPLICATION]\n"
+" alias [import FILE]\n"
+" splash\n"
+" tips\n"
+" path, cwd\n"
+" cmd, commands\n"
+" lm [on, off]\n"
+" rf, refresh\n"
+" cc, colors\n"
+" hf, hidden [on, off, status]\n"
+" ff, folders first [on, off, status]\n"
+" fc, filescounter [on, off, status]\n"
+" pg, pager [on, off, status]\n"
+" uc, unicode [on, off, status]\n"
+" ext [on, off, status]\n"
+" ver, version\n"
+" fs\n"
+" q, quit, exit, zz\n"
+msgstr ""
+
+#: ../0_27_1.c:17487
 #, c-format
 msgid ""
 "\n"
-"%sColor codes:%s%s\n"
+"The value in parentheses is the code that must be used modify the color of "
+"the corresponding filetype in the configuration file (in the \"FiletypeColors"
+"\" line), using the same ANSI style color format used by dircolors. By "
+"default, %s uses only 8 colors, but you can use 256 and RGB colors as well.\n"
 "\n"
 msgstr ""
 
-#: 0_12_3_test.c:9885
+#: ../0_27_1.c:17515
 #, c-format
 msgid ""
 "\n"
-"%sConfiguration file%s%s: ~/.config/%s/%src\n"
-msgstr ""
-
-#: 0_12_3_test.c:9836
-#, c-format
-msgid ""
-"\n"
-"%sNotes%s%s:\n"
-msgstr ""
-
-#: 0_12_3_test.c:9891
-#, c-format
-msgid ""
-"\n"
-"%sProfile file%s%s: ~/.config/%s/%s_profile\n"
-msgstr ""
-
-#: 0_12_3_test.c:9676
-#, c-format
-msgid ""
-"\n"
-"%salias%s%s: Show aliases, if any. To write a new alias simpy type 'edit' to "
-"open the configuration file and add a line like this: alias "
-"alias_name='command_name args...'\n"
-msgstr ""
-
-#: 0_12_3_test.c:9602
-#, c-format
-msgid ""
-"\n"
-"%sb, back%s%s [h, hist] [clear] [!ELN]: Unlike 'cd ..', which will send you "
-"to the parent directory of the current directory, this command (with no "
-"argument) will send you back to the previously visited directory. %s keeps a "
-"record of all the visited directories. You can see this list by typing 'b "
-"hist', 'b h' or 'bh', and you can access any element in this list by simply "
-"passing the corresponding ELN in this list (preceded by the exclamation "
-"mark) to the 'back' command. Example:\n"
-"\t[user@hostname:S] ~ $ bh\n"
-"\t1 /home/user\n"
-"\t2 /etc\n"
-"\t3 /proc\n"
-"\t[user@hostname:S] ~ $ b !3\n"
-"\t[user@hostname:S] /proc $ \n"
-"  Note: The line printed in green indicates the current position of the back "
-"function in the directory history list.\n"
-"Finally, you can also clear this history list by typing 'b clear'.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9580
-#, c-format
-msgid ""
-"\n"
-"%sbm, bookmarks%s%s: Open the bookmarks menu. Here you can add, remove or "
-"edit your bookmarks to your liking, or simply change the current directory "
-"to that specified by the corresponding bookmark by just typing either its "
-"ELN or its hotkey.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9621
-#, c-format
-msgid ""
-"\n"
-"%sc, l, m, md, r%s%s: short for 'cp', 'ln', 'mv', 'mkdir', and 'rm' commands "
-"respectivelly.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9592
-#, c-format
-msgid ""
-"\n"
-"%scd%s%s [ELN/dir]: When used with no argument, it changes the current "
-"directory to the default directory (HOME). Otherwise, 'cd' changes the "
-"current directory to the one specified by the first argument. You can use "
-"either ELN's or a string to indicate the directory you want. Ex: 'cd 12' or "
-"'cd ~/media'. Unlike the shell 'cd' command, %s's built-in 'cd' function "
-"doesn not only changes the current directory, but also lists its content "
-"(provided the option \"cd lists automatically\" is enabled, which is the "
-"default) according to a comprehensive list of color codes. By default, the "
-"output of 'cd' is much like this shell command: cd DIR && ls -A --color=auto "
-"--group-directories-first\n"
-msgstr ""
-
-#: 0_12_3_test.c:9572
-#, c-format
-msgid ""
-"\n"
-"%scmd, commands%s%s: Show this list of commands.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9684
-#, c-format
-msgid ""
-"\n"
-"%scolors%s%s: Show the color codes used in the elements list.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9633
-#, c-format
-msgid ""
-"\n"
-"%sds, desel%s%s [a, all]: Deselect one or more selected elements. You can "
-"also deselect all selected elements by typing 'ds a' or 'ds all'.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9674
-#, c-format
-msgid ""
-"\n"
-"%sedit%s%s: Edit the configuration file.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9694
-#, c-format
-msgid ""
-"\n"
-"%sext%s%s [on/off/status]: Toggle external commands on/off.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9618
-#, c-format
-msgid ""
-"\n"
-"%sf, forth%s%s [h, hist] [clear] [!ELN]: It works just like the back "
-"function, but it goes forward in the history record. Of course, you can use "
-"'f hist', 'f h', 'fh', and 'f !ELN'\n"
-msgstr ""
-
-#: 0_12_3_test.c:9688
-#, c-format
-msgid ""
-"\n"
-"%sff, folders first%s%s [on/off/status]: Toggle list folders first on/off.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9700
-#, c-format
-msgid ""
-"\n"
-"%sfs%s%s: Print an extract from 'What is Free Software?', written by Richard "
-"Stallman.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9686
-#, c-format
-msgid ""
-"\n"
-"%shf, hidden%s%s [on/off/status]: Toggle hidden files on/off.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9665
-#, c-format
-msgid ""
-"\n"
-"%shistory%s%s [clear] [-n]: With no arguments, it shows the history list. If "
-"'clear' is passed as argument, it will delete all the entries in the history "
-"file. Finally, '-n' tells the history command to list only the last 'n' "
-"commands in the history list.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9698
-#, c-format
-msgid ""
-"\n"
-"%slicense%s%s: Display the license notice.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9659
-#, c-format
-msgid ""
-"\n"
-"%slog%s%s [clear]: With no arguments, it shows the log file. If clear is "
-"passed as argument, it will delete all the logs.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9650
-#, c-format
-msgid ""
-"\n"
-"%smp, mountpoints%s%s: List available mountpoints and change the current "
-"working directory into the selected mountpoint.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9662
-#, c-format
-msgid ""
-"\n"
-"%smsg, messages%s%s [clear]: With no arguments, prints the list of messages "
-"in the current session. The 'clear' option tells %s to empty the messages "
-"list.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9584
-#, c-format
-msgid ""
-"\n"
-"%so, open%s%s ELN/dir/filename [application name]: Open either a directory "
-"or a file. For example: 'o 12' or 'o filename'. By default, the 'open' "
-"function will open files with the default application associated to them (if "
-"xdg-open command is found). However, if you want to open a file with a "
-"different application, just add the application name as second argument, e."
-"g. 'o 12 leafpad'. If you want to run the program in the background, simply "
-"add the ampersand character (&): 'o 12 &'. When it comes to directories, "
-"'open' works just like the 'cd' command.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9623
-#, c-format
-msgid ""
-"\n"
-"%sp, pr, prop%s%s ELN/filename(s) [a, all] [s, size]: Print file properties "
-"of FILENAME(s). Use 'all' to list properties of all files in the current "
-"working directory, and 'size' to list their corresponding sizes.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9680
-#, c-format
-msgid ""
-"\n"
-"%spath, cwd%s%s: Print the current working directory.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9690
-#, c-format
-msgid ""
-"\n"
-"%spg, pager%s%s [on/off/status]: Toggle the pager on/off.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9703
-#, c-format
-msgid ""
-"\n"
-"%sq, quit, exit, zz%s%s: Safely quit %s.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9682
-#, c-format
-msgid ""
-"\n"
-"%srf, refresh%s%s: Refresh the screen.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9627
-#, c-format
-msgid ""
-"\n"
-"%ss, sel%s%s ELN ELN-ELN filename path... n: Send one or multiple elements "
-"to the Selection Box. 'Sel' accepts individual elements, range of elements, "
-"say 1-6, filenames and paths, just as wildcards. Ex: sel 1 4-10 file* "
-"filename /path/to/filename\n"
-msgstr ""
-
-#: 0_12_3_test.c:9631
-#, c-format
-msgid ""
-"\n"
-"%ssb, selbox%s%s: Show the elements contained in the Selection Box.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9679
-#, c-format
-msgid ""
-"\n"
-"%ssplash%s%s: Show the splash screen.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9637
-#, c-format
-msgid ""
-"\n"
-"%st, tr, trash%s%s  [ELN's, file(s)] [ls, list] [clear] [del, rm]: With no "
-"argument (or by passing the 'ls' option), it prints a list of currently "
-"trashed files. The 'clear' option removes all files from the trash can, "
-"while the 'del' option lists trashed files allowing you to remove one or "
-"more of them. The trash directory is $XDG_DATA_HOME/Trash, that is, '~/."
-"local/share/Trash'. Since this trash system follows the freedesktop "
-"specification, it is able to handle files trashed by different Trash "
-"implementations.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9645
-#, c-format
-msgid ""
-"\n"
-"%su, undel, untrash%s%s [a, all]: Print a list of currently trashed files "
-"allowing you to choose one or more of these files to be undeleted, that is "
-"to say, restored to their original location. You can also undelete all "
-"trashed files at once using the 'a' or 'all' option.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9692
-#, c-format
-msgid ""
-"\n"
-"%suc, unicode%s%s [on/off/status]: Toggle unicode on/off.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9653
-#, c-format
-msgid ""
-"\n"
-"%sv, paste%s%s [sel] [destiny]: The 'paste sel' command will copy the "
-"currently selected elements, if any, into the current working directory. If "
-"you want to copy these elements into another directory, you only need to "
-"tell 'paste' where to copy these files. Ex: paste sel /path/to/directory\n"
-msgstr ""
-
-#: 0_12_3_test.c:9696
-#, c-format
-msgid ""
-"\n"
-"%sver, version%s%s: Show %s version details.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9565
-#, c-format
-msgid ""
-"\n"
-"*The slash followed by a number (/xx) after directory names indicates the "
-"amount of files contained by the corresponding directory.\n"
-"\n"
-msgstr ""
-
-#: 0_12_3_test.c:9847
-#, c-format
-msgid ""
-"\n"
-"Besides the default TAB completion for paths, you can also expand ELN's "
-"using the TAB key. Example: 'o 12', press TAB, and it becomes 'o filename ', "
-"or, if 12 refers to a directory, 'o dir/'.\n"
-msgstr ""
-
-#: 0_12_3_test.c:2919
-msgid ""
-"\n"
-"Choose a mountpoint ('q' to quit): "
-msgstr ""
-
-#: 0_12_3_test.c:9827
-#, c-format
-msgid ""
-"\n"
-"Command line arguments take precedence over both the configuration file and "
-"the default options, whereas the configuration file takes precedence only "
-"over default options.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9837
-#, c-format
-msgid ""
-"\n"
-"It depends on the terminal emulator you use to correctly display non-ASCII "
-"characters and characters from the extended ASCII charset.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9916
-#, c-format
-msgid ""
-"\n"
-"Press any key to exit help..."
-msgstr ""
-
-#: 0_12_3_test.c:9804
-#, c-format
-msgid ""
-"\n"
-"Usage: %s [-aAfFgGhiIlLoOsuUvx] [-p path]\n"
+"USAGE: %s [-aAfFgGhiIlLoOsuUvx] [-p PATH] [-P PROFILE]\n"
 "\n"
 " -a, --no-hidden\t\t do not show hidden files\n"
 " -A, --show-hidden\t\t show hidden files (default)\n"
@@ -545,7 +154,8 @@ msgid ""
 " -L, --long-view\t\t enable long view mode\n"
 " -o, --no-list-on-the-fly\t 'cd' works as the shell 'cd' command\n"
 " -O, --list-on-the-fly\t\t 'cd' lists files on the fly (default)\n"
-" -p, --path /starting/path\t use /starting/path as %s starting path\n"
+" -p, --path PATH\t\t use PATH as %s starting path\n"
+" -P, --profile PROFILE\t\t use (or create) PROFILE as profile\n"
 " -s, --splash \t\t\t enable the splash screen\n"
 " -u, --no-unicode \t\t disable unicode\n"
 " -U, --unicode \t\t\t enable unicode to correctly list filenames containing "
@@ -553,48 +163,48 @@ msgid ""
 "default for non-english locales\n"
 " -v, --version\t\t\t show version details and exit\n"
 " -x, --ext-cmds\t\t\t allow the use of external commands\n"
+" -y, --light-mode\t\t enable the light mode\n"
+" -z, --sort METHOD\t\t sort files by METHOD, where METHOD could be: 0 = "
+"none, 1 = name, 2 = size, 3 = atime, 4 = btime, 5 = ctime, 6 = mtime, 7 = "
+"version\n"
 msgstr ""
 
-#: 0_12_3_test.c:9878
+#: ../0_27_1.c:17473
 #, c-format
-msgid ""
-"\n"
-"When dealing with filenames containing spaces, you can use both single and "
-"double quotes (ex: \"this file\" or 'this file') plus escape sequences (ex: "
-"this\\ file)."
+msgid " %s%sfile name%s%s: File with capabilities (ca)\n"
 msgstr ""
 
-#: 0_12_3_test.c:9561
+#: ../0_27_1.c:17479
 #, c-format
-msgid " %s%sfile name%s%s: Other-writable and NOT sticky directory*\n"
+msgid " %s%sfile name%s%s: Other-writable and NOT sticky directory* (ow)\n"
 msgstr ""
 
-#: 0_12_3_test.c:9555
+#: ../0_27_1.c:17471
 #, c-format
-msgid " %s%sfile name%s%s: SGID file\n"
+msgid " %s%sfile name%s%s: SGID file (sg)\n"
 msgstr ""
 
-#: 0_12_3_test.c:9553
+#: ../0_27_1.c:17469
 #, c-format
-msgid " %s%sfile name%s%s: SUID file\n"
+msgid " %s%sfile name%s%s: SUID file (su)\n"
 msgstr ""
 
-#: 0_12_3_test.c:9557
+#: ../0_27_1.c:17475
 #, c-format
-msgid " %s%sfile name%s%s: Sticky and NOT other-writable directory*\n"
+msgid " %s%sfile name%s%s: Sticky and NOT other-writable directory* (st)\n"
 msgstr ""
 
-#: 0_12_3_test.c:9559
+#: ../0_27_1.c:17477
 #, c-format
-msgid " %s%sfile name%s%s: Sticky and other-writable directory*\n"
+msgid " %s%sfile name%s%s: Sticky and other-writable directory* (tw)\n"
 msgstr ""
 
-#: 0_12_3_test.c:9563
+#: ../0_27_1.c:17481
 #, c-format
-msgid " %s%sfile name%s%s: Unknown file type\n"
+msgid " %s%sfile name%s%s: Unknown file type (no)\n"
 msgstr ""
 
-#: 0_12_3_test.c:4977
+#: ../0_27_1.c:3823 ../0_27_1.c:9292
 #, c-format
 msgid ""
 "#%s profile\n"
@@ -603,455 +213,548 @@ msgid ""
 "#echo -e \"%s, the anti-eye-candy/KISS file manager\"\n"
 msgstr ""
 
-#: 0_12_3_test.c:5026
+#: ../0_27_1.c:17513
 #, c-format
-msgid "#Default starting path is HOME\n"
+msgid "%s %s (%s), by %s\n"
 msgstr ""
 
-#: 0_12_3_test.c:5030
-#, c-format
-msgid ""
-"#Write below the commands you want to be executed before the prompt\n"
-"#Ex:\n"
-msgstr ""
-
-#: 0_12_3_test.c:7798
-#, c-format
-msgid "%d elements are now in the Selection Box\n"
-msgstr ""
-
-#: 0_12_3_test.c:7800
-#, c-format
-msgid "%d selected %s:\n"
-msgstr ""
-
-#: 0_12_3_test.c:9705
-#, c-format
-msgid ""
-"%s  \n"
-"Keyboard shortcuts%s%s:\n"
-"%s  A-f%s%s:\tToggle list-folders-first on/off\n"
-"%s  C-r%s%s:\tRefresh the screen\n"
-"%s  A-l%s%s:\tToggle long view mode on/off\n"
-"%s  A-m%s%s:\tList mountpoints\n"
-"%s  A-b%s%s:\tLaunch the Bookmarks Manager\n"
-"%s  A-i%s%s:\tToggle hidden files on/off\n"
-"%s  A-s%s%s:\tOpen the Selection Box\n"
-"%s  A-a%s%s:\tSelect all files in the current working directory\n"
-"%s  A-d%s%s:\tDeselect all selected files\n"
-"%s  A-r%s%s:\tGo to the root directory\n"
-"%s  A-e%s%s:\tGo to the home directory\n"
-"%s  A-u%s%s:\tGo up to the parent directory of the current working "
-"directory\n"
-"%s  A-h/A-j%s%s:\tGo to the previous directory in the directory history "
-"list\n"
-"%s  A-k%s%s:\tGo to the next directory in the directory history list\n"
-"%s  F10%s%s:\tOpen the configuration file\n"
-"  Some (and even all) of these keybindings might not work in some terminals, "
-"though they do work fine in the Linux built-in console, xvt-like terminal "
-"emulators like Urxvt and Aterm, and xterm-like ones.\n"
-"  %s will create HOME/.Xresources, if it doesn't already exist, for these "
-"keybindings to work correctly.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9962
+#: ../0_27_1.c:17667
 #, c-format
 msgid ""
 "%s %s (%s), by %s\n"
 "Contact: %s\n"
+"Website: %s\n"
+"License: %s\n"
 msgstr ""
 
-#: 0_12_3_test.c:5002
+#: ../0_27_1.c:9251
 #, c-format
 msgid ""
-"%s configuration file\n"
-"########################\n"
-"\n"
+"%s created a new MIME list file (%s). It is recommended to edit this file "
+"(typing 'mm edit' or however you want) to add the programs you use and "
+"remove those you don't. This will make the process of opening files faster "
+"and smoother\n"
 msgstr ""
 
-#: 0_12_3_test.c:9543
+#: ../0_27_1.c:17453
 #, c-format
-msgid "%s file name%s%s: Block special file\n"
+msgid "%s file name%s%s: Block special file (bd)\n"
 msgstr ""
 
-#: 0_12_3_test.c:9547
+#: ../0_27_1.c:17457
 #, c-format
-msgid "%s file name%s%s: Broken symbolic link\n"
+msgid "%s file name%s%s: Broken symbolic link (or)\n"
 msgstr ""
 
-#: 0_12_3_test.c:9551
+#: ../0_27_1.c:17463
 #, c-format
-msgid "%s file name%s%s: Character special file\n"
+msgid "%s file name%s%s: Character special file (cd)\n"
 msgstr ""
 
-#: 0_12_3_test.c:9535
+#: ../0_27_1.c:17439
 #, c-format
-msgid "%s file name%s%s: Directory with no read permission\n"
+msgid "%s file name%s%s: Directory with no read permission (nd)\n"
 msgstr ""
 
-#: 0_12_3_test.c:9539
+#: ../0_27_1.c:17443
 #, c-format
-msgid "%s file name%s%s: Directory*\n"
+msgid "%s file name%s%s: Directory* (di)\n"
 msgstr ""
 
-#: 0_12_3_test.c:9540
+#: ../0_27_1.c:17445
 #, c-format
-msgid "%s file name%s%s: EMPTY directory\n"
+msgid "%s file name%s%s: EMPTY directory (ed)\n"
 msgstr ""
 
-#: 0_12_3_test.c:9544
+#: ../0_27_1.c:17447
 #, c-format
-msgid "%s file name%s%s: Empty (zero-lenght) file\n"
+msgid "%s file name%s%s: EMPTY directory with no read permission (ne)\n"
 msgstr ""
 
-#: 0_12_3_test.c:9542
+#: ../0_27_1.c:17467
 #, c-format
-msgid "%s file name%s%s: Empty executable file\n"
+msgid "%s file name%s%s: Empty (zero-lenght) file (ef)\n"
 msgstr ""
 
-#: 0_12_3_test.c:9541
+#: ../0_27_1.c:17451
 #, c-format
-msgid "%s file name%s%s: Executable file\n"
+msgid "%s file name%s%s: Empty executable file (ee)\n"
 msgstr ""
 
-#: 0_12_3_test.c:9537
+#: ../0_27_1.c:17449
 #, c-format
-msgid "%s file name%s%s: File with no read permission\n"
+msgid "%s file name%s%s: Executable file (ex)\n"
 msgstr ""
 
-#: 0_12_3_test.c:9549
+#: ../0_27_1.c:17441
 #, c-format
-msgid "%s file name%s%s: Pipe or FIFO special file\n"
+msgid "%s file name%s%s: File with no read permission (nf)\n"
 msgstr ""
 
-#: 0_12_3_test.c:9552
+#: ../0_27_1.c:17461
 #, c-format
-msgid "%s file name%s%s: Regular file\n"
+msgid "%s file name%s%s: Pipe or FIFO special file (pi)\n"
 msgstr ""
 
-#: 0_12_3_test.c:9548
+#: ../0_27_1.c:17465
 #, c-format
-msgid "%s file name%s%s: Socket file\n"
+msgid "%s file name%s%s: Regular file (fi)\n"
 msgstr ""
 
-#: 0_12_3_test.c:9546
+#: ../0_27_1.c:17459
 #, c-format
-msgid "%s file name%s%s: Symbolic link\n"
+msgid "%s file name%s%s: Socket file (so)\n"
 msgstr ""
 
-#: 0_12_3_test.c:9752
+#: ../0_27_1.c:17455
 #, c-format
-msgid ""
-"%s is a completely text-based, KISS file manager able to perform all the "
-"basic operations you may expect from any other FM. However, the most salient "
-"features of %s are: \n"
-"  a) The use of short commands and numbers (ELN's), instead of filenames. "
-"Type 'o 12', for instance, to open a file with your default text editor or "
-"to change to the desired directory. Since numbers could be a bit tricky when "
-"it comes to listed files, you can use the TAB key to expand the filename "
-"corresponding to the required ELN. With the automatic ELN's expansion "
-"feature you can use ELN's with external commands as well. 'diff 12 5', for "
-"example, will run 'diff' over the files corresponding to ELN's 12 and 5. "
-"Ranges are also accepted, for example: rm 1-12.\n"
-"  b) Bookmarks: bookmark your favorite directories, and even files, to get "
-"easy access to them. Example: type 'bm' (or Alt-b) to open the bookmarks "
-"screen and then simply type a number or a hotkey to access the desired "
-"bookmark.\n"
-"  c) The Selection Box (easily accessible via the 'sb' command) allows you "
-"to select files and directories from different parts of your filesystem and "
-"then operate on them with just one command. \n"
-"  d) The back and forth functions keep track of all the paths visited by "
-"you, so that you can go back and forth to any of them by just typing 'b' or "
-"'f' (Alt-h, Alt-k).\n"
-"  e) Keyboard shortcuts make it even easier and faster to navigate and "
-"operate on your files. For example, instead of typing 'cd ..' to go back to "
-"the parent directory, or 'sel *' to select all files in the current "
-"directory, you can simply press Alt-u and Alt-a respectivelly.\n"
-"  f) The quick search function makes it really easy to quickly find the "
-"files you are looking for: just type '/search_string', that's all.\n"
-"  g) It is blazing fast and incredibly lightweigth. With a memory footprint "
-"below 5Mb, it can run on really old hardware.\n"
-"  h) It is so simple that it doesn't require an X session nor any graphical "
-"environment at all, being able thus to perfectly run on the linux built-in "
-"console and even on a headless machine via a SSH or a telnet session. \n"
-"All of these features (described in more detail below) are aimed to make "
-"easier and faster to move through and to operate on your files.\n"
-"Because inspired in Arch Linux and its KISS principle, %s is fundamentally "
-"aimed to be lightweight, fast, and simple. On Arch's notion of simplcity "
-"see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity\n"
+msgid "%s file name%s%s: Symbolic link* (ln)\n"
 msgstr ""
 
-#: 0_12_3_test.c:9750
+#: ../0_27_1.c:1735
 #, c-format
-msgid ""
-"%s%s %s%s %s(%s), by %s\n"
-"\n"
+msgid "%s%s%s: Succesfully mounted on %s\n"
 msgstr ""
 
-#: 0_12_3_test.c:2519
-#, c-format
-msgid ""
-"%s, 2017-%d, %s\n"
-"\n"
-"This program is free software; you can redistribute it and/or modify it "
-"under the terms of the GNU General Public License (version 2 or later) as "
-"published by the Free Software Foundation.\n"
-"\n"
-"This program is distributed in the hope that it will be useful, but WITHOUT "
-"ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or "
-"FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for "
-"more details.\n"
-"\n"
-"You should have received a copy of the GNU General Public License along with "
-"this program. If not, write to the Free Software Foundation, Inc., 51 "
-"Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA, or visit <http://"
-"www.gnu.org/licenses/>\n"
-"\n"
-"NOTE: For more information about the meaning of 'free software' run 'fs'.\n"
-msgstr ""
-
-#: 0_12_3_test.c:9381
+#: ../0_27_1.c:17160
 #, c-format
 msgid "%s: !%d: event not found\n"
 msgstr ""
 
-#: 0_12_3_test.c:9401
+#: ../0_27_1.c:17205
 #, c-format
 msgid "%s: !%s: event not found\n"
 msgstr ""
 
-#: 0_12_3_test.c:4444 0_12_3_test.c:4451 0_12_3_test.c:4481 0_12_3_test.c:4488
+#: ../0_27_1.c:5918
+#, c-format
+msgid "%s: %s -> '%s' (%s): Cannot open file. Try 'APPLICATION FILENAME'.\n"
+msgstr ""
+
+#: ../0_27_1.c:8079 ../0_27_1.c:8111 ../0_27_1.c:8129
 #, c-format
 msgid "%s: %s failed to allocate %zu bytes\n"
 msgstr ""
 
-#: 0_12_3_test.c:7790
+#: ../0_27_1.c:14940 ../0_27_1.c:15129
 #, c-format
-msgid "%s: %s: '%s': Already selected\n"
+msgid "%s: %s: Error dequoting filename\n"
 msgstr ""
 
-#: 0_12_3_test.c:7761
+#: ../0_27_1.c:10989
 #, c-format
-msgid "%s: %s: '%s': No such file or directory\n"
+msgid "%s: %s: Error getting variable name\n"
 msgstr ""
 
-#: 0_12_3_test.c:9455
+#: ../0_27_1.c:10870 ../0_27_1.c:10954 ../0_27_1.c:11153 ../0_27_1.c:11246
 #, c-format
-msgid "%s: %s: Command not found\n"
+msgid "%s: %s: Error quoting filename\n"
 msgstr ""
 
-#: 0_12_3_test.c:7058
+#: ../0_27_1.c:3876
 #, c-format
-msgid "%s: '%.2s': Syntax error\n"
+msgid "%s: %s: No such profile\n"
 msgstr ""
 
-#: 0_12_3_test.c:7388
+#: ../0_27_1.c:852 ../0_27_1.c:4013
+#, c-format
+msgid ""
+"%s: %s: System shell not found. Please edit the configuration file to "
+"specify a working shell.\n"
+msgstr ""
+
+#: ../0_27_1.c:3285
+#, c-format
+msgid "%s: %zu aliases were successfully imported\n"
+msgstr ""
+
+#: ../0_27_1.c:14048
 #, c-format
 msgid "%s: '%c': Syntax error\n"
 msgstr ""
 
-#: 0_12_3_test.c:2665
+#: ../0_27_1.c:5926
 #, c-format
-msgid "%s: '%s -> %s' (%s): Cannot open file. Try 'application filename'.\n"
+msgid "%s: '%s' (%s): Cannot open file. Try 'APPLICATION FILENAME'.\n"
 msgstr ""
 
-#: 0_12_3_test.c:2669
+#: ../0_27_1.c:9883
 #, c-format
-msgid "%s: '%s' (%s): Cannot open file. Try 'application filename'.\n"
+msgid "%s: '%s': %s. Using the current working directory as starting path\n"
 msgstr ""
 
-#: 0_12_3_test.c:7622
+#: ../0_27_1.c:2453 ../0_27_1.c:2570 ../0_27_1.c:2689
 #, c-format
-msgid "%s: '%s': Command not found\n"
+msgid "%s: '%s': Cannot create mountpoint\n"
 msgstr ""
 
-#: 0_12_3_test.c:3143
+#: ../0_27_1.c:9241
+#, c-format
+msgid ""
+"%s: '%s': Directory not writable. Bookmarks, commands logs, and commands "
+"history are disabled. Program messages won't be persistent. Using default "
+"options\n"
+msgstr ""
+
+#: ../0_27_1.c:9218
+#, c-format
+msgid "%s: '%s': Directory not writable. Trash function disabled\n"
+msgstr ""
+
+#: ../0_27_1.c:3853
+#, c-format
+msgid "%s: '%s': Error creating profile\n"
+msgstr ""
+
+#: ../0_27_1.c:3727
+#, c-format
+msgid "%s: '%s': Error creating profile: Home directory not found\n"
+msgstr ""
+
+#: ../0_27_1.c:2953 ../0_27_1.c:5809 ../0_27_1.c:16460
+#, c-format
+msgid "%s: '%s': Error dequoting filename\n"
+msgstr ""
+
+#: ../0_27_1.c:6503
 #, c-format
 msgid "%s: '%s': Error getting parent directory\n"
 msgstr ""
 
-#: 0_12_3_test.c:7331
+#: ../0_27_1.c:4399
+#, c-format
+msgid "%s: '%s': Error opening file\n"
+msgstr ""
+
+#: ../0_27_1.c:3898
+#, c-format
+msgid "%s: '%s': Error removing profile\n"
+msgstr ""
+
+#: ../0_27_1.c:13987
 #, c-format
 msgid "%s: '%s': Is a directory\n"
 msgstr ""
 
-#: 0_12_3_test.c:7619
+#: ../0_27_1.c:2461 ../0_27_1.c:2698
 #, c-format
-msgid "%s: '%s': Permission denied\n"
+msgid "%s: '%s': Mounpoint not empty\n"
 msgstr ""
 
-#: 0_12_3_test.c:2280 0_12_3_test.c:2289
+#: ../0_27_1.c:2578
 #, c-format
-msgid ""
-"%s: '%s': Warning! Failure getting the home directory. Using '%s' as an "
-"emergency home\n"
+msgid "%s: '%s': Mountpoint not empty\n"
 msgstr ""
 
-#: 0_12_3_test.c:9464
+#: ../0_27_1.c:3269
 #, c-format
-msgid "%s: 'xdg-open' not found. Try 'edit application_name'\n"
+msgid "%s: '%s': No alias found\n"
 msgstr ""
 
-#: 0_12_3_test.c:4504 0_12_3_test.c:4513
+#: ../0_27_1.c:3920
 #, c-format
 msgid ""
-"%s: 'xdg-open' not found. Without this program you will always need to "
-"specify an application when opening files.\n"
+"%s: '%s': No such profile\n"
+"To add a new profile enter 'pf add PROFILE'\n"
 msgstr ""
 
-#: 0_12_3_test.c:7663
+#: ../0_27_1.c:2969
 #, c-format
-msgid "%s: Command not found\n"
+msgid "%s: '%s': Not a directory\n"
 msgstr ""
 
-#: 0_12_3_test.c:2333 0_12_3_test.c:2340
+#: ../0_27_1.c:3721
+#, c-format
+msgid "%s: '%s': Profile already exists\n"
+msgstr ""
+
+#: ../0_27_1.c:3846
+#, c-format
+msgid "%s: '%s': Profile succesfully created\n"
+msgstr ""
+
+#: ../0_27_1.c:3890
+#, c-format
+msgid "%s: '%s': Profile successfully removed\n"
+msgstr ""
+
+#: ../0_27_1.c:13231
+#, c-format
+msgid "%s: '%s': Syntax error\n"
+msgstr ""
+
+#: ../0_27_1.c:4094
+#, c-format
+msgid "%s: 'file' command not found\n"
+msgstr ""
+
+#: ../0_27_1.c:5944
+#, c-format
+msgid ""
+"%s: 'file' command not found. Specify an application to open the file\n"
+"Usage: open ELN/FILENAME [APPLICATION]\n"
+msgstr ""
+
+#: ../0_27_1.c:8145
+#, c-format
+msgid ""
+"%s: 'file' command not found. Specify an application when opening files. Ex: "
+"'o 12 nano' or just 'nano 12'\n"
+msgstr ""
+
+#: ../0_27_1.c:17340
+#, c-format
+msgid "%s: 'file' command not found. Try 'edit APPLICATION'\n"
+msgstr ""
+
+#: ../0_27_1.c:3288
+#, c-format
+msgid "%s: 1 alias was successfully imported\n"
+msgstr ""
+
+#: ../0_27_1.c:17261
+#, c-format
+msgid "%s: Cannot access the configuration file\n"
+msgstr ""
+
+#: ../0_27_1.c:780
+#, c-format
+msgid ""
+"%s: Cannot access the home directory. Trash, bookmarks, commands logs, and "
+"commands history are disabled. Program messages and selected files won't be "
+"persistent. Using default options\n"
+msgstr ""
+
+#: ../0_27_1.c:2928
+#, c-format
+msgid "%s: Default terminal not set. Use the configuration file to set one\n"
+msgstr ""
+
+#: ../0_27_1.c:3818
+#, c-format
+msgid "%s: Error creating the profile file\n"
+msgstr ""
+
+#: ../0_27_1.c:11466
+#, c-format
+msgid "%s: Error decoding prompt line. Using an emergency prompt\n"
+msgstr ""
+
+#: ../0_27_1.c:871
 #, c-format
 msgid "%s: Error getting hostname\n"
 msgstr ""
 
-#: 0_12_3_test.c:2300 0_12_3_test.c:2307
+#: ../0_27_1.c:4174
+#, c-format
+msgid "%s: Error getting mime-type\n"
+msgstr ""
+
+#: ../0_27_1.c:794
 #, c-format
 msgid "%s: Error getting username\n"
 msgstr ""
 
-#: 0_12_3_test.c:4311
+#: ../0_27_1.c:7906
 #, c-format
 msgid "%s: Error getting variable name\n"
 msgstr ""
 
-#: 0_12_3_test.c:4316
+#: ../0_27_1.c:7913
 #, c-format
 msgid "%s: Error getting variable value\n"
 msgstr ""
 
-#: 0_12_3_test.c:7169
+#: ../0_27_1.c:3049
+#, c-format
+msgid "%s: Error lauching new instance\n"
+msgstr ""
+
+#: ../0_27_1.c:4062
+#, c-format
+msgid "%s: Error opening the history file\n"
+msgstr ""
+
+#: ../0_27_1.c:13155
+#, c-format
+msgid "%s: Error parsing aliased command\n"
+msgstr ""
+
+#: ../0_27_1.c:17155 ../0_27_1.c:17194 ../0_27_1.c:17242
+#, c-format
+msgid "%s: Error parsing history command\n"
+msgstr ""
+
+#: ../0_27_1.c:5200 ../0_27_1.c:5405 ../0_27_1.c:5514
+#, c-format
+msgid "%s: Error registering environment colors\n"
+msgstr ""
+
+#: ../0_27_1.c:13656
 #, c-format
 msgid "%s: External commands %s\n"
 msgstr ""
 
-#: 0_12_3_test.c:7366
+#: ../0_27_1.c:14025
 #, c-format
-msgid "%s: External commands are not allowed\n"
+msgid "%s: External commands are not allowed. Run 'ext on' to enable them.\n"
 msgstr ""
 
-#: 0_12_3_test.c:7177
+#: ../0_27_1.c:13665
 #, c-format
 msgid "%s: External commands disabled\n"
 msgstr ""
 
-#: 0_12_3_test.c:7173
+#: ../0_27_1.c:13660
 #, c-format
 msgid "%s: External commands enabled\n"
 msgstr ""
 
-#: 0_12_3_test.c:2450 0_12_3_test.c:2457
+#: ../0_27_1.c:2425
+#, c-format
+msgid "%s: FTP is not yet supported on FreeBSD\n"
+msgstr ""
+
+#: ../0_27_1.c:975
 #, c-format
 msgid "%s: Fatal error! Failed retrieving current working directory\n"
 msgstr ""
 
-#: 0_12_3_test.c:7234
+#: ../0_27_1.c:13789
 #, c-format
 msgid "%s: Folders first %s\n"
 msgstr ""
 
-#: 0_12_3_test.c:9094
+#: ../0_27_1.c:2934
+#, c-format
+msgid "%s: Function only available for graphical environments\n"
+msgstr ""
+
+#: ../0_27_1.c:16788
 #, c-format
 msgid "%s: Hidden files %s\n"
 msgstr ""
 
-#: 0_12_3_test.c:5733
+#: ../0_27_1.c:17056
 #, c-format
-msgid "%s: Missing quote\n"
+msgid "%s: History function disabled\n"
 msgstr ""
 
-#: 0_12_3_test.c:8108 0_12_3_test.c:8166
+#: ../0_27_1.c:6018
+#, c-format
+msgid "%s: Home directory not found\n"
+msgstr ""
+
+#: ../0_27_1.c:13829
+#, c-format
+msgid "%s: Log function disabled\n"
+msgstr ""
+
+#: ../0_27_1.c:5681
+#, c-format
+msgid "%s: Missing '%c'\n"
+msgstr ""
+
+#: ../0_27_1.c:3278
+#, c-format
+msgid "%s: No alias imported\n"
+msgstr ""
+
+#: ../0_27_1.c:4213
+#, c-format
+msgid "%s: No associated application found\n"
+msgstr ""
+
+#: ../0_27_1.c:15096 ../0_27_1.c:15099 ../0_27_1.c:15315
 #, c-format
 msgid "%s: No matches found\n"
 msgstr ""
 
-#: 0_12_3_test.c:7189
+#: ../0_27_1.c:3035
+#, c-format
+msgid ""
+"%s: No option specified for '%s'\n"
+"Trying '%s -e %s -p %s'\n"
+msgstr ""
+
+#: ../0_27_1.c:13688
 #, c-format
 msgid "%s: Pager %s\n"
 msgstr ""
 
-#: 0_12_3_test.c:7197
+#: ../0_27_1.c:13696
 #, c-format
 msgid "%s: Pager disabled\n"
 msgstr ""
 
-#: 0_12_3_test.c:7193
+#: ../0_27_1.c:13692
 #, c-format
 msgid "%s: Pager enabled\n"
 msgstr ""
 
-#: 0_12_3_test.c:6519
+#: ../0_27_1.c:11855
 #, c-format
-msgid "%s: Path variable is NULL or empty\n"
+msgid "%s: Path is NULL or empty\n"
 msgstr ""
 
-#: 0_12_3_test.c:7660
-#, c-format
-msgid "%s: Permission denied\n"
-msgstr ""
-
-#: 0_12_3_test.c:4924 0_12_3_test.c:4935
+#: ../0_27_1.c:10011
 #, c-format
 msgid ""
 "%s: Restart your %s for changes to ~/.Xresources to take effect. Otherwise, "
 "%s keybindings might not work as expected.\n"
 msgstr ""
 
-#: 0_12_3_test.c:7268 0_12_3_test.c:7282
+#: ../0_27_1.c:2647
+#, c-format
+msgid "%s: SFTP is not yet supported on FreeBSD"
+msgstr ""
+
+#: ../0_27_1.c:2505
+#, c-format
+msgid "%s: SMB is not yet supported on FreeBSD\n"
+msgstr ""
+
+#: ../0_27_1.c:13847 ../0_27_1.c:13863
 #, c-format
 msgid "%s: There are no messages\n"
 msgstr ""
 
-#: 0_12_3_test.c:6060
+#: ../0_27_1.c:10909
 #, c-format
 msgid "%s: There are no selected files\n"
 msgstr ""
 
-#: 0_12_3_test.c:7357
+#: ../0_27_1.c:14015
 #, c-format
-msgid "%s: To gracefully quit type 'quit'\n"
+msgid "%s: To gracefully quit enter'quit'\n"
 msgstr ""
 
-#: 0_12_3_test.c:7209
+#: ../0_27_1.c:7088 ../0_27_1.c:7320
+#, c-format
+msgid "%s: Trash function disabled\n"
+msgstr ""
+
+#: ../0_27_1.c:13754
 #, c-format
 msgid "%s: Unicode %s\n"
 msgstr ""
 
-#: 0_12_3_test.c:7217
+#: ../0_27_1.c:13762
 #, c-format
 msgid "%s: Unicode disabled\n"
 msgstr ""
 
-#: 0_12_3_test.c:7213
+#: ../0_27_1.c:13758
 #, c-format
 msgid "%s: Unicode enabled\n"
 msgstr ""
 
-#: 0_12_3_test.c:7165 0_12_3_test.c:7180
-#, c-format
-msgid "%s: Usage: ext [on, off, status]\n"
-msgstr ""
-
-#: 0_12_3_test.c:7186 0_12_3_test.c:7200
-#, c-format
-msgid "%s: Usage: pager [on, off, status]\n"
-msgstr ""
-
-#: 0_12_3_test.c:7206 0_12_3_test.c:7220
-#, c-format
-msgid "%s: Usage: unicode [on, off, status]\n"
-msgstr ""
-
-#: 0_12_3_test.c:5041 0_12_3_test.c:5049
+#: ../0_27_1.c:9322
 #, c-format
 msgid "%s: fopen: '%s': %s. Using default values.\n"
 msgstr ""
 
-#: 0_12_3_test.c:5509
+#: ../0_27_1.c:10379
 #, c-format
 msgid ""
 "%s: invalid option -- '%c'\n"
@@ -1059,315 +762,354 @@ msgid ""
 "Try '%s --help' for more information.\n"
 msgstr ""
 
-#: 0_12_3_test.c:4859 0_12_3_test.c:4868
+#: ../0_27_1.c:3743
 #, c-format
 msgid "%s: mkdir: '%s': Error creating configuration directory\n"
 msgstr ""
 
-#: 0_12_3_test.c:3863 0_12_3_test.c:3871 0_12_3_test.c:4835 0_12_3_test.c:4845
+#: ../0_27_1.c:9230
 #, c-format
-msgid "%s: mkdir: '%s': Error creating trash directory\n"
+msgid ""
+"%s: mkdir: '%s': Error creating configuration directory. Bookmarks, commands "
+"logs, and command history are disabled. Program messages won't be "
+"persistent. Using default options\n"
 msgstr ""
 
-#: 0_12_3_test.c:2606
+#: ../0_27_1.c:9209
+#, c-format
+msgid ""
+"%s: mkdir: '%s': Error creating trash directory. Trash function disabled\n"
+msgstr ""
+
+#: ../0_27_1.c:5862
 #, c-format
 msgid "%s: open: '%s': Broken link\n"
 msgstr ""
 
-#: 0_12_3_test.c:2722
-#, c-format
-msgid "%s: open: '%s': Command not found\n"
-msgstr ""
-
-#: 0_12_3_test.c:5505
+#: ../0_27_1.c:10374
 #, c-format
 msgid ""
 "%s: option requires an argument -- '%c'\n"
 "Try '%s --help' for more information.\n"
 msgstr ""
 
-#: 0_12_3_test.c:3514 0_12_3_test.c:3776
+#: ../0_27_1.c:14529
+#, c-format
+msgid "%s: sel: '%s': Already selected\n"
+msgstr ""
+
+#: ../0_27_1.c:14492
+#, c-format
+msgid "%s: sel: '%s': No such %s\n"
+msgstr ""
+
+#: ../0_27_1.c:6925
 #, c-format
 msgid "%s: trash: '%d': Invalid ELN\n"
 msgstr ""
 
-#: 0_12_3_test.c:3283
+#: ../0_27_1.c:6603
+#, c-format
+msgid "%s: trash: '%s' (%s): Unsupported file type\n"
+msgstr ""
+
+#: ../0_27_1.c:6656
 #, c-format
 msgid "%s: trash: '%s': Error getting filename\n"
 msgstr ""
 
-#: 0_12_3_test.c:3833
+#: ../0_27_1.c:7272
 #, c-format
 msgid "%s: trash: '%s': Error removing trashed file\n"
 msgstr ""
 
-#: 0_12_3_test.c:3312
+#: ../0_27_1.c:6699
 #, c-format
 msgid "%s: trash: '%s': Failed copying file to Trash\n"
 msgstr ""
 
-#: 0_12_3_test.c:3345
+#: ../0_27_1.c:6743
 #, c-format
 msgid "%s: trash: '%s': Failed encoding path\n"
 msgstr ""
 
-#: 0_12_3_test.c:3365
+#: ../0_27_1.c:6767
 #, c-format
 msgid "%s: trash: '%s': Failed removing file\n"
 msgstr ""
 
-#: 0_12_3_test.c:3497
+#: ../0_27_1.c:6901
 #, c-format
 msgid "%s: trash: '%s': Invalid ELN\n"
 msgstr ""
 
-#: 0_12_3_test.c:3238
-#, c-format
-msgid "%s: trash: '%s': Unsuported file type\n"
-msgstr ""
-
-#: 0_12_3_test.c:3332
+#: ../0_27_1.c:6726
 #, c-format
 msgid ""
 "%s: trash: '%s/%s': Failed removing trash file\n"
 "Try removing it manually\n"
 msgstr ""
 
-#: 0_12_3_test.c:3483 0_12_3_test.c:3528
+#: ../0_27_1.c:6882 ../0_27_1.c:6940
 #, c-format
 msgid "%s: trash: Error trashing %s\n"
 msgstr ""
 
-#: 0_12_3_test.c:3372
+#: ../0_27_1.c:6780
 #, c-format
 msgid ""
 "%s: trash: Failed removing temporary files from Trash.\n"
 "Try removing them manually\n"
 msgstr ""
 
-#: 0_12_3_test.c:3571
+#: ../0_27_1.c:7202
+#, c-format
+msgid "%s: undel: '%d': Invalid ELN\n"
+msgstr ""
+
+#: ../0_27_1.c:6998
 #, c-format
 msgid "%s: undel: '%s': Failed decoding path\n"
 msgstr ""
 
-#: 0_12_3_test.c:3621
+#: ../0_27_1.c:7056
 #, c-format
 msgid "%s: undel: '%s': Failed removing info file\n"
 msgstr ""
 
-#: 0_12_3_test.c:3626
+#: ../0_27_1.c:7065
 #, c-format
 msgid "%s: undel: '%s': Failed restoring trashed file\n"
 msgstr ""
 
-#: 0_12_3_test.c:3595
+#: ../0_27_1.c:7028
 #, c-format
 msgid "%s: undel: '%s': No such file or directory\n"
 msgstr ""
 
-#: 0_12_3_test.c:3602
+#: ../0_27_1.c:7036
 #, c-format
 msgid "%s: undel: '%s': Permission denied\n"
 msgstr ""
 
-#: 0_12_3_test.c:3631
+#: ../0_27_1.c:7072
 #, c-format
 msgid ""
 "%s: undel: Info file for '%s' not found. Try restoring the file manually\n"
 msgstr ""
 
-#: 0_12_3_test.c:5512
+#: ../0_27_1.c:10383
 #, c-format
 msgid "%s: unknown option character '\\%x'\n"
 msgstr ""
 
-#: 0_12_3_test.c:2682
-#, c-format
-msgid ""
-"%s: xdg-open not found. Specify an application to open the file\n"
-"Usage: open ELN/filename [application] [&]\n"
-msgstr ""
-
-#: 0_12_3_test.c:8646
-#, c-format
-msgid "%s: xdg-open not found. Try 'ELN/hot-key application'\n"
-msgstr ""
-
-#: 0_12_3_test.c:8501
-#, c-format
-msgid "%s: xdg-open not found. Try 'e application'\n"
-msgstr ""
-
-#: 0_12_3_test.c:8588
-#, c-format
-msgid "%s: xdg-open not found. Try 'hotkey application'\n"
-msgstr ""
-
-#: 0_12_3_test.c:8343
-#, c-format
-msgid "%s: xdg-open: Command not found\n"
-msgstr ""
-
-#: 0_12_3_test.c:8295
+#: ../0_27_1.c:16012
 #, c-format
 msgid ""
 "%sBookmarks Manager%s\n"
 "\n"
 msgstr ""
 
-#: 0_12_3_test.c:6122
-#, c-format
-msgid "%sCliFM, the anti-eye-candy, KISS file manager%s\n"
-msgstr ""
-
-#: 0_12_3_test.c:9832
+#: ../0_27_1.c:11407
 #, c-format
 msgid ""
-"%sCommands:\n"
-"%s%sNote: ELN = Element List Number. Example: In the line \"12 openbox\", 12 "
-"is the ELN corresponding to the 'openbox' file.\n"
-"%s"
+"%sCliFM, the anti-eye-candy, KISS file manager%s\n"
+"%sEnter 'help' or '?' for instructions.%s\n"
 msgstr ""
 
-#: 0_12_3_test.c:9899
-#, c-format
-msgid "%sLog file%s%s: ~/.config/%s/log.cfm\n"
-msgstr ""
-
-#: 0_12_3_test.c:9904
-#, c-format
-msgid "%sMessages log file%s%s: ~/.config/%s/messages.cfm\n"
-msgstr ""
-
-#: 0_12_3_test.c:2870
+#: ../0_27_1.c:6181
 #, c-format
 msgid ""
 "%sMountpoints%s\n"
 "\n"
 msgstr ""
 
-#: 0_12_3_test.c:7820 0_12_3_test.c:7888
+#: ../0_27_1.c:14575 ../0_27_1.c:14647
 #, c-format
 msgid "%sSelection Box%s%s\n"
 msgstr ""
 
-#: 0_12_3_test.c:3403 0_12_3_test.c:3702
+#: ../0_27_1.c:6813 ../0_27_1.c:7137
 #, c-format
 msgid ""
 "%sTrashed files%s%s\n"
 "\n"
 msgstr ""
 
-#: 0_12_3_test.c:6124
+#: ../0_27_1.c:1485
 #, c-format
-msgid "%sType 'help' or '?' for instructions.%s\n"
+msgid ""
+"%s[e]%sxtract %s[E]%sxtract-to-dir %s[l]%sist %s[m]%sount %s[r]%sepack "
+"%s[q]%suit\n"
 msgstr ""
 
-#: 0_12_3_test.c:3158
+#: ../0_27_1.c:14548
+#, c-format
+msgid "%zu elements are now in the Selection Box\n"
+msgstr ""
+
+#: ../0_27_1.c:14551
+#, c-format
+msgid "%zu selected %s:\n"
+msgstr ""
+
+#: ../0_27_1.c:3255
+#, c-format
+msgid "'%s': Alias already exists\n"
+msgstr ""
+
+#: ../0_27_1.c:3213
+#, c-format
+msgid "'%s': Alias conflicts with internal command\n"
+msgstr ""
+
+#: ../0_27_1.c:6519
 #, c-format
 msgid "'%s': Directory is immutable\n"
 msgstr ""
 
-#: 0_12_3_test.c:3210
+#: ../0_27_1.c:6573
 #, c-format
 msgid "'%s': File is immutable\n"
 msgstr ""
 
-#: 0_12_3_test.c:3130
+#: ../0_27_1.c:6488
 #, c-format
 msgid "'%s': No such file or directory\n"
 msgstr ""
 
-#: 0_12_3_test.c:3101 0_12_3_test.c:3189 0_12_3_test.c:3197 0_12_3_test.c:3217
-#: 0_12_3_test.c:3230
+#: ../0_27_1.c:6459 ../0_27_1.c:6550 ../0_27_1.c:6559 ../0_27_1.c:6580
+#: ../0_27_1.c:6595
 #, c-format
 msgid "'%s': Permission denied\n"
 msgstr ""
 
-#: 0_12_3_test.c:8738
-msgid "('du': not found)"
+#: ../0_27_1.c:16380 ../0_27_1.c:16384
+msgid "???"
 msgstr ""
 
-#: 0_12_3_test.c:9908
-#, c-format
-msgid ""
-"A bold green asterisk at the left of the prompt indicates that there are "
-"elements in the Selection Box. In the same way, a yellow 'T' notices that "
-"there are currently files in the trash can. Finally, %s makes use of three "
-"kind of messages: errors (a red 'E' at the left of the prompt), warnings (a "
-"yellow 'W'), and simple notices (a green 'N').\n"
-msgstr ""
-
-#: 0_12_3_test.c:9906
-#, c-format
-msgid ""
-"A file containing a list of system messages, either errors, warnings, or "
-"simple notices. The messages log format is: [date] message.\n"
-"\n"
-msgstr ""
-
-#: 0_12_3_test.c:9067
+#: ../0_27_1.c:16759
 #, c-format
 msgid "Access: \t%s\n"
 msgstr ""
 
-#: 0_12_3_test.c:9070
+#: ../0_27_1.c:4227
+#, c-format
+msgid "Associated application: %s (%s)\n"
+msgstr ""
+
+#: ../0_27_1.c:4211
+msgid "Associated application: None\n"
+msgstr ""
+
+#: ../0_27_1.c:16765
 #, c-format
 msgid "Birth: \t\t%s\n"
 msgstr ""
 
-#: 0_12_3_test.c:9051
+#: ../0_27_1.c:16742
 #, c-format
 msgid "Block special file"
 msgstr ""
 
-#: 0_12_3_test.c:9069
+#: ../0_27_1.c:16262
+#, c-format
+msgid "Bookmarks function disabled\n"
+msgstr ""
+
+#: ../0_27_1.c:16143
+#, c-format
+msgid "Bookmarks: '%d': No such ELN\n"
+msgstr ""
+
+#: ../0_27_1.c:16220
+#, c-format
+msgid "Bookmarks: '%s': Cannot open file\n"
+msgstr ""
+
+#: ../0_27_1.c:16161
+#, c-format
+msgid "Bookmarks: '%s': No such bookmark\n"
+msgstr ""
+
+#: ../0_27_1.c:16204
+#, c-format
+msgid "Bookmarks: 'file' command not found. Try 'bookmark APPLICATION'\n"
+msgstr ""
+
+#: ../0_27_1.c:16108
+#, c-format
+msgid "Bookmarks: 'file' command not found.Try 'e APPLICATION'\n"
+msgstr ""
+
+#: ../0_27_1.c:15930
+#, c-format
+msgid ""
+"Bookmarks: There are no bookmarks\n"
+"Enter 'bm edit' to edit the bookmarks file or 'bm add PATH' to add a new "
+"bookmark\n"
+msgstr ""
+
+#: ../0_27_1.c:16116
+#, c-format
+msgid "Bookmarks: Try 'e APPLICATION'\n"
+msgstr ""
+
+#: ../0_27_1.c:16761
 #, c-format
 msgid "Change: \t%s\n"
 msgstr ""
 
-#: 0_12_3_test.c:9052
+#: ../0_27_1.c:16743
 #, c-format
 msgid "Character special file"
 msgstr ""
 
-#: 0_12_3_test.c:8274
-msgid "Choose a bookmark ([e]dit, [q]uit): "
+#: ../0_27_1.c:15442
+msgid "Choose a bookmark: "
 msgstr ""
 
-#: 0_12_3_test.c:9059
+#: ../0_27_1.c:6242
+msgid "Choose a mountpoint ('q' to quit): "
+msgstr ""
+
+#: ../0_27_1.c:17618
+msgid ""
+"Color codes: Run the 'colors' or 'cc' command to see the list of currently "
+"used color codes.\n"
+msgstr ""
+
+#: ../0_27_1.c:16752
 #, c-format
-msgid "Device: %d:%d"
+msgid "Device: %zu"
 msgstr ""
 
-#: 0_12_3_test.c:9048
+#: ../0_27_1.c:16739
 #, c-format
 msgid "Directory"
 msgstr ""
 
-#: 0_12_3_test.c:7901
-msgid "Elements to be deselected (ex: 1 2 6, or *)? "
+#: ../0_27_1.c:14661
+msgid "Element(s) to be deselected (ex: 1 2-6, or *): "
 msgstr ""
 
-#: 0_12_3_test.c:3442
-msgid "Elements to be removed (ex: 1 2 6, or *)? "
+#: ../0_27_1.c:6838
+msgid "Element(s) to be removed (ex: 1 2-6, or *): "
 msgstr ""
 
-#: 0_12_3_test.c:3725
-msgid "Elements to be undeleted (ex: 1 2 6, or *)? "
+#: ../0_27_1.c:7154
+msgid "Element(s) to be undeleted (ex: 1 2-6, or *): "
 msgstr ""
 
-#: 0_12_3_test.c:7823 0_12_3_test.c:7890
+#: ../0_27_1.c:14578 ../0_27_1.c:14649
 msgid "Empty"
 msgstr ""
 
-#: 0_12_3_test.c:6684
-#, c-format
-msgid "Error: %s: %d: %s: %s\n"
+#: ../0_27_1.c:1070 ../0_27_1.c:4518
+msgid "Error opening temporary file\n"
 msgstr ""
 
-#: 0_12_3_test.c:9927
-#, c-format
+#: ../0_27_1.c:17629
 msgid ""
 "Excerpt from 'What is Free Software?', by Richard Stallman. Source: https://"
 "www.gnu.org/philosophy/free-sw.html\n"
@@ -1404,92 +1146,159 @@ msgid ""
 "A program is free software if it gives users adequately all of these "
 "freedoms. Otherwise, it is nonfree. While we can distinguish various nonfree "
 "distribution schemes in terms of how far they fall short of being free, we "
-"consider them all equally unethical (...)\"\n"
+"consider them all equally unethical (...)\""
 msgstr ""
 
-#: 0_12_3_test.c:2593 0_12_3_test.c:2635
+#: ../0_27_1.c:4202
+#, c-format
+msgid "Extension: %s\n"
+msgstr ""
+
+#: ../0_27_1.c:4204
+msgid "Extension: None"
+msgstr ""
+
+#: ../0_27_1.c:5849 ../0_27_1.c:5885
 msgid "FIFO/pipe"
 msgstr ""
 
-#: 0_12_3_test.c:9053
+#: ../0_27_1.c:16744
 #, c-format
 msgid "Fifo"
 msgstr ""
 
-#: 0_12_3_test.c:9887
+#: ../0_27_1.c:15907
 #, c-format
-msgid ""
-"Here you can permanently set up %s options, add aliases and some prompt "
-"commands (which will be executed immediately before each new prompt line). "
-"Just recall that in order to use prompt commands you must allow the use of "
-"external commands. See the 'ext' command above.\n"
+msgid "File succesfully bookmarked\n"
 msgstr ""
 
-#: 0_12_3_test.c:9893
-#, c-format
+#: ../0_27_1.c:1300
+msgid "Filename ('q' to quit): "
+msgstr ""
+
+#: ../0_27_1.c:13723 ../0_27_1.c:13731
+msgid "Filescounter is disabled"
+msgstr ""
+
+#: ../0_27_1.c:13717 ../0_27_1.c:13729
+msgid "Filescounter is enabled"
+msgstr ""
+
+#: ../0_27_1.c:17593
 msgid ""
-"In this file you can add those commands you want to be executed at startup. "
-"You can also permanently set here some custom variables, ex: 'dir=\"/path/to/"
-"folder\"'. This variable may be used as a shorcut to that folder, for "
-"instance: 'cd $dir'. Custom variables could also be temporarily defined via "
-"the command prompt: Ex: user@hostname ~ $ var=\"This is a test\". Temporary "
-"variables will be removed at program exit.\n"
+"KEYBOARD SHORTCUTS:\n"
 "\n"
+" A-c:\tClear the current command line buffer\n"
+" A-f:\tToggle list-folders-first on/off\n"
+" C-r:\tRefresh the screen\n"
+" A-l:\tToggle long view mode on/off\n"
+" A-m:\tList mountpoints\n"
+" A-b:\tLaunch the Bookmarks Manager\n"
+" A-i:\tToggle hidden files on/off\n"
+" A-s:\tOpen the Selection Box\n"
+" A-a:\tSelect all files in the current working directory\n"
+" A-d:\tDeselect all selected files\n"
+" A-r:\tChange to the root directory\n"
+" A-e:\tChange to the home directory\n"
+" A-u:\tChange to the parent directory\n"
+" A-j:\tChange to the previous directory in the directory history list\n"
+" A-k:\tChange to the next directory in the directory history list\n"
+" A-y:\tToggle light mode on/off\n"
+" A-z:\tChange to previous sorting method\n"
+" A-x:\tChange to next sorting method\n"
+" F10:\tOpen the configuration file\n"
+"\n"
+"NOTE: Depending on the terminal emulator being used, some of these "
+"keybindings, like A-e, A-f, and F10, might conflict with some of the "
+"terminal keybindings.\n"
 msgstr ""
 
-#: 0_12_3_test.c:9068
+#: ../0_27_1.c:16863
+#, c-format
+msgid "Logs %s\n"
+msgstr ""
+
+#: ../0_27_1.c:16880
+msgid "Logs already disabled"
+msgstr ""
+
+#: ../0_27_1.c:16869
+msgid "Logs already enabled"
+msgstr ""
+
+#: ../0_27_1.c:16884
+msgid "Logs succesfully disabled"
+msgstr ""
+
+#: ../0_27_1.c:16872
+msgid "Logs successfully enabled"
+msgstr ""
+
+#: ../0_27_1.c:4181
+#, c-format
+msgid "MIME type: %s\n"
+msgstr ""
+
+#: ../0_27_1.c:16760
 #, c-format
 msgid "Modify: \t%s\n"
 msgstr ""
 
-#: 0_12_3_test.c:4940
-#, c-format
-msgid "Press any key to continue... "
+#: ../0_27_1.c:1772
+msgid "New format (Ex: .tar.xz): "
 msgstr ""
 
-#: 0_12_3_test.c:9054
+#: ../0_27_1.c:1224 ../0_27_1.c:1493
+msgid "Operation: "
+msgstr ""
+
+#: ../0_27_1.c:16745
 #, c-format
 msgid "Regular file"
 msgstr ""
 
-#: 0_12_3_test.c:9078
+#: ../0_27_1.c:17590
+msgid ""
+"Run 'cmd' or consult the manpage for more information about each of these "
+"commands.\n"
+msgstr ""
+
+#: ../0_27_1.c:16774
 #, c-format
 msgid "Size: \t\t%s\n"
 msgstr ""
 
-#: 0_12_3_test.c:9049
+#: ../0_27_1.c:16740
 #, c-format
 msgid "Socket"
 msgstr ""
 
-#: 0_12_3_test.c:9050
+#: ../0_27_1.c:4876
+#, c-format
+msgid "Successfully set '%s' as %s default shell\n"
+msgstr ""
+
+#: ../0_27_1.c:16741
 #, c-format
 msgid "Symbolic link"
 msgstr ""
 
-#: 0_12_3_test.c:8344
-msgid "Text editor: "
-msgstr ""
-
-#: 0_12_3_test.c:8329
+#: ../0_27_1.c:17621
 msgid ""
-"There are no bookmarks.\n"
-"Do you want to edit the bookmarks file? [Y/n] "
+"The configuration and profile files allow you to customize colors, define "
+"some prompt commands and aliases, and more. For a full description consult "
+"the manpage."
 msgstr ""
 
-#: 0_12_3_test.c:9901
-#, c-format
-msgid ""
-"This file contains a series of fields separated by a colon in the following "
-"way: 'date:user:cwd:cmd. All commands executed as external will be logged.\n"
-"\n"
-msgstr ""
-
-#: 0_12_3_test.c:9074
+#: ../0_27_1.c:16770
 msgid "Total size: \t"
 msgstr ""
 
-#: 0_12_3_test.c:9415
+#: ../0_27_1.c:4372
+msgid "Try 'mm, mime edit APPLICATION'\n"
+msgstr ""
+
+#: ../0_27_1.c:17247
 #, c-format
 msgid ""
 "Usage:\n"
@@ -1498,190 +1307,370 @@ msgid ""
 "!-n: Execute the last-n command in the history list.\n"
 msgstr ""
 
-#: 0_12_3_test.c:2799
-msgid "Usage: back [h, hist] [clear] [!ELN]"
+#: ../0_27_1.c:13510
+msgid "Usage: ac, ad ELN/FILE ..."
 msgstr ""
 
-#: 0_12_3_test.c:2743
-msgid "Usage: cd [ELN/directory]"
+#: ../0_27_1.c:13871
+msgid "Usage: alias [import FILE]"
 msgstr ""
 
-#: 0_12_3_test.c:7241 0_12_3_test.c:7252
-msgid "Usage: folders first [on, off, status]\n"
-msgstr ""
-
-#: 0_12_3_test.c:2832
-msgid "Usage: forth [h, hist] [clear] [!ELN]"
-msgstr ""
-
-#: 0_12_3_test.c:9090
-msgid "Usage: hidden [on, off, status]"
-msgstr ""
-
-#: 0_12_3_test.c:9115
+#: ../0_27_1.c:13876
 #, c-format
-msgid "Usage: hidden [on, off, status]\n"
+msgid "Usage: alias import FILE\n"
 msgstr ""
 
-#: 0_12_3_test.c:9359
+#: ../0_27_1.c:6093
+msgid "Usage: back, b [h, hist] [clear] [!ELN]"
+msgstr ""
+
+#: ../0_27_1.c:13300
+msgid "Usage: bm, bookmarks [a, add FILE] [d, del] [edit]"
+msgstr ""
+
+#: ../0_27_1.c:16295
+#, c-format
+msgid "Usage: bookmarks, bm [a, add PATH]\n"
+msgstr ""
+
+#: ../0_27_1.c:13483 ../0_27_1.c:13488
+msgid "Usage: br, bulk ELN/FILE ...\n"
+msgstr ""
+
+#: ../0_27_1.c:13249
+msgid "Usage: cd [ELN/DIR]"
+msgstr ""
+
+#: ../0_27_1.c:13416
+msgid "Usage: desel, ds [*, a, all]"
+msgstr ""
+
+#: ../0_27_1.c:13647 ../0_27_1.c:13652
+msgid "Usage: ext [on, off, status]"
+msgstr ""
+
+#: ../0_27_1.c:13669
+msgid "Usage: ext [on, off, status]\n"
+msgstr ""
+
+#: ../0_27_1.c:13710
+msgid "Usage: fc, filescounter [on, off, status]"
+msgstr ""
+
+#: ../0_27_1.c:13735
+msgid "Usage: fc, filescounter [on, off, status]\n"
+msgstr ""
+
+#: ../0_27_1.c:13784
+msgid "Usage: folders first, ff [on, off, status]"
+msgstr ""
+
+#: ../0_27_1.c:13797 ../0_27_1.c:13812
+msgid "Usage: folders first, ff [on, off, status]\n"
+msgstr ""
+
+#: ../0_27_1.c:6132
+msgid "Usage: forth, f [h, hist] [clear] [!ELN]"
+msgstr ""
+
+#: ../0_27_1.c:13918 ../0_27_1.c:13925
+msgid "Usage: hidden, hf [on, off, status]"
+msgstr ""
+
+#: ../0_27_1.c:16814
+msgid "Usage: hidden, hf [on, off, status]\n"
+msgstr ""
+
+#: ../0_27_1.c:17106
 msgid "Usage: history [clear] [-n]"
 msgstr ""
 
-#: 0_12_3_test.c:2562
-msgid "Usage: open ELN/filename [application] [&]"
+#: ../0_27_1.c:13821
+msgid "Usage: log [clear]"
 msgstr ""
 
-#: 0_12_3_test.c:8786
-msgid "Usage: pr [ELN/filename(s)] [a, all] [s, size]"
+#: ../0_27_1.c:13842
+msgid "Usage: messages, msg [clear]"
 msgstr ""
 
-#: 0_12_3_test.c:7731
-msgid "Usage: sel [ELN ELN-ELN filename path... n]"
+#: ../0_27_1.c:4087
+msgid "Usage: mm, mime [info ELN/FILENAME] [edit]"
 msgstr ""
 
-#: 0_12_3_test.c:3878
-msgid "Usage: trash ELN/filename... [ls, list] [clear] [del, rm]"
+#: ../0_27_1.c:4111
+msgid "Usage: mm, mime info FILENAME\n"
 msgstr ""
 
-#: 0_12_3_test.c:3640
-msgid "Usage: undel"
+#: ../0_27_1.c:13634
+msgid "Usage: mountpoints, mp"
 msgstr ""
 
-#: 0_12_3_test.c:4928 0_12_3_test.c:4939
+#: ../0_27_1.c:13591
+msgid "Usage: n, net [sftp, smb, ftp]://ADDRESS [OPTIONS]"
+msgstr ""
+
+#: ../0_27_1.c:13604
+msgid "Usage: n, net [sftp, smb, ftp]://ADDRESS [OPTIONS]\n"
+msgstr ""
+
+#: ../0_27_1.c:13268 ../0_27_1.c:13273
+msgid "Usage: o, open ELN/FILE [APPLICATION]"
+msgstr ""
+
+#: ../0_27_1.c:13532
+msgid "Usage: opener APPLICATION\n"
+msgstr ""
+
+#: ../0_27_1.c:13679 ../0_27_1.c:13684
+msgid "Usage: pager, pg [on, off, status]"
+msgstr ""
+
+#: ../0_27_1.c:13699
+msgid "Usage: pager, pg [on, off, status]\n"
+msgstr ""
+
+#: ../0_27_1.c:3648
+msgid "Usage: pf, prof, profile [ls, list] [set, add, del PROFILE]"
+msgstr ""
+
+#: ../0_27_1.c:3690
+msgid "Usage: pf, prof, profile [set, add, del PROFILE]\n"
+msgstr ""
+
+#: ../0_27_1.c:13462
+msgid "Usage: pr [ELN/FILE ... n] [a, all] [s, size]"
+msgstr ""
+
+#: ../0_27_1.c:13456
+msgid "Usage: pr [ELN/FILE ... n] [a, all] [s, size]\n"
+msgstr ""
+
+#: ../0_27_1.c:13397 ../0_27_1.c:13402
+msgid "Usage: s, sel ELN ELN-ELN FILE ... n"
+msgstr ""
+
+#: ../0_27_1.c:13901
+msgid "Usage: shell [SHELL]"
+msgstr ""
+
+#: ../0_27_1.c:13498
+msgid ""
+"Usage: st [METHOD] [rev]\n"
+"METHOD: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime, 5 = ctime, 6 = "
+"mtime, 7 = version"
+msgstr ""
+
+#: ../0_27_1.c:2145
+msgid ""
+"Usage: st [METHOD] [rev]\n"
+"METHOD: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime, 5 = ctime, 6 = "
+"mtime, 7 = version\n"
+msgstr ""
+
+#: ../0_27_1.c:13360
+msgid "Usage: t, tr, trash [ELN/FILE ... n] [ls, list] [clear] [del, rm]"
+msgstr ""
+
+#: ../0_27_1.c:13383
+msgid "Usage: u, undel, untrash [*, a, all]"
+msgstr ""
+
+#: ../0_27_1.c:13745 ../0_27_1.c:13750
+msgid "Usage: unicode, uc [on, off, status]"
+msgstr ""
+
+#: ../0_27_1.c:13765
+msgid "Usage: unicode, uc [on, off, status]\n"
+msgstr ""
+
+#: ../0_27_1.c:1296
+msgid ""
+"Use extension to specify archive/compression type.\n"
+"Defaults to .tar.gz"
+msgstr ""
+
+#: ../0_27_1.c:10015
 msgid "X session"
 msgstr ""
 
-#: 0_12_3_test.c:9669
+#: ../0_27_1.c:1590
 #, c-format
-msgid ""
-"You can use the exclamation character (!) to perform some history commands:\n"
-"  !!: Execute the last command.\n"
-"  !n: Execute the command number 'n' in the history list.\n"
-"  !-n: Execute the last-n command in the history list.\n"
+msgid "archiver: '%s': Error dequoting filename\n"
 msgstr ""
 
-#: 0_12_3_test.c:2584 0_12_3_test.c:2626
+#: ../0_27_1.c:1359
+#, c-format
+msgid "archiver: '%s': Error escaping string\n"
+msgstr ""
+
+#: ../0_27_1.c:1565 ../0_27_1.c:1638 ../0_27_1.c:1701
+#, c-format
+msgid "archiver: '%s': Not an archive/compressed file\n"
+msgstr ""
+
+#: ../0_27_1.c:5837 ../0_27_1.c:5876
 msgid "block device"
 msgstr ""
 
-#: 0_12_3_test.c:8551
+#: ../0_27_1.c:15749
 #, c-format
-msgid "bookmarks: %d: No such bookmark\n"
+msgid "bookmarks: '%s': Path already bookmarked\n"
 msgstr ""
 
-#: 0_12_3_test.c:8605 0_12_3_test.c:8673
+#: ../0_27_1.c:15824
 #, c-format
-msgid "bookmarks: %s: Application not found\n"
+msgid "bookmarks: '%s': This name is already in use\n"
 msgstr ""
 
-#: 0_12_3_test.c:8553 0_12_3_test.c:8687
+#: ../0_27_1.c:15792
 #, c-format
-msgid "bookmarks: %s: No such bookmark\n"
+msgid "bookmarks: '%s': This shortcut is already in use\n"
 msgstr ""
 
-#: 0_12_3_test.c:8518
+#: ../0_27_1.c:15604
 #, c-format
-msgid "bookmarks: '%s': Application not found\n"
+msgid ""
+"bookmarks: All bookmarks were deleted\n"
+" However, a backup copy was created (%s)\n"
 msgstr ""
 
-#: 0_12_3_test.c:8612 0_12_3_test.c:8683
+#: ../0_27_1.c:15611
 #, c-format
-msgid "bookmarks: '%s': Cannot open file\n"
+msgid "bookmarks: Error creating backup file. No bookmark was deleted\n"
 msgstr ""
 
-#: 0_12_3_test.c:8359
+#: ../0_27_1.c:15644
 #, c-format
-msgid "bookmarks: '%s': Wrong answer\n"
+msgid "bookmarks: Error creating temporary file\n"
 msgstr ""
 
-#: 0_12_3_test.c:2587 0_12_3_test.c:2629
+#: ../0_27_1.c:15727 ../0_27_1.c:15889 ../0_27_1.c:15898
+#, c-format
+msgid "bookmarks: Error opening the bookmarks file\n"
+msgstr ""
+
+#: ../0_27_1.c:15555
+#, c-format
+msgid "bookmarks: Error parsing input\n"
+msgstr ""
+
+#: ../0_27_1.c:15487
+msgid "bookmarks: There are no bookmarks"
+msgstr ""
+
+#: ../0_27_1.c:5841 ../0_27_1.c:5879
 msgid "character device"
 msgstr ""
 
-#: 0_12_3_test.c:7944
+#: ../0_27_1.c:14717
+#, c-format
+msgid "desel: '%s': Invalid ELN\n"
+msgstr ""
+
+#: ../0_27_1.c:14703
 #, c-format
 msgid "desel: '%s': Invalid element\n"
 msgstr ""
 
-#: 0_12_3_test.c:7880
+#: ../0_27_1.c:14639
 msgid "desel: There are no selected files"
 msgstr ""
 
-#: 0_12_3_test.c:7170 0_12_3_test.c:7190 0_12_3_test.c:7210 0_12_3_test.c:7235
-#: 0_12_3_test.c:9095
+#: ../0_27_1.c:13657 ../0_27_1.c:13689 ../0_27_1.c:13755 ../0_27_1.c:13791
+#: ../0_27_1.c:16789 ../0_27_1.c:16864
 msgid "disabled"
 msgstr ""
 
-#: 0_12_3_test.c:7800
+#: ../0_27_1.c:14552
 msgid "element"
 msgstr ""
 
-#: 0_12_3_test.c:7801
+#: ../0_27_1.c:14552
 msgid "elements"
 msgstr ""
 
-#: 0_12_3_test.c:7170 0_12_3_test.c:7190 0_12_3_test.c:7210 0_12_3_test.c:7235
-#: 0_12_3_test.c:9095
+#: ../0_27_1.c:13657 ../0_27_1.c:13689 ../0_27_1.c:13755 ../0_27_1.c:13790
+#: ../0_27_1.c:16789 ../0_27_1.c:16863
 msgid "enabled"
 msgstr ""
 
-#: 0_12_3_test.c:7477
+#: ../0_27_1.c:14185
 #, c-format
 msgid "history: '%d': No such ELN\n"
 msgstr ""
 
-#: 0_12_3_test.c:7481
+#: ../0_27_1.c:14189
 msgid "history: Usage: b/f [hist] [clear] [!ELN]\n"
 msgstr ""
 
-#: 0_12_3_test.c:2940
+#: ../0_27_1.c:6267
 #, c-format
 msgid "mp: '%s': Invalid mountpoint\n"
 msgstr ""
 
-#: 0_12_3_test.c:2914
-#, c-format
+#: ../0_27_1.c:6234
 msgid "mp: There are no available mountpoints\n"
 msgstr ""
 
-#: 0_12_3_test.c:2590 0_12_3_test.c:2632
+#: ../0_27_1.c:13543
+#, c-format
+msgid "opener: Opener set to '%s'\n"
+msgstr ""
+
+#: ../0_27_1.c:5845 ../0_27_1.c:5882
 msgid "socket"
 msgstr ""
 
-#: 0_12_3_test.c:6337
+#: ../0_27_1.c:2187 ../0_27_1.c:2193 ../0_27_1.c:2223 ../0_27_1.c:2229
+#: ../0_27_1.c:2248 ../0_27_1.c:2255 ../0_27_1.c:2288 ../0_27_1.c:2294
+#: ../0_27_1.c:2321 ../0_27_1.c:2327 ../0_27_1.c:2354 ../0_27_1.c:2360
+#: ../0_27_1.c:11637
 #, c-format
 msgid "stat: cannot access '%s': %s\n"
 msgstr ""
 
-#: 0_12_3_test.c:4927 0_12_3_test.c:4938
+#: ../0_27_1.c:10015
 msgid "terminal"
 msgstr ""
 
-#: 0_12_3_test.c:3953
+#: ../0_27_1.c:7416
+#, c-format
+msgid "trash: '%s': %s\n"
+msgstr ""
+
+#: ../0_27_1.c:7425
+#, c-format
+msgid "trash: '%s': Cannot trash a block device\n"
+msgstr ""
+
+#: ../0_27_1.c:7432
+#, c-format
+msgid "trash: '%s': Cannot trash a character device\n"
+msgstr ""
+
+#: ../0_27_1.c:7398
 #, c-format
 msgid "trash: Cannot trash '%s'\n"
 msgstr ""
 
-#: 0_12_3_test.c:3408 0_12_3_test.c:3664 0_12_3_test.c:3819 0_12_3_test.c:3911
-#, c-format
-msgid "trash: There are no trashed files\n"
+#: ../0_27_1.c:6818 ../0_27_1.c:7106 ../0_27_1.c:7246 ../0_27_1.c:7349
+msgid "trash: There are no trashed files"
 msgstr ""
 
-#: 0_12_3_test.c:3960
-#, c-format
-msgid "trash: Use 'trash del' to remove trashed files\n"
+#: ../0_27_1.c:7408
+msgid "trash: Use 'trash del' to remove trashed files"
 msgstr ""
 
-#: 0_12_3_test.c:3754
+#: ../0_27_1.c:7179
 #, c-format
 msgid "undel: '%s': Invalid ELN\n"
 msgstr ""
 
-#: 0_12_3_test.c:8776 0_12_3_test.c:8779 0_12_3_test.c:8992 0_12_3_test.c:8993
-#: 0_12_3_test.c:9014 0_12_3_test.c:9015 0_12_3_test.c:9061 0_12_3_test.c:9063
+#: ../0_27_1.c:16645 ../0_27_1.c:16646 ../0_27_1.c:16665 ../0_27_1.c:16666
+#: ../0_27_1.c:16754 ../0_27_1.c:16756
 msgid "unknown"
 msgstr ""
 
-#: 0_12_3_test.c:2647 0_12_3_test.c:2657
+#: ../0_27_1.c:5899 ../0_27_1.c:5909
 msgid "unknown file type"
 msgstr ""
