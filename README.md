@@ -1,5 +1,5 @@
 # CliFM
-> The KISS file manager: text-based, ultra-lightweight, lightning fast, and written in C
+> The KISS file manager: CLI-based, ultra-lightweight, lightning fast, and written in C
 
 ### Packages
 
@@ -15,19 +15,23 @@ Version 0.17.2 is the first one to work on ARM machines.
 
 Since version 0.16.0 a lot (really, a lot) of bug fixes and some new features were added: a trash system (freedesktop compliant), keyboard shorcuts (very handy), a little messages system to keep track of important messages and errors, "sel" keyword and ranges auto-expansion, ELN expansion with the TAB key, including a Bash-like quoting system (absolutely great), colors customization, and commands sequential and conditional execution (very useful). Consult the manpage for more information). I also added support for translations (using `gettext`).
 
+## Rationale
+
+Why in this world do we need another file manager? In the first place, just because I can do it, write it, and learn (a lot) in the process, because this is a free world, and very specially, a free community; and, needless to say, alternatives are at the heart of freedom. Secondly, because I'm sure I'm not the only person in this world looking for a non-bloated, KISS file manager: it just does whatever needs to be done using as little resources as possible. No GUI, no curses, but just a command line file manager: 5MiB of RAM and 250KiB of disk space is all you need. Finally, because it is certainly a file manager, but also half-shell: almost everything you do on your shell can be done in this file manager as well. Search for files, copy, rename, and remove some of them, but, at the same time, update/upgrade your system, add some cronjob, or stop a service.
+
 ## Description
 
 ![clifm](images/clifm.png)
 
-CliFM is a completely text-based file manager able to perform all the basic operations you may expect from any other FM. Besides these common operations, such as copy, move, remove, etc, CLiFM most distinctive features are:
+CliFM is a completely CLI-based, shell-like file manager able to perform all the basic operations you may expect from any other FM. Besides these common operations, such as copy, move, remove, etc, CLiFM most distinctive features are:
 
-* It is REALLY text-based. No GUI (like Thunar and the like) nor TUI or curses (like Ranger) at all, just text. Since it does not need any GUI, it can run on the Linux built-in console and even on a SSH or telnet session.
+* It is REALLY CLI-based. No GUI (like Thunar and the like) nor TUI or curses (like Ranger) at all, just a command line. Since it does not need any GUI, it can run on the Linux built-in console and even on a SSH or any other remote session.
 
 * With a memory footprint below 5 MiB and a disk usage of 0.25 MiB, it is incredibly lightweight and fast, and as such, able to run on really old hardware. It is probabily the most lightweight and fastest file manager out there.
 
 * The use of short (and even one-character) commands, and list numbers (ELN's) for filenames. For example, instead of typing: `cp file1 file2 file3 file4 dir/`, you can do this: `c 1-4 7`. Shorter and quicker. As a plus, ELN's can also be used with external commands. Example: `diff 1 5` or `ls -l 12 14`. If numbers are a bit tricky to you, as they are to me, you can use the TAB key to expand the ELN to the corresponding filename. So, type `r 56`, then TAB, and it becomes `r filename`.
 
-* Bookmarks: Let's suppose you constantly need to access `/media/data/misc/iso_images`. With CLiFM bookmarks function, accessing this location could be as easy as this: `bm` (or `Alt-b`), to call the bookmarks function, and then `1`, provided `/media/data/misc/iso_images` is your first bookmark.
+* Bookmarks: With CLiFM bookmarks function, accessing your preferred files and/or directories be as easy as this: `bm` (or `Alt-b`), to call the bookmarks function, and then `1` (or whatever is the number corresponding to your bookmark).
 
 ![bookmarks](images/bookmarks.png)
 
@@ -37,27 +41,25 @@ CliFM is a completely text-based file manager able to perform all the basic oper
 
 You can also use the 'sel' keyword with external commands. Example: `s 1-4 7 10 && file sel`.
 
-Of course, you can deselect some or all selected files whenever you want with the `desel` or `ds` command.
+Of course, you can deselect some or all selected files whenever you want with the `desel` or `ds` command: `ds *`, or just press `Alt-d`.
 
 ![selection box](images/sel_box.png)
  
- * Open files without the need to specify any program. Via `mime` (the built-in resource opener), if no program was specified, CliFM will open the file with the default program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background.
+ * Open files without the need to specify any program. Via `mime` (the built-in resource opener), if no program was specified, CliFM will open the file with the default program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background. Of course, you can also set a custom resource opener.
 
-* Quick search: type `/string` and CliFM will list all the files containing `string` in its name. This function also support wildcards. Example: `/*.png` will list all the .png files in the current directory. If you want to search for files in another directory, just tell the search function where to search: `/*.png /media/images`.
+* Quick search: type `/string` and CliFM will list all the files containing `string` in its name. This function also supports wildcards. Example: `/*.png` will list all the .png files in the current directory. If you want to search for files in another directory, just tell the search function where to search: `/*.png /media/images`.
 
 ![quick search](images/quick_search.png)
 
 * A `trash system` to be able to recover deleted files.
 
-* Just like the `ls` command, CLiFM uses (customizable) color codes to identify file types. However, and unlike `ls`, CLiFM is also able to distinguish between empty and non-empty files or directories. Once in CliFM, type `colors` to see the entire list of color codes.
+* Just like the `ls` command, CLiFM uses (customizable) color codes to identify file types. However, and unlike `ls`, CLiFM is also able to distinguish between empty and non-empty files or directories. Once in CliFM, type `colors` to see the list of currently used color codes.
 
 ![colors](images/colors.png)
 
 * It also displays the amount of files contained by listed directories.
 
 ![dirs](images/dirs.png)
-
-* Sort files by name, size, atime, btime, ctime, mtime, and version. Also supports reverse sorting.
 
 Because file manager, but also half shell, CLiFM also offers the following features:
 
@@ -73,8 +75,9 @@ Because file manager, but also half shell, CLiFM also offers the following featu
 * User profiles
 * Keyboard shortcuts
 * Resource opener
+* Sorting methods: name, size, atime, btime, ctime, mtime, and version. Also supports reverse sorting.
 * Bulk rename
-* Archives management
+* Archives and compression support
 
 Finally, all CLiFM options could be handled directly by command line, by passing parameters to the program, or via plain
 text configuration files, located in `~/.config/clifm/`.
@@ -155,4 +158,8 @@ Just try it and run the `help` command to learn more about CliFM. Once in the Cl
 This last version includes a spanish translation. To use it, simply copy `translations/spanish/clifm.mo` to
  `/usr/share/locale/es/LC_MESSAGES/` in your local machine. New translations are welcome. You can find the .pot file in `translations/clifm.pot`.
  
-I you find some bug, and you will, please let me know it. It gets better and better. I myself use it as my main, and indeed only, file manager; it couldn't be so bad, isn't it?
+## Contributing
+
+The best way to contribute is creating a new GitHub issue here pointing out bugs and suggesting missing or wanted features. I'll do my best to fix whatever is broken and to add/improve whatever is missing.
+
+Just try it and let me know. It gets better and better. I myself use it as my main, and indeed only, file manager; it couldn't be so bad, isn't it?
