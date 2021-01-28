@@ -75,9 +75,9 @@ Because file manager, but also half shell, CLiFM also offers the following featu
 * User profiles
 * Keyboard shortcuts
 * Resource opener
-* Sorting methods: name, size, atime, btime, ctime, mtime, and version. Also supports reverse sorting.
+* Multiple sorting methods: name, size, atime, btime, ctime, mtime, and version. Also supports reverse sorting.
 * Bulk rename
-* Archives and compression support
+* Archives and compression support (including Zstandard)
 
 Finally, all CLiFM options could be handled directly by command line, by passing parameters to the program, or via plain
 text configuration files, located in `~/.config/clifm/`.
@@ -153,12 +153,8 @@ Just try it and run the `help` command to learn more about CliFM. Once in the Cl
 	12:12 user:hostname /etc
 	:) $ help
 
-## Translating CliFM
-
-This last version includes a spanish translation. New translations are welcome. You can find the .pot file in `translations/clifm.pot`.
- 
 ## Contributing
 
-The best way to contribute is creating a new GitHub issue here pointing out bugs and suggesting missing or wanted features. I'll do my best to fix whatever is broken and to add/improve whatever is missing.
+The best way to contribute is creating a new GitHub issue here pointing out bugs and suggesting missing or wanted features. I'll do my best to fix whatever is broken and to add/improve whatever is missing. For the time being, it includes only a spanish translation. New translations are a nice way to contribute (you can find the .pot file in `translations/clifm.pot`). Of course, you can also tell your friends about CliFM, write a (positive) review of it somewhere on the internet, or you can just create a nice logo and print it on a t-shirt to tell the world how great ClifM is (just kidding, or not).
 
 Just try it and let me know. It gets better and better. I myself use it as my main, and indeed only, file manager; it couldn't be so bad, isn't it?
