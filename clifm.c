@@ -150,7 +150,7 @@ in FreeBSD, but is deprecated */
 /* #define TMP_DIR "/tmp/clifm" */
 /* If no formatting, puts (or write) is faster than printf */
 /* #define CLEAR puts("\x1b[c") */
-#define CLEAR write(STDOUT_FILENO, "\x1b[c", 3);
+#define CLEAR write(STDOUT_FILENO, "\033c", 3);
 #define VERSION "0.27.1"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
