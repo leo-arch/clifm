@@ -92,7 +92,7 @@ On Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Lin
 
 ## Compiling and Running CliFM:
 
-### Archlinux
+### Arch Linux
 
 You'll find the corresponding package on the AUR (https://aur.archlinux.org/packages/clifm). 
 
@@ -102,7 +102,7 @@ Of course, you can also clone, build, and install the package using the PKGBUILD
 	$ cd clifm
 	$ makepkg -si
 
-### Another distro (or FreeBSD):
+### Some other distribution (or FreeBSD):
 
 1. Clone the repository
 
