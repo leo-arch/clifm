@@ -23,9 +23,9 @@ Why in this world do we need another file manager? In the first place, just beca
 
 ![clifm](images/clifm.png)
 
-CliFM is a completely CLI-based, shell-like file manager able to perform all the basic operations you may expect from any other FM. Besides these common operations, such as copy, move, remove, etc, CLiFM most distinctive features are:
+CliFM is a completely command-line-based, shell-like file manager able to perform all the basic operations you may expect from any other FM. Besides these common operations, such as copy, move, remove, etc, CLiFM most distinctive features are:
 
-* It is REALLY CLI-based. No GUI (like Thunar and the like) nor TUI or curses (like Ranger) at all, just a command line. Since it does not need any GUI, it can run on the Linux built-in console and even on a SSH or any other remote session.
+* It is REALLY CLI-based. No GUI (like Thunar and the like) nor TUI or curses (like Ranger or nnn) at all, just a command line. Since it does not need any GUI, it can run on the Linux built-in console and even on a SSH or any other remote session.
 
 * With a memory footprint below 5 MiB and a disk usage of 0.25 MiB, it is incredibly lightweight and fast, and as such, able to run on really old hardware. It is probabily the most lightweight and fastest file manager out there.
 
@@ -53,15 +53,15 @@ Of course, you can deselect some or all selected files whenever you want with th
 
 * A `trash system` to be able to recover deleted files.
 
-* Just like the `ls` command, CLiFM uses (customizable) color codes to identify file types. However, and unlike `ls`, CLiFM is also able to distinguish between empty and non-empty files or directories. Once in CliFM, type `colors` to see the list of currently used color codes.
+* Just like the `ls` command, CLiFM uses (customizable) color codes to identify file types. However, and unlike `ls`, CLiFM is also able to distinguish between empty and non-empty files or directories, broken and non-broken symlinks, files and directories with or without read permission, and more. Once in CliFM, type `colors` to see the list of currently used color codes.
 
 ![colors](images/colors.png)
 
-* It also displays the amount of files contained by listed directories.
+* It also displays the amount of files contained by listed directories or symlinks to directories.
 
 ![dirs](images/dirs.png)
 
-Because file manager, but also half shell, CLiFM also offers the following features:
+Because file manager, but also half-shell, CLiFM als provides the following features:
 
 * TAB-completion for commands, paths, and ELN's
 * Bash-like quoting system
@@ -71,7 +71,7 @@ Because file manager, but also half shell, CLiFM also offers the following featu
 * Logs
 * Prompt and profile commands
 * Bash-like prompt customization
-* Sequential and conditional execution of commands 
+* Sequential and conditional commands execution 
 * User profiles
 * Keyboard shortcuts
 * Resource opener
@@ -79,22 +79,22 @@ Because file manager, but also half shell, CLiFM also offers the following featu
 * Bulk rename
 * Archives and compression support (including Zstandard)
 
-Finally, all CLiFM options could be handled directly by command line, by passing parameters to the program, or via plain
+Finally, all CLiFM options could be handled directly via command line, by passing parameters to the program, or via plain
 text configuration files, located in `~/.config/clifm/`.
 
-Insofar as it is heavily inspired by Arch Linux and its KISS principle, CLiFM is fundamentally aimed to be lightweight, fast, and simple. And if it's not fast enough, you can always try the **light mode** to make it even faster.
+Insofar as it is heavily inspired by Arch Linux and its KISS principle, CLiFM is fundamentally aimed to be lightweight, fast, and simple. And if you think it's not fast enough, you can always try the **light mode** to make it even faster.
 
 On Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity
 
 ## Dependencies:
 
-`glibc`, `ncurses`, `libcap`, `readline`, `coreutils` (providing basic programs such as rm, cp, mkdir, etc). For Archers: All these deps are part of the `core` repo, and `glibc` is also part of the `base` metapackage. In Debian systems two packages must be installed before compilation: `libcap-dev` and `libreadline-dev`. In Fedora based systems you need `libcap-devel` and `readline-devel`. Optional dependencies: `file`, `atool`, and `archivemount`.
+`glibc`, `ncurses`, `libcap`, `readline`, `coreutils` (providing basic programs such as rm, cp, mkdir, etc). For archers: All these dependenciess are part of the `core` repo, and `glibc` is also part of the `base` metapackage. In Debian systems two packages must be installed before compilation: `libcap-dev` and `libreadline-dev`. In Fedora based systems you need `libcap-devel` and `readline-devel`. Optional dependencies: `file`, `atool`, and `archivemount`.
 
 ## Compiling and Running CliFM:
 
-### Archlinux
+### Arch Linux
 
-You'll find the corresponding package on the AUR (https://aur.archlinux.org/packages/clifm). 
+You'll find the corresponding packages on the AUR: https://aur.archlinux.org/packages/clifm and, for the development version, https://aur.archlinux.org/packages/clifm-git. 
 
 Of course, you can also clone, build, and install the package using the PKGBUILD file:
 
@@ -102,7 +102,7 @@ Of course, you can also clone, build, and install the package using the PKGBUILD
 	$ cd clifm
 	$ makepkg -si
 
-### Another distro (or FreeBSD):
+### Some other distribution (or FreeBSD):
 
 1. Clone the repository
 
