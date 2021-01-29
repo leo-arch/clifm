@@ -155,7 +155,7 @@ in FreeBSD, but is deprecated */
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "January 27, 2021"
+#define DATE "January 29, 2021"
 #define LICENSE "GPL2+"
 
 /* Define flags for program options and internal use */
@@ -377,7 +377,9 @@ int skip_nonexec(const struct dirent *entry);
 /* Sorting functions */
 int sort_function(char **arg);
 void print_sort_method(void);
+#if !defined __FreeBSD__
 int m_versionsort(const struct dirent **a, const struct dirent **b);
+#endif
 int m_alphasort(const struct dirent **a, const struct dirent **b);
 int alphasort_insensitive(const struct dirent **a,
 						  const struct dirent **b);
@@ -2045,7 +2047,7 @@ print_sort_method(void)
 			|| defined(__BSD_VISIBLE) || defined(_STATX)
 				printf("btime %s\n", (sort_reverse) ? "[rev]" : "");
 			#else
-				printf("btime (not found: using ctime) %s\n",
+				printf("btime (not found: using 'ctime') %s\n",
 					   (sort_reverse) ? "[rev]" : "");
 			#endif
 			break;
@@ -2053,7 +2055,12 @@ print_sort_method(void)
 			break;
 		case 6: printf("mtime %s\n", (sort_reverse) ? "[rev]" : "");
 			break;
+		#if __FreeBSD__
+		case 7: printf("version (not available: using 'name') %s\n",
+					   (sort_reverse) ? "[rev]" : "");
+		#else
 		case 7: printf("version %s\n", (sort_reverse) ? "[rev]" : "");
+		#endif
 			break;
 	}
 }
@@ -2406,6 +2413,7 @@ m_alphasort(const struct dirent **a, const struct dirent **b)
 	return (ret - (ret * 2));
 }
 
+#if !defined __FreeBSD__
 int
 m_versionsort(const struct dirent **a, const struct dirent **b)
 /* Just a reverse sorting capable versionsort */
@@ -2417,6 +2425,7 @@ m_versionsort(const struct dirent **a, const struct dirent **b)
 
 	return (ret - (ret * 2));
 }
+#endif
 
 int
 remote_ftp(char *address, char *options)
@@ -2881,6 +2890,7 @@ TerminalCmd='%s'\n\n"
 
 "# Choose sorting method: 0 = none, 1 = name, 2 = size, 3 = atime\n\
 # 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version\n\
+# NOTE: the 'version' method is not available on FreeBSD\n\
 Sort=1\n\
 # By default, CliFM sorts files from less to more (ex: from 'a' to 'z' if\n\
 # using the \"name\" method). To invert this ordering, set SortReverse to\n\
@@ -11916,7 +11926,11 @@ list_dir(void)
 		break;
 
 		case 7:
+		#if __FreeBSD__
+			total = scandir(path, &list, skip_implied_dot, m_alphasort);
+		#else
 			total = scandir(path, &list, skip_implied_dot, m_versionsort);
+		#endif
 		break;
 	}
 
@@ -12563,7 +12577,11 @@ list_dir_light(void)
 		break;
 
 		case 7:
+		# if __FreeBSD__
+			total = scandir(path, &list, skip_implied_dot, m_alphasort);
+		#else
 			total = scandir(path, &list, skip_implied_dot, m_versionsort);
+		#endif
 		break;
 	}
 
