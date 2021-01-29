@@ -92,7 +92,7 @@ On Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Lin
 
 ## Compiling and Running CliFM:
 
-#### Archlinux
+### Archlinux
 
 You'll find the corresponding package on the AUR (https://aur.archlinux.org/packages/clifm). 
 
@@ -102,7 +102,7 @@ Of course, you can also clone, build, and install the package using the PKGBUILD
 	$ cd clifm
 	$ makepkg -si
 
-#### Another distro (or FreeBSD):
+### Another distro (or FreeBSD):
 
 1. Clone the repository
 
@@ -111,7 +111,9 @@ Of course, you can also clone, build, and install the package using the PKGBUILD
 
 2. You have two options here:
 
-**a)** Run `make` (*this is the recommended procedure*) as follows:
+#### Via make
+
+Run `make` (*this is the recommended procedure*) as follows:
 
 	$ make build && sudo make install
 
@@ -123,15 +125,15 @@ To uninstall `clifm` issue this command wherever the Makefile is located:
 
 	$ sudo make uninstall
 
-**b)** Compile the program manually via `gcc` (`tcc` and `clang` also work). 
+#### Manually via `gcc` (`tcc` and `clang` also work). 
 
-#### On Linux:
+##### On Linux:
 
 	$ gcc -O3 -march=native -fstack-protector-strong -s -o clifm clifm.c -lcap -lreadline -lacl
 
 To enable POSIX compliance, pass this option to the compiler: `-D_BE_POSIX.` The only feature disabled in this way is files birth time, only available on Linux via statx(), which is Linux-specific and thereby not POSIX compliant.
 
-#### On FreeBSD:
+##### On FreeBSD:
 
 	$ gcc -O3 -march=native -fstack-protector-strong -s -o clifm clifm.c -lintl -lreadline
 
