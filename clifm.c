@@ -150,7 +150,7 @@ in FreeBSD, but is deprecated */
 /* #define TMP_DIR "/tmp/clifm" */
 /* If no formatting, puts (or write) is faster than printf */
 /* #define CLEAR puts("\x1b[c") */
-#define CLEAR write(STDOUT_FILENO, "\ec", 3)
+#define CLEAR write(STDOUT_FILENO, "\x1b[c", 3);
 #define VERSION "0.27.1"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
@@ -377,7 +377,7 @@ int skip_nonexec(const struct dirent *entry);
 /* Sorting functions */
 int sort_function(char **arg);
 void print_sort_method(void);
-#if !defined __FreeBSD__
+#if !defined __FreeBSD__ && !defined _BE_POSIX
 int m_versionsort(const struct dirent **a, const struct dirent **b);
 #endif
 int m_alphasort(const struct dirent **a, const struct dirent **b);
@@ -2047,7 +2047,7 @@ print_sort_method(void)
 			|| defined(__BSD_VISIBLE) || defined(_STATX)
 				printf("btime %s\n", (sort_reverse) ? "[rev]" : "");
 			#else
-				printf("btime (not found: using 'ctime') %s\n",
+				printf("btime (not available: using 'ctime') %s\n",
 					   (sort_reverse) ? "[rev]" : "");
 			#endif
 			break;
@@ -2055,7 +2055,7 @@ print_sort_method(void)
 			break;
 		case 6: printf("mtime %s\n", (sort_reverse) ? "[rev]" : "");
 			break;
-		#if __FreeBSD__
+		#if __FreeBSD__ || _BE_POSIX
 		case 7: printf("version (not available: using 'name') %s\n",
 					   (sort_reverse) ? "[rev]" : "");
 		#else
@@ -2413,10 +2413,12 @@ m_alphasort(const struct dirent **a, const struct dirent **b)
 	return (ret - (ret * 2));
 }
 
-#if !defined __FreeBSD__
+/* NOTE: strverscmp() is a GNU extension, so that it will be available
+ * neither on FreeBSD nor when compiling with _BE_POSIX */
+#if !defined __FreeBSD__ && !defined _BE_POSIX
 int
 m_versionsort(const struct dirent **a, const struct dirent **b)
-/* Just a reverse sorting capable versionsort */
+/* Just a reverse sorting capable versionsort. */
 {
 	int ret = strverscmp((*a)->d_name, (*b)->d_name);
 
@@ -2840,8 +2842,11 @@ DividingLineChar='='\n\n"
 # add color to the prompt line\n\
 # \\]: End a sequence of non-printing characters\n\n"
 
-"Prompt=\"%s\"\n\n"
+"Prompt=\"%s\"\n\n",
 
+			DEFAULT_PROMPT);
+
+	fprintf(config_fp,
 "# MaxPath is only used for the /p option of the prompt: the current working \n\
 # directory will be abbreviated to its basename (everything after last slash)\n\
 # whenever the current path is longer than MaxPath.\n\
@@ -2911,7 +2916,7 @@ ClearScreen=false\n\n"
 StartingPath=\n\n"
 "#END OF OPTIONS\n\n", 
 
-			DEFAULT_PROMPT, DEFAULT_TERM_CMD);
+			DEFAULT_TERM_CMD);
 
 	fputs(
 
@@ -11926,7 +11931,7 @@ list_dir(void)
 		break;
 
 		case 7:
-		#if __FreeBSD__
+		#if __FreeBSD__ || _BE_POSIX
 			total = scandir(path, &list, skip_implied_dot, m_alphasort);
 		#else
 			total = scandir(path, &list, skip_implied_dot, m_versionsort);
@@ -12577,7 +12582,7 @@ list_dir_light(void)
 		break;
 
 		case 7:
-		# if __FreeBSD__
+		# if __FreeBSD__ || _BE_POSIX
 			total = scandir(path, &list, skip_implied_dot, m_alphasort);
 		#else
 			total = scandir(path, &list, skip_implied_dot, m_versionsort);
