@@ -22,8 +22,9 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
+**Environment (please complete the following information):**
+ - OS: [e.g. FreeBSD]
+ - Program version [e.g. 0.27.0]
  - Shell [e.g. bash, zsh]
  - Version [e.g. 12]
  - Terminal [e.g. xterm, konsole]
