@@ -92,7 +92,9 @@ On Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Lin
 
 ## Compiling and Running CliFM:
 
-If using Arch, you'll find it on the AUR (https://aur.archlinux.org/packages/clifm). 
+#### Archlinux
+
+You'll find the corresponding package on the AUR (https://aur.archlinux.org/packages/clifm). 
 
 Of course, you can also clone, build, and install the package using the PKGBUILD file:
 
@@ -100,7 +102,7 @@ Of course, you can also clone, build, and install the package using the PKGBUILD
 	$ cd clifm
 	$ makepkg -si
 
-If using another distro (or FreeBSD):
+#### Another distro (or FreeBSD):
 
 1. Clone the repository
 
@@ -123,13 +125,13 @@ To uninstall `clifm` issue this command wherever the Makefile is located:
 
 **b)** Compile the program manually via `gcc` (`tcc` and `clang` also work). 
 
-On Linux:
+#### On Linux:
 
 	$ gcc -O3 -march=native -fstack-protector-strong -s -o clifm clifm.c -lcap -lreadline -lacl
 
 To enable POSIX compliance, pass this option to the compiler: `-D_BE_POSIX.` The only feature disabled in this way is files birth time, only available on Linux via statx(), which is Linux-specific and thereby not POSIX compliant.
 
-On FreeBSD:
+#### On FreeBSD:
 
 	$ gcc -O3 -march=native -fstack-protector-strong -s -o clifm clifm.c -lintl -lreadline
 
@@ -148,13 +150,11 @@ Do not forget to install the manpage as well (the full help is in here):
 
 Then you can access the manpage as always: `man clifm`
 
-Just try it and run the `help` command to learn more about CliFM. Once in the CliFM prompt, type `help` or `?`:
+Try `help` command to learn more about CliFM. Once in the CliFM prompt, type `help` or `?`:
 
 	12:12 user:hostname /etc
 	:) $ help
 
-## Contributing
-
-The best way to contribute is creating a new GitHub issue here pointing out bugs (make sure to provide enough information to make the bug reproducible) and suggesting missing or wanted features (I'm running out of ideas). I'll do my best to fix whatever is broken and to add/improve whatever is missing. For the time being, it includes only a spanish translation. New translations are a nice way to contribute (you can find the .pot file in `translations/clifm.pot`). Of course, you can also tell your friends about CliFM, write a (positive) review of it somewhere on the internet, or you can just create a nice logo and print it on a t-shirt to tell the world how great ClifM is (just kidding, or not).
+To jumtp into the COMMANDS section in the manpage, simply enter `cmd`.
 
 Just try it and let me know. It gets better and better. I myself use it as my main, and indeed only, file manager; it couldn't be so bad, isn't it?
