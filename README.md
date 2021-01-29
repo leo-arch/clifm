@@ -152,6 +152,8 @@ Do not forget to install the manpage as well (the full help is in here):
 
 Then you can access the manpage as always: `man clifm`
 
+## First steps
+
 Try `help` command to learn more about CliFM. Once in the CliFM prompt, type `help` or `?`:
 
 	12:12 user:hostname /etc
