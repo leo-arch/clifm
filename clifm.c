@@ -153,11 +153,11 @@ in FreeBSD, but is deprecated */
 //#define CLEAR write(STDOUT_FILENO, "\033c", 3);
 #define CLEAR write(STDOUT_FILENO, "\x1b[2J\x1b[3J\x1b[H", 11);
 /* #define CLEAR write(STDOUT_FILENO, "\033[2J\033[H", 7); */
-#define VERSION "0.27.1"
+#define VERSION "0.27.2"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "January 29, 2021"
+#define DATE "January 30, 2021"
 #define LICENSE "GPL2+"
 
 /* Define flags for program options and internal use */
@@ -428,11 +428,14 @@ struct fileinfo
 	size_t filesn; /* Number of files in subdir */
 	int exists;
 	int brokenlink;
+	int linkdir;
 	int exec;
 	mode_t type;
 	off_t size;
 	int ruser; /* User read permission for dir */
 };
+
+struct fileinfo *file_info = (struct fileinfo *)NULL;
 
 /* Struct to specify which parameters have been set from the command
  * line, to avoid overriding them with init_config(). While no command
@@ -483,7 +486,7 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 	home_ok = 1, config_ok = 1, trash_ok = 1, selfile_ok = 1, tips = -1,
 	mime_match = 0, logs_enabled = -1, sort = -1, files_counter = -1,
 	light_mode = -1, dir_indicator = -1, classify = -1, sort_switch = 0,
-	sort_reverse = 0;
+	sort_reverse = 0, autocd = -1, auto_open = -1;
 	/* -1 means non-initialized or unset. Once initialized, these variables
 	 * are always either zero or one */
 /*	sel_no_sel=0 */
@@ -541,7 +544,8 @@ const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
 		"colors", "version", "splash", "folders first", "opener", 
 		"exit", "quit", "pager", "trash", "undel", "messages", 
 		"mountpoints", "bookmarks", "log", "untrash", "unicode", 
-		"profile", "shell", "mime", "sort", "tips", NULL };
+		"profile", "shell", "mime", "sort", "tips", "autocd",
+		"autoopen", NULL };
 
 #define DEFAULT_PROMPT "\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\
 \\z\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
@@ -2899,6 +2903,12 @@ LongViewMode=false\n\
 ExternalCommands=false\n\
 LogCmds=false\n\n"
 
+"# If set to true, a command name that is the name of a directory or a\n\
+# file is executed as if it were the argument to the the 'cd' or the \n\
+# 'open' commands respectivelly.\n\
+Autocd=true\n\
+AutoOpen=true\n\n"
+
 "# In light mode, colors and filetype checks (except the directory check,\n\
 # which is enabled by default) are disabled to speed up the listing\n\
 # process.\n\
@@ -4816,7 +4826,8 @@ is_internal_c(const char *cmd)
 					"ver", "version", "?", "help", "cmd", "commands",
 					"colors", "cc", "fs", "mm", "mime", "x", "n",
 					"net", "lm", "st", "sort", "fc", "tips", "br",
-					"bulk", "opener", "ac", "ad", NULL };
+					"bulk", "opener", "ac", "ad", "acd", "autocd",
+					"ao", "autoopen", NULL };
 
 	short found = 0;
 	size_t i;
@@ -5528,6 +5539,15 @@ set_default_options(void)
 	max_path = 40;
 	logs_enabled = 0;
 	div_line_char = '=';
+	light_mode = 0;
+	dir_indicator = 1;
+	classify = 0;
+	share_selbox = 0;
+	sort = 1;
+	sort_reverse = 0;
+	tips = 1;
+	autocd = 1;
+	auto_open = 1;
 
 	strcpy(text_color, "\001\x1b[00;39m\002");
 	strcpy(eln_color, "\x1b[01;33m");
@@ -7678,7 +7698,6 @@ int
 readline_kbind_action(int count, int key) {
 	/* Prevent Valgrind from complaining about unused variable */
 	if (count) {}
-/*	int status = 0; */
 
 	/* Disable all keybindings while in the bookmarks or mountpoints
 	 * screen */
@@ -7720,6 +7739,7 @@ readline_kbind_action(int count, int key) {
 		/* 1) Clear text typed so far (\x1b[2K) and move cursor to the
 		 * beginning of the current line (\r) */
 		write(STDOUT_FILENO, "\x1b[2K\r", 5);
+
 		/* 2) Clear the readline buffer */
 		rl_delete_text(0, rl_end);
 		rl_end = rl_point = 0;
@@ -7994,6 +8014,9 @@ free_stuff(void)
 	size_t i = 0;
 
 	free(TMP_DIR);
+
+	if (file_info)
+		free(file_info);
 
 	if (opener)
 		free(opener);
@@ -8867,7 +8890,16 @@ my_rl_completion(const char *text, int start, int end)
 			rl_attempted_completion_over = 1;
 			return (char **)NULL;
 		}
-		matches = rl_completion_matches(text, &bin_cmd_generator);
+
+		if ((autocd || auto_open) && *text >= 0x31 && *text <= 0x39) {
+			int num_text = atoi(text);
+			if (is_number(text) && num_text > 0
+			&& num_text <= (int)files)
+					matches = rl_completion_matches(text,
+							  &filenames_generator);
+		}
+		else
+			matches = rl_completion_matches(text, &bin_cmd_generator);
 	}
 	else {
 		 
@@ -8878,7 +8910,8 @@ my_rl_completion(const char *text, int start, int end)
 		 * to atoi */
 		if (*text >= 0x31 && *text <= 0x39) {
 			int num_text = atoi(text);
-			if (is_number(text) && num_text > 0 && num_text <= (int)files)
+			if (is_number(text) && num_text > 0
+			&& num_text <= (int)files)
 					matches = rl_completion_matches(text,
 							  &filenames_generator);
 		}
@@ -9478,6 +9511,28 @@ init_config(void)
 							tips = 1;
 					}
 
+					else if (strncmp(line, "Autocd=", 7) == 0) {
+						char opt_str[MAX_BOOL] = "";
+						ret = sscanf(line, "Autocd=%5s\n", opt_str);
+						if (ret == -1)
+							continue;
+						if (strncmp(opt_str, "false", 5) == 0)
+							autocd = 0;
+						else /* True and default */
+							autocd = 1;
+					}
+
+					else if (strncmp(line, "AutoOpen=", 9) == 0) {
+						char opt_str[MAX_BOOL] = "";
+						ret = sscanf(line, "AutoOpen=%5s\n", opt_str);
+						if (ret == -1)
+							continue;
+						if (strncmp(opt_str, "false", 5) == 0)
+							auto_open = 0;
+						else /* True and default */
+							auto_open = 1;
+					}
+
 					else if (strncmp(line, "DirIndicator=", 13) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "DirIndicator=%5s\n", opt_str);
@@ -9983,6 +10038,8 @@ init_config(void)
 			 * via the config file, or if this latter could not be read
 			 * for any reason, set the defaults */
 			/* -1 means not set */
+			if (auto_open == -1) auto_open = 1;
+			if (autocd == -1) autocd = 1;
 			if (light_mode == -1) light_mode = 0;
 			if (dir_indicator == -1) dir_indicator = 1;
 			if (classify == -1) classify = 0;
@@ -11011,17 +11068,22 @@ parse_input_str(char *str)
 				 * #   2.c) ELN EXPANSION   # 
 				 * ##########################*/
 
-		/* i must be bigger than zero because the first string in
-		 * comm_array, the command name, should NOT be expanded, but only
-		 * arguments. Otherwise, if the expanded ELN happens to be a
-		 * program name as well, this program will be executed, and this,
-		 * for sure, is to be avoided */
+		/* If autocd is set to false, i must be bigger than zero because
+		 * the first string in comm_array, the command name, should NOT
+		 * be expanded, but only arguments. Otherwise, if the expanded
+		 * ELN happens to be a program name as well, this program will
+		 * be executed, and this, for sure, is to be avoided */
 
 		/* The 'sort' command take digits as arguments. So, do not expand
 		 * ELN's in this case */
 		if (strcmp(substr[0], "st") != 0
 		&& strcmp(substr[0], "sort") != 0) {
-			if (i > 0 && is_number(substr[i])) {
+			if (is_number(substr[i])) {
+
+				/* Expand first word only if autocd is set to true */
+				if (i == 0 && !autocd && !auto_open)
+					continue;
+				
 				int num = atoi(substr[i]);
 				/* Expand numbers only if there is a corresponding ELN */
 
@@ -12022,7 +12084,13 @@ list_dir(void)
 	/* Struct to store information about each file, so that we don't
 	 * need to run stat() and strlen() again later, perhaps hundreds
 	 * of times */
-	struct fileinfo *file_info = (struct fileinfo *)xnmalloc(
+/*	struct fileinfo *file_info = (struct fileinfo *)xnmalloc(
+					(size_t)total + 1, sizeof(struct fileinfo)); */
+
+	if (file_info)
+		free(file_info);
+
+	file_info = (struct fileinfo *)xnmalloc(
 					(size_t)total + 1, sizeof(struct fileinfo));
 
 	if (list_folders_first) {
@@ -12139,6 +12207,7 @@ list_dir(void)
 		file_info[i].exists = 1;
 		file_info[i].type = file_attrib.st_mode;
 		file_info[i].size = file_attrib.st_size;
+		file_info[i].linkdir = -1;
 
 		/* file_name_width contains: ELN's amount of digits + one space 
 		 * between ELN and filename + filename length. Ex: '12 name'
@@ -12160,7 +12229,6 @@ list_dir(void)
 		case S_IFLNK:
 			{
 			char *linkname = (char *)NULL;
-			int link_to_dir = -1;
 
 			/* In case of symlink, check if it points to a directory */
 			if ((file_info[i].type & S_IFMT) == S_IFLNK) {
@@ -12174,20 +12242,20 @@ list_dir(void)
 					if ((link_attrib.st_mode & S_IFMT) != S_IFDIR) {
 						free(linkname);
 						linkname = (char *)NULL;
-						link_to_dir = 0;
+						file_info[i].linkdir = 0;
 					}
 					else /* We have a symlink to a valid directory */
-						link_to_dir = 1;
+						file_info[i].linkdir = 1;
 				}
 				else {
-					link_to_dir = 0;
+					file_info[i].linkdir = 0;
 					file_info[i].brokenlink = 1;
 				}
 			}
 
 			/* If dir counter is disabled and/or the file is a symlink
 			 * to a non-directory */
-			if (!files_counter || link_to_dir == 0) {
+			if (!files_counter || file_info[i].linkdir == 0) {
 				/* All dirs will be printed as having read access and
 				 * being not empty, no matter if they are empty or not or
 				 * if the user has read access or not. Disabling the
@@ -12196,7 +12264,7 @@ list_dir(void)
 				 * the listing process could become really slow */
 				file_info[i].ruser = 1;
 
-				if (link_to_dir == 0)
+				if (file_info[i].linkdir == 0)
 					file_info[i].filesn = 0;
 				else
 					file_info[i].filesn = 3;
@@ -12557,7 +12625,7 @@ list_dir(void)
 		}
 	}
 	
-	free(file_info);
+/*	free(file_info); */
 	
 	/* If the pager was disabled during listing (by pressing 'c', 'p' or
 	 * 'q'), reenable it */
@@ -12670,7 +12738,10 @@ list_dir_light(void)
 			return EXIT_FAILURE;
 	}
 
-	struct fileinfo *file_info = (struct fileinfo *)xnmalloc(
+	if (file_info)
+		free(file_info);
+
+	file_info = (struct fileinfo *)xnmalloc(
 					(size_t)total + 1, sizeof(struct fileinfo));
 
 	files = (size_t)total;
@@ -12769,6 +12840,8 @@ list_dir_light(void)
 	longest = 0; /* Global */
 
 	for (i = (int)files; i--;) {
+
+		file_info[i].linkdir = -1;
 
 		size_t file_name_width = digits_in_num(i + 1) + 1
 								 + file_info[i].len;
@@ -13062,7 +13135,7 @@ list_dir_light(void)
 		}
 	}
 
-	free(file_info);
+/*	free(file_info); */
 	
 	/* If the pager was disabled during listing (by pressing 'c', 'p' or
 	 * 'q'), reenable it */
@@ -13328,6 +13401,55 @@ exec_cmd(char **comm)
 			return EXIT_FAILURE;
 		}
 	}
+
+				/* #### AUTOCD & AUTOOPEN #### */
+
+	/* Only autocd or autoopen if there is no second argument of if
+	 * second argument is "&" */
+	if ((autocd || auto_open) && (!comm[1] || (*comm[1] == '&')
+	&& comm[1][1] == '\0')) {
+
+		char *tmp = comm[0];
+		size_t i, tmp_len = strlen(tmp);
+
+		if (tmp[tmp_len - 1] == '/')
+			tmp[tmp_len - 1] = 0x00;
+
+		for (i = files; i--;) {
+
+			if (*tmp != *dirlist[i])
+				continue;
+
+			if (strcmp(tmp, dirlist[i]) != 0)
+				continue;
+
+			/* In light mode, stat() is never called, so that we
+			 * don't have the stat macros (S_IFDIR and company), but
+			 * only those provided by scandir (DT_DIR and company) */
+			if (autocd && (((light_mode) ? file_info[i].type
+			: file_info[i].type & S_IFMT) == ((light_mode)
+			? DT_DIR : S_IFDIR) || file_info[i].linkdir == 1)) {
+				exit_code = cd_function(tmp);
+				return exit_code;
+			}
+
+			else if (auto_open && (((light_mode) ? file_info[i].type
+			: file_info[i].type & S_IFMT) == ((light_mode)
+			? DT_REG : S_IFREG) || ((light_mode) ? file_info[i].type
+			: file_info[i].type & S_IFMT) == ((light_mode)
+			? DT_LNK : S_IFLNK))) {
+				char *cmd[] = { "open", comm[0],
+								(comm[1]) ? comm[1] : NULL,
+								NULL }; 
+				exit_code = open_function(cmd);
+				return exit_code;
+			}
+
+			else
+				break;
+		}
+	}
+
 
 	/* The more often a function is used, the more on top should it be
 	 * in this if...else..if chain. It will be found faster this way. */
@@ -14005,7 +14127,7 @@ exec_cmd(char **comm)
 	else if (strcmp(comm[0], "hf") == 0 
 	|| strcmp(comm[0], "hidden") == 0) {
 		if (!comm[1]) {
-			puts(_("Usage: hidden, hf [on, off, status]")); 
+			fputs(_("Usage: hidden, hf [on, off, status]\n"), stderr); 
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
@@ -14019,6 +14141,73 @@ exec_cmd(char **comm)
 			exit_code = hidden_function(comm);
 	}
 
+					/* #### AUTOCD #### */
+	else if (strcmp(comm[0], "acd") == 0
+	|| strcmp(comm[0], "autocd") == 0) {
+
+		if (!comm[1]) {
+			fputs("Usage: acd, autocd [on, off, status]\n", stderr);
+			exit_code = EXIT_FAILURE;
+			return EXIT_FAILURE;
+		}
+
+		if (strcmp(comm[1], "on") == 0) {
+			autocd = 1;
+			printf("%s: autocd is enabled\n", PROGRAM_NAME);
+		}
+		else if (strcmp(comm[1], "off") == 0) {
+			autocd = 0;
+			printf("%s: autocd is disabled\n", PROGRAM_NAME);
+		}
+		else if (strcmp(comm[1], "status") == 0) {
+			if (autocd)
+				printf("%s: autocd is enabled\n", PROGRAM_NAME);
+			else
+				printf("%s: autocd is disabled\n", PROGRAM_NAME);
+		}
+		else if (strcmp(comm[1], "--help") == 0)
+			puts("Usage: acd, autocd [on, off, status]");
+		else {
+			fputs("Usage: acd, autocd [on, off, status]\n", stderr);
+			exit_code = EXIT_FAILURE;
+			return EXIT_FAILURE;
+		}
+	}
+
+					/* #### AUTOOPEN #### */
+	else if (strcmp(comm[0], "ao") == 0
+	|| strcmp(comm[0], "autoopen") == 0) {
+
+		if (!comm[1]) {
+			fputs("Usage: ao, autoopen [on, off, status]\n", stderr);
+			exit_code = EXIT_FAILURE;
+			return EXIT_FAILURE;
+		}
+
+		if (strcmp(comm[1], "on") == 0) {
+			auto_open = 1;
+			printf("%s: autoopen is enabled\n", PROGRAM_NAME);
+		}
+		else if (strcmp(comm[1], "off") == 0) {
+			auto_open = 0;
+			printf("%s: autoopen is disabled\n", PROGRAM_NAME);
+		}
+		else if (strcmp(comm[1], "status") == 0) {
+			if (auto_open)
+				printf("%s: autoopen is enabled\n", PROGRAM_NAME);
+			else
+				printf("%s: autoopen is disabled\n", PROGRAM_NAME);
+		}
+		else if (strcmp(comm[1], "--help") == 0)
+			puts("Usage: ao, autoopen [on, off, status]");
+		else {
+			fputs("Usage: ao, autoopen [on, off, status]\n", stderr);
+			exit_code = EXIT_FAILURE;
+			return EXIT_FAILURE;
+		}
+	}
+
+					/* #### COMMANDS #### */
 	else if (strcmp(comm[0], "cmd") == 0
 	|| strcmp(comm[0], "commands") == 0) 
 		exit_code = list_commands();
@@ -14069,11 +14258,18 @@ exec_cmd(char **comm)
 	 * ####################################################*/
 
 	else {
+
 		/* IF NOT A COMMAND, BUT A DIRECTORY... */
 		if (*comm[0] == '/') {
 			struct stat file_attrib;
 			if (lstat(comm[0], &file_attrib) == 0) {
 				if ((file_attrib.st_mode & S_IFMT) == S_IFDIR ) {
+
+					if (autocd) {
+						exit_code = cd_function(comm[0]);
+						return exit_code;
+					}
+
 					fprintf(stderr, _("%s: '%s': Is a directory\n"), 
 							PROGRAM_NAME, comm[0]);
 					exit_code = EXIT_FAILURE;
@@ -17667,6 +17863,8 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
  lm [on, off]\n\
  rf, refresh\n\
  cc, colors\n\
+ acd, autocd [on, off, status]\n\
+ ao, autoopen [on, off, status]\n\
  hf, hidden [on, off, status]\n\
  ff, folders first [on, off, status]\n\
  fc, filescounter [on, off, status]\n\

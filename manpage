@@ -1,5 +1,5 @@
 '\ t
-.TH "CLIFM" "1" "January 29, 2021" "CliFM 0.27.0+" "CliFM Manual"
+.TH "CLIFM" "1" "January 30, 2021" "CliFM 0.27.2+" "CliFM Manual"
 .nh
 .ad l
 
@@ -12,7 +12,9 @@ CLIFM \- A completely CLI\-based file manager inspired by Arch Linux' KISS princ
 .SH DESCRIPTION
 CliFM is a completely text\-based file manager (no GUI nor curses at all) able to perform all the basic operations you may expect from any other FM. However, its most distinguishing characteristics are:
 .sp
-  \fBa)\fR The use of short (and even one\-character commands) and numbers (ELN's) instead of filenames. Enter 'o 12', for instance, to open a file with your default text editor or to change to the desired directory. With the automatic ELN's expansion feature you can use ELN's with external commands as well. 'diff 12 5', for example, will run 'diff' over the files corresponding to ELN's 12 and 5. Ranges are also accepted, for example: 'rm 1\-12' or 'r 1\-12'. Since numbers could be a bit tricky when it comes to listed files, you can use the TAB key to expand the filename corresponding to the required ELN.
+  \fBa)\fR The use of short (and even one\-character commands) and numbers (ELN's) instead of filenames. Enter 'o 12', for instance, to open a file with your default text editor or to change to the desired directory. If the \fBautocd\fR and \fBauto-open\fR fucntions are enabled, which is the defaut, you only need to enter the ELN to open the file or change to directory: instead of 'o 12', just enter '12'.
+.sp
+With the automatic ELN's expansion feature you can use ELN's with external commands as well. 'diff 12 5', for example, will run 'diff' over the files corresponding to ELN's 12 and 5. Ranges are also accepted, for example: 'rm 1\-12' or 'r 1\-12'. Since numbers could be a bit tricky when it comes to listed files, you can use the TAB key to expand the filename corresponding to the required ELN.
 .sp
   \fBb)\fR Automatic files listing: Unlike the shell 'cd' command, CliFM's built\-in 'cd' function automatically lists files in the new directory.
 .sp
@@ -55,6 +57,7 @@ List of CliFM features:
   21) Multiple sorting methods and reverse sorting
   22) Bulk rename
   23) Archiving and compression support
+  24) Auto-cd and auto-open
 
 .SH RATIONALE
 When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the Linux built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There is no two without three".
@@ -328,6 +331,14 @@ refresh the screen.
 show the color codes used to list files.
 .TP
 
+.B acd, autocd [on, off, status]
+toggle autocd on/off. If set to on, 'DIR' amounts to 'cd DIR'.
+.TP
+
+.B ao, autoopen [on, off, status]
+toggle autoopen on/off. If set to on, 'FILE' amounts to 'open FILE'.
+.TP
+
 .B cmd, commands 
 show this list of commands.
 .TP
@@ -599,7 +610,7 @@ A file containing a list of system messages, either errors, warnings, or simple 
 \fBNOTE\fR: If \fB$XDG_CONFIG_HOME\fR is not set, \fB$HOME/.config/\fR is used instead. 
 
 .SH CONFORMING TO
-CLiFM is C99 compliant, and, if compiled with the _BE_POSIX flag, it is POSIX.1-2008 comformant as well. If not, only two non-POSIX functions are used: \fBstatx(2)\fR (Linux specific), to get files birth time, and \fBstrverscmp(3)\fR (a GNU extension), to list files by version.
+CLiFM is C99 compliant, and, if compiled with the _BE_POSIX flag, it is POSIX.1-2008 conformant as well. If not, only two non-POSIX functions are used: \fBstatx(2)\fR (Linux specific), to get files birth time, and \fBstrverscmp(3)\fR (a GNU extension), to list files by version.
 
 .SH BUGS AND FEATURE REQUESTS
 Report at <https://github.com/leo\-arch/clifm/issues>
