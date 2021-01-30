@@ -2,15 +2,21 @@
 
 pkgname=clifm-git
 _pkgname=clifm
-pkgver=0.27.1.r7.gfdc0147
+pkgver=0.27.1.r29.g4339377
 pkgrel=1
 pkgdesc="The KISS file manager: cli-based, ultra-lightweight, and lightning fast (development version)"
 arch=(any)
 url="https://github.com/leo-arch/clifm"
 license=(GPL2)
-depends=('libcap' 'file')
+depends=('libcap' 'readline' 'acl')
 makedepends=('git')
-optdepends=('sshfs: SFTP support' 'cifs-utils: Samba support' 'curlftpfs: FTPFS support' 'archivemount: Archives mount' 'atool: Archives/compression support')
+optdepends=(
+	'sshfs: SFTP support'
+	'cifs-utils: Samba support'
+	'curlftpfs: FTPFS support'
+	'archivemount: Archives mount'
+	'atool: Archives/compression support'
+	)
 source=("git+${url}.git")
 sha256sums=('SKIP')
 
