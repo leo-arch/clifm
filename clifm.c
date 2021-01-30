@@ -149,8 +149,10 @@ in FreeBSD, but is deprecated */
 #define PNL "clifm" /* Program name lowercase */
 /* #define TMP_DIR "/tmp/clifm" */
 /* If no formatting, puts (or write) is faster than printf */
-/* #define CLEAR puts("\x1b[c") */
-#define CLEAR write(STDOUT_FILENO, "\033c", 3);
+/* #define CLEAR puts("\x1b[c") "\x1b[2J\x1b[1;1H"*/
+//#define CLEAR write(STDOUT_FILENO, "\033c", 3);
+#define CLEAR write(STDOUT_FILENO, "\x1b[2J\x1b[3J\x1b[H", 11);
+/* #define CLEAR write(STDOUT_FILENO, "\033[2J\033[H", 7); */
 #define VERSION "0.27.1"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
@@ -373,6 +375,7 @@ int new_instance(char *dir);
 int *get_hex_num(char *str);
 int create_config(char *file);
 int skip_nonexec(const struct dirent *entry);
+void print_tips(int all);
 
 /* Sorting functions */
 int sort_function(char **arg);
@@ -529,75 +532,6 @@ char *user = (char *)NULL, *path = (char *)NULL,
 	*last_cmd = (char *)NULL, *term = (char *)NULL,
 	*TMP_DIR = (char *)NULL, div_line_char = -1, *opener = (char *)NULL,
 	**old_pwd = (char **)NULL;
-
-const char *TIPS[] = {
-	"If need more speed, try the light mode (A-y)",
-	"The Selection Box is shared among different instances of CliFM",
-	"Select files here and there with the 's' command",
-	"Use wildcards with the 's' command: 's *.c'",
-	"ELN's and the 'sel' keyword work for shell commands as well: 'file 1 sel'",
-	"Press TAB to automatically expand an ELN: 'o 2' -> TAB -> 'o FILENAME'",
-	"Easily copy everything in CWD into another directory: 's * && c sel ELN/DIR'",
-	"Use ranges (ELN-ELN) to easily move multiple files: 'm 3-12 ELN/DIR'",
-	"Trash files with a simple 't ELN'",
-	"Get mime information for a file: 'mm info ELN'",
-	"Edit the mimelist file with 'mm edit'",
-	"If too many files are listed, try enabling the pager ('pg on')",
-	"Once in the pager, go backwards pressing the keyboard shortcut provided by your terminal emulator",
-	"Press 'q' to stop the pager",
-	"Press 'A-l' to switch to long view mode",
-	"Search for files using the slash command: '/*.png'",
-	"Add a new bookmark by just entering 'bm ELN/FILE'",
-	"Use c, l, m, md, and r instead of cp, ln, mv, mkdir, and rm",
-	"Access a remote file system using the 'net' command",
-	"Manage default associated applications with the 'mime' command",
-	"Go back and forth in the directory history with 'A-j' and 'A-k'",
-	"Open a new instance of CliFM with the 'x' command: 'x ELN/DIR'",
-	"Send a command directly to the system shell with ';CMD'",
-	"Run the last executed command by just running '!!'",
-	"Import aliases from file using 'alias import FILE'",
-	"List available aliases by running 'alias'",
-	"Open and edit the configuration file with 'edit'",
-	"Find a description for each CLiFM command running 'cmd'",
-	"Print the color codes list entering 'cc'",
-	"Press 'A-i' to toggle hidden files on/off",
-	"List mountpoints by pressing 'A-m'",
-	"Allow the use of shell commands with the -x option: 'clifm -x'",
-	"Go to the root directory by just pressing 'A-r'",
-	"Go to the home directory by just pressing 'A-e'",
-	"Press 'F10' to open and edit the configuration file",
-	"Customize the starting using the -p option: 'clifm -p PATH'",
-	"Use the 'o' command to open files and directories: 'o 12'",
-	"Bypass the resource opener specifying an application: 'o 12 leafpad'",
-	"Open a file and send it to the background running 'o 24 &'",
-	"Create a custom prompt editing the configuration file",
-	"Customize color codes using the configuration file",
-	"Open the bookmarks manager by just pressing 'A-b'",
-	"Chain commands using ; and &&: 's 2 7-10; r sel'",
-	"Add emojis to the prompt by copying them to the Prompt line in the configuration file",
-	"Create a new profile running 'pf add PROFILE' or 'clifm -P PROFILE'",
-	"Switch profiles using 'pf set PROFILE'",
-	"Delete a profile using 'pf del PROFILE'",
-	"Copy selected files into CWD by just running 'v sel'",
-	"Use 'p ELN' to print file properties for ELN",
-	"Deselect all selected files by pressing 'A-d'",
-	"Select all files in CWD by pressing 'A-a'",
-	"Jump to the Selection Box by pressing 'A-s'",
-	"Restore trashed files using the 'u' command",
-	"Empty the trash bin running 't clear'",
-	"Press A-f to toggle list-folders-first on/off",
-	"Use the 'fc' command to disable the files counter",
-	"Take a look at the splash screen with the 'splash' command",
-	"Have some fun trying the 'bonus' command",
-	"Launch the default system shell in CWD using ':' or ';'",
-	"Use 'A-z' and 'A-x' to switch sorting methods",
-	"Reverse sorting order using the 'rev' option: 'st rev'",
-	"Compress and decompress files using the 'ac' and 'ad' commands respectivelly",
-	"Rename multiple files at once with the bulk rename function: 'br *.txt'",
-	NULL
-};
-
-size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
 
 	/* This is not a comprehensive list of commands. It only lists
 	 * commands long version for TAB completion */
@@ -1062,6 +996,91 @@ main(int argc, char **argv)
 			 * #     FUNCTIONS DEFINITIONS     #
 			 * ################################# */
 
+void
+print_tips(int all)
+/* Print either all tips (if ALL == 1) or just a random one (ALL == 0) */
+{
+	const char *TIPS[] = {
+		"If need more speed, try the light mode (A-y)",
+		"The Selection Box is shared among different instances of CliFM",
+		"Select files here and there with the 's' command",
+		"Use wildcards with the 's' command: 's *.c'",
+		"ELN's and the 'sel' keyword work for shell commands as well: 'file 1 sel'",
+		"Press TAB to automatically expand an ELN: 'o 2' -> TAB -> 'o FILENAME'",
+		"Easily copy everything in CWD into another directory: 's * && c sel ELN/DIR'",
+		"Use ranges (ELN-ELN) to easily move multiple files: 'm 3-12 ELN/DIR'",
+		"Trash files with a simple 't ELN'",
+		"Get mime information for a file: 'mm info ELN'",
+		"Edit the mimelist file with 'mm edit'",
+		"If too many files are listed, try enabling the pager ('pg on')",
+		"Once in the pager, go backwards pressing the keyboard shortcut provided by your terminal emulator",
+		"Press 'q' to stop the pager",
+		"Press 'A-l' to switch to long view mode",
+		"Search for files using the slash command: '/*.png'",
+		"Add a new bookmark by just entering 'bm ELN/FILE'",
+		"Use c, l, m, md, and r instead of cp, ln, mv, mkdir, and rm",
+		"Access a remote file system using the 'net' command",
+		"Manage default associated applications with the 'mime' command",
+		"Go back and forth in the directory history with 'A-j' and 'A-k'",
+		"Open a new instance of CliFM with the 'x' command: 'x ELN/DIR'",
+		"Send a command directly to the system shell with ';CMD'",
+		"Run the last executed command by just running '!!'",
+		"Import aliases from file using 'alias import FILE'",
+		"List available aliases by running 'alias'",
+		"Open and edit the configuration file with 'edit'",
+		"Find a description for each CLiFM command running 'cmd'",
+		"Print the color codes list entering 'cc'",
+		"Press 'A-i' to toggle hidden files on/off",
+		"List mountpoints by pressing 'A-m'",
+		"Allow the use of shell commands with the -x option: 'clifm -x'",
+		"Go to the root directory by just pressing 'A-r'",
+		"Go to the home directory by just pressing 'A-e'",
+		"Press 'F10' to open and edit the configuration file",
+		"Customize the starting using the -p option: 'clifm -p PATH'",
+		"Use the 'o' command to open files and directories: 'o 12'",
+		"Bypass the resource opener specifying an application: 'o 12 leafpad'",
+		"Open a file and send it to the background running 'o 24 &'",
+		"Create a custom prompt editing the configuration file",
+		"Customize color codes using the configuration file",
+		"Open the bookmarks manager by just pressing 'A-b'",
+		"Chain commands using ; and &&: 's 2 7-10; r sel'",
+		"Add emojis to the prompt by copying them to the Prompt line in the configuration file",
+		"Create a new profile running 'pf add PROFILE' or 'clifm -P PROFILE'",
+		"Switch profiles using 'pf set PROFILE'",
+		"Delete a profile using 'pf del PROFILE'",
+		"Copy selected files into CWD by just running 'v sel'",
+		"Use 'p ELN' to print file properties for ELN",
+		"Deselect all selected files by pressing 'A-d'",
+		"Select all files in CWD by pressing 'A-a'",
+		"Jump to the Selection Box by pressing 'A-s'",
+		"Restore trashed files using the 'u' command",
+		"Empty the trash bin running 't clear'",
+		"Press A-f to toggle list-folders-first on/off",
+		"Use the 'fc' command to disable the files counter",
+		"Take a look at the splash screen with the 'splash' command",
+		"Have some fun trying the 'bonus' command",
+		"Launch the default system shell in CWD using ':' or ';'",
+		"Use 'A-z' and 'A-x' to switch sorting methods",
+		"Reverse sorting order using the 'rev' option: 'st rev'",
+		"Compress and decompress files using the 'ac' and 'ad' commands respectivelly",
+		"Rename multiple files at once with the bulk rename function: 'br *.txt'",
+		NULL
+	};
+
+	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
+
+	if (all) {
+		size_t i;
+		for (i = 0; i < tipsn; i++)
+			printf("%sTIP %d%s: %s\n", bold, i, NC, TIPS[i]);
+
+		return;
+	}
+
+	srand(time(NULL));
+	printf("%sTIP%s: %s\n", bold, NC, TIPS[rand() % tipsn]);
+}
+
 int
 is_compressed(char *file)
 /* Run the 'file' command on FILE and look for "archive" and
@@ -1160,15 +1179,16 @@ int
 zstandard(char *in_file, char *out_file, char mode, char op)
 /* If MODE is 'c', compress IN_FILE producing a zstandard compressed
  * file named OUT_FILE. If MODE is 'd', extract, test or get
- * information about IN_FILE. Returns zero on success and one on
- * error */
+ * information about IN_FILE. OP is used only for the 'd' mode: it
+ * tells if we have one or multiple file. Returns zero on success and
+ * one on error */
 {
 	int exit_status = EXIT_SUCCESS;
 
 	char *deq_file = dequote_str(in_file, 0);
 
 	if (!deq_file) {
-		fprintf(stderr, "archiver: '%s': Error dequoting file\n",
+		fprintf(stderr, _("archiver: '%s': Error dequoting file\n"),
 				in_file);
 		return EXIT_FAILURE;
 	}
@@ -1217,7 +1237,7 @@ zstandard(char *in_file, char *out_file, char mode, char op)
 	}
 
 
-	printf("%s[e]%sxtract %s[t]%sest %s[i]%snfo %s[q]%suit\n",
+	printf(_("%s[e]%sxtract %s[t]%sest %s[i]%snfo %s[q]%suit\n"),
 		   bold, NC, bold, NC, bold, NC, bold, NC);
 
 	char *operation = (char *)NULL;
@@ -1279,7 +1299,8 @@ archiver(char **args, char mode)
 /* Handle archives and/or compressed files (ARGS) according to MODE:
  * 'c' for archiving/compression, and 'd' for dearchiving/decompression
  * (including listing, extracting, repacking, and mounting). Returns
- * zero on success and one on error */
+ * zero on success and one on error. Depends on 'zstd' for Zdtandard
+ * files 'atool' and 'archivemount' for the remaining types. */
 {
 	size_t i;
 	int uncompressed = 0, exit_status = EXIT_SUCCESS;
@@ -1326,11 +1347,11 @@ archiver(char **args, char mode)
 			/* Multiple files */
 			if (args[2]) {
 
-				printf("\n%sNOTE%s: Zstandard does not support "
+				printf(_("\n%sNOTE%s: Zstandard does not support "
 					   "compression of multiple files into one single "
 					   "compressed file. Files will be compressed rather "
 					   "into multiple compressed files using original "
-					   "filenames\n", bold, NC);
+					   "filenames\n"), bold, NC);
 
 				for (i = 1; args[i]; i++) {
 					if (zstandard(args[i], NULL, 'c', 0)
@@ -1422,14 +1443,14 @@ archiver(char **args, char mode)
 		/* Multiple files */
 		if (files_num > 1) {
 
-			printf("%sNOTE%s: Using Zstandard\n", bold, NC);
-			printf("%s[e]%sxtract %s[t]%sest %s[i]%snfo %s[q]%suit\n",
+			printf(_("%sNOTE%s: Using Zstandard\n"), bold, NC);
+			printf(_("%s[e]%sxtract %s[t]%sest %s[i]%snfo %s[q]%suit\n"),
 				   bold, NC, bold, NC, bold, NC, bold, NC);
 
 			char *operation = (char *)NULL;
 			char sel_op = 0;
 			while(!operation) {
-				operation = rl_no_hist("Operation: ");
+				operation = rl_no_hist(_("Operation: "));
 
 				if (!operation)
 					continue;
@@ -1643,12 +1664,12 @@ archiver(char **args, char mode)
 				}
 
 				/* Ask for extraction path */
-				printf("%sFile%s: %s\n", bold, NC, args[i]);
+				printf(_("%sFile%s: %s\n"), bold, NC, args[i]);
 
 				char *ext_path = (char *)NULL;
 
 				while (!ext_path) {
-					ext_path = rl_no_hist("Path: ");
+					ext_path = rl_no_hist(_("Path: "));
 
 					if (!ext_path)
 						continue;
@@ -1677,7 +1698,7 @@ archiver(char **args, char mode)
 		case 'l':
 			for (i = 1; args[i]; i++) {
 
-				printf("%s%sFile%s: %s\n", (i > 1) ? "\n" : "",
+				printf(_("%s%sFile%s: %s\n"), (i > 1) ? "\n" : "",
 					   bold, NC, args[i]);
 
 				char *cmd[] = { "atool", "-l", args[i], NULL };
@@ -1767,7 +1788,7 @@ archiver(char **args, char mode)
 
 		case 'r': {
 			/* Ask for new archive/compression format */
-			puts("Enter 'q' to quit");
+			puts(_("Enter 'q' to quit"));
 
 			char *format = (char *)NULL;
 			while (!format) {
@@ -1816,7 +1837,7 @@ bulk_rename(char **args)
  * a temporary file, which is opened via the mime function and shown
  * to the user to modify it. Once the filenames have been modified and
  * saved, modifications are printed on the screen and the user is
- * asked whether to perform the actual bulk renaming (via mv) or not
+ * asked whether to perform the actual bulk renaming (via mv) or not.
  * I took this bulk rename method, just because it is quite simple and
  * KISS, from the fff filemanager. So, thanks fff! */
 {
@@ -1846,8 +1867,8 @@ bulk_rename(char **args)
 		if (strchr(args[i], '\\')) {
 			char *deq_file = dequote_str(args[i], 0);
 			if (!deq_file) {
-				fprintf(stderr, "bulk: '%s': Error dequoting filename\n",
-						args[i]);
+				fprintf(stderr, _("bulk: '%s': Error dequoting "
+						"filename\n"), args[i]);
 				continue;
 			}
 			strcpy(args[i], deq_file);
@@ -1891,7 +1912,7 @@ bulk_rename(char **args)
 	 * match, nothing was modified */
 	stat(BULK_FILE, &file_attrib);
 	if (mtime_bfr == file_attrib.st_mtime) {
-		printf("bulk: Nothing to do\n");
+		puts(_("bulk: Nothing to do"));
 		if (remove(BULK_FILE) == -1) {
 			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 				 BULK_FILE, strerror(errno));
@@ -1919,7 +1940,7 @@ bulk_rename(char **args)
 	}
 
 	if (arg_total != file_total) {
-		fprintf(stderr, "bulk: Line mismatch in rename file\n");
+		fputs(_("bulk: Line mismatch in rename file\n"), stderr);
 		fclose(bulk_fp);
 		if (remove(BULK_FILE) == -1)
 			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
@@ -1950,7 +1971,7 @@ bulk_rename(char **args)
 
 	/* If no filename was modified */
 	if (!modified) {
-		printf("bulk: Nothing to do\n");
+		puts(_("bulk: Nothing to do"));
 		if (remove(BULK_FILE) == -1) {
 			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 				 BULK_FILE, strerror(errno));
@@ -1964,7 +1985,7 @@ bulk_rename(char **args)
 	/* Ask the user for confirmation */
 	char *answer = (char *)NULL;
 	while (!answer) {
-		answer = readline("Continue? [y/N] ");
+		answer = readline(_("Continue? [y/N] "));
 
 		if (strlen(answer) > 1) {
 			free(answer);
@@ -2033,33 +2054,33 @@ bulk_rename(char **args)
 void
 print_sort_method(void)
 {
-	printf("%s->%s Sorted by: ", cyan, NC);
+	printf(_("%s->%s Sorted by: "), cyan, NC);
 	switch(sort) {
-		case 0: puts("none"); break;
-		case 1: printf("name %s\n", (sort_reverse) ? "[rev]" : "");
+		case 0: puts(_("none")); break;
+		case 1: printf(_("name %s\n"), (sort_reverse) ? "[rev]" : "");
 			break;
-		case 2: printf("size %s\n", (sort_reverse) ? "[rev]" : "");
+		case 2: printf(_("size %s\n"), (sort_reverse) ? "[rev]" : "");
 			break;
-		case 3: printf("atime %s\n", (sort_reverse) ? "[rev]" : "");
+		case 3: printf(_("atime %s\n"), (sort_reverse) ? "[rev]" : "");
 			break;
 		case 4:
 		#if defined(HAVE_ST_BIRTHTIME) \
 			|| defined(__BSD_VISIBLE) || defined(_STATX)
-				printf("btime %s\n", (sort_reverse) ? "[rev]" : "");
+				printf(_("btime %s\n"), (sort_reverse) ? "[rev]" : "");
 			#else
-				printf("btime (not available: using 'ctime') %s\n",
+				printf(_("btime (not available: using 'ctime') %s\n"),
 					   (sort_reverse) ? "[rev]" : "");
 			#endif
 			break;
-		case 5: printf("ctime %s\n", (sort_reverse) ? "[rev]" : "");
+		case 5: printf(_("ctime %s\n"), (sort_reverse) ? "[rev]" : "");
 			break;
-		case 6: printf("mtime %s\n", (sort_reverse) ? "[rev]" : "");
+		case 6: printf(_("mtime %s\n"), (sort_reverse) ? "[rev]" : "");
 			break;
 		#if __FreeBSD__ || _BE_POSIX
-		case 7: printf("version (not available: using 'name') %s\n",
+		case 7: printf(_("version (not available: using 'name') %s\n"),
 					   (sort_reverse) ? "[rev]" : "");
 		#else
-		case 7: printf("version %s\n", (sort_reverse) ? "[rev]" : "");
+		case 7: printf(_("version %s\n"), (sort_reverse) ? "[rev]" : "");
 		#endif
 			break;
 	}
@@ -2070,37 +2091,48 @@ sort_function(char **arg)
 {
 	int exit_status = EXIT_FAILURE;
 
+	/* No argument: Just print current sorting method */
 	if (!arg[1]) {
-		printf("Sorting method: ");
+		printf(_("Sorting method: "));
 		switch(sort) {
 			case 0:
-				printf("none %s\n", (sort_reverse) ? "[rev]": "");
+				printf(_("none %s\n"), (sort_reverse) ? "[rev]": "");
 				break;
 			case 1:
-				printf("name %s\n", (sort_reverse) ? "[rev]": "");
+				printf(_("name %s\n"), (sort_reverse) ? "[rev]": "");
 				break;
 			case 2:
-				printf("size %s\n", (sort_reverse) ? "[rev]": "");
+				printf(_("size %s\n"), (sort_reverse) ? "[rev]": "");
 				break;
 			case 3:
-				printf("atime %s\n", (sort_reverse) ? "[rev]": "");
+				printf(_("atime %s\n"), (sort_reverse) ? "[rev]": "");
 				break;
 			case 4:
-				printf("btime %s\n", (sort_reverse) ? "[rev]": "");
+			#if defined(HAVE_ST_BIRTHTIME) \
+			|| defined(__BSD_VISIBLE) || defined(_STATX)
+				printf(_("btime %s\n"), (sort_reverse) ? "[rev]": "");
+			#else
+				printf(_("ctime %s\n"), (sort_reverse) ? "[rev]": "");
+			#endif
 				break;
 			case 5:
-				printf("ctime %s\n", (sort_reverse) ? "[rev]": "");
+				printf(_("ctime %s\n"), (sort_reverse) ? "[rev]": "");
 				break;
 			case 6:
-				printf("mtime %s\n", (sort_reverse) ? "[rev]": "");
+				printf(_("mtime %s\n"), (sort_reverse) ? "[rev]": "");
 				break;
 			case 7:
-				printf("version %s\n", (sort_reverse) ? "[rev]": "");
+			#if __FreeBSD__ || _BE_POSIX
+				printf(_("name %s\n"), (sort_reverse) ? "[rev]": "");
+			#else
+				printf(_("version %s\n"), (sort_reverse) ? "[rev]": "");
+			#endif
 				break;
 		}
 		return EXIT_SUCCESS;
 	}
 
+	/* Argument is alphanumerical string */
 	else if (!is_number(arg[1])) {
 		if (strcmp(arg[1], "rev") == 0) {
 
@@ -2122,36 +2154,44 @@ sort_function(char **arg)
 
 			return exit_status;
 		}
+
 		/* If arg1 is not a number and is not "rev", the fputs()
 		 * above is executed */
 	}
 
-	else if (atoi(arg[1]) >= 0 && atoi(arg[1]) <= sort_types) {
-		sort = atoi(arg[1]);
+	/* Argument is a number */
+	else {
+		int int_arg = atoi(arg[1]);
 
-		if (arg[2] && strcmp(arg[2], "rev") == 0) {
-			if (sort_reverse)
-				sort_reverse = 0;
-			else
-				sort_reverse = 1;			
+		if (int_arg >= 0 && int_arg <= sort_types) {
+			sort = int_arg;
+
+			if (arg[2] && strcmp(arg[2], "rev") == 0) {
+				if (sort_reverse)
+					sort_reverse = 0;
+				else
+					sort_reverse = 1;			
+			}
+
+			if (cd_lists_on_the_fly) {
+				sort_switch = 1;
+				while (files--)
+					free(dirlist[files]);
+				exit_status = list_dir();
+				sort_switch = 0;
+			}
+
+			return exit_status;
 		}
-
-		if (cd_lists_on_the_fly) {
-			sort_switch = 1;
-			while (files--)
-				free(dirlist[files]);
-			exit_status = list_dir();
-			sort_switch = 0;
-		}
-
-		return exit_status;
 	}
+
 	/* If arg1 is a number but is not in the range 0-sort_types,
 	 * error */
 
 	fputs(_("Usage: st [METHOD] [rev]\nMETHOD: 0 = none, "
 			"1 = name, 2 = size, 3 = atime, 4 = btime, "
 		    "5 = ctime, 6 = mtime, 7 = version\n"), stderr);
+
 	return EXIT_FAILURE;
 }
 
@@ -7676,15 +7716,20 @@ readline_kbind_action(int count, int key) {
 			return 0;
 		break;
 
-	/* A-c: Clear the current command line (== C-a, C-k). Very handy, 
+	/* A-c: Clear the current line (== C-a, C-k). Very handy, 
 	 * since C-c is currently disabled */
 	case 99:
-		puts("");
-		rl_replace_line("", 0);
-/*		puts("");
+
+		/* 1) Clear text typed so far (\x1b[2K) and move cursor to the
+		 * beginning of the current line (\r) */
+		write(STDOUT_FILENO, "\x1b[2K\r", 5);
+		/* 2) Clear the readline buffer */
 		rl_delete_text(0, rl_end);
 		rl_end = rl_point = 0;
-		rl_on_new_line(); */
+
+/*		puts("");
+		rl_replace_line("", 0); */
+
 		break;
 
 	/* A-d: Deselect all selected files */		
@@ -11429,8 +11474,7 @@ prompt(void)
 	if (tips) {
 		static int first_run = 1;
 		if (first_run) {
-			srand(time(NULL));
-			printf("%sTIP%s: %s\n", bold, NC, TIPS[rand() % tipsn]);
+			print_tips(0);
 			first_run = 0;
 		}
 	}
@@ -13568,12 +13612,8 @@ exec_cmd(char **comm)
 	}
 
 					/* #### TIPS #### */
-	else if (strcmp(comm[0], "tips") == 0) {
-		size_t i;
-		for (i = 0; i < tipsn; i++)
-			printf("%sTIP %d%s: %s\n", bold, i, NC, TIPS[i]);
-		return EXIT_SUCCESS;
-	}
+	else if (strcmp(comm[0], "tips") == 0)
+		print_tips(1);
 
 					/* #### LIGHT MODE #### */
 	else if (strcmp(comm[0], "lm") == 0) {
@@ -17618,10 +17658,10 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
  A-f:	Toggle list-folders-first on/off\n\
  C-r:	Refresh the screen\n\
  A-l:	Toggle long view mode on/off\n\
- A-m:	List mountpoints\n\
+ A-m:	Open the mountpoints screen\n\
  A-b:	Launch the Bookmarks Manager\n\
  A-i:	Toggle hidden files on/off\n\
- A-s:	Open the Selection Box\n\
+ A-s:	Print currently selected files\n\
  A-a:	Select all files in the current working directory\n\
  A-d:	Deselect all selected files\n\
  A-r:	Change to the root directory\n\
@@ -17723,83 +17763,35 @@ splash(void)
 }
 
 void
-bonus_function (void)
+bonus_function(void)
 {
-	static short state = 0;
+	char *phrases[] = {
+		"\"Vamos Boca Juniors Carajo!\" (La mitad + 1)",
+		"\"Hey! Look behind you! A three-headed monkey! (G. Threepweed)",
+		"\"Free as in free speech, not as in free beer\" (R. M. S)",
+		"\"Nothing great has been made in the world without passion\" (G. W. F. Hegel)",
+		"\"Simplicity is the ultimate sophistication (Leo Da Vinci)",
+		"\"Yo vendí semillas de alambre de púa, al contado, y me lo agradecieron\" (Marquitos, 9 Reinas)",
+		"\"I'm so happy, because today I've found my friends, they're in my head\" (K. D. Cobain)",
+		"\"The best code is written with the delete key (Someone, somewhere, sometime)",
+		"\"I'm selling these fine leather jackets (Indy)",
+		"\"I pray to God to make me free of God\" (Meister Eckhart)",
+		"¡Truco y quiero retruco mierda!",
+		"The only truth is that there is no truth",
+		"\"This is a lie\" (The liar paradox)",
+		"\"There are two ways to write error-free programs; only the third one works\" (Alan J. Perlis)",
+		"The man who sold the world was later sold by the big G",
+		"A programmer is always one year older than herself",
+		"A smartphone is anything but smart",
+		"And he did it: he killed the one who killed him",
+		">++('>",
+		":(){:|:&};:",
+		"Keep it simple, stupid",
+		NULL
+		};
 
-	if (state > 14)
-		state = 0;
+	size_t num = (sizeof(phrases) / sizeof(phrases[0])) - 1;
 
-	switch (state) {
-	case 0:
-		puts("\"Vamos Boca Juniors Carajo!\" (La mitad + 1)");
-		break;
-
-	case 1:
-		puts("\"Hey! Look behind you! A three-headed monkey!\" "
-			 "(G. Threepweed)");
-		break;
-
-	case 2:
-		puts("\"Free as in free speech, not as in free beer\" (R. M. S)");
-		break;
-
-	case 3:
-		puts("\"Nothing great has been made in the world without "
-			 "passion\" (G. W. F. Hegel)");
-		break;
-
-	case 4:
-		puts("\"Simplicity is the ultimate sophistication\" "
-			 "(Leo Da Vinci)");
-		break;
-
-	case 5:
-		puts("\"Yo vendí semillas de alambre de púa, al contado, y "
-			 "me lo agradecieron\" (Marquitos, 9 Reinas)");
-		break;
-
-	case 6:
-		puts("\"I'm so happy, because today I've found my friends, "
-			 "they're in my head\" (K. D. Cobain)");
-		break;
-
-	case 7:
-		puts("\"The best code is written with the delete key\" "
-			 "(Someone, somewhere, sometime)");
-		break;
-
-	case 8:
-		puts("\"I'm selling these fine leather jackets\" (Indy)");
-		break;
-
-	case 9:
-		puts("\"I pray to God to make me free of God\" (Meister Eckhart)");
-		break;
-
-	case 10:
-		puts("¡Truco y quiero retruco mierda!");
-		break;
-
-	case 11:
-		puts("The only truth is that there is no truth");
-		break;
-
-	case 12:
-		puts("\"This is a lie\" (The liar paradox)");
-		break;
-
-	case 13:
-		puts("\"There are two ways to write error-free programs; only the "
-			 "third one works\" (Alan J. Perlis)");
-		break;
-
-	case 14:
-		puts("The man who sold the world was later sold by the big G");
-		break;
-
-	default: break;
-	}
-
-	state++;
+	srand(time(NULL));
+	printf("%s\n", phrases[rand() % num]);
 }
