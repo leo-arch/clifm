@@ -25,17 +25,17 @@ Why in this world do we need another file manager? In the first place, just beca
 
 CliFM is a completely command-line-based, shell-like file manager able to perform all the basic operations you may expect from any other FM. Besides these common operations, such as copy, move, remove, etc, CLiFM most distinctive features are:
 
-* It is REALLY CLI-based. No GUI (like Thunar and the like) nor TUI or curses (like Ranger or nnn) at all, just a command line. Since it does not need any GUI, it can run on the Linux built-in console and even on a SSH or any other remote session.
+* It is REALLY **CLI-based**. No GUI (like Thunar and the like) nor TUI or curses (like Ranger or nnn) at all, just a command line. Since it does not need any GUI, it can run on the Linux built-in console and even on a SSH or any other remote session.
 
-* With a memory footprint below 5 MiB and a disk usage of 0.25 MiB, it is incredibly lightweight and fast, and as such, able to run on really old hardware. It is probabily the most lightweight and fastest file manager out there.
+* With a memory footprint below 5 MiB and a disk usage of 0.25 MiB, it is incredibly **lightweight and fast**, and as such, able to run on really old hardware. It is probabily the most lightweight and fastest file manager out there.
 
-* The use of short (and even one-character) commands, and list numbers (ELN's) for filenames. For example, instead of typing: `cp file1 file2 file3 file4 dir/`, you can do this: `c 1-4 7`. Shorter and quicker. If the auto-cd and auto-open functions are enabled, which is the default, you can change to directories or open files by just entering the corresponding ELN. So, instead of `cd 12` or `o 12` you can just enter `12`; even more shroter and quicker. As a plus, ELN's can also be used with external commands. Example: `diff 1 5` or `ls -l 12 14`. If numbers are a bit tricky to you, as they are to me, you can use the TAB key to expand the ELN to the corresponding filename. So, type `r 56`, then TAB, and it becomes `r filename`.
+* The use of **short (and even one-character) commands**, and list numbers (**ELN's**) for filenames. For example, instead of typing: `cp file1 file2 file3 file4 dir/`, you can do this: `c 1-4 7`. Shorter and quicker. If the auto-cd and auto-open functions are enabled, which is the default, you can change to directories or open files by just entering the corresponding ELN. So, instead of `cd 12` or `o 12` you can just enter `12`; even more shroter and quicker. As a plus, ELN's can also be used with external commands. Example: `diff 1 5` or `ls -l 12 14`. If numbers are a bit tricky to you, as they are to me, you can use the TAB key to expand the ELN to the corresponding filename. So, type `r 56`, then TAB, and it becomes `r filename`.
 
-* Bookmarks: With CLiFM bookmarks function, accessing your preferred files and/or directories be as easy as this: `bm` (or `Alt-b`), to call the bookmarks function, and then `1` (or whatever is the number corresponding to your bookmark).
+* **Bookmarks**: With CLiFM bookmarks function, accessing your preferred files and/or directories be as easy as this: `bm` (or `Alt-b`), to call the bookmarks function, and then `1` (or whatever is the number corresponding to your bookmark).
 
 ![bookmarks](images/bookmarks.png)
 
-* Files selection: the ability to select (and deselect) files from here and there, even in different instances of the program, and then operate on them as you whish via the Selection Box or the `sel` keyword. Example: `s 1 4 56 33` will send the files corresponding to these ELN's to the Selection Box. Then, by typing `sb` you can check the contents of the Selection Box. Let's suppose you want to copy a couple of files from your home directory to some distant path, say `/media/data/misc`. Instead of copying all these files individually, you just select the files and then tell the `paste` command where to copy them:
+* **Files selection**: the ability to select (and deselect) files from here and there, even in different instances of the program, and then operate on them as you whish via the Selection Box or the `sel` keyword. Example: `s 1 4 56 33` will send the files corresponding to these ELN's to the Selection Box. Then, by typing `sb` you can check the contents of the Selection Box. Let's suppose you want to copy a couple of files from your home directory to some distant path, say `/media/data/misc`. Instead of copying all these files individually, you just select the files and then tell the `paste` command where to copy them:
  
 `s 1 2 3 6` (or `s 1-3 6`) and then `paste sel /media/data/misc`
 
@@ -45,19 +45,19 @@ Of course, you can deselect some or all selected files whenever you want with th
 
 ![selection box](images/sel_box.png)
  
- * Open files without the need to specify any program. Via `mime` (the built-in resource opener), if no program was specified, CliFM will open the file with the default program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background. Of course, you can also set a custom resource opener.
+ * Open files without the need to specify any program. Via `mime` (the **built-in resource opener**), if no program was specified, CliFM will open the file with the default program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background. Of course, you can also set a custom resource opener.
 
-* Quick search: type `/string` and CliFM will list all the files containing `string` in its name. This function also supports wildcards. Example: `/*.png` will list all the .png files in the current directory. If you want to search for files in another directory, just tell the search function where to search: `/*.png /media/images`.
+* **Quick search**: type `/string` and CliFM will list all the files containing `string` in its name. This function also supports wildcards. Example: `/*.png` will list all the .png files in the current directory. If you want to search for files in another directory, just tell the search function where to search: `/*.png /media/images`.
 
 ![quick search](images/quick_search.png)
 
-* A `trash system` to be able to recover deleted files.
+* A Freedesktop compliant **trash system** to be able to recover deleted files.
 
-* Just like the `ls` command, CLiFM uses (customizable) color codes to identify file types. However, and unlike `ls`, CLiFM is also able to distinguish between empty and non-empty files or directories, broken and non-broken symlinks, files and directories with or without read permission, and more. Once in CliFM, type `colors` to see the list of currently used color codes.
+* **Extended color codes**: Just like the `ls` command, CLiFM uses (customizable) color codes to identify file types. However, and unlike `ls`, CLiFM is also able to distinguish between empty and non-empty files or directories, broken and non-broken symlinks, files and directories with or without read permission, and more. Once in CliFM, type `colors` to see the list of currently used color codes.
 
 ![colors](images/colors.png)
 
-* It also displays the amount of files contained by listed directories or symlinks to directories.
+* **Files counter**: It also displays the amount of files contained by listed directories or symlinks to directories.
 
 ![dirs](images/dirs.png)
 
