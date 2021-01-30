@@ -988,7 +988,7 @@ main(int argc, char **argv)
 		}
 	}
 	
-	return EXIT_SUCCESS; /* Never reached */
+	return exit_code; /* Never reached */
 }
 
 
@@ -9203,21 +9203,51 @@ init_config(void)
 	if (home_ok) {
 		/* Set up program's directories and files (always per user) */
 
+		/* If $XDG_CONFIG_HOME is set, use it for the config file.
+		 * Else, fall back to $HOME/.config */
+		char *xdg_config_home = getenv("XDG_CONFIG_HOME");
+
 		/* alt_profile will not be NULL whenever the -P option is used
 		 * to run the program under an alternative profile */
 		if (alt_profile) {
-			CONFIG_DIR = (char *)xcalloc(user_home_len + pnl_len + 10 
-									+ strlen(alt_profile) + 1,
-									sizeof(char));
-			sprintf(CONFIG_DIR, "%s/.config/%s/%s", user_home, PNL, 
-					alt_profile);
+			
+			if (xdg_config_home) {
+				CONFIG_DIR = (char *)xcalloc(strlen(xdg_config_home)
+									 + pnl_len + strlen(alt_profile)
+									 + 3, sizeof(char));
+				sprintf(CONFIG_DIR, "%s/%s/%s", xdg_config_home, PNL, 
+						alt_profile);
+			}
+
+			else {
+				CONFIG_DIR = (char *)xcalloc(user_home_len + pnl_len
+										+ 11 + strlen(alt_profile),
+										sizeof(char));
+				sprintf(CONFIG_DIR, "%s/.config/%s/%s", user_home, PNL, 
+						alt_profile);
+			}
 		}
+
+		/* Use the default profile */
 		else {
-			CONFIG_DIR = (char *)xcalloc(user_home_len + pnl_len + 17
-										 + 1, sizeof(char));
-			sprintf(CONFIG_DIR, "%s/.config/%s/default", user_home,
-					PNL);
+
+			if (xdg_config_home) {
+				CONFIG_DIR = (char *)xcalloc(strlen(xdg_config_home)
+									 + pnl_len + 10, sizeof(char));
+				sprintf(CONFIG_DIR, "%s/%s/default", xdg_config_home,
+						PNL, alt_profile);
+			}
+
+			else {
+				CONFIG_DIR = (char *)xcalloc(user_home_len + pnl_len
+											 + 18, sizeof(char));
+				sprintf(CONFIG_DIR, "%s/.config/%s/default", user_home,
+						PNL);
+			}
 		}
+
+		xdg_config_home = (char *)NULL;
+		
 		TRASH_DIR = (char *)xcalloc(user_home_len + 20, sizeof(char));
 		sprintf(TRASH_DIR, "%s/.local/share/Trash", user_home);
 		size_t trash_len = strlen(TRASH_DIR);
@@ -14033,7 +14063,7 @@ exec_cmd(char **comm)
 			free(comm[i]);
 		free(comm);
 
-		exit(EXIT_SUCCESS);
+		exit(exit_code);
 	}
 
 
