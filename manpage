@@ -1,23 +1,26 @@
-.TH "CLIFM" "1" "January 25, 2021" "CliFM 0.26.0+" "CliFM Manual"
+'\ t
+.TH "CLIFM" "1" "January 29, 2021" "CliFM 0.27.0+" "CliFM Manual"
+.nh
+.ad l
 
 .SH NAME
-CLIFM - A completely CLI-based file manager inspired by Arch Linux' KISS principle
+CLIFM \- A completely CLI\-based file manager inspired by Arch Linux' KISS principle
 
 .SH SYNOPSIS
-\fIclifm\fR [-aAfFgGhiIlLoOpsuUvx] [-p PATH] [-P PROFILE]
+\fIclifm\fR [\-aAfFgGhiIlLoOsuUvxy] [\-p PATH] [\-P PROFILE] [\-z METHOD]
 
 .SH DESCRIPTION
-CliFM is a completely text-based file manager (no GUI nor curses at all) able to perform all the basic operations you may expect from any other FM. However, its most distinguishing characteristics are:
+CliFM is a completely text\-based file manager (no GUI nor curses at all) able to perform all the basic operations you may expect from any other FM. However, its most distinguishing characteristics are:
 .sp
-  \fBa)\fR The use of short (and even one-character commands) and numbers (ELN's) instead of filenames. Enter 'o 12', for instance, to open a file with your default text editor or to change to the desired directory. With the automatic ELN's expansion feature you can use ELN's with external commands as well. 'diff 12 5', for example, will run 'diff' over the files corresponding to ELN's 12 and 5. Ranges are also accepted, for example: 'rm 1-12' or 'r 1-12'. Since numbers could be a bit tricky when it comes to listed files, you can use the TAB key to expand the filename corresponding to the required ELN.
+  \fBa)\fR The use of short (and even one\-character commands) and numbers (ELN's) instead of filenames. Enter 'o 12', for instance, to open a file with your default text editor or to change to the desired directory. With the automatic ELN's expansion feature you can use ELN's with external commands as well. 'diff 12 5', for example, will run 'diff' over the files corresponding to ELN's 12 and 5. Ranges are also accepted, for example: 'rm 1\-12' or 'r 1\-12'. Since numbers could be a bit tricky when it comes to listed files, you can use the TAB key to expand the filename corresponding to the required ELN.
 .sp
-  \fBb)\fR Automatic files listing: Unlike the shell 'cd' command, CliFM's built-in 'cd' function automatically lists files in the new directory.
+  \fBb)\fR Automatic files listing: Unlike the shell 'cd' command, CliFM's built\-in 'cd' function automatically lists files in the new directory.
 .sp
-  \fBc)\fR Bookmarks: keep a list of your favorite directories, and even files, to get easy access to them. Example: enter 'bm' (or press Alt-b) to open the bookmarks screen and then simply type a number or a shortcut name to access the desired bookmark. 
+  \fBc)\fR Bookmarks: keep a list of your favorite directories, and even files, to get easy access to them. Example: enter 'bm' (or press Alt\-b) to open the bookmarks screen and then simply type a number or a shortcut name to access the desired bookmark. 
 .sp
-  \fBd)\fR The Selection Box allows you to drop files and directories from different parts of your filesystem (even from different instances of CliFM) and then operate on them with just one command. Example: select a few files in one instance of the program (say 's 12; cd /media; s 2 5-6') and then paste them somewhere else using a second instance ('v sel' or 'paste sel').
+  \fBd)\fR The Selection Box allows you to drop files and directories from different parts of your filesystem (even from different instances of CliFM) and then operate on them with just one command. Example: select a few files in one instance of the program (say 's 12; cd /media; s 2 5\-6') and then paste them somewhere else using a second instance ('v sel' or 'paste sel').
 .sp
-  \fBe)\fR The directory history function (back and forth) keeps track of all the directories visited by you in the current session, so that you can go back and forth to any of them by just entering 'b' or 'f' (or just pressing A-j and A-k respectivelly).
+  \fBe)\fR The directory history function (back and forth) keeps track of all the directories visited by you in the current session, so that you can go back and forth to any of them by just entering 'b' or 'f' (or just pressing A\-j and A\-k respectivelly).
 .sp
   \fBf)\fR Keyboard shortcuts make it even easier and faster to navigate and operate on your files. For example, instead of typing 'cd ..' to go back to the parent directory, or 's *' to select all files in the current directory, you can simply press A-u and A-a respectivelly.
 .sp
@@ -33,14 +36,14 @@ List of CliFM features:
   2) Automatic files listing
   3) Command and directory history function
   4) TAB completion for commands, paths, bookmarks, and profiles
-  5) TAB ELN-expansion
+  5) TAB ELN\-expansion
   6) Keyboard shortcuts
-  7) Wildcards auto-expansion
-  8) Braces auto-expansion
-  9) ELN's auto-expansion
-  10) 'sel' keyword auto-expansion
-  11) Ranges auto-expansion
-  12) Bash-like quoting system
+  7) Wildcards auto\-expansion
+  8) Braces auto\-expansion
+  9) ELN's auto\-expansion
+  10) 'sel' keyword auto\-expansion
+  11) Ranges auto\-expansion
+  12) Bash\-like quoting system
   13) Custom aliases and variables
   14) Customizable filetype colors
   15) Customizable prompt
@@ -54,7 +57,7 @@ List of CliFM features:
   23) Archiving and compression support
 
 .SH RATIONALE
-When it comes to software, Unix/GNU-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the Linux built-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There is no two without three".
+When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the Linux built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There is no two without three".
 .sp
 While the Linux console, which strictly speaking could be though of as a FM, does not actually feel as one and lacks many features (like bookmarks, files selection, a trash system, a resource opener and the like), graphical FM's offer most of these features, but only at the expense of system resources (at the very least 20MiB of RAM and most of the time a graphical X session). Heavily inspired by the KISS principle ("Keep Simple, Stupid"), CLiFM was born as an attempt to get the best of both worlds: the speed and lightness of the CLI and the extra features of traditional FM's. It is aimed to be, briefly speaking, a wrapper of the CLI to extend and improve its functionality; CliFM feels, acts, and flies like the CLI, offering at the same time some of the most useful features of traditional FM's.
 .sp
@@ -62,70 +65,70 @@ Personally, since I just dislike GUI and bloated stuff, I really felt the need o
 
 .SH OPTIONS
 .TP
-.B -a, --no-hidden
+.B \-a, \-\-no\-hidden
 do not show hidden files
 .TP
-.B -A, --show-hidden
+.B \-A, \-\-show\-hidden
 show hidden files (default)
 .TP
-.B -f, --no-folders-first
+.B \-f, \-\-no\-folders\-first
 do not list folders first
 .TP
-.B -F, --folders-first
+.B \-F, \-\-folders\-first
 list folders first (default)
 .TP
-.B -g, --pager
+.B \-g, \-\-pager
 enable the pager
 .TP
-.B -G, --no-pager
+.B \-G, \-\-no\-pager
 disable the pager (default)
 .TP
-.B -h, --help
+.B \-h, \-\-help
 show this help and exit
 .TP
-.B -i, --no-case-sensitive
-no case-sensitive files listing (default)
+.B \-i, \-\-no\-case\-sensitive
+no case\-sensitive files listing (default)
 .TP
-.B -I, --case-sensitive
-case-sensitive files listing
+.B \-I, \-\-case\-sensitive
+case\-sensitive files listing
 .TP
-.B -l, --no-long-view
+.B \-l, \-\-no\-long\-view
 disable long view mode (default)
 .TP
-.B -L, --long-view
+.B \-L, \-\-long\-view
 enable long view mode: list files and their properties
 .TP
-.B -l, --no-list-on-the-fly
-\'cd\' works like the built-in shell 'cd' command: change directory but do not list files automatically
+.B \-l, \-\-no\-list\-on\-the\-fly
+\'cd\' works like the built\-in shell 'cd' command: change directory but do not list files automatically
 .TP
-.B -L, --list-on-the-fly
+.B \-L, \-\-list\-on\-the\-fly
 \'cd\' lists files on the fly (default)
 .TP
-.B -p, --path \fRPATH
+.B \-p, \-\-path \fRPATH
 use PATH as CliFM starting path. Default starting path is current working directory
 .TP
-.B -P, --profile \fRPROFILE
+.B \-P, \-\-profile \fRPROFILE
 use (or create) PROFILE as profile. Default profile is 'default'
 .TP
-.B -s, --splash
+.B \-s, \-\-splash
 enable the splash screen
 .TP
-.B -u, --no-unicode
+.B \-u, \-\-no\-unicode
 disable unicode
 .TP
-.B -U, --unicode
-enable unicode to correctly list filenames containing accents, tildes, umlauts, non-latin letters, etc. This option is enabled by default for non-english locales
+.B \-U, \-\-unicode
+enable unicode to correctly list filenames containing accents, tildes, umlauts, non\-latin letters, etc. This option is enabled by default for non\-english locales
 .TP
-.B -v, --version
+.B \-v, \-\-version
 show version details and exit
 .TP
-.B -x, --ext-cmds
+.B \-x, \-\-ext\-cmds
 allow the use of external commands
 .TP
-.B -y, --light-mode
+.B \-y, \-\-light\-mode
 enable the light mode to speed up CliFM
 .TP
-.B -z, --sort \fRMETHOD
+.B \-z, \-\-sort \fRMETHOD
 sort files by METHOD, where METHOD could be: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version.
 .TP
 
@@ -135,8 +138,8 @@ Options precedence order: 1) command line; 2) configuration file; 3) default val
 \fBNOTE:\fR ELN = Entry List Number. Example: in the line "12 openbox" (when listing files), 12 is the ELN corresponding to the file named "openbox". The slash followed by a number (/xx) after directories and symbolic links to directories (the files counter) indicates the amount of files contained by the corresponding directory, excluding current and parent directories ("." and ".." respectivelly).
 .TP
 
-.B /\fRSTRING [-filetype] [DIR]
-this is the quick search function. Just type '/' followed by the string you are looking for (you can use wildcards), and CliFM will list all the matches in the current working directory. To search for files in any other directory, specify the directory name as a further argument. This argument (DIR) could be an absolute path, a relative path, or an ELN. The result of the search can be further filtered by specifying a filetype: -d, -r, -l, -s, -f, -b, and -c (directory, regular file, symlink, socket, FIFO/pipe, block device, and character device respectivelly). For example, '/*x -d Documents/' will list all directories ending with 'x' in the directory named "Documents".
+.B /\fRSTRING [\-filetype] [DIR]
+this is the quick search function. Just type '/' followed by the string you are looking for (you can use wildcards), and CliFM will list all the matches in the current working directory. To search for files in any other directory, specify the directory name as a further argument. This argument (DIR) could be an absolute path, a relative path, or an ELN. The result of the search can be further filtered by specifying a filetype: \-d, \-r, \-l, \-s, \-f, \-b, and \-c (directory, regular file, symlink, socket, FIFO/pipe, block device, and character device respectivelly). For example, '/*x \-d Documents/' will list all directories ending with 'x' in the directory named "Documents".
 .TP
 
 .B bm, bookmarks \fR[a, add PATH] [d, del] [edit] [SHORTCUT, NAME]
@@ -144,17 +147,17 @@ with no argument, open the bookmarks menu. Here you cd into the desired bookmark
 .TP
 
 .B o, open \fRELN/FILE [APPLICATION]
-open either a directory, in which case it works just like the 'cd' command (see below), or a file. For example: 'o 12', 'o filename', 'o /path/to/filename'. By default, the 'open' function will open files with the default application associated to them via the mime built-in function (see the 'mime' command below). However, if you want to open a file with a different application, just add the application name as second argument, e.g. 'o 12 leafpad'. If you want to run the program in the background, simply add the ampersand character: 'o 12 &'.
+open either a directory, in which case it works just like the 'cd' command (see below), or a file. For example: 'o 12', 'o filename', 'o /path/to/filename'. By default, the 'open' function will open files with the default application associated to them via the mime built\-in function (see the 'mime' command below). However, if you want to open a file with a different application, just add the application name as second argument, e.g. 'o 12 leafpad'. If you want to run the program in the background, simply add the ampersand character: 'o 12 &'.
 .TP
 
 .B cd \fR[ELN/DIR]
 when used with no argument, it changes the current directory to the default directory (HOME). Otherwise, 'cd' changes the current directory to the one specified by the first argument. You can use either ELN's or a string to indicate the directory you want. Ex: 'cd 12' or 'cd ~/media'.
 .sp
-Unlike the shell 'cd' command, CliFM's built-in 'cd' function not only changes the current directory, but also lists its content (provided the option "cd lists automatically" is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of 'cd' is much like this shell command: cd DIR && ls -A --color=auto --group-directories-first. Remote file systems are also supported: just enter 'cd ADDRESS [OPTIONS]'. For more information about this syntax see the description of the 'net' command below.
+Unlike the shell 'cd' command, CliFM's built\-in 'cd' function not only changes the current directory, but also lists its content (provided the option "cd lists automatically" is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of 'cd' is much like this shell command: cd DIR && ls \-A \-\-color=auto \-\-group\-directories\-first. Remote file systems are also supported: just enter 'cd ADDRESS [OPTIONS]'. For more information about this syntax see the description of the 'net' command below.
 .TP
 
 .B s, sel \fRELN/FILE ... n
-send one or multiple elements (either files or directories) to the Selection Box. 'Sel' accepts individual elements, range of elements, say 1-6, filenames and paths, just as wildcards. Example: 'sel 1 4-10 file* filename /path/to/filename'.
+send one or multiple elements (either files or directories) to the Selection Box. 'Sel' accepts individual elements, range of elements, say 1\-6, filenames and paths, just as wildcards. Example: 'sel 1 4\-10 file* filename /path/to/filename'.
 .sp
 The Selection Box is accessible to different instances of the program, provided they use the same profile (see the 'profile' command below). By default, indeed, each profile keeps a private Selection Box, being thus not accessible to other profiles. You can nonetheless modify this behaviour via the ShareSelbox option in the configuration file. If the ShareSelbox option is enabled (see the configuration file), selected files are stored in \fI/tmp/clifm/username/.selbox\fR. Otherwise, \fI/tmp/clifm/username/.selbox_profilename\fR is used (this is the default). 
 .TP
@@ -178,13 +181,13 @@ print a list of currently trashed files allowing you to choose one or more of th
 .TP
 
 .B br, bulk \fRELN/FILE ... n
-rename at once all files passed as arguments to the function. It accepts single and multiple filenames, wildcards, ELN ranges, and the 'sel' keyword. Example: 'br myfile 4-10 sel'. Each filename will be copied into a temporary file, which will be opened with the default text editor (via the \fBmime\fR function), letting the user modify it. Once the file has been modified and saved, the modifications are printed on the screeen and the user is asked whether to proceed with the actual bulk renaming or not.
+rename at once all files passed as arguments to the function. It accepts single and multiple filenames, wildcards, ELN ranges, and the 'sel' keyword. Example: 'br myfile 4\-10 sel'. Each filename will be copied into a temporary file, which will be opened with the default text editor (via the \fBmime\fR function), letting the user modify it. Once the file has been modified and saved, the modifications are printed on the screeen and the user is asked whether to proceed with the actual bulk renaming or not.
 .TP
 
 .B ac, ad \fRELN/FILE ... n
-archive/compress and dearchive/decompress one or multiple files and/or directories. The archiver function brings two modes: \fBac\fR, to generate archives or compressed files, and \fBad\fR, to decompress or dearchive files, either just listing, extracting, recompressing, or mounting their content. In this latter case, the mountpoint used automatically is \fI$HOME/.config/clifm/PROFILE/mounts/ARCHIVE_NAME\fR. The function accepts single and multiple filenames, wildcards, ELN ranges, and the 'sel' keyword. For example: 'ac sel', 'ac 4-25 myfile', or 'ad *.tar.gz'.Multiple archive/compression formats are supported, including Zstandard.
+archive/compress and dearchive/decompress one or multiple files and/or directories. The archiver function brings two modes: \fBac\fR, to generate archives or compressed files, and \fBad\fR, to decompress or dearchive files, either just listing, extracting, recompressing, or mounting their content. In this latter case, the mountpoint used automatically is \fI$HOME/.config/clifm/PROFILE/mounts/ARCHIVE_NAME\fR. The function accepts single and multiple filenames, wildcards, ELN ranges, and the 'sel' keyword. For example: 'ac sel', 'ac 4\-25 myfile', or 'ad *.tar.gz'.Multiple archive/compression formats are supported, including Zstandard.
 .sp
-The archive mount function depends on \fBarchivemount\fR, while the remaining functions depend on \fBatool\fR and other third-party utilities for achive formats support, for example, \fBp7zip\fR. For more information consult \fBatool(1)\fR, \fBarchivemount(1)\fR, and \fBzstd(1)\fR.
+The archive mount function depends on \fBarchivemount\fR, while the remaining functions depend on \fBatool\fR and other third\-party utilities for achive formats support, for example, \fBp7zip\fR. For more information consult \fBatool(1)\fR, \fBarchivemount(1)\fR, and \fBzstd(1)\fR.
 .TP
 
 .B b, back \fR[h, hist] [clear] [!ELN]
@@ -220,20 +223,20 @@ with no argument, print the current sorting method, else, set sorting method to 
 .TP
 
 .B n, net \fR[smb, ftp, sftp]://ADDRESS [OPTIONS]
-Access a remote file system, either via SSH, FTP, or SMB protocols. To access the file system of a machine via SSH, use the following URI scheme: sftp://[USER@]HOST:[/REMOTE-DIR] [PORT]. Bracketed elements are optional. If no user is specified, CliFM will attempt to login using the current local username. If no port is specified, the default port (22, if SSH) will be used.
+Access a remote file system, either via SSH, FTP, or SMB protocols. To access the file system of a machine via SSH, use the following URI scheme: sftp://[USER@]HOST:[/REMOTE\-DIR] [PORT]. Bracketed elements are optional. If no user is specified, CliFM will attempt to login using the current local username. If no port is specified, the default port (22, if SSH) will be used.
 .sp
-To access the remote file system via SMB, this scheme should be used instead: smb://[USER@]HOST[/SHARE][/REMOTE-DIR] [OPTIONS]. The URI scheme for FTP connections is this: ftp://HOST[:PORT] [OPTIONS]. Network resources are mounted in '/tmp/clifm/remote_dir', replacing all slashes in remote_dir by underscores. To disconnect from the remote machine, use 'fusermount3 -u' for SSH, 'fusermount -u' for FTP, and 'umount' for SMB, followd by the corresponding mountpoint. Examples:
+To access the remote file system via SMB, this scheme should be used instead: smb://[USER@]HOST[/SHARE][/REMOTE\-DIR] [OPTIONS]. The URI scheme for FTP connections is this: ftp://HOST[:PORT] [OPTIONS]. Network resources are mounted in '/tmp/clifm/remote_dir', replacing all slashes in remote_dir by underscores. To disconnect from the remote machine, use 'fusermount3 \-u' for SSH, 'fusermount \-u' for FTP, and 'umount' for SMB, followd by the corresponding mountpoint. Examples:
 
      net sftp://john@192.168.0.25:Documents/misc port=2222
-     fusermount3 -u /tmp/clifm/remote/john@192.168.0.25:Documents_misc
+     fusermount3 \-u /tmp/clifm/remote/john@192.168.0.25:Documents_misc
 
      net smb://192.168.1.34/share username=laura,password=my_pass
      umount /tmp/clifm/remote/192.168.0.34_share
 
      net ftp://192.168.0.123:2121 user=me:mypass
-     fusermount -u /tmp/clifm/remote/192.168.0.123:2121
+     fusermount \-u /tmp/clifm/remote/192.168.0.123:2121
 .sp
-\fBNOTE\fR: 'fusermount3' is Linux-specific. On FreeBSD 'umount' should be used instead.
+\fBNOTE\fR: 'fusermount3' is Linux\-specific. On FreeBSD 'umount' should be used instead.
 .sp
 The underlying programs used here to mount these remote file systems are: 'sshfs' for SFTP, 'mount.cifs' for SMB, and 'curlftpfs' for FTP. For more information regarding the options supported by each of them, consult the correposponding documentation.
 .TP
@@ -245,7 +248,7 @@ Toggle the light mode on/off. This option, aimed to make files listing faster th
 .B mm, mime \fR[info ELN/FILENAME] [edit]
 This is CliFM's resource opener. The 'info' option prints the MIME information about ELN/FILENAME: its MIME type, its file extension, if any, and the application associated to this MIME type or file extension. The 'edit' option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension, and then add a value for it to the MIME list file using the 'edit' option.
 .sp
-Each value in the MIME list file has this format: 'mime_type=application args;application args; ... n' or '*.c=application args;application args; ... n'. Example: 'plain/text=nano' or '*.c=geany -p;leafpad;nano'. CliFM will check the first matching line, and if at least one of the specified applications exists, this one will be used to open the corresponding associated filed. Else, the next matching line will be checked. If the MIME file is not found, CliFM will try to import MIME definitions from the default locations for the 'mimeapps.list' file as specified by the Freedesktop specification.
+Each value in the MIME list file has this format: 'mime_type=application args;application args; ... n' or '*.c=application args;application args; ... n'. Example: 'plain/text=nano' or '*.c=geany \-p;leafpad;nano'. CliFM will check the first matching line, and if at least one of the specified applications exists, this one will be used to open the corresponding associated filed. Else, the next matching line will be checked. If the MIME file is not found, CliFM will try to import MIME definitions from the default locations for the 'mimeapps.list' file as specified by the Freedesktop specification.
 .TP
 
 .B tips
@@ -257,7 +260,7 @@ open DIR in a new instance of CliFM using the value of TerminalCmd (from the con
 .TP
 
 .B ;\fR[CMD], \fB:\fR[CMD]
-If no CMD, run the default shell (see below the 'shell' command) in the current working directory. If CMD is specified, skip all CLiFM expansions (see the Built-in Expansions section below) and run the input string (CMD) as is via the default system shell.
+If no CMD, run the default shell (see below the 'shell' command) in the current working directory. If CMD is specified, skip all CLiFM expansions (see the Built\-in Expansions section below) and run the input string (CMD) as is via the default system shell.
 .TP
 
 .B mp, mountpoints
@@ -273,7 +276,7 @@ with no arguments, prints the name of the currently used profile. Use the 'ls' o
 .TP
 
 .B opener \fR[default] [APPLICATION]
-with no argument, prints the currently used resource opener (by default, \fBmime\fR, CliFM's built-in opener). Otherwise, set APPLICATION as opener or, if 'default' is passed instead, use the built-in opener. 
+with no argument, prints the currently used resource opener (by default, \fBmime\fR, CliFM's built\-in opener). Otherwise, set APPLICATION as opener or, if 'default' is passed instead, use the built\-in opener. 
 .TP
 
 .B shell \fR[SHELL]
@@ -288,13 +291,13 @@ with no arguments, prints the list of messages in the current session. The 'clea
 with no arguments, it prints the contents of the log file. If 'clear' is passed as argument, all the logs will be deleted. 'on', 'off', and 'status' enable, disable, and check the status of the log function for the current session.
 .TP
 
-.B history \fR[clear] [-n]
-with no arguments, it shows the history list. If 'clear' is passed as argument, it will delete all the entries in the history file. Finally, '-n' tells the history command to list only the last 'n' commands in the history list.
+.B history \fR[clear] [\-n]
+with no arguments, it shows the history list. If 'clear' is passed as argument, it will delete all the entries in the history file. Finally, '\-n' tells the history command to list only the last 'n' commands in the history list.
 .sp
 You can use the exclamation character (!) to perform some history commands:
   !!: Execute the last command.
   !n: Execute the command number 'n' in the history list.
-  !-n: Execute the last-n command in the history list.
+  !\-n: Execute the last\-n command in the history list.
 .TP
 
 .B edit \fR[APPLICATION]
@@ -340,7 +343,7 @@ toggle list folders first on/off.
 .B pg, pager \fR[on, off, status]
 toggle the pager on/off. Useful to list directories with hundreds or thousands of files, the pager will start working, if set to on, whenever the screen is not enough to list all files.
 .sp
-Once in the pager, press the Down arrow key, Space or Enter to move downwards one line, or PageDown to move downwards an entire page. To go upwards, use the shortcuts provided by your terminal emulator, for example, Alt-PageUp or Alt-Up. Press 'c', 'p', or 'q' keys to stop the pager.
+Once in the pager, press the Down arrow key, Space or Enter to move downwards one line, or PageDown to move downwards an entire page. To go upwards, use the shortcuts provided by your terminal emulator, for example, Alt\-PageUp or Alt\-Up. Press 'c', 'p', or 'q' keys to stop the pager.
 .TP
 .B uc, unicode \fR[on, off, status]
 toggle unicode on/off.
@@ -363,41 +366,41 @@ safely quit CliFM.
 
 .SH KEYBOARD SHORTCUTS
 .TP
-\fBA-c:\fR Clear the current command line buffer
+\fBA\-c:\fR Clear the current command line buffer
 .TP
-\fBA-f:\fR Toggle list-folders-first on/off
+\fBA\-f:\fR Toggle list\-folders\-first on/off
 .TP
-\fBC-r:\fR Refresh the screen
+\fBC\-r:\fR Refresh the screen
 .TP
-\fBA-l:\fR Toggle long view mode on/off
+\fBA\-l:\fR Toggle long view mode on/off
 .TP
-\fBA-m:\fR List mountpoints
+\fBA\-m:\fR List mountpoints
 .TP
-\fBA-b:\fR Launch the Bookmarks Manager
+\fBA\-b:\fR Launch the Bookmarks Manager
 .TP
-\fBA-i:\fR Toggle hidden files on/off
+\fBA\-i:\fR Toggle hidden files on/off
 .TP
-\fBA-s:\fR Open the Selection Box
+\fBA\-s:\fR Open the Selection Box
 .TP
-\fBA-a:\fR Select all files in the current working directory
+\fBA\-a:\fR Select all files in the current working directory
 .TP
-\fBA-d:\fR Deselect all selected files
+\fBA\-d:\fR Deselect all selected files
 .TP
-\fBA-r:\fR Change to the root directory
+\fBA\-r:\fR Change to the root directory
 .TP
-\fBA-e:\fR Change to the home directory
+\fBA\-e:\fR Change to the home directory
 .TP
-\fBA-u:\fR Change to the parent directory
+\fBA\-u:\fR Change to the parent directory
 .TP
-\fBA-j:\fR Change to the previous directory in the directory history list
+\fBA\-j:\fR Change to the previous directory in the directory history list
 .TP
-\fBA-k:\fR Change to the next directory in the directory history list
+\fBA\-k:\fR Change to the next directory in the directory history list
 .TP
-\fBA-y:\fR Toggle light mode on/off
+\fBA\-y:\fR Toggle light mode on/off
 .TP
-\fBA-z:\fR Switch to previous sorting method
+\fBA\-z:\fR Switch to previous sorting method
 .TP
-\fBA-x:\fR Switch to next sorting method
+\fBA\-x:\fR Switch to next sorting method
 .TP
 \fBF10:\fR Open the configuration file
 
@@ -428,9 +431,9 @@ Filetype colors are specified using the same format used by dircolors and the LS
  ca = file with capabilites
  no = unknown filetype
 .TP
-Color codes are just traditional ANSI color codes less the escape character and the final 'm'. Thus, for instance, if you want non-empty directories to be bold blue, the complete code is this: di=01;34
+Color codes are just traditional ANSI color codes less the escape character and the final 'm'. Thus, for instance, if you want non\-empty directories to be bold blue, the complete code is this: di=01;34
 .TP
-Though by default CliFM uses only 8 colors, you can use 256 and RGB colors as well. Example: fi=04;38;02;245;76;00 will print regular files underlined and using a bold orange RGB or 24-bit true color. In this case, just make sure to use a terminal supporting RGB colors.
+Though by default CliFM uses only 8 colors, you can use 256 and RGB colors as well. Example: fi=04;38;02;245;76;00 will print regular files underlined and using a bold orange RGB or 24\-bit true color. In this case, just make sure to use a terminal supporting RGB colors.
 .TP
 Filetype colors are defined in the configuration file and can be modified as you wish. ELN's and command line text colors are defined using these same color codes.
 .TP
@@ -459,13 +462,13 @@ CLiFM's prompt is build from the "Prompt" line in the configuration file followi
 .TP
 \\s: The name of the shell (everything after the last slash) currently used by CliFM
 .TP
-\\t: The time, in 24-hour HH:MM:SS format
+\\t: The time, in 24\-hour HH:MM:SS format
 .TP
-\\T: The time, in 12-hour HH:MM:SS format
+\\T: The time, in 12\-hour HH:MM:SS format
 .TP
-\\@: The time, in 12-hour am/pm format
+\\@: The time, in 12\-hour am/pm format
 .TP
-\\A: The time, in 24-hour HH:MM format
+\\A: The time, in 24\-hour HH:MM format
 .TP
 \\w: The full current working directory, with $HOME abbreviated with a tilde
 .TP
@@ -481,9 +484,9 @@ CLiFM's prompt is build from the "Prompt" line in the configuration file followi
 .TP
 \\\\: A backslash
 .TP
-\\[: Begin a sequence of non-printing characters. This is mostly used to add color to the prompt line
+\\[: Begin a sequence of non\-printing characters. This is mostly used to add color to the prompt line
 .TP
-\\]: End a sequence of non-printing characters
+\\]: End a sequence of non\-printing characters
 
 .TP
 By default, for example, CliFM's prompt line is this: "\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\\z\\[\\e[0;34m\\] \\$ \\[\\e[0m\\]", which once decoded should be something like this: 
@@ -497,37 +500,37 @@ with the path printed in cyan and the dollar sign in blue.
 .TP
 A bold green asterisk at the left of the prompt indicates that there are elements in the Selection Box. In the same way, a yellow 'T' means that there are currently files in the trash can. Finally, CliFM makes use of three kind of messages: errors (a red 'E' at the left of the prompt), warnings (a yellow 'W'), and simple notices (a green 'N').
 
-.SH BUILT-IN EXPANSIONS
+.SH BUILT\-IN EXPANSIONS
 .TP
-Besides the default TAB completion for command names and paths, you can also expand ELN's using the TAB key. Example: type 'o 12', press TAB, and it becomes 'o filename ', or, if 12 refers to a directory, 'o dir/'. CliFM uses a Bash-style quoting system, so that this filename: "this is a test@version{1}" is expanded as follows: this\\ is\\ a\\ test\\@version\\{1\\}
+Besides the default TAB completion for command names and paths, you can also expand ELN's using the TAB key. Example: type 'o 12', press TAB, and it becomes 'o filename ', or, if 12 refers to a directory, 'o dir/'. CliFM uses a Bash\-style quoting system, so that this filename: "this is a test@version{1}" is expanded as follows: this\\ is\\ a\\ test\\@version\\{1\\}
 .TP
 CliFM will automatically expand the 'sel' keyword: 'sel' indeed amounts to 'file1 file2 file3 ...' In this way, you can use the 'sel' keyword with any command. If you want to set the executable bit on several files, for instance, simply select the files you want and then run this command: 'chmod +x sel'. Or, if you want to copy or move several files into some directory: 'cp sel 12', or 'mv sel 12' (provided the ELN 12 corresponds to a directory), respectivelly. If the destiny directory is ommited, selected files are copied into the current working directory, that is to say, 'mv sel' amounts to 'mv sel .'. To trash or remove selected files, simply run 'tr sel' or 'rm sel' respectivelly. The same goes for wildcards and braces: 'chmod +x *', for example, will set the excutable bit on all files in the current working directory, while 'chmod +x file{1,2,3}' will do it for file1, file2, and file3 respectivelly.
 .TP
-ELN's and ELN ranges will be also automatically expanded, provided the corresponding ELN's actually exist, that is to say, provided some filename is listed on the screen under those numbers. For example: 'diff 1 118' will only expand '1', but not '118', if there is no ELN 118. In the same way, the range 1-118 will only be expanded provided there are 118 or more elements listed on the screen. If this feature somehow conflicts with the command you want to run, say, 'chmod 644 ...', because the current amount of files is equal or larger than 644 (in which case CliFM will expand that number), then you can simply run the command as external: ';chmod 644...'
+ELN's and ELN ranges will be also automatically expanded, provided the corresponding ELN's actually exist, that is to say, provided some filename is listed on the screen under those numbers. For example: 'diff 1 118' will only expand '1', but not '118', if there is no ELN 118. In the same way, the range 1\-118 will only be expanded provided there are 118 or more elements listed on the screen. If this feature somehow conflicts with the command you want to run, say, 'chmod 644 ...', because the current amount of files is equal or larger than 644 (in which case CliFM will expand that number), then you can simply run the command as external: ';chmod 644...'
 .TP
 TAB completion for bookmarks and profiles is also available. To make use of the bookmarks completion, make sure you specify some name for your bookmarks, since these names are used by the completion function. 
 .TP
-Of course, combinations of all these features is also possbile. Example: 'cp sel file* 2 23-31 .' will copy all selected files, plus all files whose name starts with "file", plus those files corresponding to the ELN's 2 and 23 through 31, into the current working directory.
+Of course, combinations of all these features is also possbile. Example: 'cp sel file* 2 23\-31 .' will copy all selected files, plus all files whose name starts with "file", plus those files corresponding to the ELN's 2 and 23 through 31, into the current working directory.
 
 .SH MISCELLANEOUS NOTES
 .TP
 For each of the internal commands (see the COMMANDS section above) you can use the semicolon to execute them sequentially and/or the double ampersand to execute them conditionally. Example: 'cmd1; cmd2 && cmd3'. 
 .TP
-Though you can use here external commands as well, bear in mind that, whenever at least one internal command is involved in a chained list of commands, CliFM will take care of executing this list (simply because the system shell isn't able to understand any of these commands), so that no shell inter-process function (like pipes), nor any stream redirection or shell expression (like IF blocks or FOR loops) will be available. However, the shell is still used to run single external commands found in the chained list, but in isolation from the remaining commands in this list.
+Though you can use here external commands as well, bear in mind that, whenever at least one internal command is involved in a chained list of commands, CliFM will take care of executing this list (simply because the system shell isn't able to understand any of these commands), so that no shell inter\-process function (like pipes), nor any stream redirection or shell expression (like IF blocks or FOR loops) will be available. However, the shell is still used to run single external commands found in the chained list, but in isolation from the remaining commands in this list.
 .TP
 As a rule of thumb, when using chained commands make sure to always expand ELN's to avoid undesired consequences. If, for instance, you issue this command: 'touch aaa && r 3', you will end up deleting a file you were not intended to delete, simple because after the successfull execution of the first command, the ELN 3 corresponds now to a different file.
 .TP
-CliFM is not limited to its own set of internal commands, like open, sel, trash, etc., but it can run any external command as well, provided external commands are allowed (see the -x option, the 'ext' command, or the configuration file). By beginning the external command by a colon or a semicolon (':', ';') you tell CliFM not to parse the input string, but instead letting this task to the system shell. However, bear in mind that CliFM is not intended to be used as a shell, but as the file manager it is.
+CliFM is not limited to its own set of internal commands, like open, sel, trash, etc., but it can run any external command as well, provided external commands are allowed (see the \-x option, the 'ext' command, or the configuration file). By beginning the external command by a colon or a semicolon (':', ';') you tell CliFM not to parse the input string, but instead letting this task to the system shell. However, bear in mind that CliFM is not intended to be used as a shell, but as the file manager it is.
 .TP
-It depends on the terminal emulator you use to correctly display non-ASCII characters and characters from the extended ASCII charset. If, for example, you create a file named "ñandú" (the spanish word for 'rhea'), it will be correctly displayed by the Linux console, Lxterminal, and Urxvt, but not thus by Xterm or Aterm.
+It depends on the terminal emulator you use to correctly display non\-ASCII characters and characters from the extended ASCII charset. If, for example, you create a file named "ñandú" (the spanish word for 'rhea'), it will be correctly displayed by the Linux console, Lxterminal, and Urxvt, but not thus by Xterm or Aterm.
 .TP
-CliFM will create ~/.Xresources, if it doesn't already exist, for keybindings to work correctly. However, some (and even all) of these keybindings might not work in some terminals, though they do work fine on the console (TTY), xvt-like terminal emulators like Urxvt and Aterm, and xterm-like ones.
+CliFM will create ~/.Xresources, if it doesn't already exist, for keybindings to work correctly. However, some (and even all) of these keybindings might not work in some terminals, though they do work fine on the console (TTY), xvt\-like terminal emulators like Urxvt and Aterm, and xterm\-like ones.
 .TP
 When dealing with filenames containing spaces, you can use both single and double quotes (ex: "this file" or 'this file') plus escape sequences (ex: this\\ file).
 .TP
-By default, CliFM starts in the current working directory. However, you can always specify a different path by passing it as an argument. Ex: clifm -p /home/user/misc. You can also permanently set up the starting path in the CliFM configuration file.
+By default, CliFM starts in the current working directory. However, you can always specify a different path by passing it as an argument. Ex: clifm \-p /home/user/misc. You can also permanently set up the starting path in the CliFM configuration file.
 .TP
-CliFM's default profile is "default". To create alternative profiles use the -P option or the 'pf' command. See above.
+CliFM's default profile is "default". To create alternative profiles use the \-P option or the 'pf' command. See above.
 
 .SH NOTE ON SPEED
 If speed is still an issue, try one of the setups below (listed from slower to faster):
@@ -548,33 +551,58 @@ If speed is still an issue, try one of the setups below (listed from slower to f
 .TP
 \fBh)\fR Light mode with all the four options disabled (ListFoldersFirst, DirIndicator, Classify, and ClassifyExec). The sorting method should also be set to "none" to go full speed.
 
+.SH EXIT STATUS
+CliFM returns the exit status of the last executed command:
+.sp
+\fB0\fR		Successfull execution
+.sp
+\fB1\fR		Error
+
 .SH FILES
 .TP
-\fBMain configuration file:\fR \fI~/.config/clifm/profile_name/clifmrc\fR
-Here you can permanently set up CliFM options, add aliases and some prompt commands (which will be executed immediately before each new prompt line). Just recall that in order to use prompt commands you must allow the use of external commands. See the -x option and the 'ext' command above.
+
+.B CONFIGURATION FILE
+The configuration file is \fI$XDG_CONFIG_HOME/clifm/profile/clifmrc\fR.
+Here you can permanently set up CliFM options, add aliases and some prompt commands (which will be executed immediately before each new prompt line). Just recall that in order to use prompt commands you must allow the use of external commands. See the \-x option and the 'ext' command above.
 .sp
 A description for each option in the configuration file can be found in the configuration file itself.
 .TP
-\fBProfile file:\fR \fI~/.config/clifm/profile_name/clifm_profile\fR
+
+.B PROFILE FILE:
+The profile file is \fI$XDG_CONFIG_HOME/clifm/profile/clifm_profile\fR.
 In this file you can add those commands you want to be executed at startup. You can also permanently set here some custom variables, ex: 'dir="/path/to/folder"'. This variable may be used as a shorcut to that folder, for instance: 'cd $dir'. Custom variables could also be temporarily defined via the command prompt: Ex: user@hostname ~ $ var="This is a test". Temporary variables will be removed at program exit.
 .TP
-\fBMIME list file:\fR \fI~/.config/clifm/profile_name/mimelist.cfm\fR
-A list of filetypes and file extensions and their associated applications used by CliFM built-in resource opener.
+
+.B MIME LIST FILE:
+The mime list file is \fI$XDG_CONFIG_HOME/clifm/profile/mimelist.cfm\fR. It is a list of filetypes and file extensions and their associated applications used by CliFM built\-in resource opener.
 .TP
-\fBBookmarks file:\fR \fI~/.config/clifm/profile_name/bookmarks.cfm\fR
+
+.B BOOKMARKS FILE
+The bookmarks file is \fI$XDG_CONFIG_HOME/clifm/profile/bookmarks.cfm\fR
 Just the list of the user's bookmarks used by the bookmarks function.
 .TP
-\fBHistory file:\fR \fI~/.config/clifm/profile_name/history.cfm\fR
+
+.SH HISTORY FILE
+The history file is \fI~/.config/clifm/profile/history.cfm\fR.
 A list of commands entered by the user and used by the history function.
 .TP
-\fBCommands log file:\fR \fI~/.config/clifm/profile_name/log.cfm\fR
+
+.B COMMANDS LOG FILE
+The commands log file is \fI$XDG_CONFIG_HOME/clifm/profile/log.cfm\fR.
 The file contains a series of fields separated by a colon in the following way: 'date:user:current_dir:command. All commands executed as external will be logged.
 .TP
-\fBMessages log file:\fR \fI~/.config.clifm/profile_name/messages.cfm\fR
-A file containing a list of system messages, either errors, warnings, or simple notices. The messages log format is: [date] message.
+
+.B MESSAGES LOG FILE
+The messages log file is \fI$XDG_CONFIG_HOME/clifm/profile/messages.cfm\fR.
+A file containing a list of system messages, either errors, warnings, or simple notices. The messages log format is: "[date] message".
+.TP
+\fBNOTE\fR: If \fB$XDG_CONFIG_HOME\fR is not set, \fB$HOME/.config/\fR is used instead. 
+
+.SH CONFORMING TO
+CLiFM is C99 compliant, and, if compiled with the _BE_POSIX flag, it is POSIX.1-2008 comformant as well. If not, only two non-POSIX functions are used: \fBstatx(2)\fR (Linux specific), to get files birth time, and \fBstrverscmp(3)\fR (a GNU extension), to list files by version.
 
 .SH BUGS AND FEATURE REQUESTS
-Report at: https://github.com/leo-arch/clifm/issues
+Report at <https://github.com/leo\-arch/clifm/issues>
 
 .SH AUTHOR
 L. M. Abramovich
