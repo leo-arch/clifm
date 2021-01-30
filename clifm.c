@@ -4310,10 +4310,7 @@ int mime_open(char **args)
 	free(file_path);
 	free(app);
 
-	if (ret != EXIT_SUCCESS)
-		return EXIT_FAILURE;
-
-	return EXIT_SUCCESS;
+	return ret;
 }
 
 int
