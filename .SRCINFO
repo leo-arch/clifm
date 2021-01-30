@@ -6,7 +6,6 @@ pkgbase = clifm-git
 	arch = any
 	license = GPL2
 	makedepends = git
-	depends = ncurses
 	depends = libcap
 	depends = file
 	optdepends = sshfs: SFTP support
