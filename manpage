@@ -12,7 +12,7 @@ CLIFM \- A completely CLI\-based file manager inspired by Arch Linux' KISS princ
 .SH DESCRIPTION
 CliFM is a completely text\-based file manager (no GUI nor curses at all) able to perform all the basic operations you may expect from any other FM. However, its most distinguishing characteristics are:
 .sp
-  \fBa)\fR The use of short (and even one\-character commands) and numbers (ELN's) instead of filenames. Enter 'o 12', for instance, to open a file with your default text editor or to change to the desired directory. If the \fBautocd\fR and \fBauto-open\fR fucntions are enabled, which is the defaut, you only need to enter the ELN to open the file or change to directory: instead of 'o 12', just enter '12'.
+  \fBa)\fR The use of short (and even one\-character commands) and numbers (ELN's) instead of filenames. Enter 'o 12', for instance, to open a file with your default text editor or to change to the desired directory. If the \fBautocd\fR and \fBauto-open\fR functions are enabled, which is the defaut, you only need to enter the ELN to open the file or change to directory: instead of 'o 12', just enter '12'.
 .sp
 With the automatic ELN's expansion feature you can use ELN's with external commands as well. 'diff 12 5', for example, will run 'diff' over the files corresponding to ELN's 12 and 5. Ranges are also accepted, for example: 'rm 1\-12' or 'r 1\-12'. Since numbers could be a bit tricky when it comes to listed files, you can use the TAB key to expand the filename corresponding to the required ELN.
 .sp
@@ -28,7 +28,7 @@ With the automatic ELN's expansion feature you can use ELN's with external comma
 .sp
   \fBg)\fR The quick search function makes it really easy to quickly find the files you are looking for: just enter a slash followed by the string or pattern you want (ex: '/*.png'), that's all.
 .sp
-  \fBh)\fR It is blazing fast and incredibly lightweigth. With a memory footprint below 5 MiB and a disk usage of 300 KiB, it can run on really old hardware. It is so simple that it doesn't require an X session nor any graphical environment at all, being able thus to perfectly run on the console (TTY) and even on a headless machine via a SSH or a telnet session. And if this is not enough, you can still use the light mode to make it even faster.
+  \fBh)\fR It is blazing fast and incredibly lightweigth. With a memory footprint below 5 MiB and a disk usage of 350 KiB, it can run on really old hardware. It is so simple that it doesn't require an X session nor any graphical environment at all, being able thus to perfectly run on the console (TTY) and even on a headless machine via a SSH or a telnet session. And if this is not enough, you can still use the light mode to make it even faster.
 .sp
 Because inspired in Arch Linux and its KISS principle, CliFM is fundamentally aimed to be lightweight, fast, and simple. On Arch's notion of simplcity see: \fIhttps://wiki.archlinux.org/index.php/Arch_Linux#Simplicity\fR
 
@@ -139,6 +139,10 @@ Options precedence order: 1) command line; 2) configuration file; 3) default val
 
 .SH COMMANDS
 \fBNOTE:\fR ELN = Entry List Number. Example: in the line "12 openbox" (when listing files), 12 is the ELN corresponding to the file named "openbox". The slash followed by a number (/xx) after directories and symbolic links to directories (the files counter) indicates the amount of files contained by the corresponding directory, excluding current and parent directories ("." and ".." respectivelly).
+.TP
+
+.B FILE/DIR
+if autocd and auto-open are enabled, which is the default value, open FILE or change directory to DIR. In other words, 'FILE' amounts to 'open FILE' or 'o FILE', and 'DIR' to 'cd DIR'. ELN's, of course, are allowed. Example: '12'. Unlike the \fBopen\fR function (see below), passing an opening application is not allowed.
 .TP
 
 .B /\fRSTRING [\-filetype] [DIR]
