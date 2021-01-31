@@ -630,10 +630,10 @@ main(int argc, char **argv)
 
 	/* What about unices like BSD, Android and even MacOS? 
 	* unix || __unix || __unix__
-	* __FreeBSD___, __NetBSD__, __OpenBSD__, __bdsi__, __DragonFly__
+	* __NetBSD__, __OpenBSD__, __bdsi__, __DragonFly__
 	* __APPLE__ && __MACH__
 	* sun || __sun
-	* __ANDROID__ 
+	* __ANDROID__
 	* __CYGWIN__
 	* MSDOS, _MSDOS, __MSDOS__, __DOS__, _WIN16, _WIN32, _WIN64 */
 
@@ -7564,6 +7564,11 @@ readline_kbinds(void)
  * terminator, and st (with some patches, however, they might stop working
  * in st) */
 
+	rl_bind_keyseq("\\x1b[H", readline_kbind_action); /* HOME: 72 */
+	rl_bind_keyseq("\\x1b[1;3A", readline_kbind_action); /* key: 65 */
+	rl_bind_keyseq("\\x1b[1;3B", readline_kbind_action); /* key: 66 */
+	rl_bind_keyseq("\\x1b[1;3C", readline_kbind_action); /* key: 67 */
+	rl_bind_keyseq("\\x1b[1;3D", readline_kbind_action); /* key: 68 */
 	rl_bind_keyseq("\\M-c", readline_kbind_action); /* key: 99 */
 	rl_bind_keyseq("\\M-u", readline_kbind_action); /* key: 117 */
 	rl_bind_keyseq("\\M-j", readline_kbind_action); /* key: 106 */
@@ -7699,6 +7704,8 @@ readline_kbind_action(int count, int key) {
 	/* Prevent Valgrind from complaining about unused variable */
 	if (count) {}
 
+/*	printf("Key: %d\n", key); */
+
 	/* Disable all keybindings while in the bookmarks or mountpoints
 	 * screen */
 	if (kbind_busy)
@@ -7754,8 +7761,9 @@ readline_kbind_action(int count, int key) {
 		keybind_exec_cmd("ds a");
 		break;
 
-	/* A-e: Change CWD to the HOME directory */
-	case 101:
+	/* Change CWD to the HOME directory */
+	case 72: /* HOME */
+	case 101: /* A-e */
 		/* If already in the home dir, do nothing */
 		if (strcmp(path, user_home) == 0)
 			return 0;
@@ -7801,16 +7809,19 @@ readline_kbind_action(int count, int key) {
 
 		break;
 
-	/* A-j: Change CWD to PREVIOUS directoy in history */
-	case 106: 
+	/* Change CWD to PREVIOUS directoy in history */
+	case 68: /* A-Left */
+	case 66: /* A-Down */
+	case 106: 	/* A-j: */
 		/* If already at the beginning of dir hist, do nothing */
 		if (dirhist_cur_index == 0)
 			return 0;
 		keybind_exec_cmd("back");
 		break;
 		
-	/* A-k: Change CWD to NEXT directory in history */
-	case 107:
+	/* Change CWD to NEXT directory in history */
+	case 67: /* A-Right */
+	case 107: /* A-k */
 		/* If already at the end of dir hist, do nothing */
 		if (dirhist_cur_index + 1 == dirhist_total_index)
 			return 0;
@@ -7851,8 +7862,9 @@ readline_kbind_action(int count, int key) {
 		keybind_exec_cmd("sb");
 		break;
 
-	/* A-u: Change CWD to PARENT directory */
-	case 117:
+	/* Change CWD to PARENT directory */
+	case 65: /* A-Up */
+	case 117: /* A-u */
 		/* If already root dir, do nothing */
 		if (strcmp(path, "/") == 0)
 			return 0;
@@ -12004,6 +12016,11 @@ list_dir(void)
 		return EXIT_FAILURE;
 	}
 
+	if (file_info) {
+		free(file_info);
+		file_info = (struct fileinfo *)NULL;
+	}
+
 	if (light_mode)
 		return list_dir_light();
 	
@@ -12084,13 +12101,9 @@ list_dir(void)
 	/* Struct to store information about each file, so that we don't
 	 * need to run stat() and strlen() again later, perhaps hundreds
 	 * of times */
-/*	struct fileinfo *file_info = (struct fileinfo *)xnmalloc(
-					(size_t)total + 1, sizeof(struct fileinfo)); */
 
-	if (file_info)
-		free(file_info);
-
-	file_info = (struct fileinfo *)xnmalloc(
+	if (total > 0)
+		file_info = (struct fileinfo *)xnmalloc(
 					(size_t)total + 1, sizeof(struct fileinfo));
 
 	if (list_folders_first) {
@@ -12737,9 +12750,6 @@ list_dir_light(void)
 		else
 			return EXIT_FAILURE;
 	}
-
-	if (file_info)
-		free(file_info);
 
 	file_info = (struct fileinfo *)xnmalloc(
 					(size_t)total + 1, sizeof(struct fileinfo));
@@ -13402,10 +13412,34 @@ exec_cmd(char **comm)
 		}
 	}
 
-				/* #### AUTOCD & AUTOOPEN #### */
+				/* #############################
+				 * #	 AUTOCD & AUTOOPEN	   #
+				 * ############################# */
 
-	/* Only autocd or auto-open if not absolute path, and if there is
-	 * no second argument or if second argument is "&" */
+	if (autocd || auto_open) {
+		/* Expand tilde */
+		if (*comm[0] == '~') {
+			char *exp_path = tilde_expand(comm[0]);
+			if (exp_path) {
+				comm[0] = (char *)xrealloc(comm[0],	(strlen(exp_path)
+										   + 1) * sizeof(char));
+				strcpy(comm[0], exp_path);
+				free(exp_path);
+			}
+		}
+
+		/* Deescape the string */
+		if (strchr(comm[0], '\\')) {
+			char *deq_str = dequote_str(comm[0], 0);
+			if (deq_str) {
+				strcpy(comm[0], deq_str);
+				free(deq_str);
+			}
+		}
+	}
+
+	/* Only autocd or auto-open here if not absolute path, and if there
+	 * is no second argument or if second argument is "&" */
 	if (*comm[0] != '/' && (autocd || auto_open)
 	&& (!comm[1] || (*comm[1] == '&' && comm[1][1] == '\0'))) {
 
@@ -14260,25 +14294,27 @@ exec_cmd(char **comm)
 	else {
 
 		/* IF NOT A COMMAND, BUT A DIRECTORY... */
-		if (*comm[0] == '/') {
-			struct stat file_attrib;
-			if (lstat(comm[0], &file_attrib) == 0) {
-				if ((file_attrib.st_mode & S_IFMT) == S_IFDIR
-				|| (file_attrib.st_mode & S_IFMT) == S_IFLNK) {
+		struct stat file_attrib;
+		if (stat(comm[0], &file_attrib) == 0) {
+			if ((file_attrib.st_mode & S_IFMT) == S_IFDIR) {
 
-					if (autocd) {
-						exit_code = cd_function(comm[0]);
-						return exit_code;
-					}
-
-					fprintf(stderr, _("%s: '%s': Is a directory\n"), 
-							PROGRAM_NAME, comm[0]);
-					exit_code = EXIT_FAILURE;
-					return EXIT_FAILURE;
+				if (autocd) {
+					exit_code = cd_function(comm[0]);
+					return exit_code;
 				}
 
-				else if (auto_open && (file_attrib.st_mode & S_IFMT)
-				== S_IFREG) {
+				fprintf(stderr, _("%s: '%s': Is a directory\n"), 
+						PROGRAM_NAME, comm[0]);
+				exit_code = EXIT_FAILURE;
+				return EXIT_FAILURE;
+			}
+
+			else if (auto_open && (file_attrib.st_mode & S_IFMT)
+			== S_IFREG) {
+				/* Make sure we have not an executable file */
+				if (!(file_attrib.st_mode
+				& (S_IXUSR|S_IXGRP|S_IXOTH))) {
+
 					char *cmd[] = { "open", comm[0], (comm[1])
 									? comm[1] : NULL, NULL };
 					exit_code = open_function(cmd);
