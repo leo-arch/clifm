@@ -77,7 +77,7 @@ Because file manager, but also half-shell, CLiFM als provides the following feat
 * Resource opener
 * Multiple sorting methods: name, size, atime, btime, ctime, mtime, and version. Also supports reverse sorting.
 * Bulk rename
-* Archives and compression support (including Zstandard)
+* Archives and compression support (including Zstandard and ISO 9660)
 * Auto-cd and auto-open
 
 Finally, all CLiFM options could be handled directly via command line, by passing parameters to the program, or via plain
