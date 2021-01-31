@@ -335,7 +335,7 @@ show the color codes used to list files.
 toggle autocd on/off. If set to on, 'DIR' amounts to 'cd DIR'.
 .TP
 
-.B ao, autoopen [on, off, status]
+.B ao, auto-open [on, off, status]
 toggle autoopen on/off. If set to on, 'FILE' amounts to 'open FILE'.
 .TP
 
