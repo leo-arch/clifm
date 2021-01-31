@@ -545,7 +545,7 @@ const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
 		"exit", "quit", "pager", "trash", "undel", "messages", 
 		"mountpoints", "bookmarks", "log", "untrash", "unicode", 
 		"profile", "shell", "mime", "sort", "tips", "autocd",
-		"autoopen", NULL };
+		"auto-open", NULL };
 
 #define DEFAULT_PROMPT "\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\
 \\z\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
@@ -4827,7 +4827,7 @@ is_internal_c(const char *cmd)
 					"colors", "cc", "fs", "mm", "mime", "x", "n",
 					"net", "lm", "st", "sort", "fc", "tips", "br",
 					"bulk", "opener", "ac", "ad", "acd", "autocd",
-					"ao", "autoopen", NULL };
+					"ao", "auto-open", NULL };
 
 	short found = 0;
 	size_t i;
@@ -13404,10 +13404,10 @@ exec_cmd(char **comm)
 
 				/* #### AUTOCD & AUTOOPEN #### */
 
-	/* Only autocd or autoopen if there is no second argument of if
-	 * second argument is "&" */
-	if ((autocd || auto_open) && (!comm[1] || (*comm[1] == '&')
-	&& comm[1][1] == '\0')) {
+	/* Only autocd or auto-open if not absolute path, and if there is
+	 * no second argument or if second argument is "&" */
+	if (*comm[0] != '/' && (autocd || auto_open)
+	&& (!comm[1] || (*comm[1] == '&' && comm[1][1] == '\0'))) {
 
 		char *tmp = comm[0];
 		size_t i, tmp_len = strlen(tmp);
@@ -14176,32 +14176,32 @@ exec_cmd(char **comm)
 
 					/* #### AUTOOPEN #### */
 	else if (strcmp(comm[0], "ao") == 0
-	|| strcmp(comm[0], "autoopen") == 0) {
+	|| strcmp(comm[0], "auto-open") == 0) {
 
 		if (!comm[1]) {
-			fputs("Usage: ao, autoopen [on, off, status]\n", stderr);
+			fputs("Usage: ao, auto-open [on, off, status]\n", stderr);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
 
 		if (strcmp(comm[1], "on") == 0) {
 			auto_open = 1;
-			printf("%s: autoopen is enabled\n", PROGRAM_NAME);
+			printf("%s: auto-open is enabled\n", PROGRAM_NAME);
 		}
 		else if (strcmp(comm[1], "off") == 0) {
 			auto_open = 0;
-			printf("%s: autoopen is disabled\n", PROGRAM_NAME);
+			printf("%s: auto-open is disabled\n", PROGRAM_NAME);
 		}
 		else if (strcmp(comm[1], "status") == 0) {
 			if (auto_open)
-				printf("%s: autoopen is enabled\n", PROGRAM_NAME);
+				printf("%s: auto-open is enabled\n", PROGRAM_NAME);
 			else
-				printf("%s: autoopen is disabled\n", PROGRAM_NAME);
+				printf("%s: auto-open is disabled\n", PROGRAM_NAME);
 		}
 		else if (strcmp(comm[1], "--help") == 0)
-			puts("Usage: ao, autoopen [on, off, status]");
+			puts("Usage: ao, auto-open [on, off, status]");
 		else {
-			fputs("Usage: ao, autoopen [on, off, status]\n", stderr);
+			fputs("Usage: ao, auto-open [on, off, status]\n", stderr);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
@@ -14263,7 +14263,8 @@ exec_cmd(char **comm)
 		if (*comm[0] == '/') {
 			struct stat file_attrib;
 			if (lstat(comm[0], &file_attrib) == 0) {
-				if ((file_attrib.st_mode & S_IFMT) == S_IFDIR ) {
+				if ((file_attrib.st_mode & S_IFMT) == S_IFDIR
+				|| (file_attrib.st_mode & S_IFMT) == S_IFLNK) {
 
 					if (autocd) {
 						exit_code = cd_function(comm[0]);
@@ -14274,6 +14275,14 @@ exec_cmd(char **comm)
 							PROGRAM_NAME, comm[0]);
 					exit_code = EXIT_FAILURE;
 					return EXIT_FAILURE;
+				}
+
+				else if (auto_open && (file_attrib.st_mode & S_IFMT)
+				== S_IFREG) {
+					char *cmd[] = { "open", comm[0], (comm[1])
+									? comm[1] : NULL, NULL };
+					exit_code = open_function(cmd);
+					return exit_code;
 				}
 			}
 		}
@@ -15156,7 +15165,7 @@ search_function(char **comm)
 		 *search_path = (char *)NULL;
 	mode_t file_type = 0;
 	struct stat file_attrib;
-	
+
 	/* If there are two arguments, the one starting with '-' is the
 	 * filetype and the other is the path */
 	if (comm[1] && comm[2]) {
@@ -17828,6 +17837,7 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
 		PROGRAM_NAME);
 
 	puts(_("\nBUILT-IN COMMANDS:\n\n\
+ ELN/FILE/DIR (auto-open and autocd)\n\
  /* [DIR]\n\
  bm, bookmarks [a, add PATH] [d, del] [edit] [SHORTCUT or NAME]\n\
  o, open [ELN/FILE] [APPLICATION]\n\
@@ -17864,7 +17874,7 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
  rf, refresh\n\
  cc, colors\n\
  acd, autocd [on, off, status]\n\
- ao, autoopen [on, off, status]\n\
+ ao, auto-open [on, off, status]\n\
  hf, hidden [on, off, status]\n\
  ff, folders first [on, off, status]\n\
  fc, filescounter [on, off, status]\n\
