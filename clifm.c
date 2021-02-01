@@ -6250,34 +6250,38 @@ open_function(char **cmd)
 	if (!cmd)
 		return EXIT_FAILURE;
 
-	char *deq_path = dequote_str(cmd[1], 0);
+	if (strchr(cmd[1], '\\')) {
+		char *deq_path = (char *)NULL;
+		deq_path = dequote_str(cmd[1], 0);
 
-	if (!deq_path) {
-		fprintf(stderr, _("%s: '%s': Error dequoting filename\n"), 
-				PROGRAM_NAME, cmd[1]);
-		return EXIT_FAILURE;
+		if (!deq_path) {
+			fprintf(stderr, _("%s: '%s': Error dequoting filename\n"), 
+					PROGRAM_NAME, cmd[1]);
+			return EXIT_FAILURE;
+		}
+
+		strcpy(cmd[1], deq_path);
+		free(deq_path);
 	}
 	
 	/* Check file existence */
 	struct stat file_attrib;
 
-	if (lstat(deq_path, &file_attrib) == -1) {
-		fprintf(stderr, "%s: open: '%s': %s\n", PROGRAM_NAME, deq_path, 
+	if (stat(cmd[1], &file_attrib) == -1) {
+		fprintf(stderr, "%s: open: '%s': %s\n", PROGRAM_NAME, cmd[1], 
 				strerror(errno));
-		free(deq_path);
 		return EXIT_FAILURE;
 	}
 	
 	/* Check file type: only directories, symlinks, and regular files
 	 * will be opened */
 
-	char *linkname = (char *)NULL, file_tmp[PATH_MAX] = "",
-		  is_link = 0, no_open_file = 1, file_type[128] = "";
+	char file_tmp[PATH_MAX] = "", no_open_file = 1, file_type[128] = "";
 		 /* Reserve a good amount of bytes for filetype: it cannot be
 		  * known beforehand how many bytes the TRANSLATED string will
 		  * need */
 
-	switch (file_attrib.st_mode & S_IFMT) {
+	switch((file_attrib.st_mode & S_IFMT)) {
 	case S_IFBLK:
 		/* Store filetype to compose and print the error message, if 
 		 * necessary */
@@ -6297,57 +6301,8 @@ open_function(char **cmd)
 		break;
 
 	case S_IFDIR:
-		free(deq_path);
 		return (cd_function(cmd[1]));
-
-	/* If a symlink, find out whether it is a symlink to dir or to
-	 * file */
-	case S_IFLNK:
-		linkname = realpath(deq_path, NULL);
-		if (!linkname) {
-			if (errno == ENOENT)
-				fprintf(stderr, _("%s: open: '%s': Broken link\n"), 
-							PROGRAM_NAME, deq_path);
-			else
-				fprintf(stderr, "%s: open: '%s': %s\n", PROGRAM_NAME,
-						deq_path, strerror(errno));
-
-			free(deq_path);
-			return EXIT_FAILURE;
-		}
-		stat(linkname, &file_attrib);
-		switch (file_attrib.st_mode & S_IFMT) {
-		/* Realpath() will never return a symlink, but an absolute 
-		 * path, so that there is no need to check for symlinks */
-		case S_IFBLK:
-			strcpy(file_type, _("block device"));
-			break;
-		case S_IFCHR:
-			strcpy(file_type, _("character device"));
-			break;
-		case S_IFSOCK:
-			strcpy(file_type, _("socket"));
-			break;
-		case S_IFIFO:
-			strcpy(file_type, _("FIFO/pipe"));
-			break;
-		case S_IFDIR:
-			free(deq_path);
-			int ret = cd_function(linkname);
-			free(linkname);
-			return ret;
-		case S_IFREG:
-		/* Set the no_open_file flag to false, since regular files)
-		 * will be opened */
-			no_open_file = 0;
-			strncpy(file_tmp, linkname, PATH_MAX);
-			break;
-		default:
-			strcpy(file_type, _("unknown file type"));
-				break;
-		}
-		break;
-
+	
 	case S_IFREG:
 		no_open_file = 0;
 		break;
@@ -6361,32 +6316,17 @@ open_function(char **cmd)
 	 * or regular file), print the corresponding error message and
 	 * exit */
 	if (no_open_file) {
-		if (linkname) {
-			fprintf(stderr, _("%s: %s -> '%s' (%s): Cannot open file. "
-							  "Try 'APPLICATION FILENAME'.\n"),
-							  PROGRAM_NAME, deq_path, linkname,
-							  file_type);
-			free(linkname);
-			linkname = (char *)NULL;
-		}
-		else
-			fprintf(stderr, _("%s: '%s' (%s): Cannot open file. Try "
-					"'APPLICATION FILENAME'.\n"), PROGRAM_NAME,
-					deq_path, file_type);
-		free(deq_path);
+		fprintf(stderr, _("%s: '%s' (%s): Cannot open file. Try "
+				"'APPLICATION FILENAME'.\n"), PROGRAM_NAME,
+				cmd[1], file_type);
 		return EXIT_FAILURE;
 	}
 	
-	if (linkname) {
-		free(linkname);
-		linkname = (char *)NULL;
-	}
-
 	/* At this point we know the file to be openend is either a regular
 	 * file or a symlink to a regular file. So, just open the file */
 
 	if (!cmd[2] || strcmp(cmd[2], "&") == 0) {
-		free(deq_path);
+
 		if (!(flags & FILE_CMD_OK)) {
 			fprintf(stderr, _("%s: 'file' command not found. Specify an "
 							  "application to open the file\nUsage: "
@@ -6394,8 +6334,10 @@ open_function(char **cmd)
 							  PROGRAM_NAME);
 			return EXIT_FAILURE;
 		}
+
 		else {
 			int ret = mime_open(cmd);
+
 			/* The return value of mime_open could be zero
 			 * (EXIT_SUCCESS), if success, one (EXIT_FAILURE) if error
 			 * (in which case the following error message should be
@@ -6408,18 +6350,17 @@ open_function(char **cmd)
 					  stderr);
 				return EXIT_FAILURE;
 			}
+
 			return EXIT_SUCCESS;
 		}
 	}
 
 	/* If some application was specified to open the file */
-	char *tmp_cmd[] = { cmd[2], (is_link) ? file_tmp : deq_path, NULL };
+	char *tmp_cmd[] = { cmd[2], cmd[1], NULL };
 
 	int ret = launch_execve(tmp_cmd, (cmd[args_n] 
 							&& strcmp(cmd[args_n], "&") == 0)
 							? BACKGROUND : FOREGROUND);
-
-	free(deq_path);
 
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
