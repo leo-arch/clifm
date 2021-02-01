@@ -1035,7 +1035,7 @@ create_iso(char *in_file, char *out_file)
 										   sizeof(char));
 		sprintf(of_option, "of=%s", out_file);
 
-		char *cmd[] = { "dd", if_option, of_option, "bs=64k",
+		char *cmd[] = { "sudo", "dd", if_option, of_option, "bs=64k",
  						"conv=noerror,sync", "status=progress",
  						NULL };
 
@@ -1060,8 +1060,6 @@ int
 handle_iso(char *file)
 {
 	int exit_status = EXIT_SUCCESS;
-
-/*	check_iso(file) */
 
 	/* Use 7z to
 	 * list (l)
@@ -1789,12 +1787,19 @@ archiver(char **args, char mode)
 			 * #      2 - DECOMPRESSION		    #
 			 * ##################################*/
 
-	/* ISO files */
+				/* ##########################
+				 * #		ISO 9660		#
+				 * ########################## */
+
 	char *ret = strrchr(args[1], '.');
 	if ((ret && strcmp(ret, ".iso") == 0)
 	|| check_iso(args[1]) == 0) {
 		return handle_iso(args[1]);
 	}
+
+				/* ##########################
+				 * #		ZSTANDARD		#
+				 * ########################## */
 
 	/* Check if we have at least one Zstandard file */
 
@@ -1811,10 +1816,6 @@ archiver(char **args, char mode)
 			}
 		}
 	}
-
-				/* ##########################
-				 * #		ZSTANDARD		#
-				 * ########################## */
 
 	if (zst_index != -1) {
 
@@ -1879,7 +1880,7 @@ archiver(char **args, char mode)
 
 
 				/* ##########################
-				 * #	NO ZSTANDARD		#
+				 * #		  OTHERS		#
 				 * ########################## */
 
 	/* 1) Get operation to be performed */
