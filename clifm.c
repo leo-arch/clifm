@@ -6301,9 +6301,16 @@ open_function(char **cmd)
 		break;
 
 	case S_IFDIR:
-		return (cd_function(cmd[1]));
+		return cd_function(cmd[1]);
 	
 	case S_IFREG:
+
+		/* If an archive/compressed file, call archiver() */
+		if (is_compressed(cmd[1]) == 0 || check_iso(cmd[1]) == 0) {
+			char *tmp_cmd[] = { "ad", cmd[1], NULL };
+			return archiver(tmp_cmd, 'd');
+		}
+
 		no_open_file = 0;
 		break;
 	
