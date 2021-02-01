@@ -7,14 +7,6 @@
 [![clifm-git](https://img.shields.io/aur/version/clifm-git?color=1793d1&label=clifm-git&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/clifm/)
 [![License](https://img.shields.io/github/license/leo-arch/clifm?color=333333&style=for-the-badge)](https://github.com/leo-arch/clifm/blob/master/LICENSE)
 
-## Version notes
-
-0.18.0. This is the first POSIX-2008 compliant and FreeBSD compatible version.
-
-Version 0.17.2 is the first one to work on ARM machines.
-
-Since version 0.16.0 a lot (really, a lot) of bug fixes and some new features were added: a trash system (freedesktop compliant), keyboard shorcuts (very handy), a little messages system to keep track of important messages and errors, "sel" keyword and ranges auto-expansion, ELN expansion with the TAB key, including a Bash-like quoting system (absolutely great), colors customization, and commands sequential and conditional execution (very useful). Consult the manpage for more information). I also added support for translations (using `gettext`).
-
 ## Rationale
 
 Why in this world do we need another file manager? In the first place, just because I can do it, write it, and learn (a lot) in the process, just because this is a free world, and very specially, a free community; and, needless to say, alternatives are at the heart of freedom. Secondly, because I'm sure I'm not the only person in this world looking for a non-bloated, KISS file manager: it just does whatever needs to be done using as little resources as possible. No GUI, no curses, but just a command line file manager: 5MiB of RAM and 250KiB of disk space is all you need. Finally, because it is certainly a file manager, but also a shell extension. Almost everything you do on your shell can be done in this file manager as well: search for files, copy, rename, and trash some of them, but, at the same time, update/upgrade your system, add some cronjob, stop a service, and run nano (or Vi if you like).
@@ -132,7 +124,7 @@ To uninstall `clifm` issue this command wherever the Makefile is located:
 
 	$ gcc -O3 -march=native -fstack-protector-strong -s -o clifm clifm.c -lcap -lreadline -lacl
 
-To enable POSIX compliance, pass this option to the compiler: `-D_BE_POSIX.` The only feature disabled in this way is files birth time, only available on Linux via statx(), which is Linux-specific and thereby not POSIX compliant.
+To enable POSIX compliance, pass this option to the compiler: `-D_BE_POSIX.` The only two features disabled in this way is a) files birth time, only available on Linux via **statx(2)**, which is Linux-specific, and **strverscmp(3)**, a GNU extension used to sort files by version.
 
 ##### On FreeBSD:
 
@@ -152,6 +144,10 @@ Do not forget to install the manpage as well (the full help is in here):
 	$ sudo gzip /usr/share/man/man1/clifm.1
 
 Then you can access the manpage as always: `man clifm`
+
+## Support
+
+ClifM is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag). It works on Linux and FreeBSD, on i686, x86_64, and ARM architechtures.
 
 ## First steps
 
