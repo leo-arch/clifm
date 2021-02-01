@@ -2,7 +2,7 @@
 
 pkgname=clifm-git
 _pkgname=clifm
-pkgver=0.27.2
+pkgver=0.27.3
 pkgrel=1
 pkgdesc="The KISS file manager: cli-based, ultra-lightweight, and lightning fast (development version)"
 arch=(any)
@@ -16,6 +16,8 @@ optdepends=(
 	'curlftpfs: FTPFS support'
 	'archivemount: Archives mount'
 	'atool: Archives/compression support'
+	'p7zip: ISO 9660 support'
+	'cdrtools: ISO 9660 support'
 	)
 source=("git+${url}.git")
 sha256sums=('SKIP')
