@@ -1442,7 +1442,12 @@ int
 is_compressed(char *file, int check_iso)
 /* Run the 'file' command on FILE and look for "archive" and
  * "compressed" strings in its output. Returns zero if compressed,
- * one if not, and -1 in case of error */
+ * one if not, and -1 in case of error.
+ * check_iso is used to determine if ISO files should be checked as
+ * well: this is the case when called from open_function() or
+ * mime_open(), since both need to check compressed and ISOs as
+ * well (and there is no need to run two functions (is_compressed and
+ * check_iso), when we can run just one) */
 {
 	if (!file || !*file) {
 		fputs(_("Error opening temporary file\n"), stderr);
@@ -1794,6 +1799,27 @@ archiver(char **args, char mode)
 			 * #      2 - DECOMPRESSION		    #
 			 * ##################################*/
 
+	/* Exit if at least one non-compressed file is found */
+	for (i = 1; args[i]; i++) {
+		char *deq = (char *)NULL;
+
+		if (strchr(args[i], '\\'))
+			deq = dequote_str(args[i], 0);
+
+		if (is_compressed((deq) ? deq : args[i], 1) != 0) {
+			fprintf(stderr, _("archiver: '%s': Not an "
+					"archive/compressed file\n"), args[i]);
+			if (deq)
+				free(deq);
+
+			return EXIT_FAILURE;
+		}
+
+		if (deq)
+			free(deq);
+	}
+
+
 				/* ##########################
 				 * #		ISO 9660		#
 				 * ########################## */
@@ -1890,7 +1916,9 @@ archiver(char **args, char mode)
 				 * #		  OTHERS		#
 				 * ########################## */
 
-	/* 1) Get operation to be performed */
+	/* 1) Get operation to be performed
+	 * ################################ */
+
 	printf(_("%s[e]%sxtract %s[E]%sxtract-to-dir %s[l]%sist "
 		  "%s[m]%sount %s[r]%sepack %s[q]%suit\n"), bold, NC, bold,
 		  NC, bold, NC, bold, NC, bold, NC, bold, NC);
@@ -1934,48 +1962,21 @@ archiver(char **args, char mode)
 			break;
 	}
 
-	/* 2) Prepare files based on operation */
+	/* 2) Prepare files based on operation
+	 * #################################### */
+
 	char *dec_files = (char *)NULL;
 
 	switch(sel_op) {
 		case 'e':
 		case 'r': {
 
-			/* Store all filenames in one single variable */
+			/* Store all filenames into one single variable */
 			size_t len = 1;
 			dec_files = (char *)xnmalloc(len, sizeof(char));
 			*dec_files = 0x00;
 
 			for (i = 1; args[i]; i++) {
-
-				/* Deescape string, if necessary */
-				char *deq_str = (char *)NULL;
-				char *tmp = strchr(args[i], '\\');
-
-				if (tmp) {
-					deq_str = dequote_str(args[i], 0);
-					tmp = (char *)NULL;
-				}
-				
-				/* Do not add a file to the list of files if not
-				 * compressed */
-				int ret = is_compressed((deq_str) ? deq_str
-										: args[i], 0);
-
-				if (deq_str)
-					free(deq_str);
-
-				if (ret == -1) {
-				/* Error message is printed by is_compressed() itself */
-					free(dec_files);
-					return EXIT_FAILURE;
-				}
-
-				if (ret == 1) {
-					fprintf(stderr, _("archiver: '%s': Not an "
-							"archive/compressed file\n"), args[i]);
-					continue;
-				}
 
 				len += strlen(args[i]) + 1;
 				dec_files = (char *)xrealloc(dec_files, (len + 1)
@@ -1990,7 +1991,8 @@ archiver(char **args, char mode)
 		case 'l':
 		case 'm': {
 
-			/* Dequote filenames, if neccessary */
+			/* These operation won't be executed via the system shell,
+			 * so that we need to deescape files if necessary */
 			for (i = 1; args[i]; i++) {
 
 				 if (strchr(args[i], '\\')) {
@@ -2011,7 +2013,8 @@ archiver(char **args, char mode)
 		break;
 	}
 
-	/* 3) Construct the corresponding commands */
+	/* 3) Construct and run the corresponding commands
+	 * ############################################### */
 
 	switch(sel_op) {
 
@@ -2036,19 +2039,6 @@ archiver(char **args, char mode)
 
 		case 'E':
 			for (i = 1; args[i]; i++) {
-
-				/* Do not attempt to extract a file that is not
-				 * an archive */
-				int ret = is_compressed(args[i], 0);
-
-				if (ret == -1)
-					return EXIT_FAILURE;
-
-				if (ret == 1) {
-					fprintf(stderr, _("archiver: '%s': Not an "
-							"archive/compressed file\n"), args[i]);
-					continue;
-				}
 
 				/* Ask for extraction path */
 				printf(_("%sFile%s: %s\n"), bold, NC, args[i]);
@@ -2099,19 +2089,6 @@ archiver(char **args, char mode)
 
 		case 'm':
 			for (i = 1; args[i]; i++) {
-
-				/* Do not attempt to mount a file that is not
-				 * an archive/compressed file */
-				int ret = is_compressed(args[i], 0);
-
-				if (ret == -1)
-					return EXIT_FAILURE;
-
-				if (ret == 1) {
-					fprintf(stderr, _("archiver: '%s': Not an "
-							"archive/compressed file\n"), args[i]);
-					continue;
-				}
 
 				/* Create mountpoint */
 				char *mountpoint = (char *)NULL;
