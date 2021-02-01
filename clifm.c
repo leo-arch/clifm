@@ -396,7 +396,7 @@ int mtime_sort(const struct dirent **a, const struct dirent **b);
 int bulk_rename(char **args);
 int archiver(char **args, char mode);
 int zstandard(char *in_file, char *out_file, char mode, char op);
-int is_compressed(char *file);
+int is_compressed(char *file, int check_iso);
 int check_iso(char *file);
 int handle_iso(char *file);
 int create_iso(char *file, char *out_file);
@@ -1439,7 +1439,7 @@ print_tips(int all)
 }
 
 int
-is_compressed(char *file)
+is_compressed(char *file, int check_iso)
 /* Run the 'file' command on FILE and look for "archive" and
  * "compressed" strings in its output. Returns zero if compressed,
  * one if not, and -1 in case of error */
@@ -1520,9 +1520,16 @@ is_compressed(char *file)
 				ret = strstr(line, "compressed");
 				if (ret)
 					compressed = 1;
+				else if (check_iso) {
+					ret = strstr(line, "ISO 9660");
+					if (ret)
+						compressed = 1;
+				}
 			}
+
 			fclose(file_fp);
 		}
+
 		remove(ARCHIVER_TMP_FILE);
 	}
 
@@ -1952,7 +1959,8 @@ archiver(char **args, char mode)
 				
 				/* Do not add a file to the list of files if not
 				 * compressed */
-				int ret = is_compressed((deq_str) ? deq_str : args[i]);
+				int ret = is_compressed((deq_str) ? deq_str
+										: args[i], 0);
 
 				if (deq_str)
 					free(deq_str);
@@ -2031,7 +2039,7 @@ archiver(char **args, char mode)
 
 				/* Do not attempt to extract a file that is not
 				 * an archive */
-				int ret = is_compressed(args[i]);
+				int ret = is_compressed(args[i], 0);
 
 				if (ret == -1)
 					return EXIT_FAILURE;
@@ -2094,7 +2102,7 @@ archiver(char **args, char mode)
 
 				/* Do not attempt to mount a file that is not
 				 * an archive/compressed file */
-				int ret = is_compressed(args[i]);
+				int ret = is_compressed(args[i], 0);
 
 				if (ret == -1)
 					return EXIT_FAILURE;
@@ -4646,16 +4654,37 @@ int mime_open(char **args)
 
 	/* Get default application for MIME or extension */
 	char *app = get_app(mime, ext);
+
 	if (!app) {
+
 		if (info)
 			fputs(_("Associated application: None\n"), stderr);			
-		else
-			fprintf(stderr, _("%s: No associated application found\n"), 
-					PROGRAM_NAME);
+
+		else {
+
+			/* If an archive/compressed file, run archiver() */
+			if (is_compressed(file_path, 1) == 0) {
+
+				char *tmp_cmd[] = { "ad", file_path, NULL };
+				int exit_status = archiver(tmp_cmd, 'd');
+				free(file_path);
+				free(mime);
+				if (ext)
+					free(ext);
+				return exit_status;
+			}
+
+			else
+				fprintf(stderr, _("%s: No associated application found\n"), 
+						PROGRAM_NAME);
+		}
+
 		free(file_path);
 		free(mime);
+
 		if (ext)
 			free(ext);
+
 		return EXIT_FAILURE;
 	}
 	
@@ -6306,7 +6335,7 @@ open_function(char **cmd)
 	case S_IFREG:
 
 		/* If an archive/compressed file, call archiver() */
-		if (is_compressed(cmd[1]) == 0 || check_iso(cmd[1]) == 0) {
+		if (is_compressed(cmd[1], 1) == 0) {
 			char *tmp_cmd[] = { "ad", cmd[1], NULL };
 			return archiver(tmp_cmd, 'd');
 		}
