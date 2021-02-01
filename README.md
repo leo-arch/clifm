@@ -147,7 +147,7 @@ Then you can access the manpage as always: `man clifm`
 
 ## Support
 
-ClifM is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag). It works on Linux and FreeBSD, on i686, x86_64, and ARM architechtures.
+ClifM is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag). It works on Linux and FreeBSD, on i686, x86_64, and ARM architectures.
 
 ## First steps
 
