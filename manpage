@@ -12,17 +12,17 @@ CLIFM \- A completely CLI\-based file manager inspired by Arch Linux' KISS princ
 .SH DESCRIPTION
 CliFM is a completely text\-based file manager (no GUI nor curses at all) able to perform all the basic operations you may expect from any other FM. However, its most distinguishing characteristics are:
 .sp
-  \fBa)\fR The use of short (and even one\-character commands) and numbers (ELN's) instead of filenames. Enter 'o 12', for instance, to open a file with your default text editor or to change to the desired directory. If the \fBautocd\fR and \fBauto-open\fR functions are enabled, which is the defaut, you only need to enter the ELN to open the file or change to directory: instead of 'o 12', just enter '12'.
+  \fBa)\fR The use of short (and even one\-character commands) and numbers (ELN's) instead of filenames. Enter 'o 12', for instance, to open a file with your default text editor or to change to the desired directory. If the \fIautocd\fR and \fIauto-open\fR functions (see below \fIac\fR and \fIad\fR commands) are enabled, which is the defaut, you only need to enter the ELN to open the file or change to directory: instead of 'o 12', just enter '12'.
 .sp
 With the automatic ELN's expansion feature you can use ELN's with external commands as well. 'diff 12 5', for example, will run 'diff' over the files corresponding to ELN's 12 and 5. Ranges are also accepted, for example: 'rm 1\-12' or 'r 1\-12'. Since numbers could be a bit tricky when it comes to listed files, you can use the TAB key to expand the filename corresponding to the required ELN.
 .sp
-  \fBb)\fR Automatic files listing: Unlike the shell 'cd' command, CliFM's built\-in 'cd' function automatically lists files in the new directory.
+  \fBb)\fR Automatic files listing: Unlike the shell 'cd' command, CliFM's built\-in \fIcd\fR function automatically lists files in the new directory.
 .sp
   \fBc)\fR Bookmarks: keep a list of your favorite directories, and even files, to get easy access to them. Example: enter 'bm' (or press Alt\-b) to open the bookmarks screen and then simply type a number or a shortcut name to access the desired bookmark. 
 .sp
   \fBd)\fR The Selection Box allows you to drop files and directories from different parts of your filesystem (even from different instances of CliFM) and then operate on them with just one command. Example: select a few files in one instance of the program (say 's 12; cd /media; s 2 5\-6') and then paste them somewhere else using a second instance ('v sel' or 'paste sel').
 .sp
-  \fBe)\fR The directory history function (back and forth) keeps track of all the directories visited by you in the current session, so that you can go back and forth to any of them by just entering 'b' or 'f' (or just pressing A\-j and A\-k respectivelly).
+  \fBe)\fR The directory history function (\fIback\fR and \fIforth\fR) keeps track of all the directories visited by you in the current session, so that you can go back and forth to any of them by just entering 'b' or 'f' (or just pressing 'A\-j' and 'A\-k' respectivelly).
 .sp
   \fBf)\fR Keyboard shortcuts make it even easier and faster to navigate and operate on your files. For example, instead of typing 'cd ..' to go back to the parent directory, or 's *' to select all files in the current directory, you can simply press A-u and A-a respectivelly.
 .sp
@@ -142,31 +142,35 @@ Options precedence order: 1) command line; 2) configuration file; 3) default val
 .TP
 
 .B FILE/DIR
-if autocd and auto-open are enabled, which is the default value, open FILE or change directory to DIR. In other words, 'FILE' amounts to 'open FILE' or 'o FILE', and 'DIR' to 'cd DIR'. ELN's, of course, are allowed. Example: '12'. Unlike the \fBopen\fR function (see below), passing an opening application is not allowed.
-.TP
-
-.B /\fRSTRING [\-filetype] [DIR]
-this is the quick search function. Just type '/' followed by the string you are looking for (you can use wildcards), and CliFM will list all the matches in the current working directory. To search for files in any other directory, specify the directory name as a further argument. This argument (DIR) could be an absolute path, a relative path, or an ELN. The result of the search can be further filtered by specifying a filetype: \-d, \-r, \-l, \-s, \-f, \-b, and \-c (directory, regular file, symlink, socket, FIFO/pipe, block device, and character device respectivelly). For example, '/*x \-d Documents/' will list all directories ending with 'x' in the directory named "Documents".
-.TP
-
-.B bm, bookmarks \fR[a, add PATH] [d, del] [edit] [SHORTCUT, NAME]
-with no argument, open the bookmarks menu. Here you cd into the desired bookmark by entering either its ELN, its shortcut, or its name. In this screen you can also add, remove or edit your bookmarks by simply typing 'e' to edit the bookmarks file (which is simply a list of lines with this format: [shortcut]name:path. Ex: [d]documents:/home/user/documents). If you want to add or remove a bookmark directly from the command line, use the 'a' and 'd' arguments respectivelly. Example: 'bm a /media/misc' or 'bm d'. You can also open a bookmark by typing 'bm shortcut' or 'bm name' (in which latter case TAB completion is available).
-.TP
-
-.B o, open \fRELN/FILE [APPLICATION]
-open either a directory, in which case it works just like the 'cd' command (see below), or a file. For example: 'o 12', 'o filename', 'o /path/to/filename'. By default, the 'open' function will open files with the default application associated to them via the mime built\-in function (see the 'mime' command below). However, if you want to open a file with a different application, just add the application name as second argument, e.g. 'o 12 leafpad'. If you want to run the program in the background, simply add the ampersand character: 'o 12 &'.
+if the \fIautocd\fR and \fIauto-open\fR functions are enabled, which is the default value, open FILE or change directory to DIR. In other words, 'FILE' amounts to 'open FILE' or 'o FILE', and 'DIR' to 'cd DIR'. ELN's, of course, are allowed. Example: '12'. Unlike the \fIopen\fR function (see below), passing an opening application is not allowed.
 .TP
 
 .B cd \fR[ELN/DIR]
-when used with no argument, it changes the current directory to the default directory (HOME). Otherwise, 'cd' changes the current directory to the one specified by the first argument. You can use either ELN's or a string to indicate the directory you want. Ex: 'cd 12' or 'cd ~/media'.
+when used with no argument, it changes the current directory to the default directory (HOME). Otherwise, \fIcd\fR changes the current directory to the one specified by the first argument. You can use either ELN's or a string to indicate the directory you want. Ex: 'cd 12' or 'cd ~/media'. If \fIautocd\fR is enabled, 'cd 12' and 'cd ~/media' can be written as '12' and '~/media' respectivelly.
 .sp
-Unlike the shell 'cd' command, CliFM's built\-in 'cd' function not only changes the current directory, but also lists its content (provided the option "cd lists automatically" is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of 'cd' is much like this shell command: cd DIR && ls \-A \-\-color=auto \-\-group\-directories\-first. Remote file systems are also supported: just enter 'cd ADDRESS [OPTIONS]'. For more information about this syntax see the description of the 'net' command below.
+Unlike the shell 'cd' command, CliFM's built\-in \fBcd\fR function not only changes the current directory, but also lists its content (provided the option "cd lists automatically" is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of \fIcd\fR is much like this shell command: cd DIR && ls \-A \-\-color=auto \-\-group\-directories\-first. Remote file systems are also supported: just enter 'cd ADDRESS [OPTIONS]'. For more information about this syntax see the description of the \fInet\fR command below.
+.TP
+
+.B o, open \fRELN/FILE [APPLICATION]
+open FILE, which can be either a directory, in which case it works just like the \fIcd\fR command (see below), a regular file, or a symbolic link to either of the two. For example: 'o 12', 'o filename', 'o /path/to/filename'.
+.sp
+By default, the \fIopen\fR function will open files with the default application associated to them via the mime built\-in function (see the \fImime\fR command below). However, if you want to open a file with a different application, just add the application name as second argument, e.g. 'o 12 leafpad'. If you want to run the program in the background, simply add the ampersand character: 'o 12 &'.
+.sp
+If the file to be opened is an archive/compressed file, the archive function (see the \fIad\fR command below) will be executed instead.
+.TP
+
+.B /\fRSTRING [\-filetype] [DIR]
+this is the quick search function. Just type '/' followed by the string you are looking for (you can use wildcards), and CliFM will list all the matches in the current working directory. 
+.sp
+To search for files in any other directory, specify the directory name as a further argument. This argument (DIR) could be an absolute path, a relative path, or an ELN.
+.sp
+The result of the search can be further filtered by specifying a filter type: \-d, \-r, \-l, \-s, \-f, \-b, and \-c (directory, regular file, symbolic link, socket, FIFO/pipe, block device, and character device respectivelly). For example, '/*x \-d Documents/' will list all directories ending with 'x' in the directory named "Documents".
 .TP
 
 .B s, sel \fRELN/FILE ... n
-send one or multiple elements (either files or directories) to the Selection Box. 'Sel' accepts individual elements, range of elements, say 1\-6, filenames and paths, just as wildcards. Example: 'sel 1 4\-10 file* filename /path/to/filename'.
+send one or multiple elements (either files or directories) to the Selection Box. \fBSel\fR accepts individual elements, range of elements, say 1\-6, filenames and paths, just as wildcards. Example: 'sel 1 4\-10 file* filename /path/to/filename'.
 .sp
-The Selection Box is accessible to different instances of the program, provided they use the same profile (see the 'profile' command below). By default, indeed, each profile keeps a private Selection Box, being thus not accessible to other profiles. You can nonetheless modify this behaviour via the ShareSelbox option in the configuration file. If the ShareSelbox option is enabled (see the configuration file), selected files are stored in \fI/tmp/clifm/username/.selbox\fR. Otherwise, \fI/tmp/clifm/username/.selbox_profilename\fR is used (this is the default). 
+The Selection Box is accessible to different instances of the program, provided they use the same profile (see the \fIprofile\fR command below). By default, indeed, each profile keeps a private Selection Box, being thus not accessible to other profiles. You can nonetheless modify this behaviour via the ShareSelbox option in the configuration file. If the ShareSelbox option is enabled (see the configuration file), selected files are stored in \fI/tmp/clifm/username/.selbox\fR. Otherwise, \fI/tmp/clifm/username/.selbox_profilename\fR is used (this is the default). 
 .TP
 
 .B sb, selbox
@@ -175,6 +179,12 @@ show the elements currently contained in the Selection Box.
 
 .B ds, desel \fR[*, a, all]
 deselect one or more selected elements. You can also deselect all selected elements at once by passing '*', 'a' or 'all' to the function.
+.TP
+
+.B bm, bookmarks \fR[a, add PATH] [d, del] [edit] [SHORTCUT, NAME]
+with no argument, open the bookmarks menu. Here you cd into the desired bookmark by entering either its ELN, its shortcut, or its name. In this screen you can also add, remove or edit your bookmarks by simply typing 'e' to edit the bookmarks file (which is simply a list of lines with this format: [shortcut]name:path. Ex: [d]documents:/home/user/documents).
+.sp
+If you want to add or remove a bookmark directly from the command line, use the 'a' and 'd' arguments respectivelly. Example: 'bm a /media/misc' or 'bm d'. You can also open a bookmark by typing 'bm shortcut' or 'bm name' (in which latter case TAB completion is available).
 .TP
 
 .B t, tr, trash  \fR[ELN/FILE ... n] [ls, list] [clear] [del, rm]
@@ -188,11 +198,15 @@ print a list of currently trashed files allowing you to choose one or more of th
 .TP
 
 .B br, bulk \fRELN/FILE ... n
-rename at once all files passed as arguments to the function. It accepts single and multiple filenames, wildcards, ELN ranges, and the 'sel' keyword. Example: 'br myfile 4\-10 sel'. Each filename will be copied into a temporary file, which will be opened with the default text editor (via the \fBmime\fR function), letting the user modify it. Once the file has been modified and saved, the modifications are printed on the screeen and the user is asked whether to proceed with the actual bulk renaming or not.
+rename at once all files passed as arguments to the function. It accepts single and multiple filenames, wildcards, ELN ranges, and the 'sel' keyword. Example: 'br myfile 4\-10 sel'.
+.sp
+Each filename will be copied into a temporary file, which will be opened with the default text editor (via the \fImime\fR function), letting the user modify it. Once the file has been modified and saved, the modifications are printed on the screeen and the user is asked whether to proceed with the actual bulk renaming or not.
 .TP
 
 .B ac, ad \fRELN/FILE ... n
-archive/compress and dearchive/decompress one or multiple files and/or directories. The archiver function brings two modes: \fBac\fR, to generate archives or compressed files, and \fBad\fR, to decompress or dearchive files, either just listing, extracting, recompressing, or mounting their content. In this latter case, the mountpoint used automatically is \fI$HOME/.config/clifm/PROFILE/mounts/ARCHIVE_NAME\fR. The function accepts single and multiple filenames, wildcards, ELN ranges, and the 'sel' keyword. For example: 'ac sel', 'ac 4\-25 myfile', or 'ad *.tar.gz'. Multiple archive/compression formats are supported, including Zstandard. When it comes to ISO 9660 files only single files are supported.
+archive/compress and dearchive/decompress one or multiple files and/or directories. The archiver function brings two modes: \fIac\fR, to generate archives or compressed files, and \fIad\fR, to decompress or dearchive files, either just listing, extracting, recompressing, or mounting their content. In this latter case, the mountpoint used automatically is \fI$HOME/.config/clifm/PROFILE/mounts/ARCHIVE_NAME\fR.
+.sp
+The function accepts single and multiple filenames, wildcards, ELN ranges, and the 'sel' keyword. For example: 'ac sel', 'ac 4\-25 myfile', or 'ad *.tar.gz'. Multiple archive/compression formats are supported, including Zstandard. When it comes to ISO 9660 files only single files are supported.
 .sp
 The archive mount function for non ISO files depends on \fBarchivemount\fR, while the remaining functions depend on \fBatool\fR and other third\-party utilities for achive formats support, for example, \fBp7zip\fR. \fBp7zip\fR is also used to manage most decompressing options for ISO 9660 files, except for mount, in which case \fBmount(8)\fR is used. Creation of ISO files is done via \fBgenisoimage(1)\fR. For more information consult \fBatool(1)\fR, \fBarchivemount(1)\fR, \fBzstd(1)\fR, and \fB7z(1)\fR. 
 .TP
@@ -200,7 +214,7 @@ The archive mount function for non ISO files depends on \fBarchivemount\fR, whil
 .B b, back \fR[h, hist] [clear] [!ELN]
 unlike 'cd ..', which sends you to the parent directory of the current directory, this command (with no argument) sends you back to the previously visited directory.
 .sp
-CliFM keeps a record of all the visited directories. You can see this list by typing 'b hist', 'b h' or 'bh', and you can access any element in this list by simply passing the corresponding ELN in this list to the 'back' command. Example:
+CliFM keeps a record of all the visited directories. You can see this list by typing 'b hist', 'b h' or 'bh', and you can access any element in this list by simply passing the corresponding ELN in this list to the \fIback\fR command. Example:
         [user@hostname] ~ $ bh
         1 /home/user
         2 /etc
@@ -208,13 +222,13 @@ CliFM keeps a record of all the visited directories. You can see this list by ty
         [user@hostname] ~ $ b !3
         [user@hostname] /proc $ 
 .sp
-\fBNOTE:\fR the line printed in green indicates the current position of the back function in the directory history list.
+\fBNOTE:\fR the line printed in green indicates the current position of the \fIback\fR function in the directory history list.
 .sp
 Finally, you can also clear this history list by typing 'b clear'.
 .TP
 
 .B f, forth \fR[h, hist] [clear] [!ELN]
-it works just like the back function, but it goes forward in the history record. Of course, you can use 'f hist', 'f h', 'fh', and 'f !ELN'.
+it works just like the \fIback\fR function, but it goes forward in the history record. Of course, you can use 'f hist', 'f h', 'fh', and 'f !ELN'.
 .TP
 
 .B c, l, m, md, r
@@ -226,7 +240,9 @@ print file properties for ELN/FILE. Use 'all' to list properties of all files in
 .TP
 
 .B st, sort \fR[METHOD] [rev]
-with no argument, print the current sorting method, else, set sorting method to METHOD, where METHOD is one of: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version. By default, files are sorted from less to more (ex: from 'a' to 'z' if using the "name" method). Use the 'rev' option to invert this ordering. Ex: 'st rev' or 'st 3 rev'. Switch back to the previous ordering running 'st rev' again.
+with no argument, print the current sorting method. Else, set sorting method to METHOD, where METHOD is one of: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime, if btime is not available), 5 = ctime, 6 = mtime, 7 = version (name, if ctime is not available).
+.sp
+By default, files are sorted from less to more (ex: from 'a' to 'z' if using the "name" method). Use the 'rev' option to invert this ordering. Ex: 'st rev' or 'st 3 rev'. Switch back to the previous ordering running 'st rev' again.
 .TP
 
 .B n, net \fR[smb, ftp, sftp]://ADDRESS [OPTIONS]
@@ -245,7 +261,7 @@ To access the remote file system via SMB, this scheme should be used instead: sm
 .sp
 \fBNOTE\fR: 'fusermount3' is Linux\-specific. On FreeBSD 'umount' should be used instead.
 .sp
-The underlying programs used here to mount these remote file systems are: 'sshfs' for SFTP, 'mount.cifs' for SMB, and 'curlftpfs' for FTP. For more information regarding the options supported by each of them, consult the correposponding documentation.
+The underlying programs used here to mount these remote file systems are: \fBsshfs(1)\fR for SFTP, \fBmount.cifs(8)\fR for SMB, and \fBcurlftpfs(1)\fR for FTP. For more information regarding the options supported by each of them, consult the correposponding documentation.
 .TP
 
 .B lm \fR[on, off]
@@ -253,9 +269,13 @@ Toggle the light mode on/off. This option, aimed to make files listing faster th
 .TP
 
 .B mm, mime \fR[info ELN/FILENAME] [edit]
-This is CliFM's resource opener. The 'info' option prints the MIME information about ELN/FILENAME: its MIME type, its file extension, if any, and the application associated to this MIME type or file extension. The 'edit' option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension, and then add a value for it to the MIME list file using the 'edit' option.
+This is CliFM's resource opener. The 'info' option prints the MIME information about ELN/FILENAME: its MIME type, its file extension, if any, and the application associated to this MIME type or file extension.
 .sp
-Each value in the MIME list file has this format: 'mime_type=application args;application args; ... n' or '*.c=application args;application args; ... n'. Example: 'plain/text=nano' or '*.c=geany \-p;leafpad;nano'. CliFM will check the first matching line, and if at least one of the specified applications exists, this one will be used to open the corresponding associated filed. Else, the next matching line will be checked. If the MIME file is not found, CliFM will try to import MIME definitions from the default locations for the 'mimeapps.list' file as specified by the Freedesktop specification.
+The 'edit' option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension, and then add a value for it to the MIME list file using the 'edit' option.
+.sp
+Each value in the MIME list file has this format: 'mime_type=application args;application args; ... n' or '*.c=application args;application args; ... n'. Example: 'plain/text=nano' or '*.c=geany \-p;leafpad;nano'. CliFM will check the first matching line, and if at least one of the specified applications exists, this one will be used to open the corresponding associated filed. Else, the next matching line will be checked.
+.sp
+If the MIME file is not found, CliFM will try to import MIME definitions from the default locations for the 'mimeapps.list' file as specified by the Freedesktop specification.
 .TP
 
 .B tips
@@ -267,7 +287,7 @@ open DIR in a new instance of CliFM using the value of TerminalCmd (from the con
 .TP
 
 .B ;\fR[CMD], \fB:\fR[CMD]
-If no CMD, run the default shell (see below the 'shell' command) in the current working directory. If CMD is specified, skip all CLiFM expansions (see the Built\-in Expansions section below) and run the input string (CMD) as is via the default system shell.
+If no CMD, run the default shell (see below the \fIshell\fR command) in the current working directory. If CMD is specified, skip all CLiFM expansions (see the Built\-in Expansions section below) and run the input string (CMD) as is via the default system shell.
 .TP
 
 .B mp, mountpoints
@@ -275,7 +295,7 @@ list available mountpoints and change the current working directory into the sel
 .TP
 
 .B v, paste \fR[sel] [DESTINY]
-the 'paste sel' command will copy the currently selected elements, if any, into the current working directory. To copy these elements into another directory, tell 'paste' where to copy these files. Ex: 'paste sel /path/to/directory'. The 'copy' command (cp, c) could be used in the same way.
+the 'paste sel' command will copy the currently selected elements, if any, into the current working directory. To copy these elements into another directory, tell 'paste' where to copy these files. Ex: 'paste sel /path/to/directory'. The \fIcopy\fR command (cp, c) could be used in the same way.
 .TP
 
 .B pf, prof, profile \fR[ls, list] [set, add, del PROFILE]
@@ -295,11 +315,11 @@ with no arguments, prints the list of messages in the current session. The 'clea
 .TP
 
 .B log \fR[clear] [on, off, status]
-with no arguments, it prints the contents of the log file. If 'clear' is passed as argument, all the logs will be deleted. 'on', 'off', and 'status' enable, disable, and check the status of the log function for the current session.
+with no arguments, it prints the contents of the log file. If 'clear' is passed as argument, all the logs will be deleted. 'on', 'off', and 'status' enable, disable, and check the status of the \fIlog\fR function for the current session.
 .TP
 
 .B history \fR[clear] [\-n]
-with no arguments, it shows the history list. If 'clear' is passed as argument, it will delete all the entries in the history file. Finally, '\-n' tells the history command to list only the last 'n' commands in the history list.
+with no arguments, it shows the history list. If 'clear' is passed as argument, it will delete all the entries in the history file. Finally, '\-n' tells the \fIhistory\fR command to list only the last 'n' commands in the history list.
 .sp
 You can use the exclamation character (!) to perform some history commands:
   !!: Execute the last command.
@@ -312,11 +332,13 @@ edit the configuration file. If an application is specified, it will be used to 
 .TP
 
 .B alias \fR[import FILE]
-with no argument, it prints the list of available  aliases, if any. To write a new alias simply enter 'edit' to open the configuration file and add a line like this one: alias name='command args...' To import aliases from a file, provided it contains aliases in the specified form, use the 'import' option. Aliases conflicting with some of the internal commands won't be imported.
+with no argument, it prints the list of available  aliases, if any. To write a new alias simply enter 'edit' to open the configuration file and add a line like this one: alias name='command args...'.
+.sp
+To import aliases from a file, provided it contains aliases in the specified form, use the 'import' option. Aliases conflicting with some of the internal commands won't be imported.
 .TP
 
 .B dc \fR[on, off, status]
-toggle the files counter function on/off
+toggle the files counter function on/off.
 .TP
 
 .B splash
@@ -336,11 +358,11 @@ show the color codes used to list files.
 .TP
 
 .B acd, autocd [on, off, status]
-toggle autocd on/off. If set to on, 'DIR' amounts to 'cd DIR'.
+toggle the autocd function on/off. If set to on, 'DIR' amounts to 'cd DIR'.
 .TP
 
 .B ao, auto-open [on, off, status]
-toggle autoopen on/off. If set to on, 'FILE' amounts to 'open FILE'.
+toggle the auto-open function on/off. If set to on, 'FILE' amounts to 'open FILE'.
 .TP
 
 .B cmd, commands 
