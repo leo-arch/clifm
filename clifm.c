@@ -9046,27 +9046,25 @@ get_path_programs(void)
 	free(commands_bin);
 	free(cmd_n);
 
-	/* Now add aliases */
-	if (aliases_n == 0)
-		return;
-
-	for (i = 0; i < aliases_n; i++) {
-		int index = strcntchr(aliases[i], '=');
-		if (index != -1) {
-			bin_commands[l] = (char *)xnmalloc((size_t)index + 1,
-											   sizeof(char));
-			strncpy(bin_commands[l++], aliases[i], (size_t)index);
+	/* Now add aliases, if any */
+	if (aliases_n) {
+		for (i = 0; i < aliases_n; i++) {
+			int index = strcntchr(aliases[i], '=');
+			if (index != -1) {
+				bin_commands[l] = (char *)xnmalloc((size_t)index + 1,
+												   sizeof(char));
+				strncpy(bin_commands[l++], aliases[i], (size_t)index);
+			}
 		}
 	}
 
-	/* And user defined actions too */
-	if (actions_n == 0)
-		return;
-
-	for (i = 0; i < actions_n; i++) {
-		bin_commands[l] = (char *)xnmalloc(strlen(usr_actions[i].name)
-										   + 1, sizeof(char));
-		strcpy(bin_commands[l++], usr_actions[i].name);
+	/* And user defined actions too, if any */
+	if (actions_n) {
+		for (i = 0; i < actions_n; i++) {
+			bin_commands[l] = (char *)xnmalloc(strlen(usr_actions[i].name)
+											   + 1, sizeof(char));
+			strcpy(bin_commands[l++], usr_actions[i].name);
+		}
 	}
 
 /*	bin_commands[l] = (char *)NULL; */
