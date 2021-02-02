@@ -1,5 +1,5 @@
 '\ t
-.TH "CLIFM" "1" "January 30, 2021" "CliFM 0.27.2+" "CliFM Manual"
+.TH "CLIFM" "1" "Febraury 2, 2021" "CliFM 0.27.3+" "CliFM Manual"
 .nh
 .ad l
 
@@ -28,7 +28,9 @@ With the automatic ELN's expansion feature you can use ELN's with external comma
 .sp
   \fBg)\fR The quick search function makes it really easy to quickly find the files you are looking for: just enter a slash followed by the string or pattern you want (ex: '/*.png'), that's all.
 .sp
-  \fBh)\fR It is blazing fast and incredibly lightweigth. With a memory footprint below 5 MiB and a disk usage of 350 KiB, it can run on really old hardware. It is so simple that it doesn't require an X session nor any graphical environment at all, being able thus to perfectly run on the console (TTY) and even on a headless machine via a SSH or a telnet session. And if this is not enough, you can still use the light mode to make it even faster.
+  \fBh)\fR CliFM's functionaly is easily extensible via shell scripts. Just drop a shell script in the scripts directory and tell CLiFM to use this scripts via a custom action name.
+.sp
+  \fBi)\fR It is blazing fast and incredibly lightweigth. With a memory footprint below 5 MiB and a disk usage of 350 KiB, it can run on really old hardware. It is so simple that it doesn't require an X session nor any graphical environment at all, being able thus to perfectly run on the console (TTY) and even on a headless machine via a SSH or a telnet session. And if this is not enough, you can still use the light mode to make it even faster.
 .sp
 Because inspired in Arch Linux and its KISS principle, CliFM is fundamentally aimed to be lightweight, fast, and simple. On Arch's notion of simplcity see: \fIhttps://wiki.archlinux.org/index.php/Arch_Linux#Simplicity\fR
 
@@ -58,6 +60,7 @@ List of CliFM features:
   22) Bulk rename
   23) Archiving and compression support
   24) Auto-cd and auto-open
+  25) Custom actions via shell scripts
 
 .SH RATIONALE
 When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the Linux built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There is no two without three".
@@ -229,6 +232,10 @@ Finally, you can also clear this history list by typing 'b clear'.
 
 .B f, forth \fR[h, hist] [clear] [!ELN]
 it works just like the \fIback\fR function, but it goes forward in the history record. Of course, you can use 'f hist', 'f h', 'fh', and 'f !ELN'.
+.TP
+
+.B actions \fR[edit]
+with no argument, lists available custom actions. Use the 'edit' option to add, remove or modify custom actions. The general procedure is quite simple: bind a custom action name to a shell script (using the \fIactions.cfm\fR file), and drop the corresponding script into the scripts directory (see the FILES section below). Once this is done, you can call the script using the custom action name defined before as if it were any other command. All arguments passed to the action command are passed to the script as well (which is run via the system shell). A ready made example could be found in the configuration directory.
 .TP
 
 .B c, l, m, md, r
@@ -605,12 +612,20 @@ Here you can permanently set up CliFM options, add aliases and some prompt comma
 A description for each option in the configuration file can be found in the configuration file itself.
 .TP
 
-.B PROFILE FILE:
+.B PROFILE FILE
 The profile file is \fI$XDG_CONFIG_HOME/clifm/profile/clifm_profile\fR.
 In this file you can add those commands you want to be executed at startup. You can also permanently set here some custom variables, ex: 'dir="/path/to/folder"'. This variable may be used as a shorcut to that folder, for instance: 'cd $dir'. Custom variables could also be temporarily defined via the command prompt: Ex: user@hostname ~ $ var="This is a test". Temporary variables will be removed at program exit.
 .TP
 
-.B MIME LIST FILE:
+.B SCRIPTS DIRECTORY
+The directory used for action scripts is \fI$XDG_CONFIG_HOME/clifm/profile/scripts\fR.
+.TP
+
+.B ACTIONS FILE
+The file used to define custom actions is \fI$XDG_CONFIG_HOME/clifm/profile/actions.cfm\fR.
+.TP
+
+.B MIMELIST FILE:
 The mime list file is \fI$XDG_CONFIG_HOME/clifm/profile/mimelist.cfm\fR. It is a list of filetypes and file extensions and their associated applications used by CliFM built\-in resource opener.
 .TP
 
