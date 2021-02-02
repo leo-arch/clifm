@@ -53,7 +53,9 @@ Of course, you can deselect some or all selected files whenever you want with th
 
 ![dirs](images/dirs.png)
 
-Because file manager, but also half-shell, CLiFM als provides the following features:
+* **Custom actions**: Use custom action names, as if they were any other command, to run custom shell scripts and extend thus CliFM functionality to your liking.
+
+Because file manager, but also half-shell, CLiFM also provides the following features:
 
 * TAB-completion for commands, paths, and ELN's
 * Bash-like quoting system
