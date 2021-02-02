@@ -249,6 +249,7 @@ void get_path_programs(void);
 size_t get_path_env(void);
 int create_config(char *file);
 int set_shell(char *str);
+int load_actions(void);
 
 /* Memory */
 char *xnmalloc(size_t nmemb, size_t size);
@@ -449,6 +450,11 @@ int *get_hex_num(char *str);
 void set_default_options(void);
 void set_colors (void);
 
+/* Actions */
+int load_actions(void);
+int run_action(char *action, char **args);
+int edit_actions(void);
+
 
 				/** ##########################
 				 * #    GLOBAL VARIABLES    # 
@@ -466,6 +472,17 @@ struct usrvar_t
 	char *name;
 	char *value;
 };
+
+struct usrvar_t *usr_var = (struct usrvar_t *)NULL;
+
+/* Struct to store user defined actions */
+struct actions_t
+{
+	char *name;
+	char *value;
+};
+
+struct actions_t *usr_actions = (struct actions_t *)NULL;
 
 /* Struct to store file information */
 struct fileinfo
@@ -503,6 +520,9 @@ struct param
 	int light;
 	int sort;
 };
+
+struct param xargs;
+
 
 /* A list of possible program messages. Each value tells the prompt what
  * to do with error messages: either to print an E, W, or N char at the
@@ -554,13 +574,11 @@ unsigned short term_cols = 0;
 
 size_t user_home_len = 0, args_n = 0, sel_n = 0, trash_n = 0, msgs_n = 0,
 	   prompt_cmds_n = 0, path_n = 0, current_hist_n = 0, usrvar_n = 0,
-	   aliases_n = 0, longest = 0, files = 0, eln_len = 0;
+	   aliases_n = 0, longest = 0, files = 0, eln_len = 0, actions_n = 0;
 
 struct termios shell_tmodes;
 off_t total_sel_size = 0;
 pid_t own_pid = 0;
-struct usrvar_t *usr_var = (struct usrvar_t *)NULL;
-struct param xargs;
 char *user = (char *)NULL, *path = (char *)NULL,
 	**sel_elements = (char **)NULL, *qc = (char *)NULL,
 	*sel_file_user = (char *)NULL, **paths = (char **)NULL,
@@ -581,7 +599,8 @@ char *user = (char *)NULL, *path = (char *)NULL,
 	**profile_names = (char **)NULL, *encoded_prompt = (char *)NULL,
 	*last_cmd = (char *)NULL, *term = (char *)NULL,
 	*TMP_DIR = (char *)NULL, div_line_char = -1, *opener = (char *)NULL,
-	**old_pwd = (char **)NULL;
+	**old_pwd = (char **)NULL, *SCRIPTS_DIR = (char *)NULL,
+	*ACTIONS_FILE = (char *)NULL;
 
 	/* This is not a comprehensive list of commands. It only lists
 	 * commands long version for TAB completion */
@@ -592,7 +611,7 @@ const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
 		"exit", "quit", "pager", "trash", "undel", "messages",
 		"mountpoints", "bookmarks", "log", "untrash", "unicode",
 		"profile", "shell", "mime", "sort", "tips", "autocd",
-		"auto-open", NULL };
+		"auto-open", "actions", NULL };
 
 #define DEFAULT_PROMPT "\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\
 \\z\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
@@ -834,6 +853,8 @@ main(int argc, char **argv)
 	if (!config_ok)
 		set_default_options();
 
+	load_actions();
+
 	/* Check whether we have a working shell */
 	if (access(sys_shell, X_OK) == -1) {
 		_err('w', PRINT_PROMPT, _("%s: %s: System shell not found. "
@@ -1046,6 +1067,170 @@ main(int argc, char **argv)
 			/** #################################
 			 * #     FUNCTIONS DEFINITIONS     #
 			 * ################################# */
+
+int
+edit_actions(void)
+{
+	/* Get actions file current modification time */
+	struct stat file_attrib;
+
+	if (stat(ACTIONS_FILE, &file_attrib) == -1) {
+		fprintf(stderr, "actions: '%s': %s\n", ACTIONS_FILE,
+				strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	time_t mtime_bfr = file_attrib.st_mtime;
+
+	char *cmd[] = { "mm", ACTIONS_FILE, NULL };
+
+	if (mime_open(cmd) != EXIT_SUCCESS)
+		return EXIT_FAILURE;
+
+	/* Get modification time after opening the file */
+	stat(ACTIONS_FILE, &file_attrib);
+
+	/* If modification times differ, the file was modified after being 
+	 * opened */
+	if (mtime_bfr != file_attrib.st_mtime) {
+
+		/* Reload the array of available actions */
+		if (load_actions() != EXIT_SUCCESS)
+			return EXIT_FAILURE;
+
+		/* Reload PATH commands as well to add new action(s) */
+		if (bin_commands) {
+			size_t i;
+			for (i = 0; bin_commands[i]; i++)
+				free(bin_commands[i]);
+
+			free(bin_commands);
+			bin_commands = (char  **)NULL;
+		}
+
+		if (paths) {
+			size_t i;
+			for (i = 0; i < path_n; i++)
+				free(paths[i]);
+		}
+
+		path_n = (size_t)get_path_env();
+
+		get_path_programs();
+
+	}
+
+	return EXIT_SUCCESS;
+}
+
+int
+run_action(char *action, char **args)
+{
+	int exit_status = EXIT_SUCCESS;
+	char *cmd = (char *)NULL;
+	size_t len = 0, action_len = strlen(action);
+
+	/* Remove terminating new line char */
+	if (action[action_len -1] == '\n')
+		action[action_len -1] = 0x00;
+
+	if (strchr(action, '/')) {
+		len = action_len;
+		cmd = (char *)xnmalloc(len + 1, sizeof(char));
+		strcpy(cmd, action);
+	}
+
+	/* If not a path, SCRIPTS_DIR is assumed */
+	else {
+		len = action_len + strlen(SCRIPTS_DIR) + 2;
+		cmd = (char *)xnmalloc(len, sizeof(char));
+		sprintf(cmd, "%s/%s", SCRIPTS_DIR, action);
+	}
+
+	/* Check if the action file exists */
+	if (access(cmd, F_OK|X_OK) == -1) {
+		fprintf(stderr, "actions: '%s': %s\n", cmd, strerror(errno));
+		free(cmd);
+		return EXIT_FAILURE;
+	}
+
+	/* Append arguments to command */
+	size_t i;
+	for (i = 1; args[i]; i++) {
+		len += strlen(args[i]) + 2;
+		cmd = (char *)xrealloc(cmd, len * sizeof(char));
+		strcat(cmd, " ");
+		strcat(cmd, args[i]);
+	}
+
+	/* Execute the command */
+	if (launch_execle(cmd) != EXIT_SUCCESS)
+		exit_status = EXIT_FAILURE;
+
+	free(cmd);
+
+	return exit_status;
+}
+
+int
+load_actions(void)
+{
+	/* Free the actions struct array */
+	if (actions_n) {
+		size_t i;
+		for (i = 0; i < actions_n; i++) {
+			free(usr_actions[i].name);
+			free(usr_actions[i].value);
+		}
+		free(usr_actions);
+		usr_actions = (struct actions_t *)xnmalloc(1,
+					   sizeof(struct actions_t));
+		actions_n = 0;
+	}
+
+	/* Open the actions file */
+	FILE *actions_fp = fopen(ACTIONS_FILE, "r");
+
+	if (!actions_fp)
+		return EXIT_FAILURE;
+
+	size_t line_size = 0;
+	char *line = (char *)NULL;
+	ssize_t line_len = 0;
+
+	while ((line_len = getline(&line, &line_size, actions_fp)) > 0) {
+
+		if (!line || !*line || *line == '#')
+			continue;
+
+		char *tmp = (char *)NULL;
+
+		tmp= strrchr(line, '=');
+
+		if (!tmp)
+			continue;
+
+		/* Now copy left and right value of each action into the
+		 * actions struct */
+		usr_actions = xrealloc(usr_actions, (size_t)(actions_n + 1)
+					   * sizeof(struct actions_t));
+
+		usr_actions[actions_n].value = xnmalloc(strlen(tmp + 1) + 1,
+											sizeof(char));
+		strcpy(usr_actions[actions_n].value, tmp + 1);
+
+		*tmp = 0x00;
+
+		usr_actions[actions_n].name = xnmalloc(strlen(line) + 1,
+											   sizeof(char));
+
+		strcpy(usr_actions[actions_n++].name, line);
+	}
+
+	free(line);
+
+	return EXIT_SUCCESS;
+}
 
 int
 create_iso(char *in_file, char *out_file)
@@ -4425,8 +4610,11 @@ profile_set(char *prof)
 	PROFILE_FILE = (char *)NULL;
 	free(MSG_LOG_FILE);
 	MSG_LOG_FILE = (char *)NULL;
+
 	free(MIME_FILE);
-	MIME_FILE = (char *)NULL;
+	free(SCRIPTS_DIR);
+	free(ACTIONS_FILE);
+	MIME_FILE = SCRIPTS_DIR = ACTIONS_FILE = (char *)NULL;
 
 	if (opener) {
 		free(opener);
@@ -4448,9 +4636,16 @@ profile_set(char *prof)
 		encoded_prompt = (char *)NULL;
 	}
 
-	splash_screen = welcome_message = ext_cmd_ok = show_hidden = -1;
-	clear_screen = pager = list_folders_first = long_view = -1;
-	case_sensitive = cd_lists_on_the_fly = unicode = -1;
+	splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
+	show_hidden = -1, clear_screen = -1, shell_terminal = 0, pager = -1, 
+	no_log = 0, internal_cmd = 0, list_folders_first = -1,
+	case_sensitive = -1, cd_lists_on_the_fly = -1, share_selbox = -1,
+	recur_perm_error_flag = 0, is_sel = 0, sel_is_last = 0, print_msg = 0,
+	long_view = -1, kbind_busy = 0, unicode = -1, dequoted = 0,
+	home_ok = 1, config_ok = 1, trash_ok = 1, selfile_ok = 1, tips = -1,
+	mime_match = 0, logs_enabled = -1, sort = -1, files_counter = -1,
+	light_mode = -1, dir_indicator = -1, classify = -1, sort_switch = 0,
+	sort_reverse = 0, autocd = -1, auto_open = -1;
 
 	shell_terminal = no_log = internal_cmd = dequoted = 0;
 	shell_is_interactive = recur_perm_error_flag = mime_match = 0;
@@ -4468,18 +4663,36 @@ profile_set(char *prof)
 		strcpy(alt_profile, prof);
 	}
 
-	/* Rerun external_arguments */
-/*	if (argc_bk > 1)
-		external_arguments(argc_bk, argv_bk); */
-	/* If command line arguments are re-processed, and if the user
-	 * used the profile option (-P), the new profile won't be set,
-	 * because it will be overriden by the command line value */
-
 	/* Set up config files and variables */
 	init_config();
 
 	if (!config_ok)
 		set_default_options();
+
+	/* If some option was set via command line, keep that value
+	 * for any profile */
+	if (xargs.ext != -1)
+		ext_cmd_ok = xargs.ext;
+	if (xargs.splash != -1)
+		splash_screen = xargs.splash;
+	if (xargs.light != -1)
+		light_mode = xargs.light;
+	if (xargs.sort != -1)
+		sort = xargs.sort;
+	if (xargs.hidden != -1)
+		show_hidden = xargs.hidden;
+	if (xargs.longview != -1)
+		long_view = xargs.longview;
+	if (xargs.ffirst != -1)
+		list_folders_first = xargs.ffirst;
+	if (xargs.cdauto != -1)
+		cd_lists_on_the_fly = xargs.cdauto;
+	if (xargs.sensitive != -1)
+		case_sensitive = xargs.sensitive;
+	if (xargs.unicode != -1)
+		unicode = xargs.unicode;
+	if (xargs.pager != -1)
+		pager = xargs.pager;
 
 	/* Check whether we have a working shell */
 	if (access(sys_shell, X_OK) == -1) {
@@ -4494,16 +4707,26 @@ profile_set(char *prof)
 	}
 	usrvar_n = 0;
 
+	for (i = 0; i < actions_n; i++) {
+		free(usr_actions[i].name);
+		free(usr_actions[i].value);
+	}
+	actions_n = 0;
+
 	for (i = 0; i < aliases_n; i++)
 		free(aliases[i]);
 	free(aliases);
 	aliases = (char **)NULL;
+
 	for (i = 0; i < prompt_cmds_n; i++)
 		free(prompt_cmds[i]);
 	free(prompt_cmds);
 	prompt_cmds = (char **)NULL;
+
 	aliases_n = prompt_cmds_n = 0; /* Reset counters */
+
 	get_aliases();
+
 	get_prompt_cmds();
 
 	exec_profile();
@@ -4541,8 +4764,29 @@ profile_set(char *prof)
 
 	get_bm_names();
 
+	load_actions();
+
+	/* Reload PATH commands (actions are profile specific) */
+	if (bin_commands) {
+		for (i = 0; bin_commands[i]; i++)
+			free(bin_commands[i]);
+
+		free(bin_commands);
+		bin_commands = (char  **)NULL;
+	}
+
+	if (paths) {
+		for (i = 0; i < path_n; i++)
+			free(paths[i]);
+	}
+
+	path_n = (size_t)get_path_env();
+
+	get_path_programs();
+
 	if (cd_lists_on_the_fly) {
-		while (files--) free(dirlist[files]);
+		while (files--)
+			free(dirlist[files]);
 		list_dir();
 	}
 
@@ -5262,7 +5506,7 @@ is_internal_c(const char *cmd)
 					"colors", "cc", "fs", "mm", "mime", "x", "n",
 					"net", "lm", "st", "sort", "fc", "tips", "br",
 					"bulk", "opener", "ac", "ad", "acd", "autocd",
-					"ao", "auto-open", NULL };
+					"ao", "auto-open", "actions", NULL };
 
 	short found = 0;
 	size_t i;
@@ -6012,6 +6256,8 @@ set_default_options(void)
 	sprintf(ee_c, "\x1b[00;32m");
 	sprintf(ca_c, "\x1b[30;41m");
 	sprintf(no_c, "\x1b[31;47m");
+
+/*	setenv("CLIFM_PROFILE", "default", 1); */
 
 	/* Set the LS_COLORS environment variable */
 	char lsc[] = "di=01;34:fi=00;97:ln=01;36:or=00;36:pi=00;35:"
@@ -8482,6 +8728,12 @@ free_stuff(void)
 	}
 	free(usr_var);
 
+	for (i = 0; i < actions_n; i++) {
+		free(usr_actions[i].name);
+		free(usr_actions[i].value);
+	}
+	free(usr_actions);
+
 	for (i = 0; i < aliases_n; i++)
 		free(aliases[i]);
 	free(aliases);
@@ -8516,6 +8768,8 @@ free_stuff(void)
 	free(MSG_LOG_FILE);
 	free(sel_file_user);
 	free(MIME_FILE);
+	free(SCRIPTS_DIR);
+	free(ACTIONS_FILE);
 
 	/* Restore the foreground color of the running terminal */
 	fputs(NC, stdout);
@@ -8761,9 +9015,11 @@ get_path_programs(void)
 	/* Get amount of internal cmds (elements in INTERNAL_CMDS array) */
 	size_t internal_cmd_n = (sizeof(INTERNAL_CMDS) /
 						  sizeof(INTERNAL_CMDS[0])) - 1;
+
 	bin_commands = (char **)xcalloc(total_cmd + internal_cmd_n +
-									aliases_n + 2,
+									aliases_n + actions_n + 2,
 									sizeof(char *));
+
 	for (i = 0; i < internal_cmd_n; i++) {
 		bin_commands[l] = (char *)xnmalloc(strlen(INTERNAL_CMDS[i]) + 1,
 								   sizeof(char));
@@ -8783,13 +9039,14 @@ get_path_programs(void)
 			strcpy(bin_commands[l++], commands_bin[i][j]->d_name);
 			free(commands_bin[i][j]);
 		}
+
 		free(commands_bin[i]);
 	}
 
 	free(commands_bin);
 	free(cmd_n);
 
-	/* Add aliases too */
+	/* Now add aliases */
 	if (aliases_n == 0)
 		return;
 
@@ -8800,6 +9057,16 @@ get_path_programs(void)
 											   sizeof(char));
 			strncpy(bin_commands[l++], aliases[i], (size_t)index);
 		}
+	}
+
+	/* And user defined actions too */
+	if (actions_n == 0)
+		return;
+
+	for (i = 0; i < actions_n; i++) {
+		bin_commands[l] = (char *)xnmalloc(strlen(usr_actions[i].name)
+										   + 1, sizeof(char));
+		strcpy(bin_commands[l++], usr_actions[i].name);
 	}
 
 /*	bin_commands[l] = (char *)NULL; */
@@ -9690,30 +9957,48 @@ init_config(void)
 
 		TRASH_DIR = (char *)xcalloc(user_home_len + 20, sizeof(char));
 		sprintf(TRASH_DIR, "%s/.local/share/Trash", user_home);
+
 		size_t trash_len = strlen(TRASH_DIR);
+
 		TRASH_FILES_DIR = (char *)xcalloc(trash_len + 7, sizeof(char));
 		sprintf(TRASH_FILES_DIR, "%s/files", TRASH_DIR);
+
 		TRASH_INFO_DIR = (char *)xcalloc(trash_len + 6, sizeof(char));
 		sprintf(TRASH_INFO_DIR, "%s/info", TRASH_DIR);
+
 		size_t config_len = strlen(CONFIG_DIR);
+
 		BM_FILE = (char *)xcalloc(config_len + 15, sizeof(char));
 		sprintf(BM_FILE, "%s/bookmarks.cfm", CONFIG_DIR);
+
 		LOG_FILE = (char *)xcalloc(config_len + 9, sizeof(char));
 		sprintf(LOG_FILE, "%s/log.cfm", CONFIG_DIR);
+
 		LOG_FILE_TMP = (char *)xcalloc(config_len + 13, sizeof(char));
 		sprintf(LOG_FILE_TMP, "%s/log_tmp.cfm", CONFIG_DIR);
+
 		HIST_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
 		sprintf(HIST_FILE, "%s/history.cfm", CONFIG_DIR);
+
 		CONFIG_FILE = (char *)xcalloc(config_len + pnl_len + 4,
 									  sizeof(char));
 		sprintf(CONFIG_FILE, "%s/%src", CONFIG_DIR, PNL);
+
 		PROFILE_FILE = (char *)xcalloc(config_len + pnl_len + 10,
 							   sizeof(char));
 		sprintf(PROFILE_FILE, "%s/%s_profile", CONFIG_DIR, PNL);
+
 		MSG_LOG_FILE = (char *)xcalloc(config_len + 14, sizeof(char));
 		sprintf(MSG_LOG_FILE, "%s/messages.cfm", CONFIG_DIR);
+
 		MIME_FILE = (char *)xcalloc(config_len + 14, sizeof(char));
 		sprintf(MIME_FILE, "%s/mimelist.cfm", CONFIG_DIR);
+
+		SCRIPTS_DIR = (char *)xcalloc(config_len + 9, sizeof(char));
+		sprintf(SCRIPTS_DIR, "%s/scripts", CONFIG_DIR);
+
+		ACTIONS_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
+		sprintf(ACTIONS_FILE, "%s/actions.cfm", CONFIG_DIR);
 
 		int ret = -1;
 
@@ -9772,6 +10057,44 @@ init_config(void)
 				 "Bookmarks, commands logs, and commands history are "
 				 "disabled. Program messages won't be persistent. "
 				 "Using default options\n"), PROGRAM_NAME, CONFIG_DIR);
+		}
+
+		/* #### CHECK THE SCRIPTS DIR #### */
+		if (config_ok && stat(SCRIPTS_DIR, &file_attrib) == -1) {
+			char *cmd[] = { "mkdir", SCRIPTS_DIR, NULL };
+			if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+				_err('e', PRINT_PROMPT, _("%s: mkdir: Error "
+					 "creating scripts directory. User defined "
+					 "action function is disabled\n"), PROGRAM_NAME);
+		}
+
+		/* #### CHECK THE ACTIONS FILE #### */
+		if (config_ok && stat(ACTIONS_FILE, &file_attrib) == -1) {
+			FILE *actions_fp = fopen(ACTIONS_FILE, "w");
+			if (!actions_fp) {
+				_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+					 ACTIONS_FILE, strerror(errno));
+			}
+			else {
+				fprintf(actions_fp, "# %s actions file #\n"
+						"######################\n\n"
+						"# Define here your custom actions. Actions "
+						"can be executed directly from\n"
+						"# %s command line, as if they were any "
+						"other command. Example:\n"
+						"# myaction=/path/to/myaction.sh\n"
+						"# Now you can run 'myaction' from the command "
+						"line, \n# and /path/to/myaction.sh will be "
+						"executed. All parameters passed to\n"
+						"# 'myaction' will be passed to "
+						"/path/to/myaction.sh\n"
+						"# If no path is specified, %s falls back "
+						"to the scripts directory \n"
+						"# ($XDG_HOME_CONFIG/clifm/profile/scripts)\n",
+						PROGRAM_NAME, PROGRAM_NAME, PROGRAM_NAME);
+
+				fclose(actions_fp);
+			}
 		}
 
 		/* #### CHECK THE MIME CONFIG FILE #### */
@@ -10661,6 +10984,10 @@ init_config(void)
 			sprintf(sel_file_user, "%s/.selbox", TMP_DIR);
 		}
 	}
+
+	/* Set a few environment variables, mostly useful to run custom
+	 * scripts via the actions function */
+	 setenv("CLIFM_PROFILE", (alt_profile) ? alt_profile : "default", 1);
 }
 
 void
@@ -13787,7 +14114,15 @@ exec_cmd(char **comm)
 	 * executed command */
 	exit_code = EXIT_SUCCESS;
 
-	/* If a user defined variable */
+	/* User defined actions */
+	if (actions_n) {
+		size_t i;
+		for (i = 0; i < actions_n; i++)
+			if (strcmp(comm[0], usr_actions[i].name) == 0)
+				 return run_action(usr_actions[i].value, comm);
+	}
+
+	/* User defined variables */
 	if (flags & IS_USRVAR_DEF) {
 		flags &= ~IS_USRVAR_DEF;
 
@@ -14197,6 +14532,35 @@ exec_cmd(char **comm)
 					/* #### TIPS #### */
 	else if (strcmp(comm[0], "tips") == 0)
 		print_tips(1);
+
+					/* #### ACTIONS #### */
+	else if (strcmp(comm[0], "actions") == 0) {
+		if (!comm[1]) {
+			if (actions_n) {
+				size_t i;
+				for (i = 0; i < actions_n; i++)
+					printf("%s:%s\n", usr_actions[i].name,
+						   usr_actions[i].value);
+			}
+			else {
+				puts(_("actions: No actions defined"));
+			}
+		}
+		
+		else if (strcmp(comm[1], "edit") == 0) {
+			exit_code = edit_actions();
+			return exit_code;
+		}
+
+		else if (strcmp(comm[1], "--help") == 0)
+			puts("Usage: actions [edit]");
+
+		else {
+			fputs("Usage: actions [edit]\n", stderr);
+			exit_code = EXIT_FAILURE;
+			return EXIT_FAILURE;
+		}
+	}
 
 					/* #### LIGHT MODE #### */
 	else if (strcmp(comm[0], "lm") == 0) {
@@ -18124,7 +18488,10 @@ edit_function (char **comm)
 		sel_file_user = (char *)NULL;
 
 		free(MIME_FILE);
-		MIME_FILE = (char *)NULL;
+		free(SCRIPTS_DIR);
+		free(ACTIONS_FILE);
+		MIME_FILE = SCRIPTS_DIR = ACTIONS_FILE = (char *)NULL;
+
 
 		if (encoded_prompt) {
 			free(encoded_prompt);
@@ -18207,8 +18574,12 @@ edit_function (char **comm)
 		CONFIG_FILE = PROFILE_FILE = MSG_LOG_FILE = (char *)NULL;
 
 		free(MIME_FILE);
+		free(SCRIPTS_DIR);
+		free(ACTIONS_FILE);
+		MIME_FILE = SCRIPTS_DIR = ACTIONS_FILE = (char *)NULL;
+
 		free(sel_file_user);
-		MIME_FILE = sel_file_user = (char *)NULL;
+		sel_file_user = (char *)NULL;
 
 
 		if (encoded_prompt) {
@@ -18396,6 +18767,7 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
  br, bulk ELN/FILE ...\n\
  ac, ad ELN/FILE ...\n\
  shell [SHELL]\n\
+ actions [edit]\n\
  st, sort [METHOD] [rev]\n\
  opener [default] [APPLICATION]\n\
  msg, messages [clear]\n\
