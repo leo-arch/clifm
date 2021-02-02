@@ -10098,7 +10098,7 @@ init_config(void)
 			}
 		}
 
-		/* Create the example action script */
+		/* ### CREATE THE EXAMPLE ACTION SCRIPT ### */
 		char *example = (char *)xnmalloc(strlen(SCRIPTS_DIR) + 12,
 										 sizeof(char));
 		sprintf(example, "%s/example.sh", SCRIPTS_DIR);
@@ -13156,8 +13156,6 @@ list_dir(void)
 		if (reset_pager)
 			pager = 1;
 
-		free(file_info);
-
 		/* Print a dividing line between the files list and the
 		 * prompt */
 		fputs(div_line_color, stdout);
@@ -13728,8 +13726,6 @@ list_dir_light(void)
 		if (reset_pager)
 			pager = 1;
 
-		free(file_info);
-
 		/* Print a dividing line between the files list and the
 		 * prompt */
 		fputs(div_line_color, stdout);
@@ -13904,8 +13900,6 @@ list_dir_light(void)
 				putchar(' ');
 		}
 	}
-
-/*	free(file_info); */
 
 	/* If the pager was disabled during listing (by pressing 'c', 'p' or
 	 * 'q'), reenable it */
