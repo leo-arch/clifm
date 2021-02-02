@@ -10076,26 +10076,59 @@ init_config(void)
 					 ACTIONS_FILE, strerror(errno));
 			}
 			else {
-				fprintf(actions_fp, "# %s actions file #\n"
-						"######################\n\n"
-						"# Define here your custom actions. Actions "
-						"can be executed directly from\n"
-						"# %s command line, as if they were any "
-						"other command. Example:\n"
-						"# myaction=/path/to/myaction.sh\n"
-						"# Now you can run 'myaction' from the command "
-						"line, \n# and /path/to/myaction.sh will be "
-						"executed. All parameters passed to\n"
-						"# 'myaction' will be passed to "
-						"/path/to/myaction.sh\n"
-						"# If no path is specified, %s falls back "
-						"to the scripts directory \n"
-						"# ($XDG_HOME_CONFIG/clifm/profile/scripts)\n",
-						PROGRAM_NAME, PROGRAM_NAME, PROGRAM_NAME);
+				fprintf(actions_fp, "######################\n"
+					"# %s actions file #\n"
+					"######################\n\n"
+					"# Define here your custom actions. Actions are "
+					"custom command names\n"
+					"# binded to a shell script located in "
+					"$XDG_CONFIG_HOME/clifm/PROFILE/scripts.\n"
+					"# Actions can be executed directly from "
+					"%s command line, as if they\n"
+					"# were any other command, and the associated "
+					"script will be executed\n"
+					"# instead. All parameters passed to the action "
+					"command will be passed\n"
+					"# to the action script as well. Example:\n"
+					"#example=example.sh\n"
+					"# Uncomment the above line and try it.\n",
+					PROGRAM_NAME, PROGRAM_NAME);
 
 				fclose(actions_fp);
 			}
 		}
+
+		/* Create the example action script */
+		char *example = (char *)xnmalloc(strlen(SCRIPTS_DIR) + 12,
+										 sizeof(char));
+		sprintf(example, "%s/example.sh", SCRIPTS_DIR);
+
+		if (config_ok && stat(example, &file_attrib) == -1) {
+
+			FILE *example_fp = fopen(example, "w");
+
+			if (!example_fp) {
+				_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+					 example, strerror(errno));
+			}
+
+			else {
+				fprintf(example_fp, "#!/bin/sh\n\n"
+					"# This is a CliFM example action script\n\n"
+					"echo \"Profile: $CLIFM_PROFILE\n"
+					"PWD: \"$(pwd)\"\n"
+					"Script: $(basename \"$0\")\n"
+					"Parameters: \"$@\"\"\n\n"
+					"exit 0\n");
+				fclose(example_fp);
+			}
+
+			/* Make it executable */
+			char *chmod_cmd[] = { "chmod", "700", example, NULL };
+			launch_execve(chmod_cmd, FOREGROUND);
+		}
+
+		free(example);
 
 		/* #### CHECK THE MIME CONFIG FILE #### */
 		/* Open the mime file or create it, if it doesn't exist */
