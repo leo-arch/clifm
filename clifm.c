@@ -1,7 +1,7 @@
 
 			/** ########################################
 			 *  #			    CliFM			       #
-			 *  # The anti-eye-candy/KISS file manager # 
+			 *  # The anti-eye-candy/KISS file manager #
 			 *  ######################################## */
 
 /*
@@ -9,17 +9,17 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301, USA.
- * 
+ *
  */
 
 
@@ -39,25 +39,25 @@
 /* Linux */
 /* The only Linux-specific function I use, and the only function
  * requiring _GNU_SOURCE, is statx(), and only to get files creation
- * (birth) date in the properties function. 
+ * (birth) date in the properties function.
  * However, the statx() is conditionally added at compile time, so that,
  * if _BE_POSIX is defined (pass the -D_BE_POSIX option to the compiler),
  * the program will just ommit the call to the function, being thus
  * completely POSIX-2008 compliant. */
 
-/* DEFAULT_SOURCE enables strcasecmp() and realpath() functions, 
+/* DEFAULT_SOURCE enables strcasecmp() and realpath() functions,
 and DT_DIR (and company) and S_ISVTX macros */
 
 /* FreeBSD*/
-/* Up tp now, two features are disabled in FreeBSD: file capabilities and 
+/* Up tp now, two features are disabled in FreeBSD: file capabilities and
  * immutable bit checks */
 
 /* The following C libraries are located in /usr/include */
-#include <stdio.h> /* (f)printf, s(n)printf, scanf, fopen, fclose, remove, 
+#include <stdio.h> /* (f)printf, s(n)printf, scanf, fopen, fclose, remove,
 					fgetc, fputc, perror, rename, sscanf, getline */
 #include <string.h> /* str(n)cpy, str(n)cat, str(n)cmp, strlen, strstr,
 					memset */
-#include <stdlib.h> /* getenv, malloc, calloc, free, atoi, realpath, 
+#include <stdlib.h> /* getenv, malloc, calloc, free, atoi, realpath,
 					EXIT_FAILURE and EXIT_SUCCESS macros */
 #include <stdarg.h> /* va_list */
 #include <dirent.h> /* scandir */
@@ -80,7 +80,7 @@ and DT_DIR (and company) and S_ISVTX macros */
 #include <getopt.h> /* getopt_long */
 #include <fcntl.h> /* O_RDONLY, O_DIRECTORY, and AT_* macros */
 #include <readline/history.h>
-#include <readline/readline.h> 
+#include <readline/readline.h>
 /* Readline: This function allows the user to move back and forth with
  * the arrow keys in the prompt. I've tried scanf, getchar, getline,
  * fscanf, fgets, and none of them does the trick. Besides, readline
@@ -108,13 +108,9 @@ in FreeBSD, but is deprecated */
 #include "clifm.h" /* A few custom functions */
 
 
-#ifndef EXIT_SUCCESS
-# define EXIT_SUCCESS 0
-#endif
+#define EXIT_SUCCESS 0
 
-#ifndef EXIT_FAILURE
-#  define EXIT_FAILURE 1
-#endif
+#define EXIT_FAILURE 1
 
 #ifndef PATH_MAX
 # define PATH_MAX 4096
@@ -157,7 +153,7 @@ in FreeBSD, but is deprecated */
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "January 30, 2021"
+#define DATE "February 1, 2021"
 #define LICENSE "GPL2+"
 
 /* Define flags for program options and internal use */
@@ -183,7 +179,7 @@ static int flags;
 #define GRAPHICAL		(1 << 13)
 #define IS_USRVAR_DEF	(1 << 14) /* 18 dec, 0x12 hex, 00010010 binary */
 
-/* Used by log_msg() to know wether to tell prompt() to print messages or 
+/* Used by log_msg() to know wether to tell prompt() to print messages or
  * not */
 #define PRINT_PROMPT 1
 #define NOPRINT_PROMPT 0
@@ -196,13 +192,13 @@ static int flags;
 #define FOREGROUND 0
 
 /* ###COLORS### */
-/* These are just a fixed color stuff in the interface. Remaining colors 
+/* These are just a fixed color stuff in the interface. Remaining colors
  * are customizable and set via the config file */
 
 /* \x1b: hex value for escape char (alternative: ^[), dec == 27
- * \033: octal value for escape char 
+ * \033: octal value for escape char
  * \e is non-standard */
-#define blue "\x1b[1;34m" 
+#define blue "\x1b[1;34m"
 #define green "\x1b[1;32m"
 #define gray "\x1b[1;30m"
 #define white "\x1b[1;37m"
@@ -224,13 +220,13 @@ static int flags;
  * produce a displaying problem in lxterminal (though not in aterm and
  * xterm). */
 
-/* Replace some functions by my custom (faster, I think: NO!!) 
+/* Replace some functions by my custom (faster, I think: NO!!)
  * implementations. */
 /*#define strlen xstrlen // All calls to strlen will be replaced by a
  * call to xstrlen */
 #define strcpy xstrcpy
-#define strncpy xstrncpy 
-#define strcmp xstrcmp  
+#define strncpy xstrncpy
+#define strcmp xstrcmp
 #define strncmp xstrncmp
 /* #define atoi xatoi */
 /*#define alphasort xalphasort */
@@ -238,85 +234,117 @@ static int flags;
 
 
 				/** ##########################
-				 * #  FUNCTIONS PROTOTYPES  # 
+				 * #  FUNCTIONS PROTOTYPES  #
 				 * ##########################*/
 
-void signal_handler(int sig_num);
-char *xnmalloc(size_t nmemb, size_t size);
-void *xcalloc(size_t nmemb, size_t size);
-void *xrealloc(void *ptr, size_t size);
-void free_stuff(void);
-void set_signals_to_ignore(void);
-void set_signals_to_default(void);
+/* Initialization */
 void init_shell(void);
-void file_cmd_check(void);
-void splash(void);
-char **my_rl_completion(const char *text, int start, int end);
-char *my_rl_quote(char *text, int m_t, char *qp);
-char *dequote_str(char *text, int m_t);
-int quote_detector(char *line, int index);
-int is_quote_char(char c);
-char *filenames_generator(const char *text, int state);
-char *bin_cmd_generator(const char *text, int state);
-void get_path_programs(void);
-size_t get_path_env(void);
-int get_sel_files(void);
 void init_config(void);
 void exec_profile(void);
 void external_arguments(int argc, char **argv);
 void get_aliases(void);
 void get_prompt_cmds(void);
 void check_log_file_size(char *log_file);
-char **check_for_alias(char **comm);
-int get_history(void);
-void add_to_dirhist(const char *dir_path);
-char *home_tilde(const char *new_path);
-char **parse_input_str(char *str);
-int list_dir(void);
-int list_dir_light(void);
-char *prompt(void);
-int exec_cmd(char **comm);
+void get_path_programs(void);
+size_t get_path_env(void);
+int create_config(char *file);
+int set_shell(char *str);
+
+/* Memory */
+char *xnmalloc(size_t nmemb, size_t size);
+void *xcalloc(size_t nmemb, size_t size);
+void *xrealloc(void *ptr, size_t size);
+void free_stuff(void);
+
+/* Exec */
 int launch_execve(char **cmd, int bg);
 int launch_execle(const char *cmd);
-char *get_cmd_path(const char *cmd);
-int brace_expansion(const char *str);
 int run_in_foreground(pid_t pid);
 void run_in_background(pid_t pid);
+char **check_for_alias(char **comm);
+int exec_cmd(char **comm);
+
+/* Signals */
+void signal_handler(int sig_num);
+void set_signals_to_ignore(void);
+void set_signals_to_default(void);
+
+/* Readline */
+char **my_rl_completion(const char *text, int start, int end);
+char *my_rl_quote(char *text, int m_t, char *qp);
+int quote_detector(char *line, int index);
+int is_quote_char(char c);
+char *filenames_generator(const char *text, int state);
+char *bin_cmd_generator(const char *text, int state);
+void readline_kbinds(void);
+int readline_kbind_action(int count, int key);
+char *rl_no_hist(const char *prompt);
+char *bookmarks_generator(const char *text, int state);
+int initialize_readline(void);
+char *my_rl_path_completion(const char *text, int state);
+void keybind_exec_cmd(char *str);
+
+/* Scandir filters */
+int folder_select(const struct dirent *entry);
+int file_select(const struct dirent *entry);
+int skip_implied_dot(const struct dirent *entry);
+int skip_nonexec(const struct dirent *entry);
+
+/* Parsing */
+char *home_tilde(const char *new_path);
+char **parse_input_str(char *str);
+int brace_expansion(const char *str);
+int *expand_range(char *str, int listdir);
+char **split_str(char *str);
+int is_internal(const char *cmd);
+char *escape_str(char *str);
+int is_internal_c(const char *cmd);
+char **get_substr(char *str, const char ifs);
+char *savestring(const char *str, size_t size);
+char *dequote_str(char *text, int m_t);
+size_t u8_xstrlen(const char *str);
+
+/* Listing */
+int list_dir(void);
+int list_dir_light(void);
+
+/* Prompt */
+char *prompt(void);
+char *decode_prompt(char *line);
+
+/* Navigation */
+int back_function(char **comm);
+int forth_function(char **comm);
+int cd_function(char *new_path);
+int open_function(char **cmd);
+
+/* Files handling */
 int copy_function(char **comm);
 int run_and_refresh(char **comm);
-int properties_function(char **comm);
-int get_properties(char *filename, int _long, int max,
-				   size_t filename_len);
+int search_function(char **comm);
+int new_instance(char *dir);
+int list_mountpoints(void);
+int alias_import(char *file);
+void exec_chained_cmds(char *cmd);
+int edit_function(char **comm);
+
+/* Selection */
 int save_sel(void);
 int sel_function(char **comm);
 void show_sel_files(void);
 int deselect(char **comm);
-int search_function(char **comm);
+int get_sel_files(void);
+
+/* Bookmarks */
 int bookmarks_function(char **cmd);
 char **get_bookmarks(char *bookmarks_file);
 char **bm_prompt(void);
-size_t count_dir(const char *dir_path);
-char *rl_no_hist(const char *prompt);
-int log_function(char **comm);
-int history_function(char **comm);
-int run_history_cmd(const char *cmd);
-int edit_function(char **comm);
-void colors_list(const char *entry, const int i, const int pad, 
-				 const int new_line);
-int hidden_function(char **comm);
-void help_function(void);
-void color_codes(void);
-int list_commands(void);
-int folder_select(const struct dirent *entry);
-int file_select(const struct dirent *entry);
-int skip_implied_dot(const struct dirent *entry);
-void version_function(void);
-void bonus_function(void);
-char *parse_usrvar_value(const char *str, const char c);
-int create_usr_var(char *str);
-void readline_kbinds(void);
-int readline_kbind_action(int count, int key);
-void surf_hist(char **comm);
+int open_bookmark(char **cmd);
+int get_bm_names(void);
+int bookmark_del(char *name);
+int bookmark_add(char *file);
+
+/* Trash */
 int trash_function(char **comm);
 int trash_element(const char *suffix, struct tm *tm, char *file);
 int wx_parent_check(char *file);
@@ -325,57 +353,30 @@ int untrash_function(char **comm);
 int untrash_element(char *file);
 int trash_clear(void);
 int recur_perm_check(const char *dirname);
-int *expand_range(char *str, int listdir);
-void log_msg(char *msg, int print);
-void keybind_exec_cmd(char *str);
-int get_max_long_view(void);
-int list_mountpoints(void);
-int back_function(char **comm);
-int forth_function(char **comm);
-int cd_function(char *new_path);
-int open_function(char **cmd);
-size_t u8_xstrlen(const char *str);
-void free_software(void);
-char **split_str(char *str);
-int is_internal(const char *cmd);
-char *escape_str(char *str);
-void set_default_options(void);
-void set_colors (void);
-int is_color_code(char *str);
-char **get_substr(char *str, const char ifs);
-int set_shell(char *str);
-void exec_chained_cmds(char *cmd);
-int is_internal_c(const char *cmd);
-int open_bookmark(char **cmd);
-int get_bm_names(void);
-char *bookmarks_generator(const char *text, int state);
-int initialize_readline(void);
-int bookmark_del(char *name);
-int bookmark_add(char *file);
-char *savestring(const char *str, size_t size);
-char *my_rl_path_completion(const char *text, int state);
-int get_link_ref(const char *link);
+
+/* Mime */
 int mime_open(char **args);
 int mime_import(char *file);
 int mime_edit(char **args);
 char *get_mime(char *file);
 char *get_app(char *mime, char *ext);
+
+/* Profile */
 int profile_function(char ** comm);
 int profile_add(char *prof);
 int profile_del(char *prof);
 int profile_set(char *prof);
 int get_profile_names(void);
 char *profiles_generator(const char *text, int state);
-char *decode_prompt(char *line);
-int alias_import(char *file);
+
+/* History */
+int history_function(char **comm);
+int run_history_cmd(const char *cmd);
+void surf_hist(char **comm);
+int get_history(void);
+void add_to_dirhist(const char *dir_path);
 int record_cmd(char *input);
 void add_to_cmdhist(char *cmd);
-int _err(int msg_type, int prompt, const char *format, ...);
-int new_instance(char *dir);
-int *get_hex_num(char *str);
-int create_config(char *file);
-int skip_nonexec(const struct dirent *entry);
-void print_tips(int all);
 
 /* Sorting functions */
 int sort_function(char **arg);
@@ -393,18 +394,60 @@ int btime_sort(const struct dirent **a, const struct dirent **b);
 int ctime_sort(const struct dirent **a, const struct dirent **b);
 int mtime_sort(const struct dirent **a, const struct dirent **b);
 
+/* Archiving and compression */
 int bulk_rename(char **args);
 int archiver(char **args, char mode);
 int zstandard(char *in_file, char *out_file, char mode, char op);
-int is_compressed(char *file, int check_iso);
+int is_compressed(char *file, int test_iso);
 int check_iso(char *file);
 int handle_iso(char *file);
 int create_iso(char *file, char *out_file);
 
-/* Still under development */
+/* Logs */
+int log_function(char **comm);
+void log_msg(char *msg, int print);
+int _err(int msg_type, int prompt, const char *format, ...);
+
+/* Remote connections: Still under development */
 int remote_ssh(char *address, char *options);
 int remote_smb(char *address, char *options);
 int remote_ftp(char *address, char *options);
+
+/* Properties */
+int properties_function(char **comm);
+int get_properties(char *filename, int _long, int max,
+				   size_t filename_len);
+
+/* User variables */
+char *parse_usrvar_value(const char *str, const char c);
+int create_usr_var(char *str);
+
+/* Printing functions */
+void splash(void);
+void version_function(void);
+void bonus_function(void);
+void colors_list(const char *entry, const int i, const int pad,
+				 const int new_line);
+int hidden_function(char **comm);
+void help_function(void);
+void color_codes(void);
+int list_commands(void);
+void free_software(void);
+void print_tips(int all);
+
+/* Checks */
+char *get_cmd_path(const char *cmd);
+size_t count_dir(const char *dir_path);
+off_t dir_size(char *dir);
+void file_cmd_check(void);
+int get_max_long_view(void);
+int is_color_code(char *str);
+int get_link_ref(const char *link);
+int *get_hex_num(char *str);
+
+/* Colors */
+void set_default_options(void);
+void set_colors (void);
 
 
 				/** ##########################
@@ -481,7 +524,7 @@ enum prog_msg pmsg = nomsg;
  * variables are automatically initialized by the compiler */
 
 short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
-	show_hidden = -1, clear_screen = -1, shell_terminal = 0, pager = -1, 
+	show_hidden = -1, clear_screen = -1, shell_terminal = 0, pager = -1,
 	no_log = 0, internal_cmd = 0, list_folders_first = -1,
 	case_sensitive = -1, cd_lists_on_the_fly = -1, share_selbox = -1,
 	recur_perm_error_flag = 0, is_sel = 0, sel_is_last = 0, print_msg = 0,
@@ -493,8 +536,8 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 	/* -1 means non-initialized or unset. Once initialized, these variables
 	 * are always either zero or one */
 /*	sel_no_sel=0 */
-/* A short int accepts values from -32,768 to 32,767, and since all the 
- * above variables will take -1, 0, and 1 as values, a short int is more 
+/* A short int accepts values from -32,768 to 32,767, and since all the
+ * above variables will take -1, 0, and 1 as values, a short int is more
  * than enough. Now, since short takes 2 bytes of memory, using int for
  * these variables would be a waste of 2 bytes (since an int takes 4 bytes).
  * I can even use char (or signed char), which takes only 1 byte (8 bits)
@@ -503,35 +546,36 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 * can hold, the result of a comparison with this variable will always be
 * true */
 
-int max_hist = -1, max_log = -1, dirhist_total_index = 0, 
-	dirhist_cur_index = 0, argc_bk = 0, max_path = -1, exit_code = 0, 
+int max_hist = -1, max_log = -1, dirhist_total_index = 0,
+	dirhist_cur_index = 0, argc_bk = 0, max_path = -1, exit_code = 0,
 	shell_is_interactive = 0, cont_bt = 0, sort_types = 7;
 
 unsigned short term_cols = 0;
 
-size_t user_home_len = 0, args_n = 0, sel_n = 0, trash_n = 0, msgs_n = 0, 
-	   prompt_cmds_n = 0, path_n = 0, current_hist_n = 0, usrvar_n = 0, 
+size_t user_home_len = 0, args_n = 0, sel_n = 0, trash_n = 0, msgs_n = 0,
+	   prompt_cmds_n = 0, path_n = 0, current_hist_n = 0, usrvar_n = 0,
 	   aliases_n = 0, longest = 0, files = 0, eln_len = 0;
 
 struct termios shell_tmodes;
+off_t total_sel_size = 0;
 pid_t own_pid = 0;
 struct usrvar_t *usr_var = (struct usrvar_t *)NULL;
 struct param xargs;
-char *user = (char *)NULL, *path = (char *)NULL, 
-	**sel_elements = (char **)NULL, *qc = (char *)NULL,	
-	*sel_file_user = (char *)NULL, **paths = (char **)NULL, 
-	**bin_commands = (char **)NULL, **history = (char **)NULL, 
+char *user = (char *)NULL, *path = (char *)NULL,
+	**sel_elements = (char **)NULL, *qc = (char *)NULL,
+	*sel_file_user = (char *)NULL, **paths = (char **)NULL,
+	**bin_commands = (char **)NULL, **history = (char **)NULL,
 	*file_cmd_path = (char *)NULL, **braces = (char **)NULL,
-	*alt_profile = (char *)NULL, **prompt_cmds = (char **)NULL, 
-	**aliases = (char **)NULL, **argv_bk = (char **)NULL, 
-	*user_home = (char *)NULL, **messages = (char **)NULL, 
+	*alt_profile = (char *)NULL, **prompt_cmds = (char **)NULL,
+	**aliases = (char **)NULL, **argv_bk = (char **)NULL,
+	*user_home = (char *)NULL, **messages = (char **)NULL,
 	*msg = (char *)NULL, *CONFIG_DIR = (char *)NULL,
-	*CONFIG_FILE = (char *)NULL, *BM_FILE = (char *)NULL, 
-	hostname[HOST_NAME_MAX] = "", *LOG_FILE = (char *)NULL, 
-	*LOG_FILE_TMP = (char *)NULL, *HIST_FILE = (char *)NULL, 
-	*MSG_LOG_FILE = (char *)NULL, *PROFILE_FILE = (char *)NULL, 
-	*TRASH_DIR = (char *)NULL, *TRASH_FILES_DIR = (char *)NULL, 
-	*TRASH_INFO_DIR = (char *)NULL, *sys_shell = (char *)NULL, 
+	*CONFIG_FILE = (char *)NULL, *BM_FILE = (char *)NULL,
+	hostname[HOST_NAME_MAX] = "", *LOG_FILE = (char *)NULL,
+	*LOG_FILE_TMP = (char *)NULL, *HIST_FILE = (char *)NULL,
+	*MSG_LOG_FILE = (char *)NULL, *PROFILE_FILE = (char *)NULL,
+	*TRASH_DIR = (char *)NULL, *TRASH_FILES_DIR = (char *)NULL,
+	*TRASH_INFO_DIR = (char *)NULL, *sys_shell = (char *)NULL,
 	**dirlist = (char **)NULL, **bookmark_names = (char **)NULL,
 	*ls_colors_bk = (char *)NULL, *MIME_FILE = (char *)NULL,
 	**profile_names = (char **)NULL, *encoded_prompt = (char *)NULL,
@@ -542,11 +586,11 @@ char *user = (char *)NULL, *path = (char *)NULL,
 	/* This is not a comprehensive list of commands. It only lists
 	 * commands long version for TAB completion */
 const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
-		"move", "paste", "sel", "selbox", "desel", "refresh", 
-		"edit", "history", "hidden", "path", "help", "commands", 
-		"colors", "version", "splash", "folders first", "opener", 
-		"exit", "quit", "pager", "trash", "undel", "messages", 
-		"mountpoints", "bookmarks", "log", "untrash", "unicode", 
+		"move", "paste", "sel", "selbox", "desel", "refresh",
+		"edit", "history", "hidden", "path", "help", "commands",
+		"colors", "version", "splash", "folders first", "opener",
+		"exit", "quit", "pager", "trash", "undel", "messages",
+		"mountpoints", "bookmarks", "log", "untrash", "unicode",
 		"profile", "shell", "mime", "sort", "tips", "autocd",
 		"auto-open", NULL };
 
@@ -568,8 +612,8 @@ const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
  * dynamically allocated arrays for them */
 
 /* Some interface colors */
-char text_color[MAX_COLOR + 2] = "", eln_color[MAX_COLOR] = "", 
-	 default_color[MAX_COLOR] = "", dir_count_color[MAX_COLOR] = "", 
+char text_color[MAX_COLOR + 2] = "", eln_color[MAX_COLOR] = "",
+	 default_color[MAX_COLOR] = "", dir_count_color[MAX_COLOR] = "",
 	 div_line_color[MAX_COLOR] = "", welcome_msg_color[MAX_COLOR] = "";
 /* text_color is used in the command line, and readline needs to know
  * that color codes are not printable chars. For this we need to add
@@ -601,9 +645,9 @@ char di_c[MAX_COLOR] = "", /* Directory */
 	no_c[MAX_COLOR] = ""; /* Unknown */
 
 
-				/** 
+				/**
 				 * #############################
-				 * #           MAIN            # 
+				 * #           MAIN            #
 				 * #############################
 				 * */
 
@@ -622,16 +666,16 @@ main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	#endif /* __x86_64__ */
 
-	/* Though this program might perfectly work on other OSes, especially 
+	/* Though this program might perfectly work on other OSes, especially
 	 * Unices, I just didn't make any test */
 	#if !defined __linux__  && !defined linux && !defined __linux \
 	&& !defined __gnu_linux__ && !defined __FreeBSD__
-		fprintf(stderr, "%s: Unsupported operating system\n", 
+		fprintf(stderr, "%s: Unsupported operating system\n",
 				PROGRAM_NAME);
 		exit(EXIT_FAILURE);
 	#endif
 
-	/* What about unices like BSD, Android and even MacOS? 
+	/* What about unices like BSD, Android and even MacOS?
 	* unix || __unix || __unix__
 	* __NetBSD__, __OpenBSD__, __bdsi__, __DragonFly__
 	* __APPLE__ && __MACH__
@@ -660,7 +704,7 @@ main(int argc, char **argv)
 
 				/* #################################
 				 * #     1) INITIALIZATION		   #
-				 * #  Basic config and variables   # 
+				 * #  Basic config and variables   #
 				 * #################################*/
 
 	/* If running the program locally, that is, not from a path in PATH,
@@ -669,9 +713,9 @@ main(int argc, char **argv)
 	if (*argv[0] == '.' && *(argv[0] + 1) == '/')
 		argv[0] += 2;
 
-	/* Use the locale specified by the environment. By default (ANSI C), 
-	 * all programs start in the standard 'C' (== 'POSIX') locale. This 
-	 * function makes the program portable to all locales (See man (3) 
+	/* Use the locale specified by the environment. By default (ANSI C),
+	 * all programs start in the standard 'C' (== 'POSIX') locale. This
+	 * function makes the program portable to all locales (See man (3)
 	 * setlocale). It affects characters handling functions like
 	 * toupper(), tolower(), alphasort() (since it uses strcoll()), and
 	 * strcoll() itself, among others. Here, it's important to correctly
@@ -679,7 +723,7 @@ main(int argc, char **argv)
 	 * locale. If the function fails, the default locale ("C") is not
 	 * changed */
 	setlocale(LC_ALL, "");
-	/* To query the current locale, use NULL as second argument to 
+	/* To query the current locale, use NULL as second argument to
 	 * setlocale(): printf("Locale: %s\n", setlocale(LC_CTYPE, NULL)); */
 
 	/* If the locale isn't English, set 'unicode' to true to correctly
@@ -709,7 +753,7 @@ main(int argc, char **argv)
 	 * executed when abnormally exiting the program, eg., via the KILL
 	 * signal */
 	atexit(free_stuff);
-	
+
 	/* Get user's home directory */
 	user_home = get_user_home();
 	if (!user_home || access(user_home, W_OK) == -1) {
@@ -743,7 +787,7 @@ main(int argc, char **argv)
 
 	/* Running in X? */
 	#if __linux__
-	if (getenv("DISPLAY") != NULL 
+	if (getenv("DISPLAY") != NULL
 	&& strncmp(getenv("TERM"), "linux", 5) != 0)
 	#else
 	if (getenv("DISPLAY") != NULL)
@@ -756,7 +800,7 @@ main(int argc, char **argv)
 	/* Copy the list of quote chars to a global variable to be used
 	 * later by some of the program functions like split_str(),
 	 * my_rl_quote(), is_quote_char(), and my_rl_dequote() */
-	qc = (char *)xcalloc(strlen(rl_filename_quote_characters) + 1, 
+	qc = (char *)xcalloc(strlen(rl_filename_quote_characters) + 1,
 						 sizeof(char));
 	strcpy(qc, rl_filename_quote_characters);
 
@@ -783,7 +827,7 @@ main(int argc, char **argv)
 
 	/* Initialize program paths and files, set options from the config
 	 * file, if they were not already set via external arguments, and
-	 * load sel elements, if any. All these configurations are made per 
+	 * load sel elements, if any. All these configurations are made per
 	 * user basis */
 	init_config();
 
@@ -811,29 +855,29 @@ main(int argc, char **argv)
 	/* Get hostname */
 	if (gethostname(hostname, sizeof(hostname)) == -1) {
 		strcpy(hostname, "???");
-		_err('w', PRINT_PROMPT, _("%s: Error getting hostname\n"), 
+		_err('w', PRINT_PROMPT, _("%s: Error getting hostname\n"),
 			 PROGRAM_NAME);
 	}
 
 	/* Initialize the shell */
 	init_shell();
 
-	exec_profile();	
-	
+	exec_profile();
+
 	if (config_ok) {
 
 		/* Limit the log files size */
 		check_log_file_size(LOG_FILE);
 		check_log_file_size(MSG_LOG_FILE);
-	
+
 		/* Get history */
 		struct stat file_attrib;
-		if (stat(HIST_FILE, &file_attrib) == 0 
+		if (stat(HIST_FILE, &file_attrib) == 0
 		&& file_attrib.st_size != 0) {
 		/* If the size condition is not included, and in case of a zero
 		 * size file, read_history() gives malloc errors */
 			/* Recover history from the history file */
-			read_history(HIST_FILE); /* This line adds more leaks to 
+			read_history(HIST_FILE); /* This line adds more leaks to
 			readline */
 			/* Limit the size of the history file to max_hist lines */
 			history_truncate_file(HIST_FILE, max_hist);
@@ -854,7 +898,7 @@ main(int argc, char **argv)
 			}
 		}
 	}
-	
+
 	/* Store history into an array to be able to manipulate it */
 	get_history();
 
@@ -867,7 +911,7 @@ main(int argc, char **argv)
 		CLEAR;
 	}
 
-	/* If path was not set (neither in the config file nor via command 
+	/* If path was not set (neither in the config file nor via command
 	 * line, that is, as external argument), set the default (CWD), and
 	 * if CWD is not set, use the user's home directory, and if the home
 	 * cannot be found either, try the root directory, and if there's no
@@ -889,7 +933,7 @@ main(int argc, char **argv)
 			}
 			else {
 				if (access("/", R_OK|X_OK) == -1) {
-					fprintf(stderr, "%s: '/': %s\n", PROGRAM_NAME, 
+					fprintf(stderr, "%s: '/': %s\n", PROGRAM_NAME,
 							strerror(errno));
 					exit(EXIT_FAILURE);
 				}
@@ -901,7 +945,7 @@ main(int argc, char **argv)
 		}
 		else {
 			path = (char*)xcalloc(strlen(cwd) + 1, sizeof(char));
-			strcpy(path, cwd);		
+			strcpy(path, cwd);
 		}
 	}
 
@@ -930,7 +974,7 @@ main(int argc, char **argv)
 	}
 	else {
 		add_to_dirhist(path);
-		if (cd_lists_on_the_fly) 
+		if (cd_lists_on_the_fly)
 			list_dir();
 	}
 
@@ -939,15 +983,15 @@ main(int argc, char **argv)
 	get_path_programs();
 
 	get_bm_names();
-	
+
 	get_profile_names();
 
 
 				/* ###########################
-				 * #   2) MAIN PROGRAM LOOP  # 
+				 * #   2) MAIN PROGRAM LOOP  #
 				 * ########################### */
 
-	/* This is the main structure of any basic shell 
+	/* This is the main structure of any basic shell
 	1 - Infinite loop
 	2 - Grab user input
 	3 - Parse user input
@@ -988,13 +1032,13 @@ main(int argc, char **argv)
 
 		else {
 			exec_cmd(cmd); /* Execute command */
-			for (i = 0; i <= args_n; i++) 
+			for (i = 0; i <= args_n; i++)
 				free(cmd[i]);
 			free(cmd);
 			cmd = (char **)NULL;
 		}
 	}
-	
+
 	return exit_code; /* Never reached */
 }
 
@@ -1127,7 +1171,7 @@ handle_iso(char *file)
 			/* 7z x -oDIR FILE (use FILE as DIR) */
 			char *o_option = (char *)xnmalloc(strlen(file) + 7,
 										sizeof(char));
-			sprintf(o_option, "-o%s.dir", file); 
+			sprintf(o_option, "-o%s.dir", file);
 
 			/* Construct and execute cmd */
 			char *cmd[] = { "7z", "x", o_option, file, NULL };
@@ -1158,7 +1202,7 @@ handle_iso(char *file)
 
 			char *o_option = (char *)xnmalloc(strlen(ext_path) + 3,
 										sizeof(char));
-			sprintf(o_option, "-o%s", ext_path); 
+			sprintf(o_option, "-o%s", ext_path);
 
 			/* Construct and execute cmd */
 			char *cmd[] = { "7z", "x", o_option, file, NULL };
@@ -1181,7 +1225,7 @@ handle_iso(char *file)
 				exit_status = EXIT_FAILURE;
 			}
 		break;
-		
+
 		/* ########## MOUNT ####### */
 
 		case 'm': {
@@ -1261,13 +1305,13 @@ check_iso(char *file)
 		fputs(_("Error opening temporary file\n"), stderr);
 		return -1;
 	}
-	
+
 	char ISO_TMP_FILE[PATH_MAX] = "";
 	sprintf(ISO_TMP_FILE, "%s/archiver_tmp", TMP_DIR);
 
 	if (access(ISO_TMP_FILE, F_OK) == 0)
 		remove(ISO_TMP_FILE);
-	
+
 	FILE *file_fp = fopen(ISO_TMP_FILE, "w");
 
 	if (!file_fp) {
@@ -1295,7 +1339,7 @@ check_iso(char *file)
 		fclose(file_fp_err);
 		return -1;
 	}
-	
+
 	/* Redirect stderr to /dev/null */
 	if (dup2(fileno(file_fp_err), STDERR_FILENO) == -1) {
 		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
@@ -1303,19 +1347,19 @@ check_iso(char *file)
 		fclose(file_fp_err);
 		return -1;
 	}
-	
+
 	fclose(file_fp);
 	fclose(file_fp_err);
 
 	char *cmd[] = { "file", "-b", file, NULL };
-	int ret = launch_execve(cmd, FOREGROUND);
-	
+	int retval = launch_execve(cmd, FOREGROUND);
+
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
 	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
 	close(stdout_bk);
 	close(stderr_bk);
 
-	if (ret != EXIT_SUCCESS)
+	if (retval != EXIT_SUCCESS)
 		return -1;
 
 	int is_iso = 0;
@@ -1429,7 +1473,7 @@ print_tips(int all)
 	if (all) {
 		size_t i;
 		for (i = 0; i < tipsn; i++)
-			printf("%sTIP %d%s: %s\n", bold, i, NC, TIPS[i]);
+			printf("%sTIP %zu%s: %s\n", bold, i, NC, TIPS[i]);
 
 		return;
 	}
@@ -1439,11 +1483,11 @@ print_tips(int all)
 }
 
 int
-is_compressed(char *file, int check_iso)
+is_compressed(char *file, int test_iso)
 /* Run the 'file' command on FILE and look for "archive" and
  * "compressed" strings in its output. Returns zero if compressed,
  * one if not, and -1 in case of error.
- * check_iso is used to determine if ISO files should be checked as
+ * test_iso is used to determine if ISO files should be checked as
  * well: this is the case when called from open_function() or
  * mime_open(), since both need to check compressed and ISOs as
  * well (and there is no need to run two functions (is_compressed and
@@ -1453,13 +1497,13 @@ is_compressed(char *file, int check_iso)
 		fputs(_("Error opening temporary file\n"), stderr);
 		return -1;
 	}
-	
+
 	char ARCHIVER_TMP_FILE[PATH_MAX] = "";
 	sprintf(ARCHIVER_TMP_FILE, "%s/archiver_tmp", TMP_DIR);
 
 	if (access(ARCHIVER_TMP_FILE, F_OK) == 0)
 		remove(ARCHIVER_TMP_FILE);
-	
+
 	FILE *file_fp = fopen(ARCHIVER_TMP_FILE, "w");
 
 	if (!file_fp) {
@@ -1487,7 +1531,7 @@ is_compressed(char *file, int check_iso)
 		fclose(file_fp_err);
 		return -1;
 	}
-	
+
 	/* Redirect stderr to /dev/null */
 	if (dup2(fileno(file_fp_err), STDERR_FILENO) == -1) {
 		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
@@ -1495,19 +1539,19 @@ is_compressed(char *file, int check_iso)
 		fclose(file_fp_err);
 		return -1;
 	}
-	
+
 	fclose(file_fp);
 	fclose(file_fp_err);
 
 	char *cmd[] = { "file", "-b", file, NULL };
-	int ret = launch_execve(cmd, FOREGROUND);
-	
+	int retval = launch_execve(cmd, FOREGROUND);
+
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
 	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
 	close(stdout_bk);
 	close(stderr_bk);
 
-	if (ret != EXIT_SUCCESS)
+	if (retval != EXIT_SUCCESS)
 		return -1;
 
 	int compressed = 0;
@@ -1525,7 +1569,7 @@ is_compressed(char *file, int check_iso)
 				ret = strstr(line, "compressed");
 				if (ret)
 					compressed = 1;
-				else if (check_iso) {
+				else if (test_iso) {
 					ret = strstr(line, "ISO 9660");
 					if (ret)
 						compressed = 1;
@@ -1637,7 +1681,7 @@ zstandard(char *in_file, char *out_file, char mode, char op)
 					exit_status = EXIT_FAILURE;
 			}
 			break;
-			
+
 			case 'i': {
 				char *cmd[] = { "zstd", "-l", deq_file, NULL };
 				if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
@@ -1655,7 +1699,7 @@ zstandard(char *in_file, char *out_file, char mode, char op)
 				operation = (char *)NULL;
 			break;
 		}
-	}	
+	}
 
 	free(operation);
 	free(deq_file);
@@ -1672,7 +1716,7 @@ archiver(char **args, char mode)
  * files 'atool' and 'archivemount' for the remaining types. */
 {
 	size_t i;
-	int uncompressed = 0, exit_status = EXIT_SUCCESS;
+	int exit_status = EXIT_SUCCESS;
 
 	if (!args[1])
 		return EXIT_FAILURE;
@@ -1842,9 +1886,9 @@ archiver(char **args, char mode)
 	for (i = 1; args[i]; i++) {
 		files_num++;
 		if (args[i][strlen(args[i]) -1] == 't') {
-			char *ret = strrchr(args[i], '.');
-			if (ret) {
-				if (strcmp(ret, ".zst") == 0)
+			char *retval = strrchr(args[i], '.');
+			if (retval) {
+				if (strcmp(retval, ".zst") == 0)
 					zst_index = i;
 			}
 		}
@@ -1894,7 +1938,7 @@ archiver(char **args, char mode)
 
 			for (i = 1; args[i]; i++) {
 				if (zstandard(args[i], NULL, 'd', sel_op)
-				!= EXIT_SUCCESS);
+				!= EXIT_SUCCESS)
 					exit_status = EXIT_FAILURE;
 			}
 
@@ -2217,7 +2261,7 @@ bulk_rename(char **args)
 
 	bulk_fp = fopen(BULK_FILE, "w+");
 	if (!bulk_fp) {
-		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", BULK_FILE, 
+		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", BULK_FILE,
 			 strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -2267,7 +2311,7 @@ bulk_rename(char **args)
 	/* Open the bulk file via the mime function */
 	char *cmd[] = { "mm", BULK_FILE, NULL };
 	mime_open(cmd);
-	
+
 	/* Restore stderr to previous value */
 	dup2(stderr_bk, STDERR_FILENO);
 	close(stderr_bk);
@@ -2367,7 +2411,7 @@ bulk_rename(char **args)
 				free(answer);
 				free(line);
 				fclose(bulk_fp);
-				return EXIT_SUCCESS; 
+				return EXIT_SUCCESS;
 
 			default:
 				free(answer);
@@ -2385,13 +2429,17 @@ bulk_rename(char **args)
 
 	/* Compose the mv commands and execute them */
 	while ((line_len = getline(&line, &line_size, bulk_fp)) > 0) {
+
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = 0x00;
+
 		if (strcmp(args[i], line) != 0) {
-			char *cmd[] = { "mv", args[i], line, NULL };
-			if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+			char *tmp_cmd[] = { "mv", args[i], line, NULL };
+
+			if (launch_execve(tmp_cmd, FOREGROUND) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 		}
+
 		i++;
 	}
 
@@ -2534,7 +2582,7 @@ sort_function(char **arg)
 				if (sort_reverse)
 					sort_reverse = 0;
 				else
-					sort_reverse = 1;			
+					sort_reverse = 1;
 			}
 
 			if (cd_lists_on_the_fly) {
@@ -2561,15 +2609,15 @@ sort_function(char **arg)
 
 int
 xalphasort(const struct dirent **a, const struct dirent **b)
-/* Same as alphasort, but is uses strcmp instead of sctroll, which is 
- * slower. However, bear in mind that, unlike strcmp(), strcoll() is locale 
+/* Same as alphasort, but is uses strcmp instead of sctroll, which is
+ * slower. However, bear in mind that, unlike strcmp(), strcoll() is locale
  * aware. Use only with C and english locales */
 {
 	int ret = 0;
 
-	/* The if statements prevent strcmp from running in every 
-	 * call to the function (it will be called only if the first 
-	 * character of the two strings is the same), which makes the 
+	/* The if statements prevent strcmp from running in every
+	 * call to the function (it will be called only if the first
+	 * character of the two strings is the same), which makes the
 	 * function faster */
 	if ((*a)->d_name[0] > (*b)->d_name[0])
 		ret = 1;
@@ -2618,7 +2666,7 @@ atime_sort(const struct dirent **a, const struct dirent **b)
 	if (!sort_reverse)
 		return ret;
 
-	return (ret - (ret * 2));	
+	return (ret - (ret * 2));
 }
 
 int
@@ -2641,7 +2689,7 @@ btime_sort(const struct dirent **a, const struct dirent **b)
 					(*b)->d_name, strerror(errno));
 			return 0;
 		}
-		
+
 		if (atta.st_birthtime > attb.st_birthtime)
 			ret = 1;
 
@@ -2705,7 +2753,7 @@ ctime_sort(const struct dirent **a, const struct dirent **b)
 		fprintf(stderr, _("stat: cannot access '%s': %s\n"),
 				(*b)->d_name, strerror(errno));
 		return 0;
-	}	
+	}
 	if (atta.st_ctim.tv_sec > attb.st_ctim.tv_sec)
 		ret = 1;
 
@@ -2738,7 +2786,7 @@ mtime_sort(const struct dirent **a, const struct dirent **b)
 		fprintf(stderr, _("stat: cannot access '%s': %s\n"),
 				(*b)->d_name, strerror(errno));
 		return 0;
-	}	
+	}
 	if (atta.st_mtim.tv_sec > attb.st_mtim.tv_sec)
 		ret = 1;
 
@@ -2844,10 +2892,10 @@ remote_ftp(char *address, char *options)
 
 	if (!address || !*address)
 		return EXIT_FAILURE;
-	
+
 	char *tmp_addr = (char *)xnmalloc(strlen(address) + 1, sizeof(char));
 	strcpy(tmp_addr, address);
-	
+
 	char *p = tmp_addr;
 	while (*p) {
 		if (*p == '/')
@@ -2878,30 +2926,30 @@ remote_ftp(char *address, char *options)
 		free(rmountpoint);
 		return EXIT_FAILURE;
 	}
-	
+
 	/* CurlFTPFS does not require sudo */
 	char *cmd[] = { "curlftpfs", address, rmountpoint, (options) ? "-o"
 					: NULL, (options) ? options: NULL, NULL };
 	int error_code = launch_execve(cmd, FOREGROUND);
-	
+
 	if (error_code) {
 		free(rmountpoint);
 		return EXIT_FAILURE;
 	}
-	
+
 	if (chdir(rmountpoint) != 0) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rmountpoint,
 				strerror(errno));
 		free(rmountpoint);
 		return EXIT_FAILURE;
 	}
-	
+
 	free(path);
 	path = (char *)xnmalloc(strlen(rmountpoint) + 1, sizeof(char));
 	strcpy(path, rmountpoint);
-	
+
 	free(rmountpoint);
-	
+
 	if (cd_lists_on_the_fly) {
 		while (files--)
 			free(dirlist[files]);
@@ -2910,7 +2958,7 @@ remote_ftp(char *address, char *options)
 	}
 
 	return error_code;
-	
+
 }
 
 int
@@ -2926,7 +2974,7 @@ remote_smb(char *address, char *options)
 
 	if (!address || !*address)
 		return EXIT_FAILURE;
-	
+
 	int free_address = 0;
 	char *ruser = (char *)NULL, *raddress = (char *)NULL;
 	char *tmp = strchr(address, '@');
@@ -2934,7 +2982,7 @@ remote_smb(char *address, char *options)
 		*tmp = 0x00;
 		ruser = (char *)xnmalloc(strlen(address) + 1, sizeof(char));
 		strcpy(ruser, address);
-		
+
 		raddress = (char *)xnmalloc(strlen(tmp + 1) + 1, sizeof(char));
 		strcpy(raddress, tmp + 1);
 		free_address = 1;
@@ -2957,7 +3005,7 @@ remote_smb(char *address, char *options)
 										 + strlen(TMP_DIR)
 										 + 9, sizeof(char));
 	sprintf(rmountpoint, "%s/remote/%s", TMP_DIR, raddress);
-	
+
 	int free_options = 0;
 	char *roptions = (char *)NULL;
 	if (ruser) {
@@ -2990,7 +3038,7 @@ remote_smb(char *address, char *options)
 
 	/* If the mountpoint already exists, check if it is empty */
 	else if (count_dir(rmountpoint) > 2) {
-		fprintf(stderr, _("%s: '%s': Mountpoint not empty\n"), 
+		fprintf(stderr, _("%s: '%s': Mountpoint not empty\n"),
 				PROGRAM_NAME, rmountpoint);
 		if (free_options)
 			free(roptions);
@@ -3006,8 +3054,8 @@ remote_smb(char *address, char *options)
 	int error_code = 1;
 	/* Create and execute the SMB command */
 	if (!(flags & ROOT_USR)) {
-		char *cmd[] = { "sudo", "-u", "root", "mount.cifs", addr_tmp, 
-						rmountpoint, (roptions) ? "-o" : NULL, 
+		char *cmd[] = { "sudo", "-u", "root", "mount.cifs", addr_tmp,
+						rmountpoint, (roptions) ? "-o" : NULL,
 						(roptions) ? roptions : NULL, NULL };
 		error_code = launch_execve(cmd, FOREGROUND);
 	}
@@ -3042,9 +3090,9 @@ remote_smb(char *address, char *options)
 	free(path);
 	path = (char *)xnmalloc(strlen(rmountpoint) + 1, sizeof(char));
 	strcpy(path, rmountpoint);
-	
+
 	free(rmountpoint);
-	
+
 	if (cd_lists_on_the_fly) {
 		while (files--)
 			free(dirlist[files]);
@@ -3063,7 +3111,7 @@ remote_ssh(char *address, char *options)
 			PROGRAM_NAME);
 	return EXIT_FAILURE;
 	#endif
-	
+
 	if (!config_ok)
 		return EXIT_FAILURE;
 
@@ -3090,11 +3138,11 @@ remote_ssh(char *address, char *options)
 		p++;
 	}
 
-	char *rmountpoint = (char *)xnmalloc(strlen(TMP_DIR) + strlen(rname) 
+	char *rmountpoint = (char *)xnmalloc(strlen(TMP_DIR) + strlen(rname)
 										 + 9, sizeof(char));
 	sprintf(rmountpoint, "%s/remote/%s", TMP_DIR, rname);
 	free(rname);
-	
+
 	/* If the mountpoint doesn't exist, create it */
 	struct stat file_attrib;
 	if (stat(rmountpoint, &file_attrib) == -1) {
@@ -3115,9 +3163,9 @@ remote_ssh(char *address, char *options)
 		free(rmountpoint);
 		return EXIT_FAILURE;
 	}
-	
+
 	/* Construct the command */
-	
+
 	int error_code = 1;
 
 	if ((flags & ROOT_USR)) {
@@ -3126,12 +3174,12 @@ remote_ssh(char *address, char *options)
 		error_code = launch_execve(cmd, FOREGROUND);
 	}
 	else {
-		char *cmd[] = { "sudo", "sshfs", address, rmountpoint, "-o", 
+		char *cmd[] = { "sudo", "sshfs", address, rmountpoint, "-o",
 						"allow_other", (options) ? "-o" : NULL,
 						(options) ? options : NULL, NULL};
 		error_code = launch_execve(cmd, FOREGROUND);
 	}
-	
+
 	if (error_code != EXIT_SUCCESS) {
 		free(rmountpoint);
 		return EXIT_FAILURE;
@@ -3324,7 +3372,7 @@ ClearScreen=false\n\n"
 
 "# If not specified, StartingPath defaults to the current working directory.\n\
 StartingPath=\n\n"
-"#END OF OPTIONS\n\n", 
+"#END OF OPTIONS\n\n",
 
 			DEFAULT_TERM_CMD);
 
@@ -3340,7 +3388,7 @@ StartingPath=\n\n"
 "#END OF PROMPT COMMANDS\n\n", config_fp);
 
 	fclose(config_fp);
-	
+
 	return EXIT_SUCCESS;
 }
 
@@ -3487,7 +3535,7 @@ add_to_cmdhist(char *cmd)
 	add_history(cmd);
 	if (config_ok)
 		append_history(1, HIST_FILE);
-	
+
 	/* For us */
 	/* Add the new input to the history array */
 	size_t cmd_len = strlen(cmd);
@@ -3516,20 +3564,20 @@ record_cmd(char *input)
 		}
 		p++;
 	}
-	
+
 	if (blank)
 		return 0;
 
 	/* Rewind the pointer to the beginning of the input line */
 	p = input;
-	
+
 	/* Commands starting with space */
 	if (*p == 0x20)
 		return 0;
 
 	/* Exit commands */
 	switch (*p) {
-	case 'q': 
+	case 'q':
 		if (*(p + 1) == 0x00 || strcmp(p, "quit") == 0)
 			return 0;
 		break;
@@ -3553,8 +3601,8 @@ record_cmd(char *input)
 	}
 
 	/* History */
-	if (*p == '!' && (isdigit(*(p + 1)) 
-	|| (*(p + 1) == '-' && isdigit(*(p + 2))) 
+	if (*p == '!' && (isdigit(*(p + 1))
+	|| (*(p + 1) == '-' && isdigit(*(p + 2)))
 	|| ((*(p + 1) == '!') && *(p + 2) == 0x00)))
 		return 0;
 
@@ -3562,7 +3610,7 @@ record_cmd(char *input)
 	if (history && history[current_hist_n - 1] 
 	&& (strcmp(p, history[current_hist_n - 1]) == 0))
 		return 0;
-	
+
 	return 1;
 }
 
@@ -3594,13 +3642,13 @@ alias_import(char *file)
 				strerror(errno));
 		return EXIT_FAILURE;
 	}
-	
+
 	if (access(rfile, F_OK|R_OK) != 0) {
 		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, rfile,
 				strerror(errno));
 		return EXIT_FAILURE;
 	}
-	
+
 	/* Open the file to import aliases from */
 	FILE *fp = fopen(rfile, "r");
 	if (!fp) {
@@ -3608,7 +3656,7 @@ alias_import(char *file)
 				strerror(errno));
 		return EXIT_FAILURE;
 	}
-	
+
 	/* Open CLiFM config file as well */
 	FILE *config_fp = fopen(CONFIG_FILE, "a");
 	if (!config_fp) {
@@ -3617,7 +3665,7 @@ alias_import(char *file)
 		fclose(fp);
 		return EXIT_FAILURE;
 	}
-	
+
 	size_t line_size = 0, i;
 	char *line = (char *)NULL;
 	ssize_t line_len = 0;
@@ -3640,10 +3688,10 @@ alias_import(char *file)
 				free(alias_name);
 				continue;
 			}
-			
+
 			char *p = line + 6; /* p points now to the beginning of the 
 			alias name (because "alias " == 6) */
-			
+
 			/* Only accept single quoted aliases commands */
 			char *tmp = strchr(p, '=');
 			if (!tmp)
@@ -3654,7 +3702,7 @@ alias_import(char *file)
 				continue;
 			}
 
-			/* If alias already exists, skip it too */			
+			/* If alias already exists, skip it too */
 			int exists = 0;
 			for (i = 0; i < aliases_n; i++) {
 				int alias_len = strcntchr(aliases[i], '=');
@@ -3664,13 +3712,13 @@ alias_import(char *file)
 					break;
 				}
 			}
-			
+
 			if (!exists) {
 				if (first) {
 					first = 0;
 					fputs("\n\n", config_fp);
 				}
-				
+
 				alias_imported++;
 
 				/* Write the new alias into CLiFM config file */
@@ -3679,7 +3727,7 @@ alias_import(char *file)
 			else
 				fprintf(stderr, _("'%s': Alias already exists\n"),
 						alias_name);
-			
+
 			free(alias_name);
 		}
 	}
@@ -3688,7 +3736,7 @@ alias_import(char *file)
 
 	fclose(fp);
 	fclose(config_fp);
-	
+
 	/* No alias was found in FILE */
 	if (alias_found == 0) {
 		fprintf(stderr, _("%s: '%s': No alias found\n"), PROGRAM_NAME,
@@ -3723,9 +3771,9 @@ alias_import(char *file)
 		free(bin_commands);
 		bin_commands = (char  **)NULL;
 	}
-	
+
 	get_path_programs();
-		
+
 	return EXIT_SUCCESS;
 }
 
@@ -3736,7 +3784,7 @@ get_hex_num(char *str)
 {
 	size_t i = 0; 
 	int *hex_n = (int *)calloc(3, sizeof(int));
-	
+
 	while (*str) {
 		if (*str == '\\') {
 			if (*(str + 1) == 'x') {
@@ -3753,10 +3801,10 @@ get_hex_num(char *str)
 		}
 		str++;
 	}
-	
+
 	hex_n = xrealloc(hex_n, (i + 1) * sizeof(int));
 	hex_n[i] = -1; /* -1 marks the end of the int array */
-	
+
 	return hex_n;
 }
 
@@ -3771,27 +3819,27 @@ decode_prompt(char *line)
 
 	#define CTLESC '\001'
 	#define CTLNUL '\177'
-	
+
 	char *temp = (char *)NULL, *result = (char *)NULL;
 	size_t result_len = 0;
 	int c;
-	
+
 	while((c = *line++)) {
 		/* We have a escape char */
 		if (c == '\\') {
-			
+
 			/* Now move on to the next char */
 			c = *line;
 
 			switch (c) {
-			
+
 			case 'z': /* Exit status of last executed command */
 				temp = (char *)xnmalloc(3, sizeof(char));
 				temp[0] = ':';
 				temp[1] = (exit_code) ? '(' : ')';
 				temp[2] = 0x00;
 				goto add_string;
-			
+
 			case 'x': /* Hex numbers */
 			{
 				/* Go back one char, so that we have "\x ... n", which
@@ -3819,7 +3867,7 @@ decode_prompt(char *line)
 				free(hex);
 				goto add_string;
 			}
-			
+
 			case 'e': /* Escape char */
 				temp = xnmalloc(3, sizeof(char));
 				line ++;
@@ -3960,7 +4008,7 @@ decode_prompt(char *line)
 					/* If not root dir (/), get last dir name */
 					if (!(*tmp_path == '/' && !*(tmp_path + 1)))
 						ret = strrchr(tmp_path, '/');
-					
+
 					if (!ret)
 						temp = savestring(tmp_path, strlen(tmp_path));
 					else
@@ -3990,7 +4038,7 @@ decode_prompt(char *line)
 
 				goto add_string;
 				}
-				
+
 			case '$': /* '$' or '#' for normal and root user */
 				if ((flags & ROOT_USR))
 					temp = savestring("#", 1);
@@ -4023,11 +4071,11 @@ decode_prompt(char *line)
 			case '\\': /* Literal backslash */
 				temp = savestring ("\\", 1);
 				goto add_string;
-			
+
 			default:
 				temp = savestring("\\ ", 2);
 				temp[1] = (char)c;
-			
+
 			add_string:
 				if (c)
 					line++;
@@ -4036,14 +4084,14 @@ decode_prompt(char *line)
 					result = (char *)xcalloc(result_len + 1,
 											 sizeof(char));
 				else
-					result = (char *)xrealloc(result, (result_len + 1) 
+					result = (char *)xrealloc(result, (result_len + 1)
 											  * sizeof(char));
 				strcat(result, temp);
 				free(temp);
 				break;
 			}
 		}
-		
+
 		/* If not escape code, just add whatever char is there */
 		else {
 			/* Remove non-escaped quotes */
@@ -4055,11 +4103,11 @@ decode_prompt(char *line)
 			result[result_len] = 0x00;
 		}
 	}
-	
+
 	/* Remove trailing new line char, if any */
 	if (result[result_len - 1] == '\n')
 		result[result_len - 1] = 0x00;
-	
+
 	return result;
 }
 
@@ -4072,7 +4120,7 @@ profile_function(char **comm)
 		if (strcmp(comm[1], "--help") == 0)
 			puts(_("Usage: pf, prof, profile [ls, list] [set, add, "
 				   "del PROFILE]"));
-		
+
 		/* List profiles */
 		else if (comm[1] && (strcmp(comm[1], "ls") == 0
 		|| strcmp(comm[1], "list") == 0)) {
@@ -4090,7 +4138,7 @@ profile_function(char **comm)
 				fputs("Usage: pf, prof, profile add PROFILE\n", stderr);
 				exit_status = EXIT_FAILURE;
 			}
-		
+
 		/* Delete a profile */
 		else if (strcmp(comm[1], "del") == 0)
 			if (comm[2])
@@ -4099,7 +4147,7 @@ profile_function(char **comm)
 				fputs("Usage: pf, prof, profile del PROFILE\n", stderr);
 				exit_status = EXIT_FAILURE;
 		}
-		
+
 		/* Switch to another profile */
 		else if (strcmp(comm[1], "set") == 0) {
 			if (comm[2])
@@ -4109,7 +4157,7 @@ profile_function(char **comm)
 				exit_status = EXIT_FAILURE;
 			}
 		}
-		
+
 		/* None of the above == error */
 		else {
 			fputs(_("Usage: pf, prof, profile [set, add, del PROFILE]\n"), 
@@ -4117,7 +4165,7 @@ profile_function(char **comm)
 			exit_status = EXIT_FAILURE;
 		}
 	}
-	
+
 	/* If only "pr" print the current profile name */
 	else if (!alt_profile)
 		printf("%s: profile: default\n", PROGRAM_NAME);
@@ -4132,7 +4180,7 @@ profile_add(char *prof)
 {
 	if (!prof)
 		return EXIT_FAILURE;
-		
+
 	int found = 0;
 	size_t i;
 	for (i = 0; profile_names[i]; i++) {
@@ -4141,19 +4189,19 @@ profile_add(char *prof)
 			break;
 		}
 	}
-	
+
 	if (found) {
 		fprintf(stderr, _("%s: '%s': Profile already exists\n"),
 				PROGRAM_NAME, prof);
 		return EXIT_FAILURE;
 	}
-	
+
 	if (!home_ok) {
 		fprintf(stderr, _("%s: '%s': Error creating profile: Home "
 		"directory not found\n"), PROGRAM_NAME, prof);
 		return EXIT_FAILURE;
 	}
-	
+
 	size_t pnl_len = strlen(PNL);
 	/* ### GENERATE PROGRAM'S CONFIG DIRECTORY NAME ### */
 	char *NCONFIG_DIR = (char *)xcalloc(user_home_len + pnl_len 
@@ -4201,26 +4249,26 @@ profile_add(char *prof)
 	/* #### CREATE THE HISTORY FILE #### */
 	FILE *hist_fp = fopen(NHIST_FILE, "w+");
 	if (!hist_fp) {
-		fprintf(stderr, "%s: fopen: '%s': %s\n", PROGRAM_NAME, 
+		fprintf(stderr, "%s: fopen: '%s': %s\n", PROGRAM_NAME,
 				NHIST_FILE, strerror(errno));
 		error_code = 1;
 	}
 	else {
-		/* To avoid malloc errors in read_history(), do not create 
+		/* To avoid malloc errors in read_history(), do not create
 		 * an empty file */
 		fputs("edit\n", hist_fp);
 		fclose(hist_fp);
 	}
 
 	/* #### CREATE THE MIME CONFIG FILE #### */
-	/* Try importing MIME associations from the system, and in case 
+	/* Try importing MIME associations from the system, and in case
 	 * nothing can be imported, create an empty MIME associations
 	 * file */
 	ret = mime_import(NMIME_FILE);
 	if (ret != 0) {
 		FILE *mime_fp = fopen(NMIME_FILE, "w");
 		if (!mime_fp) {
-			fprintf(stderr, "%s: fopen: '%s': %s\n", PROGRAM_NAME, 
+			fprintf(stderr, "%s: fopen: '%s': %s\n", PROGRAM_NAME,
 					NMIME_FILE, strerror(errno));
 			error_code = 1;
 		}
@@ -4240,7 +4288,7 @@ profile_add(char *prof)
 	/* #### CREATE THE PROFILE FILE #### */
 	FILE *profile_fp = fopen(NPROFILE_FILE, "w");
 	if (!profile_fp) {
-		fprintf(stderr, _("%s: Error creating the profile file\n"), 
+		fprintf(stderr, _("%s: Error creating the profile file\n"),
 				PROGRAM_NAME);
 		error_code = 1;
 	}
@@ -4251,12 +4299,12 @@ profile_add(char *prof)
 				"file manager\"\n"), PROGRAM_NAME, PROGRAM_NAME);
 		fclose(profile_fp);
 	}
-		
+
 	/* #### CREATE THE CONFIG FILE #### */
 		error_code = create_config(NCONFIG_FILE);
-	
+
 	/* Free stuff */
-	
+
 	free(NCONFIG_DIR);
 	free(NCONFIG_FILE);
 /*	free(NBM_FILE);
@@ -4275,7 +4323,7 @@ profile_add(char *prof)
 		get_profile_names();
 	}
 	else
-		fprintf(stderr, _("%s: '%s': Error creating profile\n"), 
+		fprintf(stderr, _("%s: '%s': Error creating profile\n"),
 				PROGRAM_NAME, prof);
 
 	return error_code;
@@ -4296,17 +4344,17 @@ profile_del(char *prof)
 			break;
 		}
 	}
-	
+
 	if (!found) {
 		fprintf(stderr, _("%s: %s: No such profile\n"),
 				PROGRAM_NAME, prof);
 		return EXIT_FAILURE;
 	}
-	
+
 	char *tmp = (char *)xcalloc(user_home_len + strlen(PNL)
 								+ strlen(prof) + 11, sizeof(char));
 	sprintf(tmp, "%s/.config/%s/%s", user_home, PNL, prof);
-	
+
 	char *cmd[] = { "rm", "-r", tmp, NULL };
 	int ret = launch_execve(cmd, FOREGROUND);
 	free(tmp);
@@ -4319,7 +4367,7 @@ profile_del(char *prof)
 		get_profile_names();
 		return EXIT_SUCCESS;
 	}
-	
+
 	fprintf(stderr, _("%s: '%s': Error removing profile\n"),
 			PROGRAM_NAME, prof);
 	return EXIT_FAILURE;
@@ -4346,7 +4394,7 @@ profile_set(char *prof)
 				"profile enter 'pf add PROFILE'\n"), PROGRAM_NAME, prof);
 		return EXIT_FAILURE;
 	}
-	
+
 	/* If changing to the current profile, do nothing */
 	if ((strcmp(prof, "default") == 0 && !alt_profile)
 	|| (alt_profile && strcmp(prof, alt_profile) == 0)) {
@@ -4384,12 +4432,12 @@ profile_set(char *prof)
 		free(opener);
 		opener = (char *)NULL;
 	}
-	
+
 	free(TMP_DIR);
-	TMP_DIR = (char *)NULL;	
+	TMP_DIR = (char *)NULL;
 	free(sel_file_user);
 	sel_file_user = (char *)NULL;
-	
+
 	if (alt_profile) {
 		free(alt_profile);
 		alt_profile = (char *)NULL;
@@ -4406,7 +4454,7 @@ profile_set(char *prof)
 
 	shell_terminal = no_log = internal_cmd = dequoted = 0;
 	shell_is_interactive = recur_perm_error_flag = mime_match = 0;
-	recur_perm_error_flag = is_sel = sel_is_last = print_msg = 0; 
+	recur_perm_error_flag = is_sel = sel_is_last = print_msg = 0;
 	kbind_busy = 0;
 	cont_bt = 0;
 	pmsg = nomsg;
@@ -4429,7 +4477,7 @@ profile_set(char *prof)
 
 	/* Set up config files and variables */
 	init_config();
-	
+
 	if (!config_ok)
 		set_default_options();
 
@@ -4457,8 +4505,8 @@ profile_set(char *prof)
 	aliases_n = prompt_cmds_n = 0; /* Reset counters */
 	get_aliases();
 	get_prompt_cmds();
-		
-	exec_profile();		
+
+	exec_profile();
 
 	if (msgs_n) {
 		for (i = 0; i < (size_t)msgs_n; i++)
@@ -4474,7 +4522,7 @@ profile_set(char *prof)
 		/* Reset history */
 		if (access(HIST_FILE, F_OK|W_OK) == 0) {
 			clear_history(); /* This is for readline */
-			read_history(HIST_FILE); 
+			read_history(HIST_FILE);
 			history_truncate_file(HIST_FILE, max_hist);
 		}
 		else {
@@ -4544,21 +4592,21 @@ int mime_open(char **args)
 		}
 		else
 			file_path = realpath(args[2], NULL);
-		
+
 		if (!file_path) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[2], 
-					(is_number(args[2]) == 1) ? "No such ELN" 
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[2],
+					(is_number(args[2]) == 1) ? "No such ELN"
 					: strerror(errno));
 			return EXIT_FAILURE;
 		}
-		
+
 		if (access(file_path, R_OK) == -1) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_path, 
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_path,
 					strerror(errno));
 			free(file_path);
 			return EXIT_FAILURE;
-		}	
-		
+		}
+
 		info = 1;
 		file_index = 2;
 	}
@@ -4601,7 +4649,7 @@ int mime_open(char **args)
 		free(file_path);
 		return EXIT_FAILURE;
 	}
-	
+
 	if (info)
 		printf(_("MIME type: %s\n"), mime);
 
@@ -4635,7 +4683,7 @@ int mime_open(char **args)
 	if (!app) {
 
 		if (info)
-			fputs(_("Associated application: None\n"), stderr);			
+			fputs(_("Associated application: None\n"), stderr);
 
 		else {
 
@@ -4664,7 +4712,7 @@ int mime_open(char **args)
 
 		return EXIT_FAILURE;
 	}
-	
+
 	if (info) {
 		/* In case of "cmd args" print only cmd */
 		int ret = strcntchr(app, 0x20);
@@ -4679,7 +4727,7 @@ int mime_open(char **args)
 			free(ext);
 		return EXIT_SUCCESS;
 	}
-	
+
 	free(mime);
 	mime = (char *)NULL;
 	if (ext) {
@@ -4692,12 +4740,12 @@ int mime_open(char **args)
 	/* Get number of arguments to check for final ampersand */
 	int args_num = 0;
 	for (args_num = 0; args[args_num]; args_num++);
-	
+
 	/* Construct the command and run it */
 	char *cmd[] = { (opener) ? opener : app, file_path, NULL };
-	int ret = launch_execve(cmd, strcmp(args[args_num - 1], "&") == 0 
+	int ret = launch_execve(cmd, strcmp(args[args_num - 1], "&") == 0
 							? BACKGROUND : FOREGROUND);
-	
+
 	free(file_path);
 	free(app);
 
@@ -4717,7 +4765,7 @@ mime_import(char *file)
 	FILE *mime_fp = fopen(file, "w");
 	if (!mime_fp)
 		return EXIT_FAILURE;
-		
+
 	/* If not in X, just specify a few basic associations to make sure
 	 * that at least 'mm edit' will work ('vi' should be installed in
 	 * almost any Unix computer) */
@@ -4739,15 +4787,15 @@ mime_import(char *file)
 	config_path = (char *)xcalloc(home_len + 23, sizeof(char));
 	local_path = (char *)xcalloc(home_len + 41, sizeof(char));
 	sprintf(config_path, "%s/.config/mimeapps.list", user_home);
-	sprintf(local_path, "%s/.local/share/applications/mimeapps.list", 
+	sprintf(local_path, "%s/.local/share/applications/mimeapps.list",
 			user_home);
-	
+
 	char *mime_paths[] = { config_path, local_path,
 						   "/usr/local/share/applications/mimeapps.list",
 						   "/usr/share/applications/mimeapps.list",
 						   "/etc/xdg/mimeapps.list",
 						   NULL };
-	
+
 	/* Check each mimeapps.list file and store its associations into
 	 * FILE */
 	size_t i;
@@ -4756,7 +4804,7 @@ mime_import(char *file)
 		FILE *sys_mime_fp = fopen(mime_paths[i], "r");
 		if (!sys_mime_fp)
 			continue;
-		
+
 		size_t line_size = 0;
 		char *line = (char *)NULL;
 		ssize_t line_len = 0;
@@ -4784,10 +4832,10 @@ mime_import(char *file)
 
 		free(line);
 		line = (char *)NULL;
-		
+
 		fclose(sys_mime_fp);
 	}
-	
+
 	/* Make sure there is an entry for text/plain and *.cfm files, so
 	 * that at least 'mm edit' will work. Gedit, kate, pluma, mousepad,
 	 * and leafpad, are the default text editors of Gnome, KDE, Mate,
@@ -4796,9 +4844,9 @@ mime_import(char *file)
 		  "vi;emacs;ed\n"
 		  "*.cfm=gedit;kate;pluma;mousepad;leafpad;nano;vim;vi;"
 		  "emacs;ed\n", mime_fp);
-	
+
 	fclose(mime_fp);
-	
+
 	free(config_path);
 	free(local_path);
 
@@ -4835,7 +4883,7 @@ get_app(char *mime, char *ext)
 {
 	if (!mime)
 		return (char *)NULL;
-	
+
 	FILE *defs_fp = fopen(MIME_FILE, "r");
 
 	if (!defs_fp) {
@@ -4895,7 +4943,7 @@ get_app(char *mime, char *ext)
 				while (*tmp != 0x00 && *tmp != ';' && *tmp != '\n' 
 				&& *tmp != '\'' && *tmp != '"')
 					app[app_len++] = *(tmp++);
-				
+
 				while (*tmp == 0x20) /* Remove leading spaces */
 					tmp++;
 				if (app_len) {
@@ -4930,18 +4978,18 @@ get_app(char *mime, char *ext)
 					break;
 				tmp++;
 			}
-			
+
 			if (cmd_ok)
 				break;
 		}
 	}
-	
+
 	free(mime_tmp);
 	free(ext_tmp);
-	
+
 	free(line);
 	fclose(defs_fp);
-	
+
 	if (found) {
 		if (app)
 			return app;
@@ -4961,13 +5009,13 @@ get_mime(char *file)
 		fputs(_("Error opening temporary file\n"), stderr);
 		return (char *)NULL;
 	}
-	
+
 	char MIME_TMP_FILE[PATH_MAX] = "";
 	sprintf(MIME_TMP_FILE, "%s/mime_tmp", TMP_DIR);
 
 	if (access(MIME_TMP_FILE, F_OK) == 0)
 		remove(MIME_TMP_FILE);
-	
+
 	FILE *file_fp = fopen(MIME_TMP_FILE, "w");
 
 	if (!file_fp) {
@@ -4995,7 +5043,7 @@ get_mime(char *file)
 		fclose(file_fp_err);
 		return (char *)NULL;
 	}
-	
+
 	/* Redirect stderr to /dev/null */
 	if (dup2(fileno(file_fp_err), STDERR_FILENO) == -1) {
 		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
@@ -5003,13 +5051,13 @@ get_mime(char *file)
 		fclose(file_fp_err);
 		return (char *)NULL;
 	}
-	
+
 	fclose(file_fp);
 	fclose(file_fp_err);
 
 	char *cmd[] = { "file", "--mime-type", file, NULL };
 	int ret = launch_execve(cmd, FOREGROUND);
-	
+
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
 	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
 	close(stdout_bk);
@@ -5061,7 +5109,7 @@ _err(int msg_type, int prompt, const char *format, ...)
 	va_copy(tmp_list, arglist);
 	size = vsnprintf((char *)NULL, 0, format, tmp_list);
 	va_end(tmp_list);
-	
+
 	if (size < 0) {
 		va_end(arglist);
 		return EXIT_FAILURE;
@@ -5103,7 +5151,8 @@ initialize_readline(void)
 	/* #### INITIALIZE READLINE (what a hard beast to tackle!!) #### */
 
 	 /* Enable tab auto-completion for commands (in PATH) in case of
-	  * first entered string. The second and later entered string will
+	  * first entered string (if autocd and/or auto-open are enabled, check
+	  * for paths as well). The second and later entered strings will
 	  * be autocompleted with paths instead, just like in Bash, or with
 	  * listed filenames, in case of ELN's. I use a custom completion
 	  * function to add command and ELN completion, since readline's
@@ -5123,22 +5172,25 @@ initialize_readline(void)
 	 * array of strings returned. */
 	rl_attempted_completion_function = my_rl_completion;
 	rl_ignore_completion_duplicates = 1;
+
 	/* I'm using here a custom quoting function. If not specified,
 	 * readline uses the default internal function. */
 	rl_filename_quoting_function = my_rl_quote;
-	/* Tell readline what char to use for quoting. This is only the the
+
+	/* Tell readline what char to use for quoting. This is only the
 	 * readline internal quoting function, and for custom ones, like the
 	 * one I use above. However, custom quoting functions, though they
 	 * need to define their own quoting chars, won't be called at all
 	 * if this variable isn't set. */
 	rl_completer_quote_characters = "\"'";
 	rl_completer_word_break_characters = " ";
+
 	/* Whenever readline finds any of the following chars, it will call
 	 * the quoting function */
 	rl_filename_quote_characters = " \t\n\"\\'`@$><=,;|&{[()]}?!*^";
 	/* According to readline documentation, the following string is
 	 * the default and the one used by Bash: " \t\n\"\\'`@$><=;|&{(" */
-	
+
 	/* Executed immediately before calling the completer function, it
 	 * tells readline if a space char, which is a word break character
 	 * (see the above rl_completer_word_break_characters variable) is
@@ -5148,6 +5200,7 @@ initialize_readline(void)
 	 * Thanks to George Brocklehurst for pointing out this function:
 	 * https://thoughtbot.com/blog/tab-completion-in-gnu-readline*/
 	rl_char_is_quoted_p = quote_detector;
+
 	/* This function is executed inmediately before path completion. So,
 	 * if the string to be completed is, for instance, "user\ file" (see
 	 * the above comment), this function should return the dequoted
@@ -5155,9 +5208,10 @@ initialize_readline(void)
 	 * "user file", because "user\ file" does not exist, and, in this
 	 * latter case, readline won't find any matches */
 	rl_filename_dequoting_function = dequote_str;
+
 	/* Initialize the keyboard bindings function */
 	readline_kbinds();
-	
+
 	return EXIT_SUCCESS;
 }
 
@@ -5222,7 +5276,7 @@ is_internal_c(const char *cmd)
 	if (found)
 		return 1;
 
-	/* Check for the search and history functions as well */	
+	/* Check for the search and history functions as well */
 	else if ((cmd[0] == '/' && access(cmd, F_OK) != 0) 
 	|| (cmd[0] == '!' && (isdigit(cmd[1]) 
 	|| (cmd[1] == '-' && isdigit(cmd[2])) || cmd[1] == '!')))
@@ -5274,7 +5328,7 @@ exec_chained_cmds(char *cmd)
 				else {
 					if (exec_cmd(tmp_cmd) != 0)
 						error_code = 1;
-					for (j = 0; j <= args_n; j++) 
+					for (j = 0; j <= args_n; j++)
 						free(tmp_cmd[j]);
 					free(tmp_cmd);
 				}
@@ -5293,8 +5347,8 @@ set_shell(char *str)
 {
 	if (!str || !*str)
 		return EXIT_FAILURE;
-	
-	/* IF no slash in STR, check PATH env variable for a file named STR 
+
+	/* IF no slash in STR, check PATH env variable for a file named STR
 	 * and get its full path*/
 	char *full_path = (char *)NULL;
 	if (strcntchr(str, '/') == -1)
@@ -5305,7 +5359,7 @@ set_shell(char *str)
 		tmp = full_path;
 	else
 		tmp = str;
-	
+
 	if (access(tmp, X_OK) == -1) {
 		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, tmp,
 				strerror(errno));
@@ -5319,7 +5373,7 @@ set_shell(char *str)
 	strcpy(sys_shell, tmp);
 	printf(_("Successfully set '%s' as %s default shell\n"), sys_shell, 
 		   PROGRAM_NAME);
-	
+
 	if (full_path)
 		free(full_path);
 
@@ -5336,9 +5390,9 @@ get_substr(char *str, const char ifs)
 {
 	if (!str || *str == 0x00)
 		return (char **)NULL;
-	
+
 	/* ############## SPLIT THE STRING #######################*/
-	
+
 	char **substr = (char **)NULL;
 	void *p = (char *)NULL;
 	size_t str_len = strlen(str);
@@ -5377,7 +5431,7 @@ get_substr(char *str, const char ifs)
 		else
 			str++;
 	}
-	
+
 	free(buf);
 
 	if (!substr_n)
@@ -5398,7 +5452,7 @@ get_substr(char *str, const char ifs)
 	substr[substr_n] = (char *)NULL;
 
 	/* ################### EXPAND RANGES ######################*/
-	
+
 	int afirst = 0, asecond = 0, ranges_ok = 0;
 
 	for (i = 0; substr[i]; i++) {
@@ -5443,7 +5497,7 @@ get_substr(char *str, const char ifs)
 		/* If a valid range */
 		size_t k = 0, next = 0;
 		char **rbuf = (char **)NULL;
-		rbuf = (char **)xcalloc((substr_n + (size_t)(asecond - afirst) 
+		rbuf = (char **)xcalloc((substr_n + (size_t)(asecond - afirst)
 								+ 1), sizeof(char *));
 		/* Copy everything before the range expression
 		 * into the buffer */
@@ -5454,11 +5508,11 @@ get_substr(char *str, const char ifs)
 		}
 		/* Copy the expanded range into the buffer */
 		for (j = (size_t)afirst; j <= (size_t)asecond; j++) {
-			rbuf[k] = (char *)xcalloc(digits_in_num((int)j) + 1, 
+			rbuf[k] = (char *)xcalloc(digits_in_num((int)j) + 1,
 									  sizeof(char));
 			sprintf(rbuf[k++], "%zu", j);
 		}
-		/* Copy everything after the range expression into 
+		/* Copy everything after the range expression into
 		 * the buffer, if anything */
 		if (substr[i+1]) {
 			next = k;
@@ -5480,7 +5534,7 @@ get_substr(char *str, const char ifs)
 		substr = (char **)xrealloc(substr, (substr_n + 1)
 								   * sizeof(char *));
 		for (j = 0;j < substr_n; j++) {
-			substr[j] = (char *)xcalloc(strlen(rbuf[j]) + 1, 
+			substr[j] = (char *)xcalloc(strlen(rbuf[j]) + 1,
 										sizeof(char));
 			strcpy(substr[j], rbuf[j]);
 			free(rbuf[j]);
@@ -5495,14 +5549,14 @@ get_substr(char *str, const char ifs)
 		else
 			break;
 	}
-	
+
 	/* ############## REMOVE DUPLICATES ###############*/
 
 	char **dstr = (char **)NULL;
 	size_t len = 0, d;
 	for (i = 0;i < substr_n; i++) {
 		short duplicate = 0;
-		
+
 		for (d = (i + 1); d < substr_n; d++) {
 			if (strcmp(substr[i], substr[d]) == 0) {
 				duplicate = 1;
@@ -5523,7 +5577,7 @@ get_substr(char *str, const char ifs)
 
 	dstr = (char **)xrealloc(dstr, (len + 1) * sizeof(char *));
 	dstr[len] = (char *)NULL;
-	
+
 	return dstr;
 }
 
@@ -5535,9 +5589,9 @@ is_color_code(char *str)
 {
 	if(!str || !*str)
 		return 0;
-	
+
 	size_t digits = 0, semicolon = 0;
-	
+
 	while(*str) {
 
 		if (*str >= 0x30 && *str <= 0x39)
@@ -5557,12 +5611,12 @@ is_color_code(char *str)
 
 		str++;
 	}
-	
+
 	/* No digits at all, ending semicolon, more than eleven fields, or
 	 * more than three consecutive digits */
 	if (!digits || digits > 3 || semicolon > 11)
 		return 0;
-		
+
 	/* At this point, we have a semicolon separated string of digits (3
 	 * consecutive max) with at most 12 fields. The only thing not
 	 * validated here are numbers themselves */
@@ -5577,7 +5631,7 @@ set_colors(void)
  * not found, or if it's a wrong value, the default is set. */
 {
 	char *dircolors = (char *)NULL;
-	
+
 	/* Get the colors line from the config file */
 	FILE *fp_colors = fopen(CONFIG_FILE, "r");
 	if (fp_colors) {
@@ -5608,11 +5662,11 @@ set_colors(void)
 	}
 
 	if (dircolors) {
-		
+
 		/* Set the LS_COLORS environment variable to use CliFM own
 		 * colors. In this way, files listed for TAB completion will
 		 * use CliFM colors instead of system colors */
-		 
+
 		/* Strip CLiFM custom filetypes (nd, ne, nf, ed, ef, ee, and ca), 
 		 * from dircolors to construct a valid value for LS_COLORS */
 		size_t i = 0, buflen = 0, linec_len = strlen(dircolors);
@@ -5621,9 +5675,9 @@ set_colors(void)
 		while (dircolors[i]) {
 
 			int rem = 0;
-			if ((int)i < (int)(linec_len - 3) && ( 
-			(dircolors[i] == 'n' && (dircolors[i+1] == 'd' 
-			|| dircolors[i+1] == 'e' || dircolors[i+1] == 'f')) 
+			if ((int)i < (int)(linec_len - 3) && (
+			(dircolors[i] == 'n' && (dircolors[i+1] == 'd'
+			|| dircolors[i+1] == 'e' || dircolors[i+1] == 'f'))
 			|| (dircolors[i] == 'e' && (dircolors[i+1] == 'd'
 			|| dircolors[i+1] == 'f' || dircolors[i+1] == 'e'))
 			|| (dircolors[i] == 'c' && dircolors[i+1] == 'a') )
@@ -5631,13 +5685,13 @@ set_colors(void)
 				rem = 1;
 				for (i += 3; dircolors[i] && dircolors[i] != ':'; i++);
 			}
-			
+
 			if (dircolors[i] && !rem && dircolors[i] != '"'
 			&& dircolors[i] != '\'')
 				ls_buf[buflen++] = dircolors[i];
 			i++;
 		}
-		
+
 		if (ls_buf) {
 			ls_buf[buflen] = 0x00;
 			if (setenv("LS_COLORS", ls_buf, 1) == -1)
@@ -5646,7 +5700,7 @@ set_colors(void)
 			free(ls_buf);
 			ls_buf = (char *)NULL;
 		}
-		
+
 		/* Split the colors line into substrings (one per color) */
 		char *p = dircolors, *buf = (char *)NULL, **colors = (char **)NULL;
 		size_t len = 0, words = 0;
@@ -5846,10 +5900,10 @@ set_colors(void)
 				     "so=01;35:bd=01;33:cd=01;37:su=37;41:sg=30;43:"
 				     "st=37;44:tw=30;42:ow=34;42:ex=01;32:no=31;47";
 		if (setenv("LS_COLORS", lsc, 1) == -1)
-			fprintf(stderr, _("%s: Error registering environment colors\n"), 
+			fprintf(stderr, _("%s: Error registering environment colors\n"),
 				 	PROGRAM_NAME);
 	}
-	
+
 	/* If some color was not set or it was a wrong color code, set the
 	 * default */
 	if (!*di_c)
@@ -5914,7 +5968,7 @@ set_default_options(void)
 	max_log = 1000;
 	clear_screen = 0;
 	list_folders_first = 1;
-	cd_lists_on_the_fly = 1;	
+	cd_lists_on_the_fly = 1;
 	case_sensitive = 0;
 	unicode = 0;
 	max_path = 40;
@@ -5966,7 +6020,7 @@ set_default_options(void)
 	if (setenv("LS_COLORS", lsc, 1) == -1) 
 		fprintf(stderr, _("%s: Error registering environment colors\n"), 
 				PROGRAM_NAME);
-	
+
 	if (sys_shell) {
 		free(sys_shell);
 		sys_shell = (char *)NULL;
@@ -5985,7 +6039,7 @@ set_default_options(void)
 
 	term = (char *)xcalloc(strlen(DEFAULT_TERM_CMD) + 1, sizeof(char));
 	strcpy(term, DEFAULT_TERM_CMD);
-	
+
 	if (encoded_prompt)
 		free(encoded_prompt);
 
@@ -6052,7 +6106,7 @@ quote_detector(char *line, int index)
 /* Used by readline to check if a char in the string being completed is
  * quoted or not */
 {
-	if (index > 0 && line[index - 1] == '\\' 
+	if (index > 0 && line[index - 1] == '\\'
 	&& !quote_detector(line, index - 1))
 		return 1;
 
@@ -6062,10 +6116,10 @@ quote_detector(char *line, int index)
 int
 is_quote_char(char c)
 /* Simply check a single chartacter (c) against the quoting characters
- * list defined in the qc global array (which takes its values from 
+ * list defined in the qc global array (which takes its values from
  * rl_filename_quote_characters */
 {
-	if (c == 0x00 || !qc) 
+	if (c == 0x00 || !qc)
 		return -1;
 
 	char *p = qc;
@@ -6131,7 +6185,7 @@ split_str(char *str)
 			/* The above while breaks with NULL or quote, so that if
 			 * *str is a null byte there was not terminating quote */
 			if (!*str) {
-				fprintf(stderr, _("%s: Missing '%c'\n"), PROGRAM_NAME, 
+				fprintf(stderr, _("%s: Missing '%c'\n"), PROGRAM_NAME,
 						quote);
 
 				/* Free the current buffer and whatever was already
@@ -6167,7 +6221,7 @@ split_str(char *str)
 				 * array */
 				buf[buf_len] = 0x00;
 				if (buf_len > 0) {
-					substr = (char **)xrealloc(substr, (words + 1) 
+					substr = (char **)xrealloc(substr, (words + 1)
 											   * sizeof(char *));
 					substr[words] = (char *)xcalloc(buf_len + 1,
 													sizeof(char));
@@ -6191,7 +6245,7 @@ split_str(char *str)
 		str++;
 		str_len++;
 	}
-	
+
 	/* The while loop stops when the null byte is reached, so that the
 	 * last substring is not printed, but still stored in the buffer.
 	 * Therefore, we need to add it, if not empty, to our subtrings
@@ -6227,7 +6281,7 @@ split_str(char *str)
 
 size_t
 u8_xstrlen(const char *str)
-/* An strlen implementation able to handle unicode characters. Taken from: 
+/* An strlen implementation able to handle unicode characters. Taken from:
 * https://stackoverflow.com/questions/5117393/number-of-character-cells-used-by-string
 * Explanation: strlen() counts bytes, not chars. Now, since ASCII chars
 * take each 1 byte, the amount of bytes equals the amount of chars.
@@ -6261,7 +6315,7 @@ open_function(char **cmd)
 		deq_path = dequote_str(cmd[1], 0);
 
 		if (!deq_path) {
-			fprintf(stderr, _("%s: '%s': Error dequoting filename\n"), 
+			fprintf(stderr, _("%s: '%s': Error dequoting filename\n"),
 					PROGRAM_NAME, cmd[1]);
 			return EXIT_FAILURE;
 		}
@@ -6269,20 +6323,20 @@ open_function(char **cmd)
 		strcpy(cmd[1], deq_path);
 		free(deq_path);
 	}
-	
+
 	/* Check file existence */
 	struct stat file_attrib;
 
 	if (stat(cmd[1], &file_attrib) == -1) {
-		fprintf(stderr, "%s: open: '%s': %s\n", PROGRAM_NAME, cmd[1], 
+		fprintf(stderr, "%s: open: '%s': %s\n", PROGRAM_NAME, cmd[1],
 				strerror(errno));
 		return EXIT_FAILURE;
 	}
-	
+
 	/* Check file type: only directories, symlinks, and regular files
 	 * will be opened */
 
-	char file_tmp[PATH_MAX] = "", no_open_file = 1, file_type[128] = "";
+	char no_open_file = 1, file_type[128] = "";
 		 /* Reserve a good amount of bytes for filetype: it cannot be
 		  * known beforehand how many bytes the TRANSLATED string will
 		  * need */
@@ -6308,7 +6362,7 @@ open_function(char **cmd)
 
 	case S_IFDIR:
 		return cd_function(cmd[1]);
-	
+
 	case S_IFREG:
 
 		/* If an archive/compressed file, call archiver() */
@@ -6319,7 +6373,7 @@ open_function(char **cmd)
 
 		no_open_file = 0;
 		break;
-	
+
 	default:
 		strcpy(file_type, _("unknown file type"));
 		break;
@@ -6334,7 +6388,7 @@ open_function(char **cmd)
 				cmd[1], file_type);
 		return EXIT_FAILURE;
 	}
-	
+
 	/* At this point we know the file to be openend is either a regular
 	 * file or a symlink to a regular file. So, just open the file */
 
@@ -6371,7 +6425,7 @@ open_function(char **cmd)
 	/* If some application was specified to open the file */
 	char *tmp_cmd[] = { cmd[2], cmd[1], NULL };
 
-	int ret = launch_execve(tmp_cmd, (cmd[args_n] 
+	int ret = launch_execve(tmp_cmd, (cmd[args_n]
 							&& strcmp(cmd[args_n], "&") == 0)
 							? BACKGROUND : FOREGROUND);
 
@@ -6401,35 +6455,35 @@ cd_function(char *new_path)
 
 	/* If no argument, change to home */
 	if (!deq_path || deq_path[0] == 0x00) {
-		
+
 		if (dequoted_p) {
 			free(deq_path);
 			deq_path = (char *)NULL;
 		}
-		
+
 		if (user_home) {
 			int ret = chdir(user_home);
 			if (ret != 0) {
 				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
-						user_home, strerror(errno));				
+						user_home, strerror(errno));
 				return EXIT_FAILURE;
 			}
 			else
 				strncpy(buf, user_home, PATH_MAX);
 		}
 		else {
-			fprintf(stderr, _("%s: Home directory not found\n"), 
+			fprintf(stderr, _("%s: Home directory not found\n"),
 					PROGRAM_NAME);
 			return EXIT_FAILURE;
 		}
 	}
-	
+
 	/* If we have some argument, resolve it with realpath(), cd into
 	 * the resolved path, and set the path variable to this latter */
 	else {
-		
+
 		char *real_path = realpath(deq_path, NULL);
-		
+
 		if (!real_path) {
 			fprintf(stderr, "%s: cd: '%s': %s\n", PROGRAM_NAME,
 					deq_path, strerror(errno));
@@ -6437,7 +6491,7 @@ cd_function(char *new_path)
 				free(deq_path);
 			return EXIT_FAILURE;
 		}
-		
+
 		/* Execute permission is enough to access a directory, but not
 		 * to list its content; for this we need read permission as well.
 		 * So, without the read permission check, chdir() below will be
@@ -6449,7 +6503,7 @@ cd_function(char *new_path)
 			if (dequoted_p)
 				free(deq_path);
 			free(real_path);
-			return EXIT_FAILURE;			
+			return EXIT_FAILURE;
 		}
 
 		int ret = chdir(real_path);
@@ -6468,7 +6522,7 @@ cd_function(char *new_path)
 
 	if (dequoted_p)
 		free(deq_path);
-	
+
 	/* If chdir() was successful */
 	free(path);
 	path = (char *)xcalloc(strlen(buf) + 1, sizeof(char));
@@ -6559,7 +6613,7 @@ forth_function(char **comm)
 	else
 		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, 
 				old_pwd[dirhist_cur_index], strerror(errno));
-	
+
 	return EXIT_SUCCESS;
 }
 
@@ -6572,7 +6626,7 @@ list_mountpoints(void)
 				PROGRAM_NAME, strerror(errno));
 		return EXIT_FAILURE;
 	}
-	
+
 	FILE *mp_fp = fopen("/proc/mounts", "r");
 
 	if (!mp_fp) {
@@ -6590,7 +6644,7 @@ list_mountpoints(void)
 	size_t line_size = 0;
 	char *line = (char *)NULL;
 	ssize_t line_len = 0;
-		
+
 	while ((line_len = getline(&line, &line_size, mp_fp)) > 0) {
 		/* Do not list all mountpoints, but only those corresponding
 		 * to a block device (/dev) */
@@ -6607,7 +6661,7 @@ list_mountpoints(void)
 			 * line */
 			while (str && counter < 2) {
 				if (counter == 1) { /* 1 == second field */
-					printf("%s%ld%s %s%s%s (%s)\n", eln_color, mp_n + 1,
+					printf("%s%zu%s %s%s%s (%s)\n", eln_color, mp_n + 1,
 						   NC, (access(str, R_OK|X_OK) == 0)
 						   ? blue : red, str, default_color,
 						   device);
@@ -6616,17 +6670,17 @@ list_mountpoints(void)
 					mountpoints = (char **)xrealloc(mountpoints, 
 										   (mp_n + 1) * sizeof(char *));
 					mountpoints[mp_n] = (char *)xcalloc(strlen(str)
-												+ 1, sizeof(char));					
+												+ 1, sizeof(char));
 					strcpy(mountpoints[mp_n++], str);
 				}
 				str = strtok(NULL, " ,");
 				counter++;
 			}
-				
+
 			free(device);
 		}
 	}
-		
+
 	free(line);
 	line = (char *)NULL;
 	fclose(mp_fp);
@@ -6637,7 +6691,7 @@ list_mountpoints(void)
 		fputs(_("mp: There are no available mountpoints\n"), stdout);
 		return EXIT_SUCCESS;
 	}
-		
+
 	puts("");
 	/* Ask the user and chdir into the selected mountpoint */
 	char *input = (char *)NULL;
@@ -6657,7 +6711,7 @@ list_mountpoints(void)
 				if (cd_lists_on_the_fly) {
 					while (files--)
 						free(dirlist[files]);
-					list_dir();						
+					list_dir();
 				}
 			}
 			else {
@@ -6671,7 +6725,7 @@ list_mountpoints(void)
 			exit_status = EXIT_FAILURE;
 		}
 	}
-		
+
 	/* Free stuff and exit */
 	if (input)
 		free(input);
@@ -6739,7 +6793,7 @@ log_msg(char *_msg, int print)
 	else /* NOPRINT_PROMPT */
 		/* Print the message directly here */
 		fputs(_msg, stderr);
-	
+
 	/* If the config dir cannot be found or if msg log file isn't set
 	 * yet... This will happen if an error occurs before running
 	 * init_config(), for example, if the user's home cannot be found */
@@ -6760,7 +6814,7 @@ log_msg(char *_msg, int print)
 		time_t rawtime = time(NULL);
 		struct tm *tm = localtime(&rawtime);
 		char date[64] = "";
-		strftime(date, sizeof(date), "%c", tm);
+		strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", tm);
 		fprintf(msg_fp, "[%d-%d-%dT%d:%d:%d] ", tm->tm_year + 1900, 
 				tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, 
 				tm->tm_sec);
@@ -6821,7 +6875,7 @@ expand_range(char *str, int listdir)
 
 	int *buf = (int *)NULL;
 	buf = (int *)xcalloc((size_t)(asecond - afirst) + 2, sizeof(int));
-	
+
 	size_t i, j = 0;
 	for (i = (size_t)afirst; i <= (size_t)asecond; i++)
 		buf[j++] = (int)i;
@@ -7043,7 +7097,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 	/* If absolute path */
 	else if (wx_parent_check(file) != 0)
 		return EXIT_FAILURE;
-	
+
 	int ret = -1;
 
 	/* Create the trashed file name: orig_filename.suffix, where SUFFIX is
@@ -7140,7 +7194,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 		if (*file != '/')
 			url_str = url_encode(full_path);
 		else
-			url_str = url_encode(file);			
+			url_str = url_encode(file);
 
 		if (!url_str) {
 			fprintf(stderr, _("%s: trash: '%s': Failed encoding path\n"), 
@@ -7188,7 +7242,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 			return EXIT_FAILURE;
 		}
 	}
-	
+
 	free(info_file);
 	free(file_suffix);
 	return EXIT_SUCCESS;
@@ -7211,7 +7265,7 @@ remove_from_trash(void)
 						  skip_implied_dot, (unicode) ? alphasort
 						  : (case_sensitive) ? xalphasort
 						  : alphasort_insensitive);
-	
+
 	if (files_n) {
 		printf(_("%sTrashed files%s%s\n\n"), white, NC, default_color);
 		for (i = 0; i < (size_t)files_n; i++)
@@ -7225,14 +7279,14 @@ remove_from_trash(void)
 		}
 		return EXIT_SUCCESS;
 	}
-	
+
 	/* Restore CWD and continue */
 	if (chdir(path) == -1) {
 		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME, 
 			 path, strerror(errno));
 		return EXIT_FAILURE;
 	}
-	
+
 	/* Get user input */
 	printf(_("\n%s%sEnter 'q' to quit.\n"), NC, default_color);
 	char *line = (char *)NULL, **rm_elements = (char **)NULL;
@@ -7250,22 +7304,22 @@ remove_from_trash(void)
 	/* Remove files */
 	char rm_file[PATH_MAX] = "", rm_info[PATH_MAX] = "";
 	int ret = -1, exit_status = EXIT_SUCCESS;
-	
+
 	/* First check for exit, wildcard, and non-number args */
 	for (i = 0; rm_elements[i]; i++) {
 
 		/* Quit */
 		if (strcmp(rm_elements[i], "q") == 0) {
 			size_t j;
-			
+
 			for (j = 0; rm_elements[j]; j++)
 				free(rm_elements[j]);
 			free(rm_elements);
-			
+
 			for (j = 0; j < (size_t)files_n; j++)
 				free(trash_files[j]);
 			free(trash_files);
-			
+
 			return exit_status;
 		}
 
@@ -7273,23 +7327,23 @@ remove_from_trash(void)
 		else if (strcmp(rm_elements[i], "*") == 0) {
 			size_t j;
 			for (j = 0; j < (size_t)files_n; j++) {
-				
-				snprintf(rm_file, PATH_MAX, "%s/%s", TRASH_FILES_DIR, 
+
+				snprintf(rm_file, PATH_MAX, "%s/%s", TRASH_FILES_DIR,
 						 trash_files[j]->d_name);
 				snprintf(rm_info, PATH_MAX, "%s/%s.trashinfo",
 						 TRASH_INFO_DIR, trash_files[j]->d_name);
 				char *tmp_cmd[] = { "rm", "-r", rm_file, rm_info, NULL };
 				ret = launch_execve(tmp_cmd, FOREGROUND);
-				
+
 				if (ret != EXIT_SUCCESS) {
 					fprintf(stderr, _("%s: trash: Error trashing %s\n"), 
 							 PROGRAM_NAME, trash_files[j]->d_name);
 					exit_status = EXIT_FAILURE;
 				}
-				
+
 				free(trash_files[j]);
 			}
-			
+
 			free(trash_files);
 
 			for (j = 0; rm_elements[j]; j++)
@@ -7316,7 +7370,7 @@ remove_from_trash(void)
 			free(trash_files);
 
 			return exit_status;
-		}	
+		}
 	}
 
 	/* If all args are numbers, and neither 'q' nor wildcard */
@@ -7338,13 +7392,13 @@ remove_from_trash(void)
 				 trash_files[rm_num - 1]->d_name);
 		char *tmp_cmd2[] = { "rm", "-r", rm_file, rm_info, NULL };
 		ret = launch_execve(tmp_cmd2, FOREGROUND);
-		
+
 		if (ret != EXIT_SUCCESS) {
 			fprintf(stderr, _("%s: trash: Error trashing %s\n"),
 					PROGRAM_NAME, trash_files[rm_num - 1]->d_name);
 			exit_status = EXIT_FAILURE;
 		}
-		
+
 		free(rm_elements[i]);
 	}
 
@@ -7362,7 +7416,7 @@ untrash_element(char *file)
 {
 	if (!file)
 		return EXIT_FAILURE;
-	
+
 	char undel_file[PATH_MAX] = "", undel_info[PATH_MAX] = "";
 	snprintf(undel_file, PATH_MAX, "%s/%s", TRASH_FILES_DIR, file);
 	snprintf(undel_info, PATH_MAX, "%s/%s.trashinfo", TRASH_INFO_DIR,
@@ -7379,7 +7433,7 @@ untrash_element(char *file)
 			if (strncmp(line, "Path=", 5) == 0)
 				orig_path = straft(line, '=');
 		fclose (info_fp);
-		
+
 		/* If original path is NULL or empty, return error */
 		if (!orig_path)
 			return EXIT_FAILURE;
@@ -7389,12 +7443,12 @@ untrash_element(char *file)
 			free(orig_path);
 			return EXIT_FAILURE;
 		}
-		
+
 		/* Remove new line char from original path, if any */
 		size_t orig_path_len = strlen(orig_path);
 		if (orig_path[orig_path_len - 1] == '\n')
 			orig_path[orig_path_len - 1] = 0x00;
-		
+
 		/* Decode original path's URL format */
 		char *url_decoded = url_decode(orig_path);
 		if (!url_decoded) {
@@ -7406,7 +7460,7 @@ untrash_element(char *file)
 
 		free(orig_path);
 		orig_path = (char *)NULL;
-		
+
 		/* Check existence and permissions of parent directory */
 		char *parent = (char *)NULL;
 		parent = strbfrlst(url_decoded, '/');
@@ -7470,14 +7524,14 @@ untrash_element(char *file)
 			return EXIT_FAILURE;
 		}
 	}
-	
+
 	else { /* !info_fp */
 		fprintf(stderr, _("%s: undel: Info file for '%s' not found. "
 						  "Try restoring the file manually\n"),
 						  PROGRAM_NAME, file);
 		return EXIT_FAILURE;
 	}
-	
+
 	return EXIT_FAILURE; /* Never reached */
 }
 
@@ -7532,10 +7586,10 @@ untrash_function(char **comm)
 				 PROGRAM_NAME, path, strerror(errno));
 			return EXIT_FAILURE;
 		}
-		
+
 		return exit_status;
-	}	
-	
+	}
+
 	/* List trashed files */
 	printf(_("%sTrashed files%s%s\n\n"), white, NC, default_color);
 	size_t i;
@@ -7607,19 +7661,19 @@ untrash_function(char **comm)
 			free(undel_elements[i]);
 			continue;
 		}
-		
+
 		/* If valid ELN */
 		if (untrash_element(trash_files[undel_num - 1]->d_name) != 0)
 			exit_status = EXIT_FAILURE;
 		free(undel_elements[i]);
 	}
 	free(undel_elements);
-	
+
 	/* Free trashed files list */
 	for (i = 0; i < (size_t)trash_files_n; i++)
 		free(trash_files[i]);
 	free(trash_files);
-	
+
 	/* If some trashed file still remains, reload the undel screen */
 	trash_n = count_dir(TRASH_FILES_DIR);
 	if (trash_n <= 2)
@@ -7641,7 +7695,7 @@ trash_clear(void)
 			 TRASH_FILES_DIR, strerror(errno));
 		return EXIT_FAILURE;
 	}
-	
+
 	files_n = scandir(TRASH_FILES_DIR, &trash_files, skip_implied_dot, 
 					  xalphasort);
 
@@ -7678,7 +7732,7 @@ trash_clear(void)
 			exit_status = EXIT_FAILURE;
 			/* If there is at least one error, return error */
 		}
-		
+
 		free(info_file);
 		free(trash_files[i]);
 	}
@@ -7704,7 +7758,7 @@ trash_function (char **comm)
 		sprintf(trash_files, "%s/files", TRASH_DIR);
 		char *trash_info=NULL;
 		trash_info = xcalloc(strlen(TRASH_DIR) + 6, sizeof(char));
-		sprintf(trash_info, "%s/info", TRASH_DIR);		
+		sprintf(trash_info, "%s/info", TRASH_DIR);
 		char *cmd[] = { "mkdir", "-p", trash_files, trash_info, NULL };
 		int ret = launch_execve (cmd, FOREGROUND);
 		free(trash_files);
@@ -7728,13 +7782,13 @@ trash_function (char **comm)
 	if (!comm[1] || strcmp(comm[1], "ls") == 0 
 			|| strcmp(comm[1], "list") == 0) {
 		/* List files in the Trash/files dir */
-		
+
 		if (chdir(TRASH_FILES_DIR) == -1) {
 			_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n",
 				 PROGRAM_NAME, TRASH_FILES_DIR, strerror(errno));
 			return EXIT_FAILURE;
 		}
-		
+
 		struct dirent **trash_files = (struct dirent **)NULL;
 		int files_n = scandir(TRASH_FILES_DIR, &trash_files,
 							  skip_implied_dot, (unicode) ? alphasort : 
@@ -7767,12 +7821,12 @@ trash_function (char **comm)
 		time_t rawtime = time(NULL);
 		struct tm *tm = localtime(&rawtime);
 		char date[64] = "";
-		strftime(date, sizeof(date), "%c", tm);
+		strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", tm);
 		char suffix[68] = "";
 		snprintf(suffix, 67, "%d%d%d%d%d%d", tm->tm_year + 1900,
 				tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min,
 				tm->tm_sec);
-		
+
 		/* Remove file(s) from Trash */
 		if (strcmp(comm[1], "del") == 0 || strcmp(comm[1], "rm") == 0)
 			exit_status = remove_from_trash();
@@ -7839,7 +7893,7 @@ trash_function (char **comm)
 						continue;
 					}
 				}
-				
+
 				/* Once here, everything is fine: trash the file */
 				exit_status = trash_element(suffix, tm, deq_file);
 				/* The trash_element() function will take care of
@@ -8003,7 +8057,7 @@ keybind_exec_cmd(char *str)
 
 	char **cmd = parse_input_str(str);
 	puts("");
-	
+
 	if (cmd) {
 
 		exec_cmd(cmd);
@@ -8087,7 +8141,7 @@ readline_kbind_action(int count, int key) {
 
 		break;
 
-	/* A-d: Deselect all selected files */		
+	/* A-d: Deselect all selected files */
 	case 100:
 		keybind_exec_cmd("ds a");
 		break;
@@ -8100,7 +8154,7 @@ readline_kbind_action(int count, int key) {
 			return 0;
 		keybind_exec_cmd("cd");
 		break;
-		
+
 	/* A-f: Toggle folders first on/off */
 	case 102:
 		/* If status == 0 set it to 1. In this way, the next time
@@ -8110,7 +8164,7 @@ readline_kbind_action(int count, int key) {
 			list_folders_first = 0;
 		else
 			list_folders_first = 1;
-		
+
 		if (cd_lists_on_the_fly) {
 			CLEAR;
 			while (files--)
@@ -8129,7 +8183,7 @@ readline_kbind_action(int count, int key) {
 			show_hidden = 0;
 		else
 			show_hidden = 1;
-		
+
 		if (cd_lists_on_the_fly) {
 			CLEAR;
 			while (files--)
@@ -8149,7 +8203,7 @@ readline_kbind_action(int count, int key) {
 			return 0;
 		keybind_exec_cmd("back");
 		break;
-		
+
 	/* Change CWD to NEXT directory in history */
 	case 67: /* A-Right */
 	case 107: /* A-k */
@@ -8180,7 +8234,7 @@ readline_kbind_action(int count, int key) {
 			return 0;
 		break;
 
-	/* A-r: Change CWD to the ROOT directory */		
+	/* A-r: Change CWD to the ROOT directory */
 	case 114:
 		/* If already in the root dir, do nothing */
 		if (strcmp(path, "/") == 0)
@@ -8216,7 +8270,7 @@ readline_kbind_action(int count, int key) {
 			puts("");
 			list_dir();
 		}
-		
+
 		break;
 
 	/* A-z: Change to previous sorting method */
@@ -8259,7 +8313,7 @@ readline_kbind_action(int count, int key) {
 	case 126:
 		keybind_exec_cmd("edit");
 		break;
-		
+
 	default: break;
 	}
 
@@ -8310,7 +8364,7 @@ parse_usrvar_value(const char *str, const char c)
 
 	if (buf)
 		return buf;
-	
+
 	return (char *)NULL;
 }
 
@@ -8319,7 +8373,7 @@ create_usr_var(char *str)
 {
 	char *name = strbfr(str, '=');
 	char *value = parse_usrvar_value(str, '=');
-	
+
 	if (!name) {
 		if (value)
 			free(value);
@@ -8327,14 +8381,14 @@ create_usr_var(char *str)
 				PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
-	
+
 	if (!value) {
 		free(name);
 		fprintf(stderr, _("%s: Error getting variable value\n"),
 				PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
-	
+
 	usr_var = xrealloc(usr_var, (size_t)(usrvar_n + 1)
 					   * sizeof(struct usrvar_t));
 	usr_var[usrvar_n].name = xcalloc(strlen(name) + 1, sizeof(char));
@@ -8345,7 +8399,7 @@ create_usr_var(char *str)
 
 	free(name);
 	free(value);
-	
+
 	return EXIT_SUCCESS;
 }
 
@@ -8363,7 +8417,7 @@ free_stuff(void)
 
 	if (opener)
 		free(opener);
-	
+
 	if (encoded_prompt)
 		free(encoded_prompt);
 
@@ -8381,23 +8435,23 @@ free_stuff(void)
 
 	if (alt_profile)
 		free(alt_profile);
-	
+
 	while (files--)
 		free(dirlist[files]);
 	free(dirlist);
-	
+
 	if (sel_n > 0) {
 		for (i = 0; i < sel_n; i++)
 			free(sel_elements[i]);
 		free(sel_elements);
 	}
-	
+
 	if (bin_commands) {
 		for (i = 0; bin_commands[i]; i++)
 			free(bin_commands[i]);
 		free(bin_commands);
 	}
-	
+
 	if (paths) {
 		for (i = 0; i < path_n; i++)
 			free(paths[i]);
@@ -8409,19 +8463,19 @@ free_stuff(void)
 			free(history[i]);
 		free(history);
 	}
-	
+
 	if (argv_bk) {
 		for (i = 0; i < (size_t)argc_bk; i++)
 			free(argv_bk[i]);
 		free(argv_bk);
 	}
-	
+
 	if (dirhist_total_index) {
 		for (i = 0; i < (size_t)dirhist_total_index; i++)
 			free(old_pwd[i]);
 		free(old_pwd);
 	}
-	
+
 	for (i = 0; i < usrvar_n; i++) {
 		free(usr_var[i].name);
 		free(usr_var[i].value);
@@ -8438,7 +8492,7 @@ free_stuff(void)
 
 	if (flags & FILE_CMD_OK)
 		free(file_cmd_path);
-	
+
 	if (msgs_n) {
 		for (i = 0; i < (size_t)msgs_n; i++)
 			free(messages[i]);
@@ -8604,19 +8658,19 @@ set_signals_to_default (void)
 
 void
 init_shell(void)
-/* Keep track of attributes of the shell. Make sure the shell is running 
- * interactively as the foreground job before proceeding. 
- * Taken from: 
+/* Keep track of attributes of the shell. Make sure the shell is running
+ * interactively as the foreground job before proceeding.
+ * Taken from:
  * https://www.gnu.org/software/libc/manual/html_node/Initializing-the-Shell.html#Initializing-the-Shell
  * */
 {
 	/* Check wether we are running interactively */
 	shell_terminal = STDIN_FILENO;
-	shell_is_interactive = isatty(shell_terminal); 
+	shell_is_interactive = isatty(shell_terminal);
 	/* isatty() returns 1 if the file descriptor, here STDIN_FILENO,
 	 * outputs to a terminal (is interactive). Otherwise, it returns
 	 * zero */
-	
+
 	if (shell_is_interactive) {
 		/* Loop until we are in the foreground */
 		while (tcgetpgrp(shell_terminal) != (own_pid = getpgrp()))
@@ -8633,12 +8687,12 @@ init_shell(void)
 			/* Without the setpgid line below, the program cannot be run
 			 * with sudo, but it can be run nonetheless by the root user */
 			if (setpgid(own_pid, own_pid) < 0) {
-				_err(0, NOPRINT_PROMPT, "%s: setpgid: %s\n", PROGRAM_NAME, 
+				_err(0, NOPRINT_PROMPT, "%s: setpgid: %s\n", PROGRAM_NAME,
 					 strerror(errno));
 				exit(EXIT_FAILURE);
 			}
 		}
-		
+
 		/* Grab control of the terminal */
 		tcsetpgrp(shell_terminal, own_pid);
 
@@ -8679,7 +8733,7 @@ get_path_programs(void)
  * them into an array to be read by my readline custom auto-complete
  * function (my_rl_completion) */
 {
-	struct dirent ***commands_bin = (struct dirent ***)xnmalloc(path_n, 
+	struct dirent ***commands_bin = (struct dirent ***)xnmalloc(path_n,
 												sizeof(struct dirent));
 	size_t i, j, l = 0, total_cmd = 0;
 	int *cmd_n = (int *)xnmalloc(path_n, sizeof(int));
@@ -8705,40 +8759,40 @@ get_path_programs(void)
 
 	/* Add internal commands */
 	/* Get amount of internal cmds (elements in INTERNAL_CMDS array) */
-	size_t internal_cmd_n = (sizeof(INTERNAL_CMDS) / 
+	size_t internal_cmd_n = (sizeof(INTERNAL_CMDS) /
 						  sizeof(INTERNAL_CMDS[0])) - 1;
-	bin_commands = (char **)xcalloc(total_cmd + internal_cmd_n + 
-									aliases_n + 2, 
+	bin_commands = (char **)xcalloc(total_cmd + internal_cmd_n +
+									aliases_n + 2,
 									sizeof(char *));
 	for (i = 0; i < internal_cmd_n; i++) {
-		bin_commands[l] = (char *)xnmalloc(strlen(INTERNAL_CMDS[i]) + 1, 
+		bin_commands[l] = (char *)xnmalloc(strlen(INTERNAL_CMDS[i]) + 1,
 								   sizeof(char));
-		strcpy(bin_commands[l++], INTERNAL_CMDS[i]);		
+		strcpy(bin_commands[l++], INTERNAL_CMDS[i]);
 	}
 
 	/* Add commands in PATH */
 	for (i = 0; i < path_n; i++) {
-		
+
 		if (cmd_n[i] <= 0)
 			continue;
-		
+
 		for (j = 0; j < (size_t)cmd_n[i]; j++) {
 			bin_commands[l] = (char *)xnmalloc(
-									strlen(commands_bin[i][j]->d_name) 
+									strlen(commands_bin[i][j]->d_name)
 									+ 1, sizeof(char));
 			strcpy(bin_commands[l++], commands_bin[i][j]->d_name);
 			free(commands_bin[i][j]);
 		}
 		free(commands_bin[i]);
 	}
-	
+
 	free(commands_bin);
 	free(cmd_n);
-	
+
 	/* Add aliases too */
 	if (aliases_n == 0)
 		return;
-	
+
 	for (i = 0; i < aliases_n; i++) {
 		int index = strcntchr(aliases[i], '=');
 		if (index != -1) {
@@ -8754,7 +8808,7 @@ get_path_programs(void)
 char *
 my_rl_quote(char *text, int m_t, char *qp)
 /* Performs bash-style filename quoting for readline (put a backslash
- * before sany char listed in rl_filename_quote_characters.
+ * before any char listed in rl_filename_quote_characters.
  * Modified version of:
  * https://utcc.utoronto.ca/~cks/space/blog/programming/ReadlineQuotingExample*/
 {
@@ -8762,14 +8816,14 @@ my_rl_quote(char *text, int m_t, char *qp)
 	 * rl_filename_quoting_function */
 
 	/* 
-	 * How it works: p and r are pointers to the same memory location 
+	 * How it works: P and R are pointers to the same memory location 
 	 * initialized (calloced) twice as big as the line that needs to be 
-	 * quoted (in case all chars in the line need to be quoted); tp is a 
-	 * pointer to text, which contains the string to be quoted. We move 
-	 * through tp to find all chars that need to be quoted ("a's" becomes 
-	 * "a\'s", for example). At this point we cannot return p, since this 
-	 * pointer is at the end of the string, so that we return r instead, 
-	 * which is at the beginning of the same string pointed by p. 
+	 * quoted (in case all chars in the line need to be quoted); TP is a 
+	 * pointer to TEXT, which contains the string to be quoted. We move 
+	 * through TP to find all chars that need to be quoted ("a's" becomes 
+	 * "a\'s", for example). At this point we cannot return P, since this 
+	 * pointer is at the end of the string, so that we return R instead, 
+	 * which is at the beginning of the same string pointed to by P. 
 	 * */
 	char *r = (char *)NULL, *p = (char *)NULL, *tp = (char *)NULL;
 
@@ -8798,7 +8852,7 @@ my_rl_quote(char *text, int m_t, char *qp)
 char *
 dequote_str(char *text, int m_t)
 /* This function simply deescapes whatever escaped chars it founds in
- * text, so that readline can compare it to system filenames when
+ * TEXT, so that readline can compare it to system filenames when
  * completing paths. Returns a string containing text without escape
  * sequences */
 {
@@ -8812,17 +8866,21 @@ dequote_str(char *text, int m_t)
 	size_t len = 0;
 
 	while(*text) {
+
 		switch (*text) {
-		case '\\':
-			if (*(text + 1) && is_quote_char(*(text + 1)))
-				buf[len++] = *(++text);
-			else
+
+			case '\\':
+				if (*(text + 1) && is_quote_char(*(text + 1)))
+					buf[len++] = *(++text);
+				else
+					buf[len++] = *text;
+			break;
+
+			default:
 				buf[len++] = *text;
 			break;
-		default:
-			buf[len++] = *text;
-			break;
 		}
+
 		text++;
 	}
 
@@ -8854,7 +8912,7 @@ my_rl_path_completion(const char *text, int state)
 		if (!tmp_text)
 			return (char *)NULL;
 	}
-	
+
 	int rl_complete_with_tilde_expansion = 0;
 	/* ~/Doc -> /home/user/Doc */
 
@@ -8935,9 +8993,9 @@ my_rl_path_completion(const char *text, int state)
 
 		rl_filename_completion_desired = 1;
 
-		
+
     }
-    
+
     if (tmp_text) {
 		free(tmp_text);
 		tmp_text = (char *)NULL;
@@ -8947,7 +9005,7 @@ my_rl_path_completion(const char *text, int state)
 	 * a match among files in dir, break the loop and print the match */
 
 	match = 0;
-	
+
 	size_t dirname_len = strlen(dirname);
 
 	/* This block is used only in case of "/path/./" to remove the
@@ -8956,7 +9014,7 @@ my_rl_path_completion(const char *text, int state)
 	exec_path = 0;
 	if (dirname_len > 2) {
 		if (dirname[dirname_len - 3] == '/'
-		&& dirname[dirname_len - 2] == '.' 
+		&& dirname[dirname_len - 2] == '.'
 		&& dirname[dirname_len - 1] == '/') {
 			dir_tmp = savestring(dirname, dirname_len);
 			if (dir_tmp) {
@@ -8968,7 +9026,7 @@ my_rl_path_completion(const char *text, int state)
 
 	/* ############### COMPLETION FILTER ################## */
 	/*         This is the heart of the function           */
-	 
+ 
 	while (directory && (entry = readdir(directory))) {
 		/* If the user entered nothing before TAB (ex: "cd [TAB]") */
 		if (!filename_len) {
@@ -8984,53 +9042,53 @@ my_rl_path_completion(const char *text, int state)
 						if (dirname[0] == '.' && !dirname[1])
 							ret = get_link_ref(entry->d_name);
 						else {
-							snprintf(tmp, PATH_MAX, "%s%s", dirname, 
+							snprintf(tmp, PATH_MAX, "%s%s", dirname,
 									 entry->d_name);
 							ret = get_link_ref(tmp);
 						}
 						if (ret == S_IFDIR)
 							match = 1;
 						break;
-					
-					case DT_DIR: 
+
+					case DT_DIR:
 						match = 1;
 						break;
-					
+
 					default:
 						break;
 					}
 				}
 
 				/* If 'open', allow only reg files, dirs, and symlinks */
-				else if (strncmp(rl_line_buffer, "o ", 2) == 0 
+				else if (strncmp(rl_line_buffer, "o ", 2) == 0
 				|| strncmp(rl_line_buffer, "open ", 5) == 0) {
 					ret = -1;
 					switch (entry->d_type) {
-					
+
 					case DT_LNK:
 						if (dirname[0] == '.' && !dirname[1])
 							ret = get_link_ref(entry->d_name);
 						else {
-							snprintf(tmp, PATH_MAX, "%s%s", dirname, 
+							snprintf(tmp, PATH_MAX, "%s%s", dirname,
 									 entry->d_name);
 							ret = get_link_ref(tmp);
 						}
-						if (ret == S_IFDIR || ret == S_IFREG) 
+						if (ret == S_IFDIR || ret == S_IFREG)
 							match = 1;
 						break;
-					
+
 					case DT_REG:
-					case DT_DIR: 
+					case DT_DIR:
 						match = 1;
 						break;
-					
-					default: 
+
+					default:
 						break;
 					}
 				}
 
-				/* If 'trash', allow only reg files, dirs, symlinks, pipes 
-				 * and sockets. You should not trash a block or a character 
+				/* If 'trash', allow only reg files, dirs, symlinks, pipes
+				 * and sockets. You should not trash a block or a character
 				 * device */
 				else if (strncmp(rl_line_buffer, "t ", 2) == 0
 				|| strncmp(rl_line_buffer, "tr ", 2) == 0
@@ -9038,20 +9096,20 @@ my_rl_path_completion(const char *text, int state)
 					if (entry->d_type != DT_BLK && entry->d_type != DT_CHR)
 						match = 1;
 				}
-				
+
 				/* If "./", list only executable regular files */
 				else if (exec) {
 					if (entry->d_type == DT_REG 
 					&& access(entry->d_name, X_OK) == 0)
 						match = 1;
 				}
-				
+
 				/* If "/path/./", list only executable regular files */
 				else if (exec_path) {
 					if (entry->d_type == DT_REG) {
 						/* dir_tmp is dirname less "./", already
 						 * allocated before the while loop */
-						snprintf(tmp, PATH_MAX, "%s%s", dir_tmp, 
+						snprintf(tmp, PATH_MAX, "%s%s", dir_tmp,
 								 entry->d_name);
 						if (access(tmp, X_OK) == 0)
 							match = 1;
@@ -9067,7 +9125,7 @@ my_rl_path_completion(const char *text, int state)
 
 		/* If there is at least one char to complete (ex: "cd .[TAB]") */
 		else {
-			/* Check if possible completion match up to the length of 
+			/* Check if possible completion match up to the length of
 			 * filename. */
 			if ((entry->d_name[0] == filename[0])
 			&& ((strlen(entry->d_name)) >= filename_len)
@@ -9080,23 +9138,23 @@ my_rl_path_completion(const char *text, int state)
 						if (dirname[0] == '.' && !dirname[1])
 							ret = get_link_ref(entry->d_name);
 						else {
-							snprintf(tmp, PATH_MAX, "%s%s", dirname, 
+							snprintf(tmp, PATH_MAX, "%s%s", dirname,
 									 entry->d_name);
 							ret = get_link_ref(tmp);
 						}
-						if (ret == S_IFDIR) 
+						if (ret == S_IFDIR)
 							match = 1;
 						break;
-					
+
 					case DT_DIR:
 						match = 1;
 						break;
-					
+
 					default:
 						break;
 					}
 				}
-				
+
 				else if (strncmp(rl_line_buffer, "o ", 2) == 0
 				|| strncmp(rl_line_buffer, "open ", 5) == 0) {
 					ret = -1;
@@ -9111,16 +9169,16 @@ my_rl_path_completion(const char *text, int state)
 							ret = get_link_ref(entry->d_name);
 						}
 						else {
-							snprintf(tmp, PATH_MAX, "%s%s", dirname, 
+							snprintf(tmp, PATH_MAX, "%s%s", dirname,
 									 entry->d_name);
 							ret = get_link_ref(tmp);
 						}
 						if (ret == S_IFDIR || ret == S_IFREG)
 							match = 1;
 						break;
-					
+
 					default:
-						break;				
+						break;
 					}
 				}
 
@@ -9131,7 +9189,7 @@ my_rl_path_completion(const char *text, int state)
 					&& entry->d_type != DT_CHR)
 						match = 1;
 				}
-				
+
 				else if (exec) {
 					if (entry->d_type == DT_REG
 					&& access(entry->d_name, X_OK) == 0)
@@ -9146,12 +9204,12 @@ my_rl_path_completion(const char *text, int state)
 							match = 1;
 					}
 				}
-				
+
 				else
 					match = 1;
 			}
 		}
-		
+
 		if (match)
 			break;
 	}
@@ -9225,7 +9283,7 @@ my_rl_completion(const char *text, int start, int end)
 	char **matches = (char **)NULL;
 
 	if (start == 0) { /* Only for the first word entered in the prompt */
-		
+
 		/* Commands completion */
 		if (end == 0) { /* If text is empty, do nothing */
 			/* Prevent readline from attempting path completion if 
@@ -9234,47 +9292,56 @@ my_rl_completion(const char *text, int start, int end)
 			return (char **)NULL;
 		}
 
+		/* If autocd or auto-open, try to expand ELN's first */
 		if ((autocd || auto_open) && *text >= 0x31 && *text <= 0x39) {
+
 			int num_text = atoi(text);
+
 			if (is_number(text) && num_text > 0
 			&& num_text <= (int)files)
-					matches = rl_completion_matches(text,
-							  &filenames_generator);
+				matches = rl_completion_matches(text,
+						  &filenames_generator);
 		}
+
+		/* If not ELN, complete with command names */
 		else
 			matches = rl_completion_matches(text, &bin_cmd_generator);
 	}
+
+	/* Second word or more */
 	else {
-		 
+
 				/* #### ELN EXPANSION ### */
-		
+
 		/* Perform this check only if the first char of the string to be 
 		 * completed is a number in order to prevent an unnecessary call
 		 * to atoi */
 		if (*text >= 0x31 && *text <= 0x39) {
+
 			int num_text = atoi(text);
+
 			if (is_number(text) && num_text > 0
 			&& num_text <= (int)files)
-					matches = rl_completion_matches(text,
-							  &filenames_generator);
+				matches = rl_completion_matches(text,
+						  &filenames_generator);
 		}
 				/* ### BOOKMARKS COMPLETION ### */
-		
+
 		else if (*rl_line_buffer == 'b' 
 		/* Why to compare the first char of the line buffer? Simply to
 		 * prevent unnecessary calls to strncmp(). For instance, if the
 		 * user typed "cd ", there is no need to compare the line
 		 * against "bm" or "bookmarks" */
-		&& (strncmp(rl_line_buffer, "bm ", 3) == 0 
+		&& (strncmp(rl_line_buffer, "bm ", 3) == 0
 		|| strncmp(rl_line_buffer, "bookmarks ", 10) == 0)) {
 			rl_attempted_completion_over = 1;
 			matches = rl_completion_matches(text, &bookmarks_generator);
 		}
 
-				/* ### PROFILES COMPLETION ### */		
+				/* ### PROFILES COMPLETION ### */
 
-		else if (*rl_line_buffer == 'p' 
-		&& (strncmp(rl_line_buffer, "pf set ", 7) == 0 
+		else if (*rl_line_buffer == 'p'
+		&& (strncmp(rl_line_buffer, "pf set ", 7) == 0
 		|| strncmp(rl_line_buffer, "profile set ", 12) == 0
 		|| strncmp(rl_line_buffer, "pf del ", 7) == 0
 		|| strncmp(rl_line_buffer, "profile del ", 12) == 0)) {
@@ -9293,7 +9360,7 @@ my_rl_completion(const char *text, int start, int end)
 int
 get_profile_names(void)
 {
-	char *pf_dir = (char *)xcalloc(user_home_len + strlen(PNL) + 10, 
+	char *pf_dir = (char *)xcalloc(user_home_len + strlen(PNL) + 10,
 								   sizeof(char));
 	sprintf(pf_dir, "%s/.config/%s", user_home, PNL);
 
@@ -9304,7 +9371,7 @@ get_profile_names(void)
 
 	if (files_n == -1)
 		return EXIT_FAILURE;
-	
+
 	size_t i, pf_n = 0;
 	for (i = 0; i < (size_t)files_n; i++) {
 		if (profs[i]->d_type == DT_DIR
@@ -9312,7 +9379,7 @@ get_profile_names(void)
 		&& strncmp(profs[i]->d_name, ".", 1) != 0) {
 			profile_names = (char **)xrealloc(profile_names, (pf_n + 1)
 											  * sizeof(char *));
-			profile_names[pf_n] = (char *)xcalloc(strlen(profs[i]->d_name) 
+			profile_names[pf_n] = (char *)xcalloc(strlen(profs[i]->d_name)
 											+ 1, sizeof(char));
 			strcpy(profile_names[pf_n++], profs[i]->d_name);
 		}
@@ -9320,16 +9387,16 @@ get_profile_names(void)
 	}
 	free(profs);
 	profs = (struct dirent **)NULL;
-	
-	profile_names = (char **)xrealloc(profile_names, (pf_n + 1) 
+
+	profile_names = (char **)xrealloc(profile_names, (pf_n + 1)
 									  * sizeof(char *));
 	profile_names[pf_n] = (char *)NULL;
-	
-	return EXIT_SUCCESS;	
+
+	return EXIT_SUCCESS;
 }
 
 char *
-profiles_generator(const char *text, int state) 
+profiles_generator(const char *text, int state)
 /* Used by profiles completion */
 {
 	static int i;
@@ -9348,7 +9415,7 @@ profiles_generator(const char *text, int state)
 		if (strncmp(name, text, len) == 0)
 			return strdup(name);
 	}
-	
+
 	return (char *)NULL;
 }
 
@@ -9358,7 +9425,7 @@ get_bm_names(void)
 {
 	if (!config_ok)
 		return EXIT_FAILURE;
-	
+
 	FILE *fp;
 
 	/* If the bookmarks file doesn't exist, create it */
@@ -9366,7 +9433,7 @@ get_bm_names(void)
 	if (stat(BM_FILE, &file_attrib) == -1) {
 		fp = fopen(BM_FILE, "w+");
 		if (!fp) {
-			_err('e', PRINT_PROMPT, "bookmarks: '%s': %s\n", BM_FILE, 
+			_err('e', PRINT_PROMPT, "bookmarks: '%s': %s\n", BM_FILE,
 				 strerror(errno));
 			return EXIT_FAILURE;
 		}
@@ -9392,7 +9459,7 @@ get_bm_names(void)
 		for (i = 0; bookmark_names[i]; i++)
 			free(bookmark_names[i]);
 	}
-	
+
 	size_t line_size = 0, bm_n = 0;
 	char *line = (char *)NULL;
 	ssize_t line_len = 0;
@@ -9428,16 +9495,16 @@ get_bm_names(void)
 	bookmark_names = (char **)xrealloc(bookmark_names, (bm_n + 1)
 									   * sizeof(char *));
 	bookmark_names[bm_n] = (char *)NULL;
-	
+
 	free(line);
 
 	fclose(fp);
-	
+
 	return EXIT_SUCCESS;
 }
 
 char *
-bookmarks_generator(const char *text, int state) 
+bookmarks_generator(const char *text, int state)
 /* Used by bookmarks completion */
 {
 	static int i;
@@ -9447,14 +9514,14 @@ bookmarks_generator(const char *text, int state)
 	if (!state) {
 		i = 0;
 		len = strlen(text);
-	} 
+	}
 
 	/* Look for bookmarks in bookmark_names for a match */
 	while ((name = bookmark_names[i++]) != NULL) {
 		if (strncmp(name, text, len) == 0)
 			return strdup(name);
 	}
-	
+
 	return (char *)NULL;
 }
 
@@ -9491,17 +9558,17 @@ bin_cmd_generator(const char *text, int state)
 	static int i;
 	static size_t len;
 	char *name;
-	
+
 	if (!state) {
 		i = 0;
 		len = strlen(text);
-	} 
-	
+	}
+
 	while ((name = bin_commands[i++]) != NULL) {
 		if (strncmp(name, text, len) == 0)
 			return strdup(name);
 	}
-	
+
 	return (char *)NULL;
 }
 
@@ -9555,9 +9622,9 @@ get_path_env(void)
 		if (!path_tmp[i])
 			break;
 	}
-	
+
 	free(path_tmp);
-	
+
 	return path_num;
 }
 
@@ -9583,12 +9650,12 @@ init_config(void)
 		/* alt_profile will not be NULL whenever the -P option is used
 		 * to run the program under an alternative profile */
 		if (alt_profile) {
-			
+
 			if (xdg_config_home) {
 				CONFIG_DIR = (char *)xcalloc(strlen(xdg_config_home)
 									 + pnl_len + strlen(alt_profile)
 									 + 3, sizeof(char));
-				sprintf(CONFIG_DIR, "%s/%s/%s", xdg_config_home, PNL, 
+				sprintf(CONFIG_DIR, "%s/%s/%s", xdg_config_home, PNL,
 						alt_profile);
 			}
 
@@ -9608,7 +9675,7 @@ init_config(void)
 				CONFIG_DIR = (char *)xcalloc(strlen(xdg_config_home)
 									 + pnl_len + 10, sizeof(char));
 				sprintf(CONFIG_DIR, "%s/%s/default", xdg_config_home,
-						PNL, alt_profile);
+						PNL);
 			}
 
 			else {
@@ -9620,7 +9687,7 @@ init_config(void)
 		}
 
 		xdg_config_home = (char *)NULL;
-		
+
 		TRASH_DIR = (char *)xcalloc(user_home_len + 20, sizeof(char));
 		sprintf(TRASH_DIR, "%s/.local/share/Trash", user_home);
 		size_t trash_len = strlen(TRASH_DIR);
@@ -9640,7 +9707,7 @@ init_config(void)
 		CONFIG_FILE = (char *)xcalloc(config_len + pnl_len + 4,
 									  sizeof(char));
 		sprintf(CONFIG_FILE, "%s/%src", CONFIG_DIR, PNL);
-		PROFILE_FILE = (char *)xcalloc(config_len + pnl_len + 10, 
+		PROFILE_FILE = (char *)xcalloc(config_len + pnl_len + 10,
 							   sizeof(char));
 		sprintf(PROFILE_FILE, "%s/%s_profile", CONFIG_DIR, PNL);
 		MSG_LOG_FILE = (char *)xcalloc(config_len + 14, sizeof(char));
@@ -9652,7 +9719,7 @@ init_config(void)
 
 		/* #### CHECK THE TRASH DIR #### */
 		/* Create trash dirs, if necessary */
-		
+
 		if (stat(TRASH_DIR, &file_attrib) == -1) {
 			char *trash_files = (char *)NULL;
 			trash_files = (char *)xcalloc(strlen(TRASH_DIR) + 7,
@@ -9661,7 +9728,7 @@ init_config(void)
 			char *trash_info = (char *)NULL;
 			trash_info = (char *)xcalloc(strlen(TRASH_DIR) + 6,
 										 sizeof(char));
-			sprintf(trash_info, "%s/info", TRASH_DIR);		
+			sprintf(trash_info, "%s/info", TRASH_DIR);
 			char *cmd[] = { "mkdir", "-p", trash_files, trash_info,
 							NULL };
 			ret = launch_execve(cmd, FOREGROUND);
@@ -9674,7 +9741,7 @@ init_config(void)
 					 "disabled\n"), PROGRAM_NAME, TRASH_DIR);
 			}
 		}
-		
+
 		/* If it exists, check it is writable */
 		else if (access (TRASH_DIR, W_OK) == -1) {
 			trash_ok = 0;
@@ -9686,7 +9753,7 @@ init_config(void)
 		/* If the config directory doesn't exist, create it */
 		/* Use the GNU mkdir to let it handle parent directories */
 		if (stat(CONFIG_DIR, &file_attrib) == -1) {
-			char *tmp_cmd[] = { "mkdir", "-p", CONFIG_DIR, NULL }; 
+			char *tmp_cmd[] = { "mkdir", "-p", CONFIG_DIR, NULL };
 			ret = launch_execve(tmp_cmd, FOREGROUND);
 			if (ret != EXIT_SUCCESS) {
 				config_ok = 0;
@@ -9697,7 +9764,7 @@ init_config(void)
 					 "default options\n"), PROGRAM_NAME, CONFIG_DIR);
 			}
 		}
-		
+
 		/* If it exists, check it is writable */
 		else if (access(CONFIG_DIR, W_OK) == -1) {
 			config_ok = 0;
@@ -9759,7 +9826,7 @@ init_config(void)
 				fclose(profile_fp);
 			}
 		}
-		
+
 		/* #### CHECK THE CONFIG FILE #### */
 		/* Open the config file or create it, if it doesn't exist */
 		if (config_ok && stat(CONFIG_FILE, &file_attrib) == -1) {
@@ -9772,7 +9839,7 @@ init_config(void)
 
 				/* #### READ THE CONFIG FILE ##### */
 		if (config_ok) {
-			
+
 			set_colors();
 
 			short text_color_set = -1, eln_color_set = -1, 
@@ -9836,7 +9903,7 @@ init_config(void)
 							free(opt_str);
 							continue;
 						}
-							
+
 						opener = (char *)xcalloc(strlen(tmp) + 1,
 										sizeof(char));
 						strcpy(opener, tmp);
@@ -10035,13 +10102,13 @@ init_config(void)
 						char *opt_str = straft(line, '=');
 						if (!opt_str)
 							continue;
-						
+
 						char *tmp = remove_quotes(opt_str);
 						if (!tmp) {
 							free(opt_str);
 							continue;
 						}
-						
+
 						if (*tmp == '/') {
 							if (access(tmp, F_OK|X_OK) != 0) {
 								free(opt_str);
@@ -10051,7 +10118,7 @@ init_config(void)
 													+ 1, sizeof(char));
 							strcpy(sys_shell, tmp);
 						}
-						
+
 						else {
 							char *shell_path = get_cmd_path(tmp);
 							if (!shell_path) {
@@ -10064,7 +10131,7 @@ init_config(void)
 							strcpy(sys_shell, shell_path);
 							free(shell_path);
 						}
-						
+
 						free(opt_str);
 					}
 
@@ -10291,13 +10358,13 @@ init_config(void)
 						opt_str = straft(line, '=');
 						if (!opt_str)
 							continue;
-							
+
 						char *tmp = remove_quotes(opt_str);
 						if (!tmp) {
 							free(opt_str);
 							continue;
 						}
-						
+
 						if (!is_color_code(tmp)) {
 							free(opt_str);
 							continue;
@@ -10352,7 +10419,7 @@ init_config(void)
 							free(opt_str);
 							continue;
 						}
-						
+
 						/* If starting path is not NULL, and exists,
 						 * and is a directory, and the user has
 						 * appropriate permissions, set path to starting
@@ -10501,7 +10568,7 @@ init_config(void)
 						 "expected.\n"), PROGRAM_NAME, (xrdb_path) 
 						 ? _("terminal") : _("X session"),
 						 PROGRAM_NAME);
-						
+
 					if (xrdb_path)
 						free(xrdb_path);
 				}
@@ -10514,7 +10581,7 @@ init_config(void)
 			}
 		}
 	}
-	
+
 	/* ################## END OF IF HOME ########################### */
 
 	/* #### CHECK THE TMP DIR #### */
@@ -10556,7 +10623,7 @@ init_config(void)
 				 PROGRAM_NAME, TMP_DIR, strerror(errno));
 		}
 	}
-	
+
 	/* If the directory exists, check it is writable */
 	else if (access(TMP_DIR, W_OK) == -1) {
 		selfile_ok = 0;
@@ -10655,7 +10722,7 @@ get_cmd_path(const char *cmd)
 {
 	char *cmd_path = (char *)NULL;
 	size_t i;
-	
+
 	cmd_path = (char *)xnmalloc(PATH_MAX + 1, sizeof(char));
 
 	for (i = 0; i < path_n; i++) { /* Get each path from PATH */
@@ -10665,10 +10732,10 @@ get_cmd_path(const char *cmd)
 		if (access(cmd_path, X_OK) == 0)
 			return cmd_path;
 	}
-	
+
 	/* If cmd was not found */
 	free(cmd_path);
-	
+
 	return (char *)NULL;
 }
 
@@ -10803,11 +10870,11 @@ external_arguments(int argc, char **argv)
 		case 'p':
 			flags |= START_PATH;
 			path_value = optarg;
-			xargs.path = 1;			
+			xargs.path = 1;
 			break;
 
 		case 'P':
-			flags |= ALT_PROFILE;				
+			flags |= ALT_PROFILE;
 			alt_profile_value = optarg;
 			break;
 
@@ -10870,7 +10937,7 @@ external_arguments(int argc, char **argv)
 			else fprintf(stderr, _("%s: unknown option character '\\%x'\n"), 
 						 PROGRAM_NAME, (unsigned int)optopt);
 			exit(EXIT_FAILURE);
-		
+
 		default: break;
 		}
 	}
@@ -10894,7 +10961,7 @@ external_arguments(int argc, char **argv)
 		if (path_exp)
 			free(path_exp);
 	}
-	
+
 	if ((flags & ALT_PROFILE) && alt_profile_value) {
 		if (alt_profile)
 			free(alt_profile);
@@ -10913,12 +10980,12 @@ home_tilde(const char *new_path)
 {
 	if (!home_ok)
 		return (char *)NULL;
-	
-	char *path_tilde = (char *)NULL;	
+
+	char *path_tilde = (char *)NULL;
 
 	/* If path == HOME */
 	if (strcmp(new_path, user_home) == 0) {
-		path_tilde = (char *)xcalloc(2, sizeof(char));		
+		path_tilde = (char *)xcalloc(2, sizeof(char));
 		path_tilde[0] = '~';
 	}
 
@@ -10929,7 +10996,7 @@ home_tilde(const char *new_path)
 							 + 3, sizeof(char));
 		sprintf(path_tilde, "~/%s", new_path + user_home_len + 1);
 	}
-	
+
 	return path_tilde;
 }
 
@@ -10984,12 +11051,12 @@ brace_expansion(const char *str)
 										   (closing_brace -
 										   initial_brace),
 										   sizeof(char));
-		
+
 		while (str[i] != '}' && str[i] != ',' && str[i] != 0x00)
 			brace_tmp[k++] = str[i++];
-		
+
 		brace_tmp[k] = 0x00;
-		
+
 		if (braces_end) {
 			braces[braces_n] = (char *)xcalloc(strlen(braces_root) 
 									+ strlen(brace_tmp)
@@ -11004,16 +11071,16 @@ brace_expansion(const char *str)
 										sizeof(char));
 			sprintf(braces[braces_n], "%s%s", braces_root, brace_tmp);
 		}
-		
+
 		if (str[i] == ',')
 			braces = (char **)xrealloc(braces, (++braces_n + 1)
 									   * sizeof(char *));
-		
+
 		k = 0;
-	
+
 		free(brace_tmp);
 	}
-	
+
 	if (braces_root)
 		free(braces_root);
 
@@ -11078,7 +11145,7 @@ parse_input_str(char *str)
 
 	if (!send_shell) {
 		for (i = 0; str[i]; i++) {
-				
+
 				/* ##################################
 				 * #   0.b) CONDITIONAL EXECUTION   # 
 				 * ##################################*/
@@ -11087,7 +11154,7 @@ parse_input_str(char *str)
 			if (!chaining && str[i] == ';' && i > 0
 			&& str[i - 1] != '\\')
 				chaining = 1;
-				
+
 			/* Check for conditional execution (cmd1 && cmd 2)*/
 			if (!cond_cmd && str[i] == '&' && i > 0
 			&& str[i - 1] != '\\' && str[i + 1] && str[i + 1] == '&')
@@ -11096,7 +11163,7 @@ parse_input_str(char *str)
 				/* ##################################
 				 * #   0.c) USER DEFINED VARIABLE   # 
 				 * ##################################*/
-				 			
+
 			/* If user defined variable send the whole string to
 			 * exec_cmd(), which will take care of storing the
 			 * variable. */
@@ -11120,11 +11187,11 @@ parse_input_str(char *str)
 						if (*(p++) == 0x20)
 							space_found = 1;
 					}
-					
+
 					if (!space_found)
 						flags |= IS_USRVAR_DEF;
 				}
-				
+
 				p = (char *)NULL;
 			}
 		}
@@ -11135,14 +11202,14 @@ parse_input_str(char *str)
 	 * our internal commands and therefore cannot execute them); else,
 	 * if no internal command is found, let it to the system shell */
 	if (chaining || cond_cmd) {
-		
+
 		/* User defined variables are always internal, so that there is
 		 * no need to check whatever else is in the command string */
 		if (flags & IS_USRVAR_DEF) {
 			exec_chained_cmds(str);
-			return (char **)NULL;		
+			return (char **)NULL;
 		}
-		
+
 		register size_t j = 0; 
 		size_t str_len = strlen(str), len = 0, internal_ok = 0;
 		char *buf = (char *)NULL;
@@ -11150,26 +11217,26 @@ parse_input_str(char *str)
 		/* Get each word (cmd) in STR */
 		buf = (char *)xcalloc(str_len + 1, sizeof(char));
 		for (j = 0; j < str_len; j++) {
-			
+
 			while (str[j] && str[j] != 0x20 && str[j] != ';'
 			&& str[j] != '&') {
 				buf[len++] = str[j++];
 			}
-			
+
 			if (strcmp(buf, "&&") != 0) {
 				if (is_internal_c(buf)) {
 					internal_ok = 1;
 					break;
 				}
 			}
-			
+
 			memset(buf, 0x00, len);
 			len = 0;
 		}
 
 		free(buf);
 		buf = (char *)NULL;
-		
+
 		if (internal_ok) {
 			exec_chained_cmds(str);
 			return (char **)NULL;
@@ -11181,7 +11248,7 @@ parse_input_str(char *str)
 		char *p = str;
 		while (*p == 0x20 || *p == '\t')
 			p++;
-		
+
 		args_n=0;
 
 		char **cmd = (char **)NULL;
@@ -11230,9 +11297,9 @@ parse_input_str(char *str)
 	int *range_array = (int *)xnmalloc(int_array_max, sizeof(int));
 
 	for (i = 0; i <= args_n; i++) {
-		
+
 		size_t substr_len = strlen(substr[i]);
-		
+
 		/* Check for ranges */
 		register size_t j = 0;
 		for (j = 0; substr[i][j]; j++) {
@@ -11251,12 +11318,12 @@ parse_input_str(char *str)
 				if (ranges_ok < int_array_max)
 					range_array[ranges_ok++] = (int)i;
 		}
-	
+
 		/* Expand 'sel' only as an argument, not as command */
 		if (i > 0 && strcmp(substr[i], "sel") == 0)
 			is_sel = (short)i;
 	}
-	
+
 			/* ####################################
 			 * #       2.a) RANGES EXPANSION      # 
 			 * ####################################*/
@@ -11267,14 +11334,14 @@ parse_input_str(char *str)
 	if (ranges_ok) {
 		size_t old_ranges_n = 0;
 		register size_t r = 0;
-		
+
 		for (r = 0; r < ranges_ok; r++) {
 			size_t ranges_n = 0;
 			int *ranges = expand_range(substr[range_array[r] + 
 									   (int)old_ranges_n], 1);
 			if (ranges) {
 				register size_t j = 0;
-				
+
 				for (ranges_n = 0; ranges[ranges_n]; ranges_n++);
 				char **ranges_cmd = (char **)NULL;
 				ranges_cmd = (char **)xcalloc(args_n + ranges_n + 2, 
@@ -11284,13 +11351,13 @@ parse_input_str(char *str)
 													sizeof(char));
 					strcpy(ranges_cmd[j++], substr[i]);
 				}
-				
+
 				for (i = 0; i < ranges_n; i++) {
 					ranges_cmd[j] = (char *)xcalloc(digits_in_num(ranges[i])
 													+ 1, sizeof(int));
 					sprintf(ranges_cmd[j++], "%d", ranges[i]);
 				}
-				
+
 				for (i = (size_t)range_array[r] + old_ranges_n + 1; 
 				i <= args_n; i++) {
 					ranges_cmd[j] = (char *)xcalloc(strlen(substr[i]) + 1, 
@@ -11299,13 +11366,13 @@ parse_input_str(char *str)
 				}
 				ranges_cmd[j] = NULL;
 				free(ranges);
-				
+
 				for (i = 0; i <= args_n; i++) 
 					free(substr[i]);
-				
+
 				substr = (char **)xrealloc(substr, (args_n + ranges_n + 2)
 										   * sizeof(char *));
-				
+
 				for (i = 0; i < j; i++) {
 					substr[i] = (char *)xcalloc(strlen(ranges_cmd[i])
 												+ 1, sizeof(char));
@@ -11318,9 +11385,9 @@ parse_input_str(char *str)
 			old_ranges_n += (ranges_n - 1);
 		}
 	}
-	
+
 	free(range_array);
-	
+
 				/* ##########################
 				 * #   2.b) SEL EXPANSION   # 
 				 * ##########################*/
@@ -11335,13 +11402,13 @@ parse_input_str(char *str)
 			char **sel_array = (char **)NULL;
 			sel_array = (char **)xcalloc(args_n + sel_n + 2,
 										 sizeof(char *));
-			
+
 			for (i = 0; i < (size_t)is_sel; i++) {
-				sel_array[j] = (char *)xcalloc(strlen(substr[i]) + 1, 
+				sel_array[j] = (char *)xcalloc(strlen(substr[i]) + 1,
 											   sizeof(char));
 				strcpy(sel_array[j++], substr[i]);
 			}
-			
+
 			for (i = 0; i < sel_n; i++) {
 				/* Escape selected filenames and copy them into tmp
 				 * array */
@@ -11368,19 +11435,19 @@ parse_input_str(char *str)
 					return (char **)NULL;
 				}
 			}
-			
+
 			for (i = (size_t)is_sel + 1; i <= args_n; i++) {
 				sel_array[j] = (char *)xcalloc(strlen(substr[i]) + 1, 
 											   sizeof(char));
 				strcpy(sel_array[j++], substr[i]);
 			}
-			
+
 			for (i = 0; i <= args_n; i++)
 				free(substr[i]);
-			
+
 			substr = (char **)xrealloc(substr, (args_n + sel_n + 2) 
 									   * sizeof(char *));
-			
+
 			for (i = 0; i < j; i++) {
 				substr[i] = (char *)xcalloc(strlen(sel_array[i]) + 1,
 										    sizeof(char));
@@ -11396,11 +11463,11 @@ parse_input_str(char *str)
 			fprintf(stderr, _("%s: There are no selected files\n"), 
 					PROGRAM_NAME);
 			register size_t j = 0;
-			
+
 			for (j = 0; j <= args_n; j++)
 				free(substr[j]);
 			free(substr);
-			
+
 			return (char **)NULL;
 		}
 	}
@@ -11426,7 +11493,7 @@ parse_input_str(char *str)
 				/* Expand first word only if autocd is set to true */
 				if (i == 0 && !autocd && !auto_open)
 					continue;
-				
+
 				int num = atoi(substr[i]);
 				/* Expand numbers only if there is a corresponding ELN */
 
@@ -11456,7 +11523,7 @@ parse_input_str(char *str)
 				}
 			}
 		}
-		
+
 		/* #############################################
 		 * #   2.d) USER DEFINED VARIABLES EXPANSION   # 
 		 * #############################################*/
@@ -11465,7 +11532,7 @@ parse_input_str(char *str)
 			char *var_name = straft(substr[i], '$');
 			if (var_name) {
 				size_t j;
-				
+
 				for (j = 0; j < usrvar_n; j++) {
 					if (strcmp(var_name, usr_var[j].name) == 0) {
 						substr[i] = (char *)xrealloc(substr[i], 
@@ -11481,11 +11548,11 @@ parse_input_str(char *str)
 				fprintf(stderr, _("%s: %s: Error getting variable name\n"), 
 						PROGRAM_NAME, substr[i]);
 				size_t j;
-				
+
 				for (j = 0; j <= args_n; j++)
 					free(substr[j]);
 				free(substr);
-				
+
 				return (char **)NULL;
 			}
 		}
@@ -11500,7 +11567,7 @@ parse_input_str(char *str)
 
 	if(!is_internal(substr[0]))
 		return substr;
-	
+
 	/* #############################################################
 	 * #			   ONLY FOR INTERNAL COMMANDS 				   # 
 	 * #############################################################*/
@@ -11528,7 +11595,7 @@ parse_input_str(char *str)
 			if (i >= (size_t)is_sel && i <= sel_n)
 				continue;
 		}
-		
+
 		/* The search function admits a path as second argument. So, if
 		 * the command is search, perform the expansions only for the
 		 * first parameter, if any. */
@@ -11555,13 +11622,13 @@ parse_input_str(char *str)
 
 		register size_t j = 0;
 		for (j = 0; substr[i][j]; j++) {
-			
+
 			/* If a brace is found, store its index */
 			if (substr[i][j] == '{' && substr[i][j + 1] != 0x00
 			&& substr[i][j + 1] != '}' && substr[i][j - 1] != 0x00
 			&& substr[i][j - 1] != '\\') {
 				size_t k;
-				
+
 				for (k = j + 1; substr[i][k] && substr[i][k]!='}'; k++) {
 					if (substr[i][k] == ',' && substr[i][k - 1] != '\\'
 					&& braces_n < int_array_max) {
@@ -11624,14 +11691,14 @@ parse_input_str(char *str)
 				register size_t j = 0;
 				char **glob_cmd = (char **)NULL;
 				glob_cmd = (char **)xcalloc(args_n + globbuf.gl_pathc + 1, 
-											sizeof(char *));			
-				
+											sizeof(char *));
+
 				for (i = 0; i < ((size_t)glob_array[g] + old_pathc); i++) {
 					glob_cmd[j] = (char *)xcalloc(strlen(substr[i]) + 1, 
 												  sizeof(char));
 					strcpy(glob_cmd[j++], substr[i]);
 				}
-				
+
 				for (i = 0; i < globbuf.gl_pathc; i++) {
 					/* Escape the globbed filename and copy it*/
 					char *esc_str = escape_str(globbuf.gl_pathv[i]);
@@ -11656,7 +11723,7 @@ parse_input_str(char *str)
 						return (char **)NULL;
 					}
 				}
-				
+
 				for (i = (size_t)glob_array[g] + old_pathc + 1;
 				i <= args_n; i++) {
 					glob_cmd[j] = (char *)xcalloc(strlen(substr[i])
@@ -11670,7 +11737,7 @@ parse_input_str(char *str)
 				substr = (char **)xrealloc(substr, 
 										(args_n+globbuf.gl_pathc + 1)
 										* sizeof(char *));
-				
+
 				for (i = 0;i < j; i++) {
 					substr[i] = (char *)xcalloc(strlen(glob_cmd[i])
 												+ 1, sizeof(char));
@@ -11684,9 +11751,9 @@ parse_input_str(char *str)
 			globfree(&globbuf);
 		}
 	}
-	
+
 	free(glob_array);
-	
+
 				/* #############################
 				 * #    6) BRACES EXPANSION    # 
 				 * #############################*/
@@ -11712,7 +11779,7 @@ parse_input_str(char *str)
 												sizeof(char *));
 				/* First, add to the new array the paramenters coming
 				 * before braces */
-				
+
 				for (i = 0; i < (size_t)(braces_array[b] + old_braces_arg); 
 				i++) {
 					comm_array_braces[i] = (char *)xcalloc(
@@ -11723,7 +11790,7 @@ parse_input_str(char *str)
 
 				/* Now, add the expanded braces to the same array */
 				register size_t j = 0;
-				
+
 				for (j = 0; j < (size_t)braced_args; j++) {
 					/* Escape each filename and copy it */
 					char *esc_str = escape_str(braces[j]);
@@ -11739,21 +11806,21 @@ parse_input_str(char *str)
 								"filename\n"), PROGRAM_NAME,
 								braces[j]);
 						register size_t k = 0;
-						
+
 						for (k = 0; k < braces_n; k++)
 							free(braces[k]);
 						free(braces);
 						braces = (char **)NULL;
-						
+
 						for (k = 0;k < i; k++)
 							free(comm_array_braces[k]);
 						free(comm_array_braces);
 						comm_array_braces = (char **)NULL;
-						
+
 						for (k = 0; k < args_n; k++)
 							free(substr[k]);
 						free(substr);
-						
+
 						return (char **)NULL;
 					}
 					free(braces[j]);
@@ -11762,43 +11829,44 @@ parse_input_str(char *str)
 				braces = (char **)NULL;
 				/* Finally, add, if any, those parameters coming after
 				 * the braces */
-				
+
 				for (j = (size_t)(braces_array[b] + old_braces_arg) + 1;
 				j <= args_n; j++) {
 					comm_array_braces[i] = (char *)xcalloc(
 												    strlen(substr[j])
 													+ 1, sizeof(char));
-					strcpy(comm_array_braces[i++], substr[j]);				
+					strcpy(comm_array_braces[i++], substr[j]);
 				}
+
 				/* Now, free the old comm_array and copy to it our new
 				 * array containing all the parameters, including the
 				 * expanded braces */
 				for (j = 0; j <= args_n; j++)
 					free(substr[j]);
-				substr = (char **)xrealloc(substr, (args_n + 
-										   (size_t)braced_args + 1) * 
-										   sizeof(char *));			
-				
+				substr = (char **)xrealloc(substr, (args_n +
+										   (size_t)braced_args + 1) *
+										   sizeof(char *));
+
 				args_n = i - 1;
-				
+
 				for (j = 0; j < i; j++) {
 					substr[j] = (char *)xcalloc(strlen(
-										comm_array_braces[j]) + 1, 
+										comm_array_braces[j]) + 1,
 										sizeof(char));
 					strcpy(substr[j], comm_array_braces[j]);
 					free(comm_array_braces[j]);
 				}
-				
+
 				old_braces_arg += (braced_args - 1);
 				free(comm_array_braces);
 			}
 		}
 	}
-	
+
 	free(braces_array);
 
 	/* #### 7) NULL TERMINATE THE INPUT STRING ARRAY (again) #### */
-	substr = (char **)xrealloc(substr, (args_n + 2) * sizeof(char *));	
+	substr = (char **)xrealloc(substr, (args_n + 2) * sizeof(char *));
 	substr[args_n + 1] = (char *)NULL;
 
 	return substr;
@@ -11836,7 +11904,7 @@ rl_no_hist(const char *prompt)
 			free(input);
 			return (char *)NULL;
 		}
-	
+
 		return input;
 	}
 
@@ -11894,14 +11962,14 @@ prompt(void)
 		else
 			path[i] = 0x00;
 	}
-	
+
 	if (welcome_message) {
 		printf(_("%sCliFM, the anti-eye-candy, KISS file manager%s\n"
 			   "%sEnter 'help' or '?' for instructions.%s\n"), 
 			   welcome_msg_color, NC, default_color, NC);
 		welcome_message = 0;
 	}
-	
+
 	/* Print the tip of the day (only on first run) */
 	if (tips) {
 		static int first_run = 1;
@@ -11923,7 +11991,7 @@ prompt(void)
 		if (trash_n <= 2)
 			trash_n = 0;
 	}
-	
+
 	get_sel_files();
 
 	/* Messages are categorized in three groups: errors, warnings, and
@@ -11971,7 +12039,7 @@ prompt(void)
 	 * 1 = null terminating char */
 
 	char *the_prompt = (char *)xnmalloc(prompt_length, sizeof(char));
-	
+
 	snprintf(the_prompt, prompt_length, "%s%s%s%s%s%s%s%s", 
 		(msgs_n && pmsg) ? msg_str : "", (trash_n) ? yellow_b : "", 
 		(trash_n) ? "T\001\x1b[0m\002" : "", (sel_n) ? green_b : "", 
@@ -11998,7 +12066,7 @@ prompt(void)
 	input = readline(the_prompt);
 
 	free(the_prompt);
-	
+
 	if (!input)
 	/* Same as 'input == NULL': input is a pointer poiting to no
 	 * memory address whatsover */
@@ -12026,7 +12094,7 @@ prompt(void)
 	 * equal inputs, or lines starting with space */
 	if (record_cmd(input))
 		add_to_cmdhist(input);
-		
+
 	return input;
 }
 
@@ -12164,7 +12232,7 @@ folder_select(const struct dirent *entry)
 			return 0;
 	}
 	else
-		return 0; 
+		return 0;
 
 	return 0; /* Never reached */
 }
@@ -12184,7 +12252,7 @@ file_select(const struct dirent *entry)
 	}
 	else
 		return 0;
-		
+
 	return 0; /* Never reached */
 }
 
@@ -12229,16 +12297,16 @@ colors_list(const char *entry, const int i, const int pad,
 			printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC, nf_c,
 				   entry, NC, new_line ? "\n" : "", pad, "");
 		else if (file_attrib.st_mode & S_ISUID) /* set uid file */
-			printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC, su_c, 
+			printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC, su_c,
 				   entry, NC, new_line ? "\n" : "", pad, "");
 		else if (file_attrib.st_mode & S_ISGID) /* set gid file */
-			printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC, sg_c, 
+			printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC, sg_c,
 				   entry, NC, new_line ? "\n" : "", pad, "");
 		else {
 			#ifdef _LINUX_CAP
 			cap = cap_get_file(entry);
 			if (cap) {
-				printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC, ca_c, 
+				printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC, ca_c,
 					   entry, NC, new_line ? "\n" : "", pad, "");
 				cap_free(cap);
 			}
@@ -12324,7 +12392,7 @@ colors_list(const char *entry, const int i, const int pad,
 	default: printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC, no_c, 
 				    entry, NC, new_line ? "\n" : "", pad, "");
 	}
-	
+
 	free(index);
 }
 
@@ -12354,7 +12422,7 @@ list_dir(void)
 
 	if (light_mode)
 		return list_dir_light();
-	
+
 	files = 0; /* Reset the files counter */
 
 	/* CPU Registers are faster than memory to access, so the variables 
@@ -12445,7 +12513,7 @@ list_dir(void)
 		int *tmp_files = (int *)xnmalloc((size_t)total + 1, sizeof(int)); 
 		int *tmp_dirs = (int *)xnmalloc((size_t)total + 1, sizeof(int));
 		size_t filesn = 0, dirsn = 0;
-		
+
 		for (i = 0; i < total; i++) {
 
 			switch (list[i]->d_type) {
@@ -12465,7 +12533,7 @@ list_dir(void)
 					break;
 			}
 		}
-		
+
 		/* Allocate enough space to store all dirs and file names in 
 		 * the dirlist array */
 		if (!filesn && !dirsn)
@@ -12486,7 +12554,7 @@ list_dir(void)
 							: sizeof(char));
 			strcpy(dirlist[i], list[tmp_dirs[i]]->d_name);
 		}
-		
+
 		/* Now copy file names */
 		register int j;
 		for (j = 0; j < (int)filesn; j++) {
@@ -12499,7 +12567,7 @@ list_dir(void)
 							: sizeof(char));
 			strcpy(dirlist[i++], list[tmp_files[j]]->d_name);
 		}
-		
+
 		free(tmp_files);
 		free(tmp_dirs);
 		dirlist[i] = (char *)NULL;
@@ -12508,7 +12576,7 @@ list_dir(void)
 		 * in the CWD */
 		files = (size_t)i;
 	}
-	
+
 	/* If no list_folders_first */
 	else {
 
@@ -12524,7 +12592,7 @@ list_dir(void)
 								? sizeof(char32_t) : sizeof(char));
 			strcpy(dirlist[i], list[i]->d_name);
 		}
-		
+
 		dirlist[files] = (char *)NULL;
 	}
 
@@ -12619,11 +12687,11 @@ list_dir(void)
 			else {
 				/* linkname is not null only if the file is a symlink
 				 * to an existent directory */
-				int ret = count_dir((linkname) ? linkname
+				int retval = count_dir((linkname) ? linkname
 									: dirlist[i]);
-				if (ret != -1) {
+				if (retval != -1) {
 
-					file_info[i].filesn = ret;
+					file_info[i].filesn = retval;
 					file_info[i].ruser = 1;
 
 					if (file_info[i].filesn > 2)
@@ -12664,7 +12732,7 @@ list_dir(void)
 		register size_t counter = 0;
 
 		int max = get_max_long_view(), eln_len_cur = 0, eln_len_bk = 0;
-		
+
 		eln_len = digits_in_num((int)files); /* This is max ELN length */
 		eln_len_bk = eln_len;
 
@@ -12684,7 +12752,7 @@ list_dir(void)
 				eln_len = eln_len_bk - (eln_len_bk - eln_len_cur);
 			else
 				eln_len = eln_len_bk;
-					
+
 			if (pager) {
 				/*	Check terminal amount of rows: if as many filenames
 				 * as the amount of available terminal rows has been
@@ -12729,7 +12797,7 @@ list_dir(void)
 			pager = 1;
 
 		free(file_info);
-		
+
 		/* Print a dividing line between the files list and the
 		 * prompt */
 		fputs(div_line_color, stdout);
@@ -12743,31 +12811,31 @@ list_dir(void)
 		while (total--)
 			free(list[total]);
 		free(list);
-		
+
 		return EXIT_SUCCESS;
 	}
-	
+
 	/* Normal view mode */
-	
+
 	/* Get possible amount of columns for the dirlist screen */
 	size_t columns_n = (size_t)term_cols / (longest + 1); /* +1 for the
 	space between file names */
-	
+
 	/* If longest is bigger than terminal columns, columns_n will be 
 	 * negative or zero. To avoid this: */
 	if (columns_n < 1)
 		columns_n = 1;
-	
-	/* If we have only three files, we don't want four columns */	
+
+	/* If we have only three files, we don't want four columns */
 	if (columns_n > files)
 		columns_n = files;
 
 	if (clear_screen)
 		CLEAR;
-	
+
 	short last_column = 0; /* c, reset_pager=0; */
 	register size_t counter = 0;
-	
+
 	/* Now we can do the listing */
 	for (i = 0; i < (int)files; i++) {
 
@@ -12917,7 +12985,8 @@ list_dir(void)
 			#ifdef _LINUX_CAP
 			else if ((cap = cap_get_file(dirlist[i]))) {
 				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, ca_c, 
-						dirlist[i], NC, (last_column) ? "\n" : "");				
+						dirlist[i], NC, (last_column) ? "\n" : "");
+
 				cap_free(cap);
 			}
 			#endif
@@ -12949,7 +13018,7 @@ list_dir(void)
 			 * current element */
 			size_t diff = longest - (digits_in_num(i + 1) + 1 + 
 						  file_info[i].len);
-			
+
 			if (is_dir) { /* If a directory, make room for displaying the 
 				* amount of files it contains */
 				/* Get the amount of digits in the number of files
@@ -12968,9 +13037,9 @@ list_dir(void)
 				putchar(' ');
 		}
 	}
-	
+
 /*	free(file_info); */
-	
+
 	/* If the pager was disabled during listing (by pressing 'c', 'p' or
 	 * 'q'), reenable it */
 	if (reset_pager)
@@ -13101,7 +13170,7 @@ list_dir_light(void)
 		int *tmp_files = (int *)xnmalloc((size_t)total + 1, sizeof(int)); 
 		int *tmp_dirs = (int *)xnmalloc((size_t)total + 1, sizeof(int));
 		size_t filesn = 0, dirsn = 0;
-		
+
 		for (i = 0; i < total; i++) {
 			switch (list[i]->d_type) {
 				case DT_DIR:
@@ -13113,7 +13182,7 @@ list_dir_light(void)
 					break;
 			}
 		}
-		
+
 		/* Allocate enough space to store all dirs and file names in 
 		 * the dirlist array */
 		if (!filesn && !dirsn)
@@ -13137,7 +13206,7 @@ list_dir_light(void)
 							: sizeof(char));
 			strcpy(dirlist[i], list[tmp_dirs[i]]->d_name);
 		}
-		
+
 		/* Now copy file names */
 		register int j;
 		for (j = 0; j < (int)filesn; j++) {
@@ -13150,7 +13219,7 @@ list_dir_light(void)
 								: sizeof(char));
 			strcpy(dirlist[i++], list[tmp_files[j]]->d_name);
 		}
-		
+
 		free(tmp_files);
 		free(tmp_dirs);
 		dirlist[i] = (char *)NULL;
@@ -13235,7 +13304,7 @@ list_dir_light(void)
 		register size_t counter = 0;
 
 		int max = get_max_long_view(), eln_len_cur = 0, eln_len_bk = 0;
-		
+
 		eln_len = digits_in_num((int)files); /* This is max ELN length */
 		eln_len_bk = eln_len;
 
@@ -13255,7 +13324,7 @@ list_dir_light(void)
 				eln_len = eln_len_bk - (eln_len_bk - eln_len_cur);
 			else
 				eln_len = eln_len_bk;
-					
+
 			if (pager) {
 				/*	Check terminal amount of rows: if as many filenames
 				 * as the amount of available terminal rows has been
@@ -13314,31 +13383,31 @@ list_dir_light(void)
 		while (total--)
 			free(list[total]);
 		free(list);
-		
+
 		return EXIT_SUCCESS;
 	}
-	
+
 	/* Normal view mode */
-	
+
 	/* Get possible amount of columns for the dirlist screen */
 	size_t columns_n = (size_t)term_cols / (longest + 1); /* +1 for the
 	space between file names */
-	
+
 	/* If longest is bigger than terminal columns, columns_n will be 
 	 * negative or zero. To avoid this: */
 	if (columns_n < 1)
 		columns_n = 1;
-	
-	/* If we have only three files, we don't want four columns */	
+
+	/* If we have only three files, we don't want four columns */
 	if (columns_n > files)
 		columns_n = files;
 
 	if (clear_screen)
 		CLEAR;
-	
+
 	short last_column = 0; /* c, reset_pager=0; */
 	register size_t counter = 0;
-	
+
 	/* Now we can do the listing */
 	for (i = 0; i < (int)files; i++) {
 
@@ -13439,7 +13508,7 @@ list_dir_light(void)
 			 * current element */
 			size_t diff = longest - (digits_in_num(i + 1) + 1 + 
 						  file_info[i].len);
-			
+
 			/* Print the spaces needed to equate the length of the
 			 * lines */
 			register int j;
@@ -13477,7 +13546,7 @@ list_dir_light(void)
 	}
 
 /*	free(file_info); */
-	
+
 	/* If the pager was disabled during listing (by pressing 'c', 'p' or
 	 * 'q'), reenable it */
 	if (reset_pager)
@@ -13544,7 +13613,7 @@ get_prompt_cmds(void)
 
 	while ((line_len = getline(&line, &line_size,
 	config_file_fp)) > 0) {
-		
+
 		if (prompt_line_found) {
 			if (strncmp(line, "#END OF PROMPT", 14) == 0)
 				break;
@@ -13558,11 +13627,11 @@ get_prompt_cmds(void)
 				strcpy(prompt_cmds[prompt_cmds_n++], line);
 			}
 		}
-		
+
 		else if (strncmp(line, "#PROMPT", 7) == 0) 
 			prompt_line_found = 1;
 	}
-	
+
 	free(line);
 
 	fclose(config_file_fp);
@@ -13591,16 +13660,16 @@ get_aliases(void)
 		aliases_n = 0;
 	}
 
-	
+
 	char *line = (char *)NULL;
 	size_t line_size = 0;
 	ssize_t line_len = 0;
 
 	while ((line_len = getline(&line, &line_size,
 	config_file_fp)) > 0) {
-		
+
 		if (strncmp(line, "alias ", 6) == 0) {
-			char *alias_line = strchr(line, ' ');	
+			char *alias_line = strchr(line, ' ');
 			if (alias_line) {
 				alias_line++;
 				aliases = (char **)xrealloc(aliases, (aliases_n + 1)
@@ -13612,7 +13681,7 @@ get_aliases(void)
 			}
 		}
 	}
-	
+
 	free(line);
 
 	fclose(config_file_fp);
@@ -13625,7 +13694,7 @@ check_for_alias(char **comm)
 {
 	if (aliases_n == 0 || !aliases)
 		return (char **)NULL;
-	
+
 	char *aliased_cmd = (char *)NULL;
 	size_t comm_len = strlen(comm[0]);
 	char *comm_tmp = (char *)xcalloc(comm_len + 2, sizeof(char));
@@ -13634,30 +13703,30 @@ check_for_alias(char **comm)
 
 	register size_t i;
 	for (i = 0; i < aliases_n; i++) {
-		
+
 		/* If a match is found */
 		if (strncmp(aliases[i], comm_tmp, comm_len + 1) == 0) {
-		
+
 			/* Get the aliased command */
 			aliased_cmd = strbtw(aliases[i], '\'', '\'');
-			
+
 			if (!aliased_cmd) {
 				free(comm_tmp);
 				return (char **)NULL;
 			}
-			
+
 			if (*aliased_cmd == 0x00) { /* zero length */
 				free(comm_tmp);
 				free(aliased_cmd);
 				return (char **)NULL;
 			}
-		
+
 			args_n = 0; /* Reset args_n to be used by parse_input_str() */
-			
+
 			/* Parse the aliased cmd */
 			char **alias_comm = parse_input_str(aliased_cmd);
 			free(aliased_cmd);
-			
+
 			if (!alias_comm) {
 				args_n = 0;
 				fprintf(stderr, _("%s: Error parsing aliased command\n"), 
@@ -13665,11 +13734,11 @@ check_for_alias(char **comm)
 				free(comm_tmp);
 				return (char **)NULL;
 			}
-			
+
 			register size_t j;
 
 			/* Add input parameters, if any, to alias_comm */
-			if (comm[1]) {	
+			if (comm[1]) {
 				for (j = 1; comm[j]; j++) {
 					alias_comm = (char **)xrealloc(alias_comm, (++args_n
 												+ 1) * sizeof(char *));
@@ -13678,25 +13747,25 @@ check_for_alias(char **comm)
 					strcpy(alias_comm[args_n], comm[j]);
 				}
 			}
-			
+
 			/* Add a terminating NULL string */
 			alias_comm = (char **)xrealloc(alias_comm, (args_n + 2)
 										   * sizeof(char *));
 			alias_comm[args_n + 1] = (char *)NULL;
-			
+
 			/* Free original command */
 			for (j = 0; comm[j]; j++) 
 				free(comm[j]);
 			free(comm);	
-			
+
 			free(comm_tmp);
 
 			return alias_comm;
 		}
 	}
-	
+
 	free(comm_tmp);
-	
+
 	return (char **)NULL;
 }
 
@@ -13721,7 +13790,7 @@ exec_cmd(char **comm)
 	/* If a user defined variable */
 	if (flags & IS_USRVAR_DEF) {
 		flags &= ~IS_USRVAR_DEF;
-		
+
 		exit_code = create_usr_var(comm[0]);
 		return exit_code;
 	}
@@ -13819,9 +13888,9 @@ exec_cmd(char **comm)
 	/* The more often a function is used, the more on top should it be
 	 * in this if...else..if chain. It will be found faster this way. */
 
-	/* ####################################################   
-	 * #				 BUILTIN COMMANDS 				  #     
-	 * ####################################################*/	
+	/* ####################################################
+	 * #				 BUILTIN COMMANDS 				  #
+	 * ####################################################*/
 
 
 	/*          ############### CD ##################     */
@@ -13835,7 +13904,7 @@ exec_cmd(char **comm)
 		else if (strncmp(comm[1], "smb://", 6) == 0)
 			exit_code = remote_smb(comm[1] + 6, (comm[2]) ? comm[2]
 								   : NULL);
-		else if (strncmp(comm[1], "ftp://", 6) == 0) 
+		else if (strncmp(comm[1], "ftp://", 6) == 0)
 			exit_code = remote_ftp(comm[1] + 6, (comm[2]) ? comm[2]
 								   : NULL);
 		else
@@ -13864,7 +13933,7 @@ exec_cmd(char **comm)
 		else
 			exit_code = open_function(comm);
 	}
-	
+
 	else if (strcmp(comm[0], "rf") == 0
 	|| strcmp(comm[0], "refresh") == 0) {
 		if (cd_lists_on_the_fly) {
@@ -13873,9 +13942,9 @@ exec_cmd(char **comm)
 			exit_code = list_dir();
 		}
 	}
-	
+
 	/*         ############### BOOKMARKS ##################     */
-	else if (strcmp(comm[0], "bm") == 0 
+	else if (strcmp(comm[0], "bm") == 0
 	|| strcmp(comm[0], "bookmarks") == 0) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: bm, bookmarks [a, add FILE] [d, del] [edit]"));
@@ -13893,14 +13962,14 @@ exec_cmd(char **comm)
 		/* Reenable keyboard shortcuts */
 		kbind_busy = 0;
 	}
-	
+
 	/*       ############### BACK AND FORTH ##################     */
 	else if (strcmp(comm[0], "b") == 0 || strcmp(comm[0], "back") == 0)
 		exit_code = back_function (comm);
-	
+
 	else if (strcmp(comm[0], "f") == 0 || strcmp(comm[0], "forth") == 0)
 		exit_code = forth_function (comm);
-	
+
 	else if (strcmp(comm[0], "bh") == 0
 	|| strcmp(comm[0], "fh") == 0) {
 		int i;
@@ -13909,7 +13978,7 @@ exec_cmd(char **comm)
 				printf("%d %s%s%s%s\n", i + 1, green, old_pwd[i], NC, 
 						default_color);
 			else 
-				printf("%d %s\n", i + 1, old_pwd[i]);	
+				printf("%d %s\n", i + 1, old_pwd[i]);
 		}
 	}
 
@@ -13947,31 +14016,31 @@ exec_cmd(char **comm)
 
 		if (is_sel) { /* If 'tr sel', deselect everything */
 			size_t i;
-		
+
 			for (i = 0; i < sel_n; i++)
 				free(sel_elements[i]);
-		
+
 			sel_n = 0;
-		
+
 			if (save_sel() != 0)
 				exit_code = EXIT_FAILURE;
 		}
 	}
-	
+
 	else if (strcmp(comm[0], "undel") == 0 || strcmp(comm[0], "u") == 0
 	|| strcmp(comm[0], "untrash") == 0) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: u, undel, untrash [*, a, all]"));
 			return EXIT_SUCCESS;
 		}
-		
+
 		kbind_busy = 1;
 		rl_attempted_completion_function = NULL;
 		exit_code = untrash_function(comm);
 		rl_attempted_completion_function = my_rl_completion;
 		kbind_busy = 0;
 	}
-	
+
 	/*         ############### SELECTION ##################     */
 	else if (strcmp(comm[0], "s") == 0 || strcmp(comm[0], "sel") == 0) {
 		if (!comm[1]) {
@@ -13986,11 +14055,11 @@ exec_cmd(char **comm)
 
 		exit_code = sel_function(comm);
 	}
-	
+
 	else if (strcmp(comm[0], "sb") == 0
 	|| strcmp(comm[0], "selbox") == 0)
 		show_sel_files();
-	
+
 	else if (strcmp(comm[0], "ds") == 0
 	|| strcmp(comm[0], "desel") == 0) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
@@ -14004,7 +14073,7 @@ exec_cmd(char **comm)
 		rl_attempted_completion_function = my_rl_completion;
 		kbind_busy = 0;
 	}
-	
+
 	/*  ############### SOME SHELL CMD WRAPPERS ##################  */
 	else if (strcmp(comm[0], "rm") == 0 || strcmp(comm[0], "mkdir") == 0 
 	|| strcmp(comm[0], "touch") == 0 || strcmp(comm[0], "ln") == 0
@@ -14029,7 +14098,7 @@ exec_cmd(char **comm)
 		exit_code = run_and_refresh(comm);
 		kbind_busy = 0;
 	}
-	
+
 	/*    ############### PROPERTIES ##################     */
 	else if (strcmp(comm[0], "pr") == 0 || strcmp(comm[0], "prop") == 0 
 	|| strcmp(comm[0], "p") == 0) {
@@ -14045,12 +14114,12 @@ exec_cmd(char **comm)
 		}
 		exit_code = properties_function(comm);
 	}
-	
+
 	/*     ############### SEARCH ##################     */	
 	else if (comm[0][0] == '/' && access(comm[0], F_OK) != 0)
 								/* If not absolute path */ 
 		exit_code = search_function(comm);
-	
+
 	/*      ############### HISTORY ##################     */
 	/* If '!number' or '!-number' or '!!' */
 	else if (comm[0][0] == '!' && (isdigit(comm[0][1]) 
@@ -14161,7 +14230,7 @@ exec_cmd(char **comm)
 			return EXIT_FAILURE;
 		}
 	}
-	
+
 						/* #### NET #### */
 	else if (strcmp(comm[0], "n") == 0 || strcmp(comm[0], "net") == 0) {
 		if (!comm[1]) {
@@ -14198,12 +14267,12 @@ exec_cmd(char **comm)
 		if (get_sel_files() != 0)
 			exit_code = EXIT_FAILURE;
 	}
-				
+
 					/* #### PROFILE #### */
 	else if (strcmp(comm[0], "pf") == 0 || strcmp(comm[0], "prof") == 0 
 	|| strcmp(comm[0], "profile") == 0)
 		exit_code = profile_function(comm);
-	
+
 					/* #### MOUNTPOINTS #### */
 	else if (strcmp(comm[0], "mp") == 0 
 	|| (strcmp(comm[0], "mountpoints") == 0)) {
@@ -14217,7 +14286,7 @@ exec_cmd(char **comm)
 			kbind_busy = 0;
 		}
 	}
-	
+
 					/* #### EXT #### */
 	else if (strcmp(comm[0], "ext") == 0) {
 		if (!comm[1]) {
@@ -14248,7 +14317,7 @@ exec_cmd(char **comm)
 			}
 		}
 	}
-	
+
 					/* #### PAGER #### */
 	else if (strcmp(comm[0], "pg") == 0
 	|| strcmp(comm[0], "pager") == 0) {
@@ -14288,7 +14357,7 @@ exec_cmd(char **comm)
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
-		
+
 		if (strcmp(comm[1], "on") == 0) {
 			files_counter = 1;
 			puts(_("Filescounter is enabled"));
@@ -14345,7 +14414,7 @@ exec_cmd(char **comm)
 			}
 		}
 	}
-	
+
 				/* #### FOLDERS FIRST #### */
 	else if ((strcmp(comm[0], "folders") == 0 
 	&& strcmp(comm[1], "first") == 0) || strcmp(comm[0], "ff") == 0) {
@@ -14374,7 +14443,7 @@ exec_cmd(char **comm)
 				fputs(_("Usage: folders first, ff [on, off, status]\n"), 
 					    stderr);
 				exit_code = EXIT_FAILURE;
-				return EXIT_FAILURE;			
+				return EXIT_FAILURE;
 			}
 
 			if (list_folders_first != status) {
@@ -14391,7 +14460,7 @@ exec_cmd(char **comm)
 			exit_code = EXIT_FAILURE;
 		}
 	}
-	
+
 				/* #### LOG #### */
 	else if (strcmp(comm[0], "log") == 0) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
@@ -14408,10 +14477,10 @@ exec_cmd(char **comm)
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
-		
+
 		exit_code = log_function(comm);
 	}
-	
+
 				/* #### MESSAGES #### */
 	else if (strcmp(comm[0], "msg") == 0
 	|| strcmp(comm[0], "messages") == 0) {
@@ -14440,7 +14509,7 @@ exec_cmd(char **comm)
 				printf(_("%s: There are no messages\n"), PROGRAM_NAME);
 		}
 	}
-	
+
 				/* #### ALIASES #### */
 	else if (strcmp(comm[0], "alias") == 0) {
 		if (comm[1]) {
@@ -14458,14 +14527,14 @@ exec_cmd(char **comm)
 				return exit_code;
 			}
 		}
-		
+
 		if (aliases_n) {
 			size_t i;
 			for (i = 0; i < aliases_n; i++)
-				printf("%s", aliases[i]);	
+				printf("%s", aliases[i]);
 		}
 	}
-	
+
 				/* #### SHELL #### */
 	else if (strcmp(comm[0], "shell") == 0) {
 		if (!comm[1]) {
@@ -14479,13 +14548,13 @@ exec_cmd(char **comm)
 		else
 			exit_code = set_shell(comm[1]);
 	}
-	
+
 				/* #### EDIT #### */
-	else if (strcmp(comm[0], "edit") == 0) 
+	else if (strcmp(comm[0], "edit") == 0)
 		exit_code = edit_function(comm);
-	
+
 				/* #### HISTORY #### */
-	else if (strcmp(comm[0], "history") == 0) 
+	else if (strcmp(comm[0], "history") == 0)
 		exit_code = history_function(comm);
 
 			  /* #### HIDDEN FILES #### */
@@ -14582,27 +14651,27 @@ exec_cmd(char **comm)
 	 * is always zero, that is to say, success */
 	else if (strcmp(comm[0], "path") == 0 || strcmp(comm[0], "cwd") == 0) 
 		printf("%s\n", path);
-	
+
 	else if (strcmp(comm[0], "help") == 0 || strcmp(comm[0], "?") == 0)
 		help_function();
-	
+
 	else if (strcmp(comm[0], "colors") == 0
 	|| strcmp(comm[0], "cc") == 0)
 		color_codes();
-	
+
 	else if (strcmp(comm[0], "ver") == 0
 	|| strcmp(comm[0], "version") == 0)
 		version_function();
-	
+
 	else if (strcmp(comm[0], "fs") == 0)
 		free_software();
-	
+
 	else if (strcmp(comm[0], "bonus") == 0)
 		bonus_function();
-	
+
 	else if (strcmp(comm[0], "splash") == 0)
 		splash();
-	
+
 					/* #### QUIT #### */
 	else if (strcmp(comm[0], "q") == 0 || strcmp(comm[0], "quit") == 0 
 	|| strcmp(comm[0], "exit") == 0 || strcmp(comm[0], "zz") == 0 
@@ -14653,16 +14722,16 @@ exec_cmd(char **comm)
 			}
 		}
 
-	/* ####################################################   
-	 * #				EXTERNAL/SHELL COMMANDS			  #     
+	/* ####################################################
+	 * #				EXTERNAL/SHELL COMMANDS			  #
 	 * ####################################################*/
 
 
-		/* LOG EXTERNAL COMMANDS 
+		/* LOG EXTERNAL COMMANDS
 		* 'no_log' will be true when running profile or prompt commands */
 		if (!no_log)
 			exit_code = log_function(comm);
-		
+
 		/* PREVENT UNGRACEFUL EXIT */
 		/* Prevent the user from killing the program via the 'kill',
 		 * 'pkill' or 'killall' commands, from within CliFM itself.
@@ -14685,7 +14754,7 @@ exec_cmd(char **comm)
 				}
 			}
 		}
-		
+
 		/* CHECK WHETHER EXTERNAL COMMANDS ARE ALLOWED */
 		if (!ext_cmd_ok) {
 			fprintf(stderr, _("%s: External commands are not allowed. "
@@ -14693,7 +14762,7 @@ exec_cmd(char **comm)
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
-		
+
 		/*
 		 * By making precede the command by a colon or a semicolon, the
 		 * user can BYPASS CliFM parsing, expansions, and checks to be
@@ -14719,9 +14788,9 @@ exec_cmd(char **comm)
 			else
 				strcpy(comm[0], comm_tmp);
 		}
-		
+
 		/* #### RUN THE EXTERNAL COMMAND #### */
-		
+
 		/* Store the command and each argument into a single array to be 
 		 * executed by execle() using the system shell (/bin/sh -c) */
 		char *ext_cmd = (char *)NULL;
@@ -14768,7 +14837,7 @@ exec_cmd(char **comm)
 			setenv("LS_COLORS", ls_colors_bk, 1);
 		else
 			unsetenv("LS_COLORS");
-		
+
 		if (launch_execle(ext_cmd) != EXIT_SUCCESS)
 			exit_code = EXIT_FAILURE;
 		free(ext_cmd);
@@ -14964,7 +15033,7 @@ launch_execve(char **cmd, int bg)
 	 * and
 	 * https://www.gnu.org/software/libc/manual/html_node/Exit-Status.html 
 	*/
-	
+
 	if (!cmd)
 		return EXNULLERR;
 
@@ -14994,7 +15063,7 @@ launch_execve(char **cmd, int bg)
 			pid_t sid = setsid();
 			signal(SIGHUP, SIG_IGN);
 		} */
-		
+
 		execvp(cmd[0], cmd);
 		/* This will only be reached if execvp() fails, because the exec
 		 * family of functions returns only on error */
@@ -15011,7 +15080,7 @@ launch_execve(char **cmd, int bg)
 		else
 			return run_in_foreground(pid);
 	}
-	
+
 	/* Never reached */
 	return EXIT_FAILURE;
 }
@@ -15086,7 +15155,7 @@ save_sel(void)
 			 sel_file_user, strerror(errno));
 		return EXIT_FAILURE;
 	}
-	
+
 	size_t i;
 	for (i = 0; i < sel_n; i++) {
 		fputs(sel_elements[i], sel_fp);
@@ -15115,22 +15184,28 @@ sel_function (char **comm)
 		if (strcmp(comm[i], "*") == 0 || strcmp(comm[i], ".*") == 0
 		|| strcmp(comm[i], ".") == 0 || strcmp(comm[i], "..") == 0)
 			continue;
+
 		char *deq_file = dequote_str(comm[i], 0);
+
 		if (!deq_file) {
 			for (j = 0; j < sel_n; j++)
 				free(sel_elements[j]);
 			return EXIT_FAILURE;
 		}
+
 		size_t file_len = strlen(deq_file);
+
 		/* Remove final slash from directories. No need to check if file
 		 * is a directory, since in Linux only directories can contain a
 		 * slash in its name */
 		if (deq_file[file_len - 1] == '/')
 			deq_file[file_len - 1] = 0x00;
+
 		if (strcmp(deq_file, ".") == 0 || strcmp(deq_file, "..") == 0) {
 			free(deq_file);
 			continue;
 		}
+
 		/* If a filename in CWD... */
 		int sel_is_filename = 0, sel_is_relative_path = 0;
 		for (j = 0; j < files; j++) {
@@ -15139,7 +15214,9 @@ sel_function (char **comm)
 				break;
 			}
 		}
+
 		if (!sel_is_filename) {
+
 			/* If a path (contains a slash)... */
 			if (strcntchr(deq_file, '/') != -1) {
 				if (deq_file[0] != '/') /* If relative path */
@@ -15154,44 +15231,55 @@ sel_function (char **comm)
 					continue;
 				}
 			}
-			else { /* If neither a filename in CWD nor a path... */
+
+			/* If neither a filename in CWD nor a path... */
+			else {
 				fprintf(stderr, _("%s: sel: '%s': No such %s\n"), 
 						PROGRAM_NAME, deq_file, 
-						(is_number(deq_file)) ? "ELN" : "file or directory");
+						(is_number(deq_file)) ? "ELN"
+						: "file or directory");
 				free(deq_file);
 				exit_status = EXIT_FAILURE;
 				continue;
 			}
 		}
+
 		if (sel_is_filename || sel_is_relative_path) { 
 			/* Add path to filename or relative path */
 			sel_tmp = (char *)xcalloc(strlen(path) + strlen(deq_file)
 									  + 2, sizeof(char));
 			sprintf(sel_tmp, "%s/%s", path, deq_file);
 		}
+
 		else { /* If absolute path... */
-			sel_tmp = (char *)xcalloc(strlen(deq_file) + 1, sizeof(char));		
+			sel_tmp = (char *)xcalloc(strlen(deq_file) + 1,
+									  sizeof(char));
 			strcpy(sel_tmp, deq_file);
 		}
+
 		free(deq_file);
 		deq_file = (char *)NULL;
+
 		/* Check if the selected element is already in the selection 
 		 * box */
 		exists = 0; 
+
 		for (j = 0; j < sel_n; j++) {
 			if (strcmp(sel_elements[j], sel_tmp) == 0) {
 				exists = 1;
 				break;
 			}
 		}
+
 		if (!exists) {
-			sel_elements = (char **)xrealloc(sel_elements, (sel_n + 1) * 
-											 sizeof(char *));
+			sel_elements = (char **)xrealloc(sel_elements, (sel_n + 1)
+											 * sizeof(char *));
 			sel_elements[sel_n] = (char *)xcalloc(strlen(sel_tmp) + 1,
 												  sizeof(char));
 			strcpy(sel_elements[sel_n++], sel_tmp);
 			new_sel++;
 		}
+
 		else fprintf(stderr, _("%s: sel: '%s': Already selected\n"), 
 					 PROGRAM_NAME, sel_tmp);
 		free(sel_tmp);
@@ -15201,26 +15289,54 @@ sel_function (char **comm)
 
 	if (!selfile_ok)
 		return EXIT_FAILURE;
-	
+
 	if (!new_sel)
 		return exit_status;
 
 	/* At this point, we know there are new selected files and that the
 	 * selection file is OK. So, write new selections into the selection 
-	 * file*/
+	 * file */
 	if (save_sel() == 0) { /* If selected files were successfully written
 		to sel file */
+
+		/* Get size of total sel files */
+		struct stat sel_attrib;
+		for (i = 0; i < sel_n; i++) {
+			if (lstat(sel_elements[i], &sel_attrib) != -1) {
+				if ((sel_attrib.st_mode & S_IFMT) == S_IFDIR)
+					total_sel_size += dir_size(sel_elements[i]);
+				else
+					total_sel_size += sel_attrib.st_size;
+			}
+		}
+
+		/* Print entries */
 		if (sel_n > 10)
 			printf(_("%zu elements are now in the Selection Box\n"),
 					 sel_n);
+
 		else if (sel_n > 0) {
-			printf(_("%zu selected %s:\n"), sel_n, (sel_n == 1)
+			printf(_("%zu selected %s:\n\n"), sel_n, (sel_n == 1)
 					? _("element") : _("elements"));
+
 			for (i = 0; i < sel_n; i++)
-				printf("  %s\n", sel_elements[i]);
+				colors_list(sel_elements[i], (int)i + 1, 0, 1);
 		}
+
+		/* Print total size */
+		char *human_size = get_size_unit(total_sel_size);
+
+		if (sel_n > 10)
+			printf("Total size: %s\n", human_size);
+
+		else if (sel_n > 0)
+			printf("\n%sTotal size%s: %s\n", white, NC, human_size);
+
+		free(human_size);
+
 		return exit_status;
 	}
+
 	else {
 		if (sel_n > 0) { /* In case of error, remove sel files from
 			memory */
@@ -15238,10 +15354,14 @@ show_sel_files(void)
 {
 	if (clear_screen)
 		CLEAR;
+
 	printf(_("%sSelection Box%s%s\n"), white, NC, default_color);
+
 	short reset_pager = 0;
+
 	if (sel_n == 0)
 		puts(_("Empty"));
+
 	else {
 		puts("");
 		struct winsize w;
@@ -15251,8 +15371,10 @@ show_sel_files(void)
 		unsigned short term_rows = w.ws_row;
 		term_rows -= 2;
 		size_t i;
+
 		for(i = 0; i < sel_n; i++) {
 /*			if (pager && counter > (term_rows-2)) { */
+
 			if (pager && counter > (size_t)term_rows) {
 				switch(c = xgetchar()) {
 				/* Advance one line at a time */
@@ -15272,13 +15394,18 @@ show_sel_files(void)
 				/* If another key is pressed, go back one position. 
 				 * Otherwise, some filenames won't be listed.*/
 				default: i--; continue;
-					break;				
+					break;
 				}
 			}
 			counter++;
 			colors_list(sel_elements[i], (int)i + 1, 0, 1);
 		}
+
+		char *human_size = get_size_unit(total_sel_size);
+		printf("\n%sTotal size%s: %s\n", white, NC, human_size);
+		free(human_size);
 	}
+
 	if (reset_pager)
 		pager = 1;
 }
@@ -15295,7 +15422,7 @@ deselect(char **comm)
 			size_t i;
 			for (i = 0; i < sel_n; i++)
 				free(sel_elements[i]);
-			sel_n = 0;
+			sel_n = total_sel_size = 0;
 			if (save_sel() != 0)
 				return EXIT_FAILURE;
 			else
@@ -15306,18 +15433,27 @@ deselect(char **comm)
 			return EXIT_SUCCESS;
 		}
 	}
-	
+
 	register size_t i; 
+
 	if (clear_screen)
 		CLEAR;
+
 	printf(_("%sSelection Box%s%s\n"), white, NC, default_color);
+
 	if (sel_n == 0) {
 		puts(_("Empty"));
 		return EXIT_SUCCESS;
 	}
+
 	puts("");
+
 	for (i = 0; i < sel_n; i++)
 		colors_list(sel_elements[i], (int)i + 1, 0, 1);
+
+	char *human_size = get_size_unit(total_sel_size);
+	printf("\n%sTotal size%s: %s\n", white, NC, human_size);
+	free(human_size);
 
 	printf(_("\n%s%sEnter 'q' to quit.\n"), NC, default_color);
 	size_t desel_n = 0;
@@ -15337,20 +15473,22 @@ deselect(char **comm)
 		desel_n++;
 
 	for (i = 0; i < desel_n; i++) { /* Validation */
-		
+
 		/* If not a number */
 		if (!is_number(desel_elements[i])) {
+
 			if (strcmp(desel_elements[i], "q") == 0) {
 				for (i = 0; i < desel_n; i++)
 					free(desel_elements[i]);
 				free(desel_elements);
 				return EXIT_SUCCESS;
 			}
+			
 			else if (strcmp(desel_elements[i], "*") == 0) {
 				/* Clear the sel array */
 				for (i = 0; i < sel_n; i++)
 					free(sel_elements[i]);
-				sel_n = 0;
+				sel_n = total_sel_size = 0;
 				for (i = 0; i < desel_n; i++)
 					free(desel_elements[i]);
 				int exit_status = EXIT_SUCCESS;
@@ -15365,6 +15503,7 @@ deselect(char **comm)
 				}
 				return exit_status;
 			}
+
 			else {
 				printf(_("desel: '%s': Invalid element\n"),
 						desel_elements[i]);
@@ -15386,7 +15525,7 @@ deselect(char **comm)
 				for (j = 0; j < desel_n; j++)
 					free(desel_elements[j]);
 				free(desel_elements);
-				return EXIT_FAILURE;				
+				return EXIT_FAILURE;
 			}
 		}
 	}
@@ -15411,15 +15550,25 @@ deselect(char **comm)
 
 	/* Search the sel array for the path of the element to deselect and
 	 * store its index */
+	struct stat desel_attrib;
 	for (i = 0; i < desel_n; i++) {
 		size_t j, k, desel_index = 0;
 		for (k = 0; k < sel_n; k++) {
 			if (strcmp(sel_elements[k], desel_path[i]) == 0) {
+
+				/* Sustract size from total size */
+				if (lstat(sel_elements[k], &desel_attrib) != -1) {
+					if ((desel_attrib.st_mode & S_IFMT) == S_IFDIR)
+						total_sel_size -= dir_size(sel_elements[k]);
+					else
+						total_sel_size -= desel_attrib.st_size;
+				}
+
 				desel_index = k;
 				break;
 			}
 		}
-		
+
 		/* Once the index was found, rearrange the sel array removing the 
 		 * deselected element (actually, moving each string after it to
 		 * the previous position) */
@@ -15442,7 +15591,7 @@ deselect(char **comm)
 	sel_n = (sel_n - desel_n);
 
 	if ((int)sel_n < 0)
-		sel_n = 0;
+		sel_n = total_sel_size = 0;
 
 	if (sel_n)
 		sel_elements = (char **)xrealloc(sel_elements,
@@ -15467,7 +15616,7 @@ deselect(char **comm)
 
 	if (save_sel() != 0)
 		exit_status = EXIT_FAILURE;
-	
+
 	/* If there is still some selected file, reload the desel screen */
 	if (sel_n)
 		if (deselect(comm) != 0)
@@ -15488,14 +15637,14 @@ run_and_refresh(char **comm)
 	size_t i = 0, total_len = 0;
 	for (i = 0; i <= args_n; i++)
 		total_len += strlen(comm[i]);
-		
+
 	char *tmp_cmd = (char *)NULL;
 	tmp_cmd = (char *)xcalloc(total_len + (i + 1) + 1, sizeof(char));
 	for (i = 0; i <= args_n; i++) {
 		strcat(tmp_cmd, comm[i]);
 		strcat(tmp_cmd, " ");
 	}
-	
+
 	int ret = launch_execle(tmp_cmd);
 	free(tmp_cmd);
 	tmp_cmd = (char *)NULL;
@@ -15561,7 +15710,7 @@ search_function(char **comm)
 			search_path = comm[1];
 	}
 	/* If no arguments, search_path will be NULL and file_type zero */
-	
+
 	/* Convert filetype into a macro that can be decoded by stat() */
 	if (file_type) {
 		switch (file_type) {
@@ -15574,7 +15723,7 @@ search_function(char **comm)
 		case 'c': file_type = S_IFCHR; break;
 		default:
 			fprintf(stderr, "%s: '%c': Unrecognized filetype\n",
-					PROGRAM_NAME, file_type);
+					PROGRAM_NAME, (char)file_type);
 			return EXIT_FAILURE;
 		}
 	}
@@ -15592,12 +15741,12 @@ search_function(char **comm)
 				/* #############################
 				 * #         WILDACRDS         #
 				 * #############################*/
-	
-	if (strcntchr(search_str, '*') != -1 
-	|| strcntchr(search_str, '?') != -1 
+
+	if (strcntchr(search_str, '*') != -1
+	|| strcntchr(search_str, '?') != -1
 	|| strcntchr(search_str, '[') != -1) {
 
-		/* If we have a path ("/search_str /path"), chdir into it, since 
+		/* If we have a path ("/search_str /path"), chdir into it, since
 		 * glob() works on CWD */
 		if (search_path && *search_path != 0x00) {
 			deq_dir = dequote_str(search_path, 0);
@@ -15609,15 +15758,15 @@ search_function(char **comm)
 			}
 
 			if (chdir(deq_dir) == -1) {
-				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, deq_dir, 
+				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, deq_dir,
 						strerror(errno));
 				free(deq_dir);
 				return EXIT_FAILURE;
 			}
 		}
-		
+
 		/* Get globbed files */
-		glob_t globbed_files;	
+		glob_t globbed_files;
 		int ret = glob(search_str, 0, NULL, &globbed_files);
 		if (ret == 0) {
 
@@ -15646,7 +15795,7 @@ search_function(char **comm)
 					/* Store pointer to maching filename in array of 
 					 * pointers */
 					pfiles[found] = globbed_files.gl_pathv[i];
-					
+
 					/* Get the longest filename in the list */
 					len = (unicode) ? u8_xstrlen(pfiles[found])
 						  : strlen(pfiles[found]);
@@ -15654,7 +15803,7 @@ search_function(char **comm)
 					if (len > flongest)
 						flongest = len;
 				}
-				
+
 				/* Print the result */
 				if (found) {
 
@@ -15662,10 +15811,10 @@ search_function(char **comm)
 						columns_n = 1;
 					else
 						columns_n = (size_t)tcols / (flongest + 1);
-					
+
 					if (columns_n > found)
 						columns_n = found;
-					
+
 					for (i = 0; i < found; i++) {
 						if ((i + 1) % columns_n == 0)
 							last_column = 1;
@@ -15715,7 +15864,7 @@ search_function(char **comm)
 							break;
 						}
 					}
-					
+
 					size_t elnn = (index[found] != -1 ) ? 
 								  digits_in_num(index[found] + 1) : 1;
 					len = ((unicode) ? u8_xstrlen(pfiles[found]) 
@@ -15733,16 +15882,16 @@ search_function(char **comm)
 						columns_n = 1;
 					else
 						columns_n = tcols / (flongest + 1);
-					
+
 					if ((size_t)columns_n > found)
 						columns_n = found;
-					
+
 					for (i = 0; i < found; i++) {
 						if ((i + 1) % columns_n == 0)
 							last_column = 1;
 						else
 							last_column = 0;
-					
+
 						colors_list(pfiles[i], (index[i] != -1) 
 									? index[i] + 1 : -1, (last_column
 									|| i == found - 1) ? 0
@@ -15754,10 +15903,10 @@ search_function(char **comm)
 
 				free(index);
 			}
-			
+
 			free(files_len);
 			free(pfiles);
-			
+
 			if (!found) 
 				printf(_("%s: No matches found\n"), PROGRAM_NAME);
 		}
@@ -15779,9 +15928,9 @@ search_function(char **comm)
 			return EXIT_SUCCESS;
 		}
 	}
-	
+
 				/* #####################
-				 * #    NO WILDCARDS   # 
+				 * #    NO WILDCARDS   #
 				 * #####################*/
 
 	else {
@@ -15799,7 +15948,7 @@ search_function(char **comm)
 
 			struct dirent **search_list;
 			int search_files = 0;
-			
+
 			search_files = scandir(deq_dir, &search_list, NULL, alphasort);
 			if (search_files == -1) {
 				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, deq_dir, 
@@ -15807,7 +15956,7 @@ search_function(char **comm)
 				free(deq_dir);
 				return EXIT_FAILURE;
 			}
-			
+
 			if (chdir(deq_dir) == -1) {
 				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, deq_dir, 
 						strerror(errno));
@@ -15819,7 +15968,7 @@ search_function(char **comm)
 
 				return EXIT_FAILURE;
 			}
-			
+
 			pfiles = (char **)xnmalloc((size_t)search_files + 1,
 									   sizeof(char *));
 			size_t *files_len = (size_t *)xnmalloc((size_t)search_files
@@ -15855,24 +16004,24 @@ search_function(char **comm)
 					}
 				}
 			}
-			
+
 			if (found) {
 
 					if (flongest <= 0 || flongest > tcols)
 						columns_n = 1;
 					else
 						columns_n = (size_t)tcols / (flongest + 1);
-					
+
 					if (columns_n > found)
 						columns_n = found;
 
 				for (i = 0; i < found; i++) {
-					
+
 					if ((i + 1) % columns_n == 0)
 						last_column = 1;
 					else
 						last_column = 0;
-					
+
 					colors_list(pfiles[i], 0, (last_column
 								|| i == found - 1) ? 0
 								: (int)(flongest - files_len[i]) + 1, 
@@ -15880,11 +16029,11 @@ search_function(char **comm)
 								? 1 : 0);
 				}
 			}
-			
+
 			for (i = 0; i < (size_t)search_files; i++)
 				free(search_list[i]);
 			free(search_list);
-			
+
 			free(files_len);
 			free(pfiles);
 
@@ -15897,7 +16046,7 @@ search_function(char **comm)
 				return EXIT_FAILURE;
 			}
 		}
-		
+
 		/* If /search_str */
 		else {
 			int *index = (int *)xnmalloc(files + 1, sizeof(int));
@@ -15932,7 +16081,7 @@ search_function(char **comm)
 
 						index[found] = (int)i;
 						pfiles[found] = dirlist[i];
-						
+
 						len = ((unicode) ? u8_xstrlen(pfiles[found]) 
 							  : strlen(pfiles[found])) + 
 							  (size_t)((index[found] != -1) 
@@ -15953,10 +16102,10 @@ search_function(char **comm)
 						columns_n = 1;
 					else
 						columns_n = tcols / (flongest + 1);
-					
+
 					if ((size_t)columns_n > found)
 						columns_n = found;
-			
+
 				for (i = 0; i < found; i++) {
 
 					if ((i + 1) % columns_n == 0)
@@ -15971,7 +16120,7 @@ search_function(char **comm)
 								(last_column || i == found - 1) ? 1 : 0);
 				}
 			}
-			
+
 			free(index);
 			free(files_len);
 			free(pfiles);
@@ -15980,13 +16129,13 @@ search_function(char **comm)
 		if (!found)
 			printf(_("%s: No matches found\n"), PROGRAM_NAME);
 	}
-	
+
 	if (deq_dir)
 		free(deq_dir);
-		
+
 	if (!found)
 		return EXIT_FAILURE;
-	
+
 	return EXIT_SUCCESS;
 }
 
@@ -16006,17 +16155,17 @@ copy_function(char **comm)
 			total_len += strlen(comm[i]);
 		}
 		tmp_cmd = (char *)xcalloc(total_len + (i + 1) + 2, sizeof(char));
-		for (i = 0; i <= args_n; i++) {			
+		for (i = 0; i <= args_n; i++) {
 			strcat(tmp_cmd, comm[i]);
 			strcat(tmp_cmd, " ");
 		}
 		if (sel_is_last)
 			strcat(tmp_cmd, ".");
-		
+
 		int ret = 0;
 		ret = launch_execle(tmp_cmd);
 		free(tmp_cmd);
-		
+
 		if (ret == EXIT_SUCCESS) {
 			/* If 'mv sel' and command is successful deselect everything,
 			 * since sel files are note there anymore */
@@ -16035,7 +16184,7 @@ copy_function(char **comm)
 		else
 			return EXIT_FAILURE;
 	}
-	
+
 	/* ####If NOT SEL#######... */
 	return run_and_refresh(comm);
 }
@@ -16106,11 +16255,11 @@ bm_prompt(void)
 
 	while (!bm_sel)
 		bm_sel = rl_no_hist(_("Choose a bookmark: "));
-	
+
 	char **comm_bm = get_substr(bm_sel, ' ');
 	free(bm_sel);
 
-	return comm_bm;	
+	return comm_bm;
 }
 
 int
@@ -16120,9 +16269,9 @@ bookmark_del(char *name)
 	bm_fp = fopen(BM_FILE, "r");
 	if (!bm_fp)
 		return EXIT_FAILURE;
-	
-	size_t i = 0;	
-	
+
+	size_t i = 0;
+
 	/* Get bookmarks from file */
 	size_t line_size = 0;
 	char *line = (char *)NULL, **bms = (char **)NULL;
@@ -16131,7 +16280,7 @@ bookmark_del(char *name)
 	while ((line_len = getline(&line, &line_size, bm_fp)) > 0) {
 		if (*line == '#' || *line == '\n')
 			continue;
-		int slash = 0;
+	int slash = 0;
 		for (i = 0; i < (size_t)line_len; i++) {
 			if (line[i] == '/') {
 				slash = 1;
@@ -16174,7 +16323,7 @@ bookmark_del(char *name)
 			free(bm_name);
 		}
 	}
-	
+
 	/* If a valid bookmark name was passed in command line, copy the 
 	 * corresponding bookmark index (plus 1, as if it were typed in the 
 	 * bookmarks screen) to the del_elements array */
@@ -16195,7 +16344,7 @@ bookmark_del(char *name)
 		fclose(bm_fp);
 		return EXIT_FAILURE;
 	}
-	
+
 	/* If not name, list bookmarks and get user input */
 	else {
 		printf("%sBookmarks%s\n\n", white, NC);
@@ -16250,7 +16399,7 @@ bookmark_del(char *name)
 			return EXIT_SUCCESS;
 		}
 	}
-	
+
 	/* If "*", simply remove the bookmarks file */
 	/* If there is some "*" in the input line (like "1 5 6-9 *"), it
 	 * makes no sense to remove singles bookmarks: Just delete all of
@@ -16286,7 +16435,7 @@ bookmark_del(char *name)
 
 			/* Update bookmark names for TAB completion */
 			get_bm_names();
-			
+
 			/* If the argument "*" was specified in command line */
 			if (cmd_line != -1)
 				fputs("All bookmarks succesfully removed\n", stdout);
@@ -16294,7 +16443,7 @@ bookmark_del(char *name)
 			return EXIT_SUCCESS;
 		}
 	}
-	
+
 	/* Remove single bookmarks */
 	/* Open a temporary file */
 	char *tmp_file = (char *)NULL;
@@ -16308,15 +16457,15 @@ bookmark_del(char *name)
 		free(bms);
 		fclose(bm_fp);
 		fprintf(stderr, _("bookmarks: Error creating temporary file\n"));
-		return EXIT_FAILURE;	
+		return EXIT_FAILURE;
 	}
-	
+
 	/* Go back to the beginning of the bookmarks file */
 	fseek(bm_fp, 0, SEEK_SET);
 
 	/* Dump into the tmp file everything except bookmarks marked for 
 	 * deletion */
-	
+
 	line_len = 0;
 	line_size = 0;
 	char *lineb = (char *)NULL;
@@ -16360,7 +16509,7 @@ bookmark_del(char *name)
 
 	/* Update bookmark names for TAB completion */
 	get_bm_names();
-	
+
 	/* If the bookmark to be removed was specified in command line */
 	if (cmd_line != -1)
 		printf("Successfully removed '%s'\n", name);
@@ -16387,7 +16536,7 @@ bookmark_add(char *file)
 	}
 
 	/* Check if FILE is an available path */
-	
+
 	FILE *bm_fp = fopen(BM_FILE, "r");	
 	if (!bm_fp) {
 		fprintf(stderr, _("bookmarks: Error opening the bookmarks file\n"));
@@ -16404,7 +16553,7 @@ bookmark_add(char *file)
 	while ((line_len = getline(&line, &line_size, bm_fp)) > 0) {
 		if (*line == '#')
 			continue;
-		
+
 		char *tmp_line = (char *)NULL;
 		tmp_line = strchr (line, '/');
 		if (tmp_line) {
@@ -16419,11 +16568,11 @@ bookmark_add(char *file)
 			}
 			tmp_line = (char *)NULL;
 		}
-		/* Store lines: used later to check hotkeys */		
+		/* Store lines: used later to check hotkeys */
 		bms = (char **)xrealloc(bms, (bmn + 1) * sizeof(char *));
 		bms[bmn] = (char *)xcalloc(strlen(line) + 1, sizeof(char));
 		strcpy(bms[bmn++], line);
-		
+
 	}
 
 	free(line);
@@ -16438,8 +16587,8 @@ bookmark_add(char *file)
 			free(file);
 		return EXIT_FAILURE;
 	}
-	
-	/* If path is available */	
+
+	/* If path is available */
 
 	char *name = (char *)NULL, *hk = (char *)NULL, *tmp = (char *)NULL;
 
@@ -16447,7 +16596,7 @@ bookmark_add(char *file)
 	 * NULL */
 	puts("Bookmark line example: [sc]name:path");
 	hk = rl_no_hist("Shortcut: ");
-	
+
 	/* Check if hotkey is available */
 	if (hk) {
 		char *tmp_line = (char *)NULL;
@@ -16456,7 +16605,8 @@ bookmark_add(char *file)
 			if (tmp_line) {
 				if (strcmp(hk, tmp_line) == 0) {
 					fprintf(stderr, _("bookmarks: '%s': This shortcut is "
-								 	  "already in use\n"), hk);					
+								 	  "already in use\n"), hk);
+
 					dup = 1;
 					free(tmp_line);
 					break;
@@ -16476,7 +16626,7 @@ bookmark_add(char *file)
 			free(file);
 		return EXIT_FAILURE;
 	}
-	
+
 	name = rl_no_hist("Name: ");
 
 	if (name) {
@@ -16488,14 +16638,15 @@ bookmark_add(char *file)
 			if (tmp_line) {
 				if (strcmp(name, tmp_line) == 0) {
 					fprintf(stderr, _("bookmarks: '%s': This name is "
-								 	  "already in use\n"), name);					
+								 	  "already in use\n"), name);
+
 					dup = 1;
 					free(tmp_line);
 					break;
 				}
 				free(tmp_line);
 			}
-		}		
+		}
 
 		if (dup) {
 			free(name);
@@ -16508,7 +16659,7 @@ bookmark_add(char *file)
 				free(file);
 			return EXIT_FAILURE;
 		}
-		
+
 		/* Generate the bookmark line */
 		if (hk) { /* name AND hk */
 			tmp = (char *)xcalloc(strlen(hk) + strlen(name)
@@ -16542,7 +16693,7 @@ bookmark_add(char *file)
 		free(bms[i]);
 	free(bms);
 	bms = (char **)NULL;
-	
+
 	if (!tmp) {
 		fprintf(stderr, "bookmarks: Error generating the bookmark line\n");
 		return EXIT_FAILURE;
@@ -16566,7 +16717,7 @@ bookmark_add(char *file)
 		fclose(bm_fp);
 		return EXIT_FAILURE;
 	}
-	
+
 	/* Everything is fine: add the new bookmark to the bookmarks file */
 	fprintf(bm_fp, "%s", tmp);
 	fclose(bm_fp);
@@ -16693,7 +16844,8 @@ open_bookmark(char **cmd)
 						else /* No directory */
 							printf("%s%zu %s[%s]%s %s%s%s\n", eln_color,
 									i + 1, white, hot_keys[i], NC,
-									default_color, bm_names[i], NC);					
+									default_color, bm_names[i], NC);
+
 					}
 					else /* Invalid path */
 						printf("%s%zu [%s] %s%s\n", gray, i + 1,
@@ -16708,7 +16860,7 @@ open_bookmark(char **cmd)
 						else
 							printf("%s%zu %s[%s]%s %s%s%s\n", eln_color,
 									i + 1, white, hot_keys[i], NC,
-									default_color, bm_paths[i], NC);		
+									default_color, bm_paths[i], NC);
 					}
 					else
 						printf("%s%zu [%s] %s%s\n", gray, i + 1,
@@ -16723,7 +16875,7 @@ open_bookmark(char **cmd)
 									cyan, bm_names[i], NC);
 						else
 							printf("%s%zu %s%s%s%s\n", eln_color, i + 1,
-									NC, default_color, bm_names[i], NC);				
+									NC, default_color, bm_names[i], NC);
 					}
 					else
 						printf("%s%zu %s%s\n", gray, i + 1, bm_names[i],
@@ -16736,7 +16888,7 @@ open_bookmark(char **cmd)
 									cyan, bm_paths[i], NC);
 						else
 							printf("%s%zu %s%s%s%s\n", eln_color, i + 1,
-									NC, default_color, bm_paths[i], NC);	
+									NC, default_color, bm_paths[i], NC);
 					}
 					else
 						printf("%s%zu %s%s\n", gray, i + 1, bm_paths[i],
@@ -16780,7 +16932,7 @@ open_bookmark(char **cmd)
 				int ret = mime_open(tmp_cmd);
 				if (ret != 0) {
 					fprintf(stderr, _("Bookmarks: Try 'e APPLICATION'\n"));
-					error_code = 1;				
+					error_code = 1;
 				}
 				else
 					reload_bm = 1;
@@ -16799,7 +16951,7 @@ open_bookmark(char **cmd)
 	}
 
 	/* Case "quit" */
-	else if (strcmp(arg[0], "q") == 0 || strcmp(arg[0], "quit") == 0)		
+	else if (strcmp(arg[0], "q") == 0 || strcmp(arg[0], "quit") == 0)
 		goto free_and_exit;
 
 	/* Get the corresponding bookmark path */
@@ -16815,14 +16967,14 @@ open_bookmark(char **cmd)
 	}
 	else { /* If string, check shortcuts and names */
 		for (i = 0; i < bm_n; i++) {
-			if (strcmp(arg[0], hot_keys[i]) == 0 
+			if (strcmp(arg[0], hot_keys[i]) == 0
 			|| strcmp(arg[0], bm_names[i]) == 0) {
 				tmp_path = bm_paths[i];
 				break;
 			}
 		}
 	}
-	
+
 	if (!tmp_path) {
 		fprintf(stderr, _("Bookmarks: '%s': No such bookmark\n"),
 						  arg[0]);
@@ -16838,7 +16990,7 @@ open_bookmark(char **cmd)
 		error_code = 1;
 		goto free_and_exit;
 	}
-	
+
 	/* If a directory */
 	if ((file_attrib.st_mode & S_IFMT) == S_IFDIR) {
 		int ret = chdir(tmp_path);
@@ -16851,12 +17003,12 @@ open_bookmark(char **cmd)
 		}
 		else {
 			error_code = 1;
-			fprintf(stderr, "Bookmarks: '%s': %s\n", tmp_path, 
+			fprintf(stderr, "Bookmarks: '%s': %s\n", tmp_path,
 					strerror(errno));
 		}
 		goto free_and_exit;
 	}
-	
+
 	/* If a regular file */
 	else if ((file_attrib.st_mode & S_IFMT) == S_IFREG) {
 		if (arg[1]) {
@@ -16883,12 +17035,12 @@ open_bookmark(char **cmd)
 
 	/* If neither directory nor regular file */
 	else {
-		fprintf(stderr, _("Bookmarks: '%s': Cannot open file\n"), 
+		fprintf(stderr, _("Bookmarks: '%s': Cannot open file\n"),
 				tmp_path);
 		error_code = 1;
 		goto free_and_exit;
 	}
-	
+
 	free_and_exit:
 		for (i = 0; arg[i]; i++)
 			free(arg[i]);
@@ -16963,7 +17115,7 @@ bookmarks_function(char **cmd)
 			}
 
 			if (access(cmd[2], F_OK) != 0) {
-				fprintf(stderr, "bookmarks: %s: %s\n", cmd[2], 
+				fprintf(stderr, "bookmarks: %s: %s\n", cmd[2],
 						strerror(errno));
 				return EXIT_FAILURE;
 			}
@@ -16979,18 +17131,18 @@ bookmarks_function(char **cmd)
 				return bookmark_del(NULL);
 		}
 	}
-	
+
 	/* If no arguments or "bm [edit] [shortcut, name]" */
 	return open_bookmark(cmd);
 }
 
-void
+off_t
 dir_size(char *dir)
 {
 	#define DU_TMP_FILE "/tmp/.du_size"
 
 	if (!dir)
-		return;
+		return -1;
 
 	FILE *du_fp = fopen(DU_TMP_FILE, "w");
 	FILE *du_fp_err = fopen("/dev/null", "w");
@@ -17010,9 +17162,9 @@ dir_size(char *dir)
 	launch_execle(cmd);
 	free(cmd); */
 
-	char *cmd[] = { "du", "-sh", dir, NULL };
+	char *cmd[] = { "du", "--block-size=1", "-s", dir, NULL };
 	launch_execve(cmd, FOREGROUND);
-	
+
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
 	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
 	close(stdout_bk);
@@ -17023,31 +17175,33 @@ dir_size(char *dir)
 		return;
 	} */
 
+	off_t retval = -1;
+
 	if (access(DU_TMP_FILE, F_OK) == 0) {
+
 		du_fp = fopen(DU_TMP_FILE, "r");
+
 		if (du_fp) {
 			/* I only need here the first field of the line, which is a
 			 * file size and could only take a few bytes, so that 32
 			 * bytes is more than enough */
 			char line[32] = "";
 			fgets(line, sizeof(line), du_fp);
-			
+
 			char *file_size = strbfr(line, '\t');
-			
-			if (file_size)
-				printf("%siB\n", file_size);
-			else 
-				puts("???");
-			
-			free(file_size);
+
+			if (file_size) {
+				retval = (off_t)atoi(file_size);
+				free(file_size);
+			}
+
 			fclose(du_fp);
 		}
-		else
-			puts(_("???"));
+
 		remove(DU_TMP_FILE);
 	}
-	else 
-		puts(_("???"));
+
+	return retval;
 }
 
 int
@@ -17080,7 +17234,7 @@ properties_function(char **comm)
 
 		return exit_status;
 	}
-	
+
 	/* List files by size */
 	register int i;
 	if (comm[1] && (strcmp(comm[1], "size") == 0
@@ -17109,14 +17263,14 @@ properties_function(char **comm)
 			/* Print: 	filename	ELN		Padding		no new line */
 			colors_list(dirlist[i], i + 1, (int)largest + cont_bt, 0);
 			printf("%s%s%s\n", NC, default_color, (size) ? size : "??");
-		
+
 			if (size)
 				free(size);
 		}
-		
+
 		return EXIT_SUCCESS;
 	}
-	
+
 	/* If "pr file file..." */
 	for (i = 1; i <= (int)args_n; i++) {
 
@@ -17133,7 +17287,7 @@ properties_function(char **comm)
 			exit_status = EXIT_FAILURE;
 		free(deq_file);
 	}
-	
+
 	return exit_status;
 }
 
@@ -17142,11 +17296,11 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 {
 	if (!filename || !*filename)
 		return EXIT_FAILURE;
-	
+
 	size_t len = strlen(filename);
 	if (filename[len - 1] == '/')
 		filename[len - 1] = 0x00;
-	
+
 	struct stat file_attrib;
 	/* Check file existence */
 	if (lstat(filename, &file_attrib) == -1) {
@@ -17219,7 +17373,7 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 	case S_IFIFO: file_type = 'p'; strcpy(color, pi_c); break;
 	default: file_type = '?'; strcpy(color, no_c);
 	}
-	
+
 	/* Get file permissions */
 	char read_usr = '-', write_usr = '-', exec_usr = '-', 
 		 read_grp = '-', write_grp = '-', exec_grp = '-',
@@ -17264,7 +17418,7 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 	struct passwd *owner;
 	group = getgrgid(group_id);
 	owner = getpwuid(owner_id); 
-	
+
 	/* Print file properties for long view mode */
 	if (_long) {
 
@@ -17283,7 +17437,7 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 			trim_filename[max + cont_bt] = 0x00;
 			filename_len = (max + cont_bt);
 		}
-		
+
 		/* Calculate pad for each file */
 		int pad;
 
@@ -17298,7 +17452,7 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 
 		if (pad < 0)
 			pad = 0;
-		
+
 		printf("%s%s%s%-*s%s (%04o) %c/%c%c%c/%c%c%c/%c%c%c%s %s %s %s %s\n", 
 				(light_mode) ? "" : color, (!trim) ? filename
 				: trim_filename, (light_mode) ? "" : NC,
@@ -17344,7 +17498,7 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 
 	else { /* Broken link */
 		char link[PATH_MAX] = "";
-		ssize_t ret = readlink(filename, link, PATH_MAX);		
+		ssize_t ret = readlink(filename, link, PATH_MAX);
 		if (ret) {
 			printf("%s%s%s%s -> %s (broken link)\n", color, filename, NC, 
 				   default_color, link);
@@ -17353,7 +17507,7 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 			printf("%s%s%s%s -> ???\n", color, filename, NC,
 				   default_color);
 	}
-	
+
 	/* Stat information */
 
 	/* Last access time */
@@ -17434,8 +17588,20 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 	/* Print file size */
 	if ((file_attrib.st_mode & S_IFMT) == S_IFDIR) {
 		fputs(_("Total size: \t"), stdout);
-		dir_size(filename);
+		off_t total_size = dir_size(filename);
+		if (total_size != -1) {
+			char *human_size = get_size_unit(total_size);
+			if (human_size) {
+				printf("%s\n", human_size);
+				free(human_size);
+			}
+			else
+				puts("???");
+		}
+		else
+			puts("???");
 	}
+
 	else
 		printf(_("Size: \t\t%s\n"), (size_type) ? size_type : "??");
 
@@ -17476,9 +17642,9 @@ hidden_function(char **comm)
 		}
 	}
 
-	else 
+	else
 		fputs(_("Usage: hidden, hf [on, off, status]\n"), stderr);
-	
+
 	return exit_status;
 }
 
@@ -17491,10 +17657,10 @@ log_function(char **comm)
 		if (strcmp(comm[0], "log") != 0)
 			return EXIT_SUCCESS;
 	}
-	
+
 	if (!config_ok)
 		return EXIT_FAILURE;
-	
+
 	int clear_log = 0;
 
 	/* If the command was just 'log' */
@@ -17510,23 +17676,23 @@ log_function(char **comm)
 			size_t line_size = 0;
 			char *line_buff = (char *)NULL;
 			ssize_t line_len = 0;
-			
+
 			while ((line_len = getline(&line_buff, &line_size,
 			log_fp)) > 0)
 				fputs(line_buff, stdout);
-			
+
 			free(line_buff);
 
 			fclose(log_fp);
 			return EXIT_SUCCESS;
 		}
 	}
-	
+
 	else if (strcmp(comm[0], "log") == 0 && comm[1]) {
 		if (strcmp(comm[1], "clear") == 0)
 			clear_log = 1;
 		else if (strcmp(comm[1], "status") == 0) {
-			printf(_("Logs %s\n"), (logs_enabled) ? _("enabled") 
+			printf(_("Logs %s\n"), (logs_enabled) ? _("enabled")
 				   : _("disabled"));
 			return EXIT_SUCCESS;
 		}
@@ -17582,10 +17748,10 @@ log_function(char **comm)
 	char *full_log = (char *)xnmalloc(log_len, sizeof(char));
 	snprintf(full_log, log_len, "[%s] %s:%s\n", date, path, last_cmd);
 	free(date);
-	
+
 	free(last_cmd);
 	last_cmd = (char *)NULL;
-	
+
 	/* Write the log into LOG_FILE */
 	FILE *log_fp;
 	/* If not 'log clear', append the log to the existing logs */
@@ -17593,7 +17759,7 @@ log_function(char **comm)
 		log_fp = fopen(LOG_FILE, "a");
 	/* Else, overwrite the log file leaving only the 'log clear'
 	 * command */
-	else 
+	else
 		log_fp = fopen(LOG_FILE, "w+");
 
 	if (!log_fp) {
@@ -17628,7 +17794,7 @@ check_log_file_size(char *log_file)
 		return; /* Return anyway, for, being a new empty file, there's
 		no need to truncate it */
 	}
-	
+
 	/* Truncate the file, if needed */
 	log_fp = fopen (log_file, "r");
 	if (log_fp) {
@@ -17689,7 +17855,7 @@ get_history(void)
 	}
 
 	FILE *hist_fp = fopen(HIST_FILE, "r");
-	
+
 	if (!hist_fp) {
 		_err('e', PRINT_PROMPT, "%s: history: '%s': %s\n",
 			 PROGRAM_NAME, HIST_FILE,  strerror(errno));
@@ -17699,7 +17865,7 @@ get_history(void)
 	size_t line_size = 0;
 	char *line_buff = (char *)NULL;
 	ssize_t line_len = 0;
-		
+
 	while ((line_len = getline(&line_buff, &line_size, hist_fp)) > 0) {
 		line_buff[line_len - 1] = 0x00;
 		history = (char **)xrealloc(history, (current_hist_n + 1)
@@ -17708,7 +17874,7 @@ get_history(void)
 												  sizeof(char));
 		strcpy(history[current_hist_n++], line_buff);
 	}
-		
+
 	free(line_buff);
 	fclose (hist_fp);
 
@@ -17723,7 +17889,7 @@ history_function(char **comm)
 				PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
-	
+
 	/* If no arguments, print the history list */
 	if (args_n == 0) {
 		size_t i;
@@ -17761,13 +17927,13 @@ history_function(char **comm)
 		if (num < 0 || num > (int)current_hist_n) {
 			num = (int)current_hist_n;
 		}
-		
+
 		size_t i;
 		for (i = current_hist_n - (size_t)num; i < current_hist_n; i++)
 			printf("%zu %s\n", i + 1, history[i]);
 		return EXIT_SUCCESS;
 	}
-	
+
 	/* None of the above */
 	puts(_("Usage: history [clear] [-n]"));
 
@@ -17813,7 +17979,7 @@ run_history_cmd(const char *cmd)
 						free(cmd_hist[i]);
 					free(cmd_hist);
 				}
-				
+
 				args_n = old_args;
 
 				return exit_status;
@@ -17835,7 +18001,7 @@ run_history_cmd(const char *cmd)
 			add_to_cmdhist(history[current_hist_n - 1]);
 		char **cmd_hist = parse_input_str(history[current_hist_n - 1]);
 		if (cmd_hist) {
-			
+
 			char **alias_cmd = check_for_alias(cmd_hist);
 			if (alias_cmd) {
 				if (exec_cmd(alias_cmd) != 0)
@@ -17844,7 +18010,7 @@ run_history_cmd(const char *cmd)
 					free(alias_cmd[i]);
 				free(alias_cmd);
 				alias_cmd = (char **)NULL;
-			}			
+			}
 
 			else {
 				if (exec_cmd(cmd_hist) != 0)
@@ -17876,7 +18042,7 @@ run_history_cmd(const char *cmd)
 		char **cmd_hist = parse_input_str(history[current_hist_n
 										  - (size_t)acmd - 1]);
 		if (cmd_hist) {
-			
+
 			char **alias_cmd = check_for_alias(cmd_hist);
 			if (alias_cmd) {
 				if (exec_cmd(alias_cmd) != 0)
@@ -17943,13 +18109,13 @@ edit_function (char **comm)
 		free(TRASH_INFO_DIR);
 		CONFIG_DIR = TRASH_DIR = TRASH_FILES_DIR = (char *)NULL;
 		TRASH_INFO_DIR = (char *)NULL;
-		
+
 		free(BM_FILE);
 		free(LOG_FILE);
 		free(LOG_FILE_TMP);
 		free(HIST_FILE);
 		BM_FILE = LOG_FILE = LOG_FILE_TMP = HIST_FILE = (char *)NULL;
-		
+
 		free(CONFIG_FILE);
 		free(PROFILE_FILE);
 		free(MSG_LOG_FILE);
@@ -17969,7 +18135,7 @@ edit_function (char **comm)
 			free(sys_shell);
 			sys_shell = (char *)NULL;
 		}
-			
+
 		if (term) {
 			free(term);
 			term = (char *)NULL;
@@ -17979,10 +18145,10 @@ edit_function (char **comm)
 			free(opener);
 			opener = (char *)NULL;
 		}
-		
+
 		free(TMP_DIR);
 		TMP_DIR = (char *)NULL;
-	
+
 		/* Rerun external_arguments */
 		if (argc_bk > 1)
 			external_arguments(argc_bk, argv_bk);
@@ -17990,7 +18156,7 @@ edit_function (char **comm)
 		init_config();
 		stat(CONFIG_FILE, &file_attrib);
 	}
-	
+
 	time_t mtime_bfr = file_attrib.st_mtime;
 
 	if (comm[1]) { /* If there is an argument... */
@@ -18019,7 +18185,7 @@ edit_function (char **comm)
 	stat(CONFIG_FILE, &file_attrib);
 	/* If modification times differ, the file was modified after being 
 	 * opened */
-	if (mtime_bfr != file_attrib.st_mtime) {	
+	if (mtime_bfr != file_attrib.st_mtime) {
 		/* Reload configuration only if the config file was modified */
 
 		free(CONFIG_DIR);
@@ -18028,13 +18194,13 @@ edit_function (char **comm)
 		free(TRASH_INFO_DIR);
 		CONFIG_DIR = TRASH_DIR = TRASH_FILES_DIR = (char *)NULL;
 		TRASH_INFO_DIR = (char *)NULL;
-		
+
 		free(BM_FILE);
 		free(LOG_FILE);
 		free(LOG_FILE_TMP);
 		free(HIST_FILE);
 		BM_FILE = LOG_FILE = LOG_FILE_TMP = HIST_FILE = (char *)NULL;
-		
+
 		free(CONFIG_FILE);
 		free(PROFILE_FILE);
 		free(MSG_LOG_FILE);
@@ -18054,7 +18220,7 @@ edit_function (char **comm)
 			free(sys_shell);
 			sys_shell = (char *)NULL;
 		}
-			
+
 		if (term) {
 			free(term);
 			term = (char *)NULL;
@@ -18117,9 +18283,9 @@ color_codes (void)
 	printf(_("%s file name%s%s: Empty executable file (ee)\n"), ee_c, NC, 
 		   default_color);
 	printf(_("%s file name%s%s: Block special file (bd)\n"), bd_c, NC, 
-		   default_color);	
+		   default_color);
 	printf(_("%s file name%s%s: Symbolic link* (ln)\n"), ln_c, NC, 
-		   default_color);	
+		   default_color);
 	printf(_("%s file name%s%s: Broken symbolic link (or)\n"), or_c, NC, 
 		   default_color);
 	printf(_("%s file name%s%s: Socket file (so)\n"), so_c, NC, 

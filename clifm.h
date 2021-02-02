@@ -657,7 +657,7 @@ get_date (void)
 	else
 		return (char *)NULL;
 
-	strftime(date, date_max, "%a, %b %d, %Y, %T", tm);
+	strftime(date, date_max, "%Y-%m-%dT%T%z", tm);
 
 	return date;
 }
