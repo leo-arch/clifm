@@ -286,8 +286,6 @@ char *my_rl_path_completion(const char *text, int state);
 void keybind_exec_cmd(char *str);
 
 /* Scandir filters */
-int folder_select(const struct dirent *entry);
-int file_select(const struct dirent *entry);
 int skip_implied_dot(const struct dirent *entry);
 int skip_nonexec(const struct dirent *entry);
 
@@ -663,8 +661,8 @@ char di_c[MAX_COLOR] = "", /* Directory */
 	ex_c[MAX_COLOR] = "", /* Executable */
 	ee_c[MAX_COLOR] = "", /* Empty executable */
 	ca_c[MAX_COLOR] = "", /* Cap file */
-	no_c[MAX_COLOR] = ""; /* Unknown */
-
+	no_c[MAX_COLOR] = "", /* Unknown */
+	uf_c[MAX_COLOR] = ""; /* Unstatable file */
 
 				/**
 				 * #############################
@@ -3107,12 +3105,12 @@ ext_sort(const struct dirent **a, const struct dirent **b)
 		if (!extb) /* !a && !b */
 			ret = strcoll((*a)->d_name, (*b)->d_name);
 		else /* !a && b */
-			ret = -1;
+			ret = 1;
 	}
 	else if (extb) /* a && b*/
 		ret = strcoll(exta, extb);
 	else /* a && !b */
-		ret = 1;
+		ret = -1;
 
 	if (!sort_reverse)
 		return ret;
@@ -3506,7 +3504,7 @@ create_config(char *file)
 "FiletypeColors=\"di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;39:\
 ef=00;33:nf=00;31:ln=01;36:or=00;36:pi=33;40:so=01;35:bd=01;33:\
 cd=01;37:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:\
-ex=01;32:ee=00;32:no=00;31;47\"\n\n"
+ex=01;32:ee=00;32:no=00;31;47:uf=31;40\"\n\n"
 
 "# All the color lines below use the same color codes as FiletypeColors.\n"
 "# TextColor specifies the color of the text typed in the command line.\n"
@@ -5994,8 +5992,9 @@ set_colors(void)
 		 * colors. In this way, files listed for TAB completion will
 		 * use CliFM colors instead of system colors */
 
-		/* Strip CLiFM custom filetypes (nd, ne, nf, ed, ef, ee, and ca), 
-		 * from dircolors to construct a valid value for LS_COLORS */
+		/* Strip CLiFM custom filetypes (nd, ne, nf, ed, ef, ee, uf,
+		 * and ca), from dircolors to construct a valid value for
+		 * LS_COLORS */
 		size_t i = 0, buflen = 0, linec_len = strlen(dircolors);
 		char *ls_buf = (char *)NULL;
 		ls_buf = (char *)xcalloc(linec_len + 1, sizeof(char));
@@ -6007,6 +6006,7 @@ set_colors(void)
 			|| dircolors[i+1] == 'e' || dircolors[i+1] == 'f'))
 			|| (dircolors[i] == 'e' && (dircolors[i+1] == 'd'
 			|| dircolors[i+1] == 'f' || dircolors[i+1] == 'e'))
+			|| (dircolors[i] == 'u' && dircolors[i+1] == 'f')
 			|| (dircolors[i] == 'c' && dircolors[i+1] == 'a') )
 			&& dircolors[i+2] == '=') {
 				rem = 1;
@@ -6031,12 +6031,15 @@ set_colors(void)
 		/* Split the colors line into substrings (one per color) */
 		char *p = dircolors, *buf = (char *)NULL, **colors = (char **)NULL;
 		size_t len = 0, words = 0;
+
 		while(*p) {
 			switch (*p) {
+
 			case '\'':
 			case '"':
 				p++;
 				break;
+
 			case ':':
 				buf[len] = 0x00;
 				colors = (char **)xrealloc(colors, (words + 1)
@@ -6047,12 +6050,14 @@ set_colors(void)
 				len = 0;
 				p++;
 				break;
+
 			default:
 				buf = (char *)xrealloc(buf, (len + 2) * sizeof(char));
 				buf[len++] = *(p++);
 				break;
 			}
 		}
+
 		p = (char *)NULL;
 		free(dircolors);
 		dircolors = (char *)NULL;
@@ -6078,6 +6083,7 @@ set_colors(void)
 
 		/* Set the color variables */
 		for (i = 0; colors[i]; i++) {
+
 			if (strncmp(colors[i], "di=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
 					/* zero the corresponding variable as a flag for
@@ -6087,135 +6093,165 @@ set_colors(void)
 				else
 					snprintf(di_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
+
 			else if (strncmp(colors[i], "nd=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
 					memset(nd_c, 0x00, MAX_COLOR);
 				else
 					snprintf(nd_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
+
 			else if (strncmp(colors[i], "ed=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
 					memset(ed_c, 0x00, MAX_COLOR);
 				else
 					snprintf(ed_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
+
 			else if (strncmp(colors[i], "ne=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
 					memset(ne_c, 0x00, MAX_COLOR);
 				else
 					snprintf(ne_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
+
 			else if (strncmp(colors[i], "fi=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
 					memset(fi_c, 0x00, MAX_COLOR);
 				else
 					snprintf(fi_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
+
 			else if (strncmp(colors[i], "ef=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
 					memset(ef_c, 0x00, MAX_COLOR);
 				else
 					snprintf(ef_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
+
 			else if (strncmp(colors[i], "nf=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
 					memset(nf_c, 0x00, MAX_COLOR);
 				else
 					snprintf(nf_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
+
 			else if (strncmp(colors[i], "ln=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
 					memset(ln_c, 0x00, MAX_COLOR);
 				else
 					snprintf(ln_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
+
 			else if (strncmp(colors[i], "or=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
 					memset(or_c, 0x00, MAX_COLOR);
 				else
 					snprintf(or_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
+
 			else if (strncmp(colors[i], "ex=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
 					memset(ex_c, 0x00, MAX_COLOR);
 				else
 					snprintf(ex_c, MAX_COLOR-1, "\x1b[%sm", colors[i]
 							 + 3);
+
 			else if (strncmp(colors[i], "ee=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
 					memset(ee_c, 0x00, MAX_COLOR);
 				else
 					snprintf(ee_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
+
 			else if (strncmp(colors[i], "bd=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
 					memset(bd_c, 0x00, MAX_COLOR);
 				else
 					snprintf(bd_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
+
 			else if (strncmp(colors[i], "cd=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
 					memset(cd_c, 0x00, MAX_COLOR);
 				else
 					snprintf(cd_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
+
 			else if (strncmp(colors[i], "pi=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
 					memset(pi_c, 0x00, MAX_COLOR);
 				else
 					snprintf(pi_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
+
 			else if (strncmp(colors[i], "so=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
 					memset(so_c, 0x00, MAX_COLOR);
 				else
 					snprintf(so_c, MAX_COLOR-1, "\x1b[%sm", colors[i]
 							 + 3);
+
 			else if (strncmp(colors[i], "su=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
 					memset(su_c, 0x00, MAX_COLOR);
 				else
 					snprintf(su_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
+
 			else if (strncmp(colors[i], "sg=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
 					memset(sg_c, 0x00, MAX_COLOR);
 				else
 					snprintf(sg_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
+
 			else if (strncmp(colors[i], "tw=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
 					memset(tw_c, 0x00, MAX_COLOR);
 				else
 					snprintf(tw_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
+
 			else if (strncmp(colors[i], "st=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
 					memset(st_c, 0x00, MAX_COLOR);
 				else
 					snprintf(st_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
+
 			else if (strncmp(colors[i], "ow=", 3) == 0)
 				if (!is_color_code(colors[i]+3))
 					memset(ow_c, 0x00, MAX_COLOR);
 				else
 					snprintf(ow_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
+
 			else if (strncmp(colors[i], "ca=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
 					memset(ca_c, 0x00, MAX_COLOR);
 				else
 					snprintf(ca_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
-			else if (strncmp(colors[i], "no=", 3) == 0) {
+
+			else if (strncmp(colors[i], "no=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
 					memset(no_c, 0x00, MAX_COLOR);
 				else
 					snprintf(no_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
+
+			else if (strncmp(colors[i], "uf=", 3) == 0) {
+				if (!is_color_code(colors[i] + 3))
+					memset(uf_c, 0x00, MAX_COLOR);
+				else
+					snprintf(uf_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
+							 + 3);
 			}
+
 			free(colors[i]);
 		}
+
 		free(colors);
 		colors = (char **)NULL;
 	}
@@ -6277,6 +6313,8 @@ set_colors(void)
 		sprintf(ca_c, "\x1b[30;41m");
 	if (!*no_c)
 		sprintf(no_c, "\x1b[31;47m");
+	if (!*uf_c)
+		sprintf(uf_c, "\x1b[31;40m");
 }
 
 void
@@ -6339,6 +6377,7 @@ set_default_options(void)
 	sprintf(ee_c, "\x1b[00;32m");
 	sprintf(ca_c, "\x1b[30;41m");
 	sprintf(no_c, "\x1b[31;47m");
+	sprintf(uf_c, "\x1b[31;40m");
 
 /*	setenv("CLIFM_PROFILE", "default", 1); */
 
@@ -12633,69 +12672,32 @@ skip_implied_dot(const struct dirent *entry)
 {
 	/* In case a directory isn't reacheable, like a failed
 	 * mountpoint... */
-	struct stat file_attrib;
+/*	struct stat file_attrib;
+
 	if (lstat(entry->d_name, &file_attrib) == -1) {
 		fprintf(stderr, _("stat: cannot access '%s': %s\n"),
 				entry->d_name, strerror(errno));
 		return 0;
-	}
-	if (strcmp(entry->d_name, ".") !=0
-	&& strcmp(entry->d_name, "..") !=0) {
-		if (show_hidden == 0) { /* Do not show hidden files (hidden == 0) */
-			if (entry->d_name[0] == '.')
-				return 0;
-			else
-				return 1;
-		}
-		else
-			return 1;
-	}
-	else
-		return 0;
-}
+	} */
 
-int
-folder_select(const struct dirent *entry)
-{
-	if (entry->d_type == DT_DIR) {
-		if (strcmp(entry->d_name, ".") != 0 
-		&& strcmp(entry->d_name, "..") != 0) {
-			/* Do not print hidden files (hidden == 0) */
-			if (show_hidden == 0) {
-				if (entry->d_name[0] == '.')
-					return 0;
-				else
-					return 1;
-			}
-			else
-				return 1;
-		}
-		else
+	/* Skip "." and ".." */
+	if (entry->d_name[0] == '.' && entry->d_name[1] == 0x00)
+		return 0;
+
+	if (entry->d_name[0] == '.' && entry->d_name[1] == '.'
+	&& entry->d_name[2] == 0x00)
+		return 0;
+
+	/* If not hidden files */
+	if (show_hidden == 0) {
+		if (entry->d_name[0] == '.')
 			return 0;
-	}
-	else
-		return 0;
-
-	return 0; /* Never reached */
-}
-
-int
-file_select(const struct dirent *entry)
-{
-	if (entry->d_type != DT_DIR) {
-		if (show_hidden == 0) { /* Do not show hidden files */
-			if (entry->d_name[0] == '.')
-				return 0;
-			else
-				return 1;
-		}
 		else
 			return 1;
 	}
-	else
-		return 0;
 
-	return 0; /* Never reached */
+	else
+		return 1;
 }
 
 void
@@ -12723,8 +12725,9 @@ colors_list(const char *entry, const int i, const int pad,
 	ret = lstat(entry, &file_attrib);
 
 	if (ret == -1) {
-		fprintf(stderr, "%s%-*s: %s%s", index, pad, entry,
-				strerror(errno), new_line ? "\n" : "");
+		fprintf(stderr, "%s%s%s%s%-*s%s%s", eln_color, index, NC,
+				uf_c, pad, entry, NC, new_line ? "\n" : "");
+		free(index);
 		return;
 	}
 
@@ -13064,13 +13067,17 @@ list_dir(void)
 
 		if (ret == -1) {
 			file_info[i].exists = 0;
-			continue;
+			file_info[i].type = S_IFREG;
+			file_info[i].size = 0;
+			file_info[i].linkdir = -1;
 		}
 
-		file_info[i].exists = 1;
-		file_info[i].type = file_attrib.st_mode;
-		file_info[i].size = file_attrib.st_size;
-		file_info[i].linkdir = -1;
+		else {
+			file_info[i].exists = 1;
+			file_info[i].type = file_attrib.st_mode;
+			file_info[i].size = file_attrib.st_size;
+			file_info[i].linkdir = -1;
+		}
 
 		/* file_name_width contains: ELN's amount of digits + one space 
 		 * between ELN and filename + filename length. Ex: '12 name'
@@ -13236,12 +13243,18 @@ list_dir(void)
 				counter++;
 			}
 
-			/* Print ELN. The remaining part of the line will be printed
-			 * by get_properties() */
-			printf("%s%d%s ", eln_color, i + 1, NC);
+			if (!file_info[i].exists)
+				printf("%s%d%s %s%s%s\n", eln_color, i + 1, NC, uf_c,
+					   dirlist[i], NC);
 
-			get_properties(dirlist[i], (int)long_view, max,
-						   file_info[i].len);
+			else {
+				/* Print ELN. The remaining part of the line will be
+				 * printed by get_properties() */
+				printf("%s%d%s ", eln_color, i + 1, NC);
+
+				get_properties(dirlist[i], (int)long_view, max,
+							   file_info[i].len);
+			}
 		}
 
 		if (reset_pager)
@@ -13288,8 +13301,8 @@ list_dir(void)
 	/* Now we can do the listing */
 	for (i = 0; i < (int)files; i++) {
 
-		if (file_info[i].exists == 0)
-			continue;
+/*		if (file_info[i].exists == 0)
+			continue; */
 
 		/* A basic pager for directories containing large amount of
 		 * files. What's missing? It only goes downwards. To go
@@ -13337,6 +13350,10 @@ list_dir(void)
 		else
 			last_column = 0;
 
+		if (file_info[i].exists == 0)
+				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, uf_c, 
+					   dirlist[i], NC, (last_column) ? "\n" : "");
+		else {
 		switch (file_info[i].type & S_IFMT) {
 		case S_IFDIR:
 			if (!file_info[i].ruser)
@@ -13460,6 +13477,7 @@ list_dir(void)
 		default: 
 			printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, no_c, 
 					dirlist[i], NC, (last_column) ? "\n" : "");
+		}
 		}
 
 		if (!last_column) {
@@ -17798,6 +17816,7 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 				strerror(errno));
 		return EXIT_FAILURE;
 	}
+
 	/* Get file size */
 	char *size_type = get_size_unit(file_attrib.st_size);
 
@@ -17805,7 +17824,9 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 	int sticky = 0;
 	char file_type = 0, color[MAX_COLOR]= "";
 	char *linkname = (char *)NULL;
+
 	switch (file_attrib.st_mode & S_IFMT) {
+
 	case S_IFREG:
 		file_type='-';
 /*		if (!(file_attrib.st_mode & S_IRUSR)) strcpy(color, nf_c); */
@@ -17857,10 +17878,15 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 		else
 			strcpy(color, or_c);
 		break;
+
 	case S_IFSOCK: file_type = 's'; strcpy(color, so_c); break;
+
 	case S_IFBLK: file_type = 'b'; strcpy(color, bd_c); break;
+
 	case S_IFCHR: file_type = 'c'; strcpy(color, cd_c); break;
+
 	case S_IFIFO: file_type = 'p'; strcpy(color, pi_c); break;
+
 	default: file_type = '?'; strcpy(color, no_c);
 	}
 
@@ -17894,10 +17920,12 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 	time_t time = file_attrib.st_mtim.tv_sec;
 	struct tm *tm = localtime(&time);
 	char mod_time[128] = "";
+
 	if (time)
 		/* Store formatted (and localized) date-time string into
 		 * mod_time */
 		strftime(mod_time, sizeof(mod_time), "%b %d %H:%M:%S %Y", tm);
+
 	else
 		mod_time[0] = '-';
 
@@ -18004,10 +18032,12 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 	time = file_attrib.st_atim.tv_sec;
 	tm = localtime(&time);
 	char access_time[128] = "";
+
 	if (time)
 		/* Store formatted (and localized) date-time string into
 		 * access_time */
 		strftime(access_time, sizeof(access_time), "%b %d %H:%M:%S %Y", tm);
+
 	else
 		access_time[0] = '-';
 
@@ -18015,9 +18045,11 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 	time = file_attrib.st_ctim.tv_sec;
 	tm = localtime(&time);
 	char change_time[128] = "";
+
 	if (time)
 		strftime(change_time, sizeof(change_time), "%b %d %H:%M:%S %Y",
 				 tm);
+
 	else
 		change_time[0] = '-';
 
@@ -18026,8 +18058,10 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 		time = file_attrib.st_birthtime;
 		tm = localtime(&time);
 		char creation_time[128] = "";
+
 		if (!time)
 			creation_time[0] = '-';
+
 		else
 			strftime(creation_time, sizeof(creation_time),
 					 "%b %d %H:%M:%S %Y", tm);
@@ -18038,8 +18072,10 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 		time = xfile_attrib.stx_btime.tv_sec;
 		tm = localtime(&time);
 		char creation_time[128] = "";
+
 		if (!time)
 			creation_time[0] = '-';
+
 		else
 			strftime(creation_time, sizeof(creation_time),
 					 "%b %d %H:%M:%S %Y", tm);
@@ -18809,6 +18845,8 @@ color_codes (void)
 			 "directory* (ow)\n"),  NC, ow_c, NC, default_color);
 	printf(_(" %s%sfile name%s%s: Unknown file type (no)\n"), NC, no_c, 
 		   NC, default_color);
+	printf(_(" %s%sfile name%s%s: Unaccessible file (uf)\n"), NC,
+		   uf_c, NC, default_color);
 	printf(_("\n*The slash followed by a number (/xx) after directories "
 			 "or symbolic links to directories indicates the amount of "
 			 "files contained by the corresponding directory, excluding "
