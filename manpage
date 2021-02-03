@@ -28,7 +28,7 @@ With the automatic ELN's expansion feature you can use ELN's with external comma
 .sp
   \fBg)\fR The quick search function makes it really easy to quickly find the files you are looking for: just enter a slash followed by the string or pattern you want (ex: '/*.png'), that's all.
 .sp
-  \fBh)\fR CliFM's functionaly is easily extensible via shell scripts. Just drop a shell script in the scripts directory and tell CLiFM to use this scripts via a custom action name.
+  \fBh)\fR Build your own custom commands using shell scripts. Just drop a shell script in the scripts directory, tell CLiFM to use this script via a custom action name, and use it as any other command.
 .sp
   \fBi)\fR It is blazing fast and incredibly lightweigth. With a memory footprint below 5 MiB and a disk usage of 350 KiB, it can run on really old hardware. It is so simple that it doesn't require an X session nor any graphical environment at all, being able thus to perfectly run on the console (TTY) and even on a headless machine via a SSH or a telnet session. And if this is not enough, you can still use the light mode to make it even faster.
 .sp
@@ -255,16 +255,16 @@ By default, files are sorted from less to more (ex: from 'a' to 'z' if using the
 .B n, net \fR[smb, ftp, sftp]://ADDRESS [OPTIONS]
 Access a remote file system, either via SSH, FTP, or SMB protocols. To access the file system of a machine via SSH, use the following URI scheme: sftp://[USER@]HOST:[/REMOTE\-DIR] [PORT]. Bracketed elements are optional. If no user is specified, CliFM will attempt to login using the current local username. If no port is specified, the default port (22, if SSH) will be used.
 .sp
-To access the remote file system via SMB, this scheme should be used instead: smb://[USER@]HOST[/SHARE][/REMOTE\-DIR] [OPTIONS]. The URI scheme for FTP connections is this: ftp://HOST[:PORT] [OPTIONS]. Network resources are mounted in '/tmp/clifm/remote_dir', replacing all slashes in remote_dir by underscores. To disconnect from the remote machine, use 'fusermount3 \-u' for SSH, 'fusermount \-u' for FTP, and 'umount' for SMB, followd by the corresponding mountpoint. Examples:
+To access the remote file system via SMB, this scheme should be used instead: smb://[USER@]HOST[/SHARE][/REMOTE\-DIR] [OPTIONS]. The URI scheme for FTP connections is this: ftp://HOST[:PORT] [OPTIONS]. Network resources are mounted in '/tmp/clifm/remote_dir', replacing all slashes in remote_dir by underscores. To disconnect from the remote machine, use 'fusermount3 \-u' for SSH, 'fusermount \-u' for FTP, and 'umount' for SMB, followed by the corresponding mountpoint. Examples:
 
-     net sftp://john@192.168.0.25:Documents/misc port=2222
-     fusermount3 \-u /tmp/clifm/remote/john@192.168.0.25:Documents_misc
+  net sftp://john@192.168.0.25:Documents/misc port=2222
+  fusermount3 \-u /tmp/clifm/remote/john@192.168.0.25:Documents_misc
+ 
+  net smb://192.168.1.34/share username=laura,password=my_pass
+  umount /tmp/clifm/remote/192.168.0.34_share
 
-     net smb://192.168.1.34/share username=laura,password=my_pass
-     umount /tmp/clifm/remote/192.168.0.34_share
-
-     net ftp://192.168.0.123:2121 user=me:mypass
-     fusermount \-u /tmp/clifm/remote/192.168.0.123:2121
+  net ftp://192.168.0.123:2121 user=me:mypass
+  fusermount \-u /tmp/clifm/remote/192.168.0.123:2121
 .sp
 \fBNOTE\fR: 'fusermount3' is Linux\-specific. On FreeBSD 'umount' should be used instead.
 .sp
@@ -474,6 +474,7 @@ Filetype colors are specified using the same format used by dircolors and the LS
  ee = empty executable file
  ca = file with capabilites
  no = unknown filetype
+ uf = unaccesible files (\fBstat(3)\fR error)
 .TP
 Color codes are just traditional ANSI color codes less the escape character and the final 'm'. Thus, for instance, if you want non\-empty directories to be bold blue, the complete code is this: di=01;34
 .TP
@@ -587,7 +588,7 @@ If speed is still an issue, try one of the setups below (listed from slower to f
 .TP
 \fBd)\fR Default mode with FilesCounter and ListFoldersFisrt options disabled (this latter needs to reorder the list of files provided by \fBscandir(3)\fR in order to place directories first, which of course is slower)
 .TP
-\fBe)\fR Light mode with ClassifyExec option enabled. In light mode, colors and FilesCounter are disabled, while every call to \fBstat(3)\fR, which could be quite time consuming, is omitted.
+\fBe)\fR Light mode with ClassifyExec option enabled. In light mode, colors and FilesCounter are disabled, while (if not running in long view mode) every call to \fBstat(3)\fR, which could be quite time consuming, is omitted.
 .TP
 \fBf)\fR Light mode with Classify enabled and ClassifyExec disabled (this latter needs to call \fBaccess(3)\fR for every regular file to find out whether it is executable or not, which slows things down)
 .TP
