@@ -432,6 +432,7 @@ void colors_list(const char *entry, const int i, const int pad,
 int hidden_function(char **comm);
 void help_function(void);
 void color_codes(void);
+char *get_ext_color(char *ext);
 int list_commands(void);
 void free_software(void);
 void print_tips(int all);
@@ -575,7 +576,8 @@ unsigned short term_cols = 0;
 
 size_t user_home_len = 0, args_n = 0, sel_n = 0, trash_n = 0, msgs_n = 0,
 	   prompt_cmds_n = 0, path_n = 0, current_hist_n = 0, usrvar_n = 0,
-	   aliases_n = 0, longest = 0, files = 0, eln_len = 0, actions_n = 0;
+	   aliases_n = 0, longest = 0, files = 0, eln_len = 0, actions_n = 0,
+	   ext_colors_n = 0;
 
 struct termios shell_tmodes;
 off_t total_sel_size = 0;
@@ -601,7 +603,7 @@ char *user = (char *)NULL, *path = (char *)NULL,
 	*last_cmd = (char *)NULL, *term = (char *)NULL,
 	*TMP_DIR = (char *)NULL, div_line_char = -1, *opener = (char *)NULL,
 	**old_pwd = (char **)NULL, *SCRIPTS_DIR = (char *)NULL,
-	*ACTIONS_FILE = (char *)NULL;
+	*ACTIONS_FILE = (char *)NULL, **ext_colors = (char **)NULL;
 
 	/* This is not a comprehensive list of commands. It only lists
 	 * commands long version for TAB completion */
@@ -1068,6 +1070,30 @@ main(int argc, char **argv)
 			/** #################################
 			 * #     FUNCTIONS DEFINITIONS     #
 			 * ################################# */
+
+char
+*get_ext_color(char *ext)
+/* Returns a pointer to the corresponding color code for EXT, if some
+ * color was defined */
+{
+	if (!ext || !ext_colors_n)
+		return (char *)NULL;
+
+	ext++;
+
+	size_t i;
+
+	for (i = 0; i < ext_colors_n; i++) {
+
+		if (*ext == ext_colors[i][2]) {
+			size_t len = strlen(ext);
+			if (strncmp(ext, ext_colors[i] + 2, len))
+				return (strchr(ext_colors[i], '=') + 1);
+		}
+	}
+
+	return (char *)NULL;
+}
 
 int
 edit_actions(void)
@@ -5956,7 +5982,7 @@ set_colors(void)
  * values into the corresponnding filetype variable. If some value is
  * not found, or if it's a wrong value, the default is set. */
 {
-	char *dircolors = (char *)NULL;
+	char *dircolors = (char *)NULL, *extcolors = (char *)NULL;
 
 	/* Get the colors line from the config file */
 	FILE *fp_colors = fopen(CONFIG_FILE, "r");
@@ -5964,27 +5990,126 @@ set_colors(void)
 		char *line = (char *)NULL;
 		ssize_t line_len = 0;
 		size_t line_size = 0;
+		int file_type_found = 0, ext_type_found = 0;
 
 		while ((line_len = getline(&line, &line_size, fp_colors)) > 0) {
+
 			if (strncmp(line, "FiletypeColors=", 15) == 0) {
-				char *opt_str = straft(line, '=');
+				file_type_found = 1;
+				char *opt_str = strchr(line, '=');
+
 				if (!opt_str)
 					continue;
+
+				opt_str++;
 				size_t str_len = strlen(opt_str);
 				dircolors = (char *)xcalloc(str_len + 1, sizeof(char));
+
 				if (opt_str[str_len-1] == '\n')
 					opt_str[str_len-1] = 0x00;
+
 				strcpy(dircolors, opt_str);
-				free(opt_str);
 				opt_str = (char *)NULL;
-				break;
+
+/*				break; */
 			}
+
+			/* Colors for file types based on extensions */
+			else if (strncmp(line, "ExtColors=", 10) == 0) {
+				ext_type_found = 1;
+				char *opt_str = strchr(line, '=');
+
+				if (!opt_str)
+					continue;
+
+				opt_str++;
+				size_t str_len = strlen(opt_str);
+				extcolors = (char *)xcalloc(str_len + 1, sizeof(char));
+
+				if (opt_str[str_len-1] == '\n')
+					opt_str[str_len-1] = 0x00;
+
+				strcpy(extcolors, opt_str);
+				opt_str = (char *)NULL;
+			}
+
+			if (file_type_found && ext_type_found)
+				break;
 		}
 
 		free(line);
 		line = (char *)NULL;
 
 		fclose(fp_colors);
+	}
+
+	if (extcolors) {
+
+		char *p = extcolors, *buf = (char *)NULL;
+		size_t len = 0;
+
+		if (ext_colors_n) {
+			size_t i;
+			for (i = 0; i < ext_colors_n; i++)
+				free(ext_colors[i]);
+			free(ext_colors);
+			ext_colors = (char **)NULL;
+		}
+		
+		ext_colors_n = 0;
+
+		while(*p) {
+			switch (*p) {
+
+			case '\'':
+			case '"':
+				p++;
+				break;
+
+			case ':':
+				buf[len] = 0x00;
+				ext_colors = (char **)xrealloc(ext_colors,
+											(ext_colors_n + 1)
+											* sizeof(char *));
+				ext_colors[ext_colors_n] = (char *)xcalloc(len + 1,
+													sizeof(char));
+				strcpy(ext_colors[ext_colors_n++], buf);
+				memset(buf, 0x00, len);
+				len = 0;
+				p++;
+				break;
+
+			default:
+				buf = (char *)xrealloc(buf, (len + 2) * sizeof(char));
+				buf[len++] = *(p++);
+				break;
+			}
+		}
+
+		p = (char *)NULL;
+		free(extcolors);
+		extcolors = (char *)NULL;
+
+		if (len) {
+			buf[len] = 0x00;
+			ext_colors = (char **)xrealloc(ext_colors,
+										   (ext_colors_n + 1)
+										   * sizeof(char *));
+			ext_colors[ext_colors_n] = (char *)xcalloc(len + 1, sizeof(char));
+			strcpy(ext_colors[ext_colors_n++], buf);
+		}
+
+		if (buf) {
+			free(buf);
+			buf = (char *)NULL;
+		}
+
+		if (ext_colors) {
+			ext_colors = (char **)xrealloc(ext_colors,
+										   (ext_colors_n + 1)
+										   * sizeof(char *));
+			ext_colors[ext_colors_n] = (char *)NULL;
+		}
 	}
 
 	if (dircolors) {
@@ -8884,6 +9009,12 @@ free_stuff(void)
 		for (i = 0; i < (size_t)msgs_n; i++)
 			free(messages[i]);
 		free(messages);
+	}
+
+	if (ext_colors_n) {
+		for (i = 0; i < ext_colors_n; i++)
+			free(ext_colors[i]);
+		free(ext_colors);
 	}
 
 	free(user);
@@ -12792,10 +12923,28 @@ colors_list(const char *entry, const int i, const int pad,
 				printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC,
 					   mh_c, entry, NC, new_line ? "\n" : "",
 					   pad, "");
-			else
-				printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC,
-					   fi_c, entry, NC, new_line ? "\n" : "",
-					   pad, "");
+			else {
+				char *ext = (strrchr(entry, '.'));
+				if (ext) {
+					char *extcolor = get_ext_color(ext);
+					if (extcolor) {
+						printf("%s%s%s\x1b[%sm%s%s%s%-*s", eln_color,
+							   index, NC, extcolor, entry, NC,
+							   new_line ? "\n" : "", pad, "");
+						extcolor = (char *)NULL;
+					}
+					else
+						printf("%s%s%s%s%s%s%s%-*s", eln_color, index,
+							   NC, fi_c, entry, NC, new_line ? "\n"
+							   : "", pad, "");
+
+					ext = (char *)NULL;
+				}
+				else
+					printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC,
+						   fi_c, entry, NC, new_line ? "\n" : "",
+						   pad, "");
+			}
 		}
 			break;
 
@@ -13490,15 +13639,37 @@ list_dir(void)
 			else if (file_info[i].size == 0)
 				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, ef_c, 
 						dirlist[i], NC, (last_column) ? "\n" : "");
-/* ############################################# */
-			/* Multi-hardlink */
-			else if (file_info[i].links > 1)
+
+			else if (file_info[i].links > 1) /* Multi-hardlink */
 				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, mh_c, 
 						dirlist[i], NC, (last_column) ? "\n" : "");
-/* ############################################# */
-			else
-				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, fi_c, 
-						dirlist[i], NC, (last_column) ? "\n" : "");
+
+			else {
+				/* Check extension color */
+				char *ext = strrchr(dirlist[i], '.');
+				if (ext) {
+					char *extcolor = get_ext_color(ext);
+
+					if (extcolor) {
+						printf("%s%d%s \x1b[%sm%s%s%s", eln_color,
+								i + 1, NC, extcolor, dirlist[i], NC,
+								(last_column) ? "\n" : "");
+						extcolor = (char *)NULL;
+					}
+
+					else /* No matching extension found */
+						printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC,
+								fi_c, dirlist[i], NC, (last_column)
+								? "\n" : "");
+
+					ext = (char *)NULL;
+				}
+
+				else /* Bare regular file */
+					printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC,
+							fi_c, dirlist[i], NC, (last_column)
+							? "\n" : "");
+			}
 			break;
 
 		/* In case all of the above cases are false, we have an
@@ -17887,7 +18058,24 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 			}
 			else if (file_attrib.st_size == 0) strcpy(color, ef_c);
 			else if (file_attrib.st_nlink > 1) strcpy(color, mh_c);
-			else strcpy(color, fi_c);
+			else {
+				char *ext = strrchr(filename, '.');
+				if (ext) {
+					char *extcolor = get_ext_color(ext);
+
+					if (extcolor) {
+						sprintf(color, "\x1b[%sm", extcolor);
+						extcolor = (char *)NULL;
+					}
+
+					else /* No matching extension found */
+						strcpy(color, fi_c);
+
+					ext = (char *)NULL;
+				}
+				else
+					strcpy(color, fi_c);
+			}
 		}
 		break;
 
@@ -18837,54 +19025,50 @@ color_codes (void)
 		return;
 	}
 
-	printf(_("%s file name%s%s: Directory with no read permission (nd)\n"), 
+	if (ext_colors_n)
+		printf("%sFile type colors%s\n\n", bold, NC);
+
+	printf(_(" %sDirectory with no read permission%s%s (nd)\n"), 
 		   nd_c, NC, default_color);
-	printf(_("%s file name%s%s: File with no read permission (nf)\n"), 
+	printf(_(" %sFile with no read permission%s%s (nf)\n"), 
 		   nf_c, NC, default_color);
-	printf(_("%s file name%s%s: Directory* (di)\n"), di_c, NC,
+	printf(_(" %sDirectory%s%s* (di)\n"), di_c, NC,
 		   default_color);
-	printf(_("%s file name%s%s: EMPTY directory (ed)\n"), ed_c, NC, 
+	printf(_(" %sEMPTY directory%s%s (ed)\n"), ed_c, NC, default_color);
+	printf(_(" %sEMPTY directory with no read permission%s%s (ne)\n"),
+		   ne_c, NC, default_color);
+	printf(_(" %sExecutable file%s%s (ex)\n"), ex_c, NC, default_color);
+	printf(_(" %sEmpty executable file%s%s (ee)\n"), ee_c, NC, 
 		   default_color);
-	printf(_("%s file name%s%s: EMPTY directory with no read "
-			 "permission (ne)\n"), ne_c, NC, default_color);
-	printf(_("%s file name%s%s: Executable file (ex)\n"), ex_c, NC, 
+	printf(_(" %sBlock special file%s%s (bd)\n"), bd_c, NC, 
 		   default_color);
-	printf(_("%s file name%s%s: Empty executable file (ee)\n"), ee_c, NC, 
+	printf(_(" %sSymbolic link%s%s* (ln)\n"), ln_c, NC, default_color);
+	printf(_(" %sMulti-hardlink%s%s (mh)\n"), mh_c, NC, default_color);
+	printf(_(" %sBroken symbolic link %s%s (or)\n"), or_c, NC, 
 		   default_color);
-	printf(_("%s file name%s%s: Block special file (bd)\n"), bd_c, NC, 
-		   default_color);
-	printf(_("%s file name%s%s: Symbolic link* (ln)\n"), ln_c, NC, 
-		   default_color);
-	printf(_("%s file name%s%s: Multi-hardlink (mh)\n"), mh_c, NC, 
-		   default_color);
-	printf(_("%s file name%s%s: Broken symbolic link (or)\n"), or_c, NC, 
-		   default_color);
-	printf(_("%s file name%s%s: Socket file (so)\n"), so_c, NC, 
-		   default_color);
-	printf(_("%s file name%s%s: Pipe or FIFO special file (pi)\n"), pi_c,
+	printf(_(" %sSocket file%s%s (so)\n"), so_c, NC, default_color);
+	printf(_(" %sPipe or FIFO special file%s%s (pi)\n"), pi_c,
 		   NC, default_color);
-	printf(_("%s file name%s%s: Character special file (cd)\n"), cd_c, NC, 
+	printf(_(" %sCharacter special file%s%s (cd)\n"), cd_c, NC, 
 		   default_color);
-	printf(_("%s file name%s%s: Regular file (fi)\n"), fi_c, NC, 
-		   default_color);
-	printf(_("%s file name%s%s: Empty (zero-lenght) file (ef)\n"), ef_c,
+	printf(_(" %sRegular file%s%s (fi)\n"), fi_c, NC, default_color);
+	printf(_(" %sEmpty (zero-lenght) file%s%s: (ef)\n"), ef_c,
 		   NC, default_color);
-	printf(_(" %s%sfile name%s%s: SUID file (su)\n"), NC, su_c, NC, 
-		   default_color);
-	printf(_(" %s%sfile name%s%s: SGID file (sg)\n"), NC, sg_c, NC, 
-		   default_color);
-	printf(_(" %s%sfile name%s%s: File with capabilities (ca)\n"), NC, ca_c, 
+	printf(_(" %s%sSUID file%s%s (su)\n"), NC, su_c, NC, default_color);
+	printf(_(" %s%sSGID file%s%s (sg)\n"), NC, sg_c, NC, default_color);
+	printf(_(" %s%sFile with capabilities%s%s (ca)\n"), NC, ca_c, 
 		   NC, default_color);
-	printf(_(" %s%sfile name%s%s: Sticky and NOT other-writable "
-			 "directory* (st)\n"),  NC, st_c, NC, default_color);
-	printf(_(" %s%sfile name%s%s: Sticky and other-writable "
-			 "directory* (tw)\n"),  NC, tw_c, NC, default_color);
-	printf(_(" %s%sfile name%s%s: Other-writable and NOT sticky "
-			 "directory* (ow)\n"),  NC, ow_c, NC, default_color);
-	printf(_(" %s%sfile name%s%s: Unknown file type (no)\n"), NC, no_c, 
+	printf(_(" %s%sSticky and NOT other-writable directory%s%s* (st)\n"),
+		   NC, st_c, NC, default_color);
+	printf(_(" %s%sSticky and other-writable directory%s%s* (tw)\n"),
+		   NC, tw_c, NC, default_color);
+	printf(_(" %s%sOther-writable and NOT sticky directory%s%s* (ow)\n"),
+		   NC, ow_c, NC, default_color);
+	printf(_(" %s%sUnknown file type%s%s (no)\n"), NC, no_c, 
 		   NC, default_color);
-	printf(_(" %s%sfile name%s%s: Unaccessible file (uf)\n"), NC,
-		   uf_c, NC, default_color);
+	printf(_(" %s%sUnaccessible file%s%s (uf)\n"), NC, uf_c, NC,
+		   default_color);
+
 	printf(_("\n*The slash followed by a number (/xx) after directories "
 			 "or symbolic links to directories indicates the amount of "
 			 "files contained by the corresponding directory, excluding "
@@ -18895,6 +19079,23 @@ color_codes (void)
 			 "using the same ANSI style color format used by dircolors. "
 			 "By default, %s uses only 8 colors, but you can use 256 and "
 			 "RGB colors as well.\n\n"), PROGRAM_NAME);
+
+	if (ext_colors_n) {
+		size_t i, j;
+		printf("%sExtension colors%s\n\n", bold, NC);
+		for (i = 0; i < ext_colors_n; i++) {
+			char *ret = strrchr(ext_colors[i], '=');
+
+			if (!ret)
+				continue;
+
+			printf(" \x1b[%sm", ret + 1);
+			for (j = 0; ext_colors[i][j] != '='; j++)
+				printf("%c", ext_colors[i][j]);
+			puts("\x1b[0m");
+		}
+		puts("");
+	}
 }
 
 int
