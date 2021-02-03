@@ -493,6 +493,7 @@ struct fileinfo
 	int brokenlink;
 	int linkdir;
 	int exec;
+	nlink_t links;
 	mode_t type;
 	off_t size;
 	int ruser; /* User read permission for dir */
@@ -662,8 +663,8 @@ char di_c[MAX_COLOR] = "", /* Directory */
 	ee_c[MAX_COLOR] = "", /* Empty executable */
 	ca_c[MAX_COLOR] = "", /* Cap file */
 	no_c[MAX_COLOR] = "", /* Unknown */
-	uf_c[MAX_COLOR] = ""; /* Unstatable file */
-
+	uf_c[MAX_COLOR] = "", /* Non-'stat'able file */
+	mh_c[MAX_COLOR] = ""; /* Multi-hardlink file */
 				/**
 				 * #############################
 				 * #           MAIN            #
@@ -3502,9 +3503,9 @@ create_config(char *file)
 # the final 'm'. 8 bit, 256 colors, and RGB colors are supported.\n"
 
 "FiletypeColors=\"di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;39:\
-ef=00;33:nf=00;31:ln=01;36:or=00;36:pi=33;40:so=01;35:bd=01;33:\
-cd=01;37:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:\
-ex=01;32:ee=00;32:no=00;31;47:uf=31;40\"\n\n"
+ef=00;33:nf=00;31:ln=01;36:mh=30;46:or=00;36:pi=33;40:so=01;35:\
+bd=01;33:cd=01;37:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:\
+st=37;44:ex=01;32:ee=00;32:no=00;31;47:uf=31;40\"\n\n"
 
 "# All the color lines below use the same color codes as FiletypeColors.\n"
 "# TextColor specifies the color of the text typed in the command line.\n"
@@ -3592,8 +3593,8 @@ LightMode=false\n\n"
 # names.\n\
 DirIndicator=true\n"
 "# Append filetype indicator at the end of filenames: '/' for directories,\n\
-# '@' for symbolic links, '=' for sockets, and '|' for FIFO/pipes. This\n\
-# option implies DirIndicator.\n\
+# '@' for symbolic links, '=' for sockets, '|' for FIFO/pipes, and '?'\n\
+# for unknown file types. This option implies DirIndicator.\n\
 Classify=false\n"
 "# Same as Classify, but append '*' to executable files as well. This\n\
 # option implies Classify, but is slower, since access(3) needs to be\n\
@@ -6241,6 +6242,13 @@ set_colors(void)
 					snprintf(no_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
 
+			else if (strncmp(colors[i], "mh=", 3) == 0)
+				if (!is_color_code(colors[i] + 3))
+					memset(mh_c, 0x00, MAX_COLOR);
+				else
+					snprintf(mh_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
+							 + 3);
+
 			else if (strncmp(colors[i], "uf=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					memset(uf_c, 0x00, MAX_COLOR);
@@ -6259,9 +6267,10 @@ set_colors(void)
 	/* If not dircolors */
 	else {
 		/* Set the LS_COLORS environment variable with default values */
-		char lsc[] = "di=01;34:fi=00;97:ln=01;36:or=00;36:pi=00;35:"
-				     "so=01;35:bd=01;33:cd=01;37:su=37;41:sg=30;43:"
-				     "st=37;44:tw=30;42:ow=34;42:ex=01;32:no=31;47";
+		char lsc[] = "di=01;34:fi=00;97:ln=01;36:mh=30;46:or=00;36:"
+					 "pi=00;35:so=01;35:bd=01;33:cd=01;37:su=37;41:"
+					 "sg=30;43:st=37;44:tw=30;42:ow=34;42:ex=01;32:"
+					 "no=31;47";
 		if (setenv("LS_COLORS", lsc, 1) == -1)
 			fprintf(stderr, _("%s: Error registering environment colors\n"),
 				 	PROGRAM_NAME);
@@ -6315,6 +6324,8 @@ set_colors(void)
 		sprintf(no_c, "\x1b[31;47m");
 	if (!*uf_c)
 		sprintf(uf_c, "\x1b[31;40m");
+	if (!*mh_c)
+		sprintf(mh_c, "\x1b[30;46m");
 }
 
 void
@@ -6378,13 +6389,15 @@ set_default_options(void)
 	sprintf(ca_c, "\x1b[30;41m");
 	sprintf(no_c, "\x1b[31;47m");
 	sprintf(uf_c, "\x1b[31;40m");
+	sprintf(mh_c, "\x1b[30;46m");
 
 /*	setenv("CLIFM_PROFILE", "default", 1); */
 
 	/* Set the LS_COLORS environment variable */
-	char lsc[] = "di=01;34:fi=00;97:ln=01;36:or=00;36:pi=00;35:"
-			     "so=01;35:bd=01;33:cd=01;37:su=37;41:sg=30;43:"
-			     "st=37;44:tw=30;42:ow=34;42:ex=01;32:no=31;47";
+	char lsc[] = "di=01;34:fi=00;97:ln=01;36:mh=30;46:or=00;36:"
+				 "pi=00;35:so=01;35:bd=01;33:cd=01;37:su=37;41:"
+				 "sg=30;43:st=37;44:tw=30;42:ow=34;42:ex=01;32:"
+				 "no=31;47";
 	if (setenv("LS_COLORS", lsc, 1) == -1) 
 		fprintf(stderr, _("%s: Error registering environment colors\n"), 
 				PROGRAM_NAME);
@@ -6445,7 +6458,7 @@ int
 is_internal(const char *cmd)
 /* Check cmd against a list of internal commands. Used by parse_input_str()
  * to know if it should perform additional expansions. Only commands
- * dealing with filenames should be here */
+ * dealing with filenames should be found here */
 {
 	const char *int_cmds[] = { "o", "open", "cd", "p", "pr", "prop", "t",
 							   "tr", "trash", "s", "sel", "mm", "mime",
@@ -11141,7 +11154,10 @@ init_config(void)
 
 	/* Set a few environment variables, mostly useful to run custom
 	 * scripts via the actions function */
-	 setenv("CLIFM_PROFILE", (alt_profile) ? alt_profile : "default", 1);
+	/* CLIFM env variable is set to one when CliFM is running, so that
+	 * external programs can determine if they were spawned by CliFM */
+	setenv("CLIFM", "1", 1);
+	setenv("CLIFM_PROFILE", (alt_profile) ? alt_profile : "default", 1);
 }
 
 void
@@ -12772,6 +12788,10 @@ colors_list(const char *entry, const int i, const int pad,
 				printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC,
 					   ef_c, entry, NC, new_line ? "\n" : "",
 					   pad, "");
+			else if (file_attrib.st_nlink > 1)
+				printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC,
+					   mh_c, entry, NC, new_line ? "\n" : "",
+					   pad, "");
 			else
 				printf("%s%s%s%s%s%s%s%-*s", eln_color, index, NC,
 					   fi_c, entry, NC, new_line ? "\n" : "",
@@ -13070,6 +13090,7 @@ list_dir(void)
 			file_info[i].type = S_IFREG;
 			file_info[i].size = 0;
 			file_info[i].linkdir = -1;
+			file_info[i].links = 1;
 		}
 
 		else {
@@ -13077,6 +13098,7 @@ list_dir(void)
 			file_info[i].type = file_attrib.st_mode;
 			file_info[i].size = file_attrib.st_size;
 			file_info[i].linkdir = -1;
+			file_info[i].links = file_attrib.st_nlink;
 		}
 
 		/* file_name_width contains: ELN's amount of digits + one space 
@@ -13301,9 +13323,6 @@ list_dir(void)
 	/* Now we can do the listing */
 	for (i = 0; i < (int)files; i++) {
 
-/*		if (file_info[i].exists == 0)
-			continue; */
-
 		/* A basic pager for directories containing large amount of
 		 * files. What's missing? It only goes downwards. To go
 		 * backwards, use the terminal scrollback function */
@@ -13353,8 +13372,11 @@ list_dir(void)
 		if (file_info[i].exists == 0)
 				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, uf_c, 
 					   dirlist[i], NC, (last_column) ? "\n" : "");
+
 		else {
+
 		switch (file_info[i].type & S_IFMT) {
+
 		case S_IFDIR:
 			if (!file_info[i].ruser)
 				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, nd_c, 
@@ -13468,12 +13490,19 @@ list_dir(void)
 			else if (file_info[i].size == 0)
 				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, ef_c, 
 						dirlist[i], NC, (last_column) ? "\n" : "");
+/* ############################################# */
+			/* Multi-hardlink */
+			else if (file_info[i].links > 1)
+				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, mh_c, 
+						dirlist[i], NC, (last_column) ? "\n" : "");
+/* ############################################# */
 			else
 				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, fi_c, 
 						dirlist[i], NC, (last_column) ? "\n" : "");
 			break;
-			/* In case all of the above conditions are false, we have an
-			 * unknown file type */
+
+		/* In case all of the above cases are false, we have an
+		 * unknown file type */
 		default: 
 			printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, no_c, 
 					dirlist[i], NC, (last_column) ? "\n" : "");
@@ -13733,12 +13762,13 @@ list_dir_light(void)
 
 		if (classify) {
 			/* Increase filename width in one to include the ending
-			 * classification char ( one of *@/=| ) */
+			 * classification char ( one of *@/=|? ) */
 			switch (file_info[i].type) {
 				case DT_DIR:
 				case DT_LNK:
 				case DT_FIFO:
 				case DT_SOCK:
+				case DT_UNKNOWN:
 					file_name_width++;
 					break;
 
@@ -13960,6 +13990,10 @@ list_dir_light(void)
 								dirlist[i], (last_column) ? "\n" : "");
 				break;
 
+				case DT_UNKNOWN:
+						printf("%s%d%s %s?%s", eln_color, i + 1, NC,
+							   dirlist[i], (last_column) ? "\n" : "");
+
 				default:
 						printf("%s%d%s %s%s", eln_color, i + 1, NC,
 							   dirlist[i], (last_column) ? "\n" : "");
@@ -13996,6 +14030,7 @@ list_dir_light(void)
 					case DT_LNK:
 					case DT_FIFO:
 					case DT_SOCK:
+					case DT_UNKNOWN:
 						break;
 
 					case DT_REG:
@@ -17851,6 +17886,7 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 				else strcpy(color, ex_c);
 			}
 			else if (file_attrib.st_size == 0) strcpy(color, ef_c);
+			else if (file_attrib.st_nlink > 1) strcpy(color, mh_c);
 			else strcpy(color, fi_c);
 		}
 		break;
@@ -18818,6 +18854,8 @@ color_codes (void)
 	printf(_("%s file name%s%s: Block special file (bd)\n"), bd_c, NC, 
 		   default_color);
 	printf(_("%s file name%s%s: Symbolic link* (ln)\n"), ln_c, NC, 
+		   default_color);
+	printf(_("%s file name%s%s: Multi-hardlink (mh)\n"), mh_c, NC, 
 		   default_color);
 	printf(_("%s file name%s%s: Broken symbolic link (or)\n"), or_c, NC, 
 		   default_color);
