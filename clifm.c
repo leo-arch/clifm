@@ -3097,11 +3097,17 @@ ext_sort(const struct dirent **a, const struct dirent **b)
 	exta = strrchr((*a)->d_name, '.');
 	extb = strrchr((*b)->d_name, '.');
 
+	/* Hidden files are not extensions (tell MC) */
+	if (exta == (*a)->d_name)
+		exta = (char *)NULL;
+	if (extb == (*b)->d_name)
+		extb = (char *)NULL;
+
 	if (!exta) {
 		if (!extb) /* !a && !b */
 			ret = strcoll((*a)->d_name, (*b)->d_name);
 		else /* !a && b */
-			return 0;
+			ret = -1;
 	}
 	else if (extb) /* a && b*/
 		ret = strcoll(exta, extb);
