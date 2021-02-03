@@ -394,6 +394,8 @@ int atime_sort(const struct dirent **a, const struct dirent **b);
 int btime_sort(const struct dirent **a, const struct dirent **b);
 int ctime_sort(const struct dirent **a, const struct dirent **b);
 int mtime_sort(const struct dirent **a, const struct dirent **b);
+int ext_sort(const struct dirent **a, const struct dirent **b);
+int inode_sort(const struct dirent **a, const struct dirent **b);
 
 /* Archiving and compression */
 int bulk_rename(char **args);
@@ -568,7 +570,7 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 
 int max_hist = -1, max_log = -1, dirhist_total_index = 0,
 	dirhist_cur_index = 0, argc_bk = 0, max_path = -1, exit_code = 0,
-	shell_is_interactive = 0, cont_bt = 0, sort_types = 7;
+	shell_is_interactive = 0, cont_bt = 0, sort_types = 9;
 
 unsigned short term_cols = 0;
 
@@ -2680,6 +2682,10 @@ print_sort_method(void)
 		case 7: printf(_("version %s\n"), (sort_reverse) ? "[rev]" : "");
 		#endif
 			break;
+		case 8: printf(_("extension %s\n"), (sort_reverse) ? "[rev]" : "");
+			break;
+		case 9: printf(_("inode %s\n"), (sort_reverse) ? "[rev]" : "");
+			break;
 	}
 }
 
@@ -2690,7 +2696,9 @@ sort_function(char **arg)
 
 	/* No argument: Just print current sorting method */
 	if (!arg[1]) {
+
 		printf(_("Sorting method: "));
+
 		switch(sort) {
 			case 0:
 				printf(_("none %s\n"), (sort_reverse) ? "[rev]": "");
@@ -2725,7 +2733,14 @@ sort_function(char **arg)
 				printf(_("version %s\n"), (sort_reverse) ? "[rev]": "");
 			#endif
 				break;
+			case 8: printf(_("extension %s\n"), (sort_reverse)
+						   ? "[rev]" : "");
+				break;
+			case 9:
+				printf(_("inode %s\n"), (sort_reverse) ? "[rev]": "");
+				break;
 		}
+		
 		return EXIT_SUCCESS;
 	}
 
@@ -3022,6 +3037,40 @@ size_sort(const struct dirent **a, const struct dirent **b)
 }
 
 int
+inode_sort(const struct dirent **a, const struct dirent **b)
+/* Sort files by size */
+{
+	int ret = 0;
+	struct stat atta, attb;
+
+	if (lstat((*a)->d_name, &atta) == -1) {
+		fprintf(stderr, _("stat: cannot access '%s': %s\n"),
+				(*a)->d_name, strerror(errno));
+		return 0;
+	}
+
+	if (lstat((*b)->d_name, &attb) == -1) {
+		fprintf(stderr, _("stat: cannot access '%s': %s\n"),
+				(*b)->d_name, strerror(errno));
+		return 0;
+	}
+
+	if (atta.st_ino > attb.st_ino)
+		ret = 1;
+
+	else if (atta.st_ino < attb.st_ino)
+		ret = -1;
+
+	else
+		return 0;
+
+	if (!sort_reverse)
+		return ret;
+
+	return (ret - (ret * 2));
+}
+
+int
 alphasort_insensitive(const struct dirent **a, const struct dirent **b)
 /* This is a modification of the alphasort function that makes it case 
  * insensitive. It also sorts without taking the initial dot of hidden 
@@ -3031,6 +3080,33 @@ alphasort_insensitive(const struct dirent **a, const struct dirent **b)
 	int ret = strcasecmp(((*a)->d_name[0] == '.') ? (*a)->d_name + 1 : 
 						(*a)->d_name, ((*b)->d_name[0] == '.') ? 
 						(*b)->d_name + 1 : (*b)->d_name);
+
+	if (!sort_reverse)
+		return ret;
+
+	return (ret - (ret * 2));
+}
+
+int
+ext_sort(const struct dirent **a, const struct dirent **b)
+/* Sort files by extension */
+{
+	char *exta = (char *)NULL, *extb = (char *)NULL;
+	int ret;
+
+	exta = strrchr((*a)->d_name, '.');
+	extb = strrchr((*b)->d_name, '.');
+
+	if (!exta) {
+		if (!extb) /* !a && !b */
+			ret = strcoll((*a)->d_name, (*b)->d_name);
+		else /* !a && b */
+			return 0;
+	}
+	else if (extb) /* a && b*/
+		ret = strcoll(exta, extb);
+	else /* a && !b */
+		ret = 1;
 
 	if (!sort_reverse)
 		return ret;
@@ -3538,6 +3614,7 @@ TerminalCmd='%s'\n\n"
 
 "# Choose sorting method: 0 = none, 1 = name, 2 = size, 3 = atime\n\
 # 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version\n\
+# (name if note available) 8 = extension, 9 = inode\n\
 # NOTE: the 'version' method is not available on FreeBSD\n\
 Sort=1\n\
 # By default, CliFM sorts files from less to more (ex: from 'a' to 'z' if\n\
@@ -9061,8 +9138,9 @@ get_path_programs(void)
 	/* And user defined actions too, if any */
 	if (actions_n) {
 		for (i = 0; i < actions_n; i++) {
-			bin_commands[l] = (char *)xnmalloc(strlen(usr_actions[i].name)
-											   + 1, sizeof(char));
+			bin_commands[l] = (char *)xnmalloc(
+											strlen(usr_actions[i].name)
+											+ 1, sizeof(char));
 			strcpy(bin_commands[l++], usr_actions[i].name);
 		}
 	}
@@ -12844,6 +12922,15 @@ list_dir(void)
 			total = scandir(path, &list, skip_implied_dot, m_versionsort);
 		#endif
 		break;
+
+		case 8:
+			total = scandir(path, &list, skip_implied_dot, ext_sort);
+		break;
+
+		case 9:
+			total = scandir(path, &list, skip_implied_dot, inode_sort);
+		break;
+
 	}
 
 	if (total == -1) {
@@ -13495,6 +13582,14 @@ list_dir_light(void)
 		#else
 			total = scandir(path, &list, skip_implied_dot, m_versionsort);
 		#endif
+		break;
+
+		case 8:
+			total = scandir(path, &list, skip_implied_dot, ext_sort);
+		break;
+
+		case 9:
+			total = scandir(path, &list, skip_implied_dot, inode_sort);
 		break;
 	}
 
@@ -18766,8 +18861,8 @@ is enabled by default for non-english locales\
 \n -y, --light-mode\t\t enable the light mode\
 \n -z, --sort METHOD\t\t sort files by METHOD, where METHOD could \
 be: 0 = none, 1 = name, 2 = size, 3 = atime, \
-4 = btime, 5 = ctime, 6 = mtime, 7 = version\n"), PNL, 
-		PROGRAM_NAME);
+4 = btime, 5 = ctime, 6 = mtime, 7 = version, 8 = extension \
+9 = inode\n"), PNL, PROGRAM_NAME);
 
 	puts(_("\nBUILT-IN COMMANDS:\n\n\
  ELN/FILE/DIR (auto-open and autocd)\n\
