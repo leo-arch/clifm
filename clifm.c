@@ -450,6 +450,7 @@ int *get_hex_num(char *str);
 /* Colors */
 void set_default_options(void);
 void set_colors (void);
+char *strip_color_line(char *str, char mode);
 
 /* Actions */
 int load_actions(void);
@@ -1072,6 +1073,53 @@ main(int argc, char **argv)
 			/** #################################
 			 * #     FUNCTIONS DEFINITIONS     #
 			 * ################################# */
+
+char
+*strip_color_line(char *str, char mode)
+/* Strip color lines from the config file (FiletypeColors, if mode is
+ * 't', and ExtColors, if mode is 'x') returning the same string
+ * containing only allowed characters */
+{
+	if (!str || !*str)
+		return (char *)NULL;
+
+	char *buf = (char *)xnmalloc(strlen(str) + 1, sizeof(char));
+	size_t len = 0;
+
+	switch(mode) {
+
+		case 't': /* di=01;31: */
+			while(*str) {
+				if ((*str >= '0' && *str <= '9')
+				|| (*str >= 'a' && *str <= 'z')
+				|| *str == '=' || *str == ';' || *str == ':')
+					buf[len++] = *str;
+				str++;
+			}
+		break;
+
+		case 'x': /* *.tar=01;31: */
+			while(*str) {
+				if ((*str >= '0' && *str <= '9')
+				|| (*str >= 'a' && *str <= 'z')
+				|| (*str >= 'A' && *str <= 'Z')
+				|| *str == '*' || *str == '.' || *str == '='
+				|| *str == ';' || *str == ':')
+					buf[len++] = *str;
+				str++;
+			}
+		break;
+	}
+
+	if (!len || !*buf) {
+		free(buf);
+		return (char *)NULL;
+	}
+
+	buf[len] = 0x00;
+
+	return buf;
+}
 
 char
 *get_ext_color(char *ext)
@@ -6041,14 +6089,16 @@ set_colors(void)
 					continue;
 
 				opt_str++;
-				size_t str_len = strlen(opt_str);
-				dircolors = (char *)xcalloc(str_len + 1, sizeof(char));
 
-				if (opt_str[str_len-1] == '\n')
-					opt_str[str_len-1] = 0x00;
+				char *color_line = strip_color_line(opt_str, 't');
+				if (!color_line)
+					continue;
 
-				strcpy(dircolors, opt_str);
-				opt_str = (char *)NULL;
+				dircolors = (char *)xcalloc(strlen(color_line) + 1,
+											sizeof(char));
+
+				strcpy(dircolors, color_line);
+				free(color_line);
 			}
 
 			/* Colors for file extensions */
@@ -6060,14 +6110,16 @@ set_colors(void)
 					continue;
 
 				opt_str++;
-				size_t str_len = strlen(opt_str);
-				extcolors = (char *)xcalloc(str_len + 1, sizeof(char));
 
-				if (opt_str[str_len-1] == '\n')
-					opt_str[str_len-1] = 0x00;
+				char *color_line = strip_color_line(opt_str, 'x');
+				if (!color_line)
+					continue;
 
-				strcpy(extcolors, opt_str);
-				opt_str = (char *)NULL;
+				extcolors = (char *)xcalloc(strlen(color_line) + 1,
+											sizeof(char));
+
+				strcpy(extcolors, color_line);
+				free(color_line);
 			}
 
 			if (file_type_found && ext_type_found)
@@ -6085,10 +6137,27 @@ set_colors(void)
 			 * ############################## */
 
 	/* Split the colors line */
-	if (extcolors) {
+
+	/* If no extcolors or extcolors is empty string or just ' or " */
+	if (!extcolors) {
+
+		/* Unload current extension colors */
+		if (ext_colors_n) {
+			size_t i;
+			for (i = 0; i < ext_colors_n; i++)
+				free(ext_colors[i]);
+			free(ext_colors);
+			ext_colors = (char **)NULL;
+			free(ext_colors_len);
+			ext_colors_n = 0;
+		}
+	}
+
+	else {
 
 		char *p = extcolors, *buf = (char *)NULL;
 		size_t len = 0;
+		int eol = 0;
 
 		if (ext_colors_n) {
 			size_t i;
@@ -6096,18 +6165,15 @@ set_colors(void)
 				free(ext_colors[i]);
 			free(ext_colors);
 			ext_colors = (char **)NULL;
+			free(ext_colors_len);
+			ext_colors_n = 0;
 		}
 		
-		ext_colors_n = 0;
-
-		while(*p) {
+		while(!eol) {
 			switch (*p) {
 
-			case '\'':
-			case '"':
-				p++;
-				break;
-
+			case 0x00:
+			case '\n':
 			case ':':
 				buf[len] = 0x00;
 				ext_colors = (char **)xrealloc(ext_colors,
@@ -6117,6 +6183,8 @@ set_colors(void)
 													sizeof(char));
 				strcpy(ext_colors[ext_colors_n++], buf);
 				memset(buf, 0x00, len);
+				if (!*p)
+					eol = 1;
 				len = 0;
 				p++;
 				break;
@@ -6131,15 +6199,6 @@ set_colors(void)
 		p = (char *)NULL;
 		free(extcolors);
 		extcolors = (char *)NULL;
-
-		if (len) {
-			buf[len] = 0x00;
-			ext_colors = (char **)xrealloc(ext_colors,
-										   (ext_colors_n + 1)
-										   * sizeof(char *));
-			ext_colors[ext_colors_n] = (char *)xcalloc(len + 1, sizeof(char));
-			strcpy(ext_colors[ext_colors_n++], buf);
-		}
 
 		if (buf) {
 			free(buf);
@@ -6156,7 +6215,7 @@ set_colors(void)
 		/* Make sure we have valid color codes and store the length
 		 * of each stored extension: this length will be used later
 		 * when listing files */
-		ext_colors_len = (size_t *)calloc(ext_colors_n, sizeof(size_t));
+		ext_colors_len = (size_t *)xnmalloc(ext_colors_n, sizeof(size_t));
 
 		size_t i;
 		for (i = 0; i < ext_colors_n; i++) {
@@ -6179,8 +6238,46 @@ set_colors(void)
 			 * #	  FILE TYPE COLORS		#
 			 * ############################## */
 
-	if (dircolors) {
+	/* If not dircolors */
+	if (!dircolors) {
 
+		/* Free and reset whatever value was loaded */
+		memset(nd_c, 0x00, MAX_COLOR);
+		memset(nf_c, 0x00, MAX_COLOR);
+		memset(di_c, 0x00, MAX_COLOR);
+		memset(ed_c, 0x00, MAX_COLOR);
+		memset(ne_c, 0x00, MAX_COLOR);
+		memset(ex_c, 0x00, MAX_COLOR);
+		memset(ee_c, 0x00, MAX_COLOR);
+		memset(bd_c, 0x00, MAX_COLOR);
+		memset(ln_c, 0x00, MAX_COLOR);
+		memset(mh_c, 0x00, MAX_COLOR);
+		memset(or_c, 0x00, MAX_COLOR);
+		memset(so_c, 0x00, MAX_COLOR);
+		memset(pi_c, 0x00, MAX_COLOR);
+		memset(cd_c, 0x00, MAX_COLOR);
+		memset(fi_c, 0x00, MAX_COLOR);
+		memset(ef_c, 0x00, MAX_COLOR);
+		memset(su_c, 0x00, MAX_COLOR);
+		memset(sg_c, 0x00, MAX_COLOR);
+		memset(ca_c, 0x00, MAX_COLOR);
+		memset(st_c, 0x00, MAX_COLOR);
+		memset(tw_c, 0x00, MAX_COLOR);
+		memset(ow_c, 0x00, MAX_COLOR);
+		memset(no_c, 0x00, MAX_COLOR);
+		memset(uf_c, 0x00, MAX_COLOR);
+
+		/* Set the LS_COLORS environment variable with default values */
+		char lsc[] = "di=01;34:fi=00;97:ln=01;36:mh=30;46:or=00;36:"
+					 "pi=00;35:so=01;35:bd=01;33:cd=01;37:su=37;41:"
+					 "sg=30;43:st=37;44:tw=30;42:ow=34;42:ex=01;32:"
+					 "no=31;47";
+		if (setenv("LS_COLORS", lsc, 1) == -1)
+			fprintf(stderr, _("%s: Error registering environment colors\n"),
+				 	PROGRAM_NAME);
+	}
+
+	else {
 		/* Set the LS_COLORS environment variable to use CliFM own
 		 * colors. In this way, files listed for TAB completion will
 		 * use CliFM colors instead of system colors */
@@ -6190,10 +6287,13 @@ set_colors(void)
 		 * LS_COLORS */
 		size_t i = 0, buflen = 0, linec_len = strlen(dircolors);
 		char *ls_buf = (char *)NULL;
+
 		ls_buf = (char *)xcalloc(linec_len + 1, sizeof(char));
+
 		while (dircolors[i]) {
 
 			int rem = 0;
+
 			if ((int)i < (int)(linec_len - 3) && (
 			(dircolors[i] == 'n' && (dircolors[i+1] == 'd'
 			|| dircolors[i+1] == 'e' || dircolors[i+1] == 'f'))
@@ -6206,14 +6306,19 @@ set_colors(void)
 				for (i += 3; dircolors[i] && dircolors[i] != ':'; i++);
 			}
 
-			if (dircolors[i] && !rem && dircolors[i] != '"'
-			&& dircolors[i] != '\'')
-				ls_buf[buflen++] = dircolors[i];
+			if (dircolors[i]) {
+				if (!rem)
+					ls_buf[buflen++] = dircolors[i];
+			}
+			else
+				break;
+
 			i++;
 		}
 
-		if (ls_buf) {
+		if (buflen) {
 			ls_buf[buflen] = 0x00;
+
 			if (setenv("LS_COLORS", ls_buf, 1) == -1)
 				fprintf(stderr, _("%s: Error registering environment "
 						          "colors\n"), PROGRAM_NAME);
@@ -6224,15 +6329,13 @@ set_colors(void)
 		/* Split the colors line into substrings (one per color) */
 		char *p = dircolors, *buf = (char *)NULL, **colors = (char **)NULL;
 		size_t len = 0, words = 0;
+		int eol = 0;
 
-		while(*p) {
+		while(!eol) {
 			switch (*p) {
 
-			case '\'':
-			case '"':
-				p++;
-				break;
-
+			case 0x00:
+			case '\n':
 			case ':':
 				buf[len] = 0x00;
 				colors = (char **)xrealloc(colors, (words + 1)
@@ -6240,6 +6343,8 @@ set_colors(void)
 				colors[words] = (char *)xcalloc(len + 1, sizeof(char));
 				strcpy(colors[words++], buf);
 				memset(buf, 0x00, len);
+				if (!*p)
+					eol = 1;
 				len = 0;
 				p++;
 				break;
@@ -6254,14 +6359,6 @@ set_colors(void)
 		p = (char *)NULL;
 		free(dircolors);
 		dircolors = (char *)NULL;
-
-		if (len) {
-			buf[len] = 0x00;
-			colors = (char **)xrealloc(colors, (words + 1)
-									   * sizeof(char *));
-			colors[words] = (char *)xcalloc(len + 1, sizeof(char));
-			strcpy(colors[words++], buf);
-		}
 
 		if (buf) {
 			free(buf);
@@ -6280,7 +6377,7 @@ set_colors(void)
 			if (strncmp(colors[i], "di=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
 					/* zero the corresponding variable as a flag for
-					 * the check after this for loop and to prepare the
+					 * the check after this for loop to prepare the
 					 * variable to hold the default color */
 					memset(di_c, 0x00, MAX_COLOR);
 				else
@@ -6454,18 +6551,6 @@ set_colors(void)
 
 		free(colors);
 		colors = (char **)NULL;
-	}
-
-	/* If not dircolors */
-	else {
-		/* Set the LS_COLORS environment variable with default values */
-		char lsc[] = "di=01;34:fi=00;97:ln=01;36:mh=30;46:or=00;36:"
-					 "pi=00;35:so=01;35:bd=01;33:cd=01;37:su=37;41:"
-					 "sg=30;43:st=37;44:tw=30;42:ow=34;42:ex=01;32:"
-					 "no=31;47";
-		if (setenv("LS_COLORS", lsc, 1) == -1)
-			fprintf(stderr, _("%s: Error registering environment colors\n"),
-				 	PROGRAM_NAME);
 	}
 
 	/* If some color was not set or it was a wrong color code, set the
@@ -8982,6 +9067,9 @@ free_stuff(void)
  * time and avoid thus memory leaks */
 {
 	size_t i = 0;
+
+	if (ext_colors_n)
+		free(ext_colors_len);
 
 	free(TMP_DIR);
 
