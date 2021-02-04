@@ -605,6 +605,8 @@ char *user = (char *)NULL, *path = (char *)NULL,
 	**old_pwd = (char **)NULL, *SCRIPTS_DIR = (char *)NULL,
 	*ACTIONS_FILE = (char *)NULL, **ext_colors = (char **)NULL;
 
+size_t *ext_colors_len = (size_t *)NULL;
+
 	/* This is not a comprehensive list of commands. It only lists
 	 * commands long version for TAB completion */
 const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
@@ -1085,22 +1087,19 @@ char
 
 	for (i = 0; i < ext_colors_n; i++) {
 
+		/* Only run the check if the first char of both found and
+		 * stored extensions match */
 		if (*ext == ext_colors[i][2]) {
-			size_t j, len = strlen(ext), len2 = 0;
+			/* +2 because stored extensions have this form: *.ext */
 
-			/* Get size of stored extension */
-			for (j = 2; ext_colors[i][j]; j++) {
-				if (ext_colors[i][j] != '=')
-					len2++;
-				else
-					break;
-			}
+			/* Get size of found extension */
+			size_t len_found = strlen(ext);
 
 			/* Compare found and stored extensions */
-			if (len != len2)
+			if (len_found != ext_colors_len[i])
 				continue;
 
-			if (strncmp(ext, ext_colors[i] + 2, len) == 0)
+			if (strncmp(ext, ext_colors[i] + 2, len_found) == 0)
 				return (strchr(ext_colors[i], '=') + 1);
 		}
 	}
@@ -6016,13 +6015,14 @@ is_color_code(char *str)
 
 void
 set_colors(void)
-/* Open the config file, get values for filetype colors and copy these
- * values into the corresponnding filetype variable. If some value is
+/* Open the config file, get values for filetype and extension colors
+ * and copy these values into the corresponding variable. If some value is
  * not found, or if it's a wrong value, the default is set. */
 {
 	char *dircolors = (char *)NULL, *extcolors = (char *)NULL;
 
-	/* Get the colors line from the config file */
+	/* Get color lines, for both file types and extensions, from the
+	 * config file */
 	FILE *fp_colors = fopen(CONFIG_FILE, "r");
 	if (fp_colors) {
 		char *line = (char *)NULL;
@@ -6032,6 +6032,7 @@ set_colors(void)
 
 		while ((line_len = getline(&line, &line_size, fp_colors)) > 0) {
 
+			/* Colors for file types */
 			if (strncmp(line, "FiletypeColors=", 15) == 0) {
 				file_type_found = 1;
 				char *opt_str = strchr(line, '=');
@@ -6048,11 +6049,9 @@ set_colors(void)
 
 				strcpy(dircolors, opt_str);
 				opt_str = (char *)NULL;
-
-/*				break; */
 			}
 
-			/* Colors for file types based on extensions */
+			/* Colors for file extensions */
 			else if (strncmp(line, "ExtColors=", 10) == 0) {
 				ext_type_found = 1;
 				char *opt_str = strchr(line, '=');
@@ -6081,6 +6080,11 @@ set_colors(void)
 		fclose(fp_colors);
 	}
 
+			/* ##############################
+			 * #	FILE EXTENSION COLORS	#
+			 * ############################## */
+
+	/* Split the colors line */
 	if (extcolors) {
 
 		char *p = extcolors, *buf = (char *)NULL;
@@ -6148,7 +6152,32 @@ set_colors(void)
 										   * sizeof(char *));
 			ext_colors[ext_colors_n] = (char *)NULL;
 		}
+
+		/* Make sure we have valid color codes and store the length
+		 * of each stored extension: this length will be used later
+		 * when listing files */
+		ext_colors_len = (size_t *)calloc(ext_colors_n, sizeof(size_t));
+
+		size_t i;
+		for (i = 0; i < ext_colors_n; i++) {
+			char *ret = strrchr(ext_colors[i], '=');
+
+			if (!ret || !is_color_code(ret + 1)) {
+				memset(ext_colors[i], 0x00, strlen(ext_colors[i]));
+				ext_colors_len[i] = 0;
+				continue;
+			}
+
+			size_t j, ext_len = 0;
+			for (j = 2; ext_colors[i][j] != '='; j++)
+				ext_len++;
+			ext_colors_len[i] = ext_len;
+		}
 	}
+
+			/* ##############################
+			 * #	  FILE TYPE COLORS		#
+			 * ############################## */
 
 	if (dircolors) {
 
