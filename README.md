@@ -69,7 +69,7 @@ Because file manager, but also half-shell, CLiFM also provides the following fea
 * User profiles
 * Keyboard shortcuts
 * Resource opener
-* Multiple sorting methods: name, size, atime, btime, ctime, mtime, and version. Also supports reverse sorting.
+* Multiple sorting methods: name, size, atime, btime, ctime, mtime, version, extension, and inode. It also supports reverse sorting.
 * Bulk rename
 * Archives and compression support (including Zstandard and ISO 9660)
 * Auto-cd and auto-open
