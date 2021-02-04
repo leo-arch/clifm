@@ -452,7 +452,7 @@ safely quit CliFM.
 
 .SH COLOR CODES
 .TP
-Filetype colors are specified using the same format used by dircolors and the LS_COLORS environment variable, namely, a colon separated list of codes with this format: filetype=color. This is the list of filetype codes:
+Colors are specified using the same format used by \fBdircolors(1)\fR and the LS_COLORS environment variable, namely, a colon separated list of codes with this general format: filetype=color. This is the list of filetype codes:
 
  di = directory
  ed = empty directory
@@ -479,13 +479,15 @@ Filetype colors are specified using the same format used by dircolors and the LS
  no = unknown filetype
  uf = unaccesible files (\fBstat(3)\fR error)
 .TP
-Color codes are just traditional ANSI color codes less the escape character and the final 'm'. Thus, for instance, if you want non\-empty directories to be bold blue, the complete code is this: di=01;34
+Color codes are just traditional ANSI color codes less the escape character and the final 'm'. Thus, for instance, if you want non\-empty directories to be bold blue, add this to the FiletypeColors line in the configuration file: di=01;34
+.TP
+Color codes can be used for file extensions as well using this format: *.ext=color. For example, to print C source files in bold green, add this to the ExtColors line in the configuration file: *.c=01;32
 .TP
 Though by default CliFM uses only 8 colors, you can use 256 and RGB colors as well. Example: fi=04;38;02;245;76;00 will print regular files underlined and using a bold orange RGB or 24\-bit true color. In this case, just make sure to use a terminal supporting RGB colors.
 .TP
 Filetype and file extension colors are defined in the configuration file and can be modified as you wish. ELN's and command line text colors are defined using these same color codes.
 .TP
-To see a colored list of the currently used color codes run 'cc' or 'colors' in CliFM.
+To see a colored list of the currently used color codes run \fIcc\fR or \fIcolors\fR in CliFM.
 
 .SH THE PROMPT
 .TP
