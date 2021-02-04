@@ -556,7 +556,8 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 	home_ok = 1, config_ok = 1, trash_ok = 1, selfile_ok = 1, tips = -1,
 	mime_match = 0, logs_enabled = -1, sort = -1, files_counter = -1,
 	light_mode = -1, dir_indicator = -1, classify = -1, sort_switch = 0,
-	sort_reverse = 0, autocd = -1, auto_open = -1;
+	sort_reverse = 0, autocd = -1, auto_open = -1,
+	restore_last_path = -1;
 	/* -1 means non-initialized or unset. Once initialized, these variables
 	 * are always either zero or one */
 /*	sel_no_sel=0 */
@@ -939,11 +940,52 @@ main(int argc, char **argv)
 		CLEAR;
 	}
 
+	/* Last path is overriden by the -p option in the command line */
+	if (xargs.path == -1 && restore_last_path) {
+
+		char *last_file = (char *)xnmalloc(strlen(CONFIG_DIR) + 7,
+										   sizeof(char));
+		sprintf(last_file, "%s/.last", CONFIG_DIR);
+
+		struct stat last_attrib;
+		if (stat(last_file, &last_attrib) != -1) {
+
+			FILE *last_fp = fopen(last_file, "r");
+
+			if (!last_fp) {
+				_err('w', PRINT_PROMPT, _("%s: Error retrieving last "
+					 "visited directory\n"), PROGRAM_NAME);
+			}
+
+			else {
+				char line[PATH_MAX] = "";
+				fgets(line, sizeof(line), last_fp);
+
+				if (*line && strchr(line, '/')) {
+					/* In case path was set via StartingPath in the
+					 * config file */
+					if (path) {
+						free(path);
+						path = (char *)NULL;
+					}
+
+					path = (char *)xnmalloc(strlen(line) + 1,
+											sizeof(char));
+					strcpy(path, line);
+				}
+
+				fclose(last_fp);
+			}
+		}
+
+		free(last_file);
+	}
+
 	/* If path was not set (neither in the config file nor via command
-	 * line, that is, as external argument), set the default (CWD), and
-	 * if CWD is not set, use the user's home directory, and if the home
-	 * cannot be found either, try the root directory, and if there's no
-	 * access to the root dir either, exit. 
+	 * line nor via the RestoreLastPath option), set the default (CWD),
+	 * and if CWD is not set, use the user's home directory, and if the
+	 * home cannot be found either, try the root directory, and if
+	 * there's no access to the root dir either, exit. 
 	 * Bear in mind that if you launch CliFM through a terminal emulator, 
 	 * say xterm (xterm -e clifm), xterm will run a shell, say bash, and 
 	 * the shell will read its config file. Now, if this config file
@@ -3921,6 +3963,11 @@ ClearScreen=false\n\n"
 
 "# If not specified, StartingPath defaults to the current working directory.\n\
 StartingPath=\n\n"
+
+"# If set to true, start CliFM in the last visited directory. This option\n\
+# overrides StartingPath.\
+RestoreLastPath=false\n\n"
+
 "#END OF OPTIONS\n\n",
 
 			DEFAULT_TERM_CMD);
@@ -9240,6 +9287,27 @@ free_stuff(void)
 {
 	size_t i = 0;
 
+	/* Store last visited directory for the restore last path
+	 * function */
+	if (restore_last_path && path && config_ok) {
+		char *last_dir = (char *)xnmalloc(strlen(CONFIG_DIR) + 7,
+										  sizeof(char));
+		sprintf(last_dir, "%s/.last", CONFIG_DIR);
+
+		FILE *last_fp;
+
+		last_fp = fopen(last_dir, "w");
+		if (!last_fp)
+			fprintf(stderr, _("%s: Error storing last visited "
+					"directory\n"), PROGRAM_NAME);
+		else {
+			fprintf(last_fp, "%s", path);
+			fclose(last_fp);
+		}
+
+		free(last_dir);
+	}
+
 	if (ext_colors_n)
 		free(ext_colors_len);
 
@@ -10796,17 +10864,20 @@ init_config(void)
 
 			FILE *config_fp;
 			config_fp = fopen(CONFIG_FILE, "r");
+
 			if (!config_fp) {
 				_err('e', PRINT_PROMPT, _("%s: fopen: '%s': %s. Using "
 					 "default values.\n"), PROGRAM_NAME, CONFIG_FILE,
 					 strerror(errno));
 			}
+			
 			else {
 				div_line_char = -1;
 				#define MAX_BOOL 6
 				/* starting path(14) + PATH_MAX + \n(1)*/
 				char line[PATH_MAX + 15];
 				while (fgets(line, sizeof(line), config_fp)) {
+
 					if (strncmp(line, "#END OF OPTIONS", 15) == 0)
 						break;
 
@@ -10838,6 +10909,18 @@ init_config(void)
 							light_mode = 1;
 						else /* False and default */
 							light_mode = 0;
+					}
+
+					else if (strncmp(line, "RestoreLastPath=", 16) == 0) {
+						char opt_str[MAX_BOOL] = "";
+						ret = sscanf(line, "RestoreLastPath=%5s\n",
+									 opt_str);
+						if (ret == -1)
+							continue;
+						if (strncmp(opt_str, "true", 4) == 0)
+							restore_last_path = 1;
+						else /* False and default */
+							restore_last_path = 0;
 					}
 
 					else if (strncmp(line, "Opener=", 7) == 0) {
