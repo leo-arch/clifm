@@ -45,7 +45,7 @@ Of course, you can deselect some or all selected files whenever you want with th
 
 * A Freedesktop compliant **trash system** to be able to recover deleted files.
 
-* **Extended color codes**: Just like the `ls` command, CLiFM uses (customizable) color codes to identify file types. However, and unlike `ls`, CLiFM is also able to distinguish between empty and non-empty files or directories, broken and non-broken symlinks, files and directories with or without read permission, and more. Once in CliFM, type `colors` to see the list of currently used color codes.
+* **Extended color codes**: Just like the `ls` command, CLiFM uses (customizable) color codes to identify file types and extensions. However, and unlike `ls`, CLiFM is also able to distinguish between empty and non-empty files or directories, broken and non-broken symlinks, files and directories with or without read permission, multi-hardlink files, and more. Once in CliFM, type `colors` to see the list of currently used color codes.
 
 ![colors](images/colors.png)
 
