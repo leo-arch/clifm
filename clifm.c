@@ -326,6 +326,7 @@ int list_mountpoints(void);
 int alias_import(char *file);
 void exec_chained_cmds(char *cmd);
 int edit_function(char **comm);
+int edit_link(char *link);
 
 /* Selection */
 int save_sel(void);
@@ -1073,6 +1074,176 @@ main(int argc, char **argv)
 			/** #################################
 			 * #     FUNCTIONS DEFINITIONS     #
 			 * ################################# */
+
+int
+edit_link(char *link)
+/* Relink symlink to new path */
+{
+	if (!link || !*link)
+		return EXIT_FAILURE;
+
+	/* Dequote the filename, if necessary */
+	if (strchr(link, '\\')) {
+		char *tmp = dequote_str(link, 0);
+		if (!tmp) {
+			fprintf(stderr, _("%s: '%s': Error dequoting file\n"),
+					PROGRAM_NAME, link);
+			return EXIT_FAILURE;
+		}
+		strcpy(link, tmp);
+		free(tmp);
+	}
+
+	/* Check we have a valid symbolic link */
+	struct stat file_attrib;
+
+	if (lstat(link, &file_attrib) == -1) {
+		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, link,
+				strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	if ((file_attrib.st_mode & S_IFMT) != S_IFLNK) {
+		fprintf(stderr, _("%s: '%s': Not a symbolic link\n"),
+				PROGRAM_NAME, link);
+		return EXIT_FAILURE;
+	}
+
+	/* Get file pointed to by symlink and report to the user */
+	char *real_path = realpath(link, NULL);
+
+	if (!real_path)
+		printf(_("%s%s%s currently pointing to nowhere (broken link)\n"),
+			   or_c, link, NC);
+	else {
+		printf(_("%s%s%s currently pointing to "), ln_c, link, NC);
+		colors_list(real_path, 0, 0, 1);
+		free(real_path);
+		real_path = (char *)NULL;
+	}
+
+	char *new_path = (char *)NULL;
+
+	/* Enable autocd and auto-open (in case they are not already
+	 * enabled) to allow TAB completion for ELN's */
+	int autocd_status = autocd, auto_open_status = auto_open;
+	autocd = auto_open = 1;	
+
+	while (!new_path) {
+		new_path = rl_no_hist("New path ('q' to quit): ");
+		if (!new_path)
+			continue;
+		if (!*new_path) {
+			free(new_path);
+			new_path = (char *)NULL;
+			continue;
+		}
+		if (strcmp(new_path, "q") == 0) {
+			free(new_path);
+			return EXIT_SUCCESS;
+		}
+	}
+
+	/* Set autocd and auto-open to their original values */
+	autocd = autocd_status;
+	auto_open = auto_open_status;
+
+	/* If an ELN, replace by the corresponding filename */
+	if (is_number(new_path)) {
+		int i_new_path = atoi(new_path) - 1;
+		if (dirlist[i_new_path]) {
+			new_path = (char *)xrealloc(new_path,
+								(strlen(dirlist[i_new_path]) + 1) *
+								sizeof(char));
+			strcpy(new_path, dirlist[i_new_path]);
+		}
+	}
+
+	/* Remove terminating space. TAB completion puts a final space
+	 * after file names */
+	size_t path_len = strlen(new_path);
+	if (new_path[path_len - 1] == 0x20)
+		new_path[path_len - 1] = 0x00;
+
+	/* Dequote new path, if needed */
+	if(strchr(new_path, '\\')) {
+		char *tmp = dequote_str(new_path, 0);
+
+		if (!tmp) {
+			fprintf(stderr, _("%s: '%s': Error dequoting file\n"),
+					PROGRAM_NAME, new_path);
+			free(new_path);
+			return EXIT_FAILURE;
+		}
+
+		strcpy(new_path, tmp);
+		free(tmp);
+	}
+
+	/* Check new_path existence and warn the user if it does not
+	 * exist */
+	if (lstat(new_path, &file_attrib) == -1) {
+
+		printf("'%s': %s\n", new_path, strerror(errno));
+		char *answer = (char *)NULL;
+		while (!answer) {
+			answer= rl_no_hist(_("Relink as a broken symbolic link? "
+								"[y/n] "));
+
+			if (!answer)
+				continue;
+
+			if (!*answer) {
+				free(answer);
+				answer = (char *)NULL;
+				continue;
+			}
+
+			if (*answer != 'y' && *answer != 'n') {
+				free(answer);
+				answer = (char *)NULL;
+				continue;
+			}
+
+			if (answer[1]) {
+				free(answer);
+				answer = (char *)NULL;
+				continue;
+			}
+
+			if (*answer == 'y') {
+				free(answer);
+				break;
+			}
+
+			else {
+				free(answer);
+				free(new_path);
+				return EXIT_SUCCESS;
+			}
+		}
+	}
+
+	/* Finally, relink the symlink to new_path */
+	char *cmd[] = { "ln", "-sfn", new_path, link, NULL };
+	if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS) {
+		free(new_path);
+		return EXIT_FAILURE;
+	}
+
+	real_path = realpath(link, NULL);
+
+	printf(_("%s%s%s successfully relinked to "), real_path ? ln_c
+		   : or_c, link, NC);
+	colors_list(new_path, 0, 0, 1);
+
+	free(new_path);
+
+	if (real_path)
+		free(real_path);
+
+	return EXIT_SUCCESS;
+}
 
 char
 *strip_color_line(char *str, char mode)
@@ -13011,15 +13182,19 @@ colors_list(const char *entry, const int i, const int pad,
  * 1 or 0 respectivelly) */
 {
 	size_t i_digits = digits_in_num(i);
+
 							/* Num (i) + space + null byte */
 	char *index = (char *)xnmalloc(i_digits + 2, sizeof(char));
+
 	if (i > 0) /* When listing files in CWD */
 		sprintf(index, "%d ", i);
+
 	else if (i == -1) /* ELN for entry could not be found */
 		sprintf(index, "? ");
+
 	/* When listing files NOT in CWD (called from search_function() and
 	 * first argument is a path: "/search_str /path") 'i' is zero. In
-	 * this case, no index should be shown at all */
+	 * this case, no index should be printed at all */
 	else
 		index[0] = 0x00;
 
@@ -14932,7 +15107,7 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "touch") == 0 || strcmp(comm[0], "ln") == 0
 	|| strcmp(comm[0], "chmod") == 0 || strcmp(comm[0], "unlink") == 0
 	|| strcmp(comm[0], "r") == 0 || strcmp(comm[0], "l") == 0
-	|| strcmp(comm[0], "md") == 0) {
+	|| strcmp(comm[0], "md") == 0 || strcmp(comm[0], "le") == 0) {
 
 		if (strcmp(comm[0], "l") == 0) {
 			comm[0] = (char *)xrealloc(comm[0], 3 * sizeof(char *));
@@ -14945,6 +15120,30 @@ exec_cmd(char **comm)
 		else if (strcmp(comm[0], "md") == 0) {
 			comm[0] = (char *)xrealloc(comm[0], 6 * sizeof(char *));
 			strncpy(comm[0], "mkdir", 6);
+		}
+
+		if (strcmp(comm[0], "le") == 0) {
+			if (!comm[1]) {
+				fputs(_("Usage: le SYMLINK\n"), stderr);
+				exit_code = EXIT_FAILURE;
+				return EXIT_FAILURE;
+			}
+
+			exit_code = edit_link(comm[1]);
+			return exit_code;
+		}
+
+		else if (strcmp(comm[0], "ln") == 0) {
+			if (comm[1] && (strcmp(comm[1], "edit") == 0
+			|| strcmp(comm[1], "e") == 0)) {
+				if (!comm[2]) {
+					fputs(_("Usage: ln edit SYMLINK\n"), stderr);
+					exit_code = EXIT_FAILURE;
+					return EXIT_FAILURE;
+				}
+				exit_code = edit_link(comm[2]);
+				return exit_code;
+			}
 		}
 
 		kbind_busy = 1;
@@ -19358,7 +19557,7 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
  u, undel, untrash [*, a, all]\n\
  b, back [h, hist] [clear] [!ELN]\n\
  f, forth [h, hist] [clear] [!ELN]\n\
- c, l, m, md, r\n\
+ c, l [e, edit], m, md, r\n\
  p, pr, prop [ELN/FILE ... n] [s, size] [a, all]\n\
  mm, mime [info ELN/FILE] [edit]\n\
  ;[CMD], :[CMD]\n\
