@@ -6228,7 +6228,8 @@ set_colors(void)
 			}
 
 			size_t j, ext_len = 0;
-			for (j = 2; ext_colors[i][j] != '='; j++)
+			for (j = 2; ext_colors[i][j]
+			&& ext_colors[i][j] != '='; j++)
 				ext_len++;
 			ext_colors_len[i] = ext_len;
 		}
@@ -13782,7 +13783,8 @@ list_dir(void)
 				cap_free(cap);
 			}
 			#endif
-			else if (file_info[i].type & (S_IXUSR|S_IXGRP|S_IXOTH))
+
+			else if (file_info[i].type & (S_IXUSR|S_IXGRP|S_IXOTH)) {
 				if (file_info[i].size == 0)
 					printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, ee_c, 
 							dirlist[i], NC, (last_column) 
@@ -13791,6 +13793,8 @@ list_dir(void)
 					printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, ex_c, 
 							dirlist[i], NC, (last_column) 
 							? "\n" : "");
+			}
+
 			else if (file_info[i].size == 0)
 				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, ef_c, 
 						dirlist[i], NC, (last_column) ? "\n" : "");
@@ -13799,9 +13803,11 @@ list_dir(void)
 				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, mh_c, 
 						dirlist[i], NC, (last_column) ? "\n" : "");
 
-			else {
-				/* Check extension color */
+			/* Check extension color only if some is defined */
+			else if (ext_colors_n) {
 				char *ext = strrchr(dirlist[i], '.');
+				/* Make sure not to take a hidden file for an
+				 * extension */
 				if (ext && ext != dirlist[i]) {
 					char *extcolor = get_ext_color(ext);
 
@@ -13825,6 +13831,13 @@ list_dir(void)
 							fi_c, dirlist[i], NC, (last_column)
 							? "\n" : "");
 			}
+			else {
+				/* Bare regular file */
+				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC,
+					fi_c, dirlist[i], NC, (last_column)
+					? "\n" : "");
+			}
+
 			break;
 
 		/* In case all of the above cases are false, we have an
@@ -19146,10 +19159,32 @@ edit_function (char **comm)
 		free(TMP_DIR);
 		TMP_DIR = (char *)NULL;
 
-		if (argc_bk > 1)
-			external_arguments(argc_bk, argv_bk);
-
 		init_config();
+
+		/* If some option was set via command line (except the profile),
+		 * keep that value for any profile */
+		if (xargs.ext != -1)
+			ext_cmd_ok = xargs.ext;
+		if (xargs.splash != -1)
+			splash_screen = xargs.splash;
+		if (xargs.light != -1)
+			light_mode = xargs.light;
+		if (xargs.sort != -1)
+			sort = xargs.sort;
+		if (xargs.hidden != -1)
+			show_hidden = xargs.hidden;
+		if (xargs.longview != -1)
+			long_view = xargs.longview;
+		if (xargs.ffirst != -1)
+			list_folders_first = xargs.ffirst;
+		if (xargs.cdauto != -1)
+			cd_lists_on_the_fly = xargs.cdauto;
+		if (xargs.sensitive != -1)
+			case_sensitive = xargs.sensitive;
+		if (xargs.unicode != -1)
+			unicode = xargs.unicode;
+		if (xargs.pager != -1)
+			pager = xargs.pager;
 
 		/* Free the aliases and prompt_cmds arrays to be allocated again */
 		size_t i = 0;
@@ -19183,46 +19218,54 @@ color_codes (void)
 	if (ext_colors_n)
 		printf("%sFile type colors%s\n\n", bold, NC);
 
-	printf(_(" %sDirectory with no read permission%s%s (nd)\n"), 
+	printf(_("%s file name%s%s: Directory with no read permission (nd)\n"), 
 		   nd_c, NC, default_color);
-	printf(_(" %sFile with no read permission%s%s (nf)\n"), 
+	printf(_("%s file name%s%s: File with no read permission (nf)\n"), 
 		   nf_c, NC, default_color);
-	printf(_(" %sDirectory%s%s* (di)\n"), di_c, NC,
+	printf(_("%s file name%s%s: Directory* (di)\n"), di_c, NC,
 		   default_color);
-	printf(_(" %sEMPTY directory%s%s (ed)\n"), ed_c, NC, default_color);
-	printf(_(" %sEMPTY directory with no read permission%s%s (ne)\n"),
-		   ne_c, NC, default_color);
-	printf(_(" %sExecutable file%s%s (ex)\n"), ex_c, NC, default_color);
-	printf(_(" %sEmpty executable file%s%s (ee)\n"), ee_c, NC, 
+	printf(_("%s file name%s%s: EMPTY directory (ed)\n"), ed_c, NC, 
 		   default_color);
-	printf(_(" %sBlock special file%s%s (bd)\n"), bd_c, NC, 
+	printf(_("%s file name%s%s: EMPTY directory with no read "
+			 "permission (ne)\n"), ne_c, NC, default_color);
+	printf(_("%s file name%s%s: Executable file (ex)\n"), ex_c, NC, 
 		   default_color);
-	printf(_(" %sSymbolic link%s%s* (ln)\n"), ln_c, NC, default_color);
-	printf(_(" %sMulti-hardlink%s%s (mh)\n"), mh_c, NC, default_color);
-	printf(_(" %sBroken symbolic link %s%s (or)\n"), or_c, NC, 
+	printf(_("%s file name%s%s: Empty executable file (ee)\n"), ee_c, NC, 
 		   default_color);
-	printf(_(" %sSocket file%s%s (so)\n"), so_c, NC, default_color);
-	printf(_(" %sPipe or FIFO special file%s%s (pi)\n"), pi_c,
+	printf(_("%s file name%s%s: Block special file (bd)\n"), bd_c, NC, 
+		   default_color);	
+	printf(_("%s file name%s%s: Symbolic link* (ln)\n"), ln_c, NC, 
+		   default_color);	
+	printf(_("%s file name%s%s: Broken symbolic link (or)\n"), or_c, NC, 
+		   default_color);
+	printf(_(" %s%sfile name%s%s: Multi-hardlink (mh)\n"), NC, mh_c, 
 		   NC, default_color);
-	printf(_(" %sCharacter special file%s%s (cd)\n"), cd_c, NC, 
+	printf(_("%s file name%s%s: Socket file (so)\n"), so_c, NC, 
 		   default_color);
-	printf(_(" %sRegular file%s%s (fi)\n"), fi_c, NC, default_color);
-	printf(_(" %sEmpty (zero-lenght) file%s%s: (ef)\n"), ef_c,
+	printf(_("%s file name%s%s: Pipe or FIFO special file (pi)\n"), pi_c,
 		   NC, default_color);
-	printf(_(" %s%sSUID file%s%s (su)\n"), NC, su_c, NC, default_color);
-	printf(_(" %s%sSGID file%s%s (sg)\n"), NC, sg_c, NC, default_color);
-	printf(_(" %s%sFile with capabilities%s%s (ca)\n"), NC, ca_c, 
-		   NC, default_color);
-	printf(_(" %s%sSticky and NOT other-writable directory%s%s* (st)\n"),
-		   NC, st_c, NC, default_color);
-	printf(_(" %s%sSticky and other-writable directory%s%s* (tw)\n"),
-		   NC, tw_c, NC, default_color);
-	printf(_(" %s%sOther-writable and NOT sticky directory%s%s* (ow)\n"),
-		   NC, ow_c, NC, default_color);
-	printf(_(" %s%sUnknown file type%s%s (no)\n"), NC, no_c, 
-		   NC, default_color);
-	printf(_(" %s%sUnaccessible file%s%s (uf)\n"), NC, uf_c, NC,
+	printf(_("%s file name%s%s: Character special file (cd)\n"), cd_c, NC, 
 		   default_color);
+	printf(_("%s file name%s%s: Regular file (fi)\n"), fi_c, NC, 
+		   default_color);
+	printf(_("%s file name%s%s: Empty (zero-lenght) file (ef)\n"), ef_c,
+		   NC, default_color);
+	printf(_(" %s%sfile name%s%s: SUID file (su)\n"), NC, su_c, NC, 
+		   default_color);
+	printf(_(" %s%sfile name%s%s: SGID file (sg)\n"), NC, sg_c, NC, 
+		   default_color);
+	printf(_(" %s%sfile name%s%s: File with capabilities (ca)\n"), NC, ca_c, 
+		   NC, default_color);
+	printf(_(" %s%sfile name%s%s: Sticky and NOT other-writable "
+			 "directory* (st)\n"),  NC, st_c, NC, default_color);
+	printf(_(" %s%sfile name%s%s: Sticky and other-writable "
+			 "directory* (tw)\n"),  NC, tw_c, NC, default_color);
+	printf(_(" %s%sfile name%s%s: Other-writable and NOT sticky "
+			 "directory* (ow)\n"),  NC, ow_c, NC, default_color);
+	printf(_(" %s%sfile name%s%s: Unknown file type (no)\n"), NC, no_c, 
+		   NC, default_color);
+	printf(_(" %s%sfile name%s%s: Unaccessible (non-stat'able) file "
+		   "(uf)\n"), NC, uf_c, NC, default_color);
 
 	printf(_("\n*The slash followed by a number (/xx) after directories "
 			 "or symbolic links to directories indicates the amount of "
