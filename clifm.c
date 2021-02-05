@@ -1627,8 +1627,10 @@ load_actions(void)
 		if (!line || !*line || *line == '#')
 			continue;
 
-		char *tmp = (char *)NULL;
+		if (line[line_len - 1] == '\n')
+			line[line_len - 1] = 0x00;
 
+		char *tmp = (char *)NULL;
 		tmp= strrchr(line, '=');
 
 		if (!tmp)
@@ -2002,7 +2004,7 @@ print_tips(int all)
 		"of 'open FILE' or 'cd FILE'",
 		"Add a new entry to the mimelist file with 'mm edit'",
 		"Do not forget to take a look at the manpage",
-		"If need more speed, try the light mode (A-y)",
+		"Need more speed? Try the light mode (A-y)",
 		"The Selection Box is shared among different instances of CliFM",
 		"Select files here and there with the 's' command",
 		"Use wildcards with the 's' command: 's *.c'",
@@ -2019,7 +2021,7 @@ print_tips(int all)
 		"If too many files are listed, try enabling the pager ('pg on')",
 		"Once in the pager, go backwards pressing the keyboard shortcut "
 		"provided by your terminal emulator",
-		"Press 'q' to stop the pager",
+		"Once in the pager, press 'q' to stop it",
 		"Press 'A-l' to switch to long view mode",
 		"Search for files using the slash command: '/*.png'",
 		"Add a new bookmark by just entering 'bm ELN/FILE'",
@@ -2032,6 +2034,7 @@ print_tips(int all)
 		"Run the last executed command by just running '!!'",
 		"Import aliases from file using 'alias import FILE'",
 		"List available aliases by running 'alias'",
+		"Create aliases to easily run your preferred commands",
 		"Open and edit the configuration file with 'edit'",
 		"Find a description for each CLiFM command by running 'cmd'",
 		"Print the currently used color codes list by entering 'cc'",
@@ -2074,6 +2077,13 @@ print_tips(int all)
 		"commands respectivelly",
 		"Rename multiple files at once with the bulk rename function: "
 		"'br *.txt'",
+		"Need no more tips? Disable this feature in the configuration "
+		"file",
+		"Need root privileges? Launch a new instance of CLifM as root "
+		"running the 'X' command",
+		"Create custom commands and features using the 'actions' command",
+		"Create a fresh configuration file by running 'edit gen'",
+		"Use 'ln edit' (or 'le') to edit symbolic links",
 		NULL
 	};
 
@@ -14987,7 +14997,7 @@ exec_cmd(char **comm)
 		}
 	}
 
-	/* Only autocd or auto-open here if not absolute path, and if there
+	/* Only autocd or auto-open here if not absolute path and if there
 	 * is no second argument or if second argument is "&" */
 	if (*comm[0] != '/' && (autocd || auto_open)
 	&& (!comm[1] || (*comm[1] == '&' && comm[1][1] == '\0'))) {
@@ -15043,7 +15053,7 @@ exec_cmd(char **comm)
 
 
 	/*          ############### CD ##################     */
-	if (strcmp(comm[0], "cd") == 0) {
+	if (*comm[0] == 'c' && strcmp(comm[0], "cd") == 0) {
 		if (strcmp(comm[1], "--help") == 0)
 			puts(_("Usage: cd [ELN/DIR]"));
 
@@ -15061,8 +15071,8 @@ exec_cmd(char **comm)
 	}
 
 	/*         ############### OPEN ##################     */
-	else if (strcmp(comm[0], "o") == 0
-	|| strcmp(comm[0], "open") == 0) {
+	else if (*comm[0] == 'o' && (strcmp(comm[0], "o") == 0
+	|| strcmp(comm[0], "open") == 0)) {
 		if (!comm[1]) {
 			puts(_("Usage: o, open ELN/FILE [APPLICATION]"));
 			exit_code = EXIT_FAILURE;
@@ -15083,8 +15093,8 @@ exec_cmd(char **comm)
 			exit_code = open_function(comm);
 	}
 
-	else if (strcmp(comm[0], "rf") == 0
-	|| strcmp(comm[0], "refresh") == 0) {
+	else if (*comm[0] == 'r' && (strcmp(comm[0], "rf") == 0
+	|| strcmp(comm[0], "refresh") == 0)) {
 		if (cd_lists_on_the_fly) {
 			while (files--)
 				free(dirlist[files]);
@@ -15093,8 +15103,8 @@ exec_cmd(char **comm)
 	}
 
 	/*         ############### BOOKMARKS ##################     */
-	else if (strcmp(comm[0], "bm") == 0
-	|| strcmp(comm[0], "bookmarks") == 0) {
+	else if (*comm[0] == 'b' && (strcmp(comm[0], "bm") == 0
+	|| strcmp(comm[0], "bookmarks") == 0)) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: bm, bookmarks [a, add FILE] [d, del] [edit]"));
 			return EXIT_SUCCESS;
@@ -15113,10 +15123,12 @@ exec_cmd(char **comm)
 	}
 
 	/*       ############### BACK AND FORTH ##################     */
-	else if (strcmp(comm[0], "b") == 0 || strcmp(comm[0], "back") == 0)
+	else if (*comm[0] == 'b' && (strcmp(comm[0], "b") == 0
+	|| strcmp(comm[0], "back") == 0))
 		exit_code = back_function (comm);
 
-	else if (strcmp(comm[0], "f") == 0 || strcmp(comm[0], "forth") == 0)
+	else if (*comm[0] == 'f' && (strcmp(comm[0], "f") == 0
+	|| strcmp(comm[0], "forth") == 0))
 		exit_code = forth_function (comm);
 
 	else if (strcmp(comm[0], "bh") == 0
@@ -15153,8 +15165,8 @@ exec_cmd(char **comm)
 	}
 
 	/*         ############### TRASH ##################     */	
-	else if (strcmp(comm[0], "tr") == 0 || strcmp(comm[0], "t") == 0 
-	|| strcmp(comm[0], "trash") == 0) {
+	else if (*comm[0] == 't' && (strcmp(comm[0], "tr") == 0
+	|| strcmp(comm[0], "t") == 0 || strcmp(comm[0], "trash") == 0)) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: t, tr, trash [ELN/FILE ... n] "
 				 "[ls, list] [clear] [del, rm]"));
@@ -15176,8 +15188,8 @@ exec_cmd(char **comm)
 		}
 	}
 
-	else if (strcmp(comm[0], "undel") == 0 || strcmp(comm[0], "u") == 0
-	|| strcmp(comm[0], "untrash") == 0) {
+	else if (*comm[0] == 'u' && (strcmp(comm[0], "undel") == 0
+	|| strcmp(comm[0], "u") == 0 || strcmp(comm[0], "untrash") == 0)) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: u, undel, untrash [*, a, all]"));
 			return EXIT_SUCCESS;
@@ -15191,7 +15203,8 @@ exec_cmd(char **comm)
 	}
 
 	/*         ############### SELECTION ##################     */
-	else if (strcmp(comm[0], "s") == 0 || strcmp(comm[0], "sel") == 0) {
+	else if (*comm[0] == 's' && (strcmp(comm[0], "s") == 0
+	|| strcmp(comm[0], "sel") == 0)) {
 		if (!comm[1]) {
 			puts(_("Usage: s, sel ELN ELN-ELN FILE ... n"));
 			exit_code = EXIT_FAILURE;
@@ -15205,12 +15218,12 @@ exec_cmd(char **comm)
 		exit_code = sel_function(comm);
 	}
 
-	else if (strcmp(comm[0], "sb") == 0
-	|| strcmp(comm[0], "selbox") == 0)
+	else if (*comm[0] == 's' && (strcmp(comm[0], "sb") == 0
+	|| strcmp(comm[0], "selbox") == 0))
 		show_sel_files();
 
-	else if (strcmp(comm[0], "ds") == 0
-	|| strcmp(comm[0], "desel") == 0) {
+	else if (*comm[0] == 'd' && (strcmp(comm[0], "ds") == 0
+	|| strcmp(comm[0], "desel") == 0)) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: desel, ds [*, a, all]"));
 			return EXIT_SUCCESS;
@@ -15273,8 +15286,8 @@ exec_cmd(char **comm)
 	}
 
 	/*    ############### PROPERTIES ##################     */
-	else if (strcmp(comm[0], "pr") == 0 || strcmp(comm[0], "prop") == 0 
-	|| strcmp(comm[0], "p") == 0) {
+	else if (*comm[0] == 'p' && (strcmp(comm[0], "pr") == 0
+	|| strcmp(comm[0], "prop") == 0 || strcmp(comm[0], "p") == 0)) {
 		if (!comm[1]) {
 			fputs(_("Usage: pr [ELN/FILE ... n] [a, all] [s, size]\n"),
 				  stderr);
@@ -15300,8 +15313,8 @@ exec_cmd(char **comm)
 		exit_code = run_history_cmd(comm[0] + 1);
 
 	/*    ############### BULK RENAME ##################     */
-	else if (strcmp(comm[0], "br") == 0
-	|| strcmp(comm[0], "bulk") == 0) {
+	else if (*comm[0] == 'b' && (strcmp(comm[0], "br") == 0
+	|| strcmp(comm[0], "bulk") == 0)) {
 		if (!comm[1]) {
 			fputs(_("Usage: br, bulk ELN/FILE ...\n"), stderr);
 			exit_code = EXIT_FAILURE;
@@ -15315,8 +15328,8 @@ exec_cmd(char **comm)
 	}
 
 	/*      ################ SORT ##################     */
-	else if (strcmp(comm[0], "st") == 0
-	|| strcmp(comm[0], "sort") == 0) {
+	else if (*comm[0] == 's' && (strcmp(comm[0], "st") == 0
+	|| strcmp(comm[0], "sort") == 0)) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: st [METHOD] [rev]\nMETHOD: 0 = none, "
 				   "1 = name, 2 = size, 3 = atime, 4 = btime, "
@@ -15327,8 +15340,8 @@ exec_cmd(char **comm)
 	}
 
 	/*   ################ ARCHIVER ##################     */
-	else if (strcmp(comm[0], "ac") == 0
-	|| strcmp(comm[0], "ad") == 0) {
+	else if (*comm[0] == 'a' && (strcmp(comm[0], "ac") == 0
+	|| strcmp(comm[0], "ad") == 0)) {
 		if (!comm[1] || strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: ac, ad ELN/FILE ..."));
 			return EXIT_SUCCESS;
@@ -15346,13 +15359,13 @@ exec_cmd(char **comm)
 	 * #			     MINOR FUNCTIONS 				#
 	 * ##################################################*/
 
-	else if (strcmp(comm[0], "opener") == 0) {
+	else if (*comm[0] == 'o' && strcmp(comm[0], "opener") == 0) {
 		if (!comm[1]) {
 			printf("opener: %s\n", (opener) ? opener : "mime (built-in)");
 			return EXIT_SUCCESS;
 		}
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
-			puts(_("Usage: opener APPLICATION\n"));
+			puts(_("Usage: opener APPLICATION"));
 			return EXIT_SUCCESS;
 		}
 		if (opener) {
@@ -15368,20 +15381,21 @@ exec_cmd(char **comm)
 	}
 
 					/* #### TIPS #### */
-	else if (strcmp(comm[0], "tips") == 0)
+	else if (*comm[0] == 't' && strcmp(comm[0], "tips") == 0)
 		print_tips(1);
 
 					/* #### ACTIONS #### */
-	else if (strcmp(comm[0], "actions") == 0) {
+	else if (*comm[0] == 'a' && strcmp(comm[0], "actions") == 0) {
 		if (!comm[1]) {
 			if (actions_n) {
 				size_t i;
 				for (i = 0; i < actions_n; i++)
-					printf("%s:%s\n", usr_actions[i].name,
-						   usr_actions[i].value);
+					printf("%s %s->%s %s\n", usr_actions[i].name,
+						   blue, NC, usr_actions[i].value);
 			}
 			else {
-				puts(_("actions: No actions defined"));
+				puts(_("actions: No actions defined. Use the 'actions "
+				"edit' command to add some"));
 			}
 		}
 		
@@ -15401,7 +15415,7 @@ exec_cmd(char **comm)
 	}
 
 					/* #### LIGHT MODE #### */
-	else if (strcmp(comm[0], "lm") == 0) {
+	else if (*comm[0] == 'l' && strcmp(comm[0], "lm") == 0) {
 		if (comm[1]) {
 			if (strcmp(comm[1], "on") == 0) {
 				light_mode = 1;
@@ -15422,9 +15436,17 @@ exec_cmd(char **comm)
 		}
 	}
 
-	else if (strcmp(comm[0], "rl") == 0
-	|| strcmp(comm[0], "reload") == 0) {
+	else if (*comm[0] == 'r' && (strcmp(comm[0], "rl") == 0
+	|| strcmp(comm[0], "reload") == 0)) {
 		exit_code = reload_config();
+		welcome_message = 0;
+
+		if (cd_lists_on_the_fly) {
+			while (files--) free(dirlist[files]);
+			if (list_dir() != EXIT_SUCCESS)
+				exit_code = EXIT_FAILURE;
+		}
+
 		return exit_code;
 	}
 
@@ -15454,7 +15476,8 @@ exec_cmd(char **comm)
 	}
 
 						/* #### NET #### */
-	else if (strcmp(comm[0], "n") == 0 || strcmp(comm[0], "net") == 0) {
+	else if (*comm[0] == 'n' && (strcmp(comm[0], "n") == 0
+	|| strcmp(comm[0], "net") == 0)) {
 		if (!comm[1]) {
 			puts(_("Usage: n, net [sftp, smb, ftp]://ADDRESS [OPTIONS]"));
 			return EXIT_SUCCESS;
@@ -15477,11 +15500,13 @@ exec_cmd(char **comm)
 	}
 
 						/* #### MIME #### */
-	else if (strcmp(comm[0], "mm") == 0 || strcmp(comm[0], "mime") == 0) {
+	else if (*comm[0] == 'm' && (strcmp(comm[0], "mm") == 0
+	|| strcmp(comm[0], "mime") == 0)) {
 		exit_code = mime_open(comm);
 	}
 
-	else if (strcmp(comm[0], "ls") == 0 && !cd_lists_on_the_fly) {
+	else if (*comm[0] == 'l' && strcmp(comm[0], "ls") == 0
+	&& !cd_lists_on_the_fly) {
 		while (files--)
 			free(dirlist[files]);
 		exit_code = list_dir();
@@ -15491,13 +15516,13 @@ exec_cmd(char **comm)
 	}
 
 					/* #### PROFILE #### */
-	else if (strcmp(comm[0], "pf") == 0 || strcmp(comm[0], "prof") == 0 
-	|| strcmp(comm[0], "profile") == 0)
+	else if (*comm[0] == 'p' && (strcmp(comm[0], "pf") == 0
+	|| strcmp(comm[0], "prof") == 0 || strcmp(comm[0], "profile") == 0))
 		exit_code = profile_function(comm);
 
 					/* #### MOUNTPOINTS #### */
-	else if (strcmp(comm[0], "mp") == 0 
-	|| (strcmp(comm[0], "mountpoints") == 0)) {
+	else if (*comm[0] == 'm' && (strcmp(comm[0], "mp") == 0 
+	|| strcmp(comm[0], "mountpoints") == 0)) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0)
 			puts(_("Usage: mountpoints, mp"));
 		else {
@@ -15510,7 +15535,7 @@ exec_cmd(char **comm)
 	}
 
 					/* #### EXT #### */
-	else if (strcmp(comm[0], "ext") == 0) {
+	else if (*comm[0] == 'e' && strcmp(comm[0], "ext") == 0) {
 		if (!comm[1]) {
 			puts(_("Usage: ext [on, off, status]"));
 			exit_code = EXIT_FAILURE;
@@ -15541,8 +15566,8 @@ exec_cmd(char **comm)
 	}
 
 					/* #### PAGER #### */
-	else if (strcmp(comm[0], "pg") == 0
-	|| strcmp(comm[0], "pager") == 0) {
+	else if (*comm[0] == 'p' && (strcmp(comm[0], "pg") == 0
+	|| strcmp(comm[0], "pager") == 0)) {
 		if (!comm[1]) {
 			puts(_("Usage: pager, pg [on, off, status]"));
 			exit_code = EXIT_FAILURE;
@@ -15572,8 +15597,8 @@ exec_cmd(char **comm)
 	}
 
 					/* #### DIR COUNTER #### */
-	else if (strcmp(comm[0], "fc") == 0
-	|| strcmp(comm[0], "filescounter") == 0) {
+	else if (*comm[0] == 'f' && (strcmp(comm[0], "fc") == 0
+	|| strcmp(comm[0], "filescounter") == 0)) {
 		if (!comm[1]) {
 			fputs(_("Usage: fc, filescounter [on, off, status]"), stderr);
 			exit_code = EXIT_FAILURE;
@@ -15607,8 +15632,8 @@ exec_cmd(char **comm)
 	}
 
 				    /* #### UNICODE #### */
-	else if (strcmp(comm[0], "uc") == 0
-	|| strcmp(comm[0], "unicode") == 0) {
+	else if (*comm[0] == 'u' && (strcmp(comm[0], "uc") == 0
+	|| strcmp(comm[0], "unicode") == 0)) {
 		if (!comm[1]) {
 			fputs(_("Usage: unicode, uc [on, off, status]"), stderr);
 			exit_code = EXIT_FAILURE;
@@ -15684,7 +15709,7 @@ exec_cmd(char **comm)
 	}
 
 				/* #### LOG #### */
-	else if (strcmp(comm[0], "log") == 0) {
+	else if (*comm[0] == 'l' && strcmp(comm[0], "log") == 0) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: log [clear]"));
 			return EXIT_SUCCESS;
@@ -15704,8 +15729,8 @@ exec_cmd(char **comm)
 	}
 
 				/* #### MESSAGES #### */
-	else if (strcmp(comm[0], "msg") == 0
-	|| strcmp(comm[0], "messages") == 0) {
+	else if (*comm[0] == 'm' && (strcmp(comm[0], "msg") == 0
+	|| strcmp(comm[0], "messages") == 0)) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: messages, msg [clear]"));
 			return EXIT_SUCCESS;
@@ -15733,7 +15758,7 @@ exec_cmd(char **comm)
 	}
 
 				/* #### ALIASES #### */
-	else if (strcmp(comm[0], "alias") == 0) {
+	else if (*comm[0] == 'a' && strcmp(comm[0], "alias") == 0) {
 		if (comm[1]) {
 			if (strcmp(comm[1], "--help") == 0) {
 				puts(_("Usage: alias [import FILE]"));
@@ -15758,7 +15783,7 @@ exec_cmd(char **comm)
 	}
 
 				/* #### SHELL #### */
-	else if (strcmp(comm[0], "shell") == 0) {
+	else if (*comm[0] == 's' && strcmp(comm[0], "shell") == 0) {
 		if (!comm[1]) {
 			if (sys_shell)
 				printf("%s: shell: %s\n", PROGRAM_NAME, sys_shell);
@@ -15772,16 +15797,16 @@ exec_cmd(char **comm)
 	}
 
 				/* #### EDIT #### */
-	else if (strcmp(comm[0], "edit") == 0)
+	else if (*comm[0] == 'e' && strcmp(comm[0], "edit") == 0)
 		exit_code = edit_function(comm);
 
 				/* #### HISTORY #### */
-	else if (strcmp(comm[0], "history") == 0)
+	else if (*comm[0] == 'h' && strcmp(comm[0], "history") == 0)
 		exit_code = history_function(comm);
 
 			  /* #### HIDDEN FILES #### */
-	else if (strcmp(comm[0], "hf") == 0 
-	|| strcmp(comm[0], "hidden") == 0) {
+	else if (*comm[0] == 'h' && (strcmp(comm[0], "hf") == 0 
+	|| strcmp(comm[0], "hidden") == 0)) {
 		if (!comm[1]) {
 			fputs(_("Usage: hidden, hf [on, off, status]\n"), stderr); 
 			exit_code = EXIT_FAILURE;
@@ -15798,8 +15823,8 @@ exec_cmd(char **comm)
 	}
 
 					/* #### AUTOCD #### */
-	else if (strcmp(comm[0], "acd") == 0
-	|| strcmp(comm[0], "autocd") == 0) {
+	else if (*comm[0] == 'a' && (strcmp(comm[0], "acd") == 0
+	|| strcmp(comm[0], "autocd") == 0)) {
 
 		if (!comm[1]) {
 			fputs(_("Usage: acd, autocd [on, off, status]\n"), stderr);
@@ -15831,8 +15856,8 @@ exec_cmd(char **comm)
 	}
 
 					/* #### AUTOOPEN #### */
-	else if (strcmp(comm[0], "ao") == 0
-	|| strcmp(comm[0], "auto-open") == 0) {
+	else if (*comm[0] == 'a' && (strcmp(comm[0], "ao") == 0
+	|| strcmp(comm[0], "auto-open") == 0)) {
 
 		if (!comm[1]) {
 			fputs(_("Usage: ao, auto-open [on, off, status]\n"), stderr);
@@ -15864,8 +15889,8 @@ exec_cmd(char **comm)
 	}
 
 					/* #### COMMANDS #### */
-	else if (strcmp(comm[0], "cmd") == 0
-	|| strcmp(comm[0], "commands") == 0) 
+	else if (*comm[0] == 'c' && (strcmp(comm[0], "cmd") == 0
+	|| strcmp(comm[0], "commands") == 0)) 
 		exit_code = list_commands();
 
 			  /* #### AND THESE ONES TOO #### */
@@ -15877,21 +15902,21 @@ exec_cmd(char **comm)
 	else if (strcmp(comm[0], "help") == 0 || strcmp(comm[0], "?") == 0)
 		help_function();
 
-	else if (strcmp(comm[0], "colors") == 0
-	|| strcmp(comm[0], "cc") == 0)
+	else if (*comm[0] == 'c' && (strcmp(comm[0], "colors") == 0
+	|| strcmp(comm[0], "cc") == 0))
 		color_codes();
 
-	else if (strcmp(comm[0], "ver") == 0
-	|| strcmp(comm[0], "version") == 0)
+	else if (*comm[0] == 'v' && (strcmp(comm[0], "ver") == 0
+	|| strcmp(comm[0], "version") == 0))
 		version_function();
 
-	else if (strcmp(comm[0], "fs") == 0)
+	else if (*comm[0] == 'f' && strcmp(comm[0], "fs") == 0)
 		free_software();
 
-	else if (strcmp(comm[0], "bonus") == 0)
+	else if (*comm[0] == 'b' && strcmp(comm[0], "bonus") == 0)
 		bonus_function();
 
-	else if (strcmp(comm[0], "splash") == 0)
+	else if (*comm[0] == 's' && strcmp(comm[0], "splash") == 0)
 		splash();
 
 					/* #### QUIT #### */
@@ -19446,6 +19471,7 @@ edit_function (char **comm)
 		/* Reload configuration only if the config file was modified */
 
 		reload_config();
+		welcome_message = 0;
 
 		if (cd_lists_on_the_fly) {
 			while (files--) free(dirlist[files]);
