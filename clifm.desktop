@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=clifm
+Comment=CliFM file manager
+Icon=utilities-terminal
+Terminal=true
+Exec=clifm
+Categories=ConsoleOnly;System;FileTools;FileManager
+MimeType=inode/directory;
+Keywords=File;Manager;Browser;Explorer;Launcher
