@@ -250,6 +250,8 @@ size_t get_path_env(void);
 int create_config(char *file);
 int set_shell(char *str);
 int load_actions(void);
+int regen_config(void);
+int reload_config(void);
 
 /* Memory */
 char *xnmalloc(size_t nmemb, size_t size);
@@ -619,7 +621,7 @@ const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
 		"exit", "quit", "pager", "trash", "undel", "messages",
 		"mountpoints", "bookmarks", "log", "untrash", "unicode",
 		"profile", "shell", "mime", "sort", "tips", "autocd",
-		"auto-open", "actions", NULL };
+		"auto-open", "actions", "reload", NULL };
 
 #define DEFAULT_PROMPT "\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\
 \\z\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
@@ -1116,6 +1118,128 @@ main(int argc, char **argv)
 			/** #################################
 			 * #     FUNCTIONS DEFINITIONS     #
 			 * ################################# */
+
+int
+reload_config(void)
+{
+	/* Free everything */
+	free(CONFIG_DIR);
+	free(TRASH_DIR);
+	free(TRASH_FILES_DIR);
+	free(TRASH_INFO_DIR);
+	CONFIG_DIR = TRASH_DIR = TRASH_FILES_DIR = (char *)NULL;
+	TRASH_INFO_DIR = (char *)NULL;
+
+	free(BM_FILE);
+	free(LOG_FILE);
+	free(LOG_FILE_TMP);
+	free(HIST_FILE);
+	BM_FILE = LOG_FILE = LOG_FILE_TMP = HIST_FILE = (char *)NULL;
+
+	free(CONFIG_FILE);
+	free(PROFILE_FILE);
+	free(MSG_LOG_FILE);
+	CONFIG_FILE = PROFILE_FILE = MSG_LOG_FILE = (char *)NULL;
+
+	free(MIME_FILE);
+	free(SCRIPTS_DIR);
+	free(ACTIONS_FILE);
+	MIME_FILE = SCRIPTS_DIR = ACTIONS_FILE = (char *)NULL;
+
+	if (opener) {
+		free(opener);
+		opener = (char *)NULL;
+	}
+
+	free(TMP_DIR);
+	TMP_DIR = (char *)NULL;
+
+	free(sel_file_user);
+	sel_file_user = (char *)NULL;
+
+	if (encoded_prompt) {
+		free(encoded_prompt);
+		encoded_prompt = (char *)NULL;
+	}
+
+	if (term) {
+		free(term);
+		term = (char *)NULL;
+	}
+
+	if (sys_shell) {
+		free(sys_shell);
+		sys_shell = (char *)NULL;
+	}
+
+	/* Reset all variables */
+	splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
+	show_hidden = -1, clear_screen = -1, shell_terminal = 0, pager = -1, 
+	no_log = 0, internal_cmd = 0, list_folders_first = -1,
+	case_sensitive = -1, cd_lists_on_the_fly = -1, share_selbox = -1,
+	recur_perm_error_flag = 0, is_sel = 0, sel_is_last = 0, print_msg = 0,
+	long_view = -1, kbind_busy = 0, unicode = -1, dequoted = 0,
+	home_ok = 1, config_ok = 1, trash_ok = 1, selfile_ok = 1, tips = -1,
+	mime_match = 0, logs_enabled = -1, sort = -1, files_counter = -1,
+	light_mode = -1, dir_indicator = -1, classify = -1, sort_switch = 0,
+	sort_reverse = 0, autocd = -1, auto_open = -1;
+
+	shell_terminal = no_log = internal_cmd = dequoted = 0;
+	shell_is_interactive = recur_perm_error_flag = mime_match = 0;
+	recur_perm_error_flag = is_sel = sel_is_last = print_msg = 0;
+	kbind_busy = cont_bt = 0;
+	pmsg = nomsg;
+
+	home_ok = config_ok = trash_ok = selfile_ok = 1;
+
+	/* Set up config files and variables */
+	init_config();
+
+	if (!config_ok)
+		set_default_options();
+
+	/* If some option was set via command line, keep that value
+	 * for any profile */
+	if (xargs.ext != -1)
+		ext_cmd_ok = xargs.ext;
+	if (xargs.splash != -1)
+		splash_screen = xargs.splash;
+	if (xargs.light != -1)
+		light_mode = xargs.light;
+	if (xargs.sort != -1)
+		sort = xargs.sort;
+	if (xargs.hidden != -1)
+		show_hidden = xargs.hidden;
+	if (xargs.longview != -1)
+		long_view = xargs.longview;
+	if (xargs.ffirst != -1)
+		list_folders_first = xargs.ffirst;
+	if (xargs.cdauto != -1)
+		cd_lists_on_the_fly = xargs.cdauto;
+	if (xargs.sensitive != -1)
+		case_sensitive = xargs.sensitive;
+	if (xargs.unicode != -1)
+		unicode = xargs.unicode;
+	if (xargs.pager != -1)
+		pager = xargs.pager;
+
+	/* Free the aliases and prompt_cmds arrays to be allocated again */
+	size_t i = 0;
+
+	for (i = 0; i < aliases_n; i++)
+		free(aliases[i]);
+
+	for (i = 0; i < prompt_cmds_n; i++)
+		free(prompt_cmds[i]);
+
+	aliases_n = prompt_cmds_n = 0;
+
+	get_aliases();
+
+	get_prompt_cmds();
+
+	return EXIT_SUCCESS;
+}
 
 int
 edit_link(char *link)
@@ -4971,7 +5095,7 @@ profile_del(char *prof)
 
 int
 profile_set(char *prof)
-/* Switch to another profile */
+/* Switch profile to PROF */
 {
 	if (!prof)
 		return EXIT_FAILURE;
@@ -4998,74 +5122,10 @@ profile_set(char *prof)
 		return EXIT_SUCCESS;
 	}
 
-	/* Reset everything */
-	free(CONFIG_DIR);
-	CONFIG_DIR = (char *)NULL;
-	free(TRASH_DIR);
-	TRASH_DIR = (char *)NULL;
-	free(TRASH_FILES_DIR);
-	TRASH_FILES_DIR = (char *)NULL;
-	free(TRASH_INFO_DIR);
-	TRASH_INFO_DIR = (char *)NULL;
-	free(BM_FILE);
-	BM_FILE = (char *)NULL;
-	free(LOG_FILE);
-	LOG_FILE = (char *)NULL;
-	free(LOG_FILE_TMP);
-	LOG_FILE_TMP = (char *)NULL;
-	free(HIST_FILE);
-	HIST_FILE = (char *)NULL;
-	free(CONFIG_FILE);
-	CONFIG_FILE = (char *)NULL;
-	free(PROFILE_FILE);
-	PROFILE_FILE = (char *)NULL;
-	free(MSG_LOG_FILE);
-	MSG_LOG_FILE = (char *)NULL;
-
-	free(MIME_FILE);
-	free(SCRIPTS_DIR);
-	free(ACTIONS_FILE);
-	MIME_FILE = SCRIPTS_DIR = ACTIONS_FILE = (char *)NULL;
-
-	if (opener) {
-		free(opener);
-		opener = (char *)NULL;
-	}
-
-	free(TMP_DIR);
-	TMP_DIR = (char *)NULL;
-	free(sel_file_user);
-	sel_file_user = (char *)NULL;
-
 	if (alt_profile) {
 		free(alt_profile);
 		alt_profile = (char *)NULL;
 	}
-
-	if (encoded_prompt) {
-		free(encoded_prompt);
-		encoded_prompt = (char *)NULL;
-	}
-
-	splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
-	show_hidden = -1, clear_screen = -1, shell_terminal = 0, pager = -1, 
-	no_log = 0, internal_cmd = 0, list_folders_first = -1,
-	case_sensitive = -1, cd_lists_on_the_fly = -1, share_selbox = -1,
-	recur_perm_error_flag = 0, is_sel = 0, sel_is_last = 0, print_msg = 0,
-	long_view = -1, kbind_busy = 0, unicode = -1, dequoted = 0,
-	home_ok = 1, config_ok = 1, trash_ok = 1, selfile_ok = 1, tips = -1,
-	mime_match = 0, logs_enabled = -1, sort = -1, files_counter = -1,
-	light_mode = -1, dir_indicator = -1, classify = -1, sort_switch = 0,
-	sort_reverse = 0, autocd = -1, auto_open = -1;
-
-	shell_terminal = no_log = internal_cmd = dequoted = 0;
-	shell_is_interactive = recur_perm_error_flag = mime_match = 0;
-	recur_perm_error_flag = is_sel = sel_is_last = print_msg = 0;
-	kbind_busy = 0;
-	cont_bt = 0;
-	pmsg = nomsg;
-
-	home_ok = config_ok = trash_ok = selfile_ok = 1;
 
 	/* Set the new profile value */
 	/* Default profile == (alt_profile == NULL) */
@@ -5074,36 +5134,8 @@ profile_set(char *prof)
 		strcpy(alt_profile, prof);
 	}
 
-	/* Set up config files and variables */
-	init_config();
-
-	if (!config_ok)
-		set_default_options();
-
-	/* If some option was set via command line, keep that value
-	 * for any profile */
-	if (xargs.ext != -1)
-		ext_cmd_ok = xargs.ext;
-	if (xargs.splash != -1)
-		splash_screen = xargs.splash;
-	if (xargs.light != -1)
-		light_mode = xargs.light;
-	if (xargs.sort != -1)
-		sort = xargs.sort;
-	if (xargs.hidden != -1)
-		show_hidden = xargs.hidden;
-	if (xargs.longview != -1)
-		long_view = xargs.longview;
-	if (xargs.ffirst != -1)
-		list_folders_first = xargs.ffirst;
-	if (xargs.cdauto != -1)
-		cd_lists_on_the_fly = xargs.cdauto;
-	if (xargs.sensitive != -1)
-		case_sensitive = xargs.sensitive;
-	if (xargs.unicode != -1)
-		unicode = xargs.unicode;
-	if (xargs.pager != -1)
-		pager = xargs.pager;
+	/* Reset everything */
+	reload_config();
 
 	/* Check whether we have a working shell */
 	if (access(sys_shell, X_OK) == -1) {
@@ -5123,22 +5155,6 @@ profile_set(char *prof)
 		free(usr_actions[i].value);
 	}
 	actions_n = 0;
-
-	for (i = 0; i < aliases_n; i++)
-		free(aliases[i]);
-	free(aliases);
-	aliases = (char **)NULL;
-
-	for (i = 0; i < prompt_cmds_n; i++)
-		free(prompt_cmds[i]);
-	free(prompt_cmds);
-	prompt_cmds = (char **)NULL;
-
-	aliases_n = prompt_cmds_n = 0; /* Reset counters */
-
-	get_aliases();
-
-	get_prompt_cmds();
 
 	exec_profile();
 
@@ -5917,7 +5933,8 @@ is_internal_c(const char *cmd)
 					"colors", "cc", "fs", "mm", "mime", "x", "n",
 					"net", "lm", "st", "sort", "fc", "tips", "br",
 					"bulk", "opener", "ac", "ad", "acd", "autocd",
-					"ao", "auto-open", "actions", NULL };
+					"ao", "auto-open", "actions", "rl", "reload",
+					NULL };
 
 	short found = 0;
 	size_t i;
@@ -15384,6 +15401,12 @@ exec_cmd(char **comm)
 		}
 	}
 
+	else if (strcmp(comm[0], "rl") == 0
+	|| strcmp(comm[0], "reload") == 0) {
+		exit_code = reload_config();
+		return exit_code;
+	}
+
 					/* #### NEW INSTANCE #### */
 	else if (strcmp(comm[0], "x") == 0) {
 		if (comm[1])
@@ -19285,10 +19308,59 @@ run_history_cmd(const char *cmd)
 }
 
 int
-edit_function (char **comm)
-/* Edit the config file, either via my mime function or via the first
- * passed argument (Ex: 'edit nano') */
+regen_config(void)
+/* Regenerate the configuration file and create a back up of the old
+ * one */
 {
+	int config_found = 1;
+	struct stat config_attrib;
+
+	if (stat(CONFIG_FILE, &config_attrib) == -1) {
+		puts(_("No configuration file found"));
+		config_found = 0;
+	}
+
+	if (config_found) {
+		time_t rawtime = time(NULL);
+		struct tm *tm = localtime(&rawtime);
+		size_t date_max = 7;
+
+		char date[date_max];
+		strftime(date, date_max, "%H%M%S", tm);
+
+		char *bk = (char *)xnmalloc(strlen(CONFIG_FILE) + strlen(date)
+									+ 2, sizeof(char));
+		sprintf(bk, "%s.%s", CONFIG_FILE, date);
+		char *cmd[] = { "mv", CONFIG_FILE, bk, NULL };
+		if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS) {
+			free(bk);
+			return EXIT_FAILURE;
+		}
+
+		printf(_("Old configuration file stored as '%s'\n"), bk);
+		free(bk);
+	}
+
+	if (create_config(CONFIG_FILE) != EXIT_SUCCESS)
+		return EXIT_FAILURE;
+
+	printf(_("New configuration file written to '%s'\n"), CONFIG_FILE);
+
+	reload_config();
+	
+	return EXIT_SUCCESS;
+}
+
+int
+edit_function (char **comm)
+/* Edit the config file, either via the mime function or via the first
+ * passed argument (Ex: 'edit nano'). The 'gen' option regenerates
+ * the configuration file and creates a back up of the old one. */
+{
+
+	if (comm[1] && strcmp(comm[1], "gen") == 0)
+		return regen_config();
+
 	if (!config_ok) {
 		fprintf(stderr, _("%s: Cannot access the configuration file\n"), 
 				PROGRAM_NAME);
@@ -19303,60 +19375,7 @@ edit_function (char **comm)
 	 * to recreate the configuration file. Then run 'stat' again to
 	 * reread the attributes of the file */ 
 	if (stat(CONFIG_FILE, &file_attrib) == -1) {
-		free(CONFIG_DIR);
-		free(TRASH_DIR);
-		free(TRASH_FILES_DIR);
-		free(TRASH_INFO_DIR);
-		CONFIG_DIR = TRASH_DIR = TRASH_FILES_DIR = (char *)NULL;
-		TRASH_INFO_DIR = (char *)NULL;
-
-		free(BM_FILE);
-		free(LOG_FILE);
-		free(LOG_FILE_TMP);
-		free(HIST_FILE);
-		BM_FILE = LOG_FILE = LOG_FILE_TMP = HIST_FILE = (char *)NULL;
-
-		free(CONFIG_FILE);
-		free(PROFILE_FILE);
-		free(MSG_LOG_FILE);
-		free(sel_file_user);
-		CONFIG_FILE = PROFILE_FILE = MSG_LOG_FILE = (char *)NULL;
-		sel_file_user = (char *)NULL;
-
-		free(MIME_FILE);
-		free(SCRIPTS_DIR);
-		free(ACTIONS_FILE);
-		MIME_FILE = SCRIPTS_DIR = ACTIONS_FILE = (char *)NULL;
-
-
-		if (encoded_prompt) {
-			free(encoded_prompt);
-			encoded_prompt = (char *)NULL;
-		}
-
-		if (sys_shell) {
-			free(sys_shell);
-			sys_shell = (char *)NULL;
-		}
-
-		if (term) {
-			free(term);
-			term = (char *)NULL;
-		}
-
-		if (opener) {
-			free(opener);
-			opener = (char *)NULL;
-		}
-
-		free(TMP_DIR);
-		TMP_DIR = (char *)NULL;
-
-		/* Rerun external_arguments */
-		if (argc_bk > 1)
-			external_arguments(argc_bk, argv_bk);
-/*		initialize_readline(); */
-		init_config();
+		create_config(CONFIG_FILE);
 		stat(CONFIG_FILE, &file_attrib);
 	}
 
@@ -19391,92 +19410,7 @@ edit_function (char **comm)
 	if (mtime_bfr != file_attrib.st_mtime) {
 		/* Reload configuration only if the config file was modified */
 
-		free(CONFIG_DIR);
-		free(TRASH_DIR);
-		free(TRASH_FILES_DIR);
-		free(TRASH_INFO_DIR);
-		CONFIG_DIR = TRASH_DIR = TRASH_FILES_DIR = (char *)NULL;
-		TRASH_INFO_DIR = (char *)NULL;
-
-		free(BM_FILE);
-		free(LOG_FILE);
-		free(LOG_FILE_TMP);
-		free(HIST_FILE);
-		BM_FILE = LOG_FILE = LOG_FILE_TMP = HIST_FILE = (char *)NULL;
-
-		free(CONFIG_FILE);
-		free(PROFILE_FILE);
-		free(MSG_LOG_FILE);
-		CONFIG_FILE = PROFILE_FILE = MSG_LOG_FILE = (char *)NULL;
-
-		free(MIME_FILE);
-		free(SCRIPTS_DIR);
-		free(ACTIONS_FILE);
-		MIME_FILE = SCRIPTS_DIR = ACTIONS_FILE = (char *)NULL;
-
-		free(sel_file_user);
-		sel_file_user = (char *)NULL;
-
-
-		if (encoded_prompt) {
-			free(encoded_prompt);
-			encoded_prompt = (char *)NULL;
-		}
-
-		if (sys_shell) {
-			free(sys_shell);
-			sys_shell = (char *)NULL;
-		}
-
-		if (term) {
-			free(term);
-			term = (char *)NULL;
-		}
-
-		if (opener) {
-			free(opener);
-			opener = (char *)NULL;
-		}
-
-		free(TMP_DIR);
-		TMP_DIR = (char *)NULL;
-
-		init_config();
-
-		/* If some option was set via command line (except the profile),
-		 * keep that value for any profile */
-		if (xargs.ext != -1)
-			ext_cmd_ok = xargs.ext;
-		if (xargs.splash != -1)
-			splash_screen = xargs.splash;
-		if (xargs.light != -1)
-			light_mode = xargs.light;
-		if (xargs.sort != -1)
-			sort = xargs.sort;
-		if (xargs.hidden != -1)
-			show_hidden = xargs.hidden;
-		if (xargs.longview != -1)
-			long_view = xargs.longview;
-		if (xargs.ffirst != -1)
-			list_folders_first = xargs.ffirst;
-		if (xargs.cdauto != -1)
-			cd_lists_on_the_fly = xargs.cdauto;
-		if (xargs.sensitive != -1)
-			case_sensitive = xargs.sensitive;
-		if (xargs.unicode != -1)
-			unicode = xargs.unicode;
-		if (xargs.pager != -1)
-			pager = xargs.pager;
-
-		/* Free the aliases and prompt_cmds arrays to be allocated again */
-		size_t i = 0;
-		for (i = 0; i < aliases_n; i++)
-			free(aliases[i]);
-		for (i = 0; i < prompt_cmds_n; i++)
-			free(prompt_cmds[i]);
-		aliases_n = prompt_cmds_n = 0; /* Reset counters */
-		get_aliases();
-		get_prompt_cmds();
+		reload_config();
 
 		if (cd_lists_on_the_fly) {
 			while (files--) free(dirlist[files]);
@@ -19652,6 +19586,7 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
  shell [SHELL]\n\
  actions [edit]\n\
  st, sort [METHOD] [rev]\n\
+ rl, reload\n\
  opener [default] [APPLICATION]\n\
  msg, messages [clear]\n\
  log [clear]\n\
