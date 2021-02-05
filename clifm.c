@@ -323,7 +323,7 @@ int open_function(char **cmd);
 int copy_function(char **comm);
 int run_and_refresh(char **comm);
 int search_function(char **comm);
-int new_instance(char *dir);
+int new_instance(char *dir, int sudo);
 int list_mountpoints(void);
 int alias_import(char *file);
 void exec_chained_cmds(char *cmd);
@@ -4113,7 +4113,7 @@ RestoreLastPath=false\n\n"
 }
 
 int
-new_instance(char *dir)
+new_instance(char *dir, int sudo)
 /* Open DIR in a new instance of the program (using TERM, set in the config 
  * file, as terminal emulator) */
 {
@@ -4184,15 +4184,18 @@ new_instance(char *dir)
 	free(cmd); */
 
  	char **tmp_term = (char **)NULL, **tmp_cmd = (char **)NULL;
+
 	if (strcntchr(term, 0x20) != -1) {
+
 		tmp_term = get_substr(term, 0x20);
+
 		if (tmp_term) {
 			size_t i;
 
 			for (i = 0; tmp_term[i]; i++);
 
 			size_t num = i;
-			tmp_cmd = (char **)xrealloc(tmp_cmd, (i + 4)
+			tmp_cmd = (char **)xrealloc(tmp_cmd, (i + (sudo ? 5 : 4))
 										* sizeof(char *));
 			for (i = 0; tmp_term[i]; i++) {
 				tmp_cmd[i] = (char *)xnmalloc(strlen(tmp_term[i])
@@ -4203,15 +4206,24 @@ new_instance(char *dir)
 			free(tmp_term);
 
 			i = num - 1;
-			tmp_cmd[i + 1] = (char *)xnmalloc(strlen(self) + 1,
+
+			int plus = 1;
+			if (sudo) {
+				tmp_cmd[i + plus] = (char *)xnmalloc(strlen(self) + 1,
+												  sizeof(char));
+				strcpy(tmp_cmd[i + plus], "sudo");
+				plus++;
+			}
+
+			tmp_cmd[i + plus] = (char *)xnmalloc(strlen(self) + 1,
 											  sizeof(char));
-			strcpy(tmp_cmd[i + 1], self);
-			tmp_cmd[i + 2] = (char *)xnmalloc(3, sizeof(char));
-			strcpy(tmp_cmd[i + 2], "-p\0");
-			tmp_cmd[i + 3] = (char *)xnmalloc(strlen(path_dir)
+			strcpy(tmp_cmd[i + plus++], self);
+			tmp_cmd[i + plus] = (char *)xnmalloc(3, sizeof(char));
+			strcpy(tmp_cmd[i + plus++], "-p\0");
+			tmp_cmd[i + plus] = (char *)xnmalloc(strlen(path_dir)
 											  + 1, sizeof(char));
-			strcpy(tmp_cmd[i + 3], path_dir);
-			tmp_cmd[i + 4] = (char *)NULL;
+			strcpy(tmp_cmd[i + plus++], path_dir);
+			tmp_cmd[i + plus] = (char *)NULL;
 		}
 	}
 
@@ -4219,6 +4231,7 @@ new_instance(char *dir)
 
 	if (tmp_cmd) {
 		ret = launch_execve(tmp_cmd, BACKGROUND);
+
 		for (size_t i = 0; tmp_cmd[i]; i++)
 			free(tmp_cmd[i]);
 		free(tmp_cmd);
@@ -4229,8 +4242,16 @@ new_instance(char *dir)
 				"Trying '%s -e %s -p %s'\n"), PROGRAM_NAME, term,
 				term, self, path);
 
-		char *cmd[] = { term, "-e", self, "-p", path_dir, NULL };
-		ret = launch_execve(cmd, BACKGROUND);
+		if (sudo) {
+			char *cmd[] = { term, "-e", "sudo", self, "-p", path_dir,
+							NULL };
+			ret = launch_execve(cmd, BACKGROUND);
+		}
+
+		else {
+			char *cmd[] = { term, "-e", self, "-p", path_dir, NULL };
+			ret = launch_execve(cmd, BACKGROUND);
+		}
 	}
 
 	if (*deq_dir != '/')
@@ -15408,14 +15429,28 @@ exec_cmd(char **comm)
 	}
 
 					/* #### NEW INSTANCE #### */
-	else if (strcmp(comm[0], "x") == 0) {
-		if (comm[1])
-			exit_code = new_instance(comm[1]);
-		else {
-			fputs("Usage: x DIR\n", stderr);
-			exit_code = EXIT_FAILURE;
-			return EXIT_FAILURE;
+	else if (strcmp(comm[0], "x") == 0 || strcmp(comm[0], "X") == 0) {
+		if (comm[1]) {
+			if (strcmp(comm[1], "--help") == 0) {
+				puts(_("Usage: x, X [DIR]"));
+				return EXIT_SUCCESS;
+			}
+
+			else if (*comm[0] == 'x')
+				exit_code = new_instance(comm[1], 0);
+			else /* Run as root */
+				exit_code = new_instance(comm[1], 1);
 		}
+
+		/* Run new instance in CWD */
+		else {
+			if (*comm[0] == 'x')
+				exit_code = new_instance(path, 0);
+			else
+				exit_code = new_instance(path, 1);
+		}
+
+		return exit_code;
 	}
 
 						/* #### NET #### */
@@ -19583,6 +19618,7 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
  pf, prof, profile [ls, list] [set, add, del PROFILE]\n\
  br, bulk ELN/FILE ...\n\
  ac, ad ELN/FILE ...\n\
+ x, X [ELN/DIR]\n\
  shell [SHELL]\n\
  actions [edit]\n\
  st, sort [METHOD] [rev]\n\
@@ -19687,7 +19723,7 @@ being free, we consider them all equally unethical (...)\""));
 }
 
 void
-version_function(void)
+version_function (void)
 {
 	printf(_("%s %s (%s), by %s\nContact: %s\nWebsite: "
 		   "%s\nLicense: %s\n"), PROGRAM_NAME, VERSION, DATE,
@@ -19695,7 +19731,7 @@ version_function(void)
 }
 
 void
-splash(void)
+splash (void)
 {
 	printf("\n%s                         xux\n"
 	"       :xuiiiinu:.......u@@@u........:xunninnu;\n"
@@ -19725,7 +19761,7 @@ splash(void)
 }
 
 void
-bonus_function(void)
+bonus_function (void)
 {
 	char *phrases[] = {
 		"\"Vamos Boca Juniors Carajo!\" (La mitad + 1)",
