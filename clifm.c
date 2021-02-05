@@ -149,11 +149,11 @@ in FreeBSD, but is deprecated */
 //#define CLEAR write(STDOUT_FILENO, "\033c", 3);
 #define CLEAR write(STDOUT_FILENO, "\x1b[2J\x1b[3J\x1b[H", 11);
 /* #define CLEAR write(STDOUT_FILENO, "\033[2J\033[H", 7); */
-#define VERSION "0.27.3"
+#define VERSION "0.28.0"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "February 1, 2021"
+#define DATE "February 4, 2021"
 #define LICENSE "GPL2+"
 
 /* Define flags for program options and internal use */
