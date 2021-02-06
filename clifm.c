@@ -107,6 +107,8 @@ in FreeBSD, but is deprecated */
 
 #include "clifm.h" /* A few custom functions */
 
+#include <wordexp.h>
+
 
 #define EXIT_SUCCESS 0
 
@@ -7141,11 +7143,12 @@ char **
 split_str(char *str)
 /* This function takes a string as argument and split it into substrings 
  * taking tab, new line char, and space as word delimiters, except when
- * they are preceded by a quote char (single or double quotes), in which
- * case eveything after the first quote char is taken as one single string.
- * It also allows escaping space to prevent word spliting. It returns an
- * array of splitted strings (without leading and terminating spaces) or
- * NULL if str is NULL or if no substring was found, i.e., if str contains
+ * they are preceded by a quote char (single or double quotes) or in
+ * case of command substitution ($(cmd) or `cmd`), in which case
+ * eveything after the corresponding closing char is taken as one single
+ * string. It also escapes spaecial chars. It returns an array of
+ * splitted strings (without leading and terminating spaces) or NULL if
+ * str is NULL or if no substring was found, i.e., if str contains
  * only spaces. */
 {
 	if (!str)
@@ -7154,14 +7157,87 @@ split_str(char *str)
 	size_t buf_len = 0, words = 0, str_len = 0;
 	char *buf = (char *)NULL;
 	buf = (char *)xcalloc(1, sizeof(char));;
-	short quote = 0;
+	short quote = 0, close = 0;
 	char **substr = (char **)NULL;
 
 	while (*str) {
 		switch (*str) {
+
+		/* Command substitution */
+		case '$':
+		case '`':
+
+			/* Define the closing char: If "$(" then ')', else '`' */
+			if (*str == '$') {
+				/* If escaped, it has no special meaning */
+				if ((str_len && *(str - 1) == '\\')
+				|| *(str + 1) != '(') {
+					buf = (char *)xrealloc(buf, (buf_len + 1)
+										   * sizeof(char *));
+					buf[buf_len++] = *str;
+					break;
+				}
+
+				else
+					close = ')';
+			}
+
+			else {
+				/* If escaped, it has no special meaning */
+				if (str_len && *(str - 1) == '\\') {
+					buf = (char *)xrealloc(buf, (buf_len + 1)
+										   * sizeof(char *));
+					buf[buf_len++] = *str;
+					break;
+				}
+
+				else {
+					/* If '`' advance one char. Otherwise the while
+					 * below will stop at first char, which is not
+					 * what we want */
+					close = *str;
+					str++;
+					buf = (char *)xrealloc(buf, (buf_len + 1)
+										   * sizeof(char *));
+					buf[buf_len++] = '`';
+				}
+			}
+			
+			/* Copy everything until null byte or closing char */
+			while (*str && *str != close) {
+				buf = (char *)xrealloc(buf, (buf_len + 1)
+									   * sizeof(char *));
+				buf[buf_len++] = *(str++);
+			}
+
+			/* If the while loop stopped with a null byte, there was
+			 * no ending close (either ')' or '`')*/
+			if (!*str) {
+				fprintf(stderr, _("%s: Missing '%c'\n"), PROGRAM_NAME,
+						close);
+
+				free(buf);
+				buf = (char *)NULL;
+				size_t i;
+				for (i = 0; i < words; i++)
+					free(substr[i]);
+				free(substr);
+
+				return (char **)NULL;			
+			}
+
+			/* Copy the closing char and add an space: this function
+			 * takes space as word breaking char, so that everything
+			 * in the buffer will be copied as one single word */
+			buf = (char *)xrealloc(buf, (buf_len + 2) * sizeof(char *));
+			buf[buf_len++] = *str;
+			buf[buf_len] = 0x20;
+
+		break;
+
 		case '\'':
 		case '"':
-			/* If the quote is escaped, copy it into the buffer */
+			/* If the quote is escaped, it has no special meaning */
 			if (str_len && *(str - 1) == '\\') {
 				buf = (char *)xrealloc(buf, (buf_len + 1)
 									   * sizeof(char *));
@@ -7176,18 +7252,21 @@ split_str(char *str)
 			/* Copy into the buffer whatever is after the first quote
 			 * up to the last quote or NULL */
 			while (*str && *str != quote) {
+
+				/* If char has special meaning, escape it */
 				if (is_quote_char(*str)) {
 					buf = (char *)xrealloc(buf, (buf_len + 1)
 										   * sizeof(char *));
 					buf[buf_len++] = '\\';
 				}
+
 				buf = (char *)xrealloc(buf, (buf_len + 1)
 									   * sizeof(char *));
 				buf[buf_len++] = *(str++);
 			}
 
 			/* The above while breaks with NULL or quote, so that if
-			 * *str is a null byte there was not terminating quote */
+			 * *str is a null byte there was not ending quote */
 			if (!*str) {
 				fprintf(stderr, _("%s: Missing '%c'\n"), PROGRAM_NAME,
 						quote);
@@ -7239,13 +7318,14 @@ split_str(char *str)
 			}
 			break;
 
-		/* If neither a quote nor a breaking word char, just dump it
-		 * into the buffer */
+		/* If neither a quote nor a breaking word char nor command
+		 * substitution, just dump it into the buffer */
 		default:
 			buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
 			buf[buf_len++] = *str;
 			break;
 		}
+
 		str++;
 		str_len++;
 	}
@@ -7255,6 +7335,7 @@ split_str(char *str)
 	 * Therefore, we need to add it, if not empty, to our subtrings
 	 * array */
 	buf[buf_len] = 0x00;
+
 	if (buf_len > 0) {
 		if (!words)
 			substr = (char **)xcalloc(words + 1, sizeof(char *));
@@ -7274,9 +7355,11 @@ split_str(char *str)
 		substr = (char **)xrealloc(substr, (words + 1)
 								   * sizeof(char *));
 		substr[words] = (char *)NULL;
+
 		args_n = words - 1;
 		return substr;
 	}
+
 	else {
 		args_n = 0; /* Just in case, but I think it's not needed */
 		return (char **)NULL;
@@ -11668,6 +11751,32 @@ init_config(void)
 									   sizeof(char));
 				strcpy(term, DEFAULT_TERM_CMD);
 			}
+
+
+			/* Define the file for the Selection Box */
+
+			if (sel_file_user) {
+				free(sel_file_user);
+				sel_file_user = (char *)NULL;
+			}
+
+			if (!share_selbox) {
+				/* Private selection box is stored in the profile
+				 * directory, that is, per user */
+				sel_file_user = (char *)xcalloc(config_len + 9,
+												sizeof(char));
+
+				sprintf(sel_file_user, "%s/selbox", CONFIG_DIR);
+			}
+
+			else {
+				/* Common selection box is stored in the general
+				 * configuration directory */
+				sel_file_user = (char *)xcalloc(config_len + 17,
+												sizeof(char));
+				sprintf(sel_file_user, "%s/.config/%s/selbox",
+						user_home, PNL);
+			}
 		}
 
 		/* If we reset all these values, a) the user will be able to
@@ -11758,8 +11867,8 @@ init_config(void)
 
 	if (stat(TMP_DIR, &file_attrib) == -1) {
 /*		if (mkdir(TMP_DIR, 1777) == -1) { */
-		char *tmp_cmd2[] = { "mkdir", "-pm1777", TMP_DIR, NULL };
-		int ret = launch_execve(tmp_cmd2, FOREGROUND);
+		char *md_cmd[] = { "mkdir", "-pm1777", TMP_DIR, NULL };
+		int ret = launch_execve(md_cmd, FOREGROUND);
 		if (ret != EXIT_SUCCESS) {
 			_err('e', PRINT_PROMPT, "%s: mkdir: '%s': %s\n",
 				 PROGRAM_NAME, TMP_DIR, strerror(errno));
@@ -11776,8 +11885,8 @@ init_config(void)
 
 	if (stat(TMP_DIR, &file_attrib) == -1) {
 /*		if (mkdir(TMP_DIR, 1777) == -1) { */
-		char *tmp_cmd3[] = { "mkdir", "-pm700", TMP_DIR, NULL };
-		int ret = launch_execve(tmp_cmd3, FOREGROUND);
+		char *md_cmd2[] = { "mkdir", "-pm700", TMP_DIR, NULL };
+		int ret = launch_execve(md_cmd2, FOREGROUND);
 		if (ret != EXIT_SUCCESS) {
 			selfile_ok = 0;
 			_err('e', PRINT_PROMPT, "%s: mkdir: '%s': %s\n",
@@ -11787,21 +11896,26 @@ init_config(void)
 
 	/* If the directory exists, check it is writable */
 	else if (access(TMP_DIR, W_OK) == -1) {
-		selfile_ok = 0;
-		_err('e', PRINT_PROMPT, "%s: '%s': Directory not writable. "
-			 "Selected files won't be persistent\n", PROGRAM_NAME,
-			 TMP_DIR);
+		if (!sel_file_user) {
+			selfile_ok = 0;
+			_err('w', PRINT_PROMPT, "%s: '%s': Directory not writable. "
+				 "Selected files will be lost after program exit\n",
+				 PROGRAM_NAME, TMP_DIR);
+		}
 	}
 
-	if (selfile_ok) {
+	/* If the config directory isn't available, define an alternative
+	 * selection file in /tmp */
+	if (!sel_file_user) {
+
+		_err('w', PRINT_PROMPT, "%s: '%s': Using a temporary file for "
+			 "the Selection Box. Selected files won't be persistent "
+			 "accros reboots\n", PROGRAM_NAME, TMP_DIR);
 
 		size_t tmp_dir_len = strlen(TMP_DIR);
 
 		/* Define the user's sel file. There will be one per
 		 * user-profile (/tmp/clifm/username/.selbox_PROFILE) */
-
-		if (sel_file_user)
-			free(sel_file_user);
 
 		if (!share_selbox) {
 			size_t prof_len = 0;
@@ -11812,14 +11926,14 @@ init_config(void)
 				prof_len = 7; /* Lenght of "default" */
 
 			sel_file_user = (char *)xcalloc(tmp_dir_len + prof_len
-											+ 10, sizeof(char));
-			sprintf(sel_file_user, "%s/.selbox_%s", TMP_DIR,
+											+ 9, sizeof(char));
+			sprintf(sel_file_user, "%s/selbox_%s", TMP_DIR,
 					(alt_profile) ? alt_profile : "default");
 		}
 		else {
-			sel_file_user = (char *)xcalloc(tmp_dir_len + 9,
+			sel_file_user = (char *)xcalloc(tmp_dir_len + 8,
 											sizeof(char));
-			sprintf(sel_file_user, "%s/.selbox", TMP_DIR);
+			sprintf(sel_file_user, "%s/selbox", TMP_DIR);
 		}
 	}
 
@@ -12696,7 +12810,8 @@ parse_input_str(char *str)
 		 * #   2.d) USER DEFINED VARIABLES EXPANSION   # 
 		 * #############################################*/
 
-		if (substr[i][0] == '$' && substr[i][1] != '(') {
+		if (substr[i][0] == '$' && substr[i][1] != '('
+		&& substr[i][1] != '{') {
 			char *var_name = straft(substr[i], '$');
 			if (var_name) {
 				size_t j;
@@ -12749,7 +12864,8 @@ parse_input_str(char *str)
 	 *  */
 
 	int *glob_array = (int *)xnmalloc(int_array_max, sizeof(int)); 
-	size_t glob_n = 0;
+	int *word_array = (int *)xnmalloc(int_array_max, sizeof(int)); 
+	size_t glob_n = 0, word_n = 0;
 
 	for (i = 0; substr[i]; i++) {
 
@@ -12763,33 +12879,44 @@ parse_input_str(char *str)
 				continue;
 		}
 
-		/* The search function admits a path as second argument. So, if
-		 * the command is search, perform the expansions only for the
-		 * first parameter, if any. */
-		if (substr[0][0] == '/' && i != 1)
+		/* Ignore the first string of the search function: it will be
+		 * expanded by the search function itself */
+		if (substr[0][0] == '/' && i == 0)
 			continue;
 
 		/* ###############################################
 		 * #   3) WILDCARD, BRACE, AND TILDE EXPANSION   # 
 		 * ############################################### */
 
-		if (*substr[i] == '~') {
+		/* Tilde expansion is made by glob() */
+		if (*substr[i] == '~')
 			if (glob_n < int_array_max)
 				glob_array[glob_n++] = (int)i;
-		}
 
 		register size_t j = 0;
 		for (j = 0; substr[i][j]; j++) {
 
-			/* Check for glob chars (including braces) */
+			/* Brace and wildcard expansion is made by glob()
+			 * as well */
 			if ((substr[i][j] == '*' || substr[i][j] == '?' 
 			|| substr[i][j] == '[' || substr[i][j] == '{')
-			&& substr[i][j + 1] != 0x20) {
-			/* Strings containing these characters are taken as wildacard 
-			 * patterns and are expanded by the glob function. See man (7) 
-			 * glob */
+			&& substr[i][j + 1] != 0x20)
+			/* Strings containing these characters are taken as
+			 * wildacard patterns and are expanded by the glob
+			 * function. See man (7) glob */
 				if (glob_n < int_array_max)
 					glob_array[glob_n++] = (int)i;
+
+			/* Command substitution is made by wordexp() */
+			if (substr[i][j] == '$' && (substr[i][j + 1] == '('
+			|| substr[i][j + 1] == '{')) {
+				if (word_n < int_array_max)
+					word_array[word_n++] = (int)i;
+			}
+
+			if (substr[i][j] == '`'	&& substr[i][j + 1] != 0x20) {
+				if (word_n < int_array_max)
+					word_array[word_n++] = (int)i;
 			}
 		}
 	}
@@ -12832,8 +12959,8 @@ parse_input_str(char *str)
 			if (globbuf.gl_pathc) {
 				register size_t j = 0;
 				char **glob_cmd = (char **)NULL;
-				glob_cmd = (char **)xcalloc(args_n + globbuf.gl_pathc + 1, 
-											sizeof(char *));
+				glob_cmd = (char **)xcalloc(args_n + globbuf.gl_pathc
+											+ 1, sizeof(char *));
 
 				for (i = 0; i < ((size_t)glob_array[g] + old_pathc); i++) {
 					glob_cmd[j] = (char *)xcalloc(strlen(substr[i]) + 1, 
@@ -12855,13 +12982,16 @@ parse_input_str(char *str)
 										  "filename\n"), PROGRAM_NAME,
 										  globbuf.gl_pathv[i]);
 						register size_t k = 0;
+
 						for (k = 0; k < j; k++)
 							free(glob_cmd[k]);
 						free(glob_cmd);
 						glob_cmd = (char **)NULL;
+
 						for (k = 0; k <= args_n; k++)
 							free(substr[k]);
 						free(substr);
+
 						return (char **)NULL;
 					}
 				}
@@ -12872,31 +13002,129 @@ parse_input_str(char *str)
 												  + 1, sizeof(char));
 					strcpy(glob_cmd[j++], substr[i]);
 				}
+
 				glob_cmd[j] = (char *)NULL;
 
 				for (i = 0; i <= args_n; i++) 
 					free(substr[i]);
+
 				substr = (char **)xrealloc(substr, 
 										(args_n+globbuf.gl_pathc + 1)
 										* sizeof(char *));
 
-				for (i = 0;i < j; i++) {
+				for (i = 0; i < j; i++) {
 					substr[i] = (char *)xcalloc(strlen(glob_cmd[i])
 												+ 1, sizeof(char));
 					strcpy(substr[i], glob_cmd[i]);
 					free(glob_cmd[i]);
 				}
-				args_n = j-1;
+
+				args_n = j - 1;
 				free(glob_cmd);
 			}
-			old_pathc += (globbuf.gl_pathc-1);
+
+			old_pathc += (globbuf.gl_pathc - 1);
 			globfree(&globbuf);
 		}
 	}
 
 	free(glob_array);
 
-	/* #### 7) NULL TERMINATE THE INPUT STRING ARRAY (again) #### */
+		/* #############################################
+		 * #    4) COMMAND & PARAMETER SUBSTITUTION    # 
+		 * ############################################# */
+
+	if (word_n) {
+
+		size_t old_pathc = 0;
+
+		register size_t w = 0;
+		for (w = 0; w < (size_t)word_n; w++){
+			wordexp_t wordbuf;
+			int ret = wordexp(substr[word_array[w] + (int)old_pathc],
+						&wordbuf, 0);
+
+			if (ret != 0)
+				continue;
+
+			if (wordbuf.we_wordc) {
+				register size_t j = 0;
+				char **word_cmd = (char **)NULL;
+				word_cmd = (char **)xcalloc(args_n + wordbuf.we_wordc
+											+ 1, sizeof(char *));
+
+				for (i = 0; i < ((size_t)word_array[w] + old_pathc);
+				i++) {
+					word_cmd[j] = (char *)xcalloc(strlen(substr[i])
+												+ 1, sizeof(char));
+					strcpy(word_cmd[j++], substr[i]);
+				}
+
+				for (i = 0; i < wordbuf.we_wordc; i++) {
+					/* Escape the globbed filename and copy it*/
+					char *esc_str = escape_str(wordbuf.we_wordv[i]);
+
+					if (esc_str) {
+						word_cmd[j] = (char *)xcalloc(strlen(esc_str)
+													+ 1, sizeof(char));
+						strcpy(word_cmd[j++], esc_str);
+						free(esc_str);
+					}
+
+					else {
+						fprintf(stderr, _("%s: %s: Error quoting "
+										  "filename\n"), PROGRAM_NAME,
+										  wordbuf.we_wordv[i]);
+
+						register size_t k = 0;
+						for (k = 0; k < j; k++)
+							free(word_cmd[k]);
+						free(word_cmd);
+						word_cmd = (char **)NULL;
+
+						for (k = 0; k <= args_n; k++)
+							free(substr[k]);
+						free(substr);
+
+						return (char **)NULL;
+					}
+				}
+
+				for (i = (size_t)word_array[w] + old_pathc + 1;
+				i <= args_n; i++) {
+					word_cmd[j] = (char *)xcalloc(strlen(substr[i])
+												  + 1, sizeof(char));
+					strcpy(word_cmd[j++], substr[i]);
+				}
+
+				word_cmd[j] = (char *)NULL;
+
+				for (i = 0; i <= args_n; i++) 
+					free(substr[i]);
+
+				substr = (char **)xrealloc(substr, 
+									(args_n + wordbuf.we_wordc + 1)
+									* sizeof(char *));
+
+				for (i = 0; i < j; i++) {
+					substr[i] = (char *)xcalloc(strlen(word_cmd[i])
+												+ 1, sizeof(char));
+					strcpy(substr[i], word_cmd[i]);
+					free(word_cmd[i]);
+				}
+
+				args_n = j - 1;
+				free(word_cmd);
+			}
+
+			old_pathc += (wordbuf.we_wordc - 1);
+			wordfree(&wordbuf);
+		}
+	}
+
+	free(word_array);
+
+	/* #### 5) NULL TERMINATE THE INPUT STRING ARRAY (again) #### */
 	substr = (char **)xrealloc(substr, (args_n + 2) * sizeof(char *));
 	substr[args_n + 1] = (char *)NULL;
 
@@ -16878,15 +17106,11 @@ run_and_refresh(char **comm)
 int
 search_function(char **comm)
 /* List matching filenames in the specified directory */
-/* This function just works, but its logic is crap */
 {
 	if (!comm || !comm[0])
 		return EXIT_FAILURE;
 
-	/* If search string (comm[0]) is "/search", comm[0]+1 returns
-	 * "search" */
-	char *search_str = comm[0] + 1, *deq_dir = (char *)NULL, 
-		 *search_path = (char *)NULL;
+	char *search_str = (char *)NULL, *search_path = (char *)NULL;
 	mode_t file_type = 0;
 	struct stat file_attrib;
 
@@ -16913,10 +17137,14 @@ search_function(char **comm)
 		else
 			search_path = comm[1];
 	}
+	
 	/* If no arguments, search_path will be NULL and file_type zero */
 
-	/* Convert filetype into a macro that can be decoded by stat() */
 	if (file_type) {
+
+		/* Convert filetype into a macro that can be decoded by stat().
+		 * If file type is specified, matches will be checked against
+		 * this value */
 		switch (file_type) {
 		case 'd': file_type = S_IFDIR; break;
 		case 'r': file_type = S_IFREG; break;
@@ -16925,36 +17153,21 @@ search_function(char **comm)
 		case 'f': file_type = S_IFIFO; break;
 		case 'b': file_type = S_IFBLK; break;
 		case 'c': file_type = S_IFCHR; break;
+
 		default:
-			fprintf(stderr, "%s: '%c': Unrecognized filetype\n",
+			fprintf(stderr, _("%s: '%c': Unrecognized filetype\n"),
 					PROGRAM_NAME, (char)file_type);
 			return EXIT_FAILURE;
 		}
 	}
 
-	struct winsize w;
-	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-	/* ws_col and ws_row are both unsigned short int according to 
-	 * /bits/ioctl-types.h */
-	unsigned short tcols = w.ws_col; /* This one is global */
+	/* If we have a path ("/str /path"), chdir into it, since
+	 * glob() works on CWD */
+	if (search_path && *search_path) {
 
-	/* We will store here pointers to file names to be printed */
-	char **pfiles = (char **)NULL;
-	size_t found = 0;
-
-				/* #############################
-				 * #         WILDACRDS         #
-				 * #############################*/
-
-	if (strcntchr(search_str, '*') != -1
-	|| strcntchr(search_str, '?') != -1
-	|| strcntchr(search_str, '[') != -1
-	|| strcntchr(search_str, '{')) {
-
-		/* If we have a path ("/search_str /path"), chdir into it, since
-		 * glob() works on CWD */
-		if (search_path && *search_path != 0x00) {
-			deq_dir = dequote_str(search_path, 0);
+		/* Deescape the search path, if necessary */
+		if (strchr(search_path, '\\')) {
+			char *deq_dir = dequote_str(search_path, 0);
 
 			if (!deq_dir) {
 				fprintf(stderr, _("%s: %s: Error dequoting filename\n"),
@@ -16962,382 +17175,195 @@ search_function(char **comm)
 				return EXIT_FAILURE;
 			}
 
-			if (chdir(deq_dir) == -1) {
-				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, deq_dir,
-						strerror(errno));
-				free(deq_dir);
-				return EXIT_FAILURE;
-			}
+			strcpy(search_path, deq_dir);
+			free(deq_dir);
 		}
 
-		/* Get globbed files */
-		glob_t globbed_files;
-		int ret = glob(search_str, GLOB_BRACE, NULL, &globbed_files);
-		if (ret == 0) {
-
-			int last_column = 0;
-			size_t len = 0, flongest = 0, columns_n = 0;
-			pfiles = (char **)xnmalloc(globbed_files.gl_pathc + 1, 
-									   sizeof(char *));
-			size_t *files_len = (size_t *)xnmalloc(globbed_files.gl_pathc
-												+ 1, sizeof(size_t));
-
-			/* If we have a path */
-			if (deq_dir) {
-				size_t i;
-				for (i = 0; globbed_files.gl_pathv[i]; i++) {
-					if (strcmp(globbed_files.gl_pathv[i], ".") == 0
-					|| strcmp(globbed_files.gl_pathv[i], "..") == 0)
-						continue;
-					if (file_type) {
-						/* Simply skip all files not matching file_type */
-						if (lstat(globbed_files.gl_pathv[i], 
-								  &file_attrib) == -1)
-							continue;
-						if ((file_attrib.st_mode & S_IFMT) != file_type)
-							continue;
-					}
-					/* Store pointer to maching filename in array of 
-					 * pointers */
-					pfiles[found] = globbed_files.gl_pathv[i];
-
-					/* Get the longest filename in the list */
-					len = (unicode) ? u8_xstrlen(pfiles[found])
-						  : strlen(pfiles[found]);
-					files_len[found++] = len;
-					if (len > flongest)
-						flongest = len;
-				}
-
-				/* Print the result */
-				if (found) {
-
-					if (flongest <= 0 || flongest > tcols)
-						columns_n = 1;
-					else
-						columns_n = (size_t)tcols / (flongest + 1);
-
-					if (columns_n > found)
-						columns_n = found;
-
-					for (i = 0; i < found; i++) {
-						if ((i + 1) % columns_n == 0)
-							last_column = 1;
-						else
-							last_column = 0;
-						colors_list(pfiles[i], 0, (last_column 
-									|| i == found - 1) ? 0 : 
-									(int)(flongest - files_len[i]) + 1, 
-									(last_column || i == found - 1)
-									? 1 : 0);
-						/* Second argument to colors_list() is:
-						 * 0: Do not print any ELN 
-						 * Positive number: Print positive number as ELN
-						 * -1: Print "?" instead of an ELN */
-					}
-				}
-			}
-
-			/* If no path was specified */
-			else {
-				size_t i, j;
-				int *index = (int *)xnmalloc(globbed_files.gl_pathc + 1, 
-											 sizeof(int));
-				for (i = 0; globbed_files.gl_pathv[i]; i++) {
-					if (strcmp(globbed_files.gl_pathv[i], ".") == 0
-					|| strcmp(globbed_files.gl_pathv[i], "..") == 0)
-						continue;
-					if (file_type) {
-						if (lstat(globbed_files.gl_pathv[i], 
-						&file_attrib) == -1)
-							continue;
-						if ((file_attrib.st_mode & S_IFMT) != file_type)
-							continue;
-					}
-					pfiles[found] = globbed_files.gl_pathv[i];
-
-					/* In case 'index' is not found in the next for loop,
-					 * that is, if the globbed file is not found in the
-					 * current dir list, 'index' value would be that of
-					 * the previous file if 'index' is not set to zero
-					 * in each for iteration */
-					index[found] = -1;
-					for (j = 0; j < files; j++) {
-						if (strcmp(globbed_files.gl_pathv[i],
-						dirlist[j]) == 0) {
-							index[found] = (int)j;
-							break;
-						}
-					}
-
-					size_t elnn = (index[found] != -1 ) ? 
-								  digits_in_num(index[found] + 1) : 1;
-					len = ((unicode) ? u8_xstrlen(pfiles[found]) 
-						  : strlen(pfiles[found])) + elnn + 1;
-					/* len == ELN + space + filename */
-					files_len[found] = len;
-					if (len > flongest)
-						flongest = len;
-					found++;
-				}
-
-				if (found) {
-
-					if (flongest <= 0 || flongest > tcols)
-						columns_n = 1;
-					else
-						columns_n = tcols / (flongest + 1);
-
-					if ((size_t)columns_n > found)
-						columns_n = found;
-
-					for (i = 0; i < found; i++) {
-						if ((i + 1) % columns_n == 0)
-							last_column = 1;
-						else
-							last_column = 0;
-
-						colors_list(pfiles[i], (index[i] != -1) 
-									? index[i] + 1 : -1, (last_column
-									|| i == found - 1) ? 0
-									: (int)(flongest - files_len[i]) + 1, 
-									(last_column || i == found - 1)
-									? 1 : 0);
-					}
-				}
-
-				free(index);
-			}
-
-			free(files_len);
-			free(pfiles);
-
-			if (!found) 
-				printf(_("%s: No matches found\n"), PROGRAM_NAME);
+		if (chdir(search_path) == -1) {
+			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, search_path,
+					strerror(errno));
+			return EXIT_FAILURE;
 		}
+	}
 
-		else 
-			printf(_("%s: No matches found\n"), PROGRAM_NAME);
+	size_t i;
+
+	/* Search for globbing char */
+	int glob_char_found = 0;
+	for (i = 1; comm[0][i]; i++) {
+		if (comm[0][i] == '*' || comm[0][i] == '?'
+		|| comm[0][i] == '[' || comm[0][i] == '{') {
+			glob_char_found = 1;
+			break;
+		}
+	}
+
+	/* If search string is just "STR" (no glob chars), change it
+	 * to "*STR*" */
+	if (!glob_char_found) {
+		size_t search_str_len = strlen(comm[0]);
+
+		comm[0] = (char *)xrealloc(comm[0], (search_str_len + 2) *
+								   sizeof(char));
+
+		*comm[0] = '*';
+		comm[0][search_str_len] = '*';
+		comm[0][search_str_len + 1] = 0x00;
+		search_str = comm[0];
+	}
+
+	else
+		/* If search string is "/STR", comm[0] + 1 returns "STR" */
+		search_str = comm[0] + 1;
+
+	/* Get matches, if any */
+	glob_t globbed_files;
+	int ret = glob(search_str, GLOB_BRACE, NULL, &globbed_files);
+
+	if (ret != 0) {
+		printf(_("%s: No matches found\n"), PROGRAM_NAME);
 
 		globfree(&globbed_files);
 
-		/* Go back to the directory we came from */
-		if (deq_dir) {
-			free(deq_dir);
-
-			if (chdir(path) == -1) {
+		if (search_path) {
+			/* Go back to the directory we came from */
+			if (chdir(path) == -1)
 				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
 						path, strerror(errno));
-				return EXIT_FAILURE;
-			}
-
-			return EXIT_SUCCESS;
 		}
+
+		return EXIT_FAILURE;
 	}
 
-				/* #####################
-				 * #    NO WILDCARDS   #
-				 * #####################*/
+	/* We have matches */
+	int last_column = 0;
+	size_t len = 0, flongest = 0, columns_n = 0, found = 0;
 
-	else {
-		int last_column = 0;
-		size_t len = 0, flongest = 0, i = 0, columns_n = 0;
+	/* We need to store pointers to matching filenames in array of 
+	 * pointers, just as the filename length (to construct the
+	 * columned output), and, if searching in CWD, its index (ELN)
+	 * in the dirlist array as well */
+	char **pfiles = (char **)xnmalloc(globbed_files.gl_pathc + 1, 
+							   sizeof(char *));
 
-		/* If /search_str /path */
-		if (search_path && *search_path != 0x00) {
-			deq_dir = dequote_str(search_path, 0);
-			if (!deq_dir) {
-				fprintf(stderr, _("%s: %s: Error dequoting filename\n"), 
-						PROGRAM_NAME, comm[1]);
-				return EXIT_FAILURE;
-			}
+	int *eln = (int *)xnmalloc(globbed_files.gl_pathc + 1,
+								 sizeof(int));
 
-			struct dirent **search_list;
-			int search_files = 0;
+	size_t *files_len = (size_t *)xnmalloc(globbed_files.gl_pathc
+										+ 1, sizeof(size_t));
 
-			search_files = scandir(deq_dir, &search_list, NULL, alphasort);
-			if (search_files == -1) {
-				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, deq_dir, 
-						strerror(errno));
-				free(deq_dir);
-				return EXIT_FAILURE;
-			}
+	for (i = 0; globbed_files.gl_pathv[i]; i++) {
 
-			if (chdir(deq_dir) == -1) {
-				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, deq_dir, 
-						strerror(errno));
+		if (strcmp(globbed_files.gl_pathv[i], ".") == 0
+		|| strcmp(globbed_files.gl_pathv[i], "..") == 0)
+			continue;
 
-				for (i = 0; i < (size_t)search_files; i++)
-					free(search_list[i]);
-				free(search_list);
-				free(deq_dir);
+		if (file_type) {
 
-				return EXIT_FAILURE;
-			}
+			/* Simply skip all files not matching file_type */
+			if (lstat(globbed_files.gl_pathv[i], 
+					  &file_attrib) == -1)
+				continue;
 
-			pfiles = (char **)xnmalloc((size_t)search_files + 1,
-									   sizeof(char *));
-			size_t *files_len = (size_t *)xnmalloc((size_t)search_files
-												   + 1, sizeof(size_t)); 
-
-			for (i = 0; i < (size_t)search_files; i++) {
-				if (strstr(search_list[i]->d_name, search_str)) {
-					if (file_type) {
-
-						if (lstat(search_list[i]->d_name,
-						&file_attrib) == -1)
-							continue;
-
-						if ((file_attrib.st_mode & S_IFMT) == file_type) {
-							pfiles[found] = search_list[i]->d_name;
-							len = (unicode)
-							? u8_xstrlen(search_list[i]->d_name) 
-							: strlen(search_list[i]->d_name);
-
-							files_len[found++] = len;
-							if (len > flongest)
-								flongest = len;
-						}
-					}
-					else {
-						pfiles[found] = search_list[i]->d_name;
-						len = (unicode)
-							? u8_xstrlen(search_list[i]->d_name) 
-							: strlen(search_list[i]->d_name);
-						files_len[found++] = len;
-						if (len > flongest)
-							flongest = len;
-					}
-				}
-			}
-
-			if (found) {
-
-					if (flongest <= 0 || flongest > tcols)
-						columns_n = 1;
-					else
-						columns_n = (size_t)tcols / (flongest + 1);
-
-					if (columns_n > found)
-						columns_n = found;
-
-				for (i = 0; i < found; i++) {
-
-					if ((i + 1) % columns_n == 0)
-						last_column = 1;
-					else
-						last_column = 0;
-
-					colors_list(pfiles[i], 0, (last_column
-								|| i == found - 1) ? 0
-								: (int)(flongest - files_len[i]) + 1, 
-								(last_column || i == found - 1)
-								? 1 : 0);
-				}
-			}
-
-			for (i = 0; i < (size_t)search_files; i++)
-				free(search_list[i]);
-			free(search_list);
-
-			free(files_len);
-			free(pfiles);
-
-			if (chdir(path) == -1) {
-				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
-						path, strerror(errno));
-
-				free(deq_dir);
-
-				return EXIT_FAILURE;
-			}
+			if ((file_attrib.st_mode & S_IFMT) != file_type)
+				continue;
 		}
 
-		/* If /search_str */
+		pfiles[found] = globbed_files.gl_pathv[i];
+
+		/* Get the longest filename in the list */
+
+		/* If not searching in CWD, we only need to know the file's
+		 * length (no ELN) */
+		if (search_path) {
+			len = unicode ? u8_xstrlen(pfiles[found])
+				  : strlen(pfiles[found]);
+
+			/* This will be passed to colors_list(): -1 means no ELN */
+			eln[found] = -1;
+
+			files_len[found++] = len;
+
+			if (len > flongest)
+				flongest = len;
+		}
+
+		/* If searching in CWD, take into account the file's ELN
+		 * when calculating its legnth */
 		else {
-			int *index = (int *)xnmalloc(files + 1, sizeof(int));
-			pfiles = (char **)xnmalloc(files + 1, sizeof(char *));
-			size_t *files_len = (size_t *)xnmalloc(files + 1,
-											sizeof(size_t));
+			size_t j;
 
-			for (i = 0; i < files; i++) {
-				/* strstr finds substr in STR, as if STR where
-				 * "*substr*" */
-				if (strstr(dirlist[i], search_str)) {
-					if (file_type) {
-						if (lstat(dirlist[i], &file_attrib) == -1)
-							continue;
-						if ((file_attrib.st_mode & S_IFMT) == file_type) {
-							index[found] = (int)i;
-							pfiles[found] = dirlist[i];
+			for (j = 0; dirlist[j]; j++) {
 
-							len = ((unicode) ? u8_xstrlen(pfiles[found]) 
-								  : strlen(pfiles[found])) 
-								  + (size_t)((index[found] != -1) 
-								  ? digits_in_num(index[found]) + 1 : 2);
-							files_len[found] = len;
-							if (len > flongest) {
-							flongest = len;
-							}
+				if (strcmp(pfiles[found], dirlist[j]) != 0)
+					continue;
 
-							found++;
-						}
-					}
-					else {
+				eln[found] = (int)(j + 1);
 
-						index[found] = (int)i;
-						pfiles[found] = dirlist[i];
+				len = (unicode ? u8_xstrlen(pfiles[found]) 
+					  : strlen(pfiles[found])) + 
+					  (size_t)digits_in_num(eln[found]) + 1;
 
-						len = ((unicode) ? u8_xstrlen(pfiles[found]) 
-							  : strlen(pfiles[found])) + 
-							  (size_t)((index[found] != -1) 
-							  ? digits_in_num(index[found]) + 1 : 2);
-						files_len[found] = len;
-						if (len > flongest) {
-						flongest = len;
-						}
+				files_len[found] = len;
 
-						found++;
-					}
-				}
+				if (len > flongest)
+					flongest = len;
 			}
 
-			if (found) {
-
-					if (flongest <= 0 || flongest > tcols)
-						columns_n = 1;
-					else
-						columns_n = tcols / (flongest + 1);
-
-					if ((size_t)columns_n > found)
-						columns_n = found;
-
-				for (i = 0; i < found; i++) {
-
-					if ((i + 1) % columns_n == 0)
-						last_column = 1;
-					else
-						last_column = 0;
-
-					colors_list(pfiles[i], (index[i] != -1) 
-								? index[i] + 1 : -1, (last_column 
-								|| i == found - 1) ? 0 
-								: (int)(flongest - files_len[i]) + 1, 
-								(last_column || i == found - 1) ? 1 : 0);
-				}
-			}
-
-			free(index);
-			free(files_len);
-			free(pfiles);
+			found ++;
 		}
-
-		if (!found)
-			printf(_("%s: No matches found\n"), PROGRAM_NAME);
 	}
 
-	if (deq_dir)
-		free(deq_dir);
+	/* Print the results using colors and columns */
+	if (found) {
+
+		struct winsize w;
+		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+		unsigned short tcols = w.ws_col;
+
+		if (flongest <= 0 || flongest > tcols)
+			columns_n = 1;
+		else
+			columns_n = (size_t)tcols / (flongest + 1);
+
+		if (columns_n > found)
+			columns_n = found;
+
+		for (i = 0; i < found; i++) {
+
+			if ((i + 1) % columns_n == 0)
+				last_column = 1;
+			else
+				last_column = 0;
+
+			colors_list(pfiles[i], (eln[i] != -1) ? eln[i] : 0,
+						(last_column || i == (found - 1)) ? 0 : 
+						(int)(flongest - files_len[i]) + 1, 
+						(last_column || i == found - 1) ? 1 : 0);
+			/* Second argument to colors_list() is:
+			 * 0: Do not print any ELN 
+			 * Positive number: Print positive number as ELN
+			 * -1: Print "?" instead of an ELN */
+		}
+	}
+
+	else 
+		printf(_("%s: No matches found\n"), PROGRAM_NAME);
+
+	/* Free stuff */
+	free(eln);
+	free(files_len);
+	free(pfiles);
+	globfree(&globbed_files);
+
+	/* If needed, go back to the directory we came from */
+	if (search_path) {
+		if (chdir(path) == -1) {
+			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+					path, strerror(errno));
+			return EXIT_FAILURE;
+		}
+	}
 
 	if (!found)
 		return EXIT_FAILURE;
