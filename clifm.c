@@ -12784,12 +12784,13 @@ parse_input_str(char *str)
 			/* Check for glob chars (including braces) */
 			if ((substr[i][j] == '*' || substr[i][j] == '?' 
 			|| substr[i][j] == '[' || substr[i][j] == '{')
-			&& substr[i][j + 1] != 0x20)
+			&& substr[i][j + 1] != 0x20) {
 			/* Strings containing these characters are taken as wildacard 
 			 * patterns and are expanded by the glob function. See man (7) 
 			 * glob */
 				if (glob_n < int_array_max)
 					glob_array[glob_n++] = (int)i;
+			}
 		}
 	}
 
@@ -12800,7 +12801,6 @@ parse_input_str(char *str)
 	&& strcmp(substr[0], "u") != 0
 	&& strcmp(substr[0], "undel") != 0 
 	&& strcmp(substr[0], "untrash") != 0) {
-
 	 /*	1) Expand glob
 		2) Create a new array, say comm_array_glob, large enough to store
 		   the expanded glob and the remaining (non-glob) arguments 
@@ -16948,7 +16948,8 @@ search_function(char **comm)
 
 	if (strcntchr(search_str, '*') != -1
 	|| strcntchr(search_str, '?') != -1
-	|| strcntchr(search_str, '[') != -1) {
+	|| strcntchr(search_str, '[') != -1
+	|| strcntchr(search_str, '{')) {
 
 		/* If we have a path ("/search_str /path"), chdir into it, since
 		 * glob() works on CWD */
@@ -16971,7 +16972,7 @@ search_function(char **comm)
 
 		/* Get globbed files */
 		glob_t globbed_files;
-		int ret = glob(search_str, 0, NULL, &globbed_files);
+		int ret = glob(search_str, GLOB_BRACE, NULL, &globbed_files);
 		if (ret == 0) {
 
 			int last_column = 0;
@@ -17114,6 +17115,7 @@ search_function(char **comm)
 			if (!found) 
 				printf(_("%s: No matches found\n"), PROGRAM_NAME);
 		}
+
 		else 
 			printf(_("%s: No matches found\n"), PROGRAM_NAME);
 
