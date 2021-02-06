@@ -53,7 +53,7 @@ and DT_DIR (and company) and S_ISVTX macros */
  * immutable bit checks */
 
 /* The following C libraries are located in /usr/include */
-#include <stdio.h> /* (f)printf, s(n)printf, scanf, fopen, fclose, remove,
+#include <stdio.h> /* (f)printf, s(n)printf, scanf, fopen, fclose, unlink,
 					fgetc, fputc, perror, rename, sscanf, getline */
 #include <string.h> /* str(n)cpy, str(n)cat, str(n)cmp, strlen, strstr,
 					memset */
@@ -318,6 +318,8 @@ int back_function(char **comm);
 int forth_function(char **comm);
 int cd_function(char *new_path);
 int open_function(char **cmd);
+void save_last_path(void);
+int get_last_path(void);
 
 /* Files handling */
 int copy_function(char **comm);
@@ -529,7 +531,6 @@ struct param
 
 struct param xargs;
 
-
 /* A list of possible program messages. Each value tells the prompt what
  * to do with error messages: either to print an E, W, or N char at the
  * beginning of the prompt, or nothing (nomsg) */
@@ -598,17 +599,18 @@ char *user = (char *)NULL, *path = (char *)NULL,
 	*msg = (char *)NULL, *CONFIG_DIR = (char *)NULL,
 	*CONFIG_FILE = (char *)NULL, *BM_FILE = (char *)NULL,
 	hostname[HOST_NAME_MAX] = "", *LOG_FILE = (char *)NULL,
-	*LOG_FILE_TMP = (char *)NULL, *HIST_FILE = (char *)NULL,
-	*MSG_LOG_FILE = (char *)NULL, *PROFILE_FILE = (char *)NULL,
-	*TRASH_DIR = (char *)NULL, *TRASH_FILES_DIR = (char *)NULL,
-	*TRASH_INFO_DIR = (char *)NULL, *sys_shell = (char *)NULL,
-	**dirlist = (char **)NULL, **bookmark_names = (char **)NULL,
-	*ls_colors_bk = (char *)NULL, *MIME_FILE = (char *)NULL,
-	**profile_names = (char **)NULL, *encoded_prompt = (char *)NULL,
-	*last_cmd = (char *)NULL, *term = (char *)NULL,
-	*TMP_DIR = (char *)NULL, div_line_char = -1, *opener = (char *)NULL,
+	*HIST_FILE = (char *)NULL, *MSG_LOG_FILE = (char *)NULL,
+	*PROFILE_FILE = (char *)NULL, *TRASH_DIR = (char *)NULL,
+	*TRASH_FILES_DIR = (char *)NULL, *TRASH_INFO_DIR = (char *)NULL,
+	*sys_shell = (char *)NULL, **dirlist = (char **)NULL,
+	**bookmark_names = (char **)NULL, *ls_colors_bk = (char *)NULL,
+	*MIME_FILE = (char *)NULL, **profile_names = (char **)NULL,
+	*encoded_prompt = (char *)NULL, *last_cmd = (char *)NULL,
+	*term = (char *)NULL, *TMP_DIR = (char *)NULL, *opener = (char *)NULL,
 	**old_pwd = (char **)NULL, *SCRIPTS_DIR = (char *)NULL,
 	*ACTIONS_FILE = (char *)NULL, **ext_colors = (char **)NULL;
+
+char div_line_char = -1;
 
 size_t *ext_colors_len = (size_t *)NULL;
 
@@ -683,7 +685,7 @@ char di_c[MAX_COLOR] = "", /* Directory */
 int
 main(int argc, char **argv)
 {
-
+	
 	/* #########################################################
 	 * #			0) INITIAL CONDITIONS					   #
 	 * #########################################################*/
@@ -934,7 +936,8 @@ main(int argc, char **argv)
 	get_history();
 
 	/* Check if the 'file' command is available */
-	file_cmd_check();
+	if (!opener)
+		file_cmd_check();
 
 	if (splash_screen) {
 		splash();
@@ -943,45 +946,8 @@ main(int argc, char **argv)
 	}
 
 	/* Last path is overriden by the -p option in the command line */
-	if (xargs.path == -1 && restore_last_path) {
-
-		char *last_file = (char *)xnmalloc(strlen(CONFIG_DIR) + 7,
-										   sizeof(char));
-		sprintf(last_file, "%s/.last", CONFIG_DIR);
-
-		struct stat last_attrib;
-		if (stat(last_file, &last_attrib) != -1) {
-
-			FILE *last_fp = fopen(last_file, "r");
-
-			if (!last_fp) {
-				_err('w', PRINT_PROMPT, _("%s: Error retrieving last "
-					 "visited directory\n"), PROGRAM_NAME);
-			}
-
-			else {
-				char line[PATH_MAX] = "";
-				fgets(line, sizeof(line), last_fp);
-
-				if (*line && strchr(line, '/')) {
-					/* In case path was set via StartingPath in the
-					 * config file */
-					if (path) {
-						free(path);
-						path = (char *)NULL;
-					}
-
-					path = (char *)xnmalloc(strlen(line) + 1,
-											sizeof(char));
-					strcpy(path, line);
-				}
-
-				fclose(last_fp);
-			}
-		}
-
-		free(last_file);
-	}
+	if (xargs.path == -1 && restore_last_path)
+		get_last_path();
 
 	/* If path was not set (neither in the config file nor via command
 	 * line nor via the RestoreLastPath option), set the default (CWD),
@@ -1120,6 +1086,55 @@ main(int argc, char **argv)
 			 * ################################# */
 
 int
+get_last_path(void)
+/* Set PATH to last visited directory */
+{
+	char *last_file = (char *)xnmalloc(strlen(CONFIG_DIR) + 7,
+									   sizeof(char));
+	sprintf(last_file, "%s/.last", CONFIG_DIR);
+
+	struct stat last_attrib;
+	if (stat(last_file, &last_attrib) == -1) {
+		free(last_file);
+		return EXIT_FAILURE;
+	}
+
+	FILE *last_fp = fopen(last_file, "r");
+
+	if (!last_fp) {
+		_err('w', PRINT_PROMPT, _("%s: Error retrieving last "
+			 "visited directory\n"), PROGRAM_NAME);
+		free(last_file);
+		return EXIT_FAILURE;
+	}
+
+	char line[PATH_MAX] = "";
+	fgets(line, sizeof(line), last_fp);
+
+	if (!*line || !strchr(line, '/')) {
+		free(last_file);
+		fclose(last_fp);
+		return EXIT_FAILURE;
+	}
+
+	/* In case path was set via StartingPath in the config file */
+	if (path) {
+		free(path);
+		path = (char *)NULL;
+	}
+
+	path = (char *)xnmalloc(strlen(line) + 1,
+							sizeof(char));
+	strcpy(path, line);
+
+	fclose(last_fp);
+
+	free(last_file);
+
+	return EXIT_SUCCESS;
+}
+
+int
 reload_config(void)
 {
 	/* Free everything */
@@ -1132,9 +1147,8 @@ reload_config(void)
 
 	free(BM_FILE);
 	free(LOG_FILE);
-	free(LOG_FILE_TMP);
 	free(HIST_FILE);
-	BM_FILE = LOG_FILE = LOG_FILE_TMP = HIST_FILE = (char *)NULL;
+	BM_FILE = LOG_FILE = HIST_FILE = (char *)NULL;
 
 	free(CONFIG_FILE);
 	free(PROFILE_FILE);
@@ -1182,7 +1196,7 @@ reload_config(void)
 	home_ok = 1, config_ok = 1, trash_ok = 1, selfile_ok = 1, tips = -1,
 	mime_match = 0, logs_enabled = -1, sort = -1, files_counter = -1,
 	light_mode = -1, dir_indicator = -1, classify = -1, sort_switch = 0,
-	sort_reverse = 0, autocd = -1, auto_open = -1;
+	sort_reverse = 0, autocd = -1, auto_open = -1, restore_last_path = -1;
 
 	shell_terminal = no_log = internal_cmd = dequoted = 0;
 	shell_is_interactive = recur_perm_error_flag = mime_match = 0;
@@ -1297,13 +1311,16 @@ edit_link(char *link)
 
 	while (!new_path) {
 		new_path = rl_no_hist("New path ('q' to quit): ");
+
 		if (!new_path)
 			continue;
+
 		if (!*new_path) {
 			free(new_path);
 			new_path = (char *)NULL;
 			continue;
 		}
+
 		if (strcmp(new_path, "q") == 0) {
 			free(new_path);
 			return EXIT_SUCCESS;
@@ -1598,6 +1615,7 @@ run_action(char *action, char **args)
 
 int
 load_actions(void)
+/* Store actions from the actions file into a struct */
 {
 	/* Free the actions struct array */
 	if (actions_n) {
@@ -1918,10 +1936,13 @@ check_iso(char *file)
 	}
 
 	char ISO_TMP_FILE[PATH_MAX] = "";
-	sprintf(ISO_TMP_FILE, "%s/archiver_tmp", TMP_DIR);
+	char *rand_ext = gen_rand_str(6);
 
-	if (access(ISO_TMP_FILE, F_OK) == 0)
-		remove(ISO_TMP_FILE);
+	if (!rand_ext)
+		return -1;
+
+	sprintf(ISO_TMP_FILE, "%s/archiver.%s", TMP_DIR, rand_ext);
+	free(rand_ext);
 
 	FILE *file_fp = fopen(ISO_TMP_FILE, "w");
 
@@ -1986,7 +2007,7 @@ check_iso(char *file)
 				is_iso = 1;
 			fclose(file_fp);
 		}
-		remove(ISO_TMP_FILE);
+		unlink(ISO_TMP_FILE);
 	}
 
 	if (is_iso)
@@ -2117,11 +2138,18 @@ is_compressed(char *file, int test_iso)
 		return -1;
 	}
 
-	char ARCHIVER_TMP_FILE[PATH_MAX] = "";
-	sprintf(ARCHIVER_TMP_FILE, "%s/archiver_tmp", TMP_DIR);
+	char *rand_ext = gen_rand_str(6);
+
+	if (!rand_ext)
+		return -1;
+
+	char ARCHIVER_TMP_FILE[PATH_MAX] = "";	
+	sprintf(ARCHIVER_TMP_FILE, "%s/archiver.%s", TMP_DIR, rand_ext);
+
+	free(rand_ext);
 
 	if (access(ARCHIVER_TMP_FILE, F_OK) == 0)
-		remove(ARCHIVER_TMP_FILE);
+		unlink(ARCHIVER_TMP_FILE);
 
 	FILE *file_fp = fopen(ARCHIVER_TMP_FILE, "w");
 
@@ -2198,7 +2226,7 @@ is_compressed(char *file, int test_iso)
 			fclose(file_fp);
 		}
 
-		remove(ARCHIVER_TMP_FILE);
+		unlink(ARCHIVER_TMP_FILE);
 	}
 
 	if (compressed)
@@ -2466,20 +2494,17 @@ archiver(char **args, char mode)
 	for (i = 1; args[i]; i++) {
 		char *deq = (char *)NULL;
 
-		if (strchr(args[i], '\\'))
+		if (strchr(args[i], '\\')) {
 			deq = dequote_str(args[i], 0);
-
-		if (is_compressed((deq) ? deq : args[i], 1) != 0) {
-			fprintf(stderr, _("archiver: '%s': Not an "
-					"archive/compressed file\n"), args[i]);
-			if (deq)
-				free(deq);
-
-			return EXIT_FAILURE;
+			strcpy(args[i], deq);
+			free(deq);
 		}
 
-		if (deq)
-			free(deq);
+		if (is_compressed(args[i], 1) != 0) {
+			fprintf(stderr, _("archiver: '%s': Not an "
+					"archive/compressed file\n"), args[i]);
+			return EXIT_FAILURE;
+		}
 	}
 
 
@@ -2488,10 +2513,10 @@ archiver(char **args, char mode)
 				 * ########################## */
 
 	char *ret = strrchr(args[1], '.');
+
 	if ((ret && strcmp(ret, ".iso") == 0)
-	|| check_iso(args[1]) == 0) {
+	|| check_iso(args[1]) == 0)
 		return handle_iso(args[1]);
-	}
 
 				/* ##########################
 				 * #		ZSTANDARD		#
@@ -2940,7 +2965,7 @@ bulk_rename(char **args)
 	stat(BULK_FILE, &file_attrib);
 	if (mtime_bfr == file_attrib.st_mtime) {
 		puts(_("bulk: Nothing to do"));
-		if (remove(BULK_FILE) == -1) {
+		if (unlink(BULK_FILE) == -1) {
 			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 				 BULK_FILE, strerror(errno));
 			exit_status = EXIT_FAILURE;
@@ -2969,7 +2994,7 @@ bulk_rename(char **args)
 	if (arg_total != file_total) {
 		fputs(_("bulk: Line mismatch in rename file\n"), stderr);
 		fclose(bulk_fp);
-		if (remove(BULK_FILE) == -1)
+		if (unlink(BULK_FILE) == -1)
 			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 				 BULK_FILE, strerror(errno));
 		return EXIT_FAILURE;
@@ -2999,7 +3024,7 @@ bulk_rename(char **args)
 	/* If no filename was modified */
 	if (!modified) {
 		puts(_("bulk: Nothing to do"));
-		if (remove(BULK_FILE) == -1) {
+		if (unlink(BULK_FILE) == -1) {
 			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 				 BULK_FILE, strerror(errno));
 			exit_status = EXIT_FAILURE;
@@ -3066,7 +3091,7 @@ bulk_rename(char **args)
 
 	fclose(bulk_fp);
 
-	if (remove(BULK_FILE) == -1) {
+	if (unlink(BULK_FILE) == -1) {
 		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 			 BULK_FILE, strerror(errno));
 		exit_status = EXIT_FAILURE;
@@ -3564,8 +3589,8 @@ m_alphasort(const struct dirent **a, const struct dirent **b)
 	return (ret - (ret * 2));
 }
 
-/* NOTE: strverscmp() is a GNU extension, so that it will be available
- * neither on FreeBSD nor when compiling with _BE_POSIX */
+/* NOTE: strverscmp() is a GNU extension, so that it won't be available
+ * on FreeBSD nor when compiling with the _BE_POSIX flag */
 #if !defined __FreeBSD__ && !defined _BE_POSIX
 int
 m_versionsort(const struct dirent **a, const struct dirent **b)
@@ -4099,7 +4124,7 @@ ClearScreen=false\n\n"
 StartingPath=\n\n"
 
 "# If set to true, start CliFM in the last visited directory. This option\n\
-# overrides StartingPath.\
+# overrides StartingPath.\n\
 RestoreLastPath=false\n\n"
 
 "#END OF OPTIONS\n\n",
@@ -5149,9 +5174,13 @@ profile_set(char *prof)
 	/* If changing to the current profile, do nothing */
 	if ((strcmp(prof, "default") == 0 && !alt_profile)
 	|| (alt_profile && strcmp(prof, alt_profile) == 0)) {
-		printf("%s: '%s' is the current profile\n", PROGRAM_NAME, prof);
+		printf(_("%s: '%s' is the current profile\n"), PROGRAM_NAME,
+			   prof);
 		return EXIT_SUCCESS;
 	}
+
+	if (restore_last_path)
+		save_last_path();
 
 	if (alt_profile) {
 		free(alt_profile);
@@ -5167,6 +5196,9 @@ profile_set(char *prof)
 
 	/* Reset everything */
 	reload_config();
+
+	if (restore_last_path)
+		get_last_path();
 
 	/* Check whether we have a working shell */
 	if (access(sys_shell, X_OK) == -1) {
@@ -5712,11 +5744,17 @@ get_mime(char *file)
 		return (char *)NULL;
 	}
 
+	char *rand_ext = gen_rand_str(6);
+
+	if (!rand_ext)
+		return (char *)NULL;
+
 	char MIME_TMP_FILE[PATH_MAX] = "";
-	sprintf(MIME_TMP_FILE, "%s/mime_tmp", TMP_DIR);
+	sprintf(MIME_TMP_FILE, "%s/mime.%s", TMP_DIR, rand_ext);
+	free(rand_ext);
 
 	if (access(MIME_TMP_FILE, F_OK) == 0)
-		remove(MIME_TMP_FILE);
+		unlink(MIME_TMP_FILE);
 
 	FILE *file_fp = fopen(MIME_TMP_FILE, "w");
 
@@ -5785,7 +5823,7 @@ get_mime(char *file)
 			}
 			fclose(file_fp);
 		}
-		remove(MIME_TMP_FILE);
+		unlink(MIME_TMP_FILE);
 	}
 
 	if (mime_type)
@@ -9329,15 +9367,10 @@ create_usr_var(char *str)
 }
 
 void
-free_stuff(void)
-/* This function is called by atexit() to clear whatever is there at exit
- * time and avoid thus memory leaks */
+save_last_path(void)
+/* Store last visited directory for the restore last path function */
 {
-	size_t i = 0;
-
-	/* Store last visited directory for the restore last path
-	 * function */
-	if (restore_last_path && path && config_ok) {
+	if (path && config_ok) {
 		char *last_dir = (char *)xnmalloc(strlen(CONFIG_DIR) + 7,
 										  sizeof(char));
 		sprintf(last_dir, "%s/.last", CONFIG_DIR);
@@ -9355,6 +9388,17 @@ free_stuff(void)
 
 		free(last_dir);
 	}
+}
+
+void
+free_stuff(void)
+/* This function is called by atexit() to clear whatever is there at exit
+ * time and avoid thus memory leaks */
+{
+	size_t i = 0;
+
+	if (restore_last_path)
+		save_last_path();
 
 	if (ext_colors_n)
 		free(ext_colors_len);
@@ -9470,7 +9514,6 @@ free_stuff(void)
 	free(TRASH_INFO_DIR);
 	free(BM_FILE);
 	free(LOG_FILE);
-	free(LOG_FILE_TMP);
 	free(HIST_FILE);
 	free(CONFIG_FILE);
 	free(PROFILE_FILE);
@@ -10682,9 +10725,6 @@ init_config(void)
 		LOG_FILE = (char *)xcalloc(config_len + 9, sizeof(char));
 		sprintf(LOG_FILE, "%s/log.cfm", CONFIG_DIR);
 
-		LOG_FILE_TMP = (char *)xcalloc(config_len + 13, sizeof(char));
-		sprintf(LOG_FILE_TMP, "%s/log_tmp.cfm", CONFIG_DIR);
-
 		HIST_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
 		sprintf(HIST_FILE, "%s/history.cfm", CONFIG_DIR);
 
@@ -11527,6 +11567,7 @@ init_config(void)
 			 * via the config file, or if this latter could not be read
 			 * for any reason, set the defaults */
 			/* -1 means not set */
+			if (restore_last_path == -1) restore_last_path = 0;
 			if (auto_open == -1) auto_open = 1;
 			if (autocd == -1) autocd = 1;
 			if (light_mode == -1) light_mode = 0;
@@ -16386,7 +16427,7 @@ save_sel(void)
 		return EXIT_FAILURE;
 
 	if (sel_n == 0) {
-		if (remove(sel_file_user) == -1) {
+		if (unlink(sel_file_user) == -1) {
 			fprintf(stderr, "%s: sel: '%s': %s\n", PROGRAM_NAME, 
 					sel_file_user, strerror(errno));
 			return EXIT_FAILURE;
@@ -17662,7 +17703,7 @@ bookmark_del(char *name)
 			int ret = launch_execve(tmp_cmd, FOREGROUND);
 			/* Remove the bookmarks file, free stuff, and exit */
 			if (ret == EXIT_SUCCESS) {
-				remove(BM_FILE);
+				unlink(BM_FILE);
 				printf(_("bookmarks: All bookmarks were deleted\n "
 						 "However, a backup copy was created (%s)\n"),
 						  bk_file);
@@ -17749,7 +17790,7 @@ bookmark_del(char *name)
 
 	/* Remove the old bookmarks file and make the tmp file the new 
 	 * bookmarks file*/
-	remove(BM_FILE);
+	unlink(BM_FILE);
 	rename(tmp_file, BM_FILE);
 	free(tmp_file);
 	tmp_file = (char *)NULL;
@@ -18386,7 +18427,13 @@ bookmarks_function(char **cmd)
 off_t
 dir_size(char *dir)
 {
-	#define DU_TMP_FILE "/tmp/.du_size"
+	char *rand_ext = gen_rand_str(6);
+	if (!rand_ext)
+		return -1;
+
+	char DU_TMP_FILE[15];
+	sprintf(DU_TMP_FILE, "/tmp/du.%s", rand_ext);
+	free(rand_ext);
 
 	if (!dir)
 		return -1;
@@ -18445,7 +18492,7 @@ dir_size(char *dir)
 			fclose(du_fp);
 		}
 
-		remove(DU_TMP_FILE);
+		unlink(DU_TMP_FILE);
 	}
 
 	return retval;
@@ -19064,60 +19111,90 @@ check_log_file_size(char *log_file)
 /* Keep only the last 'max_log' records in LOG_FILE */
 {
 	/* Create the file, if it doesn't exist */
-	struct stat file_attrib;
 	FILE *log_fp = (FILE *)NULL;
+	struct stat file_attrib;
+
 	if (stat(log_file, &file_attrib) == -1) {
 		log_fp = fopen(log_file, "w");
+
 		if (!log_fp) {
 			_err(0, NOPRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 				 log_file, strerror(errno));
 		}
 		else
 			fclose(log_fp);
+
 		return; /* Return anyway, for, being a new empty file, there's
 		no need to truncate it */
 	}
 
-	/* Truncate the file, if needed */
+	/* Once we know the files exists, keep only max logs */
 	log_fp = fopen (log_file, "r");
-	if (log_fp) {
-		int logs_num = 0, c;
 
-		/* Count newline chars to get amount of lines in file */
-		while ((c = fgetc(log_fp)) != EOF) {
-			if (c == '\n')
-				logs_num++;
-		}
-
-		if (logs_num > max_log) {
-			/* Go back to the beginning of the log file */
-			fseek(log_fp, 0, SEEK_SET);
-			/* Create a temp file to store only newest logs */
-			FILE *log_fp_tmp = fopen(LOG_FILE_TMP, "w+");
-			if (!log_fp_tmp) {
-				perror("log");
-				fclose(log_fp);
-				return;
-			}
-			int i = 1;
-			size_t line_size = 0;
-			char *line_buff = (char *)NULL;
-			ssize_t line_len = 0;
-			while ((line_len = getline(&line_buff, &line_size,
-			log_fp)) > 0)
-				/* Delete oldest entries */
-				if (i++ >= logs_num - (max_log - 1))
-					fprintf(log_fp_tmp, "%s", line_buff);
-			free(line_buff);
-			fclose(log_fp_tmp);
-			fclose(log_fp);
-			remove(log_file);
-			rename(LOG_FILE_TMP, log_file);
-		}
-	}
-	else
+	if (!log_fp) {
 		_err(0, NOPRINT_PROMPT, "%s: log: %s: %s\n", PROGRAM_NAME,
-			 log_file, strerror(errno));
+		 log_file, strerror(errno));
+		return;
+	}
+
+	int logs_num = 0, c;
+
+	/* Count newline chars to get amount of lines in the log file */
+	while ((c = fgetc(log_fp)) != EOF) {
+		if (c == '\n')
+			logs_num++;
+	}
+
+	if (logs_num <= max_log) {
+		fclose(log_fp);
+		return;
+	}
+
+	/* Go back to the beginning of the log file */
+	fseek(log_fp, 0, SEEK_SET);
+
+	/* Create a temp file to store only newest logs */
+	char *rand_ext = gen_rand_str(6);
+
+	if (!rand_ext) {
+		fclose(log_fp);
+		return;
+	}
+
+	char *tmp_file = (char *)xnmalloc(strlen(CONFIG_DIR) + 12,
+									  sizeof(char));
+	sprintf(tmp_file, "%s/log.%s", CONFIG_DIR, rand_ext);
+	free(rand_ext);
+	
+	FILE *log_fp_tmp = fopen(tmp_file, "w+");
+
+	if (!log_fp_tmp) {
+		fprintf(stderr, "log: %s: %s", tmp_file, strerror(errno));
+		fclose(log_fp);
+		free(tmp_file);
+		return;
+	}
+
+	int i = 1;
+	size_t line_size = 0;
+	char *line_buff = (char *)NULL;
+	ssize_t line_len = 0;
+
+	while ((line_len = getline(&line_buff, &line_size,
+	log_fp)) > 0) {
+		/* Delete old entries = copy only new ones */
+		if (i++ >= logs_num - (max_log - 1))
+			fprintf(log_fp_tmp, "%s", line_buff);
+	}
+	
+	free(line_buff);
+	fclose(log_fp_tmp);
+	fclose(log_fp);
+	unlink(log_file);
+	rename(tmp_file, log_file);
+	free(tmp_file);
+
+	return;
 }
 
 int
