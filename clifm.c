@@ -331,6 +331,7 @@ int alias_import(char *file);
 void exec_chained_cmds(char *cmd);
 int edit_function(char **comm);
 int edit_link(char *link);
+int export(char **files);
 
 /* Selection */
 int save_sel(void);
@@ -623,7 +624,7 @@ const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
 		"exit", "quit", "pager", "trash", "undel", "messages",
 		"mountpoints", "bookmarks", "log", "untrash", "unicode",
 		"profile", "shell", "mime", "sort", "tips", "autocd",
-		"auto-open", "actions", "reload", NULL };
+		"auto-open", "actions", "reload", "export", NULL };
 
 #define DEFAULT_PROMPT "\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\
 \\z\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
@@ -1084,6 +1085,46 @@ main(int argc, char **argv)
 			/** #################################
 			 * #     FUNCTIONS DEFINITIONS     #
 			 * ################################# */
+
+int
+export(char **filenames)
+{
+	if (!filenames)
+		return EXIT_FAILURE;
+
+	char *rand_ext = gen_rand_str(6);
+
+	if (!rand_ext)
+		return EXIT_FAILURE;
+	
+	char *tmp_file = (char *)xnmalloc(strlen(TMP_DIR) + 14,
+									 sizeof(char));
+	sprintf(tmp_file, "%s/.clifm%s", TMP_DIR, rand_ext);
+	free(rand_ext);
+
+	FILE *fp = fopen(tmp_file, "w");
+
+	if (!fp) {
+		free(tmp_file);
+		return EXIT_FAILURE;
+	}
+
+	size_t i;
+	for (i = 1; filenames[i]; i++) {
+		if (strcmp(filenames[i], ".") != 0
+		&& strcmp(filenames[i], "..") != 0)
+			fprintf(fp, "%s\n", filenames[i]);
+	}
+
+	fclose(fp);
+
+	char *cmd[] = { "mime", tmp_file, NULL };
+	int exit_status = mime_open(cmd);
+
+	free(tmp_file);
+
+	return exit_status;
+}
 
 int
 get_last_path(void)
@@ -6003,7 +6044,7 @@ is_internal_c(const char *cmd)
 					"net", "lm", "st", "sort", "fc", "tips", "br",
 					"bulk", "opener", "ac", "ad", "acd", "autocd",
 					"ao", "auto-open", "actions", "rl", "reload",
-					NULL };
+					"exp", "export", NULL };
 
 	short found = 0;
 	size_t i;
@@ -7045,7 +7086,7 @@ is_internal(const char *cmd)
 	const char *int_cmds[] = { "o", "open", "cd", "p", "pr", "prop", "t",
 							   "tr", "trash", "s", "sel", "mm", "mime",
 							   "bm", "bookmarks", "br", "bulk", "ac",
-							   "ad", NULL };
+							   "ad", "exp", "export", NULL };
 	short found = 0;
 	size_t i;
 
@@ -12708,8 +12749,7 @@ parse_input_str(char *str)
 	 *  */
 
 	int *glob_array = (int *)xnmalloc(int_array_max, sizeof(int)); 
-	int *braces_array = (int *)xnmalloc(int_array_max, sizeof(int)); 
-	size_t glob_n = 0, braces_n = 0;
+	size_t glob_n = 0;
 
 	for (i = 0; substr[i]; i++) {
 
@@ -12729,45 +12769,22 @@ parse_input_str(char *str)
 		if (substr[0][0] == '/' && i != 1)
 			continue;
 
-				/* ############################
-				 * #    4) TILDE EXPANSION    # 
-				 * ###########################*/
+		/* ###############################################
+		 * #   3) WILDCARD, BRACE, AND TILDE EXPANSION   # 
+		 * ############################################### */
 
-		 /* (replace "~" by "/home/user") */
-/*		if (strncmp (substr[i], "~", 1) == 0) { */
 		if (*substr[i] == '~') {
-			/* tilde_expand() is provided by the readline lib */
-			char *exp_path = tilde_expand(substr[i]);
-			if (exp_path) {
-				substr[i] = (char *)xrealloc(substr[i], 
-									 (strlen(exp_path) + 1) * sizeof(char));
-				strcpy(substr[i], exp_path);
-			}
-			free(exp_path);
-			exp_path = (char *)NULL;
+			if (glob_n < int_array_max)
+				glob_array[glob_n++] = (int)i;
 		}
 
 		register size_t j = 0;
 		for (j = 0; substr[i][j]; j++) {
 
-			/* If a brace is found, store its index */
-			if (substr[i][j] == '{' && substr[i][j + 1] != 0x00
-			&& substr[i][j + 1] != '}' && substr[i][j - 1] != 0x00
-			&& substr[i][j - 1] != '\\') {
-				size_t k;
-
-				for (k = j + 1; substr[i][k] && substr[i][k]!='}'; k++) {
-					if (substr[i][k] == ',' && substr[i][k - 1] != '\\'
-					&& braces_n < int_array_max) {
-						braces_array[braces_n++] = (int)i;
-						break;
-					}
-				}
-			}
-
-			/* Check for glob chars */
-			if (substr[i][j] == '*' || substr[i][j] == '?' 
-			|| (substr[i][j] == '[' && substr[i][j + 1] != 0x20))
+			/* Check for glob chars (including braces) */
+			if ((substr[i][j] == '*' || substr[i][j] == '?' 
+			|| substr[i][j] == '[' || substr[i][j] == '{')
+			&& substr[i][j + 1] != 0x20)
 			/* Strings containing these characters are taken as wildacard 
 			 * patterns and are expanded by the glob function. See man (7) 
 			 * glob */
@@ -12776,10 +12793,6 @@ parse_input_str(char *str)
 		}
 	}
 
-				/* ###########################
-				 * #    5) GLOB EXPANSION    # 
-				 * ###########################*/
-
 	/* Do not expand if command is deselect or untrash, just to allow the
 	 * use of "*" for both commands: "ds *" and "u *" */
 	if (glob_n && strcmp(substr[0], "ds") != 0 
@@ -12787,6 +12800,7 @@ parse_input_str(char *str)
 	&& strcmp(substr[0], "u") != 0
 	&& strcmp(substr[0], "undel") != 0 
 	&& strcmp(substr[0], "untrash") != 0) {
+
 	 /*	1) Expand glob
 		2) Create a new array, say comm_array_glob, large enough to store
 		   the expanded glob and the remaining (non-glob) arguments 
@@ -12812,7 +12826,8 @@ parse_input_str(char *str)
 		register size_t g = 0;
 		for (g = 0; g < (size_t)glob_n; g++){
 			glob_t globbuf;
-			glob(substr[glob_array[g] + (int)old_pathc], 0, NULL, &globbuf);
+			glob(substr[glob_array[g] + (int)old_pathc],
+				 GLOB_BRACE|GLOB_TILDE, NULL, &globbuf);
 
 			if (globbuf.gl_pathc) {
 				register size_t j = 0;
@@ -12880,117 +12895,6 @@ parse_input_str(char *str)
 	}
 
 	free(glob_array);
-
-				/* #############################
-				 * #    6) BRACES EXPANSION    # 
-				 * #############################*/
-
-	if (braces_n) { /* If there is some braced parameter... */
-		/* We already know the indexes of braced strings
-		 * (braces_array[]) */
-		int old_braces_arg = 0;
-		register size_t b = 0;
-		for (b = 0; b < braces_n; b++) {
-			/* Expand the braced parameter and store it into a new
-			 * array */
-			int braced_args = brace_expansion(substr[braces_array[b]
-											  + old_braces_arg]);
-			/* Now we also know how many elements the expanded braced 
-			 * parameter has */
-			if (braced_args) {
-				/* Create an array large enough to store parameters
-				 * plus expanded braces */
-				char **comm_array_braces = (char **)NULL;
-				comm_array_braces = (char **)xcalloc(args_n + 
-												(size_t)braced_args, 
-												sizeof(char *));
-				/* First, add to the new array the paramenters coming
-				 * before braces */
-
-				for (i = 0; i < (size_t)(braces_array[b] + old_braces_arg); 
-				i++) {
-					comm_array_braces[i] = (char *)xcalloc(
-												strlen(substr[i])
-												 + 1, sizeof(char));
-					strcpy(comm_array_braces[i], substr[i]);
-				}
-
-				/* Now, add the expanded braces to the same array */
-				register size_t j = 0;
-
-				for (j = 0; j < (size_t)braced_args; j++) {
-					/* Escape each filename and copy it */
-					char *esc_str = escape_str(braces[j]);
-					if (esc_str) {
-						comm_array_braces[i] = (char *)xcalloc(
-												strlen(esc_str)
-												+ 1, sizeof(char));
-						strcpy(comm_array_braces[i++], esc_str);
-						free(esc_str);
-					}
-					else {
-						fprintf(stderr, _("%s: %s: Error quoting "
-								"filename\n"), PROGRAM_NAME,
-								braces[j]);
-						register size_t k = 0;
-
-						for (k = 0; k < braces_n; k++)
-							free(braces[k]);
-						free(braces);
-						braces = (char **)NULL;
-
-						for (k = 0;k < i; k++)
-							free(comm_array_braces[k]);
-						free(comm_array_braces);
-						comm_array_braces = (char **)NULL;
-
-						for (k = 0; k < args_n; k++)
-							free(substr[k]);
-						free(substr);
-
-						return (char **)NULL;
-					}
-					free(braces[j]);
-				}
-				free(braces);
-				braces = (char **)NULL;
-				/* Finally, add, if any, those parameters coming after
-				 * the braces */
-
-				for (j = (size_t)(braces_array[b] + old_braces_arg) + 1;
-				j <= args_n; j++) {
-					comm_array_braces[i] = (char *)xcalloc(
-												    strlen(substr[j])
-													+ 1, sizeof(char));
-					strcpy(comm_array_braces[i++], substr[j]);
-				}
-
-				/* Now, free the old comm_array and copy to it our new
-				 * array containing all the parameters, including the
-				 * expanded braces */
-				for (j = 0; j <= args_n; j++)
-					free(substr[j]);
-				substr = (char **)xrealloc(substr, (args_n +
-										   (size_t)braced_args + 1) *
-										   sizeof(char *));
-
-				args_n = i - 1;
-
-				for (j = 0; j < i; j++) {
-					substr[j] = (char *)xcalloc(strlen(
-										comm_array_braces[j]) + 1,
-										sizeof(char));
-					strcpy(substr[j], comm_array_braces[j]);
-					free(comm_array_braces[j]);
-				}
-
-				old_braces_arg += (braced_args - 1);
-				free(comm_array_braces);
-			}
-		}
-	}
-
-	free(braces_array);
 
 	/* #### 7) NULL TERMINATE THE INPUT STRING ARRAY (again) #### */
 	substr = (char **)xrealloc(substr, (args_n + 2) * sizeof(char *));
@@ -15399,6 +15303,18 @@ exec_cmd(char **comm)
 	/* ##################################################
 	 * #			     MINOR FUNCTIONS 				#
 	 * ##################################################*/
+
+	else if (*comm[0] == 'e' && (strcmp(comm[0], "exp") == 0
+	|| strcmp(comm[0], "export") == 0)) {
+
+		if (!comm[1] || strcmp(comm[1], "--help") == 0)
+			puts(_("Usage: exp, export [FILE(s)]"));
+
+		else
+			exit_code = export(comm);
+
+		return exit_code;
+	}
 
 	else if (*comm[0] == 'o' && strcmp(comm[0], "opener") == 0) {
 		if (!comm[1]) {
