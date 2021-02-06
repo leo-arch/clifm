@@ -643,6 +643,35 @@ url_decode(char *str)
 }
 
 char *
+gen_rand_str(size_t len)
+/* Generate a random string of LEN bytes using characters from CHARSET */
+{
+	char charset[] = "0123456789#%-_"
+                     "abcdefghijklmnopqrstuvwxyz"
+                     "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+	srand(time(NULL));
+
+	char *str = (char *)malloc((len + 1) * sizeof(char));
+	char *p = str;
+
+	if (!p) {
+		fprintf(stderr, "Error allocating %zu bytes\n", len);
+		return (char *)NULL;
+	}
+
+	size_t i;
+	while (len--) {
+		i = (double)rand() / RAND_MAX * (sizeof charset - 1);
+		*p++ = charset[i];
+    }
+
+   	*p = 0x00;
+
+   	return str;
+}
+
+char *
 get_date (void)
 {
 	time_t rawtime = time(NULL);
