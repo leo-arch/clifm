@@ -246,7 +246,7 @@ void exec_profile(void);
 void external_arguments(int argc, char **argv);
 void get_aliases(void);
 void get_prompt_cmds(void);
-void check_log_file_size(char *log_file);
+void check_file_size(char *log_file, size_t max);
 void get_path_programs(void);
 size_t get_path_env(void);
 int create_config(char *file);
@@ -254,6 +254,8 @@ int set_shell(char *str);
 int load_actions(void);
 int regen_config(void);
 int reload_config(void);
+int save_dirhist(void);
+int load_dirhist(void);
 
 /* Memory */
 char *xnmalloc(size_t nmemb, size_t size);
@@ -579,7 +581,8 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 
 int max_hist = -1, max_log = -1, dirhist_total_index = 0,
 	dirhist_cur_index = 0, argc_bk = 0, max_path = -1, exit_code = 0,
-	shell_is_interactive = 0, cont_bt = 0, sort_types = 9;
+	shell_is_interactive = 0, cont_bt = 0, sort_types = 9,
+	max_dirhist = -1;
 
 unsigned short term_cols = 0;
 
@@ -611,7 +614,8 @@ char *user = (char *)NULL, *path = (char *)NULL,
 	*encoded_prompt = (char *)NULL, *last_cmd = (char *)NULL,
 	*term = (char *)NULL, *TMP_DIR = (char *)NULL, *opener = (char *)NULL,
 	**old_pwd = (char **)NULL, *SCRIPTS_DIR = (char *)NULL,
-	*ACTIONS_FILE = (char *)NULL, **ext_colors = (char **)NULL;
+	*ACTIONS_FILE = (char *)NULL, **ext_colors = (char **)NULL,
+	*DIRHIST_FILE = (char *)NULL;
 
 char div_line_char = -1;
 
@@ -776,7 +780,9 @@ main(int argc, char **argv)
 	 * then external_arguments() */
 	argc_bk = argc;
 	argv_bk = (char **)xnmalloc((size_t)argc, sizeof(char *));
+
 	register size_t i = 0;
+
 	for (i = 0; i < (size_t)argc; i++) {
 		argv_bk[i] = (char *)xnmalloc(strlen(argv[i]) + 1, sizeof(char));
 		strcpy(argv_bk[i], argv[i]);
@@ -790,6 +796,7 @@ main(int argc, char **argv)
 
 	/* Get user's home directory */
 	user_home = get_user_home();
+
 	if (!user_home || access(user_home, W_OK) == -1) {
 		/* If no user's home, or if it's not writable, there won't be
 		 * any config nor trash directory. These flags are used to
@@ -868,6 +875,10 @@ main(int argc, char **argv)
 	if (!config_ok)
 		set_default_options();
 
+	check_file_size(DIRHIST_FILE, max_dirhist);
+
+	load_dirhist();
+
 	load_actions();
 
 	/* Check whether we have a working shell */
@@ -903,11 +914,12 @@ main(int argc, char **argv)
 	if (config_ok) {
 
 		/* Limit the log files size */
-		check_log_file_size(LOG_FILE);
-		check_log_file_size(MSG_LOG_FILE);
+		check_file_size(LOG_FILE, max_log);
+		check_file_size(MSG_LOG_FILE, max_log);
 
 		/* Get history */
 		struct stat file_attrib;
+
 		if (stat(HIST_FILE, &file_attrib) == 0
 		&& file_attrib.st_size != 0) {
 		/* If the size condition is not included, and in case of a zero
@@ -918,12 +930,16 @@ main(int argc, char **argv)
 			/* Limit the size of the history file to max_hist lines */
 			history_truncate_file(HIST_FILE, max_hist);
 		}
-		else { /* If the history file doesn't exist, create it */
+
+		/* If the history file doesn't exist, create it */
+		else {
 			FILE *hist_fp = fopen(HIST_FILE, "w+");
+
 			if (!hist_fp) {
 				_err('w', PRINT_PROMPT, "%s: fopen: '%s': %s\n",
 					 PROGRAM_NAME, HIST_FILE, strerror(errno));
 			}
+
 			else {
 				/* To avoid malloc errors in read_history(), do not
 				 * create an empty file */
@@ -1191,7 +1207,8 @@ reload_config(void)
 	free(BM_FILE);
 	free(LOG_FILE);
 	free(HIST_FILE);
-	BM_FILE = LOG_FILE = HIST_FILE = (char *)NULL;
+	free(DIRHIST_FILE);
+	BM_FILE = LOG_FILE = HIST_FILE = DIRHIST_FILE = (char *)NULL;
 
 	free(CONFIG_FILE);
 	free(PROFILE_FILE);
@@ -1283,17 +1300,28 @@ reload_config(void)
 	/* Free the aliases and prompt_cmds arrays to be allocated again */
 	size_t i = 0;
 
+	for (i = 0; i < dirhist_total_index; i++)
+		free(old_pwd[i]);
+
+	free(old_pwd);
+
+	old_pwd = (char **)NULL;
+
 	for (i = 0; i < aliases_n; i++)
 		free(aliases[i]);
 
 	for (i = 0; i < prompt_cmds_n; i++)
 		free(prompt_cmds[i]);
 
-	aliases_n = prompt_cmds_n = 0;
+	aliases_n = prompt_cmds_n = dirhist_total_index = 0;
 
 	get_aliases();
 
 	get_prompt_cmds();
+
+	load_dirhist();
+
+	dirhist_cur_index = dirhist_total_index - 1;
 
 	return EXIT_SUCCESS;
 }
@@ -4160,6 +4188,7 @@ CaseSensitiveList=false\n\
 Unicode=false\n\
 Pager=false\n\
 MaxHistory=500\n\
+MaxDirhist=30\n\
 MaxLog=1000\n\
 ClearScreen=false\n\n"
 
@@ -5272,8 +5301,8 @@ profile_set(char *prof)
 
 	if (config_ok) {
 		/* Limit the log files size */
-		check_log_file_size(LOG_FILE);
-		check_log_file_size(MSG_LOG_FILE);
+		check_file_size(LOG_FILE, max_log);
+		check_file_size(MSG_LOG_FILE, max_log);
 
 		/* Reset history */
 		if (access(HIST_FILE, F_OK|W_OK) == 0) {
@@ -6966,6 +6995,7 @@ set_default_options(void)
 	ext_cmd_ok = 0;
 	pager = 0;
 	max_hist = 500;
+	max_dirhist = 30;
 	max_log = 1000;
 	clear_screen = 0;
 	list_folders_first = 1;
@@ -7683,6 +7713,7 @@ forth_function(char **comm)
 	/* If last path in dirhist was reached, do nothing */
 	if (dirhist_cur_index + 1 >= dirhist_total_index)
 		return EXIT_SUCCESS;
+
 	dirhist_cur_index++;
 
 	int ret = chdir(old_pwd[dirhist_cur_index]);
@@ -9514,12 +9545,83 @@ save_last_path(void)
 	}
 }
 
+int
+load_dirhist(void)
+{
+	FILE *fp = fopen(DIRHIST_FILE, "r");
+
+	if (!fp)
+		return EXIT_FAILURE;
+
+	size_t dirs = 0;
+
+	char tmp_line[PATH_MAX];
+
+	while (fgets(tmp_line, sizeof(tmp_line), fp))
+		dirs++;
+
+	if (!dirs) {
+		fclose(fp);
+		return EXIT_SUCCESS;
+	}
+
+	old_pwd = (char **)xcalloc(dirs + 1, sizeof(char *));
+
+	fseek(fp, 0L, SEEK_SET);
+
+	size_t line_size = 0;
+	char *line = (char *)NULL;
+	ssize_t line_len = 0;
+
+	dirhist_total_index = 0;
+
+	while ((line_len = getline(&line, &line_size, fp)) > 0) {
+		old_pwd[dirhist_total_index] = (char *)xcalloc(line_len
+											   + 1, sizeof(char));
+		if (!line || !*line || *line == '\n')
+			continue;
+
+		if (line[line_len - 1] == '\n')
+			line[line_len - 1] = 0x00;
+
+		strcpy(old_pwd[dirhist_total_index++], line);
+	}
+
+	free(line);
+
+	dirhist_cur_index = dirhist_total_index - 1;
+
+	return EXIT_SUCCESS;
+}
+
+int
+save_dirhist(void)
+{
+	FILE *fp = fopen(DIRHIST_FILE, "w");
+
+	if (!fp) {
+		fprintf(stderr, _("%s: Cannot save directory history: %s\n"),
+				PROGRAM_NAME, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	size_t i;
+	for (i = 0; i < dirhist_total_index; i++)
+		fprintf(fp, "%s\n", old_pwd[i]);
+
+	fclose(fp);
+
+	return EXIT_SUCCESS;
+}
+
 void
 free_stuff(void)
 /* This function is called by atexit() to clear whatever is there at exit
  * time and avoid thus memory leaks */
 {
 	size_t i = 0;
+
+	save_dirhist();
 
 	if (restore_last_path)
 		save_last_path();
@@ -9639,6 +9741,7 @@ free_stuff(void)
 	free(BM_FILE);
 	free(LOG_FILE);
 	free(HIST_FILE);
+	free(DIRHIST_FILE);
 	free(CONFIG_FILE);
 	free(PROFILE_FILE);
 	free(MSG_LOG_FILE);
@@ -10843,6 +10946,9 @@ init_config(void)
 
 		size_t config_len = strlen(CONFIG_DIR);
 
+		DIRHIST_FILE = (char *)xcalloc(config_len + 9, sizeof(char));
+		sprintf(DIRHIST_FILE, "%s/dirhist", CONFIG_DIR);
+
 		BM_FILE = (char *)xcalloc(config_len + 15, sizeof(char));
 		sprintf(BM_FILE, "%s/bookmarks.cfm", CONFIG_DIR);
 
@@ -11238,6 +11344,17 @@ init_config(void)
 							sort = opt_num;
 						else /* default (sort by name) */
 							sort = 1;
+					}
+
+					else if (strncmp(line, "MaxDirhist=", 11) == 0) {
+						int opt_num = 0;
+						ret = sscanf(line, "MaxDirhist=%d\n", &opt_num);
+						if (ret == -1)
+							continue;
+						if (opt_num >= 0)
+							max_dirhist = opt_num;
+						else /* default */
+							max_dirhist = 30;
 					}
 
 					else if (strncmp(line, "SortReverse=", 12) == 0) {
@@ -11691,6 +11808,7 @@ init_config(void)
 			 * via the config file, or if this latter could not be read
 			 * for any reason, set the defaults */
 			/* -1 means not set */
+			if (max_dirhist == -1) max_dirhist = 30;
 			if (restore_last_path == -1) restore_last_path = 0;
 			if (auto_open == -1) auto_open = 1;
 			if (autocd == -1) autocd = 1;
@@ -12900,12 +13018,13 @@ parse_input_str(char *str)
 			 * as well */
 			if ((substr[i][j] == '*' || substr[i][j] == '?' 
 			|| substr[i][j] == '[' || substr[i][j] == '{')
-			&& substr[i][j + 1] != 0x20)
+			&& substr[i][j + 1] != 0x20) {
 			/* Strings containing these characters are taken as
 			 * wildacard patterns and are expanded by the glob
 			 * function. See man (7) glob */
 				if (glob_n < int_array_max)
 					glob_array[glob_n++] = (int)i;
+			}
 
 			/* Command substitution is made by wordexp() */
 			if (substr[i][j] == '$' && (substr[i][j + 1] == '('
@@ -12953,8 +13072,11 @@ parse_input_str(char *str)
 		register size_t g = 0;
 		for (g = 0; g < (size_t)glob_n; g++){
 			glob_t globbuf;
-			glob(substr[glob_array[g] + (int)old_pathc],
-				 GLOB_BRACE|GLOB_TILDE, NULL, &globbuf);
+			if (glob(substr[glob_array[g] + (int)old_pathc],
+			GLOB_BRACE|GLOB_TILDE, NULL, &globbuf) != EXIT_SUCCESS) {
+				globfree(&globbuf);
+				continue;
+			}
 
 			if (globbuf.gl_pathc) {
 				register size_t j = 0;
@@ -12969,14 +13091,22 @@ parse_input_str(char *str)
 				}
 
 				for (i = 0; i < globbuf.gl_pathc; i++) {
-					/* Escape the globbed filename and copy it*/
+
+					/* Do not match "." or ".." */
+/*					if (strcmp(globbuf.gl_pathv[i], ".") == 0
+					|| strcmp(globbuf.gl_pathv[i], "..") == 0)
+						continue; */
+
+					/* Escape the globbed filename and copy it */
 					char *esc_str = escape_str(globbuf.gl_pathv[i]);
+
 					if (esc_str) {
 						glob_cmd[j] = (char *)xcalloc(strlen(esc_str)
 													+ 1, sizeof(char));
 						strcpy(glob_cmd[j++], esc_str);
 						free(esc_str);
 					}
+
 					else {
 						fprintf(stderr, _("%s: %s: Error quoting "
 										  "filename\n"), PROGRAM_NAME,
@@ -12991,6 +13121,8 @@ parse_input_str(char *str)
 						for (k = 0; k <= args_n; k++)
 							free(substr[k]);
 						free(substr);
+
+						globfree(&globbuf);
 
 						return (char **)NULL;
 					}
@@ -13009,7 +13141,7 @@ parse_input_str(char *str)
 					free(substr[i]);
 
 				substr = (char **)xrealloc(substr, 
-										(args_n+globbuf.gl_pathc + 1)
+										(args_n + globbuf.gl_pathc + 1)
 										* sizeof(char *));
 
 				for (i = 0; i < j; i++) {
@@ -13041,11 +13173,11 @@ parse_input_str(char *str)
 		register size_t w = 0;
 		for (w = 0; w < (size_t)word_n; w++){
 			wordexp_t wordbuf;
-			int ret = wordexp(substr[word_array[w] + (int)old_pathc],
-						&wordbuf, 0);
-
-			if (ret != 0)
+			if (wordexp(substr[word_array[w] + (int)old_pathc],
+			&wordbuf, 0) != EXIT_SUCCESS) {
+				wordfree(&wordbuf);
 				continue;
+			}
 
 			if (wordbuf.we_wordc) {
 				register size_t j = 0;
@@ -16609,7 +16741,7 @@ sel_function (char **comm)
 	size_t i = 0, j = 0;
 	int exists = 0, new_sel = 0, exit_status = EXIT_SUCCESS;
 
-	for (i = 1; i <= args_n; i++) {
+	for (i = 1; comm[i]; i++) {
 		/* If string is "*" or ".*", the wildcards expansion function
 		 * found no match, in which case the string must be skipped.
 		 * Exclude self and parent directories (. and ..) as well */
@@ -16617,31 +16749,31 @@ sel_function (char **comm)
 		|| strcmp(comm[i], ".") == 0 || strcmp(comm[i], "..") == 0)
 			continue;
 
-		char *deq_file = dequote_str(comm[i], 0);
+		if (strchr(comm[i], '\\')) {
+			char *deq_file = dequote_str(comm[i], 0);
 
-		if (!deq_file) {
-			for (j = 0; j < sel_n; j++)
-				free(sel_elements[j]);
-			return EXIT_FAILURE;
+			if (!deq_file) {
+				for (j = 0; j < sel_n; j++)
+					free(sel_elements[j]);
+				return EXIT_FAILURE;
+			}
+
+			strcpy(comm[i], deq_file);
+			free(deq_file);
 		}
 
-		size_t file_len = strlen(deq_file);
+		size_t file_len = strlen(comm[i]);
 
 		/* Remove final slash from directories. No need to check if file
 		 * is a directory, since in Linux only directories can contain a
 		 * slash in its name */
-		if (deq_file[file_len - 1] == '/')
-			deq_file[file_len - 1] = 0x00;
-
-		if (strcmp(deq_file, ".") == 0 || strcmp(deq_file, "..") == 0) {
-			free(deq_file);
-			continue;
-		}
+		if (comm[i][file_len - 1] == '/')
+			comm[i][file_len - 1] = 0x00;
 
 		/* If a filename in CWD... */
 		int sel_is_filename = 0, sel_is_relative_path = 0;
 		for (j = 0; j < files; j++) {
-			if (strcmp(dirlist[j], deq_file) == 0) {
+			if (strcmp(dirlist[j], comm[i]) == 0) {
 				sel_is_filename = 1;
 				break;
 			}
@@ -16650,14 +16782,15 @@ sel_function (char **comm)
 		if (!sel_is_filename) {
 
 			/* If a path (contains a slash)... */
-			if (strcntchr(deq_file, '/') != -1) {
-				if (deq_file[0] != '/') /* If relative path */
+			if (strcntchr(comm[i], '/') != -1) {
+
+				if (comm[i][0] != '/') /* If relative path */
 					sel_is_relative_path = 1;
+
 				struct stat file_attrib;
-				if (stat(deq_file, &file_attrib) != 0) {
+				if (stat(comm[i], &file_attrib) != 0) {
 					fprintf(stderr, "%s: sel: '%s': %s\n", PROGRAM_NAME, 
-							deq_file, strerror(errno));
-					free(deq_file);
+							comm[i], strerror(errno));
 					/* Return error when at least one error occur */
 					exit_status = EXIT_FAILURE;
 					continue;
@@ -16667,10 +16800,9 @@ sel_function (char **comm)
 			/* If neither a filename in CWD nor a path... */
 			else {
 				fprintf(stderr, _("%s: sel: '%s': No such %s\n"), 
-						PROGRAM_NAME, deq_file, 
-						(is_number(deq_file)) ? "ELN"
+						PROGRAM_NAME, comm[i], 
+						(is_number(comm[i])) ? "ELN"
 						: "file or directory");
-				free(deq_file);
 				exit_status = EXIT_FAILURE;
 				continue;
 			}
@@ -16678,19 +16810,16 @@ sel_function (char **comm)
 
 		if (sel_is_filename || sel_is_relative_path) { 
 			/* Add path to filename or relative path */
-			sel_tmp = (char *)xcalloc(strlen(path) + strlen(deq_file)
+			sel_tmp = (char *)xcalloc(strlen(path) + strlen(comm[i])
 									  + 2, sizeof(char));
-			sprintf(sel_tmp, "%s/%s", path, deq_file);
+			sprintf(sel_tmp, "%s/%s", path, comm[i]);
 		}
 
 		else { /* If absolute path... */
-			sel_tmp = (char *)xcalloc(strlen(deq_file) + 1,
+			sel_tmp = (char *)xcalloc(strlen(comm[i]) + 1,
 									  sizeof(char));
-			strcpy(sel_tmp, deq_file);
+			strcpy(sel_tmp, comm[i]);
 		}
-
-		free(deq_file);
-		deq_file = (char *)NULL;
 
 		/* Check if the selected element is already in the selection 
 		 * box */
@@ -16712,10 +16841,13 @@ sel_function (char **comm)
 			new_sel++;
 		}
 
-		else fprintf(stderr, _("%s: sel: '%s': Already selected\n"), 
-					 PROGRAM_NAME, sel_tmp);
+		else
+			fprintf(stderr, _("%s: sel: '%s': Already selected\n"), 
+				    PROGRAM_NAME, sel_tmp);
+
 		free(sel_tmp);
 		sel_tmp = (char *)NULL;
+
 		continue;
 	}
 
@@ -19051,7 +19183,7 @@ log_function(char **comm)
 }
 
 void
-check_log_file_size(char *log_file)
+check_file_size(char *log_file, size_t max)
 /* Keep only the last 'max_log' records in LOG_FILE */
 {
 	/* Create the file, if it doesn't exist */
@@ -19089,7 +19221,7 @@ check_log_file_size(char *log_file)
 			logs_num++;
 	}
 
-	if (logs_num <= max_log) {
+	if (logs_num <= max) {
 		fclose(log_fp);
 		return;
 	}
@@ -19109,7 +19241,7 @@ check_log_file_size(char *log_file)
 									  sizeof(char));
 	sprintf(tmp_file, "%s/log.%s", CONFIG_DIR, rand_ext);
 	free(rand_ext);
-	
+
 	FILE *log_fp_tmp = fopen(tmp_file, "w+");
 
 	if (!log_fp_tmp) {
@@ -19124,10 +19256,10 @@ check_log_file_size(char *log_file)
 	char *line_buff = (char *)NULL;
 	ssize_t line_len = 0;
 
-	while ((line_len = getline(&line_buff, &line_size,
-	log_fp)) > 0) {
+	while ((line_len = getline(&line_buff, &line_size, log_fp)) > 0) {
+
 		/* Delete old entries = copy only new ones */
-		if (i++ >= logs_num - (max_log - 1))
+		if (i++ >= logs_num - (max - 1))
 			fprintf(log_fp_tmp, "%s", line_buff);
 	}
 	
