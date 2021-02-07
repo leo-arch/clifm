@@ -667,6 +667,7 @@ The file contains a series of fields separated by a colon in the following way: 
 The messages log file is \fI$XDG_CONFIG_HOME/clifm/profile/messages.cfm\fR.
 A file containing a list of system messages, either errors, warnings, or simple notices. The messages log format is: "[date] message".
 .TP
+
 \fBNOTE\fR: If \fB$XDG_CONFIG_HOME\fR is not set, \fB$HOME/.config/\fR is used instead. 
 
 .SH CONFORMING TO
