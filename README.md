@@ -67,7 +67,7 @@ Because file manager, but also half-shell, CLiFM also provides the following fea
 * Bash-like prompt customization
 * Sequential and conditional commands execution 
 * User profiles
-* Keyboard shortcuts
+* Customizable keyboard shortcuts
 * Resource opener
 * Multiple sorting methods: name, size, atime, btime, ctime, mtime, version, extension, and inode. It also supports reverse sorting.
 * Bulk rename
