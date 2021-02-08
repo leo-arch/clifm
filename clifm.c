@@ -20662,6 +20662,7 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
  br, bulk ELN/FILE ...\n\
  ac, ad ELN/FILE ...\n\
  x, X [ELN/DIR]\n\
+ exp, export [ELN/FILE ...]\n\
  shell [SHELL]\n\
  actions [edit]\n\
  st, sort [METHOD] [rev]\n\
