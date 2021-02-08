@@ -9,7 +9,11 @@
 
 ## Rationale
 
-Why in this world do we need another file manager? In the first place, just because I can do it, write it, and learn (a lot) in the process, just because this is a free world, and very specially, a free community; and, needless to say, alternatives are at the heart of freedom. Secondly, because I'm sure I'm not the only person in this world looking for a non-bloated, KISS file manager: it just does whatever needs to be done using as little resources as possible. No GUI, no curses, but just a command line file manager: 5MiB of RAM and 250KiB of disk space is all you need. Finally, because it is certainly a file manager, but also a shell extension. Almost everything you do on your shell can be done in this file manager as well: search for files, copy, rename, and trash some of them, but, at the same time, update/upgrade your system, add some cronjob, stop a service, and run nano (or Vi if you like).
+Why in this world do we need another file manager? In the first place, just because I can do it, write it, and learn (a lot) in the process, just because this is a free world, and very specially, a free community; and, needless to say, alternatives are at the heart of freedom.
+
+Secondly, because I'm sure I'm not the only person in this world looking for a non-bloated, KISS file manager (on Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity): it just does whatever needs to be done using as little resources as possible. No GUI, no curses, but just a command line, shell-like file manager: 5MiB of RAM and 350KiB of disk space (plus some willingness to try something different and new) is all you need.
+
+Finally, because CliFM, unlike most file managers out there, is certainly a file manager, but also **a shell extension**. Almost everything you do on your shell can be done in this file manager as well: search for files, copy, rename, and trash some of them, but, at the same time, update/upgrade your system, add some cronjob, stop a service, and run nano (or vi, or emacs, if you like).
 
 ## Description
 
@@ -76,11 +80,9 @@ Because file manager, but also half-shell, CLiFM also provides the following fea
 * Symlinks editor
 
 Finally, all CLiFM options could be handled directly via command line, by passing parameters to the program, or via plain
-text configuration files, located in `~/.config/clifm/`.
+text configuration files, located in `$XDG_CONFIG_HOME/clifm/`.
 
 Insofar as it is heavily inspired by Arch Linux and its KISS principle, CLiFM is fundamentally aimed to be lightweight, fast, and simple. And if you think it's not fast enough, you can always try the **light mode** to make it even faster.
-
-On Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity
 
 ## Dependencies:
 
