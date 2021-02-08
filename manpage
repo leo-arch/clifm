@@ -359,6 +359,10 @@ with no argument, it prints the list of available  aliases, if any. To write a n
 To import aliases from a file, provided it contains aliases in the specified form, use the 'import' option. Aliases conflicting with some of the internal commands won't be imported.
 .TP
 
+.B exp, export [FILE ...]
+with no argument, export the list of files in the current working directory to e temporary file. Otherwise, export only those specified as further arguments: they could be directories, filenams, ELN's or some search expression.
+.TP
+
 .B dc \fR[on, off, status]
 toggle the files counter function on/off.
 .TP
@@ -385,6 +389,10 @@ toggle the autocd function on/off. If set to on, 'DIR' amounts to 'cd DIR'.
 
 .B ao, auto-open [on, off, status]
 toggle the auto-open function on/off. If set to on, 'FILE' amounts to 'open FILE'.
+.TP
+
+.B kb, keybinds [edit]
+with no argument, prints the current keyboard shortcuts and their associated functions. To edit the keybindings file, use the 'edit' option.
 .TP
 
 .B cmd, commands 
@@ -462,6 +470,8 @@ safely quit CliFM.
 \fBA\-x:\fR Switch to next sorting method
 .TP
 \fBF10:\fR Open the configuration file
+.TP
+These are the default keyboard shortcuts. However, the user can modify them as she please using the keybindings file (see the FILES section below).
 
 .SH COLOR CODES
 .TP
@@ -625,46 +635,50 @@ CliFM returns the exit status of the last executed command:
 .TP
 
 .B CONFIGURATION FILE
-The configuration file is \fI$XDG_CONFIG_HOME/clifm/profile/clifmrc\fR.
+The configuration file is \fI$XDG_CONFIG_HOME/clifm/PROFILE/clifmrc\fR.
 Here you can permanently set up CliFM options, add aliases and some prompt commands (which will be executed immediately before each new prompt line). Just recall that in order to use prompt commands you must allow the use of external commands. See the \-x option and the 'ext' command above.
 .sp
 A description for each option in the configuration file can be found in the configuration file itself.
 .TP
 
 .B PROFILE FILE
-The profile file is \fI$XDG_CONFIG_HOME/clifm/profile/clifm_profile\fR.
+The profile file is \fI$XDG_CONFIG_HOME/clifm/PROFILE/clifm_profile\fR.
 In this file you can add those commands you want to be executed at startup. You can also permanently set here some custom variables, ex: 'dir="/path/to/folder"'. This variable may be used as a shorcut to that folder, for instance: 'cd $dir'. Custom variables could also be temporarily defined via the command prompt: Ex: user@hostname ~ $ var="This is a test". Temporary variables will be removed at program exit.
 .TP
 
+.B KEYBINDINGS FILE
+The keybindings file is \fI$XDG_CONFIG_HOME/clifm/keybindings\fR. This file is used to specify the keyboard shortcuts used for some ClifM's functions. The format for each kyebinding is always "keyseq:function", where 'keyseq' is an escape sequence in GNU emacs style.
+.TP
+
 .B SCRIPTS DIRECTORY
-The directory used for action scripts is \fI$XDG_CONFIG_HOME/clifm/profile/scripts\fR.
+The directory used for action scripts is \fI$XDG_CONFIG_HOME/clifm/PROFILE/scripts\fR.
 .TP
 
 .B ACTIONS FILE
-The file used to define custom actions is \fI$XDG_CONFIG_HOME/clifm/profile/actions.cfm\fR.
+The file used to define custom actions is \fI$XDG_CONFIG_HOME/clifm/PROFILE/actions.cfm\fR.
 .TP
 
 .B MIMELIST FILE:
-The mime list file is \fI$XDG_CONFIG_HOME/clifm/profile/mimelist.cfm\fR. It is a list of filetypes and file extensions and their associated applications used by CliFM built\-in resource opener.
+The mime list file is \fI$XDG_CONFIG_HOME/clifm/PROFILE/mimelist.cfm\fR. It is a list of filetypes and file extensions and their associated applications used by CliFM built\-in resource opener.
 .TP
 
 .B BOOKMARKS FILE
-The bookmarks file is \fI$XDG_CONFIG_HOME/clifm/profile/bookmarks.cfm\fR
+The bookmarks file is \fI$XDG_CONFIG_HOME/clifm/PROFILE/bookmarks.cfm\fR
 Just the list of the user's bookmarks used by the bookmarks function.
 .TP
 
 .SH HISTORY FILE
-The history file is \fI~/.config/clifm/profile/history.cfm\fR.
+The history file is \fI~/.config/clifm/PROFILE/history.cfm\fR.
 A list of commands entered by the user and used by the history function.
 .TP
 
 .B COMMANDS LOG FILE
-The commands log file is \fI$XDG_CONFIG_HOME/clifm/profile/log.cfm\fR.
+The commands log file is \fI$XDG_CONFIG_HOME/clifm/PROFILE/log.cfm\fR.
 The file contains a series of fields separated by a colon in the following way: 'date:user:current_dir:command. All commands executed as external will be logged.
 .TP
 
 .B MESSAGES LOG FILE
-The messages log file is \fI$XDG_CONFIG_HOME/clifm/profile/messages.cfm\fR.
+The messages log file is \fI$XDG_CONFIG_HOME/clifm/PROFILE/messages.cfm\fR.
 A file containing a list of system messages, either errors, warnings, or simple notices. The messages log format is: "[date] message".
 .TP
 
