@@ -53,7 +53,7 @@ Of course, you can deselect some or all selected files whenever you want with th
 
 ![dirs](images/dirs.png)
 
-* **Custom actions**: Use custom action names, as if they were any other command, to run custom shell scripts and extend thus CliFM functionality to fit your needs. This is basically an easy way of building custom commands for CliFM.
+* **NEW: PLUGINS via custom actions**: Use custom action names, as if they were any other command, to run custom shell scripts and extend thus CliFM functionality to fit your needs. This is basically an easy way of building custom commands for CliFM.
 
 Because file manager, but also half-shell, CLiFM also provides the following features:
 
@@ -67,7 +67,7 @@ Because file manager, but also half-shell, CLiFM also provides the following fea
 * Bash-like prompt customization
 * Sequential and conditional commands execution 
 * User profiles
-* Customizable keyboard shortcuts
+* Customizable keyboard shortcuts (**NEW**)
 * Resource opener
 * Multiple sorting methods: name, size, atime, btime, ctime, mtime, version, extension, and inode. It also supports reverse sorting.
 * Bulk rename
