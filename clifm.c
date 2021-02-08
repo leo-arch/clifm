@@ -1234,18 +1234,59 @@ create_kbinds_file(void)
 		return EXIT_FAILURE;
 	}
 
-	fprintf(fp, "refresh-screen:\\C-r\n\
-parent-dir:\\M-u\n\
-#parent-dir:\\x1b[1;3A\n\
+	fprintf(fp, "# %s keybindings file\n\n\
+# Use the 'kbgen' command to find out the escape code for the key or\n\
+# key sequence you want. Use either octal or hexadecimal codes. Ex:\n\
+# For Alt-/ (in rxvt terminals) 'kbgen' will print the following lines:\n\
+# Hex  | Oct\n\
+# ----  ----\n\
+# \\x1b | \\033\n\
+# \\x2f | \\057\n\
+# In this case, the keybinding is: \"function:\\x1b\\x2f\"\n\
+# GNU emacs escape sequences are also allowed (ex: \"\\M-a\", Alt-a \n\
+# in most keyboards, or \"\\C-r\" for Ctrl-r).\n\
+# Some codes, especially those involving function keys, like\n\
+# Ctrl or Alt, or arrow keys, vary depending on the terminal emulator\n\
+# and the system settings. These keybindings should be set up thus on \n\
+# a per terminal basis.\n\
+\n\
+# Alt-j\n\
 previous-dir:\\M-j\n\
-#previous-dir:\\x1b[1;3B\n\
+# Ctrl-left (rxvt)\n\
+previous-dir2:\\x1b\\x4f\\x64\n\
+# Ctrl-left (xterm)\n\
+previous-dir3:\\x1b\\x5b\\x35\\x44\n\
+#previous-dir4:\n\
+\n\
+# Alt-k\n\
 next-dir:\\M-k\n\
-#next-dir:\\x1b[1;3C\n\
+# Ctrl-right (rxvt)\n\
+next-dir2:\\x1b\\x4f\\x63\n\
+# Ctrl-right (xterm)\n\
+next-dir3:\\x1b\\x5b\\x35\\x43\n\
+#next-dir4:\n\
+\n\
+# Alt-u\n\
+parent-dir:\\M-u\n\
+parent-dir2:\n\
+\n\
+# Alt-e\n\
+home-dir:\\M-e\n\
+# Home key (rxvt)\n\
+home-dir2:\\x1b\\x5b\\x37\\x7e\n\
+# Home key (xterm)\n\
+home-dir3:\\x1b\\x5b\\x48\n\
+\n\
+# Alt-r\n\
+root-dir:\\M-r\n\
+# Alt-/ (rxvt)\n\
+root-dir2:\\x1b\\x2f\n\n\
+#root-dir3:\n\
+\n\
+refresh-screen:\\C-r\n\
 clear-line:\\M-c\n\
 toggle-hidden:\\M-i\n\
-open-config:\\x1b[21~\n\
-home-dir:\\M-e\n\
-root-dir:\\M-r\n\
+open-config:\\e[21~\n\
 toggle-light:\\M-y\n\
 toggle-long:\\M-l\n\
 sort-previous:\\M-z\n\
@@ -1255,7 +1296,7 @@ select-all:\\M-a\n\
 deselect-all:\\M-d\n\
 mountpoints:\\M-m\n\
 folders-first:\\M-f\n\
-selbox:\\M-s");
+selbox:\\M-s\n", PROGRAM_NAME);
 
 	fclose(fp);
 
@@ -2349,6 +2390,7 @@ print_tips(int all)
 		"Create custom commands and features using the 'actions' command",
 		"Create a fresh configuration file by running 'edit gen'",
 		"Use 'ln edit' (or 'le') to edit symbolic links",
+		"Change default keyboard shortcuts editing the keybindings file",
 		NULL
 	};
 
@@ -9810,30 +9852,35 @@ int rl_test(int count, int key)
 void
 readline_kbinds(void)
 {
-/*	rl_command_func_t readline_kbind_action; */
 /* To get the keyseq value for a given key do this in an Xterm terminal:
  * C-v and then press the key (or the key combination). So, for example, 
  * C-v, C-right arrow gives "[[1;5C", which here should be written like
  * this:
  * "\\x1b[1;5C" */
 
-/* These keybindings work on all the terminals I tried: the linux built-in
- * console, aterm, urxvt, xterm, lxterminal, xfce4-terminal, gnome-terminal,
- * terminator, and st (with some patches, however, they might stop working
- * in st) */
-
-/*	char res[32] = "";
-	int *len = (int *)malloc(32);
-	rl_translate_keyseq("\\e[11~", res, len);
-	printf("@%s@\n", res);
-	free(len); */
-
-	rl_bind_keyseq(find_key("refresh-screen"), rl_refresh);
+	/* Navigation keys */
+	/* Define multiple keybinds for different terminals:
+	 * rxvt, xterm, linux console */
+	rl_bind_keyseq("\\[1;5C", rl_previous_dir);
 	rl_bind_keyseq(find_key("parent-dir"), rl_parent_dir);
+	rl_bind_keyseq(find_key("parent-dir2"), rl_parent_dir);
 	rl_bind_keyseq(find_key("previous-dir"), rl_previous_dir);
+	rl_bind_keyseq(find_key("previous-dir2"), rl_previous_dir);
+	rl_bind_keyseq(find_key("previous-dir3"), rl_previous_dir);
+	rl_bind_keyseq(find_key("previous-dir4"), rl_previous_dir);
 	rl_bind_keyseq(find_key("next-dir"), rl_next_dir);
+	rl_bind_keyseq(find_key("next-dir2"), rl_next_dir);
+	rl_bind_keyseq(find_key("next-dir3"), rl_next_dir);
+	rl_bind_keyseq(find_key("next-dir4"), rl_next_dir);
 	rl_bind_keyseq(find_key("home-dir"), rl_home_dir);
+	rl_bind_keyseq(find_key("home-dir2"), rl_home_dir);
+	rl_bind_keyseq(find_key("home-dir3"), rl_home_dir);
 	rl_bind_keyseq(find_key("root-dir"), rl_root_dir);
+	rl_bind_keyseq(find_key("root-dir2"), rl_root_dir);
+	rl_bind_keyseq(find_key("root-dir3"), rl_root_dir);
+
+	/* Shortcuts to functions */
+	rl_bind_keyseq(find_key("refresh-screen"), rl_refresh);
 	rl_bind_keyseq(find_key("clear-line"), rl_clear_line);
 	rl_bind_keyseq(find_key("toggle-hidden"), rl_hidden);
 	rl_bind_keyseq(find_key("toggle-long"), rl_long);
@@ -11644,7 +11691,7 @@ init_config(void)
 	ls_colors_bk = getenv("LS_COLORS");
 
 	if (home_ok) {
-		/* Set up program's directories and files (always per user) */
+		/* Set up program's directories and files */
 
 		/* If $XDG_CONFIG_HOME is set, use it for the config file.
 		 * Else, fall back to $HOME/.config */
@@ -12661,7 +12708,7 @@ init_config(void)
 
 			if (!share_selbox) {
 				/* Private selection box is stored in the profile
-				 * directory, that is, per user */
+				 * directory */
 				sel_file_user = (char *)xcalloc(config_len + 9,
 												sizeof(char));
 
@@ -12693,37 +12740,62 @@ init_config(void)
 		 * xterm-like terminal emulators */
 		/* However, there is no need to do this if using the linux console, 
 		 * since we are not in a graphical environment */
-		if (flags & GRAPHICAL) {
+		if ((flags & GRAPHICAL)
+		&& strncmp(getenv("TERM"), "xterm", 5) == 0) {
+			puts("xterm");
 			/* Check ~/.Xresources exists and eightBitInput is set to
 			 * false. If not, create the file and set the corresponding
 			 * value */
 			char xresources[PATH_MAX] = "";
 			sprintf(xresources, "%s/.Xresources", user_home);
+
 			FILE *xresources_fp = fopen(xresources, "a+");
+
 			if (xresources_fp) {
-				/* Since I'm looking for a very specific line, which is
-				 * a fixed line far below MAX_LINE, I don't care to get
+				/* Since I'm looking for very specific lines, which are
+				 * fixed lines far below MAX_LINE, I don't care to get
 				 * any of the remaining lines truncated */
 				#if __FreeBSD__
 					fseek(xresources_fp, 0, SEEK_SET);
 				#endif
 				char line[256] = "";
-				int eight_bit_ok = 0;
-				while (fgets(line, sizeof(line), xresources_fp))
+				int eight_bit_ok = 0, cursor = 0, function = 0;
+
+				while (fgets(line, sizeof(line), xresources_fp)) {
 					if (strncmp(line, "XTerm*eightBitInput: false",
 					26) == 0)
 						eight_bit_ok = 1;
-				if (!eight_bit_ok) {
+					else if (strncmp(line, "XTerm*modifyCursorKeys: 1",
+					25) == 0)
+						cursor = 1;
+					else if (strncmp(line, "XTerm*modifyFunctionKeys: 1",
+					27) == 0)
+						function = 1;
+				}
+
+				if (!eight_bit_ok || !cursor || !function) {
 					/* Set the file position indicator at the end of
 					 * the file */
 					fseek(xresources_fp, 0L, SEEK_END);
-					fputs("\nXTerm*eightBitInput: false\n",
-						  xresources_fp);
+
+					if (!eight_bit_ok)
+						fputs("\nXTerm*eightBitInput: false\n",
+							  xresources_fp);
+
+					if (!cursor)
+						fputs("\nXTerm*modifyCursorKeys: 1\n",
+							  xresources_fp);
+
+					if (!function)
+						fputs("\nXTerm*modifyFunctionKeys: 1\n",
+							  xresources_fp);
+
 					char *xrdb_path = get_cmd_path("xrdb");
+
 					if (xrdb_path) {
 						char *res_file = (char *)xnmalloc(
-													strlen(user_home) 
-													+ 13, sizeof(char));
+												 strlen(user_home) 
+												 + 13, sizeof(char));
 						sprintf(res_file, "%s/.Xresources", user_home); 
 						char *cmd[] = { "xrdb", "merge", res_file,
 										NULL };
@@ -12769,8 +12841,8 @@ init_config(void)
 		char *md_cmd[] = { "mkdir", "-pm1777", TMP_DIR, NULL };
 		int ret = launch_execve(md_cmd, FOREGROUND);
 		if (ret != EXIT_SUCCESS) {
-			_err('e', PRINT_PROMPT, "%s: mkdir: '%s': %s\n",
-				 PROGRAM_NAME, TMP_DIR, strerror(errno));
+			_err('e', PRINT_PROMPT, _("%s: '%s': Error creating "
+				 "temporary directory\n"), PROGRAM_NAME, TMP_DIR);
 		}
 	}
 
@@ -12788,8 +12860,8 @@ init_config(void)
 		int ret = launch_execve(md_cmd2, FOREGROUND);
 		if (ret != EXIT_SUCCESS) {
 			selfile_ok = 0;
-			_err('e', PRINT_PROMPT, "%s: mkdir: '%s': %s\n",
-				 PROGRAM_NAME, TMP_DIR, strerror(errno));
+			_err('e', PRINT_PROMPT, _("%s: '%s': Error creating "
+				 "temporary directory\n"), PROGRAM_NAME, TMP_DIR);
 		}
 	}
 
