@@ -1235,52 +1235,59 @@ create_kbinds_file(void)
 	}
 
 	fprintf(fp, "# %s keybindings file\n\n\
-# Use the 'kbgen' command to find out the escape code for the key or\n\
-# key sequence you want. Use either octal or hexadecimal codes. Ex:\n\
-# For Alt-/ (in rxvt terminals) 'kbgen' will print the following lines:\n\
-# Hex  | Oct\n\
-# ----  ----\n\
-# \\x1b | \\033\n\
-# \\x2f | \\057\n\
-# In this case, the keybinding is: \"function:\\x1b\\x2f\"\n\
-# GNU emacs escape sequences are also allowed (ex: \"\\M-a\", Alt-a \n\
+# Use the 'kbgen' plugin to find out the escape code for the key or\n\
+# key sequence you want. Use either octal, hexadecimal codes or symbols.\n\
+# Ex: For Alt-/ (in rxvt terminals) 'kbgen' will print the following \n\
+# lines:\n\
+# Hex  | Oct | Symbol\n\
+# ----  ---- | ------\n\
+# \\x1b | \\033 | ESC (\\e)\n\
+# \\x2f | \\057 | /\n\
+# In this case, the keybinding is: \"function:\\e/\"\n\
+# GNU emacs escape sequences are also allowed (ex: \"\\M-a\", Alt-a\n\
 # in most keyboards, or \"\\C-r\" for Ctrl-r).\n\
-# Some codes, especially those involving function keys, like\n\
-# Ctrl or Alt, or arrow keys, vary depending on the terminal emulator\n\
-# and the system settings. These keybindings should be set up thus on \n\
-# a per terminal basis.\n\
+# Some codes, especially those involving keys like Ctrl or the arrow\n\
+# keys, vary depending on the terminal emulator and the system settings.\n\
+# These keybindings should be set up thus on a per terminal basis.\n\
 \n\
 # Alt-j\n\
 previous-dir:\\M-j\n\
-# Ctrl-left (rxvt)\n\
-previous-dir2:\\x1b\\x4f\\x64\n\
-# Ctrl-left (xterm)\n\
-previous-dir3:\\x1b\\x5b\\x35\\x44\n\
-#previous-dir4:\n\
+# Shift-left (rxvt)\n\
+previous-dir2:\\e[d\n\
+# Shift-left (xterm)\n\
+previous-dir3:\\e[2D\n\
+# Shift-left (others)\n\
+previous-dir4:\\e[1;2D\n\
 \n\
 # Alt-k\n\
 next-dir:\\M-k\n\
-# Ctrl-right (rxvt)\n\
-next-dir2:\\x1b\\x4f\\x63\n\
-# Ctrl-right (xterm)\n\
-next-dir3:\\x1b\\x5b\\x35\\x43\n\
-#next-dir4:\n\
+# Shift-right (rxvt)\n\
+next-dir2:\\e[c\n\
+# Shift-right (xterm)\n\
+next-dir3:\\e[2C\n\
+# Shift-right (others)\n\
+next-dir4:\\e[1;2C\n\
 \n\
 # Alt-u\n\
 parent-dir:\\M-u\n\
-parent-dir2:\n\
+# Shift-up (rxvt)\n\
+parent-dir2:\\e[a\n\
+# Shift-up (xterm)\n\
+parent-dir3:\\e[2A\n\
+# Shift-up (others)\n\
+parent-dir4:\\e[1;2A\n\
 \n\
 # Alt-e\n\
 home-dir:\\M-e\n\
 # Home key (rxvt)\n\
-home-dir2:\\x1b\\x5b\\x37\\x7e\n\
+home-dir2:\\e[7~\n\
 # Home key (xterm)\n\
-home-dir3:\\x1b\\x5b\\x48\n\
+home-dir3:\\e[H\n\
 \n\
 # Alt-r\n\
 root-dir:\\M-r\n\
 # Alt-/ (rxvt)\n\
-root-dir2:\\x1b\\x2f\n\n\
+root-dir2:\\e/\n\
 #root-dir3:\n\
 \n\
 refresh-screen:\\C-r\n\
@@ -9861,9 +9868,10 @@ readline_kbinds(void)
 	/* Navigation keys */
 	/* Define multiple keybinds for different terminals:
 	 * rxvt, xterm, linux console */
-	rl_bind_keyseq("\\[1;5C", rl_previous_dir);
 	rl_bind_keyseq(find_key("parent-dir"), rl_parent_dir);
 	rl_bind_keyseq(find_key("parent-dir2"), rl_parent_dir);
+	rl_bind_keyseq(find_key("parent-dir3"), rl_parent_dir);
+	rl_bind_keyseq(find_key("parent-dir4"), rl_parent_dir);
 	rl_bind_keyseq(find_key("previous-dir"), rl_previous_dir);
 	rl_bind_keyseq(find_key("previous-dir2"), rl_previous_dir);
 	rl_bind_keyseq(find_key("previous-dir3"), rl_previous_dir);
