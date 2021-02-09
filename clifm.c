@@ -20719,7 +20719,8 @@ help_function (void)
 
 	printf(_("%s %s (%s), by %s\n"), PROGRAM_NAME, VERSION, DATE, AUTHOR);
 
-	printf(_("\nUSAGE: %s [-aAfFgGhiIlLoOsuUvx] [-p PATH] [-P PROFILE]\n\
+	printf(_("\nUSAGE: %s [-aAfFgGhiIlLoOsuUvxy] [-p PATH] [-P PROFILE] "
+			"[-z METHOD]\n\
 \n -a, --no-hidden\t\t do not show hidden files\
 \n -A, --show-hidden\t\t show hidden files (default)\
 \n -f, --no-folders-first\t\t do not list folders first\
