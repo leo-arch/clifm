@@ -295,6 +295,7 @@ char *find_key(char *function);
 int load_keybinds(void);
 int kbinds_function(char **args);
 int kbinds_edit(void);
+int kbinds_reset(void);
 int rl_refresh(int count, int key);
 int rl_parent_dir(int count, int key);
 int rl_root_dir(int count, int key);
@@ -1149,6 +1150,29 @@ main(int argc, char **argv)
 			 * #     FUNCTIONS DEFINITIONS     #
 			 * ################################# */
 
+int kbinds_reset(void)
+{
+	int exit_status = EXIT_SUCCESS;
+	struct stat file_attrib;
+
+	if (stat(KBINDS_FILE, &file_attrib) == -1)
+		exit_status = create_kbinds_file();
+
+	else {
+		char *cmd[] = { "rm", KBINDS_FILE, NULL };
+		if (launch_execve(cmd, FOREGROUND) == EXIT_SUCCESS)
+			exit_status = create_kbinds_file();
+		else
+			exit_status = EXIT_FAILURE;
+	}
+
+	if (exit_status == EXIT_SUCCESS)
+		_err('n', PRINT_PROMPT, _("%s: Restart the program for changes "
+			 "to take effect\n"), PROGRAM_NAME);
+
+	return exit_status;
+}
+
 int
 kbinds_edit(void)
 {
@@ -1185,8 +1209,8 @@ kbinds_edit(void)
 	if (mtime_bfr == file_attrib.st_mtime)
 		return EXIT_SUCCESS;
 
-	_err('n', PRINT_PROMPT, _("%s: Restart %s for changes to "
-		 "take effect\n"), PROGRAM_NAME, PROGRAM_NAME);
+	_err('n', PRINT_PROMPT, _("%s: Restart the program for changes to "
+		 "take effect\n"), PROGRAM_NAME);
 
 	return EXIT_SUCCESS;
 }
@@ -1207,14 +1231,17 @@ kbinds_function(char **args)
 	}
 
 	if (strcmp(args[1], "--help") == 0) {
-		puts(_("Usage: kb, keybinds [edit]"));
+		puts(_("Usage: kb, keybinds [edit] [reset]"));
 		return EXIT_SUCCESS;
 	}
 
 	if (strcmp(args[1], "edit") == 0)
 		return kbinds_edit();
+
+	if (strcmp(args[1], "reset") == 0)
+		return kbinds_reset();
 	
-	fputs(_("Usage: kb, keybinds [edit]\n"), stderr);
+	fputs(_("Usage: kb, keybinds [edit] [reset]\n"), stderr);
 	return EXIT_FAILURE;
 }
 
@@ -1243,7 +1270,8 @@ create_kbinds_file(void)
 # ----  ---- | ------\n\
 # \\x1b | \\033 | ESC (\\e)\n\
 # \\x2f | \\057 | /\n\
-# In this case, the keybinding is: \"function:\\e/\"\n\
+# In this case, the keybinding, if using symbols, is: \"\\e/:function\"\n\
+# In case you prefer the hex codes it would be: \\x1b\\x2f:function.\n\
 # GNU emacs escape sequences are also allowed (ex: \"\\M-a\", Alt-a\n\
 # in most keyboards, or \"\\C-r\" for Ctrl-r).\n\
 # Some codes, especially those involving keys like Ctrl or the arrow\n\
@@ -1283,6 +1311,7 @@ home-dir:\\M-e\n\
 home-dir2:\\e[7~\n\
 # Home key (xterm)\n\
 home-dir3:\\e[H\n\
+home-dir4:\n\
 \n\
 # Alt-r\n\
 root-dir:\\M-r\n\
@@ -20753,7 +20782,7 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
  history [clear] [-n]\n\
  edit [APPLICATION]\n\
  alias [import FILE]\n\
- kb, keybinds [edit]\n\
+ kb, keybinds [edit] [reset]\n\
  splash\n\
  tips\n\
  path, cwd\n\
@@ -20776,7 +20805,30 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
 	puts(_("Run 'cmd' or consult the manpage for more information about "
 		   "each of these commands.\n"));
 
-	puts(_("To list current keyboard shotcuts run the 'kb' command.\n"));
+	printf("DEFAULT KEYBOARD SHORTCUTS:\n\n"
+" M-c: Clear the current command line buffer\n\
+ M-f: Toggle list-folders-first on/off\n\
+ C-r: Refresh the screen\n\
+ M-l: Toggle long view mode on/off\n\
+ M-m: List mountpoints\n\
+ M-b: Launch the Bookmarks Manager\n\
+ M-i: Toggle hidden files on/off\n\
+ M-s: Open the Selection Box\n\
+ M-a: Select all files in the current working directory\n\
+ M-d: Deselect all selected files\n\
+ M-r: Change to the root directory\n\
+ M-e, Home: Change to the home directory\n\
+ M-u, S-Up: Change to the parent directory\n\
+ M-j, S-Left: Change to the previous directory in the directory history "
+"list\n"
+" M-k, S-Right: Change to the next directory in the directory history "
+"list"
+" M-y: Toggle light mode on/off\n\
+ M-z: Switch to previous sorting method\n\
+ M-x: Switch to next sorting method\n\
+ F10: Open the configuration file\n\n"
+"NOTE: C stands for Ctrl, S for Shift, and M for Meta (Alt key in "
+"most keyboards)\n\n");
 
 	puts(_("Run the 'colors' or 'cc' command to see the list "
 		   "of currently used color codes.\n"));
