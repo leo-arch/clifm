@@ -619,12 +619,14 @@ int max_hist = -1, max_log = -1, dirhist_total_index = 0,
 	shell_is_interactive = 0, cont_bt = 0, sort_types = 9,
 	max_dirhist = -1;
 
+int *eln_as_file = (int *)0;
+
 unsigned short term_cols = 0;
 
 size_t user_home_len = 0, args_n = 0, sel_n = 0, trash_n = 0, msgs_n = 0,
 	   prompt_cmds_n = 0, path_n = 0, current_hist_n = 0, usrvar_n = 0,
 	   aliases_n = 0, longest = 0, files = 0, eln_len = 0, actions_n = 0,
-	   ext_colors_n = 0, kbinds_n = 0, total = 0;
+	   ext_colors_n = 0, kbinds_n = 0, total = 0, eln_as_file_n = 0;
 
 struct termios shell_tmodes;
 struct dirent **tmp_dirlist = (struct dirent **)NULL;
@@ -10324,6 +10326,9 @@ free_stuff(void)
 {
 	size_t i = 0;
 
+	if (eln_as_file_n)
+		free(eln_as_file);
+
 	save_dirhist();
 
 	if (restore_last_path)
@@ -13710,10 +13715,48 @@ parse_input_str(char *str)
 				int num = atoi(substr[i]);
 				/* Expand numbers only if there is a corresponding ELN */
 
+				/* Do not expand ELN if there is a file named as the
+				 * ELN */
+				if (eln_as_file_n) {
+					int conflict = 0;
+					if (eln_as_file_n > 1) {
+						size_t j;
+
+						for (j = 0; j < eln_as_file_n; j++) {
+							if (atoi(dirlist[eln_as_file[j]]) == num) {
+								conflict = num;
+								/* One conflicting filename is enough */
+								break;
+							}
+						}
+					}
+
+					else {
+						if (atoi(dirlist[eln_as_file[0]]) == num)
+							conflict = num;
+					}
+
+					if (conflict) {
+						size_t j;
+						for (j = 0; j <= args_n; j++)
+							free(substr[j]);
+						free(substr);
+
+						fprintf(stderr, _("%s: '%d': ELN-filename "
+								"conflict. Bypass internal expansions "
+								"to fix this issue: ';CMD "
+								"FILENAME'\n"), PROGRAM_NAME,
+								conflict);
+
+						return (char **)NULL;
+					}
+				}
+
 				if (num > 0 && num <= (int)files) {
 					/* Replace the ELN by the corresponding escaped
 					 * filename */
 					char *esc_str = escape_str(dirlist[num - 1]);
+
 					if (esc_str) {
 						substr[i] = (char *)xrealloc(substr[i], 
 												(strlen(esc_str) + 1) * 
@@ -13722,15 +13765,19 @@ parse_input_str(char *str)
 						free(esc_str);
 						esc_str = (char *)NULL;
 					}
+
 					else {
 						fprintf(stderr, _("%s: %s: Error quoting "
 								"filename\n"), PROGRAM_NAME,
 								dirlist[num-1]);
 						/* Free whatever was allocated thus far */
 						size_t j;
+
 						for (j = 0; j <= args_n; j++)
 							free(substr[j]);
+
 						free(substr);
+
 						return (char **)NULL;
 					}
 				}
@@ -13755,9 +13802,11 @@ parse_input_str(char *str)
 						strcpy(substr[i], usr_var[j].value);
 					}
 				}
+
 				free(var_name);
 				var_name = (char *)NULL;
 			}
+
 			else {
 				fprintf(stderr, _("%s: %s: Error getting variable name\n"), 
 						PROGRAM_NAME, substr[i]);
@@ -14629,10 +14678,16 @@ list_dir(void)
 		file_info = (struct fileinfo *)NULL;
 	}
 
+	/* Free indices of files named as ELN, if any */
+	if (eln_as_file_n) {
+		free(eln_as_file);
+		eln_as_file = (int *)0;
+	}
+
+	files = eln_as_file_n = 0; /* Reset the files counter */
+
 	if (light_mode)
 		return list_dir_light();
-
-	files = 0; /* Reset the files counter */
 
 	/* CPU Registers are faster than memory to access, so the variables 
 	 * which are most frequently used in a C program can be put in
@@ -14834,7 +14889,22 @@ list_dir(void)
 	 * information */
 	longest = 0; /* Global */
 	struct stat file_attrib;
+
 	for (i = (int)files; i--;) {
+
+		/* Take note of files named as existing ELN: they
+		 * shouldn't be expanded */
+		 /* We check from 1 to 9 because there will never be an
+		  * ELN 0 */
+		if (*tmp_dirlist[i]->d_name >= '1'
+		&& *tmp_dirlist[i]->d_name <= '9'
+		&& is_number(tmp_dirlist[i]->d_name)
+		&& atoi(tmp_dirlist[i]->d_name) <= files) {
+			eln_as_file = (int *)xrealloc(eln_as_file,
+								(eln_as_file_n + 1) * sizeof(int));
+			eln_as_file[eln_as_file_n++] = i;
+		}
+
 		int ret = lstat(dirlist[i], &file_attrib);
 
 		if (ret == -1) {
@@ -15575,6 +15645,17 @@ list_dir_light(void)
 	longest = 0; /* Global */
 
 	for (i = (int)files; i--;) {
+
+		/* Take note of files named as existing ELN: they
+		 * shouldn't be expanded */
+		if (*tmp_dirlist[i]->d_name >= '1'
+		&& *tmp_dirlist[i]->d_name <= '9'
+		&& is_number(tmp_dirlist[i]->d_name)
+		&& atoi(tmp_dirlist[i]->d_name) <= files) {
+			eln_as_file = (int *)xrealloc(eln_as_file,
+								(eln_as_file_n + 1) * sizeof(int));
+			eln_as_file[eln_as_file_n++] = i;
+		}
 
 		file_info[i].linkdir = -1;
 
