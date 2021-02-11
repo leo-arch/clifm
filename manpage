@@ -1,5 +1,5 @@
 '\ t
-.TH "CLIFM" "1" "Febraury 4, 2021" "CliFM 0.28.0+" "CliFM Manual"
+.TH "CLIFM" "1" "Febraury 10, 2021" "CliFM 0.29.0+" "CliFM Manual"
 .nh
 .ad l
 
@@ -7,7 +7,7 @@
 CLIFM \- A completely CLI\-based file manager inspired by Arch Linux' KISS principle
 
 .SH SYNOPSIS
-\fIclifm\fR [\-aAfFgGhiIlLoOsuUvxy] [\-p PATH] [\-P PROFILE] [\-z METHOD]
+\fIclifm\fR [\-aAfFgGhiIlLmoOsuUvxy] [\-p PATH] [\-P PROFILE] [\-z METHOD]
 
 .SH DESCRIPTION
 CliFM is a completely text\-based file manager (no GUI nor curses at all) able to perform all the basic operations you may expect from any other FM. However, its most distinguishing characteristics are:
@@ -113,6 +113,11 @@ enable long view mode: list files and their properties
 .B \-L, \-\-list\-on\-the\-fly
 \'cd\' lists files on the fly (default)
 .TP
+
+.B \-m, \-\-dirhist\-map
+enable the directory history map
+.TP
+
 .B \-p, \-\-path \fRPATH
 use PATH as CliFM starting path. Default starting path is current working directory
 .TP
