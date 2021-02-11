@@ -566,6 +566,7 @@ struct param
 	int path;
 	int light;
 	int sort;
+	int dirmap;
 };
 
 struct param xargs;
@@ -671,8 +672,8 @@ const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
 \\z\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
 
 /* Used when dirhist map is set to true */
-#define DEFAULT_PROMPT_NO_CWD "\\A \\u:\\H\\n\\[\\e[0m\\]\
-\\z\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
+/* #define DEFAULT_PROMPT_NO_CWD "\\A \\u:\\H\\n\\[\\e[0m\\]\
+\\z\\[\\e[0;34m\\] \\$\\[\\e[0m\\] " */
 
 #define DEFAULT_TERM_CMD "xterm -e"
 
@@ -888,7 +889,8 @@ main(int argc, char **argv)
 	/* Set all external arguments flags to uninitialized state */
 	xargs.splash = xargs.hidden = xargs.longview = xargs.ext = -1;
 	xargs.ffirst = xargs.sensitive = xargs.unicode = xargs.pager = -1;
-	xargs.path = xargs.cdauto = xargs.light = xargs.sort = -1;
+	xargs.path = xargs.cdauto = xargs.light = xargs.sort = -1,
+	xargs.dirmap = -1;
 
 	if (argc > 1)
 		external_arguments(argc, argv);
@@ -2354,7 +2356,7 @@ print_tips(int all)
 		"of 'open FILE' or 'cd FILE'",
 		"Add a new entry to the mimelist file with 'mm edit'",
 		"Do not forget to take a look at the manpage",
-		"Need more speed? Try the light mode (A-y)",
+		"Need more speed? Try the light mode (Alt-y)",
 		"The Selection Box is shared among different instances of CliFM",
 		"Select files here and there with the 's' command",
 		"Use wildcards with the 's' command: 's *.c'",
@@ -2372,13 +2374,14 @@ print_tips(int all)
 		"Once in the pager, go backwards pressing the keyboard shortcut "
 		"provided by your terminal emulator",
 		"Once in the pager, press 'q' to stop it",
-		"Press 'A-l' to switch to long view mode",
+		"Press 'Alt-l' to switch to long view mode",
 		"Search for files using the slash command: '/*.png'",
 		"Add a new bookmark by just entering 'bm ELN/FILE'",
 		"Use c, l, m, md, and r instead of cp, ln, mv, mkdir, and rm",
 		"Access a remote file system using the 'net' command",
 		"Manage default associated applications with the 'mime' command",
-		"Go back and forth in the directory history with 'A-j' and 'A-k'",
+		"Go back and forth in the directory history with 'Alt-j' and 'Alt-k' "
+		"or Shift-Left and Shift-Right",
 		"Open a new instance of CliFM with the 'x' command: 'x ELN/DIR'",
 		"Send a command directly to the system shell with ';CMD'",
 		"Run the last executed command by just running '!!'",
@@ -2388,11 +2391,11 @@ print_tips(int all)
 		"Open and edit the configuration file with 'edit'",
 		"Find a description for each CLiFM command by running 'cmd'",
 		"Print the currently used color codes list by entering 'cc'",
-		"Press 'A-i' to toggle hidden files on/off",
-		"List mountpoints by pressing 'A-m'",
+		"Press 'Alt-i' to toggle hidden files on/off",
+		"List mountpoints by pressing 'Alt-m'",
 		"Allow the use of shell commands with the -x option: 'clifm -x'",
-		"Go to the root directory by just pressing 'A-r'",
-		"Go to the home directory by just pressing 'A-e'",
+		"Go to the root directory by just pressing 'Alt-r'",
+		"Go to the home directory by just pressing 'Alt-e'",
 		"Press 'F10' to open and edit the configuration file",
 		"Customize the starting using the -p option: 'clifm -p PATH'",
 		"Use the 'o' command to open files and directories: 'o 12'",
@@ -2401,7 +2404,7 @@ print_tips(int all)
 		"Open a file and send it to the background running 'o 24 &'",
 		"Create a custom prompt editing the configuration file",
 		"Customize color codes using the configuration file",
-		"Open the bookmarks manager by just pressing 'A-b'",
+		"Open the bookmarks manager by just pressing 'Alt-b'",
 		"Chain commands using ; and &&: 's 2 7-10; r sel'",
 		"Add emojis to the prompt by copying them to the Prompt line "
 		"in the configuration file",
@@ -2411,17 +2414,17 @@ print_tips(int all)
 		"Delete a profile using 'pf del PROFILE'",
 		"Copy selected files into CWD by just running 'v sel'",
 		"Use 'p ELN' to print file properties for ELN",
-		"Deselect all selected files by pressing 'A-d'",
-		"Select all files in CWD by pressing 'A-a'",
-		"Jump to the Selection Box by pressing 'A-s'",
+		"Deselect all selected files by pressing 'Alt-d'",
+		"Select all files in CWD by pressing 'Alt-a'",
+		"Jump to the Selection Box by pressing 'Alt-s'",
 		"Restore trashed files using the 'u' command",
 		"Empty the trash bin running 't clear'",
-		"Press A-f to toggle list-folders-first on/off",
+		"Press Alt-f to toggle list-folders-first on/off",
 		"Use the 'fc' command to disable the files counter",
 		"Take a look at the splash screen with the 'splash' command",
 		"Have some fun trying the 'bonus' command",
 		"Launch the default system shell in CWD using ':' or ';'",
-		"Use 'A-z' and 'A-x' to switch sorting methods",
+		"Use 'Alt-z' and 'Alt-x' to switch sorting methods",
 		"Reverse sorting order using the 'rev' option: 'st rev'",
 		"Compress and decompress files using the 'ac' and 'ad' "
 		"commands respectivelly",
@@ -2435,6 +2438,8 @@ print_tips(int all)
 		"Create a fresh configuration file by running 'edit gen'",
 		"Use 'ln edit' (or 'le') to edit symbolic links",
 		"Change default keyboard shortcuts editing the keybindings file",
+		"Keep in sight previous and next visited directories enabling the "
+		"DirhistMap option in the configuration file",
 		NULL
 	};
 
@@ -4381,7 +4386,7 @@ DividingLineChar='='\n\n"
 
 "# If set to true, print a map of the current position in the directory\n\
 # history list\n\
-DirhistMap=true\n\
+DirhistMap=false\n\
 DirhistIndexColor=01;32\n\n"
 
 "# The prompt line is build using string literals and/or the following escape\n\
@@ -7428,7 +7433,7 @@ set_default_options(void)
 	tips = 1;
 	autocd = 1;
 	auto_open = 1;
-	dirhist_map = 1;
+	dirhist_map = 0;
 
 	strcpy(dirhist_index_color, "\x1b[00;36m");
 	strcpy(text_color, "\001\x1b[00;39m\002");
@@ -7437,6 +7442,7 @@ set_default_options(void)
 	strcpy(default_color, "\x1b[00;39;49m");
 	strcpy(div_line_color, "\x1b[00;34m");
 	strcpy(welcome_msg_color, "\x1b[01;36m");
+	strcpy(dirhist_index_color, "\x1b[00;36m");
 	sprintf(di_c, "\x1b[01;34m");
 	sprintf(nd_c, "\x1b[01;31m");
 	sprintf(ed_c, "\x1b[00;34m");
@@ -9481,8 +9487,6 @@ void
 add_to_dirhist(const char *dir_path)
 /* Add DIR_PATH to visited directory history (old_pwd) */
 {
-	clock_t start = clock();
-
 	/* Do not add anything if new path equals last entry in directory
 	 * history */
 
@@ -9543,10 +9547,6 @@ add_to_dirhist(const char *dir_path)
 
 		old_pwd[dirhist_total_index] = (char *)NULL;
 	}
-
-	clock_t end = clock();
-	printf("time: %f\n", (double)(end-start)/CLOCKS_PER_SEC);
-
 }
 
 int
@@ -10297,6 +10297,9 @@ load_dirhist(void)
 int
 save_dirhist(void)
 {
+	if (!DIRHIST_FILE)
+		return EXIT_FAILURE;
+		
 	FILE *fp = fopen(DIRHIST_FILE, "w");
 
 	if (!fp) {
@@ -12022,15 +12025,16 @@ init_config(void)
 							auto_open = 1;
 					}
 
-					else if (strncmp(line, "DirhistMap=", 11) == 0) {
+					else if (xargs.dirmap == -1
+					&& strncmp(line, "DirhistMap=", 11) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "DirhistMap=%5s\n", opt_str);
 						if (ret == -1)
 							continue;
-						if (strncmp(opt_str, "false", 5) == 0)
-							dirhist_map = 0;
-						else /* True and default */
+						if (strncmp(opt_str, "true", 4) == 0)
 							dirhist_map = 1;
+						else /* False and default */
+							dirhist_map = 0;
 					}
 
 					else if (strncmp(line, "DirIndicator=", 13) == 0) {
@@ -12573,7 +12577,7 @@ init_config(void)
 			 * via the config file, or if this latter could not be read
 			 * for any reason, set the defaults */
 			/* -1 means not set */
-			if (dirhist_map == -1) dirhist_map = 1;
+			if (dirhist_map == -1) dirhist_map = 0;
 			if (max_dirhist == -1) max_dirhist = 30;
 			if (restore_last_path == -1) restore_last_path = 0;
 			if (auto_open == -1) auto_open = 1;
@@ -12954,6 +12958,7 @@ external_arguments(int argc, char **argv)
 		{"case-sensitive", no_argument, 0, 'I'},
 		{"no-long-view", no_argument, 0, 'l'},
 		{"long-view", no_argument, 0, 'L'},
+		{"dirhist-map", no_argument, 0, 'm'},
 		{"no-list-on-the-fly", no_argument, 0, 'o'},
 		{"list-on-the-fly", no_argument, 0, 'O'},
 		{"path", required_argument, 0, 'p'},
@@ -12971,13 +12976,14 @@ external_arguments(int argc, char **argv)
 	/* Set all external arguments flags to uninitialized state */
 	xargs.splash = xargs.hidden = xargs.longview = xargs.ext = -1;
 	xargs.ffirst = xargs.sensitive = xargs.unicode = xargs.pager = -1;
-	xargs.path = xargs.cdauto = xargs.light = xargs.sort = -1;
+	xargs.path = xargs.cdauto = xargs.light = xargs.sort = -1,
+	xargs.dirmap = -1;
 
 	int optc;
 	/* Variables to store arguments to options (-p and -P) */
 	char *path_value = (char *)NULL, *alt_profile_value = (char *)NULL;
 
-	while ((optc = getopt_long(argc, argv, "+aAfFgGhiIlLoOp:P:sUuvxyz:",
+	while ((optc = getopt_long(argc, argv, "+aAfFgGhiIlLmoOp:P:sUuvxyz:",
 							   longopts, (int *)0)) != EOF) {
 		/* ':' and '::' in the short options string means 'required' and 
 		 * 'optional argument' respectivelly. Thus, 'p' and 'P' require
@@ -13048,6 +13054,11 @@ external_arguments(int argc, char **argv)
 			xargs.longview = 1;
 			break;
 
+		case 'm':
+			dirhist_map = 1;
+			xargs.dirmap = 1;
+			break;
+
 		case 'o':
 			flags &= ~ON_THE_FLY;
 			cd_lists_on_the_fly = 0;
@@ -13116,19 +13127,28 @@ external_arguments(int argc, char **argv)
 			break;
 
 		case '?': /* If some unrecognized option was found... */
+
 			/* Options that require an argument */
-			if (optopt == 'p')
+			if (optopt == 'p') {
 				fprintf(stderr, _("%s: option requires an argument -- "
 						"'%c'\nTry '%s --help' for more information.\n"), 
 						PROGRAM_NAME, optopt, PNL);
+			}
+
 			/* If unknown option is printable... */
-			else if (isprint(optopt))
+			else if (isprint(optopt)) {
 				fprintf(stderr, _("%s: invalid option -- '%c'\nUsage: %s "
-						"[-aAfFgGhiIlLoOsuUvx] [-p path]\nTry '%s --help' "
-						"for more information.\n"), PROGRAM_NAME, optopt,
-						PNL, PNL);
-			else fprintf(stderr, _("%s: unknown option character '\\%x'\n"), 
+						"[-aAfFgGhiIlLmoOsuUvxyz] [-p PATH] [-P PROFILE] "
+						"[-z METHOD]\nTry '%s --help' for more "
+						"information.\n"), PROGRAM_NAME, optopt, PNL,
+						PNL);
+			}
+
+			else {
+				fprintf(stderr, _("%s: unknown option character '\\%x'\n"), 
 						 PROGRAM_NAME, (unsigned int)optopt);
+			}
+
 			exit(EXIT_FAILURE);
 
 		default: break;
@@ -20711,7 +20731,7 @@ help_function (void)
 
 	printf(_("%s %s (%s), by %s\n"), PROGRAM_NAME, VERSION, DATE, AUTHOR);
 
-	printf(_("\nUSAGE: %s [-aAfFgGhiIlLoOsuUvxy] [-p PATH] [-P PROFILE] "
+	printf(_("\nUSAGE: %s [-aAfFgGhiIlLmoOsuUvxy] [-p PATH] [-P PROFILE] "
 			"[-z METHOD]\n\
 \n -a, --no-hidden\t\t do not show hidden files\
 \n -A, --show-hidden\t\t show hidden files (default)\
@@ -20724,6 +20744,7 @@ help_function (void)
 \n -I, --case-sensitive\t\t case-sensitive files listing\
 \n -l, --no-long-view\t\t disable long view mode (default)\
 \n -L, --long-view\t\t enable long view mode\
+\n -m, --dihist-map\t\t enable the directory history map\
 \n -o, --no-list-on-the-fly\t 'cd' works as the shell 'cd' command\
 \n -O, --list-on-the-fly\t\t 'cd' lists files on the fly (default)\
 \n -p, --path PATH\t\t use PATH as %s starting path\
@@ -20932,6 +20953,8 @@ bonus_function (void)
 		">++('>",
 		":(){:|:&};:",
 		"Keep it simple, stupid",
+		"If ain't broken, brake it",
+		"An Archer knows her target like the back of her hands",
 		NULL };
 
 	size_t num = (sizeof(phrases) / sizeof(phrases[0])) - 1;
