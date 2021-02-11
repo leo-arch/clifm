@@ -59,7 +59,7 @@ Of course, you can deselect some or all selected files whenever you want with th
 
 * **NEW: PLUGINS via custom actions**: Use custom action names, as if they were any other command, to run custom shell scripts and extend thus CliFM functionality to fit your needs. This is basically an easy way of building custom commands for CliFM.
 
-* **NEW: Directory history map**: Keep in sight previous, current, and next entries in the directory history list for easiest and fasterst navigation.
+* **NEW: Directory history map**: Keep in sight previous, current, and next entries in the directory history list for easiest and fastest navigation through visited directories.
 
 Because file manager, but also half-shell, CLiFM also provides the following features:
 
