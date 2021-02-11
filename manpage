@@ -365,7 +365,7 @@ To import aliases from a file, provided it contains aliases in the specified for
 .TP
 
 .B exp, export [FILE ...]
-with no argument, export the list of files in the current working directory to e temporary file. Otherwise, export only those specified as further arguments: they could be directories, filenams, ELN's or some search expression.
+with no argument, export the list of files in the current working directory to a temporary file. Otherwise, export only those specified as further arguments: they could be directories, filenames, ELN's or some search expression like "*.c".
 .TP
 
 .B dc \fR[on, off, status]
