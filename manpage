@@ -391,8 +391,8 @@ toggle the autocd function on/off. If set to on, 'DIR' amounts to 'cd DIR'.
 toggle the auto-open function on/off. If set to on, 'FILE' amounts to 'open FILE'.
 .TP
 
-.B kb, keybinds [edit]
-with no argument, prints the current keyboard shortcuts and their associated functions. To edit the keybindings file, use the 'edit' option.
+.B kb, keybinds [edit] [default]
+with no argument, prints the current keyboard codes and their associated functions. To edit the keybindings file, use the 'edit' option. Use the 'default' option To set the default values.
 .TP
 
 .B cmd, commands 
@@ -433,46 +433,47 @@ safely quit CliFM.
 
 .SH KEYBOARD SHORTCUTS
 .TP
-\fBA\-c:\fR Clear the current command line buffer
+\fBM\-c:\fR Clear the current command line buffer
 .TP
-\fBA\-f:\fR Toggle list\-folders\-first on/off
+\fBM\-f:\fR Toggle list\-folders\-first on/off
 .TP
 \fBC\-r:\fR Refresh the screen
 .TP
-\fBA\-l:\fR Toggle long view mode on/off
+\fBM\-l:\fR Toggle long view mode on/off
 .TP
-\fBA\-m:\fR List mountpoints
+\fBM\-m:\fR List mountpoints
 .TP
-\fBA\-b:\fR Launch the Bookmarks Manager
+\fBM\-b:\fR Launch the Bookmarks Manager
 .TP
-\fBA\-i:\fR Toggle hidden files on/off
+\fBM\-i:\fR Toggle hidden files on/off
 .TP
-\fBA\-s:\fR Open the Selection Box
+\fBM\-s:\fR Open the Selection Box
 .TP
-\fBA\-a:\fR Select all files in the current working directory
+\fBM\-a:\fR Select all files in the current working directory
 .TP
-\fBA\-d:\fR Deselect all selected files
+\fBM\-d:\fR Deselect all selected files
 .TP
-\fBA\-r:\fR Change to the root directory
+\fBM\-r:\fR Change to the root directory
 .TP
-\fBA\-e:\fR Change to the home directory
+\fBM\-e, Home:\fR Change to the home directory
 .TP
-\fBA\-u:\fR Change to the parent directory
+\fBM\-u, S-Up:\fR Change to the parent directory
 .TP
-\fBA\-j:\fR Change to the previous directory in the directory history list
+\fBM\-j, S-Left:\fR Change to the previous directory in the directory history list
 .TP
-\fBA\-k:\fR Change to the next directory in the directory history list
+\fBM\-k, S-Right:\fR Change to the next directory in the directory history list
 .TP
-\fBA\-y:\fR Toggle light mode on/off
+\fBM\-y:\fR Toggle light mode on/off
 .TP
-\fBA\-z:\fR Switch to previous sorting method
+\fBM\-z:\fR Switch to previous sorting method
 .TP
-\fBA\-x:\fR Switch to next sorting method
+\fBM\-x:\fR Switch to next sorting method
 .TP
 \fBF10:\fR Open the configuration file
 .TP
-These are the default keyboard shortcuts. However, the user can modify them as she please using the keybindings file (see the FILES section below).
-
+These are the default keyboard shortcuts. However, they can be freely modified using the 'kb edit' command or just editing the keybindings file (see the FILES section below).
+.TP
+NOTE: C stands for Control, S for Shift, and M for the Meta key (the Alt key in most keyboards).
 .SH COLOR CODES
 .TP
 Colors are specified using the same format used by \fBdircolors(1)\fR and the LS_COLORS environment variable, namely, a colon separated list of codes with this general format: filetype=color. This is the list of filetype codes:
@@ -502,9 +503,9 @@ Colors are specified using the same format used by \fBdircolors(1)\fR and the LS
  no = unknown filetype
  uf = unaccesible files (\fBstat(3)\fR error)
 .TP
-Color codes are just traditional ANSI color codes less the escape character and the final 'm'. Thus, for instance, if you want non\-empty directories to be bold blue, add this to the FiletypeColors line in the configuration file: di=01;34
+Color codes are just traditional ANSI color codes less the escape character and the final 'm'. Thus, for instance, if you want non\-empty directories to be bold blue, add this to the \fIFiletypeColors\fR line in the configuration file: di=01;34
 .TP
-Color codes can be used for file extensions as well using this format: *.ext=color. For example, to print C source files in bold green, add this to the ExtColors line in the configuration file: *.c=01;32
+Color codes can be used for file extensions as well using this format: *.ext=color. For example, to print C source files in bold green, add this to the \fIExtColors\fR line in the configuration file: *.c=01;32
 .TP
 Though by default CliFM uses only 8 colors, you can use 256 and RGB colors as well. Example: fi=04;38;02;245;76;00 will print regular files underlined and using a bold orange RGB or 24\-bit true color. In this case, just make sure to use a terminal supporting RGB colors.
 .TP
@@ -514,7 +515,7 @@ To see a colored list of the currently used color codes run \fIcc\fR or \fIcolor
 
 .SH THE PROMPT
 .TP
-CLiFM's prompt is build from the "Prompt" line in the configuration file following almost the same escape codes and rules used by the Bash prompt, except that it does not perform command substitution nor accepts any of the Bash functions. String literals and escape codes can be used to build the prompt line and its colors. This is a list of supported escape codes:
+CLiFM's prompt is build from the \fIPrompt\fR line in the configuration file following almost the same escape codes and rules used by the Bash prompt, except that it does not perform command substitution nor accepts any of the Bash functions. String literals and escape codes can be used to build the prompt line and its colors. This is a list of supported escape codes:
 .TP
 \\xnn: The character whose hexadecimal code is nn.
 \\e: Escape character

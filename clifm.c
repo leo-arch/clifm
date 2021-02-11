@@ -149,11 +149,11 @@ in FreeBSD, but is deprecated */
 //#define CLEAR write(STDOUT_FILENO, "\033c", 3);
 #define CLEAR write(STDOUT_FILENO, "\x1b[2J\x1b[3J\x1b[H", 11);
 /* #define CLEAR write(STDOUT_FILENO, "\033[2J\033[H", 7); */
-#define VERSION "0.28.0"
+#define VERSION "0.29.0"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "February 4, 2021"
+#define DATE "February 10, 2021"
 #define LICENSE "GPL2+"
 
 /* Define flags for program options and internal use */
@@ -282,7 +282,6 @@ int is_quote_char(char c);
 char *filenames_generator(const char *text, int state);
 char *bin_cmd_generator(const char *text, int state);
 void readline_kbinds(void);
-int readline_kbind_action(int count, int key);
 char *rl_no_hist(const char *prompt);
 char *bookmarks_generator(const char *text, int state);
 int initialize_readline(void);
@@ -407,7 +406,7 @@ char *profiles_generator(const char *text, int state);
 /* History */
 int history_function(char **comm);
 int run_history_cmd(const char *cmd);
-void surf_hist(char **comm);
+int surf_hist(char **comm);
 int get_history(void);
 void add_to_dirhist(const char *dir_path);
 int record_cmd(char *input);
@@ -599,7 +598,7 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 	home_ok = 1, config_ok = 1, trash_ok = 1, selfile_ok = 1, tips = -1,
 	mime_match = 0, logs_enabled = -1, sort = -1, files_counter = -1,
 	light_mode = -1, dir_indicator = -1, classify = -1, sort_switch = 0,
-	sort_reverse = 0, autocd = -1, auto_open = -1,
+	sort_reverse = 0, autocd = -1, auto_open = -1, dirhist_map = -1,
 	restore_last_path = -1;
 	/* -1 means non-initialized or unset. Once initialized, these variables
 	 * are always either zero or one */
@@ -671,6 +670,10 @@ const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
 #define DEFAULT_PROMPT "\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\
 \\z\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
 
+/* Used when dirhist map is set to true */
+#define DEFAULT_PROMPT_NO_CWD "\\A \\u:\\H\\n\\[\\e[0m\\]\
+\\z\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
+
 #define DEFAULT_TERM_CMD "xterm -e"
 
 #define FALLBACK_SHELL "/bin/sh"
@@ -688,7 +691,8 @@ const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
 /* Some interface colors */
 char text_color[MAX_COLOR + 2] = "", eln_color[MAX_COLOR] = "",
 	 default_color[MAX_COLOR] = "", dir_count_color[MAX_COLOR] = "",
-	 div_line_color[MAX_COLOR] = "", welcome_msg_color[MAX_COLOR] = "";
+	 div_line_color[MAX_COLOR] = "", welcome_msg_color[MAX_COLOR] = "",
+	 dirhist_index_color[MAX_COLOR] = "";
 /* text_color is used in the command line, and readline needs to know
  * that color codes are not printable chars. For this we need to add
  * "\001" at the beginning of the color code and "\002" at the end. We
@@ -1492,7 +1496,8 @@ reload_config(void)
 	home_ok = 1, config_ok = 1, trash_ok = 1, selfile_ok = 1, tips = -1,
 	mime_match = 0, logs_enabled = -1, sort = -1, files_counter = -1,
 	light_mode = -1, dir_indicator = -1, classify = -1, sort_switch = 0,
-	sort_reverse = 0, autocd = -1, auto_open = -1, restore_last_path = -1;
+	sort_reverse = 0, autocd = -1, auto_open = -1, restore_last_path = -1,
+	dirhist_map = -1;
 
 	shell_terminal = no_log = internal_cmd = dequoted = 0;
 	shell_is_interactive = recur_perm_error_flag = mime_match = 0;
@@ -1795,6 +1800,9 @@ char
 	size_t i;
 
 	for (i = 0; i < ext_colors_n; i++) {
+
+		if (!ext_colors[i] || !*ext_colors[i] || !ext_colors[i][2])
+			continue;
 
 		/* Only run the check if the first char of both found and
 		 * stored extensions match */
@@ -4370,6 +4378,11 @@ FilesCounter=true\n\n"
 "# DividingLineChar accepts both literal characters (in single quotes) and \n\
 # decimal numbers.\n\
 DividingLineChar='='\n\n"
+
+"# If set to true, print a map of the current position in the directory\n\
+# history list\n\
+DirhistMap=true\n\
+DirhistIndexColor=01;32\n\n"
 
 "# The prompt line is build using string literals and/or the following escape\n\
 # sequences:\n"
@@ -7415,7 +7428,9 @@ set_default_options(void)
 	tips = 1;
 	autocd = 1;
 	auto_open = 1;
+	dirhist_map = 1;
 
+	strcpy(dirhist_index_color, "\x1b[00;36m");
 	strcpy(text_color, "\001\x1b[00;39m\002");
 	strcpy(eln_color, "\x1b[01;33m");
 	strcpy(dir_count_color, "\x1b[00;97m");
@@ -7949,64 +7964,53 @@ open_function(char **cmd)
 
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
-	else
-		return EXIT_SUCCESS;
+
+	return EXIT_SUCCESS;
 }
 
 int
 cd_function(char *new_path)
 /* Change CliFM working directory to NEW_PATH */
 {
-	int dequoted_p = 0;
-	char *deq_path = (char *)NULL;
 	char buf[PATH_MAX] = ""; /* Temporarily store new_path */
 
-	/* dequote new_path, if necessary */
-	if (strcntchr(new_path, '\\') != -1) {
-		deq_path = dequote_str(new_path, 0);
-		dequoted_p = 1; /* Only in this case deq_path should be freed */
-	}
-	else {
-		deq_path = new_path;
-		new_path = (char *)NULL;
-	}
-
 	/* If no argument, change to home */
-	if (!deq_path || deq_path[0] == 0x00) {
+	if (!new_path || !*new_path) {
 
-		if (dequoted_p) {
-			free(deq_path);
-			deq_path = (char *)NULL;
-		}
-
-		if (user_home) {
-			int ret = chdir(user_home);
-			if (ret != 0) {
-				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
-						user_home, strerror(errno));
-				return EXIT_FAILURE;
-			}
-			else
-				strncpy(buf, user_home, PATH_MAX);
-		}
-		else {
-			fprintf(stderr, _("%s: Home directory not found\n"),
+		if (!user_home) {
+			fprintf(stderr, _("%s: cd: Home directory not found\n"),
 					PROGRAM_NAME);
 			return EXIT_FAILURE;
 		}
+
+		if (chdir(user_home) != EXIT_SUCCESS) {
+			fprintf(stderr, "%s: cd: '%s': %s\n", PROGRAM_NAME,
+					user_home, strerror(errno));
+			return EXIT_FAILURE;
+		}
+
+		strncpy(buf, user_home, PATH_MAX);
 	}
 
-	/* If we have some argument, resolve it with realpath(), cd into
-	 * the resolved path, and set the path variable to this latter */
+	/* If we have some argument, dequote it, resolve it with realpath(),
+	 * cd into the resolved path, and set the path variable to this
+	 * latter */
 	else {
 
-		char *real_path = realpath(deq_path, NULL);
+		if (strchr(new_path, '\\')) {
+			char *deq_path = dequote_str(new_path, 0);
+
+			if (deq_path) {
+				strcpy(new_path, deq_path);
+				free(deq_path);
+			}
+		}
+
+		char *real_path = realpath(new_path, NULL);
 
 		if (!real_path) {
 			fprintf(stderr, "%s: cd: '%s': %s\n", PROGRAM_NAME,
-					deq_path, strerror(errno));
-			if (dequoted_p)
-				free(deq_path);
+					new_path, strerror(errno));
 			return EXIT_FAILURE;
 		}
 
@@ -8015,41 +8019,35 @@ cd_function(char *new_path)
 		 * So, without the read permission check, chdir() below will be
 		 * successfull, but CliFM will be nonetheless unable to list the
 		 * content of the directory */
-		if (access(real_path, R_OK) != 0) {
-			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+		if (access(real_path, R_OK) != EXIT_SUCCESS) {
+			fprintf(stderr, "%s: cd: '%s': %s\n", PROGRAM_NAME,
 					real_path, strerror(errno));
-			if (dequoted_p)
-				free(deq_path);
 			free(real_path);
 			return EXIT_FAILURE;
 		}
 
-		int ret = chdir(real_path);
-		if (ret != 0) {
-			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+		if (chdir(real_path) != EXIT_SUCCESS) {
+			fprintf(stderr, "%s: cd: '%s': %s\n", PROGRAM_NAME,
 					real_path, strerror(errno));
-			if (dequoted_p)
-				free(deq_path);
 			free(real_path);
 			return EXIT_FAILURE;
 		}
-		else
-			strncpy(buf, real_path, PATH_MAX);
+
+		strncpy(buf, real_path, PATH_MAX);
 		free(real_path);
 	}
 
-	if (dequoted_p)
-		free(deq_path);
-
 	/* If chdir() was successful */
 	free(path);
-	path = (char *)xcalloc(strlen(buf) + 1, sizeof(char));
+	path = (char *)xnmalloc(strlen(buf) + 1, sizeof(char));
 	strcpy(path, buf);
 	add_to_dirhist(path);
 
 	if (cd_lists_on_the_fly) {
 		free_dirlist();
-		list_dir();
+
+		if (list_dir() != EXIT_SUCCESS)
+			return EXIT_FAILURE;
 	}
 
 	return EXIT_SUCCESS;
@@ -8057,93 +8055,103 @@ cd_function(char *new_path)
 
 int
 back_function(char **comm)
-/* Go back one element in dir hist */
+/* Go back one entry in dirhist */
 {
 	if (!comm)
 		return EXIT_FAILURE;
 
 	if (comm[1]) {
-		if (strcmp(comm[1], "--help") == 0)
+		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: back, b [h, hist] [clear] [!ELN]"));
-		else
-			surf_hist(comm);
-		return EXIT_SUCCESS;
-	}
-	/* If just 'back', with no arguments */
-	/* If first path in current dirhist was reached, do nothing */
-	if (dirhist_cur_index <= 0) {
-/*		dirhist_cur_index=dirhist_total_index; */
-		return EXIT_SUCCESS;
+			return EXIT_SUCCESS;
+		}
+
+		return surf_hist(comm);
 	}
 
-	int ret = chdir(old_pwd[dirhist_cur_index - 1]);
-	if (ret == 0) {
+	/* If just 'back', with no arguments */
+
+	/* If first path in current dirhist was reached, do nothing */
+	if (dirhist_cur_index <= 0)
+		return EXIT_SUCCESS;
+
+	int exit_status = EXIT_FAILURE;
+
+	if (chdir(old_pwd[dirhist_cur_index - 1]) == EXIT_SUCCESS) {
+
 		free(path);
+
 		path = (char *)xcalloc(strlen(old_pwd[dirhist_cur_index - 1])
 							   + 1, sizeof(char));
+
 		strcpy(path, old_pwd[--dirhist_cur_index]);
+
+		exit_status = EXIT_SUCCESS;
+
 		if (cd_lists_on_the_fly) {
 			free_dirlist();
-			list_dir();
+			exit_status = list_dir();
 		}
 	}
+
 	else
 		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, 
 				old_pwd[dirhist_cur_index - 1], strerror(errno));
 
-	return EXIT_SUCCESS;
+	return exit_status;
 }
 
 int
 forth_function(char **comm)
-/* Go forth one element in dir hist */
+/* Go forth one entry in dirhist */
 {
 	if (!comm)
 		return EXIT_FAILURE;
 
 	if (comm[1]) {
-		if (strcmp(comm[1], "--help") == 0)
+		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: forth, f [h, hist] [clear] [!ELN]"));
-		else
-			surf_hist(comm);
-		return EXIT_SUCCESS;
+			return EXIT_SUCCESS;
+		}
+
+		return surf_hist(comm);
 	}
 
 	/* If just 'forth', with no arguments */
+
 	/* If last path in dirhist was reached, do nothing */
 	if (dirhist_cur_index + 1 >= dirhist_total_index)
 		return EXIT_SUCCESS;
 
 	dirhist_cur_index++;
 
-	int ret = chdir(old_pwd[dirhist_cur_index]);
-	if (ret == 0) {
+	int exit_status = EXIT_FAILURE;
+	if (chdir(old_pwd[dirhist_cur_index]) == EXIT_SUCCESS) {
+
 		free(path);
 		path = (char *)xcalloc(strlen(old_pwd[dirhist_cur_index])
 							   + 1, sizeof(char));
 		strcpy(path, old_pwd[dirhist_cur_index]);
+
+		exit_status = EXIT_SUCCESS;
+
 		if (cd_lists_on_the_fly) {
 			free_dirlist();
-			list_dir();
+			exit_status = list_dir();
 		}
 	}
+
 	else
 		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, 
 				old_pwd[dirhist_cur_index], strerror(errno));
 
-	return EXIT_SUCCESS;
+	return exit_status;
 }
 
 int
 list_mountpoints(void)
 /* List available mountpoints and chdir into one of them */
 {
-	if (access("/proc/mounts", F_OK) != 0) {
-		fprintf(stderr, "%s: mp: '/proc/mounts': %s\n",
-				PROGRAM_NAME, strerror(errno));
-		return EXIT_FAILURE;
-	}
-
 	FILE *mp_fp = fopen("/proc/mounts", "r");
 
 	if (!mp_fp) {
@@ -8168,15 +8176,18 @@ list_mountpoints(void)
 		if (strncmp(line, "/dev/", 5) == 0) {
 			char *str = (char *)NULL;
 			size_t counter = 0;
+
 			/* use strtok() to split LINE into tokens using space as
 			 * IFS */
 			str = strtok(line, " ");
 			size_t dev_len = strlen(str);
+
 			char *device = (char *)xnmalloc(dev_len + 1, sizeof(char));
 			strcpy(device, str);
 			/* Print only the first two fileds of each /proc/mounts
 			 * line */
 			while (str && counter < 2) {
+
 				if (counter == 1) { /* 1 == second field */
 					printf("%s%zu%s %s%s%s (%s)\n", eln_color, mp_n + 1,
 						   NC, (access(str, R_OK|X_OK) == 0)
@@ -8190,6 +8201,7 @@ list_mountpoints(void)
 												+ 1, sizeof(char));
 					strcpy(mountpoints[mp_n++], str);
 				}
+
 				str = strtok(NULL, " ,");
 				counter++;
 			}
@@ -8212,30 +8224,38 @@ list_mountpoints(void)
 	puts("");
 	/* Ask the user and chdir into the selected mountpoint */
 	char *input = (char *)NULL;
+
 	while (!input)
 		input = rl_no_hist(_("Choose a mountpoint ('q' to quit): "));
 
 	if (!(*input == 'q' && *(input + 1) == 0x00)) {
 		int atoi_num = atoi(input);
+
 		if (atoi_num > 0 && atoi_num <= (int)mp_n) {
 			int ret = chdir(mountpoints[atoi_num - 1]);
+
 			if (ret == 0) {
 				free(path);
 				path = (char *)xcalloc(strlen(mountpoints[atoi_num - 1]) 
 									   + 1, sizeof(char));
 				strcpy(path, mountpoints[atoi_num - 1]);
 				add_to_dirhist(path);
+
 				if (cd_lists_on_the_fly) {
 					free_dirlist();
-					list_dir();
+
+					if (list_dir() != EXIT_SUCCESS)
+						exit_status =  EXIT_FAILURE;
 				}
 			}
+
 			else {
 				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, 
 						mountpoints[atoi_num - 1], strerror(errno));
 				exit_status = EXIT_FAILURE;
 			}
 		}
+
 		else {
 			printf(_("mp: '%s': Invalid mountpoint\n"), input);
 			exit_status = EXIT_FAILURE;
@@ -8325,11 +8345,13 @@ log_msg(char *_msg, int print)
 		fputs("Press any key to continue... ", stdout);
 		xgetchar(); puts("");
 	}
+
 	else {
 		/* Write message to messages file: [date] msg */
 		time_t rawtime = time(NULL);
 		struct tm *tm = localtime(&rawtime);
 		char date[64] = "";
+
 		strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", tm);
 		fprintf(msg_fp, "[%d-%d-%dT%d:%d:%d] ", tm->tm_year + 1900, 
 				tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, 
@@ -8385,6 +8407,7 @@ expand_range(char *str, int listdir)
 		|| asecond > (int)files || afirst >= asecond)
 			return (int *)NULL;
 	}
+
 	else
 		if (afirst >= asecond)
 			return (int *)NULL;
@@ -8412,12 +8435,16 @@ recur_perm_check(const char *dirname)
 		return EXIT_FAILURE;
 
 	while ((entry = readdir(dir)) != NULL) {
+
 		if (entry->d_type == DT_DIR) {
 			char dirpath[PATH_MAX] = "";
+
 			if (strcmp(entry->d_name, ".") == 0 
 					|| strcmp(entry->d_name, "..") == 0)
 				continue;
+
 			snprintf(dirpath, PATH_MAX, "%s/%s", dirname, entry->d_name);
+
 			if (access(dirpath, W_OK|X_OK) != 0) {
 				/* recur_perm_error_flag needs to be a global variable.
 				  * Otherwise, since this function calls itself
@@ -8431,15 +8458,17 @@ recur_perm_check(const char *dirname)
 				recur_perm_error_flag = 1;
 				fprintf(stderr, _("'%s': Permission denied\n"), dirpath);
 			}
+
 			recur_perm_check(dirpath);
 		}
 	}
+
 	closedir(dir);
 
 	if (recur_perm_error_flag)
 		return EXIT_FAILURE;
-	else 
-		return EXIT_SUCCESS;
+
+	return EXIT_SUCCESS;
 }
 
 int
@@ -8455,8 +8484,10 @@ wx_parent_check(char *file)
 	short exit_status = -1; 
 	int ret = -1;
 	size_t file_len = strlen(file);
+
 	if (file[file_len - 1] == '/')
 		file[file_len - 1] = 0x00;
+
 	if (lstat(file, &file_attrib) == -1) {
 		fprintf(stderr, _("'%s': No such file or directory\n"), file);
 		return EXIT_FAILURE;
@@ -8472,6 +8503,7 @@ wx_parent_check(char *file)
 			parent[0] = '/';
 			parent[1] = 0x00;
 		}
+
 		else {
 			fprintf(stderr, _("%s: '%s': Error getting parent "
 					"directory\n"), PROGRAM_NAME, file);
@@ -8484,17 +8516,21 @@ wx_parent_check(char *file)
 	/* DIRECTORY */
 	case S_IFDIR:
 		ret = check_immutable_bit(file);
+
 		if (ret == -1) {
 			/* Error message is printed by check_immutable_bit() itself */
 			exit_status = EXIT_FAILURE;
 		}
+
 		else if (ret == 1) {
 			fprintf(stderr, _("'%s': Directory is immutable\n"), file);
 			exit_status = EXIT_FAILURE;
 		}
+
 		/* Check the parent for appropriate permissions */
 		else if (access(parent, W_OK|X_OK) == 0) {
 			size_t files_n = count_dir(parent);
+
 			if (files_n > 2) {
 				/* I manually check here subdir because recur_perm_check() 
 				 * will only check the contents of subdir, but not subdir 
@@ -8504,30 +8540,37 @@ wx_parent_check(char *file)
 					/* If subdir is ok and not empty, recusivelly check 
 					 * subdir */
 					files_n = count_dir(file);
+
 					if (files_n > 2) {
 						/* Reset the recur_perm_check() error flag. See 
 						 * the note in the function block. */
 						recur_perm_error_flag = 0;
+
 						if (recur_perm_check(file) == 0) {
 							exit_status = EXIT_SUCCESS;
 						}
+
 						else
 							/* recur_perm_check itself will print the 
 							 * error messages */
 							exit_status = EXIT_FAILURE;
 					}
+
 					else /* Subdir is ok and empty */
 						exit_status = EXIT_SUCCESS;
 				}
+
 				else { /* No permission for subdir */
 					fprintf(stderr, _("'%s': Permission denied\n"),
 							file);
 					exit_status = EXIT_FAILURE;
 				}
 			}
+
 			else
 				exit_status = EXIT_SUCCESS;
 		}
+
 		else { /* No permission for parent */
 			fprintf(stderr, _("'%s': Permission denied\n"), parent);
 			exit_status = EXIT_FAILURE;
@@ -8537,15 +8580,18 @@ wx_parent_check(char *file)
 	/* REGULAR FILE */
 	case S_IFREG:
 		ret=check_immutable_bit(file);
+
 		if (ret == -1) {
 			/* Error message is printed by check_immutable_bit()
 			 * itself */
 			exit_status = EXIT_FAILURE;
 		}
+
 		else if (ret == 1) {
 			fprintf(stderr, _("'%s': File is immutable\n"), file);
 			exit_status = EXIT_FAILURE;
 		}
+
 		else if (parent) {
 			if (access(parent, W_OK|X_OK) == 0)
 				exit_status = EXIT_SUCCESS;
@@ -8554,6 +8600,7 @@ wx_parent_check(char *file)
 				exit_status = EXIT_FAILURE;
 			}
 		}
+
 		break;
 
 	/* SYMLINK, SOCKET, AND FIFO PIPE */
@@ -8562,8 +8609,10 @@ wx_parent_check(char *file)
 	case S_IFLNK:
 		/* Symlinks, sockets and pipes do not support immutable bit */
 		if (parent) {
+
 			if (access(parent, W_OK|X_OK) == 0)
 				exit_status = EXIT_SUCCESS;
+
 			else {
 				fprintf(stderr, _("'%s': Permission denied\n"), parent);
 				exit_status = EXIT_FAILURE;
@@ -8683,6 +8732,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 	sprintf(info_file, "%s/%s.trashinfo", TRASH_INFO_DIR, file_suffix);
 
 	FILE *info_fp = fopen(info_file, "w");
+
 	if (!info_fp) { /* If error creating the info file */
 		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, info_file, 
 				strerror(errno));
@@ -8695,14 +8745,18 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 		char *tmp_cmd2[] = { "rm", "-r", trash_file, NULL };
 		ret = launch_execve (tmp_cmd2, FOREGROUND);
 		free(trash_file);
+
 		if (ret != EXIT_SUCCESS)
 			fprintf(stderr, _("%s: trash: '%s/%s': Failed removing trash "
 					"file\nTry removing it manually\n"), PROGRAM_NAME, 
 					TRASH_FILES_DIR, file_suffix);
+
 		free(file_suffix);
 		free(info_file);
+
 		return EXIT_FAILURE;
 	}
+
 	else { /* If info file was generated successfully */
 		/* Encode path to URL format (RF 2396) */
 		char *url_str = (char *)NULL;
@@ -8735,6 +8789,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 	/* Remove the file to be trashed */
 	char *tmp_cmd3[] = { "rm", "-r", file, NULL };
 	ret = launch_execve(tmp_cmd3, FOREGROUND);
+
 	/* If remove fails, remove trash and info files */
 	if (ret != EXIT_SUCCESS) {
 		fprintf(stderr, _("%s: trash: '%s': Failed removing file\n"), 
@@ -9424,32 +9479,74 @@ trash_function (char **comm)
 
 void
 add_to_dirhist(const char *dir_path)
-/* Add new path (DIR_PATH) to visited directory history (old_pwd) */
+/* Add DIR_PATH to visited directory history (old_pwd) */
 {
+	clock_t start = clock();
+
 	/* Do not add anything if new path equals last entry in directory
-	 * history.Just update the current dihist index to reflect the path
-	 * change */
-	if (dirhist_total_index > 0) {
-		if (strcmp(dir_path, old_pwd[dirhist_total_index - 1]) == 0) {
-			int i;
-			for (i = (dirhist_total_index - 1); i >= 0; i--) {
-				if (strcmp(old_pwd[i], dir_path) == 0) {
-					dirhist_cur_index = i;
-					break;
-				}
-			}
-			return;
+	 * history */
+
+	if ((dirhist_total_index - 1) >= 0
+	&& old_pwd[dirhist_total_index - 1]
+	&& *(dir_path + 1) == *(old_pwd[dirhist_total_index - 1] + 1)
+	&& strcmp(dir_path, old_pwd[dirhist_total_index - 1]) == 0)
+		return;
+
+	static size_t end_counter = 11, mid_counter = 11;
+
+	/* If already at the end of dirhist, add new entry */
+	if (dirhist_cur_index + 1 >= dirhist_total_index) {
+
+		/* Realloc only once per 10 operations */
+		if (end_counter > 10) {
+			end_counter = 1;
+			/* 20: Realloc dirhist_total + (2 * 10) */
+			old_pwd = (char **)xrealloc(old_pwd,
+									(size_t)(dirhist_total_index + 20) 
+									* sizeof(char *));
 		}
+
+		end_counter++;
+
+		old_pwd[dirhist_total_index] = (char *)xcalloc(strlen(dir_path)
+													+ 1, sizeof(char));
+
+		dirhist_cur_index = dirhist_total_index;
+		strcpy(old_pwd[dirhist_total_index++], dir_path);
+
+		old_pwd[dirhist_total_index] = (char *)NULL;
 	}
 
-	old_pwd = (char **)xrealloc(old_pwd, (size_t)(dirhist_total_index + 2) 
-								* sizeof(char *));
-	old_pwd[dirhist_total_index] = (char *)xcalloc(strlen(dir_path) + 1, 
-												   sizeof(char));
-	dirhist_cur_index = dirhist_total_index;
-	strcpy(old_pwd[dirhist_total_index++], dir_path);
+	/* I not at the end of dirhist, add previous AND new entry */
+	else {
+		if (mid_counter > 10) {
+			mid_counter = 1;
+			/* 30: Realloc dirhist_total + (3 * 10) */
+			old_pwd = (char **)xrealloc(old_pwd,
+									(size_t)(dirhist_total_index + 30) 
+									* sizeof(char *));
+		}
 
-	old_pwd[dirhist_total_index] = (char *)NULL;
+		mid_counter++;
+
+		old_pwd[dirhist_total_index] = (char *)xcalloc(strlen(
+											old_pwd[dirhist_cur_index])
+											+ 1, sizeof(char));
+		strcpy(old_pwd[dirhist_total_index++],
+			   old_pwd[dirhist_cur_index]);
+
+		old_pwd[dirhist_total_index] = (char *)xcalloc(strlen(dir_path)
+													+ 1, sizeof(char));
+
+		dirhist_cur_index = dirhist_total_index;
+		strcpy(old_pwd[dirhist_total_index++], dir_path);
+
+		old_pwd[dirhist_total_index] = (char *)NULL;
+	}
+
+	clock_t end = clock();
+	printf("time: %f\n", (double)(end-start)/CLOCKS_PER_SEC);
+
 }
 
 int
@@ -10039,239 +10136,6 @@ keybind_exec_cmd(char *str)
 	}
 
 	args_n = old_args;
-}
-
-int
-readline_kbind_action(int count, int key) {
-	/* Prevent Valgrind from complaining about unused variable */
-	if (count) {}
-
-/*	printf("Key: %d\n", key); */
-
-	/* Disable all keybindings while in the bookmarks or mountpoints
-	 * screen */
-	if (kbind_busy)
-		return 0;
-
-	switch (key) {
-
-	/* C-r: Refresh the screen */
-	case 18:
-		CLEAR;
-		keybind_exec_cmd("rf");
-		break;
-
-	/* A-a: Select all files in CWD */
-	case 97:
-		keybind_exec_cmd("sel .* *");
-		break;
-
-	/* A-b: Run the bookmarks manager */
-	case 98:
-		/* Call the function only if it is not already running */
-		if (!kbind_busy) {
-/*				if (!config_ok) {
-				fprintf(stderr, "%s: Trash disabled\n", PROGRAM_NAME);
-				return 0;
-			} */
-			kbind_busy=1;
-			keybind_exec_cmd("bm");
-		}
-		else
-			return 0;
-		break;
-
-	/* A-c: Clear the current line (== C-a, C-k). Very handy, 
-	 * since C-c is currently disabled */
-	case 99:
-
-		/* 1) Clear text typed so far (\x1b[2K) and move cursor to the
-		 * beginning of the current line (\r) */
-		write(STDOUT_FILENO, "\x1b[2K\r", 5);
-
-		/* 2) Clear the readline buffer */
-		rl_delete_text(0, rl_end);
-		rl_end = rl_point = 0;
-
-/*		puts("");
-		rl_replace_line("", 0); */
-
-		break;
-
-	/* A-d: Deselect all selected files */
-	case 100:
-		keybind_exec_cmd("ds a");
-		break;
-
-	/* Change CWD to the HOME directory */
-	case 72: /* HOME */
-	case 101: /* A-e */
-		/* If already in the home dir, do nothing */
-		if (strcmp(path, user_home) == 0)
-			return 0;
-		keybind_exec_cmd("cd");
-		break;
-
-	/* A-f: Toggle folders first on/off */
-	case 102:
-		/* If status == 0 set it to 1. In this way, the next time
-		 * this function is called it will not be true, and the else
-		 * clause will be executed instead */
-		if (list_folders_first)
-			list_folders_first = 0;
-		else
-			list_folders_first = 1;
-
-		if (cd_lists_on_the_fly) {
-			CLEAR;
-			free_dirlist();
-			/* Without this puts(), the first entries of the directories
-			 * list are printed in the prompt line */
-			puts("");
-			list_dir();
-		}
-
-		break;
-
-	/* A-i: Toggle hidden files on/off */
-	case 105:
-		if (show_hidden)
-			show_hidden = 0;
-		else
-			show_hidden = 1;
-
-		if (cd_lists_on_the_fly) {
-			CLEAR;
-			free_dirlist();
-			puts("");
-			list_dir();
-		}
-
-		break;
-
-	/* Change CWD to PREVIOUS directoy in history */
-	case 68: /* A-Left */
-	case 66: /* A-Down */
-	case 106: 	/* A-j: */
-		/* If already at the beginning of dir hist, do nothing */
-		if (dirhist_cur_index == 0)
-			return 0;
-		keybind_exec_cmd("back");
-		break;
-
-	/* Change CWD to NEXT directory in history */
-	case 67: /* A-Right */
-	case 107: /* A-k */
-		/* If already at the end of dir hist, do nothing */
-		if (dirhist_cur_index + 1 == dirhist_total_index)
-			return 0;
-		keybind_exec_cmd("forth");
-		break;
-
-	/* A-l: Toggle long view mode on/off */
-	case 108:
-		if (long_view)
-			long_view = 0;
-		else
-			long_view = 1;
-		CLEAR;
-		keybind_exec_cmd("rf");
-		break;
-
-	/* A-m: List available mountpoints */
-	case 109:
-		/* Call the function only if it's not already running */
-		if (!kbind_busy) {
-			kbind_busy = 1;
-			keybind_exec_cmd("mp");
-		}
-		else
-			return 0;
-		break;
-
-	/* A-r: Change CWD to the ROOT directory */
-	case 114:
-		/* If already in the root dir, do nothing */
-		if (strcmp(path, "/") == 0)
-			return 0;
-		keybind_exec_cmd("cd /");
-		break;
-
-	/* A-s: Launch the Selection Box*/
-	case 115:
-		keybind_exec_cmd("sb");
-		break;
-
-	/* Change CWD to PARENT directory */
-	case 65: /* A-Up */
-	case 117: /* A-u */
-		/* If already root dir, do nothing */
-		if (strcmp(path, "/") == 0)
-			return 0;
-		keybind_exec_cmd("cd ..");
-		break;
-
-	/* A-y: Toggle light mode on/off */
-	case 121:
-		if (light_mode)
-			light_mode = 0;
-		else
-			light_mode = 1;
-
-		if (cd_lists_on_the_fly) {
-			CLEAR;
-			free_dirlist();
-			puts("");
-			list_dir();
-		}
-
-		break;
-
-	/* A-z: Change to previous sorting method */
-	case 122:
-		sort--;
-		if (sort < 0)
-			sort = sort_types;
-
-		if (cd_lists_on_the_fly) {
-			CLEAR;
-			sort_switch = 1;
-			free_dirlist();
-			puts("");
-			list_dir();
-			sort_switch = 0;
-		}
-
-		break;
-
-	/* A-x: Change to next sorting method */
-	case 120:
-		sort++;
-		if (sort > sort_types)
-			sort = 0;
-
-		if (cd_lists_on_the_fly) {
-			CLEAR;
-			sort_switch = 1;
-			free_dirlist();
-			puts("");
-			list_dir();
-			sort_switch = 0;
-		}
-
-		break;
-
-	/* F10: Open the config file */
-	case 126:
-		keybind_exec_cmd("edit");
-		break;
-
-	default: break;
-	}
-
-	rl_on_new_line();
-
-	return 0;
 }
 
 char *
@@ -12043,7 +11907,8 @@ init_config(void)
 
 			short text_color_set = -1, eln_color_set = -1, 
 				  default_color_set = -1, dir_count_color_set = -1, 
-				  div_line_color_set = -1, welcome_msg_color_set = -1;
+				  div_line_color_set = -1, welcome_msg_color_set = -1,
+				  dirhist_index_color_set = -1;
 
 			FILE *config_fp;
 			config_fp = fopen(CONFIG_FILE, "r");
@@ -12155,6 +12020,17 @@ init_config(void)
 							auto_open = 0;
 						else /* True and default */
 							auto_open = 1;
+					}
+
+					else if (strncmp(line, "DirhistMap=", 11) == 0) {
+						char opt_str[MAX_BOOL] = "";
+						ret = sscanf(line, "DirhistMap=%5s\n", opt_str);
+						if (ret == -1)
+							continue;
+						if (strncmp(opt_str, "false", 5) == 0)
+							dirhist_map = 0;
+						else /* True and default */
+							dirhist_map = 1;
 					}
 
 					else if (strncmp(line, "DirIndicator=", 13) == 0) {
@@ -12506,6 +12382,30 @@ init_config(void)
 						free(opt_str);
 					}
 
+					else if (strncmp(line, "DirhistIndexColor=", 18)
+					== 0) {
+						char *opt_str = (char *)NULL;
+						opt_str = straft(line, '=');
+						if (!opt_str)
+							continue;
+
+						char *tmp = remove_quotes(opt_str);
+						if (!tmp) {
+							free(opt_str);
+							continue;
+						}
+
+						if (!is_color_code(tmp)) {
+							free(opt_str);
+							continue;
+						}
+
+						dirhist_index_color_set = 1;
+						snprintf(dirhist_index_color, MAX_COLOR,
+								 "\x1b[%sm", tmp);
+						free(opt_str);
+					}
+
 					else if (strncmp(line, "DefaultColor=", 13) == 0) {
 						char *opt_str = (char *)NULL;
 						opt_str = straft(line, '=');
@@ -12673,6 +12573,7 @@ init_config(void)
 			 * via the config file, or if this latter could not be read
 			 * for any reason, set the defaults */
 			/* -1 means not set */
+			if (dirhist_map == -1) dirhist_map = 1;
 			if (max_dirhist == -1) max_dirhist = 30;
 			if (restore_last_path == -1) restore_last_path = 0;
 			if (auto_open == -1) auto_open = 1;
@@ -12702,6 +12603,8 @@ init_config(void)
 			if (unicode == -1) unicode = 0;
 			if (text_color_set == -1)
 				strcpy(text_color, "\001\x1b[00;39;49m\002");
+			if (dirhist_index_color_set == -1)
+				strcpy(dirhist_index_color, "\x1b[00;36m");
 			if (eln_color_set == -1)
 				strcpy(eln_color, "\x1b[01;33m");
 			if (default_color_set == -1)
@@ -15118,6 +15021,24 @@ list_dir(void)
 			putchar(div_line_char);
 		printf("%s%s", NC, default_color);
 
+		if (dirhist_map) {
+			/* Print current, previous, and next entries */
+			for (i = 0; i < dirhist_total_index; i++) {
+				if (i == dirhist_cur_index) {
+					if (i > 0 && old_pwd[i - 1])
+						printf("%d %s\n", i, old_pwd[i - 1]);
+
+					printf("%d %s%s%s\n", i + 1, dirhist_index_color,
+						   old_pwd[i], NC);
+
+					if (i + 1 < dirhist_total_index && old_pwd[i + 1])
+						printf("%d %s\n", i + 2, old_pwd[i + 1]);
+
+					break;
+				}
+			}
+		}
+
 		if (sort_switch)
 			print_sort_method();
 
@@ -15416,6 +15337,24 @@ list_dir(void)
 	printf("%s%s", NC, default_color);
 
 	fflush(stdout);
+
+	if (dirhist_map) {
+		/* Print current, previous, and next entries */
+		for (i = 0; i < dirhist_total_index; i++) {
+			if (i == dirhist_cur_index) {
+				if (i > 0 && old_pwd[i - 1])
+					printf("%d %s\n", i, old_pwd[i - 1]);
+
+				printf("%d %s%s%s\n", i + 1, dirhist_index_color,
+					   old_pwd[i], NC);
+
+				if (i + 1 < dirhist_total_index && old_pwd[i + 1])
+					printf("%d %s\n", i + 2, old_pwd[i + 1]);
+
+				break;
+			}
+		}
+	}
 
 	/* If changing sorting method, inform the user about the current
 	 * method */
@@ -15743,6 +15682,24 @@ list_dir_light(void)
 			putchar(div_line_char);
 		printf("%s%s", NC, default_color);
 
+		if (dirhist_map) {
+			/* Print current, previous, and next entries */
+			for (i = 0; i < dirhist_total_index; i++) {
+				if (i == dirhist_cur_index) {
+					if (i > 0 && old_pwd[i - 1])
+						printf("%d %s\n", i, old_pwd[i - 1]);
+
+					printf("%d %s%s%s\n", i + 1, dirhist_index_color,
+						   old_pwd[i], NC);
+
+					if (i + 1 < dirhist_total_index && old_pwd[i + 1])
+						printf("%d %s\n", i + 2, old_pwd[i + 1]);
+
+					break;
+				}
+			}
+		}
+
 		if (sort_switch)
 			print_sort_method();
 
@@ -15931,6 +15888,24 @@ list_dir_light(void)
 	printf("%s%s", NC, default_color);
 
 	fflush(stdout);
+
+	if (dirhist_map) {
+		/* Print current, previous, and next entries */
+		for (i = 0; i < dirhist_total_index; i++) {
+			if (i == dirhist_cur_index) {
+				if (i > 0 && old_pwd[i - 1])
+					printf("%d %s\n", i, old_pwd[i - 1]);
+
+				printf("%d %s%s%s\n", i + 1, dirhist_index_color,
+					   old_pwd[i], NC);
+
+				if (i + 1 < dirhist_total_index && old_pwd[i + 1])
+					printf("%d %s\n", i + 2, old_pwd[i + 1]);
+
+				break;
+			}
+		}
+	}
 
 	/* If changing sorting method, inform the user about the current
 	 * method */
@@ -16344,8 +16319,8 @@ exec_cmd(char **comm)
 		int i;
 		for (i = 0; i < dirhist_total_index; i++) {
 			if (i == dirhist_cur_index)
-				printf("%d %s%s%s%s\n", i + 1, green, old_pwd[i], NC, 
-						default_color);
+				printf("%d %s%s%s%s\n", i + 1, dirhist_index_color,
+						old_pwd[i], NC, default_color);
 			else 
 				printf("%d %s\n", i + 1, old_pwd[i]);
 		}
@@ -17344,45 +17319,62 @@ exec_cmd(char **comm)
 	return exit_code;
 }
 
-void
+int
 surf_hist(char **comm)
 {
-	if (strcmp(comm[1], "h") == 0 || strcmp(comm[1], "hist") == 0) {
+	if (*comm[1] == 'h' && (strcmp(comm[1], "h") == 0
+	|| strcmp(comm[1], "hist") == 0)) {
 		/* Show the list of already visited directories */
 		int i;
 		for (i = 0; i < dirhist_total_index; i++) {
 			if (i == dirhist_cur_index)
-				printf("%d %s%s%s%s\n", i + 1, green, old_pwd[i], NC, 
-					   default_color);
+				printf("%d %s%s%s%s\n", i + 1, dirhist_index_color,
+					   old_pwd[i], NC, default_color);
+
 			else
 				printf("%d %s\n", i + 1, old_pwd[i]);
 		}
+
+		return EXIT_SUCCESS;
 	}
-	else if (strcmp(comm[1], "clear") == 0) {
+
+	if (*comm[1] == 'c' && strcmp(comm[1], "clear") == 0) {
 		int i;
 		for (i = 0; i < dirhist_total_index; i++)
 			free(old_pwd[i]);
+
 		dirhist_cur_index = dirhist_total_index = 0;
 		add_to_dirhist(path);
+
+		return EXIT_SUCCESS;
 	}
-	else if (comm[1][0] == '!' && is_number (comm[1] + 1) == 1) {
+
+	int exit_status = EXIT_FAILURE;
+
+	if (*comm[1] == '!' && is_number(comm[1] + 1) == 1) {
 		/* Go the the specified directory (first arg) in the directory
 		 * history list */
 		int atoi_comm = atoi(comm[1] + 1);
 		if (atoi_comm > 0 && atoi_comm <= dirhist_total_index) {
+
 			int ret = chdir(old_pwd[atoi_comm - 1]);
+
 			if (ret == 0) {
 				free(path);
 				path = (char *)xcalloc(strlen(old_pwd[atoi_comm - 1])
 									   + 1, sizeof(char));
 				strcpy(path, old_pwd[atoi_comm - 1]);
-/*				add_to_dirhist(path); */
+
 				dirhist_cur_index = atoi_comm - 1;
+
+				exit_status = EXIT_SUCCESS;
+
 				if (cd_lists_on_the_fly) {
 					free_dirlist();
-					list_dir();
+					exit_status = list_dir();
 				}
 			}
+
 			else
 				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
 						old_pwd[atoi_comm - 1], strerror(errno));
@@ -17394,7 +17386,7 @@ surf_hist(char **comm)
 	else 
 		fputs(_("history: Usage: b/f [hist] [clear] [!ELN]\n"), stderr);
 
-	return;
+	return exit_status;
 }
 
 int
