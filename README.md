@@ -80,7 +80,7 @@ Because file manager, but also half-shell, CLiFM also provides the following fea
 * Archives and compression support (including Zstandard and ISO 9660)
 * Auto-cd and auto-open
 * Symlinks editor
-* Disk usage
+* Disk usage (**NEW**)
 
 Finally, all CLiFM options could be handled directly via command line, by passing parameters to the program, or via plain
 text configuration files, located in `$XDG_CONFIG_HOME/clifm/`.
@@ -103,7 +103,7 @@ Of course, you can also clone, build, and install the package using the PKGBUILD
 	$ cd clifm
 	$ makepkg -si
 
-### Some other distribution (or FreeBSD):
+### Other Linux distributions (or FreeBSD):
 
 1. Clone the repository
 
