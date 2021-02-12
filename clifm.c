@@ -150,7 +150,7 @@ in FreeBSD, but is deprecated */
 //#define CLEAR write(STDOUT_FILENO, "\033c", 3);
 #define CLEAR write(STDOUT_FILENO, "\x1b[2J\x1b[3J\x1b[H", 11);
 /* #define CLEAR write(STDOUT_FILENO, "\033[2J\033[H", 7); */
-#define VERSION "0.29.1"
+#define VERSION "0.29.2"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
@@ -223,13 +223,13 @@ static int flags;
 
 /* Replace some functions by my custom (faster, I think: NO!!)
  * implementations. */
-/*#define strlen xstrlen
+/* #define strlen xstrlen */
 #define strcpy xstrcpy
 #define strncpy xstrncpy
 #define strcmp xstrcmp
 #define strncmp xstrncmp
 /* #define atoi xatoi */
-/*#define alphasort xalphasort */
+/* #define alphasort xalphasort */
 #define _(String) gettext (String)
 
 
@@ -14939,8 +14939,8 @@ list_dir(void)
 	}
 
 	if (files == 0) {
-		if (clear_screen)
-			CLEAR;
+/*		if (clear_screen)
+			CLEAR; */
 		printf("%s. ..%s\n", blue, NC);
 		free(file_info);
 		return EXIT_SUCCESS;
@@ -15527,6 +15527,9 @@ list_dir_light(void)
 {
 /*	clock_t start = clock(); */
 
+	if (clear_screen)
+		CLEAR;
+
 	files = 0; /* Reset the files counter */
 
 	register int i = 0;
@@ -15885,8 +15888,8 @@ list_dir_light(void)
 	if (columns_n > files)
 		columns_n = files;
 
-	if (clear_screen)
-		CLEAR;
+/*	if (clear_screen)
+		CLEAR; */
 
 	short last_column = 0; /* c, reset_pager=0; */
 	register size_t counter = 0;
@@ -20870,8 +20873,8 @@ list_commands (void)
 void
 help_function (void)
 {
-/*	if (clear_screen)
-		CLEAR; */
+	if (clear_screen)
+		CLEAR;
 
 	printf(_("%s %s (%s), by %s\n"), PROGRAM_NAME, VERSION, DATE, AUTHOR);
 
