@@ -223,8 +223,7 @@ static int flags;
 
 /* Replace some functions by my custom (faster, I think: NO!!)
  * implementations. */
-/*#define strlen xstrlen // All calls to strlen will be replaced by a
- * call to xstrlen */
+/*#define strlen xstrlen
 #define strcpy xstrcpy
 #define strncpy xstrncpy
 #define strcmp xstrcmp
