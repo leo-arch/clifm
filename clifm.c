@@ -150,7 +150,7 @@ in FreeBSD, but is deprecated */
 //#define CLEAR write(STDOUT_FILENO, "\033c", 3);
 #define CLEAR write(STDOUT_FILENO, "\x1b[2J\x1b[3J\x1b[H", 11);
 /* #define CLEAR write(STDOUT_FILENO, "\033[2J\033[H", 7); */
-#define VERSION "0.29.0"
+#define VERSION "0.29.1"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
@@ -9539,14 +9539,13 @@ void
 add_to_dirhist(const char *dir_path)
 /* Add DIR_PATH to visited directory history (old_pwd) */
 {
-	/* Do not add anything if new path equals last entry in directory
-	 * history */
-
 /*	static size_t end_counter = 11, mid_counter = 11; */
 
 	/* If already at the end of dirhist, add new entry */
 	if (dirhist_cur_index + 1 >= dirhist_total_index) {
 
+		/* Do not add anything if new path equals last entry in
+		 * directory history */
 		if ((dirhist_total_index - 1) >= 0
 		&& old_pwd[dirhist_total_index - 1]
 		&& *(dir_path + 1) == *(old_pwd[dirhist_total_index - 1] + 1)
