@@ -2,7 +2,7 @@
 
 pkgname=clifm-git
 _pkgname=clifm
-pkgver=0.29.0
+pkgver=0.29.1
 pkgrel=1
 pkgdesc="The KISS file manager: cli-based, ultra-lightweight, and lightning fast (development version)"
 arch=(any)
