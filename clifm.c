@@ -147,8 +147,8 @@ in FreeBSD, but is deprecated */
 /* #define TMP_DIR "/tmp/clifm" */
 /* If no formatting, puts (or write) is faster than printf */
 /* #define CLEAR puts("\x1b[c") "\x1b[2J\x1b[1;1H"*/
-//#define CLEAR write(STDOUT_FILENO, "\033c", 3);
-#define CLEAR write(STDOUT_FILENO, "\x1b[2J\x1b[3J\x1b[H", 11);
+#define CLEAR write(STDOUT_FILENO, "\033c", 3);
+//#define CLEAR write(STDOUT_FILENO, "\x1b[2J\x1b[3J\x1b[H", 11);
 /* #define CLEAR write(STDOUT_FILENO, "\033[2J\033[H", 7); */
 #define VERSION "0.29.2"
 #define AUTHOR "L. Abramovich"
@@ -4479,7 +4479,7 @@ MaxPath=40\n\n"
 
 "WelcomeMessage=true\n\
 SplashScreen=false\n\
-ShowHiddenFiles=true\n\
+ShowHiddenFiles=false\n\
 LongViewMode=false\n\
 ExternalCommands=false\n\
 LogCmds=false\n\n"
@@ -4543,8 +4543,10 @@ Pager=false\n\
 MaxHistory=500\n\
 MaxDirhist=30\n\
 MaxLog=1000\n\
-DiskUsage=false\n\
-ClearScreen=false\n\n"
+DiskUsage=false\n\n"
+
+"# If set to true, clear the screen before listing files\n\
+ClearScreen=true\n\n"
 
 "# If not specified, StartingPath defaults to the current working directory.\n\
 StartingPath=\n\n"
@@ -7456,7 +7458,7 @@ set_default_options(void)
 {
 	splash_screen = 0;
 	welcome_message = 1;
-	show_hidden = 1;
+	show_hidden = 0;
 	sort = 1;
 	files_counter = 1;
 	long_view = 0;
@@ -7465,7 +7467,7 @@ set_default_options(void)
 	max_hist = 500;
 	max_dirhist = 30;
 	max_log = 1000;
-	clear_screen = 0;
+	clear_screen = 1;
 	list_folders_first = 1;
 	cd_lists_on_the_fly = 1;
 	case_sensitive = 0;
@@ -12207,10 +12209,10 @@ init_config(void)
 									 opt_str);
 						if (ret == -1)
 							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							clear_screen = 1;
-						else /* False and default */
+						if (strncmp(opt_str, "false", 5) == 0)
 							clear_screen = 0;
+						else /* True and default */
+							clear_screen = 1;
 					}
 
 					else if (xargs.hidden == -1 
@@ -12220,10 +12222,10 @@ init_config(void)
 									 opt_str);
 						if (ret == -1)
 							continue;
-						if (strncmp(opt_str, "false", 5) == 0)
-							show_hidden = 0;
-						else /* True and default */
+						if (strncmp(opt_str, "true", 4) == 0)
 							show_hidden = 1;
+						else /* False and default */
+							show_hidden = 0;
 					}
 
 					else if (xargs.longview == -1 
@@ -12653,7 +12655,7 @@ init_config(void)
 			if (share_selbox == -1) share_selbox = 0;
 			if (splash_screen == -1) splash_screen = 0;
 			if (welcome_message == -1) welcome_message = 1;
-			if (show_hidden == -1) show_hidden = 1;
+			if (show_hidden == -1) show_hidden = 0;
 			if (sort == -1) sort = 1;
 			if (sort_reverse == -1) sort_reverse = 0;
 			if (tips == -1) tips = 1;
@@ -12665,7 +12667,7 @@ init_config(void)
 			if (pager == -1) pager = 0;
 			if (max_hist == -1) max_hist = 500;
 			if (max_log == -1) max_log = 1000;
-			if (clear_screen == -1) clear_screen = 0;
+			if (clear_screen == -1) clear_screen = 1;
 			if (list_folders_first == -1) list_folders_first = 1;
 			if (cd_lists_on_the_fly == -1) cd_lists_on_the_fly = 1;	
 			if (case_sensitive == -1) case_sensitive = 0;
@@ -14722,6 +14724,9 @@ list_dir(void)
 {
 /*	clock_t start = clock(); */
 
+	if (clear_screen)
+		CLEAR;
+
 	/* The global variable 'path' SHOULD be set before calling this
 	 * function */
 
@@ -15212,8 +15217,8 @@ list_dir(void)
 	if (columns_n > files)
 		columns_n = files;
 
-	if (clear_screen)
-		CLEAR;
+/*	if (clear_screen)
+		CLEAR; */
 
 	short last_column = 0; /* c, reset_pager=0; */
 	register size_t counter = 0;
@@ -15526,9 +15531,6 @@ list_dir_light(void)
 {
 /*	clock_t start = clock(); */
 
-	if (clear_screen)
-		CLEAR;
-
 	files = 0; /* Reset the files counter */
 
 	register int i = 0;
@@ -15616,8 +15618,8 @@ list_dir_light(void)
 	files = total;
 
 	if (files == 0) {
-		if (clear_screen)
-			CLEAR;
+/*		if (clear_screen)
+			CLEAR; */
 		puts(". ..\n");
 		return EXIT_SUCCESS;
 	}
@@ -20872,8 +20874,8 @@ list_commands (void)
 void
 help_function (void)
 {
-	if (clear_screen)
-		CLEAR;
+/*	if (clear_screen)
+		CLEAR; */
 
 	printf(_("%s %s (%s), by %s\n"), PROGRAM_NAME, VERSION, DATE, AUTHOR);
 
