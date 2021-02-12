@@ -107,6 +107,7 @@ in FreeBSD, but is deprecated */
 
 #include "clifm.h" /* A few custom functions */
 #include <wordexp.h> /* For command substitution */
+#include <sys/statvfs.h>
 
 #define EXIT_SUCCESS 0
 
@@ -153,7 +154,7 @@ in FreeBSD, but is deprecated */
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "February 10, 2021"
+#define DATE "February 11, 2021"
 #define LICENSE "GPL2+"
 
 /* Define flags for program options and internal use */
@@ -471,6 +472,8 @@ char *get_ext_color(char *ext);
 int list_commands(void);
 void free_software(void);
 void print_tips(int all);
+void print_disk_usage(void);
+void print_div_line(void);
 
 /* Checks */
 char *get_cmd_path(const char *cmd);
@@ -600,7 +603,7 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 	mime_match = 0, logs_enabled = -1, sort = -1, files_counter = -1,
 	light_mode = -1, dir_indicator = -1, classify = -1, sort_switch = 0,
 	sort_reverse = 0, autocd = -1, auto_open = -1, dirhist_map = -1,
-	restore_last_path = -1;
+	restore_last_path = -1, disk_usage = -1;
 	/* -1 means non-initialized or unset. Once initialized, these variables
 	 * are always either zero or one */
 /*	sel_no_sel=0 */
@@ -1158,6 +1161,49 @@ main(int argc, char **argv)
 			 * #     FUNCTIONS DEFINITIONS     #
 			 * ################################# */
 
+void
+print_div_line(void)
+{
+	fputs(div_line_color, stdout);
+
+	int i;
+	for (i = term_cols; i--;)
+		putchar(div_line_char);
+
+	printf("%s%s", NC, default_color);
+
+	fflush(stdout);
+}
+
+void
+print_disk_usage(void)
+/* Print free/total space for the filesystem of the current working
+ * directory */
+{
+	if (!path || !*path)
+		return;
+
+	struct statvfs stat;
+
+	if (statvfs(path, &stat) != EXIT_SUCCESS) {
+		_err('w', PRINT_PROMPT, "statvfs: %s\n", strerror(errno));
+		return;
+	}
+
+	char *free_space = get_size_unit((off_t)(stat.f_frsize
+									 * stat.f_bavail));
+
+	char *size = get_size_unit((off_t)(stat.f_blocks * stat.f_frsize));
+
+	printf("%s->%s %s/%s\n", cyan, NC, free_space, size);
+
+	free(free_space);
+	free(size);
+
+	return;
+}
+
+
 int kbinds_reset(void)
 {
 	int exit_status = EXIT_SUCCESS;
@@ -1501,7 +1547,7 @@ reload_config(void)
 	mime_match = 0, logs_enabled = -1, sort = -1, files_counter = -1,
 	light_mode = -1, dir_indicator = -1, classify = -1, sort_switch = 0,
 	sort_reverse = 0, autocd = -1, auto_open = -1, restore_last_path = -1,
-	dirhist_map = -1;
+	dirhist_map = -1, disk_usage = -1;
 
 	shell_terminal = no_log = internal_cmd = dequoted = 0;
 	shell_is_interactive = recur_perm_error_flag = mime_match = 0;
@@ -1541,6 +1587,8 @@ reload_config(void)
 		unicode = xargs.unicode;
 	if (xargs.pager != -1)
 		pager = xargs.pager;
+	if (xargs.dirmap != -1)
+		dirhist_map = xargs.dirmap;
 
 	/* Free the aliases and prompt_cmds arrays to be allocated again */
 	size_t i = 0;
@@ -4497,6 +4545,7 @@ Pager=false\n\
 MaxHistory=500\n\
 MaxDirhist=30\n\
 MaxLog=1000\n\
+DiskUsage=false\n\
 ClearScreen=false\n\n"
 
 "# If not specified, StartingPath defaults to the current working directory.\n\
@@ -7436,6 +7485,7 @@ set_default_options(void)
 	autocd = 1;
 	auto_open = 1;
 	dirhist_map = 0;
+	disk_usage = 0;
 
 	strcpy(dirhist_index_color, "\x1b[00;36m");
 	strcpy(text_color, "\001\x1b[00;39m\002");
@@ -9492,27 +9542,27 @@ add_to_dirhist(const char *dir_path)
 	/* Do not add anything if new path equals last entry in directory
 	 * history */
 
-	if ((dirhist_total_index - 1) >= 0
-	&& old_pwd[dirhist_total_index - 1]
-	&& *(dir_path + 1) == *(old_pwd[dirhist_total_index - 1] + 1)
-	&& strcmp(dir_path, old_pwd[dirhist_total_index - 1]) == 0)
-		return;
-
-	static size_t end_counter = 11, mid_counter = 11;
+/*	static size_t end_counter = 11, mid_counter = 11; */
 
 	/* If already at the end of dirhist, add new entry */
 	if (dirhist_cur_index + 1 >= dirhist_total_index) {
 
+		if ((dirhist_total_index - 1) >= 0
+		&& old_pwd[dirhist_total_index - 1]
+		&& *(dir_path + 1) == *(old_pwd[dirhist_total_index - 1] + 1)
+		&& strcmp(dir_path, old_pwd[dirhist_total_index - 1]) == 0)
+			return;
+
 		/* Realloc only once per 10 operations */
-		if (end_counter > 10) {
-			end_counter = 1;
+/*		if (end_counter > 10) {
+			end_counter = 1; */
 			/* 20: Realloc dirhist_total + (2 * 10) */
 			old_pwd = (char **)xrealloc(old_pwd,
-									(size_t)(dirhist_total_index + 20) 
+									(size_t)(dirhist_total_index + 2) 
 									* sizeof(char *));
-		}
+/*		}
 
-		end_counter++;
+		end_counter++; */
 
 		old_pwd[dirhist_total_index] = (char *)xcalloc(strlen(dir_path)
 													+ 1, sizeof(char));
@@ -9525,15 +9575,15 @@ add_to_dirhist(const char *dir_path)
 
 	/* I not at the end of dirhist, add previous AND new entry */
 	else {
-		if (mid_counter > 10) {
-			mid_counter = 1;
+/*		if (mid_counter > 10) {
+			mid_counter = 1; */
 			/* 30: Realloc dirhist_total + (3 * 10) */
 			old_pwd = (char **)xrealloc(old_pwd,
-									(size_t)(dirhist_total_index + 30) 
+									(size_t)(dirhist_total_index + 3) 
 									* sizeof(char *));
-		}
+/*		}
 
-		mid_counter++;
+		mid_counter++; */
 
 		old_pwd[dirhist_total_index] = (char *)xcalloc(strlen(
 											old_pwd[dirhist_cur_index])
@@ -9977,12 +10027,13 @@ rl_sort_previous(int count, int key)
 	return EXIT_SUCCESS;
 }
 
+/*
 int rl_test(int count, int key)
 {
 	puts("TEST!!");
 
 	return EXIT_SUCCESS;
-}
+} */
 
 void
 readline_kbinds(void)
@@ -12008,6 +12059,17 @@ init_config(void)
 							tips = 1;
 					}
 
+					else if (strncmp(line, "DiskUsage=", 10) == 0) {
+						char opt_str[MAX_BOOL] = "";
+						ret = sscanf(line, "DiskUsage=%5s\n", opt_str);
+						if (ret == -1)
+							continue;
+						if (strncmp(opt_str, "true", 4) == 0)
+							disk_usage = 1;
+						else /* False and default */
+							disk_usage = 0;
+					}
+
 					else if (strncmp(line, "Autocd=", 7) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "Autocd=%5s\n", opt_str);
@@ -12582,6 +12644,7 @@ init_config(void)
 			 * via the config file, or if this latter could not be read
 			 * for any reason, set the defaults */
 			/* -1 means not set */
+			if (disk_usage == -1) disk_usage = 0;
 			if (dirhist_map == -1) dirhist_map = 0;
 			if (max_dirhist == -1) max_dirhist = 30;
 			if (restore_last_path == -1) restore_last_path = 0;
@@ -15106,10 +15169,7 @@ list_dir(void)
 
 		/* Print a dividing line between the files list and the
 		 * prompt */
-		fputs(div_line_color, stdout);
-		for (i = term_cols; i--; )
-			putchar(div_line_char);
-		printf("%s%s", NC, default_color);
+		print_div_line();
 
 		if (dirhist_map) {
 			/* Print current, previous, and next entries */
@@ -15127,7 +15187,12 @@ list_dir(void)
 					break;
 				}
 			}
+
+			print_div_line();
 		}
+
+		if (disk_usage)
+			print_disk_usage();
 
 		if (sort_switch)
 			print_sort_method();
@@ -15419,14 +15484,7 @@ list_dir(void)
 		putchar('\n');
 
 	/* Print a dividing line between the files list and the prompt */
-	fputs(div_line_color, stdout);
-
-	for (i = term_cols; i--; )
-		putchar(div_line_char);
-
-	printf("%s%s", NC, default_color);
-
-	fflush(stdout);
+	print_div_line();
 
 	if (dirhist_map) {
 		/* Print current, previous, and next entries */
@@ -15444,7 +15502,12 @@ list_dir(void)
 				break;
 			}
 		}
+
+		print_div_line();
 	}
+
+	if (disk_usage)
+		print_disk_usage();
 
 	/* If changing sorting method, inform the user about the current
 	 * method */
@@ -15778,10 +15841,7 @@ list_dir_light(void)
 
 		/* Print a dividing line between the files list and the
 		 * prompt */
-		fputs(div_line_color, stdout);
-		for (i = term_cols; i--; )
-			putchar(div_line_char);
-		printf("%s%s", NC, default_color);
+		print_div_line();
 
 		if (dirhist_map) {
 			/* Print current, previous, and next entries */
@@ -15799,7 +15859,12 @@ list_dir_light(void)
 					break;
 				}
 			}
+
+			print_div_line();
 		}
+
+		if (disk_usage)
+			print_disk_usage();
 
 		if (sort_switch)
 			print_sort_method();
@@ -15983,12 +16048,7 @@ list_dir_light(void)
 		putchar('\n');
 
 	/* Print a dividing line between the files list and the prompt */
-	fputs(div_line_color, stdout);
-	for (i = term_cols; i--; )
-		putchar(div_line_char);
-	printf("%s%s", NC, default_color);
-
-	fflush(stdout);
+	print_div_line();
 
 	if (dirhist_map) {
 		/* Print current, previous, and next entries */
@@ -16006,7 +16066,12 @@ list_dir_light(void)
 				break;
 			}
 		}
+
+		print_div_line();
 	}
+
+	if (disk_usage)
+		print_disk_usage();
 
 	/* If changing sorting method, inform the user about the current
 	 * method */
