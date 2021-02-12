@@ -605,7 +605,6 @@ short splash_screen = -1, welcome_message = -1, ext_cmd_ok = -1,
 	restore_last_path = -1, disk_usage = -1;
 	/* -1 means non-initialized or unset. Once initialized, these variables
 	 * are always either zero or one */
-/*	sel_no_sel=0 */
 /* A short int accepts values from -32,768 to 32,767, and since all the
  * above variables will take -1, 0, and 1 as values, a short int is more
  * than enough. Now, since short takes 2 bytes of memory, using int for
