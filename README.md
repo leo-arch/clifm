@@ -57,7 +57,7 @@ Of course, you can deselect some or all selected files whenever you want with th
 
 ![dirs](images/dirs.png)
 
-* **NEW: PLUGINS via custom actions**: Use custom action names, as if they were any other command, to run custom shell scripts and extend thus CliFM functionality to fit your needs. This is basically an easy way of building custom commands for CliFM.
+* **NEW: PLUGINS via custom actions**: Use custom action names, as if they were any other command, to run custom shell scripts or programs written in any language you know and extend thus CliFM's functionality to fit your needs. This is basically an easy way of building custom commands for CliFM.
 
 * **NEW: Directory history map**: Keep in sight previous, current, and next entries in the directory history list for easiest and fastest navigation through visited directories.
 
