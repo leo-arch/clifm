@@ -258,8 +258,8 @@ short for 'cp', 'ln', 'mv', 'mkdir', and 'rm' commands respectivelly.
 The \fIln\fR command allows the use of the 'e, edit' option to modify the destination of a symbolic link. Example: 'l e 12', or 'le 12',  to relink the symbolic link corresponding to the ELN 12.
 .TP
 
-.B p, pr, prop \fRELN/FILE ... n [a, all] [s, size]
-print file properties for ELN/FILE. Use 'all' to list properties of all files in the current working directory, and 'size' to list them by size.
+.B p, pr, prop \fRELN/FILE ... n
+print file properties for ELN/FILE.
 .TP
 
 .B st, sort \fR[METHOD] [rev]
