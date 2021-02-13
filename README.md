@@ -43,7 +43,7 @@ Of course, you can deselect some or all selected files whenever you want with th
  
  * Open files without the need to specify any program. Via `mime` (the **built-in resource opener**), if no program was specified, CliFM will open the file with the default program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background. Of course, you can also set a custom resource opener.
 
-* **Quick search**: type `/string` and CliFM will list all the files containing `string` in its name. This function also supports wildcards. Example: `/*.png` will list all the .png files in the current directory. If you want to search for files in another directory, just tell the search function where to search: `/*.png /media/images`.
+* **Quick search**: type `/REGEX` and CliFM will list all matches for the corresponding REGEX. Example: `/.*.png` will list all the PNG files in the current directory. If you want to search for files in another directory, just tell the search function where to search: `/.*.png /media/images`. And, if you want to further filter the search, you still can specify what kind of files you want. For example: `/[.-].*d$ -d /etc` will list all directories (-d) in `/etc` containing a dot or a slash and ending with 'd'.
 
 ![quick search](images/quick_search.png)
 
