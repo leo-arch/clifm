@@ -108,6 +108,7 @@ in FreeBSD, but is deprecated */
 #include "clifm.h" /* A few custom functions */
 #include <wordexp.h> /* For command substitution */
 #include <sys/statvfs.h>
+#include <regex.h>
 
 #define EXIT_SUCCESS 0
 
@@ -18371,8 +18372,8 @@ search_function(char **comm)
 	/* If just one argument, '-' indicates filetype. Else, we have a
 	 * path */
 	else if (comm[1]) {
-		if (comm[1][0] == '-')
-			file_type = (mode_t)comm[1][1];
+		if (*comm[1] == '-')
+			file_type = (mode_t)*(comm[1] + 1);
 		else
 			search_path = comm[1];
 	}
@@ -18400,8 +18401,11 @@ search_function(char **comm)
 		}
 	}
 
+	struct dirent **reg_dirlist = (struct dirent **)NULL;
+	int tmp_files = 0;
+
 	/* If we have a path ("/str /path"), chdir into it, since
-	 * glob() works on CWD */
+	 * regex() works on CWD */
 	if (search_path && *search_path) {
 
 		/* Deescape the search path, if necessary */
@@ -18423,31 +18427,65 @@ search_function(char **comm)
 					strerror(errno));
 			return EXIT_FAILURE;
 		}
+
+		tmp_files = scandir(".", &reg_dirlist, skip_implied_dot,
+							xalphasort);
+
+/*		tmp_files = scandir(".", &reg_dirlist, skip_implied_dot,
+							sort == 0 ? NULL : sort == 1 ? m_alphasort
+							: sort == 2 ? size_sort : sort == 3
+							? atime_sort : sort == 4 ? btime_sort
+							: sort == 5 ? ctime_sort : sort == 6
+							? mtime_sort : sort == 7 ? m_versionsort
+							: sort == 8 ? ext_sort : inode_sort); */
+
+		if (tmp_files == -1) {
+			fprintf(stderr, "scandir: %s: %s\n", search_path,
+					strerror(errno));
+
+			if (chdir(path) == -1)
+				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+						path, strerror(errno));
+
+			return EXIT_FAILURE;
+		}
 	}
 
 	size_t i;
 
-	/* Search for globbing char */
-	int glob_char_found = 0;
+	/* Search for regex char */
+	int regex_char_found = 0;
 	for (i = 1; comm[0][i]; i++) {
 		if (comm[0][i] == '*' || comm[0][i] == '?'
-		|| comm[0][i] == '[' || comm[0][i] == '{') {
-			glob_char_found = 1;
+		|| comm[0][i] == '[' || comm[0][i] == '{'
+		|| comm[0][i] == '^' || comm[0][i] == '.'
+		|| comm[0][i] == '|' || comm[0][i] == '+') {
+/*		|| comm[0][i] == '\\') */
+			regex_char_found = 1;
 			break;
 		}
 	}
 
-	/* If search string is just "STR" (no glob chars), change it
-	 * to "*STR*" */
-	if (!glob_char_found) {
+	/* If search string is just "STR" (no regex chars), change it
+	 * to ".*STR.*" */
+	if (!regex_char_found) {
 		size_t search_str_len = strlen(comm[0]);
 
-		comm[0] = (char *)xrealloc(comm[0], (search_str_len + 2) *
+		comm[0] = (char *)xrealloc(comm[0], (search_str_len + 5) *
 								   sizeof(char));
 
-		*comm[0] = '*';
-		comm[0][search_str_len] = '*';
-		comm[0][search_str_len + 1] = 0x00;
+		char *tmp_str = (char *)xnmalloc(search_str_len + 1,
+										 sizeof(char));
+
+		strcpy(tmp_str, comm[0] + 1);
+		*comm[0] = '.';
+		*(comm[0] + 1) = '*';
+		*(comm[0] + 2) = 0x00;
+		strcat(comm[0], tmp_str);
+		free(tmp_str);
+		*(comm[0] + search_str_len + 1) = '.';
+		*(comm[0] + search_str_len + 2) = '*';
+		*(comm[0] + search_str_len + 3) = 0x00;
 		search_str = comm[0];
 	}
 
@@ -18456,16 +18494,21 @@ search_function(char **comm)
 		search_str = comm[0] + 1;
 
 	/* Get matches, if any */
-	glob_t globbed_files;
-	int ret = glob(search_str, GLOB_BRACE, NULL, &globbed_files);
+	regex_t regex_files;
+	int ret = regcomp(&regex_files, search_str, REG_NOSUB|REG_EXTENDED);
 
 	if (ret != 0) {
-		printf(_("%s: No matches found\n"), PROGRAM_NAME);
+		printf(_("%s: '%s': Not a valid regular expression\n"),
+			   PROGRAM_NAME, search_str);
 
-		globfree(&globbed_files);
+		regfree(&regex_files);
 
 		if (search_path) {
-			/* Go back to the directory we came from */
+			for (i = 0; i < tmp_files; i++)
+				free(reg_dirlist[i]);
+
+			free(reg_dirlist);
+
 			if (chdir(path) == -1)
 				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
 						path, strerror(errno));
@@ -18474,54 +18517,79 @@ search_function(char **comm)
 		return EXIT_FAILURE;
 	}
 
+	size_t found = 0;
+	int *regex_index = (int *)xnmalloc((search_path ? tmp_files
+									   : files) + 1, sizeof(int));
+
+	for (i = 0; i < (search_path ? tmp_files : files); i++) {
+		if (regexec(&regex_files, (search_path ? reg_dirlist[i]->d_name
+		: dirlist[i]), 0, NULL, 0) == EXIT_SUCCESS) {
+			regex_index[found++] = i;
+		}
+	}
+
+	regfree(&regex_files);
+
+	if (!found) {
+		fprintf(stderr, "No matches found\n");
+		free(regex_index);
+
+		if (search_path) {
+			for (i = 0; i < tmp_files; i++)
+				free(reg_dirlist[i]);
+
+			free(reg_dirlist);
+
+			if (chdir(path) == -1)
+					fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+							path, strerror(errno));
+		}
+
+		return EXIT_FAILURE;
+	}
+
 	/* We have matches */
 	int last_column = 0;
-	size_t len = 0, flongest = 0, columns_n = 0, found = 0;
+	size_t len = 0, flongest = 0, total_cols = 0, type_ok = 0;
 
-	/* We need to store pointers to matching filenames in array of 
-	 * pointers, just as the filename length (to construct the
-	 * columned output), and, if searching in CWD, its index (ELN)
-	 * in the dirlist array as well */
-	char **pfiles = (char **)xnmalloc(globbed_files.gl_pathc + 1, 
-							   sizeof(char *));
+	size_t *files_len = (size_t *)xnmalloc(found + 1, sizeof(size_t));
+	int *match_type = (int *)xnmalloc(found + 1, sizeof(int));
+	 
 
-	int *eln = (int *)xnmalloc(globbed_files.gl_pathc + 1,
-								 sizeof(int));
+	/* Get the longest filename in the list */
+	for (i = 0; i < found; i++) {
 
-	size_t *files_len = (size_t *)xnmalloc(globbed_files.gl_pathc
-										+ 1, sizeof(size_t));
-
-	for (i = 0; globbed_files.gl_pathv[i]; i++) {
-
-		if (strcmp(globbed_files.gl_pathv[i], ".") == 0
-		|| strcmp(globbed_files.gl_pathv[i], "..") == 0)
-			continue;
-
+		/* Simply skip all files not matching file_type */
 		if (file_type) {
 
-			/* Simply skip all files not matching file_type */
-			if (lstat(globbed_files.gl_pathv[i], 
-					  &file_attrib) == -1)
-				continue;
+			match_type[i] = 0;
+
+			if (search_path) {
+				if (lstat(reg_dirlist[regex_index[i]]->d_name,
+						  &file_attrib) == -1)
+					continue;
+			}
+
+			else if (lstat(dirlist[i], &file_attrib) == -1)
+					continue;
 
 			if ((file_attrib.st_mode & S_IFMT) != file_type)
 				continue;
 		}
 
-		pfiles[found] = globbed_files.gl_pathv[i];
-
-		/* Get the longest filename in the list */
+		/* Amount of non-filtered files */
+		type_ok++;
+		/* Which file is non-filtered */
+		match_type[i] = 1;
 
 		/* If not searching in CWD, we only need to know the file's
 		 * length (no ELN) */
 		if (search_path) {
-			len = unicode ? u8_xstrlen(pfiles[found])
-				  : strlen(pfiles[found]);
+			len = unicode ? u8_xstrlen(
+				  reg_dirlist[regex_index[i]]->d_name)
+				  : strlen(reg_dirlist[regex_index[i]]->d_name);
 
-			/* This will be passed to colors_list(): -1 means no ELN */
-			eln[found] = -1;
-
-			files_len[found++] = len;
+			files_len[i] = len;
 
 			if (len > flongest)
 				flongest = len;
@@ -18530,83 +18598,84 @@ search_function(char **comm)
 		/* If searching in CWD, take into account the file's ELN
 		 * when calculating its legnth */
 		else {
-			size_t j;
+			len = file_info[regex_index[i]].len
+			+ (size_t)digits_in_num(regex_index[i] + 1) + 1;
 
-			for (j = 0; dirlist[j]; j++) {
+			files_len[i] = len;
 
-				if (strcmp(pfiles[found], dirlist[j]) != 0)
-					continue;
-
-				eln[found] = (int)(j + 1);
-
-				len = (unicode ? u8_xstrlen(pfiles[found]) 
-					  : strlen(pfiles[found])) + 
-					  (size_t)digits_in_num(eln[found]) + 1;
-
-				files_len[found] = len;
-
-				if (len > flongest)
-					flongest = len;
-			}
-
-			found ++;
+			if (len > flongest)
+				flongest = len;
 		}
 	}
 
-	/* Print the results using colors and columns */
-	if (found) {
+	struct winsize w;
+	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+	unsigned short terminal_cols = w.ws_col;
 
-		struct winsize w;
-		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-		unsigned short tcols = w.ws_col;
+	if (flongest <= 0 || flongest > terminal_cols)
+		total_cols = 1;
+	else
+		total_cols = (size_t)terminal_cols / (flongest + 1);
 
-		if (flongest <= 0 || flongest > tcols)
-			columns_n = 1;
+	if (total_cols > type_ok)
+		total_cols = type_ok;
+
+	/* Current columns number */
+	size_t cur_col = 0;
+
+	for (i = 0; i < found; i++) {
+
+		if (!match_type[i])
+			continue;
+
+		/* Print the results using colors and columns */
+		cur_col++;
+
+		/* If the current file is in the last column, we need to
+		 * print no pad and a newline char. Else, print the
+		 * corresponding pad, to equate the longest file length, and
+		 * no newline char */
+		if (cur_col == total_cols) {
+			last_column = 1;
+			cur_col = 0;
+		}
 		else
-			columns_n = (size_t)tcols / (flongest + 1);
+			last_column = 0;
 
-		if (columns_n > found)
-			columns_n = found;
+		if (search_path)
+			colors_list(reg_dirlist[regex_index[i]]->d_name, NO_ELN,
+					(last_column || i == (type_ok - 1)) ? NO_PAD
+					: (int)(flongest - files_len[i]) + 1,
+					(last_column || i == type_ok - 1) ? PRINT_NEWLINE
+					: NO_NEWLINE);
 
-		for (i = 0; i < found; i++) {
-
-			if ((i + 1) % columns_n == 0)
-				last_column = 1;
-			else
-				last_column = 0;
-
-			colors_list(pfiles[i], (eln[i] != -1) ? eln[i] : NO_ELN,
-						(last_column || i == (found - 1)) ? NO_PAD : 
-						(int)(flongest - files_len[i]) + 1, 
-						(last_column || i == found - 1) ? PRINT_NEWLINE
-						: NO_NEWLINE);
-			/* Second argument to colors_list() is:
-			 * 0: Do not print any ELN 
-			 * Positive number: Print positive number as ELN
-			 * -1: Print "?" instead of an ELN */
-		}
+		else
+			colors_list(dirlist[regex_index[i]], regex_index[i]	+ 1,
+					(last_column || i == (type_ok - 1)) ? NO_PAD : 
+					(int)(flongest - files_len[i]) + 1,
+					(last_column || i == type_ok - 1) ? PRINT_NEWLINE
+					: NO_NEWLINE);
 	}
-
-	else 
-		printf(_("%s: No matches found\n"), PROGRAM_NAME);
 
 	/* Free stuff */
-	free(eln);
 	free(files_len);
-	free(pfiles);
-	globfree(&globbed_files);
+	free(match_type);
+	free(regex_index);
+	regfree(&regex_files);
 
 	/* If needed, go back to the directory we came from */
 	if (search_path) {
+		for (i = 0; i < tmp_files; i++)
+			free(reg_dirlist[i]);
+
+		free(reg_dirlist);
+		
 		if (chdir(path) == -1) {
 			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
 					path, strerror(errno));
 			return EXIT_FAILURE;
 		}
 	}
-
-	if (!found)
-		return EXIT_FAILURE;
 
 	return EXIT_SUCCESS;
 }
