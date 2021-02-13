@@ -143,7 +143,7 @@ allow the use of external commands
 enable the light mode to speed up CliFM
 .TP
 .B \-z, \-\-sort \fRMETHOD
-sort files by METHOD, where METHOD could be: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version.
+sort files by METHOD, where METHOD could be: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version (name if not available), 8 =  extension, 9 = inode.
 .TP
 
 Options precedence order: 1) command line; 2) configuration file; 3) default values.
