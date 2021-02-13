@@ -62,7 +62,7 @@ List of CliFM features:
   22) Bulk rename
   23) Archiving and compression support
   24) Auto-cd and auto-open
-  25) Plugins support via custom actions and shell scripts
+  25) Plugins support via custom actions and any program/script you want
   26) Symbolic links editor
 
 .SH RATIONALE
@@ -243,11 +243,11 @@ it works just like the \fIback\fR function, but it goes forward in the history r
 .TP
 
 .B actions \fR[edit]
-with no argument, lists available custom actions. Use the 'edit' option to add, remove or modify custom actions. The aim of this function is to allow the user to easily add custom commands and functions to CliFM. In other words, the actions functions is a plugins capability.
+with no argument, lists available custom actions. Use the 'edit' option to add, remove or modify custom actions. The aim of this function is to allow the user to easily add custom commands and functions to CliFM. In other words, the actions function is a plugins capability.
 .sp
-The general procedure is quite simple: a) bind a custom action name to a shell script (using the \fIactions.cfm\fR file located in the configuration directory). Example: "myaction=myscript.sh". b) Now, drop the corresponding script (in our example, myscript.sh) into the scripts directory (see the FILES section below). 3) Once this is done, you can call the script using the custom action name defined before as if it were any other command: run 'myaction', and myscript.sh will be executed.
+The general procedure is quite simple: a) bind a custom action name to an executable file written in any language you want, be it a shell or Python script, a C program or whatever you like (using the \fIactions.cfm\fR file located in the configuration directory). Example: "myaction=myscript.sh". b) Now, drop the corresponding script (in our example, myscript.sh) into the scripts directory (see the FILES section below). 3) Once this is done, you can call the script using the custom action name defined before as if it were any other command: run 'myaction', and myscript.sh will be executed.
 .sp
-All arguments passed to the action command are passed to the script as well (which is run via the system shell).
+All arguments passed to the action command are passed to the script or program as well (which is run via the system shell).
 .sp
 A ready made example could be found in the configuration directory (\fIscripts/example.sh\fR).
 .TP
