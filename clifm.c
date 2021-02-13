@@ -222,14 +222,14 @@ static int flags;
  * xterm). */
 
 /* Default colors */
-#define DEF_LS_COLORS "di=01;34:fi=00;97:ln=01;36:mh=30;46:or=00;36:\
+#define DEF_LS_COLORS "di=01;34:fi=00;39:ln=01;36:mh=30;46:or=00;36:\
 pi=00;35:so=01;35:bd=01;33:cd=01;37:su=37;41:sg=30;43:st=37;44:\
 tw=30;42:ow=34;42:ex=01;32:no=31;47"
 
 #define DEF_DIRHIST_INDEX_COLOR "\x1b[00;36m"
 #define DEF_TEXT_COLOR "\001\x1b[00;39m\002"
 #define DEF_ELN_COLOR "\x1b[01;33m"
-#define DEF_DIR_COUNT_COLOR "\x1b[00;97m"
+#define DEF_DIR_COUNT_COLOR "\x1b[00;39m"
 #define DEF_DEFAULT_COLOR "\x1b[00;39;49m"
 #define DEF_DIV_LINE_COLOR "\x1b[00;34m"
 #define DEF_WELCOME_MSG_COLOR "\x1b[01;36m"
@@ -238,7 +238,7 @@ tw=30;42:ow=34;42:ex=01;32:no=31;47"
 #define DEF_ND_C "\x1b[01;31m"
 #define DEF_ED_C "\x1b[00;34m"
 #define DEF_NE_C "\x1b[00;31m"
-#define DEF_FI_C "\x1b[00;97m"
+#define DEF_FI_C "\x1b[00;39m"
 #define DEF_EF_C "\x1b[00;33m"
 #define DEF_NF_C "\x1b[00;31m"
 #define DEF_LN_C "\x1b[01;36m"
@@ -3742,7 +3742,8 @@ sort_function(char **arg)
 
 	fputs(_("Usage: st [METHOD] [rev]\nMETHOD: 0 = none, "
 			"1 = name, 2 = size, 3 = atime, 4 = btime, "
-		    "5 = ctime, 6 = mtime, 7 = version\n"), stderr);
+		    "5 = ctime, 6 = mtime, 7 = version, 8 = extension, "
+		    "9 = inode\n"), stderr);
 
 	return EXIT_FAILURE;
 }
@@ -16696,7 +16697,8 @@ exec_cmd(char **comm)
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: st [METHOD] [rev]\nMETHOD: 0 = none, "
 				   "1 = name, 2 = size, 3 = atime, 4 = btime, "
-				   "5 = ctime, 6 = mtime, 7 = version"));
+				   "5 = ctime, 6 = mtime, 7 = version, "
+				   "8 = extension, 9 = inode"));
 		    return EXIT_SUCCESS;
 		}
 		exit_code = sort_function(comm);
