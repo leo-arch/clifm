@@ -18357,12 +18357,12 @@ search_function(char **comm)
 	/* If there are two arguments, the one starting with '-' is the
 	 * filetype and the other is the path */
 	if (comm[1] && comm[2]) {
-		if (comm[1][0] == '-') {
-			file_type = (mode_t)comm[1][1];
+		if (*comm[1] == '-') {
+			file_type = (mode_t)*(comm[1] + 1);
 			search_path = comm[2];
 		}
-		else if (comm[2][0] == '-') {
-			file_type = (mode_t)comm[2][1];
+		else if (*comm[2] == '-') {
+			file_type = (mode_t)*(comm[2] + 1);
 			search_path = comm[1];
 		}
 		else
@@ -18493,7 +18493,7 @@ search_function(char **comm)
 		/* If search string is "/STR", comm[0] + 1 returns "STR" */
 		search_str = comm[0] + 1;
 
-	/* Get matches, if any */
+	/* Get matches, if any, using regular expressions */
 	regex_t regex_files;
 	int ret = regcomp(&regex_files, search_str, REG_NOSUB|REG_EXTENDED);
 
@@ -18570,8 +18570,10 @@ search_function(char **comm)
 					continue;
 			}
 
-			else if (lstat(dirlist[i], &file_attrib) == -1)
+			else {
+				if (lstat(dirlist[regex_index[i]], &file_attrib) == -1)
 					continue;
+			}
 
 			if ((file_attrib.st_mode & S_IFMT) != file_type)
 				continue;
@@ -18579,7 +18581,7 @@ search_function(char **comm)
 
 		/* Amount of non-filtered files */
 		type_ok++;
-		/* Which file is non-filtered */
+		/* Index of each non-filtered files */
 		match_type[i] = 1;
 
 		/* If not searching in CWD, we only need to know the file's
@@ -18620,21 +18622,21 @@ search_function(char **comm)
 	if (total_cols > type_ok)
 		total_cols = type_ok;
 
-	/* Current columns number */
-	size_t cur_col = 0;
+	/* cur_col: Current columns number */
+	size_t cur_col = 0, counter = 0;
 
 	for (i = 0; i < found; i++) {
 
-		if (!match_type[i])
+		if (match_type[i] == 0)
 			continue;
 
 		/* Print the results using colors and columns */
 		cur_col++;
 
-		/* If the current file is in the last column, we need to
-		 * print no pad and a newline char. Else, print the
-		 * corresponding pad, to equate the longest file length, and
-		 * no newline char */
+		/* If the current file is in the last column or is the last
+		 * listed file, we need to print no pad and a newline char.
+		 * Else, print the corresponding pad, to equate the longest
+		 * file length, and no newline char */
 		if (cur_col == total_cols) {
 			last_column = 1;
 			cur_col = 0;
@@ -18642,19 +18644,32 @@ search_function(char **comm)
 		else
 			last_column = 0;
 
-		if (search_path)
+		/* Counter: Current amount of non-filtered files: if COUNTER
+		 * equals TYPE_OK (total amount of non-filtered files), we have
+		 * the last file to be printed */
+		counter++;
+
+		colors_list(search_path ? reg_dirlist[regex_index[i]]->d_name
+				: dirlist[regex_index[i]], search_path ? NO_ELN
+				: regex_index[i] + 1, (last_column
+				|| counter == type_ok) ? NO_PAD
+				: (int)(flongest - files_len[i]) + 1,
+				(last_column || counter == type_ok)
+				? PRINT_NEWLINE : NO_NEWLINE);
+
+/*		if (search_path)
 			colors_list(reg_dirlist[regex_index[i]]->d_name, NO_ELN,
-					(last_column || i == (type_ok - 1)) ? NO_PAD
+					(last_column || counter == type_ok) ? NO_PAD
 					: (int)(flongest - files_len[i]) + 1,
-					(last_column || i == type_ok - 1) ? PRINT_NEWLINE
+					(last_column || counter == type_ok) ? PRINT_NEWLINE
 					: NO_NEWLINE);
 
 		else
 			colors_list(dirlist[regex_index[i]], regex_index[i]	+ 1,
-					(last_column || i == (type_ok - 1)) ? NO_PAD : 
+					(last_column || counter == type_ok) ? NO_PAD : 
 					(int)(flongest - files_len[i]) + 1,
-					(last_column || i == type_ok - 1) ? PRINT_NEWLINE
-					: NO_NEWLINE);
+					(last_column || counter == type_ok) ? PRINT_NEWLINE
+					: NO_NEWLINE); */
 	}
 
 	/* Free stuff */
