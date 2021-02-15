@@ -22,13 +22,13 @@ With the automatic ELN's expansion feature you can use ELN's with external comma
 .sp
   \fBd)\fR Bookmarks: keep a list of your favorite directories, and even files, to get easy access to them. Example: enter 'bm' (or press Alt\-b) to open the bookmarks screen and then simply type a number or a shortcut name to access the desired bookmark. 
 .sp
-  \fBe)\fR The Selection Box allows you to drop files and directories from different parts of your filesystem (even from different instances of CliFM) and then operate on them with just one command. Example: select a few files in one instance of the program (say 's 12; cd /media; s 2 5\-6') and then paste them somewhere else using a second instance ('v sel' or 'paste sel').
+  \fBe)\fR The Selection Box allows you to drop files and directories from different parts of your filesystem (even from different instances of CliFM) and then operate on them with just one command. Example: select a few files in one instance of the program (say 's 12; cd /media; s 2 5\-6') and then paste them somewhere else using a second instance ('v sel' or 'paste sel'). Both globbing and regular expressions are suppported.
 .sp
   \fBf)\fR The directory history function (\fIback\fR and \fIforth\fR) keeps track of all the directories visited by you in the current session, so that you can go back and forth to any of them by just entering 'b' or 'f' (or just pressing 'A\-j' and 'A\-k' respectivelly).
 .sp
   \fBg)\fR Keyboard shortcuts make it even easier and faster to navigate and operate on your files. For example, instead of typing 'cd ..' to go back to the parent directory, or 's *' to select all files in the current directory, you can simply press A-u and A-a respectivelly.
 .sp
-  \fBh)\fR The quick search function makes it really easy to quickly find the files you are looking for: just enter a slash followed by the string or pattern you want (ex: '/*.png'), that's all.
+  \fBh)\fR The quick search function makes it really easy to quickly find the files you are looking for: just enter a slash followed by the string or regular expression you want (ex: '/.*\.png'), that's all.
 .sp
   \fBi)\fR Build your own custom commands using shell scripts. Just drop a shell script in the scripts directory, tell CLiFM to use this script via a custom action name, and use it as any other command.
 .sp
@@ -44,7 +44,7 @@ List of CliFM features:
   4) TAB completion for commands, paths, bookmarks, and profiles
   5) TAB ELN\-expansion
   6) Customizable keyboard shortcuts
-  7) Wildcards auto\-expansion
+  7) Wildcards and regex auto\-expansion
   8) Braces auto\-expansion
   9) ELN's auto\-expansion
   10) 'sel' keyword auto\-expansion
@@ -64,6 +64,7 @@ List of CliFM features:
   24) Auto-cd and auto-open
   25) Plugins support via custom actions and any program/script you want
   26) Symbolic links editor
+  27) Regular expressions and filetype filter support for both search and selection of files
 
 .SH RATIONALE
 When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the Linux built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There is no two without three".
@@ -171,15 +172,21 @@ If the file to be opened is an archive/compressed file, the archive function (se
 .TP
 
 .B /\fRREGEX [\-filetype] [DIR]
-this is the quick search function. Just type '/' followed by a regular expression, and CliFM will list all matches in the current working directory. For example, '/.pdf$' will list all PDF files in the current working directory 
+this is the quick search function. Just type '/' followed by a regular (or extended regular) expression, and CliFM will list all matches in the current working directory. For example, '/.pdf$' will list all PDF files in the current working directory 
 .sp
 To search for files in any other directory, specify the directory name as a further argument. This argument (DIR) could be an absolute path, a relative path, or an ELN. For example, enter '/^A 7' to search for all files starting with 'A' in the directory corresponding to the ELN 7.
 .sp
 The result of the search could be further filtered by specifying a filter type: \-d, \-r, \-l, \-s, \-f, \-b, and \-c (directory, regular file, symbolic link, socket, FIFO/pipe, block device, and character device respectivelly). For example, '/[.-].*d$ \-d Documents/' will list all directories containing a dot or a dash and ending with 'd' in the directory named "Documents".
 .TP
 
-.B s, sel \fRELN/FILE ... n
-send one or multiple elements (either files or directories) to the Selection Box. \fBSel\fR accepts individual elements, range of elements, say 1\-6, filenames and paths, just as wildcards. Example: 'sel 1 4\-10 file* filename /path/to/filename'.
+.B s, sel \fRELN/FILE ... n [REGEX [DIR]] [-filetype]
+send one or multiple elements (either files or directories) to the Selection Box. \fBSel\fR accepts individual elements, range of elements, say 1\-6, filenames and paths, just as wildcards (globbing) and regular expressions. Just as in the \fBsearch\fR function (see above), it is also possible to further filter the list of matches indicating the desired filetype. Example: 'sel -d 1 4\-10 \^r file* filename /path/to/filename'.
+.sp
+When using regular expressions, the next argument, if it is a directory name, will be taken as an arugment for the previous expression. For example, 's ^d.*\.conf$' /etc' will select all files in \fI/etc\fR starting with 'd' and ending with '.conf'. If no directory is specified, the pattern will be evaluated against all files in the current working directory.
+.sp
+Glob and regular expressions could be used at once. For example: 's ^[r|R].*d$ /etc/*.conf' will select all files starting with either 'r' or 'R' and ending with 'd' in the current working directory, and all .conf files in \fI/etc\fR.
+.sp
+It is important to note that glob expressions are evaluated before regular expressions, in such a way that any expression that could be understood by both kind of expressions will be avaluated according to the first, that is, as a glob expression.
 .sp
 The Selection Box is accessible to different instances of the program, provided they use the same profile (see the \fIprofile\fR command below). By default, indeed, each profile keeps a private Selection Box, being thus not accessible to other profiles. You can nonetheless modify this behaviour via the ShareSelbox option in the configuration file. If the ShareSelbox option is enabled (see the configuration file), selected files are stored in \fI/tmp/clifm/username/.selbox\fR. Otherwise, \fI/tmp/clifm/username/.selbox_profilename\fR is used (this is the default). 
 .TP
