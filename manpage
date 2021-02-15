@@ -171,8 +171,8 @@ By default, the \fIopen\fR function will open files with the default application
 If the file to be opened is an archive/compressed file, the archive function (see the \fIad\fR command below) will be executed instead.
 .TP
 
-.B /\fRREGEX [\-filetype] [DIR]
-this is the quick search function. Just type '/' followed by a regular (or extended regular) expression, and CliFM will list all matches in the current working directory. For example, '/.pdf$' will list all PDF files in the current working directory. Expressions containing no regex metacharacter are automatically replaced by '/.*EXP.*'. For example '/test' becomes '/.*test.*'.
+.B /\fRPATTERN [\-filetype] [DIR]
+this is the quick search function. Just type '/' followed by a glob or regular (or extended regular) expression, and CliFM will list all matches in the current working directory. For example, both '/*.pdf' and '/.pdf$' will list all PDF files in the current working directory, the former using wildcards, and second a regular expression. Expressions containing no pattern metacharacter are automatically replaced by '/*EXP*'. For example '/test' becomes '/*test*'.
 .sp
 To search for files in any other directory, specify the directory name as a further argument. This argument (DIR) could be an absolute path, a relative path, or an ELN. For example, enter '/^A 7' to search for all files starting with 'A' in the directory corresponding to the ELN 7.
 .sp
