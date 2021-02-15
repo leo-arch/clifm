@@ -172,7 +172,9 @@ If the file to be opened is an archive/compressed file, the archive function (se
 .TP
 
 .B /\fRPATTERN [\-filetype] [DIR]
-this is the quick search function. Just type '/' followed by a glob or regular (or extended regular) expression, and CliFM will list all matches in the current working directory. For example, both '/*.pdf' and '/.pdf$' will list all PDF files in the current working directory, the former using wildcards, and second a regular expression. Expressions containing no pattern metacharacter are automatically replaced by '/*EXP*'. For example '/test' becomes '/*test*'.
+this is the quick search function. Just type '/' followed by a glob or regular (or extended regular) expression, and CliFM will list all matches in the current working directory. For example, both '/*.pdf' and '/.pdf$' expressions will list all PDF files in the current working directory, the former using wildcards, and the second a regular expression. 
+.sp
+Bear in mind that search patterns are evaluated first as glob expressions, and then, if no matches are found, as regular expressions. Expressions containing no pattern metacharacter are automatically replaced by '/*EXP*'. For example '/test' becomes '/*test*'.
 .sp
 To search for files in any other directory, specify the directory name as a further argument. This argument (DIR) could be an absolute path, a relative path, or an ELN. For example, enter '/^A 7' to search for all files starting with 'A' in the directory corresponding to the ELN 7.
 .sp
@@ -184,9 +186,9 @@ send one or multiple elements (either files or directories) to the Selection Box
 .sp
 When using regular expressions, the next argument, if it is a directory name, will be taken as an arugment for the previous expression. For example, 's ^d.*\.conf$' /etc' will select all files in \fI/etc\fR starting with 'd' and ending with '.conf'. If no directory is specified, the pattern will be evaluated against all files in the current working directory.
 .sp
-Glob and regular expressions could be used at once. For example: 's ^[r|R].*d$ /etc/*.conf' will select all files starting with either 'r' or 'R' and ending with 'd' in the current working directory, plus all .conf files in \fI/etc\fR.
+Glob and regular expressions could be used together. For example: 's ^[r|R].*d$ /etc/*.conf' will select all files starting with either 'r' or 'R' and ending with 'd' in the current working directory, plus all .conf files in \fI/etc\fR.
 .sp
-It is important to note however that glob expressions are evaluated before regular expressions, in such a way that any expression that could be understood by both kind of expressions will be evaluated according to the first, that is, as a glob expression.
+It is important to note however that glob expressions are evaluated before regular expressions, in such a way that any expression that could be understood by both kinds of pattern matching mechanisms will be evaluated according to the first, that is, as a glob expression. For example, '.*', as regular expression, should match all files. However, since glob expressions are evaluated first, it will only match hidden files. To select all files using a glob expression, try '.* *', or, with a regular expression: '^' or '(.*?)'.
 .sp
 The Selection Box is accessible to different instances of the program, provided they use the same profile (see the \fIprofile\fR command below). By default, indeed, each profile keeps a private Selection Box, being thus not accessible to other profiles. You can nonetheless modify this behaviour via the ShareSelbox option in the configuration file. If the ShareSelbox option is enabled (see the configuration file), selected files are stored in \fI/tmp/clifm/username/.selbox\fR. Otherwise, \fI/tmp/clifm/username/.selbox_profilename\fR is used (this is the default). 
 .TP
