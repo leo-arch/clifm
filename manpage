@@ -22,13 +22,13 @@ With the automatic ELN's expansion feature you can use ELN's with external comma
 .sp
   \fBd)\fR Bookmarks: keep a list of your favorite directories, and even files, to get easy access to them. Example: enter 'bm' (or press Alt\-b) to open the bookmarks screen and then simply type a number or a shortcut name to access the desired bookmark. 
 .sp
-  \fBe)\fR The Selection Box allows you to drop files and directories from different parts of your filesystem (even from different instances of CliFM) and then operate on them with just one command. Example: select a few files in one instance of the program (say 's 12; cd /media; s 2 5\-6') and then paste them somewhere else using a second instance ('v sel' or 'paste sel'). Both globbing and regular expressions are suppported.
+  \fBe)\fR The Selection Box allows you to drop files and directories from different parts of your filesystem (even from different instances of CliFM) and then operate on them with just one command. Example: select a few files in one instance of the program (say 's 12; cd /media; s 2 5\-6') and then paste them somewhere else using a second instance ('v sel' or 'paste sel'). Both glob and regular expressions are suppported.
 .sp
-  \fBf)\fR The directory history function (\fIback\fR and \fIforth\fR) keeps track of all the directories visited by you in the current session, so that you can go back and forth to any of them by just entering 'b' or 'f' (or just pressing 'A\-j' and 'A\-k' respectivelly).
+  \fBf)\fR The directory history function (\fIback\fR and \fIforth\fR) keeps track of all visited directories, so that you can go back and forth to any of them by just entering 'b' or 'f' (or just pressing 'Alt\-j' and 'Alt\-k', or Shift\-Left and Shift\-Right, respectivelly).
 .sp
-  \fBg)\fR Keyboard shortcuts make it even easier and faster to navigate and operate on your files. For example, instead of typing 'cd ..' to go back to the parent directory, or 's *' to select all files in the current directory, you can simply press A-u and A-a respectivelly.
+  \fBg)\fR Keyboard shortcuts make it even easier and faster to navigate and operate on your files. For example, instead of typing 'cd ..' to go back to the parent directory, or 's *' to select all files in the current directory, you can simply press Alt\-u (or Shift\-Up) and Alt\-a respectivelly.
 .sp
-  \fBh)\fR The quick search function makes it really easy to quickly find the files you are looking for: just enter a slash followed by the string or regular expression you want (ex: '/.*\.png'), that's all.
+  \fBh)\fR The quick search function makes it really easy to quickly find the files you are looking for: just enter a slash followed by the string or regular expression you want (ex: '/myfile' or '/.*\.png'), that's all.
 .sp
   \fBi)\fR Build your own custom commands using shell scripts. Just drop a shell script in the scripts directory, tell CLiFM to use this script via a custom action name, and use it as any other command.
 .sp
@@ -62,7 +62,7 @@ List of CliFM features:
   22) Bulk rename
   23) Archiving and compression support
   24) Auto-cd and auto-open
-  25) Plugins support via custom actions and any program/script you want
+  25) Plugins support via custom actions linked to executable files
   26) Symbolic links editor
   27) Regular expressions and filetype filter support for both search and selection of files
 
@@ -160,7 +160,7 @@ if the \fIautocd\fR and \fIauto-open\fR functions are enabled, which is the defa
 .B cd \fR[ELN/DIR]
 when used with no argument, it changes the current directory to the default directory (HOME). Otherwise, \fIcd\fR changes the current directory to the one specified by the first argument. You can use either ELN's or a string to indicate the directory you want. Ex: 'cd 12' or 'cd ~/media'. If \fIautocd\fR is enabled, 'cd 12' and 'cd ~/media' can be written as '12' and '~/media' respectivelly.
 .sp
-Unlike the shell 'cd' command, CliFM's built\-in \fBcd\fR function not only changes the current directory, but also lists its content (provided the option "cd lists automatically" is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of \fIcd\fR is much like this shell command: cd DIR && ls \-A \-\-color=auto \-\-group\-directories\-first. Remote file systems are also supported: just enter 'cd ADDRESS [OPTIONS]'. For more information about this syntax see the description of the \fInet\fR command below.
+Unlike the shell 'cd' command, CliFM's built\-in \fBcd\fR function not only changes the current directory, but also lists its content (provided the option "cd lists automatically" is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of \fIcd\fR is much like this shell command: cd DIR && ls \-\-color=auto \-\-group\-directories\-first. Remote file systems are also supported: just enter 'cd ADDRESS [OPTIONS]'. For more information about this syntax see the description of the \fInet\fR command below.
 .TP
 
 .B o, open \fRELN/FILE [APPLICATION]
@@ -172,7 +172,7 @@ If the file to be opened is an archive/compressed file, the archive function (se
 .TP
 
 .B /\fRREGEX [\-filetype] [DIR]
-this is the quick search function. Just type '/' followed by a regular (or extended regular) expression, and CliFM will list all matches in the current working directory. For example, '/.pdf$' will list all PDF files in the current working directory 
+this is the quick search function. Just type '/' followed by a regular (or extended regular) expression, and CliFM will list all matches in the current working directory. For example, '/.pdf$' will list all PDF files in the current working directory. Expressions containing no regex metacharacter are automatically replaced by '/.*EXP.*'. For example '/test' becomes '/.*test.*'.
 .sp
 To search for files in any other directory, specify the directory name as a further argument. This argument (DIR) could be an absolute path, a relative path, or an ELN. For example, enter '/^A 7' to search for all files starting with 'A' in the directory corresponding to the ELN 7.
 .sp
@@ -180,13 +180,13 @@ The result of the search could be further filtered by specifying a filter type: 
 .TP
 
 .B s, sel \fRELN/FILE ... n [REGEX [DIR]] [-filetype]
-send one or multiple elements (either files or directories) to the Selection Box. \fBSel\fR accepts individual elements, range of elements, say 1\-6, filenames and paths, just as wildcards (globbing) and regular expressions. Just as in the \fBsearch\fR function (see above), it is also possible to further filter the list of matches indicating the desired filetype. Example: 'sel -d 1 4\-10 \^r file* filename /path/to/filename'.
+send one or multiple elements (either files or directories) to the Selection Box. \fIsel\fR accepts individual elements, range of elements, say 1\-6, filenames and paths, just as wildcards (globbing) and regular expressions. Just as in the \fIsearch\fR function (see above), it is also possible to further filter the list of matches indicating the desired filetype. Example: 'sel -d 1 4\-10 ^r file* filename /path/to/filename'.
 .sp
 When using regular expressions, the next argument, if it is a directory name, will be taken as an arugment for the previous expression. For example, 's ^d.*\.conf$' /etc' will select all files in \fI/etc\fR starting with 'd' and ending with '.conf'. If no directory is specified, the pattern will be evaluated against all files in the current working directory.
 .sp
-Glob and regular expressions could be used at once. For example: 's ^[r|R].*d$ /etc/*.conf' will select all files starting with either 'r' or 'R' and ending with 'd' in the current working directory, and all .conf files in \fI/etc\fR.
+Glob and regular expressions could be used at once. For example: 's ^[r|R].*d$ /etc/*.conf' will select all files starting with either 'r' or 'R' and ending with 'd' in the current working directory, plus all .conf files in \fI/etc\fR.
 .sp
-It is important to note that glob expressions are evaluated before regular expressions, in such a way that any expression that could be understood by both kind of expressions will be avaluated according to the first, that is, as a glob expression.
+It is important to note however that glob expressions are evaluated before regular expressions, in such a way that any expression that could be understood by both kind of expressions will be evaluated according to the first, that is, as a glob expression.
 .sp
 The Selection Box is accessible to different instances of the program, provided they use the same profile (see the \fIprofile\fR command below). By default, indeed, each profile keeps a private Selection Box, being thus not accessible to other profiles. You can nonetheless modify this behaviour via the ShareSelbox option in the configuration file. If the ShareSelbox option is enabled (see the configuration file), selected files are stored in \fI/tmp/clifm/username/.selbox\fR. Otherwise, \fI/tmp/clifm/username/.selbox_profilename\fR is used (this is the default). 
 .TP
