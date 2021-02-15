@@ -442,7 +442,8 @@ int get_last_path(void);
 /* Files handling */
 int copy_function(char **comm);
 int run_and_refresh(char **comm);
-int search_function(char **comm);
+int search_regex(char **comm);
+int search_glob(char **comm);
 int new_instance(char *dir, int sudo);
 int list_mountpoints(void);
 int alias_import(char *file);
@@ -14578,7 +14579,7 @@ colors_list(const char *entry, const int i, const int pad,
 	else if (i == -1) /* ELN for entry could not be found */
 		sprintf(index, "? ");
 
-	/* When listing files NOT in CWD (called from search_function() and
+	/* When listing files NOT in CWD (called from search function and
 	 * first argument is a path: "/search_str /path") 'i' is zero. In
 	 * this case, no index should be printed at all */
 	else
@@ -16674,9 +16675,16 @@ exec_cmd(char **comm)
 	}
 
 	/*     ############### SEARCH ##################     */	
-	else if (*comm[0] == '/' && access(comm[0], F_OK) != 0)
+	else if (*comm[0] == '/' && access(comm[0], F_OK) != 0) {
 								/* If not absolute path */ 
-		exit_code = search_function(comm);
+		if (search_glob(comm) == EXIT_FAILURE)
+			exit_code = search_regex(comm);
+		else
+			exit_code = EXIT_SUCCESS;
+	}
+
+/*	else if (*comm[0] == '%')
+		exit_code = search_glob(comm); */
 
 	/*      ############### HISTORY ##################     */
 	/* If '!number' or '!-number' or '!!' */
@@ -17892,7 +17900,7 @@ sel_regex(char *str, const char *dest_path, mode_t filetype)
 
 	regex_t regex;
 	if (regcomp(&regex, str, REG_NOSUB|REG_EXTENDED) != EXIT_SUCCESS) {
-		fprintf(stderr, _("%s: sel: '%s': Not a valid regular "
+		fprintf(stderr, _("%s: sel: '%s': Invalid regular "
 			    "expression\n"), PROGRAM_NAME, str);
 
 		regfree(&regex);
@@ -18256,13 +18264,16 @@ show_sel_files(void)
 					break;
 				}
 			}
+
 			counter++;
 			colors_list(sel_elements[i], (int)i + 1, NO_PAD,
 						PRINT_NEWLINE);
 		}
 
 		char *human_size = get_size_unit(total_sel_size);
+
 		printf(_("\n%sTotal size%s: %s\n"), white, NC, human_size);
+
 		free(human_size);
 	}
 
@@ -18519,11 +18530,13 @@ run_and_refresh(char **comm)
 	log_function(comm);
 
 	size_t i = 0, total_len = 0;
+
 	for (i = 0; i <= args_n; i++)
 		total_len += strlen(comm[i]);
 
 	char *tmp_cmd = (char *)NULL;
 	tmp_cmd = (char *)xcalloc(total_len + (i + 1) + 1, sizeof(char));
+
 	for (i = 0; i <= args_n; i++) {
 		strcat(tmp_cmd, comm[i]);
 		strcat(tmp_cmd, " ");
@@ -18532,14 +18545,18 @@ run_and_refresh(char **comm)
 	int ret = launch_execle(tmp_cmd);
 	free(tmp_cmd);
 	tmp_cmd = (char *)NULL;
+
 	if (ret == EXIT_SUCCESS) {
 		/* If 'rm sel' and command is successful, deselect everything */
 		if (is_sel && strcmp(comm[0], "rm") == 0) {
+
 			for (i = 0; i < sel_n; i++)
 				free(sel_elements[i]);
+
 			sel_n = 0;
 			save_sel();
 		}
+
 		/* When should the screen actually be refreshed: 
 		* 1) Creation or removal of file (in current files list)
 		* 2) The contents of a directory (in current files list) changed */
@@ -18548,15 +18565,17 @@ run_and_refresh(char **comm)
 			free_dirlist();
 			list_dir();
 		}
+
 		return EXIT_SUCCESS;
 	}
+
 	else
 		return EXIT_FAILURE;
 	/* Error messages will be printed by launch_execve() itself */
 }
 
 int
-search_function(char **comm)
+search_glob(char **comm)
 /* List matching filenames in the specified directory */
 {
 	if (!comm || !comm[0])
@@ -18569,14 +18588,285 @@ search_function(char **comm)
 	/* If there are two arguments, the one starting with '-' is the
 	 * filetype and the other is the path */
 	if (comm[1] && comm[2]) {
+		if (comm[1][0] == '-') {
+			file_type = (mode_t)comm[1][1];
+			search_path = comm[2];
+		}
+		else if (comm[2][0] == '-') {
+			file_type = (mode_t)comm[2][1];
+			search_path = comm[1];
+		}
+		else
+			search_path = comm[1];
+	}
+
+	/* If just one argument, '-' indicates filetype. Else, we have a
+	 * path */
+	else if (comm[1]) {
+		if (comm[1][0] == '-')
+			file_type = (mode_t)comm[1][1];
+		else
+			search_path = comm[1];
+	}
+	
+	/* If no arguments, search_path will be NULL and file_type zero */
+
+	if (file_type) {
+
+		/* Convert filetype into a macro that can be decoded by stat().
+		 * If file type is specified, matches will be checked against
+		 * this value */
+		switch (file_type) {
+		case 'd': file_type = S_IFDIR; break;
+		case 'r': file_type = S_IFREG; break;
+		case 'l': file_type = S_IFLNK; break;
+		case 's': file_type = S_IFSOCK; break;
+		case 'f': file_type = S_IFIFO; break;
+		case 'b': file_type = S_IFBLK; break;
+		case 'c': file_type = S_IFCHR; break;
+
+		default:
+			fprintf(stderr, _("%s: '%c': Unrecognized filetype\n"),
+					PROGRAM_NAME, (char)file_type);
+			return EXIT_FAILURE;
+		}
+	}
+
+	/* If we have a path ("/str /path"), chdir into it, since
+	 * glob() works on CWD */
+	if (search_path && *search_path) {
+
+		/* Deescape the search path, if necessary */
+		if (strchr(search_path, '\\')) {
+			char *deq_dir = dequote_str(search_path, 0);
+
+			if (!deq_dir) {
+				fprintf(stderr, _("%s: %s: Error dequoting filename\n"),
+						PROGRAM_NAME, comm[1]);
+				return EXIT_FAILURE;
+			}
+
+			strcpy(search_path, deq_dir);
+			free(deq_dir);
+		}
+
+		if (chdir(search_path) == -1) {
+			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, search_path,
+					strerror(errno));
+			return EXIT_FAILURE;
+		}
+	}
+
+	size_t i;
+
+	/* Search for globbing char */
+	int glob_char_found = 0;
+	for (i = 1; comm[0][i]; i++) {
+		if (comm[0][i] == '*' || comm[0][i] == '?'
+		|| comm[0][i] == '[' || comm[0][i] == '{') {
+			glob_char_found = 1;
+			break;
+		}
+	}
+
+	/* If search string is just "STR" (no glob chars), change it
+	 * to "*STR*" */
+	if (!glob_char_found) {
+		size_t search_str_len = strlen(comm[0]);
+
+		comm[0] = (char *)xrealloc(comm[0], (search_str_len + 2) *
+								   sizeof(char));
+
+		*comm[0] = '*';
+		comm[0][search_str_len] = '*';
+		comm[0][search_str_len + 1] = 0x00;
+		search_str = comm[0];
+	}
+
+	else
+		/* If search string is "/STR", comm[0] + 1 returns "STR" */
+		search_str = comm[0] + 1;
+
+	/* Get matches, if any */
+	glob_t globbed_files;
+	int ret = glob(search_str, GLOB_BRACE, NULL, &globbed_files);
+
+	if (ret != 0) {
+/*		printf(_("%s: No matches found\n"), PROGRAM_NAME); */
+
+		globfree(&globbed_files);
+
+		if (search_path) {
+			/* Go back to the directory we came from */
+			if (chdir(path) == -1)
+				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+						path, strerror(errno));
+		}
+
+		return EXIT_FAILURE;
+	}
+
+	/* We have matches */
+	int last_column = 0;
+	size_t len = 0, flongest = 0, columns_n = 0, found = 0;
+
+	/* We need to store pointers to matching filenames in array of 
+	 * pointers, just as the filename length (to construct the
+	 * columned output), and, if searching in CWD, its index (ELN)
+	 * in the dirlist array as well */
+	char **pfiles = (char **)xnmalloc(globbed_files.gl_pathc + 1, 
+							   sizeof(char *));
+
+	int *eln = (int *)xnmalloc(globbed_files.gl_pathc + 1,
+								 sizeof(int));
+
+	size_t *files_len = (size_t *)xnmalloc(globbed_files.gl_pathc
+										+ 1, sizeof(size_t));
+
+	for (i = 0; globbed_files.gl_pathv[i]; i++) {
+
+		if (strcmp(globbed_files.gl_pathv[i], ".") == 0
+		|| strcmp(globbed_files.gl_pathv[i], "..") == 0)
+			continue;
+
+		if (file_type) {
+
+			/* Simply skip all files not matching file_type */
+			if (lstat(globbed_files.gl_pathv[i], 
+					  &file_attrib) == -1)
+				continue;
+
+			if ((file_attrib.st_mode & S_IFMT) != file_type)
+				continue;
+		}
+
+		pfiles[found] = globbed_files.gl_pathv[i];
+
+		/* Get the longest filename in the list */
+
+		/* If not searching in CWD, we only need to know the file's
+		 * length (no ELN) */
+		if (search_path) {
+			len = unicode ? u8_xstrlen(pfiles[found])
+				  : strlen(pfiles[found]);
+
+			/* This will be passed to colors_list(): -1 means no ELN */
+			eln[found] = -1;
+
+			files_len[found++] = len;
+
+			if (len > flongest)
+				flongest = len;
+		}
+
+		/* If searching in CWD, take into account the file's ELN
+		 * when calculating its legnth */
+		else {
+			size_t j;
+
+			for (j = 0; dirlist[j]; j++) {
+
+				if (strcmp(pfiles[found], dirlist[j]) != 0)
+					continue;
+
+				eln[found] = (int)(j + 1);
+
+				len = (unicode ? u8_xstrlen(pfiles[found]) 
+					  : strlen(pfiles[found])) + 
+					  (size_t)digits_in_num(eln[found]) + 1;
+
+				files_len[found] = len;
+
+				if (len > flongest)
+					flongest = len;
+			}
+
+			found ++;
+		}
+	}
+
+	/* Print the results using colors and columns */
+	if (found) {
+
+		struct winsize w;
+		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+		unsigned short tcols = w.ws_col;
+
+		if (flongest <= 0 || flongest > tcols)
+			columns_n = 1;
+		else
+			columns_n = (size_t)tcols / (flongest + 1);
+
+		if (columns_n > found)
+			columns_n = found;
+
+		for (i = 0; i < found; i++) {
+
+			if ((i + 1) % columns_n == 0)
+				last_column = 1;
+			else
+				last_column = 0;
+
+			colors_list(pfiles[i], (eln[i] != -1) ? eln[i] : 0,
+						(last_column || i == (found - 1)) ? 0 : 
+						(int)(flongest - files_len[i]) + 1, 
+						(last_column || i == found - 1) ? 1 : 0);
+			/* Second argument to colors_list() is:
+			 * 0: Do not print any ELN 
+			 * Positive number: Print positive number as ELN
+			 * -1: Print "?" instead of an ELN */
+		}
+	}
+
+/*	else 
+		printf(_("%s: No matches found\n"), PROGRAM_NAME); */
+
+	/* Free stuff */
+	free(eln);
+	free(files_len);
+	free(pfiles);
+	globfree(&globbed_files);
+
+	/* If needed, go back to the directory we came from */
+	if (search_path) {
+		if (chdir(path) == -1) {
+			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+					path, strerror(errno));
+			return EXIT_FAILURE;
+		}
+	}
+
+	if (!found)
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
+}
+
+int
+search_regex(char **comm)
+/* List matching filenames in the specified directory */
+{
+	if (!comm || !comm[0])
+		return EXIT_FAILURE;
+
+	char *search_str = (char *)NULL, *search_path = (char *)NULL;
+	mode_t file_type = 0;
+	struct stat file_attrib;
+
+	/* If there are two arguments, the one starting with '-' is the
+	 * filetype and the other is the path */
+	if (comm[1] && comm[2]) {
+
 		if (*comm[1] == '-') {
 			file_type = (mode_t)*(comm[1] + 1);
 			search_path = comm[2];
 		}
+
 		else if (*comm[2] == '-') {
 			file_type = (mode_t)*(comm[2] + 1);
 			search_path = comm[1];
 		}
+
 		else
 			search_path = comm[1];
 	}
@@ -18665,12 +18955,12 @@ search_function(char **comm)
 
 	size_t i;
 
-	/* Search for regex char */
-	int regex_char_found = check_regex(comm[0] + 1);
+	/* Search for regex expression */
+	int regex_found = check_regex(comm[0] + 1);
 
 	/* If search string is just "STR" (no regex chars), change it
 	 * to ".*STR.*" */
-	if (regex_char_found == EXIT_FAILURE) {
+	if (regex_found == EXIT_FAILURE) {
 		size_t search_str_len = strlen(comm[0]);
 
 		comm[0] = (char *)xrealloc(comm[0], (search_str_len + 5) *
@@ -18700,7 +18990,7 @@ search_function(char **comm)
 	int ret = regcomp(&regex_files, search_str, REG_NOSUB|REG_EXTENDED);
 
 	if (ret != EXIT_SUCCESS) {
-		fprintf(stderr, _("%s: '%s': Not a valid regular expression\n"),
+		fprintf(stderr, _("%s: '%s': Invalid regular expression\n"),
 			   PROGRAM_NAME, search_str);
 
 		regfree(&regex_files);
@@ -18812,71 +19102,60 @@ search_function(char **comm)
 		}
 	}
 
-	/* Check for the sel keyword. If present, just copy all matches
-	 * into the selbox */
-/*	 printf("%s\n", comm[args_n]); */
+	if (type_ok) {
 
-	struct winsize w;
-	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-	unsigned short terminal_cols = w.ws_col;
+		struct winsize w;
+		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+		unsigned short terminal_cols = w.ws_col;
 
-	if (flongest <= 0 || flongest > terminal_cols)
-		total_cols = 1;
-	else
-		total_cols = (size_t)terminal_cols / (flongest + 1);
-
-	if (total_cols > type_ok)
-		total_cols = type_ok;
-
-	/* cur_col: Current columns number */
-	size_t cur_col = 0, counter = 0;
-
-	for (i = 0; i < found; i++) {
-
-		if (match_type[i] == 0)
-			continue;
-
-		/* Print the results using colors and columns */
-		cur_col++;
-
-		/* If the current file is in the last column or is the last
-		 * listed file, we need to print no pad and a newline char.
-		 * Else, print the corresponding pad, to equate the longest
-		 * file length, and no newline char */
-		if (cur_col == total_cols) {
-			last_column = 1;
-			cur_col = 0;
-		}
+		if (flongest <= 0 || flongest > terminal_cols)
+			total_cols = 1;
 		else
-			last_column = 0;
+			total_cols = (size_t)terminal_cols / (flongest + 1);
 
-		/* Counter: Current amount of non-filtered files: if COUNTER
-		 * equals TYPE_OK (total amount of non-filtered files), we have
-		 * the last file to be printed */
-		counter++;
+		if (total_cols > type_ok)
+			total_cols = type_ok;
 
-		colors_list(search_path ? reg_dirlist[regex_index[i]]->d_name
-				: dirlist[regex_index[i]], search_path ? NO_ELN
-				: regex_index[i] + 1, (last_column
-				|| counter == type_ok) ? NO_PAD
-				: (int)(flongest - files_len[i]) + 1,
-				(last_column || counter == type_ok)
-				? PRINT_NEWLINE : NO_NEWLINE);
+		/* cur_col: Current columns number */
+		size_t cur_col = 0, counter = 0;
 
-/*		if (search_path)
-			colors_list(reg_dirlist[regex_index[i]]->d_name, NO_ELN,
-					(last_column || counter == type_ok) ? NO_PAD
+		for (i = 0; i < found; i++) {
+
+			if (match_type[i] == 0)
+				continue;
+
+			/* Print the results using colors and columns */
+			cur_col++;
+
+			/* If the current file is in the last column or is the last
+			 * listed file, we need to print no pad and a newline char.
+			 * Else, print the corresponding pad, to equate the longest
+			 * file length, and no newline char */
+			if (cur_col == total_cols) {
+				last_column = 1;
+				cur_col = 0;
+			}
+			else
+				last_column = 0;
+
+			/* Counter: Current amount of non-filtered files: if
+			 * COUNTER equals TYPE_OK (total amount of non-filtered
+			 * files), we have the last file to be printed */
+			counter++;
+
+			colors_list(search_path ? reg_dirlist[regex_index[i]]->d_name
+					: dirlist[regex_index[i]], search_path ? NO_ELN
+					: regex_index[i] + 1, (last_column
+					|| counter == type_ok) ? NO_PAD
 					: (int)(flongest - files_len[i]) + 1,
-					(last_column || counter == type_ok) ? PRINT_NEWLINE
-					: NO_NEWLINE);
+					(last_column || counter == type_ok)
+					? PRINT_NEWLINE : NO_NEWLINE);
 
-		else
-			colors_list(dirlist[regex_index[i]], regex_index[i]	+ 1,
-					(last_column || counter == type_ok) ? NO_PAD : 
-					(int)(flongest - files_len[i]) + 1,
-					(last_column || counter == type_ok) ? PRINT_NEWLINE
-					: NO_NEWLINE); */
+		}
 	}
+
+	else
+		fputs(_("No matches found\n"), stderr);
 
 	/* Free stuff */
 	free(files_len);
@@ -18898,7 +19177,10 @@ search_function(char **comm)
 		}
 	}
 
-	return EXIT_SUCCESS;
+	if (type_ok)
+		return EXIT_SUCCESS;
+
+	return EXIT_FAILURE;
 }
 
 int
@@ -18913,14 +19195,17 @@ copy_function(char **comm)
 	if (is_sel) {
 		char *tmp_cmd = (char *)NULL;
 		size_t total_len = 0, i = 0;
-		for (i = 0; i <= args_n; i++) {
+
+		for (i = 0; i <= args_n; i++)
 			total_len += strlen(comm[i]);
-		}
+
 		tmp_cmd = (char *)xcalloc(total_len + (i + 1) + 2, sizeof(char));
+
 		for (i = 0; i <= args_n; i++) {
 			strcat(tmp_cmd, comm[i]);
 			strcat(tmp_cmd, " ");
 		}
+
 		if (sel_is_last)
 			strcat(tmp_cmd, ".");
 
@@ -18932,17 +19217,22 @@ copy_function(char **comm)
 			/* If 'mv sel' and command is successful deselect everything,
 			 * since sel files are note there anymore */
 			if (strcmp(comm[0], "mv") == 0) {
+
 				for (i = 0; i < sel_n; i++)
 					free(sel_elements[i]);
+
 				sel_n = 0;
 				save_sel();
 			}
+
 			if (cd_lists_on_the_fly) {
 				free_dirlist();
 				list_dir();
 			}
+
 			return EXIT_SUCCESS;
 		}
+
 		else
 			return EXIT_FAILURE;
 	}
@@ -21262,7 +21552,7 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
 
 	puts(_("\nBUILT-IN COMMANDS:\n\n\
  ELN/FILE/DIR (auto-open and autocd functions)\n\
- /REGEX [DIR] [-filetype]\n\
+ /PATTERN [DIR] [-filetype]\n\
  bm, bookmarks [a, add PATH] [d, del] [edit] [SHORTCUT or NAME]\n\
  o, open [ELN/FILE] [APPLICATION]\n\
  cd [ELN/DIR]\n\
