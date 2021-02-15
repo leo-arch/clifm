@@ -2497,6 +2497,7 @@ print_tips(int all)
 		"The Selection Box is shared among different instances of CliFM",
 		"Select files here and there with the 's' command",
 		"Use wildcards with the 's' command: 's *.c'",
+		""
 		"ELN's and the 'sel' keyword work for shell commands as well: "
 		"'file 1 sel'",
 		"Press TAB to automatically expand an ELN: 'o 2' -> TAB -> "
@@ -17825,15 +17826,26 @@ check_regex(char *str)
 {
 	if (!str || !*str)
 		return EXIT_FAILURE;
-	
-	while (*str) {
-		if (*str == '*' || *str == '?' || *str == '[' || *str == '{'
-		|| *str == '^' || *str == '.' || *str == '|' || *str == '+'
-		|| *str == '$')
-			return EXIT_SUCCESS;
 
-		str++;
+	int char_found = 0;
+	char *p = str;
+
+	while (*p) {
+		/* If STR contains at least one of the following chars */
+		if (*p == '*' || *p == '?' || *p == '[' || *p == '{'
+		|| *p == '^' || *p == '.' || *p == '|' || *p == '+'
+		|| *p == '$') {
+			char_found = 1;
+			break;
+		}
+
+		p++;
 	}
+
+	/* And if STR is not a filename, take it as a possible regex */
+	if (char_found)
+		if (access(str, F_OK) == -1)
+			return EXIT_SUCCESS;
 
 	return EXIT_FAILURE;
 }
@@ -17905,21 +17917,16 @@ sel_regex(char *str, const char *dest_path, mode_t filetype)
 
 				char tmp_path[PATH_MAX] = "";
 				sprintf(tmp_path, "%s/%s", path, dirlist[i]);
-
 				new_sel += select_file(tmp_path);
 			}
 		}
 	}
 
 	else { /* Check pattern against files in DEST_FILE */
-		if (chdir(dest_path) != EXIT_SUCCESS) {
-			fprintf(stderr, "sel: %s: %s\n", dest_path,
-					strerror(errno));
-			return -1;
-		}
 
 		struct dirent **list = (struct dirent **)NULL;
-		int filesn = scandir(".", &list, skip_implied_dot, xalphasort);
+		int filesn = scandir(dest_path, &list, skip_implied_dot,
+							 xalphasort);
 
 		if (filesn == -1) {
 			fprintf(stderr, "sel: %s: %s\n", dest_path,
@@ -17942,7 +17949,18 @@ sel_regex(char *str, const char *dest_path, mode_t filetype)
 				}
 
 				char tmp_path[PATH_MAX] = "";
-				sprintf(tmp_path, "%s/%s", dest_path, list[i]->d_name);
+
+				/* Absolute path */
+				if (*dest_path == '/') {
+					sprintf(tmp_path, "%s/%s", dest_path,
+							list[i]->d_name);
+				}
+
+				/* Relative path */
+				else {
+					sprintf(tmp_path, "%s/%s/%s", path, dest_path,
+							list[i]->d_name);
+				}
 
 				new_sel += select_file(tmp_path);
 			}
@@ -17951,11 +17969,6 @@ sel_regex(char *str, const char *dest_path, mode_t filetype)
 		}
 
 		free(list);
-
-		if (chdir(path) != EXIT_SUCCESS) {
-			fprintf(stderr, "sel: %s: %s\n", path, strerror(errno));
-			return -1;
-		}
 	}
 
 	regfree(&regex);
@@ -17970,9 +17983,9 @@ sel_function (char **comm)
 		return EXIT_FAILURE;
 
 	char *sel_tmp = (char *)NULL;
+	int new_sel = 0, exit_status = EXIT_SUCCESS, file_type_index = -1;
 	size_t i = 0, j = 0;
-	int new_sel = 0, exit_status = EXIT_SUCCESS;
-	mode_t file_type = 0, file_type_index = -1;
+	mode_t file_type = 0;
 
 	for (i = 0; comm[i]; i++) {
 		if (*comm[i] == '-' && *(comm[i] + 1)) {
@@ -18003,9 +18016,7 @@ sel_function (char **comm)
 	}
 
 	for (i = 1; comm[i]; i++) {
-		/* If string is "*" or ".*", the wildcards expansion function
-		 * found no match, in which case the string must be skipped.
-		 * Exclude self and parent directories (. and ..) as well */
+		/* Exclude self and parent directories (. and ..) */
 /*		if (strcmp(comm[i], "*") == 0 || strcmp(comm[i], ".*") == 0
 		|| strcmp(comm[i], ".") == 0 || strcmp(comm[i], "..") == 0)
 			continue; */
@@ -18014,7 +18025,7 @@ sel_function (char **comm)
 			continue;
 
 		/* Check for regex expressions */
-		if (*comm[i] != '/' && check_regex(comm[i]) == EXIT_SUCCESS) {
+		if (check_regex(comm[i]) == EXIT_SUCCESS) {
 			int sel_path = 0;
 
 			if (comm[i + 1]) {
@@ -18034,7 +18045,7 @@ sel_function (char **comm)
 			if (ret == -1)
 				return EXIT_FAILURE;
 
-			/* Skip next entry: its an argument for the regex
+			/* Skip next entry: it's an argument for the regex
 			 * expression */
 			if (sel_path)
 				i++;
@@ -21250,7 +21261,7 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
 9 = inode\n"), PNL, PROGRAM_NAME);
 
 	puts(_("\nBUILT-IN COMMANDS:\n\n\
- ELN/FILE/DIR (auto-open and autocd)\n\
+ ELN/FILE/DIR (auto-open and autocd functions)\n\
  /REGEX [DIR] [-filetype]\n\
  bm, bookmarks [a, add PATH] [d, del] [edit] [SHORTCUT or NAME]\n\
  o, open [ELN/FILE] [APPLICATION]\n\
