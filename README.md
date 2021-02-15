@@ -23,7 +23,7 @@ CliFM is a completely command-line-based, shell-like file manager able to perfor
 
 * It is REALLY **CLI-based**. No GUI (like Thunar and the like) nor TUI or curses (like Ranger or nnn) at all, just a command line. Since it does not need any GUI, it can run on the Linux built-in console and even on a SSH or any other remote session.
 
-* With a memory footprint below 5 MiB and a disk usage of 0.25 MiB, it is incredibly **lightweight and fast**, and as such, able to run on really old hardware. It is probabily the most lightweight and fastest file manager out there.
+* With a memory footprint below 5 MiB and a disk usage of 0.4 MiB, it is incredibly **lightweight and fast**, and as such, able to run on really old hardware. It is probabily the most lightweight and fastest file manager out there.
 
 * The use of **short (and even one-character) commands**, and list numbers (**ELN's**) for filenames. For example, instead of typing: `cp file1 file2 file3 file4 dir/`, you can do this: `c 1-4 7`. Shorter and quicker. If the auto-cd and auto-open functions are enabled, which is the default, you can change to directories or open files by just entering the corresponding ELN. So, instead of `cd 12` or `o 12` you can just enter `12`; even shorter and quicker. As a plus, ELN's can also be used with external commands. Example: `diff 1 5` or `ls -l 12 14`. If numbers are a bit tricky to you, as they are to me, you can use the TAB key to expand the ELN to the corresponding filename. So, type `r 56`, then TAB, and it becomes `r filename`.
 
@@ -31,7 +31,7 @@ CliFM is a completely command-line-based, shell-like file manager able to perfor
 
 ![bookmarks](images/bookmarks.png)
 
-* **Files selection**: the ability to select (and deselect) files from here and there, even in different instances of the program, and then operate on them as you whish via the Selection Box or the `sel` keyword. Example: `s 1 4 56 33` will send the files corresponding to these ELN's to the Selection Box. Then, by typing `sb` you can check the contents of the Selection Box. Let's suppose you want to copy a couple of files from your home directory to some distant path, say `/media/data/misc`. Instead of copying all these files individually, you just select the files and then tell the `paste` command where to copy them:
+* **Files selection**: the ability to select (and deselect) files from here and there, even in different instances of the program (using filetype filters, glob and regular expressions), and then operate on them as you whish via the Selection Box or the `sel` keyword. Example: `s 1 4 56 33` will send the files corresponding to these ELN's to the Selection Box. Or, if you want to select all symbolic links ending with 'a' in `/etc`: `s .*d$ /etc -l`. Then, by typing `sb` you can check the contents of the Selection Box. Let's suppose you want to copy a couple of files from your home directory to some distant path, say `/media/data/misc`. Instead of copying all these files individually, you just select the files and then tell the `paste` command where to copy them:
  
 `s 1 2 3 6` (or `s 1-3 6`) and then `paste sel /media/data/misc`
 
@@ -43,7 +43,7 @@ Of course, you can deselect some or all selected files whenever you want with th
  
  * Open files without the need to specify any program. Via `mime` (the **built-in resource opener**), if no program was specified, CliFM will open the file with the default program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background. Of course, you can also set a custom resource opener.
 
-* **Quick search**: type `/REGEX` and CliFM will list all matches for the corresponding REGEX. Example: `/.*.png` will list all the PNG files in the current directory. If you want to search for files in another directory, just tell the search function where to search: `/.*.png /media/images`. And, if you want to further filter the search, you still can specify what kind of files you want. For example: `/[.-].*d$ -d /etc` will list all directories (-d) in `/etc` containing a dot or a slash and ending with 'd'.
+* **Quick search**: type `/REGEX` and CliFM will list all matches for the corresponding REGEX pattern. Example: `/.*.png` will list all the PNG files in the current directory. If you want to search for files in another directory, just tell the search function where to search: `/.*.png /media/images`. And, if you want to further filter the search, you still can specify what kind of files you want. For example: `/[.-].*d$ -d /etc` will list all directories (-d) in `/etc` containing a dot or a slash and ending with 'd'.
 
 ![quick search](images/quick_search.png)
 
