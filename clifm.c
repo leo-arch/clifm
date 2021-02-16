@@ -149,8 +149,11 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 /* #define CLEAR puts("\x1b[c") "\x1b[2J\x1b[1;1H"*/
 #define CLEAR write(STDOUT_FILENO, "\033c", 3);
+//#define CLEAR puts("\x1b[2J\x1b[1;1H");
 //#define CLEAR write(STDOUT_FILENO, "\x1b[2J\x1b[3J\x1b[H", 11);
-/* #define CLEAR write(STDOUT_FILENO, "\033[2J\033[H", 7); */
+//#define CLEAR puts("\x1b[1;1H\x1b[2J");
+//#define CLEAR puts("\x1b[H\x1b[J");
+//#define CLEAR write(STDOUT_FILENO, "\x1b[2J\x1b[H", 7);
 #define VERSION "0.29.2"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
@@ -576,6 +579,7 @@ int is_color_code(char *str);
 int get_link_ref(const char *link);
 int *get_hex_num(char *str);
 int check_regex(char *str);
+int check_dir(char **args);
 
 /* Colors */
 void set_default_options(void);
@@ -6527,6 +6531,10 @@ initialize_readline(void)
 {
 	/* #### INITIALIZE READLINE (what a hard beast to tackle!!) #### */
 
+	/* Set the name of the program using readline. Mostly used for
+	 * conditional constructs in $HOME/.inputrc */
+	rl_readline_name = argv_bk[0];
+
 	 /* Enable tab auto-completion for commands (in PATH) in case of
 	  * first entered string (if autocd and/or auto-open are enabled, check
 	  * for paths as well). The second and later entered strings will
@@ -8073,7 +8081,7 @@ open_function(char **cmd)
 	/* At this point we know the file to be openend is either a regular
 	 * file or a symlink to a regular file. So, just open the file */
 
-	if (!cmd[2] || strcmp(cmd[2], "&") == 0) {
+	if (!cmd[2] || (*cmd[2] == '&' && !cmd[2][1] )) {
 
 		if (!(flags & FILE_CMD_OK)) {
 			fprintf(stderr, _("%s: 'file' command not found. Specify an "
@@ -9802,10 +9810,10 @@ rl_parent_dir(int count, int key)
 		return EXIT_SUCCESS;
 
 	/* If already root dir, do nothing */
-	if (strcmp(path, "/") == 0)
+	if (*path == '/' && !path[1])
 		return EXIT_SUCCESS;
 
-	keybind_exec_cmd("cd ..");
+	keybind_exec_cmd("..");
 
 	rl_reset_line_state();
 
@@ -9819,10 +9827,10 @@ rl_root_dir(int count, int key)
 		return EXIT_SUCCESS;
 
 	/* If already root dir, do nothing */
-	if (strcmp(path, "/") == 0)
+	if (*path == '/' && !path[1])
 		return EXIT_SUCCESS;
 
-	keybind_exec_cmd("cd /");
+	keybind_exec_cmd("/");
 
 	rl_reset_line_state();
 
@@ -9836,7 +9844,7 @@ rl_home_dir(int count, int key)
 		return EXIT_SUCCESS;
 
 	/* If already in home, do nothing */
-	if (strcmp(path, user_home) == 0)
+	if (*path == *user_home && strcmp(path, user_home) == 0)
 		return EXIT_SUCCESS;
 
 	keybind_exec_cmd("cd");
@@ -9856,7 +9864,7 @@ rl_next_dir(int count, int key)
 	if (dirhist_cur_index + 1 == dirhist_total_index)
 		return EXIT_SUCCESS;
 
-	keybind_exec_cmd("forth");
+	keybind_exec_cmd("f");
 
 	rl_reset_line_state();
 
@@ -9873,7 +9881,7 @@ rl_previous_dir(int count, int key)
 	if (dirhist_cur_index == 0)
 		return EXIT_SUCCESS;
 
-	keybind_exec_cmd("back");
+	keybind_exec_cmd("b");
 
 	rl_reset_line_state();
 
@@ -10007,7 +10015,7 @@ rl_select_all(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	keybind_exec_cmd("sel .* *");
+	keybind_exec_cmd("s ^");
 
 	rl_reset_line_state();
 
@@ -10020,7 +10028,7 @@ rl_deselect_all(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	keybind_exec_cmd("desel *");
+	keybind_exec_cmd("ds *");
 
 	rl_reset_line_state();
 
@@ -10121,6 +10129,29 @@ rl_sort_previous(int count, int key)
 	return EXIT_SUCCESS;
 }
 
+int rl_lock(int count, int key)
+{
+	int ret = EXIT_SUCCESS;
+
+	rl_deprep_terminal();
+
+	#if __FreeBSD__
+	char *cmd[] = { "lock", NULL };
+	ret = launch_execve(cmd, FOREGROUND);
+	#elif __linux__
+	char *cmd[] = { "vlock", NULL };
+	ret = launch_execve(cmd, FOREGROUND);
+	#endif
+
+	rl_prep_terminal(0);
+	rl_reset_line_state();
+
+	if (ret != EXIT_SUCCESS)
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
+}
+
 /*
 int rl_test(int count, int key)
 {
@@ -10141,6 +10172,8 @@ readline_kbinds(void)
 	/* Navigation keys */
 	/* Define multiple keybinds for different terminals:
 	 * rxvt, xterm, linux console */
+
+//	rl_bind_keyseq("\\M-[D", rl_test); // Left arrow key
 	rl_bind_keyseq(find_key("parent-dir"), rl_parent_dir);
 	rl_bind_keyseq(find_key("parent-dir2"), rl_parent_dir);
 	rl_bind_keyseq(find_key("parent-dir3"), rl_parent_dir);
@@ -10161,6 +10194,7 @@ readline_kbinds(void)
 	rl_bind_keyseq(find_key("root-dir3"), rl_root_dir);
 
 	/* Shortcuts to functions */
+	rl_bind_keyseq(find_key("lock"), rl_lock);
 	rl_bind_keyseq(find_key("refresh-screen"), rl_refresh);
 	rl_bind_keyseq(find_key("clear-line"), rl_clear_line);
 	rl_bind_keyseq(find_key("toggle-hidden"), rl_hidden);
@@ -16293,6 +16327,25 @@ check_for_alias(char **comm)
 }
 
 int
+check_dir(char **args)
+{
+	if (!args)
+		return EXIT_FAILURE;
+
+	size_t i;
+	struct stat attrib;
+
+	for (i = 1; args[i]; i++) {
+
+		if (lstat(args[i], &attrib) != -1
+		&& (attrib.st_mode & S_IFMT) == S_IFDIR)
+			return EXIT_SUCCESS;
+	}
+
+	return EXIT_FAILURE;
+}
+
+int
 exec_cmd(char **comm)
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
@@ -16372,7 +16425,7 @@ exec_cmd(char **comm)
 	/* Only autocd or auto-open here if not absolute path and if there
 	 * is no second argument or if second argument is "&" */
 	if (*comm[0] != '/' && (autocd || auto_open)
-	&& (!comm[1] || (*comm[1] == '&' && comm[1][1] == '\0'))) {
+	&& (!comm[1] || (*comm[1] == '&' && !comm[1][1]))) {
 
 		char *tmp = comm[0];
 		size_t i, tmp_len = strlen(tmp);
@@ -16425,47 +16478,57 @@ exec_cmd(char **comm)
 
 
 	/*          ############### CD ##################     */
-	if (*comm[0] == 'c' && strcmp(comm[0], "cd") == 0) {
-		if (strcmp(comm[1], "--help") == 0)
+	if (*comm[0] == 'c' && comm[0][1] == 'd' && !comm[0][2]) {
+		if (!comm[1])
+			exit_code = cd_function(NULL);
+
+		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
 			puts(_("Usage: cd [ELN/DIR]"));
 
-		else if (strncmp(comm[1], "sftp://", 7) == 0)
+		/* Remotes */
+		else if (*comm[1] == 's' && strncmp(comm[1], "sftp://", 7) == 0)
 			exit_code = remote_ssh(comm[1] + 7, (comm[2]) ? comm[2]
 								   : NULL);
-		else if (strncmp(comm[1], "smb://", 6) == 0)
+		else if (*comm[1] == 's' && strncmp(comm[1], "smb://", 6) == 0)
 			exit_code = remote_smb(comm[1] + 6, (comm[2]) ? comm[2]
 								   : NULL);
-		else if (strncmp(comm[1], "ftp://", 6) == 0)
+		else if (*comm[1] == 'f' && strncmp(comm[1], "ftp://", 6) == 0)
 			exit_code = remote_ftp(comm[1] + 6, (comm[2]) ? comm[2]
 								   : NULL);
+
 		else
 			exit_code = cd_function(comm[1]);
 	}
 
 	/*         ############### OPEN ##################     */
-	else if (*comm[0] == 'o' && (strcmp(comm[0], "o") == 0
+	else if (*comm[0] == 'o' && (!comm[0][1]
 	|| strcmp(comm[0], "open") == 0)) {
+
 		if (!comm[1]) {
 			puts(_("Usage: o, open ELN/FILE [APPLICATION]"));
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
-		else if (strcmp(comm[1], "--help") == 0)
+
+		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
 			puts(_("Usage: o, open ELN/FILE [APPLICATION]"));
-		else if (strncmp(comm[1], "sftp://", 7) == 0)
+
+		/* Remotes */
+		else if (*comm[1] == 's' && strncmp(comm[1], "sftp://", 7) == 0)
 			exit_code = remote_ssh(comm[1] + 7, (comm[2]) ? comm[2]
 								   : NULL);
-		else if (strncmp(comm[1], "smb://", 6) == 0)
+		else if (*comm[1] == 's' && strncmp(comm[1], "smb://", 6) == 0)
 			exit_code = remote_smb(comm[1] + 6, (comm[2]) ? comm[2]
 								   : NULL);
-		else if (strncmp(comm[1], "ftp://", 6) == 0)
+		else if (*comm[1] == 'f' && strncmp(comm[1], "ftp://", 6) == 0)
 			exit_code = remote_ftp(comm[1] + 6, (comm[2]) ? comm[2]
 								   : NULL);
+
 		else
 			exit_code = open_function(comm);
 	}
 
-	else if (*comm[0] == 'r' && (strcmp(comm[0], "rf") == 0
+	else if (*comm[0] == 'r' && ((comm[0][1] == 'f' && !comm[0][2])
 	|| strcmp(comm[0], "refresh") == 0)) {
 		if (cd_lists_on_the_fly) {
 			free_dirlist();
@@ -16474,7 +16537,7 @@ exec_cmd(char **comm)
 	}
 
 	/*         ############### BOOKMARKS ##################     */
-	else if (*comm[0] == 'b' && (strcmp(comm[0], "bm") == 0
+	else if (*comm[0] == 'b' && ((comm[0][1] == 'm' && !comm[0][2])
 	|| strcmp(comm[0], "bookmarks") == 0)) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: bm, bookmarks [a, add FILE] [d, del] [edit]"));
@@ -16494,16 +16557,16 @@ exec_cmd(char **comm)
 	}
 
 	/*       ############### BACK AND FORTH ##################     */
-	else if (*comm[0] == 'b' && (strcmp(comm[0], "b") == 0
+	else if (*comm[0] == 'b' && (!comm[0][1]
 	|| strcmp(comm[0], "back") == 0))
 		exit_code = back_function (comm);
 
-	else if (*comm[0] == 'f' && (strcmp(comm[0], "f") == 0
+	else if (*comm[0] == 'f' && (!comm[0][1]
 	|| strcmp(comm[0], "forth") == 0))
 		exit_code = forth_function (comm);
 
-	else if (strcmp(comm[0], "bh") == 0
-	|| strcmp(comm[0], "fh") == 0) {
+	else if ((*comm[0] == 'b' && comm[0][1] == 'h' && !comm[0][2])
+	|| (*comm[0] == 'f' && comm[0][1] == 'h' && !comm[0][2])) {
 		int i;
 		for (i = 0; i < dirhist_total_index; i++) {
 			if (i == dirhist_cur_index)
@@ -16515,29 +16578,35 @@ exec_cmd(char **comm)
 	}
 
 	/*     ############### COPY AND MOVE ##################     */
-	else if (strcmp(comm[0], "cp") == 0 || strcmp(comm[0], "paste") == 0 
-	|| strcmp(comm[0], "mv") == 0 || strcmp(comm[0], "c") == 0 
-	|| strcmp(comm[0], "m") == 0 || strcmp(comm[0], "v") == 0) {
-		if (strcmp(comm[0], "c") == 0) {
-			comm[0] = (char *)xrealloc(comm[0], 3 * sizeof(char *));
-			strncpy(comm[0], "cp", 3);
+	else if ((*comm[0] == 'c' && (!comm[0][1]
+	|| (comm[0][1] == 'p' && !comm[0][2])))
+
+	|| (*comm[0] == 'm' && (!comm[0][1]
+	|| (comm[0][1] == 'v' && !comm[0][2])))
+
+	|| (*comm[0] == 'v' && !comm[0][1])
+
+	|| (*comm[0] == 'p' && strcmp(comm[0], "paste") == 0)) {
+
+		if (((*comm[0] == 'c' || *comm[0] == 'v') && !comm[0][1])
+		|| strcmp(comm[0], "paste") == 0) {
+			comm[0] = (char *)xrealloc(comm[0], 8 * sizeof(char *));
+			strcpy(comm[0], "cp -iRp");
 		}
-		else if (strcmp(comm[0], "m") == 0) {
-			comm[0] = (char *)xrealloc(comm[0], 3 * sizeof(char *));
-			strncpy(comm[0], "mv", 3);
-		}
-		else if (strcmp(comm[0], "v") == 0) {
+
+		else if (*comm[0] == 'm' && !comm[0][1]) {
 			comm[0] = (char *)xrealloc(comm[0], 6 * sizeof(char *));
-			strncpy(comm[0], "paste", 6);
+			strcpy(comm[0], "mv -i");
 		}
+
 		kbind_busy = 1;
 		exit_code = copy_function(comm);
 		kbind_busy = 0;
 	}
 
 	/*         ############### TRASH ##################     */	
-	else if (*comm[0] == 't' && (strcmp(comm[0], "tr") == 0
-	|| strcmp(comm[0], "t") == 0 || strcmp(comm[0], "trash") == 0)) {
+	else if (*comm[0] == 't' && (!comm[0][1]
+	|| strcmp(comm[0], "tr") == 0 || strcmp(comm[0], "trash") == 0)) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: t, tr, trash [ELN/FILE ... n] "
 				 "[ls, list] [clear] [del, rm]"));
@@ -16559,8 +16628,9 @@ exec_cmd(char **comm)
 		}
 	}
 
-	else if (*comm[0] == 'u' && (strcmp(comm[0], "undel") == 0
-	|| strcmp(comm[0], "u") == 0 || strcmp(comm[0], "untrash") == 0)) {
+	else if (*comm[0] == 'u' && (!comm[0][1]
+	|| strcmp(comm[0], "undel") == 0
+	|| strcmp(comm[0], "untrash") == 0)) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: u, undel, untrash [*, a, all]"));
 			return EXIT_SUCCESS;
@@ -16574,7 +16644,7 @@ exec_cmd(char **comm)
 	}
 
 	/*         ############### SELECTION ##################     */
-	else if (*comm[0] == 's' && (strcmp(comm[0], "s") == 0
+	else if (*comm[0] == 's' && (!comm[0][1]
 	|| strcmp(comm[0], "sel") == 0)) {
 		if (!comm[1]) {
 			puts(_("Usage: s, sel ELN ELN-ELN FILE ... n"));
@@ -16616,20 +16686,29 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "r") == 0 || strcmp(comm[0], "l") == 0
 	|| strcmp(comm[0], "md") == 0 || strcmp(comm[0], "le") == 0)) {
 
-		if (strcmp(comm[0], "l") == 0) {
-			comm[0] = (char *)xrealloc(comm[0], 3 * sizeof(char *));
-			strncpy(comm[0], "ln", 3);
-		}
-		else if (strcmp(comm[0], "r") == 0) {
-			comm[0] = (char *)xrealloc(comm[0], 3 * sizeof(char *));
-			strncpy(comm[0], "rm", 3);
-		}
-		else if (strcmp(comm[0], "md") == 0) {
-			comm[0] = (char *)xrealloc(comm[0], 6 * sizeof(char *));
-			strncpy(comm[0], "mkdir", 6);
+		if (*comm[0] == 'l' && !comm[0][1]) {
+			comm[0] = (char *)xrealloc(comm[0], 7 * sizeof(char *));
+			strcpy(comm[0], "ln -sn");
 		}
 
-		if (strcmp(comm[0], "le") == 0) {
+		else if (*comm[0] == 'r' && !comm[0][1]) {
+			/* If we have at least one directory */
+			if (check_dir(comm) == EXIT_SUCCESS) {
+				comm[0] = (char *)xrealloc(comm[0], 8 * sizeof(char *));
+				strcpy(comm[0], "rm -dIr");
+			}
+			else {
+				comm[0] = (char *)xrealloc(comm[0], 6 * sizeof(char *));
+				strcpy(comm[0], "rm -I");
+			}
+		}
+
+		else if (*comm[0] == 'm' && comm[0][1] == 'd' && !comm[0][2]) {
+			comm[0] = (char *)xrealloc(comm[0], 9 * sizeof(char *));
+			strcpy(comm[0], "mkdir -p");
+		}
+
+		if (*comm[0] == 'l' && comm[0][1] == 'e' && !comm[0][2]) {
 			if (!comm[1]) {
 				fputs(_("Usage: le SYMLINK\n"), stderr);
 				exit_code = EXIT_FAILURE;
@@ -16640,7 +16719,7 @@ exec_cmd(char **comm)
 			return exit_code;
 		}
 
-		else if (strcmp(comm[0], "ln") == 0) {
+		else if (*comm[0] == 'l' && comm[0][1] == 'n' && !comm[0][2]) {
 			if (comm[1] && (strcmp(comm[1], "edit") == 0
 			|| strcmp(comm[1], "e") == 0)) {
 				if (!comm[2]) {
@@ -16659,32 +16738,32 @@ exec_cmd(char **comm)
 	}
 
 	/*    ############### PROPERTIES ##################     */
-	else if (*comm[0] == 'p' && (strcmp(comm[0], "pr") == 0
-	|| strcmp(comm[0], "prop") == 0 || strcmp(comm[0], "p") == 0)) {
+	else if (*comm[0] == 'p' && (!comm[0][1]
+	|| strcmp(comm[0], "pr") == 0 || strcmp(comm[0], "prop") == 0)) {
 		if (!comm[1]) {
 			fputs(_("Usage: pr [ELN/FILE ... n]\n"),
 				  stderr);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
-		else if (strcmp(comm[1], "--help") == 0) {
+
+		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: pr [ELN/FILE ... n]"));
 			return EXIT_SUCCESS;
 		}
+
 		exit_code = properties_function(comm);
 	}
 
 	/*     ############### SEARCH ##################     */	
 	else if (*comm[0] == '/' && access(comm[0], F_OK) != 0) {
 								/* If not absolute path */ 
+		/* Try first globbing, and if no result, try regex */
 		if (search_glob(comm) == EXIT_FAILURE)
 			exit_code = search_regex(comm);
 		else
 			exit_code = EXIT_SUCCESS;
 	}
-
-/*	else if (*comm[0] == '%')
-		exit_code = search_glob(comm); */
 
 	/*      ############### HISTORY ##################     */
 	/* If '!number' or '!-number' or '!!' */
@@ -16693,22 +16772,25 @@ exec_cmd(char **comm)
 		exit_code = run_history_cmd(comm[0] + 1);
 
 	/*    ############### BULK RENAME ##################     */
-	else if (*comm[0] == 'b' && (strcmp(comm[0], "br") == 0
+	else if (*comm[0] == 'b' && ((comm[0][1] == 'r' && !comm[0][2])
 	|| strcmp(comm[0], "bulk") == 0)) {
+
 		if (!comm[1]) {
 			fputs(_("Usage: br, bulk ELN/FILE ...\n"), stderr);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
+
 		if (strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: br, bulk ELN/FILE ...\n"));
 			return EXIT_SUCCESS;
 		}
+
 		exit_code = bulk_rename(comm);
 	}
 
 	/*      ################ SORT ##################     */
-	else if (*comm[0] == 's' && (strcmp(comm[0], "st") == 0
+	else if (*comm[0] == 's' && ((comm[0][1] == 't' && !comm[0][2])
 	|| strcmp(comm[0], "sort") == 0)) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: st [METHOD] [rev]\nMETHOD: 0 = none, "
@@ -16717,13 +16799,16 @@ exec_cmd(char **comm)
 				   "8 = extension, 9 = inode"));
 		    return EXIT_SUCCESS;
 		}
+
 		exit_code = sort_function(comm);
 	}
 
 	/*   ################ ARCHIVER ##################     */
-	else if (*comm[0] == 'a' && (strcmp(comm[0], "ac") == 0
-	|| strcmp(comm[0], "ad") == 0)) {
-		if (!comm[1] || strcmp(comm[1], "--help") == 0) {
+	else if (*comm[0] == 'a' && ((comm[0][1] == 'c'
+	|| comm[0][1] == 'd') && !comm[0][2])) {
+
+		if (!comm[1] || (*comm[1] == '-'
+		&& strcmp(comm[1], "--help") == 0)) {
 			puts(_("Usage: ac, ad ELN/FILE ..."));
 			return EXIT_SUCCESS;
 		}
@@ -16759,22 +16844,27 @@ exec_cmd(char **comm)
 	}
 
 	else if (*comm[0] == 'o' && strcmp(comm[0], "opener") == 0) {
+
 		if (!comm[1]) {
 			printf("opener: %s\n", (opener) ? opener : "mime (built-in)");
 			return EXIT_SUCCESS;
 		}
+
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: opener APPLICATION"));
 			return EXIT_SUCCESS;
 		}
+
 		if (opener) {
 			free(opener);
 			opener = (char *)NULL;
 		}
+
 		if (strcmp(comm[1], "default") != 0) {
 			opener = (char *)xcalloc(strlen(comm[1]) + 1, sizeof(char));
 			strcpy(opener, comm[1]);
 		}
+
 		printf(_("opener: Opener set to '%s'\n"), (opener) ? opener
 			   : "mime (built-in)");
 	}
@@ -16814,28 +16904,31 @@ exec_cmd(char **comm)
 	}
 
 					/* #### LIGHT MODE #### */
-	else if (*comm[0] == 'l' && strcmp(comm[0], "lm") == 0) {
+	else if (*comm[0] == 'l' && comm[0][1] == 'm' && !comm[0][2]) {
 		if (comm[1]) {
 			if (strcmp(comm[1], "on") == 0) {
 				light_mode = 1;
 				puts(_("Light mode is on"));
 			}
+
 			else if (strcmp(comm[1], "off") == 0) {
 				light_mode = 0;
 				puts(_("Light mode is off"));
 			}
+
 			else {
 				puts(_("Usage: lm [on, off]"));
 				exit_code = EXIT_FAILURE;
 			}
 		}
+
 		else {
 			fputs(_("Usage: lm [on, off]\n"), stderr);
 			exit_code = EXIT_FAILURE;
 		}
 	}
 
-	else if (*comm[0] == 'r' && (strcmp(comm[0], "rl") == 0
+	else if (*comm[0] == 'r' && ((comm[0][1] == 'l' && !comm[0][2])
 	|| strcmp(comm[0], "reload") == 0)) {
 		exit_code = reload_config();
 		welcome_message = 0;
@@ -16850,9 +16943,9 @@ exec_cmd(char **comm)
 	}
 
 					/* #### NEW INSTANCE #### */
-	else if (strcmp(comm[0], "x") == 0 || strcmp(comm[0], "X") == 0) {
+	else if ((*comm[0] == 'x' || *comm[0] == 'X') && !comm[0][1]) {
 		if (comm[1]) {
-			if (strcmp(comm[1], "--help") == 0) {
+			if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
 				puts(_("Usage: x, X [DIR]"));
 				return EXIT_SUCCESS;
 			}
@@ -16875,21 +16968,26 @@ exec_cmd(char **comm)
 	}
 
 						/* #### NET #### */
-	else if (*comm[0] == 'n' && (strcmp(comm[0], "n") == 0
+	else if (*comm[0] == 'n' && (!comm[0][1]
 	|| strcmp(comm[0], "net") == 0)) {
+
 		if (!comm[1]) {
 			puts(_("Usage: n, net [sftp, smb, ftp]://ADDRESS [OPTIONS]"));
 			return EXIT_SUCCESS;
 		}
+
 		if (strncmp(comm[1], "sftp://", 7) == 0)
 			exit_code = remote_ssh(comm[1] + 7, (comm[2]) ? comm[2]
 								   : NULL);
+
 		else if (strncmp(comm[1], "smb://", 6) == 0)
 			exit_code = remote_smb(comm[1] + 6, (comm[2]) ? comm[2]
 								   : NULL);
+
 		else if (strncmp(comm[1], "ftp://", 6) == 0)
 			exit_code = remote_ftp(comm[1] + 6, (comm[2]) ? comm[2]
 								   : NULL);
+
 		else {
 			fputs(_("Usage: n, net [sftp, smb, ftp]://ADDRESS [OPTIONS]\n"),
 				  stderr);
@@ -16899,12 +16997,12 @@ exec_cmd(char **comm)
 	}
 
 						/* #### MIME #### */
-	else if (*comm[0] == 'm' && (strcmp(comm[0], "mm") == 0
+	else if (*comm[0] == 'm' && ((comm[0][1] == 'm' && !comm[0][2])
 	|| strcmp(comm[0], "mime") == 0)) {
 		exit_code = mime_open(comm);
 	}
 
-	else if (*comm[0] == 'l' && strcmp(comm[0], "ls") == 0
+	else if (*comm[0] == 'l' && comm[0][1] == 's' && !comm[0][2]
 	&& !cd_lists_on_the_fly) {
 		free_dirlist();
 		exit_code = list_dir();
@@ -16914,12 +17012,12 @@ exec_cmd(char **comm)
 	}
 
 					/* #### PROFILE #### */
-	else if (*comm[0] == 'p' && (strcmp(comm[0], "pf") == 0
+	else if (*comm[0] == 'p' && ((comm[0][1] == 'f' && !comm[0][2])
 	|| strcmp(comm[0], "prof") == 0 || strcmp(comm[0], "profile") == 0))
 		exit_code = profile_function(comm);
 
 					/* #### MOUNTPOINTS #### */
-	else if (*comm[0] == 'm' && (strcmp(comm[0], "mp") == 0 
+	else if (*comm[0] == 'm' && ((comm[0][1] == 'p' && !comm[0][2]) 
 	|| strcmp(comm[0], "mountpoints") == 0)) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0)
 			puts(_("Usage: mountpoints, mp"));
@@ -16933,29 +17031,35 @@ exec_cmd(char **comm)
 	}
 
 					/* #### EXT #### */
-	else if (*comm[0] == 'e' && strcmp(comm[0], "ext") == 0) {
+	else if (*comm[0] == 'e' && comm[0][1] == 'x' && comm[0][2] == 't'
+	&& !comm[0][3]) {
+
 		if (!comm[1]) {
 			puts(_("Usage: ext [on, off, status]"));
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
-		else if (strcmp(comm[1], "--help") == 0) 
+
+		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) 
 			puts(_("Usage: ext [on, off, status]"));
 
 		else {
-			if (strcmp(comm[1], "status") == 0)
+			if (*comm[1] == 's' && strcmp(comm[1], "status") == 0)
 				printf(_("%s: External commands %s\n"), PROGRAM_NAME, 
 					    (ext_cmd_ok) ? _("enabled") : _("disabled"));
-			else if (strcmp(comm[1], "on") == 0) {
+
+			else if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
 				ext_cmd_ok = 1;
 				printf(_("%s: External commands enabled\n"),
 					   PROGRAM_NAME);
 			}
-			else if (strcmp(comm[1], "off") == 0) {
+
+			else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
 				ext_cmd_ok = 0;
 				printf(_("%s: External commands disabled\n"),
 					   PROGRAM_NAME);
 			}
+
 			else {
 				fputs(_("Usage: ext [on, off, status]\n"), stderr);
 				exit_code = EXIT_FAILURE;
@@ -16964,25 +17068,27 @@ exec_cmd(char **comm)
 	}
 
 					/* #### PAGER #### */
-	else if (*comm[0] == 'p' && (strcmp(comm[0], "pg") == 0
+	else if (*comm[0] == 'p' && ((comm[0][1] == 'g' && !comm[0][2])
 	|| strcmp(comm[0], "pager") == 0)) {
+
 		if (!comm[1]) {
 			puts(_("Usage: pager, pg [on, off, status]"));
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
-		else if (strcmp(comm[1], "--help") == 0) 
+
+		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) 
 			puts(_("Usage: pager, pg [on, off, status]"));
 
 		else {
-			if (strcmp(comm[1], "status") == 0)
+			if (*comm[1] == 's' && strcmp(comm[1], "status") == 0)
 				printf(_("%s: Pager %s\n"), PROGRAM_NAME, 
 					   (pager) ? _("enabled") : _("disabled"));
-			else if (strcmp(comm[1], "on") == 0) {
+			else if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
 				pager = 1;
 				printf(_("%s: Pager enabled\n"), PROGRAM_NAME);
 			}
-			else if (strcmp(comm[1], "off") == 0) {
+			else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
 				pager = 0;
 				printf(_("%s: Pager disabled\n"), PROGRAM_NAME);
 			}
@@ -16995,7 +17101,7 @@ exec_cmd(char **comm)
 	}
 
 					/* #### DIR COUNTER #### */
-	else if (*comm[0] == 'f' && (strcmp(comm[0], "fc") == 0
+	else if (*comm[0] == 'f' && ((comm[0][1] == 'c' && !comm[0][2])
 	|| strcmp(comm[0], "filescounter") == 0)) {
 		if (!comm[1]) {
 			fputs(_("Usage: fc, filescounter [on, off, status]"), stderr);
@@ -17022,6 +17128,7 @@ exec_cmd(char **comm)
 				puts(_("Filescounter is disabled"));
 			return EXIT_SUCCESS;
 		}
+
 		else {
 			fputs(_("Usage: fc, filescounter [on, off, status]\n"), stderr);
 			exit_code = EXIT_FAILURE;
@@ -17030,14 +17137,14 @@ exec_cmd(char **comm)
 	}
 
 				    /* #### UNICODE #### */
-	else if (*comm[0] == 'u' && (strcmp(comm[0], "uc") == 0
+	else if (*comm[0] == 'u' && ((comm[0][1] == 'c' && !comm[0][2])
 	|| strcmp(comm[0], "unicode") == 0)) {
 		if (!comm[1]) {
 			fputs(_("Usage: unicode, uc [on, off, status]"), stderr);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
-		else if (strcmp(comm[1], "--help") == 0)
+		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
 			puts(_("Usage: unicode, uc [on, off, status]"));
 
 		else {
@@ -17202,14 +17309,15 @@ exec_cmd(char **comm)
 		exit_code = history_function(comm);
 
 			  /* #### HIDDEN FILES #### */
-	else if (*comm[0] == 'h' && (strcmp(comm[0], "hf") == 0 
+	else if (*comm[0] == 'h' && ((comm[0][1] == 'f' && !comm[0][2]) 
 	|| strcmp(comm[0], "hidden") == 0)) {
 		if (!comm[1]) {
 			fputs(_("Usage: hidden, hf [on, off, status]\n"), stderr); 
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
-		else if (strcmp(comm[1], "--help") == 0) {
+
+		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
 			/* The same message is in hidden_function(), and printed
 			 * whenever an invalid argument is entered */
 			puts(_("Usage: hidden, hf [on, off, status]")); 
@@ -17233,18 +17341,22 @@ exec_cmd(char **comm)
 			autocd = 1;
 			printf(_("%s: autocd is enabled\n"), PROGRAM_NAME);
 		}
+
 		else if (strcmp(comm[1], "off") == 0) {
 			autocd = 0;
 			printf(_("%s: autocd is disabled\n"), PROGRAM_NAME);
 		}
+
 		else if (strcmp(comm[1], "status") == 0) {
 			if (autocd)
 				printf(_("%s: autocd is enabled\n"), PROGRAM_NAME);
 			else
 				printf(_("%s: autocd is disabled\n"), PROGRAM_NAME);
 		}
-		else if (strcmp(comm[1], "--help") == 0)
+
+		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
 			puts(_("Usage: acd, autocd [on, off, status]"));
+
 		else {
 			fputs(_("Usage: acd, autocd [on, off, status]\n"), stderr);
 			exit_code = EXIT_FAILURE;
@@ -17252,8 +17364,8 @@ exec_cmd(char **comm)
 		}
 	}
 
-					/* #### AUTOOPEN #### */
-	else if (*comm[0] == 'a' && (strcmp(comm[0], "ao") == 0
+					/* #### AUTO-OPEN #### */
+	else if (*comm[0] == 'a' && ((comm[0][1] == 'o' && !comm[0][2])
 	|| strcmp(comm[0], "auto-open") == 0)) {
 
 		if (!comm[1]) {
@@ -17266,18 +17378,22 @@ exec_cmd(char **comm)
 			auto_open = 1;
 			printf(_("%s: auto-open is enabled\n"), PROGRAM_NAME);
 		}
+
 		else if (strcmp(comm[1], "off") == 0) {
 			auto_open = 0;
 			printf(_("%s: auto-open is disabled\n"), PROGRAM_NAME);
 		}
+
 		else if (strcmp(comm[1], "status") == 0) {
 			if (auto_open)
 				printf(_("%s: auto-open is enabled\n"), PROGRAM_NAME);
 			else
 				printf(_("%s: auto-open is disabled\n"), PROGRAM_NAME);
 		}
+
 		else if (strcmp(comm[1], "--help") == 0)
 			puts(_("Usage: ao, auto-open [on, off, status]"));
+
 		else {
 			fputs(_("Usage: ao, auto-open [on, off, status]\n"), stderr);
 			exit_code = EXIT_FAILURE;
@@ -17296,18 +17412,19 @@ exec_cmd(char **comm)
 	else if (strcmp(comm[0], "path") == 0 || strcmp(comm[0], "cwd") == 0) 
 		printf("%s\n", path);
 
-	else if (strcmp(comm[0], "help") == 0 || strcmp(comm[0], "?") == 0)
+	else if ((*comm[0] == '?' && !comm[0][1])
+	|| strcmp(comm[0], "help") == 0)
 		help_function();
 
-	else if (*comm[0] == 'c' && (strcmp(comm[0], "colors") == 0
-	|| strcmp(comm[0], "cc") == 0))
+	else if (*comm[0] == 'c' && ((comm[0][1] == 'c' && !comm[0][2])
+	|| strcmp(comm[0], "colors") == 0))
 		color_codes();
 
 	else if (*comm[0] == 'v' && (strcmp(comm[0], "ver") == 0
 	|| strcmp(comm[0], "version") == 0))
 		version_function();
 
-	else if (*comm[0] == 'f' && strcmp(comm[0], "fs") == 0)
+	else if (*comm[0] == 'f' && comm[0][1] == 's' && !comm[0][2])
 		free_software();
 
 	else if (*comm[0] == 'b' && strcmp(comm[0], "bonus") == 0)
@@ -17317,9 +17434,10 @@ exec_cmd(char **comm)
 		splash();
 
 					/* #### QUIT #### */
-	else if (strcmp(comm[0], "q") == 0 || strcmp(comm[0], "quit") == 0 
-	|| strcmp(comm[0], "exit") == 0 || strcmp(comm[0], "zz") == 0 
-	|| strcmp(comm[0], "salir") == 0 || strcmp(comm[0], "chau") == 0) {
+	else if ((*comm[0] == 'q' && !comm[0][1])
+	|| strcmp(comm[0], "quit") == 0 || strcmp(comm[0], "exit") == 0
+	|| strcmp(comm[0], "zz") == 0  || strcmp(comm[0], "salir") == 0
+	|| strcmp(comm[0], "chau") == 0) {
 
 		/* Free everything and exit */
 		size_t i;
@@ -17418,14 +17536,14 @@ exec_cmd(char **comm)
 		 * which is not what the user wants. To prevent this, simply run
 		 * the command as follows: ";chmod 644 filename" */
 
-		if (comm[0][0] == ':' || comm[0][0] == ';') {
+		if (*comm[0] == ':' || *comm[0] == ';') {
 			/* Remove the colon from the beginning of the first argument,
 			 * that is, move the pointer to the next (second) position */
 			char *comm_tmp = comm[0] + 1;
 			/* If string == ":" or ";" */
-			if (!comm_tmp || comm_tmp[0] == 0x00) {
+			if (!comm_tmp || !*comm_tmp) {
 				fprintf(stderr, _("%s: '%c': Syntax error\n"),
-						PROGRAM_NAME, comm[0][0]);
+						PROGRAM_NAME, *comm[0]);
 				exit_code = EXIT_FAILURE;
 				return EXIT_FAILURE;
 			}
@@ -19186,12 +19304,9 @@ search_regex(char **comm)
 int
 copy_function(char **comm)
 {
-	if (strcmp(comm[0], "paste") == 0)
-		strncpy(comm[0], "cp\0", 3);
-
 	log_function(comm);
 
-	/* #####If SEL###### */
+	/* ##### If SEL ###### */
 	if (is_sel) {
 		char *tmp_cmd = (char *)NULL;
 		size_t total_len = 0, i = 0;
@@ -21624,8 +21739,9 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
  M-j, S-Left: Change to the previous directory in the directory history "
 "list\n"
 " M-k, S-Right: Change to the next directory in the directory history "
-"list"
-" M-y: Toggle light mode on/off\n\
+"list\n"
+" M-o: Lock terminal\n\
+ M-y: Toggle light mode on/off\n\
  M-z: Switch to previous sorting method\n\
  M-x: Switch to next sorting method\n\
  F10: Open the configuration file\n\n"
