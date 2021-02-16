@@ -417,7 +417,7 @@ show this list of commands.
 toggle hidden files on/off.
 .TP
 
-.B ff, folders first \fR[on, off, status]
+.B ff, folders-first \fR[on, off, status]
 toggle list folders first on/off.
 .TP
 
@@ -476,6 +476,20 @@ safely quit CliFM.
 \fBM\-j, S-Left:\fR Change to the previous directory in the directory history list
 .TP
 \fBM\-k, S-Right:\fR Change to the next directory in the directory history list
+.TP
+\fBC\-M\-o:\fR Switch to previous profile
+.TP
+\fBC\-M\-p:\fR Switch to next profile
+.TP
+\fBC\-M\-e:\fR Export selected files
+.TP
+\fBC\-M\-r:\fR Rename selected files
+.TP
+\fBC\-M\-d:\fR Remove selected files 
+.TP
+\fBC\-M\-n:\fR Move selected files into the current directory
+.TP
+\fBC\-M\-v:\fR Copy selected files into the current directory
 .TP
 \fBM\-y:\fR Toggle light mode on/off
 .TP
