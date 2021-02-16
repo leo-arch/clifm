@@ -1463,6 +1463,7 @@ root-dir2:\\e/\n\
 #root-dir3:\n\
 \n\
 quit:\\M-q\n\
+new-instance:\\C-x\n\
 previous-profile:\\C-M-o\n\
 next-profile:\\C-M-p\n\
 archive-sel:\\C-M-a\n\
@@ -10387,6 +10388,18 @@ rl_archive_sel(int count, int key)
 }
 
 int
+rl_new_instance(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	keybind_exec_cmd("x .");
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+int
 rl_open_sel(int count, int key)
 {
 	if (kbind_busy)
@@ -10424,13 +10437,15 @@ readline_kbinds(void)
  * C-v, C-right arrow gives "[[1;5C", which here should be written like
  * this:
  * "\\x1b[1;5C" */
-
-	/* Navigation keys */
-	/* Define multiple keybinds for different terminals:
-	 * rxvt, xterm, linux console */
 //	rl_bind_keyseq("\\M-[D", rl_test); // Left arrow key
 
+			/* ##############################
+			 * #		KEYBINDINGS			#
+			 * ##############################*/
+
 	/* Navigation */
+	/* Define multiple keybinds for different terminals:
+	 * rxvt, xterm, linux console */
 	rl_bind_keyseq(find_key("parent-dir"), rl_parent_dir);
 	rl_bind_keyseq(find_key("parent-dir2"), rl_parent_dir);
 	rl_bind_keyseq(find_key("parent-dir3"), rl_parent_dir);
@@ -10479,6 +10494,7 @@ readline_kbinds(void)
 	rl_bind_keyseq(find_key("sort-previous"), rl_sort_previous);
 	rl_bind_keyseq(find_key("sort-next"), rl_sort_next);
 
+	rl_bind_keyseq(find_key("new-instance"), rl_new_instance);
 	rl_bind_keyseq(find_key("show-dirhist"), rl_dirhist);
 	rl_bind_keyseq(find_key("bookmarks"), rl_bookmarks);
 	rl_bind_keyseq(find_key("mountpoints"), rl_mountpoints);
@@ -22076,6 +22092,7 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
  M-y: Toggle light mode on/off\n\
  M-z: Switch to previous sorting method\n\
  M-x: Switch to next sorting method\n\
+ C-x: Launch a new instance\n\
  M-q: Quit\n\
  F9: Open the keybindings file\n\
  F10: Open the configuration file\n\n"

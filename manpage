@@ -503,6 +503,8 @@ safely quit CliFM.
 .TP
 \fBM\-x:\fR Switch to next sorting method
 .TP
+\fBC\-x:\fR Launch new instance of the program
+.TP
 \fBF9:\fR Open the keybindings file
 .TP
 \fBF10:\fR Open the configuration file
