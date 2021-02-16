@@ -461,6 +461,8 @@ safely quit CliFM.
 .TP
 \fBM\-i:\fR Toggle hidden files on/off
 .TP
+\fBM\-h:\fR Show directory history
+.TP
 \fBM\-s:\fR Open the Selection Box
 .TP
 \fBM\-a:\fR Select all files in the current working directory
@@ -486,6 +488,8 @@ safely quit CliFM.
 \fBC\-M\-r:\fR Rename selected files
 .TP
 \fBC\-M\-d:\fR Remove selected files 
+.TP
+\fBC\-M\-g:\fR Open/change-to last selected file/directory 
 .TP
 \fBC\-M\-n:\fR Move selected files into the current directory
 .TP
