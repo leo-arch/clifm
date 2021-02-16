@@ -16703,20 +16703,17 @@ exec_cmd(char **comm)
 		}
 
 		else if (*comm[0] == 'r' && !comm[0][1]) {
+
 			/* If we have at least one directory */
 			if (check_dir(comm) == EXIT_SUCCESS) {
 				comm[0] = (char *)xrealloc(comm[0], 8 * sizeof(char *));
 				strcpy(comm[0], "rm -dIr");
 			}
+
 			else {
 				comm[0] = (char *)xrealloc(comm[0], 6 * sizeof(char *));
 				strcpy(comm[0], "rm -I");
 			}
-
-			size_t u;
-			for (u = 0; comm[u]; u++)
-				printf("%s\n", comm[u]);
-			return EXIT_SUCCESS;
 		}
 
 		else if (*comm[0] == 'm' && comm[0][1] == 'd' && !comm[0][2]) {
