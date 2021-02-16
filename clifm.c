@@ -407,6 +407,7 @@ int rl_selbox(int count, int key);
 int rl_clear_line(int count, int key);
 int rl_sort_next(int count, int key);
 int rl_sort_previous(int count, int key);
+int rl_paste_sel(int count, int key);
 
 /* Scandir filters */
 int skip_implied_dot(const struct dirent *entry);
@@ -701,7 +702,7 @@ short splash_screen = UNSET, welcome_message = UNSET, ext_cmd_ok = UNSET,
 	no_log = 0, internal_cmd = 0, shell_terminal = 0, print_msg = 0,
 	recur_perm_error_flag = 0, is_sel = 0, sel_is_last = 0,
 	kbind_busy = 0, unicode = UNSET, dequoted = 0, mime_match = 0, 
-	sort_reverse = 0, sort_switch = 0,
+	sort_reverse = 0, sort_switch = 0, kb_shortcut = 0,
 
 	home_ok = 1, config_ok = 1, trash_ok = 1, selfile_ok = 1;
 
@@ -765,7 +766,7 @@ size_t *ext_colors_len = (size_t *)NULL;
 const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
 		"move", "paste", "sel", "selbox", "desel", "refresh",
 		"edit", "history", "hidden", "path", "help", "commands",
-		"colors", "version", "splash", "folders first", "opener",
+		"colors", "version", "splash", "folders-first", "opener",
 		"exit", "quit", "pager", "trash", "undel", "messages",
 		"mountpoints", "bookmarks", "log", "untrash", "unicode",
 		"profile", "shell", "mime", "sort", "tips", "autocd",
@@ -1461,6 +1462,14 @@ root-dir:\\M-r\n\
 root-dir2:\\e/\n\
 #root-dir3:\n\
 \n\
+quit:\\M-q\n\
+previous-profile:\\C-M-o\n\
+next-profile:\\C-M-p\n\
+rename-sel:\\C-M-r\n\
+remove-sel:\\C-M-d\n\
+paste-sel:\\C-M-v\n\
+move-sel:\\C-M-n\n\
+export-sel:\\C-M-e\n\
 refresh-screen:\\C-r\n\
 clear-line:\\M-c\n\
 toggle-hidden:\\M-i\n\
@@ -5857,6 +5866,7 @@ profile_set(char *prof)
 					 "history file\n"),	PROGRAM_NAME);
 			}
 		}
+
 		get_history(); /* This is only for us */
 	}
 
@@ -6640,8 +6650,8 @@ is_internal_c(const char *cmd)
 					"desel", "rm", "mkdir", "ln", "unlink", "touch",
 					"r", "md", "l", "p", "pr", "prop", "pf", "prof",
 					"profile", "mp", "mountpoints", "ext", "pg",
-					"pager", "uc", "unicode", "folders", "ff", "log",
-					"msg", "messages", "alias", "shell", "edit",
+					"pager", "uc", "unicode", "folders-first", "ff",
+					"log", "msg", "messages", "alias", "shell", "edit",
 					"history", "hf", "hidden", "path", "cwd", "splash",
 					"ver", "version", "?", "help", "cmd", "commands",
 					"colors", "cc", "fs", "mm", "mime", "x", "n",
@@ -10152,6 +10162,187 @@ int rl_lock(int count, int key)
 	return EXIT_SUCCESS;
 }
 
+int
+rl_remove_sel(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	rl_deprep_terminal();
+
+	kb_shortcut = 1;
+	keybind_exec_cmd("r sel");
+	kb_shortcut = 0;
+
+	rl_prep_terminal(0);
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
+int
+rl_export_sel(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	kb_shortcut = 1;
+	keybind_exec_cmd("exp sel");
+	kb_shortcut = 0;
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
+int
+rl_move_sel(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	kb_shortcut = 1;
+	keybind_exec_cmd("m sel");
+	kb_shortcut = 0;
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
+int
+rl_rename_sel(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	kb_shortcut = 1;
+	keybind_exec_cmd("br sel");
+	kb_shortcut = 0;
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
+int
+rl_paste_sel(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	kb_shortcut = 1;
+	keybind_exec_cmd("c sel");
+	kb_shortcut = 0;
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
+int
+rl_quit(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	keybind_exec_cmd("q");
+
+	return EXIT_SUCCESS;
+}
+
+int
+rl_previous_profile(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	int prev_prof;
+
+	size_t i, cur_prof = -1, total_profs = 0;
+	for (i = 0; profile_names[i]; i++) {
+		total_profs++;
+
+		if (!alt_profile) {
+			if (strcmp(profile_names[i], "default") == 0) {
+				cur_prof = i;
+			}
+		}
+
+		else {
+			if (strcmp(alt_profile, profile_names[i]) == 0) {
+				cur_prof = i;
+			}
+		}
+	}
+
+	if (cur_prof == -1 || !profile_names[cur_prof])
+		return EXIT_FAILURE;
+
+	prev_prof = cur_prof - 1;
+	total_profs--;
+
+	if (prev_prof < 0 || !profile_names[prev_prof])
+		prev_prof = total_profs;
+
+	CLEAR;
+
+	if (profile_set(profile_names[prev_prof]) == EXIT_SUCCESS) {
+		printf("%s->%s Switched to profile '%s'\n", green, NC,
+			   profile_names[prev_prof]);
+		char *input = prompt();
+		free(input);
+	}
+
+	return EXIT_SUCCESS;
+}
+
+int
+rl_next_profile(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	int next_prof;
+
+	size_t i, cur_prof = -1, total_profs = 0;
+	for (i = 0; profile_names[i]; i++) {
+		total_profs++;
+
+		if (!alt_profile) {
+			if (strcmp(profile_names[i], "default") == 0) {
+				cur_prof = i;
+			}
+		}
+
+		else {
+			if (strcmp(alt_profile, profile_names[i]) == 0) {
+				cur_prof = i;
+			}
+		}
+	}
+
+	if (cur_prof == -1 || !profile_names[cur_prof])
+		return EXIT_FAILURE;
+
+	next_prof = cur_prof + 1;
+	total_profs--;
+
+	if (next_prof > total_profs || !profile_names[next_prof])
+		next_prof = 0;
+
+	CLEAR;
+
+	if (profile_set(profile_names[next_prof]) == EXIT_SUCCESS) {
+		printf("%s->%s Switched to profile '%s'\n", green, NC,
+			   profile_names[next_prof]);
+		char *input = prompt();
+		free(input);
+	}
+
+	return EXIT_SUCCESS;
+}
+
 /*
 int rl_test(int count, int key)
 {
@@ -10194,6 +10385,14 @@ readline_kbinds(void)
 	rl_bind_keyseq(find_key("root-dir3"), rl_root_dir);
 
 	/* Shortcuts to functions */
+	rl_bind_keyseq(find_key("next-profile"), rl_next_profile);
+	rl_bind_keyseq(find_key("previous-profile"), rl_previous_profile);
+	rl_bind_keyseq(find_key("quit"), rl_quit);
+	rl_bind_keyseq(find_key("export-sel"), rl_export_sel);
+	rl_bind_keyseq(find_key("move-sel"), rl_move_sel);
+	rl_bind_keyseq(find_key("rename-sel"), rl_rename_sel);
+	rl_bind_keyseq(find_key("remove-sel"), rl_remove_sel);
+	rl_bind_keyseq(find_key("paste-sel"), rl_paste_sel);
 	rl_bind_keyseq(find_key("lock"), rl_lock);
 	rl_bind_keyseq(find_key("refresh-screen"), rl_refresh);
 	rl_bind_keyseq(find_key("clear-line"), rl_clear_line);
@@ -11521,8 +11720,10 @@ get_profile_names(void)
 											+ 1, sizeof(char));
 			strcpy(profile_names[pf_n++], profs[i]->d_name);
 		}
+
 		free(profs[i]);
 	}
+
 	free(profs);
 	profs = (struct dirent **)NULL;
 
@@ -13799,14 +14000,18 @@ parse_input_str(char *str)
 			substr[i] = (char *)NULL;
 			args_n = j - 1;
 		}
+
 		else {
 			/* 'sel' is an argument, but there are no selected files. */ 
-			fprintf(stderr, _("%s: There are no selected files\n"), 
-					PROGRAM_NAME);
+			fprintf(stderr, _("%c%s: There are no selected files%c"), 
+					kb_shortcut ? '\n' : '\0', PROGRAM_NAME,
+					kb_shortcut ? '\0' : '\n');
+
 			register size_t j = 0;
 
 			for (j = 0; j <= args_n; j++)
 				free(substr[j]);
+
 			free(substr);
 
 			return (char **)NULL;
@@ -16398,6 +16603,7 @@ exec_cmd(char **comm)
 				exit_code = EXIT_FAILURE;
 			return exit_code;
 		}
+
 		/* If double semi colon or colon (or ";:" or ":;") */
 		else if (comm[0][1] == ';' || comm[0][1] == ':') {
 			fprintf(stderr, _("%s: '%s': Syntax error\n"),
@@ -16551,12 +16757,13 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'b' && ((comm[0][1] == 'm' && !comm[0][2])
 	|| strcmp(comm[0], "bookmarks") == 0)) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
-			puts(_("Usage: bm, bookmarks [a, add FILE] [d, del] [edit]"));
+			puts(_("Usage: bm, bookmarks [a, add FILE] [d, del] "
+				 "[edit]"));
 			return EXIT_SUCCESS;
 		}
-		/* Disable keyboard shortcuts. Otherwise, the function will still
-		 * be waiting for input while the screen have been taken by 
-		 * another function */
+		/* Disable keyboard shortcuts. Otherwise, the function will
+		 * still be waiting for input while the screen have been taken
+		 * by another function */
 		kbind_busy = 1;
 		/* Disable TAB completion while in Bookmarks */
 		rl_attempted_completion_function = NULL;
@@ -16662,7 +16869,8 @@ exec_cmd(char **comm)
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
-		else if (strcmp(comm[1], "--help") == 0) {
+
+		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: s, sel ELN ELN-ELN FILE ... n"));
 			return EXIT_SUCCESS;
 		}
@@ -16838,7 +17046,7 @@ exec_cmd(char **comm)
 	 * #			     MINOR FUNCTIONS 				#
 	 * ##################################################*/
 
-	else if (*comm[0] == 'k' && (strcmp(comm[0], "kb") == 0
+	else if (*comm[0] == 'k' && ((comm[0][1] == 'b' && !comm[0][2])
 	|| strcmp(comm[0], "keybinds") == 0)) {
 		exit_code = kbinds_function(comm);
 		return exit_code;
@@ -16863,7 +17071,7 @@ exec_cmd(char **comm)
 			return EXIT_SUCCESS;
 		}
 
-		if (comm[1] && strcmp(comm[1], "--help") == 0) {
+		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: opener APPLICATION"));
 			return EXIT_SUCCESS;
 		}
@@ -16919,12 +17127,12 @@ exec_cmd(char **comm)
 					/* #### LIGHT MODE #### */
 	else if (*comm[0] == 'l' && comm[0][1] == 'm' && !comm[0][2]) {
 		if (comm[1]) {
-			if (strcmp(comm[1], "on") == 0) {
+			if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
 				light_mode = 1;
 				puts(_("Light mode is on"));
 			}
 
-			else if (strcmp(comm[1], "off") == 0) {
+			else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
 				light_mode = 0;
 				puts(_("Light mode is off"));
 			}
@@ -16989,15 +17197,15 @@ exec_cmd(char **comm)
 			return EXIT_SUCCESS;
 		}
 
-		if (strncmp(comm[1], "sftp://", 7) == 0)
+		if (*comm[1] == 's' && strncmp(comm[1], "sftp://", 7) == 0)
 			exit_code = remote_ssh(comm[1] + 7, (comm[2]) ? comm[2]
 								   : NULL);
 
-		else if (strncmp(comm[1], "smb://", 6) == 0)
+		else if (*comm[1] == 's' && strncmp(comm[1], "smb://", 6) == 0)
 			exit_code = remote_smb(comm[1] + 6, (comm[2]) ? comm[2]
 								   : NULL);
 
-		else if (strncmp(comm[1], "ftp://", 6) == 0)
+		else if (*comm[1] == 'f' && strncmp(comm[1], "ftp://", 6) == 0)
 			exit_code = remote_ftp(comm[1] + 6, (comm[2]) ? comm[2]
 								   : NULL);
 
@@ -17011,16 +17219,15 @@ exec_cmd(char **comm)
 
 						/* #### MIME #### */
 	else if (*comm[0] == 'm' && ((comm[0][1] == 'm' && !comm[0][2])
-	|| strcmp(comm[0], "mime") == 0)) {
+	|| strcmp(comm[0], "mime") == 0))
 		exit_code = mime_open(comm);
-	}
 
 	else if (*comm[0] == 'l' && comm[0][1] == 's' && !comm[0][2]
 	&& !cd_lists_on_the_fly) {
 		free_dirlist();
 		exit_code = list_dir();
 
-		if (get_sel_files() != 0)
+		if (get_sel_files() != EXIT_SUCCESS)
 			exit_code = EXIT_FAILURE;
 	}
 
@@ -17032,8 +17239,10 @@ exec_cmd(char **comm)
 					/* #### MOUNTPOINTS #### */
 	else if (*comm[0] == 'm' && ((comm[0][1] == 'p' && !comm[0][2]) 
 	|| strcmp(comm[0], "mountpoints") == 0)) {
+
 		if (comm[1] && strcmp(comm[1], "--help") == 0)
 			puts(_("Usage: mountpoints, mp"));
+
 		else {
 			kbind_busy = 1;
 			rl_attempted_completion_function = NULL;
@@ -17097,10 +17306,12 @@ exec_cmd(char **comm)
 			if (*comm[1] == 's' && strcmp(comm[1], "status") == 0)
 				printf(_("%s: Pager %s\n"), PROGRAM_NAME, 
 					   (pager) ? _("enabled") : _("disabled"));
+
 			else if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
 				pager = 1;
 				printf(_("%s: Pager enabled\n"), PROGRAM_NAME);
 			}
+
 			else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
 				pager = 0;
 				printf(_("%s: Pager disabled\n"), PROGRAM_NAME);
@@ -17122,19 +17333,19 @@ exec_cmd(char **comm)
 			return EXIT_FAILURE;
 		}
 
-		if (strcmp(comm[1], "on") == 0) {
+		if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
 			files_counter = 1;
 			puts(_("Filescounter is enabled"));
 			return EXIT_SUCCESS;
 		}
 
-		if (strcmp(comm[1], "off") == 0) {
+		if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
 			files_counter = 0;
 			puts(_("Filescounter is disabled"));
 			return EXIT_SUCCESS;
 		}
 
-		if (strcmp(comm[1], "status") == 0) {
+		if (*comm[1] == 's' && strcmp(comm[1], "status") == 0) {
 			if (files_counter)
 				puts(_("Filescounter is enabled"));
 			else
@@ -17153,7 +17364,7 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'u' && ((comm[0][1] == 'c' && !comm[0][2])
 	|| strcmp(comm[0], "unicode") == 0)) {
 		if (!comm[1]) {
-			fputs(_("Usage: unicode, uc [on, off, status]"), stderr);
+			fputs(_("Usage: unicode, uc [on, off, status]\n"), stderr);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
@@ -17161,17 +17372,20 @@ exec_cmd(char **comm)
 			puts(_("Usage: unicode, uc [on, off, status]"));
 
 		else {
-			if (strcmp(comm[1], "status") == 0)
+			if (*comm[1] == 's' && strcmp(comm[1], "status") == 0)
 				printf(_("%s: Unicode %s\n"), PROGRAM_NAME, 
 					    (unicode) ? _("enabled") : _("disabled"));
-			else if (strcmp(comm[1], "on") == 0) {
+
+			else if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
 				unicode = 1;
 				printf(_("%s: Unicode enabled\n"), PROGRAM_NAME);
 			}
-			else if (strcmp(comm[1], "off") == 0) {
+
+			else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
 				unicode = 0;
 				printf(_("%s: Unicode disabled\n"), PROGRAM_NAME);
 			}
+
 			else {
 				fputs(_("Usage: unicode, uc [on, off, status]\n"),
 					  stderr);
@@ -17181,53 +17395,56 @@ exec_cmd(char **comm)
 	}
 
 				/* #### FOLDERS FIRST #### */
-	else if ((strcmp(comm[0], "folders") == 0 
-	&& strcmp(comm[1], "first") == 0) || strcmp(comm[0], "ff") == 0) {
+	else if (*comm[0] == 'f' && ((comm[0][1] == 'f' && !comm[0][2])
+	|| strcmp(comm[0], "folders-first") == 0)) {
+
 		if (cd_lists_on_the_fly == 0) 
 			return EXIT_SUCCESS;
-		int n = 0;
-		if (strcmp(comm[0], "ff") == 0)
-			n = 1;
-		else
-			n = 2;
-		if (comm[n]) {
-			if (strcmp(comm[n], "--help") == 0) {
-				puts(_("Usage: folders first, ff [on, off, status]"));
-				return EXIT_SUCCESS;
-			}
-			int status = list_folders_first;
-			if (strcmp(comm[n], "status") == 0)
-				printf(_("%s: Folders first %s\n"), PROGRAM_NAME, 
-					     (list_folders_first) ? _("enabled")
-					     : _("disabled"));
-			else if (strcmp(comm[n], "on") == 0)
-				list_folders_first = 1;
-			else if (strcmp(comm[n], "off") == 0)
-				list_folders_first = 0;
-			else {
-				fputs(_("Usage: folders first, ff [on, off, status]\n"), 
-					    stderr);
-				exit_code = EXIT_FAILURE;
-				return EXIT_FAILURE;
-			}
 
-			if (list_folders_first != status) {
-				if (cd_lists_on_the_fly) {
-					free_dirlist();
-					exit_code = list_dir();
-				}
-			}
-		}
-		else {
-			fputs(_("Usage: folders first, ff [on, off, status]\n"),
-					stderr);
+		if (!comm[1]) {
+			fputs(_("Usage: ff, folders-first [on, off, status]\n"),
+				  stderr);
 			exit_code = EXIT_FAILURE;
+			return EXIT_FAILURE;
+		}
+		
+		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
+			puts(_("Usage: ff, folders-first [on, off, status]"));
+			return EXIT_SUCCESS;
+		}
+
+		int status = list_folders_first;
+
+		if (*comm[1] == 's' && strcmp(comm[1], "status") == 0)
+			printf(_("%s: Folders first %s\n"), PROGRAM_NAME, 
+				     (list_folders_first) ? _("enabled")
+				     : _("disabled"));
+
+		else if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0)
+			list_folders_first = 1;
+
+		else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0)
+			list_folders_first = 0;
+
+		else {
+			fputs(_("Usage: ff, folders-first [on, off, status]\n"), 
+				    stderr);
+			exit_code = EXIT_FAILURE;
+			return EXIT_FAILURE;
+		}
+
+		if (list_folders_first != status) {
+			if (cd_lists_on_the_fly) {
+				free_dirlist();
+				exit_code = list_dir();
+			}
 		}
 	}
 
 				/* #### LOG #### */
 	else if (*comm[0] == 'l' && strcmp(comm[0], "log") == 0) {
-		if (comm[1] && strcmp(comm[1], "--help") == 0) {
+		if (comm[1] && *comm[1] == '-'
+		&& strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: log [clear]"));
 			return EXIT_SUCCESS;
 		}
@@ -17248,27 +17465,34 @@ exec_cmd(char **comm)
 				/* #### MESSAGES #### */
 	else if (*comm[0] == 'm' && (strcmp(comm[0], "msg") == 0
 	|| strcmp(comm[0], "messages") == 0)) {
+
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: messages, msg [clear]"));
 			return EXIT_SUCCESS;
 		}
+
 		if (comm[1] && strcmp(comm[1], "clear") == 0) {
 			if (!msgs_n) {
 				printf(_("%s: There are no messages\n"), PROGRAM_NAME);
 				return EXIT_SUCCESS;
 			}
+
 			size_t i;
+
 			for (i = 0; i < (size_t)msgs_n; i++)
 				free(messages[i]);
+
 			msgs_n = 0;
 			pmsg = nomsg;
 		}
+
 		else {
 			if (msgs_n) {
 				size_t i;
 				for (i = 0; i < (size_t)msgs_n; i++)
 					printf("%s", messages[i]);
 			}
+
 			else
 				printf(_("%s: There are no messages\n"), PROGRAM_NAME);
 		}
@@ -17277,16 +17501,19 @@ exec_cmd(char **comm)
 				/* #### ALIASES #### */
 	else if (*comm[0] == 'a' && strcmp(comm[0], "alias") == 0) {
 		if (comm[1]) {
-			if (strcmp(comm[1], "--help") == 0) {
+			if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
 				puts(_("Usage: alias [import FILE]"));
 				return EXIT_SUCCESS;
 			}
-			else if (strcmp(comm[1], "import") == 0) {
+
+			else if (*comm[1] == 'i' && strcmp(comm[1], "import") == 0) {
+
 				if (!comm[2]) {
 					fprintf(stderr, _("Usage: alias import FILE\n"));
 					exit_code = EXIT_FAILURE;
 					return EXIT_FAILURE;
 				}
+
 				exit_code = alias_import(comm[2]);
 				return exit_code;
 			}
@@ -17307,7 +17534,8 @@ exec_cmd(char **comm)
 			else
 				printf("%s: shell: unknown\n", PROGRAM_NAME);
 		}
-		else if (strcmp(comm[1], "--help") == 0)
+
+		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
 			puts(_("Usage: shell [SHELL]"));
 		else
 			exit_code = set_shell(comm[1]);
@@ -17575,6 +17803,7 @@ exec_cmd(char **comm)
 
 		register size_t i;
 		if (args_n) { /* This will be false in case of ";cmd" or ":cmd" */
+
 			for (i = 1; i <= args_n; i++) {
 				ext_cmd_len += strlen(comm[i]) + 1;
 				ext_cmd = (char *)xrealloc(ext_cmd, (ext_cmd_len + 1)
@@ -17615,6 +17844,7 @@ exec_cmd(char **comm)
 
 		if (launch_execle(ext_cmd) != EXIT_SUCCESS)
 			exit_code = EXIT_FAILURE;
+
 		free(ext_cmd);
 
 		/* Restore LS_COLORS value to use CliFM colors */
@@ -17633,7 +17863,9 @@ exec_cmd(char **comm)
 		if (bin_commands) {
 			for (i = 0; bin_commands[i]; i++)
 				free(bin_commands[i]);
+
 			free(bin_commands);
+
 			bin_commands = (char  **)NULL;
 		}
 
@@ -18679,7 +18911,8 @@ run_and_refresh(char **comm)
 
 	if (ret == EXIT_SUCCESS) {
 		/* If 'rm sel' and command is successful, deselect everything */
-		if (is_sel && strcmp(comm[0], "rm") == 0) {
+		if (is_sel && *comm[0] == 'r' && comm[0][1] ==  'm'
+		&& (!comm[0][2] || comm[0][2] == ' ')) {
 
 			for (i = 0; i < sel_n; i++)
 				free(sel_elements[i]);
@@ -19344,7 +19577,8 @@ copy_function(char **comm)
 		if (ret == EXIT_SUCCESS) {
 			/* If 'mv sel' and command is successful deselect everything,
 			 * since sel files are note there anymore */
-			if (strcmp(comm[0], "mv") == 0) {
+			if (*comm[0] == 'm' && comm[0][1] == 'v'
+			&& (!comm[0][2] || comm[0][2] == ' ')) {
 
 				for (i = 0; i < sel_n; i++)
 					free(sel_elements[i]);
@@ -21723,7 +21957,7 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
  acd, autocd [on, off, status]\n\
  ao, auto-open [on, off, status]\n\
  hf, hidden [on, off, status]\n\
- ff, folders first [on, off, status]\n\
+ ff, folders-first [on, off, status]\n\
  fc, filescounter [on, off, status]\n\
  pg, pager [on, off, status]\n\
  uc, unicode [on, off, status]\n\
@@ -21754,9 +21988,17 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
 " M-k, S-Right: Change to the next directory in the directory history "
 "list\n"
 " M-o: Lock terminal\n\
+ C-M-o: Switch to previous profile\n\
+ C-M-p: Switch to next profile\n\
+ C-M-e: Export selected files\n\
+ C-M-r: Rename selected files\n\
+ C-M-d: Remove selected files\n\
+ C-M-n: Move selected files into the current working directory\n\
+ C-M-v: Copy selected files into the current working directory\n\
  M-y: Toggle light mode on/off\n\
  M-z: Switch to previous sorting method\n\
  M-x: Switch to next sorting method\n\
+ M-q: Quit\n\
  F10: Open the configuration file\n\n"
 "NOTE: C stands for Ctrl, S for Shift, and M for Meta (Alt key in "
 "most keyboards)\n\n");
