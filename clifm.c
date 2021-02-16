@@ -1470,8 +1470,10 @@ remove-sel:\\C-M-d\n\
 paste-sel:\\C-M-v\n\
 move-sel:\\C-M-n\n\
 export-sel:\\C-M-e\n\
+open-sel:\\C-M-g\n\
 refresh-screen:\\C-r\n\
 clear-line:\\M-c\n\
+show-dirhist:\\M-h\n\
 toggle-hidden:\\M-i\n\
 open-config:\\e[21~\n\
 toggle-light:\\M-y\n\
@@ -10343,6 +10345,41 @@ rl_next_profile(int count, int key)
 	return EXIT_SUCCESS;
 }
 
+int
+rl_dirhist(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	keybind_exec_cmd("bh");
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
+int
+rl_open_sel(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	if (sel_n == 0 || !sel_elements[sel_n - 1]) {
+		fprintf(stderr, "%s: No selected files\n", PROGRAM_NAME);
+		rl_reset_line_state();
+		return EXIT_FAILURE;
+	}
+
+	char cmd[PATH_MAX + 3];
+	sprintf(cmd, "o %s", sel_elements[sel_n -  1]);
+
+	keybind_exec_cmd(cmd);
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
 /*
 int rl_test(int count, int key)
 {
@@ -10385,6 +10422,8 @@ readline_kbinds(void)
 	rl_bind_keyseq(find_key("root-dir3"), rl_root_dir);
 
 	/* Shortcuts to functions */
+	rl_bind_keyseq(find_key("open-sel"), rl_open_sel);
+	rl_bind_keyseq(find_key("show-dirhist"), rl_dirhist);
 	rl_bind_keyseq(find_key("next-profile"), rl_next_profile);
 	rl_bind_keyseq(find_key("previous-profile"), rl_previous_profile);
 	rl_bind_keyseq(find_key("quit"), rl_quit);
@@ -21976,6 +22015,7 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
  M-l: Toggle long view mode on/off\n\
  M-m: List mountpoints\n\
  M-b: Launch the Bookmarks Manager\n\
+ M-h: Show directory history\n\
  M-i: Toggle hidden files on/off\n\
  M-s: Open the Selection Box\n\
  M-a: Select all files in the current working directory\n\
@@ -21993,6 +22033,7 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
  C-M-e: Export selected files\n\
  C-M-r: Rename selected files\n\
  C-M-d: Remove selected files\n\
+ C-M-g: Open/change-into last selected file/directory\n\
  C-M-n: Move selected files into the current working directory\n\
  C-M-v: Copy selected files into the current working directory\n\
  M-y: Toggle light mode on/off\n\
