@@ -16337,9 +16337,20 @@ check_dir(char **args)
 
 	for (i = 1; args[i]; i++) {
 
-		if (lstat(args[i], &attrib) != -1
-		&& (attrib.st_mode & S_IFMT) == S_IFDIR)
+		char *tmp = (char *)NULL;
+
+		if (strchr(args[i], '\\')) {
+			char *deq_file = dequote_str(args[i], 0);
+			if (deq_file)
+				tmp = deq_file;
+		}
+
+		if (lstat(tmp ? tmp : args[i], &attrib) != -1
+		&& (attrib.st_mode & S_IFMT) == S_IFDIR) {
+			if (tmp)
+				free(tmp);
 			return EXIT_SUCCESS;
+		}
 	}
 
 	return EXIT_FAILURE;
@@ -16701,6 +16712,11 @@ exec_cmd(char **comm)
 				comm[0] = (char *)xrealloc(comm[0], 6 * sizeof(char *));
 				strcpy(comm[0], "rm -I");
 			}
+
+			size_t u;
+			for (u = 0; comm[u]; u++)
+				printf("%s\n", comm[u]);
+			return EXIT_SUCCESS;
 		}
 
 		else if (*comm[0] == 'm' && comm[0][1] == 'd' && !comm[0][2]) {
