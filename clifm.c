@@ -1465,6 +1465,7 @@ root-dir2:\\e/\n\
 quit:\\M-q\n\
 previous-profile:\\C-M-o\n\
 next-profile:\\C-M-p\n\
+archive-sel:\\C-M-a\n\
 rename-sel:\\C-M-r\n\
 remove-sel:\\C-M-d\n\
 paste-sel:\\C-M-v\n\
@@ -1476,6 +1477,7 @@ clear-line:\\M-c\n\
 show-dirhist:\\M-h\n\
 toggle-hidden:\\M-i\n\
 open-config:\\e[21~\n\
+open-keybinds:\\e[20~\n\
 toggle-light:\\M-y\n\
 toggle-long:\\M-l\n\
 sort-previous:\\M-z\n\
@@ -10007,6 +10009,19 @@ rl_open_config(int count, int key)
 }
 
 int
+rl_open_keybinds(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	keybind_exec_cmd("kb edit");
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
+int
 rl_mountpoints(int count, int key)
 {
 	if (kbind_busy)
@@ -10359,13 +10374,26 @@ rl_dirhist(int count, int key)
 }
 
 int
+rl_archive_sel(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	keybind_exec_cmd("ac sel");
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
+int
 rl_open_sel(int count, int key)
 {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
 	if (sel_n == 0 || !sel_elements[sel_n - 1]) {
-		fprintf(stderr, "%s: No selected files\n", PROGRAM_NAME);
+		fprintf(stderr, "\n%s: No selected files\n", PROGRAM_NAME);
 		rl_reset_line_state();
 		return EXIT_FAILURE;
 	}
@@ -10380,13 +10408,13 @@ rl_open_sel(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-/*
+
 int rl_test(int count, int key)
 {
 	puts("TEST!!");
 
 	return EXIT_SUCCESS;
-} */
+}
 
 void
 readline_kbinds(void)
@@ -10400,8 +10428,9 @@ readline_kbinds(void)
 	/* Navigation keys */
 	/* Define multiple keybinds for different terminals:
 	 * rxvt, xterm, linux console */
-
 //	rl_bind_keyseq("\\M-[D", rl_test); // Left arrow key
+
+	/* Navigation */
 	rl_bind_keyseq(find_key("parent-dir"), rl_parent_dir);
 	rl_bind_keyseq(find_key("parent-dir2"), rl_parent_dir);
 	rl_bind_keyseq(find_key("parent-dir3"), rl_parent_dir);
@@ -10421,17 +10450,25 @@ readline_kbinds(void)
 	rl_bind_keyseq(find_key("root-dir2"), rl_root_dir);
 	rl_bind_keyseq(find_key("root-dir3"), rl_root_dir);
 
-	/* Shortcuts to functions */
+	/* Operations on files */
+	rl_bind_keyseq(find_key("archive-sel"), rl_archive_sel);
 	rl_bind_keyseq(find_key("open-sel"), rl_open_sel);
-	rl_bind_keyseq(find_key("show-dirhist"), rl_dirhist);
-	rl_bind_keyseq(find_key("next-profile"), rl_next_profile);
-	rl_bind_keyseq(find_key("previous-profile"), rl_previous_profile);
-	rl_bind_keyseq(find_key("quit"), rl_quit);
 	rl_bind_keyseq(find_key("export-sel"), rl_export_sel);
 	rl_bind_keyseq(find_key("move-sel"), rl_move_sel);
 	rl_bind_keyseq(find_key("rename-sel"), rl_rename_sel);
 	rl_bind_keyseq(find_key("remove-sel"), rl_remove_sel);
 	rl_bind_keyseq(find_key("paste-sel"), rl_paste_sel);
+	rl_bind_keyseq(find_key("select-all"), rl_select_all);
+	rl_bind_keyseq(find_key("deselect-all"), rl_deselect_all);
+
+	/* Config files */
+	rl_bind_keyseq(find_key("open-config"), rl_open_config);
+	rl_bind_keyseq(find_key("open-keybinds"), rl_open_keybinds);
+
+	/* Settings */
+	rl_bind_keyseq(find_key("next-profile"), rl_next_profile);
+	rl_bind_keyseq(find_key("previous-profile"), rl_previous_profile);
+	rl_bind_keyseq(find_key("quit"), rl_quit);
 	rl_bind_keyseq(find_key("lock"), rl_lock);
 	rl_bind_keyseq(find_key("refresh-screen"), rl_refresh);
 	rl_bind_keyseq(find_key("clear-line"), rl_clear_line);
@@ -10439,12 +10476,11 @@ readline_kbinds(void)
 	rl_bind_keyseq(find_key("toggle-long"), rl_long);
 	rl_bind_keyseq(find_key("toggle-light"), rl_light);
 	rl_bind_keyseq(find_key("folders-first"), rl_folders_first);
-	rl_bind_keyseq(find_key("open-config"), rl_open_config);
-	rl_bind_keyseq(find_key("bookmarks"), rl_bookmarks);
-	rl_bind_keyseq(find_key("select-all"), rl_select_all);
-	rl_bind_keyseq(find_key("deselect-all"), rl_deselect_all);
 	rl_bind_keyseq(find_key("sort-previous"), rl_sort_previous);
 	rl_bind_keyseq(find_key("sort-next"), rl_sort_next);
+
+	rl_bind_keyseq(find_key("show-dirhist"), rl_dirhist);
+	rl_bind_keyseq(find_key("bookmarks"), rl_bookmarks);
 	rl_bind_keyseq(find_key("mountpoints"), rl_mountpoints);
 	rl_bind_keyseq(find_key("selbox"), rl_selbox);
 
@@ -22030,6 +22066,7 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
 " M-o: Lock terminal\n\
  C-M-o: Switch to previous profile\n\
  C-M-p: Switch to next profile\n\
+ C-M-a: Archive selected files\n\
  C-M-e: Export selected files\n\
  C-M-r: Rename selected files\n\
  C-M-d: Remove selected files\n\
@@ -22040,6 +22077,7 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
  M-z: Switch to previous sorting method\n\
  M-x: Switch to next sorting method\n\
  M-q: Quit\n\
+ F9: Open the keybindings file\n\
  F10: Open the configuration file\n\n"
 "NOTE: C stands for Ctrl, S for Shift, and M for Meta (Alt key in "
 "most keyboards)\n\n");

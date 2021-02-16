@@ -483,6 +483,8 @@ safely quit CliFM.
 .TP
 \fBC\-M\-p:\fR Switch to next profile
 .TP
+\fBC\-M\-a:\fR Archive selected files
+.TP
 \fBC\-M\-e:\fR Export selected files
 .TP
 \fBC\-M\-r:\fR Rename selected files
@@ -500,6 +502,8 @@ safely quit CliFM.
 \fBM\-z:\fR Switch to previous sorting method
 .TP
 \fBM\-x:\fR Switch to next sorting method
+.TP
+\fBF9:\fR Open the keybindings file
 .TP
 \fBF10:\fR Open the configuration file
 .TP
