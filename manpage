@@ -262,7 +262,7 @@ A ready made example could be found in the configuration directory (\fIscripts/e
 .TP
 
 .B c, l [e, edit], m, md, r
-short for 'cp', 'ln', 'mv', 'mkdir', and 'rm' commands respectivelly.
+short for following commands respectivelly: 'cp -iRp', 'ln -sn', 'mv -i', 'mkdir -p', and 'rm -I' (for files) or 'rm -dIr' (for directories). To use these commands without any of these arguments, or with any other argument you need, just use the non-abbreviated command, for instance, 'cp' instead of 'c'.
 .sp
 The \fIln\fR command allows the use of the 'e, edit' option to modify the destination of a symbolic link. Example: 'l e 12', or 'le 12',  to relink the symbolic link corresponding to the ELN 12.
 .TP
