@@ -1472,6 +1472,8 @@ next-profile:\\C-M-p\n\
 archive-sel:\\C-M-a\n\
 rename-sel:\\C-M-r\n\
 remove-sel:\\C-M-d\n\
+trash-sel:\\C-M-t\n\
+untrash-all:\\C-M-u\n\
 paste-sel:\\C-M-v\n\
 move-sel:\\C-M-n\n\
 export-sel:\\C-M-e\n\
@@ -10455,6 +10457,32 @@ rl_clear_msgs(int count, int key)
 }
 
 int
+rl_trash_sel(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	keybind_exec_cmd("t sel");
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
+int
+rl_untrash_all(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	keybind_exec_cmd("u *");
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
+int
 rl_open_sel(int count, int key)
 {
 	if (kbind_busy)
@@ -10501,8 +10529,6 @@ readline_kbinds(void)
 	/* Navigation */
 	/* Define multiple keybinds for different terminals:
 	 * rxvt, xterm, linux console */
-	rl_bind_keyseq("\\C-\\M-j", rl_first_dir);
-	rl_bind_keyseq("\\C-\\M-k", rl_last_dir);
 	rl_bind_keyseq(find_key("parent-dir"), rl_parent_dir);
 	rl_bind_keyseq(find_key("parent-dir2"), rl_parent_dir);
 	rl_bind_keyseq(find_key("parent-dir3"), rl_parent_dir);
@@ -10522,6 +10548,9 @@ readline_kbinds(void)
 	rl_bind_keyseq(find_key("root-dir2"), rl_root_dir);
 	rl_bind_keyseq(find_key("root-dir3"), rl_root_dir);
 
+	rl_bind_keyseq(find_key("first-dir"), rl_first_dir);
+	rl_bind_keyseq(find_key("last-dir"), rl_last_dir);
+
 	/* Operations on files */
 	rl_bind_keyseq(find_key("archive-sel"), rl_archive_sel);
 	rl_bind_keyseq(find_key("open-sel"), rl_open_sel);
@@ -10529,6 +10558,8 @@ readline_kbinds(void)
 	rl_bind_keyseq(find_key("move-sel"), rl_move_sel);
 	rl_bind_keyseq(find_key("rename-sel"), rl_rename_sel);
 	rl_bind_keyseq(find_key("remove-sel"), rl_remove_sel);
+	rl_bind_keyseq(find_key("trash-sel"), rl_trash_sel);
+	rl_bind_keyseq(find_key("untrash-all"), rl_untrash_all);
 	rl_bind_keyseq(find_key("paste-sel"), rl_paste_sel);
 	rl_bind_keyseq(find_key("select-all"), rl_select_all);
 	rl_bind_keyseq(find_key("deselect-all"), rl_deselect_all);
@@ -22249,6 +22280,8 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
  C-M-e: Export selected files\n\
  C-M-r: Rename selected files\n\
  C-M-d: Remove selected files\n\
+ C-M-t: Trash selected files\n\
+ C-M-u: Restore trashed files\n\
  C-M-g: Open/change-into last selected file/directory\n\
  C-M-n: Move selected files into the current working directory\n\
  C-M-v: Copy selected files into the current working directory\n\

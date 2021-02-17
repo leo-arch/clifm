@@ -503,6 +503,10 @@ safely quit CliFM.
 .TP
 \fBC\-M\-d:\fR Remove selected files 
 .TP
+\fBC\-M\-t:\fR Trash selected files 
+.TP
+\fBC\-M\-u:\fR Restore trashed files 
+.TP
 \fBC\-M\-g:\fR Open/change-to last selected file/directory 
 .TP
 \fBC\-M\-n:\fR Move selected files into the current directory
