@@ -507,6 +507,8 @@ safely quit CliFM.
 .TP
 \fBC\-M\-u:\fR Restore trashed files 
 .TP
+\fBC\-M\-b:\fR Bookmark last selected file/directory 
+.TP
 \fBC\-M\-g:\fR Open/change-to last selected file/directory 
 .TP
 \fBC\-M\-n:\fR Move selected files into the current directory
@@ -521,9 +523,17 @@ safely quit CliFM.
 .TP
 \fBC\-x:\fR Launch new instance of the program
 .TP
+\fBF1:\fR Go to the manpage
+.TP
+\fBF2:\fR List commands
+.TP
+\fBF3:\fR List keybindings
+.TP
 \fBF9:\fR Open the keybindings file
 .TP
 \fBF10:\fR Open the configuration file
+.TP
+\fBF11:\fR Open the bookmarks file
 .TP
 \fBF12:\fR Quit
 .TP

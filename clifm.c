@@ -1466,6 +1466,11 @@ root-dir:\\M-r\n\
 root-dir2:\\e/\n\
 #root-dir3:\n\
 \n\
+# Help\n\
+show-manpage:\eOP\n\
+show-cmds:\eOQ\n\
+show-kbinds:\eOR\n\
+\n\
 new-instance:\\C-x\n\
 previous-profile:\\C-M-o\n\
 next-profile:\\C-M-p\n\
@@ -1478,6 +1483,7 @@ paste-sel:\\C-M-v\n\
 move-sel:\\C-M-n\n\
 export-sel:\\C-M-e\n\
 open-sel:\\C-M-g\n\
+bookmark-sel:\\C-M-b\n\
 refresh-screen:\\C-r\n\
 clear-line:\\M-c\n\
 clear-msgs:\\M-t\n\
@@ -1495,6 +1501,7 @@ folders-first:\\M-f\n\
 selbox:\\M-s\n\
 open-keybinds:\\e[20~\n\
 open-config:\\e[21~\n\
+open-bookmarks:\\e[23~\n\
 quit:\\e[24~\n", PROGRAM_NAME);
 
 	fclose(fp);
@@ -10066,6 +10073,19 @@ rl_open_keybinds(int count, int key)
 }
 
 int
+rl_open_bm_file(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	keybind_exec_cmd("bm edit");
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
+int
 rl_mountpoints(int count, int key)
 {
 	if (kbind_busy)
@@ -10126,7 +10146,7 @@ rl_selbox(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	keybind_exec_cmd("sb");
+	keybind_exec_cmd("ds");
 
 	rl_reset_line_state();
 
@@ -10504,13 +10524,67 @@ rl_open_sel(int count, int key)
 	return EXIT_SUCCESS;
 }
 
+int
+rl_bm_sel(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
 
+	if (sel_n == 0 || !sel_elements[sel_n - 1]) {
+		fprintf(stderr, "\n%s: No selected files\n", PROGRAM_NAME);
+		rl_reset_line_state();
+		return EXIT_FAILURE;
+	}
+
+	char cmd[PATH_MAX + 6];
+	sprintf(cmd, "bm a %s", sel_elements[sel_n -  1]);
+
+	keybind_exec_cmd(cmd);
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
+int
+rl_kbinds_help (int count, int key)
+{
+	char *cmd[] = { "man", "-P", "less -p ^\"KEYBOARD SHORTCUTS\"", PNL,
+					NULL };
+	if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
+}
+
+int
+rl_cmds_help (int count, int key)
+{
+	char *cmd[] = { "man", "-P", "less -p ^COMMANDS", PNL, NULL };
+	if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
+}
+
+int
+rl_manpage (int count, int key)
+{
+	char *cmd[] = { "man", PNL, NULL };
+
+	if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+		return EXIT_FAILURE;
+
+	return EXIT_SUCCESS;
+}
+
+/*
 int rl_test(int count, int key)
 {
 	puts("TEST!!");
 
 	return EXIT_SUCCESS;
-}
+} */
 
 void
 readline_kbinds(void)
@@ -10520,15 +10594,21 @@ readline_kbinds(void)
  * C-v, C-right arrow gives "[[1;5C", which here should be written like
  * this:
  * "\\x1b[1;5C" */
-//	rl_bind_keyseq("\\M-[D", rl_test); // Left arrow key
 
 			/* ##############################
 			 * #		KEYBINDINGS			#
 			 * ##############################*/
 
+	/* Help */
+	rl_bind_keyseq(find_key("show-manpage"), rl_manpage);
+	rl_bind_keyseq(find_key("show-cmds"), rl_cmds_help);
+	rl_bind_keyseq(find_key("show-kbinds"), rl_kbinds_help);
+
 	/* Navigation */
 	/* Define multiple keybinds for different terminals:
 	 * rxvt, xterm, linux console */
+//	rl_bind_keyseq("\\M-[D", rl_test); // Left arrow key
+//	rl_bind_keyseq("\\M-+", rl_test);
 	rl_bind_keyseq(find_key("parent-dir"), rl_parent_dir);
 	rl_bind_keyseq(find_key("parent-dir2"), rl_parent_dir);
 	rl_bind_keyseq(find_key("parent-dir3"), rl_parent_dir);
@@ -10552,6 +10632,7 @@ readline_kbinds(void)
 	rl_bind_keyseq(find_key("last-dir"), rl_last_dir);
 
 	/* Operations on files */
+	rl_bind_keyseq(find_key("bookmark-sel"), rl_bm_sel);
 	rl_bind_keyseq(find_key("archive-sel"), rl_archive_sel);
 	rl_bind_keyseq(find_key("open-sel"), rl_open_sel);
 	rl_bind_keyseq(find_key("export-sel"), rl_export_sel);
@@ -10567,6 +10648,7 @@ readline_kbinds(void)
 	/* Config files */
 	rl_bind_keyseq(find_key("open-config"), rl_open_config);
 	rl_bind_keyseq(find_key("open-keybinds"), rl_open_keybinds);
+	rl_bind_keyseq(find_key("open-bookmarks"), rl_open_bm_file);
 
 	/* Settings */
 	rl_bind_keyseq(find_key("clear-msgs"), rl_clear_msgs);
@@ -10588,77 +10670,6 @@ readline_kbinds(void)
 	rl_bind_keyseq(find_key("bookmarks"), rl_bookmarks);
 	rl_bind_keyseq(find_key("mountpoints"), rl_mountpoints);
 	rl_bind_keyseq(find_key("selbox"), rl_selbox);
-
-/*
- * Do not use arrow keys for keybindings: there are no standard codes for 
- * them: what works for a certain terminal might not work for another
-
-	rl_bind_keyseq("\\x1b[1;5A", readline_kbind_action); // C-up: 65
-	rl_bind_keyseq("\\x1b[1;5B", readline_kbind_action); // C-down: 66
-	rl_bind_keyseq("\\x1b[1;5C", readline_kbind_action); // C-right: 67
-	rl_bind_keyseq("\\x1b[1;5D", readline_kbind_action); // C-left: 68
-	rl_bind_keyseq("\\x1b[H", readline_kbind_action); // HOME: 72
-	rl_bind_keyseq("\\x1b[21~", readline_kbind_action); // F10: 126
-*/
-
-/*	rl_bind_keyseq("\\C-a", readline_kbind_action); //key: 1
-	rl_bind_keyseq("\\C-b", readline_kbind_action); //key: 2
-	rl_bind_keyseq("\\C-c", readline_kbind_action); //key: 3 Doesn't work
-	rl_bind_keyseq("\\C-d", readline_kbind_action); //key: 4 Doesn't work
-	rl_bind_keyseq("\\C-e", readline_kbind_action); //key: 5
-	rl_bind_keyseq("\\C-f", readline_kbind_action); //key: 6
-	rl_bind_keyseq("\\C-g", readline_kbind_action); //key: 7
-	rl_bind_keyseq("\\C-h", readline_kbind_action); //key: 8
-	rl_bind_keyseq("\\C-i", readline_kbind_action); //key: 9
-	rl_bind_keyseq("\\C-j", readline_kbind_action); //key: 10
-	rl_bind_keyseq("\\C-k", readline_kbind_action); //key: 11
-	rl_bind_keyseq("\\C-l", readline_kbind_action); //key: 12
-	rl_bind_keyseq("\\C-m", readline_kbind_action); //key: 13
-	rl_bind_keyseq("\\C-n", readline_kbind_action); //key: 14
-	rl_bind_keyseq("\\C-o", readline_kbind_action); //key: 15
-	rl_bind_keyseq("\\C-p", readline_kbind_action); //key: 16
-	rl_bind_keyseq("\\C-q", readline_kbind_action); //key: 17
-	rl_bind_keyseq("\\C-r", readline_kbind_action); //key: 18
-	rl_bind_keyseq("\\C-s", readline_kbind_action); //key: 19 Doesn't work
-	NOTE: C-s blocks the terminal. It's a feature of the OS called 
-	Software Flow Control (XON/XOFF flow control). To reenable it simply 
-	press C-q.
-	rl_bind_keyseq("\\C-t", readline_kbind_action); //key: 20
-	rl_bind_keyseq("\\C-u", readline_kbind_action); //key: 21 Doesn't work
-	rl_bind_keyseq("\\C-v", readline_kbind_action); //key: 22 Doesn't work
-	rl_bind_keyseq("\\C-w", readline_kbind_action); //key: 23 Doesn't work
-	rl_bind_keyseq("\\C-x", readline_kbind_action); //key: 24
-	rl_bind_keyseq("\\C-y", readline_kbind_action); //key: 25
-	rl_bind_keyseq("\\C-z", readline_kbind_action); //key: 26 Doesn't work
-
-	NOTE: \\M-a means Meta-a, that is, Alt-a
-	rl_bind_keyseq("\\M-a", readline_kbind_action); //key: 97
-	rl_bind_keyseq("\\M-b", readline_kbind_action); //key: 98
-	rl_bind_keyseq("\\M-c", readline_kbind_action); //key: 99
-	rl_bind_keyseq("\\M-d", readline_kbind_action); //key: 100
-	rl_bind_keyseq("\\M-e", readline_kbind_action); //key: 101
-	rl_bind_keyseq("\\M-f", readline_kbind_action); //key: 102
-	rl_bind_keyseq("\\M-g", readline_kbind_action); //key: 103
-	rl_bind_keyseq("\\M-h", readline_kbind_action); //key: 104
-	rl_bind_keyseq("\\M-i", readline_kbind_action); //key: 105
-	rl_bind_keyseq("\\M-j", readline_kbind_action); //key: 106
-	rl_bind_keyseq("\\M-k", readline_kbind_action); //key: 107
-	rl_bind_keyseq("\\M-l", readline_kbind_action); //key: 108
-	rl_bind_keyseq("\\M-m", readline_kbind_action); //key: 109
-	rl_bind_keyseq("\\M-n", readline_kbind_action); //key: 110 
-	rl_bind_keyseq("\\M-o", readline_kbind_action); //key: 111
-	rl_bind_keyseq("\\M-p", readline_kbind_action); //key: 112
-	rl_bind_keyseq("\\M-q", readline_kbind_action); //key: 113
-	rl_bind_keyseq("\\M-r", readline_kbind_action); //key: 114
-	rl_bind_keyseq("\\M-s", readline_kbind_action); //key: 115
-	rl_bind_keyseq("\\M-t", readline_kbind_action); //key: 116
-	rl_bind_keyseq("\\M-u", readline_kbind_action); //key: 117
-	rl_bind_keyseq("\\M-v", readline_kbind_action); //key: 118
-	rl_bind_keyseq("\\M-w", readline_kbind_action); //key: 119
-	rl_bind_keyseq("\\M-x", readline_kbind_action); //key: 120
-	rl_bind_keyseq("\\M-y", readline_kbind_action); //key: 121
-	rl_bind_keyseq("\\M-z", readline_kbind_action); //key: 122
-*/
 }
 
 void
@@ -22163,11 +22174,11 @@ help_function (void)
 {
 	printf(_("%s %s (%s), by %s\n"), PROGRAM_NAME, VERSION, DATE, AUTHOR);
 
-	printf(_("\nUSAGE: %s [-aAfFgGhiIlLmoOsuUvxy] [-c CONFIG_FILE] "
-		    "[-k KEYBINDINGS_FILE] [-p PATH] [-P PROFILE] [-z METHOD]\n\
+	printf(_("\nUSAGE: %s [-aAfFgGhiIlLmoOsuUvxy] [-c FILE] "
+		    "[-k FILE] [-p PATH] [-P PROFILE] [-z METHOD]\n\
 \n -a, --no-hidden\t\t do not show hidden files\
 \n -A, --show-hidden\t\t show hidden files (default)\
-\n -c, --config-file\t\t specify an alternative configuration file\
+\n -c, --config-file FILE\t\t specify an alternative configuration file\
 \n -f, --no-folders-first\t\t do not list folders first\
 \n -F, --folders-first\t\t list folders first (default)\
 \n -g, --pager\t\t\t enable the pager\
@@ -22175,7 +22186,7 @@ help_function (void)
 \n -h, --help\t\t\t show this help and exit\
 \n -i, --no-case-sensitive\t no case-sensitive files listing (default)\
 \n -I, --case-sensitive\t\t case-sensitive files listing\
-\n -k, --keybindings-file\t\t specify an alternative keybindings file\
+\n -k, --keybindings-file FILE\t specify an alternative keybindings file\
 \n -l, --no-long-view\t\t disable long view mode (default)\
 \n -L, --long-view\t\t enable long view mode\
 \n -m, --dihist-map\t\t enable the directory history map\
@@ -22282,6 +22293,7 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
  C-M-d: Remove selected files\n\
  C-M-t: Trash selected files\n\
  C-M-u: Restore trashed files\n\
+ C-M-b: Bookmark last selected file or directory\n\
  C-M-g: Open/change-into last selected file/directory\n\
  C-M-n: Move selected files into the current working directory\n\
  C-M-v: Copy selected files into the current working directory\n\
@@ -22289,8 +22301,12 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
  M-z: Switch to previous sorting method\n\
  M-x: Switch to next sorting method\n\
  C-x: Launch a new instance\n\
+ F1: Manual page\n\
+ F2: Commands help\n\
+ F3: Keybindings help\n\
  F9: Open the keybindings file\n\
  F10: Open the configuration file\n\
+ F11: Open the bookmarks file\n\
  F12: Quit\n\n"
 "NOTE: C stands for Ctrl, S for Shift, and M for Meta (Alt key in "
 "most keyboards)\n\n");
