@@ -7,34 +7,34 @@
 CLIFM \- A completely CLI\-based file manager inspired by Arch Linux' KISS principle
 
 .SH SYNOPSIS
-\fIclifm\fR [\-aAfFgGhiIlLmoOsuUvxy] [-c CONFIG_FILE] [-k KEYBINDINGS_FILE] [\-p PATH] [\-P PROFILE] [\-z METHOD]
+\fIclifm\fR [\-aAfFgGhiIlLmoOsuUvxy] [\-c FILE] [\-k FILE] [\-p PATH] [\-P PROFILE] [\-z METHOD]
 
 .SH DESCRIPTION
-CliFM is a completely text\-based file manager (no GUI nor curses at all) able to perform all the basic operations you may expect from any other FM. However, its most distinguishing characteristics are:
+CliFM is a completely text\-based, \fBshell\-like\fR file manager (no GUI nor curses at all) able to perform all the basic operations you may expect from any other FM. However, its most distinguishing characteristics are:
 .sp
-  \fBa)\fR An extensive and customizable list of color codes to easily identify file types and extensions.
+  \fBa)\fR An extensive and customizable list of \fBcolor codes\fR to easily identify file types and extensions.
 .sp
-  \fBb)\fR The use of short (and even one\-character commands) and numbers (ELN's) instead of filenames. Enter 'o 12', for instance, to open a file with your default text editor or to change to the desired directory. If the \fIautocd\fR and \fIauto-open\fR functions (see below \fIac\fR and \fIad\fR commands) are enabled, which is the defaut, you only need to enter the ELN to open the file or change to directory: instead of 'o 12', just enter '12'.
+  \fBb)\fR The use of \fBshort (and even one\-character commands) and numbers\fR (ELN's) instead of filenames. Enter 'o 12', for instance, to open a file with your default text editor or to change to the desired directory. If the \fBautocd\fR and \fBauto-open\fR functions (see below \fIac\fR and \fIad\fR commands) are enabled, which is the defaut, you only need to enter the ELN to open the file or change to directory: instead of 'o 12', just enter '12'.
 .sp
-With the automatic ELN's expansion feature you can use ELN's with external commands as well. 'diff 12 5', for example, will run 'diff' over the files corresponding to ELN's 12 and 5. Ranges are also accepted, for example: 'rm 1\-12' or 'r 1\-12'. Since numbers could be a bit tricky when it comes to listed files, you can use the TAB key to expand the filename corresponding to the required ELN.
+With the \fBautomatic ELN expansion\fR feature you can use ELN's with external commands as well. 'diff 12 5', for example, will run 'diff' over the files corresponding to ELN's 12 and 5. \fBRanges\fR are also accepted, for example: 'rm 1\-12' or 'r 1\-12'. Since numbers could be a bit tricky when it comes to listed files, \fBTAB completion\fR is available for ELN's, just as for commands, paths, profiles, and bookmarks.
 .sp
-  \fBc)\fR Automatic files listing: Unlike the shell 'cd' command, CliFM's built\-in \fIcd\fR function automatically lists files in the new directory.
+  \fBc)\fR \fBAutomatic files listing\fR: Unlike the shell 'cd' command, CliFM's built\-in \fIcd\fR function automatically lists files in the new directory.
 .sp
-  \fBd)\fR Bookmarks: keep a list of your favorite directories, and even files, to get easy access to them. Example: enter 'bm' (or press Alt\-b) to open the bookmarks screen and then simply type a number or a shortcut name to access the desired bookmark. 
+  \fBd)\fR \fBBookmarks\fR: keep a list of your favorite directories, and even files, to get easy access to them. Example: enter 'bm' (or press Alt\-b) to open the bookmarks screen and then simply type a number or a shortcut name to access the desired bookmark. 
 .sp
-  \fBe)\fR The Selection Box allows you to drop files and directories from different parts of your filesystem (even from different instances of CliFM) and then operate on them with just one command. Example: select a few files in one instance of the program (say 's 12; cd /media; s 2 5\-6') and then paste them somewhere else using a second instance ('v sel' or 'paste sel'). Both glob and regular expressions are suppported.
+  \fBe)\fR The \fBSelection Box\fR allows you to drop files and directories from different parts of your filesystem (even from different instances of CliFM) and then operate on them with just one command. Example: select a few files in one instance of the program (say 's 12; cd /media; s 2 5\-6') and then paste them somewhere else using a second instance ('v sel' or 'paste sel'). Both glob and regular expressions are suppported.
 .sp
-  \fBf)\fR The directory history function (\fIback\fR and \fIforth\fR) keeps track of all visited directories, so that you can go back and forth to any of them by just entering 'b' or 'f' (or just pressing 'Alt\-j' and 'Alt\-k', or Shift\-Left and Shift\-Right, respectivelly).
+  \fBf)\fR The \fBdirectory history\fR function (\fIback\fR and \fIforth\fR) keeps track of all visited directories, so that you can go back and forth to any of them by just entering 'b' or 'f' (or just pressing 'Alt\-j' and 'Alt\-k', or Shift\-Left and Shift\-Right, respectivelly).
 .sp
-  \fBg)\fR Keyboard shortcuts make it even easier and faster to navigate and operate on your files. For example, instead of typing 'cd ..' to go back to the parent directory, or 's *' to select all files in the current directory, you can simply press Alt\-u (or Shift\-Up) and Alt\-a respectivelly.
+  \fBg)\fR An extensive list of \fBkeyboard shortcuts\fR make it even easier and faster to navigate and operate on your files. For example, instead of typing 'cd ..' to go back to the parent directory, or 's *' to select all files in the current directory, you can simply press Alt\-u (or Shift\-Up) and Alt\-a respectivelly.
 .sp
-  \fBh)\fR The quick search function makes it really easy to quickly find the files you are looking for: just enter a slash followed by the string or regular expression you want (ex: '/myfile' or '/.*\.png'), that's all.
+  \fBh)\fR The \fBquick search\fR function makes it really easy to quickly find the files you are looking for: just enter a slash followed by the string or regular expression you want (ex: '/myfile' or '/.*\.png'), that's all.
 .sp
-  \fBi)\fR Build your own custom commands using shell scripts. Just drop a shell script in the scripts directory, tell CLiFM to use this script via a custom action name, and use it as any other command.
+  \fBi)\fR \fBPlugins\fR: Build your own custom commands using shell scripts. Just drop a shell script in the scripts directory, tell CLiFM to use this script via a custom action name, and use it as any other command.
 .sp
-  \fBj)\fR It is blazing fast and incredibly lightweigth. With a memory footprint below 5 MiB and a disk usage of 350 KiB, it can run on really old hardware. It is so simple that it doesn't require an X session nor any graphical environment at all, being able thus to perfectly run on the console (TTY) and even on a headless machine via a SSH or a telnet session. And if this is not enough, you can still use the light mode to make it even faster.
+  \fBj)\fR It is blazing \fBfast\fR and incredibly \fBlightweigth\fR. With a memory footprint below 5 MiB and a disk usage of 400 KiB, it can run on really old hardware. It is so simple that it doesn't require an X session nor any graphical environment at all, being able thus to perfectly run on the console (TTY) and even on a headless machine via a SSH or a telnet session. And if this is not enough, you can still use the light mode to make it even faster.
 .sp
-Because inspired in Arch Linux and its KISS principle, CliFM is fundamentally aimed to be lightweight, fast, and simple. On Arch's notion of simplcity see: \fIhttps://wiki.archlinux.org/index.php/Arch_Linux#Simplicity\fR
+Because inspired in Arch Linux and its \fBKISS\fR principle, CliFM is fundamentally aimed to be lightweight, fast, and simple. On Arch's notion of simplcity see: \fIhttps://wiki.archlinux.org/index.php/Arch_Linux#Simplicity\fR
 
 List of CliFM features:
 
@@ -43,7 +43,7 @@ List of CliFM features:
   3) Command and directory history function
   4) TAB completion for commands, paths, bookmarks, and profiles
   5) TAB ELN\-expansion
-  6) Customizable keyboard shortcuts
+  6) More than 40 customizable keyboard shortcuts
   7) Wildcards and regex auto\-expansion
   8) Braces auto\-expansion
   9) ELN's auto\-expansion
@@ -58,18 +58,19 @@ List of CliFM features:
   18) User profiles
   19) Commands sequential and conditional execution
   20) Resource opener
-  21) Multiple sorting methods and reverse sorting
+  21) 9 sorting methods and reverse sorting
   22) Bulk rename
   23) Archiving and compression support
   24) Auto-cd and auto-open
   25) Plugins support via custom actions linked to executable files
   26) Symbolic links editor
   27) Regular expressions and filetype filter support for both search and selection of files
+  28) Command substitution for internal commands
 
 .SH RATIONALE
 When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the Linux built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There is no two without three".
 .sp
-While the Linux console, which strictly speaking could be though of as a FM, does not actually feel as one and lacks many features (like bookmarks, files selection, a trash system, a resource opener and the like), graphical FM's offer most of these features, but only at the expense of system resources (at the very least 20MiB of RAM and most of the time a graphical X session). Heavily inspired by the KISS principle ("Keep Simple, Stupid"), CLiFM was born as an attempt to get the best of both worlds: the speed and lightness of the CLI and the extra features of traditional FM's. It is aimed to be, briefly speaking, a wrapper of the CLI to extend and improve its functionality; CliFM feels, acts, and flies like the CLI, offering at the same time some of the most useful features of traditional FM's.
+While the Linux console, which strictly speaking could be though of as a FM, does not actually feel as one and lacks many features (like bookmarks, files selection, a trash system, a resource opener and the like), graphical FM's offer most of these features, but only at the expense of system resources (at the very least 20MiB of RAM and most of the time a graphical X session). Heavily inspired by the KISS principle ("Keep it Simple, Stupid"), CLiFM was born as an attempt to get the best of both worlds: the speed and lightness of the CLI and the extra features of traditional FM's. It is aimed to be, briefly speaking, a wrapper of the CLI to extend and improve its functionality; CliFM feels, acts, and flies like the CLI, offering at the same time some of the most useful features of traditional FM's.
 .sp
 Personally, since I just dislike GUI and bloated stuff, I really felt the need of an extended and improved way to manage my files in the CLI. Indeed, CLiFM originated as an attempt to add a bookmarks function to the Bash shell, and then grew from these humble beginnings. In between the CLI and traditional FM's, we have now CLiFM, because, as the old Italian saying goes: "There is no two without three". 
 
@@ -81,7 +82,7 @@ do not show hidden files
 .B \-A, \-\-show\-hidden
 show hidden files (default)
 .TP
-.B \-c \-\-config\-file \fRCONFIG_FILE
+.B \-c \-\-config\-file \fRFILE
 set an alternative configuration file
 .TP
 .B \-f, \-\-no\-folders\-first
@@ -105,7 +106,7 @@ no case\-sensitive files listing (default)
 .B \-I, \-\-case\-sensitive
 case\-sensitive files listing
 .TP
-.B \-k \-\-keybindings\-file \fRKEYBINDINGS_FILE
+.B \-k \-\-keybindings\-file \fRFILE
 set an alternative keybindings file
 .TP
 .B \-l, \-\-no\-long\-view
