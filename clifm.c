@@ -1440,6 +1440,8 @@ next-dir2:\\e[c\n\
 next-dir3:\\e[2C\n\
 # Shift-right (others)\n\
 next-dir4:\\e[1;2C\n\
+first-dir:\\C-M-j\n\
+last-dir:\\C-M-k\n\
 \n\
 # Alt-u\n\
 parent-dir:\\M-u\n\
@@ -9890,6 +9892,42 @@ rl_next_dir(int count, int key)
 }
 
 int
+rl_first_dir(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	/* If already at the beginning of dir hist, do nothing */
+	if (dirhist_cur_index == 0)
+		return EXIT_SUCCESS;
+
+	keybind_exec_cmd("b !1");
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
+int
+rl_last_dir(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	/* If already at the end of dir hist, do nothing */
+	if (dirhist_cur_index + 1 == dirhist_total_index)
+		return EXIT_SUCCESS;
+
+	char cmd[PATH_MAX + 4];
+	sprintf(cmd, "b !%d", dirhist_total_index);
+	keybind_exec_cmd(cmd);
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
+int
 rl_previous_dir(int count, int key)
 {
 	if (kbind_busy)
@@ -10463,6 +10501,8 @@ readline_kbinds(void)
 	/* Navigation */
 	/* Define multiple keybinds for different terminals:
 	 * rxvt, xterm, linux console */
+	rl_bind_keyseq("\\C-\\M-j", rl_first_dir);
+	rl_bind_keyseq("\\C-\\M-k", rl_last_dir);
 	rl_bind_keyseq(find_key("parent-dir"), rl_parent_dir);
 	rl_bind_keyseq(find_key("parent-dir2"), rl_parent_dir);
 	rl_bind_keyseq(find_key("parent-dir3"), rl_parent_dir);
@@ -22198,11 +22238,11 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
  M-r: Change to the root directory\n\
  M-e, Home: Change to the home directory\n\
  M-u, S-Up: Change to the parent directory\n\
- M-j, S-Left: Change to the previous directory in the directory history "
-"list\n"
-" M-k, S-Right: Change to the next directory in the directory history "
-"list\n"
-" M-o: Lock terminal\n\
+ M-j, S-Left: Change to previous visited directory\n\
+ M-k, S-Right: Change to next visited directory\n\
+ M-o: Lock terminal\n\
+ C-M-j: Change to first visited directory\n\
+ C-M-k: Change to last visited directory\n\
  C-M-o: Switch to previous profile\n\
  C-M-p: Switch to next profile\n\
  C-M-a: Archive selected files\n\

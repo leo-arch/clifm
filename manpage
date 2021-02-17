@@ -477,15 +477,19 @@ safely quit CliFM.
 .TP
 \fBM\-d:\fR Deselect all selected files
 .TP
-\fBM\-r:\fR Change to the root directory
+\fBM\-r:\fR Change to root directory
 .TP
-\fBM\-e, Home:\fR Change to the home directory
+\fBM\-e, Home:\fR Change to home directory
 .TP
-\fBM\-u, S-Up:\fR Change to the parent directory
+\fBM\-u, S-Up:\fR Change to parent directory
 .TP
-\fBM\-j, S-Left:\fR Change to the previous directory in the directory history list
+\fBM\-j, S-Left:\fR Change to previous directory
 .TP
-\fBM\-k, S-Right:\fR Change to the next directory in the directory history list
+\fBM\-k, S-Right:\fR Change to next visited directory
+.TP
+\fBC\-M\-j:\fR Change to first visited directory
+.TP
+\fBC\-M\-k:\fR Change to last visited directory
 .TP
 \fBC\-M\-o:\fR Switch to previous profile
 .TP
