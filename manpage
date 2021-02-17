@@ -7,7 +7,7 @@
 CLIFM \- A completely CLI\-based file manager inspired by Arch Linux' KISS principle
 
 .SH SYNOPSIS
-\fIclifm\fR [\-aAfFgGhiIlLmoOsuUvxy] [\-p PATH] [\-P PROFILE] [\-z METHOD]
+\fIclifm\fR [\-aAfFgGhiIlLmoOsuUvxy] [-c CONFIG_FILE] [-k KEYBINDINGS_FILE] [\-p PATH] [\-P PROFILE] [\-z METHOD]
 
 .SH DESCRIPTION
 CliFM is a completely text\-based file manager (no GUI nor curses at all) able to perform all the basic operations you may expect from any other FM. However, its most distinguishing characteristics are:
@@ -81,6 +81,9 @@ do not show hidden files
 .B \-A, \-\-show\-hidden
 show hidden files (default)
 .TP
+.B \-c \-\-config\-file \fRCONFIG_FILE
+set an alternative configuration file
+.TP
 .B \-f, \-\-no\-folders\-first
 do not list folders first
 .TP
@@ -101,6 +104,9 @@ no case\-sensitive files listing (default)
 .TP
 .B \-I, \-\-case\-sensitive
 case\-sensitive files listing
+.TP
+.B \-k \-\-keybindings\-file \fRKEYBINDINGS_FILE
+set an alternative keybindings file
 .TP
 .B \-l, \-\-no\-long\-view
 disable long view mode (default)
@@ -453,6 +459,8 @@ safely quit CliFM.
 .TP
 \fBC\-r:\fR Refresh the screen
 .TP
+\fBM\-t:\fR Clear program messages
+.TP
 \fBM\-l:\fR Toggle long view mode on/off
 .TP
 \fBM\-m:\fR List mountpoints
@@ -508,6 +516,8 @@ safely quit CliFM.
 \fBF9:\fR Open the keybindings file
 .TP
 \fBF10:\fR Open the configuration file
+.TP
+\fBF12:\fR Quit
 .TP
 These are the default keyboard shortcuts. However, they can be freely modified using the 'kb edit' command or just editing the keybindings file (see the FILES section below).
 .TP

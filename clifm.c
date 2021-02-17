@@ -667,6 +667,7 @@ struct param
 	int light;
 	int sort;
 	int dirmap;
+	int config;
 };
 
 struct param xargs;
@@ -755,7 +756,8 @@ char *user = (char *)NULL, *path = (char *)NULL,
 	*term = (char *)NULL, *TMP_DIR = (char *)NULL, *opener = (char *)NULL,
 	**old_pwd = (char **)NULL, *SCRIPTS_DIR = (char *)NULL,
 	*ACTIONS_FILE = (char *)NULL, **ext_colors = (char **)NULL,
-	*DIRHIST_FILE = (char *)NULL, *KBINDS_FILE = (char *)NULL;
+	*DIRHIST_FILE = (char *)NULL, *KBINDS_FILE = (char *)NULL,
+	*alt_config_file = (char *)NULL, *alt_kbinds_file = (char *)NULL;
 
 char div_line_char = UNSET;
 
@@ -1462,7 +1464,6 @@ root-dir:\\M-r\n\
 root-dir2:\\e/\n\
 #root-dir3:\n\
 \n\
-quit:\\M-q\n\
 new-instance:\\C-x\n\
 previous-profile:\\C-M-o\n\
 next-profile:\\C-M-p\n\
@@ -1475,10 +1476,9 @@ export-sel:\\C-M-e\n\
 open-sel:\\C-M-g\n\
 refresh-screen:\\C-r\n\
 clear-line:\\M-c\n\
+clear-msgs:\\M-t\n\
 show-dirhist:\\M-h\n\
 toggle-hidden:\\M-i\n\
-open-config:\\e[21~\n\
-open-keybinds:\\e[20~\n\
 toggle-light:\\M-y\n\
 toggle-long:\\M-l\n\
 sort-previous:\\M-z\n\
@@ -1488,7 +1488,10 @@ select-all:\\M-a\n\
 deselect-all:\\M-d\n\
 mountpoints:\\M-m\n\
 folders-first:\\M-f\n\
-selbox:\\M-s\n", PROGRAM_NAME);
+selbox:\\M-s\n\
+open-keybinds:\\e[20~\n\
+open-config:\\e[21~\n\
+quit:\\e[24~\n", PROGRAM_NAME);
 
 	fclose(fp);
 
@@ -10399,6 +10402,20 @@ rl_new_instance(int count, int key)
 
 	return EXIT_SUCCESS;
 }
+
+int
+rl_clear_msgs(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	keybind_exec_cmd("msg clear");
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
 int
 rl_open_sel(int count, int key)
 {
@@ -10481,6 +10498,7 @@ readline_kbinds(void)
 	rl_bind_keyseq(find_key("open-keybinds"), rl_open_keybinds);
 
 	/* Settings */
+	rl_bind_keyseq(find_key("clear-msgs"), rl_clear_msgs);
 	rl_bind_keyseq(find_key("next-profile"), rl_next_profile);
 	rl_bind_keyseq(find_key("previous-profile"), rl_previous_profile);
 	rl_bind_keyseq(find_key("quit"), rl_quit);
@@ -12121,19 +12139,29 @@ init_config(void)
 			}
 		}
 
-		/* Keybindings per user, not per profile */
-		if (xdg_config_home) {
-			KBINDS_FILE = (char *)xcalloc(strlen(xdg_config_home)
-								 + pnl_len + 14, sizeof(char));
-			sprintf(KBINDS_FILE, "%s/%s/keybindings", xdg_config_home,
-					PNL);
+		if (alt_kbinds_file) {
+			KBINDS_FILE = (char *)xcalloc(strlen(alt_kbinds_file)
+								 + 1, sizeof(char));
+			strcpy(KBINDS_FILE, alt_kbinds_file);
+			free(alt_kbinds_file);
+			alt_kbinds_file = (char *)NULL;
 		}
 
 		else {
-			KBINDS_FILE = (char *)xcalloc(user_home_len + pnl_len
-										  + 22, sizeof(char));
-			sprintf(KBINDS_FILE, "%s/.config/%s/keybindings", user_home,
-					PNL);
+			/* Keybindings per user, not per profile */
+			if (xdg_config_home) {
+				KBINDS_FILE = (char *)xcalloc(strlen(xdg_config_home)
+									 + pnl_len + 14, sizeof(char));
+				sprintf(KBINDS_FILE, "%s/%s/keybindings",
+						xdg_config_home, PNL);
+			}
+
+			else {
+				KBINDS_FILE = (char *)xcalloc(user_home_len + pnl_len
+											  + 22, sizeof(char));
+				sprintf(KBINDS_FILE, "%s/.config/%s/keybindings",
+						user_home, PNL);
+			}
 		}
 
 		xdg_config_home = (char *)NULL;
@@ -12166,9 +12194,19 @@ init_config(void)
 		HIST_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
 		sprintf(HIST_FILE, "%s/history.cfm", CONFIG_DIR);
 
-		CONFIG_FILE = (char *)xcalloc(config_len + pnl_len + 4,
-									  sizeof(char));
-		sprintf(CONFIG_FILE, "%s/%src", CONFIG_DIR, PNL);
+		if (!alt_config_file) {
+			CONFIG_FILE = (char *)xcalloc(config_len + pnl_len + 4,
+										  sizeof(char));
+			sprintf(CONFIG_FILE, "%s/%src", CONFIG_DIR, PNL);
+		}
+
+		else {
+			CONFIG_FILE = (char *)xcalloc(strlen(alt_config_file) + 1,
+										  sizeof(char));
+			strcpy(CONFIG_FILE, alt_config_file);
+			free(alt_config_file);
+			alt_config_file = (char *)NULL;
+		}
 
 		PROFILE_FILE = (char *)xcalloc(config_len + pnl_len + 10,
 							   sizeof(char));
@@ -13458,6 +13496,7 @@ external_arguments(int argc, char **argv)
 	static struct option longopts[] = {
 		{"no-hidden", no_argument, 0, 'a'},
 		{"show-hidden", no_argument, 0, 'A'},
+		{"config-file", no_argument, 0, 'c'},
 		{"no-folders-first", no_argument, 0, 'f'},
 		{"folders-first", no_argument, 0, 'F'},
 		{"pager", no_argument, 0, 'g'},
@@ -13465,6 +13504,7 @@ external_arguments(int argc, char **argv)
 		{"help", no_argument, 0, 'h'},
 		{"no-case-sensitive", no_argument, 0, 'i'},
 		{"case-sensitive", no_argument, 0, 'I'},
+		{"keybindings-file", no_argument, 0, 'k'},
 		{"no-long-view", no_argument, 0, 'l'},
 		{"long-view", no_argument, 0, 'L'},
 		{"dirhist-map", no_argument, 0, 'm'},
@@ -13486,13 +13526,14 @@ external_arguments(int argc, char **argv)
 	xargs.splash = xargs.hidden = xargs.longview = xargs.ext = -1;
 	xargs.ffirst = xargs.sensitive = xargs.unicode = xargs.pager = -1;
 	xargs.path = xargs.cdauto = xargs.light = xargs.sort = -1,
-	xargs.dirmap = -1;
+	xargs.dirmap = -1, xargs.config = -1;
 
 	int optc;
-	/* Variables to store arguments to options (-p and -P) */
-	char *path_value = (char *)NULL, *alt_profile_value = (char *)NULL;
+	/* Variables to store arguments to options (-c, -p and -P) */
+	char *path_value = (char *)NULL, *alt_profile_value = (char *)NULL,
+		 *config_value = (char *)NULL, *kbinds_value = (char *)NULL;
 
-	while ((optc = getopt_long(argc, argv, "+aAfFgGhiIlLmoOp:P:sUuvxyz:",
+	while ((optc = getopt_long(argc, argv, "+aAc:fFgGhiIk:lLmoOp:P:sUuvxyz:",
 							   longopts, (int *)0)) != EOF) {
 		/* ':' and '::' in the short options string means 'required' and 
 		 * 'optional argument' respectivelly. Thus, 'p' and 'P' require
@@ -13510,6 +13551,11 @@ external_arguments(int argc, char **argv)
 			flags |= HIDDEN; /* Add HIDDEN to 'flags' */
 			show_hidden = 1;
 			xargs.hidden = 1;
+			break;
+
+		case 'c':
+			xargs.config = 1;
+			config_value = optarg;
 			break;
 
 		case 'f':
@@ -13551,6 +13597,10 @@ external_arguments(int argc, char **argv)
 			flags |= CASE_SENS;
 			case_sensitive = 1;
 			xargs.sensitive = 1;
+			break;
+
+		case 'k':
+			kbinds_value = optarg;
 			break;
 
 		case 'l':
@@ -13647,10 +13697,11 @@ external_arguments(int argc, char **argv)
 			/* If unknown option is printable... */
 			else if (isprint(optopt)) {
 				fprintf(stderr, _("%s: invalid option -- '%c'\nUsage: %s "
-						"[-aAfFgGhiIlLmoOsuUvxyz] [-p PATH] [-P PROFILE] "
+						"[-aAfFgGhiIlLmoOsuUvxyz] [-c CONFIG_FILE] "
+						"[-k KEYBINDINGS_FILE] [-p PATH] [-P PROFILE] "
 						"[-z METHOD]\nTry '%s --help' for more "
-						"information.\n"), PROGRAM_NAME, optopt, PNL,
-						PNL);
+						"information.\n"),
+						PROGRAM_NAME, optopt, PNL, PNL);
 			}
 
 			else {
@@ -13664,22 +13715,91 @@ external_arguments(int argc, char **argv)
 		}
 	}
 
+	if (kbinds_value) {
+		char *kbinds_exp = (char *)NULL;
+
+		if (*kbinds_value == '~') {
+			kbinds_exp = tilde_expand(kbinds_value);
+			kbinds_value = kbinds_exp;
+		}
+
+/*		if (alt_kbinds_file) {
+			free(alt_kbinds_file);
+			alt_kbinds_file = (char *)NULL;
+		} */
+
+		if (access(kbinds_value, R_OK) == -1) {
+			_err('e', PRINT_PROMPT, "%s: %s: %s\n"
+				"Falling back to default\n", PROGRAM_NAME,
+				 kbinds_value, strerror(errno));
+//			xargs.config = -1;
+		}
+
+		else {
+			alt_kbinds_file = (char *)xnmalloc(strlen(kbinds_value)
+											+ 1, sizeof(char));
+			strcpy(alt_kbinds_file, kbinds_value);
+			_err('n', PRINT_PROMPT, "%s: Loaded alternative "
+				 "keybindings file\n", PROGRAM_NAME);
+		}
+
+		if (kbinds_exp)
+			free(kbinds_exp);
+	}
+
+	if (xargs.config && config_value) {
+		char *config_exp = (char *)NULL;
+
+		if (*config_value == '~') {
+			config_exp = tilde_expand(config_value);
+			config_value = config_exp;
+		}
+
+/*		if (alt_config_file) {
+			free(alt_config_file);
+			alt_config_file = (char *)NULL;
+		} */
+
+		if (access(config_value, R_OK) == -1) {
+			_err('e', PRINT_PROMPT, "%s: %s: %s\n"
+				"Falling back to default\n", PROGRAM_NAME,
+				 config_value, strerror(errno));
+			xargs.config = -1;
+		}
+
+		else {
+			alt_config_file = (char *)xnmalloc(strlen(config_value)
+											+ 1, sizeof(char));
+			strcpy(alt_config_file, config_value);
+			_err('n', PRINT_PROMPT, "%s: Loaded alternative "
+				 "configuration file\n", PROGRAM_NAME);
+		}
+
+		if (config_exp)
+			free(config_exp);
+	}
+
 	if ((flags & START_PATH) && path_value) {
 		char *path_exp = (char *)NULL;
+
 		if (*path_value == '~') {
 			path_exp = tilde_expand(path_value);
 			path_value = path_exp;
 		}
+
 		if (chdir(path_value) == 0) {
 			if (path)
 				free(path);
+
 			path = (char *)xcalloc(strlen(path_value) + 1, sizeof(char));
 			strcpy(path, path_value);
 		}
+
 		else { /* Error changing directory */
 			_err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 				 path_value, strerror(errno));
 		}
+
 		if (path_exp)
 			free(path_exp);
 	}
@@ -21972,10 +22092,11 @@ help_function (void)
 {
 	printf(_("%s %s (%s), by %s\n"), PROGRAM_NAME, VERSION, DATE, AUTHOR);
 
-	printf(_("\nUSAGE: %s [-aAfFgGhiIlLmoOsuUvxy] [-p PATH] [-P PROFILE] "
-			"[-z METHOD]\n\
+	printf(_("\nUSAGE: %s [-aAfFgGhiIlLmoOsuUvxy] [-c CONFIG_FILE] "
+		    "[-k KEYBINDINGS_FILE] [-p PATH] [-P PROFILE] [-z METHOD]\n\
 \n -a, --no-hidden\t\t do not show hidden files\
 \n -A, --show-hidden\t\t show hidden files (default)\
+\n -c, --config-file\t\t specify an alternative configuration file\
 \n -f, --no-folders-first\t\t do not list folders first\
 \n -F, --folders-first\t\t list folders first (default)\
 \n -g, --pager\t\t\t enable the pager\
@@ -21983,6 +22104,7 @@ help_function (void)
 \n -h, --help\t\t\t show this help and exit\
 \n -i, --no-case-sensitive\t no case-sensitive files listing (default)\
 \n -I, --case-sensitive\t\t case-sensitive files listing\
+\n -k, --keybindings-file\t\t specify an alternative keybindings file\
 \n -l, --no-long-view\t\t disable long view mode (default)\
 \n -L, --long-view\t\t enable long view mode\
 \n -m, --dihist-map\t\t enable the directory history map\
@@ -22066,6 +22188,7 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
  C-r: Refresh the screen\n\
  M-l: Toggle long view mode on/off\n\
  M-m: List mountpoints\n\
+ M-t: Clear messages\n\
  M-b: Launch the Bookmarks Manager\n\
  M-h: Show directory history\n\
  M-i: Toggle hidden files on/off\n\
@@ -22093,9 +22216,9 @@ be: 0 = none, 1 = name, 2 = size, 3 = atime, \
  M-z: Switch to previous sorting method\n\
  M-x: Switch to next sorting method\n\
  C-x: Launch a new instance\n\
- M-q: Quit\n\
  F9: Open the keybindings file\n\
- F10: Open the configuration file\n\n"
+ F10: Open the configuration file\n\
+ F12: Quit\n\n"
 "NOTE: C stands for Ctrl, S for Shift, and M for Meta (Alt key in "
 "most keyboards)\n\n");
 
