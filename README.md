@@ -41,7 +41,7 @@ Of course, you can deselect some or all selected files whenever you want with th
 
 ![selection box](images/sel_box.png)
  
- * Open files without the need to specify any program. Via `mime` (the **built-in resource opener**), if no program was specified, CliFM will open the file with the default program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background. Of course, you can also set a custom resource opener.
+ * Open files without the need to specify any program. Via `lira` (the **built-in resource opener**), if no program was specified, CliFM will open the file with the default program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background. Of course, you can also set a custom resource opener.
 
 * **Quick search**: type `/REGEX` and CliFM will list all matches for the corresponding REGEX pattern. Example: `/.*.png` will list all the PNG files in the current directory. If you want to search for files in another directory, just tell the search function where to search: `/.*.png /media/images`. And, if you want to further filter the search, you still can specify what kind of files you want. For example: `/[.-].*d$ -d /etc` will list all directories (-d) in `/etc` containing a dot or a slash and ending with 'd'.
 
@@ -60,6 +60,8 @@ Of course, you can deselect some or all selected files whenever you want with th
 * **NEW: PLUGINS via custom actions**: Use custom action names, as if they were any other command, to run custom shell scripts or programs written in any language you know and extend thus CliFM's functionality to fit your needs. This is basically an easy way of building custom commands for CliFM.
 
 * **NEW: Directory history map**: Keep in sight previous, current, and next entries in the directory history list for easiest and fastest navigation through visited directories.
+
+* **NEW: Stealth mode**: Leave no trace on the host system.
 
 Because file manager, but also half-shell, CLiFM also provides the following features:
 
