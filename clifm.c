@@ -1353,7 +1353,7 @@ int kbinds_reset(void)
 int
 kbinds_edit(void)
 {
-	if (xargs.stealth_mode) {
+	if (xargs.stealth_mode == 1) {
 		printf("%s: Access to configuration files is not allowed in "
 			   "stealth mode\n", PROGRAM_NAME);
 		return EXIT_SUCCESS;
@@ -2049,7 +2049,7 @@ char
 int
 edit_actions(void)
 {
-	if (xargs.stealth_mode) {
+	if (xargs.stealth_mode == 1) {
 		printf("%s: Access to configuration files is not allowed in "
 			   "stealth mode\n", PROGRAM_NAME);
 		return EXIT_SUCCESS;
@@ -2422,7 +2422,7 @@ handle_iso(char *file)
 			/* Create mountpoint */
 			char *mountpoint = (char *)NULL;
 
-			if (xargs.stealth_mode) {
+			if (xargs.stealth_mode == 1) {
 				mountpoint = (char *)xnmalloc(strlen(file) + 19,
 											  sizeof(char));
 
@@ -2511,7 +2511,7 @@ check_iso(char *file)
 	if (!rand_ext)
 		return -1;
 
-	if (xargs.stealth_mode)
+	if (xargs.stealth_mode == 1)
 		sprintf(ISO_TMP_FILE, "/tmp/clifm-archiver.%s", rand_ext);
 	else
 		sprintf(ISO_TMP_FILE, "%s/archiver.%s", TMP_DIR, rand_ext);
@@ -2728,7 +2728,7 @@ is_compressed(char *file, int test_iso)
 
 	char ARCHIVER_TMP_FILE[PATH_MAX] = "";
 
-	if (xargs.stealth_mode)
+	if (xargs.stealth_mode == 1)
 		sprintf(ARCHIVER_TMP_FILE, "/tmp/clifm-archiver.%s", rand_ext);
 	else
 		sprintf(ARCHIVER_TMP_FILE, "%s/archiver.%s", TMP_DIR, rand_ext);
@@ -3366,7 +3366,7 @@ archiver(char **args, char mode)
 				/* Create mountpoint */
 				char *mountpoint = (char *)NULL;
 
-				if (xargs.stealth_mode) {
+				if (xargs.stealth_mode == 1) {
 					mountpoint = (char *)xnmalloc(strlen(args[i]) + 19,
 										sizeof(char));
 
@@ -3494,7 +3494,7 @@ bulk_rename(char **args)
 	int exit_status = EXIT_SUCCESS;
 
 	char BULK_FILE[PATH_MAX] = "";
-	if (xargs.stealth_mode)
+	if (xargs.stealth_mode == 1)
 		sprintf(BULK_FILE, "/tmp/.clifm_bulk_rename");
 	else
 		sprintf(BULK_FILE, "%s/.bulk_rename", TMP_DIR);
@@ -4223,7 +4223,7 @@ m_versionsort(const struct dirent **a, const struct dirent **b)
 int
 remote_ftp(char *address, char *options)
 {
-	if (xargs.stealth_mode) {
+	if (xargs.stealth_mode == 1) {
 		printf("%s: Access to remote filesystems is disabled in "
 			   "stealth mode\n", PROGRAM_NAME);
 		return EXIT_SUCCESS;
@@ -4312,7 +4312,7 @@ remote_ftp(char *address, char *options)
 int
 remote_smb(char *address, char *options)
 {
-	if (xargs.stealth_mode) {
+	if (xargs.stealth_mode == 1) {
 		printf("%s: Access to remote filesystems is disabled in "
 			   "stealth mode\n", PROGRAM_NAME);
 		return EXIT_SUCCESS;
@@ -4478,7 +4478,7 @@ remote_smb(char *address, char *options)
 int
 remote_ssh(char *address, char *options)
 {
-	if (xargs.stealth_mode) {
+	if (xargs.stealth_mode == 1) {
 		printf("%s: Access to remote filesystems is disabled in "
 			   "stealth mode\n", PROGRAM_NAME);
 		return EXIT_SUCCESS;
@@ -5068,7 +5068,7 @@ record_cmd(char *input)
 int
 alias_import(char *file)
 {
-	if (xargs.stealth_mode) {
+	if (xargs.stealth_mode == 1) {
 		printf("%s: The alias function is disabled in stealth mode\n",
 			   PROGRAM_NAME);
 		return EXIT_SUCCESS;
@@ -5590,7 +5590,7 @@ decode_prompt(char *line)
 int
 profile_function(char **comm)
 {
-	if (xargs.stealth_mode) {
+	if (xargs.stealth_mode == 1) {
 		printf("%s: The profile function is disabled in stealth mode\n",
 			   PROGRAM_NAME);
 		return EXIT_SUCCESS;
@@ -5837,7 +5837,7 @@ profile_add(char *prof)
 int
 profile_del(char *prof)
 {
-	if (xargs.stealth_mode) {
+	if (xargs.stealth_mode == 1) {
 		printf("%s: The profile function is disabled in stealth mode\n",
 			   PROGRAM_NAME);
 		return EXIT_SUCCESS;
@@ -5891,7 +5891,7 @@ int
 profile_set(char *prof)
 /* Switch profile to PROF */
 {
-	if (xargs.stealth_mode) {
+	if (xargs.stealth_mode == 1) {
 		printf("%s: The profile function is disabled in stealth mode\n",
 			   PROGRAM_NAME);
 		return EXIT_SUCCESS;
@@ -7728,7 +7728,7 @@ set_default_options(void)
 	/* Since in stealth mode we have no access to config file, we
 	 * cannot use 'lira', since it relays on a file.
 	 * Set it thus to xdg-open, if not set via command line */
-	if (xargs.stealth_mode && !opener) {
+	if (xargs.stealth_mode == 1 && !opener) {
 		opener = (char *)xnmalloc(9, sizeof(char));
 		strcpy(opener, "xdg-open");
 	}
@@ -9487,7 +9487,7 @@ untrash_element(char *file)
 int
 untrash_function(char **comm)
 {
-	if (xargs.stealth_mode) {
+	if (xargs.stealth_mode == 1) {
 		printf("%s: The trash function is disabled in "
 			   "stealth mode\n", PROGRAM_NAME);
 		return EXIT_SUCCESS;
@@ -9706,7 +9706,7 @@ trash_clear(void)
 int
 trash_function (char **comm)
 {
-	if (xargs.stealth_mode) {
+	if (xargs.stealth_mode == 1) {
 		printf("%s: The trash function is disabled in "
 			   "stealth mode\n", PROGRAM_NAME);
 		return EXIT_SUCCESS;
@@ -21301,7 +21301,7 @@ open_bookmark(char **cmd)
 int
 bookmarks_function(char **cmd)
 {
-	if (xargs.stealth_mode) {
+	if (xargs.stealth_mode == 1) {
 		printf("%s: Access to configuration files is not allowed in "
 			   "stealth mode\n", PROGRAM_NAME);
 		return EXIT_SUCCESS;
@@ -22446,7 +22446,7 @@ edit_function (char **comm)
  * passed argument (Ex: 'edit nano'). The 'gen' option regenerates
  * the configuration file and creates a back up of the old one. */
 {
-	if (xargs.stealth_mode) {
+	if (xargs.stealth_mode == 1) {
 		printf("%s: Access to configuration files is not allowed in "
 			   "stealth mode\n", PROGRAM_NAME);
 		return EXIT_SUCCESS;
