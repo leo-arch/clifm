@@ -221,6 +221,7 @@ static int flags;
 #define green_b "\001\x1b[1;32m\002" /* sel, notice message indicator */
 #define yellow_b "\001\x1b[0;33m\002" /* trash, warning message indicator */
 #define NC_b "\001\x1b[0m\002"
+#define stealth_color "\001\x1b[1;34m\002" /* stealth mode */
 /* NOTE: Do not use \001 prefix and \002 suffix for colors list: they
  * produce a displaying problem in lxterminal (though not in aterm and
  * xterm). */
@@ -267,6 +268,7 @@ tw=30;42:ow=34;42:ex=01;32:no=31;47"
 #define DEF_SPLASH_SCREEN 0
 #define DEF_WELCOME_MESSAGE 1
 #define DEF_SHOW_HIDDEN 0
+#define DEF_SHOW_BK_FILES 1
 #define DEF_SORT 1
 #define DEF_FILES_COUNTER 1
 #define DEF_LONG_VIEW 0
@@ -309,6 +311,9 @@ tw=30;42:ow=34;42:ex=01;32:no=31;47"
 /* Used when dirhist map is set to true */
 /* #define DEFAULT_PROMPT_NO_CWD "\\A \\u:\\H\\n\\[\\e[0m\\]\
 \\z\\[\\e[0;34m\\] \\$\\[\\e[0m\\] " */
+
+#define GRAL_USAGE "[-aAfFgGhiIlLmoOsSuUvxyz] [-c FILE] [-k FILE] \
+[-p PATH] [-P PROFILE] [-z METHOD]"
 
 #define DEFAULT_TERM_CMD "xterm -e"
 
@@ -657,7 +662,9 @@ struct param
 	int splash;
 	int hidden;
 	int longview;
-	int cdauto;
+	int cd_list_auto;
+	int autocd;
+	int auto_open; 
 	int ext;
 	int ffirst;
 	int sensitive;
@@ -668,6 +675,22 @@ struct param
 	int sort;
 	int dirmap;
 	int config;
+	int stealth_mode;
+	int restore_last_path;
+	int tips;
+	int disk_usage;
+	int dir_indicator;
+	int classify;
+	int share_selbox;
+	int rl_vi_mode;
+	int max_dirhist;
+	int sort_reverse;
+	int files_counter;
+	int welcome_message;
+	int clear_screen;
+	int bk_files;
+	int logs;
+	int max_path;
 };
 
 struct param xargs;
@@ -698,7 +721,7 @@ short splash_screen = UNSET, welcome_message = UNSET, ext_cmd_ok = UNSET,
 	tips = UNSET, logs_enabled = UNSET, sort = UNSET, classify = UNSET,
 	files_counter = UNSET, light_mode = UNSET, dir_indicator = UNSET,
 	autocd = UNSET, auto_open = UNSET,dirhist_map = UNSET,
-	restore_last_path = UNSET, pager = UNSET,
+	restore_last_path = UNSET, pager = UNSET, show_bk_files = UNSET,
 
 	no_log = 0, internal_cmd = 0, shell_terminal = 0, print_msg = 0,
 	recur_perm_error_flag = 0, is_sel = 0, sel_is_last = 0,
@@ -984,8 +1007,8 @@ main(int argc, char **argv)
 	/* Set all external arguments flags to uninitialized state */
 	xargs.splash = xargs.hidden = xargs.longview = xargs.ext = UNSET;
 	xargs.ffirst = xargs.sensitive = xargs.unicode = xargs.pager = UNSET;
-	xargs.path = xargs.cdauto = xargs.light = xargs.sort = UNSET;
-	xargs.dirmap = UNSET;
+	xargs.path = xargs.cd_list_auto = xargs.light = xargs.sort = UNSET;
+	xargs.dirmap = UNSET, xargs.stealth_mode = UNSET;
 
 	if (argc > 1)
 		external_arguments(argc, argv);
@@ -993,11 +1016,20 @@ main(int argc, char **argv)
 		 * specified (-P option), it sets the value of alt_profile, which
 		 * is then checked by init_config */
 
-	/* Initialize program paths and files, set options from the config
-	 * file, if they were not already set via external arguments, and
-	 * load sel elements, if any. All these configurations are made per
-	 * user basis */
-	init_config();
+	/* If not in stealth mode, initialize program paths and files, set
+	 * options from the config file, if they were not already set via
+	 * external arguments, and load sel elements, if any. All these
+	 * configurations are made per user basis */
+	if (xargs.stealth_mode != 1)
+		init_config();
+
+	else {
+		_err(0, PRINT_PROMPT, _("%s: Running in stealth mode: trash, "
+			 "persisent selection and directory history, just as "
+			 "bookmarks, logs and configuration files, are "
+			 "disabled.\n"), PROGRAM_NAME);
+		config_ok = 0;
+	}
 
 	if (!config_ok)
 		set_default_options();
@@ -1321,6 +1353,15 @@ int kbinds_reset(void)
 int
 kbinds_edit(void)
 {
+	if (xargs.stealth_mode) {
+		printf("%s: Access to configuration files is not allowed in "
+			   "stealth mode\n", PROGRAM_NAME);
+		return EXIT_SUCCESS;
+	}
+	
+	if (!KBINDS_FILE)
+		return EXIT_FAILURE;
+
 	struct stat file_attrib;
 
 	if (stat(KBINDS_FILE, &file_attrib) == -1) {
@@ -1393,6 +1434,9 @@ kbinds_function(char **args)
 int
 create_kbinds_file(void)
 {
+	if (!config_ok)
+		return EXIT_FAILURE;
+
 	struct stat file_attrib;
 
 	if (stat(KBINDS_FILE, &file_attrib) != -1)
@@ -1467,6 +1511,7 @@ root-dir2:\\e/\n\
 #root-dir3:\n\
 \n\
 # Help\n\
+# F1-3\n\
 show-manpage:\eOP\n\
 show-cmds:\eOQ\n\
 show-kbinds:\eOR\n\
@@ -1499,6 +1544,7 @@ deselect-all:\\M-d\n\
 mountpoints:\\M-m\n\
 folders-first:\\M-f\n\
 selbox:\\M-s\n\
+# F9-12\n\
 open-keybinds:\\e[20~\n\
 open-config:\\e[21~\n\
 open-bookmarks:\\e[23~\n\
@@ -1661,6 +1707,13 @@ reload_config(void)
 	disk_usage = tips = logs_enabled = sort = files_counter = UNSET;
 	light_mode = dir_indicator = classify = UNSET;
 
+	xargs.restore_last_path = xargs.tips = xargs.disk_usage = UNSET;
+	xargs.dir_indicator = xargs.classify = xargs.share_selbox = UNSET;
+	xargs.rl_vi_mode = xargs.max_dirhist = xargs.sort_reverse = UNSET;
+	xargs.files_counter = xargs.welcome_message = UNSET;
+	xargs.clear_screen = xargs.bk_files = xargs.logs = UNSET;
+	xargs.max_path = UNSET;
+
 	shell_terminal = no_log = internal_cmd = recur_perm_error_flag = 0;
 	is_sel = sel_is_last = print_msg = kbind_busy = dequoted = 0;
 	mime_match = sort_switch = sort_reverse = kbind_busy = cont_bt = 0;
@@ -1696,8 +1749,8 @@ reload_config(void)
 		long_view = xargs.longview;
 	if (xargs.ffirst != UNSET)
 		list_folders_first = xargs.ffirst;
-	if (xargs.cdauto != UNSET)
-		cd_lists_on_the_fly = xargs.cdauto;
+	if (xargs.cd_list_auto != UNSET)
+		cd_lists_on_the_fly = xargs.cd_list_auto;
 	if (xargs.sensitive != UNSET)
 		case_sensitive = xargs.sensitive;
 	if (xargs.unicode != UNSET)
@@ -1996,6 +2049,12 @@ char
 int
 edit_actions(void)
 {
+	if (xargs.stealth_mode) {
+		printf("%s: Access to configuration files is not allowed in "
+			   "stealth mode\n", PROGRAM_NAME);
+		return EXIT_SUCCESS;
+	}
+
 	/* Get actions file's current modification time */
 	struct stat file_attrib;
 
@@ -2116,6 +2175,9 @@ int
 load_actions(void)
 /* Store actions from the actions file into a struct */
 {
+	if (!config_ok)
+		return EXIT_FAILURE;
+
 	/* Free the actions struct array */
 	if (actions_n) {
 		size_t i;
@@ -2359,11 +2421,21 @@ handle_iso(char *file)
 		case 'm': {
 			/* Create mountpoint */
 			char *mountpoint = (char *)NULL;
-			mountpoint = (char *)xnmalloc(strlen(CONFIG_DIR)
-										  + strlen(file) + 9,
-										  sizeof(char));
 
-			sprintf(mountpoint, "%s/mounts/%s", CONFIG_DIR, file);
+			if (xargs.stealth_mode) {
+				mountpoint = (char *)xnmalloc(strlen(file) + 19,
+											  sizeof(char));
+
+				sprintf(mountpoint, "/tmp/clifm-mounts/%s", file);
+			}
+
+			else {
+				mountpoint = (char *)xnmalloc(strlen(CONFIG_DIR)
+											  + strlen(file) + 9,
+											  sizeof(char));
+
+				sprintf(mountpoint, "%s/mounts/%s", CONFIG_DIR, file);
+			}
 
 			char *dir_cmd[] = { "mkdir", "-pm700", mountpoint, NULL };
 
@@ -2439,7 +2511,11 @@ check_iso(char *file)
 	if (!rand_ext)
 		return -1;
 
-	sprintf(ISO_TMP_FILE, "%s/archiver.%s", TMP_DIR, rand_ext);
+	if (xargs.stealth_mode)
+		sprintf(ISO_TMP_FILE, "/tmp/clifm-archiver.%s", rand_ext);
+	else
+		sprintf(ISO_TMP_FILE, "%s/archiver.%s", TMP_DIR, rand_ext);
+
 	free(rand_ext);
 
 	FILE *file_fp = fopen(ISO_TMP_FILE, "w");
@@ -2611,6 +2687,7 @@ print_tips(int all)
 		"Change default keyboard shortcuts editing the keybindings file",
 		"Keep in sight previous and next visited directories enabling the "
 		"DirhistMap option in the configuration file",
+		"Leave no traces at all running in stealth mode",
 		NULL
 	};
 
@@ -2649,8 +2726,12 @@ is_compressed(char *file, int test_iso)
 	if (!rand_ext)
 		return -1;
 
-	char ARCHIVER_TMP_FILE[PATH_MAX] = "";	
-	sprintf(ARCHIVER_TMP_FILE, "%s/archiver.%s", TMP_DIR, rand_ext);
+	char ARCHIVER_TMP_FILE[PATH_MAX] = "";
+
+	if (xargs.stealth_mode)
+		sprintf(ARCHIVER_TMP_FILE, "/tmp/clifm-archiver.%s", rand_ext);
+	else
+		sprintf(ARCHIVER_TMP_FILE, "%s/archiver.%s", TMP_DIR, rand_ext);
 
 	free(rand_ext);
 
@@ -2754,7 +2835,7 @@ zstandard(char *in_file, char *out_file, char mode, char op)
 	char *deq_file = dequote_str(in_file, 0);
 
 	if (!deq_file) {
-		fprintf(stderr, _("archiver: '%s': Error dequoting file\n"),
+		fprintf(stderr, _("archiver: '%s': Error dequoting filename\n"),
 				in_file);
 		return EXIT_FAILURE;
 	}
@@ -3013,7 +3094,6 @@ archiver(char **args, char mode)
 		}
 	}
 
-
 				/* ##########################
 				 * #		ISO 9660		#
 				 * ########################## */
@@ -3104,7 +3184,6 @@ archiver(char **args, char mode)
 			return exit_status;
 		}
 	}
-
 
 				/* ##########################
 				 * #		  OTHERS		#
@@ -3286,12 +3365,23 @@ archiver(char **args, char mode)
 
 				/* Create mountpoint */
 				char *mountpoint = (char *)NULL;
-				mountpoint = (char *)xnmalloc(strlen(CONFIG_DIR)
-									+ strlen(args[i]) + 9,
-									sizeof(char));
 
-				sprintf(mountpoint, "%s/mounts/%s", CONFIG_DIR,
-						args[i]);
+				if (xargs.stealth_mode) {
+					mountpoint = (char *)xnmalloc(strlen(args[i]) + 19,
+										sizeof(char));
+
+					sprintf(mountpoint, "/tmp/clifm-mounts/%s",
+							args[i]);
+				}
+
+				else {
+					mountpoint = (char *)xnmalloc(strlen(CONFIG_DIR)
+										+ strlen(args[i]) + 9,
+										sizeof(char));
+
+					sprintf(mountpoint, "%s/mounts/%s", CONFIG_DIR,
+							args[i]);
+				}
 
 				char *dir_cmd[] = { "mkdir", "-pm700", mountpoint,
 									NULL };
@@ -3404,7 +3494,10 @@ bulk_rename(char **args)
 	int exit_status = EXIT_SUCCESS;
 
 	char BULK_FILE[PATH_MAX] = "";
-	sprintf(BULK_FILE, "%s/.bulk_rename", TMP_DIR);
+	if (xargs.stealth_mode)
+		sprintf(BULK_FILE, "/tmp/.clifm_bulk_rename");
+	else
+		sprintf(BULK_FILE, "%s/.bulk_rename", TMP_DIR);
 
 	FILE *bulk_fp;
 
@@ -4130,6 +4223,12 @@ m_versionsort(const struct dirent **a, const struct dirent **b)
 int
 remote_ftp(char *address, char *options)
 {
+	if (xargs.stealth_mode) {
+		printf("%s: Access to remote filesystems is disabled in "
+			   "stealth mode\n", PROGRAM_NAME);
+		return EXIT_SUCCESS;
+	}
+
 	#if __FreeBSD__
 	fprintf(stderr, _("%s: FTP is not yet supported on FreeBSD\n"),
 			PROGRAM_NAME);
@@ -4213,6 +4312,12 @@ remote_ftp(char *address, char *options)
 int
 remote_smb(char *address, char *options)
 {
+	if (xargs.stealth_mode) {
+		printf("%s: Access to remote filesystems is disabled in "
+			   "stealth mode\n", PROGRAM_NAME);
+		return EXIT_SUCCESS;
+	}
+
 	#if __FreeBSD__
 	fprintf(stderr, _("%s: SMB is not yet supported on FreeBSD\n"),
 			PROGRAM_NAME);
@@ -4373,6 +4478,12 @@ remote_smb(char *address, char *options)
 int
 remote_ssh(char *address, char *options)
 {
+	if (xargs.stealth_mode) {
+		printf("%s: Access to remote filesystems is disabled in "
+			   "stealth mode\n", PROGRAM_NAME);
+		return EXIT_SUCCESS;
+	}
+	
 	#if __FreeBSD__
 	fprintf(stderr, _("%s: SFTP is not yet supported on FreeBSD"),
 			PROGRAM_NAME);
@@ -4604,6 +4715,7 @@ MaxPath=40\n\n"
 "WelcomeMessage=true\n\
 SplashScreen=false\n\
 ShowHiddenFiles=false\n\
+ShowBackUpFiles=true\n\
 LongViewMode=false\n\
 ExternalCommands=false\n\
 LogCmds=false\n\n"
@@ -4636,7 +4748,7 @@ ClassifyExec=false\n\n"
 ShareSelbox=false\n\n"
 
 "# Choose the resource opener to open files with their default associated\n\
-# application. If not set, CLiFM built-in opener is used\n\
+# application. If not set, 'lira', CLiFM built-in opener, is used\n\
 Opener=\n\n"
 
 "# Set the shell to be used when running external commands. Defaults to the \n\
@@ -4956,6 +5068,12 @@ record_cmd(char *input)
 int
 alias_import(char *file)
 {
+	if (xargs.stealth_mode) {
+		printf("%s: The alias function is disabled in stealth mode\n",
+			   PROGRAM_NAME);
+		return EXIT_SUCCESS;
+	}
+
 	if (!file)
 		return EXIT_FAILURE;
 
@@ -5472,6 +5590,12 @@ decode_prompt(char *line)
 int
 profile_function(char **comm)
 {
+	if (xargs.stealth_mode) {
+		printf("%s: The profile function is disabled in stealth mode\n",
+			   PROGRAM_NAME);
+		return EXIT_SUCCESS;
+	}
+
 	int exit_status = EXIT_SUCCESS;
 
 	if (comm[1]) {
@@ -5713,6 +5837,12 @@ profile_add(char *prof)
 int
 profile_del(char *prof)
 {
+	if (xargs.stealth_mode) {
+		printf("%s: The profile function is disabled in stealth mode\n",
+			   PROGRAM_NAME);
+		return EXIT_SUCCESS;
+	}
+
 	if (!prof)
 		return EXIT_FAILURE;
 
@@ -5761,6 +5891,12 @@ int
 profile_set(char *prof)
 /* Switch profile to PROF */
 {
+	if (xargs.stealth_mode) {
+		printf("%s: The profile function is disabled in stealth mode\n",
+			   PROGRAM_NAME);
+		return EXIT_SUCCESS;
+	}
+
 	if (!prof)
 		return EXIT_FAILURE;
 
@@ -6137,7 +6273,7 @@ int mime_open(char **args)
 	for (args_num = 0; args[args_num]; args_num++);
 
 	/* Construct the command and run it */
-	char *cmd[] = { (opener) ? opener : app, file_path, NULL };
+	char *cmd[] = { app, file_path, NULL };
 
 	int ret = launch_execve(cmd, strcmp(args[args_num - 1], "&") == 0
 							? BACKGROUND : FOREGROUND);
@@ -7584,38 +7720,79 @@ set_colors(void)
 
 void
 set_default_options(void)
-/* Set the default options. Used when the config file isn't accessible */
+/* Set the default options. Used when the config file isn't accessible
+ * or when running in stealth mode */
 {
-	splash_screen = DEF_SPLASH_SCREEN;
-	welcome_message = DEF_WELCOME_MESSAGE;
-	show_hidden = DEF_SHOW_HIDDEN;
-	files_counter = DEF_FILES_COUNTER;
-	long_view = DEF_LONG_VIEW;
-	ext_cmd_ok = DEF_EXT_CMD_OK;
-	pager = DEF_PAGER;
-	max_hist = DEF_MAX_HIST;
-	max_dirhist = DEF_MAX_DIRHIST;
-	max_log = DEF_MAX_LOG;
-	clear_screen = DEF_CLEAR_SCREEN;
-	list_folders_first = DEF_LIST_FOLDERS_FIRST;
-	cd_lists_on_the_fly = DEF_CD_LISTS_ON_THE_FLY;
-	case_sensitive = DEF_CASE_SENSITIVE;
-	unicode = DEF_UNICODE;
-	max_path = DEF_MAX_PATH;
-	logs_enabled = DEF_LOGS_ENABLED;
+	/* Do no override command line options */
+
+	/* Since in stealth mode we have no access to config file, we
+	 * cannot use 'lira', since it relays on a file.
+	 * Set it thus to xdg-open, if not set via command line */
+	if (xargs.stealth_mode && !opener) {
+		opener = (char *)xnmalloc(9, sizeof(char));
+		strcpy(opener, "xdg-open");
+	}
+
+	if (xargs.splash == UNSET)
+		splash_screen = DEF_SPLASH_SCREEN;
+	if (xargs.welcome_message == UNSET)
+		welcome_message = DEF_WELCOME_MESSAGE;
+	if (xargs.hidden == UNSET)
+		show_hidden = DEF_SHOW_HIDDEN;
+	if (xargs.bk_files == UNSET)
+		show_bk_files = DEF_SHOW_BK_FILES;
+	if (xargs.files_counter == UNSET)
+		files_counter = DEF_FILES_COUNTER;
+	if (xargs.longview == UNSET)
+		long_view = DEF_LONG_VIEW;
+	if (xargs.ext == UNSET)
+		ext_cmd_ok = DEF_EXT_CMD_OK;
+	if (xargs.pager == UNSET)
+		pager = DEF_PAGER;
+	if (xargs.max_dirhist == UNSET)
+		max_dirhist = DEF_MAX_DIRHIST;
+	if (xargs.clear_screen == UNSET)
+		clear_screen = DEF_CLEAR_SCREEN;
+	if (xargs.ffirst == UNSET)
+		list_folders_first = DEF_LIST_FOLDERS_FIRST;
+	if (xargs.cd_list_auto == UNSET)
+		cd_lists_on_the_fly = DEF_CD_LISTS_ON_THE_FLY;
+	if (xargs.sensitive == UNSET)
+		case_sensitive = DEF_CASE_SENSITIVE;
+	if (xargs.unicode == UNSET)
+		unicode = DEF_UNICODE;
+	if (xargs.max_path == UNSET)
+		max_path = DEF_MAX_PATH;
+	if (xargs.logs == UNSET)
+		logs_enabled = DEF_LOGS_ENABLED;
+	if (xargs.light == UNSET)
+		light_mode = DEF_LIGHT_MODE;
+	if (xargs.dir_indicator == UNSET)
+		dir_indicator = DEF_DIR_INDICATOR;
+	if (xargs.classify == UNSET)
+		classify = DEF_CLASSIFY;
+	if (xargs.share_selbox == UNSET)
+		share_selbox = DEF_SHARE_SELBOX;
+	if (xargs.sort == UNSET)
+		sort = DEF_SORT;
+	if (xargs.sort_reverse == UNSET)
+		sort_reverse = DEF_SORT_REVERSE;
+	if (xargs.tips == UNSET)
+		tips = DEF_TIPS;
+	if (xargs.autocd == UNSET)
+		autocd = DEF_AUTOCD;
+	if (xargs.auto_open == UNSET)
+		auto_open = DEF_AUTO_OPEN;
+	if (xargs.dirmap == UNSET)
+		dirhist_map = DEF_DIRHIST_MAP;
+	if (xargs.disk_usage == UNSET)
+		disk_usage = DEF_DISK_USAGE;
+	if (xargs.restore_last_path == UNSET)
+		restore_last_path = DEF_RESTORE_LAST_PATH;
+
 	div_line_char = DEF_DIV_LINE_CHAR;
-	light_mode = DEF_LIGHT_MODE;
-	dir_indicator = DEF_DIR_INDICATOR;
-	classify = DEF_CLASSIFY;
-	share_selbox = DEF_SHARE_SELBOX;
-	sort = DEF_SORT;
-	sort_reverse = DEF_SORT_REVERSE;
-	tips = DEF_TIPS;
-	autocd = DEF_AUTOCD;
-	auto_open = DEF_AUTO_OPEN;
-	dirhist_map = DEF_DIRHIST_MAP;
-	disk_usage = DEF_DISK_USAGE;
-	restore_last_path = DEF_RESTORE_LAST_PATH;
+	max_hist = DEF_MAX_HIST;
+	max_log = DEF_MAX_LOG;
 
 	strcpy(dirhist_index_color, DEF_DIRHIST_INDEX_COLOR);
 	strcpy(text_color, DEF_TEXT_COLOR);
@@ -8112,7 +8289,20 @@ open_function(char **cmd)
 
 	if (!cmd[2] || (*cmd[2] == '&' && !cmd[2][1] )) {
 
-		if (!(flags & FILE_CMD_OK)) {
+		if (opener) {
+			char *tmp_cmd[] = { opener, cmd[1], NULL };
+
+			int ret = launch_execve(tmp_cmd,
+						strcmp(cmd[args_n], "&") == 0 ? BACKGROUND
+						: FOREGROUND);
+
+			if (ret != EXIT_SUCCESS)
+				return EXIT_FAILURE;
+
+			return EXIT_SUCCESS;
+		}
+
+		else if (!(flags & FILE_CMD_OK)) {
 			fprintf(stderr, _("%s: 'file' command not found. Specify an "
 							  "application to open the file\nUsage: "
 							  "open ELN/FILENAME [APPLICATION]\n"), 
@@ -9297,6 +9487,12 @@ untrash_element(char *file)
 int
 untrash_function(char **comm)
 {
+	if (xargs.stealth_mode) {
+		printf("%s: The trash function is disabled in "
+			   "stealth mode\n", PROGRAM_NAME);
+		return EXIT_SUCCESS;
+	}
+
 	if (!comm)
 		return EXIT_FAILURE;
 
@@ -9510,6 +9706,12 @@ trash_clear(void)
 int
 trash_function (char **comm)
 {
+	if (xargs.stealth_mode) {
+		printf("%s: The trash function is disabled in "
+			   "stealth mode\n", PROGRAM_NAME);
+		return EXIT_SUCCESS;
+	}
+
 	/* Create trash dirs, if necessary */
 /*	struct stat file_attrib;
 	if (stat (TRASH_DIR, &file_attrib) == -1) {
@@ -9533,7 +9735,7 @@ trash_function (char **comm)
 	if (!comm)
 		return EXIT_FAILURE;
 
-	if (!trash_ok) {
+	if (!trash_ok || !config_ok) {
 		fprintf(stderr, _("%s: Trash function disabled\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
@@ -9736,6 +9938,9 @@ int
 load_keybinds(void)
 /* Store keybinds from the keybinds file into a struct */
 {
+	if (!config_ok)
+		return EXIT_FAILURE;
+
 	/* Free the keybinds struct array */
 	if (kbinds_n) {
 		size_t i;
@@ -10598,78 +10803,150 @@ readline_kbinds(void)
 			/* ##############################
 			 * #		KEYBINDINGS			#
 			 * ##############################*/
+	if (KBINDS_FILE) {
+		/* Help */
+		rl_bind_keyseq(find_key("show-manpage"), rl_manpage);
+		rl_bind_keyseq(find_key("show-cmds"), rl_cmds_help);
+		rl_bind_keyseq(find_key("show-kbinds"), rl_kbinds_help);
 
-	/* Help */
-	rl_bind_keyseq(find_key("show-manpage"), rl_manpage);
-	rl_bind_keyseq(find_key("show-cmds"), rl_cmds_help);
-	rl_bind_keyseq(find_key("show-kbinds"), rl_kbinds_help);
+		/* Navigation */
+		/* Define multiple keybinds for different terminals:
+		 * rxvt, xterm, linux console */
+//		rl_bind_keyseq("\\M-[D", rl_test); // Left arrow key
+//		rl_bind_keyseq("\\M-+", rl_test);
+		rl_bind_keyseq(find_key("parent-dir"), rl_parent_dir);
+		rl_bind_keyseq(find_key("parent-dir2"), rl_parent_dir);
+		rl_bind_keyseq(find_key("parent-dir3"), rl_parent_dir);
+		rl_bind_keyseq(find_key("parent-dir4"), rl_parent_dir);
+		rl_bind_keyseq(find_key("previous-dir"), rl_previous_dir);
+		rl_bind_keyseq(find_key("previous-dir2"), rl_previous_dir);
+		rl_bind_keyseq(find_key("previous-dir3"), rl_previous_dir);
+		rl_bind_keyseq(find_key("previous-dir4"), rl_previous_dir);
+		rl_bind_keyseq(find_key("next-dir"), rl_next_dir);
+		rl_bind_keyseq(find_key("next-dir2"), rl_next_dir);
+		rl_bind_keyseq(find_key("next-dir3"), rl_next_dir);
+		rl_bind_keyseq(find_key("next-dir4"), rl_next_dir);
+		rl_bind_keyseq(find_key("home-dir"), rl_home_dir);
+		rl_bind_keyseq(find_key("home-dir2"), rl_home_dir);
+		rl_bind_keyseq(find_key("home-dir3"), rl_home_dir);
+		rl_bind_keyseq(find_key("root-dir"), rl_root_dir);
+		rl_bind_keyseq(find_key("root-dir2"), rl_root_dir);
+		rl_bind_keyseq(find_key("root-dir3"), rl_root_dir);
 
-	/* Navigation */
-	/* Define multiple keybinds for different terminals:
-	 * rxvt, xterm, linux console */
-//	rl_bind_keyseq("\\M-[D", rl_test); // Left arrow key
-//	rl_bind_keyseq("\\M-+", rl_test);
-	rl_bind_keyseq(find_key("parent-dir"), rl_parent_dir);
-	rl_bind_keyseq(find_key("parent-dir2"), rl_parent_dir);
-	rl_bind_keyseq(find_key("parent-dir3"), rl_parent_dir);
-	rl_bind_keyseq(find_key("parent-dir4"), rl_parent_dir);
-	rl_bind_keyseq(find_key("previous-dir"), rl_previous_dir);
-	rl_bind_keyseq(find_key("previous-dir2"), rl_previous_dir);
-	rl_bind_keyseq(find_key("previous-dir3"), rl_previous_dir);
-	rl_bind_keyseq(find_key("previous-dir4"), rl_previous_dir);
-	rl_bind_keyseq(find_key("next-dir"), rl_next_dir);
-	rl_bind_keyseq(find_key("next-dir2"), rl_next_dir);
-	rl_bind_keyseq(find_key("next-dir3"), rl_next_dir);
-	rl_bind_keyseq(find_key("next-dir4"), rl_next_dir);
-	rl_bind_keyseq(find_key("home-dir"), rl_home_dir);
-	rl_bind_keyseq(find_key("home-dir2"), rl_home_dir);
-	rl_bind_keyseq(find_key("home-dir3"), rl_home_dir);
-	rl_bind_keyseq(find_key("root-dir"), rl_root_dir);
-	rl_bind_keyseq(find_key("root-dir2"), rl_root_dir);
-	rl_bind_keyseq(find_key("root-dir3"), rl_root_dir);
+		rl_bind_keyseq(find_key("first-dir"), rl_first_dir);
+		rl_bind_keyseq(find_key("last-dir"), rl_last_dir);
 
-	rl_bind_keyseq(find_key("first-dir"), rl_first_dir);
-	rl_bind_keyseq(find_key("last-dir"), rl_last_dir);
+		/* Operations on files */
+		rl_bind_keyseq(find_key("bookmark-sel"), rl_bm_sel);
+		rl_bind_keyseq(find_key("archive-sel"), rl_archive_sel);
+		rl_bind_keyseq(find_key("open-sel"), rl_open_sel);
+		rl_bind_keyseq(find_key("export-sel"), rl_export_sel);
+		rl_bind_keyseq(find_key("move-sel"), rl_move_sel);
+		rl_bind_keyseq(find_key("rename-sel"), rl_rename_sel);
+		rl_bind_keyseq(find_key("remove-sel"), rl_remove_sel);
+		rl_bind_keyseq(find_key("trash-sel"), rl_trash_sel);
+		rl_bind_keyseq(find_key("untrash-all"), rl_untrash_all);
+		rl_bind_keyseq(find_key("paste-sel"), rl_paste_sel);
+		rl_bind_keyseq(find_key("select-all"), rl_select_all);
+		rl_bind_keyseq(find_key("deselect-all"), rl_deselect_all);
 
-	/* Operations on files */
-	rl_bind_keyseq(find_key("bookmark-sel"), rl_bm_sel);
-	rl_bind_keyseq(find_key("archive-sel"), rl_archive_sel);
-	rl_bind_keyseq(find_key("open-sel"), rl_open_sel);
-	rl_bind_keyseq(find_key("export-sel"), rl_export_sel);
-	rl_bind_keyseq(find_key("move-sel"), rl_move_sel);
-	rl_bind_keyseq(find_key("rename-sel"), rl_rename_sel);
-	rl_bind_keyseq(find_key("remove-sel"), rl_remove_sel);
-	rl_bind_keyseq(find_key("trash-sel"), rl_trash_sel);
-	rl_bind_keyseq(find_key("untrash-all"), rl_untrash_all);
-	rl_bind_keyseq(find_key("paste-sel"), rl_paste_sel);
-	rl_bind_keyseq(find_key("select-all"), rl_select_all);
-	rl_bind_keyseq(find_key("deselect-all"), rl_deselect_all);
+		/* Config files */
+		rl_bind_keyseq(find_key("open-config"), rl_open_config);
+		rl_bind_keyseq(find_key("open-keybinds"), rl_open_keybinds);
+		rl_bind_keyseq(find_key("open-bookmarks"), rl_open_bm_file);
 
-	/* Config files */
-	rl_bind_keyseq(find_key("open-config"), rl_open_config);
-	rl_bind_keyseq(find_key("open-keybinds"), rl_open_keybinds);
-	rl_bind_keyseq(find_key("open-bookmarks"), rl_open_bm_file);
+		/* Settings */
+		rl_bind_keyseq(find_key("clear-msgs"), rl_clear_msgs);
+		rl_bind_keyseq(find_key("next-profile"), rl_next_profile);
+		rl_bind_keyseq(find_key("previous-profile"), rl_previous_profile);
+		rl_bind_keyseq(find_key("quit"), rl_quit);
+		rl_bind_keyseq(find_key("lock"), rl_lock);
+		rl_bind_keyseq(find_key("refresh-screen"), rl_refresh);
+		rl_bind_keyseq(find_key("clear-line"), rl_clear_line);
+		rl_bind_keyseq(find_key("toggle-hidden"), rl_hidden);
+		rl_bind_keyseq(find_key("toggle-long"), rl_long);
+		rl_bind_keyseq(find_key("toggle-light"), rl_light);
+		rl_bind_keyseq(find_key("folders-first"), rl_folders_first);
+		rl_bind_keyseq(find_key("sort-previous"), rl_sort_previous);
+		rl_bind_keyseq(find_key("sort-next"), rl_sort_next);
 
-	/* Settings */
-	rl_bind_keyseq(find_key("clear-msgs"), rl_clear_msgs);
-	rl_bind_keyseq(find_key("next-profile"), rl_next_profile);
-	rl_bind_keyseq(find_key("previous-profile"), rl_previous_profile);
-	rl_bind_keyseq(find_key("quit"), rl_quit);
-	rl_bind_keyseq(find_key("lock"), rl_lock);
-	rl_bind_keyseq(find_key("refresh-screen"), rl_refresh);
-	rl_bind_keyseq(find_key("clear-line"), rl_clear_line);
-	rl_bind_keyseq(find_key("toggle-hidden"), rl_hidden);
-	rl_bind_keyseq(find_key("toggle-long"), rl_long);
-	rl_bind_keyseq(find_key("toggle-light"), rl_light);
-	rl_bind_keyseq(find_key("folders-first"), rl_folders_first);
-	rl_bind_keyseq(find_key("sort-previous"), rl_sort_previous);
-	rl_bind_keyseq(find_key("sort-next"), rl_sort_next);
+		rl_bind_keyseq(find_key("new-instance"), rl_new_instance);
+		rl_bind_keyseq(find_key("show-dirhist"), rl_dirhist);
+		rl_bind_keyseq(find_key("bookmarks"), rl_bookmarks);
+		rl_bind_keyseq(find_key("mountpoints"), rl_mountpoints);
+		rl_bind_keyseq(find_key("selbox"), rl_selbox);
+	}
 
-	rl_bind_keyseq(find_key("new-instance"), rl_new_instance);
-	rl_bind_keyseq(find_key("show-dirhist"), rl_dirhist);
-	rl_bind_keyseq(find_key("bookmarks"), rl_bookmarks);
-	rl_bind_keyseq(find_key("mountpoints"), rl_mountpoints);
-	rl_bind_keyseq(find_key("selbox"), rl_selbox);
+	/* If no kbinds file is found, set the defaults */
+	else {
+		/* Help */
+		rl_bind_keyseq("\eOP", rl_manpage);
+		rl_bind_keyseq("\eOQ", rl_cmds_help);
+		rl_bind_keyseq("\eOR", rl_kbinds_help);
+
+		/* Navigation */
+		rl_bind_keyseq("\\M-u", rl_parent_dir);
+		rl_bind_keyseq("\\e[a", rl_parent_dir);
+		rl_bind_keyseq("\\e[2A", rl_parent_dir);
+		rl_bind_keyseq("\\e[1;2A", rl_parent_dir);
+		rl_bind_keyseq("\\M-j", rl_previous_dir);
+		rl_bind_keyseq("\\e[d", rl_previous_dir);
+		rl_bind_keyseq("\\e[2D", rl_previous_dir);
+		rl_bind_keyseq("\\e[1;2D", rl_previous_dir);
+		rl_bind_keyseq("\\M-k", rl_next_dir);
+		rl_bind_keyseq("\\e[c", rl_next_dir);
+		rl_bind_keyseq("\\e[2C", rl_next_dir);
+		rl_bind_keyseq("\\e[1;2C", rl_next_dir);
+		rl_bind_keyseq("\\M-e", rl_home_dir);
+		rl_bind_keyseq("\\e[7~", rl_home_dir);
+		rl_bind_keyseq("\\e[H", rl_home_dir);
+		rl_bind_keyseq("\\M-r", rl_root_dir);
+		rl_bind_keyseq("\\e/", rl_root_dir);
+/*		rl_bind_keyseq("", rl_root_dir); */
+
+		rl_bind_keyseq("\\C-\\M-j", rl_first_dir);
+		rl_bind_keyseq("\\C-\\M-k", rl_last_dir);
+
+		/* Operations on files */
+		rl_bind_keyseq("\\C-\\M-b", rl_bm_sel);
+		rl_bind_keyseq("\\C-\\M-a", rl_archive_sel);
+		rl_bind_keyseq("\\C-\\M-g", rl_open_sel);
+		rl_bind_keyseq("\\C-\\M-e", rl_export_sel);
+		rl_bind_keyseq("\\C-\\M-n", rl_move_sel);
+		rl_bind_keyseq("\\C-\\M-r", rl_rename_sel);
+		rl_bind_keyseq("\\C-\\M-d", rl_remove_sel);
+		rl_bind_keyseq("\\C-\\M-t", rl_trash_sel);
+		rl_bind_keyseq("\\C-\\M-u", rl_untrash_all);
+		rl_bind_keyseq("\\C-\\M-v", rl_paste_sel);
+		rl_bind_keyseq("\\M-a", rl_select_all);
+		rl_bind_keyseq("\\M-d", rl_deselect_all);
+
+		/* Config files */
+		rl_bind_keyseq("\\e[21~", rl_open_config);
+		rl_bind_keyseq("\\e[20~", rl_open_keybinds);
+		rl_bind_keyseq("\\e[23~", rl_open_bm_file);
+
+		/* Settings */
+		rl_bind_keyseq("\\M-t", rl_clear_msgs);
+/*		rl_bind_keyseq("", rl_next_profile);
+		rl_bind_keyseq("", rl_previous_profile); */
+		rl_bind_keyseq("\\e[24~", rl_quit);
+		rl_bind_keyseq("\\M-o", rl_lock);
+		rl_bind_keyseq("\\C-r", rl_refresh);
+		rl_bind_keyseq("\\M-c", rl_clear_line);
+		rl_bind_keyseq("\\M-i", rl_hidden);
+		rl_bind_keyseq("\\M-l", rl_long);
+		rl_bind_keyseq("\\M-y", rl_light);
+		rl_bind_keyseq("\\M-f", rl_folders_first);
+		rl_bind_keyseq("\\M-z", rl_sort_previous);
+		rl_bind_keyseq("\\M-x", rl_sort_next);
+
+		rl_bind_keyseq("\\C-x", rl_new_instance);
+		rl_bind_keyseq("\\M-h", rl_dirhist);
+		rl_bind_keyseq("\\M-b", rl_bookmarks);
+		rl_bind_keyseq("\\M-m", rl_mountpoints);
+		rl_bind_keyseq("\\M-s", rl_selbox);		
+	}
 }
 
 void
@@ -10817,6 +11094,9 @@ save_last_path(void)
 int
 load_dirhist(void)
 {
+	if (!config_ok)
+		return EXIT_FAILURE;
+
 	FILE *fp = fopen(DIRHIST_FILE, "r");
 
 	if (!fp)
@@ -11133,12 +11413,14 @@ file_cmd_check(void)
  * function */
 {
 	file_cmd_path = get_cmd_path("file");
+
 	if (!file_cmd_path) {
 		flags &= ~FILE_CMD_OK;
 		_err('n', PRINT_PROMPT, _("%s: 'file' command not found. "
 			 "Specify an application when opening files. Ex: 'o 12 nano' "
 			 "or just 'nano 12'\n"), PROGRAM_NAME);
 	}
+
 	else
 		flags |= FILE_CMD_OK;
 }
@@ -12527,13 +12809,14 @@ init_config(void)
 				char line[PATH_MAX + 15];
 				while (fgets(line, sizeof(line), config_fp)) {
 
-					if (strncmp(line, "#END OF OPTIONS", 15) == 0)
+					if (*line == '#'
+					&& strncmp(line, "#END OF OPTIONS", 15) == 0)
 						break;
 
 					/* Check for the xargs.splash flag. If -1, it was
 					 * not set via command line, so that it must be
 					 * set here */
-					else if (xargs.splash == UNSET
+					else if (xargs.splash == UNSET && *line == 'S'
 					&& strncmp(line, "SplashScreen=", 13) == 0) {
 						char opt_str[MAX_BOOL] = ""; /* false (5) + 1 */
 						ret = sscanf(line, "SplashScreen=%5s\n", opt_str);
@@ -12548,7 +12831,7 @@ init_config(void)
 							splash_screen = 0;
 					}
 
-					else if (xargs.light == UNSET
+					else if (xargs.light == UNSET && *line == 'L'
 					&& strncmp(line, "LightMode=", 10) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "LightMode=%5s\n", opt_str);
@@ -12560,7 +12843,9 @@ init_config(void)
 							light_mode = 0;
 					}
 
-					else if (strncmp(line, "RestoreLastPath=", 16) == 0) {
+					else if (xargs.restore_last_path == UNSET
+					&& *line == 'R'
+					&& strncmp(line, "RestoreLastPath=", 16) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "RestoreLastPath=%5s\n",
 									 opt_str);
@@ -12572,7 +12857,8 @@ init_config(void)
 							restore_last_path = 0;
 					}
 
-					else if (strncmp(line, "Opener=", 7) == 0) {
+					else if (!opener && *line == 'O'
+					&& strncmp(line, "Opener=", 7) == 0) {
 						char *opt_str = (char *)NULL;
 						opt_str = straft(line, '=');
 						if (!opt_str)
@@ -12590,18 +12876,20 @@ init_config(void)
 						free(opt_str);
 					}
 
-					else if (strncmp(line, "Tips=", 5) == 0) {
+					else if (xargs.tips == UNSET && *line == 'T'
+					&& strncmp(line, "Tips=", 5) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "Tips=%5s\n", opt_str);
 						if (ret == -1)
 							continue;
 						if (strncmp(opt_str, "false", 5) == 0)
 							tips = 0;
-						else /* True and default */
+						else if (strncmp(opt_str, "true", 4) == 0)
 							tips = 1;
 					}
 
-					else if (strncmp(line, "DiskUsage=", 10) == 0) {
+					else if (xargs.disk_usage == UNSET  && *line == 'D'
+					&& strncmp(line, "DiskUsage=", 10) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "DiskUsage=%5s\n", opt_str);
 						if (ret == -1)
@@ -12612,7 +12900,8 @@ init_config(void)
 							disk_usage = 0;
 					}
 
-					else if (strncmp(line, "Autocd=", 7) == 0) {
+					else if (xargs.autocd == UNSET  && *line == 'A'
+					&& strncmp(line, "Autocd=", 7) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "Autocd=%5s\n", opt_str);
 						if (ret == -1)
@@ -12623,7 +12912,8 @@ init_config(void)
 							autocd = 0;
 					}
 
-					else if (strncmp(line, "AutoOpen=", 9) == 0) {
+					else if (xargs.auto_open == UNSET  && *line == 'A'
+					&& strncmp(line, "AutoOpen=", 9) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "AutoOpen=%5s\n", opt_str);
 						if (ret == -1)
@@ -12634,7 +12924,7 @@ init_config(void)
 							auto_open = 0;
 					}
 
-					else if (xargs.dirmap == UNSET
+					else if (xargs.dirmap == UNSET  && *line == 'D'
 					&& strncmp(line, "DirhistMap=", 11) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "DirhistMap=%5s\n", opt_str);
@@ -12646,7 +12936,9 @@ init_config(void)
 							dirhist_map = 0;
 					}
 
-					else if (strncmp(line, "DirIndicator=", 13) == 0) {
+					else if (xargs.dir_indicator == UNSET
+					&& *line == 'D'
+					&& strncmp(line, "DirIndicator=", 13) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "DirIndicator=%5s\n", opt_str);
 						if (ret == -1)
@@ -12657,7 +12949,8 @@ init_config(void)
 							dir_indicator = 0;
 					}
 
-					else if (strncmp(line, "Classify=", 9) == 0) {
+					else if (xargs.classify == UNSET && *line == 'C'
+					&& strncmp(line, "Classify=", 9) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "Classify=%5s\n", opt_str);
 						if (ret == -1)
@@ -12677,7 +12970,8 @@ init_config(void)
 							classify = 2;
 					}
 
-					else if (strncmp(line, "ShareSelbox=", 12) == 0) {
+					else if (xargs.share_selbox == UNSET && *line == 'S'
+					&& strncmp(line, "ShareSelbox=", 12) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "ShareSelbox=%5s\n", opt_str);
 						if (ret == -1)
@@ -12688,7 +12982,7 @@ init_config(void)
 							share_selbox = 0;
 					}
 
-					else if (xargs.sort == UNSET
+					else if (xargs.sort == UNSET && *line == 'S'
 					&& strncmp(line, "Sort=", 5) == 0) {
 						int opt_num = 0;
 						ret = sscanf(line, "Sort=%d\n", &opt_num);
@@ -12700,18 +12994,15 @@ init_config(void)
 							sort = DEF_SORT;
 					}
 
-					else if (strncmp(line, "RlEditMode=", 11) == 0) {
-						int opt_num = -1;
-						ret = sscanf(line, "RlEditMode=%d\n", &opt_num);
-						if (ret == -1)
-							continue;
-						if (opt_num == 0)
-							rl_vi_editing_mode(1, 0);
+					else if (*line == 'R'
+					&& strncmp(line, "RlEditMode=0", 12) == 0) {
+						rl_vi_editing_mode(1, 0);
 						/* By default, readline uses emacs editing
 						 * mode */
 					}
 
-					else if (strncmp(line, "MaxDirhist=", 11) == 0) {
+					else if (xargs.max_dirhist == UNSET && *line == 'M'
+					&& strncmp(line, "MaxDirhist=", 11) == 0) {
 						int opt_num = 0;
 						ret = sscanf(line, "MaxDirhist=%d\n", &opt_num);
 						if (ret == -1)
@@ -12722,7 +13013,8 @@ init_config(void)
 							max_dirhist = DEF_MAX_DIRHIST;
 					}
 
-					else if (strncmp(line, "SortReverse=", 12) == 0) {
+					else if (xargs.sort_reverse == UNSET && *line == 'S'
+					&& strncmp(line, "SortReverse=", 12) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "SortReverse=%5s\n", opt_str);
 						if (ret == -1)
@@ -12733,7 +13025,8 @@ init_config(void)
 							sort_reverse = 0;
 					}
 
-					else if (strncmp(line, "FilesCounter=", 13) == 0) {
+					else if (xargs.files_counter == UNSET && *line == 'F'
+					&& strncmp(line, "FilesCounter=", 13) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "FilesCounter=%5s\n", opt_str);
 						if (ret == -1)
@@ -12744,7 +13037,8 @@ init_config(void)
 							files_counter = 0;
 					}
 
-					else if (strncmp(line, "WelcomeMessage=",
+					else if (xargs.welcome_message == UNSET
+					 && *line == 'W' && strncmp(line, "WelcomeMessage=",
 					15) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "WelcomeMessage=%5s\n",
@@ -12757,7 +13051,8 @@ init_config(void)
 							welcome_message = 0;
 					}
 
-					else if (strncmp(line, "ClearScreen=", 12) == 0) {
+					else if (xargs.clear_screen == UNSET && *line == 'C'
+					&& strncmp(line, "ClearScreen=", 12) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "ClearScreen=%5s\n",
 									 opt_str);
@@ -12769,7 +13064,7 @@ init_config(void)
 							clear_screen = 0;
 					}
 
-					else if (xargs.hidden == UNSET
+					else if (xargs.hidden == UNSET && *line == 'S'
 					&& strncmp(line, "ShowHiddenFiles=", 16) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "ShowHiddenFiles=%5s\n",
@@ -12782,7 +13077,20 @@ init_config(void)
 							show_hidden = 0;
 					}
 
-					else if (xargs.longview == UNSET
+					else if (xargs.bk_files == UNSET && *line == 'S'
+					&& strncmp(line, "ShowBackUpFiles=", 16) == 0) {
+						char opt_str[MAX_BOOL] = "";
+						ret = sscanf(line, "ShowBackUpFiles=%5s\n",
+									 opt_str);
+						if (ret == -1)
+							continue;
+						if (strncmp(opt_str, "true", 4) == 0)
+							show_bk_files = 1;
+						else if (strncmp(opt_str, "false", 5) == 0)
+							show_bk_files = 0;
+					}
+
+					else if (xargs.longview == UNSET && *line == 'L'
 					&& strncmp(line, "LongViewMode=", 13) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "LongViewMode=%5s\n",
@@ -12795,7 +13103,7 @@ init_config(void)
 							long_view = 0;
 					}
 
-					else if (xargs.ext == UNSET
+					else if (xargs.ext == UNSET && *line == 'E'
 					&& strncmp(line, "ExternalCommands=", 17) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "ExternalCommands=%5s\n",
@@ -12808,7 +13116,8 @@ init_config(void)
 							ext_cmd_ok = 0;
 					}
 
-					else if (strncmp(line, "LogCmds=", 8) == 0) {
+					else if (xargs.logs == UNSET && *line == 'L'
+					&& strncmp(line, "LogCmds=", 8) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "LogCmds=%5s\n", opt_str);
 						if (ret == -1)
@@ -12819,7 +13128,8 @@ init_config(void)
 							logs_enabled = 0;
 					}
 
-					else if (strncmp(line, "SystemShell=", 12) == 0) {
+					else if (*line == 'S'
+					&& strncmp(line, "SystemShell=", 12) == 0) {
 						if (sys_shell) {
 							free(sys_shell);
 							sys_shell = (char *)NULL;
@@ -12860,7 +13170,8 @@ init_config(void)
 						free(opt_str);
 					}
 
-					else if (strncmp(line, "TerminalCmd=", 12) == 0) {
+					else if (*line == 'T'
+					&& strncmp(line, "TerminalCmd=", 12) == 0) {
 
 						if (term) {
 							free(term);
@@ -12883,7 +13194,7 @@ init_config(void)
 						free(opt_str);
 					}
 
-					else if (xargs.ffirst == UNSET 
+					else if (xargs.ffirst == UNSET  && *line == 'L'
 					&& strncmp(line, "ListFoldersFirst=", 17) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "ListFoldersFirst=%5s\n",
@@ -12896,7 +13207,7 @@ init_config(void)
 							list_folders_first = 0;
 					}
 
-					else if (xargs.cdauto == UNSET
+					else if (xargs.cd_list_auto == UNSET && *line == 'C'
 					&& strncmp(line, "CdListsAutomatically=",
 					21) == 0) {
 						char opt_str[MAX_BOOL] = "";
@@ -12910,7 +13221,7 @@ init_config(void)
 							cd_lists_on_the_fly = 0;
 					}
 
-					else if (xargs.sensitive == UNSET 
+					else if (xargs.sensitive == UNSET && *line == 'C'
 					&& strncmp(line, "CaseSensitiveList=", 18) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "CaseSensitiveList=%5s\n", 
@@ -12923,7 +13234,7 @@ init_config(void)
 							case_sensitive = 0;
 					}
 
-					else if (xargs.unicode == UNSET
+					else if (xargs.unicode == UNSET && *line == 'U'
 					&& strncmp(line, "Unicode=", 8) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "Unicode=%5s\n", opt_str);
@@ -12935,7 +13246,7 @@ init_config(void)
 							unicode = 0;
 					}
 
-					else if (xargs.pager == UNSET
+					else if (xargs.pager == UNSET && *line == 'P'
 					&& strncmp(line, "Pager=", 6) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "Pager=%5s\n", opt_str);
@@ -12947,13 +13258,15 @@ init_config(void)
 							pager = 0;
 					}
 
-					else if (strncmp(line, "Prompt=", 7) == 0) {
+					else if (*line == 'P'
+					&& strncmp(line, "Prompt=", 7) == 0) {
 						if (encoded_prompt)
 							free(encoded_prompt);
 						encoded_prompt = straft(line, '=');
 					}
 
-					else if (strncmp(line, "MaxPath=", 8) == 0) {
+					else if (xargs.max_path == UNSET && *line == 'M'
+					&& strncmp(line, "MaxPath=", 8) == 0) {
 						int opt_num = 0;
 						sscanf(line, "MaxPath=%d\n", &opt_num);
 						if (opt_num <= 0)
@@ -12961,7 +13274,8 @@ init_config(void)
 						max_path = opt_num;
 					}
 
-					else if (strncmp(line, "TextColor=", 10) == 0) {
+					else if (*line == 'T'
+					&& strncmp(line, "TextColor=", 10) == 0) {
 						char *opt_str = (char *)NULL;
 						opt_str = straft(line, '=');
 						if (!opt_str)
@@ -12984,7 +13298,8 @@ init_config(void)
 						free(opt_str);
 					}
 
-					else if (strncmp(line, "ELNColor=", 9) == 0) {
+					else if (*line == 'E' &&
+					strncmp(line, "ELNColor=", 9) == 0) {
 						char *opt_str = (char *)NULL;
 						opt_str = straft(line, '=');
 						if (!opt_str)
@@ -13006,8 +13321,8 @@ init_config(void)
 						free(opt_str);
 					}
 
-					else if (strncmp(line, "DirhistIndexColor=", 18)
-					== 0) {
+					else if (*line == 'D'
+					&& strncmp(line, "DirhistIndexColor=", 18) == 0) {
 						char *opt_str = (char *)NULL;
 						opt_str = straft(line, '=');
 						if (!opt_str)
@@ -13030,7 +13345,8 @@ init_config(void)
 						free(opt_str);
 					}
 
-					else if (strncmp(line, "DefaultColor=", 13) == 0) {
+					else if (*line == 'D'
+					&& strncmp(line, "DefaultColor=", 13) == 0) {
 						char *opt_str = (char *)NULL;
 						opt_str = straft(line, '=');
 						if (!opt_str)
@@ -13053,8 +13369,8 @@ init_config(void)
 						free(opt_str);
 					}
 
-					else if (strncmp(line, "DirCounterColor=",
-					16) == 0) {
+					else if (*line == 'D'
+					&& strncmp(line, "DirCounterColor=", 16) == 0) {
 						char *opt_str = (char *)NULL;
 						opt_str = straft(line, '=');
 						if (!opt_str)
@@ -13077,8 +13393,8 @@ init_config(void)
 						free(opt_str);
 					}
 
-					else if (strncmp(line, "WelcomeMessageColor=",
-					20) == 0) {
+					else if (*line == 'W'
+					&& strncmp(line, "WelcomeMessageColor=", 20) == 0) {
 						char *opt_str = (char *)NULL;
 						opt_str=straft(line, '=');
 						if (!opt_str)
@@ -13101,8 +13417,8 @@ init_config(void)
 						free(opt_str);
 					}
 
-					else if (strncmp(line, "DividingLineColor=",
-					18) == 0) {
+					else if (*line == 'D'
+					&& strncmp(line, "DividingLineColor=", 18) == 0) {
 						char *opt_str = (char *)NULL;
 						opt_str = straft(line, '=');
 						if (!opt_str)
@@ -13124,8 +13440,8 @@ init_config(void)
 								 "\x1b[%sm", tmp);
 						free(opt_str);
 					}
-					else if (strncmp(line, "DividingLineChar=",
-					17) == 0) {
+					else if (*line == 'D'
+					&& strncmp(line, "DividingLineChar=", 17) == 0) {
 						/* Accepts both chars and decimal integers */
 						char opt_c = -1;
 						sscanf(line, "DividingLineChar='%c'", &opt_c);
@@ -13141,7 +13457,8 @@ init_config(void)
 							div_line_char = opt_c;
 					}
 
-					else if (strncmp(line, "MaxHistory=", 11) == 0) {
+					else if (*line == 'M'
+					&& strncmp(line, "MaxHistory=", 11) == 0) {
 						int opt_num = 0;
 						sscanf(line, "MaxHistory=%d\n", &opt_num);
 						if (opt_num <= 0)
@@ -13149,7 +13466,8 @@ init_config(void)
 						max_hist = opt_num;
 					}
 
-					else if (strncmp(line, "MaxLog=", 7) == 0) {
+					else if (*line == 'M'
+					&& strncmp(line, "MaxLog=", 7) == 0) {
 						int opt_num = 0;
 						sscanf (line, "MaxLog=%d\n", &opt_num);
 						if (opt_num <= 0)
@@ -13157,7 +13475,7 @@ init_config(void)
 						max_log = opt_num;
 					}
 
-					else if (xargs.path == UNSET && !path 
+					else if (xargs.path == UNSET && !path && *line == 'S' 
 					&& strncmp(line, "StartingPath=", 13) == 0) {
 						char *opt_str = straft(line, '=');
 						if (!opt_str)
@@ -13197,6 +13515,7 @@ init_config(void)
 			 * via the config file, or if this latter could not be read
 			 * for any reason, set the defaults */
 			/* -1 means not set */
+			if (xargs.rl_vi_mode == 1) rl_vi_editing_mode(1, 0);
 			if (disk_usage == UNSET) disk_usage = DEF_DISK_USAGE;
 			if (dirhist_map == UNSET) dirhist_map = DEF_DIRHIST_MAP;
 			if (max_dirhist == UNSET) max_dirhist = DEF_MAX_DIRHIST;
@@ -13214,6 +13533,8 @@ init_config(void)
 			if (welcome_message == UNSET)
 				welcome_message = DEF_WELCOME_MESSAGE;
 			if (show_hidden == UNSET) show_hidden = DEF_SHOW_HIDDEN;
+			if (show_bk_files == UNSET)
+				show_bk_files = DEF_SHOW_BK_FILES;
 			if (sort == UNSET) sort = DEF_SORT;
 			if (sort_reverse == UNSET) sort_reverse = DEF_SORT_REVERSE;
 			if (tips == UNSET) tips = DEF_TIPS;
@@ -13570,11 +13891,12 @@ external_arguments(int argc, char **argv)
 /* Evaluate external arguments, if any, and change initial variables to
  * its corresponding value */
 {
-/* Link long (--option) and short options (-o) for the getopt_long
- * function */
 	/* Disable automatic error messages to be able to handle them
 	 * myself via the '?' case in the switch */
-	opterr=optind = 0;
+	opterr = optind = 0;
+
+	/* Link long (--option) and short options (-o) for the getopt_long
+	 * function */
 	static struct option longopts[] = {
 		{"no-hidden", no_argument, 0, 'a'},
 		{"show-hidden", no_argument, 0, 'A'},
@@ -13598,30 +13920,164 @@ external_arguments(int argc, char **argv)
 		{"no-unicode", no_argument, 0, 'u'},
 		{"version", no_argument, 0, 'v'},
 		{"splash", no_argument, 0, 's'},
+		{"stealth-mode", no_argument, 0, 'S'},
 		{"ext-cmds", no_argument, 0, 'x'},
 		{"light", no_argument, 0, 'y'},
 		{"sort", required_argument, 0, 'z'},
+
+		/* Only long options */
+		{"no-cd-auto", no_argument, 0, 0},
+		{"no-open-auto", no_argument, 0, 1},
+		{"restore-last-path", no_argument, 0, 2},
+		{"no-tips", no_argument, 0, 3},
+		{"disk-usage", no_argument, 0, 4},
+		{"no-dir-indicator", no_argument, 0, 5},
+		{"classify", required_argument, 0, 6},
+		{"share-selbox", no_argument, 0, 7},
+		{"rl-vi-mode", no_argument, 0, 8},
+		{"max-dirhist", required_argument, 0, 9},
+		{"sort-reverse", no_argument, 0, 10},
+		{"no-files-counter", no_argument, 0, 11},
+		{"no-welcome-message", no_argument, 0, 12},
+		{"no-clear-screen", no_argument, 0, 13},
+		{"no-backup-files", no_argument, 0, 14},
+		{"enable-logs", no_argument, 0, 15},
+		{"max-path", required_argument, 0, 16},
+		{"opener", required_argument, 0, 17},
 		{0, 0, 0, 0}
 	};
 
 	/* Set all external arguments flags to uninitialized state */
-	xargs.splash = xargs.hidden = xargs.longview = xargs.ext = -1;
-	xargs.ffirst = xargs.sensitive = xargs.unicode = xargs.pager = -1;
-	xargs.path = xargs.cdauto = xargs.light = xargs.sort = -1,
-	xargs.dirmap = -1, xargs.config = -1;
+	xargs.splash = xargs.hidden = xargs.longview = xargs.ext = UNSET;
+	xargs.ffirst = xargs.sensitive = xargs.unicode = xargs.pager = UNSET;
+	xargs.path = xargs.cd_list_auto = xargs.autocd = UNSET;
+	xargs.light = xargs.sort = xargs.dirmap = xargs.config = UNSET;
+	xargs.stealth_mode = xargs.auto_open = UNSET;
+
+	xargs.restore_last_path = xargs.tips = xargs.disk_usage = UNSET;
+	xargs.dir_indicator = xargs.classify = xargs.share_selbox = UNSET;
+	xargs.rl_vi_mode = xargs.max_dirhist = xargs.sort_reverse = UNSET;
+	xargs.files_counter = xargs.welcome_message = UNSET;
+	xargs.clear_screen = xargs.bk_files = xargs.logs = UNSET;
+	xargs.max_path = UNSET;
 
 	int optc;
 	/* Variables to store arguments to options (-c, -p and -P) */
 	char *path_value = (char *)NULL, *alt_profile_value = (char *)NULL,
 		 *config_value = (char *)NULL, *kbinds_value = (char *)NULL;
 
-	while ((optc = getopt_long(argc, argv, "+aAc:fFgGhiIk:lLmoOp:P:sUuvxyz:",
+	while ((optc = getopt_long(argc, argv, "+aAc:fFgGhiIk:lLmoOp:P:sSUuvxyz:",
 							   longopts, (int *)0)) != EOF) {
 		/* ':' and '::' in the short options string means 'required' and 
 		 * 'optional argument' respectivelly. Thus, 'p' and 'P' require
 		 * an argument here. The plus char (+) tells getopt to stop
 		 * processing at the first non-option (and non-argument) */
 		switch (optc) {
+
+		case 0:
+			xargs.autocd = 0;
+			autocd = 0;
+		break;
+
+		case 1:
+			xargs.auto_open = 0;
+			auto_open = 0;
+		break;
+
+		case 2:
+			xargs.restore_last_path = 1;
+			restore_last_path = 1;
+		break;
+
+		case 3:
+			xargs.tips = 0;
+			tips = 0;
+		break;
+
+		case 4:
+			xargs.disk_usage = 1;
+			disk_usage = 1;
+		break;
+
+		case 5:
+			xargs.dir_indicator = 0;
+			dir_indicator = 0;
+		break;
+
+		case 6: {
+			if (!is_number(optarg)) break;
+			int opt_int = atoi(optarg);
+			switch(opt_int) {
+				case 0:
+				case 1:
+				case 2:
+					xargs.classify = classify = opt_int;
+					break;
+				default: break;
+			}
+		}
+		break;
+
+		case 7:
+			xargs.share_selbox = 1;
+			share_selbox = 1;
+		break;
+
+		case 8:
+			xargs.rl_vi_mode = 1;
+		break;
+
+		case 9: {
+			if (!is_number(optarg)) break;
+			int opt_int = atoi(optarg);
+			if (opt_int >= 0)
+				xargs.max_dirhist = max_dirhist = opt_int;
+		}
+		break;
+
+		case 10:
+			xargs.sort_reverse = 1;
+			sort_reverse = 1;
+		break;
+
+		case 11:
+			xargs.files_counter = 0;
+			files_counter = 0;
+		break;
+
+		case 12:
+			xargs.welcome_message = 0;
+			welcome_message = 0;
+		break;
+
+		case 13:
+			xargs.clear_screen = 0;
+			clear_screen = 0;
+		break;
+
+		case 14:
+			xargs.bk_files = 0;
+			show_bk_files = 0;
+		break;
+
+		case 15:
+			xargs.logs = 1;
+			logs_enabled = 1;
+		break;
+
+		case 16: {
+			if (!is_number(optarg)) break;
+			int opt_int = atoi(optarg);
+			if (opt_int >= 0)
+			xargs.max_path = max_path = opt_int;
+		}
+		break;
+
+		case 17: {
+			opener = (char *)xnmalloc(strlen(optarg) + 1, sizeof(char));
+			strcpy(opener, optarg);
+		}
+		break;
 
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
@@ -13703,13 +14159,13 @@ external_arguments(int argc, char **argv)
 		case 'o':
 			flags &= ~ON_THE_FLY;
 			cd_lists_on_the_fly = 0;
-			xargs.cdauto = 0;
+			xargs.cd_list_auto = 0;
 			break;
 
 		case 'O':
 			flags |= ON_THE_FLY;
 			cd_lists_on_the_fly = 1;
-			xargs.cdauto = 1;
+			xargs.cd_list_auto = 1;
 			break;
 
 		case 'p':
@@ -13728,6 +14184,11 @@ external_arguments(int argc, char **argv)
 			splash_screen = 1;
 			xargs.splash = 1;
 			break;
+
+		case 'S':
+			xargs.stealth_mode = 1;
+			break;
+
 
 		case 'u':
 			unicode = 0;
@@ -13778,12 +14239,10 @@ external_arguments(int argc, char **argv)
 
 			/* If unknown option is printable... */
 			else if (isprint(optopt)) {
-				fprintf(stderr, _("%s: invalid option -- '%c'\nUsage: %s "
-						"[-aAfFgGhiIlLmoOsuUvxyz] [-c CONFIG_FILE] "
-						"[-k KEYBINDINGS_FILE] [-p PATH] [-P PROFILE] "
-						"[-z METHOD]\nTry '%s --help' for more "
+				fprintf(stderr, _("%s: invalid option -- '%c'\nUsage: "
+						"%s %s\nTry '%s --help' for more "
 						"information.\n"),
-						PROGRAM_NAME, optopt, PNL, PNL);
+						PROGRAM_NAME, optopt, GRAL_USAGE, PNL, PNL);
 			}
 
 			else {
@@ -13812,9 +14271,9 @@ external_arguments(int argc, char **argv)
 
 		if (access(kbinds_value, R_OK) == -1) {
 			_err('e', PRINT_PROMPT, "%s: %s: %s\n"
-				"Falling back to default\n", PROGRAM_NAME,
-				 kbinds_value, strerror(errno));
-//			xargs.config = -1;
+				"Falling back to the default keybindings file\n",
+				PROGRAM_NAME, kbinds_value, strerror(errno));
+/*			xargs.config = -1; */
 		}
 
 		else {
@@ -14789,7 +15248,7 @@ int
 get_sel_files(void)
 /* Get elements currently in the Selection Box, if any. */
 {
-	if (!selfile_ok)
+	if (!selfile_ok || !config_ok)
 		return EXIT_FAILURE;
 
 	/* First, clear the sel array, in case it was already used */
@@ -14839,7 +15298,7 @@ prompt(void)
 
 	if (welcome_message) {
 		printf(_("%sCliFM, the anti-eye-candy, KISS file manager%s\n"
-			   "%sEnter 'help' or '?' for instructions.%s\n"), 
+			   "%sEnter '?' or press F1-3 for instructions.%s\n"), 
 			   welcome_msg_color, NC, default_color, NC);
 		welcome_message = 0;
 	}
@@ -14905,6 +15364,7 @@ prompt(void)
 	size_t decoded_prompt_len = strlen(decoded_prompt);
 
 	size_t prompt_length = (size_t)(decoded_prompt_len
+		+ (xargs.stealth_mode == 1 ? 16 : 0)
 		+ (sel_n ? 16 : 0) + (trash_n ? 16 : 0) + ((msgs_n && pmsg)
 		? 16: 0) + 6 + sizeof(text_color) + 1);
 
@@ -14912,13 +15372,16 @@ prompt(void)
 	 * 6 = NC_b
 	 * 1 = null terminating char */
 
-	char *the_prompt = (char *)xnmalloc(prompt_length, sizeof(char));
+//	char *the_prompt = (char *)xnmalloc(prompt_length, sizeof(char));
+	char the_prompt[prompt_length];
 
-	snprintf(the_prompt, prompt_length, "%s%s%s%s%s%s%s%s", 
-		(msgs_n && pmsg) ? msg_str : "", (trash_n) ? yellow_b : "", 
-		(trash_n) ? "T\001\x1b[0m\002" : "", (sel_n) ? green_b : "", 
-		(sel_n) ? "*\001\x1b[0m\002" : "", decoded_prompt, NC_b,
-		text_color);
+	snprintf(the_prompt, prompt_length, "%s%s%s%s%s%s%s%s%s%s", 
+		(msgs_n && pmsg) ? msg_str : "", (xargs.stealth_mode == 1)
+		? stealth_color : "", (xargs.stealth_mode == 1)
+		? "S\001\x1b[0m\002" : "", (trash_n) ? yellow_b : "",
+		(trash_n) ? "T\001\x1b[0m\002" : "", (sel_n) ? green_b
+		: "", (sel_n) ? "*\001\x1b[0m\002" : "", decoded_prompt,
+		NC_b, text_color);
 
 	free(decoded_prompt);
 
@@ -14930,6 +15393,7 @@ prompt(void)
 	if (print_msg) {
 		for (i = 0; i < (size_t)msgs_n; i++)
 			fputs(messages[i], stderr);
+
 		print_msg = 0; /* Print messages only once */
 	}
 
@@ -14939,7 +15403,7 @@ prompt(void)
 	char *input = (char *)NULL;
 	input = readline(the_prompt);
 
-	free(the_prompt);
+//	free(the_prompt);
 
 	if (!input)
 	/* Same as 'input == NULL': input is a pointer poiting to no
@@ -14960,6 +15424,7 @@ prompt(void)
 	if (logs_enabled) {
 		if (last_cmd)
 			free(last_cmd);
+
 		last_cmd = (char *)xnmalloc(strlen(input) + 1, sizeof(char));
 		strcpy(last_cmd, input);
 	}
@@ -14994,9 +15459,12 @@ prompt(void)
 size_t
 count_dir(const char *dir_path) /* Readdir version */
 {
+	if (!dir_path)
+		return 0;
+
 	struct stat file_attrib;
 
-	if (lstat (dir_path, &file_attrib) == -1)
+	if (lstat(dir_path, &file_attrib) == -1)
 		return 0;
 
 	size_t file_count = 0;
@@ -15007,11 +15475,12 @@ count_dir(const char *dir_path) /* Readdir version */
 		if (errno == ENOMEM)
 			exit(EXIT_FAILURE);
 		else
-			return -1;
+			return 0;
 	}
 
 	while ((entry = readdir(dir_p))) 
 		file_count++;
+
 	closedir(dir_p);
 
 	return file_count;
@@ -15074,23 +15543,25 @@ skip_implied_dot(const struct dirent *entry)
 	} */
 
 	/* Skip "." and ".." */
-	if (entry->d_name[0] == '.' && entry->d_name[1] == 0x00)
-		return 0;
-
-	if (entry->d_name[0] == '.' && entry->d_name[1] == '.'
-	&& entry->d_name[2] == 0x00)
+	if (*entry->d_name == '.' && (!entry->d_name[1]
+	|| (entry->d_name[1] == '.' && !entry->d_name[2])))
 		return 0;
 
 	/* If not hidden files */
-	if (show_hidden == 0) {
-		if (entry->d_name[0] == '.')
+	if (!show_hidden && *entry->d_name == '.')
+		return 0;
+
+	/* Do not show files ending with tilde */
+	if (!show_bk_files) {
+		size_t len;
+
+		for (len = 0; entry->d_name[len]; len++);
+
+		if (entry->d_name[len - 1] == '~')
 			return 0;
-		else
-			return 1;
 	}
 
-	else
-		return 1;
+	return 1;
 }
 
 void
@@ -17360,7 +17831,7 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'o' && strcmp(comm[0], "opener") == 0) {
 
 		if (!comm[1]) {
-			printf("opener: %s\n", (opener) ? opener : "mime (built-in)");
+			printf("opener: %s\n", (opener) ? opener : "lira (built-in)");
 			return EXIT_SUCCESS;
 		}
 
@@ -17380,7 +17851,7 @@ exec_cmd(char **comm)
 		}
 
 		printf(_("opener: Opener set to '%s'\n"), (opener) ? opener
-			   : "mime (built-in)");
+			   : "lira (built-in)");
 	}
 
 					/* #### TIPS #### */
@@ -18452,7 +18923,7 @@ save_sel(void)
  * first instance and then execute a second one to operate on those
  * files as he/she whises. */
 {
-	if (!selfile_ok)
+	if (!selfile_ok || !config_ok)
 		return EXIT_FAILURE;
 
 	if (sel_n == 0) {
@@ -18681,11 +19152,8 @@ sel_function (char **comm)
 
 	for (i = 1; comm[i]; i++) {
 		/* Exclude self and parent directories (. and ..) */
-/*		if (strcmp(comm[i], "*") == 0 || strcmp(comm[i], ".*") == 0
-		|| strcmp(comm[i], ".") == 0 || strcmp(comm[i], "..") == 0)
-			continue; */
-		if (i == file_type_index || strcmp(comm[i], ".") == 0
-		|| strcmp(comm[i], "..") == 0)
+		if (i == file_type_index || (*comm[i] == '.' && (!comm[i][1]
+		|| (comm[i][1] == '.' && !comm[i][2]))))
 			continue;
 
 		/* Check for regex expressions */
@@ -18808,9 +19276,6 @@ sel_function (char **comm)
 		continue;
 	}
 
-	if (!selfile_ok)
-		return EXIT_FAILURE;
-
 	if (!new_sel)
 		return exit_status;
 
@@ -18818,58 +19283,50 @@ sel_function (char **comm)
 	 * selection file is OK. So, write new selections into the selection 
 	 * file */
 
-	/* If selected files were successfully written to sel file */
-	if (save_sel() == EXIT_SUCCESS) {
-
-		/* Get size of total sel files */
-		struct stat sel_attrib;
-		for (i = 0; i < sel_n; i++) {
-			if (lstat(sel_elements[i], &sel_attrib) != -1) {
-				if ((sel_attrib.st_mode & S_IFMT) == S_IFDIR)
-					total_sel_size += dir_size(sel_elements[i]);
-				else
-					total_sel_size += sel_attrib.st_size;
-			}
+	if (config_ok && selfile_ok) {
+		if (save_sel() != EXIT_SUCCESS) {
+			_err('e', PRINT_PROMPT, "%s: Error writing selected files "
+			"to the selections file\n", PROGRAM_NAME);
 		}
-
-		/* Print entries */
-		if (sel_n > 10)
-			printf(_("%zu elements are now in the Selection Box\n"),
-					 sel_n);
-
-		else if (sel_n > 0) {
-			printf(_("%zu selected %s:\n\n"), sel_n, (sel_n == 1)
-					? _("element") : _("elements"));
-
-			for (i = 0; i < sel_n; i++)
-				colors_list(sel_elements[i], (int)i + 1, NO_PAD,
-							PRINT_NEWLINE);
-		}
-
-		/* Print total size */
-		char *human_size = get_size_unit(total_sel_size);
-
-		if (sel_n > 10)
-			printf(_("Total size: %s\n"), human_size);
-
-		else if (sel_n > 0)
-			printf(_("\n%sTotal size%s: %s\n"), white, NC, human_size);
-
-		free(human_size);
-
-		return exit_status;
 	}
 
-	else {
-		if (sel_n > 0) { /* In case of error, remove sel files from
-			memory */
-			for (i = 0; i < sel_n; i++)
-				free(sel_elements[i]);
-			sel_n = 0;
+	/* Get size of total sel files */
+	struct stat sel_attrib;
+	for (i = 0; i < sel_n; i++) {
+		if (lstat(sel_elements[i], &sel_attrib) != -1) {
+			if ((sel_attrib.st_mode & S_IFMT) == S_IFDIR)
+				total_sel_size += dir_size(sel_elements[i]);
+			else
+				total_sel_size += sel_attrib.st_size;
 		}
-/*		save_sel(); */
-		return EXIT_FAILURE;
 	}
+
+	/* Print entries */
+	if (sel_n > 10)
+		printf(_("%zu elements are now in the Selection Box\n"),
+				 sel_n);
+
+	else if (sel_n > 0) {
+		printf(_("%zu selected %s:\n\n"), sel_n, (sel_n == 1)
+				? _("element") : _("elements"));
+
+		for (i = 0; i < sel_n; i++)
+			colors_list(sel_elements[i], (int)i + 1, NO_PAD,
+						PRINT_NEWLINE);
+	}
+
+	/* Print total size */
+	char *human_size = get_size_unit(total_sel_size);
+
+	if (sel_n > 10)
+		printf(_("Total size: %s\n"), human_size);
+
+	else if (sel_n > 0)
+		printf(_("\n%sTotal size%s: %s\n"), white, NC, human_size);
+
+	free(human_size);
+
+	return exit_status;
 }
 
 void
@@ -20844,6 +21301,12 @@ open_bookmark(char **cmd)
 int
 bookmarks_function(char **cmd)
 {
+	if (xargs.stealth_mode) {
+		printf("%s: Access to configuration files is not allowed in "
+			   "stealth mode\n", PROGRAM_NAME);
+		return EXIT_SUCCESS;
+	}
+
 	if (!config_ok) {
 		fprintf(stderr, _("Bookmarks function disabled\n"));
 		return EXIT_FAILURE;
@@ -21555,6 +22018,9 @@ void
 check_file_size(char *log_file, size_t max)
 /* Keep only the last MAX records in LOG_FILE */
 {
+	if (!config_ok)
+		return;
+
 	/* Create the file, if it doesn't exist */
 	FILE *log_fp = (FILE *)NULL;
 	struct stat file_attrib;
@@ -21980,6 +22446,11 @@ edit_function (char **comm)
  * passed argument (Ex: 'edit nano'). The 'gen' option regenerates
  * the configuration file and creates a back up of the old one. */
 {
+	if (xargs.stealth_mode) {
+		printf("%s: Access to configuration files is not allowed in "
+			   "stealth mode\n", PROGRAM_NAME);
+		return EXIT_SUCCESS;
+	}
 
 	if (comm[1] && strcmp(comm[1], "gen") == 0)
 		return regen_config();
@@ -22174,11 +22645,10 @@ help_function (void)
 {
 	printf(_("%s %s (%s), by %s\n"), PROGRAM_NAME, VERSION, DATE, AUTHOR);
 
-	printf(_("\nUSAGE: %s [-aAfFgGhiIlLmoOsuUvxy] [-c FILE] "
-		    "[-k FILE] [-p PATH] [-P PROFILE] [-z METHOD]\n\
+	printf(_("\nUSAGE: %s %s\n\
 \n -a, --no-hidden\t\t do not show hidden files\
 \n -A, --show-hidden\t\t show hidden files (default)\
-\n -c, --config-file FILE\t\t specify an alternative configuration file\
+\n -c, --config-file=FILE\t\t specify an alternative configuration file\
 \n -f, --no-folders-first\t\t do not list folders first\
 \n -F, --folders-first\t\t list folders first (default)\
 \n -g, --pager\t\t\t enable the pager\
@@ -22186,26 +22656,79 @@ help_function (void)
 \n -h, --help\t\t\t show this help and exit\
 \n -i, --no-case-sensitive\t no case-sensitive files listing (default)\
 \n -I, --case-sensitive\t\t case-sensitive files listing\
-\n -k, --keybindings-file FILE\t specify an alternative keybindings file\
+\n -k, --keybindings-file=FILE\t specify an alternative keybindings file\
 \n -l, --no-long-view\t\t disable long view mode (default)\
 \n -L, --long-view\t\t enable long view mode\
 \n -m, --dihist-map\t\t enable the directory history map\
 \n -o, --no-list-on-the-fly\t 'cd' works as the shell 'cd' command\
 \n -O, --list-on-the-fly\t\t 'cd' lists files on the fly (default)\
 \n -p, --path PATH\t\t use PATH as %s starting path\
-\n -P, --profile PROFILE\t\t use (or create) PROFILE as profile\
+\n -P, --profile=PROFILE\t\t use (or create) PROFILE as profile\
 \n -s, --splash \t\t\t enable the splash screen\
+\n -S, --stealth-mode \t\t leave no trace on the host system.\
+\n				Nothing is read from any file nor any file \
+\n				is created: all settings are set to the \
+\n				default value. However, most setting can \
+\n				be controlled via command line options\
 \n -u, --no-unicode \t\t disable unicode\
 \n -U, --unicode \t\t\t enable unicode to correctly list filenames \
-containing accents, tildes, umlauts, non-latin letters, etc. This option \
-is enabled by default for non-english locales\
+\n				containing accents, tildes, umlauts, \
+\n				non-latin letters, etc. This option is \
+\n				enabled by default for non-english locales\
 \n -v, --version\t\t\t show version details and exit\
 \n -x, --ext-cmds\t\t\t allow the use of external commands\
 \n -y, --light-mode\t\t enable the light mode\
-\n -z, --sort METHOD\t\t sort files by METHOD, where METHOD could \
-be: 0 = none, 1 = name, 2 = size, 3 = atime, \
-4 = btime, 5 = ctime, 6 = mtime, 7 = version, 8 = extension \
-9 = inode\n"), PNL, PROGRAM_NAME);
+\n -z, --sort=METHOD\t\t sort files by METHOD, where METHOD \
+\n				could be: 0 = none, 1 = name, 2 = size, \
+\n				3 = atime, 4 = btime, 5 = ctime, \
+\n				6 = mtime, 7 = version, 8 = extension, \
+\n				9 = inode"), PNL, GRAL_USAGE, PROGRAM_NAME);
+
+	printf("\
+\n     --no-cd-auto\t\t by default, %s changes to directories \
+\n\t\t\t\tby just specifying the corresponding ELN \
+\n				(e.g. '12' instead of 'cd 12'). This \
+\n				option forces the use of 'cd'\
+\n     --no-open-auto\t\t same as no-cd-auto, but for files\
+\n     --restore-last-path\t save last visited directory to be \
+\n				restored in the next session\
+\n     --no-tips\t\t\t disable startup tips\
+\n     --disk-usage\t\t show disk usage (free/total) for the\
+\n				filesystem to which the current directory \
+\n				belongs\
+\n     --no-dir-indicator\t\t do not add / indicator to directories \
+\n				when running in light mode\
+\n     --classify=NUM\t\t specify whether to classify files or not \
+\n				when running in light mode. 0 for no, 1 \
+\n				for yes, and 2 to classify executable files \
+\n				as well (option 2 implies running access(3) \
+\n				over each regular file, which is an \
+\n				expensive operation)\
+\n     --share-selbox\t\t make the Selection Box common to \
+\n				different profiles\
+\n     --rl-vi-mode\t\t set readline to vi editing mode (defaults \
+\n				to emacs editing mode)\
+\n     --max-dirhist\t\t maximum number of visited directories to \
+\n				remember\
+\n     --sort-reverse\t\t sort in reverse order, for example: z-a \
+\n				instead of a-z, which is the default order\
+\n     --no-files-counter\t\t disable the files counter for \
+\n				directories. This option is especially \
+\n				useful to speed up the listing process; \
+\n				counting files in directories is expensive\
+\n     --no-welcome-message\t disable the welcome message\
+\n     --no-clear-screen\t\t do not clear the screen when listing \
+\n				directories\
+\n     --no-backup-files\t\t do not show files ending with tilde (~)\
+\n     --enable-logs\t\t enable program logs\
+\n     --opener=APPLICATION\t resource opener to use instead of 'lira',\
+\n				%s built-in opener\
+\n     --max-path=NUM\t\t set the maximun number of characters \
+\n				after which the current directory in the \
+\n				prompt line will be abreviated to the \
+\n				directory base name (if \\z is used in \
+\n				the prompt)\n",
+		 PROGRAM_NAME, PROGRAM_NAME);
 
 	puts(_("\nBUILT-IN COMMANDS:\n\n\
  ELN/FILE/DIR (auto-open and autocd functions)\n\
