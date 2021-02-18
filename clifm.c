@@ -19821,7 +19821,12 @@ search_glob(char **comm)
 	int glob_char_found = 0;
 	for (i = 1; comm[0][i]; i++) {
 		if (comm[0][i] == '*' || comm[0][i] == '?'
-		|| comm[0][i] == '[' || comm[0][i] == '{') {
+		|| comm[0][i] == '[' || comm[0][i] == '{'
+		/* Consider regex chars as well: we don't want this "r$"
+		 * to become this "*r$*" */
+		|| comm[0][i] == '|' || comm[0][i] == '^'
+		|| comm[0][i] == '+' || comm[0][i] == '$'
+		|| comm[0][i] == '.') {
 			glob_char_found = 1;
 			break;
 		}
@@ -22690,8 +22695,8 @@ help_function (void)
 	printf(_("%s %s (%s), by %s\n"), PROGRAM_NAME, VERSION, DATE, AUTHOR);
 
 	printf(_("\nUSAGE: %s %s\n\
-\n -a, --no-hidden\t\t do not show hidden files\
-\n -A, --show-hidden\t\t show hidden files (default)\
+\n -a, --no-hidden\t\t do not show hidden files (default)\
+\n -A, --show-hidden\t\t show hidden files\
 \n -b, --bookmarks-file=FILE\t specify an alternative bookmarks file\
 \n -c, --config-file=FILE\t\t specify an alternative configuration file\
 \n -f, --no-folders-first\t\t do not list folders first\
