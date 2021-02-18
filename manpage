@@ -80,10 +80,13 @@ Personally, since I just dislike GUI and bloated stuff, I really felt the need o
 .SH OPTIONS
 .TP
 .B \-a, \-\-no\-hidden
-do not show hidden files
+do not show hidden files (default)
 .TP
 .B \-A, \-\-show\-hidden
-show hidden files (default)
+show hidden files
+.TP
+.B \-b \-\-bookmarks\-file=FILE
+set an alternative bookmarks file
 .TP
 .B \-c \-\-config\-file=FILE
 set an alternative configuration file

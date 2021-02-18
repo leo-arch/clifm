@@ -312,8 +312,8 @@ tw=30;42:ow=34;42:ex=01;32:no=31;47"
 /* #define DEFAULT_PROMPT_NO_CWD "\\A \\u:\\H\\n\\[\\e[0m\\]\
 \\z\\[\\e[0;34m\\] \\$\\[\\e[0m\\] " */
 
-#define GRAL_USAGE "[-aAfFgGhiIlLmoOsSuUvxyz] [-c FILE] [-k FILE] \
-[-p PATH] [-P PROFILE] [-z METHOD]"
+#define GRAL_USAGE "[-aAfFgGhiIlLmoOsSuUvxyz] [-b FILE] [-c FILE] \
+[-k FILE] [-p PATH] [-P PROFILE] [-z METHOD]"
 
 #define DEFAULT_TERM_CMD "xterm -e"
 
@@ -691,6 +691,7 @@ struct param
 	int bk_files;
 	int logs;
 	int max_path;
+	int bm_file;
 };
 
 struct param xargs;
@@ -780,7 +781,8 @@ char *user = (char *)NULL, *path = (char *)NULL,
 	**old_pwd = (char **)NULL, *SCRIPTS_DIR = (char *)NULL,
 	*ACTIONS_FILE = (char *)NULL, **ext_colors = (char **)NULL,
 	*DIRHIST_FILE = (char *)NULL, *KBINDS_FILE = (char *)NULL,
-	*alt_config_file = (char *)NULL, *alt_kbinds_file = (char *)NULL;
+	*alt_config_file = (char *)NULL, *alt_kbinds_file = (char *)NULL,
+	*alt_bm_file = (char *)NULL;
 
 char div_line_char = UNSET;
 
@@ -1712,7 +1714,7 @@ reload_config(void)
 	xargs.rl_vi_mode = xargs.max_dirhist = xargs.sort_reverse = UNSET;
 	xargs.files_counter = xargs.welcome_message = UNSET;
 	xargs.clear_screen = xargs.bk_files = xargs.logs = UNSET;
-	xargs.max_path = UNSET;
+	xargs.max_path = xargs.bm_file = UNSET;
 
 	shell_terminal = no_log = internal_cmd = recur_perm_error_flag = 0;
 	is_sel = sel_is_last = print_msg = kbind_busy = dequoted = 0;
@@ -1720,8 +1722,6 @@ reload_config(void)
 	shell_terminal = no_log = internal_cmd = dequoted = 0;
 	shell_is_interactive = recur_perm_error_flag = mime_match = 0;
 	recur_perm_error_flag = is_sel = sel_is_last = print_msg = 0;
-
-	home_ok = 1, config_ok = 1, trash_ok = 1, selfile_ok = 1;
 
 	pmsg = nomsg;
 
@@ -12549,8 +12549,19 @@ init_config(void)
 		DIRHIST_FILE = (char *)xcalloc(config_len + 9, sizeof(char));
 		sprintf(DIRHIST_FILE, "%s/dirhist", CONFIG_DIR);
 
-		BM_FILE = (char *)xcalloc(config_len + 15, sizeof(char));
-		sprintf(BM_FILE, "%s/bookmarks.cfm", CONFIG_DIR);
+		if (!alt_bm_file) {
+			BM_FILE = (char *)xcalloc(config_len + 15, sizeof(char));
+			sprintf(BM_FILE, "%s/bookmarks.cfm", CONFIG_DIR);
+		}
+
+		else {
+			BM_FILE = (char *)xcalloc(strlen(alt_bm_file) + 1,
+									  sizeof(char));
+			strcpy(BM_FILE, alt_bm_file);
+			free(alt_bm_file);
+			alt_bm_file = (char *)NULL;
+
+		}
 
 		LOG_FILE = (char *)xcalloc(config_len + 9, sizeof(char));
 		sprintf(LOG_FILE, "%s/log.cfm", CONFIG_DIR);
@@ -13581,11 +13592,13 @@ init_config(void)
 					strcpy(sys_shell, FALLBACK_SHELL);
 				}
 			}
+
 			if (!encoded_prompt) {
 				encoded_prompt = (char *)xcalloc(strlen(DEFAULT_PROMPT)
 												 + 1, sizeof(char));
 				strcpy(encoded_prompt, DEFAULT_PROMPT);
 			}
+
 			if (!term) {
 				term = (char *)xcalloc(strlen(DEFAULT_TERM_CMD) + 1, 
 									   sizeof(char));
@@ -13900,6 +13913,7 @@ external_arguments(int argc, char **argv)
 	static struct option longopts[] = {
 		{"no-hidden", no_argument, 0, 'a'},
 		{"show-hidden", no_argument, 0, 'A'},
+		{"bookmarks-file", no_argument, 0, 'b'},
 		{"config-file", no_argument, 0, 'c'},
 		{"no-folders-first", no_argument, 0, 'f'},
 		{"folders-first", no_argument, 0, 'F'},
@@ -13959,15 +13973,17 @@ external_arguments(int argc, char **argv)
 	xargs.rl_vi_mode = xargs.max_dirhist = xargs.sort_reverse = UNSET;
 	xargs.files_counter = xargs.welcome_message = UNSET;
 	xargs.clear_screen = xargs.bk_files = xargs.logs = UNSET;
-	xargs.max_path = UNSET;
+	xargs.max_path = xargs.bm_file = UNSET;
 
 	int optc;
 	/* Variables to store arguments to options (-c, -p and -P) */
 	char *path_value = (char *)NULL, *alt_profile_value = (char *)NULL,
-		 *config_value = (char *)NULL, *kbinds_value = (char *)NULL;
+		 *config_value = (char *)NULL, *kbinds_value = (char *)NULL,
+		 *bm_value = (char *)NULL;
 
-	while ((optc = getopt_long(argc, argv, "+aAc:fFgGhiIk:lLmoOp:P:sSUuvxyz:",
-							   longopts, (int *)0)) != EOF) {
+	while ((optc = getopt_long(argc, argv,
+	"+aAb:c:fFgGhiIk:lLmoOp:P:sSUuvxyz:", longopts,
+	(int *)0)) != EOF) {
 		/* ':' and '::' in the short options string means 'required' and 
 		 * 'optional argument' respectivelly. Thus, 'p' and 'P' require
 		 * an argument here. The plus char (+) tells getopt to stop
@@ -14089,6 +14105,11 @@ external_arguments(int argc, char **argv)
 			flags |= HIDDEN; /* Add HIDDEN to 'flags' */
 			show_hidden = 1;
 			xargs.hidden = 1;
+			break;
+
+		case 'b':
+			xargs.bm_file = 1;
+			bm_value = optarg;
 			break;
 
 		case 'c':
@@ -14253,6 +14274,29 @@ external_arguments(int argc, char **argv)
 			exit(EXIT_FAILURE);
 
 		default: break;
+		}
+	}
+
+	if (bm_value) {
+		char *bm_exp = (char *)NULL;
+
+		if (*bm_value == '~') {
+			bm_exp = tilde_expand(bm_value);
+			bm_value = bm_exp;
+		}
+
+		if (access(bm_value, R_OK) == -1) {
+			_err('e', PRINT_PROMPT, "%s: %s: %s\n"
+				"Falling back to the default bookmarks file\n",
+				PROGRAM_NAME, bm_value, strerror(errno));
+		}
+
+		else {
+			alt_bm_file = (char *)xnmalloc(strlen(bm_value)
+											+ 1, sizeof(char));
+			strcpy(alt_bm_file, bm_value);
+			_err('n', PRINT_PROMPT, "%s: Loaded alternative "
+				 "bookmarks file\n", PROGRAM_NAME);
 		}
 	}
 
@@ -22648,6 +22692,7 @@ help_function (void)
 	printf(_("\nUSAGE: %s %s\n\
 \n -a, --no-hidden\t\t do not show hidden files\
 \n -A, --show-hidden\t\t show hidden files (default)\
+\n -b, --bookmarks-file=FILE\t specify an alternative bookmarks file\
 \n -c, --config-file=FILE\t\t specify an alternative configuration file\
 \n -f, --no-folders-first\t\t do not list folders first\
 \n -F, --folders-first\t\t list folders first (default)\
