@@ -4,10 +4,10 @@
 .ad l
 
 .SH NAME
-CLIFM \- A completely CLI\-based file manager inspired by Arch Linux' KISS principle
+CLIFM \- A completely CLI\-based file manager inspired by the KISS principle
 
 .SH SYNOPSIS
-\fIclifm\fR [\-aAfFgGhiIlLmoOsuUvxy] [\-c FILE] [\-k FILE] [\-p PATH] [\-P PROFILE] [\-z METHOD]
+\fIclifm\fR [\-aAfFgGhiIlLmoOsSuUvxy] [\-c FILE] [\-k FILE] [\-p PATH] [\-P PROFILE] [\-z METHOD]
 
 .SH DESCRIPTION
 CliFM is a completely text\-based, \fBshell\-like\fR file manager (no GUI nor curses at all) able to perform all the basic operations you may expect from any other FM. However, its most distinguishing characteristics are:
@@ -34,6 +34,8 @@ With the \fBautomatic ELN expansion\fR feature you can use ELN's with external c
 .sp
   \fBj)\fR It is blazing \fBfast\fR and incredibly \fBlightweigth\fR. With a memory footprint below 5 MiB and a disk usage of 400 KiB, it can run on really old hardware. It is so simple that it doesn't require an X session nor any graphical environment at all, being able thus to perfectly run on the console (TTY) and even on a headless machine via a SSH or a telnet session. And if this is not enough, you can still use the light mode to make it even faster.
 .sp
+  \fBi)\fR When running in \fBstealth mode\fR, it will leave not trace at all in the host system.
+.sp
 Because inspired in Arch Linux and its \fBKISS\fR principle, CliFM is fundamentally aimed to be lightweight, fast, and simple. On Arch's notion of simplcity see: \fIhttps://wiki.archlinux.org/index.php/Arch_Linux#Simplicity\fR
 
 List of CliFM features:
@@ -57,7 +59,7 @@ List of CliFM features:
   17) Startup and prompt commands
   18) User profiles
   19) Commands sequential and conditional execution
-  20) Resource opener
+  20) Built-in resource opener (lira)
   21) 9 sorting methods and reverse sorting
   22) Bulk rename
   23) Archiving and compression support
@@ -66,6 +68,7 @@ List of CliFM features:
   26) Symbolic links editor
   27) Regular expressions and filetype filter support for both search and selection of files
   28) Command substitution for internal commands
+  29) Privacy oriented
 
 .SH RATIONALE
 When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the Linux built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There is no two without three".
@@ -82,7 +85,7 @@ do not show hidden files
 .B \-A, \-\-show\-hidden
 show hidden files (default)
 .TP
-.B \-c \-\-config\-file \fRFILE
+.B \-c \-\-config\-file=FILE
 set an alternative configuration file
 .TP
 .B \-f, \-\-no\-folders\-first
@@ -106,7 +109,7 @@ no case\-sensitive files listing (default)
 .B \-I, \-\-case\-sensitive
 case\-sensitive files listing
 .TP
-.B \-k \-\-keybindings\-file \fRFILE
+.B \-k \-\-keybindings\-file=FILE
 set an alternative keybindings file
 .TP
 .B \-l, \-\-no\-long\-view
@@ -121,19 +124,20 @@ enable long view mode: list files and their properties
 .B \-L, \-\-list\-on\-the\-fly
 \'cd\' lists files on the fly (default)
 .TP
-
 .B \-m, \-\-dirhist\-map
 enable the directory history map
 .TP
-
-.B \-p, \-\-path \fRPATH
+.B \-p, \-\-path=PATH
 use PATH as CliFM starting path. Default starting path is current working directory
 .TP
-.B \-P, \-\-profile \fRPROFILE
+.B \-P, \-\-profile=PROFILE
 use (or create) PROFILE as profile. Default profile is 'default'
 .TP
 .B \-s, \-\-splash
 enable the splash screen
+.TP
+.B \-S \-\-stealth-mode
+leave no trace on the host system. Nothing is read from files nor any file is created: all settings are set the the default value. However, most settings can still be controlled via command line options.
 .TP
 .B \-u, \-\-no\-unicode
 disable unicode
@@ -150,10 +154,64 @@ allow the use of external commands
 .B \-y, \-\-light\-mode
 enable the light mode to speed up CliFM
 .TP
-.B \-z, \-\-sort \fRMETHOD
+.B \-z, \-\-sort=METHOD
 sort files by METHOD, where METHOD could be: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version (name if not available), 8 =  extension, 9 = inode.
 .TP
+.B \-\-no\-cd\-auto
+by default, CliFM changes to directories by just specifying the corresponding ELN (e.g. '12' instead of 'cd 12'). This option forces the use of 'cd'
+.TP
+.B \-\-no\-open\-auto
+same as no-cd-auto, but for files instead of directories
+.TP
+.B \-\-restore\-last\-path
+save last visited directory to be restored in the next session
+.TP
+.B \-\-no\-tips
+disable startup tips
+.TP
+.B \-\-disk\-usage
+show disk usage (free/total) for the filesystem to which the current directory belongs
+.TP
+.B \-\-no\-dir\-indicator
+do not add / indicator to directory names when running in light mode
+.TP
+.B \-\-classify=NUM
+specify whether to classify files or not when running in light mode. 0 for no, 1 for yes, and 2 to classify executable files as well (option 2 implies running access(3) over each regular file, which is an expensive operation)
+.TP
+.B \-\-share\-selbox
+make the Selection Box common to different profiles
+.TP
+.B --opener=APPLICATION
+specify a resource opener to use. If opener is not set, \fIlira\fR will be used instead
+.TP
+.B \-\-rl\-vi\-mode
+set readline to vi editing mode (defaults to emacs editing mode)
+.TP
+.B \-\-max\-dirhist
+maximum number of visited directories to remember
+.TP
+.B \-\-sort\-reverse
+sort in reverse order, for example: z-a instead of a-z, which is the default order
+.TP
+.B \-\-no\-files\-counter
+disable the files counter for directories. This option is especially useful to speed up the listing process; counting files in directories is particularly expensive
+.TP
+.B \-\-no\-welcome\-message
+disable the welcome message
+.TP
+.B \-\-no\-clear\-screen
+do not clear the screen when listing directories
+.TP
+.B \-\-no\-backup\-files
+do not show files ending with tilde (~)
+.TP
+.B \-\-enable\-logs
+enable program logs
+.TP
+.B \-\-max\-path=NUM
+set the maximun number of characters after which the current directory in the prompt line will be abreviated to the directory base name (if \\z is used in the prompt)
 
+.TP
 Options precedence order: 1) command line; 2) configuration file; 3) default values.
 
 .SH COMMANDS
@@ -308,11 +366,11 @@ Toggle the light mode on/off. This option, aimed to make files listing faster th
 .TP
 
 .B mm, mime \fR[info ELN/FILENAME] [edit]
-This is CliFM's resource opener. The 'info' option prints the MIME information about ELN/FILENAME: its MIME type, its file extension, if any, and the application associated to this MIME type or file extension.
+This is \fIlira\fR, CliFM's resource opener. The 'info' option prints the MIME information about ELN/FILENAME: its MIME type, its file extension, if any, and the application associated to this MIME type or file extension.
 .sp
 The 'edit' option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension, and then add a value for it to the MIME list file using the 'edit' option.
 .sp
-Each value in the MIME list file has this format: 'mime_type=application args;application args; ... n' or '*.c=application args;application args; ... n'. Example: 'plain/text=nano' or '*.c=geany \-p;leafpad;nano'. CliFM will check the first matching line, and if at least one of the specified applications exists, this one will be used to open the corresponding associated filed. Else, the next matching line will be checked.
+Each value in the MIME list file has this format: 'mime_type=application args;application args; ... n' or '*.c=application args;application args; ... n'. Example: 'plain/text=nano' or '*.c=geany \-p;leafpad;nano'. \fIlira\fR will check the first matching line, and if at least one of the specified applications exists, this one will be used to open the corresponding associated filed. Else, the next matching line will be checked.
 .sp
 If the MIME file is not found, CliFM will try to import MIME definitions from the default locations for the 'mimeapps.list' file as specified by the Freedesktop specification.
 .TP
@@ -342,7 +400,7 @@ with no arguments, prints the name of the currently used profile. Use the 'ls' o
 .TP
 
 .B opener \fR[default] [APPLICATION]
-with no argument, prints the currently used resource opener (by default, \fBmime\fR, CliFM's built\-in opener). Otherwise, set APPLICATION as opener or, if 'default' is passed instead, use the built\-in opener. 
+with no argument, prints the currently used resource opener (by default, \fIlira\fR, CliFM's built\-in opener). Otherwise, set APPLICATION as opener or, if 'default' is passed instead, use \fIlira\fR. 
 .TP
 
 .B shell \fR[SHELL]
@@ -639,7 +697,7 @@ By default, for example, CliFM's prompt line is this: "\\A \\u:\\H \\[\\e[00;36m
 with the path printed in cyan and the dollar sign in blue.
 
 .TP
-A bold green asterisk at the left of the prompt indicates that there are elements in the Selection Box. In the same way, a yellow 'T' means that there are currently files in the trash can. Finally, CliFM makes use of three kind of messages: errors (a red 'E' at the left of the prompt), warnings (a yellow 'W'), and simple notices (a green 'N').
+A bold green asterisk at the left of the prompt indicates that there are elements in the Selection Box. In the same way, a yellow 'T' means that there are currently files in the trash can, just as a bold blue 'S' means that the program is running in stealth mode. Finally, CliFM makes use of three kind of messages: errors (a red 'E' at the left of the prompt), warnings (a yellow 'W'), and simple notices (a green 'N').
 
 .SH BUILT\-IN EXPANSIONS
 .TP
@@ -727,7 +785,7 @@ The file used to define custom actions is \fI$XDG_CONFIG_HOME/clifm/PROFILE/acti
 .TP
 
 .B MIMELIST FILE:
-The mime list file is \fI$XDG_CONFIG_HOME/clifm/PROFILE/mimelist.cfm\fR. It is a list of filetypes and file extensions and their associated applications used by CliFM built\-in resource opener.
+The mime list file is \fI$XDG_CONFIG_HOME/clifm/PROFILE/mimelist.cfm\fR. It is a list of filetypes and file extensions and their associated applications used by \fIlira\fR.
 .TP
 
 .B BOOKMARKS FILE
