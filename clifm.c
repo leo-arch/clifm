@@ -7214,67 +7214,90 @@ set_colors(void)
 {
 	char *dircolors = (char *)NULL, *extcolors = (char *)NULL;
 
+	/* Try to get colors from environment variables */
+	char *env_dircolors = getenv("CLIFM_FILE_COLORS");
+	char *env_extcolors = getenv("CLIFM_EXT_COLORS");
+
+	if (env_dircolors) {
+		dircolors = (char *)xnmalloc(strlen(env_dircolors)
+									 + 1, sizeof(char));
+		strcpy(dircolors, env_dircolors);
+		env_dircolors = (char *)NULL;
+	}
+
+	if (env_extcolors) {
+		extcolors = (char *)xnmalloc(strlen(env_extcolors)
+									 + 1, sizeof(char));
+		strcpy(extcolors, env_extcolors);
+		env_extcolors = (char *)NULL;
+	}
+
+	if (!dircolors || !extcolors) {
 	/* Get color lines, for both file types and extensions, from the
 	 * config file */
-	FILE *fp_colors = fopen(CONFIG_FILE, "r");
-	if (fp_colors) {
-		char *line = (char *)NULL;
-		ssize_t line_len = 0;
-		size_t line_size = 0;
-		int file_type_found = 0, ext_type_found = 0;
+		FILE *fp_colors = fopen(CONFIG_FILE, "r");
 
-		while ((line_len = getline(&line, &line_size, fp_colors)) > 0) {
+		if (fp_colors) {
+			char *line = (char *)NULL;
+			ssize_t line_len = 0;
+			size_t line_size = 0;
+			int file_type_found = 0, ext_type_found = 0;
 
-			/* Colors for file types */
-			if (strncmp(line, "FiletypeColors=", 15) == 0) {
-				file_type_found = 1;
-				char *opt_str = strchr(line, '=');
+			while ((line_len = getline(&line, &line_size, fp_colors)) > 0) {
 
-				if (!opt_str)
-					continue;
+				/* Colors for file types */
+				if (!dircolors && *line == 'F'
+				&& strncmp(line, "FiletypeColors=", 15) == 0) {
+					file_type_found = 1;
+					char *opt_str = strchr(line, '=');
 
-				opt_str++;
+					if (!opt_str)
+						continue;
 
-				char *color_line = strip_color_line(opt_str, 't');
-				if (!color_line)
-					continue;
+					opt_str++;
 
-				dircolors = (char *)xcalloc(strlen(color_line) + 1,
-											sizeof(char));
+					char *color_line = strip_color_line(opt_str, 't');
+					if (!color_line)
+						continue;
 
-				strcpy(dircolors, color_line);
-				free(color_line);
+					dircolors = (char *)xcalloc(strlen(color_line) + 1,
+												sizeof(char));
+
+					strcpy(dircolors, color_line);
+					free(color_line);
+				}
+
+				/* Colors for file extensions */
+				else if (!extcolors && *line == 'E'
+				&& strncmp(line, "ExtColors=", 10) == 0) {
+					ext_type_found = 1;
+					char *opt_str = strchr(line, '=');
+
+					if (!opt_str)
+						continue;
+
+					opt_str++;
+
+					char *color_line = strip_color_line(opt_str, 'x');
+					if (!color_line)
+						continue;
+
+					extcolors = (char *)xcalloc(strlen(color_line) + 1,
+												sizeof(char));
+
+					strcpy(extcolors, color_line);
+					free(color_line);
+				}
+
+				if (file_type_found && ext_type_found)
+					break;
 			}
 
-			/* Colors for file extensions */
-			else if (strncmp(line, "ExtColors=", 10) == 0) {
-				ext_type_found = 1;
-				char *opt_str = strchr(line, '=');
+			free(line);
+			line = (char *)NULL;
 
-				if (!opt_str)
-					continue;
-
-				opt_str++;
-
-				char *color_line = strip_color_line(opt_str, 'x');
-				if (!color_line)
-					continue;
-
-				extcolors = (char *)xcalloc(strlen(color_line) + 1,
-											sizeof(char));
-
-				strcpy(extcolors, color_line);
-				free(color_line);
-			}
-
-			if (file_type_found && ext_type_found)
-				break;
+			fclose(fp_colors);
 		}
-
-		free(line);
-		line = (char *)NULL;
-
-		fclose(fp_colors);
 	}
 
 			/* ##############################
@@ -7289,8 +7312,10 @@ set_colors(void)
 		/* Unload current extension colors */
 		if (ext_colors_n) {
 			size_t i;
+
 			for (i = 0; i < ext_colors_n; i++)
 				free(ext_colors[i]);
+
 			free(ext_colors);
 			ext_colors = (char **)NULL;
 			free(ext_colors_len);
@@ -7456,6 +7481,7 @@ set_colors(void)
 				if (!rem)
 					ls_buf[buflen++] = dircolors[i];
 			}
+
 			else
 				break;
 
