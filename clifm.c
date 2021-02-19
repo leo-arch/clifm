@@ -21344,10 +21344,10 @@ bookmarks_function(char **cmd)
 
 		if ((xbookmarks[i].hotkey
 		&& *cmd[1] == *xbookmarks[i].hotkey
-		&& strcmp(cmd[1], xbookmarks[i].hotkey))
+		&& strcmp(cmd[1], xbookmarks[i].hotkey) == 0)
 		|| (xbookmarks[i].name
 		&& *cmd[1] == *xbookmarks[i].name
-		&& strcmp(cmd[1], xbookmarks[i].name))) {
+		&& strcmp(cmd[1], xbookmarks[i].name) == 0)) {
 
 			if (xbookmarks[i].path) {
 				char *tmp_cmd[] = { "o", xbookmarks[i].path, NULL };
