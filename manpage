@@ -51,24 +51,25 @@ List of CliFM features:
   9) ELN's auto\-expansion
   10) 'sel' keyword auto\-expansion
   11) Ranges auto\-expansion
-  12) Bash\-like quoting system
-  13) Custom aliases and variables
-  14) Customizable colors for file types and extensions
-  15) Customizable prompt
-  16) Shell commands execution
-  17) Startup and prompt commands
-  18) User profiles
-  19) Commands sequential and conditional execution
-  20) Built-in resource opener (lira)
-  21) 9 sorting methods and reverse sorting
-  22) Bulk rename
-  23) Archiving and compression support
-  24) Auto-cd and auto-open
-  25) Plugins support via custom actions linked to executable files
-  26) Symbolic links editor
-  27) Regular expressions and filetype filter support for both search and selection of files
-  28) Command substitution for internal commands
-  29) Privacy oriented
+  12) Bookmarks auto\-expansion
+  13) Bash\-like quoting system
+  14) Custom aliases and variables
+  15) Customizable colors for file types and extensions
+  16) Customizable prompt
+  17) Shell commands execution
+  18) Startup and prompt commands
+  19) User profiles
+  20) Commands sequential and conditional execution
+  21) Built-in resource opener (lira)
+  22) 9 sorting methods and reverse sorting
+  23) Bulk rename
+  24) Archiving and compression support
+  25) Auto-cd and auto-open
+  26) Plugins support via custom actions linked to executable files
+  27) Symbolic links editor
+  28) Regular expressions and filetype filter support for both search and selection of files
+  29) Command substitution for internal commands
+  30) Privacy oriented
 
 .SH RATIONALE
 When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the Linux built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There is no two without three".
@@ -180,6 +181,9 @@ do not add / indicator to directory names when running in light mode
 .TP
 .B \-\-classify=NUM
 specify whether to classify files or not when running in light mode. 0 for no, 1 for yes, and 2 to classify executable files as well (option 2 implies running access(3) over each regular file, which is an expensive operation)
+.TP
+.B \-\-expand\-bookmarks
+expand bookmark names into the corresponding bookmark paths and enable TAB completion for bookmark names as well. If the bookmark is, .e.g. mybookmark=/my/path, "mybo" will be completed as "mybookmark", which will be interpreted as "/my/path".
 .TP
 .B \-\-share\-selbox
 make the Selection Box common to different profiles
