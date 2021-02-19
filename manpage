@@ -203,6 +203,9 @@ sort in reverse order, for example: z-a instead of a-z, which is the default ord
 .B \-\-no\-files\-counter
 disable the files counter for directories. This option is especially useful to speed up the listing process; counting files in directories is particularly expensive
 .TP
+.B \-\-only\-dirs
+list only directories and symbolic links to directories 
+.TP
 .B \-\-no\-welcome\-message
 disable the welcome message
 .TP
