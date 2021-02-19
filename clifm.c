@@ -299,6 +299,7 @@ tw=30;42:ow=34;42:ex=01;32:no=31;47"
 #define DEF_DISK_USAGE 0
 #define DEF_RESTORE_LAST_PATH 0
 #define DEF_EXPAND_BOOKMARKS 0
+#define DEF_ONLY_DIRS 0
 #define UNSET -1
 
 /* Macros for the colors_list function */
@@ -707,6 +708,7 @@ struct param
 	int max_path;
 	int bm_file;
 	int expand_bookmarks;
+	int only_dirs;
 };
 
 struct param xargs;
@@ -738,7 +740,7 @@ short splash_screen = UNSET, welcome_message = UNSET, ext_cmd_ok = UNSET,
 	files_counter = UNSET, light_mode = UNSET, dir_indicator = UNSET,
 	autocd = UNSET, auto_open = UNSET,dirhist_map = UNSET,
 	restore_last_path = UNSET, pager = UNSET, show_bk_files = UNSET,
-	expand_bookmarks = UNSET,
+	expand_bookmarks = UNSET, only_dirs = UNSET,
 
 	no_log = 0, internal_cmd = 0, shell_terminal = 0, print_msg = 0,
 	recur_perm_error_flag = 0, is_sel = 0, sel_is_last = 0,
@@ -760,7 +762,7 @@ short splash_screen = UNSET, welcome_message = UNSET, ext_cmd_ok = UNSET,
 int max_hist = UNSET, max_log = UNSET, dirhist_total_index = 0,
 	dirhist_cur_index = 0, argc_bk = 0, max_path = UNSET, exit_code = 0,
 	shell_is_interactive = 0, cont_bt = 0, sort_types = 9,
-	max_dirhist = UNSET;
+	max_dirhist = UNSET, total = 0;
 
 int *eln_as_file = (int *)0;
 
@@ -769,7 +771,7 @@ unsigned short term_cols = 0;
 size_t user_home_len = 0, args_n = 0, sel_n = 0, trash_n = 0, msgs_n = 0,
 	   prompt_cmds_n = 0, path_n = 0, current_hist_n = 0, usrvar_n = 0,
 	   aliases_n = 0, longest = 0, files = 0, eln_len = 0, actions_n = 0,
-	   ext_colors_n = 0, kbinds_n = 0, total = 0, eln_as_file_n = 0,
+	   ext_colors_n = 0, kbinds_n = 0, eln_as_file_n = 0,
 	   bm_n = 0;
 
 struct termios shell_tmodes;
@@ -1736,6 +1738,7 @@ reload_config(void)
 	xargs.files_counter = xargs.welcome_message = UNSET;
 	xargs.clear_screen = xargs.bk_files = xargs.logs = UNSET;
 	xargs.max_path = xargs.bm_file = xargs.expand_bookmarks = UNSET;
+	xargs.only_dirs = UNSET;
 
 	shell_terminal = no_log = internal_cmd = recur_perm_error_flag = 0;
 	is_sel = sel_is_last = print_msg = kbind_busy = dequoted = 0;
@@ -7772,6 +7775,8 @@ set_default_options(void)
 		strcpy(opener, "xdg-open");
 	}
 
+	if (xargs.only_dirs == UNSET)
+		only_dirs = DEF_ONLY_DIRS;
 	if (xargs.expand_bookmarks == UNSET)
 		expand_bookmarks = DEF_EXPAND_BOOKMARKS;
 	if (xargs.splash == UNSET)
@@ -11234,20 +11239,11 @@ free_stuff(void)
 
 	free(TMP_DIR);
 
-	if (file_info)
-		free(file_info);
-
 	if (opener)
 		free(opener);
 
 	if (encoded_prompt)
 		free(encoded_prompt);
-
-/*	if (bookmark_names) {
-		for (i = 0; bookmark_names[i]; i++)
-			free(bookmark_names[i]);
-		free(bookmark_names);
-	} */
 
 	if (profile_names) {
 		for (i = 0; profile_names[i]; i++)
@@ -13523,6 +13519,8 @@ init_config(void)
 			if (xargs.rl_vi_mode == 1) rl_vi_editing_mode(1, 0);
 			if (expand_bookmarks == UNSET)
 				expand_bookmarks = DEF_EXPAND_BOOKMARKS;
+			if (only_dirs == UNSET)
+				only_dirs = DEF_ONLY_DIRS;
 			if (disk_usage == UNSET) disk_usage = DEF_DISK_USAGE;
 			if (dirhist_map == UNSET) dirhist_map = DEF_DIRHIST_MAP;
 			if (max_dirhist == UNSET) max_dirhist = DEF_MAX_DIRHIST;
@@ -13955,6 +13953,7 @@ external_arguments(int argc, char **argv)
 		{"max-path", required_argument, 0, 16},
 		{"opener", required_argument, 0, 17},
 		{"expand-bookmarks", no_argument, 0, 18},
+		{"only-dirs", no_argument, 0, 19},
 		{0, 0, 0, 0}
 	};
 
@@ -13963,7 +13962,7 @@ external_arguments(int argc, char **argv)
 	xargs.ffirst = xargs.sensitive = xargs.unicode = xargs.pager = UNSET;
 	xargs.path = xargs.cd_list_auto = xargs.autocd = UNSET;
 	xargs.light = xargs.sort = xargs.dirmap = xargs.config = UNSET;
-	xargs.stealth_mode = xargs.auto_open = UNSET;
+	xargs.stealth_mode = xargs.auto_open = xargs.only_dirs = UNSET;
 
 	xargs.restore_last_path = xargs.tips = xargs.disk_usage = UNSET;
 	xargs.dir_indicator = xargs.classify = xargs.share_selbox = UNSET;
@@ -14094,6 +14093,10 @@ external_arguments(int argc, char **argv)
 
 		case 18:
 			xargs.expand_bookmarks = expand_bookmarks = 1;
+		break;
+
+		case 19:
+			xargs.only_dirs = only_dirs = 1;
 		break;
 
 		case 'a':
@@ -15819,9 +15822,16 @@ free_dirlist(void)
 	free(tmp_dirlist);
 	tmp_dirlist = (struct dirent **)NULL;
 
+	if (files) {
+		free(file_info);
+		file_info = (struct fileinfo *)NULL;
+	}
+
 	while (files--)
 		dirlist[files] = (char *)NULL;
 
+	files = 0;
+	
 	return;
 }
 
@@ -15847,10 +15857,10 @@ list_dir(void)
 		return EXIT_FAILURE;
 	}
 
-	if (files) {
+/*	if (files) {
 		free(file_info);
 		file_info = (struct fileinfo *)NULL;
-	}
+	} */
 
 	/* Free indices of files named as ELN, if any */
 	if (eln_as_file_n) {
@@ -15964,14 +15974,16 @@ list_dir(void)
 		file_info = (struct fileinfo *)xnmalloc(
 					total + 1, sizeof(struct fileinfo));
 
-	if (list_folders_first) {
+	if (list_folders_first || only_dirs) {
 
 		/* Store indices of dirs and files into different int arrays,
 		 * counting the number of elements for each array too. Symlinks
 		 * to directories are counted as directories. */
-		int *tmp_files = (int *)xnmalloc(total + 1, sizeof(int)); 
 		int *tmp_dirs = (int *)xnmalloc(total + 1, sizeof(int));
-		size_t filesn = 0, dirsn = 0;
+		size_t dirsn = 0;
+
+		int *tmp_files = (int *)xnmalloc(total + 1, sizeof(int)); 
+		size_t filesn = 0;
 
 		for (i = 0; i < total; i++) {
 
@@ -15993,6 +16005,9 @@ list_dir(void)
 					break;
 			}
 		}
+
+		if (only_dirs)
+			filesn = 0;
 
 		/* Allocate enough space to store all dirs and file names in 
 		 * the dirlist array */
@@ -16636,8 +16651,6 @@ list_dir_light(void)
 {
 /*	clock_t start = clock(); */
 
-	files = 0; /* Reset the files counter */
-
 	register int i = 0;
 
 	total = -1;
@@ -16717,19 +16730,11 @@ list_dir_light(void)
 			return EXIT_FAILURE;
 	}
 
-	file_info = (struct fileinfo *)xnmalloc(
-				 total + 1, sizeof(struct fileinfo));
+	if (total > 0)
+		file_info = (struct fileinfo *)xnmalloc(
+					 total + 1, sizeof(struct fileinfo));
 
-	files = total;
-
-	if (files == 0) {
-/*		if (clear_screen)
-			CLEAR; */
-		puts(". ..\n");
-		return EXIT_SUCCESS;
-	}
-
-	if (list_folders_first) {
+	if (list_folders_first || only_dirs) {
 
 		/* Store indices of dirs and files into different int arrays,
 		 * counting the number of elements for each array too. */
@@ -16748,6 +16753,9 @@ list_dir_light(void)
 					break;
 			}
 		}
+
+		if (only_dirs)
+			filesn = 0;
 
 		/* Allocate enough space to store all dirs and file names in 
 		 * the dirlist array */
@@ -16795,6 +16803,9 @@ list_dir_light(void)
 
 	/* If no list_folders_first */
 	else {
+
+		files = total;
+
 		dirlist = (char **)xrealloc(dirlist, (size_t)(files + 1)
 										* sizeof(char *));
 
@@ -16811,6 +16822,14 @@ list_dir_light(void)
 
 	dirlist[files] = (char *)NULL;
 
+	if (files == 0) {
+/*		if (clear_screen)
+			CLEAR; */
+		free(file_info);
+		puts(". ..\n");
+		return EXIT_SUCCESS;
+	}
+
 	/* Get the longest filename */
 	longest = 0; /* Global */
 
@@ -16822,6 +16841,7 @@ list_dir_light(void)
 		&& *tmp_dirlist[i]->d_name <= '9'
 		&& is_number(tmp_dirlist[i]->d_name)
 		&& atoi(tmp_dirlist[i]->d_name) <= files) {
+
 			eln_as_file = (int *)xrealloc(eln_as_file,
 								(eln_as_file_n + 1) * sizeof(int));
 			eln_as_file[eln_as_file_n++] = i;
@@ -20978,6 +20998,9 @@ bookmark_add(char *file)
 int
 create_bm_file(void)
 {
+	if (!BM_FILE)
+		return EXIT_FAILURE;
+
 	struct stat file_attrib;
 
 	if (stat(BM_FILE, &file_attrib) == -1) {
@@ -21170,31 +21193,33 @@ load_bookmarks(void)
 void
 free_bookmarks(void)
 {
+	if (!bm_n)
+		return;
+
 	size_t i;
 
-	if (bm_n) {
-		for (i = 0; i < bm_n; i++) {
-			if (bookmarks[i].shortcut)
-				free(bookmarks[i].shortcut);
+	for (i = 0; i < bm_n; i++) {
+		if (bookmarks[i].shortcut)
+			free(bookmarks[i].shortcut);
 
-			if (bookmarks[i].name)
-				free(bookmarks[i].name);
+		if (bookmarks[i].name)
+			free(bookmarks[i].name);
 
-			if (bookmarks[i].path)
-				free(bookmarks[i].path);
-		}
-
-		free(bookmarks);
-		bookmarks = (struct bookmarks_t *)NULL;
-
-		bm_n = 0;
+		if (bookmarks[i].path)
+			free(bookmarks[i].path);
 	}
+
+	free(bookmarks);
+	bookmarks = (struct bookmarks_t *)NULL;
 
 	for (i = 0; bookmark_names[i]; i++)
 		free(bookmark_names[i]);
 
 	free(bookmark_names);
 	bookmark_names = (char **)NULL;
+
+	bm_n = 0;
+
 	return;
 }
 
@@ -22842,6 +22867,8 @@ help_function (void)
 \n				directories\
 \n     --no-backup-files\t\t do not show files ending with tilde (~)\
 \n     --enable-logs\t\t enable program logs\
+\n     --only-dirs\t\t list only directories and symbolic links\
+\n				to directories\
 \n     --opener=APPLICATION\t resource opener to use instead of 'lira',\
 \n				%s built-in opener\
 \n     --max-path=NUM\t\t set the maximun number of characters \
