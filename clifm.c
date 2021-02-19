@@ -15547,7 +15547,7 @@ count_dir(const char *dir_path) /* Readdir version */
 	struct stat file_attrib;
 
 	if (lstat(dir_path, &file_attrib) == -1)
-		return 0;
+		return -1;
 
 	size_t file_count = 0;
 	DIR *dir_p;
@@ -15557,7 +15557,7 @@ count_dir(const char *dir_path) /* Readdir version */
 		if (errno == ENOMEM)
 			exit(EXIT_FAILURE);
 		else
-			return 0;
+			return -1;
 	}
 
 	while ((entry = readdir(dir_p))) 
@@ -16174,6 +16174,11 @@ list_dir(void)
 			/* Dir counter is enabled, and the file is either a
 			 * directory or a symlink to a directory */
 			else {
+
+				/* It's a directory, so that " /" will be appended
+				 * anyway */
+				file_name_width += 2;
+
 				/* linkname is not null only if the file is a symlink
 				 * to an existent directory */
 				int retval = count_dir((linkname) ? linkname
@@ -16183,15 +16188,17 @@ list_dir(void)
 					file_info[i].filesn = retval;
 					file_info[i].ruser = 1;
 
-					if (file_info[i].filesn > 2)
+					if (file_info[i].filesn > 2) {
 						/* Add dir counter lenght (" /num") to
 						 * file_name_with */
 						file_name_width += 
-							digits_in_num((int)file_info[i].filesn)
-							+ 2;
+							digits_in_num((int)file_info[i].filesn);
+					}
 				}
-				else
+				else {
+					file_info[i].filesn = 0;
 					file_info[i].ruser = 0;
+				}
 			}
 
 			if (linkname)
@@ -16400,9 +16407,12 @@ list_dir(void)
 		switch (file_info[i].type & S_IFMT) {
 
 		case S_IFDIR:
-			if (!file_info[i].ruser)
-				printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC, nd_c, 
-					   dirlist[i], NC, (last_column) ? "\n" : "");
+			if (!file_info[i].ruser) {
+				printf("%s%d%s %s%s%s /%s%s", eln_color, i + 1, NC, nd_c, 
+					   dirlist[i], dir_count_color, NC, (last_column)
+					   ? "\n" : "");
+				is_dir = 1;
+			}
 			else {
 				int is_oth_w = 0;
 				if (file_info[i].type & S_IWOTH) is_oth_w = 1;
@@ -16411,12 +16421,12 @@ list_dir(void)
 				 * will be zero */
 				if (file_info[i].filesn == 2
 				|| file_info[i].filesn == 0) {
-					/* If sticky bit dir */
-					printf("%s%d%s %s%s%s%s", eln_color, i + 1, NC,
+					printf("%s%d%s %s%s%s /%s%s", eln_color, i + 1, NC,
 						 (file_info[i].type & S_ISVTX) ? ((is_oth_w) ? 
 						 tw_c : st_c) : ((is_oth_w) 
-						 ? ow_c : ed_c), dirlist[i], 
+						 ? ow_c : ed_c), dirlist[i], dir_count_color,
 						 NC, (last_column) ? "\n" : "");
+					is_dir = 1;
 				}
 				else {
 					if (files_counter) {
@@ -16574,12 +16584,17 @@ list_dir(void)
 			size_t diff = longest - (digits_in_num(i + 1) + 1 + 
 						  file_info[i].len);
 
-			if (is_dir) { /* If a directory, make room for displaying the 
+			if (is_dir) {
+				/* If a directory, make room for displaying the 
 				* amount of files it contains */
 				/* Get the amount of digits in the number of files
 				 * contained by the listed directory */
-				size_t dig_num = digits_in_num(
-										(int)file_info[i].filesn - 2);
+				size_t dig_num = 0;
+
+				if (file_info[i].filesn > 0 && file_info[i].ruser)
+					dig_num = digits_in_num(
+								(int)file_info[i].filesn - 2);
+
 				/* The amount of digits plus 2 chars for " /" */
 				diff -= (dig_num + 2);
 			}
@@ -19347,9 +19362,17 @@ sel_function (char **comm)
 
 		if (sel_is_filename || sel_is_relative_path) { 
 			/* Add path to filename or relative path */
-			sel_tmp = (char *)xcalloc(strlen(path) + strlen(comm[i])
-									  + 2, sizeof(char));
-			sprintf(sel_tmp, "%s/%s", path, comm[i]);
+			if (strcmp(path, "/") == 0) {
+				sel_tmp = (char *)xcalloc(strlen(comm[i])
+										  + 2, sizeof(char));
+				sprintf(sel_tmp, "/%s", comm[i]);
+			}
+
+			else {
+				sel_tmp = (char *)xcalloc(strlen(path) + strlen(comm[i])
+										  + 2, sizeof(char));
+				sprintf(sel_tmp, "%s/%s", path, comm[i]);
+			}
 		}
 
 		else { /* If absolute path... */
@@ -19393,8 +19416,11 @@ sel_function (char **comm)
 
 	/* Get size of total sel files */
 	struct stat sel_attrib;
+
 	for (i = 0; i < sel_n; i++) {
+
 		if (lstat(sel_elements[i], &sel_attrib) != -1) {
+
 			if ((sel_attrib.st_mode & S_IFMT) == S_IFDIR)
 				total_sel_size += dir_size(sel_elements[i]);
 			else
@@ -19567,9 +19593,12 @@ deselect(char **comm)
 		if (!is_number(desel_elements[i])) {
 
 			if (strcmp(desel_elements[i], "q") == 0) {
+
 				for (i = 0; i < desel_n; i++)
 					free(desel_elements[i]);
+
 				free(desel_elements);
+
 				return EXIT_SUCCESS;
 			}
 			
@@ -19654,6 +19683,7 @@ deselect(char **comm)
 	/* Search the sel array for the path of the element to deselect and
 	 * store its index */
 	struct stat desel_attrib;
+
 	for (i = 0; i < desel_n; i++) {
 		size_t j, k, desel_index = 0;
 
@@ -19680,8 +19710,8 @@ deselect(char **comm)
 		 * the previous position) */
 		for (j = desel_index; j < (sel_n - 1); j++) {
 			sel_elements[j] = (char *)xrealloc(sel_elements[j], 
-										(strlen(sel_elements[j + 1]) + 1)
-										* sizeof(char));
+									(strlen(sel_elements[j + 1]) + 1)
+									* sizeof(char));
 			strcpy(sel_elements[j], sel_elements[j + 1]);
 		}
 	}
@@ -19803,14 +19833,17 @@ search_glob(char **comm)
 	/* If there are two arguments, the one starting with '-' is the
 	 * filetype and the other is the path */
 	if (comm[1] && comm[2]) {
+
 		if (comm[1][0] == '-') {
 			file_type = (mode_t)comm[1][1];
 			search_path = comm[2];
 		}
+
 		else if (comm[2][0] == '-') {
 			file_type = (mode_t)comm[2][1];
 			search_path = comm[1];
 		}
+
 		else
 			search_path = comm[1];
 	}
@@ -19818,6 +19851,7 @@ search_glob(char **comm)
 	/* If just one argument, '-' indicates filetype. Else, we have a
 	 * path */
 	else if (comm[1]) {
+
 		if (comm[1][0] == '-')
 			file_type = (mode_t)comm[1][1];
 		else
