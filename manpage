@@ -141,7 +141,7 @@ use (or create) PROFILE as profile. Default profile is 'default'
 enable the splash screen
 .TP
 .B \-S \-\-stealth-mode
-leave no trace on the host system. Nothing is read from files nor any file is created: all settings are set the the default value. However, most settings can still be controlled via command line options.
+leave no trace on the host system. Nothing is read from files nor any file is created: all settings are set to the default value. However, most settings can still be controlled via command line options. Listing colors could be customized via dedicated environment variables (see the ENVIRONMENT section below).
 .TP
 .B \-u, \-\-no\-unicode
 disable unicode
@@ -760,6 +760,23 @@ If speed is still an issue, try one of the setups below (listed from slower to f
 \fBg)\fR Light mode with only DirIndicator enabled
 .TP
 \fBh)\fR Light mode with all the four options disabled (ListFoldersFirst, DirIndicator, Classify, and ClassifyExec). The sorting method should also be set to "none" to go full speed.
+
+.SH ENVIRONMENT
+The following variables are read at initialization time:
+.TP
+.B CLIFM_FILE_COLORS
+A colon separated list of file type color codes in the same form specified above in the COLOR CODES section
+.TP
+.B CLIFM_EXT_COLORS
+Same as above, but for file extensions
+.TP
+Except when running in stealth mode, CliFM sets the following environment variables:
+.TP
+.B CLIFM
+This variable is set to 1 to let other programs know they were spawned from CliFM
+.TP
+.B CLIFM_PROFILE
+This variable is set to the current profile of CliFM. Specially useful  to develop CLiFM plugins on a per profile basis.
 
 .SH EXIT STATUS
 CliFM returns the exit status of the last executed command:
