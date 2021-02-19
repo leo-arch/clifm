@@ -612,6 +612,7 @@ Colors are specified using the same format used by \fBdircolors(1)\fR and the LS
  ne = empty directory with no read permission
  fi = regular file
  ef = empty regular file
+ bm = bookmarked directory in bookmarks screen
  nf = file with no access permission
  ln = symlink
  mh = multi-hardlink file
