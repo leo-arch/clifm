@@ -206,6 +206,9 @@ disable the files counter for directories. This option is especially useful to s
 .B \-\-only\-dirs
 list only directories and symbolic links to directories 
 .TP
+.B \-\-list\-and\-quit
+list files and quit. It may be used in conjunction with \-p
+.TP
 .B \-\-no\-welcome\-message
 disable the welcome message
 .TP
