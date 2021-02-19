@@ -709,6 +709,7 @@ struct param
 	int bm_file;
 	int expand_bookmarks;
 	int only_dirs;
+	int list_and_quit;
 };
 
 struct param xargs;
@@ -1738,7 +1739,7 @@ reload_config(void)
 	xargs.files_counter = xargs.welcome_message = UNSET;
 	xargs.clear_screen = xargs.bk_files = xargs.logs = UNSET;
 	xargs.max_path = xargs.bm_file = xargs.expand_bookmarks = UNSET;
-	xargs.only_dirs = UNSET;
+	xargs.only_dirs = xargs.list_and_quit = UNSET;
 
 	shell_terminal = no_log = internal_cmd = recur_perm_error_flag = 0;
 	is_sel = sel_is_last = print_msg = kbind_busy = dequoted = 0;
@@ -13980,6 +13981,7 @@ external_arguments(int argc, char **argv)
 		{"opener", required_argument, 0, 17},
 		{"expand-bookmarks", no_argument, 0, 18},
 		{"only-dirs", no_argument, 0, 19},
+		{"list-and-quit", no_argument, 0, 20},
 		{0, 0, 0, 0}
 	};
 
@@ -13996,6 +13998,7 @@ external_arguments(int argc, char **argv)
 	xargs.files_counter = xargs.welcome_message = UNSET;
 	xargs.clear_screen = xargs.bk_files = xargs.logs = UNSET;
 	xargs.max_path = xargs.bm_file = xargs.expand_bookmarks = UNSET;
+	xargs.list_and_quit = UNSET;
 
 	int optc;
 	/* Variables to store arguments to options (-c, -p and -P) */
@@ -14123,6 +14126,10 @@ external_arguments(int argc, char **argv)
 
 		case 19:
 			xargs.only_dirs = only_dirs = 1;
+		break;
+
+		case 20:
+			xargs.list_and_quit = 1;
 		break;
 
 		case 'a':
@@ -16321,6 +16328,9 @@ list_dir(void)
 			}
 		}
 
+		if (xargs.list_and_quit == 1)
+			exit(exit_code);
+
 		if (reset_pager)
 			pager = 1;
 
@@ -16632,6 +16642,12 @@ list_dir(void)
 			for (j = (int)diff + 1; j--;)
 				putchar(' ');
 		}
+	}
+
+	if (xargs.list_and_quit == 1) {
+		if (!last_column)
+			putchar('\n');
+		exit(exit_code);
 	}
 
 	/* If the pager was disabled during listing (by pressing 'c', 'p'
@@ -17004,6 +17020,9 @@ list_dir_light(void)
 						   file_info[i].len);
 		}
 
+		if (xargs.list_and_quit == 1)
+			exit(exit_code);
+
 		if (reset_pager)
 			pager = 1;
 
@@ -17211,6 +17230,9 @@ list_dir_light(void)
 	 * line, for it has none */
 	 if (!last_column)
 		putchar('\n');
+
+	if (xargs.list_and_quit == 1)
+		exit(exit_code);
 
 	/* Print a dividing line between the files list and the prompt */
 	print_div_line();
@@ -21688,6 +21710,7 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 		filename[len - 1] = 0x00;
 
 	struct stat file_attrib;
+
 	/* Check file existence */
 	if (lstat(filename, &file_attrib) == -1) {
 		fprintf(stderr, "%s: pr: '%s': %s\n", PROGRAM_NAME, filename, 
@@ -21710,10 +21733,13 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 /*		if (!(file_attrib.st_mode & S_IRUSR)) strcpy(color, nf_c); */
 		if (access(filename, R_OK) == -1)
 			strcpy(color, nf_c);
+
 		else if (file_attrib.st_mode & S_ISUID)
 			strcpy(color, su_c);
+
 		else if (file_attrib.st_mode & S_ISGID)
 			strcpy(color, sg_c);
+
 		else {
 			#ifdef _LINUX_CAP
 			cap_t cap = cap_get_file(filename);
@@ -21721,17 +21747,24 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 				strcpy(color, ca_c);
 				cap_free(cap);
 			}
+
 			else if (file_attrib.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH)) {
 			#else
+
 			if (file_attrib.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH)) {
 			#endif
+
 				if (file_attrib.st_size == 0) strcpy(color, ee_c);
 				else strcpy(color, ex_c);
 			}
+
 			else if (file_attrib.st_size == 0) strcpy(color, ef_c);
+
 			else if (file_attrib.st_nlink > 1) strcpy(color, mh_c);
+
 			else {
 				char *ext = strrchr(filename, '.');
+
 				if (ext) {
 					char *extcolor = get_ext_color(ext);
 
@@ -21745,6 +21778,7 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 
 					ext = (char *)NULL;
 				}
+
 				else
 					strcpy(color, fi_c);
 			}
@@ -21753,8 +21787,10 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 
 	case S_IFDIR:
 		file_type='d';
+
 		if (access(filename, R_OK|X_OK) != 0)
 			strcpy(color, nd_c);
+
 		else {
 			int is_oth_w = 0;
 			if (file_attrib.st_mode & S_ISVTX) sticky = 1;
@@ -21764,11 +21800,13 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 				st_c) : ((is_oth_w) ? ow_c : 
 				((files_dir == 2 || files_dir == 0) ? ed_c : di_c)));
 		}
+
 		break;
 
 	case S_IFLNK:
 		file_type = 'l';
 		linkname = realpath(filename, (char *)NULL);
+
 		if (linkname)
 			strcpy(color, ln_c);
 		else
@@ -21844,6 +21882,7 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 		  * function */
 		char trim_filename[NAME_MAX] = "";
 		short trim = 0;
+
 		if (filename_len > (size_t)max) {
 			trim = 1;
 			strcpy(trim_filename, filename);
@@ -21935,7 +21974,8 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 	if (time)
 		/* Store formatted (and localized) date-time string into
 		 * access_time */
-		strftime(access_time, sizeof(access_time), "%b %d %H:%M:%S %Y", tm);
+		strftime(access_time, sizeof(access_time), "%b %d %H:%M:%S %Y",
+				 tm);
 
 	else
 		access_time[0] = '-';
@@ -22012,19 +22052,24 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 
 	/* Print file size */
 	if ((file_attrib.st_mode & S_IFMT) == S_IFDIR) {
-		fputs(_("Total size: \t"), stdout);
+
+/*		fputs(_("Total size: \t"), stdout);
 		off_t total_size = dir_size(filename);
+
 		if (total_size != -1) {
 			char *human_size = get_size_unit(total_size);
+
 			if (human_size) {
 				printf("%s\n", human_size);
 				free(human_size);
 			}
+
 			else
 				puts("???");
 		}
+
 		else
-			puts("???");
+			puts("???"); */
 	}
 
 	else
@@ -22048,6 +22093,7 @@ hidden_function(char **comm)
 	else if (strcmp(comm[1], "off") == 0) {
 		if (show_hidden == 1) {
 			show_hidden = 0;
+
 			if (cd_lists_on_the_fly) {
 				free_dirlist();
 				exit_status = list_dir();
@@ -22058,6 +22104,7 @@ hidden_function(char **comm)
 	else if (strcmp(comm[1], "on") == 0) {
 		if (show_hidden == 0) {
 			show_hidden = 1;
+
 			if (cd_lists_on_the_fly) {
 				free_dirlist();
 				exit_status = list_dir();
@@ -22126,12 +22173,15 @@ log_function(char **comm)
 		}
 
 		else if (strcmp(comm[1], "on") == 0) {
+
 			if (logs_enabled)
 				puts(_("Logs already enabled"));
+
 			else {
 				logs_enabled = 1;
 				puts(_("Logs successfully enabled"));
 			}
+			
 			return EXIT_SUCCESS;
 		}
 
@@ -22142,6 +22192,7 @@ log_function(char **comm)
 				puts(_("Logs already disabled"));
 				return EXIT_SUCCESS;
 			}
+
 			else {
 				puts(_("Logs succesfully disabled"));
 				logs_enabled = 0;
@@ -22397,19 +22448,22 @@ history_function(char **comm)
 
 		/* Update the history array */
 		int exit_status = EXIT_SUCCESS;
+
 		if (get_history() != 0)
 			exit_status = EXIT_FAILURE;
+
 		if (log_function(comm) != 0)
 			exit_code = EXIT_FAILURE;
+
 		return exit_status;
 	}
 
 	/* If 'history -n', print the last -n elements */
 	if (args_n == 1 && comm[1][0] == '-' && is_number(comm[1]+1)) {
 		int num = atoi(comm[1] + 1);
-		if (num < 0 || num > (int)current_hist_n) {
+
+		if (num < 0 || num > (int)current_hist_n)
 			num = (int)current_hist_n;
-		}
 
 		size_t i;
 
@@ -22437,6 +22491,7 @@ run_history_cmd(const char *cmd)
 
 	if (is_number(cmd)) {
 		int num = atoi(cmd);
+
 		if (num > 0 && num < (int)current_hist_n) {
 			size_t old_args = args_n;
 
@@ -22537,12 +22592,14 @@ run_history_cmd(const char *cmd)
 	else if (cmd[0] == '-') {
 		/* If not number or zero or bigger than max... */
 		int acmd = atoi(cmd + 1);
+
 		if (!is_number(cmd + 1) || acmd == 0 
 		|| acmd > (int)current_hist_n - 1) {
 			fprintf(stderr, _("%s: !%s: event not found\n"), 
 					PROGRAM_NAME, cmd);
 			return EXIT_FAILURE;
 		}
+
 		size_t old_args = args_n;
 		char **cmd_hist = parse_input_str(history[current_hist_n
 										  - (size_t)acmd - 1]);
@@ -22927,6 +22984,8 @@ help_function (void)
 \n				directories\
 \n     --no-backup-files\t\t do not show files ending with tilde (~)\
 \n     --enable-logs\t\t enable program logs\
+\n     --list-and-quit\t\t list files and quit. It may be used\
+\n				in conjunction with -p\
 \n     --only-dirs\t\t list only directories and symbolic links\
 \n				to directories\
 \n     --opener=APPLICATION\t resource opener to use instead of 'lira',\
