@@ -298,6 +298,7 @@ tw=30;42:ow=34;42:ex=01;32:no=31;47"
 #define DEF_DIRHIST_MAP 0
 #define DEF_DISK_USAGE 0
 #define DEF_RESTORE_LAST_PATH 0
+#define DEF_EXPAND_BOOKMARKS 0
 #define UNSET -1
 
 /* Macros for the colors_list function */
@@ -641,12 +642,12 @@ struct kbinds_t *kbinds = (struct kbinds_t *)NULL;
 /* Struct to store bookmarks */
 struct bookmarks_t
 {
-	char *hotkey;
+	char *shortcut;
 	char *name;
 	char *path;
 };
 
-struct bookmarks_t *xbookmarks = (struct bookmarks_t *)NULL;
+struct bookmarks_t *bookmarks = (struct bookmarks_t *)NULL;
 
 /* Struct to store file information */
 struct fileinfo
@@ -705,6 +706,7 @@ struct param
 	int logs;
 	int max_path;
 	int bm_file;
+	int expand_bookmarks;
 };
 
 struct param xargs;
@@ -736,6 +738,7 @@ short splash_screen = UNSET, welcome_message = UNSET, ext_cmd_ok = UNSET,
 	files_counter = UNSET, light_mode = UNSET, dir_indicator = UNSET,
 	autocd = UNSET, auto_open = UNSET,dirhist_map = UNSET,
 	restore_last_path = UNSET, pager = UNSET, show_bk_files = UNSET,
+	expand_bookmarks = UNSET,
 
 	no_log = 0, internal_cmd = 0, shell_terminal = 0, print_msg = 0,
 	recur_perm_error_flag = 0, is_sel = 0, sel_is_last = 0,
@@ -1732,7 +1735,7 @@ reload_config(void)
 	xargs.rl_vi_mode = xargs.max_dirhist = xargs.sort_reverse = UNSET;
 	xargs.files_counter = xargs.welcome_message = UNSET;
 	xargs.clear_screen = xargs.bk_files = xargs.logs = UNSET;
-	xargs.max_path = xargs.bm_file = UNSET;
+	xargs.max_path = xargs.bm_file = xargs.expand_bookmarks = UNSET;
 
 	shell_terminal = no_log = internal_cmd = recur_perm_error_flag = 0;
 	is_sel = sel_is_last = print_msg = kbind_busy = dequoted = 0;
@@ -4743,6 +4746,11 @@ LogCmds=false\n\n"
 # 'open' commands respectivelly.\n\
 Autocd=true\n\
 AutoOpen=true\n\n"
+
+"# If set to true, expand bookmark names into the corresponding bookmark\n\
+# path: if the bookmark is \"name=/path\", \"name\" will be interpreted\n\
+# as /path. TAB completion is also available for bookmark names.\n\
+ExpandBookmarks=false\n\n"
 
 "# In light mode, colors and filetype checks (except the directory check,\n\
 # which is enabled by default) are disabled to speed up the listing\n\
@@ -7764,6 +7772,8 @@ set_default_options(void)
 		strcpy(opener, "xdg-open");
 	}
 
+	if (xargs.expand_bookmarks == UNSET)
+		expand_bookmarks = DEF_EXPAND_BOOKMARKS;
 	if (xargs.splash == UNSET)
 		splash_screen = DEF_SPLASH_SCREEN;
 	if (xargs.welcome_message == UNSET)
@@ -7856,6 +7866,7 @@ set_default_options(void)
 	sprintf(no_c, DEF_NO_C);
 	sprintf(uf_c, DEF_UF_C);
 	sprintf(mh_c, DEF_MH_C);
+	sprintf(bm_c, DEF_BM_C);
 
 /*	setenv("CLIFM_PROFILE", "default", 1); */
 
@@ -8250,10 +8261,12 @@ open_function(char **cmd)
 		free(deq_path);
 	}
 
+	char *file = cmd[1];
+
 	/* Check file existence */
 	struct stat file_attrib;
 
-	if (stat(cmd[1], &file_attrib) == -1) {
+	if (stat(file, &file_attrib) == -1) {
 		fprintf(stderr, "%s: open: '%s': %s\n", PROGRAM_NAME, cmd[1],
 				strerror(errno));
 		return EXIT_FAILURE;
@@ -8287,13 +8300,13 @@ open_function(char **cmd)
 		break;
 
 	case S_IFDIR:
-		return cd_function(cmd[1]);
+		return cd_function(file);
 
 	case S_IFREG:
 
 		/* If an archive/compressed file, call archiver() */
-		if (is_compressed(cmd[1], 1) == 0) {
-			char *tmp_cmd[] = { "ad", cmd[1], NULL };
+		if (is_compressed(file, 1) == 0) {
+			char *tmp_cmd[] = { "ad", file, NULL };
 			return archiver(tmp_cmd, 'd');
 		}
 
@@ -8321,7 +8334,7 @@ open_function(char **cmd)
 	if (!cmd[2] || (*cmd[2] == '&' && !cmd[2][1] )) {
 
 		if (opener) {
-			char *tmp_cmd[] = { opener, cmd[1], NULL };
+			char *tmp_cmd[] = { opener, file, NULL };
 
 			int ret = launch_execve(tmp_cmd,
 						strcmp(cmd[args_n], "&") == 0 ? BACKGROUND
@@ -8362,7 +8375,7 @@ open_function(char **cmd)
 	}
 
 	/* If some application was specified to open the file */
-	char *tmp_cmd[] = { cmd[2], cmd[1], NULL };
+	char *tmp_cmd[] = { cmd[2], file, NULL };
 
 	int ret = launch_execve(tmp_cmd, (cmd[args_n]
 							&& strcmp(cmd[args_n], "&") == 0)
@@ -12138,17 +12151,27 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* If autocd or auto-open, try to expand ELN's first */
-		if ((autocd || auto_open) && *text >= 0x31 && *text <= 0x39) {
+		if (autocd || auto_open) {
 
-			int num_text = atoi(text);
+			/* ELN completion */
+			if (*text >= 0x31 && *text <= 0x39) {
+				int num_text = atoi(text);
 
-			if (is_number(text) && num_text > 0
-			&& num_text <= (int)files)
+				if (is_number(text) && num_text > 0
+				&& num_text <= (int)files) {
+					matches = rl_completion_matches(text,
+							  &filenames_generator);
+				}
+			}
+
+			/* Bookmarks completion */
+			else if (expand_bookmarks)
 				matches = rl_completion_matches(text,
-						  &filenames_generator);
+						  &bookmarks_generator);
 		}
 
-		/* If not ELN, complete with command names */
+		/* If neither autocd nor auto-open, ttry to complete with
+		 * command names */
 		else
 			matches = rl_completion_matches(text, &bin_cmd_generator);
 	}
@@ -12172,7 +12195,8 @@ my_rl_completion(const char *text, int start, int end)
 		}
 				/* ### BOOKMARKS COMPLETION ### */
 
-		else if (*rl_line_buffer == 'b' 
+		else if (*rl_line_buffer == 'b'
+		&& (rl_line_buffer[1] == 'm' || rl_line_buffer[1] == 'o')
 		/* Why to compare the first char of the line buffer? Simply to
 		 * prevent unnecessary calls to strncmp(). For instance, if the
 		 * user typed "cd ", there is no need to compare the line
@@ -12186,6 +12210,7 @@ my_rl_completion(const char *text, int start, int end)
 				/* ### PROFILES COMPLETION ### */
 
 		else if (*rl_line_buffer == 'p'
+		&& (rl_line_buffer[1] == 'r' || rl_line_buffer[1] == 'f')
 		&& (strncmp(rl_line_buffer, "pf set ", 7) == 0
 		|| strncmp(rl_line_buffer, "profile set ", 12) == 0
 		|| strncmp(rl_line_buffer, "pf del ", 7) == 0
@@ -12193,11 +12218,15 @@ my_rl_completion(const char *text, int start, int end)
 			rl_attempted_completion_over = 1;
 			matches = rl_completion_matches(text, &profiles_generator);
 		}
+
+		else if (expand_bookmarks)
+			matches = rl_completion_matches(text,
+					  &bookmarks_generator);
 	}
 
 				/* ### PATH COMPLETION ### */
 
-	/* If not first word and not a number, readline will attempt 
+	/* If none of the above, readline will attempt 
 	 * path completion instead via my custom my_rl_path_completion() */
 	return matches;
 }
@@ -12803,6 +12832,20 @@ init_config(void)
 							light_mode = 1;
 						else if (strncmp(opt_str, "false", 5) == 0)
 							light_mode = 0;
+					}
+
+					else if (xargs.expand_bookmarks == UNSET
+					&& *line == 'E'
+					&& strncmp(line, "ExpandBookmarks=", 16) == 0) {
+						char opt_str[MAX_BOOL] = "";
+						ret = sscanf(line, "ExpandBookmarks=%5s\n",
+									 opt_str);
+						if (ret == -1)
+							continue;
+						if (strncmp(opt_str, "true", 4) == 0)
+							expand_bookmarks = 1;
+						else if (strncmp(opt_str, "false", 5) == 0)
+							expand_bookmarks = 0;
 					}
 
 					else if (xargs.restore_last_path == UNSET
@@ -13478,6 +13521,8 @@ init_config(void)
 			 * for any reason, set the defaults */
 			/* -1 means not set */
 			if (xargs.rl_vi_mode == 1) rl_vi_editing_mode(1, 0);
+			if (expand_bookmarks == UNSET)
+				expand_bookmarks = DEF_EXPAND_BOOKMARKS;
 			if (disk_usage == UNSET) disk_usage = DEF_DISK_USAGE;
 			if (dirhist_map == UNSET) dirhist_map = DEF_DIRHIST_MAP;
 			if (max_dirhist == UNSET) max_dirhist = DEF_MAX_DIRHIST;
@@ -13909,6 +13954,7 @@ external_arguments(int argc, char **argv)
 		{"enable-logs", no_argument, 0, 15},
 		{"max-path", required_argument, 0, 16},
 		{"opener", required_argument, 0, 17},
+		{"expand-bookmarks", no_argument, 0, 18},
 		{0, 0, 0, 0}
 	};
 
@@ -13924,7 +13970,7 @@ external_arguments(int argc, char **argv)
 	xargs.rl_vi_mode = xargs.max_dirhist = xargs.sort_reverse = UNSET;
 	xargs.files_counter = xargs.welcome_message = UNSET;
 	xargs.clear_screen = xargs.bk_files = xargs.logs = UNSET;
-	xargs.max_path = xargs.bm_file = UNSET;
+	xargs.max_path = xargs.bm_file = xargs.expand_bookmarks = UNSET;
 
 	int optc;
 	/* Variables to store arguments to options (-c, -p and -P) */
@@ -14044,6 +14090,10 @@ external_arguments(int argc, char **argv)
 			opener = (char *)xnmalloc(strlen(optarg) + 1, sizeof(char));
 			strcpy(opener, optarg);
 		}
+		break;
+
+		case 18:
+			xargs.expand_bookmarks = expand_bookmarks = 1;
 		break;
 
 		case 'a':
@@ -14586,10 +14636,44 @@ parse_input_str(char *str)
 
 	for (i = 0; i <= args_n; i++) {
 
+		register size_t j = 0;
+
+			/* ######################################
+			 * #	  2.a) BOOKMARKS EXPANSION		#
+			 * ###################################### */
+
+		/* Expand bookmark names into paths */
+		if (expand_bookmarks) {
+
+			int bm_exp = 0;
+
+			for (j = 0; j < bm_n; j++) {
+
+				if (bookmarks[j].name && *substr[i] == *bookmarks[j].name
+				&& strcmp(substr[i], bookmarks[j].name) == 0) {
+
+					if (bookmarks[j].path) {
+						substr[i] = (char *)xrealloc(substr[i], 
+									(strlen(bookmarks[j].path) + 1)
+									* sizeof(char));
+						strcpy(substr[i], bookmarks[j].path);
+
+						bm_exp =  1;
+
+						break;
+					}
+				}
+			}
+
+			if (bm_exp)
+				continue;
+		}
+
+		/* ############################################# */
+
 		size_t substr_len = strlen(substr[i]);
 
 		/* Check for ranges */
-		register size_t j = 0;
 		for (j = 0; substr[i][j]; j++) {
 			/* If some alphabetic char, besides '-', is found in the
 			 * string, we have no range */
@@ -14613,7 +14697,7 @@ parse_input_str(char *str)
 	}
 
 			/* ####################################
-			 * #       2.a) RANGES EXPANSION      # 
+			 * #       2.b) RANGES EXPANSION      # 
 			 * ####################################*/
 
 	 /* Expand expressions like "1-3" to "1 2 3" if all the numbers in
@@ -14677,7 +14761,7 @@ parse_input_str(char *str)
 	free(range_array);
 
 				/* ##########################
-				 * #   2.b) SEL EXPANSION   # 
+				 * #   2.c) SEL EXPANSION   # 
 				 * ##########################*/
 
 /*	if (is_sel && *substr[0] != '/') { */
@@ -14768,7 +14852,7 @@ parse_input_str(char *str)
 	for (i = 0; i <= args_n; i++) {
 
 				/* ##########################
-				 * #   2.c) ELN EXPANSION   # 
+				 * #   2.d) ELN EXPANSION   # 
 				 * ##########################*/
 
 		/* If autocd is set to false, i must be bigger than zero because
@@ -14860,7 +14944,7 @@ parse_input_str(char *str)
 		}
 
 		/* #############################################
-		 * #   2.d) USER DEFINED VARIABLES EXPANSION   # 
+		 * #   2.e) USER DEFINED VARIABLES EXPANSION   # 
 		 * #############################################*/
 
 		if (substr[i][0] == '$' && substr[i][1] != '('
@@ -20946,7 +21030,7 @@ load_bookmarks(void)
 
 	fseek(bm_fp, 0L, SEEK_SET);
 
-	xbookmarks = (struct bookmarks_t *)xnmalloc(bm_total + 1,
+	bookmarks = (struct bookmarks_t *)xnmalloc(bm_total + 1,
 									sizeof(struct bookmarks_t));
 
 	size_t line_size = 0;
@@ -20963,12 +21047,12 @@ load_bookmarks(void)
 
 		/* Neither hotkey nor name, but only a path */
 		if (*line == '/') {
-			xbookmarks[bm_n].hotkey = (char *)NULL;
-			xbookmarks[bm_n].name = (char *)NULL;
+			bookmarks[bm_n].shortcut = (char *)NULL;
+			bookmarks[bm_n].name = (char *)NULL;
 
-			xbookmarks[bm_n].path = (char *)xnmalloc(strlen(line) + 1,
+			bookmarks[bm_n].path = (char *)xnmalloc(strlen(line) + 1,
 													sizeof(char));
-			strcpy(xbookmarks[bm_n++].path, line);
+			strcpy(bookmarks[bm_n++].path, line);
 
 			continue;
 		}
@@ -20979,17 +21063,17 @@ load_bookmarks(void)
 			char *tmp = strchr(line, ']');
 
 			if (!tmp) {
-				xbookmarks[bm_n].hotkey = (char *)NULL;
-				xbookmarks[bm_n].name = (char *)NULL;
-				xbookmarks[bm_n++].path = (char *)NULL;
+				bookmarks[bm_n].shortcut = (char *)NULL;
+				bookmarks[bm_n].name = (char *)NULL;
+				bookmarks[bm_n++].path = (char *)NULL;
 				continue;
 			}
 
 			*tmp = 0x00;
 
-			xbookmarks[bm_n].hotkey = (char *)xnmalloc(strlen(p) + 1,
+			bookmarks[bm_n].shortcut = (char *)xnmalloc(strlen(p) + 1,
 											   sizeof(char));
-			strcpy(xbookmarks[bm_n].hotkey, p);
+			strcpy(bookmarks[bm_n].shortcut, p);
 
 			tmp++;
 			p = tmp;
@@ -20998,62 +21082,62 @@ load_bookmarks(void)
 
 			if (!tmp) {
 
-				xbookmarks[bm_n].name = (char *)NULL;
+				bookmarks[bm_n].name = (char *)NULL;
 
 				if (*p) {
-					xbookmarks[bm_n].path = (char *)xnmalloc(strlen(p)
+					bookmarks[bm_n].path = (char *)xnmalloc(strlen(p)
 													+ 1, sizeof(char));
-					strcpy(xbookmarks[bm_n++].path, p);
+					strcpy(bookmarks[bm_n++].path, p);
 				}
 
 				else
-					xbookmarks[bm_n++].path = (char *)NULL;
+					bookmarks[bm_n++].path = (char *)NULL;
 
 				continue;
 			}
 
 			*tmp = 0x00;
-			xbookmarks[bm_n].name = (char *)xnmalloc(strlen(p) + 1,
+			bookmarks[bm_n].name = (char *)xnmalloc(strlen(p) + 1,
 													sizeof(char));
-			strcpy(xbookmarks[bm_n].name, p);
+			strcpy(bookmarks[bm_n].name, p);
 
 			if (!*(++tmp)) {
-				xbookmarks[bm_n++].path = (char *)NULL;
+				bookmarks[bm_n++].path = (char *)NULL;
 				continue;
 			}
 
-			xbookmarks[bm_n].path = (char *)xnmalloc(strlen(tmp) + 1,
+			bookmarks[bm_n].path = (char *)xnmalloc(strlen(tmp) + 1,
 													sizeof(char));
-			strcpy(xbookmarks[bm_n++].path, tmp);
+			strcpy(bookmarks[bm_n++].path, tmp);
 
 			continue;
 		}
 
 		/* No shortcut. Let's try with name */
-		xbookmarks[bm_n].hotkey = (char *)NULL;
+		bookmarks[bm_n].shortcut = (char *)NULL;
 
 		char *tmp = strchr(line, ':');
 
 		/* No name either */
 		if (!tmp)
-			xbookmarks[bm_n].name = (char *)NULL;
+			bookmarks[bm_n].name = (char *)NULL;
 
 		else {
 			*tmp = 0x00;
-			xbookmarks[bm_n].name = (char *)xnmalloc(strlen(line) + 1,
+			bookmarks[bm_n].name = (char *)xnmalloc(strlen(line) + 1,
 													sizeof(char));
-			strcpy(xbookmarks[bm_n].name, line);
+			strcpy(bookmarks[bm_n].name, line);
 		}
 
 		if (!*(++tmp)) {
-			xbookmarks[bm_n++].path = (char *)NULL;
+			bookmarks[bm_n++].path = (char *)NULL;
 			continue;
 		}
 
 		else {
-			xbookmarks[bm_n].path = (char *)xnmalloc(strlen(tmp) + 1,
+			bookmarks[bm_n].path = (char *)xnmalloc(strlen(tmp) + 1,
 													sizeof(char));
-			strcpy(xbookmarks[bm_n++].path, tmp);
+			strcpy(bookmarks[bm_n++].path, tmp);
 		}
 	}
 
@@ -21070,12 +21154,12 @@ load_bookmarks(void)
 
 	for (i = 0; i < bm_n; i++) {
 
-		if (!xbookmarks[i].name || !*xbookmarks[i].name)
+		if (!bookmarks[i].name || !*bookmarks[i].name)
 			continue;
 
-		bookmark_names[j] = (char *)xnmalloc(strlen(xbookmarks[i].name)
+		bookmark_names[j] = (char *)xnmalloc(strlen(bookmarks[i].name)
 										+ 1, sizeof(char));
-		strcpy(bookmark_names[j++], xbookmarks[i].name);
+		strcpy(bookmark_names[j++], bookmarks[i].name);
 	}
 
 	bookmark_names[j] = (char *)NULL;
@@ -21090,18 +21174,18 @@ free_bookmarks(void)
 
 	if (bm_n) {
 		for (i = 0; i < bm_n; i++) {
-			if (xbookmarks[i].hotkey)
-				free(xbookmarks[i].hotkey);
+			if (bookmarks[i].shortcut)
+				free(bookmarks[i].shortcut);
 
-			if (xbookmarks[i].name)
-				free(xbookmarks[i].name);
+			if (bookmarks[i].name)
+				free(bookmarks[i].name);
 
-			if (xbookmarks[i].path)
-				free(xbookmarks[i].path);
+			if (bookmarks[i].path)
+				free(bookmarks[i].path);
 		}
 
-		free(xbookmarks);
-		xbookmarks = (struct bookmarks_t *)NULL;
+		free(bookmarks);
+		bookmarks = (struct bookmarks_t *)NULL;
 
 		bm_n = 0;
 	}
@@ -21139,19 +21223,19 @@ open_bookmark(void)
 
 	for (i = 0; i < bm_n; i++) {
 
-		if (!xbookmarks[i].path || !*xbookmarks[i].path)
+		if (!bookmarks[i].path || !*bookmarks[i].path)
 			continue;
 
 		eln++;
 
-		int is_dir = 0, hk_ok = 0, name_ok = 0, non_existent = 0;
+		int is_dir = 0, sc_ok = 0, name_ok = 0, non_existent = 0;
 
-		int path_ok = stat(xbookmarks[i].path, &file_attrib);
+		int path_ok = stat(bookmarks[i].path, &file_attrib);
 
-		if (xbookmarks[i].hotkey)
-			hk_ok = 1;
+		if (bookmarks[i].shortcut)
+			sc_ok = 1;
 
-		if (xbookmarks[i].name)
+		if (bookmarks[i].name)
 			name_ok = 1;
 
 		if (path_ok == -1)
@@ -21169,10 +21253,10 @@ open_bookmark(void)
 		}
 
 		printf("%s%zu%s %s%c%s%c%s %s%s%s\n", eln_color, eln, NC,
-			   bold, hk_ok ? '[' : 0, hk_ok
-			   ? xbookmarks[i].hotkey : "", hk_ok ? ']' : 0, NC,
-			   non_existent ? gray : (is_dir ? bm_c : fi_c),
-			   name_ok ? xbookmarks[i].name : xbookmarks[i].path, NC);
+			   bold, sc_ok ? '[' : 0, sc_ok ? bookmarks[i].shortcut
+			   : "", sc_ok ? ']' : 0, NC, non_existent ? gray
+			   : (is_dir ? bm_c : fi_c), name_ok ? bookmarks[i].name
+			   : bookmarks[i].path, NC);
 	}
 
 	/* User selection. Display the prompt */
@@ -21230,7 +21314,7 @@ open_bookmark(void)
 		}
 
 		else
-			tmp_path = xbookmarks[num - 1].path;
+			tmp_path = bookmarks[num - 1].path;
 	}
 
 	/* If string, check shortcuts and names */
@@ -21238,15 +21322,15 @@ open_bookmark(void)
 
 		for (i = 0; i < bm_n; i++) {
 
-			if ((xbookmarks[i].hotkey
-			&& *arg[0] == *xbookmarks[i].hotkey
-			&& strcmp(arg[0], xbookmarks[i].hotkey) == 0)
-			|| (xbookmarks[i].name
-			&& *arg[0] == *xbookmarks[i].name
-			&& strcmp(arg[0], xbookmarks[i].name) == 0)) {
+			if ((bookmarks[i].shortcut
+			&& *arg[0] == *bookmarks[i].shortcut
+			&& strcmp(arg[0], bookmarks[i].shortcut) == 0)
+			|| (bookmarks[i].name
+			&& *arg[0] == *bookmarks[i].name
+			&& strcmp(arg[0], bookmarks[i].name) == 0)) {
 
-				if (xbookmarks[i].path) {
-					char *tmp_cmd[] = { "o", xbookmarks[i].path,
+				if (bookmarks[i].path) {
+					char *tmp_cmd[] = { "o", bookmarks[i].path,
 										arg[1] ? arg[1] : NULL,
 										NULL };
 
@@ -21342,15 +21426,17 @@ bookmarks_function(char **cmd)
 	size_t i;
 	for (i = 0; i < bm_n; i++) {
 
-		if ((xbookmarks[i].hotkey
-		&& *cmd[1] == *xbookmarks[i].hotkey
-		&& strcmp(cmd[1], xbookmarks[i].hotkey) == 0)
-		|| (xbookmarks[i].name
-		&& *cmd[1] == *xbookmarks[i].name
-		&& strcmp(cmd[1], xbookmarks[i].name) == 0)) {
+		if ((bookmarks[i].shortcut
+		&& *cmd[1] == *bookmarks[i].shortcut
+		&& strcmp(cmd[1], bookmarks[i].shortcut) == 0)
+		|| (bookmarks[i].name
+		&& *cmd[1] == *bookmarks[i].name
+		&& strcmp(cmd[1], bookmarks[i].name) == 0)) {
 
-			if (xbookmarks[i].path) {
-				char *tmp_cmd[] = { "o", xbookmarks[i].path, NULL };
+			if (bookmarks[i].path) {
+				char *tmp_cmd[] = { "o", bookmarks[i].path,
+									cmd[2] ? cmd[2] : NULL,
+									NULL };
 
 				return open_function(tmp_cmd);
 			}
@@ -22727,6 +22813,10 @@ help_function (void)
 \n     --disk-usage\t\t show disk usage (free/total) for the\
 \n				filesystem to which the current directory \
 \n				belongs\
+\n     --expand-bookmarks\t\t expand bookmark names into the \
+\n				corresponding bookmark paths. TAB \
+\n				completion for bookmark names is also \
+\n				available\
 \n     --no-dir-indicator\t\t do not add / indicator to directories \
 \n				when running in light mode\
 \n     --classify=NUM\t\t specify whether to classify files or not \
