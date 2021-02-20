@@ -231,6 +231,52 @@ static int flags;
 pi=00;35:so=01;35:bd=01;33:cd=01;37:su=37;41:sg=30;43:st=37;44:\
 tw=30;42:ow=34;42:ex=01;32:no=31;47"
 
+#define DEF_FILE_COLORS "di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;39:\
+ef=00;33:nf=00;31:bm=01;36:ln=01;36:mh=30;46:or=00;36:pi=33;40:\
+so=01;35:bd=01;33:cd=01;37:su=37;41:sg=30;43:ca=30;41:tw=30;42:\
+ow=34;42:st=37;44:ex=01;32:ee=00;32:no=00;31;47:uf=31;40:"
+
+#define DEF_GREEN_COLORS "di=01;32:nd=01;31:ed=00;34:ne=00;31:fi=00;39:\
+ef=00;33:nf=00;31:bm=01;36:ln=01;36:mh=30;46:or=00;36:pi=33;40:\
+so=01;35:bd=01;33:cd=01;37:su=37;41:sg=30;43:ca=30;41:tw=30;42:\
+ow=34;42:st=37;44:ex=01;04;32:ee=00;04;33:no=31;47:uf=31;40:"
+
+#define DEF_MONO_COLORS "di=01;37:nd=01;31:ed=00;37:ne=00;31:fi=00;39:\
+ef=00;33:nf=00;31:bm=01;36:ln=01;04;36:mh=30;46:or=00;36:pi=33;40:\
+so=01;35:bd=01;33:cd=01;37:su=37;41:sg=30;43:ca=30;41:tw=30;42:\
+ow=34;42:st=37;44:ex=01;32:ee=00;32:no=31;47:uf=31;40:"
+
+/*
+#define DEF_256_COLORS "di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;39:\
+ef=00;33:nf=00;31:bm=01;36:ln=01;36:mh=30;46:or=00;36:pi=33;40:\
+so=01;35:bd=01;33:cd=01;37:su=37;41:sg=30;43:ca=30;41:tw=30;42:\
+ow=34;42:st=37;44:ex=01;32:ee=00;32:no=00;31;47:uf=31;40:"
+*/
+
+#define DEF_EXT_COLORS "*.tar=01;31:*.tgz=01;31:*.arc=01;31:\
+*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:\
+*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:\
+*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:\
+*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:\
+*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:\
+*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:\
+*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:\
+*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:\
+*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:\
+*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:\
+*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:\
+*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:\
+*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:\
+*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:\
+*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:\
+*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:\
+*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:\
+*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:\
+*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:\
+*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:\
+*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:\
+*.opus=00;36:*.spx=00;36:*.xspf=00;36:"
+
 #define DEF_DIRHIST_INDEX_COLOR "\x1b[00;36m"
 #define DEF_TEXT_COLOR "\001\x1b[00;39m\002"
 #define DEF_ELN_COLOR "\x1b[01;33m"
@@ -355,6 +401,8 @@ int regen_config(void);
 int reload_config(void);
 int save_dirhist(void);
 int load_dirhist(void);
+int load_pinned_dir(void);
+void save_pinned_dir(void);
 
 /* Memory */
 char *xnmalloc(size_t nmemb, size_t size);
@@ -710,6 +758,7 @@ struct param
 	int expand_bookmarks;
 	int only_dirs;
 	int list_and_quit;
+	int color_scheme;
 };
 
 struct param xargs;
@@ -802,7 +851,7 @@ char *user = (char *)NULL, *path = (char *)NULL,
 	*ACTIONS_FILE = (char *)NULL, **ext_colors = (char **)NULL,
 	*DIRHIST_FILE = (char *)NULL, *KBINDS_FILE = (char *)NULL,
 	*alt_config_file = (char *)NULL, *alt_kbinds_file = (char *)NULL,
-	*alt_bm_file = (char *)NULL;
+	*alt_bm_file = (char *)NULL, *pinned_dir = (char *)NULL;
 
 char div_line_char = UNSET;
 
@@ -817,7 +866,8 @@ const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
 		"exit", "quit", "pager", "trash", "undel", "messages",
 		"mountpoints", "bookmarks", "log", "untrash", "unicode",
 		"profile", "shell", "mime", "sort", "tips", "autocd",
-		"auto-open", "actions", "reload", "export", "keybinds", NULL };
+		"auto-open", "actions", "reload", "export", "keybinds",
+		"pin", "unpin", NULL };
 
 #define MAX_COLOR 46
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
@@ -1249,6 +1299,8 @@ main(int argc, char **argv)
 
 	get_profile_names();
 
+	load_pinned_dir();
+
 
 				/* ###########################
 				 * #   2) MAIN PROGRAM LOOP  #
@@ -1671,6 +1723,58 @@ get_last_path(void)
 }
 
 int
+load_pinned_dir(void)
+/* Restore pinned dir from file */
+{
+	if (!config_ok)
+		return EXIT_FAILURE;
+
+	char *pin_file = (char *)xnmalloc(strlen(CONFIG_DIR) + 6,
+									   sizeof(char));
+	sprintf(pin_file, "%s/.pin", CONFIG_DIR);
+
+	struct stat attr;
+
+	if (lstat(pin_file, &attr) == -1) {
+		free(pin_file);
+		return EXIT_FAILURE;
+	}
+
+	FILE *fp = fopen(pin_file, "r");
+
+	if (!fp) {
+		_err('w', PRINT_PROMPT, _("%s: Error retrieving pinned "
+			 "directory\n"), PROGRAM_NAME);
+		free(pin_file);
+		return EXIT_FAILURE;
+	}
+
+	char line[PATH_MAX] = "";
+	fgets(line, sizeof(line), fp);
+
+	if (!*line || !strchr(line, '/')) {
+		free(pin_file);
+		fclose(fp);
+		return EXIT_FAILURE;
+	}
+
+	if (pinned_dir) {
+		free(pinned_dir);
+		pinned_dir = (char *)NULL;
+	}
+
+	pinned_dir = (char *)xnmalloc(strlen(line) + 1, sizeof(char));
+
+	strcpy(pinned_dir, line);
+
+	fclose(fp);
+
+	free(pin_file);
+
+	return EXIT_SUCCESS;
+}
+
+int
 reload_config(void)
 {
 	/* Free everything */
@@ -1739,7 +1843,7 @@ reload_config(void)
 	xargs.files_counter = xargs.welcome_message = UNSET;
 	xargs.clear_screen = xargs.bk_files = xargs.logs = UNSET;
 	xargs.max_path = xargs.bm_file = xargs.expand_bookmarks = UNSET;
-	xargs.only_dirs = xargs.list_and_quit = UNSET;
+	xargs.only_dirs = xargs.list_and_quit = xargs.color_scheme = UNSET;
 
 	shell_terminal = no_log = internal_cmd = recur_perm_error_flag = 0;
 	is_sel = sel_is_last = print_msg = kbind_busy = dequoted = 0;
@@ -2713,6 +2817,8 @@ print_tips(int all)
 		"Keep in sight previous and next visited directories enabling the "
 		"DirhistMap option in the configuration file",
 		"Leave no traces at all running in stealth mode",
+		"Pin a file via the 'pin' command and then use it with the "
+		"period keyword (,). E.g. 'pin directory' and then 'cd ,'",
 		NULL
 	};
 
@@ -4639,35 +4745,10 @@ create_config(char *file)
 # Color codes are traditional ANSI escape sequences less the escape char and \n\
 # the final 'm'. 8 bit, 256 colors, and RGB colors are supported.\n"
 
-"FiletypeColors=\"di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;39:\
-ef=00;33:nf=00;31:bm=01;36:ln=01;36:mh=30;46:or=00;36:pi=33;40:\
-so=01;35:bd=01;33:cd=01;37:su=37;41:sg=30;43:ca=30;41:tw=30;42:\
-ow=34;42:st=37;44:ex=01;32:ee=00;32:no=00;31;47:uf=31;40:\"\n\n"
+"FiletypeColors=\"%s\"\n\n"
 
 "# Same as FiletypeColors, but for file extensions.\n"
-"ExtColors=\"*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:\
-*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:\
-*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:\
-*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:\
-*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:\
-*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:\
-*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:\
-*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:\
-*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:\
-*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:\
-*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:\
-*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:\
-*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:\
-*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:\
-*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:\
-*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:\
-*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:\
-*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:\
-*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:\
-*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:\
-*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:\
-*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:\
-*.xspf=00;36:\"\n\n"
+"ExtColors=\"%s\"\n\n"
 
 "# All the color lines below use the same color codes as FiletypeColors.\n"
 "# TextColor specifies the color of the text typed in the command line.\n"
@@ -4695,7 +4776,7 @@ DividingLineChar='='\n\n"
 "# If set to true, print a map of the current position in the directory\n\
 # history list\n\
 DirhistMap=false\n\
-DirhistIndexColor=01;32\n\n"
+DirhistIndexColor=00;36\n\n"
 
 "# The prompt line is build using string literals and/or the following escape\n\
 # sequences:\n"
@@ -4729,7 +4810,7 @@ DirhistIndexColor=01;32\n\n"
 
 "Prompt=\"%s\"\n\n",
 
-			DEFAULT_PROMPT);
+			DEF_FILE_COLORS, DEF_EXT_COLORS, DEFAULT_PROMPT);
 
 	fprintf(config_fp,
 "# MaxPath is only used for the /p option of the prompt: the current working \n\
@@ -6845,7 +6926,8 @@ is_internal_c(const char *cmd)
 					"net", "lm", "st", "sort", "fc", "tips", "br",
 					"bulk", "opener", "ac", "ad", "acd", "autocd",
 					"ao", "auto-open", "actions", "rl", "reload",
-					"exp", "export", "kb", "keybinds", NULL };
+					"exp", "export", "kb", "keybinds", "pin",
+					"unpin", NULL };
 
 	short found = 0;
 	size_t i;
@@ -7215,23 +7297,53 @@ set_colors(void)
 {
 	char *dircolors = (char *)NULL, *extcolors = (char *)NULL;
 
+	if (xargs.color_scheme != -1) {
+
+		switch(xargs.color_scheme) {
+			case 0: {
+				dircolors = (char *)xnmalloc(strlen(DEF_FILE_COLORS)
+											+ 1, sizeof(char));
+				strcpy(dircolors, DEF_FILE_COLORS);
+			}
+			break;
+
+			case 1: {
+				dircolors = (char *)xnmalloc(strlen(DEF_GREEN_COLORS)
+											+ 1, sizeof(char));
+				strcpy(dircolors, DEF_GREEN_COLORS);
+			}
+			break;
+
+			case 2: {
+				dircolors = (char *)xnmalloc(strlen(DEF_MONO_COLORS)
+											+ 1, sizeof(char));
+				strcpy(dircolors, DEF_MONO_COLORS);
+			}
+			break;
+
+			default: break;
+		}
+	}
+
 	/* Try to get colors from environment variables */
 	char *env_dircolors = getenv("CLIFM_FILE_COLORS");
 	char *env_extcolors = getenv("CLIFM_EXT_COLORS");
 
-	if (env_dircolors) {
+	if (env_dircolors && !dircolors) {
 		dircolors = (char *)xnmalloc(strlen(env_dircolors)
 									 + 1, sizeof(char));
 		strcpy(dircolors, env_dircolors);
-		env_dircolors = (char *)NULL;
 	}
 
-	if (env_extcolors) {
+	env_dircolors = (char *)NULL;
+
+	if (env_extcolors && !extcolors) {
 		extcolors = (char *)xnmalloc(strlen(env_extcolors)
 									 + 1, sizeof(char));
 		strcpy(extcolors, env_extcolors);
-		env_extcolors = (char *)NULL;
 	}
+
+	env_extcolors = (char *)NULL;
 
 	if (!dircolors || !extcolors) {
 	/* Get color lines, for both file types and extensions, from the
@@ -7970,7 +8082,7 @@ is_internal(const char *cmd)
 	const char *int_cmds[] = { "o", "open", "cd", "p", "pr", "prop", "t",
 							   "tr", "trash", "s", "sel", "mm", "mime",
 							   "bm", "bookmarks", "br", "bulk", "ac",
-							   "ad", "exp", "export", NULL };
+							   "ad", "exp", "export", "pin", NULL };
 	short found = 0;
 	size_t i;
 
@@ -11144,6 +11256,33 @@ create_usr_var(char *str)
 }
 
 void
+save_pinned_dir(void)
+/* Store pinned directory for the next session */
+{
+	if (pinned_dir && config_ok) {
+
+		char *pin_file = (char *)xnmalloc(strlen(CONFIG_DIR) + 7,
+										  sizeof(char));
+		sprintf(pin_file, "%s/.pin", CONFIG_DIR);
+
+		FILE *fp = fopen(pin_file, "w");
+
+		if (!fp)
+			fprintf(stderr, _("%s: Error storing pinned "
+					"directory\n"), PROGRAM_NAME);
+
+		else {
+			fprintf(fp, "%s", pinned_dir);
+			fclose(fp);
+		}
+
+		free(pin_file);
+	}
+
+	return;
+}
+
+void
 save_last_path(void)
 /* Store last visited directory for the restore last path function */
 {
@@ -11250,6 +11389,12 @@ free_stuff(void)
  * time and avoid thus memory leaks */
 {
 	size_t i = 0;
+
+	if (xargs.stealth_mode != 1)
+		save_pinned_dir();
+
+	if (pinned_dir)
+		free(pinned_dir);
 
 	free_bookmarks();
 
@@ -12174,24 +12319,20 @@ my_rl_completion(const char *text, int start, int end)
 		}
 
 		/* If autocd or auto-open, try to expand ELN's first */
-		if (autocd || auto_open) {
+		if ((autocd || auto_open) && *text >= 0x31 && *text <= 0x39) {
+			int num_text = atoi(text);
 
-			/* ELN completion */
-			if (*text >= 0x31 && *text <= 0x39) {
-				int num_text = atoi(text);
-
-				if (is_number(text) && num_text > 0
-				&& num_text <= (int)files) {
-					matches = rl_completion_matches(text,
-							  &filenames_generator);
-				}
-			}
-
-			/* Bookmarks completion */
-			else if (expand_bookmarks)
+			if (is_number(text) && num_text > 0
+			&& num_text <= (int)files) {
 				matches = rl_completion_matches(text,
-						  &bookmarks_generator);
+						  &filenames_generator);
+			}
 		}
+
+		/* Bookmarks completion */
+		else if ((autocd || auto_open) && expand_bookmarks
+		&& (matches = rl_completion_matches(text,
+					  &bookmarks_generator)));
 
 		/* If neither autocd nor auto-open, ttry to complete with
 		 * command names */
@@ -12242,9 +12383,10 @@ my_rl_completion(const char *text, int start, int end)
 			matches = rl_completion_matches(text, &profiles_generator);
 		}
 
-		else if (expand_bookmarks)
+		else if (expand_bookmarks) {
 			matches = rl_completion_matches(text,
 					  &bookmarks_generator);
+		}
 	}
 
 				/* ### PATH COMPLETION ### */
@@ -13982,6 +14124,7 @@ external_arguments(int argc, char **argv)
 		{"expand-bookmarks", no_argument, 0, 18},
 		{"only-dirs", no_argument, 0, 19},
 		{"list-and-quit", no_argument, 0, 20},
+		{"color-scheme", required_argument, 0, 21},
 		{0, 0, 0, 0}
 	};
 
@@ -13998,7 +14141,7 @@ external_arguments(int argc, char **argv)
 	xargs.files_counter = xargs.welcome_message = UNSET;
 	xargs.clear_screen = xargs.bk_files = xargs.logs = UNSET;
 	xargs.max_path = xargs.bm_file = xargs.expand_bookmarks = UNSET;
-	xargs.list_and_quit = UNSET;
+	xargs.list_and_quit = xargs.color_scheme = UNSET;
 
 	int optc;
 	/* Variables to store arguments to options (-c, -p and -P) */
@@ -14130,6 +14273,14 @@ external_arguments(int argc, char **argv)
 
 		case 20:
 			xargs.list_and_quit = 1;
+		break;
+
+		case 21: {
+			if (!is_number(optarg)) break;
+			int opt_int = atoi(optarg);
+			if (opt_int >= 0 && opt_int <= 2)
+				xargs.color_scheme = opt_int;
+		}
 		break;
 
 		case 'a':
@@ -14673,6 +14824,17 @@ parse_input_str(char *str)
 	for (i = 0; i <= args_n; i++) {
 
 		register size_t j = 0;
+
+
+			/* ######################################
+			 * #	 2.a) PINNED DIR EXPANSION		#
+			 * ###################################### */
+
+		if (*substr[i] == ',' && !substr[i][1] && pinned_dir) {
+			substr[i] = (char *)xrealloc(substr[i], (strlen(pinned_dir)
+										 + 1) * sizeof(char));
+			strcpy(substr[i], pinned_dir);
+		}
 
 			/* ######################################
 			 * #	  2.a) BOOKMARKS EXPANSION		#
@@ -17488,6 +17650,86 @@ check_dir(char **args)
 }
 
 int
+pin_directory(char *dir)
+{
+	if (!dir || !*dir)
+		return EXIT_FAILURE;
+
+	struct stat attr;
+
+	if (lstat(dir, &attr) == -1) {
+		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, dir,
+				strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	if (pinned_dir) {
+		free(pinned_dir);
+		pinned_dir = (char *)NULL;
+	}
+
+	/* If absolute path */
+	if (*dir == '/') {
+		pinned_dir = (char *)xnmalloc(strlen(dir) + 1, sizeof(char));
+
+		strcpy(pinned_dir, dir);
+	}
+
+	else { /* If relative path */
+
+		if (strcmp(path, "/") == 0) {
+			pinned_dir = (char *)xnmalloc(strlen(dir) + 2, sizeof(char));
+			sprintf(pinned_dir, "/%s", dir);
+		}
+
+		else {
+			pinned_dir = (char *)xnmalloc(strlen(dir) + strlen(path)
+										  + 2, sizeof(char));
+			sprintf(pinned_dir, "%s/%s", path, dir);
+		}
+	}
+
+	printf(_("%s: Succesfully pinned '%s'\n"), PROGRAM_NAME, dir);
+
+	return EXIT_SUCCESS;
+}
+
+int
+unpin_dir(void)
+{
+	if (!pinned_dir) {
+		printf(_("%s: No pinned file\n"), PROGRAM_NAME);
+		return EXIT_SUCCESS;
+	}
+
+	if (CONFIG_DIR && xargs.stealth_mode != 1) {
+
+		int cmd_error = 0;
+		char *pin_file = (char *)xnmalloc(strlen(CONFIG_DIR) + 7,
+											  sizeof(char));
+		sprintf(pin_file, "%s/.pin", CONFIG_DIR);
+
+		if (unlink(pin_file) == -1) {
+			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, pin_file,
+					strerror(errno));
+			cmd_error = 1;
+		}
+
+		free(pin_file);
+
+		if (cmd_error)
+			return EXIT_FAILURE;
+	}
+
+	printf(_("Succesfully unpinned %s\n"), pinned_dir);
+
+	free(pinned_dir);
+	pinned_dir = (char *)NULL;
+
+	return EXIT_SUCCESS;
+}
+
+int
 exec_cmd(char **comm)
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
@@ -17885,6 +18127,26 @@ exec_cmd(char **comm)
 		exit_code = run_and_refresh(comm);
 		kbind_busy = 0;
 	}
+
+	else if (*comm[0] == 'p' && strcmp(comm[0], "pin") == 0) {
+
+		if (comm[1]) {
+			if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
+				puts("Usage: pin FILE/DIR");
+			else
+				exit_code = pin_directory(comm[1]);
+		}
+
+		else {
+			if (pinned_dir)
+				printf(_("pinned file: %s\n"), pinned_dir);
+			else
+				puts(_("No pinned file"));
+		}
+	}
+
+	else if (*comm[0] == 'u' && strcmp(comm[0], "unpin") == 0)
+		return (exit_code = unpin_dir());
 
 	/*    ############### PROPERTIES ##################     */
 	else if (*comm[0] == 'p' && (!comm[0][1]
@@ -22952,6 +23214,8 @@ help_function (void)
 \n     --restore-last-path\t save last visited directory to be \
 \n				restored in the next session\
 \n     --no-tips\t\t\t disable startup tips\
+\n     --color-scheme=NUM\t\t set NUM as color scheme. NUM could\
+\n				be: 0 (default), 1 (green), and 2(mono)\
 \n     --disk-usage\t\t show disk usage (free/total) for the\
 \n				filesystem to which the current directory \
 \n				belongs\
@@ -23023,6 +23287,8 @@ help_function (void)
  exp, export [ELN/FILE ...]\n\
  shell [SHELL]\n\
  actions [edit]\n\
+ pin [FILE/DIR]\n\
+ unpin\n\
  st, sort [METHOD] [rev]\n\
  rl, reload\n\
  opener [default] [APPLICATION]\n\
