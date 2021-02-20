@@ -173,6 +173,9 @@ save last visited directory to be restored in the next session
 .B \-\-no\-tips
 disable startup tips
 .TP
+.B \-\-color\-scheme=NUM
+set NUM as color scheme. NUM could be: 0 (default), 1 (green), and 2 (mono).
+.TP
 .B \-\-disk\-usage
 show disk usage (free/total) for the filesystem to which the current directory belongs
 .TP
@@ -183,7 +186,7 @@ do not add / indicator to directory names when running in light mode
 specify whether to classify files or not when running in light mode. 0 for no, 1 for yes, and 2 to classify executable files as well (option 2 implies running access(3) over each regular file, which is an expensive operation)
 .TP
 .B \-\-expand\-bookmarks
-expand bookmark names into the corresponding bookmark paths and enable TAB completion for bookmark names as well. If the bookmark is, .e.g. mybookmark=/my/path, "mybo" will be completed as "mybookmark", which will be interpreted as "/my/path".
+expand bookmark names into the corresponding bookmark paths and enable TAB completion for bookmark names as well. If the bookmark is, .e.g. mybookmark=/my/path, "mybo" will be completed as "mybookmark", which will be interpreted then as "/my/path".
 .TP
 .B \-\-share\-selbox
 make the Selection Box common to different profiles
@@ -238,7 +241,7 @@ if the \fIautocd\fR and \fIauto-open\fR functions are enabled, which is the defa
 .B cd \fR[ELN/DIR]
 when used with no argument, it changes the current directory to the default directory (HOME). Otherwise, \fIcd\fR changes the current directory to the one specified by the first argument. You can use either ELN's or a string to indicate the directory you want. Ex: 'cd 12' or 'cd ~/media'. If \fIautocd\fR is enabled, 'cd 12' and 'cd ~/media' can be written as '12' and '~/media' respectivelly.
 .sp
-Unlike the shell 'cd' command, CliFM's built\-in \fBcd\fR function not only changes the current directory, but also lists its content (provided the option "cd lists automatically" is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of \fIcd\fR is much like this shell command: cd DIR && ls \-\-color=auto \-\-group\-directories\-first. Remote file systems are also supported: just enter 'cd ADDRESS [OPTIONS]'. For more information about this syntax see the description of the \fInet\fR command below.
+Unlike the shell 'cd' command, CliFM's built\-in \fIcd\fR function not only changes the current directory, but also lists its content (provided the option "cd lists automatically" is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of \fIcd\fR is much like this shell command: cd DIR && ls \-\-color=auto \-\-group\-directories\-first. Remote file systems are also supported: just enter 'cd ADDRESS [OPTIONS]'. For more information about this syntax see the description of the \fInet\fR command below.
 .TP
 
 .B o, open \fRELN/FILE [APPLICATION]
@@ -280,9 +283,41 @@ deselect one or more selected elements. You can also deselect all selected eleme
 .TP
 
 .B bm, bookmarks \fR[a, add PATH] [d, del] [edit] [SHORTCUT, NAME]
-with no argument, open the bookmarks menu. Here you cd into the desired bookmark by entering either its ELN, its shortcut, or its name. In this screen you can also add, remove or edit your bookmarks by simply typing 'e' to edit the bookmarks file (which is simply a list of lines with this format: [shortcut]name:path. Ex: [d]documents:/home/user/documents).
+with no argument, open the bookmarks menu. Here you can cd into the desired bookmark by entering either its ELN, its shortcut or its name. In this screen you can also add, remove or edit your bookmarks by simply typing 'e' to edit the bookmarks file (which is simply a list of lines with this format: [shortcut]name:path. Ex: [d]documents:/home/user/documents).
 .sp
 If you want to add or remove a bookmark directly from the command line, use the 'a' and 'd' arguments respectivelly. Example: 'bm a /media/misc' or 'bm d'. You can also open a bookmark by typing 'bm shortcut' or 'bm name' (in which latter case TAB completion is available).
+.sp
+A handy use for the bookmarks function, provided the expand-bookmarks option is enabled, is to create bookmarks using short names, which will be later easily accessible via TAB completion.  
+.TP
+
+.B alias \fR[import FILE]
+with no argument, it prints the list of available aliases, if any. To write a new alias simply enter 'edit' to open the configuration file and add a line like this one: "alias name='command args...'" or "alias name='directory'".
+.sp
+To import aliases from a file, provided it contains aliases in the specified form, use the 'import' option. Aliases conflicting with some of the internal commands won't be imported.
+.sp
+However, a neat usage for the alias function is not so much to bind short keys to commands, but to files and directories visited regularly. In this way, it is possible to bind as many files or directories, no matter how deep they are in the filesystem, to very short strings, even single characters. For example, "alias w='/some/file/deep/in/the/filsystem'. Now, no matter where we are, we can just enter 'w', provided \fIautocd\fR and/or \fIauto-open\fR function are enabled, to access the file or directory we want. Theoretically at least, this procedure could be repeated until the system memory is exhausted.
+.sp
+To create multiple aliases for files at once, this is the recommended procedure: 1) Select all files you want to alias with the \fIsel\fR function: 's file1 file2 file3 ...'. 2) Export the selected files into a temporary file running 'exp sel'; 3) Edit this file to contain only valid alias lines: 
+
+ alias a1='file1'
+ alias b1='file2'
+ alias c1='file3'
+
+NOTE: Make sure alias names do not conflict with other commands, either internal or external. To bypass the conflicts check, performed automaically by the 'alias import' command, you can just edit the aliases file manually.
+
+4) Finally, import this file with the \fIalias\fR function: 'alias import tmp_file'. Now, you can access any of these files by entering just a few caracters: a1, b1, and c1.
+.TP
+
+.B pin \fR[FILE/DIR]
+pin a file or a directory to be accessed later via the period (,) keyword. For example, run 'pin mydir' and then access "mydir" as follows: 'cd ,' where the period is automatically expanded to the pinned file, in this case "mydir". The period keyword could be used with any command, either internal or external, e.g, 'ls ,'.
+.sp
+With no arguments, the function prints the current pinned file, if any. If an argument is given, it will be taken as a filename to be pinned. Running this command again, frees the previous pin and sets a new one. In other words, only one pin is supported at a time. An easy alternative to create as many pins or shortcuts as you want, and how you want, is to use the \fIalias\fR function. Bookmarks could also be used to achieve a very similar result.
+.sp
+At program exit, the pinned file is written to a file in the configuration directory (as .pin) to be loaded in the next session.
+.TP
+
+.B unpin
+this command takes no argument. It just frees the current pin and, if it exists, deletes the .pin file generated by the \fIpin\fR command.
 .TP
 
 .B t, tr, trash  \fR[ELN/FILE ... n] [ls, list] [clear] [del, rm]
@@ -443,12 +478,6 @@ You can use the exclamation character (!) to perform some history commands:
 
 .B edit \fR[gen] [APPLICATION]
 edit the configuration file. If an application is specified, it will be used to open the configuration file. Use the 'gen' option to generate a fresh configuration file and make a copy of the old one (named clifmrc.HHMMSS).
-.TP
-
-.B alias \fR[import FILE]
-with no argument, it prints the list of available  aliases, if any. To write a new alias simply enter 'edit' to open the configuration file and add a line like this one: alias name='command args...'.
-.sp
-To import aliases from a file, provided it contains aliases in the specified form, use the 'import' option. Aliases conflicting with some of the internal commands won't be imported.
 .TP
 
 .B exp, export [FILE ...]
