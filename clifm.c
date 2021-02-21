@@ -213,6 +213,8 @@ static int flags;
 #define NC "\x1b[0m"
 #define bold "\x1b[1m"
 
+#define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
+
 /* Colors for the prompt: */
 /* \001 and \002 tell readline that color codes between them are
  * non-printing chars. This is specially useful for the prompt, i.e.,
@@ -230,25 +232,8 @@ so=01;35:bd=01;33:cd=01;37:su=37;41:sg=30;43:ca=30;41:tw=30;42:\
 ow=34;42:st=37;44:ex=01;32:ee=00;32:no=00;31;47:uf=31;40:"
 
 #define DEF_IFACE_COLORS "el=01;33:mi=01;36:dl=01;34:tx=00;39:df=00;39:\
-dc=00;39:wc=00;36:dh=00;36:li=01;32:si=01;34:ti=01;33:em=01;31:wm=01;33:\
+dc=00;39:wc=01;36:dh=00;36:li=01;32:si=01;34:ti=01;33:em=01;31:wm=01;33:\
 nm=01;32:bm=01;36:"
-
-#define DEF_GREEN_COLORS "di=01;32:nd=01;31:ed=00;34:ne=00;31:fi=00;39:\
-ef=00;33:nf=00;31:bm=01;36:ln=01;36:mh=30;46:or=00;36:pi=33;40:\
-so=01;35:bd=01;33:cd=01;37:su=37;41:sg=30;43:ca=30;41:tw=30;42:\
-ow=34;42:st=37;44:ex=01;04;32:ee=00;04;33:no=31;47:uf=31;40:"
-
-#define DEF_MONO_COLORS "di=01;37:nd=01;31:ed=00;37:ne=00;31:fi=00;39:\
-ef=00;33:nf=00;31:bm=01;36:ln=01;04;36:mh=30;46:or=00;36:pi=33;40:\
-so=01;35:bd=01;33:cd=01;37:su=37;41:sg=30;43:ca=30;41:tw=30;42:\
-ow=34;42:st=37;44:ex=01;32:ee=00;32:no=31;47:uf=31;40:"
-
-/*
-#define DEF_256_COLORS "di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;39:\
-ef=00;33:nf=00;31:bm=01;36:ln=01;36:mh=30;46:or=00;36:pi=33;40:\
-so=01;35:bd=01;33:cd=01;37:su=37;41:sg=30;43:ca=30;41:tw=30;42:\
-ow=34;42:st=37;44:ex=01;32:ee=00;32:no=00;31;47:uf=31;40:"
-*/
 
 #define DEF_EXT_COLORS "*.tar=01;31:*.tgz=01;31:*.arc=01;31:\
 *.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:\
@@ -429,6 +414,7 @@ char **my_rl_completion(const char *text, int start, int end);
 char *my_rl_quote(char *text, int m_t, char *qp);
 int quote_detector(char *line, int index);
 int is_quote_char(char c);
+char *cschemes_generator(const char *text, int state);
 char *filenames_generator(const char *text, int state);
 char *bin_cmd_generator(const char *text, int state);
 void readline_kbinds(void);
@@ -643,8 +629,12 @@ int check_dir(char **args);
 
 /* Colors */
 void set_default_options(void);
-void set_colors (void);
+void set_colors (char *colorscheme, int env);
 char *strip_color_line(char *str, char mode);
+size_t get_colorschemes(void);
+int cschemes_function(char **args);
+void create_def_cscheme(void);
+void free_colors(void);
 
 /* Actions */
 int load_actions(void);
@@ -797,6 +787,7 @@ short splash_screen = UNSET, welcome_message = UNSET, ext_cmd_ok = UNSET,
 	recur_perm_error_flag = 0, is_sel = 0, sel_is_last = 0,
 	kbind_busy = 0, unicode = UNSET, dequoted = 0, mime_match = 0, 
 	sort_reverse = 0, sort_switch = 0, kb_shortcut = 0,
+	switch_cscheme = 0,
 
 	home_ok = 1, config_ok = 1, trash_ok = 1, selfile_ok = 1;
 
@@ -823,7 +814,7 @@ size_t user_home_len = 0, args_n = 0, sel_n = 0, trash_n = 0, msgs_n = 0,
 	   prompt_cmds_n = 0, path_n = 0, current_hist_n = 0, usrvar_n = 0,
 	   aliases_n = 0, longest = 0, files = 0, eln_len = 0, actions_n = 0,
 	   ext_colors_n = 0, kbinds_n = 0, eln_as_file_n = 0,
-	   bm_n = 0;
+	   bm_n = 0, cschemes_n = 0;
 
 struct termios shell_tmodes;
 struct dirent **tmp_dirlist = (struct dirent **)NULL;
@@ -852,7 +843,9 @@ char *user = (char *)NULL, *path = (char *)NULL,
 	*ACTIONS_FILE = (char *)NULL, **ext_colors = (char **)NULL,
 	*DIRHIST_FILE = (char *)NULL, *KBINDS_FILE = (char *)NULL,
 	*alt_config_file = (char *)NULL, *alt_kbinds_file = (char *)NULL,
-	*alt_bm_file = (char *)NULL, *pinned_dir = (char *)NULL;
+	*alt_bm_file = (char *)NULL, *pinned_dir = (char *)NULL,
+	*COLORS_DIR = (char *)NULL, **color_schemes = (char **)NULL,
+	*cur_cscheme = (char *)NULL, *usr_cscheme = (char *)NULL;
 
 char div_line_char = UNSET;
 
@@ -868,7 +861,7 @@ const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
 		"mountpoints", "bookmarks", "log", "untrash", "unicode",
 		"profile", "shell", "mime", "sort", "tips", "autocd",
 		"auto-open", "actions", "reload", "export", "keybinds",
-		"pin", "unpin", NULL };
+		"pin", "unpin", "colorschemes", NULL };
 
 #define MAX_COLOR 46
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
@@ -1117,11 +1110,19 @@ main(int argc, char **argv)
 	if (!config_ok)
 		set_default_options();
 
+	cschemes_n = get_colorschemes();
+
+	set_colors(usr_cscheme ? usr_cscheme : "default", 1);
+
+	free(usr_cscheme);
+	usr_cscheme = (char *)NULL;
+
 	create_kbinds_file();
 
 	load_bookmarks();
 
 	load_keybinds();
+
 
 	/* ##### READLINE ##### */
 	initialize_readline();
@@ -1811,16 +1812,28 @@ reload_config(void)
 	free(KBINDS_FILE);
 	MIME_FILE = SCRIPTS_DIR = ACTIONS_FILE = KBINDS_FILE = (char *)NULL;
 
+	free(COLORS_DIR);
+	free(TMP_DIR);
+	free(sel_file_user);
+	TMP_DIR = COLORS_DIR = sel_file_user = (char *)NULL;
+
+	size_t i = 0;
+
+	for (i = 0; color_schemes[i]; i++)
+		free(color_schemes[i]);
+
+	free(color_schemes);
+	color_schemes = (char **)NULL;
+
+/*	if (usr_cscheme) {
+		free(usr_cscheme);
+		usr_cscheme = (char *)NULL;
+	} */
+
 	if (opener) {
 		free(opener);
 		opener = (char *)NULL;
 	}
-
-	free(TMP_DIR);
-	TMP_DIR = (char *)NULL;
-
-	free(sel_file_user);
-	sel_file_user = (char *)NULL;
 
 	if (encoded_prompt) {
 		free(encoded_prompt);
@@ -1852,7 +1865,7 @@ reload_config(void)
 	xargs.files_counter = xargs.welcome_message = UNSET;
 	xargs.clear_screen = xargs.bk_files = xargs.logs = UNSET;
 	xargs.max_path = xargs.bm_file = xargs.expand_bookmarks = UNSET;
-	xargs.only_dirs = xargs.list_and_quit = xargs.color_scheme = UNSET;
+	xargs.only_dirs = xargs.list_and_quit = UNSET;
 
 	shell_terminal = no_log = internal_cmd = recur_perm_error_flag = 0;
 	is_sel = sel_is_last = print_msg = kbind_busy = dequoted = 0;
@@ -1871,6 +1884,13 @@ reload_config(void)
 	if (!config_ok)
 		set_default_options();
 
+	cschemes_n = get_colorschemes();
+	free_colors();
+	set_colors(usr_cscheme ? usr_cscheme : "default", 1);
+
+	free(usr_cscheme);
+	usr_cscheme = (char *)NULL;
+	
 	/* If some option was set via command line, keep that value
 	 * for any profile */
 	if (xargs.ext != UNSET)
@@ -1899,7 +1919,6 @@ reload_config(void)
 		dirhist_map = xargs.dirmap;
 
 	/* Free the aliases and prompt_cmds arrays to be allocated again */
-	size_t i = 0;
 
 	for (i = 0; i < dirhist_total_index; i++)
 		free(old_pwd[i]);
@@ -4748,17 +4767,10 @@ create_config(char *file)
 
 "# This is the configuration file for CLiFM\n\n"
 
-"# FiletypeColors defines the color used for filetypes when listing files. It \n\
-# uses the same format used by the LS_COLORS environment variable. Thus, \n\
-# \"di=01;34\" means that (non-empty) directories will be listed in bold blue.\n\
-# Color codes are traditional ANSI escape sequences less the escape char and \n\
-# the final 'm'. 8 bit, 256 colors, and RGB colors are supported.\n"
-"FiletypeColors=\"%s\"\n\n"
-
-"# Same as FiletypeColors, but for file extensions.\n"
-"ExtColors=\"%s\"\n\n"
-
-"InterfaceColors=\"%s\"\n\n"
+"# Color schemes are stored in the colors directory. By default,\n\
+# the 'default' color scheme is used. Visit %s\n\
+# to get a few more\n\
+ColorScheme=default\n\n"
 
 "# By default, the amount of files contained by a directory is informed next\n\
 # to the directory name. However, this feature might slow things down when, \n\
@@ -4806,8 +4818,7 @@ DirhistMap=false\n\n"
 
 "Prompt=\"%s\"\n\n",
 
-			DEF_FILE_COLORS, DEF_EXT_COLORS, DEF_IFACE_COLORS,
-			DEFAULT_PROMPT);
+			COLORS_REPO, DEFAULT_PROMPT);
 
 	fprintf(config_fp,
 "# MaxPath is only used for the /p option of the prompt: the current working \n\
@@ -6924,7 +6935,7 @@ is_internal_c(const char *cmd)
 					"bulk", "opener", "ac", "ad", "acd", "autocd",
 					"ao", "auto-open", "actions", "rl", "reload",
 					"exp", "export", "kb", "keybinds", "pin",
-					"unpin", NULL };
+					"unpin", "cs", "colorschemes", NULL };
 
 	short found = 0;
 	size_t i;
@@ -7286,8 +7297,66 @@ is_color_code(char *str)
 	return 1;
 }
 
+size_t
+get_colorschemes(void)
+{
+	if (!COLORS_DIR)
+		return 0;
+
+	struct stat attr;
+
+	if (stat(COLORS_DIR, &attr) == -1)
+		return 0;
+
+	size_t schemes_total = count_dir(COLORS_DIR);
+
+	if (schemes_total <= 2)
+		return 0;
+
+	color_schemes = (char **)xcalloc(schemes_total + 2,
+									  sizeof(char *));
+
+	size_t i = 0;
+
+	DIR *dir_p;
+	struct dirent *entry;
+
+	/* count_dir already opened and read this directory succesfully,
+	 * so that we don't need to check opendir for errors */
+	dir_p = opendir(COLORS_DIR);
+
+	while ((entry = readdir(dir_p)) != NULL) {
+
+		/* Skipp . and .. */
+		char *name = entry->d_name;
+
+		if (*name == '.' && (!name[1]
+		|| (name[1] == '.' && !name[2])))
+			continue;
+
+		char *ret = strchr(name, '.');
+
+		/* If the file contains not dot, or if its extension is not
+		 * .cfm, or if it's just a hidden file named ".cfm", skip it */
+		if (!ret || strcmp(ret, ".cfm") != 0 || ret == name)
+			continue;
+
+		*ret = 0x00;
+
+		color_schemes[i] = (char *)xnmalloc(strlen(name) + 1,
+											sizeof(char));
+		strcpy(color_schemes[i++], name);
+	}
+
+	color_schemes[i] = (char *)NULL;
+
+	closedir(dir_p);
+
+	return i;
+}
+
 void
-set_colors(void)
+set_colors(char *colorscheme, int env)
 /* Open the config file, get values for filetype and extension colors
  * and copy these values into the corresponding variable. If some value is
  * not found, or if it's a wrong value, the default is set. */
@@ -7295,68 +7364,78 @@ set_colors(void)
 	char *filecolors = (char *)NULL, *extcolors = (char *)NULL,
 		 *ifacecolors = (char *)NULL;
 
-	if (xargs.color_scheme != -1) {
+	/* Set a pointer to the current color scheme */
+	if (colorscheme && *colorscheme && color_schemes) {
 
-		switch(xargs.color_scheme) {
-			case 0: {
-				filecolors = (char *)xnmalloc(strlen(DEF_FILE_COLORS)
-											+ 1, sizeof(char));
-				strcpy(filecolors, DEF_FILE_COLORS);
+		char *def_cscheme = (char *)NULL;
+
+		size_t i;
+
+		for (i = 0; color_schemes[i]; i++) {
+
+			if (*colorscheme == *color_schemes[i]
+			&& strcmp(colorscheme, color_schemes[i]) == 0) {
+				cur_cscheme = color_schemes[i];
+				break;
 			}
-			break;
 
-			case 1: {
-				filecolors = (char *)xnmalloc(strlen(DEF_GREEN_COLORS)
-											+ 1, sizeof(char));
-				strcpy(filecolors, DEF_GREEN_COLORS);
-			}
-			break;
+			if (*color_schemes[i] == 'd'
+			&& strcmp(color_schemes[i], "default") == 0)
+				def_cscheme = color_schemes[i];
+		}
 
-			case 2: {
-				filecolors = (char *)xnmalloc(strlen(DEF_MONO_COLORS)
-											+ 1, sizeof(char));
-				strcpy(filecolors, DEF_MONO_COLORS);
-			}
-			break;
+		if (!cur_cscheme) {
+			_err('w', PRINT_PROMPT, _("%s: %s: No such color scheme. "
+				 "Falling back to the default one\n"), PROGRAM_NAME,
+				 colorscheme);
 
-			default: break;
+			if (def_cscheme)
+				cur_cscheme = def_cscheme;
 		}
 	}
 
-	/* Try to get colors from environment variables */
-	char *env_filecolors = getenv("CLIFM_FILE_COLORS");
-	char *env_extcolors = getenv("CLIFM_EXT_COLORS");
-	char *env_ifacecolors = getenv("CLIFM_IFACE_COLORS");
+	if (env) {
+		/* Try to get colors from environment variables */
+		char *env_filecolors = getenv("CLIFM_FILE_COLORS");
+		char *env_extcolors = getenv("CLIFM_EXT_COLORS");
+		char *env_ifacecolors = getenv("CLIFM_IFACE_COLORS");
 
-	if (env_filecolors && !filecolors) {
-		filecolors = (char *)xnmalloc(strlen(env_filecolors)
-									 + 1, sizeof(char));
-		strcpy(filecolors, env_filecolors);
+		if (env_filecolors && !filecolors) {
+			filecolors = (char *)xnmalloc(strlen(env_filecolors)
+										 + 1, sizeof(char));
+			strcpy(filecolors, env_filecolors);
+		}
+
+		env_filecolors = (char *)NULL;
+
+		if (env_extcolors && !extcolors) {
+			extcolors = (char *)xnmalloc(strlen(env_extcolors)
+										 + 1, sizeof(char));
+			strcpy(extcolors, env_extcolors);
+		}
+
+		env_extcolors = (char *)NULL;
+
+		if (env_ifacecolors && !ifacecolors) {
+			ifacecolors = (char *)xnmalloc(strlen(env_ifacecolors)
+										 + 1, sizeof(char));
+			strcpy(ifacecolors, env_ifacecolors);
+		}
+
+		env_ifacecolors = (char *)NULL;
 	}
 
-	env_filecolors = (char *)NULL;
+	if (config_ok && (!filecolors || !extcolors || !ifacecolors)) {
+	/* Get color lines, for both file types and extensions, from
+	 * COLORSCHEME file */
 
-	if (env_extcolors && !extcolors) {
-		extcolors = (char *)xnmalloc(strlen(env_extcolors)
-									 + 1, sizeof(char));
-		strcpy(extcolors, env_extcolors);
-	}
+		char *colorscheme_file = xnmalloc(strlen(COLORS_DIR)
+									+ strlen(colorscheme) + 6,
+									sizeof(char));
+		sprintf(colorscheme_file, "%s/%s.cfm", COLORS_DIR,
+				colorscheme ? colorscheme : "default");
 
-	env_extcolors = (char *)NULL;
-
-	if (env_ifacecolors && !ifacecolors) {
-		ifacecolors = (char *)xnmalloc(strlen(env_ifacecolors)
-									 + 1, sizeof(char));
-		strcpy(ifacecolors, env_ifacecolors);
-	}
-
-	env_ifacecolors = (char *)NULL;
-
-
-	if (!filecolors || !extcolors || !ifacecolors) {
-	/* Get color lines, for both file types and extensions, from the
-	 * config file */
-		FILE *fp_colors = fopen(CONFIG_FILE, "r");
+		FILE *fp_colors = fopen(colorscheme_file, "r");
 
 		if (fp_colors) {
 			char *line = (char *)NULL;
@@ -7445,15 +7524,17 @@ set_colors(void)
 
 			fclose(fp_colors);
 		}
+
+		free(colorscheme_file);
+		colorscheme_file = (char *)NULL;
 	}
 
 			/* ##############################
 			 * #	FILE EXTENSION COLORS	#
 			 * ############################## */
 
-	/* Split the colors line */
+	/* Split the colors line into substrings (one per color) */
 
-	/* If no extcolors or extcolors is empty string or just ' or " */
 	if (!extcolors) {
 
 		/* Unload current extension colors */
@@ -7556,7 +7637,6 @@ set_colors(void)
 			 * #	  INTERFACE COLORS		#
 			 * ############################## */
 
-	/* If not ifacecolors */
 	if (!ifacecolors) {
 
 		/* Free and reset whatever value was loaded */
@@ -7579,7 +7659,6 @@ set_colors(void)
 
 	else {
 
-		/* Split the colors line into substrings (one per color) */
 		char *p = ifacecolors, *buf = (char *)NULL,
 			 **colors = (char **)NULL;
 		size_t len = 0, words = 0;
@@ -7759,10 +7838,8 @@ set_colors(void)
 		colors = (char **)NULL;
 	}
 
-	/* If not filecolors */
 	if (!filecolors) {
 
-		/* Free and reset whatever value was loaded */
 		memset(nd_c, 0x00, MAX_COLOR);
 		memset(nf_c, 0x00, MAX_COLOR);
 		memset(di_c, 0x00, MAX_COLOR);
@@ -10766,6 +10843,18 @@ rl_open_keybinds(int count, int key)
 	return EXIT_SUCCESS;
 }
 
+int rl_open_cscheme(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	keybind_exec_cmd("cs e");
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
 int
 rl_open_bm_file(int count, int key)
 {
@@ -11340,6 +11429,7 @@ readline_kbinds(void)
 		rl_bind_keyseq(find_key("deselect-all"), rl_deselect_all);
 
 		/* Config files */
+		rl_bind_keyseq(find_key("edit-color-scheme"), rl_open_cscheme);
 		rl_bind_keyseq(find_key("open-config"), rl_open_config);
 		rl_bind_keyseq(find_key("open-keybinds"), rl_open_keybinds);
 		rl_bind_keyseq(find_key("open-bookmarks"), rl_open_bm_file);
@@ -11411,6 +11501,7 @@ readline_kbinds(void)
 		rl_bind_keyseq("\\M-d", rl_deselect_all);
 
 		/* Config files */
+		rl_bind_keyseq("\\e[19~", rl_open_cscheme);
 		rl_bind_keyseq("\\e[21~", rl_open_config);
 		rl_bind_keyseq("\\e[20~", rl_open_keybinds);
 		rl_bind_keyseq("\\e[23~", rl_open_bm_file);
@@ -11691,6 +11782,13 @@ free_stuff(void)
 {
 	size_t i = 0;
 
+	if (color_schemes) {
+		for (i = 0; color_schemes[i]; i++)
+			free(color_schemes[i]);
+
+		free(color_schemes);
+	}
+
 	if (xargs.stealth_mode != 1)
 		save_pinned_dir();
 
@@ -11827,6 +11925,7 @@ free_stuff(void)
 	free(SCRIPTS_DIR);
 	free(ACTIONS_FILE);
 	free(KBINDS_FILE);
+	free(COLORS_DIR);
 
 	/* Restore the foreground color of the running terminal */
 	fputs(NC, stdout);
@@ -12658,6 +12757,7 @@ my_rl_completion(const char *text, int start, int end)
 				matches = rl_completion_matches(text,
 						  &filenames_generator);
 		}
+
 				/* ### BOOKMARKS COMPLETION ### */
 
 		else if (*rl_line_buffer == 'b'
@@ -12670,6 +12770,14 @@ my_rl_completion(const char *text, int start, int end)
 		|| strncmp(rl_line_buffer, "bookmarks ", 10) == 0)) {
 			rl_attempted_completion_over = 1;
 			matches = rl_completion_matches(text, &bookmarks_generator);
+		}
+
+				/* ### COLOR SCHEMES COMPLETION ### */
+		else if (*rl_line_buffer == 'c'	&& ((rl_line_buffer[1] == 's'
+		&& rl_line_buffer[2] == ' ')
+		|| strncmp(rl_line_buffer, "colorschemes ", 13) == 0)) {
+				matches = rl_completion_matches(text,
+						  &cschemes_generator);
 		}
 
 				/* ### PROFILES COMPLETION ### */
@@ -12735,6 +12843,32 @@ get_profile_names(void)
 	profile_names[pf_n] = (char *)NULL;
 
 	return EXIT_SUCCESS;
+}
+
+char *
+cschemes_generator(const char *text, int state)
+{
+	static int i;
+	static size_t len;
+	char *name;
+
+	if (!state) {
+		i = 0;
+		len = strlen(text);
+	} /* The state variable is zero only the first time the function is
+	called, and a non-zero positive in later calls. This means that i
+	and len will be necessarilly initialized the first time */
+
+	if (!color_schemes)
+		return (char *)NULL;
+
+	/* Look for color schemes in color_schemes for a match */
+	while ((name = color_schemes[i++]) != NULL) {
+		if (strncmp(name, text, len) == 0)
+			return strdup(name);
+	}
+
+	return (char *)NULL;
 }
 
 char *
@@ -12887,6 +13021,60 @@ get_path_env(void)
 }
 
 void
+create_def_cscheme(void)
+{
+	if (!COLORS_DIR)
+		return;
+
+	char *cscheme_file = (char *)xnmalloc(
+						  strlen(COLORS_DIR) + 13,
+						  sizeof(char));
+
+	sprintf(cscheme_file, "%s/default.cfm", COLORS_DIR);
+
+	/* If the file already exists, do nothing */
+	struct stat attr;
+
+	if (stat(cscheme_file, &attr) != -1) {
+		free(cscheme_file);
+		return;
+	}
+
+	FILE *fp = fopen(cscheme_file, "w+");
+
+	if (!fp) {
+		_err('w', PRINT_PROMPT, "%s: Error creating default color "
+		"scheme file\n", PROGRAM_NAME);
+		free(cscheme_file);
+		return;
+	}
+
+	fprintf(fp, "# CliFM default color scheme\n\n\
+# FiletypeColors defines the color used for filetypes when listing files, \n\
+# just as InterfaceColors defines colors for CliFM interface. Both make\n\
+# use of the same format used by the LS_COLORS environment variable. Thus,\n\
+# \"di=01;34\" means that (non-empty) directories will be listed in bold blue.\n\
+# Color codes are traditional ANSI escape sequences less the escape char and\n\
+# the final 'm'. 8 bit, 256 colors, and RGB colors are supported.\n\
+# For more information consult the manpage.\n\n"
+
+"FiletypeColors=\"%s\"\n\n"
+
+"InterfaceColors=\"%s\"\n\n"
+
+"# Same as FiletypeColors, but for file extensions. The format is always\n\
+# *.EXT=COLOR\n"
+"ExtColors=\"%s\"\n",
+			DEF_FILE_COLORS, DEF_IFACE_COLORS, DEF_EXT_COLORS);
+
+	fclose(fp);
+
+	free(cscheme_file);
+
+	return;
+}
+
+void
 init_config(void)
 /* Set up CliFM directories and config files. Load the user's 
  * configuration from clifmrc */
@@ -12994,6 +13182,9 @@ init_config(void)
 
 		DIRHIST_FILE = (char *)xcalloc(config_len + 9, sizeof(char));
 		sprintf(DIRHIST_FILE, "%s/dirhist", CONFIG_DIR);
+
+		COLORS_DIR = (char *)xnmalloc(config_len + 14, sizeof(char));
+		sprintf(COLORS_DIR, "%s/colors", CONFIG_DIR);
 
 		if (!alt_bm_file) {
 			BM_FILE = (char *)xcalloc(config_len + 15, sizeof(char));
@@ -13103,6 +13294,20 @@ init_config(void)
 				 "disabled. Program messages won't be persistent. "
 				 "Using default options\n"), PROGRAM_NAME, CONFIG_DIR);
 		}
+
+		/* #### CHECK THE COLORS DIR #### */
+		if (config_ok && stat(COLORS_DIR, &file_attrib) == -1) {
+
+			char *cmd[] = { "mkdir", COLORS_DIR, NULL };
+
+			if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS) {
+				_err('w', PRINT_PROMPT, _("%s: mkdir: Error "
+					 "creating colors directory. Using the default "
+					 "color scheme\n"), PROGRAM_NAME);
+			}
+		}
+
+		create_def_cscheme();
 
 		/* #### CHECK THE SCRIPTS DIR #### */
 		if (config_ok && stat(SCRIPTS_DIR, &file_attrib) == -1) {
@@ -13241,8 +13446,6 @@ init_config(void)
 				/* #### READ THE CONFIG FILE ##### */
 		if (config_ok) {
 
-			set_colors();
-
 			FILE *config_fp;
 			config_fp = fopen(CONFIG_FILE, "r");
 
@@ -13281,14 +13484,37 @@ init_config(void)
 							splash_screen = 0;
 					}
 
+					else if (!usr_cscheme && *line == 'C'
+					&& strncmp(line, "ColorScheme=", 12) == 0) {
+
+						char *opt_str = (char *)NULL;
+						opt_str = strchr(line, '=');
+
+						if (!opt_str)
+							continue;
+
+						if (!*(opt_str++))
+							continue;
+
+						size_t len = strlen(opt_str);
+						if (opt_str[len - 1] == '\n')
+							opt_str[len - 1] = 0x00;
+
+						usr_cscheme = (char *)xnmalloc(len + 1,
+												 sizeof(char));
+						strcpy(usr_cscheme, opt_str);
+					}
+
 					else if (xargs.light == UNSET && *line == 'L'
 					&& strncmp(line, "LightMode=", 10) == 0) {
 						char opt_str[MAX_BOOL] = "";
 						ret = sscanf(line, "LightMode=%5s\n", opt_str);
 						if (ret == -1)
 							continue;
+
 						if (strncmp(opt_str, "true", 4) == 0)
 							light_mode = 1;
+
 						else if (strncmp(opt_str, "false", 5) == 0)
 							light_mode = 0;
 					}
@@ -13301,8 +13527,10 @@ init_config(void)
 									 opt_str);
 						if (ret == -1)
 							continue;
+
 						if (strncmp(opt_str, "true", 4) == 0)
 							expand_bookmarks = 1;
+
 						else if (strncmp(opt_str, "false", 5) == 0)
 							expand_bookmarks = 0;
 					}
@@ -13315,16 +13543,20 @@ init_config(void)
 									 opt_str);
 						if (ret == -1)
 							continue;
+
 						if (strncmp(opt_str, "true", 4) == 0)
 							restore_last_path = 1;
+
 						else if (strncmp(opt_str, "false", 5) == 0)
 							restore_last_path = 0;
 					}
 
 					else if (!opener && *line == 'O'
 					&& strncmp(line, "Opener=", 7) == 0) {
+
 						char *opt_str = (char *)NULL;
 						opt_str = straft(line, '=');
+
 						if (!opt_str)
 							continue;
 
@@ -13812,7 +14044,12 @@ init_config(void)
 			/* If some option was not set, neither via command line nor
 			 * via the config file, or if this latter could not be read
 			 * for any reason, set the defaults */
-			/* -1 means not set */
+
+			if (!usr_cscheme) {
+				usr_cscheme = (char *)xnmalloc(8, sizeof(char));
+				strcpy(usr_cscheme, "default");
+			}
+
 			if (xargs.rl_vi_mode == 1) rl_vi_editing_mode(1, 0);
 			if (expand_bookmarks == UNSET)
 				expand_bookmarks = DEF_EXPAND_BOOKMARKS;
@@ -14254,7 +14491,7 @@ external_arguments(int argc, char **argv)
 	xargs.files_counter = xargs.welcome_message = UNSET;
 	xargs.clear_screen = xargs.bk_files = xargs.logs = UNSET;
 	xargs.max_path = xargs.bm_file = xargs.expand_bookmarks = UNSET;
-	xargs.list_and_quit = xargs.color_scheme = UNSET;
+	xargs.list_and_quit = UNSET;
 
 	int optc;
 	/* Variables to store arguments to options (-c, -p and -P) */
@@ -14389,10 +14626,9 @@ external_arguments(int argc, char **argv)
 		break;
 
 		case 21: {
-			if (!is_number(optarg)) break;
-			int opt_int = atoi(optarg);
-			if (opt_int >= 0 && opt_int <= 2)
-				xargs.color_scheme = opt_int;
+			usr_cscheme = (char *)xnmalloc(strlen(optarg) + 1,
+									sizeof(char *));
+			strcpy(usr_cscheme, optarg);
 		}
 		break;
 
@@ -16963,6 +17199,12 @@ list_dir(void)
 	if (disk_usage)
 		print_disk_usage();
 
+	/* If changing color scheme, inform the user about the current
+	 * color scheme */
+	if (switch_cscheme)
+		printf("color scheme %s->%s %s\n", mi_c, NC,
+			   cur_cscheme ? cur_cscheme : "?");
+
 	/* If changing sorting method, inform the user about the current
 	 * method */
 	if (sort_switch)
@@ -17842,6 +18084,157 @@ unpin_dir(void)
 	return EXIT_SUCCESS;
 }
 
+void
+free_colors(void)
+{
+	/* Free and reset whatever value was loaded */
+	memset(bm_c, 0x00, MAX_COLOR);
+	memset(dl_c, 0x00, MAX_COLOR);
+	memset(el_c, 0x00, MAX_COLOR);
+	memset(mi_c, 0x00, MAX_COLOR);
+	memset(tx_c, 0x00, MAX_COLOR);
+	memset(df_c, 0x00, MAX_COLOR);
+	memset(dc_c, 0x00, MAX_COLOR);
+	memset(wc_c, 0x00, MAX_COLOR);
+	memset(dh_c, 0x00, MAX_COLOR);
+	memset(li_c, 0x00, MAX_COLOR + 2);
+	memset(ti_c, 0x00, MAX_COLOR + 2);
+	memset(em_c, 0x00, MAX_COLOR + 2);
+	memset(wm_c, 0x00, MAX_COLOR + 2);
+	memset(nm_c, 0x00, MAX_COLOR + 2);
+	memset(si_c, 0x00, MAX_COLOR + 2);
+	memset(nd_c, 0x00, MAX_COLOR);
+	memset(nf_c, 0x00, MAX_COLOR);
+	memset(di_c, 0x00, MAX_COLOR);
+	memset(ed_c, 0x00, MAX_COLOR);
+	memset(ne_c, 0x00, MAX_COLOR);
+	memset(ex_c, 0x00, MAX_COLOR);
+	memset(ee_c, 0x00, MAX_COLOR);
+	memset(bd_c, 0x00, MAX_COLOR);
+	memset(ln_c, 0x00, MAX_COLOR);
+	memset(mh_c, 0x00, MAX_COLOR);
+	memset(or_c, 0x00, MAX_COLOR);
+	memset(so_c, 0x00, MAX_COLOR);
+	memset(pi_c, 0x00, MAX_COLOR);
+	memset(cd_c, 0x00, MAX_COLOR);
+	memset(fi_c, 0x00, MAX_COLOR);
+	memset(ef_c, 0x00, MAX_COLOR);
+	memset(su_c, 0x00, MAX_COLOR);
+	memset(sg_c, 0x00, MAX_COLOR);
+	memset(ca_c, 0x00, MAX_COLOR);
+	memset(st_c, 0x00, MAX_COLOR);
+	memset(tw_c, 0x00, MAX_COLOR);
+	memset(ow_c, 0x00, MAX_COLOR);
+	memset(no_c, 0x00, MAX_COLOR);
+	memset(uf_c, 0x00, MAX_COLOR);
+
+	return;
+}
+
+int
+cschemes_function(char **args)
+{
+	if (xargs.stealth_mode == 1) {
+		fprintf(stderr, _("%s: The color schemes function is "
+				"disabled in stealth mode\nTIP: To change the current "
+				"color scheme use the following environment "
+				"variables: CLIFM_FILE_COLORS, CLIFM_IFACE_COLORS, "
+				"and CLIFM_EXT_COLORS\n"), PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	if (!args)
+		return EXIT_FAILURE;
+
+	if (!args[1]) {
+
+		if (!cschemes_n) {
+			printf("%s: No color schemes found\n", PROGRAM_NAME);
+			return EXIT_SUCCESS;
+		}
+
+		size_t i;
+		for (i = 0; color_schemes[i]; i++) {
+			if (cur_cscheme == color_schemes[i])
+				printf("%s%s%s\n", mi_c, color_schemes[i], NC);
+			else
+				printf("%s\n", color_schemes[i]);
+		}
+
+		return EXIT_SUCCESS;
+	}
+
+	if (*args[1] == '-' && strcmp(args[1], "--help") == 0) {
+		puts(_("Usage: cs, colorschemes [edit] [COLORSCHEME]"));
+		return EXIT_SUCCESS;
+	}
+
+	if (*args[1] == 'e' && (!args[1][1]
+	|| strcmp(args[1], "edit") == 0)) {
+		char file[PATH_MAX] = "";
+		sprintf(file, "%s/%s.cfm", COLORS_DIR, cur_cscheme);
+
+		struct stat attr;
+		stat(file, &attr);
+		time_t mtime_bfr = attr.st_mtime;
+
+		char *cmd[] = { "mm", file, NULL };
+
+		int ret = mime_open(cmd);
+
+		if (ret != EXIT_FAILURE) {
+
+			stat(file, &attr);
+
+			if (mtime_bfr != attr.st_mtime) {
+				free_colors();
+				set_colors(cur_cscheme, 0);
+
+				if (cd_lists_on_the_fly) {
+					free_dirlist();
+					list_dir();
+				}
+			}
+		}
+
+		return ret;
+		
+	}
+
+	if (*args[1] == 'n' && (!args[1][1]
+	|| strcmp(args[1], "name") == 0)) {
+		printf("%s: current color scheme: %s\n", PROGRAM_NAME,
+			   cur_cscheme ? cur_cscheme : "?");
+		return EXIT_SUCCESS;
+	}
+
+	size_t i;
+	for (i = 0; color_schemes[i]; i++) {
+		if (strcmp(args[1], color_schemes[i]) == 0) {
+
+			free_colors();
+			set_colors(args[1], 0);
+
+			cur_cscheme = color_schemes[i];
+
+			switch_cscheme = 1;
+
+			if (cd_lists_on_the_fly) {
+				free_dirlist();
+				list_dir();
+			}
+
+			switch_cscheme = 0;
+
+			return EXIT_SUCCESS;
+		}
+	}
+
+	fprintf(stderr, _("%s: No such color scheme\n"), PROGRAM_NAME);
+
+	return EXIT_FAILURE;
+}
+
 int
 exec_cmd(char **comm)
 /* Take the command entered by the user, already splitted into substrings
@@ -18348,6 +18741,12 @@ exec_cmd(char **comm)
 	/* ##################################################
 	 * #			     MINOR FUNCTIONS 				#
 	 * ##################################################*/
+
+	else if (*comm[0] == 'c' && ((comm[0][1] == 's' && !comm[0][2])
+	|| strcmp(comm[0], "colorschemes") == 0)) {
+		exit_code = cschemes_function(comm);
+		return exit_code;
+	}
 
 	else if (*comm[0] == 'k' && ((comm[0][1] == 'b' && !comm[0][2])
 	|| strcmp(comm[0], "keybinds") == 0)) {
@@ -23327,8 +23726,6 @@ help_function (void)
 \n     --restore-last-path\t save last visited directory to be \
 \n				restored in the next session\
 \n     --no-tips\t\t\t disable startup tips\
-\n     --color-scheme=NUM\t\t set NUM as color scheme. NUM could\
-\n				be: 0 (default), 1 (green), and 2(mono)\
 \n     --disk-usage\t\t show disk usage (free/total) for the\
 \n				filesystem to which the current directory \
 \n				belongs\
@@ -23336,6 +23733,7 @@ help_function (void)
 \n				corresponding bookmark paths. TAB \
 \n				completion for bookmark names is also \
 \n				available\
+\n     --color-scheme=NAME\t use color scheme NAME\
 \n     --no-dir-indicator\t\t do not add / indicator to directories \
 \n				when running in light mode\
 \n     --classify=NUM\t\t specify whether to classify files or not \
@@ -23394,6 +23792,7 @@ help_function (void)
  mp, mountpoints\n\
  v, paste [sel] [DESTINY]\n\
  pf, prof, profile [ls, list] [set, add, del PROFILE]\n\
+ cs, colorscheme [edit] [COLORSCHEME]\n\
  br, bulk ELN/FILE ...\n\
  ac, ad ELN/FILE ...\n\
  x, X [ELN/DIR]\n\
@@ -23473,6 +23872,7 @@ help_function (void)
  F1: Manual page\n\
  F2: Commands help\n\
  F3: Keybindings help\n\
+ F8: Open the current color scheme file\n\
  F9: Open the keybindings file\n\
  F10: Open the configuration file\n\
  F11: Open the bookmarks file\n\
