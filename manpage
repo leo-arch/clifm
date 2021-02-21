@@ -69,7 +69,8 @@ List of CliFM features:
   27) Symbolic links editor
   28) Regular expressions and filetype filter support for both search and selection of files
   29) Command substitution for internal commands
-  30) Privacy oriented
+  30) Theming support via color schemes
+  31) Privacy oriented
 
 .SH RATIONALE
 When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the Linux built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There is no two without three".
@@ -172,9 +173,6 @@ save last visited directory to be restored in the next session
 .TP
 .B \-\-no\-tips
 disable startup tips
-.TP
-.B \-\-color\-scheme=NUM
-set NUM as color scheme. NUM could be: 0 (default), 1 (green), and 2 (mono).
 .TP
 .B \-\-disk\-usage
 show disk usage (free/total) for the filesystem to which the current directory belongs
@@ -644,14 +642,13 @@ NOTE: C stands for Control, S for Shift, and M for the Meta key (the Alt key in 
 .SH COLOR CODES
 .TP
 Colors are specified using the same format used by \fBdircolors(1)\fR and the LS_COLORS environment variable, namely, a colon separated list of codes with this general format: filetype=color. This is the list of filetype codes:
-
+.sp
  di = directory
  ed = empty directory
  nd = directory with no read permission
  ne = empty directory with no read permission
  fi = regular file
  ef = empty regular file
- bm = bookmarked directory in bookmarks screen
  nf = file with no access permission
  ln = symlink
  mh = multi-hardlink file
@@ -670,16 +667,35 @@ Colors are specified using the same format used by \fBdircolors(1)\fR and the LS
  ca = file with capabilites
  no = unknown filetype
  uf = unaccesible files (\fBstat(3)\fR error)
+
 .TP
-Color codes are just traditional ANSI color codes less the escape character and the final 'm'. Thus, for instance, if you want non\-empty directories to be bold blue, add this to the \fIFiletypeColors\fR line in the configuration file: di=01;34
+The following codes are used for different interface elements:
+.sp
+ bm = bookmarked directory in bookmarks screen
+ el = ELN color
+ mi = misc indicators color (disk usage, sort method, bulk rename)
+ tx = command line color
+ df = default color
+ dc = files counter color
+ wc = welcome message color
+ dh = directory history index color
+ dl = dividing line color
+ li = selected files indicator color
+ ti = trash indicator color
+ em = error message indicator color
+ wm = warning message indicator  color
+ nm = notice message indicator color
+ si = stealth mode indicator color
+.TP
+Color codes are just traditional ANSI color codes less the escape character and the final 'm'. Thus, for instance, if you want non\-empty directories to be bold blue, add this to the \fIFiletypeColors\fR line in the configuration file: di=01;34. If you want ELN's to be red, add this code to the \fIInterfaceColors\fR line: el=00;31
 .TP
 Color codes can be used for file extensions as well using this format: *.ext=color. For example, to print C source files in bold green, add this to the \fIExtColors\fR line in the configuration file: *.c=01;32
 .TP
-Though by default CliFM uses only 8 colors, you can use 256 and RGB colors as well. Example: fi=04;38;02;245;76;00 will print regular files underlined and using a bold orange RGB or 24\-bit true color. In this case, just make sure to use a terminal supporting RGB colors.
+Though by default CliFM uses only 8 colors, you can use 256 and RGB colors as well. Example: fi=04;38;2;245;76;00;48;2;00;00;255 will print regular files underlined and using a bold orange RGB color on a blue background. In this case, just make sure to use a terminal supporting RGB colors.
 .TP
-Filetype and file extension colors are defined in the configuration file and can be modified as you wish. ELN's and command line text colors are defined using these same color codes.
+Filetype and file extension colors, just as interface colors, are defined in the configuration file and can be modified as you wish.
 .TP
-To see a colored list of the currently used color codes run \fIcc\fR or \fIcolors\fR in CliFM.
+To see a colored list of the currently used file color codes run \fIcc\fR or \fIcolors\fR in CliFM.
 
 .SH THE PROMPT
 .TP
