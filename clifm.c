@@ -902,7 +902,6 @@ char di_c[MAX_COLOR] = "", /* Directory */
 	bm_c[MAX_COLOR] = "", /* Bookmarked directory */
 	el_c[MAX_COLOR] = "", /* ELN color */
 	mi_c[MAX_COLOR] = "", /* Misc indicators color */
-	tx_c[MAX_COLOR] = "", /* Text color */
 	df_c[MAX_COLOR] = "", /* Default color */
 	dc_c[MAX_COLOR] = "", /* Files counter color */
 	wc_c[MAX_COLOR] = "", /* Welcome message color */
@@ -911,6 +910,7 @@ char di_c[MAX_COLOR] = "", /* Directory */
 
 	/* Used in command line, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */
+	tx_c[MAX_COLOR + 2] = "", /* Text color */
 	li_c[MAX_COLOR + 2] = "", /* Sel indicator color */
 	ti_c[MAX_COLOR + 2] = "", /* Trash indicator color */
 	em_c[MAX_COLOR + 2] = "", /* Error msg color */
