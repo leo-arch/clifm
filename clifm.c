@@ -203,14 +203,10 @@ static int flags;
 /* \x1b: hex value for escape char (alternative: ^[), dec == 27
  * \033: octal value for escape char
  * \e is non-standard */
-#define blue "\x1b[1;34m"
-#define green "\x1b[1;32m"
 #define gray "\x1b[1;30m"
 #define white "\x1b[1;37m"
-#define red "\x1b[1;31m"
 #define cyan "\x1b[1;36m"
 #define d_cyan "\x1b[0;36m"
-#define NC "\x1b[0m"
 #define bold "\x1b[1m"
 
 #define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
@@ -869,9 +865,10 @@ const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
  * (Select Graphic Rendition) parameter, and, of course, the terminating
  * null byte.
 
- * To store all the 29 color variables I use, with 46 bytes each, I need
- * a total of 1,3Kb. It's not much but it could be less if I'd use
- * dynamically allocated arrays for them */
+ * To store all the 39 color variables I use, with 46 bytes each, I need
+ * a total of 1,8Kb. It's not much but it could be less if I'd use
+ * dynamically allocated arrays for them (which, on the other side,
+ * would make the whole thing slower and more tedious) */
 
 /* Colors (filetype and interface) */
 char di_c[MAX_COLOR] = "", /* Directory */
@@ -881,12 +878,12 @@ char di_c[MAX_COLOR] = "", /* Directory */
 	fi_c[MAX_COLOR] = "", /* Reg file */
 	ef_c[MAX_COLOR] = "", /* Empty reg file */
 	nf_c[MAX_COLOR] = "", /* No read file */
-	ln_c[MAX_COLOR] = "",	/* Symlink */
+	ln_c[MAX_COLOR] = "", /* Symlink */
 	or_c[MAX_COLOR] = "", /* Broken symlink */
 	pi_c[MAX_COLOR] = "", /* FIFO, pipe */
 	so_c[MAX_COLOR] = "", /* Socket */
 	bd_c[MAX_COLOR] = "", /* Block device */
-	cd_c[MAX_COLOR] = "",	/* Char device */
+	cd_c[MAX_COLOR] = "", /* Char device */
 	su_c[MAX_COLOR] = "", /* SUID file */
 	sg_c[MAX_COLOR] = "", /* SGID file */
 	tw_c[MAX_COLOR] = "", /* Sticky other writable */
@@ -908,7 +905,7 @@ char di_c[MAX_COLOR] = "", /* Directory */
 	dh_c[MAX_COLOR] = "", /* Dirhist index color */
 	dl_c[MAX_COLOR] = "", /* Dividing line index color */
 
-	/* Used in command line, so that \001 and \002 needs to
+	/* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */
 	tx_c[MAX_COLOR + 2] = "", /* Text color */
 	li_c[MAX_COLOR + 2] = "", /* Sel indicator color */
@@ -1381,7 +1378,7 @@ print_div_line(void)
 	for (i = term_cols; i--;)
 		putchar(div_line_char);
 
-	printf("%s%s", NC, df_c);
+	printf("%s", df_c);
 
 	fflush(stdout);
 }
@@ -1406,7 +1403,7 @@ print_disk_usage(void)
 
 	char *size = get_size_unit((off_t)(stat.f_blocks * stat.f_frsize));
 
-	printf("%s->%s %s/%s\n", mi_c, NC, free_space, size);
+	printf("%s->%s %s/%s\n", mi_c, df_c, free_space, size);
 
 	free(free_space);
 	free(size);
@@ -1985,9 +1982,9 @@ edit_link(char *link)
 
 	if (!real_path)
 		printf(_("%s%s%s currently pointing to nowhere (broken link)\n"),
-			   or_c, link, NC);
+			   or_c, link, df_c);
 	else {
-		printf(_("%s%s%s currently pointing to "), ln_c, link, NC);
+		printf(_("%s%s%s currently pointing to "), ln_c, link, df_c);
 		colors_list(real_path, NO_ELN, NO_PAD, PRINT_NEWLINE);
 		free(real_path);
 		real_path = (char *)NULL;
@@ -2001,7 +1998,7 @@ edit_link(char *link)
 	autocd = auto_open = 1;	
 
 	while (!new_path) {
-		new_path = rl_no_hist("New path ('q' to quit): ");
+		new_path = rl_no_hist(_("New path ('q' to quit): "));
 
 		if (!new_path)
 			continue;
@@ -2108,7 +2105,7 @@ edit_link(char *link)
 	real_path = realpath(link, NULL);
 
 	printf(_("%s%s%s successfully relinked to "), real_path ? ln_c
-		   : or_c, link, NC);
+		   : or_c, link, df_c);
 	colors_list(new_path, NO_ELN, NO_PAD, PRINT_NEWLINE);
 
 	free(new_path);
@@ -2459,8 +2456,8 @@ handle_iso(char *file)
 	 * test (t) */
 
 	printf(_("%s[e]%sxtract %s[E]%sxtract-to-dir %s[l]%sist "
-		  "%s[t]%stest %s[m]%sount %s[q]%suit\n"), bold, NC, bold,
-		  NC, bold, NC, bold, NC, bold, NC, bold, NC);
+		  "%s[t]%stest %s[m]%sount %s[q]%suit\n"), bold, df_c, bold,
+		  df_c, bold, df_c, bold, df_c, bold, df_c, bold, df_c);
 
 	char *operation = (char *)NULL;
 	char sel_op = 0;
@@ -2855,13 +2852,13 @@ print_tips(int all)
 	if (all) {
 		size_t i;
 		for (i = 0; i < tipsn; i++)
-			printf("%sTIP %zu%s: %s\n", bold, i, NC, TIPS[i]);
+			printf("%sTIP %zu%s: %s\n", bold, i, df_c, TIPS[i]);
 
 		return;
 	}
 
 	srand(time(NULL));
-	printf("%sTIP%s: %s\n", bold, NC, TIPS[rand() % tipsn]);
+	printf("%sTIP%s: %s\n", bold, df_c, TIPS[rand() % tipsn]);
 }
 
 int
@@ -3044,7 +3041,7 @@ zstandard(char *in_file, char *out_file, char mode, char op)
 
 
 	printf(_("%s[e]%sxtract %s[t]%sest %s[i]%snfo %s[q]%suit\n"),
-		   bold, NC, bold, NC, bold, NC, bold, NC);
+		   bold, df_c, bold, df_c, bold, df_c, bold, df_c);
 
 	char *operation = (char *)NULL;
 
@@ -3157,7 +3154,7 @@ archiver(char **args, char mode)
 					   "compression of multiple files into one single "
 					   "compressed file. Files will be compressed rather "
 					   "into multiple compressed files using original "
-					   "filenames\n"), bold, NC);
+					   "filenames\n"), bold, df_c);
 
 				for (i = 1; args[i]; i++) {
 					if (zstandard(args[i], NULL, 'c', 0)
@@ -3288,9 +3285,9 @@ archiver(char **args, char mode)
 		/* Multiple files */
 		if (files_num > 1) {
 
-			printf(_("%sNOTE%s: Using Zstandard\n"), bold, NC);
+			printf(_("%sNOTE%s: Using Zstandard\n"), bold, df_c);
 			printf(_("%s[e]%sxtract %s[t]%sest %s[i]%snfo %s[q]%suit\n"),
-				   bold, NC, bold, NC, bold, NC, bold, NC);
+				   bold, df_c, bold, df_c, bold, df_c, bold, df_c);
 
 			char *operation = (char *)NULL;
 			char sel_op = 0;
@@ -3352,8 +3349,8 @@ archiver(char **args, char mode)
 	 * ################################ */
 
 	printf(_("%s[e]%sxtract %s[E]%sxtract-to-dir %s[l]%sist "
-		  "%s[m]%sount %s[r]%sepack %s[q]%suit\n"), bold, NC, bold,
-		  NC, bold, NC, bold, NC, bold, NC, bold, NC);
+		  "%s[m]%sount %s[r]%sepack %s[q]%suit\n"), bold, df_c, bold,
+		  df_c, bold, df_c, bold, df_c, bold, df_c, bold, df_c);
 
 	char *operation = (char *)NULL;
 	char sel_op = 0;
@@ -3473,7 +3470,7 @@ archiver(char **args, char mode)
 			for (i = 1; args[i]; i++) {
 
 				/* Ask for extraction path */
-				printf(_("%sFile%s: %s\n"), bold, NC, args[i]);
+				printf(_("%sFile%s: %s\n"), bold, df_c, args[i]);
 
 				char *ext_path = (char *)NULL;
 
@@ -3508,7 +3505,7 @@ archiver(char **args, char mode)
 			for (i = 1; args[i]; i++) {
 
 				printf(_("%s%sFile%s: %s\n"), (i > 1) ? "\n" : "",
-					   bold, NC, args[i]);
+					   bold, df_c, args[i]);
 
 				char *cmd[] = { "atool", "-l", args[i], NULL };
 
@@ -3563,7 +3560,7 @@ archiver(char **args, char mode)
 				 * one archive */
 				if (files_num > 1) {
 					printf(_("%s%s%s: Succesfully mounted "
-							"on %s\n"), bold, args[i], NC, mountpoint);
+							"on %s\n"), bold, args[i], df_c, mountpoint);
 					free(mountpoint);
 					continue;
 				}
@@ -3785,7 +3782,7 @@ bulk_rename(char **args)
 			line[line_len - 1] = 0x00;
 
 		if (strcmp(args[i], line) != 0) {
-			printf("%s %s->%s %s\n", args[i], mi_c, NC, line);
+			printf("%s %s->%s %s\n", args[i], mi_c, df_c, line);
 			modified++;
 		}
 
@@ -3884,7 +3881,7 @@ bulk_rename(char **args)
 void
 print_sort_method(void)
 {
-	printf(_("%s->%s Sorted by: "), mi_c, NC);
+	printf(_("%s->%s Sorted by: "), mi_c, df_c);
 
 	switch(sort) {
 		case 0: puts(_("none")); break;
@@ -9103,7 +9100,7 @@ list_mountpoints(void)
 		return EXIT_FAILURE;
 	}
 
-	printf(_("%sMountpoints%s\n\n"), white, NC);
+	printf(_("%sMountpoints%s\n\n"), bold, df_c);
 
 	char **mountpoints = (char **)NULL;
 	size_t mp_n = 0; 
@@ -9133,8 +9130,8 @@ list_mountpoints(void)
 
 				if (counter == 1) { /* 1 == second field */
 					printf("%s%zu%s %s%s%s (%s)\n", el_c, mp_n + 1,
-						   NC, (access(str, R_OK|X_OK) == 0)
-						   ? blue : red, str, df_c,
+						   df_c, (access(str, R_OK|X_OK) == 0)
+						   ? di_c : nd_c, str, df_c,
 						   device);
 					/* Store the second field (mountpoint) into an
 					 * array */
@@ -9781,7 +9778,7 @@ remove_from_trash(void)
 						  : alphasort_insensitive);
 
 	if (files_n) {
-		printf(_("%sTrashed files%s%s\n\n"), white, NC, df_c);
+		printf(_("%sTrashed files%s\n\n"), bold, df_c);
 		for (i = 0; i < (size_t)files_n; i++)
 			colors_list(trash_files[i]->d_name, (int)i + 1, NO_PAD,
 						PRINT_NEWLINE);
@@ -9803,7 +9800,7 @@ remove_from_trash(void)
 	}
 
 	/* Get user input */
-	printf(_("\n%s%sEnter 'q' to quit.\n"), NC, df_c);
+	printf(_("\n%sEnter 'q' to quit.\n"), df_c);
 	char *line = (char *)NULL, **rm_elements = (char **)NULL;
 
 	while (!line)
@@ -10112,7 +10109,7 @@ untrash_function(char **comm)
 	}
 
 	/* List trashed files */
-	printf(_("%sTrashed files%s%s\n\n"), white, NC, df_c);
+	printf(_("%sTrashed files%s\n\n"), bold, df_c);
 	size_t i;
 	for (i = 0; i < (size_t)trash_files_n; i++)
 		colors_list(trash_files[i]->d_name, (int)i + 1, NO_PAD,
@@ -10126,7 +10123,7 @@ untrash_function(char **comm)
 	}
 
 	/* Get user input */
-	printf(_("\n%s%sEnter 'q' to quit.\n"), NC, df_c);
+	printf(_("\n%sEnter 'q' to quit.\n"), df_c);
 	int undel_n = 0;
 	char *line = (char *)NULL, **undel_elements = (char **)NULL;
 	while (!line)
@@ -11152,7 +11149,7 @@ rl_previous_profile(int count, int key)
 	CLEAR;
 
 	if (profile_set(profile_names[prev_prof]) == EXIT_SUCCESS) {
-		printf("%s->%s Switched to profile '%s'\n", green, NC,
+		printf("%s->%s Switched to profile '%s'\n", mi_c, df_c,
 			   profile_names[prev_prof]);
 		char *input = prompt();
 		free(input);
@@ -11198,7 +11195,7 @@ rl_next_profile(int count, int key)
 	CLEAR;
 
 	if (profile_set(profile_names[next_prof]) == EXIT_SUCCESS) {
-		printf("%s->%s Switched to profile '%s'\n", green, NC,
+		printf("%s->%s Switched to profile '%s'\n", mi_c, df_c,
 			   profile_names[next_prof]);
 		char *input = prompt();
 		free(input);
@@ -11928,7 +11925,7 @@ free_stuff(void)
 	free(COLORS_DIR);
 
 	/* Restore the foreground color of the running terminal */
-	fputs(NC, stdout);
+	fputs("\x1b[0m", stdout);
 }
 
 char *
@@ -15924,8 +15921,8 @@ prompt(void)
 
 	if (welcome_message) {
 		printf(_("%sCliFM, the anti-eye-candy, KISS file manager%s\n"
-			   "%sEnter '?' or press F1-3 for instructions.%s\n"), 
-			   wc_c, NC, df_c, NC);
+			   "Enter '?' or press F1-3 for instructions.\n"), 
+			   wc_c, df_c);
 		welcome_message = 0;
 	}
 
@@ -16219,8 +16216,8 @@ colors_list(const char *entry, const int i, const int pad,
 	ret = lstat(entry, &file_attrib);
 
 	if (ret == -1) {
-		fprintf(stderr, "%s%s%s%s%-*s%s%s", el_c, index, NC,
-				uf_c, pad, entry, NC, new_line ? "\n" : "");
+		fprintf(stderr, "%s%s%s%s%-*s%s%s", el_c, index, df_c,
+				uf_c, pad, entry, df_c, new_line ? "\n" : "");
 		free(index);
 		return;
 	}
@@ -16233,20 +16230,20 @@ colors_list(const char *entry, const int i, const int pad,
 	case S_IFREG:
 /*		if (!(file_attrib.st_mode & S_IRUSR)) */
 		if (access(entry, R_OK) == -1)
-			printf("%s%s%s%s%s%s%s%-*s", el_c, index, NC, nf_c,
-				   entry, NC, new_line ? "\n" : "", pad, "");
+			printf("%s%s%s%s%s%s%s%-*s", el_c, index, df_c, nf_c,
+				   entry, df_c, new_line ? "\n" : "", pad, "");
 		else if (file_attrib.st_mode & S_ISUID) /* set uid file */
-			printf("%s%s%s%s%s%s%s%-*s", el_c, index, NC, su_c,
-				   entry, NC, new_line ? "\n" : "", pad, "");
+			printf("%s%s%s%s%s%s%s%-*s", el_c, index, df_c, su_c,
+				   entry, df_c, new_line ? "\n" : "", pad, "");
 		else if (file_attrib.st_mode & S_ISGID) /* set gid file */
-			printf("%s%s%s%s%s%s%s%-*s", el_c, index, NC, sg_c,
-				   entry, NC, new_line ? "\n" : "", pad, "");
+			printf("%s%s%s%s%s%s%s%-*s", el_c, index, df_c, sg_c,
+				   entry, df_c, new_line ? "\n" : "", pad, "");
 		else {
 			#ifdef _LINUX_CAP
 			cap = cap_get_file(entry);
 			if (cap) {
-				printf("%s%s%s%s%s%s%s%-*s", el_c, index, NC, ca_c,
-					   entry, NC, new_line ? "\n" : "", pad, "");
+				printf("%s%s%s%s%s%s%s%-*s", el_c, index, df_c, ca_c,
+					   entry, df_c, new_line ? "\n" : "", pad, "");
 				cap_free(cap);
 			}
 			else if (file_attrib.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH)) {
@@ -16254,21 +16251,21 @@ colors_list(const char *entry, const int i, const int pad,
 			if (file_attrib.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH)) {
 			#endif
 				if (file_attrib.st_size == 0)
-					printf("%s%s%s%s%s%s%s%-*s", el_c, index, NC,
-						   ee_c, entry, NC, new_line ? "\n" : "",
+					printf("%s%s%s%s%s%s%s%-*s", el_c, index, df_c,
+						   ee_c, entry, df_c, new_line ? "\n" : "",
 						   pad, "");
 				else 
-					printf("%s%s%s%s%s%s%s%-*s", el_c, index, NC,
-						   ex_c, entry, NC, new_line ? "\n" : "",
+					printf("%s%s%s%s%s%s%s%-*s", el_c, index, df_c,
+						   ex_c, entry, df_c, new_line ? "\n" : "",
 						   pad, "");
 			}
 			else if (file_attrib.st_size == 0)
-				printf("%s%s%s%s%s%s%s%-*s", el_c, index, NC,
-					   ef_c, entry, NC, new_line ? "\n" : "",
+				printf("%s%s%s%s%s%s%s%-*s", el_c, index, df_c,
+					   ef_c, entry, df_c, new_line ? "\n" : "",
 					   pad, "");
 			else if (file_attrib.st_nlink > 1)
-				printf("%s%s%s%s%s%s%s%-*s", el_c, index, NC,
-					   mh_c, entry, NC, new_line ? "\n" : "",
+				printf("%s%s%s%s%s%s%s%-*s", el_c, index, df_c,
+					   mh_c, entry, df_c, new_line ? "\n" : "",
 					   pad, "");
 			else {
 				char *ext = (strrchr(entry, '.'));
@@ -16276,20 +16273,20 @@ colors_list(const char *entry, const int i, const int pad,
 					char *extcolor = get_ext_color(ext);
 					if (extcolor) {
 						printf("%s%s%s\x1b[%sm%s%s%s%-*s", el_c,
-							   index, NC, extcolor, entry, NC,
+							   index, df_c, extcolor, entry, df_c,
 							   new_line ? "\n" : "", pad, "");
 						extcolor = (char *)NULL;
 					}
 					else
 						printf("%s%s%s%s%s%s%s%-*s", el_c, index,
-							   NC, fi_c, entry, NC, new_line ? "\n"
+							   df_c, fi_c, entry, df_c, new_line ? "\n"
 							   : "", pad, "");
 
 					ext = (char *)NULL;
 				}
 				else
-					printf("%s%s%s%s%s%s%s%-*s", el_c, index, NC,
-						   fi_c, entry, NC, new_line ? "\n" : "",
+					printf("%s%s%s%s%s%s%s%-*s", el_c, index, df_c,
+						   fi_c, entry, df_c, new_line ? "\n" : "",
 						   pad, "");
 			}
 		}
@@ -16297,8 +16294,8 @@ colors_list(const char *entry, const int i, const int pad,
 
 	case S_IFDIR:
 		if (access(entry, R_OK|X_OK) != 0)
-			printf("%s%s%s%s%s%s%s%-*s", el_c, index, NC, nd_c, 
-				   entry, NC, new_line ? "\n" : "", pad, "");
+			printf("%s%s%s%s%s%s%s%-*s", el_c, index, df_c, nd_c, 
+				   entry, df_c, new_line ? "\n" : "", pad, "");
 		else {
 			int is_oth_w = 0;
 			if (file_attrib.st_mode & S_IWOTH) is_oth_w = 1;
@@ -16307,17 +16304,17 @@ colors_list(const char *entry, const int i, const int pad,
 				empty, it contains only "." and ".." (2 elements). If
 				not mounted (ex: /media/usb) the result will be zero. */
 				/* If sticky bit dir: green bg. */
-				printf("%s%s%s%s%s%s%s%-*s", el_c, index, NC, 
+				printf("%s%s%s%s%s%s%s%-*s", el_c, index, df_c, 
 					   (file_attrib.st_mode & S_ISVTX) ? ((is_oth_w) ? 
 					   tw_c : st_c) : ((is_oth_w) ? 
-					   ow_c : ed_c), entry, NC, 
+					   ow_c : ed_c), entry, df_c, 
 					   new_line ? "\n" : "", pad, "");
 			}
 			else
-				printf("%s%s%s%s%s%s%s%-*s", el_c, index, NC,
+				printf("%s%s%s%s%s%s%s%-*s", el_c, index, df_c,
 					   (file_attrib.st_mode & S_ISVTX) ? ((is_oth_w) ? 
 					   tw_c : st_c) : ((is_oth_w) ? 
-					   ow_c : di_c), entry, NC, 
+					   ow_c : di_c), entry, df_c, 
 					   new_line ? "\n" : "", pad, "");
 	}
 		break;
@@ -16325,33 +16322,33 @@ colors_list(const char *entry, const int i, const int pad,
 	case S_IFLNK:
 		linkname = realpath(entry, (char *)NULL);
 		if (linkname) {
-			printf("%s%s%s%s%s%s%s%-*s", el_c, index, NC, ln_c, 
-				   entry, NC, new_line ? "\n" : "", pad, "");
+			printf("%s%s%s%s%s%s%s%-*s", el_c, index, df_c, ln_c, 
+				   entry, df_c, new_line ? "\n" : "", pad, "");
 			free(linkname);
 		}
-		else printf("%s%s%s%s%s%s%s%-*s", el_c, index, NC, or_c, 
-					entry, NC, new_line ? "\n" : "", pad, "");
+		else printf("%s%s%s%s%s%s%s%-*s", el_c, index, df_c, or_c, 
+					entry, df_c, new_line ? "\n" : "", pad, "");
 		break;
 
-	case S_IFIFO: printf("%s%s%s%s%s%s%s%-*s", el_c, index, NC,
-						 pi_c, entry, NC, new_line ? "\n" : "",
+	case S_IFIFO: printf("%s%s%s%s%s%s%s%-*s", el_c, index, df_c,
+						 pi_c, entry, df_c, new_line ? "\n" : "",
 						 pad, ""); break;
 
-	case S_IFBLK: printf("%s%s%s%s%s%s%s%-*s", el_c, index, NC,
-						 bd_c, entry, NC, new_line ? "\n" : "",
+	case S_IFBLK: printf("%s%s%s%s%s%s%s%-*s", el_c, index, df_c,
+						 bd_c, entry, df_c, new_line ? "\n" : "",
 						 pad, ""); break;
 
-	case S_IFCHR: printf("%s%s%s%s%s%s%s%-*s", el_c, index, NC,
-						 cd_c, entry, NC, new_line ? "\n" : "",
+	case S_IFCHR: printf("%s%s%s%s%s%s%s%-*s", el_c, index, df_c,
+						 cd_c, entry, df_c, new_line ? "\n" : "",
 						 pad, ""); break;
 
-	case S_IFSOCK: printf("%s%s%s%s%s%s%s%-*s", el_c, index, NC,
-						  so_c, entry, NC, new_line ? "\n" : "",
+	case S_IFSOCK: printf("%s%s%s%s%s%s%s%-*s", el_c, index, df_c,
+						  so_c, entry, df_c, new_line ? "\n" : "",
 						  pad, ""); break;
 
 	/* In case all of the above conditions are false... */
-	default: printf("%s%s%s%s%s%s%s%-*s", el_c, index, NC, no_c, 
-				    entry, NC, new_line ? "\n" : "", pad, "");
+	default: printf("%s%s%s%s%s%s%s%-*s", el_c, index, df_c, no_c, 
+				    entry, df_c, new_line ? "\n" : "", pad, "");
 	}
 
 	free(index);
@@ -16611,7 +16608,7 @@ list_dir(void)
 	}
 
 	if (files == 0) {
-		printf("%s. ..%s\n", blue, NC);
+		printf("%s. ..%s\n", di_c, df_c);
 		free(file_info);
 		return EXIT_SUCCESS;
 	}
@@ -16826,13 +16823,13 @@ list_dir(void)
 			}
 
 			if (!file_info[i].exists)
-				printf("%s%d%s %s%s%s\n", el_c, i + 1, NC, uf_c,
-					   dirlist[i], NC);
+				printf("%s%d%s %s%s%s\n", el_c, i + 1, df_c, uf_c,
+					   dirlist[i], df_c);
 
 			else {
 				/* Print ELN. The remaining part of the line will be
 				 * printed by get_properties() */
-				printf("%s%d%s ", el_c, i + 1, NC);
+				printf("%s%d%s ", el_c, i + 1, df_c);
 
 				get_properties(dirlist[i], (int)long_view, max,
 							   file_info[i].len);
@@ -16857,7 +16854,7 @@ list_dir(void)
 						printf("%d %s\n", i, old_pwd[i - 1]);
 
 					printf("%d %s%s%s\n", i + 1, dh_c,
-						   old_pwd[i], NC);
+						   old_pwd[i], df_c);
 
 					if (i + 1 < dirhist_total_index && old_pwd[i + 1])
 						printf("%d %s\n", i + 2, old_pwd[i + 1]);
@@ -16946,8 +16943,8 @@ list_dir(void)
 			last_column = 0;
 
 		if (file_info[i].exists == 0)
-				printf("%s%d%s %s%s%s%s", el_c, i + 1, NC, uf_c, 
-					   dirlist[i], NC, (last_column) ? "\n" : "");
+				printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c, uf_c, 
+					   dirlist[i], df_c, (last_column) ? "\n" : "");
 
 		else {
 
@@ -16955,8 +16952,8 @@ list_dir(void)
 
 		case S_IFDIR:
 			if (!file_info[i].ruser) {
-				printf("%s%d%s %s%s%s /%s%s", el_c, i + 1, NC, nd_c, 
-					   dirlist[i], dc_c, NC, (last_column)
+				printf("%s%d%s %s%s%s /%s%s", el_c, i + 1, df_c, nd_c, 
+					   dirlist[i], dc_c, df_c, (last_column)
 					   ? "\n" : "");
 				is_dir = 1;
 			}
@@ -16968,37 +16965,37 @@ list_dir(void)
 				 * will be zero */
 				if (file_info[i].filesn == 2
 				|| file_info[i].filesn == 0) {
-					printf("%s%d%s %s%s%s /%s%s", el_c, i + 1, NC,
+					printf("%s%d%s %s%s%s /%s%s", el_c, i + 1, df_c,
 						 (file_info[i].type & S_ISVTX) ? ((is_oth_w) ? 
 						 tw_c : st_c) : ((is_oth_w) 
 						 ? ow_c : ed_c), dirlist[i], dc_c,
-						 NC, (last_column) ? "\n" : "");
+						 df_c, (last_column) ? "\n" : "");
 					is_dir = 1;
 				}
 				else {
 					if (files_counter) {
 						printf("%s%d%s %s%s%s%s /%zu%s%s", el_c,
-							 i + 1, NC, (file_info[i].type & S_ISVTX)
+							 i + 1, df_c, (file_info[i].type & S_ISVTX)
 							 ? ((is_oth_w) ? tw_c : st_c) : ((is_oth_w) 
-							 ? ow_c : di_c), dirlist[i], NC,
+							 ? ow_c : di_c), dirlist[i], df_c,
 							 dc_c, file_info[i].filesn - 2, 
-							 NC, (last_column) ? "\n" : "");
+							 df_c, (last_column) ? "\n" : "");
 						is_dir = 1;
 					}
 					else {
 						printf("%s%d%s %s%s%s%s", el_c, i + 1, 
-							 NC, (file_info[i].type & S_ISVTX)
+							 df_c, (file_info[i].type & S_ISVTX)
 							 ? ((is_oth_w) ? tw_c : st_c) : ((is_oth_w) 
 							 ? ow_c : di_c), dirlist[i], 
-							 NC, (last_column) ? "\n" : "");
+							 df_c, (last_column) ? "\n" : "");
 					}
 				}
 			}
 			break;
 
 		case S_IFIFO:
-			printf("%s%d%s %s%s%s%s", el_c, i + 1, NC, pi_c, 
-					dirlist[i], NC, (last_column) ? "\n" : "");
+			printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c, pi_c, 
+					dirlist[i], df_c, (last_column) ? "\n" : "");
 			break;
 
 		case S_IFLNK:
@@ -17008,35 +17005,35 @@ list_dir(void)
 						/* Symlink to dir */
 						is_dir = 1;
 						printf("%s%d%s %s%s%s%s /%zu%s%s", el_c,
-							i + 1, NC, ln_c, dirlist[i], NC,
+							i + 1, df_c, ln_c, dirlist[i], df_c,
 							dc_c, file_info[i].filesn -2,
-							NC, (last_column) ? "\n" : "");
+							df_c, (last_column) ? "\n" : "");
 					}
 					else /* Symlink to file */
-						printf("%s%d%s %s%s%s%s", el_c, i + 1, NC,
-								ln_c, dirlist[i], NC, (last_column)
+						printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c,
+								ln_c, dirlist[i], df_c, (last_column)
 								? "\n" : "");
 				}
 				else /* Oops, broken symlink */
-					printf("%s%d%s %s%s%s%s", el_c, i + 1, NC,
-							or_c, dirlist[i], NC, (last_column)
+					printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c,
+							or_c, dirlist[i], df_c, (last_column)
 							? "\n" : "");
 			}
 			break;
 
 		case S_IFBLK:
-				printf("%s%d%s %s%s%s%s", el_c, i + 1, NC, bd_c, 
-					    dirlist[i], NC, (last_column) ? "\n" : "");
+				printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c, bd_c, 
+					    dirlist[i], df_c, (last_column) ? "\n" : "");
 			break;
 
 		case S_IFCHR:
-			printf("%s%d%s %s%s%s%s", el_c, i + 1, NC, cd_c, 
-					dirlist[i], NC, (last_column) ? "\n" : "");
+			printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c, cd_c, 
+					dirlist[i], df_c, (last_column) ? "\n" : "");
 			break;
 
 		case S_IFSOCK:
-			printf("%s%d%s %s%s%s%s", el_c, i + 1, NC, so_c, 
-				    dirlist[i], NC, (last_column) ? "\n" : "");
+			printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c, so_c, 
+				    dirlist[i], df_c, (last_column) ? "\n" : "");
 			break;
 
 		case S_IFREG:
@@ -17044,18 +17041,18 @@ list_dir(void)
 /*			if (!(file_info[i].type & S_IROTH)) */
 			if (access(dirlist[i], F_OK|R_OK) == -1)
 /*			if (faccessat(AT_FDCWD, dirlist[i], R_OK, AT_EACCESS) == -1) */
-				printf("%s%d%s %s%s%s%s", el_c, i + 1, NC, nf_c, 
-						dirlist[i], NC, (last_column) ? "\n" : "");
+				printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c, nf_c, 
+						dirlist[i], df_c, (last_column) ? "\n" : "");
 			else if (file_info[i].type & S_ISUID) /* set uid file */
-				printf("%s%d%s %s%s%s%s", el_c, i + 1, NC, su_c, 
-						dirlist[i], NC, (last_column) ? "\n" : "");
+				printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c, su_c, 
+						dirlist[i], df_c, (last_column) ? "\n" : "");
 			else if (file_info[i].type & S_ISGID) /* set gid file */
-				printf("%s%d%s %s%s%s%s", el_c, i + 1, NC, sg_c, 
-					dirlist[i], NC, (last_column) ? "\n" : "");
+				printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c, sg_c, 
+					dirlist[i], df_c, (last_column) ? "\n" : "");
 			#ifdef _LINUX_CAP
 			else if ((cap = cap_get_file(dirlist[i]))) {
-				printf("%s%d%s %s%s%s%s", el_c, i + 1, NC, ca_c, 
-						dirlist[i], NC, (last_column) ? "\n" : "");
+				printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c, ca_c, 
+						dirlist[i], df_c, (last_column) ? "\n" : "");
 
 				cap_free(cap);
 			}
@@ -17063,22 +17060,22 @@ list_dir(void)
 
 			else if (file_info[i].type & (S_IXUSR|S_IXGRP|S_IXOTH)) {
 				if (file_info[i].size == 0)
-					printf("%s%d%s %s%s%s%s", el_c, i + 1, NC,
-							ee_c, dirlist[i], NC, (last_column) 
+					printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c,
+							ee_c, dirlist[i], df_c, (last_column) 
 							? "\n" : "");
 				else
-					printf("%s%d%s %s%s%s%s", el_c, i + 1, NC,
-							ex_c, dirlist[i], NC, (last_column) 
+					printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c,
+							ex_c, dirlist[i], df_c, (last_column) 
 							? "\n" : "");
 			}
 
 			else if (file_info[i].size == 0)
-				printf("%s%d%s %s%s%s%s", el_c, i + 1, NC, ef_c, 
-						dirlist[i], NC, (last_column) ? "\n" : "");
+				printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c, ef_c, 
+						dirlist[i], df_c, (last_column) ? "\n" : "");
 
 			else if (file_info[i].links > 1) /* Multi-hardlink */
-				printf("%s%d%s %s%s%s%s", el_c, i + 1, NC, mh_c, 
-						dirlist[i], NC, (last_column) ? "\n" : "");
+				printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c, mh_c, 
+						dirlist[i], df_c, (last_column) ? "\n" : "");
 
 			/* Check extension color only if some is defined */
 			else if (ext_colors_n) {
@@ -17090,28 +17087,28 @@ list_dir(void)
 
 					if (extcolor) {
 						printf("%s%d%s \x1b[%sm%s%s%s", el_c,
-								i + 1, NC, extcolor, dirlist[i], NC,
+								i + 1, df_c, extcolor, dirlist[i], df_c,
 								(last_column) ? "\n" : "");
 						extcolor = (char *)NULL;
 					}
 
 					else /* No matching extension found */
-						printf("%s%d%s %s%s%s%s", el_c, i + 1, NC,
-								fi_c, dirlist[i], NC, (last_column)
+						printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c,
+								fi_c, dirlist[i], df_c, (last_column)
 								? "\n" : "");
 
 					ext = (char *)NULL;
 				}
 
 				else /* Bare regular file */
-					printf("%s%d%s %s%s%s%s", el_c, i + 1, NC,
-							fi_c, dirlist[i], NC, (last_column)
+					printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c,
+							fi_c, dirlist[i], df_c, (last_column)
 							? "\n" : "");
 			}
 			else {
 				/* Bare regular file */
-				printf("%s%d%s %s%s%s%s", el_c, i + 1, NC,
-					fi_c, dirlist[i], NC, (last_column)
+				printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c,
+					fi_c, dirlist[i], df_c, (last_column)
 					? "\n" : "");
 			}
 
@@ -17120,8 +17117,8 @@ list_dir(void)
 		/* In case all of the above cases are false, we have an
 		 * unknown file type */
 		default: 
-			printf("%s%d%s %s%s%s%s", el_c, i + 1, NC, no_c, 
-					dirlist[i], NC, (last_column) ? "\n" : "");
+			printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c, no_c, 
+					dirlist[i], df_c, (last_column) ? "\n" : "");
 		}
 		}
 
@@ -17184,7 +17181,7 @@ list_dir(void)
 					printf("%d %s\n", i, old_pwd[i - 1]);
 
 				printf("%d %s%s%s\n", i + 1, dh_c,
-					   old_pwd[i], NC);
+					   old_pwd[i], df_c);
 
 				if (i + 1 < dirhist_total_index && old_pwd[i + 1])
 					printf("%d %s\n", i + 2, old_pwd[i + 1]);
@@ -17202,7 +17199,7 @@ list_dir(void)
 	/* If changing color scheme, inform the user about the current
 	 * color scheme */
 	if (switch_cscheme)
-		printf("color scheme %s->%s %s\n", mi_c, NC,
+		printf("color scheme %s->%s %s\n", mi_c, df_c,
 			   cur_cscheme ? cur_cscheme : "?");
 
 	/* If changing sorting method, inform the user about the current
@@ -17531,7 +17528,7 @@ list_dir_light(void)
 
 			/* Print ELN. The remaining part of the line will be
 			 * printed by get_properties() */
-			printf("%s%d%s ", el_c, i + 1, NC);
+			printf("%s%d%s ", el_c, i + 1, df_c);
 
 			get_properties(dirlist[i], (int)long_view, max,
 						   file_info[i].len);
@@ -17555,7 +17552,7 @@ list_dir_light(void)
 						printf("%d %s\n", i, old_pwd[i - 1]);
 
 					printf("%d %s%s%s\n", i + 1, dh_c,
-						   old_pwd[i], NC);
+						   old_pwd[i], df_c);
 
 					if (i + 1 < dirhist_total_index && old_pwd[i + 1])
 						printf("%d %s\n", i + 2, old_pwd[i + 1]);
@@ -17638,47 +17635,47 @@ list_dir_light(void)
 		/* Print the corresponding entry */
 		if (!dir_indicator && !classify)
 			/* No filetype indicator at all */
-			printf("%s%d%s %s%s", el_c, i + 1, NC, dirlist[i],
+			printf("%s%d%s %s%s", el_c, i + 1, df_c, dirlist[i],
 				   (last_column) ? "\n" : "");
 
 		else if (classify) {
 
 			switch(file_info[i].type) {
 				case DT_DIR:
-					printf("%s%d%s %s/%s", el_c, i + 1, NC,
+					printf("%s%d%s %s/%s", el_c, i + 1, df_c,
 							dirlist[i], (last_column) ? "\n" : "");
 				break;
 
 				case DT_LNK:
-					printf("%s%d%s %s@%s", el_c, i + 1, NC,
+					printf("%s%d%s %s@%s", el_c, i + 1, df_c,
 							dirlist[i], (last_column) ? "\n" : "");
 				break;
 
 				case DT_FIFO:
-					printf("%s%d%s %s|%s", el_c, i + 1, NC,
+					printf("%s%d%s %s|%s", el_c, i + 1, df_c,
 							dirlist[i], (last_column) ? "\n" : "");
 				break;
 
 				case DT_SOCK:
-					printf("%s%d%s %s=%s", el_c, i + 1, NC,
+					printf("%s%d%s %s=%s", el_c, i + 1, df_c,
 							dirlist[i], (last_column) ? "\n" : "");
 				break;
 
 				case DT_REG:
 					if (file_info[i].exec)
-						printf("%s%d%s %s*%s", el_c, i + 1, NC,
+						printf("%s%d%s %s*%s", el_c, i + 1, df_c,
 						 		dirlist[i], (last_column) ? "\n" : "");
 					else
-						printf("%s%d%s %s%s", el_c, i + 1, NC,
+						printf("%s%d%s %s%s", el_c, i + 1, df_c,
 								dirlist[i], (last_column) ? "\n" : "");
 				break;
 
 				case DT_UNKNOWN:
-						printf("%s%d%s %s?%s", el_c, i + 1, NC,
+						printf("%s%d%s %s?%s", el_c, i + 1, df_c,
 							   dirlist[i], (last_column) ? "\n" : "");
 
 				default:
-						printf("%s%d%s %s%s", el_c, i + 1, NC,
+						printf("%s%d%s %s%s", el_c, i + 1, df_c,
 							   dirlist[i], (last_column) ? "\n" : "");
 				break;
 			}
@@ -17686,10 +17683,10 @@ list_dir_light(void)
 
 		else { /* Only dirs */
 			if (file_info[i].type == DT_DIR)
-				printf("%s%d%s %s/%s", el_c, i + 1, NC, dirlist[i],
+				printf("%s%d%s %s/%s", el_c, i + 1, df_c, dirlist[i],
 					   (last_column) ? "\n" : "");
 			else
-				printf("%s%d%s %s%s", el_c, i + 1, NC, dirlist[i],
+				printf("%s%d%s %s%s", el_c, i + 1, df_c, dirlist[i],
 					   (last_column) ? "\n" : "");
 		}
 
@@ -17762,7 +17759,7 @@ list_dir_light(void)
 					printf("%d %s\n", i, old_pwd[i - 1]);
 
 				printf("%d %s%s%s\n", i + 1, dh_c,
-					   old_pwd[i], NC);
+					   old_pwd[i], df_c);
 
 				if (i + 1 < dirhist_total_index && old_pwd[i + 1])
 					printf("%d %s\n", i + 2, old_pwd[i + 1]);
@@ -18156,7 +18153,7 @@ cschemes_function(char **args)
 		size_t i;
 		for (i = 0; color_schemes[i]; i++) {
 			if (cur_cscheme == color_schemes[i])
-				printf("%s%s%s\n", mi_c, color_schemes[i], NC);
+				printf("%s%s%s\n", mi_c, color_schemes[i], df_c);
 			else
 				printf("%s\n", color_schemes[i]);
 		}
@@ -18464,8 +18461,8 @@ exec_cmd(char **comm)
 		int i;
 		for (i = 0; i < dirhist_total_index; i++) {
 			if (i == dirhist_cur_index)
-				printf("%d %s%s%s%s\n", i + 1, dh_c,
-						old_pwd[i], NC, df_c);
+				printf("%d %s%s%s\n", i + 1, dh_c,
+						old_pwd[i], df_c);
 			else 
 				printf("%d %s\n", i + 1, old_pwd[i]);
 		}
@@ -18803,7 +18800,7 @@ exec_cmd(char **comm)
 				size_t i;
 				for (i = 0; i < actions_n; i++)
 					printf("%s %s->%s %s\n", usr_actions[i].name,
-						   blue, NC, usr_actions[i].value);
+						   mi_c, df_c, usr_actions[i].value);
 			}
 			else {
 				puts(_("actions: No actions defined. Use the 'actions "
@@ -19591,8 +19588,8 @@ surf_hist(char **comm)
 		int i;
 		for (i = 0; i < dirhist_total_index; i++) {
 			if (i == dirhist_cur_index)
-				printf("%d %s%s%s%s\n", i + 1, dh_c,
-					   old_pwd[i], NC, df_c);
+				printf("%d %s%s%s\n", i + 1, dh_c,
+					   old_pwd[i], df_c);
 
 			else
 				printf("%d %s\n", i + 1, old_pwd[i]);
@@ -20271,7 +20268,7 @@ sel_function (char **comm)
 		printf(_("Total size: %s\n"), human_size);
 
 	else if (sel_n > 0)
-		printf(_("\n%sTotal size%s: %s\n"), white, NC, human_size);
+		printf(_("\n%s%sTotal size%s: %s\n"), df_c, bold, df_c, human_size);
 
 	free(human_size);
 
@@ -20284,7 +20281,7 @@ show_sel_files(void)
 	if (clear_screen)
 		CLEAR;
 
-	printf(_("%sSelection Box%s%s\n"), white, NC, df_c);
+	printf(_("%s%sSelection Box%s\n"), df_c, bold, df_c);
 
 	short reset_pager = 0;
 
@@ -20334,7 +20331,8 @@ show_sel_files(void)
 
 		char *human_size = get_size_unit(total_sel_size);
 
-		printf(_("\n%sTotal size%s: %s\n"), white, NC, human_size);
+		printf(_("\n%s%sTotal size%s: %s\n"), df_c, bold, df_c,
+			   human_size);
 
 		free(human_size);
 	}
@@ -20376,7 +20374,7 @@ deselect(char **comm)
 	if (clear_screen)
 		CLEAR;
 
-	printf(_("%sSelection Box%s%s\n"), white, NC, df_c);
+	printf(_("%sSelection Box%s\n"), bold, df_c);
 
 	if (sel_n == 0) {
 		puts(_("Empty"));
@@ -20389,10 +20387,10 @@ deselect(char **comm)
 		colors_list(sel_elements[i], (int)i + 1, NO_PAD, PRINT_NEWLINE);
 
 	char *human_size = get_size_unit(total_sel_size);
-	printf(_("\n%sTotal size%s: %s\n"), white, NC, human_size);
+	printf(_("\n%s%sTotal size%s: %s\n"), df_c, bold, df_c, human_size);
 	free(human_size);
 
-	printf(_("\n%s%sEnter 'q' to quit.\n"), NC, df_c);
+	printf(_("\n%sEnter 'q' to quit.\n"), df_c);
 	size_t desel_n = 0;
 	char *line = NULL, **desel_elements = (char **)NULL;
 
@@ -21422,13 +21420,13 @@ bookmark_del(char *name)
 
 	/* If not name, list bookmarks and get user input */
 	else {
-		printf("%sBookmarks%s\n\n", white, NC);
+		printf("%sBookmarks%s\n\n", bold, df_c);
 		for (i = 0; i < bmn; i++)
 			printf("%s%zu %s%s%s\n", el_c, i + 1, bm_c, bms[i],
-				   NC);
+				   df_c);
 
 		/* Get user input */
-		printf(_("\n%s%sEnter 'q' to quit.\n"), NC, df_c);
+		printf(_("\n%sEnter 'q' to quit.\n"), df_c);
 		char *input = (char *)NULL;
 		while (!input)
 			input = rl_no_hist("Bookmark(s) to be deleted "
@@ -22096,7 +22094,7 @@ open_bookmark(void)
 	if (clear_screen)
 		CLEAR;
 
-	printf(_("%sBookmarks Manager%s\n\n"), white, NC);
+	printf(_("%sBookmarks Manager%s\n\n"), bold, df_c);
 
 	/* Print bookmarks taking into account the existence of shortcut,
 	 * name, and path for each bookmark */
@@ -22133,11 +22131,11 @@ open_bookmark(void)
 			}
 		}
 
-		printf("%s%zu%s %s%c%s%c%s %s%s%s\n", el_c, eln, NC,
+		printf("%s%zu%s %s%c%s%c%s %s%s%s\n", el_c, eln, df_c,
 			   bold, sc_ok ? '[' : 0, sc_ok ? bookmarks[i].shortcut
-			   : "", sc_ok ? ']' : 0, NC, non_existent ? gray
+			   : "", sc_ok ? ']' : 0, df_c, non_existent ? gray
 			   : (is_dir ? bm_c : fi_c), name_ok ? bookmarks[i].name
-			   : bookmarks[i].path, NC);
+			   : bookmarks[i].path, df_c);
 	}
 
 	/* User selection. Display the prompt */
@@ -22682,7 +22680,7 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 
 		printf("%s%s%s%-*s%s (%04o) %c/%c%c%c/%c%c%c/%c%c%c%s %s %s %s %s\n", 
 				(light_mode) ? "" : color, (!trim) ? filename
-				: trim_filename, (light_mode) ? "" : NC,
+				: trim_filename, (light_mode) ? "" : df_c,
 				pad, "", df_c, file_attrib.st_mode & 07777,
 				file_type,
 				read_usr, write_usr, exec_usr, 
@@ -22716,10 +22714,10 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 							(mod_time[0] != 0x00) ? mod_time : "??");
 
 	if (file_type && file_type != 'l')
-		printf("%s%s%s%s\n", color, filename, NC, df_c);
+		printf("%s%s%s\n", color, filename, df_c);
 
 	else if (linkname) {
-		printf("%s%s%s%s -> %s\n", color, filename, NC, df_c, 
+		printf("%s%s%s -> %s\n", color, filename, df_c, 
 			   linkname);
 		free(linkname);
 	}
@@ -22729,13 +22727,12 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 		ssize_t ret = readlink(filename, link, PATH_MAX);
 
 		if (ret) {
-			printf("%s%s%s%s -> %s (broken link)\n", color, filename, NC, 
+			printf("%s%s%s -> %s (broken link)\n", color, filename,
 				   df_c, link);
 		}
 
 		else
-			printf("%s%s%s%s -> ???\n", color, filename, NC,
-				   df_c);
+			printf("%s%s%s -> ???\n", color, filename, df_c);
 	}
 
 	/* Stat information */
@@ -23576,56 +23573,43 @@ color_codes (void)
 	}
 
 	if (ext_colors_n)
-		printf(_("%sFile type colors%s\n\n"), bold, NC);
+		printf(_("%sFile type colors%s\n\n"), bold, df_c);
 
-	printf(_("%s file name%s%s: Directory with no read permission (nd)\n"), 
-		   nd_c, NC, df_c);
-	printf(_("%s file name%s%s: File with no read permission (nf)\n"), 
-		   nf_c, NC, df_c);
-	printf(_("%s file name%s%s: Directory* (di)\n"), di_c, NC,
+	printf(_(" %sfile name%s: Directory with no read permission (nd)\n"), 
+		   nd_c, df_c);
+	printf(_(" %sfile name%s: File with no read permission (nf)\n"), 
+		   nf_c, df_c);
+	printf(_(" %sfile name%s: Directory* (di)\n"), di_c, df_c);
+	printf(_(" %sfile name%s: EMPTY directory (ed)\n"), ed_c, df_c);
+	printf(_(" %sfile name%s: EMPTY directory with no read "
+			 "permission (ne)\n"), ne_c, df_c);
+	printf(_(" %sfile name%s: Executable file (ex)\n"), ex_c, df_c);
+	printf(_(" %sfile name%s: Empty executable file (ee)\n"), ee_c, df_c);
+	printf(_(" %sfile name%s: Block special file (bd)\n"), bd_c, df_c);	
+	printf(_(" %sfile name%s: Symbolic link* (ln)\n"), ln_c, df_c);	
+	printf(_(" %sfile name%s: Broken symbolic link (or)\n"), or_c, df_c);
+	printf(_(" %sfile name%s: Multi-hardlink (mh)\n"), mh_c, df_c);
+	printf(_(" %sfile name%s: Socket file (so)\n"), so_c, df_c);
+	printf(_(" %sfile name%s: Pipe or FIFO special file (pi)\n"), pi_c,
 		   df_c);
-	printf(_("%s file name%s%s: EMPTY directory (ed)\n"), ed_c, NC, 
+	printf(_(" %sfile name%s: Character special file (cd)\n"), cd_c,
 		   df_c);
-	printf(_("%s file name%s%s: EMPTY directory with no read "
-			 "permission (ne)\n"), ne_c, NC, df_c);
-	printf(_("%s file name%s%s: Executable file (ex)\n"), ex_c, NC, 
+	printf(_(" %sfile name%s: Regular file (fi)\n"), fi_c, df_c);
+	printf(_(" %sfile name%s: Empty (zero-lenght) file (ef)\n"), ef_c,
 		   df_c);
-	printf(_("%s file name%s%s: Empty executable file (ee)\n"), ee_c, NC, 
+	printf(_(" %sfile name%s: SUID file (su)\n"), su_c, df_c);
+	printf(_(" %sfile name%s: SGID file (sg)\n"), sg_c, df_c);
+	printf(_(" %sfile name%s: File with capabilities (ca)\n"), ca_c,
 		   df_c);
-	printf(_("%s file name%s%s: Block special file (bd)\n"), bd_c, NC, 
-		   df_c);	
-	printf(_("%s file name%s%s: Symbolic link* (ln)\n"), ln_c, NC, 
-		   df_c);	
-	printf(_("%s file name%s%s: Broken symbolic link (or)\n"), or_c, NC, 
-		   df_c);
-	printf(_(" %s%sfile name%s%s: Multi-hardlink (mh)\n"), NC, mh_c, 
-		   NC, df_c);
-	printf(_("%s file name%s%s: Socket file (so)\n"), so_c, NC, 
-		   df_c);
-	printf(_("%s file name%s%s: Pipe or FIFO special file (pi)\n"), pi_c,
-		   NC, df_c);
-	printf(_("%s file name%s%s: Character special file (cd)\n"), cd_c, NC, 
-		   df_c);
-	printf(_("%s file name%s%s: Regular file (fi)\n"), fi_c, NC, 
-		   df_c);
-	printf(_("%s file name%s%s: Empty (zero-lenght) file (ef)\n"), ef_c,
-		   NC, df_c);
-	printf(_(" %s%sfile name%s%s: SUID file (su)\n"), NC, su_c, NC, 
-		   df_c);
-	printf(_(" %s%sfile name%s%s: SGID file (sg)\n"), NC, sg_c, NC, 
-		   df_c);
-	printf(_(" %s%sfile name%s%s: File with capabilities (ca)\n"), NC,
-		   ca_c, NC, df_c);
-	printf(_(" %s%sfile name%s%s: Sticky and NOT other-writable "
-			 "directory* (st)\n"),  NC, st_c, NC, df_c);
-	printf(_(" %s%sfile name%s%s: Sticky and other-writable "
-			 "directory* (tw)\n"),  NC, tw_c, NC, df_c);
-	printf(_(" %s%sfile name%s%s: Other-writable and NOT sticky "
-			 "directory* (ow)\n"),  NC, ow_c, NC, df_c);
-	printf(_(" %s%sfile name%s%s: Unknown file type (no)\n"), NC, no_c, 
-		   NC, df_c);
-	printf(_(" %s%sfile name%s%s: Unaccessible (non-stat'able) file "
-		   "(uf)\n"), NC, uf_c, NC, df_c);
+	printf(_(" %sfile name%s: Sticky and NOT other-writable "
+			 "directory* (st)\n"),  st_c, df_c);
+	printf(_(" %sfile name%s: Sticky and other-writable "
+			 "directory* (tw)\n"),  tw_c, df_c);
+	printf(_(" %sfile name%s: Other-writable and NOT sticky "
+			 "directory* (ow)\n"),  ow_c, df_c);
+	printf(_(" %sfile name%s: Unknown file type (no)\n"), no_c, df_c);
+	printf(_(" %sfile name%s: Unaccessible (non-stat'able) file "
+		   "(uf)\n"), uf_c, df_c);
 
 	printf(_("\n*The slash followed by a number (/xx) after directories "
 			 "or symbolic links to directories indicates the amount of "
@@ -23641,7 +23625,7 @@ color_codes (void)
 	if (ext_colors_n) {
 		size_t i, j;
 
-		printf(_("%sExtension colors%s\n\n"), bold, NC);
+		printf(_("%sExtension colors%s\n\n"), bold, df_c);
 		for (i = 0; i < ext_colors_n; i++) {
 			char *ret = strrchr(ext_colors[i], '=');
 
@@ -23954,7 +23938,7 @@ splash (void)
 	"         .:xuuuunnu;...;ux;.", d_cyan);
 
 	printf(_("\n\t\t   %sThe anti-eye-candy/KISS file manager\n%s"),
-		   white, NC);
+		   white, df_c);
 
 	if (splash_screen) {
 		printf(_("\n\t\t\tPress any key to continue... "));
