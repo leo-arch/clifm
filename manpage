@@ -210,6 +210,9 @@ list only directories and symbolic links to directories
 .B \-\-list\-and\-quit
 list files and quit. It may be used in conjunction with \-p
 .TP
+.B \-\-color\-scheme=NAME
+set NAME as color scheme
+.TP
 .B \-\-no\-welcome\-message
 disable the welcome message
 .TP
@@ -409,6 +412,10 @@ The underlying programs used here to mount these remote file systems are: \fBssh
 
 .B lm \fR[on, off]
 Toggle the light mode on/off. This option, aimed to make files listing faster than the default mode, is especially usefull for really old hardware or when working on remote machines. For more details see the NOTE ON SPEED section below.
+.TP
+
+.B cs, colorschemes \fR[edit] [NAME]
+with no arguments, list available color schemes. Use the 'edit' option to open the configuration file of the current color scheme. Otherwise, just switch to the color scheme NAME. TAB completion is avaiable.
 .TP
 
 .B mm, mime \fR[info ELN/FILENAME] [edit]
@@ -628,6 +635,8 @@ safely quit CliFM.
 .TP
 \fBF3:\fR List keybindings
 .TP
+\fBF8:\fR Open the configuration file of the current color scheme
+.TP
 \fBF9:\fR Open the keybindings file
 .TP
 \fBF10:\fR Open the configuration file
@@ -766,7 +775,7 @@ CliFM will automatically expand the 'sel' keyword: 'sel' indeed amounts to 'file
 .TP
 ELN's and ELN ranges will be also automatically expanded, provided the corresponding ELN's actually exist, that is to say, provided some filename is listed on the screen under those numbers. For example: 'diff 1 118' will only expand '1', but not '118', if there is no ELN 118. In the same way, the range 1\-118 will only be expanded provided there are 118 or more elements listed on the screen. If this feature somehow conflicts with the command you want to run, say, 'chmod 644 ...', because the current amount of files is equal or larger than 644 (in which case CliFM will expand that number), then you can simply run the command as external: ';chmod 644...'
 .TP
-TAB completion for bookmarks and profiles is also available. To make use of the bookmarks completion, make sure you specify some name for your bookmarks, since these names are used by the completion function. 
+TAB completion for bookmarks, color schemes, and profiles is also available. To make use of the bookmarks completion, make sure you specify some name for your bookmarks, since these names are used by the completion function. 
 .TP
 Of course, combinations of all these features is also possbile. Example: 'cp sel file* 2 23\-31 .' will copy all selected files, plus all files whose name starts with "file", plus those files corresponding to the ELN's 2 and 23 through 31, into the current working directory.
 
@@ -818,6 +827,9 @@ A colon separated list of file type color codes in the same form specified above
 .B CLIFM_EXT_COLORS
 Same as above, but for file extensions
 .TP
+.B CLIFM_IFACE_COLORS
+Same as above, but for different element of ClIFM's interface
+.TP
 Except when running in stealth mode, CliFM sets the following environment variables:
 .TP
 .B CLIFM
@@ -854,6 +866,10 @@ The keybindings file is \fI$XDG_CONFIG_HOME/clifm/keybindings\fR. This file is u
 
 .B SCRIPTS DIRECTORY
 The directory used for action scripts is \fI$XDG_CONFIG_HOME/clifm/PROFILE/scripts\fR.
+.TP
+
+.B COLORS DIRECTORY
+This directory, \fI$XDG_CONFIG_HOME/clifm/PROFILE/colors\fR, contains available color schemes as files with a .cfm extension. You can create as many color schemes as you want by just dropping them in this directory. The default color scheme file (default.cfm) could be used as a guide.
 .TP
 
 .B ACTIONS FILE
