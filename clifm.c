@@ -216,6 +216,8 @@ static int flags;
  * non-printing chars. This is specially useful for the prompt, i.e.,
  * when passing color codes to readline */
 #define NC_b "\001\x1b[0m\002"
+#define NB "\x1b[49m"
+#define NB_b "\001\x1b[49m\002"
 
 /* Default colors */
 #define DEF_LS_COLORS "di=01;34:fi=00;39:ln=01;36:mh=30;46:or=00;36:\
@@ -284,7 +286,7 @@ nm=01;32:bm=01;36:"
 #define DEF_EL_C "\x1b[01;33m"
 #define DEF_MI_C "\x1b[01;36m"
 #define DEF_DL_C "\x1b[01;34m"
-#define DEF_DF_C "\x1b[00;39m"
+#define DEF_DF_C "\x1b[00;39;49m"
 #define DEF_DC_C "\x1b[00;39m"
 #define DEF_WC_C "\x1b[01;36m"
 #define DEF_DH_C "\x1b[00;36m"
@@ -625,7 +627,7 @@ int check_dir(char **args);
 
 /* Colors */
 void set_default_options(void);
-void set_colors (char *colorscheme, int env);
+int set_colors (char *colorscheme, int env);
 char *strip_color_line(char *str, char mode);
 size_t get_colorschemes(void);
 int cschemes_function(char **args);
@@ -1882,7 +1884,7 @@ reload_config(void)
 		set_default_options();
 
 	cschemes_n = get_colorschemes();
-	free_colors();
+
 	set_colors(usr_cscheme ? usr_cscheme : "default", 1);
 
 	free(usr_cscheme);
@@ -2759,8 +2761,8 @@ print_tips(int all)
 		"Need more speed? Try the light mode (Alt-y)",
 		"The Selection Box is shared among different instances of CliFM",
 		"Select files here and there with the 's' command",
-		"Use wildcards with the 's' command: 's *.c'",
-		""
+		"Use wildcards and regular expressions with the 's' command: "
+		"'s *.c' or 's .*\\.c$'",
 		"ELN's and the 'sel' keyword work for shell commands as well: "
 		"'file 1 sel'",
 		"Press TAB to automatically expand an ELN: 'o 2' -> TAB -> "
@@ -2777,6 +2779,7 @@ print_tips(int all)
 		"Once in the pager, press 'q' to stop it",
 		"Press 'Alt-l' to switch to long view mode",
 		"Search for files using the slash command: '/*.png'",
+		"The search function allows regular expressions: '/^c'",
 		"Add a new bookmark by just entering 'bm ELN/FILE'",
 		"Use c, l, m, md, and r instead of cp, ln, mv, mkdir, and rm",
 		"Access a remote file system using the 'net' command",
@@ -2797,8 +2800,11 @@ print_tips(int all)
 		"Allow the use of shell commands with the -x option: 'clifm -x'",
 		"Go to the root directory by just pressing 'Alt-r'",
 		"Go to the home directory by just pressing 'Alt-e'",
+		"Press 'F8' to open and edit current color scheme",
+		"Press 'F9' to open and edit the keybindings file",
 		"Press 'F10' to open and edit the configuration file",
-		"Customize the starting using the -p option: 'clifm -p PATH'",
+		"Press 'F11' to open and edit the bookmarks file",
+		"Customize the starting path using the -p option: 'clifm -p PATH'",
 		"Use the 'o' command to open files and directories: 'o 12'",
 		"Bypass the resource opener specifying an application: 'o 12 "
 		"leafpad'",
@@ -2813,7 +2819,8 @@ print_tips(int all)
 		"PROFILE'",
 		"Switch profiles using 'pf set PROFILE'",
 		"Delete a profile using 'pf del PROFILE'",
-		"Copy selected files into CWD by just running 'v sel'",
+		"Copy selected files into CWD by just running 'v sel' or "
+		"pressing Ctrl-Alt-v",
 		"Use 'p ELN' to print file properties for ELN",
 		"Deselect all selected files by pressing 'Alt-d'",
 		"Select all files in CWD by pressing 'Alt-a'",
@@ -2838,12 +2845,13 @@ print_tips(int all)
 		"Create custom commands and features using the 'actions' command",
 		"Create a fresh configuration file by running 'edit gen'",
 		"Use 'ln edit' (or 'le') to edit symbolic links",
-		"Change default keyboard shortcuts editing the keybindings file",
+		"Change default keyboard shortcuts by editing the keybindings file",
 		"Keep in sight previous and next visited directories enabling the "
 		"DirhistMap option in the configuration file",
 		"Leave no traces at all running in stealth mode",
 		"Pin a file via the 'pin' command and then use it with the "
 		"period keyword (,). E.g. 'pin directory' and then 'cd ,'",
+		"Switch between color schemes using the 'cs' command",
 		NULL
 	};
 
@@ -6253,6 +6261,12 @@ int mime_open(char **args)
 		else
 			file_path = realpath(args[1], NULL);
 
+		if (!file_path) {
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_path, 
+					strerror(errno));
+			return -1;
+		}
+
 		if (access(file_path, R_OK) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_path, 
 					strerror(errno));
@@ -7352,7 +7366,7 @@ get_colorschemes(void)
 	return i;
 }
 
-void
+int
 set_colors(char *colorscheme, int env)
 /* Open the config file, get values for filetype and extension colors
  * and copy these values into the corresponding variable. If some value is
@@ -7391,6 +7405,7 @@ set_colors(char *colorscheme, int env)
 		}
 	}
 
+	/* env is true only when the function is called from main() */
 	if (env) {
 		/* Try to get colors from environment variables */
 		char *env_filecolors = getenv("CLIFM_FILE_COLORS");
@@ -7435,6 +7450,12 @@ set_colors(char *colorscheme, int env)
 		FILE *fp_colors = fopen(colorscheme_file, "r");
 
 		if (fp_colors) {
+
+			/* If called from the color scheme function, reset all
+			 * color values before proceeding */
+			if (!env)
+				free_colors();
+
 			char *line = (char *)NULL;
 			ssize_t line_len = 0;
 			size_t line_size = 0;
@@ -7520,6 +7541,22 @@ set_colors(char *colorscheme, int env)
 			line = (char *)NULL;
 
 			fclose(fp_colors);
+		}
+
+		/* If fopen failed */
+		else {
+			if (!env) {
+				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+						colorscheme_file, strerror(errno));
+				free(colorscheme_file);
+				return EXIT_FAILURE;
+			}
+
+			else {
+				_err('w', PRINT_PROMPT, _("%s: %s: No such color "
+					 "scheme. Falling back to the default one\n"),
+					 PROGRAM_NAME, colorscheme);
+			}
 		}
 
 		free(colorscheme_file);
@@ -7800,7 +7837,8 @@ set_colors(char *colorscheme, int env)
 				if (!is_color_code(colors[i] + 3))
 					memset(df_c, 0x00, MAX_COLOR);
 				else
-					snprintf(df_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
+					snprintf(df_c, MAX_COLOR - 1, "\x1b[%s;49m",
+							 colors[i]
 							 + 3);
 			}
 
@@ -8264,6 +8302,8 @@ set_colors(char *colorscheme, int env)
 		sprintf(uf_c, DEF_UF_C);
 	if (!*mh_c)
 		sprintf(mh_c, DEF_MH_C);
+
+	return EXIT_SUCCESS;
 }
 
 void
@@ -13053,7 +13093,7 @@ create_def_cscheme(void)
 # \"di=01;34\" means that (non-empty) directories will be listed in bold blue.\n\
 # Color codes are traditional ANSI escape sequences less the escape char and\n\
 # the final 'm'. 8 bit, 256 colors, and RGB colors are supported.\n\
-# For more information consult the manpage.\n\n"
+# A detailed explanation of all these codes can be found in the manpage.\n\n"
 
 "FiletypeColors=\"%s\"\n\n"
 
@@ -18183,14 +18223,14 @@ cschemes_function(char **args)
 
 			stat(file, &attr);
 
-			if (mtime_bfr != attr.st_mtime) {
-				free_colors();
-				set_colors(cur_cscheme, 0);
+			if (mtime_bfr != attr.st_mtime
+			&& set_colors(cur_cscheme, 0) == EXIT_SUCCESS
+			&& cd_lists_on_the_fly) {
 
-				if (cd_lists_on_the_fly) {
-					free_dirlist();
-					list_dir();
-				}
+				puts("here");
+
+				free_dirlist();
+				list_dir();
 			}
 		}
 
@@ -18205,29 +18245,34 @@ cschemes_function(char **args)
 		return EXIT_SUCCESS;
 	}
 
-	size_t i;
+	size_t i, cs_found = 0;
+
 	for (i = 0; color_schemes[i]; i++) {
-		if (strcmp(args[1], color_schemes[i]) == 0) {
+		if (*args[1] == *color_schemes[i]
+		&& strcmp(args[1], color_schemes[i]) == 0) {
 
-			free_colors();
-			set_colors(args[1], 0);
+			cs_found = 1;
 
-			cur_cscheme = color_schemes[i];
+			if (set_colors(args[1], 0) == EXIT_SUCCESS) {
 
-			switch_cscheme = 1;
+				cur_cscheme = color_schemes[i];
 
-			if (cd_lists_on_the_fly) {
-				free_dirlist();
-				list_dir();
+				switch_cscheme = 1;
+
+				if (cd_lists_on_the_fly) {
+					free_dirlist();
+					list_dir();
+				}
+
+				switch_cscheme = 0;
+
+				return EXIT_SUCCESS;
 			}
-
-			switch_cscheme = 0;
-
-			return EXIT_SUCCESS;
 		}
 	}
 
-	fprintf(stderr, _("%s: No such color scheme\n"), PROGRAM_NAME);
+	if (!cs_found)
+		fprintf(stderr, _("%s: No such color scheme\n"), PROGRAM_NAME);
 
 	return EXIT_FAILURE;
 }
