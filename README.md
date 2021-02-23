@@ -66,7 +66,7 @@ Of course, you can deselect some or all selected files whenever you want with th
 
 Because file manager, but also half-shell, CLiFM also provides the following features:
 
-* TAB-completion for commands, paths, and ELN's
+* TAB-completion for commands, paths, profiles, bookmarks, color schemes, and ELN's
 * Bash-like quoting system
 * History function
 * Shell commands execution 
