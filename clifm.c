@@ -13199,6 +13199,19 @@ init_config(void)
 			}
 		}
 
+		if (xdg_config_home) {
+			COLORS_DIR = (char *)xnmalloc(strlen(xdg_config_home) + 8,
+										  sizeof(char));
+			sprintf(COLORS_DIR, "%s/colors", xdg_config_home);
+		}
+
+		else {
+			COLORS_DIR = (char *)xcalloc(user_home_len + pnl_len
+										  + 17, sizeof(char));
+			sprintf(COLORS_DIR, "%s/.config/%s/colors",
+					user_home, PNL);
+		}
+
 		xdg_config_home = (char *)NULL;
 
 		TRASH_DIR = (char *)xcalloc(user_home_len + 20, sizeof(char));
@@ -13220,8 +13233,8 @@ init_config(void)
 		DIRHIST_FILE = (char *)xcalloc(config_len + 9, sizeof(char));
 		sprintf(DIRHIST_FILE, "%s/dirhist", CONFIG_DIR);
 
-		COLORS_DIR = (char *)xnmalloc(config_len + 14, sizeof(char));
-		sprintf(COLORS_DIR, "%s/colors", CONFIG_DIR);
+/*		COLORS_DIR = (char *)xnmalloc(config_len + 14, sizeof(char));
+		sprintf(COLORS_DIR, "%s/colors", CONFIG_DIR); */
 
 		if (!alt_bm_file) {
 			BM_FILE = (char *)xcalloc(config_len + 15, sizeof(char));
