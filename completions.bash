@@ -5,8 +5,6 @@
 #   L. Abramovich <johndoe.arch@outlook.com>
 #
 
-echo "here"
-
 _clifm ()
 {
     COMPREPLY=()
@@ -100,7 +98,7 @@ _clifm ()
         COMPREPLY=( $(compgen -W "$profiles" -- "$cur") )
 
     elif [[ $prev == --color-scheme ]]; then
-        local schemes=$(basename -a $(ls -Ad ~/.config/clifm/*/colors/*) | cut -d"." -f1 | sort -u)
+        local schemes=$(basename -a $(ls -Ad ~/.config/clifm/colors/*) | cut -d"." -f1)
         COMPREPLY=( $(compgen -W "$schemes" -- "$cur") )
 
     elif [[ $prev == --classify ]]; then
