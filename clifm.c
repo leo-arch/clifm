@@ -15249,7 +15249,20 @@ parse_input_str(char *str)
 				if (bookmarks[j].name && *substr[i] == *bookmarks[j].name
 				&& strcmp(substr[i], bookmarks[j].name) == 0) {
 
-					if (bookmarks[j].path) {
+					/* Do not expand bookmark names that conflicts
+					 * with a filename in CWD */
+					int conflict = 0;
+					size_t k;
+
+					for (k = 0; k < files; k++) {
+						if (*bookmarks[j].name == *dirlist[k]
+						&& strcmp(bookmarks[j].name, dirlist[k]) == 0) {
+							conflict = 1;
+							break;
+						}
+					}
+
+					if (!conflict && bookmarks[j].path) {
 						substr[i] = (char *)xrealloc(substr[i], 
 									(strlen(bookmarks[j].path) + 1)
 									* sizeof(char));
