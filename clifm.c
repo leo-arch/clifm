@@ -13230,8 +13230,8 @@ init_config(void)
 /*		KBINDS_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
 		sprintf(KBINDS_FILE, "%s/keybindings", CONFIG_DIR); */
 
-		DIRHIST_FILE = (char *)xcalloc(config_len + 9, sizeof(char));
-		sprintf(DIRHIST_FILE, "%s/dirhist", CONFIG_DIR);
+		DIRHIST_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
+		sprintf(DIRHIST_FILE, "%s/dirhist.cfm", CONFIG_DIR);
 
 /*		COLORS_DIR = (char *)xnmalloc(config_len + 14, sizeof(char));
 		sprintf(COLORS_DIR, "%s/colors", CONFIG_DIR); */
@@ -13270,9 +13270,8 @@ init_config(void)
 			alt_config_file = (char *)NULL;
 		}
 
-		PROFILE_FILE = (char *)xcalloc(config_len + pnl_len + 10,
-							   sizeof(char));
-		sprintf(PROFILE_FILE, "%s/%s_profile", CONFIG_DIR, PNL);
+		PROFILE_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
+		sprintf(PROFILE_FILE, "%s/profile.cfm", CONFIG_DIR);
 
 		MSG_LOG_FILE = (char *)xcalloc(config_len + 14, sizeof(char));
 		sprintf(MSG_LOG_FILE, "%s/messages.cfm", CONFIG_DIR);
@@ -15275,6 +15274,7 @@ parse_input_str(char *str)
 				}
 			}
 
+			/* Do not perform any check on the expanded bookmark */
 			if (bm_exp)
 				continue;
 		}
