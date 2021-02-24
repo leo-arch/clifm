@@ -12059,7 +12059,7 @@ free_stuff(void)
 
 	save_dirhist();
 
-	if (restore_last_path)
+	if (restore_last_path || cd_on_quit)
 		save_last_path();
 
 	if (ext_colors_n)
