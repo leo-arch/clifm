@@ -88,6 +88,7 @@ _clifm ()
         --opener
         --max-path
         --color-scheme
+        --cd-on-quit
     )
 
     if [[ $prev == -b || $prev == -c || $prev == -k || $prev == -p ]]; then
