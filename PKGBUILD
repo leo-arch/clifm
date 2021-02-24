@@ -38,6 +38,6 @@ package() {
   install -g 0 -o 0 -Dm644 manpage "$pkgdir/usr/share/man/man1/${_pkgname}.1"
   gzip "$pkgdir/usr/share/man/man1/$_pkgname.1"
   install -g 0 -o 0 -Dm644 "${_pkgname}.desktop" "$pkgdir/usr/share/applications/${_pkgname}.desktop"
-  install -g 0 -o 0 -Dm644 completions.bash "$pkgdir/usr/share/bash-completions/completions/${_pkgname}"
+  install -g 0 -o 0 -Dm644 completions.bash "$pkgdir/usr/share/bash-completion/completions/${_pkgname}"
   install -g 0 -o 0 -Dm644 "translations/spanish/${_pkgname}.mo" "$pkgdir/usr/share/locale/es/LC_MESSAGES/${_pkgname}.mo"
 }

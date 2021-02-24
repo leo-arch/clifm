@@ -36,6 +36,8 @@ install:
 	@mkdir -p /usr/share/man/man1
 	@install -g 0 -o 0 -Dm644 manpage /usr/share/man/man1/"${PROG}".1
 	@gzip /usr/share/man/man1/"${PROG}".1
+	@mkdir -p /usr/share/bash-completion/completions
+	@install -g 0 -o 0 -Dm644 completions.bash /usr/share/bash-completion/completion/"${PROG}"
 	@mkdir -p /usr/share/locale/es/LC_MESSAGES
 	@install -g 0 -o 0 -Dm644 translations/spanish/"${PROG}".mo \
 	/usr/share/locale/es/LC_MESSAGES/"${PROG}".mo
