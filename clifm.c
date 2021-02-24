@@ -11912,41 +11912,48 @@ save_last_path(void)
 /* Store last visited directory for the restore last path and the
  * cd on quit functions */
 {
-	if (path && config_ok) {
-		char *last_dir = (char *)xnmalloc(strlen(CONFIG_DIR) + 7,
-										  sizeof(char));
-		sprintf(last_dir, "%s/.last", CONFIG_DIR);
+	if (!path || !config_ok)
+		return;
 
-		FILE *last_fp;
+	char *last_dir = (char *)xnmalloc(strlen(CONFIG_DIR) + 7,
+									  sizeof(char));
+	sprintf(last_dir, "%s/.last", CONFIG_DIR);
 
-		last_fp = fopen(last_dir, "w");
+	FILE *last_fp;
 
-		if (!last_fp) {
-			fprintf(stderr, _("%s: Error storing last visited "
-					"directory\n"), PROGRAM_NAME);
-			free(last_dir);
-			return;
-		}
+	last_fp = fopen(last_dir, "w");
 
-		fprintf(last_fp, "%s", path);
-
-		fclose(last_fp);
-
-		if (cd_on_quit) {
-			char *last_dir_tmp = xnmalloc(strlen(CONFIG_DIR_GRAL)
-										  + 7, sizeof(char *));
-			sprintf(last_dir_tmp, "%s/.last", CONFIG_DIR_GRAL);
-
-			char *cmd[] = { "cp", "-p", last_dir, last_dir_tmp,
-							NULL };
-
-			launch_execve(cmd, FOREGROUND);
-
-			free(last_dir_tmp);
-		}
-
-		free(last_dir);		
+	if (!last_fp) {
+		fprintf(stderr, _("%s: Error storing last visited "
+				"directory\n"), PROGRAM_NAME);
+		free(last_dir);
+		return;
 	}
+
+	fprintf(last_fp, "%s", path);
+
+	fclose(last_fp);
+
+	char *last_dir_tmp = xnmalloc(strlen(CONFIG_DIR_GRAL)
+									  + 7, sizeof(char *));
+	sprintf(last_dir_tmp, "%s/.last", CONFIG_DIR_GRAL);
+
+	if (cd_on_quit) {
+		char *cmd[] = { "cp", "-p", last_dir, last_dir_tmp,
+						NULL };
+
+		launch_execve(cmd, FOREGROUND);
+	}
+
+	/* If not cd on quit, remove the file */
+	else {
+		char *cmd[] = { "rm", "-f", last_dir_tmp, NULL };
+
+		launch_execve(cmd, FOREGROUND);
+	}
+
+	free(last_dir_tmp);
+	free(last_dir);
 
 	return;
 }
