@@ -14754,7 +14754,7 @@ external_arguments(int argc, char **argv)
 		{"only-dirs", no_argument, 0, 19},
 		{"list-and-quit", no_argument, 0, 20},
 		{"color-scheme", required_argument, 0, 21},
-		{"cd-on-quit", required_argument, 0, 22},
+		{"cd-on-quit", no_argument, 0, 22},
 		{0, 0, 0, 0}
 	};
 
