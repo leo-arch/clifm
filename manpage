@@ -583,6 +583,8 @@ safely quit CliFM.
 .TP
 \fBM\-d:\fR Deselect all selected files
 .TP
+\fBM\-p:\fR Change to pinned directory
+.TP
 \fBM\-r:\fR Change to root directory
 .TP
 \fBM\-e, Home:\fR Change to home directory
@@ -635,7 +637,7 @@ safely quit CliFM.
 .TP
 \fBF3:\fR List keybindings
 .TP
-\fBF8:\fR Open the configuration file of the current color scheme
+\fBF8:\fR Edit the current color scheme file
 .TP
 \fBF9:\fR Open the keybindings file
 .TP
