@@ -334,6 +334,7 @@ nm=01;32:bm=01;36:"
 #define DEF_RESTORE_LAST_PATH 0
 #define DEF_EXPAND_BOOKMARKS 0
 #define DEF_ONLY_DIRS 0
+#define DEF_CD_ON_QUIT 0
 #define UNSET -1
 
 /* Macros for the colors_list function */
@@ -389,6 +390,7 @@ int load_pinned_dir(void);
 void save_pinned_dir(void);
 void set_sel_file(void);
 void create_tmp_files(void);
+void unset_xargs(void);
 
 /* Memory management */
 char *xnmalloc(size_t nmemb, size_t size);
@@ -750,6 +752,7 @@ struct param
 	int only_dirs;
 	int list_and_quit;
 	int color_scheme;
+	int cd_on_quit;
 };
 
 struct param xargs;
@@ -781,7 +784,7 @@ short splash_screen = UNSET, welcome_message = UNSET, ext_cmd_ok = UNSET,
 	files_counter = UNSET, light_mode = UNSET, dir_indicator = UNSET,
 	autocd = UNSET, auto_open = UNSET, dirhist_map = UNSET,
 	restore_last_path = UNSET, pager = UNSET, show_bk_files = UNSET,
-	expand_bookmarks = UNSET, only_dirs = UNSET,
+	expand_bookmarks = UNSET, only_dirs = UNSET, cd_on_quit = UNSET,
 
 	no_log = 0, internal_cmd = 0, shell_terminal = 0, print_msg = 0,
 	recur_perm_error_flag = 0, is_sel = 0, sel_is_last = 0,
@@ -847,7 +850,8 @@ char *user = (char *)NULL, *path = (char *)NULL,
 	*alt_config_file = (char *)NULL, *alt_kbinds_file = (char *)NULL,
 	*alt_bm_file = (char *)NULL, *pinned_dir = (char *)NULL,
 	*COLORS_DIR = (char *)NULL, **color_schemes = (char **)NULL,
-	*cur_cscheme = (char *)NULL, *usr_cscheme = (char *)NULL;
+	*cur_cscheme = (char *)NULL, *usr_cscheme = (char *)NULL,
+	*CONFIG_DIR_GRAL = (char *)NULL;
 
 char div_line_char = UNSET;
 
@@ -1084,10 +1088,8 @@ main(int argc, char **argv)
 	 * (init_config) */
 
 	/* Set all external arguments flags to uninitialized state */
-	xargs.splash = xargs.hidden = xargs.longview = xargs.ext = UNSET;
-	xargs.ffirst = xargs.sensitive = xargs.unicode = xargs.pager = UNSET;
-	xargs.path = xargs.cd_list_auto = xargs.light = xargs.sort = UNSET;
-	xargs.dirmap = UNSET, xargs.stealth_mode = UNSET;
+
+	unset_xargs();
 
 	if (argc > 1)
 		external_arguments(argc, argv);
@@ -1379,6 +1381,23 @@ main(int argc, char **argv)
 			 * ################################# */
 
 void
+unset_xargs(void)
+{
+	xargs.splash = xargs.hidden = xargs.longview = UNSET;
+	xargs.autocd = xargs.auto_open = xargs.ext = xargs.ffirst = UNSET;
+	xargs.sensitive = xargs.unicode = xargs.pager = xargs.path = UNSET;
+	xargs.light = xargs.cd_list_auto = xargs.sort = xargs.dirmap = UNSET;
+	xargs.config = xargs.stealth_mode = xargs.restore_last_path = UNSET;
+	xargs.tips = xargs.disk_usage = xargs.dir_indicator = UNSET;
+	xargs.classify = xargs.share_selbox = xargs.rl_vi_mode = UNSET;
+	xargs.max_dirhist = xargs.sort_reverse = xargs.files_counter = UNSET;
+	xargs.welcome_message = xargs.clear_screen = xargs.bk_files = UNSET;
+	xargs.logs = xargs.max_path = xargs.bm_file = UNSET;
+	xargs.expand_bookmarks = xargs.only_dirs = UNSET;
+	xargs.list_and_quit = xargs.color_scheme = xargs.cd_on_quit = UNSET;
+}
+
+void
 print_div_line(void)
 {
 	fputs(dl_c, stdout);
@@ -1604,6 +1623,8 @@ root-dir:\\M-r\n\
 root-dir2:\\e/\n\
 #root-dir3:\n\
 \n\
+pinned-dir:\\M-p\n\
+\n\
 # Help\n\
 # F1-3\n\
 show-manpage:\eOP\n\
@@ -1794,6 +1815,7 @@ int
 reload_config(void)
 {
 	/* Free everything */
+	free(CONFIG_DIR_GRAL);
 	free(CONFIG_DIR);
 	free(TRASH_DIR);
 	free(TRASH_FILES_DIR);
@@ -1825,17 +1847,6 @@ reload_config(void)
 
 	size_t i = 0;
 
-	for (i = 0; color_schemes[i]; i++)
-		free(color_schemes[i]);
-
-	free(color_schemes);
-	color_schemes = (char **)NULL;
-
-/*	if (usr_cscheme) {
-		free(usr_cscheme);
-		usr_cscheme = (char *)NULL;
-	} */
-
 	if (opener) {
 		free(opener);
 		opener = (char *)NULL;
@@ -1863,15 +1874,7 @@ reload_config(void)
 	unicode = case_sensitive = cd_lists_on_the_fly = share_selbox = UNSET;
 	autocd = auto_open = restore_last_path = dirhist_map = UNSET;
 	disk_usage = tips = logs_enabled = sort = files_counter = UNSET;
-	light_mode = dir_indicator = classify = UNSET;
-
-	xargs.restore_last_path = xargs.tips = xargs.disk_usage = UNSET;
-	xargs.dir_indicator = xargs.classify = xargs.share_selbox = UNSET;
-	xargs.rl_vi_mode = xargs.max_dirhist = xargs.sort_reverse = UNSET;
-	xargs.files_counter = xargs.welcome_message = UNSET;
-	xargs.clear_screen = xargs.bk_files = xargs.logs = UNSET;
-	xargs.max_path = xargs.bm_file = xargs.expand_bookmarks = UNSET;
-	xargs.only_dirs = xargs.list_and_quit = UNSET;
+	light_mode = dir_indicator = classify = cd_on_quit = UNSET;
 
 	shell_terminal = no_log = internal_cmd = recur_perm_error_flag = 0;
 	is_sel = sel_is_last = print_msg = kbind_busy = dequoted = 0;
@@ -1894,8 +1897,6 @@ reload_config(void)
 
 	create_tmp_files();
 
-	cschemes_n = get_colorschemes();
-
 	set_colors(usr_cscheme ? usr_cscheme : "default", 1);
 
 	free(usr_cscheme);
@@ -1903,6 +1904,8 @@ reload_config(void)
 	
 	/* If some option was set via command line, keep that value
 	 * for any profile */
+	if (xargs.cd_on_quit != UNSET)
+		cd_on_quit = xargs.cd_on_quit;
 	if (xargs.ext != UNSET)
 		ext_cmd_ok = xargs.ext;
 	if (xargs.splash != UNSET)
@@ -1927,6 +1930,44 @@ reload_config(void)
 		pager = xargs.pager;
 	if (xargs.dirmap != UNSET)
 		dirhist_map = xargs.dirmap;
+	if (xargs.autocd != UNSET)
+		autocd = xargs.autocd;
+	if (xargs.auto_open != UNSET)
+		auto_open = xargs.auto_open;
+	if (xargs.restore_last_path != UNSET)
+		restore_last_path = xargs.restore_last_path;
+	if (xargs.tips != UNSET)
+		tips = xargs.tips;
+	if (xargs.disk_usage != UNSET)
+		disk_usage = xargs.disk_usage;
+	if (xargs.dir_indicator != UNSET)
+		dir_indicator = xargs.dir_indicator;
+	if (xargs.classify != UNSET)
+		classify = xargs.classify;
+	if (xargs.share_selbox != UNSET)
+		share_selbox = xargs.share_selbox;
+	if (xargs.max_dirhist != UNSET)
+		max_dirhist = xargs.max_dirhist;
+	if (xargs.sort_reverse != UNSET)
+		sort_reverse = xargs.sort_reverse;
+	if (xargs.files_counter != UNSET)
+		files_counter = xargs.files_counter;
+	if (xargs.welcome_message != UNSET)
+		welcome_message = xargs.welcome_message;
+	if (xargs.clear_screen != UNSET)
+		clear_screen = xargs.clear_screen;
+	if (xargs.bk_files != UNSET)
+		show_bk_files = xargs.bk_files;
+	if (xargs.logs != UNSET)
+		logs_enabled = xargs.logs;
+	if (xargs.max_path != UNSET)
+		max_path = xargs.max_path;
+	if (xargs.expand_bookmarks != UNSET)
+		expand_bookmarks = xargs.expand_bookmarks;
+	if (xargs.only_dirs != UNSET)
+		only_dirs = xargs.only_dirs;
+	if (xargs.tips != UNSET)
+		tips = xargs.tips;
 
 	/* Free the aliases and prompt_cmds arrays to be allocated again */
 
@@ -1951,6 +1992,8 @@ reload_config(void)
 
 	load_dirhist();
 
+	/* Set the current poistion of the dirhist index to the last
+	 * entry */
 	dirhist_cur_index = dirhist_total_index - 1;
 
 	return EXIT_SUCCESS;
@@ -4848,6 +4891,7 @@ ShowHiddenFiles=false\n\
 ShowBackUpFiles=true\n\
 LongViewMode=false\n\
 ExternalCommands=false\n\
+CdOnQuit=false\n\
 LogCmds=false\n\n"
 
 "# If set to true, a command name that is the name of a directory or a\n\
@@ -5163,26 +5207,37 @@ record_cmd(char *input)
 
 	/* Exit commands */
 	switch (*p) {
+
 	case 'q':
 		if (*(p + 1) == 0x00 || strcmp(p, "quit") == 0)
 			return 0;
 		break;
-	case 'e':
-		if (strcmp(p, "exit") == 0)
+
+	case 'Q':
+		if (*(p + 1) == 0x00)
 			return 0;
 		break;
+
+	case 'e':
+		if (*(p + 1) == 'x' && strcmp(p, "exit") == 0)
+			return 0;
+		break;
+
 	case 'z':
 		if (*(p + 1) == 'z' && *(p + 2) == 0x00)
 			return 0;
 		break;
+
 	case 's':
-		if (strcmp(p, "salir") == 0)
+		if (*(p + 1) == 'a' && strcmp(p, "salir") == 0)
 			return 0;
 		break;
+
 	case 'c':
-		if (strcmp(p, "chau") == 0)
+		if (*(p + 1) == 'h' && strcmp(p, "chau") == 0)
 			return 0;
 		break;
+
 	default: break;
 	}
 
@@ -5194,7 +5249,8 @@ record_cmd(char *input)
 
 	/* Consequtively equal commands in history */
 	if (history && history[current_hist_n - 1] 
-	&& (strcmp(p, history[current_hist_n - 1]) == 0))
+	&& *p == *history[current_hist_n - 1]
+	&& strcmp(p, history[current_hist_n - 1]) == 0)
 		return 0;
 
 	return 1;
@@ -8517,6 +8573,13 @@ check_options(void)
 			auto_open = xargs.auto_open;
 	}
 
+	if (cd_on_quit == UNSET) {
+		if (xargs.cd_on_quit == UNSET)
+			cd_on_quit = DEF_CD_ON_QUIT;
+		else
+			cd_on_quit = xargs.cd_on_quit;
+	}
+
 	if (dirhist_map == UNSET) {
 		if (xargs.dirmap == UNSET)
 			dirhist_map = DEF_DIRHIST_MAP;
@@ -11513,8 +11576,24 @@ rl_manpage (int count, int key)
 	return EXIT_SUCCESS;
 }
 
+int
+rl_pinned_dir(int count, int key)
+{
+	if (!pinned_dir) {
+		printf(_("%s: No pinned file\n"), PROGRAM_NAME);
+		return EXIT_SUCCESS;
+	}
+
+	keybind_exec_cmd(",");
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
 /*
-int rl_test(int count, int key)
+int
+rl_test(int count, int key)
 {
 	puts("TEST!!");
 
@@ -11565,6 +11644,8 @@ readline_kbinds(void)
 
 		rl_bind_keyseq(find_key("first-dir"), rl_first_dir);
 		rl_bind_keyseq(find_key("last-dir"), rl_last_dir);
+
+		rl_bind_keyseq(find_key("pinned-dir"), rl_pinned_dir);
 
 		/* Operations on files */
 		rl_bind_keyseq(find_key("bookmark-sel"), rl_bm_sel);
@@ -11828,7 +11909,8 @@ save_pinned_dir(void)
 
 void
 save_last_path(void)
-/* Store last visited directory for the restore last path function */
+/* Store last visited directory for the restore last path and the
+ * cd on quit functions */
 {
 	if (path && config_ok) {
 		char *last_dir = (char *)xnmalloc(strlen(CONFIG_DIR) + 7,
@@ -11838,16 +11920,35 @@ save_last_path(void)
 		FILE *last_fp;
 
 		last_fp = fopen(last_dir, "w");
-		if (!last_fp)
+
+		if (!last_fp) {
 			fprintf(stderr, _("%s: Error storing last visited "
 					"directory\n"), PROGRAM_NAME);
-		else {
-			fprintf(last_fp, "%s", path);
-			fclose(last_fp);
+			free(last_dir);
+			return;
 		}
 
-		free(last_dir);
+		fprintf(last_fp, "%s", path);
+
+		fclose(last_fp);
+
+		if (cd_on_quit) {
+			char *last_dir_tmp = xnmalloc(strlen(CONFIG_DIR_GRAL)
+										  + 7, sizeof(char *));
+			sprintf(last_dir_tmp, "%s/.last", CONFIG_DIR_GRAL);
+
+			char *cmd[] = { "cp", "-p", last_dir, last_dir_tmp,
+							NULL };
+
+			launch_execve(cmd, FOREGROUND);
+
+			free(last_dir_tmp);
+		}
+
+		free(last_dir);		
 	}
+
+	return;
 }
 
 int
@@ -11964,8 +12065,6 @@ free_stuff(void)
 	if (ext_colors_n)
 		free(ext_colors_len);
 
-	free(TMP_DIR);
-
 	if (opener)
 		free(opener);
 
@@ -12065,10 +12164,12 @@ free_stuff(void)
 	free(user_home);
 	free(sys_shell);
 	free(path);
+	free(CONFIG_DIR_GRAL);
 	free(CONFIG_DIR);
 	free(TRASH_DIR);
 	free(TRASH_FILES_DIR);
 	free(TRASH_INFO_DIR);
+	free(TMP_DIR);
 	free(BM_FILE);
 	free(LOG_FILE);
 	free(HIST_FILE);
@@ -13241,8 +13342,6 @@ define_config_file_names(void)
 
 	size_t xdg_config_home_len = 0;
 
-	char *CONFIG_DIR_GRAL = (char *)NULL;
-
 	if (xdg_config_home) {
 		xdg_config_home_len = strlen(xdg_config_home);
 
@@ -13297,8 +13396,8 @@ define_config_file_names(void)
 								  sizeof(char));
 	sprintf(COLORS_DIR, "%s/colors", CONFIG_DIR_GRAL);
 
-	free(CONFIG_DIR_GRAL);
-	CONFIG_DIR_GRAL = (char *)NULL;
+/*	free(CONFIG_DIR_GRAL);
+	CONFIG_DIR_GRAL = (char *)NULL; */
 
 
 	TRASH_DIR = (char *)xcalloc(user_home_len + 20, sizeof(char));
@@ -13655,6 +13754,9 @@ read_config(void)
 
 	while (fgets(line, sizeof(line), config_fp)) {
 
+		if (*line == '\n' || (*line == '#' && line[1] != 'E'))
+			continue;
+
 		if (*line == '#'
 		&& strncmp(line, "#END OF OPTIONS", 15) == 0)
 			break;
@@ -13713,6 +13815,20 @@ read_config(void)
 
 			else if (strncmp(opt_str, "false", 5) == 0)
 				light_mode = 0;
+		}
+
+		else if (xargs.cd_on_quit == UNSET && *line == 'C'
+		&& strncmp(line, "CdOnQuit=", 9) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "CdOnQuit=%5s\n", opt_str);
+			if (ret == -1)
+				continue;
+
+			if (strncmp(opt_str, "true", 4) == 0)
+				cd_on_quit = 1;
+
+			else if (strncmp(opt_str, "false", 5) == 0)
+				cd_on_quit = 0;
 		}
 
 		else if (xargs.expand_bookmarks == UNSET
@@ -14638,23 +14754,9 @@ external_arguments(int argc, char **argv)
 		{"only-dirs", no_argument, 0, 19},
 		{"list-and-quit", no_argument, 0, 20},
 		{"color-scheme", required_argument, 0, 21},
+		{"cd-on-quit", required_argument, 0, 22},
 		{0, 0, 0, 0}
 	};
-
-	/* Set all external arguments flags to uninitialized state */
-	xargs.splash = xargs.hidden = xargs.longview = xargs.ext = UNSET;
-	xargs.ffirst = xargs.sensitive = xargs.unicode = xargs.pager = UNSET;
-	xargs.path = xargs.cd_list_auto = xargs.autocd = UNSET;
-	xargs.light = xargs.sort = xargs.dirmap = xargs.config = UNSET;
-	xargs.stealth_mode = xargs.auto_open = xargs.only_dirs = UNSET;
-
-	xargs.restore_last_path = xargs.tips = xargs.disk_usage = UNSET;
-	xargs.dir_indicator = xargs.classify = xargs.share_selbox = UNSET;
-	xargs.rl_vi_mode = xargs.max_dirhist = xargs.sort_reverse = UNSET;
-	xargs.files_counter = xargs.welcome_message = UNSET;
-	xargs.clear_screen = xargs.bk_files = xargs.logs = UNSET;
-	xargs.max_path = xargs.bm_file = xargs.expand_bookmarks = UNSET;
-	xargs.list_and_quit = UNSET;
 
 	int optc;
 	/* Variables to store arguments to options (-c, -p and -P) */
@@ -14672,33 +14774,27 @@ external_arguments(int argc, char **argv)
 		switch (optc) {
 
 		case 0:
-			xargs.autocd = 0;
-			autocd = 0;
+			xargs.autocd = autocd = 0;
 		break;
 
 		case 1:
-			xargs.auto_open = 0;
-			auto_open = 0;
+			xargs.auto_open = auto_open = 0;
 		break;
 
 		case 2:
-			xargs.restore_last_path = 1;
-			restore_last_path = 1;
+			xargs.restore_last_path = restore_last_path = 1;
 		break;
 
 		case 3:
-			xargs.tips = 0;
-			tips = 0;
+			xargs.tips = tips = 0;
 		break;
 
 		case 4:
-			xargs.disk_usage = 1;
-			disk_usage = 1;
+			xargs.disk_usage = disk_usage = 1;
 		break;
 
 		case 5:
-			xargs.dir_indicator = 0;
-			dir_indicator = 0;
+			xargs.dir_indicator = dir_indicator = 0;
 		break;
 
 		case 6: {
@@ -14716,8 +14812,7 @@ external_arguments(int argc, char **argv)
 		break;
 
 		case 7:
-			xargs.share_selbox = 1;
-			share_selbox = 1;
+			xargs.share_selbox = share_selbox = 1;
 		break;
 
 		case 8:
@@ -14733,33 +14828,27 @@ external_arguments(int argc, char **argv)
 		break;
 
 		case 10:
-			xargs.sort_reverse = 1;
-			sort_reverse = 1;
+			xargs.sort_reverse = sort_reverse = 1;
 		break;
 
 		case 11:
-			xargs.files_counter = 0;
-			files_counter = 0;
+			xargs.files_counter = files_counter = 0;
 		break;
 
 		case 12:
-			xargs.welcome_message = 0;
-			welcome_message = 0;
+			xargs.welcome_message = welcome_message = 0;
 		break;
 
 		case 13:
-			xargs.clear_screen = 0;
-			clear_screen = 0;
+			xargs.clear_screen = clear_screen = 0;
 		break;
 
 		case 14:
-			xargs.bk_files = 0;
-			show_bk_files = 0;
+			xargs.bk_files = show_bk_files = 0;
 		break;
 
 		case 15:
-			xargs.logs = 1;
-			logs_enabled = 1;
+			xargs.logs = logs_enabled = 1;
 		break;
 
 		case 16: {
@@ -14795,16 +14884,18 @@ external_arguments(int argc, char **argv)
 		}
 		break;
 
+		case 22:
+			xargs.cd_on_quit = cd_on_quit = 1;
+		break;
+
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
-			show_hidden = 0;
-			xargs.hidden = 0;
+			show_hidden = xargs.hidden = 0;
 			break;
 
 		case 'A':
 			flags |= HIDDEN; /* Add HIDDEN to 'flags' */
-			show_hidden = 1;
-			xargs.hidden = 1;
+			show_hidden = xargs.hidden = 1;
 			break;
 
 		case 'b':
@@ -14819,24 +14910,20 @@ external_arguments(int argc, char **argv)
 
 		case 'f':
 			flags &= ~FOLDERS_FIRST;
-			list_folders_first = 0;
-			xargs.ffirst = 0;
+			list_folders_first = xargs.ffirst = 0;
 			break;
 
 		case 'F':
 			flags |= FOLDERS_FIRST;
-			list_folders_first = 1;
-			xargs.ffirst = 1;
+			list_folders_first = xargs.ffirst = 1;
 			break;
 
 		case 'g':
-			pager = 1;
-			xargs.pager = 1;
+			pager = xargs.pager = 1;
 			break;
 
 		case 'G':
-			pager = 0;
-			xargs.pager = 0;
+			pager = xargs.pager = 0;
 			break;
 
 		case 'h':
@@ -14848,14 +14935,12 @@ external_arguments(int argc, char **argv)
 
 		case 'i':
 			flags &= ~CASE_SENS;
-			case_sensitive = 0;
-			xargs.sensitive = 0;
+			case_sensitive = xargs.sensitive = 0;
 			break;
 
 		case 'I':
 			flags |= CASE_SENS;
-			case_sensitive = 1;
-			xargs.sensitive = 1;
+			case_sensitive = xargs.sensitive = 1;
 			break;
 
 		case 'k':
@@ -14863,30 +14948,25 @@ external_arguments(int argc, char **argv)
 			break;
 
 		case 'l':
-			long_view = 0;
-			xargs.longview = 0;
+			long_view = xargs.longview = 0;
 			break;
 
 		case 'L':
-			long_view = 1;
-			xargs.longview = 1;
+			long_view = xargs.longview = 1;
 			break;
 
 		case 'm':
-			dirhist_map = 1;
-			xargs.dirmap = 1;
+			dirhist_map = xargs.dirmap = 1;
 			break;
 
 		case 'o':
 			flags &= ~ON_THE_FLY;
-			cd_lists_on_the_fly = 0;
-			xargs.cd_list_auto = 0;
+			cd_lists_on_the_fly = xargs.cd_list_auto = 0;
 			break;
 
 		case 'O':
 			flags |= ON_THE_FLY;
-			cd_lists_on_the_fly = 1;
-			xargs.cd_list_auto = 1;
+			cd_lists_on_the_fly = xargs.cd_list_auto = 1;
 			break;
 
 		case 'p':
@@ -14902,8 +14982,7 @@ external_arguments(int argc, char **argv)
 
 		case 's':
 			flags |= SPLASH;
-			splash_screen = 1;
-			xargs.splash = 1;
+			splash_screen = xargs.splash = 1;
 			break;
 
 		case 'S':
@@ -14912,13 +14991,11 @@ external_arguments(int argc, char **argv)
 
 
 		case 'u':
-			unicode = 0;
-			xargs.unicode = 0;
+			unicode = xargs.unicode = 0;
 			break;
 
 		case 'U':
-			unicode = 1;
-			xargs.unicode = 1;
+			unicode = xargs.unicode = 1;
 			break;
 
 		case 'v':
@@ -14927,25 +15004,23 @@ external_arguments(int argc, char **argv)
 			exit(EXIT_SUCCESS);
 
 		case 'x':
-			ext_cmd_ok = 1;
-			xargs.ext = 1;
+			ext_cmd_ok = xargs.ext = 1;
 			break;
 
 		case 'y':
-			light_mode = 1;
-			xargs.light = 1;
+			light_mode = xargs.light = 1;
 			break;
 
 		case 'z':
 			{
 				int arg = atoi(optarg);
-				if (!is_number(optarg))
-					sort = 1;
-				else if (arg < 0 || arg > sort_types)
+
+				if (!is_number(optarg) || arg < 0 || arg > sort_types)
 					sort = 1;
 				else
 					sort = arg;
-				xargs.sort = 1;
+
+				xargs.sort = sort;
 			}
 			break;
 
@@ -19577,6 +19652,15 @@ exec_cmd(char **comm)
 		exit(exit_code);
 	}
 
+	else if (*comm[0] == 'Q' && !comm[1]) {
+		size_t i;
+		for (i = 0; i <= args_n; i++)
+			free(comm[i]);
+		free(comm);
+
+		cd_on_quit = 1;
+		exit(exit_code);
+	}
 
 	else {
 
@@ -23896,6 +23980,9 @@ help_function (void)
 \n				(e.g. '12' instead of 'cd 12'). This \
 \n				option forces the use of 'cd'\
 \n     --no-open-auto\t\t same as no-cd-auto, but for files\
+\n     --cd-on-quit\t\t write last visited path to \
+\n				$XDG_CONFIG_HOME/clifm/.last to be accessed\
+\n				later by a shell funtion. See the manpage\
 \n     --restore-last-path\t save last visited directory to be \
 \n				restored in the next session\
 \n     --no-tips\t\t\t disable startup tips\
@@ -24000,7 +24087,8 @@ help_function (void)
  ext [on, off, status]\n\
  ver, version\n\
  fs\n\
- q, quit, exit, zz\n"));
+ q, quit, exit, zz\n\
+ Q\n"));
 
 	puts(_("Run 'cmd' or consult the manpage for more information about "
 		   "each of these commands.\n"));
@@ -24024,6 +24112,7 @@ help_function (void)
  M-j, S-Left: Change to previous visited directory\n\
  M-k, S-Right: Change to next visited directory\n\
  M-o: Lock terminal\n\
+ M-p: Change to pinned directory\n\
  C-M-j: Change to first visited directory\n\
  C-M-k: Change to last visited directory\n\
  C-M-o: Switch to previous profile\n\
