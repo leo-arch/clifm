@@ -76,14 +76,15 @@ Because file manager, but also half-shell, CLiFM also provides the following fea
 * Bash-like prompt customization
 * Sequential and conditional commands execution 
 * User profiles
-* Customizable keyboard shortcuts (**NEW**)
+* Customizable keyboard shortcuts
 * Resource opener
 * Multiple sorting methods: name, size, atime, btime, ctime, mtime, version, extension, and inode. It also supports reverse sorting.
 * Bulk rename
 * Archives and compression support (including Zstandard and ISO 9660)
 * Auto-cd and auto-open
 * Symlinks editor
-* Disk usage (**NEW**)
+* Disk usage
+* CD on quit (**NEW**)
 * Color schemes (**NEW**)
 
 **NOTE**: By default, CliFM ships only one color scheme, but more can be found at https://github.com/leo-arch/clifm-colors. The package is also available in the AUR: https://aur.archlinux.org/packages/clifm-colors-git
