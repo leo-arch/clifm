@@ -387,8 +387,10 @@ int save_dirhist(void);
 int load_dirhist(void);
 int load_pinned_dir(void);
 void save_pinned_dir(void);
+void set_sel_file(void);
+void create_tmp_files(void);
 
-/* Memory */
+/* Memory management */
 char *xnmalloc(size_t nmemb, size_t size);
 void *xcalloc(size_t nmemb, size_t size);
 void *xrealloc(void *ptr, size_t size);
@@ -626,7 +628,7 @@ int check_regex(char *str);
 int check_dir(char **args);
 
 /* Colors */
-void set_default_options(void);
+void check_options(void);
 int set_colors (char *colorscheme, int env);
 char *strip_color_line(char *str, char mode);
 size_t get_colorschemes(void);
@@ -777,7 +779,7 @@ short splash_screen = UNSET, welcome_message = UNSET, ext_cmd_ok = UNSET,
 	case_sensitive = UNSET, cd_lists_on_the_fly = UNSET,
 	tips = UNSET, logs_enabled = UNSET, sort = UNSET, classify = UNSET,
 	files_counter = UNSET, light_mode = UNSET, dir_indicator = UNSET,
-	autocd = UNSET, auto_open = UNSET,dirhist_map = UNSET,
+	autocd = UNSET, auto_open = UNSET, dirhist_map = UNSET,
 	restore_last_path = UNSET, pager = UNSET, show_bk_files = UNSET,
 	expand_bookmarks = UNSET, only_dirs = UNSET,
 
@@ -799,10 +801,12 @@ short splash_screen = UNSET, welcome_message = UNSET, ext_cmd_ok = UNSET,
 * can hold, the result of a comparison with this variable will always be
 * true */
 
-int max_hist = UNSET, max_log = UNSET, dirhist_total_index = 0,
-	dirhist_cur_index = 0, argc_bk = 0, max_path = UNSET, exit_code = 0,
+int max_hist = UNSET, max_log = UNSET, max_dirhist = UNSET,
+	max_path = UNSET,
+
+	dirhist_cur_index = 0, argc_bk = 0, exit_code = 0,
 	shell_is_interactive = 0, cont_bt = 0, sort_types = 9,
-	max_dirhist = UNSET, total = 0;
+	total = 0, dirhist_total_index = 0;
 
 int *eln_as_file = (int *)0;
 
@@ -820,7 +824,7 @@ off_t total_sel_size = 0;
 pid_t own_pid = 0;
 char *user = (char *)NULL, *path = (char *)NULL,
 	**sel_elements = (char **)NULL, *qc = (char *)NULL,
-	*sel_file_user = (char *)NULL, **paths = (char **)NULL,
+	*SEL_FILE = (char *)NULL, **paths = (char **)NULL,
 	**bin_commands = (char **)NULL, **history = (char **)NULL,
 	*file_cmd_path = (char *)NULL, **braces = (char **)NULL,
 	*alt_profile = (char *)NULL, **prompt_cmds = (char **)NULL,
@@ -1106,8 +1110,11 @@ main(int argc, char **argv)
 		config_ok = 0;
 	}
 
-	if (!config_ok)
-		set_default_options();
+	check_options();
+
+	set_sel_file();
+
+	create_tmp_files();
 
 	cschemes_n = get_colorschemes();
 
@@ -1813,8 +1820,8 @@ reload_config(void)
 
 	free(COLORS_DIR);
 	free(TMP_DIR);
-	free(sel_file_user);
-	TMP_DIR = COLORS_DIR = sel_file_user = (char *)NULL;
+	free(SEL_FILE);
+	TMP_DIR = COLORS_DIR = SEL_FILE = (char *)NULL;
 
 	size_t i = 0;
 
@@ -1877,11 +1884,15 @@ reload_config(void)
 
 	home_ok = config_ok = trash_ok = selfile_ok = 1;
 
-	/* Set up config files and variables */
+	/* Set up config files and options */
 	init_config();
 
-	if (!config_ok)
-		set_default_options();
+	/* If some option was not set, set it to the default value*/
+	check_options();
+
+	set_sel_file();
+
+	create_tmp_files();
 
 	cschemes_n = get_colorschemes();
 
@@ -7511,7 +7522,7 @@ set_colors(char *colorscheme, int env)
 				}
 
 				/* File extension colors */
-				else if (!extcolors && *line == 'E'
+				if (!extcolors && *line == 'E'
 				&& strncmp(line, "ExtColors=", 10) == 0) {
 					ext_type_found = 1;
 					char *opt_str = strchr(line, '=');
@@ -8224,243 +8235,347 @@ set_colors(char *colorscheme, int env)
 	/* If some color was not set or it was a wrong color code, set the
 	 * default */
 	if (!*el_c)
-		sprintf(el_c, DEF_EL_C);
+		strcpy(el_c, DEF_EL_C);
 	if (!*mi_c)
-		sprintf(mi_c, DEF_MI_C);
+		strcpy(mi_c, DEF_MI_C);
 	if (!*dl_c)
-		sprintf(dl_c, DEF_DL_C);
+		strcpy(dl_c, DEF_DL_C);
 	if (!*df_c)
-		sprintf(df_c, DEF_DF_C);
+		strcpy(df_c, DEF_DF_C);
 	if (!*dc_c)
-		sprintf(dc_c, DEF_DC_C);
+		strcpy(dc_c, DEF_DC_C);
 	if (!*wc_c)
-		sprintf(wc_c, DEF_WC_C);
+		strcpy(wc_c, DEF_WC_C);
 	if (!*dh_c)
-		sprintf(dh_c, DEF_DH_C);
+		strcpy(dh_c, DEF_DH_C);
 	if (!*tx_c)
-		sprintf(tx_c, DEF_TX_C);
+		strcpy(tx_c, DEF_TX_C);
 	if (!*li_c)
-		sprintf(li_c, DEF_LI_C);
+		strcpy(li_c, DEF_LI_C);
 	if (!*ti_c)
-		sprintf(ti_c, DEF_TI_C);
+		strcpy(ti_c, DEF_TI_C);
 	if (!*em_c)
-		sprintf(em_c, DEF_EM_C);
+		strcpy(em_c, DEF_EM_C);
 	if (!*wm_c)
-		sprintf(wm_c, DEF_WM_C);
+		strcpy(wm_c, DEF_WM_C);
 	if (!*nm_c)
-		sprintf(nm_c, DEF_NM_C);
+		strcpy(nm_c, DEF_NM_C);
 	if (!*si_c)
-		sprintf(si_c, DEF_SI_C);
+		strcpy(si_c, DEF_SI_C);
 	if (!*bm_c)
-		sprintf(bm_c, DEF_BM_C);
+		strcpy(bm_c, DEF_BM_C);
 
 	if (!*di_c)
-		sprintf(di_c, DEF_DI_C);
+		strcpy(di_c, DEF_DI_C);
 	if (!*nd_c)
-		sprintf(nd_c, DEF_ND_C);
+		strcpy(nd_c, DEF_ND_C);
 	if (!*ed_c)
-		sprintf(ed_c, DEF_ED_C);
+		strcpy(ed_c, DEF_ED_C);
 	if (!*ne_c)
-		sprintf(ne_c, DEF_NE_C);
+		strcpy(ne_c, DEF_NE_C);
 	if (!*fi_c)
-		sprintf(fi_c, DEF_FI_C);
+		strcpy(fi_c, DEF_FI_C);
 	if (!*ef_c)
-		sprintf(ef_c, DEF_EF_C);
+		strcpy(ef_c, DEF_EF_C);
 	if (!*nf_c)
-		sprintf(nf_c, DEF_NF_C);
+		strcpy(nf_c, DEF_NF_C);
 	if (!*ln_c)
-		sprintf(ln_c, DEF_LN_C);
+		strcpy(ln_c, DEF_LN_C);
 	if (!*or_c)
-		sprintf(or_c, DEF_OR_C);
+		strcpy(or_c, DEF_OR_C);
 	if (!*pi_c)
-		sprintf(pi_c, DEF_PI_C);
+		strcpy(pi_c, DEF_PI_C);
 	if (!*so_c)
-		sprintf(so_c, DEF_SO_C);
+		strcpy(so_c, DEF_SO_C);
 	if (!*bd_c)
-		sprintf(bd_c, DEF_BD_C);
+		strcpy(bd_c, DEF_BD_C);
 	if (!*cd_c)
-		sprintf(cd_c, DEF_CD_C);
+		strcpy(cd_c, DEF_CD_C);
 	if (!*su_c)
-		sprintf(su_c, DEF_SU_C);
+		strcpy(su_c, DEF_SU_C);
 	if (!*sg_c)
-		sprintf(sg_c, DEF_SG_C);
+		strcpy(sg_c, DEF_SG_C);
 	if (!*st_c)
-		sprintf(st_c, DEF_ST_C);
+		strcpy(st_c, DEF_ST_C);
 	if (!*tw_c)
-		sprintf(tw_c, DEF_TW_C);
+		strcpy(tw_c, DEF_TW_C);
 	if (!*ow_c)
-		sprintf(ow_c, DEF_OW_C);
+		strcpy(ow_c, DEF_OW_C);
 	if (!*ex_c)
-		sprintf(ex_c, DEF_EX_C);
+		strcpy(ex_c, DEF_EX_C);
 	if (!*ee_c)
-		sprintf(ee_c, DEF_EE_C);
+		strcpy(ee_c, DEF_EE_C);
 	if (!*ca_c)
-		sprintf(ca_c, DEF_CA_C);
+		strcpy(ca_c, DEF_CA_C);
 	if (!*no_c)
-		sprintf(no_c, DEF_NO_C);
+		strcpy(no_c, DEF_NO_C);
 	if (!*uf_c)
-		sprintf(uf_c, DEF_UF_C);
+		strcpy(uf_c, DEF_UF_C);
 	if (!*mh_c)
-		sprintf(mh_c, DEF_MH_C);
+		strcpy(mh_c, DEF_MH_C);
 
 	return EXIT_SUCCESS;
 }
 
 void
-set_default_options(void)
-/* Set the default options. Used when the config file isn't accessible
- * or when running in stealth mode */
+check_options(void)
+/* If some option was not set, set it to the default value */
 {
-	/* Do no override command line options */
+	if (!usr_cscheme) {
+		usr_cscheme = (char *)xnmalloc(8, sizeof(char));
+		strcpy(usr_cscheme, "default");
+	}
 
-	/* Since in stealth mode we have no access to config file, we
+	/* Do no override command line options */
+	if (only_dirs == UNSET) {
+		if (xargs.only_dirs == UNSET)
+			only_dirs = DEF_ONLY_DIRS;
+		else
+			only_dirs = xargs.only_dirs;
+	}
+
+	if (expand_bookmarks == UNSET) {
+		if (xargs.expand_bookmarks == UNSET)
+			expand_bookmarks = DEF_EXPAND_BOOKMARKS;
+		else
+			expand_bookmarks = xargs.expand_bookmarks;
+	}
+
+	if (splash_screen == UNSET) {
+		if (xargs.splash == UNSET)
+			splash_screen = DEF_SPLASH_SCREEN;
+		else
+			splash_screen = xargs.splash;
+	}
+
+	if (welcome_message == UNSET) {
+		if (xargs.welcome_message == UNSET)
+			welcome_message = DEF_WELCOME_MESSAGE;
+		else
+			welcome_message = xargs.welcome_message;
+	}
+
+	if (show_hidden == UNSET) {
+		if (xargs.hidden == UNSET)
+			show_hidden = DEF_SHOW_HIDDEN;
+		else
+			show_hidden = xargs.hidden;
+	}
+
+	if (show_bk_files == UNSET) {
+		if (xargs.bk_files == UNSET)
+			show_bk_files = DEF_SHOW_BK_FILES;
+		else
+			show_bk_files = xargs.bk_files;
+	}
+
+	if (files_counter == UNSET) {
+		if (xargs.files_counter == UNSET)
+			files_counter = DEF_FILES_COUNTER;
+		else
+			files_counter = xargs.files_counter;
+	}
+
+	if (long_view == UNSET) {
+		if (xargs.longview == UNSET)
+			long_view = DEF_LONG_VIEW;
+		else
+			long_view = xargs.longview;
+	}
+
+	if (ext_cmd_ok == UNSET) {
+		if (xargs.ext == UNSET)
+			ext_cmd_ok = DEF_EXT_CMD_OK;
+		else
+			ext_cmd_ok = xargs.ext;
+	}
+
+	if (pager == UNSET) {
+		if (xargs.pager == UNSET)
+			pager = DEF_PAGER;
+		else
+			pager = xargs.pager;
+	}
+
+	if (max_dirhist == UNSET) {
+		if (xargs.max_dirhist == UNSET)
+			max_dirhist = DEF_MAX_DIRHIST;
+		else
+			max_dirhist = xargs.max_dirhist;
+	}
+
+	if (clear_screen == UNSET) {
+		if (xargs.clear_screen == UNSET)
+			clear_screen = DEF_CLEAR_SCREEN;
+		else
+			clear_screen = xargs.clear_screen;
+	}
+
+
+	if (list_folders_first == UNSET) {
+		if (xargs.ffirst == UNSET)
+			list_folders_first = DEF_LIST_FOLDERS_FIRST;
+		else
+			list_folders_first = xargs.ffirst;
+	}
+
+	if (cd_lists_on_the_fly == UNSET) {
+		if (xargs.cd_list_auto == UNSET)
+			cd_lists_on_the_fly = DEF_CD_LISTS_ON_THE_FLY;
+		else
+			cd_lists_on_the_fly = xargs.cd_list_auto;
+	}
+
+	if (case_sensitive == UNSET) {
+		if (xargs.sensitive == UNSET)
+			case_sensitive = DEF_CASE_SENSITIVE;
+		else
+			case_sensitive = xargs.sensitive;
+	}
+
+	if (unicode == UNSET) {
+		if (xargs.unicode == UNSET)
+			unicode = DEF_UNICODE;
+		else
+			unicode = xargs.unicode;
+	}
+
+	if (max_path == UNSET) {
+		if (xargs.max_path == UNSET)
+			max_path = DEF_MAX_PATH;
+		else
+			max_path = xargs.max_path;
+	}
+
+	if (logs_enabled == UNSET) {
+		if (xargs.logs == UNSET)
+			logs_enabled = DEF_LOGS_ENABLED;
+		else
+			logs_enabled = xargs.logs;
+	}
+
+	if (light_mode == UNSET) {
+		if (xargs.light == UNSET)
+			light_mode = DEF_LIGHT_MODE;
+		else
+			light_mode = xargs.light;
+	}
+
+	if (dir_indicator == UNSET) {
+		if (xargs.dir_indicator == UNSET)
+			dir_indicator = DEF_DIR_INDICATOR;
+		else
+			dir_indicator = xargs.dir_indicator;
+	}
+
+	if (classify == UNSET) {
+		if (xargs.classify == UNSET)
+			classify = DEF_CLASSIFY;
+		else
+			classify = xargs.classify;
+	}
+
+	if (share_selbox == UNSET) {
+		if (xargs.share_selbox == UNSET)
+			share_selbox = DEF_SHARE_SELBOX;
+		else
+			share_selbox = xargs.share_selbox;
+	}
+
+	if (sort == UNSET) {
+		if (xargs.sort == UNSET)
+			sort = DEF_SORT;
+		else
+			sort = xargs.sort;
+	}
+
+	if (sort_reverse == UNSET) {
+		if (xargs.sort_reverse == UNSET)
+			sort_reverse = DEF_SORT_REVERSE;
+		else
+			sort_reverse = xargs.sort_reverse;
+	}
+
+	if (tips == UNSET) {
+		if (xargs.tips == UNSET)
+			tips = DEF_TIPS;
+		else
+			tips = xargs.tips;
+	}
+
+	if (autocd == UNSET) {
+		if (xargs.autocd == UNSET)
+			autocd = DEF_AUTOCD;
+		else
+			autocd = xargs.autocd;
+	}
+
+	if (auto_open == UNSET) {
+		if (xargs.auto_open == UNSET)
+			auto_open = DEF_AUTO_OPEN;
+		else
+			auto_open = xargs.auto_open;
+	}
+
+	if (dirhist_map == UNSET) {
+		if (xargs.dirmap == UNSET)
+			dirhist_map = DEF_DIRHIST_MAP;
+		else
+			dirhist_map = xargs.dirmap;
+	}
+
+	if (disk_usage == UNSET) {
+		if (xargs.disk_usage == UNSET)
+			disk_usage = DEF_DISK_USAGE;
+		else
+			disk_usage = xargs.disk_usage;
+	}
+
+	if (restore_last_path == UNSET) {
+		if (xargs.restore_last_path == UNSET)
+			restore_last_path = DEF_RESTORE_LAST_PATH;
+		else
+			restore_last_path = xargs.restore_last_path;
+	}
+
+	if (div_line_char == UNSET)
+		div_line_char = DEF_DIV_LINE_CHAR;
+
+	if (max_hist == UNSET)
+		max_hist = DEF_MAX_HIST;
+
+	if (max_log == UNSET)
+		max_log = DEF_MAX_LOG;
+
+	if (!sys_shell) {
+		sys_shell = get_sys_shell();
+
+		if (!sys_shell) {
+			sys_shell = (char *)xcalloc(strlen(FALLBACK_SHELL) + 1,
+										sizeof(char));
+			strcpy(sys_shell, FALLBACK_SHELL);
+		}
+	}
+
+	if (!term) {
+		term = (char *)xcalloc(strlen(DEFAULT_TERM_CMD) + 1,
+							   sizeof(char));
+		strcpy(term, DEFAULT_TERM_CMD);
+	}
+
+	if (!encoded_prompt) {
+		encoded_prompt = (char *)xcalloc(strlen(DEFAULT_PROMPT) + 1,
+										 sizeof(char));
+		strcpy(encoded_prompt, DEFAULT_PROMPT);
+	}
+
+	/* Since in stealth mode we have no access to the config file, we
 	 * cannot use 'lira', since it relays on a file.
-	 * Set it thus to xdg-open, if not set via command line */
+	 * Set it thus to xdg-open, if not alreqady set via command line */
 	if (xargs.stealth_mode == 1 && !opener) {
 		opener = (char *)xnmalloc(9, sizeof(char));
 		strcpy(opener, "xdg-open");
 	}
-
-	if (xargs.only_dirs == UNSET)
-		only_dirs = DEF_ONLY_DIRS;
-	if (xargs.expand_bookmarks == UNSET)
-		expand_bookmarks = DEF_EXPAND_BOOKMARKS;
-	if (xargs.splash == UNSET)
-		splash_screen = DEF_SPLASH_SCREEN;
-	if (xargs.welcome_message == UNSET)
-		welcome_message = DEF_WELCOME_MESSAGE;
-	if (xargs.hidden == UNSET)
-		show_hidden = DEF_SHOW_HIDDEN;
-	if (xargs.bk_files == UNSET)
-		show_bk_files = DEF_SHOW_BK_FILES;
-	if (xargs.files_counter == UNSET)
-		files_counter = DEF_FILES_COUNTER;
-	if (xargs.longview == UNSET)
-		long_view = DEF_LONG_VIEW;
-	if (xargs.ext == UNSET)
-		ext_cmd_ok = DEF_EXT_CMD_OK;
-	if (xargs.pager == UNSET)
-		pager = DEF_PAGER;
-	if (xargs.max_dirhist == UNSET)
-		max_dirhist = DEF_MAX_DIRHIST;
-	if (xargs.clear_screen == UNSET)
-		clear_screen = DEF_CLEAR_SCREEN;
-	if (xargs.ffirst == UNSET)
-		list_folders_first = DEF_LIST_FOLDERS_FIRST;
-	if (xargs.cd_list_auto == UNSET)
-		cd_lists_on_the_fly = DEF_CD_LISTS_ON_THE_FLY;
-	if (xargs.sensitive == UNSET)
-		case_sensitive = DEF_CASE_SENSITIVE;
-	if (xargs.unicode == UNSET)
-		unicode = DEF_UNICODE;
-	if (xargs.max_path == UNSET)
-		max_path = DEF_MAX_PATH;
-	if (xargs.logs == UNSET)
-		logs_enabled = DEF_LOGS_ENABLED;
-	if (xargs.light == UNSET)
-		light_mode = DEF_LIGHT_MODE;
-	if (xargs.dir_indicator == UNSET)
-		dir_indicator = DEF_DIR_INDICATOR;
-	if (xargs.classify == UNSET)
-		classify = DEF_CLASSIFY;
-	if (xargs.share_selbox == UNSET)
-		share_selbox = DEF_SHARE_SELBOX;
-	if (xargs.sort == UNSET)
-		sort = DEF_SORT;
-	if (xargs.sort_reverse == UNSET)
-		sort_reverse = DEF_SORT_REVERSE;
-	if (xargs.tips == UNSET)
-		tips = DEF_TIPS;
-	if (xargs.autocd == UNSET)
-		autocd = DEF_AUTOCD;
-	if (xargs.auto_open == UNSET)
-		auto_open = DEF_AUTO_OPEN;
-	if (xargs.dirmap == UNSET)
-		dirhist_map = DEF_DIRHIST_MAP;
-	if (xargs.disk_usage == UNSET)
-		disk_usage = DEF_DISK_USAGE;
-	if (xargs.restore_last_path == UNSET)
-		restore_last_path = DEF_RESTORE_LAST_PATH;
-
-	div_line_char = DEF_DIV_LINE_CHAR;
-	max_hist = DEF_MAX_HIST;
-	max_log = DEF_MAX_LOG;
-
-	strcpy(di_c, DEF_DI_C);
-	strcpy(tx_c, DEF_TX_C);
-	strcpy(dc_c, DEF_DC_C);
-	strcpy(df_c, DEF_DF_C);
-	strcpy(dl_c, DEF_DL_C);
-	strcpy(wc_c, DEF_WC_C);
-	strcpy(el_c, DEF_EL_C);
-	strcpy(mi_c, DEF_MI_C);
-	strcpy(li_c, DEF_LI_C);
-	strcpy(ti_c, DEF_TI_C);
-	strcpy(em_c, DEF_EM_C);
-	strcpy(wm_c, DEF_WC_C);
-	strcpy(nm_c, DEF_NM_C);
-	strcpy(si_c, DEF_SI_C);
-
-	sprintf(di_c, DEF_DI_C);
-	sprintf(nd_c, DEF_ND_C);
-	sprintf(ed_c, DEF_ED_C);
-	sprintf(ne_c, DEF_NE_C);
-	sprintf(fi_c, DEF_FI_C);
-	sprintf(ef_c, DEF_EF_C);
-	sprintf(nf_c, DEF_NF_C);
-	sprintf(ln_c, DEF_LN_C);
-	sprintf(or_c, DEF_OR_C);
-	sprintf(pi_c, DEF_PI_C);
-	sprintf(so_c, DEF_SO_C);
-	sprintf(bd_c, DEF_BD_C);
-	sprintf(cd_c, DEF_CD_C);
-	sprintf(su_c, DEF_SU_C);
-	sprintf(sg_c, DEF_SG_C);
-	sprintf(st_c, DEF_ST_C);
-	sprintf(tw_c, DEF_TW_C);
-	sprintf(ow_c, DEF_OW_C);
-	sprintf(ex_c, DEF_EX_C);
-	sprintf(ee_c, DEF_EE_C);
-	sprintf(ca_c, DEF_CA_C);
-	sprintf(no_c, DEF_NO_C);
-	sprintf(uf_c, DEF_UF_C);
-	sprintf(mh_c, DEF_MH_C);
-	sprintf(bm_c, DEF_BM_C);
-
-/*	setenv("CLIFM_PROFILE", "default", 1); */
-
-	/* Set the LS_COLORS environment variable */
-	char lsc[] = DEF_LS_COLORS;
-
-	if (setenv("LS_COLORS", lsc, 1) == -1) 
-		fprintf(stderr, _("%s: Error registering environment colors\n"), 
-				PROGRAM_NAME);
-
-	if (sys_shell) {
-		free(sys_shell);
-		sys_shell = (char *)NULL;
-	}
-
-	sys_shell = get_sys_shell();
-
-	if (!sys_shell) {
-		sys_shell = (char *)xcalloc(strlen(FALLBACK_SHELL) + 1,
-									sizeof(char));
-		strcpy(sys_shell, FALLBACK_SHELL);
-	}
-
-	if (term)
-		free(term);
-
-	term = (char *)xcalloc(strlen(DEFAULT_TERM_CMD) + 1, sizeof(char));
-	strcpy(term, DEFAULT_TERM_CMD);
-
-	if (encoded_prompt)
-		free(encoded_prompt);
-
-	encoded_prompt = (char *)xcalloc(strlen(DEFAULT_PROMPT) + 1,
-									 sizeof(char));
-	strcpy(encoded_prompt, DEFAULT_PROMPT);
 }
 
 char *
@@ -11794,16 +11909,20 @@ save_dirhist(void)
 {
 	if (!DIRHIST_FILE)
 		return EXIT_FAILURE;
+
+	if (!old_pwd || !old_pwd[0])
+		return EXIT_SUCCESS;
 		
 	FILE *fp = fopen(DIRHIST_FILE, "w");
 
 	if (!fp) {
-		fprintf(stderr, _("%s: Cannot save directory history: %s\n"),
+		fprintf(stderr, _("%s: Could not save directory history: %s\n"),
 				PROGRAM_NAME, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	size_t i;
+
 	for (i = 0; old_pwd[i]; i++)
 		fprintf(fp, "%s\n", old_pwd[i]);
 
@@ -11957,7 +12076,7 @@ free_stuff(void)
 	free(CONFIG_FILE);
 	free(PROFILE_FILE);
 	free(MSG_LOG_FILE);
-	free(sel_file_user);
+	free(SEL_FILE);
 	free(MIME_FILE);
 	free(SCRIPTS_DIR);
 	free(ACTIONS_FILE);
@@ -13112,1187 +13231,1149 @@ create_def_cscheme(void)
 }
 
 void
-init_config(void)
-/* Set up CliFM directories and config files. Load the user's 
- * configuration from clifmrc */
+define_config_file_names(void)
 {
-	struct stat file_attrib;
 	size_t pnl_len = strlen(PNL);
 
-	/* Store a pointer to the current LS_COLORS value to be used by
-	 * external commands */
-	ls_colors_bk = getenv("LS_COLORS");
+	/* If $XDG_CONFIG_HOME is set, use it for the config file.
+	 * Else, fall back to $HOME/.config */
+	char *xdg_config_home = getenv("XDG_CONFIG_HOME");
 
-	if (home_ok) {
-		/* Set up program's directories and files */
+	size_t xdg_config_home_len = 0;
 
-		/* If $XDG_CONFIG_HOME is set, use it for the config file.
-		 * Else, fall back to $HOME/.config */
-		char *xdg_config_home = getenv("XDG_CONFIG_HOME");
+	char *CONFIG_DIR_GRAL = (char *)NULL;
 
-		size_t xdg_config_home_len = 0;
+	if (xdg_config_home) {
+		xdg_config_home_len = strlen(xdg_config_home);
 
-		if (xdg_config_home)
-			xdg_config_home_len = strlen(xdg_config_home);
-
-		/* alt_profile will not be NULL whenever the -P option is used
-		 * to run the program under an alternative profile */
-		if (alt_profile) {
-
-			if (xdg_config_home) {
-				CONFIG_DIR = (char *)xcalloc(xdg_config_home_len
-									 + pnl_len + strlen(alt_profile)
-									 + 3, sizeof(char));
-				sprintf(CONFIG_DIR, "%s/%s/%s", xdg_config_home, PNL,
-						alt_profile);
-			}
-
-			else {
-				CONFIG_DIR = (char *)xcalloc(user_home_len + pnl_len
-										+ 11 + strlen(alt_profile),
-										sizeof(char));
-				sprintf(CONFIG_DIR, "%s/.config/%s/%s", user_home, PNL, 
-						alt_profile);
-			}
-		}
-
-		/* Use the default profile */
-		else {
-
-			if (xdg_config_home) {
-				CONFIG_DIR = (char *)xcalloc(xdg_config_home_len
-									 + pnl_len + 10, sizeof(char));
-				sprintf(CONFIG_DIR, "%s/%s/default", xdg_config_home,
-						PNL);
-			}
-
-			else {
-				CONFIG_DIR = (char *)xcalloc(user_home_len + pnl_len
-											 + 18, sizeof(char));
-				sprintf(CONFIG_DIR, "%s/.config/%s/default", user_home,
-						PNL);
-			}
-		}
-
-		if (alt_kbinds_file) {
-			KBINDS_FILE = (char *)xcalloc(strlen(alt_kbinds_file)
-								 + 1, sizeof(char));
-			strcpy(KBINDS_FILE, alt_kbinds_file);
-			free(alt_kbinds_file);
-			alt_kbinds_file = (char *)NULL;
-		}
-
-		else {
-			/* Keybindings per user, not per profile */
-			if (xdg_config_home) {
-				KBINDS_FILE = (char *)xcalloc(strlen(xdg_config_home)
-									 + pnl_len + 14, sizeof(char));
-				sprintf(KBINDS_FILE, "%s/%s/keybindings",
-						xdg_config_home, PNL);
-			}
-
-			else {
-				KBINDS_FILE = (char *)xcalloc(user_home_len + pnl_len
-											  + 22, sizeof(char));
-				sprintf(KBINDS_FILE, "%s/.config/%s/keybindings",
-						user_home, PNL);
-			}
-		}
-
-		if (xdg_config_home) {
-			COLORS_DIR = (char *)xnmalloc(strlen(xdg_config_home) + 8,
-										  sizeof(char));
-			sprintf(COLORS_DIR, "%s/colors", xdg_config_home);
-		}
-
-		else {
-			COLORS_DIR = (char *)xcalloc(user_home_len + pnl_len
-										  + 17, sizeof(char));
-			sprintf(COLORS_DIR, "%s/.config/%s/colors",
-					user_home, PNL);
-		}
+		CONFIG_DIR_GRAL = (char *)xcalloc(xdg_config_home_len
+							 + pnl_len + 2, sizeof(char));
+		sprintf(CONFIG_DIR_GRAL, "%s/%s", xdg_config_home, PNL);
 
 		xdg_config_home = (char *)NULL;
+	}
 
-		TRASH_DIR = (char *)xcalloc(user_home_len + 20, sizeof(char));
-		sprintf(TRASH_DIR, "%s/.local/share/Trash", user_home);
+	else {
+		CONFIG_DIR_GRAL = (char *)xcalloc(user_home_len + pnl_len
+								+ 11, sizeof(char));
+		sprintf(CONFIG_DIR_GRAL, "%s/.config/%s", user_home, PNL);
+	}
 
-		size_t trash_len = strlen(TRASH_DIR);
+	size_t config_gral_len = strlen(CONFIG_DIR_GRAL);
 
-		TRASH_FILES_DIR = (char *)xcalloc(trash_len + 7, sizeof(char));
-		sprintf(TRASH_FILES_DIR, "%s/files", TRASH_DIR);
+	/* alt_profile will not be NULL whenever the -P option is used
+	 * to run the program under an alternative profile */
+	if (alt_profile) {
+		CONFIG_DIR = (char *)xcalloc(config_gral_len
+							 + strlen(alt_profile)
+							 + 2, sizeof(char));
+		sprintf(CONFIG_DIR, "%s/%s", CONFIG_DIR_GRAL,
+				alt_profile);
+	}
 
-		TRASH_INFO_DIR = (char *)xcalloc(trash_len + 6, sizeof(char));
-		sprintf(TRASH_INFO_DIR, "%s/info", TRASH_DIR);
+	else {
+		CONFIG_DIR = (char *)xcalloc(config_gral_len + 9,
+								sizeof(char));
+		sprintf(CONFIG_DIR, "%s/default", CONFIG_DIR_GRAL);
+	}
 
-		size_t config_len = strlen(CONFIG_DIR);
+	if (alt_kbinds_file) {
+		KBINDS_FILE = (char *)xcalloc(strlen(alt_kbinds_file)
+							 + 1, sizeof(char));
+		strcpy(KBINDS_FILE, alt_kbinds_file);
+		free(alt_kbinds_file);
+		alt_kbinds_file = (char *)NULL;
+	}
 
-/*		KBINDS_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
-		sprintf(KBINDS_FILE, "%s/keybindings", CONFIG_DIR); */
+	else {
+		/* Keybindings per user, not per profile */
+		KBINDS_FILE = (char *)xcalloc(config_gral_len
+							 + 13, sizeof(char));
+		sprintf(KBINDS_FILE, "%s/keybindings",
+				CONFIG_DIR_GRAL);
+	}
 
-		DIRHIST_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
-		sprintf(DIRHIST_FILE, "%s/dirhist.cfm", CONFIG_DIR);
+	COLORS_DIR = (char *)xnmalloc(config_gral_len + 8,
+								  sizeof(char));
+	sprintf(COLORS_DIR, "%s/colors", CONFIG_DIR_GRAL);
 
-/*		COLORS_DIR = (char *)xnmalloc(config_len + 14, sizeof(char));
-		sprintf(COLORS_DIR, "%s/colors", CONFIG_DIR); */
+	free(CONFIG_DIR_GRAL);
+	CONFIG_DIR_GRAL = (char *)NULL;
 
-		if (!alt_bm_file) {
-			BM_FILE = (char *)xcalloc(config_len + 15, sizeof(char));
-			sprintf(BM_FILE, "%s/bookmarks.cfm", CONFIG_DIR);
-		}
 
-		else {
-			BM_FILE = (char *)xcalloc(strlen(alt_bm_file) + 1,
+	TRASH_DIR = (char *)xcalloc(user_home_len + 20, sizeof(char));
+	sprintf(TRASH_DIR, "%s/.local/share/Trash", user_home);
+
+	size_t trash_len = strlen(TRASH_DIR);
+
+	TRASH_FILES_DIR = (char *)xcalloc(trash_len + 7, sizeof(char));
+	sprintf(TRASH_FILES_DIR, "%s/files", TRASH_DIR);
+
+	TRASH_INFO_DIR = (char *)xcalloc(trash_len + 6, sizeof(char));
+	sprintf(TRASH_INFO_DIR, "%s/info", TRASH_DIR);
+
+	size_t config_len = strlen(CONFIG_DIR);
+
+	DIRHIST_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
+	sprintf(DIRHIST_FILE, "%s/dirhist.cfm", CONFIG_DIR);
+
+	if (!alt_bm_file) {
+		BM_FILE = (char *)xcalloc(config_len + 15, sizeof(char));
+		sprintf(BM_FILE, "%s/bookmarks.cfm", CONFIG_DIR);
+	}
+
+	else {
+		BM_FILE = (char *)xcalloc(strlen(alt_bm_file) + 1,
+								  sizeof(char));
+		strcpy(BM_FILE, alt_bm_file);
+		free(alt_bm_file);
+		alt_bm_file = (char *)NULL;
+
+	}
+
+	LOG_FILE = (char *)xcalloc(config_len + 9, sizeof(char));
+	sprintf(LOG_FILE, "%s/log.cfm", CONFIG_DIR);
+
+	HIST_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
+	sprintf(HIST_FILE, "%s/history.cfm", CONFIG_DIR);
+
+	if (!alt_config_file) {
+		CONFIG_FILE = (char *)xcalloc(config_len + pnl_len + 4,
 									  sizeof(char));
-			strcpy(BM_FILE, alt_bm_file);
-			free(alt_bm_file);
-			alt_bm_file = (char *)NULL;
+		sprintf(CONFIG_FILE, "%s/%src", CONFIG_DIR, PNL);
+	}
 
-		}
+	else {
+		CONFIG_FILE = (char *)xcalloc(strlen(alt_config_file) + 1,
+									  sizeof(char));
+		strcpy(CONFIG_FILE, alt_config_file);
+		free(alt_config_file);
+		alt_config_file = (char *)NULL;
+	}
 
-		LOG_FILE = (char *)xcalloc(config_len + 9, sizeof(char));
-		sprintf(LOG_FILE, "%s/log.cfm", CONFIG_DIR);
+	PROFILE_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
+	sprintf(PROFILE_FILE, "%s/profile.cfm", CONFIG_DIR);
 
-		HIST_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
-		sprintf(HIST_FILE, "%s/history.cfm", CONFIG_DIR);
+	MSG_LOG_FILE = (char *)xcalloc(config_len + 14, sizeof(char));
+	sprintf(MSG_LOG_FILE, "%s/messages.cfm", CONFIG_DIR);
 
-		if (!alt_config_file) {
-			CONFIG_FILE = (char *)xcalloc(config_len + pnl_len + 4,
-										  sizeof(char));
-			sprintf(CONFIG_FILE, "%s/%src", CONFIG_DIR, PNL);
-		}
+	MIME_FILE = (char *)xcalloc(config_len + 14, sizeof(char));
+	sprintf(MIME_FILE, "%s/mimelist.cfm", CONFIG_DIR);
 
-		else {
-			CONFIG_FILE = (char *)xcalloc(strlen(alt_config_file) + 1,
-										  sizeof(char));
-			strcpy(CONFIG_FILE, alt_config_file);
-			free(alt_config_file);
-			alt_config_file = (char *)NULL;
-		}
+	SCRIPTS_DIR = (char *)xcalloc(config_len + 9, sizeof(char));
+	sprintf(SCRIPTS_DIR, "%s/scripts", CONFIG_DIR);
 
-		PROFILE_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
-		sprintf(PROFILE_FILE, "%s/profile.cfm", CONFIG_DIR);
+	ACTIONS_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
+	sprintf(ACTIONS_FILE, "%s/actions.cfm", CONFIG_DIR);
 
-		MSG_LOG_FILE = (char *)xcalloc(config_len + 14, sizeof(char));
-		sprintf(MSG_LOG_FILE, "%s/messages.cfm", CONFIG_DIR);
+	return;
+}
 
-		MIME_FILE = (char *)xcalloc(config_len + 14, sizeof(char));
-		sprintf(MIME_FILE, "%s/mimelist.cfm", CONFIG_DIR);
+void
+create_config_files(void)
+{
+	int ret = -1;
+	struct stat file_attrib;
 
-		SCRIPTS_DIR = (char *)xcalloc(config_len + 9, sizeof(char));
-		sprintf(SCRIPTS_DIR, "%s/scripts", CONFIG_DIR);
+			/* #############################
+			 * #		TRASH DIRS		   #
+			 * ############################# */
 
-		ACTIONS_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
-		sprintf(ACTIONS_FILE, "%s/actions.cfm", CONFIG_DIR);
+	if (stat(TRASH_DIR, &file_attrib) == -1) {
+		char *trash_files = (char *)NULL;
+		trash_files = (char *)xcalloc(strlen(TRASH_DIR) + 7,
+									  sizeof(char));
 
-		int ret = -1;
+		sprintf(trash_files, "%s/files", TRASH_DIR);
+		char *trash_info = (char *)NULL;
+		trash_info = (char *)xcalloc(strlen(TRASH_DIR) + 6,
+									 sizeof(char));
 
-		/* #### CHECK THE TRASH DIR #### */
-		/* Create trash dirs, if necessary */
+		sprintf(trash_info, "%s/info", TRASH_DIR);
+		char *cmd[] = { "mkdir", "-p", trash_files, trash_info,
+						NULL };
 
-		if (stat(TRASH_DIR, &file_attrib) == -1) {
-			char *trash_files = (char *)NULL;
-			trash_files = (char *)xcalloc(strlen(TRASH_DIR) + 7,
-										  sizeof(char));
-			sprintf(trash_files, "%s/files", TRASH_DIR);
-			char *trash_info = (char *)NULL;
-			trash_info = (char *)xcalloc(strlen(TRASH_DIR) + 6,
-										 sizeof(char));
-			sprintf(trash_info, "%s/info", TRASH_DIR);
-			char *cmd[] = { "mkdir", "-p", trash_files, trash_info,
-							NULL };
-			ret = launch_execve(cmd, FOREGROUND);
-			free(trash_files);
-			free(trash_info);
-			if (ret != EXIT_SUCCESS) {
-				trash_ok = 0;
-				_err('w', PRINT_PROMPT, _("%s: mkdir: '%s': Error "
-					 "creating trash directory. Trash function "
-					 "disabled\n"), PROGRAM_NAME, TRASH_DIR);
-			}
-		}
+		ret = launch_execve(cmd, FOREGROUND);
+		free(trash_files);
+		free(trash_info);
 
-		/* If it exists, check it is writable */
-		else if (access (TRASH_DIR, W_OK) == -1) {
+		if (ret != EXIT_SUCCESS) {
 			trash_ok = 0;
-			_err('w', PRINT_PROMPT, _("%s: '%s': Directory not writable. "
-				 "Trash function disabled\n"), PROGRAM_NAME, TRASH_DIR);
-		}
-
-		/* #### CHECK THE CONFIG DIR #### */
-		/* If the config directory doesn't exist, create it */
-		/* Use the GNU mkdir to let it handle parent directories */
-		if (stat(CONFIG_DIR, &file_attrib) == -1) {
-			char *tmp_cmd[] = { "mkdir", "-p", CONFIG_DIR, NULL };
-			ret = launch_execve(tmp_cmd, FOREGROUND);
-			if (ret != EXIT_SUCCESS) {
-				config_ok = 0;
-				_err('e', PRINT_PROMPT, _("%s: mkdir: '%s': Error "
-					 "creating configuration directory. Bookmarks, "
-					 "commands logs, and command history are disabled. "
-					 "Program messages won't be persistent. Using "
-					 "default options\n"), PROGRAM_NAME, CONFIG_DIR);
-			}
-		}
-
-		/* If it exists, check it is writable */
-		else if (access(CONFIG_DIR, W_OK) == -1) {
-			config_ok = 0;
-			_err('e', PRINT_PROMPT, _("%s: '%s': Directory not writable. "
-				 "Bookmarks, commands logs, and commands history are "
-				 "disabled. Program messages won't be persistent. "
-				 "Using default options\n"), PROGRAM_NAME, CONFIG_DIR);
-		}
-
-		/* #### CHECK THE COLORS DIR #### */
-		if (config_ok && stat(COLORS_DIR, &file_attrib) == -1) {
-
-			char *cmd[] = { "mkdir", COLORS_DIR, NULL };
-
-			if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS) {
-				_err('w', PRINT_PROMPT, _("%s: mkdir: Error "
-					 "creating colors directory. Using the default "
-					 "color scheme\n"), PROGRAM_NAME);
-			}
-		}
-
-		create_def_cscheme();
-
-		/* #### CHECK THE SCRIPTS DIR #### */
-		if (config_ok && stat(SCRIPTS_DIR, &file_attrib) == -1) {
-			char *cmd[] = { "mkdir", SCRIPTS_DIR, NULL };
-			if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
-				_err('e', PRINT_PROMPT, _("%s: mkdir: Error "
-					 "creating scripts directory. User defined "
-					 "action function is disabled\n"), PROGRAM_NAME);
-		}
-
-		/* #### CHECK THE ACTIONS FILE #### */
-		if (config_ok && stat(ACTIONS_FILE, &file_attrib) == -1) {
-			FILE *actions_fp = fopen(ACTIONS_FILE, "w");
-			if (!actions_fp) {
-				_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-					 ACTIONS_FILE, strerror(errno));
-			}
-			else {
-				fprintf(actions_fp, "######################\n"
-					"# %s actions file #\n"
-					"######################\n\n"
-					"# Define here your custom actions. Actions are "
-					"custom command names\n"
-					"# binded to a shell script located in "
-					"$XDG_CONFIG_HOME/clifm/PROFILE/scripts.\n"
-					"# Actions can be executed directly from "
-					"%s command line, as if they\n"
-					"# were any other command, and the associated "
-					"script will be executed\n"
-					"# instead. All parameters passed to the action "
-					"command will be passed\n"
-					"# to the action script as well. Example:\n"
-					"#example=example.sh\n"
-					"# Uncomment the above line and try it.\n",
-					PROGRAM_NAME, PROGRAM_NAME);
-
-				fclose(actions_fp);
-			}
-		}
-
-		/* ### CREATE THE EXAMPLE ACTION SCRIPT ### */
-		char *example = (char *)xnmalloc(strlen(SCRIPTS_DIR) + 12,
-										 sizeof(char));
-		sprintf(example, "%s/example.sh", SCRIPTS_DIR);
-
-		if (config_ok && stat(example, &file_attrib) == -1) {
-
-			FILE *example_fp = fopen(example, "w");
-
-			if (!example_fp) {
-				_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-					 example, strerror(errno));
-			}
-
-			else {
-				fprintf(example_fp, "#!/bin/sh\n\n"
-					"# This is a CliFM example action script\n\n"
-					"echo \"Profile: $CLIFM_PROFILE\n"
-					"PWD: \"$(pwd)\"\n"
-					"Script: $(basename \"$0\")\n"
-					"Parameters: \"$@\"\"\n\n"
-					"exit 0\n");
-				fclose(example_fp);
-			}
-
-			/* Make it executable */
-			char *chmod_cmd[] = { "chmod", "700", example, NULL };
-			launch_execve(chmod_cmd, FOREGROUND);
-		}
-
-		free(example);
-
-		/* #### CHECK THE MIME CONFIG FILE #### */
-		/* Open the mime file or create it, if it doesn't exist */
-		if (config_ok && stat(MIME_FILE, &file_attrib) == -1) {
-
-			_err('n', PRINT_PROMPT, _("%s created a new MIME list file "
-				 "(%s). It is recommended to edit this file (typing "
-				 "'mm edit' or however you want) to add the programs "
-				 "you use and remove those you don't. This will make "
-				 "the process of opening files faster and smoother\n"),
-				 PROGRAM_NAME, MIME_FILE);
-
-
-			/* Try importing MIME associations from the system, and in
-			 * case nothing can be imported, create an empty MIME list
-			 * file */
-			ret = mime_import(MIME_FILE);
-			if (ret != 0) {
-				FILE *mime_fp = fopen(MIME_FILE, "w");
-				if (!mime_fp) {
-					_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n", 
-						 PROGRAM_NAME, MIME_FILE, strerror(errno));
-				}
-				else {
-					if (!(flags & GRAPHICAL))
-						fputs("text/plain=nano;vim;vi;emacs;ed\n"
-							  "*.cfm=nano;vim;vi;emacs;ed\n", mime_fp);
-					else
-						fputs("text/plain=gedit;kate;pluma;mousepad;"
-							  "leafpad;nano;vim;vi;emacs;ed\n"
-							  "*.cfm=gedit;kate;pluma;mousepad;leafpad;"
-							  "nano;vim;vi;emacs;ed\n", mime_fp);
-					fclose(mime_fp);
-				}
-			}
-		}
-
-		/* #### CHECK THE PROFILE FILE #### */
-		/* Open the profile file or create it, if it doesn't exist */
-		if (config_ok && stat(PROFILE_FILE, &file_attrib) == -1) {
-			FILE *profile_fp = fopen(PROFILE_FILE, "w");
-			if (!profile_fp) {
-				_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n",
-					 PROGRAM_NAME, PROFILE_FILE, strerror(errno));
-			}
-			else {
-				fprintf(profile_fp, _("#%s profile\n\
-#Write here the commands you want to be executed at startup\n\
-#Ex:\n#echo -e \"%s, the anti-eye-candy/KISS file manager\"\n"), 
-						PROGRAM_NAME, PROGRAM_NAME);
-				fclose(profile_fp);
-			}
-		}
-
-		/* #### CHECK THE CONFIG FILE #### */
-		/* Open the config file or create it, if it doesn't exist */
-		if (config_ok && stat(CONFIG_FILE, &file_attrib) == -1) {
-			ret = create_config(CONFIG_FILE);
-			if (ret == EXIT_SUCCESS)
-				config_ok = 1;
-			else
-				config_ok = 0;
-		}
-
-				/* #### READ THE CONFIG FILE ##### */
-		if (config_ok) {
-
-			FILE *config_fp;
-			config_fp = fopen(CONFIG_FILE, "r");
-
-			if (!config_fp) {
-				_err('e', PRINT_PROMPT, _("%s: fopen: '%s': %s. Using "
-					 "default values.\n"), PROGRAM_NAME, CONFIG_FILE,
-					 strerror(errno));
-			}
-			
-			else {
-				div_line_char = UNSET;
-				#define MAX_BOOL 6
-				/* starting path(14) + PATH_MAX + \n(1)*/
-				char line[PATH_MAX + 15];
-				while (fgets(line, sizeof(line), config_fp)) {
-
-					if (*line == '#'
-					&& strncmp(line, "#END OF OPTIONS", 15) == 0)
-						break;
-
-					/* Check for the xargs.splash flag. If -1, it was
-					 * not set via command line, so that it must be
-					 * set here */
-					else if (xargs.splash == UNSET && *line == 'S'
-					&& strncmp(line, "SplashScreen=", 13) == 0) {
-						char opt_str[MAX_BOOL] = ""; /* false (5) + 1 */
-						ret = sscanf(line, "SplashScreen=%5s\n", opt_str);
-						/* According to cppcheck: "sscanf() without field 
-						 * width limits can crash with huge input data". 
-						 * Field width limits = %5s */
-						if (ret == -1)
-							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							splash_screen = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							splash_screen = 0;
-					}
-
-					else if (!usr_cscheme && *line == 'C'
-					&& strncmp(line, "ColorScheme=", 12) == 0) {
-
-						char *opt_str = (char *)NULL;
-						opt_str = strchr(line, '=');
-
-						if (!opt_str)
-							continue;
-
-						if (!*(opt_str++))
-							continue;
-
-						size_t len = strlen(opt_str);
-						if (opt_str[len - 1] == '\n')
-							opt_str[len - 1] = 0x00;
-
-						usr_cscheme = (char *)xnmalloc(len + 1,
-												 sizeof(char));
-						strcpy(usr_cscheme, opt_str);
-					}
-
-					else if (xargs.light == UNSET && *line == 'L'
-					&& strncmp(line, "LightMode=", 10) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "LightMode=%5s\n", opt_str);
-						if (ret == -1)
-							continue;
-
-						if (strncmp(opt_str, "true", 4) == 0)
-							light_mode = 1;
-
-						else if (strncmp(opt_str, "false", 5) == 0)
-							light_mode = 0;
-					}
-
-					else if (xargs.expand_bookmarks == UNSET
-					&& *line == 'E'
-					&& strncmp(line, "ExpandBookmarks=", 16) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "ExpandBookmarks=%5s\n",
-									 opt_str);
-						if (ret == -1)
-							continue;
-
-						if (strncmp(opt_str, "true", 4) == 0)
-							expand_bookmarks = 1;
-
-						else if (strncmp(opt_str, "false", 5) == 0)
-							expand_bookmarks = 0;
-					}
-
-					else if (xargs.restore_last_path == UNSET
-					&& *line == 'R'
-					&& strncmp(line, "RestoreLastPath=", 16) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "RestoreLastPath=%5s\n",
-									 opt_str);
-						if (ret == -1)
-							continue;
-
-						if (strncmp(opt_str, "true", 4) == 0)
-							restore_last_path = 1;
-
-						else if (strncmp(opt_str, "false", 5) == 0)
-							restore_last_path = 0;
-					}
-
-					else if (!opener && *line == 'O'
-					&& strncmp(line, "Opener=", 7) == 0) {
-
-						char *opt_str = (char *)NULL;
-						opt_str = straft(line, '=');
-
-						if (!opt_str)
-							continue;
-
-						char *tmp = remove_quotes(opt_str);
-						if (!tmp) {
-							free(opt_str);
-							continue;
-						}
-
-						opener = (char *)xcalloc(strlen(tmp) + 1,
-										sizeof(char));
-						strcpy(opener, tmp);
-						free(opt_str);
-					}
-
-					else if (xargs.tips == UNSET && *line == 'T'
-					&& strncmp(line, "Tips=", 5) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "Tips=%5s\n", opt_str);
-						if (ret == -1)
-							continue;
-						if (strncmp(opt_str, "false", 5) == 0)
-							tips = 0;
-						else if (strncmp(opt_str, "true", 4) == 0)
-							tips = 1;
-					}
-
-					else if (xargs.disk_usage == UNSET  && *line == 'D'
-					&& strncmp(line, "DiskUsage=", 10) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "DiskUsage=%5s\n", opt_str);
-						if (ret == -1)
-							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							disk_usage = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							disk_usage = 0;
-					}
-
-					else if (xargs.autocd == UNSET  && *line == 'A'
-					&& strncmp(line, "Autocd=", 7) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "Autocd=%5s\n", opt_str);
-						if (ret == -1)
-							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							autocd = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							autocd = 0;
-					}
-
-					else if (xargs.auto_open == UNSET  && *line == 'A'
-					&& strncmp(line, "AutoOpen=", 9) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "AutoOpen=%5s\n", opt_str);
-						if (ret == -1)
-							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							auto_open = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							auto_open = 0;
-					}
-
-					else if (xargs.dirmap == UNSET  && *line == 'D'
-					&& strncmp(line, "DirhistMap=", 11) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "DirhistMap=%5s\n", opt_str);
-						if (ret == -1)
-							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							dirhist_map = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							dirhist_map = 0;
-					}
-
-					else if (xargs.dir_indicator == UNSET
-					&& *line == 'D'
-					&& strncmp(line, "DirIndicator=", 13) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "DirIndicator=%5s\n", opt_str);
-						if (ret == -1)
-							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							dir_indicator = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							dir_indicator = 0;
-					}
-
-					else if (xargs.classify == UNSET && *line == 'C'
-					&& strncmp(line, "Classify=", 9) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "Classify=%5s\n", opt_str);
-						if (ret == -1)
-							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							classify = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							classify = 0;
-					}
-
-					else if (strncmp(line, "ClassifyExec=", 13) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "ClassifyExec=%5s\n", opt_str);
-						if (ret == -1)
-							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							classify = 2;
-					}
-
-					else if (xargs.share_selbox == UNSET && *line == 'S'
-					&& strncmp(line, "ShareSelbox=", 12) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "ShareSelbox=%5s\n", opt_str);
-						if (ret == -1)
-							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							share_selbox = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							share_selbox = 0;
-					}
-
-					else if (xargs.sort == UNSET && *line == 'S'
-					&& strncmp(line, "Sort=", 5) == 0) {
-						int opt_num = 0;
-						ret = sscanf(line, "Sort=%d\n", &opt_num);
-						if (ret == -1)
-							continue;
-						if (opt_num >= 0 && opt_num <= sort_types)
-							sort = opt_num;
-						else /* default (sort by name) */
-							sort = DEF_SORT;
-					}
-
-					else if (*line == 'R'
-					&& strncmp(line, "RlEditMode=0", 12) == 0) {
-						rl_vi_editing_mode(1, 0);
-						/* By default, readline uses emacs editing
-						 * mode */
-					}
-
-					else if (xargs.max_dirhist == UNSET && *line == 'M'
-					&& strncmp(line, "MaxDirhist=", 11) == 0) {
-						int opt_num = 0;
-						ret = sscanf(line, "MaxDirhist=%d\n", &opt_num);
-						if (ret == -1)
-							continue;
-						if (opt_num >= 0)
-							max_dirhist = opt_num;
-						else /* default */
-							max_dirhist = DEF_MAX_DIRHIST;
-					}
-
-					else if (xargs.sort_reverse == UNSET && *line == 'S'
-					&& strncmp(line, "SortReverse=", 12) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "SortReverse=%5s\n", opt_str);
-						if (ret == -1)
-							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							sort_reverse = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							sort_reverse = 0;
-					}
-
-					else if (xargs.files_counter == UNSET && *line == 'F'
-					&& strncmp(line, "FilesCounter=", 13) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "FilesCounter=%5s\n", opt_str);
-						if (ret == -1)
-							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							files_counter = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							files_counter = 0;
-					}
-
-					else if (xargs.welcome_message == UNSET
-					 && *line == 'W' && strncmp(line, "WelcomeMessage=",
-					15) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "WelcomeMessage=%5s\n",
-									 opt_str);
-						if (ret == -1)
-							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							welcome_message = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							welcome_message = 0;
-					}
-
-					else if (xargs.clear_screen == UNSET && *line == 'C'
-					&& strncmp(line, "ClearScreen=", 12) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "ClearScreen=%5s\n",
-									 opt_str);
-						if (ret == -1)
-							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							clear_screen = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							clear_screen = 0;
-					}
-
-					else if (xargs.hidden == UNSET && *line == 'S'
-					&& strncmp(line, "ShowHiddenFiles=", 16) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "ShowHiddenFiles=%5s\n",
-									 opt_str);
-						if (ret == -1)
-							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							show_hidden = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							show_hidden = 0;
-					}
-
-					else if (xargs.bk_files == UNSET && *line == 'S'
-					&& strncmp(line, "ShowBackUpFiles=", 16) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "ShowBackUpFiles=%5s\n",
-									 opt_str);
-						if (ret == -1)
-							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							show_bk_files = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							show_bk_files = 0;
-					}
-
-					else if (xargs.longview == UNSET && *line == 'L'
-					&& strncmp(line, "LongViewMode=", 13) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "LongViewMode=%5s\n",
-									 opt_str);
-						if (ret == -1)
-							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							long_view = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							long_view = 0;
-					}
-
-					else if (xargs.ext == UNSET && *line == 'E'
-					&& strncmp(line, "ExternalCommands=", 17) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "ExternalCommands=%5s\n",
-									 opt_str);
-						if (ret == -1)
-							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							ext_cmd_ok = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							ext_cmd_ok = 0;
-					}
-
-					else if (xargs.logs == UNSET && *line == 'L'
-					&& strncmp(line, "LogCmds=", 8) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "LogCmds=%5s\n", opt_str);
-						if (ret == -1)
-							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							logs_enabled = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							logs_enabled = 0;
-					}
-
-					else if (*line == 'S'
-					&& strncmp(line, "SystemShell=", 12) == 0) {
-						if (sys_shell) {
-							free(sys_shell);
-							sys_shell = (char *)NULL;
-						}
-						char *opt_str = straft(line, '=');
-						if (!opt_str)
-							continue;
-
-						char *tmp = remove_quotes(opt_str);
-						if (!tmp) {
-							free(opt_str);
-							continue;
-						}
-
-						if (*tmp == '/') {
-							if (access(tmp, F_OK|X_OK) != 0) {
-								free(opt_str);
-								continue;
-							}
-							sys_shell = (char *)xnmalloc(strlen(tmp)
-													+ 1, sizeof(char));
-							strcpy(sys_shell, tmp);
-						}
-
-						else {
-							char *shell_path = get_cmd_path(tmp);
-							if (!shell_path) {
-								free(opt_str);
-								continue;
-							}
-							sys_shell = (char *)xnmalloc(
-												strlen(shell_path)
-												+ 1, sizeof(char));
-							strcpy(sys_shell, shell_path);
-							free(shell_path);
-						}
-
-						free(opt_str);
-					}
-
-					else if (*line == 'T'
-					&& strncmp(line, "TerminalCmd=", 12) == 0) {
-
-						if (term) {
-							free(term);
-							term = (char *)NULL;
-						}
-
-						char *opt_str = straft(line, '=');
-						if (!opt_str)
-							continue;
-
-						char *tmp = remove_quotes(opt_str);
-						if (!tmp) {
-							free(opt_str);
-							continue;
-						}
-
-						term = (char *)xnmalloc(strlen(tmp) + 1,
-												sizeof(char));
-						strcpy(term, tmp);
-						free(opt_str);
-					}
-
-					else if (xargs.ffirst == UNSET  && *line == 'L'
-					&& strncmp(line, "ListFoldersFirst=", 17) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "ListFoldersFirst=%5s\n",
-									 opt_str);
-						if (ret == -1)
-							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							list_folders_first = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							list_folders_first = 0;
-					}
-
-					else if (xargs.cd_list_auto == UNSET && *line == 'C'
-					&& strncmp(line, "CdListsAutomatically=",
-					21) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "CdListsAutomatically=%5s\n", 
-									 opt_str);
-						if (ret == -1)
-							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							cd_lists_on_the_fly = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							cd_lists_on_the_fly = 0;
-					}
-
-					else if (xargs.sensitive == UNSET && *line == 'C'
-					&& strncmp(line, "CaseSensitiveList=", 18) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "CaseSensitiveList=%5s\n", 
-								   opt_str);
-						if (ret == -1)
-							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							case_sensitive = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							case_sensitive = 0;
-					}
-
-					else if (xargs.unicode == UNSET && *line == 'U'
-					&& strncmp(line, "Unicode=", 8) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "Unicode=%5s\n", opt_str);
-						if (ret == -1)
-							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							unicode = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							unicode = 0;
-					}
-
-					else if (xargs.pager == UNSET && *line == 'P'
-					&& strncmp(line, "Pager=", 6) == 0) {
-						char opt_str[MAX_BOOL] = "";
-						ret = sscanf(line, "Pager=%5s\n", opt_str);
-						if (ret == -1)
-							continue;
-						if (strncmp(opt_str, "true", 4) == 0)
-							pager = 1;
-						else if (strncmp(opt_str, "false", 5) == 0)
-							pager = 0;
-					}
-
-					else if (*line == 'P'
-					&& strncmp(line, "Prompt=", 7) == 0) {
-						if (encoded_prompt)
-							free(encoded_prompt);
-						encoded_prompt = straft(line, '=');
-					}
-
-					else if (xargs.max_path == UNSET && *line == 'M'
-					&& strncmp(line, "MaxPath=", 8) == 0) {
-						int opt_num = 0;
-						sscanf(line, "MaxPath=%d\n", &opt_num);
-						if (opt_num <= 0)
-							continue;
-						max_path = opt_num;
-					}
-
-					else if (*line == 'D'
-					&& strncmp(line, "DividingLineChar=", 17) == 0) {
-						/* Accepts both chars and decimal integers */
-						char opt_c = -1;
-						sscanf(line, "DividingLineChar='%c'", &opt_c);
-						if (opt_c == -1) {
-							int num = -1;
-							sscanf(line, "DividingLineChar=%d", &num);
-							if (num == -1)
-								div_line_char = DEF_DIV_LINE_CHAR;
-							else
-								div_line_char = (char)num;
-						}
-						else
-							div_line_char = opt_c;
-					}
-
-					else if (*line == 'M'
-					&& strncmp(line, "MaxHistory=", 11) == 0) {
-						int opt_num = 0;
-						sscanf(line, "MaxHistory=%d\n", &opt_num);
-						if (opt_num <= 0)
-							continue;
-						max_hist = opt_num;
-					}
-
-					else if (*line == 'M'
-					&& strncmp(line, "MaxLog=", 7) == 0) {
-						int opt_num = 0;
-						sscanf (line, "MaxLog=%d\n", &opt_num);
-						if (opt_num <= 0)
-							continue;
-						max_log = opt_num;
-					}
-
-					else if (xargs.path == UNSET && !path && *line == 'S' 
-					&& strncmp(line, "StartingPath=", 13) == 0) {
-						char *opt_str = straft(line, '=');
-						if (!opt_str)
-							continue;
-
-						char *tmp = remove_quotes(opt_str);
-						if (!tmp) {
-							free(opt_str);
-							continue;
-						}
-
-						/* If starting path is not NULL, and exists,
-						 * and is a directory, and the user has
-						 * appropriate permissions, set path to starting
-						 * path. If any of these conditions is false,
-						 * path will be set to default, that is, CWD */
-						if (chdir(tmp) == 0) {
-							free(path);
-							path = (char *)xnmalloc(strlen(tmp) + 1, 
-												    sizeof(char));
-							strcpy(path, tmp);
-						}
-						else {
-							_err('w', PRINT_PROMPT, _("%s: '%s': %s. "
-								 "Using the current working directory "
-								 "as starting path\n"), PROGRAM_NAME,
-								 tmp, strerror(errno));
-						}
-						free(opt_str);
-					}
-				}
-
-				fclose(config_fp);
-			}
-
-			/* If some option was not set, neither via command line nor
-			 * via the config file, or if this latter could not be read
-			 * for any reason, set the defaults */
-
-			if (!usr_cscheme) {
-				usr_cscheme = (char *)xnmalloc(8, sizeof(char));
-				strcpy(usr_cscheme, "default");
-			}
-
-			if (xargs.rl_vi_mode == 1) rl_vi_editing_mode(1, 0);
-			if (expand_bookmarks == UNSET)
-				expand_bookmarks = DEF_EXPAND_BOOKMARKS;
-			if (only_dirs == UNSET)
-				only_dirs = DEF_ONLY_DIRS;
-			if (disk_usage == UNSET) disk_usage = DEF_DISK_USAGE;
-			if (dirhist_map == UNSET) dirhist_map = DEF_DIRHIST_MAP;
-			if (max_dirhist == UNSET) max_dirhist = DEF_MAX_DIRHIST;
-			if (restore_last_path == UNSET)
-				restore_last_path = DEF_RESTORE_LAST_PATH;
-			if (auto_open == UNSET) auto_open = DEF_AUTO_OPEN;
-			if (autocd == UNSET) autocd = DEF_AUTOCD;
-			if (light_mode == UNSET) light_mode = DEF_LIGHT_MODE;
-			if (dir_indicator == UNSET)
-				dir_indicator = DEF_DIR_INDICATOR;
-			if (classify == UNSET) classify = DEF_CLASSIFY;
-			if (share_selbox == UNSET) share_selbox = DEF_SHARE_SELBOX;
-			if (splash_screen == UNSET)
-				splash_screen = DEF_SPLASH_SCREEN;
-			if (welcome_message == UNSET)
-				welcome_message = DEF_WELCOME_MESSAGE;
-			if (show_hidden == UNSET) show_hidden = DEF_SHOW_HIDDEN;
-			if (show_bk_files == UNSET)
-				show_bk_files = DEF_SHOW_BK_FILES;
-			if (sort == UNSET) sort = DEF_SORT;
-			if (sort_reverse == UNSET) sort_reverse = DEF_SORT_REVERSE;
-			if (tips == UNSET) tips = DEF_TIPS;
-			if (files_counter == UNSET)
-				files_counter = DEF_FILES_COUNTER;
-			if (long_view == UNSET) long_view = DEF_LONG_VIEW;
-			if (ext_cmd_ok == UNSET) ext_cmd_ok = DEF_EXT_CMD_OK;
-			if (max_path == UNSET) max_path = DEF_MAX_PATH;
-			if (logs_enabled == UNSET) logs_enabled = DEF_LOGS_ENABLED;
-			if (pager == UNSET) pager = DEF_PAGER;
-			if (max_hist == UNSET) max_hist = DEF_MAX_HIST;
-			if (max_log == UNSET) max_log = DEF_MAX_LOG;
-			if (clear_screen == UNSET) clear_screen = DEF_CLEAR_SCREEN;
-			if (list_folders_first == UNSET)
-				list_folders_first = DEF_LIST_FOLDERS_FIRST;
-			if (cd_lists_on_the_fly == UNSET)
-				cd_lists_on_the_fly = DEF_CD_LISTS_ON_THE_FLY;	
-			if (case_sensitive == UNSET)
-				case_sensitive = DEF_CASE_SENSITIVE;
-			if (unicode == UNSET) unicode = DEF_UNICODE;
-
-			if (!sys_shell) {
-				/* Get user's default shell */
-				sys_shell = get_sys_shell();
-				if (!sys_shell) {
-					/* Fallback to FALLBACK_SHELL */
-					sys_shell = (char *)xcalloc(strlen(FALLBACK_SHELL)
-												+ 1, sizeof(char));
-					strcpy(sys_shell, FALLBACK_SHELL);
-				}
-			}
-
-			if (!encoded_prompt) {
-				encoded_prompt = (char *)xcalloc(strlen(DEFAULT_PROMPT)
-												 + 1, sizeof(char));
-				strcpy(encoded_prompt, DEFAULT_PROMPT);
-			}
-
-			if (!term) {
-				term = (char *)xcalloc(strlen(DEFAULT_TERM_CMD) + 1, 
-									   sizeof(char));
-				strcpy(term, DEFAULT_TERM_CMD);
-			}
-
-
-			/* Define the file for the Selection Box */
-
-			if (sel_file_user) {
-				free(sel_file_user);
-				sel_file_user = (char *)NULL;
-			}
-
-			if (!share_selbox) {
-				/* Private selection box is stored in the profile
-				 * directory */
-				sel_file_user = (char *)xcalloc(config_len + 9,
-												sizeof(char));
-
-				sprintf(sel_file_user, "%s/selbox", CONFIG_DIR);
-			}
-
-			else {
-				/* Common selection box is stored in the general
-				 * configuration directory */
-				sel_file_user = (char *)xcalloc(config_len + 17,
-												sizeof(char));
-				sprintf(sel_file_user, "%s/.config/%s/selbox",
-						user_home, PNL);
-			}
-		}
-
-		/* If we reset all these values, a) the user will be able to
-		 * modify them while in the program via the edit command.
-		 * However, this means that b) any edit, to whichever option,
-		 * will override the values for ALL options, including those
-		 * set in the command line. Example: if the user pass the -A
-		 * option to show hidden files (while it is disabled in the
-		 * config file), and she edits the config file to, say, change
-		 * the prompt, hidden files will be disabled, which is not what
-		 * the user wanted */
-
-		/* "XTerm*eightBitInput: false" must be set in HOME/.Xresources
-		 * to make some keybindings like Alt+letter work correctly in
-		 * xterm-like terminal emulators */
-		/* However, there is no need to do this if using the linux console, 
-		 * since we are not in a graphical environment */
-		if ((flags & GRAPHICAL)
-		&& strncmp(getenv("TERM"), "xterm", 5) == 0) {
-			puts("xterm");
-			/* Check ~/.Xresources exists and eightBitInput is set to
-			 * false. If not, create the file and set the corresponding
-			 * value */
-			char xresources[PATH_MAX] = "";
-			sprintf(xresources, "%s/.Xresources", user_home);
-
-			FILE *xresources_fp = fopen(xresources, "a+");
-
-			if (xresources_fp) {
-				/* Since I'm looking for very specific lines, which are
-				 * fixed lines far below MAX_LINE, I don't care to get
-				 * any of the remaining lines truncated */
-				#if __FreeBSD__
-					fseek(xresources_fp, 0, SEEK_SET);
-				#endif
-				char line[256] = "";
-				int eight_bit_ok = 0, cursor = 0, function = 0;
-
-				while (fgets(line, sizeof(line), xresources_fp)) {
-					if (strncmp(line, "XTerm*eightBitInput: false",
-					26) == 0)
-						eight_bit_ok = 1;
-					else if (strncmp(line, "XTerm*modifyCursorKeys: 1",
-					25) == 0)
-						cursor = 1;
-					else if (strncmp(line, "XTerm*modifyFunctionKeys: 1",
-					27) == 0)
-						function = 1;
-				}
-
-				if (!eight_bit_ok || !cursor || !function) {
-					/* Set the file position indicator at the end of
-					 * the file */
-					fseek(xresources_fp, 0L, SEEK_END);
-
-					if (!eight_bit_ok)
-						fputs("\nXTerm*eightBitInput: false\n",
-							  xresources_fp);
-
-					if (!cursor)
-						fputs("\nXTerm*modifyCursorKeys: 1\n",
-							  xresources_fp);
-
-					if (!function)
-						fputs("\nXTerm*modifyFunctionKeys: 1\n",
-							  xresources_fp);
-
-					char *xrdb_path = get_cmd_path("xrdb");
-
-					if (xrdb_path) {
-						char *res_file = (char *)xnmalloc(
-												 strlen(user_home) 
-												 + 13, sizeof(char));
-						sprintf(res_file, "%s/.Xresources", user_home); 
-						char *cmd[] = { "xrdb", "merge", res_file,
-										NULL };
-						launch_execve(cmd, FOREGROUND);
-						free(res_file);
-					}
-
-					_err('w', PRINT_PROMPT, _("%s: Restart your %s for "
-						 "changes to ~/.Xresources to take effect. "
-						 "Otherwise, %s keybindings might not work as "
-						 "expected.\n"), PROGRAM_NAME, (xrdb_path) 
-						 ? _("terminal") : _("X session"),
-						 PROGRAM_NAME);
-
-					if (xrdb_path)
-						free(xrdb_path);
-				}
-
-				fclose(xresources_fp);
-			}
-			else {
-				_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n",
-					 PROGRAM_NAME, xresources, strerror(errno));
-			}
+			_err('w', PRINT_PROMPT, _("%s: mkdir: '%s': Error "
+				 "creating trash directory. Trash function "
+				 "disabled\n"), PROGRAM_NAME, TRASH_DIR);
 		}
 	}
 
-	/* ################## END OF IF HOME ########################### */
+	/* If it exists, check it is writable */
+	else if (access (TRASH_DIR, W_OK) == -1) {
+		trash_ok = 0;
+		_err('w', PRINT_PROMPT, _("%s: '%s': Directory not writable. "
+			 "Trash function disabled\n"), PROGRAM_NAME, TRASH_DIR);
+	}
+
+				/* ####################
+				 * #	CONFIG DIR    #
+				 * #################### */
+
+	/* If the config directory doesn't exist, create it */
+	/* Use the GNU mkdir to let it handle parent directories */
+	if (stat(CONFIG_DIR, &file_attrib) == -1) {
+		char *tmp_cmd[] = { "mkdir", "-p", CONFIG_DIR, NULL };
+
+		if (launch_execve(tmp_cmd, FOREGROUND) != EXIT_SUCCESS) {
+
+			config_ok = 0;
+
+			_err('e', PRINT_PROMPT, _("%s: mkdir: '%s': Error "
+				 "creating configuration directory. Bookmarks, "
+				 "commands logs, and command history are disabled. "
+				 "Program messages won't be persistent. Using "
+				 "default options\n"), PROGRAM_NAME, CONFIG_DIR);
+
+			return;
+		}
+	}
+
+	/* If it exists, check it is writable */
+	else if (access(CONFIG_DIR, W_OK) == -1) {
+
+		config_ok = 0;
+
+		_err('e', PRINT_PROMPT, _("%s: '%s': Directory not writable. "
+			 "Bookmarks, commands logs, and commands history are "
+			 "disabled. Program messages won't be persistent. "
+			 "Using default options\n"), PROGRAM_NAME, CONFIG_DIR);
+
+		return;
+	}
+
+				/* #####################
+				 * #	CONFIG FILE	   #
+				 * #####################*/
+
+	if (stat(CONFIG_FILE, &file_attrib) == -1) {
+
+		if (create_config(CONFIG_FILE) == EXIT_SUCCESS)
+			config_ok = 1;
+
+		else
+			config_ok = 0;
+	}
+
+	if (!config_ok)
+		return;
+
+				/* ######################
+				 * #	PROFILE FILE	#
+				 * ###################### */
+
+	if (stat(PROFILE_FILE, &file_attrib) == -1) {
+
+		FILE *profile_fp = fopen(PROFILE_FILE, "w");
+
+		if (!profile_fp) {
+			_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n",
+				 PROGRAM_NAME, PROFILE_FILE, strerror(errno));
+		}
+
+		else {
+			fprintf(profile_fp, _("#%s profile\n\
+#Write here the commands you want to be executed at startup\n\
+#Ex:\n#echo -e \"%s, the anti-eye-candy/KISS file manager\"\n"), 
+					PROGRAM_NAME, PROGRAM_NAME);
+			fclose(profile_fp);
+		}
+	}
+
+				/* #####################
+				 * #	COLORS DIR	   #
+				 * ##################### */
+
+	if (stat(COLORS_DIR, &file_attrib) == -1) {
+
+		char *cmd[] = { "mkdir", COLORS_DIR, NULL };
+
+		if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS) {
+			_err('w', PRINT_PROMPT, _("%s: mkdir: Error "
+				 "creating colors directory. Using the default "
+				 "color scheme\n"), PROGRAM_NAME);
+		}
+	}
+
+	/* Generate the default color scheme file */
+	create_def_cscheme();
+
+				/* #####################
+				 * #	SCRIPTS DIR	   #
+				 * #####################*/
+
+	if (stat(SCRIPTS_DIR, &file_attrib) == -1) {
+		char *cmd[] = { "mkdir", SCRIPTS_DIR, NULL };
+
+		if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+			_err('e', PRINT_PROMPT, _("%s: mkdir: Error "
+				 "creating scripts directory. User defined "
+				 "action function is disabled\n"), PROGRAM_NAME);
+	}
+
+				/* #####################
+				 * #	ACTIONS FILE   #
+				 * #####################*/
+
+	if (stat(ACTIONS_FILE, &file_attrib) == -1) {
+		FILE *actions_fp = fopen(ACTIONS_FILE, "w");
+
+		if (!actions_fp) {
+			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+				 ACTIONS_FILE, strerror(errno));
+		}
+
+		else {
+			fprintf(actions_fp, "######################\n"
+				"# %s actions file #\n"
+				"######################\n\n"
+				"# Define here your custom actions. Actions are "
+				"custom command names\n"
+				"# binded to a shell script located in "
+				"$XDG_CONFIG_HOME/clifm/PROFILE/scripts.\n"
+				"# Actions can be executed directly from "
+				"%s command line, as if they\n"
+				"# were any other command, and the associated "
+				"script will be executed\n"
+				"# instead. All parameters passed to the action "
+				"command will be passed\n"
+				"# to the action script as well. Example:\n"
+				"#example=example.sh\n"
+				"# Uncomment the above line and try it.\n",
+				PROGRAM_NAME, PROGRAM_NAME);
+
+			fclose(actions_fp);
+		}
+	}
+
+			/* ##############################
+			 * #	EXAMPLE ACTION SCRIPT	#
+			 * ############################## */
+
+	char *example = (char *)xnmalloc(strlen(SCRIPTS_DIR) + 12,
+									 sizeof(char));
+	sprintf(example, "%s/example.sh", SCRIPTS_DIR);
+
+	if (stat(example, &file_attrib) == -1) {
+
+		FILE *example_fp = fopen(example, "w");
+
+		if (!example_fp) {
+			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+				 example, strerror(errno));
+		}
+
+		else {
+			fprintf(example_fp, "#!/bin/sh\n\n"
+				"# This is a CliFM example action script\n\n"
+				"echo \"Profile: $CLIFM_PROFILE\n"
+				"PWD: \"$(pwd)\"\n"
+				"Script: $(basename \"$0\")\n"
+				"Parameters: \"$@\"\"\n\n"
+				"exit 0\n");
+			fclose(example_fp);
+		}
+
+		/* Make it executable */
+		char *chmod_cmd[] = { "chmod", "700", example, NULL };
+		launch_execve(chmod_cmd, FOREGROUND);
+	}
+
+	free(example);
+
+				/* #####################
+				 * #	 MIME FILE	   #
+				 * #####################*/
+
+	if (stat(MIME_FILE, &file_attrib) == 0)
+		return;
+
+	_err('n', PRINT_PROMPT, _("%s created a new MIME list file "
+		 "(%s). It is recommended to edit this file (typing "
+		 "'mm edit' or however you want) to add the programs "
+		 "you use and remove those you don't. This will make "
+		 "the process of opening files faster and smoother\n"),
+		 PROGRAM_NAME, MIME_FILE);
+
+
+	/* Try importing MIME associations from the system, and in
+	 * case nothing can be imported, create an empty MIME list
+	 * file */
+	if (mime_import(MIME_FILE) != EXIT_SUCCESS) {
+
+		FILE *mime_fp = fopen(MIME_FILE, "w");
+
+		if (!mime_fp) {
+			_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n", 
+				 PROGRAM_NAME, MIME_FILE, strerror(errno));
+		}
+
+		else {
+
+			if (!(flags & GRAPHICAL))
+				fputs("text/plain=nano;vim;vi;emacs;ed\n"
+					  "*.cfm=nano;vim;vi;emacs;ed\n", mime_fp);
+
+			else
+				fputs("text/plain=gedit;kate;pluma;mousepad;"
+					  "leafpad;nano;vim;vi;emacs;ed\n"
+					  "*.cfm=gedit;kate;pluma;mousepad;leafpad;"
+					  "nano;vim;vi;emacs;ed\n", mime_fp);
+
+			fclose(mime_fp);
+		}
+	}
+}
+
+void
+read_config(void)
+{
+	int ret = -1;
+
+	FILE *config_fp = fopen(CONFIG_FILE, "r");
+
+	if (!config_fp) {
+		_err('e', PRINT_PROMPT, _("%s: fopen: '%s': %s. Using "
+			 "default values.\n"), PROGRAM_NAME, CONFIG_FILE,
+			 strerror(errno));
+		return;
+	}
+
+	if (xargs.rl_vi_mode == 1)
+		rl_vi_editing_mode(1, 0);	
+
+	div_line_char = UNSET;
+	#define MAX_BOOL 6
+	/* starting path(14) + PATH_MAX + \n(1)*/
+	char line[PATH_MAX + 15];
+
+	while (fgets(line, sizeof(line), config_fp)) {
+
+		if (*line == '#'
+		&& strncmp(line, "#END OF OPTIONS", 15) == 0)
+			break;
+
+		/* Check for the xargs.splash flag. If -1, it was
+		 * not set via command line, so that it must be
+		 * set here */
+		else if (xargs.splash == UNSET && *line == 'S'
+		&& strncmp(line, "SplashScreen=", 13) == 0) {
+			char opt_str[MAX_BOOL] = ""; /* false (5) + 1 */
+			ret = sscanf(line, "SplashScreen=%5s\n", opt_str);
+			/* According to cppcheck: "sscanf() without field 
+			 * width limits can crash with huge input data". 
+			 * Field width limits = %5s */
+
+			if (ret == -1)
+				continue;
+
+			if (strncmp(opt_str, "true", 4) == 0)
+				splash_screen = 1;
+
+			else if (strncmp(opt_str, "false", 5) == 0)
+				splash_screen = 0;
+		}
+
+		else if (!usr_cscheme && *line == 'C'
+		&& strncmp(line, "ColorScheme=", 12) == 0) {
+
+			char *opt_str = (char *)NULL;
+			opt_str = strchr(line, '=');
+
+			if (!opt_str)
+				continue;
+
+			if (!*(opt_str++))
+				continue;
+
+			size_t len = strlen(opt_str);
+			if (opt_str[len - 1] == '\n')
+				opt_str[len - 1] = 0x00;
+
+			usr_cscheme = (char *)xnmalloc(len + 1,
+									 sizeof(char));
+			strcpy(usr_cscheme, opt_str);
+		}
+
+		else if (xargs.light == UNSET && *line == 'L'
+		&& strncmp(line, "LightMode=", 10) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "LightMode=%5s\n", opt_str);
+			if (ret == -1)
+				continue;
+
+			if (strncmp(opt_str, "true", 4) == 0)
+				light_mode = 1;
+
+			else if (strncmp(opt_str, "false", 5) == 0)
+				light_mode = 0;
+		}
+
+		else if (xargs.expand_bookmarks == UNSET
+		&& *line == 'E'
+		&& strncmp(line, "ExpandBookmarks=", 16) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "ExpandBookmarks=%5s\n",
+						 opt_str);
+			if (ret == -1)
+				continue;
+
+			if (strncmp(opt_str, "true", 4) == 0)
+				expand_bookmarks = 1;
+
+			else if (strncmp(opt_str, "false", 5) == 0)
+				expand_bookmarks = 0;
+		}
+
+		else if (xargs.restore_last_path == UNSET
+		&& *line == 'R'
+		&& strncmp(line, "RestoreLastPath=", 16) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "RestoreLastPath=%5s\n",
+						 opt_str);
+			if (ret == -1)
+				continue;
+
+			if (strncmp(opt_str, "true", 4) == 0)
+				restore_last_path = 1;
+
+			else if (strncmp(opt_str, "false", 5) == 0)
+				restore_last_path = 0;
+		}
+
+		else if (!opener && *line == 'O'
+		&& strncmp(line, "Opener=", 7) == 0) {
+
+			char *opt_str = (char *)NULL;
+			opt_str = straft(line, '=');
+
+			if (!opt_str)
+				continue;
+
+			char *tmp = remove_quotes(opt_str);
+			if (!tmp) {
+				free(opt_str);
+				continue;
+			}
+
+			opener = (char *)xcalloc(strlen(tmp) + 1,
+							sizeof(char));
+			strcpy(opener, tmp);
+			free(opt_str);
+		}
+
+		else if (xargs.tips == UNSET && *line == 'T'
+		&& strncmp(line, "Tips=", 5) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "Tips=%5s\n", opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "false", 5) == 0)
+				tips = 0;
+			else if (strncmp(opt_str, "true", 4) == 0)
+				tips = 1;
+		}
+
+		else if (xargs.disk_usage == UNSET  && *line == 'D'
+		&& strncmp(line, "DiskUsage=", 10) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "DiskUsage=%5s\n", opt_str);
+
+			if (ret == -1)
+				continue;
+
+			if (strncmp(opt_str, "true", 4) == 0)
+				disk_usage = 1;
+
+			else if (strncmp(opt_str, "false", 5) == 0)
+				disk_usage = 0;
+		}
+
+		else if (xargs.autocd == UNSET  && *line == 'A'
+		&& strncmp(line, "Autocd=", 7) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "Autocd=%5s\n", opt_str);
+
+			if (ret == -1)
+				continue;
+
+			if (strncmp(opt_str, "true", 4) == 0)
+				autocd = 1;
+
+			else if (strncmp(opt_str, "false", 5) == 0)
+				autocd = 0;
+		}
+
+		else if (xargs.auto_open == UNSET  && *line == 'A'
+		&& strncmp(line, "AutoOpen=", 9) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "AutoOpen=%5s\n", opt_str);
+
+			if (ret == -1)
+				continue;
+
+			if (strncmp(opt_str, "true", 4) == 0)
+				auto_open = 1;
+
+			else if (strncmp(opt_str, "false", 5) == 0)
+				auto_open = 0;
+		}
+
+		else if (xargs.dirmap == UNSET  && *line == 'D'
+		&& strncmp(line, "DirhistMap=", 11) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "DirhistMap=%5s\n", opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "true", 4) == 0)
+				dirhist_map = 1;
+			else if (strncmp(opt_str, "false", 5) == 0)
+				dirhist_map = 0;
+		}
+
+		else if (xargs.dir_indicator == UNSET
+		&& *line == 'D'
+		&& strncmp(line, "DirIndicator=", 13) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "DirIndicator=%5s\n", opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "true", 4) == 0)
+				dir_indicator = 1;
+			else if (strncmp(opt_str, "false", 5) == 0)
+				dir_indicator = 0;
+		}
+
+		else if (xargs.classify == UNSET && *line == 'C'
+		&& strncmp(line, "Classify=", 9) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "Classify=%5s\n", opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "true", 4) == 0)
+				classify = 1;
+			else if (strncmp(opt_str, "false", 5) == 0)
+				classify = 0;
+		}
+
+		else if (strncmp(line, "ClassifyExec=", 13) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "ClassifyExec=%5s\n", opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "true", 4) == 0)
+				classify = 2;
+		}
+
+		else if (xargs.share_selbox == UNSET && *line == 'S'
+		&& strncmp(line, "ShareSelbox=", 12) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "ShareSelbox=%5s\n", opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "true", 4) == 0)
+				share_selbox = 1;
+			else if (strncmp(opt_str, "false", 5) == 0)
+				share_selbox = 0;
+		}
+
+		else if (xargs.sort == UNSET && *line == 'S'
+		&& strncmp(line, "Sort=", 5) == 0) {
+			int opt_num = 0;
+			ret = sscanf(line, "Sort=%d\n", &opt_num);
+			if (ret == -1)
+				continue;
+			if (opt_num >= 0 && opt_num <= sort_types)
+				sort = opt_num;
+			else /* default (sort by name) */
+				sort = DEF_SORT;
+		}
+
+		else if (*line == 'R'
+		&& strncmp(line, "RlEditMode=0", 12) == 0) {
+			rl_vi_editing_mode(1, 0);
+			/* By default, readline uses emacs editing
+			 * mode */
+		}
+
+		else if (xargs.max_dirhist == UNSET && *line == 'M'
+		&& strncmp(line, "MaxDirhist=", 11) == 0) {
+			int opt_num = 0;
+			ret = sscanf(line, "MaxDirhist=%d\n", &opt_num);
+			if (ret == -1)
+				continue;
+			if (opt_num >= 0)
+				max_dirhist = opt_num;
+			else /* default */
+				max_dirhist = DEF_MAX_DIRHIST;
+		}
+
+		else if (xargs.sort_reverse == UNSET && *line == 'S'
+		&& strncmp(line, "SortReverse=", 12) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "SortReverse=%5s\n", opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "true", 4) == 0)
+				sort_reverse = 1;
+			else if (strncmp(opt_str, "false", 5) == 0)
+				sort_reverse = 0;
+		}
+
+		else if (xargs.files_counter == UNSET && *line == 'F'
+		&& strncmp(line, "FilesCounter=", 13) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "FilesCounter=%5s\n", opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "true", 4) == 0)
+				files_counter = 1;
+			else if (strncmp(opt_str, "false", 5) == 0)
+				files_counter = 0;
+		}
+
+		else if (xargs.welcome_message == UNSET
+		 && *line == 'W' && strncmp(line, "WelcomeMessage=",
+		15) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "WelcomeMessage=%5s\n",
+						 opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "true", 4) == 0)
+				welcome_message = 1;
+			else if (strncmp(opt_str, "false", 5) == 0)
+				welcome_message = 0;
+		}
+
+		else if (xargs.clear_screen == UNSET && *line == 'C'
+		&& strncmp(line, "ClearScreen=", 12) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "ClearScreen=%5s\n",
+						 opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "true", 4) == 0)
+				clear_screen = 1;
+			else if (strncmp(opt_str, "false", 5) == 0)
+				clear_screen = 0;
+		}
+
+		else if (xargs.hidden == UNSET && *line == 'S'
+		&& strncmp(line, "ShowHiddenFiles=", 16) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "ShowHiddenFiles=%5s\n",
+						 opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "true", 4) == 0)
+				show_hidden = 1;
+			else if (strncmp(opt_str, "false", 5) == 0)
+				show_hidden = 0;
+		}
+
+		else if (xargs.bk_files == UNSET && *line == 'S'
+		&& strncmp(line, "ShowBackUpFiles=", 16) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "ShowBackUpFiles=%5s\n",
+						 opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "true", 4) == 0)
+				show_bk_files = 1;
+			else if (strncmp(opt_str, "false", 5) == 0)
+				show_bk_files = 0;
+		}
+
+		else if (xargs.longview == UNSET && *line == 'L'
+		&& strncmp(line, "LongViewMode=", 13) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "LongViewMode=%5s\n",
+						 opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "true", 4) == 0)
+				long_view = 1;
+			else if (strncmp(opt_str, "false", 5) == 0)
+				long_view = 0;
+		}
+
+		else if (xargs.ext == UNSET && *line == 'E'
+		&& strncmp(line, "ExternalCommands=", 17) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "ExternalCommands=%5s\n",
+						 opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "true", 4) == 0)
+				ext_cmd_ok = 1;
+			else if (strncmp(opt_str, "false", 5) == 0)
+				ext_cmd_ok = 0;
+		}
+
+		else if (xargs.logs == UNSET && *line == 'L'
+		&& strncmp(line, "LogCmds=", 8) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "LogCmds=%5s\n", opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "true", 4) == 0)
+				logs_enabled = 1;
+			else if (strncmp(opt_str, "false", 5) == 0)
+				logs_enabled = 0;
+		}
+
+		else if (*line == 'S'
+		&& strncmp(line, "SystemShell=", 12) == 0) {
+			if (sys_shell) {
+				free(sys_shell);
+				sys_shell = (char *)NULL;
+			}
+			char *opt_str = straft(line, '=');
+			if (!opt_str)
+				continue;
+
+			char *tmp = remove_quotes(opt_str);
+			if (!tmp) {
+				free(opt_str);
+				continue;
+			}
+
+			if (*tmp == '/') {
+				if (access(tmp, F_OK|X_OK) != 0) {
+					free(opt_str);
+					continue;
+				}
+				sys_shell = (char *)xnmalloc(strlen(tmp)
+										+ 1, sizeof(char));
+				strcpy(sys_shell, tmp);
+			}
+
+			else {
+				char *shell_path = get_cmd_path(tmp);
+				if (!shell_path) {
+					free(opt_str);
+					continue;
+				}
+				sys_shell = (char *)xnmalloc(
+									strlen(shell_path)
+									+ 1, sizeof(char));
+				strcpy(sys_shell, shell_path);
+				free(shell_path);
+			}
+
+			free(opt_str);
+		}
+
+		else if (*line == 'T'
+		&& strncmp(line, "TerminalCmd=", 12) == 0) {
+
+			if (term) {
+				free(term);
+				term = (char *)NULL;
+			}
+
+			char *opt_str = straft(line, '=');
+			if (!opt_str)
+				continue;
+
+			char *tmp = remove_quotes(opt_str);
+			if (!tmp) {
+				free(opt_str);
+				continue;
+			}
+
+			term = (char *)xnmalloc(strlen(tmp) + 1,
+									sizeof(char));
+			strcpy(term, tmp);
+			free(opt_str);
+		}
+
+		else if (xargs.ffirst == UNSET  && *line == 'L'
+		&& strncmp(line, "ListFoldersFirst=", 17) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "ListFoldersFirst=%5s\n",
+						 opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "true", 4) == 0)
+				list_folders_first = 1;
+			else if (strncmp(opt_str, "false", 5) == 0)
+				list_folders_first = 0;
+		}
+
+		else if (xargs.cd_list_auto == UNSET && *line == 'C'
+		&& strncmp(line, "CdListsAutomatically=",
+		21) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "CdListsAutomatically=%5s\n", 
+						 opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "true", 4) == 0)
+				cd_lists_on_the_fly = 1;
+			else if (strncmp(opt_str, "false", 5) == 0)
+				cd_lists_on_the_fly = 0;
+		}
+
+		else if (xargs.sensitive == UNSET && *line == 'C'
+		&& strncmp(line, "CaseSensitiveList=", 18) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "CaseSensitiveList=%5s\n", 
+					   opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "true", 4) == 0)
+				case_sensitive = 1;
+			else if (strncmp(opt_str, "false", 5) == 0)
+				case_sensitive = 0;
+		}
+
+		else if (xargs.unicode == UNSET && *line == 'U'
+		&& strncmp(line, "Unicode=", 8) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "Unicode=%5s\n", opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "true", 4) == 0)
+				unicode = 1;
+			else if (strncmp(opt_str, "false", 5) == 0)
+				unicode = 0;
+		}
+
+		else if (xargs.pager == UNSET && *line == 'P'
+		&& strncmp(line, "Pager=", 6) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "Pager=%5s\n", opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "true", 4) == 0)
+				pager = 1;
+			else if (strncmp(opt_str, "false", 5) == 0)
+				pager = 0;
+		}
+
+		else if (*line == 'P'
+		&& strncmp(line, "Prompt=", 7) == 0) {
+			if (encoded_prompt)
+				free(encoded_prompt);
+			encoded_prompt = straft(line, '=');
+		}
+
+		else if (xargs.max_path == UNSET && *line == 'M'
+		&& strncmp(line, "MaxPath=", 8) == 0) {
+			int opt_num = 0;
+			sscanf(line, "MaxPath=%d\n", &opt_num);
+			if (opt_num <= 0)
+				continue;
+			max_path = opt_num;
+		}
+
+		else if (*line == 'D'
+		&& strncmp(line, "DividingLineChar=", 17) == 0) {
+			/* Accepts both chars and decimal integers */
+			char opt_c = -1;
+			sscanf(line, "DividingLineChar='%c'", &opt_c);
+			if (opt_c == -1) {
+				int num = -1;
+				sscanf(line, "DividingLineChar=%d", &num);
+				if (num == -1)
+					div_line_char = DEF_DIV_LINE_CHAR;
+				else
+					div_line_char = (char)num;
+			}
+			else
+				div_line_char = opt_c;
+		}
+
+		else if (*line == 'M'
+		&& strncmp(line, "MaxHistory=", 11) == 0) {
+			int opt_num = 0;
+			sscanf(line, "MaxHistory=%d\n", &opt_num);
+			if (opt_num <= 0)
+				continue;
+			max_hist = opt_num;
+		}
+
+		else if (*line == 'M'
+		&& strncmp(line, "MaxLog=", 7) == 0) {
+			int opt_num = 0;
+			sscanf (line, "MaxLog=%d\n", &opt_num);
+			if (opt_num <= 0)
+				continue;
+			max_log = opt_num;
+		}
+
+		else if (xargs.path == UNSET && !path && *line == 'S' 
+		&& strncmp(line, "StartingPath=", 13) == 0) {
+			char *opt_str = straft(line, '=');
+			if (!opt_str)
+				continue;
+
+			char *tmp = remove_quotes(opt_str);
+			if (!tmp) {
+				free(opt_str);
+				continue;
+			}
+
+			/* If starting path is not NULL, and exists,
+			 * and is a directory, and the user has
+			 * appropriate permissions, set path to starting
+			 * path. If any of these conditions is false,
+			 * path will be set to default, that is, CWD */
+			if (chdir(tmp) == 0) {
+				free(path);
+				path = (char *)xnmalloc(strlen(tmp) + 1, 
+									    sizeof(char));
+				strcpy(path, tmp);
+			}
+			else {
+				_err('w', PRINT_PROMPT, _("%s: '%s': %s. "
+					 "Using the current working directory "
+					 "as starting path\n"), PROGRAM_NAME,
+					 tmp, strerror(errno));
+			}
+			free(opt_str);
+		}
+	}
+
+	fclose(config_fp);
+
+	return;
+}
+
+void
+set_sel_file(void)
+/* Define the file for the Selection Box */
+{
+	if (SEL_FILE) {
+		free(SEL_FILE);
+		SEL_FILE = (char *)NULL;
+	}
+
+	if (!CONFIG_DIR)
+		return;
+
+	size_t config_len = strlen(CONFIG_DIR);
+
+	if (!share_selbox) {
+		/* Private selection box is stored in the profile
+		 * directory */
+		SEL_FILE = (char *)xcalloc(config_len + 9,
+										sizeof(char));
+
+		sprintf(SEL_FILE, "%s/selbox", CONFIG_DIR);
+	}
+
+	else {
+		/* Common selection box is stored in the general
+		 * configuration directory */
+		SEL_FILE = (char *)xcalloc(config_len + 17,
+										sizeof(char));
+		sprintf(SEL_FILE, "%s/.config/%s/selbox",
+				user_home, PNL);
+	}
+
+	return;
+}
+
+void
+edit_xresources()
+{
+	/* Check if ~/.Xresources exists and eightBitInput is set to
+	 * false. If not, create the file and set the corresponding
+	 * value */
+	char xresources[PATH_MAX] = "";
+	sprintf(xresources, "%s/.Xresources", user_home);
+
+	FILE *xresources_fp = fopen(xresources, "a+");
+
+	if (!xresources_fp) {
+		_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n",
+			 PROGRAM_NAME, xresources, strerror(errno));
+		return;
+	}
+
+	/* Since I'm looking for very specific lines, which are
+	 * fixed lines far below MAX_LINE, I don't care to get
+	 * any of the remaining lines truncated */
+	#if __FreeBSD__
+		fseek(xresources_fp, 0, SEEK_SET);
+	#endif
+	char line[256] = "";
+	int eight_bit = 0, cursor = 0, function = 0;
+
+	while (fgets(line, sizeof(line), xresources_fp)) {
+
+		if (strncmp(line, "XTerm*eightBitInput: false",
+		26) == 0)
+			eight_bit = 1;
+
+		else if (strncmp(line, "XTerm*modifyCursorKeys: 1",
+		25) == 0)
+			cursor = 1;
+
+		else if (strncmp(line, "XTerm*modifyFunctionKeys: 1",
+		27) == 0)
+			function = 1;
+	}
+
+	if (!eight_bit || !cursor || !function) {
+		/* Set the file position indicator at the end of
+		 * the file */
+		fseek(xresources_fp, 0L, SEEK_END);
+
+		if (!eight_bit)
+			fputs("\nXTerm*eightBitInput: false\n",
+				  xresources_fp);
+
+		if (!cursor)
+			fputs("\nXTerm*modifyCursorKeys: 1\n",
+				  xresources_fp);
+
+		if (!function)
+			fputs("\nXTerm*modifyFunctionKeys: 1\n",
+				  xresources_fp);
+
+		char *xrdb_path = get_cmd_path("xrdb");
+
+		if (xrdb_path) {
+			char *res_file = (char *)xnmalloc(
+									 strlen(user_home) 
+									 + 13, sizeof(char));
+			sprintf(res_file, "%s/.Xresources", user_home); 
+			char *cmd[] = { "xrdb", "merge", res_file,
+							NULL };
+			launch_execve(cmd, FOREGROUND);
+			free(res_file);
+		}
+
+		_err('w', PRINT_PROMPT, _("%s: Restart your %s for "
+			 "changes to ~/.Xresources to take effect. "
+			 "Otherwise, %s keybindings might not work as "
+			 "expected.\n"), PROGRAM_NAME, (xrdb_path) 
+			 ? _("terminal") : _("X session"),
+			 PROGRAM_NAME);
+
+		if (xrdb_path)
+			free(xrdb_path);
+	}
+
+	fclose(xresources_fp);
+
+	return;
+}
+
+void
+create_tmp_files(void)
+{
+	size_t pnl_len = strlen(PNL);
 
 	/* #### CHECK THE TMP DIR #### */
 
@@ -14305,11 +14386,13 @@ init_config(void)
 	TMP_DIR = (char *)xnmalloc(strlen(user) + pnl_len + 7, sizeof(char));
 	sprintf(TMP_DIR, "/tmp/%s", PNL);
 
+	struct stat file_attrib;
+
 	if (stat(TMP_DIR, &file_attrib) == -1) {
-/*		if (mkdir(TMP_DIR, 1777) == -1) { */
+
 		char *md_cmd[] = { "mkdir", "-pm1777", TMP_DIR, NULL };
-		int ret = launch_execve(md_cmd, FOREGROUND);
-		if (ret != EXIT_SUCCESS) {
+
+		if (launch_execve(md_cmd, FOREGROUND) != EXIT_SUCCESS) {
 			_err('e', PRINT_PROMPT, _("%s: '%s': Error creating "
 				 "temporary directory\n"), PROGRAM_NAME, TMP_DIR);
 		}
@@ -14324,10 +14407,10 @@ init_config(void)
 	sprintf(TMP_DIR, "/tmp/%s/%s", PNL, user);
 
 	if (stat(TMP_DIR, &file_attrib) == -1) {
-/*		if (mkdir(TMP_DIR, 1777) == -1) { */
+
 		char *md_cmd2[] = { "mkdir", "-pm700", TMP_DIR, NULL };
-		int ret = launch_execve(md_cmd2, FOREGROUND);
-		if (ret != EXIT_SUCCESS) {
+
+		if (launch_execve(md_cmd2, FOREGROUND) != EXIT_SUCCESS) {
 			selfile_ok = 0;
 			_err('e', PRINT_PROMPT, _("%s: '%s': Error creating "
 				 "temporary directory\n"), PROGRAM_NAME, TMP_DIR);
@@ -14336,7 +14419,8 @@ init_config(void)
 
 	/* If the directory exists, check it is writable */
 	else if (access(TMP_DIR, W_OK) == -1) {
-		if (!sel_file_user) {
+
+		if (!SEL_FILE) {
 			selfile_ok = 0;
 			_err('w', PRINT_PROMPT, "%s: '%s': Directory not writable. "
 				 "Selected files will be lost after program exit\n",
@@ -14346,7 +14430,7 @@ init_config(void)
 
 	/* If the config directory isn't available, define an alternative
 	 * selection file in /tmp */
-	if (!sel_file_user) {
+	if (!SEL_FILE) {
 
 		_err('w', PRINT_PROMPT, "%s: '%s': Using a temporary file for "
 			 "the Selection Box. Selected files won't be persistent "
@@ -14365,16 +14449,46 @@ init_config(void)
 			else
 				prof_len = 7; /* Lenght of "default" */
 
-			sel_file_user = (char *)xcalloc(tmp_dir_len + prof_len
+			SEL_FILE = (char *)xcalloc(tmp_dir_len + prof_len
 											+ 9, sizeof(char));
-			sprintf(sel_file_user, "%s/selbox_%s", TMP_DIR,
+			sprintf(SEL_FILE, "%s/selbox_%s", TMP_DIR,
 					(alt_profile) ? alt_profile : "default");
 		}
+
 		else {
-			sel_file_user = (char *)xcalloc(tmp_dir_len + 8,
+			SEL_FILE = (char *)xcalloc(tmp_dir_len + 8,
 											sizeof(char));
-			sprintf(sel_file_user, "%s/selbox", TMP_DIR);
+			sprintf(SEL_FILE, "%s/selbox", TMP_DIR);
 		}
+	}
+}
+
+void
+init_config(void)
+/* Set up CliFM directories and config files. Load the user's 
+ * configuration from clifmrc */
+{
+	/* Store a pointer to the current LS_COLORS value to be used by
+	 * external commands */
+	ls_colors_bk = getenv("LS_COLORS");
+
+	if (home_ok) {
+
+		define_config_file_names();
+
+		create_config_files();
+
+		if (config_ok)
+			read_config();
+
+		/* "XTerm*eightBitInput: false" must be set in HOME/.Xresources
+		 * to make some keybindings like Alt+letter work correctly in
+		 * xterm-like terminal emulators */
+		/* However, there is no need to do this if using the linux console, 
+		 * since we are not in a graphical environment */
+		if ((flags & GRAPHICAL)
+		&& strncmp(getenv("TERM"), "xterm", 5) == 0)
+			edit_xresources();
 	}
 
 	/* Set a few environment variables, mostly useful to run custom
@@ -15949,26 +16063,30 @@ get_sel_files(void)
 /*	free(sel_elements); */
 	sel_n = 0;
 	/* Open the tmp sel file and load its contents into the sel array */
-	FILE *sel_fp = fopen(sel_file_user, "r");
+	FILE *sel_fp = fopen(SEL_FILE, "r");
 /*	sel_elements=xcalloc(1, sizeof(char *)); */
-	if (sel_fp) {
-		/* Since this file contains only paths, I can be sure no line
-		 * length will be larger than PATH_MAX */
-		char sel_line[PATH_MAX] = "";
-		while (fgets(sel_line, sizeof(sel_line), sel_fp)) {
-			size_t line_len = strlen(sel_line);
-			sel_line[line_len - 1] = 0x00;
-			sel_elements = (char **)xrealloc(sel_elements, (sel_n + 1)
-											 * sizeof(char *));
-			sel_elements[sel_n] = (char *)xcalloc(line_len+1,
-												  sizeof(char));
-			strcpy(sel_elements[sel_n++], sel_line);
-		}
-		fclose(sel_fp);
-		return EXIT_SUCCESS;
-	}
-	else
+	if (!sel_fp)
 		return EXIT_FAILURE;
+
+	/* Since this file contains only paths, I can be sure no line
+	 * length will be larger than PATH_MAX */
+	char sel_line[PATH_MAX] = "";
+
+	while (fgets(sel_line, sizeof(sel_line), sel_fp)) {
+
+		size_t line_len = strlen(sel_line);
+
+		sel_line[line_len - 1] = 0x00;
+
+		sel_elements = (char **)xrealloc(sel_elements, (sel_n + 1)
+										 * sizeof(char *));
+		sel_elements[sel_n] = (char *)xcalloc(line_len+1,
+											  sizeof(char));
+		strcpy(sel_elements[sel_n++], sel_line);
+	}
+	fclose(sel_fp);
+
+	return EXIT_SUCCESS;
 }
 
 char *
@@ -19933,20 +20051,20 @@ save_sel(void)
 		return EXIT_FAILURE;
 
 	if (sel_n == 0) {
-		if (unlink(sel_file_user) == -1) {
+		if (unlink(SEL_FILE) == -1) {
 			fprintf(stderr, "%s: sel: '%s': %s\n", PROGRAM_NAME, 
-					sel_file_user, strerror(errno));
+					SEL_FILE, strerror(errno));
 			return EXIT_FAILURE;
 		}
 		else
 			return EXIT_SUCCESS;
 	}
 
-	FILE *sel_fp = fopen(sel_file_user, "w");
+	FILE *sel_fp = fopen(SEL_FILE, "w");
 
 	if (!sel_fp) {
 		_err(0, NOPRINT_PROMPT, "%s: sel: '%s': %s\n", PROGRAM_NAME, 
-			 sel_file_user, strerror(errno));
+			 SEL_FILE, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
