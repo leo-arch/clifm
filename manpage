@@ -71,6 +71,7 @@ List of CliFM features:
   29) Command substitution for internal commands
   30) Theming support via color schemes
   31) Privacy oriented
+  32) CD on quit
 
 .SH RATIONALE
 When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the Linux built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There is no two without three".
@@ -164,6 +165,9 @@ sort files by METHOD, where METHOD could be: 0 = none, 1 = name, 2 = size, 3 = a
 .TP
 .B \-\-no\-cd\-auto
 by default, CliFM changes to directories by just specifying the corresponding ELN (e.g. '12' instead of 'cd 12'). This option forces the use of 'cd'
+.TP
+.B \-\-cd\-on\-quit
+write last visited directory to \fI$XDG_CONFIG_HOME/clifm/.last\fR to be later accessed by the corresponding shell function at program exit. See MISCELLANOEOUS NOTES section below.
 .TP
 .B \-\-no\-open\-auto
 same as no-cd-auto, but for files instead of directories
@@ -557,6 +561,10 @@ Print an extract from 'What is Free Software?', written by Richard Stallman.
 .B q, quit, exit, zz
 safely quit CliFM.
 
+.TP
+.B Q
+same as \fIquit\fR, but enabling the CD on quit functionality.
+
 .SH KEYBOARD SHORTCUTS
 .TP
 \fBM\-c:\fR Clear the current command line buffer
@@ -800,6 +808,20 @@ When dealing with filenames containing spaces, you can use both single and doubl
 By default, CliFM starts in the current working directory. However, you can always specify a different path by passing it as an argument. Ex: clifm \-p /home/user/misc. You can also permanently set up the starting path in the CliFM configuration file. If the RestoreLastPath option is set to true, CLiFM will start instead in the last visited directory, unless the starting path is specified via command line.
 .TP
 CliFM's default profile is "default". To create alternative profiles use the \-P option or the 'pf' command. See above.
+.TP
+Enabling the CD on quit functionality:
+.TP
+a) Enable the CD on quit function, either via command line (with the --cd-on-quit option) or via the configuration file (with the \fICdOnQuit\fR option). This option will write the last visited directory to \fI$XDG_CONFIG_HOME/clifm/.last\fR.
+.TP
+b) Write a shell function like this one:
+.TP
+For Bash and Zsh (add it to the corresponding rc file):
+.sp
+c() { clifm "$@"; cd "$(cat ${XDG_CONFIG_HOME:=${HOME}/.config}/clifm/.last)" }
+.TP
+Recall to spawn a new shell for changes to take effect.
+.TP
+3) Run CLiFM as c, or whatever you named the above function. At exit, the shell will cd into the last directory visited in CliFM.
 
 .SH NOTE ON SPEED
 If speed is still an issue, try one of the setups below (listed from slower to faster):
