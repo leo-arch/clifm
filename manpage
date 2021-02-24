@@ -817,7 +817,7 @@ b) Write a shell function like this one:
 .TP
 For Bash and Zsh (add it to the corresponding rc file):
 .sp
-c() { clifm "$@"; cd "$(cat ${XDG_CONFIG_HOME:=${HOME}/.config}/clifm/.last)" }
+c() { clifm "$@"; dir=$(/usr/bin/cat "${XDG_CONFIG_HOME:=${HOME}/.config}/clifm/.last" 2>/dev/null); if [[ -d "$dir" ]]; then cd "$dir"; fi }
 .TP
 Recall to spawn a new shell for changes to take effect.
 .TP
