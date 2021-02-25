@@ -1,6 +1,6 @@
 #!/bin/env bash
 
-# Image viewer plugin for CLiFM
+# Image thumbnails plugin for CLiFM
 # Written by L. Abramovich
 
 SUCCESS=0
@@ -16,13 +16,20 @@ if [[ -n $CLIFM_IMG_VIEWER ]]; then
 
 elif [[ $(type -P sxiv) ]]; then
 	if [[ -d "$1" || -h "$1" || -n "$2" ]]; then
-		sxiv -tr "$@"
+		sxiv -aqtr -- "$@"
 	else
-		sxiv "$@"
+		sxiv -aqt -- "$@"
 	fi
 
 elif [[ $(type -P feh) ]]; then
-	feh "$@"
+	feh -tZ -- "$@"
+
+elif [[ $(type -P lsix) ]]; then
+	if [[ -d "$1" || -h "$1" ]]; then
+		lsix "$1"/*
+	else
+		lsix "$@"
+fi
 
 else
 	echo "CliFM: No image viewer found" >&2
