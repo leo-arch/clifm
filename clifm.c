@@ -18720,9 +18720,13 @@ autojump(char **args)
 		break;
 	}
 
-	
+	/* If ARG is an actual directory, just cd into it */
+	struct stat attr;
 
-	/* Jump into a visited directory using only its basename */
+	if (lstat(args[1], &attr) != -1)
+		return cd_function(args[1]);
+
+	/* Jump into a visited directory using ARGS as filter(s) */
 	size_t i, j, match = 0;
 
 	char **matches = (char **)xnmalloc(dirhist_total_index + 1,
@@ -18730,59 +18734,59 @@ autojump(char **args)
 
 	for (i = 1; args[i]; i++) {
 
-		/* Using the first parameter, get a list of matches in the
+		/* 1) Using the first parameter, get a list of matches in the
 		 * dirhist list */
 		if (!match) {
 
 			for (j = 0; old_pwd[j]; j++) {
 
-				if (strstr(old_pwd[j], args[i])) {
+				if (!strstr(old_pwd[j], args[i]))
+					continue;
 
-					/* Exclue CWD */
-					if (strcmp(old_pwd[j], path) == 0)
-						continue;
+				/* Exclue CWD */
+				if (strcmp(old_pwd[j], path) == 0)
+					continue;
 
-					int exclude = 0;
+				int exclude = 0;
 
-					/* Filter matches according to parent or
-					 * child options */
-					switch(jump_opt) {
-						case jparent:
-							if (!strstr(path, old_pwd[j]))
-								exclude = 1;
+				/* Filter matches according to parent or
+				 * child options */
+				switch(jump_opt) {
+					case jparent:
+						if (!strstr(path, old_pwd[j]))
+							exclude = 1;
+					break;
+
+					case jchild:
+						if (!strstr(old_pwd[j], path))
+							exclude = 1;
+
+					case none:
+					default:
 						break;
-
-						case jchild:
-							if (!strstr(old_pwd[j], path))
-								exclude = 1;
-
-						case none:
-						default:
-							break;
-					}
-
-					if (exclude)
-						continue;
-					
-					int already_matched = 0;
-
-					/* Do not match duplicated entries */
-					if (match) {
-						size_t k;
-
-						for (k = 0; k < match; k++)
-
-							if (strcmp(old_pwd[j], matches[k]) == 0)
-								already_matched = 1;
-					}
-
-					if (!already_matched)
-						matches[match++] = old_pwd[j];
 				}
+
+				if (exclude)
+					continue;
+				
+				int already_matched = 0;
+
+				/* Do not match duplicated entries */
+				if (match) {
+					size_t k;
+
+					for (k = 0; k < match; k++)
+
+						if (strcmp(old_pwd[j], matches[k]) == 0)
+							already_matched = 1;
+				}
+
+				if (!already_matched)
+					matches[match++] = old_pwd[j];
 			}
 		}
 
-		/* Once we have the list of matches, perform a reverse
+		/* 2) Once we have the list of matches, perform a reverse
 		 * matching process, that is, excluding non-matches,
 		 * using subsequent parameters */
 		else {
@@ -18797,7 +18801,7 @@ autojump(char **args)
 		}
 	}
 
-	/* Finally, if something remains, we have at least one match */
+	/* 3) Finally, if something remains, we have at least one match */
 
 	/* NOTE:
 	 * This list of matches should be further filtered by the number
