@@ -18810,6 +18810,7 @@ autojump(char **args)
 		if (matches[i]) {
 			found = 1;
 			exit_status = cd_function(matches[i]);
+			break;
 		}
 	}
 
