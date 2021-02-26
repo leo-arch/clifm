@@ -416,6 +416,7 @@ char **my_rl_completion(const char *text, int start, int end);
 char *my_rl_quote(char *text, int m_t, char *qp);
 int quote_detector(char *line, int index);
 int is_quote_char(char c);
+char *dirhist_generator(const char *text, int state);
 char *cschemes_generator(const char *text, int state);
 char *filenames_generator(const char *text, int state);
 char *bin_cmd_generator(const char *text, int state);
@@ -768,6 +769,13 @@ enum prog_msg
 	notice = 4
 };
 
+/* Enumeration for the autojump function options */
+enum jump {
+	none = 0,
+	jparent = 1,
+	jchild = 2
+};
+
 /* pmsg holds the current program message type */
 enum prog_msg pmsg = nomsg;
 
@@ -852,6 +860,7 @@ char *user = (char *)NULL, *path = (char *)NULL,
 	*COLORS_DIR = (char *)NULL, **color_schemes = (char **)NULL,
 	*cur_cscheme = (char *)NULL, *usr_cscheme = (char *)NULL,
 	*CONFIG_DIR_GRAL = (char *)NULL;
+/*	*img_viewer = (char *)NULL */
 
 char div_line_char = UNSET;
 
@@ -13022,6 +13031,16 @@ my_rl_completion(const char *text, int start, int end)
 						  &filenames_generator);
 		}
 
+				/* ### DIRHIST COMPLETION ### */
+				/*  For the autojump function */
+
+		else if (*rl_line_buffer == 'j' && (rl_line_buffer[1] == 0x20
+		|| ((rl_line_buffer[1] == 'c' || rl_line_buffer[1] == 'p')
+		&& rl_line_buffer[2] == 0x20)
+		|| strncmp(rl_line_buffer, "jump ", 5) == 0)) {
+			matches = rl_completion_matches(text, &dirhist_generator);
+		}
+
 				/* ### BOOKMARKS COMPLETION ### */
 
 		else if (*rl_line_buffer == 'b'
@@ -13107,6 +13126,44 @@ get_profile_names(void)
 	profile_names[pf_n] = (char *)NULL;
 
 	return EXIT_SUCCESS;
+}
+
+char *
+dirhist_generator(const char *text, int state)
+{
+	static int i;
+	char *name;
+
+	if (!state)
+		i = 0;
+	
+	if (!old_pwd)
+		return (char *)NULL;
+
+	/* Look for matches in the dirhist list */
+	while ((name = old_pwd[i++]) != NULL) {
+
+		/* Exclude CWD */
+		if (name[1] == path[1] && strcmp(name, path) == 0)
+			continue;
+
+		/* Filter by parent */
+		if (rl_line_buffer[1] == 'p') {
+			if (!strstr(path, name))
+				continue;
+		}
+		
+		/* Filter by child */
+		else if (rl_line_buffer[1] == 'c') {
+			if (!strstr(name, path))
+				continue;
+		}
+		
+		if (strstr(name, text))
+			return strdup(name);
+	}
+
+	return (char *)NULL;
 }
 
 char *
@@ -14620,6 +14677,7 @@ init_config(void)
 	 * external programs can determine if they were spawned by CliFM */
 	setenv("CLIFM", "1", 1);
 	setenv("CLIFM_PROFILE", (alt_profile) ? alt_profile : "default", 1);
+/*	setenv("CLIFM_IMG_VIEWER", img_viewer ? img_viewer : "", 1); */
 }
 
 void
@@ -15224,10 +15282,11 @@ parse_input_str(char *str)
  * shell (via launch_execle()) to prevent all of the expansions made
  * here.
  * 4) The following expansions (especific to CLiFM) are performed here:
- * ELN's, "sel" keyword, and ranges of numbers (ELN's). For CliFM
- * internal commands, braces, tilde, and wildarcards expansions are
- * performed here as well. These expansions are the most import part
- * of this function.
+ * ELN's, "sel" keyword, ranges of numbers (ELN's), pinned dir and
+ * bookmark names, and, for internal commands only. For CliFM internal
+ * commands, tilde, braces, wildcards, command and paramenter
+ * substitution, and regex expansion are performed here as well.
+ * These expansions are the most import part of this function.
  */
 
 /* NOTE: Though filenames could consist of everything except of slash
@@ -15404,7 +15463,7 @@ parse_input_str(char *str)
 				 * #   2) BUILTIN EXPANSIONS    #
 				 * ############################## 
 
-	 * Ranges, sel, ELN, and internal variables. 
+	 * Ranges, sel, ELN, pinned dirs, bookmarks, and internal variables. 
 	 * These expansions are specific to CliFM. To be able to use them
 	 * even with external commands, they must be expanded here, before
 	 * sending the input string, in case the command is external, to
@@ -15419,9 +15478,12 @@ parse_input_str(char *str)
 
 		register size_t j = 0;
 
+				/* ##############################
+				 * #   		2.a) AUTOJUMP  		#
+				 * ############################## */
 
 			/* ######################################
-			 * #	 2.a) PINNED DIR EXPANSION		#
+			 * #	 2.b) PINNED DIR EXPANSION		#
 			 * ###################################### */
 
 		if (*substr[i] == ',' && !substr[i][1] && pinned_dir) {
@@ -15431,7 +15493,7 @@ parse_input_str(char *str)
 		}
 
 			/* ######################################
-			 * #	  2.a) BOOKMARKS EXPANSION		#
+			 * #	  2.c) BOOKMARKS EXPANSION		#
 			 * ###################################### */
 
 		/* Expand bookmark names into paths */
@@ -15503,7 +15565,7 @@ parse_input_str(char *str)
 	}
 
 			/* ####################################
-			 * #       2.b) RANGES EXPANSION      # 
+			 * #       2.d) RANGES EXPANSION      # 
 			 * ####################################*/
 
 	 /* Expand expressions like "1-3" to "1 2 3" if all the numbers in
@@ -15567,7 +15629,7 @@ parse_input_str(char *str)
 	free(range_array);
 
 				/* ##########################
-				 * #   2.c) SEL EXPANSION   # 
+				 * #   2.e) SEL EXPANSION   # 
 				 * ##########################*/
 
 /*	if (is_sel && *substr[0] != '/') { */
@@ -15658,7 +15720,7 @@ parse_input_str(char *str)
 	for (i = 0; i <= args_n; i++) {
 
 				/* ##########################
-				 * #   2.d) ELN EXPANSION   # 
+				 * #   2.f) ELN EXPANSION   # 
 				 * ##########################*/
 
 		/* If autocd is set to false, i must be bigger than zero because
@@ -15750,7 +15812,7 @@ parse_input_str(char *str)
 		}
 
 		/* #############################################
-		 * #   2.e) USER DEFINED VARIABLES EXPANSION   # 
+		 * #   2.g) USER DEFINED VARIABLES EXPANSION   # 
 		 * #############################################*/
 
 		if (substr[i][0] == '$' && substr[i][1] != '('
@@ -15787,11 +15849,8 @@ parse_input_str(char *str)
 	}
 
 	/* #### 3) NULL TERMINATE THE INPUT STRING ARRAY #### */
-	substr = (char **)xrealloc(substr, sizeof(char *) * (args_n + 2));	
-	substr[args_n + 1] = (char *)NULL;
-
-	/* If the command is internal, go on for more expansions; else, just
-	 * return the input string array */
+	substr = (char **)xrealloc(substr, sizeof(char *) * (args_n + 2));
+	substr[args_n + 1] = (char *)NULL; 
 
 	if(!is_internal(substr[0]))
 		return substr;
@@ -15804,9 +15863,11 @@ parse_input_str(char *str)
 	 * wrappers of a shell command and do not call the system shell at all.
 	 * For this reason, some expansions normally made by the system shell
 	 * must be made here (in the lobby [got it?]) in order to be able to 
-	 * understand these expansions at all. These functions are properties,
-	 * selection, and trash.
-	 *  */
+	 * understand these expansions at all. */
+
+		/* ###############################################
+		 * #   3) WILDCARD, BRACE, AND TILDE EXPANSION   # 
+		 * ############################################### */
 
 	int *glob_array = (int *)xnmalloc(int_array_max, sizeof(int)); 
 	int *word_array = (int *)xnmalloc(int_array_max, sizeof(int)); 
@@ -15828,10 +15889,6 @@ parse_input_str(char *str)
 		 * expanded by the search function itself */
 		if (substr[0][0] == '/' && i == 0)
 			continue;
-
-		/* ###############################################
-		 * #   3) WILDCARD, BRACE, AND TILDE EXPANSION   # 
-		 * ############################################### */
 
 		/* Tilde expansion is made by glob() */
 		if (*substr[i] == '~')
@@ -15899,6 +15956,7 @@ parse_input_str(char *str)
 		register size_t g = 0;
 		for (g = 0; g < (size_t)glob_n; g++){
 			glob_t globbuf;
+
 			if (glob(substr[glob_array[g] + (int)old_pathc],
 			GLOB_BRACE|GLOB_TILDE, NULL, &globbuf) != EXIT_SUCCESS) {
 				globfree(&globbuf);
@@ -15920,9 +15978,9 @@ parse_input_str(char *str)
 				for (i = 0; i < globbuf.gl_pathc; i++) {
 
 					/* Do not match "." or ".." */
-/*					if (strcmp(globbuf.gl_pathv[i], ".") == 0
+					if (strcmp(globbuf.gl_pathv[i], ".") == 0
 					|| strcmp(globbuf.gl_pathv[i], "..") == 0)
-						continue; */
+						continue;
 
 					/* Escape the globbed filename and copy it */
 					char *esc_str = escape_str(globbuf.gl_pathv[i]);
@@ -15967,19 +16025,11 @@ parse_input_str(char *str)
 				for (i = 0; i <= args_n; i++) 
 					free(substr[i]);
 
-				substr = (char **)xrealloc(substr, 
-										(args_n + globbuf.gl_pathc + 1)
-										* sizeof(char *));
-
-				for (i = 0; i < j; i++) {
-					substr[i] = (char *)xcalloc(strlen(glob_cmd[i])
-												+ 1, sizeof(char));
-					strcpy(substr[i], glob_cmd[i]);
-					free(glob_cmd[i]);
-				}
+				free(substr);
+				substr = glob_cmd;
+				glob_cmd = (char **)NULL;
 
 				args_n = j - 1;
-				free(glob_cmd);
 			}
 
 			old_pathc += (globbuf.gl_pathc - 1);
@@ -16061,19 +16111,11 @@ parse_input_str(char *str)
 				for (i = 0; i <= args_n; i++) 
 					free(substr[i]);
 
-				substr = (char **)xrealloc(substr, 
-									(args_n + wordbuf.we_wordc + 1)
-									* sizeof(char *));
-
-				for (i = 0; i < j; i++) {
-					substr[i] = (char *)xcalloc(strlen(word_cmd[i])
-												+ 1, sizeof(char));
-					strcpy(substr[i], word_cmd[i]);
-					free(word_cmd[i]);
-				}
+				free(substr);
+				substr = word_cmd;
+				word_cmd = (char **)NULL;
 
 				args_n = j - 1;
-				free(word_cmd);
 			}
 
 			old_pathc += (wordbuf.we_wordc - 1);
@@ -16083,9 +16125,97 @@ parse_input_str(char *str)
 
 	free(word_array);
 
-	/* #### 5) NULL TERMINATE THE INPUT STRING ARRAY (again) #### */
+	/* Null terminate the input string array (again) */
 	substr = (char **)xrealloc(substr, (args_n + 2) * sizeof(char *));
 	substr[args_n + 1] = (char *)NULL;
+
+	if ((*substr[0] == 'd' || *substr[0] == 'u')
+	&& (strcmp(substr[0], "desel") == 0
+	|| strcmp(substr[0], "undel") == 0
+	|| strcmp(substr[0], "untrash") == 0))
+		return substr;
+
+		/* #############################################
+		 * #   			 5) REGEX EXPANSION  		   # 
+		 * ############################################# */
+		
+	char **regex_files = (char **)xnmalloc(files + args_n + 1,
+										sizeof(char *));
+
+	size_t j, r_files = 0;
+
+	for (i = 0; substr[i]; i++) {
+
+		if (r_files > (files + args_n))
+			break;
+
+		/* Ignore the first string of the search function: it will be
+		 * expanded by the search function itself */
+		if (*substr[0] == '/') {
+			regex_files[r_files++] = substr[i];
+			continue;
+		}
+
+		if (check_regex(substr[i]) != EXIT_SUCCESS) {
+			regex_files[r_files++] = substr[i];
+			continue;
+		}
+
+		regex_t regex;
+
+		if (regcomp(&regex, substr[i], REG_NOSUB|REG_EXTENDED)
+		!= EXIT_SUCCESS) {
+/*			fprintf(stderr, "%s: %s: Invalid regular expression",
+					PROGRAM_NAME, substr[i]); */
+			regfree(&regex);
+			regex_files[r_files++] = substr[i];
+			continue;
+		}
+
+		int reg_found = 0;
+
+		for (j = 0; j < files; j++) {
+
+			if (regexec(&regex, dirlist[j], 0, NULL, 0)
+			== EXIT_SUCCESS) {
+				regex_files[r_files++] = dirlist[j];
+				reg_found = 1;
+			}
+		}
+
+		if (!reg_found)
+			regex_files[r_files++] = substr[i];	
+
+		regfree(&regex);
+	}
+
+	if (r_files) {
+		regex_files[r_files] = (char *)NULL;
+
+		char **tmp_files = (char **)xnmalloc(r_files + 2,
+											 sizeof(char *));
+		size_t k = 0;
+		for (j = 0; regex_files[j]; j++) {
+			tmp_files[k] = (char *)xnmalloc(strlen(regex_files[j])
+									+ 1, sizeof(char));
+			strcpy(tmp_files[k++], regex_files[j]);
+		}
+
+		tmp_files[k] = (char *)NULL;
+
+		for (j = 0; j <= args_n; j++)
+			free(substr[j]);
+		free(substr);
+
+		substr = tmp_files;
+		tmp_files = (char **)NULL;
+
+		args_n = k - 1;
+
+		free(tmp_files);
+	}
+
+	free(regex_files);
 
 	return substr;
 }
@@ -18504,6 +18634,196 @@ cschemes_function(char **args)
 }
 
 int
+edit_dirhist(void)
+{
+	if (!config_ok || !DIRHIST_FILE)
+		return EXIT_FAILURE;
+
+	struct stat attr;
+
+	if (stat(DIRHIST_FILE, &attr) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, DIRHIST_FILE,
+				strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	time_t mtime_bfr = attr.st_mtime;
+
+	char *cmd[] = { "o", DIRHIST_FILE, NULL };
+	open_function(cmd);
+
+	stat(DIRHIST_FILE, &attr);
+
+	if (mtime_bfr == attr.st_mtime)
+		return EXIT_SUCCESS;
+
+	if (old_pwd) {
+		size_t i;
+
+		for (i = 0; i < (size_t)dirhist_total_index; i++)
+			free(old_pwd[i]);
+
+		free(old_pwd);
+		old_pwd = (char **)NULL;
+	}
+
+	load_dirhist();
+
+	return EXIT_SUCCESS;
+}
+
+int
+autojump(char **args)
+{
+	/* Implement all features of the original autojump.
+	 * See https://github.com/wting/autojump */
+
+	/* If no parameter, print the list of entries in the dirhist
+	 * list */
+	if (!args[1]) {
+		size_t i;
+
+		for (i = 0; old_pwd[i]; i++)
+			printf("%s\n", old_pwd[i]);
+
+		return EXIT_SUCCESS;
+	}
+
+	/* Add: take into account how many times a directory was visited.
+	 * If two or more results, the most visited one should be chosen.
+	 * To acomplish this I should create an array of ints paralell to
+	 * old_pwd */
+
+	if (*args[1] == '-' && strcmp(args[1], "--help") == 0) {
+		puts(_("Usage: j[c, p], jump [e, edit] [CHAR/STRING ...]"));
+		return EXIT_SUCCESS;
+	}
+
+	if (*args[1] == 'e' && (!args[1][1] || strcmp(args[1], "edit") == 0))
+		return edit_dirhist();
+
+	enum jump jump_opt = none;
+
+	switch(args[0][1]) {
+		case 'c': jump_opt = jchild; break;
+		case 'p': jump_opt = jparent; break;
+		case 'u':
+		case '\0':
+			jump_opt = none;
+			break;
+		default:
+			fprintf(stderr, "%s: '%c': Invalid option\n", PROGRAM_NAME,
+					args[0][1]);
+			fputs(_("Usage: j[c, p] jump [e, edit] [CHAR/STRING "
+				  "...]\n"), stderr);
+			return EXIT_FAILURE;
+		break;
+	}
+
+	
+
+	/* Jump into a visited directory using only its basename */
+	size_t i, j, match = 0;
+
+	char **matches = (char **)xnmalloc(dirhist_total_index + 1,
+									   sizeof(char *));
+
+	for (i = 1; args[i]; i++) {
+
+		/* Using the first parameter, get a list of matches in the
+		 * dirhist list */
+		if (!match) {
+
+			for (j = 0; old_pwd[j]; j++) {
+
+				if (strstr(old_pwd[j], args[i])) {
+
+					/* Exclue CWD */
+					if (strcmp(old_pwd[j], path) == 0)
+						continue;
+
+					int exclude = 0;
+
+					/* Filter matches according to parent or
+					 * child options */
+					switch(jump_opt) {
+						case jparent:
+							if (!strstr(path, old_pwd[j]))
+								exclude = 1;
+						break;
+
+						case jchild:
+							if (!strstr(old_pwd[j], path))
+								exclude = 1;
+
+						case none:
+						default:
+							break;
+					}
+
+					if (exclude)
+						continue;
+					
+					int already_matched = 0;
+
+					/* Do not match duplicated entries */
+					if (match) {
+						size_t k;
+
+						for (k = 0; k < match; k++)
+
+							if (strcmp(old_pwd[j], matches[k]) == 0)
+								already_matched = 1;
+					}
+
+					if (!already_matched)
+						matches[match++] = old_pwd[j];
+				}
+			}
+		}
+
+		/* Once we have the list of matches, perform a reverse
+		 * matching process, that is, excluding non-matches,
+		 * using subsequent parameters */
+		else {
+			for (j = 0; j < match; j++) {
+
+				if (!matches[j] || !*matches[j]
+				|| !strstr(matches[j], args[i])) {
+					matches[j] = (char *)NULL;
+					continue;
+				}
+			}
+		}
+	}
+
+	/* Finally, if something remains, we have at least one match */
+
+	/* NOTE:
+	 * This list of matches should be further filtered by the number
+	 * of accesses, in such a way that only the most visited directory
+	 * will be returned */
+
+	int found = 0, exit_status = EXIT_FAILURE;
+
+	for (i = 0; i < match; i++) {
+		if (matches[i]) {
+			found = 1;
+			exit_status = cd_function(matches[i]);
+		}
+	}
+
+	free(matches);
+
+	if (!found) {
+		printf(_("%s: No matches found\n"), PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	return exit_status;
+}
+
+int
 exec_cmd(char **comm)
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
@@ -18526,8 +18846,10 @@ exec_cmd(char **comm)
 		size_t i;
 		for (i = 0; i < actions_n; i++) {
 			if (*comm[0] == *usr_actions[i].name
-			&& strcmp(comm[0], usr_actions[i].name) == 0)
-				return run_action(usr_actions[i].value, comm);
+			&& strcmp(comm[0], usr_actions[i].name) == 0) {
+				exit_code = run_action(usr_actions[i].value, comm);
+				return exit_code;
+			}	
 		}
 	}
 
@@ -18689,6 +19011,16 @@ exec_cmd(char **comm)
 			exit_code = open_function(comm);
 	}
 
+	
+	/*       ############### AUTOJUMP ##################     */
+	else if (*comm[0] == 'j' && (!comm[0][1]
+	|| ((comm[0][1] == 'c' || comm[0][1] == 'p') && !comm[0][2])
+	|| strcmp(comm[0], "jump") == 0)) {
+		exit_code = autojump(comm);
+		return exit_code;
+	}
+
+	/*       ############### REFRESH ##################     */
 	else if (*comm[0] == 'r' && ((comm[0][1] == 'f' && !comm[0][2])
 	|| strcmp(comm[0], "refresh") == 0)) {
 		if (cd_lists_on_the_fly) {
@@ -24045,6 +24377,7 @@ help_function (void)
  bm, bookmarks [a, add PATH] [d, del] [edit] [SHORTCUT or NAME]\n\
  o, open [ELN/FILE] [APPLICATION]\n\
  cd [ELN/DIR]\n\
+ j[c, p], jump [e, edit] [CHAR/STRING ...]\n\
  s, sel [ELN ELN-ELN FILE ... n] [REGEX [DIR]] [-filetype]\n\
  sb, selbox\n\
  ds, desel [*, a, all]\n\
