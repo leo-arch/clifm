@@ -391,6 +391,8 @@ void save_pinned_dir(void);
 void set_sel_file(void);
 void create_tmp_files(void);
 void unset_xargs(void);
+void load_jumpdb(void);
+void save_jumpdb(void);
 
 /* Memory management */
 char *xnmalloc(size_t nmemb, size_t size);
@@ -416,7 +418,7 @@ char **my_rl_completion(const char *text, int start, int end);
 char *my_rl_quote(char *text, int m_t, char *qp);
 int quote_detector(char *line, int index);
 int is_quote_char(char c);
-char *dirhist_generator(const char *text, int state);
+char *jump_generator(const char *text, int state);
 char *cschemes_generator(const char *text, int state);
 char *filenames_generator(const char *text, int state);
 char *bin_cmd_generator(const char *text, int state);
@@ -682,6 +684,15 @@ struct kbinds_t
 
 struct kbinds_t *kbinds = (struct kbinds_t *)NULL;
 
+/* Struct to store the autojump database values */
+struct jump_t
+{
+	char *path;
+	size_t visits;
+};
+
+struct jump_t *jump_db = (struct jump_t *)NULL;
+
 /* Struct to store bookmarks */
 struct bookmarks_t
 {
@@ -827,7 +838,7 @@ size_t user_home_len = 0, args_n = 0, sel_n = 0, trash_n = 0, msgs_n = 0,
 	   prompt_cmds_n = 0, path_n = 0, current_hist_n = 0, usrvar_n = 0,
 	   aliases_n = 0, longest = 0, files = 0, eln_len = 0, actions_n = 0,
 	   ext_colors_n = 0, kbinds_n = 0, eln_as_file_n = 0,
-	   bm_n = 0, cschemes_n = 0;
+	   bm_n = 0, cschemes_n = 0, jump_n = 0;
 
 struct termios shell_tmodes;
 struct dirent **tmp_dirlist = (struct dirent **)NULL;
@@ -1162,6 +1173,8 @@ main(int argc, char **argv)
 
 	load_dirhist();
 
+	load_jumpdb();
+
 	load_actions();
 
 	/* Check whether we have a working shell */
@@ -1308,12 +1321,15 @@ main(int argc, char **argv)
 			free(path);
 		path = (char *)xcalloc(strlen(cwd) + 1, sizeof(char));
 		strcpy(path, cwd);
+
 		add_to_dirhist(path);
+
 		if (cd_lists_on_the_fly)
 			list_dir();
 	}
 	else {
 		add_to_dirhist(path);
+
 		if (cd_lists_on_the_fly)
 			list_dir();
 	}
@@ -1321,8 +1337,6 @@ main(int argc, char **argv)
 	/* Get the list of available applications in PATH to be used by my
 	 * custom TAB-completion function */
 	get_path_programs();
-
-//	get_bm_names();
 
 	get_profile_names();
 
@@ -1388,6 +1402,160 @@ main(int argc, char **argv)
 			/** #################################
 			 * #     FUNCTIONS DEFINITIONS     #
 			 * ################################# */
+
+int
+add_to_jumpdb(char *dir)
+{
+	if (!dir || !*dir)
+		return EXIT_FAILURE;
+
+	size_t i;
+	int new_entry = 1;
+
+	if (!jump_db) {
+		jump_db = (struct jump_t *)xnmalloc(1, sizeof(struct jump_t));
+		jump_n = 0;
+	}
+
+	for (i = 0; i < jump_n; i++) {
+
+		if (dir[1] == jump_db[i].path[1]
+		&& strcmp(jump_db[i].path, dir) == 0) {
+			jump_db[i].visits++;
+			new_entry = 0;
+			break;
+		}
+	}
+
+	if (new_entry) {
+		jump_db = (struct jump_t *)xrealloc(jump_db, (jump_n + 2)
+										* sizeof(struct jump_t));
+		jump_db[jump_n].path = (char *)xnmalloc(strlen(dir) + 1,
+												sizeof(char));
+		strcpy(jump_db[jump_n].path, dir);
+		jump_db[jump_n++].visits = 1;
+
+		jump_db[jump_n].path = (char *)NULL;
+		jump_db[jump_n].visits = 0;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+void
+load_jumpdb(void)
+{
+
+	if (!config_ok || !CONFIG_DIR_GRAL)
+		return;
+
+	char *JUMP_FILE = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) + 10,
+									   sizeof(char));
+	sprintf(JUMP_FILE, "%s/jump.cfm", CONFIG_DIR_GRAL);
+
+	struct stat attr;
+	
+	if (stat(JUMP_FILE, &attr) == -1) {
+		free(JUMP_FILE);
+		return;
+	}
+
+	FILE *fp = fopen(JUMP_FILE, "r");
+
+	if (!fp) {
+		free(JUMP_FILE);
+		return;
+	}
+
+	char tmp_line[PATH_MAX];
+	int jump_lines = 0;
+
+	while (fgets(tmp_line, sizeof(tmp_line), fp))
+		jump_lines++;
+
+	if (!jump_lines) {
+		free(JUMP_FILE);
+		fclose(fp);
+		return;
+	}
+
+	jump_db = (struct jump_t *)xnmalloc(jump_lines + 2,
+										sizeof(struct jump_t));
+
+	fseek(fp, 0L, SEEK_SET);
+
+	size_t line_size = 0;
+	char *line = (char *)NULL;
+	ssize_t line_len = 0;
+
+	while ((line_len = getline(&line, &line_size, fp)) > 0) {
+
+		if (!*line || *line == '\n' || *line < '0' || *line > '9')
+			continue;
+
+		if (line[line_len - 1] == '\n')
+			line[line_len - 1] = 0x00;
+
+		char *tmp = strchr(line, ':');
+
+		if (!tmp)
+			continue;
+
+		*tmp = 0x00;
+
+		if (!*(++tmp))
+			continue;
+
+		jump_db[jump_n].path = (char *)xnmalloc(strlen(tmp) + 1,
+										   sizeof(char));
+
+		strcpy(jump_db[jump_n].path, tmp);
+
+		if (!is_number(line))
+			jump_db[jump_n++].visits = 1;
+
+		else
+			jump_db[jump_n++].visits = atoi(line);
+	}
+
+	jump_db[jump_n].path = (char *)NULL;
+	jump_db[jump_n].visits = 0;
+
+	fclose(fp);
+
+	free(line);
+	free(JUMP_FILE);
+
+	return;
+}
+
+void
+save_jumpdb(void)
+{
+	if (!config_ok || !CONFIG_DIR_GRAL || !jump_db)
+		return;
+
+	char *JUMP_FILE = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) + 10,
+									   sizeof(char));
+	sprintf(JUMP_FILE, "%s/jump.cfm", CONFIG_DIR_GRAL);
+
+	FILE *fp = fopen(JUMP_FILE, "w+");
+
+	if (!fp) {
+		free(JUMP_FILE);
+		return;
+	}
+
+	size_t i;
+
+	for (i = 0; i < jump_n; i++)
+		fprintf(fp, "%zu:%s\n", jump_db[i].visits, jump_db[i].path);
+
+	fclose(fp);
+	free(JUMP_FILE);
+
+	return;
+}
 
 void
 unset_xargs(void)
@@ -1987,6 +2155,16 @@ reload_config(void)
 
 	old_pwd = (char **)NULL;
 
+/** #################################### */
+	if (jump_db) {
+		for (i = 0; jump_db[i].path; i++)
+			free(jump_db[i].path);
+
+		free(jump_db);
+		jump_db = (struct jump_t *)NULL;
+	}
+/** #################################### */
+
 	for (i = 0; i < aliases_n; i++)
 		free(aliases[i]);
 
@@ -2000,6 +2178,10 @@ reload_config(void)
 	get_prompt_cmds();
 
 	load_dirhist();
+
+/** #################################### */
+	load_jumpdb();
+/** #################################### */
 
 	/* Set the current poistion of the dirhist index to the last
 	 * entry */
@@ -2684,6 +2866,8 @@ handle_iso(char *file)
 			path = (char *)xcalloc(strlen(mountpoint) + 1,
 								   sizeof(char));
 			strcpy(path, mountpoint);
+
+			add_to_jumpdb(path);
 
 			if (cd_lists_on_the_fly) {
 				free_dirlist();
@@ -3647,7 +3831,10 @@ archiver(char **args, char mode)
 				path = (char *)xcalloc(strlen(mountpoint) + 1,
 									   sizeof(char));
 				strcpy(path, mountpoint);
+		
 				free(mountpoint);
+
+				add_to_jumpdb(path);
 
 				if (cd_lists_on_the_fly) {
 					free_dirlist();
@@ -9206,7 +9393,10 @@ cd_function(char *new_path)
 	free(path);
 	path = (char *)xnmalloc(strlen(buf) + 1, sizeof(char));
 	strcpy(path, buf);
+
 	add_to_dirhist(path);
+
+	add_to_jumpdb(path);
 
 	if (cd_lists_on_the_fly) {
 		free_dirlist();
@@ -9255,6 +9445,8 @@ back_function(char **comm)
 
 		exit_status = EXIT_SUCCESS;
 
+		add_to_jumpdb(path);
+
 		if (cd_lists_on_the_fly) {
 			free_dirlist();
 			exit_status = list_dir();
@@ -9299,6 +9491,8 @@ forth_function(char **comm)
 		path = (char *)xcalloc(strlen(old_pwd[dirhist_cur_index])
 							   + 1, sizeof(char));
 		strcpy(path, old_pwd[dirhist_cur_index]);
+
+		add_to_jumpdb(path);
 
 		exit_status = EXIT_SUCCESS;
 
@@ -12062,8 +12256,18 @@ free_stuff(void)
 		free(color_schemes);
 	}
 
-	if (xargs.stealth_mode != 1)
+	if (xargs.stealth_mode != 1) {
 		save_pinned_dir();
+		save_jumpdb();
+	}
+
+	if (jump_db) {
+
+		for (i = 0; i < jump_n; i++)
+			free(jump_db[i].path);
+
+		free(jump_db);
+	}
 
 	if (pinned_dir)
 		free(pinned_dir);
@@ -13031,14 +13235,13 @@ my_rl_completion(const char *text, int start, int end)
 						  &filenames_generator);
 		}
 
-				/* ### DIRHIST COMPLETION ### */
-				/*  For the autojump function */
+				/* ### AUTOJUMP COMPLETION ### */
 
 		else if (*rl_line_buffer == 'j' && (rl_line_buffer[1] == 0x20
 		|| ((rl_line_buffer[1] == 'c' || rl_line_buffer[1] == 'p')
 		&& rl_line_buffer[2] == 0x20)
 		|| strncmp(rl_line_buffer, "jump ", 5) == 0)) {
-			matches = rl_completion_matches(text, &dirhist_generator);
+			matches = rl_completion_matches(text, &jump_generator);
 		}
 
 				/* ### BOOKMARKS COMPLETION ### */
@@ -13129,7 +13332,7 @@ get_profile_names(void)
 }
 
 char *
-dirhist_generator(const char *text, int state)
+jump_generator(const char *text, int state)
 {
 	static int i;
 	char *name;
@@ -13137,11 +13340,11 @@ dirhist_generator(const char *text, int state)
 	if (!state)
 		i = 0;
 	
-	if (!old_pwd)
+	if (!jump_db)
 		return (char *)NULL;
 
 	/* Look for matches in the dirhist list */
-	while ((name = old_pwd[i++]) != NULL) {
+	while ((name = jump_db[i++].path) != NULL) {
 
 		/* Exclude CWD */
 		if (name[1] == path[1] && strcmp(name, path) == 0)
@@ -18634,40 +18837,50 @@ cschemes_function(char **args)
 }
 
 int
-edit_dirhist(void)
+edit_jumpdb(void)
 {
-	if (!config_ok || !DIRHIST_FILE)
+	if (!config_ok || !CONFIG_DIR_GRAL)
 		return EXIT_FAILURE;
+
+	char *JUMP_FILE = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) + 10,
+									   sizeof(char));
+	sprintf(JUMP_FILE, "%s/jump.cfm", CONFIG_DIR_GRAL);
 
 	struct stat attr;
 
-	if (stat(DIRHIST_FILE, &attr) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, DIRHIST_FILE,
+	if (stat(JUMP_FILE, &attr) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, JUMP_FILE,
 				strerror(errno));
+		free(JUMP_FILE);
 		return EXIT_FAILURE;
 	}
 
 	time_t mtime_bfr = attr.st_mtime;
 
-	char *cmd[] = { "o", DIRHIST_FILE, NULL };
+	char *cmd[] = { "o", JUMP_FILE, NULL };
 	open_function(cmd);
 
-	stat(DIRHIST_FILE, &attr);
+	stat(JUMP_FILE, &attr);
 
-	if (mtime_bfr == attr.st_mtime)
+	if (mtime_bfr == attr.st_mtime) {
+		free(JUMP_FILE);
 		return EXIT_SUCCESS;
-
-	if (old_pwd) {
-		size_t i;
-
-		for (i = 0; i < (size_t)dirhist_total_index; i++)
-			free(old_pwd[i]);
-
-		free(old_pwd);
-		old_pwd = (char **)NULL;
 	}
 
-	load_dirhist();
+	if (jump_db) {
+		size_t i;
+
+		for (i = 0; i < jump_n; i++)
+			free(jump_db[i].path);
+
+		free(jump_db);
+		jump_db = (struct jump_t *)NULL;
+		jump_n = 0;
+	}
+
+	load_jumpdb();
+
+	free(JUMP_FILE);
 
 	return EXIT_SUCCESS;
 }
@@ -18680,11 +18893,22 @@ autojump(char **args)
 
 	/* If no parameter, print the list of entries in the dirhist
 	 * list */
-	if (!args[1]) {
+	if (!args[1] && args[0][1] != 'e') {
 		size_t i;
 
-		for (i = 0; old_pwd[i]; i++)
-			printf("%s\n", old_pwd[i]);
+		printf("Visits\tDirectory\n");
+
+		for (i = 0; i < jump_n; i++) {
+
+			if (strcmp(path, jump_db[i].path) == 0) {
+				printf("  %zu\t%s%s%s \n", jump_db[i].visits,
+					   mi_c, jump_db[i].path, df_c);
+			}
+
+			else
+				printf("  %zu\t%s \n", jump_db[i].visits,
+					   jump_db[i].path);
+		}
 
 		return EXIT_SUCCESS;
 	}
@@ -18694,17 +18918,19 @@ autojump(char **args)
 	 * To acomplish this I should create an array of ints paralell to
 	 * old_pwd */
 
-	if (*args[1] == '-' && strcmp(args[1], "--help") == 0) {
-		puts(_("Usage: j[c, p], jump [e, edit] [CHAR/STRING ...]"));
+	if (args[1] && *args[1] == '-' && strcmp(args[1], "--help") == 0) {
+		puts(_("Usage: j[c, p, e], jump [CHAR/STRING ...]"));
 		return EXIT_SUCCESS;
 	}
 
-	if (*args[1] == 'e' && (!args[1][1] || strcmp(args[1], "edit") == 0))
-		return edit_dirhist();
+	if (args[1] && *args[1] == 'e' && (!args[1][1]
+	|| strcmp(args[1], "edit") == 0))
+		return edit_jumpdb();
 
 	enum jump jump_opt = none;
 
 	switch(args[0][1]) {
+		case 'e': return edit_jumpdb();
 		case 'c': jump_opt = jchild; break;
 		case 'p': jump_opt = jparent; break;
 		case 'u':
@@ -18731,6 +18957,8 @@ autojump(char **args)
 
 	char **matches = (char **)xnmalloc(dirhist_total_index + 1,
 									   sizeof(char *));
+	int *visits = (int *)xnmalloc(dirhist_total_index + 1,
+								  sizeof(int));
 
 	for (i = 1; args[i]; i++) {
 
@@ -18738,13 +18966,13 @@ autojump(char **args)
 		 * dirhist list */
 		if (!match) {
 
-			for (j = 0; old_pwd[j]; j++) {
+			for (j = 0; j < jump_n; j++) {
 
-				if (!strstr(old_pwd[j], args[i]))
+				if (!strstr(jump_db[j].path, args[i]))
 					continue;
 
 				/* Exclue CWD */
-				if (strcmp(old_pwd[j], path) == 0)
+				if (strcmp(jump_db[j].path, path) == 0)
 					continue;
 
 				int exclude = 0;
@@ -18753,12 +18981,12 @@ autojump(char **args)
 				 * child options */
 				switch(jump_opt) {
 					case jparent:
-						if (!strstr(path, old_pwd[j]))
+						if (!strstr(path, jump_db[j].path))
 							exclude = 1;
 					break;
 
 					case jchild:
-						if (!strstr(old_pwd[j], path))
+						if (!strstr(jump_db[j].path, path))
 							exclude = 1;
 
 					case none:
@@ -18769,20 +18997,8 @@ autojump(char **args)
 				if (exclude)
 					continue;
 				
-				int already_matched = 0;
-
-				/* Do not match duplicated entries */
-				if (match) {
-					size_t k;
-
-					for (k = 0; k < match; k++)
-
-						if (strcmp(old_pwd[j], matches[k]) == 0)
-							already_matched = 1;
-				}
-
-				if (!already_matched)
-					matches[match++] = old_pwd[j];
+				visits[match] = jump_db[j].visits;
+				matches[match++] = jump_db[j].path;
 			}
 		}
 
@@ -18801,24 +19017,30 @@ autojump(char **args)
 		}
 	}
 
-	/* 3) Finally, if something remains, we have at least one match */
+	/* 3) If something remains, we have at least one match */
 
-	/* NOTE:
-	 * This list of matches should be further filtered by the number
-	 * of accesses, in such a way that only the most visited directory
-	 * will be returned */
+	/* 4) Further filter the list of matches by the number of visits,
+	 * in such a way that only the most visited directory will be
+	 * returned */
 
 	int found = 0, exit_status = EXIT_FAILURE;
+	int most_visited = 0, max = -1; 
 
 	for (i = 0; i < match; i++) {
 		if (matches[i]) {
 			found = 1;
-			exit_status = cd_function(matches[i]);
-			break;
+			if (visits[i] > max) {
+				max = visits[i];
+				most_visited = i;
+			}
 		}
 	}
 
+	if (found)
+		exit_status = cd_function(matches[most_visited]);
+
 	free(matches);
+	free(visits);
 
 	if (!found) {
 		printf(_("%s: No matches found\n"), PROGRAM_NAME);
@@ -19019,7 +19241,8 @@ exec_cmd(char **comm)
 	
 	/*       ############### AUTOJUMP ##################     */
 	else if (*comm[0] == 'j' && (!comm[0][1]
-	|| ((comm[0][1] == 'c' || comm[0][1] == 'p') && !comm[0][2])
+	|| ((comm[0][1] == 'c' || comm[0][1] == 'p'
+	|| comm[0][1] == 'e') && !comm[0][2])
 	|| strcmp(comm[0], "jump") == 0)) {
 		exit_code = autojump(comm);
 		return exit_code;
