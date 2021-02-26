@@ -24,7 +24,7 @@ With the \fBautomatic ELN expansion\fR feature you can use ELN's with external c
 .sp
   \fBe)\fR The \fBSelection Box\fR allows you to drop files and directories from different parts of your filesystem (even from different instances of CliFM) and then operate on them with just one command. Example: select a few files in one instance of the program (say 's 12; cd /media; s 2 5\-6') and then paste them somewhere else using a second instance ('v sel' or 'paste sel'). Both glob and regular expressions are suppported.
 .sp
-  \fBf)\fR The \fBdirectory history\fR function (\fIback\fR and \fIforth\fR) keeps track of all visited directories, so that you can go back and forth to any of them by just entering 'b' or 'f' (or just pressing 'Alt\-j' and 'Alt\-k', or Shift\-Left and Shift\-Right, respectivelly).
+  \fBf)\fR The \fBdirectory history\fR function (\fIback\fR and \fIforth\fR) keeps track of all visited directories, so that you can go back and forth to any of them by just entering 'b' or 'f' (or just pressing 'Alt\-j' and 'Alt\-k', or Shift\-Left and Shift\-Right, respectivelly). Another way of quickly navigating through visited directories is using the built-in \fBautojump\fR function. See the \fIjump\fR command below.
 .sp
   \fBg)\fR An extensive list of \fBkeyboard shortcuts\fR make it even easier and faster to navigate and operate on your files. For example, instead of typing 'cd ..' to go back to the parent directory, or 's *' to select all files in the current directory, you can simply press Alt\-u (or Shift\-Up) and Alt\-a respectivelly.
 .sp
@@ -43,7 +43,7 @@ List of CliFM features:
   1) FreeDesktop compliant Trash system
   2) Automatic files listing
   3) Command and directory history function
-  4) TAB completion for commands, paths, bookmarks, and profiles
+  4) TAB completion for commands, paths, bookmarks, profiles, color schemes, and directory history via the jump command
   5) TAB ELN\-expansion
   6) More than 40 customizable keyboard shortcuts
   7) Wildcards and regex auto\-expansion
@@ -67,11 +67,11 @@ List of CliFM features:
   25) Auto-cd and auto-open
   26) Plugins support via custom actions linked to executable files
   27) Symbolic links editor
-  28) Regular expressions and filetype filter support for both search and selection of files
-  29) Command substitution for internal commands
+  28) Regular expressions and filetype filter support for both the search and the selection function
+  29) Command substitution and regular expressions for all internal commands
   30) Theming support via color schemes
   31) Privacy oriented
-  32) CD on quit
+  32) Built-in autojump function
 
 .SH RATIONALE
 When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the Linux built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There is no two without three".
@@ -255,6 +255,20 @@ open FILE, which can be either a directory, in which case it works just like the
 By default, the \fIopen\fR function will open files with the default application associated to them via the mime built\-in function (see the \fImime\fR command below). However, if you want to open a file with a different application, just add the application name as second argument, e.g. 'o 12 leafpad'. If you want to run the program in the background, simply add the ampersand character: 'o 12 &'.
 .sp
 If the file to be opened is an archive/compressed file, the archive function (see the \fIad\fR command below) will be executed instead.
+.TP
+
+.B j[c, p], jump \fR[e, edit] [CHAR/STRING ...]
+\fIj\fR is the fastest way of using the \fBautojump\fR function to quickly navigate through the directory history list (or the list of visited directories).
+.sp
+With no argument, \fIj\fR just prints the directory history list. Otherwise, it searchs for CHAR/STR in this list and cd into the matching entry, if any. Example: 'j Down' will probably take you to /home/user/Downloads, provided this directory has been already visited.
+.sp
+Multiple query strings could be passed to the function. For example, 'j et mo' will first check for 'et' in the directory history list and then will further filter the search using the second parameter: 'mo'. It will most probably (again, provided the directory has been already visited) take you to /etc/modprobe.d directory.
+.sp
+\fIj\fR accepts two modifiers: 'p' and 'c', the first standing for "parent" and the second for "child". Thus, 'jc' will search for files querying only child drectories relative to the current working directory, while 'jp' will do the same but for parent directories. Examples:'jp foo' will take you to any parent directory containing the string "foo", while 'jc bar' will take you to any child directory containing the string "bar".
+.sp
+Finally, you can edit the directory history list using the 'e' or 'edit' option: 'j e' or 'j edit'.
+.sp
+TAB completion is also available for this function.
 .TP
 
 .B /\fRPATTERN [\-filetype] [DIR]
@@ -785,7 +799,7 @@ CliFM will automatically expand the 'sel' keyword: 'sel' indeed amounts to 'file
 .TP
 ELN's and ELN ranges will be also automatically expanded, provided the corresponding ELN's actually exist, that is to say, provided some filename is listed on the screen under those numbers. For example: 'diff 1 118' will only expand '1', but not '118', if there is no ELN 118. In the same way, the range 1\-118 will only be expanded provided there are 118 or more elements listed on the screen. If this feature somehow conflicts with the command you want to run, say, 'chmod 644 ...', because the current amount of files is equal or larger than 644 (in which case CliFM will expand that number), then you can simply run the command as external: ';chmod 644...'
 .TP
-TAB completion for bookmarks, color schemes, and profiles is also available. To make use of the bookmarks completion, make sure you specify some name for your bookmarks, since these names are used by the completion function. 
+TAB completion for bookmarks, color schemes, profiles and directory histry (via the \fIjump\fR command) is also available. To make use of the bookmarks completion, make sure you specify some name for your bookmarks, since these names are used by the completion function. 
 .TP
 Of course, combinations of all these features is also possbile. Example: 'cp sel file* 2 23\-31 .' will copy all selected files, plus all files whose name starts with "file", plus those files corresponding to the ELN's 2 and 23 through 31, into the current working directory.
 
