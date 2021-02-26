@@ -12,7 +12,7 @@
 
 Why in this world do we need another file manager? In the first place, just because I can do it, write it, and learn (a lot) in the process, just because this is a free world, and very specially, a free community; and, needless to say, alternatives are at the heart of freedom.
 
-Secondly, because I'm sure I'm not the only person in this world looking for a non-bloated, KISS file manager (on Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity): it just does whatever needs to be done using as little resources as possible. No GUI, no curses, but just a command line, shell-like file manager: 5MiB of RAM and 350KiB of disk space (plus some willingness to try something different and new) is all you need.
+Secondly, because I'm sure I'm not the only person in this world looking for a non-bloated, KISS file manager (on Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity): it just does whatever needs to be done using as little resources as possible. No GUI, no curses, but just a command line, shell-like file manager: 5MiB of RAM and 450KiB of disk space (plus some willingness to try something different and new) is all you need.
 
 Finally, because CliFM, unlike most file managers out there, is certainly a file manager, but also **a shell extension**. Almost everything you do on your shell can be done in this file manager as well: search for files, copy, rename, and trash some of them, but, at the same time, update/upgrade your system, add some cronjob, stop a service, and run nano (or vi, or emacs, if you like).
 
@@ -28,7 +28,7 @@ CliFM is a completely command-line-based, shell-like file manager able to perfor
 
 * The use of **short (and even one-character) commands**, and list numbers (**ELN's**) for filenames. For example, instead of typing: `cp file1 file2 file3 file4 dir/`, you can do this: `c 1-4 7`. Shorter and quicker. If the auto-cd and auto-open functions are enabled, which is the default, you can change to directories or open files by just entering the corresponding ELN. So, instead of `cd 12` or `o 12` you can just enter `12`; even shorter and quicker. As a plus, ELN's can also be used with external commands. Example: `diff 1 5` or `ls -l 12 14`. If numbers are a bit tricky to you, as they are to me, you can use the TAB key to expand the ELN to the corresponding filename. So, type `r 56`, then TAB, and it becomes `r filename`.
 
-* **Bookmarks**: With CLiFM bookmarks function, accessing your preferred files and/or directories be as easy as this: `bm` (or `Alt-b`), to call the bookmarks function, and then `1` (or whatever is the number corresponding to your bookmark).
+* **Bookmarks**: With CLiFM bookmarks function, accessing your preferred files and/or directories could be as easy as this: `bm` (or `Alt-b`), to call the bookmarks function, and then `1` (or whatever is the number corresponding to your bookmark).
 
 ![bookmarks](images/bookmarks.png)
 
@@ -42,7 +42,7 @@ Of course, you can deselect some or all selected files whenever you want with th
 
 ![selection box](images/sel_box.png)
  
- * Open files without the need to specify any program. Via `lira` (the **built-in resource opener**), if no program was specified, CliFM will open the file with the default program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background. Of course, you can also set a custom resource opener.
+ * Open files without the need to specify any program. Via `lira` (the **built-in resource opener**), if no program was specified, CliFM will open the file with the default program associated to the file type. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background. Of course, you can also set a custom resource opener.
 
 * **Quick search**: type `/REGEX` and CliFM will list all matches for the corresponding REGEX pattern. Example: `/.*.png` will list all the PNG files in the current directory. If you want to search for files in another directory, just tell the search function where to search: `/.*.png /media/images`. And, if you want to further filter the search, you still can specify what kind of files you want. For example: `/[.-].*d$ -d /etc` will list all directories (-d) in `/etc` containing a dot or a slash and ending with 'd'.
 
@@ -50,7 +50,7 @@ Of course, you can deselect some or all selected files whenever you want with th
 
 * A Freedesktop compliant **trash system** to be able to recover deleted files.
 
-* **Extended color codes**: Just like the `ls` command, CLiFM uses (customizable) color codes to identify file types and extensions. However, and unlike `ls`, CLiFM is also able to distinguish between empty and non-empty files or directories, broken and non-broken symlinks, files and directories with or without read permission, multi-hardlink files, and more. Once in CliFM, type `colors` or `cc` to see the list of currently used color codes.
+* **Extended color codes**: Just like the `ls` command, CLiFM uses customizable color codes to identify file types and extensions. However, and unlike `ls`, CLiFM is also able to distinguish between empty and non-empty files or directories, broken and non-broken symlinks, files and directories with or without read permission, multi-hardlink files, and more. Once in CliFM, type `colors` or `cc` to see the list of currently used color codes.
 
 ![colors](images/colors.png)
 
@@ -64,11 +64,11 @@ Of course, you can deselect some or all selected files whenever you want with th
 
 * **NEW: Stealth mode**: Leave no trace on the host system.
 
-* **NEW** Quickly and easily navigate through the list of visited directory via the **autojump** function.
+* **NEW** Quickly and easily navigate through the jump database (a list of visited directories and the amount of times each of them was visited) via the **autojump** function.
 
 Because file manager, but also half-shell, CLiFM also provides the following features:
 
-* TAB-completion for commands, paths, profiles, bookmarks, color schemes, and ELN's
+* TAB-completion for commands, paths, profiles, bookmarks, color schemes, ELN's, and the autojump function
 * Bash-like quoting system
 * History function
 * Shell commands execution 
@@ -168,7 +168,7 @@ ClifM is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag).
 
 ## First steps
 
-Try `help` command to learn more about CliFM. Once in the CliFM prompt, type `help` or `?`:
+Try the `help` command to learn more about CliFM. Once in the CliFM prompt, type `help` or `?`:
 
 	12:12 user:hostname /etc
 	:) $ help
