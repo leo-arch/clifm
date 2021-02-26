@@ -257,18 +257,18 @@ By default, the \fIopen\fR function will open files with the default application
 If the file to be opened is an archive/compressed file, the archive function (see the \fIad\fR command below) will be executed instead.
 .TP
 
-.B j[c, p], jump \fR[e, edit] [CHAR/STRING ...]
-\fIj\fR is the fastest way of using the \fBautojump\fR function to quickly navigate through the directory history list (or the list of visited directories).
+.B j[c, p, e], jump \fR[e, edit] [CHAR/STRING ...]
+\fIj\fR is the fastest way of using the \fBautojump\fR function to quickly navigate through the jump database (i.e. a list containing the name of visited directories and the amount of times each of them was visited).
 .sp
-With no argument, \fIj\fR just prints the directory history list. Otherwise, it searchs for CHAR/STR in this list and cd into the matching entry, if any. Example: 'j Down' will probably take you to /home/user/Downloads, provided this directory has been already visited.
+With no argument, \fIj\fR just lists the entries in the jump database, printing both the amount of times a directory was visited and the directory name itself. Otherwise, it searchs for CHAR/STR in the database and cd into the most visited matching entry, if any. Example: 'j Down' will probably take you to /home/user/Downloads, provided this directory has been already visited and is the most visited match.
 .sp
-Multiple query strings could be passed to the function. For example, 'j et mo' will first check for 'et' in the directory history list and then will further filter the search using the second parameter: 'mo'. It will most probably (again, provided the directory has been already visited) take you to /etc/modprobe.d directory. Bear in mind that if STR is an actual directory, \fIjump\fR will just cd into it without performing any query.
+Multiple query strings could be passed to the function. For example, 'j et mo' will first check for 'et' in the jump database and then will further filter the search using the second parameter: 'mo'. It will most probably take you (again, provided the directory has been already visited and is the most visited match) to /etc/modprobe.d directory. Bear in mind that if STR is an actual directory, \fIjump\fR will just cd into it without performing any query.
 .sp
-\fIj\fR accepts two modifiers: 'p' and 'c', the first standing for "parent" and the second for "child". Thus, 'jc' will search for files querying only child drectories relative to the current working directory, while 'jp' will do the same but for parent directories. Examples:'jp foo' will take you to any parent directory containing the string "foo", while 'jc bar' will take you to any child directory containing the string "bar".
+\fIj\fR accepts three modifiers: 'e', 'p' and 'c', the first standing for "edit", the second for "parent", and the third for "child". Thus, 'je' will open the jump database to be edited if need, 'jc' will search for files querying only child drectories relative to the current working directory, while 'jp' will do the same but for parent directories. Examples:'jp foo' will take you to the most visited parent directory containing the string "foo", while 'jc bar' will take you to the most visited child directory containing the string "bar".
 .sp
-Finally, you can edit the directory history list using the 'e' or 'edit' option: 'j e' or 'j edit'.
+Finally, you can also edit the jump database using the 'e' or 'edit' option: 'j e' or 'j edit'.
 .sp
-TAB completion is also available for this function.
+TAB completion is available for this function.
 .TP
 
 .B /\fRPATTERN [\-filetype] [DIR]
