@@ -5,6 +5,7 @@
 
 [![clifm](https://img.shields.io/aur/version/clifm?color=1793d1&label=clifm&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/clifm/)
 [![clifm-git](https://img.shields.io/aur/version/clifm-git?color=1793d1&label=clifm-git&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/clifm/)
+[![clifm-colors-git](https://img.shields.io/aur/version/clifm-colors-git?color=1793d1&label=clifm-colors-git&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/clifm/)
 [![License](https://img.shields.io/github/license/leo-arch/clifm?color=333333&style=for-the-badge)](https://github.com/leo-arch/clifm/blob/master/LICENSE)
 
 ## Rationale
@@ -43,7 +44,10 @@ Of course, you can deselect some or all selected files whenever you want with th
  
  * Open files without the need to specify any program. Via `mime` (the **built-in resource opener**), if no program was specified, CliFM will open the file with the default program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background. Of course, you can also set a custom resource opener.
 
-* **Quick search**: type `/string` and CliFM will list all the files containing `string` in its name. This function also supports wildcards. Example: `/*.png` will list all the .png files in the current directory. If you want to search for files in another directory, just tell the search function where to search: `/*.png /media/images`.
+* **Quick search**: type `/REGEX` and CliFM will list all matches for the corresponding REGEX pattern. Example: `/.*.png`
+ will list all the PNG files in the current directory. If you want to 
+search for files in another directory, just tell the search function 
+where to search: `/.*.png /media/images`. And, if you want to further filter the search, you still can specify what kind of files you want. For example: `/[.-].*d$ -d /etc` will list all directories (-d) in /etc containing a dot or a slash and ending with 'd'.
 
 ![quick search](images/quick_search.png)
 
@@ -57,9 +61,13 @@ Of course, you can deselect some or all selected files whenever you want with th
 
 ![dirs](images/dirs.png)
 
+* **Directory history map**: Keep in sight previous, current, and next entries in the directory history list for easiest and fastest navigation through visited directories.
+
 * **NEW: PLUGINS via custom actions**: Use custom action names, as if they were any other command, to run custom shell scripts and extend thus CliFM functionality to fit your needs. This is basically an easy way of building custom commands for CliFM.
 
-* **NEW: Directory history map**: Keep in sight previous, current, and next entries in the directory history list for easiest and fastest navigation through visited directories.
+**NEW: Stealth mode:** Leave no trace on the host system.
+
+**NEW:** Quickly and easily navigate through the jump database (a list of visited directories and the amount of times each of them was visited) via the autojump function.
 
 Because file manager, but also half-shell, CLiFM also provides the following features:
 
@@ -81,6 +89,11 @@ Because file manager, but also half-shell, CLiFM also provides the following fea
 * Auto-cd and auto-open
 * Symlinks editor
 * Disk usage (**NEW**)
+* CD on quit, file picker (as shell functions) (**NEW**)
+* PDF reader, image/video previews, wallpaper setter, music playlist (plugins) (**NEW**)
+* Color schemes (**NEW**)
+
+**NOTE:** By default, CliFM ships only one color scheme, but more can be found at https://github.com/leo-arch/clifm-colors. The package is also available in the AUR: https://aur.archlinux.org/packages/clifm-colors-git
 
 Finally, all CLiFM options could be handled directly via command line, by passing parameters to the program, or via plain
 text configuration files, located in `$XDG_CONFIG_HOME/clifm/`.
