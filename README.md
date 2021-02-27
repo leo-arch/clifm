@@ -86,7 +86,9 @@ Because file manager, but also half-shell, CLiFM also provides the following fea
 * Auto-cd and auto-open
 * Symlinks editor
 * Disk usage
-* CD on quit (**NEW**)
+* Plugins: PDF reader, music playlist, image and video preview
+* CD on quit (shell function)
+* File picker (shell function)
 * Color schemes (**NEW**)
 
 **NOTE**: By default, CliFM ships only one color scheme, but more can be found at https://github.com/leo-arch/clifm-colors. The package is also available in the AUR: https://aur.archlinux.org/packages/clifm-colors-git
