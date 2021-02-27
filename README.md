@@ -65,13 +65,15 @@ where to search: `/.*.png /media/images`. And, if you want to further filter the
 
 * **NEW: PLUGINS via custom actions**: Use custom action names, as if they were any other command, to run custom shell scripts and extend thus CliFM functionality to fit your needs. This is basically an easy way of building custom commands for CliFM.
 
-**NEW: Stealth mode:** Leave no trace on the host system.
+* **NEW: Stealth mode:** Leave no trace on the host system.
 
-**NEW:** Quickly and easily navigate through the jump database (a list of visited directories and the amount of times each of them was visited) via the autojump function.
+* **NEW:** Quickly and easily navigate through the jump database (a list of visited directories and the amount of times each of them was visited) via the autojump function.
+
+![autojump](images/autojump.png)
 
 Because file manager, but also half-shell, CLiFM also provides the following features:
 
-* TAB-completion for commands, paths, and ELN's
+* TAB-completion for commands, paths, ELN's, profiles, bookmarks, color schemes, and the autojump function
 * Bash-like quoting system
 * History function
 * Shell commands execution 
