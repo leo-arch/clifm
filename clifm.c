@@ -1448,9 +1448,9 @@ load_jumpdb(void)
 	if (xargs.no_autojump ==  1 || !config_ok || !CONFIG_DIR_GRAL)
 		return;
 
-	char *JUMP_FILE = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) + 10,
+	char *JUMP_FILE = (char *)xnmalloc(strlen(CONFIG_DIR) + 10,
 									   sizeof(char));
-	sprintf(JUMP_FILE, "%s/jump.cfm", CONFIG_DIR_GRAL);
+	sprintf(JUMP_FILE, "%s/jump.cfm", CONFIG_DIR);
 
 	struct stat attr;
 	
@@ -1535,9 +1535,9 @@ save_jumpdb(void)
 	|| !jump_db)
 		return;
 
-	char *JUMP_FILE = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) + 10,
+	char *JUMP_FILE = (char *)xnmalloc(strlen(CONFIG_DIR) + 10,
 									   sizeof(char));
-	sprintf(JUMP_FILE, "%s/jump.cfm", CONFIG_DIR_GRAL);
+	sprintf(JUMP_FILE, "%s/jump.cfm", CONFIG_DIR);
 
 	FILE *fp = fopen(JUMP_FILE, "w+");
 
@@ -13666,6 +13666,9 @@ define_config_file_names(void)
 								  sizeof(char));
 	sprintf(COLORS_DIR, "%s/colors", CONFIG_DIR_GRAL);
 
+	SCRIPTS_DIR = (char *)xnmalloc(config_gral_len + 9, sizeof(char));
+	sprintf(SCRIPTS_DIR, "%s/scripts", CONFIG_DIR_GRAL);
+
 /*	free(CONFIG_DIR_GRAL);
 	CONFIG_DIR_GRAL = (char *)NULL; */
 
@@ -13728,9 +13731,6 @@ define_config_file_names(void)
 
 	MIME_FILE = (char *)xcalloc(config_len + 14, sizeof(char));
 	sprintf(MIME_FILE, "%s/mimelist.cfm", CONFIG_DIR);
-
-	SCRIPTS_DIR = (char *)xcalloc(config_len + 9, sizeof(char));
-	sprintf(SCRIPTS_DIR, "%s/scripts", CONFIG_DIR);
 
 	ACTIONS_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
 	sprintf(ACTIONS_FILE, "%s/actions.cfm", CONFIG_DIR);
