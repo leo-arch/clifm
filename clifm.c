@@ -765,6 +765,7 @@ struct param
 	int list_and_quit;
 	int color_scheme;
 	int cd_on_quit;
+	int no_autojump;
 };
 
 struct param xargs;
@@ -887,7 +888,7 @@ const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
 		"mountpoints", "bookmarks", "log", "untrash", "unicode",
 		"profile", "shell", "mime", "sort", "tips", "autocd",
 		"auto-open", "actions", "reload", "export", "keybinds",
-		"pin", "unpin", "colorschemes", NULL };
+		"pin", "unpin", "colorschemes", "jump", NULL };
 
 #define MAX_COLOR 46
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
@@ -1108,7 +1109,6 @@ main(int argc, char **argv)
 	 * (init_config) */
 
 	/* Set all external arguments flags to uninitialized state */
-
 	unset_xargs();
 
 	if (argc > 1)
@@ -1406,7 +1406,7 @@ main(int argc, char **argv)
 int
 add_to_jumpdb(char *dir)
 {
-	if (!dir || !*dir)
+	if (xargs.no_autojump == 1 || !dir || !*dir)
 		return EXIT_FAILURE;
 
 	size_t i;
@@ -1445,8 +1445,7 @@ add_to_jumpdb(char *dir)
 void
 load_jumpdb(void)
 {
-
-	if (!config_ok || !CONFIG_DIR_GRAL)
+	if (xargs.no_autojump ==  1 || !config_ok || !CONFIG_DIR_GRAL)
 		return;
 
 	char *JUMP_FILE = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) + 10,
@@ -1532,7 +1531,8 @@ load_jumpdb(void)
 void
 save_jumpdb(void)
 {
-	if (!config_ok || !CONFIG_DIR_GRAL || !jump_db)
+	if (xargs.no_autojump == 1 ||  !config_ok || !CONFIG_DIR_GRAL
+	|| !jump_db)
 		return;
 
 	char *JUMP_FILE = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) + 10,
@@ -1572,6 +1572,7 @@ unset_xargs(void)
 	xargs.logs = xargs.max_path = xargs.bm_file = UNSET;
 	xargs.expand_bookmarks = xargs.only_dirs = UNSET;
 	xargs.list_and_quit = xargs.color_scheme = xargs.cd_on_quit = UNSET;
+	xargs.no_autojump = UNSET;
 }
 
 void
@@ -7209,7 +7210,8 @@ is_internal_c(const char *cmd)
 					"bulk", "opener", "ac", "ad", "acd", "autocd",
 					"ao", "auto-open", "actions", "rl", "reload",
 					"exp", "export", "kb", "keybinds", "pin",
-					"unpin", "cs", "colorschemes", NULL };
+					"unpin", "cs", "colorschemes", "jump", "je",
+					"jc", "jp", NULL };
 
 	short found = 0;
 	size_t i;
@@ -8871,7 +8873,8 @@ is_internal(const char *cmd)
 	const char *int_cmds[] = { "o", "open", "cd", "p", "pr", "prop", "t",
 							   "tr", "trash", "s", "sel", "mm", "mime",
 							   "bm", "bookmarks", "br", "bulk", "ac",
-							   "ad", "exp", "export", "pin", NULL };
+							   "ad", "exp", "export", "pin", "jump",
+							   "jc", "jp", NULL };
 	short found = 0;
 	size_t i;
 
@@ -15023,6 +15026,7 @@ external_arguments(int argc, char **argv)
 		{"list-and-quit", no_argument, 0, 20},
 		{"color-scheme", required_argument, 0, 21},
 		{"cd-on-quit", no_argument, 0, 22},
+		{"no-autojump", no_argument, 0, 23},
 		{0, 0, 0, 0}
 	};
 
@@ -15154,6 +15158,10 @@ external_arguments(int argc, char **argv)
 
 		case 22:
 			xargs.cd_on_quit = cd_on_quit = 1;
+		break;
+
+		case 23:
+			xargs.no_autojump = 1;
 		break;
 
 		case 'a':
@@ -15513,9 +15521,9 @@ parse_input_str(char *str)
 
 	int chaining = 0, cond_cmd = 0, send_shell = 0;
 
-					/* ###########################
-					 * #  0.a) RUN AS EXTERNAL   # 
-					 * ###########################*/
+				/* ###########################
+				 * #  0.a) RUN AS EXTERNAL   # 
+				 * ###########################*/
 
 	/* If invoking a command via ';' or ':' set the send_shell flag to
 	 * true and send the whole string to exec_cmd(), in which case no
@@ -15681,12 +15689,8 @@ parse_input_str(char *str)
 
 		register size_t j = 0;
 
-				/* ##############################
-				 * #   		2.a) AUTOJUMP  		#
-				 * ############################## */
-
 			/* ######################################
-			 * #	 2.b) PINNED DIR EXPANSION		#
+			 * #	 2.a) PINNED DIR EXPANSION		#
 			 * ###################################### */
 
 		if (*substr[i] == ',' && !substr[i][1] && pinned_dir) {
@@ -15696,7 +15700,7 @@ parse_input_str(char *str)
 		}
 
 			/* ######################################
-			 * #	  2.c) BOOKMARKS EXPANSION		#
+			 * #	  2.b) BOOKMARKS EXPANSION		#
 			 * ###################################### */
 
 		/* Expand bookmark names into paths */
@@ -15768,7 +15772,7 @@ parse_input_str(char *str)
 	}
 
 			/* ####################################
-			 * #       2.d) RANGES EXPANSION      # 
+			 * #       2.c) RANGES EXPANSION      # 
 			 * ####################################*/
 
 	 /* Expand expressions like "1-3" to "1 2 3" if all the numbers in
@@ -15832,7 +15836,7 @@ parse_input_str(char *str)
 	free(range_array);
 
 				/* ##########################
-				 * #   2.e) SEL EXPANSION   # 
+				 * #   2.d) SEL EXPANSION   # 
 				 * ##########################*/
 
 /*	if (is_sel && *substr[0] != '/') { */
@@ -15923,7 +15927,7 @@ parse_input_str(char *str)
 	for (i = 0; i <= args_n; i++) {
 
 				/* ##########################
-				 * #   2.f) ELN EXPANSION   # 
+				 * #   2.e) ELN EXPANSION   # 
 				 * ##########################*/
 
 		/* If autocd is set to false, i must be bigger than zero because
@@ -16015,7 +16019,7 @@ parse_input_str(char *str)
 		}
 
 		/* #############################################
-		 * #   2.g) USER DEFINED VARIABLES EXPANSION   # 
+		 * #   2.f) USER DEFINED VARIABLES EXPANSION   # 
 		 * #############################################*/
 
 		if (substr[i][0] == '$' && substr[i][1] != '('
@@ -16479,7 +16483,7 @@ get_sel_files(void)
 	sel_n = 0;
 	/* Open the tmp sel file and load its contents into the sel array */
 	FILE *sel_fp = fopen(SEL_FILE, "r");
-/*	sel_elements=xcalloc(1, sizeof(char *)); */
+/*	sel_elements = xcalloc(1, sizeof(char *)); */
 	if (!sel_fp)
 		return EXIT_FAILURE;
 
@@ -16499,6 +16503,7 @@ get_sel_files(void)
 											  sizeof(char));
 		strcpy(sel_elements[sel_n++], sel_line);
 	}
+
 	fclose(sel_fp);
 
 	return EXIT_SUCCESS;
@@ -16625,7 +16630,7 @@ prompt(void)
 	char *input = (char *)NULL;
 	input = readline(the_prompt);
 
-//	free(the_prompt);
+/*	free(the_prompt); */
 
 	if (!input)
 	/* Same as 'input == NULL': input is a pointer poiting to no
@@ -17384,40 +17389,74 @@ list_dir(void)
 			 * 12) filename (prop)
 			 * */
 			eln_len_cur = digits_in_num(i + 1);
+
 			if (eln_len_bk > eln_len_cur)
 				eln_len = eln_len_bk - (eln_len_bk - eln_len_cur);
+
 			else
 				eln_len = eln_len_bk;
 
 			if (pager) {
-				/*	Check terminal amount of rows: if as many filenames
-				 * as the amount of available terminal rows has been
-				 * printed, stop */
 
-				 /* NOTE: No need to disable keybinds, since every
-				  * keystroke is filtered here */
-				if ((int)counter > (int)(term_rows - 2)) {
-					switch(c = xgetchar()) {
+				if (counter > (size_t)(term_rows - 2)) {
+
+					printf("\x1b[7;97m--Mas--\x1b[0;49m");
+
+					switch (c = xgetchar()) {
+
 					/* Advance one line at a time */
 					case 66: /* Down arrow */
 					case 10: /* Enter */
 					case 32: /* Space */
 						break;
+
 					/* Advance one page at a time */
 					case 126: counter = 0; /* Page Down */
 						break;
+
+					case 63: /* ? */
+					case 104: { /* h: Print pager help */
+							CLEAR;
+
+							printf("?, h: help\n"
+							"Down arrow, Enter, Space: Advance one line\n"
+							"Page Down: Advance one page\n"
+							"q: Stop pagging\n");
+
+							size_t l;
+							for (l = 0; l < (term_rows - 5); l++)
+								puts("");
+
+							printf("\x1b[7;97m--Mas--\x1b[0;49m");
+
+							i-= (term_rows - 1);
+
+							if (i < 0) i = 0;
+
+							counter = 0;
+							xgetchar();
+							CLEAR;
+						}
+						break;
+
 					/* Stop paging (and set a flag to reenable the pager 
 					 * later) */
-					case 99: /* 'c' */
+					case 99:  /* 'c' */
 					case 112: /* 'p' */
 					case 113: pager = 0, reset_pager = 1; /* 'q' */
 						break;
+
 					/* If another key is pressed, go back one position. 
-					 * Otherwise, some filenames won't be listed */
-					default: i--; continue;
-						break;
+					 * Otherwise, some filenames won't be listed.*/
+					default:
+						i--;
+						printf("\r\x1b[K\x1b[3J");
+						continue;
 					}
+
+					printf("\r\x1b[K\x1b[3J");
 				}
+
 				counter++;
 			}
 
@@ -17504,29 +17543,64 @@ list_dir(void)
 			/*		Check rows					Check columns */
 			if ((counter / columns_n) > (size_t)(term_rows - 2) 
 			&& last_column) {
-/*				printf("--Mas--"); */
+
+				printf("\x1b[7;97m--Mas--\x1b[0;49m");
+
 				switch (c = xgetchar()) {
+
 				/* Advance one line at a time */
 				case 66: /* Down arrow */
 				case 10: /* Enter */
 				case 32: /* Space */
 					break;
+
 				/* Advance one page at a time */
 				case 126: counter = 0; /* Page Down */
 					break;
+
+				case 63: /* ? */
+				case 104: { /* h: Print pager help */
+						CLEAR;
+
+						printf("?, h: help\n"
+						"Down arrow, Enter, Space: Advance one line\n"
+						"Page Down: Advance one page\n"
+						"q: Stop pagging\n");
+
+						size_t l;
+						for (l = 0; l < (term_rows - 5); l++)
+							puts("");
+
+						printf("\x1b[7;97m--Mas--\x1b[0;49m");
+
+						i-= ((term_rows * columns_n) - 1);
+
+						if (i < 0) i = 0;
+
+						counter = 0;
+						xgetchar();
+						CLEAR;
+					}
+					break;
+
 				/* Stop paging (and set a flag to reenable the pager 
 				 * later) */
 				case 99:  /* 'c' */
 				case 112: /* 'p' */
 				case 113: pager = 0, reset_pager = 1; /* 'q' */
 					break;
+
 				/* If another key is pressed, go back one position. 
 				 * Otherwise, some filenames won't be listed.*/
-				default: i--; continue;
-					break;
+				default:
+					i--;
+					printf("\r\x1b[K\x1b[3J");
+					continue;
 				}
-/*				printf("\r\r\r\r\r\r\r\r"); */
+
+				printf("\r\x1b[K\x1b[3J");
 			}
+
 			counter++;
 		}
 
@@ -18094,34 +18168,66 @@ list_dir_light(void)
 				eln_len = eln_len_bk;
 
 			if (pager) {
-				/*	Check terminal amount of rows: if as many filenames
-				 * as the amount of available terminal rows has been
-				 * printed, stop */
 
-				 /* NOTE: No need to disable keybinds, since every
-				  * keystroke is filtered here */
-				if ((int)counter > (int)(term_rows - 2)) {
-					switch(c = xgetchar()) {
+				if (counter > (size_t)(term_rows - 2)) {
+
+					printf("\x1b[7;97m--Mas--\x1b[0;49m");
+
+					switch (c = xgetchar()) {
+
 					/* Advance one line at a time */
 					case 66: /* Down arrow */
 					case 10: /* Enter */
 					case 32: /* Space */
 						break;
+
 					/* Advance one page at a time */
 					case 126: counter = 0; /* Page Down */
 						break;
+
+					case 63: /* ? */
+					case 104: { /* h: Print pager help */
+							CLEAR;
+
+							printf("?, h: help\n"
+							"Down arrow, Enter, Space: Advance one line\n"
+							"Page Down: Advance one page\n"
+							"q: Stop pagging\n");
+
+							size_t l;
+							for (l = 0; l < (term_rows - 5); l++)
+								puts("");
+
+							printf("\x1b[7;97m--Mas--\x1b[0;49m");
+
+							i-= (term_rows - 1);
+
+							if (i < 0) i = 0;
+
+							counter = 0;
+							xgetchar();
+							CLEAR;
+						}
+						break;
+
 					/* Stop paging (and set a flag to reenable the pager 
 					 * later) */
-					case 99: /* 'c' */
+					case 99:  /* 'c' */
 					case 112: /* 'p' */
 					case 113: pager = 0, reset_pager = 1; /* 'q' */
 						break;
+
 					/* If another key is pressed, go back one position. 
-					 * Otherwise, some filenames won't be listed */
-					default: i--; continue;
-						break;
+					 * Otherwise, some filenames won't be listed.*/
+					default:
+						i--;
+						printf("\r\x1b[K\x1b[3J");
+						continue;
 					}
+
+					printf("\r\x1b[K\x1b[3J");
 				}
+
 				counter++;
 			}
 
@@ -18194,9 +18300,13 @@ list_dir_light(void)
 	for (i = 0; i < (int)files; i++) {
 
 		if (pager) {
-
+			/* Run the pager only once all columns and rows fitting in
+			 * the screen are filled with the corresponding filenames */
+			/*		Check rows					Check columns */
 			if ((counter / columns_n) > (size_t)(term_rows - 2) 
 			&& last_column) {
+
+				printf("\x1b[7;97m--Mas--\x1b[0;49m");
 
 				switch (c = xgetchar()) {
 
@@ -18209,6 +18319,32 @@ list_dir_light(void)
 				/* Advance one page at a time */
 				case 126: counter = 0; /* Page Down */
 					break;
+
+				case 63: /* ? */
+				case 104: { /* h: Print pager help */
+						CLEAR;
+
+						printf("?, h: help\n"
+						"Down arrow, Enter, Space: Advance one line\n"
+						"Page Down: Advance one page\n"
+						"q: Stop pagging\n");
+
+						size_t l;
+						for (l = 0; l < (term_rows - 5); l++)
+							puts("");
+
+						printf("\x1b[7;97m--Mas--\x1b[0;49m");
+
+						i-= ((term_rows * columns_n) - 1);
+
+						if (i < 0) i = 0;
+
+						counter = 0;
+						xgetchar();
+						CLEAR;
+					}
+					break;
+
 				/* Stop paging (and set a flag to reenable the pager 
 				 * later) */
 				case 99:  /* 'c' */
@@ -18218,11 +18354,15 @@ list_dir_light(void)
 
 				/* If another key is pressed, go back one position. 
 				 * Otherwise, some filenames won't be listed.*/
-				default: i--; continue;
-					break;
+				default:
+					i--;
+					printf("\r\x1b[K\x1b[3J");
+					continue;
 				}
-/*				printf("\r\r\r\r\r\r\r\r"); */
+
+				printf("\r\x1b[K\x1b[3J");
 			}
+
 			counter++;
 		}
 
@@ -18842,6 +18982,8 @@ edit_jumpdb(void)
 	if (!config_ok || !CONFIG_DIR_GRAL)
 		return EXIT_FAILURE;
 
+	save_jumpdb();
+
 	char *JUMP_FILE = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) + 10,
 									   sizeof(char));
 	sprintf(JUMP_FILE, "%s/jump.cfm", CONFIG_DIR_GRAL);
@@ -18888,11 +19030,13 @@ edit_jumpdb(void)
 int
 autojump(char **args)
 {
-	/* Implement all features of the original autojump.
-	 * See https://github.com/wting/autojump */
+	if (xargs.no_autojump == 1) {
+		printf("%s: Autojump function disabled\n", PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
 
-	/* If no parameter, print the list of entries in the dirhist
-	 * list */
+	/* If no parameter, print the list of entries in the jump
+	 * database */
 	if (!args[1] && args[0][1] != 'e') {
 		size_t i;
 
@@ -18913,11 +19057,6 @@ autojump(char **args)
 		return EXIT_SUCCESS;
 	}
 
-	/* Add: take into account how many times a directory was visited.
-	 * If two or more results, the most visited one should be chosen.
-	 * To acomplish this I should create an array of ints paralell to
-	 * old_pwd */
-
 	if (args[1] && *args[1] == '-' && strcmp(args[1], "--help") == 0) {
 		puts(_("Usage: j[c, p, e], jump [CHAR/STRING ...]"));
 		return EXIT_SUCCESS;
@@ -18930,13 +19069,18 @@ autojump(char **args)
 	enum jump jump_opt = none;
 
 	switch(args[0][1]) {
+
 		case 'e': return edit_jumpdb();
+
 		case 'c': jump_opt = jchild; break;
+
 		case 'p': jump_opt = jparent; break;
+
 		case 'u':
 		case '\0':
 			jump_opt = none;
 			break;
+
 		default:
 			fprintf(stderr, "%s: '%c': Invalid option\n", PROGRAM_NAME,
 					args[0][1]);
@@ -18963,7 +19107,7 @@ autojump(char **args)
 	for (i = 1; args[i]; i++) {
 
 		/* 1) Using the first parameter, get a list of matches in the
-		 * dirhist list */
+		 * database */
 		if (!match) {
 
 			for (j = 0; j < jump_n; j++) {
@@ -19010,6 +19154,7 @@ autojump(char **args)
 
 				if (!matches[j] || !*matches[j]
 				|| !strstr(matches[j], args[i])) {
+
 					matches[j] = (char *)NULL;
 					continue;
 				}
@@ -19023,29 +19168,32 @@ autojump(char **args)
 	 * in such a way that only the most visited directory will be
 	 * returned */
 
-	int found = 0, exit_status = EXIT_FAILURE;
-	int most_visited = 0, max = -1; 
+	int found = 0, exit_status = EXIT_FAILURE,
+		most_visited = 0, max = -1; 
 
 	for (i = 0; i < match; i++) {
-		if (matches[i]) {
-			found = 1;
-			if (visits[i] > max) {
-				max = visits[i];
-				most_visited = i;
-			}
+
+		if (!matches[i])
+			continue;
+
+		found = 1;
+
+		if (visits[i] > max) {
+			max = visits[i];
+			most_visited = i;
 		}
 	}
 
-	if (found)
+	if (!found) {
+		printf(_("%s: No matches found\n"), PROGRAM_NAME);
+		exit_status = EXIT_FAILURE;
+	}
+
+	else
 		exit_status = cd_function(matches[most_visited]);
 
 	free(matches);
 	free(visits);
-
-	if (!found) {
-		printf(_("%s: No matches found\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
-	}
 
 	return exit_status;
 }
@@ -24560,6 +24708,7 @@ help_function (void)
 \n				corresponding bookmark paths. TAB \
 \n				completion for bookmark names is also \
 \n				available\
+\n     --no-autojump\t\t disable the autojump function\
 \n     --color-scheme=NAME\t use color scheme NAME\
 \n     --no-dir-indicator\t\t do not add / indicator to directories \
 \n				when running in light mode\
@@ -24605,7 +24754,7 @@ help_function (void)
  bm, bookmarks [a, add PATH] [d, del] [edit] [SHORTCUT or NAME]\n\
  o, open [ELN/FILE] [APPLICATION]\n\
  cd [ELN/DIR]\n\
- j[c, p], jump [e, edit] [CHAR/STRING ...]\n\
+ j[c, p, e], jump [e, edit] [CHAR/STRING ...]\n\
  s, sel [ELN ELN-ELN FILE ... n] [REGEX [DIR]] [-filetype]\n\
  sb, selbox\n\
  ds, desel [*, a, all]\n\
