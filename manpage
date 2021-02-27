@@ -101,7 +101,7 @@ do not list folders first
 list folders first (default)
 .TP
 .B \-g, \-\-pager
-enable the pager
+enable Mas, the built-in pager for files listing
 .TP
 .B \-G, \-\-no\-pager
 disable the pager (default)
@@ -552,9 +552,9 @@ toggle list folders first on/off.
 .TP
 
 .B pg, pager \fR[on, off, status]
-toggle the pager on/off. Useful to list directories with hundreds or thousands of files, the pager will start working, if set to on, whenever the screen is not enough to list all files.
+toggle the pager (Mas) on/off. Useful to list directories with hundreds or thousands of files, the pager will start working, if set to on, whenever the screen is not enough to list all files.
 .sp
-Once in the pager, press the Down arrow key, Space or Enter to move downwards one line, or PageDown to move downwards an entire page. To go upwards, use the shortcuts provided by your terminal emulator, for example, Alt\-PageUp or Alt\-Up. Press 'c', 'p', or 'q' keys to stop the pager.
+Once in the pager, press the Down arrow key, Space or Enter to move downwards one line, or PageDown to move downwards an entire page. To go upwards, use the shortcuts provided by your terminal emulator, for example, Alt\-PageUp or Alt\-Up. Press 'c', 'p', or 'q' keys to stop the pager, and 'h' or '?' for help.
 .TP
 .B uc, unicode \fR[on, off, status]
 toggle unicode on/off.
