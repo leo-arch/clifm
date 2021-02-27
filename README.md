@@ -69,7 +69,7 @@ where to search: `/.*.png /media/images`. And, if you want to further filter the
 
 * **NEW:** Quickly and easily navigate through the jump database (a list of visited directories and the amount of times each of them was visited) via the autojump function.
 
-![autojump](images/autojump.png)
+![autojump](images/autojump0.png)
 ![autojump](images/autojump2.png)
 
 Because file manager, but also half-shell, CLiFM also provides the following features:
