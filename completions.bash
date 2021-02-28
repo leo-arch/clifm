@@ -90,6 +90,7 @@ _clifm ()
         --color-scheme
         --cd-on-quit
         --no-autojump
+        --icons
     )
 
     if [[ $prev == -b || $prev == -c || $prev == -k || $prev == -p ]]; then
