@@ -17352,6 +17352,29 @@ free_dirlist(void)
 	return;
 }
 
+void
+print_dirhist_map(void)
+{
+	size_t i;
+
+	for (i = 0; i < dirhist_total_index; i++) {
+
+		if (i != dirhist_cur_index)
+			continue;
+
+		if (i > 0 && old_pwd[i - 1])
+			printf("%zu %s\n", i, old_pwd[i - 1]);
+
+		printf("%zu %s%s%s\n", i + 1, dh_c,
+			   old_pwd[i], df_c);
+
+		if (i + 1 < dirhist_total_index && old_pwd[i + 1])
+			printf("%zu %s\n", i + 2, old_pwd[i + 1]);
+
+		break;
+	}
+}
+
 int
 list_dir(void)
 /* List files in the current working directory (global variable 'path'). 
@@ -17765,6 +17788,8 @@ list_dir(void)
 		eln_len = digits_in_num((int)files); /* This is max ELN length */
 		eln_len_bk = eln_len;
 
+		char *icon = ICON_REG;
+
 		for (i = 0; i < (int)files; i++) {
 
 			/* Correct padding, if necessary. Without this correction,
@@ -17804,28 +17829,28 @@ list_dir(void)
 
 					case 63: /* ? */
 					case 104: { /* h: Print pager help */
-							CLEAR;
+						CLEAR;
 
-							printf("?, h: help\n"
-							"Down arrow, Enter, Space: Advance one line\n"
-							"Page Down: Advance one page\n"
-							"q: Stop pagging\n");
+						printf("?, h: help\n"
+						"Down arrow, Enter, Space: Advance one line\n"
+						"Page Down: Advance one page\n"
+						"q: Stop pagging\n");
 
-							size_t l;
-							for (l = 0; l < (term_rows - 5); l++)
-								puts("");
+						size_t l;
+						for (l = 0; l < (term_rows - 5); l++)
+							puts("");
 
-							printf("\x1b[7;97m--Mas--\x1b[0;49m");
+						printf("\x1b[7;97m--Mas--\x1b[0;49m");
 
-							i-= (term_rows - 1);
+						i-= (term_rows - 1);
 
-							if (i < 0) i = 0;
+						if (i < 0) i = 0;
 
-							counter = 0;
-							xgetchar();
-							CLEAR;
-						}
-						break;
+						counter = 0;
+						xgetchar();
+						CLEAR;
+					}
+					break;
 
 					/* Stop paging (and set a flag to reenable the pager 
 					 * later) */
@@ -17849,7 +17874,8 @@ list_dir(void)
 			}
 
 			if (!file_info[i].exists)
-				printf("%s%d%s %s%s%s\n", el_c, i + 1, df_c, uf_c,
+				printf("%s%d%s %s%s%c%s%s\n", el_c, i + 1, df_c, uf_c,
+					   icons ? icon : "", icons ? 0x20 : 0,
 					   dirlist[i], df_c);
 
 			else {
@@ -17874,22 +17900,7 @@ list_dir(void)
 
 		if (dirhist_map) {
 			/* Print current, previous, and next entries */
-			for (i = 0; i < dirhist_total_index; i++) {
-
-				if (i == dirhist_cur_index) {
-
-					if (i > 0 && old_pwd[i - 1])
-						printf("%d %s\n", i, old_pwd[i - 1]);
-
-					printf("%d %s%s%s\n", i + 1, dh_c,
-						   old_pwd[i], df_c);
-
-					if (i + 1 < dirhist_total_index && old_pwd[i + 1])
-						printf("%d %s\n", i + 2, old_pwd[i + 1]);
-
-					break;
-				}
-			}
+			print_dirhist_map();
 
 			print_div_line();
 		}
@@ -18240,22 +18251,7 @@ list_dir(void)
 
 	if (dirhist_map) {
 		/* Print current, previous, and next entries */
-		for (i = 0; i < dirhist_total_index; i++) {
-
-			if (i == dirhist_cur_index) {
-
-				if (i > 0 && old_pwd[i - 1])
-					printf("%d %s\n", i, old_pwd[i - 1]);
-
-				printf("%d %s%s%s\n", i + 1, dh_c,
-					   old_pwd[i], df_c);
-
-				if (i + 1 < dirhist_total_index && old_pwd[i + 1])
-					printf("%d %s\n", i + 2, old_pwd[i + 1]);
-
-				break;
-			}
-		}
+		print_dirhist_map();
 
 		print_div_line();
 	}
@@ -18503,6 +18499,7 @@ list_dir_light(void)
 					break;
 
 				case DT_REG:
+
 					/* classify is greater than 1 only if the
 					 * ClassifyExec option is enabled, in which case
 					 * executable files must be classified as well */
@@ -18511,8 +18508,10 @@ list_dir_light(void)
 						file_info[i].exec = 1;
 						file_name_width++;
 					}
+
 					else
 						file_info[i].exec = 0;
+
 					break;
 			}
 		}
@@ -18559,8 +18558,10 @@ list_dir_light(void)
 			 * 12) filename (prop)
 			 * */
 			eln_len_cur = digits_in_num(i + 1);
+
 			if (eln_len_bk > eln_len_cur)
 				eln_len = eln_len_bk - (eln_len_bk - eln_len_cur);
+
 			else
 				eln_len = eln_len_bk;
 
@@ -18642,27 +18643,10 @@ list_dir_light(void)
 		if (reset_pager)
 			pager = 1;
 
-		/* Print a dividing line between the files list and the
-		 * prompt */
 		print_div_line();
 
 		if (dirhist_map) {
-			/* Print current, previous, and next entries */
-			for (i = 0; i < dirhist_total_index; i++) {
-				if (i == dirhist_cur_index) {
-					if (i > 0 && old_pwd[i - 1])
-						printf("%d %s\n", i, old_pwd[i - 1]);
-
-					printf("%d %s%s%s\n", i + 1, dh_c,
-						   old_pwd[i], df_c);
-
-					if (i + 1 < dirhist_total_index && old_pwd[i + 1])
-						printf("%d %s\n", i + 2, old_pwd[i + 1]);
-
-					break;
-				}
-			}
-
+			print_dirhist_map();
 			print_div_line();
 		}
 
@@ -18867,28 +18851,10 @@ list_dir_light(void)
 	if (xargs.list_and_quit == 1)
 		exit(exit_code);
 
-	/* Print a dividing line between the files list and the prompt */
 	print_div_line();
 
 	if (dirhist_map) {
-		/* Print current, previous, and next entries */
-		for (i = 0; i < dirhist_total_index; i++) {
-
-			if (i == dirhist_cur_index) {
-
-				if (i > 0 && old_pwd[i - 1])
-					printf("%d %s\n", i, old_pwd[i - 1]);
-
-				printf("%d %s%s%s\n", i + 1, dh_c,
-					   old_pwd[i], df_c);
-
-				if (i + 1 < dirhist_total_index && old_pwd[i + 1])
-					printf("%d %s\n", i + 2, old_pwd[i + 1]);
-
-				break;
-			}
-		}
-
+		print_dirhist_map();
 		print_div_line();
 	}
 
@@ -23902,28 +23868,32 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 
 	/* Get file type (and color): */
 	int sticky = 0;
-	char file_type = 0, color[MAX_COLOR]= "";
-	char *linkname = (char *)NULL;
+	char file_type = 0;
+	char *linkname = (char *)NULL, *color = (char *)NULL,
+		*icon = ICON_REG;
 
 	switch (file_attrib.st_mode & S_IFMT) {
 
 	case S_IFREG:
 		file_type='-';
 /*		if (!(file_attrib.st_mode & S_IRUSR)) strcpy(color, nf_c); */
-		if (access(filename, R_OK) == -1)
-			strcpy(color, nf_c);
+		if (access(filename, R_OK) == -1) {
+			color = nf_c;
+			icon = ICON_LOCK;
+		}
 
 		else if (file_attrib.st_mode & S_ISUID)
-			strcpy(color, su_c);
+			color = su_c;
 
 		else if (file_attrib.st_mode & S_ISGID)
-			strcpy(color, sg_c);
+			color = sg_c;
 
 		else {
 			#ifdef _LINUX_CAP
 			cap_t cap = cap_get_file(filename);
+
 			if (cap) {
-				strcpy(color, ca_c);
+				color = ca_c;
 				cap_free(cap);
 			}
 
@@ -23933,13 +23903,15 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 			if (file_attrib.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH)) {
 			#endif
 
-				if (file_attrib.st_size == 0) strcpy(color, ee_c);
-				else strcpy(color, ex_c);
+				icon = ICON_EXEC;
+				if (file_attrib.st_size == 0) color = ee_c;
+
+				else color = ex_c;
 			}
 
-			else if (file_attrib.st_size == 0) strcpy(color, ef_c);
+			else if (file_attrib.st_size == 0) color = ef_c;
 
-			else if (file_attrib.st_nlink > 1) strcpy(color, mh_c);
+			else if (file_attrib.st_nlink > 1) color = mh_c;
 
 			else {
 				char *ext = strrchr(filename, '.');
@@ -23948,18 +23920,20 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 					char *extcolor = get_ext_color(ext);
 
 					if (extcolor) {
-						sprintf(color, "\x1b[%sm", extcolor);
+						char ext_color[MAX_COLOR] = "";
+						sprintf(ext_color, "\x1b[%sm", extcolor);
+						color = ext_color;
 						extcolor = (char *)NULL;
 					}
 
 					else /* No matching extension found */
-						strcpy(color, fi_c);
+						color = fi_c;
 
 					ext = (char *)NULL;
 				}
 
 				else
-					strcpy(color, fi_c);
+					color = fi_c;
 			}
 		}
 		break;
@@ -23967,40 +23941,50 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 	case S_IFDIR:
 		file_type='d';
 
-		if (access(filename, R_OK|X_OK) != 0)
-			strcpy(color, nd_c);
+		icon = ICON_DIR;
+
+		if (access(filename, R_OK|X_OK) != 0) {
+			color = nd_c;
+			icon = ICON_LOCK;
+		}
 
 		else {
 			int is_oth_w = 0;
 			if (file_attrib.st_mode & S_ISVTX) sticky = 1;
+
 			if (file_attrib.st_mode & S_IWOTH) is_oth_w = 1;
+
 			size_t files_dir = count_dir(filename);
-			strcpy(color, (sticky) ? ((is_oth_w) ? tw_c : 
-				st_c) : ((is_oth_w) ? ow_c : 
-				((files_dir == 2 || files_dir == 0) ? ed_c : di_c)));
+
+			color = sticky ? (is_oth_w ? tw_c : st_c)
+				: is_oth_w ? ow_c : 
+				((files_dir == 2 || files_dir == 0) ? ed_c : di_c);
 		}
 
 		break;
 
 	case S_IFLNK:
 		file_type = 'l';
+
+		icon = ICON_LINK;
+		
 		linkname = realpath(filename, (char *)NULL);
 
 		if (linkname)
-			strcpy(color, ln_c);
+			color = ln_c;
 		else
-			strcpy(color, or_c);
+			color = or_c;
 		break;
 
-	case S_IFSOCK: file_type = 's'; strcpy(color, so_c); break;
+	case S_IFSOCK: file_type = 's'; color = so_c; break;
 
-	case S_IFBLK: file_type = 'b'; strcpy(color, bd_c); break;
+	case S_IFBLK: file_type = 'b'; color = bd_c; break;
 
-	case S_IFCHR: file_type = 'c'; strcpy(color, cd_c); break;
+	case S_IFCHR: file_type = 'c'; color = cd_c; break;
 
-	case S_IFIFO: file_type = 'p'; strcpy(color, pi_c); break;
+	case S_IFIFO: file_type = 'p'; color = pi_c; break;
 
-	default: file_type = '?'; strcpy(color, no_c);
+	default: file_type = '?'; color = no_c;
 	}
 
 	/* Get file permissions */
@@ -24085,11 +24069,12 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 		if (pad < 0)
 			pad = 0;
 
-		printf("%s%s%s%-*s%s (%04o) %c/%c%c%c/%c%c%c/%c%c%c%s %s %s %s %s\n", 
-				(light_mode) ? "" : color, (!trim) ? filename
-				: trim_filename, (light_mode) ? "" : df_c,
-				pad, "", df_c, file_attrib.st_mode & 07777,
-				file_type,
+		printf("%s%s%c%s%s%-*s%s (%04o) %c/%c%c%c/%c%c%c/%c%c%c%s "
+				"%s %s %s %s\n", 
+				(light_mode) ? "" : color, icons ? icon : "", icons
+				? 0x20 : 0,	(!trim) ? filename : trim_filename,
+				light_mode ? "" : df_c,	pad, "", df_c,
+				file_attrib.st_mode & 07777, file_type,
 				read_usr, write_usr, exec_usr, 
 				read_grp, write_grp, exec_grp,
 				read_others, write_others, (sticky) ? 't' : exec_others,
