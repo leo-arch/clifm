@@ -72,6 +72,7 @@ List of CliFM features:
   30) Theming support via color schemes
   31) Privacy oriented
   32) Built-in autojump function
+  33) Icons support (depends on icons-in-terminal: https://github.com/sebastiencs/icons-in-terminal)
 
 .SH RATIONALE
 When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the Linux built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There is no two without three".
@@ -165,6 +166,9 @@ sort files by METHOD, where METHOD could be: 0 = none, 1 = name, 2 = size, 3 = a
 .TP
 .B \-\-no\-cd\-auto
 by default, CliFM changes to directories by just specifying the corresponding ELN (e.g. '12' instead of 'cd 12'). This option forces the use of 'cd'
+.TP
+.B \-\-icons
+enable icons
 .TP
 .B \-\-cd\-on\-quit
 write last visited directory to \fI$XDG_CONFIG_HOME/clifm/.last\fR to be later accessed by the corresponding shell function at program exit. See MISCELLANOEOUS NOTES section below.
@@ -448,6 +452,10 @@ If the MIME file is not found, CliFM will try to import MIME definitions from th
 
 .B tips
 print the list of CLiFM tips
+.TP
+
+.B icons \fR[on, off]
+toggle icons on/off
 .TP
 
 .B x, X \fR[DIR]
