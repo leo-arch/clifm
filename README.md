@@ -67,7 +67,7 @@ where to search: `/.*.png /media/images`. And, if you want to further filter the
 
 * **NEW: Stealth mode:** Leave no trace on the host system.
 
-* **NEW:** Quickly and easily navigate through the jump database (a list of visited directories and the amount of times each of them was visited) via the autojump function.
+* **NEW:** Quickly and easily navigate through the jump database (a list of visited directories and the amount of times each of them was visited) via the **autojump** function.
 
 ![autojump](images/autojump0.png)
 ![autojump](images/autojump2.png)
