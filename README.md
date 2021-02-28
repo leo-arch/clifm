@@ -72,6 +72,10 @@ where to search: `/.*.png /media/images`. And, if you want to further filter the
 ![autojump](images/autojump0.png)
 ![autojump](images/autojump2.png)
 
+* **NEW: Icons support** (via icons-in-terminal)
+
+![icons](images/icons.png)
+
 Because file manager, but also half-shell, CLiFM also provides the following features:
 
 * TAB-completion for commands, paths, ELN's, profiles, bookmarks, color schemes, and the autojump function
