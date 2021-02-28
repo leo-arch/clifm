@@ -110,6 +110,8 @@ in FreeBSD, but is deprecated */
 #include <sys/statvfs.h>
 #include <regex.h>
 
+/*#include <wchar.h> */
+
 #define EXIT_SUCCESS 0
 
 #define EXIT_FAILURE 1
@@ -716,6 +718,7 @@ struct fileinfo
 	mode_t type;
 	off_t size;
 	int ruser; /* User read permission for dir */
+	size_t eln_digits;
 };
 
 struct fileinfo *file_info = (struct fileinfo *)NULL;
@@ -766,6 +769,7 @@ struct param
 	int color_scheme;
 	int cd_on_quit;
 	int no_autojump;
+	int icons;
 };
 
 struct param xargs;
@@ -810,7 +814,7 @@ short splash_screen = UNSET, welcome_message = UNSET, ext_cmd_ok = UNSET,
 	recur_perm_error_flag = 0, is_sel = 0, sel_is_last = 0,
 	kbind_busy = 0, unicode = UNSET, dequoted = 0, mime_match = 0, 
 	sort_reverse = 0, sort_switch = 0, kb_shortcut = 0,
-	switch_cscheme = 0,
+	switch_cscheme = 0, icons = 0,
 
 	home_ok = 1, config_ok = 1, trash_ok = 1, selfile_ok = 1;
 
@@ -889,7 +893,7 @@ const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
 		"mountpoints", "bookmarks", "log", "untrash", "unicode",
 		"profile", "shell", "mime", "sort", "tips", "autocd",
 		"auto-open", "actions", "reload", "export", "keybinds",
-		"pin", "unpin", "colorschemes", "jump", NULL };
+		"pin", "unpin", "colorschemes", "jump", "icons", NULL };
 
 #define MAX_COLOR 46
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
@@ -947,6 +951,57 @@ char di_c[MAX_COLOR] = "", /* Directory */
 	nm_c[MAX_COLOR + 2] = "", /* Notice msg color */
 	si_c[MAX_COLOR + 2] = ""; /* stealth indicator color */
 
+/* Icons */
+char ICON_DIR[4] = "\ue155",
+	ICON_LOCK[4] = "\ue200",
+	ICON_REG[4] = "\ue0f6",
+	ICON_EXEC[4] = "\ue0f3",
+	ICON_LINK[4] = "\ue18a"; // \ue122
+
+/*	ICON_IMG[4] = "\ue27e",
+ 	ICON_VID[4] = "\ue281",
+	ICON_SND[4] = "\ue280",
+	ICON_PDF[4] = "\ue27a",
+	ICON_ZIP[4] = "\ue27f",
+	ICON_ISO[4] = "\uecd3",
+	ICON_SCRIPT[4] = "\uee1d",
+	ICON_DOWN[4] = "\ue0f9", // \ue1b4
+	ICON_HOME[4] = "\ue0f5",
+	ICON_ROOT[4] = "\ue254",
+	ICON_REC_BIN[4] = "\ue0f4",
+	ICON_FAV[4] = "\ue0e7",
+	ICON_MUSIC[4] = "\ue0e2",
+	ICON_MAIL[4] = "\ue1a7",
+	ICON_NET[4] = "\ue1af",
+	ICON_TXT[4] = "\ue1bc",
+	ICON_C[4] = "\uedb1",
+	ICON_CPP[4] = "\uedb8",
+	ICON_CSHARP[4] = "\uedb9",
+	ICON_MYPC[4] = "\ue1cd",
+	ICON_GAMES[4] = "\ue1df",
+	ICON_DROPBOX[4] = "\ue22a",
+	ICON_LINUX[4] = "\ue23a",
+	ICON_STEAM[4] = "\ue270",
+	ICON_HTML[4] = "\ue282",
+	ICON_USB[4] = "\ue334",
+	ICON_BLUETOOTH[4] = "\ue33f",
+	ICON_CLOUD[4] = "\ue574",
+	ICON_PRINTER[4] = "\ue5a9",
+	ICON_PHOTOS[4] = "\ue5ab",
+	ICON_WORD[4] = "\ue850",
+	ICON_EXCEL[4] = "\ue851",
+	ICON_ACCESS[4] = "\ue84d",
+	ICON_POWERPOINT[4] = "\ue84f",
+	ICON_ANDROID[4] = "\ue64d",
+	ICON_WINDOWS[4] = "\uea16",
+	ICON_APPLE[4] = "\uea18",
+	ICON_PYTHON[4] = "\uea43",
+	ICON_CHROME[4] = "\uea4a",
+	ICON_IE[4] = "\uea4b",
+	ICON_FIREFOX[4] = "\uea4c",
+	ICON_OPERA[4] = "\uea4d"; */
+
+
 				/**
 				 * #############################
 				 * #           MAIN            #
@@ -956,7 +1011,7 @@ char di_c[MAX_COLOR] = "", /* Directory */
 int
 main(int argc, char **argv)
 {
-	
+
 	/* #########################################################
 	 * #			0) INITIAL CONDITIONS					   #
 	 * #########################################################*/
@@ -1587,7 +1642,7 @@ unset_xargs(void)
 	xargs.logs = xargs.max_path = xargs.bm_file = UNSET;
 	xargs.expand_bookmarks = xargs.only_dirs = UNSET;
 	xargs.list_and_quit = xargs.color_scheme = xargs.cd_on_quit = UNSET;
-	xargs.no_autojump = UNSET;
+	xargs.no_autojump = xargs.icons = UNSET;
 }
 
 void
@@ -7252,7 +7307,7 @@ is_internal_c(const char *cmd)
 					"ao", "auto-open", "actions", "rl", "reload",
 					"exp", "export", "kb", "keybinds", "pin",
 					"unpin", "cs", "colorschemes", "jump", "je",
-					"jc", "jp", NULL };
+					"jc", "jp", "icons", NULL };
 
 	short found = 0;
 	size_t i;
@@ -15301,6 +15356,7 @@ external_arguments(int argc, char **argv)
 		{"color-scheme", required_argument, 0, 21},
 		{"cd-on-quit", no_argument, 0, 22},
 		{"no-autojump", no_argument, 0, 23},
+		{"icons", no_argument, 0, 24},
 		{0, 0, 0, 0}
 	};
 
@@ -15436,6 +15492,10 @@ external_arguments(int argc, char **argv)
 
 		case 23:
 			xargs.no_autojump = 1;
+		break;
+
+		case 24:
+			xargs.icons = icons = 1;
 		break;
 
 		case 'a':
@@ -16895,7 +16955,12 @@ prompt(void)
 		sprintf(decoded_prompt, "\001\x1b[0m\002> ");
 	}
 
-	size_t decoded_prompt_len = strlen(decoded_prompt);
+	size_t decoded_prompt_len;
+
+	if (unicode)
+		decoded_prompt_len = u8_xstrlen(decoded_prompt);
+	else
+		decoded_prompt_len = strlen(decoded_prompt);
 
 	size_t prompt_length = (size_t)(decoded_prompt_len
 		+ (xargs.stealth_mode == 1 ? 16 : 0)
@@ -17465,6 +17530,7 @@ list_dir(void)
 		 * the dirlist array */
 		if (!filesn && !dirsn)
 			dirlist = (char **)xrealloc(dirlist, sizeof(char *));
+
 		else
 			dirlist = (char **)xrealloc(dirlist, (filesn + dirsn + 1) 
 										* sizeof(char *));
@@ -17482,11 +17548,13 @@ list_dir(void)
 
 		/* Now copy file names */
 		register int j;
+
 		for (j = 0; j < (int)filesn; j++) {
 
-			file_info[i].len = (unicode)
+			file_info[i].len = unicode
 				  ? u8_xstrlen(tmp_dirlist[tmp_files[j]]->d_name)
 				  : strlen(tmp_dirlist[tmp_files[j]]->d_name);
+
 			/* cont_bt value is set by u8_xstrlen() */
 			dirlist[i++] = tmp_dirlist[tmp_files[j]]->d_name;
 		}
@@ -17512,6 +17580,7 @@ list_dir(void)
 			file_info[i].len = unicode
 					? u8_xstrlen(tmp_dirlist[i]->d_name)
 					: strlen(tmp_dirlist[i]->d_name);
+
 			dirlist[i] = tmp_dirlist[i]->d_name;
 		}
 
@@ -17527,6 +17596,7 @@ list_dir(void)
 	/* Get the longest element and a few more things about file
 	 * information */
 	longest = 0; /* Global */
+
 	struct stat file_attrib;
 
 	for (i = (int)files; i--;) {
@@ -17539,6 +17609,7 @@ list_dir(void)
 		&& *tmp_dirlist[i]->d_name <= '9'
 		&& is_number(tmp_dirlist[i]->d_name)
 		&& atoi(tmp_dirlist[i]->d_name) <= files) {
+
 			eln_as_file = (int *)xrealloc(eln_as_file,
 								(eln_as_file_n + 1) * sizeof(int));
 			eln_as_file[eln_as_file_n++] = i;
@@ -17565,7 +17636,8 @@ list_dir(void)
 		/* file_name_width contains: ELN's amount of digits + one space 
 		 * between ELN and filename + filename length. Ex: '12 name'
 		 * contains 7 chars */
-		size_t file_name_width = digits_in_num(i + 1) + 1
+		file_info[i].eln_digits = digits_in_num(i + 1);
+		size_t file_name_width = file_info[i].eln_digits + 1
 								 + file_info[i].len;
 
 		/* If the file is a non-empty directory or a symlink to a
@@ -17597,9 +17669,11 @@ list_dir(void)
 						linkname = (char *)NULL;
 						file_info[i].linkdir = 0;
 					}
+
 					else /* We have a symlink to a valid directory */
 						file_info[i].linkdir = 1;
 				}
+
 				else {
 					file_info[i].linkdir = 0;
 					file_info[i].brokenlink = 1;
@@ -17619,6 +17693,7 @@ list_dir(void)
 
 				if (file_info[i].linkdir == 0)
 					file_info[i].filesn = 0;
+
 				else
 					file_info[i].filesn = 3;
 			}
@@ -17647,6 +17722,7 @@ list_dir(void)
 							digits_in_num((int)file_info[i].filesn);
 					}
 				}
+
 				else {
 					file_info[i].filesn = 0;
 					file_info[i].ruser = 0;
@@ -17657,12 +17733,16 @@ list_dir(void)
 				free(linkname);
 
 			}
+
 			break;
 		}
 
 		if (file_name_width > longest)
 			longest = file_name_width;
 	}
+
+	if (icons)
+		longest += 3;
 
 	/* Get terminal current amount of rows and columns */
 	struct winsize w;
@@ -17681,6 +17761,7 @@ list_dir(void)
 
 		int max = get_max_long_view(), eln_len_cur = 0, eln_len_bk = 0;
 
+//		eln_len = max_eln_digits;
 		eln_len = digits_in_num((int)files); /* This is max ELN length */
 		eln_len_bk = eln_len;
 
@@ -17695,7 +17776,7 @@ list_dir(void)
 			 * 1) filename  (prop)
 			 * 12) filename (prop)
 			 * */
-			eln_len_cur = digits_in_num(i + 1);
+			eln_len_cur = file_info[i].eln_digits;
 
 			if (eln_len_bk > eln_len_cur)
 				eln_len = eln_len_bk - (eln_len_bk - eln_len_cur);
@@ -17794,7 +17875,9 @@ list_dir(void)
 		if (dirhist_map) {
 			/* Print current, previous, and next entries */
 			for (i = 0; i < dirhist_total_index; i++) {
+
 				if (i == dirhist_cur_index) {
+
 					if (i > 0 && old_pwd[i - 1])
 						printf("%d %s\n", i, old_pwd[i - 1]);
 
@@ -17837,6 +17920,8 @@ list_dir(void)
 
 	short last_column = 0; /* c, reset_pager=0; */
 	register size_t counter = 0;
+
+	char *color = (char *)NULL;
 
 	/* Now we can do the listing */
 	for (i = 0; i < (int)files; i++) {
@@ -17911,7 +17996,8 @@ list_dir(void)
 			counter++;
 		}
 
-		int is_dir = 0;
+		int is_dir = 0, no_files_count = 0;
+		char *icon = ICON_REG;
 
 		#ifdef _LINUX_CAP
 		cap_t cap;
@@ -17922,174 +18008,149 @@ list_dir(void)
 		else
 			last_column = 0;
 
-		if (file_info[i].exists == 0)
-				printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c, uf_c, 
-					   dirlist[i], df_c, (last_column) ? "\n" : "");
+		if (file_info[i].exists == 0) color = uf_c;
 
 		else {
+
+		char ext_color[MAX_COLOR] = "";
 
 		switch (file_info[i].type & S_IFMT) {
 
 		case S_IFDIR:
+
 			if (!file_info[i].ruser) {
-				printf("%s%d%s %s%s%s /%s%s", el_c, i + 1, df_c, nd_c, 
-					   dirlist[i], dc_c, df_c, (last_column)
-					   ? "\n" : "");
+				color = nd_c;
 				is_dir = 1;
+				no_files_count = 1;
+				icon = ICON_LOCK;
 			}
+
 			else {
+				icon = ICON_DIR;
 				int is_oth_w = 0;
-				if (file_info[i].type & S_IWOTH) is_oth_w = 1;
+
+				if (file_info[i].type & S_IWOTH)
+					is_oth_w = 1;
+
 				/* If folder is empty, it contains only "." and ".." 
 				 * (2 elements). If not mounted (ex: /media/usb) the result 
 				 * will be zero */
 				if (file_info[i].filesn == 2
 				|| file_info[i].filesn == 0) {
-					printf("%s%d%s %s%s%s /%s%s", el_c, i + 1, df_c,
-						 (file_info[i].type & S_ISVTX) ? ((is_oth_w) ? 
-						 tw_c : st_c) : ((is_oth_w) 
-						 ? ow_c : ed_c), dirlist[i], dc_c,
-						 df_c, (last_column) ? "\n" : "");
+					color = (file_info[i].type & S_ISVTX)
+						? ((is_oth_w) ?  tw_c : st_c)
+						: ((is_oth_w) ? ow_c : ed_c);
+
 					is_dir = 1;
+					no_files_count = 1;
 				}
+
 				else {
-					if (files_counter) {
-						printf("%s%d%s %s%s%s%s /%zu%s%s", el_c,
-							 i + 1, df_c, (file_info[i].type & S_ISVTX)
-							 ? ((is_oth_w) ? tw_c : st_c) : ((is_oth_w) 
-							 ? ow_c : di_c), dirlist[i], df_c,
-							 dc_c, file_info[i].filesn - 2, 
-							 df_c, (last_column) ? "\n" : "");
+
+					if (files_counter)
 						is_dir = 1;
-					}
-					else {
-						printf("%s%d%s %s%s%s%s", el_c, i + 1, 
-							 df_c, (file_info[i].type & S_ISVTX)
-							 ? ((is_oth_w) ? tw_c : st_c) : ((is_oth_w) 
-							 ? ow_c : di_c), dirlist[i], 
-							 df_c, (last_column) ? "\n" : "");
-					}
+
+					color =  (file_info[i].type & S_ISVTX)
+						 ? ((is_oth_w) ? tw_c : st_c) : ((is_oth_w) 
+						 ? ow_c : di_c);
 				}
 			}
 			break;
 
-		case S_IFIFO:
-			printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c, pi_c, 
-					dirlist[i], df_c, (last_column) ? "\n" : "");
-			break;
+		case S_IFIFO: color = pi_c; break;
 
 		case S_IFLNK:
 			{
+				icon = ICON_LINK;
+
 				if (!file_info[i].brokenlink) {
-					if (files_counter && file_info[i].filesn > 2) {
-						/* Symlink to dir */
+
+					/* Symlink to dir */
+					if (files_counter && file_info[i].filesn > 2)
 						is_dir = 1;
-						printf("%s%d%s %s%s%s%s /%zu%s%s", el_c,
-							i + 1, df_c, ln_c, dirlist[i], df_c,
-							dc_c, file_info[i].filesn -2,
-							df_c, (last_column) ? "\n" : "");
-					}
-					else /* Symlink to file */
-						printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c,
-								ln_c, dirlist[i], df_c, (last_column)
-								? "\n" : "");
+
+					color = ln_c;
 				}
+
 				else /* Oops, broken symlink */
-					printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c,
-							or_c, dirlist[i], df_c, (last_column)
-							? "\n" : "");
+					color = or_c;
 			}
 			break;
 
-		case S_IFBLK:
-				printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c, bd_c, 
-					    dirlist[i], df_c, (last_column) ? "\n" : "");
-			break;
+		case S_IFBLK: color = bd_c; break;
 
-		case S_IFCHR:
-			printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c, cd_c, 
-					dirlist[i], df_c, (last_column) ? "\n" : "");
-			break;
+		case S_IFCHR: color = cd_c; break;
 
-		case S_IFSOCK:
-			printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c, so_c, 
-				    dirlist[i], df_c, (last_column) ? "\n" : "");
-			break;
+		case S_IFSOCK: color = so_c; break;
 
 		case S_IFREG:
-			/* WARNING: S_IRUSR refers to owner, not current user */
-/*			if (!(file_info[i].type & S_IROTH)) */
-			if (access(dirlist[i], F_OK|R_OK) == -1)
-/*			if (faccessat(AT_FDCWD, dirlist[i], R_OK, AT_EACCESS) == -1) */
-				printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c, nf_c, 
-						dirlist[i], df_c, (last_column) ? "\n" : "");
-			else if (file_info[i].type & S_ISUID) /* set uid file */
-				printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c, su_c, 
-						dirlist[i], df_c, (last_column) ? "\n" : "");
-			else if (file_info[i].type & S_ISGID) /* set gid file */
-				printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c, sg_c, 
-					dirlist[i], df_c, (last_column) ? "\n" : "");
+
+			if (access(dirlist[i], F_OK|R_OK) == -1) {
+				color = nf_c;
+				icon = ICON_LOCK;
+			}
+
+			else if (file_info[i].type & S_ISUID) { /* set uid file */
+				color = su_c;
+				icon = ICON_EXEC;
+			}
+
+			else if (file_info[i].type & S_ISGID) { /* set gid file */
+				color = sg_c;
+				icon = ICON_EXEC;
+			}
+
 			#ifdef _LINUX_CAP
 			else if ((cap = cap_get_file(dirlist[i]))) {
-				printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c, ca_c, 
-						dirlist[i], df_c, (last_column) ? "\n" : "");
+				color = ca_c;
 
 				cap_free(cap);
 			}
 			#endif
 
 			else if (file_info[i].type & (S_IXUSR|S_IXGRP|S_IXOTH)) {
+
+				icon = ICON_EXEC;
 				if (file_info[i].size == 0)
-					printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c,
-							ee_c, dirlist[i], df_c, (last_column) 
-							? "\n" : "");
+					color = ee_c;
 				else
-					printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c,
-							ex_c, dirlist[i], df_c, (last_column) 
-							? "\n" : "");
+					color = ex_c;
 			}
 
 			else if (file_info[i].size == 0)
-				printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c, ef_c, 
-						dirlist[i], df_c, (last_column) ? "\n" : "");
+				color = ef_c;
 
 			else if (file_info[i].links > 1) /* Multi-hardlink */
-				printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c, mh_c, 
-						dirlist[i], df_c, (last_column) ? "\n" : "");
+				color = mh_c;
 
 			/* Check extension color only if some is defined */
 			else if (ext_colors_n) {
+
 				char *ext = strrchr(dirlist[i], '.');
 				/* Make sure not to take a hidden file for an
 				 * extension */
+
 				if (ext && ext != dirlist[i]) {
 					char *extcolor = get_ext_color(ext);
 
 					if (extcolor) {
-						printf("%s%d%s \x1b[%sm%s%s%s", el_c,
-								i + 1, df_c, extcolor, dirlist[i], df_c,
-								(last_column) ? "\n" : "");
+						sprintf(ext_color, "\x1b[%sm", extcolor);
+						color = ext_color;
 						extcolor = (char *)NULL;
 					}
 
 					else /* No matching extension found */
-						printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c,
-								fi_c, dirlist[i], df_c, (last_column)
-								? "\n" : "");
+						color = fi_c;
 
 					ext = (char *)NULL;
 				}
 
 				else /* Bare regular file */
-					printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c,
-							fi_c, dirlist[i], df_c, (last_column)
-							? "\n" : "");
+					color = fi_c;
 			}
 			else {
 				/* Bare regular file */
-				printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c,
-					fi_c, dirlist[i], df_c, (last_column)
-					? "\n" : "");
+				color = fi_c;
 			}
 
 			break;
@@ -18097,16 +18158,37 @@ list_dir(void)
 		/* In case all of the above cases are false, we have an
 		 * unknown file type */
 		default: 
-			printf("%s%d%s %s%s%s%s", el_c, i + 1, df_c, no_c, 
-					dirlist[i], df_c, (last_column) ? "\n" : "");
+			color = no_c;
 		}
+		}
+
+		if (is_dir) {
+
+ 			if (no_files_count)
+				printf("%s%d%s %s%s%c%s%s %s/%s%s", el_c, i + 1, df_c,
+					   color, icons ? icon : "", icons ? 0x20
+					   : 0, dirlist[i], df_c, dc_c, df_c,
+					   last_column ? "\n" : "");
+
+			else
+				printf("%s%d%s %s%s%c%s%s %s/%zu%s%s", el_c, i + 1,
+					   df_c, color, icons ? icon : "", icons
+					   ? 0x20 : 0, dirlist[i], df_c, dc_c,
+					   file_info[i].filesn - 2, df_c,
+					   last_column ? "\n" : "");
+		}
+
+		else {
+			printf("%s%d%s %s%s%c%s%s%s", el_c, i + 1, df_c, color,
+				   icons ? icon : "", icons ? 0x20 : 0, dirlist[i],
+				   df_c, last_column ? "\n" : "");
 		}
 
 		if (!last_column) {
 			/* Get the difference between the length of longest and the 
 			 * current element */
-			size_t diff = longest - (digits_in_num(i + 1) + 1 + 
-						  file_info[i].len);
+			size_t diff = longest - (file_info[i].eln_digits + 1 + 
+						  (icons ? 3 : 0) + file_info[i].len);
 
 			if (is_dir) {
 				/* If a directory, make room for displaying the 
@@ -18127,14 +18209,17 @@ list_dir(void)
 			 * lines */
 			/* +1 is for the space between filenames */
 			register int j;
+
 			for (j = (int)diff + 1; j--;)
 				putchar(' ');
 		}
 	}
 
 	if (xargs.list_and_quit == 1) {
+
 		if (!last_column)
 			putchar('\n');
+
 		exit(exit_code);
 	}
 
@@ -18156,7 +18241,9 @@ list_dir(void)
 	if (dirhist_map) {
 		/* Print current, previous, and next entries */
 		for (i = 0; i < dirhist_total_index; i++) {
+
 			if (i == dirhist_cur_index) {
+
 				if (i > 0 && old_pwd[i - 1])
 					printf("%d %s\n", i, old_pwd[i - 1]);
 
@@ -18439,6 +18526,9 @@ list_dir_light(void)
 			longest = file_name_width;
 	}
 
+	if (icons)
+		longest += 3;
+
 	/* Get terminal current amount of rows and columns */
 	struct winsize w;
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
@@ -18494,28 +18584,28 @@ list_dir_light(void)
 
 					case 63: /* ? */
 					case 104: { /* h: Print pager help */
-							CLEAR;
+						CLEAR;
 
-							printf("?, h: help\n"
-							"Down arrow, Enter, Space: Advance one line\n"
-							"Page Down: Advance one page\n"
-							"q: Stop pagging\n");
+						printf("?, h: help\n"
+						"Down arrow, Enter, Space: Advance one line\n"
+						"Page Down: Advance one page\n"
+						"q: Stop pagging\n");
 
-							size_t l;
-							for (l = 0; l < (term_rows - 5); l++)
-								puts("");
+						size_t l;
+						for (l = 0; l < (term_rows - 5); l++)
+							puts("");
 
-							printf("\x1b[7;97m--Mas--\x1b[0;49m");
+						printf("\x1b[7;97m--Mas--\x1b[0;49m");
 
-							i-= (term_rows - 1);
+						i-= (term_rows - 1);
 
-							if (i < 0) i = 0;
+						if (i < 0) i = 0;
 
-							counter = 0;
-							xgetchar();
-							CLEAR;
-						}
-						break;
+						counter = 0;
+						xgetchar();
+						CLEAR;
+					}
+					break;
 
 					/* Stop paging (and set a flag to reenable the pager 
 					 * later) */
@@ -18678,69 +18768,51 @@ list_dir_light(void)
 		else
 			last_column = 0;
 
-		/* Print the corresponding entry */
-		if (!dir_indicator && !classify)
-			/* No filetype indicator at all */
-			printf("%s%d%s %s%s", el_c, i + 1, df_c, dirlist[i],
-				   (last_column) ? "\n" : "");
+		/* Indicator char */
+		char ichar = 0;
+		char *icon = ICON_REG;
 
-		else if (classify) {
+		if (classify) {
 
 			switch(file_info[i].type) {
-				case DT_DIR:
-					printf("%s%d%s %s/%s", el_c, i + 1, df_c,
-							dirlist[i], (last_column) ? "\n" : "");
-				break;
 
-				case DT_LNK:
-					printf("%s%d%s %s@%s", el_c, i + 1, df_c,
-							dirlist[i], (last_column) ? "\n" : "");
-				break;
+				case DT_DIR: ichar = '/'; icon = ICON_DIR; break;
 
-				case DT_FIFO:
-					printf("%s%d%s %s|%s", el_c, i + 1, df_c,
-							dirlist[i], (last_column) ? "\n" : "");
-				break;
+				case DT_LNK:  ichar = '@'; icon = ICON_LINK; break;
 
-				case DT_SOCK:
-					printf("%s%d%s %s=%s", el_c, i + 1, df_c,
-							dirlist[i], (last_column) ? "\n" : "");
-				break;
+				case DT_FIFO: ichar = '|'; break;
+
+				case DT_SOCK: ichar = '='; break;
 
 				case DT_REG:
-					if (file_info[i].exec)
-						printf("%s%d%s %s*%s", el_c, i + 1, df_c,
-						 		dirlist[i], (last_column) ? "\n" : "");
-					else
-						printf("%s%d%s %s%s", el_c, i + 1, df_c,
-								dirlist[i], (last_column) ? "\n" : "");
+					if (file_info[i].exec) {
+						ichar = '*';
+						icon = ICON_EXEC; 
+					}
 				break;
 
-				case DT_UNKNOWN:
-						printf("%s%d%s %s?%s", el_c, i + 1, df_c,
-							   dirlist[i], (last_column) ? "\n" : "");
+				case DT_UNKNOWN:  ichar = '?'; break;
 
-				default:
-						printf("%s%d%s %s%s", el_c, i + 1, df_c,
-							   dirlist[i], (last_column) ? "\n" : "");
-				break;
+				default: ichar = 0; break;
 			}
 		} 
 
 		else { /* Only dirs */
-			if (file_info[i].type == DT_DIR)
-				printf("%s%d%s %s/%s", el_c, i + 1, df_c, dirlist[i],
-					   (last_column) ? "\n" : "");
-			else
-				printf("%s%d%s %s%s", el_c, i + 1, df_c, dirlist[i],
-					   (last_column) ? "\n" : "");
+			if (file_info[i].type == DT_DIR) {
+				ichar = '/';
+				icon = ICON_DIR;
+			}
 		}
+
+		printf("%s%d%s %s%c%s%c%s", el_c, i + 1, df_c,
+			   icons ? icon : "", icons ? 0x20 : 0,
+			   dirlist[i], ichar, (last_column) ? "\n" : "");
 
 		if (!last_column) {
 			/* Get the difference between the length of longest and the 
 			 * current element */
 			size_t diff = longest - (digits_in_num(i + 1) + 1 + 
-						  file_info[i].len);
+						  (icons ? 3 : 0) + file_info[i].len);
 
 			/* Print the spaces needed to equate the length of the
 			 * lines */
@@ -18774,6 +18846,7 @@ list_dir_light(void)
 				if (file_info[i].type != DT_DIR)
 					putchar(' ');
 			}
+
 			else
 				putchar(' ');
 		}
@@ -18800,7 +18873,9 @@ list_dir_light(void)
 	if (dirhist_map) {
 		/* Print current, previous, and next entries */
 		for (i = 0; i < dirhist_total_index; i++) {
+
 			if (i == dirhist_cur_index) {
+
 				if (i > 0 && old_pwd[i - 1])
 					printf("%d %s\n", i, old_pwd[i - 1]);
 
@@ -19706,6 +19781,7 @@ exec_cmd(char **comm)
 	/*       ############### REFRESH ##################     */
 	else if (*comm[0] == 'r' && ((comm[0][1] == 'f' && !comm[0][2])
 	|| strcmp(comm[0], "refresh") == 0)) {
+
 		if (cd_lists_on_the_fly) {
 			free_dirlist();
 			exit_code = list_dir();
@@ -20024,6 +20100,42 @@ exec_cmd(char **comm)
 	/* ##################################################
 	 * #			     MINOR FUNCTIONS 				#
 	 * ##################################################*/
+
+	else if (*comm[0] == 'i' && strcmp(comm[0], "icons") == 0) {
+
+		if (!comm[1] || (*comm[1] == '-'
+		&& strcmp(comm[1], "--help") == 0))
+			puts(_("Usage: icons [on, off]"));
+
+		else if (*comm[1] == 'o' && comm[1][1] == 'n' && !comm[1][2]) {
+//			printf(_("%s: Icons enabled\n"), PROGRAM_NAME);
+
+			icons = 1;
+
+			if (cd_lists_on_the_fly) {
+				free_dirlist();
+				exit_code = list_dir();
+			}
+		}
+
+		else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
+//			printf(_("%s: Icons disabled\n"), PROGRAM_NAME);
+			icons = 0;
+
+			if (cd_lists_on_the_fly) {
+				free_dirlist();
+				exit_code = list_dir();
+			}
+		}
+
+		else {
+			fputs(_("Usage: icons [on, off]\n"), stderr);
+			exit_code = EXIT_FAILURE;
+			return EXIT_FAILURE;
+		}
+
+		return EXIT_SUCCESS;
+	}
 
 	else if (*comm[0] == 'c' && ((comm[0][1] == 's' && !comm[0][2])
 	|| strcmp(comm[0], "colorschemes") == 0)) {
@@ -25015,6 +25127,7 @@ help_function (void)
 \n				corresponding bookmark paths. TAB \
 \n				completion for bookmark names is also \
 \n				available\
+\n     --icons\t\t\t enable icons\
 \n     --no-autojump\t\t disable the autojump function\
 \n     --color-scheme=NAME\t use color scheme NAME\
 \n     --no-dir-indicator\t\t do not add / indicator to directories \
@@ -25083,6 +25196,7 @@ help_function (void)
  exp, export [ELN/FILE ...]\n\
  shell [SHELL]\n\
  actions [edit]\n\
+ icons [on, off]\n\
  pin [FILE/DIR]\n\
  unpin\n\
  st, sort [METHOD] [rev]\n\
