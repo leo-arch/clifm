@@ -106,6 +106,7 @@ in FreeBSD, but is deprecated */
 /* #include <sys/types.h> */
 
 #include "clifm.h" /* A few custom functions */
+#include "icons.h"
 #include <wordexp.h> /* For command substitution */
 #include <sys/statvfs.h>
 #include <regex.h>
@@ -222,17 +223,17 @@ static int flags;
 #define NB_b "\001\x1b[49m\002"
 
 /* Default colors */
-#define DEF_LS_COLORS "di=01;34:fi=00;39:ln=01;36:mh=30;46:or=00;36:\
+#define DEF_LS_COLORS "di=01;34:fi=00;37:ln=01;36:mh=30;46:or=00;36:\
 pi=00;35:so=01;35:bd=01;33:cd=01;37:su=37;41:sg=30;43:st=37;44:\
 tw=30;42:ow=34;42:ex=01;32:no=31;47"
 
-#define DEF_FILE_COLORS "di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;39:\
+#define DEF_FILE_COLORS "di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;37:\
 ef=00;33:nf=00;31:ln=01;36:mh=30;46:or=00;36:pi=33;40:\
 so=01;35:bd=01;33:cd=01;37:su=37;41:sg=30;43:ca=30;41:tw=30;42:\
 ow=34;42:st=37;44:ex=01;32:ee=00;32:no=00;31;47:uf=31;40:"
 
-#define DEF_IFACE_COLORS "el=01;33:mi=01;36:dl=01;34:tx=00;39:df=00;39:\
-dc=00;39:wc=01;36:dh=00;36:li=01;32:si=01;34:ti=01;33:em=01;31:wm=01;33:\
+#define DEF_IFACE_COLORS "el=01;33:mi=01;36:dl=01;34:tx=00;37:df=00;37:\
+dc=00;37:wc=01;36:dh=00;36:li=01;32:si=01;34:ti=01;33:em=01;31:wm=01;33:\
 nm=01;32:bm=01;36:"
 
 #define DEF_EXT_COLORS "*.tar=01;31:*.tgz=01;31:*.arc=01;31:\
@@ -701,15 +702,9 @@ struct bookmarks_t
 	char *shortcut;
 	char *name;
 	char *path;
-};
+};+
 
 struct bookmarks_t *bookmarks = (struct bookmarks_t *)NULL;
-
-struct icons_t
-{
-	char *name;
-	char *icon;
-};
 
 /* Struct to store file information */
 struct fileinfo
@@ -882,8 +877,8 @@ char *user = (char *)NULL, *path = (char *)NULL,
 	*alt_bm_file = (char *)NULL, *pinned_dir = (char *)NULL,
 	*COLORS_DIR = (char *)NULL, **color_schemes = (char **)NULL,
 	*cur_cscheme = (char *)NULL, *usr_cscheme = (char *)NULL,
-	*CONFIG_DIR_GRAL = (char *)NULL;
-/*	*img_viewer = (char *)NULL */
+	*CONFIG_DIR_GRAL = (char *)NULL, *icon = (char *)NULL,
+	*icon_color = (char *)NULL;
 
 char div_line_char = UNSET;
 
@@ -956,265 +951,6 @@ char di_c[MAX_COLOR] = "", /* Directory */
 	wm_c[MAX_COLOR + 2] = "", /* Warning msg color */
 	nm_c[MAX_COLOR + 2] = "", /* Notice msg color */
 	si_c[MAX_COLOR + 2] = ""; /* stealth indicator color */
-
-/* Icons (from the 'icons-in-terminal' proyect) */
-char
-	/* File types */
-	ICON_DIR[4] = "\ue155",
-	ICON_LOCK[4] = "\ue200",
-	ICON_REG[4] = "\ue0f6",
-	ICON_EXEC[4] = "\ue0f3",
-	ICON_LINK[4] = "\ue18a",
-
-	/* Extensions */
-	ICON_BINARY[4] = "\ue073",
-	ICON_MANPAGE[4] = "\ue799",
-	ICON_MAKEFILE[4] = "\ue7a2",
-	ICON_MARKDOWN[4] = "\uea45",
-	ICON_DATABASE[4] = "\uedc0",
-	ICON_CONF[4] = "\ue15e",
-	ICON_DIFF[4] = "\ue7c3",
-	ICON_DEB[4] = "\uedc1",
-	ICON_CODE[4] = "\ue282",
-	ICON_VIM[4] = "\ueacc",
-	ICON_NASM[4] = "\ue8d5",
-	ICON_JAVA[4] = "\uede3",
-	ICON_JAVASCRIPT[4] = "\uede6",
-	ICON_ELF[4] = "\ue23a",
-	ICON_HTML[4] = "\ue282",
-	ICON_GO[4] = "\uedd0",
-	ICON_PHP[4] = "\uee09",
-	ICON_PERL[4] = "\uee05",
-	ICON_SCALA[4] = "\uee1f",
-	ICON_MYSQL[4] = "\uedf8",
-	ICON_FSHARP[4] = "\ueaae",
-	ICON_LUA[4] = "\ue77e",
-	ICON_PATCH[4] = "\ue7c4",
-	ICON_IMG[4] = "\ue27e",
- 	ICON_VID[4] = "\ue281",
-	ICON_AUDIO[4] = "\ue280",
-	ICON_PDF[4] = "\ue27a",
-	ICON_ARCHIVE[4] = "\ue27f",
-	ICON_CD[4] = "\uecd3",
-	ICON_SCRIPT[4] = "\uee1d",
-	ICON_TXT[4] = "\ue1bc",
-	ICON_C[4] = "\uedb1",
-	ICON_CPP[4] = "\uedb8",
-	ICON_CSHARP[4] = "\uedb9",
-	ICON_PYTHON[4] = "\uee10",
-	ICON_WINDOWS[4] = "\uea16",
-	ICON_WORD[4] = "\ue850",
-	ICON_EXCEL[4] = "\ue851",
-	ICON_ACCESS[4] = "\ue84d",
-	ICON_POWERPOINT[4] = "\ue84f",
-	ICON_PHOTOSHOP[4] = "\ueabf",
-	ICON_COPYRIGHT[4] = "\ue2af",
-	ICON_CONFIGURE[4] = "\ue8df",
-	ICON_HISTORY[4] = "\ue292",
-
-	/* Dir names */
-	ICON_DESKTOP[4] = "\ue1cd",
-	ICON_DOCUMETS[4] = "\ue187",
-	ICON_DOWNLOADS[4] = "\ue0f9",
-	ICON_HOME[4] = "\ue0f5",
-	ICON_TRASH[4] = "\ue0f4",
-	ICON_FAV[4] = "\ue0e7",
-	ICON_MUSIC[4] = "\ue0e2",
-	ICON_PICTURES[4] = "\ue4fb",
-	ICON_VIDEOS[4] = "\ue0e9",
-	ICON_PUBLIC[4] = "\ue0fc",
-	ICON_TEMPLATES[4] = "\ue18f",
-	ICON_DOTGIT[4] = "\ue28b",
-	ICON_GAMES[4] = "\ue1df",
-	ICON_DROPBOX[4] = "\ue22a",
-	ICON_STEAM[4] = "\ue270";
-
-/*	ICON_MAIL[4] = "\ue1a7",
-	ICON_NET[4] = "\ue1af",
-	ICON_MYPC[4] = "\ue1cd",
-	ICON_USB[4] = "\ue334",
-	ICON_BLUETOOTH[4] = "\ue33f",
-	ICON_CLOUD[4] = "\ue574",
-	ICON_PRINTER[4] = "\ue5a9",
-	ICON_ANDROID[4] = "\ue64d",
-	ICON_APPLE[4] = "\uea18",
-	ICON_CHROME[4] = "\uea4a",
-	ICON_IE[4] = "\uea4b",
-	ICON_FIREFOX[4] = "\uea4c",
-	ICON_OPERA[4] = "\uea4d"; */
-
-struct icons_t icon_ext[] = {
-	{ "1" , ICON_MANPAGE },
-	{ "7z" , ICON_ARCHIVE },
-
-	{ "a" , ICON_MANPAGE },
-	{ "apk" , ICON_ARCHIVE },
-	{ "asm" , ICON_NASM },
-	{ "aup" , ICON_AUDIO },
-	{ "avi" , ICON_VID },
-
-	{ "bat" , ICON_SCRIPT },
-	{ "bin" , ICON_EXEC },
-	{ "bmp" , ICON_IMG },
-	{ "bz2" , ICON_ARCHIVE },
-
-	{ "c" , ICON_C },
-	{ "c++" , ICON_CPP },
-	{ "cab" , ICON_ARCHIVE },
-	{ "cbr" , ICON_ARCHIVE },
-	{ "cbz" , ICON_ARCHIVE },
-	{ "cc" , ICON_CPP },
-	{ "class" , ICON_JAVA },
-	{ "cmake" , ICON_MAKEFILE },
-	{ "conf" , ICON_CONF },
-	{ "cpio" , ICON_ARCHIVE },
-	{ "cpp" , ICON_CPP },
-	{ "cue" , ICON_AUDIO },
-	{ "cvs" , ICON_CONF },
-	{ "cxx" , ICON_CPP },
-
-	{ "db" , ICON_DATABASE },
-	{ "deb" , ICON_DEB },
-	{ "diff" , ICON_DIFF },
-	{ "dll" , ICON_MANPAGE },
-	{ "doc" , ICON_WORD },
-	{ "docx" , ICON_WORD },
-
-	{ "ejs" , ICON_CODE },
-	{ "elf" , ICON_ELF },
-	{ "epub" , ICON_PDF },
-	{ "exe" , ICON_WINDOWS },
-
-	{ "f#" , ICON_FSHARP },
-	{ "flac" , ICON_AUDIO },
-	{ "flv" , ICON_VID },
-	{ "fs" , ICON_FSHARP },
-	{ "fsi" , ICON_FSHARP },
-	{ "fsscript" , ICON_FSHARP },
-	{ "fsx" , ICON_FSHARP },
-
-	{ "gem" , ICON_ARCHIVE },
-	{ "gif" , ICON_IMG },
-	{ "go" , ICON_GO },
-	{ "gz" , ICON_ARCHIVE },
-	{ "gzip" , ICON_ARCHIVE },
-
-	{ "h" , ICON_C },
-	{ "hh" , ICON_CPP },
-	{ "htaccess" , ICON_CONF },
-	{ "htpasswd" , ICON_CONF },
-	{ "htm" , ICON_HTML },
-	{ "html" , ICON_HTML },
-	{ "hxx" , ICON_CPP },
-
-	{ "ico" , ICON_IMG },
-	{ "img" , ICON_IMG },
-	{ "ini" , ICON_CONF },
-	{ "iso" , ICON_CD },
-
-	{ "jar" , ICON_JAVA },
-	{ "java" , ICON_JAVA },
-	{ "jpeg" , ICON_IMG },
-	{ "jpg" , ICON_IMG },
-	{ "js" , ICON_JAVASCRIPT },
-	{ "json" , ICON_JAVASCRIPT },
-
-	{ "lha" , ICON_ARCHIVE },
-	{ "log" , ICON_TXT },
-	{ "lua" , ICON_LUA },
-	{ "lzh" , ICON_ARCHIVE },
-	{ "lzma" , ICON_ARCHIVE },
-
-	{ "m4a" , ICON_AUDIO },
-	{ "m4v" , ICON_VID },
-	{ "markdown" , ICON_MARKDOWN },
-	{ "md" , ICON_MARKDOWN },
-	{ "mk" , ICON_MAKEFILE },
-	{ "mkv" , ICON_VID },
-	{ "mov" , ICON_VID },
-	{ "mp3" , ICON_AUDIO },
-	{ "mp4" , ICON_VID },
-	{ "mpeg" , ICON_VID },
-	{ "mpg" , ICON_VID },
-	{ "msi" , ICON_WINDOWS },
-
-	{ "o" , ICON_MANPAGE },
-	{ "ogg" , ICON_AUDIO },
-	{ "opdownload" , ICON_DOWNLOADS},
-	{ "out" , ICON_ELF },
-
-	{ "part" , ICON_DOWNLOADS },
-	{ "patch" , ICON_PATCH },
-	{ "pdf" , ICON_PDF },
-	{ "php" , ICON_PHP },
-	{ "png" , ICON_IMG },
-	{ "ppt" , ICON_POWERPOINT },
-	{ "pptx" , ICON_POWERPOINT },
-	{ "psv" , ICON_PHOTOSHOP },
-	{ "psd" , ICON_PHOTOSHOP },
-	{ "py" , ICON_PYTHON },
-	{ "pyc" , ICON_PYTHON },
-	{ "pyd" , ICON_PYTHON },
-	{ "pyo" , ICON_PYTHON },
-
-	{ "rar" , ICON_ARCHIVE },
-	{ "rc" , ICON_CONF },
-	{ "rpm" , ICON_ARCHIVE },
-	{ "rtf" , ICON_PDF },
-
-	{ "so" , ICON_MANPAGE },
-	{ "scala" , ICON_SCALA },
-	{ "sh" , ICON_SCRIPT },
-	{ "slim" , ICON_CODE },
-	{ "sql" , ICON_MYSQL },
-	{ "svg" , ICON_IMG },
-
-	{ "tar" , ICON_ARCHIVE },
-	{ "tgz" , ICON_ARCHIVE },
-	{ "txt" , ICON_TXT },
-	{ "txz" , ICON_ARCHIVE },
-
-	{ "vid" , ICON_VID },
-	{ "vim" , ICON_VIM },
-	{ "vimrc" , ICON_VIM },
-
-	{ "wav" , ICON_AUDIO },
-	{ "webm" , ICON_VID },
-	{ "wma" , ICON_AUDIO },
-	{ "wmv" , ICON_VID },
-
-	{ "xbps" , ICON_ARCHIVE },
-	{ "xthml" , ICON_HTML },
-	{ "xls" , ICON_EXCEL },
-	{ "xlsx" , ICON_EXCEL },
-	{ "xml" , ICON_CODE },
-	{ "xz" , ICON_ARCHIVE },
-
-	{ "yaml" , ICON_CONF },
-	{ "yml" , ICON_CONF },
-
-	{ "zip" , ICON_ARCHIVE },
-	{ "zst" , ICON_ARCHIVE },
-};
-
-struct icons_t icon_dirnames[] = {
-	{ ".git" , ICON_DOTGIT },
-	{ "Desktop" , ICON_DESKTOP },
-	{ "Documents" , ICON_DOCUMETS },
-	{ "Downloads" , ICON_DOWNLOADS },
-	{ "Music" , ICON_MUSIC },
-	{ "Public" , ICON_PUBLIC },
-	{ "Pictures" , ICON_PICTURES },
-	{ "Templates" , ICON_TEMPLATES },
-	{ "Videos" , ICON_VIDEOS },
-};
-
-struct icons_t icon_filenames[] = {
-	{ "CHANGELOG" , ICON_HISTORY },
-	{ "configure" , ICON_CONFIGURE },
-	{ "License" , ICON_COPYRIGHT },
-	{ "Makefile" , ICON_MAKEFILE },
-};
 
 				/**
 				 * #############################
@@ -2699,53 +2435,67 @@ char
 	return buf;
 }
 
-char
-*get_file_icon(char *file)
+void
+get_file_icon(char *file)
 /* Returns a pointer to the corresponding icon for DIR. If not found,
  * returns the default icon (DIR) */
 {
+	icon = DEF_FILE_ICON;
+	icon_color = DEF_FILE_ICON_COLOR;
+
 	if (!file)
-		return ICON_REG;
+		return;
 
 	size_t i;
 
 	for (i = 0; i < sizeof(icon_filenames)/sizeof(struct icons_t); i++) {
 
 		if (*file == *icon_filenames[i].name
-		&& strcasecmp(file, icon_filenames[i].name) == 0)
-			return icon_filenames[i].icon;
+		&& strcasecmp(file, icon_filenames[i].name) == 0) {
+			icon = icon_filenames[i].icon;
+			icon_color = icon_filenames[i].color;
+		}
 	}
 
-	return ICON_REG;
+	return;
 }
 
-char
-*get_dir_icon(char *dir)
+void
+get_dir_icon(char *dir)
 /* Returns a pointer to the corresponding icon for DIR. If not found,
- * returns the default icon (DIR) */
+ * returns the default icon and colors */
 {
+	/* Default values for directories */
+	icon = DEF_DIR_ICON;
+	icon_color = DEF_DIR_ICON_COLOR;
+
 	if (!dir)
-		return ICON_DIR;
+		return;
 
 	size_t i;
 
 	for (i = 0; i < sizeof(icon_dirnames)/sizeof(struct icons_t); i++) {
 
 		if (*dir == *icon_dirnames[i].name
-		&& strcasecmp(dir, icon_dirnames[i].name) == 0)
-			return icon_dirnames[i].icon;
+		&& strcasecmp(dir, icon_dirnames[i].name) == 0) {
+			icon = icon_dirnames[i].icon;
+			icon_color = icon_dirnames[i].color;
+		}
 	}
 
-	return ICON_DIR;
+	return;
 }
 
-char
-*get_ext_icon(char *ext)
+void
+get_ext_icon(char *ext)
 /* Returns a pointer to the corresponding icon for EXT. If not found,
- * returns the default icon (TXT) */
+ * returns the default icon and color */
 {
+	icon = DEF_FILE_ICON;
+	icon_color = DEF_FILE_ICON_COLOR;
+
 	if (!ext)
-		return ICON_TXT;
+		return;
 
 	ext++;
 
@@ -2753,12 +2503,18 @@ char
 
 	for (i = 0; i < sizeof(icon_ext)/sizeof(struct icons_t); i++) {
 
-		if (*ext == *icon_ext[i].name
-		&& strcasecmp(ext, icon_ext[i].name) == 0)
-			return icon_ext[i].icon;
+		/* Tolower */
+		char c = (*ext >= 'A' && *ext <= 'Z')
+				 ? (*ext - 'A' + 'a') : *ext;	
+
+		if (c == *icon_ext[i].name
+		&& strcasecmp(ext, icon_ext[i].name) == 0) {
+			icon = icon_ext[i].icon;
+			icon_color = icon_ext[i].color;
+		}
 	}
 
-	return ICON_TXT;
+	return;
 }
 
 char
@@ -18062,7 +17818,7 @@ list_dir(void)
 		eln_len = digits_in_num((int)files); /* This is max ELN length */
 		eln_len_bk = eln_len;
 
-		char *icon = ICON_REG;
+		icon = ICON_REG;
 
 		for (i = 0; i < (int)files; i++) {
 
@@ -18282,7 +18038,8 @@ list_dir(void)
 		}
 
 		int is_dir = 0, no_files_count = 0;
-		char *icon = ICON_REG;
+		icon = DEF_FILE_ICON;
+		icon_color = DEF_FILE_ICON_COLOR;
 
 		#ifdef _LINUX_CAP
 		cap_t cap;
@@ -18308,11 +18065,12 @@ list_dir(void)
 				is_dir = 1;
 				no_files_count = 1;
 				icon = ICON_LOCK;
+				icon_color = YELLOW;
 			}
 
 			else {
 				if (icons)
-					icon = get_dir_icon(dirlist[i]);
+					get_dir_icon(dirlist[i]);
 
 				int is_oth_w = 0;
 
@@ -18370,11 +18128,13 @@ list_dir(void)
 
 		case S_IFSOCK: color = so_c; break;
 
-		case S_IFREG:
+		case S_IFREG: {
+			char *ext = (char *)NULL;
 
 			if (access(dirlist[i], F_OK|R_OK) == -1) {
 				color = nf_c;
 				icon = ICON_LOCK;
+				icon_color = YELLOW;
 			}
 
 			else if (file_info[i].type & S_ISUID) { /* set uid file */
@@ -18412,15 +18172,16 @@ list_dir(void)
 			/* Check extension color only if some is defined */
 			else if (ext_colors_n) {
 
-				char *ext = strrchr(dirlist[i], '.');
+				ext = strrchr(dirlist[i], '.');
 				/* Make sure not to take a hidden file for an
 				 * extension */
 
 				if (ext && ext != dirlist[i]) {
-					char *extcolor = get_ext_color(ext);
 
 					if (icons)
-						icon = get_ext_icon(ext);
+						get_ext_icon(ext);
+
+					char *extcolor = get_ext_color(ext);
 
 					if (extcolor) {
 						sprintf(ext_color, "\x1b[%sm", extcolor);
@@ -18430,14 +18191,12 @@ list_dir(void)
 
 					else /* No matching extension found */
 						color = fi_c;
-
-					ext = (char *)NULL;
 				}
 
-				else {/* Bare regular file */
+				else { /* Bare regular file */
 					color = fi_c;
 					if (icons)
-						icon = get_file_icon(dirlist[i]);
+						get_file_icon(dirlist[i]);
 				}
 			}
 
@@ -18445,9 +18204,19 @@ list_dir(void)
 				/* Bare regular file */
 				color = fi_c;
 				if (icons)
-					icon = get_file_icon(dirlist[i]);
+					get_file_icon(dirlist[i]);
 			}
 
+			/* If the file color was not set via file extension,
+			 * we still need to check the extension to find out
+			 * the file icon */
+			if (icons && !ext) {
+				ext = strrchr(dirlist[i], '.');
+
+				if (ext && ext != dirlist[i])
+					get_ext_icon(ext);
+			}
+			}
 			break;
 
 		/* In case all of the above cases are false, we have an
@@ -18457,25 +18226,31 @@ list_dir(void)
 		}
 		}
 
+		if (!icon_color || !*icon_color)
+			icon_color = df_c;
+
 		if (is_dir) {
 
  			if (no_files_count)
-				printf("%s%d%s %s%s%c%s%s %s/%s%s", el_c, i + 1, df_c,
-					   color, icons ? icon : "", icons ? 0x20
-					   : 0, dirlist[i], df_c, dc_c, df_c,
+				printf("%s%d%s %s%s%c%s%s%s%s %s/%s%s", el_c, i + 1, df_c,
+					   icons ? icon_color : "", icons ? icon : "",
+					   icons ? 0x20 : 0, df_c,
+					   color, dirlist[i], df_c, dc_c, df_c,
 					   last_column ? "\n" : "");
 
 			else
-				printf("%s%d%s %s%s%c%s%s %s/%zu%s%s", el_c, i + 1,
-					   df_c, color, icons ? icon : "", icons
-					   ? 0x20 : 0, dirlist[i], df_c, dc_c,
+				printf("%s%d%s %s%s%c%s%s%s%s %s/%zu%s%s", el_c, i + 1,
+					   df_c, icons ? icon_color : "",
+					   icons ? icon : "", icons
+					   ? 0x20 : 0, df_c, color, dirlist[i], df_c, dc_c,
 					   file_info[i].filesn - 2, df_c,
 					   last_column ? "\n" : "");
 		}
 
 		else {
-			printf("%s%d%s %s%s%c%s%s%s", el_c, i + 1, df_c, color,
-				   icons ? icon : "", icons ? 0x20 : 0, dirlist[i],
+			printf("%s%d%s %s%s%c%s%s%s%s%s", el_c, i + 1, df_c,
+				   icons ? icon_color : "", icons ? icon : "",
+				   icons ? 0x20 : 0, df_c, color, dirlist[i],
 				   df_c, last_column ? "\n" : "");
 		}
 
@@ -19038,7 +18813,7 @@ list_dir_light(void)
 
 		/* Indicator char */
 		char ichar = 0;
-		char *icon = ICON_REG;
+		icon = ICON_REG;
 
 		if (classify) {
 
@@ -19048,7 +18823,7 @@ list_dir_light(void)
 					ichar = '/';
 
 					if (icons)
-						icon = get_dir_icon(dirlist[i]);
+						get_dir_icon(dirlist[i]);
 
 				break;
 
@@ -19075,7 +18850,7 @@ list_dir_light(void)
 			if (file_info[i].type == DT_DIR) {
 				ichar = '/';
 				if (icons)
-					icon = get_dir_icon(dirlist[i]);
+					get_dir_icon(dirlist[i]);
 			}
 		}
 
@@ -24160,24 +23935,34 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 	/* Get file type (and color): */
 	int sticky = 0;
 	char file_type = 0;
-	char *linkname = (char *)NULL, *color = (char *)NULL,
-		*icon = ICON_REG;
+	char *linkname = (char *)NULL, *color = (char *)NULL;
+
+	icon = DEF_FILE_ICON;
+	icon_color = DEF_FILE_ICON_COLOR;
 
 	switch (file_attrib.st_mode & S_IFMT) {
 
-	case S_IFREG:
+	case S_IFREG: {
+
+		char *ext = (char *)NULL;
+
 		file_type='-';
-/*		if (!(file_attrib.st_mode & S_IRUSR)) strcpy(color, nf_c); */
+
 		if (access(filename, R_OK) == -1) {
 			color = nf_c;
 			icon = ICON_LOCK;
+			icon_color = YELLOW;
 		}
 
-		else if (file_attrib.st_mode & S_ISUID)
+		else if (file_attrib.st_mode & S_ISUID) {
 			color = su_c;
+			icon = ICON_EXEC;
+		}
 
-		else if (file_attrib.st_mode & S_ISGID)
+		else if (file_attrib.st_mode & S_ISGID) {
 			color = sg_c;
+			icon = ICON_EXEC;
+		}
 
 		else {
 			#ifdef _LINUX_CAP
@@ -24205,11 +23990,14 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 			else if (file_attrib.st_nlink > 1) color = mh_c;
 
 			else {
-				char *ext = strrchr(filename, '.');
+				ext = strrchr(filename, '.');
 
 				if (ext) {
+
+					if (icons)
+						get_ext_icon(ext);
+
 					char *extcolor = get_ext_color(ext);
-					icon = get_ext_icon(ext);
 
 					if (extcolor) {
 						char ext_color[MAX_COLOR] = "";
@@ -24218,26 +24006,40 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 						extcolor = (char *)NULL;
 					}
 
-					else /* No matching extension found */
+					else { /* No matching extension found */
 						color = fi_c;
-
-					ext = (char *)NULL;
+						if (icons)
+							get_file_icon(filename);
+					}
 				}
 
-				else
+				else {
 					color = fi_c;
+					if (icons)
+						get_file_icon(filename);
+				}
 			}
+
+			if (icons && !ext) {
+				ext = strrchr(filename, '.');
+
+				if (ext && ext != filename)
+					get_ext_icon(ext);
+			}
+		}
 		}
 		break;
 
 	case S_IFDIR:
 		file_type='d';
 
-		icon = ICON_DIR;
+		if (icons)
+			get_dir_icon(filename);
 
 		if (access(filename, R_OK|X_OK) != 0) {
 			color = nd_c;
 			icon = ICON_LOCK;
+			icon_color = YELLOW;
 		}
 
 		else {
@@ -24361,10 +24163,13 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 		if (pad < 0)
 			pad = 0;
 
-		printf("%s%s%c%s%s%-*s%s (%04o) %c/%c%c%c/%c%c%c/%c%c%c%s "
+		printf("%s%s%c%s%s%s%-*s%s (%04o) %c/%c%c%c/%c%c%c/%c%c%c%s "
 				"%s %s %s %s\n", 
-				(light_mode) ? "" : color, icons ? icon : "", icons
-				? 0x20 : 0,	(!trim) ? filename : trim_filename,
+				light_mode ? "" : icon_color, 
+				icons ? icon : "", icons ? 0x20 : 0,
+
+				light_mode ? "" : color,
+				(!trim) ? filename : trim_filename,
 				light_mode ? "" : df_c,	pad, "", df_c,
 				file_attrib.st_mode & 07777, file_type,
 				read_usr, write_usr, exec_usr, 
