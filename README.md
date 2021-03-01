@@ -72,7 +72,7 @@ where to search: `/.*.png /media/images`. And, if you want to further filter the
 ![autojump](images/autojump0.png)
 ![autojump](images/autojump2.png)
 
-* **NEW: Icons support** (via icons-in-terminal)
+* **NEW: Icons support** (depends on the `icons-in-terminal` proyect. See https://github.com/sebastiencs/icons-in-terminal)
 
 ![icons](images/icons.png)
 
