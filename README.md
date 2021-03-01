@@ -77,7 +77,7 @@ where to search: `/.*.png /media/images`. And, if you want to further filter the
 1) [Install](https://github.com/sebastiencs/icons-in-terminal#installation) icons-in-terminal.
 2) Run CliFM with the `--icons` command line option, or, once in the program, enter `icons on`.
 
-![icons](images/icons.png)
+![icons](images/icons2.png)
 
 Because file manager, but also half-shell, CLiFM also provides the following features:
 
