@@ -702,7 +702,7 @@ struct bookmarks_t
 	char *shortcut;
 	char *name;
 	char *path;
-};+
+};
 
 struct bookmarks_t *bookmarks = (struct bookmarks_t *)NULL;
 
