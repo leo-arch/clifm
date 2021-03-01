@@ -72,7 +72,10 @@ where to search: `/.*.png /media/images`. And, if you want to further filter the
 ![autojump](images/autojump0.png)
 ![autojump](images/autojump2.png)
 
-* **NEW: Icons support** (depends on the `icons-in-terminal` project. See https://github.com/sebastiencs/icons-in-terminal)
+* **NEW: Icons support** :smirk: (depends on the `icons-in-terminal` project. See https://github.com/sebastiencs/icons-in-terminal)
+
+1) [install](https://github.com/sebastiencs/icons-in-terminal#installation) icons-in-terminal.
+2) Run CliFM with the `--icons` command line option, or, once in the program, enter `icons on`.
 
 ![icons](images/icons.png)
 
