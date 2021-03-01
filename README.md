@@ -12,7 +12,7 @@
 
 Why in this world do we need another file manager? In the first place, just because I can do it, write it, and learn (a lot) in the process, just because this is a free world, and very specially, a free community; and, needless to say, alternatives are at the heart of freedom.
 
-Secondly, because I'm sure I'm not the only person in this world looking for a non-bloated, KISS file manager (on Arch's notion of simplcity see: https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity): it just does whatever needs to be done using as little resources as possible. No GUI, no curses, but just a command line, shell-like file manager: 5MiB of RAM and 350KiB of disk space (plus some willingness to try something different and new) is all you need.
+Secondly, because I'm sure I'm not the only person in this world looking for a non-bloated, [KISS](https://wiki.archlinux.org/index.php/Arch_Linux#Simplicity) file manager: it just does whatever needs to be done using as little resources as possible. No GUI, no curses, but just a command line, shell-like file manager: 5MiB of RAM and 400KiB of disk space (plus some willingness to try something different and new) is all you need.
 
 Finally, because CliFM, unlike most file managers out there, is certainly a file manager, but also **a shell extension**. Almost everything you do on your shell can be done in this file manager as well: search for files, copy, rename, and trash some of them, but, at the same time, update/upgrade your system, add some cronjob, stop a service, and run nano (or vi, or emacs, if you like).
 
@@ -24,7 +24,7 @@ CliFM is a completely command-line-based, shell-like file manager able to perfor
 
 * It is REALLY **CLI-based**. No GUI (like Thunar and the like) nor TUI or curses (like Ranger or nnn) at all, just a command line. Since it does not need any GUI, it can run on the Linux built-in console and even on a SSH or any other remote session.
 
-* With a memory footprint below 5 MiB and a disk usage of 0.25 MiB, it is incredibly **lightweight and fast**, and as such, able to run on really old hardware. It is probabily the most lightweight and fastest file manager out there.
+* With a memory footprint below 5 MiB and a disk usage of 0.4 MiB, it is incredibly **lightweight and fast**, and as such, able to run on really old hardware. 
 
 * The use of **short (and even one-character) commands**, and list numbers (**ELN's**) for filenames. For example, instead of typing: `cp file1 file2 file3 file4 dir/`, you can do this: `c 1-4 7`. Shorter and quicker. If the auto-cd and auto-open functions are enabled, which is the default, you can change to directories or open files by just entering the corresponding ELN. So, instead of `cd 12` or `o 12` you can just enter `12`; even shorter and quicker. As a plus, ELN's can also be used with external commands. Example: `diff 1 5` or `ls -l 12 14`. If numbers are a bit tricky to you, as they are to me, you can use the TAB key to expand the ELN to the corresponding filename. So, type `r 56`, then TAB, and it becomes `r filename`.
 
@@ -72,7 +72,10 @@ where to search: `/.*.png /media/images`. And, if you want to further filter the
 ![autojump](images/autojump0.png)
 ![autojump](images/autojump2.png)
 
-* **NEW: Icons support** (via icons-in-terminal)
+* **NEW: Icons support** :smirk: (depends on the [icons-in-terminal](https://github.com/sebastiencs/icons-in-terminal) project)
+
+1) [Install](https://github.com/sebastiencs/icons-in-terminal#installation) icons-in-terminal.
+2) Run CliFM with the `--icons` command line option, or, once in the program, enter `icons on`.
 
 ![icons](images/icons.png)
 
@@ -101,7 +104,7 @@ Because file manager, but also half-shell, CLiFM also provides the following fea
 * PDF reader, image/video previews, wallpaper setter, music playlist (plugins) (**NEW**)
 * Color schemes (**NEW**)
 
-**NOTE:** By default, CliFM ships only one color scheme, but more can be found at https://github.com/leo-arch/clifm-colors. The package is also available in the AUR: https://aur.archlinux.org/packages/clifm-colors-git
+**NOTE:** By default, CliFM ships only one color scheme, but more are provided by [clifm-colors](https://github.com/leo-arch/clifm-colors). The package is also available in the [AUR](https://aur.archlinux.org/packages/clifm-colors-git).
 
 Finally, all CLiFM options could be handled directly via command line, by passing parameters to the program, or via plain
 text configuration files, located in `$XDG_CONFIG_HOME/clifm/`.
@@ -116,7 +119,7 @@ Insofar as it is heavily inspired by Arch Linux and its KISS principle, CLiFM is
 
 ### Arch Linux
 
-You'll find the corresponding packages on the AUR: https://aur.archlinux.org/packages/clifm and, for the development version, https://aur.archlinux.org/packages/clifm-git. 
+You'll find the corresponding packages on the AUR: the [stable](https://aur.archlinux.org/packages/clifm) and the [development](https://aur.archlinux.org/packages/clifm-git) version. 
 
 Of course, you can also clone, build, and install the package using the PKGBUILD file:
 
