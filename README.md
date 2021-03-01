@@ -72,7 +72,7 @@ where to search: `/.*.png /media/images`. And, if you want to further filter the
 ![autojump](images/autojump0.png)
 ![autojump](images/autojump2.png)
 
-* **NEW: Icons support** :smirk: (depends on the `icons-in-terminal` project. See https://github.com/sebastiencs/icons-in-terminal)
+* **NEW: Icons support** :smirk: (depends on the [icons-in-terminal](https://github.com/sebastiencs/icons-in-terminal) project)
 
 1) [Install](https://github.com/sebastiencs/icons-in-terminal#installation) icons-in-terminal.
 2) Run CliFM with the `--icons` command line option, or, once in the program, enter `icons on`.
@@ -104,7 +104,7 @@ Because file manager, but also half-shell, CLiFM also provides the following fea
 * PDF reader, image/video previews, wallpaper setter, music playlist (plugins) (**NEW**)
 * Color schemes (**NEW**)
 
-**NOTE:** By default, CliFM ships only one color scheme, but more can be found at https://github.com/leo-arch/clifm-colors. The package is also available in the AUR: https://aur.archlinux.org/packages/clifm-colors-git
+**NOTE:** By default, CliFM ships only one color scheme, but more are provided by [clifm-colors](https://github.com/leo-arch/clifm-colors). The package is also available in the [AUR](https://aur.archlinux.org/packages/clifm-colors-git).
 
 Finally, all CLiFM options could be handled directly via command line, by passing parameters to the program, or via plain
 text configuration files, located in `$XDG_CONFIG_HOME/clifm/`.
@@ -119,7 +119,7 @@ Insofar as it is heavily inspired by Arch Linux and its KISS principle, CLiFM is
 
 ### Arch Linux
 
-You'll find the corresponding packages on the AUR: https://aur.archlinux.org/packages/clifm and, for the development version, https://aur.archlinux.org/packages/clifm-git. 
+You'll find the corresponding packages on the AUR: the [stable](https://aur.archlinux.org/packages/clifm) and the [development](https://aur.archlinux.org/packages/clifm-git) version. 
 
 Of course, you can also clone, build, and install the package using the PKGBUILD file:
 
