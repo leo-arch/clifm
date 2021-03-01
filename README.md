@@ -44,16 +44,16 @@ Of course, you can deselect some or all selected files whenever you want with th
  
  * Open files without the need to specify any program. Via `mime` (the **built-in resource opener**), if no program was specified, CliFM will open the file with the default program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background. Of course, you can also set a custom resource opener.
 
-* **Quick search**: type `/REGEX` and CliFM will list all matches for the corresponding REGEX pattern. Example: `/.*.png`
+* **Quick search**: type `/REGEX` and CliFM will list all matches for the corresponding REGEX pattern. Example: `/.*\.png$`
  will list all the PNG files in the current directory. If you want to 
 search for files in another directory, just tell the search function 
-where to search: `/.*.png /media/images`. And, if you want to further filter the search, you still can specify what kind of files you want. For example: `/[.-].*d$ -d /etc` will list all directories (-d) in /etc containing a dot or a slash and ending with 'd'.
+where to search: `/.*\.png$ /media/images`. And, if you want to further filter the search, you still can specify what kind of files you want. For example: `/[.-].*d$ -d /etc` will list all directories (-d) in /etc containing a dot or a slash and ending with 'd'.
 
 ![quick search](images/quick_search.png)
 
 * A Freedesktop compliant **trash system** to be able to recover deleted files.
 
-* **Extended color codes**: Just like the `ls` command, CLiFM uses (customizable) color codes to identify file types and extensions. However, and unlike `ls`, CLiFM is also able to distinguish between empty and non-empty files or directories, broken and non-broken symlinks, files and directories with or without read permission, multi-hardlink files, and more. Once in CliFM, type `colors` or `cc` to see the list of currently used color codes.
+* **Extended color codes**: Just like the `ls` command, CLiFM uses customizable color codes to identify file types and extensions. However, and unlike `ls`, CLiFM is also able to distinguish between empty and non-empty files or directories, broken and non-broken symlinks, files and directories with or without read permission, multi-hardlink files, and more. Once in CliFM, type `colors` or `cc` to see the list of currently used color codes.
 
 ![colors](images/colors.png)
 
@@ -63,9 +63,9 @@ where to search: `/.*.png /media/images`. And, if you want to further filter the
 
 * **Directory history map**: Keep in sight previous, current, and next entries in the directory history list for easiest and fastest navigation through visited directories.
 
-* **NEW: PLUGINS via custom actions**: Use custom action names, as if they were any other command, to run custom shell scripts and extend thus CliFM functionality to fit your needs. This is basically an easy way of building custom commands for CliFM.
+* **NEW: PLUGINS via custom actions**: Use custom action names, as if they were any other command, to run programs or scripts written in any language and extend thus CliFM functionality to fit your needs. This is basically an easy way of building custom commands for CliFM.
 
-* **NEW: Stealth mode:** Leave no trace on the host system.
+* **NEW: Stealth mode:** Leave no trace on the host system. No file is read, no file is written.
 
 * **NEW:** Quickly and easily navigate through the jump database (a list of visited directories and the amount of times each of them was visited) via the **autojump** function.
 
@@ -99,7 +99,7 @@ Because file manager, but also half-shell, CLiFM also provides the following fea
 * Archives and compression support (including Zstandard and ISO 9660)
 * Auto-cd and auto-open
 * Symlinks editor
-* Disk usage (**NEW**)
+* Disk usage
 * CD on quit, file picker (as shell functions) (**NEW**)
 * PDF reader, image/video previews, wallpaper setter, music playlist (plugins) (**NEW**)
 * Color schemes (**NEW**)
