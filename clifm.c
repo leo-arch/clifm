@@ -302,6 +302,8 @@ nm=01;32:bm=01;36:"
 #define DEF_NM_C "\001\x1b[01;32m\002"
 #define DEF_SI_C "\001\x1b[01;34m\002"
 
+#define DEF_DIR_ICO_C "\x1b[0;33m"
+
 /* Default options */
 #define DEF_SPLASH_SCREEN 0
 #define DEF_WELCOME_MESSAGE 1
@@ -771,6 +773,7 @@ struct param
 	int cd_on_quit;
 	int no_autojump;
 	int icons;
+	int icons_use_file_color;
 };
 
 struct param xargs;
@@ -950,7 +953,9 @@ char di_c[MAX_COLOR] = "", /* Directory */
 	em_c[MAX_COLOR + 2] = "", /* Error msg color */
 	wm_c[MAX_COLOR + 2] = "", /* Warning msg color */
 	nm_c[MAX_COLOR + 2] = "", /* Notice msg color */
-	si_c[MAX_COLOR + 2] = ""; /* stealth indicator color */
+	si_c[MAX_COLOR + 2] = "", /* stealth indicator color */
+
+	dir_ico_c[MAX_COLOR] = ""; /* Directories icon color */
 
 				/**
 				 * #############################
@@ -1593,6 +1598,7 @@ unset_xargs(void)
 	xargs.expand_bookmarks = xargs.only_dirs = UNSET;
 	xargs.list_and_quit = xargs.color_scheme = xargs.cd_on_quit = UNSET;
 	xargs.no_autojump = xargs.icons = UNSET;
+	xargs.icons_use_file_color = 0;
 }
 
 void
@@ -7817,6 +7823,8 @@ set_colors(char *colorscheme, int env)
 	char *filecolors = (char *)NULL, *extcolors = (char *)NULL,
 		 *ifacecolors = (char *)NULL;
 
+	memset(dir_ico_c, 0x00, MAX_COLOR);
+
 	/* Set a pointer to the current color scheme */
 	if (colorscheme && *colorscheme && color_schemes) {
 
@@ -7902,7 +7910,7 @@ set_colors(char *colorscheme, int env)
 			ssize_t line_len = 0;
 			size_t line_size = 0;
 			int file_type_found = 0, ext_type_found = 0,
-				iface_found = 0;
+				iface_found = 0, dir_icon_found = 0;
 
 			while ((line_len = getline(&line, &line_size,
 			fp_colors)) > 0) {
@@ -7976,7 +7984,23 @@ set_colors(char *colorscheme, int env)
 					free(color_line);
 				}
 
-				if (file_type_found && ext_type_found && iface_found)
+				/* Dir icons Color */
+				if (*line == 'D'
+				&& strncmp(line, "DirIconsColor=", 14) == 0) {
+					dir_icon_found = 1;
+					char *opt_str = strchr(line, '=');
+
+					if (!opt_str)
+						continue;
+
+					if (!*(++opt_str))
+						continue;
+
+					sprintf(dir_ico_c, "\x1b[%sm", opt_str); 
+				}
+
+				if (file_type_found && ext_type_found
+				&& iface_found && dir_icon_found)
 					break;
 			}
 
@@ -8763,6 +8787,9 @@ set_colors(char *colorscheme, int env)
 		strcpy(uf_c, DEF_UF_C);
 	if (!*mh_c)
 		strcpy(mh_c, DEF_MH_C);
+
+	if (!*dir_ico_c)
+		strcpy(dir_ico_c, DEF_DIR_ICO_C);
 
 	return EXIT_SUCCESS;
 }
@@ -15399,6 +15426,7 @@ external_arguments(int argc, char **argv)
 		{"cd-on-quit", no_argument, 0, 22},
 		{"no-autojump", no_argument, 0, 23},
 		{"icons", no_argument, 0, 24},
+		{"icons-use-file-color", no_argument, 0, 25},
 		{0, 0, 0, 0}
 	};
 
@@ -15538,6 +15566,10 @@ external_arguments(int argc, char **argv)
 
 		case 24:
 			xargs.icons = icons = 1;
+		break;
+
+		case 25:
+			xargs.icons_use_file_color = 1;
 		break;
 
 		case 'a':
@@ -17814,11 +17846,11 @@ list_dir(void)
 
 		int max = get_max_long_view(), eln_len_cur = 0, eln_len_bk = 0;
 
-//		eln_len = max_eln_digits;
 		eln_len = digits_in_num((int)files); /* This is max ELN length */
 		eln_len_bk = eln_len;
 
-		icon = ICON_REG;
+		icon = DEF_FILE_ICON;
+		icon_color = DEF_FILE_ICON_COLOR;
 
 		for (i = 0; i < (int)files; i++) {
 
@@ -18069,8 +18101,13 @@ list_dir(void)
 			}
 
 			else {
-				if (icons)
+				if (icons) {
 					get_dir_icon(dirlist[i]);
+
+					/* If set from the color scheme file */
+					if (*dir_ico_c)
+						icon_color = dir_ico_c;
+				}
 
 				int is_oth_w = 0;
 
@@ -18226,23 +18263,25 @@ list_dir(void)
 		}
 		}
 
-		if (!icon_color || !*icon_color)
-			icon_color = df_c;
+/*		if (!icon_color || !*icon_color)
+			icon_color = df_c; */
+
+		if (xargs.icons_use_file_color)
+			icon_color = color;
 
 		if (is_dir) {
 
  			if (no_files_count)
 				printf("%s%d%s %s%s%c%s%s%s%s %s/%s%s", el_c, i + 1, df_c,
 					   icons ? icon_color : "", icons ? icon : "",
-					   icons ? 0x20 : 0, df_c,
-					   color, dirlist[i], df_c, dc_c, df_c,
-					   last_column ? "\n" : "");
+					   icons ? 0x20 : 0, df_c, color, dirlist[i],
+					   df_c, dc_c, df_c, last_column ? "\n" : "");
 
 			else
 				printf("%s%d%s %s%s%c%s%s%s%s %s/%zu%s%s", el_c, i + 1,
 					   df_c, icons ? icon_color : "",
-					   icons ? icon : "", icons
-					   ? 0x20 : 0, df_c, color, dirlist[i], df_c, dc_c,
+					   icons ? icon : "", icons ? 0x20 : 0,
+					   df_c, color, dirlist[i], df_c, dc_c,
 					   file_info[i].filesn - 2, df_c,
 					   last_column ? "\n" : "");
 		}
@@ -24036,6 +24075,9 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 		if (icons)
 			get_dir_icon(filename);
 
+		if (*dir_ico_c)
+			icon_color = dir_ico_c;
+
 		if (access(filename, R_OK|X_OK) != 0) {
 			color = nd_c;
 			icon = ICON_LOCK;
@@ -24162,6 +24204,9 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 
 		if (pad < 0)
 			pad = 0;
+
+		if (xargs.icons_use_file_color)
+			icon_color =  color;
 
 		printf("%s%s%c%s%s%s%-*s%s (%04o) %c/%c%c%c/%c%c%c/%c%c%c%s "
 				"%s %s %s %s\n", 
