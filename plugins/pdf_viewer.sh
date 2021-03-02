@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/bin/bash
 
 SUCCESS=0
 ERROR=1

@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/bin/bash
 
 # Drag and drop plugin for CLiFM
 # Written by L. Abramovich

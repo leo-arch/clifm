@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/bin/bash
 
 # Music player plugin for CliFM
 # Written by L. Abramovich

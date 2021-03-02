@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/bin/bash
 
 # Plugins to check for CliFM's updates
 # Written by L. Abramovich
