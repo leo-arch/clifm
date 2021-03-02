@@ -398,6 +398,7 @@ void create_tmp_files(void);
 void unset_xargs(void);
 void load_jumpdb(void);
 void save_jumpdb(void);
+void set_env(void);
 
 /* Memory management */
 char *xnmalloc(size_t nmemb, size_t size);
@@ -1362,6 +1363,8 @@ main(int argc, char **argv)
 
 	load_pinned_dir();
 
+	set_env();
+
 
 				/* ###########################
 				 * #   2) MAIN PROGRAM LOOP  #
@@ -1427,6 +1430,23 @@ main(int argc, char **argv)
 			/** #################################
 			 * #     FUNCTIONS DEFINITIONS     #
 			 * ################################# */
+
+void
+set_env(void)
+{
+	/* Set a few environment variables, mostly useful to run custom
+	 * scripts via the actions function */
+	/* CLIFM env variable is set to one when CliFM is running, so that
+	 * external programs can determine if they were spawned by CliFM */
+	setenv("CLIFM", "1", 1);
+
+	setenv("CLIFM_PROFILE", (alt_profile) ? alt_profile : "default", 1);
+
+	if (SEL_FILE)
+		setenv("CLIFM_SELFILE", SEL_FILE, 1);
+
+	return;
+}
 
 int
 add_to_jumpdb(char *dir)
@@ -2217,6 +2237,8 @@ reload_config(void)
 	/* Set the current poistion of the dirhist index to the last
 	 * entry */
 	dirhist_cur_index = dirhist_total_index - 1;
+
+	set_env();
 
 	return EXIT_SUCCESS;
 }
@@ -15249,32 +15271,24 @@ init_config(void)
 	 * external commands */
 	ls_colors_bk = getenv("LS_COLORS");
 
-	if (home_ok) {
+	if (!home_ok)
+		return;
 
-		define_config_file_names();
+	define_config_file_names();
 
-		create_config_files();
+	create_config_files();
 
-		if (config_ok)
-			read_config();
+	if (config_ok)
+		read_config();
 
-		/* "XTerm*eightBitInput: false" must be set in HOME/.Xresources
-		 * to make some keybindings like Alt+letter work correctly in
-		 * xterm-like terminal emulators */
-		/* However, there is no need to do this if using the linux console, 
-		 * since we are not in a graphical environment */
-		if ((flags & GRAPHICAL)
-		&& strncmp(getenv("TERM"), "xterm", 5) == 0)
-			edit_xresources();
-	}
-
-	/* Set a few environment variables, mostly useful to run custom
-	 * scripts via the actions function */
-	/* CLIFM env variable is set to one when CliFM is running, so that
-	 * external programs can determine if they were spawned by CliFM */
-	setenv("CLIFM", "1", 1);
-	setenv("CLIFM_PROFILE", (alt_profile) ? alt_profile : "default", 1);
-/*	setenv("CLIFM_IMG_VIEWER", img_viewer ? img_viewer : "", 1); */
+	/* "XTerm*eightBitInput: false" must be set in HOME/.Xresources
+	 * to make some keybindings like Alt+letter work correctly in
+	 * xterm-like terminal emulators */
+	/* However, there is no need to do this if using the linux console, 
+	 * since we are not in a graphical environment */
+	if ((flags & GRAPHICAL)
+	&& strncmp(getenv("TERM"), "xterm", 5) == 0)
+		edit_xresources();
 }
 
 void
