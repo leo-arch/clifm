@@ -29,13 +29,13 @@ With the \fBautomatic ELN expansion\fR feature you can use ELN's with external c
 .sp
   \fBh)\fR The \fBquick search\fR function makes it really easy to quickly find the files you are looking for: just enter a slash followed by the string or regular expression you want (ex: '/myfile' or '/.*\.png'), that's all.
 .sp
-  \fBi)\fR \fBPlugins\fR: Build your own custom commands using shell scripts. Just drop a shell script in the scripts directory, tell CLiFM to use this script via a custom action name, and use it as any other command.
+  \fBi)\fR \fBPlugins\fR: Build your own custom commands using executable files (shell scripts or binaries). Just drop an executable file (all languages are supported) in the scripts directory, tell CLiFM to use this executable file via a custom action name, and use it as any other command.
 .sp
-  \fBj)\fR It is blazing \fBfast\fR and incredibly \fBlightweigth\fR. With a memory footprint below 5 MiB and a disk usage of 400 KiB, it can run on really old hardware. It is so simple that it doesn't require an X session nor any graphical environment at all, being able thus to perfectly run on the console (TTY) and even on a headless machine via a SSH or a telnet session. And if this is not enough, you can still use the light mode to make it even faster.
+  \fBj)\fR It is blazing \fBfast\fR and incredibly \fBlightweigth\fR. With a memory footprint below 5 MiB and a disk usage of 400 KiB, it can run on really old hardware. It is so simple that it doesn't require an X session nor any graphical environment at all, being able thus to perfectly run on the console (TTY) and even on a headless machine via a SSH or a telnet session. And if this is not enough, you can still use the \fBlight mode\fR to make it even faster.
 .sp
   \fBi)\fR When running in \fBstealth mode\fR, it will leave not trace at all in the host system.
 .sp
-Because inspired in Arch Linux and its \fBKISS\fR principle, CliFM is fundamentally aimed to be lightweight, fast, and simple. On Arch's notion of simplcity see: \fIhttps://wiki.archlinux.org/index.php/Arch_Linux#Simplicity\fR
+Because inspired in the \fBKISS\fR principle, CliFM is fundamentally aimed to be lightweight, fast, and simple. On Archlinux' notion of simplcity see: \fIhttps://wiki.archlinux.org/index.php/Arch_Linux#Simplicity\fR
 
 List of CliFM features:
 
@@ -897,14 +897,14 @@ CliFM returns the exit status of the last executed command:
 .TP
 
 .B CONFIGURATION FILE
-The configuration file is \fI$XDG_CONFIG_HOME/clifm/PROFILE/clifmrc\fR.
+The configuration file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/clifmrc\fR.
 Here you can permanently set up CliFM options, add aliases and some prompt commands (which will be executed immediately before each new prompt line). Just recall that in order to use prompt commands you must allow the use of external commands. See the \-x option and the 'ext' command above.
 .sp
 A description for each option in the configuration file can be found in the configuration file itself.
 .TP
 
 .B PROFILE FILE
-The profile file is \fI$XDG_CONFIG_HOME/clifm/PROFILE/clifm_profile\fR.
+The profile file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/profile.cfm\fR.
 In this file you can add those commands you want to be executed at startup. You can also permanently set here some custom variables, ex: 'dir="/path/to/folder"'. This variable may be used as a shorcut to that folder, for instance: 'cd $dir'. Custom variables could also be temporarily defined via the command prompt: Ex: user@hostname ~ $ var="This is a test". Temporary variables will be removed at program exit.
 .TP
 
@@ -913,42 +913,42 @@ The keybindings file is \fI$XDG_CONFIG_HOME/clifm/keybindings\fR. This file is u
 .TP
 
 .B SCRIPTS DIRECTORY
-The directory used for action scripts is \fI$XDG_CONFIG_HOME/clifm/PROFILE/scripts\fR.
+The directory used to store programs or scripts pointed to by actions (in other words, plugins) is \fI$XDG_CONFIG_HOME/clifm/scripts\fR.
 .TP
 
 .B COLORS DIRECTORY
-This directory, \fI$XDG_CONFIG_HOME/clifm/PROFILE/colors\fR, contains available color schemes as files with a .cfm extension. You can create as many color schemes as you want by just dropping them in this directory. The default color scheme file (default.cfm) could be used as a guide.
+This directory, \fI$XDG_CONFIG_HOME/clifm/colors\fR, contains available color schemes as files with a .cfm extension. You can create as many color schemes as you want by just dropping them in this directory. The default color scheme file (default.cfm) could be used as a guide.
 .TP
 
 .B ACTIONS FILE
-The file used to define custom actions is \fI$XDG_CONFIG_HOME/clifm/PROFILE/actions.cfm\fR.
+The file used to define custom actions is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/actions.cfm\fR.
 .TP
 
 .B MIMELIST FILE:
-The mime list file is \fI$XDG_CONFIG_HOME/clifm/PROFILE/mimelist.cfm\fR. It is a list of filetypes and file extensions and their associated applications used by \fIlira\fR.
+The mime list file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/mimelist.cfm\fR. It is a list of filetypes and file extensions and their associated applications used by \fIlira\fR.
 .TP
 
 .B BOOKMARKS FILE
-The bookmarks file is \fI$XDG_CONFIG_HOME/clifm/PROFILE/bookmarks.cfm\fR
+The bookmarks file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/bookmarks.cfm\fR
 Just the list of the user's bookmarks used by the bookmarks function.
 .TP
 
 .SH HISTORY FILE
-The history file is \fI~/.config/clifm/PROFILE/history.cfm\fR.
+The history file is \fI~/.config/clifm/profiles/PROFILE/history.cfm\fR.
 A list of commands entered by the user and used by the history function.
 .TP
 
 .B COMMANDS LOG FILE
-The commands log file is \fI$XDG_CONFIG_HOME/clifm/PROFILE/log.cfm\fR.
+The commands log file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/log.cfm\fR.
 The file contains a series of fields separated by a colon in the following way: 'date:user:current_dir:command. All commands executed as external will be logged.
 .TP
 
 .B MESSAGES LOG FILE
-The messages log file is \fI$XDG_CONFIG_HOME/clifm/PROFILE/messages.cfm\fR.
+The messages log file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/messages.cfm\fR.
 A file containing a list of system messages, either errors, warnings, or simple notices. The messages log format is: "[date] message".
 .TP
 
-\fBNOTE\fR: If \fB$XDG_CONFIG_HOME\fR is not set, \fB$HOME/.config/\fR is used instead. 
+\fBNOTE\fR: If \fB$XDG_CONFIG_HOME\fR is not set, \fB$HOME/.config/\fR is used instead.
 
 .SH CONFORMING TO
 CLiFM is C99 compliant, and, if compiled with the _BE_POSIX flag, it is POSIX.1-2008 conformant as well. If not, only two non-POSIX functions are used: \fBstatx(2)\fR (Linux specific), to get files birth time, and \fBstrverscmp(3)\fR (a GNU extension), to list files by version.
