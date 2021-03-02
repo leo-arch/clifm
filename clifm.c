@@ -302,7 +302,7 @@ nm=01;32:bm=01;36:"
 #define DEF_NM_C "\001\x1b[01;32m\002"
 #define DEF_SI_C "\001\x1b[01;34m\002"
 
-#define DEF_DIR_ICO_C "\x1b[0;33m"
+#define DEF_DIR_ICO_C "\x1b[00;33m"
 
 /* Default options */
 #define DEF_SPLASH_SCREEN 0
@@ -1065,7 +1065,7 @@ main(int argc, char **argv)
 
 	/* Register the function to be called at normal exit, either via
 	 * exit() or main's return. The registered function will not be
-	 * executed when abnormally exiting the program, eg., via the KILL
+	 * executed when abnormally exiting the program, e.g., via the KILL
 	 * signal */
 	atexit(free_stuff);
 
@@ -1094,7 +1094,7 @@ main(int argc, char **argv)
 	if (!user) {
 		user = (char *)xnmalloc(4, sizeof(char));
 		strcpy(user, "???\0");
-		_err('w', PRINT_PROMPT, _("%s: Error getting username\n"), 
+		_err('e', PRINT_PROMPT, _("%s: Error getting username\n"), 
 			 PROGRAM_NAME);
 	}
 
@@ -1188,6 +1188,7 @@ main(int argc, char **argv)
 	}
 
 	get_aliases();
+
 	get_prompt_cmds();
 
 	get_sel_files();
@@ -1201,7 +1202,7 @@ main(int argc, char **argv)
 	/* Get hostname */
 	if (gethostname(hostname, sizeof(hostname)) == -1) {
 		strcpy(hostname, "???");
-		_err('w', PRINT_PROMPT, _("%s: Error getting hostname\n"),
+		_err('e', PRINT_PROMPT, _("%s: Error getting hostname\n"),
 			 PROGRAM_NAME);
 	}
 
@@ -1222,7 +1223,7 @@ main(int argc, char **argv)
 		if (stat(HIST_FILE, &file_attrib) == 0
 		&& file_attrib.st_size != 0) {
 		/* If the size condition is not included, and in case of a zero
-		 * size file, read_history() gives malloc errors */
+		 * size file, read_history() produces malloc errors */
 			/* Recover history from the history file */
 			read_history(HIST_FILE); /* This line adds more leaks to
 			readline */
@@ -1332,19 +1333,12 @@ main(int argc, char **argv)
 
 		path = (char *)xcalloc(strlen(cwd) + 1, sizeof(char));
 		strcpy(path, cwd);
-
-		add_to_dirhist(path);
-
-		if (cd_lists_on_the_fly)
-			list_dir();
 	}
 
-	else {
-		add_to_dirhist(path);
+	add_to_dirhist(path);
 
-		if (cd_lists_on_the_fly)
-			list_dir();
-	}
+	if (cd_lists_on_the_fly)
+		list_dir();
 
 	/* Get the list of available applications in PATH to be used by my
 	 * custom TAB-completion function */
@@ -2188,6 +2182,8 @@ reload_config(void)
 		only_dirs = xargs.only_dirs;
 	if (xargs.tips != UNSET)
 		tips = xargs.tips;
+	if (xargs.icons != UNSET)
+		icons = xargs.icons;
 
 	/* Free the aliases and prompt_cmds arrays to be allocated again */
 
@@ -2198,7 +2194,6 @@ reload_config(void)
 
 	old_pwd = (char **)NULL;
 
-/** #################################### */
 	if (jump_db) {
 		for (i = 0; jump_db[i].path; i++)
 			free(jump_db[i].path);
@@ -2208,7 +2203,6 @@ reload_config(void)
 	}
 
 	jump_n = 0;
-/** #################################### */
 
 	for (i = 0; i < aliases_n; i++)
 		free(aliases[i]);
@@ -2224,9 +2218,7 @@ reload_config(void)
 
 	load_dirhist();
 
-/** #################################### */
 	load_jumpdb();
-/** #################################### */
 
 	/* Set the current poistion of the dirhist index to the last
 	 * entry */
@@ -6226,10 +6218,10 @@ profile_add(char *prof)
 
 	size_t pnl_len = strlen(PNL);
 	/* ### GENERATE PROGRAM'S CONFIG DIRECTORY NAME ### */
-	char *NCONFIG_DIR = (char *)xcalloc(user_home_len + pnl_len 
+	char *NCONFIG_DIR = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) 
 										+ strlen(prof) + 11,
 										sizeof(char));
-	sprintf(NCONFIG_DIR, "%s/.config/%s/%s", user_home, PNL, prof);
+	sprintf(NCONFIG_DIR, "%s/profiles/%s", CONFIG_DIR_GRAL, prof);
 
 	/* #### CREATE THE CONFIG DIR #### */
 	char *tmp_cmd[] = { "mkdir", "-p", NCONFIG_DIR, NULL }; 
@@ -6392,9 +6384,9 @@ profile_del(char *prof)
 		return EXIT_FAILURE;
 	}
 
-	char *tmp = (char *)xcalloc(user_home_len + strlen(PNL)
+	char *tmp = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL)
 								+ strlen(prof) + 11, sizeof(char));
-	sprintf(tmp, "%s/.config/%s/%s", user_home, PNL, prof);
+	sprintf(tmp, "%s/profiles/%s", CONFIG_DIR_GRAL, prof);
 
 	char *cmd[] = { "rm", "-r", tmp, NULL };
 	int ret = launch_execve(cmd, FOREGROUND);
@@ -8011,6 +8003,27 @@ set_colors(char *colorscheme, int env)
 
 					if (!*(++opt_str))
 						continue;
+
+					if (*opt_str == '\'' || *opt_str == '"')
+						opt_str++;
+
+					if (!*opt_str)
+						continue;
+
+					int nl_removed = 0;
+					if (line[line_len - 1] == '\n') {
+						line[line_len - 1] = 0x00;
+						nl_removed = 1;
+					}
+
+					int end_char = line_len - 1;
+
+					if (nl_removed)
+						end_char--;
+
+					if (line[end_char] == '\''
+					|| line[end_char] == '"')
+						line[end_char] = 0x00;
 
 					sprintf(dir_ico_c, "\x1b[%sm", opt_str); 
 				}
@@ -13701,9 +13714,9 @@ my_rl_completion(const char *text, int start, int end)
 int
 get_profile_names(void)
 {
-	char *pf_dir = (char *)xcalloc(user_home_len + strlen(PNL) + 10,
+	char *pf_dir = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) + 10,
 								   sizeof(char));
-	sprintf(pf_dir, "%s/.config/%s", user_home, PNL);
+	sprintf(pf_dir, "%s/profiles", CONFIG_DIR_GRAL);
 
 	struct dirent **profs = (struct dirent **)NULL;
 	int files_n = scandir(pf_dir, &profs, NULL, xalphasort);
@@ -13720,7 +13733,7 @@ get_profile_names(void)
 
 		if (profs[i]->d_type == DT_DIR
 		/* Discard ".", "..", and hidden dirs */
-		&& strncmp(profs[i]->d_name, ".", 1) != 0) {
+		&& *profs[i]->d_name != '.') {
 			profile_names = (char **)xrealloc(profile_names, (pf_n + 1)
 											  * sizeof(char *));
 			profile_names[pf_n] = (char *)xcalloc(strlen(profs[i]->d_name)
@@ -13998,7 +14011,9 @@ create_def_cscheme(void)
 
 "# Same as FiletypeColors, but for file extensions. The format is always\n\
 # *.EXT=COLOR\n"
-"ExtColors=\"%s\"\n",
+"ExtColors=\"%s\"\n\n"
+
+"DirIconsColor=\"00;33\"\n",
 			DEF_FILE_COLORS, DEF_IFACE_COLORS, DEF_EXT_COLORS);
 
 	fclose(fp);
@@ -14042,15 +14057,15 @@ define_config_file_names(void)
 	if (alt_profile) {
 		CONFIG_DIR = (char *)xcalloc(config_gral_len
 							 + strlen(alt_profile)
-							 + 2, sizeof(char));
-		sprintf(CONFIG_DIR, "%s/%s", CONFIG_DIR_GRAL,
+							 + 11, sizeof(char));
+		sprintf(CONFIG_DIR, "%s/profiles/%s", CONFIG_DIR_GRAL,
 				alt_profile);
 	}
 
 	else {
-		CONFIG_DIR = (char *)xcalloc(config_gral_len + 9,
+		CONFIG_DIR = (char *)xcalloc(config_gral_len + 18,
 								sizeof(char));
-		sprintf(CONFIG_DIR, "%s/default", CONFIG_DIR_GRAL);
+		sprintf(CONFIG_DIR, "%s/profiles/default", CONFIG_DIR_GRAL);
 	}
 
 	if (alt_kbinds_file) {
