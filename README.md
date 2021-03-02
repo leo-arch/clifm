@@ -113,7 +113,8 @@ Insofar as it is heavily inspired by Arch Linux and its KISS principle, CLiFM is
 
 ## Dependencies:
 
-`glibc` and `coreutils`, of course, but also `libcap`, `acl`, `file`, and `readline`. For archers: All these dependenciess are part of the `core` reposiroty. In Debian systems two packages must be installed before compilation: `libcap-dev` and `libreadline-dev`. In Fedora based systems you need `libcap-devel` and `readline-devel`. Optional dependencies: `sshfs`, `curlftpfs`, and `cifs-utils` (for remote filesystems support), and `atool`, `archivemount`, `genisoimage`, `p7zip`, and `cdrtools` (for archiving and compression support).
+`glibc` and `coreutils`, of course, but also `libcap`, `acl`, `file`, and `readline`. For Archlinux users, all these dependenciess are part of the `core` reposiroty. In Debian systems two packages must be installed before compilation: `libcap-dev` and `libreadline-dev`. In Fedora based systems you need `libcap-devel` and `readline-devel`.
+Optional dependencies: `sshfs`, `curlftpfs`, and `cifs-utils` (for remote filesystems support), and `atool`, `archivemount`, `genisoimage`, `p7zip`, and `cdrtools` (for archiving and compression support).
 
 ## Compiling and Running CliFM:
 
@@ -183,11 +184,11 @@ ClifM is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag).
 
 ## First steps
 
-Try `help` command to learn more about CliFM. Once in the CliFM prompt, type `help` or `?`:
+Try the `help` command to learn more about CliFM. Once in the CliFM prompt, type `help` or `?`:
 
 	12:12 user:hostname /etc
 	:) $ help
 
-To jumtp into the COMMANDS section in the manpage, simply enter `cmd`.
+To jump into the COMMANDS section in the manpage, simply enter `cmd`.
 
 Just try it and let me know. It gets better and better. I myself use it as my main, and indeed only, file manager; it couldn't be so bad, isn't it?
