@@ -1129,20 +1129,11 @@ main(int argc, char **argv)
 		 * specified (-P option), it sets the value of alt_profile, which
 		 * is then checked by init_config */
 
-	/* If not in stealth mode, initialize program paths and files, set
-	 * options from the config file, if they were not already set via
-	 * external arguments, and load sel elements, if any. All these
-	 * configurations are made per user basis */
-	if (xargs.stealth_mode != 1)
-		init_config();
-
-	else {
-		_err(0, PRINT_PROMPT, _("%s: Running in stealth mode: trash, "
-			 "persisent selection and directory history, just as "
-			 "bookmarks, logs and configuration files, are "
-			 "disabled.\n"), PROGRAM_NAME);
-		config_ok = 0;
-	}
+	/* Initialize program paths and files, set options from the config
+	 * file, if they were not already set via external arguments, and
+	 * load sel elements, if any. All these configurations are made
+	 * per user basis */
+	init_config();
 
 	check_options();
 
@@ -1434,6 +1425,9 @@ main(int argc, char **argv)
 void
 set_env(void)
 {
+	if (xargs.stealth_mode == 1)
+		return;
+
 	/* Set a few environment variables, mostly useful to run custom
 	 * scripts via the actions function */
 	/* CLIFM env variable is set to one when CliFM is running, so that
@@ -15267,6 +15261,18 @@ init_config(void)
 /* Set up CliFM directories and config files. Load the user's 
  * configuration from clifmrc */
 {
+	if (xargs.stealth_mode == 1) {
+
+		_err(0, PRINT_PROMPT, _("%s: Running in stealth mode: trash, "
+			 "persisent selection and directory history, just as "
+			 "bookmarks, logs and configuration files, are "
+			 "disabled.\n"), PROGRAM_NAME);
+
+		config_ok = 0;
+
+		return;
+	}
+
 	/* Store a pointer to the current LS_COLORS value to be used by
 	 * external commands */
 	ls_colors_bk = getenv("LS_COLORS");
