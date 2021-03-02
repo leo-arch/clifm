@@ -3,7 +3,7 @@
 pkgname=clifm-git
 _pkgname=clifm
 pkgver=0.29.2
-pkgrel=1
+pkgrel=2
 pkgdesc="The KISS file manager: cli-based, ultra-lightweight, and lightning fast (development version)"
 arch=(any)
 url="https://github.com/leo-arch/clifm"
@@ -36,7 +36,7 @@ package() {
   cd "$srcdir/$_pkgname"
   install -Dm755 "$_pkgname" "$pkgdir/usr/bin/$_pkgname"
   install -g 0 -o 0 -Dm644 manpage "$pkgdir/usr/share/man/man1/${_pkgname}.1"
-  gzip "$pkgdir/usr/share/man/man1/$_pkgname.1"
+  gzip -9n "$pkgdir/usr/share/man/man1/$_pkgname.1"
   install -g 0 -o 0 -Dm644 "${_pkgname}.desktop" "$pkgdir/usr/share/applications/${_pkgname}.desktop"
   install -g 0 -o 0 -Dm644 completions.bash "$pkgdir/usr/share/bash-completion/completions/${_pkgname}"
   install -g 0 -o 0 -Dm644 "translations/spanish/${_pkgname}.mo" "$pkgdir/usr/share/locale/es/LC_MESSAGES/${_pkgname}.mo"
