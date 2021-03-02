@@ -850,7 +850,7 @@ If speed is still an issue, try one of the setups below (listed from slower to f
 .TP
 \fBa)\fR Default mode (all listing features enabled)
 .TP
-\fBb)\fR Default mode with sorting method set to "none" (sorting files could be expensive).
+\fBb)\fR Default mode with sorting method set to "none" (sorting files could be expensive). Needless to say, if icons are enabled, disable them.
 .TP
 \fBc)\fR Default mode with FilesCounter option disabled (the files counter function could be quite time consuming, since every directory needs to be accessed via \fBreaddir(3)\fR to get the amount of files it contains)
 .TP
@@ -879,10 +879,13 @@ Same as above, but for different element of ClIFM's interface
 Except when running in stealth mode, CliFM sets the following environment variables:
 .TP
 .B CLIFM
-This variable is set to 1 to let other programs know they were spawned from CliFM
+This variable is set to 1 to let other programs know they were spawned by CliFM
 .TP
 .B CLIFM_PROFILE
 This variable is set to the current profile of CliFM. Specially useful  to develop CLiFM plugins on a per profile basis.
+.TP
+.B CLIFM_SELFILE
+The path to the current selection file.
 
 .SH EXIT STATUS
 CliFM returns the exit status of the last executed command:
