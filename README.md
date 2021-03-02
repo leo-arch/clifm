@@ -114,6 +114,7 @@ Insofar as it is heavily inspired by Arch Linux and its KISS principle, CLiFM is
 ## Dependencies:
 
 `glibc` and `coreutils`, of course, but also `libcap`, `acl`, `file`, and `readline`. For Archlinux users, all these dependenciess are part of the `core` reposiroty. In Debian systems two packages must be installed before compilation: `libcap-dev` and `libreadline-dev`. In Fedora based systems you need `libcap-devel` and `readline-devel`.
+
 Optional dependencies: `sshfs`, `curlftpfs`, and `cifs-utils` (for remote filesystems support), and `atool`, `archivemount`, `genisoimage`, `p7zip`, and `cdrtools` (for archiving and compression support).
 
 ## Compiling and Running CliFM:
