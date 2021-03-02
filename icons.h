@@ -30,6 +30,7 @@ char
 	ICON_NASM[4] = "\ue8d5",
 	ICON_JAVA[4] = "\uede3",
 	ICON_JAVASCRIPT[4] = "\uede6",
+	ICON_SQLITE[4] = "\ue840",
 	ICON_ELF[4] = "\ue23a",
 	ICON_HTML[4] = "\ue282",
 	ICON_GO[4] = "\uedd0",
@@ -198,6 +199,7 @@ struct icons_t icon_ext[] = {
 	{ "lha", ICON_ARCHIVE, YELLOW },
 	{ "log", ICON_TXT, WHITE },
 	{ "lua", ICON_LUA, WHITE },
+	{ "lz4", ICON_ARCHIVE, YELLOW },
 	{ "lzh", ICON_ARCHIVE, YELLOW },
 	{ "lzma", ICON_ARCHIVE, YELLOW },
 
@@ -243,6 +245,7 @@ struct icons_t icon_ext[] = {
 	{ "sh", ICON_SCRIPT, WHITE },
 	{ "slim", ICON_CODE, WHITE },
 	{ "sql", ICON_MYSQL, WHITE },
+	{ "sqlite", ICON_SQLITE, WHITE },
 	{ "svg", ICON_IMG, GREEN },
 
 	{ "tar", ICON_ARCHIVE, YELLOW },
