@@ -28,7 +28,7 @@ CliFM is a completely command-line-based, shell-like file manager able to perfor
 
 * The use of **short (and even one-character) commands**, and list numbers (**ELN's**) for filenames. For example, instead of typing: `cp file1 file2 file3 file4 dir/`, you can do this: `c 1-4 7`. Shorter and quicker. If the auto-cd and auto-open functions are enabled, which is the default, you can change to directories or open files by just entering the corresponding ELN. So, instead of `cd 12` or `o 12` you can just enter `12`; even shorter and quicker. As a plus, ELN's can also be used with external commands. Example: `diff 1 5` or `ls -l 12 14`. If numbers are a bit tricky to you, as they are to me, you can use the TAB key to expand the ELN to the corresponding filename. So, type `r 56`, then TAB, and it becomes `r filename`.
 
-* **Bookmarks**: With CLiFM bookmarks function, accessing your preferred files and/or directories be as easy as this: `bm` (or `Alt-b`), to call the bookmarks function, and then `1` (or whatever is the number corresponding to your bookmark).
+* **Bookmarks**: With CLiFM bookmarks function, accessing your preferred files and/or directories could be as easy as this: `bm` (or `Alt-b`), to call the bookmarks function, and then `1` (or whatever is the number corresponding to your bookmark).
 
 ![bookmarks](images/bookmarks.png)
 
@@ -42,7 +42,7 @@ Of course, you can deselect some or all selected files whenever you want with th
 
 ![selection box](images/sel_box.png)
  
- * Open files without the need to specify any program. Via `mime` (the **built-in resource opener**), if no program was specified, CliFM will open the file with the default program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background. Of course, you can also set a custom resource opener.
+ * Open files without the need to specify any program. Via `lira` (the **built-in resource opener**), if no program was specified, CliFM will open the file with the default program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background. Of course, you can also set a custom resource opener.
 
 * **Quick search**: type `/REGEX` and CliFM will list all matches for the corresponding REGEX pattern. Example: `/.*\.png$`
  will list all the PNG files in the current directory. If you want to 
@@ -84,7 +84,7 @@ Because file manager, but also half-shell, CLiFM also provides the following fea
 * TAB-completion for commands, paths, ELN's, profiles, bookmarks, color schemes, and the autojump function
 * Bash-like quoting system
 * History function
-* Shell commands execution 
+* Shell commands execution
 * Aliases
 * Logs
 * Prompt and profile commands
@@ -101,7 +101,7 @@ Because file manager, but also half-shell, CLiFM also provides the following fea
 * Symlinks editor
 * Disk usage
 * CD on quit, file picker (as shell functions) (**NEW**)
-* PDF reader, image/video previews, wallpaper setter, music playlist (plugins) (**NEW**)
+* PDF reader, image/video previews, wallpaper setter, music playlist, updates check, and drag and drop (plugins) (**NEW**)
 * Color schemes (**NEW**)
 
 **NOTE:** By default, CliFM ships only one color scheme, but more are provided by [clifm-colors](https://github.com/leo-arch/clifm-colors). The package is also available in the [AUR](https://aur.archlinux.org/packages/clifm-colors-git).
@@ -109,7 +109,7 @@ Because file manager, but also half-shell, CLiFM also provides the following fea
 Finally, all CLiFM options could be handled directly via command line, by passing parameters to the program, or via plain
 text configuration files, located in `$XDG_CONFIG_HOME/clifm/`.
 
-Insofar as it is heavily inspired by Arch Linux and its KISS principle, CLiFM is fundamentally aimed to be lightweight, fast, and simple. And if you think it's not fast enough, you can always try the **light mode** to make it even faster.
+Insofar as it is heavily inspired by the KISS principle, CLiFM is fundamentally aimed to be lightweight, fast, and simple. And if you think it's not fast enough, you can always try the **light mode** to make it even faster.
 
 ## Dependencies:
 
