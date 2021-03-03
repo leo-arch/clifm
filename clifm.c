@@ -17597,9 +17597,12 @@ list_dir(void)
 	if (total == -1) {
 
 		if (cd_lists_on_the_fly) {
-			_err('e', PRINT_PROMPT, "%s: '%s': %s\n",
-				 PROGRAM_NAME, path, strerror(errno));
+
+			char err_path[PATH_MAX];
+			strcpy(err_path, path);
 			cd_function(old_pwd[--dirhist_cur_index]);
+			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+					err_path, strerror(errno));
 		}
 
 		else
