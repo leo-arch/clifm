@@ -464,8 +464,8 @@ int rl_sort_previous(int count, int key);
 int rl_paste_sel(int count, int key);
 
 /* Scandir filters */
-int skip_implied_dot(const struct dirent *entry);
-int skip_nonexec(const struct dirent *entry);
+int skip_implied_dot(const struct dirent *ent);
+int skip_nonexec(const struct dirent *ent);
 
 /* Parsing */
 char *home_tilde(const char *new_path);
@@ -614,7 +614,7 @@ int create_usr_var(char *str);
 void splash(void);
 void version_function(void);
 void bonus_function(void);
-void colors_list(const char *entry, const int i, const int pad,
+void colors_list(const char *ent, const int i, const int pad,
 				 const int new_line);
 int hidden_function(char **comm);
 void help_function(void);
@@ -628,7 +628,7 @@ void print_div_line(void);
 
 /* Checks */
 char *get_cmd_path(const char *cmd);
-size_t count_dir(const char *dir_path);
+int count_dir(const char *dir_path);
 off_t dir_size(char *dir);
 void file_cmd_check(void);
 int get_max_long_view(void);
@@ -838,13 +838,13 @@ int max_hist = UNSET, max_log = UNSET, max_dirhist = UNSET,
 
 	dirhist_cur_index = 0, argc_bk = 0, exit_code = 0,
 	shell_is_interactive = 0, cont_bt = 0, sort_types = 9,
-	total = 0, dirhist_total_index = 0;
+	total = 0, dirhist_total_index = 0, trash_n = 0;
 
 int *eln_as_file = (int *)0;
 
 unsigned short term_cols = 0;
 
-size_t user_home_len = 0, args_n = 0, sel_n = 0, trash_n = 0, msgs_n = 0,
+size_t user_home_len = 0, args_n = 0, sel_n = 0, msgs_n = 0,
 	   prompt_cmds_n = 0, path_n = 0, current_hist_n = 0, usrvar_n = 0,
 	   aliases_n = 0, longest = 0, files = 0, eln_len = 0, actions_n = 0,
 	   ext_colors_n = 0, kbinds_n = 0, eln_as_file_n = 0,
@@ -7775,7 +7775,7 @@ get_colorschemes(void)
 	if (stat(COLORS_DIR, &attr) == -1)
 		return 0;
 
-	size_t schemes_total = count_dir(COLORS_DIR);
+	int schemes_total = count_dir(COLORS_DIR);
 
 	if (schemes_total <= 2)
 		return 0;
@@ -7786,16 +7786,16 @@ get_colorschemes(void)
 	size_t i = 0;
 
 	DIR *dir_p;
-	struct dirent *entry;
+	struct dirent *ent;
 
 	/* count_dir already opened and read this directory succesfully,
 	 * so that we don't need to check opendir for errors */
 	dir_p = opendir(COLORS_DIR);
 
-	while ((entry = readdir(dir_p)) != NULL) {
+	while ((ent = readdir(dir_p)) != NULL) {
 
 		/* Skipp . and .. */
-		char *name = entry->d_name;
+		char *name = ent->d_name;
 
 		if (*name == '.' && (!name[1]
 		|| (name[1] == '.' && !name[2])))
@@ -10060,21 +10060,21 @@ recur_perm_check(const char *dirname)
  * write/execute permissions */
 {
 	DIR *dir;
-	struct dirent *entry;
+	struct dirent *ent;
 
 	if (!(dir = opendir(dirname)))
 		return EXIT_FAILURE;
 
-	while ((entry = readdir(dir)) != NULL) {
+	while ((ent = readdir(dir)) != NULL) {
 
-		if (entry->d_type == DT_DIR) {
+		if (ent->d_type == DT_DIR) {
 			char dirpath[PATH_MAX] = "";
 
-			if (strcmp(entry->d_name, ".") == 0 
-					|| strcmp(entry->d_name, "..") == 0)
+			if (*ent->d_name == '.' && (!ent->d_name[1]
+			|| (ent->d_name[1] == '.' && !ent->d_name[2])))
 				continue;
 
-			snprintf(dirpath, PATH_MAX, "%s/%s", dirname, entry->d_name);
+			snprintf(dirpath, PATH_MAX, "%s/%s", dirname, ent->d_name);
 
 			if (access(dirpath, W_OK|X_OK) != 0) {
 				/* recur_perm_error_flag needs to be a global variable.
@@ -10160,7 +10160,7 @@ wx_parent_check(char *file)
 
 		/* Check the parent for appropriate permissions */
 		else if (access(parent, W_OK|X_OK) == 0) {
-			size_t files_n = count_dir(parent);
+			int files_n = count_dir(parent);
 
 			if (files_n > 2) {
 				/* I manually check here subdir because recur_perm_check() 
@@ -10210,7 +10210,7 @@ wx_parent_check(char *file)
 
 	/* REGULAR FILE */
 	case S_IFREG:
-		ret=check_immutable_bit(file);
+		ret = check_immutable_bit(file);
 
 		if (ret == -1) {
 			/* Error message is printed by check_immutable_bit()
@@ -10476,16 +10476,20 @@ remove_from_trash(void)
 
 	if (files_n) {
 		printf(_("%sTrashed files%s\n\n"), bold, df_c);
+
 		for (i = 0; i < (size_t)files_n; i++)
 			colors_list(trash_files[i]->d_name, (int)i + 1, NO_PAD,
 						PRINT_NEWLINE);
 	}
+
 	else {
 		puts(_("trash: There are no trashed files"));
+
 		if (chdir(path) == -1) { /* Restore CWD and return */
 			_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n",
 				 PROGRAM_NAME, path, strerror(errno));
 		}
+
 		return EXIT_SUCCESS;
 	}
 
@@ -13203,7 +13207,7 @@ my_rl_path_completion(const char *text, int state)
 	static char *users_dirname = (char *)NULL;
 	static size_t filename_len;
 	static int match, ret;
-	struct dirent *entry = (struct dirent *)NULL;
+	struct dirent *ent = (struct dirent *)NULL;
 	static int exec = 0, exec_path = 0;
 	static char *dir_tmp = (char *)NULL;
 	static char tmp[PATH_MAX] = "";
@@ -13319,26 +13323,26 @@ my_rl_path_completion(const char *text, int state)
 	/* ############### COMPLETION FILTER ################## */
 	/*         This is the heart of the function           */
  
-	while (directory && (entry = readdir(directory))) {
+	while (directory && (ent = readdir(directory))) {
 
 		/* If the user entered nothing before TAB (ex: "cd [TAB]") */
 		if (!filename_len) {
 
 			/* Exclude "." and ".." as possible completions */
-			if ((strcmp(entry->d_name, ".") != 0)
-			&& (strcmp(entry->d_name, "..") != 0)) {
+			if ((strcmp(ent->d_name, ".") != 0)
+			&& (strcmp(ent->d_name, "..") != 0)) {
 
 				/* If 'cd', match only dirs or symlinks to dir */
 				if (strncmp(rl_line_buffer, "cd ", 3) == 0) {
 					ret = -1;
 
-					switch (entry->d_type) {
+					switch (ent->d_type) {
 					case DT_LNK:
 						if (dirname[0] == '.' && !dirname[1])
-							ret = get_link_ref(entry->d_name);
+							ret = get_link_ref(ent->d_name);
 						else {
 							snprintf(tmp, PATH_MAX, "%s%s", dirname,
-									 entry->d_name);
+									 ent->d_name);
 							ret = get_link_ref(tmp);
 						}
 
@@ -13360,16 +13364,16 @@ my_rl_path_completion(const char *text, int state)
 				else if (strncmp(rl_line_buffer, "o ", 2) == 0
 				|| strncmp(rl_line_buffer, "open ", 5) == 0) {
 					ret = -1;
-					switch (entry->d_type) {
+					switch (ent->d_type) {
 
 					case DT_LNK:
 
 						if (dirname[0] == '.' && !dirname[1])
-							ret = get_link_ref(entry->d_name);
+							ret = get_link_ref(ent->d_name);
 
 						else {
 							snprintf(tmp, PATH_MAX, "%s%s", dirname,
-									 entry->d_name);
+									 ent->d_name);
 							ret = get_link_ref(tmp);
 						}
 
@@ -13395,26 +13399,26 @@ my_rl_path_completion(const char *text, int state)
 				|| strncmp(rl_line_buffer, "tr ", 2) == 0
 				|| strncmp(rl_line_buffer, "trash ", 6) == 0) {
 
-					if (entry->d_type != DT_BLK && entry->d_type != DT_CHR)
+					if (ent->d_type != DT_BLK && ent->d_type != DT_CHR)
 						match = 1;
 				}
 
 				/* If "./", list only executable regular files */
 				else if (exec) {
 
-					if (entry->d_type == DT_REG 
-					&& access(entry->d_name, X_OK) == 0)
+					if (ent->d_type == DT_REG 
+					&& access(ent->d_name, X_OK) == 0)
 						match = 1;
 				}
 
 				/* If "/path/./", list only executable regular files */
 				else if (exec_path) {
 
-					if (entry->d_type == DT_REG) {
+					if (ent->d_type == DT_REG) {
 						/* dir_tmp is dirname less "./", already
 						 * allocated before the while loop */
 						snprintf(tmp, PATH_MAX, "%s%s", dir_tmp,
-								 entry->d_name);
+								 ent->d_name);
 
 						if (access(tmp, X_OK) == 0)
 							match = 1;
@@ -13432,21 +13436,21 @@ my_rl_path_completion(const char *text, int state)
 		else {
 			/* Check if possible completion match up to the length of
 			 * filename. */
-			if ((entry->d_name[0] == filename[0])
-			&& ((strlen(entry->d_name)) >= filename_len)
-			&& (strncmp(filename, entry->d_name, filename_len) == 0)) {
+			if ((ent->d_name[0] == filename[0])
+			&& ((strlen(ent->d_name)) >= filename_len)
+			&& (strncmp(filename, ent->d_name, filename_len) == 0)) {
 
 				if (strncmp(rl_line_buffer, "cd ", 3) == 0) {
 					ret = -1;
-					switch (entry->d_type) {
+					switch (ent->d_type) {
 					case DT_LNK:
 
 						if (dirname[0] == '.' && !dirname[1])
-							ret = get_link_ref(entry->d_name);
+							ret = get_link_ref(ent->d_name);
 
 						else {
 							snprintf(tmp, PATH_MAX, "%s%s", dirname,
-									 entry->d_name);
+									 ent->d_name);
 							ret = get_link_ref(tmp);
 						}
 
@@ -13467,7 +13471,7 @@ my_rl_path_completion(const char *text, int state)
 				else if (strncmp(rl_line_buffer, "o ", 2) == 0
 				|| strncmp(rl_line_buffer, "open ", 5) == 0) {
 					ret = -1;
-					switch (entry->d_type) {
+					switch (ent->d_type) {
 					case DT_REG:
 					case DT_DIR:
 						match = 1;
@@ -13476,12 +13480,12 @@ my_rl_path_completion(const char *text, int state)
 					case DT_LNK:
 
 						if (dirname[0] == '.' && !dirname [1]) {
-							ret = get_link_ref(entry->d_name);
+							ret = get_link_ref(ent->d_name);
 						}
 
 						else {
 							snprintf(tmp, PATH_MAX, "%s%s", dirname,
-									 entry->d_name);
+									 ent->d_name);
 							ret = get_link_ref(tmp);
 						}
 
@@ -13499,23 +13503,23 @@ my_rl_path_completion(const char *text, int state)
 				|| strncmp(rl_line_buffer, "tr ", 3) == 0
 				|| strncmp(rl_line_buffer, "trash ", 6) == 0) {
 
-					if (entry->d_type != DT_BLK
-					&& entry->d_type != DT_CHR)
+					if (ent->d_type != DT_BLK
+					&& ent->d_type != DT_CHR)
 						match = 1;
 				}
 
 				else if (exec) {
 
-					if (entry->d_type == DT_REG
-					&& access(entry->d_name, X_OK) == 0)
+					if (ent->d_type == DT_REG
+					&& access(ent->d_name, X_OK) == 0)
 						match = 1;
 				}
 
 				else if (exec_path) {
 
-					if (entry->d_type == DT_REG) {
+					if (ent->d_type == DT_REG) {
 						snprintf(tmp, PATH_MAX, "%s%s", dir_tmp,
-								 entry->d_name);
+								 ent->d_name);
 						if (access(tmp, X_OK) == 0)
 							match = 1;
 					}
@@ -13538,7 +13542,7 @@ my_rl_path_completion(const char *text, int state)
 	/* readdir() returns NULL on reaching the end of directory stream.
 	 * So that if entry is NULL, we have no matches */
 
-	if (!entry) { /* == !match */
+	if (!ent) { /* == !match */
 		if (directory) {
 			closedir(directory);
 			directory = (DIR *)NULL;
@@ -13572,7 +13576,7 @@ my_rl_path_completion(const char *text, int state)
 			if (rl_complete_with_tilde_expansion
 			&& *users_dirname == '~') {
 				size_t dirlen = strlen(dirname);
-				temp = (char *)xcalloc(dirlen + strlen(entry->d_name)
+				temp = (char *)xcalloc(dirlen + strlen(ent->d_name)
 									   + 2, sizeof(char));
 				strcpy(temp, dirname);
 				/* Canonicalization cuts off any final slash present.
@@ -13586,15 +13590,15 @@ my_rl_path_completion(const char *text, int state)
 
 			else {
 				  temp = (char *)xcalloc(strlen(users_dirname) + 
-										 strlen(entry->d_name) 
+										 strlen(ent->d_name) 
 										 + 1, sizeof(char));
 				  strcpy(temp, users_dirname);
 			}
-			strcat(temp, entry->d_name);
+			strcat(temp, ent->d_name);
 		}
 
 		else
-			temp = savestring(entry->d_name, strlen(entry->d_name));
+			temp = savestring(ent->d_name, strlen(ent->d_name));
 
 		return (temp);
 	}
@@ -13631,7 +13635,7 @@ my_rl_completion(const char *text, int start, int end)
 		&& (matches = rl_completion_matches(text,
 					  &bookmarks_generator)));
 
-		/* If neither autocd nor auto-open, ttry to complete with
+		/* If neither autocd nor auto-open, try to complete with
 		 * command names */
 		else
 			matches = rl_completion_matches(text, &bin_cmd_generator);
@@ -13870,7 +13874,7 @@ filenames_generator(const char *text, int state)
 {
 	static size_t i;
 	char *name;
-	rl_filename_completion_desired=1;
+	rl_filename_completion_desired = 1;
 	/* According to the GNU readline documention: "If it is set to a
 	 * non-zero value, directory names have a slash appended and
 	 * Readline attempts to quote completed filenames if they contain
@@ -13884,7 +13888,8 @@ filenames_generator(const char *text, int state)
 
 	/* Check list of currently displayed files for a match */
 	while (i < files && (name = dirlist[i++]) != NULL)
-		if (strcmp(name, dirlist[num_text-1]) == 0)
+		if (*name == *dirlist[num_text - 1]
+		&& strcmp(name, dirlist[num_text - 1]) == 0)
 			return strdup(name);
 
 	return (char *)NULL;
@@ -14090,10 +14095,6 @@ define_config_file_names(void)
 
 	SCRIPTS_DIR = (char *)xnmalloc(config_gral_len + 9, sizeof(char));
 	sprintf(SCRIPTS_DIR, "%s/scripts", CONFIG_DIR_GRAL);
-
-/*	free(CONFIG_DIR_GRAL);
-	CONFIG_DIR_GRAL = (char *)NULL; */
-
 
 	TRASH_DIR = (char *)xcalloc(user_home_len + 20, sizeof(char));
 	sprintf(TRASH_DIR, "%s/.local/share/Trash", user_home);
@@ -14458,6 +14459,7 @@ read_config(void)
 		 * set here */
 		else if (xargs.splash == UNSET && *line == 'S'
 		&& strncmp(line, "SplashScreen=", 13) == 0) {
+
 			char opt_str[MAX_BOOL] = ""; /* false (5) + 1 */
 			ret = sscanf(line, "SplashScreen=%5s\n", opt_str);
 			/* According to cppcheck: "sscanf() without field 
@@ -14497,8 +14499,10 @@ read_config(void)
 
 		else if (xargs.light == UNSET && *line == 'L'
 		&& strncmp(line, "LightMode=", 10) == 0) {
+
 			char opt_str[MAX_BOOL] = "";
 			ret = sscanf(line, "LightMode=%5s\n", opt_str);
+
 			if (ret == -1)
 				continue;
 
@@ -14511,8 +14515,10 @@ read_config(void)
 
 		else if (xargs.cd_on_quit == UNSET && *line == 'C'
 		&& strncmp(line, "CdOnQuit=", 9) == 0) {
+
 			char opt_str[MAX_BOOL] = "";
 			ret = sscanf(line, "CdOnQuit=%5s\n", opt_str);
+
 			if (ret == -1)
 				continue;
 
@@ -14526,6 +14532,7 @@ read_config(void)
 		else if (xargs.expand_bookmarks == UNSET
 		&& *line == 'E'
 		&& strncmp(line, "ExpandBookmarks=", 16) == 0) {
+
 			char opt_str[MAX_BOOL] = "";
 			ret = sscanf(line, "ExpandBookmarks=%5s\n",
 						 opt_str);
@@ -14565,6 +14572,7 @@ read_config(void)
 				continue;
 
 			char *tmp = remove_quotes(opt_str);
+
 			if (!tmp) {
 				free(opt_str);
 				continue;
@@ -16820,7 +16828,7 @@ parse_input_str(char *str)
 		 * #   			 5) REGEX EXPANSION  		   # 
 		 * ############################################# */
 		
-	char **regex_files = (char **)xnmalloc(files + args_n + 1,
+	char **regex_files = (char **)xnmalloc(files + args_n + 2,
 										sizeof(char *));
 
 	size_t j, r_files = 0;
@@ -16865,7 +16873,7 @@ parse_input_str(char *str)
 		}
 
 		if (!reg_found)
-			regex_files[r_files++] = substr[i];	
+			regex_files[r_files++] = substr[i];
 
 		regfree(&regex);
 	}
@@ -17022,7 +17030,7 @@ prompt(void)
 
 	/* Update trash and sel file indicator on every prompt call */
 	if (trash_ok) {
-		trash_n = (size_t)count_dir(TRASH_FILES_DIR);
+		trash_n = count_dir(TRASH_FILES_DIR);
 
 		if (trash_n <= 2)
 			trash_n = 0;
@@ -17099,8 +17107,9 @@ prompt(void)
 	 * be printed in place by log_msg() itself, without waiting for
 	 * the next prompt */
 	if (print_msg) {
-		for (i = 0; i < (size_t)msgs_n; i++)
-			fputs(messages[i], stderr);
+/*		for (i = 0; i < (size_t)msgs_n; i++)
+			fputs(messages[i], stderr); */
+		fputs(messages[msgs_n - 1], stderr);
 
 		print_msg = 0; /* Print messages only once */
 	}
@@ -17145,39 +17154,18 @@ prompt(void)
 	return input;
 }
 
-/*
- * int count_dir(const char *dir_path) //Scandir version
-// Count the amount of elements contained in a directory. Receives the
-// path to the directory as argument.
-{
-	int files_n=0;
-	struct dirent **dirlist_n=NULL;
-	files_n=scandir(dir_path, &dirlist_n, NULL, alphasort);
-	if (files_n >= 0) { //this includes implied . and ..
-		for (int i=0;i<files_n;i++) free(dirlist_n[i]);
-		free(dirlist_n);
-	}
-	else if (files_n == -1 && errno == ENOMEM) {
-		fprintf(stderr, "CliFM: scandir: Out of memory!\n");
-		exit(EXIT_FAILURE);
-	}
-	return files_n;
-}*/
-
-size_t
+int
 count_dir(const char *dir_path) /* Readdir version */
 {
-	if (!dir_path)
-		return 0;
+/*	if (!dir_path)
+		return 0; */
 
-	struct stat file_attrib;
+/*	struct stat file_attrib;
 
 	if (lstat(dir_path, &file_attrib) == -1)
-		return -1;
+		return -1; */
 
-	size_t file_count = 0;
 	DIR *dir_p;
-	struct dirent *entry;
 
 	if ((dir_p = opendir(dir_path)) == NULL) {
 		if (errno == ENOMEM)
@@ -17186,7 +17174,10 @@ count_dir(const char *dir_path) /* Readdir version */
 			return -1;
 	}
 
-	while ((entry = readdir(dir_p))) 
+	int file_count = 0;
+	struct dirent *ent;
+
+	while ((ent = readdir(dir_p))) 
 		file_count++;
 
 	closedir(dir_p);
@@ -17204,24 +17195,31 @@ int count_dir(const char *dir_path) //Getdents version
 		unsigned short  d_reclen;
 		char           	 d_name[];
 	};
+
 	int fd;
 	char buf[BUF_SIZE];
 	struct linux_dirent *d;
 	int bpos;
 
-	fd=open(dir_path, O_RDONLY | O_DIRECTORY);
+	fd = open(dir_path, O_RDONLY | O_DIRECTORY);
+
 	if (fd == -1) { perror("open"); return -1; }
 
 	size_t files_n=0;
+
 //	int nread;
+
 	for ( ; ; ) {
-		int nread=syscall(SYS_getdents, fd, buf, BUF_SIZE);
+		int nread = syscall(SYS_getdents, fd, buf, BUF_SIZE);
+
 		if (nread == -1) { perror("syscall"); return -1; }
+
 		if (nread == 0) break;
+
 		for (bpos=0; bpos < nread;) {
-			d=(struct linux_dirent *)(buf + bpos);
+			d = (struct linux_dirent *)(buf + bpos);
 			files_n++;
-			bpos+=d->d_reclen;
+			bpos += d->d_reclen;
 		}
 	}
 	close(fd);
@@ -17229,16 +17227,16 @@ int count_dir(const char *dir_path) //Getdents version
 }*/
 
 int
-skip_nonexec(const struct dirent *entry)
+skip_nonexec(const struct dirent *ent)
 {
-	if (access(entry->d_name, R_OK) == -1)
+	if (access(ent->d_name, R_OK) == -1)
 		return 0;
 
 	return 1;
 }
 
 int
-skip_implied_dot(const struct dirent *entry)
+skip_implied_dot(const struct dirent *ent)
 {
 	/* In case a directory isn't reacheable, like a failed
 	 * mountpoint... */
@@ -17251,21 +17249,21 @@ skip_implied_dot(const struct dirent *entry)
 	} */
 
 	/* Skip "." and ".." */
-	if (*entry->d_name == '.' && (!entry->d_name[1]
-	|| (entry->d_name[1] == '.' && !entry->d_name[2])))
+	if (*ent->d_name == '.' && (!ent->d_name[1]
+	|| (ent->d_name[1] == '.' && !ent->d_name[2])))
 		return 0;
 
 	/* If not hidden files */
-	if (!show_hidden && *entry->d_name == '.')
+	if (!show_hidden && *ent->d_name == '.')
 		return 0;
 
 	/* Do not show files ending with tilde */
 	if (!show_bk_files) {
 		size_t len;
 
-		for (len = 0; entry->d_name[len]; len++);
+		for (len = 0; ent->d_name[len]; len++);
 
-		if (entry->d_name[len - 1] == '~')
+		if (ent->d_name[len - 1] == '~')
 			return 0;
 	}
 
@@ -17273,7 +17271,7 @@ skip_implied_dot(const struct dirent *entry)
 }
 
 void
-colors_list(const char *entry, const int i, const int pad, 
+colors_list(const char *ent, const int i, const int pad, 
 			const int new_line)
 /* Print ENTRY using color codes and I as ELN, right padding PAD
  * chars and terminating ENTRY with or without a new line char (NEW_LINE
@@ -17298,11 +17296,11 @@ colors_list(const char *entry, const int i, const int pad,
 
 	struct stat file_attrib;
 	int ret = 0;
-	ret = lstat(entry, &file_attrib);
+	ret = lstat(ent, &file_attrib);
 
 	if (ret == -1) {
 		fprintf(stderr, "%s%s%s%s%-*s%s%s", el_c, index, df_c,
-				uf_c, pad, entry, df_c, new_line ? "\n" : "");
+				uf_c, pad, ent, df_c, new_line ? "\n" : "");
 		free(index);
 		return;
 	}
@@ -17319,7 +17317,7 @@ colors_list(const char *entry, const int i, const int pad,
 
 	case S_IFREG:
 
-		if (access(entry, R_OK) == -1) color = nf_c;
+		if (access(ent, R_OK) == -1) color = nf_c;
 
 		else if (file_attrib.st_mode & S_ISUID) /* set uid file */
 			color = su_c;
@@ -17329,7 +17327,7 @@ colors_list(const char *entry, const int i, const int pad,
 
 		else {
 			#ifdef _LINUX_CAP
-			cap = cap_get_file(entry);
+			cap = cap_get_file(ent);
 
 			if (cap) {
 				color = ca_c;
@@ -17354,7 +17352,7 @@ colors_list(const char *entry, const int i, const int pad,
 				color = mh_c;
 
 			else {
-				char *ext = (strrchr(entry, '.'));
+				char *ext = (strrchr(ent, '.'));
 
 				if (ext) {
 					char *extcolor = get_ext_color(ext);
@@ -17375,7 +17373,7 @@ colors_list(const char *entry, const int i, const int pad,
 
 	case S_IFDIR:
 
-		if (access(entry, R_OK|X_OK) != 0)
+		if (access(ent, R_OK|X_OK) != 0)
 			color = nd_c;
 
 		else {
@@ -17384,7 +17382,7 @@ colors_list(const char *entry, const int i, const int pad,
 			if (file_attrib.st_mode & S_IWOTH)
 				is_oth_w = 1;
 
-			size_t files_dir = count_dir(entry);
+			int files_dir = count_dir(ent);
 
 			color = (file_attrib.st_mode & S_ISVTX) ? (is_oth_w
 					? tw_c : st_c) : (is_oth_w ? ow_c :
@@ -17398,7 +17396,7 @@ colors_list(const char *entry, const int i, const int pad,
 		break;
 
 	case S_IFLNK:
-		linkname = realpath(entry, (char *)NULL);
+		linkname = realpath(ent, (char *)NULL);
 
 		if (linkname) {
 			color = ln_c;
@@ -17422,7 +17420,7 @@ colors_list(const char *entry, const int i, const int pad,
 	}
 
 	printf("%s%s%s%s%s%s%s%-*s", el_c, index, df_c, color,
-		   entry, df_c, new_line ? "\n" : "", pad, "");
+		   ent, df_c, new_line ? "\n" : "", pad, "");
 
 	free(index);
 }
@@ -17430,11 +17428,13 @@ colors_list(const char *entry, const int i, const int pad,
 void
 free_dirlist(void)
 {
-	while (total--)
-		free(tmp_dirlist[total]);
+	if (total > 0) {
+		while (total--)
+			free(tmp_dirlist[total]);
 
-	free(tmp_dirlist);
-	tmp_dirlist = (struct dirent **)NULL;
+		free(tmp_dirlist);
+		tmp_dirlist = (struct dirent **)NULL;
+	}
 
 	if (files) {
 		free(file_info);
@@ -17595,8 +17595,17 @@ list_dir(void)
 	}
 
 	if (total == -1) {
-		_err('e', PRINT_PROMPT, "%s: scandir: '%s': %s\n",
-			 PROGRAM_NAME, path, strerror(errno));
+
+		if (cd_lists_on_the_fly) {
+			_err('e', PRINT_PROMPT, "%s: '%s': %s\n",
+				 PROGRAM_NAME, path, strerror(errno));
+			cd_function(old_pwd[--dirhist_cur_index]);
+		}
+
+		else
+			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, path,
+					strerror(errno));
+
 		if (errno == ENOMEM)
 			exit(EXIT_FAILURE);
 		else
@@ -18203,7 +18212,9 @@ list_dir(void)
 		case S_IFREG: {
 			char *ext = (char *)NULL;
 
-			if (access(dirlist[i], F_OK|R_OK) == -1) {
+			/* Do not perform the access check if the user is root */
+			if (!(flags & ROOT_USR)
+			&& access(dirlist[i], F_OK|R_OK) == -1) {
 				color = nf_c;
 				icon = ICON_LOCK;
 				icon_color = YELLOW;
@@ -18245,7 +18256,7 @@ list_dir(void)
 			else if (ext_colors_n) {
 
 				ext = strrchr(dirlist[i], '.');
-				/* Make sure not to take a hidden file for an
+				/* Make sure not to take a hidden file for a file
 				 * extension */
 
 				if (ext && ext != dirlist[i]) {
@@ -18424,7 +18435,7 @@ list_dir_light(void)
 
 	/* Get the list of files in CWD according to sorting method
 	 * 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime,
-	 * 5 = ctime, 6 = mtime, 7 = version */
+	 * 5 = ctime, 6 = mtime, 7 = version, 8 = ext, 9 = inode */
 	switch(sort) {
 		case 0:
 			total = scandir(path, &tmp_dirlist, skip_implied_dot, NULL);
@@ -18489,8 +18500,17 @@ list_dir_light(void)
 	}
 
 	if (total == -1) {
-		_err('e', PRINT_PROMPT, "%s: scandir: '%s': %s\n",
-			 PROGRAM_NAME, path, strerror(errno));
+
+		if (cd_lists_on_the_fly) {
+			_err('e', PRINT_PROMPT, "%s: '%s': %s\n",
+				 PROGRAM_NAME, path, strerror(errno));
+			cd_function(old_pwd[--dirhist_cur_index]);
+		}
+
+		else
+			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, path,
+					strerror(errno));
+
 		if (errno == ENOMEM)
 			exit(EXIT_FAILURE);
 		else
@@ -19378,9 +19398,12 @@ cschemes_function(char **args)
 		}
 
 		size_t i;
+
 		for (i = 0; color_schemes[i]; i++) {
+
 			if (cur_cscheme == color_schemes[i])
 				printf("%s%s%s\n", mi_c, color_schemes[i], df_c);
+
 			else
 				printf("%s\n", color_schemes[i]);
 		}
@@ -19413,8 +19436,6 @@ cschemes_function(char **args)
 			if (mtime_bfr != attr.st_mtime
 			&& set_colors(cur_cscheme, 0) == EXIT_SUCCESS
 			&& cd_lists_on_the_fly) {
-
-				puts("here");
 
 				free_dirlist();
 				list_dir();
@@ -20214,8 +20235,6 @@ exec_cmd(char **comm)
 			puts(_("Usage: icons [on, off]"));
 
 		else if (*comm[1] == 'o' && comm[1][1] == 'n' && !comm[1][2]) {
-//			printf(_("%s: Icons enabled\n"), PROGRAM_NAME);
-
 			icons = 1;
 
 			if (cd_lists_on_the_fly) {
@@ -20225,7 +20244,6 @@ exec_cmd(char **comm)
 		}
 
 		else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
-//			printf(_("%s: Icons disabled\n"), PROGRAM_NAME);
 			icons = 0;
 
 			if (cd_lists_on_the_fly) {
@@ -24125,7 +24143,7 @@ get_properties (char *filename, int _long, int max, size_t filename_len)
 
 			if (file_attrib.st_mode & S_IWOTH) is_oth_w = 1;
 
-			size_t files_dir = count_dir(filename);
+			int files_dir = count_dir(filename);
 
 			color = sticky ? (is_oth_w ? tw_c : st_c)
 				: is_oth_w ? ow_c : 
