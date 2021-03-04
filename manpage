@@ -629,6 +629,8 @@ same as \fIquit\fR, but enabling the CD on quit functionality.
 .TP
 \fBM\-d:\fR Deselect all selected files
 .TP
+\fBM\-n:\fR Find as you type with the help of Rofi
+.TP
 \fBM\-p:\fR Change to pinned directory
 .TP
 \fBM\-r:\fR Change to root directory
@@ -683,7 +685,9 @@ same as \fIquit\fR, but enabling the CD on quit functionality.
 .TP
 \fBF3:\fR List keybindings
 .TP
-\fBF8:\fR Edit the current color scheme file
+\fBF7:\fR Open the jump database file
+.TP
+\fBF8:\fR Open the current color scheme file
 .TP
 \fBF9:\fR Open the keybindings file
 .TP
