@@ -5,6 +5,11 @@
 			 *  ######################################## */
 
 /*
+ *  GPL2+ License
+ * 
+ * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
+ * All rights reserved.
+
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -152,11 +157,11 @@ in FreeBSD, but is deprecated */
 /* If no formatting, puts (or write) is faster than printf */
 /* #define CLEAR puts("\x1b[c") "\x1b[2J\x1b[1;1H"*/
 #define CLEAR write(STDOUT_FILENO, "\033c", 3);
-//#define CLEAR puts("\x1b[2J\x1b[1;1H");
-//#define CLEAR write(STDOUT_FILENO, "\x1b[2J\x1b[3J\x1b[H", 11);
-//#define CLEAR puts("\x1b[1;1H\x1b[2J");
-//#define CLEAR puts("\x1b[H\x1b[J");
-//#define CLEAR write(STDOUT_FILENO, "\x1b[2J\x1b[H", 7);
+/* #define CLEAR puts("\x1b[2J\x1b[1;1H");
+* #define CLEAR write(STDOUT_FILENO, "\x1b[2J\x1b[3J\x1b[H", 11);
+* #define CLEAR puts("\x1b[1;1H\x1b[2J");
+* #define CLEAR puts("\x1b[H\x1b[J");
+* #define CLEAR write(STDOUT_FILENO, "\x1b[2J\x1b[H", 7); */
 #define VERSION "0.29.2"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
@@ -425,6 +430,7 @@ char *my_rl_quote(char *text, int m_t, char *qp);
 int quote_detector(char *line, int index);
 int is_quote_char(char c);
 char *jump_generator(const char *text, int state);
+char *jump_entries_generator(const char *text, int state);
 char *cschemes_generator(const char *text, int state);
 char *filenames_generator(const char *text, int state);
 char *bin_cmd_generator(const char *text, int state);
@@ -794,7 +800,8 @@ enum prog_msg
 enum jump {
 	none = 0,
 	jparent = 1,
-	jchild = 2
+	jchild = 2,
+	jorder = 4
 };
 
 /* pmsg holds the current program message type */
@@ -13644,7 +13651,7 @@ my_rl_completion(const char *text, int start, int end)
 	/* Second word or more */
 	else {
 
-				/* #### ELN EXPANSION ### */
+			/* #### ELN AND JUMP ORDER EXPANSION ### */
 
 		/* Perform this check only if the first char of the string to be 
 		 * completed is a number in order to prevent an unnecessary call
@@ -13653,14 +13660,25 @@ my_rl_completion(const char *text, int start, int end)
 
 			int num_text = atoi(text);
 
-			if (is_number(text) && num_text > 0
+					/* Autojump: jo command */
+			if (*rl_line_buffer == 'j' && rl_line_buffer[1] == 'o'
+			&& rl_line_buffer[2] == 0x20) {
+				if (is_number(text) && num_text > 0
+				&& num_text <= jump_n) {
+					matches = rl_completion_matches(text,
+							  &jump_entries_generator);
+				}
+			}
+
+					/* ELN expansion */
+			else if (is_number(text) && num_text > 0
 			&& num_text <= (int)files)
 				matches = rl_completion_matches(text,
 						  &filenames_generator);
 		}
 
 				/* ### AUTOJUMP COMPLETION ### */
-
+					/* j, jc, jp commands */
 		else if (*rl_line_buffer == 'j' && (rl_line_buffer[1] == 0x20
 		|| ((rl_line_buffer[1] == 'c' || rl_line_buffer[1] == 'p')
 		&& rl_line_buffer[2] == 0x20)
@@ -13760,6 +13778,8 @@ get_profile_names(void)
 
 char *
 jump_generator(const char *text, int state)
+/* Expand string into matching path in the jump database. Used by
+ * j, jc, and jp commands */
 {
 	static int i;
 	char *name;
@@ -13792,6 +13812,28 @@ jump_generator(const char *text, int state)
 		if (strstr(name, text))
 			return strdup(name);
 	}
+
+	return (char *)NULL;
+}
+
+char *
+jump_entries_generator(const char *text, int state)
+/* Expand jump order number into the corresponding path. Used by the
+ * jo command */
+{
+	static size_t i;
+	char *name;
+
+	if (!state)
+		i=0;
+
+	int num_text = atoi(text);
+
+	/* Check list of jump entries for a match */
+	while (i <= jump_n && (name = jump_db[i++].path) != NULL)
+		if (*name == *jump_db[num_text - 1].path
+		&& strcmp(name, jump_db[num_text - 1].path) == 0)
+			return strdup(name);
 
 	return (char *)NULL;
 }
@@ -16403,10 +16445,11 @@ parse_input_str(char *str)
 		 * ELN happens to be a program name as well, this program will
 		 * be executed, and this, for sure, is to be avoided */
 
-		/* The 'sort' command take digits as arguments. So, do not expand
-		 * ELN's in this case */
+		/* The 'sort' and jo commands take digits as arguments. So, do
+		 * not expand ELN's in this case */
 		if (strcmp(substr[0], "st") != 0
-		&& strcmp(substr[0], "sort") != 0) {
+		&& strcmp(substr[0], "sort") != 0
+		&& strcmp(substr[0], "jo") != 0) {
 
 			if (is_number(substr[i])) {
 
@@ -17598,9 +17641,18 @@ list_dir(void)
 
 		if (cd_lists_on_the_fly) {
 
+			/* Store current errno, since it could be modified by
+			 * cd_function */
+			int tmp_errno = errno;
+			/* Same thing for path */
 			char err_path[PATH_MAX];
+
 			strcpy(err_path, path);
+
 			cd_function(old_pwd[--dirhist_cur_index]);
+
+			errno = tmp_errno;
+
 			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
 					err_path, strerror(errno));
 		}
@@ -17819,7 +17871,7 @@ list_dir(void)
 				 * being not empty, no matter if they are empty or not or
 				 * if the user has read access or not. Disabling the
 				 * dir counter could be useful when listing files on a
-				 * remote server (or fi the hardware is too old), where
+				 * remote server (or if the hardware is too old), where
 				 * the listing process could become really slow */
 				file_info[i].ruser = 1;
 
@@ -18175,7 +18227,6 @@ list_dir(void)
 				}
 
 				else {
-
 					if (files_counter)
 						is_dir = 1;
 
@@ -19552,17 +19603,17 @@ autojump(char **args)
 	if (!args[1] && args[0][1] != 'e') {
 		size_t i;
 
-		printf("Visits\tDirectory\n");
+		printf("Order\tVisits\tDirectory\n");
 
 		for (i = 0; i < jump_n; i++) {
 
 			if (strcmp(path, jump_db[i].path) == 0) {
-				printf("  %zu\t%s%s%s \n", jump_db[i].visits,
-					   mi_c, jump_db[i].path, df_c);
+				printf("  %zu\t%zu\t%s%s%s \n", i + 1,
+					   jump_db[i].visits, mi_c, jump_db[i].path, df_c);
 			}
 
 			else
-				printf("  %zu\t%s \n", jump_db[i].visits,
+				printf("  %zu\t%zu\t%s \n", i + 1, jump_db[i].visits,
 					   jump_db[i].path);
 		}
 
@@ -19570,7 +19621,8 @@ autojump(char **args)
 	}
 
 	if (args[1] && *args[1] == '-' && strcmp(args[1], "--help") == 0) {
-		puts(_("Usage: j[c, p, e], jump [CHAR/STRING ...]"));
+		puts(_("Usage: j, jc [STRING ...], jp [STRING ...], "
+			 "je, jo [ORDER]], jump [e, edit] [STRING ...]"));
 		return EXIT_SUCCESS;
 	}
 
@@ -19588,6 +19640,8 @@ autojump(char **args)
 
 		case 'p': jump_opt = jparent; break;
 
+		case 'o': jump_opt = jorder; break;
+
 		case 'u':
 		case '\0':
 			jump_opt = none;
@@ -19596,10 +19650,46 @@ autojump(char **args)
 		default:
 			fprintf(stderr, "%s: '%c': Invalid option\n", PROGRAM_NAME,
 					args[0][1]);
-			fputs(_("Usage: j[c, p] jump [e, edit] [CHAR/STRING "
-				  "...]\n"), stderr);
+			fputs(_("Usage: j, jc [STRING ...], jp [STRING ...], "
+				  "je, jo [ORDER]], jump [e, edit] [STRING ...]\n"),
+				  stderr);
 			return EXIT_FAILURE;
 		break;
+	}
+
+	if (jump_opt == jorder) {
+
+		if (!args[1]) {
+			fputs(_("Usage: j, jc [STRING ...], jp [STRING ...], "
+				  "je, jo [ORDER]], jump [e, edit] [STRING ...]\n"),
+				  stderr);
+			return EXIT_FAILURE;
+		}
+
+		if (!is_number(args[1])) {
+			struct stat attr;
+
+			if (stat(args[1], &attr) != -1)
+				return cd_function(args[1]);
+
+			else {
+				fprintf(stderr, "%s: '%s': No such jump entry\n",
+						PROGRAM_NAME, args[1]);
+				return EXIT_FAILURE;
+			}
+		}
+
+		else {
+
+			int int_order = atoi(args[1]);
+			if (int_order <= 0 || int_order > jump_n) {
+				fprintf(stderr, _("%s: No such order number\n"),
+						PROGRAM_NAME);
+				return EXIT_FAILURE;
+			}
+
+			return cd_function(jump_db[int_order - 1].path);
+		}
 	}
 
 	/* If ARG is an actual directory, just cd into it */
@@ -19611,10 +19701,8 @@ autojump(char **args)
 	/* Jump into a visited directory using ARGS as filter(s) */
 	size_t i, j, match = 0;
 
-	char **matches = (char **)xnmalloc(dirhist_total_index + 1,
-									   sizeof(char *));
-	int *visits = (int *)xnmalloc(dirhist_total_index + 1,
-								  sizeof(int));
+	char **matches = (char **)xnmalloc(jump_n + 1, sizeof(char *));
+	int *visits = (int *)xnmalloc(jump_n + 1, sizeof(int));
 
 	for (i = 1; args[i]; i++) {
 
@@ -19902,7 +19990,7 @@ exec_cmd(char **comm)
 	/*       ############### AUTOJUMP ##################     */
 	else if (*comm[0] == 'j' && (!comm[0][1]
 	|| ((comm[0][1] == 'c' || comm[0][1] == 'p'
-	|| comm[0][1] == 'e') && !comm[0][2])
+	|| comm[0][1] == 'e' || comm[0][1] == 'o') && !comm[0][2])
 	|| strcmp(comm[0], "jump") == 0)) {
 		exit_code = autojump(comm);
 		return exit_code;
@@ -25357,7 +25445,9 @@ help_function (void)
  bm, bookmarks [a, add PATH] [d, del] [edit] [SHORTCUT or NAME]\n\
  o, open [ELN/FILE] [APPLICATION]\n\
  cd [ELN/DIR]\n\
- j[c, p, e], jump [e, edit] [CHAR/STRING ...]\n\
+ j, jc [STRING ...], jp [STRING ...], je, jo [ORDER]], jump [e, edit] \
+[STRING ...]\n\
+ j[c, p, e, o], jump [e, edit] [CHAR/STRING ...]\n\
  s, sel [ELN ELN-ELN FILE ... n] [REGEX [DIR]] [-filetype]\n\
  sb, selbox\n\
  ds, desel [*, a, all]\n\
