@@ -74,6 +74,8 @@ where to search: `/.*\.png$ /media/images`. And, if you want to further filter t
 
 * **NEW: Icons support** :smirk: (depends on the [icons-in-terminal](https://github.com/sebastiencs/icons-in-terminal) project)
 
+* **NEW: Find as you type**: Navigate the file system with the help of Rofi.
+
 1) [Install](https://github.com/sebastiencs/icons-in-terminal#installation) icons-in-terminal.
 2) Run CliFM with the `--icons` command line option, or, once in the program, enter `icons on`.
 
