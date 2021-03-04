@@ -72,6 +72,7 @@ List of CliFM features:
   31) Privacy oriented
   32) Built-in autojump function
   33) Icons support (depends on icons-in-terminal: \fIhttps://github.com/sebastiencs/icons-in-terminal\fR)
+  34) Find as you type (depends on Rofi)
 
 .SH RATIONALE
 When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the Linux built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There is no two without three".
@@ -285,6 +286,11 @@ TAB completion is available for this function.
 To reset or modify the jump database as you whish, simply open the jump file using the 'je', edit whatever needs to be edited, save changes, and close the editor.
 .TP
 
+.B +
+The plus key is used to invoke the find-as-you-type function. Enter '+' and a Rofi window (if installed) will be opened in dmenu mode listing files in the current directory: as you type, Rofi takes care of filtering the list of possible matches. Once a match is found (usually a few key presses are enough), press Enter to cd into the corresponding directory or to open the corresponding file.
+.sp
+CliFM uses Rofi's system configuration. To customize its appearance and behaviour consult Rofi's manpages (\fBrofi(1)\fR, \fBrofi-theme(5)\fR, and \fBrofi-theme-selector(1)\fR).
+.TP
 .B /\fRPATTERN [\-filetype] [DIR]
 this is the quick search function. Just type '/' followed by a glob or regular (or extended regular) expression, and CliFM will list all matches in the current working directory. For example, both '/*.pdf' and '/.pdf$' expressions will list all PDF files in the current working directory, the former using wildcards, and the second a regular expression. 
 .sp
