@@ -514,7 +514,7 @@ int alias_import(char *file);
 void exec_chained_cmds(char *cmd);
 int edit_function(char **comm);
 int edit_link(char *link);
-int export(char **files);
+char *export(char **filenames, int open);
 
 /* Selection */
 int save_sel(void);
@@ -1891,16 +1891,16 @@ quit:\\e[24~\n", PROGRAM_NAME);
 	return EXIT_SUCCESS;
 }
 
-int
-export(char **filenames)
+char *
+export(char **filenames, int open)
+/* Export files in CWD (if FILENAMES is NULL), or files in FILENAMES,
+ * into a temporary file. Return the address of this empt file if
+ * success (it must be freed) or NULL in case of error */
 {
-	if (!filenames)
-		return EXIT_FAILURE;
-
 	char *rand_ext = gen_rand_str(6);
 
 	if (!rand_ext)
-		return EXIT_FAILURE;
+		return (char *)NULL;
 	
 	char *tmp_file = (char *)xnmalloc(strlen(TMP_DIR) + 14,
 									 sizeof(char));
@@ -1911,24 +1911,53 @@ export(char **filenames)
 
 	if (!fp) {
 		free(tmp_file);
-		return EXIT_FAILURE;
+		return (char *)NULL;
 	}
 
 	size_t i;
-	for (i = 1; filenames[i]; i++) {
-		if (strcmp(filenames[i], ".") != 0
-		&& strcmp(filenames[i], "..") != 0)
+
+	/* If no argument, export files in CWD */
+	if (!filenames[1]) {
+		for (i = 0; dirlist[i]; i++)
+			fprintf(fp, "%s\n", dirlist[i]);
+
+	}
+
+	else {
+		for (i = 1; filenames[i]; i++) {
+			if (*filenames[i] == '.' && (!filenames[i][1]
+			|| (filenames[i][1] == '.' && !filenames[i][2])))
+				continue;
+
 			fprintf(fp, "%s\n", filenames[i]);
+		}
 	}
 
 	fclose(fp);
 
+	if (!open)
+		return tmp_file;
+
+	FILE *fp_err = fopen("/dev/null", "w");
+	int stderr_bk = dup(STDERR_FILENO); /* Save original stderr */
+	dup2(fileno(fp_err), STDERR_FILENO); /* Redirect stderr to
+	/dev/null */
+	fclose(fp_err);
+
 	char *cmd[] = { "mime", tmp_file, NULL };
-	int exit_status = mime_open(cmd);
 
-	free(tmp_file);
+	int ret = mime_open(cmd);
 
-	return exit_status;
+	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
+	close(stderr_bk);
+
+	if (ret == EXIT_SUCCESS)
+		return tmp_file;
+
+	else {
+		free(tmp_file);
+		return (char *)NULL;
+	}
 }
 
 int
@@ -19799,6 +19828,90 @@ autojump(char **args)
 }
 
 int
+find_as_you_type(void)
+{
+	if (!(flags & GRAPHICAL)) {
+		fprintf(stderr, _("%s: This function is only available for "
+				"graphical environments\n"), PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	/* Export files in CWD to a temporary file */
+	char *cmd[] = { "exp", NULL };
+	char *tmp_file = export(cmd, 0);
+
+	if (!tmp_file)
+		return EXIT_FAILURE;
+
+	/* Run rofi using the above list of files and store output
+	 * into a new temp file */
+
+	char *rand_ext = gen_rand_str(6);
+	if (!rand_ext)
+		return EXIT_FAILURE;
+
+	char cmd_out[23];
+	sprintf(cmd_out, "/tmp/clifm_rofi.%s", rand_ext);
+	free(rand_ext);
+
+	char *rofi_cmd[] = { "rofi", "-dmenu", "-p", PROGRAM_NAME,
+						 "-input", tmp_file, NULL };
+
+	FILE *fp = fopen(cmd_out, "w");
+	int stdout_bk = dup(STDOUT_FILENO); /* Save original stdout */
+	dup2(fileno(fp), STDOUT_FILENO); /* Redirect stdout to the desired
+	file */
+
+	fclose(fp);
+
+	if (launch_execve(rofi_cmd, FOREGROUND) != EXIT_SUCCESS) {
+		free(tmp_file);
+		dup2(stdout_bk, STDOUT_FILENO);
+		unlink(cmd_out);
+		return EXIT_FAILURE;
+	}
+
+	free(tmp_file);
+
+	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
+
+	/* Read rofi's output from file */
+	if (access(cmd_out, F_OK) != 0) {
+		unlink(cmd_out);
+		return EXIT_FAILURE;
+	}
+
+	fp = fopen(cmd_out, "r");
+
+	if (!fp) {
+		unlink(cmd_out);
+		return EXIT_FAILURE;
+	}
+
+	char line[PATH_MAX] = "";
+	fgets(line, sizeof(line), fp);
+
+	if (!*line) {
+		fclose(fp);
+		unlink(cmd_out);
+		/* User exited rofi by pressing ESC */
+		return EXIT_SUCCESS;
+	}
+
+	fclose(fp);
+
+	unlink(cmd_out);
+
+	size_t len = strlen(line);
+	if (line[len - 1] == '\n')
+		line[len - 1] = 0x00;
+
+	/* If everything is OK, open the file/dir */
+	char *args[] = { "o", line, NULL };
+	return open_function(args);
+}
+
+int
 exec_cmd(char **comm)
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
@@ -20364,16 +20477,30 @@ exec_cmd(char **comm)
 		return exit_code;
 	}
 
+	else if (*comm[0] == '+' && !comm[0][1]) {
+		exit_code = find_as_you_type();
+		return exit_code;
+	}
+
 	else if (*comm[0] == 'e' && (strcmp(comm[0], "exp") == 0
 	|| strcmp(comm[0], "export") == 0)) {
 
-		if (!comm[1] || strcmp(comm[1], "--help") == 0)
+		if (comm[1] && *comm[1] == '-'
+		&& strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: exp, export [FILE(s)]"));
+			return EXIT_SUCCESS;
+		}
 
-		else
-			exit_code = export(comm);
+		char *ret = export(comm, 0);
 
-		return exit_code;
+		if (ret) {
+			printf("Files imported to: %s\n", ret);
+			free(ret);
+			return EXIT_SUCCESS;
+		}
+
+		exit_code = EXIT_FAILURE;
+		return EXIT_FAILURE;
 	}
 
 	else if (*comm[0] == 'o' && strcmp(comm[0], "opener") == 0) {
@@ -25448,6 +25575,7 @@ help_function (void)
  j, jc [STRING ...], jp [STRING ...], je, jo [ORDER]], jump [e, edit] \
 [STRING ...]\n\
  j[c, p, e, o], jump [e, edit] [CHAR/STRING ...]\n\
+ + (find-as-you-type)\n\
  s, sel [ELN ELN-ELN FILE ... n] [REGEX [DIR]] [-filetype]\n\
  sb, selbox\n\
  ds, desel [*, a, all]\n\
