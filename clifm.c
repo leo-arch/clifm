@@ -1843,6 +1843,7 @@ root-dir2:\\e/\n\
 #root-dir3:\n\
 \n\
 pinned-dir:\\M-p\n\
+find-as-you-type:\\M-n\n\
 \n\
 # Help\n\
 # F1-3\n\
@@ -1880,6 +1881,7 @@ folders-first:\\M-f\n\
 selbox:\\M-s\n\
 lock:\\M-o\n\
 # F8-12\n\
+open-jump-db:\\e[18~\n\
 edit-color-scheme:\\e[19~\n\
 open-keybinds:\\e[20~\n\
 open-config:\\e[21~\n\
@@ -3258,6 +3260,7 @@ print_tips(int all)
 		"Switch between color schemes using the 'cs' command",
 		"Use the 'j' command to quickly navigate through visited "
 		"directories",
+		"Enter '+' to try the find-as-you-type function",
 		NULL
 	};
 
@@ -4067,7 +4070,8 @@ bulk_rename(char **args)
  * saved, modifications are printed on the screen and the user is
  * asked whether to perform the actual bulk renaming (via mv) or not.
  * I took this bulk rename method, just because it is quite simple and
- * KISS, from the fff filemanager. So, thanks fff! */
+ * KISS, from the fff filemanager. So, thanks fff! BTW, this method
+ * is also implemented by ranger and nnn */
 {
 	if (!args[1])
 		return EXIT_FAILURE;
@@ -11678,6 +11682,19 @@ rl_open_bm_file(int count, int key)
 }
 
 int
+rl_open_jump_db(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	keybind_exec_cmd("je");
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
+int
 rl_mountpoints(int count, int key)
 {
 	if (kbind_busy)
@@ -12185,6 +12202,19 @@ rl_pinned_dir(int count, int key)
 	return EXIT_SUCCESS;
 }
 
+int
+rl_find_as_you_type(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	keybind_exec_cmd("+");
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
 /*
 int
 rl_test(int count, int key)
@@ -12240,6 +12270,8 @@ readline_kbinds(void)
 		rl_bind_keyseq(find_key("last-dir"), rl_last_dir);
 
 		rl_bind_keyseq(find_key("pinned-dir"), rl_pinned_dir);
+		rl_bind_keyseq(find_key("find-as-you-type"),
+					   rl_find_as_you_type);
 
 		/* Operations on files */
 		rl_bind_keyseq(find_key("bookmark-sel"), rl_bm_sel);
@@ -12256,6 +12288,7 @@ readline_kbinds(void)
 		rl_bind_keyseq(find_key("deselect-all"), rl_deselect_all);
 
 		/* Config files */
+		rl_bind_keyseq(find_key("open-jump-db"), rl_open_jump_db);
 		rl_bind_keyseq(find_key("edit-color-scheme"), rl_open_cscheme);
 		rl_bind_keyseq(find_key("open-config"), rl_open_config);
 		rl_bind_keyseq(find_key("open-keybinds"), rl_open_keybinds);
@@ -12698,7 +12731,6 @@ free_stuff(void)
 
 	if (alt_profile)
 		free(alt_profile);
-
 
 	free_dirlist();
 
@@ -13765,6 +13797,9 @@ my_rl_completion(const char *text, int start, int end)
 int
 get_profile_names(void)
 {
+	if (!CONFIG_DIR_GRAL)
+		return EXIT_FAILURE;
+	
 	char *pf_dir = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) + 10,
 								   sizeof(char));
 	sprintf(pf_dir, "%s/profiles", CONFIG_DIR_GRAL);
@@ -15317,16 +15352,9 @@ create_tmp_files(void)
 
 	/* If the config directory isn't available, define an alternative
 	 * selection file in /tmp */
-	if (!SEL_FILE) {
-
-		_err('w', PRINT_PROMPT, "%s: '%s': Using a temporary file for "
-			 "the Selection Box. Selected files won't be persistent "
-			 "accros reboots\n", PROGRAM_NAME, TMP_DIR);
+	if (!SEL_FILE && xargs.stealth_mode != 1) {
 
 		size_t tmp_dir_len = strlen(TMP_DIR);
-
-		/* Define the user's sel file. There will be one per
-		 * user-profile (/tmp/clifm/username/.selbox_PROFILE) */
 
 		if (!share_selbox) {
 			size_t prof_len = 0;
@@ -15347,6 +15375,10 @@ create_tmp_files(void)
 											sizeof(char));
 			sprintf(SEL_FILE, "%s/selbox", TMP_DIR);
 		}
+
+		_err('w', PRINT_PROMPT, _("%s: '%s': Using a temporary "
+			 "directory for the Selection Box. Selected files won't "
+			 "be persistent accros reboots"), PROGRAM_NAME, TMP_DIR);
 	}
 }
 
@@ -15386,7 +15418,7 @@ init_config(void)
 	 * xterm-like terminal emulators */
 	/* However, there is no need to do this if using the linux console, 
 	 * since we are not in a graphical environment */
-	if ((flags & GRAPHICAL)
+	if (xargs.stealth_mode != 1 && (flags & GRAPHICAL)
 	&& strncmp(getenv("TERM"), "xterm", 5) == 0)
 		edit_xresources();
 }
@@ -17229,8 +17261,8 @@ prompt(void)
 int
 count_dir(const char *dir_path) /* Readdir version */
 {
-/*	if (!dir_path)
-		return 0; */
+	if (!dir_path)
+		return 0;
 
 /*	struct stat file_attrib;
 
@@ -19857,23 +19889,36 @@ find_as_you_type(void)
 	char *rofi_cmd[] = { "rofi", "-dmenu", "-p", PROGRAM_NAME,
 						 "-input", tmp_file, NULL };
 
+	/* Redirect stdout to file and silence stderr */
 	FILE *fp = fopen(cmd_out, "w");
 	int stdout_bk = dup(STDOUT_FILENO); /* Save original stdout */
 	dup2(fileno(fp), STDOUT_FILENO); /* Redirect stdout to the desired
 	file */
-
 	fclose(fp);
+
+	FILE *fp_err = fopen("/dev/null", "w");
+	int stderr_bk = dup(STDERR_FILENO); /* Save original stderr */
+	dup2(fileno(fp_err), STDERR_FILENO); /* Redirect stderr to
+	/dev/null */
+	fclose(fp_err);
 
 	if (launch_execve(rofi_cmd, FOREGROUND) != EXIT_SUCCESS) {
 		free(tmp_file);
 		dup2(stdout_bk, STDOUT_FILENO);
+		close(stdout_bk);
+		dup2(stderr_bk, STDERR_FILENO);
+		close(stderr_bk);
 		unlink(cmd_out);
 		return EXIT_FAILURE;
 	}
 
+	unlink(tmp_file);
 	free(tmp_file);
 
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
+	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
+	close(stdout_bk);
+	close(stderr_bk);
 
 	/* Read rofi's output from file */
 	if (access(cmd_out, F_OK) != 0) {
@@ -19894,7 +19939,7 @@ find_as_you_type(void)
 	if (!*line) {
 		fclose(fp);
 		unlink(cmd_out);
-		/* User exited rofi by pressing ESC */
+		/* User exited rofi without selecting any file */
 		return EXIT_SUCCESS;
 	}
 
@@ -25650,6 +25695,7 @@ help_function (void)
  M-u, S-Up: Change to the parent directory\n\
  M-j, S-Left: Change to previous visited directory\n\
  M-k, S-Right: Change to next visited directory\n\
+ M-n: Find as you type with the help of Rofi\n\
  M-o: Lock terminal\n\
  M-p: Change to pinned directory\n\
  C-M-j: Change to first visited directory\n\
@@ -25673,6 +25719,7 @@ help_function (void)
  F1: Manual page\n\
  F2: Commands help\n\
  F3: Keybindings help\n\
+ F7: Open the jump database\n\
  F8: Open the current color scheme file\n\
  F9: Open the keybindings file\n\
  F10: Open the configuration file\n\
