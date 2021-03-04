@@ -71,7 +71,7 @@ List of CliFM features:
   30) Theming support via color schemes
   31) Privacy oriented
   32) Built-in autojump function
-  33) Icons support (depends on icons-in-terminal: https://github.com/sebastiencs/icons-in-terminal)
+  33) Icons support (depends on icons-in-terminal: \fIhttps://github.com/sebastiencs/icons-in-terminal\fR)
 
 .SH RATIONALE
 When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the Linux built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There is no two without three".
@@ -169,6 +169,9 @@ by default, CliFM changes to directories by just specifying the corresponding EL
 .B \-\-icons
 enable icons
 .TP
+.B \-\-icons\-use\-file\-color
+Instead of an specific color, icons take the color of the corresponding filename (specified either via file type or via file extension). Useful when building custom color schemes.
+.TP
 .B \-\-cd\-on\-quit
 write last visited directory to \fI$XDG_CONFIG_HOME/clifm/.last\fR to be later accessed by the corresponding shell function at program exit. See MISCELLANOEOUS NOTES section below.
 .TP
@@ -260,18 +263,26 @@ By default, the \fIopen\fR function will open files with the default application
 If the file to be opened is an archive/compressed file, the archive function (see the \fIad\fR command below) will be executed instead.
 .TP
 
-.B j[c, p, e], jump \fR[e, edit] [CHAR/STRING ...]
+.B j \fR[STRING ...] \fBjc\fR [STRING ...], \fBjp\fR [STRING ...], \fBje\fR, \fBjo\fR [ORDER], \fBjump\fR [e, edit] [STRING ...]
 \fIj\fR is the fastest way of using the \fBautojump\fR function to quickly navigate through the jump database (i.e. a list containing the name of visited directories and the amount of times each of them was visited).
 .sp
 With no argument, \fIj\fR just lists the entries in the jump database, printing both the amount of times a directory was visited and the directory name itself. Otherwise, it searchs for CHAR/STR in the database and cd into the most visited matching entry, if any. Example: 'j D' will probably take you to /home/user/Downloads, provided this directory has been already visited and is the most visited match in the database.
 .sp
 Multiple query strings could be passed to the function. For example, 'j et mo' will first check for 'et' in the jump database and then will further filter the search using the second parameter: 'mo'. It will most probably take you (again, provided the directory has been already visited and is the most visited match) to /etc/modprobe.d directory. Bear in mind that if STR is an actual directory, \fIjump\fR will just cd into it without performing any query.
 .sp
-\fIj\fR accepts three modifiers: 'e', 'p' and 'c', the first standing for "edit", the second for "parent", and the third for "child". Thus, 'je' will open the jump database to be edited if needed; 'jc' will search for files querying only child drectories relative to the current working directory, while 'jp' will do the same but for parent directories. Examples:'jp foo' will take you to the most visited parent directory containing the string "foo", while 'jc bar' will take you to the most visited child directory containing the string "bar".
+\fIj\fR accepts four modifiers: 'e', 'p' 'c', and 'o', the first standing for "edit", the second for "parent", the third for "child", and the last one for "order". Thus, 'je' will open the jump database to be edited if needed; 'jc' will search for files querying only child drectories relative to the current working directory, while 'jp' will do the same but for parent directories. 'jo', finally, allows to specify an order number (the left most value in the jump list) instead of a string or a filename. Examples:
 .sp
-Finally, you can also edit the jump database using the 'e' or 'edit' option: 'j e' or 'j edit'.
+\'jp foo\' will take you to the most visited \fBparent\fR directory containing the string "foo".
+.sp
+\'jc bar test\' will take you to the most visited \fBchild\fR directory containing the strings "bar" and "test".
+.sp
+\'jo 13\' will cd into the path corresponding to the order number 13. TAB completion is available to expand order numbers into the corresponding paths.
+.sp
+Finally, you can also edit the jump database using the 'e' or 'edit' option, i.e., 'j e' or 'j edit'.
 .sp
 TAB completion is available for this function.
+.sp
+To reset or modify the jump database as you whish, simply open the jump file using the 'je', edit whatever needs to be edited, save changes, and close the editor.
 .TP
 
 .B /\fRPATTERN [\-filetype] [DIR]
