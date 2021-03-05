@@ -1423,6 +1423,67 @@ main(int argc, char **argv)
 			 * #     FUNCTIONS DEFINITIONS     #
 			 * ################################# */
 
+int
+batch_link(char **args)
+{
+	if (!args)
+		return EXIT_FAILURE;
+
+	if (!args[1] || (*args[1] == '-'
+	&& strcmp(args[1], "--help") == 0)) {
+		puts(_("Usage: bl [FILE(s)]"));
+		return EXIT_SUCCESS;
+	}
+
+	char *suffix = (char *)NULL;
+	while (!suffix) {
+		suffix = rl_no_hist("Enter links suffix ('n' for none): ");
+
+		if (!suffix)
+			continue;
+
+		if (!*suffix) {
+			free(suffix);
+			continue;
+		}
+	}
+
+	size_t i;
+
+	int exit_status = EXIT_SUCCESS;
+
+	for (i = 1; args[i]; i++) {
+		char *linkname = (char *)NULL;
+
+		if (*suffix == 'n' && !suffix[1])
+			linkname = args[i];
+
+		else {
+			char tmp[NAME_MAX];
+			snprintf(tmp, NAME_MAX, "%s%s", args[i], suffix);
+			linkname = tmp;
+		}
+
+		char *ptr = strrchr(linkname, '/');
+
+		char *cmd[] = { "ln", "-sn", args[i], ptr ? ++ptr
+						: linkname, NULL };
+
+		if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
+	}
+
+	if (exit_status == EXIT_SUCCESS && cd_lists_on_the_fly) {
+		free_dirlist();
+
+		if (list_dir() != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
+	}
+
+	free(suffix);
+	return exit_status;
+}
+
 void
 set_env(void)
 {
@@ -20423,6 +20484,12 @@ exec_cmd(char **comm)
 	|| (comm[0][1] == '-' && isdigit(comm[0][2])) || comm[0][1] == '!'))
 		exit_code = run_history_cmd(comm[0] + 1);
 
+	/*    ############### BATCH LINK ##################     */
+	else if (*comm[0] == 'b' && comm[0][1] == 'l' && !comm[0][2]) {
+		exit_code = batch_link(comm);
+		return exit_code;
+	}
+
 	/*    ############### BULK RENAME ##################     */
 	else if (*comm[0] == 'b' && ((comm[0][1] == 'r' && !comm[0][2])
 	|| strcmp(comm[0], "bulk") == 0)) {
@@ -25637,6 +25704,7 @@ help_function (void)
  pf, prof, profile [ls, list] [set, add, del PROFILE]\n\
  cs, colorscheme [edit] [COLORSCHEME]\n\
  br, bulk ELN/FILE ...\n\
+ bl ELN/FILE ...\n\
  ac, ad ELN/FILE ...\n\
  x, X [ELN/DIR]\n\
  exp, export [ELN/FILE ...]\n\
@@ -25839,6 +25907,9 @@ bonus_function (void)
 		"Keep it simple, stupid",
 		"If ain't broken, brake it",
 		"An Archer knows her target like the back of her hands",
+		"\"I only know that I know nothing\" (Socrates)",
+		"(Learned) Ignorance is the true outcome of wisdom (Nicholas "
+		"of Cusa)",
 		NULL };
 
 	size_t num = (sizeof(phrases) / sizeof(phrases[0])) - 1;
