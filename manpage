@@ -910,6 +910,15 @@ This variable is set to the current profile of CliFM. Specially useful  to devel
 .TP
 .B CLIFM_SELFILE
 The path to the current selection file.
+.TP
+.B CLIFM_BUS
+This variable contains the path of a pipe by means of which plugins can talk to CliFM. Just write to the pipe and CLiFM will hear and handle the message immediately after the plugin's execution. If the message is a path, CliFM will run the open function, changing the current directory to the new path, if a directory, or opening it with the resource opener, if a file. Otherwise, if the message is not a path, it will be taken and executed as a command. Examples:
+.sp
+\'echo "/tmp" > "$CLIFM_BUS"\' tells CLiFM to change the current directory to /tmp
+.sp
+\'echo "s *.png" > "$CLIFM_BUS"\' makes CliFM select all files in the current directory ending with ".png"
+.sp
+The pipe (CLIFM_BUS) is deleted immediately after the execution of its content and recreated before running any plugin.
 
 .SH EXIT STATUS
 CliFM returns the exit status of the last executed command:
