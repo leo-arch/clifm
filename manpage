@@ -375,6 +375,10 @@ rename at once all files passed as arguments to the function. It accepts single 
 Each filename will be copied into a temporary file, which will be opened with the default text editor (via the \fImime\fR function), letting the user modify it. Once the file has been modified and saved, the modifications are printed on the screeen and the user is asked whether to proceed with the actual bulk renaming or not.
 .TP
 
+.B bl \fRELN/FILE ... n
+Create symbolic links for each specified file in the current directory.
+.TP
+
 .B ac, ad \fRELN/FILE ... n
 archive/compress and dearchive/decompress one or multiple files and/or directories. The archiver function brings two modes: \fIac\fR, to generate archives or compressed files, and \fIad\fR, to decompress or dearchive files, either just listing, extracting, recompressing, or mounting their content. In this latter case, the mountpoint used automatically is \fI$HOME/.config/clifm/PROFILE/mounts/ARCHIVE_NAME\fR.
 .sp
