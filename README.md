@@ -74,6 +74,8 @@ where to search: `/.*\.png$ /media/images`. And, if you want to further filter t
 
 * **NEW: Find as you type**: Navigate the file system with the help of Rofi.
 
+* **NEW: Batch link**: Create multiple symbolic links at once.
+
 * **NEW: Icons support** :smirk: (depends on the [icons-in-terminal](https://github.com/sebastiencs/icons-in-terminal) project)
 
 1) [Install](https://github.com/sebastiencs/icons-in-terminal#installation) icons-in-terminal.
