@@ -439,7 +439,7 @@ char *rl_no_hist(const char *prompt);
 char *bookmarks_generator(const char *text, int state);
 int initialize_readline(void);
 char *my_rl_path_completion(const char *text, int state);
-void keybind_exec_cmd(char *str);
+int keybind_exec_cmd(char *str);
 
 /* Keybindings */
 int create_kbinds_file(void);
@@ -974,7 +974,6 @@ char di_c[MAX_COLOR] = "", /* Directory */
 int
 main(int argc, char **argv)
 {
-
 	/* #########################################################
 	 * #			0) INITIAL CONDITIONS					   #
 	 * #########################################################*/
@@ -1764,14 +1763,14 @@ kbinds_edit(void)
 
 	time_t mtime_bfr = file_attrib.st_mtime;
 
-	FILE *fp_out = fopen("/dev/null", "w");
+	int fd_out = open("/dev/null", O_WRONLY, 0200);
 	/* Store stderr current value */
 	int stderr_bk = dup(STDERR_FILENO);
 
 	/* Redirect stderr to /dev/null */
-	dup2(fileno(fp_out), STDERR_FILENO);
+	dup2(fd_out, STDERR_FILENO);
 
-	fclose(fp_out);
+	close(fd_out);
 
 	char *cmd[] = { "mm", KBINDS_FILE, NULL };
 	int ret = mime_open(cmd);
@@ -2745,10 +2744,16 @@ edit_actions(void)
 
 int
 run_action(char *action, char **args)
+/* The core of this function was taken from NNN's run_selected_plugin
+ * function and modified to fit our needs. Thanks NNN! */
 {
 	int exit_status = EXIT_SUCCESS;
 	char *cmd = (char *)NULL;
 	size_t len = 0, action_len = strlen(action);
+
+		/* #####################################
+		 * # 	1) CREATE CMD TO BE EXECUTED   #
+		 * ##################################### */
 
 	/* Remove terminating new line char */
 	if (action[action_len -1] == '\n')
@@ -2783,11 +2788,95 @@ run_action(char *action, char **args)
 		strcat(cmd, args[i]);
 	}
 
-	/* Execute the command */
-	if (launch_execle(cmd) != EXIT_SUCCESS)
-		exit_status = EXIT_FAILURE;
+			/* ##############################
+			 * # 	2) CREATE A PIPE FILE	#
+			 * ############################## */
+
+	char *rand_ext = gen_rand_str(6);
+
+	if (!rand_ext) {
+		free(cmd);
+		return EXIT_FAILURE;
+	}
+
+	char fifo_path[PATH_MAX];
+	sprintf(fifo_path, "%s/.pipe.%s", TMP_DIR, rand_ext);
+	free(rand_ext);
+
+	setenv("CLIFM_BUS", fifo_path, 1);
+
+	if (mkfifo(fifo_path, 0600) != EXIT_SUCCESS) {
+		free(cmd);
+		return EXIT_FAILURE;
+	}
+
+	/* ################################################
+	 * #   3) EXEC CMD & LET THE CHILD WRITE TO PIPE  #
+	 * ################################################ */
+
+	if (fork() == EXIT_SUCCESS) {
+
+		/* Silence stderr */
+		int fd = open("/dev/null", O_WRONLY, 0200);
+
+/*		dup2(fd, 0);
+		dup2(fd, 1); */
+		dup2(fd, 2);
+		close(fd);
+
+		/* Child: write-only end of the pipe */
+		int wfd = open(fifo_path, O_WRONLY | O_CLOEXEC);
+
+		if (wfd == -1)
+			_exit(EXIT_FAILURE);
+
+		launch_execle(cmd);
+
+		close(wfd);
+		_exit(EXIT_SUCCESS);
+	}
 
 	free(cmd);
+
+		/* ########################################
+		 * # 	4) LET THE PARENT READ THE PIPE   #
+		 * ######################################## */
+
+	/* Parent: read-only end of the pipe */
+	int rfd;
+
+	do
+		rfd = open(fifo_path, O_RDONLY);
+	while (rfd == -1 && errno == EINTR);
+
+	char buf[PATH_MAX] = "";
+	ssize_t buf_len = 0;
+
+	do
+		buf_len = read(rfd, buf, sizeof(buf));
+	while (buf_len == -1 && errno == EINTR);
+
+	close(rfd);
+
+	if (buf[buf_len - 1] == '\n')
+		buf[buf_len - 1] = 0x00;
+
+	/* If the pipe was not empty */
+	if (*buf) {
+		/* Make sure we have a valid file */
+		struct stat attr;
+		if (lstat(buf, &attr) != -1) {
+			char *o_cmd[] = { "o", buf, NULL };
+			exit_status = open_function(o_cmd);
+		}
+
+		/* If not a file, take it as a command*/
+		else
+			keybind_exec_cmd(buf);
+	}
+
+	/* Remove the pipe file */
+	unlink(fifo_path);
 
 	return exit_status;
 }
@@ -12450,7 +12539,7 @@ readline_kbinds(void)
 	}
 }
 
-void
+int
 keybind_exec_cmd(char *str)
 /* Runs any command recognized by CliFM via a keybind. Example:
  * keybind_exec_cmd("sel *") */
@@ -12458,12 +12547,14 @@ keybind_exec_cmd(char *str)
 	size_t old_args = args_n;
 	args_n = 0;
 
+	int exit_status = EXIT_FAILURE;
+
 	char **cmd = parse_input_str(str);
 	puts("");
 
 	if (cmd) {
 
-		exec_cmd(cmd);
+		exit_status = exec_cmd(cmd);
 
 		/* While in the bookmarks or mountpoints screen, the kbind_busy 
 		 * flag will be set to 1 and no keybinding will work. Once the 
@@ -12485,6 +12576,8 @@ keybind_exec_cmd(char *str)
 	}
 
 	args_n = old_args;
+
+	return exit_status;
 }
 
 char *
@@ -19601,9 +19694,21 @@ cschemes_function(char **args)
 		stat(file, &attr);
 		time_t mtime_bfr = attr.st_mtime;
 
+		int fd_out = open("/dev/null", O_WRONLY, 0200);
+		/* Store stderr current value */
+		int stderr_bk = dup(STDERR_FILENO);
+
+		/* Redirect stderr to /dev/null */
+		dup2(fd_out, STDERR_FILENO);
+
+		close(fd_out);
+
 		char *cmd[] = { "mm", file, NULL };
 
 		int ret = mime_open(cmd);
+
+		dup2(stderr_bk, STDERR_FILENO);
+		close(stderr_bk);
 
 		if (ret != EXIT_FAILURE) {
 
@@ -19684,8 +19789,20 @@ edit_jumpdb(void)
 
 	time_t mtime_bfr = attr.st_mtime;
 
+	int fd_out = open("/dev/null", O_WRONLY, 0200);
+	/* Store stderr current value */
+	int stderr_bk = dup(STDERR_FILENO);
+
+	/* Redirect stderr to /dev/null */
+	dup2(fd_out, STDERR_FILENO);
+
+	close(fd_out);
+
 	char *cmd[] = { "o", JUMP_FILE, NULL };
 	open_function(cmd);
+
+	dup2(stderr_bk, STDERR_FILENO);
+	close(stderr_bk);
 
 	stat(JUMP_FILE, &attr);
 
@@ -21555,7 +21672,7 @@ launch_execle(const char *cmd)
 		execl(sys_shell, name ? name + 1 : sys_shell, "-c", cmd, NULL);
 		fprintf(stderr, "%s: '%s': execle: %s\n", PROGRAM_NAME, sys_shell, 
 				strerror(errno));
-		exit(errno);
+		_exit(errno);
 	}
 	/* Get command status */
 	else if (pid > 0) {
@@ -21653,7 +21770,7 @@ launch_execve(char **cmd, int bg)
 		 * family of functions returns only on error */
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, cmd[0], 
 				strerror(errno));
-		exit(errno);
+		_exit(errno);
 	}
 	/* Get the command status */
 	else { /* pid > 0 */
@@ -24195,6 +24312,16 @@ bookmarks_function(char **cmd)
 int
 edit_bookmarks(char *cmd)
 {
+	int exit_status = EXIT_SUCCESS;
+
+	/* Silence stderr */
+	int fd_out = open("/dev/null", O_WRONLY, 0200);
+	int stderr_bk = dup(STDERR_FILENO);
+
+	dup2(fd_out, STDERR_FILENO);
+
+	close(fd_out);
+
 	if (!cmd) {
 
 		if (opener) {
@@ -24204,25 +24331,31 @@ edit_bookmarks(char *cmd)
 			!= EXIT_SUCCESS) {
 				fprintf(stderr, _("%s: Cannot open the "
 						"bookmarks file"), PROGRAM_NAME);
-				return EXIT_FAILURE;
+				exit_status = EXIT_FAILURE;
 			}
-
-			return EXIT_SUCCESS;
 		}
 
 		else {
 			char *tmp_cmd[] = { "mm", BM_FILE, NULL };
 
-			return mime_open(tmp_cmd);
+			exit_status = mime_open(tmp_cmd);
 		}
 	}
 
-	char *tmp_cmd[] = { cmd, BM_FILE, NULL };
+	else {
+		char *tmp_cmd[] = { cmd, BM_FILE, NULL };
 
-	if (launch_execve(tmp_cmd, FOREGROUND) != EXIT_SUCCESS)
-		return EXIT_FAILURE;
+		int ret = launch_execve(tmp_cmd, FOREGROUND);
 
-	return EXIT_SUCCESS;
+		if (ret != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
+	}
+
+	/* Restore stderr previous value */
+	dup2(stderr_bk, STDERR_FILENO);
+	close(stderr_bk);
+
+	return exit_status;
 }
 
 off_t
