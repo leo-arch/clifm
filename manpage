@@ -628,8 +628,6 @@ same as \fIquit\fR, but enabling the CD on quit functionality.
 .TP
 \fBM\-d:\fR Deselect all selected files
 .TP
-\fBM\-n:\fR Find as you type with the help of Rofi
-.TP
 \fBM\-p:\fR Change to pinned directory
 .TP
 \fBM\-r:\fR Change to root directory
