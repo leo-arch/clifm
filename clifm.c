@@ -1933,7 +1933,6 @@ root-dir2:\\e/\n\
 #root-dir3:\n\
 \n\
 pinned-dir:\\M-p\n\
-find-as-you-type:\\M-n\n\
 \n\
 # Help\n\
 # F1-3\n\
@@ -12443,8 +12442,6 @@ readline_kbinds(void)
 		rl_bind_keyseq(find_key("last-dir"), rl_last_dir);
 
 		rl_bind_keyseq(find_key("pinned-dir"), rl_pinned_dir);
-		rl_bind_keyseq(find_key("find-as-you-type"),
-					   rl_find_as_you_type);
 
 		/* Operations on files */
 		rl_bind_keyseq(find_key("bookmark-sel"), rl_bm_sel);
