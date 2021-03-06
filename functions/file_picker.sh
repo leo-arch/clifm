@@ -1,21 +1,30 @@
 # CLiFM file picker function
-# Usage: p ARG ..., where ARG is the command that should pick selected files 
-# and its corresponding parameters. Example: p ls -l
-# Customize this function as you need and add it to your .bashrc file
+
+# Usage: p CMD [ARGS ...], where CMD (plus its corresponding parameters)# is the command that should pick selected files. Example: p ls -l.
+# CliFM will be executed: select the files you need and quit. Selected
+# files will be passed to CMD
+
+# Customize this function as you need and add it to your .bashrc file.
+# Recall to restart your shell for changes to take effect.
 
 p() {
 
-	if [[ !"$1" ]]; then
-		echo "Missing argument" >&2
+	if [[ -z "$1" ]]; then
+		echo "Usage: p CMD [ARGS ...]" >&2
+		return
 	fi
 
 	CLIFM_OPTIONS=""
 
 	clifm $CLIFM_OPTIONS
-	file="${XDG_CONFIG_HOME:=${HOME}/.config}/clifm/default/selbox"
+	file="$(find ${XDG_CONFIG_HOME:=${HOME}/.config}/clifm -name selbox*)"
+	if [[ -z "$file" ]]; then
+		file="$(find /tmp/clifm -name selbox*)"
+	fi
 
 	if [[ -f "$file" ]]; then
 		"$@" $(cat "$file")
+		rm -- "$file"
 	else
 		echo "No selected files" >&2
 	fi
