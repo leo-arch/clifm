@@ -1,10 +1,15 @@
-#!/bin/env bash
+#!/bin/bash
 
 # Music player plugin for CliFM
 # Written by L. Abramovich
 
 SUCCESS=0
 ERROR=1
+
+if ! [[ $(type -P mplayer) ]]; then
+	echo "CliFM: mplayer: Command not found" >&2
+	exit $ERROR;
+fi
 
 if [[ -z "$1" ]]; then
 	echo "CliFM: Missing argument" >&2

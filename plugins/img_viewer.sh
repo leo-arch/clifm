@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/bin/bash
 
 # Image thumbnails plugin for CLiFM
 # Written by L. Abramovich

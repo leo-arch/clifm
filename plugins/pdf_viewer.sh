@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/bin/bash
 
 # A PDF text viewer plugin for CLiFM
 # Written by L. Abramovich
