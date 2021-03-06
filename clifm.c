@@ -970,10 +970,41 @@ char di_c[MAX_COLOR] = "", /* Directory */
 				 * #           MAIN            #
 				 * #############################
 				 * */
+/*
+void
+check_stdin()
+{
+	fd_set readfds;
+    FD_ZERO(&readfds);
+
+    struct timeval timeout;
+    timeout.tv_sec = 0;
+    timeout.tv_usec = 0;
+
+	FD_SET(STDIN_FILENO, &readfds);
+
+	if (select(1, &readfds, NULL, NULL, &timeout)) {
+		char buf[PATH_MAX * 100] = "";
+		ssize_t len = 0;
+
+		do
+			len = read(STDIN_FILENO, buf, sizeof(buf));
+		while (len == -1 && errno == EINTR);
+
+		if (*buf)
+			printf("a%s\n", buf);
+	}
+
+	return;
+} */
 
 int
 main(int argc, char **argv)
 {
+//	check_stdin();
+
+//	return EXIT_SUCCESS;
+
 	/* #########################################################
 	 * #			0) INITIAL CONDITIONS					   #
 	 * #########################################################*/
@@ -1355,7 +1386,6 @@ main(int argc, char **argv)
 	load_pinned_dir();
 
 	set_env();
-
 
 				/* ###########################
 				 * #   2) MAIN PROGRAM LOOP  #
@@ -2816,14 +2846,6 @@ run_action(char *action, char **args)
 
 	if (fork() == EXIT_SUCCESS) {
 
-		/* Silence stderr */
-		int fd = open("/dev/null", O_WRONLY, 0200);
-
-/*		dup2(fd, 0);
-		dup2(fd, 1); */
-		dup2(fd, 2);
-		close(fd);
-
 		/* Child: write-only end of the pipe */
 		int wfd = open(fifo_path, O_WRONLY | O_CLOEXEC);
 
@@ -2858,13 +2880,14 @@ run_action(char *action, char **args)
 
 	close(rfd);
 
-	if (buf[buf_len - 1] == '\n')
-		buf[buf_len - 1] = 0x00;
-
 	/* If the pipe was not empty */
 	if (*buf) {
+		if (buf[buf_len - 1] == '\n')
+			buf[buf_len - 1] = 0x00;
+
 		/* Make sure we have a valid file */
 		struct stat attr;
+
 		if (lstat(buf, &attr) != -1) {
 			char *o_cmd[] = { "o", buf, NULL };
 			exit_status = open_function(o_cmd);
@@ -20038,103 +20061,6 @@ autojump(char **args)
 }
 
 int
-find_as_you_type(void)
-{
-	if (!(flags & GRAPHICAL)) {
-		fprintf(stderr, _("%s: This function is only available for "
-				"graphical environments\n"), PROGRAM_NAME);
-		return EXIT_FAILURE;
-	}
-
-	/* Export files in CWD to a temporary file */
-	char *cmd[] = { "exp", NULL };
-	char *tmp_file = export(cmd, 0);
-
-	if (!tmp_file)
-		return EXIT_FAILURE;
-
-	/* Run rofi using the above list of files and store output
-	 * into a new temp file */
-
-	char *rand_ext = gen_rand_str(6);
-	if (!rand_ext)
-		return EXIT_FAILURE;
-
-	char cmd_out[23];
-	sprintf(cmd_out, "/tmp/clifm_rofi.%s", rand_ext);
-	free(rand_ext);
-
-	char *rofi_cmd[] = { "rofi", "-dmenu", "-p", PROGRAM_NAME,
-						 "-input", tmp_file, NULL };
-
-	/* Redirect stdout to file and silence stderr */
-	FILE *fp = fopen(cmd_out, "w");
-	int stdout_bk = dup(STDOUT_FILENO); /* Save original stdout */
-	dup2(fileno(fp), STDOUT_FILENO); /* Redirect stdout to the desired
-	file */
-	fclose(fp);
-
-	FILE *fp_err = fopen("/dev/null", "w");
-	int stderr_bk = dup(STDERR_FILENO); /* Save original stderr */
-	dup2(fileno(fp_err), STDERR_FILENO); /* Redirect stderr to
-	/dev/null */
-	fclose(fp_err);
-
-	if (launch_execve(rofi_cmd, FOREGROUND) != EXIT_SUCCESS) {
-		free(tmp_file);
-		dup2(stdout_bk, STDOUT_FILENO);
-		close(stdout_bk);
-		dup2(stderr_bk, STDERR_FILENO);
-		close(stderr_bk);
-		unlink(cmd_out);
-		return EXIT_FAILURE;
-	}
-
-	unlink(tmp_file);
-	free(tmp_file);
-
-	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
-	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
-	close(stdout_bk);
-	close(stderr_bk);
-
-	/* Read rofi's output from file */
-	if (access(cmd_out, F_OK) != 0) {
-		unlink(cmd_out);
-		return EXIT_FAILURE;
-	}
-
-	fp = fopen(cmd_out, "r");
-
-	if (!fp) {
-		unlink(cmd_out);
-		return EXIT_FAILURE;
-	}
-
-	char line[PATH_MAX] = "";
-	fgets(line, sizeof(line), fp);
-
-	if (!*line) {
-		fclose(fp);
-		unlink(cmd_out);
-		/* User exited rofi without selecting any file */
-		return EXIT_SUCCESS;
-	}
-
-	fclose(fp);
-
-	unlink(cmd_out);
-
-	size_t len = strlen(line);
-	if (line[len - 1] == '\n')
-		line[len - 1] = 0x00;
-
-	/* If everything is OK, open the file/dir */
-	char *args[] = { "o", line, NULL };
-	return open_function(args);
-}
-
-int
 exec_cmd(char **comm)
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
@@ -20703,11 +20629,6 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'k' && ((comm[0][1] == 'b' && !comm[0][2])
 	|| strcmp(comm[0], "keybinds") == 0)) {
 		exit_code = kbinds_function(comm);
-		return exit_code;
-	}
-
-	else if (*comm[0] == '+' && !comm[0][1]) {
-		exit_code = find_as_you_type();
 		return exit_code;
 	}
 
@@ -25820,7 +25741,6 @@ help_function (void)
  j, jc [STRING ...], jp [STRING ...], je, jo [ORDER]], jump [e, edit] \
 [STRING ...]\n\
  j[c, p, e, o], jump [e, edit] [CHAR/STRING ...]\n\
- + (find-as-you-type)\n\
  s, sel [ELN ELN-ELN FILE ... n] [REGEX [DIR]] [-filetype]\n\
  sb, selbox\n\
  ds, desel [*, a, all]\n\
