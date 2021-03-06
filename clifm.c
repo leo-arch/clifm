@@ -16160,6 +16160,12 @@ external_arguments(int argc, char **argv)
 		}
 
 		else { /* Error changing directory */
+			if (xargs.list_and_quit == 1) {
+				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+						path_value, strerror(errno));
+				exit(EXIT_FAILURE);
+			}
+
 			_err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 				 path_value, strerror(errno));
 		}
