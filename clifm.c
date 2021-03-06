@@ -9357,7 +9357,7 @@ is_internal(const char *cmd)
 							   "tr", "trash", "s", "sel", "mm", "mime",
 							   "bm", "bookmarks", "br", "bulk", "ac",
 							   "ad", "exp", "export", "pin", "jump",
-							   "jc", "jp", NULL };
+							   "jc", "jp", "r", NULL };
 	short found = 0;
 	size_t i;
 
@@ -14636,49 +14636,22 @@ create_config_files(void)
 				"script will be executed\n"
 				"# instead. All parameters passed to the action "
 				"command will be passed\n"
-				"# to the action script as well. Example:\n"
-				"#example=example.sh\n"
-				"# Uncomment the above line and try it.\n",
+				"# to the action script as well.\n\n"
+				"i=img_viewer.sh\n"
+				"kbgen=kbgen\n"
+				"vid=vid_viewer.sh\n"
+				"p2t=pdf_viewer.sh\n"
+				"music=music_player.sh\n"
+				"update=update.sh\n"
+				"wall=wallpaper_setter.sh\n"
+				"dragon=dragondrop.sh\n"
+				"+=finder.sh\n"
+				"++=jumper.sh\n",
 				PROGRAM_NAME, PROGRAM_NAME);
 
 			fclose(actions_fp);
 		}
 	}
-
-			/* ##############################
-			 * #	EXAMPLE ACTION SCRIPT	#
-			 * ############################## */
-
-	char *example = (char *)xnmalloc(strlen(PLUGINS_DIR) + 12,
-									 sizeof(char));
-	sprintf(example, "%s/example.sh", PLUGINS_DIR);
-
-	if (stat(example, &file_attrib) == -1) {
-
-		FILE *example_fp = fopen(example, "w");
-
-		if (!example_fp) {
-			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-				 example, strerror(errno));
-		}
-
-		else {
-			fprintf(example_fp, "#!/bin/sh\n\n"
-				"# This is a CliFM example action script\n\n"
-				"echo \"Profile: $CLIFM_PROFILE\n"
-				"PWD: \"$(pwd)\"\n"
-				"Script: $(basename \"$0\")\n"
-				"Parameters: \"$@\"\"\n\n"
-				"exit 0\n");
-			fclose(example_fp);
-		}
-
-		/* Make it executable */
-		char *chmod_cmd[] = { "chmod", "700", example, NULL };
-		launch_execve(chmod_cmd, FOREGROUND);
-	}
-
-	free(example);
 
 				/* #####################
 				 * #	 MIME FILE	   #
