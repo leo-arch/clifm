@@ -404,6 +404,7 @@ void unset_xargs(void);
 void load_jumpdb(void);
 void save_jumpdb(void);
 void set_env(void);
+void copy_plugins(void);
 
 /* Memory management */
 char *xnmalloc(size_t nmemb, size_t size);
@@ -881,7 +882,7 @@ char *user = (char *)NULL, *path = (char *)NULL,
 	*MIME_FILE = (char *)NULL, **profile_names = (char **)NULL,
 	*encoded_prompt = (char *)NULL, *last_cmd = (char *)NULL,
 	*term = (char *)NULL, *TMP_DIR = (char *)NULL, *opener = (char *)NULL,
-	**old_pwd = (char **)NULL, *SCRIPTS_DIR = (char *)NULL,
+	**old_pwd = (char **)NULL, *PLUGINS_DIR = (char *)NULL,
 	*ACTIONS_FILE = (char *)NULL, **ext_colors = (char **)NULL,
 	*DIRHIST_FILE = (char *)NULL, *KBINDS_FILE = (char *)NULL,
 	*alt_config_file = (char *)NULL, *alt_kbinds_file = (char *)NULL,
@@ -1178,6 +1179,8 @@ main(int argc, char **argv)
 
 	create_tmp_files();
 
+	copy_plugins();
+
 	cschemes_n = get_colorschemes();
 
 	set_colors(usr_cscheme ? usr_cscheme : "default", 1);
@@ -1451,6 +1454,22 @@ main(int argc, char **argv)
 			/** #################################
 			 * #     FUNCTIONS DEFINITIONS     #
 			 * ################################# */
+
+void
+copy_plugins()
+{
+	char usr_share_plugins_dir[] = "/usr/share/clifm/plugins";
+
+	/* Make sure the system pĺugins dir exists and is not empty */
+	if (count_dir(usr_share_plugins_dir) <= 2)
+		return;
+
+	char *cp_cmd[] = { "cp", "-r", usr_share_plugins_dir,
+					   CONFIG_DIR_GRAL, NULL };
+	launch_execve(cp_cmd, FOREGROUND);
+
+	return;
+}
 
 int
 batch_link(char **args)
@@ -2176,10 +2195,10 @@ reload_config(void)
 	CONFIG_FILE = PROFILE_FILE = MSG_LOG_FILE = (char *)NULL;
 
 	free(MIME_FILE);
-	free(SCRIPTS_DIR);
+	free(PLUGINS_DIR);
 	free(ACTIONS_FILE);
 	free(KBINDS_FILE);
-	MIME_FILE = SCRIPTS_DIR = ACTIONS_FILE = KBINDS_FILE = (char *)NULL;
+	MIME_FILE = PLUGINS_DIR = ACTIONS_FILE = KBINDS_FILE = (char *)NULL;
 
 	free(COLORS_DIR);
 	free(TMP_DIR);
@@ -2794,11 +2813,11 @@ run_action(char *action, char **args)
 		strcpy(cmd, action);
 	}
 
-	/* If not a path, SCRIPTS_DIR is assumed */
+	/* If not a path, PLUGINS_DIR is assumed */
 	else {
-		len = action_len + strlen(SCRIPTS_DIR) + 2;
+		len = action_len + strlen(PLUGINS_DIR) + 2;
 		cmd = (char *)xnmalloc(len, sizeof(char));
-		sprintf(cmd, "%s/%s", SCRIPTS_DIR, action);
+		sprintf(cmd, "%s/%s", PLUGINS_DIR, action);
 	}
 
 	/* Check if the action file exists */
@@ -13010,7 +13029,7 @@ free_stuff(void)
 	free(MSG_LOG_FILE);
 	free(SEL_FILE);
 	free(MIME_FILE);
-	free(SCRIPTS_DIR);
+	free(PLUGINS_DIR);
 	free(ACTIONS_FILE);
 	free(KBINDS_FILE);
 	free(COLORS_DIR);
@@ -14373,8 +14392,8 @@ define_config_file_names(void)
 								  sizeof(char));
 	sprintf(COLORS_DIR, "%s/colors", CONFIG_DIR_GRAL);
 
-	SCRIPTS_DIR = (char *)xnmalloc(config_gral_len + 9, sizeof(char));
-	sprintf(SCRIPTS_DIR, "%s/scripts", CONFIG_DIR_GRAL);
+	PLUGINS_DIR = (char *)xnmalloc(config_gral_len + 9, sizeof(char));
+	sprintf(PLUGINS_DIR, "%s/plugins", CONFIG_DIR_GRAL);
 
 	TRASH_DIR = (char *)xcalloc(user_home_len + 20, sizeof(char));
 	sprintf(TRASH_DIR, "%s/.local/share/Trash", user_home);
@@ -14577,16 +14596,18 @@ create_config_files(void)
 	create_def_cscheme();
 
 				/* #####################
-				 * #	SCRIPTS DIR	   #
+				 * #	  PLUGINS      #
 				 * #####################*/
 
-	if (stat(SCRIPTS_DIR, &file_attrib) == -1) {
-		char *cmd[] = { "mkdir", SCRIPTS_DIR, NULL };
+	if (stat(PLUGINS_DIR, &file_attrib) == -1) {
+		char *cmd[] = { "mkdir", PLUGINS_DIR, NULL };
 
 		if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
 			_err('e', PRINT_PROMPT, _("%s: mkdir: Error "
-				 "creating scripts directory. User defined "
-				 "action function is disabled\n"), PROGRAM_NAME);
+				 "creating scripts directory. The "
+				 "actions function is disabled\n"), PROGRAM_NAME);
+		else
+			copy_plugins();
 	}
 
 				/* #####################
@@ -14628,9 +14649,9 @@ create_config_files(void)
 			 * #	EXAMPLE ACTION SCRIPT	#
 			 * ############################## */
 
-	char *example = (char *)xnmalloc(strlen(SCRIPTS_DIR) + 12,
+	char *example = (char *)xnmalloc(strlen(PLUGINS_DIR) + 12,
 									 sizeof(char));
-	sprintf(example, "%s/example.sh", SCRIPTS_DIR);
+	sprintf(example, "%s/example.sh", PLUGINS_DIR);
 
 	if (stat(example, &file_attrib) == -1) {
 
@@ -17455,7 +17476,7 @@ count_dir(const char *dir_path) /* Readdir version */
 		if (errno == ENOMEM)
 			exit(EXIT_FAILURE);
 		else
-			return -1;
+			return 0;
 	}
 
 	int file_count = 0;
