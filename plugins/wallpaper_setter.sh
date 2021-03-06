@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/env bash
 
 # Wallpaper setter plugin for CliFM
 # Written by L. Abramovich

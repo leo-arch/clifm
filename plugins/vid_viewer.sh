@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/env bash
 
 # Video thumbnails plugin for CliFM
 # Written by L. Abramovich
@@ -16,7 +16,9 @@ if [[ -z "$1" ]]; then
 	exit $ERROR
 fi
 
-mkdir .vidthumbs >&2
+TMP_DIR=".vidthumbs.$(tr -dc A-Za-z0-9 </dev/urandom | head -c6)"
+
+mkdir -- "$TMP_DIR" >&2
 
 for arg in "$@"; do
 
@@ -28,31 +30,33 @@ for arg in "$@"; do
 
 		for file in "$arg"/*; do
 			if [[ -f "$file" ]]; then
-				ffmpegthumbnailer -i "$file" -o .vidthumbs/$(basename "$file").jpg 2>/dev/null
+				ffmpegthumbnailer -i "$file" -o \
+				"$TMP_DIR/$(basename "$file").jpg" 2>/dev/null
 			fi
 		done
 
 	else
-		ffmpegthumbnailer -i "$arg" -o .vidthumbs/$(basename "$arg").jpg 2>/dev/null
+		ffmpegthumbnailer -i "$arg" -o \
+		"$TMP_DIR/$(basename "$arg").jpg" 2>/dev/null
 	fi
 
 done
 
 if [[ $(type -P sxiv) ]]; then
-	sxiv -aqtr -- .vidthumbs
+	sxiv -aqtr -- "$TMP_DIR"
 
 elif [[ $(type -P feh) ]]; then
-	feh -tZk -- .vidthumbs
+	feh -tZk -- "$TMP_DIR"
 
 elif [[ $(type -P lsix) ]]; then
-	lsix .vidthumbs/*
+	lsix "$TMP_DIR"/*
 
 else
-	echo "CliFM: No thumbails viewer found" <&2
-	rm -rf .vidthumbs 2>/dev/null
+	echo "CliFM: No thumbails viewer found" >&2
+	rm -rf -- "$TMP_DIR" 2>/dev/null
 	exit $ERROR
 fi
 
-rm -rf .vidthumbs 2>/dev/null
+rm -rf -- "$TMP_DIR" 2>/dev/null
 
 exit $SUCCESS

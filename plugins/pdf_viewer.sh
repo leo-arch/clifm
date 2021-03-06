@@ -1,4 +1,7 @@
-#!/bin/bash
+#!/bin/env bash
+
+# A PDF text viewer plugin for CLiFM
+# Written by L. Abramovich
 
 SUCCESS=0
 ERROR=1
@@ -18,9 +21,6 @@ if [[ "$(head -c4 "$1")" != "%PDF" ]]; then
 	exit $ERROR
 fi
 
-TMP_FILE="/tmp/$1"
-PAGER="less"
-
-pdftotext -nopgbrk -layout "$1" - | $PAGER
+pdftotext -nopgbrk -layout "$1" - | ${PAGER:=less}
 
 exit $SUCCESS
