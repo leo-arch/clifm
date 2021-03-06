@@ -25816,7 +25816,6 @@ help_function (void)
  M-u, S-Up: Change to the parent directory\n\
  M-j, S-Left: Change to previous visited directory\n\
  M-k, S-Right: Change to next visited directory\n\
- M-n: Find as you type with the help of Rofi\n\
  M-o: Lock terminal\n\
  M-p: Change to pinned directory\n\
  C-M-j: Change to first visited directory\n\
