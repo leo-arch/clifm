@@ -42,4 +42,5 @@ package() {
   install -g 0 -o 0 -Dm644 "translations/spanish/${_pkgname}.mo" "$pkgdir/usr/share/locale/es/LC_MESSAGES/${_pkgname}.mo"
   mkdir -p "$pkgdir/usr/share/$_pkgname"
   cp -r plugins "$pkgdir/usr/share/$_pkgname"
+  cp -r functions "$pkgdir/usr/share/$-pkgname"
 }
