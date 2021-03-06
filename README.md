@@ -72,8 +72,6 @@ where to search: `/.*\.png$ /media/images`. And, if you want to further filter t
 ![autojump](images/autojump0.png)
 ![autojump](images/autojump2.png)
 
-* **NEW: Find as you type**: Navigate the file system with the help of Rofi.
-
 * **NEW: Batch link**: Create multiple symbolic links at once.
 
 * **NEW: Icons support** :smirk: (depends on the [icons-in-terminal](https://github.com/sebastiencs/icons-in-terminal) project)
@@ -105,8 +103,9 @@ Because file manager, but also half-shell, CLiFM also provides the following fea
 * Symlinks editor
 * Disk usage
 * CD on quit, file picker (as shell functions) (**NEW**)
-* PDF reader, image/video previews, wallpaper setter, music playlist, updates check, and drag and drop (plugins) (**NEW**)
+* Plugins: PDF reader, image/video previews, wallpaper setter, music playlist, updates check, drag and drop, finder, and jumper (**NEW**)
 * Color schemes (**NEW**)
+* Batch links (**NEW**)
 
 **NOTE:** By default, CliFM ships only one color scheme, but more are provided by [clifm-colors](https://github.com/leo-arch/clifm-colors). The package is also available in the [AUR](https://aur.archlinux.org/packages/clifm-colors-git).
 
