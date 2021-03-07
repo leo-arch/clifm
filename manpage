@@ -824,7 +824,7 @@ CliFM will automatically expand the 'sel' keyword: 'sel' indeed amounts to 'file
 .TP
 ELN's and ELN ranges will be also automatically expanded, provided the corresponding ELN's actually exist, that is to say, provided some filename is listed on the screen under those numbers. For example: 'diff 1 118' will only expand '1', but not '118', if there is no ELN 118. In the same way, the range 1\-118 will only be expanded provided there are 118 or more elements listed on the screen. If this feature somehow conflicts with the command you want to run, say, 'chmod 644 ...', because the current amount of files is equal or larger than 644 (in which case CliFM will expand that number), then you can simply run the command as external: ';chmod 644...'
 .TP
-TAB completion for bookmarks, color schemes, profiles and directory histry (via the \fIjump\fR command) is also available. To make use of the bookmarks completion, make sure you specify some name for your bookmarks, since these names are used by the completion function. 
+TAB completion for bookmarks, color schemes, profiles and directory history (via the \fIjump\fR command) is also available. To make use of the bookmarks completion, make sure you specify some name for your bookmarks, since these names are used by the completion function. 
 .TP
 Of course, combinations of all these features is also possbile. Example: 'cp sel file* 2 23\-31 .' will copy all selected files, plus all files whose name starts with "file", plus those files corresponding to the ELN's 2 and 23 through 31, into the current working directory.
 
@@ -833,6 +833,28 @@ CliFM includes a few shell functions to perform specific actions. Take a look at
 
 .SH PLUGINS
 Plugins are just scripts or programs (written in any language) able to add, extend or improve CliFM functionalities. Though several plugins are provided at installation time (in the \fIplugins\fR directory), you can write yours as you like, with any language you like, and for whatever goal you want. Writing plugins is generally quite easy; but your mileage may vary depending on what you are trying to achieve. A good place to start is examining the provide plugins and reading the \fIactions\fR command description and the ENVIRONMENT and FILES sections below.
+
+.SH STANDARD INPUT (STDIN)
+CliFM is able to read and list paths from the input stream. Each path in the list should be terminated with a new line character (\\n) and stripped from extra characters not belonging to the path itself. The size of the input stream buffer is 16MiB (4096 paths, provided each path is PATH_MAX size).
+.sp
+Each file passed via standard input will be stored as a symbolic link pointing to the original file in a temporary directory (which will be deleted at program exit) and listed on startup. Bear in mind that the restore last path function is disabled when listing in this way. Examples:
+.sp
+ ls -A /var/* | clifm
+.sp
+This command will pass all files in /var to CliFM
+.sp
+If you need to perform more specific queries, you can use \fIfind\fR as follows:
+.sp
+ find \-maxdepth 1 \-size +500k \-print0 | tr '\\0' '\\n' | sed 's/\\.\\///g' | clifm
+.sp
+The above command will pass all files in the current directory bigger than 500KiB to CliFM.
+.sp
+You can also use stream redirection:
+.sp
+ ls -A > list.txt
+ clifm < list.txt
+.sp
+All operations performed on these symbolic links (provided the current working directory is the temporary directory where all these files are stored) will be performed on the target files and NOT on the symbolic links themselves.
 
 .SH MISCELLANEOUS NOTES
 .TP
