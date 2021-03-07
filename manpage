@@ -224,6 +224,9 @@ list files and quit. It may be used in conjunction with \-p
 .B \-\-color\-scheme=NAME
 set NAME as color scheme
 .TP
+.B \-\-no\-columns
+disable columns for files listing
+.TP
 .B \-\-no\-welcome\-message
 disable the welcome message
 .TP
@@ -564,6 +567,10 @@ with no argument, prints the current keyboard codes and their associated functio
 
 .B cmd, commands 
 show this list of commands.
+.TP
+
+.B cl, columns \fR[on, off]
+toggle columns on/off.
 .TP
 
 .B hf, hidden \fR[on, off, status]
