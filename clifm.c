@@ -782,6 +782,7 @@ struct param
 	int no_autojump;
 	int icons;
 	int icons_use_file_color;
+	int no_columns;
 };
 
 struct param xargs;
@@ -822,6 +823,7 @@ short splash_screen = UNSET, welcome_message = UNSET, ext_cmd_ok = UNSET,
 	autocd = UNSET, auto_open = UNSET, dirhist_map = UNSET,
 	restore_last_path = UNSET, pager = UNSET, show_bk_files = UNSET,
 	expand_bookmarks = UNSET, only_dirs = UNSET, cd_on_quit = UNSET,
+	columned = UNSET,
 
 	no_log = 0, internal_cmd = 0, shell_terminal = 0, print_msg = 0,
 	recur_perm_error_flag = 0, is_sel = 0, sel_is_last = 0,
@@ -906,7 +908,8 @@ const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
 		"mountpoints", "bookmarks", "log", "untrash", "unicode",
 		"profile", "shell", "mime", "sort", "tips", "autocd",
 		"auto-open", "actions", "reload", "export", "keybinds",
-		"pin", "unpin", "colorschemes", "jump", "icons", NULL };
+		"pin", "unpin", "colorschemes", "jump", "icons", "columns",
+		NULL };
 
 #define MAX_COLOR 46
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
@@ -1727,7 +1730,7 @@ unset_xargs(void)
 	xargs.expand_bookmarks = xargs.only_dirs = UNSET;
 	xargs.list_and_quit = xargs.color_scheme = xargs.cd_on_quit = UNSET;
 	xargs.no_autojump = xargs.icons = UNSET;
-	xargs.icons_use_file_color = 0;
+	xargs.icons_use_file_color = xargs.no_columns = UNSET;
 }
 
 void
@@ -2240,7 +2243,8 @@ reload_config(void)
 	autocd = auto_open = restore_last_path = dirhist_map = UNSET;
 	disk_usage = tips = logs_enabled = sort = files_counter = UNSET;
 	light_mode = dir_indicator = classify = cd_on_quit = UNSET;
-
+	columned = UNSET;
+	
 	shell_terminal = no_log = internal_cmd = recur_perm_error_flag = 0;
 	is_sel = sel_is_last = print_msg = kbind_busy = dequoted = 0;
 	mime_match = sort_switch = sort_reverse = kbind_busy = cont_bt = 0;
@@ -2269,6 +2273,8 @@ reload_config(void)
 	
 	/* If some option was set via command line, keep that value
 	 * for any profile */
+	if (xargs.no_columns != UNSET)
+		columned = xargs.no_columns;
 	if (xargs.cd_on_quit != UNSET)
 		cd_on_quit = xargs.cd_on_quit;
 	if (xargs.ext != UNSET)
@@ -7591,7 +7597,7 @@ is_internal_c(const char *cmd)
 					"ao", "auto-open", "actions", "rl", "reload",
 					"exp", "export", "kb", "keybinds", "pin",
 					"unpin", "cs", "colorschemes", "jump", "je",
-					"jc", "jp", "icons", NULL };
+					"jc", "jp", "jo", "icons", "cl", "columns", NULL };
 
 	short found = 0;
 	size_t i;
@@ -15900,6 +15906,7 @@ external_arguments(int argc, char **argv)
 		{"no-autojump", no_argument, 0, 23},
 		{"icons", no_argument, 0, 24},
 		{"icons-use-file-color", no_argument, 0, 25},
+		{"no-columns", no_argument, 0, 26},
 		{0, 0, 0, 0}
 	};
 
@@ -16043,6 +16050,10 @@ external_arguments(int argc, char **argv)
 
 		case 25:
 			xargs.icons_use_file_color = 1;
+		break;
+
+		case 26:
+			xargs.no_columns = 1;
 		break;
 
 		case 'a':
@@ -17612,7 +17623,7 @@ int
 count_dir(const char *dir_path) /* Readdir version */
 {
 	if (!dir_path)
-		return 0;
+		return -1;
 
 /*	struct stat file_attrib;
 
@@ -17961,6 +17972,9 @@ list_dir(void)
 
 	files = eln_as_file_n = 0; /* Reset the files counter */
 
+	if (columned == UNSET)
+		columned = (xargs.no_columns != 1 || long_view) ? 1 : 0;
+
 	if (light_mode)
 		return list_dir_light();
 
@@ -18134,9 +18148,11 @@ list_dir(void)
 		for (i = 0; i < (int)dirsn; i++) {
 			/* Store the filename length here, so that we don't need to
 			 * run strlen() again later on the same filename */
-			file_info[i].len = unicode
-					? u8_xstrlen(tmp_dirlist[tmp_dirs[i]]->d_name)
-					: strlen(tmp_dirlist[tmp_dirs[i]]->d_name);
+			if (columned) {
+				file_info[i].len = unicode
+						? u8_xstrlen(tmp_dirlist[tmp_dirs[i]]->d_name)
+						: strlen(tmp_dirlist[tmp_dirs[i]]->d_name);
+			}
 
 			dirlist[i] = tmp_dirlist[tmp_dirs[i]]->d_name;
 		}
@@ -18146,10 +18162,11 @@ list_dir(void)
 
 		for (j = 0; j < (int)filesn; j++) {
 
-			file_info[i].len = unicode
-				  ? u8_xstrlen(tmp_dirlist[tmp_files[j]]->d_name)
-				  : strlen(tmp_dirlist[tmp_files[j]]->d_name);
-
+			if (columned) {
+				file_info[i].len = unicode
+					  ? u8_xstrlen(tmp_dirlist[tmp_files[j]]->d_name)
+					  : strlen(tmp_dirlist[tmp_files[j]]->d_name);
+			}
 			/* cont_bt value is set by u8_xstrlen() */
 			dirlist[i++] = tmp_dirlist[tmp_files[j]]->d_name;
 		}
@@ -18172,10 +18189,11 @@ list_dir(void)
 									* sizeof(char *));
 
 		for (i = 0; i < (int)files; i++) {
-			file_info[i].len = unicode
-					? u8_xstrlen(tmp_dirlist[i]->d_name)
-					: strlen(tmp_dirlist[i]->d_name);
-
+			if (columned) {
+				file_info[i].len = unicode
+						? u8_xstrlen(tmp_dirlist[i]->d_name)
+						: strlen(tmp_dirlist[i]->d_name);
+			}
 			dirlist[i] = tmp_dirlist[i]->d_name;
 		}
 
@@ -18231,9 +18249,12 @@ list_dir(void)
 		/* file_name_width contains: ELN's amount of digits + one space 
 		 * between ELN and filename + filename length. Ex: '12 name'
 		 * contains 7 chars */
-		file_info[i].eln_digits = digits_in_num(i + 1);
-		size_t file_name_width = file_info[i].eln_digits + 1
-								 + file_info[i].len;
+		size_t file_name_width = 0;
+		if (columned) {
+			file_info[i].eln_digits = digits_in_num(i + 1);
+			file_name_width = file_info[i].eln_digits + 1
+									 + file_info[i].len;
+		}
 
 		/* If the file is a non-empty directory or a symlink to a
 		 * non-emtpy directory, and the user has access permision to
@@ -18299,7 +18320,8 @@ list_dir(void)
 
 				/* It's a directory, so that " /" will be appended
 				 * anyway */
-				file_name_width += 2;
+				if (columned)
+					file_name_width += 2;
 
 				/* linkname is not null only if the file is a symlink
 				 * to an existent directory */
@@ -18310,7 +18332,8 @@ list_dir(void)
 					file_info[i].filesn = retval;
 					file_info[i].ruser = 1;
 
-					if (file_info[i].filesn > 2) {
+					if (columned
+					&& file_info[i].filesn > 2) {
 						/* Add dir counter lenght (" /num") to
 						 * file_name_with */
 						file_name_width += 
@@ -18332,11 +18355,11 @@ list_dir(void)
 			break;
 		}
 
-		if (file_name_width > longest)
+		if (columned && file_name_width > longest)
 			longest = file_name_width;
 	}
 
-	if (icons)
+	if (columned && icons)
 		longest += 3;
 
 	/* Get terminal current amount of rows and columns */
@@ -18587,7 +18610,7 @@ list_dir(void)
 		cap_t cap;
 		#endif
 
-		if (((size_t)i + 1) % columns_n == 0)
+		if (!columned || ((size_t)i + 1) % columns_n == 0)
 			last_column = 1;
 		else
 			last_column = 0;
@@ -19022,9 +19045,11 @@ list_dir_light(void)
 			/* Store the filename length (and filetype) here, so that
 			 * we don't need to run strlen() again later on the same
 			 * file */
-			file_info[i].len = (unicode)
-					? u8_xstrlen(tmp_dirlist[tmp_dirs[i]]->d_name)
-					: strlen(tmp_dirlist[tmp_dirs[i]]->d_name);
+			if (columned) {
+				file_info[i].len = (unicode)
+						? u8_xstrlen(tmp_dirlist[tmp_dirs[i]]->d_name)
+						: strlen(tmp_dirlist[tmp_dirs[i]]->d_name);
+			}
 
 			file_info[i].type = tmp_dirlist[tmp_dirs[i]]->d_type;
 			/* cont_bt value is set by u8_xstrlen() */
@@ -19035,9 +19060,11 @@ list_dir_light(void)
 		/* Now copy file names */
 		register int j;
 		for (j = 0; j < (int)filesn; j++) {
-			file_info[i].len = (unicode)
-					? u8_xstrlen(tmp_dirlist[tmp_files[j]]->d_name)
-					: strlen(tmp_dirlist[tmp_files[j]]->d_name);
+			if (columned) {
+				file_info[i].len = (unicode)
+						? u8_xstrlen(tmp_dirlist[tmp_files[j]]->d_name)
+						: strlen(tmp_dirlist[tmp_files[j]]->d_name);
+			}
 
 			file_info[i].type = tmp_dirlist[tmp_files[j]]->d_type;
 
@@ -19062,10 +19089,11 @@ list_dir_light(void)
 										* sizeof(char *));
 
 		for (i = 0; i < (int)files; i++) {
-			file_info[i].len = unicode
-							   ? u8_xstrlen(tmp_dirlist[i]->d_name)
-							   : strlen(tmp_dirlist[i]->d_name);
-
+			if (columned) {
+				file_info[i].len = unicode
+						   ? u8_xstrlen(tmp_dirlist[i]->d_name)
+						   : strlen(tmp_dirlist[i]->d_name);
+			}
 			file_info[i].type = tmp_dirlist[i]->d_type;
 
 			dirlist[i] = tmp_dirlist[i]->d_name;
@@ -19101,8 +19129,11 @@ list_dir_light(void)
 
 		file_info[i].linkdir = -1;
 
-		size_t file_name_width = digits_in_num(i + 1) + 1
-								 + file_info[i].len;
+		size_t file_name_width = 0;
+
+		if (columned)
+			file_name_width = digits_in_num(i + 1) + 1
+							  + file_info[i].len;
 
 		if (classify) {
 			/* Increase filename width in one to include the ending
@@ -19134,16 +19165,17 @@ list_dir_light(void)
 			}
 		}
 
-		else if (dir_indicator && file_info[i].type == DT_DIR)
+		else if (columned && dir_indicator
+		&& file_info[i].type == DT_DIR)
 			file_name_width++;
 
 		/* Else, there is no filetype indicator at all */
 
-		if (file_name_width > longest)
+		if (columned && file_name_width > longest)
 			longest = file_name_width;
 	}
 
-	if (icons)
+	if (columned && icons)
 		longest += 3;
 
 	/* Get terminal current amount of rows and columns */
@@ -19365,7 +19397,7 @@ list_dir_light(void)
 			counter++;
 		}
 
-		if (((size_t)i + 1) % columns_n == 0)
+		if (!columned || ((size_t)i + 1) % columns_n == 0)
 			last_column = 1;
 		else
 			last_column = 0;
@@ -20759,6 +20791,37 @@ exec_cmd(char **comm)
 	/* ##################################################
 	 * #			     MINOR FUNCTIONS 				#
 	 * ##################################################*/
+
+	else if (*comm[0] == 'c' && ((comm[0][1] == 'l' && !comm[0][2])
+	|| strcmp(comm[0], "columns") == 0)) {
+		if (!comm[1] || (*comm[1] == '-'
+		&& strcmp(comm[1], "--help") == 0))
+			puts(_("Usage: cl, columns [on, off]"));
+
+		else if (*comm[1] == 'o' && comm[1][1] == 'n' && !comm[1][2]) {
+			columned = 1;
+
+			if (cd_lists_on_the_fly) {
+				free_dirlist();
+				exit_code = list_dir();
+			}
+		}
+
+		else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
+			columned = 0;
+
+			if (cd_lists_on_the_fly) {
+				free_dirlist();
+				exit_code = list_dir();
+			}
+		}
+
+		else {
+			fputs(_("Usage: cl, columns [on, off]\n"), stderr);
+			exit_code = EXIT_FAILURE;
+			return EXIT_FAILURE;
+		}
+	}
 
 	else if (*comm[0] == 'i' && strcmp(comm[0], "icons") == 0) {
 
@@ -25888,6 +25951,7 @@ help_function (void)
 \n				useful to speed up the listing process; \
 \n				counting files in directories is expensive\
 \n     --no-welcome-message\t disable the welcome message\
+\n     --no-columns\t\t disable columned files listing\
 \n     --no-clear-screen\t\t do not clear the screen when listing \
 \n				directories\
 \n     --no-backup-files\t\t do not show files ending with tilde (~)\
@@ -25956,6 +26020,7 @@ help_function (void)
  rf, refresh\n\
  cc, colors\n\
  acd, autocd [on, off, status]\n\
+ cl, columns [on, off]\n\
  ao, auto-open [on, off, status]\n\
  hf, hidden [on, off, status]\n\
  ff, folders-first [on, off, status]\n\
