@@ -828,6 +828,12 @@ TAB completion for bookmarks, color schemes, profiles and directory histry (via 
 .TP
 Of course, combinations of all these features is also possbile. Example: 'cp sel file* 2 23\-31 .' will copy all selected files, plus all files whose name starts with "file", plus those files corresponding to the ELN's 2 and 23 through 31, into the current working directory.
 
+.SH SHELL FUNCTIONS
+CliFM includes a few shell functions to perform specific actions. Take a look at the corresponding files, in the \fIfunctions\fR directory, and follow the instructions. Needles to say, you can write your own functions.
+
+.SH PLUGINS
+Plugins are just scripts or programs (written in any language) able to add, extend or improve CliFM functionalities. Though several plugins are provided at installation time (in the \fIplugins\fR directory), you can write yours as you like, with any language you like, and for whatever goal you want. Writing plugins is generally quite easy; but your mileage may vary depending on what you are trying to achieve. A good place to start is examining the provide plugins and reading the \fIactions\fR command description and the ENVIRONMENT and FILES sections below.
+
 .SH MISCELLANEOUS NOTES
 .TP
 For each of the internal commands (see the COMMANDS section above) you can use the semicolon to execute them sequentially and/or the double ampersand to execute them conditionally. Example: 'cmd1; cmd2 && cmd3'. 
@@ -840,27 +846,13 @@ CliFM is not limited to its own set of internal commands, like open, sel, trash,
 .TP
 It depends on the terminal emulator you use to correctly display non\-ASCII characters and characters from the extended ASCII charset. If, for example, you create a file named "ñandú" (the spanish word for 'rhea'), it will be correctly displayed by the Linux console, Lxterminal, and Urxvt, but not thus by Xterm or Aterm.
 .TP
-CliFM will create ~/.Xresources, if it doesn't already exist, for keybindings to work correctly. However, some (and even all) of these keybindings might not work in some terminals, though they do work fine on the console (TTY), xvt\-like terminal emulators like Urxvt and Aterm, and xterm\-like ones.
+CliFM will create ~/.Xresources, if it doesn't already exist, for keybindings to work correctly. However, some (and even all) of these keybindings might not work in some terminals, though they do work fine on the console (TTY), xvt\-like terminal emulators like Urxvt and Aterm, and xterm\-like ones. However, keybinding can be edited freely to make them work on any terminal emulator.
 .TP
 When dealing with filenames containing spaces, you can use both single and double quotes (ex: "this file" or 'this file') plus escape sequences (ex: this\\ file).
 .TP
 By default, CliFM starts in the current working directory. However, you can always specify a different path by passing it as an argument. Ex: clifm \-p /home/user/misc. You can also permanently set up the starting path in the CliFM configuration file. If the RestoreLastPath option is set to true, CLiFM will start instead in the last visited directory, unless the starting path is specified via command line.
 .TP
-CliFM's default profile is "default". To create alternative profiles use the \-P option or the 'pf' command. See above.
-.TP
-Enabling the CD on quit functionality:
-.TP
-a) Enable the CD on quit function, either via command line (with the --cd-on-quit option) or via the configuration file (with the \fICdOnQuit\fR option). This option will write the last visited directory to \fI$XDG_CONFIG_HOME/clifm/.last\fR.
-.TP
-b) Write a shell function like this one:
-.TP
-For Bash and Zsh (add it to the corresponding rc file):
-.sp
-c() { clifm "$@"; dir=$(/usr/bin/cat "${XDG_CONFIG_HOME:=${HOME}/.config}/clifm/.last" 2>/dev/null); if [[ -d "$dir" ]]; then cd "$dir"; fi }
-.TP
-Recall to spawn a new shell for changes to take effect.
-.TP
-3) Run CLiFM as c, or whatever you named the above function. At exit, the shell will cd into the last directory visited in CliFM.
+CliFM's default profile is "default". To create alternative profiles use the \-P option or the 'pf' command (see above).
 
 .SH NOTE ON SPEED
 If speed is still an issue, try one of the setups below (listed from slower to faster):
