@@ -890,7 +890,7 @@ char *user = (char *)NULL, *path = (char *)NULL,
 	*COLORS_DIR = (char *)NULL, **color_schemes = (char **)NULL,
 	*cur_cscheme = (char *)NULL, *usr_cscheme = (char *)NULL,
 	*CONFIG_DIR_GRAL = (char *)NULL, *icon = (char *)NULL,
-	*icon_color = (char *)NULL;
+	*icon_color = (char *)NULL, *STDIN_TMP_DIR = (char *)NULL;
 
 char div_line_char = UNSET;
 
@@ -1390,6 +1390,14 @@ main(int argc, char **argv)
 
 	set_env();
 
+/*	if (!isatty(STDIN_FILENO)) {
+		fprintf(stderr, "%s: stdin is not in interactive mode. "
+				"Exiting\n", PROGRAM_NAME);
+
+		return EXIT_FAILURE;
+
+	} */
+
 				/* ###########################
 				 * #   2) MAIN PROGRAM LOOP  #
 				 * ########################### */
@@ -1514,10 +1522,7 @@ batch_link(char **args)
 
 		char *ptr = strrchr(linkname, '/');
 
-		char *cmd[] = { "ln", "-sn", args[i], ptr ? ++ptr
-						: linkname, NULL };
-
-		if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+		if (symlink(args[i], ptr ? ++ptr : linkname) == -1)
 			exit_status = EXIT_FAILURE;
 	}
 
@@ -9350,8 +9355,8 @@ escape_str(char *str)
 int
 is_internal(const char *cmd)
 /* Check cmd against a list of internal commands. Used by parse_input_str()
- * to know if it should perform additional expansions. Only commands
- * dealing with filenames should be found here */
+ * to know if it should perform additional expansions. Only internal
+ * commands dealing with filenames should be checked here */
 {
 	const char *int_cmds[] = { "o", "open", "cd", "p", "pr", "prop", "t",
 							   "tr", "trash", "s", "sel", "mm", "mime",
@@ -9362,7 +9367,7 @@ is_internal(const char *cmd)
 	size_t i;
 
 	for (i = 0; int_cmds[i]; i++) {
-		if (strcmp(cmd, int_cmds[i]) == 0) {
+		if (*cmd == *int_cmds[i] && strcmp(cmd, int_cmds[i]) == 0) {
 			found = 1;
 			break;
 		}
@@ -9370,7 +9375,8 @@ is_internal(const char *cmd)
 
 	if (found) /* Check for the search function as well */
 		return 1;
-	else if (cmd[0] == '/' && access(cmd, F_OK) != 0)
+
+	else if (*cmd == '/' && access(cmd, F_OK) != 0)
 		return 1;
 
 	return 0;
@@ -12874,6 +12880,12 @@ free_stuff(void)
 {
 	size_t i = 0;
 
+	if (STDIN_TMP_DIR) {
+		char *rm_cmd[] = { "rm", "-rd", "--", STDIN_TMP_DIR, NULL };
+		launch_execve(rm_cmd, FOREGROUND);
+		free(STDIN_TMP_DIR);
+	}
+
 	if (color_schemes) {
 		for (i = 0; color_schemes[i]; i++)
 			free(color_schemes[i]);
@@ -13178,6 +13190,155 @@ set_signals_to_default (void)
 }
 
 void
+handle_stdin()
+{
+	/* If files are passed via stdin, we need to disable restore
+	 * last path in order to correctly understand relative paths */
+	restore_last_path = 0;
+
+	/* Max input size: 256 * (256 * 256)
+	 * 256 chunks of 65536 bytes (64KiB) each
+	 * == (4096 * PATH_MAX) or (65793 * NAME_MAX [== 255])
+	 * == 16MiB of data ((4096 * PATH_MAX) / 1024) */
+
+	size_t chunk = 256 * 256, chunks_n = 1, input_len = 0,
+		   total_len = 0, max_chunks = 256;
+
+	/* NNN uses the following values: chunk = 512 * 1024,
+	 * max_chunks = 512, getting a max input size of 256MiB */
+
+	/* Initial buffer allocation == 1 chunk */
+	char *buf = (char *)xnmalloc(chunk, sizeof(char));
+
+	while (chunks_n < max_chunks) {
+		input_len = read(STDIN_FILENO, buf + total_len, chunk);
+
+		/* Error */
+		if (input_len < 0) {
+			free(buf);
+			return;
+		}
+
+		/* Nothing else to be read */
+		if (input_len == 0)
+			break;
+
+		total_len += input_len;
+		chunks_n++;
+
+		/* Append a new chunk of memory to the buffer */
+		buf = (char *)xrealloc(buf, (chunks_n + 1) * chunk);
+	}
+
+	if (total_len == 0)
+		goto FREE_N_EXIT;
+
+	/* Null terminate the input buffer */
+	buf[total_len] = 0x00;
+
+	/* Create tmp dir to store links to files */
+	char *rand_ext = gen_rand_str(6);
+	if (!rand_ext)
+		goto FREE_N_EXIT;
+
+	if (TMP_DIR) {
+		STDIN_TMP_DIR = (char *)xnmalloc(strlen(TMP_DIR) + 14,
+										 sizeof(char));
+		sprintf(STDIN_TMP_DIR, "%s/clifm.%s", TMP_DIR, rand_ext);
+	}
+
+	else {
+		STDIN_TMP_DIR = (char *)xnmalloc(18, sizeof(char));
+		sprintf(STDIN_TMP_DIR, "/tmp/clifm.%s", rand_ext);
+	}
+
+	free(rand_ext);
+
+	char *cmd[] = { "mkdir", "-p", STDIN_TMP_DIR, NULL };
+	if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+		goto FREE_N_EXIT;
+
+	/* Get CWD: we need it to preppend it to relative paths */
+	char *cwd = (char *)NULL;
+	cwd = getcwd(NULL, 0);
+	if (!cwd)
+		goto FREE_N_EXIT;
+
+	/* Get substrings from buf */
+	char *p = buf, *q = buf;
+
+	while (*p) {
+
+		if (!*p || *p == '\n') {
+			*p = 0x00;
+
+			/* Create symlinks (in tmp dir) to each valid file in
+			 * the buffer */
+
+			/* If file does not exist */
+			struct stat attr;
+			if (lstat(q, &attr) == -1)
+				continue;
+
+			/* Construct source and destiny files */
+			char *tmp_file = strrchr(q, '/');
+
+			if (!tmp_file || !*(++tmp_file))
+				tmp_file = q;
+
+			char source[PATH_MAX];
+
+			if (*q != '/' || !q[1])
+				snprintf(source, PATH_MAX + 1, "%s/%s", cwd, q);
+
+			else
+				strncpy(source, q, PATH_MAX);
+
+			char dest[PATH_MAX];
+			sprintf(dest, "%s/%s", STDIN_TMP_DIR, tmp_file);
+
+			if (symlink(source, dest) == -1)
+				_err('w', PRINT_PROMPT, "ln: '%s': %s\n", q,
+					 strerror(errno));
+
+			q = p + 1;
+		}
+
+		p++;
+	}
+
+	/* chdir to tmp dir and update path var */
+	if (chdir(STDIN_TMP_DIR) == -1) {
+		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, STDIN_TMP_DIR,
+				strerror(errno));
+
+		char *rm_cmd[] = { "rm" , "-drf", STDIN_TMP_DIR, NULL };
+		launch_execve(rm_cmd, FOREGROUND);
+
+		free(cwd);
+		goto FREE_N_EXIT;
+	}
+
+	free(cwd);
+
+	if (path)
+		free(path);
+
+	path = (char *)xnmalloc(strlen(STDIN_TMP_DIR) + 1, sizeof(char));
+	strcpy(path, STDIN_TMP_DIR);
+
+	goto FREE_N_EXIT;
+
+	FREE_N_EXIT:
+		free(buf);
+
+		/* Go back to tty */
+		dup2(STDOUT_FILENO, STDIN_FILENO);
+
+		return;
+}
+
+void
 init_shell(void)
 /* Keep track of attributes of the shell. Make sure the shell is running
  * interactively as the foreground job before proceeding.
@@ -13185,17 +13346,11 @@ init_shell(void)
  * https://www.gnu.org/software/libc/manual/html_node/Initializing-the-Shell.html#Initializing-the-Shell
  * */
 {
-	/* Check wether we are running interactively */
-	shell_terminal = STDIN_FILENO;
-	shell_is_interactive = isatty(shell_terminal);
-	/* isatty() returns 1 if the file descriptor, here STDIN_FILENO,
-	 * outputs to a terminal (is interactive). Otherwise, it returns
-	 * zero */
-
-	if (shell_is_interactive) {
+	/* If shell is interactive */
+	if (isatty(STDIN_FILENO)) {
 
 		/* Loop until we are in the foreground */
-		while (tcgetpgrp(shell_terminal) != (own_pid = getpgrp()))
+		while (tcgetpgrp(STDIN_FILENO) != (own_pid = getpgrp()))
 			kill (- own_pid, SIGTTIN);
 
 		/* Ignore interactive and job-control signals */
@@ -13216,11 +13371,15 @@ init_shell(void)
 		}
 
 		/* Grab control of the terminal */
-		tcsetpgrp(shell_terminal, own_pid);
+		tcsetpgrp(STDIN_FILENO, own_pid);
 
 		/* Save default terminal attributes for shell */
-		tcgetattr(shell_terminal, &shell_tmodes);
+		tcgetattr(STDIN_FILENO, &shell_tmodes);
 	}
+
+	/* If not interactive ... */
+	else
+		handle_stdin();
 }
 
 /*
@@ -16668,6 +16827,11 @@ parse_input_str(char *str)
 		}
 	}
 
+	int stdin_dir_ok = 0;
+
+	if (STDIN_TMP_DIR && strcmp(path, STDIN_TMP_DIR) == 0)
+		stdin_dir_ok = 1;
+
 	for (i = 0; i <= args_n; i++) {
 
 				/* ##########################
@@ -16801,6 +16965,18 @@ parse_input_str(char *str)
 				free(substr);
 
 				return (char **)NULL;
+			}
+		}
+
+		/* We are in STDIN_TMP_DIR: Expand symlinks to target */
+		if (stdin_dir_ok) {
+			char *real_path = realpath(substr[i], NULL);
+
+			if (real_path) {
+				substr[i] = (char *)xrealloc(substr[i],
+							(strlen(real_path) + 1) * sizeof(char));
+				strcpy(substr[i], real_path);
+				free(real_path);
 			}
 		}
 	}
