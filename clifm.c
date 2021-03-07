@@ -13196,13 +13196,13 @@ handle_stdin()
 	 * last path in order to correctly understand relative paths */
 	restore_last_path = 0;
 
-	/* Max input size: 256 * (256 * 256)
-	 * 256 chunks of 65536 bytes (64KiB) each
-	 * == (4096 * PATH_MAX) or (65793 * NAME_MAX [== 255])
-	 * == 16MiB of data ((4096 * PATH_MAX) / 1024) */
+	/* Max input size: 512 * (512 * 1024)
+	 * 512 chunks of 524288 bytes (512KiB) each
+	 * == (65535 * PATH_MAX)
+	 * == 262MiB of data ((65535 * PATH_MAX) / 1024) */
 
-	size_t chunk = 256 * 256, chunks_n = 1, input_len = 0,
-		   total_len = 0, max_chunks = 256;
+	size_t chunk = 512 * 1024, chunks_n = 1, input_len = 0,
+		   total_len = 0, max_chunks = 512;
 
 	/* NNN uses the following values: chunk = 512 * 1024,
 	 * max_chunks = 512, getting a max input size of 256MiB */
@@ -17625,7 +17625,7 @@ count_dir(const char *dir_path) /* Readdir version */
 		if (errno == ENOMEM)
 			exit(EXIT_FAILURE);
 		else
-			return 0;
+			return -1;
 	}
 
 	int file_count = 0;
