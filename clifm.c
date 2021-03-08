@@ -913,7 +913,7 @@ const char *INTERNAL_CMDS[] = { "alias", "open", "prop", "back", "forth",
 		"profile", "shell", "mime", "sort", "tips", "autocd",
 		"auto-open", "actions", "reload", "export", "keybinds",
 		"pin", "unpin", "colorschemes", "jump", "icons", "columns",
-		NULL };
+		"filter", NULL };
 
 #define MAX_COLOR 46
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
@@ -1467,6 +1467,55 @@ main(int argc, char **argv)
 			/** #################################
 			 * #     FUNCTIONS DEFINITIONS     #
 			 * ################################# */
+
+int
+filter_function(char *arg)
+{
+	if (!arg) {
+		printf(_("Current filter: %s\n"), filter ? filter : "none");
+		return EXIT_SUCCESS;
+	}
+
+	if (*arg == '-' && strcmp(arg, "--help") == 0) {
+		puts(_("Usage: ft, filter [unset] [REGEX]"));
+	}
+
+	if (*arg == 'u' && strcmp(arg, "unset") == 0) {
+		if (filter) {
+			free(filter);
+			filter = (char *)NULL;
+			regfree(&regex_exp);
+			puts(_("Filter unset"));
+		}
+
+		else
+			puts(_("No filter set"));
+
+		return EXIT_SUCCESS;
+	}
+
+	if (filter)
+		free(filter);
+
+	regfree(&regex_exp);
+
+	filter = (char *)xnmalloc(strlen(arg) + 1, sizeof(char));
+	strcpy(filter, arg);
+
+	if (regcomp(&regex_exp, filter, REG_NOSUB|REG_EXTENDED)
+	!= EXIT_SUCCESS) {
+		fprintf(stderr, _("%s: '%s': Invalid regular expression\n"),
+				PROGRAM_NAME, filter);
+		free(filter);
+		filter = (char *)NULL;
+		regfree(&regex_exp);
+	}
+
+	else
+		puts(_("New filter successfully set"));
+	
+	return EXIT_SUCCESS;
+}
 
 void
 check_env_filter(void)
@@ -7627,7 +7676,8 @@ is_internal_c(const char *cmd)
 					"ao", "auto-open", "actions", "rl", "reload",
 					"exp", "export", "kb", "keybinds", "pin",
 					"unpin", "cs", "colorschemes", "jump", "je",
-					"jc", "jp", "jo", "icons", "cl", "columns", NULL };
+					"jc", "jp", "jo", "icons", "cl", "columns",
+					"ft", "filter", NULL };
 
 	short found = 0;
 	size_t i;
@@ -20862,6 +20912,10 @@ exec_cmd(char **comm)
 	 * #			     MINOR FUNCTIONS 				#
 	 * ##################################################*/
 
+	else if(*comm[0] == 'f' && ((comm[0][1] == 't' && !comm[0][2])
+	|| strcmp(comm[0], "filter") == 0))
+		return filter_function(comm[1]);
+
 	else if (*comm[0] == 'c' && ((comm[0][1] == 'l' && !comm[0][2])
 	|| strcmp(comm[0], "columns") == 0)) {
 		if (!comm[1] || (*comm[1] == '-'
@@ -26060,6 +26114,7 @@ help_function (void)
  ;[CMD], :[CMD]\n\
  mp, mountpoints\n\
  v, paste [sel] [DESTINY]\n\
+ ft, filter [unset] [REGEX]\n\
  pf, prof, profile [ls, list] [set, add, del PROFILE]\n\
  cs, colorscheme [edit] [COLORSCHEME]\n\
  br, bulk ELN/FILE ...\n\
