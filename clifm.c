@@ -2876,6 +2876,23 @@ edit_actions(void)
 }
 
 int
+run_exec(char *cmd)
+{
+	signal (SIGHUP, SIG_DFL);
+	signal (SIGINT, SIG_DFL);
+	signal (SIGQUIT, SIG_DFL);
+	signal (SIGTERM, SIG_DFL);
+
+	char *name = strrchr(sys_shell, '/');
+
+	execl(sys_shell, name ? name + 1 : sys_shell, "-c", cmd, NULL);
+	fprintf(stderr, "%s: '%s': execle: %s\n", PROGRAM_NAME, sys_shell, 
+			strerror(errno));
+
+	return EXIT_SUCCESS;
+}
+
+int
 run_action(char *action, char **args)
 /* The core of this function was taken from NNN's run_selected_plugin
  * function and modified to fit our needs. Thanks NNN! */
@@ -2983,28 +3000,61 @@ run_action(char *action, char **args)
 
 	close(rfd);
 
-	/* If the pipe was not empty */
-	if (*buf) {
-		if (buf[buf_len - 1] == '\n')
-			buf[buf_len - 1] = 0x00;
+	/* If the pipe is empty */
+	if (!*buf) {
+		unlink(fifo_path);
+		return EXIT_SUCCESS;	
+	}
 
-		/* Make sure we have a valid file */
-		struct stat attr;
+	if (buf[buf_len - 1] == '\n')
+		buf[buf_len - 1] = 0x00;
 
-		if (lstat(buf, &attr) != -1) {
-			char *o_cmd[] = { "o", buf, NULL };
-			exit_status = open_function(o_cmd);
+	/* If a valid file */
+	struct stat attr;
+
+	if (lstat(buf, &attr) != -1) {
+		char *o_cmd[] = { "o", buf, NULL };
+		exit_status = open_function(o_cmd);
+	}
+
+	/* If not a file, take it as a command*/
+	else {
+		size_t old_args = args_n;
+		args_n = 0;
+
+		char **_cmd = parse_input_str(buf);
+
+		if (_cmd) {
+
+			char **alias_cmd = check_for_alias(_cmd);
+
+			if (alias_cmd) {
+				exit_status = exec_cmd(alias_cmd);
+
+				for (i = 0; alias_cmd[i]; i++)
+					free(alias_cmd[i]);
+
+				free(alias_cmd);
+			}
+
+			else {
+				exit_status = exec_cmd(_cmd);
+
+				for (i = 0; i <= args_n; i++)
+					free(_cmd[i]);
+
+				free(_cmd);
+			}
 		}
 
-		/* If not a file, take it as a command*/
-		else
-			keybind_exec_cmd(buf);
+		args_n = old_args;
 	}
 
 	/* Remove the pipe file */
 	unlink(fifo_path);
 
 	return exit_status;
+
 }
 
 int
@@ -17531,7 +17581,7 @@ rl_no_hist(const char *prompt)
 
 int
 get_sel_files(void)
-/* Get elements currently in the Selection Box, if any. */
+/* Get current entries in the Selection Box, if any. */
 {
 	if (!selfile_ok || !config_ok)
 		return EXIT_FAILURE;
@@ -17539,32 +17589,41 @@ get_sel_files(void)
 	/* First, clear the sel array, in case it was already used */
 	if (sel_n > 0) {
 		size_t i;
+
 		for (i = 0; i < sel_n; i++)
 			free(sel_elements[i]);
 	}
+
 /*	free(sel_elements); */
+
 	sel_n = 0;
+
 	/* Open the tmp sel file and load its contents into the sel array */
 	FILE *sel_fp = fopen(SEL_FILE, "r");
+
 /*	sel_elements = xcalloc(1, sizeof(char *)); */
 	if (!sel_fp)
 		return EXIT_FAILURE;
 
-	/* Since this file contains only paths, I can be sure no line
+	/* Since this file contains only paths, we can be sure no line
 	 * length will be larger than PATH_MAX */
-	char sel_line[PATH_MAX] = "";
+	char line[PATH_MAX] = "";
 
-	while (fgets(sel_line, sizeof(sel_line), sel_fp)) {
+	while (fgets(line, sizeof(line), sel_fp)) {
 
-		size_t line_len = strlen(sel_line);
+		size_t len = strlen(line);
 
-		sel_line[line_len - 1] = 0x00;
+		if (line[len - 1 ] == '\n')
+			line[len - 1] = 0x00;
+
+		if (!*line || *line == '#')
+			continue;
 
 		sel_elements = (char **)xrealloc(sel_elements, (sel_n + 1)
 										 * sizeof(char *));
-		sel_elements[sel_n] = (char *)xcalloc(line_len+1,
+		sel_elements[sel_n] = (char *)xnmalloc(len + 1,
 											  sizeof(char));
-		strcpy(sel_elements[sel_n++], sel_line);
+		strcpy(sel_elements[sel_n++], line);
 	}
 
 	fclose(sel_fp);
@@ -17579,7 +17638,9 @@ prompt(void)
 {
 	/* Remove all final slash(es) from path, if any */
 	size_t path_len = strlen(path), i;
+
 	for (i = path_len - 1; path[i] && i > 0; i--) {
+
 		if (path[i] != '/')
 			break;
 		else
@@ -17596,6 +17657,7 @@ prompt(void)
 	/* Print the tip of the day (only on first run) */
 	if (tips) {
 		static int first_run = 1;
+
 		if (first_run) {
 			print_tips(0);
 			first_run = 0;
@@ -17605,6 +17667,7 @@ prompt(void)
 	/* Execute prompt commands, if any, and only if external commands
 	 * are allowed */
 	if (ext_cmd_ok && prompt_cmds_n > 0) 
+
 		for (i = 0; i < prompt_cmds_n; i++)
 			launch_execle(prompt_cmds[i]);
 
@@ -17648,7 +17711,9 @@ prompt(void)
 	if (!decoded_prompt) {
 		fprintf(stderr, _("%s: Error decoding prompt line. Using an "
 				"emergency prompt\n"), PROGRAM_NAME);
+
 		decoded_prompt = (char *)xnmalloc(9, sizeof(char));
+
 		sprintf(decoded_prompt, "\001\x1b[0m\002> ");
 	}
 
@@ -17668,7 +17733,7 @@ prompt(void)
 	 * 6 = NC_b
 	 * 1 = null terminating char */
 
-//	char *the_prompt = (char *)xnmalloc(prompt_length, sizeof(char));
+/*	char *the_prompt = (char *)xnmalloc(prompt_length, sizeof(char)); */
 	char the_prompt[prompt_length];
 
 	snprintf(the_prompt, prompt_length, "%s%s%s%s%s%s%s%s%s%s", 
@@ -17687,8 +17752,6 @@ prompt(void)
 	 * be printed in place by log_msg() itself, without waiting for
 	 * the next prompt */
 	if (print_msg) {
-/*		for (i = 0; i < (size_t)msgs_n; i++)
-			fputs(messages[i], stderr); */
 		fputs(messages[msgs_n - 1], stderr);
 
 		print_msg = 0; /* Print messages only once */
