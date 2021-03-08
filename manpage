@@ -328,6 +328,12 @@ If you want to add or remove a bookmark directly from the command line, use the 
 A handy use for the bookmarks function, provided the expand-bookmarks option is enabled, is to create bookmarks using short names, which will be later easily accessible via TAB completion.  
 .TP
 
+.B ft, filter \fR[unset] [REGEX]
+with no argument, print the current filter. To remove the current filter use the 'unset' option. To set a new filter enter 'ft REGEX', for example: 'ft ^\.' to exclude all hidden files.
+.sp
+The filter will be lost at program exit. To permanently set a files filter use the \fIFilter\fR option (in the configuration file). You can also use the CLIFM_FILTER environment variable (see below), though the value of this variable will be lost at system shutdown or reboot. 
+.TP
+
 .B alias \fR[import FILE]
 with no argument, it prints the list of available aliases, if any. To write a new alias simply enter 'edit' to open the configuration file and add a line like this one: "alias name='command args...'" or "alias name='directory'".
 .sp
@@ -897,7 +903,7 @@ If speed is still an issue, try one of the setups below (listed from slower to f
 .TP
 \fBa)\fR Default mode (all listing features enabled)
 .TP
-\fBb)\fR Default mode with sorting method set to "none" (sorting files could be expensive). Needless to say, if icons are enabled, disable them.
+\fBb)\fR Default mode with sorting method set to "none" (sorting files could be expensive). Needless to say, if icons are enabled, disable them. Columns and files filter should also be disabled.
 .TP
 \fBc)\fR Default mode with FilesCounter option disabled (the files counter function could be quite time consuming, since every directory needs to be accessed via \fBreaddir(3)\fR to get the amount of files it contains)
 .TP
@@ -922,6 +928,9 @@ Same as above, but for file extensions
 .TP
 .B CLIFM_IFACE_COLORS
 Same as above, but for different element of ClIFM's interface
+.TP
+.B CLIFM_FILTER
+Define a file filter. If set, this variable overrides the \fIFilter\fR option in the configuration file
 .TP
 Except when running in stealth mode, CliFM sets the following environment variables:
 .TP
