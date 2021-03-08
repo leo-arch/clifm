@@ -405,6 +405,7 @@ void load_jumpdb(void);
 void save_jumpdb(void);
 void set_env(void);
 void copy_plugins(void);
+void check_env_filter(void);
 
 /* Memory management */
 char *xnmalloc(size_t nmemb, size_t size);
@@ -471,7 +472,7 @@ int rl_sort_previous(int count, int key);
 int rl_paste_sel(int count, int key);
 
 /* Scandir filters */
-int skip_implied_dot(const struct dirent *ent);
+int skip_files(const struct dirent *ent);
 int skip_nonexec(const struct dirent *ent);
 
 /* Parsing */
@@ -892,7 +893,10 @@ char *user = (char *)NULL, *path = (char *)NULL,
 	*COLORS_DIR = (char *)NULL, **color_schemes = (char **)NULL,
 	*cur_cscheme = (char *)NULL, *usr_cscheme = (char *)NULL,
 	*CONFIG_DIR_GRAL = (char *)NULL, *icon = (char *)NULL,
-	*icon_color = (char *)NULL, *STDIN_TMP_DIR = (char *)NULL;
+	*icon_color = (char *)NULL, *STDIN_TMP_DIR = (char *)NULL,
+	*filter = (char *)NULL;
+
+regex_t regex_exp;
 
 char div_line_char = UNSET;
 
@@ -1005,10 +1009,6 @@ check_stdin()
 int
 main(int argc, char **argv)
 {
-//	check_stdin();
-
-//	return EXIT_SUCCESS;
-
 	/* #########################################################
 	 * #			0) INITIAL CONDITIONS					   #
 	 * #########################################################*/
@@ -1169,6 +1169,8 @@ main(int argc, char **argv)
 		/* external_arguments is executed before init_config because, if
 		 * specified (-P option), it sets the value of alt_profile, which
 		 * is then checked by init_config */
+
+	check_env_filter();
 
 	/* Initialize program paths and files, set options from the config
 	 * file, if they were not already set via external arguments, and
@@ -1467,7 +1469,24 @@ main(int argc, char **argv)
 			 * ################################# */
 
 void
-copy_plugins()
+check_env_filter(void)
+{
+	if (filter)
+		return;
+
+	char *p = getenv("CLIFM_FILTER");
+
+	if (!p)
+		return;
+
+	filter = (char *)xnmalloc(strlen(p) + 1, sizeof(char));
+	strcpy(filter, p);
+
+	return;
+}
+
+void
+copy_plugins(void)
 {
 	char usr_share_plugins_dir[] = "/usr/share/clifm/plugins";
 
@@ -2215,6 +2234,12 @@ reload_config(void)
 
 	size_t i = 0;
 
+	if (filter) {
+		regfree(&regex_exp);
+		free(filter);
+		filter = (char *)NULL;
+	}
+
 	if (opener) {
 		free(opener);
 		opener = (char *)NULL;
@@ -2270,7 +2295,7 @@ reload_config(void)
 
 	free(usr_cscheme);
 	usr_cscheme = (char *)NULL;
-	
+
 	/* If some option was set via command line, keep that value
 	 * for any profile */
 	if (xargs.no_columns != UNSET)
@@ -5416,6 +5441,11 @@ DividingLineChar='='\n\n"
 "# If set to true, print a map of the current position in the directory\n\
 # history list\n\
 DirhistMap=false\n\n"
+
+"# Use a regex expression to exclude filenames when listing files.\n\
+# Example: .*~$ to exclude backup files (ending with ~). Do not quote\n\
+# the regular expression\n\
+Filter=\n\n"
 
 "# The prompt line is build using string literals and/or the following escape\n\
 # sequences:\n"
@@ -10713,7 +10743,7 @@ remove_from_trash(void)
 	size_t i = 0;
 	struct dirent **trash_files = (struct dirent **)NULL;
 	int files_n = scandir(TRASH_FILES_DIR, &trash_files,
-						  skip_implied_dot, (unicode) ? alphasort
+						  skip_files, (unicode) ? alphasort
 						  : (case_sensitive) ? xalphasort
 						  : alphasort_insensitive);
 
@@ -11041,7 +11071,7 @@ untrash_function(char **comm)
 	/* Get trashed files */
 	struct dirent **trash_files = (struct dirent **)NULL;
 	int trash_files_n = scandir(TRASH_FILES_DIR, &trash_files,
-								skip_implied_dot, (unicode) ? alphasort
+								skip_files, (unicode) ? alphasort
 								: (case_sensitive) ? xalphasort
 								: alphasort_insensitive);
 	if (trash_files_n <= 0) {
@@ -11212,7 +11242,7 @@ trash_clear(void)
 		return EXIT_FAILURE;
 	}
 
-	files_n = scandir(TRASH_FILES_DIR, &trash_files, skip_implied_dot, 
+	files_n = scandir(TRASH_FILES_DIR, &trash_files, skip_files, 
 					  xalphasort);
 
 	if (!files_n) {
@@ -11318,7 +11348,7 @@ trash_function (char **comm)
 
 		struct dirent **trash_files = (struct dirent **)NULL;
 		int files_n = scandir(TRASH_FILES_DIR, &trash_files,
-							  skip_implied_dot, (unicode) ? alphasort : 
+							  skip_files, (unicode) ? alphasort : 
 							  (case_sensitive) ? xalphasort : 
 							  alphasort_insensitive);
 		if (files_n) {
@@ -12914,6 +12944,11 @@ free_stuff(void)
 
 	if (pinned_dir)
 		free(pinned_dir);
+
+	if (filter) {
+		regfree(&regex_exp);
+		free(filter);
+	}
 
 	free_bookmarks();
 
@@ -14915,6 +14950,25 @@ read_config(void)
 				splash_screen = 0;
 		}
 
+		else if (!filter && *line == 'F'
+		&& strncmp(line, "Filter=", 7) == 0) {
+
+			char *opt_str = strchr(line, '=');
+
+			if (!opt_str)
+				continue;
+
+			size_t len = strlen(opt_str);
+			if (opt_str[len - 1] == '\n')
+				opt_str[len - 1] = 0x00;
+
+			if (!*(++opt_str))
+				continue;
+
+			filter = (char *)xnmalloc(len + 1, sizeof(char));
+			strcpy(filter, opt_str);
+		}
+
 		else if (!usr_cscheme && *line == 'C'
 		&& strncmp(line, "ColorScheme=", 12) == 0) {
 
@@ -14924,15 +14978,14 @@ read_config(void)
 			if (!opt_str)
 				continue;
 
-			if (!*(opt_str++))
-				continue;
-
 			size_t len = strlen(opt_str);
 			if (opt_str[len - 1] == '\n')
 				opt_str[len - 1] = 0x00;
 
-			usr_cscheme = (char *)xnmalloc(len + 1,
-									 sizeof(char));
+			if (!*(++opt_str))
+				continue;
+
+			usr_cscheme = (char *)xnmalloc(len + 1, sizeof(char));
 			strcpy(usr_cscheme, opt_str);
 		}
 
@@ -15499,6 +15552,18 @@ read_config(void)
 	}
 
 	fclose(config_fp);
+
+	if (filter) {
+		ret = regcomp(&regex_exp, filter, REG_NOSUB|REG_EXTENDED);
+
+		if (ret != EXIT_SUCCESS) {
+			_err('w', PRINT_PROMPT, _("%s: '%s': Invalid regular "
+				 "expression\n"), PROGRAM_NAME, filter);
+			free(filter);
+			filter = (char *)NULL;
+			regfree(&regex_exp);
+		}
+	}
 
 	return;
 }
@@ -17701,7 +17766,7 @@ skip_nonexec(const struct dirent *ent)
 }
 
 int
-skip_implied_dot(const struct dirent *ent)
+skip_files(const struct dirent *ent)
 {
 	/* In case a directory isn't reacheable, like a failed
 	 * mountpoint... */
@@ -17716,6 +17781,11 @@ skip_implied_dot(const struct dirent *ent)
 	/* Skip "." and ".." */
 	if (*ent->d_name == '.' && (!ent->d_name[1]
 	|| (ent->d_name[1] == '.' && !ent->d_name[2])))
+		return 0;
+
+	/* Skip files matching FILTER */
+	if (filter && regexec(&regex_exp, ent->d_name, 0, NULL, 0)
+	== EXIT_SUCCESS)
 		return 0;
 
 	/* If not hidden files */
@@ -17880,7 +17950,7 @@ colors_list(const char *ent, const int i, const int pad,
 
 	case S_IFSOCK: color = so_c; break;
 
-	/* In case all of the above conditions are false... */
+	/* In case all the above conditions are false... */
 	default: color = no_c; break;
 	}
 
@@ -18000,63 +18070,63 @@ list_dir(void)
 			/* tmp_dirlist is a global array to store the list of files
 			 * in the current working directory. Pointers to this list
 			 * will be stored in the dirlist array */
-			total = scandir(path, &tmp_dirlist, skip_implied_dot, NULL);
+			total = scandir(path, &tmp_dirlist, skip_files, NULL);
 		break;
 
 		case 1:
-			total = scandir(path, &tmp_dirlist, skip_implied_dot,
+			total = scandir(path, &tmp_dirlist, skip_files,
 							(unicode) ? m_alphasort : (case_sensitive)
 							? xalphasort : alphasort_insensitive);
 		break;
 
 		case 2:
-			total = scandir(path, &tmp_dirlist, skip_implied_dot,
+			total = scandir(path, &tmp_dirlist, skip_files,
 							size_sort);
 		break;
 
 		case 3:
-			total = scandir(path, &tmp_dirlist, skip_implied_dot,
+			total = scandir(path, &tmp_dirlist, skip_files,
 							atime_sort);
 		break;
 
 		case 4:
 		#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) \
 		|| defined(_STATX)
-			total = scandir(path, &tmp_dirlist, skip_implied_dot,
+			total = scandir(path, &tmp_dirlist, skip_files,
 							btime_sort);
 		#else
-			total = scandir(path, &tmp_dirlist, skip_implied_dot,
+			total = scandir(path, &tmp_dirlist, skip_files,
 							ctime_sort);
 		#endif
 		break;
 
 		case 5:
-			total = scandir(path, &tmp_dirlist, skip_implied_dot,
+			total = scandir(path, &tmp_dirlist, skip_files,
 							ctime_sort);
 		break;
 
 		case 6:
-			total = scandir(path, &tmp_dirlist, skip_implied_dot,
+			total = scandir(path, &tmp_dirlist, skip_files,
 							mtime_sort);
 		break;
 
 		case 7:
 		#if __FreeBSD__ || _BE_POSIX
-			total = scandir(path, &tmp_dirlist, skip_implied_dot,
+			total = scandir(path, &tmp_dirlist, skip_files,
 							m_alphasort);
 		#else
-			total = scandir(path, &tmp_dirlist, skip_implied_dot,
+			total = scandir(path, &tmp_dirlist, skip_files,
 							m_versionsort);
 		#endif
 		break;
 
 		case 8:
-			total = scandir(path, &tmp_dirlist, skip_implied_dot,
+			total = scandir(path, &tmp_dirlist, skip_files,
 							ext_sort);
 		break;
 
 		case 9:
-			total = scandir(path, &tmp_dirlist, skip_implied_dot,
+			total = scandir(path, &tmp_dirlist, skip_files,
 							inode_sort);
 		break;
 
@@ -18926,63 +18996,63 @@ list_dir_light(void)
 	 * 5 = ctime, 6 = mtime, 7 = version, 8 = ext, 9 = inode */
 	switch(sort) {
 		case 0:
-			total = scandir(path, &tmp_dirlist, skip_implied_dot, NULL);
+			total = scandir(path, &tmp_dirlist, skip_files, NULL);
 		break;
 
 		case 1:
-			total = scandir(path, &tmp_dirlist, skip_implied_dot,
+			total = scandir(path, &tmp_dirlist, skip_files,
 							(unicode) ? m_alphasort : (case_sensitive)
 							? xalphasort : alphasort_insensitive);
 		break;
 
 		case 2:
-			total = scandir(path, &tmp_dirlist, skip_implied_dot,
+			total = scandir(path, &tmp_dirlist, skip_files,
 							size_sort);
 		break;
 
 		case 3:
-			total = scandir(path, &tmp_dirlist, skip_implied_dot,
+			total = scandir(path, &tmp_dirlist, skip_files,
 							atime_sort);
 		break;
 
 		case 4:
 		#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) \
 		|| defined(_STATX)
-			total = scandir(path, &tmp_dirlist, skip_implied_dot,
+			total = scandir(path, &tmp_dirlist, skip_files,
 							btime_sort);
 		#else
-			total = scandir(path, &tmp_dirlist, skip_implied_dot,
+			total = scandir(path, &tmp_dirlist, skip_files,
 							ctime_sort);
 		#endif
 		break;
 
 		case 5:
-			total = scandir(path, &tmp_dirlist, skip_implied_dot,
+			total = scandir(path, &tmp_dirlist, skip_files,
 							ctime_sort);
 		break;
 
 		case 6:
-			total = scandir(path, &tmp_dirlist, skip_implied_dot,
+			total = scandir(path, &tmp_dirlist, skip_files,
 							mtime_sort);
 		break;
 
 		case 7:
 		# if __FreeBSD__ || _BE_POSIX
-			total = scandir(path, &tmp_dirlist, skip_implied_dot,
+			total = scandir(path, &tmp_dirlist, skip_files,
 							m_alphasort);
 		#else
-			total = scandir(path, &tmp_dirlist, skip_implied_dot,
+			total = scandir(path, &tmp_dirlist, skip_files,
 							m_versionsort);
 		#endif
 		break;
 
 		case 8:
-			total = scandir(path, &tmp_dirlist, skip_implied_dot,
+			total = scandir(path, &tmp_dirlist, skip_files,
 							ext_sort);
 		break;
 
 		case 9:
-			total = scandir(path, &tmp_dirlist, skip_implied_dot,
+			total = scandir(path, &tmp_dirlist, skip_files,
 							inode_sort);
 		break;
 	}
@@ -22130,7 +22200,7 @@ sel_regex(char *str, const char *dest_path, mode_t filetype)
 	else { /* Check pattern against files in DEST_FILE */
 
 		struct dirent **list = (struct dirent **)NULL;
-		int filesn = scandir(dest_path, &list, skip_implied_dot,
+		int filesn = scandir(dest_path, &list, skip_files,
 							 xalphasort);
 
 		if (filesn == -1) {
@@ -23139,10 +23209,9 @@ search_regex(char **comm)
 			return EXIT_FAILURE;
 		}
 
-		tmp_files = scandir(".", &reg_dirlist, skip_implied_dot,
-							xalphasort);
+		tmp_files = scandir(".", &reg_dirlist, skip_files, xalphasort);
 
-/*		tmp_files = scandir(".", &reg_dirlist, skip_implied_dot,
+/*		tmp_files = scandir(".", &reg_dirlist, skip_files,
 							sort == 0 ? NULL : sort == 1 ? m_alphasort
 							: sort == 2 ? size_sort : sort == 3
 							? atime_sort : sort == 4 ? btime_sort
