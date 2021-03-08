@@ -73,6 +73,7 @@ List of CliFM features:
   32) Built-in autojump function
   33) Icons support (depends on icons-in-terminal: \fIhttps://github.com/sebastiencs/icons-in-terminal\fR)
   34) Batch symbolic links
+  35) Files filter via regular expressions for the files list
 
 .SH RATIONALE
 When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the Linux built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There is no two without three".
@@ -609,6 +610,15 @@ safely quit CliFM.
 .B Q
 same as \fIquit\fR, but enabling the CD on quit functionality.
 
+.SH FILE FILTERS
+CliFM offers three kinds of file filters:
+.sp
+ a) Dot and backup files filters (for files starting with a dot or ending with a tilde respectivelly) to permanently exclude hidden and backup files from the files list. See above the corresponding options and commands.
+.sp
+ b) Files filter via regular expressions (using the \fIFilter\fR option in the configuration file) to permanently exclude certain groups of filenames.
+.sp
+ c) Local filter via the \fIQuick search\fI function (supporting both regular expressions and wildcards) to temporarily filter the current list of files.
+
 .SH KEYBOARD SHORTCUTS
 .TP
 \fBM\-c:\fR Clear the current command line buffer
@@ -822,7 +832,6 @@ with the path printed in cyan and the dollar sign in blue.
 
 .TP
 A bold green asterisk at the left of the prompt indicates that there are elements in the Selection Box. In the same way, a yellow 'T' means that there are currently files in the trash can, just as a bold blue 'S' means that the program is running in stealth mode. Finally, CliFM makes use of three kind of messages: errors (a red 'E' at the left of the prompt), warnings (a yellow 'W'), and simple notices (a green 'N').
-
 .SH BUILT\-IN EXPANSIONS
 .TP
 Besides the default TAB completion for command names and paths, you can also expand ELN's using the TAB key. Example: type 'o 12', press TAB, and it becomes 'o filename ', or, if 12 refers to a directory, 'o dir/'. CliFM uses a Bash\-style quoting system, so that this filename: "this is a test@version{1}" is expanded as follows: this\\ is\\ a\\ test\\@version\\{1\\}
