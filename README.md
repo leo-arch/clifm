@@ -106,6 +106,8 @@ Because file manager, but also half-shell, CLiFM also provides the following fea
 * Plugins: PDF reader, image/video previews, wallpaper setter, music playlist, updates check, drag and drop, finder, and jumper (**NEW**)
 * Color schemes (**NEW**)
 * Batch links (**NEW**)
+* Read and list files form standard input (**NEW**)
+* Exclude certain groups of filenames via the files filter using regular expressions (**NEW**)
 
 **NOTE:** By default, CliFM ships only one color scheme, but more are provided by [clifm-colors](https://github.com/leo-arch/clifm-colors). The package is also available in the [AUR](https://aur.archlinux.org/packages/clifm-colors-git).
 
