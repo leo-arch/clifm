@@ -431,6 +431,7 @@ char **my_rl_completion(const char *text, int start, int end);
 char *my_rl_quote(char *text, int m_t, char *qp);
 int quote_detector(char *line, int index);
 int is_quote_char(char c);
+char *hist_generator(const char *text, int state);
 char *jump_generator(const char *text, int state);
 char *jump_entries_generator(const char *text, int state);
 char *cschemes_generator(const char *text, int state);
@@ -14180,8 +14181,13 @@ my_rl_completion(const char *text, int start, int end)
 			return (char **)NULL;
 		}
 
+		/* History cmd completion */
+		if (*text == '!')
+			matches = rl_completion_matches(text + 1, &hist_generator);
+
 		/* If autocd or auto-open, try to expand ELN's first */
-		if ((autocd || auto_open) && *text >= 0x31 && *text <= 0x39) {
+		else if ((autocd || auto_open)
+		&& *text >= 0x31 && *text <= 0x39) {
 			int num_text = atoi(text);
 
 			if (is_number(text) && num_text > 0
@@ -14236,9 +14242,9 @@ my_rl_completion(const char *text, int start, int end)
 		else if (*rl_line_buffer == 'j' && (rl_line_buffer[1] == 0x20
 		|| ((rl_line_buffer[1] == 'c' || rl_line_buffer[1] == 'p')
 		&& rl_line_buffer[2] == 0x20)
-		|| strncmp(rl_line_buffer, "jump ", 5) == 0)) {
+		|| strncmp(rl_line_buffer, "jump ", 5) == 0))
+
 			matches = rl_completion_matches(text, &jump_generator);
-		}
 
 				/* ### BOOKMARKS COMPLETION ### */
 
@@ -14285,6 +14291,28 @@ my_rl_completion(const char *text, int start, int end)
 	/* If none of the above, readline will attempt 
 	 * path completion instead via my custom my_rl_path_completion() */
 	return matches;
+}
+
+char *
+hist_generator(const char *text, int state)
+/* Used by history completion */
+{
+	static int i;
+	static size_t len;
+	char *name;
+
+	if (!state) {
+		i = 0;
+		len = strlen(text);
+	}
+
+	/* Look for cmd history entries for a match */
+	while ((name = history[i++]) != NULL) {
+		if (strncmp(name, text, len) == 0)
+			return strdup(name);
+	}
+
+	return (char *)NULL;
 }
 
 int
@@ -20861,6 +20889,7 @@ exec_cmd(char **comm)
 		kbind_busy = 0;
 	}
 
+	/*    ############### PINNED FILE ##################     */
 	else if (*comm[0] == 'p' && strcmp(comm[0], "pin") == 0) {
 
 		if (comm[1]) {
@@ -20911,8 +20940,12 @@ exec_cmd(char **comm)
 
 	/*      ############### HISTORY ##################     */
 	/* If '!number' or '!-number' or '!!' */
-	else if (comm[0][0] == '!' && (isdigit(comm[0][1]) 
-	|| (comm[0][1] == '-' && isdigit(comm[0][2])) || comm[0][1] == '!'))
+/*	else if (comm[0][0] == '!' && (isdigit(comm[0][1]) 
+	|| (comm[0][1] == '-' && isdigit(comm[0][2])) || comm[0][1] == '!')) */
+
+	else if (*comm[0] == '!' && comm[0][1] != 0x20
+	&& comm[0][1] != '\t' && comm[0][1] != '\n' && comm[0][1] != '='
+	&& comm[0][1] != '(')
 		exit_code = run_history_cmd(comm[0] + 1);
 
 	/*    ############### BATCH LINK ##################     */
@@ -21161,6 +21194,7 @@ exec_cmd(char **comm)
 		}
 	}
 
+	/*    ############### RELOAD ##################     */
 	else if (*comm[0] == 'r' && ((comm[0][1] == 'l' && !comm[0][2])
 	|| strcmp(comm[0], "reload") == 0)) {
 		exit_code = reload_config();
@@ -25709,7 +25743,7 @@ run_history_cmd(const char *cmd)
 	}
 
 	/* If "!!", execute the last command */
-	else if (strcmp(cmd, "!") == 0) {
+	else if (*cmd == '!' && !cmd[1]) {
 		size_t old_args = args_n;
 
 		if (record_cmd(history[current_hist_n - 1]))
@@ -25753,13 +25787,13 @@ run_history_cmd(const char *cmd)
 	}
 
 	/* If "!-n" */
-	else if (cmd[0] == '-') {
+	else if (*cmd == '-') {
 		/* If not number or zero or bigger than max... */
 		int acmd = atoi(cmd + 1);
 
 		if (!is_number(cmd + 1) || acmd == 0 
 		|| acmd > (int)current_hist_n - 1) {
-			fprintf(stderr, _("%s: !%s: event not found\n"), 
+			fprintf(stderr, _("%s: !%s: Event not found\n"), 
 					PROGRAM_NAME, cmd);
 			return EXIT_FAILURE;
 		}
@@ -25807,6 +25841,58 @@ run_history_cmd(const char *cmd)
 				PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
+
+	else if ((*cmd >= 'a' && *cmd <= 'z')
+	|| (*cmd >= 'A' && *cmd <= 'Z')) {
+
+		size_t len = strlen(cmd), old_args = args_n;;
+
+		for (i = 0; history[i]; i++) {
+
+			if (*cmd == *history[i]
+			&& strncmp(cmd, history[i], len) == 0) {
+
+				char **cmd_hist = parse_input_str(history[i]);
+
+				if (cmd_hist) {
+
+					char **alias_cmd = check_for_alias(cmd_hist);
+
+					if (alias_cmd) {
+
+						if (exec_cmd(alias_cmd) != EXIT_SUCCESS)
+							exit_status = EXIT_FAILURE;
+
+						for (i = 0; alias_cmd[i]; i++)
+							free(alias_cmd[i]);
+
+						free(alias_cmd);
+
+						alias_cmd = (char **)NULL;
+					}
+
+					else {
+						if (exec_cmd(cmd_hist) != EXIT_SUCCESS)
+							exit_status = EXIT_FAILURE;
+
+						for (i = 0; cmd_hist[i]; i++)
+							free(cmd_hist[i]);
+
+						free(cmd_hist);
+					}
+
+					args_n = old_args;
+					return exit_status;
+				}
+			}
+		}
+
+		fprintf(stderr, _("%s: !%s: Event not found\n"),
+				PROGRAM_NAME, cmd);
+
+		return EXIT_FAILURE;
+	}
+	
 	else {
 		printf(_("Usage:\n\
 !!: Execute the last command.\n\
