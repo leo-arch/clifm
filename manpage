@@ -42,7 +42,7 @@ List of CliFM features:
   1) FreeDesktop compliant Trash system
   2) Automatic files listing
   3) Command and directory history function
-  4) TAB completion for commands, paths, bookmarks, profiles, color schemes, and directory history via the jump command
+  4) TAB completion for commands, paths, bookmarks, profiles, color schemes, command history, and directory history via the jump command
   5) TAB ELN\-expansion
   6) More than 40 customizable keyboard shortcuts
   7) Wildcards and regex auto\-expansion
@@ -530,6 +530,7 @@ You can use the exclamation character (!) to perform some history commands:
   !!: Execute the last command.
   !n: Execute the command number 'n' in the history list.
   !\-n: Execute the last\-n command in the history list.
+  ![STRING]: Execute command starting with STRING. TAB completion is available in this case.
 .TP
 
 .B edit \fR[gen] [APPLICATION]
