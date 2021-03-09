@@ -103,7 +103,7 @@ Because file manager, but also half-shell, CLiFM also provides the following fea
 * Symlinks editor
 * Disk usage
 * CD on quit, file picker (as shell functions) (**NEW**)
-* Plugins: PDF reader, image/video previews, wallpaper setter, music playlist, updates check, drag and drop, finder, and jumper (**NEW**)
+* Plugins: PDF reader, image/video previews, wallpaper setter, music playlist, updates check, drag and drop, finder, jumper, clipboard, and interactive help (**NEW**)
 * Color schemes (**NEW**)
 * Batch links (**NEW**)
 * Read and list files form standard input (**NEW**)
