@@ -108,6 +108,7 @@ Because file manager, but also half-shell, CLiFM also provides the following fea
 * Batch links (**NEW**)
 * Read and list files form standard input (**NEW**)
 * Exclude certain groups of filenames via the files filter using regular expressions (**NEW**)
+* Up to four workspaces (**NEW**)
 
 **NOTE:** By default, CliFM ships only one color scheme, but more are provided by [clifm-colors](https://github.com/leo-arch/clifm-colors). The package is also available in the [AUR](https://aur.archlinux.org/packages/clifm-colors-git).
 
