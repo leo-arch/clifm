@@ -6383,6 +6383,13 @@ decode_prompt(char *line)
 				goto add_string;
 				}
 
+			case 'S': { /* Current workspace */
+				char s[2];
+				sprintf(s, "%d", cur_ws + 1);
+				temp = savestring(s, 1);
+				goto add_string;
+				}
+
 			case 'p':
 			case 'w': /* Full PWD */
 			case 'W': /* Short PWD */
@@ -6395,7 +6402,8 @@ decode_prompt(char *line)
 				/* Reduce HOME to "~" */
 				int free_tmp_path = 0;
 				char *tmp_path = (char *)NULL;
-				if (strncmp(ws[cur_ws].path, user_home, user_home_len) == 0)
+				if (strncmp(ws[cur_ws].path, user_home,
+				user_home_len) == 0)
 					tmp_path = home_tilde(ws[cur_ws].path);
 				if (!tmp_path) {
 					tmp_path = ws[cur_ws].path;
