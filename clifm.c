@@ -2166,8 +2166,6 @@ int
 get_last_path(void)
 /* Set PATH to last visited directory */
 {
-	puts("here");
-
 	char *last_file = (char *)xnmalloc(strlen(CONFIG_DIR) + 7,
 									   sizeof(char));
 	sprintf(last_file, "%s/.last", CONFIG_DIR);
@@ -2200,27 +2198,42 @@ get_last_path(void)
 
 	while (fgets(line, sizeof(line), last_fp)) {
 
-		if (!*line || !strchr(line, '/'))
+		char *p = line;
+
+		printf("%s", p);
+
+		if (!*p || !strchr(p, '/'))
 			continue;
 
-		if (!strchr(line, ':'))
+		if (!strchr(p, ':'))
 			continue;
 
-		size_t len = strlen(line);
-		if (line[len - 1] == '\n')
-			line[len - 1] = 0x00;
+		size_t len = strlen(p);
+		if (p[len - 1] == '\n')
+			p[len - 1] = 0x00;
 
-		int ws_n = *line - '0';
+		int cur = 0;
+		if (*p == '*') {
+			if (!*(++p))
+				continue;
+			cur = 1;
+		}
+
+		int ws_n = *p - '0';
+
+		if (cur)
+			cur_ws = ws_n;
 
 		if (ws_n >= 0 && ws_n <= max_ws && !ws[ws_n].path) {
-			ws[ws_n].path = (char *)xnmalloc(strlen(line + 2) + 1,
+			ws[ws_n].path = (char *)xnmalloc(strlen(p + 2) + 1,
 									sizeof(char));
-			strcpy(ws[ws_n].path, line + 2);
+			strcpy(ws[ws_n].path, p + 2);
 		}
+
+		printf("%s", ws[ws_n].path);
 	}
 
 	fclose(last_fp);
-
 	free(last_file);
 
 	return EXIT_SUCCESS;
@@ -12987,16 +13000,23 @@ save_last_path(void)
 	last_fp = fopen(last_dir, "w");
 
 	if (!last_fp) {
-		fprintf(stderr, _("%s: Error storing last visited "
+		fprintf(stderr, _("%s: Error saving last visited "
 				"directory\n"), PROGRAM_NAME);
 		free(last_dir);
 		return;
 	}
 
 	size_t i;
-	for (i = 0; i < max_ws; i++)
-		if (ws[i].path)
-			fprintf(last_fp, "%zu:%s\n", i, ws[i].path);
+	for (i = 0; i < max_ws; i++) {
+		if (ws[i].path) {
+			/* Mark current workspace with an asterisk. It will
+			 * be read at startup by get_last_path */
+			if (cur_ws == i)
+				fprintf(last_fp, "*%zu:%s\n", i, ws[i].path);
+			else
+				fprintf(last_fp, "%zu:%s\n", i, ws[i].path);
+		}
+	}
 
 	fclose(last_fp);
 
