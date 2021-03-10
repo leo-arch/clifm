@@ -83,6 +83,7 @@ CMDS=(
 	"unpin@"
 	"v, paste@"
 	"ver, version@"
+    "ws@"
 	"x, X@"
 )
 
