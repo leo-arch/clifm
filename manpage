@@ -6,7 +6,7 @@
 CLIFM \- A completely CLI\-based file manager inspired by the KISS principle
 
 .SH SYNOPSIS
-\fIclifm\fR [\-aAfFgGhiIlLmoOsSuUvxy] [\-c FILE] [\-k FILE] [\-p PATH] [\-P PROFILE] [\-z METHOD]
+\fIclifm\fR [\-aAfFgGhiIlLmoOsSuUvxy] [\-c FILE] [\-k FILE] [\-p PATH] [\-P PROFILE] [-w NUM] [\-z METHOD]
 
 .SH DESCRIPTION
 CliFM is a completely text\-based, \fBshell\-like\fR file manager (no GUI nor curses at all) able to perform all the basic operations you may expect from any other FM. However, its most distinguishing characteristics are:
@@ -157,6 +157,9 @@ enable unicode to correctly list filenames containing accents, tildes, umlauts, 
 .B \-v, \-\-version
 show version details and exit
 .TP
+.B \-w, \-\-workspace=NUM
+start in workspace NUM
+.TP
 .B \-x, \-\-ext\-cmds
 allow the use of external commands
 .TP
@@ -294,7 +297,8 @@ To reset or modify the jump database as you whish, simply open the jump file usi
 .B ws \fR[NUM, +, -]
 CliFM offers up to four workspaces, each with its own independent paths.
 .sp
-With no argument, the \fIws\fR command prints the list of workspaces and its corresponding paths, highlighting the current workspace. Use NUM to switch to workspace NUM, the plus sign (+) to switch to the next workspace, and the minus sign (-) to switch to the previous workspace..sp
+With no argument, the \fIws\fR command prints the list of workspaces and its corresponding paths, highlighting the current workspace. Use NUM to switch to workspace NUM, the plus sign (+) to switch to the next workspace, and the minus sign (-) to switch to the previous workspace.
+.sp
 Any time a new workspace is opened, it starts in the path of the workspace from which it was invoked (in other words, in the current working directory).
 .TP
 
