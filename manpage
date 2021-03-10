@@ -822,6 +822,8 @@ CLiFM's prompt is build from the \fIPrompt\fR line in the configuration file fol
 .TP
 \\s: The name of the shell (everything after the last slash) currently used by CliFM
 .TP
+\\S: Current workspace number
+.TP
 \\t: The time, in 24\-hour HH:MM:SS format
 .TP
 \\T: The time, in 12\-hour HH:MM:SS format
