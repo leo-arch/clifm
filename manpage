@@ -74,6 +74,7 @@ List of CliFM features:
   33) Icons support (depends on icons-in-terminal: \fIhttps://github.com/sebastiencs/icons-in-terminal\fR)
   34) Batch symbolic links
   35) Files filter via regular expressions for the files list
+  36) Up to four workspaces
 
 .SH RATIONALE
 When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the Linux built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There is no two without three".
@@ -288,6 +289,13 @@ Finally, you can also edit the jump database using the 'e' or 'edit' option, i.e
 TAB completion is available for this function.
 .sp
 To reset or modify the jump database as you whish, simply open the jump file using the 'je', edit whatever needs to be edited, save changes, and close the editor.
+.TP
+
+.B ws \fR[NUM, +, -]
+CliFM offers up to four workspaces, each with its own independent paths.
+.sp
+With no argument, the \fIws\fR command prints the list of workspaces and its corresponding paths, highlighting the current workspace. Use NUM to switch to workspace NUM, the plus sign (+) to switch to the next workspace, and the minus sign (-) to switch to the previous workspace..sp
+Any time a new workspace is opened, it starts in the path of the workspace from which it was invoked (in other words, in the current working directory).
 .TP
 
 .B /\fRPATTERN [\-filetype] [DIR]
@@ -653,6 +661,14 @@ CliFM offers three kinds of file filters:
 \fBM\-d:\fR Deselect all selected files
 .TP
 \fBM\-p:\fR Change to pinned directory
+.TP
+\fBM\-1:\fR Switch to workspace 1
+.TP
+\fBM\-2:\fR Switch to workspace 2
+.TP
+\fBM\-3:\fR Switch to workspace 3
+.TP
+\fBM\-4:\fR Switch to workspace 4
 .TP
 \fBM\-r:\fR Change to root directory
 .TP
