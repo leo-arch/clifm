@@ -295,7 +295,7 @@ To reset or modify the jump database as you whish, simply open the jump file usi
 .TP
 
 .B ws \fR[NUM, +, -]
-CliFM offers up to four workspaces, each with its own independent paths.
+CliFM offers up to four workspaces, each with its own independent path.
 .sp
 With no argument, the \fIws\fR command prints the list of workspaces and its corresponding paths, highlighting the current workspace. Use NUM to switch to workspace NUM, the plus sign (+) to switch to the next workspace, and the minus sign (-) to switch to the previous workspace.
 .sp
@@ -917,7 +917,7 @@ CliFM will create ~/.Xresources, if it doesn't already exist, for keybindings to
 .TP
 When dealing with filenames containing spaces, you can use both single and double quotes (ex: "this file" or 'this file') plus escape sequences (ex: this\\ file).
 .TP
-By default, CliFM starts in the current working directory. However, you can always specify a different path by passing it as an argument. Ex: clifm \-p /home/user/misc. You can also permanently set up the starting path in the CliFM configuration file. If the RestoreLastPath option is set to true, CLiFM will start instead in the last visited directory, unless the starting path is specified via command line.
+By default, CliFM starts in the current working directory. However, you can always specify a different path by passing it as an argument. Ex: clifm \-p /home/user/misc. You can also permanently set up the starting path in the CliFM configuration file. If the RestoreLastPath option is set to true, CLiFM will start instead in the last visited directory (and in the last used workspace), unless the starting path (and optionally the workspace number) is specified via command line.
 .TP
 CliFM's default profile is "default". To create alternative profiles use the \-P option or the 'pf' command (see above).
 
