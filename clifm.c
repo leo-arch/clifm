@@ -2185,22 +2185,20 @@ get_last_path(void)
 		return EXIT_FAILURE;
 	}
 
-/*	size_t i;
+	size_t i;
 	for (i = 0; i < max_ws; i++) {
 
 		if (ws[i].path) {
 			free(ws[i].path);
 			ws[i].path = (char *)NULL;
 		}
-	} */
+	}
 
 	char line[PATH_MAX] = "";
 
 	while (fgets(line, sizeof(line), last_fp)) {
 
 		char *p = line;
-
-		printf("%s", p);
 
 		if (!*p || !strchr(p, '/'))
 			continue;
@@ -2229,8 +2227,6 @@ get_last_path(void)
 									sizeof(char));
 			strcpy(ws[ws_n].path, p + 2);
 		}
-
-		printf("%s", ws[ws_n].path);
 	}
 
 	fclose(last_fp);
@@ -2494,6 +2490,9 @@ reload_config(void)
 	load_dirhist();
 
 	load_jumpdb();
+
+	if (restore_last_path)
+		get_last_path();
 
 	/* Set the current poistion of the dirhist index to the last
 	 * entry */
