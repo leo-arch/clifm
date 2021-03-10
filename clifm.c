@@ -1325,7 +1325,7 @@ main(int argc, char **argv)
 	}
 
 	/* Last path is overriden by the -p option in the command line */
-	if (xargs.path == UNSET && restore_last_path)
+	if (restore_last_path)
 		get_last_path();
 
 	/* If path was not set (neither in the config file nor via command
@@ -2187,14 +2187,14 @@ get_last_path(void)
 		return EXIT_FAILURE;
 	}
 
-	size_t i;
+/*	size_t i;
 	for (i = 0; i < max_ws; i++) {
 
 		if (ws[i].path) {
 			free(ws[i].path);
 			ws[i].path = (char *)NULL;
 		}
-	}
+	} */
 
 	char line[PATH_MAX] = "";
 
@@ -2212,7 +2212,7 @@ get_last_path(void)
 
 		int ws_n = *line - '0';
 
-		if (ws_n >= 0 && ws_n <= max_ws) {
+		if (ws_n >= 0 && ws_n <= max_ws && !ws[ws_n].path) {
 			ws[ws_n].path = (char *)xnmalloc(strlen(line + 2) + 1,
 									sizeof(char));
 			strcpy(ws[ws_n].path, line + 2);
@@ -16160,6 +16160,7 @@ external_arguments(int argc, char **argv)
 		{"version", no_argument, 0, 'v'},
 		{"splash", no_argument, 0, 's'},
 		{"stealth-mode", no_argument, 0, 'S'},
+		{"workspace", required_argument, 0, 'w'},
 		{"ext-cmds", no_argument, 0, 'x'},
 		{"light", no_argument, 0, 'y'},
 		{"sort", required_argument, 0, 'z'},
@@ -16202,7 +16203,7 @@ external_arguments(int argc, char **argv)
 		 *bm_value = (char *)NULL;
 
 	while ((optc = getopt_long(argc, argv,
-	"+aAb:c:fFgGhiIk:lLmoOp:P:sSUuvxyz:", longopts,
+	"+aAb:c:fFgGhiIk:lLmoOp:P:sSUuvw:xyz:", longopts,
 	(int *)0)) != EOF) {
 		/* ':' and '::' in the short options string means 'required' and 
 		 * 'optional argument' respectivelly. Thus, 'p' and 'P' require
@@ -16456,6 +16457,14 @@ external_arguments(int argc, char **argv)
 			version_function();
 			exit(EXIT_SUCCESS);
 
+		case 'w': {
+			int iopt = atoi(optarg);
+
+			if (iopt >= 0 && iopt <= max_ws)
+				cur_ws = iopt - 1;
+			}
+			break;
+
 		case 'x':
 			ext_cmd_ok = xargs.ext = 1;
 			break;
@@ -16604,7 +16613,8 @@ external_arguments(int argc, char **argv)
 			if (ws[cur_ws].path)
 				free(ws[cur_ws].path);
 
-			ws[cur_ws].path = (char *)xcalloc(strlen(path_value) + 1, sizeof(char));
+			ws[cur_ws].path = (char *)xcalloc(strlen(path_value) + 1,
+											  sizeof(char));
 			strcpy(ws[cur_ws].path, path_value);
 		}
 
@@ -26347,6 +26357,7 @@ help_function (void)
 \n				non-latin letters, etc. This option is \
 \n				enabled by default for non-english locales\
 \n -v, --version\t\t\t show version details and exit\
+\n -w, --workspace=NUM\t\t start in workspace NUM\
 \n -x, --ext-cmds\t\t\t allow the use of external commands\
 \n -y, --light-mode\t\t enable the light mode\
 \n -z, --sort=METHOD\t\t sort files by METHOD, where METHOD \
