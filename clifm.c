@@ -690,6 +690,14 @@ struct actions_t
 
 struct actions_t *usr_actions = (struct actions_t *)NULL;
 
+struct ws_t
+{
+	char *path;
+	int num;
+};
+
+struct ws_t *ws = (struct ws_t *)NULL;
+
 /* Struct to store user defined keybindings */
 struct kbinds_t
 {
@@ -831,9 +839,11 @@ short splash_screen = UNSET, welcome_message = UNSET, ext_cmd_ok = UNSET,
 	recur_perm_error_flag = 0, is_sel = 0, sel_is_last = 0,
 	kbind_busy = 0, unicode = UNSET, dequoted = 0, mime_match = 0, 
 	sort_reverse = 0, sort_switch = 0, kb_shortcut = 0,
-	switch_cscheme = 0, icons = 0,
+	switch_cscheme = 0, icons = 0, cur_ws = 0,
 
-	home_ok = 1, config_ok = 1, trash_ok = 1, selfile_ok = 1;
+	home_ok = 1, config_ok = 1, trash_ok = 1, selfile_ok = 1,
+
+	max_ws = 4;
 
 /* A short int accepts values from -32,768 to 32,767, and since all the
  * above variables will take -1, 0, and 1 as values, a short int is more
@@ -867,7 +877,7 @@ struct dirent **tmp_dirlist = (struct dirent **)NULL;
 off_t total_sel_size = 0;
 pid_t own_pid = 0;
 
-char *user = (char *)NULL, *path = (char *)NULL,
+char *user = (char *)NULL,
 	**sel_elements = (char **)NULL, *qc = (char *)NULL,
 	*SEL_FILE = (char *)NULL, **paths = (char **)NULL,
 	**bin_commands = (char **)NULL, **history = (char **)NULL,
@@ -1162,6 +1172,10 @@ main(int argc, char **argv)
 	 * External arguments will override initialization values
 	 * (init_config) */
 
+	ws = (struct ws_t *)xnmalloc(max_ws, sizeof(struct ws_t));
+	for (i = 0; i < max_ws; i++)
+		ws[i].path = (char *)NULL;
+
 	/* Set all external arguments flags to uninitialized state */
 	unset_xargs();
 
@@ -1323,16 +1337,16 @@ main(int argc, char **argv)
 	 * say xterm (xterm -e clifm), xterm will run a shell, say bash, and 
 	 * the shell will read its config file. Now, if this config file
 	 * changes the CWD, this will be the CWD for CliFM */
-	if (!path) {
+	if (!ws[cur_ws].path) {
 		char cwd[PATH_MAX] = "";
 
 		getcwd(cwd, sizeof(cwd));
 
 		if (!*cwd || strlen(cwd) == 0) {
 			if (user_home) {
-				path = (char *)xcalloc(strlen(user_home)
+				ws[cur_ws].path = (char *)xnmalloc(strlen(user_home)
 									   + 1, sizeof(char));
-				strcpy(path, user_home);
+				strcpy(ws[cur_ws].path, user_home);
 			}
 
 			else {
@@ -1343,25 +1357,26 @@ main(int argc, char **argv)
 				}
 
 				else {
-					path = (char *)xnmalloc(2, sizeof(char));
-					strcpy(path, "/\0");
+					ws[cur_ws].path = (char *)xnmalloc(2, sizeof(char));
+					strcpy(ws[cur_ws].path, "/\0");
 				}
 			}
 		}
 
 		else {
-			path = (char*)xcalloc(strlen(cwd) + 1, sizeof(char));
-			strcpy(path, cwd);
+			ws[cur_ws].path = (char*)xnmalloc(strlen(cwd) + 1,
+											  sizeof(char));
+			strcpy(ws[cur_ws].path, cwd);
 		}
 	}
 
 	/* Make path the CWD */
 	/* If chdir(path) fails, set path to cwd, list files and print the
 	 * error message. If no access to CWD either, exit */
-	if (chdir(path) == -1) {
+	if (chdir(ws[cur_ws].path) == -1) {
 
 		_err('e', PRINT_PROMPT, "%s: chdir: '%s': %s\n", PROGRAM_NAME,
-			 path, strerror(errno));
+			 ws[cur_ws].path, strerror(errno));
 
 		char cwd[PATH_MAX] = "";
 
@@ -1374,14 +1389,14 @@ main(int argc, char **argv)
 			exit(EXIT_FAILURE);
 		}
 
-		if (path)
-			free(path);
+		if (ws[cur_ws].path)
+			free(ws[cur_ws].path);
 
-		path = (char *)xcalloc(strlen(cwd) + 1, sizeof(char));
-		strcpy(path, cwd);
+		ws[cur_ws].path = (char *)xnmalloc(strlen(cwd) + 1, sizeof(char));
+		strcpy(ws[cur_ws].path, cwd);
 	}
 
-	add_to_dirhist(path);
+	add_to_dirhist(ws[cur_ws].path);
 
 	if (cd_lists_on_the_fly)
 		list_dir();
@@ -1821,12 +1836,12 @@ print_disk_usage(void)
 /* Print free/total space for the filesystem of the current working
  * directory */
 {
-	if (!path || !*path)
+	if (!ws[cur_ws].path || !*ws[cur_ws].path)
 		return;
 
 	struct statvfs stat;
 
-	if (statvfs(path, &stat) != EXIT_SUCCESS) {
+	if (statvfs(ws[cur_ws].path, &stat) != EXIT_SUCCESS) {
 		_err('w', PRINT_PROMPT, "statvfs: %s\n", strerror(errno));
 		return;
 	}
@@ -2151,6 +2166,8 @@ int
 get_last_path(void)
 /* Set PATH to last visited directory */
 {
+	puts("here");
+
 	char *last_file = (char *)xnmalloc(strlen(CONFIG_DIR) + 7,
 									   sizeof(char));
 	sprintf(last_file, "%s/.last", CONFIG_DIR);
@@ -2170,24 +2187,37 @@ get_last_path(void)
 		return EXIT_FAILURE;
 	}
 
+	size_t i;
+	for (i = 0; i < max_ws; i++) {
+
+		if (ws[i].path) {
+			free(ws[i].path);
+			ws[i].path = (char *)NULL;
+		}
+	}
+
 	char line[PATH_MAX] = "";
-	fgets(line, sizeof(line), last_fp);
 
-	if (!*line || !strchr(line, '/')) {
-		free(last_file);
-		fclose(last_fp);
-		return EXIT_FAILURE;
+	while (fgets(line, sizeof(line), last_fp)) {
+
+		if (!*line || !strchr(line, '/'))
+			continue;
+
+		if (!strchr(line, ':'))
+			continue;
+
+		size_t len = strlen(line);
+		if (line[len - 1] == '\n')
+			line[len - 1] = 0x00;
+
+		int ws_n = *line - '0';
+
+		if (ws_n >= 0 && ws_n <= max_ws) {
+			ws[ws_n].path = (char *)xnmalloc(strlen(line + 2) + 1,
+									sizeof(char));
+			strcpy(ws[ws_n].path, line + 2);
+		}
 	}
-
-	/* In case path was set via StartingPath in the config file */
-	if (path) {
-		free(path);
-		path = (char *)NULL;
-	}
-
-	path = (char *)xnmalloc(strlen(line) + 1,
-							sizeof(char));
-	strcpy(path, line);
 
 	fclose(last_fp);
 
@@ -3348,18 +3378,18 @@ handle_iso(char *file)
 				return EXIT_FAILURE;
 			}
 
-			free(path);
-			path = (char *)xcalloc(strlen(mountpoint) + 1,
+			free(ws[cur_ws].path);
+			ws[cur_ws].path = (char *)xcalloc(strlen(mountpoint) + 1,
 								   sizeof(char));
-			strcpy(path, mountpoint);
+			strcpy(ws[cur_ws].path, mountpoint);
 
-			add_to_jumpdb(path);
+			add_to_jumpdb(ws[cur_ws].path);
 
 			if (cd_lists_on_the_fly) {
 				free_dirlist();
 				if (list_dir() != EXIT_SUCCESS)
 					exit_status = EXIT_FAILURE;
-				add_to_dirhist(path);
+				add_to_dirhist(ws[cur_ws].path);
 			}
 			else
 				printf("%s: Successfully mounted on %s\n", file,
@@ -4324,20 +4354,20 @@ archiver(char **args, char mode)
 					return EXIT_FAILURE;
 				}
 
-				free(path);
-				path = (char *)xcalloc(strlen(mountpoint) + 1,
+				free(ws[cur_ws].path);
+				ws[cur_ws].path = (char *)xcalloc(strlen(mountpoint) + 1,
 									   sizeof(char));
-				strcpy(path, mountpoint);
+				strcpy(ws[cur_ws].path, mountpoint);
 		
 				free(mountpoint);
 
-				add_to_jumpdb(path);
+				add_to_jumpdb(ws[cur_ws].path);
 
 				if (cd_lists_on_the_fly) {
 					free_dirlist();
 					if (list_dir() != EXIT_SUCCESS)
 						exit_status = EXIT_FAILURE;
-					add_to_dirhist(path);
+					add_to_dirhist(ws[cur_ws].path);
 				}
 			}
 		break;
@@ -5205,9 +5235,9 @@ remote_ftp(char *address, char *options)
 		return EXIT_FAILURE;
 	}
 
-	free(path);
-	path = (char *)xnmalloc(strlen(rmountpoint) + 1, sizeof(char));
-	strcpy(path, rmountpoint);
+	free(ws[cur_ws].path);
+	ws[cur_ws].path = (char *)xnmalloc(strlen(rmountpoint) + 1, sizeof(char));
+	strcpy(ws[cur_ws].path, rmountpoint);
 
 	free(rmountpoint);
 
@@ -5375,9 +5405,9 @@ remote_smb(char *address, char *options)
 		return EXIT_FAILURE;
 	}
 
-	free(path);
-	path = (char *)xnmalloc(strlen(rmountpoint) + 1, sizeof(char));
-	strcpy(path, rmountpoint);
+	free(ws[cur_ws].path);
+	ws[cur_ws].path = (char *)xnmalloc(strlen(rmountpoint) + 1, sizeof(char));
+	strcpy(ws[cur_ws].path, rmountpoint);
 
 	free(rmountpoint);
 
@@ -5487,9 +5517,9 @@ remote_ssh(char *address, char *options)
 		return EXIT_FAILURE;
 	}
 
-	free(path);
-	path = (char *)xnmalloc(strlen(rmountpoint) + 1, sizeof(char));
-	strcpy(path, rmountpoint);
+	free(ws[cur_ws].path);
+	ws[cur_ws].path = (char *)xnmalloc(strlen(rmountpoint) + 1, sizeof(char));
+	strcpy(ws[cur_ws].path, rmountpoint);
 	free(rmountpoint);
 
 	if (cd_lists_on_the_fly) {
@@ -5755,9 +5785,9 @@ new_instance(char *dir, int sudo)
 	char *path_dir = (char *)NULL;
 
 	if (*deq_dir != '/') {
-		path_dir = (char *)xnmalloc(strlen(path) + strlen(deq_dir)
+		path_dir = (char *)xnmalloc(strlen(ws[cur_ws].path) + strlen(deq_dir)
 									+ 2, sizeof(char));
-		sprintf(path_dir, "%s/%s", path, deq_dir);
+		sprintf(path_dir, "%s/%s", ws[cur_ws].path, deq_dir);
 	}
 	else
 		path_dir = deq_dir;
@@ -5827,7 +5857,7 @@ new_instance(char *dir, int sudo)
 	else {
 		fprintf(stderr, _("%s: No option specified for '%s'\n"
 				"Trying '%s -e %s -p %s'\n"), PROGRAM_NAME, term,
-				term, self, path);
+				term, self, ws[cur_ws].path);
 
 		if (sudo) {
 			char *cmd[] = { term, "-e", "sudo", self, "-p", path_dir,
@@ -6357,7 +6387,7 @@ decode_prompt(char *line)
 			case 'w': /* Full PWD */
 			case 'W': /* Short PWD */
 				{
-				if (!path) {
+				if (!ws[cur_ws].path) {
 					line++;
 					break;
 				}
@@ -6365,10 +6395,10 @@ decode_prompt(char *line)
 				/* Reduce HOME to "~" */
 				int free_tmp_path = 0;
 				char *tmp_path = (char *)NULL;
-				if (strncmp(path, user_home, user_home_len) == 0)
-					tmp_path = home_tilde(path);
+				if (strncmp(ws[cur_ws].path, user_home, user_home_len) == 0)
+					tmp_path = home_tilde(ws[cur_ws].path);
 				if (!tmp_path) {
-					tmp_path = path;
+					tmp_path = ws[cur_ws].path;
 				}
 				else
 					free_tmp_path = 1;
@@ -7728,7 +7758,7 @@ is_internal_c(const char *cmd)
 					"exp", "export", "kb", "keybinds", "pin",
 					"unpin", "cs", "colorschemes", "jump", "je",
 					"jc", "jp", "jo", "icons", "cl", "columns",
-					"ft", "filter", NULL };
+					"ft", "filter", "ws", NULL };
 
 	short found = 0;
 	size_t i;
@@ -10029,13 +10059,13 @@ cd_function(char *new_path)
 	}
 
 	/* If chdir() was successful */
-	free(path);
-	path = (char *)xnmalloc(strlen(buf) + 1, sizeof(char));
-	strcpy(path, buf);
+	free(ws[cur_ws].path);
+	ws[cur_ws].path = (char *)xnmalloc(strlen(buf) + 1, sizeof(char));
+	strcpy(ws[cur_ws].path, buf);
 
-	add_to_dirhist(path);
+	add_to_dirhist(ws[cur_ws].path);
 
-	add_to_jumpdb(path);
+	add_to_jumpdb(ws[cur_ws].path);
 
 	if (cd_lists_on_the_fly) {
 		free_dirlist();
@@ -10075,16 +10105,15 @@ back_function(char **comm)
 
 	if (chdir(old_pwd[dirhist_cur_index]) == EXIT_SUCCESS) {
 
-		free(path);
-
-		path = (char *)xcalloc(strlen(old_pwd[dirhist_cur_index])
+		free(ws[cur_ws].path);
+		ws[cur_ws].path = (char *)xcalloc(strlen(old_pwd[dirhist_cur_index])
 							   + 1, sizeof(char));
 
-		strcpy(path, old_pwd[dirhist_cur_index]);
+		strcpy(ws[cur_ws].path, old_pwd[dirhist_cur_index]);
 
 		exit_status = EXIT_SUCCESS;
 
-		add_to_jumpdb(path);
+		add_to_jumpdb(ws[cur_ws].path);
 
 		if (cd_lists_on_the_fly) {
 			free_dirlist();
@@ -10126,12 +10155,12 @@ forth_function(char **comm)
 	int exit_status = EXIT_FAILURE;
 	if (chdir(old_pwd[dirhist_cur_index]) == EXIT_SUCCESS) {
 
-		free(path);
-		path = (char *)xcalloc(strlen(old_pwd[dirhist_cur_index])
+		free(ws[cur_ws].path);
+		ws[cur_ws].path = (char *)xcalloc(strlen(old_pwd[dirhist_cur_index])
 							   + 1, sizeof(char));
-		strcpy(path, old_pwd[dirhist_cur_index]);
+		strcpy(ws[cur_ws].path, old_pwd[dirhist_cur_index]);
 
-		add_to_jumpdb(path);
+		add_to_jumpdb(ws[cur_ws].path);
 
 		exit_status = EXIT_SUCCESS;
 
@@ -10236,11 +10265,11 @@ list_mountpoints(void)
 			int ret = chdir(mountpoints[atoi_num - 1]);
 
 			if (ret == 0) {
-				free(path);
-				path = (char *)xcalloc(strlen(mountpoints[atoi_num - 1]) 
+				free(ws[cur_ws].path);
+				ws[cur_ws].path = (char *)xcalloc(strlen(mountpoints[atoi_num - 1]) 
 									   + 1, sizeof(char));
-				strcpy(path, mountpoints[atoi_num - 1]);
-				add_to_dirhist(path);
+				strcpy(ws[cur_ws].path, mountpoints[atoi_num - 1]);
+				add_to_dirhist(ws[cur_ws].path);
 
 				if (cd_lists_on_the_fly) {
 					free_dirlist();
@@ -10661,7 +10690,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 
 	if (*file != '/') {
 		/* Construct absolute path for file */
-		snprintf(full_path, PATH_MAX, "%s/%s", path, file);
+		snprintf(full_path, PATH_MAX, "%s/%s", ws[cur_ws].path, file);
 		if (wx_parent_check(full_path) != 0)
 			return EXIT_FAILURE;
 	}
@@ -10859,18 +10888,18 @@ remove_from_trash(void)
 	else {
 		puts(_("trash: There are no trashed files"));
 
-		if (chdir(path) == -1) { /* Restore CWD and return */
+		if (chdir(ws[cur_ws].path) == -1) { /* Restore CWD and return */
 			_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n",
-				 PROGRAM_NAME, path, strerror(errno));
+				 PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
 		}
 
 		return EXIT_SUCCESS;
 	}
 
 	/* Restore CWD and continue */
-	if (chdir(path) == -1) {
+	if (chdir(ws[cur_ws].path) == -1) {
 		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME, 
-			 path, strerror(errno));
+			 ws[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -11179,9 +11208,9 @@ untrash_function(char **comm)
 
 		puts(_("trash: There are no trashed files"));
 
-		if (chdir(path) == -1) {
+		if (chdir(ws[cur_ws].path) == -1) {
 			_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n",
-				 PROGRAM_NAME, path, strerror(errno));
+				 PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
 		}
 
@@ -11204,9 +11233,9 @@ untrash_function(char **comm)
 
 		free(trash_files);
 
-		if (chdir(path) == -1) {
+		if (chdir(ws[cur_ws].path) == -1) {
 			_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n",
-				 PROGRAM_NAME, path, strerror(errno));
+				 PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
 		}
 
@@ -11222,9 +11251,9 @@ untrash_function(char **comm)
 					PRINT_NEWLINE);
 
 	/* Go back to previous path */
-	if (chdir(path) == -1) {
+	if (chdir(ws[cur_ws].path) == -1) {
 		_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n", PROGRAM_NAME,
-			 path, strerror(errno));
+			 ws[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -11390,9 +11419,9 @@ trash_clear(void)
 
 	free(trash_files);
 
-	if (chdir(path) == -1) {
+	if (chdir(ws[cur_ws].path) == -1) {
 		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME,
-			 path, strerror(errno));
+			 ws[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -11467,9 +11496,9 @@ trash_function (char **comm)
 		else
 			puts(_("trash: There are no trashed files"));
 
-		if (chdir(path) == -1) {
+		if (chdir(ws[cur_ws].path) == -1) {
 			_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n",
-				 PROGRAM_NAME, path, strerror(errno));
+				 PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
 		}
 
@@ -11514,7 +11543,7 @@ trash_function (char **comm)
 
 				else { /* If relative path, add path to check against 
 					TRASH_DIR */
-					snprintf(tmp_comm, PATH_MAX, "%s/%s", path,
+					snprintf(tmp_comm, PATH_MAX, "%s/%s", ws[cur_ws].path,
 							 deq_file);
 				}
 
@@ -11756,7 +11785,7 @@ rl_parent_dir(int count, int key)
 		return EXIT_SUCCESS;
 
 	/* If already root dir, do nothing */
-	if (*path == '/' && !path[1])
+	if (*ws[cur_ws].path == '/' && !ws[cur_ws].path[1])
 		return EXIT_SUCCESS;
 
 	keybind_exec_cmd("..");
@@ -11773,7 +11802,7 @@ rl_root_dir(int count, int key)
 		return EXIT_SUCCESS;
 
 	/* If already root dir, do nothing */
-	if (*path == '/' && !path[1])
+	if (*ws[cur_ws].path == '/' && !ws[cur_ws].path[1])
 		return EXIT_SUCCESS;
 
 	keybind_exec_cmd("/");
@@ -11790,7 +11819,7 @@ rl_home_dir(int count, int key)
 		return EXIT_SUCCESS;
 
 	/* If already in home, do nothing */
-	if (*path == *user_home && strcmp(path, user_home) == 0)
+	if (*ws[cur_ws].path == *user_home && strcmp(ws[cur_ws].path, user_home) == 0)
 		return EXIT_SUCCESS;
 
 	keybind_exec_cmd("cd");
@@ -12549,6 +12578,57 @@ rl_find_as_you_type(int count, int key)
 	return EXIT_SUCCESS;
 }
 
+int
+rl_ws1(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	keybind_exec_cmd("ws 1");
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
+int
+rl_ws2(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	keybind_exec_cmd("ws 2");
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
+int
+rl_ws3(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	keybind_exec_cmd("ws 3");
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
+int
+rl_ws4(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	keybind_exec_cmd("ws 4");
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
 /*
 int
 rl_test(int count, int key)
@@ -12604,6 +12684,10 @@ readline_kbinds(void)
 		rl_bind_keyseq(find_key("last-dir"), rl_last_dir);
 
 		rl_bind_keyseq(find_key("pinned-dir"), rl_pinned_dir);
+		rl_bind_keyseq(find_key("workspace1"), rl_ws1);
+		rl_bind_keyseq(find_key("workspace2"), rl_ws2);
+		rl_bind_keyseq(find_key("workspace3"), rl_ws3);
+		rl_bind_keyseq(find_key("workspace4"), rl_ws4);
 
 		/* Operations on files */
 		rl_bind_keyseq(find_key("bookmark-sel"), rl_bm_sel);
@@ -12883,7 +12967,7 @@ save_last_path(void)
 /* Store last visited directory for the restore last path and the
  * cd on quit functions */
 {
-	if (!path || !config_ok)
+	if (!config_ok)
 		return;
 
 	char *last_dir = (char *)xnmalloc(strlen(CONFIG_DIR) + 7,
@@ -12901,7 +12985,10 @@ save_last_path(void)
 		return;
 	}
 
-	fprintf(last_fp, "%s", path);
+	size_t i;
+	for (i = 0; i < max_ws; i++)
+		if (ws[i].path)
+			fprintf(last_fp, "%zu:%s\n", i, ws[i].path);
 
 	fclose(last_fp);
 
@@ -13167,7 +13254,12 @@ free_stuff(void)
 	free(user);
 	free(user_home);
 	free(sys_shell);
-	free(path);
+
+	for (i = 0; i < max_ws; i++)
+		if (ws[i].path)
+			free(ws[i].path);
+	free(ws);
+
 	free(CONFIG_DIR_GRAL);
 	free(CONFIG_DIR);
 	free(TRASH_DIR);
@@ -13463,11 +13555,11 @@ handle_stdin()
 
 	free(cwd);
 
-	if (path)
-		free(path);
+	if (ws[cur_ws].path)
+		free(ws[cur_ws].path);
 
-	path = (char *)xnmalloc(strlen(STDIN_TMP_DIR) + 1, sizeof(char));
-	strcpy(path, STDIN_TMP_DIR);
+	ws[cur_ws].path = (char *)xnmalloc(strlen(STDIN_TMP_DIR) + 1, sizeof(char));
+	strcpy(ws[cur_ws].path, STDIN_TMP_DIR);
 
 	goto FREE_N_EXIT;
 
@@ -13488,40 +13580,40 @@ init_shell(void)
  * https://www.gnu.org/software/libc/manual/html_node/Initializing-the-Shell.html#Initializing-the-Shell
  * */
 {
-	/* If shell is interactive */
-	if (isatty(STDIN_FILENO)) {
-
-		/* Loop until we are in the foreground */
-		while (tcgetpgrp(STDIN_FILENO) != (own_pid = getpgrp()))
-			kill (- own_pid, SIGTTIN);
-
-		/* Ignore interactive and job-control signals */
-		set_signals_to_ignore();
-
-		/* Put ourselves in our own process group */
-		own_pid = get_own_pid();
-
-		if (flags & ROOT_USR) {
-			/* Make the shell pgid (process group id) equal to its pid */
-			/* Without the setpgid line below, the program cannot be run
-			 * with sudo, but it can be run nonetheless by the root user */
-			if (setpgid(own_pid, own_pid) < 0) {
-				_err(0, NOPRINT_PROMPT, "%s: setpgid: %s\n", PROGRAM_NAME,
-					 strerror(errno));
-				exit(EXIT_FAILURE);
-			}
-		}
-
-		/* Grab control of the terminal */
-		tcsetpgrp(STDIN_FILENO, own_pid);
-
-		/* Save default terminal attributes for shell */
-		tcgetattr(STDIN_FILENO, &shell_tmodes);
+	/* If shell is not interactive */
+	if (!isatty(STDIN_FILENO)) {
+		handle_stdin();
+		return;
 	}
 
-	/* If not interactive ... */
-	else
-		handle_stdin();
+	/* Loop until we are in the foreground */
+	while (tcgetpgrp(STDIN_FILENO) != (own_pid = getpgrp()))
+		kill (- own_pid, SIGTTIN);
+
+	/* Ignore interactive and job-control signals */
+	set_signals_to_ignore();
+
+	/* Put ourselves in our own process group */
+	own_pid = get_own_pid();
+
+	if (flags & ROOT_USR) {
+		/* Make the shell pgid (process group id) equal to its pid */
+		/* Without the setpgid line below, the program cannot be run
+		 * with sudo, but it can be run nonetheless by the root user */
+		if (setpgid(own_pid, own_pid) < 0) {
+			_err(0, NOPRINT_PROMPT, "%s: setpgid: %s\n", PROGRAM_NAME,
+				 strerror(errno));
+			exit(EXIT_FAILURE);
+		}
+	}
+
+	/* Grab control of the terminal */
+	tcsetpgrp(STDIN_FILENO, own_pid);
+
+	/* Save default terminal attributes for shell */
+	tcgetattr(STDIN_FILENO, &shell_tmodes);
+
+	return;
 }
 
 /*
@@ -13578,7 +13670,7 @@ get_path_programs(void)
 			total_cmd += (size_t)cmd_n[i];
 	}
 
-	chdir(path);
+	chdir(ws[cur_ws].path);
 
 	/* Add internal commands */
 	/* Get amount of internal cmds (elements in INTERNAL_CMDS array) */
@@ -14379,18 +14471,18 @@ jump_generator(const char *text, int state)
 	while ((name = jump_db[i++].path) != NULL) {
 
 		/* Exclude CWD */
-		if (name[1] == path[1] && strcmp(name, path) == 0)
+		if (name[1] == ws[cur_ws].path[1] && strcmp(name, ws[cur_ws].path) == 0)
 			continue;
 
 		/* Filter by parent */
 		if (rl_line_buffer[1] == 'p') {
-			if (!strstr(path, name))
+			if (!strstr(ws[cur_ws].path, name))
 				continue;
 		}
 		
 		/* Filter by child */
 		else if (rl_line_buffer[1] == 'c') {
-			if (!strstr(name, path))
+			if (!strstr(name, ws[cur_ws].path))
 				continue;
 		}
 		
@@ -15646,7 +15738,7 @@ read_config(void)
 			max_log = opt_num;
 		}
 
-		else if (xargs.path == UNSET && !path && *line == 'S' 
+		else if (xargs.path == UNSET && !ws[cur_ws].path && *line == 'S' 
 		&& strncmp(line, "StartingPath=", 13) == 0) {
 			char *opt_str = straft(line, '=');
 			if (!opt_str)
@@ -15664,10 +15756,10 @@ read_config(void)
 			 * path. If any of these conditions is false,
 			 * path will be set to default, that is, CWD */
 			if (chdir(tmp) == 0) {
-				free(path);
-				path = (char *)xnmalloc(strlen(tmp) + 1, 
+				free(ws[cur_ws].path);
+				ws[cur_ws].path = (char *)xnmalloc(strlen(tmp) + 1, 
 									    sizeof(char));
-				strcpy(path, tmp);
+				strcpy(ws[cur_ws].path, tmp);
 			}
 			else {
 				_err('w', PRINT_PROMPT, _("%s: '%s': %s. "
@@ -16509,11 +16601,11 @@ external_arguments(int argc, char **argv)
 		}
 
 		if (chdir(path_value) == 0) {
-			if (path)
-				free(path);
+			if (ws[cur_ws].path)
+				free(ws[cur_ws].path);
 
-			path = (char *)xcalloc(strlen(path_value) + 1, sizeof(char));
-			strcpy(path, path_value);
+			ws[cur_ws].path = (char *)xcalloc(strlen(path_value) + 1, sizeof(char));
+			strcpy(ws[cur_ws].path, path_value);
 		}
 
 		else { /* Error changing directory */
@@ -17033,7 +17125,7 @@ parse_input_str(char *str)
 
 	int stdin_dir_ok = 0;
 
-	if (STDIN_TMP_DIR && strcmp(path, STDIN_TMP_DIR) == 0)
+	if (STDIN_TMP_DIR && strcmp(ws[cur_ws].path, STDIN_TMP_DIR) == 0)
 		stdin_dir_ok = 1;
 
 	for (i = 0; i <= args_n; i++) {
@@ -17051,6 +17143,7 @@ parse_input_str(char *str)
 		/* The 'sort' and jo commands take digits as arguments. So, do
 		 * not expand ELN's in this case */
 		if (strcmp(substr[0], "st") != 0
+		&& strcmp(substr[0], "ws") != 0
 		&& strcmp(substr[0], "sort") != 0
 		&& strcmp(substr[0], "jo") != 0) {
 
@@ -17665,14 +17758,14 @@ prompt(void)
  * parsed later by parse_input_str()) */
 {
 	/* Remove all final slash(es) from path, if any */
-	size_t path_len = strlen(path), i;
+	size_t path_len = strlen(ws[cur_ws].path), i;
 
-	for (i = path_len - 1; path[i] && i > 0; i--) {
+	for (i = path_len - 1; ws[cur_ws].path[i] && i > 0; i--) {
 
-		if (path[i] != '/')
+		if (ws[cur_ws].path[i] != '/')
 			break;
 		else
-			path[i] = 0x00;
+			ws[cur_ws].path[i] = 0x00;
 	}
 
 	if (welcome_message) {
@@ -18165,7 +18258,7 @@ list_dir(void)
 	/* "!path" means that the pointer 'path' points to no memory address 
 	 * (NULL), while "*path == 0x00" means that the first byte of 
 	 * the memory block pointed to by the pointer 'path' is a null char */
-	if (!path || !*path) {
+	if (!ws[cur_ws].path || !*ws[cur_ws].path) {
 		fprintf(stderr, _("%s: Path is NULL or empty\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
@@ -18211,63 +18304,64 @@ list_dir(void)
 			/* tmp_dirlist is a global array to store the list of files
 			 * in the current working directory. Pointers to this list
 			 * will be stored in the dirlist array */
-			total = scandir(path, &tmp_dirlist, skip_files, NULL);
+			total = scandir(ws[cur_ws].path, &tmp_dirlist,
+							skip_files, NULL);
 		break;
 
 		case 1:
-			total = scandir(path, &tmp_dirlist, skip_files,
+			total = scandir(ws[cur_ws].path, &tmp_dirlist, skip_files,
 							(unicode) ? m_alphasort : (case_sensitive)
 							? xalphasort : alphasort_insensitive);
 		break;
 
 		case 2:
-			total = scandir(path, &tmp_dirlist, skip_files,
+			total = scandir(ws[cur_ws].path, &tmp_dirlist, skip_files,
 							size_sort);
 		break;
 
 		case 3:
-			total = scandir(path, &tmp_dirlist, skip_files,
+			total = scandir(ws[cur_ws].path, &tmp_dirlist, skip_files,
 							atime_sort);
 		break;
 
 		case 4:
 		#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) \
 		|| defined(_STATX)
-			total = scandir(path, &tmp_dirlist, skip_files,
+			total = scandir(ws[cur_ws].path, &tmp_dirlist, skip_files,
 							btime_sort);
 		#else
-			total = scandir(path, &tmp_dirlist, skip_files,
+			total = scandir(ws[cur_ws].path, &tmp_dirlist, skip_files,
 							ctime_sort);
 		#endif
 		break;
 
 		case 5:
-			total = scandir(path, &tmp_dirlist, skip_files,
+			total = scandir(ws[cur_ws].path, &tmp_dirlist, skip_files,
 							ctime_sort);
 		break;
 
 		case 6:
-			total = scandir(path, &tmp_dirlist, skip_files,
+			total = scandir(ws[cur_ws].path, &tmp_dirlist, skip_files,
 							mtime_sort);
 		break;
 
 		case 7:
 		#if __FreeBSD__ || _BE_POSIX
-			total = scandir(path, &tmp_dirlist, skip_files,
+			total = scandir(ws[cur_ws].path, &tmp_dirlist, skip_files,
 							m_alphasort);
 		#else
-			total = scandir(path, &tmp_dirlist, skip_files,
+			total = scandir(ws[cur_ws].path, &tmp_dirlist, skip_files,
 							m_versionsort);
 		#endif
 		break;
 
 		case 8:
-			total = scandir(path, &tmp_dirlist, skip_files,
+			total = scandir(ws[cur_ws].path, &tmp_dirlist, skip_files,
 							ext_sort);
 		break;
 
 		case 9:
-			total = scandir(path, &tmp_dirlist, skip_files,
+			total = scandir(ws[cur_ws].path, &tmp_dirlist, skip_files,
 							inode_sort);
 		break;
 
@@ -18283,7 +18377,7 @@ list_dir(void)
 			/* Same thing for path */
 			char err_path[PATH_MAX];
 
-			strcpy(err_path, path);
+			strcpy(err_path, ws[cur_ws].path);
 
 			cd_function(old_pwd[--dirhist_cur_index]);
 
@@ -18294,8 +18388,8 @@ list_dir(void)
 		}
 
 		else
-			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, path,
-					strerror(errno));
+			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+					ws[cur_ws].path, strerror(errno));
 
 		if (errno == ENOMEM)
 			exit(EXIT_FAILURE);
@@ -19137,63 +19231,63 @@ list_dir_light(void)
 	 * 5 = ctime, 6 = mtime, 7 = version, 8 = ext, 9 = inode */
 	switch(sort) {
 		case 0:
-			total = scandir(path, &tmp_dirlist, skip_files, NULL);
+			total = scandir(ws[cur_ws].path, &tmp_dirlist, skip_files, NULL);
 		break;
 
 		case 1:
-			total = scandir(path, &tmp_dirlist, skip_files,
+			total = scandir(ws[cur_ws].path, &tmp_dirlist, skip_files,
 							(unicode) ? m_alphasort : (case_sensitive)
 							? xalphasort : alphasort_insensitive);
 		break;
 
 		case 2:
-			total = scandir(path, &tmp_dirlist, skip_files,
+			total = scandir(ws[cur_ws].path, &tmp_dirlist, skip_files,
 							size_sort);
 		break;
 
 		case 3:
-			total = scandir(path, &tmp_dirlist, skip_files,
+			total = scandir(ws[cur_ws].path, &tmp_dirlist, skip_files,
 							atime_sort);
 		break;
 
 		case 4:
 		#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) \
 		|| defined(_STATX)
-			total = scandir(path, &tmp_dirlist, skip_files,
+			total = scandir(ws[cur_ws].path, &tmp_dirlist, skip_files,
 							btime_sort);
 		#else
-			total = scandir(path, &tmp_dirlist, skip_files,
+			total = scandir(ws[cur_ws].path, &tmp_dirlist, skip_files,
 							ctime_sort);
 		#endif
 		break;
 
 		case 5:
-			total = scandir(path, &tmp_dirlist, skip_files,
+			total = scandir(ws[cur_ws].path, &tmp_dirlist, skip_files,
 							ctime_sort);
 		break;
 
 		case 6:
-			total = scandir(path, &tmp_dirlist, skip_files,
+			total = scandir(ws[cur_ws].path, &tmp_dirlist, skip_files,
 							mtime_sort);
 		break;
 
 		case 7:
 		# if __FreeBSD__ || _BE_POSIX
-			total = scandir(path, &tmp_dirlist, skip_files,
+			total = scandir(ws[cur_ws].path, &tmp_dirlist, skip_files,
 							m_alphasort);
 		#else
-			total = scandir(path, &tmp_dirlist, skip_files,
+			total = scandir(ws[cur_ws].path, &tmp_dirlist, skip_files,
 							m_versionsort);
 		#endif
 		break;
 
 		case 8:
-			total = scandir(path, &tmp_dirlist, skip_files,
+			total = scandir(ws[cur_ws].path, &tmp_dirlist, skip_files,
 							ext_sort);
 		break;
 
 		case 9:
-			total = scandir(path, &tmp_dirlist, skip_files,
+			total = scandir(ws[cur_ws].path, &tmp_dirlist, skip_files,
 							inode_sort);
 		break;
 	}
@@ -19202,12 +19296,12 @@ list_dir_light(void)
 
 		if (cd_lists_on_the_fly) {
 			_err('e', PRINT_PROMPT, "%s: '%s': %s\n",
-				 PROGRAM_NAME, path, strerror(errno));
+				 PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
 			cd_function(old_pwd[--dirhist_cur_index]);
 		}
 
 		else
-			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, path,
+			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, ws[cur_ws].path,
 					strerror(errno));
 
 		if (errno == ENOMEM)
@@ -19984,15 +20078,15 @@ pin_directory(char *dir)
 
 	else { /* If relative path */
 
-		if (strcmp(path, "/") == 0) {
+		if (strcmp(ws[cur_ws].path, "/") == 0) {
 			pinned_dir = (char *)xnmalloc(strlen(dir) + 2, sizeof(char));
 			sprintf(pinned_dir, "/%s", dir);
 		}
 
 		else {
-			pinned_dir = (char *)xnmalloc(strlen(dir) + strlen(path)
+			pinned_dir = (char *)xnmalloc(strlen(dir) + strlen(ws[cur_ws].path)
 										  + 2, sizeof(char));
-			sprintf(pinned_dir, "%s/%s", path, dir);
+			sprintf(pinned_dir, "%s/%s", ws[cur_ws].path, dir);
 		}
 	}
 
@@ -20285,7 +20379,7 @@ autojump(char **args)
 
 		for (i = 0; i < jump_n; i++) {
 
-			if (strcmp(path, jump_db[i].path) == 0) {
+			if (strcmp(ws[cur_ws].path, jump_db[i].path) == 0) {
 				printf("  %zu\t%zu\t%s%s%s \n", i + 1,
 					   jump_db[i].visits, mi_c, jump_db[i].path, df_c);
 			}
@@ -20394,7 +20488,7 @@ autojump(char **args)
 					continue;
 
 				/* Exclue CWD */
-				if (strcmp(jump_db[j].path, path) == 0)
+				if (strcmp(jump_db[j].path, ws[cur_ws].path) == 0)
 					continue;
 
 				int exclude = 0;
@@ -20403,12 +20497,12 @@ autojump(char **args)
 				 * child options */
 				switch(jump_opt) {
 					case jparent:
-						if (!strstr(path, jump_db[j].path))
+						if (!strstr(ws[cur_ws].path, jump_db[j].path))
 							exclude = 1;
 					break;
 
 					case jchild:
-						if (!strstr(jump_db[j].path, path))
+						if (!strstr(jump_db[j].path, ws[cur_ws].path))
 							exclude = 1;
 
 					case none:
@@ -20472,6 +20566,81 @@ autojump(char **args)
 
 	free(matches);
 	free(visits);
+
+	return exit_status;
+}
+
+int workspaces(char *str)
+{
+	if (!str || !*str) {
+		size_t i;
+		for (i = 0; i < max_ws; i++) {
+			if (i == cur_ws)
+				printf("%s%zu%s: %s\n", mi_c, i + 1, df_c, ws[i].path);
+			else
+				printf("%zu: %s\n", i + 1, ws[i].path ? ws[i].path
+					   : "none");
+		}
+
+		return EXIT_SUCCESS;
+	}
+
+	if (*str == '-' && strcmp(str, "--help") == 0) {
+		puts("Usage: ws [NUM, +, -]");
+		return EXIT_SUCCESS;
+	}
+
+	int tmp_ws = 0;
+
+	if (is_number(str)) {
+
+		int istr = atoi(str);
+
+		if (istr <= 0 || istr > max_ws) {
+			fprintf(stderr, "%s: %d: Invalid workspace number\n",
+					PROGRAM_NAME, istr);
+			return EXIT_FAILURE;
+		}
+
+		tmp_ws = istr - 1;
+	}
+
+	else if (*str == '+' && !str[1]) {
+		if ((cur_ws + 1) < max_ws)
+			tmp_ws = cur_ws + 1;
+		else
+			return EXIT_FAILURE;
+	}
+
+	else if (*str == '-' && !str[1]) {
+		if ((cur_ws - 1) >= 0)
+			tmp_ws = cur_ws - 1;
+		else
+			return EXIT_FAILURE;
+	}
+
+	/* If new workspace has no path yet, copy the path of the current
+	 * workspace */
+	if (!ws[tmp_ws].path) {
+		ws[tmp_ws].path = (char *)xnmalloc(strlen(ws[cur_ws].path)
+										+ 1, sizeof(char));
+		strcpy(ws[tmp_ws].path, ws[cur_ws].path);
+	}
+
+	if (chdir(ws[tmp_ws].path) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[tmp_ws].path,
+				strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	cur_ws = tmp_ws;
+
+	int exit_status =  EXIT_SUCCESS;
+
+	if (cd_lists_on_the_fly) {
+		free_dirlist();
+		exit_status = list_dir();
+	}
 
 	return exit_status;
 }
@@ -21008,9 +21177,16 @@ exec_cmd(char **comm)
 	 * #			     MINOR FUNCTIONS 				#
 	 * ##################################################*/
 
+	else if (*comm[0] == 'w' && comm[0][1] == 's' && !comm[0][2]) {
+		exit_code = workspaces(comm[1] ? comm[1] : NULL);
+		return exit_code;
+	}
+
 	else if(*comm[0] == 'f' && ((comm[0][1] == 't' && !comm[0][2])
-	|| strcmp(comm[0], "filter") == 0))
-		return filter_function(comm[1]);
+	|| strcmp(comm[0], "filter") == 0)) {
+		exit_code = filter_function(comm[1]);
+		return exit_code;
+	}
 
 	else if (*comm[0] == 'c' && ((comm[0][1] == 'l' && !comm[0][2])
 	|| strcmp(comm[0], "columns") == 0)) {
@@ -21226,9 +21402,9 @@ exec_cmd(char **comm)
 		/* Run new instance in CWD */
 		else {
 			if (*comm[0] == 'x')
-				exit_code = new_instance(path, 0);
+				exit_code = new_instance(ws[cur_ws].path, 0);
 			else
-				exit_code = new_instance(path, 1);
+				exit_code = new_instance(ws[cur_ws].path, 1);
 		}
 
 		return exit_code;
@@ -21697,7 +21873,7 @@ exec_cmd(char **comm)
 	/* These functions just print stuff, so that the value of exit_code
 	 * is always zero, that is to say, success */
 	else if (strcmp(comm[0], "path") == 0 || strcmp(comm[0], "cwd") == 0) 
-		printf("%s\n", path);
+		printf("%s\n", ws[cur_ws].path);
 
 	else if ((*comm[0] == '?' && !comm[0][1])
 	|| strcmp(comm[0], "help") == 0)
@@ -21960,7 +22136,7 @@ surf_hist(char **comm)
 			free(old_pwd[i]);
 
 		dirhist_cur_index = dirhist_total_index = 0;
-		add_to_dirhist(path);
+		add_to_dirhist(ws[cur_ws].path);
 
 		return EXIT_SUCCESS;
 	}
@@ -21976,10 +22152,10 @@ surf_hist(char **comm)
 			int ret = chdir(old_pwd[atoi_comm - 1]);
 
 			if (ret == 0) {
-				free(path);
-				path = (char *)xcalloc(strlen(old_pwd[atoi_comm - 1])
+				free(ws[cur_ws].path);
+				ws[cur_ws].path = (char *)xcalloc(strlen(old_pwd[atoi_comm - 1])
 									   + 1, sizeof(char));
-				strcpy(path, old_pwd[atoi_comm - 1]);
+				strcpy(ws[cur_ws].path, old_pwd[atoi_comm - 1]);
 
 				dirhist_cur_index = atoi_comm - 1;
 
@@ -22342,7 +22518,7 @@ sel_regex(char *str, const char *dest_path, mode_t filetype)
 				}
 
 				char tmp_path[PATH_MAX] = "";
-				sprintf(tmp_path, "%s/%s", path, dirlist[i]);
+				sprintf(tmp_path, "%s/%s", ws[cur_ws].path, dirlist[i]);
 				new_sel += select_file(tmp_path);
 			}
 		}
@@ -22384,7 +22560,7 @@ sel_regex(char *str, const char *dest_path, mode_t filetype)
 
 				/* Relative path */
 				else {
-					sprintf(tmp_path, "%s/%s/%s", path, dest_path,
+					sprintf(tmp_path, "%s/%s/%s", ws[cur_ws].path, dest_path,
 							list[i]->d_name);
 				}
 
@@ -22537,16 +22713,16 @@ sel_function (char **comm)
 
 		if (sel_is_filename || sel_is_relative_path) { 
 			/* Add path to filename or relative path */
-			if (strcmp(path, "/") == 0) {
+			if (strcmp(ws[cur_ws].path, "/") == 0) {
 				sel_tmp = (char *)xcalloc(strlen(comm[i])
 										  + 2, sizeof(char));
 				sprintf(sel_tmp, "/%s", comm[i]);
 			}
 
 			else {
-				sel_tmp = (char *)xcalloc(strlen(path) + strlen(comm[i])
+				sel_tmp = (char *)xcalloc(strlen(ws[cur_ws].path) + strlen(comm[i])
 										  + 2, sizeof(char));
-				sprintf(sel_tmp, "%s/%s", path, comm[i]);
+				sprintf(sel_tmp, "%s/%s", ws[cur_ws].path, comm[i]);
 			}
 		}
 
@@ -23114,7 +23290,6 @@ search_glob(char **comm)
 	}
 
 	else
-		/* If search string is "/STR", comm[0] + 1 returns "STR" */
 		search_str = comm[0] + 1;
 
 	/* Get matches, if any */
@@ -23128,9 +23303,9 @@ search_glob(char **comm)
 
 		if (search_path) {
 			/* Go back to the directory we came from */
-			if (chdir(path) == -1)
+			if (chdir(ws[cur_ws].path) == -1)
 				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
-						path, strerror(errno));
+						ws[cur_ws].path, strerror(errno));
 		}
 
 		return EXIT_FAILURE;
@@ -23259,9 +23434,9 @@ search_glob(char **comm)
 
 	/* If needed, go back to the directory we came from */
 	if (search_path) {
-		if (chdir(path) == -1) {
+		if (chdir(ws[cur_ws].path) == -1) {
 			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
-					path, strerror(errno));
+					ws[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
 		}
 	}
@@ -23374,9 +23549,9 @@ search_regex(char **comm)
 			fprintf(stderr, "scandir: %s: %s\n", search_path,
 					strerror(errno));
 
-			if (chdir(path) == -1)
+			if (chdir(ws[cur_ws].path) == -1)
 				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
-						path, strerror(errno));
+						ws[cur_ws].path, strerror(errno));
 
 			return EXIT_FAILURE;
 		}
@@ -23430,9 +23605,9 @@ search_regex(char **comm)
 
 			free(reg_dirlist);
 
-			if (chdir(path) == -1)
+			if (chdir(ws[cur_ws].path) == -1)
 				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
-						path, strerror(errno));
+						ws[cur_ws].path, strerror(errno));
 		}
 
 		return EXIT_FAILURE;
@@ -23461,9 +23636,9 @@ search_regex(char **comm)
 
 			free(reg_dirlist);
 
-			if (chdir(path) == -1)
+			if (chdir(ws[cur_ws].path) == -1)
 					fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
-							path, strerror(errno));
+							ws[cur_ws].path, strerror(errno));
 		}
 
 		return EXIT_FAILURE;
@@ -23599,9 +23774,9 @@ search_regex(char **comm)
 
 		free(reg_dirlist);
 		
-		if (chdir(path) == -1) {
+		if (chdir(ws[cur_ws].path) == -1) {
 			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
-					path, strerror(errno));
+					ws[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
 		}
 	}
@@ -23976,9 +24151,9 @@ bookmark_add(char *file)
 	/* If not absolute path, prepend current path to file */
 	if (*file != '/') {
 		char *tmp_file = (char *)NULL;
-		tmp_file = (char *)xnmalloc((strlen(path) + strlen(file) + 2), 
+		tmp_file = (char *)xnmalloc((strlen(ws[cur_ws].path) + strlen(file) + 2), 
 								    sizeof(char));
-		sprintf(tmp_file, "%s/%s", path, file);
+		sprintf(tmp_file, "%s/%s", ws[cur_ws].path, file);
 		file = tmp_file;
 		tmp_file = (char *)NULL;
 		mod_file = 1;
@@ -25426,10 +25601,10 @@ log_function(char **comm)
 	}
 
 	char *date = get_date();
-	size_t log_len = strlen(date) + strlen(path) + strlen(last_cmd) + 6;
+	size_t log_len = strlen(date) + strlen(ws[cur_ws].path) + strlen(last_cmd) + 6;
 	char *full_log = (char *)xnmalloc(log_len, sizeof(char));
 
-	snprintf(full_log, log_len, "[%s] %s:%s\n", date, path, last_cmd);
+	snprintf(full_log, log_len, "[%s] %s:%s\n", date, ws[cur_ws].path, last_cmd);
 
 	free(date);
 
@@ -26257,6 +26432,7 @@ help_function (void)
  u, undel, untrash [*, a, all]\n\
  b, back [h, hist] [clear] [!ELN]\n\
  f, forth [h, hist] [clear] [!ELN]\n\
+ ws [NUM, +, -]\n\
  c, l [e, edit], m, md, r\n\
  p, pr, prop [ELN/FILE ... n]\n\
  mm, mime [info ELN/FILE] [edit]\n\
@@ -26329,6 +26505,10 @@ help_function (void)
  M-k, S-Right: Change to next visited directory\n\
  M-o: Lock terminal\n\
  M-p: Change to pinned directory\n\
+ M-1: Switch to workspace 1\n\
+ M-2: Switch to workspace 2\n\
+ M-3: Switch to workspace 3\n\
+ M-4: Switch to workspace 4\n\
  C-M-j: Change to first visited directory\n\
  C-M-k: Change to last visited directory\n\
  C-M-o: Switch to previous profile\n\
