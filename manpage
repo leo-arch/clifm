@@ -390,6 +390,8 @@ print a list of currently trashed files allowing you to choose one or more of th
 rename at once all files passed as arguments to the function. It accepts single and multiple filenames, wildcards, ELN ranges, and the 'sel' keyword. Example: 'br myfile 4\-10 sel'.
 .sp
 Each filename will be copied into a temporary file, which will be opened with the default text editor (via the \fImime\fR function), letting the user modify it. Once the file has been modified and saved, the modifications are printed on the screeen and the user is asked whether to proceed with the actual bulk renaming or not.
+.sp
+This built-in bulk rename function won't deal with deletions, replacements, file name conflicts and the like. For a smarter alternative use \fBqmv(1).
 .TP
 
 .B bl \fRELN/FILE ... n
