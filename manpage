@@ -939,6 +939,8 @@ If speed is still an issue, try one of the setups below (listed from slower to f
 \fBg)\fR Light mode with only DirIndicator enabled
 .TP
 \fBh)\fR Light mode with all the four options disabled (ListFoldersFirst, DirIndicator, Classify, and ClassifyExec). The sorting method should also be set to "none" to go full speed.
+.TP
+Despite the above, however, it is important to bear in mind that listing speed does not only depend on the program's code and enabled features, but also on the terminal emulator used. Old, basic terminal emulators like Xterm and Aterm (this one especially) are really slow compared to more modern ones like Urxvt, Lxterminal, and Terminator, to name just a few.
 
 .SH ENVIRONMENT
 The following variables are read at initialization time:
