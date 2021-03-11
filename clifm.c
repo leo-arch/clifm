@@ -39,6 +39,11 @@
 #  endif
 #endif
 
+/* Support large files on ARM or 32-bit machines */
+#if defined(__arm__) || defined(__i386__)
+#	define _FILE_OFFSET_BITS 64
+#endif
+
 /* #define __SIZEOF_WCHAR_T__ 4 */
 
 /* Linux */
@@ -116,7 +121,7 @@ in FreeBSD, but is deprecated */
 #include <sys/statvfs.h>
 #include <regex.h>
 
-/*#include <wchar.h> */
+#include <wchar.h>
 
 #define EXIT_SUCCESS 0
 
@@ -487,7 +492,7 @@ int is_internal_c(const char *cmd);
 char **get_substr(char *str, const char ifs);
 char *savestring(const char *str, size_t size);
 char *dequote_str(char *text, int m_t);
-size_t u8_xstrlen(const char *str);
+size_t wc_xstrlen(const char *str);
 
 /* Listing */
 int list_dir(void);
@@ -665,6 +670,9 @@ int edit_actions(void);
 				/** ##########################
 				 * #    GLOBAL VARIABLES    # 
 				 * ##########################*/
+
+#define CMD_LEN_MAX (PATH_MAX + ((NAME_MAX + 1) << 1))
+static char len_buf[CMD_LEN_MAX] __attribute__ ((aligned));
 
 /* Without this variable, TCC complains that __dso_handle is an
  * undefined symbol and won't compile */
@@ -984,38 +992,12 @@ char di_c[MAX_COLOR] = "", /* Directory */
 
 	dir_ico_c[MAX_COLOR] = ""; /* Directories icon color */
 
+
 				/**
 				 * #############################
 				 * #           MAIN            #
 				 * #############################
 				 * */
-/*
-void
-check_stdin()
-{
-	fd_set readfds;
-    FD_ZERO(&readfds);
-
-    struct timeval timeout;
-    timeout.tv_sec = 0;
-    timeout.tv_usec = 0;
-
-	FD_SET(STDIN_FILENO, &readfds);
-
-	if (select(1, &readfds, NULL, NULL, &timeout)) {
-		char buf[PATH_MAX * 100] = "";
-		ssize_t len = 0;
-
-		do
-			len = read(STDIN_FILENO, buf, sizeof(buf));
-		while (len == -1 && errno == EINTR);
-
-		if (*buf)
-			printf("a%s\n", buf);
-	}
-
-	return;
-} */
 
 int
 main(int argc, char **argv)
@@ -2490,9 +2472,6 @@ reload_config(void)
 	load_dirhist();
 
 	load_jumpdb();
-
-	if (restore_last_path)
-		get_last_path();
 
 	/* Set the current poistion of the dirhist index to the last
 	 * entry */
@@ -6396,7 +6375,7 @@ decode_prompt(char *line)
 				}
 
 			case 'S': { /* Current workspace */
-				char s[2];
+				char s[8];
 				sprintf(s, "%d", cur_ws + 1);
 				temp = savestring(s, 1);
 				goto add_string;
@@ -6891,12 +6870,6 @@ profile_set(char *prof)
 	/* Reset everything */
 	reload_config();
 
-	if (restore_last_path)
-		get_last_path();
-
-/*	set_colors();
-	rl_initialize(); */
-
 	/* Check whether we have a working shell */
 	if (access(sys_shell, X_OK) == -1) {
 		_err('w', PRINT_PROMPT, _("%s: %s: System shell not found. Please "
@@ -6971,7 +6944,6 @@ profile_set(char *prof)
 
 	free_bookmarks();
 	load_bookmarks();
-/*	get_bm_names(); */
 
 	load_actions();
 
@@ -6995,12 +6967,23 @@ profile_set(char *prof)
 
 	get_path_programs();
 
-	if (cd_lists_on_the_fly) {
-		free_dirlist();
-		list_dir();
+	if (restore_last_path)
+		get_last_path();
+
+	if (chdir(ws[cur_ws].path) == -1) {
+		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, ws[cur_ws].path,
+				strerror(errno));
+		return EXIT_FAILURE;
 	}
 
-	return EXIT_SUCCESS;
+	int exit_status = EXIT_SUCCESS;
+
+	if (cd_lists_on_the_fly) {
+		free_dirlist();
+		exit_status = list_dir();
+	}
+
+	return exit_status;
 }
 
 int mime_open(char **args)
@@ -7082,7 +7065,7 @@ int mime_open(char **args)
 			file_path = realpath(args[1], NULL);
 
 		if (!file_path) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_path, 
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[1], 
 					strerror(errno));
 			return -1;
 		}
@@ -9859,6 +9842,19 @@ u8_xstrlen(const char *str)
 		else
 			cont_bt++;
 	}
+
+	return len;
+}
+
+size_t
+wc_xstrlen(const char *str)
+{
+	wchar_t * const wbuf = (wchar_t *)len_buf;
+
+	/* Convert multi-byte to wide char */
+	size_t len = mbstowcs(wbuf, str, NAME_MAX);
+
+	len = wcswidth(wbuf, len);
 
 	return len;
 }
@@ -18492,7 +18488,7 @@ list_dir(void)
 			 * run strlen() again later on the same filename */
 			if (columned) {
 				file_info[i].len = unicode
-						? u8_xstrlen(tmp_dirlist[tmp_dirs[i]]->d_name)
+						? wc_xstrlen(tmp_dirlist[tmp_dirs[i]]->d_name)
 						: strlen(tmp_dirlist[tmp_dirs[i]]->d_name);
 			}
 
@@ -18506,10 +18502,10 @@ list_dir(void)
 
 			if (columned) {
 				file_info[i].len = unicode
-					  ? u8_xstrlen(tmp_dirlist[tmp_files[j]]->d_name)
+					  ? wc_xstrlen(tmp_dirlist[tmp_files[j]]->d_name)
 					  : strlen(tmp_dirlist[tmp_files[j]]->d_name);
 			}
-			/* cont_bt value is set by u8_xstrlen() */
+			/* cont_bt value is set by wc_xstrlen() */
 			dirlist[i++] = tmp_dirlist[tmp_files[j]]->d_name;
 		}
 
@@ -18533,7 +18529,7 @@ list_dir(void)
 		for (i = 0; i < (int)files; i++) {
 			if (columned) {
 				file_info[i].len = unicode
-						? u8_xstrlen(tmp_dirlist[i]->d_name)
+						? wc_xstrlen(tmp_dirlist[i]->d_name)
 						: strlen(tmp_dirlist[i]->d_name);
 			}
 			dirlist[i] = tmp_dirlist[i]->d_name;
@@ -19389,12 +19385,12 @@ list_dir_light(void)
 			 * file */
 			if (columned) {
 				file_info[i].len = (unicode)
-						? u8_xstrlen(tmp_dirlist[tmp_dirs[i]]->d_name)
+						? wc_xstrlen(tmp_dirlist[tmp_dirs[i]]->d_name)
 						: strlen(tmp_dirlist[tmp_dirs[i]]->d_name);
 			}
 
 			file_info[i].type = tmp_dirlist[tmp_dirs[i]]->d_type;
-			/* cont_bt value is set by u8_xstrlen() */
+			/* cont_bt value is set by wc_xstrlen() */
 
 			dirlist[i] = tmp_dirlist[tmp_dirs[i]]->d_name;
 		}
@@ -19404,7 +19400,7 @@ list_dir_light(void)
 		for (j = 0; j < (int)filesn; j++) {
 			if (columned) {
 				file_info[i].len = (unicode)
-						? u8_xstrlen(tmp_dirlist[tmp_files[j]]->d_name)
+						? wc_xstrlen(tmp_dirlist[tmp_files[j]]->d_name)
 						: strlen(tmp_dirlist[tmp_files[j]]->d_name);
 			}
 
@@ -19433,7 +19429,7 @@ list_dir_light(void)
 		for (i = 0; i < (int)files; i++) {
 			if (columned) {
 				file_info[i].len = unicode
-						   ? u8_xstrlen(tmp_dirlist[i]->d_name)
+						   ? wc_xstrlen(tmp_dirlist[i]->d_name)
 						   : strlen(tmp_dirlist[i]->d_name);
 			}
 			file_info[i].type = tmp_dirlist[i]->d_type;
@@ -23389,7 +23385,7 @@ search_glob(char **comm)
 		/* If not searching in CWD, we only need to know the file's
 		 * length (no ELN) */
 		if (search_path) {
-			len = unicode ? u8_xstrlen(pfiles[found])
+			len = unicode ? wc_xstrlen(pfiles[found])
 				  : strlen(pfiles[found]);
 
 			/* This will be passed to colors_list(): -1 means no ELN */
@@ -23413,7 +23409,7 @@ search_glob(char **comm)
 
 				eln[found] = (int)(j + 1);
 
-				len = (unicode ? u8_xstrlen(pfiles[found]) 
+				len = (unicode ? wc_xstrlen(pfiles[found]) 
 					  : strlen(pfiles[found])) + 
 					  (size_t)digits_in_num(eln[found]) + 1;
 
@@ -23720,7 +23716,7 @@ search_regex(char **comm)
 		/* If not searching in CWD, we only need to know the file's
 		 * length (no ELN) */
 		if (search_path) {
-			len = unicode ? u8_xstrlen(
+			len = unicode ? wc_xstrlen(
 				  reg_dirlist[regex_index[i]]->d_name)
 				  : strlen(reg_dirlist[regex_index[i]]->d_name);
 
