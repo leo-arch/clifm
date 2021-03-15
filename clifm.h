@@ -692,31 +692,35 @@ get_date (void)
 }
 
 char *
-get_size_unit(off_t file_size)
+get_size_unit(off_t size)
 /* Convert FILE_SIZE to human readeable form */
 {
-	size_t max_size_type_len = 11;
-	/* Max size type length == 10 == "1024.1KiB\0",
-	 * or 11 == "1023 bytes\0" */
-	char *size_type = calloc(max_size_type_len + 1, sizeof(char));
-	short units_n = 0;
-	float size = (float)file_size;
+	size_t max = 8;
+	/* Max size type length == 8 == "1024.1K\0" */
+	char *p = malloc(max * sizeof(char));
 
-	while (size > 1024) {
-		size = size/1024;
-		++units_n;
+	if (!p)
+		return (char *)NULL;
+
+	char *str = p;
+	p = (char *)NULL;
+
+	size_t n = 0;
+	float s = (float)size;
+
+	while (s > 1024) {
+		s = s/1024;
+		++n;
 	}
 
-	/* If bytes */
-	if (!units_n)
-		snprintf(size_type, max_size_type_len, "%.0f bytes", (double)size);
-	else {
-		static char units[] = { 'b', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y' };		
-		snprintf(size_type, max_size_type_len, "%.1f%ciB", (double)size, 
-				 units[units_n]);
-	}
+	int x = (int)s;
+	/* If x == s, then s is an interger; else, it's float
+	 * We don't want to print the reminder when the reminder is zero */
 
-	return size_type;
+	const char *const u = "BKMGTPEZY";
+	snprintf(str, max, "%.*f%c", (s == x) ? 0 : 1, (double)s, u[n]);
+
+	return str;
 }
 
 int
