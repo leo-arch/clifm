@@ -3716,8 +3716,12 @@ export(char **filenames, int open)
 
 int
 get_last_path(void)
-/* Set PATH to last visited directory */
+/* Set PATH to last visited directory and CUR_WS to last used
+ * workspace */
 {
+	if (!CONFIG_DIR)
+		return EXIT_FAILURE;
+
 	char *last_file = (char *)xnmalloc(strlen(CONFIG_DIR) + 7,
 									   sizeof(char));
 	sprintf(last_file, "%s/.last", CONFIG_DIR);
@@ -4559,7 +4563,7 @@ load_actions(void)
 
 	while ((line_len = getline(&line, &line_size, actions_fp)) > 0) {
 
-		if (!line || !*line || *line == '#')
+		if (!line || !*line || *line == '#' || *line == '\n')
 			continue;
 
 		if (line[line_len - 1] == '\n')
@@ -8123,6 +8127,21 @@ profile_set(char *prof)
 
 	if (restore_last_path)
 		get_last_path();
+
+	if (cur_ws == UNSET)
+		cur_ws = 0;
+
+	if (!ws[cur_ws].path) {
+		char cwd[PATH_MAX] = "";
+		getcwd(cwd, sizeof(cwd));
+		if (!*cwd) {
+			fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+			exit(EXIT_FAILURE);
+		}
+		ws[cur_ws].path = (char *)xnmalloc(strlen(cwd) + 1,
+										   sizeof(char));
+		strcpy(ws[cur_ws].path, cwd);
+	}
 
 	if (chdir(ws[cur_ws].path) == -1) {
 		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, ws[cur_ws].path,
@@ -12867,7 +12886,7 @@ load_keybinds(void)
 		kbinds_n = 0;
 	}
 
-	/* Open the actions file */
+	/* Open the keybinds file */
 	FILE *fp = fopen(KBINDS_FILE, "r");
 
 	if (!fp)
@@ -12879,7 +12898,7 @@ load_keybinds(void)
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
 
-		if (!line || !*line || *line == '#')
+		if (!line || !*line || *line == '#' || *line == '\n')
 			continue;
 
 		if (line[line_len - 1] == '\n')
@@ -12904,7 +12923,6 @@ load_keybinds(void)
 
 		kbinds[kbinds_n].function = xnmalloc(strlen(line) + 1,
 											   sizeof(char));
-
 		strcpy(kbinds[kbinds_n++].function, line);
 	}
 
@@ -17204,7 +17222,7 @@ exec_profile(void)
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
 
 		/* Skip empty and commented lines */
-		if (*line == 0x00 || *line == '\n' || *line == '#')
+		if (!*line || *line == '\n' || *line == '#')
 			continue;
 
 		/* Remove trailing new line char */
@@ -23365,7 +23383,7 @@ bookmark_del(char *name)
 	size_t bmn = 0;
 	ssize_t line_len = 0;
 	while ((line_len = getline(&line, &line_size, bm_fp)) > 0) {
-		if (*line == '#' || *line == '\n')
+		if (!line || !*line || *line == '#' || *line == '\n')
 			continue;
 
 		int slash = 0;
@@ -23641,8 +23659,8 @@ bookmark_add(char *file)
 	/* If not absolute path, prepend current path to file */
 	if (*file != '/') {
 		char *tmp_file = (char *)NULL;
-		tmp_file = (char *)xnmalloc((strlen(ws[cur_ws].path) + strlen(file) + 2), 
-								    sizeof(char));
+		tmp_file = (char *)xnmalloc((strlen(ws[cur_ws].path)
+								+ strlen(file) + 2), sizeof(char));
 		sprintf(tmp_file, "%s/%s", ws[cur_ws].path, file);
 		file = tmp_file;
 		tmp_file = (char *)NULL;
@@ -23653,7 +23671,8 @@ bookmark_add(char *file)
 
 	FILE *bm_fp = fopen(BM_FILE, "r");	
 	if (!bm_fp) {
-		fprintf(stderr, _("bookmarks: Error opening the bookmarks file\n"));
+		fprintf(stderr, _("bookmarks: Error opening the bookmarks "
+				"file\n"));
 		if (mod_file)
 			free(file);
 
@@ -23667,7 +23686,7 @@ bookmark_add(char *file)
 	ssize_t line_len = 0;
 
 	while ((line_len = getline(&line, &line_size, bm_fp)) > 0) {
-		if (*line == '#')
+		if (!line || !*line || *line == '#' || *line == '\n')
 			continue;
 
 		char *tmp_line = (char *)NULL;
@@ -23919,10 +23938,15 @@ load_bookmarks(void)
 
 	while (fgets(tmp_line, sizeof(tmp_line), bm_fp)) {
 
-		if (!*tmp_line || *tmp_line == '#')
+		if (!*tmp_line || *tmp_line == '#' || *tmp_line == '\n')
 			continue;
 
 		bm_total++;
+	}
+
+	if (!bm_total) {
+		fclose(bm_fp);
+		return EXIT_SUCCESS;
 	}
 
 	fseek(bm_fp, 0L, SEEK_SET);
@@ -24041,8 +24065,14 @@ load_bookmarks(void)
 	free(line);
 	fclose(bm_fp);
 
+	if (!bm_n) {
+		free(bookmarks);
+		bookmarks = (struct bookmarks_t *)NULL;
+		return EXIT_SUCCESS;
+	}
+
 	/* bookmark_names array shouldn't exist: is only used for bookmark
-	 * completion. xbookmarks[i].name should e used instead, but is
+	 * completion. xbookmarks[i].name should be used instead, but is
 	 * currently not working */
 
 	size_t i, j = 0;
@@ -24988,10 +25018,12 @@ log_function(char **comm)
 	}
 
 	char *date = get_date();
-	size_t log_len = strlen(date) + strlen(ws[cur_ws].path) + strlen(last_cmd) + 6;
+	size_t log_len = strlen(date) + strlen(ws[cur_ws].path)
+					 + strlen(last_cmd) + 6;
 	char *full_log = (char *)xnmalloc(log_len, sizeof(char));
 
-	snprintf(full_log, log_len, "[%s] %s:%s\n", date, ws[cur_ws].path, last_cmd);
+	snprintf(full_log, log_len, "[%s] %s:%s\n", date, ws[cur_ws].path,
+			 last_cmd);
 
 	free(date);
 
