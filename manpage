@@ -74,7 +74,7 @@ List of CliFM features:
   33) Icons support (depends on icons-in-terminal: \fIhttps://github.com/sebastiencs/icons-in-terminal\fR)
   34) Batch symbolic links
   35) Files filter via regular expressions for the files list
-  36) Up to four workspaces
+  36) Up to eight workspaces
 
 .SH RATIONALE
 When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the Linux built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There is no two without three".
@@ -125,19 +125,19 @@ set an alternative keybindings file
 disable long view mode (default)
 .TP
 .B \-L, \-\-long\-view
-enable long view mode: list files and their properties
+enable long view mode to list files and their properties. For each file, the following information is provided: filename, file properties (symbolic notation), owner, group, last modification time, and size. To get more detailed information use the \fIpr\fR command (see below).
 .TP
 .B \-l, \-\-no\-list\-on\-the\-fly
-\'cd\' works like the built\-in shell 'cd' command: change directory but do not list files automatically
+\'cd\' works like the shell 'cd' command: change directory but do not list files automatically
 .TP
 .B \-L, \-\-list\-on\-the\-fly
-\'cd\' lists files on the fly (default)
+\'cd\' changes directory and lists files on the fly (default)
 .TP
 .B \-m, \-\-dirhist\-map
-enable the directory history map
+enable the directory history map to keep in view previous, current and next entries in the directory history list
 .TP
 .B \-p, \-\-path=PATH
-use PATH as CliFM starting path. Default starting path is current working directory
+use PATH as CliFM starting path. Default starting path is current working directory. If no workspace is specified via the \fB--workspace\fR option (see below), the first workspace (1) is used.
 .TP
 .B \-P, \-\-profile=PROFILE
 use (or create) PROFILE as profile. Default profile is 'default'
@@ -152,19 +152,19 @@ leave no trace on the host system. Nothing is read from files nor any file is cr
 disable unicode
 .TP
 .B \-U, \-\-unicode
-enable unicode to correctly list filenames containing accents, tildes, umlauts, non\-latin letters, etc. This option is enabled by default for non\-english locales
+enable unicode to correctly list filenames containing accents, tildes, umlauts, non\-latin letters, etc. This option is enabled by default for non\-english locales.
 .TP
 .B \-v, \-\-version
 show version details and exit
 .TP
 .B \-w, \-\-workspace=NUM
-start in workspace NUM
+start in workspace NUM. By default, CliFM will recover last visited path for each workspace. However, you can override this behaiviour using the \fB--path\fR option described above to start in workspace NUM and in path PATH. 
 .TP
 .B \-x, \-\-ext\-cmds
-allow the use of external commands
+allow the use of external, shell commands
 .TP
 .B \-y, \-\-light\-mode
-enable the light mode to speed up CliFM
+enable the light mode to speed up CliFM. See the NOTE ON SPEED section below.
 .TP
 .B \-z, \-\-sort=METHOD
 sort files by METHOD, where METHOD could be: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version (name if not available), 8 =  extension, 9 = inode.
@@ -185,7 +185,7 @@ write last visited directory to \fI$XDG_CONFIG_HOME/clifm/.last\fR to be later a
 same as no-cd-auto, but for files instead of directories
 .TP
 .B \-\-restore\-last\-path
-save last visited directory to be restored in the next session
+save last visited directory for each workspace to be restored in the next session.
 .TP
 .B \-\-no\-tips
 disable startup tips
@@ -193,11 +193,15 @@ disable startup tips
 .B \-\-disk\-usage
 show disk usage (free/total) for the filesystem to which the current directory belongs
 .TP
-.B \-\-no\-dir\-indicator
-do not add / indicator to directory names when running in light mode
-.TP
-.B \-\-classify=NUM
-specify whether to classify files or not when running in light mode. 0 for no, 1 for yes, and 2 to classify executable files as well (option 2 implies running access(3) over each regular file, which is an expensive operation)
+.B \-\-no-classify
+By default, CliFM appends a filetype indicator character to filenames when running with colors disabled (see the --no-colors option below).  Classification characters are: 
+ /: directories
+ @: symbolic links
+ |: fifo/pipes
+ =: sockets
+ *: executable files
+ ?: unknown filetype
+Use this option to disable this filetype classification.
 .TP
 .B \-\-expand\-bookmarks
 expand bookmark names into the corresponding bookmark paths and enable TAB completion for bookmark names as well. If the bookmark is, .e.g. mybookmark=/my/path, "mybo" will be completed as "mybookmark", which will be interpreted then as "/my/path".
@@ -232,14 +236,14 @@ set NAME as color scheme
 .B \-\-no\-columns
 disable columns for files listing
 .TP
+.B \-\-no\-colors
+disable colors for files listing
+.TP
 .B \-\-no\-welcome\-message
 disable the welcome message
 .TP
 .B \-\-no\-clear\-screen
 do not clear the screen when listing directories
-.TP
-.B \-\-no\-backup\-files
-do not show files ending with tilde (~)
 .TP
 .B \-\-enable\-logs
 enable program logs
@@ -295,7 +299,7 @@ To reset or modify the jump database as you whish, simply open the jump file usi
 .TP
 
 .B ws \fR[NUM, +, -]
-CliFM offers up to four workspaces, each with its own independent path.
+CliFM offers up to eight workspaces, each with its own independent path.
 .sp
 With no argument, the \fIws\fR command prints the list of workspaces and its corresponding paths, highlighting the current workspace. Use NUM to switch to workspace NUM, the plus sign (+) to switch to the next workspace, and the minus sign (-) to switch to the previous workspace.
 .sp
@@ -634,9 +638,9 @@ same as \fIquit\fR, but enabling the CD on quit functionality.
 .SH FILE FILTERS
 CliFM offers three kinds of file filters:
 .sp
- a) Dot and backup files filters (for files starting with a dot or ending with a tilde respectivelly) to permanently exclude hidden and backup files from the files list. See above the corresponding options and commands.
+ a) Dot filter to permanently exclude hidden files from the files list. See the -A and -a options above.
 .sp
- b) Files filter via regular expressions (using the \fIFilter\fR option in the configuration file) to permanently exclude certain groups of filenames.
+ b) Files filter via regular expressions (using the \fIFilter\fR option in the configuration file) to permanently exclude certain groups of filenames, for example, backup files or files ending with a tilde (~).
 .sp
  c) Local filter via the \fIQuick search\fI function (supporting both regular expressions and wildcards) to temporarily filter the current list of files.
 
@@ -924,25 +928,15 @@ By default, CliFM starts in the current working directory. However, you can alwa
 CliFM's default profile is "default". To create alternative profiles use the \-P option or the 'pf' command (see above).
 
 .SH NOTE ON SPEED
-If speed is still an issue, try one of the setups below (listed from slower to faster):
-.TP
-\fBa)\fR Default mode (all listing features enabled)
-.TP
-\fBb)\fR Default mode with sorting method set to "none" (sorting files could be expensive). Needless to say, if icons are enabled, disable them. Columns and files filter should also be disabled.
-.TP
-\fBc)\fR Default mode with FilesCounter option disabled (the files counter function could be quite time consuming, since every directory needs to be accessed via \fBreaddir(3)\fR to get the amount of files it contains)
-.TP
-\fBd)\fR Default mode with FilesCounter and ListFoldersFisrt options disabled (this latter needs to reorder the list of files provided by \fBscandir(3)\fR in order to place directories first, which of course is slower)
-.TP
-\fBe)\fR Light mode with ClassifyExec option enabled. In light mode, colors and FilesCounter are disabled, while (if not running in long view mode) every call to \fBstat(3)\fR, which could be quite time consuming, is omitted.
-.TP
-\fBf)\fR Light mode with Classify enabled and ClassifyExec disabled (this latter needs to call \fBaccess(3)\fR for every regular file to find out whether it is executable or not, which slows things down)
-.TP
-\fBg)\fR Light mode with only DirIndicator enabled
-.TP
-\fBh)\fR Light mode with all the four options disabled (ListFoldersFirst, DirIndicator, Classify, and ClassifyExec). The sorting method should also be set to "none" to go full speed.
-.TP
-Despite the above, however, it is important to bear in mind that listing speed does not only depend on the program's code and enabled features, but also on the terminal emulator used. Old, basic terminal emulators like Xterm and Aterm (this one especially) are really slow compared to more modern ones like Urxvt, Lxterminal, and Terminator, to name just a few.
+CliFM is by itself quite fast by default, but if speed is still an issue, it is possible to get some extra performance.
+.sp
+The two most time consuming features are:
+ 1) The files counter, used to print the amount of files contained by listed directories. Disabling this option produces a nice performance boost.
+ 2) In default mode, \fBfstatat(3)\fR and \fBaccess(3)\fR are used to gather information about listed files. Since these functions, especially when executed hundreds (or even thousands) of times, are quite time consuming, the \fIlight mode\fR was implemented as an alternative listing process omitting all calls to them. When running in light mode, however, only basic file classification is performed, namely, those provided by the \fId_type\fR field of a dirent struct (see \fBreaddir(3)\fR).
+.sp
+Besides these two features, a few more things can be disabled to get some extra speed (though perhaps unnoticiable): icons (if enabled), columns, colors, and, if already running without colors, filetype indicators.
+.sp
+Despite the above, however, it is important to bear in mind that listing speed does not only depend on the program's code and enabled features, but also on the terminal emulator used. Old, basic terminal emulators like Xterm and Aterm (this latter especially) are really slow compared to more modern ones like Urxvt, Lxterminal, ST, and Terminator, to name just a few.
 
 .SH ENVIRONMENT
 The following variables are read at initialization time:
