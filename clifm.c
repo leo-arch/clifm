@@ -359,7 +359,7 @@ nm=01;32:bm=01;36:"
 #define PRINT_NEWLINE 1
 #define NO_NEWLINE 0
 
-#define DEFAULT_PROMPT "\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\
+#define DEFAULT_PROMPT "[\\[\\e[0;34m\\]\\S\\[\\e[0m\\]]\\l \\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\
 \\z\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
 
 #define GRAL_USAGE "[-aAfFgGhiIlLmoOsSuUvxyz] [-b FILE] [-c FILE] \
@@ -5062,16 +5062,18 @@ print_tips(int all)
 		"Create custom commands and features using the 'actions' command",
 		"Create a fresh configuration file by running 'edit gen'",
 		"Use 'ln edit' (or 'le') to edit symbolic links",
-		"Change default keyboard shortcuts by editing the keybindings file",
+		"Change default keyboard shortcuts by editing the keybindings file (F9)",
 		"Keep in sight previous and next visited directories enabling the "
 		"DirhistMap option in the configuration file",
 		"Leave no traces at all running in stealth mode",
 		"Pin a file via the 'pin' command and then use it with the "
-		"period keyword (,). E.g. 'pin directory' and then 'cd ,'",
+		"period keyword (,). Ex: 'pin DIR' and then 'cd ,'",
 		"Switch between color schemes using the 'cs' command",
 		"Use the 'j' command to quickly navigate through visited "
 		"directories",
-		"Enter '+' to try the find-as-you-type function",
+		"Switch workspaces pressing Alt-[1-4]",
+		"Use the 'ws' command to list available workspaces",
+		"Take a look at available plugins using the 'actions' command",
 		NULL
 	};
 
@@ -7539,6 +7541,14 @@ decode_prompt(char *line)
 			case 'S': { /* Current workspace */
 				char s[8];
 				sprintf(s, "%d", cur_ws + 1);
+				temp = savestring(s, 1);
+				goto add_string;
+				}
+
+			case 'l': { /* Current mode */
+				char s[2];
+				s[0] = (light_mode ? 'L' : 0x00);
+				s[1] = 0x00;
 				temp = savestring(s, 1);
 				goto add_string;
 				}
@@ -16270,7 +16280,9 @@ create_config_files(void)
 				"wall=wallpaper_setter.sh\n"
 				"dragon=dragondrop.sh\n"
 				"+=finder.sh\n"
-				"++=jumper.sh\n",
+				"++=jumper.sh\n"
+				"-=fzfnav.sh\n"
+				"*=fzfsel.sh\n",
 				PROGRAM_NAME, PROGRAM_NAME);
 
 			fclose(actions_fp);
@@ -18942,7 +18954,7 @@ prompt(void)
 
 	if (welcome_message) {
 		printf(_("%sCliFM, the anti-eye-candy, KISS file manager%s\n"
-			   "Enter '?' or press F1-3 for instructions.\n"), 
+			   "Enter '?' or press F[1-3] for instructions.\n"), 
 			   wc_c, df_c);
 		welcome_message = 0;
 	}
