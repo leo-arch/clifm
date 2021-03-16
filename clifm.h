@@ -3,7 +3,6 @@
 				 *  #  CLIFM CUSTOM LIB   # 
 				 *  ######################*/
 
-
 int
 check_immutable_bit(char *file)
 /* Check a file's immutable bit. Returns 1 if true, zero if false, and
@@ -695,8 +694,8 @@ char *
 get_size_unit(off_t size)
 /* Convert FILE_SIZE to human readeable form */
 {
-	size_t max = 8;
-	/* Max size type length == 8 == "1024.1K\0" */
+	size_t max = 9;
+	/* Max size type length == 9 == "1023.99K\0" */
 	char *p = malloc(max * sizeof(char));
 
 	if (!p)
@@ -715,10 +714,10 @@ get_size_unit(off_t size)
 
 	int x = (int)s;
 	/* If x == s, then s is an interger; else, it's float
-	 * We don't want to print the reminder when the reminder is zero */
+	 * We don't want to print the reminder when the it is zero */
 
 	const char *const u = "BKMGTPEZY";
-	snprintf(str, max, "%.*f%c", (s == x) ? 0 : 1, (double)s, u[n]);
+	snprintf(str, max, "%.*f%c", (s == x) ? 0 : 2, (double)s, u[n]);
 
 	return str;
 }
