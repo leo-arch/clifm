@@ -834,7 +834,7 @@ CLiFM's prompt is build from the \fIPrompt\fR line in the configuration file fol
 .TP
 \\S: Current workspace number
 .TP
-\\l: Print an 'L' if in light mode or an 'N' if in normal mode
+\\l: Print an 'L' if in light mode
 .TP
 \\t: The time, in 24\-hour HH:MM:SS format
 .TP
@@ -865,7 +865,7 @@ CLiFM's prompt is build from the \fIPrompt\fR line in the configuration file fol
 .TP
 By default, for example, CliFM's prompt line is this: "[\\[\\e[0;36m\\]\\S\\[\\e[0m\\]]\\l \\A \\u:\\H \\[\\e[0;36m\\]\\w\\n\\[\\e[0m\\]\\z\\[\\e[0;34m\\] \\$ \\[\\e[0m\\]", which once decoded should be something like this: 
 
- [1]N 13:45 user:hostname /my/path
+ [1] 13:45 user:hostname /my/path
  :) $
 
 .TP
