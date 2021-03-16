@@ -828,11 +828,13 @@ CLiFM's prompt is build from the \fIPrompt\fR line in the configuration file fol
 .TP
 \\a: A bell character
 .TP
-\\d: The date, in abbrevieted form (ex: “Tue May 26”)
+\\d: The date, in abbreviated form (ex: “Tue May 26”)
 .TP
 \\s: The name of the shell (everything after the last slash) currently used by CliFM
 .TP
 \\S: Current workspace number
+.TP
+\\l: Print an 'L' if in light mode or an 'N' if in normal mode
 .TP
 \\t: The time, in 24\-hour HH:MM:SS format
 .TP
@@ -861,7 +863,7 @@ CLiFM's prompt is build from the \fIPrompt\fR line in the configuration file fol
 \\]: End a sequence of non\-printing characters
 
 .TP
-By default, for example, CliFM's prompt line is this: "\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\\z\\[\\e[0;34m\\] \\$ \\[\\e[0m\\]", which once decoded should be something like this: 
+By default, for example, CliFM's prompt line is this: "[\S]\l \\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\\z\\[\\e[0;34m\\] \\$ \\[\\e[0m\\]", which once decoded should be something like this: 
 
  13:45 user:hostname /my/path
  :) $
