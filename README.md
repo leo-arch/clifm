@@ -97,7 +97,7 @@ Because file manager, but also half-shell, CLiFM also provides the following fea
 * Customizable keyboard shortcuts (**NEW**)
 * Lira, a built-in resource opener
 * Mas, a built-in pager for files listing
-* Multiple sorting methods: name, size, atime, btime, ctime, mtime, version, extension, and inode. It also supports reverse sorting.
+* Eleven sorting methods: name, size, atime, btime, ctime, mtime, version, extension, inode, owner, and group. It also supports reverse sorting.
 * Bulk rename
 * Archives and compression support (including Zstandard and ISO 9660)
 * Auto-cd and auto-open
