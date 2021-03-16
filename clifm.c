@@ -374,10 +374,10 @@ nm=01;32:bm=01;36:"
 #define SGRP 11
 #define SORT_TYPES 11
 
-#define DEFAULT_PROMPT "[\\[\\e[0;34m\\]\\S\\[\\e[0m\\]]\\l \\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\
+#define DEFAULT_PROMPT "[\\[\\e[0;36m\\]\\S\\[\\e[0m\\]]\\l \\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\
 \\z\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
 
-#define GRAL_USAGE "[-aAfFgGhiIlLmoOsSuUvxyz] [-b FILE] [-c FILE] \
+#define GRAL_USAGE "[-aAfFgGhiIlLmoOsSuUvxy] [-b FILE] [-c FILE] \
 [-k FILE] [-p PATH] [-P PROFILE] [-z METHOD]"
 
 #define DEFAULT_TERM_CMD "xterm -e"
@@ -6762,18 +6762,20 @@ create_config(char *file)
 # to get a few more\n\
 ColorScheme=default\n\n"
 
-"# By default, the amount of files contained by a directory is informed next\n\
+"# The amount of files contained by a directory is informed next\n\
 # to the directory name. However, this feature might slow things down when, \n\
 # for example, listing files on a remote server. The filescounter can be \n\
-# disabled here or using the 'fc' command while in the program itself.\n\
+# disabled here, via the --no-files-counter option, or using the 'fc' \n\
+# command while in the program itself.\n\
 FilesCounter=true\n\n"
 
-"# DividingLineChar accepts both literal characters (in single quotes) and \n\
-# decimal numbers.\n\
+"# The character used to construct the line dividing the list of files and\n\
+# the prompt. DividingLineChar accepts both literal characters (in single \n\
+# quotes) and decimal numbers.\n\
 DividingLineChar='='\n\n"
 
 "# If set to true, print a map of the current position in the directory\n\
-# history list\n\
+# history list, showing previous, current, and next entries\n\
 DirhistMap=false\n\n"
 
 "# Use a regex expression to exclude filenames when listing files.\n\
@@ -6781,8 +6783,8 @@ DirhistMap=false\n\n"
 # the regular expression\n\
 Filter=\n\n"
 
-"# The prompt line is build using string literals and/or the following escape\n\
-# sequences:\n"
+"# The prompt line is build using string literals and/or one or more of\n\
+# the following escape sequences:\n"
 "# \\xnn: The character whose hexadecimal code is nn.\n\
 # \\e: Escape character\n\
 # \\h: The hostname, up to the first dot\n\
@@ -6794,6 +6796,8 @@ Filter=\n\n"
 # \\d: The date, in abbrevieted form (ex: 'Tue May 26')\n\
 # \\s: The name of the shell (everything after the last slash) currently used\n\
 # by CliFM\n\
+# \\S: The number of the current workspace\n\
+# \\l: Print an 'L' if running in light mode\n\
 # \\t: The time, in 24-hour HH:MM:SS format\n\
 # \\T: The time, in 12-hour HH:MM:SS format\n\
 # \\@: The time, in 12-hour am/pm format\n\
@@ -6825,13 +6829,20 @@ MaxPath=40\n\n"
 SplashScreen=false\n\
 ShowHiddenFiles=false\n\
 LongViewMode=false\n\
-ExternalCommands=false\n\
-CdOnQuit=false\n\
 LogCmds=false\n\n"
+
+"# Should CliFM be allowed to run external, shell commands?\n\
+ExternalCommands=false\n\n"
+
+" Write the last visited directory to $XDG_CONFIG_HOME/clifm/.last to be\n\
+# later accessed by the corresponding shell function at program exit.\n\
+# To enable this feature consult the manpage.\n\
+CdOnQuit=false\n\n"
 
 "# If set to true, a command name that is the name of a directory or a\n\
 # file is executed as if it were the argument to the the 'cd' or the \n\
-# 'open' commands respectivelly.\n\
+# 'open' commands respectivelly: 'cd DIR' works the same as just 'DIR'\n\
+# and 'open FILE' works the same as just 'FILE'.\n\
 Autocd=true\n\
 AutoOpen=true\n\n"
 
@@ -6842,24 +6853,30 @@ ExpandBookmarks=false\n\n"
 
 "# In light mode, extra filetype checks (except those provided by\n\
 # the d_type field of the dirent structure (see readdir(3))\n\
-# are disabled to speed up the listing process.\n\
+# are disabled to speed up the listing process. stat(3) and access(3)\n\
+# are not executed at all, so that we cannot know in advance if a file\n\
+# is readable by the current user, if it is executable, SUID, SGID, if a \n\
+# symlink is broken, and so on. The file extension check is ignored as\n\
+# well, so that the color per extension feature is disabled.\n\
 LightMode=false\n\n"
 
 "# When running without colors (via the --no-colors option), append \n\
 # filetype indicator at the end of filenames: '/' for directories,\n\
 # '@' for symbolic links, '=' for sockets, '|' for FIFO/pipes, '*'\n\
-# for for executable files, and '?' for unknown file types.\n\
-Classify=true\n"
+# for for executable files, and '?' for unknown file types. Bear in mind\n\
+# that when running in light mode the check for executable files won't be\n\
+# performed, and thereby no inidicator will be added to executable files.\n\
+Classify=true\n\n"
 
 "# Should the Selection Box be shared among different profiles?\n\
 ShareSelbox=false\n\n"
 
 "# Choose the resource opener to open files with their default associated\n\
-# application. If not set, 'lira', CLiFM built-in opener, is used.\n\
+# application. If not set, 'lira', CLiFM's built-in opener, is used.\n\
 Opener=\n\n"
 
 "# Set the shell to be used when running external commands. Defaults to the \n\
-# user's shell as is specified in '/etc/passwd'.\n\
+# user's shell as specified in '/etc/passwd'.\n\
 SystemShell=\n\n"
 
 "# Only used when opening a directory via a new CliFM instance (with the 'x' \n\
@@ -6874,7 +6891,7 @@ TerminalCmd='%s'\n\n"
 Sort=1\n\
 # By default, CliFM sorts files from less to more (ex: from 'a' to 'z' if\n\
 # using the \"name\" method). To invert this ordering, set SortReverse to\n\
-# true\n\
+# true (you can also use the --sort-reverse option or the 'st' command)\n\
 SortReverse=false\n\n"
 
 "Tips=true\n\
@@ -6891,14 +6908,12 @@ DiskUsage=false\n\n"
 "# If set to true, clear the screen before listing files\n\
 ClearScreen=true\n\n"
 
-"# Define up to 16 workspaces. Defaults to 4.\n\
-Workspaces=4\n\n"
-
-"# If not specified, StartingPath defaults to the current working directory.\n\
+"# If not specified, StartingPath defaults to the current working\n\
+# directory.\n\
 StartingPath=\n\n"
 
-"# If set to true, start CliFM in the last visited directory. This option\n\
-# overrides StartingPath.\n\
+"# If set to true, start CliFM in the last visited directory (and in the\n\
+# last used workspace). This option overrides StartingPath.\n\
 RestoreLastPath=false\n\n"
 
 "# Set readline editing mode: 0 for vi and 1 for emacs (default).\n\
@@ -25840,124 +25855,125 @@ help_function (void)
 		   PNL, GRAL_USAGE, PROGRAM_NAME);
 
 	printf("\
-\n     --no-cd-auto\t\t by default, %s changes to directories \
-\n\t\t\t\tby just specifying the corresponding ELN \
-\n				(e.g. '12' instead of 'cd 12'). This \
-\n				option forces the use of 'cd'\
-\n     --no-open-auto\t\t same as no-cd-auto, but for files\
 \n     --cd-on-quit\t\t write last visited path to \
 \n				$XDG_CONFIG_HOME/clifm/.last to be accessed\
 \n				later by a shell funtion. See the manpage\
-\n     --restore-last-path\t save last visited directory to be \
-\n				restored in the next session\
-\n     --no-tips\t\t\t disable startup tips\
+\n     --color-scheme=NAME\t use color scheme NAME\
 \n     --disk-usage\t\t show disk usage (free/total) for the\
 \n				filesystem to which the current directory \
 \n				belongs\
+\n     --enable-logs\t\t enable program logs\
 \n     --expand-bookmarks\t\t expand bookmark names into the \
 \n				corresponding bookmark paths. TAB \
 \n				completion for bookmark names is also \
 \n				available\
 \n     --icons\t\t\t enable icons\
-\n     --no-autojump\t\t disable the autojump function\
-\n     --color-scheme=NAME\t use color scheme NAME\
-\n     --no-classify\t\tDo not append filetype indicators\
-\n     --share-selbox\t\t make the Selection Box common to \
-\n				different profiles\
-\n     --rl-vi-mode\t\t set readline to vi editing mode (defaults \
-\n				to emacs editing mode)\
-\n     --max-dirhist\t\t maximum number of visited directories to \
-\n				remember\
-\n     --sort-reverse\t\t sort in reverse order, for example: z-a \
-\n				instead of a-z, which is the default order\
-\n     --no-files-counter\t\t disable the files counter for \
-\n				directories. This option is especially \
-\n				useful to speed up the listing process; \
-\n				counting files in directories is expensive\
-\n     --no-welcome-message\t disable the welcome message\
-\n     --no-columns\t\t disable columned files listing\
-\n     --no-colors\t\t disable filetype colors for files listing \
-\n     --no-clear-screen\t\t do not clear the screen when listing \
-\n				directories\
-\n     --enable-logs\t\t enable program logs\
 \n     --list-and-quit\t\t list files and quit. It may be used\
 \n				in conjunction with -p\
-\n     --only-dirs\t\t list only directories and symbolic links\
-\n				to directories\
-\n     --opener=APPLICATION\t resource opener to use instead of 'lira',\
-\n				%s built-in opener\
+\n     --max-dirhist\t\t maximum number of visited directories to \
+\n				remember\
 \n     --max-path=NUM\t\t set the maximun number of characters \
 \n				after which the current directory in the \
 \n				prompt line will be abreviated to the \
 \n				directory base name (if \\z is used in \
-\n				the prompt)\n",
+\n				the prompt\
+\n     --no-autojump\t\t disable the autojump function\
+\n     --no-cd-auto\t\t by default, %s changes to directories \
+\n\t\t\t\tby just specifying the corresponding ELN \
+\n				(e.g. '12' instead of 'cd 12'). This \
+\n				option forces the use of 'cd'\
+\n     --no-classify\t\tDo not append filetype indicators\
+\n     --no-clear-screen\t\t do not clear the screen when listing \
+\n				directories\
+\n     --no-colors\t\t disable filetype colors for files listing \
+\n     --no-columns\t\t disable columned files listing\
+\n     --no-files-counter\t\t disable the files counter for \
+\n				directories. This option is especially \
+\n				useful to speed up the listing process; \
+\n				counting files in directories is expensive\
+\n     --no-open-auto\t\t same as no-cd-auto, but for files\
+\n     --no-tips\t\t\t disable startup tips\
+\n     --no-welcome-message\t disable the welcome message\
+\n     --only-dirs\t\t list only directories and symbolic links\
+\n				to directories\
+\n     --opener=APPLICATION\t resource opener to use instead of 'lira',\
+\n				%s built-in opener\
+\n     --restore-last-path\t save last visited directory to be \
+\n				restored in the next session\
+\n     --rl-vi-mode\t\t set readline to vi editing mode (defaults \
+\n				to emacs editing mode)\
+\n     --share-selbox\t\t make the Selection Box common to \
+\n				different profiles\
+\n     --sort-reverse\t\t sort in reverse order, for example: z-a \
+\n				instead of a-z, which is the default order)\n",
 		 PROGRAM_NAME, PROGRAM_NAME);
 
 	puts(_("\nBUILT-IN COMMANDS:\n\n\
  ELN/FILE/DIR (auto-open and autocd functions)\n\
  /PATTERN [DIR] [-filetype]\n\
+ ;[CMD], :[CMD]\n\
+ ac, ad ELN/FILE ...\n\
+ acd, autocd [on, off, status]\n\
+ actions [edit]\n\
+ alias [import FILE]\n\
+ ao, auto-open [on, off, status]\n\
+ b, back [h, hist] [clear] [!ELN]\n\
+ bl ELN/FILE ...\n\
  bm, bookmarks [a, add PATH] [d, del] [edit] [SHORTCUT or NAME]\n\
- o, open [ELN/FILE] [APPLICATION]\n\
+ br, bulk ELN/FILE ...\n\
+ c, l [e, edit], m, md, r\n\
+ cc, colors\n\
  cd [ELN/DIR]\n\
+ cl, columns [on, off]\n\
+ cmd, commands\n\
+ cs, colorscheme [edit] [COLORSCHEME]\n\
+ dc [on, off, status]\n\
+ ds, desel [*, a, all]\n\
+ edit [APPLICATION]\n\
+ exp, export [ELN/FILE ...]\n\
+ ext [on, off, status]\n\
+ f, forth [h, hist] [clear] [!ELN]\n\
+ fc, filescounter [on, off, status]\n\
+ ff, folders-first [on, off, status]\n\
+ fs\n\
+ ft, filter [unset] [REGEX]\n\
+ hf, hidden [on, off, status]\n\
+ history [clear] [-n]\n\
+ icons [on, off]\n\
  j, jc [STRING ...], jp [STRING ...], je, jo [ORDER]], jump [e, edit] \
 [STRING ...]\n\
- j[c, p, e, o], jump [e, edit] [CHAR/STRING ...]\n\
+ kb, keybinds [edit] [reset]\n\
+ lm [on, off]\n\
+ log [clear]\n\
+ mm, mime [info ELN/FILE] [edit]\n\
+ mp, mountpoints\n\
+ msg, messages [clear]\n\
+ n, net [smb, ftp, sftp]://ADDRESS [OPTIONS]\n\
+ o, open [ELN/FILE] [APPLICATION]\n\
+ opener [default] [APPLICATION]\n\
+ p, pr, prop [ELN/FILE ... n]\n\
+ path, cwd\n\
+ pf, prof, profile [ls, list] [set, add, del PROFILE]\n\
+ pg, pager [on, off, status]\n\
+ pin [FILE/DIR]\n\
+ q, quit, exit, zz\n\
+ Q\n\
+ rf, refresh\n\
+ rl, reload\n\
  s, sel [ELN ELN-ELN FILE ... n] [REGEX [DIR]] [-filetype]\n\
  sb, selbox\n\
- ds, desel [*, a, all]\n\
- t, tr, trash [ELN/FILE ... n] [ls, list] [clear] [del, rm]\n\
- u, undel, untrash [*, a, all]\n\
- b, back [h, hist] [clear] [!ELN]\n\
- f, forth [h, hist] [clear] [!ELN]\n\
- ws [NUM, +, -]\n\
- c, l [e, edit], m, md, r\n\
- p, pr, prop [ELN/FILE ... n]\n\
- mm, mime [info ELN/FILE] [edit]\n\
- ;[CMD], :[CMD]\n\
- mp, mountpoints\n\
- v, paste [sel] [DESTINY]\n\
- ft, filter [unset] [REGEX]\n\
- pf, prof, profile [ls, list] [set, add, del PROFILE]\n\
- cs, colorscheme [edit] [COLORSCHEME]\n\
- br, bulk ELN/FILE ...\n\
- bl ELN/FILE ...\n\
- ac, ad ELN/FILE ...\n\
- x, X [ELN/DIR]\n\
- exp, export [ELN/FILE ...]\n\
  shell [SHELL]\n\
- actions [edit]\n\
- icons [on, off]\n\
- pin [FILE/DIR]\n\
- unpin\n\
- st, sort [METHOD] [rev]\n\
- rl, reload\n\
- opener [default] [APPLICATION]\n\
- msg, messages [clear]\n\
- log [clear]\n\
- history [clear] [-n]\n\
- edit [APPLICATION]\n\
- alias [import FILE]\n\
- kb, keybinds [edit] [reset]\n\
  splash\n\
+ st, sort [METHOD] [rev]\n\
+ t, tr, trash [ELN/FILE ... n] [ls, list] [clear] [del, rm]\n\
  tips\n\
- path, cwd\n\
- cmd, commands\n\
- lm [on, off]\n\
- rf, refresh\n\
- cc, colors\n\
- acd, autocd [on, off, status]\n\
- cl, columns [on, off]\n\
- ao, auto-open [on, off, status]\n\
- hf, hidden [on, off, status]\n\
- ff, folders-first [on, off, status]\n\
- fc, filescounter [on, off, status]\n\
- pg, pager [on, off, status]\n\
+ u, undel, untrash [*, a, all]\n\
  uc, unicode [on, off, status]\n\
- ext [on, off, status]\n\
+ unpin\n\
+ v, paste [sel] [DESTINY]\n\
  ver, version\n\
- fs\n\
- q, quit, exit, zz\n\
- Q\n"));
+ ws [NUM, +, -]\n\
+ x, X [ELN/DIR]\n"));
 
 	puts(_("Run 'cmd' or consult the manpage for more information about "
 		   "each of these commands.\n"));
@@ -25969,7 +25985,6 @@ help_function (void)
  M-l: Toggle long view mode on/off\n\
  M-m: List mountpoints\n\
  M-t: Clear messages\n\
- M-b: Launch the Bookmarks Manager\n\
  M-h: Show directory history\n\
  M-i: Toggle hidden files on/off\n\
  M-s: Open the Selection Box\n\
