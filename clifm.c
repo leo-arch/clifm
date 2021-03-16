@@ -359,6 +359,21 @@ nm=01;32:bm=01;36:"
 #define PRINT_NEWLINE 1
 #define NO_NEWLINE 0
 
+/* Sort macros */
+#define SNONE 0
+#define SNAME 1
+#define SSIZE 2
+#define SATIME 3
+#define SBTIME 4
+#define SCTIME 5
+#define SMTIME 6
+#define SVER 7
+#define SEXT 8
+#define SINO 9
+#define SOWN 10
+#define SGRP 11
+#define SORT_TYPES 11
+
 #define DEFAULT_PROMPT "[\\[\\e[0;34m\\]\\S\\[\\e[0m\\]]\\l \\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\
 \\z\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
 
@@ -867,7 +882,7 @@ int max_hist = UNSET, max_log = UNSET, max_dirhist = UNSET,
 	max_path = UNSET,
 
 	dirhist_cur_index = 0, argc_bk = 0, exit_code = 0,
-	shell_is_interactive = 0, cont_bt = 0, sort_types = 9,
+	shell_is_interactive = 0, cont_bt = 0,
 	total = 0, dirhist_total_index = 0, trash_n = 0;
 
 int *eln_as_file = (int *)0;
@@ -1796,24 +1811,23 @@ static int entrycmp(const void *a, const void *b)
 	int ret = 0, st = sort;
 
 #ifndef _GNU_SOURCE
-	/* Use name instead of version */
-	if (st == 7)
-		st = 1;
+	if (st == SVER)
+		st = SNAME;
 #endif
 
 	switch(st) {
 
-	case 2: /* Size */
+	case SSIZE:
 		if (pa->size > pb->size)
 			ret = 1;
 		else if (pa->size < pb->size)
 			ret = -1;
 		break;
 
-	case 3: /* Atime */
-	case 4: /* Btime */
-	case 5: /* Ctime */
-	case 6: /* Mtime */
+	case SATIME:
+	case SBTIME:
+	case SCTIME:
+	case SMTIME:
 		if (pa->time > pb->time)
 			ret = 1;
 		else if (pa->time < pb->time)
@@ -1821,12 +1835,12 @@ static int entrycmp(const void *a, const void *b)
 		break;
 
 #ifdef _GNU_SOURCE
-	case 7: /* Version */
+	case SVER:
 		ret = strverscmp(pa->name, pb->name);
 		break;
 #endif
 
-	case 8: { /* Extension */
+	case SEXT: {
 		char *aext = (char *)NULL, *bext = (char *)NULL, *val;
 		val = strrchr(pa->name, '.');
 		if (val && val != pa->name)
@@ -1848,11 +1862,26 @@ static int entrycmp(const void *a, const void *b)
 		}
 		break;
 
-	case 9: /* Inode */
+	case SINO:
 		if (pa->inode > pb->inode)
 			ret = 1;
 		else if (pa->inode < pb->inode)
 			ret = -1;
+		break;
+
+	case SOWN:
+		if (pa->uid > pb->uid)
+			ret = 1;
+		else if (pa->uid < pb->uid)
+			ret = -1;
+		break;
+
+	case SGRP:
+		if (pa->gid > pb->gid)
+			ret = 1;
+		else if (pa->gid < pb->gid)
+			ret = -1;
+		break;
 	}
 
 	if (!ret)
@@ -2462,12 +2491,17 @@ int list_dir(void)
 		file_info[n].inode = ent->d_ino;
 		file_info[n].linkn = attr.st_nlink;
 		file_info[n].size = attr.st_size;
-		if (long_view) {
+
+		if (long_view || sort == SOWN || sort == SGRP) {
 			file_info[n].uid = attr.st_uid;
 			file_info[n].gid = attr.st_gid;
-			file_info[n].ltime = attr.st_mtim.tv_sec;
-			file_info[n].mode = attr.st_mode;
+
+			if (long_view) {
+				file_info[n].ltime = attr.st_mtim.tv_sec;
+				file_info[n].mode = attr.st_mode;
+			}
 		}
+
 		file_info[n].color = (char *)NULL;
 
 		file_info[n].icon = DEF_FILE_ICON;
@@ -6126,14 +6160,14 @@ print_sort_method(void)
 	printf(_("%s->%s Sorted by: "), mi_c, df_c);
 
 	switch(sort) {
-		case 0: puts(_("none")); break;
-		case 1: printf(_("name %s\n"), (sort_reverse) ? "[rev]" : "");
+		case SNONE: puts(_("none")); break;
+		case SNAME: printf(_("name %s\n"), (sort_reverse) ? "[rev]" : "");
 			break;
-		case 2: printf(_("size %s\n"), (sort_reverse) ? "[rev]" : "");
+		case SSIZE: printf(_("size %s\n"), (sort_reverse) ? "[rev]" : "");
 			break;
-		case 3: printf(_("atime %s\n"), (sort_reverse) ? "[rev]" : "");
+		case SATIME: printf(_("atime %s\n"), (sort_reverse) ? "[rev]" : "");
 			break;
-		case 4:
+		case SBTIME:
 		#if defined(HAVE_ST_BIRTHTIME) \
 			|| defined(__BSD_VISIBLE) || defined(_STATX)
 				printf(_("btime %s\n"), (sort_reverse) ? "[rev]" : "");
@@ -6142,20 +6176,24 @@ print_sort_method(void)
 					   (sort_reverse) ? "[rev]" : "");
 			#endif
 			break;
-		case 5: printf(_("ctime %s\n"), (sort_reverse) ? "[rev]" : "");
+		case SCTIME: printf(_("ctime %s\n"), (sort_reverse) ? "[rev]" : "");
 			break;
-		case 6: printf(_("mtime %s\n"), (sort_reverse) ? "[rev]" : "");
+		case SMTIME: printf(_("mtime %s\n"), (sort_reverse) ? "[rev]" : "");
 			break;
 		#if __FreeBSD__ || _BE_POSIX
-		case 7: printf(_("version (not available: using 'name') %s\n"),
+		case SVER: printf(_("version (not available: using 'name') %s\n"),
 					   (sort_reverse) ? "[rev]" : "");
 		#else
-		case 7: printf(_("version %s\n"), (sort_reverse) ? "[rev]" : "");
+		case SVER: printf(_("version %s\n"), (sort_reverse) ? "[rev]" : "");
 		#endif
 			break;
-		case 8: printf(_("extension %s\n"), (sort_reverse) ? "[rev]" : "");
+		case SEXT: printf(_("extension %s\n"), (sort_reverse) ? "[rev]" : "");
 			break;
-		case 9: printf(_("inode %s\n"), (sort_reverse) ? "[rev]" : "");
+		case SINO: printf(_("inode %s\n"), (sort_reverse) ? "[rev]" : "");
+			break;
+		case SOWN: printf(_("owner %s\n"), (sort_reverse) ? "[rev]" : "");
+			break;
+		case SGRP: printf(_("group %s\n"), (sort_reverse) ? "[rev]" : "");
 			break;
 	}
 }
@@ -6171,19 +6209,19 @@ sort_function(char **arg)
 		printf(_("Sorting method: "));
 
 		switch(sort) {
-			case 0:
+			case SNONE:
 				printf(_("none %s\n"), (sort_reverse) ? "[rev]": "");
 				break;
-			case 1:
+			case SNAME:
 				printf(_("name %s\n"), (sort_reverse) ? "[rev]": "");
 				break;
-			case 2:
+			case SSIZE:
 				printf(_("size %s\n"), (sort_reverse) ? "[rev]": "");
 				break;
-			case 3:
+			case SATIME:
 				printf(_("atime %s\n"), (sort_reverse) ? "[rev]": "");
 				break;
-			case 4:
+			case SBTIME:
 			#if defined(HAVE_ST_BIRTHTIME) \
 			|| defined(__BSD_VISIBLE) || defined(_STATX)
 				printf(_("btime %s\n"), (sort_reverse) ? "[rev]": "");
@@ -6191,24 +6229,30 @@ sort_function(char **arg)
 				printf(_("ctime %s\n"), (sort_reverse) ? "[rev]": "");
 			#endif
 				break;
-			case 5:
+			case SCTIME:
 				printf(_("ctime %s\n"), (sort_reverse) ? "[rev]": "");
 				break;
-			case 6:
+			case SMTIME:
 				printf(_("mtime %s\n"), (sort_reverse) ? "[rev]": "");
 				break;
-			case 7:
+			case SVER:
 			#if __FreeBSD__ || _BE_POSIX
 				printf(_("name %s\n"), (sort_reverse) ? "[rev]": "");
 			#else
 				printf(_("version %s\n"), (sort_reverse) ? "[rev]": "");
 			#endif
 				break;
-			case 8: printf(_("extension %s\n"), (sort_reverse)
+			case SEXT: printf(_("extension %s\n"), (sort_reverse)
 						   ? "[rev]" : "");
 				break;
-			case 9:
+			case SINO:
 				printf(_("inode %s\n"), (sort_reverse) ? "[rev]": "");
+				break;
+			case SOWN:
+				printf(_("owner %s\n"), (sort_reverse) ? "[rev]": "");
+				break;
+			case SGRP:
+				printf(_("group %s\n"), (sort_reverse) ? "[rev]": "");
 				break;
 		}
 		
@@ -6245,7 +6289,7 @@ sort_function(char **arg)
 	else {
 		int int_arg = atoi(arg[1]);
 
-		if (int_arg >= 0 && int_arg <= sort_types) {
+		if (int_arg >= 0 && int_arg <= SORT_TYPES) {
 			sort = int_arg;
 
 			if (arg[2] && strcmp(arg[2], "rev") == 0) {
@@ -6266,13 +6310,13 @@ sort_function(char **arg)
 		}
 	}
 
-	/* If arg1 is a number but is not in the range 0-sort_types,
+	/* If arg1 is a number but is not in the range 0-SORT_TYPES,
 	 * error */
 
 	fputs(_("Usage: st [METHOD] [rev]\nMETHOD: 0 = none, "
 			"1 = name, 2 = size, 3 = atime, 4 = btime, "
 		    "5 = ctime, 6 = mtime, 7 = version, 8 = extension, "
-		    "9 = inode\n"), stderr);
+		    "9 = inode, 10 = owner, 11 = group\n"), stderr);
 
 	return EXIT_FAILURE;
 }
@@ -6811,7 +6855,7 @@ Classify=true\n"
 ShareSelbox=false\n\n"
 
 "# Choose the resource opener to open files with their default associated\n\
-# application. If not set, 'lira', CLiFM built-in opener, is used\n\
+# application. If not set, 'lira', CLiFM built-in opener, is used.\n\
 Opener=\n\n"
 
 "# Set the shell to be used when running external commands. Defaults to the \n\
@@ -6825,7 +6869,7 @@ TerminalCmd='%s'\n\n"
 
 "# Choose sorting method: 0 = none, 1 = name, 2 = size, 3 = atime\n\
 # 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version\n\
-# (name if note available) 8 = extension, 9 = inode\n\
+# (name if note available) 8 = extension, 9 = inode, 10 = owner, 11 = group\n\
 # NOTE: the 'version' method is not available on FreeBSD\n\
 Sort=1\n\
 # By default, CliFM sorts files from less to more (ex: from 'a' to 'z' if\n\
@@ -13358,7 +13402,7 @@ rl_sort_next(int count, int key)
 		return EXIT_SUCCESS;
 
 	sort++;
-	if (sort > sort_types)
+	if (sort > SORT_TYPES)
 		sort = 0;
 
 	if (cd_lists_on_the_fly) {
@@ -13383,7 +13427,7 @@ rl_sort_previous(int count, int key)
 
 	sort--;
 	if (sort < 0)
-		sort = sort_types;
+		sort = SORT_TYPES;
 
 	if (cd_lists_on_the_fly) {
 		CLEAR;
@@ -16611,7 +16655,7 @@ read_config(void)
 			ret = sscanf(line, "Sort=%d\n", &opt_num);
 			if (ret == -1)
 				continue;
-			if (opt_num >= 0 && opt_num <= sort_types)
+			if (opt_num >= 0 && opt_num <= SORT_TYPES)
 				sort = opt_num;
 			else /* default (sort by name) */
 				sort = DEF_SORT;
@@ -17647,7 +17691,7 @@ external_arguments(int argc, char **argv)
 			{
 				int arg = atoi(optarg);
 
-				if (!is_number(optarg) || arg < 0 || arg > sort_types)
+				if (!is_number(optarg) || arg < 0 || arg > SORT_TYPES)
 					sort = 1;
 				else
 					sort = arg;
@@ -20673,7 +20717,7 @@ exec_cmd(char **comm)
 			puts(_("Usage: st [METHOD] [rev]\nMETHOD: 0 = none, "
 				   "1 = name, 2 = size, 3 = atime, 4 = btime, "
 				   "5 = ctime, 6 = mtime, 7 = version, "
-				   "8 = extension, 9 = inode"));
+				   "8 = extension, 9 = inode, 10 = owner, 11 = group"));
 		    return EXIT_SUCCESS;
 		}
 
@@ -25792,7 +25836,8 @@ help_function (void)
 \n				could be: 0 = none, 1 = name, 2 = size, \
 \n				3 = atime, 4 = btime, 5 = ctime, \
 \n				6 = mtime, 7 = version, 8 = extension, \
-\n				9 = inode"), PNL, GRAL_USAGE, PROGRAM_NAME);
+\n				9 = inode, 10 = owner, 11 = group"),
+		   PNL, GRAL_USAGE, PROGRAM_NAME);
 
 	printf("\
 \n     --no-cd-auto\t\t by default, %s changes to directories \
