@@ -318,7 +318,6 @@ nm=01;32:bm=01;36:"
 #define DEF_SPLASH_SCREEN 0
 #define DEF_WELCOME_MESSAGE 1
 #define DEF_SHOW_HIDDEN 0
-#define DEF_SHOW_BK_FILES 1
 #define DEF_SORT 1
 #define DEF_FILES_COUNTER 1
 #define DEF_LONG_VIEW 0
@@ -336,8 +335,7 @@ nm=01;32:bm=01;36:"
 #define DEF_LOGS_ENABLED 0
 #define DEF_DIV_LINE_CHAR '='
 #define DEF_LIGHT_MODE 0
-#define DEF_DIR_INDICATOR 1
-#define DEF_CLASSIFY 0
+#define DEF_CLASSIFY 1
 #define DEF_SHARE_SELBOX 0
 #define DEF_SORT 1
 #define DEF_SORT_REVERSE 0
@@ -352,6 +350,7 @@ nm=01;32:bm=01;36:"
 #define DEF_CD_ON_QUIT 0
 #define DEF_COLORS 1
 #define MAX_WS 8
+#define DEF_CUR_WS 0
 #define UNSET -1
 
 /* Macros for the colors_list function */
@@ -402,7 +401,6 @@ void get_path_programs(void);
 size_t get_path_env(void);
 int create_config(char *file);
 int set_shell(char *str);
-int load_actions(void);
 int regen_config(void);
 int reload_config(void);
 int save_dirhist(void);
@@ -1312,10 +1310,14 @@ main(int argc, char **argv)
 	if (restore_last_path)
 		get_last_path();
 
+	if (cur_ws == UNSET)
+		cur_ws = DEF_CUR_WS;
+
 	if (cur_ws > MAX_WS - 1) {
+		cur_ws = DEF_CUR_WS;
 		_err('w', PRINT_PROMPT, _("%s: %zu: Invalid workspace."
-			 "\nFalling back to workspace 1\n"), PROGRAM_NAME, cur_ws);
-		cur_ws = 0;
+			 "\nFalling back to workspace %zu\n"), PROGRAM_NAME,
+			 cur_ws, cur_ws + 1);
 	}
 
 	/* If path was not set (neither in the config file nor via command
@@ -3260,11 +3262,13 @@ load_jumpdb(void)
 		return;
 	}
 
-	char tmp_line[PATH_MAX];
+	char tmp_line[PATH_MAX] = "";
 	int jump_lines = 0;
 
-	while (fgets(tmp_line, sizeof(tmp_line), fp))
-		jump_lines++;
+	while (fgets(tmp_line, sizeof(tmp_line), fp)) {
+		if (*tmp_line != '\n' && *tmp_line >= '0' && *tmp_line <= '9')
+			jump_lines++;
+	}
 
 	if (!jump_lines) {
 		free(JUMP_FILE);
@@ -3311,13 +3315,19 @@ load_jumpdb(void)
 			jump_db[jump_n++].visits = atoi(line);
 	}
 
-	jump_db[jump_n].path = (char *)NULL;
-	jump_db[jump_n].visits = 0;
-
 	fclose(fp);
 
 	free(line);
 	free(JUMP_FILE);
+
+	if (!jump_n) {
+		free(jump_db);
+		jump_db = (struct jump_t *)NULL;
+		return;
+	}
+
+	jump_db[jump_n].path = (char *)NULL;
+	jump_db[jump_n].visits = 0;
 
 	return;
 }
@@ -3404,7 +3414,8 @@ print_disk_usage(void)
 
 	char *size = get_size_unit((off_t)(stat.f_blocks * stat.f_frsize));
 
-	printf("%s->%s %s/%s\n", mi_c, df_c, free_space, size);
+	printf("%s->%s %s/%s\n", mi_c, df_c, free_space ? free_space : "?",
+		   size ?  size : "?");
 
 	free(free_space);
 	free(size);
@@ -7763,7 +7774,7 @@ profile_add(char *prof)
 	}
 
 	if (!home_ok) {
-		fprintf(stderr, _("%s: '%s': Error creating profile: Home "
+		fprintf(stderr, _("%s: '%s': Cannot create profile: Home "
 		"directory not found\n"), PROGRAM_NAME, prof);
 		return EXIT_FAILURE;
 	}
@@ -8129,7 +8140,7 @@ profile_set(char *prof)
 		get_last_path();
 
 	if (cur_ws == UNSET)
-		cur_ws = 0;
+		cur_ws = DEF_CUR_WS;
 
 	if (!ws[cur_ws].path) {
 		char cwd[PATH_MAX] = "";
@@ -17758,7 +17769,7 @@ external_arguments(int argc, char **argv)
 
 		if (chdir(path_value) == 0) {
 			if (cur_ws == UNSET)
-				cur_ws = 0;
+				cur_ws = DEF_CUR_WS;
 			if (ws[cur_ws].path)
 				free(ws[cur_ws].path);
 
@@ -20113,6 +20124,9 @@ int workspaces(char *str)
 		}
 
 		tmp_ws = istr - 1;
+
+		if (tmp_ws == cur_ws)
+			return EXIT_FAILURE;
 	}
 
 	else if (*str == '+' && !str[1]) {
@@ -20256,21 +20270,14 @@ exec_cmd(char **comm)
 			if (strcmp(tmp, file_info[i].name) != 0)
 				continue;
 
-			/* In light mode, stat() is never called, so that we
-			 * don't have the stat macros (S_IFDIR and company), but
-			 * only those provided by scandir (DT_DIR and company) */
-			if (autocd && (((light_mode) ? file_info[i].type
-			: file_info[i].type & S_IFMT) == ((light_mode)
-			? DT_DIR : S_IFDIR) || file_info[i].dir == 1)) {
+			if (autocd && (file_info[i].type == DT_DIR
+			|| file_info[i].dir == 1)) {
 				exit_code = cd_function(tmp);
 				return exit_code;
 			}
 
-			else if (auto_open && (((light_mode) ? file_info[i].type
-			: file_info[i].type & S_IFMT) == ((light_mode)
-			? DT_REG : S_IFREG) || ((light_mode) ? file_info[i].type
-			: file_info[i].type & S_IFMT) == ((light_mode)
-			? DT_LNK : S_IFLNK))) {
+			else if (auto_open && (file_info[i].type == DT_REG
+			|| file_info[i].type == DT_LNK)) {
 				char *cmd[] = { "open", comm[0],
 								(comm[1]) ? comm[1] : NULL,
 								NULL }; 
