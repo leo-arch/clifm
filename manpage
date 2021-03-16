@@ -60,7 +60,7 @@ List of CliFM features:
   19) User profiles
   20) Commands sequential and conditional execution
   21) Built-in resource opener (lira)
-  22) 9 sorting methods and reverse sorting
+  22) 11 sorting methods and reverse sorting
   23) Bulk rename
   24) Archiving and compression support
   25) Auto-cd and auto-open
@@ -167,7 +167,7 @@ allow the use of external, shell commands
 enable the light mode to speed up CliFM. See the NOTE ON SPEED section below.
 .TP
 .B \-z, \-\-sort=METHOD
-sort files by METHOD, where METHOD could be: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version (name if not available), 8 =  extension, 9 = inode.
+sort files by METHOD, where METHOD could be: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version (name if not available), 8 =  extension, 9 = inode, 10 = owner, 11 = group.
 .TP
 .B \-\-no\-cd\-auto
 by default, CliFM changes to directories by just specifying the corresponding ELN (e.g. '12' instead of 'cd 12'). This option forces the use of 'cd'
