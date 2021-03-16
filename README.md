@@ -188,15 +188,10 @@ Then you can access the manpage as always: `man clifm`
 
 ## Support
 
-ClifM is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag). It works on Linux and FreeBSD, on i686, x86_64, and ARM architectures.
+CliFM is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag). It works on Linux and FreeBSD, on i686, x86_64, and ARM architectures.
 
 ## First steps
 
-Try the `help` command to learn more about CliFM. Once in the CliFM prompt, type `help` or `?`:
-
-	12:12 user:hostname /etc
-	:) $ help
-
-To jump into the COMMANDS section in the manpage, simply enter `cmd`.
+Try the `help` command to learn more about CliFM. Once in the CliFM prompt, type `help` or `?`. To jump into the COMMANDS section in the manpage, simply enter `cmd` or press **F2**. Press **F1** to access to full manpage and **F3** to access the keybindings help page.
 
 Just try it and let me know. It gets better and better. I myself use it as my main, and indeed only, file manager; it couldn't be so bad, isn't it?
