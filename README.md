@@ -104,7 +104,7 @@ Because file manager, but also half-shell, CLiFM also provides the following fea
 * Symlinks editor
 * Disk usage
 * CD on quit, file picker (as shell functions) (**NEW**)
-* Plugins: PDF reader, image/video previews, wallpaper setter, music playlist, updates check, drag and drop, finder, jumper, clipboard, and interactive help (**NEW**)
+* Plugins: PDF reader, image/video previews, wallpaper setter, music playlist, updates check, drag and drop, finder, jumper, clipboard, FZF navigation, FZF selection, and interactive help (**NEW**)
 * Color schemes (**NEW**)
 * Batch links (**NEW**)
 * Read and list files form standard input (**NEW**)
@@ -192,6 +192,6 @@ CliFM is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag).
 
 ## First steps
 
-Try the `help` command to learn more about CliFM. Once in the CliFM prompt, type `help` or `?`. To jump into the COMMANDS section in the manpage, simply enter `cmd` or press **F2**. Press **F1** to access to full manpage and **F3** to access the keybindings help page.
+Try the `help` command to learn more about CliFM. Once in the CliFM prompt, type `help` or `?`. To jump into the COMMANDS section in the manpage, simply enter `cmd` or press **F2**. Press **F1** to access the full manpage and **F3** to access the keybindings help page.
 
 Just try it and let me know. It gets better and better. I myself use it as my main, and indeed only, file manager; it couldn't be so bad, isn't it?
