@@ -1961,9 +1961,15 @@ list_dir_light(void)
 		}
 
 		file_info[n].name = (char *)xnmalloc(NAME_MAX + 1, sizeof(char));
-		/* Do not use with unicode  */
-		file_info[n].len = (xstrsncpy(file_info[n].name, ename,
-									 NAME_MAX + 1) - 1);
+
+		if (!unicode)
+			file_info[n].len = (xstrsncpy(file_info[n].name, ename,
+										  NAME_MAX + 1) - 1);
+		else {
+			xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
+			file_info[n].len = wc_xstrlen(ename);
+		}
+
 		/* ################  */
 		file_info[n].dir = (ent->d_type == DT_DIR) ? 1 : 0;
 		file_info[n].symlink = (ent->d_type == DT_LNK) ? 1 : 0;
@@ -2480,9 +2486,15 @@ int list_dir(void)
 		}
 
 		file_info[n].name = (char *)xnmalloc(NAME_MAX + 1, sizeof(char));
-		/* Do not use with unicode  */
-		file_info[n].len = (xstrsncpy(file_info[n].name, ename,
-									 NAME_MAX + 1) - 1);
+
+		if (!unicode)
+			file_info[n].len = (xstrsncpy(file_info[n].name, ename,
+										  NAME_MAX + 1) - 1);
+		else {
+			xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
+			file_info[n].len = wc_xstrlen(ename);
+		}
+		
 		/* ################  */
 		file_info[n].dir = (ent->d_type == DT_DIR) ? 1 : 0;
 		file_info[n].symlink = (ent->d_type == DT_LNK) ? 1 : 0;
@@ -25975,8 +25987,8 @@ help_function (void)
  ws [NUM, +, -]\n\
  x, X [ELN/DIR]\n"));
 
-	puts(_("Run 'cmd' or consult the manpage for more information about "
-		   "each of these commands.\n"));
+	puts(_("Run 'cmd' (F2) or consult the manpage (F1) for "
+		   "more information about each of these commands.\n"));
 
 	printf("DEFAULT KEYBOARD SHORTCUTS:\n\n"
 " M-c: Clear the current command line buffer\n\
