@@ -1896,6 +1896,9 @@ static int entrycmp(const void *a, const void *b)
 void
 free_dirlist(void)
 {
+	if (!file_info || !files)
+		return;
+
 	size_t i;
 
 	for (i = 0; i < files; i++)
@@ -5472,7 +5475,6 @@ archiver(char **args, char mode)
 				 * #		  OTHERS		#
 				 * ########################## */
 
-
 		/* Escape the string, if needed */
 		char *esc_name = escape_str(name);
 		free(name);
@@ -5691,11 +5693,18 @@ archiver(char **args, char mode)
 
 			for (i = 1; args[i]; i++) {
 
-				len += strlen(args[i]) + 1;
+				/* Escape the string, if needed */
+				char *esc_name = escape_str(args[i]);
+				if (!esc_name)
+					continue;
+
+				len += strlen(esc_name) + 1;
 				dec_files = (char *)xrealloc(dec_files, (len + 1)
 											 * sizeof(char));
 				strcat(dec_files, " ");
-				strcat(dec_files, args[i]);
+				strcat(dec_files, esc_name);
+
+				free(esc_name);
 			}
 		}
 		break;
@@ -19632,7 +19641,7 @@ check_dir(char **args)
 		return EXIT_FAILURE;
 
 	size_t i;
-	struct stat attrib;
+	struct stat attr;
 
 	for (i = 1; args[i]; i++) {
 
@@ -19644,12 +19653,15 @@ check_dir(char **args)
 				tmp = deq_file;
 		}
 
-		if (lstat(tmp ? tmp : args[i], &attrib) != -1
-		&& (attrib.st_mode & S_IFMT) == S_IFDIR) {
+		if (lstat(tmp ? tmp : args[i], &attr) != -1
+		&& (attr.st_mode & S_IFMT) == S_IFDIR) {
 			if (tmp)
 				free(tmp);
 			return EXIT_SUCCESS;
 		}
+
+		if (tmp)
+			free(tmp);
 	}
 
 	return EXIT_FAILURE;
