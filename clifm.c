@@ -373,6 +373,12 @@ nm=01;32:bm=01;36:"
 #define SGRP 11
 #define SORT_TYPES 11
 
+/* Max length of the properties string in long view mode. This value
+ * depends however on the length of owner and group for each file, so
+ * that 57 is only an approximated value (it takes "owner:group" to be
+ * 13 bytes) */
+#define MAX_PROP_STR 57
+
 #define DEFAULT_PROMPT "[\\[\\e[0;36m\\]\\S\\[\\e[0m\\]]\\l \\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\
 \\z\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
 
@@ -385,7 +391,7 @@ nm=01;32:bm=01;36:"
 
 /* Replace some functions by my custom (faster, I think: NO!!)
  * implementations. */
-/* #define strlen xstrlen */
+#define strlen xstrlen
 #define strcpy xstrcpy
 #define strncpy xstrncpy
 #define strcmp xstrcmp
@@ -486,17 +492,17 @@ struct fileinfo {
 	char *name;
 	int filesn; /* Number of files in subdir */
 	size_t len;
-	mode_t type;
-	mode_t mode; /* For long view mode */
+	mode_t type; /* Store d_type value */
+	mode_t mode; /* Store st_mode (for long view mode) */
 	ino_t inode;
 	off_t size;
 	size_t eln_n;
 	uid_t uid;
 	gid_t gid;
-	int symlink;
 	nlink_t linkn;
 	time_t time;
 	time_t ltime; /* For long view mode */
+	int symlink;
 	int dir;
 	int exec;
 	char *color;
@@ -638,16 +644,6 @@ static short
 	trash_ok = 1,
 	selfile_ok = 1;
 
-/* A short int accepts values from -32,768 to 32,767, and since all the
- * above variables will take -1, 0, and 1 as values, a short int is more
- * than enough. Now, since short takes 2 bytes of memory, using int for
- * these variables would be a waste of 2 bytes (since an int takes 4 bytes).
- * I can even use char (or signed char), which takes only 1 byte (8 bits)
- * and accepts negative numbers (-128 -> +127).
-* NOTE: If the value passed to a variable is bigger than what the variable
-* can hold, the result of a comparison with this variable will always be
-* true */
-
 static int
 	max_hist = UNSET,
 	max_log = UNSET,
@@ -660,9 +656,8 @@ static int
 	shell_is_interactive = 0,
 	cont_bt = 0,
 	dirhist_total_index = 0,
-	trash_n = 0;
-
-static int *eln_as_file = (int *)0;
+	trash_n = 0,
+	*eln_as_file = (int *)0;
 
 static unsigned short term_cols = 0;
 
@@ -691,6 +686,7 @@ static off_t total_sel_size = 0;
 static pid_t own_pid = 0;
 
 static char
+	div_line_char = UNSET,
 	hostname[HOST_NAME_MAX] = "",
 
 	**aliases = (char **)NULL,
@@ -748,12 +744,10 @@ static char
 
 static regex_t regex_exp;
 
-static char div_line_char = UNSET;
-
 static size_t *ext_colors_len = (size_t *)NULL;
 
-	/* This is not a comprehensive list of commands. It only lists
-	 * commands long version for TAB completion */
+/* This is not a comprehensive list of commands. It only lists
+ * commands long version for TAB completion */
 static const char *INTERNAL_CMDS[] = {
 	"alias",
 	"open",
@@ -807,7 +801,7 @@ static const char *INTERNAL_CMDS[] = {
 	"columns",
 	"filter",
 	NULL
-	};
+};
 
 #define MAX_COLOR 46
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
@@ -871,6 +865,156 @@ static char di_c[MAX_COLOR] = "", /* Directory */
 			/** #################################
 			 * #     FUNCTIONS DEFINITIONS     #
 			 * ################################# */
+
+static size_t
+wc_xstrlen(const char *str)
+{
+	size_t len;
+#ifndef _BE_POSIX
+	wchar_t * const wbuf = (wchar_t *)len_buf;
+
+	/* Convert multi-byte to wide char */
+	len = mbstowcs(wbuf, str, NAME_MAX);
+
+	len = wcswidth(wbuf, len);
+#else
+	len = u8_xstrlen(str);
+#endif
+
+	return len;
+}
+
+static int
+u8truncstr(char *str, size_t n)
+{
+	size_t len = 0;
+
+	while (*(str++)) {
+
+		/* Do not count continuation bytes (used by multibyte, that is,
+		 * wide or non-ASCII characters) */
+		if ((*str & 0xc0) != 0x80) {
+			len++;
+
+			if (len == n) {
+/*				*(str - 1) = '~'; */
+				*str = 0x00;
+				return EXIT_SUCCESS;
+			}
+		}
+	}
+
+	return EXIT_FAILURE;
+}
+
+static size_t
+u8_xstrlen(const char *str)
+/* An strlen implementation able to handle unicode characters. Taken from:
+* https://stackoverflow.com/questions/5117393/number-of-character-cells-used-by-string
+* Explanation: strlen() counts bytes, not chars. Now, since ASCII chars
+* take each 1 byte, the amount of bytes equals the amount of chars.
+* However, non-ASCII or wide chars are multibyte chars, that is, one char
+* takes more than 1 byte, and this is why strlen() does not work as
+* expected for this kind of chars: a 6 chars string might take 12 or
+* more bytes */
+{
+	size_t len = 0;
+	cont_bt = 0;
+
+	while (*(str++)) {
+
+		if ((*str & 0xc0) != 0x80)
+			len++;
+
+		else
+			cont_bt++;
+	}
+
+	return len;
+}
+
+static inline size_t
+xstrlen(const char *restrict s)
+/* Taken from NNN's source code */
+{
+#if !defined(__GLIBC__)
+	return strlen(s);
+#else
+	return (char *)rawmemchr(s, '\0') - s;
+#endif
+}
+
+static int
+is_number(const char *str)
+/* Check whether a given string contains only digits. Returns 1 if true
+ * and 0 if false. It does not work with negative numbers */
+{
+	for (; *str ; str++)
+		if (*str < 0x30 || *str > 0x39)
+			return 0;
+
+	return 1;
+}
+
+static inline size_t
+digits_in_num(int n)
+/* Return the amount of digits in N. No need to deal with negative
+ * numbers, since this function is only used for ELN's and amount of
+ * files in directories, which are always positive */
+{
+	if (n < 10)
+		return 1;
+	if (n < 100)
+		return 2;
+	if (n < 1000)
+		return 3;
+	if (n < 10000)
+		return 4;
+	if (n < 10000)
+		return 4;
+	if (n < 100000)
+		return 5;
+
+	size_t c = 0; 
+
+	do
+		++c;
+	while ((n /= 10) != 0);
+
+	return c;
+}
+
+static inline char *
+get_size_unit(off_t size)
+/* Convert FILE_SIZE to human readeable form */
+{
+	size_t max = 9;
+	/* Max size type length == 9 == "1023.99K\0" */
+	char *p = malloc(max * sizeof(char));
+
+	if (!p)
+		return (char *)NULL;
+
+	char *str = p;
+	p = (char *)NULL;
+
+	size_t n = 0;
+	float s = (float)size;
+
+	while (s > 1024) {
+		s = s/1024;
+		++n;
+	}
+
+	int x = (int)s;
+	/* If x == s, then s is an interger; else, it's float
+	 * We don't want to print the reminder when the it is zero */
+
+	const char *const u = "BKMGTPEZY";
+	snprintf(str, max, "%.*f%c", (s == x) ? 0 : 2, (double)s, u[n]);
+
+	return str;
+}
 
 static void *
 xrealloc(void *ptr, size_t size)
@@ -937,8 +1081,8 @@ Usage example:
 static char *
 xnmalloc(size_t nmemb, size_t size)
 {
-	if (nmemb < 0) nmemb = 0;
-	if (size < 0) size = 0;
+	if (nmemb == 0) ++nmemb;
+	if (size == 0) ++size;
 
 	char *new_ptr = (char *)malloc(nmemb * size);
 
@@ -1152,7 +1296,7 @@ launch_execve(char **cmd, int bg)
 	return EXIT_FAILURE;
 }
 
-static void
+static inline void
 free_dirlist(void)
 {
 	if (!file_info || !files)
@@ -1172,9 +1316,9 @@ print_dirhist_map(void)
 {
 	size_t i;
 
-	for (i = 0; i < dirhist_total_index; i++) {
+	for (i = 0; i < (size_t)dirhist_total_index; i++) {
 
-		if (i != dirhist_cur_index)
+		if (i != (size_t)dirhist_cur_index)
 			continue;
 
 		if (i > 0 && old_pwd[i - 1])
@@ -1183,7 +1327,7 @@ print_dirhist_map(void)
 		printf("%zu %s%s%s\n", i + 1, dh_c,
 			   old_pwd[i], df_c);
 
-		if (i + 1 < dirhist_total_index && old_pwd[i + 1])
+		if (i + 1 < (size_t)dirhist_total_index && old_pwd[i + 1])
 			printf("%zu %s\n", i + 2, old_pwd[i + 1]);
 
 		break;
@@ -1191,16 +1335,14 @@ print_dirhist_map(void)
 }
 
 static size_t
-xstrsncpy(char *restrict dst, const char *restrict src,
-						size_t n)
-/* Taken from NNN's source code */
+xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
+/* Taken from NNN's source code: very clever */
 {
 	char *end = memccpy(dst, src, '\0', n);
 
 	if (!end) {
 		dst[n - 1] = '\0';
-		end = dst + n; /* If we return n here, binary size increases
-		due to auto-inlining */
+		end = dst + n;
 	}
 
 	return end - dst;
@@ -1208,8 +1350,8 @@ xstrsncpy(char *restrict dst, const char *restrict src,
 
 static void
 get_file_icon(char *file, int n)
-/* Returns a pointer to the corresponding icon for DIR. If not found,
- * returns the default icon (DIR) */
+/* Set the icon field to the corresponding icon for FILE. If not found,
+ * set the default icon (FILE) */
 {
 	file_info[n].icon = DEF_FILE_ICON;
 	file_info[n].icon_color = DEF_FILE_ICON_COLOR;
@@ -1217,9 +1359,9 @@ get_file_icon(char *file, int n)
 	if (!file)
 		return;
 
-	size_t i;
+	int i;
 
-	for (i = 0; i < sizeof(icon_filenames)/sizeof(struct icons_t); i++) {
+	for (i = sizeof(icon_filenames)/sizeof(struct icons_t) - 1; i >= 0; i--) {
 
 		if (*file == *icon_filenames[i].name
 		&& strcasecmp(file, icon_filenames[i].name) == 0) {
@@ -1233,8 +1375,8 @@ get_file_icon(char *file, int n)
 
 static void
 get_dir_icon(char *dir, int n)
-/* Returns a pointer to the corresponding icon for DIR. If not found,
- * returns the default icon and colors */
+/* Set the icon field to the corresponding icon for DIR. If not found,
+ * set the default icon (DIR) */
 {
 	/* Default values for directories */
 	file_info[n].icon = DEF_DIR_ICON;
@@ -1243,9 +1385,9 @@ get_dir_icon(char *dir, int n)
 	if (!dir)
 		return;
 
-	size_t i;
+	int i;
 
-	for (i = 0; i < sizeof(icon_dirnames)/sizeof(struct icons_t); i++) {
+	for (i = sizeof(icon_dirnames)/sizeof(struct icons_t) - 1; i >= 0; i--) {
 
 		if (*dir == *icon_dirnames[i].name
 		&& strcasecmp(dir, icon_dirnames[i].name) == 0) {
@@ -1259,8 +1401,8 @@ get_dir_icon(char *dir, int n)
 
 static void
 get_ext_icon(char *ext, int n)
-/* Returns a pointer to the corresponding icon for EXT. If not found,
- * returns the default icon and color */
+/* Set the icon field to the corresponding icon for EXT. If not found,
+ * set the default icon (EXT) */
 {
 
 	file_info[n].icon = DEF_FILE_ICON;
@@ -1271,9 +1413,9 @@ get_ext_icon(char *ext, int n)
 
 	ext++;
 
-	size_t i;
+	int i;
 
-	for (i = 0; i < sizeof(icon_ext)/sizeof(struct icons_t); i++) {
+	for (i = sizeof(icon_ext)/sizeof(struct icons_t) - 1; i >= 0; i--) {
 
 		/* Tolower */
 		char c = (*ext >= 'A' && *ext <= 'Z')
@@ -1300,9 +1442,9 @@ get_ext_color(char *ext)
 
 	ext++;
 
-	size_t i;
+	int i;
 
-	for (i = 0; i < ext_colors_n; i++) {
+	for (i = ext_colors_n - 1; i >= 0; i--) {
 
 		if (!ext_colors[i] || !*ext_colors[i] || !ext_colors[i][2])
 			continue;
@@ -1328,7 +1470,7 @@ get_ext_color(char *ext)
 }
 
 static int
-print_entry_props(struct fileinfo *props, int max)
+print_entry_props(struct fileinfo *props, size_t max)
 {
 	/* Get file size */
 	char *size_type = get_size_unit(props->size);
@@ -1372,7 +1514,7 @@ print_entry_props(struct fileinfo *props, int max)
 		(val & S_IXGRP) ? (exec_grp = 's') : (exec_grp = 'S');
 
 	/* Get modification time */
-	char mod_time[128] = "";
+	char mod_time[17];
 
 	if (props->ltime) {
 		struct tm *t = localtime(&props->ltime);
@@ -1389,27 +1531,32 @@ print_entry_props(struct fileinfo *props, int max)
 	owner = getpwuid(props->gid); 
 
 	/*	If filename length is greater than max, truncate it
-	 * (max - 1 = '~') to let the user know the filename isn't
-	 * complete */
-	 /* The value of max (global) is (or should be) already
-	  * calculated by get_max_long_view() before calling this
-	  * function */
-	char trim_filename[NAME_MAX] = "";
-	short trim = 0;
+	 * to max (later a tilde (~) will be appended to let the user know
+	 * the file name was truncated) */
+	char trim_name[NAME_MAX];
+	int trim = 0;
 
-	size_t filename_len = props->len;
-	if (filename_len > (size_t)max) {
+	size_t cur_len = props->eln_n + 1 + props->len;
+	if (icons) {
+		cur_len += 3;
+		max += 3;
+	}
+
+	if (cur_len > max) {
+		int rest = cur_len - max;
 		trim = 1;
-		strcpy(trim_filename, props->name);
-		trim_filename[(max + cont_bt) - 1] = '~';
-		trim_filename[max + cont_bt] = 0x00;
-		filename_len = (max + cont_bt);
+		strcpy(trim_name, props->name);
+		if (unicode)
+			u8truncstr(trim_name, (size_t)(props->len - rest - 1));
+		else
+			trim_name[props->len -rest - 1] = 0x00;
+		cur_len -= rest;
 	}
 
 	/* Calculate pad for each file */
 	int pad;
 
-	pad = (int)(longest - (props->eln_n + 1 + filename_len));
+	pad = (int)(max - cur_len);
 
 	if (pad < 0)
 		pad = 0;
@@ -1418,20 +1565,21 @@ print_entry_props(struct fileinfo *props, int max)
 	if (props->mode & S_ISVTX)
 		sticky = 1;
 
-	printf("%s%s%c%s%s%s%-*s%s %c/%c%c%c/%c%c%c/%c%c%c%s  "
-			"%s:%s  %s  %s\n", 
+	printf("%s%s%c%s%s%s%-*s%s%c %c/%c%c%c/%c%c%c/%c%c%c%s  "
+			"%u:%u  %s  %s\n", 
 			colorize ? props->icon_color : "", 
 			icons ? props->icon : "", icons ? 0x20 : 0,
 			colorize ? props->color : "",
-			!trim ? props->name : trim_filename,
+			!trim ? props->name : trim_name,
 			light_mode ? "" : df_c,	pad, "", df_c,
-			file_type,
+			trim ? '~' : 0, file_type,
 			read_usr, write_usr, exec_usr, 
 			read_grp, write_grp, exec_grp,
 			read_others, write_others, sticky ? 't' : exec_others,
 			is_acl(props->name) ? "+" : "",
-			!owner ? _("?") : owner->pw_name, 
-			!group ? _("?") : group->gr_name,
+//			!owner ? _("?") : owner->pw_name, 
+//			!group ? _("?") : group->gr_name,
+			props->uid, props->gid,
 			*mod_time ? mod_time : "?",
 			size_type ? size_type : "?");
 
@@ -1491,6 +1639,9 @@ entrycmp(const void *a, const void *b)
 	if (st == SVER)
 		st = SNAME;
 #endif
+
+	if (light_mode && (st == SOWN || st == SGRP))
+		st = SNAME;
 
 	switch(st) {
 
@@ -1636,8 +1787,9 @@ check_env_filter(void)
 	return;
 }
 
-static int
+static inline int
 count_dir(const char *dir_path) /* Readdir version */
+/* Count files in DIR_PATH, including self and parent. */
 {
 	if (!dir_path)
 		return -1;
@@ -1833,7 +1985,7 @@ set_env(void)
 	 * external programs can determine if they were spawned by CliFM */
 	setenv("CLIFM", "1", 1);
 
-	setenv("CLIFM_PROFILE", (alt_profile) ? alt_profile : "default", 1);
+	setenv("CLIFM_PROFILE", alt_profile ? alt_profile : "default", 1);
 
 	if (SEL_FILE)
 		setenv("CLIFM_SELFILE", SEL_FILE, 1);
@@ -2027,11 +2179,16 @@ print_div_line(void)
 {
 	fputs(dl_c, stdout);
 
+/*	char l[term_cols];
+	memset(l, div_line_char, term_cols);
+	l[term_cols] = '\0';
+	fputs(l, stdout); */
 	int i;
 	for (i = term_cols; i--;)
 		putchar(div_line_char);
 
-	printf("%s", df_c);
+	fputs(df_c, stdout);
+//	printf("%s", df_c);
 
 	fflush(stdout);
 }
@@ -5597,7 +5754,7 @@ reload_config(void)
 
 	/* Free the aliases and prompt_cmds arrays to be allocated again */
 
-	for (i = 0; i < dirhist_total_index; i++)
+	for (i = 0; i < (size_t)dirhist_total_index; i++)
 		free(old_pwd[i]);
 
 	free(old_pwd);
@@ -7565,9 +7722,19 @@ print_sort_method(void)
 			break;
 		case SINO: printf(_("inode %s\n"), (sort_reverse) ? "[rev]" : "");
 			break;
-		case SOWN: printf(_("owner %s\n"), (sort_reverse) ? "[rev]" : "");
+		case SOWN:
+			if (light_mode)
+				printf(_("owner (not available: using 'name') %s\n"),
+					   (sort_reverse) ? "[rev]" : "");
+			else
+				printf(_("owner %s\n"), (sort_reverse) ? "[rev]" : "");
 			break;
-		case SGRP: printf(_("group %s\n"), (sort_reverse) ? "[rev]" : "");
+		case SGRP:
+			if (light_mode)
+				printf(_("group (not available: using 'name') %s\n"),
+					   (sort_reverse) ? "[rev]" : "");
+			else
+				printf(_("group %s\n"), (sort_reverse) ? "[rev]" : "");
 			break;
 	}
 }
@@ -9438,7 +9605,7 @@ save_last_path(void)
 		if (ws[i].path) {
 			/* Mark current workspace with an asterisk. It will
 			 * be read at startup by get_last_path */
-			if (cur_ws == i)
+			if ((size_t)cur_ws == i)
 				fprintf(last_fp, "*%zu:%s\n", i, ws[i].path);
 			else
 				fprintf(last_fp, "%zu:%s\n", i, ws[i].path);
@@ -9740,7 +9907,7 @@ profile_del(char *prof)
 }
 
 static void
-check_file_size(char *log_file, size_t max)
+check_file_size(char *log_file, int max)
 /* Keep only the last MAX records in LOG_FILE */
 {
 	if (!config_ok)
@@ -12230,52 +12397,6 @@ split_str(char *str)
 	}
 }
 
-static size_t
-u8_xstrlen(const char *str)
-/* An strlen implementation able to handle unicode characters. Taken from:
-* https://stackoverflow.com/questions/5117393/number-of-character-cells-used-by-string
-* Explanation: strlen() counts bytes, not chars. Now, since ASCII chars
-* take each 1 byte, the amount of bytes equals the amount of chars.
-* However, non-ASCII or wide chars are multibyte chars, that is, one char
-* takes more than 1 byte, and this is why strlen() does not work as
-* expected for this kind of chars: a 6 chars string might take 12 or
-* more bytes */
-{
-	size_t len = 0;
-	cont_bt = 0;
-
-	while (*(str++)) {
-
-		if ((*str & 0xc0) != 0x80)
-		/* Do not count continuation bytes (used by multibyte, that is,
-		 * wide or non-ASCII characters) */
-			len++;
-
-		else
-			cont_bt++;
-	}
-
-	return len;
-}
-
-static size_t
-wc_xstrlen(const char *str)
-{
-	size_t len;
-#ifndef _BE_POSIX
-	wchar_t * const wbuf = (wchar_t *)len_buf;
-
-	/* Convert multi-byte to wide char */
-	len = mbstowcs(wbuf, str, NAME_MAX);
-
-	len = wcswidth(wbuf, len);
-#else
-	len = u8_xstrlen(str);
-#endif
-
-	return len;
-}
-
 static int
 cd_function(char *new_path)
 /* Change CliFM working directory to NEW_PATH */
@@ -12970,29 +13091,6 @@ list_mountpoints(void)
 	free(mountpoints);
 
 	return exit_status;
-}
-
-static int
-get_max_long_view(void)
-/* Returns the max length a filename can have in long view mode */
-{
-	/* 70 is approx the length of the properties string (less filename).
-	 * So, the amount of current terminal columns less 70 should be the
-	 * space left to print the filename, that is, the max filename
-	 * length */
-	int max = (term_cols - 70);
-
-	/* Do not allow max to be less than 20 (this is a more or less
-	 * arbitrary value), specially because the result of the above
-	 * operation could be negative */
-	if (max < 20) max = 20;
-
-	if ((int)longest < max)
-		max = (int)longest;
-	/* Should I specify a max length for trimmed filenames ?
-	if (max > 50) max=50; */
-
-	return max;
 }
 
 static int *
@@ -15138,9 +15236,7 @@ rl_previous_profile(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	int prev_prof;
-
-	size_t i, cur_prof = -1, total_profs = 0;
+	int prev_prof, i, cur_prof = -1, total_profs = 0;
 	for (i = 0; profile_names[i]; i++) {
 		total_profs++;
 
@@ -15184,9 +15280,7 @@ rl_next_profile(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	int next_prof;
-
-	size_t i, cur_prof = -1, total_profs = 0;
+	int next_prof, i, cur_prof = -1, total_profs = 0;
 	for (i = 0; profile_names[i]; i++) {
 		total_profs++;
 
@@ -15209,7 +15303,7 @@ rl_next_profile(int count, int key)
 	next_prof = cur_prof + 1;
 	total_profs--;
 
-	if (next_prof > total_profs || !profile_names[next_prof])
+	if (next_prof > (int)total_profs || !profile_names[next_prof])
 		next_prof = 0;
 
 	CLEAR;
@@ -15935,8 +16029,9 @@ handle_stdin()
 	 * == (65535 * PATH_MAX)
 	 * == 262MiB of data ((65535 * PATH_MAX) / 1024) */
 
-	size_t chunk = 512 * 1024, chunks_n = 1, input_len = 0,
+	size_t chunk = 512 * 1024, chunks_n = 1,
 		   total_len = 0, max_chunks = 512;
+	ssize_t input_len = 0;
 
 	/* NNN uses the following values: chunk = 512 * 1024,
 	 * max_chunks = 512, getting a max input size of 256MiB */
@@ -16887,7 +16982,7 @@ my_rl_completion(const char *text, int start, int end)
 			if (*rl_line_buffer == 'j' && rl_line_buffer[1] == 'o'
 			&& rl_line_buffer[2] == 0x20) {
 				if (is_number(text) && num_text > 0
-				&& num_text <= jump_n) {
+				&& num_text <= (int)jump_n) {
 					matches = rl_completion_matches(text,
 							  &jump_entries_generator);
 				}
@@ -17346,7 +17441,7 @@ autojump(char **args)
 		else {
 
 			int int_order = atoi(args[1]);
-			if (int_order <= 0 || int_order > jump_n) {
+			if (int_order <= 0 || int_order > (int)jump_n) {
 				fprintf(stderr, _("%s: No such order number\n"),
 						PROGRAM_NAME);
 				return EXIT_FAILURE;
@@ -17466,12 +17561,12 @@ static int
 workspaces(char *str)
 {
 	if (!str || !*str) {
-		size_t i;
+		int i;
 		for (i = 0; i < MAX_WS; i++) {
 			if (i == cur_ws)
-				printf("%s%zu%s: %s\n", mi_c, i + 1, df_c, ws[i].path);
+				printf("%s%d%s: %s\n", mi_c, i + 1, df_c, ws[i].path);
 			else
-				printf("%zu: %s\n", i + 1, ws[i].path ? ws[i].path
+				printf("%d: %s\n", i + 1, ws[i].path ? ws[i].path
 					   : "none");
 		}
 
@@ -17696,7 +17791,7 @@ sel_regex(char *str, const char *dest_path, mode_t filetype)
 			return -1;
 		}
 
-		for (i = 0; i < filesn; i++) {
+		for (i = 0; i < (size_t)filesn; i++) {
 			if (regexec(&regex, list[i]->d_name, 0, NULL, 0)
 			== EXIT_SUCCESS) {
 
@@ -17853,7 +17948,7 @@ sel_function (char **comm)
 
 	for (i = 1; comm[i]; i++) {
 		/* Exclude self and parent directories (. and ..) */
-		if (i == file_type_index || (*comm[i] == '.' && (!comm[i][1]
+		if ((int)i == file_type_index || (*comm[i] == '.' && (!comm[i][1]
 		|| (comm[i][1] == '.' && !comm[i][2]))))
 			continue;
 
@@ -18779,7 +18874,7 @@ search_regex(char **comm)
 		regfree(&regex_files);
 
 		if (search_path) {
-			for (i = 0; i < tmp_files; i++)
+			for (i = 0; i < (size_t)tmp_files; i++)
 				free(reg_dirlist[i]);
 
 			free(reg_dirlist);
@@ -18793,10 +18888,10 @@ search_regex(char **comm)
 	}
 
 	size_t found = 0;
-	int *regex_index = (int *)xnmalloc((search_path ? tmp_files
+	int *regex_index = (int *)xnmalloc((search_path ? (size_t)tmp_files
 									   : files) + 1, sizeof(int));
 
-	for (i = 0; i < (search_path ? tmp_files : files); i++) {
+	for (i = 0; i < (search_path ? (size_t)tmp_files : files); i++) {
 		if (regexec(&regex_files, (search_path ? reg_dirlist[i]->d_name
 		: file_info[i].name), 0, NULL, 0) == EXIT_SUCCESS) {
 			regex_index[found++] = i;
@@ -18810,7 +18905,7 @@ search_regex(char **comm)
 		free(regex_index);
 
 		if (search_path) {
-			for (i = 0; i < tmp_files; i++)
+			for (i = 0; i < (size_t)tmp_files; i++)
 				free(reg_dirlist[i]);
 
 			free(reg_dirlist);
@@ -18949,7 +19044,7 @@ search_regex(char **comm)
 
 	/* If needed, go back to the directory we came from */
 	if (search_path) {
-		for (i = 0; i < tmp_files; i++)
+		for (i = 0; i < (size_t)tmp_files; i++)
 			free(reg_dirlist[i]);
 
 		free(reg_dirlist);
@@ -21448,7 +21543,13 @@ list_dir_light(void)
 	if (long_view) {
 
 		struct stat lattr;
-		int max = get_max_long_view();
+		int space_left = term_cols - MAX_PROP_STR;
+
+		if (space_left < 20)
+			space_left = 20;
+
+		if ((int)longest < space_left)
+			space_left = longest;
 
 		for (i = 0; i < (int)files; i++) {
 
@@ -21482,7 +21583,7 @@ list_dir_light(void)
 						"Page Down: Advance one page\n"
 						"q: Stop pagging\n");
 
-						size_t l;
+						int l;
 						for (l = 0; l < (term_rows - 5); l++)
 							puts("");
 
@@ -21529,7 +21630,7 @@ list_dir_light(void)
 			 * printed by print_entry_props() */
 			printf("%s%d%s ", el_c, i + 1, df_c);
 
-			print_entry_props(&file_info[i], max);
+			print_entry_props(&file_info[i], (size_t)space_left);
 		}
 
 		goto END;
@@ -21551,8 +21652,8 @@ list_dir_light(void)
 		columns_n = 1;
 
 	/* If we have only three files, we don't want four columns */
-	if (columns_n > n)
-		columns_n = n;
+	if (columns_n > (size_t)n)
+		columns_n = (size_t)n;
 
 	for (i = 0; i < n; i++) {
 
@@ -21589,7 +21690,7 @@ list_dir_light(void)
 						"Page Down: Advance one page\n"
 						"q: Stop pagging\n");
 
-						size_t l;
+						int l;
 						for (l = 0; l < (term_rows - 5); l++)
 							puts("");
 
@@ -21817,9 +21918,10 @@ list_dir(void)
 
 		file_info[n].name = (char *)xnmalloc(NAME_MAX + 1, sizeof(char));
 
-		if (!unicode)
+		if (!unicode) {
 			file_info[n].len = (xstrsncpy(file_info[n].name, ename,
 										  NAME_MAX + 1) - 1);
+		}
 		else {
 			xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
 			file_info[n].len = wc_xstrlen(ename);
@@ -21856,11 +21958,11 @@ list_dir(void)
 		file_info[n].filesn = 0;
 
 		switch(sort) {
-			case 3: file_info[n].time = attr.st_atime; break;
+			case SATIME: file_info[n].time = attr.st_atime; break;
 #if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
-			case 4: file_info[n].time = attr.st_birthtime; break;
+			case SBTIME: file_info[n].time = attr.st_birthtime; break;
 #elif defined(_STATX)
-			case 4: {
+			case SBTIME: {
 				struct statx attx;
 				if (statx(AT_FDCWD, ename, AT_SYMLINK_NOFOLLOW,
 				STATX_BTIME, &attx) == -1)
@@ -21870,10 +21972,10 @@ list_dir(void)
 				}
 				break;
 #else
-			case 4: file_info[n].time = attr.st_ctime; break;
+			case SBTIME: file_info[n].time = attr.st_ctime; break;
 #endif
-			case 5: file_info[n].time = attr.st_ctime; break;
-			case 6: file_info[n].time = attr.st_mtime; break;
+			case SCTIME: file_info[n].time = attr.st_ctime; break;
+			case SMTIME: file_info[n].time = attr.st_mtime; break;
 			default: file_info[n].time = 0; break;
 		}
 
@@ -22045,7 +22147,7 @@ list_dir(void)
 	term_cols = w.ws_col; /* This one is global */
 	unsigned short term_rows = w.ws_row;
 
-	short reset_pager = 0;
+	int reset_pager = 0;
 	int c, i;
 	register size_t counter = 0;
 
@@ -22096,7 +22198,18 @@ list_dir(void)
 				 * ######################## */
 
 	if (long_view) {
-		int max = get_max_long_view();
+		int space_left = term_cols - MAX_PROP_STR;
+		/* space_left is the max space that should be used to print the
+		 * filename (plus space char) */
+
+		/* Do not allow space_left to be less than 20 (this is a more
+		 * or less arbitrary value), especially because the result of
+		 * the above operation could be negative */
+		if (space_left < 20)
+			space_left = 20;
+
+		if ((int)longest < space_left)
+			space_left = longest;
 
 		for (i = 0; i < (int)files; i++) {
 
@@ -22127,7 +22240,7 @@ list_dir(void)
 						"Page Down: Advance one page\n"
 						"q: Stop pagging\n");
 
-						size_t l;
+						int l;
 						for (l = 0; l < (term_rows - 5); l++)
 							puts("");
 
@@ -22168,7 +22281,7 @@ list_dir(void)
 			 * printed by print_entry_props() */
 			printf("%s%d%s ", el_c, i + 1, df_c);
 
-			print_entry_props(&file_info[i], max);
+			print_entry_props(&file_info[i], (size_t)space_left);
 		}
 
 		goto END;
@@ -22178,7 +22291,7 @@ list_dir(void)
 				 * #   NORMAL VIEW MODE   #
 				 * ######################## */
 
-	short last_column = 0;
+	int last_column = 0;
 
 	/* Get possible amount of columns for the dirlist screen */
 	columns_n = (size_t)term_cols / (longest + 1); /* +1 for the
@@ -22190,8 +22303,8 @@ list_dir(void)
 		columns_n = 1;
 
 	/* If we have only three files, we don't want four columns */
-	if (columns_n > n)
-		columns_n = n;
+	if (columns_n > (size_t)n)
+		columns_n = (size_t)n;
 
 	for (i = 0; i < n; i++) {
 
@@ -22228,7 +22341,7 @@ list_dir(void)
 						"Page Down: Advance one page\n"
 						"q: Stop pagging\n");
 
-						size_t l;
+						int l;
 						for (l = 0; l < (term_rows - 5); l++)
 							puts("");
 
