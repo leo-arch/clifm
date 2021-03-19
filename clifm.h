@@ -57,10 +57,10 @@ xgetchar(void)
 
 int
 xstrcmp(const char *str1, const char *str2)
-{
 /* Check for null. This check is done neither by strcmp nor by strncmp. I 
 * use 256 for error code since it does not represent any ASCII code (the 
 * extended version goes up to 255) */
+{
 	if (!str1 || !str2)
 		return 256;
 
@@ -74,11 +74,6 @@ xstrcmp(const char *str1, const char *str2)
 		return (0 - *str2);
 
 	return 0;
-	
-/*	for (; *str1 == *str2; str1++, str2++)
-		if (*str1 == 0x00)
-			return 0;
-	return *str1 - *str2; */
 }
 
 int
@@ -233,15 +228,6 @@ get_user(void)
 	/* Get a passwd struct for current user ID. An alternative is
 	 * to use setpwent(), getpwent(), and endpwent() */
 	pw = getpwuid(uid);
-/*
-	printf("Username: %s\n", user_info->pw_name);
-	printf("Password: %s\n", user_info->pw_passwd);
-	printf("UID: %d\n", user_info->pw_uid);
-	printf("GID: %d\n", user_info->pw_gid);
-	printf("Gecos: %s\n", user_info->pw_gecos);
-	printf("Home: %s\n", user_info->pw_dir);
-	printf("Shell: %s\n", user_info->pw_shell);
-*/
 
 	if (!pw)
 		return (char *)NULL;
@@ -316,31 +302,6 @@ get_sys_shell(void)
 	strcpy(shell, pw->pw_shell);
 	
 	return shell;
-}
-
-int
-is_number(const char *str)
-/* Check whether a given string contains only digits. Returns 1 if true and 0 
- * if false. Does not work with negative numbers */
-{
-	for (; *str ; str++)
-		if (*str < 0x30 || *str > 0x39)
-			return 0;
-
-	return 1;
-}
-
-size_t
-digits_in_num(int num) {
-/* Return the amount of digits in a given number */
-	size_t count = 0; /* VERSION 2: neither printf nor any function call at all */
-
-	while (num != 0) {
-		num /= 10; /* n = n/10 */
-		++count;
-	}
-
-	return count;
 }
 
 int
@@ -547,16 +508,16 @@ strbtw(char *str, const char a, const char b)
  * url_decode) were taken from "http://www.geekhideout.com/urlcode.shtml"
  * and modified to comform to RFC 2395, as recommended by the freedesktop
  * trash specification */
-char
+static char
 from_hex(char c)
 /* Converts a hex char to its integer value */
 {
 	return isdigit(c) ? c - '0' : tolower(c) - 'a' + 10;
 }
 
-char
+static char
 to_hex(char c)
-/* Converts an integer value to its hex form*/
+/* Converts an integer value to its hex form */
 {
 	static char hex[] = "0123456789ABCDEF";
 	return hex[c & 15];
@@ -688,38 +649,6 @@ get_date (void)
 	strftime(date, date_max, "%Y-%m-%dT%T%z", tm);
 
 	return date;
-}
-
-char *
-get_size_unit(off_t size)
-/* Convert FILE_SIZE to human readeable form */
-{
-	size_t max = 9;
-	/* Max size type length == 9 == "1023.99K\0" */
-	char *p = malloc(max * sizeof(char));
-
-	if (!p)
-		return (char *)NULL;
-
-	char *str = p;
-	p = (char *)NULL;
-
-	size_t n = 0;
-	float s = (float)size;
-
-	while (s > 1024) {
-		s = s/1024;
-		++n;
-	}
-
-	int x = (int)s;
-	/* If x == s, then s is an interger; else, it's float
-	 * We don't want to print the reminder when the it is zero */
-
-	const char *const u = "BKMGTPEZY";
-	snprintf(str, max, "%.*f%c", (s == x) ? 0 : 2, (double)s, u[n]);
-
-	return str;
 }
 
 int
