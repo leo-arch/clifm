@@ -75,6 +75,7 @@ List of CliFM features:
   34) Batch symbolic links
   35) Files filter via regular expressions for the files list
   36) Up to eight workspaces
+  37) Fused parameters support for ELN's
 
 .SH RATIONALE
 When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the Linux built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There is no two without three".
@@ -258,7 +259,8 @@ Options precedence order: 1) command line; 2) configuration file; 3) default val
 
 .SH COMMANDS
 \fBNOTE:\fR ELN = Entry List Number. Example: in the line "12 openbox" (when listing files), 12 is the ELN corresponding to the file named "openbox". The slash followed by a number (/xx) after directories and symbolic links to directories (the files counter) indicates the amount of files contained by the corresponding directory, excluding self and parent directories ("." and ".." respectivelly).
-.TP
+.sp
+\fBNOTE 2:\fR CliFM now supports fused parameters for internal commands taking an ELN or range of ELN's as parameters. Much like short options for command line programs, you can drop or omit the space between internal commands and the corresponding ELN passed as argument. In general, you can write 'CMDELN' instead of 'CMD ELN'. For example: 'o12' or 's1-5' instead of 'o 12' and 's 1-5' respectivelly. Bear in mind, however, that in thus omitting the space char TAB completion for ELN's won't be available. 
 
 .B FILE/DIR
 if the \fIautocd\fR and \fIauto-open\fR functions are enabled, which is the default value, open FILE or change directory to DIR. In other words, 'FILE' amounts to 'open FILE' or 'o FILE', and 'DIR' to 'cd DIR'. ELN's, of course, are allowed. Example: '12'. Unlike the \fIopen\fR function (see below), passing an opening application is not allowed.
