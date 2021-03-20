@@ -60,37 +60,41 @@ _clifm ()
         --unicode
         -v
         --version
+		-w
+		--workspace
         -x
         --ext-cmds
         -y
         --light-mode
         -z
-        --sort
-        --no-cd-auto
-        --no-open-auto
-        --restore-last-path
-        --no-tips
+		--sort
+        --cd-on-quit
+		--color-scheme
         --disk-usage
-        --expand-bookmarks
-        --no-dir-indicator
-        --classify
-        --share-selbox
-        --rl-vi-mode
-        --max-dirhist
-        --sort-reverse
-        --no-files-counter
-        --no-welcome-message
-        --no-clear-screen
-        --no-backup-files
         --enable-logs
+        --expand-bookmarks
+        --icons
+		--icons-use-file-color
         --list-and-quit
+        --max-dirhist
+		--max-files
+        --max-path
+        --no-autojump
+        --no-cd-auto
+        --no-classify
+        --no-clear-screen
+		--no-colors
+		--no-columns
+        --no-files-counter
+        --no-open-auto
+        --no-tips
+        --no-welcome-message
         --only-dirs
         --opener
-        --max-path
-        --color-scheme
-        --cd-on-quit
-        --no-autojump
-        --icons
+        --restore-last-path
+        --rl-vi-mode
+        --share-selbox
+        --sort-reverse
     )
 
     if [[ $prev == -b || $prev == -c || $prev == -k || $prev == -p ]]; then
