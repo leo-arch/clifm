@@ -351,6 +351,7 @@ nm=01;32:bm=01;36:"
 #define MAX_WS 8
 #define DEF_CUR_WS 0
 #define UNSET -1
+#define DEF_MAX_FILES UNSET
 
 /* Macros for the colors_list function */
 #define NO_ELN 0
@@ -376,7 +377,7 @@ nm=01;32:bm=01;36:"
 /* Max length of the properties string in long view mode. This value
  * depends however on the length of owner and group for each file, so
  * that 57 is only an approximated value (it takes "owner:group" to be
- * 13 bytes) */
+ * 13 bytes long) */
 #define MAX_PROP_STR 57
 
 #define DEFAULT_PROMPT "[\\[\\e[0;36m\\]\\S\\[\\e[0m\\]]\\l \\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\
@@ -561,6 +562,7 @@ struct param
 	int icons_use_file_color;
 	int no_columns;
 	int no_colors;
+	int max_files;
 };
 
 static struct param xargs;
@@ -649,12 +651,12 @@ static int
 	max_log = UNSET,
 	max_dirhist = UNSET,
 	max_path = UNSET,
+	max_files = UNSET,
 
 	dirhist_cur_index = 0,
 	argc_bk = 0,
 	exit_code = 0,
 	shell_is_interactive = 0,
-	cont_bt = 0,
 	dirhist_total_index = 0,
 	trash_n = 0,
 	*eln_as_file = (int *)0;
@@ -886,6 +888,8 @@ wc_xstrlen(const char *str)
 
 static int
 u8truncstr(char *str, size_t n)
+/* Truncate an UTF-8 string at length N. Returns zero if truncated and
+ * one if not */
 {
 	size_t len = 0;
 
@@ -919,15 +923,10 @@ u8_xstrlen(const char *str)
 * more bytes */
 {
 	size_t len = 0;
-	cont_bt = 0;
 
 	while (*(str++)) {
-
 		if ((*str & 0xc0) != 0x80)
 			len++;
-
-		else
-			cont_bt++;
 	}
 
 	return len;
@@ -1351,7 +1350,7 @@ xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 static void
 get_file_icon(char *file, int n)
 /* Set the icon field to the corresponding icon for FILE. If not found,
- * set the default icon (FILE) */
+ * set the default icon */
 {
 	file_info[n].icon = DEF_FILE_ICON;
 	file_info[n].icon_color = DEF_FILE_ICON_COLOR;
@@ -1369,14 +1368,12 @@ get_file_icon(char *file, int n)
 			file_info[n].icon_color = icon_filenames[i].color;
 		}
 	}
-
-	return;
 }
 
 static void
 get_dir_icon(char *dir, int n)
 /* Set the icon field to the corresponding icon for DIR. If not found,
- * set the default icon (DIR) */
+ * set the default icon */
 {
 	/* Default values for directories */
 	file_info[n].icon = DEF_DIR_ICON;
@@ -1395,14 +1392,12 @@ get_dir_icon(char *dir, int n)
 			file_info[n].icon_color = icon_dirnames[i].color;
 		}
 	}
-
-	return;
 }
 
 static void
 get_ext_icon(char *ext, int n)
 /* Set the icon field to the corresponding icon for EXT. If not found,
- * set the default icon (EXT) */
+ * set the default icon */
 {
 
 	file_info[n].icon = DEF_FILE_ICON;
@@ -1428,8 +1423,6 @@ get_ext_icon(char *ext, int n)
 
 		}
 	}
-
-	return;
 }
 
 static char *
@@ -1577,8 +1570,8 @@ print_entry_props(struct fileinfo *props, size_t max)
 			read_grp, write_grp, exec_grp,
 			read_others, write_others, sticky ? 't' : exec_others,
 			is_acl(props->name) ? "+" : "",
-//			!owner ? _("?") : owner->pw_name, 
-//			!group ? _("?") : group->gr_name,
+/*			!owner ? _("?") : owner->pw_name, 
+			!group ? _("?") : group->gr_name, */
 			props->uid, props->gid,
 			*mod_time ? mod_time : "?",
 			size_type ? size_type : "?");
@@ -1783,8 +1776,6 @@ check_env_filter(void)
 
 	filter = (char *)xnmalloc(strlen(p) + 1, sizeof(char));
 	strcpy(filter, p);
-
-	return;
 }
 
 static inline int
@@ -1819,47 +1810,6 @@ count_dir(const char *dir_path) /* Readdir version */
 	return file_count;
 }
 
-/*
-int count_dir(const char *dir_path) //Getdents version
-{
-	#define BUF_SIZE 1024
-	struct linux_dirent {
-		long           	 d_ino;
-		off_t          	 d_off;
-		unsigned short  d_reclen;
-		char           	 d_name[];
-	};
-
-	int fd;
-	char buf[BUF_SIZE];
-	struct linux_dirent *d;
-	int bpos;
-
-	fd = open(dir_path, O_RDONLY | O_DIRECTORY);
-
-	if (fd == -1) { perror("open"); return -1; }
-
-	size_t files_n=0;
-
-//	int nread;
-
-	for ( ; ; ) {
-		int nread = syscall(SYS_getdents, fd, buf, BUF_SIZE);
-
-		if (nread == -1) { perror("syscall"); return -1; }
-
-		if (nread == 0) break;
-
-		for (bpos=0; bpos < nread;) {
-			d = (struct linux_dirent *)(buf + bpos);
-			files_n++;
-			bpos += d->d_reclen;
-		}
-	}
-	close(fd);
-	return files_n;
-}*/
-
 static void
 copy_plugins(void)
 {
@@ -1872,8 +1822,6 @@ copy_plugins(void)
 	char *cp_cmd[] = { "cp", "-r", usr_share_plugins_dir,
 					   CONFIG_DIR_GRAL, NULL };
 	launch_execve(cp_cmd, FOREGROUND);
-
-	return;
 }
 
 static char *
@@ -1989,8 +1937,6 @@ set_env(void)
 
 	if (SEL_FILE)
 		setenv("CLIFM_SELFILE", SEL_FILE, 1);
-
-	return;
 }
 
 static int
@@ -2122,8 +2068,6 @@ load_jumpdb(void)
 
 	jump_db[jump_n].path = (char *)NULL;
 	jump_db[jump_n].visits = 0;
-
-	return;
 }
 
 static void
@@ -2151,8 +2095,6 @@ save_jumpdb(void)
 
 	fclose(fp);
 	free(JUMP_FILE);
-
-	return;
 }
 
 static void
@@ -5659,7 +5601,7 @@ reload_config(void)
 	
 	shell_terminal = no_log = internal_cmd = recur_perm_error_flag = 0;
 	is_sel = sel_is_last = print_msg = kbind_busy = dequoted = 0;
-	mime_match = sort_switch = sort_reverse = kbind_busy = cont_bt = 0;
+	mime_match = sort_switch = sort_reverse = kbind_busy = 0;
 	shell_terminal = no_log = internal_cmd = dequoted = 0;
 	shell_is_interactive = recur_perm_error_flag = mime_match = 0;
 	recur_perm_error_flag = is_sel = sel_is_last = print_msg = 0;
@@ -5881,10 +5823,8 @@ colors_list(const char *ent, const int i, const int pad,
 		index[0] = 0x00;
 
 	struct stat file_attrib;
-	int ret = 0;
-	ret = lstat(ent, &file_attrib);
 
-	if (ret == -1) {
+	if (lstat(ent, &file_attrib) == -1) {
 		fprintf(stderr, "%s%s%s%s%-*s%s%s", el_c, index, df_c,
 				uf_c, pad, ent, df_c, new_line ? "\n" : "");
 		free(index);
@@ -6305,24 +6245,6 @@ get_path_env(void)
 
 	return path_num;
 }
-
-/*
-static int
-run_exec(char *cmd)
-{
-	signal (SIGHUP, SIG_DFL);
-	signal (SIGINT, SIG_DFL);
-	signal (SIGQUIT, SIG_DFL);
-	signal (SIGTERM, SIG_DFL);
-
-	char *name = strrchr(sys_shell, '/');
-
-	execl(sys_shell, name ? name + 1 : sys_shell, "-c", cmd, NULL);
-	fprintf(stderr, "%s: '%s': execle: %s\n", PROGRAM_NAME, sys_shell, 
-			strerror(errno));
-
-	return EXIT_SUCCESS;
-} */
 
 static int
 create_iso(char *in_file, char *out_file)
@@ -8769,7 +8691,7 @@ is_internal_c(const char *cmd)
 					"exp", "export", "kb", "keybinds", "pin",
 					"unpin", "cs", "colorschemes", "jump", "je",
 					"jc", "jp", "jo", "icons", "cl", "columns",
-					"ft", "filter", "ws", NULL };
+					"ft", "filter", "ws", "mf", NULL };
 
 	short found = 0;
 	size_t i;
@@ -21048,6 +20970,7 @@ help_function (void)
 \n				in conjunction with -p\
 \n     --max-dirhist\t\t maximum number of visited directories to \
 \n				remember\
+\n     --max-files=NUM\t\t list only up to NUM files\
 \n     --max-path=NUM\t\t set the maximun number of characters \
 \n				after which the current directory in the \
 \n				prompt line will be abreviated to the \
@@ -21121,6 +21044,7 @@ help_function (void)
  kb, keybinds [edit] [reset]\n\
  lm [on, off]\n\
  log [clear]\n\
+ mf NUM\n\
  mm, mime [info ELN/FILE] [edit]\n\
  mp, mountpoints\n\
  msg, messages [clear]\n\
@@ -21553,6 +21477,9 @@ list_dir_light(void)
 
 		for (i = 0; i < (int)files; i++) {
 
+			if (max_files != UNSET && i == max_files)
+				break;
+
 			if (lstat(file_info[i].name, &lattr) == -1)
 				continue;
 
@@ -21656,6 +21583,9 @@ list_dir_light(void)
 		columns_n = (size_t)n;
 
 	for (i = 0; i < n; i++) {
+
+		if (max_files != UNSET && i == max_files)
+			break;
 
 		/* A basic pager for directories containing large amount of
 		 * files. What's missing? It only goes downwards. To go
@@ -21831,6 +21761,9 @@ END:
 	/* Print a dividing line between the files list and the
 	 * prompt */
 	print_div_line();
+
+	if (max_files != UNSET && (int)files > max_files)
+		printf("%d/%zu\n", max_files, files);
 
 	if (dirhist_map) {
 		/* Print current, previous, and next entries */
@@ -22213,6 +22146,9 @@ list_dir(void)
 
 		for (i = 0; i < (int)files; i++) {
 
+			if (max_files != UNSET && i == max_files)
+				break;
+
 			if (pager) {
 
 				if (counter > (size_t)(term_rows - 2)) {
@@ -22307,6 +22243,9 @@ list_dir(void)
 		columns_n = (size_t)n;
 
 	for (i = 0; i < n; i++) {
+
+		if (max_files != UNSET && i == max_files)
+			break;
 
 		/* A basic pager for directories containing large amount of
 		 * files. What's missing? It only goes downwards. To go
@@ -22508,6 +22447,9 @@ END:
 	/* Print a dividing line between the files list and the
 	 * prompt */
 	print_div_line();
+
+	if (max_files != UNSET && (int)files > max_files)
+		printf("%d/%zu\n", max_files, files);
 
 	if (dirhist_map) {
 		/* Print current, previous, and next entries */
@@ -23456,6 +23398,28 @@ exec_cmd(char **comm)
 		}
 	}
 
+					/* #### MAX FILES #### */
+	else if (*comm[0] == 'm' && comm[0][1] == 'f' && !comm[0][2]) {
+		if (!comm[1] || (strcmp(comm[1], "-1") != 0
+		&& !is_number(comm[1]))) {
+			fprintf(stderr, "%s: Usage: ml NUM\n", PROGRAM_NAME);
+			exit_code = EXIT_FAILURE;
+			return EXIT_FAILURE;
+		}
+
+		int inum = atoi(comm[1]);
+		if (inum < -1) {
+			max_files = inum;
+			fprintf(stderr, "%s: %d: Invalid number\n", PROGRAM_NAME,
+					inum);
+			exit_code = EXIT_FAILURE;
+			return EXIT_FAILURE;
+		}
+		
+		max_files = inum;
+		return EXIT_SUCCESS;
+	}
+
 					/* #### EXT #### */
 	else if (*comm[0] == 'e' && comm[0][1] == 'x' && comm[0][2] == 't'
 	&& !comm[0][3]) {
@@ -23528,7 +23492,7 @@ exec_cmd(char **comm)
 		}
 	}
 
-					/* #### DIR COUNTER #### */
+					/* #### FILES COUNTER #### */
 	else if (*comm[0] == 'f' && ((comm[0][1] == 'c' && !comm[0][2])
 	|| strcmp(comm[0], "filescounter") == 0)) {
 		if (!comm[1]) {
@@ -24575,7 +24539,8 @@ parse_input_str(char *str)
 
 		/* The 'sort' and jo commands take digits as arguments. So, do
 		 * not expand ELN's in this case */
-		if (strcmp(substr[0], "st") != 0
+		if (strcmp(substr[0], "mf") != 0
+		&& strcmp(substr[0], "st") != 0
 		&& strcmp(substr[0], "ws") != 0
 		&& strcmp(substr[0], "sort") != 0
 		&& strcmp(substr[0], "jo") != 0) {
@@ -25237,6 +25202,7 @@ external_arguments(int argc, char **argv)
 		{"icons-use-file-color", no_argument, 0, 25},
 		{"no-columns", no_argument, 0, 26},
 		{"no-colors", no_argument, 0, 27},
+		{"max-files", required_argument, 0, 28},
 		{0, 0, 0, 0}
 	};
 
@@ -25372,6 +25338,13 @@ external_arguments(int argc, char **argv)
 		case 27:
 			xargs.no_colors = 1;
 			colorize = 0;
+		break;
+
+		case 28:
+			if (!is_number(optarg)) break;
+			int opt_int = atoi(optarg);
+			if (opt_int >= 0)
+			xargs.max_files = max_files = opt_int;
 		break;
 
 		case 'a':
@@ -25686,7 +25659,7 @@ external_arguments(int argc, char **argv)
 				 * */
 
 int
-main(int argc, char **argv)
+main(int argc, char *argv[])
 {
 /*	printf("DBG: %s (%d)\n", __func__, __LINE__); */
 
