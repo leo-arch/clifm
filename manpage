@@ -198,7 +198,11 @@ maximum number of visited directories to remember
 .TP
 .B \-\-max\-path=NUM
 set the maximun number of characters after which the current directory in the prompt line will be abreviated to the directory base name (if \\z is used in the prompt)
-B \-\-no\-cd\-auto
+.TP
+.B \-\-max\-files=NUM
+list only up to NUM files. Use -1 to list all files (default). See the \fBmf\fR command for a more detailed explanation
+.TP
+.B \-\-no\-cd\-auto
 by default, CliFM changes to directories by just specifying the corresponding ELN (e.g. '12' instead of 'cd 12'). This option forces the use of 'cd'
 .TP
 .B \-\-no-classify
@@ -444,6 +448,9 @@ Toggle the light mode on/off. This option, aimed to make files listing faster th
 .TP
 .B log \fR[clear] [on, off, status]
 with no arguments, it prints the contents of the log file. If 'clear' is passed as argument, all the logs will be deleted. 'on', 'off', and 'status' enable, disable, and check the status of the \fIlog\fR function for the current session.
+.TP
+.B mf \fRNUM
+List only up to NUM files. Use -1 to list all files (default). An indicator (listed_files/total_files) will be printed below the list of files whenever some file is not being listed (e.g. 20/310). Note however that though some files are excluded, all of them are loaded, so that you can still perform any valid operation on them. For example, even if only 10 files are listed, you can still search for ALL symbolic links using the appropriate command: '/* -l'.
 .TP
 .B mm, mime \fR[info ELN/FILENAME] [edit]
 This is \fILira\fR, CliFM's resource opener. The 'info' option prints the MIME information about ELN/FILENAME: its MIME type, its file extension, if any, and the application associated to this MIME type or file extension.
