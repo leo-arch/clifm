@@ -901,7 +901,6 @@ u8truncstr(char *str, size_t n)
 			len++;
 
 			if (len == n) {
-/*				*(str - 1) = '~'; */
 				*str = 0x00;
 				return EXIT_SUCCESS;
 			}
@@ -1092,6 +1091,104 @@ xnmalloc(size_t nmemb, size_t size)
 	}
 
 	return new_ptr;
+}
+
+static int
+is_internal_c(const char *cmd)
+/* Check cmd against a list of internal commands. Used by
+ * parse_input_str() when running chained commands */
+{
+	const char *int_cmds[] = { "o", "open", "cd", "p", "pr", "prop",
+			"t", "tr", "trash", "s", "sel", "rf", "refresh",
+			"c", "cp", "m", "mv", "bm", "bookmarks", "b",
+			"back", "f", "forth", "bh", "fh", "u", "undel",
+			"untrash", "s", "sel", "sb", "selbox", "ds",
+			"desel", "rm", "mkdir", "ln", "unlink", "touch",
+			"r", "md", "l", "p", "pp", "pr", "prop", "pf", "prof",
+			"profile", "mp", "mountpoints", "ext", "pg",
+			"pager", "uc", "unicode", "folders-first", "ff",
+			"log", "msg", "messages", "alias", "shell", "edit",
+			"history", "hf", "hidden", "path", "cwd", "splash",
+			"ver", "version", "?", "help", "cmd", "commands",
+			"colors", "cc", "fs", "mm", "mime", "x", "n",
+			"net", "lm", "st", "sort", "fc", "tips", "br",
+			"bulk", "opener", "ac", "ad", "acd", "autocd",
+			"ao", "auto-open", "actions", "rl", "reload",
+			"exp", "export", "kb", "keybinds", "pin", "unpin",
+			"cs", "colorschemes", "jump", "je", "jc", "jp", "jo",
+			"icons", "cl", "columns", "ft", "filter", "ws", "mf",
+			NULL };
+
+	short found = 0;
+	size_t i;
+	for (i = 0; int_cmds[i]; i++) {
+		if (strcmp(cmd, int_cmds[i]) == 0) {
+			found = 1;
+			break;
+		}
+	}
+
+	if (found)
+		return 1;
+
+	/* Check for the search and history functions as well */
+	else if ((cmd[0] == '/' && access(cmd, F_OK) != 0) 
+	|| (cmd[0] == '!' && (isdigit(cmd[1]) 
+	|| (cmd[1] == '-' && isdigit(cmd[2])) || cmd[1] == '!')))
+		return 1;
+
+	return 0;
+}
+
+static char *
+split_fusedcmd(char *str)
+{
+	if (!str || !*str)
+		return (char *)NULL;
+
+	/* The buffer size is the double of STR, just in case each subtr
+	 * needs to be splitted */
+	char *buf = (char *)xnmalloc(((strlen(str) * 2) + 2), sizeof(char));
+
+	char *p = str, *pp = str;
+	char *q = buf;
+	size_t c = 0;
+
+	while(*p) {
+		/* Transform "cmdeln" into "cmd eln" */
+		if (*p > 0x30 && *p <= 0x39 && c && *(p - 1) >= 0x61
+		&& *(p - 1) <= 0x7a) {
+
+			char tmp = *p;
+			*p = 0x00;
+
+			if (!is_internal_c(pp)) {
+				*p = tmp;
+				*(q++) = *(p++);
+				continue;
+			}
+
+			*p = tmp;
+			*(q++) = 0x20;
+			*(q++) = *(p++);
+		}
+
+		else {
+			if (*p == 0x20 && *(p + 1))
+				pp = p + 1;
+			*(q++) = *(p++);
+		}
+
+		c++;
+	}
+
+	*q = 0x00;
+
+	/* Readjust the buffer size */
+	size_t len = strlen(buf);
+	buf = (char *)xrealloc(buf, (len + 1) * sizeof(char));
+
+	return buf;
 }
 
 static int
@@ -6777,6 +6874,7 @@ print_tips(int all)
 		"Switch workspaces pressing Alt-[1-4]",
 		"Use the 'ws' command to list available workspaces",
 		"Take a look at available plugins using the 'actions' command",
+		"Space not needed: enter 'p12' instead of 'p 12'",
 		NULL
 	};
 
@@ -8665,53 +8763,6 @@ record_cmd(char *input)
 		return 0;
 
 	return 1;
-}
-
-static int
-is_internal_c(const char *cmd)
-/* Check cmd against a list of internal commands. Used by
- * parse_input_str() when running chained commands */
-{
-	const char *int_cmds[] = { "o", "open", "cd", "p", "pr", "prop",
-					"t", "tr", "trash", "s", "sel", "rf", "refresh",
-					"c", "cp", "m", "mv", "bm", "bookmarks", "b",
-					"back", "f", "forth", "bh", "fh", "u", "undel",
-					"untrash", "s", "sel", "sb", "selbox", "ds",
-					"desel", "rm", "mkdir", "ln", "unlink", "touch",
-					"r", "md", "l", "p", "pr", "prop", "pf", "prof",
-					"profile", "mp", "mountpoints", "ext", "pg",
-					"pager", "uc", "unicode", "folders-first", "ff",
-					"log", "msg", "messages", "alias", "shell", "edit",
-					"history", "hf", "hidden", "path", "cwd", "splash",
-					"ver", "version", "?", "help", "cmd", "commands",
-					"colors", "cc", "fs", "mm", "mime", "x", "n",
-					"net", "lm", "st", "sort", "fc", "tips", "br",
-					"bulk", "opener", "ac", "ad", "acd", "autocd",
-					"ao", "auto-open", "actions", "rl", "reload",
-					"exp", "export", "kb", "keybinds", "pin",
-					"unpin", "cs", "colorschemes", "jump", "je",
-					"jc", "jp", "jo", "icons", "cl", "columns",
-					"ft", "filter", "ws", "mf", NULL };
-
-	short found = 0;
-	size_t i;
-	for (i = 0; int_cmds[i]; i++) {
-		if (strcmp(cmd, int_cmds[i]) == 0) {
-			found = 1;
-			break;
-		}
-	}
-
-	if (found)
-		return 1;
-
-	/* Check for the search and history functions as well */
-	else if ((cmd[0] == '/' && access(cmd, F_OK) != 0) 
-	|| (cmd[0] == '!' && (isdigit(cmd[1]) 
-	|| (cmd[1] == '-' && isdigit(cmd[2])) || cmd[1] == '!')))
-		return 1;
-
-	return 0;
 }
 
 static int
@@ -19825,7 +19876,7 @@ bookmarks_function(char **cmd)
 }
 
 static int
-get_properties(char *filename, int max, size_t filename_len)
+get_properties(char *filename, int dsize)
 {
 	if (!filename || !*filename)
 		return EXIT_FAILURE;
@@ -20016,8 +20067,8 @@ get_properties(char *filename, int max, size_t filename_len)
 			is_acl(filename) ? "+" : "", link_n, 
 			(!owner) ? _("unknown") : owner->pw_name, 
 			(!group) ? _("unknown") : group->gr_name, 
-			(size_type) ? size_type : "??", 
-			(mod_time[0] != 0x00) ? mod_time : "??");
+			(size_type) ? size_type : "?", 
+			(mod_time[0] != 0x00) ? mod_time : "?");
 
 	if (file_type && file_type != 'l')
 		printf("%s%s%s\n", color, filename, df_c);
@@ -20127,30 +20178,33 @@ get_properties(char *filename, int max, size_t filename_len)
 		printf(_("Birth: \t\t%s\n"), creation_time);
 	#endif
 
-	/* Print file size */
+	/* Print size */
+
 	if ((file_attrib.st_mode & S_IFMT) == S_IFDIR) {
 
-/*		fputs(_("Total size: \t"), stdout);
-		off_t total_size = dir_size(filename);
+		if (dsize) {
+			fputs(_("Total size: \t"), stdout);
+			off_t total_size = dir_size(filename);
 
-		if (total_size != -1) {
-			char *human_size = get_size_unit(total_size);
+			if (total_size != -1) {
+				char *human_size = get_size_unit(total_size);
 
-			if (human_size) {
-				printf("%s\n", human_size);
-				free(human_size);
+				if (human_size) {
+					printf("%s\n", human_size);
+					free(human_size);
+				}
+
+				else
+					puts("?");
 			}
 
 			else
-				puts("???");
+				puts("?");
 		}
-
-		else
-			puts("???"); */
 	}
 
 	else
-		printf(_("Size: \t\t%s\n"), (size_type) ? size_type : "??");
+		printf(_("Size: \t\t%s\n"), size_type ? size_type : "?");
 
 	if (size_type)
 		free(size_type);
@@ -20166,6 +20220,10 @@ properties_function(char **comm)
 
 	size_t i;
 	int exit_status = EXIT_SUCCESS;
+	int dir_size = 0;
+
+	if (*comm[0] == 'p' && comm[0][1] == 'p' && !comm[0][2])
+		dir_size = 1;
 
 	/* If "pr file file..." */
 	for (i = 1; i <= args_n; i++) {
@@ -20184,7 +20242,7 @@ properties_function(char **comm)
 			free(deq_file);
 		}
 
-		if (get_properties(comm[i], 0, 0) != 0)
+		if (get_properties(comm[i], dir_size) != 0)
 			exit_status = EXIT_FAILURE;
 	}
 
@@ -20966,6 +21024,7 @@ help_function (void)
 \n				completion for bookmark names is also \
 \n				available\
 \n     --icons\t\t\t enable icons\
+\n     --icons-use-file-color\t icons color follows file color\
 \n     --list-and-quit\t\t list files and quit. It may be used\
 \n				in conjunction with -p\
 \n     --max-dirhist\t\t maximum number of visited directories to \
@@ -23009,16 +23068,17 @@ exec_cmd(char **comm)
 
 	/*    ############### PROPERTIES ##################     */
 	else if (*comm[0] == 'p' && (!comm[0][1]
-	|| strcmp(comm[0], "pr") == 0 || strcmp(comm[0], "prop") == 0)) {
+	|| strcmp(comm[0], "pr") == 0 || strcmp(comm[0], "pp") == 0
+	|| strcmp(comm[0], "prop") == 0)) {
 		if (!comm[1]) {
-			fputs(_("Usage: pr [ELN/FILE ... n]\n"),
+			fputs(_("Usage: pr, pp [ELN/FILE ... n]\n"),
 				  stderr);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
 
 		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
-			puts(_("Usage: pr [ELN/FILE ... n]"));
+			puts(_("Usage: pr, pp [ELN/FILE ... n]"));
 			return EXIT_SUCCESS;
 		}
 
@@ -23400,9 +23460,18 @@ exec_cmd(char **comm)
 
 					/* #### MAX FILES #### */
 	else if (*comm[0] == 'm' && comm[0][1] == 'f' && !comm[0][2]) {
-		if (!comm[1] || (strcmp(comm[1], "-1") != 0
-		&& !is_number(comm[1]))) {
-			fprintf(stderr, "%s: Usage: ml NUM\n", PROGRAM_NAME);
+		if (!comm[1]) {
+			printf(_("Max files: %d\n"), max_files);
+			return EXIT_SUCCESS;
+		}
+
+		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
+			puts(_("Usage: mf [NUM]"));
+			return EXIT_SUCCESS;
+		}
+
+		if (strcmp(comm[1], "-1") != 0 && !is_number(comm[1])) {
+			fprintf(stderr, _("%s: Usage: ml [NUM]\n"), PROGRAM_NAME);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
@@ -23410,7 +23479,7 @@ exec_cmd(char **comm)
 		int inum = atoi(comm[1]);
 		if (inum < -1) {
 			max_files = inum;
-			fprintf(stderr, "%s: %d: Invalid number\n", PROGRAM_NAME,
+			fprintf(stderr, _("%s: %d: Invalid number\n"), PROGRAM_NAME,
 					inum);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
@@ -24094,6 +24163,14 @@ parse_input_str(char *str)
 {
 	register size_t i = 0;
 
+/** ###################### */
+	char *p = split_fusedcmd(str);
+	if (p) {
+		str = p;
+		p = (char *)NULL;
+	}
+/** ###################### */
+
 		   /* ########################################
 		    * #    0) CHECK FOR SPECIAL FUNCTIONS    # 
 		    * ########################################*/
@@ -24241,6 +24318,10 @@ parse_input_str(char *str)
 	/* split_str() returns an array of strings without leading,
 	 * terminating and double spaces. */
 	char **substr = split_str(str);
+
+/** ###################### */
+	free(str);
+/** ###################### */
 
 	/* NOTE: isspace() not only checks for space, but also for new line, 
 	 * carriage return, vertical and horizontal TAB. Be careful when
