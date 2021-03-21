@@ -76,6 +76,7 @@ List of CliFM features:
   35) Files filter via regular expressions for the files list
   36) Up to eight workspaces
   37) Fused parameters support for ELN's
+  38) Advcpmv support (cp and mv with a progress bar). Depends on advcpmv (See \fIhttps://github.com/jarun/advcpmv\fR)
 
 .SH RATIONALE
 When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the Linux built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There is no two without three".
@@ -353,6 +354,10 @@ This built-in bulk rename function won't deal with deletions, replacements, file
 .B c, l [e, edit], m, md, r
 short for the following commands respectivelly: 'cp -iRp', 'ln -sn', 'mv -i', 'mkdir -p', and 'rm -I' (for files) or 'rm -dIr' (for directories). To use these commands without any of these arguments, or with any other argument you need, just use the non-abbreviated command, for instance, 'cp' instead of 'c'.
 .sp
+CliFM supports \fIadvcp\fR and \fIwcp\fR to copy files (to add a progress bar to \fIcp\fR). To use them instead of \fIcp\fR set the corresponding option (cpCmd) in the configuration file. If \fIadvcp\fR is selected, the command used is 'advcp -giRp'. \fIwcp\fR takes no argument.
+.sp
+\fIadvmv\fR is also supported to move files (to add a progress bar to \fImv\fR). Use the 'mvCmd' option in the configuration file to choose this alternative implementation of \fImv\fR. In this case, the command used is 'advmv -gi'.
+.sp
 The \fIln\fR command allows the use of the 'e, edit' option to modify the destination of a symbolic link. Example: 'l e 12', or 'le 12',  to relink the symbolic link corresponding to the ELN 12.
 .TP
 .B cc, colors
@@ -498,7 +503,7 @@ If the file to be opened is an archive/compressed file, the archive function (se
 with no argument, prints the currently used resource opener (by default, \fILira\fR, CliFM's built\-in opener). Otherwise, set APPLICATION as opener or, if 'default' is passed instead, use \fILira\fR. 
 .TP
 .B p, pr, prop \fRELN/FILE ... n
-print file properties for ELN/FILE. The output of this function is much like the combined output of 'ls -l' plus the 'stat' commands.
+print file properties for ELN/FILE. The output of this function is much like the combined output of 'ls -l' plus the 'stat' commands. By default, directories size is not shown. Use \fIppfR to print directories size as well (it could take longer depending on the directory's content).
 .TP
 .B path, cwd
 print the current working directory.
