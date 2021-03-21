@@ -6,7 +6,7 @@
 
 /*
  *  GPL2+ License
- * 
+ *
  * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
  * All rights reserved.
 
@@ -353,6 +353,15 @@ nm=01;32:bm=01;36:"
 #define UNSET -1
 #define DEF_MAX_FILES UNSET
 
+/* Macros for the cp and mv cmds */
+#define CP_CP 0
+#define CP_ADVCP 1
+#define CP_WCP 2
+#define DEF_CP_CMD CP_CP
+#define MV_MV 0
+#define CP_ADVMV 1
+#define DEF_MV_CMD MV_MV
+
 /* Macros for the colors_list function */
 #define NO_ELN 0
 #define NO_PAD 0
@@ -419,7 +428,7 @@ static int mime_edit(char **);
 static char **parse_input_str(char *);
 
 				/** #########################
-				 *  #    GLOBAL VARIABLES   # 
+				 *  #    GLOBAL VARIABLES   #
 				 *  ######################### */
 
 #ifndef _BE_POSIX
@@ -526,7 +535,7 @@ struct param
 	int longview;
 	int cd_list_auto;
 	int autocd;
-	int auto_open; 
+	int auto_open;
 	int ext;
 	int ffirst;
 	int sensitive;
@@ -623,6 +632,8 @@ static short
 	columned = UNSET,
 	colorize = UNSET,
 	cur_ws = UNSET,
+	cp_cmd = UNSET,
+	mv_cmd = UNSET,
 
 	no_log = 0,
 	internal_cmd = 0,
@@ -634,7 +645,7 @@ static short
 	kbind_busy = 0,
 	unicode = UNSET,
 	dequoted = 0,
-	mime_match = 0, 
+	mime_match = 0,
 	sort_reverse = 0,
 	sort_switch = 0,
 	kb_shortcut = 0,
@@ -973,7 +984,7 @@ digits_in_num(int n)
 	if (n < 100000)
 		return 5;
 
-	size_t c = 0; 
+	size_t c = 0;
 
 	do
 		++c;
@@ -1018,7 +1029,7 @@ static void *
 xrealloc(void *ptr, size_t size)
 /*
 Usage example:
-	char **str = NULL; 
+	char **str = NULL;
 	int i;
 	str = xcalloc(1, sizeof(char *));
 	for (i = 0; i < 10; i++)
@@ -1052,7 +1063,7 @@ Usage example:
 
 	int i;
 	for (i = 0; str; i++) //to allocate elements of the array
-		str[i] = xcalloc(7, sizeof(char)); 
+		str[i] = xcalloc(7, sizeof(char));
 
 	char *str = NULL;
 	str = xcalloc(20, sizeof(char)); //for strings allocation
@@ -1085,7 +1096,7 @@ xnmalloc(size_t nmemb, size_t size)
 	char *new_ptr = (char *)malloc(nmemb * size);
 
 	if (!new_ptr) {
-		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"), 
+		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
 			 PROGRAM_NAME, __func__, nmemb*size);
 		exit(EXIT_FAILURE);
 	}
@@ -1132,8 +1143,8 @@ is_internal_c(const char *cmd)
 		return 1;
 
 	/* Check for the search and history functions as well */
-	else if ((cmd[0] == '/' && access(cmd, F_OK) != 0) 
-	|| (cmd[0] == '!' && (isdigit(cmd[1]) 
+	else if ((cmd[0] == '/' && access(cmd, F_OK) != 0)
+	|| (cmd[0] == '!' && (isdigit(cmd[1])
 	|| (cmd[1] == '-' && isdigit(cmd[2])) || cmd[1] == '!')))
 		return 1;
 
@@ -1199,13 +1210,13 @@ run_in_foreground (pid_t pid)
 	/* The parent process calls waitpid() on the child */
 	if (waitpid(pid, &status, 0) > 0) {
 		if (WIFEXITED(status) && !WEXITSTATUS(status)) {
-			/* The program terminated normally and executed successfully 
+			/* The program terminated normally and executed successfully
 			 * (WEXITSTATUS(status) == 0) */
 			return EXIT_SUCCESS;
 		}
 		else if (WIFEXITED(status) && WEXITSTATUS(status)) {
-			/* Program terminated normally, but returned a 
-			 * non-zero status. Error codes should be printed by the 
+			/* Program terminated normally, but returned a
+			 * non-zero status. Error codes should be printed by the
 			 * program itself */
 			return WEXITSTATUS(status);
 		}
@@ -1276,7 +1287,7 @@ launch_execle(const char *cmd)
 		/* This is basically what the system() function does: running
 		 * a command via the system shell */
 		execl(sys_shell, name ? name + 1 : sys_shell, "-c", cmd, NULL);
-		fprintf(stderr, "%s: '%s': execle: %s\n", PROGRAM_NAME, sys_shell, 
+		fprintf(stderr, "%s: '%s': execle: %s\n", PROGRAM_NAME, sys_shell,
 				strerror(errno));
 		_exit(errno);
 	}
@@ -1290,10 +1301,10 @@ launch_execle(const char *cmd)
 				return EXIT_SUCCESS;
 			}
 			else if (WIFEXITED(status) && WEXITSTATUS(status)) {
-				/* Either "command not found" (WEXITSTATUS(status) == 127), 
-				 * "permission denied" (not executable) (WEXITSTATUS(status) == 
-				 * 126) or the program terminated normally, but returned a 
-				 * non-zero status. These exit codes will be handled by the 
+				/* Either "command not found" (WEXITSTATUS(status) == 127),
+				 * "permission denied" (not executable) (WEXITSTATUS(status) ==
+				 * 126) or the program terminated normally, but returned a
+				 * non-zero status. These exit codes will be handled by the
 				 * system shell itself, since we're using here execle() */
 				return WEXITSTATUS(status);
 			}
@@ -1304,7 +1315,7 @@ launch_execle(const char *cmd)
 		}
 		else {
 			/* Waitpid() failed */
-			fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME, 
+			fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME,
 					strerror(errno));
 			return errno;
 		}
@@ -1328,17 +1339,17 @@ launch_execve(char **cmd, int bg)
 	#define EXEXECERR 80
 	#define EXFORKERR 81
 	#define EXCRASHERR 82
-	#define EXWAITERR 83 
+	#define EXWAITERR 83
 	*/
-	/* Standard exit codes in UNIX/Linux go from 0 to 255, where 0 means 
-	 * success and a non-zero value means error. This is why I should use 
+	/* Standard exit codes in UNIX/Linux go from 0 to 255, where 0 means
+	 * success and a non-zero value means error. This is why I should use
 	 * negative values (or > 255) so that my own exit codes won't be
 	 * confused with some standard exit code. However, the Linux
 	 * Documentation Project (tldp) recommends the use of codes 64-113
 	 * for user-defined exit codes. See:
 	 * http://www.tldp.org/LDP/abs/html/exitcodes.html
 	 * and
-	 * https://www.gnu.org/software/libc/manual/html_node/Exit-Status.html 
+	 * https://www.gnu.org/software/libc/manual/html_node/Exit-Status.html
 	*/
 
 	if (!cmd)
@@ -1374,7 +1385,7 @@ launch_execve(char **cmd, int bg)
 		execvp(cmd[0], cmd);
 		/* This will only be reached if execvp() fails, because the exec
 		 * family of functions returns only on error */
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, cmd[0], 
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, cmd[0],
 				strerror(errno));
 		_exit(errno);
 	}
@@ -1511,7 +1522,7 @@ get_ext_icon(char *ext, int n)
 
 		/* Tolower */
 		char c = (*ext >= 'A' && *ext <= 'Z')
-				 ? (*ext - 'A' + 'a') : *ext;	
+				 ? (*ext - 'A' + 'a') : *ext;
 
 		if (c == *icon_ext[i].name
 		&& strcasecmp(ext, icon_ext[i].name) == 0) {
@@ -1581,13 +1592,13 @@ print_entry_props(struct fileinfo *props, size_t max)
 	}
 
 	/* Get file permissions */
-	char read_usr = '-', write_usr = '-', exec_usr = '-', 
+	char read_usr = '-', write_usr = '-', exec_usr = '-',
 		 read_grp = '-', write_grp = '-', exec_grp = '-',
 		 read_others = '-', write_others = '-', exec_others = '-';
 
 	mode_t val = (props->mode & ~S_IFMT);
 	if (val & S_IRUSR) read_usr = 'r';
-	if (val & S_IWUSR) write_usr = 'w'; 
+	if (val & S_IWUSR) write_usr = 'w';
 	if (val & S_IXUSR) exec_usr = 'x';
 
 	if (val & S_IRGRP) read_grp = 'r';
@@ -1598,13 +1609,13 @@ print_entry_props(struct fileinfo *props, size_t max)
 	if (val & S_IWOTH) write_others = 'w';
 	if (val & S_IXOTH) exec_others = 'x';
 
-	if (props->mode & S_ISUID) 
+	if (props->mode & S_ISUID)
 		(val & S_IXUSR) ? (exec_usr = 's') : (exec_usr = 'S');
-	if (props->mode & S_ISGID) 
+	if (props->mode & S_ISGID)
 		(val & S_IXGRP) ? (exec_grp = 's') : (exec_grp = 'S');
 
 	/* Get modification time */
-	char mod_time[17];
+	char mod_time[128];
 
 	if (props->ltime) {
 		struct tm *t = localtime(&props->ltime);
@@ -1615,10 +1626,10 @@ print_entry_props(struct fileinfo *props, size_t max)
 		strcpy(mod_time, "-               ");
 
 	/* Get owner and group names */
-	struct group *group;
+/*	struct group *group;
 	struct passwd *owner;
 	group = getgrgid(props->uid);
-	owner = getpwuid(props->gid); 
+	owner = getpwuid(props->gid); */
 
 	/*	If filename length is greater than max, truncate it
 	 * to max (later a tilde (~) will be appended to let the user know
@@ -1656,18 +1667,18 @@ print_entry_props(struct fileinfo *props, size_t max)
 		sticky = 1;
 
 	printf("%s%s%c%s%s%s%-*s%s%c %c/%c%c%c/%c%c%c/%c%c%c%s  "
-			"%u:%u  %s  %s\n", 
-			colorize ? props->icon_color : "", 
+			"%u:%u  %s  %s\n",
+			colorize ? props->icon_color : "",
 			icons ? props->icon : "", icons ? 0x20 : 0,
 			colorize ? props->color : "",
 			!trim ? props->name : trim_name,
 			light_mode ? "" : df_c,	pad, "", df_c,
 			trim ? '~' : 0, file_type,
-			read_usr, write_usr, exec_usr, 
+			read_usr, write_usr, exec_usr,
 			read_grp, write_grp, exec_grp,
 			read_others, write_others, sticky ? 't' : exec_others,
 			is_acl(props->name) ? "+" : "",
-/*			!owner ? _("?") : owner->pw_name, 
+/*			!owner ? _("?") : owner->pw_name,
 			!group ? _("?") : group->gr_name, */
 			props->uid, props->gid,
 			*mod_time ? mod_time : "?",
@@ -1821,6 +1832,7 @@ filter_function(char *arg)
 
 	if (*arg == '-' && strcmp(arg, "--help") == 0) {
 		puts(_("Usage: ft, filter [unset] [REGEX]"));
+		return EXIT_SUCCESS;
 	}
 
 	if (*arg == 'u' && strcmp(arg, "unset") == 0) {
@@ -1856,7 +1868,7 @@ filter_function(char *arg)
 
 	else
 		puts(_("New filter successfully set"));
-	
+
 	return EXIT_SUCCESS;
 }
 
@@ -1899,7 +1911,7 @@ count_dir(const char *dir_path) /* Readdir version */
 	int file_count = 0;
 	struct dirent *ent;
 
-	while ((ent = readdir(dir_p))) 
+	while ((ent = readdir(dir_p)))
 		file_count++;
 
 	closedir(dir_p);
@@ -2086,7 +2098,7 @@ load_jumpdb(void)
 	sprintf(JUMP_FILE, "%s/jump.cfm", CONFIG_DIR);
 
 	struct stat attr;
-	
+
 	if (stat(JUMP_FILE, &attr) == -1) {
 		free(JUMP_FILE);
 		return;
@@ -2732,7 +2744,7 @@ set_colors(char *colorscheme, int env)
 					|| line[end_char] == '"')
 						line[end_char] = 0x00;
 
-					sprintf(dir_ico_c, "\x1b[%sm", opt_str); 
+					sprintf(dir_ico_c, "\x1b[%sm", opt_str);
 				}
 
 				if (file_type_found && ext_type_found
@@ -2805,7 +2817,7 @@ set_colors(char *colorscheme, int env)
 			free(ext_colors_len);
 			ext_colors_n = 0;
 		}
-		
+
 		while(!eol) {
 			switch (*p) {
 
@@ -3540,6 +3552,12 @@ check_options(void)
 	}
 
 	/* Do no override command line options */
+	if (cp_cmd == UNSET)
+		cp_cmd = DEF_CP_CMD;
+
+	if (mv_cmd == UNSET)
+		mv_cmd = DEF_MV_CMD;
+
 	if (only_dirs == UNSET) {
 		if (xargs.only_dirs == UNSET)
 			only_dirs = DEF_ONLY_DIRS;
@@ -3553,7 +3571,7 @@ check_options(void)
 		else
 			colorize = xargs.no_colors;
 	}
-	
+
 	if (expand_bookmarks == UNSET) {
 		if (xargs.expand_bookmarks == UNSET)
 			expand_bookmarks = DEF_EXPAND_BOOKMARKS;
@@ -3819,8 +3837,8 @@ create_tmp_files(void)
 		}
 	}
 
-	/* Once the parent directory exists, create the user's directory to 
-	 * store the list of selected files: 
+	/* Once the parent directory exists, create the user's directory to
+	 * store the list of selected files:
 	 * TMP_DIR/clifm/username/.selbox_PROFILE. I use here very
 	 * restrictive permissions (700), since only the corresponding user
 	 * must be able to read and/or modify this list */
@@ -4012,7 +4030,7 @@ load_dirhist(void)
 	}
 
 	old_pwd[dirhist_total_index] = (char *)NULL;
-	
+
 	free(line);
 
 	dirhist_cur_index = dirhist_total_index - 1;
@@ -4065,7 +4083,7 @@ get_prompt_cmds(void)
 			}
 		}
 
-		else if (strncmp(line, "#PROMPT", 7) == 0) 
+		else if (strncmp(line, "#PROMPT", 7) == 0)
 			prompt_line_found = 1;
 	}
 
@@ -4292,9 +4310,9 @@ edit_xresources(void)
 
 		if (xrdb_path) {
 			char *res_file = (char *)xnmalloc(
-									 strlen(user_home) 
+									 strlen(user_home)
 									 + 13, sizeof(char));
-			sprintf(res_file, "%s/.Xresources", user_home); 
+			sprintf(res_file, "%s/.Xresources", user_home);
 			char *cmd[] = { "xrdb", "merge", res_file,
 							NULL };
 			launch_execve(cmd, FOREGROUND);
@@ -4304,7 +4322,7 @@ edit_xresources(void)
 		_err('w', PRINT_PROMPT, _("%s: Restart your %s for "
 			 "changes to ~/.Xresources to take effect. "
 			 "Otherwise, %s keybindings might not work as "
-			 "expected.\n"), PROGRAM_NAME, (xrdb_path) 
+			 "expected.\n"), PROGRAM_NAME, (xrdb_path)
 			 ? _("terminal") : _("X session"),
 			 PROGRAM_NAME);
 
@@ -4456,7 +4474,7 @@ create_config(char *file)
 	FILE *config_fp = fopen(file, "w");
 
 	if (!config_fp) {
-		fprintf(stderr, "%s: fopen: '%s': %s\n", PROGRAM_NAME, 
+		fprintf(stderr, "%s: fopen: '%s': %s\n", PROGRAM_NAME,
 				file, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -4496,6 +4514,14 @@ DirhistMap=false\n\n"
 # Example: .*~$ to exclude backup files (ending with ~). Do not quote\n\
 # the regular expression\n\
 Filter=\n\n"
+
+"# Set the default copy command. Available options are: 0 = cp,\n\
+# 1 = advcp, and 2 = wcp. Both 1 and 2 add a progress bar to cp.\n\
+cpCmd=0\n\n"
+
+"# Set the default move command. Available options are: 0 = mv,\n\
+# and 1 = advmv. 2 adds a progress bar to mv.\n\
+mvCmd=0\n\n"
 
 "# The prompt line is build using string literals and/or one or more of\n\
 # the following escape sequences:\n"
@@ -4820,7 +4846,7 @@ create_config_files(void)
 		else {
 			fprintf(profile_fp, _("#%s profile\n\
 #Write here the commands you want to be executed at startup\n\
-#Ex:\n#echo -e \"%s, the anti-eye-candy/KISS file manager\"\n"), 
+#Ex:\n#echo -e \"%s, the anti-eye-candy/KISS file manager\"\n"),
 					PROGRAM_NAME, PROGRAM_NAME);
 			fclose(profile_fp);
 		}
@@ -4927,7 +4953,7 @@ create_config_files(void)
 		FILE *mime_fp = fopen(MIME_FILE, "w");
 
 		if (!mime_fp) {
-			_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n", 
+			_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n",
 				 PROGRAM_NAME, MIME_FILE, strerror(errno));
 		}
 
@@ -4963,7 +4989,7 @@ read_config(void)
 	}
 
 	if (xargs.rl_vi_mode == 1)
-		rl_vi_editing_mode(1, 0);	
+		rl_vi_editing_mode(1, 0);
 
 	div_line_char = UNSET;
 	#define MAX_BOOL 6
@@ -4987,8 +5013,8 @@ read_config(void)
 
 			char opt_str[MAX_BOOL] = ""; /* false (5) + 1 */
 			ret = sscanf(line, "SplashScreen=%5s\n", opt_str);
-			/* According to cppcheck: "sscanf() without field 
-			 * width limits can crash with huge input data". 
+			/* According to cppcheck: "sscanf() without field
+			 * width limits can crash with huge input data".
 			 * Field width limits = %5s */
 
 			if (ret == -1)
@@ -5232,6 +5258,30 @@ read_config(void)
 				sort = DEF_SORT;
 		}
 
+		else if (*line == 'c'
+		&& strncmp(line, "cpCmd=", 6) == 0) {
+			int opt_num = 0;
+			ret = sscanf(line, "cpCmd=%d\n", &opt_num);
+			if (ret == -1)
+				continue;
+			if (opt_num >= 0 && opt_num <= 2)
+				cp_cmd = opt_num;
+			else /* default (sort by name) */
+				cp_cmd = DEF_CP_CMD;
+		}
+
+		else if (*line == 'm'
+		&& strncmp(line, "mvCmd=", 6) == 0) {
+			int opt_num = 0;
+			ret = sscanf(line, "mvCmd=%d\n", &opt_num);
+			if (ret == -1)
+				continue;
+			if (opt_num == 0 || opt_num == 1)
+				mv_cmd = opt_num;
+			else /* default (sort by name) */
+				mv_cmd = DEF_MV_CMD;
+		}
+
 		else if (*line == 'R'
 		&& strncmp(line, "RlEditMode=0", 12) == 0) {
 			rl_vi_editing_mode(1, 0);
@@ -5436,7 +5486,7 @@ read_config(void)
 		&& strncmp(line, "CdListsAutomatically=",
 		21) == 0) {
 			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "CdListsAutomatically=%5s\n", 
+			ret = sscanf(line, "CdListsAutomatically=%5s\n",
 						 opt_str);
 			if (ret == -1)
 				continue;
@@ -5449,7 +5499,7 @@ read_config(void)
 		else if (xargs.sensitive == UNSET && *line == 'C'
 		&& strncmp(line, "CaseSensitiveList=", 18) == 0) {
 			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "CaseSensitiveList=%5s\n", 
+			ret = sscanf(line, "CaseSensitiveList=%5s\n",
 					   opt_str);
 			if (ret == -1)
 				continue;
@@ -5534,7 +5584,7 @@ read_config(void)
 			max_log = opt_num;
 		}
 
-		else if (xargs.path == UNSET && cur_ws == UNSET && *line == 'S' 
+		else if (xargs.path == UNSET && cur_ws == UNSET && *line == 'S'
 		&& strncmp(line, "StartingPath=", 13) == 0) {
 			char *opt_str = straft(line, '=');
 			if (!opt_str)
@@ -5553,7 +5603,7 @@ read_config(void)
 			 * path will be set to default, that is, CWD */
 			if (chdir(tmp) == 0) {
 				free(ws[cur_ws].path);
-				ws[cur_ws].path = (char *)xnmalloc(strlen(tmp) + 1, 
+				ws[cur_ws].path = (char *)xnmalloc(strlen(tmp) + 1,
 									    sizeof(char));
 				strcpy(ws[cur_ws].path, tmp);
 			}
@@ -5586,7 +5636,7 @@ read_config(void)
 
 static void
 init_config(void)
-/* Set up CliFM directories and config files. Load the user's 
+/* Set up CliFM directories and config files. Load the user's
  * configuration from clifmrc */
 {
 	if (xargs.stealth_mode == 1) {
@@ -5618,7 +5668,7 @@ init_config(void)
 	/* "XTerm*eightBitInput: false" must be set in HOME/.Xresources
 	 * to make some keybindings like Alt+letter work correctly in
 	 * xterm-like terminal emulators */
-	/* However, there is no need to do this if using the linux console, 
+	/* However, there is no need to do this if using the linux console,
 	 * since we are not in a graphical environment */
 	if (xargs.stealth_mode != 1 && (flags & GRAPHICAL)
 	&& strncmp(getenv("TERM"), "xterm", 5) == 0)
@@ -5695,7 +5745,7 @@ reload_config(void)
 	autocd = auto_open = restore_last_path = dirhist_map = UNSET;
 	disk_usage = tips = logs_enabled = sort = files_counter = UNSET;
 	light_mode = classify = cd_on_quit = columned = UNSET;
-	
+
 	shell_terminal = no_log = internal_cmd = recur_perm_error_flag = 0;
 	is_sel = sel_is_last = print_msg = kbind_busy = dequoted = 0;
 	mime_match = sort_switch = sort_reverse = kbind_busy = 0;
@@ -5896,7 +5946,7 @@ dequote_str(char *text, int m_t)
 }
 
 static void
-colors_list(const char *ent, const int i, const int pad, 
+colors_list(const char *ent, const int i, const int pad,
 			const int new_line)
 /* Print ENTRY using color codes and I as ELN, right padding PAD
  * chars and terminating ENTRY with or without a new line char (NEW_LINE
@@ -6100,7 +6150,7 @@ edit_link(char *link)
 	/* Enable autocd and auto-open (in case they are not already
 	 * enabled) to allow TAB completion for ELN's */
 	int autocd_status = autocd, auto_open_status = auto_open;
-	autocd = auto_open = 1;	
+	autocd = auto_open = 1;
 
 	while (!new_path) {
 		new_path = rl_no_hist(_("New path ('q' to quit): "));
@@ -6418,7 +6468,7 @@ add_to_dirhist(const char *dir_path)
 			end_counter = 1; */
 			/* 20: Realloc dirhist_total + (2 * 10) */
 			old_pwd = (char **)xrealloc(old_pwd,
-									(size_t)(dirhist_total_index + 2) 
+									(size_t)(dirhist_total_index + 2)
 									* sizeof(char *));
 /*		}
 
@@ -6439,7 +6489,7 @@ add_to_dirhist(const char *dir_path)
 			mid_counter = 1; */
 			/* 30: Realloc dirhist_total + (3 * 10) */
 			old_pwd = (char **)xrealloc(old_pwd,
-									(size_t)(dirhist_total_index + 3) 
+									(size_t)(dirhist_total_index + 3)
 									* sizeof(char *));
 /*		}
 
@@ -7646,7 +7696,7 @@ archiver(char **args, char mode)
 				ws[cur_ws].path = (char *)xcalloc(strlen(mountpoint) + 1,
 									   sizeof(char));
 				strcpy(ws[cur_ws].path, mountpoint);
-		
+
 				free(mountpoint);
 
 				add_to_jumpdb(ws[cur_ws].path);
@@ -7816,7 +7866,7 @@ sort_function(char **arg)
 				printf(_("group %s\n"), (sort_reverse) ? "[rev]": "");
 				break;
 		}
-		
+
 		return EXIT_SUCCESS;
 	}
 
@@ -7884,13 +7934,13 @@ sort_function(char **arg)
 
 static int
 alphasort_insensitive(const struct dirent **a, const struct dirent **b)
-/* This is a modification of the alphasort function that makes it case 
- * insensitive. It also sorts without taking the initial dot of hidden 
+/* This is a modification of the alphasort function that makes it case
+ * insensitive. It also sorts without taking the initial dot of hidden
  * files into account. Note that strcasecmp() isn't locale aware. Use
  * only with C and english locales */
 {
-	int ret = strcasecmp(((*a)->d_name[0] == '.') ? (*a)->d_name + 1 : 
-						(*a)->d_name, ((*b)->d_name[0] == '.') ? 
+	int ret = strcasecmp(((*a)->d_name[0] == '.') ? (*a)->d_name + 1 :
+						(*a)->d_name, ((*b)->d_name[0] == '.') ?
 						(*b)->d_name + 1 : (*b)->d_name);
 
 	if (!sort_reverse)
@@ -8165,7 +8215,7 @@ remote_ssh(char *address, char *options)
 			   "stealth mode\n", PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
-	
+
 	#if __FreeBSD__
 	fprintf(stderr, _("%s: SFTP is not yet supported on FreeBSD"),
 			PROGRAM_NAME);
@@ -8209,7 +8259,7 @@ remote_ssh(char *address, char *options)
 		char *mkdir_cmd[] = { "mkdir", "-p", rmountpoint, NULL };
 
 		if (launch_execve(mkdir_cmd, FOREGROUND) != EXIT_SUCCESS) {
-			fprintf(stderr, _("%s: '%s': Cannot create mountpoint\n"), 
+			fprintf(stderr, _("%s: '%s': Cannot create mountpoint\n"),
 					PROGRAM_NAME, rmountpoint);
 			free(rmountpoint);
 			return EXIT_FAILURE;
@@ -8218,7 +8268,7 @@ remote_ssh(char *address, char *options)
 
 	/* If it exists, make sure it is not populated */
 	else if (count_dir(rmountpoint) > 2) {
-		fprintf(stderr, _("%s: '%s': Mounpoint not empty\n"), 
+		fprintf(stderr, _("%s: '%s': Mounpoint not empty\n"),
 				PROGRAM_NAME, rmountpoint);
 		free(rmountpoint);
 		return EXIT_FAILURE;
@@ -8503,7 +8553,7 @@ get_substr(char *str, const char ifs)
 
 static int
 new_instance(char *dir, int sudo)
-/* Open DIR in a new instance of the program (using TERM, set in the config 
+/* Open DIR in a new instance of the program (using TERM, set in the config
  * file, as terminal emulator) */
 {
 	if (!term) {
@@ -8543,7 +8593,7 @@ new_instance(char *dir, int sudo)
 	struct stat file_attrib;
 
 	if (stat(deq_dir, &file_attrib) == -1) {
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, deq_dir, 
+		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, deq_dir,
 				strerror(errno));
 		free(self);
 		free(deq_dir);
@@ -8568,9 +8618,9 @@ new_instance(char *dir, int sudo)
 	else
 		path_dir = deq_dir;
 
-/*	char *cmd = (char *)xnmalloc(strlen(term) + strlen(self) 
+/*	char *cmd = (char *)xnmalloc(strlen(term) + strlen(self)
 								 + strlen(path_dir) + 13, sizeof(char));
-	sprintf(cmd, "%s %s -p \"%s\" &", term, self, path_dir); 
+	sprintf(cmd, "%s %s -p \"%s\" &", term, self, path_dir);
 
 	int ret = launch_execle(cmd);
 	free(cmd); */
@@ -8654,7 +8704,7 @@ new_instance(char *dir, int sudo)
 	free(self);
 
 	if (ret != EXIT_SUCCESS)
-		fprintf(stderr, _("%s: Error lauching new instance\n"), 
+		fprintf(stderr, _("%s: Error lauching new instance\n"),
 				PROGRAM_NAME);
 
 	return ret;
@@ -8675,7 +8725,7 @@ add_to_cmdhist(char *cmd)
 	/* For us */
 	/* Add the new input to the history array */
 	size_t cmd_len = strlen(cmd);
-	history = (char **)xrealloc(history, (size_t)(current_hist_n + 2) 
+	history = (char **)xrealloc(history, (size_t)(current_hist_n + 2)
 								* sizeof(char *));
 	history[current_hist_n] = (char *)xcalloc(cmd_len + 1,
 											  sizeof(char));
@@ -8757,7 +8807,7 @@ record_cmd(char *input)
 		return 0;
 
 	/* Consequtively equal commands in history */
-	if (history && history[current_hist_n - 1] 
+	if (history && history[current_hist_n - 1]
 	&& *p == *history[current_hist_n - 1]
 	&& strcmp(p, history[current_hist_n - 1]) == 0)
 		return 0;
@@ -8786,7 +8836,7 @@ alias_import(char *file)
 		char *file_exp = tilde_expand(file);
 
 		if (!file_exp) {
-			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, file, 
+			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, file,
 					strerror(errno));
 			return EXIT_FAILURE;
 		}
@@ -8854,14 +8904,14 @@ alias_import(char *file)
 				continue;
 			}
 
-			char *p = line + 6; /* p points now to the beginning of the 
+			char *p = line + 6; /* p points now to the beginning of the
 			alias name (because "alias " == 6) */
 
 			/* Only accept single quoted aliases commands */
 			char *tmp = strchr(p, '=');
 
 			if (!tmp)
-				continue; 
+				continue;
 
 			if (*(++tmp) != '\'') {
 				free(alias_name);
@@ -8874,7 +8924,7 @@ alias_import(char *file)
 			for (i = 0; i < aliases_n; i++) {
 				int alias_len = strcntchr(aliases[i], '=');
 
-				if (alias_len != -1 
+				if (alias_len != -1
 				&& strncmp(aliases[i], p, (size_t)alias_len + 1) == 0) {
 					exists = 1;
 					break;
@@ -8953,7 +9003,7 @@ get_hex_num(char *str)
 /* Given this value: \xA0\xA1\xA1, return an array of integers with
  * the integer values for A0, A1, and A2 respectivelly */
 {
-	size_t i = 0; 
+	size_t i = 0;
 	int *hex_n = (int *)calloc(3, sizeof(int));
 
 	while (*str) {
@@ -8999,7 +9049,7 @@ savestring(const char *str, size_t size)
 
 static char *
 home_tilde(const char *new_path)
-/* Reduce "HOME" to tilde ("~"). The new_path variable is always either 
+/* Reduce "HOME" to tilde ("~"). The new_path variable is always either
  * "HOME" or "HOME/file", that's why there's no need to check for
  * "/file" */
 {
@@ -9063,7 +9113,7 @@ decode_prompt(char *line)
 				 * is what the get_hex_num() requires */
 				line--;
 				/* get_hex_num returns an array on integers corresponding
-				 * to the hex codes found in line up to the fisrt non-hex 
+				 * to the hex codes found in line up to the fisrt non-hex
 				 * expression */
 				int *hex = get_hex_num(line);
 				int n = 0, i = 0, j;
@@ -9533,7 +9583,7 @@ load_bookmarks(void)
 
 	size_t i, j = 0;
 
-	bookmark_names = (char **)xnmalloc(bm_n + 2, sizeof(char *));	
+	bookmark_names = (char **)xnmalloc(bm_n + 2, sizeof(char *));
 
 	for (i = 0; i < bm_n; i++) {
 
@@ -9616,7 +9666,7 @@ get_profile_names(void)
 {
 	if (!CONFIG_DIR_GRAL)
 		return EXIT_FAILURE;
-	
+
 	char *pf_dir = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) + 10,
 								   sizeof(char));
 	sprintf(pf_dir, "%s/profiles", CONFIG_DIR_GRAL);
@@ -9688,13 +9738,13 @@ profile_add(char *prof)
 
 	size_t pnl_len = strlen(PNL);
 	/* ### GENERATE PROGRAM'S CONFIG DIRECTORY NAME ### */
-	char *NCONFIG_DIR = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) 
+	char *NCONFIG_DIR = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL)
 										+ strlen(prof) + 11,
 										sizeof(char));
 	sprintf(NCONFIG_DIR, "%s/profiles/%s", CONFIG_DIR_GRAL, prof);
 
 	/* #### CREATE THE CONFIG DIR #### */
-	char *tmp_cmd[] = { "mkdir", "-p", NCONFIG_DIR, NULL }; 
+	char *tmp_cmd[] = { "mkdir", "-p", NCONFIG_DIR, NULL };
 	int ret = launch_execve(tmp_cmd, FOREGROUND);
 
 	if (ret != EXIT_SUCCESS) {
@@ -9711,19 +9761,19 @@ profile_add(char *prof)
 	int error_code = 0;
 	size_t config_len = strlen(NCONFIG_DIR);
 
-	char *NCONFIG_FILE = (char *)xcalloc(config_len + pnl_len + 4, 
+	char *NCONFIG_FILE = (char *)xcalloc(config_len + pnl_len + 4,
 										 sizeof(char));
-	sprintf(NCONFIG_FILE, "%s/%src", NCONFIG_DIR, PNL);	
+	sprintf(NCONFIG_FILE, "%s/%src", NCONFIG_DIR, PNL);
 	char *NHIST_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
 	sprintf(NHIST_FILE, "%s/history.cfm", NCONFIG_DIR);
-	char *NPROFILE_FILE = (char *)xcalloc(config_len + pnl_len + 10, 
+	char *NPROFILE_FILE = (char *)xcalloc(config_len + pnl_len + 10,
 										  sizeof(char));
 	sprintf(NPROFILE_FILE, "%s/%s_profile", NCONFIG_DIR, PNL);
 	char *NMIME_FILE = (char *)xcalloc(config_len + 14, sizeof(char));
 	sprintf(NMIME_FILE, "%s/mimelist.cfm", NCONFIG_DIR);
 
 /*	char *NMSG_LOG_FILE = (char *)xcalloc(config_len + 14, sizeof(char));
-	sprintf(NMSG_LOG_FILE, "%s/messages.cfm", NCONFIG_DIR);	
+	sprintf(NMSG_LOG_FILE, "%s/messages.cfm", NCONFIG_DIR);
 	char *NBM_FILE = (char *)xcalloc(config_len + 15, sizeof(char));
 	sprintf(NBM_FILE, "%s/bookmarks.cfm", NCONFIG_DIR);
 	char *NLOG_FILE = (char *)xcalloc(config_len + 9, sizeof(char));
@@ -9962,7 +10012,7 @@ check_file_size(char *log_file, int max)
 		if (i++ >= logs_num - (max - 1))
 			fprintf(log_fp_tmp, "%s", line_buff);
 	}
-	
+
 	free(line_buff);
 	fclose(log_fp_tmp);
 	fclose(log_fp);
@@ -10190,7 +10240,7 @@ get_history(void)
 
 		history = (char **)xrealloc(history, (current_hist_n + 2)
 									* sizeof(char *));
-		history[current_hist_n] = (char *)xcalloc((size_t)line_len + 1, 
+		history[current_hist_n] = (char *)xcalloc((size_t)line_len + 1,
 												  sizeof(char));
 		strcpy(history[current_hist_n++], line_buff);
 	}
@@ -10462,7 +10512,7 @@ profile_function(char **comm)
 		/* None of the above == error */
 		else {
 
-			fputs(_("Usage: pf, prof, profile [set, add, del PROFILE]\n"), 
+			fputs(_("Usage: pf, prof, profile [set, add, del PROFILE]\n"),
 				  stderr);
 
 			exit_status = EXIT_FAILURE;
@@ -10544,7 +10594,7 @@ get_app(char *mime, char *ext)
 				app_len = 0;
 				/* Split the appplications line into substrings, if
 				 * any */
-				while (*tmp != 0x00 && *tmp != ';' && *tmp != '\n' 
+				while (*tmp != 0x00 && *tmp != ';' && *tmp != '\n'
 				&& *tmp != '\'' && *tmp != '"')
 					app[app_len++] = *(tmp++);
 
@@ -10559,7 +10609,7 @@ get_app(char *mime, char *ext)
 					int ret = strcntchr(app, 0x20);
 
 					if (ret != -1) {
-						char *app_tmp = (char *)xcalloc(app_len + 1, 
+						char *app_tmp = (char *)xcalloc(app_len + 1,
 														sizeof(char));
 						strcpy(app_tmp, app);
 						app_tmp[ret] = 0x00;
@@ -10740,7 +10790,7 @@ mime_open(char **args)
 	char *file_path = (char *)NULL, *deq_file = (char *)NULL;
 	int info = 0, file_index = 0;
 
-	if (strcmp(args[1], "edit") == 0) {	
+	if (strcmp(args[1], "edit") == 0) {
 		return mime_edit(args);
 	}
 
@@ -10792,13 +10842,13 @@ mime_open(char **args)
 			file_path = realpath(args[1], NULL);
 
 		if (!file_path) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[1], 
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[1],
 					strerror(errno));
 			return -1;
 		}
 
 		if (access(file_path, R_OK) == -1) {
-			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_path, 
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_path,
 					strerror(errno));
 
 			free(file_path);
@@ -10887,7 +10937,7 @@ mime_open(char **args)
 			}
 
 			else
-				fprintf(stderr, _("%s: No associated application found\n"), 
+				fprintf(stderr, _("%s: No associated application found\n"),
 						PROGRAM_NAME);
 		}
 
@@ -10907,7 +10957,7 @@ mime_open(char **args)
 		if (ret != -1)
 			app[ret] = 0x00;
 
-		printf(_("Associated application: %s (%s)\n"), app, 
+		printf(_("Associated application: %s (%s)\n"), app,
 			   (mime_match) ? "MIME" : "ext");
 
 		free(file_path);
@@ -10965,7 +11015,7 @@ mime_import(char *file)
 	 * that at least 'mm edit' will work ('vi' should be installed in
 	 * almost any Unix computer) */
 	if (!(flags & GRAPHICAL)) {
-		fputs("text/plain=nano;vim;vi;emacs;ed\n" 
+		fputs("text/plain=nano;vim;vi;emacs;ed\n"
 			  "*.cfm=nano;vim;vi;emacs;ed\n", mime_fp);
 		fclose(mime_fp);
 		return EXIT_SUCCESS;
@@ -11182,7 +11232,7 @@ bulk_rename(char **args)
 	bulk_fp = fopen(BULK_FILE, "r");
 
 	if (!bulk_fp) {
-		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", BULK_FILE, 
+		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", BULK_FILE,
 			 strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -11334,7 +11384,7 @@ export(char **filenames, int open)
 
 	if (!rand_ext)
 		return (char *)NULL;
-	
+
 	char *tmp_file = (char *)xnmalloc(strlen(TMP_DIR) + 14,
 									 sizeof(char));
 	sprintf(tmp_file, "%s/.clifm%s", TMP_DIR, rand_ext);
@@ -11435,7 +11485,7 @@ edit_actions(void)
 	/* Get modification time after opening the file */
 	stat(ACTIONS_FILE, &file_attrib);
 
-	/* If modification times differ, the file was modified after being 
+	/* If modification times differ, the file was modified after being
 	 * opened */
 	if (mtime_bfr != file_attrib.st_mtime) {
 
@@ -11629,7 +11679,7 @@ kbinds_edit(void)
 			   "stealth mode\n", PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
-	
+
 	if (!KBINDS_FILE)
 		return EXIT_FAILURE;
 
@@ -11697,7 +11747,7 @@ kbinds_function(char **args)
 
 	if (strcmp(args[1], "reset") == 0)
 		return kbinds_reset();
-	
+
 	fputs(_("Usage: kb, keybinds [edit] [reset]\n"), stderr);
 	return EXIT_FAILURE;
 }
@@ -11745,7 +11795,7 @@ log_msg(char *_msg, int print)
 	if (!msg_fp) {
 		/* Do not log this error: We might incur in an infinite loop
 		 * trying to access a file that cannot be accessed */
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, MSG_LOG_FILE, 
+		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, MSG_LOG_FILE,
 				strerror(errno));
 		fputs("Press any key to continue... ", stdout);
 		xgetchar(); puts("");
@@ -11758,8 +11808,8 @@ log_msg(char *_msg, int print)
 		char date[64] = "";
 
 		strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", tm);
-		fprintf(msg_fp, "[%d-%d-%dT%d:%d:%d] ", tm->tm_year + 1900, 
-				tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, 
+		fprintf(msg_fp, "[%d-%d-%dT%d:%d:%d] ", tm->tm_year + 1900,
+				tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min,
 				tm->tm_sec);
 		fputs(_msg, msg_fp);
 		fclose(msg_fp);
@@ -11768,7 +11818,7 @@ log_msg(char *_msg, int print)
 
 static int
 _err(int msg_type, int prompt, const char *format, ...)
-/* Custom POSIX implementation of GNU asprintf() modified to log program 
+/* Custom POSIX implementation of GNU asprintf() modified to log program
  * messages. MSG_TYPE is one of: 'e', 'w', 'n', or zero (meaning this
  * latter that no message mark (E, W, or N) will be added to the prompt).
  * PROMPT tells whether to print the message immediately before the
@@ -11821,8 +11871,8 @@ _err(int msg_type, int prompt, const char *format, ...)
 
 static int
 get_link_ref(const char *link)
-/* Return the filetype of the file pointed to by LINK, or -1 in case of 
- * error. Possible return values: 
+/* Return the filetype of the file pointed to by LINK, or -1 in case of
+ * error. Possible return values:
 	S_IFDIR: 40000 (octal) / 16384 (decimal, integer)
 	S_IFREG: 100000 / 32768
 	S_IFLNK: 120000 / 40960
@@ -11888,7 +11938,7 @@ check_for_alias(char **comm)
 
 			if (!alias_comm) {
 				args_n = 0;
-				fprintf(stderr, _("%s: Error parsing aliased command\n"), 
+				fprintf(stderr, _("%s: Error parsing aliased command\n"),
 						PROGRAM_NAME);
 				free(comm_tmp);
 				return (char **)NULL;
@@ -11913,9 +11963,9 @@ check_for_alias(char **comm)
 			alias_comm[args_n + 1] = (char *)NULL;
 
 			/* Free original command */
-			for (j = 0; comm[j]; j++) 
+			for (j = 0; comm[j]; j++)
 				free(comm[j]);
-			free(comm);	
+			free(comm);
 
 			free(comm_tmp);
 
@@ -11931,8 +11981,8 @@ check_for_alias(char **comm)
 static void
 exec_chained_cmds(char *cmd)
 /* Execute chained commands (cmd1;cmd2 and/or cmd1 && cmd2). The function
- * is called by parse_input_str() if some non-quoted double ampersand or 
- * semicolon is found in the input string AND at least one of these 
+ * is called by parse_input_str() if some non-quoted double ampersand or
+ * semicolon is found in the input string AND at least one of these
  * chained commands is internal */
 {
 	if (!cmd)
@@ -12027,7 +12077,7 @@ set_shell(char *str)
 
 	sys_shell = (char *)xnmalloc(strlen(tmp) + 1, sizeof(char));
 	strcpy(sys_shell, tmp);
-	printf(_("Successfully set '%s' as %s default shell\n"), sys_shell, 
+	printf(_("Successfully set '%s' as %s default shell\n"), sys_shell,
 		   PROGRAM_NAME);
 
 	if (full_path)
@@ -12138,7 +12188,7 @@ quote_detector(char *line, int index)
 
 static char **
 split_str(char *str)
-/* This function takes a string as argument and split it into substrings 
+/* This function takes a string as argument and split it into substrings
  * taking tab, new line char, and space as word delimiters, except when
  * they are preceded by a quote char (single or double quotes) or in
  * case of command substitution ($(cmd) or `cmd`), in which case
@@ -12199,7 +12249,7 @@ split_str(char *str)
 					buf[buf_len++] = '`';
 				}
 			}
-			
+
 			/* Copy everything until null byte or closing char */
 			while (*str && *str != close) {
 				buf = (char *)xrealloc(buf, (buf_len + 1)
@@ -12222,7 +12272,7 @@ split_str(char *str)
 
 				free(substr);
 
-				return (char **)NULL;			
+				return (char **)NULL;
 			}
 
 			/* Copy the closing char and add an space: this function
@@ -12499,7 +12549,7 @@ open_function(char **cmd)
 
 	switch((file_attrib.st_mode & S_IFMT)) {
 	case S_IFBLK:
-		/* Store filetype to compose and print the error message, if 
+		/* Store filetype to compose and print the error message, if
 		 * necessary */
 		strcpy(file_type, _("block device"));
 		break;
@@ -12715,7 +12765,7 @@ run_action(char *action, char **args)
 	/* If the pipe is empty */
 	if (!*buf) {
 		unlink(fifo_path);
-		return EXIT_SUCCESS;	
+		return EXIT_SUCCESS;
 	}
 
 	if (buf[buf_len - 1] == '\n')
@@ -12828,11 +12878,11 @@ surf_hist(char **comm)
 				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
 						old_pwd[atoi_comm - 1], strerror(errno));
 		}
-		else 
-			fprintf(stderr, _("history: '%d': No such ELN\n"), 
+		else
+			fprintf(stderr, _("history: '%d': No such ELN\n"),
 					atoi(comm[1] + 1));
 	}
-	else 
+	else
 		fputs(_("history: Usage: b/f [hist] [clear] [!ELN]\n"), stderr);
 
 	return exit_status;
@@ -12883,7 +12933,7 @@ back_function(char **comm)
 	}
 
 	else
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, 
+		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
 				old_pwd[dirhist_cur_index], strerror(errno));
 
 	return exit_status;
@@ -12932,7 +12982,7 @@ forth_function(char **comm)
 	}
 
 	else
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, 
+		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
 				old_pwd[dirhist_cur_index], strerror(errno));
 
 	return exit_status;
@@ -12953,7 +13003,7 @@ list_mountpoints(void)
 	printf(_("%sMountpoints%s\n\n"), bold, df_c);
 
 	char **mountpoints = (char **)NULL;
-	size_t mp_n = 0; 
+	size_t mp_n = 0;
 	int exit_status = EXIT_SUCCESS;
 
 	size_t line_size = 0;
@@ -12986,7 +13036,7 @@ list_mountpoints(void)
 						   device);
 					/* Store the second field (mountpoint) into an
 					 * array */
-					mountpoints = (char **)xrealloc(mountpoints, 
+					mountpoints = (char **)xrealloc(mountpoints,
 										   (mp_n + 1) * sizeof(char *));
 					mountpoints[mp_n] = (char *)xcalloc(strlen(str)
 												+ 1, sizeof(char));
@@ -13027,7 +13077,7 @@ list_mountpoints(void)
 
 			if (ret == 0) {
 				free(ws[cur_ws].path);
-				ws[cur_ws].path = (char *)xcalloc(strlen(mountpoints[atoi_num - 1]) 
+				ws[cur_ws].path = (char *)xcalloc(strlen(mountpoints[atoi_num - 1])
 									   + 1, sizeof(char));
 				strcpy(ws[cur_ws].path, mountpoints[atoi_num - 1]);
 				add_to_dirhist(ws[cur_ws].path);
@@ -13041,7 +13091,7 @@ list_mountpoints(void)
 			}
 
 			else {
-				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, 
+				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
 						mountpoints[atoi_num - 1], strerror(errno));
 				exit_status = EXIT_FAILURE;
 			}
@@ -13075,13 +13125,13 @@ expand_range(char *str, int listdir)
  * an array of int's with the expanded range or NULL if one of the
  * above conditions is not met */
 {
-	if (strcntchr(str, '-') == -1) 
+	if (strcntchr(str, '-') == -1)
 		return (int *)NULL;
 
 	char *first = (char *)NULL;
 	first = strbfr(str, '-');
 
-	if (!first) 
+	if (!first)
 		return (int *)NULL;
 
 	if (!is_number(first)) {
@@ -13109,7 +13159,7 @@ expand_range(char *str, int listdir)
 
 	if (listdir) {
 
-		if (afirst <= 0 || afirst > (int)files || asecond <= 0 
+		if (afirst <= 0 || afirst > (int)files || asecond <= 0
 		|| asecond > (int)files || afirst >= asecond)
 			return (int *)NULL;
 	}
@@ -13189,7 +13239,7 @@ wx_parent_check(char *file)
  * appropriate permissions, including the immutable bit */
 {
 	struct stat file_attrib;
-	short exit_status = -1; 
+	short exit_status = -1;
 	int ret = -1;
 	size_t file_len = strlen(file);
 
@@ -13240,17 +13290,17 @@ wx_parent_check(char *file)
 			int files_n = count_dir(parent);
 
 			if (files_n > 2) {
-				/* I manually check here subdir because recur_perm_check() 
-				 * will only check the contents of subdir, but not subdir 
+				/* I manually check here subdir because recur_perm_check()
+				 * will only check the contents of subdir, but not subdir
 				 * itself */
 				/* If the parent is ok and not empty, check subdir */
 				if (access(file, W_OK|X_OK) == 0) {
-					/* If subdir is ok and not empty, recusivelly check 
+					/* If subdir is ok and not empty, recusivelly check
 					 * subdir */
 					files_n = count_dir(file);
 
 					if (files_n > 2) {
-						/* Reset the recur_perm_check() error flag. See 
+						/* Reset the recur_perm_check() error flag. See
 						 * the note in the function block. */
 						recur_perm_error_flag = 0;
 
@@ -13259,7 +13309,7 @@ wx_parent_check(char *file)
 						}
 
 						else
-							/* recur_perm_check itself will print the 
+							/* recur_perm_check itself will print the
 							 * error messages */
 							exit_status = EXIT_FAILURE;
 					}
@@ -13332,7 +13382,7 @@ wx_parent_check(char *file)
 
 	/* DO NOT TRASH BLOCK AND CHAR DEVICES */
 	default:
-		fprintf(stderr, _("%s: trash: '%s' (%s): Unsupported file type\n"), 
+		fprintf(stderr, _("%s: trash: '%s' (%s): Unsupported file type\n"),
 				PROGRAM_NAME, file, ((file_attrib.st_mode & S_IFMT) == S_IFBLK)
 				? "Block device" : ((file_attrib.st_mode & S_IFMT) == S_IFCHR)
 				? "Character device" : "Unknown filetype");
@@ -13353,7 +13403,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 	struct stat file_attrib;
 
 	if (lstat(file, &file_attrib) == -1) {
-		fprintf(stderr, "%s: trash: '%s': %s\n", PROGRAM_NAME, file, 
+		fprintf(stderr, "%s: trash: '%s': %s\n", PROGRAM_NAME, file,
 				strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -13385,11 +13435,11 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 		filename = straftlst(file, '/');
 
 	if (!filename) {
-		fprintf(stderr, _("%s: trash: '%s': Error getting filename\n"), 
+		fprintf(stderr, _("%s: trash: '%s': Error getting filename\n"),
 				PROGRAM_NAME, file);
 		return EXIT_FAILURE;
 	}
-	/* If the length of the trashed file name (orig_filename.suffix) is 
+	/* If the length of the trashed file name (orig_filename.suffix) is
 	 * longer than NAME_MAX (255), trim the original filename, so that
 	 * (original_filename_len + 1 (dot) + suffix_len) won't be longer
 	 * than NAME_MAX */
@@ -13397,8 +13447,8 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 	int size = (int)(filename_len + suffix_len + 1) - NAME_MAX;
 
 	if (size > 0) {
-		/* If SIZE is a positive value, that is, the trashed file name 
-		 * exceeds NAME_MAX by SIZE bytes, reduce the original file name 
+		/* If SIZE is a positive value, that is, the trashed file name
+		 * exceeds NAME_MAX by SIZE bytes, reduce the original file name
 		 * SIZE bytes. Terminate the original file name (FILENAME) with
 		 * a tilde (~), to let the user know it is trimmed */
 		filename[filename_len - (size_t)size - 1] = '~';
@@ -13445,11 +13495,11 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 	FILE *info_fp = fopen(info_file, "w");
 
 	if (!info_fp) { /* If error creating the info file */
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, info_file, 
+		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, info_file,
 				strerror(errno));
 		/* Remove the trash file */
 		char *trash_file = (char *)NULL;
-		trash_file = (char *)xnmalloc(strlen(TRASH_FILES_DIR) 
+		trash_file = (char *)xnmalloc(strlen(TRASH_FILES_DIR)
 									  + strlen(file_suffix) + 2,
 									  sizeof(char));
 		sprintf(trash_file, "%s/%s", TRASH_FILES_DIR, file_suffix);
@@ -13462,7 +13512,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 
 		if (ret != EXIT_SUCCESS)
 			fprintf(stderr, _("%s: trash: '%s/%s': Failed removing trash "
-					"file\nTry removing it manually\n"), PROGRAM_NAME, 
+					"file\nTry removing it manually\n"), PROGRAM_NAME,
 					TRASH_FILES_DIR, file_suffix);
 
 		free(file_suffix);
@@ -13481,7 +13531,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 			url_str = url_encode(file);
 
 		if (!url_str) {
-			fprintf(stderr, _("%s: trash: '%s': Failed encoding path\n"), 
+			fprintf(stderr, _("%s: trash: '%s': Failed encoding path\n"),
 					PROGRAM_NAME, file);
 			fclose(info_fp);
 
@@ -13491,9 +13541,9 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 		}
 
 		/* Write trashed file information into the info file */
-		fprintf(info_fp, 
-				"[Trash Info]\nPath=%s\nDeletionDate=%d%d%dT%d:%d:%d\n", 
-				url_str, tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, 
+		fprintf(info_fp,
+				"[Trash Info]\nPath=%s\nDeletionDate=%d%d%dT%d:%d:%d\n",
+				url_str, tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
 				tm->tm_hour, tm->tm_min, tm->tm_sec);
 		fclose(info_fp);
 		free(url_str);
@@ -13506,10 +13556,10 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 
 	/* If remove fails, remove trash and info files */
 	if (ret != EXIT_SUCCESS) {
-		fprintf(stderr, _("%s: trash: '%s': Failed removing file\n"), 
+		fprintf(stderr, _("%s: trash: '%s': Failed removing file\n"),
 				PROGRAM_NAME, file);
 		char *trash_file = (char *)NULL;
-		trash_file = (char *)xnmalloc(strlen(TRASH_FILES_DIR) 
+		trash_file = (char *)xnmalloc(strlen(TRASH_FILES_DIR)
 									 + strlen(file_suffix) + 2,
 									 sizeof(char));
 		sprintf(trash_file, "%s/%s", TRASH_FILES_DIR, file_suffix);
@@ -13569,7 +13619,7 @@ remove_from_trash(void)
 	/* List trashed files */
 	/* Change CWD to the trash directory. Otherwise, scandir() will fail */
 	if (chdir(TRASH_FILES_DIR) == -1) {
-		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME, 
+		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME,
 			 TRASH_FILES_DIR, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -13602,7 +13652,7 @@ remove_from_trash(void)
 
 	/* Restore CWD and continue */
 	if (chdir(ws[cur_ws].path) == -1) {
-		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME, 
+		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME,
 			 ws[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -13660,7 +13710,7 @@ remove_from_trash(void)
 				ret = launch_execve(tmp_cmd, FOREGROUND);
 
 				if (ret != EXIT_SUCCESS) {
-					fprintf(stderr, _("%s: trash: Error trashing %s\n"), 
+					fprintf(stderr, _("%s: trash: Error trashing %s\n"),
 							 PROGRAM_NAME, trash_files[j]->d_name);
 					exit_status = EXIT_FAILURE;
 				}
@@ -13671,7 +13721,7 @@ remove_from_trash(void)
 			free(trash_files);
 
 			for (j = 0; rm_elements[j]; j++)
-				free(rm_elements[j]);	
+				free(rm_elements[j]);
 
 			free(rm_elements);
 
@@ -13714,9 +13764,9 @@ remove_from_trash(void)
 			continue;
 		}
 
-		snprintf(rm_file, PATH_MAX, "%s/%s", TRASH_FILES_DIR, 
+		snprintf(rm_file, PATH_MAX, "%s/%s", TRASH_FILES_DIR,
 				 trash_files[rm_num - 1]->d_name);
-		snprintf(rm_info, PATH_MAX, "%s/%s.trashinfo", TRASH_INFO_DIR, 
+		snprintf(rm_info, PATH_MAX, "%s/%s.trashinfo", TRASH_INFO_DIR,
 				 trash_files[rm_num - 1]->d_name);
 
 		char *tmp_cmd2[] = { "rm", "-r", rm_file, rm_info, NULL };
@@ -13790,7 +13840,7 @@ untrash_element(char *file)
 		char *url_decoded = url_decode(orig_path);
 
 		if (!url_decoded) {
-			fprintf(stderr, _("%s: undel: '%s': Failed decoding path\n"), 
+			fprintf(stderr, _("%s: undel: '%s': Failed decoding path\n"),
 					PROGRAM_NAME, orig_path);
 			free(orig_path);
 			return EXIT_FAILURE;
@@ -13897,7 +13947,7 @@ untrash_function(char **comm)
 
 	/* Change CWD to the trash directory to make scandir() work */
 	if (chdir(TRASH_FILES_DIR) == -1) {
-		_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n", PROGRAM_NAME, 
+		_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n", PROGRAM_NAME,
 			 TRASH_FILES_DIR, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -14001,12 +14051,12 @@ untrash_function(char **comm)
 		}
 
 		else if (!is_number(undel_elements[i])) {
-			fprintf(stderr, _("undel: '%s': Invalid ELN\n"), 
+			fprintf(stderr, _("undel: '%s': Invalid ELN\n"),
 					undel_elements[i]);
 			exit_status = EXIT_FAILURE;
 			free_and_return = 1;
 		}
-	} 
+	}
 
 	/* Free and return if any of the above conditions is true */
 	if (free_and_return) {
@@ -14071,12 +14121,12 @@ trash_clear(void)
 	int files_n = -1, exit_status = EXIT_SUCCESS;
 
 	if (chdir(TRASH_FILES_DIR) == -1) {
-		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME, 
+		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME,
 			 TRASH_FILES_DIR, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
-	files_n = scandir(TRASH_FILES_DIR, &trash_files, skip_files, 
+	files_n = scandir(TRASH_FILES_DIR, &trash_files, skip_files,
 					  xalphasort);
 
 	if (!files_n) {
@@ -14182,8 +14232,8 @@ trash_function (char **comm)
 
 		struct dirent **trash_files = (struct dirent **)NULL;
 		int files_n = scandir(TRASH_FILES_DIR, &trash_files,
-							  skip_files, (unicode) ? alphasort : 
-							  (case_sensitive) ? xalphasort : 
+							  skip_files, (unicode) ? alphasort :
+							  (case_sensitive) ? xalphasort :
 							  alphasort_insensitive);
 		if (files_n) {
 			size_t i;
@@ -14212,7 +14262,7 @@ trash_function (char **comm)
 
 	else {
 
-		/* Create suffix from current date and time to create unique 
+		/* Create suffix from current date and time to create unique
 		 * filenames for trashed files */
 		int exit_status = EXIT_SUCCESS;
 		time_t rawtime = time(NULL);
@@ -14245,7 +14295,7 @@ trash_function (char **comm)
 				if (deq_file[0] == '/') /* If absolute path */
 					strcpy(tmp_comm, deq_file);
 
-				else { /* If relative path, add path to check against 
+				else { /* If relative path, add path to check against
 					TRASH_DIR */
 					snprintf(tmp_comm, PATH_MAX, "%s/%s", ws[cur_ws].path,
 							 deq_file);
@@ -14255,7 +14305,7 @@ trash_function (char **comm)
 				/* Do not trash any of the parent directories of TRASH_DIR,
 				 * that is, /, /home, ~/, ~/.local, ~/.local/share */
 				if (strncmp(tmp_comm, TRASH_DIR, strlen(tmp_comm)) == 0) {
-					fprintf(stderr, _("trash: Cannot trash '%s'\n"), 
+					fprintf(stderr, _("trash: Cannot trash '%s'\n"),
 							tmp_comm);
 					exit_status = EXIT_FAILURE;
 					free(deq_file);
@@ -14264,7 +14314,7 @@ trash_function (char **comm)
 
 				/* Do no trash TRASH_DIR itself nor anything inside it,
 				 * that is, already trashed files */
-				else if (strncmp(tmp_comm, TRASH_DIR, 
+				else if (strncmp(tmp_comm, TRASH_DIR,
 						 strlen(TRASH_DIR)) == 0) {
 					puts(_("trash: Use 'trash del' to remove trashed "
 							 "files"));
@@ -14276,7 +14326,7 @@ trash_function (char **comm)
 				struct stat file_attrib;
 
 				if (lstat(deq_file, &file_attrib) == -1) {
-					fprintf(stderr, _("trash: '%s': %s\n"), deq_file, 
+					fprintf(stderr, _("trash: '%s': %s\n"), deq_file,
 							strerror(errno));
 					exit_status = EXIT_FAILURE;
 					free(deq_file);
@@ -14384,7 +14434,7 @@ prompt(void)
 
 	if (welcome_message) {
 		printf(_("%sCliFM, the anti-eye-candy, KISS file manager%s\n"
-			   "Enter '?' or press F[1-3] for instructions.\n"), 
+			   "Enter '?' or press F[1-3] for instructions.\n"),
 			   wc_c, df_c);
 		welcome_message = 0;
 	}
@@ -14401,7 +14451,7 @@ prompt(void)
 
 	/* Execute prompt commands, if any, and only if external commands
 	 * are allowed */
-	if (ext_cmd_ok && prompt_cmds_n > 0) 
+	if (ext_cmd_ok && prompt_cmds_n > 0)
 
 		for (i = 0; i < prompt_cmds_n; i++)
 			launch_execle(prompt_cmds[i]);
@@ -14464,14 +14514,14 @@ prompt(void)
 		+ (sel_n ? 16 : 0) + (trash_n ? 16 : 0) + ((msgs_n && pmsg)
 		? 16: 0) + 6 + sizeof(tx_c) + 1);
 
-	/* 16 = color_b({red,green,yellow}_b)+letter (sel, trash, msg)+NC_b; 
+	/* 16 = color_b({red,green,yellow}_b)+letter (sel, trash, msg)+NC_b;
 	 * 6 = NC_b
 	 * 1 = null terminating char */
 
 /*	char *the_prompt = (char *)xnmalloc(prompt_length, sizeof(char)); */
 	char the_prompt[prompt_length];
 
-	snprintf(the_prompt, prompt_length, "%s%s%s%s%s%s%s%s%s%s", 
+	snprintf(the_prompt, prompt_length, "%s%s%s%s%s%s%s%s%s%s",
 		(msgs_n && pmsg) ? msg_str : "", (xargs.stealth_mode == 1)
 		? si_c : "", (xargs.stealth_mode == 1)
 		? "S\001\x1b[0m\002" : "", (trash_n) ? ti_c : "",
@@ -14481,7 +14531,7 @@ prompt(void)
 
 	free(decoded_prompt);
 
-	/* Print error messages, if any. 'print_errors' is set to true by 
+	/* Print error messages, if any. 'print_errors' is set to true by
 	 * log_msg() with the PRINT_PROMPT flag. If NOPRINT_PROMPT is
 	 * passed instead, 'print_msg' will be false and the message will
 	 * be printed in place by log_msg() itself, without waiting for
@@ -14524,7 +14574,7 @@ prompt(void)
 		strcpy(last_cmd, input);
 	}
 
-	/* Do not record empty lines, exit, history commands, consecutively 
+	/* Do not record empty lines, exit, history commands, consecutively
 	 * equal inputs, or lines starting with space */
 	if (record_cmd(input))
 		add_to_cmdhist(input);
@@ -14616,7 +14666,7 @@ find_key(char *function)
 		if (strcmp(function, kbinds[i].function) == 0)
 			return kbinds[i].key;
 	}
-	
+
 	return (char *)NULL;
 }
 
@@ -14637,9 +14687,9 @@ keybind_exec_cmd(char *str)
 
 		exit_status = exec_cmd(cmd);
 
-		/* While in the bookmarks or mountpoints screen, the kbind_busy 
-		 * flag will be set to 1 and no keybinding will work. Once the 
-		 * corresponding function exited, set the kbind_busy flag to zero, 
+		/* While in the bookmarks or mountpoints screen, the kbind_busy
+		 * flag will be set to 1 and no keybinding will work. Once the
+		 * corresponding function exited, set the kbind_busy flag to zero,
 		 * so that keybindings work again */
 		if (kbind_busy)
 			kbind_busy = 0;
@@ -14649,8 +14699,8 @@ keybind_exec_cmd(char *str)
 			free(cmd[i]);
 		free(cmd);
 
-		/* This call to prompt() just updates the prompt in case it was 
-		 * modified, for example, in case of chdir, files selection, and 
+		/* This call to prompt() just updates the prompt in case it was
+		 * modified, for example, in case of chdir, files selection, and
 		 * so on */
 		char *buf = prompt();
 		free(buf);
@@ -15538,7 +15588,7 @@ static void
 readline_kbinds(void)
 {
 /* To get the keyseq value for a given key do this in an Xterm terminal:
- * C-v and then press the key (or the key combination). So, for example, 
+ * C-v and then press the key (or the key combination). So, for example,
  * C-v, C-right arrow gives "[[1;5C", which here should be written like
  * this:
  * "\\x1b[1;5C" */
@@ -15697,7 +15747,7 @@ readline_kbinds(void)
 		rl_bind_keyseq("\\M-h", rl_dirhist);
 		rl_bind_keyseq("\\M-b", rl_bookmarks);
 		rl_bind_keyseq("\\M-m", rl_mountpoints);
-		rl_bind_keyseq("\\M-s", rl_selbox);		
+		rl_bind_keyseq("\\M-s", rl_selbox);
 	}
 }
 
@@ -15736,7 +15786,7 @@ save_dirhist(void)
 
 	if (!old_pwd || !old_pwd[0])
 		return EXIT_SUCCESS;
-		
+
 	FILE *fp = fopen(DIRHIST_FILE, "w");
 
 	if (!fp) {
@@ -16201,7 +16251,7 @@ void signal_handler(int sig_num)
 //		rl_reset_line_state();
 //		rl_on_new_line();
 //	}
-	//if Ctrl-C and pid is not ClifM's pid, kill the current foreground 
+	//if Ctrl-C and pid is not ClifM's pid, kill the current foreground
 	//process AND its childs (-pid).
 //	if (sig_num == SIGINT && pid != own_pid) {
 //		if (kill(-pid, SIGTERM) != -1)
@@ -16221,20 +16271,20 @@ my_rl_quote(char *text, int m_t, char *qp)
 	/* NOTE: m_t and qp arguments are not used here, but are required by
 	 * rl_filename_quoting_function */
 
-	/* 
-	 * How it works: P and R are pointers to the same memory location 
-	 * initialized (calloced) twice as big as the line that needs to be 
-	 * quoted (in case all chars in the line need to be quoted); TP is a 
-	 * pointer to TEXT, which contains the string to be quoted. We move 
-	 * through TP to find all chars that need to be quoted ("a's" becomes 
-	 * "a\'s", for example). At this point we cannot return P, since this 
-	 * pointer is at the end of the string, so that we return R instead, 
-	 * which is at the beginning of the same string pointed to by P. 
+	/*
+	 * How it works: P and R are pointers to the same memory location
+	 * initialized (calloced) twice as big as the line that needs to be
+	 * quoted (in case all chars in the line need to be quoted); TP is a
+	 * pointer to TEXT, which contains the string to be quoted. We move
+	 * through TP to find all chars that need to be quoted ("a's" becomes
+	 * "a\'s", for example). At this point we cannot return P, since this
+	 * pointer is at the end of the string, so that we return R instead,
+	 * which is at the beginning of the same string pointed to by P.
 	 * */
 	char *r = (char *)NULL, *p = (char *)NULL, *tp = (char *)NULL;
 
 	size_t text_len = strlen(text);
-	/* Worst case: every character of text needs to be escaped. In this 
+	/* Worst case: every character of text needs to be escaped. In this
 	 * case we need 2x text's bytes plus the NULL byte. */
 	p = (char *)xcalloc((text_len * 2) + 1, sizeof(char));
 	r = p;
@@ -16259,14 +16309,14 @@ my_rl_quote(char *text, int m_t, char *qp)
 
 static char *
 my_rl_path_completion(const char *text, int state)
-/* This is the filename_completion_function() function of an old Bash 
+/* This is the filename_completion_function() function of an old Bash
  * release (1.14.7) modified to fit CliFM needs */
 {
 	/* state is zero before completion, and 1 ... n after getting
-	 * possible completions. Example: 
+	 * possible completions. Example:
 	 * cd Do[TAB] -> state 0
 	 * cuments/ -> state 1
-	 * wnloads/ -> state 2 
+	 * wnloads/ -> state 2
 	 * */
 
 	/* Dequote string to be completed (text), if necessary */
@@ -16411,7 +16461,7 @@ my_rl_path_completion(const char *text, int state)
 
 	/* ############### COMPLETION FILTER ################## */
 	/*         This is the heart of the function           */
- 
+
 	while (directory && (ent = readdir(directory))) {
 
 		/* If the user entered nothing before TAB (ex: "cd [TAB]") */
@@ -16495,7 +16545,7 @@ my_rl_path_completion(const char *text, int state)
 				/* If "./", list only executable regular files */
 				else if (exec) {
 
-					if (ent->d_type == DT_REG 
+					if (ent->d_type == DT_REG
 					&& access(ent->d_name, X_OK) == 0)
 						match = 1;
 				}
@@ -16514,7 +16564,7 @@ my_rl_path_completion(const char *text, int state)
 					}
 				}
 
-				/* No filter for everything else. Just print whatever is 
+				/* No filter for everything else. Just print whatever is
 				 * there */
 				else
 					match = 1;
@@ -16678,8 +16728,8 @@ my_rl_path_completion(const char *text, int state)
 			}
 
 			else {
-				  temp = (char *)xcalloc(strlen(users_dirname) + 
-										 strlen(ent->d_name) 
+				  temp = (char *)xcalloc(strlen(users_dirname) +
+										 strlen(ent->d_name)
 										 + 1, sizeof(char));
 				  strcpy(temp, users_dirname);
 			}
@@ -16725,7 +16775,7 @@ jump_generator(const char *text, int state)
 
 	if (!state)
 		i = 0;
-	
+
 	if (!jump_db)
 		return (char *)NULL;
 
@@ -16741,13 +16791,13 @@ jump_generator(const char *text, int state)
 			if (!strstr(ws[cur_ws].path, name))
 				continue;
 		}
-		
+
 		/* Filter by child */
 		else if (rl_line_buffer[1] == 'c') {
 			if (!strstr(name, ws[cur_ws].path))
 				continue;
 		}
-		
+
 		if (strstr(name, text))
 			return strdup(name);
 	}
@@ -16906,7 +16956,7 @@ my_rl_completion(const char *text, int start, int end)
 
 		/* Commands completion */
 		if (end == 0) { /* If text is empty, do nothing */
-			/* Prevent readline from attempting path completion if 
+			/* Prevent readline from attempting path completion if
 			* rl_completion matches returns NULL */
 			rl_attempted_completion_over = 1;
 			return (char **)NULL;
@@ -16944,7 +16994,7 @@ my_rl_completion(const char *text, int start, int end)
 
 			/* #### ELN AND JUMP ORDER EXPANSION ### */
 
-		/* Perform this check only if the first char of the string to be 
+		/* Perform this check only if the first char of the string to be
 		 * completed is a number in order to prevent an unnecessary call
 		 * to atoi */
 		if (*text >= 0x31 && *text <= 0x39) {
@@ -17019,7 +17069,7 @@ my_rl_completion(const char *text, int start, int end)
 
 				/* ### PATH COMPLETION ### */
 
-	/* If none of the above, readline will attempt 
+	/* If none of the above, readline will attempt
 	 * path completion instead via my custom my_rl_path_completion() */
 	return matches;
 }
@@ -17217,7 +17267,7 @@ cschemes_function(char **args)
 		}
 
 		return ret;
-		
+
 	}
 
 	if (*args[1] == 'n' && (!args[1][1]
@@ -17472,7 +17522,7 @@ autojump(char **args)
 
 				if (exclude)
 					continue;
-				
+
 				visits[match] = jump_db[j].visits;
 				matches[match++] = jump_db[j].path;
 			}
@@ -17501,7 +17551,7 @@ autojump(char **args)
 	 * returned */
 
 	int found = 0, exit_status = EXIT_FAILURE,
-		most_visited = 0, max = -1; 
+		most_visited = 0, max = -1;
 
 	for (i = 0; i < match; i++) {
 
@@ -17622,7 +17672,7 @@ save_sel(void)
 
 	if (sel_n == 0) {
 		if (unlink(SEL_FILE) == -1) {
-			fprintf(stderr, "%s: sel: '%s': %s\n", PROGRAM_NAME, 
+			fprintf(stderr, "%s: sel: '%s': %s\n", PROGRAM_NAME,
 					SEL_FILE, strerror(errno));
 			return EXIT_FAILURE;
 		}
@@ -17633,7 +17683,7 @@ save_sel(void)
 	FILE *sel_fp = fopen(SEL_FILE, "w");
 
 	if (!sel_fp) {
-		_err(0, NOPRINT_PROMPT, "%s: sel: '%s': %s\n", PROGRAM_NAME, 
+		_err(0, NOPRINT_PROMPT, "%s: sel: '%s': %s\n", PROGRAM_NAME,
 			 SEL_FILE, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -17685,9 +17735,9 @@ select_file(char *file)
 	if (!file || !*file)
 		return 0;
 
-	/* Check if the selected element is already in the selection 
+	/* Check if the selected element is already in the selection
 	 * box */
-	int exists = 0, new_sel = 0; 
+	int exists = 0, new_sel = 0;
 	size_t j;
 
 	for (j = 0; j < sel_n; j++) {
@@ -17729,7 +17779,7 @@ sel_regex(char *str, const char *dest_path, mode_t filetype)
 	}
 
 	int new_sel = 0;
-	
+
 	size_t i;
 
 	if (!dest_path) { /* Check pattern (STR) against files in CWD */
@@ -17795,7 +17845,7 @@ sel_regex(char *str, const char *dest_path, mode_t filetype)
 				new_sel += select_file(tmp_path);
 			}
 
-			free(list[i]);		
+			free(list[i]);
 		}
 
 		free(list);
@@ -17937,7 +17987,7 @@ sel_function (char **comm)
 					if ((file_attrib.st_mode & S_IFMT) == S_IFDIR)
 						sel_path = 1;
 			}
-			
+
 			int ret = -1;
 
 			ret = sel_regex(comm[i], sel_path ? comm[i + 1] : NULL,
@@ -17995,7 +18045,7 @@ sel_function (char **comm)
 
 				struct stat file_attrib;
 				if (stat(comm[i], &file_attrib) != 0) {
-					fprintf(stderr, "%s: sel: '%s': %s\n", PROGRAM_NAME, 
+					fprintf(stderr, "%s: sel: '%s': %s\n", PROGRAM_NAME,
 							comm[i], strerror(errno));
 					/* Return error when at least one error occur */
 					exit_status = EXIT_FAILURE;
@@ -18005,7 +18055,7 @@ sel_function (char **comm)
 
 			/* If neither a filename in CWD nor a path... */
 			else {
-				fprintf(stderr, _("%s: sel: '%s': No such %s\n"), 
+				fprintf(stderr, _("%s: sel: '%s': No such %s\n"),
 						PROGRAM_NAME, comm[i], (is_number(comm[i]))
 						? "ELN" : _("file or directory"));
 				exit_status = EXIT_FAILURE;
@@ -18013,7 +18063,7 @@ sel_function (char **comm)
 			}
 		}
 
-		if (sel_is_filename || sel_is_relative_path) { 
+		if (sel_is_filename || sel_is_relative_path) {
 			/* Add path to filename or relative path */
 			if (strcmp(ws[cur_ws].path, "/") == 0) {
 				sel_tmp = (char *)xcalloc(strlen(comm[i])
@@ -18057,7 +18107,7 @@ sel_function (char **comm)
 		return exit_status;
 
 	/* At this point, we know there are new selected files and that the
-	 * selection file is OK. So, write new selections into the selection 
+	 * selection file is OK. So, write new selections into the selection
 	 * file */
 
 	if (config_ok && selfile_ok) {
@@ -18145,13 +18195,13 @@ show_sel_files(void)
 				/* Advance one page at a time */
 				case 126: counter=0; /* Page Down */
 					break;
-				/* Stop paging (and set a flag to reenable the pager 
+				/* Stop paging (and set a flag to reenable the pager
 				 * later) */
 				case 99: /* 'c' */
 				case 112: /* 'p' */
 				case 113: pager=0, reset_pager=1; /* 'q' */
 					break;
-				/* If another key is pressed, go back one position. 
+				/* If another key is pressed, go back one position.
 				 * Otherwise, some filenames won't be listed.*/
 				default: i--; continue;
 					break;
@@ -18255,7 +18305,7 @@ deselect(char **comm)
 
 				return EXIT_SUCCESS;
 			}
-			
+
 			else if (strcmp(desel_elements[i], "*") == 0) {
 
 				/* Clear the sel array */
@@ -18329,7 +18379,7 @@ deselect(char **comm)
 		int desel_int = atoi(desel_elements[i]);
 
 		desel_path[i] = (char *)xnmalloc(
-								strlen(sel_elements[desel_int - 1]) 
+								strlen(sel_elements[desel_int - 1])
 								+ 1, sizeof(char));
 		strcpy(desel_path[i], sel_elements[desel_int - 1]);
 	}
@@ -18359,11 +18409,11 @@ deselect(char **comm)
 			}
 		}
 
-		/* Once the index was found, rearrange the sel array removing the 
+		/* Once the index was found, rearrange the sel array removing the
 		 * deselected element (actually, moving each string after it to
 		 * the previous position) */
 		for (j = desel_index; j < (sel_n - 1); j++) {
-			sel_elements[j] = (char *)xrealloc(sel_elements[j], 
+			sel_elements[j] = (char *)xrealloc(sel_elements[j],
 									(strlen(sel_elements[j + 1]) + 1)
 									* sizeof(char));
 			strcpy(sel_elements[j], sel_elements[j + 1]);
@@ -18456,7 +18506,7 @@ search_glob(char **comm)
 		else
 			search_path = comm[1];
 	}
-	
+
 	/* If no arguments, search_path will be NULL and file_type zero */
 
 	if (file_type) {
@@ -18562,11 +18612,11 @@ search_glob(char **comm)
 	int last_column = 0;
 	size_t len = 0, flongest = 0, columns_n = 0, found = 0;
 
-	/* We need to store pointers to matching filenames in array of 
+	/* We need to store pointers to matching filenames in array of
 	 * pointers, just as the filename length (to construct the
 	 * columned output), and, if searching in CWD, its index (ELN)
 	 * in the dirlist array as well */
-	char **pfiles = (char **)xnmalloc(globbed_files.gl_pathc + 1, 
+	char **pfiles = (char **)xnmalloc(globbed_files.gl_pathc + 1,
 							   sizeof(char *));
 
 	int *eln = (int *)xnmalloc(globbed_files.gl_pathc + 1,
@@ -18584,7 +18634,7 @@ search_glob(char **comm)
 		if (file_type) {
 
 			/* Simply skip all files not matching file_type */
-			if (lstat(globbed_files.gl_pathv[i], 
+			if (lstat(globbed_files.gl_pathv[i],
 					  &file_attrib) == -1)
 				continue;
 
@@ -18623,8 +18673,8 @@ search_glob(char **comm)
 
 				eln[found] = (int)(j + 1);
 
-				len = (unicode ? wc_xstrlen(pfiles[found]) 
-					  : strlen(pfiles[found])) + 
+				len = (unicode ? wc_xstrlen(pfiles[found])
+					  : strlen(pfiles[found])) +
 					  (size_t)digits_in_num(eln[found]) + 1;
 
 				files_len[found] = len;
@@ -18660,17 +18710,17 @@ search_glob(char **comm)
 				last_column = 0;
 
 			colors_list(pfiles[i], (eln[i] != -1) ? eln[i] : 0,
-						(last_column || i == (found - 1)) ? 0 : 
-						(int)(flongest - files_len[i]) + 1, 
+						(last_column || i == (found - 1)) ? 0 :
+						(int)(flongest - files_len[i]) + 1,
 						(last_column || i == found - 1) ? 1 : 0);
 			/* Second argument to colors_list() is:
-			 * 0: Do not print any ELN 
+			 * 0: Do not print any ELN
 			 * Positive number: Print positive number as ELN
 			 * -1: Print "?" instead of an ELN */
 		}
 	}
 
-/*	else 
+/*	else
 		printf(_("%s: No matches found\n"), PROGRAM_NAME); */
 
 	/* Free stuff */
@@ -18731,7 +18781,7 @@ search_regex(char **comm)
 		else
 			search_path = comm[1];
 	}
-	
+
 	/* If no arguments, search_path will be NULL and file_type zero */
 
 	if (file_type) {
@@ -18897,7 +18947,7 @@ search_regex(char **comm)
 
 	size_t *files_len = (size_t *)xnmalloc(found + 1, sizeof(size_t));
 	int *match_type = (int *)xnmalloc(found + 1, sizeof(int));
-	 
+ 
 
 	/* Get the longest filename in the list */
 	for (i = 0; i < found; i++) {
@@ -19021,7 +19071,7 @@ search_regex(char **comm)
 			free(reg_dirlist[i]);
 
 		free(reg_dirlist);
-		
+
 		if (chdir(ws[cur_ws].path) == -1) {
 			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
 					ws[cur_ws].path, strerror(errno));
@@ -19119,12 +19169,12 @@ bookmark_del(char *name)
 		}
 	}
 
-	/* If a valid bookmark name was passed in command line, copy the 
-	 * corresponding bookmark index (plus 1, as if it were typed in the 
+	/* If a valid bookmark name was passed in command line, copy the
+	 * corresponding bookmark index (plus 1, as if it were typed in the
 	 * bookmarks screen) to the del_elements array */
 	if (cmd_line != -1) {
 		del_elements = (char **)xnmalloc(2, sizeof(char *));
-		del_elements[0] = (char *)xnmalloc(digits_in_num(cmd_line + 1) 
+		del_elements[0] = (char *)xnmalloc(digits_in_num(cmd_line + 1)
 										   + 1, sizeof(char));
 		sprintf(del_elements[0], "%d", cmd_line + 1);
 		del_elements[1] = (char *)NULL;
@@ -19170,16 +19220,16 @@ bookmark_del(char *name)
 	/* We have input */
 	/* If quit */
 	/* I inspect all substrings entered by the user for "q" before any
-	 * other value to prevent some accidental deletion, like "1 q", or 
+	 * other value to prevent some accidental deletion, like "1 q", or
 	 * worst, "* q" */
 	for (i = 0; del_elements[i]; i++) {
 		int quit = 0;
 		if (strcmp(del_elements[i], "q") == 0)
 			quit = 1;
-		else if (is_number(del_elements[i]) 
+		else if (is_number(del_elements[i])
 		&& (atoi(del_elements[i]) <= 0
 		|| atoi(del_elements[i]) > (int)bmn)) {
-			fprintf(stderr, "bookmarks: '%s': No such bookmark\n", 
+			fprintf(stderr, "bookmarks: '%s': No such bookmark\n",
 					del_elements[i]);
 			quit = 1;
 		}
@@ -19267,7 +19317,7 @@ bookmark_del(char *name)
 	/* Go back to the beginning of the bookmarks file */
 	fseek(bm_fp, 0, SEEK_SET);
 
-	/* Dump into the tmp file everything except bookmarks marked for 
+	/* Dump into the tmp file everything except bookmarks marked for
 	 * deletion */
 
 	line_len = 0;
@@ -19314,7 +19364,7 @@ bookmark_del(char *name)
 	fclose(bm_fp);
 	fclose(tmp_fp);
 
-	/* Remove the old bookmarks file and make the tmp file the new 
+	/* Remove the old bookmarks file and make the tmp file the new
 	 * bookmarks file*/
 	unlink(BM_FILE);
 	rename(tmp_file, BM_FILE);
@@ -19353,7 +19403,7 @@ bookmark_add(char *file)
 
 	/* Check if FILE is an available path */
 
-	FILE *bm_fp = fopen(BM_FILE, "r");	
+	FILE *bm_fp = fopen(BM_FILE, "r");
 	if (!bm_fp) {
 		fprintf(stderr, _("bookmarks: Error opening the bookmarks "
 				"file\n"));
@@ -19506,7 +19556,7 @@ bookmark_add(char *file)
 			free(hk);
 		}
 		else { /* Only name */
-			tmp = (char *)xcalloc(strlen(name) + strlen(file) + 3, 
+			tmp = (char *)xcalloc(strlen(name) + strlen(file) + 3,
 								  sizeof(char));
 			sprintf(tmp, "%s:%s\n", name, file);
 		}
@@ -19889,7 +19939,7 @@ get_properties(char *filename, int dsize)
 
 	/* Check file existence */
 	if (lstat(filename, &file_attrib) == -1) {
-		fprintf(stderr, "%s: pr: '%s': %s\n", PROGRAM_NAME, filename, 
+		fprintf(stderr, "%s: pr: '%s': %s\n", PROGRAM_NAME, filename,
 				strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -19983,7 +20033,7 @@ get_properties(char *filename, int dsize)
 			int files_dir = count_dir(filename);
 
 			color = sticky ? (is_oth_w ? tw_c : st_c)
-				: is_oth_w ? ow_c : 
+				: is_oth_w ? ow_c :
 				((files_dir == 2 || files_dir == 0) ? ed_c : di_c);
 		}
 
@@ -20012,13 +20062,13 @@ get_properties(char *filename, int dsize)
 	}
 
 	/* Get file permissions */
-	char read_usr = '-', write_usr = '-', exec_usr = '-', 
+	char read_usr = '-', write_usr = '-', exec_usr = '-',
 		 read_grp = '-', write_grp = '-', exec_grp = '-',
 		 read_others = '-', write_others = '-', exec_others = '-';
 
 	mode_t val = (file_attrib.st_mode & ~S_IFMT);
 	if (val & S_IRUSR) read_usr = 'r';
-	if (val & S_IWUSR) write_usr = 'w'; 
+	if (val & S_IWUSR) write_usr = 'w';
 	if (val & S_IXUSR) exec_usr = 'x';
 
 	if (val & S_IRGRP) read_grp = 'r';
@@ -20029,9 +20079,9 @@ get_properties(char *filename, int dsize)
 	if (val & S_IWOTH) write_others = 'w';
 	if (val & S_IXOTH) exec_others = 'x';
 
-	if (file_attrib.st_mode & S_ISUID) 
+	if (file_attrib.st_mode & S_ISUID)
 		(val & S_IXUSR) ? (exec_usr = 's') : (exec_usr = 'S');
-	if (file_attrib.st_mode & S_ISGID) 
+	if (file_attrib.st_mode & S_ISGID)
 		(val & S_IXGRP) ? (exec_grp = 's') : (exec_grp = 'S');
 
 	/* Get number of links to the file */
@@ -20056,25 +20106,25 @@ get_properties(char *filename, int dsize)
 	struct group *group;
 	struct passwd *owner;
 	group = getgrgid(group_id);
-	owner = getpwuid(owner_id); 
+	owner = getpwuid(owner_id);
 
 	/* Print file properties */
-	printf("(%04o)%c/%c%c%c/%c%c%c/%c%c%c%s %zu %s %s %s %s ", 
-			file_attrib.st_mode & 07777, file_type, 
-			read_usr, write_usr, exec_usr, read_grp, 
-			write_grp, exec_grp, read_others, write_others, 
-			(sticky) ? 't' : exec_others, 
-			is_acl(filename) ? "+" : "", link_n, 
-			(!owner) ? _("unknown") : owner->pw_name, 
-			(!group) ? _("unknown") : group->gr_name, 
-			(size_type) ? size_type : "?", 
+	printf("(%04o)%c/%c%c%c/%c%c%c/%c%c%c%s %zu %s %s %s %s ",
+			file_attrib.st_mode & 07777, file_type,
+			read_usr, write_usr, exec_usr, read_grp,
+			write_grp, exec_grp, read_others, write_others,
+			(sticky) ? 't' : exec_others,
+			is_acl(filename) ? "+" : "", link_n,
+			(!owner) ? _("unknown") : owner->pw_name,
+			(!group) ? _("unknown") : group->gr_name,
+			(size_type) ? size_type : "?",
 			(mod_time[0] != 0x00) ? mod_time : "?");
 
 	if (file_type && file_type != 'l')
 		printf("%s%s%s\n", color, filename, df_c);
 
 	else if (linkname) {
-		printf("%s%s%s -> %s\n", color, filename, df_c, 
+		printf("%s%s%s -> %s\n", color, filename, df_c,
 			   linkname);
 		free(linkname);
 	}
@@ -20134,7 +20184,7 @@ get_properties(char *filename, int dsize)
 					 "%b %d %H:%M:%S %Y", tm);
 	#elif defined(_STATX)
 		struct statx attrx;
-		statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, 
+		statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW, STATX_BTIME,
 			  &attrx);
 		time = attrx.stx_btime.tv_sec;
 		tm = localtime(&time);
@@ -20232,7 +20282,7 @@ properties_function(char **comm)
 			char *deq_file = dequote_str(comm[i], 0);
 
 			if (!deq_file) {
-				fprintf(stderr, _("%s: '%s': Error dequoting filename\n"), 
+				fprintf(stderr, _("%s: '%s': Error dequoting filename\n"),
 						PROGRAM_NAME, comm[i]);
 				exit_status = EXIT_FAILURE;
 				continue;
@@ -20255,7 +20305,7 @@ hidden_function(char **comm)
 	int exit_status = EXIT_SUCCESS;
 
 	if (strcmp(comm[1], "status") == 0)
-		printf(_("%s: Hidden files %s\n"), PROGRAM_NAME, 
+		printf(_("%s: Hidden files %s\n"), PROGRAM_NAME,
 			   (show_hidden) ? _("enabled") : _("disabled"));
 
 	else if (strcmp(comm[1], "off") == 0) {
@@ -20349,7 +20399,7 @@ log_function(char **comm)
 				logs_enabled = 1;
 				puts(_("Logs successfully enabled"));
 			}
-			
+
 			return EXIT_SUCCESS;
 		}
 
@@ -20372,7 +20422,7 @@ log_function(char **comm)
 
 	if (!last_cmd) {
 		if (!logs_enabled) {
-			/* When cmd logs are disabled, "log clear" and "log off" are 
+			/* When cmd logs are disabled, "log clear" and "log off" are
 			 * the only commands that can reach this code */
 
 			if (clear_log) {
@@ -20507,7 +20557,7 @@ history_function(char **comm)
 
 static int
 run_history_cmd(const char *cmd)
-/* Takes as argument the history cmd less the first exclamation mark. 
+/* Takes as argument the history cmd less the first exclamation mark.
  * Example: if exec_cmd() gets "!-10" it pass to this function "-10",
  * that is, comm + 1 */
 {
@@ -20560,12 +20610,12 @@ run_history_cmd(const char *cmd)
 
 				return exit_status;
 			}
-			fprintf(stderr, _("%s: Error parsing history command\n"), 
+			fprintf(stderr, _("%s: Error parsing history command\n"),
 					PROGRAM_NAME);
 			return EXIT_FAILURE;
 		}
 		else
-			fprintf(stderr, _("%s: !%d: event not found\n"), 
+			fprintf(stderr, _("%s: !%d: event not found\n"),
 					PROGRAM_NAME, num);
 		return EXIT_FAILURE;
 	}
@@ -20609,7 +20659,7 @@ run_history_cmd(const char *cmd)
 			args_n = old_args;
 			return exit_status;
 		}
-		fprintf(stderr, _("%s: Error parsing history command\n"), 
+		fprintf(stderr, _("%s: Error parsing history command\n"),
 				PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
@@ -20619,9 +20669,9 @@ run_history_cmd(const char *cmd)
 		/* If not number or zero or bigger than max... */
 		int acmd = atoi(cmd + 1);
 
-		if (!is_number(cmd + 1) || acmd == 0 
+		if (!is_number(cmd + 1) || acmd == 0
 		|| acmd > (int)current_hist_n - 1) {
-			fprintf(stderr, _("%s: !%s: Event not found\n"), 
+			fprintf(stderr, _("%s: !%s: Event not found\n"),
 					PROGRAM_NAME, cmd);
 			return EXIT_FAILURE;
 		}
@@ -20665,7 +20715,7 @@ run_history_cmd(const char *cmd)
 		if (record_cmd(history[current_hist_n - (size_t)acmd - 1]))
 			add_to_cmdhist(history[current_hist_n - (size_t)acmd - 1]);
 
-		fprintf(stderr, _("%s: Error parsing history command\n"), 
+		fprintf(stderr, _("%s: Error parsing history command\n"),
 				PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
@@ -20720,7 +20770,7 @@ run_history_cmd(const char *cmd)
 
 		return EXIT_FAILURE;
 	}
-	
+
 	else {
 		printf(_("Usage:\n\
 !!: Execute the last command.\n\
@@ -20772,7 +20822,7 @@ regen_config(void)
 	printf(_("New configuration file written to '%s'\n"), CONFIG_FILE);
 
 	reload_config();
-	
+
 	return EXIT_SUCCESS;
 }
 
@@ -20792,7 +20842,7 @@ edit_function (char **comm)
 		return regen_config();
 
 	if (!config_ok) {
-		fprintf(stderr, _("%s: Cannot access the configuration file\n"), 
+		fprintf(stderr, _("%s: Cannot access the configuration file\n"),
 				PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
@@ -20803,7 +20853,7 @@ edit_function (char **comm)
 	/* If, for some reason (like someone erasing the file while the
 	 * program is running) clifmrc doesn't exist, call init_config()
 	 * to recreate the configuration file. Then run 'stat' again to
-	 * reread the attributes of the file */ 
+	 * reread the attributes of the file */
 	if (stat(CONFIG_FILE, &file_attrib) == -1) {
 		create_config(CONFIG_FILE);
 		stat(CONFIG_FILE, &file_attrib);
@@ -20851,7 +20901,7 @@ edit_function (char **comm)
 
 	/* Get modification time after opening the config file */
 	stat(CONFIG_FILE, &file_attrib);
-	/* If modification times differ, the file was modified after being 
+	/* If modification times differ, the file was modified after being
 	 * opened */
 
 	if (mtime_bfr != file_attrib.st_mtime) {
@@ -20882,9 +20932,9 @@ color_codes (void)
 	if (ext_colors_n)
 		printf(_("%sFile type colors%s\n\n"), bold, df_c);
 
-	printf(_(" %sfile name%s: Directory with no read permission (nd)\n"), 
+	printf(_(" %sfile name%s: Directory with no read permission (nd)\n"),
 		   nd_c, df_c);
-	printf(_(" %sfile name%s: File with no read permission (nf)\n"), 
+	printf(_(" %sfile name%s: File with no read permission (nf)\n"),
 		   nf_c, df_c);
 	printf(_(" %sfile name%s: Directory* (di)\n"), di_c, df_c);
 	printf(_(" %sfile name%s: EMPTY directory (ed)\n"), ed_c, df_c);
@@ -20892,8 +20942,8 @@ color_codes (void)
 			 "permission (ne)\n"), ne_c, df_c);
 	printf(_(" %sfile name%s: Executable file (ex)\n"), ex_c, df_c);
 	printf(_(" %sfile name%s: Empty executable file (ee)\n"), ee_c, df_c);
-	printf(_(" %sfile name%s: Block special file (bd)\n"), bd_c, df_c);	
-	printf(_(" %sfile name%s: Symbolic link* (ln)\n"), ln_c, df_c);	
+	printf(_(" %sfile name%s: Block special file (bd)\n"), bd_c, df_c);
+	printf(_(" %sfile name%s: Symbolic link* (ln)\n"), ln_c, df_c);
 	printf(_(" %sfile name%s: Broken symbolic link (or)\n"), or_c, df_c);
 	printf(_(" %sfile name%s: Multi-hardlink (mh)\n"), mh_c, df_c);
 	printf(_(" %sfile name%s: Socket file (so)\n"), so_c, df_c);
@@ -21314,7 +21364,7 @@ bonus_function (void)
 
 static int
 list_dir_light(void)
-/* List files in the current working directory (global variable 'path'). 
+/* List files in the current working directory (global variable 'path').
  * Unlike list_dir(), however, this function uses no color and runs
  * neither stat() nor count_dir(), which makes it quite faster. Return
  * zero on success or one on error */
@@ -21334,7 +21384,7 @@ list_dir_light(void)
 	errno = 0;
 	int n = 0, total_dents = 0;
 
-	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 1, 
+	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 1,
 								   sizeof(struct fileinfo));
 
 	int count = 0;
@@ -21421,7 +21471,7 @@ list_dir_light(void)
 					file_info[n].icon = ICON_LOCK;
 					file_info[n].icon_color = YELLOW;
 				}
-				
+
 				break;
 
 			case DT_LNK:
@@ -21469,7 +21519,7 @@ list_dir_light(void)
 	/* Get terminal current amount of rows and columns */
 	struct winsize w;
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-	/* ws_col and ws_row are both unsigned short int according to 
+	/* ws_col and ws_row are both unsigned short int according to
 	 * /bits/ioctl-types.h */
 	term_cols = w.ws_col; /* This one is global */
 	unsigned short term_rows = w.ws_row;
@@ -21585,14 +21635,14 @@ list_dir_light(void)
 					}
 					break;
 
-					/* Stop paging (and set a flag to reenable the pager 
+					/* Stop paging (and set a flag to reenable the pager
 					 * later) */
 					case 99:  /* 'c' */
 					case 112: /* 'p' */
 					case 113: pager = 0, reset_pager = 1; /* 'q' */
 						break;
 
-					/* If another key is pressed, go back one position. 
+					/* If another key is pressed, go back one position.
 					 * Otherwise, some filenames won't be listed.*/
 					default:
 						i--;
@@ -21632,7 +21682,7 @@ list_dir_light(void)
 	columns_n = (size_t)term_cols / (longest + 1); /* +1 for the
 	space between file names */
 
-	/* If longest is bigger than terminal columns, columns_n will be 
+	/* If longest is bigger than terminal columns, columns_n will be
 	 * negative or zero. To avoid this: */
 	if (columns_n < 1)
 		columns_n = 1;
@@ -21653,7 +21703,7 @@ list_dir_light(void)
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding filenames */
 			/*		Check rows					Check columns */
-			if ((counter / columns_n) > (size_t)(term_rows - 2) 
+			if ((counter / columns_n) > (size_t)(term_rows - 2)
 			&& last_column) {
 
 				printf("\x1b[7;97m--Mas--\x1b[0;49m");
@@ -21695,14 +21745,14 @@ list_dir_light(void)
 					}
 					break;
 
-				/* Stop paging (and set a flag to reenable the pager 
+				/* Stop paging (and set a flag to reenable the pager
 				 * later) */
 				case 99:  /* 'c' */
 				case 112: /* 'p' */
 				case 113: pager = 0, reset_pager = 1; /* 'q' */
 					break;
 
-				/* If another key is pressed, go back one position. 
+				/* If another key is pressed, go back one position.
 				 * Otherwise, some filenames won't be listed.*/
 				default:
 					i--;
@@ -21872,7 +21922,7 @@ list_dir(void)
 	errno = 0;
 	int n = 0, total_dents = 0;
 
-	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 1, 
+	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 1,
 								   sizeof(struct fileinfo));
 
 	int count = 0;
@@ -21918,7 +21968,7 @@ list_dir(void)
 			xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
 			file_info[n].len = wc_xstrlen(ename);
 		}
-		
+
 		/* ################  */
 		file_info[n].dir = (ent->d_type == DT_DIR) ? 1 : 0;
 		file_info[n].symlink = (ent->d_type == DT_LNK) ? 1 : 0;
@@ -21999,7 +22049,7 @@ list_dir(void)
 					file_info[n].icon = ICON_LOCK;
 					file_info[n].icon_color = YELLOW;
 				}
-				
+
 				break;
 
 			case DT_LNK:
@@ -22134,7 +22184,7 @@ list_dir(void)
 	/* Get terminal current amount of rows and columns */
 	struct winsize w;
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-	/* ws_col and ws_row are both unsigned short int according to 
+	/* ws_col and ws_row are both unsigned short int according to
 	 * /bits/ioctl-types.h */
 	term_cols = w.ws_col; /* This one is global */
 	unsigned short term_rows = w.ws_row;
@@ -22251,14 +22301,14 @@ list_dir(void)
 					}
 					break;
 
-					/* Stop paging (and set a flag to reenable the pager 
+					/* Stop paging (and set a flag to reenable the pager
 					 * later) */
 					case 99:  /* 'c' */
 					case 112: /* 'p' */
 					case 113: pager = 0, reset_pager = 1; /* 'q' */
 						break;
 
-					/* If another key is pressed, go back one position. 
+					/* If another key is pressed, go back one position.
 					 * Otherwise, some filenames won't be listed.*/
 					default:
 						i--;
@@ -22292,7 +22342,7 @@ list_dir(void)
 	columns_n = (size_t)term_cols / (longest + 1); /* +1 for the
 	space between file names */
 
-	/* If longest is bigger than terminal columns, columns_n will be 
+	/* If longest is bigger than terminal columns, columns_n will be
 	 * negative or zero. To avoid this: */
 	if (columns_n < 1)
 		columns_n = 1;
@@ -22313,7 +22363,7 @@ list_dir(void)
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding filenames */
 			/*		Check rows					Check columns */
-			if ((counter / columns_n) > (size_t)(term_rows - 2) 
+			if ((counter / columns_n) > (size_t)(term_rows - 2)
 			&& last_column) {
 
 				printf("\x1b[7;97m--Mas--\x1b[0;49m");
@@ -22355,14 +22405,14 @@ list_dir(void)
 					}
 					break;
 
-				/* Stop paging (and set a flag to reenable the pager 
+				/* Stop paging (and set a flag to reenable the pager
 				 * later) */
 				case 99:  /* 'c' */
 				case 112: /* 'p' */
 				case 113: pager = 0, reset_pager = 1; /* 'q' */
 					break;
 
-				/* If another key is pressed, go back one position. 
+				/* If another key is pressed, go back one position.
 				 * Otherwise, some filenames won't be listed.*/
 				default:
 					i--;
@@ -22567,10 +22617,10 @@ run_and_refresh(char **comm)
 			save_sel();
 		}
 
-		/* When should the screen actually be refreshed: 
+		/* When should the screen actually be refreshed:
 		* 1) Creation or removal of file (in current files list)
 		* 2) The contents of a directory (in current files list) changed */
-		if (cd_lists_on_the_fly && strcmp(comm[1], "--help") != 0 
+		if (cd_lists_on_the_fly && strcmp(comm[1], "--help") != 0
 		&& strcmp(comm[1], "--version") != 0) {
 			free_dirlist();
 			list_dir();
@@ -22666,7 +22716,7 @@ exec_cmd(char **comm)
 			&& strcmp(comm[0], usr_actions[i].name) == 0) {
 				exit_code = run_action(usr_actions[i].value, comm);
 				return exit_code;
-			}	
+			}
 		}
 	}
 
@@ -22751,7 +22801,7 @@ exec_cmd(char **comm)
 			|| file_info[i].type == DT_LNK)) {
 				char *cmd[] = { "open", comm[0],
 								(comm[1]) ? comm[1] : NULL,
-								NULL }; 
+								NULL };
 				exit_code = open_function(cmd);
 				return exit_code;
 			}
@@ -22820,7 +22870,7 @@ exec_cmd(char **comm)
 			exit_code = open_function(comm);
 	}
 
-	
+
 	/*       ############### AUTOJUMP ##################     */
 	else if (*comm[0] == 'j' && (!comm[0][1]
 	|| ((comm[0][1] == 'c' || comm[0][1] == 'p'
@@ -22895,13 +22945,21 @@ exec_cmd(char **comm)
 
 		if (((*comm[0] == 'c' || *comm[0] == 'v') && !comm[0][1])
 		|| strcmp(comm[0], "paste") == 0) {
-			comm[0] = (char *)xrealloc(comm[0], 8 * sizeof(char *));
-			strcpy(comm[0], "cp -iRp");
+			comm[0] = (char *)xrealloc(comm[0], 12 * sizeof(char *));
+			if (cp_cmd == CP_CP)
+				strcpy(comm[0], "cp -iRp");
+			else if (cp_cmd == CP_ADVCP)
+				strcpy(comm[0], "advcp -giRp");
+			else
+				strcpy(comm[0], "wcp");
 		}
 
 		else if (*comm[0] == 'm' && !comm[0][1]) {
-			comm[0] = (char *)xrealloc(comm[0], 6 * sizeof(char *));
-			strcpy(comm[0], "mv -i");
+			comm[0] = (char *)xrealloc(comm[0], 10 * sizeof(char *));
+			if (mv_cmd == MV_MV)
+				strcpy(comm[0], "mv -i");
+			else
+				strcpy(comm[0], "advmv -gi");
 		}
 
 		kbind_busy = 1;
@@ -22909,7 +22967,7 @@ exec_cmd(char **comm)
 		kbind_busy = 0;
 	}
 
-	/*         ############### TRASH ##################     */	
+	/*         ############### TRASH ##################     */
 	else if (*comm[0] == 't' && (!comm[0][1]
 	|| strcmp(comm[0], "tr") == 0 || strcmp(comm[0], "trash") == 0)) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
@@ -22986,7 +23044,7 @@ exec_cmd(char **comm)
 	/*  ############### SOME SHELL CMD WRAPPERS ##################  */
 	else if ((*comm[0] == 'r' || *comm[0] == 'm' || *comm[0] == 't'
 	|| *comm[0] == 'l' || *comm[0] == 'c' || *comm[0] == 'u')
-	&& (strcmp(comm[0], "rm") == 0 || strcmp(comm[0], "mkdir") == 0 
+	&& (strcmp(comm[0], "rm") == 0 || strcmp(comm[0], "mkdir") == 0
 	|| strcmp(comm[0], "touch") == 0 || strcmp(comm[0], "ln") == 0
 	|| strcmp(comm[0], "chmod") == 0 || strcmp(comm[0], "unlink") == 0
 	|| strcmp(comm[0], "r") == 0 || strcmp(comm[0], "l") == 0
@@ -23085,9 +23143,9 @@ exec_cmd(char **comm)
 		exit_code = properties_function(comm);
 	}
 
-	/*     ############### SEARCH ##################     */	
+	/*     ############### SEARCH ##################     */
 	else if (*comm[0] == '/' && access(comm[0], F_OK) != 0) {
-								/* If not absolute path */ 
+								/* If not absolute path */
 		/* Try first globbing, and if no result, try regex */
 		if (search_glob(comm) == EXIT_FAILURE)
 			exit_code = search_regex(comm);
@@ -23313,7 +23371,7 @@ exec_cmd(char **comm)
 				"edit' command to add some"));
 			}
 		}
-		
+
 		else if (strcmp(comm[1], "edit") == 0) {
 			exit_code = edit_actions();
 			return exit_code;
@@ -23443,11 +23501,11 @@ exec_cmd(char **comm)
 		exit_code = profile_function(comm);
 
 					/* #### MOUNTPOINTS #### */
-	else if (*comm[0] == 'm' && ((comm[0][1] == 'p' && !comm[0][2]) 
+	else if (*comm[0] == 'm' && ((comm[0][1] == 'p' && !comm[0][2])
 	|| strcmp(comm[0], "mountpoints") == 0)) {
 
 		if (comm[1] && strcmp(comm[1], "--help") == 0)
-			puts(_("Usage: mountpoints, mp"));
+			puts(_("Usage: mp, mountpoints"));
 
 		else {
 			kbind_busy = 1;
@@ -23471,7 +23529,7 @@ exec_cmd(char **comm)
 		}
 
 		if (strcmp(comm[1], "-1") != 0 && !is_number(comm[1])) {
-			fprintf(stderr, _("%s: Usage: ml [NUM]\n"), PROGRAM_NAME);
+			fprintf(stderr, _("%s: Usage: mf [NUM]\n"), PROGRAM_NAME);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
@@ -23484,8 +23542,12 @@ exec_cmd(char **comm)
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
-		
+
 		max_files = inum;
+		if (max_files == -1)
+			puts(_("Max files unset"));
+		else
+			printf(_("Max files set to %d\n"), max_files);
 		return EXIT_SUCCESS;
 	}
 
@@ -23499,12 +23561,12 @@ exec_cmd(char **comm)
 			return EXIT_FAILURE;
 		}
 
-		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) 
+		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
 			puts(_("Usage: ext [on, off, status]"));
 
 		else {
 			if (*comm[1] == 's' && strcmp(comm[1], "status") == 0)
-				printf(_("%s: External commands %s\n"), PROGRAM_NAME, 
+				printf(_("%s: External commands %s\n"), PROGRAM_NAME,
 					    (ext_cmd_ok) ? _("enabled") : _("disabled"));
 
 			else if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
@@ -23536,12 +23598,12 @@ exec_cmd(char **comm)
 			return EXIT_FAILURE;
 		}
 
-		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) 
-			puts(_("Usage: pager, pg [on, off, status]"));
+		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
+			puts(_("Usage: pg, pager [on, off, status]"));
 
 		else {
 			if (*comm[1] == 's' && strcmp(comm[1], "status") == 0)
-				printf(_("%s: Pager %s\n"), PROGRAM_NAME, 
+				printf(_("%s: Pager %s\n"), PROGRAM_NAME,
 					   (pager) ? _("enabled") : _("disabled"));
 
 			else if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
@@ -23554,7 +23616,7 @@ exec_cmd(char **comm)
 				printf(_("%s: Pager disabled\n"), PROGRAM_NAME);
 			}
 			else {
-				fputs(_("Usage: pager, pg [on, off, status]\n"),
+				fputs(_("Usage: pg, pager [on, off, status]\n"),
 					  stderr);
 				exit_code = EXIT_FAILURE;
 			}
@@ -23591,7 +23653,8 @@ exec_cmd(char **comm)
 		}
 
 		else {
-			fputs(_("Usage: fc, filescounter [on, off, status]\n"), stderr);
+			fputs(_("Usage: fc, filescounter [on, off, status]\n"),
+				  stderr);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
@@ -23610,7 +23673,7 @@ exec_cmd(char **comm)
 
 		else {
 			if (*comm[1] == 's' && strcmp(comm[1], "status") == 0)
-				printf(_("%s: Unicode %s\n"), PROGRAM_NAME, 
+				printf(_("%s: Unicode %s\n"), PROGRAM_NAME,
 					    (unicode) ? _("enabled") : _("disabled"));
 
 			else if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
@@ -23635,7 +23698,7 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'f' && ((comm[0][1] == 'f' && !comm[0][2])
 	|| strcmp(comm[0], "folders-first") == 0)) {
 
-		if (cd_lists_on_the_fly == 0) 
+		if (cd_lists_on_the_fly == 0)
 			return EXIT_SUCCESS;
 
 		if (!comm[1]) {
@@ -23644,7 +23707,7 @@ exec_cmd(char **comm)
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
-		
+
 		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: ff, folders-first [on, off, status]"));
 			return EXIT_SUCCESS;
@@ -23653,7 +23716,7 @@ exec_cmd(char **comm)
 		int status = list_folders_first;
 
 		if (*comm[1] == 's' && strcmp(comm[1], "status") == 0)
-			printf(_("%s: Folders first %s\n"), PROGRAM_NAME, 
+			printf(_("%s: Folders first %s\n"), PROGRAM_NAME,
 				     (list_folders_first) ? _("enabled")
 				     : _("disabled"));
 
@@ -23664,7 +23727,7 @@ exec_cmd(char **comm)
 			list_folders_first = 0;
 
 		else {
-			fputs(_("Usage: ff, folders-first [on, off, status]\n"), 
+			fputs(_("Usage: ff, folders-first [on, off, status]\n"),
 				    stderr);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
@@ -23787,10 +23850,10 @@ exec_cmd(char **comm)
 		exit_code = history_function(comm);
 
 			  /* #### HIDDEN FILES #### */
-	else if (*comm[0] == 'h' && ((comm[0][1] == 'f' && !comm[0][2]) 
+	else if (*comm[0] == 'h' && ((comm[0][1] == 'f' && !comm[0][2])
 	|| strcmp(comm[0], "hidden") == 0)) {
 		if (!comm[1]) {
-			fputs(_("Usage: hidden, hf [on, off, status]\n"), stderr); 
+			fputs(_("Usage: hidden, hf [on, off, status]\n"), stderr);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
@@ -23798,7 +23861,7 @@ exec_cmd(char **comm)
 		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
 			/* The same message is in hidden_function(), and printed
 			 * whenever an invalid argument is entered */
-			puts(_("Usage: hidden, hf [on, off, status]")); 
+			puts(_("Usage: hidden, hf [on, off, status]"));
 			return EXIT_SUCCESS;
 		}
 		else
@@ -23881,13 +23944,13 @@ exec_cmd(char **comm)
 
 					/* #### COMMANDS #### */
 	else if (*comm[0] == 'c' && (strcmp(comm[0], "cmd") == 0
-	|| strcmp(comm[0], "commands") == 0)) 
+	|| strcmp(comm[0], "commands") == 0))
 		exit_code = list_commands();
 
 			  /* #### AND THESE ONES TOO #### */
 	/* These functions just print stuff, so that the value of exit_code
 	 * is always zero, that is to say, success */
-	else if (strcmp(comm[0], "path") == 0 || strcmp(comm[0], "cwd") == 0) 
+	else if (strcmp(comm[0], "path") == 0 || strcmp(comm[0], "cwd") == 0)
 		printf("%s\n", ws[cur_ws].path);
 
 	else if ((*comm[0] == '?' && !comm[0][1])
@@ -23951,7 +24014,7 @@ exec_cmd(char **comm)
 					return exit_code;
 				}
 
-				fprintf(stderr, _("%s: '%s': Is a directory\n"), 
+				fprintf(stderr, _("%s: '%s': Is a directory\n"),
 						PROGRAM_NAME, comm[0]);
 				exit_code = EXIT_FAILURE;
 				return EXIT_FAILURE;
@@ -23986,15 +24049,15 @@ exec_cmd(char **comm)
 		 * 'pkill' or 'killall' commands, from within CliFM itself.
 		 * Otherwise, the program will be forcefully terminated without
 		 * freeing allocated memory */
-		if (strcmp(comm[0], "kill") == 0 
-		|| strcmp(comm[0], "killall") == 0 
+		if (strcmp(comm[0], "kill") == 0
+		|| strcmp(comm[0], "killall") == 0
 		|| strcmp(comm[0], "pkill") == 0) {
 			size_t i;
 			for (i = 1; i <= args_n; i++) {
-				if ((strcmp(comm[0], "kill") == 0 
-				&& atoi(comm[i]) == (int)own_pid) 
-				|| ((strcmp(comm[0], "killall") == 0 
-				|| strcmp(comm[0], "pkill") == 0) 
+				if ((strcmp(comm[0], "kill") == 0
+				&& atoi(comm[i]) == (int)own_pid)
+				|| ((strcmp(comm[0], "killall") == 0
+				|| strcmp(comm[0], "pkill") == 0)
 				&& strcmp(comm[i], argv_bk[0]) == 0)) {
 					fprintf(stderr, _("%s: To gracefully quit enter"
 									  "'quit'\n"), PROGRAM_NAME);
@@ -24040,7 +24103,7 @@ exec_cmd(char **comm)
 
 		/* #### RUN THE EXTERNAL COMMAND #### */
 
-		/* Store the command and each argument into a single array to be 
+		/* Store the command and each argument into a single array to be
 		 * executed by execle() using the system shell (/bin/sh -c) */
 		char *ext_cmd = (char *)NULL;
 		size_t ext_cmd_len = strlen(comm[0]);
@@ -24060,7 +24123,7 @@ exec_cmd(char **comm)
 		}
 
 		/* Since we modified LS_COLORS, store its current value and unset
-		 * it. Some shell commands use LS_COLORS to display their outputs 
+		 * it. Some shell commands use LS_COLORS to display their outputs
 		 * ("ls -l", for example, use the "no" value to print file
 		 * properties). So, we unset it to prevent wrong color output
 		 * for external commands. The disadvantage of this procedure is
@@ -24101,9 +24164,9 @@ exec_cmd(char **comm)
 		#endif
 
  		/* Reload the list of available commands in PATH for TAB completion.
- 		 * Why? If this list is not updated, whenever some new program is 
+ 		 * Why? If this list is not updated, whenever some new program is
  		 * installed, renamed, or removed from some of the pathsin PATH
- 		 * while in CliFM, this latter needs to be restarted in order 
+ 		 * while in CliFM, this latter needs to be restarted in order
  		 * to be able to recognize the new program for TAB completion */
 
 		if (bin_commands) {
@@ -24128,11 +24191,11 @@ exec_cmd(char **comm)
 
 static char **
 parse_input_str(char *str)
-/* 
- * This function is one of the keys of CliFM. It will perform a series of 
+/*
+ * This function is one of the keys of CliFM. It will perform a series of
  * actions:
  * 1) Take the string stored by readline and get its substrings without
- * spaces. 
+ * spaces.
  * 2) In case of user defined variable (var=value), it will pass the
  * whole string to exec_cmd(), which will take care of storing the
  * variable;
@@ -24172,13 +24235,13 @@ parse_input_str(char *str)
 /** ###################### */
 
 		   /* ########################################
-		    * #    0) CHECK FOR SPECIAL FUNCTIONS    # 
+		    * #    0) CHECK FOR SPECIAL FUNCTIONS    #
 		    * ########################################*/
 
 	int chaining = 0, cond_cmd = 0, send_shell = 0;
 
 				/* ###########################
-				 * #  0.a) RUN AS EXTERNAL   # 
+				 * #  0.a) RUN AS EXTERNAL   #
 				 * ###########################*/
 
 	/* If invoking a command via ';' or ':' set the send_shell flag to
@@ -24192,7 +24255,7 @@ parse_input_str(char *str)
 		for (i = 0; str[i]; i++) {
 
 				/* ##################################
-				 * #   0.b) CONDITIONAL EXECUTION   # 
+				 * #   0.b) CONDITIONAL EXECUTION   #
 				 * ##################################*/
 
 			/* Check for chained commands (cmd1;cmd2) */
@@ -24206,13 +24269,13 @@ parse_input_str(char *str)
 				cond_cmd = 1;
 
 				/* ##################################
-				 * #   0.c) USER DEFINED VARIABLE   # 
+				 * #   0.c) USER DEFINED VARIABLE   #
 				 * ##################################*/
 
 			/* If user defined variable send the whole string to
 			 * exec_cmd(), which will take care of storing the
 			 * variable. */
-			if (!(flags & IS_USRVAR_DEF) && str[i] == '=' && i > 0 
+			if (!(flags & IS_USRVAR_DEF) && str[i] == '=' && i > 0
 			&& str[i - 1] != '\\' && str[0] != '=') {
 				/* Remove leading spaces. This: '   a="test"' should be
 				 * taken as a valid variable declaration */
@@ -24255,7 +24318,7 @@ parse_input_str(char *str)
 			return (char **)NULL;
 		}
 
-		register size_t j = 0; 
+		register size_t j = 0;
 		size_t str_len = strlen(str), len = 0, internal_ok = 0;
 		char *buf = (char *)NULL;
 
@@ -24312,8 +24375,8 @@ parse_input_str(char *str)
 	}
 
 		/* ################################################
-		 * #     1) SPLIT INPUT STRING INTO SUBSTRINGS    # 
-		 * ################################################*/
+		 * #     1) SPLIT INPUT STRING INTO SUBSTRINGS    #
+		 * ################################################ */
 
 	/* split_str() returns an array of strings without leading,
 	 * terminating and double spaces. */
@@ -24323,7 +24386,7 @@ parse_input_str(char *str)
 	free(str);
 /** ###################### */
 
-	/* NOTE: isspace() not only checks for space, but also for new line, 
+	/* NOTE: isspace() not only checks for space, but also for new line,
 	 * carriage return, vertical and horizontal TAB. Be careful when
 	 * replacing this function. */
 
@@ -24332,9 +24395,9 @@ parse_input_str(char *str)
 
 				/* ##############################
 				 * #   2) BUILTIN EXPANSIONS    #
-				 * ############################## 
+				 * ##############################
 
-	 * Ranges, sel, ELN, pinned dirs, bookmarks, and internal variables. 
+	 * Ranges, sel, ELN, pinned dirs, bookmarks, and internal variables.
 	 * These expansions are specific to CliFM. To be able to use them
 	 * even with external commands, they must be expanded here, before
 	 * sending the input string, in case the command is external, to
@@ -24388,7 +24451,7 @@ parse_input_str(char *str)
 					}
 
 					if (!conflict && bookmarks[j].path) {
-						substr[i] = (char *)xrealloc(substr[i], 
+						substr[i] = (char *)xrealloc(substr[i],
 									(strlen(bookmarks[j].path) + 1)
 									* sizeof(char));
 						strcpy(substr[i], bookmarks[j].path);
@@ -24423,7 +24486,7 @@ parse_input_str(char *str)
 			}
 
 			/* If a range is found, store its index */
-			if (j > 0 && j < substr_len && substr[i][j] == '-' && 
+			if (j > 0 && j < substr_len && substr[i][j] == '-' &&
 			isdigit(substr[i][j - 1]) && isdigit(substr[i][j + 1]))
 				if (ranges_ok < int_array_max)
 					range_array[ranges_ok++] = (int)i;
@@ -24435,7 +24498,7 @@ parse_input_str(char *str)
 	}
 
 			/* ####################################
-			 * #       2.c) RANGES EXPANSION      # 
+			 * #       2.c) RANGES EXPANSION      #
 			 * ####################################*/
 
 	 /* Expand expressions like "1-3" to "1 2 3" if all the numbers in
@@ -24447,7 +24510,7 @@ parse_input_str(char *str)
 
 		for (r = 0; r < ranges_ok; r++) {
 			size_t ranges_n = 0;
-			int *ranges = expand_range(substr[range_array[r] + 
+			int *ranges = expand_range(substr[range_array[r] +
 									   (int)old_ranges_n], 1);
 			if (ranges) {
 				register size_t j = 0;
@@ -24456,11 +24519,11 @@ parse_input_str(char *str)
 
 				char **ranges_cmd = (char **)NULL;
 
-				ranges_cmd = (char **)xcalloc(args_n + ranges_n + 2, 
+				ranges_cmd = (char **)xcalloc(args_n + ranges_n + 2,
 											  sizeof(char *));
 
 				for (i = 0; i < (size_t)range_array[r] + old_ranges_n; i++) {
-					ranges_cmd[j] = (char *)xcalloc(strlen(substr[i]) + 1, 
+					ranges_cmd[j] = (char *)xcalloc(strlen(substr[i]) + 1,
 													sizeof(char));
 					strcpy(ranges_cmd[j++], substr[i]);
 				}
@@ -24471,9 +24534,9 @@ parse_input_str(char *str)
 					sprintf(ranges_cmd[j++], "%d", ranges[i]);
 				}
 
-				for (i = (size_t)range_array[r] + old_ranges_n + 1; 
+				for (i = (size_t)range_array[r] + old_ranges_n + 1;
 				i <= args_n; i++) {
-					ranges_cmd[j] = (char *)xcalloc(strlen(substr[i]) + 1, 
+					ranges_cmd[j] = (char *)xcalloc(strlen(substr[i]) + 1,
 													sizeof(char));
 					strcpy(ranges_cmd[j++], substr[i]);
 				}
@@ -24481,7 +24544,7 @@ parse_input_str(char *str)
 				ranges_cmd[j] = NULL;
 				free(ranges);
 
-				for (i = 0; i <= args_n; i++) 
+				for (i = 0; i <= args_n; i++)
 					free(substr[i]);
 
 				substr = (char **)xrealloc(substr, (args_n + ranges_n + 2)
@@ -24505,7 +24568,7 @@ parse_input_str(char *str)
 	free(range_array);
 
 				/* ##########################
-				 * #   2.d) SEL EXPANSION   # 
+				 * #   2.d) SEL EXPANSION   #
 				 * ##########################*/
 
 /*	if (is_sel && *substr[0] != '/') { */
@@ -24532,7 +24595,7 @@ parse_input_str(char *str)
 				char *esc_str = escape_str(sel_elements[i]);
 
 				if (esc_str) {
-					sel_array[j] = (char *)xcalloc(strlen(esc_str) + 1, 
+					sel_array[j] = (char *)xcalloc(strlen(esc_str) + 1,
 												   sizeof(char));
 					strcpy(sel_array[j++], esc_str);
 					free(esc_str);
@@ -24540,7 +24603,7 @@ parse_input_str(char *str)
 				}
 
 				else {
-					fprintf(stderr, _("%s: %s: Error quoting filename\n"), 
+					fprintf(stderr, _("%s: %s: Error quoting filename\n"),
 							PROGRAM_NAME, sel_elements[j]);
 					/* Free elements selected thus far and and all the
 					 * input substrings */
@@ -24561,7 +24624,7 @@ parse_input_str(char *str)
 			}
 
 			for (i = (size_t)is_sel + 1; i <= args_n; i++) {
-				sel_array[j] = (char *)xcalloc(strlen(substr[i]) + 1, 
+				sel_array[j] = (char *)xcalloc(strlen(substr[i]) + 1,
 											   sizeof(char));
 				strcpy(sel_array[j++], substr[i]);
 			}
@@ -24569,7 +24632,7 @@ parse_input_str(char *str)
 			for (i = 0; i <= args_n; i++)
 				free(substr[i]);
 
-			substr = (char **)xrealloc(substr, (args_n + sel_n + 2) 
+			substr = (char **)xrealloc(substr, (args_n + sel_n + 2)
 									   * sizeof(char *));
 
 			for (i = 0; i < j; i++) {
@@ -24585,8 +24648,8 @@ parse_input_str(char *str)
 		}
 
 		else {
-			/* 'sel' is an argument, but there are no selected files. */ 
-			fprintf(stderr, _("%c%s: There are no selected files%c"), 
+			/* 'sel' is an argument, but there are no selected files. */
+			fprintf(stderr, _("%c%s: There are no selected files%c"),
 					kb_shortcut ? '\n' : '\0', PROGRAM_NAME,
 					kb_shortcut ? '\0' : '\n');
 
@@ -24609,7 +24672,7 @@ parse_input_str(char *str)
 	for (i = 0; i <= args_n; i++) {
 
 				/* ##########################
-				 * #   2.e) ELN EXPANSION   # 
+				 * #   2.e) ELN EXPANSION   #
 				 * ##########################*/
 
 		/* If autocd is set to false, i must be bigger than zero because
@@ -24682,8 +24745,8 @@ parse_input_str(char *str)
 					char *esc_str = escape_str(file_info[num - 1].name);
 
 					if (esc_str) {
-						substr[i] = (char *)xrealloc(substr[i], 
-												(strlen(esc_str) + 1) * 
+						substr[i] = (char *)xrealloc(substr[i],
+												(strlen(esc_str) + 1) *
 												 sizeof(char));
 						strcpy(substr[i], esc_str);
 						free(esc_str);
@@ -24709,7 +24772,7 @@ parse_input_str(char *str)
 		}
 
 		/* #############################################
-		 * #   2.f) USER DEFINED VARIABLES EXPANSION   # 
+		 * #   2.f) USER DEFINED VARIABLES EXPANSION   #
 		 * #############################################*/
 
 		if (substr[i][0] == '$' && substr[i][1] != '('
@@ -24721,7 +24784,7 @@ parse_input_str(char *str)
 				for (j = 0; j < usrvar_n; j++) {
 
 					if (strcmp(var_name, usr_var[j].name) == 0) {
-						substr[i] = (char *)xrealloc(substr[i], 
+						substr[i] = (char *)xrealloc(substr[i],
 							    (strlen(usr_var[j].value) + 1)
 							    * sizeof(char));
 						strcpy(substr[i], usr_var[j].value);
@@ -24733,7 +24796,7 @@ parse_input_str(char *str)
 			}
 
 			else {
-				fprintf(stderr, _("%s: %s: Error getting variable name\n"), 
+				fprintf(stderr, _("%s: %s: Error getting variable name\n"),
 						PROGRAM_NAME, substr[i]);
 				size_t j;
 
@@ -24760,27 +24823,27 @@ parse_input_str(char *str)
 
 	/* #### 3) NULL TERMINATE THE INPUT STRING ARRAY #### */
 	substr = (char **)xrealloc(substr, sizeof(char *) * (args_n + 2));
-	substr[args_n + 1] = (char *)NULL; 
+	substr[args_n + 1] = (char *)NULL;
 
 	if(!is_internal(substr[0]))
 		return substr;
 
 	/* #############################################################
-	 * #			   ONLY FOR INTERNAL COMMANDS 				   # 
+	 * #			   ONLY FOR INTERNAL COMMANDS 				   #
 	 * #############################################################*/
 
 	/* Some functions of CliFM are purely internal, that is, they are not
 	 * wrappers of a shell command and do not call the system shell at all.
 	 * For this reason, some expansions normally made by the system shell
-	 * must be made here (in the lobby [got it?]) in order to be able to 
+	 * must be made here (in the lobby [got it?]) in order to be able to
 	 * understand these expansions at all. */
 
 		/* ###############################################
-		 * #   3) WILDCARD, BRACE, AND TILDE EXPANSION   # 
+		 * #   3) WILDCARD, BRACE, AND TILDE EXPANSION   #
 		 * ############################################### */
 
-	int *glob_array = (int *)xnmalloc(int_array_max, sizeof(int)); 
-	int *word_array = (int *)xnmalloc(int_array_max, sizeof(int)); 
+	int *glob_array = (int *)xnmalloc(int_array_max, sizeof(int));
+	int *word_array = (int *)xnmalloc(int_array_max, sizeof(int));
 	size_t glob_n = 0, word_n = 0;
 
 	for (i = 0; substr[i]; i++) {
@@ -24812,7 +24875,7 @@ parse_input_str(char *str)
 
 			/* Brace and wildcard expansion is made by glob()
 			 * as well */
-			if ((substr[i][j] == '*' || substr[i][j] == '?' 
+			if ((substr[i][j] == '*' || substr[i][j] == '?'
 			|| substr[i][j] == '[' || substr[i][j] == '{')
 			&& substr[i][j + 1] != 0x20) {
 			/* Strings containing these characters are taken as
@@ -24838,21 +24901,21 @@ parse_input_str(char *str)
 
 	/* Do not expand if command is deselect or untrash, just to allow the
 	 * use of "*" for both commands: "ds *" and "u *" */
-	if (glob_n && strcmp(substr[0], "ds") != 0 
-	&& strcmp(substr[0], "desel") != 0 
+	if (glob_n && strcmp(substr[0], "ds") != 0
+	&& strcmp(substr[0], "desel") != 0
 	&& strcmp(substr[0], "u") != 0
-	&& strcmp(substr[0], "undel") != 0 
+	&& strcmp(substr[0], "undel") != 0
 	&& strcmp(substr[0], "untrash") != 0) {
 	 /*	1) Expand glob
 		2) Create a new array, say comm_array_glob, large enough to store
-		   the expanded glob and the remaining (non-glob) arguments 
+		   the expanded glob and the remaining (non-glob) arguments
 		   (args_n+gl_pathc)
-		3) Copy into this array everything before the glob 
+		3) Copy into this array everything before the glob
 		   (i=0;i<glob_char;i++)
-		4) Copy the expanded elements (if none, copy the original element, 
+		4) Copy the expanded elements (if none, copy the original element,
 		   comm_array[glob_char])
 		5) Copy the remaining elements (i=glob_char+1;i<=args_n;i++)
-		6) Free the old comm_array and fill it with comm_array_glob 
+		6) Free the old comm_array and fill it with comm_array_glob
 	  */
 		size_t old_pathc = 0;
 		/* glob_array stores the index of the globbed strings. However,
@@ -24883,7 +24946,7 @@ parse_input_str(char *str)
 											+ 1, sizeof(char *));
 
 				for (i = 0; i < ((size_t)glob_array[g] + old_pathc); i++) {
-					glob_cmd[j] = (char *)xcalloc(strlen(substr[i]) + 1, 
+					glob_cmd[j] = (char *)xcalloc(strlen(substr[i]) + 1,
 												  sizeof(char));
 					strcpy(glob_cmd[j++], substr[i]);
 				}
@@ -24937,7 +25000,7 @@ parse_input_str(char *str)
 
 				glob_cmd[j] = (char *)NULL;
 
-				for (i = 0; i <= args_n; i++) 
+				for (i = 0; i <= args_n; i++)
 					free(substr[i]);
 
 				free(substr);
@@ -24955,7 +25018,7 @@ parse_input_str(char *str)
 	free(glob_array);
 
 		/* #############################################
-		 * #    4) COMMAND & PARAMETER SUBSTITUTION    # 
+		 * #    4) COMMAND & PARAMETER SUBSTITUTION    #
 		 * ############################################# */
 
 	if (word_n) {
@@ -25028,7 +25091,7 @@ parse_input_str(char *str)
 
 				word_cmd[j] = (char *)NULL;
 
-				for (i = 0; i <= args_n; i++) 
+				for (i = 0; i <= args_n; i++)
 					free(substr[i]);
 
 				free(substr);
@@ -25056,9 +25119,9 @@ parse_input_str(char *str)
 		return substr;
 
 		/* #############################################
-		 * #   			 5) REGEX EXPANSION  		   # 
+		 * #   			 5) REGEX EXPANSION  		   #
 		 * ############################################# */
-		
+
 	char **regex_files = (char **)xnmalloc(files + args_n + 2,
 										sizeof(char *));
 
@@ -25196,7 +25259,7 @@ initialize_readline(void)
 	 * (see the above rl_completer_word_break_characters variable) is
 	 * quoted or not. If it is, readline then passes the whole string
 	 * to the completer function (ex: "user\ file"), and if not, only
-	 * wathever it found after the space char (ex: "file") 
+	 * wathever it found after the space char (ex: "file")
 	 * Thanks to George Brocklehurst for pointing out this function:
 	 * https://thoughtbot.com/blog/tab-completion-in-gnu-readline*/
 	rl_char_is_quoted_p = quote_detector;
@@ -25296,7 +25359,7 @@ external_arguments(int argc, char **argv)
 	while ((optc = getopt_long(argc, argv,
 	"+aAb:c:fFgGhiIk:lLmoOp:P:sSUuvw:xyz:", longopts,
 	(int *)0)) != EOF) {
-		/* ':' and '::' in the short options string means 'required' and 
+		/* ':' and '::' in the short options string means 'required' and
 		 * 'optional argument' respectivelly. Thus, 'p' and 'P' require
 		 * an argument here. The plus char (+) tells getopt to stop
 		 * processing at the first non-option (and non-argument) */
@@ -25592,7 +25655,7 @@ external_arguments(int argc, char **argv)
 			}
 
 			else {
-				fprintf(stderr, _("%s: unknown option character '\\%x'\n"), 
+				fprintf(stderr, _("%s: unknown option character '\\%x'\n"),
 						 PROGRAM_NAME, (unsigned int)optopt);
 			}
 
@@ -25727,7 +25790,7 @@ external_arguments(int argc, char **argv)
 		if (alt_profile)
 			free(alt_profile);
 
-		alt_profile = (char *)xcalloc(strlen(alt_profile_value) + 1, 
+		alt_profile = (char *)xcalloc(strlen(alt_profile_value) + 1,
 									  sizeof(char));
 		strcpy(alt_profile, alt_profile_value);
 	}
@@ -25870,7 +25933,7 @@ main(int argc, char *argv[])
 	if (!user) {
 		user = (char *)xnmalloc(4, sizeof(char));
 		strcpy(user, "???\0");
-		_err('e', PRINT_PROMPT, _("%s: Error getting username\n"), 
+		_err('e', PRINT_PROMPT, _("%s: Error getting username\n"),
 			 PROGRAM_NAME);
 	}
 
@@ -26066,9 +26129,9 @@ main(int argc, char *argv[])
 	 * line nor via the RestoreLastPath option), set the default (CWD),
 	 * and if CWD is not set, use the user's home directory, and if the
 	 * home cannot be found either, try the root directory, and if
-	 * there's no access to the root dir either, exit. 
-	 * Bear in mind that if you launch CliFM through a terminal emulator, 
-	 * say xterm (xterm -e clifm), xterm will run a shell, say bash, and 
+	 * there's no access to the root dir either, exit.
+	 * Bear in mind that if you launch CliFM through a terminal emulator,
+	 * say xterm (xterm -e clifm), xterm will run a shell, say bash, and
 	 * the shell will read its config file. Now, if this config file
 	 * changes the CWD, this will be the CWD for CliFM */
 	if (!ws[cur_ws].path) {
@@ -26188,7 +26251,7 @@ main(int argc, char *argv[])
 
 		if (alias_cmd) {
 			/* If an alias is found, check_for_alias() frees cmd
-			 * and returns alias_cmd in its place to be executed by 
+			 * and returns alias_cmd in its place to be executed by
 			 * exec_cmd() */
 			exec_cmd(alias_cmd);
 
