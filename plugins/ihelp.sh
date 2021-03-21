@@ -57,6 +57,7 @@ CMDS=(
 	"kb, keybinds@"
 	"log@"
 	"lm@"
+	"mf@"
 	"mm, mime@"
 	"mp, mountpoints@"
 	"msg, messages@"
