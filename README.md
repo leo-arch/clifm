@@ -47,7 +47,7 @@ Of course, you can deselect some or all selected files whenever you want with th
 * **Quick search**: type `/REGEX` and CliFM will list all matches for the corresponding REGEX pattern. Example: `/.*\.png$`
  will list all the PNG files in the current directory. If you want to 
 search for files in another directory, just tell the search function 
-where to search: `/.*\.png$ /media/images`. And, if you want to further filter the search, you still can specify what kind of files you want. For example: `/[.-].*d$ -d /etc` will list all directories (-d) in /etc containing a dot or a slash and ending with 'd'.
+where to search: `/.*\.png$ /media/images`. And, if you want to further filter the search, you still can specify what kind of files you want. For example: `/[.-].*d$ -d /etc` will list all directories (-d) in /etc containing a dot or a slash and ending with 'd'. The quick search function also supports invert search: prepend the exclamation mark (!) to negate a given search pattern. For example: "!.*s$ -d /etc" will match all directories in /etc NOT ending with 'd', just as "!D*" will match all files in the current directory not starting with 'D'.
 
 ![quick search](images/quick_search.png)
 
