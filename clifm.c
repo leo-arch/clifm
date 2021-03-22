@@ -399,8 +399,6 @@ nm=01;32:bm=01;36:"
 
 #define FALLBACK_SHELL "/bin/sh"
 
-/* Replace some functions by my custom (faster, I think: NO!!)
- * implementations. */
 #define strlen xstrlen
 #define strcpy xstrcpy
 #define strncpy xstrncpy
@@ -1922,6 +1920,9 @@ count_dir(const char *dir_path) /* Readdir version */
 static void
 copy_plugins(void)
 {
+	if (!CONFIG_DIR_GRAL)
+		return;
+
 	char usr_share_plugins_dir[] = "/usr/share/clifm/plugins";
 
 	/* Make sure the system pĺugins dir exists and is not empty */
@@ -4251,6 +4252,9 @@ get_cmd_path(const char *cmd)
 static void
 edit_xresources(void)
 {
+	if (xargs.stealth_mode == 1)
+		return;
+
 	/* Check if ~/.Xresources exists and eightBitInput is set to
 	 * false. If not, create the file and set the corresponding
 	 * value */
@@ -4520,7 +4524,7 @@ Filter=\n\n"
 cpCmd=0\n\n"
 
 "# Set the default move command. Available options are: 0 = mv,\n\
-# and 1 = advmv. 2 adds a progress bar to mv.\n\
+# and 1 = advmv. 1 adds a progress bar to mv.\n\
 mvCmd=0\n\n"
 
 "# The prompt line is build using string literals and/or one or more of\n\
@@ -4923,7 +4927,8 @@ create_config_files(void)
 				"+=finder.sh\n"
 				"++=jumper.sh\n"
 				"-=fzfnav.sh\n"
-				"*=fzfsel.sh\n",
+				"*=fzfsel.sh\n"
+				"h=fzfhist.sh\n",
 				PROGRAM_NAME, PROGRAM_NAME);
 
 			fclose(actions_fp);
@@ -11538,8 +11543,9 @@ create_kbinds_file(void)
 	}
 
 	fprintf(fp, "# %s keybindings file\n\n\
-# Use the 'kbgen' plugin to find out the escape code for the key or\n\
-# key sequence you want. Use either octal, hexadecimal codes or symbols.\n\
+# Use the 'kbgen' plugin (compile it first: gcc -o kbgen kbgen.c) to \n\
+# find out the escape code for the key o key sequence you want. Use \n\
+# either octal, hexadecimal codes or symbols.\n\
 # Ex: For Alt-/ (in rxvt terminals) 'kbgen' will print the following \n\
 # lines:\n\
 # Hex  | Oct | Symbol\n\
@@ -11553,6 +11559,8 @@ create_kbinds_file(void)
 # Some codes, especially those involving keys like Ctrl or the arrow\n\
 # keys, vary depending on the terminal emulator and the system settings.\n\
 # These keybindings should be set up thus on a per terminal basis.\n\
+# You can also consult the terminfo database via the infocmp command.\n\
+# See terminfo(5) and infocmp(1).\n\
 \n\
 # Alt-j\n\
 previous-dir:\\M-j\n\
@@ -17917,7 +17925,7 @@ dir_size(char *dir)
 			char *file_size = strbfr(line, '\t');
 
 			if (file_size) {
-				retval = (off_t)atoi(file_size);
+				retval = (off_t)atoll(file_size);
 				free(file_size);
 			}
 
@@ -18118,16 +18126,18 @@ sel_function (char **comm)
 	}
 
 	/* Get size of total sel files */
-	struct stat sel_attrib;
+	struct stat sattr;
 
 	for (i = 0; i < sel_n; i++) {
 
-		if (lstat(sel_elements[i], &sel_attrib) != -1) {
+		if (lstat(sel_elements[i], &sattr) != -1) {
 
-			if ((sel_attrib.st_mode & S_IFMT) == S_IFDIR)
-				total_sel_size += dir_size(sel_elements[i]);
-			else
-				total_sel_size += sel_attrib.st_size;
+/*			if ((sattr.st_mode & S_IFMT) == S_IFDIR) {
+				off_t dsize = dir_size(sel_elements[i]);
+				total_sel_size += dsize;
+			}
+			else */
+				total_sel_size += sattr.st_size;
 		}
 	}
 
@@ -18469,7 +18479,7 @@ deselect(char **comm)
 }
 
 static int
-search_glob(char **comm)
+search_glob(char **comm, int invert)
 /* List matching filenames in the specified directory */
 {
 	if (!comm || !comm[0])
@@ -18515,13 +18525,13 @@ search_glob(char **comm)
 		 * If file type is specified, matches will be checked against
 		 * this value */
 		switch (file_type) {
-		case 'd': file_type = S_IFDIR; break;
-		case 'r': file_type = S_IFREG; break;
-		case 'l': file_type = S_IFLNK; break;
-		case 's': file_type = S_IFSOCK; break;
-		case 'f': file_type = S_IFIFO; break;
-		case 'b': file_type = S_IFBLK; break;
-		case 'c': file_type = S_IFCHR; break;
+		case 'd': file_type = invert ? DT_DIR : S_IFDIR; break;
+		case 'r': file_type = invert ? DT_REG : S_IFREG; break;
+		case 'l': file_type = invert ? DT_LNK : S_IFLNK; break;
+		case 's': file_type = invert ? DT_SOCK : S_IFSOCK; break;
+		case 'f': file_type = invert ? DT_FIFO : S_IFIFO; break;
+		case 'b': file_type = invert ? DT_BLK : S_IFBLK; break;
+		case 'c': file_type = invert ? DT_CHR : S_IFCHR; break;
 
 		default:
 			fprintf(stderr, _("%s: '%c': Unrecognized filetype\n"),
@@ -18557,16 +18567,21 @@ search_glob(char **comm)
 
 	size_t i;
 
+	char *tmp = comm[0];
+
+	if (invert)
+		tmp++;
+
 	/* Search for globbing char */
 	int glob_char_found = 0;
-	for (i = 1; comm[0][i]; i++) {
-		if (comm[0][i] == '*' || comm[0][i] == '?'
-		|| comm[0][i] == '[' || comm[0][i] == '{'
+	for (i = 1; tmp[i]; i++) {
+		if (tmp[i] == '*' || tmp[i] == '?'
+		|| tmp[i] == '[' || tmp[i] == '{'
 		/* Consider regex chars as well: we don't want this "r$"
 		 * to become this "*r$*" */
-		|| comm[0][i] == '|' || comm[0][i] == '^'
-		|| comm[0][i] == '+' || comm[0][i] == '$'
-		|| comm[0][i] == '.') {
+		|| tmp[i] == '|' || tmp[i] == '^'
+		|| tmp[i] == '+' || tmp[i] == '$'
+		|| tmp[i] == '.') {
 			glob_char_found = 1;
 			break;
 		}
@@ -18574,20 +18589,27 @@ search_glob(char **comm)
 
 	/* If search string is just "STR" (no glob chars), change it
 	 * to "*STR*" */
+	size_t search_str_len = 0;
+
 	if (!glob_char_found) {
-		size_t search_str_len = strlen(comm[0]);
+		search_str_len = strlen(comm[0]);
 
 		comm[0] = (char *)xrealloc(comm[0], (search_str_len + 2) *
 								   sizeof(char));
 
-		*comm[0] = '*';
-		comm[0][search_str_len] = '*';
-		comm[0][search_str_len + 1] = 0x00;
-		search_str = comm[0];
+		tmp = comm[0];
+		if (invert) {
+			++tmp;
+			search_str_len = strlen(tmp);
+		}
+		tmp[0] = '*';
+		tmp[search_str_len] = '*';
+		tmp[search_str_len + 1] = 0x00;
+		search_str = tmp;
 	}
 
 	else
-		search_str = comm[0] + 1;
+		search_str = tmp + 1;
 
 	/* Get matches, if any */
 	glob_t globbed_files;
@@ -18609,81 +18631,169 @@ search_glob(char **comm)
 	}
 
 	/* We have matches */
-	int last_column = 0;
+	int last_column = 0, scandir_files;
 	size_t len = 0, flongest = 0, columns_n = 0, found = 0;
 
 	/* We need to store pointers to matching filenames in array of
 	 * pointers, just as the filename length (to construct the
 	 * columned output), and, if searching in CWD, its index (ELN)
 	 * in the dirlist array as well */
-	char **pfiles = (char **)xnmalloc(globbed_files.gl_pathc + 1,
-							   sizeof(char *));
+	char **pfiles = (char **)NULL;
+	int *eln = (int *)0;
+	size_t *files_len = (size_t *)0;
+	struct dirent **ent = (struct dirent **)NULL;
 
-	int *eln = (int *)xnmalloc(globbed_files.gl_pathc + 1,
-								 sizeof(int));
+	if (invert) {
+		if (!search_path) {
+			int k;
 
-	size_t *files_len = (size_t *)xnmalloc(globbed_files.gl_pathc
-										+ 1, sizeof(size_t));
+			pfiles = (char **)xnmalloc(files + 1, sizeof(char *));
+			eln = (int *)xnmalloc(files + 1, sizeof(int));
+			files_len = (size_t *)xnmalloc(files + 1, sizeof(size_t));
 
-	for (i = 0; globbed_files.gl_pathv[i]; i++) {
+			for (k = 0; file_info[k].name; k++) {
+				int l, f = 0;
 
-		if (strcmp(globbed_files.gl_pathv[i], ".") == 0
-		|| strcmp(globbed_files.gl_pathv[i], "..") == 0)
-			continue;
+				for (l = 0; globbed_files.gl_pathv[l]; l++) {
+					if (*globbed_files.gl_pathv[l] == *file_info[k].name
+					&& strcmp(globbed_files.gl_pathv[l], file_info[k].name)
+					== 0) {
+						f = 1;
+						break;
+					}
+				}
 
-		if (file_type) {
+				if (!f) {
 
-			/* Simply skip all files not matching file_type */
-			if (lstat(globbed_files.gl_pathv[i],
-					  &file_attrib) == -1)
-				continue;
+					if (file_type && file_info[k].type != file_type)
+						continue;
 
-			if ((file_attrib.st_mode & S_IFMT) != file_type)
-				continue;
+					eln[found] = (int)(k + 1);
+					files_len[found] = file_info[k].len
+									   + file_info[k].eln_n + 1;
+					if (files_len[found] > flongest)
+						flongest = files_len[found];
+
+					pfiles[found++] = file_info[k].name;
+				}
+			}
 		}
 
-		pfiles[found] = globbed_files.gl_pathv[i];
-
-		/* Get the longest filename in the list */
-
-		/* If not searching in CWD, we only need to know the file's
-		 * length (no ELN) */
-		if (search_path) {
-			len = unicode ? wc_xstrlen(pfiles[found])
-				  : strlen(pfiles[found]);
-
-			/* This will be passed to colors_list(): -1 means no ELN */
-			eln[found] = -1;
-
-			files_len[found++] = len;
-
-			if (len > flongest)
-				flongest = len;
-		}
-
-		/* If searching in CWD, take into account the file's ELN
-		 * when calculating its legnth */
 		else {
-			size_t j;
+			scandir_files = scandir(search_path, &ent, skip_files,
+									xalphasort);
 
-			for (j = 0; file_info[j].name; j++) {
+			if (scandir_files != -1) {
 
-				if (strcmp(pfiles[found], file_info[j].name) != 0)
+				pfiles = (char **)xnmalloc(scandir_files + 1,
+										   sizeof(char *));
+				eln = (int *)xnmalloc(scandir_files + 1,
+											 sizeof(int));
+				files_len = (size_t *)xnmalloc(scandir_files + 1,
+											   sizeof(size_t));
+
+				int k, l;
+
+				for (k = 0; k < scandir_files; k++) {
+					int f = 0;
+
+					for (l = 0; globbed_files.gl_pathv[l]; l++) {
+						if (*ent[k]->d_name == *globbed_files.gl_pathv[l]
+						&& strcmp(ent[k]->d_name,
+						globbed_files.gl_pathv[l]) == 0) {
+							f = 1;
+							break;
+						}
+					}
+
+					if (!f) {
+
+						if (file_type && ent[k]->d_type != file_type)
+							continue;
+
+						eln[found] = -1;
+						files_len[found] = unicode
+								? wc_xstrlen(ent[k]->d_name)
+								: strlen(ent[k]->d_name);
+
+						if (files_len[found] > flongest)
+							flongest = files_len[found];
+
+						pfiles[found++] = ent[k]->d_name;
+					}
+				}
+			}
+		}
+	}
+
+	else { /* No invert search */
+
+		pfiles = (char **)xnmalloc(globbed_files.gl_pathc + 1,
+								   sizeof(char *));
+		eln = (int *)xnmalloc(globbed_files.gl_pathc + 1, sizeof(int));
+		files_len = (size_t *)xnmalloc(globbed_files.gl_pathc
+											+ 1, sizeof(size_t));
+
+		for (i = 0; globbed_files.gl_pathv[i]; i++) {
+
+			if (*globbed_files.gl_pathv[i] == '.'
+			&& (!globbed_files.gl_pathv[i][1]
+			|| (globbed_files.gl_pathv[i][1] == '.'
+			&& !globbed_files.gl_pathv[i][2])))
+				continue;
+
+			if (file_type) {
+
+				/* Simply skip all files not matching file_type */
+				if (lstat(globbed_files.gl_pathv[i],
+						  &file_attrib) == -1)
 					continue;
 
-				eln[found] = (int)(j + 1);
+				if ((file_attrib.st_mode & S_IFMT) != file_type)
+					continue;
+			}
 
-				len = (unicode ? wc_xstrlen(pfiles[found])
-					  : strlen(pfiles[found])) +
-					  (size_t)digits_in_num(eln[found]) + 1;
+			pfiles[found] = globbed_files.gl_pathv[i];
 
-				files_len[found] = len;
+			/* Get the longest filename in the list */
+
+			/* If not searching in CWD, we only need to know the file's
+			 * length (no ELN) */
+			if (search_path) {
+				len = unicode ? wc_xstrlen(pfiles[found])
+					  : strlen(pfiles[found]);
+
+				/* This will be passed to colors_list(): -1 means no ELN */
+				eln[found] = -1;
+
+				files_len[found++] = len;
 
 				if (len > flongest)
 					flongest = len;
 			}
 
-			found ++;
+			/* If searching in CWD, take into account the file's ELN
+			 * when calculating its legnth */
+			else {
+				size_t j;
+
+				for (j = 0; file_info[j].name; j++) {
+
+					if (*pfiles[found] != *file_info[j].name
+					|| strcmp(pfiles[found], file_info[j].name) != 0)
+						continue;
+
+					eln[found] = (int)(j + 1);
+
+					files_len[found] = file_info[j].len
+									   + file_info[j].eln_n + 1;
+
+					if (len > flongest)
+						flongest = files_len[found];
+				}
+
+				found ++;
+			}
 		}
 	}
 
@@ -18724,6 +18834,12 @@ search_glob(char **comm)
 		printf(_("%s: No matches found\n"), PROGRAM_NAME); */
 
 	/* Free stuff */
+	if (invert && search_path) {
+		for (i = 0; i < (size_t)scandir_files; i++)
+			free(ent[i]);
+		free(ent);
+	}
+
 	free(eln);
 	free(files_len);
 	free(pfiles);
@@ -18745,7 +18861,7 @@ search_glob(char **comm)
 }
 
 static int
-search_regex(char **comm)
+search_regex(char **comm, int invert)
 /* List matching filenames in the specified directory */
 {
 	if (!comm || !comm[0])
@@ -18753,7 +18869,6 @@ search_regex(char **comm)
 
 	char *search_str = (char *)NULL, *search_path = (char *)NULL;
 	mode_t file_type = 0;
-	struct stat file_attrib;
 
 	/* If there are two arguments, the one starting with '-' is the
 	 * filetype and the other is the path */
@@ -18786,17 +18901,16 @@ search_regex(char **comm)
 
 	if (file_type) {
 
-		/* Convert filetype into a macro that can be decoded by stat().
-		 * If file type is specified, matches will be checked against
+		/* If file type is specified, matches will be checked against
 		 * this value */
 		switch (file_type) {
-		case 'd': file_type = S_IFDIR; break;
-		case 'r': file_type = S_IFREG; break;
-		case 'l': file_type = S_IFLNK; break;
-		case 's': file_type = S_IFSOCK; break;
-		case 'f': file_type = S_IFIFO; break;
-		case 'b': file_type = S_IFBLK; break;
-		case 'c': file_type = S_IFCHR; break;
+		case 'd': file_type = DT_DIR; break;
+		case 'r': file_type = DT_REG; break;
+		case 'l': file_type = DT_LNK; break;
+		case 's': file_type = DT_SOCK; break;
+		case 'f': file_type = DT_FIFO; break;
+		case 'b': file_type = DT_BLK; break;
+		case 'c': file_type = DT_CHR; break;
 
 		default:
 			fprintf(stderr, _("%s: '%c': Unrecognized filetype\n"),
@@ -18870,7 +18984,8 @@ search_regex(char **comm)
 		char *tmp_str = (char *)xnmalloc(search_str_len + 1,
 										 sizeof(char));
 
-		strcpy(tmp_str, comm[0] + 1);
+		strcpy(tmp_str, comm[0] + (invert ? 2 : 1));
+
 		*comm[0] = '.';
 		*(comm[0] + 1) = '*';
 		*(comm[0] + 2) = 0x00;
@@ -18883,8 +18998,7 @@ search_regex(char **comm)
 	}
 
 	else
-		/* If search string is "/STR", comm[0] + 1 returns "STR" */
-		search_str = comm[0] + 1;
+		search_str = comm[0] + (invert ? 2 : 1);
 
 	/* Get matches, if any, using regular expressions */
 	regex_t regex_files;
@@ -18917,8 +19031,11 @@ search_regex(char **comm)
 	for (i = 0; i < (search_path ? (size_t)tmp_files : files); i++) {
 		if (regexec(&regex_files, (search_path ? reg_dirlist[i]->d_name
 		: file_info[i].name), 0, NULL, 0) == EXIT_SUCCESS) {
-			regex_index[found++] = i;
+			if (!invert)
+				regex_index[found++] = i;
 		}
+		else if (invert)
+			regex_index[found++] = i;	
 	}
 
 	regfree(&regex_files);
@@ -18958,18 +19075,11 @@ search_regex(char **comm)
 			match_type[i] = 0;
 
 			if (search_path) {
-				if (lstat(reg_dirlist[regex_index[i]]->d_name,
-						  &file_attrib) == -1)
+				if (reg_dirlist[regex_index[i]]->d_type != file_type)
 					continue;
 			}
 
-			else {
-				if (lstat(file_info[regex_index[i]].name,
-				&file_attrib) == -1)
-					continue;
-			}
-
-			if ((file_attrib.st_mode & S_IFMT) != file_type)
+			else if (file_info[regex_index[i]].type != file_type)
 				continue;
 		}
 
@@ -23147,8 +23257,9 @@ exec_cmd(char **comm)
 	else if (*comm[0] == '/' && access(comm[0], F_OK) != 0) {
 								/* If not absolute path */
 		/* Try first globbing, and if no result, try regex */
-		if (search_glob(comm) == EXIT_FAILURE)
-			exit_code = search_regex(comm);
+		if (search_glob(comm, (comm[0][1] == '!') ? 1 : 0)
+		== EXIT_FAILURE)
+			exit_code = search_regex(comm, (comm[0][1] == '!') ? 1 : 0);
 		else
 			exit_code = EXIT_SUCCESS;
 	}
@@ -24225,10 +24336,12 @@ parse_input_str(char *str)
 
 {
 	register size_t i = 0;
+	int fusedcmd_ok = 0;
 
 /** ###################### */
 	char *p = split_fusedcmd(str);
 	if (p) {
+		fusedcmd_ok = 1;
 		str = p;
 		p = (char *)NULL;
 	}
@@ -24383,7 +24496,8 @@ parse_input_str(char *str)
 	char **substr = split_str(str);
 
 /** ###################### */
-	free(str);
+	if (fusedcmd_ok) /* Just in case split_fusedcmd returned NULL */
+		free(str);
 /** ###################### */
 
 	/* NOTE: isspace() not only checks for space, but also for new line,
