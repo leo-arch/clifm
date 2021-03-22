@@ -37,8 +37,8 @@ check_immutable_bit(char *file)
 
 int
 xgetchar(void)
-/* Unlike getchar(), gets key pressed immediately, without the need to wait
- * for new line (Enter)
+/* Unlike getchar(), gets key pressed immediately, without the need to
+ * wait for new line (Enter)
  * Taken from: 
  * https://stackoverflow.com/questions/12710582/how-can-i-capture-a-key-stroke-immediately-in-linux */
 {
@@ -57,9 +57,9 @@ xgetchar(void)
 
 int
 xstrcmp(const char *str1, const char *str2)
-/* Check for null. This check is done neither by strcmp nor by strncmp. I 
-* use 256 for error code since it does not represent any ASCII code (the 
-* extended version goes up to 255) */
+/* Check for null. This check is done neither by strcmp nor by strncmp.
+ * I use 256 for error code since it does not represent any ASCII code
+ * (the extended version goes up to 255) */
 {
 	if (!str1 || !str2)
 		return 256;
@@ -82,17 +82,17 @@ xstrncmp(const char *str1, const char *str2, size_t n)
 	if (!str1 || !str2)
 		return 256;
 
-	size_t counter = 0;
-	while (*str1 && counter < n) {
+	size_t c = 0;
+	while (*str1 && c++ < n) {
 		if (*str1 != *str2)
 			return (*str1 - *str2);
 		str1++;
 		str2++;
-		counter++;
 	}
 
-	if (counter == n)
+	if (c == n)
 		return 0;
+
 	if (*str2)
 		return (0 - *str2);
 
@@ -105,11 +105,8 @@ xstrcpy(char *buf, const char *str)
 	if (!str)
 		return (char *)NULL;
 
-	while (*str) {
-		*buf = *str;
-		buf++;
-		str++;
-	}
+	while (*str)
+		*(buf++) = *(str++);
 
 	*buf = 0x00;
 
@@ -124,13 +121,9 @@ xstrncpy(char *buf, const char *str, size_t n)
 	if (!str)
 		return (char *)NULL;
 
-	size_t counter = 0;
-	while (*str && counter < n) {
-		*buf = *str;
-		buf++;
-		str++;
-		counter++;
-	}
+	size_t c = 0;
+	while (*str && c++ < n)
+		*(buf++) = *(str++);
 
 	*buf = 0x00;
 
@@ -155,7 +148,8 @@ xstrlen(const char *str)
 /*
 int
 xatoi(const char *str)
-// 2 times faster than atoi. Cannot handle negative number (See xnatoi below)
+// 2 times faster than atoi. Cannot handle negative number (See xnatoi
+// below)
 {
 	int ret = 0; 
 	
@@ -177,8 +171,8 @@ xatoi(const char *str)
 
 int
 xnatoi(const char *str)
-// 2 times faster than atoi. The commented lines make xatoi able to handle 
-// negative values
+// 2 times faster than atoi. The commented lines make xatoi able to
+// handle negative values
 {
 	int ret = 0, neg = 0;
 
@@ -217,8 +211,8 @@ get_own_pid(void)
 
 char *
 get_user(void)
-/* Returns a pointer to a new string containing the current user's name, or
- * NULL if not found */
+/* Returns a pointer to a new string containing the current user's
+ * name, or NULL if not found */
 {
 	struct passwd *pw;
 	uid_t uid = 0;
@@ -232,12 +226,13 @@ get_user(void)
 	if (!pw)
 		return (char *)NULL;
 
-	/* Why we don't just return a pointer to the field of the passwd struct
-	 * we need? Because this struct will be overwritten by subsequent calls to
-	 * getpwuid(), for example, in the properties function, in which case
-	 * our pointer will point to a wrong string. So, to avoid this, we just
-	 * copy the string we need into a new variable. The same applies to the
-	 * following functions, get_user_home() and get_sys_shell() */
+	/* Why we don't just return a pointer to the field of the passwd
+	 * struct we need? Because this struct will be overwritten by
+	 * subsequent calls to getpwuid(), for example, in the properties
+	 * function, in which case our pointer will point to a wrong string.
+	 * So, to avoid this, we just copy the string we need into a new
+	 * variable. The same applies to the following functions,
+	 * get_user_home() and get_sys_shell() */
 	char *p = (char *)NULL;
 	p = (char *)malloc((strlen(pw->pw_name) + 1) * sizeof(char));
 
@@ -254,8 +249,8 @@ get_user(void)
 
 char *
 get_user_home(void)
-/* Returns a pointer to a string containing the user's home directory, or NULL
- * if not found */
+/* Returns a pointer to a string containing the user's home directory,
+ * or NULL if not found */
 {
 	struct passwd *pw;
 	
@@ -280,8 +275,8 @@ get_user_home(void)
 
 char *
 get_sys_shell(void)
-/* Returns a pointer to a string containing the user's default shell or NULL 
- * if not found */
+/* Returns a pointer to a string containing the user's default shell
+ * or NULL if not found */
 {
 	struct passwd *pw;
 
@@ -306,9 +301,9 @@ get_sys_shell(void)
 
 int
 strcntchr(const char *str, const char c)
-/* Returns the index of the first appearance of c in str, if any, and -1 if c 
- * was not found or if no str. NOTE: Same thing as strchr(), except that 
- * returns an index, not a pointer */
+/* Returns the index of the first appearance of c in str, if any, and
+ * -1 if c was not found or if no str. NOTE: Same thing as strchr(),
+ * except that returns an index, not a pointer */
 {
 	if (!str)
 		return -1;
@@ -327,8 +322,8 @@ strcntchr(const char *str, const char c)
 
 char *
 straft(char *str, const char c)
-/* Returns the string after the first appearance of a given char, or returns 
- * NULL if C is not found in STR or C is the last char in STR. */
+/* Returns the string after the first appearance of a given char, or
+ * returns NULL if C is not found in STR or C is the last char in STR. */
 {
 	if (!str || !*str || !c)
 		return (char *)NULL;
@@ -359,8 +354,8 @@ straft(char *str, const char c)
 
 char *
 straftlst(char *str, const char c)
-/* Returns the string after the last appearance of a given char, or NULL if no 
- * match */
+/* Returns the string after the last appearance of a given char, or
+ * NULL if no match */
 {
 	if (!str || !*str || !c)
 		return (char *)NULL;
@@ -388,8 +383,8 @@ straftlst(char *str, const char c)
 
 char *
 strbfr(char *str, const char c)
-/* Returns the substring in str before the first appearance of c. If not 
- * found, or C is the first char in STR, returns NULL */
+/* Returns the substring in str before the first appearance of c. If
+ * not found, or C is the first char in STR, returns NULL */
 {
 	if (!str || !*str || !c)
 		return (char *)NULL;
@@ -397,7 +392,7 @@ strbfr(char *str, const char c)
 	char *p = str, *q = (char *)NULL;
 	while (*p) {
 		if (*p == c) {
-			q = p; /* q is now a pointer to C */
+			q = p; /* q is now a pointer to C in STR */
 			break;
 		}
 		p++;
@@ -408,14 +403,14 @@ strbfr(char *str, const char c)
 		return (char *)NULL;
 
 	*q = 0x00; 
-	/* Now C (because q points to C) is the null byte and STR ends in C, which 
-	 * is what we want */
+	/* Now C (because q points to C) is the null byte and STR ends in
+	 * C, which is what we want */
 
 	char *buf = (char *)malloc((size_t)(q - str + 1));
 
 	if (!buf) { /* Memory allocation error */
-		/* Give back to C its original value, so that STR is not modified in 
-		 * the process */
+		/* Give back to C its original value, so that STR is not
+		 * modified in the process */
 		*q = c;
 		return (char *)NULL;
 	}
@@ -429,8 +424,9 @@ strbfr(char *str, const char c)
 
 char *
 strbfrlst(char *str, const char c)
-/* Get substring in STR before the last appearance of C. Returns substring 
- * if C is found and NULL if not (or if C was the first char in STR). */
+/* Get substring in STR before the last appearance of C. Returns
+ * substring  if C is found and NULL if not (or if C was the first
+ * char in STR). */
 {
 	if (!str || !*str || !c)
 		return (char *)NULL;
@@ -464,9 +460,9 @@ strbfrlst(char *str, const char c)
 
 char *
 strbtw(char *str, const char a, const char b)
-/* Returns the string between first ocurrence of A and the first ocurrence of B 
- * in STR, or NULL if: there is nothing between A and B, or A and/or B are not 
- * found */
+/* Returns the string between first ocurrence of A and the first
+ * ocurrence of B in STR, or NULL if: there is nothing between A and
+ * B, or A and/or B are not found */
 {
 	if (!str || !*str || !a || !b)
 		return (char *)NULL;
@@ -506,8 +502,8 @@ strbtw(char *str, const char a, const char b)
 
 /* The following four functions (from_hex, to_hex, url_encode, and
  * url_decode) were taken from "http://www.geekhideout.com/urlcode.shtml"
- * and modified to comform to RFC 2395, as recommended by the freedesktop
- * trash specification */
+ * and modified to comform to RFC 2395, as recommended by the
+ * freedesktop trash specification */
 static char
 from_hex(char c)
 /* Converts a hex char to its integer value */
@@ -532,9 +528,9 @@ url_encode(char *str)
 
 	char *p;
 	p = (char *)calloc((strlen(str) * 3) + 1, sizeof(char));
-	/* The max lenght of our buffer is 3 times the length of STR plus 1 extra 
-	 * byte for the null byte terminator: each char in STR will be, if encoded, 
-	 * %XX (3 chars) */
+	/* The max lenght of our buffer is 3 times the length of STR plus
+	 * 1 extra byte for the null byte terminator: each char in STR will
+	 * be, if encoded, %XX (3 chars) */
 	if (!p)
 		return (char *)NULL;
 
@@ -543,8 +539,8 @@ url_encode(char *str)
 	p = (char *)NULL;
 
 	/* Copies of STR and BUF pointers to be able
-	* to increase and/or decrease them without loosing the original memory 
-	* location */
+	* to increase and/or decrease them without loosing the original
+	* memory location */
 	char *pstr, *pbuf; 
 	pstr = str;
 	pbuf = buf;
@@ -574,7 +570,8 @@ url_decode(char *str)
 
 	char *p = (char *)NULL;
 	p = (char *)calloc(strlen(str) + 1, sizeof(char));
-	/* The decoded string will be at most as long as the encoded string */
+	/* The decoded string will be at most as long as the encoded
+	 * string */
 
 	if (!p)
 		return (char *)NULL;
@@ -709,8 +706,9 @@ hex2int(char *str)
 
 char *
 remove_quotes(char *str)
-/* Removes end of line char and quotes (single and double) from STR. Returns a
- * pointer to the modified STR if the result is non-blank or NULL */
+/* Removes end of line char and quotes (single and double) from STR.
+ * Returns a pointer to the modified STR if the result is non-blank
+ * or NULL */
 {
 	if (!str || !*str)
 		return (char *)NULL;
@@ -773,8 +771,8 @@ is_acl(char *file)
 		acl_free(acl);
 
 		if (num > 3)
-			/* We have something else besides owner, group, and others, that is,
-			 * we have at least one ACL property */
+			/* We have something else besides owner, group, and others,
+			 * that is, we have at least one ACL property */
 			return 1;
 		else
 			return 0;
