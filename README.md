@@ -36,6 +36,8 @@ CliFM is a completely command-line-based, shell-like file manager able to perfor
  
 `s 1 2 3 6` (or `s 1-3 6`) and then `paste sel /media/data/misc`
 
+The selection function supports wildcards, regular expressions, inverse matching, filetype filter and path specification. For example, to list all regular files in the /etc directory, except those ending with .conf, issue this command: `s !*.conf -r :/etc`, or, using a regular expression: `s !.*\.conf$ -r :/etc`.
+
 You can also use the 'sel' keyword with external commands. Example: `s 1-4 7 10 && file sel`.
 
 Of course, you can deselect some or all selected files whenever you want with the `desel` or `ds` command: `ds *`, or just press `Alt-d`.
@@ -47,7 +49,7 @@ Of course, you can deselect some or all selected files whenever you want with th
 * **Quick search**: type `/REGEX` and CliFM will list all matches for the corresponding REGEX pattern. Example: `/.*\.png$`
  will list all the PNG files in the current directory. If you want to 
 search for files in another directory, just tell the search function 
-where to search: `/.*\.png$ /media/images`. And, if you want to further filter the search, you still can specify what kind of files you want. For example: `/[.-].*d$ -d /etc` will list all directories (-d) in /etc containing a dot or a slash and ending with 'd'. The quick search function also supports invert search: prepend the exclamation mark (!) to negate a given search pattern. For example: "!.*s$ -d /etc" will match all directories in /etc NOT ending with 'd', just as "!D*" will match all files in the current directory not starting with 'D'.
+where to search: `/.*\.png$ /media/images`. And, if you want to further filter the search, you still can specify what kind of files you want. For example: `/[.-].*d$ -d /etc` will list all directories (-d) in /etc containing a dot or a slash and ending with 'd'. The quick search function also supports invert search: prepend the exclamation mark (!) to negate or reverse a given search pattern. For example: `!.*s$ -d /etc` will match all directories in /etc NOT ending with 'd', just as `!D*` will match all files in the current directory not starting with 'D'.
 
 ![quick search](images/quick_search.png)
 
@@ -88,6 +90,7 @@ Because file manager, but also half-shell, CLiFM also provides the following fea
 * Bash-like quoting system
 * History function
 * Shell commands execution
+* Glob and regular expressions, including inverse matching
 * Aliases
 * Logs
 * Prompt and profile commands
