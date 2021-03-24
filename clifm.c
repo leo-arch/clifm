@@ -220,6 +220,7 @@ static int flags;
 #define cyan "\x1b[1;36m"
 #define d_cyan "\x1b[0;36m"
 #define bold "\x1b[1m"
+#define NB "\x1b[49m"
 
 #define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
 
@@ -228,7 +229,6 @@ static int flags;
  * non-printing chars. This is specially useful for the prompt, i.e.,
  * when passing color codes to readline */
 #define NC_b "\001\x1b[0m\002"
-#define NB "\x1b[49m"
 #define NB_b "\001\x1b[49m\002"
 
 /* Default colors */
@@ -237,9 +237,9 @@ pi=00;35:so=01;35:bd=01;33:cd=01;37:su=37;41:sg=30;43:st=37;44:\
 tw=30;42:ow=34;42:ex=01;32:no=31;47"
 
 #define DEF_FILE_COLORS "di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;37:\
-ef=00;33:nf=00;31:ln=01;36:mh=30;46:or=00;36:pi=33;40:\
+ef=00;33:nf=00;31:ln=01;36:mh=30;46:or=00;36:pi=00;35:\
 so=01;35:bd=01;33:cd=01;37:su=37;41:sg=30;43:ca=30;41:tw=30;42:\
-ow=34;42:st=37;44:ex=01;32:ee=00;32:no=00;31;47:uf=31;40:"
+ow=34;42:st=37;44:ex=01;32:ee=00;32:no=00;31;47:uf=34;47:"
 
 #define DEF_IFACE_COLORS "el=01;33:mi=01;36:dl=01;34:tx=00;37:df=00;37:\
 dc=00;37:wc=01;36:dh=00;36:li=01;32:si=01;34:ti=01;33:em=01;31:wm=01;33:\
@@ -291,7 +291,7 @@ nm=01;32:bm=01;36:"
 #define DEF_EE_C "\x1b[00;32m"
 #define DEF_CA_C "\x1b[30;41m"
 #define DEF_NO_C "\x1b[31;47m"
-#define DEF_UF_C "\x1b[31;40m"
+#define DEF_UF_C "\x1b[34;47m"
 #define DEF_MH_C "\x1b[30;46m"
 #define DEF_BM_C "\x1b[01;36m"
 
@@ -6929,7 +6929,9 @@ print_tips(int all)
 		"Switch workspaces pressing Alt-[1-4]",
 		"Use the 'ws' command to list available workspaces",
 		"Take a look at available plugins using the 'actions' command",
-		"Space not needed: enter 'p12' instead of 'p 12'",
+		"Space is not needed: enter 'p12' instead of 'p 12'",
+		"When searching or selecting files, use the exclamation mark "
+		"to reverse the meaning of a pattern",
 		NULL
 	};
 
@@ -21212,8 +21214,8 @@ static void
 color_codes (void)
 /* List color codes for file types used by the program */
 {
-	if (light_mode) {
-		printf(_("%s: Currently running in light mode: no colors\n"),
+	if (!colorize) {
+		printf(_("%s: Currently running without colors\n"),
 			   PROGRAM_NAME);
 		return;
 	}
@@ -21261,12 +21263,12 @@ color_codes (void)
 			 "or symbolic links to directories indicates the amount of "
 			 "files contained by the corresponding directory, excluding "
 			 "self (.) and parent (..) directories.\n"));
-	printf(_("\nThe value in parentheses is the code that must be used "
-			 "modify the color of the corresponding filetype in the "
-			 "configuration file (in the \"FiletypeColors\" line), "
+	printf(_("\nThe value in parentheses is the code that is to be used "
+			 "to modify the color of the corresponding filetype in the "
+			 "color scheme file (in the \"FiletypeColors\" line), "
 			 "using the same ANSI style color format used by dircolors. "
-			 "By default, %s uses only 8 colors, but you can use 256 and "
-			 "RGB colors as well.\n\n"), PROGRAM_NAME);
+			 "By default, %s uses only 8 colors, but you can use 256 "
+			 "and RGB colors as well.\n\n"), PROGRAM_NAME);
 
 	if (ext_colors_n) {
 		size_t i, j;
