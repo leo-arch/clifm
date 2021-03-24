@@ -17772,13 +17772,22 @@ select_file(char *file)
 }
 
 static int
-sel_regex(char *str, const char *dest_path, mode_t filetype)
+sel_regex(char *str, const char *sel_path, mode_t filetype)
 {
 	if (!str || !*str)
 		return -1;
 
+	char *pattern = str;
+
+	int invert = 0;
+	if (*pattern == '!') {
+		pattern++;
+		invert = 1;
+	}
+
 	regex_t regex;
-	if (regcomp(&regex, str, REG_NOSUB|REG_EXTENDED) != EXIT_SUCCESS) {
+	if (regcomp(&regex, pattern, REG_NOSUB|REG_EXTENDED)
+	!= EXIT_SUCCESS) {
 		fprintf(stderr, _("%s: sel: '%s': Invalid regular "
 			    "expression\n"), PROGRAM_NAME, str);
 
@@ -17790,68 +17799,76 @@ sel_regex(char *str, const char *dest_path, mode_t filetype)
 
 	size_t i;
 
-	if (!dest_path) { /* Check pattern (STR) against files in CWD */
+	if (!sel_path) { /* Check pattern (STR) against files in CWD */
 		for (i = 0; i < files; i++) {
+
+			if (filetype && file_info[i].type != filetype)
+				continue;
+
+			char tmp_path[PATH_MAX];
+			sprintf(tmp_path, "%s/%s", ws[cur_ws].path,
+					file_info[i].name);
+
 			if (regexec(&regex, file_info[i].name, 0, NULL, 0)
 			== EXIT_SUCCESS) {
-
-				if (filetype) {
-					struct stat file_attrib;
-					if (lstat(file_info[i].name, &file_attrib) != -1)
-						if ((file_attrib.st_mode & S_IFMT) != filetype)
-							continue;
-				}
-
-				char tmp_path[PATH_MAX] = "";
-				sprintf(tmp_path, "%s/%s", ws[cur_ws].path,
-						file_info[i].name);
-				new_sel += select_file(tmp_path);
+				if (!invert)
+					new_sel += select_file(tmp_path);
 			}
+			else if (invert)
+				new_sel += select_file(tmp_path);
 		}
 	}
 
-	else { /* Check pattern against files in DEST_FILE */
+	else { /* Check pattern against files in SEL_PATH */
 
 		struct dirent **list = (struct dirent **)NULL;
-		int filesn = scandir(dest_path, &list, skip_files,
+		int filesn = scandir(sel_path, &list, skip_files,
 							 xalphasort);
 
 		if (filesn == -1) {
-			fprintf(stderr, "sel: %s: %s\n", dest_path,
+			fprintf(stderr, "sel: %s: %s\n", sel_path,
 					strerror(errno));
 			return -1;
 		}
 
-		for (i = 0; i < (size_t)filesn; i++) {
-			if (regexec(&regex, list[i]->d_name, 0, NULL, 0)
-			== EXIT_SUCCESS) {
+		mode_t t = 0;
+		if (filetype) {
 
-				if (filetype) {
-					struct stat file_attrib;
-					if (lstat(list[i]->d_name, &file_attrib) != -1) {
-						if ((file_attrib.st_mode & S_IFMT) != filetype) {
-							free(list[i]);
-							continue;
-						}
+			switch(filetype) {
+			case DT_DIR: t = S_IFDIR; break;
+			case DT_REG: t = S_IFREG; break;
+			case DT_LNK: t = S_IFLNK; break;
+			case DT_SOCK: t = S_IFSOCK; break;
+			case DT_FIFO: t = S_IFIFO; break;
+			case DT_BLK: t = S_IFBLK; break;
+			case DT_CHR: t = S_IFCHR; break;
+			}
+		}
+
+		for (i = 0; i < (size_t)filesn; i++) {
+
+			if (filetype) {
+				struct stat attr;
+
+				if (lstat(list[i]->d_name, &attr) != -1) {
+					if ((attr.st_mode & S_IFMT) != t) {
+						free(list[i]);
+						continue;
 					}
 				}
-
-				char tmp_path[PATH_MAX] = "";
-
-				/* Absolute path */
-				if (*dest_path == '/') {
-					sprintf(tmp_path, "%s/%s", dest_path,
-							list[i]->d_name);
-				}
-
-				/* Relative path */
-				else {
-					sprintf(tmp_path, "%s/%s/%s", ws[cur_ws].path, dest_path,
-							list[i]->d_name);
-				}
-
-				new_sel += select_file(tmp_path);
 			}
+
+			char tmp_path[PATH_MAX];
+			sprintf(tmp_path, "%s/%s", sel_path, list[i]->d_name);
+
+			if (regexec(&regex, list[i]->d_name, 0, NULL, 0)
+			== EXIT_SUCCESS) {
+				if (!invert)
+					new_sel += select_file(tmp_path);
+			}
+
+			else if (invert)
+				new_sel += select_file(tmp_path);
 
 			free(list[i]);
 		}
@@ -17939,193 +17956,354 @@ dir_size(char *dir)
 }
 
 static int
-sel_function (char **comm)
+sel_glob(char *str, const char *sel_path, mode_t filetype)
 {
-	if (!comm)
-		return EXIT_FAILURE;
+	if (!str || !*str)
+		return -1;
 
-	char *sel_tmp = (char *)NULL;
-	int new_sel = 0, exit_status = EXIT_SUCCESS, file_type_index = -1;
-	size_t i = 0, j = 0;
-	mode_t file_type = 0;
+	glob_t gbuf;
+	char *pattern = str;
+	int invert = 0, ret = -1;
 
-	for (i = 0; comm[i]; i++) {
-		if (*comm[i] == '-' && *(comm[i] + 1)) {
-			file_type = (mode_t)*(comm[i] + 1);
-			file_type_index = i;
-			break;
+	if (*pattern == '!') {
+		pattern++;
+		invert = 1;
+	}
+
+	ret = glob(pattern, 0, NULL, &gbuf);
+
+	if (ret == GLOB_NOSPACE || ret == GLOB_ABORTED) {
+		globfree(&gbuf);
+		return -1;
+	}
+
+	if (ret == GLOB_NOMATCH) {
+		globfree(&gbuf);
+		return 0;
+	}
+
+	char **matches = (char **)NULL;
+	size_t i, j = 0, k = 0;
+	struct dirent **ent = (struct dirent **)NULL;
+
+	if (invert) {
+		if (!sel_path) {
+			matches = (char **)xnmalloc(files + 2, sizeof(char *));
+
+			for (i = 0; i < files; i++) {
+
+				if (filetype && file_info[i].type != filetype)
+					continue;
+
+				int found = 0;
+				for (j = 0; j < gbuf.gl_pathc; j++) {
+					if (*file_info[i].name == *gbuf.gl_pathv[j]
+					&& strcmp(file_info[i].name, gbuf.gl_pathv[j]) == 0) {
+						found = 1;
+						break;
+					}
+				}
+
+				if (!found)
+					matches[k++] = file_info[i].name;
+			}
+		}
+
+		else {
+			ret = scandir(sel_path, &ent, skip_files, xalphasort);
+
+			if (ret == -1) {
+				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+						sel_path, strerror(errno));
+				globfree(&gbuf);
+				return -1;
+			}
+
+			matches = (char **)xnmalloc(ret + 2, sizeof(char *));
+
+			for (i = 0; i < (size_t)ret; i++) {
+				if (filetype && ent[i]->d_type != filetype)
+					continue;
+
+				for (j = 0; j < gbuf.gl_pathc; j++) {
+					if (*ent[i]->d_name == *gbuf.gl_pathv[j]
+					&& strcmp(ent[i]->d_name, gbuf.gl_pathv[j]) == 0)
+						break;
+				}
+
+				if (!gbuf.gl_pathv[j])
+					matches[k++] = ent[i]->d_name;
+			}
 		}
 	}
 
-	if (file_type) {
+	else {
+		matches = (char **)xnmalloc(gbuf.gl_pathc + 2,
+									sizeof(char *));
+		mode_t t;
+		if (filetype) {
+
+			switch(filetype) {
+			case DT_DIR: t = S_IFDIR; break;
+			case DT_REG: t = S_IFREG; break;
+			case DT_LNK: t = S_IFLNK; break;
+			case DT_SOCK: t = S_IFSOCK; break;
+			case DT_FIFO: t = S_IFIFO; break;
+			case DT_BLK: t = S_IFBLK; break;
+			case DT_CHR: t = S_IFCHR; break;
+			}
+		}
+
+		for (i = 0; i < gbuf.gl_pathc; i++) {
+
+			/* We need to run stat(3) here, so that the d_type macros
+			 * won't work: convert them into st_mode macros */
+			if (filetype) {
+				struct stat attr;
+				if (lstat(gbuf.gl_pathv[i], &attr) == -1)
+					continue;
+
+				if ((attr.st_mode & S_IFMT) != t)
+					continue;
+			}
+
+			if (*gbuf.gl_pathv[i] == '.' && (!gbuf.gl_pathv[i][1]
+			|| (gbuf.gl_pathv[i][1] == '.' && !gbuf.gl_pathv[i][2])))
+				continue;
+
+			matches[k++] = gbuf.gl_pathv[i];
+		}
+	}
+
+	matches[k] = (char *)NULL;
+	int new_sel = 0;
+
+	for (i = 0; i < k; i++) {
+
+		if (!matches[i])
+			continue;
+		
+		char tmp[PATH_MAX];
+		if (!sel_path) {
+
+			if (*matches[i] == '/')
+				new_sel += select_file(matches[i]);
+
+			else {
+				snprintf(tmp, PATH_MAX, "%s/%s", ws[cur_ws].path,
+						 matches[i]);
+				new_sel += select_file(tmp);
+			}
+		}
+
+		else {
+			snprintf(tmp, PATH_MAX, "%s/%s", sel_path, matches[i]);
+			new_sel += select_file(tmp);
+		}
+	}
+
+	free(matches);
+	globfree(&gbuf);
+
+	if (invert && sel_path) {
+		for (i = 0; i < (size_t)ret; i++)
+			free(ent[i]);
+		free(ent);
+	}
+
+	return new_sel;
+}
+
+static int
+sel_function(char **args)
+{
+	if (!args)
+		return EXIT_FAILURE;
+
+	if (!args[1] || (*args[1] == '-' && args[1][1] == '-'
+	&& strcmp(args[1], "--help") == 0)) {
+		puts(_("Usage: s, sel ELN/FILE... [[!]PATTERN] [-FILETYPE] "
+			   "[:PATH]"));
+		return EXIT_SUCCESS;
+	}
+
+	char *sel_path = (char *)NULL;
+	mode_t filetype = 0;
+	size_t i, ifiletype = 0, isel_path = 0, new_sel = 0;
+	
+	for (i = 1; args[i]; i++) {
+
+		if (*args[i] == '-') {
+			ifiletype = i;
+			filetype = *(args[i] + 1);
+		}
+
+		if (*args[i] == ':') {
+			isel_path = i;
+			sel_path = args[i] + 1;
+		}
+	}
+
+	if (filetype) {
 		/* Convert filetype into a macro that can be decoded by stat().
 		 * If file type is specified, matches will be checked against
 		 * this value */
-		switch (file_type) {
-		case 'd': file_type = S_IFDIR; break;
-		case 'r': file_type = S_IFREG; break;
-		case 'l': file_type = S_IFLNK; break;
-		case 's': file_type = S_IFSOCK; break;
-		case 'f': file_type = S_IFIFO; break;
-		case 'b': file_type = S_IFBLK; break;
-		case 'c': file_type = S_IFCHR; break;
+		switch (filetype) {
+		case 'd': filetype = DT_DIR; break;
+		case 'r': filetype = DT_REG; break;
+		case 'l': filetype = DT_LNK; break;
+		case 's': filetype = DT_SOCK; break;
+		case 'f': filetype = DT_FIFO; break;
+		case 'b': filetype = DT_BLK; break;
+		case 'c': filetype = DT_CHR; break;
 
 		default:
 			fprintf(stderr, _("%s: '%c': Unrecognized filetype\n"),
-					PROGRAM_NAME, (char)file_type);
+					PROGRAM_NAME, (char)filetype);
 			return EXIT_FAILURE;
 		}
 	}
 
-	for (i = 1; comm[i]; i++) {
-		/* Exclude self and parent directories (. and ..) */
-		if ((int)i == file_type_index || (*comm[i] == '.' && (!comm[i][1]
-		|| (comm[i][1] == '.' && !comm[i][2]))))
+	char dir[PATH_MAX];
+
+	if (sel_path) {
+		char *tmp_dir = xnmalloc(PATH_MAX + 1, sizeof(char));
+
+		if (strchr(sel_path, '\\')) {
+			char *deq_str = dequote_str(sel_path, 0);
+			if (deq_str) {
+				strcpy(sel_path, deq_str);
+				free(deq_str);
+			}
+		}
+
+		strcpy(tmp_dir, sel_path);
+
+		if (*sel_path == '.')
+			realpath(sel_path, tmp_dir);
+
+		if (*sel_path == '~') {
+			char *exp_path = tilde_expand(sel_path);
+			if (!exp_path) {
+				fprintf(stderr, _("%s: Error expanding path\n"),
+						PROGRAM_NAME);
+				free(tmp_dir);
+				return EXIT_FAILURE;
+			}
+			strcpy(tmp_dir, exp_path);
+			free(exp_path);
+		}
+
+		if (*tmp_dir != '/') {
+			snprintf(dir, PATH_MAX, "%s/%s", ws[cur_ws].path,
+					 tmp_dir);
+		}
+		else
+			strcpy(dir, tmp_dir);
+
+		free(tmp_dir);
+
+		if (access(dir, X_OK) == -1) {
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir,
+					strerror(errno));
+			return EXIT_FAILURE;
+		}
+
+		if (chdir(dir) == -1) {
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir,
+					strerror(errno));
+			return EXIT_FAILURE;
+		}
+	}
+
+	for (i = 1; args[i]; i++) {
+
+		if (i == ifiletype || i == isel_path)
 			continue;
 
-		/* Check for regex expressions */
-		if (check_regex(comm[i]) == EXIT_SUCCESS) {
-			int sel_path = 0;
+		char *pattern = (char *)NULL;
+		int invert = 0;
+	
+		if (check_regex(args[i]) == EXIT_SUCCESS) {
+			pattern = args[i];
 
-			if (comm[i + 1]) {
-				struct stat file_attrib;
+			if (*pattern == '!') {
+				pattern++;
+				invert = 1;
+			}
+		}
 
-				if (lstat(comm[i + 1], &file_attrib) != -1)
+		if (!pattern) {
 
-					if ((file_attrib.st_mode & S_IFMT) == S_IFDIR)
-						sel_path = 1;
+			if (strchr(args[i], '\\')) {
+				char *deq_str = dequote_str(args[i], 0);
+				if (deq_str) {
+					strcpy(args[i], deq_str);
+					free(deq_str);
+				}
 			}
 
+			char *tmp = (char *)NULL;
+
+			if (*args[i] != '/') {
+				if (!sel_path) {
+					tmp = (char *)xnmalloc(strlen(ws[cur_ws].path)
+								+ strlen(args[i]) + 2, sizeof(char));
+					sprintf(tmp, "%s/%s", ws[cur_ws].path, args[i]);
+				}
+
+				else {
+					tmp = (char *)xnmalloc(strlen(dir)
+								+ strlen(args[i]) + 2, sizeof(char));
+					sprintf(tmp, "%s/%s", dir, args[i]);
+				}
+
+				new_sel += select_file(tmp);
+				free(tmp);
+			}
+
+			else
+				new_sel += select_file(args[i]);
+		}
+
+		else {
+			/* We have a pattern */
+			/* GLOB */
 			int ret = -1;
+			ret = sel_glob(args[i], sel_path ? dir : NULL,
+						   filetype ? filetype : 0);
 
-			ret = sel_regex(comm[i], sel_path ? comm[i + 1] : NULL,
-							file_type);
-
-			if (ret == -1)
-				return EXIT_FAILURE;
-
-			/* Skip next entry: it's an argument for the regex
-			 * expression */
-			if (sel_path)
-				i++;
-
-			new_sel += ret;
-			continue;
-		}
-
-		if (strchr(comm[i], '\\')) {
-			char *deq_file = dequote_str(comm[i], 0);
-
-			if (!deq_file) {
-				for (j = 0; j < sel_n; j++)
-					free(sel_elements[j]);
-				return EXIT_FAILURE;
+			/* If glob failed, try REGEX */
+			if (ret <= 0) {
+				ret = sel_regex(args[i], sel_path ? dir : NULL,
+								filetype);
+				if (ret > 0)
+					new_sel += ret;
 			}
-
-			strcpy(comm[i], deq_file);
-			free(deq_file);
+			else
+				new_sel += ret;
 		}
-
-		size_t file_len = strlen(comm[i]);
-
-		/* Remove final slash from directories. No need to check if file
-		 * is a directory, since in Linux only directories can contain a
-		 * slash in its name */
-		if (comm[i][file_len - 1] == '/')
-			comm[i][file_len - 1] = 0x00;
-
-		/* If a filename in CWD... */
-		int sel_is_filename = 0, sel_is_relative_path = 0;
-		for (j = 0; j < files; j++) {
-			if (strcmp(file_info[j].name, comm[i]) == 0) {
-				sel_is_filename = 1;
-				break;
-			}
-		}
-
-		if (!sel_is_filename) {
-
-			/* If a path (contains a slash)... */
-			if (strcntchr(comm[i], '/') != -1) {
-
-				if (comm[i][0] != '/') /* If relative path */
-					sel_is_relative_path = 1;
-
-				struct stat file_attrib;
-				if (stat(comm[i], &file_attrib) != 0) {
-					fprintf(stderr, "%s: sel: '%s': %s\n", PROGRAM_NAME,
-							comm[i], strerror(errno));
-					/* Return error when at least one error occur */
-					exit_status = EXIT_FAILURE;
-					continue;
-				}
-			}
-
-			/* If neither a filename in CWD nor a path... */
-			else {
-				fprintf(stderr, _("%s: sel: '%s': No such %s\n"),
-						PROGRAM_NAME, comm[i], (is_number(comm[i]))
-						? "ELN" : _("file or directory"));
-				exit_status = EXIT_FAILURE;
-				continue;
-			}
-		}
-
-		if (sel_is_filename || sel_is_relative_path) {
-			/* Add path to filename or relative path */
-			if (strcmp(ws[cur_ws].path, "/") == 0) {
-				sel_tmp = (char *)xcalloc(strlen(comm[i])
-										  + 2, sizeof(char));
-				sprintf(sel_tmp, "/%s", comm[i]);
-			}
-
-			else {
-				sel_tmp = (char *)xcalloc(strlen(ws[cur_ws].path) + strlen(comm[i])
-										  + 2, sizeof(char));
-				sprintf(sel_tmp, "%s/%s", ws[cur_ws].path, comm[i]);
-			}
-		}
-
-		else { /* If absolute path... */
-			sel_tmp = (char *)xcalloc(strlen(comm[i]) + 1,
-									  sizeof(char));
-			strcpy(sel_tmp, comm[i]);
-		}
-
-		if (file_type) {
-			struct stat file_attrib;
-			if (lstat(sel_tmp, &file_attrib) != -1) {
-				if ((file_attrib.st_mode & S_IFMT) != file_type) {
-					free(sel_tmp);
-					sel_tmp  = (char *)NULL;
-					continue;
-				}
-			}
-		}
-
-		new_sel += select_file(sel_tmp);
-
-		free(sel_tmp);
-		sel_tmp = (char *)NULL;
-
-		continue;
 	}
 
-	if (!new_sel)
-		return exit_status;
-
-	/* At this point, we know there are new selected files and that the
-	 * selection file is OK. So, write new selections into the selection
-	 * file */
-
-	if (config_ok && selfile_ok) {
+	if (new_sel > 0) {
 		if (save_sel() != EXIT_SUCCESS) {
-			_err('e', PRINT_PROMPT, "%s: Error writing selected files "
-			"to the selections file\n", PROGRAM_NAME);
+			_err('e', PRINT_PROMPT, _("%s: Error writing selected files "
+			"to the selections file\n"), PROGRAM_NAME);
 		}
 	}
 
-	/* Get size of total sel files */
+	if (sel_path && chdir(ws[cur_ws].path) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
+				strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	if (new_sel <= 0) {
+		fprintf(stderr, _("%s: No matches found\n"), PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	/* Get total size of sel files */
 	struct stat sattr;
 
 	for (i = 0; i < sel_n; i++) {
@@ -18166,7 +18344,7 @@ sel_function (char **comm)
 
 	free(human_size);
 
-	return exit_status;
+	return EXIT_SUCCESS;
 }
 
 static void
@@ -18862,7 +19040,8 @@ search_glob(char **comm, int invert)
 
 static int
 search_regex(char **comm, int invert)
-/* List matching filenames in the specified directory */
+/* List matching (or not marching, if inverse is set to 1) filenames
+ * in the specified directory */
 {
 	if (!comm || !comm[0])
 		return EXIT_FAILURE;
@@ -21279,7 +21458,7 @@ help_function (void)
  Q\n\
  rf, refresh\n\
  rl, reload\n\
- s, sel [ELN ELN-ELN FILE ... n] [REGEX [DIR]] [-filetype]\n\
+ s, sel ELN/FILE... [[!]PATTERN] [-FILETYPE] [:PATH]\n\
  sb, selbox\n\
  shell [SHELL]\n\
  splash\n\
@@ -23118,20 +23297,8 @@ exec_cmd(char **comm)
 
 	/*         ############### SELECTION ##################     */
 	else if (*comm[0] == 's' && (!comm[0][1]
-	|| strcmp(comm[0], "sel") == 0)) {
-		if (!comm[1]) {
-			puts(_("Usage: s, sel ELN ELN-ELN FILE ... n"));
-			exit_code = EXIT_FAILURE;
-			return EXIT_FAILURE;
-		}
-
-		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
-			puts(_("Usage: s, sel ELN ELN-ELN FILE ... n"));
-			return EXIT_SUCCESS;
-		}
-
+	|| strcmp(comm[0], "sel") == 0))
 		exit_code = sel_function(comm);
-	}
 
 	else if (*comm[0] == 's' && (strcmp(comm[0], "sb") == 0
 	|| strcmp(comm[0], "selbox") == 0))
@@ -25015,7 +25182,9 @@ parse_input_str(char *str)
 
 	/* Do not expand if command is deselect or untrash, just to allow the
 	 * use of "*" for both commands: "ds *" and "u *" */
-	if (glob_n && strcmp(substr[0], "ds") != 0
+	if (glob_n && strcmp(substr[0], "s") != 0
+	&& strcmp(substr[0], "sel") != 0
+	&& strcmp(substr[0], "ds") != 0
 	&& strcmp(substr[0], "desel") != 0
 	&& strcmp(substr[0], "u") != 0
 	&& strcmp(substr[0], "undel") != 0
@@ -25235,6 +25404,10 @@ parse_input_str(char *str)
 		/* #############################################
 		 * #   			 5) REGEX EXPANSION  		   #
 		 * ############################################# */
+
+	if (*substr[0] == 's' && (!substr[0][1]
+	|| strcmp(substr[0], "sel") == 0))
+		return substr;
 
 	char **regex_files = (char **)xnmalloc(files + args_n + 2,
 										sizeof(char *));
