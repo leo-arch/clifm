@@ -21,13 +21,13 @@ With the \fBautomatic ELN expansion\fR feature you can use ELN's with external c
 .sp
   \fBd)\fR \fBBookmarks\fR: keep a list of your favorite directories, and even files, to get easy access to them. Example: enter 'bm' (or press Alt\-b) to open the bookmarks screen and then simply type a number or a shortcut name to access the desired bookmark.
 .sp
-  \fBe)\fR The \fBSelection Box\fR allows you to drop files and directories from different parts of the filesystem (even from different instances of CliFM) and then operate on them with just one command. Example: select a few files in one instance of the program (say 's 12; cd /media; s 2 5\-6') and then paste them somewhere else using a second instance ('v sel', 'paste sel' or Ctrl-Alt-v). Both glob and regular expressions are suppported.
+  \fBe)\fR The \fBSelection Box\fR allows you to drop files and directories from different parts of the filesystem (even from different instances of CliFM) and then operate on them with just one command. Example: select a few files in one instance of the program (say 's 12; cd /media; s 2 5\-6') and then paste them somewhere else using a second instance ('v sel', 'paste sel' or Ctrl-Alt-v). Both wildcards (globbing) and regular expressions are suppported. Inverse matching is also allowed for patterns.
 .sp
   \fBf)\fR The \fBdirectory history\fR function (\fIback\fR and \fIforth\fR) keeps track of all visited directories, so that you can go back and forth to any of them by just entering 'b' or 'f' (or just pressing 'Alt\-j' and 'Alt\-k', or Shift\-Left and Shift\-Right, respectivelly). Another way of quickly navigating through visited directories is using the built-in \fBautojump\fR function. See the \fIjump\fR command below.
 .sp
   \fBg)\fR An extensive list of \fBkeyboard shortcuts\fR make it even easier and faster to navigate and operate on your files. For example, instead of typing 'cd ..' to go back to the parent directory, or 's *' to select all files in the current directory, you can simply press Alt\-u (or Shift\-Up) and Alt\-a respectivelly.
 .sp
-  \fBh)\fR The \fBquick search\fR function makes it really easy to quickly find the files you are looking for: just enter a slash followed by the string or regular expression you want (ex: '/myfile' or '/.*\.png'), that's all. Inverse search is also allowed prepending an exclamation mark (!) to the search pattern.
+  \fBh)\fR The \fBquick search\fR function makes it really easy to quickly find the files you are looking for: just enter a slash followed by the string or regular expression you want (ex: '/myfile' or '/.*\.png'), that's all. Inverse search is also allowed by prepending an exclamation mark (!) to the search pattern.
 .sp
   \fBi)\fR \fBPlugins\fR: Build your own custom commands using executable files (shell scripts or binaries). Just drop an executable file (all languages are supported) in the plugins directory, tell CLiFM to use this executable file via a custom action name, and use it as any other command.
 .sp
@@ -271,11 +271,11 @@ this is the quick search function. Just type '/' followed by a glob or regular (
 .sp
 Bear in mind that search patterns are evaluated first as glob expressions, and then, if no matches are found, as regular expressions. Expressions containing no pattern metacharacter are automatically replaced by '/*EXP*'. For example '/test' becomes '/*test*'.
 .sp
-To search for files in any other directory, specify the directory name as a further argument. This argument (DIR) could be an absolute path, a relative path, or an ELN. For example, enter '/^A 7' to search for all files starting with 'A' in the directory corresponding to the ELN 7.
+To search for files in any directory othen the current one, specify the directory name as a further argument. This argument (DIR) could be an absolute path, a relative path, or an ELN. For example, enter '/^A 7' to search for all files starting with 'A' in the directory corresponding to the ELN 7.
 .sp
 The result of the search could be further filtered by specifying a filter type: \-d, \-r, \-l, \-s, \-f, \-b, and \-c (directory, regular file, symbolic link, socket, FIFO/pipe, block device, and character device respectivelly). For example, '/[.-].*d$ \-d Documents/' will list all directories containing a dot or a dash and ending with 'd' in the directory named "Documents".
 .sp
-The quick search function also supports invert search: prepend the exclamation mark (!) to negate a given search pattern. For example: "!.*s$ -d /etc" will match all directories in /etc NOT ending with 'd', just as "!D*" will match all files in the current directory NOT starting with 'D'.
+The quick search function also supports invert search: prepend the exclamation mark (!) to negate a given search pattern. For example: "!.*s$ -d /etc" will match all directories in /etc NOT ending with 's', just as "!D*" will match all files in the current directory NOT starting with 'D'.
 .TP
 .B ;\fR[CMD], \fB:\fR[CMD]
 If no CMD, run the default shell (see below the \fIshell\fR command) in the current working directory. If CMD is specified, skip all CLiFM expansions (see the Built\-in Expansions section below) and run the input string (CMD) as is via the default system shell.
@@ -537,14 +537,18 @@ refresh the screen.
 .B rl, reload
 Reload all settings, except those passed as command line arguments, from the configuration file.
 .TP
-.B s, sel \fRELN/FILE ... n [REGEX [DIR]] [-filetype]
-send one or multiple elements (either files or directories) to the Selection Box. \fIsel\fR accepts individual elements, range of elements, say 1\-6, filenames and paths, just as wildcards (globbing) and regular expressions. Just as in the \fIsearch\fR function (see above), it is also possible to further filter the list of matches indicating the desired filetype. Example: 'sel -d 1 4\-10 ^r file* filename /path/to/filename'.
+.B s, sel \fRELN/FILE ... n [[!]PATTERN] [-filetype] [:PATH]
+send one or multiple elements (either files or directories) to the Selection Box. \fIsel\fR accepts individual elements, range of elements, say 1\-6, filenames and paths, just as wildcards (globbing) and regular expressions. Example: 's 1 4\-10 ^r file* filename /path/to/filename'. To deselect selected files, use the 'ds' command (see above).
 .sp
-When using regular expressions, the next argument, if it is a directory name, will be taken as an arugment for the previous expression. For example, 's ^d.*\.conf$' /etc' will select all files in \fI/etc\fR starting with 'd' and ending with '.conf'. If no directory is specified, the pattern will be evaluated against all files in the current working directory.
+Just as in the \fIsearch\fR function, it is also possible to further filter the list of matches indicating the desired filetype. For instance, 's ^ -d' will select all directories in the current working directory. For available filetype filters see the \fBsearch\fR function above.
 .sp
-Glob and regular expressions could be used together. For example: 's ^[r|R].*d$ /etc/*.conf' will select all files starting with either 'r' or 'R' and ending with 'd' in the current working directory, plus all .conf files in \fI/etc\fR.
+By default, the selection function operates on the current working directory. To select files in any other directory use the ":PATH" expression. For example, to select all regular files with a .conf extension in the /etc directory, the command would be: 's .*\\.conf$ -r :/etc', or using wildcards: 's *.conf -r :/etc'.
 .sp
-It is important to note however that glob expressions are evaluated before regular expressions, in such a way that any expression that could be understood by both kinds of pattern matching mechanisms will be evaluated according to the first, that is, as a glob expression. For example, '.*', as regular expression, should match all files. However, since glob expressions are evaluated first, it will only match hidden files. To select all files using a glob expression, try '.* *', or, with a regular expression: '^' or '(.*?)'.
+Just as in the case of the search function, inverse matching is supported for patterns, either wildcards or regular expressions. To invert or reverse the meaning and action of a pattern, just prepend an exclamation mark (!). So, to select all non-hidden regular files in the Documents directory, issue this comamnd: 's !^\. -r :Documents', or, to select all directories in /etc, except those ending with ".d": 's !*.d -d :/etc'.
+.sp
+Glob and regular expressions could be used together. For example: 's ^[r|R].*d$ /etc/*.conf' will select all files starting with either 'r' or 'R' and ending with 'd' in the current working directory, plus all .conf files in the /etc directory. However, this use is discouraged if both patterns refer to the same directory, since the second one will probably override the result of the first one.
+.sp
+It is important to note that glob expressions are evaluated before regular expressions, in such a way that any pattern that could be understood by both kinds of pattern matching mechanisms will be evaluated first according to the former, that is, as a glob expression. For example, '.*', as regular expression, should match all files. However, since glob expressions are evaluated first, it will only match hidden files. To select all files using a glob expression, try '.* *', or, with a regular expression: '^' or '(.*?)'.
 .sp
 The Selection Box is accessible to different instances of the program, provided they use the same profile (see the \fIprofile\fR command below). By default, indeed, each profile keeps a private Selection Box, being thus not accessible to other profiles. You can nonetheless modify this behaviour via the ShareSelbox option in the configuration file. If the ShareSelbox option is enabled (see the configuration file), selected files are stored in \fI/tmp/clifm/username/.selbox\fR. Otherwise, \fI/tmp/clifm/username/.selbox_profilename\fR is used (this is the default). 
 .TP
