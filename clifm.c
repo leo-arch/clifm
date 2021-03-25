@@ -1099,10 +1099,22 @@ xnmalloc(size_t nmemb, size_t size)
 	return new_ptr;
 }
 
+static char *
+savestring(const char *str, size_t size)
+{
+	if (!str)
+		return (char *)NULL;
+
+	char *ptr = (char *)NULL;
+	ptr = (char *)xnmalloc(size + 1, sizeof(char));
+	strcpy(ptr, str);
+
+	return ptr;
+}
+
 static int
 is_internal_c(const char *cmd)
-/* Check cmd against a list of internal commands. Used by
- * parse_input_str() when running chained commands */
+/* Check cmd against a list of internal commands */
 {
 	const char *int_cmds[] = { "o", "open", "cd", "p", "pr", "prop",
 			"t", "tr", "trash", "s", "sel", "rf", "refresh",
@@ -1466,7 +1478,7 @@ get_file_icon(char *file, int n)
 
 	for (i = sizeof(icon_filenames)/sizeof(struct icons_t) - 1; i >= 0; i--) {
 
-		if (*file == *icon_filenames[i].name
+		if (TOUPPER(*file) == TOUPPER(*icon_filenames[i].name)
 		&& strcasecmp(file, icon_filenames[i].name) == 0) {
 			file_info[n].icon = icon_filenames[i].icon;
 			file_info[n].icon_color = icon_filenames[i].color;
@@ -1490,7 +1502,7 @@ get_dir_icon(char *dir, int n)
 
 	for (i = sizeof(icon_dirnames)/sizeof(struct icons_t) - 1; i >= 0; i--) {
 
-		if (*dir == *icon_dirnames[i].name
+		if (TOUPPER(*dir) == TOUPPER(*icon_dirnames[i].name)
 		&& strcasecmp(dir, icon_dirnames[i].name) == 0) {
 			file_info[n].icon = icon_dirnames[i].icon;
 			file_info[n].icon_color = icon_dirnames[i].color;
@@ -1850,8 +1862,7 @@ filter_function(char *arg)
 
 	regfree(&regex_exp);
 
-	filter = (char *)xnmalloc(strlen(arg) + 1, sizeof(char));
-	strcpy(filter, arg);
+	filter = savestring(arg, strlen(arg));
 
 	if (regcomp(&regex_exp, filter, REG_NOSUB|REG_EXTENDED)
 	!= EXIT_SUCCESS) {
@@ -1879,8 +1890,7 @@ check_env_filter(void)
 	if (!p)
 		return;
 
-	filter = (char *)xnmalloc(strlen(p) + 1, sizeof(char));
-	strcpy(filter, p);
+	filter = savestring(p, strlen(p));
 }
 
 static inline int
@@ -2014,8 +2024,11 @@ batch_link(char **args)
 
 		char *ptr = strrchr(linkname, '/');
 
-		if (symlink(args[i], ptr ? ++ptr : linkname) == -1)
+		if (symlink(args[i], ptr ? ++ptr : linkname) == -1) {
 			exit_status = EXIT_FAILURE;
+			fprintf(stderr, _("%s: %s: Cannot create symlink: %s\n"),
+					PROGRAM_NAME, ptr ? ptr : linkname, strerror(errno));
+		}
 	}
 
 	if (exit_status == EXIT_SUCCESS && cd_lists_on_the_fly) {
@@ -2074,11 +2087,8 @@ add_to_jumpdb(char *dir)
 	if (new_entry) {
 		jump_db = (struct jump_t *)xrealloc(jump_db, (jump_n + 2)
 										* sizeof(struct jump_t));
-		jump_db[jump_n].path = (char *)xnmalloc(strlen(dir) + 1,
-												sizeof(char));
-		strcpy(jump_db[jump_n].path, dir);
+		jump_db[jump_n].path = savestring(dir, strlen(dir));
 		jump_db[jump_n++].visits = 1;
-
 		jump_db[jump_n].path = (char *)NULL;
 		jump_db[jump_n].visits = 0;
 	}
@@ -2151,10 +2161,7 @@ load_jumpdb(void)
 		if (!*(++tmp))
 			continue;
 
-		jump_db[jump_n].path = (char *)xnmalloc(strlen(tmp) + 1,
-										   sizeof(char));
-
-		strcpy(jump_db[jump_n].path, tmp);
+		jump_db[jump_n].path = savestring(tmp, strlen(tmp));
 
 		if (!is_number(line))
 			jump_db[jump_n++].visits = 1;
@@ -2229,17 +2236,11 @@ print_div_line(void)
 {
 	fputs(dl_c, stdout);
 
-/*	char l[term_cols];
-	memset(l, div_line_char, term_cols);
-	l[term_cols] = '\0';
-	fputs(l, stdout); */
 	int i;
 	for (i = term_cols; i--;)
 		putchar(div_line_char);
 
 	fputs(df_c, stdout);
-//	printf("%s", df_c);
-
 	fflush(stdout);
 }
 
@@ -2336,11 +2337,8 @@ get_last_path(void)
 		if (cur && cur_ws == UNSET)
 			cur_ws = ws_n;
 
-		if (ws_n >= 0 && ws_n < MAX_WS && !ws[ws_n].path) {
-			ws[ws_n].path = (char *)xnmalloc(strlen(p + 2) + 1,
-									sizeof(char));
-			strcpy(ws[ws_n].path, p + 2);
-		}
+		if (ws_n >= 0 && ws_n < MAX_WS && !ws[ws_n].path)
+			ws[ws_n].path = savestring(p + 2, strlen(p + 2));
 	}
 
 	fclose(last_fp);
@@ -2390,9 +2388,7 @@ load_pinned_dir(void)
 		pinned_dir = (char *)NULL;
 	}
 
-	pinned_dir = (char *)xnmalloc(strlen(line) + 1, sizeof(char));
-
-	strcpy(pinned_dir, line);
+	pinned_dir = savestring(line, strlen(line));
 
 	fclose(fp);
 
@@ -2589,25 +2585,20 @@ set_colors(char *colorscheme, int env)
 		char *env_ifacecolors = getenv("CLIFM_IFACE_COLORS");
 
 		if (env_filecolors && !filecolors) {
-			filecolors = (char *)xnmalloc(strlen(env_filecolors)
-										 + 1, sizeof(char));
-			strcpy(filecolors, env_filecolors);
+			filecolors = savestring(env_filecolors,
+									strlen(env_filecolors));
 		}
 
 		env_filecolors = (char *)NULL;
 
-		if (env_extcolors && !extcolors) {
-			extcolors = (char *)xnmalloc(strlen(env_extcolors)
-										 + 1, sizeof(char));
-			strcpy(extcolors, env_extcolors);
-		}
+		if (env_extcolors && !extcolors)
+			extcolors = savestring(env_extcolors, strlen(env_extcolors));
 
 		env_extcolors = (char *)NULL;
 
 		if (env_ifacecolors && !ifacecolors) {
-			ifacecolors = (char *)xnmalloc(strlen(env_ifacecolors)
-										 + 1, sizeof(char));
-			strcpy(ifacecolors, env_ifacecolors);
+			ifacecolors = savestring(env_ifacecolors,
+									 strlen(env_ifacecolors));
 		}
 
 		env_ifacecolors = (char *)NULL;
@@ -2657,10 +2648,8 @@ set_colors(char *colorscheme, int env)
 					if (!color_line)
 						continue;
 
-					ifacecolors = (char *)xcalloc(strlen(color_line)
-												+ 1, sizeof(char));
-
-					strcpy(ifacecolors, color_line);
+					ifacecolors = savestring(color_line,
+											 strlen(color_line));
 					free(color_line);
 				}
 
@@ -2680,10 +2669,7 @@ set_colors(char *colorscheme, int env)
 					if (!color_line)
 						continue;
 
-					filecolors = (char *)xcalloc(strlen(color_line)
-												+ 1, sizeof(char));
-
-					strcpy(filecolors, color_line);
+					filecolors = savestring(color_line, strlen(color_line));
 					free(color_line);
 				}
 
@@ -2703,10 +2689,7 @@ set_colors(char *colorscheme, int env)
 					if (!color_line)
 						continue;
 
-					extcolors = (char *)xcalloc(strlen(color_line) + 1,
-												sizeof(char));
-
-					strcpy(extcolors, color_line);
+					extcolors = savestring(color_line, strlen(color_line));
 					free(color_line);
 				}
 
@@ -2827,9 +2810,7 @@ set_colors(char *colorscheme, int env)
 				ext_colors = (char **)xrealloc(ext_colors,
 											(ext_colors_n + 1)
 											* sizeof(char *));
-				ext_colors[ext_colors_n] = (char *)xcalloc(len + 1,
-													sizeof(char));
-				strcpy(ext_colors[ext_colors_n++], buf);
+				ext_colors[ext_colors_n++] = savestring(buf, len);
 				memset(buf, 0x00, len);
 
 				if (!*p)
@@ -2928,8 +2909,7 @@ set_colors(char *colorscheme, int env)
 				buf[len] = 0x00;
 				colors = (char **)xrealloc(colors, (words + 1)
 										   * sizeof(char *));
-				colors[words] = (char *)xcalloc(len + 1, sizeof(char));
-				strcpy(colors[words++], buf);
+				colors[words++] = savestring(buf, len);
 				memset(buf, 0x00, len);
 
 				if (!*p)
@@ -3149,7 +3129,7 @@ set_colors(char *colorscheme, int env)
 		size_t i = 0, buflen = 0, linec_len = strlen(filecolors);
 		char *ls_buf = (char *)NULL;
 
-		ls_buf = (char *)xcalloc(linec_len + 1, sizeof(char));
+		ls_buf = (char *)xnmalloc(linec_len + 1, sizeof(char));
 
 		while (filecolors[i]) {
 
@@ -3206,8 +3186,7 @@ set_colors(char *colorscheme, int env)
 				buf[len] = 0x00;
 				colors = (char **)xrealloc(colors, (words + 1)
 										   * sizeof(char *));
-				colors[words] = (char *)xcalloc(len + 1, sizeof(char));
-				strcpy(colors[words++], buf);
+				colors[words++] = savestring(buf, len);
 				memset(buf, 0x00, len);
 
 				if (!*p)
@@ -3545,10 +3524,8 @@ static void
 check_options(void)
 /* If some option was not set, set it to the default value */
 {
-	if (!usr_cscheme) {
-		usr_cscheme = (char *)xnmalloc(8, sizeof(char));
-		strcpy(usr_cscheme, "default");
-	}
+	if (!usr_cscheme)
+		usr_cscheme = savestring("default", 7);
 
 	/* Do no override command line options */
 	if (cp_cmd == UNSET)
@@ -3780,32 +3757,21 @@ check_options(void)
 	if (!sys_shell) {
 		sys_shell = get_sys_shell();
 
-		if (!sys_shell) {
-			sys_shell = (char *)xcalloc(strlen(FALLBACK_SHELL) + 1,
-										sizeof(char));
-			strcpy(sys_shell, FALLBACK_SHELL);
-		}
+		if (!sys_shell)
+			sys_shell = savestring(FALLBACK_SHELL, strlen(FALLBACK_SHELL));
 	}
 
-	if (!term) {
-		term = (char *)xcalloc(strlen(DEFAULT_TERM_CMD) + 1,
-							   sizeof(char));
-		strcpy(term, DEFAULT_TERM_CMD);
-	}
+	if (!term)
+		term = savestring(DEFAULT_TERM_CMD, strlen(DEFAULT_TERM_CMD));
 
-	if (!encoded_prompt) {
-		encoded_prompt = (char *)xcalloc(strlen(DEFAULT_PROMPT) + 1,
-										 sizeof(char));
-		strcpy(encoded_prompt, DEFAULT_PROMPT);
-	}
+	if (!encoded_prompt)
+		encoded_prompt = savestring(DEFAULT_PROMPT, strlen(DEFAULT_PROMPT));
 
 	/* Since in stealth mode we have no access to the config file, we
 	 * cannot use 'lira', since it relays on a file.
 	 * Set it thus to xdg-open, if not already set via command line */
-	if (xargs.stealth_mode == 1 && !opener) {
-		opener = (char *)xnmalloc(9, sizeof(char));
-		strcpy(opener, "xdg-open");
-	}
+	if (xargs.stealth_mode == 1 && !opener)
+		opener = savestring("xdg-open", 8);
 }
 
 static void
@@ -3880,14 +3846,14 @@ create_tmp_files(void)
 			else
 				prof_len = 7; /* Lenght of "default" */
 
-			SEL_FILE = (char *)xcalloc(tmp_dir_len + prof_len
+			SEL_FILE = (char *)xnmalloc(tmp_dir_len + prof_len
 											+ 9, sizeof(char));
 			sprintf(SEL_FILE, "%s/selbox_%s", TMP_DIR,
 					(alt_profile) ? alt_profile : "default");
 		}
 
 		else {
-			SEL_FILE = (char *)xcalloc(tmp_dir_len + 8,
+			SEL_FILE = (char *)xnmalloc(tmp_dir_len + 8,
 											sizeof(char));
 			sprintf(SEL_FILE, "%s/selbox", TMP_DIR);
 		}
@@ -3970,10 +3936,8 @@ get_aliases(void)
 				alias_line++;
 				aliases = (char **)xrealloc(aliases, (aliases_n + 1)
 											* sizeof(char *));
-				aliases[aliases_n] = (char *)xcalloc(
-												strlen(alias_line)
-												+ 1, sizeof(char));
-				strcpy(aliases[aliases_n++], alias_line);
+				aliases[aliases_n++] = savestring(alias_line,
+											strlen(alias_line));
 			}
 		}
 	}
@@ -4006,7 +3970,7 @@ load_dirhist(void)
 		return EXIT_SUCCESS;
 	}
 
-	old_pwd = (char **)xcalloc(dirs + 2, sizeof(char *));
+	old_pwd = (char **)xnmalloc(dirs + 2, sizeof(char *));
 
 	fseek(fp, 0L, SEEK_SET);
 
@@ -4017,7 +3981,7 @@ load_dirhist(void)
 	dirhist_total_index = 0;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
-		old_pwd[dirhist_total_index] = (char *)xcalloc(line_len
+		old_pwd[dirhist_total_index] = (char *)xnmalloc(line_len
 											   + 1, sizeof(char));
 		if (!line || !*line || *line == '\n')
 			continue;
@@ -4075,10 +4039,8 @@ get_prompt_cmds(void)
 				prompt_cmds = (char **)xrealloc(prompt_cmds,
 										(prompt_cmds_n + 1)
 										* sizeof(char *));
-				prompt_cmds[prompt_cmds_n] = (char *)xcalloc(
-											  strlen(line) +1,
-											  sizeof(char));
-				strcpy(prompt_cmds[prompt_cmds_n++], line);
+				prompt_cmds[prompt_cmds_n++] = savestring(
+											line, strlen(line));
 			}
 		}
 
@@ -4163,15 +4125,13 @@ get_path_programs(void)
 	size_t internal_cmd_n = (sizeof(INTERNAL_CMDS) /
 						  sizeof(INTERNAL_CMDS[0])) - 1;
 
-	bin_commands = (char **)xcalloc(total_cmd + internal_cmd_n +
+	bin_commands = (char **)xnmalloc(total_cmd + internal_cmd_n +
 									aliases_n + actions_n + 2,
 									sizeof(char *));
 
-	for (i = 0; i < internal_cmd_n; i++) {
-		bin_commands[l] = (char *)xnmalloc(strlen(INTERNAL_CMDS[i]) + 1,
-								   sizeof(char));
-		strcpy(bin_commands[l++], INTERNAL_CMDS[i]);
-	}
+	for (i = 0; i < internal_cmd_n; i++)
+		bin_commands[l++] =savestring(INTERNAL_CMDS[i],
+									  strlen(INTERNAL_CMDS[i]));
 
 	/* Add commands in PATH */
 	for (i = 0; i < path_n; i++) {
@@ -4181,11 +4141,8 @@ get_path_programs(void)
 
 		for (j = 0; j < (size_t)cmd_n[i]; j++) {
 
-			bin_commands[l] = (char *)xnmalloc(
-									strlen(commands_bin[i][j]->d_name)
-									+ 1, sizeof(char));
-
-			strcpy(bin_commands[l++], commands_bin[i][j]->d_name);
+			bin_commands[l++] = savestring(commands_bin[i][j]->d_name,
+								  strlen(commands_bin[i][j]->d_name));
 			free(commands_bin[i][j]);
 		}
 
@@ -4212,14 +4169,12 @@ get_path_programs(void)
 	/* And user defined actions too, if any */
 	if (actions_n) {
 		for (i = 0; i < actions_n; i++) {
-			bin_commands[l] = (char *)xnmalloc(
-											strlen(usr_actions[i].name)
-											+ 1, sizeof(char));
-			strcpy(bin_commands[l++], usr_actions[i].name);
+			bin_commands[l++] = savestring(usr_actions[i].name,
+									strlen(usr_actions[i].name));
 		}
 	}
 
-/*	bin_commands[l] = (char *)NULL; */
+	bin_commands[l] = (char *)NULL;
 }
 
 static char *
@@ -4351,7 +4306,7 @@ define_config_file_names(void)
 	if (xdg_config_home) {
 		xdg_config_home_len = strlen(xdg_config_home);
 
-		CONFIG_DIR_GRAL = (char *)xcalloc(xdg_config_home_len
+		CONFIG_DIR_GRAL = (char *)xnmalloc(xdg_config_home_len
 							 + pnl_len + 2, sizeof(char));
 		sprintf(CONFIG_DIR_GRAL, "%s/%s", xdg_config_home, PNL);
 
@@ -4359,7 +4314,7 @@ define_config_file_names(void)
 	}
 
 	else {
-		CONFIG_DIR_GRAL = (char *)xcalloc(user_home_len + pnl_len
+		CONFIG_DIR_GRAL = (char *)xnmalloc(user_home_len + pnl_len
 								+ 11, sizeof(char));
 		sprintf(CONFIG_DIR_GRAL, "%s/.config/%s", user_home, PNL);
 	}
@@ -4369,7 +4324,7 @@ define_config_file_names(void)
 	/* alt_profile will not be NULL whenever the -P option is used
 	 * to run the program under an alternative profile */
 	if (alt_profile) {
-		CONFIG_DIR = (char *)xcalloc(config_gral_len
+		CONFIG_DIR = (char *)xnmalloc(config_gral_len
 							 + strlen(alt_profile)
 							 + 11, sizeof(char));
 		sprintf(CONFIG_DIR, "%s/profiles/%s", CONFIG_DIR_GRAL,
@@ -4377,22 +4332,20 @@ define_config_file_names(void)
 	}
 
 	else {
-		CONFIG_DIR = (char *)xcalloc(config_gral_len + 18,
+		CONFIG_DIR = (char *)xnmalloc(config_gral_len + 18,
 								sizeof(char));
 		sprintf(CONFIG_DIR, "%s/profiles/default", CONFIG_DIR_GRAL);
 	}
 
 	if (alt_kbinds_file) {
-		KBINDS_FILE = (char *)xcalloc(strlen(alt_kbinds_file)
-							 + 1, sizeof(char));
-		strcpy(KBINDS_FILE, alt_kbinds_file);
+		KBINDS_FILE = savestring(alt_kbinds_file, strlen(alt_kbinds_file));
 		free(alt_kbinds_file);
 		alt_kbinds_file = (char *)NULL;
 	}
 
 	else {
 		/* Keybindings per user, not per profile */
-		KBINDS_FILE = (char *)xcalloc(config_gral_len
+		KBINDS_FILE = (char *)xnmalloc(config_gral_len
 							 + 13, sizeof(char));
 		sprintf(KBINDS_FILE, "%s/keybindings",
 				CONFIG_DIR_GRAL);
@@ -4405,66 +4358,61 @@ define_config_file_names(void)
 	PLUGINS_DIR = (char *)xnmalloc(config_gral_len + 9, sizeof(char));
 	sprintf(PLUGINS_DIR, "%s/plugins", CONFIG_DIR_GRAL);
 
-	TRASH_DIR = (char *)xcalloc(user_home_len + 20, sizeof(char));
+	TRASH_DIR = (char *)xnmalloc(user_home_len + 20, sizeof(char));
 	sprintf(TRASH_DIR, "%s/.local/share/Trash", user_home);
 
 	size_t trash_len = strlen(TRASH_DIR);
 
-	TRASH_FILES_DIR = (char *)xcalloc(trash_len + 7, sizeof(char));
+	TRASH_FILES_DIR = (char *)xnmalloc(trash_len + 7, sizeof(char));
 	sprintf(TRASH_FILES_DIR, "%s/files", TRASH_DIR);
 
-	TRASH_INFO_DIR = (char *)xcalloc(trash_len + 6, sizeof(char));
+	TRASH_INFO_DIR = (char *)xnmalloc(trash_len + 6, sizeof(char));
 	sprintf(TRASH_INFO_DIR, "%s/info", TRASH_DIR);
 
 	size_t config_len = strlen(CONFIG_DIR);
 
-	DIRHIST_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
+	DIRHIST_FILE = (char *)xnmalloc(config_len + 13, sizeof(char));
 	sprintf(DIRHIST_FILE, "%s/dirhist.cfm", CONFIG_DIR);
 
 	if (!alt_bm_file) {
-		BM_FILE = (char *)xcalloc(config_len + 15, sizeof(char));
+		BM_FILE = (char *)xnmalloc(config_len + 15, sizeof(char));
 		sprintf(BM_FILE, "%s/bookmarks.cfm", CONFIG_DIR);
 	}
 
 	else {
-		BM_FILE = (char *)xcalloc(strlen(alt_bm_file) + 1,
-								  sizeof(char));
-		strcpy(BM_FILE, alt_bm_file);
+		BM_FILE = savestring(alt_bm_file, strlen(alt_bm_file));
 		free(alt_bm_file);
 		alt_bm_file = (char *)NULL;
-
 	}
 
-	LOG_FILE = (char *)xcalloc(config_len + 9, sizeof(char));
+	LOG_FILE = (char *)xnmalloc(config_len + 9, sizeof(char));
 	sprintf(LOG_FILE, "%s/log.cfm", CONFIG_DIR);
 
-	HIST_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
+	HIST_FILE = (char *)xnmalloc(config_len + 13, sizeof(char));
 	sprintf(HIST_FILE, "%s/history.cfm", CONFIG_DIR);
 
 	if (!alt_config_file) {
-		CONFIG_FILE = (char *)xcalloc(config_len + pnl_len + 4,
+		CONFIG_FILE = (char *)xnmalloc(config_len + pnl_len + 4,
 									  sizeof(char));
 		sprintf(CONFIG_FILE, "%s/%src", CONFIG_DIR, PNL);
 	}
 
 	else {
-		CONFIG_FILE = (char *)xcalloc(strlen(alt_config_file) + 1,
-									  sizeof(char));
-		strcpy(CONFIG_FILE, alt_config_file);
+		CONFIG_FILE = savestring(alt_config_file, strlen(alt_config_file));
 		free(alt_config_file);
 		alt_config_file = (char *)NULL;
 	}
 
-	PROFILE_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
+	PROFILE_FILE = (char *)xnmalloc(config_len + 13, sizeof(char));
 	sprintf(PROFILE_FILE, "%s/profile.cfm", CONFIG_DIR);
 
-	MSG_LOG_FILE = (char *)xcalloc(config_len + 14, sizeof(char));
+	MSG_LOG_FILE = (char *)xnmalloc(config_len + 14, sizeof(char));
 	sprintf(MSG_LOG_FILE, "%s/messages.cfm", CONFIG_DIR);
 
-	MIME_FILE = (char *)xcalloc(config_len + 14, sizeof(char));
+	MIME_FILE = (char *)xnmalloc(config_len + 14, sizeof(char));
 	sprintf(MIME_FILE, "%s/mimelist.cfm", CONFIG_DIR);
 
-	ACTIONS_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
+	ACTIONS_FILE = (char *)xnmalloc(config_len + 13, sizeof(char));
 	sprintf(ACTIONS_FILE, "%s/actions.cfm", CONFIG_DIR);
 
 	return;
@@ -4749,12 +4697,12 @@ create_config_files(void)
 
 	if (stat(TRASH_DIR, &file_attrib) == -1) {
 		char *trash_files = (char *)NULL;
-		trash_files = (char *)xcalloc(strlen(TRASH_DIR) + 7,
+		trash_files = (char *)xnmalloc(strlen(TRASH_DIR) + 7,
 									  sizeof(char));
 
 		sprintf(trash_files, "%s/files", TRASH_DIR);
 		char *trash_info = (char *)NULL;
-		trash_info = (char *)xcalloc(strlen(TRASH_DIR) + 6,
+		trash_info = (char *)xnmalloc(strlen(TRASH_DIR) + 6,
 									 sizeof(char));
 
 		sprintf(trash_info, "%s/info", TRASH_DIR);
@@ -5045,8 +4993,7 @@ read_config(void)
 			if (!*(++opt_str))
 				continue;
 
-			filter = (char *)xnmalloc(len + 1, sizeof(char));
-			strcpy(filter, opt_str);
+			filter = savestring(opt_str, len);
 		}
 
 		else if (!usr_cscheme && *line == 'C'
@@ -5065,8 +5012,7 @@ read_config(void)
 			if (!*(++opt_str))
 				continue;
 
-			usr_cscheme = (char *)xnmalloc(len + 1, sizeof(char));
-			strcpy(usr_cscheme, opt_str);
+			usr_cscheme = savestring(opt_str, len);
 		}
 
 		else if (xargs.light == UNSET && *line == 'L'
@@ -5150,9 +5096,7 @@ read_config(void)
 				continue;
 			}
 
-			opener = (char *)xcalloc(strlen(tmp) + 1,
-							sizeof(char));
-			strcpy(opener, tmp);
+			opener = savestring(tmp, strlen(tmp));
 			free(opt_str);
 		}
 
@@ -5427,21 +5371,19 @@ read_config(void)
 					free(opt_str);
 					continue;
 				}
-				sys_shell = (char *)xnmalloc(strlen(tmp)
-										+ 1, sizeof(char));
-				strcpy(sys_shell, tmp);
+
+				sys_shell = savestring(tmp, strlen(tmp));
 			}
 
 			else {
 				char *shell_path = get_cmd_path(tmp);
+
 				if (!shell_path) {
 					free(opt_str);
 					continue;
 				}
-				sys_shell = (char *)xnmalloc(
-									strlen(shell_path)
-									+ 1, sizeof(char));
-				strcpy(sys_shell, shell_path);
+
+				sys_shell = savestring(shell_path, strlen(shell_path));
 				free(shell_path);
 			}
 
@@ -5466,9 +5408,7 @@ read_config(void)
 				continue;
 			}
 
-			term = (char *)xnmalloc(strlen(tmp) + 1,
-									sizeof(char));
-			strcpy(term, tmp);
+			term = savestring(tmp, strlen(tmp));
 			free(opt_str);
 		}
 
@@ -5606,9 +5546,7 @@ read_config(void)
 			 * path will be set to default, that is, CWD */
 			if (chdir(tmp) == 0) {
 				free(ws[cur_ws].path);
-				ws[cur_ws].path = (char *)xnmalloc(strlen(tmp) + 1,
-									    sizeof(char));
-				strcpy(ws[cur_ws].path, tmp);
+				ws[cur_ws].path = savestring(tmp, strlen(tmp));
 			}
 			else {
 				_err('w', PRINT_PROMPT, _("%s: '%s': %s. "
@@ -6084,11 +6022,8 @@ colors_list(const char *ent, const int i, const int pad,
 		break;
 
 	case S_IFIFO: color = pi_c; break;
-
 	case S_IFBLK: color = bd_c; break;
-
 	case S_IFCHR: color = cd_c; break;
-
 	case S_IFSOCK: color = so_c; break;
 
 	/* In case all the above conditions are false... */
@@ -6111,11 +6046,13 @@ edit_link(char *link)
 	/* Dequote the filename, if necessary */
 	if (strchr(link, '\\')) {
 		char *tmp = dequote_str(link, 0);
+
 		if (!tmp) {
 			fprintf(stderr, _("%s: '%s': Error dequoting file\n"),
 					PROGRAM_NAME, link);
 			return EXIT_FAILURE;
 		}
+
 		strcpy(link, tmp);
 		free(tmp);
 	}
@@ -6323,16 +6260,12 @@ load_actions(void)
 		usr_actions = xrealloc(usr_actions, (size_t)(actions_n + 1)
 					   * sizeof(struct actions_t));
 
-		usr_actions[actions_n].value = xnmalloc(strlen(tmp + 1) + 1,
-											sizeof(char));
-		strcpy(usr_actions[actions_n].value, tmp + 1);
+		usr_actions[actions_n].value = savestring(tmp + 1,
+										 strlen(tmp + 1));
 
 		*tmp = 0x00;
 
-		usr_actions[actions_n].name = xnmalloc(strlen(line) + 1,
-											   sizeof(char));
-
-		strcpy(usr_actions[actions_n++].name, line);
+		usr_actions[actions_n++].name = savestring(line, strlen(line));
 	}
 
 	free(line);
@@ -6359,8 +6292,7 @@ get_path_env(void)
 	}
 
 	#else
-	path_tmp = (char *)xcalloc(strlen(getenv("PATH")) + 1, sizeof(char));
-	strcpy(path_tmp, getenv("PATH"));
+	path_tmp = savestring(getenv("PATH"), strlen(getenv("PATH")));
 	#endif
 
 	if (!path_tmp)
@@ -6379,11 +6311,8 @@ get_path_env(void)
 		/* Make room in paths for a new path */
 		paths = (char **)xrealloc(paths, (path_num + 1) * sizeof(char *));
 
-		/* Allocate space (buf length) for the new path */
-		paths[path_num] = (char *)xcalloc(length + 1, sizeof(char));
-
 		/* Dump the buffer into the global paths array */
-		strcpy(paths[path_num], buf);
+		paths[path_num] = savestring(buf, length);
 
 		path_num++;
 		length = 0;
@@ -6686,10 +6615,7 @@ handle_iso(char *file)
 			}
 
 			free(ws[cur_ws].path);
-			ws[cur_ws].path = (char *)xcalloc(strlen(mountpoint) + 1,
-								   sizeof(char));
-			strcpy(ws[cur_ws].path, mountpoint);
-
+			ws[cur_ws].path = savestring(mountpoint, strlen(mountpoint));
 			add_to_jumpdb(ws[cur_ws].path);
 
 			if (cd_lists_on_the_fly) {
@@ -7972,8 +7898,7 @@ remote_ftp(char *address, char *options)
 	if (!address || !*address)
 		return EXIT_FAILURE;
 
-	char *tmp_addr = (char *)xnmalloc(strlen(address) + 1, sizeof(char));
-	strcpy(tmp_addr, address);
+	char *tmp_addr = savestring(address, strlen(address));
 
 	char *p = tmp_addr;
 	while (*p) {
@@ -8028,8 +7953,7 @@ remote_ftp(char *address, char *options)
 	}
 
 	free(ws[cur_ws].path);
-	ws[cur_ws].path = (char *)xnmalloc(strlen(rmountpoint) + 1, sizeof(char));
-	strcpy(ws[cur_ws].path, rmountpoint);
+	ws[cur_ws].path = savestring(rmountpoint, strlen(rmountpoint));
 
 	free(rmountpoint);
 
@@ -8069,11 +7993,9 @@ remote_smb(char *address, char *options)
 
 	if (tmp) {
 		*tmp = 0x00;
-		ruser = (char *)xnmalloc(strlen(address) + 1, sizeof(char));
-		strcpy(ruser, address);
+		ruser = savestring(address, strlen(address));
 
-		raddress = (char *)xnmalloc(strlen(tmp + 1) + 1, sizeof(char));
-		strcpy(raddress, tmp + 1);
+		raddress = savestring(tmp + 1, strlen(tmp + 1));
 		free_address = 1;
 	}
 
@@ -8198,8 +8120,7 @@ remote_smb(char *address, char *options)
 	}
 
 	free(ws[cur_ws].path);
-	ws[cur_ws].path = (char *)xnmalloc(strlen(rmountpoint) + 1, sizeof(char));
-	strcpy(ws[cur_ws].path, rmountpoint);
+	ws[cur_ws].path = savestring(rmountpoint, strlen(rmountpoint));
 
 	free(rmountpoint);
 
@@ -8241,8 +8162,7 @@ remote_ssh(char *address, char *options)
 		return EXIT_FAILURE;
 
 	/* Create mountpoint */
-	char *rname = (char *)xnmalloc(strlen(address) + 1, sizeof(char));
-	strcpy(rname, address);
+	char *rname = savestring(address, strlen(address));
 
 	/* Replace all slashes in address by underscore to construct the
 	 * mounpoint name */
@@ -8310,8 +8230,7 @@ remote_ssh(char *address, char *options)
 	}
 
 	free(ws[cur_ws].path);
-	ws[cur_ws].path = (char *)xnmalloc(strlen(rmountpoint) + 1, sizeof(char));
-	strcpy(ws[cur_ws].path, rmountpoint);
+	ws[cur_ws].path = savestring(rmountpoint, strlen(rmountpoint));
 	free(rmountpoint);
 
 	if (cd_lists_on_the_fly) {
@@ -8463,11 +8382,8 @@ get_substr(char *str, const char ifs)
 
 		/* Copy everything before the range expression
 		 * into the buffer */
-		for (j = 0; j < i; j++) {
-			rbuf[k] = (char *)xcalloc(strlen(substr[j])+1,
-									  sizeof(char));
-			strcpy(rbuf[k++], substr[j]);
-		}
+		for (j = 0; j < i; j++)
+			rbuf[k++] = savestring(substr[j], strlen(substr[j]));
 
 		/* Copy the expanded range into the buffer */
 		for (j = (size_t)afirst; j <= (size_t)asecond; j++) {
@@ -8482,9 +8398,7 @@ get_substr(char *str, const char ifs)
 			next = k;
 
 			for (j = (i + 1); substr[j]; j++) {
-				rbuf[k] = (char *)xcalloc(strlen(substr[j]) + 1,
-										  sizeof(char));
-				strcpy(rbuf[k++], substr[j]);
+				rbuf[k++] = savestring(substr[j], strlen(substr[j]));
 			}
 		}
 
@@ -8502,9 +8416,7 @@ get_substr(char *str, const char ifs)
 								   * sizeof(char *));
 
 		for (j = 0;j < substr_n; j++) {
-			substr[j] = (char *)xcalloc(strlen(rbuf[j]) + 1,
-										sizeof(char));
-			strcpy(substr[j], rbuf[j]);
+			substr[j] = savestring(rbuf[j], strlen(rbuf[j]));
 			free(rbuf[j]);
 		}
 
@@ -8530,7 +8442,8 @@ get_substr(char *str, const char ifs)
 
 		for (d = (i + 1); d < substr_n; d++) {
 
-			if (strcmp(substr[i], substr[d]) == 0) {
+			if (*substr[i] == *substr[d]
+			&& strcmp(substr[i], substr[d]) == 0) {
 				duplicate = 1;
 				break;
 			}
@@ -8645,9 +8558,7 @@ new_instance(char *dir, int sudo)
 			tmp_cmd = (char **)xrealloc(tmp_cmd, (i + (sudo ? 5 : 4))
 										* sizeof(char *));
 			for (i = 0; tmp_term[i]; i++) {
-				tmp_cmd[i] = (char *)xnmalloc(strlen(tmp_term[i])
-											  + 1, sizeof(char));
-				strcpy(tmp_cmd[i], tmp_term[i]);
+				tmp_cmd[i] = savestring(tmp_term[i], strlen(tmp_term[i]));
 				free(tmp_term[i]);
 			}
 			free(tmp_term);
@@ -8732,9 +8643,7 @@ add_to_cmdhist(char *cmd)
 	size_t cmd_len = strlen(cmd);
 	history = (char **)xrealloc(history, (size_t)(current_hist_n + 2)
 								* sizeof(char *));
-	history[current_hist_n] = (char *)xcalloc(cmd_len + 1,
-											  sizeof(char));
-	strcpy(history[current_hist_n++], cmd);
+	history[current_hist_n++] = savestring(cmd, cmd_len);
 
 	history[current_hist_n] = (char *)NULL;
 }
@@ -9040,19 +8949,6 @@ get_hex_num(char *str)
 }
 
 static char *
-savestring(const char *str, size_t size)
-{
-	if (!str)
-		return (char *)NULL;
-
-	char *ptr = (char *)NULL;
-	ptr = (char *)xcalloc(size + 1, sizeof(char));
-	strcpy(ptr, str);
-
-	return ptr;
-}
-
-static char *
 home_tilde(const char *new_path)
 /* Reduce "HOME" to tilde ("~"). The new_path variable is always either
  * "HOME" or "HOME/file", that's why there's no need to check for
@@ -9064,7 +8960,7 @@ home_tilde(const char *new_path)
 	char *path_tilde = (char *)NULL;
 
 	/* If path == HOME */
-	if (strcmp(new_path, user_home) == 0) {
+	if (*new_path == *user_home && strcmp(new_path, user_home) == 0) {
 		path_tilde = (char *)xcalloc(2, sizeof(char));
 		path_tilde[0] = '~';
 	}
@@ -9482,9 +9378,7 @@ load_bookmarks(void)
 			bookmarks[bm_n].shortcut = (char *)NULL;
 			bookmarks[bm_n].name = (char *)NULL;
 
-			bookmarks[bm_n].path = (char *)xnmalloc(strlen(line) + 1,
-													sizeof(char));
-			strcpy(bookmarks[bm_n++].path, line);
+			bookmarks[bm_n++].path = savestring(line, strlen(line));
 
 			continue;
 		}
@@ -9503,9 +9397,7 @@ load_bookmarks(void)
 
 			*tmp = 0x00;
 
-			bookmarks[bm_n].shortcut = (char *)xnmalloc(strlen(p) + 1,
-											   sizeof(char));
-			strcpy(bookmarks[bm_n].shortcut, p);
+			bookmarks[bm_n].shortcut = savestring(p, strlen(p));
 
 			tmp++;
 			p = tmp;
@@ -9516,11 +9408,8 @@ load_bookmarks(void)
 
 				bookmarks[bm_n].name = (char *)NULL;
 
-				if (*p) {
-					bookmarks[bm_n].path = (char *)xnmalloc(strlen(p)
-													+ 1, sizeof(char));
-					strcpy(bookmarks[bm_n++].path, p);
-				}
+				if (*p)
+					bookmarks[bm_n++].path = savestring(p, strlen(p));
 
 				else
 					bookmarks[bm_n++].path = (char *)NULL;
@@ -9529,18 +9418,14 @@ load_bookmarks(void)
 			}
 
 			*tmp = 0x00;
-			bookmarks[bm_n].name = (char *)xnmalloc(strlen(p) + 1,
-													sizeof(char));
-			strcpy(bookmarks[bm_n].name, p);
+			bookmarks[bm_n].name = savestring(p, strlen(p));
 
 			if (!*(++tmp)) {
 				bookmarks[bm_n++].path = (char *)NULL;
 				continue;
 			}
 
-			bookmarks[bm_n].path = (char *)xnmalloc(strlen(tmp) + 1,
-													sizeof(char));
-			strcpy(bookmarks[bm_n++].path, tmp);
+			bookmarks[bm_n++].path = savestring(tmp, strlen(tmp));
 
 			continue;
 		}
@@ -9556,9 +9441,7 @@ load_bookmarks(void)
 
 		else {
 			*tmp = 0x00;
-			bookmarks[bm_n].name = (char *)xnmalloc(strlen(line) + 1,
-													sizeof(char));
-			strcpy(bookmarks[bm_n].name, line);
+			bookmarks[bm_n].name = savestring(line, strlen(line));
 		}
 
 		if (!*(++tmp)) {
@@ -9566,11 +9449,8 @@ load_bookmarks(void)
 			continue;
 		}
 
-		else {
-			bookmarks[bm_n].path = (char *)xnmalloc(strlen(tmp) + 1,
-													sizeof(char));
-			strcpy(bookmarks[bm_n++].path, tmp);
-		}
+		else
+			bookmarks[bm_n++].path = savestring(tmp, strlen(tmp));
 	}
 
 	free(line);
@@ -9595,9 +9475,8 @@ load_bookmarks(void)
 		if (!bookmarks[i].name || !*bookmarks[i].name)
 			continue;
 
-		bookmark_names[j] = (char *)xnmalloc(strlen(bookmarks[i].name)
-										+ 1, sizeof(char));
-		strcpy(bookmark_names[j++], bookmarks[i].name);
+		bookmark_names[j++] = savestring(bookmarks[i].name,
+								strlen(bookmarks[i].name));
 	}
 
 	bookmark_names[j] = (char *)NULL;
@@ -9694,9 +9573,8 @@ get_profile_names(void)
 		&& *profs[i]->d_name != '.') {
 			profile_names = (char **)xrealloc(profile_names, (pf_n + 1)
 											  * sizeof(char *));
-			profile_names[pf_n] = (char *)xcalloc(strlen(profs[i]->d_name)
-											+ 1, sizeof(char));
-			strcpy(profile_names[pf_n++], profs[i]->d_name);
+			profile_names[pf_n++] = savestring(profs[i]->d_name,
+										strlen(profs[i]->d_name));
 		}
 
 		free(profs[i]);
@@ -9723,7 +9601,8 @@ profile_add(char *prof)
 
 	for (i = 0; profile_names[i]; i++) {
 
-		if (strcmp(prof, profile_names[i]) == 0) {
+		if (*prof == *profile_names[i]
+		&& strcmp(prof, profile_names[i]) == 0) {
 			found = 1;
 			break;
 		}
@@ -9897,7 +9776,8 @@ profile_del(char *prof)
 	int found = 0;
 	size_t i;
 	for (i = 0; profile_names[i]; i++) {
-		if (strcmp(prof, profile_names[i]) == 0) {
+		if (*prof == *profile_names[i]
+		&& strcmp(prof, profile_names[i]) == 0) {
 			found = 1;
 			break;
 		}
@@ -10067,8 +9947,7 @@ parse_usrvar_value(const char *str, const char c)
 
 	/* Copy the result string into a buffer and return it */
 	char *buf = (char *)NULL;
-	buf = (char *)xnmalloc((strlen(tmp)) + 1, sizeof(char));
-	strcpy(buf, tmp);
+	buf = savestring(tmp, strlen(tmp));
 	tmp=(char *)NULL;
 
 	if (buf)
@@ -10105,11 +9984,8 @@ create_usr_var(char *str)
 
 	usr_var = xrealloc(usr_var, (size_t)(usrvar_n + 1)
 					   * sizeof(struct usrvar_t));
-	usr_var[usrvar_n].name = xcalloc(strlen(name) + 1, sizeof(char));
-	usr_var[usrvar_n].value = xcalloc(strlen(value) + 1, sizeof(char));
-
-	strcpy(usr_var[usrvar_n].name, name);
-	strcpy(usr_var[usrvar_n++].value, value);
+	usr_var[usrvar_n].name = savestring(name, strlen(name));
+	usr_var[usrvar_n++].value = savestring(value, strlen(value));
 
 	free(name);
 	free(value);
@@ -10245,9 +10121,7 @@ get_history(void)
 
 		history = (char **)xrealloc(history, (current_hist_n + 2)
 									* sizeof(char *));
-		history[current_hist_n] = (char *)xcalloc((size_t)line_len + 1,
-												  sizeof(char));
-		strcpy(history[current_hist_n++], line_buff);
+		history[current_hist_n++] = savestring(line_buff, (size_t)line_len);
 	}
 
 	history[current_hist_n] = (char *)NULL;
@@ -10277,7 +10151,8 @@ profile_set(char *prof)
 
 	for (i = 0; profile_names[i]; i++) {
 
-		if (strcmp(prof, profile_names[i]) == 0) {
+		if (*prof == *profile_names[i]
+		&& strcmp(prof, profile_names[i]) == 0) {
 			found = 1;
 			break;
 		}
@@ -10435,9 +10310,7 @@ profile_set(char *prof)
 			fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
 			exit(EXIT_FAILURE);
 		}
-		ws[cur_ws].path = (char *)xnmalloc(strlen(cwd) + 1,
-										   sizeof(char));
-		strcpy(ws[cur_ws].path, cwd);
+		ws[cur_ws].path = savestring(cwd, strlen(cwd));
 	}
 
 	if (chdir(ws[cur_ws].path) == -1) {
@@ -10468,7 +10341,7 @@ profile_function(char **comm)
 	int exit_status = EXIT_SUCCESS;
 
 	if (comm[1]) {
-		if (strcmp(comm[1], "--help") == 0)
+		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
 			puts(_("Usage: pf, prof, profile [ls, list] [set, add, "
 				   "del PROFILE]"));
 
@@ -10494,7 +10367,7 @@ profile_function(char **comm)
 			}
 
 		/* Delete a profile */
-		else if (strcmp(comm[1], "del") == 0)
+		else if (*comm[1] == 'd' && strcmp(comm[1], "del") == 0)
 			if (comm[2])
 				exit_status = profile_del(comm[2]);
 			else {
@@ -10503,7 +10376,7 @@ profile_function(char **comm)
 		}
 
 		/* Switch to another profile */
-		else if (strcmp(comm[1], "set") == 0) {
+		else if (*comm[1] == 's' && strcmp(comm[1], "set") == 0) {
 
 			if (comm[2])
 				exit_status = profile_set(comm[2]);
@@ -10614,9 +10487,7 @@ get_app(char *mime, char *ext)
 					int ret = strcntchr(app, 0x20);
 
 					if (ret != -1) {
-						char *app_tmp = (char *)xcalloc(app_len + 1,
-														sizeof(char));
-						strcpy(app_tmp, app);
+						char *app_tmp = savestring(app, app_len);
 						app_tmp[ret] = 0x00;
 						file_path = get_cmd_path(app_tmp);
 						free(app_tmp);
@@ -10672,6 +10543,8 @@ get_mime(char *file)
 		fputs(_("Error opening temporary file\n"), stderr);
 		return (char *)NULL;
 	}
+
+	puts("here");
 
 	char *rand_ext = gen_rand_str(6);
 
@@ -10751,8 +10624,7 @@ get_mime(char *file)
 				if (tmp[len - 1] == '\n')
 					tmp[len - 1] = 0x00;
 
-				mime_type = (char *)xnmalloc(strlen(tmp), sizeof(char));
-				strcpy(mime_type, tmp + 1);
+				mime_type = savestring(tmp + 1, strlen(tmp) - 1);
 			}
 
 			fclose(file_fp);
@@ -10795,11 +10667,11 @@ mime_open(char **args)
 	char *file_path = (char *)NULL, *deq_file = (char *)NULL;
 	int info = 0, file_index = 0;
 
-	if (strcmp(args[1], "edit") == 0) {
+	if (*args[1] == 'e' && strcmp(args[1], "edit") == 0) {
 		return mime_edit(args);
 	}
 
-	else if (strcmp(args[1], "info") == 0) {
+	else if (*args[1] == 'i' && strcmp(args[1], "info") == 0) {
 
 		if (!args[2]) {
 			fputs(_("Usage: mm, mime info FILENAME\n"), stderr);
@@ -10899,8 +10771,7 @@ mime_open(char **args)
 
 		if (ext_tmp) {
 			ext_tmp++; /* Remove dot from extension */
-			ext = (char *)xcalloc(strlen(ext_tmp) + 1, sizeof(char));
-			strcpy(ext, ext_tmp);
+			ext = savestring(ext_tmp, strlen(ext_tmp));
 			ext_tmp = (char *)NULL;
 		}
 
@@ -11745,15 +11616,15 @@ kbinds_function(char **args)
 		return EXIT_SUCCESS;
 	}
 
-	if (strcmp(args[1], "--help") == 0) {
+	if (*args[1] == '-' && strcmp(args[1], "--help") == 0) {
 		puts(_("Usage: kb, keybinds [edit] [reset]"));
 		return EXIT_SUCCESS;
 	}
 
-	if (strcmp(args[1], "edit") == 0)
+	if (*args[1] == 'e' && strcmp(args[1], "edit") == 0)
 		return kbinds_edit();
 
-	if (strcmp(args[1], "reset") == 0)
+	if (*args[1] == 'r' && strcmp(args[1], "reset") == 0)
 		return kbinds_reset();
 
 	fputs(_("Usage: kb, keybinds [edit] [reset]\n"), stderr);
@@ -11781,8 +11652,7 @@ log_msg(char *_msg, int print)
 	msgs_n++;
 	messages = (char **)xrealloc(messages, (size_t)(msgs_n + 1)
 								 * sizeof(char *));
-	messages[msgs_n - 1] = (char *)xcalloc(msg_len + 1, sizeof(char));
-	strcpy(messages[msgs_n - 1], _msg);
+	messages[msgs_n - 1] = savestring(_msg, msg_len);
 	messages[msgs_n] = (char *)NULL;
 
 	if (print) /* PRINT_PROMPT */
@@ -11959,9 +11829,8 @@ check_for_alias(char **comm)
 				for (j = 1; comm[j]; j++) {
 					alias_comm = (char **)xrealloc(alias_comm, (++args_n
 												+ 1) * sizeof(char *));
-					alias_comm[args_n] = (char *)xcalloc(strlen(comm[j])
-												+ 1, sizeof(char));
-					strcpy(alias_comm[args_n], comm[j]);
+					alias_comm[args_n] = savestring(comm[j],
+											strlen(comm[j]));;
 				}
 			}
 
@@ -12083,8 +11952,7 @@ set_shell(char *str)
 	if (sys_shell)
 		free(sys_shell);
 
-	sys_shell = (char *)xnmalloc(strlen(tmp) + 1, sizeof(char));
-	strcpy(sys_shell, tmp);
+	sys_shell = savestring(tmp, strlen(tmp));
 	printf(_("Successfully set '%s' as %s default shell\n"), sys_shell,
 		   PROGRAM_NAME);
 
@@ -12140,9 +12008,7 @@ get_colorschemes(void)
 
 		*ret = 0x00;
 
-		color_schemes[i] = (char *)xnmalloc(strlen(name) + 1,
-											sizeof(char));
-		strcpy(color_schemes[i++], name);
+		color_schemes[i++] = savestring(name, strlen(name));
 	}
 
 	color_schemes[i] = (char *)NULL;
@@ -12162,7 +12028,7 @@ is_internal(const char *cmd)
 							   "tr", "trash", "s", "sel", "mm", "mime",
 							   "bm", "bookmarks", "br", "bulk", "ac",
 							   "ad", "exp", "export", "pin", "jump",
-							   "jc", "jp", "r", NULL };
+							   "jc", "jp", "r", "bl", "le", NULL };
 	short found = 0;
 	size_t i;
 
@@ -12366,9 +12232,7 @@ split_str(char *str)
 				if (buf_len > 0) {
 					substr = (char **)xrealloc(substr, (words + 1)
 											   * sizeof(char *));
-					substr[words] = (char *)xcalloc(buf_len + 1,
-													sizeof(char));
-					strcpy(substr[words], buf);
+					substr[words] = savestring(buf, buf_len);
 					words++;
 				}
 
@@ -12404,8 +12268,7 @@ split_str(char *str)
 		else
 			substr = (char **)xrealloc(substr, (words + 1)
 									   * sizeof(char *));
-		substr[words] = (char *)xcalloc(buf_len + 1, sizeof(char));
-		strcpy(substr[words], buf);
+		substr[words] = savestring(buf, buf_len);
 		words++;
 	}
 
@@ -12499,8 +12362,7 @@ cd_function(char *new_path)
 
 	/* If chdir() was successful */
 	free(ws[cur_ws].path);
-	ws[cur_ws].path = (char *)xnmalloc(strlen(buf) + 1, sizeof(char));
-	strcpy(ws[cur_ws].path, buf);
+	ws[cur_ws].path = savestring(buf, strlen(buf));
 
 	add_to_dirhist(ws[cur_ws].path);
 
@@ -12681,8 +12543,7 @@ run_action(char *action, char **args)
 
 	if (strchr(action, '/')) {
 		len = action_len;
-		cmd = (char *)xnmalloc(len + 1, sizeof(char));
-		strcpy(cmd, action);
+		cmd = savestring(action, len);
 	}
 
 	/* If not a path, PLUGINS_DIR is assumed */
@@ -12868,8 +12729,9 @@ surf_hist(char **comm)
 
 			if (ret == 0) {
 				free(ws[cur_ws].path);
-				ws[cur_ws].path = (char *)xcalloc(strlen(old_pwd[atoi_comm - 1])
-									   + 1, sizeof(char));
+				ws[cur_ws].path = (char *)xnmalloc(strlen(
+										old_pwd[atoi_comm - 1])
+										+ 1, sizeof(char));
 				strcpy(ws[cur_ws].path, old_pwd[atoi_comm - 1]);
 
 				dirhist_cur_index = atoi_comm - 1;
@@ -12925,10 +12787,8 @@ back_function(char **comm)
 	if (chdir(old_pwd[dirhist_cur_index]) == EXIT_SUCCESS) {
 
 		free(ws[cur_ws].path);
-		ws[cur_ws].path = (char *)xcalloc(strlen(old_pwd[dirhist_cur_index])
-							   + 1, sizeof(char));
-
-		strcpy(ws[cur_ws].path, old_pwd[dirhist_cur_index]);
+		ws[cur_ws].path = savestring(old_pwd[dirhist_cur_index],
+							strlen(old_pwd[dirhist_cur_index]));
 
 		exit_status = EXIT_SUCCESS;
 
@@ -12975,9 +12835,8 @@ forth_function(char **comm)
 	if (chdir(old_pwd[dirhist_cur_index]) == EXIT_SUCCESS) {
 
 		free(ws[cur_ws].path);
-		ws[cur_ws].path = (char *)xcalloc(strlen(old_pwd[dirhist_cur_index])
-							   + 1, sizeof(char));
-		strcpy(ws[cur_ws].path, old_pwd[dirhist_cur_index]);
+		ws[cur_ws].path = savestring(old_pwd[dirhist_cur_index],
+							strlen(old_pwd[dirhist_cur_index]));
 
 		add_to_jumpdb(ws[cur_ws].path);
 
@@ -13031,8 +12890,7 @@ list_mountpoints(void)
 			str = strtok(line, " ");
 			size_t dev_len = strlen(str);
 
-			char *device = (char *)xnmalloc(dev_len + 1, sizeof(char));
-			strcpy(device, str);
+			char *device = savestring(str, dev_len);
 			/* Print only the first two fileds of each /proc/mounts
 			 * line */
 			while (str && counter < 2) {
@@ -13046,9 +12904,7 @@ list_mountpoints(void)
 					 * array */
 					mountpoints = (char **)xrealloc(mountpoints,
 										   (mp_n + 1) * sizeof(char *));
-					mountpoints[mp_n] = (char *)xcalloc(strlen(str)
-												+ 1, sizeof(char));
-					strcpy(mountpoints[mp_n++], str);
+					mountpoints[mp_n++] = savestring(str, strlen(str));
 				}
 
 				str = strtok(NULL, " ,");
@@ -13085,9 +12941,8 @@ list_mountpoints(void)
 
 			if (ret == 0) {
 				free(ws[cur_ws].path);
-				ws[cur_ws].path = (char *)xcalloc(strlen(mountpoints[atoi_num - 1])
-									   + 1, sizeof(char));
-				strcpy(ws[cur_ws].path, mountpoints[atoi_num - 1]);
+				ws[cur_ws].path = savestring(mountpoints[atoi_num - 1],
+									strlen(mountpoints[atoi_num - 1]));
 				add_to_dirhist(ws[cur_ws].path);
 
 				if (cd_lists_on_the_fly) {
@@ -14414,9 +14269,7 @@ get_sel_files(void)
 
 		sel_elements = (char **)xrealloc(sel_elements, (sel_n + 1)
 										 * sizeof(char *));
-		sel_elements[sel_n] = (char *)xnmalloc(len + 1,
-											  sizeof(char));
-		strcpy(sel_elements[sel_n++], line);
+		sel_elements[sel_n++] = savestring(line, len);
 	}
 
 	fclose(sel_fp);
@@ -14643,15 +14496,11 @@ load_keybinds(void)
 		kbinds = xrealloc(kbinds, (kbinds_n + 1) *
 						  sizeof(struct kbinds_t));
 
-		kbinds[kbinds_n].key = xnmalloc(strlen(tmp + 1) + 1,
-											sizeof(char));
-		strcpy(kbinds[kbinds_n].key, tmp + 1);
+		kbinds[kbinds_n].key = savestring(tmp + 1, strlen(tmp + 1));
 
 		*tmp = 0x00;
 
-		kbinds[kbinds_n].function = xnmalloc(strlen(line) + 1,
-											   sizeof(char));
-		strcpy(kbinds[kbinds_n++].function, line);
+		kbinds[kbinds_n++].function = savestring(line, strlen(line));
 	}
 
 	free(line);
@@ -15272,13 +15121,15 @@ rl_previous_profile(int count, int key)
 		total_profs++;
 
 		if (!alt_profile) {
-			if (strcmp(profile_names[i], "default") == 0) {
+			if (*profile_names[i] == 'd'
+			&& strcmp(profile_names[i], "default") == 0) {
 				cur_prof = i;
 			}
 		}
 
 		else {
-			if (strcmp(alt_profile, profile_names[i]) == 0) {
+			if (*alt_profile == *profile_names[i]
+			&& strcmp(alt_profile, profile_names[i]) == 0) {
 				cur_prof = i;
 			}
 		}
@@ -15316,13 +15167,15 @@ rl_next_profile(int count, int key)
 		total_profs++;
 
 		if (!alt_profile) {
-			if (strcmp(profile_names[i], "default") == 0) {
+			if (*profile_names[i] == 'd'
+			&& strcmp(profile_names[i], "default") == 0) {
 				cur_prof = i;
 			}
 		}
 
 		else {
-			if (strcmp(alt_profile, profile_names[i]) == 0) {
+			if (*alt_profile == *profile_names[i]
+			&& strcmp(alt_profile, profile_names[i]) == 0) {
 				cur_prof = i;
 			}
 		}
@@ -16028,25 +15881,7 @@ set_signals_to_ignore(void)
 /*	signal(SIGTERM, SIG_IGN);
 	signal(SIGTTIN, SIG_IGN);
 	signal(SIGTTOU, SIG_IGN); */
-/* Why the heck did I disabled SIGCHLD?
- * SIGCHLD is the signal sent to the parent process when the child
- * terminates, for example, when using fork() to create a new process
- * (child). Without this signal, waitpid (or wait) always fails
- * (-1 error) and you cannot get to know the status of the child.
- * (SIGCHLD, SIG_IGN); */
 }
-
-/*
-static void
-set_signals_to_default (void)
-{
-	signal(SIGINT, SIG_DFL);
-	signal(SIGQUIT, SIG_DFL);
-	signal(SIGTSTP, SIG_DFL);
-//	signal(SIGTTIN, SIG_DFL);
-//	signal(SIGTTOU, SIG_DFL);
-//	signal(SIGCHLD, SIG_DFL);
-} */
 
 static void
 handle_stdin()
@@ -16184,9 +16019,7 @@ handle_stdin()
 	if (ws[cur_ws].path)
 		free(ws[cur_ws].path);
 
-	ws[cur_ws].path = (char *)xnmalloc(strlen(STDIN_TMP_DIR) + 1,
-									   sizeof(char));
-	strcpy(ws[cur_ws].path, STDIN_TMP_DIR);
+	ws[cur_ws].path = savestring(STDIN_TMP_DIR, strlen(STDIN_TMP_DIR));
 
 	goto FREE_N_EXIT;
 
@@ -16242,32 +16075,6 @@ init_shell(void)
 
 	return;
 }
-
-/*
-void signal_handler(int sig_num)
-//handle signals catched by the signal function. In this case, the
-//function just prompts a new line. If trap signals are not enabled,
-//kill the current foreground process (pid)
-{
-//	if (sig_num == SIGINT) {
-//		printf("Content of rl_line_buffer: %s\n", rl_line_buffer);
-//		if (is_number(rl_line_buffer) && atoi(rl_line_buffer) > 0 &&
-//			atoi(rl_line_buffer) < files) {
-//			printf("%s\n", dirlist[atoi(rl_line_buffer)-1]->d_name);
-//		}
-//		memset(rl_line_buffer, 0x00, strlen(rl_line_buffer));
-//		rl_reset_line_state();
-//		rl_on_new_line();
-//	}
-	//if Ctrl-C and pid is not ClifM's pid, kill the current foreground
-	//process AND its childs (-pid).
-//	if (sig_num == SIGINT && pid != own_pid) {
-//		if (kill(-pid, SIGTERM) != -1)
-//			printf("CliFM: %d: Terminated\n", pid);
-//		else
-//			perror("CliFM: kill");
-//	}
-} */
 
 static char *
 my_rl_quote(char *text, int m_t, char *qp)
@@ -17135,11 +16942,8 @@ pin_directory(char *dir)
 	}
 
 	/* If absolute path */
-	if (*dir == '/') {
-		pinned_dir = (char *)xnmalloc(strlen(dir) + 1, sizeof(char));
-
-		strcpy(pinned_dir, dir);
-	}
+	if (*dir == '/')
+		pinned_dir =  savestring(dir, strlen(dir));
 
 	else { /* If relative path */
 
@@ -17506,7 +17310,8 @@ autojump(char **args)
 					continue;
 
 				/* Exclue CWD */
-				if (strcmp(jump_db[j].path, ws[cur_ws].path) == 0)
+				if (*jump_db[j].path == *ws[cur_ws].path
+				&& strcmp(jump_db[j].path, ws[cur_ws].path) == 0)
 					continue;
 
 				int exclude = 0;
@@ -17642,11 +17447,9 @@ workspaces(char *str)
 
 	/* If new workspace has no path yet, copy the path of the current
 	 * workspace */
-	if (!ws[tmp_ws].path) {
-		ws[tmp_ws].path = (char *)xnmalloc(strlen(ws[cur_ws].path)
-										+ 1, sizeof(char));
-		strcpy(ws[tmp_ws].path, ws[cur_ws].path);
-	}
+	if (!ws[tmp_ws].path)
+		ws[tmp_ws].path = savestring(ws[cur_ws].path,
+									 strlen(ws[cur_ws].path));
 
 	if (chdir(ws[tmp_ws].path) == -1) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[tmp_ws].path,
@@ -17757,11 +17560,10 @@ select_file(char *file)
 	}
 
 	if (!exists) {
-		sel_elements = (char **)xrealloc(sel_elements, (sel_n + 1)
+		sel_elements = (char **)xrealloc(sel_elements, (sel_n + 2)
 										 * sizeof(char *));
-		sel_elements[sel_n] = (char *)xcalloc(strlen(file) + 1,
-											  sizeof(char));
-		strcpy(sel_elements[sel_n++], file);
+		sel_elements[sel_n++] = savestring(file, strlen(file));
+		sel_elements[sel_n] = (char *)NULL;
 		new_sel++;
 	}
 
@@ -18581,11 +18383,8 @@ deselect(char **comm)
 
 	for (i = 0; i < desel_n; i++) {
 		int desel_int = atoi(desel_elements[i]);
-
-		desel_path[i] = (char *)xnmalloc(
-								strlen(sel_elements[desel_int - 1])
-								+ 1, sizeof(char));
-		strcpy(desel_path[i], sel_elements[desel_int - 1]);
+		desel_path[i] = savestring(sel_elements[desel_int - 1],
+							strlen(sel_elements[desel_int - 1]));
 	}
 
 	/* Search the sel array for the path of the element to deselect and
@@ -19437,8 +19236,7 @@ bookmark_del(char *name)
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = 0x00;
 		bms = (char **)xrealloc(bms, (bmn + 1) * sizeof(char *));
-		bms[bmn] = (char *)xcalloc((size_t)line_len + 1, sizeof(char));
-		strcpy(bms[bmn++], line);
+		bms[bmn++] = savestring(line, line_len);
 	}
 
 	free(line);
@@ -19488,16 +19286,20 @@ bookmark_del(char *name)
 	/* If bookmark name was passed but it is not a valid bookmark */
 	else if (name) {
 		fprintf(stderr, "bookmarks: '%s': No such bookmark\n", name);
+
 		for (i = 0; i < bmn; i++)
 			free(bms[i]);
+
 		free(bms);
 		fclose(bm_fp);
+
 		return EXIT_FAILURE;
 	}
 
 	/* If not name, list bookmarks and get user input */
 	else {
 		printf("%sBookmarks%s\n\n", bold, df_c);
+
 		for (i = 0; i < bmn; i++)
 			printf("%s%zu %s%s%s\n", el_c, i + 1, bm_c, bms[i],
 				   df_c);
@@ -19505,6 +19307,7 @@ bookmark_del(char *name)
 		/* Get user input */
 		printf(_("\n%sEnter 'q' to quit.\n"), df_c);
 		char *input = (char *)NULL;
+
 		while (!input)
 			input = rl_no_hist("Bookmark(s) to be deleted "
 							   "(ex: 1 2-6, or *): ");
@@ -19512,12 +19315,16 @@ bookmark_del(char *name)
 		del_elements = get_substr(input, ' ');
 		free(input);
 		input = (char *)NULL;
+
 		if (!del_elements) {
+
 			for (i = 0; i < bmn; i++)
 				free(bms[i]);
+
 			free(bms);
 			fclose(bm_fp);
 			fprintf(stderr, _("bookmarks: Error parsing input\n"));
+
 			return EXIT_FAILURE;
 		}
 	}
@@ -19529,8 +19336,10 @@ bookmark_del(char *name)
 	 * worst, "* q" */
 	for (i = 0; del_elements[i]; i++) {
 		int quit = 0;
+
 		if (strcmp(del_elements[i], "q") == 0)
 			quit = 1;
+
 		else if (is_number(del_elements[i])
 		&& (atoi(del_elements[i]) <= 0
 		|| atoi(del_elements[i]) > (int)bmn)) {
@@ -19538,14 +19347,20 @@ bookmark_del(char *name)
 					del_elements[i]);
 			quit = 1;
 		}
+
 		if (quit) {
+
 			for (i = 0; i < bmn; i++)
 				free(bms[i]);
+
 			free(bms);
+
 			for (i = 0; del_elements[i]; i++)
 				free(del_elements[i]);
+
 			free(del_elements);
 			fclose(bm_fp);
+
 			return EXIT_SUCCESS;
 		}
 	}
@@ -19562,8 +19377,10 @@ bookmark_del(char *name)
 									  sizeof(char));
 			sprintf(bk_file, "%s/bookmarks.bk", CONFIG_DIR);
 			char *tmp_cmd[] = { "cp", BM_FILE, bk_file, NULL };
+
 			int ret = launch_execve(tmp_cmd, FOREGROUND);
 			/* Remove the bookmarks file, free stuff, and exit */
+
 			if (ret == EXIT_SUCCESS) {
 				unlink(BM_FILE);
 				printf(_("bookmarks: All bookmarks were deleted\n "
@@ -19572,6 +19389,7 @@ bookmark_del(char *name)
 				free(bk_file);
 				bk_file = (char *)NULL;
 			}
+
 			else
 				printf(_("bookmarks: Error creating backup file. No "
 						 "bookmark was deleted\n"));
@@ -19747,8 +19565,7 @@ bookmark_add(char *file)
 		}
 		/* Store lines: used later to check hotkeys */
 		bms = (char **)xrealloc(bms, (bmn + 1) * sizeof(char *));
-		bms[bmn] = (char *)xcalloc(strlen(line) + 1, sizeof(char));
-		strcpy(bms[bmn++], line);
+		bms[bmn++] = savestring(line, strlen(line));
 
 	}
 
@@ -19861,7 +19678,7 @@ bookmark_add(char *file)
 			free(hk);
 		}
 		else { /* Only name */
-			tmp = (char *)xcalloc(strlen(name) + strlen(file) + 3,
+			tmp = (char *)xnmalloc(strlen(name) + strlen(file) + 3,
 								  sizeof(char));
 			sprintf(tmp, "%s:%s\n", name, file);
 		}
@@ -19870,7 +19687,7 @@ bookmark_add(char *file)
 	}
 
 	else if (hk) { /* Only hk */
-		tmp = (char *)xcalloc(strlen(hk) + strlen(file) + 4,
+		tmp = (char *)xnmalloc(strlen(hk) + strlen(file) + 4,
 							  sizeof(char));
 		sprintf(tmp, "[%s]%s\n", hk, file);
 		free(hk);
@@ -24657,8 +24474,7 @@ parse_input_str(char *str)
 
 		char **cmd = (char **)NULL;
 		cmd = (char **)xnmalloc(2, sizeof(char *));
-		cmd[0] = (char *)xcalloc(strlen(p) + 1, sizeof(char));
-		strcpy(cmd[0], p);
+		cmd[0] = savestring(p, strlen(p));
 		cmd[1] = (char *)NULL;
 
 		p = (char *)NULL;
@@ -24820,9 +24636,8 @@ parse_input_str(char *str)
 											  sizeof(char *));
 
 				for (i = 0; i < (size_t)range_array[r] + old_ranges_n; i++) {
-					ranges_cmd[j] = (char *)xcalloc(strlen(substr[i]) + 1,
-													sizeof(char));
-					strcpy(ranges_cmd[j++], substr[i]);
+					ranges_cmd[j++] = savestring(substr[i],
+											strlen(substr[i]));
 				}
 
 				for (i = 0; i < ranges_n; i++) {
@@ -24833,9 +24648,8 @@ parse_input_str(char *str)
 
 				for (i = (size_t)range_array[r] + old_ranges_n + 1;
 				i <= args_n; i++) {
-					ranges_cmd[j] = (char *)xcalloc(strlen(substr[i]) + 1,
-													sizeof(char));
-					strcpy(ranges_cmd[j++], substr[i]);
+					ranges_cmd[j++] = savestring(substr[i],
+											strlen(substr[i]));
 				}
 
 				ranges_cmd[j] = NULL;
@@ -24848,9 +24662,8 @@ parse_input_str(char *str)
 										   * sizeof(char *));
 
 				for (i = 0; i < j; i++) {
-					substr[i] = (char *)xcalloc(strlen(ranges_cmd[i])
-												+ 1, sizeof(char));
-					strcpy(substr[i], ranges_cmd[i]);
+					substr[i] = savestring(ranges_cmd[i],
+										strlen(ranges_cmd[i]));
 					free(ranges_cmd[i]);
 				}
 
@@ -24892,9 +24705,7 @@ parse_input_str(char *str)
 				char *esc_str = escape_str(sel_elements[i]);
 
 				if (esc_str) {
-					sel_array[j] = (char *)xcalloc(strlen(esc_str) + 1,
-												   sizeof(char));
-					strcpy(sel_array[j++], esc_str);
+					sel_array[j++] = savestring(esc_str, strlen(esc_str));
 					free(esc_str);
 					esc_str = (char *)NULL;
 				}
@@ -24920,11 +24731,8 @@ parse_input_str(char *str)
 				}
 			}
 
-			for (i = (size_t)is_sel + 1; i <= args_n; i++) {
-				sel_array[j] = (char *)xcalloc(strlen(substr[i]) + 1,
-											   sizeof(char));
-				strcpy(sel_array[j++], substr[i]);
-			}
+			for (i = (size_t)is_sel + 1; i <= args_n; i++)
+				sel_array[j++] = savestring(substr[i], strlen(substr[i]));
 
 			for (i = 0; i <= args_n; i++)
 				free(substr[i]);
@@ -24933,9 +24741,7 @@ parse_input_str(char *str)
 									   * sizeof(char *));
 
 			for (i = 0; i < j; i++) {
-				substr[i] = (char *)xcalloc(strlen(sel_array[i]) + 1,
-										    sizeof(char));
-				strcpy(substr[i], sel_array[i]);
+				substr[i] = savestring(sel_array[i], strlen(sel_array[i]));
 				free(sel_array[i]);
 			}
 
@@ -25244,11 +25050,8 @@ parse_input_str(char *str)
 				glob_cmd = (char **)xcalloc(args_n + globbuf.gl_pathc
 											+ 1, sizeof(char *));
 
-				for (i = 0; i < ((size_t)glob_array[g] + old_pathc); i++) {
-					glob_cmd[j] = (char *)xcalloc(strlen(substr[i]) + 1,
-												  sizeof(char));
-					strcpy(glob_cmd[j++], substr[i]);
-				}
+				for (i = 0; i < ((size_t)glob_array[g] + old_pathc); i++)
+					glob_cmd[j++] = savestring(substr[i], strlen(substr[i]));
 
 				for (i = 0; i < globbuf.gl_pathc; i++) {
 
@@ -25261,9 +25064,7 @@ parse_input_str(char *str)
 					char *esc_str = escape_str(globbuf.gl_pathv[i]);
 
 					if (esc_str) {
-						glob_cmd[j] = (char *)xcalloc(strlen(esc_str)
-													+ 1, sizeof(char));
-						strcpy(glob_cmd[j++], esc_str);
+						glob_cmd[j++] = savestring(esc_str, strlen(esc_str));
 						free(esc_str);
 					}
 
@@ -25291,11 +25092,8 @@ parse_input_str(char *str)
 				}
 
 				for (i = (size_t)glob_array[g] + old_pathc + 1;
-				i <= args_n; i++) {
-					glob_cmd[j] = (char *)xcalloc(strlen(substr[i])
-												  + 1, sizeof(char));
-					strcpy(glob_cmd[j++], substr[i]);
-				}
+				i <= args_n; i++)
+					glob_cmd[j++] = savestring(substr[i], strlen(substr[i]));
 
 				glob_cmd[j] = (char *)NULL;
 
@@ -25341,20 +25139,15 @@ parse_input_str(char *str)
 											+ 1, sizeof(char *));
 
 				for (i = 0; i < ((size_t)word_array[w] + old_pathc);
-				i++) {
-					word_cmd[j] = (char *)xcalloc(strlen(substr[i])
-												+ 1, sizeof(char));
-					strcpy(word_cmd[j++], substr[i]);
-				}
+				i++)
+					word_cmd[j++] = savestring(substr[i], strlen(substr[i]));
 
 				for (i = 0; i < wordbuf.we_wordc; i++) {
 					/* Escape the globbed filename and copy it*/
 					char *esc_str = escape_str(wordbuf.we_wordv[i]);
 
 					if (esc_str) {
-						word_cmd[j] = (char *)xcalloc(strlen(esc_str)
-													+ 1, sizeof(char));
-						strcpy(word_cmd[j++], esc_str);
+						word_cmd[j++] = savestring(esc_str, strlen(esc_str));
 						free(esc_str);
 					}
 
@@ -25382,11 +25175,8 @@ parse_input_str(char *str)
 				}
 
 				for (i = (size_t)word_array[w] + old_pathc + 1;
-				i <= args_n; i++) {
-					word_cmd[j] = (char *)xcalloc(strlen(substr[i])
-												  + 1, sizeof(char));
-					strcpy(word_cmd[j++], substr[i]);
-				}
+				i <= args_n; i++)
+					word_cmd[j++] = savestring(substr[i], strlen(substr[i]));
 
 				word_cmd[j] = (char *)NULL;
 
@@ -25482,9 +25272,8 @@ parse_input_str(char *str)
 											 sizeof(char *));
 		size_t k = 0;
 		for (j = 0; regex_files[j]; j++) {
-			tmp_files[k] = (char *)xnmalloc(strlen(regex_files[j])
-									+ 1, sizeof(char));
-			strcpy(tmp_files[k++], regex_files[j]);
+			tmp_files[k++] = savestring(regex_files[j],
+								strlen(regex_files[j]));
 		}
 
 		tmp_files[k] = (char *)NULL;
@@ -25736,10 +25525,8 @@ external_arguments(int argc, char **argv)
 		}
 		break;
 
-		case 17: {
-			opener = (char *)xnmalloc(strlen(optarg) + 1, sizeof(char));
-			strcpy(opener, optarg);
-		}
+		case 17:
+			opener = savestring(optarg, strlen(optarg));
 		break;
 
 		case 18:
@@ -25754,11 +25541,8 @@ external_arguments(int argc, char **argv)
 			xargs.list_and_quit = 1;
 		break;
 
-		case 21: {
-			usr_cscheme = (char *)xnmalloc(strlen(optarg) + 1,
-									sizeof(char *));
-			strcpy(usr_cscheme, optarg);
-		}
+		case 21:
+			usr_cscheme = savestring(optarg, strlen(optarg));
 		break;
 
 		case 22:
@@ -25983,9 +25767,7 @@ external_arguments(int argc, char **argv)
 		}
 
 		else {
-			alt_bm_file = (char *)xnmalloc(strlen(bm_value)
-											+ 1, sizeof(char));
-			strcpy(alt_bm_file, bm_value);
+			alt_bm_file = savestring(bm_value, strlen(bm_value));
 			_err('n', PRINT_PROMPT, "%s: Loaded alternative "
 				 "bookmarks file\n", PROGRAM_NAME);
 		}
@@ -26012,9 +25794,7 @@ external_arguments(int argc, char **argv)
 		}
 
 		else {
-			alt_kbinds_file = (char *)xnmalloc(strlen(kbinds_value)
-											+ 1, sizeof(char));
-			strcpy(alt_kbinds_file, kbinds_value);
+			alt_kbinds_file = savestring(kbinds_value, strlen(kbinds_value));
 			_err('n', PRINT_PROMPT, "%s: Loaded alternative "
 				 "keybindings file\n", PROGRAM_NAME);
 		}
@@ -26044,9 +25824,7 @@ external_arguments(int argc, char **argv)
 		}
 
 		else {
-			alt_config_file = (char *)xnmalloc(strlen(config_value)
-											+ 1, sizeof(char));
-			strcpy(alt_config_file, config_value);
+			alt_config_file = savestring(config_value, strlen(config_value));
 			_err('n', PRINT_PROMPT, "%s: Loaded alternative "
 				 "configuration file\n", PROGRAM_NAME);
 		}
@@ -26069,9 +25847,7 @@ external_arguments(int argc, char **argv)
 			if (ws[cur_ws].path)
 				free(ws[cur_ws].path);
 
-			ws[cur_ws].path = (char *)xnmalloc(strlen(path_value) + 1,
-											  sizeof(char));
-			strcpy(ws[cur_ws].path, path_value);
+			ws[cur_ws].path = savestring(path_value, strlen(path_value));
 		}
 
 		else { /* Error changing directory */
@@ -26093,9 +25869,8 @@ external_arguments(int argc, char **argv)
 		if (alt_profile)
 			free(alt_profile);
 
-		alt_profile = (char *)xcalloc(strlen(alt_profile_value) + 1,
-									  sizeof(char));
-		strcpy(alt_profile, alt_profile_value);
+		alt_profile = savestring(alt_profile_value,
+								strlen(alt_profile_value));
 	}
 }
 
@@ -26200,10 +25975,8 @@ main(int argc, char *argv[])
 
 	register size_t i = 0;
 
-	for (i = 0; i < (size_t)argc; i++) {
-		argv_bk[i] = (char *)xnmalloc(strlen(argv[i]) + 1, sizeof(char));
-		strcpy(argv_bk[i], argv[i]);
-	}
+	for (i = 0; i < (size_t)argc; i++)
+		argv_bk[i] = savestring(argv[i], strlen(argv[i]));
 
 	/* Register the function to be called at normal exit, either via
 	 * exit() or main's return. The registered function will not be
@@ -26311,10 +26084,8 @@ main(int argc, char *argv[])
 	/* Copy the list of quote chars to a global variable to be used
 	 * later by some of the program functions like split_str(),
 	 * my_rl_quote(), is_quote_char(), and my_rl_dequote() */
-	qc = (char *)xcalloc(strlen(rl_filename_quote_characters) + 1,
-						 sizeof(char));
-
-	strcpy(qc, rl_filename_quote_characters);
+	qc = savestring(rl_filename_quote_characters,
+					strlen(rl_filename_quote_characters));
 
 	/* Available keymaps: emacs_standard_keymap (default),
 	 * emacs_meta_keymap, emacs_ctlx_keymap, vi_movement_keymap,
@@ -26443,11 +26214,8 @@ main(int argc, char *argv[])
 		getcwd(cwd, sizeof(cwd));
 
 		if (!*cwd || strlen(cwd) == 0) {
-			if (user_home) {
-				ws[cur_ws].path = (char *)xnmalloc(strlen(user_home)
-									   + 1, sizeof(char));
-				strcpy(ws[cur_ws].path, user_home);
-			}
+			if (user_home)
+				ws[cur_ws].path = savestring(user_home, strlen(user_home));
 
 			else {
 				if (access("/", R_OK|X_OK) == -1) {
@@ -26456,18 +26224,13 @@ main(int argc, char *argv[])
 					exit(EXIT_FAILURE);
 				}
 
-				else {
-					ws[cur_ws].path = (char *)xnmalloc(2, sizeof(char));
-					strcpy(ws[cur_ws].path, "/\0");
-				}
+				else
+					ws[cur_ws].path = savestring("/\0", 2);
 			}
 		}
 
-		else {
-			ws[cur_ws].path = (char*)xnmalloc(strlen(cwd) + 1,
-											  sizeof(char));
-			strcpy(ws[cur_ws].path, cwd);
-		}
+		else
+			ws[cur_ws].path = savestring(cwd, strlen(cwd));
 	}
 
 	/* Make path the CWD */
@@ -26492,8 +26255,7 @@ main(int argc, char *argv[])
 		if (ws[cur_ws].path)
 			free(ws[cur_ws].path);
 
-		ws[cur_ws].path = (char *)xnmalloc(strlen(cwd) + 1, sizeof(char));
-		strcpy(ws[cur_ws].path, cwd);
+		ws[cur_ws].path = savestring(cwd, strlen(cwd));
 	}
 
 	add_to_dirhist(ws[cur_ws].path);
