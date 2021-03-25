@@ -359,7 +359,7 @@ nm=01;32:bm=01;36:"
 #define CP_WCP 2
 #define DEF_CP_CMD CP_CP
 #define MV_MV 0
-#define CP_ADVMV 1
+#define MV_ADVMV 1
 #define DEF_MV_CMD MV_MV
 
 /* Macros for the colors_list function */
@@ -383,11 +383,8 @@ nm=01;32:bm=01;36:"
 #define SGRP 11
 #define SORT_TYPES 11
 
-/* Max length of the properties string in long view mode. This value
- * depends however on the length of owner and group for each file, so
- * that 57 is only an approximated value (it takes "owner:group" to be
- * 13 bytes long) */
-#define MAX_PROP_STR 57
+/* Max length of the properties string in long view mode */
+#define MAX_PROP_STR 55
 
 #define DEFAULT_PROMPT "[\\[\\e[0;36m\\]\\S\\[\\e[0m\\]]\\l \\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\
 \\z\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
@@ -1113,8 +1110,8 @@ is_internal_c(const char *cmd)
 			"back", "f", "forth", "bh", "fh", "u", "undel",
 			"untrash", "s", "sel", "sb", "selbox", "ds",
 			"desel", "rm", "mkdir", "ln", "unlink", "touch",
-			"r", "md", "l", "p", "pp", "pr", "prop", "pf", "prof",
-			"profile", "mp", "mountpoints", "ext", "pg",
+			"r", "md", "l", "le", "p", "pp", "pr", "prop", "pf",
+			"prof", "profile", "mp", "mountpoints", "ext", "pg",
 			"pager", "uc", "unicode", "folders-first", "ff",
 			"log", "msg", "messages", "alias", "shell", "edit",
 			"history", "hf", "hidden", "path", "cwd", "splash",
@@ -1130,8 +1127,9 @@ is_internal_c(const char *cmd)
 
 	short found = 0;
 	size_t i;
+
 	for (i = 0; int_cmds[i]; i++) {
-		if (strcmp(cmd, int_cmds[i]) == 0) {
+		if (*cmd == *int_cmds[i] && strcmp(cmd, int_cmds[i]) == 0) {
 			found = 1;
 			break;
 		}
@@ -1141,8 +1139,8 @@ is_internal_c(const char *cmd)
 		return 1;
 
 	/* Check for the search and history functions as well */
-	else if ((cmd[0] == '/' && access(cmd, F_OK) != 0)
-	|| (cmd[0] == '!' && (isdigit(cmd[1])
+	else if ((*cmd == '/' && access(cmd, F_OK) != 0)
+	|| (*cmd == '!' && (isdigit(cmd[1])
 	|| (cmd[1] == '-' && isdigit(cmd[2])) || cmd[1] == '!')))
 		return 1;
 
@@ -6169,7 +6167,7 @@ edit_link(char *link)
 			continue;
 		}
 
-		if (strcmp(new_path, "q") == 0) {
+		if (*new_path == 'q' && !new_path[1]) {
 			free(new_path);
 			return EXIT_SUCCESS;
 		}
@@ -17751,7 +17749,8 @@ select_file(char *file)
 	size_t j;
 
 	for (j = 0; j < sel_n; j++) {
-		if (strcmp(sel_elements[j], file) == 0) {
+		if (*file == *sel_elements[j]
+		&& strcmp(sel_elements[j], file) == 0) {
 			exists = 1;
 			break;
 		}
@@ -18218,12 +18217,13 @@ sel_function(char **args)
 		}
 	}
 
+	char *pattern = (char *)NULL;
+
 	for (i = 1; args[i]; i++) {
 
 		if (i == ifiletype || i == isel_path)
 			continue;
 
-		char *pattern = (char *)NULL;
 		int invert = 0;
 	
 		if (check_regex(args[i]) == EXIT_SUCCESS) {
@@ -18260,12 +18260,25 @@ sel_function(char **args)
 					sprintf(tmp, "%s/%s", dir, args[i]);
 				}
 
-				new_sel += select_file(tmp);
+				struct stat fattr;
+				if (lstat(tmp, &fattr) == -1) {
+					fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+							args[i], strerror(errno));
+				}
+				else
+					new_sel += select_file(tmp);
 				free(tmp);
 			}
 
-			else
-				new_sel += select_file(args[i]);
+			else {
+				struct stat fattr;
+				if (lstat(args[i], &fattr) == -1) {
+					fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+							args[i], strerror(errno));
+				}
+				else
+					new_sel += select_file(args[i]);
+			}
 		}
 
 		else {
@@ -18301,7 +18314,8 @@ sel_function(char **args)
 	}
 
 	if (new_sel <= 0) {
-		fprintf(stderr, _("%s: No matches found\n"), PROGRAM_NAME);
+		if (pattern)
+			fprintf(stderr, _("%s: No matches found\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
