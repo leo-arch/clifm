@@ -29,10 +29,16 @@ function fcd() {
         local dir="$(printf '%s\n' "${lsd[@]}" |
             fzf --bind "right:accept,left:execute(cd ..),left:+accept,esc:execute(rm $TMP),esc:+abort,q:abort" --reverse --preview '
                 __cd_nxt="$(echo {})";
-                __cd_path="$(echo $(pwd)/${__cd_nxt} | sed "s;//;/;")";
-                echo $__cd_path;
-                echo;
-                ls -p --color=always "${__cd_path}";
+				if [[ -d "$__cd_nxt" ]]; then
+	                __cd_path="$(echo $(pwd)/${__cd_nxt} | sed "s;//;/;")";
+	                echo $__cd_path;
+					echo;
+    	            ls -p --color=always "${__cd_path}";
+				elif [[ $(file "$__cd_nxt" | grep "text") ]]; then
+					cat "$__cd_nxt"
+				else
+					echo -e "\e[0;30;47mBinary\e[0m"
+				fi
         ')"
         [[ ${#dir} != 0 ]] || return 0
 		echo "${PWD}/$dir" > "$TMP"
