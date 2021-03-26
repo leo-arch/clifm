@@ -10544,8 +10544,6 @@ get_mime(char *file)
 		return (char *)NULL;
 	}
 
-	puts("here");
-
 	char *rand_ext = gen_rand_str(6);
 
 	if (!rand_ext)
