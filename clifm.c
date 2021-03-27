@@ -1161,7 +1161,7 @@ is_internal_c(const char *restrict cmd)
 static char *
 split_fusedcmd(char *str)
 {
-	if (!str || !*str)
+	if (!str || !*str || *str == ';' || *str == ':')
 		return (char *)NULL;
 
 	/* The buffer size is the double of STR, just in case each subtr
@@ -14449,9 +14449,9 @@ load_keybinds(void)
 
 	/* Free the keybinds struct array */
 	if (kbinds_n) {
-		size_t i;
+		int i = kbinds_n;
 
-		for (i = 0; i < kbinds_n; i++) {
+		while (--i >= 0) {
 			free(kbinds[i].function);
 			free(kbinds[i].key);
 		}
@@ -14621,7 +14621,8 @@ rl_home_dir(int count, int key)
 		return EXIT_SUCCESS;
 
 	/* If already in home, do nothing */
-	if (*ws[cur_ws].path == *user_home && strcmp(ws[cur_ws].path, user_home) == 0)
+	if (*ws[cur_ws].path == *user_home
+	&& strcmp(ws[cur_ws].path, user_home) == 0)
 		return EXIT_SUCCESS;
 
 	keybind_exec_cmd("cd");
@@ -14762,7 +14763,8 @@ rl_light(int count, int key)
 		light_mode = 1;
 
 	if (cd_lists_on_the_fly) {
-		CLEAR;
+		if (clear_screen)
+			CLEAR;
 		free_dirlist();
 		puts("");
 		list_dir();
@@ -15151,7 +15153,7 @@ rl_previous_profile(int count, int key)
 		CLEAR;
 
 	if (profile_set(profile_names[prev_prof]) == EXIT_SUCCESS) {
-		printf("%s->%s Switched to profile '%s'\n", mi_c, df_c,
+		printf(_("%s->%s Switched to profile '%s'\n"), mi_c, df_c,
 			   profile_names[prev_prof]);
 		char *input = prompt();
 		free(input);
@@ -15198,7 +15200,7 @@ rl_next_profile(int count, int key)
 		CLEAR;
 
 	if (profile_set(profile_names[next_prof]) == EXIT_SUCCESS) {
-		printf("%s->%s Switched to profile '%s'\n", mi_c, df_c,
+		printf(_("%s->%s Switched to profile '%s'\n"), mi_c, df_c,
 			   profile_names[next_prof]);
 		char *input = prompt();
 		free(input);
@@ -15292,7 +15294,7 @@ rl_open_sel(int count, int key)
 		return EXIT_SUCCESS;
 
 	if (sel_n == 0 || !sel_elements[sel_n - 1]) {
-		fprintf(stderr, "\n%s: No selected files\n", PROGRAM_NAME);
+		fprintf(stderr, _("\n%s: No selected files\n"), PROGRAM_NAME);
 		rl_reset_line_state();
 		return EXIT_FAILURE;
 	}
@@ -15314,7 +15316,7 @@ rl_bm_sel(int count, int key)
 		return EXIT_SUCCESS;
 
 	if (sel_n == 0 || !sel_elements[sel_n - 1]) {
-		fprintf(stderr, "\n%s: No selected files\n", PROGRAM_NAME);
+		fprintf(stderr, _("\n%s: No selected files\n"), PROGRAM_NAME);
 		rl_reset_line_state();
 		return EXIT_FAILURE;
 	}
@@ -15751,7 +15753,8 @@ free_stuff(void)
 	}
 
 	if (bin_commands) {
-		for (i = 0; bin_commands[i]; i++)
+		i = path_progsn;
+		while (--i >= 0)
 			free(bin_commands[i]);
 		free(bin_commands);
 	}
@@ -15773,7 +15776,6 @@ free_stuff(void)
 	}
 
 	if (argv_bk) {
-
 		i = argc_bk;
 		while (--i >= 0)
 			free(argv_bk[i]);
@@ -17035,7 +17037,7 @@ cschemes_function(char **args)
 	if (!args[1]) {
 
 		if (!cschemes_n) {
-			printf("%s: No color schemes found\n", PROGRAM_NAME);
+			printf(_("%s: No color schemes found\n"), PROGRAM_NAME);
 			return EXIT_SUCCESS;
 		}
 
@@ -17102,7 +17104,7 @@ cschemes_function(char **args)
 
 	if (*args[1] == 'n' && (!args[1][1]
 	|| strcmp(args[1], "name") == 0)) {
-		printf("%s: current color scheme: %s\n", PROGRAM_NAME,
+		printf(_("%s: current color scheme: %s\n"), PROGRAM_NAME,
 			   cur_cscheme ? cur_cscheme : "?");
 		return EXIT_SUCCESS;
 	}
@@ -17215,7 +17217,7 @@ autojump(char **args)
 	if (!args[1] && args[0][1] != 'e') {
 		size_t i;
 
-		printf("Order\tVisits\tDirectory\n");
+		printf(_("Order\tVisits\tDirectory\n"));
 
 		for (i = 0; i < jump_n; i++) {
 
@@ -18637,12 +18639,12 @@ search_glob(char **comm, int invert)
 
 		comm[0] = (char *)xrealloc(comm[0], (search_str_len + 2) *
 								   sizeof(char));
-
 		tmp = comm[0];
 		if (invert) {
 			++tmp;
 			search_str_len = strlen(tmp);
 		}
+
 		tmp[0] = '*';
 		tmp[search_str_len] = '*';
 		tmp[search_str_len + 1] = '\0';
@@ -19088,7 +19090,7 @@ search_regex(char **comm, int invert)
 	regfree(&regex_files);
 
 	if (!found) {
-		fprintf(stderr, "No matches found\n");
+		fprintf(stderr, _("No matches found\n"));
 		free(regex_index);
 
 		if (search_path) {
@@ -19357,7 +19359,7 @@ bookmark_del(char *name)
 
 	/* If not name, list bookmarks and get user input */
 	else {
-		printf("%sBookmarks%s\n\n", bold, df_c);
+		printf(_("%sBookmarks%s\n\n"), bold, df_c);
 
 		for (i = 0; i < bmn; i++)
 			printf("%s%zu %s%s%s\n", el_c, i + 1, bm_c, bms[i],
@@ -20039,8 +20041,8 @@ static int
 bookmarks_function(char **cmd)
 {
 	if (xargs.stealth_mode == 1) {
-		printf("%s: Access to configuration files is not allowed in "
-			   "stealth mode\n", PROGRAM_NAME);
+		printf(_("%s: Access to configuration files is not allowed in "
+			   "stealth mode\n"), PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
 
@@ -20324,7 +20326,7 @@ get_properties(char *filename, int dsize)
 		ssize_t ret = readlink(filename, link, PATH_MAX);
 
 		if (ret) {
-			printf("%s%s%s -> %s (broken link)\n", color, filename,
+			printf(_("%s%s%s -> %s (broken link)\n"), color, filename,
 				   df_c, link);
 		}
 
@@ -24503,6 +24505,8 @@ parse_input_str(char *str)
 		 * no need to check whatever else is in the command string */
 		if (flags & IS_USRVAR_DEF) {
 			exec_chained_cmds(str);
+			if (fusedcmd_ok)
+				free(str);
 			return (char **)NULL;
 		}
 
@@ -24535,6 +24539,8 @@ parse_input_str(char *str)
 
 		if (internal_ok) {
 			exec_chained_cmds(str);
+			if (fusedcmd_ok)
+				free(str);
 			return (char **)NULL;
 		}
 	}
@@ -24545,7 +24551,7 @@ parse_input_str(char *str)
 		while (*p == ' ' || *p == '\t')
 			p++;
 
-		args_n=0;
+		args_n = 0;
 
 		char **cmd = (char **)NULL;
 		cmd = (char **)xnmalloc(2, sizeof(char *));
@@ -24553,6 +24559,9 @@ parse_input_str(char *str)
 		cmd[1] = (char *)NULL;
 
 		p = (char *)NULL;
+
+		if (fusedcmd_ok)
+			free(str);
 
 		return cmd;
 		/* If ";cmd" or ":cmd" the whole input line will be send to
