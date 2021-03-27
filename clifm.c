@@ -1065,7 +1065,6 @@ Usage example:
 */
 {
 	if (nmemb == 0) ++nmemb;
-
 	if (size == 0) ++size;
 
 	void *new_ptr = calloc(nmemb, size);
@@ -1417,9 +1416,9 @@ free_dirlist(void)
 	if (!file_info || !files)
 		return;
 
-	size_t i;
+	int i = files;
 
-	for (i = 0; i < files; i++)
+	while (--i >= 0)
 		free(file_info[i].name);
 
 	free(file_info);
@@ -1474,9 +1473,9 @@ get_file_icon(const char *file, int n)
 	if (!file)
 		return;
 
-	int i;
+	int i = sizeof(icon_filenames)/sizeof(struct icons_t);
 
-	for (i = sizeof(icon_filenames)/sizeof(struct icons_t) - 1; i >= 0; i--) {
+	while (--i >= 0) {
 
 		if (TOUPPER(*file) == TOUPPER(*icon_filenames[i].name)
 		&& strcasecmp(file, icon_filenames[i].name) == 0) {
@@ -1498,9 +1497,9 @@ get_dir_icon(const char *dir, int n)
 	if (!dir)
 		return;
 
-	int i;
+	int i = sizeof(icon_dirnames)/sizeof(struct icons_t);
 
-	for (i = sizeof(icon_dirnames)/sizeof(struct icons_t) - 1; i >= 0; i--) {
+	while (--i >= 0) {
 
 		if (TOUPPER(*dir) == TOUPPER(*icon_dirnames[i].name)
 		&& strcasecmp(dir, icon_dirnames[i].name) == 0) {
@@ -1524,9 +1523,9 @@ get_ext_icon(const char *restrict ext, int n)
 
 	ext++;
 
-	int i;
+	int i = sizeof(icon_ext)/sizeof(struct icons_t);
 
-	for (i = sizeof(icon_ext)/sizeof(struct icons_t) - 1; i >= 0; i--) {
+	while (--i >= 0) {
 
 		/* Tolower */
 		char c = (*ext >= 'A' && *ext <= 'Z')
@@ -1551,9 +1550,9 @@ get_ext_color(const char *ext)
 
 	ext++;
 
-	int i;
+	int i = ext_colors_n;
 
-	for (i = ext_colors_n - 1; i >= 0; i--) {
+	while (--i >= 0) {
 
 		if (!ext_colors[i] || !*ext_colors[i] || !ext_colors[i][2])
 			continue;
@@ -1962,6 +1961,7 @@ rl_no_hist(const char *prompt)
 		/* Check we have some non-blank char */
 		int no_blank = 0;
 		char *p = input;
+
 		while (*p) {
 			if (*p != ' ' && *p != '\n' && *p != '\t') {
 				no_blank = 1;
@@ -1995,7 +1995,7 @@ batch_link(char **args)
 
 	char *suffix = (char *)NULL;
 	while (!suffix) {
-		suffix = rl_no_hist("Enter links suffix ('n' for none): ");
+		suffix = rl_no_hist(_("Enter links suffix ('n' for none): "));
 
 		if (!suffix)
 			continue;
@@ -3914,8 +3914,8 @@ get_aliases(void)
 	}
 
 	if (aliases_n) {
-		size_t i;
-		for (i = 0; i < aliases_n; i++)
+		int i = aliases_n;
+		while (--i >= 0)
 			free(aliases[i]);
 		free(aliases);
 		aliases = (char **)NULL;
@@ -3930,7 +3930,7 @@ get_aliases(void)
 	while ((line_len = getline(&line, &line_size,
 	config_file_fp)) > 0) {
 
-		if (strncmp(line, "alias ", 6) == 0) {
+		if (*line == 'a' && strncmp(line, "alias ", 6) == 0) {
 			char *alias_line = strchr(line, ' ');
 			if (alias_line) {
 				alias_line++;
@@ -4642,9 +4642,8 @@ create_def_cscheme(void)
 	if (!COLORS_DIR)
 		return;
 
-	char *cscheme_file = (char *)xnmalloc(
-						  strlen(COLORS_DIR) + 13,
-						  sizeof(char));
+	char *cscheme_file = (char *)xnmalloc(strlen(COLORS_DIR) + 13,
+										  sizeof(char));
 
 	sprintf(cscheme_file, "%s/default.cfm", COLORS_DIR);
 
@@ -5657,8 +5656,6 @@ reload_config(void)
 	free(SEL_FILE);
 	TMP_DIR = COLORS_DIR = SEL_FILE = (char *)NULL;
 
-	size_t i = 0;
-
 	if (filter) {
 		regfree(&regex_exp);
 		free(filter);
@@ -5790,8 +5787,9 @@ reload_config(void)
 		icons = xargs.icons;
 
 	/* Free the aliases and prompt_cmds arrays to be allocated again */
+	int i = dirhist_total_index;
 
-	for (i = 0; i < (size_t)dirhist_total_index; i++)
+	while (--i >= 0)
 		free(old_pwd[i]);
 
 	free(old_pwd);
@@ -5808,10 +5806,12 @@ reload_config(void)
 
 	jump_n = 0;
 
-	for (i = 0; i < aliases_n; i++)
+	i = aliases_n;
+	while (--i >= 0)
 		free(aliases[i]);
 
-	for (i = 0; i < prompt_cmds_n; i++)
+	i = prompt_cmds_n;
+	while (--i >= 0)
 		free(prompt_cmds[i]);
 
 	aliases_n = prompt_cmds_n = dirhist_total_index = 0;
@@ -6227,11 +6227,13 @@ load_actions(void)
 
 	/* Free the actions struct array */
 	if (actions_n) {
-		size_t i;
-		for (i = 0; i < actions_n; i++) {
+		int i = actions_n;
+
+		while (--i >= 0) {
 			free(usr_actions[i].name);
 			free(usr_actions[i].value);
 		}
+
 		free(usr_actions);
 		usr_actions = (struct actions_t *)xnmalloc(1,
 					   sizeof(struct actions_t));
@@ -6269,7 +6271,6 @@ load_actions(void)
 
 		usr_actions[actions_n].value = savestring(tmp + 1,
 										 strlen(tmp + 1));
-
 		*tmp = '\0';
 
 		usr_actions[actions_n++].name = savestring(line, strlen(line));
@@ -6413,12 +6414,9 @@ add_to_dirhist(const char *dir_path)
 
 		end_counter++; */
 
-		old_pwd[dirhist_total_index] = (char *)xcalloc(strlen(dir_path)
-													+ 1, sizeof(char));
-
 		dirhist_cur_index = dirhist_total_index;
-		strcpy(old_pwd[dirhist_total_index++], dir_path);
-
+		old_pwd[dirhist_total_index++] = savestring(dir_path,
+											strlen(dir_path));
 		old_pwd[dirhist_total_index] = (char *)NULL;
 	}
 
@@ -6434,17 +6432,13 @@ add_to_dirhist(const char *dir_path)
 
 		mid_counter++; */
 
-		old_pwd[dirhist_total_index] = (char *)xcalloc(strlen(
-											old_pwd[dirhist_cur_index])
-											+ 1, sizeof(char));
-		strcpy(old_pwd[dirhist_total_index++],
-			   old_pwd[dirhist_cur_index]);
-
-		old_pwd[dirhist_total_index] = (char *)xcalloc(strlen(dir_path)
-													+ 1, sizeof(char));
+		old_pwd[dirhist_total_index++] = savestring(
+								old_pwd[dirhist_cur_index],
+								strlen(old_pwd[dirhist_cur_index]));
 
 		dirhist_cur_index = dirhist_total_index;
-		strcpy(old_pwd[dirhist_total_index++], dir_path);
+		old_pwd[dirhist_total_index++] = savestring(dir_path,
+											strlen(dir_path));
 
 		old_pwd[dirhist_total_index] = (char *)NULL;
 	}
@@ -12710,8 +12704,8 @@ surf_hist(char **comm)
 	}
 
 	if (*comm[1] == 'c' && strcmp(comm[1], "clear") == 0) {
-		int i;
-		for (i = 0; i < dirhist_total_index; i++)
+		int i = dirhist_total_index;
+		while (--i >= 0)
 			free(old_pwd[i]);
 
 		dirhist_cur_index = dirhist_total_index = 0;
