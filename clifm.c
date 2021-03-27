@@ -687,7 +687,8 @@ static size_t
 	eln_as_file_n = 0,
 	bm_n = 0,
 	cschemes_n = 0,
-	jump_n = 0;
+	jump_n = 0,
+	path_progsn = 0;
 
 static struct termios shell_tmodes;
 static off_t total_sel_size = 0;
@@ -4095,14 +4096,15 @@ get_path_programs(void)
  * them into an array to be read by my readline custom auto-complete
  * function (my_rl_completion) */
 {
-	struct dirent ***commands_bin = (struct dirent ***)xnmalloc(path_n,
-												sizeof(struct dirent));
-	size_t i, j, l = 0, total_cmd = 0;
+	struct dirent ***commands_bin = (struct dirent ***)xnmalloc(
+									path_n, sizeof(struct dirent));
+	int i, j, l = 0, total_cmd = 0;
 	int *cmd_n = (int *)xnmalloc(path_n, sizeof(int));
 
-	for (i = 0; i < path_n; i++) {
+	i = path_n;
+	while (--i >= 0) {
 
-		if (!paths[i] || *paths[i] == '\0' || chdir(paths[i]) == -1) {
+		if (!paths[i] || !*paths[i] || chdir(paths[i]) == -1) {
 			cmd_n[i] = 0;
 			continue;
 		}
@@ -4128,17 +4130,20 @@ get_path_programs(void)
 									aliases_n + actions_n + 2,
 									sizeof(char *));
 
-	for (i = 0; i < internal_cmd_n; i++)
+	i = internal_cmd_n;
+	while (--i >= 0)
 		bin_commands[l++] =savestring(INTERNAL_CMDS[i],
 									  strlen(INTERNAL_CMDS[i]));
 
 	/* Add commands in PATH */
-	for (i = 0; i < path_n; i++) {
+	i = path_n;
+	while (--i >= 0) {
 
 		if (cmd_n[i] <= 0)
 			continue;
 
-		for (j = 0; j < (size_t)cmd_n[i]; j++) {
+		j = cmd_n[i];
+		while (--j >= 0) {
 
 			bin_commands[l++] = savestring(commands_bin[i][j]->d_name,
 								  strlen(commands_bin[i][j]->d_name));
@@ -4154,7 +4159,8 @@ get_path_programs(void)
 	/* Now add aliases, if any */
 	if (aliases_n) {
 
-		for (i = 0; i < aliases_n; i++) {
+		i = aliases_n;
+		while (--i >= 0) {
 			int index = strcntchr(aliases[i], '=');
 
 			if (index != -1) {
@@ -4167,12 +4173,14 @@ get_path_programs(void)
 
 	/* And user defined actions too, if any */
 	if (actions_n) {
-		for (i = 0; i < actions_n; i++) {
+		i = actions_n;
+		while (--i >= 0) {
 			bin_commands[l++] = savestring(usr_actions[i].name,
 									strlen(usr_actions[i].name));
 		}
 	}
 
+	path_progsn = l;
 	bin_commands[l] = (char *)NULL;
 }
 
@@ -13520,7 +13528,7 @@ remove_from_trash(void)
 	char *line = (char *)NULL, **rm_elements = (char **)NULL;
 
 	while (!line)
-		line = rl_no_hist(_("Element(s) to be removed "
+		line = rl_no_hist(_("File(s) to be removed "
 							"(ex: 1 2-6, or *): "));
 
 	rm_elements = get_substr(line, ' ');
@@ -13874,7 +13882,7 @@ untrash_function(char **comm)
 	int undel_n = 0;
 	char *line = (char *)NULL, **undel_elements = (char **)NULL;
 	while (!line)
-		line = rl_no_hist(_("Element(s) to be undeleted "
+		line = rl_no_hist(_("File(s) to be undeleted "
 						  "(ex: 1 2-6, or *): "));
 
 	undel_elements = get_substr(line, ' ');
@@ -14509,14 +14517,14 @@ find_key(char *function)
 	if (!kbinds_n)
 		return (char *)NULL;
 
-	size_t i;
-	for (i = 0; i < kbinds_n; i++) {
+	int n = kbinds_n;
 
-		if (*function != *kbinds[i].function)
+	while (--n >= 0) {
+		if (*function != *kbinds[n].function)
 			continue;
 
-		if (strcmp(function, kbinds[i].function) == 0)
-			return kbinds[i].key;
+		if (strcmp(function, kbinds[n].function) == 0)
+			return kbinds[n].key;
 	}
 
 	return (char *)NULL;
@@ -15674,7 +15682,7 @@ free_stuff(void)
 /* This function is called by atexit() to clear whatever is there at exit
  * time and avoid thus memory leaks */
 {
-	size_t i = 0;
+	int i = 0;
 
 	if (STDIN_TMP_DIR) {
 		char *rm_cmd[] = { "rm", "-rd", "--", STDIN_TMP_DIR, NULL };
@@ -15696,7 +15704,8 @@ free_stuff(void)
 
 	if (jump_db) {
 
-		for (i = 0; i < jump_n; i++)
+		i = (int)jump_n;
+		while (--i >= 0)
 			free(jump_db[i].path);
 
 		free(jump_db);
@@ -15741,7 +15750,8 @@ free_stuff(void)
 	free_dirlist();
 
 	if (sel_n > 0) {
-		for (i = 0; i < sel_n; i++)
+		i = (int)sel_n;
+		while (--i >= 0)
 			free(sel_elements[i]);
 		free(sel_elements);
 	}
@@ -15753,16 +15763,16 @@ free_stuff(void)
 	}
 
 	if (paths) {
-
-		for (i = 0; i < path_n; i++)
+		i = (int)path_n;
+		while (--i >= 0)
 			free(paths[i]);
 
 		free(paths);
 	}
 
 	if (history) {
-
-		for (i = 0; i < current_hist_n; i++)
+		i = (int)current_hist_n;
+		while (--i >= 0)
 			free(history[i]);
 
 		free(history);
@@ -15770,41 +15780,48 @@ free_stuff(void)
 
 	if (argv_bk) {
 
-		for (i = 0; i < (size_t)argc_bk; i++)
+		i = argc_bk;
+		while (--i >= 0)
 			free(argv_bk[i]);
 
 		free(argv_bk);
 	}
 
 	if (dirhist_total_index) {
-		for (i = 0; i < (size_t)dirhist_total_index; i++)
+		i = (int)dirhist_total_index;
+		while (--i >= 0)
 			free(old_pwd[i]);
 		free(old_pwd);
 	}
 
-	for (i = 0; i < kbinds_n; i++) {
+	i = (int)kbinds_n;
+	while (--i >= 0) {
 		free(kbinds[i].function);
 		free(kbinds[i].key);
 	}
 	free(kbinds);
 
-	for (i = 0; i < usrvar_n; i++) {
+	i = (int)usrvar_n;
+	while (--i >= 0) {
 		free(usr_var[i].name);
 		free(usr_var[i].value);
 	}
 	free(usr_var);
 
-	for (i = 0; i < actions_n; i++) {
+	i = (int)actions_n;
+	while (--i >= 0) {
 		free(usr_actions[i].name);
 		free(usr_actions[i].value);
 	}
 	free(usr_actions);
 
-	for (i = 0; i < aliases_n; i++)
+	i = (int)aliases_n;
+	while (--i >= 0)
 		free(aliases[i]);
 	free(aliases);
 
-	for (i = 0; i < prompt_cmds_n; i++)
+	i = (int)prompt_cmds_n;
+	while (--i >= 0)
 		free(prompt_cmds[i]);
 	free(prompt_cmds);
 
@@ -15812,13 +15829,15 @@ free_stuff(void)
 		free(file_cmd_path);
 
 	if (msgs_n) {
-		for (i = 0; i < (size_t)msgs_n; i++)
+		i = (int)msgs_n;
+		while (--i >= 0)
 			free(messages[i]);
 		free(messages);
 	}
 
 	if (ext_colors_n) {
-		for (i = 0; i < ext_colors_n; i++)
+		i = (int)ext_colors_n;
+		while (--i >= 0)
 			free(ext_colors[i]);
 		free(ext_colors);
 	}
@@ -15827,7 +15846,8 @@ free_stuff(void)
 	free(user_home);
 	free(sys_shell);
 
-	for (i = 0; i < MAX_WS; i++)
+	i = MAX_WS;
+	while (--i >= 0)
 		if (ws[i].path)
 			free(ws[i].path);
 	free(ws);
@@ -16140,7 +16160,7 @@ my_rl_path_completion(const char *text, int state)
 	/* Dequote string to be completed (text), if necessary */
 	static char *tmp_text = (char *)NULL;
 
-	if (strcntchr(text, '\\') != -1) {
+	if (strchr(text, '\\')) {
 		char *p = savestring(text, strlen(text));
 
 		tmp_text = dequote_str(p, 0);
@@ -16601,7 +16621,8 @@ jump_generator(const char *text, int state)
 	while ((name = jump_db[i++].path) != NULL) {
 
 		/* Exclude CWD */
-		if (name[1] == ws[cur_ws].path[1] && strcmp(name, ws[cur_ws].path) == 0)
+		if (name[1] == ws[cur_ws].path[1]
+		&& strcmp(name, ws[cur_ws].path) == 0)
 			continue;
 
 		/* Filter by parent */
@@ -16956,8 +16977,8 @@ pin_directory(char *dir)
 		}
 
 		else {
-			pinned_dir = (char *)xnmalloc(strlen(dir) + strlen(ws[cur_ws].path)
-										  + 2, sizeof(char));
+			pinned_dir = (char *)xnmalloc(strlen(dir)
+						+ strlen(ws[cur_ws].path) + 2, sizeof(char));
 			sprintf(pinned_dir, "%s/%s", ws[cur_ws].path, dir);
 		}
 	}
@@ -17170,9 +17191,9 @@ edit_jumpdb(void)
 	}
 
 	if (jump_db) {
-		size_t i;
+		int i = jump_n;
 
-		for (i = 0; i < jump_n; i++)
+		while (--i >= 0)
 			free(jump_db[i].path);
 
 		free(jump_db);
@@ -17232,13 +17253,9 @@ autojump(char **args)
 	switch(args[0][1]) {
 
 		case 'e': return edit_jumpdb();
-
 		case 'c': jump_opt = jchild; break;
-
 		case 'p': jump_opt = jparent; break;
-
 		case 'o': jump_opt = jorder; break;
-
 		case 'u':
 		case '\0':
 			jump_opt = none;
@@ -17296,7 +17313,8 @@ autojump(char **args)
 		return cd_function(args[1]);
 
 	/* Jump into a visited directory using ARGS as filter(s) */
-	size_t i, j, match = 0;
+	size_t i, match = 0;
+	int j;
 
 	char **matches = (char **)xnmalloc(jump_n + 1, sizeof(char *));
 	int *visits = (int *)xnmalloc(jump_n + 1, sizeof(int));
@@ -17307,7 +17325,8 @@ autojump(char **args)
 		 * database */
 		if (!match) {
 
-			for (j = 0; j < jump_n; j++) {
+			j = jump_n;
+			while (--j >= 0) {
 
 				if (!strstr(jump_db[j].path, args[i]))
 					continue;
@@ -17348,7 +17367,8 @@ autojump(char **args)
 		 * matching process, that is, excluding non-matches,
 		 * using subsequent parameters */
 		else {
-			for (j = 0; j < match; j++) {
+			j = match;
+			while (--j >= 0) {
 
 				if (!matches[j] || !*matches[j]
 				|| !strstr(matches[j], args[i])) {
@@ -17369,16 +17389,17 @@ autojump(char **args)
 	int found = 0, exit_status = EXIT_FAILURE,
 		most_visited = 0, max = -1;
 
-	for (i = 0; i < match; i++) {
+	j = match;
+	while (--j >= 0) {
 
-		if (!matches[i])
+		if (!matches[j])
 			continue;
 
 		found = 1;
 
-		if (visits[i] > max) {
-			max = visits[i];
-			most_visited = i;
+		if (visits[j] > max) {
+			max = visits[j];
+			most_visited = j;
 		}
 	}
 
@@ -17551,10 +17572,10 @@ select_file(char *file)
 
 	/* Check if the selected element is already in the selection
 	 * box */
-	int exists = 0, new_sel = 0;
-	size_t j;
+	int exists = 0, new_sel = 0, j;
 
-	for (j = 0; j < sel_n; j++) {
+	j = sel_n;
+	while (--j >= 0) {
 		if (*file == *sel_elements[j]
 		&& strcmp(sel_elements[j], file) == 0) {
 			exists = 1;
@@ -17601,12 +17622,11 @@ sel_regex(char *str, const char *sel_path, mode_t filetype)
 		return -1;
 	}
 
-	int new_sel = 0;
-
-	size_t i;
+	int new_sel = 0, i;
 
 	if (!sel_path) { /* Check pattern (STR) against files in CWD */
-		for (i = 0; i < files; i++) {
+		i = files;
+		while (--i >= 0) {
 
 			if (filetype && file_info[i].type != filetype)
 				continue;
@@ -17651,7 +17671,8 @@ sel_regex(char *str, const char *sel_path, mode_t filetype)
 			}
 		}
 
-		for (i = 0; i < (size_t)filesn; i++) {
+		i = filesn;
+		while (--i >= 0) {
 
 			if (filetype) {
 				struct stat attr;
@@ -17792,20 +17813,22 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 	}
 
 	char **matches = (char **)NULL;
-	size_t i, j = 0, k = 0;
+	int i, j = 0, k = 0;
 	struct dirent **ent = (struct dirent **)NULL;
 
 	if (invert) {
 		if (!sel_path) {
 			matches = (char **)xnmalloc(files + 2, sizeof(char *));
 
-			for (i = 0; i < files; i++) {
+			i = files;
+			while (--i >= 0) {
 
 				if (filetype && file_info[i].type != filetype)
 					continue;
 
 				int found = 0;
-				for (j = 0; j < gbuf.gl_pathc; j++) {
+				j = gbuf.gl_pathc;
+				while (--j >= 0) {
 					if (*file_info[i].name == *gbuf.gl_pathv[j]
 					&& strcmp(file_info[i].name, gbuf.gl_pathv[j]) == 0) {
 						found = 1;
@@ -17830,11 +17853,13 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 
 			matches = (char **)xnmalloc(ret + 2, sizeof(char *));
 
-			for (i = 0; i < (size_t)ret; i++) {
+			i = ret;
+			while (--i >= 0) {
 				if (filetype && ent[i]->d_type != filetype)
 					continue;
 
-				for (j = 0; j < gbuf.gl_pathc; j++) {
+				j = gbuf.gl_pathc;
+				while (--j >= 0) {
 					if (*ent[i]->d_name == *gbuf.gl_pathv[j]
 					&& strcmp(ent[i]->d_name, gbuf.gl_pathv[j]) == 0)
 						break;
@@ -17863,7 +17888,8 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 			}
 		}
 
-		for (i = 0; i < gbuf.gl_pathc; i++) {
+		i = gbuf.gl_pathc;
+		while (--i >= 0) {
 
 			/* We need to run stat(3) here, so that the d_type macros
 			 * won't work: convert them into st_mode macros */
@@ -17887,7 +17913,8 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 	matches[k] = (char *)NULL;
 	int new_sel = 0;
 
-	for (i = 0; i < k; i++) {
+	i = k;
+	while (--i >= 0) {
 
 		if (!matches[i])
 			continue;
@@ -17920,7 +17947,8 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 	globfree(&gbuf);
 
 	if (invert && sel_path) {
-		for (i = 0; i < (size_t)ret; i++)
+		i = ret;
+		while (--i >= 0)
 			free(ent[i]);
 		free(ent);
 	}
@@ -17943,7 +17971,7 @@ sel_function(char **args)
 
 	char *sel_path = (char *)NULL;
 	mode_t filetype = 0;
-	size_t i, ifiletype = 0, isel_path = 0, new_sel = 0;
+	int i, ifiletype = 0, isel_path = 0, new_sel = 0;
 	
 	for (i = 1; args[i]; i++) {
 
@@ -17981,6 +18009,11 @@ sel_function(char **args)
 	char dir[PATH_MAX];
 
 	if (sel_path) {
+
+		size_t sel_path_len = strlen(sel_path);
+		if (sel_path[sel_path_len - 1] == '/')
+			sel_path[sel_path_len - 1] = '\0';
+
 		char *tmp_dir = xnmalloc(PATH_MAX + 1, sizeof(char));
 
 		if (strchr(sel_path, '\\')) {
@@ -18135,7 +18168,8 @@ sel_function(char **args)
 	/* Get total size of sel files */
 	struct stat sattr;
 
-	for (i = 0; i < sel_n; i++) {
+	i = sel_n;
+	while (--i >= 0) {
 
 		if (lstat(sel_elements[i], &sattr) != -1) {
 
@@ -18150,14 +18184,14 @@ sel_function(char **args)
 
 	/* Print entries */
 	if (sel_n > 10)
-		printf(_("%zu elements are now in the Selection Box\n"),
+		printf(_("%zu files are now in the Selection Box\n"),
 				 sel_n);
 
 	else if (sel_n > 0) {
 		printf(_("%zu selected %s:\n\n"), sel_n, (sel_n == 1)
-				? _("element") : _("elements"));
+				? _("file") : _("files"));
 
-		for (i = 0; i < sel_n; i++)
+		for (i = 0; i < (int)sel_n; i++)
 			colors_list(sel_elements[i], (int)i + 1, NO_PAD,
 						PRINT_NEWLINE);
 	}
@@ -18252,9 +18286,9 @@ deselect(char **comm)
 	|| strcmp(comm[1], "a") == 0 || strcmp(comm[1], "all") == 0)) {
 
 		if (sel_n > 0) {
-			size_t i;
+			int i = sel_n;
 
-			for (i = 0; i < sel_n; i++)
+			while (--i >= 0)
 				free(sel_elements[i]);
 
 			sel_n = total_sel_size = 0;
@@ -18270,7 +18304,7 @@ deselect(char **comm)
 		}
 	}
 
-	register size_t i; 
+	register int i; 
 
 	if (clear_screen)
 		CLEAR;
@@ -18284,7 +18318,7 @@ deselect(char **comm)
 
 	puts("");
 
-	for (i = 0; i < sel_n; i++)
+	for (i = 0; i < (int)sel_n; i++)
 		colors_list(sel_elements[i], (int)i + 1, NO_PAD, PRINT_NEWLINE);
 
 	char *human_size = get_size_unit(total_sel_size);
@@ -18296,7 +18330,7 @@ deselect(char **comm)
 	char *line = NULL, **desel_elements = (char **)NULL;
 
 	while (!line)
-		line = rl_no_hist(_("Element(s) to be deselected "
+		line = rl_no_hist(_("File(s) to be deselected "
 							"(ex: 1 2-6, or *): "));
 
 	desel_elements = get_substr(line, ' ');
@@ -18308,14 +18342,16 @@ deselect(char **comm)
 	for (i = 0; desel_elements[i]; i++)
 		desel_n++;
 
-	for (i = 0; i < desel_n; i++) { /* Validation */
+	i = desel_n;
+	while (--i >= 0) { /* Validation */
 
 		/* If not a number */
 		if (!is_number(desel_elements[i])) {
 
 			if (strcmp(desel_elements[i], "q") == 0) {
 
-				for (i = 0; i < desel_n; i++)
+				i = desel_n;
+				while (--i >= 0)
 					free(desel_elements[i]);
 
 				free(desel_elements);
@@ -18326,11 +18362,14 @@ deselect(char **comm)
 			else if (strcmp(desel_elements[i], "*") == 0) {
 
 				/* Clear the sel array */
-				for (i = 0; i < sel_n; i++)
+				i = sel_n;
+				while (--i >= 0)
 					free(sel_elements[i]);
+
 				sel_n = total_sel_size = 0;
 
-				for (i = 0; i < desel_n; i++)
+				i = desel_n;
+				while (--i >= 0)
 					free(desel_elements[i]);
 
 				int exit_status = EXIT_SUCCESS;
@@ -18352,9 +18391,9 @@ deselect(char **comm)
 			else {
 				printf(_("desel: '%s': Invalid element\n"),
 						desel_elements[i]);
-				size_t j;
+				int j = desel_n;
 
-				for (j = 0; j < desel_n; j++)
+				while (--j >= 0)
 					free(desel_elements[j]);
 
 				free(desel_elements);
@@ -18371,8 +18410,8 @@ deselect(char **comm)
 				printf(_("desel: '%s': Invalid ELN\n"),
 						 desel_elements[i]);
 
-				size_t j;
-				for (j = 0; j < desel_n; j++)
+				int j = desel_n;
+				while (--j >= 0)
 					free(desel_elements[j]);
 
 				free(desel_elements);
@@ -18392,7 +18431,8 @@ deselect(char **comm)
 	char **desel_path = (char **)NULL;
 	desel_path = (char **)xnmalloc(desel_n, sizeof(char *));
 
-	for (i = 0; i < desel_n; i++) {
+	i = desel_n;
+	while (--i >= 0) {
 		int desel_int = atoi(desel_elements[i]);
 		desel_path[i] = savestring(sel_elements[desel_int - 1],
 							strlen(sel_elements[desel_int - 1]));
@@ -18402,10 +18442,12 @@ deselect(char **comm)
 	 * store its index */
 	struct stat desel_attrib;
 
-	for (i = 0; i < desel_n; i++) {
-		size_t j, k, desel_index = 0;
+	i = desel_n;
+	while (--i >= 0) {
+		int j, k, desel_index = 0;
 
-		for (k = 0; k < sel_n; k++) {
+		k = sel_n;
+		while (--k >= 0) {
 
 			if (strcmp(sel_elements[k], desel_path[i]) == 0) {
 
@@ -18426,7 +18468,7 @@ deselect(char **comm)
 		/* Once the index was found, rearrange the sel array removing the
 		 * deselected element (actually, moving each string after it to
 		 * the previous position) */
-		for (j = desel_index; j < (sel_n - 1); j++) {
+		for (j = desel_index; j < (int)(sel_n - 1); j++) {
 			sel_elements[j] = (char *)xrealloc(sel_elements[j],
 									(strlen(sel_elements[j + 1]) + 1)
 									* sizeof(char));
@@ -18437,7 +18479,7 @@ deselect(char **comm)
 	/* Free the last DESEL_N elements from the old sel array. They won't
 	 * be used anymore, for they contain the same value as the last
 	 * non-deselected element due to the above array rearrangement */
-	for (i = 1; i <= desel_n; i++)
+	for (i = 1; i <= (int)desel_n; i++)
 		if ((int)(sel_n - i) >= 0 && sel_elements[sel_n - i])
 			free(sel_elements[sel_n - i]);
 
@@ -18452,7 +18494,8 @@ deselect(char **comm)
 						sel_n * sizeof(char *));
 
 	/* Deallocate local arrays */
-	for (i = 0; i < desel_n; i++) {
+	i = desel_n;
+	while (--i >= 0) {
 		free(desel_path[i]);
 		free(desel_elements[i]);
 	}
@@ -18462,7 +18505,7 @@ deselect(char **comm)
 
 	if (args_n > 0) {
 
-		for (i = 1; i <= args_n; i++)
+		for (i = 1; i <= (int)args_n; i++)
 			free(comm[i]);
 
 		comm = (char **)xrealloc(comm, 1 * sizeof(char *));
@@ -18569,7 +18612,7 @@ search_glob(char **comm, int invert)
 		}
 	}
 
-	size_t i;
+	int i;
 
 	char *tmp = comm[0];
 
@@ -18635,8 +18678,8 @@ search_glob(char **comm, int invert)
 	}
 
 	/* We have matches */
-	int last_column = 0, scandir_files = 0;
-	size_t len = 0, flongest = 0, columns_n = 0, found = 0;
+	int last_column = 0, scandir_files = 0, found = 0, columns_n = 0;
+	size_t flongest = 0;
 
 	/* We need to store pointers to matching filenames in array of
 	 * pointers, just as the filename length (to construct the
@@ -18764,16 +18807,17 @@ search_glob(char **comm, int invert)
 			/* If not searching in CWD, we only need to know the file's
 			 * length (no ELN) */
 			if (search_path) {
-				len = unicode ? wc_xstrlen(pfiles[found])
-					  : strlen(pfiles[found]);
 
 				/* This will be passed to colors_list(): -1 means no ELN */
 				eln[found] = -1;
 
-				files_len[found++] = len;
+				files_len[found] = unicode ? wc_xstrlen(pfiles[found])
+								   : strlen(pfiles[found]);
 
-				if (len > flongest)
-					flongest = len;
+				if (files_len[found] > flongest)
+					flongest = files_len[found];
+
+				found++;
 			}
 
 			/* If searching in CWD, take into account the file's ELN
@@ -18833,6 +18877,8 @@ search_glob(char **comm, int invert)
 			 * Positive number: Print positive number as ELN
 			 * -1: Print "?" instead of an ELN */
 		}
+
+		printf(_("Matches found: %d\n"), found);
 	}
 
 /*	else
@@ -18840,7 +18886,8 @@ search_glob(char **comm, int invert)
 
 	/* Free stuff */
 	if (invert && search_path) {
-		for (i = 0; i < (size_t)scandir_files; i++)
+		i = scandir_files;
+		while (--i >= 0)
 			free(ent[i]);
 		free(ent);
 	}
@@ -19051,8 +19098,10 @@ search_regex(char **comm, int invert)
 		free(regex_index);
 
 		if (search_path) {
-			for (i = 0; i < (size_t)tmp_files; i++)
-				free(reg_dirlist[i]);
+
+			int j = tmp_files;
+			while (--j >= 0)
+				free(reg_dirlist[j]);
 
 			free(reg_dirlist);
 
@@ -19066,57 +19115,54 @@ search_regex(char **comm, int invert)
 
 	/* We have matches */
 	int last_column = 0;
-	size_t len = 0, flongest = 0, total_cols = 0, type_ok = 0;
+	size_t flongest = 0, total_cols = 0, type_ok = 0;
 
 	size_t *files_len = (size_t *)xnmalloc(found + 1, sizeof(size_t));
 	int *match_type = (int *)xnmalloc(found + 1, sizeof(int));
  
 
 	/* Get the longest filename in the list */
-	for (i = 0; i < found; i++) {
+	int j = found;
+	while (--j >= 0) {
 
 		/* Simply skip all files not matching file_type */
 		if (file_type) {
 
-			match_type[i] = 0;
+			match_type[j] = 0;
 
 			if (search_path) {
-				if (reg_dirlist[regex_index[i]]->d_type != file_type)
+				if (reg_dirlist[regex_index[j]]->d_type != file_type)
 					continue;
 			}
 
-			else if (file_info[regex_index[i]].type != file_type)
+			else if (file_info[regex_index[j]].type != file_type)
 				continue;
 		}
 
 		/* Amount of non-filtered files */
 		type_ok++;
 		/* Index of each non-filtered files */
-		match_type[i] = 1;
+		match_type[j] = 1;
 
 		/* If not searching in CWD, we only need to know the file's
 		 * length (no ELN) */
 		if (search_path) {
-			len = unicode ? wc_xstrlen(
-				  reg_dirlist[regex_index[i]]->d_name)
-				  : strlen(reg_dirlist[regex_index[i]]->d_name);
+			files_len[j] = unicode ? wc_xstrlen(
+				  reg_dirlist[regex_index[j]]->d_name)
+				  : strlen(reg_dirlist[regex_index[j]]->d_name);
 
-			files_len[i] = len;
-
-			if (len > flongest)
-				flongest = len;
+			if (files_len[j] > flongest)
+				flongest = files_len[j];
 		}
 
 		/* If searching in CWD, take into account the file's ELN
 		 * when calculating its legnth */
 		else {
-			len = file_info[regex_index[i]].len
-			+ (size_t)digits_in_num(regex_index[i] + 1) + 1;
+			files_len[j] = file_info[regex_index[j]].len
+					+ (size_t)digits_in_num(regex_index[j] + 1) + 1;
 
-			files_len[i] = len;
-
-			if (len > flongest)
-				flongest = len;
+			if (files_len[j] > flongest)
+				flongest = files_len[j];
 		}
 	}
 
@@ -19170,6 +19216,8 @@ search_regex(char **comm, int invert)
 					? PRINT_NEWLINE : NO_NEWLINE);
 
 		}
+
+		printf(_("Matches found: %zu\n"), found);
 	}
 
 	else
@@ -19183,8 +19231,9 @@ search_regex(char **comm, int invert)
 
 	/* If needed, go back to the directory we came from */
 	if (search_path) {
-		for (i = 0; i < (size_t)tmp_files; i++)
-			free(reg_dirlist[i]);
+		j = tmp_files;
+		while (--j >= 0)
+			free(reg_dirlist[j]);
 
 		free(reg_dirlist);
 
@@ -19232,6 +19281,7 @@ bookmark_del(char *name)
 	char *line = (char *)NULL, **bms = (char **)NULL;
 	size_t bmn = 0;
 	ssize_t line_len = 0;
+
 	while ((line_len = getline(&line, &line_size, bm_fp)) > 0) {
 		if (!line || !*line || *line == '#' || *line == '\n')
 			continue;
@@ -19243,10 +19293,13 @@ bookmark_del(char *name)
 				break;
 			}
 		}
+
 		if (!slash)
 			continue;
+
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
+
 		bms = (char **)xrealloc(bms, (bmn + 1) * sizeof(char *));
 		bms[bmn++] = savestring(line, line_len);
 	}
@@ -19382,6 +19435,7 @@ bookmark_del(char *name)
 	 * makes no sense to remove singles bookmarks: Just delete all of
 	 * them at once */
 	for (i = 0; del_elements[i]; i++) {
+
 		if (strcmp(del_elements[i], "*") == 0) {
 			/* Create a backup copy of the bookmarks file, just in case */
 			char *bk_file = (char *)NULL;
@@ -19458,6 +19512,7 @@ bookmark_del(char *name)
 	line_len = 0;
 	line_size = 0;
 	char *lineb = (char *)NULL;
+
 	while ((line_len = getline(&lineb, &line_size, bm_fp)) > 0) {
 
 		if (lineb[line_len - 1] == '\n')
@@ -19555,6 +19610,7 @@ bookmark_add(char *file)
 	ssize_t line_len = 0;
 
 	while ((line_len = getline(&line, &line_size, bm_fp)) > 0) {
+
 		if (!line || !*line || *line == '#' || *line == '\n')
 			continue;
 
@@ -19563,6 +19619,7 @@ bookmark_add(char *file)
 
 		if (tmp_line) {
 			size_t tmp_line_len = strlen(tmp_line);
+
 			if (tmp_line_len && tmp_line[tmp_line_len - 1] == '\n')
 				tmp_line[tmp_line_len - 1] = '\0';
 
@@ -19575,6 +19632,7 @@ bookmark_add(char *file)
 
 			tmp_line = (char *)NULL;
 		}
+
 		/* Store lines: used later to check hotkeys */
 		bms = (char **)xrealloc(bms, (bmn + 1) * sizeof(char *));
 		bms[bmn++] = savestring(line, strlen(line));
@@ -19652,7 +19710,9 @@ bookmark_add(char *file)
 		char *tmp_line = (char *)NULL;
 		for (i = 0; i < bmn; i++) {
 			tmp_line = strbtw(bms[i], ']', ':');
+
 			if (tmp_line) {
+
 				if (strcmp(name, tmp_line) == 0) {
 					fprintf(stderr, _("bookmarks: '%s': This name is "
 								 	  "already in use\n"), name);
@@ -19689,11 +19749,13 @@ bookmark_add(char *file)
 			sprintf(tmp, "[%s]%s:%s\n", hk, name, file);
 			free(hk);
 		}
+
 		else { /* Only name */
 			tmp = (char *)xnmalloc(strlen(name) + strlen(file) + 3,
 								  sizeof(char));
 			sprintf(tmp, "%s:%s\n", name, file);
 		}
+
 		free(name);
 		name = (char *)NULL;
 	}
@@ -21667,7 +21729,8 @@ list_dir_light(void)
 	/* Get the longest filename */
 
 	if (columned || long_view) {
-		for (i = n - 1; i >= 0; i--) {
+		i = n;
+		while (--i >= 0) {
 			size_t total_len = 0;
 			file_info[i].eln_n = digits_in_num(i + 1);
 			total_len = file_info[i].eln_n + 1 + file_info[i].len;
@@ -22332,7 +22395,8 @@ list_dir(void)
 	/* Get the longest filename */
 
 	if (columned || long_view) {
-		for (i = n - 1; i >= 0; i--) {
+		i = n;
+		while (--i >= 0) {
 			size_t total_len = 0;
 			file_info[i].eln_n = digits_in_num(i + 1);
 			total_len = file_info[i].eln_n + 1 + file_info[i].len;
@@ -23113,9 +23177,9 @@ exec_cmd(char **comm)
 		exit_code = trash_function(comm);
 
 		if (is_sel) { /* If 'tr sel', deselect everything */
-			size_t i;
+			int i = sel_n;
 
-			for (i = 0; i < sel_n; i++)
+			while (--i >= 0)
 				free(sel_elements[i]);
 
 			sel_n = 0;
@@ -24172,9 +24236,10 @@ exec_cmd(char **comm)
 		 * 'pkill' or 'killall' commands, from within CliFM itself.
 		 * Otherwise, the program will be forcefully terminated without
 		 * freeing allocated memory */
-		if (strcmp(comm[0], "kill") == 0
+		if ((*comm[0] == 'k' || *comm[0] == 'p')
+		&& (strcmp(comm[0], "kill") == 0
 		|| strcmp(comm[0], "killall") == 0
-		|| strcmp(comm[0], "pkill") == 0) {
+		|| strcmp(comm[0], "pkill") == 0)) {
 			size_t i;
 			for (i = 1; i <= args_n; i++) {
 				if ((strcmp(comm[0], "kill") == 0
@@ -24230,7 +24295,7 @@ exec_cmd(char **comm)
 		 * executed by execle() using the system shell (/bin/sh -c) */
 		char *ext_cmd = (char *)NULL;
 		size_t ext_cmd_len = strlen(comm[0]);
-		ext_cmd = (char *)xcalloc(ext_cmd_len + 1, sizeof(char));
+		ext_cmd = (char *)xnmalloc(ext_cmd_len + 1, sizeof(char));
 		strcpy(ext_cmd, comm[0]);
 
 		register size_t i;
@@ -24260,7 +24325,7 @@ exec_cmd(char **comm)
 		 * copy the address returned by getenv() instead of the string
 		 * itself. Not sure why, but this makes the error go away */
 		p = getenv("LS_COLORS");
-		my_ls_colors = (char *)xcalloc(strlen(p) + 1, sizeof(char *));
+		my_ls_colors = (char *)xnmalloc(strlen(p) + 1, sizeof(char *));
 		strcpy(my_ls_colors, p);
 		p = (char *)NULL;
 
@@ -24292,18 +24357,22 @@ exec_cmd(char **comm)
  		 * while in CliFM, this latter needs to be restarted in order
  		 * to be able to recognize the new program for TAB completion */
 
+		int j;
 		if (bin_commands) {
-			for (i = 0; bin_commands[i]; i++)
-				free(bin_commands[i]);
+			j = path_progsn;
+			while (--j >= 0)
+				free(bin_commands[j]);
 
 			free(bin_commands);
 
 			bin_commands = (char  **)NULL;
 		}
 
-		if (paths)
-			for (i = 0; i < path_n; i++)
-				free(paths[i]);
+		if (paths) {
+			j = path_n;
+			while (--j >= 0)
+				free(paths[j]);
+		}
 
 		path_n = (size_t)get_path_env();
 		get_path_programs();
@@ -24661,7 +24730,7 @@ parse_input_str(char *str)
 				for (i = (size_t)range_array[r] + old_ranges_n + 1;
 				i <= args_n; i++) {
 					ranges_cmd[j++] = savestring(substr[i],
-											strlen(substr[i]));
+										strlen(substr[i]));
 				}
 
 				ranges_cmd[j] = NULL;
@@ -24705,11 +24774,8 @@ parse_input_str(char *str)
 			sel_array = (char **)xcalloc(args_n + sel_n + 2,
 										 sizeof(char *));
 
-			for (i = 0; i < (size_t)is_sel; i++) {
-				sel_array[j] = (char *)xcalloc(strlen(substr[i]) + 1,
-											   sizeof(char));
-				strcpy(sel_array[j++], substr[i]);
-			}
+			for (i = 0; i < (size_t)is_sel; i++)
+				sel_array[j++] = savestring(substr[i], strlen(substr[i]));
 
 			for (i = 0; i < sel_n; i++) {
 				/* Escape selected filenames and copy them into tmp
