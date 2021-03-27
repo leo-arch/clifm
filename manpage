@@ -785,7 +785,7 @@ Color codes are just traditional ANSI color codes less the escape character and 
 .TP
 Color codes can be used for file extensions as well using this format: *.ext=color. For example, to print C source files in bold green, add this to the \fIExtColors\fR line in the corresponding color scheme file: *.c=01;32
 .TP
-Though by default CliFM uses only 8 colors, you can use 256 and RGB colors as well. Example: fi=04;38;2;245;76;00;48;2;00;00;255 will print regular files underlined and using a bold orange RGB color on a blue background. In this case, just make sure to use a terminal emulator supporting RGB colors.
+Though by default CliFM uses only 8 colors, you can use 256 and RGB colors as well. Example: fi=04;38;2;245;76;00;48;2;00;00;255 will print regular files underlined and using a bold orange RGB color on a blue background. In this case, just make sure to use a terminal emulator supporting RGB colors. To test your terminal color capabilities use the colors.sh script (in the plugins directory).
 .TP
 Filetype and file extension colors, just as interface colors, are specified by the current color scheme and can be modified as you wish (see the \fIcs\fR command above).
 .TP
