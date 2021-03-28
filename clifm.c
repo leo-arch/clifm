@@ -16866,10 +16866,6 @@ my_rl_completion(const char *text, int start, int end)
 
 		else if (*rl_line_buffer == 'b'
 		&& (rl_line_buffer[1] == 'm' || rl_line_buffer[1] == 'o')
-		/* Why to compare the first char of the line buffer? Simply to
-		 * prevent unnecessary calls to strncmp(). For instance, if the
-		 * user typed "cd ", there is no need to compare the line
-		 * against "bm" or "bookmarks" */
 		&& (strncmp(rl_line_buffer, "bm ", 3) == 0
 		|| strncmp(rl_line_buffer, "bookmarks ", 10) == 0)) {
 			rl_attempted_completion_over = 1;
@@ -18601,7 +18597,13 @@ search_glob(char **comm, int invert)
 			free(deq_dir);
 		}
 
-		if (chdir(search_path) == -1) {
+		/* If search is current directory */
+		if ((*search_path == '.' && !search_path[1]) ||
+		(search_path[1] == ws[cur_ws].path[1]
+		&& strcmp(search_path, ws[cur_ws].path) == 0))
+			search_path = (char *)NULL;
+
+		else if (chdir(search_path) == -1) {
 			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, search_path,
 					strerror(errno));
 			return EXIT_FAILURE;
@@ -18989,15 +18991,22 @@ search_regex(char **comm, int invert)
 			free(deq_dir);
 		}
 
-		if (chdir(search_path) == -1) {
-			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, search_path,
-					strerror(errno));
-			return EXIT_FAILURE;
-		}
+		if ((*search_path == '.' && !search_path[1])
+		|| (search_path[1] == ws[cur_ws].path[1]
+		&& strcmp(search_path, ws[cur_ws].path) == 0))
+			search_path = (char *)NULL;
 
-		tmp_files = scandir(".", &reg_dirlist, skip_files, xalphasort);
+		if (search_path && *search_path) {
+			if (chdir(search_path) == -1) {
+				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+						search_path, strerror(errno));
+				return EXIT_FAILURE;
+			}
 
-/*		tmp_files = scandir(".", &reg_dirlist, skip_files,
+			tmp_files = scandir(".", &reg_dirlist, skip_files,
+								xalphasort);
+
+	/*		tmp_files = scandir(".", &reg_dirlist, skip_files,
 							sort == 0 ? NULL : sort == 1 ? m_alphasort
 							: sort == 2 ? size_sort : sort == 3
 							? atime_sort : sort == 4 ? btime_sort
@@ -19005,15 +19014,16 @@ search_regex(char **comm, int invert)
 							? mtime_sort : sort == 7 ? m_versionsort
 							: sort == 8 ? ext_sort : inode_sort); */
 
-		if (tmp_files == -1) {
-			fprintf(stderr, "scandir: %s: %s\n", search_path,
-					strerror(errno));
+			if (tmp_files == -1) {
+				fprintf(stderr, "scandir: %s: %s\n", search_path,
+						strerror(errno));
 
-			if (chdir(ws[cur_ws].path) == -1)
-				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
-						ws[cur_ws].path, strerror(errno));
+				if (chdir(ws[cur_ws].path) == -1)
+					fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+							ws[cur_ws].path, strerror(errno));
 
-			return EXIT_FAILURE;
+				return EXIT_FAILURE;
+			}
 		}
 	}
 
@@ -19213,7 +19223,7 @@ search_regex(char **comm, int invert)
 
 		}
 
-		printf(_("Matches found: %zu\n"), found);
+		printf(_("Matches found: %zu\n"), counter);
 	}
 
 	else
@@ -24635,10 +24645,9 @@ parse_input_str(char *str)
 
 					/* Do not expand bookmark names that conflicts
 					 * with a filename in CWD */
-					int conflict = 0;
-					size_t k;
+					int conflict = 0, k = files;
 
-					for (k = 0; k < files; k++) {
+					while (--k >= 0) {
 						if (*bookmarks[j].name == *file_info[k].name
 						&& strcmp(bookmarks[j].name, file_info[k].name)
 						== 0) {
@@ -24660,7 +24669,7 @@ parse_input_str(char *str)
 				}
 			}
 
-			/* Do not perform any check on the expanded bookmark */
+			/* Do not perform further checks on the expanded bookmark */
 			if (bm_exp)
 				continue;
 		}
