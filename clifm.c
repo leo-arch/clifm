@@ -121,6 +121,7 @@ in FreeBSD, but is deprecated */
 
 #include "clifm.h" /* A few custom functions */
 #include "icons.h"
+// #include "printf.h"
 
 #define EXIT_SUCCESS 0
 
@@ -1022,28 +1023,14 @@ get_size_unit(off_t size)
 
 static void *
 xrealloc(void *ptr, size_t size)
-/*
-Usage example:
-	char **str = NULL;
-	int i;
-	str = xcalloc(1, sizeof(char *));
-	for (i = 0; i < 10; i++)
-		str = xrealloc(str, (i + 1) * sizeof(char));
-*/
 {
-	if (size == 0)
-		++size;
-
 	void *new_ptr = realloc(ptr, size);
 
 	if (!new_ptr) {
-		new_ptr = realloc(ptr, size);
-
-		if (!new_ptr) {
-			_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate "
-				 "%zu bytes\n"), PROGRAM_NAME, __func__, size);
-			exit(EXIT_FAILURE);
-		}
+		free(ptr);
+		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate "
+			 "%zu bytes\n"), PROGRAM_NAME, __func__, size);
+		exit(EXIT_FAILURE);
 	}
 
 	return new_ptr;
@@ -1051,31 +1038,13 @@ Usage example:
 
 static void *
 xcalloc(size_t nmemb, size_t size)
-/*
-Usage example:
-	char **str = NULL;
-	str = xcalloc(1, sizeof(char *)); //for arrays allocation
-
-	int i;
-	for (i = 0; str; i++) //to allocate elements of the array
-		str[i] = xcalloc(7, sizeof(char));
-
-	char *str = NULL;
-	str = xcalloc(20, sizeof(char)); //for strings allocation
-*/
 {
-	if (nmemb == 0) ++nmemb;
-	if (size == 0) ++size;
-
 	void *new_ptr = calloc(nmemb, size);
 
 	if (!new_ptr) {
-		new_ptr = calloc(nmemb, size);
-		if (!new_ptr) {
-			_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate "
-				 "%zu bytes\n"), PROGRAM_NAME, __func__, nmemb * size);
-			exit(EXIT_FAILURE);
-		}
+		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate "
+			 "%zu bytes\n"), PROGRAM_NAME, __func__, nmemb * size);
+		exit(EXIT_FAILURE);
 	}
 
 	return new_ptr;
@@ -1084,14 +1053,11 @@ Usage example:
 static char *
 xnmalloc(size_t nmemb, size_t size)
 {
-	if (nmemb == 0) ++nmemb;
-	if (size == 0) ++size;
-
 	char *new_ptr = (char *)malloc(nmemb * size);
 
 	if (!new_ptr) {
-		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
-			 PROGRAM_NAME, __func__, nmemb*size);
+		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu "
+			 "bytes\n"), PROGRAM_NAME, __func__, nmemb * size);
 		exit(EXIT_FAILURE);
 	}
 
@@ -1116,30 +1082,26 @@ is_internal_c(const char *restrict cmd)
 /* Check cmd against a list of internal commands */
 {
 	const char *int_cmds[] = { "o", "open", "cd", "p", "pr", "prop",
-			"t", "tr", "trash", "s", "sel", "rf", "refresh",
-			"c", "cp", "m", "mv", "bm", "bookmarks", "b",
-			"back", "f", "forth", "bh", "fh", "u", "undel",
-			"untrash", "s", "sel", "sb", "selbox", "ds",
-			"desel", "rm", "mkdir", "ln", "unlink", "touch",
-			"r", "md", "l", "le", "p", "pp", "pr", "prop", "pf",
-			"prof", "profile", "mp", "mountpoints", "ext", "pg",
-			"pager", "uc", "unicode", "folders-first", "ff",
-			"log", "msg", "messages", "alias", "shell", "edit",
-			"history", "hf", "hidden", "path", "cwd", "splash",
-			"ver", "version", "?", "help", "cmd", "commands",
-			"colors", "cc", "fs", "mm", "mime", "x", "n",
-			"net", "lm", "st", "sort", "fc", "tips", "br",
-			"bulk", "opener", "ac", "ad", "acd", "autocd",
-			"ao", "auto-open", "actions", "rl", "reload",
-			"exp", "export", "kb", "keybinds", "pin", "unpin",
-			"cs", "colorschemes", "jump", "je", "jc", "jp", "jo",
-			"icons", "cl", "columns", "ft", "filter", "ws", "mf",
-			NULL };
+		"t", "tr", "trash", "s", "sel", "rf", "refresh", "c", "cp",
+		"m", "mv", "bm", "bookmarks", "b", "back", "f", "forth", "bh",
+		"fh", "u", "undel", "untrash", "s", "sel", "sb", "selbox",
+		"ds", "desel", "rm", "mkdir", "ln", "unlink", "touch", "r",
+		"md", "l", "le", "p", "pp", "pr", "prop", "pf", "prof",
+		"profile", "mp", "mountpoints", "ext", "pg", "pager", "uc",
+		"unicode", "folders-first", "ff", "log", "msg", "messages",
+		"alias", "shell", "edit", "history", "hf", "hidden", "path",
+		"cwd", "splash", "ver", "version", "?", "help", "cmd",
+		"commands", "colors", "cc", "fs", "mm", "mime", "x", "n",
+		"net", "lm", "st", "sort", "fc", "tips", "br", "bulk", "opener",
+		"ac", "ad", "acd", "autocd", "ao", "auto-open", "actions",
+		"rl", "reload", "exp", "export", "kb", "keybinds", "pin",
+		"unpin", "cs", "colorschemes", "jump", "je", "jc", "jp",
+		"jo", "icons", "cl", "columns", "ft", "filter", "ws", "mf",
+		NULL };
 
-	short found = 0;
-	size_t i;
-
-	for (i = 0; int_cmds[i]; i++) {
+	int found = 0;
+	int i = (sizeof(int_cmds)/sizeof(char *)) - 1;
+	while (--i >= 0) {
 		if (*cmd == *int_cmds[i] && strcmp(cmd, int_cmds[i]) == 0) {
 			found = 1;
 			break;
@@ -1270,7 +1232,7 @@ launch_execle(const char *cmd)
 
 	/* Reenable SIGCHLD, in case it was disabled. Otherwise, waitpid won't
 	 * be able to catch error codes coming from the child */
-	signal (SIGCHLD, SIG_DFL);
+	signal(SIGCHLD, SIG_DFL);
 
 	int status;
 	/* Create a new process via fork() */
@@ -1283,10 +1245,10 @@ launch_execle(const char *cmd)
 	else if (pid == 0) {
 		/* Reenable signals only for the child, in case they were
 		 * disabled for the parent */
-		signal (SIGHUP, SIG_DFL);
-		signal (SIGINT, SIG_DFL);
-		signal (SIGQUIT, SIG_DFL);
-		signal (SIGTERM, SIG_DFL);
+		signal(SIGHUP, SIG_DFL);
+		signal(SIGINT, SIG_DFL);
+		signal(SIGQUIT, SIG_DFL);
+		signal(SIGTERM, SIG_DFL);
 
 		/* Get shell base name */
 		char *name = strrchr(sys_shell, '/');
@@ -1569,7 +1531,8 @@ get_ext_color(const char *ext)
 			if (len_found != ext_colors_len[i])
 				continue;
 
-			if (strncmp(ext, ext_colors[i] + 2, len_found) == 0)
+			if (*ext == *(ext_colors[i] + 2)
+			&& strncmp(ext, ext_colors[i] + 2, len_found) == 0)
 				return (strchr(ext_colors[i], '=') + 1);
 		}
 	}
@@ -2066,7 +2029,7 @@ add_to_jumpdb(const char *dir)
 	if (xargs.no_autojump == 1 || !dir || !*dir)
 		return EXIT_FAILURE;
 
-	size_t i;
+	int i;
 	int new_entry = 1;
 
 	if (!jump_db) {
@@ -2074,7 +2037,8 @@ add_to_jumpdb(const char *dir)
 		jump_n = 0;
 	}
 
-	for (i = 0; i < jump_n; i++) {
+	i = jump_n;
+	while (--i >= 0) {
 
 		if (dir[1] == jump_db[i].path[1]
 		&& strcmp(jump_db[i].path, dir) == 0) {
@@ -2089,6 +2053,7 @@ add_to_jumpdb(const char *dir)
 										* sizeof(struct jump_t));
 		jump_db[jump_n].path = savestring(dir, strlen(dir));
 		jump_db[jump_n++].visits = 1;
+
 		jump_db[jump_n].path = (char *)NULL;
 		jump_db[jump_n].visits = 0;
 	}
@@ -12018,27 +11983,29 @@ get_colorschemes(void)
 static int
 is_internal(const char *cmd)
 /* Check cmd against a list of internal commands. Used by parse_input_str()
- * to know if it should perform additional expansions. Only internal
- * commands dealing with filenames should be checked here */
+ * to know if it should perform additional expansions, like glob, regex,
+ * tilde, and so on. Only internal commands dealing with filenames
+ * should be checked here */
 {
-	const char *int_cmds[] = { "o", "open", "cd", "p", "pr", "prop", "t",
-							   "tr", "trash", "s", "sel", "mm", "mime",
-							   "bm", "bookmarks", "br", "bulk", "ac",
-							   "ad", "exp", "export", "pin", "jump",
-							   "jc", "jp", "r", "bl", "le", NULL };
-	short found = 0;
-	size_t i;
+	const char *int_cmds[] = { "o", "open", "cd", "p", "pr", "prop",
+		"t", "tr", "trash", "s", "sel", "mm", "mime", "bm",
+		"bookmarks", "br", "bulk", "ac", "ad", "exp", "export",
+		"pin", "jump", "jc", "jp", "bl", "le", NULL };
 
-	for (i = 0; int_cmds[i]; i++) {
+	int found = 0;
+	int i = (sizeof(int_cmds)/sizeof(char *)) - 1;
+
+	while (--i >= 0) {
 		if (*cmd == *int_cmds[i] && strcmp(cmd, int_cmds[i]) == 0) {
 			found = 1;
 			break;
 		}
 	}
 
-	if (found) /* Check for the search function as well */
+	if (found)
 		return 1;
 
+	/* Check for the search function as well */
 	else if (*cmd == '/' && access(cmd, F_OK) != 0)
 		return 1;
 
@@ -14535,7 +14502,7 @@ keybind_exec_cmd(char *str)
 	int exit_status = EXIT_FAILURE;
 
 	char **cmd = parse_input_str(str);
-	puts("");
+	putchar('\n');
 
 	if (cmd) {
 
@@ -14548,8 +14515,8 @@ keybind_exec_cmd(char *str)
 		if (kbind_busy)
 			kbind_busy = 0;
 
-		size_t i;
-		for (i = 0; i <= args_n; i++)
+		int i = args_n + 1;
+		while (--i >= 0)
 			free(cmd[i]);
 		free(cmd);
 
@@ -14590,7 +14557,7 @@ rl_parent_dir(int count, int key)
 	if (*ws[cur_ws].path == '/' && !ws[cur_ws].path[1])
 		return EXIT_SUCCESS;
 
-	keybind_exec_cmd("..");
+	keybind_exec_cmd("cd ..");
 
 	rl_reset_line_state();
 
@@ -14607,7 +14574,7 @@ rl_root_dir(int count, int key)
 	if (*ws[cur_ws].path == '/' && !ws[cur_ws].path[1])
 		return EXIT_SUCCESS;
 
-	keybind_exec_cmd("/");
+	keybind_exec_cmd("cd /");
 
 	rl_reset_line_state();
 
@@ -14708,13 +14675,11 @@ rl_long(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	if (long_view)
-		long_view = 0;
-	else
-		long_view = 1;
+	long_view = long_view ? 0 : 1;
 
 	if (clear_screen)
 		CLEAR;
+
 	keybind_exec_cmd("rf");
 
 	rl_reset_line_state();
@@ -14728,21 +14693,15 @@ rl_folders_first(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	/* If status == 0 set it to 1. In this way, the next time
-	 * this function is called it will not be true, and the else
-	 * clause will be executed instead */
-	if (list_folders_first)
-		list_folders_first = 0;
-	else
-		list_folders_first = 1;
+	list_folders_first = list_folders_first ? 0 : 1;
 
 	if (cd_lists_on_the_fly) {
 		if (clear_screen)
 			CLEAR;
 		free_dirlist();
-		/* Without this puts(), the first entries of the directories
+		/* Without this putchar(), the first entries of the directories
 		 * list are printed in the prompt line */
-		puts("");
+		putchar('\n');
 		list_dir();
 	}
 
@@ -14757,18 +14716,12 @@ rl_light(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	if (light_mode)
-		light_mode = 0;
-	else
-		light_mode = 1;
+	light_mode = light_mode ? 0 : 1;
 
-	if (cd_lists_on_the_fly) {
-		if (clear_screen)
-			CLEAR;
-		free_dirlist();
-		puts("");
-		list_dir();
-	}
+	if (clear_screen)
+		CLEAR;
+
+	keybind_exec_cmd("rf");
 
 	rl_reset_line_state();
 
@@ -14781,17 +14734,13 @@ rl_hidden(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	if (show_hidden)
-		show_hidden = 0;
-
-	else
-		show_hidden = 1;
+	show_hidden = show_hidden ? 0 : 1;
 
 	if (cd_lists_on_the_fly) {
 		if (clear_screen)
 			CLEAR;
 		free_dirlist();
-		puts("");
+		putchar('\n');
 		list_dir();
 	}
 
@@ -14967,7 +14916,7 @@ rl_sort_next(int count, int key)
 			CLEAR;
 		sort_switch = 1;
 		free_dirlist();
-		puts("");
+		putchar('\n');
 		list_dir();
 		sort_switch = 0;
 	}
@@ -14992,7 +14941,7 @@ rl_sort_previous(int count, int key)
 			CLEAR;
 		sort_switch = 1;
 		free_dirlist();
-		puts("");
+		putchar('\n');
 		list_dir();
 		sort_switch = 0;
 	}
@@ -15378,20 +15327,6 @@ rl_pinned_dir(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-/*
-int
-rl_find_as_you_type(int count, int key)
-{
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd("+");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
-} */
-
 static int
 rl_ws1(int count, int key)
 {
@@ -15443,14 +15378,6 @@ rl_ws4(int count, int key)
 
 	return EXIT_SUCCESS;
 }
-/*
-int
-rl_test(int count, int key)
-{
-	puts("TEST!!");
-
-	return EXIT_SUCCESS;
-} */
 
 static void
 readline_kbinds(void)
@@ -15472,7 +15399,7 @@ readline_kbinds(void)
 
 		/* Navigation */
 		/* Define multiple keybinds for different terminals:
-		 * rxvt, xterm, linux console */
+		 * rxvt, xterm, kernel console */
 //		rl_bind_keyseq("\\M-[D", rl_test); // Left arrow key
 //		rl_bind_keyseq("\\M-+", rl_test);
 		rl_bind_keyseq(find_key("parent-dir"), rl_parent_dir);
@@ -15571,7 +15498,6 @@ readline_kbinds(void)
 		rl_bind_keyseq("\\e[H", rl_home_dir);
 		rl_bind_keyseq("\\M-r", rl_root_dir);
 		rl_bind_keyseq("\\e/", rl_root_dir);
-/*		rl_bind_keyseq("", rl_root_dir); */
 
 		rl_bind_keyseq("\\C-\\M-j", rl_first_dir);
 		rl_bind_keyseq("\\C-\\M-k", rl_last_dir);
@@ -18597,6 +18523,10 @@ search_glob(char **comm, int invert)
 			free(deq_dir);
 		}
 
+		size_t path_len = strlen(search_path);
+		if (search_path[path_len - 1] == '/')
+			search_path[path_len - 1] = '\0';
+
 		/* If search is current directory */
 		if ((*search_path == '.' && !search_path[1]) ||
 		(search_path[1] == ws[cur_ws].path[1]
@@ -18990,6 +18920,10 @@ search_regex(char **comm, int invert)
 			strcpy(search_path, deq_dir);
 			free(deq_dir);
 		}
+
+		size_t path_len = strlen(search_path);
+		if (search_path[path_len - 1] == '/')
+			search_path[path_len - 1] = '\0';
 
 		if ((*search_path == '.' && !search_path[1])
 		|| (search_path[1] == ws[cur_ws].path[1]
@@ -21244,7 +21178,7 @@ help_function (void)
 \n -S, --stealth-mode \t\t leave no trace on the host system.\
 \n				Nothing is read from any file nor any file \
 \n				is created: all settings are set to the \
-\n				default value. However, most setting can \
+\n				default value. However, most settings can \
 \n				be controlled via command line options\
 \n -u, --no-unicode \t\t disable unicode\
 \n -U, --unicode \t\t\t enable unicode to correctly list filenames \
