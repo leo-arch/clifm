@@ -480,6 +480,7 @@ struct jump_t
 {
 	char *path;
 	size_t visits;
+	time_t first_visit;
 };
 
 static struct jump_t *jump_db = (struct jump_t *)NULL;
@@ -590,7 +591,8 @@ enum jump {
 	none = 0,
 	jparent = 1,
 	jchild = 2,
-	jorder = 4
+	jorder = 4,
+	jlist = 8
 };
 
 /* pmsg holds the current program message type */
@@ -2055,11 +2057,13 @@ add_to_jumpdb(const char *dir)
 	if (new_entry) {
 		jump_db = (struct jump_t *)xrealloc(jump_db, (jump_n + 2)
 										* sizeof(struct jump_t));
-		jump_db[jump_n].path = savestring(dir, strlen(dir));
-		jump_db[jump_n++].visits = 1;
+		jump_db[jump_n].visits = 1;
+		jump_db[jump_n].first_visit = time(NULL);
+		jump_db[jump_n++].path = savestring(dir, strlen(dir));
 
 		jump_db[jump_n].path = (char *)NULL;
 		jump_db[jump_n].visits = 0;
+		jump_db[jump_n].first_visit = -1;
 	}
 
 	return EXIT_SUCCESS;
@@ -2130,13 +2134,27 @@ load_jumpdb(void)
 		if (!*(++tmp))
 			continue;
 
-		jump_db[jump_n].path = savestring(tmp, strlen(tmp));
+		int visits = 1;
 
-		if (!is_number(line))
-			jump_db[jump_n++].visits = 1;
+		if (is_number(line))
+			visits = atoi(line);
 
+		char *tmpb = strchr(tmp, ':');
+		if (!tmpb)
+			continue;
+
+		*tmpb = '\0';
+
+		if (!*(++tmpb))
+			continue;
+
+		if (is_number(tmp))
+			jump_db[jump_n].first_visit = (time_t)atoi(tmp);
 		else
-			jump_db[jump_n++].visits = atoi(line);
+			jump_db[jump_n].first_visit = -1;
+
+		jump_db[jump_n].visits = visits;
+		jump_db[jump_n++].path = savestring(tmpb, strlen(tmpb));
 	}
 
 	fclose(fp);
@@ -2152,6 +2170,7 @@ load_jumpdb(void)
 
 	jump_db[jump_n].path = (char *)NULL;
 	jump_db[jump_n].visits = 0;
+	jump_db[jump_n].first_visit = -1;
 }
 
 static void
@@ -2174,8 +2193,11 @@ save_jumpdb(void)
 
 	size_t i;
 
-	for (i = 0; i < jump_n; i++)
-		fprintf(fp, "%zu:%s\n", jump_db[i].visits, jump_db[i].path);
+	printf("%zu\n", jump_n);
+	for (i = 0; i < jump_n; i++) {
+		fprintf(fp, "%zu:%zu:%s\n", jump_db[i].visits,
+				jump_db[i].first_visit, jump_db[i].path);
+	}
 
 	fclose(fp);
 	free(JUMP_FILE);
@@ -17178,23 +17200,36 @@ autojump(char **args)
 		return EXIT_FAILURE;
 	}
 
+	time_t now = time(NULL);
+
 	/* If no parameter, print the list of entries in the jump
-	 * database */
+	 * database together with the corresponding information */
 	if (!args[1] && args[0][1] != 'e') {
 		size_t i;
 
-		printf(_("Order\tVisits\tDirectory\n"));
+		if (!jump_n) {
+			printf("%s: Database still empty\n", PROGRAM_NAME);
+			return EXIT_SUCCESS;
+		}
+
+		printf(_("Order\tVisits\tSince\tRank\tDirectory\n"));
 
 		for (i = 0; i < jump_n; i++) {
 
+			int days = (int)(now - jump_db[i].first_visit)/60/60/24;
+			int rank;
+			rank = days > 0 ? (jump_db[i].visits * 100) / days
+							: (jump_db[i].visits * 100);
+
 			if (strcmp(ws[cur_ws].path, jump_db[i].path) == 0) {
-				printf("  %zu\t%zu\t%s%s%s \n", i + 1,
-					   jump_db[i].visits, mi_c, jump_db[i].path, df_c);
+				printf("  %s%zu\t  %zu\t  %d\t %d\t%s%s \n", mi_c,
+					   i + 1, jump_db[i].visits, days, rank,
+					   jump_db[i].path, df_c);
 			}
 
 			else
-				printf("  %zu\t%zu\t%s \n", i + 1, jump_db[i].visits,
-					   jump_db[i].path);
+				printf("  %zu\t  %zu\t  %d\t %d\t%s \n", i + 1,
+					   jump_db[i].visits, days, rank, jump_db[i].path);
 		}
 
 		return EXIT_SUCCESS;
@@ -17218,6 +17253,7 @@ autojump(char **args)
 		case 'c': jump_opt = jchild; break;
 		case 'p': jump_opt = jparent; break;
 		case 'o': jump_opt = jorder; break;
+		case 'l': jump_opt = jlist; break;
 		case 'u':
 		case '\0':
 			jump_opt = none;
@@ -17280,6 +17316,7 @@ autojump(char **args)
 
 	char **matches = (char **)xnmalloc(jump_n + 1, sizeof(char *));
 	int *visits = (int *)xnmalloc(jump_n + 1, sizeof(int));
+	time_t *first = (time_t *)xnmalloc(jump_n + 1, sizeof(time_t));
 
 	for (i = 1; args[i]; i++) {
 
@@ -17321,6 +17358,7 @@ autojump(char **args)
 					continue;
 
 				visits[match] = jump_db[j].visits;
+				first[match] = jump_db[j].first_visit;
 				matches[match++] = jump_db[j].path;
 			}
 		}
@@ -17344,12 +17382,11 @@ autojump(char **args)
 
 	/* 3) If something remains, we have at least one match */
 
-	/* 4) Further filter the list of matches by the number of visits,
-	 * in such a way that only the most visited directory will be
-	 * returned */
+	/* 4) Further filter the list of matches by frecency, so that only
+	 * the best ranked directory will be returned */
 
 	int found = 0, exit_status = EXIT_FAILURE,
-		most_visited = 0, max = -1;
+		best_ranked = 0, max = -1;
 
 	j = match;
 	while (--j >= 0) {
@@ -17359,9 +17396,32 @@ autojump(char **args)
 
 		found = 1;
 
-		if (visits[j] > max) {
-			max = visits[j];
-			most_visited = j;
+		if (jump_opt == jlist)
+			printf("%s\n", matches[j]);
+
+		else {
+			/* Days since first access */
+			int days = (int)(now - first[j])/60/60/24;
+
+			/* Calculate the rank as frecency. The algorithm was taken
+			 * from Mozilla:
+			 * "https://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency" */
+			int rank;
+			rank = days > 0 ? (visits[j] * 100) / days
+							: (visits[j] * 100);
+
+			/* Matches in the directory basename have the highest
+			 * priority */
+			char *tmp = strrchr(matches[j], '/');
+			if (tmp && *(++tmp)) {
+				if (strstr(tmp, args[args_n]))
+					rank *= 100;
+			}
+
+			if (rank > max) {
+				max = rank;
+				best_ranked = j;
+			}
 		}
 	}
 
@@ -17370,10 +17430,11 @@ autojump(char **args)
 		exit_status = EXIT_FAILURE;
 	}
 
-	else
-		exit_status = cd_function(matches[most_visited]);
+	else if (jump_opt != jlist)
+		exit_status = cd_function(matches[best_ranked]);
 
 	free(matches);
+	free(first);
 	free(visits);
 
 	return exit_status;
@@ -21329,8 +21390,8 @@ help_function (void)
  hf, hidden [on, off, status]\n\
  history [clear] [-n]\n\
  icons [on, off]\n\
- j, jc [STRING ...], jp [STRING ...], je, jo [ORDER]], jump [e, edit] \
-[STRING ...] (autojump function)\n\
+ j, jc [STRING ...], jp [STRING ...], je, jo [ORDER]], jl [STRING ...], \
+ jump [e, edit] [STRING ...] (autojump function)\n\
  kb, keybinds [edit] [reset]\n\
  lm [on, off] (lightmode)\n\
  log [clear]\n\
@@ -23113,8 +23174,8 @@ exec_cmd(char **comm)
 	/*       ############### AUTOJUMP ##################     */
 	else if (*comm[0] == 'j' && (!comm[0][1]
 	|| ((comm[0][1] == 'c' || comm[0][1] == 'p'
-	|| comm[0][1] == 'e' || comm[0][1] == 'o') && !comm[0][2])
-	|| strcmp(comm[0], "jump") == 0)) {
+	|| comm[0][1] == 'e' || comm[0][1] == 'o' || comm[0][1] == 'l')
+	&& !comm[0][2]) || strcmp(comm[0], "jump") == 0)) {
 		exit_code = autojump(comm);
 		return exit_code;
 	}
