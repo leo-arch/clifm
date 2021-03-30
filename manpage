@@ -256,6 +256,9 @@ make the Selection Box common (that is, accessible) to different profiles. By de
 .B \-\-sort\-reverse
 sort in reverse order, for example: z-a instead of a-z, which is the default order
 .TP
+.B \-\-trash\-as\-rm
+the 'rm' command executes the built-in 'trash' instead of 'rm' to prevent accidental deletions
+.TP
 Options precedence order: 1) command line; 2) configuration file; 3) default values.
 
 .SH COMMANDS
@@ -624,7 +627,7 @@ CliFM offers three kinds of file filters:
 .TP
 \fBM\-b:\fR Launch the Bookmarks Manager
 .TP
-\fBM\-i:\fR Toggle hidden files on/off
+\fBM\-i, M\-.:\fR Toggle hidden files on/off
 .TP
 \fBM\-h:\fR Show directory history
 .TP
