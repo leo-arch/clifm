@@ -650,6 +650,7 @@ static short
 	kb_shortcut = 0,
 	switch_cscheme = 0,
 	icons = 0,
+	copy_n_rename = 0,
 
 	home_ok = 1,
 	config_ok = 1,
@@ -21359,7 +21360,7 @@ help_function (void)
  u, undel, untrash [*, a, all]\n\
  uc, unicode [on, off, status]\n\
  unpin\n\
- v, paste [sel] [DESTINY]\n\
+ v, vv, paste sel [DESTINY]\n\
  ver, version\n\
  ws [NUM, +, -] (workspaces)\n\
  x, X [ELN/DIR] (new instance)\n"));
@@ -22844,6 +22845,62 @@ copy_function(char **comm)
 		free(tmp_cmd);
 
 		if (ret == EXIT_SUCCESS) {
+
+			if (copy_n_rename) {
+				char **tmp_cmd = (char **)xnmalloc(sel_n + 3,
+												  sizeof(char *));
+				tmp_cmd[0] = savestring("br", 2);
+
+				size_t j;
+				for (j = 0; j < sel_n; j++) {
+					size_t arg_len = strlen(sel_elements[j]);
+
+					if (sel_elements[j][arg_len - 1] == '/')
+						sel_elements[j][arg_len - 1] = '\0';
+
+					if (*comm[args_n] == '~') {
+						char *exp_dest = tilde_expand(comm[args_n]);
+						comm[args_n] = xrealloc(comm[args_n],
+								(strlen(exp_dest) + 1) * sizeof(char));
+						strcpy(comm[args_n], exp_dest);
+						free(exp_dest);
+					}
+
+					size_t dest_len = strlen(comm[args_n]);
+					if (comm[args_n][dest_len - 1] == '/') {
+						comm[args_n][dest_len - 1] = '\0';
+					}
+
+					char dest[PATH_MAX];
+					strcpy(dest, (sel_is_last
+						|| strcmp(comm[args_n], ".") == 0)
+						? ws[cur_ws].path : comm[args_n]);
+
+					char *ret = strrchr(sel_elements[j], '/');
+
+					char *tmp_str = (char *)xnmalloc(strlen(dest)
+								+ strlen(ret + 1) + 2, sizeof(char));
+
+					sprintf(tmp_str, "%s/%s", dest, ret + 1);
+
+					tmp_cmd[j + 1] = savestring(tmp_str, strlen(tmp_str));
+					free(tmp_str);
+				}
+
+				tmp_cmd[j + 1] = (char *)NULL;
+
+				bulk_rename(tmp_cmd);
+
+				for (i = 0; tmp_cmd[i]; i++)
+					free(tmp_cmd[i]);
+
+				free(tmp_cmd);
+
+				copy_n_rename = 0;
+
+				return EXIT_SUCCESS;
+			}
+
 			/* If 'mv sel' and command is successful deselect everything,
 			 * since sel files are note there anymore */
 			if (*comm[0] == 'm' && comm[0][1] == 'v'
@@ -23121,12 +23178,18 @@ exec_cmd(char **comm)
 	|| (*comm[0] == 'm' && (!comm[0][1]
 	|| (comm[0][1] == 'v' && !comm[0][2])))
 
-	|| (*comm[0] == 'v' && !comm[0][1])
+	|| (*comm[0] == 'v' && (!comm[0][1] || (comm[0][1] == 'v'
+	&& !comm[0][2])))
 
 	|| (*comm[0] == 'p' && strcmp(comm[0], "paste") == 0)) {
 
 		if (((*comm[0] == 'c' || *comm[0] == 'v') && !comm[0][1])
+		|| (*comm[0] == 'v' && comm[0][1] == 'v' && !comm[0][2])
 		|| strcmp(comm[0], "paste") == 0) {
+
+			if (*comm[0] == 'v' && comm[0][1] == 'v' && !comm[0][2])
+				copy_n_rename = 1;
+
 			comm[0] = (char *)xrealloc(comm[0], 12 * sizeof(char *));
 			if (cp_cmd == CP_CP)
 				strcpy(comm[0], "cp -iRp");
@@ -24381,9 +24444,9 @@ parse_input_str(char *str)
  * here.
  * 4) The following expansions (especific to CLiFM) are performed here:
  * ELN's, "sel" keyword, ranges of numbers (ELN's), pinned dir and
- * bookmark names, and, for internal commands only. For CliFM internal
- * commands, tilde, braces, wildcards, command and paramenter
- * substitution, and regex expansion are performed here as well.
+ * bookmark names, and, for internal commands only, tilde, braces,
+ * wildcards, command and paramenter substitution, and regex expansion
+ * are performed here as well.
  * These expansions are the most import part of this function.
  */
 
@@ -24578,7 +24641,10 @@ parse_input_str(char *str)
 	if (!substr)
 		return (char **)NULL;
 
-	/* Replace rm by trash */
+					/* ######################
+					 * #	 TRASH AS RM	#
+					 * ###################### */
+
 	if (tr_as_rm && *substr[0] == 'r' && !substr[0][1]) {
 		substr[0] = (char *)xrealloc(substr[0], 3 * sizeof(char));
 		*substr[0] = 't';
@@ -25004,7 +25070,7 @@ parse_input_str(char *str)
 	substr = (char **)xrealloc(substr, sizeof(char *) * (args_n + 2));
 	substr[args_n + 1] = (char *)NULL;
 
-	if(!is_internal(substr[0]))
+	if (!is_internal(substr[0]))
 		return substr;
 
 	/* #############################################################
@@ -25991,33 +26057,6 @@ main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	#endif
 
-	/* What about unices like BSD, Android and even MacOS?
-	* unix || __unix || __unix__
-	* __NetBSD__, __OpenBSD__, __bdsi__, __DragonFly__
-	* __APPLE__ && __MACH__
-	* sun || __sun
-	* __ANDROID__
-	* __CYGWIN__
-	* MSDOS, _MSDOS, __MSDOS__, __DOS__, _WIN16, _WIN32, _WIN64 */
-
-/*	#ifndef __GLIBC__
-		fprintf(stderr, "%s: GNU C libraries not found\n", PROGRAM_NAME);
-		exit(EXIT_FAILURE);
-	#endif */
-
-/*	printf("Linux: %d\n", LINUX_VERSION_CODE);
-	printf("GLIBC: %d.%d\n", __GLIBC__, __GLIBC_MINOR__);
-
-	#ifndef _GNU_SOURCE
-		puts("Not GNU source");
-		printf("POSIX: %ld\n", _POSIX_C_SOURCE);
-	#endif
-
-	# ifndef _POSIX_C_SOURCE
-		puts("Not POSIX: Using GNU extensions");
-	#endif */
-
-
 				/* #################################
 				 * #     1) INITIALIZATION		   #
 				 * #  Basic config and variables   #
@@ -26029,18 +26068,8 @@ main(int argc, char *argv[])
 	if (*argv[0] == '.' && *(argv[0] + 1) == '/')
 		argv[0] += 2;
 
-	/* Use the locale specified by the environment. By default (ANSI C),
-	 * all programs start in the standard 'C' (== 'POSIX') locale. This
-	 * function makes the program portable to all locales (See man (3)
-	 * setlocale). It affects characters handling functions like
-	 * toupper(), tolower(), alphasort() (since it uses strcoll()), and
-	 * strcoll() itself, among others. Here, it's important to correctly
-	 * sort filenames according to the rules specified by the current
-	 * locale. If the function fails, the default locale ("C") is not
-	 * changed */
+	/* Use the locale specified by the environment */
 	setlocale(LC_ALL, "");
-	/* To query the current locale, use NULL as second argument to
-	 * setlocale(): printf("Locale: %s\n", setlocale(LC_CTYPE, NULL)); */
 
 	/* If the locale isn't English, set 'unicode' to true to correctly
 	 * list (sort and padding) filenames containing non-7bit ASCII chars
@@ -26059,9 +26088,9 @@ main(int argc, char *argv[])
 	argc_bk = argc;
 	argv_bk = (char **)xnmalloc((size_t)argc, sizeof(char *));
 
-	register size_t i = 0;
+	register int i = argc;
 
-	for (i = 0; i < (size_t)argc; i++)
+	while (--i >= 0)
 		argv_bk[i] = savestring(argv[i], strlen(argv[i]));
 
 	/* Register the function to be called at normal exit, either via
@@ -26172,12 +26201,6 @@ main(int argc, char *argv[])
 	 * my_rl_quote(), is_quote_char(), and my_rl_dequote() */
 	qc = savestring(rl_filename_quote_characters,
 					strlen(rl_filename_quote_characters));
-
-	/* Available keymaps: emacs_standard_keymap (default),
-	 * emacs_meta_keymap, emacs_ctlx_keymap, vi_movement_keymap,
-	 * and vi_insertion_keymap */
-
-/*	rl_set_keymap(vi_movement_keymap); */
 
 	check_file_size(DIRHIST_FILE, max_dirhist);
 
@@ -26359,13 +26382,6 @@ main(int argc, char *argv[])
 
 	set_env();
 
-/*	if (!isatty(STDIN_FILENO)) {
-		fprintf(stderr, "%s: stdin is not in interactive mode. "
-				"Exiting\n", PROGRAM_NAME);
-
-		return EXIT_FAILURE;
-
-	} */
 
 				/* ###########################
 				 * #   2) MAIN PROGRAM LOOP  #
@@ -26416,7 +26432,8 @@ main(int argc, char *argv[])
 		else {
 			exec_cmd(cmd);
 
-			for (i = 0; i <= args_n; i++)
+			i = args_n + 1;
+			while (--i >= 0)
 				free(cmd[i]);
 
 			free(cmd);
