@@ -148,7 +148,7 @@ use (or create) PROFILE as profile. Default profile is 'default'
 enable the splash screen
 .TP
 .B \-S \-\-stealth-mode
-leave no trace on the host system. Nothing is read from files nor any file is created: all settings are set to the default value. However, most settings can still be controlled via command line options. Listing colors could be customized via dedicated environment variables (see the ENVIRONMENT section below).
+leave no trace on the host system. Nothing is read from files nor any file is created: all settings are set to the default value. However, most settings can still be controlled via command line options. Listing colors could be customized via dedicated environment variables (see the \fBENVIRONMENT\fR section below).
 .TP
 .B \-u, \-\-no\-unicode
 disable unicode
@@ -166,13 +166,13 @@ start in workspace NUM. By default, CliFM will recover last visited path for eac
 allow the use of external, shell commands
 .TP
 .B \-y, \-\-light\-mode
-enable the light mode to speed up CliFM. See the NOTE ON SPEED section below.
+enable the light mode to speed up CliFM. See the \fBNOTE ON SPEED\fR section below.
 .TP
 .B \-z, \-\-sort=METHOD
 sort files by METHOD, where METHOD could be: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version (name if not available), 8 =  extension, 9 = inode, 10 = owner, 11 = group.
 .TP
 .B \-\-cd\-on\-quit
-write last visited directory to \fI$XDG_CONFIG_HOME/clifm/.last\fR to be later accessed by the corresponding shell function at program exit. See the SHELL FUNCTIONS section below.
+write last visited directory to \fI$XDG_CONFIG_HOME/clifm/.last\fR to be later accessed by the corresponding shell function at program exit. See the \fBSHELL FUNCTIONS\fR section below.
 .TP
 .B \-\-color\-scheme=NAME
 set NAME as color scheme
@@ -265,8 +265,8 @@ Options precedence order: 1) command line; 2) configuration file; 3) default val
 \fBNOTE:\fR ELN = Entry List Number. Example: in the line "12 openbox" (when listing files), 12 is the ELN corresponding to the file named "openbox". The slash followed by a number (/xx) after directories and symbolic links to directories (the files counter) indicates the amount of files contained by the corresponding directory, excluding self and parent directories ("." and ".." respectivelly).
 .sp
 \fBNOTE 2:\fR CliFM now supports fused parameters for internal commands taking an ELN or range of ELN's as parameters. Much like short options for command line programs, you can drop or omit the space between internal commands and the corresponding ELN passed as argument. In general, you can write 'CMDELN' instead of 'CMD ELN'. For example: 'o12' or 's1-5' instead of 'o 12' and 's 1-5' respectivelly. Bear in mind, however, that in thus omitting the space char TAB completion for ELN's won't be available. 
-
-.B FILE/DIR
+.TP
+.B \fRFILE/DIR
 if the \fIautocd\fR and \fIauto-open\fR functions are enabled, which is the default value, open FILE or change directory to DIR. In other words, 'FILE' amounts to 'open FILE' or 'o FILE', and 'DIR' to 'cd DIR'. ELN's, of course, are allowed. Example: '12'. Unlike the \fIopen\fR function (see below), passing an opening application is not allowed.
 .TP
 .B /\fRPATTERN [\-filetype] [DIR]
@@ -281,7 +281,7 @@ The result of the search could be further filtered by specifying a filter type: 
 The quick search function also supports invert search: prepend the exclamation mark (!) to negate a given search pattern. For example: "!.*s$ -d /etc" will match all directories in /etc NOT ending with 's', just as "!D*" will match all files in the current directory NOT starting with 'D'.
 .TP
 .B ;\fR[CMD], \fB:\fR[CMD]
-If no CMD, run the default shell (see below the \fIshell\fR command) in the current working directory. If CMD is specified, skip all CLiFM expansions (see the Built\-in Expansions section below) and run the input string (CMD) as is via the default system shell.
+If no CMD, run the default shell (see below the \fIshell\fR command) in the current working directory. If CMD is specified, skip all CLiFM expansions (see the \fBBUILT\-IN EXPANSIONS\fR section below) and run the input string (CMD) as is via the default system shell.
 .TP
 .B ac, ad \fRELN/FILE ... n
 archive/compress and dearchive/decompress one or multiple files and/or directories. The archiver function brings two modes: \fIac\fR, to generate archives or compressed files, and \fIad\fR, to decompress or dearchive files, either just listing, extracting, recompressing, or mounting their content. In this latter case, the mountpoint used automatically is \fI$HOME/.config/clifm/PROFILE/mounts/ARCHIVE_NAME\fR.
@@ -296,7 +296,7 @@ toggle the autocd function on/off. If set to on, 'DIR' amounts to 'cd DIR'.
 .B actions \fR[edit]
 with no argument, lists available custom actions (or plugins). Use the 'edit' option to add, remove or modify custom actions. The aim of this function is to allow the user to easily add custom commands and functions to CliFM. In other words, the actions function is a plugins capability.
 .sp
-The general procedure is quite simple: a) bind a custom action name to an executable file written in any language you want, be it a shell or Python script, a C program or whatever you like (using the \fIactions.cfm\fR file located in the configuration directory). Example: "myaction=myscript.sh". b) Now, drop the corresponding script (in our example, myscript.sh) into the plugins directory (see the FILES section below). 3) Once this is done, you can call the script using the custom action name defined before as if it were any other command: run 'myaction', and myscript.sh will be executed.
+The general procedure is quite simple: a) bind a custom action name to an executable file written in any language you want, be it a shell or Python script, a C program or whatever you like (using the \fIactions.cfm\fR file located in the configuration directory). Example: "myaction=myscript.sh". b) Now, drop the corresponding script (in our example, myscript.sh) into the plugins directory (see the \fBFILES\fR section below). 3) Once this is done, you can call the script using the custom action name defined before as if it were any other command: run 'myaction', and myscript.sh will be executed.
 .sp
 All arguments passed to the action command are passed to the script or program as well (which is run via the system shell).
 .sp
@@ -429,14 +429,14 @@ You can use the exclamation mark (!) to perform some history commands:
 .B icons \fR[on, off]
 toggle icons on/off
 .TP
-.B j \fR[STRING ...] \fBjc\fR [STRING ...], \fBjp\fR [STRING ...], \fBje\fR, \fBjo\fR [ORDER], \fBjump\fR [e, edit] [STRING ...]
-\fIj\fR is the fastest way of using the \fBautojump\fR function to quickly navigate through the jump database (i.e. a list containing the name of visited directories and the amount of times each of them was visited).
+.B j \fR[STRING ...] \fBjc\fR [STRING ...], \fBjl\fR [STRING ...], \fBjp\fR [STRING ...], \fBje\fR, \fBjo\fR [ORDER], \fBjump\fR [e, edit] [STRING ...]
+\fIj\fR is the fastest way of using the \fBautojump\fR function to quickly navigate through the jump database (i.e. a database of visited directories).
 .sp
-With no argument, \fIj\fR just lists the entries in the jump database, printing the order number of the corresponding entry, the amount of times the directory was visited and the directory name itself. Otherwise, it searchs for CHAR/STR in the database and cd into the most visited matching entry, if any. Example: 'j D' will probably take you to /home/user/Downloads, provided this directory has been already visited and is the most visited match in the database.
+With no argument, \fIj\fR just lists the entries in the jump database, printing the order number of the corresponding entry, the number of visits, the days since the first visit, the rank value, and the directory name itself. Otherwise, it searchs for CHAR/STR in the database and cd into the best ranked matching entry. Example: 'j D' will probably take you to /home/user/Downloads, provided this directory has been already visited and is the best ranked match in the database. For a more detailed description of the matching algorithm used see the \fBAUTOJUMP FRECENCY ALGORITHM\fR section below. 
 .sp
-Multiple query strings could be passed to the function. For example, 'j et mo' will first check for 'et' in the jump database and then will further filter the search using the second parameter: 'mo'. It will most probably take you (again, provided the directory has been already visited and is the most visited match) to /etc/modprobe.d directory. Bear in mind that if STR is an actual directory, \fIjump\fR will just cd into it without performing any query.
+Multiple query strings could be passed to the function. For example, 'j et mo' will first check for 'et' in the jump database and then will further filter the search using the second parameter: 'mo'. It will most probably take you (again, provided the directory has been already visited and is the best ranked match) to /etc/modprobe.d directory. Bear in mind that if STR is an actual directory, \fIjump\fR will just cd into it without performing any query.
 .sp
-\fIj\fR accepts four modifiers: 'e', 'p' 'c', and 'o', the first standing for "edit", the second for "parent", the third for "child", and the last one for "order". Thus, 'je' will open the jump database to be edited if needed; 'jc' will search for files querying only child directories relative to the current working directory, while 'jp' will do the same but for parent directories. 'jo', finally, allows to specify an order number (the left most value in the jump list) instead of a string or a filename. Examples:
+\fIj\fR accepts five modifiers: 'e', 'p' 'c', 'o', and 'l', the first standing for "edit", the second for "parent", the third for "child", the fourth for "order", and the last one for 'list'. Thus, 'je' will open the jump database to be edited if needed; 'jc' will search for files querying only child directories relative to the current working directory, while 'jp' will do the same but for parent directories. 'jo' allows to specify an order number (the left most value in the jump list) instead of a string or a filename, in which case no matching process is performed. Finally, 'jl' just prints the matches for the given query string(s), but without changing the current directory. Examples:
 .sp
 \'jp foo\' will take you to the most visited \fBparent\fR directory containing the string "foo".
 .sp
@@ -444,19 +444,21 @@ Multiple query strings could be passed to the function. For example, 'j et mo' w
 .sp
 \'jo 13\' will cd into the path corresponding to the order number 13. TAB completion is available to expand order numbers into the corresponding paths.
 .sp
+\'jl foo\' will print all entries in the database matching the word "foo".
+.sp
 Finally, you can also edit the jump database using the 'e' or 'edit' option, i.e., 'j e' or 'j edit'.
 .sp
 TAB completion is available for this function.
 .sp
-To reset or modify the jump database as you whish, simply open the jump file using the 'je', edit whatever needs to be edited, save changes, and close the editor.
+To reset or modify the jump database as you whish, simply open the jump file using the 'je' command, edit whatever needs to be edited, save changes, and close the editor.
 .sp
-An alternative way of navigating the jump database is using the jumper plugin (located in the plugins directory and binded by default to the "++" action name), which uses \fIfzf\fB to enable fuzzy searches. Just enter ++ to perform a fuzzy search over the jump database.
+An alternative way of navigating the jump database is using the jumper plugin (located in the plugins directory and binded by default to the "++" action name), which uses \fIfzf\fR to enable fuzzy searches. Just enter ++ to perform a fuzzy search over the jump database.
 .TP
 .B kb, keybinds [edit] [default]
 with no argument, prints the current keyboard codes and their associated functions. To edit the keybindings file, use the 'edit' option. Use the 'default' option to set the default values.
 .TP
 .B lm \fR[on, off]
-Toggle the light mode on/off. This option, aimed to make files listing faster than the default mode, is especially usefull for really old hardware or when working on remote machines. For more details see the NOTE ON SPEED section below.
+Toggle the light mode on/off. This option, aimed to make files listing faster than the default mode, is especially usefull for really old hardware or when working on remote machines. For more details see the \fBNOTE ON SPEED\fR section below.
 .TP
 .B log \fR[clear] [on, off, status]
 with no arguments, it prints the contents of the log file. If 'clear' is passed as argument, all the logs will be deleted. 'on', 'off', and 'status' enable, disable, and check the status of the \fIlog\fR function for the current session.
@@ -711,7 +713,7 @@ CliFM offers three kinds of file filters:
 .TP
 \fBF12:\fR Quit
 .TP
-These are the default keyboard shortcuts. However, they can be freely modified using the 'kb edit' command or just editing the keybindings file (see the FILES section below) to your liking.
+These are the default keyboard shortcuts. However, they can be freely modified using the 'kb edit' command or just editing the keybindings file (see the \fBFILES\fR section below) to your liking.
 .TP
 NOTE: C stands for Control, S for Shift, and M for the Meta key (the Alt key in most keyboards).
 .TP
@@ -873,7 +875,7 @@ Of course, combinations of all these features is also possbile. Example: 'cp sel
 CliFM includes a few shell functions to perform specific actions (cd-on-quit and file-picker). Take a look at the corresponding files, in \fI/usr/share/clifm/functions\fR, and follow the instructions. Needles to say, you can write your own functions.
 
 .SH PLUGINS
-Plugins are just scripts or programs (written in any language) able to add, extend or improve CliFM functionalities. Though several plugins are provided at installation time (in the \fIplugins\fR directory), you can write your owns as you like, with any language you like, and for whatever goal you want. Writing plugins is generally quite easy; but your mileage may vary depending on what you are trying to achieve. A good place to start is examining the provide plugins and reading the \fIactions\fR command description, and the ENVIRONMENT and FILES sections below.
+Plugins are just scripts or programs (written in any language) able to add, extend or improve CliFM functionalities. Though several plugins are provided at installation time (in the \fIplugins\fR directory), you can write your owns as you like, with any language you like, and for whatever goal you want. Writing plugins is generally quite easy; but your mileage may vary depending on what you are trying to achieve. A good place to start is examining the provide plugins and reading the \fIactions\fR command description, and the \fBENVIRONMENT\fR and \fBFILES\fR sections below.
 
 .SH STANDARD INPUT (STDIN)
 CliFM is able to read and list paths from the input stream. Each path in the list should be terminated with a new line character (\\n) and stripped from extra characters not belonging to the path itself. The size of the input stream buffer is 262MiB (65536 paths, provided each path is PATH_MAX size).
@@ -899,7 +901,7 @@ All operations performed on these symbolic links (provided the current working d
 
 .SH MISCELLANEOUS NOTES
 .TP
-For each of the internal commands (see the COMMANDS section above) you can use the semicolon to execute them sequentially and/or the double ampersand to execute them conditionally. Example: 'cmd1; cmd2 && cmd3'. 
+For each of the internal commands (see the \fBCOMMANDS\fR section above) you can use the semicolon to execute them sequentially and/or the double ampersand to execute them conditionally. Example: 'cmd1; cmd2 && cmd3'. 
 .TP
 Though you can use here external commands as well, bear in mind that, whenever at least one internal command is involved in a chained list of commands, CliFM will take care of executing this list (simply because the system shell isn't able to understand any of these commands), so that no shell inter\-process function (like pipes), nor any stream redirection or shell expression (like IF blocks or FOR loops) will be available. However, the shell is still used to run single external commands found in the chained list, but in isolation from the remaining commands in this list.
 .TP
@@ -928,11 +930,27 @@ Besides these two features, a few more things can be disabled to get some extra 
 .sp
 Despite the above, however, it is important to bear in mind that listing speed does not only depend on the program's code and enabled features, but also on the terminal emulator used. Old, basic terminal emulators like Xterm, Aterm, and the kernel built-in console are really slow compared to more modern ones like Urxvt, Lxterminal, ST, and Terminator, to name just a few.
 
+.SH AUTOJUMP FRECENCY ALGORITHM
+The autojump function is designed to learn the navigation habits of the user. The information is stored in a database (see the \fBFILES\fR section below) used to get the best match for a given string provided by the user. In this sense, autojump is like a quick, smart, and evolved cd function.
+.sp
+The information stored in the database is:
+ a) Number of visits per directory
+ b) Date of first visit per directory (seconds since the Unix epoch)
+ c) The full path of each visited directory
+.sp
+With this information it is possible to construct a ranking of directories to offer the user the most accurate matches for each query string. The matching algorithm takes into account mainly two factors: frequency and recency (which is why this algorithm could be called a 'frecency' algorithm). After getting an initial list of matches based on the query string entered by the user, we apply the frecency algorithm on each entry in the list. The algorithm is quite simple: (visits*100)/days-since-first-visit. As a result, we get the average of visits per day since the day of the first visit (what we call the directory rank).
+.sp
+There is still a further step in the ranking process. If the last query string matches the basename of a directory, the entry for this directory has higher priority over those entries matching some of the parent segments of the initially matched directories. For example, if the query string is 'test', '/media/misc/test' has higher priority than '/media/test/misc'. This is done simply because we normally use directory basenames as query strings: they are easier to remember. In doing this, we have more chances of matching what the user actually wanted to match.
+.sp 
+Once all entries in the initial list of matches have been filtered via the above procedure and ranked, we can return the best ranked entry.
+.sp
+The idea of 'frecency' together with the algorithm we use here (except for the added basename procedure) was, as far as I know, first deviced and designed by Mozilla. See \fIhttps://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency\fR.
+
 .SH ENVIRONMENT
 The following variables are read at initialization time:
 .TP
 .B CLIFM_FILE_COLORS
-A colon separated list of file type color codes in the same form specified above in the COLOR CODES section
+A colon separated list of file type color codes in the same form specified above in the \fBCOLOR CODES\fR section
 .TP
 .B CLIFM_EXT_COLORS
 Same as above, but for file extensions
@@ -1023,6 +1041,10 @@ The file contains a series of fields separated by a colon in the following way: 
 .B MESSAGES LOG FILE
 The messages log file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/messages.cfm\fR.
 A file containing a list of system messages, either errors, warnings, or simple notices. The messages log format is: "[date] message".
+.TP
+
+.B AUTOJUMP DATABASE
+The autojump database is stored in \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/jump.cfm\fR.
 .TP
 
 \fBNOTE\fR: If \fB$XDG_CONFIG_HOME\fR is not set, \fB$HOME/.config/\fR is used instead.
