@@ -121,7 +121,7 @@ in FreeBSD, but is deprecated */
 
 #include "clifm.h" /* A few custom functions */
 #include "icons.h"
-// #include "printf.h"
+/* #include "printf.h" */
 
 #define EXIT_SUCCESS 0
 
@@ -351,6 +351,7 @@ nm=01;32:bm=01;36:"
 #define DEF_COLORS 1
 #define MAX_WS 8
 #define DEF_CUR_WS 0
+#define DEF_TRASRM 0
 #define UNSET -1
 #define DEF_MAX_FILES UNSET
 
@@ -568,6 +569,7 @@ struct param
 	int no_columns;
 	int no_colors;
 	int max_files;
+	int trasrm;
 };
 
 static struct param xargs;
@@ -630,6 +632,7 @@ static short
 	cur_ws = UNSET,
 	cp_cmd = UNSET,
 	mv_cmd = UNSET,
+	tr_as_rm = UNSET,
 
 	no_log = 0,
 	internal_cmd = 0,
@@ -2193,7 +2196,7 @@ unset_xargs(void)
 	xargs.expand_bookmarks = xargs.only_dirs = UNSET;
 	xargs.list_and_quit = xargs.color_scheme = xargs.cd_on_quit = UNSET;
 	xargs.no_autojump = xargs.icons = xargs.no_colors = UNSET;
-	xargs.icons_use_file_color = xargs.no_columns = UNSET;
+	xargs.icons_use_file_color = xargs.no_columns = xargs.trasrm = UNSET;
 }
 
 static void
@@ -3499,6 +3502,13 @@ check_options(void)
 	if (mv_cmd == UNSET)
 		mv_cmd = DEF_MV_CMD;
 
+	if (tr_as_rm == UNSET) {
+		if (xargs.trasrm == UNSET)
+			tr_as_rm = DEF_TRASRM;
+		else
+			tr_as_rm = xargs.trasrm;
+	}
+
 	if (only_dirs == UNSET) {
 		if (xargs.only_dirs == UNSET)
 			only_dirs = DEF_ONLY_DIRS;
@@ -3946,14 +3956,15 @@ load_dirhist(void)
 	dirhist_total_index = 0;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
-		old_pwd[dirhist_total_index] = (char *)xnmalloc(line_len
-											   + 1, sizeof(char));
+
 		if (!line || !*line || *line == '\n')
 			continue;
 
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
 
+		old_pwd[dirhist_total_index] = (char *)xnmalloc(line_len
+											   + 1, sizeof(char));
 		strcpy(old_pwd[dirhist_total_index++], line);
 	}
 
@@ -4417,14 +4428,14 @@ create_config(const char *file)
 ColorScheme=default\n\n"
 
 "# The amount of files contained by a directory is informed next\n\
-# to the directory name. However, this feature might slow things down when, \n\
-# for example, listing files on a remote server. The filescounter can be \n\
-# disabled here, via the --no-files-counter option, or using the 'fc' \n\
+# to the directory name. However, this feature might slow things down when,\n\
+# for example, listing files on a remote server. The filescounter can be\n\
+# disabled here, via the --no-files-counter option, or using the 'fc'\n\
 # command while in the program itself.\n\
 FilesCounter=true\n\n"
 
 "# The character used to construct the line dividing the list of files and\n\
-# the prompt. DividingLineChar accepts both literal characters (in single \n\
+# the prompt. DividingLineChar accepts both literal characters (in single\n\
 # quotes) and decimal numbers.\n\
 DividingLineChar='='\n\n"
 
@@ -4468,12 +4479,12 @@ mvCmd=0\n\n"
 # \\W: The basename of $PWD, with $HOME abbreviated with a tilde\n\
 # \\p: A mix of the two above, it abbreviates the current working directory \n\
 # only if longer than PathMax (a value defined in the configuration file).\n\
-# \\z: Exit code of the last executed command. :) if success and :( in case of \n\
+# \\z: Exit code of the last executed command. :) if success and :( in case of\n\
 # error\n\
 # \\$ '#', if the effective user ID is 0, and '$' otherwise\n\
 # \\nnn: The character whose ASCII code is the octal value nnn\n\
 # \\\\: A backslash\n\
-# \\[: Begin a sequence of non-printing characters. This is mostly used to \n\
+# \\[: Begin a sequence of non-printing characters. This is mostly used to\n\
 # add color to the prompt line\n\
 # \\]: End a sequence of non-printing characters\n\n"
 
@@ -4482,7 +4493,7 @@ mvCmd=0\n\n"
 			COLORS_REPO, DEFAULT_PROMPT);
 
 	fprintf(config_fp,
-"# MaxPath is only used for the /p option of the prompt: the current working \n\
+"# MaxPath is only used for the /p option of the prompt: the current working\n\
 # directory will be abbreviated to its basename (everything after last slash)\n\
 # whenever the current path is longer than MaxPath.\n\
 MaxPath=40\n\n"
@@ -4517,12 +4528,12 @@ ExpandBookmarks=false\n\n"
 # the d_type field of the dirent structure (see readdir(3))\n\
 # are disabled to speed up the listing process. stat(3) and access(3)\n\
 # are not executed at all, so that we cannot know in advance if a file\n\
-# is readable by the current user, if it is executable, SUID, SGID, if a \n\
+# is readable by the current user, if it is executable, SUID, SGID, if a\n\
 # symlink is broken, and so on. The file extension check is ignored as\n\
 # well, so that the color per extension feature is disabled.\n\
 LightMode=false\n\n"
 
-"# When running without colors (via the --no-colors option), append \n\
+"# When running without colors (via the --no-colors option), append\n\
 # filetype indicator at the end of filenames: '/' for directories,\n\
 # '@' for symbolic links, '=' for sockets, '|' for FIFO/pipes, '*'\n\
 # for for executable files, and '?' for unknown file types. Bear in mind\n\
@@ -4537,12 +4548,12 @@ ShareSelbox=false\n\n"
 # application. If not set, 'lira', CLiFM's built-in opener, is used.\n\
 Opener=\n\n"
 
-"# Set the shell to be used when running external commands. Defaults to the \n\
+"# Set the shell to be used when running external commands. Defaults to the\n\
 # user's shell as specified in '/etc/passwd'.\n\
 SystemShell=\n\n"
 
-"# Only used when opening a directory via a new CliFM instance (with the 'x' \n\
-# command), this option specifies the command to be used to launch a \n\
+"# Only used when opening a directory via a new CliFM instance (with the 'x'\n\
+# command), this option specifies the command to be used to launch a\n\
 # terminal emulator to run CliFM on it.\n\
 TerminalCmd='%s'\n\n"
 
@@ -4577,6 +4588,10 @@ StartingPath=\n\n"
 "# If set to true, start CliFM in the last visited directory (and in the\n\
 # last used workspace). This option overrides StartingPath.\n\
 RestoreLastPath=false\n\n"
+
+"# If set to true, the 'r' command executes 'trash' instead of 'rm' to\n\
+# prevent accidental deletions.\n\
+TrashAsRm=false\n\n"
 
 "# Set readline editing mode: 0 for vi and 1 for emacs (default).\n\
 RlEditMode=1\n\n"
@@ -5000,6 +5015,22 @@ read_config(void)
 
 			else if (strncmp(opt_str, "false", 5) == 0)
 				light_mode = 0;
+		}
+
+		else if (xargs.trasrm == UNSET && *line == 'T'
+		&& strncmp(line, "TrashAsRm=", 10) == 0) {
+
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "TrashAsRm=%5s\n", opt_str);
+
+			if (ret == -1)
+				continue;
+
+			if (strncmp(opt_str, "true", 4) == 0)
+				tr_as_rm = 1;
+
+			else if (strncmp(opt_str, "false", 5) == 0)
+				tr_as_rm = 0;
 		}
 
 		else if (xargs.cd_on_quit == UNSET && *line == 'C'
@@ -5654,7 +5685,7 @@ reload_config(void)
 	unicode = case_sensitive = cd_lists_on_the_fly = share_selbox = UNSET;
 	autocd = auto_open = restore_last_path = dirhist_map = UNSET;
 	disk_usage = tips = logs_enabled = sort = files_counter = UNSET;
-	light_mode = classify = cd_on_quit = columned = UNSET;
+	light_mode = classify = cd_on_quit = columned = tr_as_rm = UNSET;
 
 	shell_terminal = no_log = internal_cmd = recur_perm_error_flag = 0;
 	is_sel = sel_is_last = print_msg = kbind_busy = dequoted = 0;
@@ -5684,6 +5715,8 @@ reload_config(void)
 
 	/* If some option was set via command line, keep that value
 	 * for any profile */
+	if (xargs.trasrm != UNSET)
+		tr_as_rm = xargs.trasrm;
 	if (xargs.no_colors != UNSET)
 		colorize = xargs.no_colors;
 	if (xargs.no_columns != UNSET)
@@ -6822,6 +6855,7 @@ print_tips(int all)
 		"Space is not needed: enter 'p12' instead of 'p 12'",
 		"When searching or selecting files, use the exclamation mark "
 		"to reverse the meaning of a pattern",
+		"Enable the TrashAsRm option to prevent accidental deletions",
 		NULL
 	};
 
@@ -11464,6 +11498,7 @@ clear-line:\\M-c\n\
 clear-msgs:\\M-t\n\
 show-dirhist:\\M-h\n\
 toggle-hidden:\\M-i\n\
+toggle-hidden2:\\M-.\n\
 toggle-light:\\M-y\n\
 toggle-long:\\M-l\n\
 sort-previous:\\M-z\n\
@@ -15098,8 +15133,11 @@ rl_previous_profile(int count, int key)
 	if (prev_prof < 0 || !profile_names[prev_prof])
 		prev_prof = total_profs;
 
-	if (clear_screen)
+	if (clear_screen) {
 		CLEAR;
+	}
+	else
+		putchar('\n');
 
 	if (profile_set(profile_names[prev_prof]) == EXIT_SUCCESS) {
 		printf(_("%s->%s Switched to profile '%s'\n"), mi_c, df_c,
@@ -15145,8 +15183,11 @@ rl_next_profile(int count, int key)
 	if (next_prof > (int)total_profs || !profile_names[next_prof])
 		next_prof = 0;
 
-	if (clear_screen)
+	if (clear_screen) {
 		CLEAR;
+	}
+	else
+		putchar('\n');
 
 	if (profile_set(profile_names[next_prof]) == EXIT_SUCCESS) {
 		printf(_("%s->%s Switched to profile '%s'\n"), mi_c, df_c,
@@ -15460,6 +15501,7 @@ readline_kbinds(void)
 		rl_bind_keyseq(find_key("refresh-screen"), rl_refresh);
 		rl_bind_keyseq(find_key("clear-line"), rl_clear_line);
 		rl_bind_keyseq(find_key("toggle-hidden"), rl_hidden);
+		rl_bind_keyseq(find_key("toggle-hidden2"), rl_hidden);
 		rl_bind_keyseq(find_key("toggle-long"), rl_long);
 		rl_bind_keyseq(find_key("toggle-light"), rl_light);
 		rl_bind_keyseq(find_key("folders-first"), rl_folders_first);
@@ -15531,6 +15573,7 @@ readline_kbinds(void)
 		rl_bind_keyseq("\\C-r", rl_refresh);
 		rl_bind_keyseq("\\M-c", rl_clear_line);
 		rl_bind_keyseq("\\M-i", rl_hidden);
+		rl_bind_keyseq("\\M-.", rl_hidden);
 		rl_bind_keyseq("\\M-l", rl_long);
 		rl_bind_keyseq("\\M-y", rl_light);
 		rl_bind_keyseq("\\M-f", rl_folders_first);
@@ -21249,29 +21292,30 @@ help_function (void)
 \n     --share-selbox\t\t make the Selection Box common to \
 \n				different profiles\
 \n     --sort-reverse\t\t sort in reverse order, for example: z-a \
-\n				instead of a-z, which is the default order)\n",
+\n				instead of a-z, which is the default order)\
+\n     --trash-as-rm\t\t the 'r' command executes 'trash' instead of \
+				'rm' to prevent accidental deletions\n",
 		 PROGRAM_NAME, PROGRAM_NAME);
 
 	puts(_("\nBUILT-IN COMMANDS:\n\n\
  ELN/FILE/DIR (auto-open and autocd functions)\n\
- /PATTERN [DIR] [-filetype]\n\
- ;[CMD], :[CMD]\n\
- ac, ad ELN/FILE ...\n\
+ /PATTERN [DIR] [-filetype] (quick search)\n\
+ ;[CMD], :[CMD] (run CMD via the system shell)\n\
+ ac, ad ELN/FILE ... (archiving functions)\n\
  acd, autocd [on, off, status]\n\
  actions [edit]\n\
  alias [import FILE]\n\
  ao, auto-open [on, off, status]\n\
  b, back [h, hist] [clear] [!ELN]\n\
- bl ELN/FILE ...\n\
+ bl ELN/FILE ... (batch links)\n\
  bm, bookmarks [a, add PATH] [d, del] [edit] [SHORTCUT or NAME]\n\
  br, bulk ELN/FILE ...\n\
- c, l [e, edit], m, md, r\n\
+ c, l [e, edit], m, md, r (copy, link, move, makedir, and remove)\n\
  cc, colors\n\
  cd [ELN/DIR]\n\
  cl, columns [on, off]\n\
  cmd, commands\n\
  cs, colorscheme [edit] [COLORSCHEME]\n\
- dc [on, off, status]\n\
  ds, desel [*, a, all]\n\
  edit [APPLICATION]\n\
  exp, export [ELN/FILE ...]\n\
@@ -21285,12 +21329,12 @@ help_function (void)
  history [clear] [-n]\n\
  icons [on, off]\n\
  j, jc [STRING ...], jp [STRING ...], je, jo [ORDER]], jump [e, edit] \
-[STRING ...]\n\
+[STRING ...] (autojump function)\n\
  kb, keybinds [edit] [reset]\n\
- lm [on, off]\n\
+ lm [on, off] (lightmode)\n\
  log [clear]\n\
- mf NUM\n\
- mm, mime [info ELN/FILE] [edit]\n\
+ mf NUM (List up to NUM files)\n\
+ mm, mime [info ELN/FILE] [edit] (resource opener)\n\
  mp, mountpoints\n\
  msg, messages [clear]\n\
  n, net [smb, ftp, sftp]://ADDRESS [OPTIONS]\n\
@@ -21317,8 +21361,8 @@ help_function (void)
  unpin\n\
  v, paste [sel] [DESTINY]\n\
  ver, version\n\
- ws [NUM, +, -]\n\
- x, X [ELN/DIR]\n"));
+ ws [NUM, +, -] (workspaces)\n\
+ x, X [ELN/DIR] (new instance)\n"));
 
 	puts(_("Run 'cmd' (F2) or consult the manpage (F1) for "
 		   "more information about each of these commands.\n"));
@@ -21331,7 +21375,7 @@ help_function (void)
  M-m: List mountpoints\n\
  M-t: Clear messages\n\
  M-h: Show directory history\n\
- M-i: Toggle hidden files on/off\n\
+ M-i, M-.: Toggle hidden files on/off\n\
  M-s: Open the Selection Box\n\
  M-a: Select all files in the current working directory\n\
  M-d: Deselect all selected files\n\
@@ -24534,6 +24578,14 @@ parse_input_str(char *str)
 	if (!substr)
 		return (char **)NULL;
 
+	/* Replace rm by trash */
+	if (tr_as_rm && *substr[0] == 'r' && !substr[0][1]) {
+		substr[0] = (char *)xrealloc(substr[0], 3 * sizeof(char));
+		*substr[0] = 't';
+		substr[0][1] = 'r';
+		substr[0][2] = '\0';
+	}
+
 				/* ##############################
 				 * #   2) BUILTIN EXPANSIONS    #
 				 * ##############################
@@ -25468,6 +25520,7 @@ external_arguments(int argc, char **argv)
 		{"no-columns", no_argument, 0, 26},
 		{"no-colors", no_argument, 0, 27},
 		{"max-files", required_argument, 0, 28},
+		{"trash-as-rm", no_argument, 0, 29},
 		{0, 0, 0, 0}
 	};
 
@@ -25605,6 +25658,10 @@ external_arguments(int argc, char **argv)
 			int opt_int = atoi(optarg);
 			if (opt_int >= 0)
 			xargs.max_files = max_files = opt_int;
+		break;
+
+		case 29:
+			xargs.trasrm = tr_as_rm = 1;
 		break;
 
 		case 'a':
