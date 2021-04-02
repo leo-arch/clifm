@@ -2203,7 +2203,7 @@ unset_xargs(void)
 	xargs.sensitive = xargs.unicode = xargs.pager = xargs.path = UNSET;
 	xargs.light = xargs.cd_list_auto = xargs.sort = xargs.dirmap = UNSET;
 	xargs.config = xargs.stealth_mode = xargs.restore_last_path = UNSET;
-	xargs.tips = xargs.disk_usage = UNSET;
+	xargs.tips = xargs.disk_usage = xargs.trasrm = UNSET;
 	xargs.classify = xargs.share_selbox = xargs.rl_vi_mode = UNSET;
 	xargs.max_dirhist = xargs.sort_reverse = xargs.files_counter = UNSET;
 	xargs.welcome_message = xargs.clear_screen = UNSET;
@@ -2211,7 +2211,7 @@ unset_xargs(void)
 	xargs.expand_bookmarks = xargs.only_dirs = xargs.noeln = UNSET;
 	xargs.list_and_quit = xargs.color_scheme = xargs.cd_on_quit = UNSET;
 	xargs.no_autojump = xargs.icons = xargs.no_colors = UNSET;
-	xargs.icons_use_file_color = xargs.no_columns = xargs.trasrm = UNSET;
+	xargs.icons_use_file_color = xargs.no_columns = UNSET;
 }
 
 static inline void
@@ -5889,7 +5889,7 @@ dequote_str(char *text, int m_t)
 	/* At most, we need as many bytes as text (in case no escape sequence
 	 * is found)*/
 	char *buf = NULL;
-	buf = (char *)xcalloc(strlen(text) + 1, sizeof(char));
+	buf = (char *)xnmalloc(strlen(text) + 1, sizeof(char));
 	size_t len = 0;
 
 	while(*text) {
@@ -5897,7 +5897,8 @@ dequote_str(char *text, int m_t)
 		switch (*text) {
 
 			case '\\':
-				if (*(text + 1) && is_quote_char(*(text + 1)))
+				if (*(text + 1) && (_ISDIGIT(*(text + 1))
+				|| is_quote_char(*(text + 1))))
 					buf[len++] = *(++text);
 				else
 					buf[len++] = *text;
@@ -21602,7 +21603,7 @@ bonus_function (void)
 		"\"Hey! Look behind you! A three-headed monkey! (G. Threepweed)",
 		"\"Free as in free speech, not as in free beer\" (R. M. S)",
 		"\"Nothing great has been made in the world without passion\" (G. W. F. Hegel)",
-		"\"Simplicity is the ultimate sophistication (Leo Da Vinci)",
+		"\"Simplicity is the ultimate sophistication\" (Leo Da Vinci)",
 		"\"Yo vendí semillas de alambre de púa, al contado, y me lo agradecieron\" (Marquitos, 9 Reinas)",
 		"\"I'm so happy, because today I've found my friends, they're in my head\" (K. D. Cobain)",
 		"\"The best code is written with the delete key (Someone, somewhere, sometime)",
@@ -21624,12 +21625,19 @@ bonus_function (void)
 		"\"I only know that I know nothing\" (Socrates)",
 		"(Learned) Ignorance is the true outcome of wisdom (Nicholas "
 		"of Cusa)",
+		"True intelligence is about questions, not about answers",
+		"Humanity is just an arrow released towards God",
+		"Buzz is right: infinity is our only and ultimate goal",
+		"That stain will never ever be erased (La 12)",
+		"\"A work of art is never finished, but adandoned\" (J. L. Guerrero)",
+		"At the beginning, software was hardware; but today hardware is "
+		"being absorbed by software",
 		NULL };
 
 	size_t num = (sizeof(phrases) / sizeof(phrases[0])) - 1;
 
 	srand(time(NULL));
-	printf("%s\n", phrases[rand() % num]);
+	puts(phrases[rand() % num]);
 }
 
 static int
@@ -22218,6 +22226,10 @@ list_dir(void)
 
 	int fd = dirfd(dir);
 
+		/* ##########################################
+		 * #	GATHER AND STORE FILE INFORMATION   #
+		 * ########################################## */
+
 	errno = 0;
 	longest = 0;
 	register unsigned int n = 0;
@@ -22267,7 +22279,6 @@ list_dir(void)
 			file_info[n].len = wc_xstrlen(ename);
 		}
 
-		/* ################  */
 		file_info[n].dir = (ent->d_type == DT_DIR) ? 1 : 0;
 		file_info[n].symlink = (ent->d_type == DT_LNK) ? 1 : 0;
 		file_info[n].exec = 0;
@@ -22292,10 +22303,7 @@ list_dir(void)
 		file_info[n].icon = DEF_FILE_ICON;
 		file_info[n].icon_color = DEF_FILE_ICON_COLOR;
 
-		/* ################  */
-		/* Check with access only if reg */
 		file_info[n].ruser = 1;
-		/* ################  */
 		file_info[n].filesn = 0;
 
 		switch(sort) {
@@ -22477,8 +22485,16 @@ list_dir(void)
 		return EXIT_SUCCESS;
 	}
 
+		/* #############################################
+		 * #	SORT FILES ACCORDING TO SORT METHOD    #
+		 * ############################################# */
+
 	if (sort)
 		qsort(file_info, n, sizeof(*file_info), entrycmp);
+
+		/* ##########################################
+		 * #	GET INFO TO PRINT COLUMNED OUTPUT   #
+		 * ########################################## */
 
 	/* Get terminal current amount of rows and columns */
 	struct winsize w;
@@ -22495,7 +22511,6 @@ list_dir(void)
 	size_t columns_n = 1;
 
 	/* Get the longest filename */
-
 	if (columned || long_view) {
 		i = n;
 		while (--i >= 0) {
@@ -22640,7 +22655,7 @@ list_dir(void)
 
 	int last_column = 0;
 
-	/* Get possible amount of columns for the dirlist screen */
+	/* Get amount of columns needed to print files in CWD  */
 	if (!columned)
 		columns_n = 1;
 
@@ -22664,6 +22679,10 @@ list_dir(void)
 
 		if (max_files != UNSET && i == max_files)
 			break;
+
+				/* ######################
+				 * #   A SIMPLE PAGER   #
+				 * ###################### */
 
 		/* A basic pager for directories containing large amount of
 		 * files. What's missing? It only goes downwards. To go
@@ -22734,6 +22753,8 @@ list_dir(void)
 			counter++;
 		}
 
+		/* Determine if current entry is in the last column, in which
+		 * case a new line char will be appended */
 		if (++cur_cols == columns_n) {
 			cur_cols = 0;
 			last_column = 1;
@@ -22747,6 +22768,10 @@ list_dir(void)
 
 		if (!classify)
 			ind_char = 0;
+
+			/* #################################
+			 * #	PRINT THE CURRENT ENTRY    #
+			 * ################################# */
 
 		if (colorize) {
 
@@ -22872,6 +22897,10 @@ list_dir(void)
 	if (!last_column)
 		putchar('\n');
 
+				/* #########################
+				 * #   POST LISTING STUFF  #
+				 * ######################### */
+
 END:
 	if (closedir(dir) == -1)
 		return EXIT_FAILURE;
@@ -22934,33 +22963,32 @@ run_and_refresh(char **comm)
 	free(tmp_cmd);
 	tmp_cmd = (char *)NULL;
 
-	if (ret == EXIT_SUCCESS) {
-		/* If 'rm sel' and command is successful, deselect everything */
-		if (is_sel && *comm[0] == 'r' && comm[0][1] ==  'm'
-		&& (!comm[0][2] || comm[0][2] == ' ')) {
+	if (ret != EXIT_SUCCESS)
+		return EXIT_FAILURE;
+		/* Error messages will be printed by launch_execve() itself */
 
-			for (i = 0; i < sel_n; i++)
-				free(sel_elements[i]);
+	/* If 'rm sel' and command is successful, deselect everything */
+	if (is_sel && *comm[0] == 'r' && comm[0][1] ==  'm'
+	&& (!comm[0][2] || comm[0][2] == ' ')) {
 
-			sel_n = 0;
-			save_sel();
-		}
+		int j = sel_n;
+		while (--j >= 0)
+			free(sel_elements[j]);
 
-		/* When should the screen actually be refreshed:
-		* 1) Creation or removal of file (in current files list)
-		* 2) The contents of a directory (in current files list) changed */
-		if (cd_lists_on_the_fly && strcmp(comm[1], "--help") != 0
-		&& strcmp(comm[1], "--version") != 0) {
-			free_dirlist();
-			list_dir();
-		}
-
-		return EXIT_SUCCESS;
+		sel_n = 0;
+		save_sel();
 	}
 
-	else
-		return EXIT_FAILURE;
-	/* Error messages will be printed by launch_execve() itself */
+	/* When should the screen actually be refreshed:
+	* 1) Creation or removal of file (in current files list)
+	* 2) The contents of a directory (in current files list) changed */
+	if (cd_lists_on_the_fly && strcmp(comm[1], "--help") != 0
+	&& strcmp(comm[1], "--version") != 0) {
+		free_dirlist();
+		list_dir();
+	}
+
+	return EXIT_SUCCESS;
 }
 
 static int
@@ -22968,111 +22996,105 @@ copy_function(char **comm)
 {
 	log_function(comm);
 
-	/* ##### If SEL ###### */
-	if (is_sel) {
-		char *tmp_cmd = (char *)NULL;
-		size_t total_len = 0, i = 0;
+	if (!is_sel)
+		return run_and_refresh(comm);
 
-		for (i = 0; i <= args_n; i++)
-			total_len += strlen(comm[i]);
+	char *tmp_cmd = (char *)NULL;
+	size_t total_len = 0, i = 0;
 
-		tmp_cmd = (char *)xcalloc(total_len + (i + 1) + 2, sizeof(char));
+	for (i = 0; i <= args_n; i++)
+		total_len += strlen(comm[i]);
 
-		for (i = 0; i <= args_n; i++) {
-			strcat(tmp_cmd, comm[i]);
-			strcat(tmp_cmd, " ");
-		}
+	tmp_cmd = (char *)xcalloc(total_len + (i + 1) + 2, sizeof(char));
 
-		if (sel_is_last)
-			strcat(tmp_cmd, ".");
-
-		int ret = 0;
-		ret = launch_execle(tmp_cmd);
-		free(tmp_cmd);
-
-		if (ret == EXIT_SUCCESS) {
-
-			if (copy_n_rename) {
-				char **tmp_cmd = (char **)xnmalloc(sel_n + 3,
-												  sizeof(char *));
-				tmp_cmd[0] = savestring("br", 2);
-
-				size_t j;
-				for (j = 0; j < sel_n; j++) {
-					size_t arg_len = strlen(sel_elements[j]);
-
-					if (sel_elements[j][arg_len - 1] == '/')
-						sel_elements[j][arg_len - 1] = '\0';
-
-					if (*comm[args_n] == '~') {
-						char *exp_dest = tilde_expand(comm[args_n]);
-						comm[args_n] = xrealloc(comm[args_n],
-								(strlen(exp_dest) + 1) * sizeof(char));
-						strcpy(comm[args_n], exp_dest);
-						free(exp_dest);
-					}
-
-					size_t dest_len = strlen(comm[args_n]);
-					if (comm[args_n][dest_len - 1] == '/') {
-						comm[args_n][dest_len - 1] = '\0';
-					}
-
-					char dest[PATH_MAX];
-					strcpy(dest, (sel_is_last
-						|| strcmp(comm[args_n], ".") == 0)
-						? ws[cur_ws].path : comm[args_n]);
-
-					char *ret = strrchr(sel_elements[j], '/');
-
-					char *tmp_str = (char *)xnmalloc(strlen(dest)
-								+ strlen(ret + 1) + 2, sizeof(char));
-
-					sprintf(tmp_str, "%s/%s", dest, ret + 1);
-
-					tmp_cmd[j + 1] = savestring(tmp_str, strlen(tmp_str));
-					free(tmp_str);
-				}
-
-				tmp_cmd[j + 1] = (char *)NULL;
-
-				bulk_rename(tmp_cmd);
-
-				for (i = 0; tmp_cmd[i]; i++)
-					free(tmp_cmd[i]);
-
-				free(tmp_cmd);
-
-				copy_n_rename = 0;
-
-				return EXIT_SUCCESS;
-			}
-
-			/* If 'mv sel' and command is successful deselect everything,
-			 * since sel files are note there anymore */
-			if (*comm[0] == 'm' && comm[0][1] == 'v'
-			&& (!comm[0][2] || comm[0][2] == ' ')) {
-
-				for (i = 0; i < sel_n; i++)
-					free(sel_elements[i]);
-
-				sel_n = 0;
-				save_sel();
-			}
-
-			if (cd_lists_on_the_fly) {
-				free_dirlist();
-				list_dir();
-			}
-
-			return EXIT_SUCCESS;
-		}
-
-		else
-			return EXIT_FAILURE;
+	for (i = 0; i <= args_n; i++) {
+		strcat(tmp_cmd, comm[i]);
+		strcat(tmp_cmd, " ");
 	}
 
-	/* ####If NOT SEL#######... */
-	return run_and_refresh(comm);
+	if (sel_is_last)
+		strcat(tmp_cmd, ".");
+
+	int ret = 0;
+	ret = launch_execle(tmp_cmd);
+	free(tmp_cmd);
+
+	if (ret != EXIT_SUCCESS)
+		return EXIT_FAILURE;
+
+	if (copy_n_rename) { /* pp */
+		char **tmp_cmd = (char **)xnmalloc(sel_n + 3,
+										  sizeof(char *));
+		tmp_cmd[0] = savestring("br", 2);
+
+		size_t j;
+		for (j = 0; j < sel_n; j++) {
+			size_t arg_len = strlen(sel_elements[j]);
+
+			if (sel_elements[j][arg_len - 1] == '/')
+				sel_elements[j][arg_len - 1] = '\0';
+
+			if (*comm[args_n] == '~') {
+				char *exp_dest = tilde_expand(comm[args_n]);
+				comm[args_n] = xrealloc(comm[args_n],
+						(strlen(exp_dest) + 1) * sizeof(char));
+				strcpy(comm[args_n], exp_dest);
+				free(exp_dest);
+			}
+
+			size_t dest_len = strlen(comm[args_n]);
+			if (comm[args_n][dest_len - 1] == '/') {
+				comm[args_n][dest_len - 1] = '\0';
+			}
+
+			char dest[PATH_MAX];
+			strcpy(dest, (sel_is_last
+				|| strcmp(comm[args_n], ".") == 0)
+				? ws[cur_ws].path : comm[args_n]);
+
+			char *ret = strrchr(sel_elements[j], '/');
+
+			char *tmp_str = (char *)xnmalloc(strlen(dest)
+						+ strlen(ret + 1) + 2, sizeof(char));
+
+			sprintf(tmp_str, "%s/%s", dest, ret + 1);
+
+			tmp_cmd[j + 1] = savestring(tmp_str, strlen(tmp_str));
+			free(tmp_str);
+		}
+
+		tmp_cmd[j + 1] = (char *)NULL;
+
+		bulk_rename(tmp_cmd);
+
+		for (i = 0; tmp_cmd[i]; i++)
+			free(tmp_cmd[i]);
+
+		free(tmp_cmd);
+
+		copy_n_rename = 0;
+
+		return EXIT_SUCCESS;
+	}
+
+	/* If 'mv sel' and command is successful deselect everything,
+	 * since sel files are note there anymore */
+	if (*comm[0] == 'm' && comm[0][1] == 'v'
+	&& (!comm[0][2] || comm[0][2] == ' ')) {
+
+		for (i = 0; i < sel_n; i++)
+			free(sel_elements[i]);
+
+		sel_n = 0;
+		save_sel();
+	}
+
+	if (cd_lists_on_the_fly) {
+		free_dirlist();
+		list_dir();
+	}
+
+	return EXIT_SUCCESS;
 }
 
 static int
@@ -25693,11 +25715,11 @@ external_arguments(int argc, char **argv)
 		{"list-on-the-fly", no_argument, 0, 'O'},
 		{"path", required_argument, 0, 'p'},
 		{"profile", required_argument, 0, 'P'},
+		{"splash", no_argument, 0, 's'},
+		{"stealth-mode", no_argument, 0, 'S'},
 		{"unicode", no_argument, 0, 'U'},
 		{"no-unicode", no_argument, 0, 'u'},
 		{"version", no_argument, 0, 'v'},
-		{"splash", no_argument, 0, 's'},
-		{"stealth-mode", no_argument, 0, 'S'},
 		{"workspace", required_argument, 0, 'w'},
 		{"ext-cmds", no_argument, 0, 'x'},
 		{"light", no_argument, 0, 'y'},
