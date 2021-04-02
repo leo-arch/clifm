@@ -8,6 +8,9 @@ CLIFM \- A completely CLI\-based file manager inspired by the KISS principle
 .SH SYNOPSIS
 \fIclifm\fR [\-aAfFgGhiIlLmoOsSuUvxy] [\-c FILE] [\-k FILE] [\-p PATH] [\-P PROFILE] [-w NUM] [\-z METHOD]
 
+.SH GETTING HELP
+There are several ways of getting help in CLiFM. Once in the program, enter '?' to see a minimal list of options, commands, and keybindings, or press F1 to access this manpage, F2 to go to the COMMANDS section of this very manpage, or F3 to go to the KEYBOARD SHORTCUTS section. A convenient way of getting full information about CliFM commands is via the 'ih' action, binded by default to the interactive help plugin (ihelp.sh). Just type 'ih' to run the plugin (it depends on \fIfzf\fR) and select the command you want to obtain information on.
+
 .SH DESCRIPTION
 CliFM is a completely text\-based, \fBshell\-like\fR file manager (no GUI nor curses at all) able to perform all the basic operations you may expect from any other FM. However, its most distinguishing characteristics are:
 .sp
