@@ -82,7 +82,7 @@ CMDS=(
 	"u, undel, untrash@"
 	"uc, unicode@"
 	"unpin @"
-	"v, paste@"
+	"v, vv, paste@"
 	"ver, version@"
     "ws @"
 	"x, X@"

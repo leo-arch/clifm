@@ -7,7 +7,7 @@ SUCCESS=0
 ERROR=1
 
 if [[ -z "$1" ]]; then
-	echo "CliFM: Missing argument" >&2
+	echo "CliFM: Missing argument. At least one image file must be specified" >&2
 	exit $ERROR
 fi
 

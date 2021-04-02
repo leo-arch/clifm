@@ -4,9 +4,9 @@
 # Written by L. Abramovich
 # License GPL2+
 
-USAGE="Usage $0 [16, 256, test]"
+USAGE="Usage: $0 [16, 256, test]"
 
-if [[ -z $1 ]]; then
+if [[ -z $1 || $1 == "--help" ]]; then
 	echo "$USAGE" >&2
 	exit 1
 fi

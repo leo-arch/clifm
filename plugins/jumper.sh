@@ -10,7 +10,7 @@ elif [[ $(type -P rofi) ]]; then
 	finder="rofi"
 
 else
-	echo "CliFM: No finder found" >&2
+	echo "CliFM: No finder found. Install either fzf or rofi" >&2
 	exit 1
 fi
 
