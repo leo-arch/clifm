@@ -387,8 +387,9 @@ nm=01;32:bm=01;36:"
 /* Max length of the properties string in long view mode */
 #define MAX_PROP_STR 55
 
-#define DEFAULT_PROMPT "[\\[\\e[0;36m\\]\\S\\[\\e[0m\\]]\\l \\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\
-\\z\\[\\e[0;34m\\] \\$\\[\\e[0m\\] "
+#define DEFAULT_PROMPT "\\[\\e[0m\\][\\[\\e[0;36m\\]\\S\\[\\e[0m\\]]\\l \
+\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\\z\\[\\e[0;34m\\] \
+\\$\\[\\e[0m\\] "
 
 #define GRAL_USAGE "[-aAfFgGhiIlLmoOsSuUvxy] [-b FILE] [-c FILE] \
 [-k FILE] [-p PATH] [-P PROFILE] [-z METHOD]"
@@ -4874,6 +4875,7 @@ create_config_files(void)
 				"-=fzfnav.sh\n"
 				"*=fzfsel.sh\n"
 				"h=fzfhist.sh\n",
+				"ih=ihelp.sh\n",
 				PROGRAM_NAME, PROGRAM_NAME);
 
 			fclose(actions_fp);
