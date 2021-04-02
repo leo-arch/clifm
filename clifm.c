@@ -26316,13 +26316,13 @@ main(int argc, char *argv[])
 
 	exec_profile();
 
-	/* Start listing as soon as possible to speed up startup time */
-	if (cd_lists_on_the_fly)
-		list_dir();
-
 	load_dirhist();
 
 	add_to_dirhist(ws[cur_ws].path);
+
+	/* Start listing as soon as possible to speed up startup time */
+	if (cd_lists_on_the_fly)
+		list_dir();
 
 	/* Get the list of available applications in PATH to be used by my
 	 * custom TAB-completion function */
