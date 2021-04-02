@@ -99,6 +99,9 @@ set an alternative bookmarks file
 .B \-c \-\-config\-file=FILE
 set an alternative configuration file
 .TP
+.B \-e, \-\-no\-eln
+do not print ELN (entry list number) at the left of each filename. Bear in mind, however, that though ELN's are not printed, they are still there and can be used as always
+.TP
 .B \-f, \-\-no\-folders\-first
 do not list folders first
 .TP
@@ -190,7 +193,7 @@ expand bookmark names into the corresponding bookmark paths and enable TAB compl
 enable icons. Suitable fonts are provided by the \fBicons-in-terminal\fR project.
 .TP
 .B \-\-icons\-use\-file\-color
-Instead of an specific color, icons take the color of the corresponding filename (specified either via file type or via file extension). Useful when building custom color schemes.
+Instead of an specific color, icons take the color of the corresponding filename (specified either via file type or via file extension). Useful when building custom color schemes. This option implies \fB--icons\fR.
 .TP
 .B \-\-list\-and\-quit
 list files and quit. It may be used in conjunction with \fB\-p\fR
@@ -530,8 +533,8 @@ With no arguments, the function prints the current pinned file, if any. If an ar
 .sp
 At program exit, the pinned file is written to a file in the configuration directory (as .pin) to be loaded in the next session.
 .TP
-.B q, quit, exit, zz
-safely quit CliFM.
+.B q, quit, exit
+Gracefully quit CliFM.
 .TP
 .B Q
 same as \fIquit\fR, but enabling the CD on quit functionality.
@@ -701,6 +704,8 @@ CliFM offers three kinds of file filters:
 .TP
 \fBF3:\fR List keybindings
 .TP
+\fBF6:\fR Open the MIME list file
+.TP
 \fBF7:\fR Open the jump database file
 .TP
 \fBF8:\fR Open the current color scheme file
@@ -713,8 +718,7 @@ CliFM offers three kinds of file filters:
 .TP
 \fBF12:\fR Quit
 .TP
-These are the default keyboard shortcuts. However, they can be freely modified using the 'kb edit' command or just editing the keybindings file (see the \fBFILES\fR section below) to your liking.
-.TP
+
 NOTE: C stands for Control, S for Shift, and M for the Meta key (the Alt key in most keyboards).
 .TP
 NOTE 2: Some of these keybindings might not work on your terminal emulator, depending on the terminal settings. Some useful tips on this regard:
@@ -736,7 +740,33 @@ Of course, the above two procedures should be similar in case of keybinding issu
 .TP
 In case some of these keybindings are already used by your Window Manager, you only need to unbind the key or rebind the corresponding function to another key. Since each Window Manager uses its own mechanisms to set/unset keybindings, you should consult the appropriate manual.
 .TP
-However, bear in mind that you can always change these default keybindings, as explained above, to fit your needs. 
+\fBCustomizing keybindings\fR
+.TP
+The above are the default keyboard shortcuts. However, they can be freely modified using the 'kb edit' command (or pressing F9) or just editing the keybindings file (see the \fBFILES\fR section below) to your liking.
+.TP
+Since CliFM does not depend on the curses library, keybindings are set up via ANSI escape codes, for example, "\e[17~" for F6 key. The two main difficulties with ANSI escape codes are: 1) They are not intuitive at all, and 2) They vary depending on the terminal emulator used. This is why we provide a plugin (kbgen) to more easily configure your keybindings.
+.TP
+The plugin can be found in the plugins directory as a C source file. The first step, therefore, is to compile this source file to produce a binary file. Compile as follows:
+.TP
+ gcc -o kbgen kbgen.c
+.TP
+Now, just run the plugin entering 'kbgen'. Use either octal, hexadecimal codes or symbols. Example: For F12 'kbgen' will print the following lines:
+.sp
+ Hex  | Oct  | Symbol
+ ---- | ---- | ------
+ \\x1b | \\033 | ESC (\\e)
+ \\x5b | \\133 | [
+ \\x32 | \\062 | 2
+ \\x34 | \\064 | 4
+ \\x7e | \\176 | ~
+.TP
+In this case, supposing you want to use F12 to open the configuration file, the keybinding would be any of the following:
+.sp
+ open-config:\\x1b\\x5b\\x32\\x34\\x7e (Hex)
+ open-config:\\033\\133\\062\\064\\176 (Oct)
+ open-config:\\e[24~ (Symbol) 
+.TP
+GNU emacs escape sequences are also allowed (ex: "\\M-a", Alt-a in most keyboards, or "\\C-r" for Ctrl-r). Some codes, especially those involving keys like Ctrl or the arrow keys, vary depending on the terminal emulator and the system settings. These keybindings should be set up thus on a per terminal basis. You can also consult the terminfo database via the \fIinfocmp\fR command. See \fBterminfo(5)\fR and \fBinfocmp(1)\fR.
 
 .SH COLOR CODES
 .TP
@@ -942,7 +972,7 @@ With this information it is possible to construct a ranking of directories to of
 .sp
 There is still a further step in the ranking process. If the last query string matches the basename of a directory, the entry for this directory has higher priority over those entries matching some of the parent segments of the initially matched directories. For example, if the query string is 'test', '/media/misc/test' has higher priority than '/media/test/misc'. This is done simply because we normally use directory basenames as query strings: they are easier to remember. In doing this, we have more chances of matching what the user actually wanted to match.
 .sp 
-Once all entries in the initial list of matches have been filtered via the above procedure and ranked, we can return the best ranked entry.
+Once all entries in the initial list of matches have been filtered via the above procedure and ranked, we can return the best ranked entry. The higher rank a directory has, the more priotity it has over the remaining entries in the initial list of matches.
 .sp
 The idea of 'frecency' together with the algorithm we use here (except for the added basename procedure) was, as far as I know, first deviced and designed by Mozilla. See \fIhttps://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency\fR.
 
