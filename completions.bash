@@ -20,6 +20,8 @@ _clifm ()
         --bookmarks-file
         -c
         --config-file
+		-e
+		--no-eln
         -f
         --no-folders-first
         -F
@@ -95,6 +97,7 @@ _clifm ()
         --rl-vi-mode
         --share-selbox
         --sort-reverse
+		--trash-as-rm
     )
 
     if [[ $prev == -b || $prev == -c || $prev == -k || $prev == -p ]]; then
