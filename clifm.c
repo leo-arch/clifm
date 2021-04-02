@@ -351,6 +351,7 @@ nm=01;32:bm=01;36:"
 #define MAX_WS 8
 #define DEF_CUR_WS 0
 #define DEF_TRASRM 0
+#define DEF_NOELN 0
 #define UNSET -1
 #define DEF_MAX_FILES UNSET
 
@@ -493,7 +494,7 @@ struct fileinfo {
 	mode_t mode; /* Store st_mode (for long view mode) */
 	ino_t inode;
 	off_t size;
-	size_t eln_n;
+	int eln_n;
 	uid_t uid;
 	gid_t gid;
 	nlink_t linkn;
@@ -560,6 +561,7 @@ struct param
 	int no_colors;
 	int max_files;
 	int trasrm;
+	int noeln;
 };
 
 static struct param xargs;
@@ -624,6 +626,7 @@ static short
 	cp_cmd = UNSET,
 	mv_cmd = UNSET,
 	tr_as_rm = UNSET,
+	no_eln = UNSET,
 
 	no_log = 0,
 	internal_cmd = 0,
@@ -2205,7 +2208,7 @@ unset_xargs(void)
 	xargs.max_dirhist = xargs.sort_reverse = xargs.files_counter = UNSET;
 	xargs.welcome_message = xargs.clear_screen = UNSET;
 	xargs.logs = xargs.max_path = xargs.bm_file = UNSET;
-	xargs.expand_bookmarks = xargs.only_dirs = UNSET;
+	xargs.expand_bookmarks = xargs.only_dirs = xargs.noeln = UNSET;
 	xargs.list_and_quit = xargs.color_scheme = xargs.cd_on_quit = UNSET;
 	xargs.no_autojump = xargs.icons = xargs.no_colors = UNSET;
 	xargs.icons_use_file_color = xargs.no_columns = xargs.trasrm = UNSET;
@@ -3515,6 +3518,13 @@ check_options(void)
 
 	if (mv_cmd == UNSET)
 		mv_cmd = DEF_MV_CMD;
+
+	if (no_eln == UNSET) {
+		if (xargs.noeln == UNSET)
+			no_eln = DEF_NOELN;
+		else
+			no_eln = xargs.noeln;
+	}
 
 	if (tr_as_rm == UNSET) {
 		if (xargs.trasrm == UNSET)
@@ -4874,7 +4884,7 @@ create_config_files(void)
 				"++=jumper.sh\n"
 				"-=fzfnav.sh\n"
 				"*=fzfsel.sh\n"
-				"h=fzfhist.sh\n",
+				"h=fzfhist.sh\n"
 				"ih=ihelp.sh\n",
 				PROGRAM_NAME, PROGRAM_NAME);
 
@@ -10657,7 +10667,7 @@ mime_open(char **args)
  * latter opening the MIME list file */
 {
 	/* Check arguments */
-	if (!args[1]) {
+	if (!args[1] || (*args[1] == '-' && strcmp(args[1], "--help") == 0)) {
 		puts(_("Usage: mm, mime [info ELN/FILENAME] [edit]"));
 		return EXIT_FAILURE;
 	}
@@ -10994,23 +11004,37 @@ mime_import(char *file)
 static int
 mime_edit(char **args)
 {
+	int exit_status = EXIT_SUCCESS;
+
+	/* Silence stderr */
+	int fd_out = open("/dev/null", O_WRONLY, 0200);
+	int stderr_bk = dup(STDERR_FILENO);
+
+	dup2(fd_out, STDERR_FILENO);
+
+	close(fd_out);
+
 	if (!args[2]) {
 		char *cmd[] = { "mime", MIME_FILE, NULL };
 
 		if (mime_open(cmd) != 0) {
 			fputs(_("Try 'mm, mime edit APPLICATION'\n"), stderr);
-			return EXIT_FAILURE;
+			exit_status = EXIT_FAILURE;
 		}
 
-		return EXIT_SUCCESS;
 	}
 
 	else {
 		char *cmd[] = { args[2], MIME_FILE, NULL };
 		if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
-			return EXIT_FAILURE;
-		return EXIT_SUCCESS;
+			exit_status = EXIT_FAILURE;
 	}
+
+	/* Restore stderr previous value */
+	dup2(stderr_bk, STDERR_FILENO);
+	close(stderr_bk);
+
+	return exit_status;
 }
 
 static int
@@ -11430,7 +11454,7 @@ create_kbinds_file(void)
 # Ex: For Alt-/ (in rxvt terminals) 'kbgen' will print the following \n\
 # lines:\n\
 # Hex  | Oct | Symbol\n\
-# ----  ---- | ------\n\
+# ---- | ---- | ------\n\
 # \\x1b | \\033 | ESC (\\e)\n\
 # \\x2f | \\057 | /\n\
 # In this case, the keybinding, if using symbols, is: \"\\e/:function\"\n\
@@ -11524,7 +11548,8 @@ mountpoints:\\M-m\n\
 folders-first:\\M-f\n\
 selbox:\\M-s\n\
 lock:\\M-o\n\
-# F8-12\n\
+# F6-12\n\
+open-mime:\\e[17~\n\
 open-jump-db:\\e[18~\n\
 edit-color-scheme:\\e[19~\n\
 open-keybinds:\\e[20~\n\
@@ -14856,6 +14881,19 @@ rl_open_jump_db(int count, int key)
 }
 
 static int
+rl_open_mime(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	keybind_exec_cmd("mm edit");
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
+static int
 rl_mountpoints(int count, int key)
 {
 	if (kbind_busy)
@@ -15100,7 +15138,7 @@ rl_quit(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	keybind_exec_cmd("q");
+//	keybind_exec_cmd("q");
 
 	return EXIT_SUCCESS;
 }
@@ -15492,6 +15530,7 @@ readline_kbinds(void)
 		rl_bind_keyseq(find_key("deselect-all"), rl_deselect_all);
 
 		/* Config files */
+		rl_bind_keyseq(find_key("open-mime"), rl_open_mime);
 		rl_bind_keyseq(find_key("open-jump-db"), rl_open_jump_db);
 		rl_bind_keyseq(find_key("edit-color-scheme"), rl_open_cscheme);
 		rl_bind_keyseq(find_key("open-config"), rl_open_config);
@@ -15565,9 +15604,11 @@ readline_kbinds(void)
 		rl_bind_keyseq("\\M-d", rl_deselect_all);
 
 		/* Config files */
+		rl_bind_keyseq("\\e[17~", rl_open_mime);
+		rl_bind_keyseq("\\e[18~", rl_open_jump_db);
 		rl_bind_keyseq("\\e[19~", rl_open_cscheme);
-		rl_bind_keyseq("\\e[21~", rl_open_config);
 		rl_bind_keyseq("\\e[20~", rl_open_keybinds);
+		rl_bind_keyseq("\\e[21~", rl_open_config);
 		rl_bind_keyseq("\\e[23~", rl_open_bm_file);
 
 		/* Settings */
@@ -15758,7 +15799,6 @@ free_stuff(void)
 	}
 
 	if (dirhist_total_index) {
-		printf("total: %d\n", dirhist_total_index);
 		i = (int)dirhist_total_index;
 		while (--i >= 0)
 			free(old_pwd[i]);
@@ -21249,6 +21289,8 @@ help_function (void)
 \n -A, --show-hidden\t\t show hidden files\
 \n -b, --bookmarks-file=FILE\t specify an alternative bookmarks file\
 \n -c, --config-file=FILE\t\t specify an alternative configuration file\
+\n -e, --no-eln\t\t\t do not print ELN (entry list number) at \
+\n				the left of each filename \
 \n -f, --no-folders-first\t\t do not list folders first\
 \n -F, --folders-first\t\t list folders first (default)\
 \n -g, --pager\t\t\t enable the pager\
@@ -21387,12 +21429,12 @@ help_function (void)
  n, net [smb, ftp, sftp]://ADDRESS [OPTIONS]\n\
  o, open [ELN/FILE] [APPLICATION]\n\
  opener [default] [APPLICATION]\n\
- p, pr, prop [ELN/FILE ... n]\n\
+ p, pr, pp, prop [ELN/FILE ... n]\n\
  path, cwd\n\
  pf, prof, profile [ls, list] [set, add, del PROFILE]\n\
  pg, pager [on, off, status]\n\
  pin [FILE/DIR]\n\
- q, quit, exit, zz\n\
+ q, quit, exit\n\
  Q\n\
  rf, refresh\n\
  rl, reload\n\
@@ -21458,7 +21500,8 @@ help_function (void)
  F1: Manual page\n\
  F2: Commands help\n\
  F3: Keybindings help\n\
- F7: Open the jump database\n\
+ F6: Open the MIME list file\n\
+ F7: Open the jump database file\n\
  F8: Open the current color scheme file\n\
  F9: Open the keybindings file\n\
  F10: Open the configuration file\n\
@@ -21761,7 +21804,7 @@ list_dir_light(void)
 		i = n;
 		while (--i >= 0) {
 			size_t total_len = 0;
-			file_info[i].eln_n = DIGINUM(i + 1);
+			file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
 			total_len = file_info[i].eln_n + 1 + file_info[i].len;
 
 			if (!long_view && classify) {
@@ -21892,7 +21935,8 @@ list_dir_light(void)
 
 			/* Print ELN. The remaining part of the line will be
 			 * printed by print_entry_props() */
-			printf("%s%d%s ", el_c, i + 1, df_c);
+			if (!no_eln)
+				printf("%s%d%s ", el_c, i + 1, df_c);
 
 			print_entry_props(&file_info[i], (size_t)space_left);
 		}
@@ -21907,19 +21951,25 @@ list_dir_light(void)
 	int last_column = 0;
 
 	/* Get possible amount of columns for the dirlist screen */
-	columns_n = (size_t)term_cols / (longest + 1); /* +1 for the
-	space between file names */
-
-	/* If longest is bigger than terminal columns, columns_n will be
-	 * negative or zero. To avoid this: */
-	if (columns_n < 1)
+	if (!columned)
 		columns_n = 1;
 
-	/* If we have only three files, we don't want four columns */
-	if (columns_n > (size_t)n)
-		columns_n = (size_t)n;
+	else {
+		columns_n = (size_t)term_cols / (longest + 1); /* +1 for the
+		space between file names */
+
+		/* If longest is bigger than terminal columns, columns_n will
+		 * be negative or zero. To avoid this: */
+		if (columns_n < 1)
+			columns_n = 1;
+
+		/* If we have only three files, we don't want four columns */
+		if (columns_n > (size_t)n)
+			columns_n = (size_t)n;
+	}
 
 	int nn = (int)n;
+	size_t cur_cols = 0;
 	for (i = 0; i < nn; i++) {
 
 		if (max_files != UNSET && i == max_files)
@@ -21931,9 +21981,8 @@ list_dir_light(void)
 		if (pager) {
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding filenames */
-			/*		Check rows					Check columns */
 			if (last_column
-			&& (counter / columns_n) > (size_t)(term_rows - 2)) {
+			&& counter > columns_n * ((size_t)term_rows - 2)) {
 
 				printf("\x1b[7;97m--Mas--\x1b[0;49m");
 
@@ -21996,12 +22045,14 @@ list_dir_light(void)
 			counter++;
 		}
 
-		if (((size_t)i + 1) % columns_n == 0 || !columned)
+		if (++cur_cols == columns_n) {
+			cur_cols = 0;
 			last_column = 1;
+		}
 		else
 			last_column = 0;
 
-		file_info[i].eln_n = DIGINUM(i + 1);
+		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
 
 		int ind_char = 1;
 
@@ -22014,13 +22065,22 @@ list_dir_light(void)
 				if (xargs.icons_use_file_color == 1)
 					file_info[i].icon_color = file_info[i].color;
 
-				printf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
-					   file_info[i].icon_color, file_info[i].icon,
-					   file_info[i].color, file_info[i].name, df_c);
+				if (no_eln)
+					printf("%s%s %s%s%s", file_info[i].icon_color,
+						   file_info[i].icon, file_info[i].color,
+						   file_info[i].name, df_c);
+				else
+					printf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
+						   file_info[i].icon_color, file_info[i].icon,
+						   file_info[i].color, file_info[i].name, df_c);
 			}
 			else {
-				printf("%s%d%s %s%s%s", el_c, i + 1, df_c,
-					   file_info[i].color, file_info[i].name, df_c);
+				if (no_eln)
+					printf("%s%s%s", file_info[i].color,
+						   file_info[i].name, df_c);
+				else
+					printf("%s%d%s %s%s%s", el_c, i + 1, df_c,
+						   file_info[i].color, file_info[i].name, df_c);
 			}
 
 			if (file_info[i].dir && classify) {
@@ -22031,13 +22091,21 @@ list_dir_light(void)
 		}
 
 		else {
-			if (icons)
-				printf("%s%d%s %s %s", el_c, i + 1, df_c,
-					   file_info[i].icon, file_info[i].name);
+			if (icons) {
+				if (no_eln)
+					printf("%s %s", file_info[i].icon, file_info[i].name);
+				else
+					printf("%s%d%s %s %s", el_c, i + 1, df_c,
+						   file_info[i].icon, file_info[i].name);
+			}
 
-			else
-				printf("%s%d%s %s", el_c, i + 1, df_c,
-					   file_info[i].name);
+			else {
+				if (no_eln)
+					printf("%s", file_info[i].name);
+				else
+					printf("%s%d%s %s", el_c, i + 1, df_c,
+						   file_info[i].name);
+			}
 
 			if (classify) {
 				switch(file_info[i].type) {
@@ -22432,7 +22500,7 @@ list_dir(void)
 		i = n;
 		while (--i >= 0) {
 			size_t total_len = 0;
-			file_info[i].eln_n = DIGINUM(i + 1);
+			file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
 			total_len = file_info[i].eln_n + 1 + file_info[i].len;
 
 			if (!long_view && classify) {
@@ -22557,7 +22625,8 @@ list_dir(void)
 
 			/* Print ELN. The remaining part of the line will be
 			 * printed by print_entry_props() */
-			printf("%s%d%s ", el_c, i + 1, df_c);
+			if (!no_eln)
+				printf("%s%d%s ", el_c, i + 1, df_c);
 
 			print_entry_props(&file_info[i], (size_t)space_left);
 		}
@@ -22572,19 +22641,25 @@ list_dir(void)
 	int last_column = 0;
 
 	/* Get possible amount of columns for the dirlist screen */
-	columns_n = (size_t)term_cols / (longest + 1); /* +1 for the
-	space between file names */
-
-	/* If longest is bigger than terminal columns, columns_n will be
-	 * negative or zero. To avoid this: */
-	if (columns_n < 1)
+	if (!columned)
 		columns_n = 1;
 
-	/* If we have only three files, we don't want four columns */
-	if (columns_n > (size_t)n)
-		columns_n = (size_t)n;
+	else {
+		columns_n = (size_t)term_cols / (longest + 1); /* +1 for the
+		space between file names */
+
+		/* If longest is bigger than terminal columns, columns_n will
+		 * be negative or zero. To avoid this: */
+		if (columns_n < 1)
+			columns_n = 1;
+
+		/* If we have only three files, we don't want four columns */
+		if (columns_n > (size_t)n)
+			columns_n = (size_t)n;
+	}
 
 	int nn = (int)n;
+	size_t cur_cols = 0;
 	for (i = 0; i < nn; i++) {
 
 		if (max_files != UNSET && i == max_files)
@@ -22596,9 +22671,8 @@ list_dir(void)
 		if (pager) {
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding filenames */
-			/*		Check rows					Check columns */
 			if (last_column
-			&& (counter / columns_n) > (size_t)(term_rows - 2)) {
+			&& counter > columns_n * ((size_t)term_rows - 2)) {
 
 				fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 
@@ -22660,12 +22734,14 @@ list_dir(void)
 			counter++;
 		}
 
-		if (((size_t)i + 1) % columns_n == 0 || !columned)
+		if (++cur_cols == columns_n) {
+			cur_cols = 0;
 			last_column = 1;
+		}
 		else
 			last_column = 0;
 
-		file_info[i].eln_n = DIGINUM(i + 1);
+		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
 
 		int ind_char = 1;
 
@@ -22676,14 +22752,24 @@ list_dir(void)
 
 			ind_char = 0;
 			if (icons) {
-				printf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
-					   file_info[i].icon_color, file_info[i].icon,
-					   file_info[i].color, file_info[i].name, df_c);
+				if (no_eln)
+					printf("%s%s %s%s%s", file_info[i].icon_color,
+						   file_info[i].icon, file_info[i].color,
+						   file_info[i].name, df_c);
+				else
+					printf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
+						   file_info[i].icon_color, file_info[i].icon,
+						   file_info[i].color, file_info[i].name, df_c);
 			}
 
-			else
-				printf("%s%d%s %s%s%s", el_c, i + 1, df_c,
-					   file_info[i].color, file_info[i].name, df_c);
+			else {
+				if (no_eln)
+					printf("%s%s%s", file_info[i].color,
+						   file_info[i].name, df_c);
+				else
+					printf("%s%d%s %s%s%s", el_c, i + 1, df_c,
+						   file_info[i].color, file_info[i].name, df_c);
+			}
 
 			if (classify) {
 				switch(file_info[i].type) {
@@ -22707,11 +22793,18 @@ list_dir(void)
 		/* No color */
 		else {
 			if (icons)
-				printf("%s%d%s %s %s", el_c, i + 1, df_c,
-					   file_info[i].icon, file_info[i].name);
-			else
-				printf("%s%d%s %s", el_c, i + 1, df_c,
-					   file_info[i].name);
+				if (no_eln)
+					printf("%s %s", file_info[i].icon, file_info[i].name);
+				else
+					printf("%s%d%s %s %s", el_c, i + 1, df_c,
+						   file_info[i].icon, file_info[i].name);
+			else {
+				if (no_eln)
+					printf("%s", file_info[i].name);
+				else
+					printf("%s%d%s %s", el_c, i + 1, df_c,
+						   file_info[i].name);
+			}
 
 			if (classify) {
 				/* Append filetype indicator */
@@ -23415,14 +23508,14 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "pr") == 0 || strcmp(comm[0], "pp") == 0
 	|| strcmp(comm[0], "prop") == 0)) {
 		if (!comm[1]) {
-			fputs(_("Usage: pr, pp [ELN/FILE ... n]\n"),
+			fputs(_("Usage: p, pr, pp, prop [ELN/FILE ... n]\n"),
 				  stderr);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
 
 		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
-			puts(_("Usage: pr, pp [ELN/FILE ... n]"));
+			puts(_("Usage: p, pr, pp, prop [ELN/FILE ... n]"));
 			return EXIT_SUCCESS;
 		}
 
@@ -23463,7 +23556,7 @@ exec_cmd(char **comm)
 		}
 
 		if (strcmp(comm[1], "--help") == 0) {
-			puts(_("Usage: br, bulk ELN/FILE ...\n"));
+			puts(_("Usage: br, bulk ELN/FILE ..."));
 			return EXIT_SUCCESS;
 		}
 
@@ -25584,6 +25677,7 @@ external_arguments(int argc, char **argv)
 		{"show-hidden", no_argument, 0, 'A'},
 		{"bookmarks-file", no_argument, 0, 'b'},
 		{"config-file", no_argument, 0, 'c'},
+		{"no-eln", no_argument, 0, 'e'},
 		{"no-folders-first", no_argument, 0, 'f'},
 		{"folders-first", no_argument, 0, 'F'},
 		{"pager", no_argument, 0, 'g'},
@@ -25648,7 +25742,7 @@ external_arguments(int argc, char **argv)
 		 *bm_value = (char *)NULL;
 
 	while ((optc = getopt_long(argc, argv,
-	"+aAb:c:fFgGhiIk:lLmoOp:P:sSUuvw:xyz:", longopts,
+	"+aAb:c:efFgGhiIk:lLmoOp:P:sSUuvw:xyz:", longopts,
 	(int *)0)) != EOF) {
 		/* ':' and '::' in the short options string means 'required' and
 		 * 'optional argument' respectivelly. Thus, 'p' and 'P' require
@@ -25757,6 +25851,7 @@ external_arguments(int argc, char **argv)
 		break;
 
 		case 25:
+			xargs.icons = icons = 1;
 			xargs.icons_use_file_color = 1;
 		break;
 
@@ -25800,6 +25895,10 @@ external_arguments(int argc, char **argv)
 			xargs.config = 1;
 			config_value = optarg;
 			break;
+
+		case 'e':
+			xargs.noeln = no_eln = 1;
+		break;
 
 		case 'f':
 			flags &= ~FOLDERS_FIRST;
