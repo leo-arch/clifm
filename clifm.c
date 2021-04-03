@@ -352,6 +352,7 @@ nm=01;32:bm=01;36:"
 #define DEF_CUR_WS 0
 #define DEF_TRASRM 0
 #define DEF_NOELN 0
+#define DEF_MIN_NAME_TRIM 20
 #define UNSET -1
 #define DEF_MAX_FILES UNSET
 
@@ -627,6 +628,7 @@ static short
 	mv_cmd = UNSET,
 	tr_as_rm = UNSET,
 	no_eln = UNSET,
+	min_name_trim = UNSET,
 
 	no_log = 0,
 	internal_cmd = 0,
@@ -1124,7 +1126,10 @@ is_internal_c(const char *restrict cmd)
 static char *
 split_fusedcmd(char *str)
 {
-	if (!str || !*str || *str == ';' || *str == ':')
+	if (!str || !*str || *str == ';' || *str == ':' || *str == '\\')
+		return (char *)NULL;
+
+	if (strchr(str, '/'))
 		return (char *)NULL;
 
 	/* The buffer size is the double of STR, just in case each subtr
@@ -3519,6 +3524,9 @@ check_options(void)
 	if (mv_cmd == UNSET)
 		mv_cmd = DEF_MV_CMD;
 
+	if (min_name_trim == UNSET)
+		min_name_trim = DEF_MIN_NAME_TRIM;
+
 	if (no_eln == UNSET) {
 		if (xargs.noeln == UNSET)
 			no_eln = DEF_NOELN;
@@ -4461,7 +4469,7 @@ FilesCounter=true\n\n"
 "# The character used to construct the line dividing the list of files and\n\
 # the prompt. DividingLineChar accepts both literal characters (in single\n\
 # quotes) and decimal numbers.\n\
-DividingLineChar='='\n\n"
+DividingLineChar='-'\n\n"
 
 "# If set to true, print a map of the current position in the directory\n\
 # history list, showing previous, current, and next entries\n\
@@ -4528,6 +4536,10 @@ ShowHiddenFiles=false\n\
 LongViewMode=false\n\
 LogCmds=false\n\n"
 
+"# Minimum length at which a filename can be trimmed in long view mode\n\
+# (including ELN length)\n\
+MinFilenameTrim=20\n\n"
+
 "# Should CliFM be allowed to run external, shell commands?\n\
 ExternalCommands=false\n\n"
 
@@ -4557,8 +4569,9 @@ ExpandBookmarks=false\n\n"
 # well, so that the color per extension feature is disabled.\n\
 LightMode=false\n\n"
 
-"# When running without colors (via the --no-colors option), append\n\
-# filetype indicator at the end of filenames: '/' for directories,\n\
+"# If running with colors, append directory indicator and files counter\n\
+# to directories. If running without colors (via the --no-colors option),\n\
+# append filetype indicator at the end of filenames: '/' for directories,\n\
 # '@' for symbolic links, '=' for sockets, '|' for FIFO/pipes, '*'\n\
 # for for executable files, and '?' for unknown file types. Bear in mind\n\
 # that when running in light mode the check for executable files won't be\n\
@@ -5232,6 +5245,18 @@ read_config(void)
 				sort = DEF_SORT;
 		}
 
+		else if (*line == 'M' && strncmp(line,
+		"MinFilenameTrim=", 16) == 0) {
+			int opt_num = 0;
+			ret = sscanf(line, "MinFilenameTrim=%d\n", &opt_num);
+			if (ret == -1)
+				continue;
+			if (opt_num > 0)
+				min_name_trim = opt_num;
+			else /* default */
+				min_name_trim = DEF_MIN_NAME_TRIM;
+		}
+
 		else if (*line == 'c'
 		&& strncmp(line, "cpCmd=", 6) == 0) {
 			int opt_num = 0;
@@ -5882,12 +5907,12 @@ dequote_str(char *text, int m_t)
  * completing paths. Returns a string containing text without escape
  * sequences */
 {
-	if (!text)
+	if (!text || !*text)
 		return (char *)NULL;
 
 	/* At most, we need as many bytes as text (in case no escape sequence
 	 * is found)*/
-	char *buf = NULL;
+	char *buf = (char *)NULL;
 	buf = (char *)xnmalloc(strlen(text) + 1, sizeof(char));
 	size_t len = 0;
 
@@ -5895,17 +5920,9 @@ dequote_str(char *text, int m_t)
 
 		switch (*text) {
 
-			case '\\':
-				if (*(text + 1) && (_ISDIGIT(*(text + 1))
-				|| is_quote_char(*(text + 1))))
-					buf[len++] = *(++text);
-				else
-					buf[len++] = *text;
-			break;
+			case '\\': buf[len++] = *(++text); break;
 
-			default:
-				buf[len++] = *text;
-			break;
+			default: buf[len++] = *text; break;
 		}
 
 		text++;
@@ -17242,10 +17259,11 @@ autojump(char **args)
 
 			int days = (int)(now - jump_db[i].first_visit)/60/60/24;
 			int rank;
-			rank = days > 0 ? (jump_db[i].visits * 100) / days
+			rank = days > 1 ? (jump_db[i].visits * 100) / days
 							: (jump_db[i].visits * 100);
 
-			if (strcmp(ws[cur_ws].path, jump_db[i].path) == 0) {
+			if (*ws[cur_ws].path == *jump_db[i].path
+			&& strcmp(ws[cur_ws].path, jump_db[i].path) == 0) {
 				printf("  %s%zu\t  %zu\t  %d\t %d\t%s%s \n", mi_c,
 					   i + 1, jump_db[i].visits, days, rank,
 					   jump_db[i].path, df_c);
@@ -21857,8 +21875,8 @@ list_dir_light(void)
 		struct stat lattr;
 		int space_left = term_cols - MAX_PROP_STR;
 
-		if (space_left < 20)
-			space_left = 20;
+		if (space_left < min_name_trim)
+			space_left = min_name_trim;
 
 		if ((int)longest < space_left)
 			space_left = longest;
@@ -22558,14 +22576,14 @@ list_dir(void)
 
 	if (long_view) {
 		int space_left = term_cols - MAX_PROP_STR;
-		/* space_left is the max space that should be used to print the
+		/* SPACE_LEFT is the max space that should be used to print the
 		 * filename (plus space char) */
 
-		/* Do not allow space_left to be less than 20 (this is a more
-		 * or less arbitrary value), especially because the result of
-		 * the above operation could be negative */
-		if (space_left < 20)
-			space_left = 20;
+		/* Do not allow SPACE_LEFT to be less than MIN_NAME_TRIM,
+		 * especially because the result of the above operation could
+		 * be negative */
+		if (space_left < min_name_trim)
+			space_left = min_name_trim;
 
 		if ((int)longest < space_left)
 			space_left = longest;
@@ -22799,6 +22817,7 @@ list_dir(void)
 			}
 
 			if (classify) {
+				/* Append directory indicator and files counter */
 				switch(file_info[i].type) {
 
 					case DT_DIR:
