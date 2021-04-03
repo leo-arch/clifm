@@ -393,12 +393,13 @@ nm=01;32:bm=01;36:"
 \\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\\z\\[\\e[0;34m\\] \
 \\$\\[\\e[0m\\] "
 
-#define GRAL_USAGE "[-aAfFgGhiIlLmoOsSuUvxy] [-b FILE] [-c FILE] \
+#define GRAL_USAGE "[-aAefFgGhiIlLmoOsSuUvxy] [-b FILE] [-c FILE] \
 [-k FILE] [-p PATH] [-P PROFILE] [-z METHOD]"
 
 #define DEFAULT_TERM_CMD "xterm -e"
 
 #define FALLBACK_SHELL "/bin/sh"
+#define FALLBACK_OPENER "xdg-open"
 
 #define strlen xstrlen
 #define strcpy xstrcpy
@@ -825,51 +826,51 @@ static const char *INTERNAL_CMDS[] = {
  * would make the whole thing slower and more tedious) */
 
 /* Colors (filetype and interface) */
-static char di_c[MAX_COLOR] = "", /* Directory */
-	nd_c[MAX_COLOR] = "", /* No read directory */
-	ed_c[MAX_COLOR] = "", /* Empty dir */
-	ne_c[MAX_COLOR] = "", /* No read empty dir */
-	fi_c[MAX_COLOR] = "", /* Reg file */
-	ef_c[MAX_COLOR] = "", /* Empty reg file */
-	nf_c[MAX_COLOR] = "", /* No read file */
-	ln_c[MAX_COLOR] = "", /* Symlink */
-	or_c[MAX_COLOR] = "", /* Broken symlink */
-	pi_c[MAX_COLOR] = "", /* FIFO, pipe */
-	so_c[MAX_COLOR] = "", /* Socket */
-	bd_c[MAX_COLOR] = "", /* Block device */
-	cd_c[MAX_COLOR] = "", /* Char device */
-	su_c[MAX_COLOR] = "", /* SUID file */
-	sg_c[MAX_COLOR] = "", /* SGID file */
-	tw_c[MAX_COLOR] = "", /* Sticky other writable */
-	st_c[MAX_COLOR] = "", /* Sticky (not ow)*/
-	ow_c[MAX_COLOR] = "", /* Other writable */
-	ex_c[MAX_COLOR] = "", /* Executable */
-	ee_c[MAX_COLOR] = "", /* Empty executable */
-	ca_c[MAX_COLOR] = "", /* Cap file */
-	no_c[MAX_COLOR] = "", /* Unknown */
-	uf_c[MAX_COLOR] = "", /* Non-'stat'able file */
-	mh_c[MAX_COLOR] = "", /* Multi-hardlink file */
+static char di_c[MAX_COLOR], /* Directory */
+	nd_c[MAX_COLOR], /* No read directory */
+	ed_c[MAX_COLOR], /* Empty dir */
+	ne_c[MAX_COLOR], /* No read empty dir */
+	fi_c[MAX_COLOR], /* Reg file */
+	ef_c[MAX_COLOR], /* Empty reg file */
+	nf_c[MAX_COLOR], /* No read file */
+	ln_c[MAX_COLOR], /* Symlink */
+	or_c[MAX_COLOR], /* Broken symlink */
+	pi_c[MAX_COLOR], /* FIFO, pipe */
+	so_c[MAX_COLOR], /* Socket */
+	bd_c[MAX_COLOR], /* Block device */
+	cd_c[MAX_COLOR], /* Char device */
+	su_c[MAX_COLOR], /* SUID file */
+	sg_c[MAX_COLOR], /* SGID file */
+	tw_c[MAX_COLOR], /* Sticky other writable */
+	st_c[MAX_COLOR], /* Sticky (not ow)*/
+	ow_c[MAX_COLOR], /* Other writable */
+	ex_c[MAX_COLOR], /* Executable */
+	ee_c[MAX_COLOR], /* Empty executable */
+	ca_c[MAX_COLOR], /* Cap file */
+	no_c[MAX_COLOR], /* Unknown */
+	uf_c[MAX_COLOR], /* Non-'stat'able file */
+	mh_c[MAX_COLOR], /* Multi-hardlink file */
 
-	bm_c[MAX_COLOR] = "", /* Bookmarked directory */
-	el_c[MAX_COLOR] = "", /* ELN color */
-	mi_c[MAX_COLOR] = "", /* Misc indicators color */
-	df_c[MAX_COLOR] = "", /* Default color */
-	dc_c[MAX_COLOR] = "", /* Files counter color */
-	wc_c[MAX_COLOR] = "", /* Welcome message color */
-	dh_c[MAX_COLOR] = "", /* Dirhist index color */
-	dl_c[MAX_COLOR] = "", /* Dividing line index color */
+	bm_c[MAX_COLOR], /* Bookmarked directory */
+	el_c[MAX_COLOR], /* ELN color */
+	mi_c[MAX_COLOR], /* Misc indicators color */
+	df_c[MAX_COLOR], /* Default color */
+	dc_c[MAX_COLOR], /* Files counter color */
+	wc_c[MAX_COLOR], /* Welcome message color */
+	dh_c[MAX_COLOR], /* Dirhist index color */
+	dl_c[MAX_COLOR], /* Dividing line index color */
 
 	/* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */
-	tx_c[MAX_COLOR + 2] = "", /* Text color */
-	li_c[MAX_COLOR + 2] = "", /* Sel indicator color */
-	ti_c[MAX_COLOR + 2] = "", /* Trash indicator color */
-	em_c[MAX_COLOR + 2] = "", /* Error msg color */
-	wm_c[MAX_COLOR + 2] = "", /* Warning msg color */
-	nm_c[MAX_COLOR + 2] = "", /* Notice msg color */
-	si_c[MAX_COLOR + 2] = "", /* stealth indicator color */
+	tx_c[MAX_COLOR + 2], /* Text color */
+	li_c[MAX_COLOR + 2], /* Sel indicator color */
+	ti_c[MAX_COLOR + 2], /* Trash indicator color */
+	em_c[MAX_COLOR + 2], /* Error msg color */
+	wm_c[MAX_COLOR + 2], /* Warning msg color */
+	nm_c[MAX_COLOR + 2], /* Notice msg color */
+	si_c[MAX_COLOR + 2], /* stealth indicator color */
 
-	dir_ico_c[MAX_COLOR] = ""; /* Directories icon color */
+	dir_ico_c[MAX_COLOR]; /* Directories icon color */
 
 
 				/** ##########################
@@ -1049,7 +1050,9 @@ xnmalloc(size_t nmemb, size_t size)
 	return new_ptr;
 }
 
-static char *xitoa(int n)
+static char *
+xitoa(int n)
+/* Transform an integer (N) into a string of chars */
 {
 	static char buf[32] = {0};
 	int i = 30, rem;
@@ -2480,47 +2483,46 @@ strip_color_line(const char *str, char mode)
 static void
 free_colors(void)
 {
-	/* Free and reset whatever value was loaded */
-	memset(bm_c, '\0', MAX_COLOR);
-	memset(dl_c, '\0', MAX_COLOR);
-	memset(el_c, '\0', MAX_COLOR);
-	memset(mi_c, '\0', MAX_COLOR);
-	memset(tx_c, '\0', MAX_COLOR);
-	memset(df_c, '\0', MAX_COLOR);
-	memset(dc_c, '\0', MAX_COLOR);
-	memset(wc_c, '\0', MAX_COLOR);
-	memset(dh_c, '\0', MAX_COLOR);
-	memset(li_c, '\0', MAX_COLOR + 2);
-	memset(ti_c, '\0', MAX_COLOR + 2);
-	memset(em_c, '\0', MAX_COLOR + 2);
-	memset(wm_c, '\0', MAX_COLOR + 2);
-	memset(nm_c, '\0', MAX_COLOR + 2);
-	memset(si_c, '\0', MAX_COLOR + 2);
-	memset(nd_c, '\0', MAX_COLOR);
-	memset(nf_c, '\0', MAX_COLOR);
-	memset(di_c, '\0', MAX_COLOR);
-	memset(ed_c, '\0', MAX_COLOR);
-	memset(ne_c, '\0', MAX_COLOR);
-	memset(ex_c, '\0', MAX_COLOR);
-	memset(ee_c, '\0', MAX_COLOR);
-	memset(bd_c, '\0', MAX_COLOR);
-	memset(ln_c, '\0', MAX_COLOR);
-	memset(mh_c, '\0', MAX_COLOR);
-	memset(or_c, '\0', MAX_COLOR);
-	memset(so_c, '\0', MAX_COLOR);
-	memset(pi_c, '\0', MAX_COLOR);
-	memset(cd_c, '\0', MAX_COLOR);
-	memset(fi_c, '\0', MAX_COLOR);
-	memset(ef_c, '\0', MAX_COLOR);
-	memset(su_c, '\0', MAX_COLOR);
-	memset(sg_c, '\0', MAX_COLOR);
-	memset(ca_c, '\0', MAX_COLOR);
-	memset(st_c, '\0', MAX_COLOR);
-	memset(tw_c, '\0', MAX_COLOR);
-	memset(ow_c, '\0', MAX_COLOR);
-	memset(no_c, '\0', MAX_COLOR);
-	memset(uf_c, '\0', MAX_COLOR);
-
+	/* Reset whatever value was loaded */
+	*bm_c = '\0';
+	*dl_c = '\0';
+	*el_c = '\0';
+	*mi_c = '\0';
+	*tx_c = '\0';
+	*df_c = '\0';
+	*dc_c = '\0';
+	*wc_c = '\0';
+	*dh_c = '\0';
+	*li_c = '\0';
+	*ti_c = '\0';
+	*em_c = '\0';
+	*wm_c = '\0';
+	*nm_c = '\0';
+	*si_c = '\0';
+	*nd_c = '\0';
+	*nf_c = '\0';
+	*di_c = '\0';
+	*ed_c = '\0';
+	*ne_c = '\0';
+	*ex_c = '\0';
+	*ee_c = '\0';
+	*bd_c = '\0';
+	*ln_c = '\0';
+	*mh_c = '\0';
+	*or_c = '\0';
+	*so_c = '\0';
+	*pi_c = '\0';
+	*cd_c = '\0';
+	*fi_c = '\0';
+	*ef_c = '\0';
+	*su_c = '\0';
+	*sg_c = '\0';
+	*ca_c = '\0';
+	*st_c = '\0';
+	*tw_c = '\0';
+	*ow_c = '\0';
+	*no_c = '\0';
+	*uf_c = '\0';
 	return;
 }
 
@@ -2533,7 +2535,7 @@ set_colors(const char *colorscheme, int env)
 	char *filecolors = (char *)NULL, *extcolors = (char *)NULL,
 		 *ifacecolors = (char *)NULL;
 
-	memset(dir_ico_c, '\0', MAX_COLOR);
+	*dir_ico_c = '\0';
 
 	/* Set a pointer to the current color scheme */
 	if (colorscheme && *colorscheme && color_schemes) {
@@ -2799,7 +2801,7 @@ set_colors(const char *colorscheme, int env)
 											(ext_colors_n + 1)
 											* sizeof(char *));
 				ext_colors[ext_colors_n++] = savestring(buf, len);
-				memset(buf, '\0', len);
+				*buf = '\0';
 
 				if (!*p)
 					eol = 1;
@@ -2842,7 +2844,7 @@ set_colors(const char *colorscheme, int env)
 			char *ret = strrchr(ext_colors[i], '=');
 
 			if (!ret || !is_color_code(ret + 1)) {
-				memset(ext_colors[i], '\0', strlen(ext_colors[i]));
+				*ext_colors[i] = '\0';
 				ext_colors_len[i] = 0;
 				continue;
 			}
@@ -2864,21 +2866,21 @@ set_colors(const char *colorscheme, int env)
 	if (!ifacecolors) {
 
 		/* Free and reset whatever value was loaded */
-		memset(bm_c, '\0', MAX_COLOR);
-		memset(dl_c, '\0', MAX_COLOR);
-		memset(el_c, '\0', MAX_COLOR);
-		memset(mi_c, '\0', MAX_COLOR);
-		memset(tx_c, '\0', MAX_COLOR);
-		memset(df_c, '\0', MAX_COLOR);
-		memset(dc_c, '\0', MAX_COLOR);
-		memset(wc_c, '\0', MAX_COLOR);
-		memset(dh_c, '\0', MAX_COLOR);
-		memset(li_c, '\0', MAX_COLOR + 2);
-		memset(ti_c, '\0', MAX_COLOR + 2);
-		memset(em_c, '\0', MAX_COLOR + 2);
-		memset(wm_c, '\0', MAX_COLOR + 2);
-		memset(nm_c, '\0', MAX_COLOR + 2);
-		memset(si_c, '\0', MAX_COLOR + 2);
+		*bm_c = '\0';
+		*dl_c = '\0';
+		*el_c = '\0';
+		*mi_c = '\0';
+		*tx_c = '\0';
+		*df_c = '\0';
+		*dc_c = '\0';
+		*wc_c = '\0';
+		*dh_c = '\0';
+		*li_c = '\0';
+		*ti_c = '\0';
+		*em_c = '\0';
+		*wm_c = '\0';
+		*nm_c = '\0';
+		*si_c = '\0';
 	}
 
 	else {
@@ -2898,7 +2900,7 @@ set_colors(const char *colorscheme, int env)
 				colors = (char **)xrealloc(colors, (words + 1)
 										   * sizeof(char *));
 				colors[words++] = savestring(buf, len);
-				memset(buf, '\0', len);
+				*buf = '\0';
 
 				if (!*p)
 					eol = 1;
@@ -2939,7 +2941,7 @@ set_colors(const char *colorscheme, int env)
 					/* zero the corresponding variable as a flag for
 					 * the check after this for loop to prepare the
 					 * variable to hold the default color */
-					memset(tx_c, '\0', MAX_COLOR + 2);
+					*tx_c = '\0';
 
 				else
 					snprintf(tx_c, MAX_COLOR + 2, "\001\x1b[%sm\002",
@@ -2949,7 +2951,7 @@ set_colors(const char *colorscheme, int env)
 			else if (*colors[i] == 'b' && strncmp(colors[i], "bm=", 3) == 0) {
 
 				if (!is_color_code(colors[i] + 3))
-					memset(bm_c, '\0', MAX_COLOR);
+					*bm_c = '\0';
 
 				else
 					snprintf(bm_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
@@ -2959,7 +2961,7 @@ set_colors(const char *colorscheme, int env)
 			else if (*colors[i] == 'l' && strncmp(colors[i], "li=", 3) == 0) {
 
 				if (!is_color_code(colors[i] + 3))
-					memset(li_c, '\0', MAX_COLOR + 2);
+					*li_c = '\0';
 
 				else
 					snprintf(li_c, MAX_COLOR + 2, "\001\x1b[%sm\002",
@@ -2968,7 +2970,7 @@ set_colors(const char *colorscheme, int env)
 
 			else if (*colors[i] == 't' && strncmp(colors[i], "ti=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
-					memset(ti_c, '\0', MAX_COLOR + 2);
+					*ti_c = '\0';
 				else
 					snprintf(ti_c, MAX_COLOR + 2, "\001\x1b[%sm\002",
 							 colors[i] + 3);
@@ -2976,7 +2978,7 @@ set_colors(const char *colorscheme, int env)
 
 			else if (*colors[i] == 'e' && strncmp(colors[i], "em=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
-					memset(em_c, '\0', MAX_COLOR + 2);
+					*em_c = '\0';
 				else
 					snprintf(em_c, MAX_COLOR + 2, "\001\x1b[%sm\002",
 							 colors[i] + 3);
@@ -2984,7 +2986,7 @@ set_colors(const char *colorscheme, int env)
 
 			else if (*colors[i] == 'w' && strncmp(colors[i], "wm=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
-					memset(wm_c, '\0', MAX_COLOR + 2);
+					*wm_c = '\0';
 				else
 					snprintf(wm_c, MAX_COLOR + 2, "\001\x1b[%sm\002",
 							 colors[i] + 3);
@@ -2992,7 +2994,7 @@ set_colors(const char *colorscheme, int env)
 
 			else if (*colors[i] == 'n' && strncmp(colors[i], "nm=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
-					memset(nm_c, '\0', MAX_COLOR + 2);
+					*nm_c = '\0';
 				else
 					snprintf(nm_c, MAX_COLOR + 2, "\001\x1b[%sm\002",
 							 colors[i] + 3);
@@ -3000,7 +3002,7 @@ set_colors(const char *colorscheme, int env)
 
 			else if (*colors[i] == 's' && strncmp(colors[i], "si=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
-					memset(si_c, '\0', MAX_COLOR + 2);
+					*si_c = '\0';
 				else
 					snprintf(si_c, MAX_COLOR + 2, "\001\x1b[%sm\002",
 							 colors[i] + 3);
@@ -3008,7 +3010,7 @@ set_colors(const char *colorscheme, int env)
 
 			else if (*colors[i] == 'e' && strncmp(colors[i], "el=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
-					memset(el_c, '\0', MAX_COLOR);
+					*el_c = '\0';
 				else
 					snprintf(el_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
@@ -3016,7 +3018,7 @@ set_colors(const char *colorscheme, int env)
 
 			else if (*colors[i] == 'm' && strncmp(colors[i], "mi=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
-					memset(mi_c, '\0', MAX_COLOR);
+					*mi_c = '\0';
 				else
 					snprintf(mi_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
@@ -3024,7 +3026,7 @@ set_colors(const char *colorscheme, int env)
 
 			else if (*colors[i] == 'd' && strncmp(colors[i], "dl=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
-					memset(dl_c, '\0', MAX_COLOR);
+					*dl_c = '\0';
 				else
 					snprintf(dl_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
@@ -3032,7 +3034,7 @@ set_colors(const char *colorscheme, int env)
 
 			else if (*colors[i] == 'd' && strncmp(colors[i], "df=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
-					memset(df_c, '\0', MAX_COLOR);
+					*df_c = '\0';
 				else
 					snprintf(df_c, MAX_COLOR - 1, "\x1b[%s;49m",
 							 colors[i]
@@ -3041,7 +3043,7 @@ set_colors(const char *colorscheme, int env)
 
 			else if (*colors[i] == 'd' && strncmp(colors[i], "dc=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
-					memset(dc_c, '\0', MAX_COLOR);
+					*dc_c = '\0';
 				else
 					snprintf(dc_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
@@ -3049,7 +3051,7 @@ set_colors(const char *colorscheme, int env)
 
 			else if (*colors[i] == 'w' && strncmp(colors[i], "wc=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
-					memset(wc_c, '\0', MAX_COLOR);
+					*wc_c = '\0';
 				else
 					snprintf(wc_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
@@ -3057,7 +3059,7 @@ set_colors(const char *colorscheme, int env)
 
 			else if (*colors[i] == 'd' && strncmp(colors[i], "dh=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
-					memset(dh_c, '\0', MAX_COLOR);
+					*dh_c = '\0';
 				else
 					snprintf(dh_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
@@ -3071,31 +3073,30 @@ set_colors(const char *colorscheme, int env)
 	}
 
 	if (!filecolors) {
-
-		memset(nd_c, '\0', MAX_COLOR);
-		memset(nf_c, '\0', MAX_COLOR);
-		memset(di_c, '\0', MAX_COLOR);
-		memset(ed_c, '\0', MAX_COLOR);
-		memset(ne_c, '\0', MAX_COLOR);
-		memset(ex_c, '\0', MAX_COLOR);
-		memset(ee_c, '\0', MAX_COLOR);
-		memset(bd_c, '\0', MAX_COLOR);
-		memset(ln_c, '\0', MAX_COLOR);
-		memset(mh_c, '\0', MAX_COLOR);
-		memset(or_c, '\0', MAX_COLOR);
-		memset(so_c, '\0', MAX_COLOR);
-		memset(pi_c, '\0', MAX_COLOR);
-		memset(cd_c, '\0', MAX_COLOR);
-		memset(fi_c, '\0', MAX_COLOR);
-		memset(ef_c, '\0', MAX_COLOR);
-		memset(su_c, '\0', MAX_COLOR);
-		memset(sg_c, '\0', MAX_COLOR);
-		memset(ca_c, '\0', MAX_COLOR);
-		memset(st_c, '\0', MAX_COLOR);
-		memset(tw_c, '\0', MAX_COLOR);
-		memset(ow_c, '\0', MAX_COLOR);
-		memset(no_c, '\0', MAX_COLOR);
-		memset(uf_c, '\0', MAX_COLOR);
+		*nd_c = '\0';
+		*nf_c = '\0';
+		*di_c = '\0';
+		*ed_c = '\0';
+		*ne_c = '\0';
+		*ex_c = '\0';
+		*ee_c = '\0';
+		*bd_c = '\0';
+		*ln_c = '\0';
+		*mh_c = '\0';
+		*or_c = '\0';
+		*so_c = '\0';
+		*pi_c = '\0';
+		*cd_c = '\0';
+		*fi_c = '\0';
+		*ef_c = '\0';
+		*su_c = '\0';
+		*sg_c = '\0';
+		*ca_c = '\0';
+		*st_c = '\0';
+		*tw_c = '\0';
+		*ow_c = '\0';
+		*no_c = '\0';
+		*uf_c = '\0';
 
 		/* Set the LS_COLORS environment variable with default values */
 		char lsc[] = DEF_LS_COLORS;
@@ -3176,7 +3177,7 @@ set_colors(const char *colorscheme, int env)
 				colors = (char **)xrealloc(colors, (words + 1)
 										   * sizeof(char *));
 				colors[words++] = savestring(buf, len);
-				memset(buf, '\0', len);
+				*buf = '\0';
 
 				if (!*p)
 					eol = 1;
@@ -3213,203 +3214,195 @@ set_colors(const char *colorscheme, int env)
 
 			if (*colors[i] == 'd' && strncmp(colors[i], "di=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(di_c, '\0', MAX_COLOR);
+					*di_c = '\0';
 				else
 					snprintf(di_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 'd' && strncmp(colors[i], "df=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(df_c, '\0', MAX_COLOR);
+					*df_c = '\0';
 				else
 					snprintf(df_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 'd' && strncmp(colors[i], "dc=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(dc_c, '\0', MAX_COLOR);
+					*dc_c = '\0';
 				else
 					snprintf(dc_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 'w' && strncmp(colors[i], "wc=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(wc_c, '\0', MAX_COLOR);
+					*wc_c = '\0';
 				else
 					snprintf(wc_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 'd' && strncmp(colors[i], "dh=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(dh_c, '\0', MAX_COLOR);
+					*dh_c = '\0';
 				else
 					snprintf(dh_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
-
-			else if (*colors[i] == 'd' && strncmp(colors[i], "di=", 3) == 0)
-				if (!is_color_code(colors[i] + 3))
-					memset(di_c, '\0', MAX_COLOR);
-				else
-					snprintf(di_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
-							 + 3);
-
 			else if (*colors[i] == 'n' && strncmp(colors[i], "nd=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(nd_c, '\0', MAX_COLOR);
+					*nd_c = '\0';
 				else
 					snprintf(nd_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 'e' && strncmp(colors[i], "ed=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(ed_c, '\0', MAX_COLOR);
+					*ed_c = '\0';
 				else
 					snprintf(ed_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 'n' && strncmp(colors[i], "ne=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(ne_c, '\0', MAX_COLOR);
+					*ne_c = '\0';
 				else
 					snprintf(ne_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 'f' && strncmp(colors[i], "fi=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(fi_c, '\0', MAX_COLOR);
+					*fi_c = '\0';
 				else
 					snprintf(fi_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 'e' && strncmp(colors[i], "ef=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(ef_c, '\0', MAX_COLOR);
+					*ef_c = '\0';
 				else
 					snprintf(ef_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 'n' && strncmp(colors[i], "nf=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(nf_c, '\0', MAX_COLOR);
+					*nf_c = '\0';
 				else
 					snprintf(nf_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 'l' && strncmp(colors[i], "ln=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(ln_c, '\0', MAX_COLOR);
+					*ln_c = '\0';
 				else
 					snprintf(ln_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 'o' && strncmp(colors[i], "or=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(or_c, '\0', MAX_COLOR);
+					*or_c = '\0';
 				else
 					snprintf(or_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 'e' && strncmp(colors[i], "ex=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(ex_c, '\0', MAX_COLOR);
+					*ex_c = '\0';
 				else
 					snprintf(ex_c, MAX_COLOR-1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 'e' && strncmp(colors[i], "ee=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(ee_c, '\0', MAX_COLOR);
+					*ee_c = '\0';
 				else
 					snprintf(ee_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 'b' && strncmp(colors[i], "bd=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(bd_c, '\0', MAX_COLOR);
+					*bd_c = '\0';
 				else
 					snprintf(bd_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 'c' && strncmp(colors[i], "cd=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(cd_c, '\0', MAX_COLOR);
+					*cd_c = '\0';
 				else
 					snprintf(cd_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 'p' && strncmp(colors[i], "pi=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(pi_c, '\0', MAX_COLOR);
+					*pi_c = '\0';
 				else
 					snprintf(pi_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 's' && strncmp(colors[i], "so=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(so_c, '\0', MAX_COLOR);
+					*so_c = '\0';
 				else
 					snprintf(so_c, MAX_COLOR-1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 's' && strncmp(colors[i], "su=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(su_c, '\0', MAX_COLOR);
+					*su_c = '\0';
 				else
 					snprintf(su_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 's' && strncmp(colors[i], "sg=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(sg_c, '\0', MAX_COLOR);
+					*sg_c = '\0';
 				else
 					snprintf(sg_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 't' && strncmp(colors[i], "tw=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(tw_c, '\0', MAX_COLOR);
+					*tw_c = '\0';
 				else
 					snprintf(tw_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 's' && strncmp(colors[i], "st=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(st_c, '\0', MAX_COLOR);
+					*st_c = '\0';
 				else
 					snprintf(st_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 'o' && strncmp(colors[i], "ow=", 3) == 0)
 				if (!is_color_code(colors[i]+3))
-					memset(ow_c, '\0', MAX_COLOR);
+					*ow_c = '\0';
 				else
 					snprintf(ow_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 'c' && strncmp(colors[i], "ca=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(ca_c, '\0', MAX_COLOR);
+					*ca_c = '\0';
 				else
 					snprintf(ca_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 'n' && strncmp(colors[i], "no=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(no_c, '\0', MAX_COLOR);
+					*no_c = '\0';
 				else
 					snprintf(no_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 'm' && strncmp(colors[i], "mh=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					memset(mh_c, '\0', MAX_COLOR);
+					*mh_c = '\0';
 				else
 					snprintf(mh_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
 
 			else if (*colors[i] == 'u' && strncmp(colors[i], "uf=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
-					memset(uf_c, '\0', MAX_COLOR);
+					*uf_c = '\0';
 				else
 					snprintf(uf_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
 							 + 3);
@@ -3778,7 +3771,7 @@ check_options(void)
 	 * cannot use 'lira', since it relays on a file.
 	 * Set it thus to xdg-open, if not already set via command line */
 	if (xargs.stealth_mode == 1 && !opener)
-		opener = savestring("xdg-open", 8);
+		opener = savestring(FALLBACK_OPENER, strlen(FALLBACK_OPENER));
 }
 
 static void
@@ -4488,7 +4481,7 @@ cpCmd=0\n\n"
 # and 1 = advmv. 1 adds a progress bar to mv.\n\
 mvCmd=0\n\n"
 
-"# The prompt line is build using string literals and/or one or more of\n\
+"# The prompt line is built using string literals and/or one or more of\n\
 # the following escape sequences:\n"
 "# \\xnn: The character whose hexadecimal code is nn.\n\
 # \\e: Escape character\n\
@@ -4913,8 +4906,8 @@ create_config_files(void)
 		return;
 
 	_err('n', PRINT_PROMPT, _("%s created a new MIME list file "
-		 "(%s). It is recommended to edit this file (typing "
-		 "'mm edit' or however you want) to add the programs "
+		 "(%s). It is recommended to edit this file (entering "
+		 "'mm edit' or pressing F6) to add the programs "
 		 "you use and remove those you don't. This will make "
 		 "the process of opening files faster and smoother\n"),
 		 PROGRAM_NAME, MIME_FILE);
@@ -5736,6 +5729,7 @@ reload_config(void)
 	autocd = auto_open = restore_last_path = dirhist_map = UNSET;
 	disk_usage = tips = logs_enabled = sort = files_counter = UNSET;
 	light_mode = classify = cd_on_quit = columned = tr_as_rm = UNSET;
+	no_eln = min_name_trim = UNSET;
 
 	shell_terminal = no_log = internal_cmd = recur_perm_error_flag = 0;
 	is_sel = sel_is_last = print_msg = kbind_busy = dequoted = 0;
@@ -5765,6 +5759,8 @@ reload_config(void)
 
 	/* If some option was set via command line, keep that value
 	 * for any profile */
+	if (xargs.noeln != UNSET)
+		no_eln = xargs.noeln;
 	if (xargs.trasrm != UNSET)
 		tr_as_rm = xargs.trasrm;
 	if (xargs.no_colors != UNSET)
