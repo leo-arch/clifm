@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# FZF navigation plugin for CLiFM
+# FZF navigation plugin for CliFM
 
 # Taken from https://github.com/junegunn/fzf/wiki/Examples#interactive-cd and adapted to CliFM by L. Abramovich
 
@@ -11,7 +11,7 @@
 # change to the last directory visited with FZF or open the last
 # hovered file. Press Esc to cancel and exit
 
-if ! [ $(which fzf 2>/dev/null) ]; then
+if ! [ $(which fzf) ]; then
 	echo "CLiFM: fzf: Command not found" >&2
 	exit 1
 fi
@@ -52,5 +52,7 @@ if [ -f "$TMP" ]; then
 	cat "$TMP" > "$CLIFM_BUS"
 	rm -- "$TMP" 2>/dev/null
 fi
+
+clear
 
 exit 0
