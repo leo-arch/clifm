@@ -135,14 +135,14 @@ disable long view mode (default)
 .B \-L, \-\-long\-view
 enable long view mode to list files and their properties. For each file, the following information is provided: filename, file properties (symbolic notation), owner, group, last modification time, and size. To get more detailed information use the \fIpr\fR command (see below).
 .TP
-.B \-l, \-\-no\-list\-on\-the\-fly
-\'cd\' works like the shell 'cd' command: change directory but do not list files automatically
-.TP
-.B \-L, \-\-list\-on\-the\-fly
-\'cd\' changes directory and lists files on the fly (default)
-.TP
 .B \-m, \-\-dirhist\-map
 enable the directory history map to keep in view previous, current and next entries in the directory history list
+.TP
+.B \-o, \-\-no\-list\-on\-the\-fly
+\'cd\' works like the shell 'cd' command: change directory but do not list files automatically
+.TP
+.B \-O, \-\-list\-on\-the\-fly
+\'cd\' changes directory and lists files on the fly (default)
 .TP
 .B \-p, \-\-path=PATH
 use PATH as CliFM starting path. Default starting path is current working directory. If no workspace is specified via the \fB--workspace\fR option (see below), the first workspace (1) is used.
@@ -214,8 +214,8 @@ list only up to NUM files. Use -1 to list all files (default). See the \fBmf\fR 
 by default, CliFM changes to directories by just specifying the corresponding ELN (e.g. '12' instead of 'cd 12'). This option forces the use of 'cd'
 .TP
 .B \-\-no-classify
-By default, CliFM appends a filetype indicator character to filenames when running with colors disabled (see the \fB--no-colors\fR option below). Classification characters are: 
- /: directories
+By default, CliFM appends a filetype indicator character to filenames when running with no colors (see the \fB--no-colors\fR option below) and both a directory indicator and a files counter for directories when running with colors. Classification characters are: 
+ /n: directories (n = files counter)
  @: symbolic links
  |: fifo/pipes
  =: sockets
@@ -270,9 +270,9 @@ Options precedence order: 1) command line; 2) configuration file; 3) default val
 .SH COMMANDS
 \fBNOTE:\fR ELN = Entry List Number. Example: in the line "12 openbox" (when listing files), 12 is the ELN corresponding to the file named "openbox". The slash followed by a number (/xx) after directories and symbolic links to directories (the files counter) indicates the amount of files contained by the corresponding directory, excluding self and parent directories ("." and ".." respectivelly).
 .sp
-\fBNOTE 2:\fR In case of ELN-filename conflict the backslash can be used to prevent ELN expansion. For example, if we have at least two files and one of them in named "2", then CLiFM cannot know in advance if the command refers to the ELN 2 or to the filename "2". In we want the ELN, we just write the ELN number, for example: 's 2'. But if we want the filename, we need to quote the filename using the backlash character: 's \\2'.
+\fBNOTE 2:\fR In case of ELN-filename conflict the backslash can be used to prevent ELN expansion. For example, if we have at least two files and one of them in named "2", then CLiFM cannot know in advance if the command refers to the ELN 2 or to the filename "2". In we want the ELN, we just write the ELN number, for example: 's 2'. But if we want the filename, we need to escape the filename using the backlash character: 's \\2'.
 .sp
-\fBNOTE 3:\fR CliFM now supports fused parameters for internal commands taking an ELN or range of ELN's as parameters. Much like short options for command line programs, you can drop or omit the space between internal commands and the corresponding ELN passed as argument. In general, you can write 'CMDELN' instead of 'CMD ELN'. For example: 'o12' or 's1-5' instead of 'o 12' and 's 1-5' respectivelly. Bear in mind, however, that in thus omitting the space char TAB completion for ELN's won't be available. 
+\fBNOTE 3:\fR CliFM now supports \fBfused parameters\fR for internal commands taking an ELN or range of ELN's as parameters. Much like short options for command line programs, you can drop or omit the space between internal commands and the corresponding ELN passed as argument. In general, you can write 'CMDELN' instead of 'CMD ELN'. For example: 'o12' or 's1-5' instead of 'o 12' and 's 1-5' respectivelly. Bear in mind, however, that in thus omitting the space char TAB completion for ELN's won't be available. If there is a file named 'o12' (more generally, CMDELN), and if you want to refer to this file instead of a CliFM command, escape the filename to prevent the split; for example: 's \\o12'.
 .TP
 .B \fRFILE/DIR
 if the \fIautocd\fR and \fIauto-open\fR functions are enabled, which is the default value, open FILE or change directory to DIR. In other words, 'FILE' amounts to 'open FILE' or 'o FILE', and 'DIR' to 'cd DIR'. ELN's, of course, are allowed. Example: '12'. Unlike the \fIopen\fR function (see below), passing an opening application is not allowed.
