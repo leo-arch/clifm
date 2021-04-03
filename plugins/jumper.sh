@@ -21,9 +21,9 @@ if ! [[ -f "$FILE" ]]; then
 fi
 
 if [[ $finder == "fzf" ]]; then
-	path="$(cut -d ":" -f2 "$FILE" | fzf --prompt="CliFM> ")"
+	path="$(cut -d ":" -f3 "$FILE" | fzf --prompt="CliFM> ")"
 else
-	path="$(cut -d ":" -f2 "$FILE" | rofi -dmenu -p CliFM)"
+	path="$(cut -d ":" -f3 "$FILE" | rofi -dmenu -p CliFM)"
 fi
 
 if [[ -n "$path" ]]; then
