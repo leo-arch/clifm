@@ -5868,9 +5868,8 @@ is_quote_char(const char c)
 	char *p = qc;
 
 	while (*p) {
-		if (c == *p)
+		if (c == *(p++))
 			return 1;
-		p++;
 	}
 
 	return 0;
@@ -21455,7 +21454,10 @@ help_function (void)
  x, X [ELN/DIR] (new instance)\n"));
 
 	puts(_("Run 'cmd' (F2) or consult the manpage (F1) for "
-		   "more information about each of these commands.\n"));
+		   "more information about each of these commands. You "
+		   "can also try the 'ih' action to run the interactive "
+		   "help plugin (depends on fzf). Just enter 'ih', that's "
+		   "it.\n"));
 
 	printf(_("DEFAULT KEYBOARD SHORTCUTS:\n\n"
 " M-c: Clear the current command line buffer\n\
@@ -21664,7 +21666,7 @@ list_dir_light(void)
 	register unsigned int n = 0;
 	unsigned int total_dents = 0, count = 0;
 
-	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 1,
+	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2,
 								   sizeof(struct fileinfo));
 
 	while ((ent = readdir(dir))) {
@@ -22235,7 +22237,7 @@ list_dir(void)
 	register unsigned int n = 0;
 	unsigned int total_dents = 0, count = 0;
 
-	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 1,
+	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2,
 								   sizeof(struct fileinfo));
 
 	while ((ent = readdir(dir))) {
