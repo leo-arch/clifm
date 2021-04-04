@@ -890,6 +890,85 @@ static char **parse_input_str(char *);
 			 * #     FUNCTIONS DEFINITIONS     #
 			 * ################################# */
 
+static int
+xstrcmp(const char *s1, const char *s2)
+/* Check for null. This check is done neither by strcmp nor by strncmp.
+ * I use 256 for error code since it does not represent any ASCII code
+ * (the extended version goes up to 255) */
+{
+	if (!s1 || !s2)
+		return 256;
+
+	while (*s1) {
+		if (*s1 != *s2)
+			return (*s1 - *s2);
+		s1++;
+		s2++;
+	}
+
+	if (*s2)
+		return (0 - *s2);
+
+	return 0;
+}
+
+static int
+xstrncmp(const char *s1, const char *s2, size_t n)
+{
+	if (!s1 || !s2)
+		return 256;
+
+	size_t c = 0;
+	while (*s1 && c++ < n) {
+		if (*s1 != *s2)
+			return (*s1 - *s2);
+		s1++;
+		s2++;
+	}
+
+	if (c == n)
+		return 0;
+
+	if (*s2)
+		return (0 - *s2);
+
+	return 0;
+}
+
+static char *
+xstrcpy(char *buf, const char *str)
+{
+	if (!str)
+		return (char *)NULL;
+
+	while (*str)
+		*(buf++) = *(str++);
+
+	*buf = '\0';
+
+/*	while ((*buf++ = *str++)); */
+
+	return buf;
+}
+
+static char *
+xstrncpy(char *buf, const char *str, size_t n)
+{
+	if (!str)
+		return (char *)NULL;
+
+	size_t c = 0;
+	while (*str && c++ < n)
+		*(buf++) = *(str++);
+
+	*buf = '\0';
+
+/*	size_t counter = 0;
+	while ((*buf++ = *str++) && counter++ < n); */
+
+	return buf;
+}
+
 static size_t
 wc_xstrlen(const char *restrict str)
 {
@@ -1485,7 +1564,6 @@ get_ext_icon(const char *restrict ext, int n)
 /* Set the icon field to the corresponding icon for EXT. If not found,
  * set the default icon */
 {
-
 	file_info[n].icon = DEF_FILE_ICON;
 	file_info[n].icon_color = DEF_FILE_ICON_COLOR;
 
@@ -6894,6 +6972,7 @@ print_tips(int all)
 		"When searching or selecting files, use the exclamation mark "
 		"to reverse the meaning of a pattern",
 		"Enable the TrashAsRm option to prevent accidental deletions",
+		"Don't like ELN's? Disable them using the -e option",
 		NULL
 	};
 
@@ -10197,8 +10276,9 @@ profile_set(const char *prof)
 	}
 
 	/* If changing to the current profile, do nothing */
-	if ((strcmp(prof, "default") == 0 && !alt_profile)
-	|| (alt_profile && strcmp(prof, alt_profile) == 0)) {
+	if ((!alt_profile && *prof == 'd' && strcmp(prof, "default") == 0)
+	|| (alt_profile && *prof == *alt_profile
+	&& strcmp(prof, alt_profile) == 0)) {
 
 		printf(_("%s: '%s' is the current profile\n"), PROGRAM_NAME,
 			   prof);
@@ -10216,7 +10296,7 @@ profile_set(const char *prof)
 
 	/* Set the new profile value */
 	/* Default profile == (alt_profile == NULL) */
-	if (strcmp(prof, "default") != 0)
+	if (*prof != 'd' || strcmp(prof, "default") != 0)
 		alt_profile = savestring(prof, strlen(prof));
 
 	/* Reset everything */
@@ -11825,25 +11905,23 @@ get_link_ref(const char *link)
 }
 
 static char **
-check_for_alias(char **comm)
-/* Returns the parsed aliased command in an array of string, if
+check_for_alias(char **args)
+/* Returns the parsed aliased command in an array of strings, if
  * matching alias is found, or NULL if not. */
 {
 	if (!aliases_n || !aliases)
 		return (char **)NULL;
 
 	char *aliased_cmd = (char *)NULL;
-	size_t comm_len = strlen(comm[0]);
-	char comm_tmp[comm_len + 2];
-	/* Look for this string: "command=", in the aliases file */
-	snprintf(comm_tmp, comm_len + 2, "%s=", comm[0]);
+	size_t cmd_len = strlen(args[0]);
 
 	register int i = aliases_n;
 	while (--i >= 0) {
 
+		/* Look for this string: "command=", in the aliases file */
 		/* If a match is found */
-		if (*aliases[i] == *comm_tmp
-		&& strncmp(aliases[i], comm_tmp, comm_len + 1) == 0) {
+		if (*aliases[i] == *args[0] && aliases[i][cmd_len] == '='
+		&& strncmp(aliases[i], args[0], cmd_len) == 0) {
 
 			/* Get the aliased command */
 			aliased_cmd = strbtw(aliases[i], '\'', '\'');
@@ -11872,12 +11950,12 @@ check_for_alias(char **comm)
 			register size_t j;
 
 			/* Add input parameters, if any, to alias_comm */
-			if (comm[1]) {
-				for (j = 1; comm[j]; j++) {
-					alias_comm = (char **)xrealloc(alias_comm, (++args_n
-												+ 2) * sizeof(char *));
-					alias_comm[args_n] = savestring(comm[j],
-											strlen(comm[j]));;
+			if (args[1]) {
+				for (j = 1; args[j]; j++) {
+					alias_comm = (char **)xrealloc(alias_comm,
+								(++args_n + 2) * sizeof(char *));
+					alias_comm[args_n] = savestring(args[j],
+											strlen(args[j]));
 				}
 			}
 
@@ -11885,9 +11963,9 @@ check_for_alias(char **comm)
 			alias_comm[args_n + 1] = (char *)NULL;
 
 			/* Free original command */
-			for (j = 0; comm[j]; j++)
-				free(comm[j]);
-			free(comm);
+			for (j = 0; args[j]; j++)
+				free(args[j]);
+			free(args);
 
 			return alias_comm;
 		}
@@ -14423,8 +14501,8 @@ prompt(void)
 	 * 6 = NC_b
 	 * 1 = null terminating char */
 
-/*	char *the_prompt = (char *)xnmalloc(prompt_length, sizeof(char)); */
-	char the_prompt[prompt_length];
+	char *the_prompt = (char *)xnmalloc(prompt_length, sizeof(char));
+/*	char the_prompt[prompt_length]; */
 
 	snprintf(the_prompt, prompt_length, "%s%s%s%s%s%s%s%s%s%s",
 		(msgs_n && pmsg) ? msg_str : "", (xargs.stealth_mode == 1)
@@ -14453,7 +14531,7 @@ prompt(void)
 	char *input = (char *)NULL;
 	input = readline(the_prompt);
 
-/*	free(the_prompt); */
+	free(the_prompt);
 
 	if (!input)
 	/* Same as 'input == NULL': input is a pointer poiting to no
@@ -21075,11 +21153,10 @@ regen_config(void)
 
 	if (config_found) {
 		time_t rawtime = time(NULL);
-		struct tm *tm = localtime(&rawtime);
-		size_t date_max = 7;
+		struct tm *t = localtime(&rawtime);
 
-		char date[date_max];
-		strftime(date, date_max, "%H%M%S", tm);
+		char date[18];
+		strftime(date, 18, "%Y%m%d@%H:%M:%S", t);
 
 		char *bk = (char *)xnmalloc(strlen(CONFIG_FILE) + strlen(date)
 									+ 2, sizeof(char));
