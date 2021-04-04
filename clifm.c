@@ -414,8 +414,7 @@ nm=01;32:bm=01;36:"
 
 #define TOUPPER(ch) (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
 #define DIGINUM(n) (((n) < 10) ? 1 : ((n) < 100) ? 2 : ((n) < 1000) ? 3 : ((n) < 10000) ? 4 : ((n) < 100000) ? 5 : ((n) < 1000000) ? 6 : ((n) < 10000000) ? 7 : ((n) < 100000000) ? 8 : ((n) < 1000000000) ? 9 : 10)
-#define _ISDIGIT(n) (((n) >= '0' && (n) <= '9') ? 1 : 0)
-
+#define _ISDIGIT(n) ((unsigned int)(n) - '0' <= 9)
 				/** #########################
 				 *  #    GLOBAL VARIABLES   #
 				 *  ######################### */
@@ -1048,7 +1047,7 @@ is_number(const char *restrict str)
  * and 0 if false. It does not work with negative numbers */
 {
 	for (;*str; str++)
-		if (*str < '0' || *str > '9')
+		if (*str > '9' || *str < '0')
 			return 0;
 
 	return 1;
@@ -1572,7 +1571,7 @@ get_ext_icon(const char *restrict ext, int n)
 
 	ext++;
 
-	int i = sizeof(icon_ext)/sizeof(struct icons_t);
+	int i = sizeof(icon_ext) / sizeof(struct icons_t);
 
 	while (--i >= 0) {
 
@@ -1600,28 +1599,28 @@ get_ext_color(const char *ext)
 	ext++;
 
 	int i = ext_colors_n;
-
 	while (--i >= 0) {
 
 		if (!ext_colors[i] || !*ext_colors[i] || !ext_colors[i][2])
 			continue;
 
-		/* Only run the check if the first char of both found and
-		 * stored extensions match */
-		if (*ext == ext_colors[i][2]) {
-			/* +2 because stored extensions have this form: *.ext */
+		char *p = (char *)ext, *q = ext_colors[i];
 
-			/* Get size of found extension */
-			size_t len_found = strlen(ext);
+		/* +2 because stored extensions have this form: *.ext */
+		q += 2;
 
-			/* Compare found and stored extensions */
-			if (len_found != ext_colors_len[i])
-				continue;
-
-			if (*ext == *(ext_colors[i] + 2)
-			&& strncmp(ext, ext_colors[i] + 2, len_found) == 0)
-				return (strchr(ext_colors[i], '=') + 1);
+		size_t match = 1;
+		while (*p) {
+			if (*p++ != *q++) {
+				match = 0;
+				break;
+			}
 		}
+
+		if (!match || *q != '=')
+			continue;
+
+		return ++q;
 	}
 
 	return (char *)NULL;
@@ -10769,7 +10768,7 @@ mime_open(char **args)
 	char *file_path_tmp = (char *)NULL;
 
 	if ((file_path_tmp = get_cmd_path("file")) == NULL) {
-		fprintf(stderr, _("%s: 'file' command not found\n"),
+		fprintf(stderr, _("%s: file: Command not found\n"),
 				PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
@@ -10926,8 +10925,8 @@ mime_open(char **args)
 			}
 
 			else
-				fprintf(stderr, _("%s: No associated application found\n"),
-						PROGRAM_NAME);
+				fprintf(stderr, _("%s: %s: No associated application "
+						"found\n"), PROGRAM_NAME, args[1]);
 		}
 
 		free(file_path);
@@ -12416,8 +12415,6 @@ static int
 cd_function(char *new_path)
 /* Change CliFM working directory to NEW_PATH */
 {
-	char buf[PATH_MAX] = ""; /* Temporarily store new_path */
-
 	/* If no argument, change to home */
 	if (!new_path || !*new_path) {
 
@@ -12433,7 +12430,8 @@ cd_function(char *new_path)
 			return EXIT_FAILURE;
 		}
 
-		strncpy(buf, user_home, PATH_MAX);
+		free(ws[cur_ws].path);
+		ws[cur_ws].path = savestring(user_home, strlen(user_home));
 	}
 
 	/* If we have some argument, dequote it, resolve it with realpath(),
@@ -12458,18 +12456,6 @@ cd_function(char *new_path)
 			return EXIT_FAILURE;
 		}
 
-		/* Execute permission is enough to access a directory, but not
-		 * to list its content; for this we need read permission as well.
-		 * So, without the read permission check, chdir() below will be
-		 * successfull, but CliFM will be nonetheless unable to list the
-		 * content of the directory */
-		if (access(real_path, R_OK) != EXIT_SUCCESS) {
-			fprintf(stderr, "%s: cd: '%s': %s\n", PROGRAM_NAME,
-					real_path, strerror(errno));
-			free(real_path);
-			return EXIT_FAILURE;
-		}
-
 		if (chdir(real_path) != EXIT_SUCCESS) {
 			fprintf(stderr, "%s: cd: '%s': %s\n", PROGRAM_NAME,
 					real_path, strerror(errno));
@@ -12477,15 +12463,13 @@ cd_function(char *new_path)
 			return EXIT_FAILURE;
 		}
 
-		strncpy(buf, real_path, PATH_MAX);
+		free(ws[cur_ws].path);
+		ws[cur_ws].path = savestring(real_path, strlen(real_path));
+
 		free(real_path);
 	}
 
 	int exit_status = EXIT_SUCCESS;
-
-	/* If chdir() was successful */
-	free(ws[cur_ws].path);
-	ws[cur_ws].path = savestring(buf, strlen(buf));
 
 	if (cd_lists_on_the_fly) {
 		free_dirlist();
@@ -12493,6 +12477,7 @@ cd_function(char *new_path)
 		if (list_dir() != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 	}
+
 	add_to_dirhist(ws[cur_ws].path);
 	add_to_jumpdb(ws[cur_ws].path);
 
@@ -12533,7 +12518,7 @@ open_function(char **cmd)
 	/* Check file type: only directories, symlinks, and regular files
 	 * will be opened */
 
-	char no_open_file = 1, file_type[128] = "";
+	char no_open_file = 1, file_type[128];
 		 /* Reserve a good amount of bytes for filetype: it cannot be
 		  * known beforehand how many bytes the TRANSLATED string will
 		  * need */
@@ -12605,7 +12590,7 @@ open_function(char **cmd)
 		}
 
 		else if (!(flags & FILE_CMD_OK)) {
-			fprintf(stderr, _("%s: 'file' command not found. Specify an "
+			fprintf(stderr, _("%s: file: Command not found. Specify an "
 							  "application to open the file\nUsage: "
 							  "open ELN/FILENAME [APPLICATION]\n"), 
 							  PROGRAM_NAME);
@@ -13058,9 +13043,10 @@ list_mountpoints(void)
 		int atoi_num = atoi(input);
 
 		if (atoi_num > 0 && atoi_num <= (int)mp_n) {
-			int ret = chdir(mountpoints[atoi_num - 1]);
+			
+			int ret = access(mountpoints[atoi_num - 1], R_OK);
 
-			if (ret == 0) {
+			if (ret == 0 && chdir(mountpoints[atoi_num - 1]) == 0) {
 				free(ws[cur_ws].path);
 				ws[cur_ws].path = savestring(mountpoints[atoi_num - 1],
 									strlen(mountpoints[atoi_num - 1]));
@@ -23285,7 +23271,10 @@ exec_cmd(char **comm)
 			tmp[tmp_len - 1] = '\0';
 
 		for (i = files; i--;) {
-
+			if (!file_info[i].name)
+				continue;
+			printf("%zu (%zu)\n", i, files);
+			printf("'%s'\n", file_info[i].name ? file_info[i].name : "Opps");
 			if (*tmp != *file_info[i].name)
 				continue;
 
