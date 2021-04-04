@@ -23271,10 +23271,7 @@ exec_cmd(char **comm)
 			tmp[tmp_len - 1] = '\0';
 
 		for (i = files; i--;) {
-			if (!file_info[i].name)
-				continue;
-			printf("%zu (%zu)\n", i, files);
-			printf("'%s'\n", file_info[i].name ? file_info[i].name : "Opps");
+
 			if (*tmp != *file_info[i].name)
 				continue;
 
