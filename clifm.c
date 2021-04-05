@@ -935,7 +935,7 @@ xstrncmp(const char *s1, const char *s2, size_t n)
 }
 
 static char *
-xstrcpy(char *buf, const char *str)
+xstrcpy(char *buf, const char *restrict str)
 {
 	if (!str)
 		return (char *)NULL;
@@ -951,7 +951,7 @@ xstrcpy(char *buf, const char *str)
 }
 
 static char *
-xstrncpy(char *buf, const char *str, size_t n)
+xstrncpy(char *buf, const char *restrict str, size_t n)
 {
 	if (!str)
 		return (char *)NULL;
@@ -966,6 +966,20 @@ xstrncpy(char *buf, const char *str, size_t n)
 	while ((*buf++ = *str++) && counter++ < n); */
 
 	return buf;
+}
+
+static size_t
+xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
+/* Taken from NNN's source code: very clever */
+{
+	char *end = memccpy(dst, src, '\0', n);
+
+	if (!end) {
+		dst[n - 1] = '\0';
+		end = dst + n;
+	}
+
+	return end - dst;
 }
 
 static size_t
@@ -1042,6 +1056,21 @@ xstrlen(const char *restrict s)
 }
 
 static int
+xchdir(const char *dir)
+/* Make sure DIR exists, it is actually a directory and is readable.
+ * Only then change directory */
+{
+	DIR *dirp = opendir(dir);
+
+	if (!dirp)
+		return -1;
+
+	closedir(dirp);
+
+	return chdir(dir);
+}
+
+static int
 is_number(const char *restrict str)
 /* Check whether a given string contains only digits. Returns 1 if true
  * and 0 if false. It does not work with negative numbers */
@@ -1053,7 +1082,7 @@ is_number(const char *restrict str)
 	return 1;
 }
 
-static inline char *
+static char *
 get_size_unit(off_t size)
 /* Convert FILE_SIZE to human readeable form */
 {
@@ -1114,10 +1143,10 @@ xcalloc(size_t nmemb, size_t size)
 	return new_ptr;
 }
 
-static char *
+static void *
 xnmalloc(size_t nmemb, size_t size)
 {
-	char *new_ptr = (char *)malloc(nmemb * size);
+	void *new_ptr = malloc(nmemb * size);
 
 	if (!new_ptr) {
 		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu "
@@ -1343,7 +1372,7 @@ launch_execle(const char *cmd)
 		/* This is basically what the system() function does: running
 		 * a command via the system shell */
 		execl(sys_shell, name ? name + 1 : sys_shell, "-c", cmd, NULL);
-		fprintf(stderr, "%s: '%s': execle: %s\n", PROGRAM_NAME, sys_shell,
+		fprintf(stderr, "%s: %s: execle: %s\n", PROGRAM_NAME, sys_shell,
 				strerror(errno));
 		_exit(errno);
 	}
@@ -1495,20 +1524,6 @@ print_dirhist_map(void)
 
 		break;
 	}
-}
-
-static size_t
-xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
-/* Taken from NNN's source code: very clever */
-{
-	char *end = memccpy(dst, src, '\0', n);
-
-	if (!end) {
-		dst[n - 1] = '\0';
-		end = dst + n;
-	}
-
-	return end - dst;
 }
 
 static void
@@ -2810,7 +2825,7 @@ set_colors(const char *colorscheme, int env)
 		/* If fopen failed */
 		else {
 			if (!env) {
-				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 						colorscheme_file, strerror(errno));
 				free(colorscheme_file);
 				return EXIT_FAILURE;
@@ -4182,7 +4197,7 @@ get_path_programs(void)
 	i = path_n;
 	while (--i >= 0) {
 
-		if (!paths[i] || !*paths[i] || chdir(paths[i]) == -1) {
+		if (!paths[i] || !*paths[i] || xchdir(paths[i]) == -1) {
 			cmd_n[i] = 0;
 			continue;
 		}
@@ -4197,7 +4212,7 @@ get_path_programs(void)
 			total_cmd += (size_t)cmd_n[i];
 	}
 
-	chdir(ws[cur_ws].path);
+	xchdir(ws[cur_ws].path);
 
 	/* Add internal commands */
 	/* Get amount of internal cmds (elements in INTERNAL_CMDS array) */
@@ -4210,7 +4225,7 @@ get_path_programs(void)
 
 	i = internal_cmd_n;
 	while (--i >= 0)
-		bin_commands[l++] =savestring(INTERNAL_CMDS[i],
+		bin_commands[l++] = savestring(INTERNAL_CMDS[i],
 									  strlen(INTERNAL_CMDS[i]));
 
 	/* Add commands in PATH */
@@ -4239,6 +4254,7 @@ get_path_programs(void)
 
 		i = aliases_n;
 		while (--i >= 0) {
+
 			int index = strcntchr(aliases[i], '=');
 
 			if (index != -1) {
@@ -4509,7 +4525,7 @@ create_config(const char *file)
 	FILE *config_fp = fopen(file, "w");
 
 	if (!config_fp) {
-		fprintf(stderr, "%s: fopen: '%s': %s\n", PROGRAM_NAME,
+		fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME,
 				file, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -5666,7 +5682,7 @@ read_config(void)
 			 * appropriate permissions, set path to starting
 			 * path. If any of these conditions is false,
 			 * path will be set to default, that is, CWD */
-			if (chdir(tmp) == 0) {
+			if (xchdir(tmp) == 0) {
 				free(ws[cur_ws].path);
 				ws[cur_ws].path = savestring(tmp, strlen(tmp));
 			}
@@ -6168,7 +6184,7 @@ edit_link(char *link)
 		char *tmp = dequote_str(link, 0);
 
 		if (!tmp) {
-			fprintf(stderr, _("%s: '%s': Error dequoting file\n"),
+			fprintf(stderr, _("%s: %s: Error dequoting file\n"),
 					PROGRAM_NAME, link);
 			return EXIT_FAILURE;
 		}
@@ -6181,13 +6197,13 @@ edit_link(char *link)
 	struct stat file_attrib;
 
 	if (lstat(link, &file_attrib) == -1) {
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, link,
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, link,
 				strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	if ((file_attrib.st_mode & S_IFMT) != S_IFLNK) {
-		fprintf(stderr, _("%s: '%s': Not a symbolic link\n"),
+		fprintf(stderr, _("%s: %s: Not a symbolic link\n"),
 				PROGRAM_NAME, link);
 		return EXIT_FAILURE;
 	}
@@ -6256,7 +6272,7 @@ edit_link(char *link)
 		char *tmp = dequote_str(new_path, 0);
 
 		if (!tmp) {
-			fprintf(stderr, _("%s: '%s': Error dequoting file\n"),
+			fprintf(stderr, _("%s: %s: Error dequoting file\n"),
 					PROGRAM_NAME, new_path);
 			free(new_path);
 			return EXIT_FAILURE;
@@ -6453,7 +6469,7 @@ create_iso(char *in_file, char *out_file)
 	struct stat file_attrib;
 
 	if (lstat(in_file, &file_attrib) == -1) {
-		fprintf(stderr, "archiver: '%s': %s\n", in_file,
+		fprintf(stderr, "archiver: %s: %s\n", in_file,
 				strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -6490,7 +6506,7 @@ create_iso(char *in_file, char *out_file)
 	}
 
 	else {
-		fprintf(stderr, "archiver: '%s': Invalid file format\nFile "
+		fprintf(stderr, "archiver: %s: Invalid file format\nFile "
 				"should be either a directory or a block device\n",
 				in_file);
 		return EXIT_FAILURE;
@@ -6721,7 +6737,7 @@ handle_iso(char *file)
 			}
 
 			/* List content of mountpoint */
-			if (chdir(mountpoint) == -1) {
+			if (xchdir(mountpoint) == -1) {
 				fprintf(stderr, "archiver: %s: %s\n", mountpoint,
 						strerror(errno));
 				free(mountpoint);
@@ -6787,7 +6803,7 @@ check_iso(char *file)
 	FILE *file_fp = fopen(ISO_TMP_FILE, "w");
 
 	if (!file_fp) {
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 				ISO_TMP_FILE, strerror(errno));
 		return -1;
 	}
@@ -6795,7 +6811,7 @@ check_iso(char *file)
 	FILE *file_fp_err = fopen("/dev/null", "w");
 
 	if (!file_fp_err) {
-		fprintf(stderr, "%s: '/dev/null': %s\n", PROGRAM_NAME,
+		fprintf(stderr, "%s: /dev/null: %s\n", PROGRAM_NAME,
 				strerror(errno));
 		fclose(file_fp);
 		return -1;
@@ -7010,7 +7026,7 @@ is_compressed(char *file, int test_iso)
 	if (!rand_ext)
 		return -1;
 
-	char ARCHIVER_TMP_FILE[PATH_MAX] = "";
+	char ARCHIVER_TMP_FILE[PATH_MAX];
 
 	if (xargs.stealth_mode == 1)
 		sprintf(ARCHIVER_TMP_FILE, "/tmp/clifm-archiver.%s", rand_ext);
@@ -7026,7 +7042,7 @@ is_compressed(char *file, int test_iso)
 	FILE *file_fp = fopen(ARCHIVER_TMP_FILE, "w");
 
 	if (!file_fp) {
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 				ARCHIVER_TMP_FILE, strerror(errno));
 		return -1;
 	}
@@ -7034,7 +7050,7 @@ is_compressed(char *file, int test_iso)
 	FILE *file_fp_err = fopen("/dev/null", "w");
 
 	if (!file_fp_err) {
-		fprintf(stderr, "%s: '/dev/null': %s\n", PROGRAM_NAME,
+		fprintf(stderr, "%s: /dev/null: %s\n", PROGRAM_NAME,
 				strerror(errno));
 		fclose(file_fp);
 		return -1;
@@ -7080,7 +7096,7 @@ is_compressed(char *file, int test_iso)
 		file_fp = fopen(ARCHIVER_TMP_FILE, "r");
 
 		if (file_fp) {
-			char line[255] = "";
+			char line[255];
 			fgets(line, sizeof(line), file_fp);
 			char *ret = strstr(line, "archive");
 
@@ -7126,7 +7142,7 @@ zstandard(char *in_file, char *out_file, char mode, char op)
 	char *deq_file = dequote_str(in_file, 0);
 
 	if (!deq_file) {
-		fprintf(stderr, _("archiver: '%s': Error dequoting filename\n"),
+		fprintf(stderr, _("archiver: %s: Error dequoting filename\n"),
 				in_file);
 		return EXIT_FAILURE;
 	}
@@ -7244,13 +7260,15 @@ escape_str(const char *str)
 	size_t len = 0;
 	char *buf = (char *)NULL;
 
-	buf = (char *)xcalloc(strlen(str) * 2 + 1, sizeof(char));
+	buf = (char *)xnmalloc(strlen(str) * 2 + 1, sizeof(char));
 
 	while(*str) {
 		if (is_quote_char(*str))
 			buf[len++] = '\\';
 		buf[len++] = *(str++);
 	}
+
+	buf[len] = '\0';
 
 	if (buf)
 		return buf;
@@ -7354,7 +7372,7 @@ archiver(char **args, char mode)
 		free(name);
 
 		if (!esc_name) {
-			fprintf(stderr, _("archiver: '%s': Error escaping "
+			fprintf(stderr, _("archiver: %s: Error escaping "
 					"string\n"), name);
 			return EXIT_FAILURE;
 		}
@@ -7404,7 +7422,7 @@ archiver(char **args, char mode)
 		}
 
 		if (is_compressed(args[i], 1) != 0) {
-			fprintf(stderr, _("archiver: '%s': Not an "
+			fprintf(stderr, _("archiver: %s: Not an "
 					"archive/compressed file\n"), args[i]);
 			return EXIT_FAILURE;
 		}
@@ -7595,7 +7613,7 @@ archiver(char **args, char mode)
 					char *deq_name = dequote_str(args[i], 0);
 
 					if (!deq_name) {
-						fprintf(stderr, _("archiver: '%s': Error "
+						fprintf(stderr, _("archiver: %s: Error "
 								"dequoting filename\n"), args[i]);
 						return EXIT_FAILURE;
 					}
@@ -7732,7 +7750,7 @@ archiver(char **args, char mode)
 					continue;
 				}
 
-				if (chdir(mountpoint) == -1) {
+				if (xchdir(mountpoint) == -1) {
 					fprintf(stderr, "archiver: %s: %s\n", mountpoint,
 							strerror(errno));
 					free(mountpoint);
@@ -8037,7 +8055,7 @@ remote_ftp(char *address, char *options)
 		char *mkdir_cmd[] = { "mkdir", "-p", rmountpoint, NULL };
 
 		if (launch_execve(mkdir_cmd, FOREGROUND) != EXIT_SUCCESS) {
-			fprintf(stderr, _("%s: '%s': Cannot create mountpoint\n"),
+			fprintf(stderr, _("%s: %s: Cannot create mountpoint\n"),
 					PROGRAM_NAME, rmountpoint);
 			free(rmountpoint);
 			return EXIT_FAILURE;
@@ -8045,7 +8063,7 @@ remote_ftp(char *address, char *options)
 	}
 
 	else if (count_dir(rmountpoint) > 2) {
-		fprintf(stderr, _("%s: '%s': Mounpoint not empty\n"),
+		fprintf(stderr, _("%s: %s: Mounpoint not empty\n"),
 				PROGRAM_NAME, rmountpoint);
 		free(rmountpoint);
 		return EXIT_FAILURE;
@@ -8061,7 +8079,7 @@ remote_ftp(char *address, char *options)
 		return EXIT_FAILURE;
 	}
 
-	if (chdir(rmountpoint) != 0) {
+	if (xchdir(rmountpoint) != 0) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rmountpoint,
 				strerror(errno));
 		free(rmountpoint);
@@ -8167,7 +8185,7 @@ remote_smb(char *address, char *options)
 			free(rmountpoint);
 			free(addr_tmp);
 
-			fprintf(stderr, _("%s: '%s': Cannot create mountpoint\n"),
+			fprintf(stderr, _("%s: %s: Cannot create mountpoint\n"),
 					PROGRAM_NAME, rmountpoint);
 
 			return EXIT_FAILURE;
@@ -8176,7 +8194,7 @@ remote_smb(char *address, char *options)
 
 	/* If the mountpoint already exists, check if it is empty */
 	else if (count_dir(rmountpoint) > 2) {
-		fprintf(stderr, _("%s: '%s': Mountpoint not empty\n"),
+		fprintf(stderr, _("%s: %s: Mountpoint not empty\n"),
 				PROGRAM_NAME, rmountpoint);
 
 		if (free_options)
@@ -8228,8 +8246,8 @@ remote_smb(char *address, char *options)
 	}
 
 	/* If successfully mounted, chdir into mountpoint */
-	if (chdir(rmountpoint) != 0) {
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, rmountpoint,
+	if (xchdir(rmountpoint) != 0) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rmountpoint,
 				strerror(errno));
 		free(rmountpoint);
 		return EXIT_FAILURE;
@@ -8300,7 +8318,7 @@ remote_ssh(char *address, char *options)
 		char *mkdir_cmd[] = { "mkdir", "-p", rmountpoint, NULL };
 
 		if (launch_execve(mkdir_cmd, FOREGROUND) != EXIT_SUCCESS) {
-			fprintf(stderr, _("%s: '%s': Cannot create mountpoint\n"),
+			fprintf(stderr, _("%s: %s: Cannot create mountpoint\n"),
 					PROGRAM_NAME, rmountpoint);
 			free(rmountpoint);
 			return EXIT_FAILURE;
@@ -8309,7 +8327,7 @@ remote_ssh(char *address, char *options)
 
 	/* If it exists, make sure it is not populated */
 	else if (count_dir(rmountpoint) > 2) {
-		fprintf(stderr, _("%s: '%s': Mounpoint not empty\n"),
+		fprintf(stderr, _("%s: %s: Mounpoint not empty\n"),
 				PROGRAM_NAME, rmountpoint);
 		free(rmountpoint);
 		return EXIT_FAILURE;
@@ -8338,8 +8356,8 @@ remote_ssh(char *address, char *options)
 	}
 
 	/* If successfully mounted, chdir into mountpoint */
-	if (chdir(rmountpoint) != 0) {
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, rmountpoint,
+	if (xchdir(rmountpoint) != 0) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rmountpoint,
 				strerror(errno));
 		free(rmountpoint);
 		return EXIT_FAILURE;
@@ -8616,7 +8634,7 @@ new_instance(char *dir, int sudo)
 	char *deq_dir = dequote_str(dir, 0);
 
 	if (!deq_dir) {
-		fprintf(stderr, _("%s: '%s': Error dequoting filename\n"),
+		fprintf(stderr, _("%s: %s: Error dequoting filename\n"),
 				PROGRAM_NAME, dir);
 		free(self);
 		return EXIT_FAILURE;
@@ -8625,7 +8643,7 @@ new_instance(char *dir, int sudo)
 	struct stat file_attrib;
 
 	if (stat(deq_dir, &file_attrib) == -1) {
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, deq_dir,
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, deq_dir,
 				strerror(errno));
 		free(self);
 		free(deq_dir);
@@ -8633,7 +8651,7 @@ new_instance(char *dir, int sudo)
 	}
 
 	if ((file_attrib.st_mode & S_IFMT) != S_IFDIR) {
-		fprintf(stderr, _("%s: '%s': Not a directory\n"),
+		fprintf(stderr, _("%s: %s: Not a directory\n"),
 				PROGRAM_NAME, deq_dir);
 		free(self);
 		free(deq_dir);
@@ -8864,7 +8882,7 @@ alias_import(char *file)
 		char *file_exp = tilde_expand(file);
 
 		if (!file_exp) {
-			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, file,
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file,
 					strerror(errno));
 			return EXIT_FAILURE;
 		}
@@ -8877,13 +8895,13 @@ alias_import(char *file)
 		realpath(file, rfile);
 
 	if (rfile[0] == '\0') {
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, file,
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file,
 				strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	if (access(rfile, F_OK|R_OK) != 0) {
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, rfile,
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rfile,
 				strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -8901,7 +8919,7 @@ alias_import(char *file)
 	FILE *config_fp = fopen(CONFIG_FILE, "a");
 
 	if (!config_fp) {
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 				CONFIG_FILE, strerror(errno));
 		fclose(fp);
 		return EXIT_FAILURE;
@@ -8926,7 +8944,7 @@ alias_import(char *file)
 				continue;
 
 			if (is_internal_c(alias_name)) {
-				fprintf(stderr, _("'%s': Alias conflicts with "
+				fprintf(stderr, _("%s: Alias conflicts with "
 						"internal command\n"), alias_name);
 				free(alias_name);
 				continue;
@@ -8971,7 +8989,7 @@ alias_import(char *file)
 				fputs(line, config_fp);
 			}
 			else
-				fprintf(stderr, _("'%s': Alias already exists\n"),
+				fprintf(stderr, _("%s: Alias already exists\n"),
 						alias_name);
 
 			free(alias_name);
@@ -8985,7 +9003,7 @@ alias_import(char *file)
 
 	/* No alias was found in FILE */
 	if (alias_found == 0) {
-		fprintf(stderr, _("%s: '%s': No alias found\n"), PROGRAM_NAME,
+		fprintf(stderr, _("%s: %s: No alias found\n"), PROGRAM_NAME,
 				rfile);
 		return EXIT_FAILURE;
 	}
@@ -9723,13 +9741,13 @@ profile_add(const char *prof)
 	}
 
 	if (found) {
-		fprintf(stderr, _("%s: '%s': Profile already exists\n"),
+		fprintf(stderr, _("%s: %s: Profile already exists\n"),
 				PROGRAM_NAME, prof);
 		return EXIT_FAILURE;
 	}
 
 	if (!home_ok) {
-		fprintf(stderr, _("%s: '%s': Cannot create profile: Home "
+		fprintf(stderr, _("%s: %s: Cannot create profile: Home "
 		"directory not found\n"), PROGRAM_NAME, prof);
 		return EXIT_FAILURE;
 	}
@@ -9746,7 +9764,7 @@ profile_add(const char *prof)
 	int ret = launch_execve(tmp_cmd, FOREGROUND);
 
 	if (ret != EXIT_SUCCESS) {
-		fprintf(stderr, _("%s: mkdir: '%s': Error creating "
+		fprintf(stderr, _("%s: mkdir: %s: Error creating "
 				"configuration directory\n"), PROGRAM_NAME,
 				NCONFIG_DIR);
 
@@ -9785,7 +9803,7 @@ profile_add(const char *prof)
 	FILE *hist_fp = fopen(NHIST_FILE, "w+");
 
 	if (!hist_fp) {
-		fprintf(stderr, "%s: fopen: '%s': %s\n", PROGRAM_NAME,
+		fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME,
 				NHIST_FILE, strerror(errno));
 		error_code = EXIT_FAILURE;
 	}
@@ -9807,7 +9825,7 @@ profile_add(const char *prof)
 		FILE *mime_fp = fopen(NMIME_FILE, "w");
 
 		if (!mime_fp) {
-			fprintf(stderr, "%s: fopen: '%s': %s\n", PROGRAM_NAME,
+			fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME,
 					NMIME_FILE, strerror(errno));
 			error_code = EXIT_FAILURE;
 		}
@@ -9868,7 +9886,7 @@ profile_add(const char *prof)
 	}
 
 	else
-		fprintf(stderr, _("%s: '%s': Error creating profile\n"),
+		fprintf(stderr, _("%s: %s: Error creating profile\n"),
 				PROGRAM_NAME, prof);
 
 	return error_code;
@@ -9923,7 +9941,7 @@ profile_del(const char *prof)
 		return EXIT_SUCCESS;
 	}
 
-	fprintf(stderr, _("%s: '%s': Error removing profile\n"),
+	fprintf(stderr, _("%s: %s: Error removing profile\n"),
 			PROGRAM_NAME, prof);
 	return EXIT_FAILURE;
 }
@@ -10268,7 +10286,7 @@ profile_set(const char *prof)
 	}
 
 	if (!found) {
-		fprintf(stderr, _("%s: '%s': No such profile\nTo add a new "
+		fprintf(stderr, _("%s: %s: No such profile\nTo add a new "
 				"profile enter 'pf add PROFILE'\n"), PROGRAM_NAME, prof);
 
 		return EXIT_FAILURE;
@@ -10427,8 +10445,8 @@ profile_set(const char *prof)
 		ws[cur_ws].path = savestring(cwd, strlen(cwd));
 	}
 
-	if (chdir(ws[cur_ws].path) == -1) {
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, ws[cur_ws].path,
+	if (xchdir(ws[cur_ws].path) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
 				strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -10533,7 +10551,7 @@ get_app(const char *mime, const char *ext)
 	FILE *defs_fp = fopen(MIME_FILE, "r");
 
 	if (!defs_fp) {
-		fprintf(stderr, _("%s: '%s': Error opening file\n"),
+		fprintf(stderr, _("%s: %s: Error opening file\n"),
 				PROGRAM_NAME, MIME_FILE);
 		return (char *)NULL;
 	}
@@ -10673,7 +10691,7 @@ get_mime(char *file)
 	FILE *file_fp = fopen(MIME_TMP_FILE, "w");
 
 	if (!file_fp) {
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 				MIME_TMP_FILE, strerror(errno));
 		return (char *)NULL;
 	}
@@ -10681,7 +10699,7 @@ get_mime(char *file)
 	FILE *file_fp_err = fopen("/dev/null", "w");
 
 	if (!file_fp_err) {
-		fprintf(stderr, "%s: '/dev/null': %s\n", PROGRAM_NAME,
+		fprintf(stderr, "%s: /dev/null: %s\n", PROGRAM_NAME,
 				strerror(errno));
 		fclose(file_fp);
 		return (char *)NULL;
@@ -10854,7 +10872,7 @@ mime_open(char **args)
 	}
 
 	if (!file_path) {
-		fprintf(stderr, "'%s': %s\n", args[file_index], strerror(errno));
+		fprintf(stderr, "%s: %s\n", args[file_index], strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -11172,7 +11190,7 @@ bulk_rename(char **args)
 			char *deq_file = dequote_str(args[i], 0);
 
 			if (!deq_file) {
-				fprintf(stderr, _("bulk: '%s': Error dequoting "
+				fprintf(stderr, _("bulk: %s: Error dequoting "
 						"filename\n"), args[i]);
 				continue;
 			}
@@ -11457,7 +11475,7 @@ edit_actions(void)
 	struct stat file_attrib;
 
 	if (stat(ACTIONS_FILE, &file_attrib) == -1) {
-		fprintf(stderr, "actions: '%s': %s\n", ACTIONS_FILE,
+		fprintf(stderr, "actions: %s: %s\n", ACTIONS_FILE,
 				strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -11801,7 +11819,7 @@ log_msg(char *_msg, int print)
 	if (!msg_fp) {
 		/* Do not log this error: We might incur in an infinite loop
 		 * trying to access a file that cannot be accessed */
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, MSG_LOG_FILE,
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, MSG_LOG_FILE,
 				strerror(errno));
 		fputs("Press any key to continue... ", stdout);
 		xgetchar();
@@ -12062,7 +12080,7 @@ set_shell(char *str)
 		tmp = str;
 
 	if (access(tmp, X_OK) == -1) {
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, tmp,
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, tmp,
 				strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -12424,8 +12442,8 @@ cd_function(char *new_path)
 			return EXIT_FAILURE;
 		}
 
-		if (chdir(user_home) != EXIT_SUCCESS) {
-			fprintf(stderr, "%s: cd: '%s': %s\n", PROGRAM_NAME,
+		if (xchdir(user_home) != EXIT_SUCCESS) {
+			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
 					user_home, strerror(errno));
 			return EXIT_FAILURE;
 		}
@@ -12451,13 +12469,13 @@ cd_function(char *new_path)
 		char *real_path = realpath(new_path, NULL);
 
 		if (!real_path) {
-			fprintf(stderr, "%s: cd: '%s': %s\n", PROGRAM_NAME,
+			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
 					new_path, strerror(errno));
 			return EXIT_FAILURE;
 		}
 
-		if (chdir(real_path) != EXIT_SUCCESS) {
-			fprintf(stderr, "%s: cd: '%s': %s\n", PROGRAM_NAME,
+		if (xchdir(real_path) != EXIT_SUCCESS) {
+			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
 					real_path, strerror(errno));
 			free(real_path);
 			return EXIT_FAILURE;
@@ -12495,7 +12513,7 @@ open_function(char **cmd)
 		deq_path = dequote_str(cmd[1], 0);
 
 		if (!deq_path) {
-			fprintf(stderr, _("%s: '%s': Error dequoting filename\n"),
+			fprintf(stderr, _("%s: %s: Error dequoting filename\n"),
 					PROGRAM_NAME, cmd[1]);
 			return EXIT_FAILURE;
 		}
@@ -12510,7 +12528,7 @@ open_function(char **cmd)
 	struct stat file_attrib;
 
 	if (stat(file, &file_attrib) == -1) {
-		fprintf(stderr, "%s: open: '%s': %s\n", PROGRAM_NAME, cmd[1],
+		fprintf(stderr, "%s: open: %s: %s\n", PROGRAM_NAME, cmd[1],
 				strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -12565,7 +12583,7 @@ open_function(char **cmd)
 	 * or regular file), print the corresponding error message and
 	 * exit */
 	if (no_open_file) {
-		fprintf(stderr, _("%s: '%s' (%s): Cannot open file. Try "
+		fprintf(stderr, _("%s: %s (%s): Cannot open file. Try "
 				"'APPLICATION FILENAME'.\n"), PROGRAM_NAME,
 				cmd[1], file_type);
 		return EXIT_FAILURE;
@@ -12661,7 +12679,7 @@ run_action(char *action, char **args)
 
 	/* Check if the action file exists */
 	if (access(cmd, F_OK|X_OK) == -1) {
-		fprintf(stderr, "actions: '%s': %s\n", cmd, strerror(errno));
+		fprintf(stderr, "actions: %s: %s\n", cmd, strerror(errno));
 		free(cmd);
 		return EXIT_FAILURE;
 	}
@@ -12831,7 +12849,7 @@ surf_hist(char **comm)
 		int atoi_comm = atoi(comm[1] + 1);
 		if (atoi_comm > 0 && atoi_comm <= dirhist_total_index) {
 
-			int ret = chdir(old_pwd[atoi_comm - 1]);
+			int ret = xchdir(old_pwd[atoi_comm - 1]);
 
 			if (ret == 0) {
 				free(ws[cur_ws].path);
@@ -12851,11 +12869,11 @@ surf_hist(char **comm)
 			}
 
 			else
-				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 						old_pwd[atoi_comm - 1], strerror(errno));
 		}
 		else
-			fprintf(stderr, _("history: '%d': No such ELN\n"),
+			fprintf(stderr, _("history: %d: No such ELN\n"),
 					atoi(comm[1] + 1));
 	}
 	else
@@ -12890,7 +12908,7 @@ back_function(char **comm)
 
 	dirhist_cur_index--;
 
-	if (chdir(old_pwd[dirhist_cur_index]) == EXIT_SUCCESS) {
+	if (xchdir(old_pwd[dirhist_cur_index]) == EXIT_SUCCESS) {
 
 		free(ws[cur_ws].path);
 		ws[cur_ws].path = savestring(old_pwd[dirhist_cur_index],
@@ -12907,7 +12925,7 @@ back_function(char **comm)
 	}
 
 	else
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 				old_pwd[dirhist_cur_index], strerror(errno));
 
 	return exit_status;
@@ -12938,7 +12956,7 @@ forth_function(char **comm)
 	dirhist_cur_index++;
 
 	int exit_status = EXIT_FAILURE;
-	if (chdir(old_pwd[dirhist_cur_index]) == EXIT_SUCCESS) {
+	if (xchdir(old_pwd[dirhist_cur_index]) == EXIT_SUCCESS) {
 
 		free(ws[cur_ws].path);
 		ws[cur_ws].path = savestring(old_pwd[dirhist_cur_index],
@@ -12955,7 +12973,7 @@ forth_function(char **comm)
 	}
 
 	else
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 				old_pwd[dirhist_cur_index], strerror(errno));
 
 	return exit_status;
@@ -12968,7 +12986,7 @@ list_mountpoints(void)
 	FILE *mp_fp = fopen("/proc/mounts", "r");
 
 	if (!mp_fp) {
-		fprintf(stderr, "%s: mp: fopen: '/proc/mounts': %s\n",
+		fprintf(stderr, "%s: mp: fopen: /proc/mounts: %s\n",
 				PROGRAM_NAME, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -13044,9 +13062,8 @@ list_mountpoints(void)
 
 		if (atoi_num > 0 && atoi_num <= (int)mp_n) {
 			
-			int ret = access(mountpoints[atoi_num - 1], R_OK);
+			if (xchdir(mountpoints[atoi_num - 1]) == EXIT_SUCCESS) {
 
-			if (ret == 0 && chdir(mountpoints[atoi_num - 1]) == 0) {
 				free(ws[cur_ws].path);
 				ws[cur_ws].path = savestring(mountpoints[atoi_num - 1],
 									strlen(mountpoints[atoi_num - 1]));
@@ -13063,14 +13080,14 @@ list_mountpoints(void)
 			}
 
 			else {
-				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 						mountpoints[atoi_num - 1], strerror(errno));
 				exit_status = EXIT_FAILURE;
 			}
 		}
-
 		else {
-			printf(_("mp: '%s': Invalid mountpoint\n"), input);
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+					mountpoints[atoi_num - 1], strerror(errno));
 			exit_status = EXIT_FAILURE;
 		}
 	}
@@ -13186,7 +13203,7 @@ recur_perm_check(const char *dirname)
 				  * calls to the function will allways return error
 				  * (even if there's no actual error) */
 				recur_perm_error_flag = 1;
-				fprintf(stderr, _("'%s': Permission denied\n"), dirpath);
+				fprintf(stderr, _("%s: Permission denied\n"), dirpath);
 			}
 
 			recur_perm_check(dirpath);
@@ -13218,7 +13235,7 @@ wx_parent_check(char *file)
 		file[file_len - 1] = '\0';
 
 	if (lstat(file, &file_attrib) == -1) {
-		fprintf(stderr, _("'%s': No such file or directory\n"), file);
+		fprintf(stderr, _("%s: No such file or directory\n"), file);
 		return EXIT_FAILURE;
 	}
 
@@ -13234,7 +13251,7 @@ wx_parent_check(char *file)
 		}
 
 		else {
-			fprintf(stderr, _("%s: '%s': Error getting parent "
+			fprintf(stderr, _("%s: %s: Error getting parent "
 					"directory\n"), PROGRAM_NAME, file);
 			return EXIT_FAILURE;
 		}
@@ -13252,7 +13269,7 @@ wx_parent_check(char *file)
 		}
 
 		else if (ret == 1) {
-			fprintf(stderr, _("'%s': Directory is immutable\n"), file);
+			fprintf(stderr, _("%s: Directory is immutable\n"), file);
 			exit_status = EXIT_FAILURE;
 		}
 
@@ -13290,7 +13307,7 @@ wx_parent_check(char *file)
 				}
 
 				else { /* No permission for subdir */
-					fprintf(stderr, _("'%s': Permission denied\n"),
+					fprintf(stderr, _("%s: Permission denied\n"),
 							file);
 					exit_status = EXIT_FAILURE;
 				}
@@ -13301,7 +13318,7 @@ wx_parent_check(char *file)
 		}
 
 		else { /* No permission for parent */
-			fprintf(stderr, _("'%s': Permission denied\n"), parent);
+			fprintf(stderr, _("%s: Permission denied\n"), parent);
 			exit_status = EXIT_FAILURE;
 		}
 		break;
@@ -13317,7 +13334,7 @@ wx_parent_check(char *file)
 		}
 
 		else if (ret == 1) {
-			fprintf(stderr, _("'%s': File is immutable\n"), file);
+			fprintf(stderr, _("%s: File is immutable\n"), file);
 			exit_status = EXIT_FAILURE;
 		}
 
@@ -13327,7 +13344,7 @@ wx_parent_check(char *file)
 				exit_status = EXIT_SUCCESS;
 
 			else {
-				fprintf(stderr, _("'%s': Permission denied\n"), parent);
+				fprintf(stderr, _("%s: Permission denied\n"), parent);
 				exit_status = EXIT_FAILURE;
 			}
 		}
@@ -13345,7 +13362,7 @@ wx_parent_check(char *file)
 				exit_status = EXIT_SUCCESS;
 
 			else {
-				fprintf(stderr, _("'%s': Permission denied\n"), parent);
+				fprintf(stderr, _("%s: Permission denied\n"), parent);
 				exit_status = EXIT_FAILURE;
 			}
 		}
@@ -13353,7 +13370,7 @@ wx_parent_check(char *file)
 
 	/* DO NOT TRASH BLOCK AND CHAR DEVICES */
 	default:
-		fprintf(stderr, _("%s: trash: '%s' (%s): Unsupported file type\n"),
+		fprintf(stderr, _("%s: trash: %s (%s): Unsupported file type\n"),
 				PROGRAM_NAME, file, ((file_attrib.st_mode & S_IFMT) == S_IFBLK)
 				? "Block device" : ((file_attrib.st_mode & S_IFMT) == S_IFCHR)
 				? "Character device" : "Unknown filetype");
@@ -13374,7 +13391,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 	struct stat file_attrib;
 
 	if (lstat(file, &file_attrib) == -1) {
-		fprintf(stderr, "%s: trash: '%s': %s\n", PROGRAM_NAME, file,
+		fprintf(stderr, "%s: trash: %s: %s\n", PROGRAM_NAME, file,
 				strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -13406,7 +13423,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 		filename = straftlst(file, '/');
 
 	if (!filename) {
-		fprintf(stderr, _("%s: trash: '%s': Error getting filename\n"),
+		fprintf(stderr, _("%s: trash: %s: Error getting filename\n"),
 				PROGRAM_NAME, file);
 		return EXIT_FAILURE;
 	}
@@ -13449,7 +13466,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 	dest = (char *)NULL;
 
 	if (ret != EXIT_SUCCESS) {
-		fprintf(stderr, _("%s: trash: '%s': Failed copying file to "
+		fprintf(stderr, _("%s: trash: %s: Failed copying file to "
 				"Trash\n"), PROGRAM_NAME, file);
 		free(file_suffix);
 		return EXIT_FAILURE;
@@ -13466,7 +13483,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 	FILE *info_fp = fopen(info_file, "w");
 
 	if (!info_fp) { /* If error creating the info file */
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, info_file,
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, info_file,
 				strerror(errno));
 		/* Remove the trash file */
 		char *trash_file = (char *)NULL;
@@ -13482,7 +13499,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 		free(trash_file);
 
 		if (ret != EXIT_SUCCESS)
-			fprintf(stderr, _("%s: trash: '%s/%s': Failed removing trash "
+			fprintf(stderr, _("%s: trash: %s/%s: Failed removing trash "
 					"file\nTry removing it manually\n"), PROGRAM_NAME,
 					TRASH_FILES_DIR, file_suffix);
 
@@ -13502,7 +13519,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 			url_str = url_encode(file);
 
 		if (!url_str) {
-			fprintf(stderr, _("%s: trash: '%s': Failed encoding path\n"),
+			fprintf(stderr, _("%s: trash: %s: Failed encoding path\n"),
 					PROGRAM_NAME, file);
 			fclose(info_fp);
 
@@ -13527,7 +13544,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 
 	/* If remove fails, remove trash and info files */
 	if (ret != EXIT_SUCCESS) {
-		fprintf(stderr, _("%s: trash: '%s': Failed removing file\n"),
+		fprintf(stderr, _("%s: trash: %s: Failed removing file\n"),
 				PROGRAM_NAME, file);
 		char *trash_file = (char *)NULL;
 		trash_file = (char *)xnmalloc(strlen(TRASH_FILES_DIR)
@@ -13589,7 +13606,7 @@ remove_from_trash(void)
 {
 	/* List trashed files */
 	/* Change CWD to the trash directory. Otherwise, scandir() will fail */
-	if (chdir(TRASH_FILES_DIR) == -1) {
+	if (xchdir(TRASH_FILES_DIR) == -1) {
 		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME,
 			 TRASH_FILES_DIR, strerror(errno));
 		return EXIT_FAILURE;
@@ -13613,7 +13630,7 @@ remove_from_trash(void)
 	else {
 		puts(_("trash: There are no trashed files"));
 
-		if (chdir(ws[cur_ws].path) == -1) { /* Restore CWD and return */
+		if (xchdir(ws[cur_ws].path) == -1) { /* Restore CWD and return */
 			_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n",
 				 PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
 		}
@@ -13622,7 +13639,7 @@ remove_from_trash(void)
 	}
 
 	/* Restore CWD and continue */
-	if (chdir(ws[cur_ws].path) == -1) {
+	if (xchdir(ws[cur_ws].path) == -1) {
 		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME,
 			 ws[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
@@ -13701,7 +13718,7 @@ remove_from_trash(void)
 
 		else if (!is_number(rm_elements[i])) {
 
-			fprintf(stderr, _("%s: trash: '%s': Invalid ELN\n"),
+			fprintf(stderr, _("%s: trash: %s: Invalid ELN\n"),
 					PROGRAM_NAME, rm_elements[i]);
 			exit_status = EXIT_FAILURE;
 
@@ -13728,7 +13745,7 @@ remove_from_trash(void)
 		rm_num = atoi(rm_elements[i]);
 
 		if (rm_num <= 0 || rm_num > files_n) {
-			fprintf(stderr, _("%s: trash: '%d': Invalid ELN\n"),
+			fprintf(stderr, _("%s: trash: %d: Invalid ELN\n"),
 					PROGRAM_NAME, rm_num);
 			free(rm_elements[i]);
 			exit_status = EXIT_FAILURE;
@@ -13811,7 +13828,7 @@ untrash_element(char *file)
 		char *url_decoded = url_decode(orig_path);
 
 		if (!url_decoded) {
-			fprintf(stderr, _("%s: undel: '%s': Failed decoding path\n"),
+			fprintf(stderr, _("%s: undel: %s: Failed decoding path\n"),
 					PROGRAM_NAME, orig_path);
 			free(orig_path);
 			return EXIT_FAILURE;
@@ -13843,7 +13860,7 @@ untrash_element(char *file)
 		}
 
 		if (access(parent, F_OK) != 0) {
-			fprintf(stderr, _("%s: undel: '%s': No such file or "
+			fprintf(stderr, _("%s: undel: %s: No such file or "
 					"directory\n"), PROGRAM_NAME, parent);
 			free(parent);
 			free(url_decoded);
@@ -13851,7 +13868,7 @@ untrash_element(char *file)
 		}
 
 		if (access(parent, X_OK|W_OK) != 0) {
-			fprintf(stderr, _("%s: undel: '%s': Permission denied\n"), 
+			fprintf(stderr, _("%s: undel: %s: Permission denied\n"), 
 					PROGRAM_NAME, parent);
 			free(parent);
 			free(url_decoded);
@@ -13872,7 +13889,7 @@ untrash_element(char *file)
 			ret = launch_execve(tmp_cmd2, FOREGROUND);
 
 			if (ret != EXIT_SUCCESS) {
-				fprintf(stderr, _("%s: undel: '%s': Failed removing "
+				fprintf(stderr, _("%s: undel: %s: Failed removing "
 								  "info file\n"), PROGRAM_NAME,
 								  undel_info);
 				return EXIT_FAILURE;
@@ -13883,7 +13900,7 @@ untrash_element(char *file)
 		}
 
 		else {
-			fprintf(stderr, _("%s: undel: '%s': Failed restoring trashed "
+			fprintf(stderr, _("%s: undel: %s: Failed restoring trashed "
 							  "file\n"), PROGRAM_NAME, undel_file);
 			return EXIT_FAILURE;
 		}
@@ -13917,7 +13934,7 @@ untrash_function(char **comm)
 	}
 
 	/* Change CWD to the trash directory to make scandir() work */
-	if (chdir(TRASH_FILES_DIR) == -1) {
+	if (xchdir(TRASH_FILES_DIR) == -1) {
 		_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n", PROGRAM_NAME,
 			 TRASH_FILES_DIR, strerror(errno));
 		return EXIT_FAILURE;
@@ -13933,7 +13950,7 @@ untrash_function(char **comm)
 
 		puts(_("trash: There are no trashed files"));
 
-		if (chdir(ws[cur_ws].path) == -1) {
+		if (xchdir(ws[cur_ws].path) == -1) {
 			_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n",
 				 PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
@@ -13958,7 +13975,7 @@ untrash_function(char **comm)
 
 		free(trash_files);
 
-		if (chdir(ws[cur_ws].path) == -1) {
+		if (xchdir(ws[cur_ws].path) == -1) {
 			_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n",
 				 PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
@@ -13976,7 +13993,7 @@ untrash_function(char **comm)
 					PRINT_NEWLINE);
 
 	/* Go back to previous path */
-	if (chdir(ws[cur_ws].path) == -1) {
+	if (xchdir(ws[cur_ws].path) == -1) {
 		_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n", PROGRAM_NAME,
 			 ws[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
@@ -14022,7 +14039,7 @@ untrash_function(char **comm)
 		}
 
 		else if (!is_number(undel_elements[i])) {
-			fprintf(stderr, _("undel: '%s': Invalid ELN\n"),
+			fprintf(stderr, _("undel: %s: Invalid ELN\n"),
 					undel_elements[i]);
 			exit_status = EXIT_FAILURE;
 			free_and_return = 1;
@@ -14052,7 +14069,7 @@ untrash_function(char **comm)
 		undel_num = atoi(undel_elements[i]);
 
 		if (undel_num <= 0 || undel_num > trash_files_n) {
-			fprintf(stderr, _("%s: undel: '%d': Invalid ELN\n"),
+			fprintf(stderr, _("%s: undel: %d: Invalid ELN\n"),
 					PROGRAM_NAME, undel_num);
 			free(undel_elements[i]);
 			continue;
@@ -14091,7 +14108,7 @@ trash_clear(void)
 	struct dirent **trash_files = (struct dirent **)NULL;
 	int files_n = -1, exit_status = EXIT_SUCCESS;
 
-	if (chdir(TRASH_FILES_DIR) == -1) {
+	if (xchdir(TRASH_FILES_DIR) == -1) {
 		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME,
 			 TRASH_FILES_DIR, strerror(errno));
 		return EXIT_FAILURE;
@@ -14131,7 +14148,7 @@ trash_clear(void)
 		free(file2);
 
 		if (ret != EXIT_SUCCESS) {
-			fprintf(stderr, _("%s: trash: '%s': Error removing "
+			fprintf(stderr, _("%s: trash: %s: Error removing "
 					"trashed file\n"), PROGRAM_NAME,
 					trash_files[i]->d_name);
 			exit_status = EXIT_FAILURE;
@@ -14144,7 +14161,7 @@ trash_clear(void)
 
 	free(trash_files);
 
-	if (chdir(ws[cur_ws].path) == -1) {
+	if (xchdir(ws[cur_ws].path) == -1) {
 		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME,
 			 ws[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
@@ -14195,8 +14212,8 @@ trash_function (char **comm)
 			|| strcmp(comm[1], "list") == 0) {
 		/* List files in the Trash/files dir */
 
-		if (chdir(TRASH_FILES_DIR) == -1) {
-			_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n",
+		if (xchdir(TRASH_FILES_DIR) == -1) {
+			_err(0, NOPRINT_PROMPT, "%s: trash: %s: %s\n",
 				 PROGRAM_NAME, TRASH_FILES_DIR, strerror(errno));
 			return EXIT_FAILURE;
 		}
@@ -14221,7 +14238,7 @@ trash_function (char **comm)
 		else
 			puts(_("trash: There are no trashed files"));
 
-		if (chdir(ws[cur_ws].path) == -1) {
+		if (xchdir(ws[cur_ws].path) == -1) {
 			_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n",
 				 PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
@@ -14297,7 +14314,7 @@ trash_function (char **comm)
 				struct stat file_attrib;
 
 				if (lstat(deq_file, &file_attrib) == -1) {
-					fprintf(stderr, _("trash: '%s': %s\n"), deq_file,
+					fprintf(stderr, _("trash: %s: %s\n"), deq_file,
 							strerror(errno));
 					exit_status = EXIT_FAILURE;
 					free(deq_file);
@@ -14307,7 +14324,7 @@ trash_function (char **comm)
 				/* Do not trash block or character devices */
 				else {
 					if ((file_attrib.st_mode & S_IFMT) == S_IFBLK) {
-						fprintf(stderr, _("trash: '%s': Cannot trash a "
+						fprintf(stderr, _("trash: %s: Cannot trash a "
 								"block device\n"), deq_file);
 						exit_status = EXIT_FAILURE;
 						free(deq_file);
@@ -14315,7 +14332,7 @@ trash_function (char **comm)
 					}
 
 					else if ((file_attrib.st_mode & S_IFMT) == S_IFCHR) {
-						fprintf(stderr, _("trash: '%s': Cannot trash a "
+						fprintf(stderr, _("trash: %s: Cannot trash a "
 								"character device\n"), deq_file);
 						exit_status = EXIT_FAILURE;
 						free(deq_file);
@@ -16114,8 +16131,8 @@ handle_stdin()
 	}
 
 	/* chdir to tmp dir and update path var */
-	if (chdir(STDIN_TMP_DIR) == -1) {
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, STDIN_TMP_DIR,
+	if (xchdir(STDIN_TMP_DIR) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, STDIN_TMP_DIR,
 				strerror(errno));
 
 		char *rm_cmd[] = { "rm" , "-drf", STDIN_TMP_DIR, NULL };
@@ -17040,7 +17057,7 @@ pin_directory(char *dir)
 	struct stat attr;
 
 	if (lstat(dir, &attr) == -1) {
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, dir,
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir,
 				strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -17089,7 +17106,7 @@ unpin_dir(void)
 		sprintf(pin_file, "%s/.pin", CONFIG_DIR);
 
 		if (unlink(pin_file) == -1) {
-			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, pin_file,
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, pin_file,
 					strerror(errno));
 			cmd_error = 1;
 		}
@@ -17387,7 +17404,7 @@ autojump(char **args)
 				return cd_function(args[1]);
 
 			else {
-				fprintf(stderr, _("%s: '%s': No such jump entry\n"),
+				fprintf(stderr, _("%s: %s: No such jump entry\n"),
 						PROGRAM_NAME, args[1]);
 				return EXIT_FAILURE;
 			}
@@ -17600,7 +17617,7 @@ workspaces(char *str)
 		ws[tmp_ws].path = savestring(ws[cur_ws].path,
 									 strlen(ws[cur_ws].path));
 
-	if (chdir(ws[tmp_ws].path) == -1) {
+	if (xchdir(ws[tmp_ws].path) == -1) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[tmp_ws].path,
 				strerror(errno));
 		return EXIT_FAILURE;
@@ -17633,7 +17650,7 @@ save_sel(void)
 
 	if (sel_n == 0) {
 		if (unlink(SEL_FILE) == -1) {
-			fprintf(stderr, "%s: sel: '%s': %s\n", PROGRAM_NAME,
+			fprintf(stderr, "%s: sel: %s: %s\n", PROGRAM_NAME,
 					SEL_FILE, strerror(errno));
 			return EXIT_FAILURE;
 		}
@@ -17644,7 +17661,7 @@ save_sel(void)
 	FILE *sel_fp = fopen(SEL_FILE, "w");
 
 	if (!sel_fp) {
-		_err(0, NOPRINT_PROMPT, "%s: sel: '%s': %s\n", PROGRAM_NAME,
+		_err(0, NOPRINT_PROMPT, "%s: sel: %s: %s\n", PROGRAM_NAME,
 			 SEL_FILE, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -17718,7 +17735,7 @@ select_file(char *file)
 	}
 
 	else
-		fprintf(stderr, _("%s: sel: '%s': Already selected\n"), 
+		fprintf(stderr, _("%s: sel: %s: Already selected\n"), 
 			    PROGRAM_NAME, file);
 
 	return new_sel;
@@ -17741,7 +17758,7 @@ sel_regex(char *str, const char *sel_path, mode_t filetype)
 	regex_t regex;
 	if (regcomp(&regex, pattern, REG_NOSUB|REG_EXTENDED)
 	!= EXIT_SUCCESS) {
-		fprintf(stderr, _("%s: sel: '%s': Invalid regular "
+		fprintf(stderr, _("%s: sel: %s: Invalid regular "
 			    "expression\n"), PROGRAM_NAME, str);
 
 		regfree(&regex);
@@ -18182,7 +18199,7 @@ sel_function(char **args)
 			return EXIT_FAILURE;
 		}
 
-		if (chdir(dir) == -1) {
+		if (xchdir(dir) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir,
 					strerror(errno));
 			return EXIT_FAILURE;
@@ -18234,7 +18251,7 @@ sel_function(char **args)
 
 				struct stat fattr;
 				if (lstat(tmp, &fattr) == -1) {
-					fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 							args[i], strerror(errno));
 				}
 				else
@@ -18245,7 +18262,7 @@ sel_function(char **args)
 			else {
 				struct stat fattr;
 				if (lstat(args[i], &fattr) == -1) {
-					fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 							args[i], strerror(errno));
 				}
 				else
@@ -18279,7 +18296,7 @@ sel_function(char **args)
 		}
 	}
 
-	if (sel_path && chdir(ws[cur_ws].path) == -1) {
+	if (sel_path && xchdir(ws[cur_ws].path) == -1) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
 				strerror(errno));
 		return EXIT_FAILURE;
@@ -18741,8 +18758,8 @@ search_glob(char **comm, int invert)
 		&& strcmp(search_path, ws[cur_ws].path) == 0))
 			search_path = (char *)NULL;
 
-		else if (chdir(search_path) == -1) {
-			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, search_path,
+		else if (xchdir(search_path) == -1) {
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, search_path,
 					strerror(errno));
 			return EXIT_FAILURE;
 		}
@@ -18805,8 +18822,8 @@ search_glob(char **comm, int invert)
 
 		if (search_path) {
 			/* Go back to the directory we came from */
-			if (chdir(ws[cur_ws].path) == -1)
-				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+			if (xchdir(ws[cur_ws].path) == -1)
+				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 						ws[cur_ws].path, strerror(errno));
 		}
 
@@ -19035,8 +19052,8 @@ search_glob(char **comm, int invert)
 
 	/* If needed, go back to the directory we came from */
 	if (search_path) {
-		if (chdir(ws[cur_ws].path) == -1) {
-			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+		if (xchdir(ws[cur_ws].path) == -1) {
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 					ws[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
 		}
@@ -19139,8 +19156,8 @@ search_regex(char **comm, int invert)
 			search_path = (char *)NULL;
 
 		if (search_path && *search_path) {
-			if (chdir(search_path) == -1) {
-				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+			if (xchdir(search_path) == -1) {
+				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 						search_path, strerror(errno));
 				return EXIT_FAILURE;
 			}
@@ -19160,8 +19177,8 @@ search_regex(char **comm, int invert)
 				fprintf(stderr, "scandir: %s: %s\n", search_path,
 						strerror(errno));
 
-				if (chdir(ws[cur_ws].path) == -1)
-					fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+				if (xchdir(ws[cur_ws].path) == -1)
+					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 							ws[cur_ws].path, strerror(errno));
 
 				return EXIT_FAILURE;
@@ -19217,8 +19234,8 @@ search_regex(char **comm, int invert)
 
 			free(reg_dirlist);
 
-			if (chdir(ws[cur_ws].path) == -1)
-				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+			if (xchdir(ws[cur_ws].path) == -1)
+				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 						ws[cur_ws].path, strerror(errno));
 		}
 
@@ -19253,8 +19270,8 @@ search_regex(char **comm, int invert)
 
 			free(reg_dirlist);
 
-			if (chdir(ws[cur_ws].path) == -1)
-					fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+			if (xchdir(ws[cur_ws].path) == -1)
+					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 							ws[cur_ws].path, strerror(errno));
 		}
 
@@ -19385,8 +19402,8 @@ search_regex(char **comm, int invert)
 
 		free(reg_dirlist);
 
-		if (chdir(ws[cur_ws].path) == -1) {
-			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+		if (xchdir(ws[cur_ws].path) == -1) {
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 					ws[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
 		}
@@ -19498,7 +19515,7 @@ bookmark_del(char *name)
 
 	/* If bookmark name was passed but it is not a valid bookmark */
 	else if (name) {
-		fprintf(stderr, _("bookmarks: '%s': No such bookmark\n"), name);
+		fprintf(stderr, _("bookmarks: %s: No such bookmark\n"), name);
 
 		for (i = 0; i < bmn; i++)
 			free(bms[i]);
@@ -19556,7 +19573,7 @@ bookmark_del(char *name)
 		else if (is_number(del_elements[i])
 		&& (atoi(del_elements[i]) <= 0
 		|| atoi(del_elements[i]) > (int)bmn)) {
-			fprintf(stderr, _("bookmarks: '%s': No such bookmark\n"),
+			fprintf(stderr, _("bookmarks: %s: No such bookmark\n"),
 					del_elements[i]);
 			quit = 1;
 		}
@@ -19772,7 +19789,7 @@ bookmark_add(char *file)
 				tmp_line[tmp_line_len - 1] = '\0';
 
 			if (strcmp(tmp_line, file) == 0) {
-				fprintf(stderr, _("bookmarks: '%s': Path already "
+				fprintf(stderr, _("bookmarks: %s: Path already "
 								   "bookmarked\n"), file);
 				dup = 1;
 				break;
@@ -19822,7 +19839,7 @@ bookmark_add(char *file)
 			if (tmp_line) {
 
 				if (strcmp(hk, tmp_line) == 0) {
-					fprintf(stderr, _("bookmarks: '%s': This shortcut is "
+					fprintf(stderr, _("bookmarks: %s: This shortcut is "
 								 	  "already in use\n"), hk);
 
 					dup = 1;
@@ -19862,7 +19879,7 @@ bookmark_add(char *file)
 			if (tmp_line) {
 
 				if (strcmp(name, tmp_line) == 0) {
-					fprintf(stderr, _("bookmarks: '%s': This name is "
+					fprintf(stderr, _("bookmarks: %s: This name is "
 								 	  "already in use\n"), name);
 
 					dup = 1;
@@ -20125,7 +20142,7 @@ open_bookmark(void)
 
 		int num = atoi(arg[0]);
 		if (num <= 0 || (size_t)num > bm_n) {
-			fprintf(stderr, _("Bookmarks: '%d': No such ELN\n"), num);
+			fprintf(stderr, _("Bookmarks: %d: No such ELN\n"), num);
 			exit_status = EXIT_FAILURE;
 			goto FREE_AND_EXIT;
 		}
@@ -20155,7 +20172,7 @@ open_bookmark(void)
 					goto FREE_AND_EXIT;
 				}
 
-				fprintf(stderr, _("%s: '%s': Invalid bookmark\n"),
+				fprintf(stderr, _("%s: %s: Invalid bookmark\n"),
 						PROGRAM_NAME, arg[0]);
 				exit_status = EXIT_FAILURE;
 				goto FREE_AND_EXIT;
@@ -20164,7 +20181,7 @@ open_bookmark(void)
 	}
 
 	if (!tmp_path) {
-		fprintf(stderr, _("Bookmarks: '%s': No such bookmark\n"),
+		fprintf(stderr, _("Bookmarks: %s: No such bookmark\n"),
 				arg[0]);
 		exit_status = EXIT_FAILURE;
 		goto FREE_AND_EXIT;
@@ -20258,13 +20275,13 @@ bookmarks_function(char **cmd)
 				return open_function(tmp_cmd);
 			}
 
-			fprintf(stderr, _("Bookmarks: '%s': Invalid bookmark\n"),
+			fprintf(stderr, _("Bookmarks: %s: Invalid bookmark\n"),
 					cmd[1]);
 			return EXIT_FAILURE;
 		}
 	}
 
-	fprintf(stderr, _("Bookmarks: '%s': No such bookmark\n"), cmd[1]);
+	fprintf(stderr, _("Bookmarks: %s: No such bookmark\n"), cmd[1]);
 
 	return EXIT_FAILURE;
 }
@@ -20626,7 +20643,7 @@ properties_function(char **comm)
 			char *deq_file = dequote_str(comm[i], 0);
 
 			if (!deq_file) {
-				fprintf(stderr, _("%s: '%s': Error dequoting filename\n"),
+				fprintf(stderr, _("%s: %s: Error dequoting filename\n"),
 						PROGRAM_NAME, comm[i]);
 				exit_status = EXIT_FAILURE;
 				continue;
@@ -21224,7 +21241,7 @@ edit_function (char **comm)
 	/* If no application has been passed as 2nd argument */
 	else {
 		if (!(flags & FILE_CMD_OK)) {
-			fprintf(stderr, _("%s: 'file' command not found. Try "
+			fprintf(stderr, _("%s: file: Command not found. Try "
 					"'edit APPLICATION'\n"), PROGRAM_NAME);
 			ret = EXIT_FAILURE;
 		}
@@ -24494,7 +24511,7 @@ exec_cmd(char **comm)
 					return exit_code;
 				}
 
-				fprintf(stderr, _("%s: '%s': Is a directory\n"),
+				fprintf(stderr, _("%s: %s: Is a directory\n"),
 						PROGRAM_NAME, comm[0]);
 				exit_code = EXIT_FAILURE;
 				return EXIT_FAILURE;
@@ -25081,7 +25098,7 @@ parse_input_str(char *str)
 		if (sel_n) {
 			register size_t j = 0;
 			char **sel_array = (char **)NULL;
-			sel_array = (char **)xcalloc(args_n + sel_n + 2,
+			sel_array = (char **)xnmalloc(args_n + sel_n + 2,
 										 sizeof(char *));
 
 			for (i = 0; i < (size_t)is_sel; i++)
@@ -25220,7 +25237,7 @@ parse_input_str(char *str)
 
 						free(substr);
 
-						fprintf(stderr, _("%s: '%d': ELN-filename "
+						fprintf(stderr, _("%s: %d: ELN-filename "
 								"conflict. Bypass internal expansions "
 								"to fix this issue: ';CMD "
 								"FILENAME'\n"), PROGRAM_NAME,
@@ -26245,7 +26262,7 @@ external_arguments(int argc, char **argv)
 			path_value = path_exp;
 		}
 
-		if (chdir(path_value) == 0) {
+		if (xchdir(path_value) == 0) {
 			if (cur_ws == UNSET)
 				cur_ws = DEF_CUR_WS;
 			if (ws[cur_ws].path)
@@ -26256,12 +26273,12 @@ external_arguments(int argc, char **argv)
 
 		else { /* Error changing directory */
 			if (xargs.list_and_quit == 1) {
-				fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 						path_value, strerror(errno));
 				exit(EXIT_FAILURE);
 			}
 
-			_err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+			_err('w', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
 				 path_value, strerror(errno));
 		}
 
@@ -26478,7 +26495,7 @@ main(int argc, char *argv[])
 
 			else {
 				if (access("/", R_OK|X_OK) == -1) {
-					fprintf(stderr, "%s: '/': %s\n", PROGRAM_NAME,
+					fprintf(stderr, "%s: /: %s\n", PROGRAM_NAME,
 							strerror(errno));
 					exit(EXIT_FAILURE);
 				}
@@ -26495,7 +26512,7 @@ main(int argc, char *argv[])
 	/* Make path the CWD */
 	/* If chdir(path) fails, set path to cwd, list files and print the
 	 * error message. If no access to CWD either, exit */
-	if (chdir(ws[cur_ws].path) == -1) {
+	if (xchdir(ws[cur_ws].path) == -1) {
 
 		_err('e', PRINT_PROMPT, "%s: chdir: '%s': %s\n", PROGRAM_NAME,
 			 ws[cur_ws].path, strerror(errno));
@@ -26526,10 +26543,6 @@ main(int argc, char *argv[])
 	/* Start listing as soon as possible to speed up startup time */
 	if (cd_lists_on_the_fly)
 		list_dir();
-
-	/* Get the list of available applications in PATH to be used by my
-	 * custom TAB-completion function */
-	get_path_programs();
 
 	copy_plugins();
 
@@ -26564,6 +26577,10 @@ main(int argc, char *argv[])
 	}
 
 	get_aliases();
+
+	/* Get the list of available applications in PATH to be used by my
+	 * custom TAB-completion function */
+	get_path_programs();
 
 	get_prompt_cmds();
 
