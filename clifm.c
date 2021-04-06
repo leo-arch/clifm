@@ -415,6 +415,8 @@ nm=01;32:bm=01;36:"
 #define TOUPPER(ch) (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
 #define DIGINUM(n) (((n) < 10) ? 1 : ((n) < 100) ? 2 : ((n) < 1000) ? 3 : ((n) < 10000) ? 4 : ((n) < 100000) ? 5 : ((n) < 1000000) ? 6 : ((n) < 10000000) ? 7 : ((n) < 100000000) ? 8 : ((n) < 1000000000) ? 9 : 10)
 #define _ISDIGIT(n) ((unsigned int)(n) - '0' <= 9)
+
+
 				/** #########################
 				 *  #    GLOBAL VARIABLES   #
 				 *  ######################### */
@@ -489,25 +491,25 @@ static struct bookmarks_t *bookmarks = (struct bookmarks_t *)NULL;
 /* Struct to store file information */
 struct fileinfo {
 	char *name;
+	char *color;
+	char *icon;
+	char *icon_color;
+	int eln_n;
 	int filesn; /* Number of files in subdir */
+	int symlink;
+	int dir;
+	int exec;
+	int ruser; /* User read permission for dir */
 	size_t len;
 	mode_t type; /* Store d_type value */
 	mode_t mode; /* Store st_mode (for long view mode) */
 	ino_t inode;
 	off_t size;
-	int eln_n;
 	uid_t uid;
 	gid_t gid;
 	nlink_t linkn;
 	time_t time;
 	time_t ltime; /* For long view mode */
-	int symlink;
-	int dir;
-	int exec;
-	char *color;
-	int ruser; /* User read permission for dir */
-	char *icon;
-	char *icon_color;
 };
 
 static struct fileinfo *file_info = (struct fileinfo *)NULL;
@@ -891,8 +893,7 @@ static char **parse_input_str(char *);
 
 static int
 xstrcmp(const char *s1, const char *s2)
-/* Check for null. This check is done neither by strcmp nor by strncmp.
- * I use 256 for error code since it does not represent any ASCII code
+/* I use 256 for error code since it does not represent any ASCII code
  * (the extended version goes up to 255) */
 {
 	if (!s1 || !s2)
@@ -1192,24 +1193,73 @@ savestring(const char *restrict str, size_t size)
 
 static int
 is_internal_c(const char *restrict cmd)
-/* Check cmd against a list of internal commands */
+/* Check CMD against a list of internal commands */
 {
-	const char *int_cmds[] = { "o", "open", "cd", "p", "pr", "prop",
-		"t", "tr", "trash", "s", "sel", "rf", "refresh", "c", "cp",
-		"m", "mv", "bm", "bookmarks", "b", "back", "f", "forth", "bh",
-		"fh", "u", "undel", "untrash", "s", "sel", "sb", "selbox",
-		"ds", "desel", "rm", "mkdir", "ln", "unlink", "touch", "r",
-		"md", "l", "le", "p", "pp", "pr", "prop", "pf", "prof",
-		"profile", "mp", "mountpoints", "ext", "pg", "pager", "uc",
-		"unicode", "folders-first", "ff", "log", "msg", "messages",
-		"alias", "shell", "edit", "history", "hf", "hidden", "path",
-		"cwd", "splash", "ver", "version", "?", "help", "cmd",
-		"commands", "colors", "cc", "fs", "mm", "mime", "x", "n",
-		"net", "lm", "st", "sort", "fc", "tips", "br", "bulk", "opener",
-		"ac", "ad", "acd", "autocd", "ao", "auto-open", "actions",
-		"rl", "reload", "exp", "export", "kb", "keybinds", "pin",
-		"unpin", "cs", "colorschemes", "jump", "je", "jc", "jp",
-		"jo", "icons", "cl", "columns", "ft", "filter", "ws", "mf",
+	const char *int_cmds[] = {
+		"?", "help",
+		"ac", "ad",
+		"acd", "autocd",
+		"actions",
+		"alias",
+		"ao", "auto-open",
+		"b", "back",
+		"bh", "fh",
+		"bm", "bookmarks",
+		"br", "bulk",
+		"c", "cp",
+		"cc", "colors",
+		"cd",
+		"cl", "columns",
+		"cmd", "commands",
+		"cs", "colorschemes",
+		"ds", "desel",
+		"edit",
+		"exp", "export",
+		"ext",
+		"f", "forth",
+		"fc",
+		"ff", "folders-first",
+		"fs",
+		"ft", "filter",
+		"history",
+		"hf", "hidden",
+		"icons",
+		"jump", "je", "jc", "jp", "jo",
+		"kb", "keybinds",
+		"l", "ln", "le",
+		"lm",
+		"log",
+		"m", "mv",
+		"md", "mkdir",
+		"mf",
+		"mm", "mime",
+		"mp", "mountpoints",
+		"msg", "messages",
+		"n", "net",
+		"o", "open",
+		"opener",
+		"p", "pp", "pr", "prop",
+		"path", "cwd",
+		"pf", "prof", "profile",
+		"pg", "pager",
+		"pin", "unpin",
+		"r", "rm",
+		"rf", "refresh",
+		"rl", "reload",
+		"s", "sel",
+		"sb", "selbox",
+		"shell",
+		"splash",
+		"st", "sort",
+		"t", "tr", "trash",
+		"tips",
+		"touch",
+		"u", "undel", "untrash",
+		"uc", "unicode",
+		"unlink",
+		"ver", "version",
+		"ws",
+		"x", "X",
 		NULL };
 
 	int found = 0;
@@ -1545,6 +1595,7 @@ get_file_icon(const char *file, int n)
 		&& strcasecmp(file, icon_filenames[i].name) == 0) {
 			file_info[n].icon = icon_filenames[i].icon;
 			file_info[n].icon_color = icon_filenames[i].color;
+			break;
 		}
 	}
 }
@@ -1569,6 +1620,7 @@ get_dir_icon(const char *dir, int n)
 		&& strcasecmp(dir, icon_dirnames[i].name) == 0) {
 			file_info[n].icon = icon_dirnames[i].icon;
 			file_info[n].icon_color = icon_dirnames[i].color;
+			break;
 		}
 	}
 }
@@ -1598,7 +1650,7 @@ get_ext_icon(const char *restrict ext, int n)
 		&& strcasecmp(ext, icon_ext[i].name) == 0) {
 			file_info[n].icon = icon_ext[i].icon;
 			file_info[n].icon_color = icon_ext[i].color;
-
+			break;
 		}
 	}
 }
@@ -1956,17 +2008,12 @@ check_env_filter(void)
 	filter = savestring(p, strlen(p));
 }
 
-static inline int
+static int
 count_dir(const char *dir_path) /* Readdir version */
 /* Count files in DIR_PATH, including self and parent. */
 {
 	if (!dir_path)
 		return -1;
-
-/*	struct stat file_attrib;
-
-	if (lstat(dir_path, &file_attrib) == -1)
-		return -1; */
 
 	DIR *dir_p;
 
@@ -18709,6 +18756,8 @@ search_glob(char **comm, int invert)
 
 	/* If no arguments, search_path will be NULL and file_type zero */
 
+	int recursive = 0;
+
 	if (file_type) {
 
 		/* Convert filetype into a macro that can be decoded by stat().
@@ -18722,12 +18771,20 @@ search_glob(char **comm, int invert)
 		case 'f': file_type = invert ? DT_FIFO : S_IFIFO; break;
 		case 'b': file_type = invert ? DT_BLK : S_IFBLK; break;
 		case 'c': file_type = invert ? DT_CHR : S_IFCHR; break;
+		case 'x': recursive = 1; break;
 
 		default:
-			fprintf(stderr, _("%s: '%c': Unrecognized filetype\n"),
+			fprintf(stderr, _("%s: '%c': aUnrecognized filetype\n"),
 					PROGRAM_NAME, (char)file_type);
 			return EXIT_FAILURE;
 		}
+	}
+
+	if (recursive) {
+		char *cmd[] = { "find", (search_path && *search_path) ? search_path
+						: ".", "-name", comm[0] + 1, NULL };
+		launch_execve(cmd, FOREGROUND);
+		return EXIT_SUCCESS;
 	}
 
 	/* If we have a path ("/str /path"), chdir into it, since
@@ -21482,7 +21539,7 @@ help_function (void)
 
 	puts(_("\nBUILT-IN COMMANDS:\n\n\
  ELN/FILE/DIR (auto-open and autocd functions)\n\
- /PATTERN [DIR] [-filetype] (quick search)\n\
+ /PATTERN [DIR] [-filetype] [-x] (quick search)\n\
  ;[CMD], :[CMD] (run CMD via the system shell)\n\
  ac, ad ELN/FILE ... (archiving functions)\n\
  acd, autocd [on, off, status]\n\
@@ -22914,18 +22971,26 @@ list_dir(void)
 
 		/* No color */
 		else {
-			if (icons)
+			if (icons) {
 				if (no_eln)
 					printf("%s %s", file_info[i].icon, file_info[i].name);
 				else
 					printf("%s%d%s %s %s", el_c, i + 1, df_c,
 						   file_info[i].icon, file_info[i].name);
+			}
+
 			else {
 				if (no_eln)
-					printf("%s", file_info[i].name);
-				else
+					fputs(file_info[i].name, stdout);
+				else {
 					printf("%s%d%s %s", el_c, i + 1, df_c,
 						   file_info[i].name);
+/*					fputs(el_c, stdout);
+					fputs(xitoa(i + 1), stdout);
+					fputs(df_c, stdout);
+					putchar(' ');
+					fputs(file_info[i].name, stdout); */
+				}
 			}
 
 			if (classify) {
