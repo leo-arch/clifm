@@ -277,8 +277,8 @@ Options precedence order: 1) command line; 2) configuration file; 3) default val
 .B \fRFILE/DIR
 if the \fIautocd\fR and \fIauto-open\fR functions are enabled, which is the default value, open FILE or change directory to DIR. In other words, 'FILE' amounts to 'open FILE' or 'o FILE', and 'DIR' to 'cd DIR'. ELN's, of course, are allowed. Example: '12'. Unlike the \fIopen\fR function (see below), passing an opening application is not allowed.
 .TP
-.B /\fRPATTERN [\-filetype] [DIR]
-this is the quick search function. Just type '/' followed by a glob or regular (or extended regular) expression, and CliFM will list all matches in the current working directory. For example, both '/*.pdf' and '/.pdf$' expressions will list all PDF files in the current working directory, the former using wildcards, and the second a regular expression. 
+.B /\fRPATTERN [\-filetype] [-x] [DIR]
+this is the quick search function. Just type '/' followed by a glob or regular (or extended regular) expression, and CliFM will list all matches in the current working directory. For example, both '/*.pdf' and '/.pdf$' expressions will list all PDF files in the current working directory, the former using wildcards, and the second a regular expression.
 .sp
 Bear in mind that search patterns are evaluated first as glob expressions, and then, if no matches are found, as regular expressions. Expressions containing no pattern metacharacter are automatically replaced by '/*EXP*'. For example '/test' becomes '/*test*'.
 .sp
@@ -287,6 +287,8 @@ To search for files in any directory other than the current one, specify the dir
 The result of the search could be further filtered by specifying a filter type: \-d, \-r, \-l, \-s, \-f, \-b, and \-c (directory, regular file, symbolic link, socket, FIFO/pipe, block device, and character device respectivelly). For example, '/[.-].*d$ \-d Documents/' will list all directories containing a dot or a dash and ending with 'd' in the directory named "Documents".
 .sp
 The quick search function also supports invert search: prepend the exclamation mark (!) to negate a given search pattern. For example: "!.*s$ -d /etc" will match all directories in /etc NOT ending with 's', just as "!D*" will match all files in the current directory NOT starting with 'D'.
+.sp
+To perform a recursive search use the -x parameter, and, optionally, a search path (DIR). The search will be performed using \fIfind\fR as follows: 'find DIR -name PATTERN'. If no search path is provided, the search is executed starting in the current directory. Otherwise, the search starts in DIR.
 .TP
 .B ;\fR[CMD], \fB:\fR[CMD]
 If no CMD, run the default shell (see below the \fIshell\fR command) in the current working directory. If CMD is specified, skip all CLiFM expansions (see the \fBBUILT\-IN EXPANSIONS\fR section below) and run the input string (CMD) as is via the default system shell.
@@ -397,7 +399,7 @@ toggle the files counter function on/off.
 deselect one or more selected elements. You can also deselect all selected elements at once by passing '*', 'a' or 'all' to the function.
 .TP
 .B edit \fR[gen] [APPLICATION]
-edit the main configuration file (F10 key is also available). If an application is specified, it will be used to open the configuration file. Use the 'gen' option to generate a fresh configuration file and make a copy of the old one (named clifmrc.HHMMSS).
+edit the main configuration file (F10 key is also available). If an application is specified, it will be used to open the configuration file. Use the 'gen' option to generate a fresh configuration file and make a copy of the old one (named clifmrc.YYYYMMDD@HH:MM:SS).
 .TP
 .B exp, export [FILE ...]
 with no argument, export the list of files in the current working directory to a temporary file. Otherwise, export only those specified as further arguments: they could be directories, filenames, ELN's or some search expression like "*.c".
