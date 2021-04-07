@@ -204,6 +204,7 @@ static int flags;
 #define EXNULLERR 79
 #define EXFORKERR 81
 #define EXCRASHERR 82
+
 #define BACKGROUND 1
 #define FOREGROUND 0
 
@@ -272,7 +273,7 @@ nm=01;32:bm=01;36:"
 #define DEF_ND_C "\x1b[01;31m"
 #define DEF_ED_C "\x1b[00;34m"
 #define DEF_NE_C "\x1b[00;31m"
-#define DEF_FI_C "\x1b[00;39m"
+#define DEF_FI_C "\x1b[00;37m"
 #define DEF_EF_C "\x1b[00;33m"
 #define DEF_NF_C "\x1b[00;31m"
 #define DEF_LN_C "\x1b[01;36m"
@@ -297,12 +298,12 @@ nm=01;32:bm=01;36:"
 #define DEF_EL_C "\x1b[01;33m"
 #define DEF_MI_C "\x1b[01;36m"
 #define DEF_DL_C "\x1b[01;34m"
-#define DEF_DF_C "\x1b[00;39;49m"
-#define DEF_DC_C "\x1b[00;39m"
+#define DEF_DF_C "\x1b[00;37m"
+#define DEF_DC_C "\x1b[00;37m"
 #define DEF_WC_C "\x1b[01;36m"
 #define DEF_DH_C "\x1b[00;36m"
 
-#define DEF_TX_C "\001\x1b[00;39m\002"
+#define DEF_TX_C "\001\x1b[00;37m\002"
 #define DEF_LI_C "\001\x1b[01;32m\002"
 #define DEF_TI_C "\001\x1b[01;33m\002"
 #define DEF_EM_C "\001\x1b[01;31m\002"
@@ -5771,7 +5772,7 @@ init_config(void)
 	if (xargs.stealth_mode == 1) {
 
 		_err(0, PRINT_PROMPT, _("%s: Running in stealth mode: trash, "
-			 "persisent selection and directory history, just as "
+			 "persistent selection and directory history, just as "
 			 "bookmarks, logs and configuration files, are "
 			 "disabled.\n"), PROGRAM_NAME);
 
