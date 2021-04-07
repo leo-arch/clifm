@@ -27,14 +27,13 @@
  *
  */
 
-
 #if defined(__linux__) && !defined(_BE_POSIX)
 #  define _GNU_SOURCE
 #else
 #  define _POSIX_C_SOURCE 200809L
 #  define _DEFAULT_SOURCE
 #  if __FreeBSD__
-#    define __XSI_VISIBLE 1
+#    define __XSI_VISIBLE 700
 #    define __BSD_VISIBLE 1
 #  endif
 #endif
@@ -106,9 +105,9 @@ in FreeBSD, but is deprecated */
 #  include <linux/version.h> /* LINUX_VERSION_CODE && KERNEL_VERSION
 								macros */
 #  include <linux/fs.h> /* FS_IOC_GETFLAGS, S_IMMUTABLE_FL macros */
-#elif __FreeBSD__
-/*#  include <strings.h> Enables strcasecmp() */
-#endif
+/*#elif __FreeBSD__
+#  include <strings.h> Enables strcasecmp() */
+#endif /* __linux__ */
 
 #include <uchar.h> /* char32_t and char16_t types */
 /* #include <bsd/string.h> // strlcpy, strlcat */
@@ -389,8 +388,8 @@ nm=01;32:bm=01;36:"
 /* Max length of the properties string in long view mode */
 #define MAX_PROP_STR 55
 
-#define DEFAULT_PROMPT "\\[\\e[0m\\][\\[\\e[0;36m\\]\\S\\[\\e[0m\\]]\\l \
-\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\\z\\[\\e[0;34m\\] \
+#define DEFAULT_PROMPT "\\[\\e[0;37m\\][\\[\\e[0;36m\\]\\S\\[\\e[0;37m\\]]\\l \
+\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0;37m\\]\\z\\[\\e[0;34m\\] \
 \\$\\[\\e[0m\\] "
 
 #define GRAL_USAGE "[-aAefFgGhiIlLmoOsSuUvxy] [-b FILE] [-c FILE] \
@@ -401,7 +400,9 @@ nm=01;32:bm=01;36:"
 #define FALLBACK_SHELL "/bin/sh"
 #define FALLBACK_OPENER "xdg-open"
 
-#define strlen xstrlen
+#ifndef __FreeBSD__
+#  define strlen xstrlen
+#endif
 #define strcpy xstrcpy
 #define strncpy xstrncpy
 #define strcmp xstrcmp
@@ -1045,6 +1046,7 @@ u8_xstrlen(const char *restrict str)
 	return len;
 }
 
+#ifndef __FreeBSD__
 static inline size_t
 xstrlen(const char *restrict s)
 /* Taken from NNN's source code */
@@ -1055,6 +1057,7 @@ xstrlen(const char *restrict s)
 	return (char *)rawmemchr(s, '\0') - s;
 #endif
 }
+#endif /* __FreeBSD__ */
 
 static int
 xchdir(const char *dir)
@@ -6929,7 +6932,7 @@ print_tips(int all)
 	const char *TIPS[] = {
 		"Try the autocd and auto-open functions: run 'FILE' instead "
 		"of 'open FILE' or 'cd FILE'",
-		"Add a new entry to the mimelist file with 'mm edit'",
+		"Add a new entry to the mimelist file with 'mm edit' or F6",
 		"Do not forget to take a look at the manpage",
 		"Need more speed? Try the light mode (Alt-y)",
 		"The Selection Box is shared among different instances of CliFM",
@@ -12673,7 +12676,7 @@ open_function(char **cmd)
 			 * corresponding message is printed by mime_open itself */
 			if (ret == EXIT_FAILURE) {
 				fputs("Add a new entry to the mimelist file ('mime "
-					  "edit') or run 'open FILE APPLICATION'\n",
+					  "edit' or F6) or run 'open FILE APPLICATION'\n",
 					  stderr);
 				return EXIT_FAILURE;
 			}
@@ -18260,14 +18263,14 @@ sel_function(char **args)
 		if (i == ifiletype || i == isel_path)
 			continue;
 
-		int invert = 0;
+/*		int invert = 0; */
 	
 		if (check_regex(args[i]) == EXIT_SUCCESS) {
 			pattern = args[i];
 
 			if (*pattern == '!') {
 				pattern++;
-				invert = 1;
+/*				invert = 1; */
 			}
 		}
 
@@ -20628,7 +20631,11 @@ get_properties(char *filename, int dsize)
 	}
 
 	printf(_("\tBlocks: %ld"), file_attrib.st_blocks);
+#if __FreeBSD__
+	printf(_("\tIO Block: %d"), file_attrib.st_blksize);
+#else
 	printf(_("\tIO Block: %ld"), file_attrib.st_blksize);
+#endif
 	printf(_("\tInode: %zu\n"), file_attrib.st_ino);
 	printf(_("Device: %zu"), file_attrib.st_dev);
 	printf(_("\tUid: %u (%s)"), file_attrib.st_uid, (!owner)
@@ -21409,12 +21416,12 @@ color_codes (void)
 			printf(" \x1b[%sm", ret + 1);
 
 			for (j = 0; ext_colors[i][j] != '='; j++)
-				printf("%c", ext_colors[i][j]);
+				putchar(ext_colors[i][j]);
 
 			puts("\x1b[0m");
 		}
 
-		puts("");
+		putchar('\n');
 	}
 }
 
@@ -21742,10 +21749,10 @@ splash (void)
 
 	if (splash_screen) {
 		printf(_("\n\t\t\tPress any key to continue... "));
-		xgetchar(); puts("");
+		xgetchar(); putchar('\n');
 	}
 	else
-		puts("");
+		putchar('\n');
 }
 
 static void
