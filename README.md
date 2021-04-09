@@ -86,7 +86,7 @@ where to search: `/.*\.png$ /media/images`. And, if you want to further filter t
 Because file manager, but also half-shell, CLiFM also provides the following features:
 
 * Unicode suppport
-* TAB-completion for commands, paths, ELN's, profiles, bookmarks, color schemes, and the autojump function
+* TAB-completion for commands, paths, ELN's, profiles, bookmarks, color schemes, and the directory jumper function
 * Bash-like quoting system
 * History function
 * Shell commands execution
