@@ -69,10 +69,10 @@ where to search: `/.*\.png$ /media/images`. And, if you want to further filter t
 
 * **NEW: Stealth mode:** Leave no trace on the host system. No file is read, no file is written.
 
-* **NEW:** Quickly and easily navigate through the jump database (i.e. a list of visited directories) via the **autojump** function.
+* **NEW:** Quickly and easily navigate through the jump database (i.e. a list of visited directories) via **Kangaroo**, a built-in directory jumper function similar to autojump, z.lua, and zoxide.
 
-![autojump](images/autojump0.png)
-![autojump](images/autojump2.png)
+![dirjump](images/autojump0.png)
+![dirjump](images/autojump2.png)
 
 * **NEW: Batch link**: Create multiple symbolic links at once.
 
