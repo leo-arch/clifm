@@ -70,6 +70,8 @@ _clifm ()
         --light-mode
         -z
 		--sort
+		--case-ins-dirjump
+		--case-ins-path-comp
         --cd-on-quit
 		--color-scheme
         --disk-usage
@@ -81,7 +83,7 @@ _clifm ()
         --max-dirhist
 		--max-files
         --max-path
-        --no-autojump
+        --no-dir-jumper
         --no-cd-auto
         --no-classify
         --no-clear-screen
@@ -104,19 +106,15 @@ _clifm ()
         COMPREPLY=( $(compgen -f -d -- "$cur") )
 
     elif [[ $prev == -P ]]; then
-        local profiles=$(basename -a $(ls -Ad ~/.config/clifm/*/))
+        local profiles=$(basename -a $(ls -Ad ~/.config/clifm/profiles/*))
         COMPREPLY=( $(compgen -W "$profiles" -- "$cur") )
 
     elif [[ $prev == --color-scheme ]]; then
         local schemes=$(basename -a $(ls -Ad ~/.config/clifm/colors/*) | cut -d"." -f1)
         COMPREPLY=( $(compgen -W "$schemes" -- "$cur") )
 
-    elif [[ $prev == --classify ]]; then
-        local args=$(echo -e "0\n1\n2")
-        COMPREPLY=( $(compgen -W "$args" -- "$cur") )
-
     elif [[ $prev == -z || $prev == "--sort" ]]; then
-        local args=$(echo -e "0\n1\n2\n3\n4\n5\n6\n7\n8\n9")
+        local args=$(echo -e "0\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\m11")
         COMPREPLY=( $(compgen -W "$args" -- "$cur") )
 
     elif [[ $prev == --opener ]]; then
