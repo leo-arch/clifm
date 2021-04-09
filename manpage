@@ -86,7 +86,9 @@ When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and 
 .sp
 While the Linux console, which strictly speaking could be though of as a FM, does not actually feel as one and lacks many features (like bookmarks, files selection, a trash system, a resource opener and the like), graphical FM's offer most of these features, but only at the expense of system resources (at the very least 20MiB of RAM and most of the time a graphical X session). Heavily inspired by the KISS principle ("Keep it Simple, Stupid"), CliFM was born as an attempt to get the best of both worlds: the speed and lightness of the CLI and the extra features of traditional FM's. It is aimed to be, briefly speaking, a wrapper of the CLI to extend and improve its functionality; CliFM feels, acts, and flies like the CLI, offering at the same time most of the useful features of modern FM's.
 .sp
-Personally, since I just dislike GUI and bloated stuff, I really felt the need of an extended and improved way to manage my files in the CLI. Indeed, CLiFM originated as an attempt to add a bookmarks function to the Bash shell, and then grew up from these humble beginnings. In between the CLI and traditional FM's, we have now CliFM, because, as the old Italian saying goes: "There is no two without three". 
+Personally, since I just dislike GUI and bloated stuff, I really felt the need of an extended and improved way to manage my files in the CLI. Indeed, CliFM originated as an attempt to add a bookmarks function to the Bash shell, and then grew up from these humble beginnings. In between the CLI and traditional FM's, we have now CliFM, because, as the old Italian saying goes: "There is no two without three".
+.sp
+CliFM, in fact, is not just another terminal file manager (one of the many we can find out there), but a truly command line interface, shell-like, and really text-based file manager.
 
 .SH OPTIONS
 .TP
