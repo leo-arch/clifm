@@ -26,7 +26,7 @@ With the \fBautomatic ELN expansion\fR feature you can use ELN's with external c
 .sp
   \fBe)\fR The \fBSelection Box\fR allows you to drop files and directories from different parts of the filesystem (even from different instances of CliFM) and then operate on them with just one command. Example: select a few files in one instance of the program (say 's 12; cd /media; s 2 5\-6') and then paste them somewhere else using a second instance ('v sel', 'paste sel' or Ctrl-Alt-v). Both wildcards (globbing) and regular expressions are suppported. Inverse matching is also allowed for patterns.
 .sp
-  \fBf)\fR The \fBdirectory history\fR function (\fIback\fR and \fIforth\fR) keeps track of all visited directories, so that you can go back and forth to any of them by just entering 'b' or 'f' (or just pressing 'Alt\-j' and 'Alt\-k', or Shift\-Left and Shift\-Right, respectivelly). Another way of quickly navigating through visited directories is using the built-in \fBautojump\fR function. See the \fIjump\fR command below.
+  \fBf)\fR The \fBdirectory history\fR function (\fIback\fR and \fIforth\fR) keeps track of all visited directories, so that you can go back and forth to any of them by just entering 'b' or 'f' (or just pressing 'Alt\-j' and 'Alt\-k', or Shift\-Left and Shift\-Right, respectivelly). Another way of quickly navigating through visited directories is using Kangaroo, a built-in \fBdirectory jumper\fR function. See the \fIj\fR command below.
 .sp
   \fBg)\fR An extensive list of \fBkeyboard shortcuts\fR make it even easier and faster to navigate and operate on your files. For example, instead of typing 'cd ..' to go back to the parent directory, or 's *' to select all files in the current directory, you can simply press Alt\-u (or Shift\-Up) and Alt\-a respectivelly.
 .sp
@@ -62,7 +62,7 @@ List of CliFM features:
   18) Startup and prompt commands
   19) User profiles
   20) Commands sequential and conditional execution
-  21) Built-in resource opener (lira)
+  21) Lira, a built-in resource opener
   22) 11 sorting methods and reverse sorting
   23) Bulk rename
   24) Archiving and compression support
@@ -73,7 +73,7 @@ List of CliFM features:
   29) Command substitution and regular expressions for all internal commands
   30) Theming support via color schemes
   31) Privacy oriented
-  32) Built-in autojump function
+  32) Kangaroo, a built-in directory jumper function
   33) Icons support (depends on icons-in-terminal: \fIhttps://github.com/sebastiencs/icons-in-terminal\fR)
   34) Batch symbolic links
   35) Files filter via regular expressions for the files list
@@ -347,7 +347,7 @@ CliFM keeps a record of all visited directories. You can see this list by typing
 .sp
 Finally, you can also clear this history list by typing 'b clear'.
 .sp
-The best way of navigating the directory history list, however, is via the \fIautojump\fR function. See the \fIj\fR command below.
+The best way of navigating the directory history list, however, is via the \fIdirectory jumper\fR function. See the \fIj\fR command below.
 .TP
 .B bl \fRELN/FILE ... n
 Create symbolic links (in the current directory) for each specified file. The user will be asked to enter a specific suffix for the symlinks. If none is specified, the basename of the corresponding file is used.
@@ -439,10 +439,10 @@ You can use the exclamation mark (!) to perform some history commands:
 .B icons \fR[on, off]
 toggle icons on/off
 .TP
-.B j \fR[STRING ...] \fBjc\fR [STRING ...], \fBjl\fR [STRING ...], \fBjp\fR [STRING ...], \fBje\fR, \fBjo\fR [ORDER], \fBjump\fR [e, edit] [STRING ...]
-\fIj\fR is the fastest way of using the \fBautojump\fR function to quickly navigate through the jump database (i.e. a database of visited directories).
+.B j, jc, jl, jp \fR[STR ...], \fBjo\fR [NUM], \fBje\fR
+\fIj\fR is the fastest way of using Kangaroo, a \fBdirectory jumper\fR function to quickly navigate through the jump database (i.e. a database of visited directories).
 .sp
-With no argument, \fIj\fR just lists the entries in the jump database, printing the order number of the corresponding entry, the number of visits, the days since the first visit, the rank value, and the directory name itself. Otherwise, it searchs for CHAR/STR in the database and cd into the best ranked matching entry. Example: 'j D' will probably take you to /home/user/Downloads, provided this directory has been already visited and is the best ranked match in the database. For a more detailed description of the matching algorithm used see the \fBAUTOJUMP FRECENCY ALGORITHM\fR section below. 
+With no argument, \fIj\fR just lists the entries in the jump database, printing the order number of the corresponding entry, the number of visits, the days since the first visit, the rank value, and the directory name itself (an asterisk next to the rank value means that the corresponding directory is bookmarked). Otherwise, it searchs for STR in the database and cd into the best ranked matching entry. Example: 'j D' will probably take you to /home/user/Downloads, provided this directory has been already visited and is the best ranked match in the database. For a more detailed description of the matching algorithm see the \fBKANGAROO FRECENCY ALGORITHM\fR section below. 
 .sp
 Multiple query strings could be passed to the function. For example, 'j et mo' will first check for 'et' in the jump database and then will further filter the search using the second parameter: 'mo'. It will most probably take you (again, provided the directory has been already visited and is the best ranked match) to /etc/modprobe.d directory. Bear in mind that if STR is an actual directory, \fIjump\fR will just cd into it without performing any query.
 .sp
@@ -455,8 +455,6 @@ Multiple query strings could be passed to the function. For example, 'j et mo' w
 \'jo 13\' will cd into the path corresponding to the order number 13. TAB completion is available to expand order numbers into the corresponding paths.
 .sp
 \'jl foo\' will print all entries in the database matching the word "foo".
-.sp
-Finally, you can also edit the jump database using the 'e' or 'edit' option, i.e., 'j e' or 'j edit'.
 .sp
 TAB completion is available for this function.
 .sp
@@ -967,21 +965,41 @@ Besides these two features, a few more things can be disabled to get some extra 
 .sp
 Despite the above, however, it is important to bear in mind that listing speed does not only depend on the program's code and enabled features, but also on the terminal emulator used. Old, basic terminal emulators like Xterm, Aterm, and the kernel built-in console are really slow compared to more modern ones like Urxvt, Lxterminal, ST, and Terminator, to name just a few.
 
-.SH AUTOJUMP FRECENCY ALGORITHM
-The autojump function is designed to learn the navigation habits of the user. The information is stored in a database (see the \fBFILES\fR section below) used to get the best match for a given string provided by the user. In this sense, autojump is like a quick, smart, and evolved cd function.
+.SH KANGAROO FRECENCY ALGORITHM
+The directory jumper function is designed to learn the navigation habits of the user. The information is stored in a database (see the \fBFILES\fR section below) used to get the best match for a given string provided by the user. In this sense, Kangaroo is like a quick, smart, and evolved cd function.
 .sp
-The information stored in the database is:
- a) Number of visits per directory
- b) Date of first visit per directory (seconds since the Unix epoch)
- c) The full path of each visited directory
+The information stored in the database, always per directory, is:
+ a) Number of visits
+ b) Date of first visit (seconds since the Unix epoch)
+ c) Date of the last visit
+ d) The full path of each visited directory
 .sp
-With this information it is possible to construct a ranking of directories to offer the user the most accurate matches for each query string. The matching algorithm takes into account mainly two factors: frequency and recency (which is why this algorithm could be called a 'frecency' algorithm). After getting an initial list of matches based on the query string entered by the user, we apply the frecency algorithm on each entry in the list. The algorithm is quite simple: (visits*100)/days-since-first-visit. As a result, we get the average of visits per day since the day of the first visit (what we call the directory rank).
+With this information it is possible to construct a ranking of directories to offer the user the most accurate matches for each query string. The matching algorithm takes into account mainly two factors: frequency and recency (which is why this kind of algorithm is often called a \fBfrecency\fR algorithm).
 .sp
-There is still a further step in the ranking process. If the last query string matches the basename of a directory, the entry for this directory has higher priority over those entries matching some of the parent segments of the initially matched directories. For example, if the query string is 'test', '/media/misc/test' has higher priority than '/media/test/misc'. This is done simply because we normally use directory basenames as query strings: they are easier to remember. In doing this, we have more chances of matching what the user actually wanted to match.
-.sp 
+After getting an initial list of matches based on the query string(s) entered by the user, the frecency algorithm is applied on each entry in the list. The algorithm is quite simple: \fB(visits * 100) / days-since-first-visit\fR. As a result, we get the average of visits per day since the day of the first visit (what we call the directory rank).
+.sp
+There are however some further steps in the ranking process: \fBBonus points\fR. 
+.sp
+Extra credits or penalties are assigned based on the directories \fBlast access time\fR according to the following simple algorithms:
+ Within last hour:	rank * 4
+ Within last day:	rank * 2
+ Within last week:	rank / 2
+ More than a week:	rank / 4
+.sp
+If the last query string matches the \fBbasename\fR of a directory, the entry for this directory has 300 extra credits. This is done simply because we normally use directory basenames as query strings: they are easier to remember.
+.sp
+In the same way, \fBbookmarked directories\fR get 500 extra credits.
+.sp
+For example: if the query string is "test", /media/data/test will be matched. Now, if this directory was accessed within the last hour, and its rank was 200, it becomes 800. But, because the search string matches its basename, it gets 300 extra credits, and, if this directory is in adittion bookmarked, it gets 500 extra credits. In this way the total rank of this directory in the matching process is 1600. In doing this, we have m	ore chances of matching what the user actually wanted to match.
+.sp
 Once all entries in the initial list of matches have been filtered via the above procedure and ranked, we can return the best ranked entry. The higher rank a directory has, the more priotity it has over the remaining entries in the initial list of matches.
 .sp
-The idea of 'frecency' together with the algorithm we use here (except for the added basename procedure) was, as far as I know, first deviced and designed by Mozilla. See \fIhttps://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency\fR.
+Automatic maintenance is done on the database applying a few simple procedures:
+ a) Each entry in the database is checked at startup to remove non-existent directories
+ b) Once the rank of a directory falls below MinJumpRank (by default 10), it is forgotten and deleted from the database. The MinJumpRank value can be customized in the configuration file. To make non-frequently visited directories dissapear faster from the database, increase this value.
+ c) Once the sum total of ranks reaches MaxJumpTotalRank (by default 100000), each individual rank is divided by a dynamic factor so that the total rank becomes less than or equal to MaxJumpTotalRank. If some rank falls in the process below MinJumpRank, it is removed from the database. MaxJumpTotalRank can be modified in the configuration file. The higher the value of MaxJumpTotalRank, the more time directories will be kept in the database.
+.sp
+The idea of 'frecency' was, as far as I know, first deviced and designed by Mozilla. See \fIhttps://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency\fR. However, it is also implemented, though using different algorithms, by different projects like \fBautojump\fR, \fBz.lua\fR, and \fBzoxide\fR.
 
 .SH ENVIRONMENT
 The following variables are read at initialization time:
@@ -1080,8 +1098,8 @@ The messages log file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/messages.cfm
 A file containing a list of system messages, either errors, warnings, or simple notices. The messages log format is: "[date] message".
 .TP
 
-.B AUTOJUMP DATABASE
-The autojump database is stored in \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/jump.cfm\fR.
+.B KANGAROO DATABASE
+The directory jumer database is stored in \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/jump.cfm\fR.
 .TP
 
 \fBNOTE\fR: If \fB$XDG_CONFIG_HOME\fR is not set, \fB$HOME/.config/\fR is used instead.
