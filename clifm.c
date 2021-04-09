@@ -353,7 +353,7 @@ nm=01;32:bm=01;36:"
 #define DEF_TRASRM 0
 #define DEF_NOELN 0
 #define DEF_MIN_NAME_TRIM 20
-#define DEF_CASE_SENS_AUTOJUMP 1
+#define DEF_CASE_SENS_DIRJUMP 1
 #define DEF_CASE_SENS_PATH_COMP 1
 #define DEF_MIN_JUMP_RANK 10
 #define DEF_MAX_JUMP_TOTAL_RANK 100000
@@ -423,7 +423,7 @@ nm=01;32:bm=01;36:"
 #define _ISDIGIT(n) ((unsigned int)(n) - '0' <= 9)
 #define SELFORPARENT(n) (*(n) == '.' && (!(n)[1] || ((n)[1] == '.' && !(n)[2])))
 
-/* autojump macros for calculating directories rank extra points */
+/* dirjump macros for calculating directories rank extra points */
 #define BASENAME_BONUS 300
 #define BOOKMARK_BONUS 500
 							/* Last directory access */
@@ -483,7 +483,7 @@ struct kbinds_t
 
 static struct kbinds_t *kbinds = (struct kbinds_t *)NULL;
 
-/* Struct to store the autojump database values */
+/* Struct to store the dirjump database values */
 struct jump_t
 {
 	char *path;
@@ -573,7 +573,7 @@ struct param
 	int list_and_quit;
 	int color_scheme;
 	int cd_on_quit;
-	int no_autojump;
+	int no_dirjump;
 	int icons;
 	int icons_use_file_color;
 	int no_columns;
@@ -581,7 +581,7 @@ struct param
 	int max_files;
 	int trasrm;
 	int noeln;
-	int case_sens_autojump;
+	int case_sens_dirjump;
 	int case_sens_path_comp;
 };
 
@@ -598,7 +598,7 @@ enum prog_msg
 	notice = 4
 };
 
-/* Enumeration for the autojump function options */
+/* Enumeration for the dirjump function options */
 enum jump {
 	none = 0,
 	jparent = 1,
@@ -649,7 +649,7 @@ static short
 	tr_as_rm = UNSET,
 	no_eln = UNSET,
 	min_name_trim = UNSET,
-	case_sens_autojump = UNSET,
+	case_sens_dirjump = UNSET,
 	case_sens_path_comp = UNSET,
 
 	no_log = 0,
@@ -2199,7 +2199,7 @@ set_env(void)
 static int
 add_to_jumpdb(const char *dir)
 {
-	if (xargs.no_autojump == 1 || !dir || !*dir)
+	if (xargs.no_dirjump == 1 || !dir || !*dir)
 		return EXIT_FAILURE;
 
 	if (!jump_db) {
@@ -2242,7 +2242,7 @@ static void
 load_jumpdb(void)
 /* Reconstruct the jump database from database file */
 {
-	if (xargs.no_autojump ==  1 || !config_ok || !CONFIG_DIR)
+	if (xargs.no_dirjump ==  1 || !config_ok || !CONFIG_DIR)
 		return;
 
 	char *JUMP_FILE = (char *)xnmalloc(strlen(CONFIG_DIR) + 10, sizeof(char));
@@ -2377,7 +2377,7 @@ static void
 save_jumpdb(void)
 /* Store the jump database into a file */
 {
-	if (xargs.no_autojump == 1 ||  !config_ok || !CONFIG_DIR
+	if (xargs.no_dirjump == 1 ||  !config_ok || !CONFIG_DIR
 	|| !jump_db || jump_n == 0)
 		return;
 
@@ -2461,9 +2461,9 @@ unset_xargs(void)
 	xargs.logs = xargs.max_path = xargs.bm_file = UNSET;
 	xargs.expand_bookmarks = xargs.only_dirs = xargs.noeln = UNSET;
 	xargs.list_and_quit = xargs.color_scheme = xargs.cd_on_quit = UNSET;
-	xargs.no_autojump = xargs.icons = xargs.no_colors = UNSET;
+	xargs.no_dirjump = xargs.icons = xargs.no_colors = UNSET;
 	xargs.icons_use_file_color = xargs.no_columns = UNSET;
-	xargs.case_sens_autojump = xargs.case_sens_path_comp = UNSET;
+	xargs.case_sens_dirjump = xargs.case_sens_path_comp = UNSET;
 }
 
 static inline void
@@ -3726,11 +3726,11 @@ check_options(void)
 			no_eln = xargs.noeln;
 	}
 
-	if (case_sens_autojump == UNSET) {
-		if (xargs.case_sens_autojump == UNSET)
-			case_sens_autojump = DEF_CASE_SENS_AUTOJUMP;
+	if (case_sens_dirjump == UNSET) {
+		if (xargs.case_sens_dirjump == UNSET)
+			case_sens_dirjump = DEF_CASE_SENS_DIRJUMP;
 		else
-			case_sens_autojump = xargs.case_sens_autojump;
+			case_sens_dirjump = xargs.case_sens_dirjump;
 	}
 
 	if (case_sens_path_comp == UNSET) {
@@ -4813,7 +4813,7 @@ SortReverse=false\n\n"
 ListFoldersFirst=true\n\
 CdListsAutomatically=true\n\
 CaseSensitiveList=false\n\
-CaseSensitiveAutojump=true\n\
+CaseSensitiveDirJump=true\n\
 CaseSensitivePathComp=true\n\
 Unicode=false\n\
 Pager=false\n\
@@ -5206,20 +5206,20 @@ read_config(void)
 				splash_screen = 0;
 		}
 
-		else if (xargs.case_sens_autojump == UNSET && *line == 'C'
-		&& strncmp(line, "CaseSensitiveAutojump=", 22) == 0) {
+		else if (xargs.case_sens_dirjump == UNSET && *line == 'C'
+		&& strncmp(line, "CaseSensitiveDirJump=", 21) == 0) {
 
 			char opt_str[MAX_BOOL] = ""; /* false (5) + 1 */
-			ret = sscanf(line, "CaseSensitiveAutojump=%5s\n", opt_str);
+			ret = sscanf(line, "CaseSensitiveDirJump=%5s\n", opt_str);
 
 			if (ret == -1)
 				continue;
 
 			if (strncmp(opt_str, "true", 4) == 0)
-				case_sens_autojump = 1;
+				case_sens_dirjump = 1;
 
 			else if (strncmp(opt_str, "false", 5) == 0)
-				case_sens_autojump = 0;
+				case_sens_dirjump = 0;
 		}
 
 		else if (xargs.case_sens_path_comp == UNSET && *line == 'C'
@@ -5976,7 +5976,7 @@ reload_config(void)
 	autocd = auto_open = restore_last_path = dirhist_map = UNSET;
 	disk_usage = tips = logs_enabled = sort = files_counter = UNSET;
 	light_mode = classify = cd_on_quit = columned = tr_as_rm = UNSET;
-	no_eln = min_name_trim = case_sens_autojump = case_sens_path_comp = UNSET;
+	no_eln = min_name_trim = case_sens_dirjump = case_sens_path_comp = UNSET;
 	min_jump_rank = max_jump_total_rank = UNSET;
 
 	shell_terminal = no_log = internal_cmd = recur_perm_error_flag = 0;
@@ -6007,8 +6007,8 @@ reload_config(void)
 
 	/* If some option was set via command line, keep that value
 	 * for any profile */
-	if (xargs.case_sens_autojump != UNSET)
-		case_sens_autojump = xargs.case_sens_autojump;
+	if (xargs.case_sens_dirjump != UNSET)
+		case_sens_dirjump = xargs.case_sens_dirjump;
 	if (xargs.case_sens_path_comp != UNSET)
 		case_sens_path_comp = xargs.case_sens_path_comp;
 	if (xargs.noeln != UNSET)
@@ -17055,7 +17055,7 @@ my_rl_completion(const char *text, int start, int end)
 
 			int num_text = atoi(text);
 
-					/* Autojump: jo command */
+					/* Dirjump: jo command */
 			if (*rl_line_buffer == 'j' && rl_line_buffer[1] == 'o'
 			&& rl_line_buffer[2] == ' ') {
 				if (is_number(text) && num_text > 0
@@ -17071,7 +17071,7 @@ my_rl_completion(const char *text, int start, int end)
 				matches = rl_completion_matches(text, &filenames_gen_eln);
 		}
 
-				/* ### AUTOJUMP COMPLETION ### */
+				/* ### DIRJUMP COMPLETION ### */
 					/* j, jc, jp commands */
 		else if (*rl_line_buffer == 'j' && (rl_line_buffer[1] == ' '
 		|| ((rl_line_buffer[1] == 'c' || rl_line_buffer[1] == 'p')
@@ -17418,11 +17418,11 @@ edit_jumpdb(void)
 }
 
 static int
-autojump(char **args)
+dirjump(char **args)
 /* Jump into best ranked directory matched by ARGS */
 {
-	if (xargs.no_autojump == 1) {
-		printf(_("%s: Autojump function disabled\n"), PROGRAM_NAME);
+	if (xargs.no_dirjump == 1) {
+		printf(_("%s: Directory jumper function disabled\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
@@ -17588,7 +17588,7 @@ autojump(char **args)
 			j = jump_n;
 			while (--j >= 0) {
 
-				if (case_sens_autojump ? !strstr(jump_db[j].path, args[i])
+				if (case_sens_dirjump ? !strstr(jump_db[j].path, args[i])
 				: !strcasestr(jump_db[j].path, args[i]))
 					continue;
 
@@ -17634,7 +17634,7 @@ autojump(char **args)
 			while (--j >= 0) {
 
 				if (!matches[j] || !*matches[j]
-				|| (case_sens_autojump ? !strstr(matches[j], args[i])
+				|| (case_sens_dirjump ? !strstr(matches[j], args[i])
 				: !strcasestr(matches[j], args[i]))) {
 
 					matches[j] = (char *)NULL;
@@ -21586,7 +21586,7 @@ help_function (void)
 
 
 	printf("\
-\n     --case-ins-autojump\t consult the jump database ignoring \
+\n     --case-ins-dirjump\t consult the jump database ignoring \
 \n				case\
 \n     --case-ins-path-comp\t TAB complete paths ignoring case\
 \n     --cd-on-quit\t\t write last visited path to \
@@ -21613,7 +21613,7 @@ help_function (void)
 \n				prompt line will be abreviated to the \
 \n				directory base name (if \\z is used in \
 \n				the prompt\
-\n     --no-autojump\t\t disable the autojump function\
+\n     --no-dir-jumper\t\t disable the directory jumper function\
 \n     --no-cd-auto\t\t by default, %s changes to directories \
 \n\t\t\t\tby just specifying the corresponding ELN \
 \n				(e.g. '12' instead of 'cd 12'). This \
@@ -21677,7 +21677,7 @@ help_function (void)
  hf, hidden [on, off, status]\n\
  history [clear] [-n]\n\
  icons [on, off]\n\
- j, jc, jp, jl [STRING ...] jo [NUM], je (autojump function)\n\
+ j, jc, jp, jl [STRING ...] jo [NUM], je (directory jumper function)\n\
  kb, keybinds [edit] [reset]\n\
  lm [on, off] (lightmode)\n\
  log [clear]\n\
@@ -23543,12 +23543,12 @@ exec_cmd(char **comm)
 	}
 
 
-	/*       ############### AUTOJUMP ##################     */
+	/*       ############### DIRECTORY JUMPER ##################     */
 	else if (*comm[0] == 'j' && (!comm[0][1]
 	|| ((comm[0][1] == 'c' || comm[0][1] == 'p'
 	|| comm[0][1] == 'e' || comm[0][1] == 'o' || comm[0][1] == 'l')
-	&& !comm[0][2]) || strcmp(comm[0], "jump") == 0)) {
-		exit_code = autojump(comm);
+	&& !comm[0][2]))) {
+		exit_code = dirjump(comm);
 		return exit_code;
 	}
 
@@ -25988,14 +25988,14 @@ external_arguments(int argc, char **argv)
 		{"list-and-quit", no_argument, 0, 20},
 		{"color-scheme", required_argument, 0, 21},
 		{"cd-on-quit", no_argument, 0, 22},
-		{"no-autojump", no_argument, 0, 23},
+		{"no-dir-jumper", no_argument, 0, 23},
 		{"icons", no_argument, 0, 24},
 		{"icons-use-file-color", no_argument, 0, 25},
 		{"no-columns", no_argument, 0, 26},
 		{"no-colors", no_argument, 0, 27},
 		{"max-files", required_argument, 0, 28},
 		{"trash-as-rm", no_argument, 0, 29},
-		{"case-ins-autojump", no_argument, 0, 30},
+		{"case-ins-dirjump", no_argument, 0, 30},
 		{"case-ins-path-comp", no_argument, 0, 31},
 		{0, 0, 0, 0}
 	};
@@ -26108,7 +26108,7 @@ external_arguments(int argc, char **argv)
 		break;
 
 		case 23:
-			xargs.no_autojump = 1;
+			xargs.no_dirjump = 1;
 		break;
 
 		case 24:
@@ -26142,7 +26142,7 @@ external_arguments(int argc, char **argv)
 		break;
 
 		case 30:
-			xargs.case_sens_autojump = case_sens_autojump = 0;
+			xargs.case_sens_dirjump = case_sens_dirjump = 0;
 		break;
 
 		case 31:
