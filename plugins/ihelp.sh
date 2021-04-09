@@ -53,7 +53,7 @@ CMDS=(
 	"hf, hidden@"
 	"history @"
 	"icons @"
-	"jump @"
+	"j, jc, @"
 	"kb, keybinds@"
 	"log @"
 	"lm @"
