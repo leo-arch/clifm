@@ -355,6 +355,8 @@ nm=01;32:bm=01;36:"
 #define DEF_MIN_NAME_TRIM 20
 #define DEF_CASE_SENS_AUTOJUMP 1
 #define DEF_CASE_SENS_PATH_COMP 1
+#define DEF_MIN_JUMP_RANK 10
+#define DEF_MAX_JUMP_TOTAL_RANK 100000
 #define UNSET -1
 #define DEF_MAX_FILES UNSET
 
@@ -421,6 +423,14 @@ nm=01;32:bm=01;36:"
 #define _ISDIGIT(n) ((unsigned int)(n) - '0' <= 9)
 #define SELFORPARENT(n) (*(n) == '.' && (!(n)[1] || ((n)[1] == '.' && !(n)[2])))
 
+/* autojump macros for calculating directories rank extra points */
+#define BASENAME_BONUS 300
+#define BOOKMARK_BONUS 500
+							/* Last directory access */
+#define JHOUR(n) ((n) *= 4)	/* Within last hour */
+#define JDAY(n) ((n) *= 2)	/* Within last day */
+#define JWEEK(n) ((n) / 2)	/* Within last week */
+#define JOLDER(n) ((n) / 4)	/* More than a week */
 
 				/** #########################
 				 *  #    GLOBAL VARIABLES   #
@@ -479,6 +489,7 @@ struct jump_t
 	char *path;
 	size_t visits;
 	time_t first_visit;
+	time_t last_visit;
 };
 
 static struct jump_t *jump_db = (struct jump_t *)NULL;
@@ -670,6 +681,8 @@ static int
 	max_dirhist = UNSET,
 	max_path = UNSET,
 	max_files = UNSET,
+	min_jump_rank = UNSET,
+	max_jump_total_rank = UNSET,
 
 	dirhist_cur_index = 0,
 	argc_bk = 0,
@@ -677,6 +690,7 @@ static int
 	shell_is_interactive = 0,
 	dirhist_total_index = 0,
 	trash_n = 0,
+	jump_total_rank = 0,
 	*eln_as_file = (int *)0;
 
 static unsigned short term_cols = 0;
@@ -2199,6 +2213,7 @@ add_to_jumpdb(const char *dir)
 		if (dir[1] == jump_db[i].path[1]
 		&& strcmp(jump_db[i].path, dir) == 0) {
 			jump_db[i].visits++;
+			jump_db[i].last_visit = time(NULL);
 			new_entry = 0;
 			break;
 		}
@@ -2210,18 +2225,22 @@ add_to_jumpdb(const char *dir)
 	jump_db = (struct jump_t *)xrealloc(jump_db, (jump_n + 2)
 									* sizeof(struct jump_t));
 	jump_db[jump_n].visits = 1;
-	jump_db[jump_n].first_visit = time(NULL);
+	time_t now = time(NULL);
+	jump_db[jump_n].first_visit = now;
+	jump_db[jump_n].last_visit = now;	
 	jump_db[jump_n++].path = savestring(dir, strlen(dir));
 
 	jump_db[jump_n].path = (char *)NULL;
 	jump_db[jump_n].visits = 0;
 	jump_db[jump_n].first_visit = -1;
+	jump_db[jump_n].last_visit = -1;
 
 	return EXIT_SUCCESS;
 }
 
 static void
 load_jumpdb(void)
+/* Reconstruct the jump database from database file */
 {
 	if (xargs.no_autojump ==  1 || !config_ok || !CONFIG_DIR)
 		return;
@@ -2267,7 +2286,19 @@ load_jumpdb(void)
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
 
-		if (!*line || *line == '\n' || *line < '0' || *line > '9')
+		if (!*line || *line == '\n')
+			continue;
+
+		if (*line == '@') {
+			if (line[line_len - 1] == '\n')
+				line[line_len - 1] = '\0';
+			if (is_number(line + 1))
+				jump_total_rank = atoi(line + 1);
+
+			continue;
+		}
+
+		if (*line < '0' || *line > '9')
 			continue;
 
 		if (line[line_len - 1] == '\n')
@@ -2297,13 +2328,33 @@ load_jumpdb(void)
 		if (!*(++tmpb))
 			continue;
 
+		time_t first = 0;
+
 		if (is_number(tmp))
-			jump_db[jump_n].first_visit = (time_t)atoi(tmp);
-		else
-			jump_db[jump_n].first_visit = -1;
+			first = (time_t)atoi(tmp);
+
+		char *tmpc = strchr(tmpb, ':');
+		if (!tmpc)
+			continue;
+
+		*tmpc = '\0';
+
+		if (!*(++tmpc))
+			continue;
+
+		/* Purge the database from non-existent directories */
+		if (access(tmpc, F_OK) == -1)
+			continue;
 
 		jump_db[jump_n].visits = visits;
-		jump_db[jump_n++].path = savestring(tmpb, strlen(tmpb));
+		jump_db[jump_n].first_visit = first;
+
+		if (is_number(tmpb))
+			jump_db[jump_n].last_visit = (time_t)atoi(tmpb);
+		else
+			jump_db[jump_n].last_visit = 0; /* UNIX Epoch */
+
+		jump_db[jump_n++].path = savestring(tmpc, strlen(tmpc));
 	}
 
 	fclose(fp);
@@ -2324,9 +2375,10 @@ load_jumpdb(void)
 
 static void
 save_jumpdb(void)
+/* Store the jump database into a file */
 {
 	if (xargs.no_autojump == 1 ||  !config_ok || !CONFIG_DIR
-	|| !jump_db)
+	|| !jump_db || jump_n == 0)
 		return;
 
 	char *JUMP_FILE = (char *)xnmalloc(strlen(CONFIG_DIR) + 10, sizeof(char));
@@ -2339,12 +2391,56 @@ save_jumpdb(void)
 		return;
 	}
 
-	size_t i;
+	size_t i, total_rank = 0, reduce = 0;
+	time_t now = time(NULL);
+
+	if (jump_total_rank > max_jump_total_rank)
+		reduce = (jump_total_rank / max_jump_total_rank) + 1;
 
 	for (i = 0; i < jump_n; i++) {
-		fprintf(fp, "%zu:%zu:%s\n", jump_db[i].visits,
-				jump_db[i].first_visit, jump_db[i].path);
+
+		int days_since_first = (int)(now - jump_db[i].first_visit) / 60 / 60 / 24;
+		int rank = days_since_first > 1 ? (jump_db[i].visits * 100)
+							/ days_since_first : (jump_db[i].visits * 100);
+
+		int hours_since_last = (int)(now - jump_db[i].last_visit) / 60 / 60;
+
+		int tmp_rank = rank;
+		if (hours_since_last == 0) 		/* Last hour */
+			rank = JHOUR(tmp_rank);
+		else if (hours_since_last <= 24)	/* Last day */
+			rank = JDAY(tmp_rank);
+		else if (hours_since_last <= 168) /* Last week */
+			rank = JWEEK(tmp_rank);
+		else							 /* More than a week */
+			rank = JOLDER(tmp_rank);
+
+		int j = bm_n;
+		while (--j >= 0) {
+			if (bookmarks[j].path[1] == jump_db[i].path[1]
+			&& strcmp(bookmarks[j].path, jump_db[i].path) == 0) {
+				rank += BOOKMARK_BONUS;
+				break;
+			}
+		}
+
+		if (reduce) {
+			tmp_rank = rank;
+			rank = tmp_rank / reduce;
+		}
+
+		/* Forget directories ranked below MIN_JUMP_RANK */
+		if (rank <= 0 || rank < min_jump_rank)
+			continue;
+
+		total_rank += rank;
+
+		fprintf(fp, "%zu:%zu:%zu:%s\n", jump_db[i].visits,
+				jump_db[i].first_visit, jump_db[i].last_visit,
+				jump_db[i].path);
 	}
+
+	fprintf(fp, "@%zu\n", total_rank);
 
 	fclose(fp);
 	free(JUMP_FILE);
@@ -3617,6 +3713,12 @@ check_options(void)
 	if (min_name_trim == UNSET)
 		min_name_trim = DEF_MIN_NAME_TRIM;
 
+	if (min_jump_rank == UNSET)
+		min_jump_rank = DEF_MIN_JUMP_RANK;
+
+	if (max_jump_total_rank == UNSET)
+		max_jump_total_rank = DEF_MAX_JUMP_TOTAL_RANK;
+
 	if (no_eln == UNSET) {
 		if (xargs.noeln == UNSET)
 			no_eln = DEF_NOELN;
@@ -4631,8 +4733,17 @@ LongViewMode=false\n\
 LogCmds=false\n\n"
 
 "# Minimum length at which a filename can be trimmed in long view mode\n\
-# (including ELN length)\n\
+# (including ELN length and spaces)\n\
 MinFilenameTrim=20\n\n"
+
+"# When a directory rank in the jump database is below MinJumpRank, it\n\
+# will be forgotten\n\
+MinJumpRank=10\n\n"
+
+"# When the sum of all ranks in the jump database reaches MaxJumpTotalRank,\n\
+# all ranks will be reduced 10%%, and those falling below MinJumpRank will\n\
+# be deleted\n\
+MaxJumpTotalRank=100000\n\n"
 
 "# Should CliFM be allowed to run external, shell commands?\n\
 ExternalCommands=false\n\n"
@@ -5100,9 +5211,6 @@ read_config(void)
 
 			char opt_str[MAX_BOOL] = ""; /* false (5) + 1 */
 			ret = sscanf(line, "CaseSensitiveAutojump=%5s\n", opt_str);
-			/* According to cppcheck: "sscanf() without field
-			 * width limits can crash with huge input data".
-			 * Field width limits = %5s */
 
 			if (ret == -1)
 				continue;
@@ -5119,9 +5227,6 @@ read_config(void)
 
 			char opt_str[MAX_BOOL] = ""; /* false (5) + 1 */
 			ret = sscanf(line, "CaseSensitivePathComp=%5s\n", opt_str);
-			/* According to cppcheck: "sscanf() without field
-			 * width limits can crash with huge input data".
-			 * Field width limits = %5s */
 
 			if (ret == -1)
 				continue;
@@ -5360,6 +5465,22 @@ read_config(void)
 				share_selbox = 1;
 			else if (strncmp(opt_str, "false", 5) == 0)
 				share_selbox = 0;
+		}
+
+		else if (*line == 'M' && strncmp(line, "MinJumpRank=", 12) == 0) {
+			int opt_num = 0;
+			ret = sscanf(line, "MinJumpRank=%d\n", &opt_num);
+			if (ret == -1 || opt_num < INT_MIN || opt_num > INT_MAX)
+				continue;
+			min_jump_rank = opt_num;
+		}
+
+		else if (*line == 'M' && strncmp(line, "MaxJumpTotalRank=", 17) == 0) {
+			int opt_num = 0;
+			ret = sscanf(line, "MaxJumpTotalRank=%d\n", &opt_num);
+			if (ret == -1 || opt_num < INT_MIN || opt_num > INT_MAX)
+				continue;
+			max_jump_total_rank = opt_num;
 		}
 
 		else if (xargs.sort == UNSET && *line == 'S'
@@ -5856,6 +5977,7 @@ reload_config(void)
 	disk_usage = tips = logs_enabled = sort = files_counter = UNSET;
 	light_mode = classify = cd_on_quit = columned = tr_as_rm = UNSET;
 	no_eln = min_name_trim = case_sens_autojump = case_sens_path_comp = UNSET;
+	min_jump_rank = max_jump_total_rank = UNSET;
 
 	shell_terminal = no_log = internal_cmd = recur_perm_error_flag = 0;
 	is_sel = sel_is_last = print_msg = kbind_busy = dequoted = 0;
@@ -16809,10 +16931,10 @@ bookmarks_generator(const char *text, int state)
 }
 
 static char *
-filenames_generator(const char *text, int state)
+filenames_gen_text(const char *text, int state)
 /* Used by ELN expansion */
 {
-	static size_t i;
+	static size_t i, len = 0;
 	char *name;
 	rl_filename_completion_desired = 1;
 	/* According to the GNU readline documention: "If it is set to a
@@ -16820,8 +16942,30 @@ filenames_generator(const char *text, int state)
 	 * Readline attempts to quote completed filenames if they contain
 	 * any embedded word break characters." To make the quoting part
 	 * work I had to specify a custom quoting function (my_rl_quote) */
-	if (!state) /* state is zero only the first time readline is
+	if (!state) { /* state is zero only the first time readline is
 	executed */
+		i = 0;
+		len = strlen(text);
+	}
+
+	/* Check list of currently displayed files for a match */
+	while (i < files && (name = file_info[i++].name) != NULL)
+		if (case_sens_path_comp ? strncmp(name, text, len) == 0
+		: strncasecmp(name, text, len) == 0)
+			return strdup(name);
+
+	return (char *)NULL;
+}
+
+static char *
+filenames_gen_eln(const char *text, int state)
+/* Used by ELN expansion */
+{
+	static size_t i;
+	char *name;
+	rl_filename_completion_desired = 1;
+
+	if (!state)
 		i = 0;
 
 	int num_text = atoi(text);
@@ -16876,23 +17020,26 @@ my_rl_completion(const char *text, int start, int end)
 			matches = rl_completion_matches(text + 1, &hist_generator);
 
 		/* If autocd or auto-open, try to expand ELN's first */
-		else if ((autocd || auto_open)
-		&& *text >= '1' && *text <= '9') {
-			int num_text = atoi(text);
+		if (!matches && (autocd || auto_open)) {
+			if (*text >= '1' && *text <= '9') {
+				int num_text = atoi(text);
 
-			if (is_number(text) && num_text > 0
-			&& num_text <= (int)files) {
-				matches = rl_completion_matches(text, &filenames_generator);
+				if (is_number(text) && num_text > 0 && num_text <= (int)files)
+					matches = rl_completion_matches(text, &filenames_gen_eln);
+			}
+
+			if (!matches && *text != '/') {
+				matches = rl_completion_matches(text, &filenames_gen_text);
 			}
 		}
 
 		/* Bookmarks completion */
-		else if ((autocd || auto_open) && expand_bookmarks
-		&& (matches = rl_completion_matches(text, &bookmarks_generator)));
+		if (!matches && (autocd || auto_open) && expand_bookmarks)
+			matches = rl_completion_matches(text, &bookmarks_generator);
 
 		/* If neither autocd nor auto-open, try to complete with
 		 * command names */
-		else
+		if (!matches)
 			matches = rl_completion_matches(text, &bin_cmd_generator);
 	}
 
@@ -16921,7 +17068,7 @@ my_rl_completion(const char *text, int start, int end)
 					/* ELN expansion */
 			else if (is_number(text) && num_text > 0
 			&& num_text <= (int)files)
-				matches = rl_completion_matches(text, &filenames_generator);
+				matches = rl_completion_matches(text, &filenames_gen_eln);
 		}
 
 				/* ### AUTOJUMP COMPLETION ### */
@@ -17272,6 +17419,7 @@ edit_jumpdb(void)
 
 static int
 autojump(char **args)
+/* Jump into best ranked directory matched by ARGS */
 {
 	if (xargs.no_autojump == 1) {
 		printf(_("%s: Autojump function disabled\n"), PROGRAM_NAME);
@@ -17280,102 +17428,135 @@ autojump(char **args)
 
 	time_t now = time(NULL);
 
+	int reduce = 0;
+
+	/* If the sum total of ranks is greater than max, divide each entry
+	 * to make the sum total less than or equal to max */
+	if (jump_total_rank > max_jump_total_rank)
+		reduce = (jump_total_rank / max_jump_total_rank) + 1;
+
 	/* If no parameter, print the list of entries in the jump
 	 * database together with the corresponding information */
 	if (!args[1] && args[0][1] != 'e') {
-		size_t i;
 
 		if (!jump_n) {
 			printf("%s: Database still empty\n", PROGRAM_NAME);
 			return EXIT_SUCCESS;
 		}
 
-		printf(_("Order\tVisits\tSince\tRank\tDirectory\n"));
+		puts(_("NOTE: First time access is displayed in days, while last "
+			 "time access is displayed in hours\n"));
+		puts(_("NOTE 2: An asterisk next rank values means that the "
+			 "corresponding directory is bookmarked\n"));
+		puts(_("Order\tVisits\tFirst\tLast\tRank\tDirectory"));
+
+		size_t i, ranks_sum = 0, visits_sum = 0;
 
 		for (i = 0; i < jump_n; i++) {
 
-			int days = (int)(now - jump_db[i].first_visit)/60/60/24;
-			int rank;
-			rank = days > 1 ? (jump_db[i].visits * 100) / days
-							: (jump_db[i].visits * 100);
+			int days_since_first = (int)(now - jump_db[i].first_visit)
+									/ 60 / 60 / 24;
+			int hours_since_last = (int)(now - jump_db[i].last_visit)
+									/ 60 / 60;
 
-			if (*ws[cur_ws].path == *jump_db[i].path
+			int rank;
+			rank = days_since_first > 1
+				   ? (jump_db[i].visits * 100) / days_since_first
+				   : jump_db[i].visits * 100;
+
+			int tmp_rank = rank;
+			if (hours_since_last == 0)	 		/* Last hour */
+				rank = JHOUR(tmp_rank);
+			else if (hours_since_last <= 24)	/* Last day */
+				rank = JDAY(tmp_rank);
+			else if (hours_since_last <= 168) 	/* Last week */
+				rank = JWEEK(tmp_rank);
+			else							 	/* More than a week */
+				rank = JOLDER(tmp_rank);
+
+			int j = bm_n, bookmarked = 0;
+			while (--j >= 0) {
+				if (bookmarks[j].path[1] == jump_db[i].path[1]
+				&& strcmp(bookmarks[j].path, jump_db[i].path) == 0) {
+					rank += BOOKMARK_BONUS;
+					bookmarked = 1;
+					break;
+				}
+			}
+
+			if (reduce) {
+				tmp_rank = rank;
+				rank = tmp_rank / reduce;
+			}
+
+			ranks_sum += rank;
+			visits_sum += jump_db[i].visits;
+
+			if (ws[cur_ws].path[1] == jump_db[i].path[1]
 			&& strcmp(ws[cur_ws].path, jump_db[i].path) == 0) {
-				printf("  %s%zu\t  %zu\t  %d\t %d\t%s%s \n", mi_c,
-					   i + 1, jump_db[i].visits, days, rank,
+				printf("  %s%zu\t %zu\t %d\t %d\t%d%c\t%s%s \n", mi_c,
+					   i + 1, jump_db[i].visits, days_since_first,
+					   hours_since_last, rank, bookmarked ? '*' : 0,
 					   jump_db[i].path, df_c);
 			}
 
 			else
-				printf("  %zu\t  %zu\t  %d\t %d\t%s \n", i + 1,
-					   jump_db[i].visits, days, rank, jump_db[i].path);
+				printf("  %zu\t %zu\t %d\t %d\t%d%c\t%s \n", i + 1,
+					   jump_db[i].visits, days_since_first,
+					   hours_since_last, rank,
+					   bookmarked ? '*' : 0, jump_db[i].path);
 		}
+
+		printf("\nTotal rank: %zu/%d\nTotal visits: %zu\n", ranks_sum,
+				max_jump_total_rank, visits_sum);
 
 		return EXIT_SUCCESS;
 	}
 
 	if (args[1] && *args[1] == '-' && strcmp(args[1], "--help") == 0) {
-		puts(_("Usage: j, jc [STRING ...], jp [STRING ...], "
-			 "je, jo [ORDER]], jump [e, edit] [STRING ...]"));
+		puts(_("Usage: j, jc, jp, jl [STRING ...], jo [NUM], je"));
 		return EXIT_SUCCESS;
 	}
-
-	if (args[1] && *args[1] == 'e' && (!args[1][1]
-	|| strcmp(args[1], "edit") == 0))
-		return edit_jumpdb();
 
 	enum jump jump_opt = none;
 
 	switch(args[0][1]) {
 
-		case 'e': return edit_jumpdb();
-		case 'c': jump_opt = jchild; break;
-		case 'p': jump_opt = jparent; break;
-		case 'o': jump_opt = jorder; break;
-		case 'l': jump_opt = jlist; break;
-		case 'u':
-		case '\0':
-			jump_opt = none;
-			break;
-
-		default:
-			fprintf(stderr, _("%s: '%c': Invalid option\n"), PROGRAM_NAME,
-					args[0][1]);
-			fputs(_("Usage: j, jc [STRING ...], jp [STRING ...], "
-				  "je, jo [ORDER]], jump [e, edit] [STRING ...]\n"),
-				  stderr);
-			return EXIT_FAILURE;
+	case 'e': return edit_jumpdb();
+	case 'c': jump_opt = jchild; break;
+	case 'p': jump_opt = jparent; break;
+	case 'o': jump_opt = jorder; break;
+	case 'l': jump_opt = jlist; break;
+	case '\0':
+		jump_opt = none;
 		break;
+
+	default:
+		fprintf(stderr, _("%s: '%c': Invalid option\n"), PROGRAM_NAME,
+				args[0][1]);
+		fputs(_("Usage: j, jc, jp, jl [STRING ...], jo [NUM], je\n"),
+			  stderr);
+		return EXIT_FAILURE;
+	break;
 	}
 
 	if (jump_opt == jorder) {
 
 		if (!args[1]) {
-			fputs(_("Usage: j, jc [STRING ...], jp [STRING ...], "
-				  "je, jo [ORDER]], jump [e, edit] [STRING ...]\n"),
+			fputs(_("Usage: j, jc, jp, jl [STRING ...], jo [NUM], je\n"),
 				  stderr);
 			return EXIT_FAILURE;
 		}
 
-		if (!is_number(args[1])) {
-			struct stat attr;
-
-			if (stat(args[1], &attr) != -1)
+		if (!is_number(args[1]))
 				return cd_function(args[1]);
-
-			else {
-				fprintf(stderr, _("%s: %s: No such jump entry\n"),
-						PROGRAM_NAME, args[1]);
-				return EXIT_FAILURE;
-			}
-		}
 
 		else {
 
 			int int_order = atoi(args[1]);
 			if (int_order <= 0 || int_order > (int)jump_n) {
-				fprintf(stderr, _("%s: No such order number\n"),
-						PROGRAM_NAME);
+				fprintf(stderr, _("%s: %d: No such order number\n"),
+						PROGRAM_NAME, int_order);
 				return EXIT_FAILURE;
 			}
 
@@ -17396,6 +17577,7 @@ autojump(char **args)
 	char **matches = (char **)xnmalloc(jump_n + 1, sizeof(char *));
 	int *visits = (int *)xnmalloc(jump_n + 1, sizeof(int));
 	time_t *first = (time_t *)xnmalloc(jump_n + 1, sizeof(time_t));
+	time_t *last = (time_t *)xnmalloc(jump_n + 1, sizeof(time_t));
 
 	for (i = 1; args[i]; i++) {
 
@@ -17411,10 +17593,8 @@ autojump(char **args)
 					continue;
 
 				/* Exclue CWD */
-				if (case_sens_autojump ? (*jump_db[j].path == *ws[cur_ws].path
+				if (jump_db[j].path[1] == ws[cur_ws].path[1]
 				&& strcmp(jump_db[j].path, ws[cur_ws].path) == 0)
-				: (TOUPPER(*jump_db[j].path) == TOUPPER(*ws[cur_ws].path)
-				&& strcasecmp(jump_db[j].path, ws[cur_ws].path) == 0))
 					continue;
 
 				int exclude = 0;
@@ -17422,22 +17602,18 @@ autojump(char **args)
 				/* Filter matches according to parent or
 				 * child options */
 				switch(jump_opt) {
-					case jparent:
-						if (case_sens_autojump
-						? !strstr(ws[cur_ws].path, jump_db[j].path)
-						: !strcasestr(ws[cur_ws].path, jump_db[j].path))
-							exclude = 1;
+				case jparent:
+					if (!strstr(ws[cur_ws].path, jump_db[j].path))
+						exclude = 1;
+				break;
+
+				case jchild:
+					if (!strstr(jump_db[j].path, ws[cur_ws].path))
+						exclude = 1;
+
+				case none:
+				default:
 					break;
-
-					case jchild:
-						if (case_sens_autojump
-						? !strstr(jump_db[j].path, ws[cur_ws].path)
-						: !strcasestr(jump_db[j].path, ws[cur_ws].path))
-							exclude = 1;
-
-					case none:
-					default:
-						break;
 				}
 
 				if (exclude)
@@ -17445,6 +17621,7 @@ autojump(char **args)
 
 				visits[match] = jump_db[j].visits;
 				first[match] = jump_db[j].first_visit;
+				last[match] = jump_db[j].last_visit;
 				matches[match++] = jump_db[j].path;
 			}
 		}
@@ -17473,7 +17650,7 @@ autojump(char **args)
 	 * the best ranked directory will be returned */
 
 	int found = 0, exit_status = EXIT_FAILURE,
-		best_ranked = 0, max = -1;
+		best_ranked = 0, max = -1, k;
 
 	j = match;
 	while (--j >= 0) {
@@ -17487,22 +17664,50 @@ autojump(char **args)
 			printf("%s\n", matches[j]);
 
 		else {
-			/* Days since first access */
-			int days = (int)(now - first[j])/60/60/24;
+			int days_since_first = (int)(now - first[j]) / 60 / 60 / 24;
 
-			/* Calculate the rank as frecency. The algorithm was taken
-			 * from Mozilla:
-			 * "https://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency" */
+			/* Calculate the rank as frecency. The algorithm is based
+			 * on Mozilla, zoxide, and z.lua. See:
+			 * "https://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency"
+			 * "https://github.com/ajeetdsouza/zoxide/wiki/Algorithm#aging"
+			 * "https://github.com/skywind3000/z.lua#aging" */
 			int rank;
-			rank = days > 0 ? (visits[j] * 100) / days
+			rank = days_since_first > 0 ? (visits[j] * 100) / days_since_first
 							: (visits[j] * 100);
 
-			/* Matches in the directory basename have the highest
-			 * priority */
+			int hours_since_last = (int)(now - last[j])	/ 60 / 60;
+
+			/* Credit or penalty based on last directory access */
+			int tmp_rank = rank;
+			if (hours_since_last == 0)			/* Last hour */
+				rank = JHOUR(tmp_rank);
+			else if (hours_since_last <= 24)  	/* Last day */
+				rank = JDAY(tmp_rank);
+			else if (hours_since_last <= 168) 	/* Last week */
+				rank = JWEEK(tmp_rank);
+			else							  	/* More than a week */
+				rank = JOLDER(tmp_rank);
+
+			/* Matches in directory basename have extra credit */
 			char *tmp = strrchr(matches[j], '/');
 			if (tmp && *(++tmp)) {
 				if (strstr(tmp, args[args_n]))
-					rank *= 100;
+					rank += BASENAME_BONUS;
+			}
+
+			/* Bookmarked directories have extra credit */
+			k = bm_n;
+			while (--k >= 0) {
+				if (bookmarks[k].path[1] == matches[j][1]
+				&& strcmp(bookmarks[k].path, matches[j]) == 0) {
+					rank *= BOOKMARK_BONUS;
+					break;
+				}
+			}
+
+			if (reduce) {
+				tmp_rank = rank;
+				rank = tmp_rank / reduce;
 			}
 
 			if (rank > max) {
@@ -17522,6 +17727,7 @@ autojump(char **args)
 
 	free(matches);
 	free(first);
+	free(last);
 	free(visits);
 
 	return exit_status;
@@ -21471,8 +21677,7 @@ help_function (void)
  hf, hidden [on, off, status]\n\
  history [clear] [-n]\n\
  icons [on, off]\n\
- j, jc [STRING ...], jp [STRING ...], je, jo [ORDER]], jl [STRING ...], \
- jump [e, edit] [STRING ...] (autojump function)\n\
+ j, jc, jp, jl [STRING ...] jo [NUM], je (autojump function)\n\
  kb, keybinds [edit] [reset]\n\
  lm [on, off] (lightmode)\n\
  log [clear]\n\
