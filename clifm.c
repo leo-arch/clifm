@@ -390,6 +390,13 @@ nm=01;32:bm=01;36:"
 #define SGRP 11
 #define SORT_TYPES 11
 
+/* Macros for launch_exec functions */
+#define E_NOFLAG 0
+#define E_NOSTDIN (1 << 1)
+#define E_NOSTDOUT (1 << 2)
+#define E_NOSTDERR (1 << 3)
+#define E_NO_OUT (E_NOSTDOUT | E_NOSTDERR)
+
 /* Max length of the properties string in long view mode */
 #define MAX_PROP_STR 55
 
@@ -1411,13 +1418,6 @@ launch_execle(const char *cmd)
  * chars like wildcards, quotes, and escape sequences. Use only when the
  * shell is needed; otherwise, launch_execve() should be used instead. */
 {
-	/* Error codes
-	#define EXNULLERR 79
-	#define EXEXECERR 80
-	#define EXFORKERR 81
-	#define EXCRASHERR 82
-	#define EXWAITERR 83
-	*/
 	if (!cmd)
 		return EXNULLERR;
 
@@ -1426,13 +1426,12 @@ launch_execle(const char *cmd)
 	signal(SIGCHLD, SIG_DFL);
 
 	int status;
-	/* Create a new process via fork() */
 	pid_t pid = fork();
 	if (pid < 0) {
 		fprintf(stderr, "%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
 		return EXFORKERR;
 	}
-	/* Run the command via execle */
+
 	else if (pid == 0) {
 		/* Reenable signals only for the child, in case they were
 		 * disabled for the parent */
@@ -1444,8 +1443,6 @@ launch_execle(const char *cmd)
 		/* Get shell base name */
 		char *name = strrchr(sys_shell, '/');
 
-		/* This is basically what the system() function does: running
-		 * a command via the system shell */
 		execl(sys_shell, name ? name + 1 : sys_shell, "-c", cmd, NULL);
 		fprintf(stderr, "%s: %s: execle: %s\n", PROGRAM_NAME, sys_shell,
 				strerror(errno));
@@ -1486,7 +1483,7 @@ launch_execle(const char *cmd)
 }
 
 static int
-launch_execve(char **cmd, int bg)
+launch_execve(char **cmd, int bg, int flags)
 /* Execute a command and return the corresponding exit status. The exit
  * status could be: zero, if everything went fine, or a non-zero value
  * in case of error. The function takes as first arguement an array of
@@ -1494,24 +1491,6 @@ launch_execve(char **cmd, int bg)
  * (cmd), and an integer (bg) specifying if the command should be
  * backgrounded (1) or not (0) */
 {
-	/* Error codes
-	#define EXNULLERR 79
-	#define EXEXECERR 80
-	#define EXFORKERR 81
-	#define EXCRASHERR 82
-	#define EXWAITERR 83
-	*/
-	/* Standard exit codes in UNIX/Linux go from 0 to 255, where 0 means
-	 * success and a non-zero value means error. This is why I should use
-	 * negative values (or > 255) so that my own exit codes won't be
-	 * confused with some standard exit code. However, the Linux
-	 * Documentation Project (tldp) recommends the use of codes 64-113
-	 * for user-defined exit codes. See:
-	 * http://www.tldp.org/LDP/abs/html/exitcodes.html
-	 * and
-	 * https://www.gnu.org/software/libc/manual/html_node/Exit-Status.html
-	*/
-
 	if (!cmd)
 		return EXNULLERR;
 
@@ -1519,13 +1498,12 @@ launch_execve(char **cmd, int bg)
 	 * won't be able to catch error codes coming from the child. */
 	signal(SIGCHLD, SIG_DFL);
 
-	/* Create a new process via fork() */
 	pid_t pid = fork();
 	if (pid < 0) {
 		fprintf(stderr, "%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
 		return errno;
 	}
-	/* Run the command via execvp */
+
 	else if (pid == 0) {
 		if (!bg) {
 			/* If the program runs in the foreground, reenable signals
@@ -1536,21 +1514,30 @@ launch_execve(char **cmd, int bg)
 			signal(SIGQUIT, SIG_DFL);
 			signal(SIGTERM, SIG_DFL);
 		}
-		/* If backgrounded, detach it from the parent */
-/*		else {
-			pid_t sid = setsid();
-			signal(SIGHUP, SIG_IGN);
-		} */
+
+		if (flags) {
+			int fd = open("/dev/null", O_WRONLY, 0200);
+
+			if (flags & E_NOSTDIN)
+				dup2(fd, STDIN_FILENO);
+
+			if (flags & E_NOSTDOUT)
+				dup2(fd, STDOUT_FILENO);
+
+			if (flags & E_NOSTDERR)
+				dup2(fd, STDERR_FILENO);
+
+			close(fd);
+		}
 
 		execvp(cmd[0], cmd);
-		/* This will only be reached if execvp() fails, because the exec
-		 * family of functions returns only on error */
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, cmd[0],
 				strerror(errno));
 		_exit(errno);
 	}
-	/* Get the command status */
-	else { /* pid > 0 */
+
+	/* Get command status (pid > 0) */
+	else {
 		if (bg) {
 			run_in_background(pid);
 			return EXIT_SUCCESS;
@@ -2074,7 +2061,7 @@ copy_plugins(void)
 
 	char *cp_cmd[] = { "cp", "-r", usr_share_plugins_dir,
 					   CONFIG_DIR_GRAL, NULL };
-	launch_execve(cp_cmd, FOREGROUND);
+	launch_execve(cp_cmd, FOREGROUND, E_NOFLAG);
 }
 
 static char *
@@ -4009,7 +3996,7 @@ create_tmp_files(void)
 
 		char *md_cmd[] = { "mkdir", "-pm1777", TMP_DIR, NULL };
 
-		if (launch_execve(md_cmd, FOREGROUND) != EXIT_SUCCESS) {
+		if (launch_execve(md_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			_err('e', PRINT_PROMPT, _("%s: '%s': Error creating "
 				 "temporary directory\n"), PROGRAM_NAME, TMP_DIR);
 		}
@@ -4027,7 +4014,7 @@ create_tmp_files(void)
 
 		char *md_cmd2[] = { "mkdir", "-pm700", TMP_DIR, NULL };
 
-		if (launch_execve(md_cmd2, FOREGROUND) != EXIT_SUCCESS) {
+		if (launch_execve(md_cmd2, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			selfile_ok = 0;
 			_err('e', PRINT_PROMPT, _("%s: '%s': Error creating "
 				 "temporary directory\n"), PROGRAM_NAME, TMP_DIR);
@@ -4488,7 +4475,7 @@ edit_xresources(void)
 			sprintf(res_file, "%s/.Xresources", user_home);
 			char *cmd[] = { "xrdb", "merge", res_file,
 							NULL };
-			launch_execve(cmd, FOREGROUND);
+			launch_execve(cmd, FOREGROUND, E_NOFLAG);
 			free(res_file);
 		}
 
@@ -4936,7 +4923,7 @@ create_config_files(void)
 		sprintf(trash_info, "%s/info", TRASH_DIR);
 		char *cmd[] = { "mkdir", "-p", trash_files, trash_info, NULL };
 
-		ret = launch_execve(cmd, FOREGROUND);
+		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 		free(trash_files);
 		free(trash_info);
 
@@ -4964,7 +4951,7 @@ create_config_files(void)
 	if (stat(CONFIG_DIR, &file_attrib) == -1) {
 		char *tmp_cmd[] = { "mkdir", "-p", CONFIG_DIR, NULL };
 
-		if (launch_execve(tmp_cmd, FOREGROUND) != EXIT_SUCCESS) {
+		if (launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 
 			config_ok = 0;
 
@@ -5037,7 +5024,7 @@ create_config_files(void)
 
 		char *cmd[] = { "mkdir", COLORS_DIR, NULL };
 
-		if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS) {
+		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			_err('w', PRINT_PROMPT, _("%s: mkdir: Error "
 				 "creating colors directory. Using the default "
 				 "color scheme\n"), PROGRAM_NAME);
@@ -5054,7 +5041,7 @@ create_config_files(void)
 	if (stat(PLUGINS_DIR, &file_attrib) == -1) {
 		char *cmd[] = { "mkdir", PLUGINS_DIR, NULL };
 
-		if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			_err('e', PRINT_PROMPT, _("%s: mkdir: Error "
 				 "creating scripts directory. The "
 				 "actions function is disabled\n"), PROGRAM_NAME);
@@ -6486,7 +6473,7 @@ edit_link(char *link)
 
 	/* Finally, relink the symlink to new_path */
 	char *cmd[] = { "ln", "-sfn", new_path, link, NULL };
-	if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS) {
+	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 		free(new_path);
 		return EXIT_FAILURE;
 	}
@@ -6634,7 +6621,7 @@ create_iso(char *in_file, char *out_file)
 	if ((file_attrib.st_mode & S_IFMT) == S_IFDIR) {
 		char *cmd[] = { "mkisofs", "-R", "-o", out_file, in_file, NULL };
 
-		if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 	}
 
@@ -6650,7 +6637,7 @@ create_iso(char *in_file, char *out_file)
 		char *cmd[] = { "sudo", "dd", if_option, of_option, "bs=64k",
  						"conv=noerror,sync", "status=progress", NULL };
 
-		if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 
 		free(if_option);
@@ -6795,7 +6782,7 @@ handle_iso(char *file)
 
 			/* Construct and execute cmd */
 			char *cmd[] = { "7z", "x", o_option, file, NULL };
-			if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 
 			free(o_option);
@@ -6827,7 +6814,7 @@ handle_iso(char *file)
 			/* Construct and execute cmd */
 			char *cmd[] = { "7z", "x", o_option, file, NULL };
 
-			if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 
 			free(ext_path);
@@ -6841,7 +6828,7 @@ handle_iso(char *file)
 			/* 7z l FILE */
 			char *cmd[] = { "7z", "l", file, NULL };
 
-			if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 			}
 		break;
@@ -6867,7 +6854,7 @@ handle_iso(char *file)
 
 			char *dir_cmd[] = { "mkdir", "-pm700", mountpoint, NULL };
 
-			if (launch_execve(dir_cmd, FOREGROUND) != EXIT_SUCCESS) {
+			if (launch_execve(dir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 				free(mountpoint);
 				return EXIT_FAILURE;
 			}
@@ -6876,7 +6863,7 @@ handle_iso(char *file)
 			char *cmd[] = { "sudo", "mount", "-o", "loop", file,
 							mountpoint, NULL };
 
-			if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS) {
+			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 				free(mountpoint);
 				return EXIT_FAILURE;
 			}
@@ -6912,7 +6899,7 @@ handle_iso(char *file)
 			/* 7z t FILE */
 			char *cmd[] = { "7z", "t", file, NULL };
 
-			if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 			}
 		break;
@@ -6985,7 +6972,7 @@ check_iso(char *file)
 	fclose(file_fp_err);
 
 	char *cmd[] = { "file", "-b", file, NULL };
-	int retval = launch_execve(cmd, FOREGROUND);
+	int retval = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
 	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
@@ -7223,7 +7210,7 @@ is_compressed(char *file, int test_iso)
 	fclose(file_fp_err);
 
 	char *cmd[] = { "file", "-b", file, NULL };
-	int retval = launch_execve(cmd, FOREGROUND);
+	int retval = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
 	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
@@ -7295,14 +7282,14 @@ zstandard(char *in_file, char *out_file, char mode, char op)
 
 		if (out_file) {
 			char *cmd[] = { "zstd", "-zo", out_file, deq_file, NULL };
-			if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 		}
 
 		else {
 			char *cmd[] = { "zstd", "-z", deq_file, NULL };
 
-			if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 		}
 
@@ -7325,7 +7312,7 @@ zstandard(char *in_file, char *out_file, char mode, char op)
 
 		char *cmd[] = { "zstd", option, deq_file, NULL };
 
-		exit_status = launch_execve(cmd, FOREGROUND);
+		exit_status = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 
 		free(deq_file);
 
@@ -7356,21 +7343,21 @@ zstandard(char *in_file, char *out_file, char mode, char op)
 		switch(*operation) {
 			case 'e': {
 				char *cmd[] = { "zstd", "-d", deq_file, NULL };
-				if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+				if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 					exit_status = EXIT_FAILURE;
 			}
 			break;
 
 			case 't': {
 				char *cmd[] = { "zstd", "-t", deq_file, NULL };
-				if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+				if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 					exit_status = EXIT_FAILURE;
 			}
 			break;
 
 			case 'i': {
 				char *cmd[] = { "zstd", "-l", deq_file, NULL };
-				if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+				if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 					exit_status = EXIT_FAILURE;
 			}
 			break;
@@ -7817,7 +7804,7 @@ archiver(char **args, char mode)
 				/* Construct and execute cmd */
 				char *cmd[] = { "atool", "-X", ext_path, args[i], NULL };
 
-				if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+				if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 					exit_status = EXIT_FAILURE;
 
 				free(ext_path);
@@ -7835,7 +7822,7 @@ archiver(char **args, char mode)
 
 				char *cmd[] = { "atool", "-l", args[i], NULL };
 
-				if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+				if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 					exit_status = EXIT_FAILURE;
 			}
 		break;
@@ -7866,7 +7853,7 @@ archiver(char **args, char mode)
 
 				char *dir_cmd[] = { "mkdir", "-pm700", mountpoint, NULL };
 
-				if (launch_execve(dir_cmd, FOREGROUND) != EXIT_SUCCESS) {
+				if (launch_execve(dir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 					free(mountpoint);
 					return EXIT_FAILURE;
 				}
@@ -7874,7 +7861,7 @@ archiver(char **args, char mode)
 				/* Construct and execute cmd */
 				char *cmd[] = { "archivemount", args[i], mountpoint, NULL };
 
-				if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS) {
+				if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 					free(mountpoint);
 					continue;
 				}
@@ -8190,7 +8177,7 @@ remote_ftp(char *address, char *options)
 
 		char *mkdir_cmd[] = { "mkdir", "-p", rmountpoint, NULL };
 
-		if (launch_execve(mkdir_cmd, FOREGROUND) != EXIT_SUCCESS) {
+		if (launch_execve(mkdir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			fprintf(stderr, _("%s: %s: Cannot create mountpoint\n"),
 					PROGRAM_NAME, rmountpoint);
 			free(rmountpoint);
@@ -8208,7 +8195,7 @@ remote_ftp(char *address, char *options)
 	/* CurlFTPFS does not require sudo */
 	char *cmd[] = { "curlftpfs", address, rmountpoint, (options) ? "-o"
 					: NULL, (options) ? options: NULL, NULL };
-	int error_code = launch_execve(cmd, FOREGROUND);
+	int error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 
 	if (error_code) {
 		free(rmountpoint);
@@ -8305,7 +8292,7 @@ remote_smb(char *address, char *options)
 	if (stat(rmountpoint, &file_attrib) == -1) {
 		char *mkdir_cmd[] = { "mkdir", "-p", rmountpoint, NULL };
 
-		if (launch_execve(mkdir_cmd, FOREGROUND) != EXIT_SUCCESS) {
+		if (launch_execve(mkdir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 
 			if (free_options)
 				free(roptions);
@@ -8353,13 +8340,13 @@ remote_smb(char *address, char *options)
 		char *cmd[] = { "sudo", "-u", "root", "mount.cifs", addr_tmp,
 						rmountpoint, (roptions) ? "-o" : NULL,
 						(roptions) ? roptions : NULL, NULL };
-		error_code = launch_execve(cmd, FOREGROUND);
+		error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	}
 
 	else {
 		char *cmd[] = { "mount.cifs", addr_tmp, rmountpoint, (roptions)
 						? "-o" : NULL, (roptions) ? roptions : NULL, NULL };
-		error_code = launch_execve(cmd, FOREGROUND);
+		error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	}
 
 	if (free_options)
@@ -8450,7 +8437,7 @@ remote_ssh(char *address, char *options)
 	if (stat(rmountpoint, &file_attrib) == -1) {
 		char *mkdir_cmd[] = { "mkdir", "-p", rmountpoint, NULL };
 
-		if (launch_execve(mkdir_cmd, FOREGROUND) != EXIT_SUCCESS) {
+		if (launch_execve(mkdir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			fprintf(stderr, _("%s: %s: Cannot create mountpoint\n"),
 					PROGRAM_NAME, rmountpoint);
 			free(rmountpoint);
@@ -8473,14 +8460,14 @@ remote_ssh(char *address, char *options)
 	if ((flags & ROOT_USR)) {
 		char *cmd[] = { "sshfs", address, rmountpoint, (options) ? "-o"
 						: NULL, (options) ? options: NULL, NULL };
-		error_code = launch_execve(cmd, FOREGROUND);
+		error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	}
 
 	else {
 		char *cmd[] = { "sudo", "sshfs", address, rmountpoint, "-o",
 						"allow_other", (options) ? "-o" : NULL,
 						(options) ? options : NULL, NULL};
-		error_code = launch_execve(cmd, FOREGROUND);
+		error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	}
 
 	if (error_code != EXIT_SUCCESS) {
@@ -8851,7 +8838,7 @@ new_instance(char *dir, int sudo)
 	int ret = -1;
 
 	if (tmp_cmd) {
-		ret = launch_execve(tmp_cmd, BACKGROUND);
+		ret = launch_execve(tmp_cmd, BACKGROUND, E_NOFLAG);
 
 		for (size_t i = 0; tmp_cmd[i]; i++)
 			free(tmp_cmd[i]);
@@ -8865,12 +8852,12 @@ new_instance(char *dir, int sudo)
 
 		if (sudo) {
 			char *cmd[] = { term, "-e", "sudo", self, "-p", path_dir, NULL };
-			ret = launch_execve(cmd, BACKGROUND);
+			ret = launch_execve(cmd, BACKGROUND, E_NOFLAG);
 		}
 
 		else {
 			char *cmd[] = { term, "-e", self, "-p", path_dir, NULL };
-			ret = launch_execve(cmd, BACKGROUND);
+			ret = launch_execve(cmd, BACKGROUND, E_NOFLAG);
 		}
 	}
 
@@ -9779,14 +9766,14 @@ save_last_path(void)
 		char *cmd[] = { "cp", "-p", last_dir, last_dir_tmp,
 						NULL };
 
-		launch_execve(cmd, FOREGROUND);
+		launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	}
 
 	/* If not cd on quit, remove the file */
 	else {
 		char *cmd[] = { "rm", "-f", last_dir_tmp, NULL };
 
-		launch_execve(cmd, FOREGROUND);
+		launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	}
 
 	free(last_dir_tmp);
@@ -9877,7 +9864,7 @@ profile_add(const char *prof)
 
 	/* #### CREATE THE CONFIG DIR #### */
 	char *tmp_cmd[] = { "mkdir", "-p", NCONFIG_DIR, NULL };
-	int ret = launch_execve(tmp_cmd, FOREGROUND);
+	int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
 
 	if (ret != EXIT_SUCCESS) {
 		fprintf(stderr, _("%s: mkdir: %s: Error creating "
@@ -10040,7 +10027,7 @@ profile_del(const char *prof)
 	sprintf(tmp, "%s/profiles/%s", CONFIG_DIR_GRAL, prof);
 
 	char *cmd[] = { "rm", "-r", tmp, NULL };
-	int ret = launch_execve(cmd, FOREGROUND);
+	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	free(tmp);
 
 	if (ret == EXIT_SUCCESS) {
@@ -10840,7 +10827,7 @@ get_mime(char *file)
 	fclose(file_fp_err);
 
 	char *cmd[] = { "file", "--mime-type", file, NULL };
-	int ret = launch_execve(cmd, FOREGROUND);
+	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
 	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
@@ -11106,7 +11093,7 @@ mime_open(char **args)
 	char *cmd[] = { app, file_path, NULL };
 
 	int ret = launch_execve(cmd, strcmp(args[args_num - 1], "&") == 0
-							? BACKGROUND : FOREGROUND);
+							? BACKGROUND : FOREGROUND, E_NOSTDERR);
 
 	free(file_path);
 	free(app);
@@ -11227,14 +11214,6 @@ mime_edit(char **args)
 {
 	int exit_status = EXIT_SUCCESS;
 
-	/* Silence stderr */
-	int fd_out = open("/dev/null", O_WRONLY, 0200);
-	int stderr_bk = dup(STDERR_FILENO);
-
-	dup2(fd_out, STDERR_FILENO);
-
-	close(fd_out);
-
 	if (!args[2]) {
 		char *cmd[] = { "mime", MIME_FILE, NULL };
 
@@ -11247,13 +11226,9 @@ mime_edit(char **args)
 
 	else {
 		char *cmd[] = { args[2], MIME_FILE, NULL };
-		if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 	}
-
-	/* Restore stderr previous value */
-	dup2(stderr_bk, STDERR_FILENO);
-	close(stderr_bk);
 
 	return exit_status;
 }
@@ -11324,24 +11299,9 @@ bulk_rename(char **args)
 	stat(BULK_FILE, &file_attrib);
 	time_t mtime_bfr = file_attrib.st_mtime;
 
-	/* The application opening the bulk file could print some stuff to
-	 * stderr. Silence it */
-	FILE *fp_out = fopen("/dev/null", "w");
-	/* Store stderr current value */
-	int stderr_bk = dup(STDERR_FILENO);
-
-	/* Redirect stderr to /dev/null */
-	dup2(fileno(fp_out), STDERR_FILENO);
-
-	fclose(fp_out);
-
 	/* Open the bulk file via the mime function */
 	char *cmd[] = { "mm", BULK_FILE, NULL };
 	mime_open(cmd);
-
-	/* Restore stderr to previous value */
-	dup2(stderr_bk, STDERR_FILENO);
-	close(stderr_bk);
 
 	/* Compare the new modification time to the stored one: if they
 	 * match, nothing was modified */
@@ -11479,7 +11439,7 @@ bulk_rename(char **args)
 		if (strcmp(args[i], line) != 0) {
 			char *tmp_cmd[] = { "mv", args[i], line, NULL };
 
-			if (launch_execve(tmp_cmd, FOREGROUND) != EXIT_SUCCESS)
+			if (launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 		}
 
@@ -11550,18 +11510,9 @@ export(char **filenames, int open)
 	if (!open)
 		return tmp_file;
 
-	FILE *fp_err = fopen("/dev/null", "w");
-	int stderr_bk = dup(STDERR_FILENO); /* Save original stderr */
-	dup2(fileno(fp_err), STDERR_FILENO); /* Redirect stderr to
-	/dev/null */
-	fclose(fp_err);
-
 	char *cmd[] = { "mime", tmp_file, NULL };
 
 	int ret = mime_open(cmd);
-
-	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
-	close(stderr_bk);
 
 	if (ret == EXIT_SUCCESS)
 		return tmp_file;
@@ -11593,20 +11544,7 @@ edit_actions(void)
 
 	char *cmd[] = { "mm", ACTIONS_FILE, NULL };
 
-	FILE *fp_out = fopen("/dev/null", "w");
-	/* Store stderr current value */
-	int stderr_bk = dup(STDERR_FILENO);
-
-	/* Redirect stderr to /dev/null */
-	dup2(fileno(fp_out), STDERR_FILENO);
-
-	fclose(fp_out);
-
 	int ret = mime_open(cmd);
-
-	/* Restore stderr to previous value */
-	dup2(stderr_bk, STDERR_FILENO);
-	close(stderr_bk);
 
 	if  (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
@@ -11792,7 +11730,7 @@ kbinds_reset(void)
 
 	else {
 		char *cmd[] = { "rm", KBINDS_FILE, NULL };
-		if (launch_execve(cmd, FOREGROUND) == EXIT_SUCCESS)
+		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
 			exit_status = create_kbinds_file();
 		else
 			exit_status = EXIT_FAILURE;
@@ -11826,21 +11764,8 @@ kbinds_edit(void)
 
 	time_t mtime_bfr = file_attrib.st_mtime;
 
-	int fd_out = open("/dev/null", O_WRONLY, 0200);
-	/* Store stderr current value */
-	int stderr_bk = dup(STDERR_FILENO);
-
-	/* Redirect stderr to /dev/null */
-	dup2(fd_out, STDERR_FILENO);
-
-	close(fd_out);
-
 	char *cmd[] = { "mm", KBINDS_FILE, NULL };
 	int ret = mime_open(cmd);
-
-	/* Restore stderr to previous value */
-	dup2(stderr_bk, STDERR_FILENO);
-	close(stderr_bk);
 
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
@@ -12695,7 +12620,7 @@ open_function(char **cmd)
 
 			int ret = launch_execve(tmp_cmd,
 						strcmp(cmd[args_n], "&") == 0 ? BACKGROUND
-						: FOREGROUND);
+						: FOREGROUND, E_NOSTDERR);
 
 			if (ret != EXIT_SUCCESS)
 				return EXIT_FAILURE;
@@ -12736,7 +12661,7 @@ open_function(char **cmd)
 
 	int ret = launch_execve(tmp_cmd, (cmd[args_n]
 							&& strcmp(cmd[args_n], "&") == 0)
-							? BACKGROUND : FOREGROUND);
+							? BACKGROUND : FOREGROUND, E_NOSTDERR);
 
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
@@ -13556,7 +13481,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 
 	free(filename);
 
-	ret = launch_execve(tmp_cmd, FOREGROUND);
+	ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
 	free(dest);
 	dest = (char *)NULL;
 
@@ -13586,7 +13511,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 
 		char *tmp_cmd2[] = { "rm", "-r", trash_file, NULL };
 
-		ret = launch_execve (tmp_cmd2, FOREGROUND);
+		ret = launch_execve (tmp_cmd2, FOREGROUND, E_NOFLAG);
 
 		free(trash_file);
 
@@ -13632,7 +13557,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 
 	/* Remove the file to be trashed */
 	char *tmp_cmd3[] = { "rm", "-r", file, NULL };
-	ret = launch_execve(tmp_cmd3, FOREGROUND);
+	ret = launch_execve(tmp_cmd3, FOREGROUND, E_NOFLAG);
 
 	/* If remove fails, remove trash and info files */
 	if (ret != EXIT_SUCCESS) {
@@ -13644,7 +13569,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 		sprintf(trash_file, "%s/%s", TRASH_FILES_DIR, file_suffix);
 
 		char *tmp_cmd4[] = { "rm", "-r", trash_file, info_file, NULL };
-		ret = launch_execve(tmp_cmd4, FOREGROUND);
+		ret = launch_execve(tmp_cmd4, FOREGROUND, E_NOFLAG);
 		free(trash_file);
 
 		if (ret != EXIT_SUCCESS) {
@@ -13785,7 +13710,7 @@ remove_from_trash(void)
 
 				char *tmp_cmd[] = { "rm", "-r", rm_file, rm_info, NULL };
 
-				ret = launch_execve(tmp_cmd, FOREGROUND);
+				ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
 
 				if (ret != EXIT_SUCCESS) {
 					fprintf(stderr, _("%s: trash: Error trashing %s\n"),
@@ -13849,7 +13774,7 @@ remove_from_trash(void)
 
 		char *tmp_cmd2[] = { "rm", "-r", rm_file, rm_info, NULL };
 
-		ret = launch_execve(tmp_cmd2, FOREGROUND);
+		ret = launch_execve(tmp_cmd2, FOREGROUND, E_NOFLAG);
 
 		if (ret != EXIT_SUCCESS) {
 			fprintf(stderr, _("%s: trash: Error trashing %s\n"),
@@ -13970,12 +13895,12 @@ untrash_element(char *file)
 		char *tmp_cmd[] = { "cp", "-a", undel_file, url_decoded, NULL };
 
 		int ret = -1;
-		ret = launch_execve(tmp_cmd, FOREGROUND);
+		ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
 		free(url_decoded);
 
 		if (ret == EXIT_SUCCESS) {
 			char *tmp_cmd2[] = { "rm", "-r", undel_file, undel_info, NULL };
-			ret = launch_execve(tmp_cmd2, FOREGROUND);
+			ret = launch_execve(tmp_cmd2, FOREGROUND, E_NOFLAG);
 
 			if (ret != EXIT_SUCCESS) {
 				fprintf(stderr, _("%s: undel: %s: Failed removing "
@@ -14227,7 +14152,7 @@ trash_clear(void)
 
 		char *tmp_cmd[] = { "rm", "-r", file1, file2, NULL };
 
-		int ret = launch_execve(tmp_cmd, FOREGROUND);
+		int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
 
 		free(file1);
 		free(file2);
@@ -14273,7 +14198,7 @@ trash_function (char **comm)
 		trash_info = xcalloc(strlen(TRASH_DIR) + 6, sizeof(char));
 		sprintf(trash_info, "%s/info", TRASH_DIR);
 		char *cmd[] = { "mkdir", "-p", trash_files, trash_info, NULL };
-		int ret = launch_execve (cmd, FOREGROUND);
+		int ret = launch_execve (cmd, FOREGROUND, E_NOFLAG);
 		free(trash_files);
 		free(trash_info);
 		if (ret != EXIT_SUCCESS) {
@@ -15212,10 +15137,10 @@ rl_lock(int count, int key)
 
 #if __FreeBSD__
 	char *cmd[] = { "lock", NULL };
-	ret = launch_execve(cmd, FOREGROUND);
+	ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 #elif __linux__
 	char *cmd[] = { "vlock", NULL };
-	ret = launch_execve(cmd, FOREGROUND);
+	ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 #endif
 
 	rl_prep_terminal(0);
@@ -15543,7 +15468,7 @@ rl_kbinds_help (int count, int key)
 {
 	char *cmd[] = { "man", "-P", "less -p ^\"KEYBOARD SHORTCUTS\"", PNL,
 					NULL };
-	if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
 	return EXIT_SUCCESS;
@@ -15553,7 +15478,7 @@ static int
 rl_cmds_help (int count, int key)
 {
 	char *cmd[] = { "man", "-P", "less -p ^COMMANDS", PNL, NULL };
-	if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
 	return EXIT_SUCCESS;
@@ -15564,7 +15489,7 @@ rl_manpage (int count, int key)
 {
 	char *cmd[] = { "man", PNL, NULL };
 
-	if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
 	return EXIT_SUCCESS;
@@ -15871,7 +15796,7 @@ free_stuff(void)
 
 	if (STDIN_TMP_DIR) {
 		char *rm_cmd[] = { "rm", "-rd", "--", STDIN_TMP_DIR, NULL };
-		launch_execve(rm_cmd, FOREGROUND);
+		launch_execve(rm_cmd, FOREGROUND, E_NOFLAG);
 		free(STDIN_TMP_DIR);
 	}
 
@@ -16156,7 +16081,7 @@ handle_stdin()
 	free(rand_ext);
 
 	char *cmd[] = { "mkdir", "-p", STDIN_TMP_DIR, NULL };
-	if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		goto FREE_N_EXIT;
 
 	/* Get CWD: we need it to preppend it to relative paths */
@@ -16213,7 +16138,7 @@ handle_stdin()
 				strerror(errno));
 
 		char *rm_cmd[] = { "rm" , "-drf", STDIN_TMP_DIR, NULL };
-		launch_execve(rm_cmd, FOREGROUND);
+		launch_execve(rm_cmd, FOREGROUND, E_NOFLAG);
 
 		free(cwd);
 		goto FREE_N_EXIT;
@@ -17282,21 +17207,8 @@ cschemes_function(char **args)
 		stat(file, &attr);
 		time_t mtime_bfr = attr.st_mtime;
 
-		int fd_out = open("/dev/null", O_WRONLY, 0200);
-		/* Store stderr current value */
-		int stderr_bk = dup(STDERR_FILENO);
-
-		/* Redirect stderr to /dev/null */
-		dup2(fd_out, STDERR_FILENO);
-
-		close(fd_out);
-
 		char *cmd[] = { "mm", file, NULL };
-
 		int ret = mime_open(cmd);
-
-		dup2(stderr_bk, STDERR_FILENO);
-		close(stderr_bk);
 
 		if (ret != EXIT_FAILURE) {
 
@@ -17377,20 +17289,8 @@ edit_jumpdb(void)
 
 	time_t mtime_bfr = attr.st_mtime;
 
-	int fd_out = open("/dev/null", O_WRONLY, 0200);
-	/* Store stderr current value */
-	int stderr_bk = dup(STDERR_FILENO);
-
-	/* Redirect stderr to /dev/null */
-	dup2(fd_out, STDERR_FILENO);
-
-	close(fd_out);
-
 	char *cmd[] = { "o", JUMP_FILE, NULL };
 	open_function(cmd);
-
-	dup2(stderr_bk, STDERR_FILENO);
-	close(stderr_bk);
 
 	stat(JUMP_FILE, &attr);
 
@@ -17445,7 +17345,7 @@ dirjump(char **args)
 		}
 
 		puts(_("NOTE: First time access is displayed in days, while last "
-			 "time access is displayed in hours\n"));
+			 "time access is displayed in hours"));
 		puts(_("NOTE 2: An asterisk next rank values means that the "
 			 "corresponding directory is bookmarked\n"));
 		puts(_("Order\tVisits\tFirst\tLast\tRank\tDirectory"));
@@ -18040,15 +17940,10 @@ dir_size(char *dir)
 		return -1;
 
 	FILE *du_fp = fopen(DU_TMP_FILE, "w");
-	FILE *du_fp_err = fopen("/dev/null", "w");
 	int stdout_bk = dup(STDOUT_FILENO); /* Save original stdout */
-	int stderr_bk = dup(STDERR_FILENO); /* Save original stderr */
 	dup2(fileno(du_fp), STDOUT_FILENO); /* Redirect stdout to the desired
 	file */	
-	dup2(fileno(du_fp_err), STDERR_FILENO); /* Redirect stderr to
-	/dev/null */
 	fclose(du_fp);
-	fclose(du_fp_err);
 
 /*	char *cmd = (char *)NULL;
 	cmd = (char *)xcalloc(strlen(dir) + 10, sizeof(char));
@@ -18058,12 +17953,10 @@ dir_size(char *dir)
 	free(cmd); */
 
 	char *cmd[] = { "du", "--block-size=1", "-s", dir, NULL };
-	launch_execve(cmd, FOREGROUND);
+	launch_execve(cmd, FOREGROUND, E_NOSTDERR);
 
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
-	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
 	close(stdout_bk);
-	close(stderr_bk);
 
 /*	if (ret != 0) {
 		puts("???");
@@ -18904,7 +18797,7 @@ search_glob(char **comm, int invert)
 	if (recursive) {
 		char *cmd[] = { "find", (search_path && *search_path) ? search_path
 						: ".", "-name", comm[0] + 1, NULL };
-		launch_execve(cmd, FOREGROUND);
+		launch_execve(cmd, FOREGROUND, E_NOFLAG);
 		return EXIT_SUCCESS;
 	}
 
@@ -19782,7 +19675,7 @@ bookmark_del(char *name)
 			sprintf(bk_file, "%s/bookmarks.bk", CONFIG_DIR);
 			char *tmp_cmd[] = { "cp", BM_FILE, bk_file, NULL };
 
-			int ret = launch_execve(tmp_cmd, FOREGROUND);
+			int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
 			/* Remove the bookmarks file, free stuff, and exit */
 
 			if (ret == EXIT_SUCCESS) {
@@ -20161,20 +20054,12 @@ edit_bookmarks(char *cmd)
 {
 	int exit_status = EXIT_SUCCESS;
 
-	/* Silence stderr */
-	int fd_out = open("/dev/null", O_WRONLY, 0200);
-	int stderr_bk = dup(STDERR_FILENO);
-
-	dup2(fd_out, STDERR_FILENO);
-
-	close(fd_out);
-
 	if (!cmd) {
 
 		if (opener) {
 			char *tmp_cmd[] = { opener, BM_FILE, NULL };
 
-			if (launch_execve(tmp_cmd, FOREGROUND) != EXIT_SUCCESS) {
+			if (launch_execve(tmp_cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS) {
 				fprintf(stderr, _("%s: Cannot open the bookmarks file"),
 						PROGRAM_NAME);
 				exit_status = EXIT_FAILURE;
@@ -20191,15 +20076,11 @@ edit_bookmarks(char *cmd)
 	else {
 		char *tmp_cmd[] = { cmd, BM_FILE, NULL };
 
-		int ret = launch_execve(tmp_cmd, FOREGROUND);
+		int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOSTDERR);
 
 		if (ret != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 	}
-
-	/* Restore stderr previous value */
-	dup2(stderr_bk, STDERR_FILENO);
-	close(stderr_bk);
 
 	return exit_status;
 }
@@ -20363,7 +20244,6 @@ open_bookmark(void)
 
 	exit_status = open_function(tmp_cmd);
 	goto FREE_AND_EXIT;
-
 
 	FREE_AND_EXIT: {
 
@@ -21332,7 +21212,7 @@ regen_config(void)
 
 		char *cmd[] = { "mv", CONFIG_FILE, bk, NULL };
 
-		if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS) {
+		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			free(bk);
 			return EXIT_FAILURE;
 		}
@@ -21388,19 +21268,10 @@ edit_function (char **comm)
 
 	int ret = EXIT_SUCCESS;
 
-	FILE *fp_out = fopen("/dev/null", "w");
-	/* Store stderr current value */
-	int stderr_bk = dup(STDERR_FILENO);
-
-	/* Redirect stderr to /dev/null */
-	dup2(fileno(fp_out), STDERR_FILENO);
-
-	fclose(fp_out);
-
 	/* If there is an argument... */
 	if (comm[1]) {
 		char *cmd[] = { comm[1], CONFIG_FILE, NULL };
-		ret = launch_execve(cmd, FOREGROUND);
+		ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
 	}
 
 	/* If no application has been passed as 2nd argument */
@@ -21416,10 +21287,6 @@ edit_function (char **comm)
 			ret = mime_open(cmd);
 		}
 	}
-
-	/* Restore stderr to previous value */
-	dup2(stderr_bk, STDERR_FILENO);
-	close(stderr_bk);
 
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
@@ -21528,7 +21395,7 @@ list_commands (void)
  * corresponding section in the manpage */
 {
 	char *cmd[] = { "man", "-P", "less -p ^COMMANDS", PNL, NULL };
-	if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
 	return EXIT_SUCCESS;
@@ -23405,7 +23272,7 @@ exec_cmd(char **comm)
 		if (!comm[0][1]) {
 			/* If just ":" or ";", launch the default shell */
 			char *cmd[] = { sys_shell, NULL };
-			if (launch_execve(cmd, FOREGROUND) != EXIT_SUCCESS)
+			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_code = EXIT_FAILURE;
 			return exit_code;
 		}
