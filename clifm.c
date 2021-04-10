@@ -165,11 +165,11 @@ in FreeBSD, but is deprecated */
 * #define CLEAR puts("\x1b[1;1H\x1b[2J");
 * #define CLEAR puts("\x1b[H\x1b[J");
 * #define CLEAR write(STDOUT_FILENO, "\x1b[2J\x1b[H", 7); */
-#define VERSION "0.29.2"
+#define VERSION "1.0"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "February 11, 2021"
+#define DATE "April 10, 2021"
 #define LICENSE "GPL2+"
 
 /* Define flags for program options and internal use */
@@ -390,12 +390,12 @@ nm=01;32:bm=01;36:"
 #define SGRP 11
 #define SORT_TYPES 11
 
-/* Macros for launch_exec functions */
-#define E_NOFLAG 0
-#define E_NOSTDIN (1 << 1)
-#define E_NOSTDOUT (1 << 2)
-#define E_NOSTDERR (1 << 3)
-#define E_NO_OUT (E_NOSTDOUT | E_NOSTDERR)
+/* Macros to control file descriptors in exec functions */
+#define E_NOFLAG 	0
+#define E_NOSTDIN 	(1 << 1)
+#define E_NOSTDOUT 	(1 << 2)
+#define E_NOSTDERR 	(1 << 3)
+#define E_MUTE 		(E_NOSTDOUT | E_NOSTDERR)
 
 /* Max length of the properties string in long view mode */
 #define MAX_PROP_STR 55
@@ -1488,8 +1488,8 @@ launch_execve(char **cmd, int bg, int flags)
  * status could be: zero, if everything went fine, or a non-zero value
  * in case of error. The function takes as first arguement an array of
  * strings containing the command name to be executed and its arguments
- * (cmd), and an integer (bg) specifying if the command should be
- * backgrounded (1) or not (0) */
+ * (cmd), an integer (bg) specifying if the command should be
+ * backgrounded (1) or not (0), and a flag to control file descriptors */
 {
 	if (!cmd)
 		return EXNULLERR;
