@@ -2,8 +2,8 @@
 
 pkgname=clifm-git
 _pkgname=clifm
-pkgver=0.29.2
-pkgrel=3
+pkgver=1.0
+pkgrel=1
 pkgdesc="The KISS file manager: cli-based, ultra-lightweight, and lightning fast (development version)"
 arch=('i686' 'pentium4' 'x86_64' 'arm' 'aarch64' 'armv7h')
 url="https://github.com/leo-arch/clifm"
