@@ -65,18 +65,18 @@ where to search: `/.*\.png$ /media/images`. And, if you want to further filter t
 
 * **Directory history map**: Keep in sight previous, current, and next entries in the directory history list for easiest and fastest navigation through visited directories.
 
-* **NEW: PLUGINS via custom actions**: Use custom action names, as if they were any other command, to run programs or scripts written in any language and extend thus CliFM functionality to fit your needs. This is basically an easy way of building custom commands for CliFM.
+* **PLUGINS via custom actions**: Use custom action names, as if they were any other command, to run programs or scripts written in any language and extend thus CliFM functionality to fit your needs. This is basically an easy way of building custom commands for CliFM.
 
-* **NEW: Stealth mode:** Leave no trace on the host system. No file is read, no file is written.
+* **Stealth mode:** Leave no trace on the host system. No file is read, no file is written.
 
-* **NEW:** Quickly and easily navigate through the jump database (i.e. a list of visited directories) via **Kangaroo**, a built-in directory jumper function similar to autojump, z.lua, and zoxide.
+* Quickly and easily navigate through the jump database (i.e. a list of visited directories) via **Kangaroo**, a built-in **directory jumper** function similar to autojump, z.lua, and zoxide.
 
 ![dirjump](images/autojump0.png)
 ![dirjump](images/autojump2.png)
 
-* **NEW: Batch link**: Create multiple symbolic links at once.
+* **Batch link**: Create multiple symbolic links at once.
 
-* **NEW: Icons support** :smirk: (depends on the [icons-in-terminal](https://github.com/sebastiencs/icons-in-terminal) project)
+* **Icons support** :smirk: (depends on the [icons-in-terminal](https://github.com/sebastiencs/icons-in-terminal) project)
 
 1) [Install](https://github.com/sebastiencs/icons-in-terminal#installation) icons-in-terminal.
 2) Run CliFM with the `--icons` command line option, or, once in the program, enter `icons on`.
@@ -97,7 +97,7 @@ Because file manager, but also half-shell, CliFM also provides the following fea
 * Bash-like prompt customization
 * Sequential and conditional commands execution 
 * User profiles
-* Customizable keyboard shortcuts (**NEW**)
+* Customizable keyboard shortcuts
 * Lira, a built-in resource opener
 * Mas, a built-in pager for files listing
 * Eleven sorting methods: name, size, atime, btime, ctime, mtime, version, extension, inode, owner, and group. It also supports reverse sorting.
@@ -106,15 +106,15 @@ Because file manager, but also half-shell, CliFM also provides the following fea
 * Auto-cd and auto-open
 * Symlinks editor
 * Disk usage
-* CD on quit, file picker (as shell functions) (**NEW**)
-* Plugins: PDF reader, image/video previews, wallpaper setter, music playlist, updates check, drag and drop, finder, jumper, clipboard, FZF navigation, FZF selection, and interactive help (**NEW**)
-* Batch links (**NEW**)
-* Read and list files form standard input (**NEW**)
-* Exclude certain groups of filenames via the files filter using regular expressions (**NEW**)
-* Up to eight workspaces (**NEW**)
-* Fused parameters for ELN's (**NEW**)
-* Advcpmv support (cp and mv with a progress bar) (**NEW**)
-* Color schemes (**NEW**)
+* CD on quit, file picker (as shell functions)
+* Plugins: PDF reader, image/video previews, wallpaper setter, music playlist, updates check, drag and drop, finder, jumper, clipboard, FZF navigation, FZF selection, and interactive help
+* Batch links
+* Read and list files form standard input
+* Exclude certain groups of filenames via the files filter using regular expressions
+* Up to eight workspaces
+* Fused parameters for ELN's
+* Advcpmv support (cp and mv with a progress bar)
+* Color schemes
 
 **NOTE:** By default, CliFM ships only one color scheme, but more are provided by [clifm-colors](https://github.com/leo-arch/clifm-colors). The package is also available in the [AUR](https://aur.archlinux.org/packages/clifm-colors-git).
 
