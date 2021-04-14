@@ -428,6 +428,7 @@ nm=01;32:bm=01;36:"
 #define TOUPPER(ch) (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
 #define DIGINUM(n) (((n) < 10) ? 1 : ((n) < 100) ? 2 : ((n) < 1000) ? 3 : ((n) < 10000) ? 4 : ((n) < 100000) ? 5 : ((n) < 1000000) ? 6 : ((n) < 10000000) ? 7 : ((n) < 100000000) ? 8 : ((n) < 1000000000) ? 9 : 10)
 #define _ISDIGIT(n) ((unsigned int)(n) - '0' <= 9)
+#define _ISALPHA(n) ((unsigned int)(n) >= 'a' && (unsigned int)(n) <= 'z')
 #define SELFORPARENT(n) (*(n) == '.' && (!(n)[1] || ((n)[1] == '.' && !(n)[2])))
 
 /* dirjump macros for calculating directories rank extra points */
@@ -24717,6 +24718,55 @@ exec_cmd(char **comm)
 	return exit_code;
 }
 
+static inline int
+is_bin_cmd(const char *str)
+/* Return one if STR is a command in PATH or zero if not */
+{
+	char *p = (char *)str, *q = (char *)str;
+	int index = 0, space_index = -1;
+
+	while (*p) {
+		if (*p == ' ') {
+			*p = '\0';
+			space_index = index;
+			break;
+		}
+		p++;
+		index++;
+	}
+
+	size_t i;
+	for (i = 0; bin_commands[i]; i++) {
+		if (*q == *bin_commands[i] && q[1] == bin_commands[i][1]
+		&& strcmp(q, bin_commands[i]) == 0) {
+			if (space_index != -1)
+				q[space_index] = ' ';
+			return 1;
+		}
+	}
+
+	if (space_index != -1)
+		q[space_index] = ' ';
+
+	return 0;
+}
+
+static inline int
+digit_found(const char *str)
+/* Returns 0 if digit is found and preceded by a letter in STR, or one if not */
+{
+	char *p = (char *)str;
+	int c = 0;
+
+	while(*p) {
+		if (c++ && _ISDIGIT(*p) && _ISALPHA(*(p - 1)))
+			return 1;
+		p++;
+	}
+
+	return 0;
+}
+
 static char **
 parse_input_str(char *str)
 /*
@@ -24756,11 +24806,15 @@ parse_input_str(char *str)
 	int fusedcmd_ok = 0;
 
 /** ###################### */
-	char *p = split_fusedcmd(str);
-	if (p) {
-		fusedcmd_ok = 1;
-		str = p;
-		p = (char *)NULL;
+	/* Before splitting 'CMDNUM' into 'CMD NUM', make sure CMDNUM is not
+	 * a cmd in PATH (for example, md5sum) */
+	if (digit_found(str) && !is_bin_cmd(str)) {
+		char *p = split_fusedcmd(str);
+		if (p) {
+			fusedcmd_ok = 1;
+			str = p;
+			p = (char *)NULL;
+		}
 	}
 /** ###################### */
 
@@ -25024,13 +25078,8 @@ parse_input_str(char *str)
 
 			/* If some alphabetic char, besides '-', is found in the
 			 * string, we have no range */
-			if (substr[i][j] != '-' && (substr[i][j] < 48
-			|| substr[i][j] > 57)) {
-/*				if (ranges_ok)
-					free(range_array);
-				ranges_ok = 0; */
+			if (substr[i][j] != '-' && !_ISDIGIT(substr[i][j]))
 				break;
-			}
 
 			/* If a range is found, store its index */
 			if (j > 0 && j < substr_len && substr[i][j] == '-' &&
@@ -25040,7 +25089,7 @@ parse_input_str(char *str)
 		}
 
 		/* Expand 'sel' only as an argument, not as command */
-		if (i > 0 && strcmp(substr[i], "sel") == 0)
+		if (i > 0 && *substr[i] == 's' && strcmp(substr[i], "sel") == 0)
 			is_sel = (short)i;
 	}
 
@@ -25271,12 +25320,24 @@ parse_input_str(char *str)
 				if (num > 0 && num <= (int)files) {
 					/* Replace the ELN by the corresponding escaped
 					 * filename */
-					char *esc_str = escape_str(file_info[num - 1].name);
+					int j = num - 1;
+					char *esc_str = escape_str(file_info[j].name);
 
 					if (esc_str) {
-						substr[i] = (char *)xrealloc(substr[i],
+
+						if (file_info[j].dir && 
+						file_info[j].name[file_info[j].len - 1] != '/') {
+							substr[i] = (char *)xrealloc(substr[i],
+										(strlen(esc_str) + 2) * sizeof(char));
+							sprintf(substr[i], "%s/", esc_str);
+						}
+
+						else {
+							substr[i] = (char *)xrealloc(substr[i],
 										(strlen(esc_str) + 1) * sizeof(char));
-						strcpy(substr[i], esc_str);
+							strcpy(substr[i], esc_str);
+						}
+
 						free(esc_str);
 						esc_str = (char *)NULL;
 					}
@@ -25285,7 +25346,6 @@ parse_input_str(char *str)
 						fprintf(stderr, _("%s: %s: Error quoting "
 							"filename\n"), PROGRAM_NAME, file_info[num-1].name);
 						/* Free whatever was allocated thus far */
-						size_t j;
 
 						for (j = 0; j <= args_n; j++)
 							free(substr[j]);
@@ -25304,21 +25364,20 @@ parse_input_str(char *str)
 
 		if (substr[i][0] == '$' && substr[i][1] != '('
 		&& substr[i][1] != '{') {
-			char *var_name = straft(substr[i], '$');
-			if (var_name) {
-				size_t j;
+			char *var_name = strchr(substr[i], '$');
+			if (var_name && *(++var_name)) {
+				size_t j = usrvar_n;
 
-				for (j = 0; j < usrvar_n; j++) {
+				while (--j >= 0) {
 
-					if (strcmp(var_name, usr_var[j].name) == 0) {
+					if (*var_name == *usr_var[j].name
+					&& strcmp(var_name, usr_var[j].name) == 0) {
 						substr[i] = (char *)xrealloc(substr[i],
 							    (strlen(usr_var[j].value) + 1) * sizeof(char));
 						strcpy(substr[i], usr_var[j].value);
+						break;
 					}
 				}
-
-				free(var_name);
-				var_name = (char *)NULL;
 			}
 
 			else {
@@ -26563,8 +26622,6 @@ main(int argc, char *argv[])
 	/* Start listing as soon as possible to speed up startup time */
 	if (cd_lists_on_the_fly)
 		list_dir();
-
-	copy_plugins();
 
 	create_kbinds_file();
 
