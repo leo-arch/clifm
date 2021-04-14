@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Music player plugin for CliFM
 # Written by L. Abramovich
@@ -6,23 +6,23 @@
 SUCCESS=0
 ERROR=1
 
-if ! [[ $(type -P mplayer) ]]; then
-	echo "CliFM: mplayer: Command not found" >&2
+if ! [ "$(which mplayer 2>/dev/null)" ]; then
+	printf "CliFM: mplayer: Command not found\n" >&2
 	exit $ERROR;
 fi
 
-if [[ -z "$1" ]]; then
-	echo "CliFM: Missing argument" >&2
+if [ -z "$1" ]; then
+	printf "CliFM: Missing argument\n" >&2
 	exit $ERROR
 fi
 
 TMP_FILE="/tmp/clifm/playlist.$(tr -dc A-Za-z0-9 </dev/urandom | head -c 6)"
 
 for file in "$@"; do
-	if [[ ${file[0]} != '/' ]]; then
-		echo "$PWD/$file" | sed 's/\\//g' >> "$TMP_FILE"
+	if [ "$(printf "%s\n" "$file" | cut -c 1-1 )" != '/' ]; then
+		printf "%s\n" "$PWD/$file" | sed 's/\\//g' >> "$TMP_FILE"
 	else
-		echo "$file" | sed 's/\\//g' >> "$TMP_FILE"
+		printf "%s\n" "$file" | sed 's/\\//g' >> "$TMP_FILE"
 	fi
 done
 

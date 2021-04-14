@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Drag and drop plugin for CLiFM
 # Written by L. Abramovich
@@ -19,28 +19,28 @@ ERROR=1
 
 DRAGON=""
 
-if [[ $(type -P dragon-drag-and-drop) ]]; then
+if [ "$(which dragon-drag-and-drop 2>/dev/null)" ]; then
 	DRAGON="dragon-drag-and-drop"
 
-elif [[ $(type -P dragon) ]]; then
+elif [ "$(which dragon 2>/dev/null)" ]; then
 	DRAGON="dragon"
 
 else
-	echo "CLiFM: Neither dragon nor dragon-drag-and-drop were found. Exiting... " >&2
+	printf "CLiFM: Neither dragon nor dragon-drag-and-drop were found. Exiting...\n" >&2
 	exit $ERROR
 fi
 
-if [[ -z $1 ]]; then
+if [ -z "$1" ]; then
 
 	$DRAGON --print-path --target | while read -r r; do
 
-		if [[ $(echo "$r" \
-		| grep '^\(https\?\|ftps\?\|s\?ftp\):\/\/') ]]; then
+		if [ "$(printf "%s\n" "$r" \
+		| grep '^\(https\?\|ftps\?\|s\?ftp\):\/\/')" ]; then
 			curl -LJO "$r"
-			echo "$PWD/$(basename "$r")" >> "$CLIFM_SELFILE"
+			printf "%s\n" "$PWD/$(basename "$r")" >> "$CLIFM_SELFILE"
 
 		else
-			echo "$r" >> "$CLIFM_SELFILE"
+			printf "%s\n" "$r" >> "$CLIFM_SELFILE"
 		fi
 
 	done
@@ -49,7 +49,7 @@ else
 	$DRAGON "$@"
 fi
 
-if [[ $? -eq 0 ]]; then
+if [ $? -eq 0 ]; then
 	exit $SUCCESS
 fi
 

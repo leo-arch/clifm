@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Image thumbnails plugin for CLiFM
 # Written by L. Abramovich
@@ -6,33 +6,33 @@
 SUCCESS=0
 ERROR=1
 
-if [[ -z "$1" ]]; then
-	echo "CliFM: Missing argument. At least one image file must be specified" >&2
+if [ -z "$1" ]; then
+	printf "CliFM: Missing argument. At least one image file must be specified\n" >&2
 	exit $ERROR
 fi
 
-if [[ -n $CLIFM_IMG_VIEWER ]]; then
-	$CLIFM_IMG_VIEWER "$@"
+if [ -n "$CLIFM_IMG_VIEWER" ]; then
+	"$CLIFM_IMG_VIEWER" "$@"
 
-elif [[ $(type -P sxiv) ]]; then
-	if [[ -d "$1" || -h "$1" || -n "$2" ]]; then
-		sxiv -aqtr -- "$@"
-	else
+elif [ "$(which sxiv 2>/dev/null)" ]; then
+#	if [ -d "$1" ] || [ -h "$1" ] || [ -n "$2" ]; then
+#		sxiv -aqt -- "$@"
+#	else
 		sxiv -aqt -- "$@"
-	fi
+#	fi
 
-elif [[ $(type -P feh) ]]; then
+elif [ "$(which feh 2>/dev/null)" ]; then
 	feh -tZ -- "$@"
 
-elif [[ $(type -P lsix) ]]; then
-	if [[ -d "$1" || -h "$1" ]]; then
+elif [ "$(which lsix 2>/dev/null)" ]; then
+	if [ -d "$1" ] || [ -h "$1" ]; then
 		lsix "$1"/*
 	else
 		lsix "$@"
 fi
 
 else
-	echo "CliFM: No image viewer found" >&2
+	printf "CliFM: No image viewer found\n" >&2
 	exit $ERROR
 fi
 

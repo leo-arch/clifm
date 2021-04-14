@@ -249,7 +249,7 @@ fcd() {
 		ls -Ap --group-directories-first --color=always --indicator-style=none)
 		dir="$(printf "%s\n" "$lsd" | fzf \
 			--color="bg+:236,gutter:236,fg+:reverse,pointer:6,prompt:6,marker:2:bold,spinner:6:bold" \
-			--bind "right:accept,left:first+accept" \
+			--bind "right:accept,left:first+select+accept" \
 			--bind "home:first,end:last" \
 			--bind "ctrl-h:preview(help)" \
 			--bind "alt-p:toggle-preview" \

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Clipboard plugin for CliFM
 # Written by L. Abramovich
@@ -14,13 +14,13 @@
 # When importing files from the clipboard, files should be absolute
 # paths.
 
-if [[ -z "$1" ]]; then
-	echo "Usage: clip [s, i] FILE(s)"
+if [ -z "$1" ]; then
+	printf "Usage: clip [s, i] FILE(s)\n"
 	exit 0
 fi
 
-if ! [[ $(type -P xclip) ]]; then
-	echo "CliFM: xclip: Command not found" >&2
+if ! [ "$(which xclip 2>/dev/null)" ]; then
+	printf "CliFM: xclip: Command not found" >&2
 	exit 1
 fi
 
@@ -31,7 +31,7 @@ case $1 in
 
 		# Clipboard values = primary, secondary, clipboard
 		clipboard="primary"
-		echo -n "$@" | xclip -selection "$clipboard"
+		printf "%s" "$@" | xclip -selection "$clipboard"
 	;;
 
 	'i')
@@ -40,7 +40,7 @@ case $1 in
 	;;
 
 	*)
-		echo "Usage: clip [s, i] FILE(s)" >&2
+		printf "Usage: clip [s, i] FILE(s)\n" >&2
 		exit 1
 	;;
 esac

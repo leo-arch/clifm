@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # A PDF text viewer plugin for CLiFM
 # Written by L. Abramovich
@@ -6,18 +6,18 @@
 SUCCESS=0
 ERROR=1
 
-if [[ -z "$1" ]]; then
-	echo "CLIFM: Missing argument" >&2
+if [ -z "$1" ]; then
+	printf "CLIFM: Missing argument\n" >&2
 	exit $ERROR
 fi
 
-if ! [[ $(type -P pdftotext) ]]; then
-	echo "CliFM: pdftotext: Command not found" >&2
+if ! [ "$(which pdftotext 2>/dev/null)" ]; then
+	printf "CliFM: pdftotext: Command not found\n" >&2
 	exit $ERROR
 fi
 
-if [[ "$(head -c4 "$1")" != "%PDF" ]]; then
-	echo "CLiFM: Not a PDF file" >&2
+if [ "$(head -c4 "$1")" != "%PDF" ]; then
+	printf "CLiFM: Not a PDF file\n" >&2
 	exit $ERROR
 fi
 

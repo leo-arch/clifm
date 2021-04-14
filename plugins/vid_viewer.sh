@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Video thumbnails plugin for CliFM
 # Written by L. Abramovich
@@ -6,13 +6,13 @@
 SUCCESS=0
 ERROR=1
 
-if ! [[ $(type -P ffmpegthumbnailer) ]]; then
-	echo "CliFM: ffmpegthumbnailer: Command not found" >&2
+if ! [ "$(which ffmpegthumbnailer 2>/dev/null)" ]; then
+	printf "CliFM: ffmpegthumbnailer: Command not found\n" >&2
 	exit $ERROR
 fi
 
-if [[ -z "$1" ]]; then
-	echo "CliFM: Missing argument" >&2
+if [ -z "$1" ]; then
+	printf "CliFM: Missing argument\n" >&2
 	exit $ERROR
 fi
 
@@ -22,14 +22,14 @@ mkdir -- "$TMP_DIR" >&2
 
 for arg in "$@"; do
 
-	if [[ -d "$arg" ]]; then
+	if [ -d "$arg" ]; then
 
-		if [[ ${arg: -1} == '/' ]]; then
+		if [ ${arg: -1} = '/' ]; then
 			arg="${arg%?}"
 		fi
 
 		for file in "$arg"/*; do
-			if [[ -f "$file" ]]; then
+			if [ -f "$file" ]; then
 				ffmpegthumbnailer -i "$file" -o \
 				"$TMP_DIR/$(basename "$file").jpg" 2>/dev/null
 			fi
@@ -42,17 +42,17 @@ for arg in "$@"; do
 
 done
 
-if [[ $(type -P sxiv) ]]; then
+if [ "$(which sxiv 2>/dev/null)" ]; then
 	sxiv -aqtr -- "$TMP_DIR"
 
-elif [[ $(type -P feh) ]]; then
+elif [ "$(which feh 2>/dev/null)" ]; then
 	feh -tZk -- "$TMP_DIR"
 
-elif [[ $(type -P lsix) ]]; then
+elif [ "$(which lsix)" ]; then
 	lsix "$TMP_DIR"/*
 
 else
-	echo "CliFM: No thumbails viewer found" >&2
+	printf "CliFM: No thumbails viewer found\n" >&2
 	rm -rf -- "$TMP_DIR" 2>/dev/null
 	exit $ERROR
 fi

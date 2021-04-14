@@ -12,17 +12,29 @@
 # At exit, selected files will be sent to CliFM Selbox
 
 if ! [ $(which fzf 2>/dev/null) ]; then
-	echo "CLiFM: fzf: Command not found" >&2
+	printf "CLiFM: fzf: Command not found\n" >&2
 	exit 1
 fi
 
-TMP="/tmp/fzfsel"
+TMPDIR="/tmp/clifm/$CLIFM_PROFILE"
+TMPFILE="$TMPDIR/${CLIFM_PROFILE}.fzfsel"
 
-ls -A | fzf -m --marker='*' --bind "space:select,space:+down,x:select,x:+down,z:deselect,z:+down,a:select-all,s:deselect-all" --layout=reverse-list --prompt "CLiFM> " > "$TMP"
+! [ -d "$TMPDIR" ] && mkdir -p "$TMPDIR"
 
-clear
+ls -A --group-directories-first --color=always | \
+fzf --multi --marker='*' \
+	--color "prompt:6,fg+:reverse" \
+	--bind "space:toggle+down,x:toggle+down" \
+	--bind "z:toggle+up" \
+	--bind "a:select-all,s:deselect-all" \
+	--layout=reverse-list --ansi --prompt "CLiFM> " > "$TMPFILE"
+
 while ISF= read line; do
-	echo "${PWD}/$line" >> "$CLIFM_SELFILE"
-done < "$TMP"
+	printf "%s\n" "$PWD/$line" >> "$CLIFM_SELFILE"
+done < "$TMPFILE"
+
+rm -- "$TMPFILE" > /dev/null 2>&1
+
+#clear
 
 exit 0

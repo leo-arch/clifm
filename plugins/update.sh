@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Plugins to check for CliFM's updates
 # Written by L. Abramovich
@@ -7,10 +7,10 @@ upstream="$(curl -s "https://github.com/leo-arch/clifm/releases/latest" | grep -
 
 cur="$(clifm -v | awk 'NR==1{print $2'})"
 
-if [[ "$cur" == "$upstream" ]]; then
-	echo "You are up to date: $cur is the latest version"
+if [ "$cur" = "$upstream" ]; then
+	printf "You are up to date: %s is the latest version\n" "$cur"
 else
-	echo "${upstream}: New release available"
+	printf "%s: New release available\n" "$upstream"
 fi
 
 exit 0
