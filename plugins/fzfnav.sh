@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # FZF navigation/previewing plugin for CliFM
 # Written by L. Abramovich
@@ -6,7 +6,7 @@
 
 # Description: Navigate the filesystem (including file previews) with FZF.
 # Previews are shown by just hovering on the file. Each generated preview is
-# cached in /tmp/clifm/previews to speed up the previewing process
+# cached in $HOME/.cache/clifm/previews to speed up the previewing process
 
 # Usage:
 # Left: go to parent directory
@@ -18,14 +18,19 @@
 # with FZF or open the last accepted file (Enter).
 # Press Esc to cancel and exit.
 
-# Preview dependencies (optional)
+# Previewing dependencies (optional)
 # atool or bsdtar or tar: archives
 # convert (imagemagick), and ueberzug (recommended) or viu or catimg: images
 # fontpreview: fonts
 # libreoffice: office documents
 # pdftoppm: PDF files
+# epub-thumbnailer: epub files
+# ddjvu (djvulibre): DjVu files
+# ghostscript: postscript files (ps)
 # ffmpegthumbnailer: videos
+# ffplay (ffmpeg): audio
 # w3m or linx or elinks: web content
+# bat or highlight: syntax highlighthing for text files
 
 uz_cleanup() {
     rm "$FIFO_UEBERZUG"
@@ -33,9 +38,9 @@ uz_cleanup() {
 }
 
 calculate_position() {
-	read -r TERM_LINES TERM_COLS << HereDoc
+	read -r TERM_LINES TERM_COLS << EOF
 	$(</dev/tty stty size)
-HereDoc
+EOF
 
      X=$((TERM_COLS - COLUMNS - 2))
      Y=1
@@ -90,7 +95,7 @@ file_preview() {
 	# Use cached images whenever possible
 	if [ -f "${PREVIEWDIR}/${entry}.jpg" ]; then
 		[ -z "$IMG_VIEWER" ] && return
-		$IMG_VIEWER "${PREVIEWDIR}/${entry}.jpg"
+		"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg"
 		return
 	fi
 
@@ -99,19 +104,11 @@ file_preview() {
 	case "$mimetype" in
 
 		*"officedocument"*|*"msword"|*"ms-excel"|"text/rtf")
-			if [ ! "$(which libreoffice 2>/dev/null)" ]; then
-				return
-			fi
+			[ -z "$LIBREOFFICE_OK" ] && return
 			libreoffice --headless --convert-to jpg "$entry" \
-			--outdir "$PREVIEWDIR/${entry%/*}" > /dev/null 2>&1
+			--outdir "$PREVIEWDIR" > /dev/null 2>&1
 
-			filename="$(printf "%s" "${entry##*/}" | cut -d. -f1)"
-
-			mv "$PREVIEWDIR/${entry%/*}/${filename}.jpg" \
-			"$PREVIEWDIR/${entry}.jpg"
-
-#			echo "$PREVIEWDIR/${entry%/*}"
-#			rm -r -- "$TMPDIR/lu"*".tmp"
+			mv "$PREVIEWDIR/${entry%.*}.jpg" "$PREVIEWDIR/${entry}.jpg"
 
 			"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg"
 		;;
@@ -123,24 +120,34 @@ file_preview() {
 			[ -z "$BROWSER" ] && return
 			"$BROWSER" "$entry" ;;
 
-		"text/"*)
-			if [ "$(which highlight 2>/dev/null)" ]; then
-				highlight -O ansi --force "$entry"
+		"text/"*|"application/x-setupscript")
+			if [ "$BAT_OK" -eq 1 ]; then
+				bat -pp --color=always "$entry"
+			elif [ "$HIGHLIGHT_OK" -eq 1 ]; then
+				highlight -O ansi "$entry"
 			else
 				cat "$entry"
 			fi
-			;;
+		;;
+
+		*"/vnd.djvu")
+			[ -z "$DDJVU_OK" ] && return
+			ddjvu --format=tiff --page=1 "$entry" "$PREVIEWDIR/${entry}.jpg"
+			"$IMG_VIEWER" "$PREVIEWDIR/${entry}.jpg"
+		;;
 
 		*"/gif")
-			[ -z "$IMG_VIEWER" ] || ! [ "$(which convert 2>/dev/null)" ] && return
+			[ -z "$IMG_VIEWER" ] || [ -z "$CONVERT_OK" ] && return
 			# Break down the gif into frames and show each frame, one each 0.1 secs
-			if [ ! -d "$PREVIEWDIR/$entry" ]; then
-				mkdir -p "$PREVIEWDIR/$entry"
+			filename="$(printf "%s" "$entry" | tr ' ' '_')"
+			if [ ! -d "$PREVIEWDIR/$filename" ]; then
+				mkdir -p "$PREVIEWDIR/$filename"
 				convert -coalesce -resize "$WIDTH"x"$HEIGHT"\> "$entry" \
-				"$PREVIEWDIR/$entry/${entry##*/}.jpg"
+				"$PREVIEWDIR/$filename/${filename%.*}.jpg"
 			fi
 			while true; do
-				for frame in $(find "$PREVIEWDIR/$entry"/*.jpg | sort -V); do
+				for frame in $(find "$PREVIEWDIR/$filename"/*.jpg 2>/dev/null \
+				| sort -V); do
 					"$IMG_VIEWER" "$frame"
 					sleep 0.1
 				done
@@ -151,13 +158,28 @@ file_preview() {
 		"image/"*)
 			[ -z "$IMG_VIEWER" ] && return
 #			convert "$entry" -flatten -resize "$WIDTH"x"$HEIGHT"\> "$PREVIEWDIR/$entry.jpg"
-			"$IMG_VIEWER" "${PWD}/$entry" ;;
+			"$IMG_VIEWER" "${PWD}/$entry"
+		;;
+
+		"application/postscript")
+			! [ "$(which gs 2>/dev/null)" ] && return
+			gs -sDEVICE=jpeg -dJPEGQ=100 -dNOPAUSE -dBATCH -dSAFER -r300 \
+			-sOutputFile="$PREVIEWDIR/${entry}.jpg" "$entry"
+			"$IMG_VIEWER" "$PREVIEWDIR/${entry}.jpg"
+		;;
+
+		*"/epub+zip")
+			[ -z "$EPUBTHUMB_OK" ] && return
+			epub-thumbnailer "$entry" "${PREVIEWDIR}/${entry}.jpg" "$WIDTH" "$HEIGHT"
+			"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg"
+		;;
 
 		*"/pdf")
 #			pdftotext -nopgbrk -layout "$entry" - | ${PAGER:=less} ;;
-			[ -z "$IMG_VIEWER" ] || ! [ "$(which pdftoppm 2>/dev/null)" ] && return
+			[ -z "$IMG_VIEWER" ] || [ -z "$PDFTOPPM_OK" ] && return
 			pdftoppm -jpeg -f 1 -singlefile "$entry" "${PREVIEWDIR}/$entry"
-			"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg" ;;
+			"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg"
+		;;
 
 		"audio"/*)
 #			[ -z "$IMG_VIEWER" ] || ! [ "$(which ffmpeg 2>/dev/null)" ] && return
@@ -168,17 +190,19 @@ file_preview() {
 
 #			uz_image "${PREVIEWDIR}/${entry}.jpg" ;;
 
-			[ -z "$IMG_VIEWER" ] || ! [ "$(which mplayer 2>/dev/null)" ] && return
-			[ "$(which mediainfo 2>/dev/null)" ] && mediainfo "$entry"
-			mplayer -really-quiet "$entry" > /dev/null 2>&1 ;;
+			[ -z "$IMG_VIEWER" ] || [ -z "$FFPLAY_OK" ] && return
+			[ "$MEDIAINFO_OK" -eq 1 ] && mediainfo "$entry"
+			ffplay -nodisp -autoexit "$entry" &
+		;;
 
 		"video/"*)
-			[ -z "$IMG_VIEWER" ] || ! [ "$(which ffmpegthumbnailer 2>/dev/null)" ] && return
+			[ -z "$IMG_VIEWER" ] || [ -z "$FFMPEGTHUMB_OK" ] && return
 			ffmpegthumbnailer -i "$entry" -o "${PREVIEWDIR}/${entry}.jpg" -s 0 -q 5
-			"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg" ;;
+			"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg"
+		;;
 
 		"font/"*)
-			[ -z "$IMG_VIEWER" ] || ! [ "$(which fontpreview 2>/dev/null)" ] && return
+			[ -z "$IMG_VIEWER" ] || [ -z "$FONTPREVIEW_OK" ] && return
 			fontpreview -i "$entry" -o "${PREVIEWDIR}/${entry}.jpg"
 			"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg" ;;
 
@@ -212,7 +236,7 @@ file_preview() {
 			if [ "$(file -bL --mime-encoding "$entry")" = "binary" ]; then
 				printf -- "--- \e[0;30;47mBinary file\e[0m ---\n"
 			fi
-			if [ "$(which mediainfo 2>/dev/null)" ]; then
+			if [ "$MEDIAINFO_OK" -eq 1 ]; then
 				mediainfo "${PWD}/$entry" 2>/dev/null
 			else
 				file -b "$entry"
@@ -241,7 +265,7 @@ fcd() {
 		return
 	fi
 
-	dir_color="$(dircolors -c | grep -o "[':]di=....." | cut -d';' -f2)"
+	dir_color="$(dircolors -c | grep -o "[\':]di=....." | cut -d';' -f2)"
 	[ -z "$dir_color" ] && dir_color="34"
 
 	while true; do
@@ -249,7 +273,7 @@ fcd() {
 		ls -Ap --group-directories-first --color=always --indicator-style=none)
 		dir="$(printf "%s\n" "$lsd" | fzf \
 			--color="bg+:236,gutter:236,fg+:reverse,pointer:6,prompt:6,marker:2:bold,spinner:6:bold" \
-			--bind "right:accept,left:first+select+accept" \
+			--bind "right:accept,left:first+accept" \
 			--bind "home:first,end:last" \
 			--bind "ctrl-h:preview(help)" \
 			--bind "alt-p:toggle-preview" \
@@ -278,8 +302,9 @@ main() {
 	fi
 
 	UEBERZUG_OK=0
-	TMPDIR="/tmp/clifm"
-	PREVIEWDIR="${TMPDIR}/previews"
+	CACHEDIR="${XDG_CACHE_HOME:-$HOME/.cache}/clifm"
+#	CACHEDIR="$HOME/.cache/clifm"
+	PREVIEWDIR="$CACHEDIR/previews"
 	WIDTH=1920
 	HEIGHT=1080
 
@@ -315,6 +340,21 @@ main() {
 		BROWSER="elinks"
 	fi
 
+	[ "$(which ffplay 2>/dev/null)" ] && FFPLAY_OK=1
+	[ "$(which mediainfo 2>/dev/null)" ] && MEDIAINFO_OK=1
+	[ "$(which pdftoppm 2>/dev/null)" ] && PDFTOPPM_OK=1
+	[ "$(which ffmpegthumbnailer 2>/dev/null)" ] && FFMPEGTHUMB_OK=1
+	[ "$(which convert 2>/dev/null)" ] && CONVERT_OK=1
+	[ "$(which libreoffice 2>/dev/null)" ] && LIBREOFFICE_OK=1
+	if [ "$(which bat 2>/dev/null)" ]; then
+		BAT_OK=1
+	elif [ "$(which highlight 2>/dev/null)" ]; then
+		HIGHLIGHT_OK=1
+	fi
+	[ "$(which fontpreview 2>/dev/null)" ] && FONTPREVIEW_OK=1
+	[ "$(which epub-thumbnailer 2>/dev/null)" ] && EPUBTHUMB_OK=1
+	[ "$(which ddjvu 2>/dev/null)" ] && DDJVU_OK=1
+
 	if [ $UEBERZUG_OK = 1 ]; then
 		export FIFO_UEBERZUG="$HOME/.cache/clifm/ueberzug-${PPID}"
 		trap uz_cleanup EXIT
@@ -325,8 +365,9 @@ main() {
 
 	export -f file_preview uz_image calculate_position start_ueberzug uz_clear \
 	help
-	export TMP TMPDIR PREVIEWDIR IMG_VIEWER ARCHIVER_CMD ARCHIVER_OPTS BROWSER \
-	WIDTH HEIGHT
+	export TMP CACHEDIR PREVIEWDIR IMG_VIEWER ARCHIVER_CMD ARCHIVER_OPTS BROWSER \
+	WIDTH HEIGHT FFPLAY_OK MEDIAINFO_OK PDFTOPPM_OK FFMPEGTHUMB_OK CONVERT_OK \
+	LIBREOFFICE_OK HIGHLIGHT_OK FONTPREVIEW_OK BAT_OK EPUBTHUMB_OK DDJVU_OK
 
 	fcd "$@"
 
