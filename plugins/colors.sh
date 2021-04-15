@@ -19,11 +19,11 @@ if [ "$opt" = "256" ]; then
 	for fgbg in $(seq 38 48) ; do
 		for color in $(seq 0 256); do #Colors
 			for attr in 0 1 2 4 5 7; do
-				printf "\e[${attr};${fgbg};5;${color}m${attr};${fgbg};5;${color}\e[0;39;49m "
+				printf "\e[%s;%s;5;%sm%s;%s;5;%s\e[0;39;49m " "${attr}" "${fgbg}" "${color}" "${attr}" "${fgbg}" "${color}"
 			done
-			printf "\n"
+			echo
 	        done
-	        printf "\n"
+	        echo
 	done
 
 elif [ "$opt" = "16" ]; then
@@ -32,13 +32,13 @@ elif [ "$opt" = "16" ]; then
 	for clbg in $(seq 40 47) $(seq 100 107) 49 ; do
 	        for clfg in $(seq 30 37) $(seq 90 97) 39 ; do
 	                for attr in 0 1 2 4 5 7 ; do
-	                        printf "\e[${attr};${clbg};${clfg}m${attr};${clbg};${clfg}\e[0;39;49m "
+						printf "\e[%s;%s;%sm%s;%s;%s\e[0;39;49m " "${attr}" "${clbg}" "${clfg}" "${attr}" "${clbg}" "${clfg}"
 	                done
 	                printf "\n"
 	        done
 	done
 
-elif [ $opt = "test" ]; then
+elif [ "$opt" = "test" ]; then
 	printf "The word 'test' should be printed in green (using the current terminal background color as background color). If not, then X colors are not supported by this terminal (emulator).\n"
 
 	printf "8 colors (3-bit)\n"
