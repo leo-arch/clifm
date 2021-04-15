@@ -1,3 +1,5 @@
+![logo](images/clifm_300.png)
+
 # CliFM
 > The KISS file manager: CLI-based, ultra-lightweight, lightning fast, and written in C
 
