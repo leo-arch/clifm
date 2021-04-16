@@ -3,6 +3,9 @@
 # CliFM
 > The KISS file manager: CLI-based, ultra-lightweight, lightning fast, and written in C
 
+## Because it's fast!
+<p align="center"><a href="https://mega.nz/embed/UtZGFLxZ#k69MIzqsJecLbmLuDVFq5ygvS6i7vDc4KCKZMEpnbTs"><img src="images/video_thumb.png"></a></p>
+
 ###
 [![clifm](https://img.shields.io/aur/version/clifm?color=1793d1&label=clifm&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/clifm/)
 [![clifm-git](https://img.shields.io/aur/version/clifm-git?color=1793d1&label=clifm-git&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/clifm/)
