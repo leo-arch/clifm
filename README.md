@@ -193,6 +193,9 @@ Do not forget to install the manpage as well (the full help is in here):
 	$ sudo gzip /usr/share/man/man1/clifm.1
 
 Then you can access the manpage as always: `man clifm`
+Finally, copy the plugins to the local plugins directory:
+
+	$ cp /usr/share/clifm/plugins/* $HOME/.config/clifm/plugins
 
 ## Support
 
