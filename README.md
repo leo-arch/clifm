@@ -1,10 +1,7 @@
-![logo](images/clifm_300.png)
+<p align="center"><img src="images/clifm_300.png"></p>
 
 # CliFM
 > The KISS file manager: CLI-based, ultra-lightweight, lightning fast, and written in C
-
-## Because it's fast!
-<p align="center"><a href="https://mega.nz/embed/UtZGFLxZ#k69MIzqsJecLbmLuDVFq5ygvS6i7vDc4KCKZMEpnbTs"><img src="images/video_thumb.png"></a></p>
 
 ###
 [![clifm](https://img.shields.io/aur/version/clifm?color=1793d1&label=clifm&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/clifm/)
@@ -12,6 +9,13 @@
 [![clifm-colors-git](https://img.shields.io/aur/version/clifm-colors-git?color=1793d1&label=clifm-colors-git&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/clifm/)
 [![privacy](https://img.shields.io/badge/privacy-ok-green?style=for-the-badge)](https://en.wikipedia.org/wiki/Privacy-invasive_software)
 [![License](https://img.shields.io/github/license/leo-arch/clifm?color=red&style=for-the-badge)](https://github.com/leo-arch/clifm/blob/master/LICENSE)
+
+
+
+
+
+<h3 align="center"><br><i>Because it's fast!</i></h3>
+<p align="center"><a href="https://mega.nz/embed/UtZGFLxZ#k69MIzqsJecLbmLuDVFq5ygvS6i7vDc4KCKZMEpnbTs"><img src="images/video_thumb.png"></a></p>
 
 ## Rationale
 
