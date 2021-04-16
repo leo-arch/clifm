@@ -8,7 +8,7 @@
 [![privacy](https://img.shields.io/badge/privacy-ok-green?style=for-the-badge)](https://en.wikipedia.org/wiki/Privacy-invasive_software)
 [![License](https://img.shields.io/github/license/leo-arch/clifm?color=red&style=for-the-badge)](https://github.com/leo-arch/clifm/blob/master/LICENSE)
 
-<h3 align="center"><br><i>Because it's fast!</i></h3>
+<h3 align="center"><br><i>Did I say it's fast?</i></h3>
 <p align="center"><a href="https://mega.nz/embed/UtZGFLxZ#k69MIzqsJecLbmLuDVFq5ygvS6i7vDc4KCKZMEpnbTs"><img src="images/video_thumb.png"></a></p>
 
 ## Rationale
