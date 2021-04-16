@@ -1,5 +1,5 @@
 <p align="center"><img src="images/clifm_300.png"></p>
-<h2 align="center">The KISS file manager: CLI-based, ultra-lightweight, lightning fast, and written in C</h2>
+<h3 align="center">The KISS file manager: CLI-based, ultra-lightweight, lightning fast, and written in C</h3>
 
 ###
 [![clifm](https://img.shields.io/aur/version/clifm?color=1793d1&label=clifm&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/clifm/)
