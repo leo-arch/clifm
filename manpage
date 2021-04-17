@@ -80,6 +80,7 @@ List of CliFM features:
   36) Up to eight workspaces
   37) Fused parameters support for ELN's
   38) Advcpmv support (cp and mv with a progress bar). Depends on advcpmv (See \fIhttps://github.com/jarun/advcpmv\fR)
+  39) Fastback function
 
 .SH RATIONALE
 When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the Linux built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There is no two without three".
@@ -275,6 +276,9 @@ Options precedence order: 1) command line; 2) configuration file; 3) default val
 \fBNOTE 2:\fR In case of ELN-filename conflict the backslash can be used to prevent ELN expansion. For example, if we have at least two files and one of them in named "2", then CLiFM cannot know in advance if the command refers to the ELN 2 or to the filename "2". In we want the ELN, we just write the ELN number, for example: 's 2'. But if we want the filename, we need to escape the filename using the backlash character: 's \\2'.
 .sp
 \fBNOTE 3:\fR CliFM now supports \fBfused parameters\fR for internal commands taking an ELN or range of ELN's as parameters. Much like short options for command line programs, you can drop or omit the space between internal commands and the corresponding ELN passed as argument. In general, you can write 'CMDELN' instead of 'CMD ELN'. For example: 'o12' or 's1-5' instead of 'o 12' and 's 1-5' respectivelly. Bear in mind, however, that in thus omitting the space char TAB completion for ELN's won't be available. If there is a file named 'o12' (more generally, CMDELN), and if you want to refer to this file instead of a CliFM command, escape the filename to prevent the split; for example: 's \\o12'.
+.sp
+\fBNOTE 4:\fR CliFM implements a \fBfastback\fR function, that is to say, the convertion of "... n" or "cmd ... n" into "../.. n" or "cmd ../.. n". In other words, subsequent dots after ".." will be converted each into "/..". For example, if you are in your home directory and type "..." or "cd ...", and since "..." amounts to "../..", you will be taken to the root directory. TAB completion is available for the fastback function: "....bin" -> TAB -> "../../../bin".
+
 .TP
 .B \fRFILE/DIR
 if the \fIautocd\fR and \fIauto-open\fR functions are enabled, which is the default value, open FILE or change directory to DIR. In other words, 'FILE' amounts to 'open FILE' or 'o FILE', and 'DIR' to 'cd DIR'. ELN's, of course, are allowed. Example: '12'. Unlike the \fIopen\fR function (see below), passing an opening application is not allowed.
@@ -388,7 +392,7 @@ Unlike the shell 'cd' command, CliFM's built\-in \fIcd\fR function not only chan
 .B cl, columns \fR[on, off]
 toggle columns on/off.
 .TP
-.B cmd, commands 
+.B cmd, commands
 show this list of commands. A more convenient way of getting information about CliFM commands is via the interactive help plugin (depends on \fIfzf\fR), by default binded to the "ihelp" action name. 
 .TP
 .B cs, colorschemes \fR[edit] [NAME]
