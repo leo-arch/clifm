@@ -529,7 +529,7 @@ gen_rand_str(size_t len)
                      "abcdefghijklmnopqrstuvwxyz"
                      "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-	srand(time(NULL));
+	srand((unsigned int)time(NULL));
 
 	char *str = (char *)malloc((len + 1) * sizeof(char));
 	char *p = str;
@@ -541,7 +541,7 @@ gen_rand_str(size_t len)
 
 	size_t i;
 	while (len--) {
-		i = (double)rand() / RAND_MAX * (sizeof charset - 1);
+		i = rand() / RAND_MAX * (sizeof charset - 1);
 		*p++ = charset[i];
     }
 

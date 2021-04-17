@@ -1140,7 +1140,7 @@ get_size_unit(off_t size)
 
 	int x = (int)s;
 	/* If x == s, then s is an interger; else, it's float
-	 * We don't want to print the reminder when the it is zero */
+	 * We don't want to print the reminder when it is zero */
 
 	const char *const u = "BKMGTPEZY";
 	snprintf(str, max, "%.*f%c", (s == x) ? 0 : 2, (double)s, u[n]);
@@ -1296,7 +1296,7 @@ is_internal_c(const char *restrict cmd)
 		NULL };
 
 	int found = 0;
-	int i = (sizeof(int_cmds)/sizeof(char *)) - 1;
+	int i = (int)(sizeof(int_cmds) / sizeof(char *)) - 1;
 	while (--i >= 0) {
 		if (*cmd == *int_cmds[i] && strcmp(cmd, int_cmds[i]) == 0) {
 			found = 1;
@@ -1484,7 +1484,7 @@ launch_execle(const char *cmd)
 }
 
 static int
-launch_execve(char **cmd, int bg, int flags)
+launch_execve(char **cmd, int bg, int xflags)
 /* Execute a command and return the corresponding exit status. The exit
  * status could be: zero, if everything went fine, or a non-zero value
  * in case of error. The function takes as first arguement an array of
@@ -1516,16 +1516,16 @@ launch_execve(char **cmd, int bg, int flags)
 			signal(SIGTERM, SIG_DFL);
 		}
 
-		if (flags) {
+		if (xflags) {
 			int fd = open("/dev/null", O_WRONLY, 0200);
 
-			if (flags & E_NOSTDIN)
+			if (xflags & E_NOSTDIN)
 				dup2(fd, STDIN_FILENO);
 
-			if (flags & E_NOSTDOUT)
+			if (xflags & E_NOSTDOUT)
 				dup2(fd, STDOUT_FILENO);
 
-			if (flags & E_NOSTDERR)
+			if (xflags & E_NOSTDERR)
 				dup2(fd, STDERR_FILENO);
 
 			close(fd);
@@ -1557,7 +1557,7 @@ free_dirlist(void)
 	if (!file_info || !files)
 		return;
 
-	int i = files;
+	int i = (int)files;
 
 	while (--i >= 0)
 		free(file_info[i].name);
@@ -1600,7 +1600,7 @@ get_file_icon(const char *file, int n)
 	if (!file)
 		return;
 
-	int i = sizeof(icon_filenames) / sizeof(struct icons_t);
+	int i = (int)(sizeof(icon_filenames) / sizeof(struct icons_t));
 
 	while (--i >= 0) {
 
@@ -1625,7 +1625,7 @@ get_dir_icon(const char *dir, int n)
 	if (!dir)
 		return;
 
-	int i = sizeof(icon_dirnames)/sizeof(struct icons_t);
+	int i = (int)(sizeof(icon_dirnames) / sizeof(struct icons_t));
 
 	while (--i >= 0) {
 
@@ -1651,7 +1651,7 @@ get_ext_icon(const char *restrict ext, int n)
 
 	ext++;
 
-	int i = sizeof(icon_ext) / sizeof(struct icons_t);
+	int i = (int)(sizeof(icon_ext) / sizeof(struct icons_t));
 
 	while (--i >= 0) {
 
@@ -1678,7 +1678,7 @@ get_ext_color(const char *ext)
 
 	ext++;
 
-	int i = ext_colors_n;
+	int i = (int)ext_colors_n;
 	while (--i >= 0) {
 
 		if (!ext_colors[i] || !*ext_colors[i] || !ext_colors[i][2])
@@ -1755,7 +1755,7 @@ print_entry_props(struct fileinfo *props, size_t max)
 
 	if (props->ltime) {
 		struct tm *t = localtime(&props->ltime);
-		sprintf(mod_time, "%d-%02d-%02d %02d:%02d", t->tm_year + 1900,
+		snprintf(mod_time, 128, "%d-%02d-%02d %02d:%02d", t->tm_year + 1900,
 				t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min);
 	}
 	else
@@ -1780,7 +1780,7 @@ print_entry_props(struct fileinfo *props, size_t max)
 	}
 
 	if (cur_len > max) {
-		int rest = cur_len - max;
+		int rest = (int)(cur_len - max);
 		trim = 1;
 		strcpy(trim_name, props->name);
 		if (unicode)
@@ -1889,9 +1889,9 @@ entrycmp(const void *a, const void *b)
 			ret = -1;
 		break;
 
-	case SATIME:
-	case SBTIME:
-	case SCTIME:
+	case SATIME: /* fallthrough */
+	case SBTIME: /* fallthrough */
+	case SCTIME: /* fallthrough */
 	case SMTIME:
 		if (pa->time > pb->time)
 			ret = 1;
@@ -2060,9 +2060,9 @@ copy_plugins(void)
 	if (count_dir(usr_share_plugins_dir) <= 2)
 		return;
 
-	char *cp_cmd[] = { "cp", "-r", usr_share_plugins_dir,
+	char *cp_comm[] = { "cp", "-r", usr_share_plugins_dir,
 					   CONFIG_DIR_GRAL, NULL };
-	launch_execve(cp_cmd, FOREGROUND, E_NOFLAG);
+	launch_execve(cp_comm, FOREGROUND, E_NOFLAG);
 }
 
 static char *
@@ -2195,7 +2195,7 @@ add_to_jumpdb(const char *dir)
 		jump_n = 0;
 	}
 
-	int i = jump_n, new_entry = 1;
+	int i = (int)jump_n, new_entry = 1;
 	while (--i >= 0) {
 
 		if (dir[1] == jump_db[i].path[1]
@@ -2233,8 +2233,9 @@ load_jumpdb(void)
 	if (xargs.no_dirjump ==  1 || !config_ok || !CONFIG_DIR)
 		return;
 
-	char *JUMP_FILE = (char *)xnmalloc(strlen(CONFIG_DIR) + 10, sizeof(char));
-	sprintf(JUMP_FILE, "%s/jump.cfm", CONFIG_DIR);
+	size_t dir_len = strlen(CONFIG_DIR);
+	char *JUMP_FILE = (char *)xnmalloc(dir_len + 10, sizeof(char));
+	snprintf(JUMP_FILE, dir_len + 10, "%s/jump.cfm", CONFIG_DIR);
 
 	struct stat attr;
 
@@ -2251,9 +2252,9 @@ load_jumpdb(void)
 	}
 
 	char tmp_line[PATH_MAX] = "";
-	int jump_lines = 0;
+	size_t jump_lines = 0;
 
-	while (fgets(tmp_line, sizeof(tmp_line), fp)) {
+	while (fgets(tmp_line, (int)sizeof(tmp_line), fp)) {
 		if (*tmp_line != '\n' && *tmp_line >= '0' && *tmp_line <= '9')
 			jump_lines++;
 	}
@@ -2334,7 +2335,7 @@ load_jumpdb(void)
 		if (access(tmpc, F_OK) == -1)
 			continue;
 
-		jump_db[jump_n].visits = visits;
+		jump_db[jump_n].visits = (size_t)visits;
 		jump_db[jump_n].first_visit = first;
 
 		if (is_number(tmpb))
@@ -2379,7 +2380,8 @@ save_jumpdb(void)
 		return;
 	}
 
-	size_t i, total_rank = 0, reduce = 0;
+	size_t i, total_rank = 0;
+	int reduce = 0;
 	time_t now = time(NULL);
 
 	if (jump_total_rank > max_jump_total_rank)
@@ -2388,8 +2390,8 @@ save_jumpdb(void)
 	for (i = 0; i < jump_n; i++) {
 
 		int days_since_first = (int)(now - jump_db[i].first_visit) / 60 / 60 / 24;
-		int rank = days_since_first > 1 ? (jump_db[i].visits * 100)
-							/ days_since_first : (jump_db[i].visits * 100);
+		int rank = days_since_first > 1 ? ((int)jump_db[i].visits * 100)
+							/ days_since_first : ((int)jump_db[i].visits * 100);
 
 		int hours_since_last = (int)(now - jump_db[i].last_visit) / 60 / 60;
 
@@ -2403,7 +2405,7 @@ save_jumpdb(void)
 		else							 /* More than a week */
 			rank = JOLDER(tmp_rank);
 
-		int j = bm_n;
+		int j = (int)bm_n;
 		while (--j >= 0) {
 			if (bookmarks[j].path[1] == jump_db[i].path[1]
 			&& strcmp(bookmarks[j].path, jump_db[i].path) == 0) {
@@ -2423,7 +2425,7 @@ save_jumpdb(void)
 
 		total_rank += rank;
 
-		fprintf(fp, "%zu:%zu:%zu:%s\n", jump_db[i].visits,
+		fprintf(fp, "%zu:%ld:%ld:%s\n", jump_db[i].visits,
 				jump_db[i].first_visit, jump_db[i].last_visit,
 				jump_db[i].path);
 	}
@@ -2460,7 +2462,7 @@ print_div_line(void)
 	fputs(dl_c, stdout);
 
 	int i;
-	for (i = term_cols; i--;)
+	for (i = (int)term_cols; i--;)
 		putchar(div_line_char);
 
 	fputs(df_c, stdout);
@@ -2532,7 +2534,7 @@ get_last_path(void)
 
 	char line[PATH_MAX] = "";
 
-	while (fgets(line, sizeof(line), last_fp)) {
+	while (fgets(line, (int)sizeof(line), last_fp)) {
 
 		char *p = line;
 
@@ -2595,7 +2597,7 @@ load_pinned_dir(void)
 	}
 
 	char line[PATH_MAX] = "";
-	fgets(line, sizeof(line), fp);
+	fgets(line, (int)sizeof(line), fp);
 
 	if (!*line || !strchr(line, '/')) {
 		free(pin_file);
@@ -2642,9 +2644,8 @@ is_color_code(const char *str)
 			semicolon++;
 		}
 
-		else if (*str == '\n');
-
-		else /* Neither digit nor semicolon */
+		/* Neither digit nor semicolon */
+		else if (*str != '\n')
 			return 0;
 
 		str++;
@@ -2930,7 +2931,7 @@ set_colors(const char *colorscheme, int env)
 						nl_removed = 1;
 					}
 
-					int end_char = line_len - 1;
+					int end_char = (int)line_len - 1;
 
 					if (nl_removed)
 						end_char--;
@@ -2983,7 +2984,7 @@ set_colors(const char *colorscheme, int env)
 
 		/* Unload current extension colors */
 		if (ext_colors_n) {
-			int i = ext_colors_n;
+			int i = (int)ext_colors_n;
 
 			while (--i >= 0)
 				free(ext_colors[i]);
@@ -3002,7 +3003,7 @@ set_colors(const char *colorscheme, int env)
 		int eol = 0;
 
 		if (ext_colors_n) {
-			int i =  ext_colors_n;
+			int i =  (int)ext_colors_n;
 
 			while (--i >= 0)
 				free(ext_colors[i]);
@@ -3016,8 +3017,8 @@ set_colors(const char *colorscheme, int env)
 		while(!eol) {
 			switch (*p) {
 
-			case '\0':
-			case '\n':
+			case '\0': /* fallthrough */
+			case '\n': /* fallthrough */
 			case ':':
 				buf[len] = '\0';
 				ext_colors = (char **)xrealloc(ext_colors,
@@ -3059,7 +3060,7 @@ set_colors(const char *colorscheme, int env)
 		 * when listing files */
 		ext_colors_len = (size_t *)xnmalloc(ext_colors_n, sizeof(size_t));
 
-		int i =  ext_colors_n;
+		int i =  (int)ext_colors_n;
 		while (--i >= 0) {
 			char *ret = strrchr(ext_colors[i], '=');
 
@@ -3113,8 +3114,8 @@ set_colors(const char *colorscheme, int env)
 		while(!eol) {
 			switch (*p) {
 
-			case '\0':
-			case '\n':
+			case '\0': /* fallthrough */
+			case '\n': /* fallthrough */
 			case ':':
 				buf[len] = '\0';
 				colors = (char **)xrealloc(colors, (words + 1) * sizeof(char *));
@@ -3150,7 +3151,7 @@ set_colors(const char *colorscheme, int env)
 			colors[words] = (char *)NULL;
 		}
 
-		int i = words;
+		int i = (int)words;
 		/* Set the color variables */
 		while (--i >= 0) {
 
@@ -3380,8 +3381,8 @@ set_colors(const char *colorscheme, int env)
 		while(!eol) {
 			switch (*p) {
 
-			case '\0':
-			case '\n':
+			case '\0': /* fallthrough */
+			case '\n': /* fallthrough */
 			case ':':
 				buf[len] = '\0';
 				colors = (char **)xrealloc(colors, (words + 1) * sizeof(char *));
@@ -3417,7 +3418,7 @@ set_colors(const char *colorscheme, int env)
 		}
 
 		/* Set the color variables */
-		i = words;
+		i = (int)words;
 		while (--i >= 0) {
 
 			if (*colors[i] == 'd' && strncmp(colors[i], "di=", 3) == 0)
@@ -3988,8 +3989,9 @@ create_tmp_files(void)
 	 * to create files in here, but only the file's owner can remove
 	 * or modify them */
 
-	TMP_DIR = (char *)xnmalloc(strlen(user) + pnl_len + 7, sizeof(char));
-	sprintf(TMP_DIR, "/tmp/%s", PNL);
+	size_t user_len = strlen(user);
+	TMP_DIR = (char *)xnmalloc(user_len + pnl_len + 7, sizeof(char));
+	snprintf(TMP_DIR, user_len, "/tmp/%s", PNL);
 
 	struct stat file_attrib;
 
@@ -4112,7 +4114,7 @@ get_aliases(void)
 	}
 
 	if (aliases_n) {
-		int i = aliases_n;
+		int i = (int)aliases_n;
 		while (--i >= 0)
 			free(aliases[i]);
 		free(aliases);
@@ -4160,7 +4162,7 @@ load_dirhist(void)
 
 	char tmp_line[PATH_MAX];
 
-	while (fgets(tmp_line, sizeof(tmp_line), fp))
+	while (fgets(tmp_line, (int)sizeof(tmp_line), fp))
 		dirs++;
 
 	if (!dirs) {
@@ -4299,7 +4301,7 @@ get_path_programs(void)
 	int i, j, l = 0, total_cmd = 0;
 	int *cmd_n = (int *)xnmalloc(path_n, sizeof(int));
 
-	i = path_n;
+	i = (int)path_n;
 	while (--i >= 0) {
 
 		if (!paths[i] || !*paths[i] || xchdir(paths[i]) == -1) {
@@ -4327,13 +4329,13 @@ get_path_programs(void)
 	bin_commands = (char **)xnmalloc(total_cmd + internal_cmd_n +
 								aliases_n + actions_n + 2, sizeof(char *));
 
-	i = internal_cmd_n;
+	i = (int)internal_cmd_n;
 	while (--i >= 0)
 		bin_commands[l++] = savestring(INTERNAL_CMDS[i],
 									  strlen(INTERNAL_CMDS[i]));
 
 	/* Add commands in PATH */
-	i = path_n;
+	i = (int)path_n;
 	while (--i >= 0) {
 
 		if (cmd_n[i] <= 0)
@@ -4356,7 +4358,7 @@ get_path_programs(void)
 	/* Now add aliases, if any */
 	if (aliases_n) {
 
-		i = aliases_n;
+		i = (int)aliases_n;
 		while (--i >= 0) {
 
 			int index = strcntchr(aliases[i], '=');
@@ -4371,14 +4373,14 @@ get_path_programs(void)
 
 	/* And user defined actions too, if any */
 	if (actions_n) {
-		i = actions_n;
+		i = (int)actions_n;
 		while (--i >= 0) {
 			bin_commands[l++] = savestring(usr_actions[i].name,
 									strlen(usr_actions[i].name));
 		}
 	}
 
-	path_progsn = l;
+	path_progsn = (size_t)l;
 	bin_commands[l] = (char *)NULL;
 }
 
@@ -4436,7 +4438,7 @@ edit_xresources(void)
 	char line[256] = "";
 	int eight_bit = 0, cursor = 0, function = 0;
 
-	while (fgets(line, sizeof(line), xresources_fp)) {
+	while (fgets(line, (int)sizeof(line), xresources_fp)) {
 
 		if (strncmp(line, "XTerm*eightBitInput: false",
 		26) == 0)
@@ -4760,8 +4762,9 @@ ExpandBookmarks=false\n\n"
 # is readable by the current user, if it is executable, SUID, SGID, if a\n\
 # symlink is broken, and so on. The file extension check is ignored as\n\
 # well, so that the color per extension feature is disabled.\n\
-LightMode=false\n\n"
+LightMode=false\n\n");
 
+	fprintf(config_fp,
 "# If running with colors, append directory indicator and files counter\n\
 # to directories. If running without colors (via the --no-colors option),\n\
 # append filetype indicator at the end of filenames: '/' for directories,\n\
@@ -5163,7 +5166,7 @@ read_config(void)
 	/* starting path(14) + PATH_MAX + \n(1)*/
 	char line[PATH_MAX + 15];
 
-	while (fgets(line, sizeof(line), config_fp)) {
+	while (fgets(line, (int)sizeof(line), config_fp)) {
 
 		if (*line == '\n' || (*line == '#' && line[1] != 'E'))
 			continue;
@@ -6090,11 +6093,11 @@ reload_config(void)
 
 	jump_n = 0;
 
-	i = aliases_n;
+	i = (int)aliases_n;
 	while (--i >= 0)
 		free(aliases[i]);
 
-	i = prompt_cmds_n;
+	i = (int)prompt_cmds_n;
 	while (--i >= 0)
 		free(prompt_cmds[i]);
 
@@ -6137,7 +6140,7 @@ is_quote_char(const char c)
 }
 
 static char *
-dequote_str(char *text, int m_t)
+dequote_str(char *text, int mt)
 /* This function simply deescapes whatever escaped chars it founds in
  * TEXT, so that readline can compare it to system filenames when
  * completing paths. Returns a string containing text without escape
@@ -6175,7 +6178,7 @@ colors_list(const char *ent, const int i, const int pad, const int new_line)
  * chars and terminating ENTRY with or without a new line char (NEW_LINE
  * 1 or 0 respectivelly) */
 {
-	size_t i_digits = DIGINUM(i);
+	size_t i_digits = (size_t)DIGINUM(i);
 
 							/* Num (i) + space + null byte */
 	char *index = (char *)xnmalloc(i_digits + 2, sizeof(char));
@@ -6502,7 +6505,7 @@ load_actions(void)
 
 	/* Free the actions struct array */
 	if (actions_n) {
-		int i = actions_n;
+		int i = (int)actions_n;
 
 		while (--i >= 0) {
 			free(usr_actions[i].name);
@@ -6740,10 +6743,10 @@ handle_iso(char *file)
 		}
 
 		switch(*operation) {
-			case 'e':
-			case 'E':
-			case 'l':
-			case 'm':
+			case 'e': /* fallthrough */
+			case 'E': /* fallthrough */
+			case 'l': /* fallthrough */
+			case 'm': /* fallthrough */
 			case 't':
 				sel_op = *operation;
 				free(operation);
@@ -6991,7 +6994,7 @@ check_iso(char *file)
 
 		if (file_fp) {
 			char line[255] = "";
-			fgets(line, sizeof(line), file_fp);
+			fgets(line, (int)sizeof(line), file_fp);
 			char *ret = strstr(line, "ISO 9660");
 
 			if (ret)
@@ -7134,7 +7137,7 @@ print_tips(int all)
 		return;
 	}
 
-	srand(time(NULL));
+	srand((unsigned int)time(NULL));
 	printf("%sTIP%s: %s\n", bold, df_c, TIPS[rand() % tipsn]);
 }
 
@@ -7229,7 +7232,7 @@ is_compressed(char *file, int test_iso)
 
 		if (file_fp) {
 			char line[255];
-			fgets(line, sizeof(line), file_fp);
+			fgets(line, (int)sizeof(line), file_fp);
 			char *ret = strstr(line, "archive");
 
 			if (ret)
@@ -7584,7 +7587,7 @@ archiver(char **args, char mode)
 			char *retval = strrchr(args[i], '.');
 			if (retval) {
 				if (strcmp(retval, ".zst") == 0)
-					zst_index = i;
+					zst_index = (int)i;
 			}
 		}
 	}
@@ -7614,8 +7617,8 @@ archiver(char **args, char mode)
 				}
 
 				switch(*operation) {
-					case 'e':
-					case 't':
+					case 'e': /* fallthrough */
+					case 't': /* fallthrough */
 					case 'i':
 						sel_op = *operation;
 					break;
@@ -7677,10 +7680,10 @@ archiver(char **args, char mode)
 		}
 
 		switch(*operation) {
-			case 'e':
-			case 'E':
-			case 'l':
-			case 'm':
+			case 'e': /* fallthrough */
+			case 'E': /* fallthrough */
+			case 'l': /* fallthrough */
+			case 'm': /* fallthrough */
 			case 'r':
 				sel_op = *operation;
 				free(operation);
@@ -7706,7 +7709,7 @@ archiver(char **args, char mode)
 	char *dec_files = (char *)NULL;
 
 	switch(sel_op) {
-		case 'e':
+		case 'e':  /* fallthrough */
 		case 'r': {
 
 			/* Store all filenames into one single variable */
@@ -8642,7 +8645,7 @@ get_substr(char *str, const char ifs)
 
 		/* Copy the expanded range into the buffer */
 		for (j = (size_t)afirst; j <= (size_t)asecond; j++) {
-			rbuf[k] = (char *)xcalloc(DIGINUM((int)j) + 1, sizeof(char));
+			rbuf[k] = (char *)xcalloc((size_t)DIGINUM((int)j) + 1, sizeof(char));
 			sprintf(rbuf[k++], "%zu", j);
 		}
 
@@ -9394,7 +9397,7 @@ decode_prompt(const char *line)
 				}
 
 			case 'S': { /* Current workspace */
-				char s[8];
+				char s[12];
 				sprintf(s, "%d", cur_ws + 1);
 				temp = savestring(s, 1);
 				goto add_string;
@@ -9583,7 +9586,7 @@ load_bookmarks(void)
 	size_t bm_total = 0;
 	char tmp_line[256];
 
-	while (fgets(tmp_line, sizeof(tmp_line), bm_fp)) {
+	while (fgets(tmp_line, (int)sizeof(tmp_line), bm_fp)) {
 
 		if (!*tmp_line || *tmp_line == '#' || *tmp_line == '\n')
 			continue;
@@ -10264,7 +10267,7 @@ exec_profile(void)
 				no_log = 1;
 				exec_cmd(cmds);
 				no_log = 0;
-				int i = args_n + 1;
+				int i = (int)args_n + 1;
 				while (--i >= 0)
 					free(cmds[i]);
 				free(cmds);
@@ -10427,21 +10430,21 @@ profile_set(const char *prof)
 			 PROGRAM_NAME, sys_shell);
 	}
 
-	i = usrvar_n;
+	i = (int)usrvar_n;
 	while (--i >= 0) {
 		free(usr_var[i].name);
 		free(usr_var[i].value);
 	}
 	usrvar_n = 0;
 
-	i = kbinds_n;
+	i = (int)kbinds_n;
 	while (--i >= 0) {
 		free(kbinds[i].function);
 		free(kbinds[i].key);
 	}
 	kbinds_n = 0;
 
-	i = actions_n;
+	i = (int)actions_n;
 	while (--i >= 0) {
 		free(usr_actions[i].name);
 		free(usr_actions[i].value);
@@ -10461,7 +10464,7 @@ profile_set(const char *prof)
 	exec_profile();
 
 	if (msgs_n) {
-		i = msgs_n;
+		i = (int)msgs_n;
 		while (--i >= 0)
 			free(messages[i]);
 	}
@@ -10513,7 +10516,7 @@ profile_set(const char *prof)
 
 	if (paths) {
 
-		i = path_n;
+		i = (int)path_n;
 		while (--i >= 0)
 			free(paths[i]);
 	}
@@ -10845,7 +10848,7 @@ get_mime(char *file)
 
 		if (file_fp) {
 			char line[255] = "";
-			fgets(line, sizeof(line), file_fp);
+			fgets(line, (int)sizeof(line), file_fp);
 			char *tmp = strrchr(line, ' ');
 
 			if (tmp) {
@@ -11298,7 +11301,7 @@ bulk_rename(char **args)
 	 * file after shown to the user */
 	struct stat file_attrib;
 	stat(BULK_FILE, &file_attrib);
-	time_t mtime_bfr = file_attrib.st_mtime;
+	time_t mtime_bfr = (time_t)file_attrib.st_mtime;
 
 	/* Open the bulk file via the mime function */
 	char *cmd[] = { "mm", BULK_FILE, NULL };
@@ -11308,7 +11311,7 @@ bulk_rename(char **args)
 	 * match, nothing was modified */
 	stat(BULK_FILE, &file_attrib);
 
-	if (mtime_bfr == file_attrib.st_mtime) {
+	if (mtime_bfr == (time_t)file_attrib.st_mtime) {
 
 		puts(_("bulk: Nothing to do"));
 
@@ -11337,7 +11340,7 @@ bulk_rename(char **args)
 	size_t file_total = 1;
 	char tmp_line[256];
 
-	while (fgets(tmp_line, sizeof(tmp_line), bulk_fp))
+	while (fgets(tmp_line, (int)sizeof(tmp_line), bulk_fp))
 		file_total++;
 
 	if (arg_total != file_total) {
@@ -11406,11 +11409,11 @@ bulk_rename(char **args)
 		}
 
 		switch(*answer) {
-			case 'y':
+			case 'y': /* fallthrough */
 			case 'Y': break;
 
-			case 'n':
-			case 'N':
+			case 'n': /* fallthrough */
+			case 'N': /* fallthrough */
 			case '\0':
 				free(answer);
 				free(line);
@@ -11541,7 +11544,7 @@ edit_actions(void)
 		return EXIT_FAILURE;
 	}
 
-	time_t mtime_bfr = file_attrib.st_mtime;
+	time_t mtime_bfr = (time_t)file_attrib.st_mtime;
 
 	char *cmd[] = { "mm", ACTIONS_FILE, NULL };
 
@@ -11555,7 +11558,7 @@ edit_actions(void)
 
 	/* If modification times differ, the file was modified after being
 	 * opened */
-	if (mtime_bfr != file_attrib.st_mtime) {
+	if (mtime_bfr != (time_t)file_attrib.st_mtime) {
 
 		/* Reload the array of available actions */
 		if (load_actions() != EXIT_SUCCESS)
@@ -11763,7 +11766,7 @@ kbinds_edit(void)
 		stat(KBINDS_FILE, &file_attrib);
 	}
 
-	time_t mtime_bfr = file_attrib.st_mtime;
+	time_t mtime_bfr = (time_t)file_attrib.st_mtime;
 
 	char *cmd[] = { "mm", KBINDS_FILE, NULL };
 	int ret = mime_open(cmd);
@@ -11773,7 +11776,7 @@ kbinds_edit(void)
 
 	stat(KBINDS_FILE, &file_attrib);
 
-	if (mtime_bfr == file_attrib.st_mtime)
+	if (mtime_bfr == (time_t)file_attrib.st_mtime)
 		return EXIT_SUCCESS;
 
 	_err('n', PRINT_PROMPT, _("%s: Restart the program for changes to "
@@ -11950,7 +11953,7 @@ get_link_ref(const char *link)
 		struct stat file_attrib;
 		stat(linkname, &file_attrib);
 		free(linkname);
-		return (file_attrib.st_mode & S_IFMT);
+		return (int)(file_attrib.st_mode & S_IFMT);
 	}
 
 	return (-1);
@@ -11967,7 +11970,7 @@ check_for_alias(char **args)
 	char *aliased_cmd = (char *)NULL;
 	size_t cmd_len = strlen(args[0]);
 
-	register int i = aliases_n;
+	register int i = (int)aliases_n;
 	while (--i >= 0) {
 
 		/* Look for this string: "command=", in the aliases file */
@@ -12148,7 +12151,7 @@ get_colorschemes(void)
 	if (schemes_total <= 2)
 		return 0;
 
-	color_schemes = (char **)xcalloc(schemes_total + 2, sizeof(char *));
+	color_schemes = (char **)xcalloc((size_t)schemes_total + 2, sizeof(char *));
 
 	size_t i = 0;
 
@@ -12200,7 +12203,7 @@ is_internal(const char *cmd)
 		"pin", "jump", "jc", "jp", "bl", "le", NULL };
 
 	int found = 0;
-	int i = (sizeof(int_cmds) / sizeof(char *)) - 1;
+	int i = (int)(sizeof(int_cmds) / sizeof(char *)) - 1;
 
 	while (--i >= 0) {
 		if (*cmd == *int_cmds[i] && strcmp(cmd, int_cmds[i]) == 0) {
@@ -12256,7 +12259,7 @@ split_str(const char *str)
 		switch (*str) {
 
 		/* Command substitution */
-		case '$':
+		case '$': /* fallthrough */
 		case '`':
 
 			/* Define the closing char: If "$(" then ')', else '`' */
@@ -12306,7 +12309,7 @@ split_str(const char *str)
 
 				free(buf);
 				buf = (char *)NULL;
-				int i = words;
+				int i = (int)words;
 
 				while (--i >= 0)
 					free(substr[i]);
@@ -12361,7 +12364,7 @@ split_str(const char *str)
 				 * allocated */
 				free(buf);
 				buf = (char *)NULL;
-				int i = words;
+				int i = (int)words;
 
 				while (--i >= 0)
 					free(substr[i]);
@@ -13118,7 +13121,7 @@ list_mountpoints(void)
 	if (input)
 		free(input);
 
-	int i = mp_n;
+	int i = (int)mp_n;
 	while (--i >= 0)
 		free(mountpoints[i]);
 
@@ -13818,7 +13821,7 @@ untrash_element(char *file)
 
 		memset(line, '\0', PATH_MAX + 6);
 
-		while (fgets(line, sizeof(line), info_fp)) {
+		while (fgets(line, (int)sizeof(line), info_fp)) {
 			if (strncmp(line, "Path=", 5) == 0)
 				orig_path = straft(line, '=');
 		}
@@ -14369,7 +14372,7 @@ get_sel_files(void)
 
 	/* First, clear the sel array, in case it was already used */
 	if (sel_n > 0) {
-		int i = sel_n;
+		int i = (int)sel_n;
 
 		while (--i >= 0)
 			free(sel_elements[i]);
@@ -14390,7 +14393,7 @@ get_sel_files(void)
 	 * length will be larger than PATH_MAX */
 	char line[PATH_MAX] = "";
 
-	while (fgets(line, sizeof(line), sel_fp)) {
+	while (fgets(line, (int)sizeof(line), sel_fp)) {
 
 		size_t len = strlen(line);
 
@@ -14583,7 +14586,7 @@ load_keybinds(void)
 
 	/* Free the keybinds struct array */
 	if (kbinds_n) {
-		int i = kbinds_n;
+		int i = (int)kbinds_n;
 
 		while (--i >= 0) {
 			free(kbinds[i].function);
@@ -14643,7 +14646,7 @@ find_key(char *function)
 	if (!kbinds_n)
 		return (char *)NULL;
 
-	int n = kbinds_n;
+	int n = (int)kbinds_n;
 
 	while (--n >= 0) {
 		if (*function != *kbinds[n].function)
@@ -14680,7 +14683,7 @@ keybind_exec_cmd(char *str)
 		if (kbind_busy)
 			kbind_busy = 0;
 
-		int i = args_n + 1;
+		int i = (int)args_n + 1;
 		while (--i >= 0)
 			free(cmd[i]);
 		free(cmd);
@@ -15662,9 +15665,9 @@ readline_kbinds(void)
 	/* If no kbinds file is found, set the defaults */
 	else {
 		/* Help */
-		rl_bind_keyseq("\eOP", rl_manpage);
-		rl_bind_keyseq("\eOQ", rl_cmds_help);
-		rl_bind_keyseq("\eOR", rl_kbinds_help);
+		rl_bind_keyseq("\\eOP", rl_manpage);
+		rl_bind_keyseq("\\eOQ", rl_cmds_help);
+		rl_bind_keyseq("\\eOR", rl_kbinds_help);
 
 		/* Navigation */
 		rl_bind_keyseq("\\M-u", rl_parent_dir);
@@ -15867,7 +15870,7 @@ free_stuff(void)
 	}
 
 	if (bin_commands) {
-		i = path_progsn;
+		i = (int)path_progsn;
 		while (--i >= 0)
 			free(bin_commands[i]);
 		free(bin_commands);
@@ -16208,13 +16211,13 @@ init_shell(void)
 }
 
 static char *
-my_rl_quote(char *text, int m_t, char *qp)
+my_rl_quote(char *text, int mt, char *qp)
 /* Performs bash-style filename quoting for readline (put a backslash
  * before any char listed in rl_filename_quote_characters.
  * Modified version of:
  * https://utcc.utoronto.ca/~cks/space/blog/programming/ReadlineQuotingExample*/
 {
-	/* NOTE: m_t and qp arguments are not used here, but are required by
+	/* NOTE: mt and qp arguments are not used here, but are required by
 	 * rl_filename_quoting_function */
 
 	/*
@@ -16569,7 +16572,7 @@ my_rl_path_completion(const char *text, int state)
 			|| strncmp(rl_line_buffer, "open ", 5) == 0)) {
 				ret = -1;
 				switch (ent->d_type) {
-				case DT_REG:
+				case DT_REG: /* fallthrough */
 				case DT_DIR:
 					match = 1;
 					break;
@@ -17206,7 +17209,7 @@ cschemes_function(char **args)
 
 		struct stat attr;
 		stat(file, &attr);
-		time_t mtime_bfr = attr.st_mtime;
+		time_t mtime_bfr = (time_t)attr.st_mtime;
 
 		char *cmd[] = { "mm", file, NULL };
 		int ret = mime_open(cmd);
@@ -17215,7 +17218,7 @@ cschemes_function(char **args)
 
 			stat(file, &attr);
 
-			if (mtime_bfr != attr.st_mtime
+			if (mtime_bfr != (time_t)attr.st_mtime
 			&& set_colors(cur_cscheme, 0) == EXIT_SUCCESS
 			&& cd_lists_on_the_fly) {
 
@@ -17288,20 +17291,20 @@ edit_jumpdb(void)
 		return EXIT_FAILURE;
 	}
 
-	time_t mtime_bfr = attr.st_mtime;
+	time_t mtime_bfr = (time_t)attr.st_mtime;
 
 	char *cmd[] = { "o", JUMP_FILE, NULL };
 	open_function(cmd);
 
 	stat(JUMP_FILE, &attr);
 
-	if (mtime_bfr == attr.st_mtime) {
+	if (mtime_bfr == (time_t)attr.st_mtime) {
 		free(JUMP_FILE);
 		return EXIT_SUCCESS;
 	}
 
 	if (jump_db) {
-		int i = jump_n;
+		int i = (int)jump_n;
 
 		while (--i >= 0)
 			free(jump_db[i].path);
@@ -17362,8 +17365,8 @@ dirjump(char **args)
 
 			int rank;
 			rank = days_since_first > 1
-				   ? (jump_db[i].visits * 100) / days_since_first
-				   : jump_db[i].visits * 100;
+				   ? ((int)jump_db[i].visits * 100) / days_since_first
+				   : (int)jump_db[i].visits * 100;
 
 			int tmp_rank = rank;
 			if (hours_since_last == 0)	 		/* Last hour */
@@ -17375,7 +17378,7 @@ dirjump(char **args)
 			else							 	/* More than a week */
 				rank = JOLDER(tmp_rank);
 
-			int j = bm_n, bookmarked = 0;
+			int j = (int)bm_n, bookmarked = 0;
 			while (--j >= 0) {
 				if (bookmarks[j].path[1] == jump_db[i].path[1]
 				&& strcmp(bookmarks[j].path, jump_db[i].path) == 0) {
@@ -17472,11 +17475,11 @@ dirjump(char **args)
 		return cd_function(args[1]);
 
 	/* Jump into a visited directory using ARGS as filter(s) */
-	size_t i, match = 0;
-	int j;
+	size_t i;
+	int j, match = 0;
 
 	char **matches = (char **)xnmalloc(jump_n + 1, sizeof(char *));
-	int *visits = (int *)xnmalloc(jump_n + 1, sizeof(int));
+	size_t *visits = (size_t *)xnmalloc(jump_n + 1, sizeof(size_t));
 	time_t *first = (time_t *)xnmalloc(jump_n + 1, sizeof(time_t));
 	time_t *last = (time_t *)xnmalloc(jump_n + 1, sizeof(time_t));
 
@@ -17486,7 +17489,7 @@ dirjump(char **args)
 		 * database */
 		if (!match) {
 
-			j = jump_n;
+			j = (int)jump_n;
 			while (--j >= 0) {
 
 				if (case_sens_dirjump ? !strstr(jump_db[j].path, args[i])
@@ -17531,7 +17534,7 @@ dirjump(char **args)
 		 * matching process, that is, excluding non-matches,
 		 * using subsequent parameters */
 		else {
-			j = match;
+			j = (int)match;
 			while (--j >= 0) {
 
 				if (!matches[j] || !*matches[j]
@@ -17573,8 +17576,8 @@ dirjump(char **args)
 			 * "https://github.com/ajeetdsouza/zoxide/wiki/Algorithm#aging"
 			 * "https://github.com/skywind3000/z.lua#aging" */
 			int rank;
-			rank = days_since_first > 0 ? (visits[j] * 100) / days_since_first
-							: (visits[j] * 100);
+			rank = days_since_first > 0 ? ((int)visits[j] * 100) / days_since_first
+							: ((int)visits[j] * 100);
 
 			int hours_since_last = (int)(now - last[j])	/ 60 / 60;
 
@@ -17597,7 +17600,7 @@ dirjump(char **args)
 			}
 
 			/* Bookmarked directories have extra credit */
-			k = bm_n;
+			k = (int)bm_n;
 			while (--k >= 0) {
 				if (bookmarks[k].path[1] == matches[j][1]
 				&& strcmp(bookmarks[k].path, matches[j]) == 0) {
@@ -17792,7 +17795,7 @@ select_file(char *file)
 	 * box */
 	int exists = 0, new_sel = 0, j;
 
-	j = sel_n;
+	j = (int)sel_n;
 	while (--j >= 0) {
 		if (*file == *sel_elements[j]
 		&& strcmp(sel_elements[j], file) == 0) {
@@ -17843,7 +17846,7 @@ sel_regex(char *str, const char *sel_path, mode_t filetype)
 	int new_sel = 0, i;
 
 	if (!sel_path) { /* Check pattern (STR) against files in CWD */
-		i = files;
+		i = (int)files;
 		while (--i >= 0) {
 
 			if (filetype && file_info[i].type != filetype)
@@ -17886,7 +17889,7 @@ sel_regex(char *str, const char *sel_path, mode_t filetype)
 			}
 		}
 
-		i = filesn;
+		i = (int)filesn;
 		while (--i >= 0) {
 
 			if (filetype) {
@@ -17975,7 +17978,7 @@ dir_size(char *dir)
 			 * file size and could only take a few bytes, so that 32
 			 * bytes is more than enough */
 			char line[32] = "";
-			fgets(line, sizeof(line), du_fp);
+			fgets(line, (int)sizeof(line), du_fp);
 
 			char *file_size = strbfr(line, '\t');
 
@@ -18028,14 +18031,14 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 		if (!sel_path) {
 			matches = (char **)xnmalloc(files + 2, sizeof(char *));
 
-			i = files;
+			i = (int)files;
 			while (--i >= 0) {
 
 				if (filetype && file_info[i].type != filetype)
 					continue;
 
 				int found = 0;
-				j = gbuf.gl_pathc;
+				j = (int)gbuf.gl_pathc;
 				while (--j >= 0) {
 					if (*file_info[i].name == *gbuf.gl_pathv[j]
 					&& strcmp(file_info[i].name, gbuf.gl_pathv[j]) == 0) {
@@ -18059,14 +18062,14 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 				return -1;
 			}
 
-			matches = (char **)xnmalloc(ret + 2, sizeof(char *));
+			matches = (char **)xnmalloc((size_t)ret + 2, sizeof(char *));
 
 			i = ret;
 			while (--i >= 0) {
 				if (filetype && ent[i]->d_type != filetype)
 					continue;
 
-				j = gbuf.gl_pathc;
+				j = (int)gbuf.gl_pathc;
 				while (--j >= 0) {
 					if (*ent[i]->d_name == *gbuf.gl_pathv[j]
 					&& strcmp(ent[i]->d_name, gbuf.gl_pathv[j]) == 0)
@@ -18096,7 +18099,7 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 			}
 		}
 
-		i = gbuf.gl_pathc;
+		i = (int)gbuf.gl_pathc;
 		while (--i >= 0) {
 
 			/* We need to run stat(3) here, so that the d_type macros
@@ -18184,12 +18187,27 @@ sel_function(char **args)
 
 		if (*args[i] == '-') {
 			ifiletype = i;
-			filetype = *(args[i] + 1);
+			filetype = (mode_t)*(args[i] + 1);
 		}
 
 		if (*args[i] == ':') {
 			isel_path = i;
 			sel_path = args[i] + 1;
+		}
+
+		if (*args[i] == '~') {
+			char *exp_path = tilde_expand(args[i]); 
+
+			if (!exp_path) {
+				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[i],
+						strerror(errno));
+				return EXIT_FAILURE;
+			}
+
+			args[i] = (char *)xrealloc(args[i], (strlen(exp_path) + 1) *
+									   sizeof(char));
+			strcpy(args[i], exp_path);
+			free(exp_path);
 		}
 	}
 
@@ -18375,7 +18393,7 @@ sel_function(char **args)
 	/* Get total size of sel files */
 	struct stat sattr;
 
-	i = sel_n;
+	i = (int)sel_n;
 	while (--i >= 0) {
 
 		if (lstat(sel_elements[i], &sattr) != -1) {
@@ -18446,8 +18464,8 @@ show_sel_files(void)
 			if (pager && counter > (size_t)term_rows) {
 				switch(c = xgetchar()) {
 				/* Advance one line at a time */
-				case 66: /* Down arrow */
-				case 10: /* Enter */
+				case 66:  /* fallthrough */ /* Down arrow */
+				case 10:  /* fallthrough */ /* Enter */
 				case 32: /* Space */
 					break;
 				/* Advance one page at a time */
@@ -18455,8 +18473,8 @@ show_sel_files(void)
 					break;
 				/* Stop paging (and set a flag to reenable the pager
 				 * later) */
-				case 99: /* 'c' */
-				case 112: /* 'p' */
+				case 99:  /* fallthrough */ /* 'c' */
+				case 112:  /* fallthrough */ /* 'p' */
 				case 113: pager=0, reset_pager=1; /* 'q' */
 					break;
 				/* If another key is pressed, go back one position.
@@ -18493,7 +18511,7 @@ deselect(char **comm)
 	|| strcmp(comm[1], "a") == 0 || strcmp(comm[1], "all") == 0)) {
 
 		if (sel_n > 0) {
-			int i = sel_n;
+			int i = (int)sel_n;
 
 			while (--i >= 0)
 				free(sel_elements[i]);
@@ -18548,7 +18566,7 @@ deselect(char **comm)
 	for (i = 0; desel_elements[i]; i++)
 		desel_n++;
 
-	i = desel_n;
+	i = (int)desel_n;
 	while (--i >= 0) { /* Validation */
 
 		/* If not a number */
@@ -18556,7 +18574,7 @@ deselect(char **comm)
 
 			if (strcmp(desel_elements[i], "q") == 0) {
 
-				i = desel_n;
+				i = (int)desel_n;
 				while (--i >= 0)
 					free(desel_elements[i]);
 
@@ -18568,13 +18586,13 @@ deselect(char **comm)
 			else if (strcmp(desel_elements[i], "*") == 0) {
 
 				/* Clear the sel array */
-				i = sel_n;
+				i = (int)sel_n;
 				while (--i >= 0)
 					free(sel_elements[i]);
 
 				sel_n = total_sel_size = 0;
 
-				i = desel_n;
+				i = (int)desel_n;
 				while (--i >= 0)
 					free(desel_elements[i]);
 
@@ -18597,7 +18615,7 @@ deselect(char **comm)
 			else {
 				printf(_("desel: '%s': Invalid element\n"),
 						desel_elements[i]);
-				int j = desel_n;
+				int j = (int)desel_n;
 
 				while (--j >= 0)
 					free(desel_elements[j]);
@@ -18616,7 +18634,7 @@ deselect(char **comm)
 				printf(_("desel: '%s': Invalid ELN\n"),
 						 desel_elements[i]);
 
-				int j = desel_n;
+				int j = (int)desel_n;
 				while (--j >= 0)
 					free(desel_elements[j]);
 
@@ -18637,7 +18655,7 @@ deselect(char **comm)
 	char **desel_path = (char **)NULL;
 	desel_path = (char **)xnmalloc(desel_n, sizeof(char *));
 
-	i = desel_n;
+	i = (int)desel_n;
 	while (--i >= 0) {
 		int desel_int = atoi(desel_elements[i]);
 		desel_path[i] = savestring(sel_elements[desel_int - 1],
@@ -18648,11 +18666,11 @@ deselect(char **comm)
 	 * store its index */
 	struct stat desel_attrib;
 
-	i = desel_n;
+	i = (int)desel_n;
 	while (--i >= 0) {
 		int j, k, desel_index = 0;
 
-		k = sel_n;
+		k = (int)sel_n;
 		while (--k >= 0) {
 
 			if (strcmp(sel_elements[k], desel_path[i]) == 0) {
@@ -18699,7 +18717,7 @@ deselect(char **comm)
 		sel_elements = (char **)xrealloc(sel_elements, sel_n * sizeof(char *));
 
 	/* Deallocate local arrays */
-	i = desel_n;
+	i = (int)desel_n;
 	while (--i >= 0) {
 		free(desel_path[i]);
 		free(desel_elements[i]);
@@ -18957,11 +18975,11 @@ search_glob(char **comm, int invert)
 
 			if (scandir_files != -1) {
 
-				pfiles = (char **)xnmalloc(scandir_files + 1,
+				pfiles = (char **)xnmalloc((size_t)scandir_files + 1,
 										   sizeof(char *));
-				eln = (int *)xnmalloc(scandir_files + 1,
+				eln = (int *)xnmalloc((size_t)scandir_files + 1,
 											 sizeof(int));
-				files_len = (size_t *)xnmalloc(scandir_files + 1,
+				files_len = (size_t *)xnmalloc((size_t)scandir_files + 1,
 											   sizeof(size_t));
 
 				int k, l;
@@ -19079,7 +19097,7 @@ search_glob(char **comm, int invert)
 			columns_n = 1;
 
 		else
-			columns_n = (size_t)tcols / (flongest + 1);
+			columns_n = (int)(tcols / (flongest + 1));
 
 		if (columns_n > found)
 			columns_n = found;
@@ -19317,10 +19335,10 @@ search_regex(char **comm, int invert)
 		if (regexec(&regex_files, (search_path ? reg_dirlist[i]->d_name
 		: file_info[i].name), 0, NULL, 0) == EXIT_SUCCESS) {
 			if (!invert)
-				regex_index[found++] = i;
+				regex_index[found++] = (int)i;
 		}
 		else if (invert)
-			regex_index[found++] = i;	
+			regex_index[found++] = (int)i;
 	}
 
 	regfree(&regex_files);
@@ -19354,7 +19372,7 @@ search_regex(char **comm, int invert)
  
 
 	/* Get the longest filename in the list */
-	int j = found;
+	int j = (int)found;
 	while (--j >= 0) {
 
 		/* Simply skip all files not matching file_type */
@@ -19533,7 +19551,7 @@ bookmark_del(char *name)
 			line[line_len - 1] = '\0';
 
 		bms = (char **)xrealloc(bms, (bmn + 1) * sizeof(char *));
-		bms[bmn++] = savestring(line, line_len);
+		bms[bmn++] = savestring(line, (size_t)line_len);
 	}
 
 	free(line);
@@ -19574,7 +19592,7 @@ bookmark_del(char *name)
 	 * bookmarks screen) to the del_elements array */
 	if (cmd_line != -1) {
 		del_elements = (char **)xnmalloc(2, sizeof(char *));
-		del_elements[0] = (char *)xnmalloc(DIGINUM(cmd_line + 1)
+		del_elements[0] = (char *)xnmalloc((size_t)DIGINUM(cmd_line + 1)
 										   + 1, sizeof(char));
 		sprintf(del_elements[0], "%d", cmd_line + 1);
 		del_elements[1] = (char *)NULL;
@@ -20159,13 +20177,13 @@ open_bookmark(void)
 	if (*arg[0] == 'e' && (!arg[0][1] || strcmp(arg[0], "edit") == 0)) {
 
 		stat(BM_FILE, &file_attrib);
-		time_t mtime_bfr = file_attrib.st_mtime;
+		time_t mtime_bfr = (time_t)file_attrib.st_mtime;
 
 		edit_bookmarks(arg[1] ? arg[1] : NULL);
 
 		stat(BM_FILE, &file_attrib);
 
-		if (mtime_bfr != file_attrib.st_mtime) {
+		if (mtime_bfr != (time_t)file_attrib.st_mtime) {
 			free_bookmarks();
 			load_bookmarks();
 		}
@@ -20501,7 +20519,7 @@ get_properties(char *filename, int dsize)
 	nlink_t link_n = file_attrib.st_nlink;
 
 	/* Get modification time */
-	time_t time = file_attrib.st_mtim.tv_sec;
+	time_t time = (time_t)file_attrib.st_mtim.tv_sec;
 	struct tm *tm = localtime(&time);
 	char mod_time[128] = "";
 
@@ -20557,7 +20575,7 @@ get_properties(char *filename, int dsize)
 	/* Stat information */
 
 	/* Last access time */
-	time = file_attrib.st_atim.tv_sec;
+	time = (time_t)file_attrib.st_atim.tv_sec;
 	tm = localtime(&time);
 	char access_time[128] = "";
 
@@ -20570,7 +20588,7 @@ get_properties(char *filename, int dsize)
 		access_time[0] = '-';
 
 	/* Last properties change time */
-	time = file_attrib.st_ctim.tv_sec;
+	time = (time_t)file_attrib.st_ctim.tv_sec;
 	tm = localtime(&time);
 	char change_time[128] = "";
 
@@ -20595,7 +20613,7 @@ get_properties(char *filename, int dsize)
 #elif defined(_STATX)
 		struct statx attrx;
 		statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attrx);
-		time = attrx.stx_btime.tv_sec;
+		time = (time_t)attrx.stx_btime.tv_sec;
 		tm = localtime(&time);
 		char creation_time[128] = "";
 
@@ -21265,7 +21283,7 @@ edit_function (char **comm)
 		stat(CONFIG_FILE, &file_attrib);
 	}
 
-	time_t mtime_bfr = file_attrib.st_mtime;
+	time_t mtime_bfr = (time_t)file_attrib.st_mtime;
 
 	int ret = EXIT_SUCCESS;
 
@@ -21297,7 +21315,7 @@ edit_function (char **comm)
 	/* If modification times differ, the file was modified after being
 	 * opened */
 
-	if (mtime_bfr != file_attrib.st_mtime) {
+	if (mtime_bfr != (time_t)file_attrib.st_mtime) {
 		/* Reload configuration only if the config file was modified */
 
 		reload_config();
@@ -21764,7 +21782,7 @@ bonus_function (void)
 
 	size_t num = (sizeof(phrases) / sizeof(phrases[0])) - 1;
 
-	srand(time(NULL));
+	srand((unsigned int)time(NULL));
 	puts(phrases[rand() % num]);
 }
 
@@ -21854,7 +21872,7 @@ list_dir_light(void)
 
 			case DT_DIR:
 				if (icons) {
-					get_dir_icon(file_info[n].name, n);
+					get_dir_icon(file_info[n].name, (int)n);
 
 					/* If set from the color scheme file */
 					if (*dir_ico_c)
@@ -21908,7 +21926,7 @@ list_dir_light(void)
 
 	file_info[n].name = (char *)NULL;
 
-	files = n;
+	files = (size_t)n;
 
 	if (n == 0) {
 		printf("%s. ..%s\n", colorize ? di_c : df_c, df_c);
@@ -21937,7 +21955,7 @@ list_dir_light(void)
 	/* Get the longest filename */
 
 	if (columned || long_view) {
-		i = n;
+		i = (int)n;
 		while (--i >= 0) {
 			size_t total_len = 0;
 			file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
@@ -21956,9 +21974,9 @@ list_dir_light(void)
 							if (file_info[i].exec)
 								total_len += 1;
 							break;
-						case DT_LNK:
-						case DT_SOCK:
-						case DT_FIFO:
+						case DT_LNK: /* fallthrough */
+						case DT_SOCK: /* fallthrough */
+						case DT_FIFO: /* fallthrough */
 						case DT_UNKNOWN:
 							total_len += 1;
 							break;
@@ -21981,13 +21999,13 @@ list_dir_light(void)
 	if (long_view) {
 
 		struct stat lattr;
-		int space_left = term_cols - MAX_PROP_STR;
+		int space_left = (int)term_cols - MAX_PROP_STR;
 
 		if (space_left < min_name_trim)
 			space_left = min_name_trim;
 
 		if ((int)longest < space_left)
-			space_left = longest;
+			space_left = (int)longest;
 
 		int k = (int)files;
 		for (i = 0; i < k; i++) {
@@ -22007,8 +22025,8 @@ list_dir_light(void)
 					switch (c = xgetchar()) {
 
 					/* Advance one line at a time */
-					case 66: /* Down arrow */
-					case 10: /* Enter */
+					case 66: /* fallthrough */ /* Down arrow */
+					case 10: /* fallthrough */ /* Enter */
 					case 32: /* Space */
 						break;
 
@@ -22016,7 +22034,7 @@ list_dir_light(void)
 					case 126: counter = 0; /* Page Down */
 						break;
 
-					case 63: /* ? */
+					case 63: /* fallthrough */ /* ? */
 					case 104: { /* h: Print pager help */
 						CLEAR;
 
@@ -22025,7 +22043,7 @@ list_dir_light(void)
 						"Page Down: Advance one page\n"
 						"q: Stop pagging\n"), stdout);
 
-						int l = term_rows - 5;
+						int l = (int)term_rows - 5;
 						while (--l >= 0)
 							putchar('\n');
 
@@ -22065,7 +22083,7 @@ list_dir_light(void)
 
 			file_info[i].uid = lattr.st_uid;
 			file_info[i].gid = lattr.st_gid;
-			file_info[i].ltime = lattr.st_mtim.tv_sec;
+			file_info[i].ltime = (time_t)lattr.st_mtim.tv_sec;
 			file_info[i].mode = lattr.st_mode;
 			file_info[i].size = lattr.st_size;
 
@@ -22125,8 +22143,8 @@ list_dir_light(void)
 				switch (c = xgetchar()) {
 
 				/* Advance one line at a time */
-				case 66: /* Down arrow */
-				case 10: /* Enter */
+				case 66: /* fallthrough */ /* Down arrow */
+				case 10: /* fallthrough */ /* Enter */
 				case 32: /* Space */
 					break;
 
@@ -22134,7 +22152,7 @@ list_dir_light(void)
 				case 126: counter = 0; /* Page Down */
 					break;
 
-				case 63: /* ? */
+				case 63: /* fallthrough */ /* ? */
 				case 104: { /* h: Print pager help */
 						CLEAR;
 
@@ -22143,7 +22161,7 @@ list_dir_light(void)
 						"Page Down: Advance one page\n"
 						"q: Stop pagging\n"), stdout);
 
-						int l = term_rows - 5;
+						int l = (int)term_rows - 5;
 						while (--l >= 0)
 							putchar('\n');
 
@@ -22268,8 +22286,8 @@ list_dir_light(void)
 		if (!last_column) {
 
 			/* Add spaces needed to equate the longest filename length */
-			int cur_len = file_info[i].eln_n + 1 + (icons ? 3 : 0)
-						  + file_info[i].len + (ind_char ? 1: 0);
+			int cur_len = (int)file_info[i].eln_n + 1 + (icons ? 3 : 0)
+						  + (int)file_info[i].len + (ind_char ? 1: 0);
 			if (classify) {
 				if (file_info[i].dir)
 					cur_len += 2;
@@ -22278,7 +22296,7 @@ list_dir_light(void)
 					cur_len += DIGINUM((int)file_info[i].filesn);
 			}
 
-			int diff = longest - cur_len;
+			int diff = (int)longest - cur_len;
 
 			register int j;
 			for (j = diff + 1; j--;)
@@ -22417,7 +22435,7 @@ list_dir(void)
 		if (long_view) {
 			file_info[n].uid = attr.st_uid;
 			file_info[n].gid = attr.st_gid;
-			file_info[n].ltime = attr.st_mtim.tv_sec;
+			file_info[n].ltime = (time_t)attr.st_mtim.tv_sec;
 			file_info[n].mode = attr.st_mode;
 		}
 		else if (sort == SOWN || sort == SGRP) {
@@ -22434,9 +22452,9 @@ list_dir(void)
 		file_info[n].filesn = 0;
 
 		switch(sort) {
-			case SATIME: file_info[n].time = attr.st_atime; break;
+			case SATIME: file_info[n].time = (time_t)attr.st_atime; break;
 #if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
-			case SBTIME: file_info[n].time = attr.st_birthtime; break;
+			case SBTIME: file_info[n].time = (time_t)attr.st_birthtime; break;
 #elif defined(_STATX)
 			case SBTIME: {
 				struct statx attx;
@@ -22444,14 +22462,14 @@ list_dir(void)
 				STATX_BTIME, &attx) == -1)
 					file_info[n].time = 0;
 				else
-					file_info[n].time = attx.stx_btime.tv_sec;
+					file_info[n].time = (time_t)attx.stx_btime.tv_sec;
 				}
 				break;
 #else
-			case SBTIME: file_info[n].time = attr.st_ctime; break;
+			case SBTIME: file_info[n].time = (time_t)attr.st_ctime; break;
 #endif
-			case SCTIME: file_info[n].time = attr.st_ctime; break;
-			case SMTIME: file_info[n].time = attr.st_mtime; break;
+			case SCTIME: file_info[n].time = (time_t)attr.st_ctime; break;
+			case SMTIME: file_info[n].time = (time_t)attr.st_mtime; break;
 			default: file_info[n].time = 0; break;
 		}
 
@@ -22459,7 +22477,7 @@ list_dir(void)
 
 			case DT_DIR:
 				if (icons) {
-					get_dir_icon(file_info[n].name, n);
+					get_dir_icon(file_info[n].name, (int)n);
 
 					/* If set from the color scheme file */
 					if (*dir_ico_c)
@@ -22556,7 +22574,7 @@ list_dir(void)
 
 					if (ext && ext != file_info[n].name) {
 						if (icons)
-							get_ext_icon(ext, n);
+							get_ext_icon(ext, (int)n);
 
 						char *extcolor = get_ext_color(ext);
 
@@ -22572,7 +22590,7 @@ list_dir(void)
 					else { /* Bare regular file */
 						file_info[n].color = fi_c;
 						if (icons)
-							get_file_icon(file_info[n].name, n);
+							get_file_icon(file_info[n].name, (int)n);
 					}
 				}
 				else
@@ -22639,7 +22657,7 @@ list_dir(void)
 
 	/* Get the longest filename */
 	if (columned || long_view) {
-		i = n;
+		i = (int)n;
 		while (--i >= 0) {
 			size_t total_len = 0;
 			file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
@@ -22659,9 +22677,9 @@ list_dir(void)
 							if (file_info[i].exec)
 								total_len += 1;
 							break;
-						case DT_LNK:
-						case DT_SOCK:
-						case DT_FIFO:
+						case DT_LNK: /* fallthrough */
+						case DT_SOCK: /* fallthrough */
+						case DT_FIFO: /* fallthrough */
 						case DT_UNKNOWN:
 							total_len += 1;
 							break;
@@ -22710,8 +22728,8 @@ list_dir(void)
 					switch (c = xgetchar()) {
 
 					/* Advance one line at a time */
-					case 66: /* Down arrow */
-					case 10: /* Enter */
+					case 66: /* fallthrough */ /* Down arrow */
+					case 10: /* fallthrough */ /* Enter */
 					case 32: /* Space */
 						break;
 
@@ -22719,7 +22737,7 @@ list_dir(void)
 					case 126: counter = 0; /* Page Down */
 						break;
 
-					case 63: /* ? */
+					case 63: /* fallthrough */ /* ? */
 					case 104: { /* h: Print pager help */
 						CLEAR;
 
@@ -22728,7 +22746,7 @@ list_dir(void)
 						"Page Down: Advance one page\n"
 						"q: Stop pagging\n"), stdout);
 
-						int l = term_rows - 5;
+						int l = (int)term_rows - 5;
 						while (--l >= 0)
 							putchar('\n');
 
@@ -22825,8 +22843,8 @@ list_dir(void)
 				switch (c = xgetchar()) {
 
 				/* Advance one line at a time */
-				case 66: /* Down arrow */
-				case 10: /* Enter */
+				case 66: /* fallthrough */ /* Down arrow */
+				case 10: /* fallthrough */ /* Enter */
 				case 32: /* Space */
 					break;
 
@@ -22834,7 +22852,7 @@ list_dir(void)
 				case 126: counter = 0; /* Page Down */
 					break;
 
-				case 63: /* ? */
+				case 63: /* fallthrough */ /* ? */
 				case 104: { /* h: Print pager help */
 						CLEAR;
 
@@ -22843,7 +22861,7 @@ list_dir(void)
 						"Page Down: Advance one page\n"
 						"q: Stop pagging\n"), stdout);
 
-						int l = term_rows - 5;
+						int l = (int)term_rows - 5;
 						while (--l >= 0)
 							putchar('\n');
 
@@ -23010,8 +23028,8 @@ list_dir(void)
 		if (!last_column) {
 
 			/* Add spaces needed to equate the longest filename length */
-			int cur_len = file_info[i].eln_n + 1 + (icons ? 3 : 0)
-						  + file_info[i].len + (ind_char ? 1 : 0);
+			int cur_len = (int)file_info[i].eln_n + 1 + (icons ? 3 : 0)
+						  + (int)file_info[i].len + (ind_char ? 1 : 0);
 			if (file_info[i].dir && classify) {
 				cur_len += 2;
 				if (file_info[i].filesn > 0 && files_counter
@@ -23019,7 +23037,7 @@ list_dir(void)
 					cur_len += DIGINUM((int)file_info[i].filesn);
 			}
 
-			int diff = longest - cur_len;
+			int diff = (int)longest - cur_len;
 
 			register int j;
 			for (j = diff + 1; j--;)
@@ -23106,7 +23124,7 @@ run_and_refresh(char **comm)
 	if (is_sel && *comm[0] == 'r' && comm[0][1] ==  'm'
 	&& (!comm[0][2] || comm[0][2] == ' ')) {
 
-		int j = sel_n;
+		int j = (int)sel_n;
 		while (--j >= 0)
 			free(sel_elements[j]);
 
@@ -23158,8 +23176,8 @@ copy_function(char **comm)
 		return EXIT_FAILURE;
 
 	if (copy_n_rename) { /* pp */
-		char **tmp_cmd = (char **)xnmalloc(sel_n + 3, sizeof(char *));
-		tmp_cmd[0] = savestring("br", 2);
+		char **tmp = (char **)xnmalloc(sel_n + 3, sizeof(char *));
+		tmp[0] = savestring("br", 2);
 
 		size_t j;
 		for (j = 0; j < sel_n; j++) {
@@ -23186,25 +23204,25 @@ copy_function(char **comm)
 				|| strcmp(comm[args_n], ".") == 0)
 				? ws[cur_ws].path : comm[args_n]);
 
-			char *ret = strrchr(sel_elements[j], '/');
+			char *ret_val = strrchr(sel_elements[j], '/');
 
 			char *tmp_str = (char *)xnmalloc(strlen(dest)
-						+ strlen(ret + 1) + 2, sizeof(char));
+						+ strlen(ret_val + 1) + 2, sizeof(char));
 
-			sprintf(tmp_str, "%s/%s", dest, ret + 1);
+			sprintf(tmp_str, "%s/%s", dest, ret_val + 1);
 
-			tmp_cmd[j + 1] = savestring(tmp_str, strlen(tmp_str));
+			tmp[j + 1] = savestring(tmp_str, strlen(tmp_str));
 			free(tmp_str);
 		}
 
-		tmp_cmd[j + 1] = (char *)NULL;
+		tmp[j + 1] = (char *)NULL;
 
-		bulk_rename(tmp_cmd);
+		bulk_rename(tmp);
 
-		for (i = 0; tmp_cmd[i]; i++)
-			free(tmp_cmd[i]);
+		for (i = 0; tmp[i]; i++)
+			free(tmp[i]);
 
-		free(tmp_cmd);
+		free(tmp);
 
 		copy_n_rename = 0;
 
@@ -23525,7 +23543,7 @@ exec_cmd(char **comm)
 		exit_code = trash_function(comm);
 
 		if (is_sel) { /* If 'tr sel', deselect everything */
-			int i = sel_n;
+			int i = (int)sel_n;
 
 			while (--i >= 0)
 				free(sel_elements[i]);
@@ -24505,7 +24523,7 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "quit") == 0 || strcmp(comm[0], "exit") == 0) {
 
 		/* Free everything and exit */
-		int i = args_n + 1;
+		int i = (int)args_n + 1;
 		while (--i >= 0)
 			free(comm[i]);
 		free(comm);
@@ -24514,7 +24532,7 @@ exec_cmd(char **comm)
 	}
 
 	else if (*comm[0] == 'Q' && !comm[1]) {
-		int i = args_n + 1;
+		int i = (int)args_n + 1;
 		while (--i >= 0)
 			free(comm[i]);
 		free(comm);
@@ -24696,7 +24714,7 @@ exec_cmd(char **comm)
 
 		int j;
 		if (bin_commands) {
-			j = path_progsn;
+			j = (int)path_progsn;
 			while (--j >= 0)
 				free(bin_commands[j]);
 
@@ -24706,7 +24724,7 @@ exec_cmd(char **comm)
 		}
 
 		if (paths) {
-			j = path_n;
+			j = (int)path_n;
 			while (--j >= 0)
 				free(paths[j]);
 		}
@@ -25040,7 +25058,7 @@ parse_input_str(char *str)
 
 					/* Do not expand bookmark names that conflicts
 					 * with a filename in CWD */
-					int conflict = 0, k = files;
+					int conflict = 0, k = (int)files;
 
 					while (--k >= 0) {
 						if (*bookmarks[j].name == *file_info[k].name
@@ -25122,7 +25140,7 @@ parse_input_str(char *str)
 					ranges_cmd[j++] = savestring(substr[i], strlen(substr[i]));
 
 				for (i = 0; i < ranges_n; i++) {
-					ranges_cmd[j] = (char *)xcalloc(DIGINUM(ranges[i])
+					ranges_cmd[j] = (char *)xcalloc((size_t)DIGINUM(ranges[i])
 													+ 1, sizeof(int));
 					sprintf(ranges_cmd[j++], "%d", ranges[i]);
 				}
@@ -25347,7 +25365,7 @@ parse_input_str(char *str)
 							"filename\n"), PROGRAM_NAME, file_info[num-1].name);
 						/* Free whatever was allocated thus far */
 
-						for (j = 0; j <= args_n; j++)
+						for (j = 0; j <= (int)args_n; j++)
 							free(substr[j]);
 
 						free(substr);
@@ -25366,7 +25384,7 @@ parse_input_str(char *str)
 		&& substr[i][1] != '{') {
 			char *var_name = strchr(substr[i], '$');
 			if (var_name && *(++var_name)) {
-				size_t j = usrvar_n;
+				int j = (int)usrvar_n;
 
 				while (--j >= 0) {
 
@@ -26782,7 +26800,7 @@ main(int argc, char *argv[])
 		else {
 			exec_cmd(cmd);
 
-			i = args_n + 1;
+			i = (int)args_n + 1;
 			while (--i >= 0)
 				free(cmd[i]);
 
