@@ -87,6 +87,7 @@ where to search: `/.*\.png$ /media/images`. And, if you want to further filter t
 ![icons](images/icons2.png)
 
 - [x] **NEW: Fastback function**
+
 ![fastback](images/fastback.png)
 
 Because file manager, but also half-shell, CliFM also provides the following features:
