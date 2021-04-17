@@ -88,36 +88,36 @@ where to search: `/.*\.png$ /media/images`. And, if you want to further filter t
 
 Because file manager, but also half-shell, CliFM also provides the following features:
 
-* Unicode suppport
-* TAB-completion for commands, paths, ELN's, profiles, bookmarks, color schemes, and the directory jumper function
-* Bash-like quoting system
-* History function
-* Shell commands execution
-* Glob and regular expressions, including inverse matching
-* Aliases
-* Logs
-* Prompt and profile commands
-* Bash-like prompt customization
-* Sequential and conditional commands execution 
-* User profiles
-* Customizable keyboard shortcuts
-* Lira, a built-in resource opener
-* Mas, a built-in pager for files listing
-* Eleven sorting methods: name, size, atime, btime, ctime, mtime, version, extension, inode, owner, and group. It also supports reverse sorting.
-* Bulk rename
-* Archives and compression support (including Zstandard and ISO 9660)
-* Auto-cd and auto-open
-* Symlinks editor
-* Disk usage
-* CD on quit, file picker (as shell functions)
-* Plugins: PDF reader, image/video previews, wallpaper setter, music playlist, updates check, drag and drop, finder, jumper, clipboard, FZF navigation, FZF selection, and interactive help
-* Batch links
-* Read and list files form standard input
-* Exclude certain groups of filenames via the files filter using regular expressions
-* Up to eight workspaces
-* Fused parameters for ELN's
-* Advcpmv support (cp and mv with a progress bar)
-* Color schemes
+-[x] Unicode suppport
+-[x] TAB-completion for commands, paths, ELN's, profiles, bookmarks, color schemes, and the directory jumper function
+-[x] Bash-like quoting system
+-[x] History function
+-[x] Shell commands execution
+-[x] Glob and regular expressions, including inverse matching
+-[x] Aliases
+-[x] Logs
+-[x] Prompt and profile commands
+-[x] Bash-like prompt customization
+-[x] Sequential and conditional commands execution 
+-[x] User profiles
+-[x] Customizable keyboard shortcuts
+-[x] Lira, a built-in resource opener
+-[x] Mas, a built-in pager for files listing
+-[x] Eleven sorting methods: name, size, atime, btime, ctime, mtime, version, extension, inode, owner, and group. It also supports reverse sorting.
+-[x] Bulk rename
+-[x] Archives and compression support (including Zstandard and ISO 9660)
+-[x] Auto-cd and auto-open
+-[x] Symlinks editor
+-[x] Disk usage
+-[x] CD on quit, file picker (as shell functions)
+-[x] Plugins: PDF reader, image/video previews, wallpaper setter, music playlist, updates check, drag and drop, finder, jumper, clipboard, FZF navigation, FZF selection, and interactive help
+-[x] Batch links
+-[x] Read and list files form standard input
+-[x] Exclude certain groups of filenames via the files filter using regular expressions
+-[x] Up to eight workspaces
+-[x] Fused parameters for ELN's
+-[x] Advcpmv support (cp and mv with a progress bar)
+-[x] Color schemes
 
 **NOTE:** By default, CliFM ships only one color scheme, but more are provided by [clifm-colors](https://github.com/leo-arch/clifm-colors). The package is also available in the [AUR](https://aur.archlinux.org/packages/clifm-colors-git).
 
