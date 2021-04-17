@@ -11716,7 +11716,17 @@ edit-color-scheme:\\e[19~\n\
 open-keybinds:\\e[20~\n\
 open-config:\\e[21~\n\
 open-bookmarks:\\e[23~\n\
-quit:\\e[24~\n", PROGRAM_NAME);
+quit:\\e[24~\n\n\
+# Plugins\n\
+# 1) Make sure your plugin is in the plugins directory (or use any of the\n\
+# plugins in there)\n\
+# 2) Link pluginx to your plugin using the 'actions edit' command. Ex:\n\
+\"plugin1=myplugin.sh\"\n\
+# 3) Set a keybinding here for pluginx. Ex: \"plugin1:\\M-7\"\n\n\
+#plugin1:\n\
+#plugin2:\n\
+#plugin3:\n\
+#plugin4:\n", PROGRAM_NAME);
 
 	fclose(fp);
 
@@ -15566,6 +15576,58 @@ rl_ws4(int count, int key)
 	return EXIT_SUCCESS;
 }
 
+static int
+rl_plugin1(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	keybind_exec_cmd("plugin1");
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
+static int
+rl_plugin2(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	keybind_exec_cmd("plugin2");
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
+static int
+rl_plugin3(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	keybind_exec_cmd("plugin3");
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
+static int
+rl_plugin4(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	keybind_exec_cmd("plugin4");
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
 static void
 readline_kbinds(void)
 {
@@ -15660,6 +15722,12 @@ readline_kbinds(void)
 		rl_bind_keyseq(find_key("bookmarks"), rl_bookmarks);
 		rl_bind_keyseq(find_key("mountpoints"), rl_mountpoints);
 		rl_bind_keyseq(find_key("selbox"), rl_selbox);
+
+		/* Plugins */
+		rl_bind_keyseq(find_key("plugin1"), rl_plugin1);
+		rl_bind_keyseq(find_key("plugin2"), rl_plugin2);
+		rl_bind_keyseq(find_key("plugin3"), rl_plugin3);
+		rl_bind_keyseq(find_key("plugin4"), rl_plugin4);
 	}
 
 	/* If no kbinds file is found, set the defaults */
