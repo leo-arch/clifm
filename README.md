@@ -117,6 +117,7 @@ Because file manager, but also half-shell, CliFM also provides the following fea
 - [x] Up to eight workspaces
 - [x] Fused parameters for ELN's
 - [x] Advcpmv support (cp and mv with a progress bar)
+- [x] **NEW**: Four customizable keybindings for custom plugins
 - [x] Color schemes
 
 **NOTE:** By default, CliFM ships only one color scheme, but more are provided by [clifm-colors](https://github.com/leo-arch/clifm-colors). The package is also available in the [AUR](https://aur.archlinux.org/packages/clifm-colors-git).
