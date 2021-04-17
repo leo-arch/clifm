@@ -774,6 +774,13 @@ In this case, supposing you want to use F12 to open the configuration file, the 
  open-config:\\e[24~ (Symbol) 
 .TP
 GNU emacs escape sequences are also allowed (ex: "\\M-a", Alt-a in most keyboards, or "\\C-r" for Ctrl-r). Some codes, especially those involving keys like Ctrl or the arrow keys, vary depending on the terminal emulator and the system settings. These keybindings should be set up thus on a per terminal basis. You can also consult the terminfo database via the \fIinfocmp\fR command. See \fBterminfo(5)\fR and \fBinfocmp(1)\fR.
+.TP
+.B Keybindings for plugins
+.TP
+CliFM provides four customizable keybindings for custom plugins. The procedure for setting a keybinding for a plugin is the following:
+ 1) Copy your plugin to the plugins directory (or use any of the plugins already in there)
+ 2) Link pluginx (where 'x' is the plugin number [1-4]) to your plugin using the 'actions edit' command. Ex: "plugin1=myplugin.sh"
+ 3) Set a keybinding for pluginx using the 'kb edit' command. Ex: "plugin1:\\M\-7"
 
 .SH COLOR CODES
 .TP
