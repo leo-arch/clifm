@@ -25,17 +25,17 @@ Finally, because CliFM, unlike most file managers out there, is certainly a file
 
 CliFM is a completely command-line-based, shell-like file manager able to perform all the basic operations you may expect from any other FM. Besides these common operations, such as copy, move, remove, etc, CliFM most distinctive features are:
 
-* It is REALLY **CLI-based**. No GUI nor TUI or curses at all, just a command line. Since it does not need any GUI, it can run on the Linux built-in console and even on a SSH or any other remote session.
+- [x] It is REALLY **CLI-based**. No GUI nor TUI or curses at all, just a command line. Since it does not need any GUI, it can run on the Linux built-in console and even on a SSH or any other remote session.
 
-* With a memory footprint below 5 MiB and a disk usage of 0.5 MiB, it is incredibly **lightweight and fast**, and as such, able to run on really old hardware.
+- [x] With a memory footprint below 5 MiB and a disk usage of 0.5 MiB, it is incredibly **lightweight and fast**, and as such, able to run on really old hardware.
 
-* The use of **short (and even one-character) commands**, and list numbers (**ELN's**) for filenames. For example, instead of typing: `cp file1 file2 file3 file4 dir/`, you can do this: `c 1-4 7`. Shorter and quicker. If the auto-cd and auto-open functions are enabled, which is the default, you can change to directories or open files by just entering the corresponding ELN. So, instead of `cd 12` or `o 12` you can just enter `12`; even shorter and quicker. As a plus, ELN's can also be used with external commands. Example: `diff 1 5` or `ls -l 12 14`. If numbers are a bit tricky to you, as they are to me, you can use the TAB key to expand the ELN to the corresponding filename. So, type `r 56`, then TAB, and it becomes `r filename`.
+- [x] The use of **short (and even one-character) commands**, and list numbers (**ELN's**) for filenames. For example, instead of typing: `cp file1 file2 file3 file4 dir/`, you can do this: `c 1-4 7`. Shorter and quicker. If the auto-cd and auto-open functions are enabled, which is the default, you can change to directories or open files by just entering the corresponding ELN. So, instead of `cd 12` or `o 12` you can just enter `12`; even shorter and quicker. As a plus, ELN's can also be used with external commands. Example: `diff 1 5` or `ls -l 12 14`. If numbers are a bit tricky to you, as they are to me, you can use the TAB key to expand the ELN to the corresponding filename. So, type `r 56`, then TAB, and it becomes `r filename`.
 
-* **Bookmarks**: With CliFM bookmarks function, accessing your preferred files and/or directories could be as easy as this: `bm` (or `Alt-b`), to call the bookmarks function, and then `1` (or whatever is the number corresponding to your bookmark).
+- [x] **Bookmarks**: With CliFM bookmarks function, accessing your preferred files and/or directories could be as easy as this: `bm` (or `Alt-b`), to call the bookmarks function, and then `1` (or whatever is the number corresponding to your bookmark).
 
 ![bookmarks](images/bookmarks.png)
 
-* **Files selection**: the ability to select (and deselect) files from here and there, even in different instances of the program, and then operate on them as you whish via the Selection Box or the `sel` keyword. Example: `s 1 4 56 33` will send the files corresponding to these ELN's to the Selection Box. Then, by typing `sb` you can check the contents of the Selection Box. Let's suppose you want to copy a couple of files from your home directory to some distant path, say `/media/data/misc`. Instead of copying all these files individually, you just select the files and then tell the `paste` command where to copy them:
+- [x] **Files selection**: the ability to select (and deselect) files from here and there, even in different instances of the program, and then operate on them as you whish via the Selection Box or the `sel` keyword. Example: `s 1 4 56 33` will send the files corresponding to these ELN's to the Selection Box. Then, by typing `sb` you can check the contents of the Selection Box. Let's suppose you want to copy a couple of files from your home directory to some distant path, say `/media/data/misc`. Instead of copying all these files individually, you just select the files and then tell the `paste` command where to copy them:
  
 `s 1 2 3 6` (or `s 1-3 6`) and then `paste sel /media/data/misc`
 
@@ -47,39 +47,39 @@ Of course, you can deselect some or all selected files whenever you want with th
 
 ![selection box](images/sel_box.png)
  
- * Open files without the need to specify any program. Via `lira` (the **built-in resource opener**), if no program was specified, CliFM will open the file with the default program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background. Of course, you can also set a custom resource opener.
+- [x] Open files without the need to specify any program. Via `lira` (the **built-in resource opener**), if no program was specified, CliFM will open the file with the default program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background. Of course, you can also set a custom resource opener.
 
-* **Quick search**: type `/REGEX` and CliFM will list all matches for the corresponding REGEX pattern. Example: `/.*\.png$`
+- [x] **Quick search**: type `/REGEX` and CliFM will list all matches for the corresponding REGEX pattern. Example: `/.*\.png$`
  will list all the PNG files in the current directory. If you want to 
 search for files in another directory, just tell the search function 
 where to search: `/.*\.png$ /media/images`. And, if you want to further filter the search, you still can specify what kind of files you want. For example: `/[.-].*d$ -d /etc` will list all directories (-d) in /etc containing a dot or a slash and ending with 'd'. The quick search function also supports invert search: prepend the exclamation mark (!) to negate or reverse a given search pattern. For example: `!.*s$ -d /etc` will match all directories in /etc NOT ending with 'd', just as `!D*` will match all files in the current directory not starting with 'D'.
 
 ![quick search](images/quick_search.png)
 
-* A Freedesktop compliant **trash system** to be able to recover deleted files.
+- [x] A Freedesktop compliant **trash system** to be able to recover deleted files.
 
-* **Extended color codes**: Just like the `ls` command, CliFM uses customizable color codes to identify file types and extensions. However, and unlike `ls`, CliFM is also able to distinguish between empty and non-empty files or directories, broken and non-broken symlinks, files and directories with or without read permission, multi-hardlink files, and more. Once in CliFM, type `colors` or `cc` to see the list of currently used color codes.
+- [x] **Extended color codes**: Just like the `ls` command, CliFM uses customizable color codes to identify file types and extensions. However, and unlike `ls`, CliFM is also able to distinguish between empty and non-empty files or directories, broken and non-broken symlinks, files and directories with or without read permission, multi-hardlink files, and more. Once in CliFM, type `colors` or `cc` to see the list of currently used color codes.
 
 ![colors](images/colors.png)
 
-* **Files counter**: It also displays the amount of files contained by listed directories or symlinks to directories.
+- [x] **Files counter**: It also displays the amount of files contained by listed directories or symlinks to directories.
 
 ![dirs](images/dirs.png)
 
-* **Directory history map**: Keep in sight previous, current, and next entries in the directory history list for easiest and fastest navigation through visited directories.
+- [x] **Directory history map**: Keep in sight previous, current, and next entries in the directory history list for easiest and fastest navigation through visited directories.
 
-* **PLUGINS via custom actions**: Use custom action names, as if they were any other command, to run programs or scripts written in any language and extend thus CliFM functionality to fit your needs. This is basically an easy way of building custom commands for CliFM.
+- [x] **PLUGINS via custom actions**: Use custom action names, as if they were any other command, to run programs or scripts written in any language and extend thus CliFM functionality to fit your needs. This is basically an easy way of building custom commands for CliFM.
 
-* **Stealth mode:** Leave no trace on the host system. No file is read, no file is written.
+- [x] **Stealth mode:** Leave no trace on the host system. No file is read, no file is written.
 
-* Quickly and easily navigate through the jump database (i.e. a list of visited directories) via **Kangaroo**, a built-in **directory jumper** function similar to autojump, z.lua, and zoxide.
+- [x] Quickly and easily navigate through the jump database (i.e. a list of visited directories) via **Kangaroo**, a built-in **directory jumper** function similar to autojump, z.lua, and zoxide.
 
 ![dirjump](images/autojump0.png)
 ![dirjump](images/autojump2.png)
 
-* **Batch link**: Create multiple symbolic links at once.
+- [x] **Batch link**: Create multiple symbolic links at once.
 
-* **Icons support** :smirk: (depends on the [icons-in-terminal](https://github.com/sebastiencs/icons-in-terminal) project)
+- [x] **Icons support** :smirk: (depends on the [icons-in-terminal](https://github.com/sebastiencs/icons-in-terminal) project)
 
 1) [Install](https://github.com/sebastiencs/icons-in-terminal#installation) icons-in-terminal.
 2) Run CliFM with the `--icons` command line option, or, once in the program, enter `icons on`.
