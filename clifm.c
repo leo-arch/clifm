@@ -25169,14 +25169,7 @@ parse_input_str(char *str)
 			 * #	 2.a) FASTBACK EXPANSION		#
 			 * ###################################### */
 
-		/* if "..." (if autocd or auto-open are enabled) or
-		 * if "cd ..." or
-		 * if "o ..." or "open ...",
-		 * transform "... n" into "../.. n" */
-		if (((i == 0 && (autocd || auto_open)) || (*substr[0] == 'c'
-		&& substr[0][1] == 'd' && !substr[0][2]) || (*substr[0] == 'o'
-		&& !substr[0][1]) || strcmp(substr[0], "open") == 0)
-		&& (*substr[i] == '.' && substr[i][1] == '.' && substr[i][2] == '.')) {
+		if (*substr[i] == '.' && substr[i][1] == '.' && substr[i][2] == '.') {
 			char *tmp = fastback(substr[i]);
 			if (tmp) {
 				substr[i] = (char *)xrealloc(substr[i], (strlen(tmp) + 1)
