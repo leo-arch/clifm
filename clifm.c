@@ -1192,6 +1192,59 @@ xnmalloc(size_t nmemb, size_t size)
 }
 
 static char *
+fastback(const char *str)
+/* Convert ... n into ../.. n */
+{
+	if (!str || !*str)
+		return (char *)NULL;
+
+	char *p = (char *)str;
+	size_t dots = 0;
+
+	char *rem = (char *)NULL;
+	while (*p) {
+		if (*p != '.') {
+			rem = p;
+			break;
+		}
+		dots++;
+		p++;
+	}
+
+	if (dots <= 2)
+		 return (char *)NULL;
+
+	char *q = (char *)NULL;
+	if (rem)
+		q = (char *)xnmalloc((dots * 3 + strlen(rem) + 2), sizeof(char));
+	else
+		q = (char *)xnmalloc((dots * 3), sizeof(char));
+	
+	q[0] = '.';
+	q[1] = '.';
+
+	size_t i, c = 2;
+	for (i = 2; c < dots;) {
+		q[i++] = '/';
+		q[i++] = '.';
+		q[i++] = '.';
+		c++;
+	}
+
+	q[i] = '\0';
+
+	if (rem) {
+		if (*rem != '/') {
+			q[i] = '/';
+			q[i + 1] = '\0';
+		}
+		strcat(q, rem);
+	}
+
+	return q;
+}
+
+static char *
 xitoa(int n)
 /* Transform an integer (N) into a string of chars */
 {
@@ -16352,6 +16405,18 @@ my_rl_path_completion(const char *text, int state)
 			return (char *)NULL;
 	}
 
+	if (*text == '.' && text[1] == '.' && text[2] == '.') {
+
+		char *p = savestring(text, strlen(text));
+		tmp_text = fastback(p);
+
+		free(p);
+		p = (char *)NULL;
+
+		if (!tmp_text)
+			return (char *)NULL;
+	}
+
 	/* Perhaps I should add bookmarks here */
 
 	int rl_complete_with_tilde_expansion = 0;
@@ -25101,7 +25166,23 @@ parse_input_str(char *str)
 		register size_t j = 0;
 
 			/* ######################################
-			 * #	 2.a) PINNED DIR EXPANSION		#
+			 * #	 2.a) FASTBACK EXPANSION		#
+			 * ###################################### */
+
+		if (((i == 0 && autocd)	|| (*substr[0] == 'c' && substr[0][1] == 'd'
+		&& !substr[0][2])) && (*substr[i] == '.' && substr[i][1] == '.'
+		&& substr[i][2] == '.')) {
+			char *tmp = fastback(substr[i]);
+			if (tmp) {
+				substr[i] = (char *)xrealloc(substr[i], (strlen(tmp) + 1)
+											 * sizeof(char));
+				strcpy(substr[i], tmp);
+				free(tmp);
+			}
+		}
+
+			/* ######################################
+			 * #	 2.b) PINNED DIR EXPANSION		#
 			 * ###################################### */
 
 		if (*substr[i] == ',' && !substr[i][1] && pinned_dir) {
@@ -25111,7 +25192,7 @@ parse_input_str(char *str)
 		}
 
 			/* ######################################
-			 * #	  2.b) BOOKMARKS EXPANSION		#
+			 * #	  2.c) BOOKMARKS EXPANSION		#
 			 * ###################################### */
 
 		/* Expand bookmark names into paths */
@@ -25180,7 +25261,7 @@ parse_input_str(char *str)
 	}
 
 			/* ####################################
-			 * #       2.c) RANGES EXPANSION      #
+			 * #       2.d) RANGES EXPANSION      #
 			 * ####################################*/
 
 	 /* Expand expressions like "1-3" to "1 2 3" if all the numbers in
@@ -25244,7 +25325,7 @@ parse_input_str(char *str)
 	free(range_array);
 
 				/* ##########################
-				 * #   2.d) SEL EXPANSION   #
+				 * #   2.e) SEL EXPANSION   #
 				 * ##########################*/
 
 /*	if (is_sel && *substr[0] != '/') { */
@@ -25337,7 +25418,7 @@ parse_input_str(char *str)
 	for (i = 0; i <= args_n; i++) {
 
 				/* ##########################
-				 * #   2.e) ELN EXPANSION   #
+				 * #   2.f) ELN EXPANSION   #
 				 * ##########################*/
 
 		/* If autocd is set to false, i must be bigger than zero because
@@ -25445,7 +25526,7 @@ parse_input_str(char *str)
 		}
 
 		/* #############################################
-		 * #   2.f) USER DEFINED VARIABLES EXPANSION   #
+		 * #   2.g) USER DEFINED VARIABLES EXPANSION   #
 		 * #############################################*/
 
 		if (substr[i][0] == '$' && substr[i][1] != '('
