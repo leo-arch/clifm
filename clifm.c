@@ -357,6 +357,7 @@ nm=01;32:bm=01;36:"
 #define DEF_CASE_SENS_PATH_COMP 1
 #define DEF_MIN_JUMP_RANK 10
 #define DEF_MAX_JUMP_TOTAL_RANK 100000
+#define DEF_CWD_IN_TITLE 0
 #define UNSET -1
 #define DEF_MAX_FILES UNSET
 
@@ -591,6 +592,7 @@ struct param
 	int noeln;
 	int case_sens_dirjump;
 	int case_sens_path_comp;
+	int cwd_in_title;
 };
 
 static struct param xargs;
@@ -1089,6 +1091,88 @@ xstrlen(const char *restrict s)
 }
 #endif /* __FreeBSD__ */
 
+static void *
+xrealloc(void *ptr, size_t size)
+{
+	void *new_ptr = realloc(ptr, size);
+
+	if (!new_ptr) {
+		free(ptr);
+		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate "
+			 "%zu bytes\n"), PROGRAM_NAME, __func__, size);
+		exit(EXIT_FAILURE);
+	}
+
+	return new_ptr;
+}
+
+static void *
+xcalloc(size_t nmemb, size_t size)
+{
+	void *new_ptr = calloc(nmemb, size);
+
+	if (!new_ptr) {
+		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate "
+			 "%zu bytes\n"), PROGRAM_NAME, __func__, nmemb * size);
+		exit(EXIT_FAILURE);
+	}
+
+	return new_ptr;
+}
+
+static void *
+xnmalloc(size_t nmemb, size_t size)
+{
+	void *new_ptr = malloc(nmemb * size);
+
+	if (!new_ptr) {
+		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu "
+			 "bytes\n"), PROGRAM_NAME, __func__, nmemb * size);
+		exit(EXIT_FAILURE);
+	}
+
+	return new_ptr;
+}
+
+static char *
+home_tilde(const char *new_path)
+/* Reduce "$HOME" to tilde ("~"). The new_path variable is always either
+ * "$HOME" or "$HOME/file", that's why there's no need to check for
+ * "/file" */
+{
+	if (!home_ok || !new_path || !*new_path)
+		return (char *)NULL;
+
+	char *path_tilde = (char *)NULL;
+
+	/* If path == HOME */
+	if (*new_path == *user_home && strcmp(new_path, user_home) == 0) {
+		path_tilde = (char *)xnmalloc(2, sizeof(char));
+		path_tilde[0] = '~';
+		path_tilde[1] = '\0';
+	}
+
+	/* If path == HOME/file */
+	else {
+		path_tilde = (char *)xnmalloc(strlen(new_path + user_home_len + 1) + 3,
+									  sizeof(char));
+		sprintf(path_tilde, "~/%s", new_path + user_home_len + 1);
+	}
+
+	return path_tilde;
+}
+
+static inline void
+set_term_title(const char *dir)
+{
+//	char *tilde_path = home_tilde(dir);
+
+/*	printf("\033]2;%s - %s\007", PROGRAM_NAME, tilde_path ? tilde_path
+		   : (dir ? dir : "")); */
+	printf("\033]2;%s - %s\007", PROGRAM_NAME, dir);
+	fflush(stdout);
+}
+
 static int
 xchdir(const char *dir)
 /* Make sure DIR exists, it is actually a directory and is readable.
@@ -1101,7 +1185,13 @@ xchdir(const char *dir)
 
 	closedir(dirp);
 
-	return chdir(dir);
+	int ret;
+	ret = chdir(dir);
+
+	if (ret == 0 && xargs.cwd_in_title == 1)
+		set_term_title(dir);
+
+	return ret;
 }
 
 static int
@@ -1146,49 +1236,6 @@ get_size_unit(off_t size)
 	snprintf(str, max, "%.*f%c", (s == x) ? 0 : 2, (double)s, u[n]);
 
 	return str;
-}
-
-static void *
-xrealloc(void *ptr, size_t size)
-{
-	void *new_ptr = realloc(ptr, size);
-
-	if (!new_ptr) {
-		free(ptr);
-		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate "
-			 "%zu bytes\n"), PROGRAM_NAME, __func__, size);
-		exit(EXIT_FAILURE);
-	}
-
-	return new_ptr;
-}
-
-static void *
-xcalloc(size_t nmemb, size_t size)
-{
-	void *new_ptr = calloc(nmemb, size);
-
-	if (!new_ptr) {
-		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate "
-			 "%zu bytes\n"), PROGRAM_NAME, __func__, nmemb * size);
-		exit(EXIT_FAILURE);
-	}
-
-	return new_ptr;
-}
-
-static void *
-xnmalloc(size_t nmemb, size_t size)
-{
-	void *new_ptr = malloc(nmemb * size);
-
-	if (!new_ptr) {
-		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu "
-			 "bytes\n"), PROGRAM_NAME, __func__, nmemb * size);
-		exit(EXIT_FAILURE);
-	}
-
-	return new_ptr;
 }
 
 static char *
@@ -2435,13 +2482,15 @@ save_jumpdb(void)
 	}
 
 	size_t i, total_rank = 0;
-	int reduce = 0;
+	int reduce = 0, keep = 0;
 	time_t now = time(NULL);
 
 	if (jump_total_rank > max_jump_total_rank)
 		reduce = (jump_total_rank / max_jump_total_rank) + 1;
 
 	for (i = 0; i < jump_n; i++) {
+
+		keep = 0;
 
 		int days_since_first = (int)(now - jump_db[i].first_visit) / 60 / 60 / 24;
 		int rank = days_since_first > 1 ? ((int)jump_db[i].visits * 100)
@@ -2459,12 +2508,29 @@ save_jumpdb(void)
 		else							 /* More than a week */
 			rank = JOLDER(tmp_rank);
 
+		/* Do not remove bookmarked, pinned, or workspaced directories */
 		int j = (int)bm_n;
 		while (--j >= 0) {
 			if (bookmarks[j].path[1] == jump_db[i].path[1]
 			&& strcmp(bookmarks[j].path, jump_db[i].path) == 0) {
 				rank += BOOKMARK_BONUS;
+				keep = 1;
 				break;
+			}
+		}
+
+		if (!keep && pinned_dir[1] == jump_db[i].path[1]
+		&& strcmp(pinned_dir, jump_db[i].path) == 0)
+			keep = 1;
+
+		if (!keep) {
+			j = MAX_WS;
+			while (--j >= 0) {
+				if (ws[j].path && ws[j].path[1] == jump_db[i].path[1]
+				&& strcmp(jump_db[i].path, ws[j].path) == 0) {
+					keep = 1;
+					break;
+				}
 			}
 		}
 
@@ -2474,7 +2540,7 @@ save_jumpdb(void)
 		}
 
 		/* Forget directories ranked below MIN_JUMP_RANK */
-		if (rank <= 0 || rank < min_jump_rank)
+		if (!keep && (rank <= 0 || rank < min_jump_rank))
 			continue;
 
 		total_rank += rank;
@@ -2508,6 +2574,7 @@ unset_xargs(void)
 	xargs.no_dirjump = xargs.icons = xargs.no_colors = UNSET;
 	xargs.icons_use_file_color = xargs.no_columns = UNSET;
 	xargs.case_sens_dirjump = xargs.case_sens_path_comp = UNSET;
+	xargs.cwd_in_title = UNSET;
 }
 
 static inline void
@@ -3747,6 +3814,9 @@ check_options(void)
 		usr_cscheme = savestring("default", 7);
 
 	/* Do no override command line options */
+	if (xargs.cwd_in_title == UNSET)
+		xargs.cwd_in_title = DEF_CWD_IN_TITLE;
+
 	if (cp_cmd == UNSET)
 		cp_cmd = DEF_CP_CMD;
 
@@ -9247,33 +9317,6 @@ get_hex_num(const char *str)
 	hex_n[i] = -1; /* -1 marks the end of the int array */
 
 	return hex_n;
-}
-
-static char *
-home_tilde(const char *new_path)
-/* Reduce "HOME" to tilde ("~"). The new_path variable is always either
- * "HOME" or "HOME/file", that's why there's no need to check for
- * "/file" */
-{
-	if (!home_ok)
-		return (char *)NULL;
-
-	char *path_tilde = (char *)NULL;
-
-	/* If path == HOME */
-	if (*new_path == *user_home && strcmp(new_path, user_home) == 0) {
-		path_tilde = (char *)xcalloc(2, sizeof(char));
-		path_tilde[0] = '~';
-	}
-
-	/* If path == HOME/file */
-	else {
-		path_tilde = (char *)xcalloc(strlen(
-						 new_path + user_home_len + 1) + 3, sizeof(char));
-		sprintf(path_tilde, "~/%s", new_path + user_home_len + 1);
-	}
-
-	return path_tilde;
 }
 
 static char *
@@ -21627,6 +21670,8 @@ help_function (void)
 \n				$XDG_CONFIG_HOME/clifm/.last to be accessed\
 \n				later by a shell funtion. See the manpage\
 \n     --color-scheme=NAME\t use color scheme NAME\
+\n     --cwd-in-title\t\t print current directory in terminal \
+\n				window title\
 \n     --disk-usage\t\t show disk usage (free/total) for the\
 \n				filesystem to which the current directory \
 \n				belongs\
@@ -26104,6 +26149,7 @@ external_arguments(int argc, char **argv)
 		{"trash-as-rm", no_argument, 0, 29},
 		{"case-ins-dirjump", no_argument, 0, 30},
 		{"case-ins-path-comp", no_argument, 0, 31},
+		{"cwd-in-title", no_argument, 0, 32},
 		{0, 0, 0, 0}
 	};
 
@@ -26254,6 +26300,10 @@ external_arguments(int argc, char **argv)
 
 		case 31:
 			xargs.case_sens_path_comp = case_sens_path_comp = 0;
+		break;
+
+		case 32:
+			xargs.cwd_in_title = 1;
 		break;
 
 		case 'a':
@@ -26792,6 +26842,11 @@ main(int argc, char *argv[])
 			free(ws[cur_ws].path);
 
 		ws[cur_ws].path = savestring(cwd, strlen(cwd));
+	}
+
+	if (xargs.cwd_in_title == 0) {
+		printf("\033]2;%s\007", PROGRAM_NAME);
+		fflush(stdout);
 	}
 
 	exec_profile();
