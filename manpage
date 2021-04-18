@@ -186,6 +186,10 @@ write last visited directory to \fI$XDG_CONFIG_HOME/clifm/.last\fR to be later a
 .B \-\-color\-scheme=NAME
 set NAME as color scheme
 .TP
+.TP
+.B \-\-cwd\-in\-title
+print current working directory in terminal window title. Otherwise, only the program name is printed
+.TP
 .B \-\-disk\-usage
 show disk usage (free/total) for the filesystem the current directory belongs to
 .TP
