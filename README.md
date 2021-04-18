@@ -29,11 +29,13 @@ CliFM is a completely command-line-based, shell-like file manager able to perfor
 
 - [x] With a memory footprint below 5 MiB and a disk usage of 0.5 MiB, it is incredibly **lightweight and fast**, and as such, able to run on really old hardware.
 
+![fast](images/fast.gif)
+
 - [x] The use of **short (and even one-character) commands**, and list numbers (**ELN's**) for filenames. For example, instead of typing: `cp file1 file2 file3 file4 dir/`, you can do this: `c 1-4 7`. Shorter and quicker. If the auto-cd and auto-open functions are enabled, which is the default, you can change to directories or open files by just entering the corresponding ELN. So, instead of `cd 12` or `o 12` you can just enter `12`; even shorter and quicker. As a plus, ELN's can also be used with external commands. Example: `diff 1 5` or `ls -l 12 14`. If numbers are a bit tricky to you, as they are to me, you can use the TAB key to expand the ELN to the corresponding filename. So, type `r 56`, then TAB, and it becomes `r filename`.
 
 - [x] **Bookmarks**: With CliFM bookmarks function, accessing your preferred files and/or directories could be as easy as this: `bm` (or `Alt-b`), to call the bookmarks function, and then `1` (or whatever is the number corresponding to your bookmark).
 
-![bookmarks](images/bookmarks.png)
+![bookmarks](images/bookmark.gif)
 
 - [x] **Files selection**: the ability to select (and deselect) files from here and there, even in different instances of the program, and then operate on them as you whish via the Selection Box or the `sel` keyword. Example: `s 1 4 56 33` will send the files corresponding to these ELN's to the Selection Box. Then, by typing `sb` you can check the contents of the Selection Box. Let's suppose you want to copy a couple of files from your home directory to some distant path, say `/media/data/misc`. Instead of copying all these files individually, you just select the files and then tell the `paste` command where to copy them:
  
@@ -45,7 +47,7 @@ You can also use the 'sel' keyword with external commands. Example: `s 1-4 7 10 
 
 Of course, you can deselect some or all selected files whenever you want with the `desel` or `ds` command: `ds *`, or just press `Alt-d`.
 
-![selection box](images/sel_box.png)
+![selection box](images/sel.gif)
  
 - [x] Open files without the need to specify any program. Via `lira` (the **built-in resource opener**), if no program was specified, CliFM will open the file with the default program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background. Of course, you can also set a custom resource opener.
 
@@ -54,7 +56,7 @@ Of course, you can deselect some or all selected files whenever you want with th
 search for files in another directory, just tell the search function 
 where to search: `/.*\.png$ /media/images`. And, if you want to further filter the search, you still can specify what kind of files you want. For example: `/[.-].*d$ -d /etc` will list all directories (-d) in /etc containing a dot or a slash and ending with 'd'. The quick search function also supports invert search: prepend the exclamation mark (!) to negate or reverse a given search pattern. For example: `!.*s$ -d /etc` will match all directories in /etc NOT ending with 'd', just as `!D*` will match all files in the current directory not starting with 'D'.
 
-![quick search](images/quick_search.png)
+![quick search](images/search.gif)
 
 - [x] A Freedesktop compliant **trash system** to be able to recover deleted files.
 
@@ -74,8 +76,7 @@ where to search: `/.*\.png$ /media/images`. And, if you want to further filter t
 
 - [x] Quickly and easily navigate through the jump database (i.e. a list of visited directories) via **Kangaroo**, a built-in **directory jumper** function similar to autojump, z.lua, and zoxide.
 
-![dirjump](images/autojump0.png)
-![dirjump](images/autojump2.png)
+![dirjump](images/jump.gif)
 
 - [x] **Batch link**: Create multiple symbolic links at once.
 
