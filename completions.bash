@@ -74,6 +74,7 @@ _clifm ()
 		--case-ins-path-comp
         --cd-on-quit
 		--color-scheme
+		--cwd-in-title
         --disk-usage
         --enable-logs
         --expand-bookmarks
