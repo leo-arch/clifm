@@ -1350,6 +1350,7 @@ is_internal_c(const char *restrict cmd)
 
 	int found = 0;
 	int i = (int)(sizeof(int_cmds) / sizeof(char *)) - 1;
+
 	while (--i >= 0) {
 		if (*cmd == *int_cmds[i] && strcmp(cmd, int_cmds[i]) == 0) {
 			found = 1;
@@ -12260,10 +12261,24 @@ is_internal(const char *cmd)
  * tilde, and so on. Only internal commands dealing with filenames
  * should be checked here */
 {
-	const char *int_cmds[] = { "o", "open", "cd", "p", "pr", "prop",
-		"t", "tr", "trash", "s", "sel", "mm", "mime", "bm",
-		"bookmarks", "br", "bulk", "ac", "ad", "exp", "export",
-		"pin", "jump", "jc", "jp", "bl", "le", NULL };
+	const char *int_cmds[] = {
+		"cd",
+		"o", "open",
+		"s", "sel",
+		"r",
+		"p", "pr", "prop",
+		"t", "tr", "trash",
+		"mm", "mime",
+		"bm", "bookmarks",
+		"l",
+		"br", "bulk",
+		"ac", "ad",
+		"exp", "export",
+		"pin",
+		"jc", "jp",
+		"bl", "le",
+		NULL
+		};
 
 	int found = 0;
 	int i = (int)(sizeof(int_cmds) / sizeof(char *)) - 1;
