@@ -127,7 +127,7 @@ Because file manager, but also half-shell, CliFM also provides the following fea
 
 **NOTE:** By default, CliFM ships only one color scheme, but more are provided by [clifm-colors](https://github.com/leo-arch/clifm-colors). The package is also available in the [AUR](https://aur.archlinux.org/packages/clifm-colors-git).
 
-[!colors](images/colors.gif)
+![colors](images/colors.gif)
 
 Finally, all CliFM options could be handled directly via command line, by passing parameters to the program, or via plain
 text configuration files, located in `$XDG_CONFIG_HOME/clifm/`.
