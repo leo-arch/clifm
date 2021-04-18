@@ -23454,11 +23454,12 @@ exec_cmd(char **comm)
 			}
 		}
 
-		/* Deescape the string */
+		/* Deescape the string (only if filename) */
 		if (strchr(comm[0], '\\')) {
 			char *deq_str = dequote_str(comm[0], 0);
 			if (deq_str) {
-				strcpy(comm[0], deq_str);
+				if (access(deq_str, F_OK) == 0)
+					strcpy(comm[0], deq_str);
 				free(deq_str);
 			}
 		}
