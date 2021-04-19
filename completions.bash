@@ -20,8 +20,8 @@ _clifm ()
         --bookmarks-file
         -c
         --config-file
-		-e
-		--no-eln
+	-e
+	--no-eln
         -f
         --no-folders-first
         -F
@@ -62,34 +62,34 @@ _clifm ()
         --unicode
         -v
         --version
-		-w
-		--workspace
+	-w
+	--workspace
         -x
         --ext-cmds
         -y
         --light-mode
         -z
-		--sort
-		--case-ins-dirjump
-		--case-ins-path-comp
+	--sort
+	--case-ins-dirjump
+	--case-ins-path-comp
         --cd-on-quit
-		--color-scheme
-		--cwd-in-title
+	--color-scheme
+	--cwd-in-title
         --disk-usage
         --enable-logs
         --expand-bookmarks
         --icons
-		--icons-use-file-color
+	--icons-use-file-color
         --list-and-quit
         --max-dirhist
-		--max-files
+	--max-files
         --max-path
         --no-dir-jumper
         --no-cd-auto
         --no-classify
         --no-clear-screen
-		--no-colors
-		--no-columns
+	--no-colors
+	--no-columns
         --no-files-counter
         --no-open-auto
         --no-tips
@@ -100,7 +100,7 @@ _clifm ()
         --rl-vi-mode
         --share-selbox
         --sort-reverse
-		--trash-as-rm
+	--trash-as-rm
     )
 
     if [[ $prev == -b || $prev == -c || $prev == -k || $prev == -p ]]; then
