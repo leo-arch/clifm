@@ -12877,6 +12877,7 @@ run_action(char *action, char **args)
 
 	if (mkfifo(fifo_path, 0600) != EXIT_SUCCESS) {
 		free(cmd);
+		printf("%s: %s\n", fifo_path, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -24829,6 +24830,12 @@ exec_cmd(char **comm)
 			return EXIT_FAILURE;
 		}
 
+		if (*comm[0] == *argv_bk[0] && strcmp(comm[0], argv_bk[0]) == 0) {
+			fprintf(stderr, "%s: Nested instances are not allowed\n",
+					PROGRAM_NAME);
+			return EXIT_FAILURE;
+		}
+
 		/*
 		 * By making precede the command by a colon or a semicolon, the
 		 * user can BYPASS CliFM parsing, expansions, and checks to be
@@ -26867,8 +26874,13 @@ main(int argc, char *argv[])
 		fflush(stdout);
 	}
 	else {
-		printf("\033]2;%s - %s\007", PROGRAM_NAME, ws[cur_ws].path);
+		char *tmp = (char *)NULL;
+		if (ws[cur_ws].path[1] == 'h')
+			tmp = home_tilde(ws[cur_ws].path);
+		printf("\033]2;%s - %s\007", PROGRAM_NAME, tmp ? tmp : ws[cur_ws].path);
 		fflush(stdout);
+		if (tmp)
+			free(tmp);
 	}
 
 	exec_profile();
