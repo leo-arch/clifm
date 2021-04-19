@@ -209,6 +209,9 @@ Finally, copy the plugins to the local plugins directory:
 
 CliFM is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag). It works on Linux and FreeBSD, on i686, x86_64, and ARM architectures.
 
+## License
+This project is licensed under the GPL version 2 (or later) license. See the LICENSE.md file for details.
+
 ## First steps
 
 Try the `help` command to learn more about CliFM. Once in the CliFM prompt, type `help` or `?`. To jump into the COMMANDS section in the manpage, simply enter `cmd` or press **F2**. Press **F1** to access the full manpage and **F3** to access the keybindings help page.
