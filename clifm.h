@@ -1,6 +1,6 @@
 
 				/** #######################
-				 *  #  CLIFM CUSTOM LIB   # 
+				 *  #  CLIFM CUSTOM LIB   #
 				 *  ######################*/
 
 int
@@ -27,9 +27,9 @@ check_immutable_bit(char *file)
 		immut_flag = 0;
 	close(fd);
 
-	if (immut_flag) 
+	if (immut_flag)
 		return 1;
-	else 
+	else
 		return 0;
 
 	#endif /* !defined(FS_IOC_GETFLAGS) || !defined(FS_IMMUTABLE_FL) */
@@ -39,7 +39,7 @@ int
 xgetchar(void)
 /* Unlike getchar(), gets key pressed immediately, without the need to
  * wait for new line (Enter)
- * Taken from: 
+ * Taken from:
  * https://stackoverflow.com/questions/12710582/how-can-i-capture-a-key-stroke-immediately-in-linux */
 {
 	struct termios oldt, newt;
@@ -73,8 +73,8 @@ xatoi(const char *str)
 // 2 times faster than atoi. Cannot handle negative number (See xnatoi
 // below)
 {
-	int ret = 0; 
-	
+	int ret = 0;
+
 	while (*str) {
 		if (*str < 0x30 || *str > 0x39)
 			return ret;
@@ -84,7 +84,7 @@ xatoi(const char *str)
 
 	if (ret > INT_MAX)
 		return INT_MAX;
-	
+
 	if (ret < INT_MIN)
 		return INT_MIN;
 
@@ -110,7 +110,7 @@ xnatoi(const char *str)
 
 	if (ret > INT_MAX)
 		return INT_MAX;
-	
+
 	if (ret < INT_MIN)
 		return INT_MIN;
 
@@ -138,7 +138,7 @@ get_user(void)
 {
 	struct passwd *pw;
 	uid_t uid = 0;
-	
+
 	uid = geteuid();
 
 	/* Get a passwd struct for current user ID. An alternative is
@@ -160,12 +160,12 @@ get_user(void)
 
 	if (!p)
 		return (char *)NULL;
-	
+
 	char *username = p;
 	p = (char *)NULL;
 
 	strcpy(username, pw->pw_name);
-	
+
 	return username;
 }
 
@@ -175,7 +175,7 @@ get_user_home(void)
  * or NULL if not found */
 {
 	struct passwd *pw;
-	
+
 	pw = getpwuid(getuid());
 
 	if (!pw)
@@ -186,7 +186,7 @@ get_user_home(void)
 
 	if (!p)
 		return (char *)NULL;
-	
+
 	char *home = p;
 	p = (char *)NULL;
 
@@ -212,12 +212,12 @@ get_sys_shell(void)
 
 	if (!p)
 		return (char *)NULL;
-	
+
 	char *shell = p;
 	p = (char *)NULL;
 
 	strcpy(shell, pw->pw_shell);
-	
+
 	return shell;
 }
 
@@ -229,7 +229,7 @@ strcntchr(const char *str, const char c)
 {
 	if (!str)
 		return -1;
-	
+
 	register int i = 0;
 
 	while (*str) {
@@ -249,7 +249,7 @@ straft(char *str, const char c)
 {
 	if (!str || !*str || !c)
 		return (char *)NULL;
-	
+
 	char *p = str, *q = (char *)NULL;
 
 	while (*p) {
@@ -259,7 +259,7 @@ straft(char *str, const char c)
 		}
 		p++;
 	}
-	
+
 	/* If C was not found or there is nothing after C */
 	if (!q || !*(q + 1))
 		return (char *)NULL;
@@ -281,25 +281,25 @@ straftlst(char *str, const char c)
 {
 	if (!str || !*str || !c)
 		return (char *)NULL;
-	
+
 	char *p = str, *q = (char *)NULL;
-	
+
 	while (*p) {
 		if (*p == c)
 			q = p;
 		p++;
 	}
-	
+
 	if (!q || !*(q + 1))
 		return (char *)NULL;
-	
+
 	char *buf = (char *)malloc(strlen(q));
-	
+
 	if (!buf)
 		return (char *)NULL;
 
 	strcpy(buf, q + 1);
-	
+
 	return buf;
 }
 
@@ -319,12 +319,12 @@ strbfr(char *str, const char c)
 		}
 		p++;
 	}
-	
+
 	/* C was not found or it was the first char in STR */
 	if (!q || q == str)
 		return (char *)NULL;
 
-	*q = 0x00; 
+	*q = '\0';
 	/* Now C (because q points to C) is the null byte and STR ends in
 	 * C, which is what we want */
 
@@ -338,9 +338,9 @@ strbfr(char *str, const char c)
 	}
 
 	strcpy(buf, str);
-	
+
 	*q = c;
-	
+
 	return buf;
 }
 
@@ -360,11 +360,11 @@ strbfrlst(char *str, const char c)
 			q = p;
 		p++;
 	}
-	
+
 	if (!q || q == str)
 		return (char *)NULL;
-	
-	*q = 0x00;
+
+	*q = '\0';
 
 	char *buf = (char *)malloc((size_t)(q - str + 1));
 
@@ -374,9 +374,9 @@ strbfrlst(char *str, const char c)
 	}
 
 	strcpy(buf, str);
-	
+
 	*q = c;
-	
+
 	return buf;
 }
 
@@ -402,23 +402,23 @@ strbtw(char *str, const char a, const char b)
 		}
 		p++;
 	}
-	
+
 	if (!pb)
 		return (char *)NULL;
-		
-	*pb = 0x00;
-	
+
+	*pb = '\0';
+
 	char *buf = (char *)malloc((size_t)(pb - pa));
-	
+
 	if (!buf) {
 		*pb = b;
 		return (char *)NULL;
 	}
-	
+
 	strcpy(buf, pa + 1);
-	
+
 	*pb = b;
-	
+
 	return buf;
 }
 
@@ -445,7 +445,7 @@ char *
 url_encode(char *str)
 /* Returns a url-encoded version of str */
 {
-	if (!str || *str == 0x00)
+	if (!str || *str == '\0')
 		return (char *)NULL;
 
 	char *p;
@@ -463,12 +463,12 @@ url_encode(char *str)
 	/* Copies of STR and BUF pointers to be able
 	* to increase and/or decrease them without loosing the original
 	* memory location */
-	char *pstr, *pbuf; 
+	char *pstr, *pbuf;
 	pstr = str;
 	pbuf = buf;
-	
+
 	for (; *pstr; pstr++) {
-		if (isalnum (*pstr) || *pstr == '-' || *pstr == '_' 
+		if (isalnum (*pstr) || *pstr == '-' || *pstr == '_'
 					|| *pstr == '.' || *pstr == '~' || *pstr == '/')
 			/* Do not encode the above chars */
 			*pbuf++ = *pstr;
@@ -479,7 +479,7 @@ url_encode(char *str)
 			*pbuf++ = to_hex(*pstr & 15); /* Bitwise AND operation */
 		}
 	}
-	
+
 	return buf;
 }
 
@@ -487,7 +487,7 @@ char *
 url_decode(char *str)
 /* Returns a url-decoded version of str */
 {
-	if (!str || str[0] == 0x00)
+	if (!str || str[0] == '\0')
 		return (char *)NULL;
 
 	char *p = (char *)NULL;
@@ -501,15 +501,15 @@ url_decode(char *str)
 	char *buf;
 	buf = p;
 	p = (char *)NULL;
-	
+
 	char *pstr, *pbuf;
-	pstr = str; 
+	pstr = str;
 	pbuf = buf;
 	for ( ; *pstr; pstr++) {
 		if (*pstr == '%') {
 			if (pstr[1] && pstr[2]) {
 				/* Decode URL code. Example: %20 to space char */  
-				/* Left shift and bitwise OR operations */  
+				/* Left shift and bitwise OR operations */
 				*pbuf++ = from_hex(pstr[1]) << 4 | from_hex(pstr[2]);
 				pstr += 2;
 			}
@@ -545,7 +545,7 @@ gen_rand_str(size_t len)
 		*p++ = charset[i];
     }
 
-   	*p = 0x00;
+   	*p = '\0';
 
    	return str;
 }
@@ -572,35 +572,35 @@ get_date (void)
 
 int
 read_octal(char *str)
-/* Convert octal string into integer. 
- * Taken from: https://www.geeksforgeeks.org/program-octal-decimal-conversion/ 
+/* Convert octal string into integer.
+ * Taken from: https://www.geeksforgeeks.org/program-octal-decimal-conversion/
  * Used by decode_prompt() to make things like this work: \033[1;34m */
 {
 	if (!str)
 		return -1;
-	
+
 	int n = atoi(str);
-	int num = n; 
-	int dec_value = 0; 
+	int num = n;
+	int dec_value = 0;
 
 	/* Initializing base value to 1, i.e 8^0 */
-	int base = 1; 
+	int base = 1;
 
-	int temp = num; 
-	while (temp) { 
+	int temp = num;
+	while (temp) {
 
 		/* Extracting last digit */
-		int last_digit = temp % 10; 
-		temp = temp / 10; 
+		int last_digit = temp % 10;
+		temp = temp / 10;
 
-		/* Multiplying last digit with appropriate 
+		/* Multiplying last digit with appropriate
 		 * base value and adding it to dec_value */
-		dec_value += last_digit * base; 
+		dec_value += last_digit * base;
 
-		base = base * 8; 
+		base = base * 8;
 	}
 
-	return dec_value; 
+	return dec_value;
 }
 
 int
@@ -634,38 +634,38 @@ remove_quotes(char *str)
 {
 	if (!str || !*str)
 		return (char *)NULL;
-	
+
 	char *p = str;
 	size_t len = strlen(p);
-	
+
 	if (len > 0 && p[len - 1] == '\n') {
-		p[len - 1] = 0x00;
+		p[len - 1] = '\0';
 		len--;
 	}
-	
+
 	if (len > 0 && (p[len - 1] == '\'' || p[len - 1] == '"'))
-		p[len - 1] = 0x00;
+		p[len - 1] = '\0';
 
 	if (*p == '\'' || *p == '"')
 		p++;
-	
+
 	if (!*p)
 		return (char *)NULL;
-	
+
 	char *q = p;
 	int blank = 1;
 
 	while(*q) {
-		if (*q != 0x20 && *q != '\n' && *q != '\t') {
+		if (*q != ' ' && *q != '\n' && *q != '\t') {
 			blank = 0;
 			break;
 		}
 		q++;
 	}
-	
+
 	if (!blank)
 		return p;
-	
+
 	return (char *)NULL;
 }
 
