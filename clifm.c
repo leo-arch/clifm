@@ -200,6 +200,10 @@ static int flags;
 #define PRINT_PROMPT 1
 #define NOPRINT_PROMPT 0
 
+/* Macros for xchdir (for setting term title or not) */
+#define SET_TITLE 1
+#define NO_TITLE 0
+
 /* Error codes, to be used by launch_exec functions */
 #define EXNULLERR 79
 #define EXFORKERR 81
@@ -1146,17 +1150,23 @@ home_tilde(const char *new_path)
 	char *path_tilde = (char *)NULL;
 
 	/* If path == HOME */
-	if (*new_path == *user_home && strcmp(new_path, user_home) == 0) {
+	if (new_path[1] == user_home[1] && strcmp(new_path, user_home) == 0) {
 		path_tilde = (char *)xnmalloc(2, sizeof(char));
 		path_tilde[0] = '~';
 		path_tilde[1] = '\0';
 	}
 
 	/* If path == HOME/file */
-	else {
+	else if (new_path[1] == user_home[1]
+	&& strncmp(new_path, user_home, user_home_len) == 0) {
 		path_tilde = (char *)xnmalloc(strlen(new_path + user_home_len + 1) + 3,
 									  sizeof(char));
 		sprintf(path_tilde, "~/%s", new_path + user_home_len + 1);
+	}
+
+	else {
+		path_tilde = (char *)xnmalloc(strlen(new_path) + 1, sizeof(char));
+		strcpy(path_tilde, new_path);
 	}
 
 	return path_tilde;
@@ -1165,16 +1175,12 @@ home_tilde(const char *new_path)
 static inline void
 set_term_title(const char *dir)
 {
-//	char *tilde_path = home_tilde(dir);
-
-/*	printf("\033]2;%s - %s\007", PROGRAM_NAME, tilde_path ? tilde_path
-		   : (dir ? dir : "")); */
 	printf("\033]2;%s - %s\007", PROGRAM_NAME, dir);
 	fflush(stdout);
 }
 
 static int
-xchdir(const char *dir)
+xchdir(const char *dir, const int set_title)
 /* Make sure DIR exists, it is actually a directory and is readable.
  * Only then change directory */
 {
@@ -1188,8 +1194,19 @@ xchdir(const char *dir)
 	int ret;
 	ret = chdir(dir);
 
-	if (ret == 0 && xargs.cwd_in_title == 1)
-		set_term_title(dir);
+	if (set_title && ret == 0 && xargs.cwd_in_title == 1) {
+		if (*dir == '/' && dir[1] == 'h') {
+			char *tmp = home_tilde(dir);
+			if (tmp) {
+				set_term_title(tmp);
+				free(tmp);
+			}
+			else
+				set_term_title(dir);
+		}
+		else
+			set_term_title(dir);
+	}
 
 	return ret;
 }
@@ -4428,7 +4445,7 @@ get_path_programs(void)
 	i = (int)path_n;
 	while (--i >= 0) {
 
-		if (!paths[i] || !*paths[i] || xchdir(paths[i]) == -1) {
+		if (!paths[i] || !*paths[i] || xchdir(paths[i], NO_TITLE) == -1) {
 			cmd_n[i] = 0;
 			continue;
 		}
@@ -4443,7 +4460,7 @@ get_path_programs(void)
 			total_cmd += (size_t)cmd_n[i];
 	}
 
-	xchdir(ws[cur_ws].path);
+	xchdir(ws[cur_ws].path, NO_TITLE);
 
 	/* Add internal commands */
 	/* Get amount of internal cmds (elements in INTERNAL_CMDS array) */
@@ -5951,7 +5968,7 @@ read_config(void)
 			 * appropriate permissions, set path to starting
 			 * path. If any of these conditions is false,
 			 * path will be set to default, that is, CWD */
-			if (xchdir(tmp) == 0) {
+			if (xchdir(tmp, SET_TITLE) == 0) {
 				free(ws[cur_ws].path);
 				ws[cur_ws].path = savestring(tmp, strlen(tmp));
 			}
@@ -6711,10 +6728,12 @@ get_path_env(void)
 	for (i = 0; path_tmp[i]; i++) {
 
 		/* Store path in PATH in a tmp buffer */
-		char buf[PATH_MAX] = "";
+		char buf[PATH_MAX];
 
 		while (path_tmp[i] && path_tmp[i] != ':')
 			buf[length++] = path_tmp[i++];
+
+		buf[length] = '\0';
 
 		/* Make room in paths for a new path */
 		paths = (char **)xrealloc(paths, (path_num + 1) * sizeof(char *));
@@ -6997,7 +7016,7 @@ handle_iso(char *file)
 			}
 
 			/* List content of mountpoint */
-			if (xchdir(mountpoint) == -1) {
+			if (xchdir(mountpoint, SET_TITLE) == -1) {
 				fprintf(stderr, "archiver: %s: %s\n", mountpoint,
 						strerror(errno));
 				free(mountpoint);
@@ -8003,7 +8022,7 @@ archiver(char **args, char mode)
 					continue;
 				}
 
-				if (xchdir(mountpoint) == -1) {
+				if (xchdir(mountpoint, SET_TITLE) == -1) {
 					fprintf(stderr, "archiver: %s: %s\n", mountpoint,
 							strerror(errno));
 					free(mountpoint);
@@ -8330,7 +8349,7 @@ remote_ftp(char *address, char *options)
 		return EXIT_FAILURE;
 	}
 
-	if (xchdir(rmountpoint) != 0) {
+	if (xchdir(rmountpoint, SET_TITLE) != 0) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rmountpoint,
 				strerror(errno));
 		free(rmountpoint);
@@ -8494,7 +8513,7 @@ remote_smb(char *address, char *options)
 	}
 
 	/* If successfully mounted, chdir into mountpoint */
-	if (xchdir(rmountpoint) != 0) {
+	if (xchdir(rmountpoint, SET_TITLE) != 0) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rmountpoint,
 				strerror(errno));
 		free(rmountpoint);
@@ -8604,7 +8623,7 @@ remote_ssh(char *address, char *options)
 	}
 
 	/* If successfully mounted, chdir into mountpoint */
-	if (xchdir(rmountpoint) != 0) {
+	if (xchdir(rmountpoint, SET_TITLE) != 0) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rmountpoint,
 				strerror(errno));
 		free(rmountpoint);
@@ -10646,7 +10665,7 @@ profile_set(const char *prof)
 		ws[cur_ws].path = savestring(cwd, strlen(cwd));
 	}
 
-	if (xchdir(ws[cur_ws].path) == -1) {
+	if (xchdir(ws[cur_ws].path, SET_TITLE) == -1) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
 				strerror(errno));
 		return EXIT_FAILURE;
@@ -12588,7 +12607,7 @@ cd_function(char *new_path)
 			return EXIT_FAILURE;
 		}
 
-		if (xchdir(user_home) != EXIT_SUCCESS) {
+		if (xchdir(user_home, SET_TITLE) != EXIT_SUCCESS) {
 			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
 					user_home, strerror(errno));
 			return EXIT_FAILURE;
@@ -12620,7 +12639,7 @@ cd_function(char *new_path)
 			return EXIT_FAILURE;
 		}
 
-		if (xchdir(real_path) != EXIT_SUCCESS) {
+		if (xchdir(real_path, SET_TITLE) != EXIT_SUCCESS) {
 			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
 					real_path, strerror(errno));
 			free(real_path);
@@ -12995,7 +13014,7 @@ surf_hist(char **comm)
 		int atoi_comm = atoi(comm[1] + 1);
 		if (atoi_comm > 0 && atoi_comm <= dirhist_total_index) {
 
-			int ret = xchdir(old_pwd[atoi_comm - 1]);
+			int ret = xchdir(old_pwd[atoi_comm - 1], SET_TITLE);
 
 			if (ret == 0) {
 				free(ws[cur_ws].path);
@@ -13054,7 +13073,7 @@ back_function(char **comm)
 
 	dirhist_cur_index--;
 
-	if (xchdir(old_pwd[dirhist_cur_index]) == EXIT_SUCCESS) {
+	if (xchdir(old_pwd[dirhist_cur_index], SET_TITLE) == EXIT_SUCCESS) {
 
 		free(ws[cur_ws].path);
 		ws[cur_ws].path = savestring(old_pwd[dirhist_cur_index],
@@ -13102,7 +13121,7 @@ forth_function(char **comm)
 	dirhist_cur_index++;
 
 	int exit_status = EXIT_FAILURE;
-	if (xchdir(old_pwd[dirhist_cur_index]) == EXIT_SUCCESS) {
+	if (xchdir(old_pwd[dirhist_cur_index], SET_TITLE) == EXIT_SUCCESS) {
 
 		free(ws[cur_ws].path);
 		ws[cur_ws].path = savestring(old_pwd[dirhist_cur_index],
@@ -13208,7 +13227,7 @@ list_mountpoints(void)
 
 		if (atoi_num > 0 && atoi_num <= (int)mp_n) {
 			
-			if (xchdir(mountpoints[atoi_num - 1]) == EXIT_SUCCESS) {
+			if (xchdir(mountpoints[atoi_num - 1], SET_TITLE) == EXIT_SUCCESS) {
 
 				free(ws[cur_ws].path);
 				ws[cur_ws].path = savestring(mountpoints[atoi_num - 1],
@@ -13747,7 +13766,7 @@ remove_from_trash(void)
 {
 	/* List trashed files */
 	/* Change CWD to the trash directory. Otherwise, scandir() will fail */
-	if (xchdir(TRASH_FILES_DIR) == -1) {
+	if (xchdir(TRASH_FILES_DIR, NO_TITLE) == -1) {
 		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME,
 			 TRASH_FILES_DIR, strerror(errno));
 		return EXIT_FAILURE;
@@ -13771,7 +13790,8 @@ remove_from_trash(void)
 	else {
 		puts(_("trash: There are no trashed files"));
 
-		if (xchdir(ws[cur_ws].path) == -1) { /* Restore CWD and return */
+		/* Restore CWD and return */
+		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
 			_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n",
 				 PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
 		}
@@ -13780,7 +13800,7 @@ remove_from_trash(void)
 	}
 
 	/* Restore CWD and continue */
-	if (xchdir(ws[cur_ws].path) == -1) {
+	if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
 		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME,
 			 ws[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
@@ -14072,7 +14092,7 @@ untrash_function(char **comm)
 	}
 
 	/* Change CWD to the trash directory to make scandir() work */
-	if (xchdir(TRASH_FILES_DIR) == -1) {
+	if (xchdir(TRASH_FILES_DIR, NO_TITLE) == -1) {
 		_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n", PROGRAM_NAME,
 			 TRASH_FILES_DIR, strerror(errno));
 		return EXIT_FAILURE;
@@ -14088,7 +14108,7 @@ untrash_function(char **comm)
 
 		puts(_("trash: There are no trashed files"));
 
-		if (xchdir(ws[cur_ws].path) == -1) {
+		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
 			_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n",
 				 PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
@@ -14113,7 +14133,7 @@ untrash_function(char **comm)
 
 		free(trash_files);
 
-		if (xchdir(ws[cur_ws].path) == -1) {
+		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
 			_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n",
 				 PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
@@ -14131,7 +14151,7 @@ untrash_function(char **comm)
 					PRINT_NEWLINE);
 
 	/* Go back to previous path */
-	if (xchdir(ws[cur_ws].path) == -1) {
+	if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
 		_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n", PROGRAM_NAME,
 			 ws[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
@@ -14244,7 +14264,7 @@ trash_clear(void)
 	struct dirent **trash_files = (struct dirent **)NULL;
 	int files_n = -1, exit_status = EXIT_SUCCESS;
 
-	if (xchdir(TRASH_FILES_DIR) == -1) {
+	if (xchdir(TRASH_FILES_DIR, NO_TITLE) == -1) {
 		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME,
 			 TRASH_FILES_DIR, strerror(errno));
 		return EXIT_FAILURE;
@@ -14295,7 +14315,7 @@ trash_clear(void)
 
 	free(trash_files);
 
-	if (xchdir(ws[cur_ws].path) == -1) {
+	if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
 		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME,
 			 ws[cur_ws].path, strerror(errno));
 		return EXIT_FAILURE;
@@ -14346,7 +14366,7 @@ trash_function (char **comm)
 			|| strcmp(comm[1], "list") == 0) {
 		/* List files in the Trash/files dir */
 
-		if (xchdir(TRASH_FILES_DIR) == -1) {
+		if (xchdir(TRASH_FILES_DIR, NO_TITLE) == -1) {
 			_err(0, NOPRINT_PROMPT, "%s: trash: %s: %s\n",
 				 PROGRAM_NAME, TRASH_FILES_DIR, strerror(errno));
 			return EXIT_FAILURE;
@@ -14372,7 +14392,7 @@ trash_function (char **comm)
 		else
 			puts(_("trash: There are no trashed files"));
 
-		if (xchdir(ws[cur_ws].path) == -1) {
+		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
 			_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n",
 				 PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
@@ -16214,9 +16234,6 @@ handle_stdin()
 		   total_len = 0, max_chunks = 512;
 	ssize_t input_len = 0;
 
-	/* NNN uses the following values: chunk = 512 * 1024,
-	 * max_chunks = 512, getting a max input size of 256MiB */
-
 	/* Initial buffer allocation == 1 chunk */
 	char *buf = (char *)xnmalloc(chunk, sizeof(char));
 
@@ -16316,7 +16333,7 @@ handle_stdin()
 	}
 
 	/* chdir to tmp dir and update path var */
-	if (xchdir(STDIN_TMP_DIR) == -1) {
+	if (xchdir(STDIN_TMP_DIR, SET_TITLE) == -1) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, STDIN_TMP_DIR,
 				strerror(errno));
 
@@ -17886,7 +17903,7 @@ workspaces(char *str)
 		ws[tmp_ws].path = savestring(ws[cur_ws].path,
 									 strlen(ws[cur_ws].path));
 
-	if (xchdir(ws[tmp_ws].path) == -1) {
+	if (xchdir(ws[tmp_ws].path, SET_TITLE) == -1) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[tmp_ws].path,
 				strerror(errno));
 		return EXIT_FAILURE;
@@ -18472,7 +18489,7 @@ sel_function(char **args)
 			return EXIT_FAILURE;
 		}
 
-		if (xchdir(dir) == -1) {
+		if (xchdir(dir, NO_TITLE) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir,
 					strerror(errno));
 			return EXIT_FAILURE;
@@ -18569,7 +18586,7 @@ sel_function(char **args)
 		}
 	}
 
-	if (sel_path && xchdir(ws[cur_ws].path) == -1) {
+	if (sel_path && xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
 				strerror(errno));
 		return EXIT_FAILURE;
@@ -19039,7 +19056,7 @@ search_glob(char **comm, int invert)
 		&& strcmp(search_path, ws[cur_ws].path) == 0))
 			search_path = (char *)NULL;
 
-		else if (xchdir(search_path) == -1) {
+		else if (xchdir(search_path, NO_TITLE) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, search_path,
 					strerror(errno));
 			return EXIT_FAILURE;
@@ -19103,7 +19120,7 @@ search_glob(char **comm, int invert)
 
 		if (search_path) {
 			/* Go back to the directory we came from */
-			if (xchdir(ws[cur_ws].path) == -1)
+			if (xchdir(ws[cur_ws].path, NO_TITLE) == -1)
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 						ws[cur_ws].path, strerror(errno));
 		}
@@ -19331,7 +19348,7 @@ search_glob(char **comm, int invert)
 
 	/* If needed, go back to the directory we came from */
 	if (search_path) {
-		if (xchdir(ws[cur_ws].path) == -1) {
+		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 					ws[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
@@ -19435,7 +19452,7 @@ search_regex(char **comm, int invert)
 			search_path = (char *)NULL;
 
 		if (search_path && *search_path) {
-			if (xchdir(search_path) == -1) {
+			if (xchdir(search_path, NO_TITLE) == -1) {
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 						search_path, strerror(errno));
 				return EXIT_FAILURE;
@@ -19455,7 +19472,7 @@ search_regex(char **comm, int invert)
 				fprintf(stderr, "scandir: %s: %s\n", search_path,
 						strerror(errno));
 
-				if (xchdir(ws[cur_ws].path) == -1)
+				if (xchdir(ws[cur_ws].path, NO_TITLE) == -1)
 					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 							ws[cur_ws].path, strerror(errno));
 
@@ -19510,7 +19527,7 @@ search_regex(char **comm, int invert)
 
 			free(reg_dirlist);
 
-			if (xchdir(ws[cur_ws].path) == -1)
+			if (xchdir(ws[cur_ws].path, NO_TITLE) == -1)
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 						ws[cur_ws].path, strerror(errno));
 		}
@@ -19546,7 +19563,7 @@ search_regex(char **comm, int invert)
 
 			free(reg_dirlist);
 
-			if (xchdir(ws[cur_ws].path) == -1)
+			if (xchdir(ws[cur_ws].path, NO_TITLE) == -1)
 					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 							ws[cur_ws].path, strerror(errno));
 		}
@@ -19678,7 +19695,7 @@ search_regex(char **comm, int invert)
 
 		free(reg_dirlist);
 
-		if (xchdir(ws[cur_ws].path) == -1) {
+		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 					ws[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
@@ -26573,7 +26590,7 @@ external_arguments(int argc, char **argv)
 			path_value = path_exp;
 		}
 
-		if (xchdir(path_value) == 0) {
+		if (xchdir(path_value, SET_TITLE) == 0) {
 			if (cur_ws == UNSET)
 				cur_ws = DEF_CUR_WS;
 			if (ws[cur_ws].path)
@@ -26823,7 +26840,7 @@ main(int argc, char *argv[])
 	/* Make path the CWD */
 	/* If chdir(path) fails, set path to cwd, list files and print the
 	 * error message. If no access to CWD either, exit */
-	if (xchdir(ws[cur_ws].path) == -1) {
+	if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
 
 		_err('e', PRINT_PROMPT, "%s: chdir: '%s': %s\n", PROGRAM_NAME,
 			 ws[cur_ws].path, strerror(errno));
@@ -26844,8 +26861,13 @@ main(int argc, char *argv[])
 		ws[cur_ws].path = savestring(cwd, strlen(cwd));
 	}
 
+	/* Set terminal window title */
 	if (xargs.cwd_in_title == 0) {
 		printf("\033]2;%s\007", PROGRAM_NAME);
+		fflush(stdout);
+	}
+	else {
+		printf("\033]2;%s - %s\007", PROGRAM_NAME, ws[cur_ws].path);
 		fflush(stdout);
 	}
 
