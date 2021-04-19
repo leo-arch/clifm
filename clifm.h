@@ -539,9 +539,9 @@ gen_rand_str(size_t len)
 		return (char *)NULL;
 	}
 
-	size_t i;
+	int i;
 	while (len--) {
-		i = rand() / RAND_MAX * (sizeof charset - 1);
+		i = rand() % (sizeof(charset) - 1);
 		*p++ = charset[i];
     }
 
@@ -557,7 +557,7 @@ get_date (void)
 	struct tm *tm = localtime(&rawtime);
 	size_t date_max = 128;
 
-	char *p = (char *)calloc(date_max + 1, sizeof(char)), *date;
+	char *p = (char *)malloc((date_max + 1) * sizeof(char)), *date;
 	if (p) {
 		date = p;
 		p = (char *)NULL;
