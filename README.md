@@ -21,8 +21,6 @@ Finally, because CliFM, unlike most file managers out there, is certainly a file
 
 ## Description
 
-![clifm](images/clifm.png)
-
 CliFM is a completely command-line-based, shell-like file manager able to perform all the basic operations you may expect from any other FM. Besides these common operations, such as copy, move, remove, etc, CliFM most distinctive features are:
 
 - [x] It is REALLY **CLI-based**. No GUI nor TUI or curses at all, just a command line. Since it does not need any GUI, it can run on the Linux built-in console and even on a SSH or any other remote session.
