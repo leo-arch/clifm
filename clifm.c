@@ -12327,12 +12327,10 @@ is_internal(const char *cmd)
 		"cd",
 		"o", "open",
 		"s", "sel",
-		"r",
 		"p", "pr", "prop",
 		"t", "tr", "trash",
 		"mm", "mime",
 		"bm", "bookmarks",
-		"l",
 		"br", "bulk",
 		"ac", "ad",
 		"exp", "export",
@@ -23325,7 +23323,6 @@ run_and_refresh(char **comm)
 
 	int ret = launch_execle(tmp_cmd);
 	free(tmp_cmd);
-	tmp_cmd = (char *)NULL;
 
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
@@ -23820,16 +23817,36 @@ exec_cmd(char **comm)
 
 		else if (*comm[0] == 'r' && !comm[0][1]) {
 
-			/* If we have at least one directory */
-			if (check_dir(comm) == EXIT_SUCCESS) {
-				comm[0] = (char *)xrealloc(comm[0], 8 * sizeof(char *));
-				strcpy(comm[0], "rm -dIr");
+			int rm_ok = UNSET;
+			char *answer = (char *)NULL;
+			while (!answer) {
+				answer = rl_no_hist("rm: Remove file(s)? [y/N] ");
+
+				if (!answer || !*answer)
+					rm_ok = 0;
+
+				else if (!*answer || (TOUPPER(*answer) == 'N' && !answer[1]))
+					rm_ok = 0;
+	
+				else if (*answer && TOUPPER(*answer) == 'Y' && !answer[1])
+					rm_ok = 1;
+
+				else {
+					free(answer);
+					answer = (char *)NULL;
+					continue;
+				}
+
+				if (answer)
+					free(answer);
+				break;
 			}
 
-			else {
-				comm[0] = (char *)xrealloc(comm[0], 6 * sizeof(char *));
-				strcpy(comm[0], "rm -I");
-			}
+			if (rm_ok != 1)
+				return EXIT_SUCCESS;
+
+			comm[0] = (char *)xrealloc(comm[0], 7 * sizeof(char *));
+			strcpy(comm[0], "rm -rf");
 		}
 
 		else if (*comm[0] == 'm' && comm[0][1] == 'd' && !comm[0][2]) {
