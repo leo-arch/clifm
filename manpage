@@ -850,7 +850,7 @@ To see a colored list of the currently used file color codes run \fIcc\fR or \fI
 
 .SH THE PROMPT
 .TP
-CLiFM's prompt is built from the \fIPrompt\fR line in the configuration file following almost the same escape codes and rules used by the Bash prompt, except that it does not perform command substitution nor accepts any of the Bash functions. String literals and escape codes can be used to build the prompt line and its colors. This is a list of supported escape codes:
+CLiFM's prompt is built from the \fIPrompt\fR line in the configuration file following almost the same escape codes and rules used by the Bash prompt, except that it does not accept shell functions (like conditionals and loops). Command substitution (in the form $(cmd)), string literals, and escape codes can be used to build the prompt line and its colors. This is a list of supported escape codes:
 .TP
 \\xnn: The character whose hexadecimal code is nn.
 \\e: Escape character
@@ -908,6 +908,12 @@ By default, for example, CliFM's prompt line is this: "[\\[\\e[0;36m\\]\\S\\[\\e
  :) $
 .TP
 with the workspace number and the path printed in cyan and the dollar sign in blue.
+.TP
+A more "classic" prompt could be construed as follows:
+ "\\u@\\U \\w> "
+.TP
+or, using now command substitution:
+ "$(whoami)@$(hostname) $(pwd)> "
 
 .TP
 A bold green asterisk at the left of the prompt indicates that there are elements in the Selection Box. In the same way, a yellow 'T' means that there are currently files in the trash can, just as a bold blue 'S' means that the program is running in stealth mode. Finally, CliFM makes use of three kind of messages: errors (a red 'E' at the left of the prompt), warnings (a yellow 'W'), and simple notices (a green 'N').
