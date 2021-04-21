@@ -439,6 +439,8 @@ nm=01;32:bm=01;36:"
 /* dirjump macros for calculating directories rank extra points */
 #define BASENAME_BONUS 300
 #define BOOKMARK_BONUS 500
+#define PINNED_BONUS 1000
+#define WORKSPACE_BONUS 300
 							/* Last directory access */
 #define JHOUR(n) ((n) *= 4)	/* Within last hour */
 #define JDAY(n) ((n) *= 2)	/* Within last day */
@@ -500,6 +502,8 @@ static struct kbinds_t *kbinds = (struct kbinds_t *)NULL;
 struct jump_t
 {
 	char *path;
+	int keep;
+	int rank;
 	size_t visits;
 	time_t first_visit;
 	time_t last_visit;
@@ -2333,11 +2337,15 @@ add_to_jumpdb(const char *dir)
 	jump_db[jump_n].visits = 1;
 	time_t now = time(NULL);
 	jump_db[jump_n].first_visit = now;
-	jump_db[jump_n].last_visit = now;	
+	jump_db[jump_n].last_visit = now;
+	jump_db[jump_n].rank = 0;
+	jump_db[jump_n].keep = 0;
 	jump_db[jump_n++].path = savestring(dir, strlen(dir));
 
 	jump_db[jump_n].path = (char *)NULL;
 	jump_db[jump_n].visits = 0;
+	jump_db[jump_n].rank = 0;
+	jump_db[jump_n].keep = 0;
 	jump_db[jump_n].first_visit = -1;
 	jump_db[jump_n].last_visit = -1;
 
@@ -2369,7 +2377,7 @@ load_jumpdb(void)
 		return;
 	}
 
-	char tmp_line[PATH_MAX] = "";
+	char tmp_line[PATH_MAX];
 	size_t jump_lines = 0;
 
 	while (fgets(tmp_line, (int)sizeof(tmp_line), fp)) {
@@ -2461,6 +2469,8 @@ load_jumpdb(void)
 		else
 			jump_db[jump_n].last_visit = 0; /* UNIX Epoch */
 
+		jump_db[jump_n].keep = 0;
+		jump_db[jump_n].rank = 0;
 		jump_db[jump_n++].path = savestring(tmpc, strlen(tmpc));
 	}
 
@@ -2476,6 +2486,8 @@ load_jumpdb(void)
 	}
 
 	jump_db[jump_n].path = (char *)NULL;
+	jump_db[jump_n].rank = 0;
+	jump_db[jump_n].keep = 0;
 	jump_db[jump_n].visits = 0;
 	jump_db[jump_n].first_visit = -1;
 }
@@ -2484,7 +2496,7 @@ static void
 save_jumpdb(void)
 /* Store the jump database into a file */
 {
-	if (xargs.no_dirjump == 1 ||  !config_ok || !CONFIG_DIR
+	if (xargs.no_dirjump == 1 || !config_ok || !CONFIG_DIR
 	|| !jump_db || jump_n == 0)
 		return;
 
@@ -2498,16 +2510,12 @@ save_jumpdb(void)
 		return;
 	}
 
-	size_t i, total_rank = 0;
-	int reduce = 0, keep = 0;
+	int i, reduce = 0, keep = 0, tmp_rank = 0, total_rank = 0;
 	time_t now = time(NULL);
 
-	if (jump_total_rank > max_jump_total_rank)
-		reduce = (jump_total_rank / max_jump_total_rank) + 1;
-
-	for (i = 0; i < jump_n; i++) {
-
-		keep = 0;
+	/* Calculate both total rank sum and rank for each entry */
+	i = (int)jump_n;
+	while (--i >= 0) {
 
 		int days_since_first = (int)(now - jump_db[i].first_visit) / 60 / 60 / 24;
 		int rank = days_since_first > 1 ? ((int)jump_db[i].visits * 100)
@@ -2515,59 +2523,71 @@ save_jumpdb(void)
 
 		int hours_since_last = (int)(now - jump_db[i].last_visit) / 60 / 60;
 
-		int tmp_rank = rank;
-		if (hours_since_last == 0) 		/* Last hour */
+		tmp_rank = rank;
+		if (hours_since_last == 0) 			/* Last hour */
 			rank = JHOUR(tmp_rank);
 		else if (hours_since_last <= 24)	/* Last day */
 			rank = JDAY(tmp_rank);
-		else if (hours_since_last <= 168) /* Last week */
+		else if (hours_since_last <= 168) 	/* Last week */
 			rank = JWEEK(tmp_rank);
-		else							 /* More than a week */
+		else								 /* More than a week */
 			rank = JOLDER(tmp_rank);
 
 		/* Do not remove bookmarked, pinned, or workspaced directories */
+		/* Add bonus points */
 		int j = (int)bm_n;
 		while (--j >= 0) {
 			if (bookmarks[j].path[1] == jump_db[i].path[1]
 			&& strcmp(bookmarks[j].path, jump_db[i].path) == 0) {
-				rank += BOOKMARK_BONUS;
-				keep = 1;
+				jump_db[i].rank += BOOKMARK_BONUS;
+				jump_db[i].keep = 1;
 				break;
 			}
 		}
 
-		if (!keep && pinned_dir[1] == jump_db[i].path[1]
-		&& strcmp(pinned_dir, jump_db[i].path) == 0)
-			keep = 1;
+ 		if (pinned_dir && pinned_dir[1] == jump_db[i].path[1]
+		&& strcmp(pinned_dir, jump_db[i].path) == 0) {
+			jump_db[i].rank += PINNED_BONUS;
+			jump_db[i].keep = 1;
+		}
 
-		if (!keep) {
-			j = MAX_WS;
-			while (--j >= 0) {
-				if (ws[j].path && ws[j].path[1] == jump_db[i].path[1]
-				&& strcmp(jump_db[i].path, ws[j].path) == 0) {
-					keep = 1;
-					break;
-				}
+		j = MAX_WS;
+		while (--j >= 0) {
+			if (ws[j].path && ws[j].path[1] == jump_db[i].path[1]
+			&& strcmp(jump_db[i].path, ws[j].path) == 0) {
+				jump_db[i].rank += WORKSPACE_BONUS;
+				jump_db[i].keep = 1;
+				break;
 			}
 		}
 
+		jump_db[i].rank = rank;
+		total_rank += rank;
+	}
+
+	/* Once we have the total rank, check if we need to recude ranks,
+	 * and write entries into the database */
+	if (total_rank > max_jump_total_rank)
+		reduce = (total_rank / max_jump_total_rank) + 1;
+
+	for (i = 0; i < (int)jump_n; i++) {
+
 		if (reduce) {
-			tmp_rank = rank;
-			rank = tmp_rank / reduce;
+			tmp_rank = jump_db[i].rank;
+			jump_db[i].rank = tmp_rank / reduce;
 		}
 
 		/* Forget directories ranked below MIN_JUMP_RANK */
-		if (!keep && (rank <= 0 || rank < min_jump_rank))
+		if (jump_db[i].keep != 1 && (jump_db[i].rank <= 0
+		|| jump_db[i].rank < min_jump_rank))
 			continue;
-
-		total_rank += rank;
 
 		fprintf(fp, "%zu:%ld:%ld:%s\n", jump_db[i].visits,
 				jump_db[i].first_visit, jump_db[i].last_visit,
 				jump_db[i].path);
 	}
 
-	fprintf(fp, "@%zu\n", total_rank);
+	fprintf(fp, "@%d\n", total_rank);
 
 	fclose(fp);
 	free(JUMP_FILE);
@@ -9400,7 +9420,7 @@ decode_prompt(const char *line)
 
 			case 'e': /* Escape char */
 				temp = xnmalloc(3, sizeof(char));
-				line ++;
+				line++;
 				temp[0] = CTLESC;
 				/* 27 (dec) == 033 (octal) == 0x1b (hex) == \e */
 				temp[1] = 27;
@@ -9636,12 +9656,64 @@ decode_prompt(const char *line)
 			}
 		}
 
-		/* If not escape code, just add whatever char is there */
+		/* If not escape code, check for command substitution, and if not,
+		 * just add whatever char is there */
 		else {
 			/* Remove non-escaped quotes */
 			if (c == '\'' || c == '"')
 				continue;
-			result = (char *)xrealloc(result, (result_len + 2) * sizeof(char));
+
+			/* Command substitution */
+			if (c == '$' && *line == '(') {
+				
+				/* Look for the ending parenthesis */
+				int tmp = strcntchr(line, ')');
+
+				if (tmp == -1)
+					continue;
+
+				/* Copy the cmd to be substituted and pass it to wordexp */
+				char *tmp_str = (char *)xnmalloc(strlen(line) + 2, sizeof(char));
+				sprintf(tmp_str, "$%s", line);
+
+				tmp_str[tmp + 2] = '\0';
+				line += tmp + 1;
+				wordexp_t wordbuf;
+				if (wordexp(tmp_str, &wordbuf, 0) != EXIT_SUCCESS) {
+					free(tmp_str);
+					continue;
+				}
+
+				free(tmp_str);
+
+				if (wordbuf.we_wordc) {
+					size_t j;
+					for (j = 0; j < wordbuf.we_wordc; j++) {
+
+						size_t word_len = strlen(wordbuf.we_wordv[j]);
+						result_len += word_len;
+
+						if (!result)
+							result = (char *)xcalloc(result_len + 2, sizeof(char));
+						else
+							result = (char *)xrealloc(result, (result_len + 2)
+													  * sizeof(char));
+						strcat(result, wordbuf.we_wordv[j]);
+
+						/* If not the last word in cmd output, add an space */
+						if (j < wordbuf.we_wordc - 1) {
+							result[result_len++] = ' ';
+							result[result_len] = '\0';
+						}
+					}
+				}
+
+				wordfree(&wordbuf);
+				continue;
+			}
+
+			result = (char *)xrealloc(result, (result_len + 2)
+									  * sizeof(char));
 			result[result_len++] = (char)c;
 			result[result_len] = '\0';
 		}
@@ -17558,17 +17630,16 @@ dirjump(char **args)
 		puts(_("NOTE: First time access is displayed in days, while last "
 			 "time access is displayed in hours"));
 		puts(_("NOTE 2: An asterisk next rank values means that the "
-			 "corresponding directory is bookmarked\n"));
+			 "corresponding directory is bookmarked, pinned, or currently "
+			 "used in some workspace\n"));
 		puts(_("Order\tVisits\tFirst\tLast\tRank\tDirectory"));
 
 		size_t i, ranks_sum = 0, visits_sum = 0;
 
 		for (i = 0; i < jump_n; i++) {
 
-			int days_since_first = (int)(now - jump_db[i].first_visit)
-									/ 60 / 60 / 24;
-			int hours_since_last = (int)(now - jump_db[i].last_visit)
-									/ 60 / 60;
+			int days_since_first = (int)(now - jump_db[i].first_visit) / 60 / 60 / 24;
+			int hours_since_last = (int)(now - jump_db[i].last_visit) / 60 / 60;
 
 			int rank;
 			rank = days_since_first > 1
@@ -17585,12 +17656,28 @@ dirjump(char **args)
 			else							 	/* More than a week */
 				rank = JOLDER(tmp_rank);
 
-			int j = (int)bm_n, bookmarked = 0;
+			int j = (int)bm_n, BPW = 0; /* Bookmarked, pinned or workspace */
 			while (--j >= 0) {
 				if (bookmarks[j].path[1] == jump_db[i].path[1]
 				&& strcmp(bookmarks[j].path, jump_db[i].path) == 0) {
 					rank += BOOKMARK_BONUS;
-					bookmarked = 1;
+					BPW = 1;
+					break;
+				}
+			}
+
+			if (pinned_dir && pinned_dir[1] == jump_db[i].path[1]
+			&& strcmp(pinned_dir, jump_db[i].path) == 0) {
+				rank += PINNED_BONUS;
+				BPW = 1;
+			}
+
+			j = MAX_WS;
+			while (--j >= 0) {
+				if (ws[j].path && ws[j].path[1] == jump_db[i].path[1]
+				&& strcmp(jump_db[i].path, ws[j].path) == 0) {
+					rank += WORKSPACE_BONUS;
+					BPW = 1;
 					break;
 				}
 			}
@@ -17607,7 +17694,7 @@ dirjump(char **args)
 			&& strcmp(ws[cur_ws].path, jump_db[i].path) == 0) {
 				printf("  %s%zu\t %zu\t %d\t %d\t%d%c\t%s%s \n", mi_c,
 					   i + 1, jump_db[i].visits, days_since_first,
-					   hours_since_last, rank, bookmarked ? '*' : 0,
+					   hours_since_last, rank, BPW ? '*' : 0,
 					   jump_db[i].path, df_c);
 			}
 
@@ -17615,7 +17702,7 @@ dirjump(char **args)
 				printf("  %zu\t %zu\t %d\t %d\t%d%c\t%s \n", i + 1,
 					   jump_db[i].visits, days_since_first,
 					   hours_since_last, rank,
-					   bookmarked ? '*' : 0, jump_db[i].path);
+					   BPW ? '*' : 0, jump_db[i].path);
 		}
 
 		printf("\nTotal rank: %zu/%d\nTotal visits: %zu\n", ranks_sum,
@@ -17811,7 +17898,20 @@ dirjump(char **args)
 			while (--k >= 0) {
 				if (bookmarks[k].path[1] == matches[j][1]
 				&& strcmp(bookmarks[k].path, matches[j]) == 0) {
-					rank *= BOOKMARK_BONUS;
+					rank += BOOKMARK_BONUS;
+					break;
+				}
+			}
+
+			if (pinned_dir && pinned_dir[1] == matches[j][1]
+			&& strcmp(pinned_dir, matches[j]) == 0)
+				rank += PINNED_BONUS;
+
+			k = MAX_WS;
+			while (--k >= 0) {
+				if (ws[k].path && ws[k].path[1] == matches[j][1]
+				&& strcmp(ws[k].path, matches[j]) == 0) {
+					rank += WORKSPACE_BONUS;
 					break;
 				}
 			}
@@ -25872,7 +25972,7 @@ parse_input_str(char *str)
 		size_t old_pathc = 0;
 
 		register size_t w = 0;
-		for (w = 0; w < (size_t)word_n; w++){
+		for (w = 0; w < (size_t)word_n; w++) {
 			wordexp_t wordbuf;
 			if (wordexp(substr[word_array[w] + (int)old_pathc],
 			&wordbuf, 0) != EXIT_SUCCESS) {
