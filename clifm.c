@@ -12162,66 +12162,71 @@ check_for_alias(char **args)
 /* Returns the parsed aliased command in an array of strings, if
  * matching alias is found, or NULL if not. */
 {
-	if (!aliases_n || !aliases)
+	if (!aliases_n || !aliases || !args)
 		return (char **)NULL;
 
 	char *aliased_cmd = (char *)NULL;
 	size_t cmd_len = strlen(args[0]);
+	char tmp_cmd[PATH_MAX * 2 + 1];
+	snprintf(tmp_cmd, sizeof(tmp_cmd), "%s=", args[0]);
 
 	register int i = (int)aliases_n;
 	while (--i >= 0) {
 
+		if (!aliases[i])
+			continue;
 		/* Look for this string: "command=", in the aliases file */
 		/* If a match is found */
-		if (*aliases[i] == *args[0] && aliases[i][cmd_len] == '='
-		&& strncmp(aliases[i], args[0], cmd_len) == 0) {
 
-			/* Get the aliased command */
-			aliased_cmd = strbtw(aliases[i], '\'', '\'');
+		if (*aliases[i] != *args[0] ||
+		strncmp(tmp_cmd, aliases[i], cmd_len + 1) != 0)
+			continue;
 
-			if (!aliased_cmd)
-				return (char **)NULL;
+		/* Get the aliased command */
+		aliased_cmd = strbtw(aliases[i], '\'', '\'');
 
-			if (!*aliased_cmd) { /* zero length */
-				free(aliased_cmd);
-				return (char **)NULL;
-			}
+		if (!aliased_cmd)
+			return (char **)NULL;
 
-			args_n = 0; /* Reset args_n to be used by parse_input_str() */
-
-			/* Parse the aliased cmd */
-			char **alias_comm = parse_input_str(aliased_cmd);
+		if (!*aliased_cmd) { /* zero length */
 			free(aliased_cmd);
-
-			if (!alias_comm) {
-				args_n = 0;
-				fprintf(stderr, _("%s: Error parsing aliased command\n"),
-						PROGRAM_NAME);
-				return (char **)NULL;
-			}
-
-			register size_t j;
-
-			/* Add input parameters, if any, to alias_comm */
-			if (args[1]) {
-				for (j = 1; args[j]; j++) {
-					alias_comm = (char **)xrealloc(alias_comm,
-								(++args_n + 2) * sizeof(char *));
-					alias_comm[args_n] = savestring(args[j],
-											strlen(args[j]));
-				}
-			}
-
-			/* Add a terminating NULL string */
-			alias_comm[args_n + 1] = (char *)NULL;
-
-			/* Free original command */
-			for (j = 0; args[j]; j++)
-				free(args[j]);
-			free(args);
-
-			return alias_comm;
+			return (char **)NULL;
 		}
+
+		args_n = 0; /* Reset args_n to be used by parse_input_str() */
+
+		/* Parse the aliased cmd */
+		char **alias_comm = parse_input_str(aliased_cmd);
+		free(aliased_cmd);
+
+		if (!alias_comm) {
+			args_n = 0;
+			fprintf(stderr, _("%s: Error parsing aliased command\n"),
+					PROGRAM_NAME);
+			return (char **)NULL;
+		}
+
+		register size_t j;
+
+		/* Add input parameters, if any, to alias_comm */
+		if (args[1]) {
+			for (j = 1; args[j]; j++) {
+				alias_comm = (char **)xrealloc(alias_comm,
+							(++args_n + 2) * sizeof(char *));
+				alias_comm[args_n] = savestring(args[j],
+										strlen(args[j]));
+			}
+		}
+
+		/* Add a terminating NULL string */
+		alias_comm[args_n + 1] = (char *)NULL;
+
+		/* Free original command */
+		for (j = 0; args[j]; j++)
+			free(args[j]);
+		free(args);
+
+		return alias_comm;
 	}
 
 	return (char **)NULL;
