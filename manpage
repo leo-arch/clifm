@@ -1005,9 +1005,9 @@ Extra credits or penalties are assigned based on the directories \fBlast access 
 .sp
 If the last query string matches the \fBbasename\fR of a directory, the entry for this directory has 300 extra credits. This is done simply because we normally use directory basenames as query strings: they are easier to remember.
 .sp
-In the same way, \fBbookmarked directories\fR get 500 extra credits.
+In the same way, \fBpinned\fR directories get 1000 extra credits, \fBbookmarked directories\fR 500 credits, and directories currently in a \fBworkspace\fR 300 credits.
 .sp
-For example: if the query string is "test", /media/data/test will be matched. Now, if this directory was accessed within the last hour, and its rank was 200, it becomes 800. But, because the search string matches its basename, it gets 300 extra credits, and, if this directory is in adittion bookmarked, it gets 500 extra credits. In this way the total rank of this directory in the matching process is 1600. In doing this, we have m	ore chances of matching what the user actually wanted to match.
+For example: if the query string is "test", /media/data/test will be matched. Now, if this directory was accessed within the last hour, and its rank was 200, it becomes 800. But, because the search string matches its basename, it gets 300 extra credits, and, if this directory is in adittion bookmarked and pinned, it gets 1500 extra credits. In this way the total rank of this directory in the matching process is 2600. In doing this, we have more chances of matching what the user actually wanted to match.
 .sp
 Once all entries in the initial list of matches have been filtered via the above procedure and ranked, we can return the best ranked entry. The higher rank a directory has, the more priotity it has over the remaining entries in the initial list of matches.
 .sp
