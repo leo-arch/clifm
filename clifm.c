@@ -2479,8 +2479,6 @@ load_jumpdb(void)
 	free(line);
 	free(JUMP_FILE);
 
-	printf("LOAD JUMP: %zu\n", jump_n);
-
 	if (!jump_n) {
 		free(jump_db);
 		jump_db = (struct jump_t *)NULL;
@@ -2593,7 +2591,6 @@ save_jumpdb(void)
 				jump_db[i].path);
 	}
 
-	printf("SAVE JUMP: %d\n", jump_num);
 	fprintf(fp, "@%d\n", total_rank);
 
 	fclose(fp);
