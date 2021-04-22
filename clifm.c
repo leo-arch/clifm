@@ -326,8 +326,8 @@ nm=01;32:bm=01;36:"
 #define DEF_LONG_VIEW 0
 #define DEF_EXT_CMD_OK 0
 #define DEF_PAGER 0
-#define DEF_MAX_HIST 500
-#define DEF_MAX_DIRHIST 30
+#define DEF_MAX_HIST 1000
+#define DEF_MAX_DIRHIST 100
 #define DEF_MAX_LOG 1000
 #define DEF_CLEAR_SCREEN 1
 #define DEF_LIST_FOLDERS_FIRST 1
@@ -12412,6 +12412,7 @@ is_internal(const char *cmd)
 		"o", "open",
 		"s", "sel",
 		"p", "pr", "prop",
+		"r",
 		"t", "tr", "trash",
 		"mm", "mime",
 		"bm", "bookmarks",
@@ -23935,36 +23936,60 @@ exec_cmd(char **comm)
 
 		else if (*comm[0] == 'r' && !comm[0][1]) {
 
-			int rm_ok = UNSET;
-			char *answer = (char *)NULL;
-			while (!answer) {
-				answer = rl_no_hist("rm: Remove file(s)? [y/N] ");
+			char **rm_cmd = (char **)xnmalloc(args_n + 4, sizeof(char *));
+			int i, j = 3, dirs = 0;
 
-				if (!answer || !*answer)
-					rm_ok = 0;
+			for (i = 1; comm[i]; i++) {
 
-				else if (!*answer || (TOUPPER(*answer) == 'N' && !answer[1]))
-					rm_ok = 0;
-	
-				else if (*answer && TOUPPER(*answer) == 'Y' && !answer[1])
-					rm_ok = 1;
+				char *tmp = (char *)NULL;
+				if (strchr(comm[i], '\\')) {
+					tmp = dequote_str(comm[i], 0);
 
-				else {
-					free(answer);
-					answer = (char *)NULL;
-					continue;
+					if (tmp) {
+						rm_cmd[j++] = savestring(tmp, strlen(tmp));
+						free(tmp);
+
+					}
+					else {
+						fprintf(stderr, "%s: %s: Error dequoting filename\n",
+								PROGRAM_NAME, comm[i]);
+						continue;
+					}
 				}
 
-				if (answer)
-					free(answer);
-				break;
+				else
+					rm_cmd[j++] = savestring(comm[i], strlen(comm[i]));
+
+				struct stat attr;
+				if (!dirs && lstat(tmp ? tmp : comm[i], &attr) != -1
+				&& (attr.st_mode & S_IFMT) == S_IFDIR)
+					dirs = 1;
 			}
 
-			if (rm_ok != 1)
-				return EXIT_SUCCESS;
+			rm_cmd[j] = (char *)NULL;
 
-			comm[0] = (char *)xrealloc(comm[0], 7 * sizeof(char *));
-			strcpy(comm[0], "rm -rf");
+			rm_cmd[0] = savestring("rm", 2);
+			if (dirs)
+				rm_cmd[1] = savestring("-dIr", 4);
+			else
+				rm_cmd[1] = savestring("-I", 2);
+			rm_cmd[2] = savestring("--", 2);
+
+			if (launch_execve(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+				exit_code = EXIT_FAILURE;
+			else {
+				if (cd_lists_on_the_fly && strcmp(comm[1], "--help") != 0) {
+					free_dirlist();
+					exit_code = list_dir();
+				}
+			}
+
+			for (i = 0; rm_cmd[i]; i++)
+				free(rm_cmd[i]);
+
+			free(rm_cmd);
+
+			return exit_code;
 		}
 
 		else if (*comm[0] == 'm' && comm[0][1] == 'd' && !comm[0][2]) {
