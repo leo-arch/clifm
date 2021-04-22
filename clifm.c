@@ -2479,6 +2479,8 @@ load_jumpdb(void)
 	free(line);
 	free(JUMP_FILE);
 
+	printf("LOAD JUMP: %zu\n", jump_n);
+
 	if (!jump_n) {
 		free(jump_db);
 		jump_db = (struct jump_t *)NULL;
@@ -2570,6 +2572,8 @@ save_jumpdb(void)
 	if (total_rank > max_jump_total_rank)
 		reduce = (total_rank / max_jump_total_rank) + 1;
 
+	int jump_num = 0;
+
 	for (i = 0; i < (int)jump_n; i++) {
 
 		if (reduce) {
@@ -2582,11 +2586,14 @@ save_jumpdb(void)
 		|| jump_db[i].rank < min_jump_rank))
 			continue;
 
+		jump_num++;
+
 		fprintf(fp, "%zu:%ld:%ld:%s\n", jump_db[i].visits,
 				jump_db[i].first_visit, jump_db[i].last_visit,
 				jump_db[i].path);
 	}
 
+	printf("SAVE JUMP: %d\n", jump_num);
 	fprintf(fp, "@%d\n", total_rank);
 
 	fclose(fp);
@@ -16435,6 +16442,12 @@ handle_stdin()
 		/* Go back to tty */
 		dup2(STDOUT_FILENO, STDIN_FILENO);
 
+		if (cd_lists_on_the_fly) {
+			free_dirlist();
+			list_dir();
+			add_to_dirhist(ws[cur_ws].path);
+		}
+
 		return;
 }
 
@@ -27012,7 +27025,7 @@ main(int argc, char *argv[])
 	add_to_dirhist(ws[cur_ws].path);
 
 	/* Start listing as soon as possible to speed up startup time */
-	if (cd_lists_on_the_fly)
+	if (cd_lists_on_the_fly && isatty(STDIN_FILENO))
 		list_dir();
 
 	create_kbinds_file();
