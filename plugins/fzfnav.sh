@@ -30,6 +30,7 @@
 # ffmpegthumbnailer: videos
 # ffplay (ffmpeg): audio
 # w3m or linx or elinks: web content
+# glow: markdown
 # bat or highlight: syntax highlighthing for text files
 
 uz_cleanup() {
@@ -89,6 +90,8 @@ file_preview() {
 		return
 	fi
 
+	printf "\n"
+
 	# Do not generate previews of previews
 	[ "$PWD" = "${PREVIEWDIR}" ] && entry="${entry%.*}"
 
@@ -99,11 +102,38 @@ file_preview() {
 		return
 	fi
 
+	ext="${entry##*.}"
+
+	if [ -n "$ext" ] && [ "$ext" != "$entry" ]; then
+		ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
+
+		case "$ext" in
+			md)
+				if [ "$(which glow 2>/dev/null)" ]; then
+					glow -s dark "$PWD/$entry"
+					return
+				fi
+			;;
+			xz)
+				[ -z "$ARCHIVER_CMD" ] && return
+				"$ARCHIVER_CMD" "$ARCHIVER_OPTS" "$entry"
+				return
+			;;
+			html|xhtml|htm)
+				[ -z "$BROWSER" ] && return
+				"$BROWSER" "$entry"
+				return
+			;;
+			*) ;;
+		esac
+	fi
+
 	mimetype="$(file -bL --mime-type "$entry")"
 
 	case "$mimetype" in
 
-		*"officedocument"*|*"msword"|*"ms-excel"|"text/rtf")
+		*"officedocument"*|*"msword"|*"ms-excel"|"text/rtf"|*".opendocument."*)
+
 			[ -z "$LIBREOFFICE_OK" ] && return
 			libreoffice --headless --convert-to jpg "$entry" \
 			--outdir "$PREVIEWDIR" > /dev/null 2>&1
@@ -118,7 +148,8 @@ file_preview() {
 
 		"text/html")
 			[ -z "$BROWSER" ] && return
-			"$BROWSER" "$entry" ;;
+			"$BROWSER" "$entry"
+		;;
 
 		"text/"*|"application/x-setupscript")
 			if [ "$BAT_OK" -eq 1 ]; then
@@ -139,6 +170,7 @@ file_preview() {
 		*"/gif")
 			[ -z "$IMG_VIEWER" ] || [ -z "$CONVERT_OK" ] && return
 			# Break down the gif into frames and show each frame, one each 0.1 secs
+#			printf "\n"
 			filename="$(printf "%s" "$entry" | tr ' ' '_')"
 			if [ ! -d "$PREVIEWDIR/$filename" ]; then
 				mkdir -p "$PREVIEWDIR/$filename"
@@ -164,7 +196,7 @@ file_preview() {
 		"application/postscript")
 			! [ "$(which gs 2>/dev/null)" ] && return
 			gs -sDEVICE=jpeg -dJPEGQ=100 -dNOPAUSE -dBATCH -dSAFER -r300 \
-			-sOutputFile="$PREVIEWDIR/${entry}.jpg" "$entry"
+			-sOutputFile="$PREVIEWDIR/${entry}.jpg" "$entry" > /dev/null 2>&1
 			"$IMG_VIEWER" "$PREVIEWDIR/${entry}.jpg"
 		;;
 
@@ -197,7 +229,7 @@ file_preview() {
 
 		"video/"*)
 			[ -z "$IMG_VIEWER" ] || [ -z "$FFMPEGTHUMB_OK" ] && return
-			ffmpegthumbnailer -i "$entry" -o "${PREVIEWDIR}/${entry}.jpg" -s 0 -q 5
+			ffmpegthumbnailer -i "$entry" -o "${PREVIEWDIR}/${entry}.jpg" -s 0 -q 5 2>/dev/null
 			"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg"
 		;;
 
@@ -209,34 +241,16 @@ file_preview() {
 		"application/zip"|"application/gzip"|"application/x-7z-compressed"|\
 		"application/x-bzip2")
 			[ -z "$ARCHIVER_CMD" ] && return
-			"$ARCHIVER_CMD" "$ARCHIVER_OPTS" "$entry" ;;
+			"$ARCHIVER_CMD" "$ARCHIVER_OPTS" "$entry"
+		;;
 
 		*)
-			ext="${entry##*.}"
-
-			if [ -n "$ext" ] && [ "$ext" != "$entry" ]; then
-				ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
-				case "$ext" in
-					xz)
-						[ -z "$ARCHIVER_CMD" ] && return
-						"$ARCHIVER_CMD" "$ARCHIVER_OPTS" "$entry"
-					;;
-					html|xhtml|htm)
-						[ -z "$BROWSER" ] && return
-						"$BROWSER" "$entry"
-					;;
-					*) not_found=1 ;;
-				esac
-
-				if [ $not_found = 0 ]; then
-					return
-				fi
-			fi
-
 			if [ "$(file -bL --mime-encoding "$entry")" = "binary" ]; then
 				printf -- "--- \e[0;30;47mBinary file\e[0m ---\n"
 			fi
-			if [ "$MEDIAINFO_OK" -eq 1 ]; then
+			if [ "$(which exiftool 2>/dev/null)" ]; then
+				exiftool "$PWD/$entry" 2>/dev/null
+			elif [ "$MEDIAINFO_OK" -eq 1 ]; then
 				mediainfo "${PWD}/$entry" 2>/dev/null
 			else
 				file -b "$entry"
@@ -289,8 +303,12 @@ $PWD" --marker="+" --preview-window=:wrap \
 			--preview 'printf "\033[2J"; file_preview {}')"
 
 		[ ${#dir} = 0 ] && return 0
-		printf "%s" "${PWD}/$dir" > "$TMP"
-		cd "$dir" || return
+		if [ -d "${PWD}/$dir" ]; then
+			printf "cd %s" "${PWD}/$dir" > "$TMP"
+			cd "$dir" || return
+		elif [ -f "${PWD}/$dir" ]; then
+			"$OPENER" "${PWD}/$dir" || return
+		fi
 	done
 }
 
@@ -303,10 +321,11 @@ main() {
 
 	UEBERZUG_OK=0
 	CACHEDIR="${XDG_CACHE_HOME:-$HOME/.cache}/clifm"
-#	CACHEDIR="$HOME/.cache/clifm"
 	PREVIEWDIR="$CACHEDIR/previews"
 	WIDTH=1920
 	HEIGHT=1080
+
+	OPENER="xdg-open"
 
 	! [ -d "$PREVIEWDIR" ] && mkdir -p "$PREVIEWDIR"
 
@@ -375,7 +394,7 @@ main() {
 
 	if [ -f "$TMP" ]; then
 		cat "$TMP" > "$CLIFM_BUS"
-		rm -- "$TMP" 2>/dev/null
+		rm -rf -- "$TMP" 2>/dev/null
 	fi
 }
 
