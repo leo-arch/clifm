@@ -956,13 +956,14 @@ Plugins are just scripts or programs (written in any language) able to add, exte
  |   -DjVu           | djvulibre                     |
  |   -Postscript     | ghostscript                   |
  |   -videos         | ffmpegthumbnailer             |
- |   -audio          | ffmpeg                        |
+ |   -audio          | ffmpeg or mplayer             |
  |   -web            | w3m, linx or elinks           |
  |   -markdown       | glow                          |
  |   -highlight      | bat or highlight              |
+ |   -file info      | exiftool, mediainfo or file   |
  | fzfsel            | fzf                           |
  | ihelp             | fzf or rofi                   |
- | img_viewer        | sxiv feh or lsix              |
+ | img_viewer        | sxiv, feh or lsix             |
  | jumper            | fzf or rofi                   |
  | music_player      | mplayer                       |
  | pdf_viewer        | pdftotext                     |
