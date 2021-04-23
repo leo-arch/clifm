@@ -594,6 +594,9 @@ with no argument (or by passing the 'ls' option), it prints a list of currently 
 .sp
 The trash directory is \fI$XDG_DATA_HOME/Trash\fR, usually \fI~/.local/share/Trash\fR. Since this trash system follows the freedesktop specification, it is able to handle files trashed by different Trash implementations.
 .TP
+.B te \fRFILE(s)
+toggles executable bit (on user, group, and others) on FILE(s). It is equivalent to the -x and +x options for the shell \fBchmod(1)\fR command.
+.TP
 .B tips
 print the list of CLiFM tips
 .TP
