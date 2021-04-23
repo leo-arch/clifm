@@ -28,10 +28,11 @@
 # ddjvu (djvulibre): DjVu files
 # ghostscript: postscript files (ps)
 # ffmpegthumbnailer: videos
-# ffplay (ffmpeg): audio
+# ffplay (ffmpeg) or mplayer: audio
 # w3m or linx or elinks: web content
 # glow: markdown
 # bat or highlight: syntax highlighthing for text files
+# exiftool or mediainfo or file: file information
 
 uz_cleanup() {
     rm "$FIFO_UEBERZUG"
@@ -109,7 +110,7 @@ file_preview() {
 
 		case "$ext" in
 			md)
-				if [ "$(which glow 2>/dev/null)" ]; then
+				if [ "$GLOW_OK" -eq 1 ]; then
 					glow -s dark "$PWD/$entry"
 					return
 				fi
@@ -222,9 +223,13 @@ file_preview() {
 
 #			uz_image "${PREVIEWDIR}/${entry}.jpg" ;;
 
-			[ -z "$IMG_VIEWER" ] || [ -z "$FFPLAY_OK" ] && return
+			if [ "$FFPLAY_OK" -eq 1 ]; then
+				ffplay -nodisp -autoexit "$entry" &
+			elif [ "$MPLAYER_OK" -eq 1 ]; then
+				mplayer "$entry" &
+			fi
 			[ "$MEDIAINFO_OK" -eq 1 ] && mediainfo "$entry"
-			ffplay -nodisp -autoexit "$entry" &
+
 		;;
 
 		"video/"*)
@@ -248,7 +253,7 @@ file_preview() {
 			if [ "$(file -bL --mime-encoding "$entry")" = "binary" ]; then
 				printf -- "--- \e[0;30;47mBinary file\e[0m ---\n"
 			fi
-			if [ "$(which exiftool 2>/dev/null)" ]; then
+			if [ "$EXIFTOOL_OK" -eq 1 ]; then
 				exiftool "$PWD/$entry" 2>/dev/null
 			elif [ "$MEDIAINFO_OK" -eq 1 ]; then
 				mediainfo "${PWD}/$entry" 2>/dev/null
@@ -325,6 +330,8 @@ main() {
 	WIDTH=1920
 	HEIGHT=1080
 
+	# In order to use CliFM built-in resource opener we need to exit
+	# the script first, so that we cannot use it here
 	OPENER="xdg-open"
 
 	! [ -d "$PREVIEWDIR" ] && mkdir -p "$PREVIEWDIR"
@@ -359,8 +366,16 @@ main() {
 		BROWSER="elinks"
 	fi
 
-	[ "$(which ffplay 2>/dev/null)" ] && FFPLAY_OK=1
-	[ "$(which mediainfo 2>/dev/null)" ] && MEDIAINFO_OK=1
+	if [ "$(which ffplay 2>/dev/null)" ]; then
+		FFPLAY_OK=1
+	elif [ "$(which mplayer 2>/dev/null)" ]; then
+		MPLAYER_OK=1
+	fi
+	if [ "$(which exiftool 2>/dev/null)" ]; then
+		EXIFTOOL_OK=1
+	elif [ "$(which mediainfo 2>/dev/null)" ]; then
+		MEDIAINFO_OK=1
+	fi
 	[ "$(which pdftoppm 2>/dev/null)" ] && PDFTOPPM_OK=1
 	[ "$(which ffmpegthumbnailer 2>/dev/null)" ] && FFMPEGTHUMB_OK=1
 	[ "$(which convert 2>/dev/null)" ] && CONVERT_OK=1
@@ -370,6 +385,7 @@ main() {
 	elif [ "$(which highlight 2>/dev/null)" ]; then
 		HIGHLIGHT_OK=1
 	fi
+	[ "$(which glow 2>/dev/null)" ] && GLOW_OK=1
 	[ "$(which fontpreview 2>/dev/null)" ] && FONTPREVIEW_OK=1
 	[ "$(which epub-thumbnailer 2>/dev/null)" ] && EPUBTHUMB_OK=1
 	[ "$(which ddjvu 2>/dev/null)" ] && DDJVU_OK=1
@@ -382,11 +398,16 @@ main() {
 
 	TMP="$(mktemp /tmp/clifm.XXXXXX)"
 
+	# We need to export functions and variables so that fzf's internal preview
+	# function can recognize and run them
+	# Exporting functions is not supported by POSIX sh, and that's why
+	# we use bash here. However, there should be a POSIX alternative.
 	export -f file_preview uz_image calculate_position start_ueberzug uz_clear \
 	help
 	export TMP CACHEDIR PREVIEWDIR IMG_VIEWER ARCHIVER_CMD ARCHIVER_OPTS BROWSER \
 	WIDTH HEIGHT FFPLAY_OK MEDIAINFO_OK PDFTOPPM_OK FFMPEGTHUMB_OK CONVERT_OK \
-	LIBREOFFICE_OK HIGHLIGHT_OK FONTPREVIEW_OK BAT_OK EPUBTHUMB_OK DDJVU_OK
+	LIBREOFFICE_OK HIGHLIGHT_OK FONTPREVIEW_OK BAT_OK EPUBTHUMB_OK DDJVU_OK \
+	MPLAYER_OK EXIFTOOL_OK GLOW_OK
 
 	fcd "$@"
 
