@@ -955,6 +955,7 @@ Plugins are just scripts or programs (written in any language) able to add, exte
  |   -videos         | ffmpegthumbnailer             |
  |   -audio          | ffmpeg                        |
  |   -web            | w3m or linx or elinks         |
+ |   -markdown       | glow                          |
  |   -highlight      | bat or highlight              |
  | fzfsel            | fzf                           |
  | ihelp             | fzf or rofi                   |
