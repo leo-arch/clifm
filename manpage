@@ -595,7 +595,7 @@ with no argument (or by passing the 'ls' option), it prints a list of currently 
 The trash directory is \fI$XDG_DATA_HOME/Trash\fR, usually \fI~/.local/share/Trash\fR. Since this trash system follows the freedesktop specification, it is able to handle files trashed by different Trash implementations.
 .TP
 .B te \fRFILE(s)
-toggles executable bit (on user, group, and others) on FILE(s). It is equivalent to the -x and +x options for the shell \fBchmod(1)\fR command.
+toggle executable bit (on user, group, and others) on FILE(s). It is equivalent to the -x and +x options for the shell \fBchmod(1)\fR command.
 .TP
 .B tips
 print the list of CLiFM tips
@@ -942,11 +942,11 @@ Plugins are just scripts or programs (written in any language) able to add, exte
  | Plugin            | Dependencies                  |
  +-------------------+-------------------------------+
  | clip              | xclip                         |
- | dragondrop        | dragon, dragon-drag-and-drop  |
+ | dragondrop        | dragon or dragon-drag-and-drop|
  | finder            | fzf or rofi                   |
  | fzfhist           | fzf                           |
  | fzfnav            | fzf                           |
- |   -archives       | atool or bsdtar or tar        |
+ |   -archives       | atool, bsdtar or tar          |
  |   -images         | imagemagick, and uerbezug     |
  |                   |   (or viu or catimg)          |
  |   -fonts          | fontpreview                   |
@@ -957,18 +957,18 @@ Plugins are just scripts or programs (written in any language) able to add, exte
  |   -Postscript     | ghostscript                   |
  |   -videos         | ffmpegthumbnailer             |
  |   -audio          | ffmpeg                        |
- |   -web            | w3m or linx or elinks         |
+ |   -web            | w3m, linx or elinks           |
  |   -markdown       | glow                          |
  |   -highlight      | bat or highlight              |
  | fzfsel            | fzf                           |
  | ihelp             | fzf or rofi                   |
- | img_viewr         | sxiv or feh or lsix           |
+ | img_viewer        | sxiv feh or lsix              |
  | jumper            | fzf or rofi                   |
  | music_player      | mplayer                       |
  | pdf_viewer        | pdftotext                     |
  | update            |                               |
  | vid_viewer        | ffmpegthumbnailer             |
- | wallpapper_setter | feh                           |
+ | wallpapper_setter | feh, xloadimage or hsetroot   |
  +-------------------+-------------------------------+
 
 .SH STANDARD INPUT (STDIN)
