@@ -1,5 +1,5 @@
 
-			/** ########################################
+			/*  ########################################
 			 *  #			    CliFM			       #
 			 *  # The anti-eye-candy/KISS file manager #
 			 *  ######################################## */
@@ -328,7 +328,7 @@ nm=01;32:bm=01;36:"
 #define DEF_PAGER 0
 #define DEF_MAX_HIST 1000
 #define DEF_MAX_DIRHIST 100
-#define DEF_MAX_LOG 1000
+#define DEF_MAX_LOG 500
 #define DEF_CLEAR_SCREEN 1
 #define DEF_LIST_FOLDERS_FIRST 1
 #define DEF_CD_LISTS_ON_THE_FLY 1
@@ -1142,6 +1142,20 @@ xnmalloc(size_t nmemb, size_t size)
 	return new_ptr;
 }
 
+static int
+xchmod(const char *file, mode_t mode)
+{
+	/* Set or unset S_IXUSR, S_IXGRP, and S_IXOTH */
+	(0100 & mode) ? (mode &= ~0111) : (mode |= 0111);
+
+	if (chmod(file, mode) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
 static char *
 home_tilde(const char *new_path)
 /* Reduce "$HOME" to tilde ("~"). The new_path variable is always either
@@ -1406,6 +1420,7 @@ is_internal_c(const char *restrict cmd)
 		"splash",
 		"st", "sort",
 		"t", "tr", "trash",
+		"te",
 		"tips",
 		"touch",
 		"u", "undel", "untrash",
@@ -4973,9 +4988,9 @@ CaseSensitiveDirJump=true\n\
 CaseSensitivePathComp=true\n\
 Unicode=false\n\
 Pager=false\n\
-MaxHistory=500\n\
-MaxDirhist=30\n\
-MaxLog=1000\n\
+MaxHistory=1000\n\
+MaxDirhist=100\n\
+MaxLog=500\n\
 DiskUsage=false\n\n"
 
 "# If set to true, clear the screen before listing files\n\
@@ -12419,6 +12434,7 @@ is_internal(const char *cmd)
 		"pin",
 		"jc", "jp",
 		"bl", "le",
+		"te",
 		NULL
 		};
 
@@ -21914,6 +21930,7 @@ help_function (void)
  splash\n\
  st, sort [METHOD] [rev]\n\
  t, tr, trash [ELN/FILE ... n] [ls, list] [clear] [del, rm]\n\
+ te [FILE(s)]\n\
  tips\n\
  u, undel, untrash [*, a, all]\n\
  uc, unicode [on, off, status]\n\
@@ -24021,6 +24038,36 @@ exec_cmd(char **comm)
 		kbind_busy = 1;
 		exit_code = run_and_refresh(comm);
 		kbind_busy = 0;
+	}
+
+	else if (*comm[0] == 't' && comm[0][1] == 'e' && !comm[0][2]) {
+		size_t j;
+		for (j = 1; comm[j]; j++) {
+			struct stat attr;
+
+			if (strchr(comm[j], '\\')) {
+				char *tmp = dequote_str(comm[j], 0);
+				if (tmp) {
+					strcpy(comm[j], tmp);
+					free(tmp);
+				}
+			}
+
+			if (lstat(comm[j], &attr) == -1) {
+				fprintf(stderr, "stat: %s: %s\n", comm[j], strerror(errno));
+				exit_code = EXIT_FAILURE;
+				continue;
+			}
+
+			if (xchmod(comm[j], attr.st_mode) == -1)
+				exit_code = EXIT_FAILURE;
+		}
+
+		if (exit_code == EXIT_SUCCESS)
+			printf("%s: Toggled executable bit on %zu file(s)\n",
+				   PROGRAM_NAME, args_n);
+
+		return exit_code;
 	}
 
 	/*    ############### PINNED FILE ##################     */
