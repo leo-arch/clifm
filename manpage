@@ -949,7 +949,7 @@ Match single mimetype:
 Match mutiple mimetypes:
  ^audio/.*=mplayer;mplayer2;vlc;gmplayer;smplayer;totem
 .TP
-\fBLira\fR will check the file line by line, and if a matching line is found, and if at least one of the specified applications exists, this application will be used to open the corresponding associated file. Else, the next line will be checked.
+\fBLira\fR will check the file line by line, and if a matching line is found, and if at least one of the specified applications exists, this application will be used to open the corresponding associated file. Else, the next line will be checked. In other words, the precedence order is top to bottom (for lines) and left to right for applications.
 .TP
 If the MIME file is not found, CliFM will try to import MIME definitions from the default locations for the 'mimeapps.list' file as specified by the Freedesktop specification.
 
