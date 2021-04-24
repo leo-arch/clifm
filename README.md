@@ -104,7 +104,7 @@ Because file manager, but also half-shell, CliFM also provides the following fea
 - [x] Sequential and conditional commands execution 
 - [x] User profiles
 - [x] Customizable keyboard shortcuts
-- [x] Lira, a built-in resource opener
+- [x] Lira, a built-in resource opener supporting both extension and mimetype matching. **NEW**: Lira supports now regular expressions.
 - [x] Mas, a built-in pager for files listing
 - [x] Eleven sorting methods: name, size, atime, btime, ctime, mtime, version, extension, inode, owner, and group. It also supports reverse sorting.
 - [x] Bulk rename
@@ -113,7 +113,7 @@ Because file manager, but also half-shell, CliFM also provides the following fea
 - [x] Symlinks editor
 - [x] Disk usage
 - [x] CD on quit, file picker (as shell functions)
-- [x] Plugins: PDF reader, image/video previews, wallpaper setter, music playlist, updates check, drag and drop, finder, jumper, clipboard, FZF navigation, FZF selection, and interactive help
+- [x] Plugins: PDF reader, image/video previews, wallpaper setter, music playlist, updates check, drag and drop, finder, jumper, clipboard, FZF navigation/file previewing (**NEW**: including support for Ranger's scope.sh file previewer script), FZF selection, and interactive help
 - [x] Batch links
 - [x] Read and list files form standard input
 - [x] Exclude certain groups of filenames via the files filter using regular expressions
