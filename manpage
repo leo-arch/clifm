@@ -950,16 +950,18 @@ Plugins are just scripts or programs (written in any language) able to add, exte
  |   -images         | imagemagick, and uerbezug     |
  |                   |   (or viu or catimg)          |
  |   -fonts          | fontpreview                   |
- |   -docs           | libreoffice                   |
- |   -PDF            | pdftoppm                      |
+ |   -docs           | libreoffice or catdoc         |
+ |   -PDF            | pdftoppm, pdftotext or mutool |
  |   -epub           | epub-thumbnailer              |
- |   -DjVu           | djvulibre                     |
+ |   -DjVu           | djvulibre or djvutxt          |
  |   -Postscript     | ghostscript                   |
  |   -videos         | ffmpegthumbnailer             |
- |   -audio          | ffmpeg or mplayer             |
+ |   -audio          | ffmpeg, mplayer or mpv        |
  |   -web            | w3m, linx or elinks           |
  |   -markdown       | glow                          |
- |   -highlight      | bat or highlight              |
+ |   -highlight      | bat, highlight or pygmentize  |
+ |   -torrent        | transmission-cli              |
+ |   -json           | python or pq                  |
  |   -file info      | exiftool, mediainfo or file   |
  | fzfsel            | fzf                           |
  | ihelp             | fzf or rofi                   |
