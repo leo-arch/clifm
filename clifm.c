@@ -10872,17 +10872,6 @@ get_app(const char *mime, const char *ext)
 	char *line = (char *)NULL, *app = (char *)NULL;
 	ssize_t line_len = 0;
 
-	char *mime_tmp = (char *)xnmalloc(mime_len + 2, sizeof(char));
-	sprintf(mime_tmp, "%s=", mime);
-
-	size_t ext_len = 0;
-	char *ext_tmp = (char *)NULL;
-	if (ext) {
-		ext_len = strlen(ext);
-		ext_tmp = (char *)xcalloc(ext_len + 2, sizeof(char));
-		sprintf(ext_tmp, "%s=", ext);
-	}
-
 	while ((line_len = getline(&line, &line_size, defs_fp)) > 0) {
 		found = mime_match = 0; /* Global variable to tell mime_open()
 		if the application is associated to the file's extension or MIME
@@ -10890,79 +10879,84 @@ get_app(const char *mime, const char *ext)
 		if (*line == '#' || *line == '[' || *line == '\n')
 			continue;
 
-		if (ext) {
-			if (*line == '*') {
-				if (strncmp(line + 2, ext_tmp, ext_len + 1) == 0)
-					found = 1;
-			}
+		char *tmp = strchr(line, '=');
+
+		if (!tmp || !*(tmp + 1))
+			continue;
+
+		/* Truncate line in '=' to get only the ext/mimetype pattern/string */
+		*tmp = '\0';
+		regex_t regex;
+
+		if (ext && *line == 'E' && line[1] == ':') {
+			if (regcomp(&regex, line + 2, REG_NOSUB|REG_EXTENDED) == 0
+			&& regexec(&regex, ext, 0, NULL, 0) == 0)
+				found = 1;
 		}
 
-		if (strncmp(line, mime_tmp, mime_len + 1) == 0)
-				found = mime_match = 1;
+		else if (regcomp(&regex, line, REG_NOSUB|REG_EXTENDED) == 0
+		&& regexec(&regex, mime, 0, NULL, 0) == 0)
+			found = mime_match = 1;
 
-		if (found) {
-			/* Get associated applications */
-			char *tmp = strrchr(line, '=');
-			if (!tmp)
-				continue;
+		regfree(&regex);
 
-			tmp++; /* We don't want the '=' char */
+		if (!found)
+			continue;
 
-			size_t tmp_len = strlen(tmp);
-			app = (char *)xrealloc(app, (tmp_len + 1) * sizeof(char));
-			size_t app_len = 0;
-			while (*tmp) {
-				app_len = 0;
-				/* Split the appplications line into substrings, if
-				 * any */
-				while (*tmp != '\0' && *tmp != ';' && *tmp != '\n'
-				&& *tmp != '\'' && *tmp != '"')
-					app[app_len++] = *(tmp++);
+		tmp++; /* We don't want the '=' char */
 
-				while (*tmp == ' ') /* Remove leading spaces */
-					tmp++;
-				if (app_len) {
-					app[app_len] = '\0';
-					/* Check each application existence */
-					char *file_path = (char *)NULL;
-					/* If app contains spaces, the command to check is
-					 * the string before the first space */
-					int ret = strcntchr(app, ' ');
+		size_t tmp_len = strlen(tmp);
+		app = (char *)xrealloc(app, (tmp_len + 1) * sizeof(char));
+		size_t app_len = 0;
+		while (*tmp) {
+			app_len = 0;
+			/* Split the appplications line into substrings, if
+			 * any */
+			while (*tmp != '\0' && *tmp != ';' && *tmp != '\n'
+			&& *tmp != '\'' && *tmp != '"')
+				app[app_len++] = *(tmp++);
 
-					if (ret != -1) {
-						char *app_tmp = savestring(app, app_len);
-						app_tmp[ret] = '\0';
-						file_path = get_cmd_path(app_tmp);
-						free(app_tmp);
-					}
+			while (*tmp == ' ') /* Remove leading spaces */
+				tmp++;
 
-					else
-						file_path = get_cmd_path(app);
+			if (app_len) {
+				app[app_len] = '\0';
+				/* Check each application existence */
+				char *file_path = (char *)NULL;
+				/* If app contains spaces, the command to check is
+				 * the string before the first space */
+				int ret = strcntchr(app, ' ');
 
-					if (file_path) {
-						/* If the app exists, break the loops and
-						 * return it */
-						free(file_path);
-						file_path = (char *)NULL;
-						cmd_ok = 1;
-					}
-
-					else
-						continue;
+				if (ret != -1) {
+					char *app_tmp = savestring(app, app_len);
+					app_tmp[ret] = '\0';
+					file_path = get_cmd_path(app_tmp);
+					free(app_tmp);
 				}
 
-				if (cmd_ok)
-					break;
-				tmp++;
+				else
+					file_path = get_cmd_path(app);
+
+				if (file_path) {
+					/* If the app exists, break the loops and
+					 * return it */
+					free(file_path);
+					file_path = (char *)NULL;
+					cmd_ok = 1;
+				}
+
+				else
+					continue;
 			}
 
 			if (cmd_ok)
 				break;
+			tmp++;
 		}
-	}
 
-	free(mime_tmp);
-	free(ext_tmp);
+		if (cmd_ok)
+			break;
+	}
 
 	free(line);
 	fclose(defs_fp);
@@ -23771,7 +23765,7 @@ exec_cmd(char **comm)
 	}
 
 
-	/*       ############### DIRECTORY JUMPER ##################     */
+	/*   ############## DIRECTORY JUMPER ##################     */
 	else if (*comm[0] == 'j' && (!comm[0][1]
 	|| ((comm[0][1] == 'c' || comm[0][1] == 'p'
 	|| comm[0][1] == 'e' || comm[0][1] == 'o' || comm[0][1] == 'l')
@@ -24040,7 +24034,13 @@ exec_cmd(char **comm)
 		kbind_busy = 0;
 	}
 
+	/*    ############### TOGGLE EXEC ##################     */
 	else if (*comm[0] == 't' && comm[0][1] == 'e' && !comm[0][2]) {
+		if (!comm[1] || (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)) {
+			puts(_("Usage: te FILE(s)"));
+			return EXIT_SUCCESS;
+		}
+
 		size_t j;
 		for (j = 1; comm[j]; j++) {
 			struct stat attr;
@@ -24064,7 +24064,7 @@ exec_cmd(char **comm)
 		}
 
 		if (exit_code == EXIT_SUCCESS)
-			printf("%s: Toggled executable bit on %zu file(s)\n",
+			printf(_("%s: Toggled executable bit on %zu file(s)\n"),
 				   PROGRAM_NAME, args_n);
 
 		return exit_code;
