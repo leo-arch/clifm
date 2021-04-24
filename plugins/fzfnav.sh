@@ -22,16 +22,18 @@
 # atool or bsdtar or tar: archives
 # convert (imagemagick), and ueberzug (recommended) or viu or catimg: images
 # fontpreview: fonts
-# libreoffice: office documents
-# pdftoppm: PDF files
+# libreoffice or catdoc: office documents
+# pdftoppm or pdftotext or mutool: PDF files
 # epub-thumbnailer: epub files
-# ddjvu (djvulibre): DjVu files
+# ddjvu (djvulibre) or djvutxt: DjVu files
 # ghostscript: postscript files (ps)
 # ffmpegthumbnailer: videos
-# ffplay (ffmpeg) or mplayer: audio
+# ffplay (ffmpeg) or mplayer or mpv: audio
 # w3m or linx or elinks: web content
 # glow: markdown
-# bat or highlight: syntax highlighthing for text files
+# bat or highlight or pygmentize: syntax highlighthing for text files
+# python or jq: json
+# transmission-cli: torrent files
 # exiftool or mediainfo or file: file information
 
 uz_cleanup() {
@@ -67,6 +69,12 @@ file_preview() {
 	entry="$1"
 
 	if [ "$entry" = ".." ]; then
+		return
+	fi
+
+	if [ "$USE_SCOPE" -eq 1 ] && [ -f "$HOME/.config/ranger/scope.sh" ]; then
+		calculate_position
+		"$SCOPE_FILE" "$PWD/$entry" "$X" "$Y" "$PREVIEWDIR" "True"
 		return
 	fi
 
@@ -109,6 +117,13 @@ file_preview() {
 		ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
 
 		case "$ext" in
+			dff|dsf|wv|wvc)
+				if [ "$MEDIAINFO_OK" -eq 1 ]; then
+					mediainfo "$PWD/$entry"
+				elif [ "$EXIFTOOL_OK" -eq 1 ]; then
+					exiftool "$EXIFTOOL_OK"
+				fi
+			;;
 			md)
 				if [ "$GLOW_OK" -eq 1 ]; then
 					glow -s dark "$PWD/$entry"
@@ -122,8 +137,22 @@ file_preview() {
 			;;
 			html|xhtml|htm)
 				[ -z "$BROWSER" ] && return
-				"$BROWSER" "$entry"
+				"$BROWSER" -dump "$entry"
 				return
+			;;
+			json)
+				if [ "$(which python 2>/dev/null)" ]; then
+					python -m json.tool -- "$entry"
+				elif [ "$(which jq 2>/dev/null)" ]; then
+					jq --color-output . "$PWD/$entry"
+				else
+					cat "$entry"
+				fi
+			;;
+			torrent)
+				if [ "$(which transmission-show 2>/dev/null)" ]; then
+					transmission-show -- "$PWD/$entry"
+				fi
 			;;
 			*) ;;
 		esac
@@ -135,37 +164,65 @@ file_preview() {
 
 		*"officedocument"*|*"msword"|*"ms-excel"|"text/rtf"|*".opendocument."*)
 
-			[ -z "$LIBREOFFICE_OK" ] && return
-			libreoffice --headless --convert-to jpg "$entry" \
-			--outdir "$PREVIEWDIR" > /dev/null 2>&1
+			if [ -n "$IMG_VIEWER" ] && [ "$LIBREOFFICE_OK" -eq 1 ]; then
+				libreoffice --headless --convert-to jpg "$entry" \
+				--outdir "$PREVIEWDIR" > /dev/null 2>&1
 
-			mv "$PREVIEWDIR/${entry%.*}.jpg" "$PREVIEWDIR/${entry}.jpg"
+				mv "$PREVIEWDIR/${entry%.*}.jpg" "$PREVIEWDIR/${entry}.jpg"
 
-			"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg"
+				"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg"
+			elif [ "$ext" = "odt" || [ "$ext" = "ods" ] || [ "$ext" = "odp" ] || [ "$ext" = "sxw" ]; then
+				if [ "$(which odt2txt 2>/dev/null)" ]; then
+					odt2txt "$PWD/$entry"
+				elif [ "$(which pandoc 2>/dev/null)" ]; then
+					pandoc -s -t markdown -- "$PWD/$entry"
+				fi
+			elif [ "$ext" != "docx" ] && [ "$(which catdoc 2>/dev/null)" ]; then
+				catdoc "$entry"
+			elif [ "$(which unzip)" ]; then
+				unzip -p "$entry" | grep --text '<w:r' | sed 's/<w:p[^<\/]*>/ /g' \
+				| sed 's/<[^<]*>//g' | grep -v '^[[:space:]]*$' | sed G
+			fi
 		;;
 
 		"inode/x-empty")
 			printf -- "--- \033[0;30;47mEmpty file\033[0m ---" ;;
 
 		"text/html")
-			[ -z "$BROWSER" ] && return
-			"$BROWSER" "$entry"
+			if [ -n "$BROWSER" ]; then
+				"$BROWSER" "$entry"
+			elif [ "$PANDOC_OK" -eq 1 ]; then
+				pandoc -s -t markdown -- "$entry"
+			fi
 		;;
 
-		"text/"*|"application/x-setupscript")
+		"text/"*|"application/x-setupscript"|*"/xml")
 			if [ "$BAT_OK" -eq 1 ]; then
 				bat -pp --color=always "$entry"
 			elif [ "$HIGHLIGHT_OK" -eq 1 ]; then
-				highlight -O ansi "$entry"
+				if [ "$COLORS" -eq 256 ]; then
+					highlight -O xterm256 "$entry"
+				else
+					highlight -O ansi "$entry"
+				fi
+			elif [ "$PIGMENTIZE_OK" -eq 1 ]; then
+				if [ "$COLORS" -eq 256 ]; then
+					pigmentize -f terminal256 "$entry"
+				else
+					pigmentize -f terminal "$entry"
+				fi
 			else
 				cat "$entry"
 			fi
 		;;
 
 		*"/vnd.djvu")
-			[ -z "$DDJVU_OK" ] && return
-			ddjvu --format=tiff --page=1 "$entry" "$PREVIEWDIR/${entry}.jpg"
-			"$IMG_VIEWER" "$PREVIEWDIR/${entry}.jpg"
+			if [ -n "$IMAGE_VIEWER" ] && [ "$DDJVU_OK" -eq 1 ]; then
+				ddjvu --format=tiff --page=1 "$entry" "$PREVIEWDIR/${entry}.jpg"
+				"$IMG_VIEWER" "$PREVIEWDIR/${entry}.jpg"
+			elif [ "$DJVUTXT" -eq 1 ]; then
+				djvutxt "$PWD/entry"
+			fi
 		;;
 
 		*"/gif")
@@ -201,17 +258,21 @@ file_preview() {
 			"$IMG_VIEWER" "$PREVIEWDIR/${entry}.jpg"
 		;;
 
-		*"/epub+zip")
+		application/epub+zip|application/x-mobipocket-ebook|application/x-fictionbook+xml)
 			[ -z "$EPUBTHUMB_OK" ] && return
 			epub-thumbnailer "$entry" "${PREVIEWDIR}/${entry}.jpg" "$WIDTH" "$HEIGHT"
 			"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg"
 		;;
 
 		*"/pdf")
-#			pdftotext -nopgbrk -layout "$entry" - | ${PAGER:=less} ;;
-			[ -z "$IMG_VIEWER" ] || [ -z "$PDFTOPPM_OK" ] && return
-			pdftoppm -jpeg -f 1 -singlefile "$entry" "${PREVIEWDIR}/$entry"
-			"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg"
+			if [ -n "$IMG_VIEWER" ] && [ "$PDFTOPPM_OK"  -eq 1 ]; then
+				pdftoppm -jpeg -f 1 -singlefile "$entry" "${PREVIEWDIR}/$entry"
+				"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg"
+			elif [ "$PDFTOTEXT_OK" -eq 1 ]; then
+				pdftotext -nopgbrk -layout -- "$entry" - | ${PAGER:=less}
+			elif [ "$MUTOOL_OK" -eq 1 ]; then
+				mutool draw -F txt -- "$entry"
+			fi
 		;;
 
 		"audio"/*)
@@ -227,6 +288,8 @@ file_preview() {
 				ffplay -nodisp -autoexit "$entry" &
 			elif [ "$MPLAYER_OK" -eq 1 ]; then
 				mplayer "$entry" &
+			elif [ "$MPV_OK" -eq 1 ]; then
+				mpv --no-video "$entry" &
 			fi
 			[ "$MEDIAINFO_OK" -eq 1 ] && mediainfo "$entry"
 
@@ -238,7 +301,7 @@ file_preview() {
 			"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg"
 		;;
 
-		"font/"*)
+		"application/font"*|"application/"*"opentype")
 			[ -z "$IMG_VIEWER" ] || [ -z "$FONTPREVIEW_OK" ] && return
 			fontpreview -i "$entry" -o "${PREVIEWDIR}/${entry}.jpg"
 			"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg" ;;
@@ -324,15 +387,23 @@ main() {
 		exit 1
 	fi
 
+	# Preview files using scope, Ranger's file preview script
+	USE_SCOPE=0
+	SCOPE_FILE="$HOME/.config/ranger/scope.sh"
+
 	UEBERZUG_OK=0
 	CACHEDIR="${XDG_CACHE_HOME:-$HOME/.cache}/clifm"
 	PREVIEWDIR="$CACHEDIR/previews"
+
+	# Default size for images
 	WIDTH=1920
 	HEIGHT=1080
 
+	COLORS="$(tput colors)"
+
 	# In order to use CliFM built-in resource opener we need to exit
 	# the script first, so that we cannot use it here
-	OPENER="xdg-open"
+	OPENER="xdg-open" # Add 'open'
 
 	! [ -d "$PREVIEWDIR" ] && mkdir -p "$PREVIEWDIR"
 
@@ -364,31 +435,57 @@ main() {
 		BROWSER="linx"
 	elif [ "$(which elinks 2>/dev/null)" ]; then
 		BROWSER="elinks"
+	elif [ "$(which pandoc 2>/dev/null)" ]; then
+		PANDOC_OK=1
 	fi
 
 	if [ "$(which ffplay 2>/dev/null)" ]; then
 		FFPLAY_OK=1
 	elif [ "$(which mplayer 2>/dev/null)" ]; then
 		MPLAYER_OK=1
+	elif [ "$(which mpv 2>/dev/null)" ]; then
+		MPV_OK=1
 	fi
+
 	if [ "$(which exiftool 2>/dev/null)" ]; then
 		EXIFTOOL_OK=1
 	elif [ "$(which mediainfo 2>/dev/null)" ]; then
 		MEDIAINFO_OK=1
 	fi
-	[ "$(which pdftoppm 2>/dev/null)" ] && PDFTOPPM_OK=1
-	[ "$(which ffmpegthumbnailer 2>/dev/null)" ] && FFMPEGTHUMB_OK=1
-	[ "$(which convert 2>/dev/null)" ] && CONVERT_OK=1
-	[ "$(which libreoffice 2>/dev/null)" ] && LIBREOFFICE_OK=1
+
+	if [ "$(which pdftoppm 2>/dev/null)" ]; then
+		PDFTOPPM_OK=1
+	elif [ "$which pdftotext 2>/dev/null" ]; then
+		PDFTOTEXT_OK=1
+	elif [ "$which mutool 2>/dev/null" ]; then
+		MUTOOL_OK=1
+	fi
+
+	if [ "$(which libreoffice 2>/dev/null)" ]; then
+		LIBREOFFICE_OK=1
+	elif [ "$(which catdoc 2>/dev/null)" ]; then
+		CATDOC_OK=1
+	fi
+
 	if [ "$(which bat 2>/dev/null)" ]; then
 		BAT_OK=1
 	elif [ "$(which highlight 2>/dev/null)" ]; then
 		HIGHLIGHT_OK=1
+	elif [ "$(which pygmentize 2>/dev/null)" ]; then
+		PYGMENTIZE_OK=1
 	fi
+
+	if [ "$(which ddjvu 2>/dev/null)" ]; then
+		DDJVU_OK=1
+	elif [ "$(which djvutxt 2>/dev/null)" ]; then
+		DJVUTXT_OK=1
+	fi
+
+	[ "$(which ffmpegthumbnailer 2>/dev/null)" ] && FFMPEGTHUMB_OK=1
+	[ "$(which convert 2>/dev/null)" ] && CONVERT_OK=1
 	[ "$(which glow 2>/dev/null)" ] && GLOW_OK=1
 	[ "$(which fontpreview 2>/dev/null)" ] && FONTPREVIEW_OK=1
 	[ "$(which epub-thumbnailer 2>/dev/null)" ] && EPUBTHUMB_OK=1
-	[ "$(which ddjvu 2>/dev/null)" ] && DDJVU_OK=1
 
 	if [ $UEBERZUG_OK = 1 ]; then
 		export FIFO_UEBERZUG="$HOME/.cache/clifm/ueberzug-${PPID}"
@@ -407,7 +504,8 @@ main() {
 	export TMP CACHEDIR PREVIEWDIR IMG_VIEWER ARCHIVER_CMD ARCHIVER_OPTS BROWSER \
 	WIDTH HEIGHT FFPLAY_OK MEDIAINFO_OK PDFTOPPM_OK FFMPEGTHUMB_OK CONVERT_OK \
 	LIBREOFFICE_OK HIGHLIGHT_OK FONTPREVIEW_OK BAT_OK EPUBTHUMB_OK DDJVU_OK \
-	MPLAYER_OK EXIFTOOL_OK GLOW_OK
+	MPLAYER_OK EXIFTOOL_OK GLOW_OK USE_SCOPE MPV_OK PDFTOTEXT_OK CATDOC_OK \
+	MUTOOL_OK PANDOC_OK COLORS PYGMENTIZE_OK SCOPE_FILE
 
 	fcd "$@"
 
