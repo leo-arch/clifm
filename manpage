@@ -487,11 +487,9 @@ List only up to NUM files. Use -1 to list all files (default). An indicator (lis
 .B mm, mime \fR[info ELN/FILENAME] [edit]
 This is \fILira\fR, CliFM's resource opener. The 'info' option prints the MIME information about ELN/FILENAME: its MIME type, its file extension, if any, and the application associated to this MIME type or file extension.
 .sp
-The 'edit' option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension (mm info FILE), and then add a value for it to the MIME list file using the 'edit' option (mm edit).
+The 'edit' option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension (mm info FILE), and then add a value for it to the MIME list file using the 'edit' option ('mm edit' or F6). Check the \fBRESOURCE OPENER\fR section below for information about the mimelist file syntax.
 .sp
-Each value in the MIME list file has this format: 'mime_type=application args;application args; ... n' or '*.c=application args;application args; ... n'. Example: 'plain/text=nano' or '*.c=geany \-p;leafpad;nano'. \fILira\fR will check the first matching line, and if at least one of the specified applications exists, this one will be used to open the corresponding associated file. Else, the next matching line will be checked.
-.sp
-If the MIME file is not found, CliFM will try to import MIME definitions from the default locations for the 'mimeapps.list' file as specified by the Freedesktop specification.
+
 .TP
 .B mp, mountpoints
 list available mountpoints and change the current working directory to the selected mountpoint.
@@ -932,6 +930,29 @@ TAB completion for bookmarks, color schemes, profiles and directory history (via
 .TP
 Of course, combinations of all these features is also possbile. Example: 'cp sel file* 2 23\-31 .' will copy all selected files, plus all files whose name starts with "file", plus those files corresponding to the ELN's 2, and 23 to 31, into the current working directory.
 
+.SH RESOURCE OPENER
+\fBLira\fR is CliFM's built-in resource opener, and is controlled via the \fImm\fR command (see above). File associations are stored in the MIME list file (see below). 
+.TP
+Each value in the MIME list file consists of a left value, containing either an extension or a mime type to match (using regular expressions) and a right value, a list of semicolon separated commands (and optionally the commands parameters) to be associated to the corresponding left value. In general, the format is: 'MIME=CMD ARGS;CMD ARGS; ...' or, for file extensions, "E:EXT=CMD ARGS;CMD ARGS; ...".
+.TP
+Examples:
+.TP
+Match single extension:
+ E:^txt$:leafpad;nano
+.TP
+Match multiple extensions:
+ E:^(sh|c|py|pl)$:geany;leafpad;nano
+.TP
+Match single mimetype:
+ ^audio/mp3$=ffplay -nodisp -autoexit;mpv;mplayer
+.TP
+Match mutiple mimetypes:
+ ^audio/.*=mplayer;mplayer2;vlc;gmplayer;smplayer;totem
+.TP
+\fBLira\fR will check the file line by line, and if a matching line is found, and if at least one of the specified applications exists, this application will be used to open the corresponding associated file. Else, the next line will be checked.
+.TP
+If the MIME file is not found, CliFM will try to import MIME definitions from the default locations for the 'mimeapps.list' file as specified by the Freedesktop specification.
+
 .SH SHELL FUNCTIONS
 CliFM includes a few shell functions to perform specific actions (cd-on-quit and file-picker). Take a look at the corresponding files, in \fI/usr/share/clifm/functions\fR, and follow the instructions. Needles to say, you can write your own functions.
 
@@ -950,14 +971,15 @@ Plugins are just scripts or programs (written in any language) able to add, exte
  |   -images         | imagemagick, and uerbezug     |
  |                   |   (or viu or catimg)          |
  |   -fonts          | fontpreview                   |
- |   -docs           | libreoffice or catdoc         |
+ |   -docs           | libreoffice, catdoc, odt2txt, |
+ |                       pandoc                      |
  |   -PDF            | pdftoppm, pdftotext or mutool |
  |   -epub           | epub-thumbnailer              |
  |   -DjVu           | djvulibre or djvutxt          |
  |   -Postscript     | ghostscript                   |
  |   -videos         | ffmpegthumbnailer             |
  |   -audio          | ffmpeg, mplayer or mpv        |
- |   -web            | w3m, linx or elinks           |
+ |   -web            | w3m, linx, elinks or pandoc   |
  |   -markdown       | glow                          |
  |   -highlight      | bat, highlight or pygmentize  |
  |   -torrent        | transmission-cli              |
@@ -973,6 +995,9 @@ Plugins are just scripts or programs (written in any language) able to add, exte
  | vid_viewer        | ffmpegthumbnailer             |
  | wallpapper_setter | feh, xloadimage or hsetroot   |
  +-------------------+-------------------------------+
+
+.TP
+NOTE: The fzfnav plugin supports the use of Ranger's scope.sh script for files previews. To use it, just edit the fzfnav plugin and set USE_SCOPE to 1 and SCOPE_FILE to the correct path of the scope.sh file.
 
 .SH STANDARD INPUT (STDIN)
 CliFM is able to read and list paths from the input stream. Each path in the list should be an absolute path, terminated with a new line character (\\n) and stripped from extra characters not belonging to the path itself. The size of the input stream buffer is 262MiB (65536 paths, provided each path takes PATH_MAX bytes (4096 by default)).
