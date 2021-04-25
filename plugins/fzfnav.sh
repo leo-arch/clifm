@@ -22,7 +22,7 @@
 # atool or bsdtar or tar: archives
 # convert (imagemagick), and ueberzug (recommended) or viu or catimg: images
 # fontpreview: fonts
-# libreoffice or catdoc: office documents
+# libreoffice, catdoc, odt2txt, pandoc: office documents
 # pdftoppm or pdftotext or mutool: PDF files
 # epub-thumbnailer: epub files
 # ddjvu (djvulibre) or djvutxt: DjVu files
@@ -42,6 +42,7 @@ uz_cleanup() {
 }
 
 calculate_position() {
+	# shellcheck disable=SC2034
 	read -r TERM_LINES TERM_COLS << EOF
 	$(</dev/tty stty size)
 EOF
@@ -95,7 +96,11 @@ file_preview() {
 		path="$(printf "%s" "$(pwd)/$entry" | sed "s;//;/;")"
 #		printf  "%s\n "$path"
 #		ls -p --color=always "${path}"
-		tree -a "$path"
+		if [ "$COLORS" -eq 256 ]; then
+			tree -a "$path"
+		else
+			tree -aA "$path"
+		fi
 		return
 	fi
 
@@ -171,7 +176,7 @@ file_preview() {
 				mv "$PREVIEWDIR/${entry%.*}.jpg" "$PREVIEWDIR/${entry}.jpg"
 
 				"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg"
-			elif [ "$ext" = "odt" || [ "$ext" = "ods" ] || [ "$ext" = "odp" ] || [ "$ext" = "sxw" ]; then
+			elif [ "$ext" = "odt" ] || [ "$ext" = "ods" ] || [ "$ext" = "odp" ] || [ "$ext" = "sxw" ]; then
 				if [ "$(which odt2txt 2>/dev/null)" ]; then
 					odt2txt "$PWD/$entry"
 				elif [ "$(which pandoc 2>/dev/null)" ]; then
@@ -205,7 +210,7 @@ file_preview() {
 				else
 					highlight -O ansi "$entry"
 				fi
-			elif [ "$PIGMENTIZE_OK" -eq 1 ]; then
+			elif [ "$PYGMENTIZE_OK" -eq 1 ]; then
 				if [ "$COLORS" -eq 256 ]; then
 					pigmentize -f terminal256 "$entry"
 				else
@@ -247,7 +252,6 @@ file_preview() {
 
 		"image/"*)
 			[ -z "$IMG_VIEWER" ] && return
-#			convert "$entry" -flatten -resize "$WIDTH"x"$HEIGHT"\> "$PREVIEWDIR/$entry.jpg"
 			"$IMG_VIEWER" "${PWD}/$entry"
 		;;
 
@@ -350,6 +354,12 @@ fcd() {
 	dir_color="$(dircolors -c | grep -o "[\':]di=....." | cut -d';' -f2)"
 	[ -z "$dir_color" ] && dir_color="34"
 
+	if [ "$COLORS" -eq 256 ]; then
+		UNICODE="--border=rounded"
+	else
+		UNICODE="--no-unicode"
+	fi
+
 	while true; do
 		lsd=$(printf "\033[0;%sm..\n" "$dir_color"; \
 		ls -Ap --group-directories-first --color=always --indicator-style=none)
@@ -368,7 +378,7 @@ fcd() {
 			--ansi --prompt="CliFM > " --reverse --no-clear \
 			--no-info --keep-right --multi --header="Press 'Ctrl+h' for help
 $PWD" --marker="+" --preview-window=:wrap \
-			--preview 'printf "\033[2J"; file_preview {}')"
+			--preview 'printf "\033[2J"; file_preview {}' "$UNICODE")"
 
 		[ ${#dir} = 0 ] && return 0
 		if [ -d "${PWD}/$dir" ]; then
@@ -455,9 +465,9 @@ main() {
 
 	if [ "$(which pdftoppm 2>/dev/null)" ]; then
 		PDFTOPPM_OK=1
-	elif [ "$which pdftotext 2>/dev/null" ]; then
+	elif [ "$(which pdftotext 2>/dev/null)" ]; then
 		PDFTOTEXT_OK=1
-	elif [ "$which mutool 2>/dev/null" ]; then
+	elif [ "$(which mutool 2>/dev/null)" ]; then
 		MUTOOL_OK=1
 	fi
 
@@ -505,7 +515,7 @@ main() {
 	WIDTH HEIGHT FFPLAY_OK MEDIAINFO_OK PDFTOPPM_OK FFMPEGTHUMB_OK CONVERT_OK \
 	LIBREOFFICE_OK HIGHLIGHT_OK FONTPREVIEW_OK BAT_OK EPUBTHUMB_OK DDJVU_OK \
 	MPLAYER_OK EXIFTOOL_OK GLOW_OK USE_SCOPE MPV_OK PDFTOTEXT_OK CATDOC_OK \
-	MUTOOL_OK PANDOC_OK COLORS PYGMENTIZE_OK SCOPE_FILE
+	MUTOOL_OK PANDOC_OK COLORS PYGMENTIZE_OK SCOPE_FILE DJVUTXT_OK
 
 	fcd "$@"
 
