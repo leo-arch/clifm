@@ -10925,13 +10925,19 @@ get_app(const char *mime, const char *ext)
 				char *file_path = (char *)NULL;
 				/* If app contains spaces, the command to check is
 				 * the string before the first space */
-				int ret = strcntchr(app, ' ');
+/*				int ret = strcntchr(app, ' ');
 
 				if (ret != -1) {
 					char *app_tmp = savestring(app, app_len);
 					app_tmp[ret] = '\0';
 					file_path = get_cmd_path(app_tmp);
 					free(app_tmp);
+				} */
+				char *ret = strchr(app, ' ');
+				if (ret) {
+					*ret = '\0';
+					file_path = get_cmd_path(app);
+					*ret = ' ';
 				}
 
 				else
@@ -11295,13 +11301,60 @@ mime_open(char **args)
 	for (args_num = 0; args[args_num]; args_num++);
 
 	/* Construct the command and run it */
-	char *cmd[] = { app, file_path, NULL };
 
-	int ret = launch_execve(cmd, strcmp(args[args_num - 1], "&") == 0
-							? BACKGROUND : FOREGROUND, E_NOSTDERR);
+	/* Two pointers to store different positions in the APP string */
+	char *p = app;
+	char *pp = app;
+
+	/* The number of spaces in APP is (at least) the number of paramenters
+	 * passed to the command. Extra spaces will be ignored */
+	size_t spaces = 0;
+	while (*p) {
+		if (*(p++) == ' ')
+			spaces++;
+	}
+
+	/* To the number of spaces/parametes we need to add the command itself,
+	 * the filename and the final NULL string (spaces + 3) */
+	char **cmd = (char **)xnmalloc(spaces + 3, sizeof(char *));
+
+	/* Rewind P to the beginning of APP */
+	p = pp;
+
+	/* Store each substring in APP into a two dimensional array (CMD) */
+	int pos = 0;
+	while (1) {
+
+		if (!*p) {
+			if (*pp)
+				cmd[pos++] = savestring(pp, strlen(pp));
+			break;
+		}
+
+		if (*p == ' ') {
+			*p = '\0';
+			if (*pp)
+				cmd[pos++] = savestring(pp, strlen(pp));
+			pp = ++p;
+		}
+
+		else
+			p++;
+	}
+
+	cmd[pos++] = savestring(file_path, strlen(file_path));
+	cmd[pos] = (char *)NULL;
+
+	int ret = launch_execve(cmd, (*args[args_num - 1] == '&'
+			&& !args[args_num - 1][1]) ? BACKGROUND : FOREGROUND, E_NOSTDERR);
 
 	free(file_path);
 	free(app);
+
+	int i = pos;
+	while (--i >= 0)
+		free(cmd[i]);
+	free(cmd);
 
 	return ret;
 }
