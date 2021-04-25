@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Image thumbnails plugin for CLiFM
+# Image thumbnails plugin for CliFM
 # Written by L. Abramovich
 
 SUCCESS=0

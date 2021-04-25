@@ -10,7 +10,7 @@ if ! [ -f "$manpage" ]; then
 	exit 1
 fi
 
-finder=""
+#finder=""
 
 if [ "$(which fzf 2>/dev/null)" ]; then
 	filter="fzf"
@@ -78,6 +78,7 @@ shell @
 splash @
 st, sort@
 t, tr, trash@
+te @
 tips @
 u, undel, untrash@
 uc, unicode@

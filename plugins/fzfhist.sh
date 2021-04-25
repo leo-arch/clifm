@@ -11,7 +11,7 @@ fi
 
 FILE="${XDG_CONFIG_HOME:=$HOME/.config}/clifm/profiles/$CLIFM_PROFILE/history.cfm"
 
-cat "$FILE" | fzf --prompt="CliFM > " > "$CLIFM_BUS"
+fzf --prompt="CliFM > " < "$FILE" > "$CLIFM_BUS"
 printf "\n"
 
 exit 0

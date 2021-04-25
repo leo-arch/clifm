@@ -6,7 +6,7 @@
 
 USAGE="Usage: $0 [16, 256, test]"
 
-if [ -z "$1" ] || [ $1 = "--help" ]; then
+if [ -z "$1" ] || [ "$1" = "--help" ]; then
 	printf "%s\n" "$USAGE" >&2
 	exit 1
 fi

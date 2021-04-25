@@ -24,7 +24,8 @@ for arg in "$@"; do
 
 	if [ -d "$arg" ]; then
 
-		if [ ${arg: -1} = '/' ]; then
+		if [ "$(printf "%s" "$arg" | tail -c1)" = '/' ]; then
+#		if [ ${arg: -1} = '/' ]; then
 			arg="${arg%?}"
 		fi
 

@@ -11,7 +11,7 @@
 # deselect using the z key (s to deselect all). Once done, press Enter.
 # At exit, selected files will be sent to CliFM Selbox
 
-if ! [ $(which fzf 2>/dev/null) ]; then
+if ! [ "$(which fzf 2>/dev/null)" ]; then
 	printf "CLiFM: fzf: Command not found\n" >&2
 	exit 1
 fi
@@ -21,6 +21,7 @@ TMPFILE="$TMPDIR/${CLIFM_PROFILE}.fzfsel"
 
 ! [ -d "$TMPDIR" ] && mkdir -p "$TMPDIR"
 
+# shellcheck disable=SC2012
 ls -A --group-directories-first --color=always | \
 fzf --multi --marker='*' \
 	--color "prompt:6,fg+:reverse" \
@@ -29,7 +30,8 @@ fzf --multi --marker='*' \
 	--bind "a:select-all,s:deselect-all" \
 	--layout=reverse-list --ansi --prompt "CLiFM> " > "$TMPFILE"
 
-while ISF= read line; do
+# shellcheck disable=SC1007
+while ISF= read -r line; do
 	printf "%s\n" "$PWD/$line" >> "$CLIFM_SELFILE"
 done < "$TMPFILE"
 

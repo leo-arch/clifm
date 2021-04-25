@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Drag and drop plugin for CLiFM
+# Drag and drop plugin for CliFM
 # Written by L. Abramovich
 
 # Depends on dragon (https://github.com/mwh/dragon). For Archers, it
@@ -26,31 +26,32 @@ elif [ "$(which dragon 2>/dev/null)" ]; then
 	DRAGON="dragon"
 
 else
-	printf "CLiFM: Neither dragon nor dragon-drag-and-drop were found. Exiting...\n" >&2
+	printf "CliFM: Neither dragon nor dragon-drag-and-drop were found. Exiting...\n" >&2
 	exit $ERROR
 fi
 
 if [ -z "$1" ]; then
 
-	$DRAGON --print-path --target | while read -r r; do
+	ret=$($DRAGON --print-path --target | while read -r r; do
 
-		if [ "$(printf "%s\n" "$r" \
-		| grep '^\(https\?\|ftps\?\|s\?ftp\):\/\/')" ]; then
+		if printf "%s\n" "$r" \
+		| grep -q '^\(https\?\|ftps\?\|s\?ftp\):\/\/'; then
 			curl -LJO "$r"
 			printf "%s\n" "$PWD/$(basename "$r")" >> "$CLIFM_SELFILE"
-
 		else
 			printf "%s\n" "$r" >> "$CLIFM_SELFILE"
 		fi
 
-	done
+	done)
+
+	if [ "$ret" = 0 ]; then
+		exit $SUCCESS
+	fi
 
 else
-	$DRAGON "$@"
-fi
-
-if [ $? -eq 0 ]; then
-	exit $SUCCESS
+	if $DRAGON "$@"; then
+		exit $SUCCESS
+	fi
 fi
 
 exit $ERROR
