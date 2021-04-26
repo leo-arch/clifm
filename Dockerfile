@@ -19,7 +19,7 @@ RUN useradd -u 10001 -m -G wheel -s /bin/bash leoarch
 # Tini allows us to avoid several Docker edge cases, see https://github.com/krallin/tini.
 # NOTE: See https://github.com/hexops/dockerfile#is-tini-still-required-in-2020-i-thought-docker-added-it-natively
 # RUN apk add --no-cache tini
-ENTRYPOINT ["/bin/sh", "-c", "clifm"]
+#ENTRYPOINT ["/bin/sh", "-c", "clifm"]
 # Replace "myapp" above with your binary
 
 # bind-tools is needed for DNS resolution to work in *some* Docker networks, but not all.
@@ -31,4 +31,4 @@ ENTRYPOINT ["/bin/sh", "-c", "clifm"]
 USER leoarch
 
 # Default arguments for your app (remove if you have none):
-CMD ["-x", "--cwd-in-title"]
+#CMD ["-x", "--cwd-in-title"]
