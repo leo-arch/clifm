@@ -2525,7 +2525,7 @@ save_jumpdb(void)
 		return;
 	}
 
-	int i, reduce = 0, keep = 0, tmp_rank = 0, total_rank = 0;
+	int i, reduce = 0, tmp_rank = 0, total_rank = 0;
 	time_t now = time(NULL);
 
 	/* Calculate both total rank sum and rank for each entry */
@@ -4170,8 +4170,8 @@ create_tmp_files(void)
 	 * or modify them */
 
 	size_t user_len = strlen(user);
-	TMP_DIR = (char *)xnmalloc(user_len + pnl_len + 7, sizeof(char));
-	snprintf(TMP_DIR, user_len, "/tmp/%s", PNL);
+	TMP_DIR = (char *)xnmalloc(pnl_len + user_len + 7, sizeof(char));
+	snprintf(TMP_DIR, pnl_len + 6, "/tmp/%s", PNL);
 
 	struct stat file_attrib;
 
@@ -4191,7 +4191,7 @@ create_tmp_files(void)
 	 * restrictive permissions (700), since only the corresponding user
 	 * must be able to read and/or modify this list */
 
-	sprintf(TMP_DIR, "/tmp/%s/%s", PNL, user);
+	snprintf(TMP_DIR, pnl_len + user_len + 7, "/tmp/%s/%s", PNL, user);
 
 	if (stat(TMP_DIR, &file_attrib) == -1) {
 
@@ -10868,7 +10868,7 @@ get_app(const char *mime, const char *ext)
 	}
 
 	int found = 0, cmd_ok = 0;
-	size_t line_size = 0, mime_len = strlen(mime);
+	size_t line_size = 0;
 	char *line = (char *)NULL, *app = (char *)NULL;
 	ssize_t line_len = 0;
 
@@ -17396,39 +17396,6 @@ my_rl_completion(const char *text, int start, int end)
 	/* If none of the above, readline will attempt
 	 * path completion instead via my custom my_rl_path_completion() */
 	return matches;
-}
-
-static int
-check_dir(char **args)
-{
-	if (!args)
-		return EXIT_FAILURE;
-
-	size_t i;
-	struct stat attr;
-
-	for (i = 1; args[i]; i++) {
-
-		char *tmp = (char *)NULL;
-
-		if (strchr(args[i], '\\')) {
-			char *deq_file = dequote_str(args[i], 0);
-			if (deq_file)
-				tmp = deq_file;
-		}
-
-		if (lstat(tmp ? tmp : args[i], &attr) != -1
-		&& (attr.st_mode & S_IFMT) == S_IFDIR) {
-			if (tmp)
-				free(tmp);
-			return EXIT_SUCCESS;
-		}
-
-		if (tmp)
-			free(tmp);
-	}
-
-	return EXIT_FAILURE;
 }
 
 static int
