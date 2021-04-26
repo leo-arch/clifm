@@ -20,18 +20,11 @@ FROM archlinux:latest
 # NOTE: See https://github.com/hexops/dockerfile#is-tini-still-required-in-2020-i-thought-docker-added-it-natively
 # RUN apk add --no-cache tini
 
-RUN curl -fsSL "https://repo.archlinuxcn.org/x86_64/glibc-linux4-2.33-4-x86_64.pkg.tar.zst" | bsdtar -C / -xvf -
-
-RUN pacman -Syu --noconfirm git make gcc
-RUN cd ~
-RUN mkdir build
-RUN cd build
-RUN git clone https://github.com/leo-arch/clifm
-RUN cd clifm
-#RUN makepkg -i PKGBUILD
-RUN make && make install
-RUN cd ~
-RUN clifm -x
+RUN curl -fsSL "https://repo.archlinuxcn.org/x86_64/glibc-linux4-2.33-4-x86_64.pkg.tar.zst" | bsdtar -C / -xvf - && \
+pacman -Syu --noconfirm git make gcc && \
+mkdir build && \
+cd build && git clone https://github.com/leo-arch/clifm && \
+cd clifm && make && make install
 
 #ENTRYPOINT ["/bin/sh", "-c", "clifm"]
 # Replace "myapp" above with your binary
