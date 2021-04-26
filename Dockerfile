@@ -19,7 +19,8 @@ FROM archlinux:latest
 # Tini allows us to avoid several Docker edge cases, see https://github.com/krallin/tini.
 # NOTE: See https://github.com/hexops/dockerfile#is-tini-still-required-in-2020-i-thought-docker-added-it-natively
 # RUN apk add --no-cache tini
-RUN pacman -Sy git
+RUN mkdir -p /var/lib/pacman
+RUN pacman -Syu git make gcc
 RUN cd ~
 RUN mkdir build
 RUN cd build
