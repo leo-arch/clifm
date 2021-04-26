@@ -19,15 +19,17 @@ FROM archlinux:latest
 # Tini allows us to avoid several Docker edge cases, see https://github.com/krallin/tini.
 # NOTE: See https://github.com/hexops/dockerfile#is-tini-still-required-in-2020-i-thought-docker-added-it-natively
 # RUN apk add --no-cache tini
-RUN mkdir -p /var/lib/pacman
-RUN pacman -Syu git make gcc
-RUN cd ~
-RUN mkdir build
-RUN cd build
-RUN git clone https://github.com/leo-arch/clifm
-RUN cd clifm
-RUN make && make install
-RUN clifm -x
+#RUN mkdir -p /var/lib/pacman
+#RUN pacman-key --init
+#RUN pacman-key --populate archlinux
+#RUN pacman -Syu git make gcc
+#RUN cd ~
+#RUN mkdir build
+#RUN cd build
+#RUN git clone https://github.com/leo-arch/clifm
+#RUN cd clifm
+#RUN make && make install
+#RUN clifm -x
 
 #ENTRYPOINT ["/bin/sh", "-c", "clifm"]
 # Replace "myapp" above with your binary
