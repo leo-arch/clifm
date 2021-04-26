@@ -22,16 +22,15 @@ FROM archlinux:latest
 
 RUN curl -fsSL "https://repo.archlinuxcn.org/x86_64/glibc-linux4-2.33-4-x86_64.pkg.tar.zst" | bsdtar -C / -xvf -
 
-#RUN pacman-key --init
-#RUN pacman-key --populate archlinux
 RUN pacman -Syu --noconfirm git make gcc
-#RUN cd ~
-#RUN mkdir build
-#RUN cd build
-#RUN git clone https://github.com/leo-arch/clifm
-#RUN cd clifm
-#RUN make && make install
-#RUN clifm -x
+RUN cd ~
+RUN mkdir build
+RUN cd build
+RUN git clone https://github.com/leo-arch/clifm
+RUN cd clifm
+RUN makepkg -i PKGBUILD
+RUN cd ~
+RUN clifm -x
 
 #ENTRYPOINT ["/bin/sh", "-c", "clifm"]
 # Replace "myapp" above with your binary
