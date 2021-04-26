@@ -28,7 +28,8 @@ RUN mkdir build
 RUN cd build
 RUN git clone https://github.com/leo-arch/clifm
 RUN cd clifm
-RUN makepkg -i PKGBUILD
+#RUN makepkg -i PKGBUILD
+RUN make && make install
 RUN cd ~
 RUN clifm -x
 
