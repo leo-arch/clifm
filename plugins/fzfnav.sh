@@ -19,24 +19,6 @@
 # with FZF or open the last accepted file (Enter).
 # Press Esc to cancel and exit.
 
-# Previewing dependencies (optional)
-# atool or bsdtar or tar: archives
-# convert (imagemagick), and ueberzug (recommended) or viu or catimg: images
-# fontpreview: fonts
-# libreoffice, catdoc, odt2txt, pandoc: office documents
-# pdftoppm or pdftotext or mutool: PDF files
-# epub-thumbnailer: epub files
-# ddjvu (djvulibre) or djvutxt: DjVu files
-# ghostscript: postscript files (ps)
-# ffmpegthumbnailer: videos
-# ffplay (ffmpeg) or mplayer or mpv: audio
-# w3m or linx or elinks: web content
-# glow: markdown
-# bat or highlight or pygmentize: syntax highlighthing for text files
-# python or jq: json
-# transmission-cli: torrent files
-# exiftool or mediainfo or file: file information
-
 uz_cleanup() {
     rm "$FIFO_UEBERZUG"
     pkill -P $$ >/dev/null
@@ -231,7 +213,7 @@ main() {
 
 	TMP="$(mktemp /tmp/clifm.XXXXXX)"
 
-	# This variables are exported to the environment so that the previewer script:
+	# These variables are exported to the environment so that the previewer script:
 	# BFG.sh, executed from within fzf, can catch them all.
 	export TMP CACHEDIR PREVIEWDIR IMG_VIEWER ARCHIVER_CMD ARCHIVER_OPTS BROWSER \
 	WIDTH HEIGHT FFPLAY_OK MEDIAINFO_OK PDFTOPPM_OK FFMPEGTHUMB_OK CONVERT_OK \

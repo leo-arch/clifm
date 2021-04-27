@@ -1,10 +1,29 @@
 #!/bin/sh
 
 # BFG: This is CliFM's file previewer script. It is called by the fzfnav.sh
-# plugin
+# plugin for each hovered file. Variables for applications are exported by fzfnav
+# to prevent this script from checking the same applications once and again
 
 # Written by L. Abramovich
 # License: GPL3
+
+# Previewing dependencies (optional)
+# atool or bsdtar or tar: archives
+# convert (imagemagick), and ueberzug (recommended) or viu or catimg: images
+# fontpreview: fonts
+# libreoffice, catdoc, odt2txt, pandoc: office documents
+# pdftoppm or pdftotext or mutool: PDF files
+# epub-thumbnailer: epub files
+# ddjvu (djvulibre) or djvutxt: DjVu files
+# ghostscript: postscript files (ps)
+# ffmpegthumbnailer: videos
+# ffplay (ffmpeg) or mplayer or mpv: audio
+# w3m or linx or elinks: web content
+# glow: markdown
+# bat or highlight or pygmentize: syntax highlighthing for text files
+# python or jq: json
+# transmission-cli: torrent files
+# exiftool or mediainfo or file: file information
 
 calculate_position() {
 	# shellcheck disable=SC2034
