@@ -4818,7 +4818,7 @@ create_config(const char *file)
 \t\t#  The anti-eye-candy, KISS file manager  #\n\
 \t\t###########################################\n\n"
 
-"# This is the configuration file for CLiFM\n\n"
+"# This is the configuration file for CliFM\n\n"
 
 "# Color schemes are stored in the colors directory. By default,\n\
 # the 'default' color scheme is used. Visit %s\n\
@@ -14817,7 +14817,6 @@ prompt(void)
 	/* Print the prompt and get user input */
 	char *input = (char *)NULL;
 	input = readline(the_prompt);
-
 	free(the_prompt);
 
 	if (!input)
@@ -21862,6 +21861,8 @@ help_function (void)
 \n     --no-welcome-message\t disable the welcome message\
 \n     --only-dirs\t\t list only directories and symbolic links\
 \n              to directories\
+\n     --open=FILE\t run as a stand-alone resource opener: open\
+\n              FILE and exit\
 \n     --opener=APPLICATION\t resource opener to use instead of 'lira',\
 \n              %s built-in opener\
 \n     --restore-last-path\t save last visited directory to be \
@@ -26407,6 +26408,7 @@ external_arguments(int argc, char **argv)
 		{"case-ins-dirjump", no_argument, 0, 30},
 		{"case-ins-path-comp", no_argument, 0, 31},
 		{"cwd-in-title", no_argument, 0, 32},
+		{"open", required_argument, 0, 33},
 		{0, 0, 0, 0}
 	};
 
@@ -26561,6 +26563,36 @@ external_arguments(int argc, char **argv)
 
 		case 32:
 			xargs.cwd_in_title = 1;
+		break;
+
+		case 33: {
+			struct stat attr;
+
+			if (stat(optarg, &attr) == -1) {
+				fprintf(stderr, "%s: %s: %s", PROGRAM_NAME, optarg,
+						strerror(errno));
+				exit(EXIT_FAILURE);
+			}
+
+			if ((attr.st_mode & S_IFMT) != S_IFDIR) {
+				TMP_DIR = (char *)xnmalloc(5, sizeof(char));
+				strcpy(TMP_DIR, "/tmp");
+				MIME_FILE = (char *)xnmalloc(PATH_MAX, sizeof(char));
+				snprintf(MIME_FILE, PATH_MAX,
+						"%s/.config/clifm/profiles/%s/mimelist.cfm",
+						getenv("HOME"), alt_profile ? alt_profile : "default");
+				char *cmd[] = { "mm", optarg, NULL };
+				int ret = mime_open(cmd);
+				exit(ret);
+			}
+
+			printf(_("%s: %s: Is a directory\n"), PROGRAM_NAME, optarg);
+			exit(EXIT_FAILURE);
+
+/*			flags |= START_PATH;
+			path_value = optarg;
+			xargs.path = 1; */
+		}
 		break;
 
 		case 'a':
