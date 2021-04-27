@@ -46,7 +46,7 @@ Alt-up/down: Move to the beginning/end in the preview window"
 
 fcd() {
 
-	if [ "$#" != 0 ]; then
+	if [ "$#" -ne 0 ]; then
 		cd "$@" || return
 		return
 	fi
@@ -54,7 +54,7 @@ fcd() {
 	dir_color="$(dircolors -c | grep -o "[\':]di=....." | cut -d';' -f2)"
 	[ -z "$dir_color" ] && dir_color="34"
 
-	if [ "$COLORS" = 256 ]; then
+	if [ "$COLORS" -eq 256 ]; then
 		BORDERS="--border=left"
 	else
 		BORDERS="--no-unicode"
@@ -63,7 +63,7 @@ fcd() {
 	while true; do
 		lsd=$(printf "\033[0;%sm..\n" "$dir_color"; \
 		ls -Ap --group-directories-first --color=always --indicator-style=none)
-		dir="$(printf "%s\n" "$lsd" | fzf \
+		file="$(printf "%s\n" "$lsd" | fzf \
 			--color="bg+:236,gutter:236,fg+:reverse,pointer:6,prompt:6,marker:2:bold,spinner:6:bold" \
 			--bind "right:accept,left:first+accept" \
 			--bind "home:first,end:last" \
@@ -80,49 +80,36 @@ fcd() {
 $PWD" --marker="+" --preview-window=:wrap "$BORDERS" \
 			--preview "printf \"\033[2J\"; $BFG_FILE {}")"
 
-		[ ${#dir} = 0 ] && return 0
-		if [ -d "${PWD}/$dir" ]; then
-			printf "cd %s" "${PWD}/$dir" > "$TMP"
-			cd "$dir" || return
-		elif [ -f "${PWD}/$dir" ]; then
-			"$OPENER" "${PWD}/$dir" || return
+		[ ${#file} -eq 0 ] && return 0
+		if [ -d "${PWD}/$file" ]; then
+			printf "cd %s" "${PWD}/$file" > "$TMP"
+			cd "$file" || return
+		elif [ -f "${PWD}/$file" ]; then
+			if [ "$OPENER" = "clifm" ]; then
+				/home/_leo08/scripts/C/clifm/versions/no_shell/clifm --open "${PWD}/$file" || return
+			else
+				"$OPENER" "${PWD}/$file" || return
+			fi
 		fi
 	done
 }
 
 main() {
 
-	if ! [ "$(which fzf)" ]; then
+	if ! [ "$(which fzf 2>/dev/null)" ]; then
 		printf "CliFM: fzf: Command not found" >&2
 		exit 1
-	fi
-
-	# Preview files using scope, Ranger's file preview script
-	USE_SCOPE=0
-	SCOPE_FILE="$HOME/.config/ranger/scope.sh"
-
-	USE_PISTOL=0
-	if ! [ "$(which pistol 2>/dev/null)" ]; then
-		USE_PISTOL=0
 	fi
 
 	BFG_FILE="$HOME/.config/clifm/plugins/BFG.sh"
 
 	UEBERZUG_OK=0
-	CACHEDIR="${XDG_CACHE_HOME:-$HOME/.cache}/clifm"
-	PREVIEWDIR="$CACHEDIR/previews"
-
-	# Default size for images
-	WIDTH=1920
-	HEIGHT=1080
 
 	COLORS="$(tput colors)"
 
 	# In order to use CliFM built-in resource opener we need to exit
 	# the script first, so that we cannot use it here
-	OPENER="xdg-open" # Add 'open'
-
-	! [ -d "$PREVIEWDIR" ] && mkdir -p "$PREVIEWDIR"
+	OPENER="clifm"
 
 	if [ -n "$DISPLAY" ]; then
 		if [ "$(which ueberzug 2>/dev/null)" ]; then
@@ -206,7 +193,7 @@ main() {
 	[ "$(which epub-thumbnailer 2>/dev/null)" ] && EPUBTHUMB_OK=1
 
 	if [ "$UEBERZUG_OK" -eq 1 ]; then
-		export FIFO_UEBERZUG="$HOME/.cache/clifm/ueberzug-${PPID}"
+		export FIFO_UEBERZUG="${XDG_CACHE_HOME:-$HOME/.cache}/clifm/ueberzug-${PPID}"
 		trap uz_cleanup EXIT
 		start_ueberzug
 	fi
@@ -215,12 +202,12 @@ main() {
 
 	# These variables are exported to the environment so that the previewer script:
 	# BFG.sh, executed from within fzf, can catch them all.
-	export TMP CACHEDIR PREVIEWDIR IMG_VIEWER ARCHIVER_CMD ARCHIVER_OPTS BROWSER \
-	WIDTH HEIGHT FFPLAY_OK MEDIAINFO_OK PDFTOPPM_OK FFMPEGTHUMB_OK CONVERT_OK \
+	export TMP IMG_VIEWER ARCHIVER_CMD ARCHIVER_OPTS BROWSER \
+	FFPLAY_OK MEDIAINFO_OK PDFTOPPM_OK FFMPEGTHUMB_OK CONVERT_OK \
 	LIBREOFFICE_OK HIGHLIGHT_OK FONTPREVIEW_OK BAT_OK EPUBTHUMB_OK DDJVU_OK \
-	MPLAYER_OK EXIFTOOL_OK GLOW_OK USE_SCOPE MPV_OK PDFTOTEXT_OK CATDOC_OK \
-	MUTOOL_OK PANDOC_OK COLORS PYGMENTIZE_OK SCOPE_FILE DJVUTXT_OK UEBERZUG_OK \
-	USE_PISTOL HELP BFG_FILE
+	MPLAYER_OK EXIFTOOL_OK GLOW_OK MPV_OK PDFTOTEXT_OK CATDOC_OK \
+	MUTOOL_OK PANDOC_OK COLORS PYGMENTIZE_OK DJVUTXT_OK UEBERZUG_OK \
+	HELP BFG_FILE
 
 	fcd "$@"
 

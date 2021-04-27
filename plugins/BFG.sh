@@ -174,7 +174,8 @@ file_preview() {
 		;;
 
 		"inode/x-empty")
-			printf -- "--- \033[0;30;47mEmpty file\033[0m ---" ;;
+			printf -- "--- \033[0;30;47mEmpty file\033[0m ---"
+		;;
 
 		"text/html")
 			if [ -n "$BROWSER" ]; then
@@ -291,7 +292,8 @@ file_preview() {
 		"application/font"*|"application/"*"opentype")
 			[ -z "$IMG_VIEWER" ] || [ -z "$FONTPREVIEW_OK" ] && return
 			fontpreview -i "$entry" -o "${PREVIEWDIR}/${entry}.jpg"
-			"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg" ;;
+			"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg"
+		;;
 
 		"application/zip"|"application/gzip"|"application/x-7z-compressed"|\
 		"application/x-bzip2")
@@ -314,4 +316,21 @@ file_preview() {
 	esac
 }
 
+CACHEDIR="${XDG_CACHE_HOME:-$HOME/.cache}/clifm"
+PREVIEWDIR="$CACHEDIR/previews"
+
+! [ -d "$PREVIEWDIR" ] && mkdir -p "$PREVIEWDIR"
+
+# Default size for images
+WIDTH=1920
+HEIGHT=1080
+
+# Preview files using scope, Ranger's file preview script
+USE_SCOPE=0
+SCOPE_FILE="$HOME/.config/ranger/scope.sh"
+
+USE_PISTOL=0
+
 file_preview "$1"
+
+exit 0
