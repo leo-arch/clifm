@@ -968,11 +968,12 @@ Plugins are just scripts or programs (written in any language) able to add, exte
  | clip              | xclip                         |
  | dragondrop        | dragon or dragon-drag-and-drop|
  | finder            | fzf or rofi                   |
+ | rgfind            | fzf and ripgrep               |
  | fzfhist           | fzf                           |
  | fzfnav            | fzf                           |
  |   -archives       | atool, bsdtar or tar          |
  |   -images         | imagemagick, and uerbezug     |
- |                   |   (or viu or catimg)          |
+ |                       (or viu or catimg)          |
  |   -fonts          | fontpreview                   |
  |   -docs           | libreoffice, catdoc, odt2txt, |
  |                       pandoc                      |
