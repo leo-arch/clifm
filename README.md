@@ -113,7 +113,7 @@ Because file manager, but also half-shell, CliFM also provides the following fea
 - [x] Symlinks editor
 - [x] Disk usage
 - [x] CD on quit, file picker (as shell functions)
-- [x] Plugins: PDF reader, image/video previews, wallpaper setter, music playlist, updates check, drag and drop, finder, jumper, clipboard, FZF navigation/file previewing (**NEW**: including support for Ranger's scope.sh file previewer script), FZF selection, and interactive help
+- [x] Plugins: PDF reader, image/video previews, wallpaper setter, music playlist, updates check, drag and drop, finder, jumper, clipboard, FZF navigation/file previewing (**NEW**: including support for Ranger's scope.sh file previewer script and pistol), FZF selection, interactive help, and search files by content via Ripgrep (**NEW**)
 - [x] Batch links
 - [x] Read and list files form standard input
 - [x] Exclude certain groups of filenames via the files filter using regular expressions
