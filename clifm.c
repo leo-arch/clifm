@@ -5273,6 +5273,7 @@ create_config_files(void)
 				"-=fzfnav.sh\n"
 				"*=fzfsel.sh\n"
 				"h=fzfhist.sh\n"
+				"//=rgfind.sh\n"
 				"ih=ihelp.sh\n",
 				PROGRAM_NAME, PROGRAM_NAME);
 
@@ -12974,7 +12975,7 @@ run_action(char *action, char **args)
 		sprintf(cmd, "%s/%s", PLUGINS_DIR, action);
 	}
 
-	/* Check if the action file exists */
+	/* Check if the action file exists and is executable */
 	if (access(cmd, F_OK|X_OK) == -1) {
 		fprintf(stderr, "actions: %s: %s\n", cmd, strerror(errno));
 		free(cmd);
