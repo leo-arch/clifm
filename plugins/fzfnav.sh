@@ -86,7 +86,7 @@ $PWD" --marker="+" --preview-window=:wrap "$BORDERS" \
 			cd "$file" || return
 		elif [ -f "${PWD}/$file" ]; then
 			if [ "$OPENER" = "clifm" ]; then
-				/home/_leo08/scripts/C/clifm/versions/no_shell/clifm --open "${PWD}/$file" || return
+				clifm --open "${PWD}/$file" || return
 			else
 				"$OPENER" "${PWD}/$file" || return
 			fi
