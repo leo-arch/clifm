@@ -9,7 +9,7 @@
 
 # Previewing dependencies (optional)
 # atool or bsdtar or tar: archives
-# convert (imagemagick), and ueberzug (recommended) or viu or catimg: images
+# convert (imagemagick), and ueberzug (recommended) or viu or catimg or img2txt: images
 # fontpreview: fonts
 # libreoffice, catdoc, odt2txt, pandoc: office documents
 # pdftoppm or pdftotext or mutool: PDF files
@@ -31,8 +31,8 @@ calculate_position() {
 	$(</dev/tty stty size)
 EOF
 
-     X=$((TERM_COLS - COLUMNS - 2))
-     Y=1
+	 X=$((TERM_COLS - COLUMNS - 2))
+	 Y=1
 }
 
 uz_image() {

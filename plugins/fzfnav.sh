@@ -119,10 +119,12 @@ main() {
 			IMG_VIEWER="viu"
 		elif [ "$(which catimg 2>/dev/null)" ]; then
 			IMG_VIEWER="catimg"
+		elif [ "$(which img2txt 2>/dev/null)" ]; then
+			IMG_VIEWER="img2txt"
 		fi
 		[ "$IMG_VIEWER" = "ueberzug" ] && IMG_VIEWER="uz_image"
 	fi
-
+	IMG_VIEWER="img2txt"
 	if [ "$(which atool 2>/dev/null)" ]; then
 		ARCHIVER_CMD="atool"
 		ARCHIVER_OPTS="-l"
