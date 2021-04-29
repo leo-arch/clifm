@@ -10,7 +10,7 @@
 # Previewing dependencies (optional)
 # atool or bsdtar or tar: archives
 # convert (imagemagick), and ueberzug (recommended) or viu or catimg or img2txt: images
-# fontpreview: fonts
+# fontpreview or fontimage (fontforge): fonts
 # libreoffice, catdoc, odt2txt, pandoc: office documents
 # pdftoppm or pdftotext or mutool: PDF files
 # epub-thumbnailer: epub files
@@ -100,6 +100,10 @@ file_preview() {
 		[ -z "$IMG_VIEWER" ] && return
 		"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg"
 		return
+	elif [ -f "${PREVIEWDIR}/${entry}.png" ]; then
+		[ -z "$IMG_VIEWER" ] && return
+		"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.png"
+		return
 	fi
 
 	ext="${entry##*.}"
@@ -114,6 +118,7 @@ file_preview() {
 				elif [ "$EXIFTOOL_OK" = 1 ]; then
 					exiftool "$EXIFTOOL_OK"
 				fi
+				return
 			;;
 			md)
 				if [ "$GLOW_OK" = 1 ]; then
@@ -139,17 +144,20 @@ file_preview() {
 				else
 					cat "$entry"
 				fi
+				return
 			;;
 			torrent)
 				if [ "$(which transmission-show 2>/dev/null)" ]; then
 					transmission-show -- "$PWD/$entry"
 				fi
+				return
 			;;
-			stl|off|dxf|scad|csg)
-				if [ "$(which openscad 2>/dev/null)" ]; then
-					openscad "$PWD/$entry"
-				fi
-			;;
+#			stl|off|dxf|scad|csg)
+#				if [ "$(which openscad 2>/dev/null)" ]; then
+#					openscad "$PWD/$entry"
+#				fi
+#				return
+#			;;
 			*) ;;
 		esac
 	fi
@@ -158,7 +166,7 @@ file_preview() {
 
 	case "$mimetype" in
 
-		*"officedocument"*|*"msword"|*"ms-excel"|"text/rtf"|*".opendocument."*)
+		*officedocument*|*msword|*ms-excel|text/rtf|*.opendocument.*)
 
 			if [ -n "$IMG_VIEWER" ] && [ "$LIBREOFFICE_OK" -eq 1 ]; then
 				libreoffice --headless --convert-to jpg "$entry" \
@@ -185,11 +193,11 @@ file_preview() {
 			fi
 		;;
 
-		"inode/x-empty")
+		inode/x-empty)
 			printf -- "--- \033[0;30;47mEmpty file\033[0m ---"
 		;;
 
-		"text/html")
+		text/html)
 			if [ -n "$BROWSER" ]; then
 				"$BROWSER" "$entry"
 			elif [ "$PANDOC_OK" = 1 ]; then
@@ -197,7 +205,7 @@ file_preview() {
 			fi
 		;;
 
-		"text/"*|"application/x-setupscript"|*"/xml")
+		text/*|application/x-setupscript|*/xml)
 			if [ "$BAT_OK" = 1 ]; then
 				bat -pp --color=always "$entry"
 			elif [ "$HIGHLIGHT_OK" = 1 ]; then
@@ -217,7 +225,7 @@ file_preview() {
 			fi
 		;;
 
-		*"/vnd.djvu")
+		*/vnd.djvu)
 			if [ -n "$IMAGE_VIEWER" ] && [ "$DDJVU_OK" = 1 ]; then
 				ddjvu --format=tiff --page=1 "$entry" "$PREVIEWDIR/${entry}.jpg"
 				"$IMG_VIEWER" "$PREVIEWDIR/${entry}.jpg"
@@ -226,7 +234,7 @@ file_preview() {
 			fi
 		;;
 
-		*"/gif")
+		*/gif)
 			[ -z "$IMG_VIEWER" ] || [ -z "$CONVERT_OK" ] && return
 			# Break down the gif into frames and show each frame, one each 0.1 secs
 #			printf "\n"
@@ -243,15 +251,14 @@ file_preview() {
 					sleep 0.1
 				done
 			done
-			return
 		;;
 
-		"image/"*)
+		image/*)
 			[ -z "$IMG_VIEWER" ] && return
 			"$IMG_VIEWER" "${PWD}/$entry"
 		;;
 
-		"application/postscript")
+		application/postscript)
 			! [ "$(which gs 2>/dev/null)" ] && return
 			gs -sDEVICE=jpeg -dJPEGQ=100 -dNOPAUSE -dBATCH -dSAFER -r300 \
 			-sOutputFile="$PREVIEWDIR/${entry}.jpg" "$entry" > /dev/null 2>&1
@@ -264,7 +271,7 @@ file_preview() {
 			"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg"
 		;;
 
-		*"/pdf")
+		*/pdf)
 			if [ -n "$IMG_VIEWER" ] && [ "$PDFTOPPM_OK" = 1 ]; then
 				pdftoppm -jpeg -f 1 -singlefile "$entry" "${PREVIEWDIR}/$entry"
 				"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg"
@@ -275,7 +282,7 @@ file_preview() {
 			fi
 		;;
 
-		"audio"/*)
+		audio/*)
 #			[ -z "$IMG_VIEWER" ] || ! [ "$(which ffmpeg 2>/dev/null)" ] && return
 
 #			ffmpeg -i "$entry" -lavfi \
@@ -295,20 +302,38 @@ file_preview() {
 
 		;;
 
-		"video/"*)
+		video/*)
 			[ -z "$IMG_VIEWER" ] || [ -z "$FFMPEGTHUMB_OK" ] && return
 			ffmpegthumbnailer -i "$entry" -o "${PREVIEWDIR}/${entry}.jpg" -s 0 -q 5 2>/dev/null
 			"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg"
 		;;
 
-		"application/font"*|"application/"*"opentype")
-			[ -z "$IMG_VIEWER" ] || [ -z "$FONTPREVIEW_OK" ] && return
-			fontpreview -i "$entry" -o "${PREVIEWDIR}/${entry}.jpg"
-			"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg"
+		font/*|application/font*|application/*opentype)
+			[ -z "$IMG_VIEWER" ] && return
+			if [ "$FONTPREVIEW_OK" = 1 ]; then
+				fontpreview -i "$entry" -o "${PREVIEWDIR}/${entry}.jpg"
+				"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg"
+			elif [ "$FONTIMAGE_OK" = 1 ]; then
+				png_file="$PREVIEWDIR/${entry}.png"
+				if fontimage -o "$png_file" \
+						--width "500" --height "290" \
+						--pixelsize "45" \
+						--fontname \
+						--pixelsize "30" \
+						--text "  ABCDEFGHIJKLMNOPQRSTUVWXYZ  " \
+						--text "  abcdefghijklmnopqrstuvwxyz  " \
+						--text "     0123456789.:,;(*!?')  " \
+						--text "        ff fl fi ffi ffl  " \
+						--text " The quick brown fox jumps over the lazy dog." \
+						"$PWD/$entry"  > /dev/null 2>&1;
+				then
+					"$IMG_VIEWER" "$png_file"
+				fi
+			fi
 		;;
 
-		"application/zip"|"application/gzip"|"application/x-7z-compressed"|\
-		"application/x-bzip2")
+		application/zip|application/gzip|application/x-7z-compressed|\
+		application/x-bzip2)
 			[ -z "$ARCHIVER_CMD" ] && return
 			"$ARCHIVER_CMD" "$ARCHIVER_OPTS" "$entry"
 		;;

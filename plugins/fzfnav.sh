@@ -188,10 +188,15 @@ main() {
 		DJVUTXT_OK=1
 	fi
 
+	if [ "$(which fontpreview 2>/dev/null)" ]; then
+		FONTPREVIEW_OK=1
+	elif [ "$(which fontimage 2>/dev/null)" ]; then
+		FONTIMAGE_OK=1
+	fi
+
 	[ "$(which ffmpegthumbnailer 2>/dev/null)" ] && FFMPEGTHUMB_OK=1
 	[ "$(which convert 2>/dev/null)" ] && CONVERT_OK=1
 	[ "$(which glow 2>/dev/null)" ] && GLOW_OK=1
-	[ "$(which fontpreview 2>/dev/null)" ] && FONTPREVIEW_OK=1
 	[ "$(which epub-thumbnailer 2>/dev/null)" ] && EPUBTHUMB_OK=1
 
 	if [ "$UEBERZUG_OK" -eq 1 ]; then
@@ -209,7 +214,7 @@ main() {
 	LIBREOFFICE_OK HIGHLIGHT_OK FONTPREVIEW_OK BAT_OK EPUBTHUMB_OK DDJVU_OK \
 	MPLAYER_OK EXIFTOOL_OK GLOW_OK MPV_OK PDFTOTEXT_OK CATDOC_OK \
 	MUTOOL_OK PANDOC_OK COLORS PYGMENTIZE_OK DJVUTXT_OK UEBERZUG_OK \
-	HELP BFG_FILE DIR_PREVIEWER
+	HELP BFG_FILE DIR_PREVIEWER FONTIMAGE_OK
 
 	fcd "$@"
 
