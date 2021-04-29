@@ -11385,8 +11385,7 @@ mime_import(char *file)
 	config_path = (char *)xcalloc(home_len + 23, sizeof(char));
 	local_path = (char *)xcalloc(home_len + 41, sizeof(char));
 	sprintf(config_path, "%s/.config/mimeapps.list", user_home);
-	sprintf(local_path, "%s/.local/share/applications/mimeapps.list",
-			user_home);
+	sprintf(local_path, "%s/.local/share/applications/mimeapps.list", user_home);
 
 	char *mime_paths[] = { config_path, local_path,
 						   "/usr/local/share/applications/mimeapps.list",
@@ -11412,8 +11411,7 @@ mime_import(char *file)
 		while ((line_len = getline(&line, &line_size,
 		sys_mime_fp)) > 0) {
 
-			if (!da_found && strncmp(line, "[Default Applications]",
-			22) == 0) {
+			if (!da_found && strncmp(line, "[Default Applications]", 22) == 0) {
 				da_found = 1;
 				continue;
 			}
@@ -19446,12 +19444,15 @@ search_glob(char **comm, int invert)
 
 		for (i = 0; i < found; i++) {
 
+			if (!pfiles[i])
+				continue;
+
 			if ((i + 1) % columns_n == 0)
 				last_column = 1;
 			else
 				last_column = 0;
 
-			colors_list(pfiles[i], (eln[i] != -1) ? eln[i] : 0,
+			colors_list(pfiles[i], (eln[i] && eln[i] != -1) ? eln[i] : 0,
 						(last_column || i == (found - 1)) ? 0 :
 						(int)(flongest - files_len[i]) + 1,
 						(last_column || i == found - 1) ? 1 : 0);
