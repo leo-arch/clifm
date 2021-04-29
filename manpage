@@ -973,7 +973,7 @@ Plugins are just scripts or programs (written in any language) able to add, exte
  | fzfnav            | fzf                           |
  |   -archives       | atool, bsdtar or tar          |
  |   -images         | imagemagick, and uerbezug     |
- |                       (or viu or catimg)          |
+ |                       or viu or catimg or img2txt |
  |   -fonts          | fontpreview                   |
  |   -docs           | libreoffice, catdoc, odt2txt, |
  |                       pandoc                      |
@@ -1001,7 +1001,7 @@ Plugins are just scripts or programs (written in any language) able to add, exte
  +-------------------+-------------------------------+
 
 .TP
-NOTE: The fzfnav plugin uses \fBfzf\fR to navigate the filesystem and BFG (a script located in the plugins directory) to show previews. However, fzfnav supports the use of both Ranger's scope.sh script and \fBpistol\fR intead of BFG definitions for files previews. To use scope, just edit the BFG.sh script and set USE_SCOPE to 1 and SCOPE_FILE to the correct path of the scope.sh file (normally $HOME/.config/ranger/scope.sh). To use pistol instead, set USE_PISTOL to 1.
+NOTE: The fzfnav plugin uses \fBfzf\fR to navigate the filesystem and BFG (a script located in the plugins directory) to show previews. However, fzfnav supports the use of both Ranger's scope.sh script and \fBpistol\fR intead of BFG definitions for files previews. To use scope, just edit the BFG.sh script and set USE_SCOPE to 1 and SCOPE_FILE to the correct path of the scope.sh file (normally $HOME/.config/ranger/scope.sh). To use pistol instead, set USE_PISTOL to 1. You can also edit fzfnav.sh to set your preferred previewing applications.
 
 .SH STANDARD INPUT (STDIN)
 CliFM is able to read and list paths from the input stream. Each path in the list should be an absolute path, terminated with a new line character (\\n) and stripped from extra characters not belonging to the path itself. The size of the input stream buffer is 262MiB (65536 paths, provided each path takes PATH_MAX bytes (4096 by default)).
