@@ -974,7 +974,7 @@ Plugins are just scripts or programs (written in any language) able to add, exte
  |   -archives       | atool, bsdtar or tar          |
  |   -images         | imagemagick, and uerbezug     |
  |                       or viu or catimg or img2txt |
- |   -fonts          | fontpreview                   |
+ |   -fonts          | fontpreview or fontforge      |
  |   -docs           | libreoffice, catdoc, odt2txt, |
  |                       pandoc                      |
  |   -PDF            | pdftoppm, pdftotext or mutool |
