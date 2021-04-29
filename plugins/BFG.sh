@@ -174,8 +174,8 @@ file_preview() {
 					pandoc -s -t markdown -- "$PWD/$entry"
 				fi
 			elif [ "$ext" = "xls" ] || [ "$ext" = "xlsx" ]; then
-				if [ "$(which xls2csv) 2>/dev/null" ]; then
-					xls2csv -- "$PWD/$entry"
+				if [ "$(which xlsx2csv) 2>/dev/null" ]; then
+					xlsx2csv -- "$PWD/$entry"
 				fi
 			elif [ "$ext" != "docx" ] && [ "$(which catdoc 2>/dev/null)" ]; then
 				catdoc "$entry"
