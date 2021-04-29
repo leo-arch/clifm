@@ -77,12 +77,15 @@ file_preview() {
 
 	if [ -d "$entry" ]; then
 		path="$(printf "%s" "$(pwd)/$entry" | sed "s;//;/;")"
-#		printf  "%s\n "$path"
-#		ls -p --color=always "${path}"
-		if [ "$COLORS" = 256 ]; then
-			tree -a "$path"
+		if [ "$DIR_PREVIEWER" = "tree" ]; then
+			if [ "$COLORS" = 256 ]; then
+				tree -a "$path"
+			else
+				tree -aA "$path"
+			fi
 		else
-			tree -aA "$path"
+			printf  "%s\n" "$path"
+			ls -p --color=always "${path}"
 		fi
 		return
 	fi
@@ -142,6 +145,11 @@ file_preview() {
 					transmission-show -- "$PWD/$entry"
 				fi
 			;;
+			stl|off|dxf|scad|csg)
+				if [ "$(which openscad 2>/dev/null)" ]; then
+					openscad "$PWD/$entry"
+				fi
+			;;
 			*) ;;
 		esac
 	fi
@@ -164,6 +172,10 @@ file_preview() {
 					odt2txt "$PWD/$entry"
 				elif [ "$(which pandoc 2>/dev/null)" ]; then
 					pandoc -s -t markdown -- "$PWD/$entry"
+				fi
+			elif [ "$ext" = "xls" ] || [ "$ext" = "xlsx" ]; then
+				if [ "$(which xls2csv) 2>/dev/null" ]; then
+					xls2csv -- "$PWD/$entry"
 				fi
 			elif [ "$ext" != "docx" ] && [ "$(which catdoc 2>/dev/null)" ]; then
 				catdoc "$entry"
@@ -209,7 +221,7 @@ file_preview() {
 			if [ -n "$IMAGE_VIEWER" ] && [ "$DDJVU_OK" = 1 ]; then
 				ddjvu --format=tiff --page=1 "$entry" "$PREVIEWDIR/${entry}.jpg"
 				"$IMG_VIEWER" "$PREVIEWDIR/${entry}.jpg"
-			elif [ "$DJVUTXT" = 1 ]; then
+			elif [ "$DJVUTXT_OK" = 1 ]; then
 				djvutxt "$PWD/entry"
 			fi
 		;;

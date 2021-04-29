@@ -107,9 +107,9 @@ main() {
 
 	COLORS="$(tput colors)"
 
-	# In order to use CliFM built-in resource opener we need to exit
-	# the script first, so that we cannot use it here
 	OPENER="clifm"
+
+	DIR_PREVIEWER="tree" # ls is another alternative
 
 	if [ -n "$DISPLAY" ]; then
 		if [ "$(which ueberzug 2>/dev/null)" ]; then
@@ -209,7 +209,7 @@ main() {
 	LIBREOFFICE_OK HIGHLIGHT_OK FONTPREVIEW_OK BAT_OK EPUBTHUMB_OK DDJVU_OK \
 	MPLAYER_OK EXIFTOOL_OK GLOW_OK MPV_OK PDFTOTEXT_OK CATDOC_OK \
 	MUTOOL_OK PANDOC_OK COLORS PYGMENTIZE_OK DJVUTXT_OK UEBERZUG_OK \
-	HELP BFG_FILE
+	HELP BFG_FILE DIR_PREVIEWER
 
 	fcd "$@"
 
