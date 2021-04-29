@@ -124,7 +124,7 @@ main() {
 		fi
 		[ "$IMG_VIEWER" = "ueberzug" ] && IMG_VIEWER="uz_image"
 	fi
-	IMG_VIEWER="img2txt"
+
 	if [ "$(which atool 2>/dev/null)" ]; then
 		ARCHIVER_CMD="atool"
 		ARCHIVER_OPTS="-l"
