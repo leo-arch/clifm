@@ -5272,6 +5272,7 @@ create_config_files(void)
 				"++=jumper.sh\n"
 				"-=fzfnav.sh\n"
 				"*=fzfsel.sh\n"
+				"**=fzfdesel.sh\n"
 				"h=fzfhist.sh\n"
 				"//=rgfind.sh\n"
 				"ih=ihelp.sh\n",
