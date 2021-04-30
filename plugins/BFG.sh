@@ -56,7 +56,7 @@ file_preview() {
 		return
 	fi
 
-	if [ "$USE_SCOPE" = 1 ] && [ -f "$HOME/.config/ranger/scope.sh" ]; then
+	if [ "$USE_SCOPE" = 1 ] && [ -x "$SCOPE_FILE" ]; then
 		calculate_position
 		"$SCOPE_FILE" "$PWD/$entry" "$X" "$Y" "$PREVIEWDIR" "True"
 		return
@@ -64,6 +64,7 @@ file_preview() {
 
 	[ "$UEBERZUG_OK" = 1 ] && uz_clear
 
+	# Symlink
 	if [ -L "$entry" ]; then
 		real_path="$(realpath "$entry")"
 		printf "%s \033[1;36m->\033[0m " "$entry"
@@ -75,6 +76,7 @@ file_preview() {
 		return
 	fi
 
+	# Directory
 	if [ -d "$entry" ]; then
 		path="$(printf "%s" "$(pwd)/$entry" | sed "s;//;/;")"
 		if [ "$DIR_PREVIEWER" = "tree" ]; then
@@ -106,12 +108,15 @@ file_preview() {
 		return
 	fi
 
+	# Check a few extensions no correctly handled by file(1)
 	ext="${entry##*.}"
 
 	if [ -n "$ext" ] && [ "$ext" != "$entry" ]; then
 		ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
 
 		case "$ext" in
+			# Direct Stream Digital/Transfer (DSDIFF) and wavpack aren not
+			# detected by file(1).
 			dff|dsf|wv|wvc)
 				if [ "$MEDIAINFO_OK" = 1 ]; then
 					mediainfo "$PWD/$entry"
@@ -120,22 +125,29 @@ file_preview() {
 				fi
 				return
 			;;
+
+			# Markdown files
 			md)
 				if [ "$GLOW_OK" = 1 ]; then
 					glow -s dark "$PWD/$entry"
 					return
 				fi
 			;;
+
+			# XZ Compressed
 			xz)
 				[ -z "$ARCHIVER_CMD" ] && return
 				"$ARCHIVER_CMD" "$ARCHIVER_OPTS" "$entry"
 				return
 			;;
+
+			# Web
 			html|xhtml|htm)
 				[ -z "$BROWSER" ] && return
 				"$BROWSER" -dump "$entry"
 				return
 			;;
+
 			json)
 				if [ "$(which python 2>/dev/null)" ]; then
 					python -m json.tool -- "$entry"
@@ -146,12 +158,14 @@ file_preview() {
 				fi
 				return
 			;;
+
 			torrent)
 				if [ "$(which transmission-show 2>/dev/null)" ]; then
 					transmission-show -- "$PWD/$entry"
 				fi
 				return
 			;;
+
 #			stl|off|dxf|scad|csg)
 #				if [ "$(which openscad 2>/dev/null)" ]; then
 #					openscad "$PWD/$entry"
@@ -166,37 +180,55 @@ file_preview() {
 
 	case "$mimetype" in
 
+		# Office documents
 		*officedocument*|*msword|*ms-excel|text/rtf|*.opendocument.*)
 
-			if [ -n "$IMG_VIEWER" ] && [ "$LIBREOFFICE_OK" -eq 1 ]; then
+			if [ -n "$IMG_VIEWER" ] && [ "$LIBREOFFICE_OK" = 1 ]; then
 				libreoffice --headless --convert-to jpg "$entry" \
 				--outdir "$PREVIEWDIR" > /dev/null 2>&1
 
 				mv "$PREVIEWDIR/${entry%.*}.jpg" "$PREVIEWDIR/${entry}.jpg"
 
 				"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg"
-			elif [ "$ext" = "odt" ] || [ "$ext" = "ods" ] || [ "$ext" = "odp" ] || [ "$ext" = "sxw" ]; then
-				if [ "$(which odt2txt 2>/dev/null)" ]; then
-					odt2txt "$PWD/$entry"
-				elif [ "$(which pandoc 2>/dev/null)" ]; then
-					pandoc -s -t markdown -- "$PWD/$entry"
-				fi
-			elif [ "$ext" = "xls" ] || [ "$ext" = "xlsx" ]; then
-				if [ "$(which xlsx2csv) 2>/dev/null" ]; then
-					xlsx2csv -- "$PWD/$entry"
-				fi
-			elif [ "$ext" != "docx" ] && [ "$(which catdoc 2>/dev/null)" ]; then
-				catdoc "$entry"
-			elif [ "$(which unzip 2>/dev/null)" ]; then
-				unzip -p "$entry" | grep --text '<w:r' | sed 's/<w:p[^<\/]*>/ /g' \
-				| sed 's/<[^<]*>//g' | grep -v '^[[:space:]]*$' | sed G
+				return
 			fi
+
+			case "$ext" in
+				odt|ods|odp|sxw)
+					if [ "$(which odt2txt 2>/dev/null)" ]; then
+						odt2txt "$PWD/$entry"
+					elif [ "$(which pandoc 2>/dev/null)" ]; then
+						pandoc -s -t markdown -- "$PWD/$entry"
+					fi
+				;;
+				xlsx)
+					if [ "$(which xlsx2csv) 2>/dev/null" ]; then
+						xlsx2csv -- "$PWD/$entry"
+					fi
+				;;
+				xls)
+					if [ "$(which xlsx2csv) 2>/dev/null" ]; then
+						xls2csv -- "$PWD/$entry"
+					fi
+				;;
+				docx)
+					if [ "$(which unzip 2>/dev/null)" ]; then
+						unzip -p "$entry" | grep --text '<w:r' | \
+						sed 's/<w:p[^<\/]*>/ /g' | sed 's/<[^<]*>//g' | \
+						grep -v '^[[:space:]]*$' | sed G
+					fi
+				;;
+				*)
+					catdoc "$entry" ;;
+			esac
 		;;
 
+		# Empty file
 		inode/x-empty)
 			printf -- "--- \033[0;30;47mEmpty file\033[0m ---"
 		;;
 
+		# Web content
 		text/html)
 			if [ -n "$BROWSER" ]; then
 				"$BROWSER" "$entry"
@@ -205,6 +237,7 @@ file_preview() {
 			fi
 		;;
 
+		# Plain text files
 		text/*|application/x-setupscript|*/xml)
 			if [ "$BAT_OK" = 1 ]; then
 				bat -pp --color=always "$entry"
@@ -225,6 +258,7 @@ file_preview() {
 			fi
 		;;
 
+		# DjVu
 		*/vnd.djvu)
 			if [ -n "$IMAGE_VIEWER" ] && [ "$DDJVU_OK" = 1 ]; then
 				ddjvu --format=tiff --page=1 "$entry" "$PREVIEWDIR/${entry}.jpg"
@@ -234,6 +268,7 @@ file_preview() {
 			fi
 		;;
 
+		# GIF files
 		*/gif)
 			[ -z "$IMG_VIEWER" ] || [ -z "$CONVERT_OK" ] && return
 			# Break down the gif into frames and show each frame, one each 0.1 secs
@@ -253,11 +288,13 @@ file_preview() {
 			done
 		;;
 
+		# Images
 		image/*)
 			[ -z "$IMG_VIEWER" ] && return
-			"$IMG_VIEWER" "${PWD}/$entry"
+			"$IMG_VIEWER" "$PWD/$entry"
 		;;
 
+		# Postscript
 		application/postscript)
 			! [ "$(which gs 2>/dev/null)" ] && return
 			gs -sDEVICE=jpeg -dJPEGQ=100 -dNOPAUSE -dBATCH -dSAFER -r300 \
@@ -265,15 +302,17 @@ file_preview() {
 			"$IMG_VIEWER" "$PREVIEWDIR/${entry}.jpg"
 		;;
 
+		# Epub
 		application/epub+zip|application/x-mobipocket-ebook|application/x-fictionbook+xml)
 			[ -z "$EPUBTHUMB_OK" ] && return
-			epub-thumbnailer "$entry" "${PREVIEWDIR}/${entry}.jpg" "$WIDTH" "$HEIGHT"
-			"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg"
+			epub-thumbnailer "$entry" "$PREVIEWDIR/${entry}.jpg" "$WIDTH" "$HEIGHT"
+			"$IMG_VIEWER" "$PREVIEWDIR/${entry}.jpg"
 		;;
 
+		# PDF
 		*/pdf)
 			if [ -n "$IMG_VIEWER" ] && [ "$PDFTOPPM_OK" = 1 ]; then
-				pdftoppm -jpeg -f 1 -singlefile "$entry" "${PREVIEWDIR}/$entry"
+				pdftoppm -jpeg -f 1 -singlefile "$entry" "$PREVIEWDIR/$entry"
 				"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg"
 			elif [ "$PDFTOTEXT_OK" = 1 ]; then
 				pdftotext -nopgbrk -layout -- "$entry" - | ${PAGER:=less}
@@ -282,6 +321,7 @@ file_preview() {
 			fi
 		;;
 
+		# Audio
 		audio/*)
 #			[ -z "$IMG_VIEWER" ] || ! [ "$(which ffmpeg 2>/dev/null)" ] && return
 
@@ -302,17 +342,19 @@ file_preview() {
 
 		;;
 
+		# Video
 		video/*)
 			[ -z "$IMG_VIEWER" ] || [ -z "$FFMPEGTHUMB_OK" ] && return
-			ffmpegthumbnailer -i "$entry" -o "${PREVIEWDIR}/${entry}.jpg" -s 0 -q 5 2>/dev/null
-			"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg"
+			ffmpegthumbnailer -i "$entry" -o "$PREVIEWDIR/${entry}.jpg" -s 0 -q 5 2>/dev/null
+			"$IMG_VIEWER" "$PREVIEWDIR/${entry}.jpg"
 		;;
 
+		# Fonts
 		font/*|application/font*|application/*opentype)
 			[ -z "$IMG_VIEWER" ] && return
 			if [ "$FONTPREVIEW_OK" = 1 ]; then
-				fontpreview -i "$entry" -o "${PREVIEWDIR}/${entry}.jpg"
-				"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg"
+				fontpreview -i "$entry" -o "$PREVIEWDIR/${entry}.jpg"
+				"$IMG_VIEWER" "$PREVIEWDIR/${entry}.jpg"
 			elif [ "$FONTIMAGE_OK" = 1 ]; then
 				png_file="$PREVIEWDIR/${entry}.png"
 				if fontimage -o "$png_file" \
@@ -332,12 +374,14 @@ file_preview() {
 			fi
 		;;
 
+		# Archives
 		application/zip|application/gzip|application/x-7z-compressed|\
 		application/x-bzip2)
 			[ -z "$ARCHIVER_CMD" ] && return
 			"$ARCHIVER_CMD" "$ARCHIVER_OPTS" "$entry"
 		;;
 
+		# If none of the above, just printf file information
 		*)
 			if [ "$(file -bL --mime-encoding "$entry")" = "binary" ]; then
 				printf -- "--- \e[0;30;47mBinary file\e[0m ---\n"
@@ -345,7 +389,7 @@ file_preview() {
 			if [ "$EXIFTOOL_OK" = 1 ]; then
 				exiftool "$PWD/$entry" 2>/dev/null
 			elif [ "$MEDIAINFO_OK" = 1 ]; then
-				mediainfo "${PWD}/$entry" 2>/dev/null
+				mediainfo "$PWD/$entry" 2>/dev/null
 			else
 				file -b "$entry"
 			fi
@@ -362,7 +406,6 @@ PREVIEWDIR="$CACHEDIR/previews"
 WIDTH=1920
 HEIGHT=1080
 
-# Preview files using scope, Ranger's file preview script
 USE_SCOPE=0
 SCOPE_FILE="$HOME/.config/ranger/scope.sh"
 

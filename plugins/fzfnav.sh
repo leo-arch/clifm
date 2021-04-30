@@ -54,12 +54,15 @@ fcd() {
 	dir_color="$(dircolors -c | grep -o "[\':]di=....." | cut -d';' -f2)"
 	[ -z "$dir_color" ] && dir_color="34"
 
+	# Make sure FZF interface won't be messed up when running on an 8 bit terminal
+	# emulator
 	if [ "$COLORS" -eq 256 ]; then
 		BORDERS="--border=left"
 	else
 		BORDERS="--no-unicode"
 	fi
 
+	# Keep FZF running until the user presses Esc or q
 	while true; do
 		lsd=$(printf "\033[0;%sm..\n" "$dir_color"; \
 		ls -Ap --group-directories-first --color=always --indicator-style=none)
@@ -80,15 +83,18 @@ fcd() {
 $PWD" --marker="+" --preview-window=:wrap "$BORDERS" \
 			--preview "printf \"\033[2J\"; $BFG_FILE {}")"
 
+		# If FZF returned no file, exit
 		[ ${#file} -eq 0 ] && return 0
+		# If the returned file is a directory, just cd into it. Otherwise, open
+		# it via OPENER
 		if [ -d "${PWD}/$file" ]; then
 			printf "cd %s" "${PWD}/$file" > "$TMP"
-			cd "$file" || return
+			cd "$file"
 		elif [ -f "${PWD}/$file" ]; then
 			if [ "$OPENER" = "clifm" ]; then
-				clifm --open "${PWD}/$file" || return
+				clifm --open "${PWD}/$file"
 			else
-				"$OPENER" "${PWD}/$file" || return
+				"$OPENER" "${PWD}/$file"
 			fi
 		fi
 	done
@@ -101,16 +107,16 @@ main() {
 		exit 1
 	fi
 
+	# This is the previewer script, similar to Ranger's scope.sh
 	BFG_FILE="$HOME/.config/clifm/plugins/BFG.sh"
 
 	UEBERZUG_OK=0
-
 	COLORS="$(tput colors)"
-
 	OPENER="clifm"
-
 	DIR_PREVIEWER="tree" # ls is another alternative
 
+	# We check here, at startup, for available applications so that we don't need
+	# to do it once and again each time a file is hovered
 	if [ -n "$DISPLAY" ]; then
 		if [ "$(which ueberzug 2>/dev/null)" ]; then
 			UEBERZUG_OK=1
@@ -122,6 +128,7 @@ main() {
 		elif [ "$(which img2txt 2>/dev/null)" ]; then
 			IMG_VIEWER="img2txt"
 		fi
+		# Überzug is not run directly, but through a function
 		[ "$IMG_VIEWER" = "ueberzug" ] && IMG_VIEWER="uz_image"
 	fi
 
@@ -208,8 +215,8 @@ main() {
 	TMP="$(mktemp /tmp/clifm.XXXXXX)"
 
 	# These variables are exported to the environment so that the previewer script:
-	# BFG.sh, executed from within fzf, can catch them all.
-	export TMP IMG_VIEWER ARCHIVER_CMD ARCHIVER_OPTS BROWSER \
+	# BFG.sh, executed from within FZF, can catch them all.
+	export IMG_VIEWER ARCHIVER_CMD ARCHIVER_OPTS BROWSER \
 	FFPLAY_OK MEDIAINFO_OK PDFTOPPM_OK FFMPEGTHUMB_OK CONVERT_OK \
 	LIBREOFFICE_OK HIGHLIGHT_OK FONTPREVIEW_OK BAT_OK EPUBTHUMB_OK DDJVU_OK \
 	MPLAYER_OK EXIFTOOL_OK GLOW_OK MPV_OK PDFTOTEXT_OK CATDOC_OK \
