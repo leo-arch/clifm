@@ -26415,6 +26415,9 @@ external_arguments(int argc, char **argv)
 		{0, 0, 0, 0}
 	};
 
+	/* Change whenever a new (only) long option is added */
+	int long_opts = 33;
+
 	int optc;
 	/* Variables to store arguments to options (-c, -p and -P) */
 	char *path_value = (char *)NULL, *alt_profile_value = (char *)NULL,
@@ -26750,19 +26753,34 @@ external_arguments(int argc, char **argv)
 
 		case '?': /* If some unrecognized option was found... */
 
-			/* Options that require an argument */
-			if (optopt == 'p') {
+			/* Options that requires an argument */
+			/* Short options */
+			switch (optopt) {
+			case 'b': /* fallthrough */
+			case 'c': /* fallthrough */
+			case 'k': /* fallthrough */
+			case 'p': /* fallthrough */
+			case 'P': /* fallthrough */
+			case 'w': /* fallthrough */
+			case 'z':
 				fprintf(stderr, _("%s: option requires an argument -- "
 						"'%c'\nTry '%s --help' for more information.\n"), 
 						PROGRAM_NAME, optopt, PNL);
+				exit(EXIT_FAILURE);
+			}
+
+			/* Long options */
+			if (optopt >= 0 && optopt <= long_opts) {
+				fprintf(stderr, _("%s: option requires an argument\nTry '%s "
+						"--help' for more information.\n"), PROGRAM_NAME, PNL);
+				exit(EXIT_FAILURE);
 			}
 
 			/* If unknown option is printable... */
-			else if (isprint(optopt)) {
+			if (isprint(optopt)) {
 				fprintf(stderr, _("%s: invalid option -- '%c'\nUsage: "
-						"%s %s\nTry '%s --help' for more "
-						"information.\n"), PROGRAM_NAME, optopt,
-						GRAL_USAGE, PNL, PNL);
+						"%s %s\nTry '%s --help' for more information.\n"),
+						PROGRAM_NAME, optopt, GRAL_USAGE, PNL, PNL);
 			}
 
 			else {
@@ -26775,6 +26793,18 @@ external_arguments(int argc, char **argv)
 		default: break;
 		}
 	}
+
+	/* Positional parameters */
+	int i = optind;
+	if (argv[i]) {
+		flags |= START_PATH;
+		path_value = argv[i];
+		xargs.path = 1;
+	}
+/*	while (argv[i]) {
+		printf("%d: %s\n", i, argv[i]);
+		i++;
+	} */
 
 	if (bm_value) {
 		char *bm_exp = (char *)NULL;
