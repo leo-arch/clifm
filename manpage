@@ -6,10 +6,10 @@
 CLIFM \- A completely CLI\-based file manager inspired by the KISS principle
 
 .SH SYNOPSIS
-\fIclifm\fR [\-aAefFgGhiIlLmoOsSuUvxy] [\-c FILE] [\-k FILE] [\-p PATH] [\-P PROFILE] [-w NUM] [\-z METHOD]
+\fIclifm\fR [\-aAefFgGhiIlLmoOsSuUvxy] [\-c FILE] [\-k FILE] [\-p PATH] [\-P PROFILE] [-w NUM] [\-z METHOD] [PATH]
 
 .SH GETTING HELP
-There are several ways of getting help in CLiFM. Once in the program, enter '?' to see a minimal list of options, commands, and keybindings, or press F1 to access this manpage, F2 to go to the COMMANDS section of this very manpage, or F3 to go to the KEYBOARD SHORTCUTS section. A convenient way of getting full information about CliFM commands is via the 'ih' action, binded by default to the interactive help plugin (ihelp.sh). Just type 'ih' to run the plugin (it depends on \fIfzf\fR) and select the command you want to obtain information on.
+There are several ways of getting help in CliFM. Once in the program, enter '?' to see a minimal list of options, commands, and keybindings, or press F1 to access this manpage, F2 to go to the COMMANDS section of this very manpage, or F3 to go to the KEYBOARD SHORTCUTS section. A convenient way of getting full information about CliFM commands is via the 'ih' action, binded by default to the interactive help plugin (ihelp.sh). Just type 'ih' to run the plugin (it depends on \fIfzf\fR) and select the command you want to obtain information on.
 
 .SH DESCRIPTION
 CliFM is a completely text\-based, \fBshell\-like\fR file manager (no GUI nor curses at all) able to perform all the basic operations you may expect from any other FM. However, its most distinguishing characteristics are:
@@ -90,6 +90,10 @@ While the Linux console, which strictly speaking could be though of as a FM, doe
 Personally, since I just dislike GUI and bloated stuff, I really felt the need of an extended and improved way to manage my files in the CLI. Indeed, CliFM originated as an attempt to add a bookmarks function to the Bash shell, and then grew up from these humble beginnings. In between the CLI and traditional FM's, we have now CliFM, because, as the old Italian saying goes: "There is no two without three".
 .sp
 CliFM, in fact, is not just another terminal file manager (one of the many we can find out there), but a truly command line interface, shell-like, and really text-based file manager.
+
+.SH POSITIONAL ARGUMENTS
+.IP "\fBPATH\fR" 7
+The first non-option parameter could be used to specify the starting path. Ex: 'clifm /etc'. If not specified, the first workspace will be used. To start in a different workspace, use the \fI-w\fR option. Ex: 'clifm -w4 /etc'.
 
 .SH OPTIONS
 .TP
