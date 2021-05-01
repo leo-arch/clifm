@@ -3,7 +3,7 @@
 .ad l
 
 .SH NAME
-CLIFM \- A completely CLI\-based file manager inspired by the KISS principle
+CLIFM \- The KISS file manager
 
 .SH SYNOPSIS
 \fIclifm\fR [\-aAefFgGhiIlLmoOsSuUvxy] [\-c FILE] [\-k FILE] [\-p PATH] [\-P PROFILE] [-w NUM] [\-z METHOD] [PATH]
@@ -32,13 +32,13 @@ With the \fBautomatic ELN expansion\fR feature you can use ELN's with external c
 .sp
   \fBh)\fR The \fBquick search\fR function makes it really easy to quickly find the files you are looking for: just enter a slash followed by the string or regular expression you want (ex: '/myfile' or '/.*\.png'), that's all. Inverse search is also allowed by prepending an exclamation mark (!) to the search pattern.
 .sp
-  \fBi)\fR \fBPlugins\fR: Build your own custom commands using executable files (shell scripts or binaries). Just drop an executable file (all languages are supported) in the plugins directory, tell CLiFM to use this executable file via a custom action name, and use it as any other command.
+  \fBi)\fR \fBPlugins\fR: Build your own custom commands using executable files (shell scripts or binaries). Just drop an executable file (all languages are supported) in the plugins directory, tell CliFM to use this executable file via a custom action name, and use it as any other command.
 .sp
   \fBj)\fR It is blazing \fBfast\fR and incredibly \fBlightweigth\fR. With a memory footprint below 5 MiB and a disk usage of 400 KiB, it can run on really old hardware. It is so simple that it doesn't require an X session nor any graphical environment at all, being able thus to perfectly run on the console (TTY) and even on a headless machine via a SSH or a telnet session. And if this is not enough, you can still use the \fBlight mode\fR to make it even faster.
 .sp
   \fBi)\fR When running in \fBstealth mode\fR, it will leave not trace at all in the host system.
 .sp
-Because inspired in the \fBKISS\fR principle, CliFM is fundamentally aimed to be lightweight, fast, and simple. On Archlinux' notion of simplcity see: \fIhttps://wiki.archlinux.org/index.php/Arch_Linux#Simplicity\fR
+Because inspired in the \fBKISS\fR principle, CliFM is fundamentally aimed to be lightweight, fast, simple, and efficient. On Archlinux' notion of simplcity see: \fIhttps://wiki.archlinux.org/index.php/Arch_Linux#Simplicity\fR
 
 List of CliFM features:
 
@@ -63,18 +63,18 @@ List of CliFM features:
   19) User profiles
   20) Commands sequential and conditional execution
   21) Lira, a built-in resource opener
-  22) 11 sorting methods and reverse sorting
+  22) Eleven sorting methods and reverse sorting
   23) Bulk rename
   24) Archiving and compression support
-  25) Auto-cd and auto-open
+  25) Auto\-cd and auto\-open
   26) Plugins support via custom actions linked to executable files
   27) Symbolic links editor
   28) Regular expressions, filetype filter, and inverse matching support for both search and selection functions
   29) Command substitution and regular expressions for all internal commands
   30) Theming support via color schemes
   31) Privacy oriented
-  32) Kangaroo, a built-in directory jumper function
-  33) Icons support (depends on icons-in-terminal: \fIhttps://github.com/sebastiencs/icons-in-terminal\fR)
+  32) Kangaroo, a built\-in directory jumper function
+  33) Icons support (depends on icons\-in\-terminal: \fIhttps://github.com/sebastiencs/icons\-in\-terminal\fR)
   34) Batch symbolic links
   35) Files filter via regular expressions for the files list
   36) Up to eight workspaces
@@ -83,17 +83,17 @@ List of CliFM features:
   39) Fastback function
 
 .SH RATIONALE
-When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the Linux built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There is no two without three".
+When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the kernel built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There are no two without three".
 .sp
-While the Linux console, which strictly speaking could be though of as a FM, does not actually feel as one and lacks many features (like bookmarks, files selection, a trash system, a resource opener and the like), graphical FM's offer most of these features, but only at the expense of system resources (at the very least 20MiB of RAM and most of the time a graphical X session). Heavily inspired by the KISS principle ("Keep it Simple, Stupid"), CliFM was born as an attempt to get the best of both worlds: the speed and lightness of the CLI and the extra features of traditional FM's. It is aimed to be, briefly speaking, a wrapper of the CLI to extend and improve its functionality; CliFM feels, acts, and flies like the CLI, offering at the same time most of the useful features of modern FM's.
+While the kernel console, which strictly speaking could be though of as a FM, does not actually feel as one and lacks many features (like bookmarks, files selection, a trash system, a resource opener and the like), graphical FM's offer most of these features, but only at the expense of system resources (at the very least 20MiB of RAM and most of the time a graphical X session), in the case of GUI\-based ones, or hidding the command line (where the real power of the Unices lies), in the case of the curses\-based ones. Heavily inspired by the KISS principle ("Keep it Simple, Stupid"), CliFM was born as an attempt to get the best of both worlds: the speed, lightness, and efficiency of the CLI and the extra features of traditional FM's. It is aimed to be, briefly speaking, a wrapper of the CLI to extend and improve its functionality; CliFM feels, acts, and flies like the CLI, offering at the same time most of the useful features of modern FM's.
 .sp
 Personally, since I just dislike GUI and bloated stuff, I really felt the need of an extended and improved way to manage my files in the CLI. Indeed, CliFM originated as an attempt to add a bookmarks function to the Bash shell, and then grew up from these humble beginnings. In between the CLI and traditional FM's, we have now CliFM, because, as the old Italian saying goes: "There is no two without three".
 .sp
-CliFM, in fact, is not just another terminal file manager (one of the many we can find out there), but a truly command line interface, shell-like, and really text-based file manager.
+CliFM is thus not just another terminal FM (one of the many we can find out there), but a truly command line interface, shell\-like, and really text\-based FM. Indeed, we normally think of terminal FM's as curses\-based FM's, not because these notions are really the same, but because of the fact that most (if not all) FM's designed for the terminal are curses-based applications. Here is where CliFM excels: it is a NON\-curses terminal FM. In this sense, CliFM is a truly command line FM.
 
 .SH POSITIONAL ARGUMENTS
 .IP "\fBPATH\fR" 7
-The first non-option parameter could be used to specify the starting path. Ex: 'clifm /etc'. If not specified, the first workspace will be used. To start in a different workspace, use the \fI-w\fR option. Ex: 'clifm -w4 /etc'.
+The first non-option parameter could be used to specify the starting path. Ex: 'clifm /etc'. If not specified, the first workspace will be used. To start in a different workspace, use the \fI\-w\fR option. Ex: 'clifm \-w4 /etc'.
 
 .SH OPTIONS
 .TP
@@ -103,10 +103,10 @@ do not show hidden files (default)
 .B \-A, \-\-show\-hidden
 show hidden files
 .TP
-.B \-b \-\-bookmarks\-file=FILE
+.B \-b \-\-bookmarks\-file\fR=FILE
 set an alternative bookmarks file
 .TP
-.B \-c \-\-config\-file=FILE
+.B \-c \-\-config\-file\fR=FILE
 set an alternative configuration file
 .TP
 .B \-e, \-\-no\-eln
@@ -133,7 +133,7 @@ no case\-sensitive files listing (default)
 .B \-I, \-\-case\-sensitive
 case\-sensitive files listing
 .TP
-.B \-k \-\-keybindings\-file=FILE
+.B \-k \-\-keybindings\-file\fR=FILE
 set an alternative keybindings file
 .TP
 .B \-l, \-\-no\-long\-view
@@ -151,10 +151,10 @@ enable the directory history map to keep in view previous, current and next entr
 .B \-O, \-\-list\-on\-the\-fly
 \'cd\' changes directory and lists files on the fly (default)
 .TP
-.B \-p, \-\-path=PATH
+.B \-p, \-\-path\fR=PATH
 use PATH as CliFM starting path. Default starting path is current working directory. If no workspace is specified via the \fB--workspace\fR option (see below), the first workspace (1) is used.
 .TP
-.B \-P, \-\-profile=PROFILE
+.B \-P, \-\-profile\fR=PROFILE
 use (or create) PROFILE as profile. Default profile is 'default'
 .TP
 .B \-s, \-\-splash
@@ -172,7 +172,7 @@ enable unicode to correctly list filenames containing accents, tildes, umlauts, 
 .B \-v, \-\-version
 show version details and exit
 .TP
-.B \-w, \-\-workspace=NUM
+.B \-w, \-\-workspace\fR=NUM
 start in workspace NUM. By default, CliFM will recover last visited path for each workspace. However, you can override this behaviour using the \fB--path\fR option described above to start in workspace NUM and in path PATH. 
 .TP
 .B \-x, \-\-ext\-cmds
@@ -181,13 +181,13 @@ allow the use of external, shell commands
 .B \-y, \-\-light\-mode
 enable the light mode to speed up CliFM. See the \fBNOTE ON SPEED\fR section below.
 .TP
-.B \-z, \-\-sort=METHOD
+.B \-z, \-\-sort\fR=METHOD
 sort files by METHOD, where METHOD could be: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version (name if not available), 8 =  extension, 9 = inode, 10 = owner, 11 = group.
 .TP
 .B \-\-cd\-on\-quit
 write last visited directory to \fI$XDG_CONFIG_HOME/clifm/.last\fR to be later accessed by the corresponding shell function at program exit. See the \fBSHELL FUNCTIONS\fR section below.
 .TP
-.B \-\-color\-scheme=NAME
+.B \-\-color\-scheme\fR=NAME
 set NAME as color scheme
 .TP
 .TP
@@ -215,10 +215,10 @@ list files and quit. It may be used in conjunction with \fB\-p\fR
 .B \-\-max\-dirhist
 maximum number of visited directories to remember
 .TP
-.B \-\-max\-path=NUM
+.B \-\-max\-path\fR=NUM
 set the maximun number of characters after which the current directory in the prompt line will be abreviated to the directory base name (if \\z is used in the prompt)
 .TP
-.B \-\-max\-files=NUM
+.B \-\-max\-files\fR=NUM
 list only up to NUM files. Use -1 to list all files (default). See the \fBmf\fR command for a more detailed description
 .TP
 .B \-\-no\-cd\-auto
@@ -258,10 +258,10 @@ disable the welcome message
 .B \-\-only\-dirs
 list only directories
 .TP
-.B \-\-open=FILE
+.B \-\-open\fR=FILE
 run as a stand-alone resource opener: open FILE and exit
 .TP
-.B \-\-opener=APPLICATION
+.B \-\-opener\fR=APPLICATION
 specify a resource opener to use. If opener is not set, \fIlira\fR will be used instead
 .TP
 .B \-\-restore\-last\-path
@@ -277,14 +277,14 @@ make the Selection Box common (that is, accessible) to different profiles. By de
 sort in reverse order, for example: z-a instead of a-z, which is the default order
 .TP
 .B \-\-trash\-as\-rm
-the 'rm' command executes the built-in 'trash' instead of 'rm' to prevent accidental deletions
+the 'r' command executes the built-in 'trash' instead of 'rm' to prevent accidental deletions
 .TP
 Options precedence order: 1) command line; 2) configuration file; 3) default values.
 
 .SH COMMANDS
 \fBNOTE:\fR ELN = Entry List Number. Example: in the line "12 openbox" (when listing files), 12 is the ELN corresponding to the file named "openbox". The slash followed by a number (/xx) after directories and symbolic links to directories (the files counter) indicates the amount of files contained by the corresponding directory, excluding self and parent directories ("." and ".." respectivelly).
 .sp
-\fBNOTE 2:\fR In case of ELN-filename conflict the backslash can be used to prevent ELN expansion. For example, if we have at least two files and one of them in named "2", then CLiFM cannot know in advance if the command refers to the ELN 2 or to the filename "2". In we want the ELN, we just write the ELN number, for example: 's 2'. But if we want the filename, we need to escape the filename using the backlash character: 's \\2'.
+\fBNOTE 2:\fR In case of ELN-filename conflict the backslash can be used to prevent ELN expansion. For example, if we have at least two files and one of them in named "2", then CliFM cannot know in advance if the command refers to the ELN 2 or to the filename "2". In we want the ELN, we just write the ELN number, for example: 's 2'. But if we want the filename, we need to escape the filename using the backlash character: 's \\2'.
 .sp
 \fBNOTE 3:\fR CliFM now supports \fBfused parameters\fR for internal commands taking an ELN or range of ELN's as parameters. Much like short options for command line programs, you can drop or omit the space between internal commands and the corresponding ELN passed as argument. In general, you can write 'CMDELN' instead of 'CMD ELN'. For example: 'o12' or 's1-5' instead of 'o 12' and 's 1-5' respectivelly. Bear in mind, however, that in thus omitting the space char TAB completion for ELN's won't be available. If there is a file named 'o12' (more generally, CMDELN), and if you want to refer to this file instead of a CliFM command, escape the filename to prevent the split; for example: 's \\o12'.
 .sp
@@ -308,7 +308,7 @@ The quick search function also supports invert search: prepend the exclamation m
 To perform a recursive search use the -x parameter, and, optionally, a search path (DIR). The search will be performed using \fIfind\fR as follows: 'find DIR -name PATTERN'. If no search path is provided, the search is executed starting in the current directory. Otherwise, the search starts in DIR.
 .TP
 .B ;\fR[CMD], \fB:\fR[CMD]
-If no CMD, run the default shell (see below the \fIshell\fR command) in the current working directory. If CMD is specified, skip all CLiFM expansions (see the \fBBUILT\-IN EXPANSIONS\fR section below) and run the input string (CMD) as is via the default system shell.
+If no CMD, run the default shell (see below the \fIshell\fR command) in the current working directory. If CMD is specified, skip all CliFM expansions (see the \fBBUILT\-IN EXPANSIONS\fR section below) and run the input string (CMD) as is via the default system shell.
 .TP
 .B ac, ad \fRELN/FILE ... n
 archive/compress and dearchive/decompress one or multiple files and/or directories. The archiver function brings two modes: \fIac\fR, to generate archives or compressed files, and \fIad\fR, to decompress or dearchive files, either just listing, extracting, recompressing, or mounting their content. In this latter case, the mountpoint used automatically is \fI$HOME/.config/clifm/PROFILE/mounts/ARCHIVE_NAME\fR.
@@ -600,10 +600,10 @@ with no argument (or by passing the 'ls' option), it prints a list of currently 
 The trash directory is \fI$XDG_DATA_HOME/Trash\fR, usually \fI~/.local/share/Trash\fR. Since this trash system follows the freedesktop specification, it is able to handle files trashed by different Trash implementations.
 .TP
 .B te \fRFILE(s)
-toggle executable bit (on user, group, and others) on FILE(s). It is equivalent to the -x and +x options for the shell \fBchmod(1)\fR command.
+toggle executable bit (on user, group, and others) on FILE(s). It is equivalent to the -x and +x options for the shell \fBchmod\fR(1) command.
 .TP
 .B tips
-print the list of CLiFM tips
+print the list of CliFM tips
 .TP
 .B u, undel, untrash \fR[*, a, all]
 print a list of currently trashed files allowing you to choose one or more of these files to be undeleted, that is to say, restored to their original location. You can also undelete all trashed files at once using the '*', 'a' or 'all' option.
@@ -748,7 +748,7 @@ NOTE 2: Some of these keybindings might not work on your terminal emulator, depe
 .TP
 Kernel built-in console: Key sequences involving the Shift key (S-up, S-left, and S-right in our case) will just not work. Use the alternative key sequences instead: M-u, M-j, and M-k respectivelly.
 .TP
-XTerm: Add the following lines to your .Xresources (or .Xdefaults) file:
+XTerm: Add the following lines to your \fI.Xresources\fR (or \fI.Xdefaults\fR) file:
  XTerm*eightBitInput: false
  XTerm*modifyCursorKeys: 1
  XTerm*modifyFunctionKeys: 1
@@ -789,7 +789,7 @@ In this case, supposing you want to use F12 to open the configuration file, the 
  open-config:\\033\\133\\062\\064\\176 (Oct)
  open-config:\\e[24~ (Symbol) 
 .TP
-GNU emacs escape sequences are also allowed (ex: "\\M-a", Alt-a in most keyboards, or "\\C-r" for Ctrl-r). Some codes, especially those involving keys like Ctrl or the arrow keys, vary depending on the terminal emulator and the system settings. These keybindings should be set up thus on a per terminal basis. You can also consult the terminfo database via the \fIinfocmp\fR command. See \fBterminfo(5)\fR and \fBinfocmp(1)\fR.
+GNU emacs escape sequences are also allowed (ex: "\\M-a", Alt-a in most keyboards, or "\\C-r" for Ctrl-r). Some codes, especially those involving keys like Ctrl or the arrow keys, vary depending on the terminal emulator and the system settings. These keybindings should be set up thus on a per terminal basis. You can also consult the terminfo database via the \fIinfocmp\fR command. See \fBterminfo\fR(5) and \fBinfocmp\fR(1).
 .TP
 .B Keybindings for plugins
 .TP
@@ -825,7 +825,7 @@ Colors are specified using the same format used by \fBdircolors(1)\fR and the LS
  ee = empty executable file
  ca = file with capabilites
  no = unknown filetype
- uf = unaccesible files (\fBfstatst(3)\fR error)
+ uf = unaccesible files (\fBfstatat\fR(3) error)
 
 .TP
 The following codes are used for different interface elements:
@@ -858,7 +858,7 @@ To see a colored list of the currently used file color codes run \fIcc\fR or \fI
 
 .SH THE PROMPT
 .TP
-CLiFM's prompt is built from the \fIPrompt\fR line in the configuration file following almost the same escape codes and rules used by the Bash prompt, except that it does not accept shell functions (like conditionals and loops). Command substitution (in the form $(cmd)), string literals, and escape codes can be used to build the prompt line and its colors. This is a list of supported escape codes:
+CliFM's prompt is built from the \fIPrompt\fR line in the configuration file following almost the same escape codes and rules used by the Bash prompt, except that it does not accept shell functions (like conditionals and loops). Command substitution (in the form $(cmd)), string literals, and escape codes can be used to build the prompt line and its colors. This is a list of supported escape codes:
 .TP
 \\xnn: The character whose hexadecimal code is nn.
 \\e: Escape character
@@ -1005,7 +1005,7 @@ Plugins are just scripts or programs (written in any language) able to add, exte
  +-------------------+-------------------------------+
 
 .TP
-NOTE: The fzfnav plugin uses \fBfzf\fR to navigate the filesystem and BFG (a script located in the plugins directory) to show previews. However, fzfnav supports the use of both Ranger's scope.sh script and \fBpistol\fR intead of BFG definitions for files previews. To use scope, just edit the BFG.sh script and set USE_SCOPE to 1 and SCOPE_FILE to the correct path of the scope.sh file (normally $HOME/.config/ranger/scope.sh). To use pistol instead, set USE_PISTOL to 1. You can also edit fzfnav.sh to set your preferred previewing applications.
+NOTE: The fzfnav plugin uses \fBfzf\fR(1) to navigate the filesystem and BFG (a script located in the plugins directory) to show previews. However, fzfnav supports the use of both Ranger's \fIscope.sh\fR script and \fBpistol\fR instead of BFG definitions for files previews. To use \fBscope\fR, just edit the BFG.sh script and set USE_SCOPE to 1 and SCOPE_FILE to the correct path of the \fIscope.sh\fR file (normally \fI$HOME/.config/ranger/scope.sh\fR). To use \fBpistol\fR instead, set USE_PISTOL to 1. You can also edit \fIfzfnav.sh\fR to set your preferred previewing applications.
 
 .SH STANDARD INPUT (STDIN)
 CliFM is able to read and list paths from the input stream. Each path in the list should be an absolute path, terminated with a new line character (\\n) and stripped from extra characters not belonging to the path itself. The size of the input stream buffer is 262MiB (65536 paths, provided each path takes PATH_MAX bytes (4096 by default)).
@@ -1041,11 +1041,11 @@ CliFM is not limited to its own set of internal commands, like open, sel, trash,
 .TP
 It depends on the terminal emulator you use to correctly display non\-ASCII characters and characters from the extended ASCII charset. If, for example, you create a file named "ñandú" (the spanish word for 'rhea'), it will be correctly displayed by the Linux console, Lxterminal, and Urxvt, but not thus by Xterm or Aterm.
 .TP
-CliFM will create ~/.Xresources, if it doesn't already exist, for keybindings to work correctly. However, some (and even all) of these keybindings might not work in some terminals, though they do work fine on the console (TTY), xvt\-like terminal emulators like Urxvt and Aterm, and xterm\-like ones. However, keybinding can be edited freely to make them work on any terminal emulator.
+CliFM will create \fI$HOME/.Xresources\fR, if it doesn't already exist, for keybindings to work correctly. However, some (and even all) of these keybindings might not work in some terminals, though they do work fine on the console (TTY), xvt\-like terminal emulators like Urxvt and Aterm, and xterm\-like ones. However, keybinding can be edited freely to make them work on any terminal emulator.
 .TP
 When dealing with filenames containing spaces, you can use both single and double quotes (ex: "this file" or 'this file') plus escape sequences (ex: this\\ file).
 .TP
-By default, CliFM starts in the current working directory. However, you can always specify a different path by passing it as an argument. Ex: clifm \-p /home/user/misc. You can also permanently set up the starting path in the CliFM configuration file. If the RestoreLastPath option is set to true, CLiFM will start instead in the last visited directory (and in the last used workspace), unless the starting path (and optionally the workspace number) is specified via command line.
+By default, CliFM starts in the current working directory. However, you can always specify a different path by passing it as an argument. Ex: clifm \-p /home/user/misc. You can also permanently set up the starting path in the CliFM configuration file. If the RestoreLastPath option is set to true, CliFM will start instead in the last visited directory (and in the last used workspace), unless the starting path (and optionally the workspace number) is specified via command line.
 .TP
 CliFM's default profile is "default". To create alternative profiles use the \-P option or the 'pf' command (see above).
 
@@ -1054,7 +1054,7 @@ CliFM is by itself quite fast by default, but if speed is still an issue, it is 
 .sp
 The two most time consuming features are:
  1) The files counter, used to print the amount of files contained by listed directories. Disabling this option produces a nice performance boost.
- 2) In default mode, \fBfstatat(3)\fR and \fBaccess(3)\fR are used to gather information about listed files. Since these functions, especially when executed hundreds (or even thousands) of times, are quite time consuming, the \fIlight mode\fR was implemented as an alternative listing process omitting all calls to them. When running in light mode, however, only basic file classification is performed, namely, those provided by the \fId_type\fR field of a dirent struct (see \fBreaddir(3)\fR).
+ 2) In default mode, \fBfstatat\fR(3) and \fBaccess\fR(3) are used to gather information about listed files. Since these functions, especially when executed hundreds (or even thousands) of times, are quite time consuming, the \fIlight mode\fR was implemented as an alternative listing process omitting all calls to them. When running in light mode, however, only basic file classification is performed, namely, those provided by the \fId_type\fR field of a dirent struct (see \fBreaddir\fR(3)).
 .sp
 Besides these two features, a few more things can be disabled to get some extra speed (though perhaps unnoticiable): icons (if enabled), columns, colors, and, if already running without colors, filetype indicators. Because listing lots of files could be expensive and time consuming, you can also try to limit the amount of files printed for each visited directory (see the \fImf\fR command above).
 .sp
@@ -1125,7 +1125,7 @@ The path to the current selection file.
 .B CLIFM_BUS
 This variable contains the path of a pipe by means of which plugins can talk to CliFM. Just write to the pipe and CliFM will hear and handle the message immediately after the plugin's execution. If the message is a path, CliFM will run the open function, changing the current directory to the new path, if a directory, or opening it with the resource opener, if a file. Otherwise, if the message is not a path, it will be taken and executed as a command. Examples:
 .sp
-\'echo "/tmp" > "$CLIFM_BUS"\' tells CLiFM to change the current directory to /tmp
+\'echo "/tmp" > "$CLIFM_BUS"\' tells CliFM to change the current directory to /tmp
 .sp
 \'echo "s *.png" > "$CLIFM_BUS"\' makes CliFM select all files in the current directory ending with ".png"
 .sp
@@ -1200,7 +1200,7 @@ The directory jumer database is stored in \fI$XDG_CONFIG_HOME/clifm/profiles/PRO
 \fBNOTE\fR: If \fB$XDG_CONFIG_HOME\fR is not set, \fB$HOME/.config/\fR is used instead.
 
 .SH CONFORMING TO
-CLiFM is C99 compliant, and, if compiled with the _BE_POSIX flag, it is POSIX.1-2008 conformant as well. If not, only two non-POSIX functions are used: \fBstatx(2)\fR (Linux specific), to get files birth time, and \fBstrverscmp(3)\fR (a GNU extension), to list files by version.
+CliFM is C99 compliant, and, if compiled with the _BE_POSIX flag, it is POSIX.1-2008 conformant as well. If not, only two non-POSIX functions are used: \fBstatx\fR(2) (Linux specific), to get files birth time, and \fBstrverscmp\fR(3) (a GNU extension), to list files by version.
 
 .SH BUGS AND FEATURE REQUESTS
 Report at <https://github.com/leo\-arch/clifm/issues>
