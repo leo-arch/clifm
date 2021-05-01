@@ -14,7 +14,7 @@ c() {
 	clifm "--cd-on-quit" "$@"
 	dir="$(grep "^\*" "${XDG_CONFIG_HOME:=${HOME}/.config}/clifm/.last" 2>/dev/null | cut -d':' -f2)";
 	if [ -d "$dir" ]; then
-		cd "$dir" || return 1
+		cd -- "$dir" || return 1
 	else
 		printf "No directory specified\n" >&2
 	fi
