@@ -773,7 +773,7 @@ The plugin can be found in the plugins directory as a C source file. The first s
 .TP
  gcc -o kbgen kbgen.c
 .TP
-Now, just run the plugin entering 'kbgen'. Use either octal, hexadecimal codes or symbols. Example: For F12 'kbgen' will print the following lines:
+Now, just run the plugin entering './kbgen'. Use either octal, hexadecimal codes or symbols. Example: For F12 'kbgen' will print the following lines:
 .sp
  Hex  | Oct  | Symbol
  ---- | ---- | ------
@@ -790,6 +790,14 @@ In this case, supposing you want to use F12 to open the configuration file, the 
  open-config:\\e[24~ (Symbol) 
 .TP
 GNU emacs escape sequences are also allowed (ex: "\\M-a", Alt-a in most keyboards, or "\\C-r" for Ctrl-r). Some codes, especially those involving keys like Ctrl or the arrow keys, vary depending on the terminal emulator and the system settings. These keybindings should be set up thus on a per terminal basis. You can also consult the terminfo database via the \fIinfocmp\fR command. See \fBterminfo\fR(5) and \fBinfocmp\fR(1).
+.TP
+.B Readline keybindings
+.TP
+System readline keybindings for command line editing, such as Ctrl-a, to move the cursor to the beginning of the line, or Ctrl-e, to move it to the end, should work out of the box. Of course, you can modify readline keybindings using the \fI$HOME/.inputrc\fR file, either globally or for some specific terminal or application. In this latter case, it is possible to set keybindings specifically for CliFM using the \fIapplication\fR construct, that is, telling readline that the following keybindings apply only to CliFM. For example, to bind the function "kill-whole-line" to Ctrl-b, add the following lines to your .inputrc file:
+.sp
+ $if clifm
+ "\\C\-b": kill\-whole\-line
+ $endif
 .TP
 .B Keybindings for plugins
 .TP
