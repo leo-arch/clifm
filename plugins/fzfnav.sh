@@ -45,10 +45,8 @@ Shift-up/down: Move one line up/down in the preview window
 Alt-up/down: Move to the beginning/end in the preview window"
 
 fcd() {
-
 	if [ "$#" -ne 0 ]; then
 		cd "$@" || return
-		return
 	fi
 
 	dir_color="$(dircolors -c | grep -o "[\':]di=....." | cut -d';' -f2)"
@@ -88,7 +86,7 @@ $PWD" --marker="+" --preview-window=:wrap "$BORDERS" \
 		# If the returned file is a directory, just cd into it. Otherwise, open
 		# it via OPENER
 		if [ -d "${PWD}/$file" ]; then
-			printf "cd %s" "${PWD}/$file" > "$TMP"
+			[ -n "$CLIFM" ] && printf "cd %s" "${PWD}/$file" > "$TMP"
 			cd "$file"
 		elif [ -f "${PWD}/$file" ]; then
 			if [ "$OPENER" = "clifm" ]; then
@@ -232,8 +230,8 @@ main() {
 	fi
 
 	if [ -f "$TMP" ]; then
-		cat "$TMP" > "$CLIFM_BUS"
-		rm -rf -- "$TMP" 2>/dev/null
+		[ -n "$CLIFM" ] && cat "$TMP" > "$CLIFM_BUS"
+		rm -f -- "$TMP" 2>/dev/null
 	fi
 }
 

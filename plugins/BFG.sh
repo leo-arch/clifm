@@ -176,7 +176,7 @@ file_preview() {
 		esac
 	fi
 
-	mimetype="$(file -bL --mime-type "$entry")"
+	mimetype="$(file --brief --dereference --mime-type "$entry")"
 
 	case "$mimetype" in
 
@@ -231,7 +231,7 @@ file_preview() {
 		# Web content
 		text/html)
 			if [ -n "$BROWSER" ]; then
-				"$BROWSER" "$entry"
+				"$BROWSER" -dump "$entry"
 			elif [ "$PANDOC_OK" = 1 ]; then
 				pandoc -s -t markdown -- "$entry"
 			fi
