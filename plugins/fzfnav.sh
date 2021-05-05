@@ -60,6 +60,8 @@ fcd() {
 		BORDERS="--no-unicode"
 	fi
 
+	[ -n "$CLIFM" ] && fzf_prompt="CliFM "
+
 	# Keep FZF running until the user presses Esc or q
 	while true; do
 		lsd=$(printf "\033[0;%sm..\n" "$dir_color"; \
@@ -76,7 +78,7 @@ fcd() {
 			--bind "alt-down:preview-page-down" \
 			--bind "esc:execute(rm $TMP)+abort" \
 			--bind "q:abort" \
-			--ansi --prompt="CliFM > " --reverse --no-clear \
+			--ansi --prompt="${fzf_prompt}> " --reverse --no-clear \
 			--no-info --keep-right --multi --header="Press 'Ctrl+h' for help
 $PWD" --marker="+" --preview-window=:wrap "$BORDERS" \
 			--preview "printf \"\033[2J\"; $BFG_FILE {}")"
@@ -87,7 +89,7 @@ $PWD" --marker="+" --preview-window=:wrap "$BORDERS" \
 		# it via OPENER
 		if [ -d "${PWD}/$file" ]; then
 			[ -n "$CLIFM" ] && printf "cd %s" "${PWD}/$file" > "$TMP"
-			cd "$file"
+			cd "$file" || return
 		elif [ -f "${PWD}/$file" ]; then
 			if [ "$OPENER" = "clifm" ]; then
 				clifm --open "${PWD}/$file"
@@ -106,7 +108,7 @@ main() {
 	fi
 
 	# This is the previewer script, similar to Ranger's scope.sh
-	BFG_FILE="$HOME/.config/clifm/plugins/BFG.sh"
+	BFG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/BFG.sh"
 
 	UEBERZUG_OK=0
 	COLORS="$(tput colors)"
@@ -161,7 +163,8 @@ main() {
 
 	if [ "$(which exiftool 2>/dev/null)" ]; then
 		EXIFTOOL_OK=1
-	elif [ "$(which mediainfo 2>/dev/null)" ]; then
+	fi
+	if [ "$(which mediainfo 2>/dev/null)" ]; then
 		MEDIAINFO_OK=1
 	fi
 
@@ -229,10 +232,8 @@ main() {
 		tput rmcup
 	fi
 
-	if [ -f "$TMP" ]; then
-		[ -n "$CLIFM" ] && cat "$TMP" > "$CLIFM_BUS"
-		rm -f -- "$TMP" 2>/dev/null
-	fi
+	[ -n "$CLIFM" ] && cat "$TMP" > "$CLIFM_BUS"
+	rm -f -- "$TMP" 2>/dev/null
 }
 
 main "$@"
