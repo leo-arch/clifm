@@ -8,6 +8,7 @@ pkgdesc="The KISS file manager: cli-based, ultra-lightweight, and lightning fast
 arch=('i686' 'pentium4' 'x86_64' 'arm' 'aarch64' 'armv7h')
 url="https://github.com/leo-arch/clifm"
 license=(GPL2)
+provides=('clifm')
 depends=('libcap' 'readline' 'acl')
 makedepends=('git')
 optdepends=(
