@@ -17,8 +17,9 @@ install: build
 	@mkdir -p /usr/share/man/man1
 	@install -g 0 -o 0 -Dm644 manpage /usr/share/man/man1/"${PROG}".1
 	@gzip /usr/share/man/man1/"${PROG}".1
-	@mkdir -p /usr/share/bash-completion/completions
+	@mkdir -p /usr/share/{bash-completion/completions,zsh/site-functions}
 	@install -g 0 -o 0 -Dm644 completions.bash /usr/share/bash-completion/completions/"${PROG}"
+	@install -g 0 -o 0 -Dm644 completions.zsh /usr/share/zsh/site-functions/_"${PROG}"
 	@mkdir -p /usr/share/zsh/site-functions
 	@install -g 0 -o 0 -Dm644 completions.bash /usr/share/zsh/site-functions/"_${PROG}"
 	@mkdir -p /usr/share/locale/es/LC_MESSAGES
