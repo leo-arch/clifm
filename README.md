@@ -163,7 +163,7 @@ Of course, you can also clone, build, and install the package using the PKGBUILD
 
 Run `make` (*this is the recommended procedure*) as follows:
 
-	$ make build && sudo make install
+	$ sudo make install
 
 You should find the binary file in `/usr/bin`, so that you can run it as any other program:
 
