@@ -11,7 +11,7 @@ PROG = clifm
 build:
 	cd src && $(MAKE) build
 
-install:
+install: build
 	@install -Dm755 -- "${PROG}" "${PREFIX}"/
 	@rm -- ${PROG}
 	@mkdir -p /usr/share/man/man1
