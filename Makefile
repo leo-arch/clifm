@@ -2,33 +2,23 @@
 # Makefile for CliFM #
 ######################
 
+OS := $(shell uname -s)
+
 SHELL = /bin/sh
 PREFIX = /usr/bin
 PROG = clifm
-OBJS = clifm.c
 
-CC = gcc
 CFLAGS = -O3 -s -fstack-protector-strong -march=native -Wall
-LIBS_LINUX = -lreadline -lacl -lcap
-LIBS_FREEBSD = -lreadline -lintl
+LIBS_Linux = -lreadline -lacl -lcap
+LIBS_FreeBSD = -lreadline -lintl
 
-build:
-	@printf "Checking operating system... "; \
-	UNAME=$$(uname -s); \
-	case $${UNAME} in \
-		Linux) \
-			printf "GNU/Linux\nCompiling $(PROG)...\n"; \
-			printf "Running '$(CC) $(CFLAGS) -o $(PROG) $(OBJS) $(LIBS_LINUX)'... "; \
-			$(CC) $(CFLAGS) -o $(PROG) $(OBJS) $(LIBS_LINUX); \
-			printf "Done\n"; ;; \
-		FreeBSD) \
-			printf "FreeBSD\nCompiling $(PROG)...\n"; \
-			printf "Running '$(CC) $(CFLAGS) -o $(PROG) $(OBJS) $(LIBS_FREEBSD)'... "; \
-			$(CC) $(CFLAGS) -o $(PROG) $(OBJS) $(LIBS_FREEBSD); \
-			printf "Done\n"; ;; \
-		*) \
-			printf "\n'$${UNAME}': Operating system not supported\n" >&2; ;; \
-	esac
+%.o: %.c
+	cc -c $(CFLAGS) $<
+
+build: clifm.o
+	@printf "Detected operating system: ";
+	@echo $(OS)
+	cc -o $(PROG) $^ ${LIBS_${OS}}
 
 install:
 	@install -Dm755 -- "${PROG}" "${PREFIX}"/
