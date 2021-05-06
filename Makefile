@@ -8,19 +8,10 @@ SHELL = /bin/sh
 PREFIX = /usr/bin
 PROG = clifm
 
-CFLAGS = -O3 -s -fstack-protector-strong -march=native -Wall
-LIBS_Linux = -lreadline -lacl -lcap
-LIBS_FreeBSD = -lreadline -lintl
+build:
+	cd src && $(MAKE) build
 
-%.o: %.c
-	cc -c $(CFLAGS) $<
-
-build: clifm.o
-	@printf "Detected operating system: ";
-	@echo $(OS)
-	cc -o $(PROG) $^ ${LIBS_${OS}}
-
-install:
+install: build
 	@install -Dm755 -- "${PROG}" "${PREFIX}"/
 	@rm -- ${PROG}
 	@mkdir -p /usr/share/man/man1
