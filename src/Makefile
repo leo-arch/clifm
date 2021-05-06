@@ -5,7 +5,7 @@
 OS := $(shell uname -s)
 
 PROG = ../clifm
-OBJS := $(ls *.c | sed "s/.c\$/.o/g")
+OBJS := $(shell ls *.c | sed "s/.c\$$/.o/g")
 
 CFLAGS = -O3 -s -fstack-protector-strong -march=native -Wall
 LIBS_Linux = -lreadline -lacl -lcap
