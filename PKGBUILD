@@ -30,7 +30,7 @@ pkgver() {
 
 build() {
   cd "$srcdir/$_pkgname/src"
-  gcc -O3 -march=native -s -fstack-protector-strong -o "$_pkgname" "${_pkgname}.c" -lreadline -lacl -lcap
+  gcc -O3 -march=native -s -fstack-protector-strong -o "$_pkgname" *.c -lreadline -lacl -lcap
 }
 
 package() {
