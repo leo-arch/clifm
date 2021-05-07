@@ -175,54 +175,6 @@ void* __dso_handle;
  * dynamically allocated arrays for them (which, on the other side,
  * would make the whole thing slower and more tedious) */
 
-/* Colors (filetype and interface) */
-static char di_c[MAX_COLOR], /* Directory */
-	nd_c[MAX_COLOR], /* No read directory */
-	ed_c[MAX_COLOR], /* Empty dir */
-	ne_c[MAX_COLOR], /* No read empty dir */
-	fi_c[MAX_COLOR], /* Reg file */
-	ef_c[MAX_COLOR], /* Empty reg file */
-	nf_c[MAX_COLOR], /* No read file */
-	ln_c[MAX_COLOR], /* Symlink */
-	or_c[MAX_COLOR], /* Broken symlink */
-	pi_c[MAX_COLOR], /* FIFO, pipe */
-	so_c[MAX_COLOR], /* Socket */
-	bd_c[MAX_COLOR], /* Block device */
-	cd_c[MAX_COLOR], /* Char device */
-	su_c[MAX_COLOR], /* SUID file */
-	sg_c[MAX_COLOR], /* SGID file */
-	tw_c[MAX_COLOR], /* Sticky other writable */
-	st_c[MAX_COLOR], /* Sticky (not ow)*/
-	ow_c[MAX_COLOR], /* Other writable */
-	ex_c[MAX_COLOR], /* Executable */
-	ee_c[MAX_COLOR], /* Empty executable */
-	ca_c[MAX_COLOR], /* Cap file */
-	no_c[MAX_COLOR], /* Unknown */
-	uf_c[MAX_COLOR], /* Non-'stat'able file */
-	mh_c[MAX_COLOR], /* Multi-hardlink file */
-
-	bm_c[MAX_COLOR], /* Bookmarked directory */
-	el_c[MAX_COLOR], /* ELN color */
-	mi_c[MAX_COLOR], /* Misc indicators color */
-	df_c[MAX_COLOR], /* Default color */
-	dc_c[MAX_COLOR], /* Files counter color */
-	wc_c[MAX_COLOR], /* Welcome message color */
-	dh_c[MAX_COLOR], /* Dirhist index color */
-	dl_c[MAX_COLOR], /* Dividing line index color */
-
-	/* Colors used in the prompt, so that \001 and \002 needs to
-	 * be added. This is why MAX_COLOR + 2 */
-	tx_c[MAX_COLOR + 2], /* Text color */
-	li_c[MAX_COLOR + 2], /* Sel indicator color */
-	ti_c[MAX_COLOR + 2], /* Trash indicator color */
-	em_c[MAX_COLOR + 2], /* Error msg color */
-	wm_c[MAX_COLOR + 2], /* Warning msg color */
-	nm_c[MAX_COLOR + 2], /* Notice msg color */
-	si_c[MAX_COLOR + 2], /* stealth indicator color */
-
-	dir_ico_c[MAX_COLOR]; /* Directories icon color */
-
-
 //
 // Forward declarations
 //
