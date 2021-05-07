@@ -17,10 +17,9 @@ install: build
 	@mkdir -p /usr/share/man/man1
 	@install -g 0 -o 0 -Dm644 manpage /usr/share/man/man1/"${PROG}".1
 	@gzip /usr/share/man/man1/"${PROG}".1
-	@mkdir -p /usr/share/bash-completion/completions
+	@mkdir -p /usr/share/{bash-completion/completions,zsh/site-functions}
 	@install -g 0 -o 0 -Dm644 completions.bash /usr/share/bash-completion/completions/"${PROG}"
-	@mkdir -p /usr/share/zsh/site-functions
-	@install -g 0 -o 0 -Dm644 completions.bash /usr/share/zsh/site-functions/"_${PROG}"
+	@install -g 0 -o 0 -Dm644 completions.zsh /usr/share/zsh/site-functions/_"${PROG}"
 	@mkdir -p /usr/share/locale/es/LC_MESSAGES
 	@install -g 0 -o 0 -Dm644 translations/spanish/"${PROG}".mo \
 	/usr/share/locale/es/LC_MESSAGES/"${PROG}".mo
@@ -33,5 +32,7 @@ uninstall:
 	@rm -- "${PREFIX}/${PROG}"
 	@rm /usr/share/man/man1/"${PROG}".1.gz
 	@rm /usr/share/locale/*/LC_MESSAGES/"${PROG}".mo
+	@rm /usr/share/bash-completion/completions/"${PROG}"
+	@rm /usr/share/zsh/site-functions/_"${PROG}"
 	@rm -r /usr/share/${PROG}
 	@printf "Successfully uninstalled ${PROG}\n"
