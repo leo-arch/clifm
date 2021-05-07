@@ -20,7 +20,7 @@
 # Press Esc to cancel and exit.
 
 uz_cleanup() {
-    rm "$FIFO_UEBERZUG"
+    rm "$FIFO_UEBERZUG" 2>/dev/null
     pkill -P $$ >/dev/null
 }
 
@@ -232,7 +232,7 @@ main() {
 		tput rmcup
 	fi
 
-	[ -n "$CLIFM" ] && cat "$TMP" > "$CLIFM_BUS"
+	[ -n "$CLIFM" ] && cat "$TMP" 2>/dev/null > "$CLIFM_BUS"
 	rm -f -- "$TMP" 2>/dev/null
 }
 
