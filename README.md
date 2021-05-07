@@ -161,10 +161,6 @@ Run `make` as follows:
 
 	$ sudo make install
 
-	or if you use doas
-
-	$ doas make install
-
 You should find the binary file in `/usr/bin`, so that you can run it as any other program:
 
 	$ clifm
