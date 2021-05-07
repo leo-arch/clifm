@@ -157,13 +157,13 @@ Of course, you can also clone, build, and install the package using the PKGBUILD
         $ git clone https://github.com/leo-arch/clifm.git
         $ cd clifm
 
-2. You have two options here:
-
-#### Via make
-
-Run `make` (*this is the recommended procedure*) as follows:
+Run `make` as follows:
 
 	$ sudo make install
+
+	or if you use doas
+
+	$ doas make install
 
 You should find the binary file in `/usr/bin`, so that you can run it as any other program:
 
@@ -172,37 +172,6 @@ You should find the binary file in `/usr/bin`, so that you can run it as any oth
 To uninstall `clifm` issue this command wherever the Makefile is located:
 
 	$ sudo make uninstall
-
-#### Manually via `gcc` (`tcc` and `clang` also work). 
-
-##### On Linux:
-
-	$ gcc -O3 -march=native -fstack-protector-strong -s -o clifm clifm.c -lcap -lreadline -lacl
-
-To enable POSIX compliance, pass this option to the compiler: `-D_BE_POSIX.` The only two features disabled in this way are: a) files birth time, only available on Linux via **statx(2)**, which is Linux-specific, and **strverscmp(3)**, a GNU extension used to sort files by version.
-
-##### On FreeBSD:
-
-	$ gcc -O3 -march=native -fstack-protector-strong -s -o clifm clifm.c -lintl -lreadline
-
-Run the binary file produced by `gcc`:
-
-	$ ./clifm
-
-Of course, you can copy this binary to `/usr/bin` or `/usr/local/bin`, or anywhere in your PATH, and then run the program as always:
-
-	$ clifm
-
-Do not forget to install the manpage as well (the full help is in here):
-
-	$ sudo cp manpage /usr/share/man/man1/clifm.1
-	$ sudo gzip /usr/share/man/man1/clifm.1
-
-Then you can access the manpage as always: `man clifm`
-
-Finally, copy the plugins to the local plugins directory:
-
-	$ cp -r /usr/share/clifm/plugins $HOME/.config/clifm
 
 ## Support
 
