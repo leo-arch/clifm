@@ -89,12 +89,12 @@ and DT_DIR (and company) and S_ISVTX macros */
 #include <getopt.h> /* getopt_long */
 #include <fcntl.h> /* O_RDONLY, O_DIRECTORY, and AT_* macros */
 #include <readline/history.h>
-#include <readline/readline.h>
 /* Readline: This function allows the user to move back and forth with
  * the arrow keys in the prompt. I've tried scanf, getchar, getline,
  * fscanf, fgets, and none of them does the trick. Besides, readline
  * provides TAB completion and history. Btw, readline is what Bash uses
  * for its prompt */
+#include <readline/readline.h>
 #include <libintl.h> /* gettext */
 #include <limits.h>
 
@@ -26415,7 +26415,7 @@ external_arguments(int argc, char **argv)
 		{0, 0, 0, 0}
 	};
 
-	/* Change whenever a new (only) long option is added */
+	/* Increment whenever a new (only) long option is added */
 	int long_opts = 33;
 
 	int optc;
@@ -26751,7 +26751,7 @@ external_arguments(int argc, char **argv)
 			}
 			break;
 
-		case '?': /* If some unrecognized option was found... */
+		case '?': /* If some unrecognized option is found... */
 
 			/* Options that requires an argument */
 			/* Short options */
