@@ -27,6 +27,13 @@
  *
  */
 
+#define VERSION "1.0"
+#define AUTHOR "L. Abramovich"
+#define CONTACT "johndoe.arch@outlook.com"
+#define WEBSITE "https://github.com/leo-arch/clifm"
+#define DATE "April 10, 2021"
+#define LICENSE "GPL2+"
+
 #if defined(__linux__) && !defined(_BE_POSIX)
 #  define _GNU_SOURCE
 #else
@@ -133,8 +140,8 @@ in FreeBSD, but is deprecated */
 
 #include "clifm.h" /* A few custom functions */
 #include "icons.h"
-#include "helpers.h" // some helper functions
-
+#include "helpers.h"
+#include "globals.h"
 
 #define VERSION "1.0"
 #define AUTHOR "L. Abramovich"
@@ -143,13 +150,13 @@ in FreeBSD, but is deprecated */
 #define DATE "April 10, 2021"
 #define LICENSE "GPL2+"
 
-				/** #########################
-				 *  #    GLOBAL VARIABLES   #
-				 *  ######################### */
+//
+// global variables
+//
 
 #ifndef _BE_POSIX
 #define CMD_LEN_MAX (PATH_MAX + ((NAME_MAX + 1) << 1))
-static char len_buf[CMD_LEN_MAX] __attribute__ ((aligned));
+char len_buf[CMD_LEN_MAX] __attribute__ ((aligned));
 #endif
 
 /* Without this variable, TCC complains that __dso_handle is an
@@ -158,401 +165,6 @@ static char len_buf[CMD_LEN_MAX] __attribute__ ((aligned));
 void* __dso_handle;
 #endif
 
-/* Struct to store user defined variables */
-struct usrvar_t
-{
-	char *name;
-	char *value;
-};
-
-static struct usrvar_t *usr_var = (struct usrvar_t *)NULL;
-
-/* Struct to store user defined actions */
-struct actions_t
-{
-	char *name;
-	char *value;
-};
-
-static struct actions_t *usr_actions = (struct actions_t *)NULL;
-
-/* Workspaces information */
-struct ws_t
-{
-	char *path;
-	int num;
-};
-
-static struct ws_t *ws = (struct ws_t *)NULL;
-
-/* Struct to store user defined keybindings */
-struct kbinds_t
-{
-	char *function;
-	char *key;
-};
-
-static struct kbinds_t *kbinds = (struct kbinds_t *)NULL;
-
-/* Struct to store the dirjump database values */
-struct jump_t
-{
-	char *path;
-	int keep;
-	int rank;
-	size_t visits;
-	time_t first_visit;
-	time_t last_visit;
-};
-
-static struct jump_t *jump_db = (struct jump_t *)NULL;
-
-/* Struct to store bookmarks */
-struct bookmarks_t
-{
-	char *shortcut;
-	char *name;
-	char *path;
-};
-
-static struct bookmarks_t *bookmarks = (struct bookmarks_t *)NULL;
-
-/* Struct to store file information */
-struct fileinfo {
-	char *name;
-	char *color;
-	char *icon;
-	char *icon_color;
-	int eln_n;
-	int filesn; /* Number of files in subdir */
-	int symlink;
-	int dir;
-	int exec;
-	int ruser; /* User read permission for dir */
-	size_t len;
-	mode_t type; /* Store d_type value */
-	mode_t mode; /* Store st_mode (for long view mode) */
-	ino_t inode;
-	off_t size;
-	uid_t uid;
-	gid_t gid;
-	nlink_t linkn;
-	time_t time;
-	time_t ltime; /* For long view mode */
-};
-
-static struct fileinfo *file_info = (struct fileinfo *)NULL;
-
-/* Struct to specify which parameters have been set from the command
- * line, to avoid overriding them with init_config(). While no command
- * line parameter will be overriden, the user still can modifiy on the
- * fly (editing the config file) any option not specified in the command
- * line */
-struct param
-{
-	int splash;
-	int hidden;
-	int longview;
-	int cd_list_auto;
-	int autocd;
-	int auto_open;
-	int ext;
-	int ffirst;
-	int sensitive;
-	int unicode;
-	int pager;
-	int path;
-	int light;
-	int sort;
-	int dirmap;
-	int config;
-	int stealth_mode;
-	int restore_last_path;
-	int tips;
-	int disk_usage;
-	int classify;
-	int share_selbox;
-	int rl_vi_mode;
-	int max_dirhist;
-	int sort_reverse;
-	int files_counter;
-	int welcome_message;
-	int clear_screen;
-	int logs;
-	int max_path;
-	int bm_file;
-	int expand_bookmarks;
-	int only_dirs;
-	int list_and_quit;
-	int color_scheme;
-	int cd_on_quit;
-	int no_dirjump;
-	int icons;
-	int icons_use_file_color;
-	int no_columns;
-	int no_colors;
-	int max_files;
-	int trasrm;
-	int noeln;
-	int case_sens_dirjump;
-	int case_sens_path_comp;
-	int cwd_in_title;
-};
-
-static struct param xargs;
-
-/* A list of possible program messages. Each value tells the prompt what
- * to do with error messages: either to print an E, W, or N char at the
- * beginning of the prompt, or nothing (nomsg) */
-enum prog_msg
-{
-	nomsg = 0,
-	error = 1,
-	warning = 2,
-	notice = 4
-};
-
-/* Enumeration for the dirjump function options */
-enum jump {
-	none = 0,
-	jparent = 1,
-	jchild = 2,
-	jorder = 4,
-	jlist = 8
-};
-
-/* pmsg holds the current program message type */
-static enum prog_msg pmsg = nomsg;
-
-/* Always initialize variables, to NULL if string, to zero if int;
- * otherwise they may contain garbage, and an access to them may result
- * in a crash or some invalid data being read. However, non-initialized
- * variables are automatically initialized by the compiler */
-
-static short
-	splash_screen = UNSET,
-	welcome_message = UNSET,
-	show_hidden = UNSET,
-	clear_screen = UNSET,
-	disk_usage = UNSET,
-	list_folders_first = UNSET,
-	share_selbox = UNSET,
-	long_view = UNSET,
-	case_sensitive = UNSET,
-	cd_lists_on_the_fly = UNSET,
-	tips = UNSET,
-	logs_enabled = UNSET,
-	sort = UNSET,
-	classify = UNSET,
-	files_counter = UNSET,
-	light_mode = UNSET,
-	autocd = UNSET,
-	auto_open = UNSET,
-	dirhist_map = UNSET,
-	restore_last_path = UNSET,
-	pager = UNSET,
-	ext_cmd_ok = UNSET,
-	expand_bookmarks = UNSET,
-	only_dirs = UNSET,
-	cd_on_quit = UNSET,
-	columned = UNSET,
-	colorize = UNSET,
-	cur_ws = UNSET,
-	cp_cmd = UNSET,
-	mv_cmd = UNSET,
-	tr_as_rm = UNSET,
-	no_eln = UNSET,
-	min_name_trim = UNSET,
-	case_sens_dirjump = UNSET,
-	case_sens_path_comp = UNSET,
-
-	no_log = 0,
-	internal_cmd = 0,
-	shell_terminal = 0,
-	print_msg = 0,
-	recur_perm_error_flag = 0,
-	is_sel = 0,
-	sel_is_last = 0,
-	kbind_busy = 0,
-	unicode = UNSET,
-	dequoted = 0,
-	mime_match = 0,
-	sort_reverse = 0,
-	sort_switch = 0,
-	kb_shortcut = 0,
-	switch_cscheme = 0,
-	icons = 0,
-	copy_n_rename = 0,
-
-	home_ok = 1,
-	config_ok = 1,
-	trash_ok = 1,
-	selfile_ok = 1;
-
-static int
-	max_hist = UNSET,
-	max_log = UNSET,
-	max_dirhist = UNSET,
-	max_path = UNSET,
-	max_files = UNSET,
-	min_jump_rank = UNSET,
-	max_jump_total_rank = UNSET,
-
-	dirhist_cur_index = 0,
-	argc_bk = 0,
-	exit_code = 0,
-	shell_is_interactive = 0,
-	dirhist_total_index = 0,
-	trash_n = 0,
-	jump_total_rank = 0,
-	*eln_as_file = (int *)0;
-
-static unsigned short term_cols = 0;
-
-static size_t
-	user_home_len = 0,
-	args_n = 0,
-	sel_n = 0,
-	msgs_n = 0,
-	prompt_cmds_n = 0,
-	path_n = 0,
-	current_hist_n = 0,
-	usrvar_n = 0,
-	aliases_n = 0,
-	longest = 0,
-	files = 0,
-	actions_n = 0,
-	ext_colors_n = 0,
-	kbinds_n = 0,
-	eln_as_file_n = 0,
-	bm_n = 0,
-	cschemes_n = 0,
-	jump_n = 0,
-	path_progsn = 0;
-
-static struct termios shell_tmodes;
-static off_t total_sel_size = 0;
-static pid_t own_pid = 0;
-
-static char
-	div_line_char = UNSET,
-	hostname[HOST_NAME_MAX],
-
-	**aliases = (char **)NULL,
-	**argv_bk = (char **)NULL,
-	**bin_commands = (char **)NULL,
-	**bookmark_names = (char **)NULL,
-	**color_schemes = (char **)NULL,
-	**ext_colors = (char **)NULL,
-	**history = (char **)NULL,
-	**messages = (char **)NULL,
-	**old_pwd = (char **)NULL,
-	**paths = (char **)NULL,
-	**profile_names = (char **)NULL,
-	**prompt_cmds = (char **)NULL,
-	**sel_elements = (char **)NULL,
-
-	*ACTIONS_FILE = (char *)NULL,
-	*alt_bm_file = (char *)NULL,
-	*alt_config_file = (char *)NULL,
-	*alt_kbinds_file = (char *)NULL,
-	*alt_profile = (char *)NULL,
-	*BM_FILE = (char *)NULL,
-	*COLORS_DIR = (char *)NULL,
-	*CONFIG_DIR = (char *)NULL,
-	*CONFIG_DIR_GRAL = (char *)NULL,
-	*CONFIG_FILE = (char *)NULL,
-	*cur_cscheme = (char *)NULL,
-	*DIRHIST_FILE = (char *)NULL,
-	*encoded_prompt = (char *)NULL,
-	*file_cmd_path = (char *)NULL,
-	*filter = (char *)NULL,
-	*HIST_FILE = (char *)NULL,
-	*KBINDS_FILE = (char *)NULL,
-	*last_cmd = (char *)NULL,
-	*LOG_FILE = (char *)NULL,
-	*ls_colors_bk = (char *)NULL,
-	*MIME_FILE = (char *)NULL,
-	*MSG_LOG_FILE = (char *)NULL,
-	*opener = (char *)NULL,
-	*pinned_dir = (char *)NULL,
-	*PLUGINS_DIR = (char *)NULL,
-	*PROFILE_FILE = (char *)NULL,
-	*qc = (char *)NULL,
-	*SEL_FILE = (char *)NULL,
-	*STDIN_TMP_DIR = (char *)NULL,
-	*sys_shell = (char *)NULL,
-	*term = (char *)NULL,
-	*TMP_DIR = (char *)NULL,
-	*TRASH_DIR = (char *)NULL,
-	*TRASH_FILES_DIR = (char *)NULL,
-	*TRASH_INFO_DIR = (char *)NULL,
-	*user = (char *)NULL,
-	*usr_cscheme = (char *)NULL,
-	*user_home = (char *)NULL;
-
-static regex_t regex_exp;
-
-static size_t *ext_colors_len = (size_t *)NULL;
-
-/* This is not a comprehensive list of commands. It only lists
- * commands long version for TAB completion */
-static const char *INTERNAL_CMDS[] = {
-	"alias",
-	"open",
-	"prop",
-	"back",
-	"forth",
-	"move",
-	"paste",
-	"sel",
-	"selbox",
-	"desel",
-	"refresh",
-	"edit",
-	"history",
-	"hidden",
-	"path",
-	"help",
-	"commands",
-	"colors",
-	"version",
-	"splash",
-	"folders-first",
-	"opener",
-	"exit",
-	"quit",
-	"pager",
-	"trash",
-	"undel",
-	"messages",
-	"mountpoints",
-	"bookmarks",
-	"log",
-	"untrash",
-	"unicode",
-	"profile",
-	"shell",
-	"mime",
-	"sort",
-	"tips",
-	"autocd",
-	"auto-open",
-	"actions",
-	"reload",
-	"export",
-	"keybinds",
-	"pin",
-	"unpin",
-	"colorschemes",
-	"jump",
-	"icons",
-	"columns",
-	"filter",
-	NULL
-};
-
-#define MAX_COLOR 46
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR
  * (Select Graphic Rendition) parameter, and, of course, the terminating
@@ -611,9 +223,9 @@ static char di_c[MAX_COLOR], /* Directory */
 	dir_ico_c[MAX_COLOR]; /* Directories icon color */
 
 
-				/** ##########################
-				 *  #  FORWARD DECLARATIONS  #
-				 *  ########################## */
+//
+// Forward declarations
+//
 
 static int _err(int, int, const char *, ...);
 static int bookmarks_function(char **);
@@ -623,10 +235,9 @@ static int mime_import(char *);
 static int mime_edit(char **);
 static char **parse_input_str(char *);
 
-
-			/** #################################
-			 * #     FUNCTIONS DEFINITIONS     #
-			 * ################################# */
+//
+// function definitions
+//
 
 static int
 xstrcmp(const char *s1, const char *s2)
@@ -26633,8 +26244,6 @@ external_arguments(int argc, char **argv)
 int
 main(int argc, char *argv[])
 {
-/*  printf("DBG: %s (%d)\n", __func__, __LINE__); */
-
 	/* #########################################################
 	 * #            0) INITIAL CONDITIONS                      #
 	 * #########################################################*/
@@ -26675,7 +26284,7 @@ main(int argc, char *argv[])
 	if (strncmp(getenv("LANG"), "en", 2) != 0)
 		unicode = 1;
 
-	/* Initialize gettext() for translations */
+	// Initialize gettext() for translations
 	bindtextdomain("clifm", "/usr/share/locale");
 	textdomain("clifm");
 
@@ -26933,23 +26542,21 @@ main(int argc, char *argv[])
 			trash_n = 0;
 	}
 
-	/* Get hostname */
 	if (gethostname(hostname, sizeof(hostname)) == -1) {
 		hostname[0] = '?';
 		hostname[1] = '\0';
+
 		_err('e', PRINT_PROMPT, _("%s: Error getting hostname\n"), PROGRAM_NAME);
 	}
 
-	/* Initialize the shell */
 	init_shell();
 
 	if (config_ok) {
-
-		/* Limit the log files size */
+		// Limit the log files size
 		check_file_size(LOG_FILE, max_log);
 		check_file_size(MSG_LOG_FILE, max_log);
 
-		/* Get history */
+		// Get history
 		struct stat file_attrib;
 
 		if (stat(HIST_FILE, &file_attrib) == 0
@@ -26997,28 +26604,26 @@ main(int argc, char *argv[])
 	set_env();
 
 
-				/* ###########################
-				 * #   2) MAIN PROGRAM LOOP  #
-				 * ########################### */
+	//
+	// Main program loop
+	//
 
 	/* This is the main structure of any basic shell
-	1 - Infinite loop
+	1 - initialize
 	2 - Grab user input
 	3 - Parse user input
 	4 - Execute command
+	5 - goto step 2 and repeat till the program ends
 	See https://brennan.io/2015/01/16/write-a-shell-in-c/
 	*/
 
-	/* 1) Infinite loop to keep the program running */
+	// Infinite loop to keep the program running
 	while (1) {
-
-		/* 2) Grab input string from the prompt */
 		char *input = prompt();
 
 		if (!input)
 			continue;
 
-		/* 3) Parse input string */
 		char **cmd = parse_input_str(input);
 
 		free(input);
@@ -27027,7 +26632,7 @@ main(int argc, char *argv[])
 		if (!cmd)
 			continue;
 
-		/* 4) Execute input string */
+		// Execute input string
 		char **alias_cmd = check_for_alias(cmd);
 
 		if (alias_cmd) {
@@ -27041,9 +26646,7 @@ main(int argc, char *argv[])
 
 			free(alias_cmd);
 			alias_cmd = (char **)NULL;
-		}
-
-		else {
+		} else {
 			exec_cmd(cmd);
 
 			i = (int)args_n + 1;
@@ -27055,5 +26658,5 @@ main(int argc, char *argv[])
 		}
 	}
 
-	return exit_code; /* Never reached */
+	return exit_code; // Never reached
 }

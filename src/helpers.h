@@ -1,5 +1,9 @@
 #pragma once
 
+#include <stddef.h>
+#include <sys/types.h>
+#include <time.h>
+
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1
 
@@ -27,12 +31,6 @@
 * #define CLEAR puts("\x1b[H\x1b[J");
 * #define CLEAR write(STDOUT_FILENO, "\x1b[2J\x1b[H", 7); */
 
-#define VERSION "1.0"
-#define AUTHOR "L. Abramovich"
-#define CONTACT "johndoe.arch@outlook.com"
-#define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "April 10, 2021"
-#define LICENSE "GPL2+"
 
 /* Define flags for program options and internal use */
 /* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags).
@@ -305,3 +303,157 @@ nm=01;32:bm=01;36:"
 #define JDAY(n) ((n) *= 2)  // Within last day
 #define JWEEK(n) ((n) / 2)  // Within last week
 #define JOLDER(n) ((n) / 4) // More than a week
+
+#define MAX_COLOR 46
+
+//
+// struct definitions
+//
+
+// Struct to store user defined variables
+struct usrvar_t
+{
+	char *name;
+	char *value;
+};
+
+// Struct to store user defined actions
+struct actions_t
+{
+	char *name;
+	char *value;
+};
+
+// Workspaces information
+struct ws_t
+{
+	char *path;
+	int num;
+};
+
+// Struct to store user defined keybindings
+struct kbinds_t
+{
+	char *function;
+	char *key;
+};
+
+// Struct to store the dirjump database values
+struct jump_t
+{
+	char *path;
+	int keep;
+	int rank;
+	size_t visits;
+	time_t first_visit;
+	time_t last_visit;
+};
+
+// Struct to store bookmarks
+struct bookmarks_t
+{
+	char *shortcut;
+	char *name;
+	char *path;
+};
+
+// Struct to store file information
+struct fileinfo {
+	char *name;
+	char *color;
+	char *icon;
+	char *icon_color;
+	int eln_n;
+	int filesn; // Number of files in subdir
+	int symlink;
+	int dir;
+	int exec;
+	int ruser; // User read permission for dir
+	size_t len;
+	mode_t type; // Store d_type value
+	mode_t mode; // Store st_mode (for long view mode)
+	ino_t inode;
+	off_t size;
+	uid_t uid;
+	gid_t gid;
+	nlink_t linkn;
+	time_t time;
+	time_t ltime; // For long view mode
+};
+
+/* Struct to specify which parameters have been set from the command
+ * line, to avoid overriding them with init_config(). While no command
+ * line parameter will be overriden, the user still can modifiy on the
+ * fly (editing the config file) any option not specified in the command
+ * line */
+struct param
+{
+	int splash;
+	int hidden; int longview; int cd_list_auto; int autocd; int auto_open; int ext;
+	int ffirst;
+	int sensitive;
+	int unicode;
+	int pager;
+	int path;
+	int light;
+	int sort;
+	int dirmap;
+	int config;
+	int stealth_mode;
+	int restore_last_path;
+	int tips;
+	int disk_usage;
+	int classify;
+	int share_selbox;
+	int rl_vi_mode;
+	int max_dirhist;
+	int sort_reverse;
+	int files_counter;
+	int welcome_message;
+	int clear_screen;
+	int logs;
+	int max_path;
+	int bm_file;
+	int expand_bookmarks;
+	int only_dirs;
+	int list_and_quit;
+	int color_scheme;
+	int cd_on_quit;
+	int no_dirjump;
+	int icons;
+	int icons_use_file_color;
+	int no_columns;
+	int no_colors;
+	int max_files;
+	int trasrm;
+	int noeln;
+	int case_sens_dirjump;
+	int case_sens_path_comp;
+	int cwd_in_title;
+};
+
+
+//
+// some enums
+//
+
+
+/* A list of possible program messages. Each value tells the prompt what
+ * to do with error messages: either to print an E, W, or N char at the
+ * beginning of the prompt, or nothing (nomsg) */
+enum prog_msg
+{
+	nomsg = 0,
+	error = 1,
+	warning = 2,
+	notice = 4
+};
+
+// Enumeration for the dirjump function options
+enum jump {
+	none = 0,
+	jparent = 1,
+	jchild = 2,
+	jorder = 4,
+	jlist = 8
+};
