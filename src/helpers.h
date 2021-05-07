@@ -306,6 +306,16 @@ nm=01;32:bm=01;36:"
 
 #define MAX_COLOR 46
 
+/* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
+ * true color format including foreground and background colors, the SGR
+ * (Select Graphic Rendition) parameter, and, of course, the terminating
+ * null byte.
+
+ * To store all the 39 color variables I use, with 46 bytes each, I need
+ * a total of 1,8Kb. It's not much but it could be less if I'd use
+ * dynamically allocated arrays for them (which, on the other side,
+ * would make the whole thing slower and more tedious) */
+
 //
 // struct definitions
 //
@@ -457,3 +467,9 @@ enum jump {
 	jorder = 4,
 	jlist = 8
 };
+
+// 
+// function defentions
+//
+char * savestring(const char *restrict str, size_t size);
+int _err(int, int, const char *, ...);

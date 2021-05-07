@@ -142,6 +142,7 @@ in FreeBSD, but is deprecated */
 #include "icons.h"
 #include "helpers.h"
 #include "globals.h"
+#include "xfunctions.h"
 
 #define VERSION "1.0"
 #define AUTHOR "L. Abramovich"
@@ -154,32 +155,16 @@ in FreeBSD, but is deprecated */
 // global variables
 //
 
-#ifndef _BE_POSIX
-#define CMD_LEN_MAX (PATH_MAX + ((NAME_MAX + 1) << 1))
-char len_buf[CMD_LEN_MAX] __attribute__ ((aligned));
-#endif
-
 /* Without this variable, TCC complains that __dso_handle is an
  * undefined symbol and won't compile */
 #if __TINYC__
 void* __dso_handle;
 #endif
 
-/* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
- * true color format including foreground and background colors, the SGR
- * (Select Graphic Rendition) parameter, and, of course, the terminating
- * null byte.
-
- * To store all the 39 color variables I use, with 46 bytes each, I need
- * a total of 1,8Kb. It's not much but it could be less if I'd use
- * dynamically allocated arrays for them (which, on the other side,
- * would make the whole thing slower and more tedious) */
-
 //
 // Forward declarations
 //
 
-static int _err(int, int, const char *, ...);
 static int bookmarks_function(char **);
 static int exec_cmd(char **);
 static int list_dir(void);
@@ -190,230 +175,6 @@ static char **parse_input_str(char *);
 //
 // function definitions
 //
-
-static int
-xstrcmp(const char *s1, const char *s2)
-/* I use 256 for error code since it does not represent any ASCII code
- * (the extended version goes up to 255) */
-{
-	if (!s1 || !s2)
-		return 256;
-
-	while (*s1) {
-		if (*s1 != *s2)
-			return (*s1 - *s2);
-		s1++;
-		s2++;
-	}
-
-	if (*s2)
-		return (0 - *s2);
-
-	return 0;
-}
-
-static int
-xstrncmp(const char *s1, const char *s2, size_t n)
-{
-	if (!s1 || !s2)
-		return 256;
-
-	size_t c = 0;
-	while (*s1 && c++ < n) {
-		if (*s1 != *s2)
-			return (*s1 - *s2);
-		s1++;
-		s2++;
-	}
-
-	if (c == n)
-		return 0;
-
-	if (*s2)
-		return (0 - *s2);
-
-	return 0;
-}
-
-static char *
-xstrcpy(char *buf, const char *restrict str)
-{
-	if (!str)
-		return (char *)NULL;
-
-	while (*str)
-		*(buf++) = *(str++);
-
-	*buf = '\0';
-
-/*  while ((*buf++ = *str++)); */
-
-	return buf;
-}
-
-static char *
-xstrncpy(char *buf, const char *restrict str, size_t n)
-{
-	if (!str)
-		return (char *)NULL;
-
-	size_t c = 0;
-	while (*str && c++ < n)
-		*(buf++) = *(str++);
-
-	*buf = '\0';
-
-/*  size_t counter = 0;
-	while ((*buf++ = *str++) && counter++ < n); */
-
-	return buf;
-}
-
-static size_t
-xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
-/* Taken from NNN's source code: very clever */
-{
-	char *end = memccpy(dst, src, '\0', n);
-
-	if (!end) {
-		dst[n - 1] = '\0';
-		end = dst + n;
-	}
-
-	return end - dst;
-}
-
-static size_t
-wc_xstrlen(const char *restrict str)
-{
-	size_t len;
-#ifndef _BE_POSIX
-	wchar_t * const wbuf = (wchar_t *)len_buf;
-
-	/* Convert multi-byte to wide char */
-	len = mbstowcs(wbuf, str, NAME_MAX);
-	len = wcswidth(wbuf, len);
-#else
-	len = u8_xstrlen(str);
-#endif
-
-	return len;
-}
-
-static int
-u8truncstr(char *restrict str, size_t n)
-/* Truncate an UTF-8 string at length N. Returns zero if truncated and
- * one if not */
-{
-	size_t len = 0;
-
-	while (*(str++)) {
-
-		/* Do not count continuation bytes (used by multibyte, that is,
-		 * wide or non-ASCII characters) */
-		if ((*str & 0xc0) != 0x80) {
-			len++;
-
-			if (len == n) {
-				*str = '\0';
-				return EXIT_SUCCESS;
-			}
-		}
-	}
-
-	return EXIT_FAILURE;
-}
-
-static size_t
-u8_xstrlen(const char *restrict str)
-/* An strlen implementation able to handle unicode characters. Taken from:
-* https://stackoverflow.com/questions/5117393/number-of-character-cells-used-by-string
-* Explanation: strlen() counts bytes, not chars. Now, since ASCII chars
-* take each 1 byte, the amount of bytes equals the amount of chars.
-* However, non-ASCII or wide chars are multibyte chars, that is, one char
-* takes more than 1 byte, and this is why strlen() does not work as
-* expected for this kind of chars: a 6 chars string might take 12 or
-* more bytes */
-{
-	size_t len = 0;
-
-	while (*(str++)) {
-		if ((*str & 0xc0) != 0x80)
-			len++;
-	}
-
-	return len;
-}
-
-#ifndef __FreeBSD__
-static inline size_t
-xstrlen(const char *restrict s)
-/* Taken from NNN's source code */
-{
-#if !defined(__GLIBC__)
-	return strlen(s);
-#else
-	return (char *)rawmemchr(s, '\0') - s;
-#endif
-}
-#endif /* __FreeBSD__ */
-
-static void *
-xrealloc(void *ptr, size_t size)
-{
-	void *new_ptr = realloc(ptr, size);
-
-	if (!new_ptr) {
-		free(ptr);
-		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate "
-			 "%zu bytes\n"), PROGRAM_NAME, __func__, size);
-		exit(EXIT_FAILURE);
-	}
-
-	return new_ptr;
-}
-
-static void *
-xcalloc(size_t nmemb, size_t size)
-{
-	void *new_ptr = calloc(nmemb, size);
-
-	if (!new_ptr) {
-		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate "
-			 "%zu bytes\n"), PROGRAM_NAME, __func__, nmemb * size);
-		exit(EXIT_FAILURE);
-	}
-
-	return new_ptr;
-}
-
-static void *
-xnmalloc(size_t nmemb, size_t size)
-{
-	void *new_ptr = malloc(nmemb * size);
-
-	if (!new_ptr) {
-		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu "
-			 "bytes\n"), PROGRAM_NAME, __func__, nmemb * size);
-		exit(EXIT_FAILURE);
-	}
-
-	return new_ptr;
-}
-
-static int
-xchmod(const char *file, mode_t mode)
-{
-	/* Set or unset S_IXUSR, S_IXGRP, and S_IXOTH */
-	(0100 & mode) ? (mode &= ~0111) : (mode |= 0111);
-
-	if (chmod(file, mode) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
-		return EXIT_FAILURE;
-	}
-
-	return EXIT_SUCCESS;
-}
 
 static char *
 home_tilde(const char *new_path)
@@ -603,19 +364,6 @@ xitoa(int n)
 	}
 
 	return &buf[++i];
-}
-
-static char *
-savestring(const char *restrict str, size_t size)
-{
-	if (!str)
-		return (char *)NULL;
-
-	char *ptr = (char *)NULL;
-	ptr = (char *)xnmalloc(size + 1, sizeof(char));
-	strcpy(ptr, str);
-
-	return ptr;
 }
 
 static int
@@ -11324,123 +11072,6 @@ kbinds_function(char **args)
 		return kbinds_reset();
 
 	fputs(_("Usage: kb, keybinds [edit] [reset]\n"), stderr);
-	return EXIT_FAILURE;
-}
-
-static void
-log_msg(char *_msg, int print)
-/* Handle the error message 'msg'. Store 'msg' in an array of error
- * messages, write it into an error log file, and print it immediately
- * (if print is zero (NOPRINT_PROMPT) or tell the next prompt, if print
- * is one to do it (PRINT_PROMPT)). Messages wrote to the error log file
- * have the following format:
- * "[date] msg", where 'date' is YYYY-MM-DDTHH:MM:SS */
-{
-	if (!_msg)
-		return;
-
-	size_t msg_len = strlen(_msg);
-	if (msg_len == 0)
-		return;
-
-	/* Store messages (for current session only) in an array, so that
-	 * the user can check them via the 'msg' command */
-	msgs_n++;
-	messages = (char **)xrealloc(messages, (size_t)(msgs_n + 1)
-								 * sizeof(char *));
-	messages[msgs_n - 1] = savestring(_msg, msg_len);
-	messages[msgs_n] = (char *)NULL;
-
-	if (print) /* PRINT_PROMPT */
-		/* The next prompt will take care of printing the message */
-		print_msg = 1;
-	else /* NOPRINT_PROMPT */
-		/* Print the message directly here */
-		fputs(_msg, stderr);
-
-	/* If the config dir cannot be found or if msg log file isn't set
-	 * yet... This will happen if an error occurs before running
-	 * init_config(), for example, if the user's home cannot be found */
-	if (!config_ok || !MSG_LOG_FILE || !*MSG_LOG_FILE)
-		return;
-
-	FILE *msg_fp = fopen(MSG_LOG_FILE, "a");
-
-	if (!msg_fp) {
-		/* Do not log this error: We might incur in an infinite loop
-		 * trying to access a file that cannot be accessed */
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, MSG_LOG_FILE,
-				strerror(errno));
-		fputs("Press any key to continue... ", stdout);
-		xgetchar();
-		putchar('\n');
-	}
-
-	else {
-		/* Write message to messages file: [date] msg */
-		time_t rawtime = time(NULL);
-		struct tm *tm = localtime(&rawtime);
-		char date[64] = "";
-
-		strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", tm);
-		fprintf(msg_fp, "[%d-%d-%dT%d:%d:%d] ", tm->tm_year + 1900,
-				tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min,
-				tm->tm_sec);
-		fputs(_msg, msg_fp);
-		fclose(msg_fp);
-	}
-}
-
-static int
-_err(int msg_type, int prompt, const char *format, ...)
-/* Custom POSIX implementation of GNU asprintf() modified to log program
- * messages. MSG_TYPE is one of: 'e', 'w', 'n', or zero (meaning this
- * latter that no message mark (E, W, or N) will be added to the prompt).
- * PROMPT tells whether to print the message immediately before the
- * prompt or rather in place. Based on littlstar's xasprintf
- * implementation:
- * https://github.com/littlstar/asprintf.c/blob/master/asprintf.c*/
-{
-	va_list arglist, tmp_list;
-	int size = 0;
-
-	va_start(arglist, format);
-	va_copy(tmp_list, arglist);
-	size = vsnprintf((char *)NULL, 0, format, tmp_list);
-	va_end(tmp_list);
-
-	if (size < 0) {
-		va_end(arglist);
-		return EXIT_FAILURE;
-	}
-
-	char *buf = (char *)xcalloc((size_t)size + 1, sizeof(char));
-
-	vsprintf(buf, format, arglist);
-	va_end(arglist);
-
-	/* If the new message is the same as the last message, skip it */
-	if (msgs_n && strcmp(messages[msgs_n - 1], buf) == 0) {
-		free(buf);
-		return EXIT_SUCCESS;
-	}
-
-	if (buf) {
-		if (msg_type) {
-			switch (msg_type) {
-			case 'e': pmsg = error; break;
-			case 'w': pmsg = warning; break;
-			case 'n': pmsg = notice; break;
-			default: pmsg = nomsg;
-			}
-		}
-
-		log_msg(buf, (prompt) ? PRINT_PROMPT : NOPRINT_PROMPT);
-		free(buf);
-
-		return EXIT_SUCCESS;
-	}
-
 	return EXIT_FAILURE;
 }
 

@@ -35,26 +35,6 @@ check_immutable_bit(char *file)
 	#endif /* !defined(FS_IOC_GETFLAGS) || !defined(FS_IMMUTABLE_FL) */
 }
 
-int
-xgetchar(void)
-/* Unlike getchar(), gets key pressed immediately, without the need to
- * wait for new line (Enter)
- * Taken from:
- * https://stackoverflow.com/questions/12710582/how-can-i-capture-a-key-stroke-immediately-in-linux */
-{
-	struct termios oldt, newt;
-	int ch;
-
-	tcgetattr(STDIN_FILENO, &oldt);
-	newt = oldt;
-	newt.c_lflag &= ~(ICANON|ECHO);
-	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-	ch = getchar();
-	tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-
-	return ch;
-}
-
 /*
 size_t
 xstrlen(const char *str)

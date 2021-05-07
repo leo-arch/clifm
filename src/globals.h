@@ -6,6 +6,12 @@
 
 #include "helpers.h"
 
+
+#ifndef _BE_POSIX
+#define CMD_LEN_MAX (PATH_MAX + ((NAME_MAX + 1) << 1))
+extern char len_buf[CMD_LEN_MAX] __attribute__ ((aligned));
+#endif
+
 //
 // some structs
 //
@@ -241,4 +247,3 @@ extern char di_c[MAX_COLOR], /* Directory */
 	si_c[MAX_COLOR + 2], /* stealth indicator color */
 
 	dir_ico_c[MAX_COLOR]; /* Directories icon color */
-
