@@ -22,7 +22,18 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <unistd.h>
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+
+#include "aux.h"
+#include "mime.h"
+#include "exec.h"
+#include "checks.h"
+#include "archives.h"
 
 char *
 get_app(const char *mime, const char *ext)

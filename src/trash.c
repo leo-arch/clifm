@@ -22,7 +22,26 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <unistd.h>
+#include <stdio.h>
+#include <errno.h>
+#include <string.h>
+#include <dirent.h>
+#include <time.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+
+#include "aux.h"
+#include "navigation.h"
+#include "misc.h"
+#include "sort.h"
+#include "exec.h"
+#include "colors.h"
+#include "trash.h"
+#include "readline.h"
+#include "checks.h"
 
 int
 trash_clear(void)

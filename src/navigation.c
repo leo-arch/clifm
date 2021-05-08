@@ -22,7 +22,21 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <unistd.h>
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <dirent.h>
+
+#include "checks.h"
+#include "navigation.h"
+#include "listing.h"
+#include "history.h"
+#include "aux.h"
+#include "jump.h"
+#include "misc.h"
 
 int
 workspaces(char *str)

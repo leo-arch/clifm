@@ -22,7 +22,28 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <readline/readline.h>
+
+#include "navigation.h"
+#include "archives.h"
+#include "exec.h"
+#include "colors.h"
+#include "mime.h"
+#include "readline.h"
+#include "checks.h"
+#include "aux.h"
+#include "history.h"
+#include "selection.h"
+#include "file_operations.h"
+#include "listing.h"
+#include "misc.h"
 
 int
 xchmod(const char *file, mode_t mode)

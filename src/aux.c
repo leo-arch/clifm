@@ -22,11 +22,25 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
 
 				/*  #######################
 				 *  #  CLIFM CUSTOM LIB   #
 				 *  ######################*/
+
+#include "helpers.h"
+
+#include <errno.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
+#include <termios.h>
+#include <ctype.h>
+
+#include "aux.h"
+#include "exec.h"
+#include "misc.h"
 
 int *
 get_hex_num(const char *str)

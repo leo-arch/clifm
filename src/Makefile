@@ -18,3 +18,6 @@ build: ${OBJS}
 	@printf "Detected operating system: ";
 	@echo $(OS)
 	cc -o $(PROG) $^ ${LIBS_${OS}}
+
+clean:
+	rm *.o

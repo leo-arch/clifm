@@ -22,8 +22,26 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
 #include "icons.h"
+
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/statvfs.h>
+#include <sys/capability.h>
+#include <string.h>
+#include <errno.h>
+#include <dirent.h>
+#include <sys/ioctl.h>
+#include <fcntl.h>
+
+#include "misc.h"
+#include "aux.h"
+#include "sort.h"
+#include "properties.h"
+#include "colors.h"
 
 void
 print_sort_method(void)

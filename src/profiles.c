@@ -22,7 +22,28 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <unistd.h>
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <readline/history.h>
+
+#include "aux.h"
+#include "sort.h"
+#include "profiles.h"
+#include "misc.h"
+#include "config.h"
+#include "exec.h"
+#include "checks.h"
+#include "history.h"
+#include "bookmarks.h"
+#include "listing.h"
+#include "actions.h"
+#include "init.h"
+#include "navigation.h"
+#include "mime.h"
 
 int
 get_profile_names(void)

@@ -22,7 +22,23 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <unistd.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <string.h>
+#include <errno.h>
+#include <time.h>
+#include <sys/capability.h>
+#include <sys/types.h>
+#include <grp.h>
+#include <pwd.h>
+#include <fcntl.h>
+
+#include "aux.h"
+#include "colors.h"
+#include "checks.h"
 
 int
 get_properties(char *filename, int dsize)

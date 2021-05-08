@@ -22,7 +22,22 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <unistd.h>
+#include <sys/stat.h>
+#include <stdio.h>
+#include <readline/readline.h>
+
+#include "config.h"
+#include "exec.h"
+#include "misc.h"
+#include "mime.h"
+#include "keybinds.h"
+#include "aux.h"
+#include "prompt.h"
+#include "listing.h"
+#include "profiles.h"
 
 int
 kbinds_reset(void)

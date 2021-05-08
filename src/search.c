@@ -22,7 +22,27 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <unistd.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <dirent.h>
+#include <string.h>
+#ifdef __linux__
+#include <sys/ioctl.h>
+#endif
+#include <errno.h>
+#include <regex.h>
+
+#include "aux.h"
+#include "exec.h"
+#include "navigation.h"
+#include "glob.h"
+#include "sort.h"
+#include "colors.h"
+#include "checks.h"
 
 int
 search_glob(char **comm, int invert)

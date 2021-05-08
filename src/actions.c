@@ -22,7 +22,21 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <string.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#include "aux.h"
+#include "exec.h"
+#include "file_operations.h"
+#include "checks.h"
+#include "mime.h"
+#include "init.h"
 
 int
 run_action(char *action, char **args)

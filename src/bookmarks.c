@@ -22,7 +22,22 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <stdio.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/stat.h>
+
+#include "bookmarks.h"
+#include "file_operations.h"
+#include "readline.h"
+#include "aux.h"
+#include "exec.h"
+#include "init.h"
+#include "checks.h"
+#include "mime.h"
 
 int
 bookmarks_function(char **cmd)

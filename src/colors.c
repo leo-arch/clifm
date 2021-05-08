@@ -22,7 +22,22 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/capability.h>
+#include <string.h>
+#include <errno.h>
+#include <unistd.h>
+#include <dirent.h>
+
+#include "aux.h"
+#include "mime.h"
+#include "colors.h"
+#include "listing.h"
+#include "misc.h"
 
 char *
 get_ext_color(const char *ext)

@@ -22,7 +22,29 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <time.h>
+#include <sys/stat.h>
+#include <readline/readline.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <signal.h>
+#include <stdarg.h>
+
+#include "aux.h"
+#include "exec.h"
+#include "checks.h"
+#include "init.h"
+#include "listing.h"
+#include "history.h"
+#include "readline.h"
+#include "navigation.h"
+#include "bookmarks.h"
+#include "jump.h"
 
 void
 set_term_title(const char *dir)
