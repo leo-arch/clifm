@@ -22,7 +22,22 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <stdio.h>
+#include <string.h>
+#include <readline/readline.h>
+#include <wordexp.h>
+
+#include "trash.h"
+#include "misc.h"
+#include "exec.h"
+#include "aux.h"
+#include "listing.h"
+#include "init.h"
+#include "prompt.h"
+#include "history.h"
+#include "prompt.h"
 
 char *
 prompt(void)

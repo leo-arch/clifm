@@ -22,7 +22,20 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <string.h>
+#include <time.h>
+#include <wchar.h>
+#include <stdio.h>
+#include <glob.h>
+#include <wordexp.h>
+
+#include "aux.h"
+#include "checks.h"
+#include "readline.h"
+#include "navigation.h"
+#include "exec.h"
 
 #ifndef _BE_POSIX
 #define CMD_LEN_MAX (PATH_MAX + ((NAME_MAX + 1) << 1))

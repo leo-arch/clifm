@@ -22,7 +22,44 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <dirent.h>
+#include <readline/readline.h>
+
+#include "aux.h"
+#include "history.h"
+#include "exec.h"
+#include "listing.h"
+#include "selection.h"
+#include "checks.h"
+#include "actions.h"
+#include "misc.h"
+#include "strings.h"
+#include "navigation.h"
+#include "file_operations.h"
+#include "remotes.h"
+#include "jump.h"
+#include "bookmarks.h"
+#include "readline.h"
+#include "trash.h"
+#include "properties.h"
+#include "search.h"
+#include "sort.h"
+#include "colors.h"
+#include "keybinds.h"
+#include "config.h"
+#include "mime.h"
+#include "init.h"
+#include "archives.h"
+#include "profiles.h"
 
 int
 run_and_refresh(char **comm)

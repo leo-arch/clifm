@@ -22,7 +22,17 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <errno.h>
+
+#include "aux.h"
+#include "exec.h"
+#include "navigation.h"
+#include "listing.h"
 
 int
 remote_ftp(char *address, char *options)

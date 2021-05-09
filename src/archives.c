@@ -22,7 +22,23 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+#include "readline.h"
+#include "aux.h"
+#include "exec.h"
+#include "navigation.h"
+#include "jump.h"
+#include "listing.h"
+#include "history.h"
+
+int zstandard(char *in_file, char *out_file, char mode, char op);
 
 int
 handle_iso(char *file)

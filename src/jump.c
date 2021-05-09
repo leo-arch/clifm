@@ -22,7 +22,19 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <time.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <string.h>
+
+#include "aux.h"
+#include "file_operations.h"
+#include "checks.h"
+#include "navigation.h"
+#include "init.h"
 
 int
 add_to_jumpdb(const char *dir)

@@ -27,7 +27,36 @@
  *
  */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <locale.h>
+#include <libintl.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <errno.h>
+#include <string.h>
+#include <readline/readline.h>
+#include <readline/history.h>
+#include <sys/stat.h>
+#include <termios.h>
+
+#include "strings.h"
+#include "aux.h"
+#include "misc.h"
+#include "init.h"
+#include "config.h"
+#include "colors.h"
+#include "navigation.h"
+#include "exec.h"
+#include "history.h"
+#include "listing.h"
+#include "keybinds.h"
+#include "jump.h"
+#include "readline.h"
+#include "checks.h"
+#include "profiles.h"
+#include "prompt.h"
 
 struct usrvar_t *usr_var = (struct usrvar_t *)NULL;
 struct actions_t *usr_actions = (struct actions_t *)NULL;

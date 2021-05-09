@@ -22,7 +22,26 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <unistd.h>
+#include <sys/stat.h>
+#include <stdio.h>
+#include <time.h>
+#include <string.h>
+#include <errno.h>
+#include <limits.h>
+#include <readline/readline.h>
+
+#include "misc.h"
+#include "aux.h"
+#include "exec.h"
+#include "config.h"
+#include "mime.h"
+#include "listing.h"
+#include "navigation.h"
+#include "colors.h"
+#include "init.h"
 
 int
 regen_config(void)

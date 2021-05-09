@@ -22,7 +22,21 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <unistd.h>
+#include <stdio.h>
+#include <readline/readline.h>
+#include <readline/history.h>
+#include <string.h>
+#include <dirent.h>
+#include <fcntl.h>
+
+#include "aux.h"
+#include "readline.h"
+#include "checks.h"
+#include "keybinds.h"
+#include "navigation.h"
 
 int
 initialize_readline(void)

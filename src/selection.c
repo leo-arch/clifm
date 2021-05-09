@@ -22,7 +22,30 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <unistd.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <string.h>
+#include <dirent.h>
+#include <readline/readline.h>
+#include <sys/stat.h>
+#include <glob.h>
+#ifdef __linux__
+#include <sys/ioctl.h>
+#endif
+
+#include "misc.h"
+#include "aux.h"
+#include "navigation.h"
+#include "checks.h"
+#include "sort.h"
+#include "selection.h"
+#include "colors.h"
+#include "readline.h"
+#include "listing.h"
 
 int
 save_sel(void)

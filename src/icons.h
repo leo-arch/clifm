@@ -1,3 +1,5 @@
+#pragma once
+
 /* Icon definitions for CliFM */
 
 #ifndef ICONS_H

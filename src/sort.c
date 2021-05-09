@@ -22,7 +22,16 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <unistd.h>
+#include <dirent.h>
+#include <fcntl.h>
+#include <string.h>
+#include <stdio.h>
+
+#include "listing.h"
+#include "checks.h"
 
 int
 skip_nonexec(const struct dirent *ent)

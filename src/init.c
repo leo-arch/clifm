@@ -22,7 +22,27 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <time.h>
+#include <unistd.h>
+#include <pwd.h>
+#include <string.h>
+#include <errno.h>
+#include <getopt.h>
+#include <readline/readline.h>
+#include <signal.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <termios.h>
+
+#include "aux.h"
+#include "checks.h"
+#include "config.h"
+#include "mime.h"
+#include "navigation.h"
+#include "sort.h"
+#include "misc.h"
 
 void
 check_env_filter(void)

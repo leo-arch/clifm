@@ -22,7 +22,20 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <time.h>
+#include <readline/history.h>
+
+#include "misc.h"
+#include "aux.h"
+#include "init.h"
+#include "history.h"
+#include "checks.h"
+#include "exec.h"
 
 int
 log_function(char **comm)

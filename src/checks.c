@@ -22,7 +22,18 @@
  * MA 02110-1301, USA.
 */
 
-#include "clifm.h"
+#include "helpers.h"
+
+#include <sys/types.h>
+#include <sys/acl.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+
+#include "misc.h"
+#include "aux.h"
 
 int
 check_immutable_bit(char *file)
