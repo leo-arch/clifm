@@ -313,10 +313,20 @@ exec_cmd(char **comm)
 	 * executed command */
 	exit_code = EXIT_SUCCESS;
 
+	/* Warn when using the ',' keyword and there's no pinned file */
+	int k = args_n + 1;
+	while (--k >= 0) {
+		if (*comm[k] == ',' && !comm[k][1]) {
+			fprintf(stderr, _("%s: No pinned file\n"), PROGRAM_NAME);
+			exit_code = EXIT_FAILURE;
+			return EXIT_FAILURE;
+		}
+	}
+
 	/* User defined actions */
 	if (actions_n) {
-		size_t i;
-		for (i = 0; i < actions_n; i++) {
+		int i = actions_n;
+		while (--i >= 0) {
 			if (*comm[0] == *usr_actions[i].name
 			&& strcmp(comm[0], usr_actions[i].name) == 0) {
 				exit_code = run_action(usr_actions[i].value, comm);
@@ -344,8 +354,7 @@ exec_cmd(char **comm)
 
 		/* If double semi colon or colon (or ";:" or ":;") */
 		else if (comm[0][1] == ';' || comm[0][1] == ':') {
-			fprintf(stderr, _("%s: '%s': Syntax error\n"),
-					PROGRAM_NAME, comm[0]);
+			fprintf(stderr, _("%s: '%s': Syntax error\n"), PROGRAM_NAME, comm[0]);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
@@ -1653,7 +1662,6 @@ exec_cmd(char **comm)
 	/* ####################################################
 	 * #                EXTERNAL/SHELL COMMANDS           #
 	 * ####################################################*/
-
 
 		/* LOG EXTERNAL COMMANDS
 		* 'no_log' will be true when running profile or prompt commands */
