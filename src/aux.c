@@ -20,18 +20,15 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301, USA.
-*/
+ */
 
 
-				/*  #######################
-				 *  #  CLIFM CUSTOM LIB   #
-				 *  ######################*/
+/*  #######################
+ *  #  CLIFM CUSTOM LIB   #
+ *  ######################*/
 
 #include "helpers.h"
 
-#ifdef __FreeBSD__
-#include <string.h>
-#endif
 #include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -46,11 +43,9 @@
 #include "exec.h"
 #include "misc.h"
 
-int *
-get_hex_num(const char *str)
 /* Given this value: \xA0\xA1\xA1, return an array of integers with
  * the integer values for A0, A1, and A2 respectivelly */
-{
+int * get_hex_num(const char *str) {
 	size_t i = 0;
 	int *hex_n = (int *)calloc(3, sizeof(int));
 
@@ -82,9 +77,8 @@ get_hex_num(const char *str)
 	return hex_n;
 }
 
-int
-count_dir(const char *dir_path) /* Readdir version */
-/* Count files in DIR_PATH, including self and parent. */
+int count_dir(const char *dir_path) /* Readdir version */
+	/* Count files in DIR_PATH, including self and parent. */
 {
 	if (!dir_path)
 		return -1;
@@ -109,11 +103,9 @@ count_dir(const char *dir_path) /* Readdir version */
 	return file_count;
 }
 
-char *
-get_cmd_path(const char *cmd)
 /* Get the path of a given command from the PATH environment variable.
  * It basically does the same as the 'which' Unix command */
-{
+char * get_cmd_path(const char *cmd) {
 	char *cmd_path = (char *)NULL;
 	size_t i;
 
@@ -134,10 +126,8 @@ get_cmd_path(const char *cmd)
 	return (char *)NULL;
 }
 
-char *
-get_size_unit(off_t size)
 /* Convert FILE_SIZE to human readeable form */
-{
+char * get_size_unit(off_t size) {
 	size_t max = 9;
 	/* Max size type length == 9 == "1023.99K\0" */
 	char *p = malloc(max * sizeof(char));
@@ -166,9 +156,7 @@ get_size_unit(off_t size)
 	return str;
 }
 
-off_t
-dir_size(char *dir)
-{
+off_t dir_size(char *dir) {
 	char *rand_ext = gen_rand_str(6);
 	if (!rand_ext)
 		return -1;
@@ -183,26 +171,14 @@ dir_size(char *dir)
 	FILE *du_fp = fopen(DU_TMP_FILE, "w");
 	int stdout_bk = dup(STDOUT_FILENO); /* Save original stdout */
 	dup2(fileno(du_fp), STDOUT_FILENO); /* Redirect stdout to the desired
-	file */ 
+																				 file */ 
 	fclose(du_fp);
-
-/*  char *cmd = (char *)NULL;
-	cmd = (char *)xcalloc(strlen(dir) + 10, sizeof(char));
-	sprintf(cmd, "du -sh '%s'", dir);
-	//int ret = launch_execle(cmd);
-	launch_execle(cmd);
-	free(cmd); */
 
 	char *cmd[] = { "du", "--block-size=1", "-s", dir, NULL };
 	launch_execve(cmd, FOREGROUND, E_NOSTDERR);
 
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
 	close(stdout_bk);
-
-/*  if (ret != 0) {
-		puts("???");
-		return;
-	} */
 
 	off_t retval = -1;
 
@@ -233,19 +209,17 @@ dir_size(char *dir)
 	return retval;
 }
 
-int
-get_link_ref(const char *link)
 /* Return the filetype of the file pointed to by LINK, or -1 in case of
  * error. Possible return values:
-	S_IFDIR: 40000 (octal) / 16384 (decimal, integer)
-	S_IFREG: 100000 / 32768
-	S_IFLNK: 120000 / 40960
-	S_IFSOCK: 140000 / 49152
-	S_IFBLK: 60000 / 24576
-	S_IFCHR: 20000 / 8192
-	S_IFIFO: 10000 / 4096
-* See the inode manpage */
-{
+S_IFDIR: 40000 (octal) / 16384 (decimal, integer)
+S_IFREG: 100000 / 32768
+S_IFLNK: 120000 / 40960
+S_IFSOCK: 140000 / 49152
+S_IFBLK: 60000 / 24576
+S_IFCHR: 20000 / 8192
+S_IFIFO: 10000 / 4096
+ * See the inode manpage */
+int get_link_ref(const char *link) {
 	if (!link)
 		return (-1);
 
@@ -260,10 +234,9 @@ get_link_ref(const char *link)
 	return (-1);
 }
 
-char *
-xitoa(int n)
-/* Transform an integer (N) into a string of chars */
-{
+// Transform an integer (N) into a string of chars
+// this exists because some Operating systems do not suppoit itoa
+char * xitoa(int n) {
 	static char buf[32] = {0};
 	int i = 30, rem;
 
@@ -287,7 +260,7 @@ void * xrealloc(void *ptr, size_t size) {
 	if (!new_ptr) {
 		free(ptr);
 		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate "
-			 "%zu bytes\n"), PROGRAM_NAME, __func__, size);
+					"%zu bytes\n"), PROGRAM_NAME, __func__, size);
 		exit(EXIT_FAILURE);
 	}
 
@@ -299,20 +272,19 @@ void * xcalloc(size_t nmemb, size_t size) {
 
 	if (!new_ptr) {
 		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate "
-			 "%zu bytes\n"), PROGRAM_NAME, __func__, nmemb * size);
+					"%zu bytes\n"), PROGRAM_NAME, __func__, nmemb * size);
 		exit(EXIT_FAILURE);
 	}
 
 	return new_ptr;
 }
 
-void *
-xnmalloc(size_t nmemb, size_t size) {
+void * xnmalloc(size_t nmemb, size_t size) {
 	void *new_ptr = malloc(nmemb * size);
 
 	if (!new_ptr) {
 		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu "
-			 "bytes\n"), PROGRAM_NAME, __func__, nmemb * size);
+					"bytes\n"), PROGRAM_NAME, __func__, nmemb * size);
 		exit(EXIT_FAILURE);
 	}
 
@@ -320,7 +292,7 @@ xnmalloc(size_t nmemb, size_t size) {
 }
 
 // unlike getchar this does not wait for newline('\n')
-// https://stackoverflow.com/questions/12710582/how-can-i-capture-a-key-stroke-immediately-in-linux */
+// https://stackoverflow.com/questions/12710582/how-can-i-capture-a-key-stroke-immediately-in-linux
 char xgetchar(void)
 {
 	struct termios oldt, newt;
@@ -336,91 +308,24 @@ char xgetchar(void)
 	return ch;
 }
 
-/*
-size_t
-xstrlen(const char *str)
-{
-	size_t len = 0;
-
-	while (*(str++))
-		len++;
-
-	return len;
-} */
-
-/*
-int
-xatoi(const char *str)
-// 2 times faster than atoi. Cannot handle negative number (See xnatoi
-// below)
-{
-	int ret = 0;
-
-	while (*str) {
-		if (*str < 0x30 || *str > 0x39)
-			return ret;
-		ret = (ret * 10) + (*str - '0');
-		str++;
-	}
-
-	if (ret > INT_MAX)
-		return INT_MAX;
-
-	if (ret < INT_MIN)
-		return INT_MIN;
-
-	return ret;
-}
-
-int
-xnatoi(const char *str)
-// 2 times faster than atoi. The commented lines make xatoi able to
-// handle negative values
-{
-	int ret = 0, neg = 0;
-
-	while (*str) {
-		if (*str < 0x30 || *str > 0x39)
-			return ret;
-		ret = (ret * 10) + (*str - '0');
-		str++;
-	}
-
-	if (neg)
-		ret = ret - (ret * 2);
-
-	if (ret > INT_MAX)
-		return INT_MAX;
-
-	if (ret < INT_MIN)
-		return INT_MIN;
-
-	return ret;
-} */
-
 /* The following four functions (from_hex, to_hex, url_encode, and
  * url_decode) were taken from "http://www.geekhideout.com/urlcode.shtml"
  * and modified to comform to RFC 2395, as recommended by the
  * freedesktop trash specification */
-char
-from_hex(char c)
-/* Converts a hex char to its integer value */
-{
+
+// Converts a hex char to its integer value
+char from_hex(char c) {
 	return isdigit(c) ? c - '0' : tolower(c) - 'a' + 10;
 }
 
-char
-to_hex(char c)
-/* Converts an integer value to its hex form */
-{
+// Converts an integer value to its hex form
+char to_hex(char c) {
 	static char hex[] = "0123456789ABCDEF";
 	return hex[c & 15];
 }
 
-char *
-url_encode(char *str)
-/* Returns a url-encoded version of str */
-{
+// Returns a url-encoded version of str
+char * url_encode(char *str) {
 	if (!str || *str == 0x00)
 		return (char *)NULL;
 
@@ -437,15 +342,15 @@ url_encode(char *str)
 	p = (char *)NULL;
 
 	/* Copies of STR and BUF pointers to be able
-	* to increase and/or decrease them without loosing the original
-	* memory location */
+	 * to increase and/or decrease them without loosing the original
+	 * memory location */
 	char *pstr, *pbuf;
 	pstr = str;
 	pbuf = buf;
 
 	for (; *pstr; pstr++) {
 		if (isalnum (*pstr) || *pstr == '-' || *pstr == '_'
-					|| *pstr == '.' || *pstr == '~' || *pstr == '/')
+				|| *pstr == '.' || *pstr == '~' || *pstr == '/')
 			/* Do not encode the above chars */
 			*pbuf++ = *pstr;
 		else {
@@ -459,10 +364,8 @@ url_encode(char *str)
 	return buf;
 }
 
-char *
-url_decode(char *str)
-/* Returns a url-decoded version of str */
-{
+// Returns a url-decoded version of str
+char * url_decode(char *str) {
 	if (!str || str[0] == 0x00)
 		return (char *)NULL;
 
@@ -497,12 +400,10 @@ url_decode(char *str)
 	return buf;
 }
 
-int
-read_octal(char *str)
 /* Convert octal string into integer.
  * Taken from: https://www.geeksforgeeks.org/program-octal-decimal-conversion/
  * Used by decode_prompt() to make things like this work: \033[1;34m */
-{
+int read_octal(char *str) {
 	if (!str)
 		return -1;
 
@@ -516,7 +417,7 @@ read_octal(char *str)
 	int temp = num;
 	while (temp) {
 
-		/* Extracting last digit */
+		// Extracting last digit
 		int last_digit = temp % 10;
 		temp = temp / 10;
 
@@ -530,8 +431,7 @@ read_octal(char *str)
 	return dec_value;
 }
 
-int
-hex2int(char *str)
+int hex2int(char *str)
 {
 	int i, n[2];
 	for (i = 1; i >= 0; i--) {
@@ -539,13 +439,13 @@ hex2int(char *str)
 			n[i] = str[i] - 0x30;
 		else {
 			switch(str[i]) {
-			case 'A': case 'a': n[i] = 10; break;
-			case 'B': case 'b': n[i] = 11; break;
-			case 'C': case 'c': n[i] = 12; break;
-			case 'D': case 'd': n[i] = 13; break;
-			case 'E': case 'e': n[i] = 14; break;
-			case 'F': case 'f': n[i] = 15; break;
-			default: break;
+				case 'A': case 'a': n[i] = 10; break;
+				case 'B': case 'b': n[i] = 11; break;
+				case 'C': case 'c': n[i] = 12; break;
+				case 'D': case 'd': n[i] = 13; break;
+				case 'E': case 'e': n[i] = 14; break;
+				case 'F': case 'f': n[i] = 15; break;
+				default: break;
 			}
 		}
 	}
