@@ -80,7 +80,7 @@ void* __dso_handle;
 #  endif /* __GLIBC__ */
 #endif /* _GNU_SOURCE */
 
-/* Because capability.h is deprecated in BSD */
+// Because capability.h is deprecated in BSD
 #if __linux__
 #  if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24)
 #    define _LINUX_CAP
@@ -88,16 +88,11 @@ void* __dso_handle;
 #endif /* __linux__ */
 
 #define PROGRAM_NAME "CliFM"
-#define PNL "clifm" /* Program name lowercase */
+#define PNL "clifm" // Program name lowercase
 /* #define TMP_DIR "/tmp/clifm" */
-/* If no formatting, puts (or write) is faster than printf */
-/* #define CLEAR puts("\x1b[c") "\x1b[2J\x1b[1;1H"*/
+// If no formatting, puts (or write) is faster than printf
 #define CLEAR write(STDOUT_FILENO, "\033c", 3);
-/* #define CLEAR puts("\x1b[2J\x1b[1;1H");
-* #define CLEAR write(STDOUT_FILENO, "\x1b[2J\x1b[3J\x1b[H", 11);
-* #define CLEAR puts("\x1b[1;1H\x1b[2J");
-* #define CLEAR puts("\x1b[H\x1b[J");
-* #define CLEAR write(STDOUT_FILENO, "\x1b[2J\x1b[H", 7); */
+
 #define VERSION "1.0"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
@@ -356,13 +351,7 @@ nm=01;32:bm=01;36:"
 #define FALLBACK_SHELL "/bin/sh"
 #define FALLBACK_OPENER "xdg-open"
 
-#ifndef __FreeBSD__
-#  define strlen xstrlen
-#endif
-#define strcpy xstrcpy
-#define strncpy xstrncpy
-#define strcmp xstrcmp
-#define strncmp xstrncmp
+#define itoa xitoa // itoa does not exist in some OS's
 /* #define atoi xatoi */
 /* #define alphasort xalphasort */
 #define _(String) gettext (String)
@@ -716,8 +705,6 @@ extern char
 	*TRASH_FILES_DIR,
 	*TRASH_INFO_DIR,
 	*usr_cscheme;
-
-extern struct user_t user;
 
 extern regex_t regex_exp;
 

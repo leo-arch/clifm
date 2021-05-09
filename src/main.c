@@ -352,8 +352,6 @@ char di_c[MAX_COLOR], /* Directory */
 	 * #############################
 	 * */
 
-struct user_t user;
-
 int
 main(int argc, char *argv[]) {
 	/* Though this program might perfectly work on other architectures,
@@ -592,7 +590,6 @@ main(int argc, char *argv[]) {
 
 	load_actions();
 
-	/* ##### READLINE ##### */
 	initialize_readline();
 
 	/* Copy the list of quote chars to a global variable to be used

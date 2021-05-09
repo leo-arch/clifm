@@ -18,7 +18,6 @@ char *strbtw(char *str, const char a, const char b);
 char *gen_rand_str(size_t len);
 char *xstrcpy(char *buf, const char *restrict str);
 size_t xstrlen(const char *restrict s);
-int xstrcmp(const char *s1, const char *s2);
 int xstrncmp(const char *s1, const char *s2, size_t n);
 char *xstrncpy(char *buf, const char *restrict str, size_t n);
 size_t xstrsncpy(char *restrict dst, const char *restrict src, size_t n);

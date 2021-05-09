@@ -46,6 +46,11 @@
 #include "init.h"
 #include "string.h"
 
+struct user_t user;
+
+// 
+// functions
+//
 void
 check_env_filter(void)
 {

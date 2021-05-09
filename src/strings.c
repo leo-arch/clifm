@@ -43,27 +43,6 @@ char len_buf[CMD_LEN_MAX] __attribute__ ((aligned));
 #endif
 
 int
-xstrcmp(const char *s1, const char *s2)
-/* I use 256 for error code since it does not represent any ASCII code
- * (the extended version goes up to 255) */
-{
-	if (!s1 || !s2)
-		return 256;
-
-	while (*s1) {
-		if (*s1 != *s2)
-			return (*s1 - *s2);
-		s1++;
-		s2++;
-	}
-
-	if (*s2)
-		return (0 - *s2);
-
-	return 0;
-}
-
-int
 xstrncmp(const char *s1, const char *s2, size_t n)
 {
 	if (!s1 || !s2)
@@ -179,35 +158,6 @@ u8_xstrlen(const char *restrict str)
 
 	return len;
 }
-
-char *
-xstrcpy(char *buf, const char *restrict str)
-{
-	if (!str)
-		return (char *)NULL;
-
-	while (*str)
-		*(buf++) = *(str++);
-
-	*buf = '\0';
-
-/*  while ((*buf++ = *str++)); */
-
-	return buf;
-}
-
-#ifndef __FreeBSD__
-size_t
-xstrlen(const char *restrict s)
-/* Taken from NNN's source code */
-{
-#if !defined(__GLIBC__)
-	return strlen(s);
-#else
-	return (char *)rawmemchr(s, '\0') - s;
-#endif
-}
-#endif /* __FreeBSD__ */
 
 int
 strcntchr(const char *str, const char c)

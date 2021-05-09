@@ -40,6 +40,7 @@
 #include <dirent.h>
 #include <termios.h>
 #include <ctype.h>
+#include <string.h>
 
 #include "aux.h"
 #include "exec.h"
@@ -279,9 +280,8 @@ xitoa(int n)
 	return &buf[++i];
 }
 
-void *
-xrealloc(void *ptr, size_t size)
-{
+// some memory wrapper functions
+void * xrealloc(void *ptr, size_t size) {
 	void *new_ptr = realloc(ptr, size);
 
 	if (!new_ptr) {
@@ -294,9 +294,7 @@ xrealloc(void *ptr, size_t size)
 	return new_ptr;
 }
 
-void *
-xcalloc(size_t nmemb, size_t size)
-{
+void * xcalloc(size_t nmemb, size_t size) {
 	void *new_ptr = calloc(nmemb, size);
 
 	if (!new_ptr) {
@@ -309,8 +307,7 @@ xcalloc(size_t nmemb, size_t size)
 }
 
 void *
-xnmalloc(size_t nmemb, size_t size)
-{
+xnmalloc(size_t nmemb, size_t size) {
 	void *new_ptr = malloc(nmemb * size);
 
 	if (!new_ptr) {
@@ -322,15 +319,12 @@ xnmalloc(size_t nmemb, size_t size)
 	return new_ptr;
 }
 
-int
-xgetchar(void)
-/* Unlike getchar(), gets key pressed immediately, without the need to
- * wait for new line (Enter)
- * Taken from:
- * https://stackoverflow.com/questions/12710582/how-can-i-capture-a-key-stroke-immediately-in-linux */
+// unlike getchar this does not wait for newline('\n')
+// https://stackoverflow.com/questions/12710582/how-can-i-capture-a-key-stroke-immediately-in-linux */
+char xgetchar(void)
 {
 	struct termios oldt, newt;
-	int ch;
+	char ch;
 
 	tcgetattr(STDIN_FILENO, &oldt);
 	newt = oldt;
