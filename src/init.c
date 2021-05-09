@@ -121,50 +121,6 @@ struct user_t get_user(void) {
 	return tmp_user;
 }
 
-// ret urns user home, or null if not found
-char * get_user_home(void) {
-	struct passwd *pw;
-
-	pw = getpwuid(getuid());
-	if (!pw)
-		return NULL;
-
-	register size_t size = strlen(pw->pw_dir) + 1;
-	char * home = (char *)malloc(size * sizeof(char));
-	if (!home)
-		return (char *)NULL;
-
-	strncpy(home, pw->pw_dir, size);
-
-	return home;
-}
-
-char *
-get_sys_shell(void)
-/* Returns a pointer to a string containing the user's default shell
- * or NULL if not found */
-{
-	struct passwd *pw;
-
-	pw = getpwuid(getuid());
-
-	if (!pw)
-		return (char *)NULL;
-
-	char *p = (char *)NULL;
-	p = (char *)malloc((strlen(pw->pw_shell) + 1) * sizeof(char));
-
-	if (!p)
-		return (char *)NULL;
-
-	char *shell = p;
-	p = (char *)NULL;
-
-	strcpy(shell, pw->pw_shell);
-
-	return shell;
-}
-
 void
 load_jumpdb(void)
 /* Reconstruct the jump database from database file */
@@ -1929,7 +1885,8 @@ check_options(void)
 		max_log = DEF_MAX_LOG;
 
 	if (!user.shell) {
-		user.shell = get_sys_shell();
+		struct user_t tmp_user = get_user();
+		user.shell = tmp_user.shell;
 
 		if (!user.shell)
 			user.shell = savestring(FALLBACK_SHELL, strlen(FALLBACK_SHELL));

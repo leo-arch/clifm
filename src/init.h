@@ -21,8 +21,6 @@ void external_arguments(int argc, char **argv);
 char *get_date (void);
 pid_t get_own_pid(void);
 struct user_t get_user(void);
-char *get_user_home(void);
-char *get_sys_shell(void);
 
 // stores information regarding the user
 struct user_t {

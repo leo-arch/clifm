@@ -518,7 +518,7 @@ edit_xresources(void)
 
 		if (xrdb_path) {
 			char *res_file = (char *)xnmalloc(
-									 strlen(user.home) + 13, sizeof(char));
+									 user.home_len + 13, sizeof(char));
 			sprintf(res_file, "%s/.Xresources", user.home);
 			char *cmd[] = { "xrdb", "merge", res_file,
 							NULL };
@@ -1734,10 +1734,8 @@ read_config(void)
 		}
 
 		else if (*line == 'S' && strncmp(line, "SystemShell=", 12) == 0) {
-			if (user.shell) {
 				free(user.shell);
 				user.shell = (char *)NULL;
-			}
 			char *opt_str = straft(line, '=');
 			if (!opt_str)
 				continue;
@@ -2048,13 +2046,10 @@ reload_config(void)
 		term = (char *)NULL;
 	}
 
-	if (user.shell) {
-		free(user.shell);
-		user.shell = (char *)NULL;
-	}
+	free(user.shell);
+	user.shell = (char *)NULL;
 
 	/* Reset all variables */
-
 	splash_screen = welcome_message = ext_cmd_ok = pager = UNSET;
 	show_hidden = clear_screen = list_folders_first = long_view = UNSET;
 	unicode = case_sensitive = cd_lists_on_the_fly = share_selbox = UNSET;
