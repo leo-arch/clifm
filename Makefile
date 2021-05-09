@@ -20,6 +20,7 @@ install: build
 	@mkdir -p /usr/share/{bash-completion/completions,zsh/site-functions}
 	@install -g 0 -o 0 -Dm644 completions.bash /usr/share/bash-completion/completions/"${PROG}"
 	@install -g 0 -o 0 -Dm644 completions.zsh /usr/share/zsh/site-functions/_"${PROG}"
+	@install -g 0 -o 0 -Dm644 misc/mimelist.example /usr/share/${PROG}//mimelist.example
 	@mkdir -p /usr/share/locale/es/LC_MESSAGES
 	@install -g 0 -o 0 -Dm644 translations/spanish/"${PROG}".mo \
 	/usr/share/locale/es/LC_MESSAGES/"${PROG}".mo
