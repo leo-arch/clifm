@@ -27,7 +27,9 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifdef __linux__
 #include <sys/capability.h>
+#endif
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>

@@ -29,6 +29,9 @@
 
 #include "helpers.h"
 
+#ifdef __FreeBSD__
+#include <string.h>
+#endif
 #include <errno.h>
 #include <stdio.h>
 #include <unistd.h>

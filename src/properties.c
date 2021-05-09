@@ -30,7 +30,9 @@
 #include <string.h>
 #include <errno.h>
 #include <time.h>
+#ifdef __linux__
 #include <sys/capability.h>
+#endif
 #include <sys/types.h>
 #include <grp.h>
 #include <pwd.h>

@@ -24,16 +24,16 @@
 
 #include "helpers.h"
 
+#include <stdio.h>
 #include <time.h>
 #include <unistd.h>
 #include <pwd.h>
 #include <string.h>
 #include <errno.h>
 #include <getopt.h>
+#include <sys/stat.h>
 #include <readline/readline.h>
 #include <signal.h>
-#include <stdio.h>
-#include <sys/stat.h>
 #include <termios.h>
 
 #include "aux.h"

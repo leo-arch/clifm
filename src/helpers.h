@@ -20,6 +20,9 @@
 #include <stdlib.h>
 #include <regex.h>
 #include <libintl.h>
+#ifdef __FreeBSD__
+#include <sys/time.h>
+#endif
 #ifdef __linux__
 #include <linux/version.h>
 #endif
@@ -777,6 +780,3 @@ extern char di_c[MAX_COLOR], /* Directory */
 
 	dir_ico_c[MAX_COLOR]; /* Directories icon color */
 
-				/** ##########################
-				 *  #  FORWARD DECLARATIONS  #
-				 *  ########################## */

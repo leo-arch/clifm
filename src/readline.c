@@ -24,8 +24,11 @@
 
 #include "helpers.h"
 
-#include <unistd.h>
+#ifdef __FreeBSD__
+#include <sys/stat.h>
+#endif
 #include <stdio.h>
+#include <unistd.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <string.h>

@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __FreeBSD__
+#include <sys/ioctl.h>
+#endif
+
 /* selection.c */
 int deselect(char **comm);
 int sel_function(char **args);

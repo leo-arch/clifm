@@ -30,9 +30,7 @@
 #include <fcntl.h>
 #include <dirent.h>
 #include <string.h>
-#ifdef __linux__
 #include <sys/ioctl.h>
-#endif
 #include <errno.h>
 #include <regex.h>
 

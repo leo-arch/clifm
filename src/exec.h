@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __FreeBSD__
+#include <signal.h>
+#endif
+
 int exec_cmd(char **comm);
 void exec_chained_cmds(char *cmd);
 void exec_profile(void);
