@@ -640,7 +640,6 @@ extern int
 extern unsigned short term_cols;
 
 extern size_t
-	user_home_len,
 	args_n,
 	sel_n,
 	msgs_n,

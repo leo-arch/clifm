@@ -1799,10 +1799,10 @@ home_tilde(const char *new_path)
 
 	/* If path == HOME/file */
 	else if (new_path[1] == user.home[1]
-	&& strncmp(new_path, user.home, user_home_len) == 0) {
-		path_tilde = (char *)xnmalloc(strlen(new_path + user_home_len + 1) + 3,
+	&& strncmp(new_path, user.home, user.home_len) == 0) {
+		path_tilde = (char *)xnmalloc(strlen(new_path + user.home_len + 1) + 3,
 									  sizeof(char));
-		sprintf(path_tilde, "~/%s", new_path + user_home_len + 1);
+		sprintf(path_tilde, "~/%s", new_path + user.home_len + 1);
 	}
 
 	else {

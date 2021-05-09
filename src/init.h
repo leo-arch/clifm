@@ -27,6 +27,7 @@ char *get_sys_shell(void);
 // stores information regarding the user
 struct user_t {
 	char * home;
+	size_t home_len;
 	char * name;
 	char * shell;
 };

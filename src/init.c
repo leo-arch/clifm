@@ -106,13 +106,6 @@ struct user_t get_user(void) {
 		exit(-1);
 	}
 
-	/* Why we don't just return a pointer to the field of the passwd
-	 * struct we need? Because this struct will be overwritten by
-	 * subsequent calls to getpwuid(), for example, in the properties
-	 * function, in which case our pointer will point to a wrong string.
-	 * So, to avoid this, we just copy the string we need into a new
-	 * variable. The same applies to the following functions,
-	 * get_user_home() and get_user.shell() */
 	tmp_user.home = savestring(pw->pw_dir, strlen(pw->pw_dir));
 	tmp_user.name = savestring(pw->pw_name, strlen(pw->pw_name));
 	tmp_user.shell = savestring(pw->pw_shell, strlen(pw->pw_shell));
@@ -121,6 +114,9 @@ struct user_t get_user(void) {
 		_err('e', NOPRINT_PROMPT, "%s: cannot detect user data, so exiting", PROGRAM_NAME);
 		exit(-1);
 	}
+
+	// some extra stuff to do before exiting
+	tmp_user.home_len = strlen(tmp_user.home);
 
 	return tmp_user;
 }

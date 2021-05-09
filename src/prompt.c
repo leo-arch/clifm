@@ -404,7 +404,7 @@ decode_prompt(const char *line)
 				int free_tmp_path = 0;
 				char *tmp_path = (char *)NULL;
 				if (strncmp(ws[cur_ws].path, user.home,
-				user_home_len) == 0)
+				user.home_len) == 0)
 					tmp_path = home_tilde(ws[cur_ws].path);
 				if (!tmp_path) {
 					tmp_path = ws[cur_ws].path;

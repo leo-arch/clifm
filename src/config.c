@@ -564,7 +564,7 @@ define_config_file_names(void)
 	}
 
 	else {
-		CONFIG_DIR_GRAL = (char *)xnmalloc(user_home_len + pnl_len
+		CONFIG_DIR_GRAL = (char *)xnmalloc(user.home_len + pnl_len
 								+ 11, sizeof(char));
 		sprintf(CONFIG_DIR_GRAL, "%s/.config/%s", user.home, PNL);
 	}
@@ -604,7 +604,7 @@ define_config_file_names(void)
 	PLUGINS_DIR = (char *)xnmalloc(config_gral_len + 9, sizeof(char));
 	sprintf(PLUGINS_DIR, "%s/plugins", CONFIG_DIR_GRAL);
 
-	TRASH_DIR = (char *)xnmalloc(user_home_len + 20, sizeof(char));
+	TRASH_DIR = (char *)xnmalloc(user.home_len + 20, sizeof(char));
 	sprintf(TRASH_DIR, "%s/.local/share/Trash", user.home);
 
 	size_t trash_len = strlen(TRASH_DIR);
