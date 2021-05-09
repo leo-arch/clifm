@@ -186,10 +186,10 @@ launch_execle(const char *cmd)
 		signal(SIGTERM, SIG_DFL);
 
 		/* Get shell base name */
-		char *name = strrchr(sys_shell, '/');
+		char *name = strrchr(user.shell, '/');
 
-		execl(sys_shell, name ? name + 1 : sys_shell, "-c", cmd, NULL);
-		fprintf(stderr, "%s: %s: execle: %s\n", PROGRAM_NAME, sys_shell,
+		execl(user.shell, name ? name + 1 : user.shell, "-c", cmd, NULL);
+		fprintf(stderr, "%s: %s: execle: %s\n", PROGRAM_NAME, user.shell,
 				strerror(errno));
 		_exit(errno);
 	}
@@ -336,7 +336,7 @@ exec_cmd(char **comm)
 	if (comm[0][0] == ';' || comm[0][0] == ':') {
 		if (!comm[0][1]) {
 			/* If just ":" or ";", launch the default shell */
-			char *cmd[] = { sys_shell, NULL };
+			char *cmd[] = { user.shell, NULL };
 			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_code = EXIT_FAILURE;
 			return exit_code;
@@ -1447,8 +1447,8 @@ exec_cmd(char **comm)
 				/* #### SHELL #### */
 	else if (*comm[0] == 's' && strcmp(comm[0], "shell") == 0) {
 		if (!comm[1]) {
-			if (sys_shell)
-				printf("%s: shell: %s\n", PROGRAM_NAME, sys_shell);
+			if (user.shell)
+				printf("%s: shell: %s\n", PROGRAM_NAME, user.shell);
 			else
 				printf(_("%s: shell: unknown\n"), PROGRAM_NAME);
 		}

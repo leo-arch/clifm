@@ -3,10 +3,7 @@
 			 *  #               CliFM                  #
 			 *  # The anti-eye-candy/KISS file manager #
 			 *  ######################################## */
-
-/*
- *  GPL2+ License
- *
+/* GPL2+ License 
  * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
  * All rights reserved.
 
@@ -233,7 +230,6 @@ char
 	*TRASH_DIR = (char *)NULL,
 	*TRASH_FILES_DIR = (char *)NULL,
 	*TRASH_INFO_DIR = (char *)NULL,
-	*user = (char *)NULL,
 	*usr_cscheme = (char *)NULL,
 	*user_home = (char *)NULL;
 
@@ -350,41 +346,31 @@ char di_c[MAX_COLOR], /* Directory */
 
 	dir_ico_c[MAX_COLOR]; /* Directories icon color */
 
-				/**
-				 * #############################
-				 * #           MAIN            #
-				 * #############################
-				 * */
+	/**
+	 * #############################
+	 * #           MAIN            #
+	 * #############################
+	 * */
+
+struct user_t user;
 
 int
-main(int argc, char *argv[])
-{
-/*  printf("DBG: %s (%d)\n", __func__, __LINE__); */
-
-	/* #########################################################
-	 * #            0) INITIAL CONDITIONS                      #
-	 * #########################################################*/
-
+main(int argc, char *argv[]) {
 	/* Though this program might perfectly work on other architectures,
 	 * I just didn't test anything beyond x86 and ARM */
 #if !defined __x86_64__ && !defined __i386__ && !defined __ARM_ARCH
-		fprintf(stderr, "Unsupported CPU architecture\n");
-		exit(EXIT_FAILURE);
-#endif /* __x86_64__ */
-
-	/* Though this program might perfectly work on other OSes, especially
-	 * Unices, I just didn't make any test */
-#if !defined __linux__  && !defined linux && !defined __linux \
-	&& !defined __gnu_linux__ && !defined __FreeBSD__
-		fprintf(stderr, _("%s: Unsupported operating system\n"),
-				PROGRAM_NAME);
-		exit(EXIT_FAILURE);
+	fprintf(stderr, "Unsupported CPU architecture\n");
+	exit(EXIT_FAILURE);
 #endif
 
-				/* #################################
-				 * #     1) INITIALIZATION         #
-				 * #  Basic config and variables   #
-				 * #################################*/
+	/* Though this program might perfectly work on other OSes, especially
+	 * Unixes, I just didn't make any test */
+#if !defined __linux__  && !defined linux && !defined __linux \
+	&& !defined __gnu_linux__ && !defined __FreeBSD__
+	fprintf(stderr, _("%s: Unsupported operating system\n"),
+			PROGRAM_NAME);
+	exit(EXIT_FAILURE);
+#endif
 
 	/* If running the program locally, that is, not from a path in PATH,
 	 * remove the leading "./" to get the correct program invocation
@@ -392,16 +378,12 @@ main(int argc, char *argv[])
 	if (*argv[0] == '.' && *(argv[0] + 1) == '/')
 		argv[0] += 2;
 
-	/* Use the locale specified by the environment */
+	// Use the locale specified by the environment
 	setlocale(LC_ALL, "");
 
-	/* If the locale isn't English, set 'unicode' to true to correctly
-	 * list (sort and padding) filenames containing non-7bit ASCII chars
-	 * like accents, tildes, umlauts, non-latin letters, and so on */
-	if (strncmp(getenv("LANG"), "en", 2) != 0)
-		unicode = 1;
+	unicode = 1; // always enable unicode
 
-	/* Initialize gettext() for translations */
+	// Initialize gettext() for translations
 	bindtextdomain("clifm", "/usr/share/locale");
 	textdomain("clifm");
 
@@ -417,16 +399,12 @@ main(int argc, char *argv[])
 	while (--i >= 0)
 		argv_bk[i] = savestring(argv[i], strlen(argv[i]));
 
-	/* Register the function to be called at normal exit, either via
-	 * exit() or main's return. The registered function will not be
-	 * executed when abnormally exiting the program, e.g., via the KILL
-	 * signal */
-	atexit(free_stuff);
+	atexit(free_stuff); // free_stuff does some cleaning
 
-	/* Get user's home directory */
-	user_home = get_user_home();
+	// Get user's home directory
+	user = get_user();
 
-	if (!user_home || access(user_home, W_OK) == -1) {
+	if (access(user.home, W_OK) == -1) {
 		/* If no user's home, or if it's not writable, there won't be
 		 * any config nor trash directory. These flags are used to
 		 * prevent functions from trying to access any of these
@@ -435,23 +413,12 @@ main(int argc, char *argv[])
 		/* Print message: trash, bookmarks, command logs, commands
 		 * history and program messages won't be stored */
 		_err('e', PRINT_PROMPT, _("%s: Cannot access the home directory. "
-			 "Trash, bookmarks, commands logs, and commands history are "
-			 "disabled. Program messages and selected files won't be "
-			 "persistent. Using default options\n"), PROGRAM_NAME);
+					"Trash, bookmarks, commands logs, and commands history are "
+					"disabled. Program messages and selected files won't be "
+					"persistent. Using default options\n"), PROGRAM_NAME);
 	}
 	else
-		user_home_len = strlen(user_home);
-
-	/* Get user name */
-	user = get_user();
-
-	if (!user) {
-		user = (char *)xnmalloc(2, sizeof(char));
-		user[0] = '?';
-		user[1] = '\0';
-		_err('e', PRINT_PROMPT, _("%s: Error getting username\n"),
-			 PROGRAM_NAME);
-	}
+		user_home_len = strlen(user.home);
 
 	if (geteuid() == 0)
 		flags |= ROOT_USR;
@@ -459,11 +426,11 @@ main(int argc, char *argv[])
 	/* Running in a graphical environment? */
 #if __linux__
 	if (getenv("DISPLAY") != NULL
-	&& strncmp(getenv("TERM"), "linux", 5) != 0)
+			&& strncmp(getenv("TERM"), "linux", 5) != 0)
 #else
-	if (getenv("DISPLAY") != NULL)
+		if (getenv("DISPLAY") != NULL)
 #endif
-		flags |= GUI;
+			flags |= GUI;
 
 	/* Get paths from PATH environment variable. These paths will be
 	 * used later by get_path_programs (for the autocomplete function)
@@ -485,9 +452,9 @@ main(int argc, char *argv[])
 
 	if (argc > 1)
 		external_arguments(argc, argv);
-		/* external_arguments is executed before init_config because, if
-		 * specified (-P option), it sets the value of alt_profile, which
-		 * is then checked by init_config */
+	/* external_arguments is executed before init_config because, if
+	 * specified (-P option), it sets the value of alt_profile, which
+	 * is then checked by init_config */
 
 	check_env_filter();
 
@@ -526,8 +493,8 @@ main(int argc, char *argv[])
 	if (cur_ws > MAX_WS - 1) {
 		cur_ws = DEF_CUR_WS;
 		_err('w', PRINT_PROMPT, _("%s: %zu: Invalid workspace."
-			 "\nFalling back to workspace %zu\n"), PROGRAM_NAME,
-			 cur_ws, cur_ws + 1);
+					"\nFalling back to workspace %zu\n"), PROGRAM_NAME,
+				cur_ws, cur_ws + 1);
 	}
 
 	/* If path was not set (neither in the config file nor via command
@@ -570,14 +537,14 @@ main(int argc, char *argv[])
 	if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
 
 		_err('e', PRINT_PROMPT, "%s: chdir: '%s': %s\n", PROGRAM_NAME,
-			 ws[cur_ws].path, strerror(errno));
+				ws[cur_ws].path, strerror(errno));
 
 		char cwd[PATH_MAX] = "";
 
 		if (getcwd(cwd, sizeof(cwd)) == NULL) {
 
 			_err(0, NOPRINT_PROMPT, _("%s: Fatal error! Failed "
-				 "retrieving current working directory\n"), PROGRAM_NAME);
+						"retrieving current working directory\n"), PROGRAM_NAME);
 
 			exit(EXIT_FAILURE);
 		}
@@ -632,15 +599,15 @@ main(int argc, char *argv[])
 	 * later by some of the program functions like split_str(),
 	 * my_rl_quote(), is_quote_char(), and my_rl_dequote() */
 	qc = savestring(rl_filename_quote_characters,
-					strlen(rl_filename_quote_characters));
+			strlen(rl_filename_quote_characters));
 
 	check_file_size(DIRHIST_FILE, max_dirhist);
 
 	/* Check whether we have a working shell */
-	if (access(sys_shell, X_OK) == -1) {
+	if (access(user.shell, X_OK) == -1) {
 		_err('w', PRINT_PROMPT, _("%s: %s: System shell not found. "
-			 "Please edit the configuration file to specify a working "
-			 "shell.\n"), PROGRAM_NAME, sys_shell);
+					"Please edit the configuration file to specify a working "
+					"shell.\n"), PROGRAM_NAME, user.shell);
 	}
 
 	get_aliases();
@@ -679,12 +646,12 @@ main(int argc, char *argv[])
 		struct stat file_attrib;
 
 		if (stat(HIST_FILE, &file_attrib) == 0
-		&& file_attrib.st_size != 0) {
-		/* If the size condition is not included, and in case of a zero
-		 * size file, read_history() produces malloc errors */
+				&& file_attrib.st_size != 0) {
+			/* If the size condition is not included, and in case of a zero
+			 * size file, read_history() produces malloc errors */
 			/* Recover history from the history file */
 			read_history(HIST_FILE); /* This line adds more leaks to
-			readline */
+																	readline */
 			/* Limit the size of the history file to max_hist lines */
 			history_truncate_file(HIST_FILE, max_hist);
 		}
@@ -695,7 +662,7 @@ main(int argc, char *argv[])
 
 			if (!hist_fp) {
 				_err('w', PRINT_PROMPT, "%s: fopen: '%s': %s\n",
-					 PROGRAM_NAME, HIST_FILE, strerror(errno));
+						PROGRAM_NAME, HIST_FILE, strerror(errno));
 			}
 
 			else {
@@ -723,17 +690,17 @@ main(int argc, char *argv[])
 	set_env();
 
 
-				/* ###########################
-				 * #   2) MAIN PROGRAM LOOP  #
-				 * ########################### */
+	/* ###########################
+	 * #   2) MAIN PROGRAM LOOP  #
+	 * ########################### */
 
 	/* This is the main structure of any basic shell
-	1 - Infinite loop
-	2 - Grab user input
-	3 - Parse user input
-	4 - Execute command
-	See https://brennan.io/2015/01/16/write-a-shell-in-c/
-	*/
+		 1 - Infinite loop
+		 2 - Grab user input
+		 3 - Parse user input
+		 4 - Execute command
+		 See https://brennan.io/2015/01/16/write-a-shell-in-c/
+		 */
 
 	/* 1) Infinite loop to keep the program running */
 	while (1) {

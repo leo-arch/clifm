@@ -558,18 +558,18 @@ mime_import(char *file)
 		return EXIT_SUCCESS;
 	}
 
-	if (!user_home) {
+	if (!user.home) {
 		fclose(mime_fp);
 		return EXIT_FAILURE;
 	}
 
 	/* Create a list of possible paths for the 'mimeapps.list' file */
-	size_t home_len = strlen(user_home);
+	size_t home_len = strlen(user.home);
 	char *config_path = (char *)NULL, *local_path = (char *)NULL;
 	config_path = (char *)xcalloc(home_len + 23, sizeof(char));
 	local_path = (char *)xcalloc(home_len + 41, sizeof(char));
-	sprintf(config_path, "%s/.config/mimeapps.list", user_home);
-	sprintf(local_path, "%s/.local/share/applications/mimeapps.list", user_home);
+	sprintf(config_path, "%s/.config/mimeapps.list", user.home);
+	sprintf(local_path, "%s/.local/share/applications/mimeapps.list", user.home);
 
 	char *mime_paths[] = { config_path, local_path,
 						   "/usr/local/share/applications/mimeapps.list",

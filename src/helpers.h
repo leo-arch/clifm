@@ -28,6 +28,7 @@
 #endif
 
 #include "strings.h"
+#include "init.h"
 
 /* #define __SIZEOF_WCHAR_T__ 4 */
 
@@ -710,15 +711,14 @@ extern char
 	*qc,
 	*SEL_FILE,
 	*STDIN_TMP_DIR,
-	*sys_shell,
 	*term,
 	*TMP_DIR,
 	*TRASH_DIR,
 	*TRASH_FILES_DIR,
 	*TRASH_INFO_DIR,
-	*user,
-	*usr_cscheme,
-	*user_home;
+	*usr_cscheme;
+
+extern struct user_t user;
 
 extern regex_t regex_exp;
 

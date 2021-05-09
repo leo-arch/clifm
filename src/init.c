@@ -43,6 +43,8 @@
 #include "navigation.h"
 #include "sort.h"
 #include "misc.h"
+#include "init.h"
+#include "string.h"
 
 void
 check_env_filter(void)
@@ -92,22 +94,17 @@ get_own_pid(void)
 		return pid;
 }
 
-char *
-get_user(void)
-/* Returns a pointer to a new string containing the current user's
- * name, or NULL if not found */
-{
+// returns pointer to username, exits if not found
+struct user_t get_user(void) {
 	struct passwd *pw;
-	uid_t uid = 0;
+	struct user_t tmp_user;
 
-	uid = geteuid();
+	pw = getpwuid(geteuid());
 
-	/* Get a passwd struct for current user ID. An alternative is
-	 * to use setpwent(), getpwent(), and endpwent() */
-	pw = getpwuid(uid);
-
-	if (!pw)
-		return (char *)NULL;
+	if (!pw) {
+		_err('e', NOPRINT_PROMPT, "%s: cannot detect user data, so exiting early", PROGRAM_NAME);
+		exit(-1);
+	}
 
 	/* Why we don't just return a pointer to the field of the passwd
 	 * struct we need? Because this struct will be overwritten by
@@ -115,43 +112,33 @@ get_user(void)
 	 * function, in which case our pointer will point to a wrong string.
 	 * So, to avoid this, we just copy the string we need into a new
 	 * variable. The same applies to the following functions,
-	 * get_user_home() and get_sys_shell() */
-	char *p = (char *)NULL;
-	p = (char *)malloc((strlen(pw->pw_name) + 1) * sizeof(char));
+	 * get_user_home() and get_user.shell() */
+	tmp_user.home = savestring(pw->pw_dir, strlen(pw->pw_dir));
+	tmp_user.name = savestring(pw->pw_name, strlen(pw->pw_name));
+	tmp_user.shell = savestring(pw->pw_shell, strlen(pw->pw_shell));
 
-	if (!p)
-		return (char *)NULL;
+	if (!tmp_user.home || !tmp_user.name || !tmp_user.shell) {
+		_err('e', NOPRINT_PROMPT, "%s: cannot detect user data, so exiting", PROGRAM_NAME);
+		exit(-1);
+	}
 
-	char *username = p;
-	p = (char *)NULL;
-
-	strcpy(username, pw->pw_name);
-
-	return username;
+	return tmp_user;
 }
 
-char *
-get_user_home(void)
-/* Returns a pointer to a string containing the user's home directory,
- * or NULL if not found */
-{
+// ret urns user home, or null if not found
+char * get_user_home(void) {
 	struct passwd *pw;
 
 	pw = getpwuid(getuid());
-
 	if (!pw)
 		return NULL;
 
-	char *p = (char *)NULL;
-	p = (char *)malloc((strlen(pw->pw_dir) + 1) * sizeof(char));
-
-	if (!p)
+	register size_t size = strlen(pw->pw_dir) + 1;
+	char * home = (char *)malloc(size * sizeof(char));
+	if (!home)
 		return (char *)NULL;
 
-	char *home = p;
-	p = (char *)NULL;
-
-	strcpy(home, pw->pw_dir);
+	strncpy(home, pw->pw_dir, size);
 
 	return home;
 }
@@ -1945,11 +1932,11 @@ check_options(void)
 	if (max_log == UNSET)
 		max_log = DEF_MAX_LOG;
 
-	if (!sys_shell) {
-		sys_shell = get_sys_shell();
+	if (!user.shell) {
+		user.shell = get_sys_shell();
 
-		if (!sys_shell)
-			sys_shell = savestring(FALLBACK_SHELL, strlen(FALLBACK_SHELL));
+		if (!user.shell)
+			user.shell = savestring(FALLBACK_SHELL, strlen(FALLBACK_SHELL));
 	}
 
 	if (!term)

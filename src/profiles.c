@@ -228,10 +228,10 @@ profile_set(const char *prof)
 	reload_config();
 
 	/* Check whether we have a working shell */
-	if (access(sys_shell, X_OK) == -1) {
+	if (access(user.shell, X_OK) == -1) {
 		_err('w', PRINT_PROMPT, _("%s: %s: System shell not found. Please "
 			 "edit the configuration file to specify a working shell.\n"),
-			 PROGRAM_NAME, sys_shell);
+			 PROGRAM_NAME, user.shell);
 	}
 
 	i = (int)usrvar_n;

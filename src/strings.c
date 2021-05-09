@@ -1791,15 +1791,15 @@ home_tilde(const char *new_path)
 	char *path_tilde = (char *)NULL;
 
 	/* If path == HOME */
-	if (new_path[1] == user_home[1] && strcmp(new_path, user_home) == 0) {
+	if (new_path[1] == user.home[1] && strcmp(new_path, user.home) == 0) {
 		path_tilde = (char *)xnmalloc(2, sizeof(char));
 		path_tilde[0] = '~';
 		path_tilde[1] = '\0';
 	}
 
 	/* If path == HOME/file */
-	else if (new_path[1] == user_home[1]
-	&& strncmp(new_path, user_home, user_home_len) == 0) {
+	else if (new_path[1] == user.home[1]
+	&& strncmp(new_path, user.home, user_home_len) == 0) {
 		path_tilde = (char *)xnmalloc(strlen(new_path + user_home_len + 1) + 3,
 									  sizeof(char));
 		sprintf(path_tilde, "~/%s", new_path + user_home_len + 1);
@@ -1877,6 +1877,8 @@ expand_range(char *str, int listdir)
 	return buf;
 }
 
+// used a lot.
+// creates a copy of a string
 char *
 savestring(const char *restrict str, size_t size)
 {
@@ -1884,7 +1886,7 @@ savestring(const char *restrict str, size_t size)
 		return (char *)NULL;
 
 	char *ptr = (char *)NULL;
-	ptr = (char *)xnmalloc(size + 1, sizeof(char));
+	ptr = (char *)malloc((size + 1) * sizeof(char));
 	strcpy(ptr, str);
 
 	return ptr;

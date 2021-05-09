@@ -22,4 +22,4 @@ build: ${OBJS}
 	cc -o $(PROG) ${OBJS} ${LIBS_${OS}}
 
 clean:
-	rm *.o
+	rm -f *.o

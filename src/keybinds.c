@@ -487,8 +487,8 @@ rl_home_dir(int count, int key)
 		return EXIT_SUCCESS;
 
 	/* If already in home, do nothing */
-	if (*ws[cur_ws].path == *user_home
-	&& strcmp(ws[cur_ws].path, user_home) == 0)
+	if (*ws[cur_ws].path == *user.home
+	&& strcmp(ws[cur_ws].path, user.home) == 0)
 		return EXIT_SUCCESS;
 
 	keybind_exec_cmd("cd");

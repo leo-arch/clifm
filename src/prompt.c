@@ -351,7 +351,7 @@ decode_prompt(const char *line)
 			}
 
 			case 'u': /* User name */
-				temp = savestring(user, strlen(user));
+				temp = savestring(user.name, strlen(user.name));
 				goto add_string;
 
 			case 'h': /* Hostname up to first '.' */
@@ -367,11 +367,11 @@ decode_prompt(const char *line)
 
 			case 's': /* Shell name (after last slash)*/
 				{
-				if (!sys_shell) {
+				if (!user.shell) {
 					line++;
 					break;
 				}
-				char *shell_name = strrchr(sys_shell, '/');
+				char *shell_name = strrchr(user.shell, '/');
 				temp = savestring(shell_name + 1, strlen(shell_name) - 1);
 				goto add_string;
 				}
@@ -403,7 +403,7 @@ decode_prompt(const char *line)
 				/* Reduce HOME to "~" */
 				int free_tmp_path = 0;
 				char *tmp_path = (char *)NULL;
-				if (strncmp(ws[cur_ws].path, user_home,
+				if (strncmp(ws[cur_ws].path, user.home,
 				user_home_len) == 0)
 					tmp_path = home_tilde(ws[cur_ws].path);
 				if (!tmp_path) {
