@@ -30,7 +30,7 @@ pkgver() {
 
 build() {
   cd "$srcdir/$_pkgname/src"
-  gcc -O3 -march=native -s -fstack-protector-strong -o "$_pkgname" *.c -lreadline -lacl -lcap
+  gcc -O3 -march=native -s -fstack-protector-strong -Wall -o "$_pkgname" *.c -lreadline -lacl -lcap
 }
 
 package() {
@@ -43,6 +43,7 @@ package() {
   install -g 0 -o 0 -Dm644 completions.zsh "$pkgdir/usr/share/zsh/site-functions/_${_pkgname}"
   install -g 0 -o 0 -Dm644 "translations/spanish/${_pkgname}.mo" "$pkgdir/usr/share/locale/es/LC_MESSAGES/${_pkgname}.mo"
   mkdir -p "$pkgdir/usr/share/$_pkgname"
+  install -g 0 -o 0 -Dm644 misc/mimelist.example "$pkgdir/usr/share/$_pkgname/mimelist.example"
   cp -r plugins "$pkgdir/usr/share/$_pkgname"
   cp -r functions "$pkgdir/usr/share/$_pkgname"
 }
