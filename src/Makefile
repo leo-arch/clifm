@@ -17,7 +17,7 @@ LIBS_FreeBSD = -L/usr/local/lib -lreadline -lintl
 build: ${OBJS}
 	@printf "Detected operating system: ";
 	@echo "$(OS)"
-	cc -o $(PROG) $^ ${LIBS_${OS}}
+	cc -o $(PROG) ${OBJS} ${LIBS_${OS}}
 
 clean:
 	rm -f *.o

@@ -45,7 +45,8 @@
 
 /* Given this value: \xA0\xA1\xA1, return an array of integers with
  * the integer values for A0, A1, and A2 respectivelly */
-int * get_hex_num(const char *str) {
+int *
+get_hex_num(const char *str) {
 	size_t i = 0;
 	int *hex_n = (int *)calloc(3, sizeof(int));
 
@@ -77,8 +78,9 @@ int * get_hex_num(const char *str) {
 	return hex_n;
 }
 
-int count_dir(const char *dir_path) /* Readdir version */
-	/* Count files in DIR_PATH, including self and parent. */
+/* Count files in DIR_PATH, including self and parent. */
+int
+count_dir(const char *dir_path) /* Readdir version */
 {
 	if (!dir_path)
 		return -1;
@@ -105,7 +107,8 @@ int count_dir(const char *dir_path) /* Readdir version */
 
 /* Get the path of a given command from the PATH environment variable.
  * It basically does the same as the 'which' Unix command */
-char * get_cmd_path(const char *cmd) {
+char *
+get_cmd_path(const char *cmd) {
 	char *cmd_path = (char *)NULL;
 	size_t i;
 
@@ -127,7 +130,8 @@ char * get_cmd_path(const char *cmd) {
 }
 
 /* Convert FILE_SIZE to human readeable form */
-char * get_size_unit(off_t size) {
+char *
+get_size_unit(off_t size) {
 	size_t max = 9;
 	/* Max size type length == 9 == "1023.99K\0" */
 	char *p = malloc(max * sizeof(char));
@@ -156,7 +160,8 @@ char * get_size_unit(off_t size) {
 	return str;
 }
 
-off_t dir_size(char *dir) {
+off_t
+dir_size(char *dir) {
 	char *rand_ext = gen_rand_str(6);
 	if (!rand_ext)
 		return -1;
@@ -219,7 +224,8 @@ S_IFBLK: 60000 / 24576
 S_IFCHR: 20000 / 8192
 S_IFIFO: 10000 / 4096
  * See the inode manpage */
-int get_link_ref(const char *link) {
+int
+get_link_ref(const char *link) {
 	if (!link)
 		return (-1);
 
@@ -234,9 +240,10 @@ int get_link_ref(const char *link) {
 	return (-1);
 }
 
-// Transform an integer (N) into a string of chars
-// this exists because some Operating systems do not suppoit itoa
-char * xitoa(int n) {
+/* Transform an integer (N) into a string of chars
+ * this exists because some Operating systems do not suppoit itoa */
+char *
+xitoa(int n) {
 	static char buf[32] = {0};
 	int i = 30, rem;
 
@@ -253,8 +260,9 @@ char * xitoa(int n) {
 	return &buf[++i];
 }
 
-// some memory wrapper functions
-void * xrealloc(void *ptr, size_t size) {
+/* some memory wrapper functions */
+void *
+xrealloc(void *ptr, size_t size) {
 	void *new_ptr = realloc(ptr, size);
 
 	if (!new_ptr) {
@@ -267,7 +275,8 @@ void * xrealloc(void *ptr, size_t size) {
 	return new_ptr;
 }
 
-void * xcalloc(size_t nmemb, size_t size) {
+void *
+xcalloc(size_t nmemb, size_t size) {
 	void *new_ptr = calloc(nmemb, size);
 
 	if (!new_ptr) {
@@ -279,7 +288,8 @@ void * xcalloc(size_t nmemb, size_t size) {
 	return new_ptr;
 }
 
-void * xnmalloc(size_t nmemb, size_t size) {
+void *
+xnmalloc(size_t nmemb, size_t size) {
 	void *new_ptr = malloc(nmemb * size);
 
 	if (!new_ptr) {
@@ -291,9 +301,11 @@ void * xnmalloc(size_t nmemb, size_t size) {
 	return new_ptr;
 }
 
-// unlike getchar this does not wait for newline('\n')
-// https://stackoverflow.com/questions/12710582/how-can-i-capture-a-key-stroke-immediately-in-linux
-char xgetchar(void)
+/* unlike getchar this does not wait for newline('\n')
+https://stackoverflow.com/questions/12710582/how-can-i-capture-a-key-stroke-immediately-in-linux 
+*/
+char
+xgetchar(void)
 {
 	struct termios oldt, newt;
 	char ch;
@@ -313,19 +325,22 @@ char xgetchar(void)
  * and modified to comform to RFC 2395, as recommended by the
  * freedesktop trash specification */
 
-// Converts a hex char to its integer value
-char from_hex(char c) {
+/* Converts a hex char to its integer value */
+char
+from_hex(char c) {
 	return isdigit(c) ? c - '0' : tolower(c) - 'a' + 10;
 }
 
-// Converts an integer value to its hex form
-char to_hex(char c) {
+/* Converts an integer value to its hex form */
+char
+to_hex(char c) {
 	static char hex[] = "0123456789ABCDEF";
 	return hex[c & 15];
 }
 
-// Returns a url-encoded version of str
-char * url_encode(char *str) {
+/* Returns a url-encoded version of str */
+char *
+url_encode(char *str) {
 	if (!str || *str == 0x00)
 		return (char *)NULL;
 
@@ -364,8 +379,9 @@ char * url_encode(char *str) {
 	return buf;
 }
 
-// Returns a url-decoded version of str
-char * url_decode(char *str) {
+/* Returns a url-decoded version of str */
+char *
+url_decode(char *str) {
 	if (!str || str[0] == 0x00)
 		return (char *)NULL;
 
@@ -403,7 +419,8 @@ char * url_decode(char *str) {
 /* Convert octal string into integer.
  * Taken from: https://www.geeksforgeeks.org/program-octal-decimal-conversion/
  * Used by decode_prompt() to make things like this work: \033[1;34m */
-int read_octal(char *str) {
+int 
+read_octal(char *str) {
 	if (!str)
 		return -1;
 
@@ -431,7 +448,8 @@ int read_octal(char *str) {
 	return dec_value;
 }
 
-int hex2int(char *str)
+int
+hex2int(char *str)
 {
 	int i, n[2];
 	for (i = 1; i >= 0; i--) {
