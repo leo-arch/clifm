@@ -213,7 +213,7 @@ set_sel_file(void)
 		 * configuration directory */
 		SEL_FILE = (char *)xnmalloc(config_len + 17, sizeof(char));
 		sprintf(SEL_FILE, "%s/.config/%s/selbox",
-				user_home, PNL);
+				user.home, PNL);
 	}
 
 	return;
@@ -376,7 +376,7 @@ create_tmp_files(void)
 	 * to create files in here, but only the file's owner can remove
 	 * or modify them */
 
-	size_t user_len = strlen(user);
+	size_t user_len = strlen(user.name);
 	TMP_DIR = (char *)xnmalloc(pnl_len + user_len + 7, sizeof(char));
 	snprintf(TMP_DIR, pnl_len + 6, "/tmp/%s", PNL);
 
@@ -398,7 +398,7 @@ create_tmp_files(void)
 	 * restrictive permissions (700), since only the corresponding user
 	 * must be able to read and/or modify this list */
 
-	snprintf(TMP_DIR, pnl_len + user_len + 7, "/tmp/%s/%s", PNL, user);
+	snprintf(TMP_DIR, pnl_len + user_len + 7, "/tmp/%s/%s", PNL, user.name);
 
 	if (stat(TMP_DIR, &file_attrib) == -1) {
 
@@ -463,7 +463,7 @@ edit_xresources(void)
 	 * false. If not, create the file and set the corresponding
 	 * value */
 	char xresources[PATH_MAX] = "";
-	sprintf(xresources, "%s/.Xresources", user_home);
+	sprintf(xresources, "%s/.Xresources", user.home);
 
 	FILE *xresources_fp = fopen(xresources, "a+");
 
@@ -518,8 +518,8 @@ edit_xresources(void)
 
 		if (xrdb_path) {
 			char *res_file = (char *)xnmalloc(
-									 strlen(user_home) + 13, sizeof(char));
-			sprintf(res_file, "%s/.Xresources", user_home);
+									 user.home_len + 13, sizeof(char));
+			sprintf(res_file, "%s/.Xresources", user.home);
 			char *cmd[] = { "xrdb", "merge", res_file,
 							NULL };
 			launch_execve(cmd, FOREGROUND, E_NOFLAG);
@@ -564,9 +564,9 @@ define_config_file_names(void)
 	}
 
 	else {
-		CONFIG_DIR_GRAL = (char *)xnmalloc(user_home_len + pnl_len
+		CONFIG_DIR_GRAL = (char *)xnmalloc(user.home_len + pnl_len
 								+ 11, sizeof(char));
-		sprintf(CONFIG_DIR_GRAL, "%s/.config/%s", user_home, PNL);
+		sprintf(CONFIG_DIR_GRAL, "%s/.config/%s", user.home, PNL);
 	}
 
 	size_t config_gral_len = strlen(CONFIG_DIR_GRAL);
@@ -604,8 +604,8 @@ define_config_file_names(void)
 	PLUGINS_DIR = (char *)xnmalloc(config_gral_len + 9, sizeof(char));
 	sprintf(PLUGINS_DIR, "%s/plugins", CONFIG_DIR_GRAL);
 
-	TRASH_DIR = (char *)xnmalloc(user_home_len + 20, sizeof(char));
-	sprintf(TRASH_DIR, "%s/.local/share/Trash", user_home);
+	TRASH_DIR = (char *)xnmalloc(user.home_len + 20, sizeof(char));
+	sprintf(TRASH_DIR, "%s/.local/share/Trash", user.home);
 
 	size_t trash_len = strlen(TRASH_DIR);
 
@@ -1734,10 +1734,8 @@ read_config(void)
 		}
 
 		else if (*line == 'S' && strncmp(line, "SystemShell=", 12) == 0) {
-			if (sys_shell) {
-				free(sys_shell);
-				sys_shell = (char *)NULL;
-			}
+				free(user.shell);
+				user.shell = (char *)NULL;
 			char *opt_str = straft(line, '=');
 			if (!opt_str)
 				continue;
@@ -1754,7 +1752,7 @@ read_config(void)
 					continue;
 				}
 
-				sys_shell = savestring(tmp, strlen(tmp));
+				user.shell = savestring(tmp, strlen(tmp));
 			}
 
 			else {
@@ -1765,7 +1763,7 @@ read_config(void)
 					continue;
 				}
 
-				sys_shell = savestring(shell_path, strlen(shell_path));
+				user.shell = savestring(shell_path, strlen(shell_path));
 				free(shell_path);
 			}
 
@@ -2048,13 +2046,10 @@ reload_config(void)
 		term = (char *)NULL;
 	}
 
-	if (sys_shell) {
-		free(sys_shell);
-		sys_shell = (char *)NULL;
-	}
+	free(user.shell);
+	user.shell = (char *)NULL;
 
 	/* Reset all variables */
-
 	splash_screen = welcome_message = ext_cmd_ok = pager = UNSET;
 	show_hidden = clear_screen = list_folders_first = long_view = UNSET;
 	unicode = case_sensitive = cd_lists_on_the_fly = share_selbox = UNSET;

@@ -28,6 +28,7 @@
 #endif
 
 #include "strings.h"
+#include "init.h"
 
 /* #define __SIZEOF_WCHAR_T__ 4 */
 
@@ -90,13 +91,8 @@ void* __dso_handle;
 #define PNL "clifm" /* Program name lowercase */
 /* #define TMP_DIR "/tmp/clifm" */
 /* If no formatting, puts (or write) is faster than printf */
-/* #define CLEAR puts("\x1b[c") "\x1b[2J\x1b[1;1H"*/
 #define CLEAR write(STDOUT_FILENO, "\033c", 3);
-/* #define CLEAR puts("\x1b[2J\x1b[1;1H");
-* #define CLEAR write(STDOUT_FILENO, "\x1b[2J\x1b[3J\x1b[H", 11);
-* #define CLEAR puts("\x1b[1;1H\x1b[2J");
-* #define CLEAR puts("\x1b[H\x1b[J");
-* #define CLEAR write(STDOUT_FILENO, "\x1b[2J\x1b[H", 7); */
+
 #define VERSION "1.0"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
@@ -355,13 +351,7 @@ nm=01;32:bm=01;36:"
 #define FALLBACK_SHELL "/bin/sh"
 #define FALLBACK_OPENER "xdg-open"
 
-#ifndef __FreeBSD__
-#  define strlen xstrlen
-#endif
-#define strcpy xstrcpy
-#define strncpy xstrncpy
-#define strcmp xstrcmp
-#define strncmp xstrncmp
+#define itoa xitoa /* itoa does not exist in some OS's */
 /* #define atoi xatoi */
 /* #define alphasort xalphasort */
 #define _(String) gettext (String)
@@ -639,7 +629,6 @@ extern int
 extern unsigned short term_cols;
 
 extern size_t
-	user_home_len,
 	args_n,
 	sel_n,
 	msgs_n,
@@ -710,15 +699,12 @@ extern char
 	*qc,
 	*SEL_FILE,
 	*STDIN_TMP_DIR,
-	*sys_shell,
 	*term,
 	*TMP_DIR,
 	*TRASH_DIR,
 	*TRASH_FILES_DIR,
 	*TRASH_INFO_DIR,
-	*user,
-	*usr_cscheme,
-	*user_home;
+	*usr_cscheme;
 
 extern regex_t regex_exp;
 

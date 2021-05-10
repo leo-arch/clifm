@@ -1,6 +1,5 @@
 #pragma once
 
-/* init.c */
 void check_env_filter(void);
 void get_prompt_cmds(void);
 void get_aliases(void);
@@ -20,7 +19,21 @@ void unset_xargs(void);
 void external_arguments(int argc, char **argv);
 char *get_date (void);
 pid_t get_own_pid(void);
-char *get_user(void);
-char *get_user_home(void);
-char *get_sys_shell(void);
+struct user_t get_user(void);
 
+/* 
+ * some useful structs
+*/
+
+/* stores information regarding the user */
+struct user_t {
+	char * home;
+	size_t home_len;
+	char * name;
+	char * shell;
+};
+
+/*
+ * some global variables
+*/
+extern struct user_t user;

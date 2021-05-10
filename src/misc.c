@@ -789,11 +789,11 @@ set_shell(char *str)
 		return EXIT_FAILURE;
 	}
 
-	if (sys_shell)
-		free(sys_shell);
+	if (user.shell)
+		free(user.shell);
 
-	sys_shell = savestring(tmp, strlen(tmp));
-	printf(_("Successfully set '%s' as %s default shell\n"), sys_shell,
+	user.shell = savestring(tmp, strlen(tmp));
+	printf(_("Successfully set '%s' as %s default shell\n"), user.shell,
 		   PROGRAM_NAME);
 
 	if (full_path)
@@ -1119,9 +1119,9 @@ free_stuff(void)
 		free(ext_colors);
 	}
 
-	free(user);
-	free(user_home);
-	free(sys_shell);
+	free(user.name);
+	free(user.home);
+	free(user.shell);
 
 	i = MAX_WS;
 	while (--i >= 0)

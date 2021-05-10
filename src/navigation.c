@@ -163,20 +163,20 @@ cd_function(char *new_path)
 	/* If no argument, change to home */
 	if (!new_path || !*new_path) {
 
-		if (!user_home) {
+		if (!user.home) {
 			fprintf(stderr, _("%s: cd: Home directory not found\n"),
 					PROGRAM_NAME);
 			return EXIT_FAILURE;
 		}
 
-		if (xchdir(user_home, SET_TITLE) != EXIT_SUCCESS) {
+		if (xchdir(user.home, SET_TITLE) != EXIT_SUCCESS) {
 			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
-					user_home, strerror(errno));
+					user.home, strerror(errno));
 			return EXIT_FAILURE;
 		}
 
 		free(ws[cur_ws].path);
-		ws[cur_ws].path = savestring(user_home, strlen(user_home));
+		ws[cur_ws].path = savestring(user.home, strlen(user.home));
 	}
 
 	/* If we have some argument, dequote it, resolve it with realpath(),

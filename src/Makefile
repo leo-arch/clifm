@@ -5,7 +5,6 @@
 OS != uname -s
 
 PROG = ../clifm
-#OBJS := $(shell ls *.c | sed "s/.c\$$/.o/g")
 OBJS != ls *.c | sed "s/.c\$$/.o/g"
 
 CFLAGS = -I/usr/local/include -O3 -fstack-protector-strong -march=native -Wall
@@ -18,8 +17,7 @@ LIBS_FreeBSD = -L/usr/local/lib -lreadline -lintl
 build: ${OBJS}
 	@printf "Detected operating system: ";
 	@echo "$(OS)"
-#	cc -o $(PROG) $^ ${LIBS_${OS}}
 	cc -o $(PROG) ${OBJS} ${LIBS_${OS}}
 
 clean:
-	rm *.o
+	rm -f *.o

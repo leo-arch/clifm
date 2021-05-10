@@ -43,29 +43,7 @@ char len_buf[CMD_LEN_MAX] __attribute__ ((aligned));
 #endif
 
 int
-xstrcmp(const char *s1, const char *s2)
-/* I use 256 for error code since it does not represent any ASCII code
- * (the extended version goes up to 255) */
-{
-	if (!s1 || !s2)
-		return 256;
-
-	while (*s1) {
-		if (*s1 != *s2)
-			return (*s1 - *s2);
-		s1++;
-		s2++;
-	}
-
-	if (*s2)
-		return (0 - *s2);
-
-	return 0;
-}
-
-int
-xstrncmp(const char *s1, const char *s2, size_t n)
-{
+xstrncmp(const char *s1, const char *s2, size_t n) {
 	if (!s1 || !s2)
 		return 256;
 
@@ -87,8 +65,7 @@ xstrncmp(const char *s1, const char *s2, size_t n)
 }
 
 char *
-xstrncpy(char *buf, const char *restrict str, size_t n)
-{
+xstrncpy(char *buf, const char *restrict str, size_t n) {
 	if (!str)
 		return (char *)NULL;
 
@@ -104,9 +81,9 @@ xstrncpy(char *buf, const char *restrict str, size_t n)
 	return buf;
 }
 
+/* Taken from NNN's source code: very clever */
 size_t
 xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
-/* Taken from NNN's source code: very clever */
 {
 	char *end = memccpy(dst, src, '\0', n);
 
@@ -119,8 +96,7 @@ xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 }
 
 size_t
-wc_xstrlen(const char *restrict str)
-{
+wc_xstrlen(const char *restrict str) {
 	size_t len;
 #ifndef _BE_POSIX
 	wchar_t * const wbuf = (wchar_t *)len_buf;
@@ -135,11 +111,10 @@ wc_xstrlen(const char *restrict str)
 	return len;
 }
 
-int
-u8truncstr(char *restrict str, size_t n)
 /* Truncate an UTF-8 string at length N. Returns zero if truncated and
  * one if not */
-{
+int
+u8truncstr(char *restrict str, size_t n) {
 	size_t len = 0;
 
 	while (*(str++)) {
@@ -159,8 +134,6 @@ u8truncstr(char *restrict str, size_t n)
 	return EXIT_FAILURE;
 }
 
-size_t
-u8_xstrlen(const char *restrict str)
 /* An strlen implementation able to handle unicode characters. Taken from:
 * https://stackoverflow.com/questions/5117393/number-of-character-cells-used-by-string
 * Explanation: strlen() counts bytes, not chars. Now, since ASCII chars
@@ -169,7 +142,8 @@ u8_xstrlen(const char *restrict str)
 * takes more than 1 byte, and this is why strlen() does not work as
 * expected for this kind of chars: a 6 chars string might take 12 or
 * more bytes */
-{
+size_t
+u8_xstrlen(const char *restrict str) {
 	size_t len = 0;
 
 	while (*(str++)) {
@@ -180,41 +154,11 @@ u8_xstrlen(const char *restrict str)
 	return len;
 }
 
-char *
-xstrcpy(char *buf, const char *restrict str)
-{
-	if (!str)
-		return (char *)NULL;
-
-	while (*str)
-		*(buf++) = *(str++);
-
-	*buf = '\0';
-
-/*  while ((*buf++ = *str++)); */
-
-	return buf;
-}
-
-#ifndef __FreeBSD__
-size_t
-xstrlen(const char *restrict s)
-/* Taken from NNN's source code */
-{
-#if !defined(__GLIBC__)
-	return strlen(s);
-#else
-	return (char *)rawmemchr(s, '\0') - s;
-#endif
-}
-#endif /* __FreeBSD__ */
-
-int
-strcntchr(const char *str, const char c)
 /* Returns the index of the first appearance of c in str, if any, and
  * -1 if c was not found or if no str. NOTE: Same thing as strchr(),
  * except that returns an index, not a pointer */
-{
+int
+strcntchr(const char *str, const char c) {
 	if (!str)
 		return -1;
 
@@ -230,11 +174,10 @@ strcntchr(const char *str, const char c)
 	return -1;
 }
 
-char *
-straft(char *str, const char c)
 /* Returns the string after the first appearance of a given char, or
  * returns NULL if C is not found in STR or C is the last char in STR. */
-{
+char *
+straft(char *str, const char c) {
 	if (!str || !*str || !c)
 		return (char *)NULL;
 
@@ -262,11 +205,10 @@ straft(char *str, const char c)
 	return buf;
 }
 
-char *
-straftlst(char *str, const char c)
 /* Returns the string after the last appearance of a given char, or
  * NULL if no match */
-{
+char *
+straftlst(char *str, const char c) {
 	if (!str || !*str || !c)
 		return (char *)NULL;
 
@@ -291,11 +233,10 @@ straftlst(char *str, const char c)
 	return buf;
 }
 
-char *
-strbfr(char *str, const char c)
 /* Returns the substring in str before the first appearance of c. If
  * not found, or C is the first char in STR, returns NULL */
-{
+char *
+strbfr(char *str, const char c) {
 	if (!str || !*str || !c)
 		return (char *)NULL;
 
@@ -332,12 +273,11 @@ strbfr(char *str, const char c)
 	return buf;
 }
 
-char *
-strbfrlst(char *str, const char c)
 /* Get substring in STR before the last appearance of C. Returns
  * substring  if C is found and NULL if not (or if C was the first
  * char in STR). */
-{
+char *
+strbfrlst(char *str, const char c) {
 	if (!str || !*str || !c)
 		return (char *)NULL;
 
@@ -368,12 +308,11 @@ strbfrlst(char *str, const char c)
 	return buf;
 }
 
-char *
-strbtw(char *str, const char a, const char b)
 /* Returns the string between first ocurrence of A and the first
  * ocurrence of B in STR, or NULL if: there is nothing between A and
  * B, or A and/or B are not found */
-{
+char *
+strbtw(char *str, const char a, const char b) {
 	if (!str || !*str || !a || !b)
 		return (char *)NULL;
 
@@ -410,10 +349,9 @@ strbtw(char *str, const char a, const char b)
 	return buf;
 }
 
-char *
-gen_rand_str(size_t len)
 /* Generate a random string of LEN bytes using characters from CHARSET */
-{
+char *
+gen_rand_str(size_t len) {
 	char charset[] = "0123456789#%-_"
                      "abcdefghijklmnopqrstuvwxyz"
                      "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -439,12 +377,11 @@ gen_rand_str(size_t len)
    	return str;
 }
 
-char *
-remove_quotes(char *str)
 /* Removes end of line char and quotes (single and double) from STR.
  * Returns a pointer to the modified STR if the result is non-blank
  * or NULL */
-{
+char *
+remove_quotes(char *str) {
 	if (!str || !*str)
 		return (char *)NULL;
 
@@ -482,8 +419,6 @@ remove_quotes(char *str)
 	return (char *)NULL;
 }
 
-char **
-split_str(const char *str)
 /* This function takes a string as argument and split it into substrings
  * taking tab, new line char, and space as word delimiters, except when
  * they are preceded by a quote char (single or double quotes) or in
@@ -493,7 +428,8 @@ split_str(const char *str)
  * splitted strings (without leading and terminating spaces) or NULL if
  * str is NULL or if no substring was found, i.e., if str contains
  * only spaces. */
-{
+char **
+split_str(const char *str) {
 	if (!str)
 		return (char **)NULL;
 
@@ -703,8 +639,7 @@ split_str(const char *str)
 }
 
 char *
-split_fusedcmd(char *str)
-{
+split_fusedcmd(char *str) {
 	if (!str || !*str || *str == ';' || *str == ':' || *str == '\\')
 		return (char *)NULL;
 
@@ -756,8 +691,6 @@ split_fusedcmd(char *str)
 	return buf;
 }
 
-char **
-parse_input_str(char *str)
 /*
  * This function is one of the keys of CliFM. It will perform a series of
  * actions:
@@ -789,8 +722,8 @@ parse_input_str(char *str)
  * simply use rl_line_buffer. However, since I use this function to
  * parse other strings, like history lines, I need to keep the str
  * argument */
-
-{
+char **
+parse_input_str(char *str) {
 	register size_t i = 0;
 	int fusedcmd_ok = 0;
 
@@ -1779,30 +1712,29 @@ parse_input_str(char *str)
 	return substr;
 }
 
-char *
-home_tilde(const char *new_path)
 /* Reduce "$HOME" to tilde ("~"). The new_path variable is always either
  * "$HOME" or "$HOME/file", that's why there's no need to check for
  * "/file" */
-{
+char *
+home_tilde(const char *new_path) {
 	if (!home_ok || !new_path || !*new_path)
 		return (char *)NULL;
 
 	char *path_tilde = (char *)NULL;
 
 	/* If path == HOME */
-	if (new_path[1] == user_home[1] && strcmp(new_path, user_home) == 0) {
+	if (new_path[1] == user.home[1] && strcmp(new_path, user.home) == 0) {
 		path_tilde = (char *)xnmalloc(2, sizeof(char));
 		path_tilde[0] = '~';
 		path_tilde[1] = '\0';
 	}
 
 	/* If path == HOME/file */
-	else if (new_path[1] == user_home[1]
-	&& strncmp(new_path, user_home, user_home_len) == 0) {
-		path_tilde = (char *)xnmalloc(strlen(new_path + user_home_len + 1) + 3,
+	else if (new_path[1] == user.home[1]
+	&& strncmp(new_path, user.home, user.home_len) == 0) {
+		path_tilde = (char *)xnmalloc(strlen(new_path + user.home_len + 1) + 3,
 									  sizeof(char));
-		sprintf(path_tilde, "~/%s", new_path + user_home_len + 1);
+		sprintf(path_tilde, "~/%s", new_path + user.home_len + 1);
 	}
 
 	else {
@@ -1813,15 +1745,14 @@ home_tilde(const char *new_path)
 	return path_tilde;
 }
 
-int *
-expand_range(char *str, int listdir)
 /* Expand a range of numbers given by str. It will expand the range
  * provided that both extremes are numbers, bigger than zero, equal or
  * smaller than the amount of files currently listed on the screen, and
  * the second (right) extreme is bigger than the first (left). Returns
  * an array of int's with the expanded range or NULL if one of the
  * above conditions is not met */
-{
+int *
+expand_range(char *str, int listdir) {
 	if (strcntchr(str, '-') == -1)
 		return (int *)NULL;
 
@@ -1877,24 +1808,24 @@ expand_range(char *str, int listdir)
 	return buf;
 }
 
+/* used a lot.
+ * creates a copy of a string */
 char *
-savestring(const char *restrict str, size_t size)
-{
+savestring(const char *restrict str, size_t size) {
 	if (!str)
 		return (char *)NULL;
 
 	char *ptr = (char *)NULL;
-	ptr = (char *)xnmalloc(size + 1, sizeof(char));
+	ptr = (char *)malloc((size + 1) * sizeof(char));
 	strcpy(ptr, str);
 
 	return ptr;
 }
 
-char *
-escape_str(const char *str)
 /* Take a string and returns the same string escaped. If nothing to be
  * escaped, the original string is returned */
-{
+char *
+escape_str(const char *str) {
 	if (!str)
 		return (char *)NULL;
 
@@ -1917,14 +1848,13 @@ escape_str(const char *str)
 	return (char *)NULL;
 }
 
-char **
-get_substr(char *str, const char ifs)
 /* Get all substrings from STR using IFS as substring separator, and,
  * if there is a range, expand it. Returns an array containing all
  * substrings in STR plus expandes ranges, or NULL if: STR is NULL or
  * empty, STR contains only IFS(s), or in case of memory allocation
  * error */
-{
+char **
+get_substr(char *str, const char ifs) {
 	if (!str || *str == '\0')
 		return (char **)NULL;
 
@@ -2140,13 +2070,12 @@ get_substr(char *str, const char ifs)
 	return dstr;
 }
 
-char *
-dequote_str(char *text, int mt)
 /* This function simply deescapes whatever escaped chars it founds in
  * TEXT, so that readline can compare it to system filenames when
  * completing paths. Returns a string containing text without escape
  * sequences */
-{
+char *
+dequote_str(char *text, int mt) {
 	if (!text || !*text)
 		return (char *)NULL;
 

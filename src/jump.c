@@ -36,8 +36,7 @@
 #include "navigation.h"
 #include "init.h"
 
-int
-add_to_jumpdb(const char *dir)
+int add_to_jumpdb(const char *dir)
 {
 	if (xargs.no_dirjump == 1 || !dir || !*dir)
 		return EXIT_FAILURE;
@@ -60,7 +59,7 @@ add_to_jumpdb(const char *dir)
 	}
 
 	if (!new_entry)
-		return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 
 	jump_db = (struct jump_t *)xrealloc(jump_db, (jump_n + 2)
 									* sizeof(struct jump_t));
@@ -82,10 +81,8 @@ add_to_jumpdb(const char *dir)
 	return EXIT_SUCCESS;
 }
 
-void
-save_jumpdb(void)
 /* Store the jump database into a file */
-{
+void save_jumpdb(void) {
 	if (xargs.no_dirjump == 1 || !config_ok || !CONFIG_DIR
 	|| !jump_db || jump_n == 0)
 		return;
@@ -187,8 +184,7 @@ save_jumpdb(void)
 	free(JUMP_FILE);
 }
 
-int
-edit_jumpdb(void)
+int edit_jumpdb(void)
 {
 	if (!config_ok || !CONFIG_DIR)
 		return EXIT_FAILURE;
@@ -238,10 +234,8 @@ edit_jumpdb(void)
 	return EXIT_SUCCESS;
 }
 
-int
-dirjump(char **args)
 /* Jump into best ranked directory matched by ARGS */
-{
+int dirjump(char **args) {
 	if (xargs.no_dirjump == 1) {
 		printf(_("%s: Directory jumper function disabled\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
