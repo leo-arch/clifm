@@ -6,7 +6,7 @@
 CLIFM \- The KISS file manager
 
 .SH SYNOPSIS
-\fIclifm\fR [\-aAefFgGhiIlLmoOsSuUvxy] [\-c FILE] [\-k FILE] [\-p PATH] [\-P PROFILE] [-w NUM] [\-z METHOD] [PATH]
+\fIclifm\fR [OPTIONS] [PATH]
 
 .SH GETTING HELP
 There are several ways of getting help in CliFM. Once in the program, enter '?' to see a minimal list of options, commands, and keybindings, or press F1 to access this manpage, F2 to go to the COMMANDS section of this very manpage, or F3 to go to the KEYBOARD SHORTCUTS section. A convenient way of getting full information about CliFM commands is via the 'ih' action, binded by default to the interactive help plugin (ihelp.sh). Just type 'ih' to run the plugin (it depends on \fIfzf\fR) and select the command you want to obtain information on.
@@ -553,14 +553,11 @@ With no arguments, the function prints the current pinned file, if any. If an ar
 .sp
 At program exit, the pinned file is written to a file in the configuration directory (as .pin) to be loaded in the next session.
 .TP
-.B q, quit, exit
-Gracefully quit CliFM.
-.TP
-.B Q
-same as \fIquit\fR, but enabling the CD on quit functionality.
+.B q, quit, exit, Q
+Gracefully quit CliFM. Use 'Q' to gracefully quit and enable the CD on quit functionality (write last visited directory to \fI$XDG_CONFIG/clifm/.last\fR to be later read by a shell function. See the \fBSHELL FUNCTIONS\fR section below).
 .TP
 .B rf, refresh
-refresh the screen.
+refresh the screen, that is, reprint files in the current directory and update the prompt
 .TP
 .B rl, reload
 Reload all settings, except those passed as command line arguments, from the configuration file.
@@ -645,7 +642,7 @@ CliFM offers three kinds of file filters:
 .TP
 \fBM\-f:\fR Toggle list\-folders\-first on/off
 .TP
-\fBC\-r:\fR Refresh the screen
+\fBC\-r:\fR Refresh the screen (reprint files in current directory and update prompt)
 .TP
 \fBM\-t:\fR Clear program messages
 .TP
@@ -969,7 +966,7 @@ Match mutiple mimetypes:
 If the MIME file is not found, CliFM will try to import MIME definitions from the default locations for the 'mimeapps.list' file as specified by the Freedesktop specification.
 
 .SH SHELL FUNCTIONS
-CliFM includes a few shell functions to perform specific actions (cd-on-quit and file-picker). Take a look at the corresponding files, in \fI/usr/share/clifm/functions\fR, and follow the instructions. Needles to say, you can write your own functions.
+CliFM includes a few shell functions to perform specific actions (cd-on-quit, file-picker, and subshell-notice). Take a look at the corresponding files, in \fI/usr/share/clifm/functions\fR, and follow the instructions. Needles to say, you can write your own functions.
 
 .SH PLUGINS
 Plugins are just scripts or programs (written in any language) able to add, extend or improve CliFM functionalities. Though several plugins are provided at installation time (in the \fIplugins\fR directory), you can write your owns as you like, with any language you like, and for whatever goal you want. Writing plugins is generally quite easy; but your mileage may vary depending on what you are trying to achieve. A good place to start is examining the provide plugins and reading the \fIactions\fR command description, and the \fBENVIRONMENT\fR and \fBFILES\fR sections below.
@@ -1206,6 +1203,83 @@ The directory jumer database is stored in \fI$XDG_CONFIG_HOME/clifm/profiles/PRO
 .TP
 
 \fBNOTE\fR: If \fB$XDG_CONFIG_HOME\fR is not set, \fB$HOME/.config/\fR is used instead.
+
+.SH EXAMPLES
+The following are just a few basic usage examples.
+
+\fBNOTE\fR: Always try TAB. TAB completeion is available for many things
+
+Get help:
+\fBF1\fR: manpage
+\fBF2\fR: keybindings
+\fBF3\fR: commands
+
+\fB/etc\fR: Change directory to \fI/etc\fR
+
+\fB5\fR: Change to the directory in the current directory whose ELN is 5
+.sp
+TIP: Press TAB to make sure 5 is the directory you want
+
+\fBj xproj\fR: Jump to \fI~/media/data/docs/work/mike/xproject\fR:
+.sp
+NOTE: This depends however on the database ranking. For more accuracy: \fBj mike xproj\fR
+
+\fBb\fR or \fBShift+left\fR or \fBAlt+j\fR: Go back to the directory you came from
+
+NOTE: Enter \fBf\fR, or press \fBShift+right\fR or \fBAlt+k\fR to go back to the first directory
+
+\fBAlt+l\fR: Change to detail/long view mode
+
+\fBp4\fR: Print the properties of the file whose ELN is 4
+
+\fBrf\fR: Reprint the list of files in the current directory
+
+\fBs *.c :/my_project\fR: Select all c files in \fImy_project/\fR
+
+\fBs 1-4 8 19-26\fR: Select multiple files in the current directory by ELN
+
+\fBsb\fR: List selected files
+
+\fBds\fR: Deselect a few files
+
+\fBmd mydir && mydir\fR: Create a directory named \fImydir\fR and cd into it
+
+\fBm sel\fR: Move selected files into the current directory
+
+\fBr sel\fR: Remove all selected files
+
+\fBmyfile.txt\fR: Open \fImyfile.txt\fR (with the default associated application)
+
+\fB12\fR: Open the file whose ELN is 12
+TIP: Press TAB to make sure 12 is the file you want
+
+\fBo myfile.txt application\fR or \fBapplication myfile.txt\fR: Open \fImyfile.txt\fB using "application"
+
+\fBbm add mydir\fR: Bookmark \fImydir/\fR
+
+\fBbm\fR or \fBCtrl+b\fR: Open the bookmarks screen. Once there, enter the bookmark ELN (1 ... n) or its hotkey ([xx]) to open it
+
+\fBws2\fR or \fBAlt+2\fR: Switch to workspace 2
+
+\fBedit\fR or \fBF10\fR: View and/or edit the configuration file
+
+\fBpf set test\fR: Change to profile \fItest\fR
+
+\fBhf\fR on or \fBAlt+.\fR: Show hidden files
+
+\fBactions\fR: List available actions/plugins
+
+\fB-\fR or \fBAlt+-\fR: Want file previews?
+
+NOTE: This runs the plugin fzfnav.sh. Take a look at the manpage for needed dependencies
+
+\fBicons on\fR: Want icons?
+
+NOTE: Recall to install \fBicons-in-terminal\fR before
+
+\fBq\fR: I'm tired, quit
+
+There is a lot more you can do, but this is enough to get you started.
 
 .SH CONFORMING TO
 CliFM is C99 compliant, and, if compiled with the _BE_POSIX flag, it is POSIX.1-2008 conformant as well. If not, only two non-POSIX functions are used: \fBstatx\fR(2) (Linux specific), to get files birth time, and \fBstrverscmp\fR(3) (a GNU extension), to list files by version.

@@ -797,7 +797,7 @@ MinJumpRank=10\n\n"
 MaxJumpTotalRank=100000\n\n"
 
 "# Should CliFM be allowed to run external, shell commands?\n\
-ExternalCommands=false\n\n"
+ExternalCommands=true\n\n"
 
 " Write the last visited directory to $XDG_CONFIG_HOME/clifm/.last to be\n\
 # later accessed by the corresponding shell function at program exit.\n\

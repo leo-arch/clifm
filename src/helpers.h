@@ -252,7 +252,7 @@ nm=01;32:bm=01;36:"
 #define DEF_SORT 1
 #define DEF_FILES_COUNTER 1
 #define DEF_LONG_VIEW 0
-#define DEF_EXT_CMD_OK 0
+#define DEF_EXT_CMD_OK 1
 #define DEF_PAGER 0
 #define DEF_MAX_HIST 1000
 #define DEF_MAX_DIRHIST 100

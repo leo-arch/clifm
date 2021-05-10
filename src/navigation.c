@@ -96,6 +96,14 @@ workspaces(char *str)
 		ws[tmp_ws].path = savestring(ws[cur_ws].path,
 									 strlen(ws[cur_ws].path));
 
+	else if (access(ws[tmp_ws].path, R_OK|X_OK) != EXIT_SUCCESS) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[tmp_ws].path,
+						strerror(errno));
+		free(ws[tmp_ws].path);
+		ws[tmp_ws].path = savestring(ws[cur_ws].path,
+									 strlen(ws[cur_ws].path));
+	}
+
 	if (xchdir(ws[tmp_ws].path, SET_TITLE) == -1) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[tmp_ws].path,
 				strerror(errno));
