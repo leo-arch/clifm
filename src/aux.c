@@ -434,7 +434,7 @@ read_octal(char *str) {
 	int temp = num;
 	while (temp) {
 
-		// Extracting last digit
+		/* Extracting last digit */
 		int last_digit = temp % 10;
 		temp = temp / 10;
 

@@ -48,12 +48,11 @@
 
 struct user_t user;
 
-// 
-// functions
-//
+/* 
+ * functions
+ */
 void
-check_env_filter(void)
-{
+check_env_filter(void) {
 	if (filter)
 		return;
 
@@ -66,8 +65,7 @@ check_env_filter(void)
 }
 
 char *
-get_date (void)
-{
+get_date (void) {
 	time_t rawtime = time(NULL);
 	struct tm *tm = localtime(&rawtime);
 	size_t date_max = 128;
@@ -86,8 +84,7 @@ get_date (void)
 }
 
 pid_t
-get_own_pid(void)
-{
+get_own_pid(void) {
 	pid_t pid;
 
 	/* Get the process id */
@@ -99,7 +96,7 @@ get_own_pid(void)
 		return pid;
 }
 
-// returns pointer to username, exits if not found
+/* returns pointer to username, exits if not found */
 struct user_t get_user(void) {
 	struct passwd *pw;
 	struct user_t tmp_user;
@@ -120,16 +117,15 @@ struct user_t get_user(void) {
 		exit(-1);
 	}
 
-	// some extra stuff to do before exiting
+	/* some extra stuff to do before exiting */
 	tmp_user.home_len = strlen(tmp_user.home);
 
 	return tmp_user;
 }
 
-void
-load_jumpdb(void)
 /* Reconstruct the jump database from database file */
-{
+void
+load_jumpdb(void) {
 	if (xargs.no_dirjump ==  1 || !config_ok || !CONFIG_DIR)
 		return;
 
@@ -424,10 +420,9 @@ load_bookmarks(void)
 	return EXIT_SUCCESS;
 }
 
-int
-load_actions(void)
 /* Store actions from the actions file into a struct */
-{
+int
+load_actions(void) {
 	if (!config_ok)
 		return EXIT_FAILURE;
 
@@ -485,11 +480,10 @@ load_actions(void)
 	return EXIT_SUCCESS;
 }
 
-void
-external_arguments(int argc, char **argv)
 /* Evaluate external arguments, if any, and change initial variables to
  * its corresponding value */
-{
+void 
+external_arguments(int argc, char **argv) {
 	/* Disable automatic error messages to be able to handle them
 	 * myself via the '?' case in the switch */
 	opterr = optind = 0;
@@ -1077,8 +1071,7 @@ external_arguments(int argc, char **argv)
 }
 
 void
-unset_xargs(void)
-{
+unset_xargs(void) {
 	xargs.splash = xargs.hidden = xargs.longview = UNSET;
 	xargs.autocd = xargs.auto_open = xargs.ext = xargs.ffirst = UNSET;
 	xargs.sensitive = xargs.unicode = xargs.pager = xargs.path = UNSET;
@@ -1097,14 +1090,13 @@ unset_xargs(void)
 	xargs.cwd_in_title = UNSET;
 }
 
-void
-init_shell(void)
 /* Keep track of attributes of the shell. Make sure the shell is running
  * interactively as the foreground job before proceeding.
  * Taken from:
  * https://www.gnu.org/software/libc/manual/html_node/Initializing-the-Shell.html#Initializing-the-Shell
  * */
-{
+void
+init_shell(void) {
 	/* If shell is not interactive */
 	if (!isatty(STDIN_FILENO)) {
 		handle_stdin();
@@ -1141,10 +1133,9 @@ init_shell(void)
 	return;
 }
 
-int
-get_sel_files(void)
 /* Get current entries in the Selection Box, if any. */
-{
+int
+get_sel_files(void) {
 	if (!selfile_ok || !config_ok)
 		return EXIT_FAILURE;
 
@@ -1191,11 +1182,10 @@ get_sel_files(void)
 	return EXIT_SUCCESS;
 }
 
-size_t
-get_path_env(void)
 /* Store all paths in the PATH environment variable into a globally
  * declared array (paths) */
-{
+size_t
+get_path_env(void) {
 	size_t i = 0;
 
 	/* Get the value of the PATH env variable */
@@ -1245,11 +1235,10 @@ get_path_env(void)
 	return path_num;
 }
 
-int
-get_last_path(void)
 /* Set PATH to last visited directory and CUR_WS to last used
  * workspace */
-{
+int
+get_last_path(void) {
 	if (!CONFIG_DIR)
 		return EXIT_FAILURE;
 
@@ -1318,10 +1307,9 @@ get_last_path(void)
 	return EXIT_SUCCESS;
 }
 
-int
-load_pinned_dir(void)
 /* Restore pinned dir from file */
-{
+int
+load_pinned_dir(void) {
 	if (!config_ok)
 		return EXIT_FAILURE;
 
@@ -1367,12 +1355,11 @@ load_pinned_dir(void)
 	return EXIT_SUCCESS;
 }
 
-void
-get_path_programs(void)
 /* Get the list of files in PATH, plus CliFM internal commands, and send
  * them into an array to be read by my readline custom auto-complete
  * function (my_rl_completion) */
-{
+void
+get_path_programs(void) {
 	struct dirent ***commands_bin = (struct dirent ***)xnmalloc(
 									path_n, sizeof(struct dirent));
 	int i, j, l = 0, total_cmd = 0;
@@ -1462,8 +1449,7 @@ get_path_programs(void)
 }
 
 void
-get_aliases(void)
-{
+get_aliases(void) {
 	if (!config_ok)
 		return;
 
@@ -1510,8 +1496,7 @@ get_aliases(void)
 }
 
 int
-load_dirhist(void)
-{
+load_dirhist(void) {
 	if (!config_ok)
 		return EXIT_FAILURE;
 
@@ -1565,8 +1550,7 @@ load_dirhist(void)
 }
 
 void
-get_prompt_cmds(void)
-{
+get_prompt_cmds(void) {
 	if (!config_ok)
 		return;
 
@@ -1615,10 +1599,9 @@ get_prompt_cmds(void)
 	fclose(config_file_fp);
 }
 
-void
-check_options(void)
 /* If some option was not set, set it to the default value */
-{
+void
+check_options(void) {
 	if (!usr_cscheme)
 		usr_cscheme = savestring("default", 7);
 

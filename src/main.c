@@ -376,12 +376,12 @@ main(int argc, char *argv[]) {
 	if (*argv[0] == '.' && *(argv[0] + 1) == '/')
 		argv[0] += 2;
 
-	// Use the locale specified by the environment
+	/* Use the locale specified by the environment */
 	setlocale(LC_ALL, "");
 
-	unicode = 1; // always enable unicode
+	unicode = 1; /* always enable unicode */
 
-	// Initialize gettext() for translations
+	/* Initialize gettext() for translations */
 	bindtextdomain("clifm", "/usr/share/locale");
 	textdomain("clifm");
 
@@ -397,9 +397,9 @@ main(int argc, char *argv[]) {
 	while (--i >= 0)
 		argv_bk[i] = savestring(argv[i], strlen(argv[i]));
 
-	atexit(free_stuff); // free_stuff does some cleaning
+	atexit(free_stuff); /* free_stuff does some cleaning */
 
-	// Get user's home directory
+	/* Get user's home directory */
 	user = get_user();
 
 	if (access(user.home, W_OK) == -1) {
