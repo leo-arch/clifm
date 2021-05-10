@@ -554,7 +554,7 @@ With no arguments, the function prints the current pinned file, if any. If an ar
 At program exit, the pinned file is written to a file in the configuration directory (as .pin) to be loaded in the next session.
 .TP
 .B q, quit, exit, Q
-Gracefully quit CliFM. Use 'Q' to gracefully quit and enable the CD on quit functionality (write last visited directory to $XDG_CONFIG/clifm/.last to be later read by a shell function. See SHELL FUNCTIONS below).
+Gracefully quit CliFM. Use 'Q' to gracefully quit and enable the CD on quit functionality (write last visited directory to \fI$XDG_CONFIG/clifm/.last\fR to be later read by a shell function. See the \fBSHELL FUNCTIONS\fR section below).
 .TP
 .B rf, refresh
 refresh the screen, that is, reprint files in the current directory and update the prompt
