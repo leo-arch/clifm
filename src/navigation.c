@@ -124,10 +124,10 @@ workspaces(char *str)
 	return exit_status;
 }
 
-int
-xchdir(const char *dir, const int set_title)
 /* Make sure DIR exists, it is actually a directory and is readable.
  * Only then change directory */
+int
+xchdir(const char *dir, const int set_title)
 {
 	DIR *dirp = opendir(dir);
 
@@ -156,9 +156,9 @@ xchdir(const char *dir, const int set_title)
 	return ret;
 }
 
+/* Change CliFM working directory to NEW_PATH */
 int
 cd_function(char *new_path)
-/* Change CliFM working directory to NEW_PATH */
 {
 	/* If no argument, change to home */
 	if (!new_path || !*new_path) {
@@ -229,9 +229,9 @@ cd_function(char *new_path)
 	return exit_status;
 }
 
+/* Convert ... n into ../.. n */
 char *
 fastback(const char *str)
-/* Convert ... n into ../.. n */
 {
 	if (!str || !*str)
 		return (char *)NULL;
@@ -353,9 +353,9 @@ surf_hist(char **comm)
 	return exit_status;
 }
 
+/* Go back one entry in dirhist */
 int
 back_function(char **comm)
-/* Go back one entry in dirhist */
 {
 	if (!comm)
 		return EXIT_FAILURE;
@@ -402,9 +402,9 @@ back_function(char **comm)
 	return exit_status;
 }
 
+/* Go forth one entry in dirhist */
 int
 forth_function(char **comm)
-/* Go forth one entry in dirhist */
 {
 	if (!comm)
 		return EXIT_FAILURE;

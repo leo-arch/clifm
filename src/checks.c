@@ -35,10 +35,10 @@
 #include "misc.h"
 #include "aux.h"
 
-int
-check_immutable_bit(char *file)
 /* Check a file's immutable bit. Returns 1 if true, zero if false, and
  * -1 in case of error */
+int
+check_immutable_bit(char *file)
 {
 	#if !defined(FS_IOC_GETFLAGS) || !defined(FS_IMMUTABLE_FL)
 	return 0;
@@ -67,10 +67,10 @@ check_immutable_bit(char *file)
 	#endif /* !defined(FS_IOC_GETFLAGS) || !defined(FS_IMMUTABLE_FL) */
 }
 
-int
-is_acl(char *file)
 /* Return 1 if FILE has some ACL property and zero if none
  * See: https://man7.org/tlpi/code/online/diff/acl/acl_view.c.html */
+int
+is_acl(char *file)
 {
 	if (!file || !*file)
 		return 0;
@@ -105,10 +105,10 @@ is_acl(char *file)
 	return 0;
 }
 
-int
-is_number(const char *restrict str)
 /* Check whether a given string contains only digits. Returns 1 if true
  * and 0 if false. It does not work with negative numbers */
+int
+is_number(const char *restrict str)
 {
 	for (;*str; str++)
 		if (*str > '9' || *str < '0')
@@ -117,9 +117,9 @@ is_number(const char *restrict str)
 	return 1;
 }
 
+/* Check CMD against a list of internal commands */
 int
 is_internal_c(const char *restrict cmd)
-/* Check CMD against a list of internal commands */
 {
 	const char *int_cmds[] = {
 		"?", "help",
@@ -211,12 +211,12 @@ is_internal_c(const char *restrict cmd)
 	return 0;
 }
 
-int
-is_internal(const char *cmd)
 /* Check cmd against a list of internal commands. Used by parse_input_str()
  * to know if it should perform additional expansions, like glob, regex,
  * tilde, and so on. Only internal commands dealing with filenames
  * should be checked here */
+int
+is_internal(const char *cmd)
 {
 	const char *int_cmds[] = {
 		"cd",
@@ -257,9 +257,9 @@ is_internal(const char *cmd)
 	return 0;
 }
 
+/* Return one if STR is a command in PATH or zero if not */
 int
 is_bin_cmd(const char *str)
-/* Return one if STR is a command in PATH or zero if not */
 {
 	char *p = (char *)str, *q = (char *)str;
 	int index = 0, space_index = -1;
@@ -290,9 +290,9 @@ is_bin_cmd(const char *str)
 	return 0;
 }
 
+/* Returns 0 if digit is found and preceded by a letter in STR, or one if not */
 int
 digit_found(const char *str)
-/* Returns 0 if digit is found and preceded by a letter in STR, or one if not */
 {
 	char *p = (char *)str;
 	int c = 0;
@@ -306,10 +306,10 @@ digit_found(const char *str)
 	return 0;
 }
 
-void
-file_cmd_check(void)
 /* Check if the 'file' command is available: it is needed by the mime
  * function */
+void
+file_cmd_check(void)
 {
 	file_cmd_path = get_cmd_path("file");
 
@@ -353,10 +353,10 @@ check_regex(char *str)
 	return EXIT_FAILURE;
 }
 
-char **
-check_for_alias(char **args)
 /* Returns the parsed aliased command in an array of strings, if
  * matching alias is found, or NULL if not. */
+char **
+check_for_alias(char **args)
 {
 	if (!aliases_n || !aliases || !args)
 		return (char **)NULL;
@@ -428,9 +428,9 @@ check_for_alias(char **args)
 	return (char **)NULL;
 }
 
+/* Keep only the last MAX records in LOG_FILE */
 void
 check_file_size(char *log_file, int max)
-/* Keep only the last MAX records in LOG_FILE */
 {
 	if (!config_ok)
 		return;

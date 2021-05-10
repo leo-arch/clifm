@@ -46,7 +46,8 @@
 /* Given this value: \xA0\xA1\xA1, return an array of integers with
  * the integer values for A0, A1, and A2 respectivelly */
 int *
-get_hex_num(const char *str) {
+get_hex_num(const char *str)
+{
 	size_t i = 0;
 	int *hex_n = (int *)calloc(3, sizeof(int));
 
@@ -79,8 +80,9 @@ get_hex_num(const char *str) {
 }
 
 /* Count files in DIR_PATH, including self and parent. */
+/* Readdir version */
 int
-count_dir(const char *dir_path) /* Readdir version */
+count_dir(const char *dir_path)
 {
 	if (!dir_path)
 		return -1;
@@ -108,7 +110,8 @@ count_dir(const char *dir_path) /* Readdir version */
 /* Get the path of a given command from the PATH environment variable.
  * It basically does the same as the 'which' Unix command */
 char *
-get_cmd_path(const char *cmd) {
+get_cmd_path(const char *cmd)
+{
 	char *cmd_path = (char *)NULL;
 	size_t i;
 
@@ -131,7 +134,8 @@ get_cmd_path(const char *cmd) {
 
 /* Convert FILE_SIZE to human readeable form */
 char *
-get_size_unit(off_t size) {
+get_size_unit(off_t size)
+{
 	size_t max = 9;
 	/* Max size type length == 9 == "1023.99K\0" */
 	char *p = malloc(max * sizeof(char));
@@ -161,7 +165,8 @@ get_size_unit(off_t size) {
 }
 
 off_t
-dir_size(char *dir) {
+dir_size(char *dir)
+{
 	char *rand_ext = gen_rand_str(6);
 	if (!rand_ext)
 		return -1;
@@ -225,7 +230,8 @@ S_IFCHR: 20000 / 8192
 S_IFIFO: 10000 / 4096
  * See the inode manpage */
 int
-get_link_ref(const char *link) {
+get_link_ref(const char *link)
+{
 	if (!link)
 		return (-1);
 
@@ -243,7 +249,8 @@ get_link_ref(const char *link) {
 /* Transform an integer (N) into a string of chars
  * this exists because some Operating systems do not suppoit itoa */
 char *
-xitoa(int n) {
+xitoa(int n)
+{
 	static char buf[32] = {0};
 	int i = 30, rem;
 
@@ -262,7 +269,8 @@ xitoa(int n) {
 
 /* some memory wrapper functions */
 void *
-xrealloc(void *ptr, size_t size) {
+xrealloc(void *ptr, size_t size)
+{
 	void *new_ptr = realloc(ptr, size);
 
 	if (!new_ptr) {
@@ -276,7 +284,8 @@ xrealloc(void *ptr, size_t size) {
 }
 
 void *
-xcalloc(size_t nmemb, size_t size) {
+xcalloc(size_t nmemb, size_t size)
+{
 	void *new_ptr = calloc(nmemb, size);
 
 	if (!new_ptr) {
@@ -289,7 +298,8 @@ xcalloc(size_t nmemb, size_t size) {
 }
 
 void *
-xnmalloc(size_t nmemb, size_t size) {
+xnmalloc(size_t nmemb, size_t size)
+{
 	void *new_ptr = malloc(nmemb * size);
 
 	if (!new_ptr) {
@@ -327,20 +337,23 @@ xgetchar(void)
 
 /* Converts a hex char to its integer value */
 char
-from_hex(char c) {
+from_hex(char c)
+{
 	return isdigit(c) ? c - '0' : tolower(c) - 'a' + 10;
 }
 
 /* Converts an integer value to its hex form */
 char
-to_hex(char c) {
+to_hex(char c)
+{
 	static char hex[] = "0123456789ABCDEF";
 	return hex[c & 15];
 }
 
 /* Returns a url-encoded version of str */
 char *
-url_encode(char *str) {
+url_encode(char *str)
+{
 	if (!str || *str == 0x00)
 		return (char *)NULL;
 
@@ -381,7 +394,8 @@ url_encode(char *str) {
 
 /* Returns a url-decoded version of str */
 char *
-url_decode(char *str) {
+url_decode(char *str)
+{
 	if (!str || str[0] == 0x00)
 		return (char *)NULL;
 
@@ -420,7 +434,8 @@ url_decode(char *str) {
  * Taken from: https://www.geeksforgeeks.org/program-octal-decimal-conversion/
  * Used by decode_prompt() to make things like this work: \033[1;34m */
 int 
-read_octal(char *str) {
+read_octal(char *str)
+{
 	if (!str)
 		return -1;
 

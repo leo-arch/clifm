@@ -39,10 +39,10 @@
 #include "history.h"
 #include "prompt.h"
 
-char *
-prompt(void)
 /* Print the prompt and return the string entered by the user (to be
  * parsed later by parse_input_str()) */
+char *
+prompt(void)
 {
 	/* Remove all final slash(es) from path, if any */
 	size_t path_len = strlen(ws[cur_ws].path), i;
@@ -202,11 +202,11 @@ prompt(void)
 	return input;
 }
 
-char *
-decode_prompt(const char *line)
 /* Decode the prompt string (encoded_prompt global variable) taken from
  * the configuration file. Based on the decode_prompt_string function
  * found in an old bash release (1.14.7). */
+char *
+decode_prompt(const char *line)
 {
 	if(!line)
 		return (char *)NULL;

@@ -37,9 +37,9 @@
 #include "checks.h"
 #include "exec.h"
 
+/* Log COMM into LOG_FILE (global) */
 int
 log_function(char **comm)
-/* Log 'comm' into LOG_FILE */
 {
 	/* If cmd logs are disabled, allow only "log" commands */
 	if (!logs_enabled) {
@@ -186,14 +186,14 @@ log_function(char **comm)
 	}
 }
 
-void
-log_msg(char *_msg, int print)
-/* Handle the error message 'msg'. Store 'msg' in an array of error
+/* Handle the error message MSG. Store MSG in an array of error
  * messages, write it into an error log file, and print it immediately
- * (if print is zero (NOPRINT_PROMPT) or tell the next prompt, if print
+ * (if PRINT is zero (NOPRINT_PROMPT) or tell the next prompt, if PRINT
  * is one to do it (PRINT_PROMPT)). Messages wrote to the error log file
  * have the following format:
  * "[date] msg", where 'date' is YYYY-MM-DDTHH:MM:SS */
+void
+log_msg(char *_msg, int print)
 {
 	if (!_msg)
 		return;
@@ -277,9 +277,9 @@ save_dirhist(void)
 	return EXIT_SUCCESS;
 }
 
+/* Add DIR_PATH to visited directory history (old_pwd) */
 void
 add_to_dirhist(const char *dir_path)
-/* Add DIR_PATH to visited directory history (old_pwd) */
 {
 /*  static size_t end_counter = 11, mid_counter = 11; */
 
@@ -400,11 +400,11 @@ history_function(char **comm)
 	return EXIT_SUCCESS;
 }
 
-int
-run_history_cmd(const char *cmd)
 /* Takes as argument the history cmd less the first exclamation mark.
  * Example: if exec_cmd() gets "!-10" it pass to this function "-10",
  * that is, comm + 1 */
+int
+run_history_cmd(const char *cmd)
 {
 	/* If "!n" */
 	int exit_status = EXIT_SUCCESS;
@@ -691,9 +691,9 @@ add_to_cmdhist(const char *cmd)
 	history[current_hist_n] = (char *)NULL;
 }
 
+/* Returns 1 if INPUT should be stored in history and 0 if not */
 int
 record_cmd(char *input)
-/* Returns 1 if INPUT should be stored in history and 0 if not */
 {
 	/* NULL input */
 	if (!input)

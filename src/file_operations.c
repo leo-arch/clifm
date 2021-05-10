@@ -205,9 +205,9 @@ open_function(char **cmd)
 	return EXIT_SUCCESS;
 }
 
+/* Relink symlink to new path */
 int
 edit_link(char *link)
-/* Relink symlink to new path */
 {
 	if (!link || !*link)
 		return EXIT_FAILURE;
@@ -558,8 +558,6 @@ remove_file(char **args)
 	return exit_status;
 }
 
-int
-bulk_rename(char **args)
 /* Rename a bulk of files (ARGS) at once. Takes files to be renamed
  * as arguments, and returns zero on success and one on error. The
  * procedude is quite simple: filenames to be renamed are copied into
@@ -570,6 +568,8 @@ bulk_rename(char **args)
  * I took this bulk rename method, just because it is quite simple and
  * KISS, from the fff filemanager. So, thanks fff! BTW, this method
  * is also implemented by ranger and nnn */
+int
+bulk_rename(char **args)
 {
 	if (!args[1])
 		return EXIT_FAILURE;
@@ -790,11 +790,11 @@ bulk_rename(char **args)
 	return exit_status;
 }
 
-char *
-export(char **filenames, int open)
 /* Export files in CWD (if FILENAMES is NULL), or files in FILENAMES,
  * into a temporary file. Return the address of this empt file if
  * success (it must be freed) or NULL in case of error */
+char *
+export(char **filenames, int open)
 {
 	char *rand_ext = gen_rand_str(6);
 

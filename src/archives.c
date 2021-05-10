@@ -288,11 +288,11 @@ create_iso(char *in_file, char *out_file)
 	return exit_status;
 }
 
-int
-check_iso(char *file)
 /* Run the 'file' command on FILE and look for "ISO 9660" and
  * string in its output. Returns zero if found, one if not, and -1
  * in case of error */
+int
+check_iso(char *file)
 {
 	if (!file || !*file) {
 		fputs(_("Error opening temporary file\n"), stderr);
@@ -387,8 +387,6 @@ check_iso(char *file)
 	return EXIT_FAILURE;
 }
 
-int
-is_compressed(char *file, int test_iso)
 /* Run the 'file' command on FILE and look for "archive" and
  * "compressed" strings in its output. Returns zero if compressed,
  * one if not, and -1 in case of error.
@@ -397,6 +395,8 @@ is_compressed(char *file, int test_iso)
  * mime_open(), since both need to check compressed and ISOs as
  * well (and there is no need to run two functions (is_compressed and
  * check_iso), when we can run just one) */
+int
+is_compressed(char *file, int test_iso)
 {
 	if (!file || !*file) {
 		fputs(_("Error opening temporary file\n"), stderr);
@@ -510,13 +510,13 @@ is_compressed(char *file, int test_iso)
 	return EXIT_FAILURE;
 }
 
-int
-archiver(char **args, char mode)
 /* Handle archives and/or compressed files (ARGS) according to MODE:
  * 'c' for archiving/compression, and 'd' for dearchiving/decompression
  * (including listing, extracting, repacking, and mounting). Returns
  * zero on success and one on error. Depends on 'zstd' for Zdtandard
  * files 'atool' and 'archivemount' for the remaining types. */
+int
+archiver(char **args, char mode)
 {
 	size_t i;
 	int exit_status = EXIT_SUCCESS;
@@ -1047,13 +1047,13 @@ archiver(char **args, char mode)
 	return exit_status;
 }
 
-int
-zstandard(char *in_file, char *out_file, char mode, char op)
 /* If MODE is 'c', compress IN_FILE producing a zstandard compressed
  * file named OUT_FILE. If MODE is 'd', extract, test or get
  * information about IN_FILE. OP is used only for the 'd' mode: it
  * tells if we have one or multiple file. Returns zero on success and
  * one on error */
+int
+zstandard(char *in_file, char *out_file, char mode, char op)
 {
 	int exit_status = EXIT_SUCCESS;
 

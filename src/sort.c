@@ -204,11 +204,11 @@ entrycmp(const void *a, const void *b)
 	return (ret - (ret * 2));
 }
 
-int
-xalphasort(const struct dirent **a, const struct dirent **b)
 /* Same as alphasort, but is uses strcmp instead of sctroll, which is
  * slower. However, bear in mind that, unlike strcmp(), strcoll() is locale
  * aware. Use only with C and english locales */
+int
+xalphasort(const struct dirent **a, const struct dirent **b)
 {
 	int ret = 0;
 
@@ -355,12 +355,12 @@ sort_function(char **arg)
 	return EXIT_FAILURE;
 }
 
-int
-alphasort_insensitive(const struct dirent **a, const struct dirent **b)
 /* This is a modification of the alphasort function that makes it case
  * insensitive. It also sorts without taking the initial dot of hidden
  * files into account. Note that strcasecmp() isn't locale aware. Use
  * only with C and english locales */
+int
+alphasort_insensitive(const struct dirent **a, const struct dirent **b)
 {
 	int ret = strcasecmp(((*a)->d_name[0] == '.') ? (*a)->d_name + 1 :
 						(*a)->d_name, ((*b)->d_name[0] == '.') ?

@@ -43,10 +43,10 @@
 #include "colors.h"
 #include "init.h"
 
-int
-regen_config(void)
 /* Regenerate the configuration file and create a back up of the old
  * one */
+int
+regen_config(void)
 {
 	int config_found = 1;
 	struct stat config_attrib;
@@ -88,11 +88,11 @@ regen_config(void)
 	return EXIT_SUCCESS;
 }
 
-int
-edit_function (char **comm)
 /* Edit the config file, either via the mime function or via the first
  * passed argument (Ex: 'edit nano'). The 'gen' option regenerates
  * the configuration file and creates a back up of the old one. */
+int
+edit_function (char **comm)
 {
 	if (xargs.stealth_mode == 1) {
 		printf(_("%s: Access to configuration files is not allowed in "
@@ -186,9 +186,9 @@ set_env(void)
 		setenv("CLIFM_SELFILE", SEL_FILE, 1);
 }
 
+/* Define the file for the Selection Box */
 void
 set_sel_file(void)
-/* Define the file for the Selection Box */
 {
 	if (SEL_FILE) {
 		free(SEL_FILE);
@@ -1950,10 +1950,10 @@ read_config(void)
 	return;
 }
 
-void
-init_config(void)
 /* Set up CliFM directories and config files. Load the user's
  * configuration from clifmrc */
+void
+init_config(void)
 {
 	if (xargs.stealth_mode == 1) {
 

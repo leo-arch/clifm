@@ -82,7 +82,8 @@ int add_to_jumpdb(const char *dir)
 }
 
 /* Store the jump database into a file */
-void save_jumpdb(void) {
+void save_jumpdb(void)
+{
 	if (xargs.no_dirjump == 1 || !config_ok || !CONFIG_DIR
 	|| !jump_db || jump_n == 0)
 		return;
@@ -235,7 +236,8 @@ int edit_jumpdb(void)
 }
 
 /* Jump into best ranked directory matched by ARGS */
-int dirjump(char **args) {
+int dirjump(char **args)
+{
 	if (xargs.no_dirjump == 1) {
 		printf(_("%s: Directory jumper function disabled\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;

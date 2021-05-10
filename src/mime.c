@@ -35,11 +35,11 @@
 #include "checks.h"
 #include "archives.h"
 
-char *
-get_app(const char *mime, const char *ext)
 /* Get application associated to a given MIME filetype or file extension.
  * Returns the first matching line in the MIME file or NULL if none is
  * found */
+char *
+get_app(const char *mime, const char *ext)
 {
 	if (!mime)
 		return (char *)NULL;
@@ -264,12 +264,12 @@ get_mime(char *file)
 	return (char *)NULL;
 }
 
-int
-mime_open(char **args)
 /* Open a file according to the application associated to its MIME type
  * or extension. It also accepts the 'info' and 'edit' arguments, the
  * former providing MIME info about the corresponding file and the
  * latter opening the MIME list file */
+int
+mime_open(char **args)
 {
 	/* Check arguments */
 	if (!args[1] || (*args[1] == '-' && strcmp(args[1], "--help") == 0)) {
@@ -533,13 +533,13 @@ mime_open(char **args)
 	return ret;
 }
 
-int
-mime_import(char *file)
 /* Import MIME definitions from the system into FILE. This function will
  * only be executed if the MIME file is not found or when creating a new
  * profile. Returns zero if some association is found in the system
  * 'mimeapps.list' files, or one in case of error or no association
  * found */
+int
+mime_import(char *file)
 {
 
 	/* Open the internal MIME file */

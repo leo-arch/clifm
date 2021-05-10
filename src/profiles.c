@@ -167,9 +167,9 @@ profile_function(char **comm)
 	return exit_status;
 }
 
+/* Switch profile to PROF */
 int
 profile_set(const char *prof)
-/* Switch profile to PROF */
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: The profile function is disabled in stealth mode\n",

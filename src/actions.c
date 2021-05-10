@@ -38,10 +38,10 @@
 #include "mime.h"
 #include "init.h"
 
-int
-run_action(char *action, char **args)
 /* The core of this function was taken from NNN's run_selected_plugin
  * function and modified to fit our needs. Thanks NNN! */
+int
+run_action(char *action, char **args)
 {
 	int exit_status = EXIT_SUCCESS;
 	char *cmd = (char *)NULL;
