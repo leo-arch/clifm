@@ -1,6 +1,6 @@
 #pragma once
 
-// some memory wrapper functions
+/* some memory wrapper functions */
 void *xrealloc(void *ptr, size_t size);
 void *xcalloc(size_t nmemb, size_t size);
 void *xnmalloc(size_t nmemb, size_t size);

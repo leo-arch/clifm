@@ -1,6 +1,5 @@
 #pragma once
 
-/* init.c */
 void check_env_filter(void);
 void get_prompt_cmds(void);
 void get_aliases(void);
@@ -22,11 +21,11 @@ char *get_date (void);
 pid_t get_own_pid(void);
 struct user_t get_user(void);
 
-// 
-// some useful structs
-//
+/* 
+ * some useful structs
+*/
 
-// stores information regarding the user
+/* stores information regarding the user */
 struct user_t {
 	char * home;
 	size_t home_len;
@@ -34,7 +33,7 @@ struct user_t {
 	char * shell;
 };
 
-//
-// some global variables
-//
+/*
+ * some global variables
+*/
 extern struct user_t user;

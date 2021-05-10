@@ -80,7 +80,7 @@ void* __dso_handle;
 #  endif /* __GLIBC__ */
 #endif /* _GNU_SOURCE */
 
-// Because capability.h is deprecated in BSD
+/* Because capability.h is deprecated in BSD */
 #if __linux__
 #  if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24)
 #    define _LINUX_CAP
@@ -88,9 +88,9 @@ void* __dso_handle;
 #endif /* __linux__ */
 
 #define PROGRAM_NAME "CliFM"
-#define PNL "clifm" // Program name lowercase
+#define PNL "clifm" /* Program name lowercase */
 /* #define TMP_DIR "/tmp/clifm" */
-// If no formatting, puts (or write) is faster than printf
+/* If no formatting, puts (or write) is faster than printf */
 #define CLEAR write(STDOUT_FILENO, "\033c", 3);
 
 #define VERSION "1.0"
@@ -351,7 +351,7 @@ nm=01;32:bm=01;36:"
 #define FALLBACK_SHELL "/bin/sh"
 #define FALLBACK_OPENER "xdg-open"
 
-#define itoa xitoa // itoa does not exist in some OS's
+#define itoa xitoa /* itoa does not exist in some OS's */
 /* #define atoi xatoi */
 /* #define alphasort xalphasort */
 #define _(String) gettext (String)
