@@ -45,12 +45,19 @@
 #include "navigation.h"
 #include "bookmarks.h"
 #include "jump.h"
+#include "strings.h"
 
 void
-set_term_title(const char *dir)
+set_term_title(const char *str)
 {
-	printf("\033]2;%s - %s\007", PROGRAM_NAME, dir);
+	char *tmp = (char *)NULL;
+	tmp = home_tilde(str);
+	
+	printf("\033]2;%s - %s\007", PROGRAM_NAME, tmp ? tmp : str);
 	fflush(stdout);
+
+	if (tmp)
+		free(tmp);
 }
 
 int

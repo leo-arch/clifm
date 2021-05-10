@@ -1835,6 +1835,10 @@ savestring(const char *restrict str, size_t size)
 
 	char *ptr = (char *)NULL;
 	ptr = (char *)malloc((size + 1) * sizeof(char));
+
+	if (!ptr)
+		return (char *)NULL;
+
 	strcpy(ptr, str);
 
 	return ptr;

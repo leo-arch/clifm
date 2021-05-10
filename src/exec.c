@@ -1720,16 +1720,20 @@ exec_cmd(char **comm)
 		if (*comm[0] == ':' || *comm[0] == ';') {
 			/* Remove the colon from the beginning of the first argument,
 			 * that is, move the pointer to the next (second) position */
-			char *comm_tmp = comm[0] + 1;
+			char *comm_tmp = savestring(comm[0] + 1, strlen(comm[0] + 1));
 			/* If string == ":" or ";" */
 			if (!comm_tmp || !*comm_tmp) {
 				fprintf(stderr, _("%s: '%c': Syntax error\n"),
 						PROGRAM_NAME, *comm[0]);
 				exit_code = EXIT_FAILURE;
+				if (comm_tmp)
+					free(comm_tmp);
 				return EXIT_FAILURE;
 			}
-			else
+			else {
 				strcpy(comm[0], comm_tmp);
+				free(comm_tmp);
+			}
 		}
 
 		/* #### RUN THE EXTERNAL COMMAND #### */
