@@ -1,11 +1,11 @@
-# CODING SUGGESTIONS FOR CLIFM
+# Coding suggestions for CliFM
 
 
-## 1) CODING STYLE
+## 1) Coding style
 
 ### C source
 
-Generally, try to stick as closely as possible to the Linux kernel coding style. See https://www.kernel.org/doc/html/v4.10/process/coding-style.html
+Generally, try to stick as closely as possible to the `Linux kernel coding style`. See https://www.kernel.org/doc/html/v4.10/process/coding-style.html
 
 Indentation: TABS
 Comments: C style only (/**/). Ex:
@@ -60,7 +60,7 @@ Make sure blank/empty lines do not contains TABS or spaces (please!)
 
 We mostly use POSIX shell scripts. In this case, always use shellcheck to check your plugins.
 
-## 2) CODE GENERAL STRUCTURE
+## 2) General code structure
 
 CliFM source code consists of multiple C source files, being main.c the starting point and helpers.h the main header file. In main.c you'll find:
 
@@ -79,7 +79,7 @@ CliFM source code consists of multiple C source files, being main.c the starting
 
 **E)** Whatever happens later, is just some function or operation invoked by the user and happening on top of the steps described above: opening a file or directory (via the open_function() and cd_function() functions, in file_operations.c and navigation.c respectivelly), opening a bookmark (bookmarks.c), opearting on files (file_operations.c), switching to a different profile (profiles.c), trashing a file (trash.c), searching for a file (search.c), running a plugin (actions.c), and so on.
 
-## 3) HACKING (work in progress)
+## 3) Hacking (work in progress)
 
 Add a new command: exec.c
 Add a new prompt feature: prompt.c
@@ -89,7 +89,7 @@ TAB completion: readline.c
 Interface: listing.c
 Jumper: jump.c
 
-## 4) PLUGINS
+## 4) Plugins
 
 CliFM plugins, that is, commands or set of commands executed by CLiFM, could be any executable file, be it a shell script, a binary file (C, Python, Go, Rust, or whatever programming language you like).
 
