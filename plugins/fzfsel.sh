@@ -116,7 +116,6 @@ else
 fi
 
 if [ "$marksel_mode" -eq 1 ]; then
-#	printf "CMD: %s\n" "$(echo $@ | sed 's/\n/ /g')"
 	printf "%s %s" "$(echo "$@" | sed 's/\n/ /g')" "$(sed 's/\n/ /g' "$TMPFILE")" > "$CLIFM_BUS"
 else
 	# shellcheck disable=SC1007
@@ -125,15 +124,12 @@ else
 	done < "$TMPFILE"
 fi
 
-
-#if [ -z "$DISPLAY" ]; then
-#	clear
-#else
-#	tput rmcup
-#fi
+if [ -z "$DISPLAY" ]; then
+	clear
+else
+	tput rmcup
+fi
 
 rm -f -- "$TMPFILE" > /dev/null 2>&1
-
-#clear
 
 exit 0
