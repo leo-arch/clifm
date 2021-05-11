@@ -91,11 +91,17 @@ CliFM source code consists of multiple C source files, being main.c the starting
 ## 3) Hacking (work in progress)
 
 Add a new command: exec.c
+
 Add a new prompt feature: prompt.c
+
 Modify/add keybindings: keybindings.c
+
 Icons: icons.h and listing.c
+
 TAB completion: readline.c
+
 Interface: listing.c
+
 Jumper: jump.c
 
 ## 4) Plugins
