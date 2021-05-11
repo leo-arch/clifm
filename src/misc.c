@@ -1485,7 +1485,7 @@ help_function (void)
 \n -U, --unicode \t\t\t enable unicode to correctly list filenames \
 \n              containing accents, tildes, umlauts, \
 \n              non-latin letters, etc. This option is \
-\n              enabled by default for non-english locales\
+\n              enabled by default\
 \n -v, --version\t\t\t show version details and exit\
 \n -w, --workspace=NUM\t\t start in workspace NUM\
 \n -x, --ext-cmds\t\t\t allow the use of external commands\
@@ -1564,6 +1564,13 @@ help_function (void)
 				'rm' to prevent accidental deletions\n",
 		 PROGRAM_NAME, PROGRAM_NAME);
 
+	puts(_("The following is just a list of available commands and possible "
+		   "parameters. For a complete description of each of these commands "
+		   "run 'cmd' (or press F2) or consult the manpage (F1). You "
+		   "can also try the 'ih' action to run the interactive "
+		   "help plugin (it depends on fzf). Just enter 'ih', that's "
+		   "it.\n"));
+
 	puts(_("\nBUILT-IN COMMANDS:\n\n\
  ELN/FILE/DIR (auto-open and autocd functions)\n\
  /PATTERN [DIR] [-filetype] [-x] (quick search)\n\
@@ -1630,12 +1637,6 @@ help_function (void)
  ver, version\n\
  ws [NUM, +, -] (workspaces)\n\
  x, X [ELN/DIR] (new instance)\n"));
-
-	puts(_("Run 'cmd' (F2) or consult the manpage (F1) for "
-		   "more information about each of these commands. You "
-		   "can also try the 'ih' action to run the interactive "
-		   "help plugin (depends on fzf). Just enter 'ih', that's "
-		   "it.\n"));
 
 	printf(_("DEFAULT KEYBOARD SHORTCUTS:\n\n"
 " M-c: Clear the current command line buffer\n\

@@ -99,7 +99,7 @@ get_own_pid(void)
 		return pid;
 }
 
-/* returns pointer to username, exits if not found */
+/* Returns pointer to username, exits if not found */
 struct user_t get_user(void)
 {
 	struct passwd *pw;
@@ -108,7 +108,7 @@ struct user_t get_user(void)
 	pw = getpwuid(geteuid());
 
 	if (!pw) {
-		_err('e', NOPRINT_PROMPT, "%s: cannot detect user data, so exiting early", PROGRAM_NAME);
+		_err('e', NOPRINT_PROMPT, _("%s: Error getting user data\n"), PROGRAM_NAME);
 		exit(-1);
 	}
 
@@ -117,7 +117,7 @@ struct user_t get_user(void)
 	tmp_user.shell = savestring(pw->pw_shell, strlen(pw->pw_shell));
 
 	if (!tmp_user.home || !tmp_user.name || !tmp_user.shell) {
-		_err('e', NOPRINT_PROMPT, "%s: cannot detect user data, so exiting", PROGRAM_NAME);
+		_err('e', NOPRINT_PROMPT, _("%s: Error getting user data\n"), PROGRAM_NAME);
 		exit(-1);
 	}
 
@@ -1893,6 +1893,9 @@ check_options(void)
 	if (!user.shell) {
 		struct user_t tmp_user = get_user();
 		user.shell = tmp_user.shell;
+		/* We don't need these values of the user struct: free(d) them */
+		free(tmp_user.name);
+		free(tmp_user.home);
 
 		if (!user.shell)
 			user.shell = savestring(FALLBACK_SHELL, strlen(FALLBACK_SHELL));
