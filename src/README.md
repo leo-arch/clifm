@@ -5,6 +5,8 @@
 
 ### C source
 
+FreeBSD compatibility: We try to keep CliFM working on FreeBSD (at the very least). So, when calling a function make sure it exists in FreeBSD. Check its syntax as well: GNU functions are not always identical to BSD ones.
+
 Generally, try to stick as closely as possible to the `Linux kernel coding style`. See https://www.kernel.org/doc/html/v4.10/process/coding-style.html
 
 Indentation: TABS
