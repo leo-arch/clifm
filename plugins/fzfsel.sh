@@ -26,11 +26,18 @@ HELP="Usage:
 Alt-h: Toggle this help screen
 
 TAB, Alt-down: Toggle select down
+
 Alt-up: Toggle select up
+
 Alt-right: Select all files
+
 Alt-left: Deselect all files
+
 Alt-Enter: Invert selection
-Enter: Confirm selection, exit, and send selected files to CliFM Selbox"
+
+Enter: Confirm selection, exit, and send selected files to CliFM Selbox
+
+Esc: Cancel and exit"
 
 if [ "$(tput colors)" -eq 256 ]; then
 	BORDERS="--border=left"
@@ -42,12 +49,12 @@ fi
 ls -A --group-directories-first --color=always | \
 fzf --multi --marker='*' --info=inline \
 	--color "prompt:6,fg+:reverse,marker:2:bold,pointer:6,header:7" \
-	--bind "alt-down:toggle+down" \
+	--bind "alt-down:toggle+down,insert:toggle+down" \
 	--bind "alt-up:toggle+up" \
 	--bind "alt-right:select-all,alt-left:deselect-all" \
 	--bind "alt-h:toggle-preview" --preview-window=:wrap \
 	--bind "alt-enter:toggle-all" --preview "printf %s \"$HELP\"" \
-	--reverse "$BORDERS" --ansi --prompt "CliFM> " > "$TMPFILE"
+	--reverse "$BORDERS" --no-sort --ansi --prompt "CliFM> " > "$TMPFILE"
 
 # shellcheck disable=SC1007
 while ISF= read -r line; do
@@ -60,7 +67,7 @@ else
 	tput rmcup
 fi
 
-rm -- "$TMPFILE" > /dev/null 2>&1
+rm -f -- "$TMPFILE" > /dev/null 2>&1
 
 #clear
 

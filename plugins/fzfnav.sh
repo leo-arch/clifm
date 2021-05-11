@@ -20,7 +20,7 @@
 # Press Esc to cancel and exit.
 
 uz_cleanup() {
-    rm "$FIFO_UEBERZUG"
+    rm "$FIFO_UEBERZUG" 2>/dev/null
     pkill -P $$ >/dev/null
 }
 
@@ -102,6 +102,7 @@ $PWD" --marker="+" --preview-window=:wrap "$BORDERS" \
 
 main() {
 
+	printf "\033[2;TEST\007"
 	if ! [ "$(which fzf 2>/dev/null)" ]; then
 		printf "CliFM: fzf: Command not found" >&2
 		exit 1
@@ -232,7 +233,7 @@ main() {
 		tput rmcup
 	fi
 
-	[ -n "$CLIFM" ] && cat "$TMP" > "$CLIFM_BUS"
+	[ -n "$CLIFM" ] && cat "$TMP" 2>/dev/null > "$CLIFM_BUS"
 	rm -f -- "$TMP" 2>/dev/null
 }
 
