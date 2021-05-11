@@ -1564,15 +1564,14 @@ help_function (void)
 				'rm' to prevent accidental deletions\n",
 		 PROGRAM_NAME, PROGRAM_NAME);
 
-	puts(_("The following is just a list of available commands and possible "
-		   "parameters. For a complete description of each of these commands "
-		   "run 'cmd' (or press F2) or consult the manpage (F1). You "
-		   "can also try the 'ih' action to run the interactive "
-		   "help plugin (it depends on fzf). Just enter 'ih', that's "
-		   "it.\n"));
 
-	puts(_("\nBUILT-IN COMMANDS:\n\n\
- ELN/FILE/DIR (auto-open and autocd functions)\n\
+	puts(_("\nBUILT-IN COMMANDS:\n\nThe following is just a list of available "
+"commands and possible parameters. For a complete description of "
+"each of these commands run 'cmd' (or press F2) or consult the "
+"manpage (F1). You can also try the 'ih' action to run the "
+"interactive help plugin (it depends on FZF). Just enter 'ih', that's it.\n"));
+
+	puts(_("ELN/FILE/DIR (auto-open and autocd functions)\n\
  /PATTERN [DIR] [-filetype] [-x] (quick search)\n\
  ;[CMD], :[CMD] (run CMD via the system shell)\n\
  ac, ad ELN/FILE ... (archiving functions)\n\
