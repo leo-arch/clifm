@@ -419,8 +419,11 @@ main(int argc, char *argv[])
 	else
 		user_home_len = strlen(user.home);
 
-	if (geteuid() == 0)
+	if (geteuid() == 0) {
 		flags |= ROOT_USR;
+		_err('w', PRINT_PROMPT, _("%s%s: \x1b[1;31mRunning as root. Be careful\n"),
+			 bold, PROGRAM_NAME);
+	}
 
 	/* Running in a graphical environment? */
 #if __linux__
