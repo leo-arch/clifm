@@ -8,7 +8,9 @@
 Generally, try to stick as closely as possible to the `Linux kernel coding style`. See https://www.kernel.org/doc/html/v4.10/process/coding-style.html
 
 Indentation: TABS
-Comments: C style only (/**/). Ex:
+Comments: C style only. Ex:
+
+	/* This is a single line comment */
 
 	/* This is a muti-line
 	* comment */
@@ -39,26 +41,30 @@ Assignements:
 
 	x = y
 
-Proper casting: Ex:
+Proper casting. For example, do not write:
 
-	return (char *)NULL
+	return NULL;
+
+But,
+
+	return (char *)NULL;
 
 Prefer ASCII instead of Hex: Ex: `'\0'` instead of `0x00`
 
 Spacing: Write easily readable code. Generally, use blank lines between code blocks (this, however, depends on the code written so far). Just make it readable (the code won't be better for being tightly written)
 
-Max line legnth: 80 characters/columns. If an statement exceeds this number, split it into multiple lines as follows:
+Max line legnth: `80 characters/columns`. If an statement exceeds this number, split it into multiple lines as follows:
 
 	if (condition)
 		printk(KERN_WARNING "Warning this is a long printk with "
 							"3 parameters a: %u b: %u "
 							"c: %u \n", a, b, c);
 
-Make sure blank/empty lines do not contains TABS or spaces (please!)
+Make sure blank/empty lines do not contains TABS or spaces. In the same way, remove ending TABS and spaces.
 
 ### Plugins
 
-We mostly use POSIX shell scripts. In this case, always use shellcheck to check your plugins.
+We mostly use `POSIX shell scripts`. In this case, always use `shellcheck` to check your plugins.
 
 ## 2) General code structure
 
