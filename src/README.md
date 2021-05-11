@@ -10,6 +10,7 @@ FreeBSD compatibility: We try to keep CliFM working on FreeBSD (at the very leas
 Generally, try to stick as closely as possible to the `Linux kernel coding style`. See https://www.kernel.org/doc/html/v4.10/process/coding-style.html
 
 Indentation: TABS
+
 Comments: C style only. Ex:
 
 	/* This is a single line comment */
