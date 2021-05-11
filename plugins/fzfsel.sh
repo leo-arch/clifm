@@ -20,7 +20,7 @@ currently selected files is printed, allowing the user to mark one or more of \
 them. At exit, marked files will be passed to CMD and executed by CliFM."
 
 if [ -n "$1" ]; then
-	if [ "$1" == "--help" ] || [ "$1" == "help" ]; then
+	if [ "$1" = "--help" ] || [ "$1" = "help" ]; then
 		printf "Usage: %s %s\n" "$(basename "$0")" "$USAGE"
 		exit 0
 	fi
@@ -90,6 +90,8 @@ if [ -n "$cmd" ]; then
 	fi
 
 	marksel_mode=1
+	# shellcheck disable=SC2012
+	# shellcheck disable=SC2046
 	ls --color=always --indicator=none $(cat "$CLIFM_SELFILE") | \
 	fzf --multi --marker='*' --info=inline --keep-right \
 		--color "prompt:6,fg+:reverse,marker:2:bold,pointer:6,header:7" \
@@ -115,7 +117,7 @@ fi
 
 if [ "$marksel_mode" -eq 1 ]; then
 #	printf "CMD: %s\n" "$(echo $@ | sed 's/\n/ /g')"
-	printf "%s %s" "$(echo $@ | sed 's/\n/ /g')" "$(cat $TMPFILE | sed 's/\n/ /g')" > "$CLIFM_BUS"
+	printf "%s %s" "$(echo "$@" | sed 's/\n/ /g')" "$(sed 's/\n/ /g' "$TMPFILE")" > "$CLIFM_BUS"
 else
 	# shellcheck disable=SC1007
 	while ISF= read -r line; do
