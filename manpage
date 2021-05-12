@@ -929,7 +929,7 @@ or, using now command substitution:
  "$(whoami)@$(hostname) $(pwd)> "
 
 .TP
-A bold green asterisk at the left of the prompt indicates that there are elements in the Selection Box. In the same way, a yellow 'T' means that there are currently files in the trash can, just as a bold blue 'S' means that the program is running in stealth mode. Finally, CliFM makes use of three kind of messages: errors (a red 'E' at the left of the prompt), warnings (a yellow 'W'), and simple notices (a green 'N').
+A bold red 'R' at the left of the prompt reminds the user that the program is running as root. A bold green asterisk indicates that there are elements in the Selection Box. In the same way, a yellow 'T' means that there are currently files in the trash can, just as a bold blue 'S' means that the program is running in stealth mode. Finally, CliFM makes use of three kind of messages: errors (a red 'E' at the left of the prompt), warnings (a yellow 'W'), and simple notices (a green 'N').
 .SH BUILT\-IN EXPANSIONS
 .TP
 Besides the default TAB completion for command names and paths, you can also expand ELN's using the TAB key. Example: type 'o 12', press TAB, and it becomes 'o filename ', or, if 12 refers to a directory, 'o dir/'. CliFM uses a Bash\-style quoting system, so that this filename: "this is a test@version{1}" is expanded as follows: this\\ is\\ a\\ test\\@version\\{1\\}
