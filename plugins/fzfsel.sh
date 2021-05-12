@@ -1,27 +1,26 @@
 #!/bin/sh
 
 # FZF selection plugin for CliFM
-# Description: Select files in the current working directory using FZF
-
 # Written by L. Abramovich
 
 # License: GPL3
 
-# Usage: select files using Space or x keys (a to select all), and
-# deselect using the z key (s to deselect all). Once done, press Enter.
-# At exit, selected files will be sent to CliFM Selbox
-
-USAGE="[CMD [ARGS]] [--help, help]
+if [ -n "$1" ]; then
+	if [ "$1" = "--help" ] || [ "$1" = "help" ]; then
+		name="$(basename "$0")"
+		printf "Usage: %s [CMD [ARGS]] [--help, help]
 Without arguments, it prints the list of files in the current directory allowing \
 the user to select one or more of them. At exit, selected files are send to CliFM's \
 Selection Box.
-If a command is passed, either internal to CliFM or external, the list of \
-currently selected files is printed, allowing the user to mark one or more of \
-them. At exit, marked files will be passed to CMD and executed by CliFM."
 
-if [ -n "$1" ]; then
-	if [ "$1" = "--help" ] || [ "$1" = "help" ]; then
-		printf "Usage: %s %s\n" "$(basename "$0")" "$USAGE"
+If a command is passed (CMD), either internal to CliFM or external, the list of \
+currently selected files is printed, allowing the user to mark one or more of \
+them. At exit, marked files will be passed to CMD and executed by CliFM.
+
+The %%f modifier can be used to specify the argument position in CMD for marked \
+files. For example, the command '%s cp %%f mydir/' will copy all marked files to \
+the directory mydir/. If %%f is not specified, marked files will be inserted at \
+the end of CMD.\n" "$name" "$name"
 		exit 0
 	fi
 fi
@@ -115,8 +114,15 @@ else
 		--reverse "$BORDERS" --no-sort --ansi --prompt "CliFM> " > "$TMPFILE"
 fi
 
+args="$*"
+
 if [ "$marksel_mode" -eq 1 ]; then
-	printf "%s %s" "$(echo "$@" | sed 's/\n/ /g')" "$(sed 's/\n/ /g' "$TMPFILE")" > "$CLIFM_BUS"
+	files="$(tr '\n' ' ' < "$TMPFILE")"
+	if echo "$args" | grep -q "%f"; then
+		echo "$args" | sed "s|\%f|$files|g" > "$CLIFM_BUS"
+	else
+		printf "%s %s" "$(echo "$args" | sed 's/\n/ /g')" "$files" > "$CLIFM_BUS"
+	fi
 else
 	# shellcheck disable=SC1007
 	while ISF= read -r line; do
