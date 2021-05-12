@@ -157,7 +157,11 @@ Of course, you can also clone, build, and install the package using the PKGBUILD
         $ git clone https://github.com/leo-arch/clifm.git
         $ cd clifm
 
-Run `make` as follows:
+2. You have two options here:
+
+#### Via make
+
+Run `make` (*this is the recommended procedure*) as follows:
 
 	$ sudo make install
 
@@ -169,6 +173,37 @@ To uninstall `clifm` issue this command wherever the Makefile is located:
 
 	$ sudo make uninstall
 
+#### Manually via `gcc` (`tcc` and `clang` also work). 
+
+##### On Linux:
+
+	$ gcc -O3 -march=native -fstack-protector-strong -s -o clifm clifm.c -lcap -lreadline -lacl
+
+To enable POSIX compliance, pass this option to the compiler: `-D_BE_POSIX.` The only two features disabled in this way are: a) files birth time, only available on Linux via **statx(2)**, which is Linux-specific, and **strverscmp(3)**, a GNU extension used to sort files by version.
+
+##### On FreeBSD:
+
+	$ gcc -O3 -march=native -fstack-protector-strong -s -o clifm clifm.c -lintl -lreadline
+
+Run the binary file produced by `gcc`:
+
+	$ ./clifm
+
+Of course, you can copy this binary to `/usr/bin` or `/usr/local/bin`, or anywhere in your PATH, and then run the program as always:
+
+	$ clifm
+
+Do not forget to install the manpage as well (the full help is in here):
+
+	$ sudo cp manpage /usr/share/man/man1/clifm.1
+	$ sudo gzip /usr/share/man/man1/clifm.1
+
+Then you can access the manpage as always: `man clifm`
+
+Finally, copy the plugins to the local plugins directory:
+
+	$ cp -r /usr/share/clifm/plugins $HOME/.config/clifm
+
 ## Support
 
 CliFM is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag). It works on Linux and FreeBSD, on i686, x86_64, and ARM architectures.
@@ -176,85 +211,8 @@ CliFM is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag).
 ## License
 This project is licensed under the GPL version 2 (or later) license. See the LICENSE file for details.
 
-
-
-
 ## First steps
 
 Try the `help` command to learn more about CliFM. Once in the CliFM prompt, type `help` or `?`. To jump into the COMMANDS section in the manpage, simply enter `cmd` or press **F2**. Press **F1** to access the full manpage and **F3** to access the keybindings help page.
-
-## A few basic usage examples
-NOTE: Always try `TAB`. `TAB` completeion is available for many things
-
-* `/etc`: Change directory to _/etc_
-
-* `5`: Change to a directory in the current directory by ELN (say 5)
-
-TIP: Press `TAB` to make sure 5 is the directory you want
-
-* `j xproj`: Jump to _~/media/data/docs/work/mike/xproject_
-
-NOTE: This depends however on the database ranking. For more accuracy: `j mike xproj`
-
-* `b` or `Shift-left` or `Alt-j`: Go back to the directory you came from
-
-NOTE: Enter 'f', or press Shift-right or Alt-k to go back to the first directory
-
-* `Alt-l`: Change to detail/long view mode
-
-* `p4`: Print the properties of the file whose ELN is 4
-
-* `rf`: Reprint the list of files in the current directory
-
-* `s *.c :my_project/`: Select all c files in _my-project/_
-
-* `s 1-4 8 19-26`: Select multiple files in the current directory by ELN
-
-* `sb`: List selected files
-
-* `ds`: Deselect a few files
-
-* `md mydir && mydir`: Create a directory named _mydir_ and cd into it
-
-* `m sel`: Move selected files into the current directory
-
-* `r sel`: Remove all selected files
-
-* `myfile.txt`: Open _myfile.txt_ (with the default associated application)
-
-* `12`: Open the file whose ELN is 12
-
-TIP: Press `TAB` to make sure 12 is the file you want
-
-* `o myfile.txt application`, or just `application myfile.txt`: Open _myfile.txt_ with _application_
-
-* `bm add mydir`: Bookmark _mydir/_:
-
-* Open/Change to a bookmarked file:
-
-1) Press Ctrl-b to open the bookmarks screen
-2) Enter the bookmark ELN (1 ... n) or its shortcut [xx]
-
-* `ws2` or `Alt-2`: Switch to workspace 2
-
-* `edit` or `F10`: View and/or edit the configuration file
-
-* `pf set test`: Change to profile _test_
-
-* `hf on` or `Alt-.`: Show hidden files
-
-* `actions`: List available actions/plugins
-
-* `-`: Want file previews?
-
-NOTE: This runs the plugin `fzfnav.sh`. Take a look at the manpage for needed dependencies
-
-* `icons on`: Want icons?
-
-NOTE: Recall to install `icons-in-terminal` before
-
-* `q`: I'm tired, quit
-
-There is a lot more you can do, but this is enough to get you started.
 
 Just try it and let me know. It gets better and better. I myself use it as my main, and indeed only, file manager; it couldn't be so bad, isn't it?
