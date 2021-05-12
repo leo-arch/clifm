@@ -102,7 +102,6 @@ $PWD" --marker="+" --preview-window=:wrap "$BORDERS" \
 
 main() {
 
-	printf "\033[2;TEST\007"
 	if ! [ "$(which fzf 2>/dev/null)" ]; then
 		printf "CliFM: fzf: Command not found" >&2
 		exit 1
