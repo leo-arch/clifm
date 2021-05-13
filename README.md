@@ -152,6 +152,8 @@ Of course, you can also clone, build, and install the package using the PKGBUILD
 
 ### Other Linux distributions (or FreeBSD):
 
+**NEW**: For Debian based systems, a [.deb package](https://github.com/leo-arch/clifm/releases/tag/v1.0) (for x86_64) is now available in the Releases section.
+
 1. Clone the repository
 
         $ git clone https://github.com/leo-arch/clifm.git
