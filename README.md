@@ -149,7 +149,7 @@ Of course, you can also clone, build, and install the package using the PKGBUILD
 	$ makepkg -si
 
 ### Debian-based
-**NEW**: A .deb package (for x86_64) is now available in [Releases]((https://github.com/leo-arch/clifm/releases)).
+**NEW**: A .deb package (for x86_64) is now available in [Releases](https://github.com/leo-arch/clifm/releases).
 
 ### Other Linux distributions (or FreeBSD):
 
