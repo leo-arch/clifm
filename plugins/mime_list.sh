@@ -5,6 +5,13 @@
 
 mime=""
 
+if [ -n "$1" ] && ([ "$1" = "--help" ] || [ "$1" = "help" ]); then
+	name="$(basename "$0")"
+	printf "List files in CWD by mime type\n"
+	printf "Usage: %s\n" "$name"
+	exit 0
+fi
+
 while [ -z "$mime" ]; do
 	printf "Mime type: "
 	read -r mime

@@ -1,4 +1,9 @@
+#pragma once
+
 /* Icon definitions for CliFM */
+
+#ifndef ICONS_H
+#define ICONS_H
 
 struct icons_t
 {
@@ -298,3 +303,5 @@ struct icons_t icon_filenames[] = {
 	{ "Makefile", ICON_MAKEFILE, DEF_FILE_ICON_COLOR },
 	{ "PKGBUILD", ICON_ARCH, CYAN },
 };
+
+#endif /* ICONS_H */

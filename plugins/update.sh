@@ -3,6 +3,13 @@
 # Plugins to check for CliFM's updates
 # Written by L. Abramovich
 
+if [ -n "$1" ] && ([ "$1" = "--help" ] || [ "$1" = "help" ]); then
+	name="$(basename "$0")"
+	printf "Check for CliFM updates\n"
+	printf "Usage: %s\n" "$name"
+	exit 0
+fi
+
 upstream="$(curl -s "https://github.com/leo-arch/clifm/releases/latest" | grep -Eo "[0-9]+\.[0-9]+.*" | cut -d'"' -f1)"
 
 if [ -z "$upstream" ]; then

@@ -6,6 +6,13 @@
 SUCCESS=0
 ERROR=1
 
+if [ -n "$1" ] && ([ "$1" = "--help" ] || [ "$1" = "help" ]); then
+	name="$(basename "$0")"
+	printf "find/open/cd files in the current directory\n"
+	printf "Usage: %s FILE\n" "$name"
+	exit $SUCCESS
+fi
+
 if [ "$(which fzf)" ]; then
 	finder="fzf"
 
