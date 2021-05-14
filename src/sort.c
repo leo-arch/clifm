@@ -377,7 +377,8 @@ sort_function(char **arg)
 	fputs(_("Usage: st [METHOD] [rev]\nMETHOD: 0 = none, "
 			"1 = name, 2 = size, 3 = atime, 4 = btime, "
 			"5 = ctime, 6 = mtime, 7 = version, 8 = extension, "
-			"9 = inode, 10 = owner, 11 = group\n"), stderr);
+			"9 = inode, 10 = owner, 11 = group\nBoth numbers and names are "
+			"allowed\n"), stderr);
 
 	return EXIT_FAILURE;
 }
