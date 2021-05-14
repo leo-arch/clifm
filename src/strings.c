@@ -670,7 +670,7 @@ split_fusedcmd(char *str)
 
 	while(*p) {
 		/* Transform "cmdeln" into "cmd eln" */
-		if (*p > '0' && *p <= '9' && c && *(p - 1) >= 'a'
+		if (*p >= '0' && *p <= '9' && c && *(p - 1) >= 'a'
 		&& *(p - 1) <= 'z') {
 
 			char tmp = *p;
