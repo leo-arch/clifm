@@ -5,15 +5,19 @@
 
 SUCCESS=0
 ERROR=1
+PLAYER="mplayer"
+OPTS="-playlist"
+
+if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "help" ]; then
+	name="$(basename "$0")"
+	printf "Play music files\n"
+	printf "Usage: %s FILE(s)\n" "$name"
+	exit $SUCCESS
+fi
 
 if ! [ "$(which mplayer 2>/dev/null)" ]; then
 	printf "CliFM: mplayer: Command not found\n" >&2
 	exit $ERROR;
-fi
-
-if [ -z "$1" ]; then
-	printf "CliFM: Missing argument\n" >&2
-	exit $ERROR
 fi
 
 TMP_FILE="/tmp/clifm/playlist.$(tr -dc A-Za-z0-9 </dev/urandom | head -c 6)"
@@ -28,7 +32,7 @@ done
 
 "${EDITOR:=nano}" "$TMP_FILE"
 
-mplayer -playlist "$TMP_FILE"
+"$PLAYER" "$OPS" "$TMP_FILE"
 
 rm -rf -- "$TMP_FILE"
 

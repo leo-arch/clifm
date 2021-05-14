@@ -4,9 +4,12 @@
 # Written by L. Abramovich
 # License GPL2+
 
-USAGE="Usage: $0 [16, 256, test]"
+name="$(basename "$0")"
+
+USAGE="Usage: $name [16, 256, test]"
 
 if [ -z "$1" ] || [ "$1" = "--help" ]; then
+	printf "Terminal colors test script for CliFM\n"
 	printf "%s\n" "$USAGE" >&2
 	exit 1
 fi

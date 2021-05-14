@@ -11,9 +11,11 @@ if ! [ "$(which ffmpegthumbnailer 2>/dev/null)" ]; then
 	exit $ERROR
 fi
 
-if [ -z "$1" ]; then
-	printf "CliFM: Missing argument\n" >&2
-	exit $ERROR
+if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "help" ]; then
+	name="$(basename "$0")"
+	printf "Display thumbnails of VIDEO(s) or of videos contained in DIR\n"
+	printf "Usage: %s [VIDEO... n] [DIR]\n" "$name"
+	exit $SUCCESS
 fi
 
 TMP_DIR=".vidthumbs.$(tr -dc A-Za-z0-9 </dev/urandom | head -c6)"

@@ -54,7 +54,7 @@ int main(int argc, char **argv)
 	printw("(Press Shift-q to quit or Shift-w to clear the screen)\n"
 		   "Hex  | Oct  | Symbol\n"
 		   "---- | ---- | ------\n");
- 
+
 	while (c != 'Q') {
 
 		c = getch();

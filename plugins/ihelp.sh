@@ -3,6 +3,13 @@
 # Interactive help plugin for CliFM
 # Written by L. Abramovich
 
+if [ -n "$1" ] && ([ "$1" = "--help" ] || [ "$1" = "help" ]); then
+	name="$(basename "$0")"
+	printf "Browse CliFM manpage via FZF\n"
+	printf "Usage: %s\n" "$name"
+	exit 0
+fi
+
 manpage="/usr/share/man/man1/clifm.1.gz"
 
 if ! [ -f "$manpage" ]; then

@@ -19,6 +19,13 @@
 # with FZF or open the last accepted file (Enter).
 # Press Esc to cancel and exit.
 
+if [ -n "$1" ] && ([ "$1" = "--help" ] || [ "$1" = "help" ]); then
+	name="$(basename "$0")"
+	printf "Navigate/preview files via FZF\n"
+	printf "Usage: %s\n" "$name"
+	exit 0
+fi
+
 uz_cleanup() {
     rm "$FIFO_UEBERZUG" 2>/dev/null
     pkill -P $$ >/dev/null

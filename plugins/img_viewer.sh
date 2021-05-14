@@ -6,9 +6,11 @@
 SUCCESS=0
 ERROR=1
 
-if [ -z "$1" ]; then
-	printf "CliFM: Missing argument. At least one image file must be specified\n" >&2
-	exit $ERROR
+if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "help" ]; then
+	name="$(basename "$0")"
+	printf "Display thumbails of FILE(s) or of those in DIR\n"
+	printf "Usage: %s [FILE... n] [DIR]\n" "$name"
+	exit $SUCCESS
 fi
 
 if [ -n "$CLIFM_IMG_VIEWER" ]; then
