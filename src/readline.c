@@ -917,6 +917,72 @@ bin_cmd_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
+char *
+sort_num_generator(const char *text, int state)
+{
+	static size_t i;
+	char *name;
+	rl_filename_completion_desired = 1;
+
+	if (!state)
+		i = 0;
+
+	int num_text = atoi(text);
+
+	struct sort_t {
+		char *name;
+		int num; 
+	};
+
+	static struct sort_t sorts[] = {
+		{ "none", 0 },
+		{ "name", 1 },
+		{ "size", 2 },
+		{ "atime", 3 },
+		{ "btime", 4 },
+		{ "ctime", 5 },
+		{ "mtime", 6 },
+		{ "version", 7 },
+		{ "extension", 8 },
+		{ "inode", 9 },
+		{ "owner", 10 },
+		{ "group", 11 },
+	};
+
+	/* Check list of currently displayed files for a match */
+	while (i <= SORT_TYPES && (name = sorts[i++].name) != NULL)
+		if (*name == *sorts[num_text].name
+		&& strcmp(name, sorts[num_text].name) == 0)
+			return strdup(name);
+
+	return (char *)NULL;
+}
+
+char *
+sort_name_generator(const char *text, int state)
+{
+	static int i;
+	static size_t len;
+	char *name;
+
+	if (!state) {
+		i = 0;
+		len = strlen(text);
+	}
+
+	static char *sorts[] = {
+		"none", "name", "size", "atime", "btime", "ctime", "mtime", "version",
+		"extension", "inode", "owner", "group", NULL
+	};
+
+	while ((name = sorts[i++]) != NULL) {
+		if (*text == *name && strncmp(name, text, len) == 0)
+			return strdup(name);
+	}
+
+	return (char *)NULL;
+}
+
 char **
 my_rl_completion(const char *text, int start, int end)
 {
@@ -968,7 +1034,7 @@ my_rl_completion(const char *text, int start, int end)
 		/* Perform this check only if the first char of the string to be
 		 * completed is a number in order to prevent an unnecessary call
 		 * to atoi */
-		if (*text >= '1' && *text <= '9') {
+		if (*text >= '0' && *text <= '9') {
 
 			int num_text = atoi(text);
 
@@ -981,6 +1047,12 @@ my_rl_completion(const char *text, int start, int end)
 							  &jump_entries_generator);
 				}
 			}
+
+					/* Sort number expansion */
+			else if (*rl_line_buffer == 's' && (strncmp(rl_line_buffer, "st ", 3) == 0
+			|| strncmp(rl_line_buffer, "sort ", 5) == 0) && is_number(text)
+			&& num_text >= 0 && num_text <= SORT_TYPES)
+				matches = rl_completion_matches(text, &sort_num_generator);
 
 					/* ELN expansion */
 			else if (is_number(text) && num_text > 0
@@ -1030,6 +1102,10 @@ my_rl_completion(const char *text, int start, int end)
 		else if (expand_bookmarks) {
 			matches = rl_completion_matches(text, &bookmarks_generator);
 		}
+
+		else if (*rl_line_buffer == 's' && (strncmp(rl_line_buffer, "st ", 3) == 0
+		|| strncmp(rl_line_buffer, "sort ", 5) == 0))
+			matches = rl_completion_matches(text, &sort_name_generator);
 	}
 
 				/* ### PATH COMPLETION ### */
