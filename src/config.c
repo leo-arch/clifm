@@ -43,10 +43,10 @@
 #include "colors.h"
 #include "init.h"
 
-int
-regen_config(void)
 /* Regenerate the configuration file and create a back up of the old
  * one */
+int
+regen_config(void)
 {
 	int config_found = 1;
 	struct stat config_attrib;
@@ -88,11 +88,11 @@ regen_config(void)
 	return EXIT_SUCCESS;
 }
 
-int
-edit_function (char **comm)
 /* Edit the config file, either via the mime function or via the first
  * passed argument (Ex: 'edit nano'). The 'gen' option regenerates
  * the configuration file and creates a back up of the old one. */
+int
+edit_function (char **comm)
 {
 	if (xargs.stealth_mode == 1) {
 		printf(_("%s: Access to configuration files is not allowed in "
@@ -179,16 +179,15 @@ set_env(void)
 	/* CLIFM env variable is set to one when CliFM is running, so that
 	 * external programs can determine if they were spawned by CliFM */
 	setenv("CLIFM", "1", 1);
-
 	setenv("CLIFM_PROFILE", alt_profile ? alt_profile : "default", 1);
 
 	if (SEL_FILE)
 		setenv("CLIFM_SELFILE", SEL_FILE, 1);
 }
 
+/* Define the file for the Selection Box */
 void
 set_sel_file(void)
-/* Define the file for the Selection Box */
 {
 	if (SEL_FILE) {
 		free(SEL_FILE);
@@ -212,8 +211,7 @@ set_sel_file(void)
 		/* Common selection box is stored in the general
 		 * configuration directory */
 		SEL_FILE = (char *)xnmalloc(config_len + 17, sizeof(char));
-		sprintf(SEL_FILE, "%s/.config/%s/selbox",
-				user.home, PNL);
+		sprintf(SEL_FILE, "%s/.config/%s/selbox", user.home, PNL);
 	}
 
 	return;
@@ -233,8 +231,8 @@ create_kbinds_file(void)
 	FILE *fp = fopen(KBINDS_FILE, "w");
 
 	if (!fp) {
-		_err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-			 KBINDS_FILE, strerror(errno));
+		_err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, KBINDS_FILE,
+			 strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -387,8 +385,8 @@ create_tmp_files(void)
 		char *md_cmd[] = { "mkdir", "-pm1777", TMP_DIR, NULL };
 
 		if (launch_execve(md_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-			_err('e', PRINT_PROMPT, _("%s: '%s': Error creating "
-				 "temporary directory\n"), PROGRAM_NAME, TMP_DIR);
+			_err('e', PRINT_PROMPT, _("%s: '%s': Error creating temporary "
+				 "directory\n"), PROGRAM_NAME, TMP_DIR);
 		}
 	}
 
@@ -406,8 +404,8 @@ create_tmp_files(void)
 
 		if (launch_execve(md_cmd2, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			selfile_ok = 0;
-			_err('e', PRINT_PROMPT, _("%s: '%s': Error creating "
-				 "temporary directory\n"), PROGRAM_NAME, TMP_DIR);
+			_err('e', PRINT_PROMPT, _("%s: '%s': Error creating temporary "
+				 "directory\n"), PROGRAM_NAME, TMP_DIR);
 		}
 	}
 
@@ -416,9 +414,8 @@ create_tmp_files(void)
 
 		if (!SEL_FILE) {
 			selfile_ok = 0;
-			_err('w', PRINT_PROMPT, "%s: '%s': Directory not writable. "
-				 "Selected files will be lost after program exit\n",
-				 PROGRAM_NAME, TMP_DIR);
+			_err('w', PRINT_PROMPT, "%s: '%s': Directory not writable. Selected "
+				 "files will be lost after program exit\n", PROGRAM_NAME, TMP_DIR);
 		}
 	}
 
@@ -447,9 +444,9 @@ create_tmp_files(void)
 			sprintf(SEL_FILE, "%s/selbox", TMP_DIR);
 		}
 
-		_err('w', PRINT_PROMPT, _("%s: '%s': Using a temporary "
-			 "directory for the Selection Box. Selected files won't "
-			 "be persistent accros reboots"), PROGRAM_NAME, TMP_DIR);
+		_err('w', PRINT_PROMPT, _("%s: '%s': Using a temporary directory for "
+			 "the Selection Box. Selected files won't be persistent accros "
+			 "reboots"), PROGRAM_NAME, TMP_DIR);
 	}
 }
 
@@ -503,35 +500,29 @@ edit_xresources(void)
 		fseek(xresources_fp, 0L, SEEK_END);
 
 		if (!eight_bit)
-			fputs("\nXTerm*eightBitInput: false\n",
-				  xresources_fp);
+			fputs("\nXTerm*eightBitInput: false\n", xresources_fp);
 
 		if (!cursor)
-			fputs("\nXTerm*modifyCursorKeys: 1\n",
-				  xresources_fp);
+			fputs("\nXTerm*modifyCursorKeys: 1\n", xresources_fp);
 
 		if (!function)
-			fputs("\nXTerm*modifyFunctionKeys: 1\n",
-				  xresources_fp);
+			fputs("\nXTerm*modifyFunctionKeys: 1\n", xresources_fp);
 
 		char *xrdb_path = get_cmd_path("xrdb");
 
 		if (xrdb_path) {
-			char *res_file = (char *)xnmalloc(
-									 user.home_len + 13, sizeof(char));
+			char *res_file = (char *)xnmalloc(user.home_len + 13, sizeof(char));
 			sprintf(res_file, "%s/.Xresources", user.home);
-			char *cmd[] = { "xrdb", "merge", res_file,
-							NULL };
+			char *cmd[] = { "xrdb", "merge", res_file, NULL };
+
 			launch_execve(cmd, FOREGROUND, E_NOFLAG);
 			free(res_file);
 		}
 
-		_err('w', PRINT_PROMPT, _("%s: Restart your %s for "
-			 "changes to ~/.Xresources to take effect. "
-			 "Otherwise, %s keybindings might not work as "
-			 "expected.\n"), PROGRAM_NAME, (xrdb_path)
-			 ? _("terminal") : _("X session"),
-			 PROGRAM_NAME);
+		_err('w', PRINT_PROMPT, _("%s: Restart your %s for changes to "
+			 "~/.Xresources to take effect. Otherwise, %s keybindings might "
+			 "not work as expected.\n"), PROGRAM_NAME, (xrdb_path)
+			 ? _("terminal") : _("X session"), PROGRAM_NAME);
 
 		if (xrdb_path)
 			free(xrdb_path);
@@ -576,8 +567,7 @@ define_config_file_names(void)
 	if (alt_profile) {
 		CONFIG_DIR = (char *)xnmalloc(config_gral_len
 							 + strlen(alt_profile) + 11, sizeof(char));
-		sprintf(CONFIG_DIR, "%s/profiles/%s", CONFIG_DIR_GRAL,
-				alt_profile);
+		sprintf(CONFIG_DIR, "%s/profiles/%s", CONFIG_DIR_GRAL, alt_profile);
 	}
 
 	else {
@@ -594,8 +584,7 @@ define_config_file_names(void)
 	else {
 		/* Keybindings per user, not per profile */
 		KBINDS_FILE = (char *)xnmalloc(config_gral_len + 13, sizeof(char));
-		sprintf(KBINDS_FILE, "%s/keybindings",
-				CONFIG_DIR_GRAL);
+		sprintf(KBINDS_FILE, "%s/keybindings", CONFIG_DIR_GRAL);
 	}
 
 	COLORS_DIR = (char *)xnmalloc(config_gral_len + 8, sizeof(char));
@@ -686,8 +675,7 @@ create_config(const char *file)
 	FILE *config_fp = fopen(file, "w");
 
 	if (!config_fp) {
-		fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME,
-				file, strerror(errno));
+		fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -918,8 +906,7 @@ create_def_cscheme(void)
 	if (!COLORS_DIR)
 		return;
 
-	char *cscheme_file = (char *)xnmalloc(strlen(COLORS_DIR) + 13,
-										  sizeof(char));
+	char *cscheme_file = (char *)xnmalloc(strlen(COLORS_DIR) + 13, sizeof(char));
 
 	sprintf(cscheme_file, "%s/default.cfm", COLORS_DIR);
 
@@ -934,8 +921,8 @@ create_def_cscheme(void)
 	FILE *fp = fopen(cscheme_file, "w+");
 
 	if (!fp) {
-		_err('w', PRINT_PROMPT, "%s: Error creating default color "
-			 "scheme file\n", PROGRAM_NAME);
+		_err('w', PRINT_PROMPT, "%s: Error creating default color scheme "
+			 "file\n", PROGRAM_NAME);
 		free(cscheme_file);
 		return;
 	}
@@ -994,9 +981,8 @@ create_config_files(void)
 
 		if (ret != EXIT_SUCCESS) {
 			trash_ok = 0;
-			_err('w', PRINT_PROMPT, _("%s: mkdir: '%s': Error "
-				 "creating trash directory. Trash function "
-				 "disabled\n"), PROGRAM_NAME, TRASH_DIR);
+			_err('w', PRINT_PROMPT, _("%s: mkdir: '%s': Error creating trash "
+				 "directory. Trash function disabled\n"), PROGRAM_NAME, TRASH_DIR);
 		}
 	}
 
@@ -1020,11 +1006,10 @@ create_config_files(void)
 
 			config_ok = 0;
 
-			_err('e', PRINT_PROMPT, _("%s: mkdir: '%s': Error "
-				 "creating configuration directory. Bookmarks, "
-				 "commands logs, and command history are disabled. "
-				 "Program messages won't be persistent. Using "
-				 "default options\n"), PROGRAM_NAME, CONFIG_DIR);
+			_err('e', PRINT_PROMPT, _("%s: mkdir: '%s': Error creating "
+				 "configuration directory. Bookmarks, commands logs, and "
+				 "command history are disabled. Program messages won't be "
+				 "persistent. Using default options\n"), PROGRAM_NAME, CONFIG_DIR);
 
 			return;
 		}
@@ -1035,10 +1020,10 @@ create_config_files(void)
 
 		config_ok = 0;
 
-		_err('e', PRINT_PROMPT, _("%s: '%s': Directory not writable. "
-			 "Bookmarks, commands logs, and commands history are "
-			 "disabled. Program messages won't be persistent. "
-			 "Using default options\n"), PROGRAM_NAME, CONFIG_DIR);
+		_err('e', PRINT_PROMPT, _("%s: '%s': Directory not writable. Bookmarks, "
+			 "commands logs, and commands history are disabled. Program messages "
+			 "won't be persistent. Using default options\n"), PROGRAM_NAME,
+			 CONFIG_DIR);
 
 		return;
 	}
@@ -1068,8 +1053,8 @@ create_config_files(void)
 		FILE *profile_fp = fopen(PROFILE_FILE, "w");
 
 		if (!profile_fp) {
-			_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n",
-				 PROGRAM_NAME, PROFILE_FILE, strerror(errno));
+			_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n", PROGRAM_NAME,
+				 PROFILE_FILE, strerror(errno));
 		}
 
 		else {
@@ -1090,9 +1075,8 @@ create_config_files(void)
 		char *cmd[] = { "mkdir", COLORS_DIR, NULL };
 
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-			_err('w', PRINT_PROMPT, _("%s: mkdir: Error "
-				 "creating colors directory. Using the default "
-				 "color scheme\n"), PROGRAM_NAME);
+			_err('w', PRINT_PROMPT, _("%s: mkdir: Error creating colors "
+				 "directory. Using the default color scheme\n"), PROGRAM_NAME);
 		}
 	}
 
@@ -1107,9 +1091,8 @@ create_config_files(void)
 		char *cmd[] = { "mkdir", PLUGINS_DIR, NULL };
 
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
-			_err('e', PRINT_PROMPT, _("%s: mkdir: Error "
-				 "creating scripts directory. The "
-				 "actions function is disabled\n"), PROGRAM_NAME);
+			_err('e', PRINT_PROMPT, _("%s: mkdir: Error creating plugins "
+				 "directory. The actions function is disabled\n"), PROGRAM_NAME);
 		else
 			copy_plugins();
 	}
@@ -1170,12 +1153,11 @@ create_config_files(void)
 	if (stat(MIME_FILE, &file_attrib) == 0)
 		return;
 
-	_err('n', PRINT_PROMPT, _("%s created a new MIME list file "
-		 "(%s). It is recommended to edit this file (entering "
-		 "'mm edit' or pressing F6) to add the programs "
-		 "you use and remove those you don't. This will make "
-		 "the process of opening files faster and smoother\n"),
-		 PROGRAM_NAME, MIME_FILE);
+	_err('n', PRINT_PROMPT, _("%s created a new MIME list file (%s). It is "
+		 "recommended to edit this file (entering 'mm edit' or pressing F6) to "
+		 "add the programs you use and remove those you don't. This will make "
+		 "the process of opening files faster and smoother\n"), PROGRAM_NAME,
+		 MIME_FILE);
 
 
 	/* Try importing MIME associations from the system, and in
@@ -1246,9 +1228,8 @@ read_config(void)
 	FILE *config_fp = fopen(CONFIG_FILE, "r");
 
 	if (!config_fp) {
-		_err('e', PRINT_PROMPT, _("%s: fopen: '%s': %s. Using "
-			 "default values.\n"), PROGRAM_NAME, CONFIG_FILE,
-			 strerror(errno));
+		_err('e', PRINT_PROMPT, _("%s: fopen: '%s': %s. Using default values.\n"),
+			 PROGRAM_NAME, CONFIG_FILE, strerror(errno));
 		return;
 	}
 
@@ -1950,17 +1931,16 @@ read_config(void)
 	return;
 }
 
-void
-init_config(void)
 /* Set up CliFM directories and config files. Load the user's
  * configuration from clifmrc */
+void
+init_config(void)
 {
 	if (xargs.stealth_mode == 1) {
 
-		_err(0, PRINT_PROMPT, _("%s: Running in stealth mode: trash, "
-			 "persistent selection and directory history, just as "
-			 "bookmarks, logs and configuration files, are "
-			 "disabled.\n"), PROGRAM_NAME);
+		_err(0, PRINT_PROMPT, _("%s: Running in stealth mode: trash, persistent "
+			 "selection and directory history, just as bookmarks, logs and "
+			 "configuration files, are disabled.\n"), PROGRAM_NAME);
 
 		config_ok = 0;
 

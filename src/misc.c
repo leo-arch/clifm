@@ -45,12 +45,19 @@
 #include "navigation.h"
 #include "bookmarks.h"
 #include "jump.h"
+#include "strings.h"
 
 void
-set_term_title(const char *dir)
+set_term_title(const char *str)
 {
-	printf("\033]2;%s - %s\007", PROGRAM_NAME, dir);
+	char *tmp = (char *)NULL;
+	tmp = home_tilde(str);
+	
+	printf("\033]2;%s - %s\007", PROGRAM_NAME, tmp ? tmp : str);
 	fflush(stdout);
+
+	if (tmp)
+		free(tmp);
 }
 
 int
@@ -102,9 +109,9 @@ filter_function(const char *arg)
 	return EXIT_SUCCESS;
 }
 
+/* Print either all tips (if ALL == 1) or just a random one (ALL == 0) */
 void
 print_tips(int all)
-/* Print either all tips (if ALL == 1) or just a random one (ALL == 0) */
 {
 	const char *TIPS[] = {
 		"Try the autocd and auto-open functions: run 'FILE' instead "
@@ -232,10 +239,10 @@ print_tips(int all)
 	printf("%sTIP%s: %s\n", bold, df_c, TIPS[rand() % tipsn]);
 }
 
-int
-new_instance(char *dir, int sudo)
 /* Open DIR in a new instance of the program (using TERM, set in the config
  * file, as terminal emulator) */
+int
+new_instance(char *dir, int sudo)
 {
 	if (!term) {
 		fprintf(stderr, _("%s: Default terminal not set. Use the "
@@ -565,10 +572,10 @@ alias_import(char *file)
 	return EXIT_SUCCESS;
 }
 
-void
-save_last_path(void)
 /* Store last visited directory for the restore last path and the
  * cd on quit functions */
+void
+save_last_path(void)
 {
 	if (!config_ok || !CONFIG_DIR)
 		return;
@@ -709,8 +716,6 @@ create_usr_var(char *str)
 	return EXIT_SUCCESS;
 }
 
-int
-_err(int msg_type, int prompt, const char *format, ...)
 /* Custom POSIX implementation of GNU asprintf() modified to log program
  * messages. MSG_TYPE is one of: 'e', 'w', 'n', or zero (meaning this
  * latter that no message mark (E, W, or N) will be added to the prompt).
@@ -718,6 +723,8 @@ _err(int msg_type, int prompt, const char *format, ...)
  * prompt or rather in place. Based on littlstar's xasprintf
  * implementation:
  * https://github.com/littlstar/asprintf.c/blob/master/asprintf.c*/
+int
+_err(int msg_type, int prompt, const char *format, ...)
 {
 	va_list arglist, tmp_list;
 	int size = 0;
@@ -762,9 +769,9 @@ _err(int msg_type, int prompt, const char *format, ...)
 	return EXIT_FAILURE;
 }
 
+/* Set STR as the program current shell */
 int
 set_shell(char *str)
-/* Set STR as the program current shell */
 {
 	if (!str || !*str)
 		return EXIT_FAILURE;
@@ -802,9 +809,9 @@ set_shell(char *str)
 	return EXIT_SUCCESS;
 }
 
+/* List available mountpoints and chdir into one of them */
 int
 list_mountpoints(void)
-/* List available mountpoints and chdir into one of them */
 {
 	FILE *mp_fp = fopen("/proc/mounts", "r");
 
@@ -928,9 +935,9 @@ list_mountpoints(void)
 	return exit_status;
 }
 
+/* Store pinned directory for the next session */
 void
 save_pinned_dir(void)
-/* Store pinned directory for the next session */
 {
 	if (pinned_dir && config_ok) {
 
@@ -955,10 +962,10 @@ save_pinned_dir(void)
 	return;
 }
 
-void
-free_stuff(void)
 /* This function is called by atexit() to clear whatever is there at exit
  * time and avoid thus memory leaks */
+void
+free_stuff(void)
 {
 	int i = 0;
 
@@ -1429,10 +1436,10 @@ hidden_function(char **comm)
 	return exit_status;
 }
 
-int
-list_commands (void)
 /* Instead of recreating here the commands description, just jump to the
  * corresponding section in the manpage */
+int
+list_commands (void)
 {
 	char *cmd[] = { "man", "-P", "less -p ^COMMANDS", PNL, NULL };
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
@@ -1478,7 +1485,7 @@ help_function (void)
 \n -U, --unicode \t\t\t enable unicode to correctly list filenames \
 \n              containing accents, tildes, umlauts, \
 \n              non-latin letters, etc. This option is \
-\n              enabled by default for non-english locales\
+\n              enabled by default\
 \n -v, --version\t\t\t show version details and exit\
 \n -w, --workspace=NUM\t\t start in workspace NUM\
 \n -x, --ext-cmds\t\t\t allow the use of external commands\
@@ -1557,8 +1564,14 @@ help_function (void)
 				'rm' to prevent accidental deletions\n",
 		 PROGRAM_NAME, PROGRAM_NAME);
 
-	puts(_("\nBUILT-IN COMMANDS:\n\n\
- ELN/FILE/DIR (auto-open and autocd functions)\n\
+
+	puts(_("\nBUILT-IN COMMANDS:\n\nThe following is just a list of available "
+"commands and possible parameters. For a complete description of "
+"each of these commands run 'cmd' (or press F2) or consult the "
+"manpage (F1). You can also try the 'ih' action to run the "
+"interactive help plugin (it depends on FZF). Just enter 'ih', that's it.\n"));
+
+	puts(_("ELN/FILE/DIR (auto-open and autocd functions)\n\
  /PATTERN [DIR] [-filetype] [-x] (quick search)\n\
  ;[CMD], :[CMD] (run CMD via the system shell)\n\
  ac, ad ELN/FILE ... (archiving functions)\n\
@@ -1623,12 +1636,6 @@ help_function (void)
  ver, version\n\
  ws [NUM, +, -] (workspaces)\n\
  x, X [ELN/DIR] (new instance)\n"));
-
-	puts(_("Run 'cmd' (F2) or consult the manpage (F1) for "
-		   "more information about each of these commands. You "
-		   "can also try the 'ih' action to run the interactive "
-		   "help plugin (depends on fzf). Just enter 'ih', that's "
-		   "it.\n"));
 
 	printf(_("DEFAULT KEYBOARD SHORTCUTS:\n\n"
 " M-c: Clear the current command line buffer\n\

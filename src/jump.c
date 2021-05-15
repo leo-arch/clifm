@@ -83,6 +83,7 @@ int add_to_jumpdb(const char *dir)
 
 /* Store the jump database into a file */
 void save_jumpdb(void) {
+
 	if (xargs.no_dirjump == 1 || !config_ok || !CONFIG_DIR
 	|| !jump_db || jump_n == 0)
 		return;

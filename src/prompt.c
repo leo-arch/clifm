@@ -39,10 +39,10 @@
 #include "history.h"
 #include "prompt.h"
 
-char *
-prompt(void)
 /* Print the prompt and return the string entered by the user (to be
  * parsed later by parse_input_str()) */
+char *
+prompt(void)
 {
 	/* Remove all final slash(es) from path, if any */
 	size_t path_len = strlen(ws[cur_ws].path), i;
@@ -132,7 +132,7 @@ prompt(void)
 		decoded_prompt_len = strlen(decoded_prompt);
 
 	size_t prompt_length = (size_t)(decoded_prompt_len
-		+ (xargs.stealth_mode == 1 ? 16 : 0)
+		+ (xargs.stealth_mode == 1 ? 16 : 0) + ((flags & ROOT_USR) ? 16 : 0) 
 		+ (sel_n ? 16 : 0) + (trash_n ? 16 : 0) + ((msgs_n && pmsg)
 		? 16 : 0) + 6 + sizeof(tx_c) + 1);
 
@@ -143,7 +143,8 @@ prompt(void)
 	char *the_prompt = (char *)xnmalloc(prompt_length, sizeof(char));
 /*  char the_prompt[prompt_length]; */
 
-	snprintf(the_prompt, prompt_length, "%s%s%s%s%s%s%s%s%s%s",
+	snprintf(the_prompt, prompt_length, "%s%s%s%s%s%s%s%s%s%s%s",
+		(flags & ROOT_USR) ? "\001\x1b[1;31mR\x1b[0m\002" : "",
 		(msgs_n && pmsg) ? msg_str : "", (xargs.stealth_mode == 1)
 		? si_c : "", (xargs.stealth_mode == 1)
 		? "S\001\x1b[0m\002" : "", (trash_n) ? ti_c : "",
@@ -202,11 +203,11 @@ prompt(void)
 	return input;
 }
 
-char *
-decode_prompt(const char *line)
 /* Decode the prompt string (encoded_prompt global variable) taken from
  * the configuration file. Based on the decode_prompt_string function
  * found in an old bash release (1.14.7). */
+char *
+decode_prompt(const char *line)
 {
 	if(!line)
 		return (char *)NULL;

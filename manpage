@@ -182,7 +182,7 @@ allow the use of external, shell commands
 enable the light mode to speed up CliFM. See the \fBNOTE ON SPEED\fR section below.
 .TP
 .B \-z, \-\-sort\fR=METHOD
-sort files by METHOD, where METHOD could be: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version (name if not available), 8 =  extension, 9 = inode, 10 = owner, 11 = group.
+sort files by METHOD, where METHOD could be on of the following numbers: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version (name if not available), 8 =  extension, 9 = inode, 10 = owner, 11 = group.
 .TP
 .B \-\-cd\-on\-quit
 write last visited directory to \fI$XDG_CONFIG_HOME/clifm/.last\fR to be later accessed by the corresponding shell function at program exit. See the \fBSHELL FUNCTIONS\fR section below.
@@ -587,7 +587,7 @@ print the current default shell for CliFM or set SHELL as the new default shell.
 show the splash screen.
 .TP
 .B st, sort \fR[METHOD] [rev]
-with no argument, print the current sorting method. Else, set sorting method to METHOD, where METHOD is one of: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime, if btime is not available), 5 = ctime, 6 = mtime, 7 = version (name, if ctime is not available), 8 = extension, and 9 = inode, 10 = owner, and 11 = group. Bear in mind that methods 10 and 11 sort by owner and group ID number, not by owner and group names.
+with no argument, print the current sorting method. Else, set sorting method to METHOD, where METHOD is one of: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime, if btime is not available), 5 = ctime, 6 = mtime, 7 = version (name, if ctime is not available), 8 = extension, and 9 = inode, 10 = owner, and 11 = group. Both numbers and names are allowed. Bear in mind that methods 10 and 11 sort by owner and group ID number, not by owner and group names.
 .sp
 By default, files are sorted from less to more (ex: from 'a' to 'z' if using the "name" method). Use the 'rev' option to invert this order. Ex: 'st rev' or 'st 3 rev'. Switch back to the previous ordering running 'st rev' again.
 .TP
@@ -929,7 +929,7 @@ or, using now command substitution:
  "$(whoami)@$(hostname) $(pwd)> "
 
 .TP
-A bold green asterisk at the left of the prompt indicates that there are elements in the Selection Box. In the same way, a yellow 'T' means that there are currently files in the trash can, just as a bold blue 'S' means that the program is running in stealth mode. Finally, CliFM makes use of three kind of messages: errors (a red 'E' at the left of the prompt), warnings (a yellow 'W'), and simple notices (a green 'N').
+A bold red 'R' at the left of the prompt reminds the user that the program is running as root. A bold green asterisk indicates that there are elements in the Selection Box. In the same way, a yellow 'T' means that there are currently files in the trash can, just as a bold blue 'S' means that the program is running in stealth mode. Finally, CliFM makes use of three kind of messages: errors (a red 'E' at the left of the prompt), warnings (a yellow 'W'), and simple notices (a green 'N').
 .SH BUILT\-IN EXPANSIONS
 .TP
 Besides the default TAB completion for command names and paths, you can also expand ELN's using the TAB key. Example: type 'o 12', press TAB, and it becomes 'o filename ', or, if 12 refers to a directory, 'o dir/'. CliFM uses a Bash\-style quoting system, so that this filename: "this is a test@version{1}" is expanded as follows: this\\ is\\ a\\ test\\@version\\{1\\}

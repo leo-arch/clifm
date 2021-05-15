@@ -28,6 +28,7 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <readline/readline.h>
+#include <termios.h>
 
 #include "config.h"
 #include "exec.h"
@@ -133,6 +134,7 @@ kbinds_function(char **args) {
  * C-v, C-right arrow gives "[[1;5C", which here should be written like
  * this:
  * "\\x1b[1;5C" */
+ 
 void
 readline_kbinds(void) {
 
@@ -227,6 +229,8 @@ readline_kbinds(void) {
 		rl_bind_keyseq(find_key("plugin2"), rl_plugin2);
 		rl_bind_keyseq(find_key("plugin3"), rl_plugin3);
 		rl_bind_keyseq(find_key("plugin4"), rl_plugin4);
+
+		rl_bind_keyseq(find_key("quit"), rl_quit);
 	}
 
 	/* If no kbinds file is found, set the defaults */
@@ -702,7 +706,8 @@ rl_open_mime(int count, int key) {
 }
 
 int
-rl_mountpoints(int count, int key) { {
+rl_mountpoints(int count, int key)
+{
 		return EXIT_SUCCESS;
 
 	/* Call the function only if it's not already running */
@@ -930,7 +935,10 @@ rl_quit(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-//  keybind_exec_cmd("q");
+	/* Reset terminal attributes before exiting. Without this line, the program
+	 * quits, but terminal input is not printed to STDOUT */
+	tcsetattr(STDIN_FILENO, TCSANOW, &shell_tmodes);
+	exit(EXIT_SUCCESS);
 
 	return EXIT_SUCCESS;
 }

@@ -47,13 +47,13 @@
 #include "readline.h"
 #include "listing.h"
 
-int
-save_sel(void)
 /* Save selected elements into a tmp file. Returns 1 if success and 0
  * if error. This function allows the user to work with multiple
  * instances of the program: he/she can select some files in the
  * first instance and then execute a second one to operate on those
  * files as he/she whises. */
+int
+save_sel(void)
 {
 	if (!selfile_ok || !config_ok)
 		return EXIT_FAILURE;

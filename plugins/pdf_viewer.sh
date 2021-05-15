@@ -6,9 +6,11 @@
 SUCCESS=0
 ERROR=1
 
-if [ -z "$1" ]; then
-	printf "CLIFM: Missing argument\n" >&2
-	exit $ERROR
+if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "help" ]; then
+	name="$(basename "$0")"
+	printf "View PDF files in the terminal\n"
+	printf "Usage: %s FILE\n" "$name"
+	exit $SUCCESS
 fi
 
 if ! [ "$(which pdftotext 2>/dev/null)" ]; then

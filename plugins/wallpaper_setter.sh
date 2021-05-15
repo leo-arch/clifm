@@ -8,9 +8,11 @@
 SUCCESS=0
 ERROR=1
 
-if [ -z "$1" ]; then
-	printf "CliFM: You must specify an image file\n" >&2
-	exit $ERROR
+if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "help" ]; then
+	name="$(basename "$0")"
+	printf "Set IMAGE as wallpaper\n"
+	printf "Usage: %s IMAGE\n" "$name"
+	exit $SUCCESS
 fi
 
 if ! [ "$(which file 2>/dev/null)" ]; then

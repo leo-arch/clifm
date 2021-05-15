@@ -112,10 +112,10 @@ print_div_line(void)
 	fflush(stdout);
 }
 
-void
-print_disk_usage(void)
 /* Print free/total space for the filesystem of the current working
  * directory */
+void
+print_disk_usage(void)
 {
 	if (!ws || !ws[cur_ws].path || !*ws[cur_ws].path)
 		return;
@@ -163,10 +163,10 @@ print_dirhist_map(void)
 	}
 }
 
-void
-get_file_icon(const char *file, int n)
 /* Set the icon field to the corresponding icon for FILE. If not found,
  * set the default icon */
+void
+get_file_icon(const char *file, int n)
 {
 	file_info[n].icon = DEF_FILE_ICON;
 	file_info[n].icon_color = DEF_FILE_ICON_COLOR;
@@ -187,10 +187,10 @@ get_file_icon(const char *file, int n)
 	}
 }
 
-void
-get_dir_icon(const char *dir, int n)
 /* Set the icon field to the corresponding icon for DIR. If not found,
  * set the default icon */
+void
+get_dir_icon(const char *dir, int n)
 {
 	/* Default values for directories */
 	file_info[n].icon = DEF_DIR_ICON;
@@ -212,10 +212,10 @@ get_dir_icon(const char *dir, int n)
 	}
 }
 
-void
-get_ext_icon(const char *restrict ext, int n)
 /* Set the icon field to the corresponding icon for EXT. If not found,
  * set the default icon */
+void
+get_ext_icon(const char *restrict ext, int n)
 {
 	file_info[n].icon = DEF_FILE_ICON;
 	file_info[n].icon_color = DEF_FILE_ICON_COLOR;
@@ -242,12 +242,12 @@ get_ext_icon(const char *restrict ext, int n)
 	}
 }
 
-int
-list_dir_light(void)
 /* List files in the current working directory (global variable 'path').
  * Unlike list_dir(), however, this function uses no color and runs
  * neither stat() nor count_dir(), which makes it quite faster. Return
  * zero on success or one on error */
+int
+list_dir_light(void)
 {
 /*  clock_t start = clock(); */
 
@@ -801,10 +801,10 @@ END:
 	return EXIT_SUCCESS;
 }
 
-int
-list_dir(void)
 /* List files in the current working directory. Uses filetype colors
  * and columns. Return zero on success or one on error */
+int
+list_dir(void)
 {
 /*  clock_t start = clock(); */
 
@@ -1027,7 +1027,6 @@ list_dir(void)
 					char *ext = strrchr(file_info[n].name, '.');
 					/* Make sure not to take a hidden file for a file
 					 * extension */
-
 					if (ext && ext != file_info[n].name) {
 						if (icons)
 							get_ext_icon(ext, (int)n);

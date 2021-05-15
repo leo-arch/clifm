@@ -115,11 +115,11 @@ initialize_readline(void)
 	return EXIT_SUCCESS;
 }
 
-int
-is_quote_char(const char c)
 /* Simply check a single chartacter (c) against the quoting characters
  * list defined in the qc global array (which takes its values from
  * rl_filename_quote_characters */
+int
+is_quote_char(const char c)
 {
 	if (c == '\0' || !qc)
 		return -1;
@@ -174,10 +174,10 @@ rl_no_hist(const char *prompt)
 	return (char *)NULL;
 }
 
-int
-quote_detector(char *line, int index)
 /* Used by readline to check if a char in the string being completed is
  * quoted or not */
+int
+quote_detector(char *line, int index)
 {
 	if (index > 0 && line[index - 1] == '\\'
 	&& !quote_detector(line, index - 1))
@@ -186,12 +186,12 @@ quote_detector(char *line, int index)
 	return 0;
 }
 
-char *
-my_rl_quote(char *text, int mt, char *qp)
 /* Performs bash-style filename quoting for readline (put a backslash
  * before any char listed in rl_filename_quote_characters.
  * Modified version of:
  * https://utcc.utoronto.ca/~cks/space/blog/programming/ReadlineQuotingExample*/
+char *
+my_rl_quote(char *text, int mt, char *qp)
 {
 	/* NOTE: mt and qp arguments are not used here, but are required by
 	 * rl_filename_quoting_function */
@@ -232,10 +232,10 @@ my_rl_quote(char *text, int mt, char *qp)
 	return r;
 }
 
-char *
-my_rl_path_completion(const char *text, int state)
 /* This is the filename_completion_function() function of an old Bash
  * release (1.14.7) modified to fit CliFM needs */
+char *
+my_rl_path_completion(const char *text, int state)
 {
 	/* state is zero before completion, and 1 ... n after getting
 	 * possible completions. Example:
@@ -690,9 +690,9 @@ my_rl_path_completion(const char *text, int state)
 	}
 }
 
+/* Used by bookmarks completion */
 char *
 bookmarks_generator(const char *text, int state)
-/* Used by bookmarks completion */
 {
 	static int i;
 	static size_t len;
@@ -712,9 +712,9 @@ bookmarks_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
+/* Used by history completion */
 char *
 hist_generator(const char *text, int state)
-/* Used by history completion */
 {
 	static int i;
 	static size_t len;
@@ -734,10 +734,10 @@ hist_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
-char *
-jump_generator(const char *text, int state)
 /* Expand string into matching path in the jump database. Used by
  * j, jc, and jp commands */
+char *
+jump_generator(const char *text, int state)
 {
 	static int i;
 	char *name;
@@ -775,10 +775,10 @@ jump_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
-char *
-jump_entries_generator(const char *text, int state)
 /* Expand jump order number into the corresponding path. Used by the
  * jo command */
+char *
+jump_entries_generator(const char *text, int state)
 {
 	static size_t i;
 	char *name;
@@ -823,9 +823,9 @@ cschemes_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
+/* Used by profiles completion */
 char *
 profiles_generator(const char *text, int state)
-/* Used by profiles completion */
 {
 	static int i;
 	static size_t len;
@@ -847,9 +847,9 @@ profiles_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
+/* Used by ELN expansion */
 char *
 filenames_gen_text(const char *text, int state)
-/* Used by ELN expansion */
 {
 	static size_t i, len = 0;
 	char *name;
@@ -874,9 +874,9 @@ filenames_gen_text(const char *text, int state)
 	return (char *)NULL;
 }
 
+/* Used by ELN expansion */
 char *
 filenames_gen_eln(const char *text, int state)
-/* Used by ELN expansion */
 {
 	static size_t i;
 	char *name;
@@ -896,9 +896,9 @@ filenames_gen_eln(const char *text, int state)
 	return (char *)NULL;
 }
 
+/* Used by commands completion */
 char *
 bin_cmd_generator(const char *text, int state)
-/* Used by commands completion */
 {
 	static int i;
 	static size_t len;
@@ -910,6 +910,72 @@ bin_cmd_generator(const char *text, int state)
 	}
 
 	while ((name = bin_commands[i++]) != NULL) {
+		if (*text == *name && strncmp(name, text, len) == 0)
+			return strdup(name);
+	}
+
+	return (char *)NULL;
+}
+
+char *
+sort_num_generator(const char *text, int state)
+{
+	static size_t i;
+	char *name;
+	rl_filename_completion_desired = 1;
+
+	if (!state)
+		i = 0;
+
+	int num_text = atoi(text);
+
+	struct sort_t {
+		char *name;
+		int num; 
+	};
+
+	static struct sort_t sorts[] = {
+		{ "none", 0 },
+		{ "name", 1 },
+		{ "size", 2 },
+		{ "atime", 3 },
+		{ "btime", 4 },
+		{ "ctime", 5 },
+		{ "mtime", 6 },
+		{ "version", 7 },
+		{ "extension", 8 },
+		{ "inode", 9 },
+		{ "owner", 10 },
+		{ "group", 11 },
+	};
+
+	/* Check list of currently displayed files for a match */
+	while (i <= SORT_TYPES && (name = sorts[i++].name) != NULL)
+		if (*name == *sorts[num_text].name
+		&& strcmp(name, sorts[num_text].name) == 0)
+			return strdup(name);
+
+	return (char *)NULL;
+}
+
+char *
+sort_name_generator(const char *text, int state)
+{
+	static int i;
+	static size_t len;
+	char *name;
+
+	if (!state) {
+		i = 0;
+		len = strlen(text);
+	}
+
+	static char *sorts[] = {
+		"none", "name", "size", "atime", "btime", "ctime", "mtime", "version",
+		"extension", "inode", "owner", "group", NULL
+	};
+
+	while ((name = sorts[i++]) != NULL) {
 		if (*text == *name && strncmp(name, text, len) == 0)
 			return strdup(name);
 	}
@@ -968,7 +1034,7 @@ my_rl_completion(const char *text, int start, int end)
 		/* Perform this check only if the first char of the string to be
 		 * completed is a number in order to prevent an unnecessary call
 		 * to atoi */
-		if (*text >= '1' && *text <= '9') {
+		if (*text >= '0' && *text <= '9') {
 
 			int num_text = atoi(text);
 
@@ -981,6 +1047,12 @@ my_rl_completion(const char *text, int start, int end)
 							  &jump_entries_generator);
 				}
 			}
+
+					/* Sort number expansion */
+			else if (*rl_line_buffer == 's' && (strncmp(rl_line_buffer, "st ", 3) == 0
+			|| strncmp(rl_line_buffer, "sort ", 5) == 0) && is_number(text)
+			&& num_text >= 0 && num_text <= SORT_TYPES)
+				matches = rl_completion_matches(text, &sort_num_generator);
 
 					/* ELN expansion */
 			else if (is_number(text) && num_text > 0
@@ -1030,6 +1102,10 @@ my_rl_completion(const char *text, int start, int end)
 		else if (expand_bookmarks) {
 			matches = rl_completion_matches(text, &bookmarks_generator);
 		}
+
+		else if (*rl_line_buffer == 's' && (strncmp(rl_line_buffer, "st ", 3) == 0
+		|| strncmp(rl_line_buffer, "sort ", 5) == 0))
+			matches = rl_completion_matches(text, &sort_name_generator);
 	}
 
 				/* ### PATH COMPLETION ### */

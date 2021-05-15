@@ -17,6 +17,15 @@
 SUCCESS=0
 ERROR=1
 
+if [ -n "$1" ] && ([ "$1" = "--help" ] || [ "$1" = "help" ]); then
+	name="$(basename "$0")"
+	printf "Drag and drop files\n"
+	printf "\nUsage: %s [FILE... n]\n" "$name"
+	printf "\nWith no arguments, it opens a window to drop files (using dragon); otherwise, files passed as arguments are send to the Dragon window to be dragged onto somewhere else.\n"
+	exit $SUCCESS
+fi
+
+
 DRAGON=""
 
 if [ "$(which dragon-drag-and-drop 2>/dev/null)" ]; then

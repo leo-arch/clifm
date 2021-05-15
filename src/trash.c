@@ -968,14 +968,14 @@ untrash_function(char **comm)
 	return exit_status;
 }
 
-int
-wx_parent_check(char *file)
 /* Check whether the current user has enough permissions (write, execute)
  * to modify the contents of the parent directory of 'file'. 'file' needs
  * to be an absolute path. Returns zero if yes and one if no. Useful to
  * know if a file can be removed from or copied into the parent. In case
  * FILE is a directory, the function checks all its subdirectories for
  * appropriate permissions, including the immutable bit */
+int
+wx_parent_check(char *file)
 {
 	struct stat file_attrib;
 	int exit_status = -1, ret = -1;
@@ -1134,11 +1134,11 @@ wx_parent_check(char *file)
 	return exit_status;
 }
 
-int
-recur_perm_check(const char *dirname)
 /* Recursively check directory permissions (write and execute). Returns
  * zero if OK, and one if at least one subdirectory does not have
  * write/execute permissions */
+int
+recur_perm_check(const char *dirname)
 {
 	DIR *dir;
 	struct dirent *ent;

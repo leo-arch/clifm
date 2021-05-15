@@ -42,9 +42,9 @@
 #include "colors.h"
 #include "checks.h"
 
+/* List matching filenames in the specified directory */
 int
 search_glob(char **comm, int invert)
-/* List matching filenames in the specified directory */
 {
 	if (!comm || !comm[0])
 		return EXIT_FAILURE;
@@ -450,10 +450,10 @@ search_glob(char **comm, int invert)
 	return EXIT_SUCCESS;
 }
 
-int
-search_regex(char **comm, int invert)
 /* List matching (or not marching, if inverse is set to 1) filenames
  * in the specified directory */
+int
+search_regex(char **comm, int invert)
 {
 	if (!comm || !comm[0])
 		return EXIT_FAILURE;

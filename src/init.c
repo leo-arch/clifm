@@ -98,6 +98,7 @@ get_own_pid(void) {
 
 /* returns pointer to username, exits if not found */
 struct user_t get_user(void) {
+
 	struct passwd *pw;
 	struct user_t tmp_user;
 
@@ -1875,6 +1876,10 @@ check_options(void) {
 	if (!user.shell) {
 		struct user_t tmp_user = get_user();
 		user.shell = tmp_user.shell;
+
+		/* We don't need these values of the user struct: free(d) them */
+		free(tmp_user.name);
+		free(tmp_user.home);
 
 		if (!user.shell)
 			user.shell = savestring(FALLBACK_SHELL, strlen(FALLBACK_SHELL));

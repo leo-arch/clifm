@@ -37,11 +37,12 @@
 #include "checks.h"
 #include "mime.h"
 #include "init.h"
+#include "misc.h"
 
-int
-run_action(char *action, char **args)
 /* The core of this function was taken from NNN's run_selected_plugin
  * function and modified to fit our needs. Thanks NNN! */
+int
+run_action(char *action, char **args)
 {
 	int exit_status = EXIT_SUCCESS;
 	char *cmd = (char *)NULL;
@@ -110,6 +111,10 @@ run_action(char *action, char **args)
 	 * #   3) EXEC CMD & LET THE CHILD WRITE TO PIPE  #
 	 * ################################################ */
 
+	/* Set terminal title to plugin name */
+	if (xargs.cwd_in_title == 1)
+		set_term_title(action);
+
 	if (fork() == EXIT_SUCCESS) {
 
 		/* Child: write-only end of the pipe */
@@ -149,6 +154,8 @@ run_action(char *action, char **args)
 	/* If the pipe is empty */
 	if (!*buf) {
 		unlink(fifo_path);
+		if (xargs.cwd_in_title == 1)
+			set_term_title(ws[cur_ws].path);
 		return EXIT_SUCCESS;
 	}
 
@@ -198,6 +205,9 @@ run_action(char *action, char **args)
 
 	/* Remove the pipe file */
 	unlink(fifo_path);
+
+	if (xargs.cwd_in_title == 1)
+		set_term_title(ws[cur_ws].path);
 
 	return exit_status;
 }

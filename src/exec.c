@@ -61,9 +61,9 @@
 #include "archives.h"
 #include "profiles.h"
 
+/* Run a command via execle() and refresh the screen in case of success */
 int
 run_and_refresh(char **comm)
-/* Run a command via execle() and refresh the screen in case of success */
 {
 	if (!comm)
 		return EXIT_FAILURE;
@@ -156,12 +156,12 @@ run_in_background(pid_t pid)
 	waitpid(pid, &status, WNOHANG); /* or: kill(pid, SIGCONT); */
 }
 
-int
-launch_execle(const char *cmd)
 /* Execute a command using the system shell (/bin/sh), which takes care
  * of special functions such as pipes and stream redirection, and special
  * chars like wildcards, quotes, and escape sequences. Use only when the
  * shell is needed; otherwise, launch_execve() should be used instead. */
+int
+launch_execle(const char *cmd)
 {
 	if (!cmd)
 		return EXNULLERR;
@@ -227,14 +227,14 @@ launch_execle(const char *cmd)
 	return EXIT_FAILURE;
 }
 
-int
-launch_execve(char **cmd, int bg, int xflags)
 /* Execute a command and return the corresponding exit status. The exit
  * status could be: zero, if everything went fine, or a non-zero value
  * in case of error. The function takes as first arguement an array of
  * strings containing the command name to be executed and its arguments
  * (cmd), an integer (bg) specifying if the command should be
  * backgrounded (1) or not (0), and a flag to control file descriptors */
+int
+launch_execve(char **cmd, int bg, int xflags)
 {
 	if (!cmd)
 		return EXNULLERR;
@@ -295,11 +295,11 @@ launch_execve(char **cmd, int bg, int xflags)
 	return EXIT_FAILURE;
 }
 
-int
-exec_cmd(char **comm)
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
  * in case of success and one in case of error */
+int
+exec_cmd(char **comm)
 {
 /*  if (!comm || *comm[0] == '\0')
 		return EXIT_FAILURE; */
@@ -1720,16 +1720,20 @@ exec_cmd(char **comm)
 		if (*comm[0] == ':' || *comm[0] == ';') {
 			/* Remove the colon from the beginning of the first argument,
 			 * that is, move the pointer to the next (second) position */
-			char *comm_tmp = comm[0] + 1;
+			char *comm_tmp = savestring(comm[0] + 1, strlen(comm[0] + 1));
 			/* If string == ":" or ";" */
 			if (!comm_tmp || !*comm_tmp) {
 				fprintf(stderr, _("%s: '%c': Syntax error\n"),
 						PROGRAM_NAME, *comm[0]);
 				exit_code = EXIT_FAILURE;
+				if (comm_tmp)
+					free(comm_tmp);
 				return EXIT_FAILURE;
 			}
-			else
+			else {
 				strcpy(comm[0], comm_tmp);
+				free(comm_tmp);
+			}
 		}
 
 		/* #### RUN THE EXTERNAL COMMAND #### */
@@ -1824,12 +1828,12 @@ exec_cmd(char **comm)
 	return exit_code;
 }
 
-void
-exec_chained_cmds(char *cmd)
 /* Execute chained commands (cmd1;cmd2 and/or cmd1 && cmd2). The function
  * is called by parse_input_str() if some non-quoted double ampersand or
  * semicolon is found in the input string AND at least one of these
  * chained commands is internal */
+void
+exec_chained_cmds(char *cmd)
 {
 	if (!cmd)
 		return;

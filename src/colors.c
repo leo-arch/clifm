@@ -41,10 +41,10 @@
 #include "listing.h"
 #include "misc.h"
 
-char *
-get_ext_color(const char *ext)
 /* Returns a pointer to the corresponding color code for EXT, if some
  * color was defined */
+char *
+get_ext_color(const char *ext)
 {
 	if (!ext || !ext_colors_n)
 		return (char *)NULL;
@@ -79,11 +79,11 @@ get_ext_color(const char *ext)
 	return (char *)NULL;
 }
 
-int
-is_color_code(const char *str)
 /* Check if STR has the format of a color code string (a number or a
  * semicolon list (max 12 fields) of numbers of at most 3 digits each).
  * Returns 1 if true and 0 if false. */
+int
+is_color_code(const char *str)
 {
 	if(!str || !*str)
 		return 0;
@@ -123,11 +123,11 @@ is_color_code(const char *str)
 	return 1;
 }
 
-char *
-strip_color_line(const char *str, char mode)
 /* Strip color lines from the config file (FiletypeColors, if mode is
  * 't', and ExtColors, if mode is 'x') returning the same string
  * containing only allowed characters */
+char *
+strip_color_line(const char *str, char mode)
 {
 	if (!str || !*str)
 		return (char *)NULL;
@@ -325,11 +325,11 @@ cschemes_function(char **args)
 	return EXIT_FAILURE;
 }
 
-int
-set_colors(const char *colorscheme, int env)
 /* Open the config file, get values for filetype and extension colors
  * and copy these values into the corresponding variable. If some value
  * is not found, or if it's a wrong value, the default is set. */
+int
+set_colors(const char *colorscheme, int env)
 {
 	char *filecolors = (char *)NULL, *extcolors = (char *)NULL,
 		 *ifacecolors = (char *)NULL;
@@ -1254,11 +1254,11 @@ set_colors(const char *colorscheme, int env)
 	return EXIT_SUCCESS;
 }
 
-void
-colors_list(const char *ent, const int i, const int pad, const int new_line)
 /* Print ENTRY using color codes and I as ELN, right padding PAD
  * chars and terminating ENTRY with or without a new line char (NEW_LINE
  * 1 or 0 respectivelly) */
+void
+colors_list(const char *ent, const int i, const int pad, const int new_line)
 {
 	size_t i_digits = (size_t)DIGINUM(i);
 
@@ -1458,9 +1458,9 @@ get_colorschemes(void)
 	return i;
 }
 
+/* List color codes for file types used by the program */
 void
 color_codes (void)
-/* List color codes for file types used by the program */
 {
 	if (!colorize) {
 		printf(_("%s: Currently running without colors\n"),

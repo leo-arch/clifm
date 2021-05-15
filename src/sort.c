@@ -204,11 +204,11 @@ entrycmp(const void *a, const void *b)
 	return (ret - (ret * 2));
 }
 
-int
-xalphasort(const struct dirent **a, const struct dirent **b)
 /* Same as alphasort, but is uses strcmp instead of sctroll, which is
  * slower. However, bear in mind that, unlike strcmp(), strcoll() is locale
  * aware. Use only with C and english locales */
+int
+xalphasort(const struct dirent **a, const struct dirent **b)
 {
 	int ret = 0;
 
@@ -294,7 +294,36 @@ sort_function(char **arg)
 	}
 
 	/* Argument is alphanumerical string */
-	else if (!is_number(arg[1])) {
+	if (!is_number(arg[1])) {
+
+		struct sort_t {
+			const char *name;
+			int num; 
+		};
+
+		static struct sort_t sorts[] = {
+			{ "none", 0 },
+			{ "name", 1 },
+			{ "size", 2 },
+			{ "atime", 3 },
+			{ "btime", 4 },
+			{ "ctime", 5 },
+			{ "mtime", 6 },
+			{ "version", 7 },
+			{ "extension", 8 },
+			{ "inode", 9 },
+			{ "owner", 10 },
+			{ "group", 11 },
+		};
+
+		size_t i;
+		for ( i = 0; i < sizeof(sorts) / sizeof(struct sort_t); i++) {
+			if (strcmp(arg[1], sorts[i].name) == 0) {
+				sprintf(arg[1], "%d", sorts[i].num);
+				break;
+			}
+		}
+		
 		if (strcmp(arg[1], "rev") == 0) {
 
 			if (sort_reverse)
@@ -320,28 +349,26 @@ sort_function(char **arg)
 	}
 
 	/* Argument is a number */
-	else {
-		int int_arg = atoi(arg[1]);
+	int int_arg = atoi(arg[1]);
 
-		if (int_arg >= 0 && int_arg <= SORT_TYPES) {
-			sort = int_arg;
+	if (int_arg >= 0 && int_arg <= SORT_TYPES) {
+		sort = int_arg;
 
-			if (arg[2] && strcmp(arg[2], "rev") == 0) {
-				if (sort_reverse)
-					sort_reverse = 0;
-				else
-					sort_reverse = 1;
-			}
-
-			if (cd_lists_on_the_fly) {
-				sort_switch = 1;
-				free_dirlist();
-				exit_status = list_dir();
-				sort_switch = 0;
-			}
-
-			return exit_status;
+		if (arg[2] && strcmp(arg[2], "rev") == 0) {
+			if (sort_reverse)
+				sort_reverse = 0;
+			else
+				sort_reverse = 1;
 		}
+
+		if (cd_lists_on_the_fly) {
+			sort_switch = 1;
+			free_dirlist();
+			exit_status = list_dir();
+			sort_switch = 0;
+		}
+
+		return exit_status;
 	}
 
 	/* If arg1 is a number but is not in the range 0-SORT_TYPES,
@@ -350,17 +377,18 @@ sort_function(char **arg)
 	fputs(_("Usage: st [METHOD] [rev]\nMETHOD: 0 = none, "
 			"1 = name, 2 = size, 3 = atime, 4 = btime, "
 			"5 = ctime, 6 = mtime, 7 = version, 8 = extension, "
-			"9 = inode, 10 = owner, 11 = group\n"), stderr);
+			"9 = inode, 10 = owner, 11 = group\nBoth numbers and names are "
+			"allowed\n"), stderr);
 
 	return EXIT_FAILURE;
 }
 
-int
-alphasort_insensitive(const struct dirent **a, const struct dirent **b)
 /* This is a modification of the alphasort function that makes it case
  * insensitive. It also sorts without taking the initial dot of hidden
  * files into account. Note that strcasecmp() isn't locale aware. Use
  * only with C and english locales */
+int
+alphasort_insensitive(const struct dirent **a, const struct dirent **b)
 {
 	int ret = strcasecmp(((*a)->d_name[0] == '.') ? (*a)->d_name + 1 :
 						(*a)->d_name, ((*b)->d_name[0] == '.') ?

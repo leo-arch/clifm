@@ -7,6 +7,13 @@
 
 # License: GPL3
 
+if [ -n "$1" ] && ([ "$1" = "--help" ] || [ "$1" = "help" ]); then
+	name="$(basename "$0")"
+	printf "Deselect CliFM selected files using FZF\n"
+	printf "Usage: %s\n" "$name"
+	exit $SUCCESS
+fi
+
 if ! [ -f "$CLIFM_SELFILE" ]; then
 	printf "CliFM: There are no selected files\n" >&2
 	exit 1

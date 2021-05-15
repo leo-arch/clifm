@@ -14,8 +14,10 @@
 # When importing files from the clipboard, files should be absolute
 # paths.
 
-if [ -z "$1" ]; then
-	printf "Usage: clip [s, i] FILE(s)\n"
+if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "help" ] ; then
+	printf "Interact with the primary clipboard via xclip\n"
+	printf "\nUsage: clip [s, i] FILE... n\n"
+	printf "\nUse the 's' parameter to send files to the X primary clipboard, and the 'i' parameter to import files in the clipboard to CliFM's Selection box"
 	exit 0
 fi
 
