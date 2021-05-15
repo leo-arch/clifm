@@ -168,9 +168,6 @@ print_dirhist_map(void)
 void
 get_file_icon(const char *file, int n)
 {
-	file_info[n].icon = DEF_FILE_ICON;
-	file_info[n].icon_color = DEF_FILE_ICON_COLOR;
-
 	if (!file)
 		return;
 
@@ -185,6 +182,8 @@ get_file_icon(const char *file, int n)
 			break;
 		}
 	}
+
+	
 }
 
 /* Set the icon field to the corresponding icon for DIR. If not found,
@@ -901,6 +900,7 @@ list_dir(void)
 
 		file_info[n].color = (char *)NULL;
 
+		/* Default icon for all files */
 		file_info[n].icon = DEF_FILE_ICON;
 		file_info[n].icon_color = DEF_FILE_ICON_COLOR;
 
@@ -1021,36 +1021,34 @@ list_dir(void)
 				else if (file_info[n].linkn > 1) /* Multi-hardlink */
 					file_info[n].color = mh_c;
 
-				/* Check extension color only if some is defined */
-				else if (ext_colors_n) {
+				else /* Regular file */
+					file_info[n].color = fi_c;
 
-					char *ext = strrchr(file_info[n].name, '.');
-					/* Make sure not to take a hidden file for a file
-					 * extension */
-					if (ext && ext != file_info[n].name) {
-						if (icons)
-							get_ext_icon(ext, (int)n);
+				/* Check file extension */
+				char *ext = strrchr(file_info[n].name, '.');
+				/* Make sure not to take a hidden file for a file extension */
+				if (ext && ext != file_info[n].name) {
+					if (icons)
+						get_ext_icon(ext, (int)n);
 
+					/* Check extension color only if some is defined */
+					if (ext_colors_n) {
 						char *extcolor = get_ext_color(ext);
 
 						if (extcolor) {
-							char ext_color[MAX_COLOR] = "";
+							char ext_color[MAX_COLOR];
 							sprintf(ext_color, "\x1b[%sm", extcolor);
 							file_info[n].color = ext_color;
 							extcolor = (char *)NULL;
 						}
-						else /* No matching extension found */
-							file_info[n].color = fi_c;
-					}
-					else { /* Bare regular file */
-						file_info[n].color = fi_c;
-						if (icons)
-							get_file_icon(file_info[n].name, (int)n);
 					}
 				}
-				else
-					file_info[n].color = fi_c;
-				}
+
+				/* No extension. Check icons for specific filenames */
+				else if (icons)
+					get_file_icon(file_info[n].name, (int)n);
+
+				} /* End of DT_REG block */
 				break;
 
 			case DT_SOCK: file_info[n].color = so_c; break;
