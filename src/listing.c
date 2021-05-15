@@ -1027,7 +1027,6 @@ list_dir(void)
 					char *ext = strrchr(file_info[n].name, '.');
 					/* Make sure not to take a hidden file for a file
 					 * extension */
-
 					if (ext && ext != file_info[n].name) {
 						if (icons)
 							get_ext_icon(ext, (int)n);
