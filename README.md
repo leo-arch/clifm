@@ -83,7 +83,7 @@ Of course, you can deselect some or all selected files whenever you want with th
 1) [Install](https://github.com/sebastiencs/icons-in-terminal#installation) icons-in-terminal.
 2) Run CliFM with the `--icons` command line option, or, once in the program, enter `icons on`.
 
-![icons](images/icons2.png)
+![icons](images/icons.png)
 
 - [x] **NEW: Fastback function**
 
