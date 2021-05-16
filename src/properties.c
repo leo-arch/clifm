@@ -24,23 +24,23 @@
 
 #include "helpers.h"
 
-#include <unistd.h>
-#include <stdio.h>
-#include <sys/stat.h>
-#include <string.h>
 #include <errno.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
 #include <time.h>
+#include <unistd.h>
 #ifdef __linux__
 #include <sys/capability.h>
 #endif
-#include <sys/types.h>
+#include <fcntl.h>
 #include <grp.h>
 #include <pwd.h>
-#include <fcntl.h>
+#include <sys/types.h>
 
 #include "aux.h"
-#include "colors.h"
 #include "checks.h"
+#include "colors.h"
 
 int
 get_properties(char *filename, int dsize)
@@ -57,7 +57,7 @@ get_properties(char *filename, int dsize)
 	/* Check file existence */
 	if (lstat(filename, &file_attrib) == -1) {
 		fprintf(stderr, "%s: pr: '%s': %s\n", PROGRAM_NAME, filename,
-				strerror(errno));
+		    strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -95,20 +95,24 @@ get_properties(char *filename, int dsize)
 				cap_free(cap);
 			}
 
-			else if (file_attrib.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH)) {
+			else if (file_attrib.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
 #else
 
-			if (file_attrib.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH)) {
+			if (file_attrib.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
 #endif
 
-				if (file_attrib.st_size == 0) color = ee_c;
+				if (file_attrib.st_size == 0)
+					color = ee_c;
 
-				else color = ex_c;
+				else
+					color = ex_c;
 			}
 
-			else if (file_attrib.st_size == 0) color = ef_c;
+			else if (file_attrib.st_size == 0)
+				color = ef_c;
 
-			else if (file_attrib.st_nlink > 1) color = mh_c;
+			else if (file_attrib.st_nlink > 1)
+				color = mh_c;
 
 			else {
 				ext = strrchr(filename, '.');
@@ -132,26 +136,26 @@ get_properties(char *filename, int dsize)
 					color = fi_c;
 			}
 		}
-		}
-		break;
+	} break;
 
 	case S_IFDIR:
 		file_type = 'd';
 
-		if (access(filename, R_OK|X_OK) != 0)
+		if (access(filename, R_OK | X_OK) != 0)
 			color = nd_c;
 
 		else {
 			int is_oth_w = 0;
-			if (file_attrib.st_mode & S_ISVTX) sticky = 1;
+			if (file_attrib.st_mode & S_ISVTX)
+				sticky = 1;
 
-			if (file_attrib.st_mode & S_IWOTH) is_oth_w = 1;
+			if (file_attrib.st_mode & S_IWOTH)
+				is_oth_w = 1;
 
 			int files_dir = count_dir(filename);
 
-			color = sticky ? (is_oth_w ? tw_c : st_c)
-				: is_oth_w ? ow_c :
-				((files_dir == 2 || files_dir == 0) ? ed_c : di_c);
+			color = sticky ? (is_oth_w ? tw_c : st_c) : is_oth_w ? ow_c
+				   : ((files_dir == 2 || files_dir == 0) ? ed_c : di_c);
 		}
 
 		break;
@@ -167,34 +171,57 @@ get_properties(char *filename, int dsize)
 			color = or_c;
 		break;
 
-	case S_IFSOCK: file_type = 's'; color = so_c; break;
+	case S_IFSOCK:
+		file_type = 's';
+		color = so_c;
+		break;
 
-	case S_IFBLK: file_type = 'b'; color = bd_c; break;
+	case S_IFBLK:
+		file_type = 'b';
+		color = bd_c;
+		break;
 
-	case S_IFCHR: file_type = 'c'; color = cd_c; break;
+	case S_IFCHR:
+		file_type = 'c';
+		color = cd_c;
+		break;
 
-	case S_IFIFO: file_type = 'p'; color = pi_c; break;
+	case S_IFIFO:
+		file_type = 'p';
+		color = pi_c;
+		break;
 
-	default: file_type = '?'; color = no_c;
+	default:
+		file_type = '?';
+		color = no_c;
 	}
 
 	/* Get file permissions */
 	char read_usr = '-', write_usr = '-', exec_usr = '-',
-		 read_grp = '-', write_grp = '-', exec_grp = '-',
-		 read_others = '-', write_others = '-', exec_others = '-';
+	     read_grp = '-', write_grp = '-', exec_grp = '-',
+	     read_others = '-', write_others = '-', exec_others = '-';
 
 	mode_t val = (file_attrib.st_mode & ~S_IFMT);
-	if (val & S_IRUSR) read_usr = 'r';
-	if (val & S_IWUSR) write_usr = 'w';
-	if (val & S_IXUSR) exec_usr = 'x';
+	if (val & S_IRUSR)
+		read_usr = 'r';
+	if (val & S_IWUSR)
+		write_usr = 'w';
+	if (val & S_IXUSR)
+		exec_usr = 'x';
 
-	if (val & S_IRGRP) read_grp = 'r';
-	if (val & S_IWGRP) write_grp = 'w';
-	if (val & S_IXGRP) exec_grp = 'x';
+	if (val & S_IRGRP)
+		read_grp = 'r';
+	if (val & S_IWGRP)
+		write_grp = 'w';
+	if (val & S_IXGRP)
+		exec_grp = 'x';
 
-	if (val & S_IROTH) read_others = 'r';
-	if (val & S_IWOTH) write_others = 'w';
-	if (val & S_IXOTH) exec_others = 'x';
+	if (val & S_IROTH)
+		read_others = 'r';
+	if (val & S_IWOTH)
+		write_others = 'w';
+	if (val & S_IXOTH)
+		exec_others = 'x';
 
 	if (file_attrib.st_mode & S_ISUID)
 		(val & S_IXUSR) ? (exec_usr = 's') : (exec_usr = 'S');
@@ -227,15 +254,15 @@ get_properties(char *filename, int dsize)
 
 	/* Print file properties */
 	printf("(%04o)%c/%c%c%c/%c%c%c/%c%c%c%s %zu %s %s %s %s ",
-			file_attrib.st_mode & 07777, file_type,
-			read_usr, write_usr, exec_usr, read_grp,
-			write_grp, exec_grp, read_others, write_others,
-			(sticky) ? 't' : exec_others,
-			is_acl(filename) ? "+" : "", link_n,
-			(!owner) ? _("unknown") : owner->pw_name,
-			(!group) ? _("unknown") : group->gr_name,
-			(size_type) ? size_type : "?",
-			(mod_time[0] != '\0') ? mod_time : "?");
+	    file_attrib.st_mode & 07777, file_type,
+	    read_usr, write_usr, exec_usr, read_grp,
+	    write_grp, exec_grp, read_others, write_others,
+	    (sticky) ? 't' : exec_others,
+	    is_acl(filename) ? "+" : "", link_n,
+	    (!owner) ? _("unknown") : owner->pw_name,
+	    (!group) ? _("unknown") : group->gr_name,
+	    (size_type) ? size_type : "?",
+	    (mod_time[0] != '\0') ? mod_time : "?");
 
 	if (file_type && file_type != 'l')
 		printf("%s%s%s\n", color, filename, df_c);
@@ -251,7 +278,7 @@ get_properties(char *filename, int dsize)
 
 		if (ret) {
 			printf(_("%s%s%s -> %s (broken link)\n"), color, filename,
-				   df_c, link);
+			    df_c, link);
 		}
 
 		else
@@ -284,42 +311,57 @@ get_properties(char *filename, int dsize)
 	else
 		change_time[0] = '-';
 
-	/* Get creation (birth) time */
+		/* Get creation (birth) time */
 #if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
-		time = file_attrib.st_birthtime;
-		tm = localtime(&time);
-		char creation_time[128] = "";
+	time = file_attrib.st_birthtime;
+	tm = localtime(&time);
+	char creation_time[128] = "";
 
-		if (!time)
-			creation_time[0] = '-';
+	if (!time)
+		creation_time[0] = '-';
 
-		else
-			strftime(creation_time, sizeof(creation_time),
-					 "%b %d %H:%M:%S %Y", tm);
+	else
+		strftime(creation_time, sizeof(creation_time),
+		    "%b %d %H:%M:%S %Y", tm);
 #elif defined(_STATX)
-		struct statx attrx;
-		statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attrx);
-		time = (time_t)attrx.stx_btime.tv_sec;
-		tm = localtime(&time);
-		char creation_time[128] = "";
+	struct statx attrx;
+	statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attrx);
+	time = (time_t)attrx.stx_btime.tv_sec;
+	tm = localtime(&time);
+	char creation_time[128] = "";
 
-		if (!time)
-			creation_time[0] = '-';
+	if (!time)
+		creation_time[0] = '-';
 
-		else
-			strftime(creation_time, sizeof(creation_time),
-					 "%b %d %H:%M:%S %Y", tm);
+	else
+		strftime(creation_time, sizeof(creation_time),
+		    "%b %d %H:%M:%S %Y", tm);
 #endif
 
 	switch (file_type) {
-		case 'd': printf(_("Directory")); break;
-		case 's': printf(_("Socket")); break;
-		case 'l': printf(_("Symbolic link")); break;
-		case 'b': printf(_("Block special file")); break;
-		case 'c': printf(_("Character special file")); break;
-		case 'p': printf(_("Fifo")); break;
-		case '-': printf(_("Regular file")); break;
-		default: break;
+	case 'd':
+		printf(_("Directory"));
+		break;
+	case 's':
+		printf(_("Socket"));
+		break;
+	case 'l':
+		printf(_("Symbolic link"));
+		break;
+	case 'b':
+		printf(_("Block special file"));
+		break;
+	case 'c':
+		printf(_("Character special file"));
+		break;
+	case 'p':
+		printf(_("Fifo"));
+		break;
+	case '-':
+		printf(_("Regular file"));
+		break;
+	default:
+		break;
 	}
 
 	printf(_("\tBlocks: %ld"), file_attrib.st_blocks);
@@ -330,19 +372,18 @@ get_properties(char *filename, int dsize)
 #endif
 	printf(_("\tInode: %zu\n"), file_attrib.st_ino);
 	printf(_("Device: %zu"), file_attrib.st_dev);
-	printf(_("\tUid: %u (%s)"), file_attrib.st_uid, (!owner)
-			? _("unknown") : owner->pw_name);
-	printf(_("\tGid: %u (%s)\n"), file_attrib.st_gid, (!group)
-			? _("unknown") : group->gr_name);
+	printf(_("\tUid: %u (%s)"), file_attrib.st_uid, (!owner) ? _("unknown")
+			: owner->pw_name);
+	printf(_("\tGid: %u (%s)\n"), file_attrib.st_gid, (!group) ? _("unknown")
+			: group->gr_name);
 
 	/* Print file timestamps */
 	printf(_("Access: \t%s\n"), access_time);
 	printf(_("Modify: \t%s\n"), mod_time);
 	printf(_("Change: \t%s\n"), change_time);
 
-#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) \
-	|| defined(_STATX)
-		printf(_("Birth: \t\t%s\n"), creation_time);
+#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
+	printf(_("Birth: \t\t%s\n"), creation_time);
 #endif
 
 	/* Print size */
@@ -390,33 +431,57 @@ print_entry_props(struct fileinfo *props, size_t max)
 
 	switch (props->mode & S_IFMT) {
 
-	case S_IFREG: file_type = '-'; break;
-	case S_IFDIR: file_type = 'd'; break;
-	case S_IFLNK: file_type = 'l'; break;
-	case S_IFSOCK: file_type = 's'; break;
-	case S_IFBLK: file_type = 'b'; break;
-	case S_IFCHR: file_type = 'c'; break;
-	case S_IFIFO: file_type = 'p'; break;
-	default: file_type = '?';
+	case S_IFREG:
+		file_type = '-';
+		break;
+	case S_IFDIR:
+		file_type = 'd';
+		break;
+	case S_IFLNK:
+		file_type = 'l';
+		break;
+	case S_IFSOCK:
+		file_type = 's';
+		break;
+	case S_IFBLK:
+		file_type = 'b';
+		break;
+	case S_IFCHR:
+		file_type = 'c';
+		break;
+	case S_IFIFO:
+		file_type = 'p';
+		break;
+	default:
+		file_type = '?';
 	}
 
 	/* Get file permissions */
 	char read_usr = '-', write_usr = '-', exec_usr = '-',
-		 read_grp = '-', write_grp = '-', exec_grp = '-',
-		 read_others = '-', write_others = '-', exec_others = '-';
+	     read_grp = '-', write_grp = '-', exec_grp = '-',
+	     read_others = '-', write_others = '-', exec_others = '-';
 
 	mode_t val = (props->mode & ~S_IFMT);
-	if (val & S_IRUSR) read_usr = 'r';
-	if (val & S_IWUSR) write_usr = 'w';
-	if (val & S_IXUSR) exec_usr = 'x';
+	if (val & S_IRUSR)
+		read_usr = 'r';
+	if (val & S_IWUSR)
+		write_usr = 'w';
+	if (val & S_IXUSR)
+		exec_usr = 'x';
 
-	if (val & S_IRGRP) read_grp = 'r';
-	if (val & S_IWGRP) write_grp = 'w';
-	if (val & S_IXGRP) exec_grp = 'x';
+	if (val & S_IRGRP)
+		read_grp = 'r';
+	if (val & S_IWGRP)
+		write_grp = 'w';
+	if (val & S_IXGRP)
+		exec_grp = 'x';
 
-	if (val & S_IROTH) read_others = 'r';
-	if (val & S_IWOTH) write_others = 'w';
-	if (val & S_IXOTH) exec_others = 'x';
+	if (val & S_IROTH)
+		read_others = 'r';
+	if (val & S_IWOTH)
+		write_others = 'w';
+	if (val & S_IXOTH)
+		exec_others = 'x';
 
 	if (props->mode & S_ISUID)
 		(val & S_IXUSR) ? (exec_usr = 's') : (exec_usr = 'S');
@@ -429,13 +494,12 @@ print_entry_props(struct fileinfo *props, size_t max)
 	if (props->ltime) {
 		struct tm *t = localtime(&props->ltime);
 		snprintf(mod_time, 128, "%d-%02d-%02d %02d:%02d", t->tm_year + 1900,
-				t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min);
-	}
-	else
+		    t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min);
+	} else
 		strcpy(mod_time, "-               ");
 
 	/* Get owner and group names */
-/*  struct group *group;
+	/*  struct group *group;
 	struct passwd *owner;
 	group = getgrgid(props->uid);
 	owner = getpwuid(props->gid); */
@@ -476,22 +540,22 @@ print_entry_props(struct fileinfo *props, size_t max)
 		sticky = 1;
 
 	printf("%s%s%c%s%s%s%-*s%s%c %c/%c%c%c/%c%c%c/%c%c%c%s  "
-			"%u:%u  %s  %s\n",
-			colorize ? props->icon_color : "",
-			icons ? props->icon : "", icons ? ' ' : 0,
-			colorize ? props->color : "",
-			!trim ? props->name : trim_name,
-			light_mode ? "" : df_c, pad, "", df_c,
-			trim ? '~' : 0, file_type,
-			read_usr, write_usr, exec_usr,
-			read_grp, write_grp, exec_grp,
-			read_others, write_others, sticky ? 't' : exec_others,
-			is_acl(props->name) ? "+" : "",
-/*          !owner ? _("?") : owner->pw_name,
+	       "%u:%u  %s  %s\n",
+	    colorize ? props->icon_color : "",
+	    icons ? props->icon : "", icons ? ' ' : 0,
+	    colorize ? props->color : "",
+	    !trim ? props->name : trim_name,
+	    light_mode ? "" : df_c, pad, "", df_c,
+	    trim ? '~' : 0, file_type,
+	    read_usr, write_usr, exec_usr,
+	    read_grp, write_grp, exec_grp,
+	    read_others, write_others, sticky ? 't' : exec_others,
+	    is_acl(props->name) ? "+" : "",
+	    /*          !owner ? _("?") : owner->pw_name,
 			!group ? _("?") : group->gr_name, */
-			props->uid, props->gid,
-			*mod_time ? mod_time : "?",
-			size_type ? size_type : "?");
+	    props->uid, props->gid,
+	    *mod_time ? mod_time : "?",
+	    size_type ? size_type : "?");
 
 	if (size_type)
 		free(size_type);
@@ -502,7 +566,7 @@ print_entry_props(struct fileinfo *props, size_t max)
 int
 properties_function(char **comm)
 {
-	if(!comm)
+	if (!comm)
 		return EXIT_FAILURE;
 
 	size_t i;
@@ -520,7 +584,7 @@ properties_function(char **comm)
 
 			if (!deq_file) {
 				fprintf(stderr, _("%s: %s: Error dequoting filename\n"),
-						PROGRAM_NAME, comm[i]);
+				    PROGRAM_NAME, comm[i]);
 				exit_status = EXIT_FAILURE;
 				continue;
 			}

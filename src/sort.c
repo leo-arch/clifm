@@ -24,14 +24,14 @@
 
 #include "helpers.h"
 
-#include <unistd.h>
 #include <dirent.h>
 #include <fcntl.h>
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 
-#include "listing.h"
 #include "checks.h"
+#include "listing.h"
 
 int
 skip_nonexec(const struct dirent *ent)
@@ -47,7 +47,7 @@ skip_files(const struct dirent *ent)
 {
 	/* In case a directory isn't reacheable, like a failed
 	 * mountpoint... */
-/*  struct stat file_attrib;
+	/*  struct stat file_attrib;
 
 	if (lstat(entry->d_name, &file_attrib) == -1) {
 		fprintf(stderr, _("stat: cannot access '%s': %s\n"),
@@ -56,13 +56,11 @@ skip_files(const struct dirent *ent)
 	} */
 
 	/* Skip "." and ".." */
-	if (*ent->d_name == '.' && (!ent->d_name[1]
-	|| (ent->d_name[1] == '.' && !ent->d_name[2])))
+	if (*ent->d_name == '.' && (!ent->d_name[1] || (ent->d_name[1] == '.' && !ent->d_name[2])))
 		return 0;
 
 	/* Skip files matching FILTER */
-	if (filter && regexec(&regex_exp, ent->d_name, 0, NULL, 0)
-	== EXIT_SUCCESS)
+	if (filter && regexec(&regex_exp, ent->d_name, 0, NULL, 0) == EXIT_SUCCESS)
 		return 0;
 
 	/* If not hidden files */
@@ -73,7 +71,7 @@ skip_files(const struct dirent *ent)
 }
 
 int
-namecmp(const char* s1, const char* s2)
+namecmp(const char *s1, const char *s2)
 {
 	/* Do not take initial dot into account */
 	if (*s1 == '.')
@@ -126,7 +124,7 @@ entrycmp(const void *a, const void *b)
 	if (light_mode && (st == SOWN || st == SGRP))
 		st = SNAME;
 
-	switch(st) {
+	switch (st) {
 
 	case SSIZE:
 		if (pa->size > pb->size)
@@ -170,8 +168,7 @@ entrycmp(const void *a, const void *b)
 			else
 				ret = strcasecmp(aext, bext);
 		}
-		}
-		break;
+	} break;
 
 	case SINO:
 		if (pa->inode > pb->inode)
@@ -242,52 +239,51 @@ sort_function(char **arg)
 
 		printf(_("Sorting method: "));
 
-		switch(sort) {
-			case SNONE:
-				printf(_("none %s\n"), (sort_reverse) ? "[rev]": "");
-				break;
-			case SNAME:
-				printf(_("name %s\n"), (sort_reverse) ? "[rev]": "");
-				break;
-			case SSIZE:
-				printf(_("size %s\n"), (sort_reverse) ? "[rev]": "");
-				break;
-			case SATIME:
-				printf(_("atime %s\n"), (sort_reverse) ? "[rev]": "");
-				break;
-			case SBTIME:
-#if defined(HAVE_ST_BIRTHTIME) \
-			|| defined(__BSD_VISIBLE) || defined(_STATX)
-				printf(_("btime %s\n"), (sort_reverse) ? "[rev]": "");
+		switch (sort) {
+		case SNONE:
+			printf(_("none %s\n"), (sort_reverse) ? "[rev]" : "");
+			break;
+		case SNAME:
+			printf(_("name %s\n"), (sort_reverse) ? "[rev]" : "");
+			break;
+		case SSIZE:
+			printf(_("size %s\n"), (sort_reverse) ? "[rev]" : "");
+			break;
+		case SATIME:
+			printf(_("atime %s\n"), (sort_reverse) ? "[rev]" : "");
+			break;
+		case SBTIME:
+#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
+			printf(_("btime %s\n"), (sort_reverse) ? "[rev]" : "");
 #else
-				printf(_("ctime %s\n"), (sort_reverse) ? "[rev]": "");
+			printf(_("ctime %s\n"), (sort_reverse) ? "[rev]" : "");
 #endif
-				break;
-			case SCTIME:
-				printf(_("ctime %s\n"), (sort_reverse) ? "[rev]": "");
-				break;
-			case SMTIME:
-				printf(_("mtime %s\n"), (sort_reverse) ? "[rev]": "");
-				break;
-			case SVER:
+			break;
+		case SCTIME:
+			printf(_("ctime %s\n"), (sort_reverse) ? "[rev]" : "");
+			break;
+		case SMTIME:
+			printf(_("mtime %s\n"), (sort_reverse) ? "[rev]" : "");
+			break;
+		case SVER:
 #if __FreeBSD__ || _BE_POSIX
-				printf(_("name %s\n"), (sort_reverse) ? "[rev]": "");
+			printf(_("name %s\n"), (sort_reverse) ? "[rev]" : "");
 #else
-				printf(_("version %s\n"), (sort_reverse) ? "[rev]": "");
+			printf(_("version %s\n"), (sort_reverse) ? "[rev]" : "");
 #endif
-				break;
-			case SEXT: printf(_("extension %s\n"), (sort_reverse)
-						   ? "[rev]" : "");
-				break;
-			case SINO:
-				printf(_("inode %s\n"), (sort_reverse) ? "[rev]": "");
-				break;
-			case SOWN:
-				printf(_("owner %s\n"), (sort_reverse) ? "[rev]": "");
-				break;
-			case SGRP:
-				printf(_("group %s\n"), (sort_reverse) ? "[rev]": "");
-				break;
+			break;
+		case SEXT:
+			printf(_("extension %s\n"), (sort_reverse) ? "[rev]" : "");
+			break;
+		case SINO:
+			printf(_("inode %s\n"), (sort_reverse) ? "[rev]" : "");
+			break;
+		case SOWN:
+			printf(_("owner %s\n"), (sort_reverse) ? "[rev]" : "");
+			break;
+		case SGRP:
+			printf(_("group %s\n"), (sort_reverse) ? "[rev]" : "");
+			break;
 		}
 
 		return EXIT_SUCCESS;
@@ -298,32 +294,32 @@ sort_function(char **arg)
 
 		struct sort_t {
 			const char *name;
-			int num; 
+			int num;
 		};
 
 		static struct sort_t sorts[] = {
-			{ "none", 0 },
-			{ "name", 1 },
-			{ "size", 2 },
-			{ "atime", 3 },
-			{ "btime", 4 },
-			{ "ctime", 5 },
-			{ "mtime", 6 },
-			{ "version", 7 },
-			{ "extension", 8 },
-			{ "inode", 9 },
-			{ "owner", 10 },
-			{ "group", 11 },
+		    {"none", 0},
+		    {"name", 1},
+		    {"size", 2},
+		    {"atime", 3},
+		    {"btime", 4},
+		    {"ctime", 5},
+		    {"mtime", 6},
+		    {"version", 7},
+		    {"extension", 8},
+		    {"inode", 9},
+		    {"owner", 10},
+		    {"group", 11},
 		};
 
 		size_t i;
-		for ( i = 0; i < sizeof(sorts) / sizeof(struct sort_t); i++) {
+		for (i = 0; i < sizeof(sorts) / sizeof(struct sort_t); i++) {
 			if (strcmp(arg[1], sorts[i].name) == 0) {
 				sprintf(arg[1], "%d", sorts[i].num);
 				break;
 			}
 		}
-		
+
 		if (strcmp(arg[1], "rev") == 0) {
 
 			if (sort_reverse)
@@ -375,10 +371,10 @@ sort_function(char **arg)
 	 * error */
 
 	fputs(_("Usage: st [METHOD] [rev]\nMETHOD: 0 = none, "
-			"1 = name, 2 = size, 3 = atime, 4 = btime, "
-			"5 = ctime, 6 = mtime, 7 = version, 8 = extension, "
-			"9 = inode, 10 = owner, 11 = group\nBoth numbers and names are "
-			"allowed\n"), stderr);
+		"1 = name, 2 = size, 3 = atime, 4 = btime, "
+		"5 = ctime, 6 = mtime, 7 = version, 8 = extension, "
+		"9 = inode, 10 = owner, 11 = group\nBoth numbers and names are "
+		"allowed\n"), stderr);
 
 	return EXIT_FAILURE;
 }
@@ -390,9 +386,8 @@ sort_function(char **arg)
 int
 alphasort_insensitive(const struct dirent **a, const struct dirent **b)
 {
-	int ret = strcasecmp(((*a)->d_name[0] == '.') ? (*a)->d_name + 1 :
-						(*a)->d_name, ((*b)->d_name[0] == '.') ?
-						(*b)->d_name + 1 : (*b)->d_name);
+	int ret = strcasecmp(((*a)->d_name[0] == '.') ? (*a)->d_name + 1
+	: (*a)->d_name, ((*b)->d_name[0] == '.') ? (*b)->d_name + 1 : (*b)->d_name);
 
 	if (!sort_reverse)
 		return ret;

@@ -27,19 +27,19 @@
 #ifdef __FreeBSD__
 #include <sys/stat.h>
 #endif
-#include <stdio.h>
-#include <unistd.h>
-#include <readline/readline.h>
-#include <readline/history.h>
-#include <string.h>
 #include <dirent.h>
 #include <fcntl.h>
+#include <readline/history.h>
+#include <readline/readline.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 
 #include "aux.h"
-#include "readline.h"
 #include "checks.h"
 #include "keybinds.h"
 #include "navigation.h"
+#include "readline.h"
 
 int
 initialize_readline(void)
@@ -50,7 +50,7 @@ initialize_readline(void)
 	 * conditional constructs in $HOME/.inputrc */
 	rl_readline_name = argv_bk[0];
 
-	 /* Enable tab auto-completion for commands (in PATH) in case of
+	/* Enable tab auto-completion for commands (in PATH) in case of
 	  * first entered string (if autocd and/or auto-open are enabled, check
 	  * for paths as well). The second and later entered strings will
 	  * be autocompleted with paths instead, just like in Bash, or with
@@ -140,7 +140,7 @@ rl_no_hist(const char *prompt)
 	stifle_history(0); /* Prevent readline from using the history
 	setting */
 	char *input = readline(prompt);
-	unstifle_history(); /* Reenable history */
+	unstifle_history();	 /* Reenable history */
 	read_history(HIST_FILE); /* Reload history lines from file */
 
 	if (input) {
@@ -179,8 +179,7 @@ rl_no_hist(const char *prompt)
 int
 quote_detector(char *line, int index)
 {
-	if (index > 0 && line[index - 1] == '\\'
-	&& !quote_detector(line, index - 1))
+	if (index > 0 && line[index - 1] == '\\' && !quote_detector(line, index - 1))
 		return 1;
 
 	return 0;
@@ -299,7 +298,7 @@ my_rl_path_completion(const char *text, int state)
 		if (users_dirname)
 			free(users_dirname);
 
-						/* tmp_text is true whenever text was dequoted */
+		/* tmp_text is true whenever text was dequoted */
 		size_t text_len = strlen((tmp_text) ? tmp_text : text);
 		if (text_len)
 			filename = savestring((tmp_text) ? tmp_text : text, text_len);
@@ -339,30 +338,28 @@ my_rl_path_completion(const char *text, int state)
 		size_t dirname_len = strlen(dirname);
 
 		users_dirname = savestring(dirname, dirname_len);
-/*      { */
-			char *temp_dirname;
-			int replace_dirname;
+		/*      { */
+		char *temp_dirname;
+		int replace_dirname;
 
-			temp_dirname = tilde_expand(dirname);
-			free(dirname);
-			dirname = temp_dirname;
+		temp_dirname = tilde_expand(dirname);
+		free(dirname);
+		dirname = temp_dirname;
 
-			replace_dirname = 0;
+		replace_dirname = 0;
 
-			if (rl_directory_completion_hook)
-				replace_dirname = (*rl_directory_completion_hook) (&dirname);
+		if (rl_directory_completion_hook)
+			replace_dirname = (*rl_directory_completion_hook)(&dirname);
 
-			if (replace_dirname) {
-				free(users_dirname);
-				users_dirname = savestring(dirname, dirname_len);
-			}
-/*      } */
+		if (replace_dirname) {
+			free(users_dirname);
+			users_dirname = savestring(dirname, dirname_len);
+		}
+		/*      } */
 		directory = opendir(dirname);
 		filename_len = strlen(filename);
 
 		rl_filename_completion_desired = 1;
-
-
 	}
 
 	if (tmp_text) {
@@ -384,8 +381,7 @@ my_rl_path_completion(const char *text, int state)
 
 	if (dirname_len > 2) {
 
-		if (dirname[dirname_len - 3] == '/'
-		&& dirname[dirname_len - 2] == '.'
+		if (dirname[dirname_len - 3] == '/' && dirname[dirname_len - 2] == '.'
 		&& dirname[dirname_len - 1] == '/') {
 			dir_tmp = savestring(dirname, dirname_len);
 
@@ -420,7 +416,7 @@ my_rl_path_completion(const char *text, int state)
 						ret = get_link_ref(ent->d_name);
 					else {
 						snprintf(tmp, PATH_MAX, "%s%s", dirname,
-								 ent->d_name);
+						    ent->d_name);
 						ret = get_link_ref(tmp);
 					}
 
@@ -452,7 +448,7 @@ my_rl_path_completion(const char *text, int state)
 
 					else {
 						snprintf(tmp, PATH_MAX, "%s%s", dirname,
-								 ent->d_name);
+						    ent->d_name);
 						ret = get_link_ref(tmp);
 					}
 
@@ -486,8 +482,7 @@ my_rl_path_completion(const char *text, int state)
 			/* If "./", list only executable regular files */
 			else if (exec) {
 
-				if (ent->d_type == DT_REG
-				&& access(ent->d_name, X_OK) == 0)
+				if (ent->d_type == DT_REG && access(ent->d_name, X_OK) == 0)
 					match = 1;
 			}
 
@@ -498,7 +493,7 @@ my_rl_path_completion(const char *text, int state)
 					/* dir_tmp is dirname less "./", already
 					 * allocated before the while loop */
 					snprintf(tmp, PATH_MAX, "%s%s", dir_tmp,
-							 ent->d_name);
+					    ent->d_name);
 
 					if (access(tmp, X_OK) == 0)
 						match = 1;
@@ -519,8 +514,7 @@ my_rl_path_completion(const char *text, int state)
 				if (*ent->d_name != *filename
 				|| (strncmp(filename, ent->d_name, filename_len) != 0))
 					continue;
-			}
-			else {
+			} else {
 				if (TOUPPER(*ent->d_name) != TOUPPER(*filename)
 				|| (strncasecmp(filename, ent->d_name, filename_len) != 0))
 					continue;
@@ -537,7 +531,7 @@ my_rl_path_completion(const char *text, int state)
 
 					else {
 						snprintf(tmp, PATH_MAX, "%s%s", dirname,
-								 ent->d_name);
+						    ent->d_name);
 						ret = get_link_ref(tmp);
 					}
 
@@ -567,13 +561,13 @@ my_rl_path_completion(const char *text, int state)
 
 				case DT_LNK:
 
-					if (dirname[0] == '.' && !dirname [1]) {
+					if (dirname[0] == '.' && !dirname[1]) {
 						ret = get_link_ref(ent->d_name);
 					}
 
 					else {
 						snprintf(tmp, PATH_MAX, "%s%s", dirname,
-								 ent->d_name);
+						    ent->d_name);
 						ret = get_link_ref(tmp);
 					}
 
@@ -592,15 +586,13 @@ my_rl_path_completion(const char *text, int state)
 			|| strncmp(rl_line_buffer, "tr ", 3) == 0
 			|| strncmp(rl_line_buffer, "trash ", 6) == 0)) {
 
-				if (ent->d_type != DT_BLK
-				&& ent->d_type != DT_CHR)
+				if (ent->d_type != DT_BLK && ent->d_type != DT_CHR)
 					match = 1;
 			}
 
 			else if (exec) {
 
-				if (ent->d_type == DT_REG
-				&& access(ent->d_name, X_OK) == 0)
+				if (ent->d_type == DT_REG && access(ent->d_name, X_OK) == 0)
 					match = 1;
 			}
 
@@ -660,11 +652,10 @@ my_rl_path_completion(const char *text, int state)
 		/* dirname && (strcmp(dirname, ".") != 0) */
 		if (dirname && (dirname[0] != '.' || dirname[1])) {
 
-			if (rl_complete_with_tilde_expansion
-			&& *users_dirname == '~') {
+			if (rl_complete_with_tilde_expansion && *users_dirname == '~') {
 				size_t dirlen = strlen(dirname);
-				temp = (char *)xcalloc(dirlen + strlen(ent->d_name)
-									   + 2, sizeof(char));
+				temp = (char *)xcalloc(dirlen + strlen(ent->d_name) + 2,
+															sizeof(char));
 				strcpy(temp, dirname);
 				/* Canonicalization cuts off any final slash present.
 				 * We need to add it back. */
@@ -676,9 +667,10 @@ my_rl_path_completion(const char *text, int state)
 			}
 
 			else {
-				  temp = (char *)xcalloc(strlen(users_dirname) +
-										 strlen(ent->d_name) + 1, sizeof(char));
-				  strcpy(temp, users_dirname);
+				temp = (char *)xcalloc(strlen(users_dirname) +
+							   strlen(ent->d_name) + 1,
+				    sizeof(char));
+				strcpy(temp, users_dirname);
 			}
 			strcat(temp, ent->d_name);
 		}
@@ -752,8 +744,7 @@ jump_generator(const char *text, int state)
 	while ((name = jump_db[i++].path) != NULL) {
 
 		/* Exclude CWD */
-		if (name[1] == ws[cur_ws].path[1]
-		&& strcmp(name, ws[cur_ws].path) == 0)
+		if (name[1] == ws[cur_ws].path[1] && strcmp(name, ws[cur_ws].path) == 0)
 			continue;
 
 		/* Filter by parent */
@@ -784,14 +775,14 @@ jump_entries_generator(const char *text, int state)
 	char *name;
 
 	if (!state)
-		i=0;
+		i = 0;
 
 	int num_text = atoi(text);
 
 	/* Check list of jump entries for a match */
 	while (i <= jump_n && (name = jump_db[i++].path) != NULL)
-		if (*name == *jump_db[num_text - 1].path
-		&& strcmp(name, jump_db[num_text - 1].path) == 0)
+		if (*name == *jump_db[num_text - 1].path && strcmp(name,
+										jump_db[num_text - 1].path) == 0)
 			return strdup(name);
 
 	return (char *)NULL;
@@ -868,7 +859,7 @@ filenames_gen_text(const char *text, int state)
 	/* Check list of currently displayed files for a match */
 	while (i < files && (name = file_info[i++].name) != NULL)
 		if (case_sens_path_comp ? strncmp(name, text, len) == 0
-		: strncasecmp(name, text, len) == 0)
+					: strncasecmp(name, text, len) == 0)
 			return strdup(name);
 
 	return (char *)NULL;
@@ -931,22 +922,22 @@ sort_num_generator(const char *text, int state)
 
 	struct sort_t {
 		char *name;
-		int num; 
+		int num;
 	};
 
 	static struct sort_t sorts[] = {
-		{ "none", 0 },
-		{ "name", 1 },
-		{ "size", 2 },
-		{ "atime", 3 },
-		{ "btime", 4 },
-		{ "ctime", 5 },
-		{ "mtime", 6 },
-		{ "version", 7 },
-		{ "extension", 8 },
-		{ "inode", 9 },
-		{ "owner", 10 },
-		{ "group", 11 },
+	    {"none", 0},
+	    {"name", 1},
+	    {"size", 2},
+	    {"atime", 3},
+	    {"btime", 4},
+	    {"ctime", 5},
+	    {"mtime", 6},
+	    {"version", 7},
+	    {"extension", 8},
+	    {"inode", 9},
+	    {"owner", 10},
+	    {"group", 11},
 	};
 
 	/* Check list of currently displayed files for a match */
@@ -971,9 +962,19 @@ sort_name_generator(const char *text, int state)
 	}
 
 	static char *sorts[] = {
-		"none", "name", "size", "atime", "btime", "ctime", "mtime", "version",
-		"extension", "inode", "owner", "group", NULL
-	};
+	    "none",
+	    "name",
+	    "size",
+	    "atime",
+	    "btime",
+	    "ctime",
+	    "mtime",
+	    "version",
+	    "extension",
+	    "inode",
+	    "owner",
+	    "group",
+	    NULL};
 
 	while ((name = sorts[i++]) != NULL) {
 		if (*text == *name && strncmp(name, text, len) == 0)
@@ -1029,7 +1030,7 @@ my_rl_completion(const char *text, int start, int end)
 	/* Second word or more */
 	else {
 
-			/* #### ELN AND JUMP ORDER EXPANSION ### */
+		/* #### ELN AND JUMP ORDER EXPANSION ### */
 
 		/* Perform this check only if the first char of the string to be
 		 * completed is a number in order to prevent an unnecessary call
@@ -1038,30 +1039,29 @@ my_rl_completion(const char *text, int start, int end)
 
 			int num_text = atoi(text);
 
-					/* Dirjump: jo command */
+			/* Dirjump: jo command */
 			if (*rl_line_buffer == 'j' && rl_line_buffer[1] == 'o'
 			&& rl_line_buffer[2] == ' ') {
-				if (is_number(text) && num_text > 0
-				&& num_text <= (int)jump_n) {
+				if (is_number(text) && num_text > 0 && num_text <= (int)jump_n) {
 					matches = rl_completion_matches(text,
-							  &jump_entries_generator);
+					    &jump_entries_generator);
 				}
 			}
 
-					/* Sort number expansion */
-			else if (*rl_line_buffer == 's' && (strncmp(rl_line_buffer, "st ", 3) == 0
-			|| strncmp(rl_line_buffer, "sort ", 5) == 0) && is_number(text)
-			&& num_text >= 0 && num_text <= SORT_TYPES)
+			/* Sort number expansion */
+			else if (*rl_line_buffer == 's'
+			&& (strncmp(rl_line_buffer, "st ", 3) == 0
+			|| strncmp(rl_line_buffer, "sort ", 5) == 0)
+			&& is_number(text) && num_text >= 0 && num_text <= SORT_TYPES)
 				matches = rl_completion_matches(text, &sort_num_generator);
 
-					/* ELN expansion */
-			else if (is_number(text) && num_text > 0
-			&& num_text <= (int)files)
+			/* ELN expansion */
+			else if (is_number(text) && num_text > 0 && num_text <= (int)files)
 				matches = rl_completion_matches(text, &filenames_gen_eln);
 		}
 
-				/* ### DIRJUMP COMPLETION ### */
-					/* j, jc, jp commands */
+		/* ### DIRJUMP COMPLETION ### */
+		/* j, jc, jp commands */
 		else if (*rl_line_buffer == 'j' && (rl_line_buffer[1] == ' '
 		|| ((rl_line_buffer[1] == 'c' || rl_line_buffer[1] == 'p')
 		&& rl_line_buffer[2] == ' ')
@@ -1069,28 +1069,28 @@ my_rl_completion(const char *text, int start, int end)
 
 			matches = rl_completion_matches(text, &jump_generator);
 
-				/* ### BOOKMARKS COMPLETION ### */
+		/* ### BOOKMARKS COMPLETION ### */
 
-		else if (*rl_line_buffer == 'b'
-		&& (rl_line_buffer[1] == 'm' || rl_line_buffer[1] == 'o')
+		else if (*rl_line_buffer == 'b' && (rl_line_buffer[1] == 'm'
+		|| rl_line_buffer[1] == 'o')
 		&& (strncmp(rl_line_buffer, "bm ", 3) == 0
 		|| strncmp(rl_line_buffer, "bookmarks ", 10) == 0)) {
 			rl_attempted_completion_over = 1;
 			matches = rl_completion_matches(text, &bookmarks_generator);
 		}
 
-				/* ### COLOR SCHEMES COMPLETION ### */
+		/* ### COLOR SCHEMES COMPLETION ### */
 		else if (*rl_line_buffer == 'c' && ((rl_line_buffer[1] == 's'
 		&& rl_line_buffer[2] == ' ')
 		|| strncmp(rl_line_buffer, "colorschemes ", 13) == 0)) {
-				matches = rl_completion_matches(text,
-						  &cschemes_generator);
+			matches = rl_completion_matches(text,
+			    &cschemes_generator);
 		}
 
-				/* ### PROFILES COMPLETION ### */
+		/* ### PROFILES COMPLETION ### */
 
-		else if (*rl_line_buffer == 'p'
-		&& (rl_line_buffer[1] == 'r' || rl_line_buffer[1] == 'f')
+		else if (*rl_line_buffer == 'p' && (rl_line_buffer[1] == 'r'
+		|| rl_line_buffer[1] == 'f')
 		&& (strncmp(rl_line_buffer, "pf set ", 7) == 0
 		|| strncmp(rl_line_buffer, "profile set ", 12) == 0
 		|| strncmp(rl_line_buffer, "pf del ", 7) == 0
@@ -1103,12 +1103,13 @@ my_rl_completion(const char *text, int start, int end)
 			matches = rl_completion_matches(text, &bookmarks_generator);
 		}
 
-		else if (*rl_line_buffer == 's' && (strncmp(rl_line_buffer, "st ", 3) == 0
+		else if (*rl_line_buffer == 's'
+		&& (strncmp(rl_line_buffer, "st ", 3) == 0
 		|| strncmp(rl_line_buffer, "sort ", 5) == 0))
 			matches = rl_completion_matches(text, &sort_name_generator);
 	}
 
-				/* ### PATH COMPLETION ### */
+	/* ### PATH COMPLETION ### */
 
 	/* If none of the above, readline will attempt
 	 * path completion instead via my custom my_rl_path_completion() */

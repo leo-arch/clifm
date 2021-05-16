@@ -24,27 +24,27 @@
 
 #include "helpers.h"
 
-#include <stdio.h>
-#include <unistd.h>
 #include <errno.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
-#include "bookmarks.h"
-#include "file_operations.h"
-#include "readline.h"
 #include "aux.h"
-#include "exec.h"
-#include "init.h"
+#include "bookmarks.h"
 #include "checks.h"
+#include "exec.h"
+#include "file_operations.h"
+#include "init.h"
 #include "mime.h"
+#include "readline.h"
 
 int
 bookmarks_function(char **cmd)
 {
 	if (xargs.stealth_mode == 1) {
 		printf(_("%s: Access to configuration files is not allowed in "
-			   "stealth mode\n"), PROGRAM_NAME);
+			 "stealth mode\n"), PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
 
@@ -74,7 +74,7 @@ bookmarks_function(char **cmd)
 
 		if (access(cmd[2], F_OK) != 0) {
 			fprintf(stderr, _("Bookmarks: %s: %s\n"), cmd[2],
-					strerror(errno));
+			    strerror(errno));
 			return EXIT_FAILURE;
 		}
 
@@ -93,22 +93,20 @@ bookmarks_function(char **cmd)
 	size_t i;
 	for (i = 0; i < bm_n; i++) {
 
-		if ((bookmarks[i].shortcut
-		&& *cmd[1] == *bookmarks[i].shortcut
-		&& strcmp(cmd[1], bookmarks[i].shortcut) == 0)
-		|| (bookmarks[i].name
-		&& *cmd[1] == *bookmarks[i].name
-		&& strcmp(cmd[1], bookmarks[i].name) == 0)) {
+		if ((bookmarks[i].shortcut && *cmd[1] == *bookmarks[i].shortcut
+			&& strcmp(cmd[1], bookmarks[i].shortcut) == 0)
+			|| (bookmarks[i].name && *cmd[1] == *bookmarks[i].name
+			&& strcmp(cmd[1], bookmarks[i].name) == 0)) {
 
 			if (bookmarks[i].path) {
-				char *tmp_cmd[] = { "o", bookmarks[i].path,
-									cmd[2] ? cmd[2] : NULL, NULL };
+				char *tmp_cmd[] = {"o", bookmarks[i].path,
+				    cmd[2] ? cmd[2] : NULL, NULL};
 
 				return open_function(tmp_cmd);
 			}
 
 			fprintf(stderr, _("Bookmarks: %s: Invalid bookmark\n"),
-					cmd[1]);
+			    cmd[1]);
 			return EXIT_FAILURE;
 		}
 	}
@@ -156,7 +154,7 @@ bm_prompt(void)
 {
 	char *bm_sel = (char *)NULL;
 	printf(_("%s%s\nEnter '%c' to edit your bookmarks or '%c' to quit.\n"),
-			NC_b, df_c, 'e', 'q');
+	    NC_b, df_c, 'e', 'q');
 
 	while (!bm_sel)
 		bm_sel = rl_no_hist(_("Choose a bookmark: "));
@@ -215,7 +213,7 @@ bookmark_del(char *name)
 	}
 
 	char **del_elements = (char **)NULL;
-	int cmd_line = -1; 
+	int cmd_line = -1;
 	/* This variable let us know two things: a) bookmark name was
 	 * specified in command line; b) the index of this name in the
 	 * bookmarks array. It is initialized as -1 since the index name
@@ -243,8 +241,7 @@ bookmark_del(char *name)
 	 * bookmarks screen) to the del_elements array */
 	if (cmd_line != -1) {
 		del_elements = (char **)xnmalloc(2, sizeof(char *));
-		del_elements[0] = (char *)xnmalloc((size_t)DIGINUM(cmd_line + 1)
-										   + 1, sizeof(char));
+		del_elements[0] = (char *)xnmalloc((size_t)DIGINUM(cmd_line + 1) + 1, sizeof(char));
 		sprintf(del_elements[0], "%d", cmd_line + 1);
 		del_elements[1] = (char *)NULL;
 	}
@@ -267,8 +264,7 @@ bookmark_del(char *name)
 		printf(_("%sBookmarks%s\n\n"), bold, df_c);
 
 		for (i = 0; i < bmn; i++)
-			printf("%s%zu %s%s%s\n", el_c, i + 1, bm_c, bms[i],
-				   df_c);
+			printf("%s%zu %s%s%s\n", el_c, i + 1, bm_c, bms[i], df_c);
 
 		/* Get user input */
 		printf(_("\n%sEnter '%c' to quit.\n"), df_c, 'q');
@@ -276,7 +272,7 @@ bookmark_del(char *name)
 
 		while (!input)
 			input = rl_no_hist(_("Bookmark(s) to be deleted "
-							   "(ex: 1 2-6, or *): "));
+								"(ex: 1 2-6, or *): "));
 
 		del_elements = get_substr(input, ' ');
 		free(input);
@@ -306,11 +302,10 @@ bookmark_del(char *name)
 		if (strcmp(del_elements[i], "q") == 0)
 			quit = 1;
 
-		else if (is_number(del_elements[i])
-		&& (atoi(del_elements[i]) <= 0
+		else if (is_number(del_elements[i]) && (atoi(del_elements[i]) <= 0
 		|| atoi(del_elements[i]) > (int)bmn)) {
 			fprintf(stderr, _("bookmarks: %s: No such bookmark\n"),
-					del_elements[i]);
+			    del_elements[i]);
 			quit = 1;
 		}
 
@@ -341,9 +336,9 @@ bookmark_del(char *name)
 			/* Create a backup copy of the bookmarks file, just in case */
 			char *bk_file = (char *)NULL;
 			bk_file = (char *)xcalloc(strlen(CONFIG_DIR) + 14,
-									  sizeof(char));
+			    sizeof(char));
 			sprintf(bk_file, "%s/bookmarks.bk", CONFIG_DIR);
-			char *tmp_cmd[] = { "cp", BM_FILE, bk_file, NULL };
+			char *tmp_cmd[] = {"cp", BM_FILE, bk_file, NULL};
 
 			int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
 			/* Remove the bookmarks file, free stuff, and exit */
@@ -351,15 +346,14 @@ bookmark_del(char *name)
 			if (ret == EXIT_SUCCESS) {
 				unlink(BM_FILE);
 				printf(_("bookmarks: All bookmarks were deleted\n "
-						 "However, a backup copy was created (%s)\n"),
-						  bk_file);
+					 "However, a backup copy was created (%s)\n"), bk_file);
 				free(bk_file);
 				bk_file = (char *)NULL;
 			}
 
 			else
 				printf(_("bookmarks: Error creating backup file. No "
-						 "bookmark was deleted\n"));
+					 "bookmark was deleted\n"));
 
 			for (i = 0; i < bmn; i++)
 				free(bms[i]);
@@ -374,7 +368,7 @@ bookmark_del(char *name)
 			fclose(bm_fp);
 
 			/* Update bookmark names for TAB completion */
-/*          get_bm_names(); */
+			/*          get_bm_names(); */
 			free_bookmarks();
 			load_bookmarks();
 
@@ -463,7 +457,7 @@ bookmark_del(char *name)
 	tmp_file = (char *)NULL;
 
 	/* Update bookmark names for TAB completion */
-/*  get_bm_names(); */
+	/*  get_bm_names(); */
 	free_bookmarks();
 	load_bookmarks();
 
@@ -484,8 +478,7 @@ bookmark_add(char *file)
 	/* If not absolute path, prepend current path to file */
 	if (*file != '/') {
 		char *tmp_file = (char *)NULL;
-		tmp_file = (char *)xnmalloc((strlen(ws[cur_ws].path)
-								+ strlen(file) + 2), sizeof(char));
+		tmp_file = (char *)xnmalloc((strlen(ws[cur_ws].path) + strlen(file) + 2), sizeof(char));
 		sprintf(tmp_file, "%s/%s", ws[cur_ws].path, file);
 		file = tmp_file;
 		tmp_file = (char *)NULL;
@@ -496,8 +489,7 @@ bookmark_add(char *file)
 
 	FILE *bm_fp = fopen(BM_FILE, "r");
 	if (!bm_fp) {
-		fprintf(stderr, _("bookmarks: Error opening the bookmarks "
-				"file\n"));
+		fprintf(stderr, _("bookmarks: Error opening the bookmarks file\n"));
 		if (mod_file)
 			free(file);
 
@@ -516,7 +508,7 @@ bookmark_add(char *file)
 			continue;
 
 		char *tmp_line = (char *)NULL;
-		tmp_line = strchr (line, '/');
+		tmp_line = strchr(line, '/');
 
 		if (tmp_line) {
 			size_t tmp_line_len = strlen(tmp_line);
@@ -526,7 +518,8 @@ bookmark_add(char *file)
 
 			if (strcmp(tmp_line, file) == 0) {
 				fprintf(stderr, _("bookmarks: %s: Path already "
-								   "bookmarked\n"), file);
+						  "bookmarked\n"),
+				    file);
 				dup = 1;
 				break;
 			}
@@ -537,7 +530,6 @@ bookmark_add(char *file)
 		/* Store lines: used later to check hotkeys */
 		bms = (char **)xrealloc(bms, (bmn + 1) * sizeof(char *));
 		bms[bmn++] = savestring(line, strlen(line));
-
 	}
 
 	free(line);
@@ -576,7 +568,7 @@ bookmark_add(char *file)
 
 				if (strcmp(hk, tmp_line) == 0) {
 					fprintf(stderr, _("bookmarks: %s: This shortcut is "
-									  "already in use\n"), hk);
+							  "already in use\n"), hk);
 
 					dup = 1;
 					free(tmp_line);
@@ -616,7 +608,7 @@ bookmark_add(char *file)
 
 				if (strcmp(name, tmp_line) == 0) {
 					fprintf(stderr, _("bookmarks: %s: This name is "
-									  "already in use\n"), name);
+							  "already in use\n"), name);
 
 					dup = 1;
 					free(tmp_line);
@@ -645,15 +637,14 @@ bookmark_add(char *file)
 
 		/* Generate the bookmark line */
 		if (hk) { /* name AND hk */
-			tmp = (char *)xcalloc(strlen(hk) + strlen(name)
-								  + strlen(file) + 5, sizeof(char));
+			tmp = (char *)xcalloc(strlen(hk) + strlen(name) + strlen(file) + 5, sizeof(char));
 			sprintf(tmp, "[%s]%s:%s\n", hk, name, file);
 			free(hk);
 		}
 
 		else { /* Only name */
 			tmp = (char *)xnmalloc(strlen(name) + strlen(file) + 3,
-								  sizeof(char));
+			    sizeof(char));
 			sprintf(tmp, "%s:%s\n", name, file);
 		}
 
@@ -663,7 +654,7 @@ bookmark_add(char *file)
 
 	else if (hk) { /* Only hk */
 		tmp = (char *)xnmalloc(strlen(hk) + strlen(file) + 4,
-							  sizeof(char));
+		    sizeof(char));
 		sprintf(tmp, "[%s]%s\n", hk, file);
 		free(hk);
 		hk = (char *)NULL;
@@ -712,7 +703,7 @@ bookmark_add(char *file)
 	free(tmp);
 
 	/* Update bookmark names for TAB completion */
-/*  get_bm_names();  */
+	/*  get_bm_names();  */
 	free_bookmarks();
 	load_bookmarks();
 
@@ -727,7 +718,7 @@ edit_bookmarks(char *cmd)
 	if (!cmd) {
 
 		if (opener) {
-			char *tmp_cmd[] = { opener, BM_FILE, NULL };
+			char *tmp_cmd[] = {opener, BM_FILE, NULL};
 
 			if (launch_execve(tmp_cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS) {
 				fprintf(stderr, _("%s: Cannot open the bookmarks file"),
@@ -737,14 +728,14 @@ edit_bookmarks(char *cmd)
 		}
 
 		else {
-			char *tmp_cmd[] = { "mm", BM_FILE, NULL };
+			char *tmp_cmd[] = {"mm", BM_FILE, NULL};
 
 			exit_status = mime_open(tmp_cmd);
 		}
 	}
 
 	else {
-		char *tmp_cmd[] = { cmd, BM_FILE, NULL };
+		char *tmp_cmd[] = {cmd, BM_FILE, NULL};
 
 		int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOSTDERR);
 
@@ -761,8 +752,8 @@ open_bookmark(void)
 	/* If no bookmarks */
 	if (bm_n == 0) {
 		printf(_("Bookmarks: There are no bookmarks\nEnter 'bm edit' "
-				 "or press F11 to edit the bookmarks file. You can "
-				 "also enter 'bm add PATH' to add a new bookmark\n"));
+			 "or press F11 to edit the bookmarks file. You can "
+			 "also enter 'bm add PATH' to add a new bookmark\n"));
 		return EXIT_SUCCESS;
 	}
 
@@ -799,21 +790,25 @@ open_bookmark(void)
 			non_existent = 1;
 
 		else {
-			switch((file_attrib.st_mode & S_IFMT)) {
+			switch ((file_attrib.st_mode & S_IFMT)) {
 
-				case S_IFDIR: is_dir = 1; break;
+			case S_IFDIR:
+				is_dir = 1;
+				break;
 
-				case S_IFREG: break;
+			case S_IFREG:
+				break;
 
-				default: non_existent = 1; break;
+			default:
+				non_existent = 1;
+				break;
 			}
 		}
 
 		printf("%s%zu%s %s%c%s%c%s %s%s%s\n", el_c, eln, df_c,
-			   bold, sc_ok ? '[' : 0, sc_ok ? bookmarks[i].shortcut
-			   : "", sc_ok ? ']' : 0, df_c, non_existent ? gray
-			   : (is_dir ? bm_c : fi_c), name_ok ? bookmarks[i].name
-			   : bookmarks[i].path, df_c);
+		    bold, sc_ok ? '[' : 0, sc_ok ? bookmarks[i].shortcut : "",
+		    sc_ok ? ']' : 0, df_c, non_existent ? gray : (is_dir ? bm_c : fi_c),
+		    name_ok ? bookmarks[i].name : bookmarks[i].path, df_c);
 	}
 
 	/* User selection. Display the prompt */
@@ -846,7 +841,7 @@ open_bookmark(void)
 
 		arg = (char **)NULL;
 
-		char *tmp_cmd[] = { "bm", NULL };
+		char *tmp_cmd[] = {"bm", NULL};
 		bookmarks_function(tmp_cmd);
 
 		return EXIT_SUCCESS;
@@ -879,24 +874,22 @@ open_bookmark(void)
 
 		for (i = 0; i < bm_n; i++) {
 
-			if ((bookmarks[i].shortcut
-			&& *arg[0] == *bookmarks[i].shortcut
+			if ((bookmarks[i].shortcut && *arg[0] == *bookmarks[i].shortcut
 			&& strcmp(arg[0], bookmarks[i].shortcut) == 0)
-			|| (bookmarks[i].name
-			&& *arg[0] == *bookmarks[i].name
+			|| (bookmarks[i].name && *arg[0] == *bookmarks[i].name
 			&& strcmp(arg[0], bookmarks[i].name) == 0)) {
 
 				if (bookmarks[i].path) {
-					char *tmp_cmd[] = { "o", bookmarks[i].path,
-										arg[1] ? arg[1] : NULL,
-										NULL };
+					char *tmp_cmd[] = {"o", bookmarks[i].path,
+					    arg[1] ? arg[1] : NULL,
+					    NULL};
 
 					exit_status = open_function(tmp_cmd);
 					goto FREE_AND_EXIT;
 				}
 
 				fprintf(stderr, _("%s: %s: Invalid bookmark\n"),
-						PROGRAM_NAME, arg[0]);
+				    PROGRAM_NAME, arg[0]);
 				exit_status = EXIT_FAILURE;
 				goto FREE_AND_EXIT;
 			}
@@ -905,25 +898,25 @@ open_bookmark(void)
 
 	if (!tmp_path) {
 		fprintf(stderr, _("Bookmarks: %s: No such bookmark\n"),
-				arg[0]);
+		    arg[0]);
 		exit_status = EXIT_FAILURE;
 		goto FREE_AND_EXIT;
 	}
 
-	char *tmp_cmd[] = { "o", tmp_path, arg[1] ? arg[1] : NULL, NULL };
+	char *tmp_cmd[] = {"o", tmp_path, arg[1] ? arg[1] : NULL, NULL};
 
 	exit_status = open_function(tmp_cmd);
 	goto FREE_AND_EXIT;
 
-	FREE_AND_EXIT: {
+FREE_AND_EXIT : {
 
-		for (i = 0; arg[i]; i++)
-			free(arg[i]);
+	for (i = 0; arg[i]; i++)
+		free(arg[i]);
 
-		free(arg);
+	free(arg);
 
-		arg = (char **)NULL;
+	arg = (char **)NULL;
 
-		return exit_status;
-	}
+	return exit_status;
+}
 }

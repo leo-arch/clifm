@@ -24,27 +24,27 @@
 
 #include "helpers.h"
 
-#include <stdio.h>
-#include <string.h>
 #include <errno.h>
-#include <time.h>
-#include <sys/stat.h>
-#include <readline/readline.h>
-#include <unistd.h>
 #include <fcntl.h>
+#include <readline/readline.h>
 #include <signal.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <time.h>
+#include <unistd.h>
 
 #include "aux.h"
-#include "exec.h"
-#include "checks.h"
-#include "init.h"
-#include "listing.h"
-#include "history.h"
-#include "readline.h"
-#include "navigation.h"
 #include "bookmarks.h"
+#include "checks.h"
+#include "exec.h"
+#include "history.h"
+#include "init.h"
 #include "jump.h"
+#include "listing.h"
+#include "navigation.h"
+#include "readline.h"
 #include "strings.h"
 
 void
@@ -52,7 +52,7 @@ set_term_title(const char *str)
 {
 	char *tmp = (char *)NULL;
 	tmp = home_tilde(str);
-	
+
 	printf("\033]2;%s - %s\007", PROGRAM_NAME, tmp ? tmp : str);
 	fflush(stdout);
 
@@ -94,10 +94,9 @@ filter_function(const char *arg)
 
 	filter = savestring(arg, strlen(arg));
 
-	if (regcomp(&regex_exp, filter, REG_NOSUB|REG_EXTENDED)
-	!= EXIT_SUCCESS) {
+	if (regcomp(&regex_exp, filter, REG_NOSUB | REG_EXTENDED) != EXIT_SUCCESS) {
 		fprintf(stderr, _("%s: '%s': Invalid regular expression\n"),
-				PROGRAM_NAME, filter);
+		    PROGRAM_NAME, filter);
 		free(filter);
 		filter = (char *)NULL;
 		regfree(&regex_exp);
@@ -114,116 +113,115 @@ void
 print_tips(int all)
 {
 	const char *TIPS[] = {
-		"Try the autocd and auto-open functions: run 'FILE' instead "
-		"of 'open FILE' or 'cd FILE'",
-		"Add a new entry to the mimelist file with 'mm edit' or F6",
-		"Do not forget to take a look at the manpage",
-		"Need more speed? Try the light mode (Alt-y)",
-		"The Selection Box is shared among different instances of CliFM",
-		"Select files here and there with the 's' command",
-		"Use wildcards and regular expressions with the 's' command: "
-		"'s *.c' or 's .*\\.c$'",
-		"ELN's and the 'sel' keyword work for shell commands as well: "
-		"'file 1 sel'",
-		"Press TAB to automatically expand an ELN: 'o 2' -> TAB -> "
-		"'o FILENAME'",
-		"Easily copy everything in CWD into another directory: 's * "
-		"&& c sel ELN/DIR'",
-		"Use ranges (ELN-ELN) to easily move multiple files: 'm 3-12 "
-		"ELN/DIR'",
-		"Trash files with a simple 't ELN'",
-		"Get mime information for a file: 'mm info ELN'",
-		"If too many files are listed, try enabling the pager ('pg on')",
-		"Once in the pager, go backwards pressing the keyboard shortcut "
-		"provided by your terminal emulator",
-		"Once in the pager, press 'q' to stop it",
-		"Press 'Alt-l' to switch to long view mode",
-		"Search for files using the slash command: '/*.png'",
-		"The search function allows regular expressions: '/^c'",
-		"Add a new bookmark by just entering 'bm ELN/FILE'",
-		"Use c, l, m, md, and r instead of cp, ln, mv, mkdir, and rm",
-		"Access a remote file system using the 'net' command",
-		"Manage default associated applications with the 'mime' command",
-		"Go back and forth in the directory history with 'Alt-j' and 'Alt-k' "
-		"or Shift-Left and Shift-Right",
-		"Open a new instance of CliFM with the 'x' command: 'x ELN/DIR'",
-		"Send a command directly to the system shell with ';CMD'",
-		"Run the last executed command by just running '!!'",
-		"Import aliases from file using 'alias import FILE'",
-		"List available aliases by running 'alias'",
-		"Create aliases to easily run your preferred commands",
-		"Open and edit the configuration file with 'edit'",
-		"Find a description for each CLiFM command by running 'cmd'",
-		"Print the currently used color codes list by entering 'cc'",
-		"Press 'Alt-i' to toggle hidden files on/off",
-		"List mountpoints by pressing 'Alt-m'",
-		"Allow the use of shell commands with the -x option: 'clifm -x'",
-		"Go to the root directory by just pressing 'Alt-r'",
-		"Go to the home directory by just pressing 'Alt-e'",
-		"Press 'F8' to open and edit current color scheme",
-		"Press 'F9' to open and edit the keybindings file",
-		"Press 'F10' to open and edit the configuration file",
-		"Press 'F11' to open and edit the bookmarks file",
-		"Customize the starting path using the -p option: 'clifm -p PATH'",
-		"Use the 'o' command to open files and directories: 'o 12'",
-		"Bypass the resource opener specifying an application: 'o 12 "
-		"leafpad'",
-		"Open a file and send it to the background running 'o 24 &'",
-		"Create a custom prompt editing the configuration file",
-		"Customize color codes using the configuration file",
-		"Open the bookmarks manager by just pressing 'Alt-b'",
-		"Chain commands using ; and &&: 's 2 7-10; r sel'",
-		"Add emojis to the prompt by copying them to the Prompt line "
-		"in the configuration file",
-		"Create a new profile running 'pf add PROFILE' or 'clifm -P "
-		"PROFILE'",
-		"Switch profiles using 'pf set PROFILE'",
-		"Delete a profile using 'pf del PROFILE'",
-		"Copy selected files into CWD by just running 'v sel' or "
-		"pressing Ctrl-Alt-v",
-		"Use 'p ELN' to print file properties for ELN",
-		"Deselect all selected files by pressing 'Alt-d'",
-		"Select all files in CWD by pressing 'Alt-a'",
-		"Jump to the Selection Box by pressing 'Alt-s'",
-		"Restore trashed files using the 'u' command",
-		"Empty the trash bin running 't clear'",
-		"Press Alt-f to toggle list-folders-first on/off",
-		"Use the 'fc' command to disable the files counter",
-		"Take a look at the splash screen with the 'splash' command",
-		"Have some fun trying the 'bonus' command",
-		"Launch the default system shell in CWD using ':' or ';'",
-		"Use 'Alt-z' and 'Alt-x' to switch sorting methods",
-		"Reverse sorting order using the 'rev' option: 'st rev'",
-		"Compress and decompress files using the 'ac' and 'ad' "
-		"commands respectivelly",
-		"Rename multiple files at once with the bulk rename function: "
-		"'br *.txt'",
-		"Need no more tips? Disable this feature in the configuration "
-		"file",
-		"Need root privileges? Launch a new instance of CLifM as root "
-		"running the 'X' command",
-		"Create custom commands and features using the 'actions' command",
-		"Create a fresh configuration file by running 'edit gen'",
-		"Use 'ln edit' (or 'le') to edit symbolic links",
-		"Change default keyboard shortcuts by editing the keybindings file (F9)",
-		"Keep in sight previous and next visited directories enabling the "
-		"DirhistMap option in the configuration file",
-		"Leave no traces at all running in stealth mode",
-		"Pin a file via the 'pin' command and then use it with the "
-		"period keyword (,). Ex: 'pin DIR' and then 'cd ,'",
-		"Switch between color schemes using the 'cs' command",
-		"Use the 'j' command to quickly navigate through visited "
-		"directories",
-		"Switch workspaces pressing Alt-[1-4]",
-		"Use the 'ws' command to list available workspaces",
-		"Take a look at available plugins using the 'actions' command",
-		"Space is not needed: enter 'p12' instead of 'p 12'",
-		"When searching or selecting files, use the exclamation mark "
-		"to reverse the meaning of a pattern",
-		"Enable the TrashAsRm option to prevent accidental deletions",
-		"Don't like ELN's? Disable them using the -e option",
-		NULL
-	};
+	    "Try the autocd and auto-open functions: run 'FILE' instead "
+	    "of 'open FILE' or 'cd FILE'",
+	    "Add a new entry to the mimelist file with 'mm edit' or F6",
+	    "Do not forget to take a look at the manpage",
+	    "Need more speed? Try the light mode (Alt-y)",
+	    "The Selection Box is shared among different instances of CliFM",
+	    "Select files here and there with the 's' command",
+	    "Use wildcards and regular expressions with the 's' command: "
+	    "'s *.c' or 's .*\\.c$'",
+	    "ELN's and the 'sel' keyword work for shell commands as well: "
+	    "'file 1 sel'",
+	    "Press TAB to automatically expand an ELN: 'o 2' -> TAB -> "
+	    "'o FILENAME'",
+	    "Easily copy everything in CWD into another directory: 's * "
+	    "&& c sel ELN/DIR'",
+	    "Use ranges (ELN-ELN) to easily move multiple files: 'm 3-12 "
+	    "ELN/DIR'",
+	    "Trash files with a simple 't ELN'",
+	    "Get mime information for a file: 'mm info ELN'",
+	    "If too many files are listed, try enabling the pager ('pg on')",
+	    "Once in the pager, go backwards pressing the keyboard shortcut "
+	    "provided by your terminal emulator",
+	    "Once in the pager, press 'q' to stop it",
+	    "Press 'Alt-l' to switch to long view mode",
+	    "Search for files using the slash command: '/*.png'",
+	    "The search function allows regular expressions: '/^c'",
+	    "Add a new bookmark by just entering 'bm ELN/FILE'",
+	    "Use c, l, m, md, and r instead of cp, ln, mv, mkdir, and rm",
+	    "Access a remote file system using the 'net' command",
+	    "Manage default associated applications with the 'mime' command",
+	    "Go back and forth in the directory history with 'Alt-j' and 'Alt-k' "
+	    "or Shift-Left and Shift-Right",
+	    "Open a new instance of CliFM with the 'x' command: 'x ELN/DIR'",
+	    "Send a command directly to the system shell with ';CMD'",
+	    "Run the last executed command by just running '!!'",
+	    "Import aliases from file using 'alias import FILE'",
+	    "List available aliases by running 'alias'",
+	    "Create aliases to easily run your preferred commands",
+	    "Open and edit the configuration file with 'edit'",
+	    "Find a description for each CLiFM command by running 'cmd'",
+	    "Print the currently used color codes list by entering 'cc'",
+	    "Press 'Alt-i' to toggle hidden files on/off",
+	    "List mountpoints by pressing 'Alt-m'",
+	    "Allow the use of shell commands with the -x option: 'clifm -x'",
+	    "Go to the root directory by just pressing 'Alt-r'",
+	    "Go to the home directory by just pressing 'Alt-e'",
+	    "Press 'F8' to open and edit current color scheme",
+	    "Press 'F9' to open and edit the keybindings file",
+	    "Press 'F10' to open and edit the configuration file",
+	    "Press 'F11' to open and edit the bookmarks file",
+	    "Customize the starting path using the -p option: 'clifm -p PATH'",
+	    "Use the 'o' command to open files and directories: 'o 12'",
+	    "Bypass the resource opener specifying an application: 'o 12 "
+	    "leafpad'",
+	    "Open a file and send it to the background running 'o 24 &'",
+	    "Create a custom prompt editing the configuration file",
+	    "Customize color codes using the configuration file",
+	    "Open the bookmarks manager by just pressing 'Alt-b'",
+	    "Chain commands using ; and &&: 's 2 7-10; r sel'",
+	    "Add emojis to the prompt by copying them to the Prompt line "
+	    "in the configuration file",
+	    "Create a new profile running 'pf add PROFILE' or 'clifm -P "
+	    "PROFILE'",
+	    "Switch profiles using 'pf set PROFILE'",
+	    "Delete a profile using 'pf del PROFILE'",
+	    "Copy selected files into CWD by just running 'v sel' or "
+	    "pressing Ctrl-Alt-v",
+	    "Use 'p ELN' to print file properties for ELN",
+	    "Deselect all selected files by pressing 'Alt-d'",
+	    "Select all files in CWD by pressing 'Alt-a'",
+	    "Jump to the Selection Box by pressing 'Alt-s'",
+	    "Restore trashed files using the 'u' command",
+	    "Empty the trash bin running 't clear'",
+	    "Press Alt-f to toggle list-folders-first on/off",
+	    "Use the 'fc' command to disable the files counter",
+	    "Take a look at the splash screen with the 'splash' command",
+	    "Have some fun trying the 'bonus' command",
+	    "Launch the default system shell in CWD using ':' or ';'",
+	    "Use 'Alt-z' and 'Alt-x' to switch sorting methods",
+	    "Reverse sorting order using the 'rev' option: 'st rev'",
+	    "Compress and decompress files using the 'ac' and 'ad' "
+	    "commands respectivelly",
+	    "Rename multiple files at once with the bulk rename function: "
+	    "'br *.txt'",
+	    "Need no more tips? Disable this feature in the configuration "
+	    "file",
+	    "Need root privileges? Launch a new instance of CLifM as root "
+	    "running the 'X' command",
+	    "Create custom commands and features using the 'actions' command",
+	    "Create a fresh configuration file by running 'edit gen'",
+	    "Use 'ln edit' (or 'le') to edit symbolic links",
+	    "Change default keyboard shortcuts by editing the keybindings file (F9)",
+	    "Keep in sight previous and next visited directories enabling the "
+	    "DirhistMap option in the configuration file",
+	    "Leave no traces at all running in stealth mode",
+	    "Pin a file via the 'pin' command and then use it with the "
+	    "period keyword (,). Ex: 'pin DIR' and then 'cd ,'",
+	    "Switch between color schemes using the 'cs' command",
+	    "Use the 'j' command to quickly navigate through visited "
+	    "directories",
+	    "Switch workspaces pressing Alt-[1-4]",
+	    "Use the 'ws' command to list available workspaces",
+	    "Take a look at available plugins using the 'actions' command",
+	    "Space is not needed: enter 'p12' instead of 'p 12'",
+	    "When searching or selecting files, use the exclamation mark "
+	    "to reverse the meaning of a pattern",
+	    "Enable the TrashAsRm option to prevent accidental deletions",
+	    "Don't like ELN's? Disable them using the -e option",
+	    NULL};
 
 	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
 
@@ -273,7 +271,7 @@ new_instance(char *dir, int sudo)
 
 	if (!deq_dir) {
 		fprintf(stderr, _("%s: %s: Error dequoting filename\n"),
-				PROGRAM_NAME, dir);
+		    PROGRAM_NAME, dir);
 		free(self);
 		return EXIT_FAILURE;
 	}
@@ -282,15 +280,14 @@ new_instance(char *dir, int sudo)
 
 	if (stat(deq_dir, &file_attrib) == -1) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, deq_dir,
-				strerror(errno));
+		    strerror(errno));
 		free(self);
 		free(deq_dir);
 		return EXIT_FAILURE;
 	}
 
 	if ((file_attrib.st_mode & S_IFMT) != S_IFDIR) {
-		fprintf(stderr, _("%s: %s: Not a directory\n"),
-				PROGRAM_NAME, deq_dir);
+		fprintf(stderr, _("%s: %s: Not a directory\n"), PROGRAM_NAME, deq_dir);
 		free(self);
 		free(deq_dir);
 		return EXIT_FAILURE;
@@ -299,14 +296,13 @@ new_instance(char *dir, int sudo)
 	char *path_dir = (char *)NULL;
 
 	if (*deq_dir != '/') {
-		path_dir = (char *)xnmalloc(strlen(ws[cur_ws].path) + strlen(deq_dir)
-									+ 2, sizeof(char));
+		path_dir = (char *)xnmalloc(strlen(ws[cur_ws].path)
+							+ strlen(deq_dir) + 2, sizeof(char));
 		sprintf(path_dir, "%s/%s", ws[cur_ws].path, deq_dir);
-	}
-	else
+	} else
 		path_dir = deq_dir;
 
-/*  char *cmd = (char *)xnmalloc(strlen(term) + strlen(self)
+	/*  char *cmd = (char *)xnmalloc(strlen(term) + strlen(self)
 								 + strlen(path_dir) + 13, sizeof(char));
 	sprintf(cmd, "%s %s -p \"%s\" &", term, self, path_dir);
 
@@ -322,11 +318,12 @@ new_instance(char *dir, int sudo)
 		if (tmp_term) {
 			size_t i;
 
-			for (i = 0; tmp_term[i]; i++);
+			for (i = 0; tmp_term[i]; i++)
+				;
 
 			size_t num = i;
 			tmp_cmd = (char **)xrealloc(tmp_cmd, (i + (sudo ? 5 : 4))
-										* sizeof(char *));
+													* sizeof(char *));
 			for (i = 0; tmp_term[i]; i++) {
 				tmp_cmd[i] = savestring(tmp_term[i], strlen(tmp_term[i]));
 				free(tmp_term[i]);
@@ -339,7 +336,7 @@ new_instance(char *dir, int sudo)
 
 			if (sudo) {
 				tmp_cmd[i + plus] = (char *)xnmalloc(strlen(self) + 1,
-												  sizeof(char));
+				    sizeof(char));
 				strcpy(tmp_cmd[i + plus], "sudo");
 				plus++;
 			}
@@ -348,8 +345,7 @@ new_instance(char *dir, int sudo)
 			strcpy(tmp_cmd[i + plus++], self);
 			tmp_cmd[i + plus] = (char *)xnmalloc(3, sizeof(char));
 			strcpy(tmp_cmd[i + plus++], "-p\0");
-			tmp_cmd[i + plus] = (char *)xnmalloc(strlen(path_dir)
-											  + 1, sizeof(char));
+			tmp_cmd[i + plus] = (char *)xnmalloc(strlen(path_dir) + 1, sizeof(char));
 			strcpy(tmp_cmd[i + plus++], path_dir);
 			tmp_cmd[i + plus] = (char *)NULL;
 		}
@@ -371,12 +367,12 @@ new_instance(char *dir, int sudo)
 				term, self, ws[cur_ws].path);
 
 		if (sudo) {
-			char *cmd[] = { term, "-e", "sudo", self, "-p", path_dir, NULL };
+			char *cmd[] = {term, "-e", "sudo", self, "-p", path_dir, NULL};
 			ret = launch_execve(cmd, BACKGROUND, E_NOFLAG);
 		}
 
 		else {
-			char *cmd[] = { term, "-e", self, "-p", path_dir, NULL };
+			char *cmd[] = {term, "-e", self, "-p", path_dir, NULL};
 			ret = launch_execve(cmd, BACKGROUND, E_NOFLAG);
 		}
 	}
@@ -398,7 +394,7 @@ alias_import(char *file)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: The alias function is disabled in stealth mode\n",
-			   PROGRAM_NAME);
+				PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
 
@@ -408,7 +404,7 @@ alias_import(char *file)
 	char rfile[PATH_MAX] = "";
 	rfile[0] = '\0';
 
-/*  if (*file == '~' && *(file + 1) == '/') { */
+	/*  if (*file == '~' && *(file + 1) == '/') { */
 
 	if (*file == '~') {
 		char *file_exp = tilde_expand(file);
@@ -430,7 +426,7 @@ alias_import(char *file)
 		return EXIT_FAILURE;
 	}
 
-	if (access(rfile, F_OK|R_OK) != 0) {
+	if (access(rfile, F_OK | R_OK) != 0) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rfile, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -448,7 +444,7 @@ alias_import(char *file)
 
 	if (!config_fp) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, CONFIG_FILE,
-				strerror(errno));
+		    strerror(errno));
 		fclose(fp);
 		return EXIT_FAILURE;
 	}
@@ -498,8 +494,8 @@ alias_import(char *file)
 			for (i = 0; i < aliases_n; i++) {
 				int alias_len = strcntchr(aliases[i], '=');
 
-				if (alias_len != -1
-				&& strncmp(aliases[i], p, (size_t)alias_len + 1) == 0) {
+				if (alias_len != -1 && strncmp(aliases[i], p,
+											(size_t)alias_len + 1) == 0) {
 					exists = 1;
 					break;
 				}
@@ -515,10 +511,9 @@ alias_import(char *file)
 
 				/* Write the new alias into CLiFM config file */
 				fputs(line, config_fp);
-			}
-			else
+			} else
 				fprintf(stderr, _("%s: Alias already exists\n"),
-						alias_name);
+				    alias_name);
 
 			free(alias_name);
 		}
@@ -532,7 +527,7 @@ alias_import(char *file)
 	/* No alias was found in FILE */
 	if (alias_found == 0) {
 		fprintf(stderr, _("%s: %s: No alias found\n"), PROGRAM_NAME,
-				rfile);
+		    rfile);
 		return EXIT_FAILURE;
 	}
 
@@ -548,11 +543,10 @@ alias_import(char *file)
 	 * message and update the aliases array */
 	if (alias_imported > 1)
 		printf(_("%s: %zu aliases were successfully imported\n"),
-				PROGRAM_NAME, alias_imported);
+		    PROGRAM_NAME, alias_imported);
 
 	else
-		printf(_("%s: 1 alias was successfully imported\n"),
-			   PROGRAM_NAME);
+		printf(_("%s: 1 alias was successfully imported\n"), PROGRAM_NAME);
 
 	/* Add new aliases to the internal list of aliases */
 	get_aliases();
@@ -564,7 +558,7 @@ alias_import(char *file)
 			free(bin_commands[i]);
 
 		free(bin_commands);
-		bin_commands = (char  **)NULL;
+		bin_commands = (char **)NULL;
 	}
 
 	get_path_programs();
@@ -589,7 +583,8 @@ save_last_path(void)
 
 	if (!last_fp) {
 		fprintf(stderr, _("%s: Error saving last visited "
-				"directory\n"), PROGRAM_NAME);
+				  "directory\n"),
+		    PROGRAM_NAME);
 		free(last_dir);
 		return;
 	}
@@ -612,15 +607,15 @@ save_last_path(void)
 	sprintf(last_dir_tmp, "%s/.last", CONFIG_DIR_GRAL);
 
 	if (cd_on_quit) {
-		char *cmd[] = { "cp", "-p", last_dir, last_dir_tmp,
-						NULL };
+		char *cmd[] = {"cp", "-p", last_dir, last_dir_tmp,
+		    NULL};
 
 		launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	}
 
 	/* If not cd on quit, remove the file */
 	else {
-		char *cmd[] = { "rm", "-f", last_dir_tmp, NULL };
+		char *cmd[] = {"rm", "-f", last_dir_tmp, NULL};
 
 		launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	}
@@ -634,7 +629,7 @@ save_last_path(void)
 char *
 parse_usrvar_value(const char *str, const char c)
 {
-	if (c == '\0' || !str) 
+	if (c == '\0' || !str)
 		return (char *)NULL;
 
 	/* Get whatever comes after c */
@@ -649,7 +644,7 @@ parse_usrvar_value(const char *str, const char c)
 		return (char *)NULL;
 
 	/* Remove leading quotes */
-	if ( *tmp == '"' || *tmp == '\'' )
+	if (*tmp == '"' || *tmp == '\'')
 		tmp++;
 
 	/* Remove trailing spaces, tabs, new line chars, and quotes */
@@ -657,8 +652,8 @@ parse_usrvar_value(const char *str, const char c)
 
 	for (i = tmp_len - 1; tmp[i] && i > 0; i--) {
 
-		if (tmp[i] != ' ' && tmp[i] != '\t' && tmp[i] != '"'
-		&& tmp[i] != '\'' && tmp[i] != '\n')
+		if (tmp[i] != ' ' && tmp[i] != '\t' && tmp[i] != '"' && tmp[i] != '\''
+		&& tmp[i] != '\n')
 			break;
 
 		else
@@ -671,7 +666,7 @@ parse_usrvar_value(const char *str, const char c)
 	/* Copy the result string into a buffer and return it */
 	char *buf = (char *)NULL;
 	buf = savestring(tmp, strlen(tmp));
-	tmp=(char *)NULL;
+	tmp = (char *)NULL;
 
 	if (buf)
 		return buf;
@@ -691,7 +686,7 @@ create_usr_var(char *str)
 			free(value);
 
 		fprintf(stderr, _("%s: Error getting variable name\n"),
-				PROGRAM_NAME);
+		    PROGRAM_NAME);
 
 		return EXIT_FAILURE;
 	}
@@ -700,13 +695,12 @@ create_usr_var(char *str)
 		free(name);
 
 		fprintf(stderr, _("%s: Error getting variable value\n"),
-				PROGRAM_NAME);
+		    PROGRAM_NAME);
 
 		return EXIT_FAILURE;
 	}
 
-	usr_var = xrealloc(usr_var, (size_t)(usrvar_n + 1)
-					   * sizeof(struct usrvar_t));
+	usr_var = xrealloc(usr_var, (size_t)(usrvar_n + 1) * sizeof(struct usrvar_t));
 	usr_var[usrvar_n].name = savestring(name, strlen(name));
 	usr_var[usrvar_n++].value = savestring(value, strlen(value));
 
@@ -753,10 +747,17 @@ _err(int msg_type, int prompt, const char *format, ...)
 	if (buf) {
 		if (msg_type) {
 			switch (msg_type) {
-			case 'e': pmsg = error; break;
-			case 'w': pmsg = warning; break;
-			case 'n': pmsg = notice; break;
-			default: pmsg = nomsg;
+			case 'e':
+				pmsg = error;
+				break;
+			case 'w':
+				pmsg = warning;
+				break;
+			case 'n':
+				pmsg = notice;
+				break;
+			default:
+				pmsg = nomsg;
 			}
 		}
 
@@ -801,7 +802,7 @@ set_shell(char *str)
 
 	user.shell = savestring(tmp, strlen(tmp));
 	printf(_("Successfully set '%s' as %s default shell\n"), user.shell,
-		   PROGRAM_NAME);
+	    PROGRAM_NAME);
 
 	if (full_path)
 		free(full_path);
@@ -851,13 +852,12 @@ list_mountpoints(void)
 
 				if (counter == 1) { /* 1 == second field */
 					printf("%s%zu%s %s%s%s (%s)\n", el_c, mp_n + 1,
-						   df_c, (access(str, R_OK|X_OK) == 0)
-						   ? di_c : nd_c, str, df_c,
-						   device);
+					    df_c, (access(str, R_OK | X_OK) == 0) ? di_c : nd_c, str, df_c,
+					    device);
 					/* Store the second field (mountpoint) into an
 					 * array */
 					mountpoints = (char **)xrealloc(mountpoints,
-										   (mp_n + 1) * sizeof(char *));
+					    (mp_n + 1) * sizeof(char *));
 					mountpoints[mp_n++] = savestring(str, strlen(str));
 				}
 
@@ -891,18 +891,18 @@ list_mountpoints(void)
 		int atoi_num = atoi(input);
 
 		if (atoi_num > 0 && atoi_num <= (int)mp_n) {
-			
+
 			if (xchdir(mountpoints[atoi_num - 1], SET_TITLE) == EXIT_SUCCESS) {
 
 				free(ws[cur_ws].path);
 				ws[cur_ws].path = savestring(mountpoints[atoi_num - 1],
-									strlen(mountpoints[atoi_num - 1]));
+				    strlen(mountpoints[atoi_num - 1]));
 
 				if (cd_lists_on_the_fly) {
 					free_dirlist();
 
 					if (list_dir() != EXIT_SUCCESS)
-						exit_status =  EXIT_FAILURE;
+						exit_status = EXIT_FAILURE;
 				}
 
 				add_to_dirhist(ws[cur_ws].path);
@@ -911,13 +911,12 @@ list_mountpoints(void)
 
 			else {
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-						mountpoints[atoi_num - 1], strerror(errno));
+				    mountpoints[atoi_num - 1], strerror(errno));
 				exit_status = EXIT_FAILURE;
 			}
-		}
-		else {
+		} else {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-					mountpoints[atoi_num - 1], strerror(errno));
+			    mountpoints[atoi_num - 1], strerror(errno));
 			exit_status = EXIT_FAILURE;
 		}
 	}
@@ -942,7 +941,7 @@ save_pinned_dir(void)
 	if (pinned_dir && config_ok) {
 
 		char *pin_file = (char *)xnmalloc(strlen(CONFIG_DIR) + 7,
-										  sizeof(char));
+		    sizeof(char));
 		sprintf(pin_file, "%s/.pin", CONFIG_DIR);
 
 		FILE *fp = fopen(pin_file, "w");
@@ -970,7 +969,7 @@ free_stuff(void)
 	int i = 0;
 
 	if (STDIN_TMP_DIR) {
-		char *rm_cmd[] = { "rm", "-rd", "--", STDIN_TMP_DIR, NULL };
+		char *rm_cmd[] = {"rm", "-rd", "--", STDIN_TMP_DIR, NULL};
 		launch_execve(rm_cmd, FOREGROUND, E_NOFLAG);
 		free(STDIN_TMP_DIR);
 	}
@@ -1163,11 +1162,11 @@ free_stuff(void)
 void
 set_signals_to_ignore(void)
 {
-/*  signal(SIGINT, signal_handler); C-c */
-	signal(SIGINT, SIG_IGN); /* C-c */
+	/*  signal(SIGINT, signal_handler); C-c */
+	signal(SIGINT, SIG_IGN);  /* C-c */
 	signal(SIGQUIT, SIG_IGN); /* C-\ */
 	signal(SIGTSTP, SIG_IGN); /* C-z */
-/*  signal(SIGTERM, SIG_IGN);
+	/*  signal(SIGTERM, SIG_IGN);
 	signal(SIGTTIN, SIG_IGN);
 	signal(SIGTTOU, SIG_IGN); */
 }
@@ -1185,7 +1184,7 @@ handle_stdin()
 	 * == 262MiB of data ((65535 * PATH_MAX) / 1024) */
 
 	size_t chunk = 512 * 1024, chunks_n = 1,
-		   total_len = 0, max_chunks = 512;
+	       total_len = 0, max_chunks = 512;
 	ssize_t input_len = 0;
 
 	/* Initial buffer allocation == 1 chunk */
@@ -1234,7 +1233,7 @@ handle_stdin()
 
 	free(rand_ext);
 
-	char *cmd[] = { "mkdir", "-p", STDIN_TMP_DIR, NULL };
+	char *cmd[] = {"mkdir", "-p", STDIN_TMP_DIR, NULL};
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		goto FREE_N_EXIT;
 
@@ -1289,9 +1288,9 @@ handle_stdin()
 	/* chdir to tmp dir and update path var */
 	if (xchdir(STDIN_TMP_DIR, SET_TITLE) == -1) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, STDIN_TMP_DIR,
-				strerror(errno));
+		    strerror(errno));
 
-		char *rm_cmd[] = { "rm" , "-drf", STDIN_TMP_DIR, NULL };
+		char *rm_cmd[] = {"rm", "-drf", STDIN_TMP_DIR, NULL};
 		launch_execve(rm_cmd, FOREGROUND, E_NOFLAG);
 
 		free(cwd);
@@ -1307,19 +1306,19 @@ handle_stdin()
 
 	goto FREE_N_EXIT;
 
-	FREE_N_EXIT:
-		free(buf);
+FREE_N_EXIT:
+	free(buf);
 
-		/* Go back to tty */
-		dup2(STDOUT_FILENO, STDIN_FILENO);
+	/* Go back to tty */
+	dup2(STDOUT_FILENO, STDIN_FILENO);
 
-		if (cd_lists_on_the_fly) {
-			free_dirlist();
-			list_dir();
-			add_to_dirhist(ws[cur_ws].path);
-		}
+	if (cd_lists_on_the_fly) {
+		free_dirlist();
+		list_dir();
+		add_to_dirhist(ws[cur_ws].path);
+	}
 
-		return;
+	return;
 }
 
 int
@@ -1331,8 +1330,7 @@ pin_directory(char *dir)
 	struct stat attr;
 
 	if (lstat(dir, &attr) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir,
-				strerror(errno));
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1343,7 +1341,7 @@ pin_directory(char *dir)
 
 	/* If absolute path */
 	if (*dir == '/')
-		pinned_dir =  savestring(dir, strlen(dir));
+		pinned_dir = savestring(dir, strlen(dir));
 
 	else { /* If relative path */
 
@@ -1354,7 +1352,7 @@ pin_directory(char *dir)
 
 		else {
 			pinned_dir = (char *)xnmalloc(strlen(dir)
-						+ strlen(ws[cur_ws].path) + 2, sizeof(char));
+								+ strlen(ws[cur_ws].path) + 2, sizeof(char));
 			sprintf(pinned_dir, "%s/%s", ws[cur_ws].path, dir);
 		}
 	}
@@ -1375,13 +1373,12 @@ unpin_dir(void)
 	if (CONFIG_DIR && xargs.stealth_mode != 1) {
 
 		int cmd_error = 0;
-		char *pin_file = (char *)xnmalloc(strlen(CONFIG_DIR) + 7,
-											  sizeof(char));
+		char *pin_file = (char *)xnmalloc(strlen(CONFIG_DIR) + 7, sizeof(char));
 		sprintf(pin_file, "%s/.pin", CONFIG_DIR);
 
 		if (unlink(pin_file) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, pin_file,
-					strerror(errno));
+			    strerror(errno));
 			cmd_error = 1;
 		}
 
@@ -1406,7 +1403,7 @@ hidden_function(char **comm)
 
 	if (strcmp(comm[1], "status") == 0)
 		printf(_("%s: Hidden files %s\n"), PROGRAM_NAME,
-			   (show_hidden) ? _("enabled") : _("disabled"));
+		    (show_hidden) ? _("enabled") : _("disabled"));
 
 	else if (strcmp(comm[1], "off") == 0) {
 		if (show_hidden == 1) {
@@ -1439,9 +1436,9 @@ hidden_function(char **comm)
 /* Instead of recreating here the commands description, just jump to the
  * corresponding section in the manpage */
 int
-list_commands (void)
+list_commands(void)
 {
-	char *cmd[] = { "man", "-P", "less -p ^COMMANDS", PNL, NULL };
+	char *cmd[] = {"man", "-P", "less -p ^COMMANDS", PNL, NULL};
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
@@ -1449,7 +1446,7 @@ list_commands (void)
 }
 
 void
-help_function (void)
+help_function(void)
 {
 	printf(_("%s %s (%s), by %s\n"), PROGRAM_NAME, VERSION, DATE, AUTHOR);
 
@@ -1495,9 +1492,7 @@ help_function (void)
 \n              3 = atime, 4 = btime, 5 = ctime, \
 \n              6 = mtime, 7 = version, 8 = extension, \
 \n              9 = inode, 10 = owner, 11 = group"),
-		   PNL, GRAL_USAGE, PROGRAM_NAME);
-
-
+	    PNL, GRAL_USAGE, PROGRAM_NAME);
 
 	printf("\
 \n     --case-ins-dirjump\t consult the jump database ignoring \
@@ -1562,14 +1557,13 @@ help_function (void)
 \n              instead of a-z, which is the default order)\
 \n     --trash-as-rm\t\t the 'r' command executes 'trash' instead of \
 				'rm' to prevent accidental deletions\n",
-		 PROGRAM_NAME, PROGRAM_NAME);
-
+	    PROGRAM_NAME, PROGRAM_NAME);
 
 	puts(_("\nBUILT-IN COMMANDS:\n\nThe following is just a list of available "
-"commands and possible parameters. For a complete description of "
-"each of these commands run 'cmd' (or press F2) or consult the "
-"manpage (F1). You can also try the 'ih' action to run the "
-"interactive help plugin (it depends on FZF). Just enter 'ih', that's it.\n"));
+	       "commands and possible parameters. For a complete description of "
+	       "each of these commands run 'cmd' (or press F2) or consult the "
+	       "manpage (F1). You can also try the 'ih' action to run the "
+	       "interactive help plugin (it depends on FZF). Just enter 'ih', that's it.\n"));
 
 	puts(_("ELN/FILE/DIR (auto-open and autocd functions)\n\
  /PATTERN [DIR] [-filetype] [-x] (quick search)\n\
@@ -1638,7 +1632,7 @@ help_function (void)
  x, X [ELN/DIR] (new instance)\n"));
 
 	printf(_("DEFAULT KEYBOARD SHORTCUTS:\n\n"
-" M-c: Clear the current command line buffer\n\
+		 " M-c: Clear the current command line buffer\n\
  M-f: Toggle list-folders-first on/off\n\
  C-r: Refresh the screen\n\
  M-l: Toggle long view mode on/off\n\
@@ -1688,19 +1682,19 @@ help_function (void)
  F10: Open the configuration file\n\
  F11: Open the bookmarks file\n\
  F12: Quit\n\n"
-"NOTE: C stands for Ctrl, S for Shift, and M for Meta (Alt key in "
-"most keyboards)\n\n"));
+		 "NOTE: C stands for Ctrl, S for Shift, and M for Meta (Alt key in "
+		 "most keyboards)\n\n"));
 
 	puts(_("Run the 'colors' or 'cc' command to see the list "
-		   "of currently used color codes.\n"));
+	       "of currently used color codes.\n"));
 
 	puts(_("The configuration and profile files allow you to customize "
-		   "colors, define some prompt commands and aliases, and more. "
-		   "For a full description consult the manpage."));
+	       "colors, define some prompt commands and aliases, and more. "
+	       "For a full description consult the manpage."));
 }
 
 void
-free_software (void)
+free_software(void)
 {
 	puts(_("Excerpt from 'What is Free Software?', by Richard Stallman. \
 Source: https://www.gnu.org/philosophy/free-sw.html\n \
@@ -1738,80 +1732,83 @@ being free, we consider them all equally unethical (...)\""));
 }
 
 void
-version_function (void)
+version_function(void)
 {
 	printf(_("%s %s (%s), by %s\nContact: %s\nWebsite: "
-		   "%s\nLicense: %s\n"), PROGRAM_NAME, VERSION, DATE,
-		   AUTHOR, CONTACT, WEBSITE, LICENSE);
+		 "%s\nLicense: %s\n"),
+	    PROGRAM_NAME, VERSION, DATE,
+	    AUTHOR, CONTACT, WEBSITE, LICENSE);
 }
 
 void
-splash (void)
+splash(void)
 {
 	printf("\n%s                         xux\n"
-	"       :xuiiiinu:.......u@@@u........:xunninnu;\n"
-	"    .xi#@@@@@@@@@n......x@@@l.......x#@@@@@@@@@:...........:;unnnu;\n"
-	"  .:i@@@@lnx;x#@@i.......l@@@u.....x#@@lu;:;;..;;nnll#llnnl#@@@@@@#u.\n"
-	"  .i@@@i:......::........;#@@#:....i@@@x......;@@@@@@@@@@@@@#iuul@@@n.\n"
-	"  ;@@@#:..........:nin:...n@@@n....n@@@nunlll;;@@@@i;:xl@@@l:...:l@@@u.\n"
-	"  ;#@@l...........x@@@l...;@@@#:...u@@@@@@@@@n:i@@@n....i@@@n....;#@@#;.\n"
-	"  .l@@@;...........l@@@x...i@@@u...x@@@@iux;:..;#@@@x...:#@@@;....n@@@l.\n"
-	"  .i@@@x...........u@@@i...;@@@l....l@@@;.......u@@@#:...;nin:.....l@@@u.\n"
-	"  .n@@@i:..........:l@@@n...xnnx....u@@@i........i@@@i.............x@@@#:\n"
-	"   :l@@@i...........:#@@@;..........:@@@@x.......:l@@@u.............n@@@n.\n"
-	"    :l@@@i;.......unni@@@#:.:xnlli;..;@@@#:.......:l@@u.............:#@@n.\n"
-	"     ;l@@@@#lnuxxi@@@i#@@@##@@@@@#;...xlln.         :.                ;:.\n"
-	"      :xil@@@@@@@@@@l:u@@@@##lnx;.\n"
-	"         .:xuuuunnu;...;ux;.", d_cyan);
+	       "       :xuiiiinu:.......u@@@u........:xunninnu;\n"
+	       "    .xi#@@@@@@@@@n......x@@@l.......x#@@@@@@@@@:...........:;unnnu;\n"
+	       "  .:i@@@@lnx;x#@@i.......l@@@u.....x#@@lu;:;;..;;nnll#llnnl#@@@@@@#u.\n"
+	       "  .i@@@i:......::........;#@@#:....i@@@x......;@@@@@@@@@@@@@#iuul@@@n.\n"
+	       "  ;@@@#:..........:nin:...n@@@n....n@@@nunlll;;@@@@i;:xl@@@l:...:l@@@u.\n"
+	       "  ;#@@l...........x@@@l...;@@@#:...u@@@@@@@@@n:i@@@n....i@@@n....;#@@#;.\n"
+	       "  .l@@@;...........l@@@x...i@@@u...x@@@@iux;:..;#@@@x...:#@@@;....n@@@l.\n"
+	       "  .i@@@x...........u@@@i...;@@@l....l@@@;.......u@@@#:...;nin:.....l@@@u.\n"
+	       "  .n@@@i:..........:l@@@n...xnnx....u@@@i........i@@@i.............x@@@#:\n"
+	       "   :l@@@i...........:#@@@;..........:@@@@x.......:l@@@u.............n@@@n.\n"
+	       "    :l@@@i;.......unni@@@#:.:xnlli;..;@@@#:.......:l@@u.............:#@@n.\n"
+	       "     ;l@@@@#lnuxxi@@@i#@@@##@@@@@#;...xlln.         :.                ;:.\n"
+	       "      :xil@@@@@@@@@@l:u@@@@##lnx;.\n"
+	       "         .:xuuuunnu;...;ux;.",
+	    d_cyan);
 
 	printf(_("\n\t\t   %sThe anti-eye-candy/KISS file manager\n%s"),
-		   white, df_c);
+	    white, df_c);
 
 	if (splash_screen) {
 		printf(_("\n\t\t\tPress any key to continue... "));
-		xgetchar(); putchar('\n');
-	}
-	else
+		xgetchar();
+		putchar('\n');
+	} else
 		putchar('\n');
 }
 
 void
-bonus_function (void)
+bonus_function(void)
 {
 	char *phrases[] = {
-		"\"Vamos Boca Juniors Carajo!\" (La mitad + 1)",
-		"\"Hey! Look behind you! A three-headed monkey! (G. Threepweed)",
-		"\"Free as in free speech, not as in free beer\" (R. M. S)",
-		"\"Nothing great has been made in the world without passion\" (G. W. F. Hegel)",
-		"\"Simplicity is the ultimate sophistication\" (Leo Da Vinci)",
-		"\"Yo vendí semillas de alambre de púa, al contado, y me lo agradecieron\" (Marquitos, 9 Reinas)",
-		"\"I'm so happy, because today I've found my friends, they're in my head\" (K. D. Cobain)",
-		"\"The best code is written with the delete key (Someone, somewhere, sometime)",
-		"\"I'm selling these fine leather jackets (Indy)",
-		"\"I pray to God to make me free of God\" (Meister Eckhart)",
-		"¡Truco y quiero retruco mierda!",
-		"The only truth is that there is no truth",
-		"\"This is a lie\" (The liar paradox)",
-		"\"There are two ways to write error-free programs; only the third one works\" (Alan J. Perlis)",
-		"The man who sold the world was later sold by the big G",
-		"A programmer is always one year older than herself",
-		"A smartphone is anything but smart",
-		"And he did it: he killed the one who killed him",
-		">++('>",
-		":(){:|:&};:",
-		"Keep it simple, stupid",
-		"If ain't broken, brake it",
-		"An Archer knows her target like the back of her hands",
-		"\"I only know that I know nothing\" (Socrates)",
-		"(Learned) Ignorance is the true outcome of wisdom (Nicholas "
-		"of Cusa)",
-		"True intelligence is about questions, not about answers",
-		"Humanity is just an arrow released towards God",
-		"Buzz is right: infinity is our only and ultimate goal",
-		"That stain will never ever be erased (La 12)",
-		"\"A work of art is never finished, but adandoned\" (J. L. Guerrero)",
-		"At the beginning, software was hardware; but today hardware is "
-		"being absorbed by software", NULL };
+	    "\"Vamos Boca Juniors Carajo!\" (La mitad + 1)",
+	    "\"Hey! Look behind you! A three-headed monkey! (G. Threepweed)",
+	    "\"Free as in free speech, not as in free beer\" (R. M. S)",
+	    "\"Nothing great has been made in the world without passion\" (G. W. F. Hegel)",
+	    "\"Simplicity is the ultimate sophistication\" (Leo Da Vinci)",
+	    "\"Yo vendí semillas de alambre de púa, al contado, y me lo agradecieron\" (Marquitos, 9 Reinas)",
+	    "\"I'm so happy, because today I've found my friends, they're in my head\" (K. D. Cobain)",
+	    "\"The best code is written with the delete key (Someone, somewhere, sometime)",
+	    "\"I'm selling these fine leather jackets (Indy)",
+	    "\"I pray to God to make me free of God\" (Meister Eckhart)",
+	    "¡Truco y quiero retruco mierda!",
+	    "The only truth is that there is no truth",
+	    "\"This is a lie\" (The liar paradox)",
+	    "\"There are two ways to write error-free programs; only the third one works\" (Alan J. Perlis)",
+	    "The man who sold the world was later sold by the big G",
+	    "A programmer is always one year older than herself",
+	    "A smartphone is anything but smart",
+	    "And he did it: he killed the one who killed him",
+	    ">++('>",
+	    ":(){:|:&};:",
+	    "Keep it simple, stupid",
+	    "If ain't broken, brake it",
+	    "An Archer knows her target like the back of her hands",
+	    "\"I only know that I know nothing\" (Socrates)",
+	    "(Learned) Ignorance is the true outcome of wisdom (Nicholas "
+	    "of Cusa)",
+	    "True intelligence is about questions, not about answers",
+	    "Humanity is just an arrow released towards God",
+	    "Buzz is right: infinity is our only and ultimate goal",
+	    "That stain will never ever be erased (La 12)",
+	    "\"A work of art is never finished, but adandoned\" (J. L. Guerrero)",
+	    "At the beginning, software was hardware; but today hardware is "
+	    "being absorbed by software",
+	    NULL};
 
 	size_t num = (sizeof(phrases) / sizeof(phrases[0])) - 1;
 

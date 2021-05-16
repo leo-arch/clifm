@@ -24,16 +24,16 @@
 
 #include "helpers.h"
 
-#include <unistd.h>
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include <errno.h>
+#include <unistd.h>
 
-#include "aux.h"
-#include "mime.h"
-#include "exec.h"
-#include "checks.h"
 #include "archives.h"
+#include "aux.h"
+#include "checks.h"
+#include "exec.h"
+#include "mime.h"
 
 /* Get application associated to a given MIME filetype or file extension.
  * Returns the first matching line in the MIME file or NULL if none is
@@ -48,7 +48,7 @@ get_app(const char *mime, const char *ext)
 
 	if (!defs_fp) {
 		fprintf(stderr, _("%s: %s: Error opening file\n"),
-				PROGRAM_NAME, MIME_FILE);
+		    PROGRAM_NAME, MIME_FILE);
 		return (char *)NULL;
 	}
 
@@ -74,12 +74,12 @@ get_app(const char *mime, const char *ext)
 		regex_t regex;
 
 		if (ext && *line == 'E' && line[1] == ':') {
-			if (regcomp(&regex, line + 2, REG_NOSUB|REG_EXTENDED) == 0
+			if (regcomp(&regex, line + 2, REG_NOSUB | REG_EXTENDED) == 0
 			&& regexec(&regex, ext, 0, NULL, 0) == 0)
 				found = 1;
 		}
 
-		else if (regcomp(&regex, line, REG_NOSUB|REG_EXTENDED) == 0
+		else if (regcomp(&regex, line, REG_NOSUB | REG_EXTENDED) == 0
 		&& regexec(&regex, mime, 0, NULL, 0) == 0)
 			found = mime_match = 1;
 
@@ -97,8 +97,8 @@ get_app(const char *mime, const char *ext)
 			app_len = 0;
 			/* Split the appplications line into substrings, if
 			 * any */
-			while (*tmp != '\0' && *tmp != ';' && *tmp != '\n'
-			&& *tmp != '\'' && *tmp != '"')
+			while (*tmp != '\0' && *tmp != ';' && *tmp != '\n' && *tmp != '\''
+			&& *tmp != '"')
 				app[app_len++] = *(tmp++);
 
 			while (*tmp == ' ') /* Remove leading spaces */
@@ -110,7 +110,7 @@ get_app(const char *mime, const char *ext)
 				char *file_path = (char *)NULL;
 				/* If app contains spaces, the command to check is
 				 * the string before the first space */
-/*              int ret = strcntchr(app, ' ');
+				/*              int ret = strcntchr(app, ' ');
 
 				if (ret != -1) {
 					char *app_tmp = savestring(app, app_len);
@@ -155,8 +155,7 @@ get_app(const char *mime, const char *ext)
 	if (found) {
 		if (app)
 			return app;
-	}
-	else {
+	} else {
 		if (app)
 			free(app);
 	}
@@ -188,7 +187,7 @@ get_mime(char *file)
 
 	if (!file_fp) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, MIME_TMP_FILE,
-				strerror(errno));
+		    strerror(errno));
 		return (char *)NULL;
 	}
 
@@ -204,7 +203,7 @@ get_mime(char *file)
 	int stderr_bk = dup(STDERR_FILENO); /* Store original stderr */
 
 	/* Redirect stdout to the desired file */
-	if (dup2(fileno(file_fp), STDOUT_FILENO) == -1 ) {
+	if (dup2(fileno(file_fp), STDOUT_FILENO) == -1) {
 		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
 		fclose(file_fp);
 		fclose(file_fp_err);
@@ -222,7 +221,7 @@ get_mime(char *file)
 	fclose(file_fp);
 	fclose(file_fp_err);
 
-	char *cmd[] = { "file", "--mime-type", file, NULL };
+	char *cmd[] = {"file", "--mime-type", file, NULL};
 	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
@@ -314,13 +313,13 @@ mime_open(char **args)
 
 		if (!file_path) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[2],
-				(is_number(args[2]) == 1) ? "No such ELN" : strerror(errno));
+			    (is_number(args[2]) == 1) ? "No such ELN" : strerror(errno));
 			return EXIT_FAILURE;
 		}
 
 		if (access(file_path, R_OK) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_path,
-					strerror(errno));
+			    strerror(errno));
 			free(file_path);
 			return EXIT_FAILURE;
 		}
@@ -343,13 +342,13 @@ mime_open(char **args)
 
 		if (!file_path) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[1],
-					strerror(errno));
+			    strerror(errno));
 			return -1;
 		}
 
 		if (access(file_path, R_OK) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_path,
-					strerror(errno));
+			    strerror(errno));
 
 			free(file_path);
 			/* Since this function is called by open_function, and since
@@ -401,7 +400,7 @@ mime_open(char **args)
 	}
 
 	if (info)
-			printf(_("Extension: %s\n"), ext ? ext : "None");
+		printf(_("Extension: %s\n"), ext ? ext : "None");
 
 	/* Get default application for MIME or extension */
 	char *app = get_app(mime, ext);
@@ -416,7 +415,7 @@ mime_open(char **args)
 			/* If an archive/compressed file, run the archiver function */
 			if (is_compressed(file_path, 1) == 0) {
 
-				char *tmp_cmd[] = { "ad", file_path, NULL };
+				char *tmp_cmd[] = {"ad", file_path, NULL};
 
 				int exit_status = archiver(tmp_cmd, 'd');
 
@@ -451,7 +450,7 @@ mime_open(char **args)
 			*ret = '\0';
 
 		printf(_("Associated application: %s (%s)\n"), app,
-			   mime_match ? "MIME" : "ext");
+		    mime_match ? "MIME" : "ext");
 
 		free(file_path);
 		free(mime);
@@ -472,7 +471,8 @@ mime_open(char **args)
 
 	/* Get number of arguments to check for final ampersand */
 	int args_num = 0;
-	for (args_num = 0; args[args_num]; args_num++);
+	for (args_num = 0; args[args_num]; args_num++)
+		;
 
 	/* Construct the command and run it */
 
@@ -520,7 +520,7 @@ mime_open(char **args)
 	cmd[pos] = (char *)NULL;
 
 	int ret = launch_execve(cmd, (*args[args_num - 1] == '&'
-			&& !args[args_num - 1][1]) ? BACKGROUND : FOREGROUND, E_NOSTDERR);
+	&& !args[args_num - 1][1]) ? BACKGROUND : FOREGROUND, E_NOSTDERR);
 
 	free(file_path);
 	free(app);
@@ -553,7 +553,8 @@ mime_import(char *file)
 	 * almost any Unix computer) */
 	if (!(flags & GUI)) {
 		fputs("text/plain=nano;vim;vi;emacs;ed\n"
-			  "*.cfm=nano;vim;vi;emacs;ed\n", mime_fp);
+		      "*.cfm=nano;vim;vi;emacs;ed\n",
+		    mime_fp);
 		fclose(mime_fp);
 		return EXIT_SUCCESS;
 	}
@@ -571,10 +572,10 @@ mime_import(char *file)
 	sprintf(config_path, "%s/.config/mimeapps.list", user.home);
 	sprintf(local_path, "%s/.local/share/applications/mimeapps.list", user.home);
 
-	char *mime_paths[] = { config_path, local_path,
-						   "/usr/local/share/applications/mimeapps.list",
-						   "/usr/share/applications/mimeapps.list",
-						   "/etc/xdg/mimeapps.list", NULL };
+	char *mime_paths[] = {config_path, local_path,
+	    "/usr/local/share/applications/mimeapps.list",
+	    "/usr/share/applications/mimeapps.list",
+	    "/etc/xdg/mimeapps.list", NULL};
 
 	/* Check each mimeapps.list file and store its associations into
 	 * FILE */
@@ -593,7 +594,7 @@ mime_import(char *file)
 		int da_found = 0;
 
 		while ((line_len = getline(&line, &line_size,
-		sys_mime_fp)) > 0) {
+			    sys_mime_fp)) > 0) {
 
 			if (!da_found && strncmp(line, "[Default Applications]", 22) == 0) {
 				da_found = 1;
@@ -627,9 +628,10 @@ mime_import(char *file)
 	 * and leafpad, are the default text editors of Gnome, KDE, Mate,
 	 * XFCE, and LXDE respectivelly */
 	fputs("text/plain=gedit;kate;pluma;mousepad;leafpad;nano;vim;"
-		  "vi;emacs;ed\n"
-		  "*.cfm=gedit;kate;pluma;mousepad;leafpad;nano;vim;vi;"
-		  "emacs;ed\n", mime_fp);
+	      "vi;emacs;ed\n"
+	      "*.cfm=gedit;kate;pluma;mousepad;leafpad;nano;vim;vi;"
+	      "emacs;ed\n",
+	    mime_fp);
 
 	fclose(mime_fp);
 
@@ -645,7 +647,7 @@ mime_edit(char **args)
 	int exit_status = EXIT_SUCCESS;
 
 	if (!args[2]) {
-		char *cmd[] = { "mime", MIME_FILE, NULL };
+		char *cmd[] = {"mime", MIME_FILE, NULL};
 
 		if (mime_open(cmd) != 0) {
 			fputs(_("Try 'mm, mime edit APPLICATION'\n"), stderr);
@@ -655,7 +657,7 @@ mime_edit(char **args)
 	}
 
 	else {
-		char *cmd[] = { args[2], MIME_FILE, NULL };
+		char *cmd[] = {args[2], MIME_FILE, NULL};
 		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 	}

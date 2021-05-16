@@ -24,26 +24,26 @@
 
 #include "helpers.h"
 
-#include <unistd.h>
-#include <stdio.h>
-#include <string.h>
 #include <errno.h>
 #include <readline/history.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 
+#include "actions.h"
 #include "aux.h"
-#include "sort.h"
-#include "profiles.h"
-#include "misc.h"
+#include "bookmarks.h"
+#include "checks.h"
 #include "config.h"
 #include "exec.h"
-#include "checks.h"
 #include "history.h"
-#include "bookmarks.h"
-#include "listing.h"
-#include "actions.h"
 #include "init.h"
-#include "navigation.h"
+#include "listing.h"
 #include "mime.h"
+#include "misc.h"
+#include "navigation.h"
+#include "profiles.h"
+#include "sort.h"
 
 int
 get_profile_names(void)
@@ -68,12 +68,12 @@ get_profile_names(void)
 	for (i = 0; i < (size_t)files_n; i++) {
 
 		if (profs[i]->d_type == DT_DIR
-		/* Discard ".", "..", and hidden dirs */
-		&& *profs[i]->d_name != '.') {
+		    /* Discard ".", "..", and hidden dirs */
+		    && *profs[i]->d_name != '.') {
 			profile_names = (char **)xrealloc(profile_names, (pf_n + 1)
-											  * sizeof(char *));
+												* sizeof(char *));
 			profile_names[pf_n++] = savestring(profs[i]->d_name,
-										strlen(profs[i]->d_name));
+			    strlen(profs[i]->d_name));
 		}
 
 		free(profs[i]);
@@ -82,8 +82,7 @@ get_profile_names(void)
 	free(profs);
 	profs = (struct dirent **)NULL;
 
-	profile_names = (char **)xrealloc(profile_names, (pf_n + 1)
-									  * sizeof(char *));
+	profile_names = (char **)xrealloc(profile_names, (pf_n + 1) * sizeof(char *));
 	profile_names[pf_n] = (char *)NULL;
 
 	return EXIT_SUCCESS;
@@ -94,7 +93,7 @@ profile_function(char **comm)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: The profile function is disabled in stealth mode\n",
-			   PROGRAM_NAME);
+		    PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
 
@@ -102,8 +101,7 @@ profile_function(char **comm)
 
 	if (comm[1]) {
 		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
-			puts(_("Usage: pf, prof, profile [ls, list] [set, add, "
-				   "del PROFILE]"));
+			puts(_("Usage: pf, prof, profile [ls, list] [set, add, del PROFILE]"));
 
 		/* List profiles */
 		else if (comm[1] && (strcmp(comm[1], "ls") == 0
@@ -133,7 +131,7 @@ profile_function(char **comm)
 			else {
 				fputs("Usage: pf, prof, profile del PROFILE\n", stderr);
 				exit_status = EXIT_FAILURE;
-		}
+			}
 
 		/* Switch to another profile */
 		else if (*comm[1] == 's' && strcmp(comm[1], "set") == 0) {
@@ -151,7 +149,7 @@ profile_function(char **comm)
 		else {
 
 			fputs(_("Usage: pf, prof, profile [set, add, del PROFILE]\n"),
-				  stderr);
+			    stderr);
 
 			exit_status = EXIT_FAILURE;
 		}
@@ -173,7 +171,7 @@ profile_set(const char *prof)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: The profile function is disabled in stealth mode\n",
-			   PROGRAM_NAME);
+		    PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
 
@@ -186,8 +184,7 @@ profile_set(const char *prof)
 
 	for (i = 0; profile_names[i]; i++) {
 
-		if (*prof == *profile_names[i]
-		&& strcmp(prof, profile_names[i]) == 0) {
+		if (*prof == *profile_names[i] && strcmp(prof, profile_names[i]) == 0) {
 			found = 1;
 			break;
 		}
@@ -195,18 +192,18 @@ profile_set(const char *prof)
 
 	if (!found) {
 		fprintf(stderr, _("%s: %s: No such profile\nTo add a new "
-				"profile enter 'pf add PROFILE'\n"), PROGRAM_NAME, prof);
+				  "profile enter 'pf add PROFILE'\n"),
+		    PROGRAM_NAME, prof);
 
 		return EXIT_FAILURE;
 	}
 
 	/* If changing to the current profile, do nothing */
 	if ((!alt_profile && *prof == 'd' && strcmp(prof, "default") == 0)
-	|| (alt_profile && *prof == *alt_profile
-	&& strcmp(prof, alt_profile) == 0)) {
+	|| (alt_profile && *prof == *alt_profile && strcmp(prof, alt_profile) == 0)) {
 
 		printf(_("%s: '%s' is the current profile\n"), PROGRAM_NAME,
-			   prof);
+		    prof);
 
 		return EXIT_SUCCESS;
 	}
@@ -230,8 +227,8 @@ profile_set(const char *prof)
 	/* Check whether we have a working shell */
 	if (access(user.shell, X_OK) == -1) {
 		_err('w', PRINT_PROMPT, _("%s: %s: System shell not found. Please "
-			 "edit the configuration file to specify a working shell.\n"),
-			 PROGRAM_NAME, user.shell);
+				  "edit the configuration file to specify a working shell.\n"),
+				PROGRAM_NAME, user.shell);
 	}
 
 	i = (int)usrvar_n;
@@ -255,7 +252,7 @@ profile_set(const char *prof)
 	}
 	actions_n = 0;
 
-/*  my_rl_unbind_functions();
+	/*  my_rl_unbind_functions();
 
 	create_kbinds_file();
 
@@ -280,7 +277,7 @@ profile_set(const char *prof)
 		check_file_size(MSG_LOG_FILE, max_log);
 
 		/* Reset history */
-		if (access(HIST_FILE, F_OK|W_OK) == 0) {
+		if (access(HIST_FILE, F_OK | W_OK) == 0) {
 			clear_history(); /* This is for readline */
 			read_history(HIST_FILE);
 			history_truncate_file(HIST_FILE, max_hist);
@@ -296,7 +293,7 @@ profile_set(const char *prof)
 
 			else {
 				_err('w', PRINT_PROMPT, _("%s: Error opening the "
-					 "history file\n"), PROGRAM_NAME);
+						"history file\n"), PROGRAM_NAME);
 			}
 		}
 
@@ -315,7 +312,7 @@ profile_set(const char *prof)
 			free(bin_commands[i]);
 
 		free(bin_commands);
-		bin_commands = (char  **)NULL;
+		bin_commands = (char **)NULL;
 	}
 
 	if (paths) {
@@ -355,7 +352,7 @@ profile_set(const char *prof)
 
 	if (xchdir(ws[cur_ws].path, SET_TITLE) == -1) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
-				strerror(errno));
+		    strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -380,39 +377,35 @@ profile_add(const char *prof)
 
 	for (i = 0; profile_names[i]; i++) {
 
-		if (*prof == *profile_names[i]
-		&& strcmp(prof, profile_names[i]) == 0) {
+		if (*prof == *profile_names[i] && strcmp(prof, profile_names[i]) == 0) {
 			found = 1;
 			break;
 		}
 	}
 
 	if (found) {
-		fprintf(stderr, _("%s: %s: Profile already exists\n"),
-				PROGRAM_NAME, prof);
+		fprintf(stderr, _("%s: %s: Profile already exists\n"), PROGRAM_NAME, prof);
 		return EXIT_FAILURE;
 	}
 
 	if (!home_ok) {
 		fprintf(stderr, _("%s: %s: Cannot create profile: Home "
-		"directory not found\n"), PROGRAM_NAME, prof);
+				"directory not found\n"), PROGRAM_NAME, prof);
 		return EXIT_FAILURE;
 	}
 
 	size_t pnl_len = strlen(PNL);
 	/* ### GENERATE PROGRAM'S CONFIG DIRECTORY NAME ### */
-	char *NCONFIG_DIR = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL)
-										+ strlen(prof) + 11, sizeof(char));
+	char *NCONFIG_DIR = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) + strlen(prof) + 11, sizeof(char));
 	sprintf(NCONFIG_DIR, "%s/profiles/%s", CONFIG_DIR_GRAL, prof);
 
 	/* #### CREATE THE CONFIG DIR #### */
-	char *tmp_cmd[] = { "mkdir", "-p", NCONFIG_DIR, NULL };
+	char *tmp_cmd[] = {"mkdir", "-p", NCONFIG_DIR, NULL};
 	int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
 
 	if (ret != EXIT_SUCCESS) {
 		fprintf(stderr, _("%s: mkdir: %s: Error creating "
-				"configuration directory\n"), PROGRAM_NAME,
-				NCONFIG_DIR);
+			"configuration directory\n"), PROGRAM_NAME, NCONFIG_DIR);
 
 		free(NCONFIG_DIR);
 
@@ -424,17 +417,17 @@ profile_add(const char *prof)
 	size_t config_len = strlen(NCONFIG_DIR);
 
 	char *NCONFIG_FILE = (char *)xcalloc(config_len + pnl_len + 4,
-										 sizeof(char));
+	    sizeof(char));
 	sprintf(NCONFIG_FILE, "%s/%src", NCONFIG_DIR, PNL);
 	char *NHIST_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
 	sprintf(NHIST_FILE, "%s/history.cfm", NCONFIG_DIR);
 	char *NPROFILE_FILE = (char *)xcalloc(config_len + pnl_len + 10,
-										  sizeof(char));
+	    sizeof(char));
 	sprintf(NPROFILE_FILE, "%s/%s_profile", NCONFIG_DIR, PNL);
 	char *NMIME_FILE = (char *)xcalloc(config_len + 14, sizeof(char));
 	sprintf(NMIME_FILE, "%s/mimelist.cfm", NCONFIG_DIR);
 
-/*  char *NMSG_LOG_FILE = (char *)xcalloc(config_len + 14, sizeof(char));
+	/*  char *NMSG_LOG_FILE = (char *)xcalloc(config_len + 14, sizeof(char));
 	sprintf(NMSG_LOG_FILE, "%s/messages.cfm", NCONFIG_DIR);
 	char *NBM_FILE = (char *)xcalloc(config_len + 15, sizeof(char));
 	sprintf(NBM_FILE, "%s/bookmarks.cfm", NCONFIG_DIR);
@@ -450,7 +443,7 @@ profile_add(const char *prof)
 
 	if (!hist_fp) {
 		fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME,
-				NHIST_FILE, strerror(errno));
+		    NHIST_FILE, strerror(errno));
 		error_code = EXIT_FAILURE;
 	}
 
@@ -472,19 +465,21 @@ profile_add(const char *prof)
 
 		if (!mime_fp) {
 			fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME,
-					NMIME_FILE, strerror(errno));
+			    NMIME_FILE, strerror(errno));
 			error_code = EXIT_FAILURE;
 		}
 
 		else {
 			if ((flags & GUI))
 				fputs("text/plain=gedit;kate;pluma;mousepad;"
-					  "leafpad;nano;vim;vi;emacs;ed\n"
-					  "*.cfm=gedit;kate;pluma;mousepad;leafpad;"
-					  "nano;vim;vi;emacs;ed\n", mime_fp);
+				      "leafpad;nano;vim;vi;emacs;ed\n"
+				      "*.cfm=gedit;kate;pluma;mousepad;leafpad;"
+				      "nano;vim;vi;emacs;ed\n",
+				    mime_fp);
 			else
 				fputs("text/plain=nano;vim;vi;emacs\n"
-					  "*.cfm=nano;vim;vi;emacs;ed\n", mime_fp);
+				      "*.cfm=nano;vim;vi;emacs;ed\n",
+				    mime_fp);
 			fclose(mime_fp);
 		}
 	}
@@ -494,7 +489,7 @@ profile_add(const char *prof)
 
 	if (!profile_fp) {
 		fprintf(stderr, _("%s: Error creating the profile file\n"),
-				PROGRAM_NAME);
+		    PROGRAM_NAME);
 		error_code = EXIT_FAILURE;
 	}
 
@@ -507,13 +502,13 @@ profile_add(const char *prof)
 	}
 
 	/* #### CREATE THE CONFIG FILE #### */
-		error_code = create_config(NCONFIG_FILE);
+	error_code = create_config(NCONFIG_FILE);
 
 	/* Free stuff */
 
 	free(NCONFIG_DIR);
 	free(NCONFIG_FILE);
-/*  free(NBM_FILE);
+	/*  free(NBM_FILE);
 	free(NLOG_FILE);
 	free(NMSG_LOG_FILE);
 	free(NLOG_FILE_TMP); */
@@ -532,7 +527,7 @@ profile_add(const char *prof)
 
 	else
 		fprintf(stderr, _("%s: %s: Error creating profile\n"),
-				PROGRAM_NAME, prof);
+		    PROGRAM_NAME, prof);
 
 	return error_code;
 }
@@ -542,7 +537,7 @@ profile_del(const char *prof)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: The profile function is disabled in stealth mode\n",
-			   PROGRAM_NAME);
+		    PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
 
@@ -553,8 +548,7 @@ profile_del(const char *prof)
 	int found = 0;
 	size_t i;
 	for (i = 0; profile_names[i]; i++) {
-		if (*prof == *profile_names[i]
-		&& strcmp(prof, profile_names[i]) == 0) {
+		if (*prof == *profile_names[i] && strcmp(prof, profile_names[i]) == 0) {
 			found = 1;
 			break;
 		}
@@ -565,17 +559,16 @@ profile_del(const char *prof)
 		return EXIT_FAILURE;
 	}
 
-	char *tmp = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL)
-								+ strlen(prof) + 11, sizeof(char));
+	char *tmp = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) + strlen(prof) + 11,
+															sizeof(char));
 	sprintf(tmp, "%s/profiles/%s", CONFIG_DIR_GRAL, prof);
 
-	char *cmd[] = { "rm", "-r", tmp, NULL };
+	char *cmd[] = {"rm", "-r", tmp, NULL};
 	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	free(tmp);
 
 	if (ret == EXIT_SUCCESS) {
-		printf(_("%s: '%s': Profile successfully removed\n"),
-				PROGRAM_NAME, prof);
+		printf(_("%s: '%s': Profile successfully removed\n"), PROGRAM_NAME, prof);
 
 		for (i = 0; profile_names[i]; i++)
 			free(profile_names[i]);
@@ -585,7 +578,6 @@ profile_del(const char *prof)
 		return EXIT_SUCCESS;
 	}
 
-	fprintf(stderr, _("%s: %s: Error removing profile\n"),
-			PROGRAM_NAME, prof);
+	fprintf(stderr, _("%s: %s: Error removing profile\n"), PROGRAM_NAME, prof);
 	return EXIT_FAILURE;
 }

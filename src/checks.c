@@ -24,25 +24,25 @@
 
 #include "helpers.h"
 
-#include <sys/types.h>
-#include <sys/acl.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include <errno.h>
+#include <sys/acl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-#include "misc.h"
 #include "aux.h"
+#include "misc.h"
 
 /* Check a file's immutable bit. Returns 1 if true, zero if false, and
  * -1 in case of error */
 int
 check_immutable_bit(char *file)
 {
-	#if !defined(FS_IOC_GETFLAGS) || !defined(FS_IMMUTABLE_FL)
+#if !defined(FS_IOC_GETFLAGS) || !defined(FS_IMMUTABLE_FL)
 	return 0;
-	#else
+#else
 
 	int attr, fd, immut_flag = -1;
 
@@ -64,7 +64,7 @@ check_immutable_bit(char *file)
 	else
 		return 0;
 
-	#endif /* !defined(FS_IOC_GETFLAGS) || !defined(FS_IMMUTABLE_FL) */
+#endif /* !defined(FS_IOC_GETFLAGS) || !defined(FS_IMMUTABLE_FL) */
 }
 
 /* Return 1 if FILE has some ACL property and zero if none
@@ -82,7 +82,7 @@ is_acl(char *file)
 	if (acl) {
 		acl_entry_t entry;
 
-		for (entryid = ACL_FIRST_ENTRY; ; entryid = ACL_NEXT_ENTRY) {
+		for (entryid = ACL_FIRST_ENTRY;; entryid = ACL_NEXT_ENTRY) {
 			if (acl_get_entry(acl, entryid, &entry) != 1)
 				break;
 			num++;
@@ -110,7 +110,7 @@ is_acl(char *file)
 int
 is_number(const char *restrict str)
 {
-	for (;*str; str++)
+	for (; *str; str++)
 		if (*str > '9' || *str < '0')
 			return 0;
 
@@ -122,72 +122,72 @@ int
 is_internal_c(const char *restrict cmd)
 {
 	const char *int_cmds[] = {
-		"?", "help",
-		"ac", "ad",
-		"acd", "autocd",
-		"actions",
-		"alias",
-		"ao", "auto-open",
-		"b", "back",
-		"bh", "fh",
-		"bm", "bookmarks",
-		"br", "bulk",
-		"c", "cp",
-		"cc", "colors",
-		"cd",
-		"cl", "columns",
-		"cmd", "commands",
-		"cs", "colorschemes",
-		"ds", "desel",
-		"edit",
-		"exp", "export",
-		"ext",
-		"f", "forth",
-		"fc",
-		"ff", "folders-first",
-		"fs",
-		"ft", "filter",
-		"history",
-		"hf", "hidden",
-		"icons",
-		"jump", "je", "jc", "jp", "jo",
-		"kb", "keybinds",
-		"l", "ln", "le",
-		"lm",
-		"log",
-		"m", "mv",
-		"md", "mkdir",
-		"mf",
-		"mm", "mime",
-		"mp", "mountpoints",
-		"msg", "messages",
-		"n", "net",
-		"o", "open",
-		"opener",
-		"p", "pp", "pr", "prop",
-		"path", "cwd",
-		"pf", "prof", "profile",
-		"pg", "pager",
-		"pin", "unpin",
-		"r", "rm",
-		"rf", "refresh",
-		"rl", "reload",
-		"s", "sel",
-		"sb", "selbox",
-		"shell",
-		"splash",
-		"st", "sort",
-		"t", "tr", "trash",
-		"te",
-		"tips",
-		"touch",
-		"u", "undel", "untrash",
-		"uc", "unicode",
-		"unlink",
-		"ver", "version",
-		"ws",
-		"x", "X",
-		NULL };
+	    "?", "help",
+	    "ac", "ad",
+	    "acd", "autocd",
+	    "actions",
+	    "alias",
+	    "ao", "auto-open",
+	    "b", "back",
+	    "bh", "fh",
+	    "bm", "bookmarks",
+	    "br", "bulk",
+	    "c", "cp",
+	    "cc", "colors",
+	    "cd",
+	    "cl", "columns",
+	    "cmd", "commands",
+	    "cs", "colorschemes",
+	    "ds", "desel",
+	    "edit",
+	    "exp", "export",
+	    "ext",
+	    "f", "forth",
+	    "fc",
+	    "ff", "folders-first",
+	    "fs",
+	    "ft", "filter",
+	    "history",
+	    "hf", "hidden",
+	    "icons",
+	    "jump", "je", "jc", "jp", "jo",
+	    "kb", "keybinds",
+	    "l", "ln", "le",
+	    "lm",
+	    "log",
+	    "m", "mv",
+	    "md", "mkdir",
+	    "mf",
+	    "mm", "mime",
+	    "mp", "mountpoints",
+	    "msg", "messages",
+	    "n", "net",
+	    "o", "open",
+	    "opener",
+	    "p", "pp", "pr", "prop",
+	    "path", "cwd",
+	    "pf", "prof", "profile",
+	    "pg", "pager",
+	    "pin", "unpin",
+	    "r", "rm",
+	    "rf", "refresh",
+	    "rl", "reload",
+	    "s", "sel",
+	    "sb", "selbox",
+	    "shell",
+	    "splash",
+	    "st", "sort",
+	    "t", "tr", "trash",
+	    "te",
+	    "tips",
+	    "touch",
+	    "u", "undel", "untrash",
+	    "uc", "unicode",
+	    "unlink",
+	    "ver", "version",
+	    "ws",
+	    "x", "X",
+	    NULL};
 
 	int found = 0;
 	int i = (int)(sizeof(int_cmds) / sizeof(char *)) - 1;
@@ -203,9 +203,9 @@ is_internal_c(const char *restrict cmd)
 		return 1;
 
 	/* Check for the search and history functions as well */
-	else if ((*cmd == '/' && access(cmd, F_OK) != 0)
-	|| (*cmd == '!' && (_ISDIGIT(cmd[1])
-	|| (cmd[1] == '-' && _ISDIGIT(cmd[2])) || cmd[1] == '!')))
+	else if ((*cmd == '/' && access(cmd, F_OK) != 0) || (*cmd == '!'
+	&& (_ISDIGIT(cmd[1]) || (cmd[1] == '-' && _ISDIGIT(cmd[2]))
+	|| cmd[1] == '!')))
 		return 1;
 
 	return 0;
@@ -219,23 +219,22 @@ int
 is_internal(const char *cmd)
 {
 	const char *int_cmds[] = {
-		"cd",
-		"o", "open",
-		"s", "sel",
-		"p", "pr", "prop",
-		"r",
-		"t", "tr", "trash",
-		"mm", "mime",
-		"bm", "bookmarks",
-		"br", "bulk",
-		"ac", "ad",
-		"exp", "export",
-		"pin",
-		"jc", "jp",
-		"bl", "le",
-		"te",
-		NULL
-		};
+	    "cd",
+	    "o", "open",
+	    "s", "sel",
+	    "p", "pr", "prop",
+	    "r",
+	    "t", "tr", "trash",
+	    "mm", "mime",
+	    "bm", "bookmarks",
+	    "br", "bulk",
+	    "ac", "ad",
+	    "exp", "export",
+	    "pin",
+	    "jc", "jp",
+	    "bl", "le",
+	    "te",
+	    NULL};
 
 	int found = 0;
 	int i = (int)(sizeof(int_cmds) / sizeof(char *)) - 1;
@@ -276,8 +275,7 @@ is_bin_cmd(const char *str)
 
 	size_t i;
 	for (i = 0; bin_commands[i]; i++) {
-		if (*q == *bin_commands[i] && q[1] == bin_commands[i][1]
-		&& strcmp(q, bin_commands[i]) == 0) {
+		if (*q == *bin_commands[i] && q[1] == bin_commands[i][1] && strcmp(q, bin_commands[i]) == 0) {
 			if (space_index != -1)
 				q[space_index] = ' ';
 			return 1;
@@ -297,7 +295,7 @@ digit_found(const char *str)
 	char *p = (char *)str;
 	int c = 0;
 
-	while(*p) {
+	while (*p) {
 		if (c++ && _ISDIGIT(*p) && _ISALPHA(*(p - 1)))
 			return 1;
 		p++;
@@ -316,8 +314,8 @@ file_cmd_check(void)
 	if (!file_cmd_path) {
 		flags &= ~FILE_CMD_OK;
 		_err('n', PRINT_PROMPT, _("%s: 'file' command not found. "
-			 "Specify an application when opening files. Ex: 'o 12 nano' "
-			 "or just 'nano 12'\n"), PROGRAM_NAME);
+				  "Specify an application when opening files. Ex: 'o 12 nano' "
+				  "or just 'nano 12'\n"), PROGRAM_NAME);
 	}
 
 	else
@@ -335,9 +333,8 @@ check_regex(char *str)
 
 	while (*p) {
 		/* If STR contains at least one of the following chars */
-		if (*p == '*' || *p == '?' || *p == '[' || *p == '{'
-		|| *p == '^' || *p == '.' || *p == '|' || *p == '+'
-		|| *p == '$') {
+		if (*p == '*' || *p == '?' || *p == '[' || *p == '{' || *p == '^'
+		|| *p == '.' || *p == '|' || *p == '+' || *p == '$') {
 			char_found = 1;
 			break;
 		}
@@ -375,7 +372,7 @@ check_for_alias(char **args)
 		/* If a match is found */
 
 		if (*aliases[i] != *args[0] ||
-		strncmp(tmp_cmd, aliases[i], cmd_len + 1) != 0)
+		    strncmp(tmp_cmd, aliases[i], cmd_len + 1) != 0)
 			continue;
 
 		/* Get the aliased command */
@@ -397,8 +394,7 @@ check_for_alias(char **args)
 
 		if (!alias_comm) {
 			args_n = 0;
-			fprintf(stderr, _("%s: Error parsing aliased command\n"),
-					PROGRAM_NAME);
+			fprintf(stderr, _("%s: Error parsing aliased command\n"), PROGRAM_NAME);
 			return (char **)NULL;
 		}
 
@@ -408,9 +404,9 @@ check_for_alias(char **args)
 		if (args[1]) {
 			for (j = 1; args[j]; j++) {
 				alias_comm = (char **)xrealloc(alias_comm,
-							(++args_n + 2) * sizeof(char *));
+				    (++args_n + 2) * sizeof(char *));
 				alias_comm[args_n] = savestring(args[j],
-										strlen(args[j]));
+				    strlen(args[j]));
 			}
 		}
 
@@ -444,9 +440,8 @@ check_file_size(char *log_file, int max)
 
 		if (!log_fp) {
 			_err(0, NOPRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-				 log_file, strerror(errno));
-		}
-		else
+			    log_file, strerror(errno));
+		} else
 			fclose(log_fp);
 
 		return; /* Return anyway, for, being a new empty file, there's
@@ -454,11 +449,11 @@ check_file_size(char *log_file, int max)
 	}
 
 	/* Once we know the files exists, keep only max logs */
-	log_fp = fopen (log_file, "r");
+	log_fp = fopen(log_file, "r");
 
 	if (!log_fp) {
 		_err(0, NOPRINT_PROMPT, "%s: log: %s: %s\n", PROGRAM_NAME,
-		 log_file, strerror(errno));
+		    log_file, strerror(errno));
 		return;
 	}
 

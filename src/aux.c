@@ -22,22 +22,21 @@
  * MA 02110-1301, USA.
  */
 
-
 /*  #######################
  *  #  CLIFM CUSTOM LIB   #
  *  ######################*/
 
 #include "helpers.h"
 
+#include <ctype.h>
+#include <dirent.h>
 #include <errno.h>
 #include <stdio.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <dirent.h>
-#include <termios.h>
-#include <ctype.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <termios.h>
+#include <unistd.h>
 
 #include "aux.h"
 #include "exec.h"
@@ -66,8 +65,7 @@ get_hex_num(const char *str)
 				hex_n[i++] = hex2int(tmp);
 
 				free(tmp);
-			}
-			else
+			} else
 				break;
 		}
 		str++;
@@ -80,9 +78,8 @@ get_hex_num(const char *str)
 }
 
 /* Count files in DIR_PATH, including self and parent. */
-/* Readdir version */
 int
-count_dir(const char *dir_path)
+count_dir(const char *dir_path) /* Readdir version */
 {
 	if (!dir_path)
 		return -1;
@@ -150,7 +147,7 @@ get_size_unit(off_t size)
 	float s = (float)size;
 
 	while (s > 1024) {
-		s = s/1024;
+		s = s / 1024;
 		++n;
 	}
 
@@ -181,10 +178,10 @@ dir_size(char *dir)
 	FILE *du_fp = fopen(DU_TMP_FILE, "w");
 	int stdout_bk = dup(STDOUT_FILENO); /* Save original stdout */
 	dup2(fileno(du_fp), STDOUT_FILENO); /* Redirect stdout to the desired
-																				 file */ 
+																				 file */
 	fclose(du_fp);
 
-	char *cmd[] = { "du", "--block-size=1", "-s", dir, NULL };
+	char *cmd[] = {"du", "--block-size=1", "-s", dir, NULL};
 	launch_execve(cmd, FOREGROUND, E_NOSTDERR);
 
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
@@ -275,8 +272,8 @@ xrealloc(void *ptr, size_t size)
 
 	if (!new_ptr) {
 		free(ptr);
-		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate "
-					"%zu bytes\n"), PROGRAM_NAME, __func__, size);
+		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
+				PROGRAM_NAME, __func__, size);
 		exit(EXIT_FAILURE);
 	}
 
@@ -289,8 +286,8 @@ xcalloc(size_t nmemb, size_t size)
 	void *new_ptr = calloc(nmemb, size);
 
 	if (!new_ptr) {
-		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate "
-					"%zu bytes\n"), PROGRAM_NAME, __func__, nmemb * size);
+		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
+				PROGRAM_NAME, __func__, nmemb * size);
 		exit(EXIT_FAILURE);
 	}
 
@@ -303,8 +300,8 @@ xnmalloc(size_t nmemb, size_t size)
 	void *new_ptr = malloc(nmemb * size);
 
 	if (!new_ptr) {
-		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu "
-					"bytes\n"), PROGRAM_NAME, __func__, nmemb * size);
+		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
+				PROGRAM_NAME, __func__, nmemb * size);
 		exit(EXIT_FAILURE);
 	}
 
@@ -322,7 +319,7 @@ xgetchar(void)
 
 	tcgetattr(STDIN_FILENO, &oldt);
 	newt = oldt;
-	newt.c_lflag &= ~(ICANON|ECHO);
+	newt.c_lflag &= ~(ICANON | ECHO);
 	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
 	ch = getchar();
 	tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
@@ -377,8 +374,7 @@ url_encode(char *str)
 	pbuf = buf;
 
 	for (; *pstr; pstr++) {
-		if (isalnum (*pstr) || *pstr == '-' || *pstr == '_'
-				|| *pstr == '.' || *pstr == '~' || *pstr == '/')
+		if (isalnum(*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.' || *pstr == '~' || *pstr == '/')
 			/* Do not encode the above chars */
 			*pbuf++ = *pstr;
 		else {
@@ -414,16 +410,15 @@ url_decode(char *str)
 	char *pstr, *pbuf;
 	pstr = str;
 	pbuf = buf;
-	for ( ; *pstr; pstr++) {
+	for (; *pstr; pstr++) {
 		if (*pstr == '%') {
 			if (pstr[1] && pstr[2]) {
-				/* Decode URL code. Example: %20 to space char */  
+				/* Decode URL code. Example: %20 to space char */
 				/* Left shift and bitwise OR operations */
 				*pbuf++ = from_hex(pstr[1]) << 4 | from_hex(pstr[2]);
 				pstr += 2;
 			}
-		}
-		else
+		} else
 			*pbuf++ = *pstr;
 	}
 
@@ -433,7 +428,7 @@ url_decode(char *str)
 /* Convert octal string into integer.
  * Taken from: https://www.geeksforgeeks.org/program-octal-decimal-conversion/
  * Used by decode_prompt() to make things like this work: \033[1;34m */
-int 
+int
 read_octal(char *str)
 {
 	if (!str)
@@ -471,14 +466,33 @@ hex2int(char *str)
 		if (str[i] >= '0' && str[i] <= '9')
 			n[i] = str[i] - 0x30;
 		else {
-			switch(str[i]) {
-				case 'A': case 'a': n[i] = 10; break;
-				case 'B': case 'b': n[i] = 11; break;
-				case 'C': case 'c': n[i] = 12; break;
-				case 'D': case 'd': n[i] = 13; break;
-				case 'E': case 'e': n[i] = 14; break;
-				case 'F': case 'f': n[i] = 15; break;
-				default: break;
+			switch (str[i]) {
+			case 'A':
+			case 'a':
+				n[i] = 10;
+				break;
+			case 'B':
+			case 'b':
+				n[i] = 11;
+				break;
+			case 'C':
+			case 'c':
+				n[i] = 12;
+				break;
+			case 'D':
+			case 'd':
+				n[i] = 13;
+				break;
+			case 'E':
+			case 'e':
+				n[i] = 14;
+				break;
+			case 'F':
+			case 'f':
+				n[i] = 15;
+				break;
+			default:
+				break;
 			}
 		}
 	}

@@ -25,20 +25,20 @@
 #include "helpers.h"
 
 #include <stdio.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #ifdef __linux__
 #include <sys/capability.h>
 #endif
-#include <string.h>
-#include <errno.h>
-#include <unistd.h>
 #include <dirent.h>
+#include <errno.h>
+#include <string.h>
+#include <unistd.h>
 
 #include "aux.h"
-#include "mime.h"
 #include "colors.h"
 #include "listing.h"
+#include "mime.h"
 #include "misc.h"
 
 /* Returns a pointer to the corresponding color code for EXT, if some
@@ -85,12 +85,12 @@ get_ext_color(const char *ext)
 int
 is_color_code(const char *str)
 {
-	if(!str || !*str)
+	if (!str || !*str)
 		return 0;
 
 	size_t digits = 0, semicolon = 0;
 
-	while(*str) {
+	while (*str) {
 
 		if (*str >= '0' && *str <= '9')
 			digits++;
@@ -135,28 +135,25 @@ strip_color_line(const char *str, char mode)
 	char *buf = (char *)xnmalloc(strlen(str) + 1, sizeof(char));
 	size_t len = 0;
 
-	switch(mode) {
+	switch (mode) {
 
-		case 't': /* di=01;31: */
-			while(*str) {
-				if ((*str >= '0' && *str <= '9')
-				|| (*str >= 'a' && *str <= 'z')
-				|| *str == '=' || *str == ';' || *str == ':')
-					buf[len++] = *str;
-				str++;
-			}
+	case 't': /* di=01;31: */
+		while (*str) {
+			if ((*str >= '0' && *str <= '9') || (*str >= 'a' && *str <= 'z')
+			|| *str == '=' || *str == ';' || *str == ':')
+				buf[len++] = *str;
+			str++;
+		}
 		break;
 
-		case 'x': /* *.tar=01;31: */
-			while(*str) {
-				if ((*str >= '0' && *str <= '9')
-				|| (*str >= 'a' && *str <= 'z')
-				|| (*str >= 'A' && *str <= 'Z')
-				|| *str == '*' || *str == '.' || *str == '='
-				|| *str == ';' || *str == ':')
-					buf[len++] = *str;
-				str++;
-			}
+	case 'x': /* *.tar=01;31: */
+		while (*str) {
+			if ((*str >= '0' && *str <= '9') || (*str >= 'a' && *str <= 'z')
+			|| (*str >= 'A' && *str <= 'Z') || *str == '*' || *str == '.'
+			|| *str == '=' || *str == ';' || *str == ':')
+				buf[len++] = *str;
+			str++;
+		}
 		break;
 	}
 
@@ -221,10 +218,10 @@ cschemes_function(char **args)
 {
 	if (xargs.stealth_mode == 1) {
 		fprintf(stderr, _("%s: The color schemes function is "
-				"disabled in stealth mode\nTIP: To change the current "
-				"color scheme use the following environment "
-				"variables: CLIFM_FILE_COLORS, CLIFM_IFACE_COLORS, "
-				"and CLIFM_EXT_COLORS\n"), PROGRAM_NAME);
+				  "disabled in stealth mode\nTIP: To change the current "
+				  "color scheme use the following environment "
+				  "variables: CLIFM_FILE_COLORS, CLIFM_IFACE_COLORS, "
+				  "and CLIFM_EXT_COLORS\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
@@ -257,8 +254,7 @@ cschemes_function(char **args)
 		return EXIT_SUCCESS;
 	}
 
-	if (*args[1] == 'e' && (!args[1][1]
-	|| strcmp(args[1], "edit") == 0)) {
+	if (*args[1] == 'e' && (!args[1][1] || strcmp(args[1], "edit") == 0)) {
 		char file[PATH_MAX] = "";
 		sprintf(file, "%s/%s.cfm", COLORS_DIR, cur_cscheme);
 
@@ -266,7 +262,7 @@ cschemes_function(char **args)
 		stat(file, &attr);
 		time_t mtime_bfr = (time_t)attr.st_mtime;
 
-		char *cmd[] = { "mm", file, NULL };
+		char *cmd[] = {"mm", file, NULL};
 		int ret = mime_open(cmd);
 
 		if (ret != EXIT_FAILURE) {
@@ -283,13 +279,11 @@ cschemes_function(char **args)
 		}
 
 		return ret;
-
 	}
 
-	if (*args[1] == 'n' && (!args[1][1]
-	|| strcmp(args[1], "name") == 0)) {
+	if (*args[1] == 'n' && (!args[1][1] || strcmp(args[1], "name") == 0)) {
 		printf(_("%s: current color scheme: %s\n"), PROGRAM_NAME,
-			   cur_cscheme ? cur_cscheme : "?");
+		    cur_cscheme ? cur_cscheme : "?");
 		return EXIT_SUCCESS;
 	}
 
@@ -332,7 +326,7 @@ int
 set_colors(const char *colorscheme, int env)
 {
 	char *filecolors = (char *)NULL, *extcolors = (char *)NULL,
-		 *ifacecolors = (char *)NULL;
+	     *ifacecolors = (char *)NULL;
 
 	*dir_ico_c = '\0';
 
@@ -358,8 +352,7 @@ set_colors(const char *colorscheme, int env)
 
 		if (!cur_cscheme) {
 			_err('w', PRINT_PROMPT, _("%s: %s: No such color scheme. "
-				 "Falling back to the default one\n"), PROGRAM_NAME,
-				 colorscheme);
+				"Falling back to the default one\n"), PROGRAM_NAME, colorscheme);
 
 			if (def_cscheme)
 				cur_cscheme = def_cscheme;
@@ -390,13 +383,13 @@ set_colors(const char *colorscheme, int env)
 	}
 
 	if (config_ok && (!filecolors || !extcolors || !ifacecolors)) {
-	/* Get color lines, for both file types and extensions, from
+		/* Get color lines, for both file types and extensions, from
 	 * COLORSCHEME file */
 
 		char *colorscheme_file = (char *)xnmalloc(strlen(COLORS_DIR)
-								+ strlen(colorscheme) + 6, sizeof(char));
+							+ strlen(colorscheme) + 6, sizeof(char));
 		sprintf(colorscheme_file, "%s/%s.cfm", COLORS_DIR,
-				colorscheme ? colorscheme : "default");
+		    colorscheme ? colorscheme : "default");
 
 		FILE *fp_colors = fopen(colorscheme_file, "r");
 
@@ -411,10 +404,10 @@ set_colors(const char *colorscheme, int env)
 			ssize_t line_len = 0;
 			size_t line_size = 0;
 			int file_type_found = 0, ext_type_found = 0,
-				iface_found = 0, dir_icon_found = 0;
+			    iface_found = 0, dir_icon_found = 0;
 
 			while ((line_len = getline(&line, &line_size,
-			fp_colors)) > 0) {
+				    fp_colors)) > 0) {
 
 				/* Interface colors */
 				if (!ifacecolors && *line == 'I'
@@ -457,8 +450,7 @@ set_colors(const char *colorscheme, int env)
 				}
 
 				/* File extension colors */
-				if (!extcolors && *line == 'E'
-				&& strncmp(line, "ExtColors=", 10) == 0) {
+				if (!extcolors && *line == 'E' && strncmp(line, "ExtColors=", 10) == 0) {
 					ext_type_found = 1;
 					char *opt_str = strchr(line, '=');
 
@@ -477,8 +469,7 @@ set_colors(const char *colorscheme, int env)
 				}
 
 				/* Dir icons Color */
-				if (*line == 'D'
-				&& strncmp(line, "DirIconsColor=", 14) == 0) {
+				if (*line == 'D' && strncmp(line, "DirIconsColor=", 14) == 0) {
 					dir_icon_found = 1;
 					char *opt_str = strchr(line, '=');
 
@@ -505,8 +496,7 @@ set_colors(const char *colorscheme, int env)
 					if (nl_removed)
 						end_char--;
 
-					if (line[end_char] == '\''
-					|| line[end_char] == '"')
+					if (line[end_char] == '\'' || line[end_char] == '"')
 						line[end_char] = '\0';
 
 					sprintf(dir_ico_c, "\x1b[%sm", opt_str);
@@ -527,15 +517,15 @@ set_colors(const char *colorscheme, int env)
 		else {
 			if (!env) {
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-						colorscheme_file, strerror(errno));
+				    colorscheme_file, strerror(errno));
 				free(colorscheme_file);
 				return EXIT_FAILURE;
 			}
 
 			else {
-				_err('w', PRINT_PROMPT, _("%s: %s: No such color "
-					 "scheme. Falling back to the default one\n"),
-					 PROGRAM_NAME, colorscheme);
+				_err('w', PRINT_PROMPT, _("%s: %s: No such color scheme. "
+					"Falling back to the default one\n"), PROGRAM_NAME,
+					colorscheme);
 			}
 		}
 
@@ -572,7 +562,7 @@ set_colors(const char *colorscheme, int env)
 		int eol = 0;
 
 		if (ext_colors_n) {
-			int i =  (int)ext_colors_n;
+			int i = (int)ext_colors_n;
 
 			while (--i >= 0)
 				free(ext_colors[i]);
@@ -583,7 +573,7 @@ set_colors(const char *colorscheme, int env)
 			ext_colors_n = 0;
 		}
 
-		while(!eol) {
+		while (!eol) {
 			switch (*p) {
 
 			case '\0': /* fallthrough */
@@ -591,7 +581,7 @@ set_colors(const char *colorscheme, int env)
 			case ':':
 				buf[len] = '\0';
 				ext_colors = (char **)xrealloc(ext_colors,
-									(ext_colors_n + 1) * sizeof(char *));
+				    (ext_colors_n + 1) * sizeof(char *));
 				ext_colors[ext_colors_n++] = savestring(buf, len);
 				*buf = '\0';
 
@@ -619,8 +609,7 @@ set_colors(const char *colorscheme, int env)
 		}
 
 		if (ext_colors) {
-			ext_colors = (char **)xrealloc(ext_colors, (ext_colors_n + 1)
-										   * sizeof(char *));
+			ext_colors = (char **)xrealloc(ext_colors, (ext_colors_n + 1) * sizeof(char *));
 			ext_colors[ext_colors_n] = (char *)NULL;
 		}
 
@@ -629,7 +618,7 @@ set_colors(const char *colorscheme, int env)
 		 * when listing files */
 		ext_colors_len = (size_t *)xnmalloc(ext_colors_n, sizeof(size_t));
 
-		int i =  (int)ext_colors_n;
+		int i = (int)ext_colors_n;
 		while (--i >= 0) {
 			char *ret = strrchr(ext_colors[i], '=');
 
@@ -641,8 +630,7 @@ set_colors(const char *colorscheme, int env)
 
 			size_t j, ext_len = 0;
 
-			for (j = 2; ext_colors[i][j]
-			&& ext_colors[i][j] != '='; j++)
+			for (j = 2; ext_colors[i][j] && ext_colors[i][j] != '='; j++)
 				ext_len++;
 
 			ext_colors_len[i] = ext_len;
@@ -676,11 +664,11 @@ set_colors(const char *colorscheme, int env)
 	else {
 
 		char *p = ifacecolors, *buf = (char *)NULL,
-			 **colors = (char **)NULL;
+		     **colors = (char **)NULL;
 		size_t len = 0, words = 0;
 		int eol = 0;
 
-		while(!eol) {
+		while (!eol) {
 			switch (*p) {
 
 			case '\0': /* fallthrough */
@@ -715,8 +703,7 @@ set_colors(const char *colorscheme, int env)
 		}
 
 		if (colors) {
-			colors = (char **)xrealloc(colors, (words + 1)
-									   * sizeof(char *));
+			colors = (char **)xrealloc(colors, (words + 1) * sizeof(char *));
 			colors[words] = (char *)NULL;
 		}
 
@@ -734,7 +721,7 @@ set_colors(const char *colorscheme, int env)
 
 				else
 					snprintf(tx_c, MAX_COLOR + 2, "\001\x1b[%sm\002",
-							 colors[i] + 3);
+					    colors[i] + 3);
 			}
 
 			else if (*colors[i] == 'b' && strncmp(colors[i], "bm=", 3) == 0) {
@@ -753,7 +740,7 @@ set_colors(const char *colorscheme, int env)
 
 				else
 					snprintf(li_c, MAX_COLOR + 2, "\001\x1b[%sm\002",
-							 colors[i] + 3);
+					    colors[i] + 3);
 			}
 
 			else if (*colors[i] == 't' && strncmp(colors[i], "ti=", 3) == 0) {
@@ -761,7 +748,7 @@ set_colors(const char *colorscheme, int env)
 					*ti_c = '\0';
 				else
 					snprintf(ti_c, MAX_COLOR + 2, "\001\x1b[%sm\002",
-							 colors[i] + 3);
+					    colors[i] + 3);
 			}
 
 			else if (*colors[i] == 'e' && strncmp(colors[i], "em=", 3) == 0) {
@@ -769,7 +756,7 @@ set_colors(const char *colorscheme, int env)
 					*em_c = '\0';
 				else
 					snprintf(em_c, MAX_COLOR + 2, "\001\x1b[%sm\002",
-							 colors[i] + 3);
+					    colors[i] + 3);
 			}
 
 			else if (*colors[i] == 'w' && strncmp(colors[i], "wm=", 3) == 0) {
@@ -777,7 +764,7 @@ set_colors(const char *colorscheme, int env)
 					*wm_c = '\0';
 				else
 					snprintf(wm_c, MAX_COLOR + 2, "\001\x1b[%sm\002",
-							 colors[i] + 3);
+					    colors[i] + 3);
 			}
 
 			else if (*colors[i] == 'n' && strncmp(colors[i], "nm=", 3) == 0) {
@@ -785,7 +772,7 @@ set_colors(const char *colorscheme, int env)
 					*nm_c = '\0';
 				else
 					snprintf(nm_c, MAX_COLOR + 2, "\001\x1b[%sm\002",
-							 colors[i] + 3);
+					    colors[i] + 3);
 			}
 
 			else if (*colors[i] == 's' && strncmp(colors[i], "si=", 3) == 0) {
@@ -793,7 +780,7 @@ set_colors(const char *colorscheme, int env)
 					*si_c = '\0';
 				else
 					snprintf(si_c, MAX_COLOR + 2, "\001\x1b[%sm\002",
-							 colors[i] + 3);
+					    colors[i] + 3);
 			}
 
 			else if (*colors[i] == 'e' && strncmp(colors[i], "el=", 3) == 0) {
@@ -882,8 +869,8 @@ set_colors(const char *colorscheme, int env)
 		char lsc[] = DEF_LS_COLORS;
 
 		if (setenv("LS_COLORS", lsc, 1) == -1)
-			fprintf(stderr, _("%s: Error registering environment "
-					"colors\n"), PROGRAM_NAME);
+			fprintf(stderr, _("%s: Error registering environment colors\n"),
+					PROGRAM_NAME);
 	}
 
 	else {
@@ -905,19 +892,19 @@ set_colors(const char *colorscheme, int env)
 
 			int rem = 0;
 
-			if ((int)i < (int)(linec_len - 3) && (
-			(filecolors[i] == 'n' && (filecolors[i+1] == 'd'
-			|| filecolors[i+1] == 'e' || filecolors[i+1] == 'f'))
-			|| (filecolors[i] == 'e' && (filecolors[i+1] == 'd'
-			|| filecolors[i+1] == 'f' || filecolors[i+1] == 'e'))
-			|| (filecolors[i] == 'u' && filecolors[i+1] == 'f')
-			|| (filecolors[i] == 'c' && filecolors[i+1] == 'a') )
-			&& filecolors[i+2] == '=') {
+			if ((int)i < (int)(linec_len - 3) && ((filecolors[i] == 'n'
+			&& (filecolors[i + 1] == 'd' || filecolors[i + 1] == 'e'
+			|| filecolors[i + 1] == 'f')) || (filecolors[i] == 'e'
+			&& (filecolors[i + 1] == 'd' || filecolors[i + 1] == 'f'
+			|| filecolors[i + 1] == 'e')) || (filecolors[i] == 'u'
+			&& filecolors[i + 1] == 'f') || (filecolors[i] == 'c'
+			&& filecolors[i + 1] == 'a')) && filecolors[i + 2] == '=') {
 
 				/* If one of the above is found, move to the next
 				 * color code */
 				rem = 1;
-				for (i += 3; filecolors[i] && filecolors[i] != ':'; i++);
+				for (i += 3; filecolors[i] && filecolors[i] != ':'; i++)
+					;
 			}
 
 			if (filecolors[i]) {
@@ -937,7 +924,7 @@ set_colors(const char *colorscheme, int env)
 
 			if (setenv("LS_COLORS", ls_buf, 1) == -1)
 				fprintf(stderr, _("%s: Error registering environment "
-								  "colors\n"), PROGRAM_NAME);
+						"colors\n"), PROGRAM_NAME);
 			free(ls_buf);
 			ls_buf = (char *)NULL;
 		}
@@ -947,7 +934,7 @@ set_colors(const char *colorscheme, int env)
 		size_t len = 0, words = 0;
 		int eol = 0;
 
-		while(!eol) {
+		while (!eol) {
 			switch (*p) {
 
 			case '\0': /* fallthrough */
@@ -1059,8 +1046,7 @@ set_colors(const char *colorscheme, int env)
 				if (!is_color_code(colors[i] + 3))
 					*ln_c = '\0';
 				else
-					snprintf(ln_c, MAX_COLOR - 1, "\x1b[%sm", colors[i]
-							 + 3);
+					snprintf(ln_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
 			else if (*colors[i] == 'o' && strncmp(colors[i], "or=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
@@ -1072,7 +1058,7 @@ set_colors(const char *colorscheme, int env)
 				if (!is_color_code(colors[i] + 3))
 					*ex_c = '\0';
 				else
-					snprintf(ex_c, MAX_COLOR-1, "\x1b[%sm", colors[i] + 3);
+					snprintf(ex_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
 			else if (*colors[i] == 'e' && strncmp(colors[i], "ee=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
@@ -1102,7 +1088,7 @@ set_colors(const char *colorscheme, int env)
 				if (!is_color_code(colors[i] + 3))
 					*so_c = '\0';
 				else
-					snprintf(so_c, MAX_COLOR-1, "\x1b[%sm", colors[i] + 3);
+					snprintf(so_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
 			else if (*colors[i] == 's' && strncmp(colors[i], "su=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
@@ -1129,7 +1115,7 @@ set_colors(const char *colorscheme, int env)
 					snprintf(st_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
 			else if (*colors[i] == 'o' && strncmp(colors[i], "ow=", 3) == 0)
-				if (!is_color_code(colors[i]+3))
+				if (!is_color_code(colors[i] + 3))
 					*ow_c = '\0';
 				else
 					snprintf(ow_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
@@ -1262,7 +1248,7 @@ colors_list(const char *ent, const int i, const int pad, const int new_line)
 {
 	size_t i_digits = (size_t)DIGINUM(i);
 
-							/* Num (i) + space + null byte */
+	/* Num (i) + space + null byte */
 	char *index = (char *)xnmalloc(i_digits + 2, sizeof(char));
 
 	if (i > 0) /* When listing files in CWD */
@@ -1281,7 +1267,7 @@ colors_list(const char *ent, const int i, const int pad, const int new_line)
 
 	if (lstat(ent, &file_attrib) == -1) {
 		fprintf(stderr, "%s%s%s%s%-*s%s%s", el_c, index, df_c,
-				uf_c, pad, ent, df_c, new_line ? "\n" : "");
+		    uf_c, pad, ent, df_c, new_line ? "\n" : "");
 		free(index);
 		return;
 	}
@@ -1298,7 +1284,8 @@ colors_list(const char *ent, const int i, const int pad, const int new_line)
 
 	case S_IFREG:
 
-		if (access(ent, R_OK) == -1) color = nf_c;
+		if (access(ent, R_OK) == -1)
+			color = nf_c;
 
 		else if (file_attrib.st_mode & S_ISUID) /* set uid file */
 			color = su_c;
@@ -1315,10 +1302,10 @@ colors_list(const char *ent, const int i, const int pad, const int new_line)
 				cap_free(cap);
 			}
 
-			else if (file_attrib.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH)) {
+			else if (file_attrib.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
 #else
 
-			if (file_attrib.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH)) {
+			if (file_attrib.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
 #endif
 				if (file_attrib.st_size == 0)
 					color = ee_c;
@@ -1340,7 +1327,7 @@ colors_list(const char *ent, const int i, const int pad, const int new_line)
 
 					if (extcolor) {
 						snprintf(ext_color, MAX_COLOR, "\x1b[%sm",
-								 extcolor);
+						    extcolor);
 						color = ext_color;
 						extcolor = (char *)NULL;
 					}
@@ -1354,7 +1341,7 @@ colors_list(const char *ent, const int i, const int pad, const int new_line)
 
 	case S_IFDIR:
 
-		if (access(ent, R_OK|X_OK) != 0)
+		if (access(ent, R_OK | X_OK) != 0)
 			color = nd_c;
 
 		else {
@@ -1370,8 +1357,7 @@ colors_list(const char *ent, const int i, const int pad, const int new_line)
 					/* If folder is empty, it contains only "."
 					 * and ".." (2 elements). If not mounted (ex:
 					 * /media/usb) the result will be zero. */
-					(files_dir == 2 || files_dir == 0) ? ed_c
-					: di_c);
+					(files_dir == 2 || files_dir == 0) ? ed_c : di_c);
 		}
 
 		break;
@@ -1384,21 +1370,32 @@ colors_list(const char *ent, const int i, const int pad, const int new_line)
 			free(linkname);
 		}
 
-		else color = or_c;
+		else
+			color = or_c;
 
 		break;
 
-	case S_IFIFO: color = pi_c; break;
-	case S_IFBLK: color = bd_c; break;
-	case S_IFCHR: color = cd_c; break;
-	case S_IFSOCK: color = so_c; break;
+	case S_IFIFO:
+		color = pi_c;
+		break;
+	case S_IFBLK:
+		color = bd_c;
+		break;
+	case S_IFCHR:
+		color = cd_c;
+		break;
+	case S_IFSOCK:
+		color = so_c;
+		break;
 
 	/* In case all the above conditions are false... */
-	default: color = no_c; break;
+	default:
+		color = no_c;
+		break;
 	}
 
 	printf("%s%s%s%s%s%s%s%-*s", el_c, index, df_c, color,
-		   ent, df_c, new_line ? "\n" : "", pad, "");
+	    ent, df_c, new_line ? "\n" : "", pad, "");
 
 	free(index);
 }
@@ -1435,8 +1432,7 @@ get_colorschemes(void)
 		/* Skipp . and .. */
 		char *name = ent->d_name;
 
-		if (*name == '.' && (!name[1]
-		|| (name[1] == '.' && !name[2])))
+		if (*name == '.' && (!name[1] || (name[1] == '.' && !name[2])))
 			continue;
 
 		char *ret = strchr(name, '.');
@@ -1460,11 +1456,11 @@ get_colorschemes(void)
 
 /* List color codes for file types used by the program */
 void
-color_codes (void)
+color_codes(void)
 {
 	if (!colorize) {
 		printf(_("%s: Currently running without colors\n"),
-			   PROGRAM_NAME);
+		    PROGRAM_NAME);
 		return;
 	}
 
@@ -1472,13 +1468,14 @@ color_codes (void)
 		printf(_("%sFile type colors%s\n\n"), bold, df_c);
 
 	printf(_(" %sfile name%s: Directory with no read permission (nd)\n"),
-		   nd_c, df_c);
+	    nd_c, df_c);
 	printf(_(" %sfile name%s: File with no read permission (nf)\n"),
-		   nf_c, df_c);
+	    nf_c, df_c);
 	printf(_(" %sfile name%s: Directory* (di)\n"), di_c, df_c);
 	printf(_(" %sfile name%s: EMPTY directory (ed)\n"), ed_c, df_c);
 	printf(_(" %sfile name%s: EMPTY directory with no read "
-			 "permission (ne)\n"), ne_c, df_c);
+		 "permission (ne)\n"),
+	    ne_c, df_c);
 	printf(_(" %sfile name%s: Executable file (ex)\n"), ex_c, df_c);
 	printf(_(" %sfile name%s: Empty executable file (ee)\n"), ee_c, df_c);
 	printf(_(" %sfile name%s: Block special file (bd)\n"), bd_c, df_c);
@@ -1494,25 +1491,29 @@ color_codes (void)
 	printf(_(" %sfile name%s: SGID file (sg)\n"), sg_c, df_c);
 	printf(_(" %sfile name%s: File with capabilities (ca)\n"), ca_c, df_c);
 	printf(_(" %sfile name%s: Sticky and NOT other-writable "
-			 "directory* (st)\n"),  st_c, df_c);
+		 "directory* (st)\n"),
+	    st_c, df_c);
 	printf(_(" %sfile name%s: Sticky and other-writable "
-			 "directory* (tw)\n"),  tw_c, df_c);
+		 "directory* (tw)\n"),
+	    tw_c, df_c);
 	printf(_(" %sfile name%s: Other-writable and NOT sticky "
-			 "directory* (ow)\n"),  ow_c, df_c);
+		 "directory* (ow)\n"),
+	    ow_c, df_c);
 	printf(_(" %sfile name%s: Unknown file type (no)\n"), no_c, df_c);
 	printf(_(" %sfile name%s: Unaccessible (non-stat'able) file "
-		   "(uf)\n"), uf_c, df_c);
+		 "(uf)\n"),
+	    uf_c, df_c);
 
 	printf(_("\n*The slash followed by a number (/xx) after directories "
-			 "or symbolic links to directories indicates the amount of "
-			 "files contained by the corresponding directory, excluding "
-			 "self (.) and parent (..) directories.\n"));
+		 "or symbolic links to directories indicates the amount of "
+		 "files contained by the corresponding directory, excluding "
+		 "self (.) and parent (..) directories.\n"));
 	printf(_("\nThe value in parentheses is the code that is to be used "
-			 "to modify the color of the corresponding filetype in the "
-			 "color scheme file (in the \"FiletypeColors\" line), "
-			 "using the same ANSI style color format used by dircolors. "
-			 "By default, %s uses only 8 colors, but you can use 256 "
-			 "and RGB colors as well.\n\n"), PROGRAM_NAME);
+		 "to modify the color of the corresponding filetype in the "
+		 "color scheme file (in the \"FiletypeColors\" line), "
+		 "using the same ANSI style color format used by dircolors. "
+		 "By default, %s uses only 8 colors, but you can use 256 "
+		 "and RGB colors as well.\n\n"), PROGRAM_NAME);
 
 	if (ext_colors_n) {
 		size_t i, j;

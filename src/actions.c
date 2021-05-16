@@ -24,19 +24,19 @@
 
 #include "helpers.h"
 
-#include <string.h>
-#include <stdio.h>
-#include <unistd.h>
 #include <errno.h>
-#include <sys/stat.h>
 #include <fcntl.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "aux.h"
+#include "checks.h"
 #include "exec.h"
 #include "file_operations.h"
-#include "checks.h"
-#include "mime.h"
 #include "init.h"
+#include "mime.h"
 #include "misc.h"
 
 /* The core of this function was taken from NNN's run_selected_plugin
@@ -48,13 +48,13 @@ run_action(char *action, char **args)
 	char *cmd = (char *)NULL;
 	size_t len = 0, action_len = strlen(action);
 
-		/* #####################################
+	/* #####################################
 		 * #    1) CREATE CMD TO BE EXECUTED   #
 		 * ##################################### */
 
 	/* Remove terminating new line char */
-	if (action[action_len -1] == '\n')
-		action[action_len -1] = '\0';
+	if (action[action_len - 1] == '\n')
+		action[action_len - 1] = '\0';
 
 	if (strchr(action, '/')) {
 		len = action_len;
@@ -69,7 +69,7 @@ run_action(char *action, char **args)
 	}
 
 	/* Check if the action file exists and is executable */
-	if (access(cmd, F_OK|X_OK) == -1) {
+	if (access(cmd, F_OK | X_OK) == -1) {
 		fprintf(stderr, "actions: %s: %s\n", cmd, strerror(errno));
 		free(cmd);
 		return EXIT_FAILURE;
@@ -84,7 +84,7 @@ run_action(char *action, char **args)
 		strcat(cmd, args[i]);
 	}
 
-			/* ##############################
+	/* ##############################
 			 * #    2) CREATE A PIPE FILE   #
 			 * ############################## */
 
@@ -131,7 +131,7 @@ run_action(char *action, char **args)
 
 	free(cmd);
 
-		/* ########################################
+	/* ########################################
 		 * #    4) LET THE PARENT READ THE PIPE   #
 		 * ######################################## */
 
@@ -166,7 +166,7 @@ run_action(char *action, char **args)
 	struct stat attr;
 
 	if (lstat(buf, &attr) != -1) {
-		char *o_cmd[] = { "o", buf, NULL };
+		char *o_cmd[] = {"o", buf, NULL};
 		exit_status = open_function(o_cmd);
 	}
 
@@ -217,7 +217,7 @@ edit_actions(void)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: Access to configuration files is not allowed in "
-			   "stealth mode\n", PROGRAM_NAME);
+		       "stealth mode\n", PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
 
@@ -231,11 +231,11 @@ edit_actions(void)
 
 	time_t mtime_bfr = (time_t)file_attrib.st_mtime;
 
-	char *cmd[] = { "mm", ACTIONS_FILE, NULL };
+	char *cmd[] = {"mm", ACTIONS_FILE, NULL};
 
 	int ret = mime_open(cmd);
 
-	if  (ret != EXIT_SUCCESS)
+	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
 	/* Get modification time after opening the file */
@@ -256,7 +256,7 @@ edit_actions(void)
 				free(bin_commands[i]);
 
 			free(bin_commands);
-			bin_commands = (char  **)NULL;
+			bin_commands = (char **)NULL;
 		}
 
 		if (paths) {
@@ -268,7 +268,6 @@ edit_actions(void)
 		path_n = (size_t)get_path_env();
 
 		get_path_programs();
-
 	}
 
 	return EXIT_SUCCESS;

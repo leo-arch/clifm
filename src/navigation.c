@@ -24,19 +24,19 @@
 
 #include "helpers.h"
 
-#include <unistd.h>
+#include <dirent.h>
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include <errno.h>
-#include <dirent.h>
+#include <unistd.h>
 
-#include "checks.h"
-#include "navigation.h"
-#include "listing.h"
-#include "history.h"
 #include "aux.h"
+#include "checks.h"
+#include "history.h"
 #include "jump.h"
+#include "listing.h"
 #include "misc.h"
+#include "navigation.h"
 
 int
 workspaces(char *str)
@@ -47,8 +47,7 @@ workspaces(char *str)
 			if (i == cur_ws)
 				printf("%s%d: %s%s\n", mi_c, i + 1, ws[i].path, df_c);
 			else
-				printf("%d: %s\n", i + 1, ws[i].path ? ws[i].path
-					   : "none");
+				printf("%d: %s\n", i + 1, ws[i].path ? ws[i].path : "none");
 		}
 
 		return EXIT_SUCCESS;
@@ -66,7 +65,7 @@ workspaces(char *str)
 
 		if (istr <= 0 || istr > MAX_WS) {
 			fprintf(stderr, _("%s: %d: Invalid workspace number\n"),
-					PROGRAM_NAME, istr);
+			    PROGRAM_NAME, istr);
 			return EXIT_FAILURE;
 		}
 
@@ -94,25 +93,25 @@ workspaces(char *str)
 	 * workspace */
 	if (!ws[tmp_ws].path)
 		ws[tmp_ws].path = savestring(ws[cur_ws].path,
-									 strlen(ws[cur_ws].path));
+		    strlen(ws[cur_ws].path));
 
-	else if (access(ws[tmp_ws].path, R_OK|X_OK) != EXIT_SUCCESS) {
+	else if (access(ws[tmp_ws].path, R_OK | X_OK) != EXIT_SUCCESS) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[tmp_ws].path,
-						strerror(errno));
+		    strerror(errno));
 		free(ws[tmp_ws].path);
 		ws[tmp_ws].path = savestring(ws[cur_ws].path,
-									 strlen(ws[cur_ws].path));
+		    strlen(ws[cur_ws].path));
 	}
 
 	if (xchdir(ws[tmp_ws].path, SET_TITLE) == -1) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[tmp_ws].path,
-				strerror(errno));
+		    strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	cur_ws = tmp_ws;
 
-	int exit_status =  EXIT_SUCCESS;
+	int exit_status = EXIT_SUCCESS;
 
 	if (cd_lists_on_the_fly) {
 		free_dirlist();
@@ -156,13 +155,13 @@ cd_function(char *new_path)
 
 		if (!user.home) {
 			fprintf(stderr, _("%s: cd: Home directory not found\n"),
-					PROGRAM_NAME);
+			    PROGRAM_NAME);
 			return EXIT_FAILURE;
 		}
 
 		if (xchdir(user.home, SET_TITLE) != EXIT_SUCCESS) {
 			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
-					user.home, strerror(errno));
+			    user.home, strerror(errno));
 			return EXIT_FAILURE;
 		}
 
@@ -188,13 +187,13 @@ cd_function(char *new_path)
 
 		if (!real_path) {
 			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
-					new_path, strerror(errno));
+			    new_path, strerror(errno));
 			return EXIT_FAILURE;
 		}
 
 		if (xchdir(real_path, SET_TITLE) != EXIT_SUCCESS) {
 			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
-					real_path, strerror(errno));
+			    real_path, strerror(errno));
 			free(real_path);
 			return EXIT_FAILURE;
 		}
@@ -241,14 +240,14 @@ fastback(const char *str)
 	}
 
 	if (dots <= 2)
-		 return (char *)NULL;
+		return (char *)NULL;
 
 	char *q = (char *)NULL;
 	if (rem)
 		q = (char *)xnmalloc((dots * 3 + strlen(rem) + 2), sizeof(char));
 	else
 		q = (char *)xnmalloc((dots * 3), sizeof(char));
-	
+
 	q[0] = '.';
 	q[1] = '.';
 
@@ -283,7 +282,7 @@ surf_hist(char **comm)
 		for (i = 0; i < dirhist_total_index; i++) {
 			if (i == dirhist_cur_index)
 				printf("%d %s%s%s\n", i + 1, dh_c,
-					   old_pwd[i], df_c);
+				    old_pwd[i], df_c);
 
 			else
 				printf("%d %s\n", i + 1, old_pwd[i]);
@@ -316,8 +315,9 @@ surf_hist(char **comm)
 			if (ret == 0) {
 				free(ws[cur_ws].path);
 				ws[cur_ws].path = (char *)xnmalloc(strlen(
-										old_pwd[atoi_comm - 1])
-										+ 1, sizeof(char));
+								       old_pwd[atoi_comm - 1]) +
+								       1,
+				    sizeof(char));
 				strcpy(ws[cur_ws].path, old_pwd[atoi_comm - 1]);
 
 				dirhist_cur_index = atoi_comm - 1;
@@ -332,13 +332,11 @@ surf_hist(char **comm)
 
 			else
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-						old_pwd[atoi_comm - 1], strerror(errno));
-		}
-		else
+				    old_pwd[atoi_comm - 1], strerror(errno));
+		} else
 			fprintf(stderr, _("history: %d: No such ELN\n"),
-					atoi(comm[1] + 1));
-	}
-	else
+			    atoi(comm[1] + 1));
+	} else
 		fputs(_("history: Usage: b/f [hist] [clear] [!ELN]\n"), stderr);
 
 	return exit_status;
@@ -374,7 +372,7 @@ back_function(char **comm)
 
 		free(ws[cur_ws].path);
 		ws[cur_ws].path = savestring(old_pwd[dirhist_cur_index],
-							strlen(old_pwd[dirhist_cur_index]));
+		    strlen(old_pwd[dirhist_cur_index]));
 
 		exit_status = EXIT_SUCCESS;
 
@@ -388,7 +386,7 @@ back_function(char **comm)
 
 	else
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-				old_pwd[dirhist_cur_index], strerror(errno));
+		    old_pwd[dirhist_cur_index], strerror(errno));
 
 	return exit_status;
 }
@@ -422,7 +420,7 @@ forth_function(char **comm)
 
 		free(ws[cur_ws].path);
 		ws[cur_ws].path = savestring(old_pwd[dirhist_cur_index],
-							strlen(old_pwd[dirhist_cur_index]));
+		    strlen(old_pwd[dirhist_cur_index]));
 
 		add_to_jumpdb(ws[cur_ws].path);
 
@@ -436,7 +434,7 @@ forth_function(char **comm)
 
 	else
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-				old_pwd[dirhist_cur_index], strerror(errno));
+		    old_pwd[dirhist_cur_index], strerror(errno));
 
 	return exit_status;
 }

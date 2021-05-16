@@ -24,21 +24,21 @@
 
 #include "helpers.h"
 
-#include <unistd.h>
-#include <sys/stat.h>
-#include <stdio.h>
 #include <readline/readline.h>
+#include <stdio.h>
+#include <sys/stat.h>
 #include <termios.h>
+#include <unistd.h>
 
+#include "aux.h"
 #include "config.h"
 #include "exec.h"
-#include "misc.h"
-#include "mime.h"
 #include "keybinds.h"
-#include "aux.h"
-#include "prompt.h"
 #include "listing.h"
+#include "mime.h"
+#include "misc.h"
 #include "profiles.h"
+#include "prompt.h"
 
 int
 kbinds_reset(void)
@@ -50,7 +50,7 @@ kbinds_reset(void)
 		exit_status = create_kbinds_file();
 
 	else {
-		char *cmd[] = { "rm", KBINDS_FILE, NULL };
+		char *cmd[] = {"rm", KBINDS_FILE, NULL};
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
 			exit_status = create_kbinds_file();
 		else
@@ -59,7 +59,7 @@ kbinds_reset(void)
 
 	if (exit_status == EXIT_SUCCESS)
 		_err('n', PRINT_PROMPT, _("%s: Restart the program for changes "
-			 "to take effect\n"), PROGRAM_NAME);
+			"to take effect\n"), PROGRAM_NAME);
 
 	return exit_status;
 }
@@ -69,7 +69,7 @@ kbinds_edit(void)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: Access to configuration files is not allowed in "
-			   "stealth mode\n", PROGRAM_NAME);
+		       "stealth mode\n", PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
 
@@ -85,7 +85,7 @@ kbinds_edit(void)
 
 	time_t mtime_bfr = (time_t)file_attrib.st_mtime;
 
-	char *cmd[] = { "mm", KBINDS_FILE, NULL };
+	char *cmd[] = {"mm", KBINDS_FILE, NULL};
 	int ret = mime_open(cmd);
 
 	if (ret != EXIT_SUCCESS)
@@ -97,7 +97,7 @@ kbinds_edit(void)
 		return EXIT_SUCCESS;
 
 	_err('n', PRINT_PROMPT, _("%s: Restart the program for changes to "
-		 "take effect\n"), PROGRAM_NAME);
+				  "take effect\n"), PROGRAM_NAME);
 
 	return EXIT_SUCCESS;
 }
@@ -137,11 +137,12 @@ kbinds_function(char **args)
  * C-v, C-right arrow gives "[[1;5C", which here should be written like
  * this:
  * "\\x1b[1;5C" */
+
 void
 readline_kbinds(void)
 {
 
-			/* ##############################
+	/* ##############################
 			 * #        KEYBINDINGS         #
 			 * ##############################*/
 	if (KBINDS_FILE) {
@@ -153,7 +154,7 @@ readline_kbinds(void)
 		/* Navigation */
 		/* Define multiple keybinds for different terminals:
 		 * rxvt, xterm, kernel console */
-/*      rl_bind_keyseq("\\M-[D", rl_test); // Left arrow key
+		/*      rl_bind_keyseq("\\M-[D", rl_test); // Left arrow key
 		rl_bind_keyseq("\\M-+", rl_test); */
 		rl_bind_keyseq(find_key("parent-dir"), rl_parent_dir);
 		rl_bind_keyseq(find_key("parent-dir2"), rl_parent_dir);
@@ -289,7 +290,7 @@ readline_kbinds(void)
 
 		/* Settings */
 		rl_bind_keyseq("\\M-t", rl_clear_msgs);
-/*      rl_bind_keyseq("", rl_next_profile);
+		/*      rl_bind_keyseq("", rl_next_profile);
 		rl_bind_keyseq("", rl_previous_profile); */
 		rl_bind_keyseq("\\e[24~", rl_quit);
 		rl_bind_keyseq("\\M-o", rl_lock);
@@ -490,8 +491,7 @@ rl_home_dir(int count, int key)
 		return EXIT_SUCCESS;
 
 	/* If already in home, do nothing */
-	if (*ws[cur_ws].path == *user.home
-	&& strcmp(ws[cur_ws].path, user.home) == 0)
+	if (*ws[cur_ws].path == *user.home && strcmp(ws[cur_ws].path, user.home) == 0)
 		return EXIT_SUCCESS;
 
 	keybind_exec_cmd("cd");
@@ -732,7 +732,7 @@ rl_open_mime(int count, int key)
 int
 rl_mountpoints(int count, int key)
 {
-		return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 
 	/* Call the function only if it's not already running */
 	kbind_busy = 1;
@@ -770,7 +770,8 @@ rl_deselect_all(int count, int key)
 }
 
 int
-rl_bookmarks(int count, int key) {
+rl_bookmarks(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -865,16 +866,17 @@ rl_sort_previous(int count, int key)
 }
 
 int
-rl_lock(int count, int key) {
+rl_lock(int count, int key)
+{
 	int ret = EXIT_SUCCESS;
 
 	rl_deprep_terminal();
 
 #if __FreeBSD__
-	char *cmd[] = { "lock", NULL };
+	char *cmd[] = {"lock", NULL};
 	ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 #elif __linux__
-	char *cmd[] = { "vlock", NULL };
+	char *cmd[] = {"vlock", NULL};
 	ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 #endif
 
@@ -1015,13 +1017,12 @@ rl_previous_profile(int count, int key)
 
 	if (clear_screen) {
 		CLEAR;
-	}
-	else
+	} else
 		putchar('\n');
 
 	if (profile_set(profile_names[prev_prof]) == EXIT_SUCCESS) {
 		printf(_("%s->%s Switched to profile '%s'\n"), mi_c, df_c,
-			   profile_names[prev_prof]);
+		    profile_names[prev_prof]);
 		char *input = prompt();
 		free(input);
 	}
@@ -1065,13 +1066,12 @@ rl_next_profile(int count, int key)
 
 	if (clear_screen) {
 		CLEAR;
-	}
-	else
+	} else
 		putchar('\n');
 
 	if (profile_set(profile_names[next_prof]) == EXIT_SUCCESS) {
 		printf(_("%s->%s Switched to profile '%s'\n"), mi_c, df_c,
-			   profile_names[next_prof]);
+		    profile_names[next_prof]);
 		char *input = prompt();
 		free(input);
 	}
@@ -1170,7 +1170,7 @@ rl_open_sel(int count, int key)
 	}
 
 	char cmd[PATH_MAX + 3];
-	sprintf(cmd, "o %s", sel_elements[sel_n -  1]);
+	sprintf(cmd, "o %s", sel_elements[sel_n - 1]);
 
 	keybind_exec_cmd(cmd);
 
@@ -1192,7 +1192,7 @@ rl_bm_sel(int count, int key)
 	}
 
 	char cmd[PATH_MAX + 6];
-	sprintf(cmd, "bm a %s", sel_elements[sel_n -  1]);
+	sprintf(cmd, "bm a %s", sel_elements[sel_n - 1]);
 
 	keybind_exec_cmd(cmd);
 
@@ -1202,10 +1202,10 @@ rl_bm_sel(int count, int key)
 }
 
 int
-rl_kbinds_help (int count, int key)
+rl_kbinds_help(int count, int key)
 {
-	char *cmd[] = { "man", "-P", "less -p ^\"KEYBOARD SHORTCUTS\"", PNL,
-					NULL };
+	char *cmd[] = {"man", "-P", "less -p ^\"KEYBOARD SHORTCUTS\"", PNL,
+					NULL};
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
@@ -1213,9 +1213,9 @@ rl_kbinds_help (int count, int key)
 }
 
 int
-rl_cmds_help (int count, int key)
+rl_cmds_help(int count, int key)
 {
-	char *cmd[] = { "man", "-P", "less -p ^COMMANDS", PNL, NULL };
+	char *cmd[] = {"man", "-P", "less -p ^COMMANDS", PNL, NULL};
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
@@ -1223,9 +1223,9 @@ rl_cmds_help (int count, int key)
 }
 
 int
-rl_manpage (int count, int key)
+rl_manpage(int count, int key)
 {
-	char *cmd[] = { "man", PNL, NULL };
+	char *cmd[] = {"man", PNL, NULL};
 
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		return EXIT_FAILURE;

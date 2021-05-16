@@ -1,25 +1,49 @@
+/* helpers.h -- main header file */
+
+/*
+ * This file is part of CliFM
+ * 
+ * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
+ * All rights reserved.
+
+ * CliFM is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * CliFM is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA 02110-1301, USA.
+*/
+
 #pragma once
 
 #if defined(__linux__) && !defined(_BE_POSIX)
-#  define _GNU_SOURCE
+#define _GNU_SOURCE
 #else
-#  define _POSIX_C_SOURCE 200809L
-#  define _DEFAULT_SOURCE
-#  if __FreeBSD__
-#    define __XSI_VISIBLE 700
-#    define __BSD_VISIBLE 1
-#  endif
+#define _POSIX_C_SOURCE 200809L
+#define _DEFAULT_SOURCE
+#if __FreeBSD__
+#define __XSI_VISIBLE 700
+#define __BSD_VISIBLE 1
+#endif
 #endif
 
 /* Support large files on ARM or 32-bit machines */
 #if defined(__arm__) || defined(__i386__)
-#   define _FILE_OFFSET_BITS 64
+#define _FILE_OFFSET_BITS 64
 #endif
 
+#include <libintl.h>
+#include <regex.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include <regex.h>
-#include <libintl.h>
 #ifdef __FreeBSD__
 #include <sys/time.h>
 #endif
@@ -27,8 +51,8 @@
 #include <linux/version.h>
 #endif
 
-#include "strings.h"
 #include "init.h"
+#include "strings.h"
 
 /* #define __SIZEOF_WCHAR_T__ 4 */
 
@@ -50,41 +74,39 @@ and DT_DIR (and company) and S_ISVTX macros */
 /* Without this variable, TCC complains that __dso_handle is an
  * undefined symbol and won't compile */
 #if __TINYC__
-void* __dso_handle;
+void *__dso_handle;
 #endif
-
-
 
 #define EXIT_SUCCESS 0
 #define EXIT_FAILURE 1
 
 #ifndef PATH_MAX
-# define PATH_MAX 4096
+#define PATH_MAX 4096
 #endif
 
 #ifndef HOST_NAME_MAX
-# define HOST_NAME_MAX 64
+#define HOST_NAME_MAX 64
 #endif
 
 #ifndef NAME_MAX
-# define NAME_MAX 255
+#define NAME_MAX 255
 #endif
 
 /* _GNU_SOURCE is only defined if __linux__ is defined and _BE_POSIX
  * is not defined */
 #ifdef _GNU_SOURCE
-#  if (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 28))
-#    if LINUX_VERSION_CODE >= KERNEL_VERSION(4,11,0)
-#      define _STATX
-#    endif /* LINUX_VERSION (4.11) */
-#  endif /* __GLIBC__ */
+#if (__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 28))
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
+#define _STATX
+#endif /* LINUX_VERSION (4.11) */
+#endif /* __GLIBC__ */
 #endif /* _GNU_SOURCE */
 
 /* Because capability.h is deprecated in BSD */
 #if __linux__
-#  if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,24)
-#    define _LINUX_CAP
-#  endif /* LINUX_VERSION (2.6.24)*/
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 24)
+#define _LINUX_CAP
+#endif /* LINUX_VERSION (2.6.24)*/
 #endif /* __linux__ */
 
 #define PROGRAM_NAME "CliFM"
@@ -106,22 +128,22 @@ void* __dso_handle;
  * (16 bytes == 128 flags) and even several of these */
 
 /* Options flags: None of these are really useful. Just testing */
-#define FOLDERS_FIRST   (1 << 1) /* 4 dec, 0x04 hex, 00000100 binary */
-#define HELP            (1 << 2) /* and so on... */
-#define HIDDEN          (1 << 3)
-#define ON_THE_FLY      (1 << 4)
-#define SPLASH          (1 << 5)
-#define CASE_SENS       (1 << 6)
-#define START_PATH      (1 << 7)
-#define PRINT_VERSION   (1 << 8)
-#define ALT_PROFILE     (1 << 9)
+#define FOLDERS_FIRST (1 << 1) /* 4 dec, 0x04 hex, 00000100 binary */
+#define HELP (1 << 2)	       /* and so on... */
+#define HIDDEN (1 << 3)
+#define ON_THE_FLY (1 << 4)
+#define SPLASH (1 << 5)
+#define CASE_SENS (1 << 6)
+#define START_PATH (1 << 7)
+#define PRINT_VERSION (1 << 8)
+#define ALT_PROFILE (1 << 9)
 
 /* Internal flags */
-#define ROOT_USR        (1 << 10)
-#define EXT_HELP        (1 << 11)
-#define FILE_CMD_OK     (1 << 12)
-#define GUI             (1 << 13)
-#define IS_USRVAR_DEF   (1 << 14) /* 18 dec, 0x12 hex, 00010010 binary */
+#define ROOT_USR (1 << 10)
+#define EXT_HELP (1 << 11)
+#define FILE_CMD_OK (1 << 12)
+#define GUI (1 << 13)
+#define IS_USRVAR_DEF (1 << 14) /* 18 dec, 0x12 hex, 00010010 binary */
 
 /* Used by log_msg() to know wether to tell prompt() to print messages or
  * not */
@@ -330,11 +352,11 @@ nm=01;32:bm=01;36:"
 #define MAX_COLOR 46
 
 /* Macros to control file descriptors in exec functions */
-#define E_NOFLAG    0
-#define E_NOSTDIN   (1 << 1)
-#define E_NOSTDOUT  (1 << 2)
-#define E_NOSTDERR  (1 << 3)
-#define E_MUTE      (E_NOSTDOUT | E_NOSTDERR)
+#define E_NOFLAG 0
+#define E_NOSTDIN (1 << 1)
+#define E_NOSTDOUT (1 << 2)
+#define E_NOSTDERR (1 << 3)
+#define E_MUTE (E_NOSTDOUT | E_NOSTDERR)
 
 /* Max length of the properties string in long view mode */
 #define MAX_PROP_STR 55
@@ -354,12 +376,20 @@ nm=01;32:bm=01;36:"
 #define itoa xitoa /* itoa does not exist in some OS's */
 /* #define atoi xatoi */
 /* #define alphasort xalphasort */
-#define _(String) gettext (String)
+#define _(String) gettext(String)
 
 #define ENTRY_N 64
 
 #define TOUPPER(ch) (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
-#define DIGINUM(n) (((n) < 10) ? 1 : ((n) < 100) ? 2 : ((n) < 1000) ? 3 : ((n) < 10000) ? 4 : ((n) < 100000) ? 5 : ((n) < 1000000) ? 6 : ((n) < 10000000) ? 7 : ((n) < 100000000) ? 8 : ((n) < 1000000000) ? 9 : 10)
+#define DIGINUM(n) (((n) < 10) ? 1 : ((n) < 100)      ? 2 \
+				 : ((n) < 1000)	      ? 3 \
+				 : ((n) < 10000)      ? 4 \
+				 : ((n) < 100000)     ? 5 \
+				 : ((n) < 1000000)    ? 6 \
+				 : ((n) < 10000000)   ? 7 \
+				 : ((n) < 100000000)  ? 8 \
+				 : ((n) < 1000000000) ? 9 \
+						      : 10)
 #define _ISDIGIT(n) ((unsigned int)(n) - '0' <= 9)
 #define _ISALPHA(n) ((unsigned int)(n) >= 'a' && (unsigned int)(n) <= 'z')
 #define SELFORPARENT(n) (*(n) == '.' && (!(n)[1] || ((n)[1] == '.' && !(n)[2])))
@@ -369,20 +399,18 @@ nm=01;32:bm=01;36:"
 #define BOOKMARK_BONUS 500
 #define PINNED_BONUS 1000
 #define WORKSPACE_BONUS 300
-							/* Last directory access */
+/* Last directory access */
 #define JHOUR(n) ((n) *= 4) /* Within last hour */
 #define JDAY(n) ((n) *= 2)  /* Within last day */
 #define JWEEK(n) ((n) / 2)  /* Within last week */
 #define JOLDER(n) ((n) / 4) /* More than a week */
-
 
 				/** #########################
 				 *  #    GLOBAL VARIABLES   #
 				 *  ######################### */
 
 /* Struct to store user defined variables */
-struct usrvar_t
-{
+struct usrvar_t {
 	char *name;
 	char *value;
 };
@@ -390,8 +418,7 @@ struct usrvar_t
 extern struct usrvar_t *usr_var;
 
 /* Struct to store user defined actions */
-struct actions_t
-{
+struct actions_t {
 	char *name;
 	char *value;
 };
@@ -399,8 +426,7 @@ struct actions_t
 extern struct actions_t *usr_actions;
 
 /* Workspaces information */
-struct ws_t
-{
+struct ws_t {
 	char *path;
 	int num;
 };
@@ -408,8 +434,7 @@ struct ws_t
 extern struct ws_t *ws;
 
 /* Struct to store user defined keybindings */
-struct kbinds_t
-{
+struct kbinds_t {
 	char *function;
 	char *key;
 };
@@ -417,8 +442,7 @@ struct kbinds_t
 extern struct kbinds_t *kbinds;
 
 /* Struct to store the dirjump database values */
-struct jump_t
-{
+struct jump_t {
 	char *path;
 	int keep;
 	int rank;
@@ -430,8 +454,7 @@ struct jump_t
 extern struct jump_t *jump_db;
 
 /* Struct to store bookmarks */
-struct bookmarks_t
-{
+struct bookmarks_t {
 	char *shortcut;
 	char *name;
 	char *path;
@@ -470,8 +493,7 @@ extern struct fileinfo *file_info;
  * line parameter will be overriden, the user still can modifiy on the
  * fly (editing the config file) any option not specified in the command
  * line */
-struct param
-{
+struct param {
 	int splash;
 	int hidden;
 	int longview;
@@ -526,8 +548,7 @@ extern struct param xargs;
 /* A list of possible program messages. Each value tells the prompt what
  * to do with error messages: either to print an E, W, or N char at the
  * beginning of the prompt, or nothing (nomsg) */
-enum prog_msg
-{
+enum prog_msg {
 	nomsg = 0,
 	error = 1,
 	warning = 2,
@@ -549,162 +570,162 @@ extern enum prog_msg pmsg;
 extern int flags;
 
 extern short
-	splash_screen,
-	welcome_message,
-	show_hidden,
-	clear_screen,
-	disk_usage,
-	list_folders_first,
-	share_selbox,
-	long_view,
-	case_sensitive,
-	cd_lists_on_the_fly,
-	tips,
-	logs_enabled,
-	sort,
-	classify,
-	files_counter,
-	light_mode,
-	autocd,
-	auto_open,
-	dirhist_map,
-	restore_last_path,
-	pager,
-	ext_cmd_ok,
-	expand_bookmarks,
-	only_dirs,
-	cd_on_quit,
-	columned,
-	colorize,
-	cur_ws,
-	cp_cmd,
-	mv_cmd,
-	tr_as_rm,
-	no_eln,
-	min_name_trim,
-	case_sens_dirjump,
-	case_sens_path_comp,
+    splash_screen,
+    welcome_message,
+    show_hidden,
+    clear_screen,
+    disk_usage,
+    list_folders_first,
+    share_selbox,
+    long_view,
+    case_sensitive,
+    cd_lists_on_the_fly,
+    tips,
+    logs_enabled,
+    sort,
+    classify,
+    files_counter,
+    light_mode,
+    autocd,
+    auto_open,
+    dirhist_map,
+    restore_last_path,
+    pager,
+    ext_cmd_ok,
+    expand_bookmarks,
+    only_dirs,
+    cd_on_quit,
+    columned,
+    colorize,
+    cur_ws,
+    cp_cmd,
+    mv_cmd,
+    tr_as_rm,
+    no_eln,
+    min_name_trim,
+    case_sens_dirjump,
+    case_sens_path_comp,
 
-	no_log,
-	internal_cmd,
-	shell_terminal,
-	print_msg,
-	recur_perm_error_flag,
-	is_sel,
-	sel_is_last,
-	kbind_busy,
-	unicode,
-	dequoted,
-	mime_match,
-	sort_reverse,
-	sort_switch,
-	kb_shortcut,
-	switch_cscheme,
-	icons,
-	copy_n_rename,
+    no_log,
+    internal_cmd,
+    shell_terminal,
+    print_msg,
+    recur_perm_error_flag,
+    is_sel,
+    sel_is_last,
+    kbind_busy,
+    unicode,
+    dequoted,
+    mime_match,
+    sort_reverse,
+    sort_switch,
+    kb_shortcut,
+    switch_cscheme,
+    icons,
+    copy_n_rename,
 
-	home_ok,
-	config_ok,
-	trash_ok,
-	selfile_ok;
+    home_ok,
+    config_ok,
+    trash_ok,
+    selfile_ok;
 
 extern int
-	max_hist,
-	max_log,
-	max_dirhist,
-	max_path,
-	max_files,
-	min_jump_rank,
-	max_jump_total_rank,
+    max_hist,
+    max_log,
+    max_dirhist,
+    max_path,
+    max_files,
+    min_jump_rank,
+    max_jump_total_rank,
 
-	dirhist_cur_index,
-	argc_bk,
-	exit_code,
-	shell_is_interactive,
-	dirhist_total_index,
-	trash_n,
-	jump_total_rank,
-	*eln_as_file;
+    dirhist_cur_index,
+    argc_bk,
+    exit_code,
+    shell_is_interactive,
+    dirhist_total_index,
+    trash_n,
+    jump_total_rank,
+    *eln_as_file;
 
 extern unsigned short term_cols;
 
 extern size_t
-	args_n,
-	sel_n,
-	msgs_n,
-	prompt_cmds_n,
-	path_n,
-	current_hist_n,
-	usrvar_n,
-	aliases_n,
-	longest,
-	files,
-	actions_n,
-	ext_colors_n,
-	kbinds_n,
-	eln_as_file_n,
-	bm_n,
-	cschemes_n,
-	jump_n,
-	path_progsn;
+    args_n,
+    sel_n,
+    msgs_n,
+    prompt_cmds_n,
+    path_n,
+    current_hist_n,
+    usrvar_n,
+    aliases_n,
+    longest,
+    files,
+    actions_n,
+    ext_colors_n,
+    kbinds_n,
+    eln_as_file_n,
+    bm_n,
+    cschemes_n,
+    jump_n,
+    path_progsn;
 
 extern struct termios shell_tmodes;
 extern off_t total_sel_size;
 extern pid_t own_pid;
 
 extern char
-	div_line_char,
-	hostname[HOST_NAME_MAX],
+    div_line_char,
+    hostname[HOST_NAME_MAX],
 
-	**aliases,
-	**argv_bk,
-	**bin_commands,
-	**bookmark_names,
-	**color_schemes,
-	**ext_colors,
-	**history,
-	**messages,
-	**old_pwd,
-	**paths,
-	**profile_names,
-	**prompt_cmds,
-	**sel_elements,
+    **aliases,
+    **argv_bk,
+    **bin_commands,
+    **bookmark_names,
+    **color_schemes,
+    **ext_colors,
+    **history,
+    **messages,
+    **old_pwd,
+    **paths,
+    **profile_names,
+    **prompt_cmds,
+    **sel_elements,
 
-	*ACTIONS_FILE,
-	*alt_bm_file,
-	*alt_config_file,
-	*alt_kbinds_file,
-	*alt_profile,
-	*BM_FILE,
-	*COLORS_DIR,
-	*CONFIG_DIR,
-	*CONFIG_DIR_GRAL,
-	*CONFIG_FILE,
-	*cur_cscheme,
-	*DIRHIST_FILE,
-	*encoded_prompt,
-	*file_cmd_path,
-	*filter,
-	*HIST_FILE,
-	*KBINDS_FILE,
-	*last_cmd,
-	*LOG_FILE,
-	*ls_colors_bk,
-	*MIME_FILE,
-	*MSG_LOG_FILE,
-	*opener,
-	*pinned_dir,
-	*PLUGINS_DIR,
-	*PROFILE_FILE,
-	*qc,
-	*SEL_FILE,
-	*STDIN_TMP_DIR,
-	*term,
-	*TMP_DIR,
-	*TRASH_DIR,
-	*TRASH_FILES_DIR,
-	*TRASH_INFO_DIR,
-	*usr_cscheme;
+    *ACTIONS_FILE,
+    *alt_bm_file,
+    *alt_config_file,
+    *alt_kbinds_file,
+    *alt_profile,
+    *BM_FILE,
+    *COLORS_DIR,
+    *CONFIG_DIR,
+    *CONFIG_DIR_GRAL,
+    *CONFIG_FILE,
+    *cur_cscheme,
+    *DIRHIST_FILE,
+    *encoded_prompt,
+    *file_cmd_path,
+    *filter,
+    *HIST_FILE,
+    *KBINDS_FILE,
+    *last_cmd,
+    *LOG_FILE,
+    *ls_colors_bk,
+    *MIME_FILE,
+    *MSG_LOG_FILE,
+    *opener,
+    *pinned_dir,
+    *PLUGINS_DIR,
+    *PROFILE_FILE,
+    *qc,
+    *SEL_FILE,
+    *STDIN_TMP_DIR,
+    *term,
+    *TMP_DIR,
+    *TRASH_DIR,
+    *TRASH_FILES_DIR,
+    *TRASH_INFO_DIR,
+    *usr_cscheme;
 
 extern regex_t regex_exp;
 
@@ -721,48 +742,47 @@ extern const char *INTERNAL_CMDS[];
 
 /* Colors (filetype and interface) */
 extern char di_c[MAX_COLOR], /* Directory */
-	nd_c[MAX_COLOR], /* No read directory */
-	ed_c[MAX_COLOR], /* Empty dir */
-	ne_c[MAX_COLOR], /* No read empty dir */
-	fi_c[MAX_COLOR], /* Reg file */
-	ef_c[MAX_COLOR], /* Empty reg file */
-	nf_c[MAX_COLOR], /* No read file */
-	ln_c[MAX_COLOR], /* Symlink */
-	or_c[MAX_COLOR], /* Broken symlink */
-	pi_c[MAX_COLOR], /* FIFO, pipe */
-	so_c[MAX_COLOR], /* Socket */
-	bd_c[MAX_COLOR], /* Block device */
-	cd_c[MAX_COLOR], /* Char device */
-	su_c[MAX_COLOR], /* SUID file */
-	sg_c[MAX_COLOR], /* SGID file */
-	tw_c[MAX_COLOR], /* Sticky other writable */
-	st_c[MAX_COLOR], /* Sticky (not ow)*/
-	ow_c[MAX_COLOR], /* Other writable */
-	ex_c[MAX_COLOR], /* Executable */
-	ee_c[MAX_COLOR], /* Empty executable */
-	ca_c[MAX_COLOR], /* Cap file */
-	no_c[MAX_COLOR], /* Unknown */
-	uf_c[MAX_COLOR], /* Non-'stat'able file */
-	mh_c[MAX_COLOR], /* Multi-hardlink file */
+    nd_c[MAX_COLOR],	     /* No read directory */
+    ed_c[MAX_COLOR],	     /* Empty dir */
+    ne_c[MAX_COLOR],	     /* No read empty dir */
+    fi_c[MAX_COLOR],	     /* Reg file */
+    ef_c[MAX_COLOR],	     /* Empty reg file */
+    nf_c[MAX_COLOR],	     /* No read file */
+    ln_c[MAX_COLOR],	     /* Symlink */
+    or_c[MAX_COLOR],	     /* Broken symlink */
+    pi_c[MAX_COLOR],	     /* FIFO, pipe */
+    so_c[MAX_COLOR],	     /* Socket */
+    bd_c[MAX_COLOR],	     /* Block device */
+    cd_c[MAX_COLOR],	     /* Char device */
+    su_c[MAX_COLOR],	     /* SUID file */
+    sg_c[MAX_COLOR],	     /* SGID file */
+    tw_c[MAX_COLOR],	     /* Sticky other writable */
+    st_c[MAX_COLOR],	     /* Sticky (not ow)*/
+    ow_c[MAX_COLOR],	     /* Other writable */
+    ex_c[MAX_COLOR],	     /* Executable */
+    ee_c[MAX_COLOR],	     /* Empty executable */
+    ca_c[MAX_COLOR],	     /* Cap file */
+    no_c[MAX_COLOR],	     /* Unknown */
+    uf_c[MAX_COLOR],	     /* Non-'stat'able file */
+    mh_c[MAX_COLOR],	     /* Multi-hardlink file */
 
-	bm_c[MAX_COLOR], /* Bookmarked directory */
-	el_c[MAX_COLOR], /* ELN color */
-	mi_c[MAX_COLOR], /* Misc indicators color */
-	df_c[MAX_COLOR], /* Default color */
-	dc_c[MAX_COLOR], /* Files counter color */
-	wc_c[MAX_COLOR], /* Welcome message color */
-	dh_c[MAX_COLOR], /* Dirhist index color */
-	dl_c[MAX_COLOR], /* Dividing line index color */
+    bm_c[MAX_COLOR], /* Bookmarked directory */
+    el_c[MAX_COLOR], /* ELN color */
+    mi_c[MAX_COLOR], /* Misc indicators color */
+    df_c[MAX_COLOR], /* Default color */
+    dc_c[MAX_COLOR], /* Files counter color */
+    wc_c[MAX_COLOR], /* Welcome message color */
+    dh_c[MAX_COLOR], /* Dirhist index color */
+    dl_c[MAX_COLOR], /* Dividing line index color */
 
-	/* Colors used in the prompt, so that \001 and \002 needs to
+    /* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */
-	tx_c[MAX_COLOR + 2], /* Text color */
-	li_c[MAX_COLOR + 2], /* Sel indicator color */
-	ti_c[MAX_COLOR + 2], /* Trash indicator color */
-	em_c[MAX_COLOR + 2], /* Error msg color */
-	wm_c[MAX_COLOR + 2], /* Warning msg color */
-	nm_c[MAX_COLOR + 2], /* Notice msg color */
-	si_c[MAX_COLOR + 2], /* stealth indicator color */
+    tx_c[MAX_COLOR + 2], /* Text color */
+    li_c[MAX_COLOR + 2], /* Sel indicator color */
+    ti_c[MAX_COLOR + 2], /* Trash indicator color */
+    em_c[MAX_COLOR + 2], /* Error msg color */
+    wm_c[MAX_COLOR + 2], /* Warning msg color */
+    nm_c[MAX_COLOR + 2], /* Notice msg color */
+    si_c[MAX_COLOR + 2], /* stealth indicator color */
 
-	dir_ico_c[MAX_COLOR]; /* Directories icon color */
-
+    dir_ico_c[MAX_COLOR]; /* Directories icon color */

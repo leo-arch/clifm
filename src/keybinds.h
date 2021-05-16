@@ -1,3 +1,27 @@
+/* keybinds.h */
+
+/*
+ * This file is part of CliFM
+ * 
+ * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
+ * All rights reserved.
+
+ * CliFM is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * CliFM is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA 02110-1301, USA.
+*/
+
 #pragma once
 
 /* keybinds.c */
@@ -49,9 +73,9 @@ int rl_trash_sel(int count, int key);
 int rl_untrash_all(int count, int key);
 int rl_open_sel(int count, int key);
 int rl_bm_sel(int count, int key);
-int rl_kbinds_help (int count, int key);
-int rl_cmds_help (int count, int key);
-int rl_manpage (int count, int key);
+int rl_kbinds_help(int count, int key);
+int rl_cmds_help(int count, int key);
+int rl_manpage(int count, int key);
 int rl_pinned_dir(int count, int key);
 int rl_ws1(int count, int key);
 int rl_ws2(int count, int key);
@@ -61,4 +85,3 @@ int rl_plugin1(int count, int key);
 int rl_plugin2(int count, int key);
 int rl_plugin3(int count, int key);
 int rl_plugin4(int count, int key);
-

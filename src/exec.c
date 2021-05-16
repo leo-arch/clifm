@@ -24,42 +24,42 @@
 
 #include "helpers.h"
 
+#include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <readline/readline.h>
 #include <stdio.h>
 #include <string.h>
-#include <errno.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <dirent.h>
-#include <readline/readline.h>
 
-#include "aux.h"
-#include "history.h"
-#include "exec.h"
-#include "listing.h"
-#include "selection.h"
-#include "checks.h"
 #include "actions.h"
-#include "misc.h"
-#include "strings.h"
-#include "navigation.h"
-#include "file_operations.h"
-#include "remotes.h"
-#include "jump.h"
-#include "bookmarks.h"
-#include "readline.h"
-#include "trash.h"
-#include "properties.h"
-#include "search.h"
-#include "sort.h"
-#include "colors.h"
-#include "keybinds.h"
-#include "config.h"
-#include "mime.h"
-#include "init.h"
 #include "archives.h"
+#include "aux.h"
+#include "bookmarks.h"
+#include "checks.h"
+#include "colors.h"
+#include "config.h"
+#include "exec.h"
+#include "file_operations.h"
+#include "history.h"
+#include "init.h"
+#include "jump.h"
+#include "keybinds.h"
+#include "listing.h"
+#include "mime.h"
+#include "misc.h"
+#include "navigation.h"
 #include "profiles.h"
+#include "properties.h"
+#include "readline.h"
+#include "remotes.h"
+#include "search.h"
+#include "selection.h"
+#include "sort.h"
+#include "strings.h"
+#include "trash.h"
 
 /* Run a command via execle() and refresh the screen in case of success */
 int
@@ -88,11 +88,11 @@ run_and_refresh(char **comm)
 
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
-		/* Error messages will be printed by launch_execve() itself */
+	/* Error messages will be printed by launch_execve() itself */
 
 	/* If 'rm sel' and command is successful, deselect everything */
-	if (is_sel && *comm[0] == 'r' && comm[0][1] ==  'm'
-	&& (!comm[0][2] || comm[0][2] == ' ')) {
+	if (is_sel && *comm[0] == 'r' && comm[0][1] == 'm' && (!comm[0][2]
+	|| comm[0][2] == ' ')) {
 
 		int j = (int)sel_n;
 		while (--j >= 0)
@@ -125,23 +125,20 @@ run_in_foreground(pid_t pid)
 			/* The program terminated normally and executed successfully
 			 * (WEXITSTATUS(status) == 0) */
 			return EXIT_SUCCESS;
-		}
-		else if (WIFEXITED(status) && WEXITSTATUS(status)) {
+		} else if (WIFEXITED(status) && WEXITSTATUS(status)) {
 			/* Program terminated normally, but returned a
 			 * non-zero status. Error codes should be printed by the
 			 * program itself */
 			return WEXITSTATUS(status);
-		}
-		else {
+		} else {
 			/* The program didn't terminate normally. In this case too,
 			 * error codes should be printed by the program */
 			return EXCRASHERR;
 		}
-	}
-	else {
+	} else {
 		/* waitpid() failed */
 		fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME,
-				strerror(errno));
+		    strerror(errno));
 		return errno;
 	}
 
@@ -190,7 +187,7 @@ launch_execle(const char *cmd)
 
 		execl(user.shell, name ? name + 1 : user.shell, "-c", cmd, NULL);
 		fprintf(stderr, "%s: %s: execle: %s\n", PROGRAM_NAME, user.shell,
-				strerror(errno));
+		    strerror(errno));
 		_exit(errno);
 	}
 	/* Get command status */
@@ -201,24 +198,21 @@ launch_execle(const char *cmd)
 				/* The program terminated normally and executed
 				 * successfully */
 				return EXIT_SUCCESS;
-			}
-			else if (WIFEXITED(status) && WEXITSTATUS(status)) {
+			} else if (WIFEXITED(status) && WEXITSTATUS(status)) {
 				/* Either "command not found" (WEXITSTATUS(status) == 127),
 				 * "permission denied" (not executable) (WEXITSTATUS(status) ==
 				 * 126) or the program terminated normally, but returned a
 				 * non-zero status. These exit codes will be handled by the
 				 * system shell itself, since we're using here execle() */
 				return WEXITSTATUS(status);
-			}
-			else {
+			} else {
 				/* The program didn't terminate normally */
 				return EXCRASHERR;
 			}
-		}
-		else {
+		} else {
 			/* Waitpid() failed */
 			fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME,
-					strerror(errno));
+			    strerror(errno));
 			return errno;
 		}
 	}
@@ -277,7 +271,7 @@ launch_execve(char **cmd, int bg, int xflags)
 
 		execvp(cmd[0], cmd);
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, cmd[0],
-				strerror(errno));
+		    strerror(errno));
 		_exit(errno);
 	}
 
@@ -286,8 +280,7 @@ launch_execve(char **cmd, int bg, int xflags)
 		if (bg) {
 			run_in_background(pid);
 			return EXIT_SUCCESS;
-		}
-		else
+		} else
 			return run_in_foreground(pid);
 	}
 
@@ -301,7 +294,7 @@ launch_execve(char **cmd, int bg, int xflags)
 int
 exec_cmd(char **comm)
 {
-/*  if (!comm || *comm[0] == '\0')
+	/*  if (!comm || *comm[0] == '\0')
 		return EXIT_FAILURE; */
 
 	fputs(df_c, stdout);
@@ -346,7 +339,7 @@ exec_cmd(char **comm)
 	if (comm[0][0] == ';' || comm[0][0] == ':') {
 		if (!comm[0][1]) {
 			/* If just ":" or ";", launch the default shell */
-			char *cmd[] = { user.shell, NULL };
+			char *cmd[] = {user.shell, NULL};
 			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_code = EXIT_FAILURE;
 			return exit_code;
@@ -369,8 +362,7 @@ exec_cmd(char **comm)
 		if (*comm[0] == '~') {
 			char *exp_path = tilde_expand(comm[0]);
 			if (exp_path) {
-				comm[0] = (char *)xrealloc(comm[0], (strlen(exp_path)
-										   + 1) * sizeof(char));
+				comm[0] = (char *)xrealloc(comm[0], (strlen(exp_path) + 1) * sizeof(char));
 				strcpy(comm[0], exp_path);
 				free(exp_path);
 			}
@@ -389,8 +381,8 @@ exec_cmd(char **comm)
 
 	/* Only autocd or auto-open here if not absolute path and if there
 	 * is no second argument or if second argument is "&" */
-	if (*comm[0] != '/' && (autocd || auto_open)
-	&& (!comm[1] || (*comm[1] == '&' && !comm[1][1]))) {
+	if (*comm[0] != '/' && (autocd || auto_open) && (!comm[1]
+	|| (*comm[1] == '&' && !comm[1][1]))) {
 
 		char *tmp = comm[0];
 		size_t i, tmp_len = strlen(tmp);
@@ -406,16 +398,15 @@ exec_cmd(char **comm)
 			if (strcmp(tmp, file_info[i].name) != 0)
 				continue;
 
-			if (autocd && (file_info[i].type == DT_DIR
-			|| file_info[i].dir == 1)) {
+			if (autocd && (file_info[i].type == DT_DIR || file_info[i].dir == 1)) {
 				exit_code = cd_function(tmp);
 				return exit_code;
 			}
 
 			else if (auto_open && (file_info[i].type == DT_REG
 			|| file_info[i].type == DT_LNK)) {
-				char *cmd[] = { "open", comm[0],
-								(comm[1]) ? comm[1] : NULL, NULL };
+				char *cmd[] = {"open", comm[0],
+				    (comm[1]) ? comm[1] : NULL, NULL};
 				exit_code = open_function(cmd);
 				return exit_code;
 			}
@@ -432,7 +423,6 @@ exec_cmd(char **comm)
 	 * #                 BUILTIN COMMANDS                 #
 	 * ####################################################*/
 
-
 	/*          ############### CD ##################     */
 	if (*comm[0] == 'c' && comm[0][1] == 'd' && !comm[0][2]) {
 		if (!comm[1])
@@ -444,21 +434,20 @@ exec_cmd(char **comm)
 		/* Remotes */
 		else if (*comm[1] == 's' && strncmp(comm[1], "sftp://", 7) == 0)
 			exit_code = remote_ssh(comm[1] + 7, (comm[2]) ? comm[2]
-								   : NULL);
+								      : NULL);
 		else if (*comm[1] == 's' && strncmp(comm[1], "smb://", 6) == 0)
 			exit_code = remote_smb(comm[1] + 6, (comm[2]) ? comm[2]
-								   : NULL);
+								      : NULL);
 		else if (*comm[1] == 'f' && strncmp(comm[1], "ftp://", 6) == 0)
 			exit_code = remote_ftp(comm[1] + 6, (comm[2]) ? comm[2]
-								   : NULL);
+								      : NULL);
 
 		else
 			exit_code = cd_function(comm[1]);
 	}
 
 	/*         ############### OPEN ##################     */
-	else if (*comm[0] == 'o' && (!comm[0][1]
-	|| strcmp(comm[0], "open") == 0)) {
+	else if (*comm[0] == 'o' && (!comm[0][1] || strcmp(comm[0], "open") == 0)) {
 
 		if (!comm[1]) {
 			puts(_("Usage: o, open ELN/FILE [APPLICATION]"));
@@ -472,24 +461,22 @@ exec_cmd(char **comm)
 		/* Remotes */
 		else if (*comm[1] == 's' && strncmp(comm[1], "sftp://", 7) == 0)
 			exit_code = remote_ssh(comm[1] + 7, (comm[2]) ? comm[2]
-								   : NULL);
+								      : NULL);
 		else if (*comm[1] == 's' && strncmp(comm[1], "smb://", 6) == 0)
 			exit_code = remote_smb(comm[1] + 6, (comm[2]) ? comm[2]
-								   : NULL);
+								      : NULL);
 		else if (*comm[1] == 'f' && strncmp(comm[1], "ftp://", 6) == 0)
 			exit_code = remote_ftp(comm[1] + 6, (comm[2]) ? comm[2]
-								   : NULL);
+								      : NULL);
 
 		else
 			exit_code = open_function(comm);
 	}
 
-
 	/*   ############## DIRECTORY JUMPER ##################     */
-	else if (*comm[0] == 'j' && (!comm[0][1]
-	|| ((comm[0][1] == 'c' || comm[0][1] == 'p'
-	|| comm[0][1] == 'e' || comm[0][1] == 'o' || comm[0][1] == 'l')
-	&& !comm[0][2]))) {
+	else if (*comm[0] == 'j' && (!comm[0][1] || ((comm[0][1] == 'c'
+	|| comm[0][1] == 'p' || comm[0][1] == 'e' || comm[0][1] == 'o'
+	|| comm[0][1] == 'l') && !comm[0][2]))) {
 		exit_code = dirjump(comm);
 		return exit_code;
 	}
@@ -509,7 +496,7 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "bookmarks") == 0)) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: bm, bookmarks [a, add FILE] [d, del] "
-				 "[edit]"));
+			       "[edit]"));
 			return EXIT_SUCCESS;
 		}
 		/* Disable keyboard shortcuts. Otherwise, the function will
@@ -526,13 +513,11 @@ exec_cmd(char **comm)
 	}
 
 	/*       ############### BACK AND FORTH ##################     */
-	else if (*comm[0] == 'b' && (!comm[0][1]
-	|| strcmp(comm[0], "back") == 0))
-		exit_code = back_function (comm);
+	else if (*comm[0] == 'b' && (!comm[0][1] || strcmp(comm[0], "back") == 0))
+		exit_code = back_function(comm);
 
-	else if (*comm[0] == 'f' && (!comm[0][1]
-	|| strcmp(comm[0], "forth") == 0))
-		exit_code = forth_function (comm);
+	else if (*comm[0] == 'f' && (!comm[0][1] || strcmp(comm[0], "forth") == 0))
+		exit_code = forth_function(comm);
 
 	else if ((*comm[0] == 'b' && comm[0][1] == 'h' && !comm[0][2])
 	|| (*comm[0] == 'f' && comm[0][1] == 'h' && !comm[0][2])) {
@@ -540,23 +525,23 @@ exec_cmd(char **comm)
 		for (i = 0; i < dirhist_total_index; i++) {
 			if (i == dirhist_cur_index)
 				printf("%d %s%s%s\n", i + 1, dh_c,
-						old_pwd[i], df_c);
-			else 
+				    old_pwd[i], df_c);
+			else
 				printf("%d %s\n", i + 1, old_pwd[i]);
 		}
 	}
 
 	/*     ############### COPY AND MOVE ##################     */
-	else if ((*comm[0] == 'c' && (!comm[0][1]
-	|| (comm[0][1] == 'p' && !comm[0][2])))
-
-	|| (*comm[0] == 'm' && (!comm[0][1]
-	|| (comm[0][1] == 'v' && !comm[0][2])))
-
-	|| (*comm[0] == 'v' && (!comm[0][1] || (comm[0][1] == 'v'
+	else if ((*comm[0] == 'c' && (!comm[0][1] || (comm[0][1] == 'p'
 	&& !comm[0][2])))
 
-	|| (*comm[0] == 'p' && strcmp(comm[0], "paste") == 0)) {
+		 || (*comm[0] == 'm' && (!comm[0][1] || (comm[0][1] == 'v'
+		 && !comm[0][2])))
+
+		 || (*comm[0] == 'v' && (!comm[0][1] || (comm[0][1] == 'v'
+		 && !comm[0][2])))
+
+		 || (*comm[0] == 'p' && strcmp(comm[0], "paste") == 0)) {
 
 		if (((*comm[0] == 'c' || *comm[0] == 'v') && !comm[0][1])
 		|| (*comm[0] == 'v' && comm[0][1] == 'v' && !comm[0][2])
@@ -588,11 +573,11 @@ exec_cmd(char **comm)
 	}
 
 	/*         ############### TRASH ##################     */
-	else if (*comm[0] == 't' && (!comm[0][1]
-	|| strcmp(comm[0], "tr") == 0 || strcmp(comm[0], "trash") == 0)) {
+	else if (*comm[0] == 't' && (!comm[0][1] || strcmp(comm[0], "tr") == 0
+	|| strcmp(comm[0], "trash") == 0)) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: t, tr, trash [ELN/FILE ... n] "
-				 "[ls, list] [clear] [del, rm]"));
+			       "[ls, list] [clear] [del, rm]"));
 			return EXIT_SUCCESS;
 		}
 
@@ -611,8 +596,7 @@ exec_cmd(char **comm)
 		}
 	}
 
-	else if (*comm[0] == 'u' && (!comm[0][1]
-	|| strcmp(comm[0], "undel") == 0
+	else if (*comm[0] == 'u' && (!comm[0][1] || strcmp(comm[0], "undel") == 0
 	|| strcmp(comm[0], "untrash") == 0)) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: u, undel, untrash [*, a, all]"));
@@ -732,7 +716,7 @@ exec_cmd(char **comm)
 
 		if (exit_code == EXIT_SUCCESS)
 			printf(_("%s: Toggled executable bit on %zu file(s)\n"),
-				   PROGRAM_NAME, args_n);
+			    PROGRAM_NAME, args_n);
 
 		return exit_code;
 	}
@@ -759,12 +743,11 @@ exec_cmd(char **comm)
 		return (exit_code = unpin_dir());
 
 	/*    ############### PROPERTIES ##################     */
-	else if (*comm[0] == 'p' && (!comm[0][1]
-	|| strcmp(comm[0], "pr") == 0 || strcmp(comm[0], "pp") == 0
-	|| strcmp(comm[0], "prop") == 0)) {
+	else if (*comm[0] == 'p' && (!comm[0][1] || strcmp(comm[0], "pr") == 0
+	|| strcmp(comm[0], "pp") == 0 || strcmp(comm[0], "prop") == 0)) {
 		if (!comm[1]) {
 			fputs(_("Usage: p, pr, pp, prop [ELN/FILE ... n]\n"),
-				  stderr);
+			    stderr);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
@@ -779,19 +762,17 @@ exec_cmd(char **comm)
 
 	/*     ############### SEARCH ##################     */
 	else if (*comm[0] == '/' && access(comm[0], F_OK) != 0) {
-								/* If not absolute path */
+		/* If not absolute path */
 		/* Try first globbing, and if no result, try regex */
-		if (search_glob(comm, (comm[0][1] == '!') ? 1 : 0)
-		== EXIT_FAILURE)
+		if (search_glob(comm, (comm[0][1] == '!') ? 1 : 0) == EXIT_FAILURE)
 			exit_code = search_regex(comm, (comm[0][1] == '!') ? 1 : 0);
 		else
 			exit_code = EXIT_SUCCESS;
 	}
 
 	/*      ############### HISTORY ##################     */
-	else if (*comm[0] == '!' && comm[0][1] != ' '
-	&& comm[0][1] != '\t' && comm[0][1] != '\n' && comm[0][1] != '='
-	&& comm[0][1] != '(')
+	else if (*comm[0] == '!' && comm[0][1] != ' ' && comm[0][1] != '\t'
+	&& comm[0][1] != '\n' && comm[0][1] != '=' && comm[0][1] != '(')
 		exit_code = run_history_cmd(comm[0] + 1);
 
 	/*    ############### BATCH LINK ##################     */
@@ -823,9 +804,9 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "sort") == 0)) {
 		if (comm[1] && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: st [METHOD] [rev]\nMETHOD: 0 = none, "
-				   "1 = name, 2 = size, 3 = atime, 4 = btime, "
-				   "5 = ctime, 6 = mtime, 7 = version, "
-				   "8 = extension, 9 = inode, 10 = owner, 11 = group"));
+			       "1 = name, 2 = size, 3 = atime, 4 = btime, "
+			       "5 = ctime, 6 = mtime, 7 = version, "
+			       "8 = extension, 9 = inode, 10 = owner, 11 = group"));
 			return EXIT_SUCCESS;
 		}
 
@@ -833,11 +814,10 @@ exec_cmd(char **comm)
 	}
 
 	/*   ################ ARCHIVER ##################     */
-	else if (*comm[0] == 'a' && ((comm[0][1] == 'c'
-	|| comm[0][1] == 'd') && !comm[0][2])) {
+	else if (*comm[0] == 'a' && ((comm[0][1] == 'c' || comm[0][1] == 'd')
+	&& !comm[0][2])) {
 
-		if (!comm[1] || (*comm[1] == '-'
-		&& strcmp(comm[1], "--help") == 0)) {
+		if (!comm[1] || (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)) {
 			puts(_("Usage: ac, ad ELN/FILE ..."));
 			return EXIT_SUCCESS;
 		}
@@ -859,7 +839,7 @@ exec_cmd(char **comm)
 		return exit_code;
 	}
 
-	else if(*comm[0] == 'f' && ((comm[0][1] == 't' && !comm[0][2])
+	else if (*comm[0] == 'f' && ((comm[0][1] == 't' && !comm[0][2])
 	|| strcmp(comm[0], "filter") == 0)) {
 		exit_code = filter_function(comm[1]);
 		return exit_code;
@@ -867,8 +847,7 @@ exec_cmd(char **comm)
 
 	else if (*comm[0] == 'c' && ((comm[0][1] == 'l' && !comm[0][2])
 	|| strcmp(comm[0], "columns") == 0)) {
-		if (!comm[1] || (*comm[1] == '-'
-		&& strcmp(comm[1], "--help") == 0))
+		if (!comm[1] || (*comm[1] == '-' && strcmp(comm[1], "--help") == 0))
 			puts(_("Usage: cl, columns [on, off]"));
 
 		else if (*comm[1] == 'o' && comm[1][1] == 'n' && !comm[1][2]) {
@@ -898,8 +877,7 @@ exec_cmd(char **comm)
 
 	else if (*comm[0] == 'i' && strcmp(comm[0], "icons") == 0) {
 
-		if (!comm[1] || (*comm[1] == '-'
-		&& strcmp(comm[1], "--help") == 0))
+		if (!comm[1] || (*comm[1] == '-' && strcmp(comm[1], "--help") == 0))
 			puts(_("Usage: icons [on, off]"));
 
 		else if (*comm[1] == 'o' && comm[1][1] == 'n' && !comm[1][2]) {
@@ -944,8 +922,7 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'e' && (strcmp(comm[0], "exp") == 0
 	|| strcmp(comm[0], "export") == 0)) {
 
-		if (comm[1] && *comm[1] == '-'
-		&& strcmp(comm[1], "--help") == 0) {
+		if (comm[1] && *comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: exp, export [FILE(s)]"));
 			return EXIT_SUCCESS;
 		}
@@ -985,25 +962,24 @@ exec_cmd(char **comm)
 		}
 
 		printf(_("opener: Opener set to '%s'\n"), (opener) ? opener
-			   : "lira (built-in)");
+								   : "lira (built-in)");
 	}
 
-					/* #### TIPS #### */
+	/* #### TIPS #### */
 	else if (*comm[0] == 't' && strcmp(comm[0], "tips") == 0)
 		print_tips(1);
 
-					/* #### ACTIONS #### */
+	/* #### ACTIONS #### */
 	else if (*comm[0] == 'a' && strcmp(comm[0], "actions") == 0) {
 		if (!comm[1]) {
 			if (actions_n) {
 				size_t i;
 				for (i = 0; i < actions_n; i++)
 					printf("%s %s->%s %s\n", usr_actions[i].name,
-						   mi_c, df_c, usr_actions[i].value);
-			}
-			else {
+					    mi_c, df_c, usr_actions[i].value);
+			} else {
 				puts(_("actions: No actions defined. Use the 'actions "
-				"edit' command to add some"));
+				       "edit' command to add some"));
 			}
 		}
 
@@ -1022,7 +998,7 @@ exec_cmd(char **comm)
 		}
 	}
 
-					/* #### LIGHT MODE #### */
+	/* #### LIGHT MODE #### */
 	else if (*comm[0] == 'l' && comm[0][1] == 'm' && !comm[0][2]) {
 		if (comm[1]) {
 			if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
@@ -1048,8 +1024,7 @@ exec_cmd(char **comm)
 	}
 
 	/*    ############### RELOAD ##################     */
-	else if (*comm[0] == 'r' && ((comm[0][1] == 'l' && !comm[0][2])
-	|| strcmp(comm[0], "reload") == 0)) {
+	else if (*comm[0] == 'r' && ((comm[0][1] == 'l' && !comm[0][2]) || strcmp(comm[0], "reload") == 0)) {
 		exit_code = reload_config();
 		welcome_message = 0;
 
@@ -1062,7 +1037,7 @@ exec_cmd(char **comm)
 		return exit_code;
 	}
 
-					/* #### NEW INSTANCE #### */
+	/* #### NEW INSTANCE #### */
 	else if ((*comm[0] == 'x' || *comm[0] == 'X') && !comm[0][1]) {
 		if (comm[1]) {
 			if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
@@ -1087,9 +1062,8 @@ exec_cmd(char **comm)
 		return exit_code;
 	}
 
-						/* #### NET #### */
-	else if (*comm[0] == 'n' && (!comm[0][1]
-	|| strcmp(comm[0], "net") == 0)) {
+	/* #### NET #### */
+	else if (*comm[0] == 'n' && (!comm[0][1] || strcmp(comm[0], "net") == 0)) {
 
 		if (!comm[1]) {
 			puts(_("Usage: n, net [sftp, smb, ftp]://ADDRESS [OPTIONS]"));
@@ -1098,31 +1072,29 @@ exec_cmd(char **comm)
 
 		if (*comm[1] == 's' && strncmp(comm[1], "sftp://", 7) == 0)
 			exit_code = remote_ssh(comm[1] + 7, (comm[2]) ? comm[2]
-								   : NULL);
+								      : NULL);
 
 		else if (*comm[1] == 's' && strncmp(comm[1], "smb://", 6) == 0)
 			exit_code = remote_smb(comm[1] + 6, (comm[2]) ? comm[2]
-								   : NULL);
+								      : NULL);
 
 		else if (*comm[1] == 'f' && strncmp(comm[1], "ftp://", 6) == 0)
 			exit_code = remote_ftp(comm[1] + 6, (comm[2]) ? comm[2]
-								   : NULL);
+								      : NULL);
 
 		else {
 			fputs(_("Usage: n, net [sftp, smb, ftp]://ADDRESS [OPTIONS]\n"),
-				  stderr);
+			    stderr);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
 	}
 
-						/* #### MIME #### */
-	else if (*comm[0] == 'm' && ((comm[0][1] == 'm' && !comm[0][2])
-	|| strcmp(comm[0], "mime") == 0))
+	/* #### MIME #### */
+	else if (*comm[0] == 'm' && ((comm[0][1] == 'm' && !comm[0][2]) || strcmp(comm[0], "mime") == 0))
 		exit_code = mime_open(comm);
 
-	else if (*comm[0] == 'l' && comm[0][1] == 's' && !comm[0][2]
-	&& !cd_lists_on_the_fly) {
+	else if (*comm[0] == 'l' && comm[0][1] == 's' && !comm[0][2] && !cd_lists_on_the_fly) {
 		free_dirlist();
 		exit_code = list_dir();
 
@@ -1130,14 +1102,12 @@ exec_cmd(char **comm)
 			exit_code = EXIT_FAILURE;
 	}
 
-					/* #### PROFILE #### */
-	else if (*comm[0] == 'p' && ((comm[0][1] == 'f' && !comm[0][2])
-	|| strcmp(comm[0], "prof") == 0 || strcmp(comm[0], "profile") == 0))
+	/* #### PROFILE #### */
+	else if (*comm[0] == 'p' && ((comm[0][1] == 'f' && !comm[0][2]) || strcmp(comm[0], "prof") == 0 || strcmp(comm[0], "profile") == 0))
 		exit_code = profile_function(comm);
 
-					/* #### MOUNTPOINTS #### */
-	else if (*comm[0] == 'm' && ((comm[0][1] == 'p' && !comm[0][2])
-	|| strcmp(comm[0], "mountpoints") == 0)) {
+	/* #### MOUNTPOINTS #### */
+	else if (*comm[0] == 'm' && ((comm[0][1] == 'p' && !comm[0][2]) || strcmp(comm[0], "mountpoints") == 0)) {
 
 		if (comm[1] && strcmp(comm[1], "--help") == 0)
 			puts(_("Usage: mp, mountpoints"));
@@ -1151,7 +1121,7 @@ exec_cmd(char **comm)
 		}
 	}
 
-					/* #### MAX FILES #### */
+	/* #### MAX FILES #### */
 	else if (*comm[0] == 'm' && comm[0][1] == 'f' && !comm[0][2]) {
 		if (!comm[1]) {
 			printf(_("Max files: %d\n"), max_files);
@@ -1173,7 +1143,7 @@ exec_cmd(char **comm)
 		if (inum < -1) {
 			max_files = inum;
 			fprintf(stderr, _("%s: %d: Invalid number\n"), PROGRAM_NAME,
-					inum);
+			    inum);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
@@ -1186,7 +1156,7 @@ exec_cmd(char **comm)
 		return EXIT_SUCCESS;
 	}
 
-					/* #### EXT #### */
+	/* #### EXT #### */
 	else if (*comm[0] == 'e' && comm[0][1] == 'x' && comm[0][2] == 't'
 	&& !comm[0][3]) {
 
@@ -1202,7 +1172,7 @@ exec_cmd(char **comm)
 		else {
 			if (*comm[1] == 's' && strcmp(comm[1], "status") == 0)
 				printf(_("%s: External commands %s\n"), PROGRAM_NAME,
-						(ext_cmd_ok) ? _("enabled") : _("disabled"));
+				    (ext_cmd_ok) ? _("enabled") : _("disabled"));
 
 			else if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
 				ext_cmd_ok = 1;
@@ -1221,7 +1191,7 @@ exec_cmd(char **comm)
 		}
 	}
 
-					/* #### PAGER #### */
+	/* #### PAGER #### */
 	else if (*comm[0] == 'p' && ((comm[0][1] == 'g' && !comm[0][2])
 	|| strcmp(comm[0], "pager") == 0)) {
 
@@ -1237,7 +1207,7 @@ exec_cmd(char **comm)
 		else {
 			if (*comm[1] == 's' && strcmp(comm[1], "status") == 0)
 				printf(_("%s: Pager %s\n"), PROGRAM_NAME,
-					   (pager) ? _("enabled") : _("disabled"));
+				    (pager) ? _("enabled") : _("disabled"));
 
 			else if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
 				pager = 1;
@@ -1247,15 +1217,14 @@ exec_cmd(char **comm)
 			else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
 				pager = 0;
 				printf(_("%s: Pager disabled\n"), PROGRAM_NAME);
-			}
-			else {
+			} else {
 				fputs(_("Usage: pg, pager [on, off, status]\n"), stderr);
 				exit_code = EXIT_FAILURE;
 			}
 		}
 	}
 
-					/* #### FILES COUNTER #### */
+	/* #### FILES COUNTER #### */
 	else if (*comm[0] == 'f' && ((comm[0][1] == 'c' && !comm[0][2])
 	|| strcmp(comm[0], "filescounter") == 0)) {
 		if (!comm[1]) {
@@ -1286,27 +1255,26 @@ exec_cmd(char **comm)
 
 		else {
 			fputs(_("Usage: fc, filescounter [on, off, status]\n"),
-				  stderr);
+			    stderr);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
 	}
 
-					/* #### UNICODE #### */
+	/* #### UNICODE #### */
 	else if (*comm[0] == 'u' && ((comm[0][1] == 'c' && !comm[0][2])
 	|| strcmp(comm[0], "unicode") == 0)) {
 		if (!comm[1]) {
 			fputs(_("Usage: unicode, uc [on, off, status]\n"), stderr);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
-		}
-		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
+		} else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
 			puts(_("Usage: unicode, uc [on, off, status]"));
 
 		else {
 			if (*comm[1] == 's' && strcmp(comm[1], "status") == 0)
 				printf(_("%s: Unicode %s\n"), PROGRAM_NAME,
-						(unicode) ? _("enabled") : _("disabled"));
+				    (unicode) ? _("enabled") : _("disabled"));
 
 			else if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
 				unicode = 1;
@@ -1325,7 +1293,7 @@ exec_cmd(char **comm)
 		}
 	}
 
-				/* #### FOLDERS FIRST #### */
+	/* #### FOLDERS FIRST #### */
 	else if (*comm[0] == 'f' && ((comm[0][1] == 'f' && !comm[0][2])
 	|| strcmp(comm[0], "folders-first") == 0)) {
 
@@ -1347,7 +1315,7 @@ exec_cmd(char **comm)
 
 		if (*comm[1] == 's' && strcmp(comm[1], "status") == 0)
 			printf(_("%s: Folders first %s\n"), PROGRAM_NAME,
-					 (list_folders_first) ? _("enabled") : _("disabled"));
+			    (list_folders_first) ? _("enabled") : _("disabled"));
 
 		else if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0)
 			list_folders_first = 1;
@@ -1369,10 +1337,9 @@ exec_cmd(char **comm)
 		}
 	}
 
-				/* #### LOG #### */
+	/* #### LOG #### */
 	else if (*comm[0] == 'l' && strcmp(comm[0], "log") == 0) {
-		if (comm[1] && *comm[1] == '-'
-		&& strcmp(comm[1], "--help") == 0) {
+		if (comm[1] && *comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: log [clear]"));
 			return EXIT_SUCCESS;
 		}
@@ -1389,7 +1356,7 @@ exec_cmd(char **comm)
 		exit_code = log_function(comm);
 	}
 
-				/* #### MESSAGES #### */
+	/* #### MESSAGES #### */
 	else if (*comm[0] == 'm' && (strcmp(comm[0], "msg") == 0
 	|| strcmp(comm[0], "messages") == 0)) {
 
@@ -1425,7 +1392,7 @@ exec_cmd(char **comm)
 		}
 	}
 
-				/* #### ALIASES #### */
+	/* #### ALIASES #### */
 	else if (*comm[0] == 'a' && strcmp(comm[0], "alias") == 0) {
 		if (comm[1]) {
 			if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
@@ -1453,7 +1420,7 @@ exec_cmd(char **comm)
 		}
 	}
 
-				/* #### SHELL #### */
+	/* #### SHELL #### */
 	else if (*comm[0] == 's' && strcmp(comm[0], "shell") == 0) {
 		if (!comm[1]) {
 			if (user.shell)
@@ -1468,15 +1435,15 @@ exec_cmd(char **comm)
 			exit_code = set_shell(comm[1]);
 	}
 
-				/* #### EDIT #### */
+	/* #### EDIT #### */
 	else if (*comm[0] == 'e' && strcmp(comm[0], "edit") == 0)
 		exit_code = edit_function(comm);
 
-				/* #### HISTORY #### */
+	/* #### HISTORY #### */
 	else if (*comm[0] == 'h' && strcmp(comm[0], "history") == 0)
 		exit_code = history_function(comm);
 
-			  /* #### HIDDEN FILES #### */
+	/* #### HIDDEN FILES #### */
 	else if (*comm[0] == 'h' && ((comm[0][1] == 'f' && !comm[0][2])
 	|| strcmp(comm[0], "hidden") == 0)) {
 		if (!comm[1]) {
@@ -1490,12 +1457,11 @@ exec_cmd(char **comm)
 			 * whenever an invalid argument is entered */
 			puts(_("Usage: hidden, hf [on, off, status]"));
 			return EXIT_SUCCESS;
-		}
-		else
+		} else
 			exit_code = hidden_function(comm);
 	}
 
-					/* #### AUTOCD #### */
+	/* #### AUTOCD #### */
 	else if (*comm[0] == 'a' && (strcmp(comm[0], "acd") == 0
 	|| strcmp(comm[0], "autocd") == 0)) {
 
@@ -1532,7 +1498,7 @@ exec_cmd(char **comm)
 		}
 	}
 
-					/* #### AUTO-OPEN #### */
+	/* #### AUTO-OPEN #### */
 	else if (*comm[0] == 'a' && ((comm[0][1] == 'o' && !comm[0][2])
 	|| strcmp(comm[0], "auto-open") == 0)) {
 
@@ -1569,19 +1535,18 @@ exec_cmd(char **comm)
 		}
 	}
 
-					/* #### COMMANDS #### */
+	/* #### COMMANDS #### */
 	else if (*comm[0] == 'c' && (strcmp(comm[0], "cmd") == 0
 	|| strcmp(comm[0], "commands") == 0))
 		exit_code = list_commands();
 
-			  /* #### AND THESE ONES TOO #### */
+	/* #### AND THESE ONES TOO #### */
 	/* These functions just print stuff, so that the value of exit_code
 	 * is always zero, that is to say, success */
 	else if (strcmp(comm[0], "path") == 0 || strcmp(comm[0], "cwd") == 0)
 		printf("%s\n", ws[cur_ws].path);
 
-	else if ((*comm[0] == '?' && !comm[0][1])
-	|| strcmp(comm[0], "help") == 0)
+	else if ((*comm[0] == '?' && !comm[0][1]) || strcmp(comm[0], "help") == 0)
 		help_function();
 
 	else if (*comm[0] == 'c' && ((comm[0][1] == 'c' && !comm[0][2])
@@ -1601,9 +1566,9 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 's' && strcmp(comm[0], "splash") == 0)
 		splash();
 
-					/* #### QUIT #### */
-	else if ((*comm[0] == 'q' && !comm[0][1])
-	|| strcmp(comm[0], "quit") == 0 || strcmp(comm[0], "exit") == 0) {
+	/* #### QUIT #### */
+	else if ((*comm[0] == 'q' && !comm[0][1]) || strcmp(comm[0], "quit") == 0
+	|| strcmp(comm[0], "exit") == 0) {
 
 		/* Free everything and exit */
 		int i = (int)args_n + 1;
@@ -1645,14 +1610,11 @@ exec_cmd(char **comm)
 				return EXIT_FAILURE;
 			}
 
-			else if (auto_open && (file_attrib.st_mode & S_IFMT)
-			== S_IFREG) {
+			else if (auto_open && (file_attrib.st_mode & S_IFMT) == S_IFREG) {
 				/* Make sure we have not an executable file */
-				if (!(file_attrib.st_mode
-				& (S_IXUSR|S_IXGRP|S_IXOTH))) {
+				if (!(file_attrib.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))) {
 
-					char *cmd[] = { "open", comm[0], (comm[1])
-									? comm[1] : NULL, NULL };
+					char *cmd[] = {"open", comm[0], (comm[1]) ? comm[1] : NULL, NULL};
 					exit_code = open_function(cmd);
 					return exit_code;
 				}
@@ -1673,19 +1635,12 @@ exec_cmd(char **comm)
 		 * 'pkill' or 'killall' commands, from within CliFM itself.
 		 * Otherwise, the program will be forcefully terminated without
 		 * freeing allocated memory */
-		if ((*comm[0] == 'k' || *comm[0] == 'p')
-		&& (strcmp(comm[0], "kill") == 0
-		|| strcmp(comm[0], "killall") == 0
-		|| strcmp(comm[0], "pkill") == 0)) {
+		if ((*comm[0] == 'k' || *comm[0] == 'p') && (strcmp(comm[0], "kill") == 0 || strcmp(comm[0], "killall") == 0 || strcmp(comm[0], "pkill") == 0)) {
 			size_t i;
 			for (i = 1; i <= args_n; i++) {
-				if ((strcmp(comm[0], "kill") == 0
-				&& atoi(comm[i]) == (int)own_pid)
-				|| ((strcmp(comm[0], "killall") == 0
-				|| strcmp(comm[0], "pkill") == 0)
-				&& strcmp(comm[i], argv_bk[0]) == 0)) {
-					fprintf(stderr, _("%s: To gracefully quit enter"
-									  "'quit'\n"), PROGRAM_NAME);
+				if ((strcmp(comm[0], "kill") == 0 && atoi(comm[i]) == (int)own_pid) || ((strcmp(comm[0], "killall") == 0 || strcmp(comm[0], "pkill") == 0) && strcmp(comm[i], argv_bk[0]) == 0)) {
+					fprintf(stderr, _("%s: To gracefully quit enter 'quit'\n"),
+							PROGRAM_NAME);
 					exit_code = EXIT_FAILURE;
 					return EXIT_FAILURE;
 				}
@@ -1695,14 +1650,14 @@ exec_cmd(char **comm)
 		/* CHECK WHETHER EXTERNAL COMMANDS ARE ALLOWED */
 		if (!ext_cmd_ok) {
 			fprintf(stderr, _("%s: External commands are not allowed. "
-					"Run 'ext on' to enable them.\n"), PROGRAM_NAME);
+					  "Run 'ext on' to enable them.\n"), PROGRAM_NAME);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
 		}
 
 		if (*comm[0] == *argv_bk[0] && strcmp(comm[0], argv_bk[0]) == 0) {
 			fprintf(stderr, "%s: Nested instances are not allowed\n",
-					PROGRAM_NAME);
+			    PROGRAM_NAME);
 			return EXIT_FAILURE;
 		}
 
@@ -1724,13 +1679,12 @@ exec_cmd(char **comm)
 			/* If string == ":" or ";" */
 			if (!comm_tmp || !*comm_tmp) {
 				fprintf(stderr, _("%s: '%c': Syntax error\n"),
-						PROGRAM_NAME, *comm[0]);
+				    PROGRAM_NAME, *comm[0]);
 				exit_code = EXIT_FAILURE;
 				if (comm_tmp)
 					free(comm_tmp);
 				return EXIT_FAILURE;
-			}
-			else {
+			} else {
 				strcpy(comm[0], comm_tmp);
 				free(comm_tmp);
 			}
@@ -1750,8 +1704,7 @@ exec_cmd(char **comm)
 
 			for (i = 1; i <= args_n; i++) {
 				ext_cmd_len += strlen(comm[i]) + 1;
-				ext_cmd = (char *)xrealloc(ext_cmd, (ext_cmd_len + 1)
-										   * sizeof(char));
+				ext_cmd = (char *)xrealloc(ext_cmd, (ext_cmd_len + 1) * sizeof(char));
 				strcat(ext_cmd, " ");
 				strcat(ext_cmd, comm[i]);
 			}
@@ -1812,7 +1765,7 @@ exec_cmd(char **comm)
 
 			free(bin_commands);
 
-			bin_commands = (char  **)NULL;
+			bin_commands = (char **)NULL;
 		}
 
 		if (paths) {
