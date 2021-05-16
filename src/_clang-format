@@ -12,4 +12,6 @@ IndentCaseLabels: false
 
 AllowShortBlocksOnASingleLine: Empty
 AlwaysBreakAfterReturnType: TopLevelDefinitions
+
+SortIncludes: false
 ---
