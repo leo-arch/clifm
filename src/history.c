@@ -24,18 +24,18 @@
 
 #include "helpers.h"
 
+#include <errno.h>
+#include <readline/history.h>
 #include <stdio.h>
 #include <string.h>
-#include <errno.h>
 #include <time.h>
-#include <readline/history.h>
 
-#include "misc.h"
 #include "aux.h"
-#include "init.h"
-#include "history.h"
 #include "checks.h"
 #include "exec.h"
+#include "history.h"
+#include "init.h"
+#include "misc.h"
 
 /* Log COMM into LOG_FILE (global) */
 int
@@ -60,7 +60,7 @@ log_function(char **comm)
 
 		if (!log_fp) {
 			_err(0, NOPRINT_PROMPT, "%s: log: '%s': %s\n",
-				 PROGRAM_NAME, LOG_FILE, strerror(errno));
+			    PROGRAM_NAME, LOG_FILE, strerror(errno));
 			return EXIT_FAILURE;
 		}
 
@@ -86,7 +86,7 @@ log_function(char **comm)
 
 		else if (*comm[1] == 's' && strcmp(comm[1], "status") == 0) {
 			printf(_("Logs %s\n"), (logs_enabled) ? _("enabled")
-				   : _("disabled"));
+							      : _("disabled"));
 			return EXIT_SUCCESS;
 		}
 
@@ -147,11 +147,10 @@ log_function(char **comm)
 
 	char *date = get_date();
 	size_t log_len = strlen(date) + strlen(ws[cur_ws].path)
-					 + strlen(last_cmd) + 6;
+					+ strlen(last_cmd) + 6;
 	char *full_log = (char *)xnmalloc(log_len, sizeof(char));
 
-	snprintf(full_log, log_len, "[%s] %s:%s\n", date, ws[cur_ws].path,
-			 last_cmd);
+	snprintf(full_log, log_len, "[%s] %s:%s\n", date, ws[cur_ws].path, last_cmd);
 
 	free(date);
 
@@ -172,7 +171,7 @@ log_function(char **comm)
 
 	if (!log_fp) {
 		_err('e', PRINT_PROMPT, "%s: log: '%s': %s\n", PROGRAM_NAME,
-			 LOG_FILE, strerror(errno));
+		    LOG_FILE, strerror(errno));
 		free(full_log);
 		return EXIT_FAILURE;
 	}
@@ -205,8 +204,7 @@ log_msg(char *_msg, int print)
 	/* Store messages (for current session only) in an array, so that
 	 * the user can check them via the 'msg' command */
 	msgs_n++;
-	messages = (char **)xrealloc(messages, (size_t)(msgs_n + 1)
-								 * sizeof(char *));
+	messages = (char **)xrealloc(messages, (size_t)(msgs_n + 1) * sizeof(char *));
 	messages[msgs_n - 1] = savestring(_msg, msg_len);
 	messages[msgs_n] = (char *)NULL;
 
@@ -229,7 +227,7 @@ log_msg(char *_msg, int print)
 		/* Do not log this error: We might incur in an infinite loop
 		 * trying to access a file that cannot be accessed */
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, MSG_LOG_FILE,
-				strerror(errno));
+		    strerror(errno));
 		fputs("Press any key to continue... ", stdout);
 		xgetchar();
 		putchar('\n');
@@ -243,8 +241,7 @@ log_msg(char *_msg, int print)
 
 		strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", tm);
 		fprintf(msg_fp, "[%d-%d-%dT%d:%d:%d] ", tm->tm_year + 1900,
-				tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min,
-				tm->tm_sec);
+		    tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
 		fputs(_msg, msg_fp);
 		fclose(msg_fp);
 	}
@@ -263,7 +260,7 @@ save_dirhist(void)
 
 	if (!fp) {
 		fprintf(stderr, _("%s: Could not save directory history: %s\n"),
-				PROGRAM_NAME, strerror(errno));
+		    PROGRAM_NAME, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -281,27 +278,23 @@ save_dirhist(void)
 void
 add_to_dirhist(const char *dir_path)
 {
-/*  static size_t end_counter = 11, mid_counter = 11; */
+	/*  static size_t end_counter = 11, mid_counter = 11; */
 
 	/* If already at the end of dirhist, add new entry */
 	if (dirhist_cur_index + 1 >= dirhist_total_index) {
 
 		/* Do not add anything if new path equals last entry in
 		 * directory history */
-		if ((dirhist_total_index - 1) >= 0
-		&& old_pwd[dirhist_total_index - 1]
-		&& *(dir_path + 1) == *(old_pwd[dirhist_total_index - 1] + 1)
-		&& strcmp(dir_path, old_pwd[dirhist_total_index - 1]) == 0)
+		if ((dirhist_total_index - 1) >= 0 && old_pwd[dirhist_total_index - 1] && *(dir_path + 1) == *(old_pwd[dirhist_total_index - 1] + 1) && strcmp(dir_path, old_pwd[dirhist_total_index - 1]) == 0)
 			return;
 
 		/* Realloc only once per 10 operations */
-/*      if (end_counter > 10) {
+		/*      if (end_counter > 10) {
 			end_counter = 1; */
-			/* 20: Realloc dirhist_total + (2 * 10) */
-			old_pwd = (char **)xrealloc(old_pwd,
-									(size_t)(dirhist_total_index + 2)
-									* sizeof(char *));
-/*      }
+		/* 20: Realloc dirhist_total + (2 * 10) */
+		old_pwd = (char **)xrealloc(old_pwd,
+		    (size_t)(dirhist_total_index + 2) * sizeof(char *));
+		/*      }
 
 		end_counter++; */
 
@@ -312,18 +305,18 @@ add_to_dirhist(const char *dir_path)
 
 	/* I not at the end of dirhist, add previous AND new entry */
 	else {
-/*      if (mid_counter > 10) {
+		/*      if (mid_counter > 10) {
 			mid_counter = 1; */
-			/* 30: Realloc dirhist_total + (3 * 10) */
-			old_pwd = (char **)xrealloc(old_pwd,
-							(size_t)(dirhist_total_index + 3) * sizeof(char *));
-/*      }
+		/* 30: Realloc dirhist_total + (3 * 10) */
+		old_pwd = (char **)xrealloc(old_pwd,
+		    (size_t)(dirhist_total_index + 3) * sizeof(char *));
+		/*      }
 
 		mid_counter++; */
 
 		old_pwd[dirhist_total_index++] = savestring(
-								old_pwd[dirhist_cur_index],
-								strlen(old_pwd[dirhist_cur_index]));
+		    old_pwd[dirhist_cur_index],
+		    strlen(old_pwd[dirhist_cur_index]));
 
 		dirhist_cur_index = dirhist_total_index;
 		old_pwd[dirhist_total_index++] = savestring(dir_path, strlen(dir_path));
@@ -354,7 +347,7 @@ history_function(char **comm)
 
 		if (!hist_fp) {
 			_err(0, NOPRINT_PROMPT, "%s: history: %s: %s\n",
-				 PROGRAM_NAME, HIST_FILE, strerror(errno));
+			    PROGRAM_NAME, HIST_FILE, strerror(errno));
 			return EXIT_FAILURE;
 		}
 
@@ -380,7 +373,7 @@ history_function(char **comm)
 	}
 
 	/* If 'history -n', print the last -n elements */
-	if (args_n == 1 && comm[1][0] == '-' && is_number(comm[1]+1)) {
+	if (args_n == 1 && comm[1][0] == '-' && is_number(comm[1] + 1)) {
 		int num = atoi(comm[1] + 1);
 
 		if (num < 0 || num > (int)current_hist_n)
@@ -456,10 +449,9 @@ run_history_cmd(const char *cmd)
 				return exit_status;
 			}
 			fprintf(stderr, _("%s: Error parsing history command\n"),
-					PROGRAM_NAME);
+			    PROGRAM_NAME);
 			return EXIT_FAILURE;
-		}
-		else
+		} else
 			fprintf(stderr, _("%s: !%d: event not found\n"), PROGRAM_NAME, num);
 		return EXIT_FAILURE;
 	}
@@ -504,7 +496,7 @@ run_history_cmd(const char *cmd)
 			return exit_status;
 		}
 		fprintf(stderr, _("%s: Error parsing history command\n"),
-				PROGRAM_NAME);
+		    PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
@@ -513,15 +505,13 @@ run_history_cmd(const char *cmd)
 		/* If not number or zero or bigger than max... */
 		int acmd = atoi(cmd + 1);
 
-		if (!is_number(cmd + 1) || acmd == 0
-		|| acmd > (int)current_hist_n - 1) {
+		if (!is_number(cmd + 1) || acmd == 0 || acmd > (int)current_hist_n - 1) {
 			fprintf(stderr, _("%s: !%s: Event not found\n"), PROGRAM_NAME, cmd);
 			return EXIT_FAILURE;
 		}
 
 		size_t old_args = args_n;
-		char **cmd_hist = parse_input_str(history[current_hist_n
-										  - (size_t)acmd - 1]);
+		char **cmd_hist = parse_input_str(history[current_hist_n - (size_t)acmd - 1]);
 		if (cmd_hist) {
 
 			char **alias_cmd = check_for_alias(cmd_hist);
@@ -562,15 +552,14 @@ run_history_cmd(const char *cmd)
 		return EXIT_FAILURE;
 	}
 
-	else if ((*cmd >= 'a' && *cmd <= 'z')
-	|| (*cmd >= 'A' && *cmd <= 'Z')) {
+	else if ((*cmd >= 'a' && *cmd <= 'z') || (*cmd >= 'A' && *cmd <= 'Z')) {
 
-		size_t len = strlen(cmd), old_args = args_n;;
+		size_t len = strlen(cmd), old_args = args_n;
+		;
 
 		for (i = 0; history[i]; i++) {
 
-			if (*cmd == *history[i]
-			&& strncmp(cmd, history[i], len) == 0) {
+			if (*cmd == *history[i] && strncmp(cmd, history[i], len) == 0) {
 
 				char **cmd_hist = parse_input_str(history[i]);
 
@@ -644,7 +633,7 @@ get_history(void)
 
 	if (!hist_fp) {
 		_err('e', PRINT_PROMPT, "%s: history: '%s': %s\n",
-			 PROGRAM_NAME, HIST_FILE,  strerror(errno));
+		    PROGRAM_NAME, HIST_FILE, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -656,15 +645,14 @@ get_history(void)
 
 		line_buff[line_len - 1] = '\0';
 
-		history = (char **)xrealloc(history, (current_hist_n + 2)
-									* sizeof(char *));
+		history = (char **)xrealloc(history, (current_hist_n + 2) * sizeof(char *));
 		history[current_hist_n++] = savestring(line_buff, (size_t)line_len);
 	}
 
 	history[current_hist_n] = (char *)NULL;
 
 	free(line_buff);
-	fclose (hist_fp);
+	fclose(hist_fp);
 
 	return EXIT_SUCCESS;
 }
@@ -684,8 +672,7 @@ add_to_cmdhist(const char *cmd)
 	/* For us */
 	/* Add the new input to the history array */
 	size_t cmd_len = strlen(cmd);
-	history = (char **)xrealloc(history, (size_t)(current_hist_n + 2)
-								* sizeof(char *));
+	history = (char **)xrealloc(history, (size_t)(current_hist_n + 2) * sizeof(char *));
 	history[current_hist_n++] = savestring(cmd, cmd_len);
 
 	history[current_hist_n] = (char *)NULL;
@@ -754,13 +741,13 @@ record_cmd(char *input)
 			return 0;
 		break;
 
-	default: break;
+	default:
+		break;
 	}
 
 	/* History */
-	if (*p == '!' && (_ISDIGIT(*(p + 1))
-	|| (*(p + 1) == '-' && _ISDIGIT(*(p + 2)))
-	|| ((*(p + 1) == '!') && *(p + 2) == '\0')))
+	if (*p == '!' && (_ISDIGIT(*(p + 1)) || (*(p + 1) == '-'
+	&& _ISDIGIT(*(p + 2))) || ((*(p + 1) == '!') && *(p + 2) == '\0')))
 		return 0;
 
 	/* Consequtively equal commands in history */

@@ -24,19 +24,20 @@
 
 #include "helpers.h"
 
-#include <time.h>
-#include <stdio.h>
-#include <sys/stat.h>
 #include <errno.h>
+#include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <time.h>
 
 #include "aux.h"
-#include "file_operations.h"
 #include "checks.h"
-#include "navigation.h"
+#include "file_operations.h"
 #include "init.h"
+#include "navigation.h"
 
-int add_to_jumpdb(const char *dir)
+int
+add_to_jumpdb(const char *dir)
 {
 	if (xargs.no_dirjump == 1 || !dir || !*dir)
 		return EXIT_FAILURE;
@@ -49,8 +50,7 @@ int add_to_jumpdb(const char *dir)
 	int i = (int)jump_n, new_entry = 1;
 	while (--i >= 0) {
 
-		if (dir[1] == jump_db[i].path[1]
-		&& strcmp(jump_db[i].path, dir) == 0) {
+		if (dir[1] == jump_db[i].path[1] && strcmp(jump_db[i].path, dir) == 0) {
 			jump_db[i].visits++;
 			jump_db[i].last_visit = time(NULL);
 			new_entry = 0;
@@ -59,10 +59,9 @@ int add_to_jumpdb(const char *dir)
 	}
 
 	if (!new_entry)
-	return EXIT_SUCCESS;
+		return EXIT_SUCCESS;
 
-	jump_db = (struct jump_t *)xrealloc(jump_db, (jump_n + 2)
-									* sizeof(struct jump_t));
+	jump_db = (struct jump_t *)xrealloc(jump_db, (jump_n + 2) * sizeof(struct jump_t));
 	jump_db[jump_n].visits = 1;
 	time_t now = time(NULL);
 	jump_db[jump_n].first_visit = now;
@@ -82,10 +81,12 @@ int add_to_jumpdb(const char *dir)
 }
 
 /* Store the jump database into a file */
-void save_jumpdb(void) {
+void
+save_jumpdb(void)
+{
 
-	if (xargs.no_dirjump == 1 || !config_ok || !CONFIG_DIR
-	|| !jump_db || jump_n == 0)
+	if (xargs.no_dirjump == 1 || !config_ok || !CONFIG_DIR || !jump_db
+	|| jump_n == 0)
 		return;
 
 	char *JUMP_FILE = (char *)xnmalloc(strlen(CONFIG_DIR) + 10, sizeof(char));
@@ -107,18 +108,18 @@ void save_jumpdb(void) {
 
 		int days_since_first = (int)(now - jump_db[i].first_visit) / 60 / 60 / 24;
 		int rank = days_since_first > 1 ? ((int)jump_db[i].visits * 100)
-							/ days_since_first : ((int)jump_db[i].visits * 100);
+					/ days_since_first : ((int)jump_db[i].visits * 100);
 
 		int hours_since_last = (int)(now - jump_db[i].last_visit) / 60 / 60;
 
 		tmp_rank = rank;
-		if (hours_since_last == 0)          /* Last hour */
+		if (hours_since_last == 0) /* Last hour */
 			rank = JHOUR(tmp_rank);
-		else if (hours_since_last <= 24)    /* Last day */
+		else if (hours_since_last <= 24) /* Last day */
 			rank = JDAY(tmp_rank);
-		else if (hours_since_last <= 168)   /* Last week */
+		else if (hours_since_last <= 168) /* Last week */
 			rank = JWEEK(tmp_rank);
-		else                                 /* More than a week */
+		else /* More than a week */
 			rank = JOLDER(tmp_rank);
 
 		/* Do not remove bookmarked, pinned, or workspaced directories */
@@ -175,8 +176,8 @@ void save_jumpdb(void) {
 		jump_num++;
 
 		fprintf(fp, "%zu:%ld:%ld:%s\n", jump_db[i].visits,
-				jump_db[i].first_visit, jump_db[i].last_visit,
-				jump_db[i].path);
+		    jump_db[i].first_visit, jump_db[i].last_visit,
+		    jump_db[i].path);
 	}
 
 	fprintf(fp, "@%d\n", total_rank);
@@ -185,7 +186,8 @@ void save_jumpdb(void) {
 	free(JUMP_FILE);
 }
 
-int edit_jumpdb(void)
+int
+edit_jumpdb(void)
 {
 	if (!config_ok || !CONFIG_DIR)
 		return EXIT_FAILURE;
@@ -193,21 +195,21 @@ int edit_jumpdb(void)
 	save_jumpdb();
 
 	char *JUMP_FILE = (char *)xnmalloc(strlen(CONFIG_DIR) + 10,
-									   sizeof(char));
+	    sizeof(char));
 	sprintf(JUMP_FILE, "%s/jump.cfm", CONFIG_DIR);
 
 	struct stat attr;
 
 	if (stat(JUMP_FILE, &attr) == -1) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, JUMP_FILE,
-				strerror(errno));
+		    strerror(errno));
 		free(JUMP_FILE);
 		return EXIT_FAILURE;
 	}
 
 	time_t mtime_bfr = (time_t)attr.st_mtime;
 
-	char *cmd[] = { "o", JUMP_FILE, NULL };
+	char *cmd[] = {"o", JUMP_FILE, NULL};
 	open_function(cmd);
 
 	stat(JUMP_FILE, &attr);
@@ -236,7 +238,9 @@ int edit_jumpdb(void)
 }
 
 /* Jump into best ranked directory matched by ARGS */
-int dirjump(char **args) {
+int
+dirjump(char **args)
+{
 	if (xargs.no_dirjump == 1) {
 		printf(_("%s: Directory jumper function disabled\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
@@ -261,10 +265,10 @@ int dirjump(char **args) {
 		}
 
 		puts(_("NOTE: First time access is displayed in days, while last "
-			 "time access is displayed in hours"));
+		       "time access is displayed in hours"));
 		puts(_("NOTE 2: An asterisk next rank values means that the "
-			 "corresponding directory is bookmarked, pinned, or currently "
-			 "used in some workspace\n"));
+		       "corresponding directory is bookmarked, pinned, or currently "
+		       "used in some workspace\n"));
 		puts(_("Order\tVisits\tFirst\tLast\tRank\tDirectory"));
 
 		size_t i, ranks_sum = 0, visits_sum = 0;
@@ -280,13 +284,13 @@ int dirjump(char **args) {
 				   : (int)jump_db[i].visits * 100;
 
 			int tmp_rank = rank;
-			if (hours_since_last == 0)          /* Last hour */
+			if (hours_since_last == 0) /* Last hour */
 				rank = JHOUR(tmp_rank);
-			else if (hours_since_last <= 24)    /* Last day */
+			else if (hours_since_last <= 24) /* Last day */
 				rank = JDAY(tmp_rank);
-			else if (hours_since_last <= 168)   /* Last week */
+			else if (hours_since_last <= 168) /* Last week */
 				rank = JWEEK(tmp_rank);
-			else                                /* More than a week */
+			else /* More than a week */
 				rank = JOLDER(tmp_rank);
 
 			int j = (int)bm_n, BPW = 0; /* Bookmarked, pinned or workspace */
@@ -326,20 +330,20 @@ int dirjump(char **args) {
 			if (ws[cur_ws].path[1] == jump_db[i].path[1]
 			&& strcmp(ws[cur_ws].path, jump_db[i].path) == 0) {
 				printf("  %s%zu\t %zu\t %d\t %d\t%d%c\t%s%s \n", mi_c,
-					   i + 1, jump_db[i].visits, days_since_first,
-					   hours_since_last, rank, BPW ? '*' : 0,
-					   jump_db[i].path, df_c);
+				    i + 1, jump_db[i].visits, days_since_first,
+				    hours_since_last, rank, BPW ? '*' : 0,
+				    jump_db[i].path, df_c);
 			}
 
 			else
 				printf("  %zu\t %zu\t %d\t %d\t%d%c\t%s \n", i + 1,
-					   jump_db[i].visits, days_since_first,
-					   hours_since_last, rank,
-					   BPW ? '*' : 0, jump_db[i].path);
+				    jump_db[i].visits, days_since_first,
+				    hours_since_last, rank,
+				    BPW ? '*' : 0, jump_db[i].path);
 		}
 
 		printf("\nTotal rank: %zu/%d\nTotal visits: %zu\n", ranks_sum,
-				max_jump_total_rank, visits_sum);
+		    max_jump_total_rank, visits_sum);
 
 		return EXIT_SUCCESS;
 	}
@@ -351,13 +355,22 @@ int dirjump(char **args) {
 
 	enum jump jump_opt = none;
 
-	switch(args[0][1]) {
+	switch (args[0][1]) {
 
-	case 'e': return edit_jumpdb();
-	case 'c': jump_opt = jchild; break;
-	case 'p': jump_opt = jparent; break;
-	case 'o': jump_opt = jorder; break;
-	case 'l': jump_opt = jlist; break;
+	case 'e':
+		return edit_jumpdb();
+	case 'c':
+		jump_opt = jchild;
+		break;
+	case 'p':
+		jump_opt = jparent;
+		break;
+	case 'o':
+		jump_opt = jorder;
+		break;
+	case 'l':
+		jump_opt = jlist;
+		break;
 	case '\0':
 		jump_opt = none;
 		break;
@@ -366,28 +379,28 @@ int dirjump(char **args) {
 		fprintf(stderr, _("%s: '%c': Invalid option\n"), PROGRAM_NAME,
 				args[0][1]);
 		fputs(_("Usage: j, jc, jp, jl [STRING ...], jo [NUM], je\n"),
-			  stderr);
+		    stderr);
 		return EXIT_FAILURE;
-	break;
+		break;
 	}
 
 	if (jump_opt == jorder) {
 
 		if (!args[1]) {
 			fputs(_("Usage: j, jc, jp, jl [STRING ...], jo [NUM], je\n"),
-				  stderr);
+			    stderr);
 			return EXIT_FAILURE;
 		}
 
 		if (!is_number(args[1]))
-				return cd_function(args[1]);
+			return cd_function(args[1]);
 
 		else {
 
 			int int_order = atoi(args[1]);
 			if (int_order <= 0 || int_order > (int)jump_n) {
 				fprintf(stderr, _("%s: %d: No such order number\n"),
-						PROGRAM_NAME, int_order);
+				    PROGRAM_NAME, int_order);
 				return EXIT_FAILURE;
 			}
 
@@ -420,7 +433,7 @@ int dirjump(char **args) {
 			while (--j >= 0) {
 
 				if (case_sens_dirjump ? !strstr(jump_db[j].path, args[i])
-				: !strcasestr(jump_db[j].path, args[i]))
+						      : !strcasestr(jump_db[j].path, args[i]))
 					continue;
 
 				/* Exclue CWD */
@@ -432,11 +445,11 @@ int dirjump(char **args) {
 
 				/* Filter matches according to parent or
 				 * child options */
-				switch(jump_opt) {
+				switch (jump_opt) {
 				case jparent:
 					if (!strstr(ws[cur_ws].path, jump_db[j].path))
 						exclude = 1;
-				break;
+					break;
 
 				case jchild:
 					if (!strstr(jump_db[j].path, ws[cur_ws].path))
@@ -481,7 +494,7 @@ int dirjump(char **args) {
 	 * the best ranked directory will be returned */
 
 	int found = 0, exit_status = EXIT_FAILURE,
-		best_ranked = 0, max = -1, k;
+	    best_ranked = 0, max = -1, k;
 
 	j = match;
 	while (--j >= 0) {
@@ -503,20 +516,20 @@ int dirjump(char **args) {
 			 * "https://github.com/ajeetdsouza/zoxide/wiki/Algorithm#aging"
 			 * "https://github.com/skywind3000/z.lua#aging" */
 			int rank;
-			rank = days_since_first > 0 ? ((int)visits[j] * 100) / days_since_first
-							: ((int)visits[j] * 100);
+			rank = days_since_first > 0 ? ((int)visits[j] * 100)
+					/ days_since_first : ((int)visits[j] * 100);
 
 			int hours_since_last = (int)(now - last[j]) / 60 / 60;
 
 			/* Credit or penalty based on last directory access */
 			int tmp_rank = rank;
-			if (hours_since_last == 0)          /* Last hour */
+			if (hours_since_last == 0) /* Last hour */
 				rank = JHOUR(tmp_rank);
-			else if (hours_since_last <= 24)    /* Last day */
+			else if (hours_since_last <= 24) /* Last day */
 				rank = JDAY(tmp_rank);
-			else if (hours_since_last <= 168)   /* Last week */
+			else if (hours_since_last <= 168) /* Last week */
 				rank = JWEEK(tmp_rank);
-			else                                /* More than a week */
+			else /* More than a week */
 				rank = JOLDER(tmp_rank);
 
 			/* Matches in directory basename have extra credit */

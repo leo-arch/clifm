@@ -24,26 +24,26 @@
 
 #include "helpers.h"
 
-#include <unistd.h>
 #include <errno.h>
-#include <string.h>
-#include <stdio.h>
-#include <sys/stat.h>
 #include <readline/readline.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
-#include "navigation.h"
 #include "archives.h"
-#include "exec.h"
-#include "colors.h"
-#include "mime.h"
-#include "readline.h"
-#include "checks.h"
 #include "aux.h"
-#include "history.h"
-#include "selection.h"
+#include "checks.h"
+#include "colors.h"
+#include "exec.h"
 #include "file_operations.h"
+#include "history.h"
 #include "listing.h"
+#include "mime.h"
 #include "misc.h"
+#include "navigation.h"
+#include "readline.h"
+#include "selection.h"
 
 int
 xchmod(const char *file, mode_t mode)
@@ -71,7 +71,7 @@ open_function(char **cmd)
 
 		if (!deq_path) {
 			fprintf(stderr, _("%s: %s: Error dequoting filename\n"),
-					PROGRAM_NAME, cmd[1]);
+			    PROGRAM_NAME, cmd[1]);
 			return EXIT_FAILURE;
 		}
 
@@ -86,7 +86,7 @@ open_function(char **cmd)
 
 	if (stat(file, &file_attrib) == -1) {
 		fprintf(stderr, "%s: open: %s: %s\n", PROGRAM_NAME, cmd[1],
-				strerror(errno));
+		    strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -94,11 +94,11 @@ open_function(char **cmd)
 	 * will be opened */
 
 	char no_open_file = 1, file_type[128];
-		 /* Reserve a good amount of bytes for filetype: it cannot be
+	/* Reserve a good amount of bytes for filetype: it cannot be
 		  * known beforehand how many bytes the TRANSLATED string will
 		  * need */
 
-	switch((file_attrib.st_mode & S_IFMT)) {
+	switch ((file_attrib.st_mode & S_IFMT)) {
 	case S_IFBLK:
 		/* Store filetype to compose and print the error message, if
 		 * necessary */
@@ -124,7 +124,7 @@ open_function(char **cmd)
 
 		/* If an archive/compressed file, call archiver() */
 		if (is_compressed(file, 1) == 0) {
-			char *tmp_cmd[] = { "ad", file, NULL };
+			char *tmp_cmd[] = {"ad", file, NULL};
 			return archiver(tmp_cmd, 'd');
 		}
 
@@ -141,22 +141,22 @@ open_function(char **cmd)
 	 * exit */
 	if (no_open_file) {
 		fprintf(stderr, _("%s: %s (%s): Cannot open file. Try "
-				"'APPLICATION FILENAME'.\n"), PROGRAM_NAME,
-				cmd[1], file_type);
+			"'APPLICATION FILENAME'.\n"), PROGRAM_NAME, cmd[1], file_type);
 		return EXIT_FAILURE;
 	}
 
 	/* At this point we know the file to be openend is either a regular
 	 * file or a symlink to a regular file. So, just open the file */
 
-	if (!cmd[2] || (*cmd[2] == '&' && !cmd[2][1] )) {
+	if (!cmd[2] || (*cmd[2] == '&' && !cmd[2][1])) {
 
 		if (opener) {
-			char *tmp_cmd[] = { opener, file, NULL };
+			char *tmp_cmd[] = {opener, file, NULL};
 
 			int ret = launch_execve(tmp_cmd,
-						strcmp(cmd[args_n], "&") == 0 ? BACKGROUND
-						: FOREGROUND, E_NOSTDERR);
+			    strcmp(cmd[args_n], "&") == 0 ? BACKGROUND
+							  : FOREGROUND,
+			    E_NOSTDERR);
 
 			if (ret != EXIT_SUCCESS)
 				return EXIT_FAILURE;
@@ -166,9 +166,8 @@ open_function(char **cmd)
 
 		else if (!(flags & FILE_CMD_OK)) {
 			fprintf(stderr, _("%s: file: Command not found. Specify an "
-							  "application to open the file\nUsage: "
-							  "open ELN/FILENAME [APPLICATION]\n"), 
-							  PROGRAM_NAME);
+					"application to open the file\nUsage: "
+					"open ELN/FILENAME [APPLICATION]\n"), PROGRAM_NAME);
 			return EXIT_FAILURE;
 		}
 
@@ -183,8 +182,7 @@ open_function(char **cmd)
 			 * corresponding message is printed by mime_open itself */
 			if (ret == EXIT_FAILURE) {
 				fputs("Add a new entry to the mimelist file ('mime "
-					  "edit' or F6) or run 'open FILE APPLICATION'\n",
-					  stderr);
+				      "edit' or F6) or run 'open FILE APPLICATION'\n", stderr);
 				return EXIT_FAILURE;
 			}
 
@@ -193,11 +191,10 @@ open_function(char **cmd)
 	}
 
 	/* If some application was specified to open the file */
-	char *tmp_cmd[] = { cmd[2], file, NULL };
+	char *tmp_cmd[] = {cmd[2], file, NULL};
 
 	int ret = launch_execve(tmp_cmd, (cmd[args_n]
-							&& strcmp(cmd[args_n], "&") == 0)
-							? BACKGROUND : FOREGROUND, E_NOSTDERR);
+	&& strcmp(cmd[args_n], "&") == 0) ? BACKGROUND : FOREGROUND, E_NOSTDERR);
 
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
@@ -218,7 +215,7 @@ edit_link(char *link)
 
 		if (!tmp) {
 			fprintf(stderr, _("%s: %s: Error dequoting file\n"),
-					PROGRAM_NAME, link);
+			    PROGRAM_NAME, link);
 			return EXIT_FAILURE;
 		}
 
@@ -231,13 +228,13 @@ edit_link(char *link)
 
 	if (lstat(link, &file_attrib) == -1) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, link,
-				strerror(errno));
+		    strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	if ((file_attrib.st_mode & S_IFMT) != S_IFLNK) {
 		fprintf(stderr, _("%s: %s: Not a symbolic link\n"),
-				PROGRAM_NAME, link);
+		    PROGRAM_NAME, link);
 		return EXIT_FAILURE;
 	}
 
@@ -246,7 +243,7 @@ edit_link(char *link)
 
 	if (!real_path)
 		printf(_("%s%s%s currently pointing to nowhere (broken link)\n"),
-			   or_c, link, df_c);
+		    or_c, link, df_c);
 	else {
 		printf(_("%s%s%s currently pointing to "), ln_c, link, df_c);
 		colors_list(real_path, NO_ELN, NO_PAD, PRINT_NEWLINE);
@@ -288,8 +285,7 @@ edit_link(char *link)
 		int i_new_path = atoi(new_path) - 1;
 		if (file_info[i_new_path].name) {
 			new_path = (char *)xrealloc(new_path,
-								(strlen(file_info[i_new_path].name)
-								+ 1) * sizeof(char));
+			    (strlen(file_info[i_new_path].name) + 1) * sizeof(char));
 			strcpy(new_path, file_info[i_new_path].name);
 		}
 	}
@@ -301,12 +297,12 @@ edit_link(char *link)
 		new_path[path_len - 1] = '\0';
 
 	/* Dequote new path, if needed */
-	if(strchr(new_path, '\\')) {
+	if (strchr(new_path, '\\')) {
 		char *tmp = dequote_str(new_path, 0);
 
 		if (!tmp) {
 			fprintf(stderr, _("%s: %s: Error dequoting file\n"),
-					PROGRAM_NAME, new_path);
+			    PROGRAM_NAME, new_path);
 			free(new_path);
 			return EXIT_FAILURE;
 		}
@@ -322,8 +318,7 @@ edit_link(char *link)
 		printf("'%s': %s\n", new_path, strerror(errno));
 		char *answer = (char *)NULL;
 		while (!answer) {
-			answer= rl_no_hist(_("Relink as a broken symbolic link? "
-								"[y/n] "));
+			answer = rl_no_hist(_("Relink as a broken symbolic link? [y/n] "));
 
 			if (!answer)
 				continue;
@@ -360,7 +355,7 @@ edit_link(char *link)
 	}
 
 	/* Finally, relink the symlink to new_path */
-	char *cmd[] = { "ln", "-sfn", new_path, link, NULL };
+	char *cmd[] = {"ln", "-sfn", new_path, link, NULL};
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 		free(new_path);
 		return EXIT_FAILURE;
@@ -369,7 +364,7 @@ edit_link(char *link)
 	real_path = realpath(link, NULL);
 
 	printf(_("%s%s%s successfully relinked to "), real_path ? ln_c
-		   : or_c, link, df_c);
+												: or_c, link, df_c);
 	colors_list(new_path, NO_ELN, NO_PAD, PRINT_NEWLINE);
 
 	free(new_path);
@@ -425,7 +420,7 @@ copy_function(char **comm)
 			if (*comm[args_n] == '~') {
 				char *exp_dest = tilde_expand(comm[args_n]);
 				comm[args_n] = xrealloc(comm[args_n],
-						(strlen(exp_dest) + 1) * sizeof(char));
+				    (strlen(exp_dest) + 1) * sizeof(char));
 				strcpy(comm[args_n], exp_dest);
 				free(exp_dest);
 			}
@@ -436,14 +431,14 @@ copy_function(char **comm)
 			}
 
 			char dest[PATH_MAX];
-			strcpy(dest, (sel_is_last
-				|| strcmp(comm[args_n], ".") == 0)
-				? ws[cur_ws].path : comm[args_n]);
+			strcpy(dest, (sel_is_last || strcmp(comm[args_n], ".") == 0)
+					 ? ws[cur_ws].path
+					 : comm[args_n]);
 
 			char *ret_val = strrchr(sel_elements[j], '/');
 
 			char *tmp_str = (char *)xnmalloc(strlen(dest)
-						+ strlen(ret_val + 1) + 2, sizeof(char));
+								+ strlen(ret_val + 1) + 2, sizeof(char));
 
 			sprintf(tmp_str, "%s/%s", dest, ret_val + 1);
 
@@ -514,10 +509,9 @@ remove_file(char **args)
 				 * and 2 for parameters, including end of parameters (--) */
 				rm_cmd[j++] = savestring(tmp, strlen(tmp));
 				free(tmp);
-			}
-			else {
+			} else {
 				fprintf(stderr, "%s: %s: Error dequoting filename\n",
-						PROGRAM_NAME, args[i]);
+				    PROGRAM_NAME, args[i]);
 				continue;
 			}
 		}
@@ -586,8 +580,7 @@ bulk_rename(char **args)
 
 	bulk_fp = fopen(BULK_FILE, "w+");
 	if (!bulk_fp) {
-		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", BULK_FILE,
-			 strerror(errno));
+		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", BULK_FILE, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -602,7 +595,8 @@ bulk_rename(char **args)
 
 			if (!deq_file) {
 				fprintf(stderr, _("bulk: %s: Error dequoting "
-						"filename\n"), args[i]);
+						  "filename\n"),
+				    args[i]);
 				continue;
 			}
 
@@ -625,7 +619,7 @@ bulk_rename(char **args)
 	time_t mtime_bfr = (time_t)file_attrib.st_mtime;
 
 	/* Open the bulk file via the mime function */
-	char *cmd[] = { "mm", BULK_FILE, NULL };
+	char *cmd[] = {"mm", BULK_FILE, NULL};
 	mime_open(cmd);
 
 	/* Compare the new modification time to the stored one: if they
@@ -638,7 +632,7 @@ bulk_rename(char **args)
 
 		if (unlink(BULK_FILE) == -1) {
 			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-				 BULK_FILE, strerror(errno));
+			    BULK_FILE, strerror(errno));
 			exit_status = EXIT_FAILURE;
 		}
 
@@ -649,7 +643,7 @@ bulk_rename(char **args)
 
 	if (!bulk_fp) {
 		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", BULK_FILE,
-			 strerror(errno));
+		    strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -672,7 +666,7 @@ bulk_rename(char **args)
 
 		if (unlink(BULK_FILE) == -1)
 			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-				 BULK_FILE, strerror(errno));
+			    BULK_FILE, strerror(errno));
 
 		return EXIT_FAILURE;
 	}
@@ -707,7 +701,7 @@ bulk_rename(char **args)
 
 		if (unlink(BULK_FILE) == -1) {
 			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-				 BULK_FILE, strerror(errno));
+			    BULK_FILE, strerror(errno));
 			exit_status = EXIT_FAILURE;
 		}
 
@@ -729,22 +723,23 @@ bulk_rename(char **args)
 			continue;
 		}
 
-		switch(*answer) {
-			case 'y': /* fallthrough */
-			case 'Y': break;
+		switch (*answer) {
+		case 'y': /* fallthrough */
+		case 'Y':
+			break;
 
-			case 'n': /* fallthrough */
-			case 'N': /* fallthrough */
-			case '\0':
-				free(answer);
-				free(line);
-				fclose(bulk_fp);
-				return EXIT_SUCCESS;
+		case 'n': /* fallthrough */
+		case 'N': /* fallthrough */
+		case '\0':
+			free(answer);
+			free(line);
+			fclose(bulk_fp);
+			return EXIT_SUCCESS;
 
-			default:
-				free(answer);
-				answer = (char *)NULL;
-				break;
+		default:
+			free(answer);
+			answer = (char *)NULL;
+			break;
 		}
 	}
 
@@ -762,7 +757,7 @@ bulk_rename(char **args)
 			line[line_len - 1] = '\0';
 
 		if (strcmp(args[i], line) != 0) {
-			char *tmp_cmd[] = { "mv", args[i], line, NULL };
+			char *tmp_cmd[] = {"mv", args[i], line, NULL};
 
 			if (launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
@@ -777,7 +772,7 @@ bulk_rename(char **args)
 
 	if (unlink(BULK_FILE) == -1) {
 		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-			 BULK_FILE, strerror(errno));
+		    BULK_FILE, strerror(errno));
 		exit_status = EXIT_FAILURE;
 	}
 
@@ -793,8 +788,7 @@ bulk_rename(char **args)
 /* Export files in CWD (if FILENAMES is NULL), or files in FILENAMES,
  * into a temporary file. Return the address of this empt file if
  * success (it must be freed) or NULL in case of error */
-char *
-export(char **filenames, int open)
+char *export(char **filenames, int open)
 {
 	char *rand_ext = gen_rand_str(6);
 
@@ -822,8 +816,7 @@ export(char **filenames, int open)
 
 	else {
 		for (i = 1; filenames[i]; i++) {
-			if (*filenames[i] == '.' && (!filenames[i][1]
-			|| (filenames[i][1] == '.' && !filenames[i][2])))
+			if (*filenames[i] == '.' && (!filenames[i][1] || (filenames[i][1] == '.' && !filenames[i][2])))
 				continue;
 
 			fprintf(fp, "%s\n", filenames[i]);
@@ -835,7 +828,7 @@ export(char **filenames, int open)
 	if (!open)
 		return tmp_file;
 
-	char *cmd[] = { "mime", tmp_file, NULL };
+	char *cmd[] = {"mime", tmp_file, NULL};
 
 	int ret = mime_open(cmd);
 
@@ -854,8 +847,7 @@ batch_link(char **args)
 	if (!args)
 		return EXIT_FAILURE;
 
-	if (!args[1] || (*args[1] == '-'
-	&& strcmp(args[1], "--help") == 0)) {
+	if (!args[1] || (*args[1] == '-' && strcmp(args[1], "--help") == 0)) {
 		puts(_("Usage: bl [FILE(s)]"));
 		return EXIT_SUCCESS;
 	}
@@ -894,7 +886,7 @@ batch_link(char **args)
 		if (symlink(args[i], ptr ? ++ptr : linkname) == -1) {
 			exit_status = EXIT_FAILURE;
 			fprintf(stderr, _("%s: %s: Cannot create symlink: %s\n"),
-					PROGRAM_NAME, ptr ? ptr : linkname, strerror(errno));
+			    PROGRAM_NAME, ptr ? ptr : linkname, strerror(errno));
 		}
 	}
 

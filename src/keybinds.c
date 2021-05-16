@@ -24,24 +24,25 @@
 
 #include "helpers.h"
 
-#include <unistd.h>
-#include <sys/stat.h>
-#include <stdio.h>
 #include <readline/readline.h>
+#include <stdio.h>
+#include <sys/stat.h>
 #include <termios.h>
+#include <unistd.h>
 
+#include "aux.h"
 #include "config.h"
 #include "exec.h"
-#include "misc.h"
-#include "mime.h"
 #include "keybinds.h"
-#include "aux.h"
-#include "prompt.h"
 #include "listing.h"
+#include "mime.h"
+#include "misc.h"
 #include "profiles.h"
+#include "prompt.h"
 
 int
-kbinds_reset(void) {
+kbinds_reset(void)
+{
 	int exit_status = EXIT_SUCCESS;
 	struct stat file_attrib;
 
@@ -49,7 +50,7 @@ kbinds_reset(void) {
 		exit_status = create_kbinds_file();
 
 	else {
-		char *cmd[] = { "rm", KBINDS_FILE, NULL };
+		char *cmd[] = {"rm", KBINDS_FILE, NULL};
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
 			exit_status = create_kbinds_file();
 		else
@@ -58,16 +59,17 @@ kbinds_reset(void) {
 
 	if (exit_status == EXIT_SUCCESS)
 		_err('n', PRINT_PROMPT, _("%s: Restart the program for changes "
-			 "to take effect\n"), PROGRAM_NAME);
+			"to take effect\n"), PROGRAM_NAME);
 
 	return exit_status;
 }
 
 static int
-kbinds_edit(void) {
+kbinds_edit(void)
+{
 	if (xargs.stealth_mode == 1) {
 		printf("%s: Access to configuration files is not allowed in "
-			   "stealth mode\n", PROGRAM_NAME);
+		       "stealth mode\n", PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
 
@@ -83,7 +85,7 @@ kbinds_edit(void) {
 
 	time_t mtime_bfr = (time_t)file_attrib.st_mtime;
 
-	char *cmd[] = { "mm", KBINDS_FILE, NULL };
+	char *cmd[] = {"mm", KBINDS_FILE, NULL};
 	int ret = mime_open(cmd);
 
 	if (ret != EXIT_SUCCESS)
@@ -95,13 +97,14 @@ kbinds_edit(void) {
 		return EXIT_SUCCESS;
 
 	_err('n', PRINT_PROMPT, _("%s: Restart the program for changes to "
-		 "take effect\n"), PROGRAM_NAME);
+				  "take effect\n"), PROGRAM_NAME);
 
 	return EXIT_SUCCESS;
 }
 
 int
-kbinds_function(char **args) {
+kbinds_function(char **args)
+{
 	if (!args)
 		return EXIT_FAILURE;
 
@@ -134,11 +137,12 @@ kbinds_function(char **args) {
  * C-v, C-right arrow gives "[[1;5C", which here should be written like
  * this:
  * "\\x1b[1;5C" */
- 
-void
-readline_kbinds(void) {
 
-			/* ##############################
+void
+readline_kbinds(void)
+{
+
+	/* ##############################
 			 * #        KEYBINDINGS         #
 			 * ##############################*/
 	if (KBINDS_FILE) {
@@ -150,7 +154,7 @@ readline_kbinds(void) {
 		/* Navigation */
 		/* Define multiple keybinds for different terminals:
 		 * rxvt, xterm, kernel console */
-/*      rl_bind_keyseq("\\M-[D", rl_test); // Left arrow key
+		/*      rl_bind_keyseq("\\M-[D", rl_test); // Left arrow key
 		rl_bind_keyseq("\\M-+", rl_test); */
 		rl_bind_keyseq(find_key("parent-dir"), rl_parent_dir);
 		rl_bind_keyseq(find_key("parent-dir2"), rl_parent_dir);
@@ -286,7 +290,7 @@ readline_kbinds(void) {
 
 		/* Settings */
 		rl_bind_keyseq("\\M-t", rl_clear_msgs);
-/*      rl_bind_keyseq("", rl_next_profile);
+		/*      rl_bind_keyseq("", rl_next_profile);
 		rl_bind_keyseq("", rl_previous_profile); */
 		rl_bind_keyseq("\\e[24~", rl_quit);
 		rl_bind_keyseq("\\M-o", rl_lock);
@@ -310,7 +314,8 @@ readline_kbinds(void) {
 
 /* Store keybinds from the keybinds file into a struct */
 int
-load_keybinds(void) {
+load_keybinds(void)
+{
 	if (!config_ok)
 		return EXIT_FAILURE;
 
@@ -371,7 +376,8 @@ load_keybinds(void) {
 }
 
 char *
-find_key(char *function) {
+find_key(char *function)
+{
 	if (!kbinds_n)
 		return (char *)NULL;
 
@@ -391,7 +397,8 @@ find_key(char *function) {
 /* Runs any command recognized by CliFM via a keybind. Example:
  * keybind_exec_cmd("sel *") */
 int
-keybind_exec_cmd(char *str) {
+keybind_exec_cmd(char *str)
+{
 	size_t old_args = args_n;
 	args_n = 0;
 
@@ -429,7 +436,8 @@ keybind_exec_cmd(char *str) {
 }
 
 int
-rl_refresh(int count, int key) {
+rl_refresh(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -443,7 +451,8 @@ rl_refresh(int count, int key) {
 }
 
 int
-rl_parent_dir(int count, int key) {
+rl_parent_dir(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -459,7 +468,8 @@ rl_parent_dir(int count, int key) {
 }
 
 int
-rl_root_dir(int count, int key) {
+rl_root_dir(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -475,13 +485,13 @@ rl_root_dir(int count, int key) {
 }
 
 int
-rl_home_dir(int count, int key) {
+rl_home_dir(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
 	/* If already in home, do nothing */
-	if (*ws[cur_ws].path == *user.home
-	&& strcmp(ws[cur_ws].path, user.home) == 0)
+	if (*ws[cur_ws].path == *user.home && strcmp(ws[cur_ws].path, user.home) == 0)
 		return EXIT_SUCCESS;
 
 	keybind_exec_cmd("cd");
@@ -492,7 +502,8 @@ rl_home_dir(int count, int key) {
 }
 
 int
-rl_next_dir(int count, int key) {
+rl_next_dir(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -508,7 +519,8 @@ rl_next_dir(int count, int key) {
 }
 
 int
-rl_first_dir(int count, int key) {
+rl_first_dir(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -524,7 +536,8 @@ rl_first_dir(int count, int key) {
 }
 
 int
-rl_last_dir(int count, int key) {
+rl_last_dir(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -542,7 +555,8 @@ rl_last_dir(int count, int key) {
 }
 
 int
-rl_previous_dir(int count, int key) {
+rl_previous_dir(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -558,7 +572,8 @@ rl_previous_dir(int count, int key) {
 }
 
 int
-rl_long(int count, int key) {
+rl_long(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -575,7 +590,8 @@ rl_long(int count, int key) {
 }
 
 int
-rl_folders_first(int count, int key) {
+rl_folders_first(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -597,7 +613,8 @@ rl_folders_first(int count, int key) {
 }
 
 int
-rl_light(int count, int key) {
+rl_light(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -614,7 +631,8 @@ rl_light(int count, int key) {
 }
 
 int
-rl_hidden(int count, int key) {
+rl_hidden(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -634,7 +652,8 @@ rl_hidden(int count, int key) {
 }
 
 int
-rl_open_config(int count, int key) {
+rl_open_config(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -646,7 +665,8 @@ rl_open_config(int count, int key) {
 }
 
 int
-rl_open_keybinds(int count, int key) {
+rl_open_keybinds(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -658,7 +678,8 @@ rl_open_keybinds(int count, int key) {
 }
 
 int
-rl_open_cscheme(int count, int key) {
+rl_open_cscheme(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -670,7 +691,8 @@ rl_open_cscheme(int count, int key) {
 }
 
 int
-rl_open_bm_file(int count, int key) {
+rl_open_bm_file(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -682,7 +704,8 @@ rl_open_bm_file(int count, int key) {
 }
 
 int
-rl_open_jump_db(int count, int key) {
+rl_open_jump_db(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -694,7 +717,8 @@ rl_open_jump_db(int count, int key) {
 }
 
 int
-rl_open_mime(int count, int key) {
+rl_open_mime(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -708,7 +732,7 @@ rl_open_mime(int count, int key) {
 int
 rl_mountpoints(int count, int key)
 {
-		return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 
 	/* Call the function only if it's not already running */
 	kbind_busy = 1;
@@ -720,7 +744,8 @@ rl_mountpoints(int count, int key)
 }
 
 int
-rl_select_all(int count, int key) {
+rl_select_all(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -732,7 +757,8 @@ rl_select_all(int count, int key) {
 }
 
 int
-rl_deselect_all(int count, int key) {
+rl_deselect_all(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -744,7 +770,8 @@ rl_deselect_all(int count, int key) {
 }
 
 int
-rl_bookmarks(int count, int key) {
+rl_bookmarks(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -757,7 +784,8 @@ rl_bookmarks(int count, int key) {
 }
 
 int
-rl_selbox(int count, int key) {
+rl_selbox(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -769,7 +797,8 @@ rl_selbox(int count, int key) {
 }
 
 int
-rl_clear_line(int count, int key) {
+rl_clear_line(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -787,7 +816,8 @@ rl_clear_line(int count, int key) {
 }
 
 int
-rl_sort_next(int count, int key) {
+rl_sort_next(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -811,7 +841,8 @@ rl_sort_next(int count, int key) {
 }
 
 int
-rl_sort_previous(int count, int key) {
+rl_sort_previous(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -835,16 +866,17 @@ rl_sort_previous(int count, int key) {
 }
 
 int
-rl_lock(int count, int key) {
+rl_lock(int count, int key)
+{
 	int ret = EXIT_SUCCESS;
 
 	rl_deprep_terminal();
 
 #if __FreeBSD__
-	char *cmd[] = { "lock", NULL };
+	char *cmd[] = {"lock", NULL};
 	ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 #elif __linux__
-	char *cmd[] = { "vlock", NULL };
+	char *cmd[] = {"vlock", NULL};
 	ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 #endif
 
@@ -858,7 +890,8 @@ rl_lock(int count, int key) {
 }
 
 int
-rl_remove_sel(int count, int key) {
+rl_remove_sel(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -875,7 +908,8 @@ rl_remove_sel(int count, int key) {
 }
 
 int
-rl_export_sel(int count, int key) {
+rl_export_sel(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -889,7 +923,8 @@ rl_export_sel(int count, int key) {
 }
 
 int
-rl_move_sel(int count, int key) {
+rl_move_sel(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -903,7 +938,8 @@ rl_move_sel(int count, int key) {
 }
 
 int
-rl_rename_sel(int count, int key) {
+rl_rename_sel(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -917,7 +953,8 @@ rl_rename_sel(int count, int key) {
 }
 
 int
-rl_paste_sel(int count, int key) {
+rl_paste_sel(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -931,7 +968,8 @@ rl_paste_sel(int count, int key) {
 }
 
 int
-rl_quit(int count, int key) {
+rl_quit(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -944,7 +982,8 @@ rl_quit(int count, int key) {
 }
 
 int
-rl_previous_profile(int count, int key) {
+rl_previous_profile(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -978,13 +1017,12 @@ rl_previous_profile(int count, int key) {
 
 	if (clear_screen) {
 		CLEAR;
-	}
-	else
+	} else
 		putchar('\n');
 
 	if (profile_set(profile_names[prev_prof]) == EXIT_SUCCESS) {
 		printf(_("%s->%s Switched to profile '%s'\n"), mi_c, df_c,
-			   profile_names[prev_prof]);
+		    profile_names[prev_prof]);
 		char *input = prompt();
 		free(input);
 	}
@@ -993,7 +1031,8 @@ rl_previous_profile(int count, int key) {
 }
 
 int
-rl_next_profile(int count, int key) {
+rl_next_profile(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1027,13 +1066,12 @@ rl_next_profile(int count, int key) {
 
 	if (clear_screen) {
 		CLEAR;
-	}
-	else
+	} else
 		putchar('\n');
 
 	if (profile_set(profile_names[next_prof]) == EXIT_SUCCESS) {
 		printf(_("%s->%s Switched to profile '%s'\n"), mi_c, df_c,
-			   profile_names[next_prof]);
+		    profile_names[next_prof]);
 		char *input = prompt();
 		free(input);
 	}
@@ -1042,7 +1080,8 @@ rl_next_profile(int count, int key) {
 }
 
 int
-rl_dirhist(int count, int key) {
+rl_dirhist(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1054,7 +1093,8 @@ rl_dirhist(int count, int key) {
 }
 
 int
-rl_archive_sel(int count, int key) {
+rl_archive_sel(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1066,7 +1106,8 @@ rl_archive_sel(int count, int key) {
 }
 
 int
-rl_new_instance(int count, int key) {
+rl_new_instance(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1078,7 +1119,8 @@ rl_new_instance(int count, int key) {
 }
 
 int
-rl_clear_msgs(int count, int key) {
+rl_clear_msgs(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1090,7 +1132,8 @@ rl_clear_msgs(int count, int key) {
 }
 
 int
-rl_trash_sel(int count, int key) {
+rl_trash_sel(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1102,7 +1145,8 @@ rl_trash_sel(int count, int key) {
 }
 
 int
-rl_untrash_all(int count, int key) {
+rl_untrash_all(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1114,7 +1158,8 @@ rl_untrash_all(int count, int key) {
 }
 
 int
-rl_open_sel(int count, int key) {
+rl_open_sel(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1125,7 +1170,7 @@ rl_open_sel(int count, int key) {
 	}
 
 	char cmd[PATH_MAX + 3];
-	sprintf(cmd, "o %s", sel_elements[sel_n -  1]);
+	sprintf(cmd, "o %s", sel_elements[sel_n - 1]);
 
 	keybind_exec_cmd(cmd);
 
@@ -1135,7 +1180,8 @@ rl_open_sel(int count, int key) {
 }
 
 int
-rl_bm_sel(int count, int key) {
+rl_bm_sel(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1146,7 +1192,7 @@ rl_bm_sel(int count, int key) {
 	}
 
 	char cmd[PATH_MAX + 6];
-	sprintf(cmd, "bm a %s", sel_elements[sel_n -  1]);
+	sprintf(cmd, "bm a %s", sel_elements[sel_n - 1]);
 
 	keybind_exec_cmd(cmd);
 
@@ -1156,9 +1202,10 @@ rl_bm_sel(int count, int key) {
 }
 
 int
-rl_kbinds_help (int count, int key) {
-	char *cmd[] = { "man", "-P", "less -p ^\"KEYBOARD SHORTCUTS\"", PNL,
-					NULL };
+rl_kbinds_help(int count, int key)
+{
+	char *cmd[] = {"man", "-P", "less -p ^\"KEYBOARD SHORTCUTS\"", PNL,
+					NULL};
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
@@ -1166,8 +1213,9 @@ rl_kbinds_help (int count, int key) {
 }
 
 int
-rl_cmds_help (int count, int key) {
-	char *cmd[] = { "man", "-P", "less -p ^COMMANDS", PNL, NULL };
+rl_cmds_help(int count, int key)
+{
+	char *cmd[] = {"man", "-P", "less -p ^COMMANDS", PNL, NULL};
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
@@ -1175,8 +1223,9 @@ rl_cmds_help (int count, int key) {
 }
 
 int
-rl_manpage (int count, int key) {
-	char *cmd[] = { "man", PNL, NULL };
+rl_manpage(int count, int key)
+{
+	char *cmd[] = {"man", PNL, NULL};
 
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
@@ -1185,7 +1234,8 @@ rl_manpage (int count, int key) {
 }
 
 int
-rl_pinned_dir(int count, int key) {
+rl_pinned_dir(int count, int key)
+{
 	if (!pinned_dir) {
 		printf(_("%s: No pinned file\n"), PROGRAM_NAME);
 		return EXIT_SUCCESS;
@@ -1199,7 +1249,8 @@ rl_pinned_dir(int count, int key) {
 }
 
 int
-rl_ws1(int count, int key) {
+rl_ws1(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1211,7 +1262,8 @@ rl_ws1(int count, int key) {
 }
 
 int
-rl_ws2(int count, int key) {
+rl_ws2(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1223,7 +1275,8 @@ rl_ws2(int count, int key) {
 }
 
 int
-rl_ws3(int count, int key) {
+rl_ws3(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1235,7 +1288,8 @@ rl_ws3(int count, int key) {
 }
 
 int
-rl_ws4(int count, int key) {
+rl_ws4(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1247,7 +1301,8 @@ rl_ws4(int count, int key) {
 }
 
 int
-rl_plugin1(int count, int key) {
+rl_plugin1(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1259,7 +1314,8 @@ rl_plugin1(int count, int key) {
 }
 
 int
-rl_plugin2(int count, int key) {
+rl_plugin2(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1271,7 +1327,8 @@ rl_plugin2(int count, int key) {
 }
 
 int
-rl_plugin3(int count, int key) {
+rl_plugin3(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1283,7 +1340,8 @@ rl_plugin3(int count, int key) {
 }
 
 int
-rl_plugin4(int count, int key) {
+rl_plugin4(int count, int key)
+{
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 

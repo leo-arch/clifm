@@ -26,76 +26,86 @@
 #include "icons.h"
 
 #include <stdio.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
+#include <sys/types.h>
+#include <unistd.h>
 #ifdef __linux__
 #include <sys/capability.h>
 #endif
-#include <string.h>
-#include <errno.h>
 #include <dirent.h>
-#include <sys/ioctl.h>
+#include <errno.h>
 #include <fcntl.h>
+#include <string.h>
+#include <sys/ioctl.h>
 
-#include "misc.h"
 #include "aux.h"
-#include "sort.h"
-#include "properties.h"
 #include "colors.h"
+#include "misc.h"
+#include "properties.h"
+#include "sort.h"
 
 void
 print_sort_method(void)
 {
 	printf(_("%s->%s Sorted by: "), mi_c, df_c);
 
-	switch(sort) {
-		case SNONE: puts(_("none")); break;
-		case SNAME: printf(_("name %s\n"), (sort_reverse) ? "[rev]" : "");
-			break;
-		case SSIZE: printf(_("size %s\n"), (sort_reverse) ? "[rev]" : "");
-			break;
-		case SATIME: printf(_("atime %s\n"), (sort_reverse) ? "[rev]" : "");
-			break;
-		case SBTIME:
-#if defined(HAVE_ST_BIRTHTIME) \
-			|| defined(__BSD_VISIBLE) || defined(_STATX)
-				printf(_("btime %s\n"), (sort_reverse) ? "[rev]" : "");
+	switch (sort) {
+	case SNONE:
+		puts(_("none"));
+		break;
+	case SNAME:
+		printf(_("name %s\n"), (sort_reverse) ? "[rev]" : "");
+		break;
+	case SSIZE:
+		printf(_("size %s\n"), (sort_reverse) ? "[rev]" : "");
+		break;
+	case SATIME:
+		printf(_("atime %s\n"), (sort_reverse) ? "[rev]" : "");
+		break;
+	case SBTIME:
+#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
+		printf(_("btime %s\n"), (sort_reverse) ? "[rev]" : "");
 #else
-				printf(_("btime (not available: using 'ctime') %s\n"),
-					   (sort_reverse) ? "[rev]" : "");
+		printf(_("btime (not available: using 'ctime') %s\n"),
+		    (sort_reverse) ? "[rev]" : "");
 #endif
-			break;
-		case SCTIME: printf(_("ctime %s\n"), (sort_reverse) ? "[rev]" : "");
-			break;
-		case SMTIME: printf(_("mtime %s\n"), (sort_reverse) ? "[rev]" : "");
-			break;
+		break;
+	case SCTIME:
+		printf(_("ctime %s\n"), (sort_reverse) ? "[rev]" : "");
+		break;
+	case SMTIME:
+		printf(_("mtime %s\n"), (sort_reverse) ? "[rev]" : "");
+		break;
 #if __FreeBSD__ || _BE_POSIX
-		case SVER: printf(_("version (not available: using 'name') %s\n"),
-					   (sort_reverse) ? "[rev]" : "");
+	case SVER:
+		printf(_("version (not available: using 'name') %s\n"),
+		    (sort_reverse) ? "[rev]" : "");
 #else
-		case SVER: printf(_("version %s\n"), (sort_reverse) ? "[rev]" : "");
+	case SVER:
+		printf(_("version %s\n"), (sort_reverse) ? "[rev]" : "");
 #endif
-			break;
-		case SEXT: printf(_("extension %s\n"), (sort_reverse) ? "[rev]" : "");
-			break;
-		case SINO: printf(_("inode %s\n"), (sort_reverse) ? "[rev]" : "");
-			break;
-		case SOWN:
-			if (light_mode)
-				printf(_("owner (not available: using 'name') %s\n"),
-					   (sort_reverse) ? "[rev]" : "");
-			else
-				printf(_("owner %s\n"), (sort_reverse) ? "[rev]" : "");
-			break;
-		case SGRP:
-			if (light_mode)
-				printf(_("group (not available: using 'name') %s\n"),
-					   (sort_reverse) ? "[rev]" : "");
-			else
-				printf(_("group %s\n"), (sort_reverse) ? "[rev]" : "");
-			break;
+		break;
+	case SEXT:
+		printf(_("extension %s\n"), (sort_reverse) ? "[rev]" : "");
+		break;
+	case SINO:
+		printf(_("inode %s\n"), (sort_reverse) ? "[rev]" : "");
+		break;
+	case SOWN:
+		if (light_mode)
+			printf(_("owner (not available: using 'name') %s\n"),
+			    (sort_reverse) ? "[rev]" : "");
+		else
+			printf(_("owner %s\n"), (sort_reverse) ? "[rev]" : "");
+		break;
+	case SGRP:
+		if (light_mode)
+			printf(_("group (not available: using 'name') %s\n"),
+			    (sort_reverse) ? "[rev]" : "");
+		else
+			printf(_("group %s\n"), (sort_reverse) ? "[rev]" : "");
+		break;
 	}
 }
 
@@ -132,7 +142,7 @@ print_disk_usage(void)
 	char *size = get_size_unit((off_t)(stat.f_blocks * stat.f_frsize));
 
 	printf("%s->%s %s/%s\n", mi_c, df_c, free_space ? free_space : "?",
-		   size ?  size : "?");
+	    size ? size : "?");
 
 	free(free_space);
 	free(size);
@@ -154,7 +164,7 @@ print_dirhist_map(void)
 			printf("%zu %s\n", i, old_pwd[i - 1]);
 
 		printf("%zu %s%s%s\n", i + 1, dh_c,
-			   old_pwd[i], df_c);
+		    old_pwd[i], df_c);
 
 		if (i + 1 < (size_t)dirhist_total_index && old_pwd[i + 1])
 			printf("%zu %s\n", i + 2, old_pwd[i + 1]);
@@ -182,8 +192,6 @@ get_file_icon(const char *file, int n)
 			break;
 		}
 	}
-
-	
 }
 
 /* Set the icon field to the corresponding icon for DIR. If not found,
@@ -230,10 +238,10 @@ get_ext_icon(const char *restrict ext, int n)
 
 		/* Tolower */
 		char c = (*ext >= 'A' && *ext <= 'Z')
-				 ? (*ext - 'A' + 'a') : *ext;
+			     ? (*ext - 'A' + 'a')
+			     : *ext;
 
-		if (c == *icon_ext[i].name
-		&& strcasecmp(ext, icon_ext[i].name) == 0) {
+		if (c == *icon_ext[i].name && strcasecmp(ext, icon_ext[i].name) == 0) {
 			file_info[n].icon = icon_ext[i].icon;
 			file_info[n].icon_color = icon_ext[i].color;
 			break;
@@ -248,7 +256,7 @@ get_ext_icon(const char *restrict ext, int n)
 int
 list_dir_light(void)
 {
-/*  clock_t start = clock(); */
+	/*  clock_t start = clock(); */
 
 	DIR *dir;
 
@@ -256,7 +264,7 @@ list_dir_light(void)
 
 	if ((dir = opendir(ws[cur_ws].path)) == NULL) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
-				strerror(errno));
+		    strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -266,20 +274,18 @@ list_dir_light(void)
 	unsigned int total_dents = 0, count = 0;
 
 	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2,
-								   sizeof(struct fileinfo));
+	    sizeof(struct fileinfo));
 
 	while ((ent = readdir(dir))) {
 
 		char *ename = ent->d_name;
 
 		/* Skip self and parent directories */
-		if (*ename == '.' && (!ename[1] || (ename[1] == '.'
-		&& !ename[2])))
+		if (*ename == '.' && (!ename[1] || (ename[1] == '.' && !ename[2])))
 			continue;
 
 		/* Skip files matching FILTER */
-		if (filter && regexec(&regex_exp, ename, 0, NULL, 0)
-		== EXIT_SUCCESS)
+		if (filter && regexec(&regex_exp, ename, 0, NULL, 0) == EXIT_SUCCESS)
 			continue;
 
 		if (!show_hidden && *ename == '.')
@@ -291,15 +297,14 @@ list_dir_light(void)
 		if (count > ENTRY_N) {
 			count = 0;
 			total_dents = n + ENTRY_N;
-			file_info = xrealloc(file_info, (total_dents + 2)
-							* sizeof(struct fileinfo));
+			file_info = xrealloc(file_info, (total_dents + 2) * sizeof(struct fileinfo));
 		}
 
 		file_info[n].name = (char *)xnmalloc(NAME_MAX + 1, sizeof(char));
 
 		if (!unicode)
 			file_info[n].len = (xstrsncpy(file_info[n].name, ename,
-										  NAME_MAX + 1) - 1);
+						NAME_MAX + 1) - 1);
 		else {
 			xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
 			file_info[n].len = wc_xstrlen(ename);
@@ -323,53 +328,67 @@ list_dir_light(void)
 
 		file_info[n].time = 0;
 
-		switch(file_info[n].type) {
+		switch (file_info[n].type) {
 
-			case DT_DIR:
-				if (icons) {
-					get_dir_icon(file_info[n].name, (int)n);
+		case DT_DIR:
+			if (icons) {
+				get_dir_icon(file_info[n].name, (int)n);
 
-					/* If set from the color scheme file */
-					if (*dir_ico_c)
-						file_info[n].icon_color = dir_ico_c;
-				}
+				/* If set from the color scheme file */
+				if (*dir_ico_c)
+					file_info[n].icon_color = dir_ico_c;
+			}
 
-				files_counter
-				? (file_info[n].filesn = (count_dir(ename) - 2))
-				: (file_info[n].filesn = 1);
+			files_counter
+			    ? (file_info[n].filesn = (count_dir(ename) - 2))
+			    : (file_info[n].filesn = 1);
 
-				if (file_info[n].filesn > 0)
-					file_info[n].color = di_c;
+			if (file_info[n].filesn > 0)
+				file_info[n].color = di_c;
 
-				else if (file_info[n].filesn == 0)
-					file_info[n].color = ed_c;
+			else if (file_info[n].filesn == 0)
+				file_info[n].color = ed_c;
 
-				else {
-					file_info[n].color = nd_c;
-					file_info[n].icon = ICON_LOCK;
-					file_info[n].icon_color = YELLOW;
-				}
+			else {
+				file_info[n].color = nd_c;
+				file_info[n].icon = ICON_LOCK;
+				file_info[n].icon_color = YELLOW;
+			}
 
-				break;
+			break;
 
-			case DT_LNK:
-				file_info[n].icon = ICON_LINK;
-				file_info[n].color = ln_c;
-				break;
+		case DT_LNK:
+			file_info[n].icon = ICON_LINK;
+			file_info[n].color = ln_c;
+			break;
 
-			case DT_REG: file_info[n].color = fi_c; break;
+		case DT_REG:
+			file_info[n].color = fi_c;
+			break;
 
-			case DT_SOCK: file_info[n].color = so_c; break;
+		case DT_SOCK:
+			file_info[n].color = so_c;
+			break;
 
-			case DT_FIFO: file_info[n].color = pi_c; break;
+		case DT_FIFO:
+			file_info[n].color = pi_c;
+			break;
 
-			case DT_BLK: file_info[n].color = bd_c; break;
+		case DT_BLK:
+			file_info[n].color = bd_c;
+			break;
 
-			case DT_CHR: file_info[n].color = cd_c; break;
+		case DT_CHR:
+			file_info[n].color = cd_c;
+			break;
 
-			case DT_UNKNOWN: file_info[n].color = uf_c; break;
+		case DT_UNKNOWN:
+			file_info[n].color = uf_c;
+			break;
 
-			default: file_info[n].color = df_c; break;
+		default:
+			file_info[n].color = df_c;
+			break;
 		}
 
 		if (xargs.icons_use_file_color == 1 && icons)
@@ -424,17 +443,17 @@ list_dir_light(void)
 					total_len += DIGINUM(file_info[i].filesn);
 
 				if (!file_info[i].dir && !colorize) {
-					switch(file_info[i].type) {
-						case DT_REG:
-							if (file_info[i].exec)
-								total_len += 1;
-							break;
-						case DT_LNK: /* fallthrough */
-						case DT_SOCK: /* fallthrough */
-						case DT_FIFO: /* fallthrough */
-						case DT_UNKNOWN:
+					switch (file_info[i].type) {
+					case DT_REG:
+						if (file_info[i].exec)
 							total_len += 1;
-							break;
+						break;
+					case DT_LNK:  /* fallthrough */
+					case DT_SOCK: /* fallthrough */
+					case DT_FIFO: /* fallthrough */
+					case DT_UNKNOWN:
+						total_len += 1;
+						break;
 					}
 				}
 			}
@@ -482,21 +501,22 @@ list_dir_light(void)
 					/* Advance one line at a time */
 					case 66: /* fallthrough */ /* Down arrow */
 					case 10: /* fallthrough */ /* Enter */
-					case 32: /* Space */
+					case 32:		   /* Space */
 						break;
 
 					/* Advance one page at a time */
-					case 126: counter = 0; /* Page Down */
+					case 126:
+						counter = 0; /* Page Down */
 						break;
 
 					case 63: /* fallthrough */ /* ? */
-					case 104: { /* h: Print pager help */
+					case 104: {		   /* h: Print pager help */
 						CLEAR;
 
 						fputs(_("?, h: help\n"
-						"Down arrow, Enter, Space: Advance one line\n"
-						"Page Down: Advance one page\n"
-						"q: Stop pagging\n"), stdout);
+							"Down arrow, Enter, Space: Advance one line\n"
+							"Page Down: Advance one page\n"
+							"q: Stop pagging\n"), stdout);
 
 						int l = (int)term_rows - 5;
 						while (--l >= 0)
@@ -512,14 +532,14 @@ list_dir_light(void)
 						counter = 0;
 						xgetchar();
 						CLEAR;
-					}
-					break;
+					} break;
 
 					/* Stop paging (and set a flag to reenable the pager
 					 * later) */
 					case 99:  /* 'c' */
 					case 112: /* 'p' */
-					case 113: pager = 0, reset_pager = 1; /* 'q' */
+					case 113:
+						pager = 0, reset_pager = 1; /* 'q' */
 						break;
 
 					/* If another key is pressed, go back one position.
@@ -590,8 +610,7 @@ list_dir_light(void)
 		if (pager) {
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding filenames */
-			if (last_column
-			&& counter > columns_n * ((size_t)term_rows - 2)) {
+			if (last_column && counter > columns_n * ((size_t)term_rows - 2)) {
 
 				printf("\x1b[7;97m--Mas--\x1b[0;49m");
 
@@ -600,44 +619,45 @@ list_dir_light(void)
 				/* Advance one line at a time */
 				case 66: /* fallthrough */ /* Down arrow */
 				case 10: /* fallthrough */ /* Enter */
-				case 32: /* Space */
+				case 32:		   /* Space */
 					break;
 
 				/* Advance one page at a time */
-				case 126: counter = 0; /* Page Down */
+				case 126:
+					counter = 0; /* Page Down */
 					break;
 
 				case 63: /* fallthrough */ /* ? */
-				case 104: { /* h: Print pager help */
-						CLEAR;
+				case 104: {		   /* h: Print pager help */
+					CLEAR;
 
-						fputs(_("?, h: help\n"
+					fputs(_("?, h: help\n"
 						"Down arrow, Enter, Space: Advance one line\n"
 						"Page Down: Advance one page\n"
 						"q: Stop pagging\n"), stdout);
 
-						int l = (int)term_rows - 5;
-						while (--l >= 0)
-							putchar('\n');
+					int l = (int)term_rows - 5;
+					while (--l >= 0)
+						putchar('\n');
 
-						fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
+					fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 
-						i -= ((term_rows * columns_n) - 1);
+					i -= ((term_rows * columns_n) - 1);
 
-						if (i < 0)
-							i = 0;
+					if (i < 0)
+						i = 0;
 
-						counter = 0;
-						xgetchar();
-						CLEAR;
-					}
-					break;
+					counter = 0;
+					xgetchar();
+					CLEAR;
+				} break;
 
 				/* Stop paging (and set a flag to reenable the pager
 				 * later) */
 				case 99:  /* 'c' */
 				case 112: /* 'p' */
-				case 113: pager = 0, reset_pager = 1; /* 'q' */
+				case 113:
+					pager = 0, reset_pager = 1; /* 'q' */
 					break;
 
 				/* If another key is pressed, go back one position.
@@ -657,8 +677,7 @@ list_dir_light(void)
 		if (++cur_cols == columns_n) {
 			cur_cols = 0;
 			last_column = 1;
-		}
-		else
+		} else
 			last_column = 0;
 
 		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
@@ -676,20 +695,19 @@ list_dir_light(void)
 
 				if (no_eln)
 					printf("%s%s %s%s%s", file_info[i].icon_color,
-						   file_info[i].icon, file_info[i].color,
-						   file_info[i].name, df_c);
+					    file_info[i].icon, file_info[i].color,
+					    file_info[i].name, df_c);
 				else
 					printf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
-						   file_info[i].icon_color, file_info[i].icon,
-						   file_info[i].color, file_info[i].name, df_c);
-			}
-			else {
+					    file_info[i].icon_color, file_info[i].icon,
+					    file_info[i].color, file_info[i].name, df_c);
+			} else {
 				if (no_eln)
 					printf("%s%s%s", file_info[i].color,
-						   file_info[i].name, df_c);
+					    file_info[i].name, df_c);
 				else
 					printf("%s%d%s %s%s%s", el_c, i + 1, df_c,
-						   file_info[i].color, file_info[i].name, df_c);
+					    file_info[i].color, file_info[i].name, df_c);
 			}
 
 			if (file_info[i].dir && classify) {
@@ -705,7 +723,7 @@ list_dir_light(void)
 					printf("%s %s", file_info[i].icon, file_info[i].name);
 				else
 					printf("%s%d%s %s %s", el_c, i + 1, df_c,
-						   file_info[i].icon, file_info[i].name);
+					    file_info[i].icon, file_info[i].name);
 			}
 
 			else {
@@ -716,24 +734,34 @@ list_dir_light(void)
 			}
 
 			if (classify) {
-				switch(file_info[i].type) {
+				switch (file_info[i].type) {
 
-					case DT_DIR:
-						ind_char = 0;
-						fputs(" /", stdout);
-						if (file_info[i].filesn > 0 && files_counter)
-							fputs(xitoa(file_info[i].filesn), stdout);
-						break;
+				case DT_DIR:
+					ind_char = 0;
+					fputs(" /", stdout);
+					if (file_info[i].filesn > 0 && files_counter)
+						fputs(xitoa(file_info[i].filesn), stdout);
+					break;
 
-					case DT_FIFO: putchar('|'); break;
+				case DT_FIFO:
+					putchar('|');
+					break;
 
-					case DT_LNK: putchar('@'); break;
+				case DT_LNK:
+					putchar('@');
+					break;
 
-					case DT_SOCK: putchar('='); break;
+				case DT_SOCK:
+					putchar('=');
+					break;
 
-					case DT_UNKNOWN: putchar('?'); break;
+				case DT_UNKNOWN:
+					putchar('?');
+					break;
 
-					default: ind_char = 0; break;
+				default:
+					ind_char = 0;
+					break;
 				}
 			}
 		}
@@ -742,7 +770,7 @@ list_dir_light(void)
 
 			/* Add spaces needed to equate the longest filename length */
 			int cur_len = (int)file_info[i].eln_n + 1 + (icons ? 3 : 0)
-						  + (int)file_info[i].len + (ind_char ? 1: 0);
+						+ (int)file_info[i].len + (ind_char ? 1 : 0);
 			if (classify) {
 				if (file_info[i].dir)
 					cur_len += 2;
@@ -756,8 +784,7 @@ list_dir_light(void)
 			register int j;
 			for (j = diff + 1; j--;)
 				putchar(' ');
-		}
-		else
+		} else
 			putchar('\n');
 	}
 
@@ -794,7 +821,7 @@ END:
 	if (sort_switch)
 		print_sort_method();
 
-/*  clock_t end = clock();
+	/*  clock_t end = clock();
 	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC); */
 
 	return EXIT_SUCCESS;
@@ -805,7 +832,7 @@ END:
 int
 list_dir(void)
 {
-/*  clock_t start = clock(); */
+	/*  clock_t start = clock(); */
 
 	if (clear_screen)
 		CLEAR;
@@ -820,7 +847,7 @@ list_dir(void)
 
 	if ((dir = opendir(ws[cur_ws].path)) == NULL) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
-				strerror(errno));
+		    strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -836,20 +863,18 @@ list_dir(void)
 	unsigned int total_dents = 0, count = 0;
 
 	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2,
-								   sizeof(struct fileinfo));
+	    sizeof(struct fileinfo));
 
 	while ((ent = readdir(dir))) {
 
 		char *ename = ent->d_name;
 
 		/* Skip self and parent directories */
-		if (*ename == '.' && (!ename[1] || (ename[1] == '.'
-		&& !ename[2])))
+		if (*ename == '.' && (!ename[1] || (ename[1] == '.' && !ename[2])))
 			continue;
 
 		/* Skip files matching FILTER */
-		if (filter && regexec(&regex_exp, ename, 0, NULL, 0)
-		== EXIT_SUCCESS)
+		if (filter && regexec(&regex_exp, ename, 0, NULL, 0) == EXIT_SUCCESS)
 			continue;
 
 		if (!show_hidden && *ename == '.')
@@ -864,17 +889,16 @@ list_dir(void)
 		if (count > ENTRY_N) {
 			count = 0;
 			total_dents = n + ENTRY_N;
-			file_info = xrealloc(file_info, (total_dents + 2)
-							* sizeof(struct fileinfo));
+			file_info = xrealloc(file_info, (total_dents + 2) * sizeof(struct fileinfo));
 		}
 
 		file_info[n].name = (char *)xnmalloc(NAME_MAX + 1, sizeof(char));
 
 		if (!unicode) {
 			file_info[n].len = (xstrsncpy(file_info[n].name, ename,
-										  NAME_MAX + 1) - 1);
-		}
-		else {
+						NAME_MAX + 1) -
+					    1);
+		} else {
 			xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
 			file_info[n].len = wc_xstrlen(ename);
 		}
@@ -892,8 +916,7 @@ list_dir(void)
 			file_info[n].gid = attr.st_gid;
 			file_info[n].ltime = (time_t)attr.st_mtim.tv_sec;
 			file_info[n].mode = attr.st_mode;
-		}
-		else if (sort == SOWN || sort == SGRP) {
+		} else if (sort == SOWN || sort == SGRP) {
 			file_info[n].uid = attr.st_uid;
 			file_info[n].gid = attr.st_gid;
 		}
@@ -907,161 +930,181 @@ list_dir(void)
 		file_info[n].ruser = 1;
 		file_info[n].filesn = 0;
 
-		switch(sort) {
-			case SATIME: file_info[n].time = (time_t)attr.st_atime; break;
+		switch (sort) {
+		case SATIME:
+			file_info[n].time = (time_t)attr.st_atime;
+			break;
 #if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
-			case SBTIME: file_info[n].time = (time_t)attr.st_birthtime; break;
+		case SBTIME:
+			file_info[n].time = (time_t)attr.st_birthtime;
+			break;
 #elif defined(_STATX)
-			case SBTIME: {
-				struct statx attx;
-				if (statx(AT_FDCWD, ename, AT_SYMLINK_NOFOLLOW,
+		case SBTIME: {
+			struct statx attx;
+			if (statx(AT_FDCWD, ename, AT_SYMLINK_NOFOLLOW,
 				STATX_BTIME, &attx) == -1)
-					file_info[n].time = 0;
-				else
-					file_info[n].time = (time_t)attx.stx_btime.tv_sec;
-				}
-				break;
+				file_info[n].time = 0;
+			else
+				file_info[n].time = (time_t)attx.stx_btime.tv_sec;
+		} break;
 #else
-			case SBTIME: file_info[n].time = (time_t)attr.st_ctime; break;
+		case SBTIME:
+			file_info[n].time = (time_t)attr.st_ctime;
+			break;
 #endif
-			case SCTIME: file_info[n].time = (time_t)attr.st_ctime; break;
-			case SMTIME: file_info[n].time = (time_t)attr.st_mtime; break;
-			default: file_info[n].time = 0; break;
+		case SCTIME:
+			file_info[n].time = (time_t)attr.st_ctime;
+			break;
+		case SMTIME:
+			file_info[n].time = (time_t)attr.st_mtime;
+			break;
+		default:
+			file_info[n].time = 0;
+			break;
 		}
 
-		switch(file_info[n].type) {
+		switch (file_info[n].type) {
 
-			case DT_DIR:
-				if (icons) {
-					get_dir_icon(file_info[n].name, (int)n);
+		case DT_DIR:
+			if (icons) {
+				get_dir_icon(file_info[n].name, (int)n);
 
-					/* If set from the color scheme file */
-					if (*dir_ico_c)
-						file_info[n].icon_color = dir_ico_c;
+				/* If set from the color scheme file */
+				if (*dir_ico_c)
+					file_info[n].icon_color = dir_ico_c;
+			}
+			files_counter
+			    ? (file_info[n].filesn = (count_dir(ename) - 2))
+			    : (file_info[n].filesn = 1);
+			if (file_info[n].filesn > 0) { /* S_ISVTX*/
+				file_info[n].color = (attr.st_mode & 01000)
+							 ? ((attr.st_mode & 00002) ? tw_c : st_c)
+							 : ((attr.st_mode & 00002) ? ow_c : di_c);
+				/* S_ISWOTH*/
+			} else if (file_info[n].filesn == 0)
+				file_info[n].color = (attr.st_mode & 01000)
+							 ? ((attr.st_mode & 00002) ? tw_c : st_c)
+							 : ((attr.st_mode & 00002) ? ow_c : ed_c);
+			else {
+				file_info[n].color = nd_c;
+				file_info[n].icon = ICON_LOCK;
+				file_info[n].icon_color = YELLOW;
+			}
+
+			break;
+
+		case DT_LNK:
+			file_info[n].icon = ICON_LINK;
+			struct stat attrl;
+			if (fstatat(fd, ename, &attrl, 0) == -1)
+				file_info[n].color = or_c;
+			else {
+				if (S_ISDIR(attrl.st_mode)) {
+					file_info[n].dir = 1;
+					files_counter
+					    ? (file_info[n].filesn = (count_dir(ename) - 2))
+					    : (file_info[n].filesn = 0);
 				}
-				files_counter
-				? (file_info[n].filesn = (count_dir(ename) - 2))
-				: (file_info[n].filesn = 1);
-				if (file_info[n].filesn > 0) {        /* S_ISVTX*/
-					file_info[n].color = (attr.st_mode & 01000)
-					? ((attr.st_mode & 00002) ?  tw_c : st_c)
-					: ((attr.st_mode & 00002) ? ow_c : di_c);
-								   /* S_ISWOTH*/
-				}
-				else if (file_info[n].filesn == 0)
-					file_info[n].color = (attr.st_mode & 01000)
-					? ((attr.st_mode & 00002) ?  tw_c : st_c)
-					: ((attr.st_mode & 00002) ? ow_c : ed_c);
-				else {
-					file_info[n].color = nd_c;
-					file_info[n].icon = ICON_LOCK;
-					file_info[n].icon_color = YELLOW;
-				}
+				file_info[n].color = ln_c;
+			}
+			break;
 
-				break;
-
-			case DT_LNK:
-				file_info[n].icon = ICON_LINK;
-				struct stat attrl;
-				if (fstatat(fd, ename, &attrl, 0) == -1)
-					file_info[n].color = or_c;
-				else {
-					if (S_ISDIR(attrl.st_mode)) {
-						file_info[n].dir = 1;
-						files_counter
-						? (file_info[n].filesn = (count_dir(ename) - 2))
-						: (file_info[n].filesn = 0);
-					}
-					file_info[n].color = ln_c;
-				}
-				break;
-
-			case DT_REG: {
+		case DT_REG: {
 #ifdef _LINUX_CAP
-				cap_t cap;
+			cap_t cap;
 #endif
-				/* Do not perform the access check if the user is root */
-				if (!(flags & ROOT_USR)
-				&& access(file_info[n].name, F_OK|R_OK) == -1) {
-					file_info[n].color = nf_c;
-					file_info[n].icon = ICON_LOCK;
-					file_info[n].icon_color = YELLOW;
-				}
-				else if (attr.st_mode & 04000) { /* SUID */
-					file_info[n].exec = 1;
-					file_info[n].color = su_c;
-					file_info[n].icon = ICON_EXEC;
-				}
-				else if (attr.st_mode & 02000) { /* SGID */
-					file_info[n].exec = 1;
-					file_info[n].color = sg_c;
-					file_info[n].icon = ICON_EXEC;
-				}
+			/* Do not perform the access check if the user is root */
+			if (!(flags & ROOT_USR)
+			&& access(file_info[n].name, F_OK | R_OK) == -1) {
+				file_info[n].color = nf_c;
+				file_info[n].icon = ICON_LOCK;
+				file_info[n].icon_color = YELLOW;
+			} else if (attr.st_mode & 04000) { /* SUID */
+				file_info[n].exec = 1;
+				file_info[n].color = su_c;
+				file_info[n].icon = ICON_EXEC;
+			} else if (attr.st_mode & 02000) { /* SGID */
+				file_info[n].exec = 1;
+				file_info[n].color = sg_c;
+				file_info[n].icon = ICON_EXEC;
+			}
 
 #ifdef _LINUX_CAP
-				else if ((cap = cap_get_file(ename))) {
-					file_info[n].color = ca_c;
-					cap_free(cap);
-				}
+			else if ((cap = cap_get_file(ename))) {
+				file_info[n].color = ca_c;
+				cap_free(cap);
+			}
 #endif
 
-				else if ((attr.st_mode & 00100) /* Exec */
-				|| (attr.st_mode & 00010) || (attr.st_mode & 00001)) {
-					file_info[n].exec = 1;
-					file_info[n].icon = ICON_EXEC;
-					if (file_info[n].size == 0)
-						file_info[n].color = ee_c;
-					else
-						file_info[n].color = ex_c;
-				}
+			else if ((attr.st_mode & 00100) /* Exec */
+				 || (attr.st_mode & 00010) || (attr.st_mode & 00001)) {
+				file_info[n].exec = 1;
+				file_info[n].icon = ICON_EXEC;
+				if (file_info[n].size == 0)
+					file_info[n].color = ee_c;
+				else
+					file_info[n].color = ex_c;
+			}
 
-				else if (file_info[n].size == 0)
-					file_info[n].color = ef_c;
+			else if (file_info[n].size == 0)
+				file_info[n].color = ef_c;
 
-				else if (file_info[n].linkn > 1) /* Multi-hardlink */
-					file_info[n].color = mh_c;
+			else if (file_info[n].linkn > 1) /* Multi-hardlink */
+				file_info[n].color = mh_c;
 
-				else /* Regular file */
-					file_info[n].color = fi_c;
+			else /* Regular file */
+				file_info[n].color = fi_c;
 
-				/* Check file extension */
-				char *ext = strrchr(file_info[n].name, '.');
-				/* Make sure not to take a hidden file for a file extension */
-				if (ext && ext != file_info[n].name) {
-					if (icons)
-						get_ext_icon(ext, (int)n);
+			/* Check file extension */
+			char *ext = strrchr(file_info[n].name, '.');
+			/* Make sure not to take a hidden file for a file extension */
+			if (ext && ext != file_info[n].name) {
+				if (icons)
+					get_ext_icon(ext, (int)n);
 
-					/* Check extension color only if some is defined */
-					if (ext_colors_n) {
-						char *extcolor = get_ext_color(ext);
+				/* Check extension color only if some is defined */
+				if (ext_colors_n) {
+					char *extcolor = get_ext_color(ext);
 
-						if (extcolor) {
-							char ext_color[MAX_COLOR];
-							sprintf(ext_color, "\x1b[%sm", extcolor);
-							file_info[n].color = ext_color;
-							extcolor = (char *)NULL;
-						}
+					if (extcolor) {
+						char ext_color[MAX_COLOR];
+						sprintf(ext_color, "\x1b[%sm", extcolor);
+						file_info[n].color = ext_color;
+						extcolor = (char *)NULL;
 					}
 				}
+			}
 
-				/* No extension. Check icons for specific filenames */
-				else if (icons)
-					get_file_icon(file_info[n].name, (int)n);
+			/* No extension. Check icons for specific filenames */
+			else if (icons)
+				get_file_icon(file_info[n].name, (int)n);
 
-				} /* End of DT_REG block */
-				break;
+		} /* End of DT_REG block */
+		break;
 
-			case DT_SOCK: file_info[n].color = so_c; break;
+		case DT_SOCK:
+			file_info[n].color = so_c;
+			break;
 
-			case DT_FIFO: file_info[n].color = pi_c; break;
+		case DT_FIFO:
+			file_info[n].color = pi_c;
+			break;
 
-			case DT_BLK: file_info[n].color = bd_c; break;
+		case DT_BLK:
+			file_info[n].color = bd_c;
+			break;
 
-			case DT_CHR: file_info[n].color = cd_c; break;
+		case DT_CHR:
+			file_info[n].color = cd_c;
+			break;
 
-			case DT_UNKNOWN: file_info[n].color = uf_c; break;
+		case DT_UNKNOWN:
+			file_info[n].color = uf_c;
+			break;
 
-			default: file_info[n].color = df_c; break;
+		default:
+			file_info[n].color = df_c;
+			break;
 		}
 
 		if (xargs.icons_use_file_color == 1 && icons)
@@ -1125,17 +1168,17 @@ list_dir(void)
 					total_len += DIGINUM(file_info[i].filesn);
 
 				if (!file_info[i].dir && !colorize) {
-					switch(file_info[i].type) {
-						case DT_REG:
-							if (file_info[i].exec)
-								total_len += 1;
-							break;
-						case DT_LNK: /* fallthrough */
-						case DT_SOCK: /* fallthrough */
-						case DT_FIFO: /* fallthrough */
-						case DT_UNKNOWN:
+					switch (file_info[i].type) {
+					case DT_REG:
+						if (file_info[i].exec)
 							total_len += 1;
-							break;
+						break;
+					case DT_LNK:  /* fallthrough */
+					case DT_SOCK: /* fallthrough */
+					case DT_FIFO: /* fallthrough */
+					case DT_UNKNOWN:
+						total_len += 1;
+						break;
 					}
 				}
 			}
@@ -1183,21 +1226,22 @@ list_dir(void)
 					/* Advance one line at a time */
 					case 66: /* fallthrough */ /* Down arrow */
 					case 10: /* fallthrough */ /* Enter */
-					case 32: /* Space */
+					case 32:		   /* Space */
 						break;
 
 					/* Advance one page at a time */
-					case 126: counter = 0; /* Page Down */
+					case 126:
+						counter = 0; /* Page Down */
 						break;
 
 					case 63: /* fallthrough */ /* ? */
-					case 104: { /* h: Print pager help */
+					case 104: {		   /* h: Print pager help */
 						CLEAR;
 
 						fputs(_("?, h: help\n"
-						"Down arrow, Enter, Space: Advance one line\n"
-						"Page Down: Advance one page\n"
-						"q: Stop pagging\n"), stdout);
+							"Down arrow, Enter, Space: Advance one line\n"
+							"Page Down: Advance one page\n"
+							"q: Stop pagging\n"), stdout);
 
 						int l = (int)term_rows - 5;
 						while (--l >= 0)
@@ -1207,19 +1251,20 @@ list_dir(void)
 
 						i -= (term_rows - 1);
 
-						if (i < 0) i = 0;
+						if (i < 0)
+							i = 0;
 
 						counter = 0;
 						xgetchar();
 						CLEAR;
-					}
-					break;
+					} break;
 
 					/* Stop paging (and set a flag to reenable the pager
 					 * later) */
 					case 99:  /* 'c' */
 					case 112: /* 'p' */
-					case 113: pager = 0, reset_pager = 1; /* 'q' */
+					case 113:
+						pager = 0, reset_pager = 1; /* 'q' */
 						break;
 
 					/* If another key is pressed, go back one position.
@@ -1288,8 +1333,7 @@ list_dir(void)
 		if (pager) {
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding filenames */
-			if (last_column
-			&& counter > columns_n * ((size_t)term_rows - 2)) {
+			if (last_column && counter > columns_n * ((size_t)term_rows - 2)) {
 
 				fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 
@@ -1298,43 +1342,45 @@ list_dir(void)
 				/* Advance one line at a time */
 				case 66: /* fallthrough */ /* Down arrow */
 				case 10: /* fallthrough */ /* Enter */
-				case 32: /* Space */
+				case 32:		   /* Space */
 					break;
 
 				/* Advance one page at a time */
-				case 126: counter = 0; /* Page Down */
+				case 126:
+					counter = 0; /* Page Down */
 					break;
 
 				case 63: /* fallthrough */ /* ? */
-				case 104: { /* h: Print pager help */
-						CLEAR;
+				case 104: {		   /* h: Print pager help */
+					CLEAR;
 
-						fputs(_("?, h: help\n"
+					fputs(_("?, h: help\n"
 						"Down arrow, Enter, Space: Advance one line\n"
 						"Page Down: Advance one page\n"
 						"q: Stop pagging\n"), stdout);
 
-						int l = (int)term_rows - 5;
-						while (--l >= 0)
-							putchar('\n');
+					int l = (int)term_rows - 5;
+					while (--l >= 0)
+						putchar('\n');
 
-						fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
+					fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 
-						i -= ((term_rows * columns_n) - 1);
+					i -= ((term_rows * columns_n) - 1);
 
-						if (i < 0) i = 0;
+					if (i < 0)
+						i = 0;
 
-						counter = 0;
-						xgetchar();
-						CLEAR;
-					}
-					break;
+					counter = 0;
+					xgetchar();
+					CLEAR;
+				} break;
 
 				/* Stop paging (and set a flag to reenable the pager
 				 * later) */
-				case 99:  /* fallthrough */ /* 'c' */
+				case 99: /* fallthrough */  /* 'c' */
 				case 112: /* fallthrough */ /* 'p' */
-				case 113: pager = 0, reset_pager = 1; /* 'q' */
+				case 113:
+					pager = 0, reset_pager = 1; /* 'q' */
 					break;
 
 				/* If another key is pressed, go back one position.
@@ -1356,8 +1402,7 @@ list_dir(void)
 		if (++cur_cols == columns_n) {
 			cur_cols = 0;
 			last_column = 1;
-		}
-		else
+		} else
 			last_column = 0;
 
 		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
@@ -1377,39 +1422,39 @@ list_dir(void)
 			if (icons) {
 				if (no_eln)
 					printf("%s%s %s%s%s", file_info[i].icon_color,
-						   file_info[i].icon, file_info[i].color,
-						   file_info[i].name, df_c);
+					    file_info[i].icon, file_info[i].color,
+					    file_info[i].name, df_c);
 				else
 					printf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
-						   file_info[i].icon_color, file_info[i].icon,
-						   file_info[i].color, file_info[i].name, df_c);
+					    file_info[i].icon_color, file_info[i].icon,
+					    file_info[i].color, file_info[i].name, df_c);
 			}
 
 			else {
 				if (no_eln)
 					printf("%s%s%s", file_info[i].color,
-						   file_info[i].name, df_c);
+					    file_info[i].name, df_c);
 				else
 					printf("%s%d%s %s%s%s", el_c, i + 1, df_c,
-						   file_info[i].color, file_info[i].name, df_c);
+					    file_info[i].color, file_info[i].name, df_c);
 			}
 
 			if (classify) {
 				/* Append directory indicator and files counter */
-				switch(file_info[i].type) {
+				switch (file_info[i].type) {
 
-					case DT_DIR:
+				case DT_DIR:
+					fputs(" /", stdout);
+					if (file_info[i].filesn > 0 && files_counter)
+						fputs(xitoa(file_info[i].filesn), stdout);
+					break;
+
+				case DT_LNK:
+					if (file_info[i].dir)
 						fputs(" /", stdout);
-						if (file_info[i].filesn > 0 && files_counter)
-							fputs(xitoa(file_info[i].filesn), stdout);
-						break;
-
-					case DT_LNK:
-						if (file_info[i].dir)
-							fputs(" /", stdout);
-						if (file_info[i].filesn > 0 && files_counter)
-							fputs(xitoa(file_info[i].filesn), stdout);
-						break;
+					if (file_info[i].filesn > 0 && files_counter)
+						fputs(xitoa(file_info[i].filesn), stdout);
+					break;
 				}
 			}
 		}
@@ -1421,7 +1466,7 @@ list_dir(void)
 					printf("%s %s", file_info[i].icon, file_info[i].name);
 				else
 					printf("%s%d%s %s %s", el_c, i + 1, df_c,
-						   file_info[i].icon, file_info[i].name);
+					    file_info[i].icon, file_info[i].name);
 			}
 
 			else {
@@ -1429,7 +1474,7 @@ list_dir(void)
 					fputs(file_info[i].name, stdout);
 				else {
 					printf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
-/*                  fputs(el_c, stdout);
+					/*                  fputs(el_c, stdout);
 					fputs(xitoa(i + 1), stdout);
 					fputs(df_c, stdout);
 					putchar(' ');
@@ -1439,41 +1484,47 @@ list_dir(void)
 
 			if (classify) {
 				/* Append filetype indicator */
-				switch(file_info[i].type) {
+				switch (file_info[i].type) {
 
-					case DT_DIR:
+				case DT_DIR:
+					ind_char = 0;
+					fputs(" /", stdout);
+					if (file_info[i].filesn > 0 && files_counter)
+						fputs(xitoa(file_info[i].filesn), stdout);
+					break;
+
+				case DT_FIFO:
+					putchar('|');
+					break;
+
+				case DT_LNK:
+					if (file_info[i].dir) {
 						ind_char = 0;
 						fputs(" /", stdout);
 						if (file_info[i].filesn > 0 && files_counter)
 							fputs(xitoa(file_info[i].filesn), stdout);
-						break;
+					} else
+						putchar('@');
 
-					case DT_FIFO: putchar('|'); break;
+					break;
 
-					case DT_LNK:
-						if (file_info[i].dir) {
-							ind_char = 0;
-							fputs(" /", stdout);
-							if (file_info[i].filesn > 0 && files_counter)
-								fputs(xitoa(file_info[i].filesn), stdout);
-						}
-						else
-							putchar('@');
+				case DT_REG:
+					if (file_info[i].exec)
+						putchar('*');
+					else
+						ind_char = 0;
+					break;
 
-						break;
+				case DT_SOCK:
+					putchar('=');
+					break;
 
-					case DT_REG:
-						if (file_info[i].exec)
-							putchar('*');
-						else
-							ind_char = 0;
-						break;
+				case DT_UNKNOWN:
+					putchar('?');
+					break;
 
-					case DT_SOCK: putchar('='); break;
-
-					case DT_UNKNOWN: putchar('?'); break;
-
-					default: ind_char = 0;
+				default:
+					ind_char = 0;
 				}
 			}
 		}
@@ -1481,12 +1532,10 @@ list_dir(void)
 		if (!last_column) {
 
 			/* Add spaces needed to equate the longest filename length */
-			int cur_len = (int)file_info[i].eln_n + 1 + (icons ? 3 : 0)
-						  + (int)file_info[i].len + (ind_char ? 1 : 0);
+			int cur_len = (int)file_info[i].eln_n + 1 + (icons ? 3 : 0) + (int)file_info[i].len + (ind_char ? 1 : 0);
 			if (file_info[i].dir && classify) {
 				cur_len += 2;
-				if (file_info[i].filesn > 0 && files_counter
-				&& file_info[i].ruser)
+				if (file_info[i].filesn > 0 && files_counter && file_info[i].ruser)
 					cur_len += DIGINUM((int)file_info[i].filesn);
 			}
 
@@ -1495,8 +1544,7 @@ list_dir(void)
 			register int j;
 			for (j = diff + 1; j--;)
 				putchar(' ');
-		}
-		else
+		} else
 			putchar('\n');
 	}
 
@@ -1537,7 +1585,7 @@ END:
 	if (sort_switch)
 		print_sort_method();
 
-/*  clock_t end = clock();
+	/*  clock_t end = clock();
 	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC); */
 
 	return EXIT_SUCCESS;

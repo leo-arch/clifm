@@ -24,20 +24,19 @@
 
 #include "helpers.h"
 
+#include <readline/readline.h>
 #include <stdio.h>
 #include <string.h>
-#include <readline/readline.h>
 #include <wordexp.h>
 
-#include "trash.h"
-#include "misc.h"
-#include "exec.h"
 #include "aux.h"
-#include "listing.h"
-#include "init.h"
-#include "prompt.h"
+#include "exec.h"
 #include "history.h"
+#include "init.h"
+#include "listing.h"
+#include "misc.h"
 #include "prompt.h"
+#include "trash.h"
 
 /* Print the prompt and return the string entered by the user (to be
  * parsed later by parse_input_str()) */
@@ -57,7 +56,7 @@ prompt(void)
 
 	if (welcome_message) {
 		printf(_("%sCliFM, the anti-eye-candy, KISS file manager%s\n"
-			   "Enter '?' or press F[1-3] for instructions.\n"), wc_c, df_c);
+			 "Enter '?' or press F[1-3] for instructions.\n"), wc_c, df_c);
 		welcome_message = 0;
 	}
 
@@ -100,11 +99,19 @@ prompt(void)
 		 * warning message, the prompt will always display the error
 		 * message sign: a red 'E'. */
 		switch (pmsg) {
-		case nomsg: break;
-		case error: sprintf(msg_str, "%sE%s", em_c, NC_b); break;
-		case warning: sprintf(msg_str, "%sW%s", wm_c, NC_b); break;
-		case notice: sprintf(msg_str, "%sN%s", nm_c, NC_b); break;
-		default: break;
+		case nomsg:
+			break;
+		case error:
+			sprintf(msg_str, "%sE%s", em_c, NC_b);
+			break;
+		case warning:
+			sprintf(msg_str, "%sW%s", wm_c, NC_b);
+			break;
+		case notice:
+			sprintf(msg_str, "%sN%s", nm_c, NC_b);
+			break;
+		default:
+			break;
 		}
 	}
 
@@ -132,25 +139,24 @@ prompt(void)
 		decoded_prompt_len = strlen(decoded_prompt);
 
 	size_t prompt_length = (size_t)(decoded_prompt_len
-		+ (xargs.stealth_mode == 1 ? 16 : 0) + ((flags & ROOT_USR) ? 16 : 0) 
-		+ (sel_n ? 16 : 0) + (trash_n ? 16 : 0) + ((msgs_n && pmsg)
-		? 16 : 0) + 6 + sizeof(tx_c) + 1);
+	+ (xargs.stealth_mode == 1 ? 16 : 0) + ((flags & ROOT_USR) ? 16 : 0)
+	+ (sel_n ? 16 : 0) + (trash_n ? 16 : 0) + ((msgs_n && pmsg) ? 16 : 0)
+	+ 6 + sizeof(tx_c) + 1);
 
 	/* 16 = color_b({red,green,yellow}_b)+letter (sel, trash, msg)+NC_b;
 	 * 6 = NC_b
 	 * 1 = null terminating char */
 
 	char *the_prompt = (char *)xnmalloc(prompt_length, sizeof(char));
-/*  char the_prompt[prompt_length]; */
+	/*  char the_prompt[prompt_length]; */
 
 	snprintf(the_prompt, prompt_length, "%s%s%s%s%s%s%s%s%s%s%s",
-		(flags & ROOT_USR) ? "\001\x1b[1;31mR\x1b[0m\002" : "",
-		(msgs_n && pmsg) ? msg_str : "", (xargs.stealth_mode == 1)
-		? si_c : "", (xargs.stealth_mode == 1)
-		? "S\001\x1b[0m\002" : "", (trash_n) ? ti_c : "",
-		(trash_n) ? "T\001\x1b[0m\002" : "", (sel_n) ? li_c
-		: "", (sel_n) ? "*\001\x1b[0m\002" : "", decoded_prompt,
-		NC_b, tx_c);
+	    (flags & ROOT_USR) ? "\001\x1b[1;31mR\x1b[0m\002" : "",
+	    (msgs_n && pmsg) ? msg_str : "", (xargs.stealth_mode == 1)
+	    ? si_c : "", (xargs.stealth_mode == 1) ? "S\001\x1b[0m\002"
+	    : "", (trash_n) ? ti_c : "", (trash_n) ? "T\001\x1b[0m\002" : "",
+	    (sel_n) ? li_c : "", (sel_n) ? "*\001\x1b[0m\002" : "", decoded_prompt,
+	    NC_b, tx_c);
 
 	free(decoded_prompt);
 
@@ -173,12 +179,12 @@ prompt(void)
 	free(the_prompt);
 
 	if (!input)
-	/* Same as 'input == NULL': input is a pointer poiting to no
+		/* Same as 'input == NULL': input is a pointer poiting to no
 	 * memory address whatsover */
 		return (char *)NULL;
 
 	if (!*input) {
-	/* input is not NULL, but a pointer poiting to a memory address
+		/* input is not NULL, but a pointer poiting to a memory address
 	 * whose first byte is the null byte (\0). In other words, it is
 	 * an empty string */
 		free(input);
@@ -209,7 +215,7 @@ prompt(void)
 char *
 decode_prompt(const char *line)
 {
-	if(!line)
+	if (!line)
 		return (char *)NULL;
 
 #define CTLESC '\001'
@@ -219,7 +225,7 @@ decode_prompt(const char *line)
 	size_t result_len = 0;
 	int c;
 
-	while((c = *line++)) {
+	while ((c = *line++)) {
 		/* We have a escape char */
 		if (c == '\\') {
 
@@ -246,7 +252,8 @@ decode_prompt(const char *line)
 				int *hex = get_hex_num(line);
 				int n = 0, i = 0, j;
 				/* Count how many hex expressions were found */
-				while (hex[n++] != -1);
+				while (hex[n++] != -1)
+					;
 				n--;
 				/* 2 + n == CTLEST + 0x00 + amount of hex numbers*/
 				temp = xnmalloc(2 + (size_t)n, sizeof(char));
@@ -280,8 +287,7 @@ decode_prompt(const char *line)
 			case '4':
 			case '5':
 			case '6':
-			case '7':
-			{
+			case '7': {
 				char octal_string[4];
 				int n;
 
@@ -296,12 +302,10 @@ decode_prompt(const char *line)
 					temp[0] = CTLESC;
 					temp[1] = (char)n;
 					temp[2] = '\0';
-				}
-				else if (n == -1) {
+				} else if (n == -1) {
 					temp[0] = '\\';
 					temp[1] = '\0';
-				}
-				else {
+				} else {
 					line += 3;
 					temp[0] = (char)n;
 					temp[1] = '\0';
@@ -327,23 +331,19 @@ decode_prompt(const char *line)
 					char time[9] = "";
 					strftime(time, sizeof(time), "%H:%M:%S", tm);
 					temp = savestring(time, sizeof(time));
-				}
-				else if (c == 'T') {
+				} else if (c == 'T') {
 					char time[9] = "";
 					strftime(time, sizeof(time), "%I:%M:%S", tm);
 					temp = savestring(time, sizeof(time));
-				}
-				else if (c == 'A') {
+				} else if (c == 'A') {
 					char time[6] = "";
 					strftime(time, sizeof(time), "%H:%M", tm);
 					temp = savestring(time, sizeof(time));
-				}
-				else if (c == '@') {
+				} else if (c == '@') {
 					char time[12] = "";
 					strftime(time, sizeof(time), "%I:%M:%S %p", tm);
 					temp = savestring(time, sizeof(time));
-				}
-				else { /* c == 'd' */
+				} else { /* c == 'd' */
 					char time[12] = "";
 					strftime(time, sizeof(time), "%a %b %d", tm);
 					temp = savestring(time, sizeof(time));
@@ -367,7 +367,7 @@ decode_prompt(const char *line)
 				goto add_string;
 
 			case 's': /* Shell name (after last slash)*/
-				{
+			{
 				if (!user.shell) {
 					line++;
 					break;
@@ -375,14 +375,14 @@ decode_prompt(const char *line)
 				char *shell_name = strrchr(user.shell, '/');
 				temp = savestring(shell_name + 1, strlen(shell_name) - 1);
 				goto add_string;
-				}
+			}
 
 			case 'S': { /* Current workspace */
 				char s[12];
 				sprintf(s, "%d", cur_ws + 1);
 				temp = savestring(s, 1);
 				goto add_string;
-				}
+			}
 
 			case 'l': { /* Current mode */
 				char s[2];
@@ -390,12 +390,12 @@ decode_prompt(const char *line)
 				s[1] = '\0';
 				temp = savestring(s, 1);
 				goto add_string;
-				}
+			}
 
 			case 'p':
 			case 'w': /* Full PWD */
 			case 'W': /* Short PWD */
-				{
+			{
 				if (!ws[cur_ws].path) {
 					line++;
 					break;
@@ -405,12 +405,11 @@ decode_prompt(const char *line)
 				int free_tmp_path = 0;
 				char *tmp_path = (char *)NULL;
 				if (strncmp(ws[cur_ws].path, user.home,
-				user.home_len) == 0)
+					user.home_len) == 0)
 					tmp_path = home_tilde(ws[cur_ws].path);
 				if (!tmp_path) {
 					tmp_path = ws[cur_ws].path;
-				}
-				else
+				} else
 					free_tmp_path = 1;
 
 				if (c == 'W') {
@@ -432,11 +431,10 @@ decode_prompt(const char *line)
 						ret = strrchr(tmp_path, '/');
 						if (!ret)
 							temp = savestring(tmp_path,
-											  strlen(tmp_path));
+							    strlen(tmp_path));
 						else
 							temp = savestring(ret + 1, strlen(ret) - 1);
-					}
-					else
+					} else
 						temp = savestring(tmp_path, strlen(tmp_path));
 				}
 
@@ -447,7 +445,7 @@ decode_prompt(const char *line)
 					free(tmp_path);
 
 				goto add_string;
-				}
+			}
 
 			case '$': /* '$' or '#' for normal and root user */
 				if ((flags & ROOT_USR))
@@ -474,12 +472,12 @@ decode_prompt(const char *line)
 				temp = xnmalloc(3, sizeof(char));
 				temp[0] = '\001';
 				temp[1] = (c == '[') ? RL_PROMPT_START_IGNORE
-						  : RL_PROMPT_END_IGNORE;
+						     : RL_PROMPT_END_IGNORE;
 				temp[2] = '\0';
 				goto add_string;
 
 			case '\\': /* Literal backslash */
-				temp = savestring ("\\", 1);
+				temp = savestring("\\", 1);
 				goto add_string;
 
 			default:
@@ -493,8 +491,7 @@ decode_prompt(const char *line)
 				if (!result)
 					result = (char *)xcalloc(result_len + 1, sizeof(char));
 				else
-					result = (char *)xrealloc(result, (result_len + 1)
-											  * sizeof(char));
+					result = (char *)xrealloc(result, (result_len + 1) * sizeof(char));
 				strcat(result, temp);
 				free(temp);
 				break;
@@ -510,7 +507,7 @@ decode_prompt(const char *line)
 
 			/* Command substitution */
 			if (c == '$' && *line == '(') {
-				
+
 				/* Look for the ending parenthesis */
 				int tmp = strcntchr(line, ')');
 
@@ -542,7 +539,7 @@ decode_prompt(const char *line)
 							result = (char *)xcalloc(result_len + 2, sizeof(char));
 						else
 							result = (char *)xrealloc(result, (result_len + 2)
-													  * sizeof(char));
+													* sizeof(char));
 						strcat(result, wordbuf.we_wordv[j]);
 
 						/* If not the last word in cmd output, add an space */
@@ -557,8 +554,7 @@ decode_prompt(const char *line)
 				continue;
 			}
 
-			result = (char *)xrealloc(result, (result_len + 2)
-									  * sizeof(char));
+			result = (char *)xrealloc(result, (result_len + 2) * sizeof(char));
 			result[result_len++] = (char)c;
 			result[result_len] = '\0';
 		}

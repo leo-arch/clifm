@@ -24,28 +24,28 @@
 
 #include "helpers.h"
 
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <errno.h>
 
 #include "aux.h"
 #include "exec.h"
-#include "navigation.h"
 #include "listing.h"
+#include "navigation.h"
 
 int
 remote_ftp(char *address, char *options)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: Access to remote filesystems is disabled in "
-			   "stealth mode\n", PROGRAM_NAME);
+		       "stealth mode\n", PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
 
 #if __FreeBSD__
 	fprintf(stderr, _("%s: FTP is not yet supported on FreeBSD\n"),
-			PROGRAM_NAME);
+	    PROGRAM_NAME);
 	return EXIT_FAILURE;
 #endif
 
@@ -61,8 +61,8 @@ remote_ftp(char *address, char *options)
 		p++;
 	}
 
-	char *rmountpoint = (char *)xnmalloc(strlen(TMP_DIR)
-									 + strlen(tmp_addr) + 9, sizeof(char));
+	char *rmountpoint = (char *)xnmalloc(strlen(TMP_DIR) + strlen(tmp_addr) + 9,
+										sizeof(char));
 
 	sprintf(rmountpoint, "%s/remote/%s", TMP_DIR, tmp_addr);
 	free(tmp_addr);
@@ -71,11 +71,11 @@ remote_ftp(char *address, char *options)
 
 	if (stat(rmountpoint, &file_attrib) == -1) {
 
-		char *mkdir_cmd[] = { "mkdir", "-p", rmountpoint, NULL };
+		char *mkdir_cmd[] = {"mkdir", "-p", rmountpoint, NULL};
 
 		if (launch_execve(mkdir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			fprintf(stderr, _("%s: %s: Cannot create mountpoint\n"),
-					PROGRAM_NAME, rmountpoint);
+			    PROGRAM_NAME, rmountpoint);
 			free(rmountpoint);
 			return EXIT_FAILURE;
 		}
@@ -83,14 +83,14 @@ remote_ftp(char *address, char *options)
 
 	else if (count_dir(rmountpoint) > 2) {
 		fprintf(stderr, _("%s: %s: Mounpoint not empty\n"),
-				PROGRAM_NAME, rmountpoint);
+		    PROGRAM_NAME, rmountpoint);
 		free(rmountpoint);
 		return EXIT_FAILURE;
 	}
 
 	/* CurlFTPFS does not require sudo */
-	char *cmd[] = { "curlftpfs", address, rmountpoint, (options) ? "-o"
-					: NULL, (options) ? options: NULL, NULL };
+	char *cmd[] = {"curlftpfs", address, rmountpoint, (options) ? "-o"
+					: NULL, (options) ? options : NULL, NULL};
 	int error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 
 	if (error_code) {
@@ -100,7 +100,7 @@ remote_ftp(char *address, char *options)
 
 	if (xchdir(rmountpoint, SET_TITLE) != 0) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rmountpoint,
-				strerror(errno));
+		    strerror(errno));
 		free(rmountpoint);
 		return EXIT_FAILURE;
 	}
@@ -117,7 +117,6 @@ remote_ftp(char *address, char *options)
 	}
 
 	return error_code;
-
 }
 
 int
@@ -125,13 +124,12 @@ remote_smb(char *address, char *options)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: Access to remote filesystems is disabled in "
-			   "stealth mode\n", PROGRAM_NAME);
+		       "stealth mode\n", PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
 
 #if __FreeBSD__
-	fprintf(stderr, _("%s: SMB is not yet supported on FreeBSD\n"),
-			PROGRAM_NAME);
+	fprintf(stderr, _("%s: SMB is not yet supported on FreeBSD\n"), PROGRAM_NAME);
 	return EXIT_FAILURE;
 #endif
 
@@ -166,27 +164,26 @@ remote_smb(char *address, char *options)
 		p++;
 	}
 
-	char *rmountpoint = (char *)xnmalloc(strlen(raddress)
-									 + strlen(TMP_DIR) + 9, sizeof(char));
+	char *rmountpoint = (char *)xnmalloc(strlen(raddress) + strlen(TMP_DIR) + 9,
+										sizeof(char));
 	sprintf(rmountpoint, "%s/remote/%s", TMP_DIR, raddress);
 
 	int free_options = 0;
 	char *roptions = (char *)NULL;
 
 	if (ruser) {
-		roptions = (char *)xnmalloc(strlen(ruser) + strlen(options)
-									+ 11, sizeof(char));
+		roptions = (char *)xnmalloc(strlen(ruser) + strlen(options) + 11,
+															sizeof(char));
 		sprintf(roptions, "username=%s,%s", ruser, options);
 		free_options = 1;
-	}
-	else
+	} else
 		roptions = options;
 
 	/* Create the mountpoint, if it doesn't exist */
 	struct stat file_attrib;
 
 	if (stat(rmountpoint, &file_attrib) == -1) {
-		char *mkdir_cmd[] = { "mkdir", "-p", rmountpoint, NULL };
+		char *mkdir_cmd[] = {"mkdir", "-p", rmountpoint, NULL};
 
 		if (launch_execve(mkdir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 
@@ -203,7 +200,7 @@ remote_smb(char *address, char *options)
 			free(addr_tmp);
 
 			fprintf(stderr, _("%s: %s: Cannot create mountpoint\n"),
-					PROGRAM_NAME, rmountpoint);
+			    PROGRAM_NAME, rmountpoint);
 
 			return EXIT_FAILURE;
 		}
@@ -212,7 +209,7 @@ remote_smb(char *address, char *options)
 	/* If the mountpoint already exists, check if it is empty */
 	else if (count_dir(rmountpoint) > 2) {
 		fprintf(stderr, _("%s: %s: Mountpoint not empty\n"),
-				PROGRAM_NAME, rmountpoint);
+		    PROGRAM_NAME, rmountpoint);
 
 		if (free_options)
 			free(roptions);
@@ -233,15 +230,15 @@ remote_smb(char *address, char *options)
 
 	/* Create and execute the SMB command */
 	if (!(flags & ROOT_USR)) {
-		char *cmd[] = { "sudo", "-u", "root", "mount.cifs", addr_tmp,
-						rmountpoint, (roptions) ? "-o" : NULL,
-						(roptions) ? roptions : NULL, NULL };
+		char *cmd[] = {"sudo", "-u", "root", "mount.cifs", addr_tmp,
+		    rmountpoint, (roptions) ? "-o" : NULL,
+		    (roptions) ? roptions : NULL, NULL};
 		error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	}
 
 	else {
-		char *cmd[] = { "mount.cifs", addr_tmp, rmountpoint, (roptions)
-						? "-o" : NULL, (roptions) ? roptions : NULL, NULL };
+		char *cmd[] = {"mount.cifs", addr_tmp, rmountpoint, (roptions) ? "-o"
+					: NULL, (roptions) ? roptions : NULL, NULL};
 		error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	}
 
@@ -254,7 +251,7 @@ remote_smb(char *address, char *options)
 	if (free_address)
 		free(raddress);
 
-	free(addr_tmp); 
+	free(addr_tmp);
 
 	if (error_code) {
 		free(rmountpoint);
@@ -264,7 +261,7 @@ remote_smb(char *address, char *options)
 	/* If successfully mounted, chdir into mountpoint */
 	if (xchdir(rmountpoint, SET_TITLE) != 0) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rmountpoint,
-				strerror(errno));
+		    strerror(errno));
 		free(rmountpoint);
 		return EXIT_FAILURE;
 	}
@@ -288,27 +285,27 @@ remote_ssh(char *address, char *options)
 {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: Access to remote filesystems is disabled in "
-			   "stealth mode\n", PROGRAM_NAME);
+		       "stealth mode\n", PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
 
 #if __FreeBSD__
 	fprintf(stderr, _("%s: SFTP is not yet supported on FreeBSD"),
-			PROGRAM_NAME);
+	    PROGRAM_NAME);
 	return EXIT_FAILURE;
 #endif
 
 	if (!config_ok)
 		return EXIT_FAILURE;
 
-/*  char *sshfs_path = get_cmd_path("sshfs");
+	/*  char *sshfs_path = get_cmd_path("sshfs");
 	if (!sshfs_path) {
 		fprintf(stderr, _("%s: sshfs: Program not found.\n"),
 				PROGRAM_NAME);
 		return EXIT_FAILURE;
 	} */
 
-	if(!address || !*address)
+	if (!address || !*address)
 		return EXIT_FAILURE;
 
 	/* Create mountpoint */
@@ -323,19 +320,19 @@ remote_ssh(char *address, char *options)
 		p++;
 	}
 
-	char *rmountpoint = (char *)xnmalloc(strlen(TMP_DIR) + strlen(rname)
-										 + 9, sizeof(char));
+	char *rmountpoint = (char *)xnmalloc(strlen(TMP_DIR) + strlen(rname) + 9,
+											sizeof(char));
 	sprintf(rmountpoint, "%s/remote/%s", TMP_DIR, rname);
 	free(rname);
 
 	/* If the mountpoint doesn't exist, create it */
 	struct stat file_attrib;
 	if (stat(rmountpoint, &file_attrib) == -1) {
-		char *mkdir_cmd[] = { "mkdir", "-p", rmountpoint, NULL };
+		char *mkdir_cmd[] = {"mkdir", "-p", rmountpoint, NULL};
 
 		if (launch_execve(mkdir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			fprintf(stderr, _("%s: %s: Cannot create mountpoint\n"),
-					PROGRAM_NAME, rmountpoint);
+			    PROGRAM_NAME, rmountpoint);
 			free(rmountpoint);
 			return EXIT_FAILURE;
 		}
@@ -344,7 +341,7 @@ remote_ssh(char *address, char *options)
 	/* If it exists, make sure it is not populated */
 	else if (count_dir(rmountpoint) > 2) {
 		fprintf(stderr, _("%s: %s: Mounpoint not empty\n"),
-				PROGRAM_NAME, rmountpoint);
+		    PROGRAM_NAME, rmountpoint);
 		free(rmountpoint);
 		return EXIT_FAILURE;
 	}
@@ -354,15 +351,15 @@ remote_ssh(char *address, char *options)
 	int error_code = 1;
 
 	if ((flags & ROOT_USR)) {
-		char *cmd[] = { "sshfs", address, rmountpoint, (options) ? "-o"
-						: NULL, (options) ? options: NULL, NULL };
+		char *cmd[] = {"sshfs", address, rmountpoint, (options) ? "-o"
+					: NULL, (options) ? options : NULL, NULL};
 		error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	}
 
 	else {
-		char *cmd[] = { "sudo", "sshfs", address, rmountpoint, "-o",
-						"allow_other", (options) ? "-o" : NULL,
-						(options) ? options : NULL, NULL};
+		char *cmd[] = {"sudo", "sshfs", address, rmountpoint, "-o",
+		    "allow_other", (options) ? "-o" : NULL,
+		    (options) ? options : NULL, NULL};
 		error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	}
 
@@ -374,7 +371,7 @@ remote_ssh(char *address, char *options)
 	/* If successfully mounted, chdir into mountpoint */
 	if (xchdir(rmountpoint, SET_TITLE) != 0) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rmountpoint,
-				strerror(errno));
+		    strerror(errno));
 		free(rmountpoint);
 		return EXIT_FAILURE;
 	}

@@ -24,23 +24,23 @@
 
 #include "helpers.h"
 
-#include <unistd.h>
-#include <stdio.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <dirent.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <regex.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/ioctl.h>
-#include <errno.h>
-#include <regex.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "aux.h"
-#include "exec.h"
-#include "navigation.h"
-#include "glob.h"
-#include "sort.h"
-#include "colors.h"
 #include "checks.h"
+#include "colors.h"
+#include "exec.h"
+#include "glob.h"
+#include "navigation.h"
+#include "sort.h"
 
 /* List matching filenames in the specified directory */
 int
@@ -91,25 +91,41 @@ search_glob(char **comm, int invert)
 		 * If file type is specified, matches will be checked against
 		 * this value */
 		switch (file_type) {
-		case 'd': file_type = invert ? DT_DIR : S_IFDIR; break;
-		case 'r': file_type = invert ? DT_REG : S_IFREG; break;
-		case 'l': file_type = invert ? DT_LNK : S_IFLNK; break;
-		case 's': file_type = invert ? DT_SOCK : S_IFSOCK; break;
-		case 'f': file_type = invert ? DT_FIFO : S_IFIFO; break;
-		case 'b': file_type = invert ? DT_BLK : S_IFBLK; break;
-		case 'c': file_type = invert ? DT_CHR : S_IFCHR; break;
-		case 'x': recursive = 1; break;
+		case 'd':
+			file_type = invert ? DT_DIR : S_IFDIR;
+			break;
+		case 'r':
+			file_type = invert ? DT_REG : S_IFREG;
+			break;
+		case 'l':
+			file_type = invert ? DT_LNK : S_IFLNK;
+			break;
+		case 's':
+			file_type = invert ? DT_SOCK : S_IFSOCK;
+			break;
+		case 'f':
+			file_type = invert ? DT_FIFO : S_IFIFO;
+			break;
+		case 'b':
+			file_type = invert ? DT_BLK : S_IFBLK;
+			break;
+		case 'c':
+			file_type = invert ? DT_CHR : S_IFCHR;
+			break;
+		case 'x':
+			recursive = 1;
+			break;
 
 		default:
 			fprintf(stderr, _("%s: '%c': aUnrecognized filetype\n"),
-					PROGRAM_NAME, (char)file_type);
+			    PROGRAM_NAME, (char)file_type);
 			return EXIT_FAILURE;
 		}
 	}
 
 	if (recursive) {
-		char *cmd[] = { "find", (search_path && *search_path) ? search_path
-						: ".", "-name", comm[0] + 1, NULL };
+		char *cmd[] = {"find", (search_path && *search_path) ? search_path
+					: ".", "-name", comm[0] + 1, NULL};
 		launch_execve(cmd, FOREGROUND, E_NOFLAG);
 		return EXIT_SUCCESS;
 	}
@@ -124,7 +140,7 @@ search_glob(char **comm, int invert)
 
 			if (!deq_dir) {
 				fprintf(stderr, _("%s: %s: Error dequoting filename\n"),
-						PROGRAM_NAME, comm[1]);
+				    PROGRAM_NAME, comm[1]);
 				return EXIT_FAILURE;
 			}
 
@@ -138,13 +154,13 @@ search_glob(char **comm, int invert)
 
 		/* If search is current directory */
 		if ((*search_path == '.' && !search_path[1]) ||
-		(search_path[1] == ws[cur_ws].path[1]
-		&& strcmp(search_path, ws[cur_ws].path) == 0))
+		    (search_path[1] == ws[cur_ws].path[1]
+		    && strcmp(search_path, ws[cur_ws].path) == 0))
 			search_path = (char *)NULL;
 
 		else if (xchdir(search_path, NO_TITLE) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, search_path,
-					strerror(errno));
+			    strerror(errno));
 			return EXIT_FAILURE;
 		}
 	}
@@ -159,13 +175,11 @@ search_glob(char **comm, int invert)
 	/* Search for globbing char */
 	int glob_char_found = 0;
 	for (i = 1; tmp[i]; i++) {
-		if (tmp[i] == '*' || tmp[i] == '?'
-		|| tmp[i] == '[' || tmp[i] == '{'
-		/* Consider regex chars as well: we don't want this "r$"
+		if (tmp[i] == '*' || tmp[i] == '?' || tmp[i] == '[' || tmp[i] == '{'
+		    /* Consider regex chars as well: we don't want this "r$"
 		 * to become this "*r$*" */
-		|| tmp[i] == '|' || tmp[i] == '^'
-		|| tmp[i] == '+' || tmp[i] == '$'
-		|| tmp[i] == '.') {
+		    || tmp[i] == '|' || tmp[i] == '^' || tmp[i] == '+' || tmp[i] == '$'
+		    || tmp[i] == '.') {
 			glob_char_found = 1;
 			break;
 		}
@@ -179,7 +193,7 @@ search_glob(char **comm, int invert)
 		search_str_len = strlen(comm[0]);
 
 		comm[0] = (char *)xrealloc(comm[0], (search_str_len + 2) *
-								   sizeof(char));
+							sizeof(char));
 		tmp = comm[0];
 		if (invert) {
 			++tmp;
@@ -208,7 +222,7 @@ search_glob(char **comm, int invert)
 			/* Go back to the directory we came from */
 			if (xchdir(ws[cur_ws].path, NO_TITLE) == -1)
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-						ws[cur_ws].path, strerror(errno));
+				    ws[cur_ws].path, strerror(errno));
 		}
 
 		return EXIT_FAILURE;
@@ -240,8 +254,7 @@ search_glob(char **comm, int invert)
 
 				for (l = 0; globbed_files.gl_pathv[l]; l++) {
 					if (*globbed_files.gl_pathv[l] == *file_info[k].name
-					&& strcmp(globbed_files.gl_pathv[l], file_info[k].name)
-					== 0) {
+					&& strcmp(globbed_files.gl_pathv[l], file_info[k].name) == 0) {
 						f = 1;
 						break;
 					}
@@ -253,8 +266,7 @@ search_glob(char **comm, int invert)
 						continue;
 
 					eln[found] = (int)(k + 1);
-					files_len[found] = file_info[k].len
-									   + file_info[k].eln_n + 1;
+					files_len[found] = file_info[k].len + file_info[k].eln_n + 1;
 					if (files_len[found] > flongest)
 						flongest = files_len[found];
 
@@ -265,16 +277,16 @@ search_glob(char **comm, int invert)
 
 		else {
 			scandir_files = scandir(search_path, &ent, skip_files,
-									xalphasort);
+			    xalphasort);
 
 			if (scandir_files != -1) {
 
 				pfiles = (char **)xnmalloc((size_t)scandir_files + 1,
-										   sizeof(char *));
+				    sizeof(char *));
 				eln = (int *)xnmalloc((size_t)scandir_files + 1,
-											 sizeof(int));
+				    sizeof(int));
 				files_len = (size_t *)xnmalloc((size_t)scandir_files + 1,
-											   sizeof(size_t));
+				    sizeof(size_t));
 
 				int k, l;
 
@@ -283,8 +295,7 @@ search_glob(char **comm, int invert)
 
 					for (l = 0; globbed_files.gl_pathv[l]; l++) {
 						if (*ent[k]->d_name == *globbed_files.gl_pathv[l]
-						&& strcmp(ent[k]->d_name,
-						globbed_files.gl_pathv[l]) == 0) {
+						&& strcmp(ent[k]->d_name, globbed_files.gl_pathv[l]) == 0) {
 							f = 1;
 							break;
 						}
@@ -297,8 +308,8 @@ search_glob(char **comm, int invert)
 
 						eln[found] = -1;
 						files_len[found] = unicode
-								? wc_xstrlen(ent[k]->d_name)
-								: strlen(ent[k]->d_name);
+								       ? wc_xstrlen(ent[k]->d_name)
+								       : strlen(ent[k]->d_name);
 
 						if (files_len[found] > flongest)
 							flongest = files_len[found];
@@ -313,10 +324,9 @@ search_glob(char **comm, int invert)
 	else { /* No invert search */
 
 		pfiles = (char **)xnmalloc(globbed_files.gl_pathc + 1,
-								   sizeof(char *));
+		    sizeof(char *));
 		eln = (int *)xnmalloc(globbed_files.gl_pathc + 1, sizeof(int));
-		files_len = (size_t *)xnmalloc(globbed_files.gl_pathc
-											+ 1, sizeof(size_t));
+		files_len = (size_t *)xnmalloc(globbed_files.gl_pathc + 1, sizeof(size_t));
 
 		for (i = 0; globbed_files.gl_pathv[i]; i++) {
 
@@ -348,7 +358,7 @@ search_glob(char **comm, int invert)
 				eln[found] = -1;
 
 				files_len[found] = unicode ? wc_xstrlen(pfiles[found])
-								   : strlen(pfiles[found]);
+							   : strlen(pfiles[found]);
 
 				if (files_len[found] > flongest)
 					flongest = files_len[found];
@@ -375,7 +385,7 @@ search_glob(char **comm, int invert)
 						flongest = files_len[found];
 				}
 
-				found ++;
+				found++;
 			}
 		}
 	}
@@ -407,9 +417,9 @@ search_glob(char **comm, int invert)
 				last_column = 0;
 
 			colors_list(pfiles[i], (eln[i] && eln[i] != -1) ? eln[i] : 0,
-						(last_column || i == (found - 1)) ? 0 :
-						(int)(flongest - files_len[i]) + 1,
-						(last_column || i == found - 1) ? 1 : 0);
+			    (last_column || i == (found - 1)) ? 0 :
+			    (int)(flongest - files_len[i]) + 1,
+			    (last_column || i == found - 1) ? 1 : 0);
 			/* Second argument to colors_list() is:
 			 * 0: Do not print any ELN
 			 * Positive number: Print positive number as ELN
@@ -419,7 +429,7 @@ search_glob(char **comm, int invert)
 		printf(_("Matches found: %d\n"), found);
 	}
 
-/*  else
+	/*  else
 		printf(_("%s: No matches found\n"), PROGRAM_NAME); */
 
 	/* Free stuff */
@@ -439,7 +449,7 @@ search_glob(char **comm, int invert)
 	if (search_path) {
 		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-					ws[cur_ws].path, strerror(errno));
+			    ws[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
 		}
 	}
@@ -466,12 +476,12 @@ search_regex(char **comm, int invert)
 	if (comm[1] && comm[2]) {
 
 		if (*comm[1] == '-') {
-			file_type = (mode_t)*(comm[1] + 1);
+			file_type = (mode_t) * (comm[1] + 1);
 			search_path = comm[2];
 		}
 
 		else if (*comm[2] == '-') {
-			file_type = (mode_t)*(comm[2] + 1);
+			file_type = (mode_t) * (comm[2] + 1);
 			search_path = comm[1];
 		}
 
@@ -483,7 +493,7 @@ search_regex(char **comm, int invert)
 	 * path */
 	else if (comm[1]) {
 		if (*comm[1] == '-')
-			file_type = (mode_t)*(comm[1] + 1);
+			file_type = (mode_t) * (comm[1] + 1);
 		else
 			search_path = comm[1];
 	}
@@ -495,17 +505,31 @@ search_regex(char **comm, int invert)
 		/* If file type is specified, matches will be checked against
 		 * this value */
 		switch (file_type) {
-		case 'd': file_type = DT_DIR; break;
-		case 'r': file_type = DT_REG; break;
-		case 'l': file_type = DT_LNK; break;
-		case 's': file_type = DT_SOCK; break;
-		case 'f': file_type = DT_FIFO; break;
-		case 'b': file_type = DT_BLK; break;
-		case 'c': file_type = DT_CHR; break;
+		case 'd':
+			file_type = DT_DIR;
+			break;
+		case 'r':
+			file_type = DT_REG;
+			break;
+		case 'l':
+			file_type = DT_LNK;
+			break;
+		case 's':
+			file_type = DT_SOCK;
+			break;
+		case 'f':
+			file_type = DT_FIFO;
+			break;
+		case 'b':
+			file_type = DT_BLK;
+			break;
+		case 'c':
+			file_type = DT_CHR;
+			break;
 
 		default:
 			fprintf(stderr, _("%s: '%c': Unrecognized filetype\n"),
-					PROGRAM_NAME, (char)file_type);
+			    PROGRAM_NAME, (char)file_type);
 			return EXIT_FAILURE;
 		}
 	}
@@ -523,7 +547,7 @@ search_regex(char **comm, int invert)
 
 			if (!deq_dir) {
 				fprintf(stderr, _("%s: %s: Error dequoting filename\n"),
-						PROGRAM_NAME, comm[1]);
+				    PROGRAM_NAME, comm[1]);
 				return EXIT_FAILURE;
 			}
 
@@ -543,13 +567,13 @@ search_regex(char **comm, int invert)
 		if (search_path && *search_path) {
 			if (xchdir(search_path, NO_TITLE) == -1) {
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-						search_path, strerror(errno));
+				    search_path, strerror(errno));
 				return EXIT_FAILURE;
 			}
 
 			tmp_files = scandir(".", &reg_dirlist, skip_files, xalphasort);
 
-	/*      tmp_files = scandir(".", &reg_dirlist, skip_files,
+			/*      tmp_files = scandir(".", &reg_dirlist, skip_files,
 							sort == 0 ? NULL : sort == 1 ? m_alphasort
 							: sort == 2 ? size_sort : sort == 3
 							? atime_sort : sort == 4 ? btime_sort
@@ -559,11 +583,11 @@ search_regex(char **comm, int invert)
 
 			if (tmp_files == -1) {
 				fprintf(stderr, "scandir: %s: %s\n", search_path,
-						strerror(errno));
+				    strerror(errno));
 
 				if (xchdir(ws[cur_ws].path, NO_TITLE) == -1)
 					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-							ws[cur_ws].path, strerror(errno));
+					    ws[cur_ws].path, strerror(errno));
 
 				return EXIT_FAILURE;
 			}
@@ -581,7 +605,7 @@ search_regex(char **comm, int invert)
 		size_t search_str_len = strlen(comm[0]);
 
 		comm[0] = (char *)xrealloc(comm[0], (search_str_len + 5) *
-								   sizeof(char));
+							sizeof(char));
 
 		char *tmp_str = (char *)xnmalloc(search_str_len + 1, sizeof(char));
 
@@ -603,7 +627,7 @@ search_regex(char **comm, int invert)
 
 	/* Get matches, if any, using regular expressions */
 	regex_t regex_files;
-	int ret = regcomp(&regex_files, search_str, REG_NOSUB|REG_EXTENDED);
+	int ret = regcomp(&regex_files, search_str, REG_NOSUB | REG_EXTENDED);
 
 	if (ret != EXIT_SUCCESS) {
 		fprintf(stderr, _("'%s': Invalid regular expression\n"), search_str);
@@ -618,7 +642,7 @@ search_regex(char **comm, int invert)
 
 			if (xchdir(ws[cur_ws].path, NO_TITLE) == -1)
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-						ws[cur_ws].path, strerror(errno));
+				    ws[cur_ws].path, strerror(errno));
 		}
 
 		return EXIT_FAILURE;
@@ -626,15 +650,16 @@ search_regex(char **comm, int invert)
 
 	size_t found = 0;
 	int *regex_index = (int *)xnmalloc((search_path ? (size_t)tmp_files
-									   : files) + 1, sizeof(int));
+							: files) +
+					       1,
+	    sizeof(int));
 
 	for (i = 0; i < (search_path ? (size_t)tmp_files : files); i++) {
 		if (regexec(&regex_files, (search_path ? reg_dirlist[i]->d_name
 		: file_info[i].name), 0, NULL, 0) == EXIT_SUCCESS) {
 			if (!invert)
 				regex_index[found++] = (int)i;
-		}
-		else if (invert)
+		} else if (invert)
 			regex_index[found++] = (int)i;
 	}
 
@@ -653,8 +678,8 @@ search_regex(char **comm, int invert)
 			free(reg_dirlist);
 
 			if (xchdir(ws[cur_ws].path, NO_TITLE) == -1)
-					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-							ws[cur_ws].path, strerror(errno));
+				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+				    ws[cur_ws].path, strerror(errno));
 		}
 
 		return EXIT_FAILURE;
@@ -666,7 +691,6 @@ search_regex(char **comm, int invert)
 
 	size_t *files_len = (size_t *)xnmalloc(found + 1, sizeof(size_t));
 	int *match_type = (int *)xnmalloc(found + 1, sizeof(int));
- 
 
 	/* Get the longest filename in the list */
 	int j = (int)found;
@@ -695,8 +719,8 @@ search_regex(char **comm, int invert)
 		 * length (no ELN) */
 		if (search_path) {
 			files_len[j] = unicode ? wc_xstrlen(
-				  reg_dirlist[regex_index[j]]->d_name)
-				  : strlen(reg_dirlist[regex_index[j]]->d_name);
+							reg_dirlist[regex_index[j]]->d_name)
+							: strlen(reg_dirlist[regex_index[j]]->d_name);
 
 			if (files_len[j] > flongest)
 				flongest = files_len[j];
@@ -706,7 +730,7 @@ search_regex(char **comm, int invert)
 		 * when calculating its legnth */
 		else {
 			files_len[j] = file_info[regex_index[j]].len
-					+ (size_t)DIGINUM(regex_index[j] + 1) + 1;
+							+ (size_t)DIGINUM(regex_index[j] + 1) + 1;
 
 			if (files_len[j] > flongest)
 				flongest = files_len[j];
@@ -745,8 +769,7 @@ search_regex(char **comm, int invert)
 			if (cur_col == total_cols) {
 				last_column = 1;
 				cur_col = 0;
-			}
-			else
+			} else
 				last_column = 0;
 
 			/* Counter: Current amount of non-filtered files: if
@@ -756,12 +779,10 @@ search_regex(char **comm, int invert)
 
 			colors_list(search_path ? reg_dirlist[regex_index[i]]->d_name
 					: file_info[regex_index[i]].name, search_path ? NO_ELN
-					: regex_index[i] + 1, (last_column
-					|| counter == type_ok) ? NO_PAD
-					: (int)(flongest - files_len[i]) + 1,
-					(last_column || counter == type_ok)
-					? PRINT_NEWLINE : NO_NEWLINE);
-
+					: regex_index[i] + 1, (last_column || counter == type_ok)
+					? NO_PAD : (int)(flongest - files_len[i]) + 1,
+					(last_column || counter == type_ok) ? PRINT_NEWLINE
+					: NO_NEWLINE);
 		}
 
 		printf(_("Matches found: %zu\n"), counter);
@@ -786,7 +807,7 @@ search_regex(char **comm, int invert)
 
 		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-					ws[cur_ws].path, strerror(errno));
+			    ws[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
 		}
 	}
