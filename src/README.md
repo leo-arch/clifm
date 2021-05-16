@@ -1,10 +1,10 @@
 # Coding suggestions for CliFM
 
-** NOTE**: To keep a consintent style, run `clang-format` over all source files, uncluding header files, using the `_clang-format` file (in `/src`) as the formatting model:
+**NOTE**: To keep a consintent style, run `clang-format` over all source files, uncluding header files, using the `_clang-format` file (in `/src`) as the formatting model:
 
 	$ clang-format -i -style=file *.[hc]
 
-This command will reformat all C and header files (*.[hc]) in place (-i) using _clang-format as model (-style=file).
+This command will reformat all c source and header files (`*.[hc]`) in place (`-i`) using the `_clang-format` file as model (`-style=file`).
 
 Once this is done, you might want to check and modify a few things from the resulting files, specially long `printf`'s and multi-line statements. Automatic formating in these cases is still not optimal.
 
