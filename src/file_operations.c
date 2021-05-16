@@ -25,11 +25,11 @@
 #include "helpers.h"
 
 #include <errno.h>
-#include <readline/readline.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <readline/readline.h>
 
 #include "archives.h"
 #include "aux.h"

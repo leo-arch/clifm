@@ -24,10 +24,10 @@
 
 #include "helpers.h"
 
-#include <readline/readline.h>
 #include <stdio.h>
 #include <string.h>
 #include <wordexp.h>
+#include <readline/readline.h>
 
 #include "aux.h"
 #include "exec.h"

@@ -29,14 +29,14 @@
 #include <errno.h>
 #include <libintl.h>
 #include <locale.h>
-#include <readline/history.h>
-#include <readline/readline.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <termios.h>
 #include <unistd.h>
+#include <readline/history.h>
+#include <readline/readline.h>
 
 #include "aux.h"
 #include "checks.h"

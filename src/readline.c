@@ -29,11 +29,12 @@
 #endif
 #include <dirent.h>
 #include <fcntl.h>
-#include <readline/history.h>
-#include <readline/readline.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <readline/history.h>
+#include <readline/readline.h>
+
 
 #include "aux.h"
 #include "checks.h"

@@ -27,7 +27,6 @@
 #include <errno.h>
 #include <getopt.h>
 #include <pwd.h>
-#include <readline/readline.h>
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
@@ -35,6 +34,7 @@
 #include <termios.h>
 #include <time.h>
 #include <unistd.h>
+#include <readline/readline.h>
 
 #include "aux.h"
 #include "checks.h"

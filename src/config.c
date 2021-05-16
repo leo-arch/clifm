@@ -26,8 +26,8 @@
 
 #include <errno.h>
 #include <limits.h>
-#include <readline/readline.h>
 #include <stdio.h>
+#include <readline/readline.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>

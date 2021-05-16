@@ -25,10 +25,10 @@
 #include "helpers.h"
 
 #include <errno.h>
-#include <readline/history.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <readline/history.h>
 
 #include "aux.h"
 #include "checks.h"

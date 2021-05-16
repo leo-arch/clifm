@@ -26,7 +26,6 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <readline/readline.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -34,6 +33,7 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
+#include <readline/readline.h>
 
 #include "aux.h"
 #include "bookmarks.h"

@@ -24,11 +24,11 @@
 
 #include "helpers.h"
 
-#include <readline/readline.h>
 #include <stdio.h>
 #include <sys/stat.h>
 #include <termios.h>
 #include <unistd.h>
+#include <readline/readline.h>
 
 #include "aux.h"
 #include "config.h"

@@ -27,12 +27,12 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <readline/readline.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <readline/readline.h>
 
 #include "actions.h"
 #include "archives.h"
