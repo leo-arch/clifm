@@ -353,8 +353,7 @@ char di_c[MAX_COLOR], /* Directory */
 	 * */
 
 int
-main(int argc, char *argv[])
-{
+main(int argc, char *argv[]) {
 	/* Though this program might perfectly work on other architectures,
 	 * I just didn't test anything beyond x86 and ARM */
 #if !defined __x86_64__ && !defined __i386__ && !defined __ARM_ARCH

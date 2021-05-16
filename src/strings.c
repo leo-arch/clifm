@@ -43,8 +43,7 @@ char len_buf[CMD_LEN_MAX] __attribute__ ((aligned));
 #endif
 
 int
-xstrncmp(const char *s1, const char *s2, size_t n)
-{
+xstrncmp(const char *s1, const char *s2, size_t n) {
 	if (!s1 || !s2)
 		return 256;
 
@@ -66,8 +65,7 @@ xstrncmp(const char *s1, const char *s2, size_t n)
 }
 
 char *
-xstrncpy(char *buf, const char *restrict str, size_t n)
-{
+xstrncpy(char *buf, const char *restrict str, size_t n) {
 	if (!str)
 		return (char *)NULL;
 
@@ -98,8 +96,7 @@ xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 }
 
 size_t
-wc_xstrlen(const char *restrict str)
-{
+wc_xstrlen(const char *restrict str) {
 	size_t len;
 #ifndef _BE_POSIX
 	wchar_t * const wbuf = (wchar_t *)len_buf;
@@ -117,8 +114,7 @@ wc_xstrlen(const char *restrict str)
 /* Truncate an UTF-8 string at length N. Returns zero if truncated and
  * one if not */
 int
-u8truncstr(char *restrict str, size_t n)
-{
+u8truncstr(char *restrict str, size_t n) {
 	size_t len = 0;
 
 	while (*(str++)) {
@@ -147,8 +143,7 @@ u8truncstr(char *restrict str, size_t n)
 * expected for this kind of chars: a 6 chars string might take 12 or
 * more bytes */
 size_t
-u8_xstrlen(const char *restrict str)
-{
+u8_xstrlen(const char *restrict str) {
 	size_t len = 0;
 
 	while (*(str++)) {
@@ -163,8 +158,7 @@ u8_xstrlen(const char *restrict str)
  * -1 if c was not found or if no str. NOTE: Same thing as strchr(),
  * except that returns an index, not a pointer */
 int
-strcntchr(const char *str, const char c)
-{
+strcntchr(const char *str, const char c) {
 	if (!str)
 		return -1;
 
@@ -183,8 +177,7 @@ strcntchr(const char *str, const char c)
 /* Returns the string after the first appearance of a given char, or
  * returns NULL if C is not found in STR or C is the last char in STR. */
 char *
-straft(char *str, const char c)
-{
+straft(char *str, const char c) {
 	if (!str || !*str || !c)
 		return (char *)NULL;
 
@@ -215,8 +208,7 @@ straft(char *str, const char c)
 /* Returns the string after the last appearance of a given char, or
  * NULL if no match */
 char *
-straftlst(char *str, const char c)
-{
+straftlst(char *str, const char c) {
 	if (!str || !*str || !c)
 		return (char *)NULL;
 
@@ -244,8 +236,7 @@ straftlst(char *str, const char c)
 /* Returns the substring in str before the first appearance of c. If
  * not found, or C is the first char in STR, returns NULL */
 char *
-strbfr(char *str, const char c)
-{
+strbfr(char *str, const char c) {
 	if (!str || !*str || !c)
 		return (char *)NULL;
 
@@ -286,8 +277,7 @@ strbfr(char *str, const char c)
  * substring  if C is found and NULL if not (or if C was the first
  * char in STR). */
 char *
-strbfrlst(char *str, const char c)
-{
+strbfrlst(char *str, const char c) {
 	if (!str || !*str || !c)
 		return (char *)NULL;
 
@@ -322,8 +312,7 @@ strbfrlst(char *str, const char c)
  * ocurrence of B in STR, or NULL if: there is nothing between A and
  * B, or A and/or B are not found */
 char *
-strbtw(char *str, const char a, const char b)
-{
+strbtw(char *str, const char a, const char b) {
 	if (!str || !*str || !a || !b)
 		return (char *)NULL;
 
@@ -362,8 +351,7 @@ strbtw(char *str, const char a, const char b)
 
 /* Generate a random string of LEN bytes using characters from CHARSET */
 char *
-gen_rand_str(size_t len)
-{
+gen_rand_str(size_t len) {
 	char charset[] = "0123456789#%-_"
                      "abcdefghijklmnopqrstuvwxyz"
                      "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -393,8 +381,7 @@ gen_rand_str(size_t len)
  * Returns a pointer to the modified STR if the result is non-blank
  * or NULL */
 char *
-remove_quotes(char *str)
-{
+remove_quotes(char *str) {
 	if (!str || !*str)
 		return (char *)NULL;
 
@@ -652,8 +639,7 @@ split_str(const char *str) {
 }
 
 char *
-split_fusedcmd(char *str)
-{
+split_fusedcmd(char *str) {
 	if (!str || !*str || *str == ';' || *str == ':' || *str == '\\')
 		return (char *)NULL;
 
@@ -737,8 +723,7 @@ split_fusedcmd(char *str)
  * parse other strings, like history lines, I need to keep the str
  * argument */
 char **
-parse_input_str(char *str)
-{
+parse_input_str(char *str) {
 	register size_t i = 0;
 	int fusedcmd_ok = 0;
 
@@ -1731,8 +1716,7 @@ parse_input_str(char *str)
  * "$HOME" or "$HOME/file", that's why there's no need to check for
  * "/file" */
 char *
-home_tilde(const char *new_path)
-{
+home_tilde(const char *new_path) {
 	if (!home_ok || !new_path || !*new_path)
 		return (char *)NULL;
 
@@ -1768,8 +1752,7 @@ home_tilde(const char *new_path)
  * an array of int's with the expanded range or NULL if one of the
  * above conditions is not met */
 int *
-expand_range(char *str, int listdir)
-{
+expand_range(char *str, int listdir) {
 	if (strcntchr(str, '-') == -1)
 		return (int *)NULL;
 
@@ -1828,8 +1811,7 @@ expand_range(char *str, int listdir)
 /* used a lot.
  * creates a copy of a string */
 char *
-savestring(const char *restrict str, size_t size)
-{
+savestring(const char *restrict str, size_t size) {
 	if (!str)
 		return (char *)NULL;
 
@@ -1838,17 +1820,15 @@ savestring(const char *restrict str, size_t size)
 
 	if (!ptr)
 		return (char *)NULL;
-
 	strcpy(ptr, str);
-
+  
 	return ptr;
 }
 
 /* Take a string and returns the same string escaped. If nothing to be
  * escaped, the original string is returned */
 char *
-escape_str(const char *str)
-{
+escape_str(const char *str) {
 	if (!str)
 		return (char *)NULL;
 
@@ -1877,8 +1857,7 @@ escape_str(const char *str)
  * empty, STR contains only IFS(s), or in case of memory allocation
  * error */
 char **
-get_substr(char *str, const char ifs)
-{
+get_substr(char *str, const char ifs) {
 	if (!str || *str == '\0')
 		return (char **)NULL;
 
@@ -2099,8 +2078,7 @@ get_substr(char *str, const char ifs)
  * completing paths. Returns a string containing text without escape
  * sequences */
 char *
-dequote_str(char *text, int mt)
-{
+dequote_str(char *text, int mt) {
 	if (!text || !*text)
 		return (char *)NULL;
 

@@ -514,6 +514,7 @@ edit_xresources(void)
 			char *res_file = (char *)xnmalloc(user.home_len + 13, sizeof(char));
 			sprintf(res_file, "%s/.Xresources", user.home);
 			char *cmd[] = { "xrdb", "merge", res_file, NULL };
+
 			launch_execve(cmd, FOREGROUND, E_NOFLAG);
 			free(res_file);
 		}

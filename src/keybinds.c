@@ -41,8 +41,7 @@
 #include "profiles.h"
 
 int
-kbinds_reset(void)
-{
+kbinds_reset(void) {
 	int exit_status = EXIT_SUCCESS;
 	struct stat file_attrib;
 
@@ -65,8 +64,7 @@ kbinds_reset(void)
 }
 
 static int
-kbinds_edit(void)
-{
+kbinds_edit(void) {
 	if (xargs.stealth_mode == 1) {
 		printf("%s: Access to configuration files is not allowed in "
 			   "stealth mode\n", PROGRAM_NAME);
@@ -103,8 +101,7 @@ kbinds_edit(void)
 }
 
 int
-kbinds_function(char **args)
-{
+kbinds_function(char **args) {
 	if (!args)
 		return EXIT_FAILURE;
 
@@ -137,9 +134,9 @@ kbinds_function(char **args)
  * C-v, C-right arrow gives "[[1;5C", which here should be written like
  * this:
  * "\\x1b[1;5C" */
+ 
 void
-readline_kbinds(void)
-{
+readline_kbinds(void) {
 
 			/* ##############################
 			 * #        KEYBINDINGS         #
@@ -313,8 +310,7 @@ readline_kbinds(void)
 
 /* Store keybinds from the keybinds file into a struct */
 int
-load_keybinds(void)
-{
+load_keybinds(void) {
 	if (!config_ok)
 		return EXIT_FAILURE;
 
@@ -375,8 +371,7 @@ load_keybinds(void)
 }
 
 char *
-find_key(char *function)
-{
+find_key(char *function) {
 	if (!kbinds_n)
 		return (char *)NULL;
 
@@ -396,8 +391,7 @@ find_key(char *function)
 /* Runs any command recognized by CliFM via a keybind. Example:
  * keybind_exec_cmd("sel *") */
 int
-keybind_exec_cmd(char *str)
-{
+keybind_exec_cmd(char *str) {
 	size_t old_args = args_n;
 	args_n = 0;
 
@@ -435,8 +429,7 @@ keybind_exec_cmd(char *str)
 }
 
 int
-rl_refresh(int count, int key)
-{
+rl_refresh(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -450,8 +443,7 @@ rl_refresh(int count, int key)
 }
 
 int
-rl_parent_dir(int count, int key)
-{
+rl_parent_dir(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -467,8 +459,7 @@ rl_parent_dir(int count, int key)
 }
 
 int
-rl_root_dir(int count, int key)
-{
+rl_root_dir(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -484,8 +475,7 @@ rl_root_dir(int count, int key)
 }
 
 int
-rl_home_dir(int count, int key)
-{
+rl_home_dir(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -502,8 +492,7 @@ rl_home_dir(int count, int key)
 }
 
 int
-rl_next_dir(int count, int key)
-{
+rl_next_dir(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -519,8 +508,7 @@ rl_next_dir(int count, int key)
 }
 
 int
-rl_first_dir(int count, int key)
-{
+rl_first_dir(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -536,8 +524,7 @@ rl_first_dir(int count, int key)
 }
 
 int
-rl_last_dir(int count, int key)
-{
+rl_last_dir(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -555,8 +542,7 @@ rl_last_dir(int count, int key)
 }
 
 int
-rl_previous_dir(int count, int key)
-{
+rl_previous_dir(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -572,8 +558,7 @@ rl_previous_dir(int count, int key)
 }
 
 int
-rl_long(int count, int key)
-{
+rl_long(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -590,8 +575,7 @@ rl_long(int count, int key)
 }
 
 int
-rl_folders_first(int count, int key)
-{
+rl_folders_first(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -613,8 +597,7 @@ rl_folders_first(int count, int key)
 }
 
 int
-rl_light(int count, int key)
-{
+rl_light(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -631,8 +614,7 @@ rl_light(int count, int key)
 }
 
 int
-rl_hidden(int count, int key)
-{
+rl_hidden(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -652,8 +634,7 @@ rl_hidden(int count, int key)
 }
 
 int
-rl_open_config(int count, int key)
-{
+rl_open_config(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -665,8 +646,7 @@ rl_open_config(int count, int key)
 }
 
 int
-rl_open_keybinds(int count, int key)
-{
+rl_open_keybinds(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -678,8 +658,7 @@ rl_open_keybinds(int count, int key)
 }
 
 int
-rl_open_cscheme(int count, int key)
-{
+rl_open_cscheme(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -691,8 +670,7 @@ rl_open_cscheme(int count, int key)
 }
 
 int
-rl_open_bm_file(int count, int key)
-{
+rl_open_bm_file(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -704,8 +682,7 @@ rl_open_bm_file(int count, int key)
 }
 
 int
-rl_open_jump_db(int count, int key)
-{
+rl_open_jump_db(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -717,8 +694,7 @@ rl_open_jump_db(int count, int key)
 }
 
 int
-rl_open_mime(int count, int key)
-{
+rl_open_mime(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -744,8 +720,7 @@ rl_mountpoints(int count, int key)
 }
 
 int
-rl_select_all(int count, int key)
-{
+rl_select_all(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -757,8 +732,7 @@ rl_select_all(int count, int key)
 }
 
 int
-rl_deselect_all(int count, int key)
-{
+rl_deselect_all(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -783,8 +757,7 @@ rl_bookmarks(int count, int key) {
 }
 
 int
-rl_selbox(int count, int key)
-{
+rl_selbox(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -796,8 +769,7 @@ rl_selbox(int count, int key)
 }
 
 int
-rl_clear_line(int count, int key)
-{
+rl_clear_line(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -815,8 +787,7 @@ rl_clear_line(int count, int key)
 }
 
 int
-rl_sort_next(int count, int key)
-{
+rl_sort_next(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -840,8 +811,7 @@ rl_sort_next(int count, int key)
 }
 
 int
-rl_sort_previous(int count, int key)
-{
+rl_sort_previous(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -888,8 +858,7 @@ rl_lock(int count, int key) {
 }
 
 int
-rl_remove_sel(int count, int key)
-{
+rl_remove_sel(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -906,8 +875,7 @@ rl_remove_sel(int count, int key)
 }
 
 int
-rl_export_sel(int count, int key)
-{
+rl_export_sel(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -921,8 +889,7 @@ rl_export_sel(int count, int key)
 }
 
 int
-rl_move_sel(int count, int key)
-{
+rl_move_sel(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -936,8 +903,7 @@ rl_move_sel(int count, int key)
 }
 
 int
-rl_rename_sel(int count, int key)
-{
+rl_rename_sel(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -951,8 +917,7 @@ rl_rename_sel(int count, int key)
 }
 
 int
-rl_paste_sel(int count, int key)
-{
+rl_paste_sel(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -966,8 +931,7 @@ rl_paste_sel(int count, int key)
 }
 
 int
-rl_quit(int count, int key)
-{
+rl_quit(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -980,8 +944,7 @@ rl_quit(int count, int key)
 }
 
 int
-rl_previous_profile(int count, int key)
-{
+rl_previous_profile(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1030,8 +993,7 @@ rl_previous_profile(int count, int key)
 }
 
 int
-rl_next_profile(int count, int key)
-{
+rl_next_profile(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1080,8 +1042,7 @@ rl_next_profile(int count, int key)
 }
 
 int
-rl_dirhist(int count, int key)
-{
+rl_dirhist(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1093,8 +1054,7 @@ rl_dirhist(int count, int key)
 }
 
 int
-rl_archive_sel(int count, int key)
-{
+rl_archive_sel(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1106,8 +1066,7 @@ rl_archive_sel(int count, int key)
 }
 
 int
-rl_new_instance(int count, int key)
-{
+rl_new_instance(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1119,8 +1078,7 @@ rl_new_instance(int count, int key)
 }
 
 int
-rl_clear_msgs(int count, int key)
-{
+rl_clear_msgs(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1132,8 +1090,7 @@ rl_clear_msgs(int count, int key)
 }
 
 int
-rl_trash_sel(int count, int key)
-{
+rl_trash_sel(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1145,8 +1102,7 @@ rl_trash_sel(int count, int key)
 }
 
 int
-rl_untrash_all(int count, int key)
-{
+rl_untrash_all(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1158,8 +1114,7 @@ rl_untrash_all(int count, int key)
 }
 
 int
-rl_open_sel(int count, int key)
-{
+rl_open_sel(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1180,8 +1135,7 @@ rl_open_sel(int count, int key)
 }
 
 int
-rl_bm_sel(int count, int key)
-{
+rl_bm_sel(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1202,8 +1156,7 @@ rl_bm_sel(int count, int key)
 }
 
 int
-rl_kbinds_help (int count, int key)
-{
+rl_kbinds_help (int count, int key) {
 	char *cmd[] = { "man", "-P", "less -p ^\"KEYBOARD SHORTCUTS\"", PNL,
 					NULL };
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
@@ -1213,8 +1166,7 @@ rl_kbinds_help (int count, int key)
 }
 
 int
-rl_cmds_help (int count, int key)
-{
+rl_cmds_help (int count, int key) {
 	char *cmd[] = { "man", "-P", "less -p ^COMMANDS", PNL, NULL };
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
@@ -1223,8 +1175,7 @@ rl_cmds_help (int count, int key)
 }
 
 int
-rl_manpage (int count, int key)
-{
+rl_manpage (int count, int key) {
 	char *cmd[] = { "man", PNL, NULL };
 
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
@@ -1234,8 +1185,7 @@ rl_manpage (int count, int key)
 }
 
 int
-rl_pinned_dir(int count, int key)
-{
+rl_pinned_dir(int count, int key) {
 	if (!pinned_dir) {
 		printf(_("%s: No pinned file\n"), PROGRAM_NAME);
 		return EXIT_SUCCESS;
@@ -1249,8 +1199,7 @@ rl_pinned_dir(int count, int key)
 }
 
 int
-rl_ws1(int count, int key)
-{
+rl_ws1(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1262,8 +1211,7 @@ rl_ws1(int count, int key)
 }
 
 int
-rl_ws2(int count, int key)
-{
+rl_ws2(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1275,8 +1223,7 @@ rl_ws2(int count, int key)
 }
 
 int
-rl_ws3(int count, int key)
-{
+rl_ws3(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1288,8 +1235,7 @@ rl_ws3(int count, int key)
 }
 
 int
-rl_ws4(int count, int key)
-{
+rl_ws4(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1301,8 +1247,7 @@ rl_ws4(int count, int key)
 }
 
 int
-rl_plugin1(int count, int key)
-{
+rl_plugin1(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1314,8 +1259,7 @@ rl_plugin1(int count, int key)
 }
 
 int
-rl_plugin2(int count, int key)
-{
+rl_plugin2(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1327,8 +1271,7 @@ rl_plugin2(int count, int key)
 }
 
 int
-rl_plugin3(int count, int key)
-{
+rl_plugin3(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1340,8 +1283,7 @@ rl_plugin3(int count, int key)
 }
 
 int
-rl_plugin4(int count, int key)
-{
+rl_plugin4(int count, int key) {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
