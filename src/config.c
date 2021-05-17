@@ -890,6 +890,7 @@ RlEditMode=1\n\n"
 	    "#PROMPT COMMANDS\n\n"
 	    "# Write below the commands you want to be executed before the prompt.\n\
 # Ex:\n\
+#/usr/share/clifm/plugins/git_status.sh\n\
 #date | awk '{print $1\", \"$2,$3\", \"$4}'\n\n"
 	    "#END OF PROMPT COMMANDS\n\n",
 	    config_fp);
