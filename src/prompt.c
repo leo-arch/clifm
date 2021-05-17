@@ -520,11 +520,24 @@ decode_prompt(const char *line)
 
 				tmp_str[tmp + 2] = '\0';
 				line += tmp + 1;
+
+				const char *old_value = getenv("IFS");
+				setenv("IFS", "", 1);
+
 				wordexp_t wordbuf;
 				if (wordexp(tmp_str, &wordbuf, 0) != EXIT_SUCCESS) {
 					free(tmp_str);
+					if (old_value)
+						setenv("IFS", old_value, 1);
+					else
+						unsetenv("IFS");
 					continue;
 				}
+
+				if (old_value)
+					setenv("IFS", old_value, 1);
+				else
+					unsetenv("IFS");
 
 				free(tmp_str);
 
@@ -543,10 +556,10 @@ decode_prompt(const char *line)
 						strcat(result, wordbuf.we_wordv[j]);
 
 						/* If not the last word in cmd output, add an space */
-						if (j < wordbuf.we_wordc - 1) {
+/*						if (j < wordbuf.we_wordc - 1) {
 							result[result_len++] = ' ';
 							result[result_len] = '\0';
-						}
+						} */
 					}
 				}
 
