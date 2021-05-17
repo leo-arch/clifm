@@ -33,5 +33,8 @@ E:^(cbr|cbz)$=zathura
 # Fonts
 ^fonts/.*=fontforge;fontpreview
 
+# Torrent:
+application/x-bittorrent=rtorrent;transimission-gtk;transmission-qt;deluge-gtk;ktorrent
+
 # Fallback to another resource opener as last resource
 .*=xdg-open;mimeo;mimeopen -n;whippet -m;open;linopen;
