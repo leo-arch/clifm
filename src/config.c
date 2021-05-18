@@ -1166,7 +1166,7 @@ create_config_files(void)
 			"you don't. This will make the process of opening files "
 			"faster and smoother\n"
 			"A MIME list file covering the most common filetype "
-			"associations can be found in /usr/share/clifm/mimelist.example"),
+			"associations can be found in /usr/share/clifm/mimelist.cfm"),
 			PROGRAM_NAME, MIME_FILE);
 
 	/* Try importing MIME associations from the system, and in

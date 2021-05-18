@@ -494,7 +494,7 @@ List only up to NUM files. Use -1 to list all files (default). An indicator (lis
 .B mm, mime \fR[info ELN/FILENAME] [edit]
 This is \fILira\fR, CliFM's resource opener. The 'info' option prints the MIME information about ELN/FILENAME: its MIME type, its file extension, if any, and the application associated to this MIME type or file extension.
 .sp
-The 'edit' option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension (mm info FILE), and then add a value for it to the MIME list file using the 'edit' option ('mm edit' or F6). Check the \fBRESOURCE OPENER\fR section below for information about the mimelist file syntax.
+The 'edit' option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension (running 'mm info FILE'), and then add a value for it to the MIME list file using the 'edit' option ('mm edit' or F6). Check the \fBRESOURCE OPENER\fR section below for information about the mimelist file syntax.
 .sp
 
 .TP
@@ -943,7 +943,9 @@ TAB completion for bookmarks, color schemes, profiles and directory history (via
 Of course, combinations of all these features is also possbile. Example: 'cp sel file* 2 23\-31 .' will copy all selected files, plus all files whose name starts with "file", plus those files corresponding to the ELN's 2, and 23 to 31, into the current working directory.
 
 .SH RESOURCE OPENER
-\fBLira\fR is CliFM's built-in resource opener, and is controlled via the \fImm\fR command (see above). File associations are stored in the MIME list file (see below). 
+\fBLira\fR is CliFM's built-in resource opener, and is controlled via the \fImm\fR command (see above). File associations are stored in the MIME list file (see the \fBFILES\fR section below).
+.TP
+When running for the first time, or whenever the MIME list file cannot be found, CliFM will import MIME definitions from the system to try to stick to the user's preferences. However, a generic MIME definitions file is provided by CliFM itself and can be found in \fI/usr/share/clifm/mimelist.cfm\fR. You can copy this file to your profile directory and modify it to feet your needs following these simple syntax rules: 
 .TP
 Each value in the MIME list file consists of a left value, containing either an extension or a mime type to match (using regular expressions) and a right value, a list of semicolon separated commands (and optionally the commands parameters) to be associated to the corresponding left value. In general, the format is: 'MIME=CMD ARGS;CMD ARGS; ...' or, for file extensions, "E:EXT=CMD ARGS;CMD ARGS; ...".
 .TP
