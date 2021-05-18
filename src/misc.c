@@ -1183,8 +1183,11 @@ handle_stdin()
 	 * == (65535 * PATH_MAX)
 	 * == 262MiB of data ((65535 * PATH_MAX) / 1024) */
 
-	size_t chunk = 512 * 1024, chunks_n = 1,
-	       total_len = 0, max_chunks = 512;
+	size_t chunk = 512 * 1024,
+		   chunks_n = 1,
+		   total_len = 0,
+		   max_chunks = 512;
+
 	ssize_t input_len = 0;
 
 	/* Initial buffer allocation == 1 chunk */
@@ -1265,7 +1268,7 @@ handle_stdin()
 			if (!tmp_file || !*(++tmp_file))
 				tmp_file = q;
 
-			char source[PATH_MAX];
+			char source[PATH_MAX + 1];
 
 			if (*q != '/' || !q[1])
 				snprintf(source, PATH_MAX, "%s/%s", cwd, q);
@@ -1273,7 +1276,7 @@ handle_stdin()
 			else
 				strncpy(source, q, PATH_MAX);
 
-			char dest[PATH_MAX];
+			char dest[PATH_MAX + 1];
 			sprintf(dest, "%s/%s", STDIN_TMP_DIR, tmp_file);
 
 			if (symlink(source, dest) == -1)
