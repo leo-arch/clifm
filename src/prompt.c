@@ -319,6 +319,13 @@ decode_prompt(const char *line)
 				temp = savestring(PNL, strlen(PNL));
 				goto add_string;
 
+			case 'P': /* Current profile name */
+				if (!alt_profile)
+					temp = savestring("default", 7);
+				else
+					temp = savestring(alt_profile, strlen(alt_profile));
+				goto add_string;
+
 			case 't': /* Time: 24-hour HH:MM:SS format */
 			case 'T': /* 12-hour HH:MM:SS format */
 			case 'A': /* 24-hour HH:MM format */

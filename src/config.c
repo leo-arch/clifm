@@ -736,6 +736,7 @@ mvCmd=0\n\n"
 # by CliFM\n\
 # \\S: The number of the current workspace\n\
 # \\l: Print an 'L' if running in light mode\n\
+# \\P: Current profile name\n\
 # \\t: The time, in 24-hour HH:MM:SS format\n\
 # \\T: The time, in 12-hour HH:MM:SS format\n\
 # \\@: The time, in 12-hour am/pm format\n\

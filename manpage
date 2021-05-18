@@ -888,6 +888,8 @@ CliFM's prompt is built from the \fIPrompt\fR line in the configuration file fol
 .TP
 \\l: Print an 'L' if in light mode
 .TP
+\\P: The current profile name
+.TP
 \\t: The time, in 24\-hour HH:MM:SS format
 .TP
 \\T: The time, in 12\-hour HH:MM:SS format
