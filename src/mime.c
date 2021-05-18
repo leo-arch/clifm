@@ -541,7 +541,6 @@ mime_open(char **args)
 int
 mime_import(char *file)
 {
-
 	/* Open the internal MIME file */
 	FILE *mime_fp = fopen(file, "w");
 
@@ -553,8 +552,7 @@ mime_import(char *file)
 	 * almost any Unix computer) */
 	if (!(flags & GUI)) {
 		fputs("text/plain=nano;vim;vi;emacs;ed\n"
-		      "*.cfm=nano;vim;vi;emacs;ed\n",
-		    mime_fp);
+		      "E:^cfm$=nano;vim;vi;emacs;ed\n", mime_fp);
 		fclose(mime_fp);
 		return EXIT_SUCCESS;
 	}
@@ -629,9 +627,8 @@ mime_import(char *file)
 	 * XFCE, and LXDE respectivelly */
 	fputs("text/plain=gedit;kate;pluma;mousepad;leafpad;nano;vim;"
 	      "vi;emacs;ed\n"
-	      "*.cfm=gedit;kate;pluma;mousepad;leafpad;nano;vim;vi;"
-	      "emacs;ed\n",
-	    mime_fp);
+	      "E:^cfm$=gedit;kate;pluma;mousepad;leafpad;nano;vim;vi;"
+	      "emacs;ed\n", mime_fp);
 
 	fclose(mime_fp);
 

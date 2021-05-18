@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
 #include <readline/history.h>
 
 #include "actions.h"
@@ -465,21 +466,26 @@ profile_add(const char *prof)
 
 		if (!mime_fp) {
 			fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME,
-			    NMIME_FILE, strerror(errno));
+									NMIME_FILE, strerror(errno));
 			error_code = EXIT_FAILURE;
 		}
 
 		else {
-			if ((flags & GUI))
-				fputs("text/plain=gedit;kate;pluma;mousepad;"
-				      "leafpad;nano;vim;vi;emacs;ed\n"
-				      "*.cfm=gedit;kate;pluma;mousepad;leafpad;"
-				      "nano;vim;vi;emacs;ed\n",
-				    mime_fp);
-			else
-				fputs("text/plain=nano;vim;vi;emacs\n"
-				      "*.cfm=nano;vim;vi;emacs;ed\n",
-				    mime_fp);
+			char sys_mimelist[] = "/usr/share/clifm/mimelist.cfm";
+
+			struct stat attr;
+			if (stat(sys_mimelist, &attr) == -1) {
+				_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+						sys_mimelist, strerror(errno));
+				error_code = EXIT_FAILURE;
+			}
+
+			else {
+
+				char *cmd[] = {"cp", "-f", sys_mimelist, NMIME_FILE, NULL};
+				launch_execve(cmd, FOREGROUND, E_NOFLAG);
+			}
+
 			fclose(mime_fp);
 		}
 	}

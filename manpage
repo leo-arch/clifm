@@ -167,7 +167,7 @@ leave no trace on the host system. Nothing is read from files nor any file is cr
 disable unicode
 .TP
 .B \-U, \-\-unicode
-enable unicode to correctly list filenames containing accents, tildes, umlauts, non\-latin letters, etc. This option is enabled by default for non\-english locales.
+enable unicode to correctly list filenames containing accents, tildes, umlauts, non\-latin letters, etc. This option is enabled by default.
 .TP
 .B \-v, \-\-version
 show version details and exit
@@ -943,16 +943,30 @@ TAB completion for bookmarks, color schemes, profiles and directory history (via
 Of course, combinations of all these features is also possbile. Example: 'cp sel file* 2 23\-31 .' will copy all selected files, plus all files whose name starts with "file", plus those files corresponding to the ELN's 2, and 23 to 31, into the current working directory.
 
 .SH RESOURCE OPENER
-\fBLira\fR is CliFM's built-in resource opener, and is controlled via the \fImm\fR command (see above). File associations are stored in the MIME list file (see the \fBFILES\fR section below).
+\fBLira\fR is CliFM's built-in resource opener, and is controlled via the \fImime\fR command (see above). File associations are stored in the MIME list file (see the \fBFILES\fR section below).
 .TP
-When running for the first time, or whenever the MIME list file cannot be found, CliFM will import MIME definitions from the system to try to stick to the user's preferences. However, a generic MIME definitions file is provided by CliFM itself and can be found in \fI/usr/share/clifm/mimelist.cfm\fR. You can copy this file to your profile directory and modify it to feet your needs following these simple syntax rules: 
+When running for the first time, or whenever the MIME list file cannot be found, CliFM will import MIME definitions from the system (from those directories specified by the Freedesktop XDG MIME Applications specification) to try to stick to the user's preferences. However, a generic MIME definitions file is provided by CliFM itself and can be found in \fI/usr/share/clifm/mimelist.cfm\fR. You can copy this file to your profile directory and modify it to feet your needs following these simple syntax rules:
 .TP
-Each value in the MIME list file consists of a left value, containing either an extension or a mime type to match (using regular expressions) and a right value, a list of semicolon separated commands (and optionally the commands parameters) to be associated to the corresponding left value. In general, the format is: 'MIME=CMD ARGS;CMD ARGS; ...' or, for file extensions, "E:EXT=CMD ARGS;CMD ARGS; ...".
+Each line in the MIME list file consists of:
+.TP
+a) A left value, containing either a file extension or a MIME type to be matched. Regular expressions are supported;
+.TP
+b) A right value, a list of semicolon separated commands (and optionally the commands parameters) to be associated to the corresponding left value.
+.TP
+Note that the syntax departs here from the Freedesktop specification in that we do not rely on desktop files (mostly used by desktop environments), but rather on commands and parameters. In general thus, the syntax is this:
+
+ MIME=CMD ARGS;CMD ARGS; ...
+.TP
+or, for file extensions:
+
+ E:EXT=CMD ARGS;CMD ARGS; ...
 .TP
 Examples:
 .TP
 Match single extension:
  E:^txt$:leafpad;nano
+.TP
+Note the 'E' character: it indicates that this rule is intended to match a file extension and not a MIME type.
 .TP
 Match multiple extensions:
  E:^(sh|c|py|pl)$:geany;leafpad;nano
@@ -963,9 +977,10 @@ Match single mimetype:
 Match mutiple mimetypes:
  ^audio/.*=mplayer;mplayer2;vlc;gmplayer;smplayer;totem
 .TP
-\fBLira\fR will check the file line by line, and if a matching line is found, and if at least one of the specified applications exists, this application will be used to open the corresponding associated file. Else, the next line will be checked. In other words, the precedence order is top to bottom (for lines) and left to right for applications.
+In case of MIME types, you can also write the entire expression without relying on any regular expression. For example:
+ text/plain=nano
 .TP
-If the MIME file is not found, CliFM will try to import MIME definitions from the default locations for the 'mimeapps.list' file as specified by the Freedesktop specification.
+\fBLira\fR will check the file line by line, and if a matching line is found, and if at least one of the specified applications exists, this application will be used to open the corresponding associated file. Else, the next line will be checked. In other words, the precedence order is top to bottom (for lines) and left to right (for applications).
 
 .SH SHELL FUNCTIONS
 CliFM includes a few shell functions to perform specific actions (cd-on-quit, file-picker, and subshell-notice). Take a look at the corresponding files, in \fI/usr/share/clifm/functions\fR, and follow the instructions. Needles to say, you can write your own functions.

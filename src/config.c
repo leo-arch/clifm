@@ -853,7 +853,7 @@ CdListsAutomatically=true\n\
 CaseSensitiveList=false\n\
 CaseSensitiveDirJump=true\n\
 CaseSensitivePathComp=true\n\
-Unicode=false\n\
+Unicode=true\n\
 Pager=false\n\
 MaxHistory=1000\n\
 MaxDirhist=100\n\
@@ -1159,6 +1159,8 @@ create_config_files(void)
 	if (stat(MIME_FILE, &file_attrib) == 0)
 		return;
 
+	char sys_mimelist[] = "/usr/share/clifm/mimelist.cfm";
+
 	_err('n', PRINT_PROMPT, _("%s created a new MIME list file (%s) "
 			"importing MIME information from the system. It is "
 			"recommended to edit this file (entering 'mm edit' or "
@@ -1166,38 +1168,33 @@ create_config_files(void)
 			"you don't. This will make the process of opening files "
 			"faster and smoother\n"
 			"A MIME list file covering the most common filetype "
-			"associations can be found in /usr/share/clifm/mimelist.cfm"),
-			PROGRAM_NAME, MIME_FILE);
+			"associations can be found in %s.\n"),
+			PROGRAM_NAME, MIME_FILE, sys_mimelist);
 
 	/* Try importing MIME associations from the system, and in
-	 * case nothing can be imported, create an empty MIME list
-	 * file */
-	if (mime_import(MIME_FILE) != EXIT_SUCCESS) {
+	 * case nothing can be imported use the default mimelist.cfm file */
+	if (mime_import(MIME_FILE) == EXIT_SUCCESS)
+		return;
 
-		FILE *mime_fp = fopen(MIME_FILE, "w");
+	FILE *mime_fp = fopen(MIME_FILE, "w");
 
-		if (!mime_fp) {
-			_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n",
-			    PROGRAM_NAME, MIME_FILE, strerror(errno));
-		}
-
-		else {
-
-			if (!(flags & GUI))
-				fputs("text/plain=nano;vim;vi;emacs;ed\n"
-				      "*.cfm=nano;vim;vi;emacs;ed\n",
-				    mime_fp);
-
-			else
-				fputs("text/plain=gedit;kate;pluma;mousepad;"
-				      "leafpad;nano;vim;vi;emacs;ed\n"
-				      "*.cfm=gedit;kate;pluma;mousepad;leafpad;"
-				      "nano;vim;vi;emacs;ed\n",
-				    mime_fp);
-
-			fclose(mime_fp);
-		}
+	if (!mime_fp) {
+		_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n",
+			PROGRAM_NAME, MIME_FILE, strerror(errno));
+		return;
 	}
+
+	if (stat(sys_mimelist, &file_attrib) == -1) {
+		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+			sys_mimelist, strerror(errno));
+		fclose(mime_fp);
+		return;
+	}
+
+	char *cmd[] = {"cp", "-f", sys_mimelist, MIME_FILE, NULL};
+	launch_execve(cmd, FOREGROUND, E_NOFLAG);
+
+	fclose(mime_fp);
 }
 
 int
