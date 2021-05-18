@@ -690,23 +690,23 @@ create_config(const char *file)
 	    "# Color schemes are stored in the colors directory. By default,\n\
 # the 'default' color scheme is used. Visit %s\n\
 # to get a few more\n\
-ColorScheme=default\n\n"
+ColorScheme=%s\n\n"
 
 	    "# The amount of files contained by a directory is informed next\n\
 # to the directory name. However, this feature might slow things down when,\n\
 # for example, listing files on a remote server. The filescounter can be\n\
 # disabled here, via the --no-files-counter option, or using the 'fc'\n\
 # command while in the program itself.\n\
-FilesCounter=true\n\n"
+FilesCounter=%s\n\n"
 
 	    "# The character used to construct the line dividing the list of files and\n\
 # the prompt. DividingLineChar accepts both literal characters (in single\n\
 # quotes) and decimal numbers.\n\
-DividingLineChar='-'\n\n"
+DividingLineChar='%c'\n\n"
 
 	    "# If set to true, print a map of the current position in the directory\n\
 # history list, showing previous, current, and next entries\n\
-DirhistMap=false\n\n"
+DirhistMap=%s\n\n"
 
 	    "# Use a regex expression to exclude filenames when listing files.\n\
 # Example: .*~$ to exclude backup files (ending with ~). Do not quote\n\
@@ -715,11 +715,11 @@ Filter=\n\n"
 
 	    "# Set the default copy command. Available options are: 0 = cp,\n\
 # 1 = advcp, and 2 = wcp. Both 1 and 2 add a progress bar to cp.\n\
-cpCmd=0\n\n"
+cpCmd=%d\n\n"
 
 	    "# Set the default move command. Available options are: 0 = mv,\n\
 # and 1 = advmv. 1 adds a progress bar to mv.\n\
-mvCmd=0\n\n"
+mvCmd=%d\n\n"
 
 	    "# The prompt line is built using string literals and/or one or more of\n\
 # the following escape sequences:\n"
@@ -756,52 +756,59 @@ mvCmd=0\n\n"
 
 	    "Prompt=\"%s\"\n\n",
 
-	    COLORS_REPO, DEFAULT_PROMPT);
+	    COLORS_REPO,
+		DEF_COLOR_SCHEME,
+		DEF_FILES_COUNTER == 1 ? "true" : "false",
+		DEF_DIV_LINE_CHAR,
+		DEF_DIRHIST_MAP == 1 ? "true" : "false",
+		DEF_CP_CMD,
+		DEF_MV_CMD,
+	    DEFAULT_PROMPT);
 
 	fprintf(config_fp,
 	    "# MaxPath is only used for the /p option of the prompt: the current working\n\
 # directory will be abbreviated to its basename (everything after last slash)\n\
 # whenever the current path is longer than MaxPath.\n\
-MaxPath=40\n\n"
+MaxPath=%d\n\n"
 
-	    "WelcomeMessage=true\n\
-SplashScreen=false\n\
-ShowHiddenFiles=false\n\
-LongViewMode=false\n\
-LogCmds=false\n\n"
+	    "WelcomeMessage=%s\n\
+SplashScreen=%s\n\
+ShowHiddenFiles=%s\n\
+LongViewMode=%s\n\
+LogCmds=%s\n\n"
 
 	    "# Minimum length at which a filename can be trimmed in long view mode\n\
 # (including ELN length and spaces)\n\
-MinFilenameTrim=20\n\n"
+MinFilenameTrim=%d\n\n"
 
 	    "# When a directory rank in the jump database is below MinJumpRank, it\n\
 # will be forgotten\n\
-MinJumpRank=10\n\n"
+MinJumpRank=%d\n\n"
 
 	    "# When the sum of all ranks in the jump database reaches MaxJumpTotalRank,\n\
 # all ranks will be reduced 10%%, and those falling below MinJumpRank will\n\
 # be deleted\n\
-MaxJumpTotalRank=100000\n\n"
+MaxJumpTotalRank=%d\n\n"
 
 	    "# Should CliFM be allowed to run external, shell commands?\n\
-ExternalCommands=true\n\n"
+ExternalCommands=%s\n\n"
 
-	    " Write the last visited directory to $XDG_CONFIG_HOME/clifm/.last to be\n\
+	    "# Write the last visited directory to $XDG_CONFIG_HOME/clifm/.last to be\n\
 # later accessed by the corresponding shell function at program exit.\n\
 # To enable this feature consult the manpage.\n\
-CdOnQuit=false\n\n"
+CdOnQuit=%s\n\n"
 
 	    "# If set to true, a command name that is the name of a directory or a\n\
 # file is executed as if it were the argument to the the 'cd' or the \n\
 # 'open' commands respectivelly: 'cd DIR' works the same as just 'DIR'\n\
 # and 'open FILE' works the same as just 'FILE'.\n\
-Autocd=true\n\
-AutoOpen=true\n\n"
+Autocd=%s\n\
+AutoOpen=%s\n\n"
 
 	    "# If set to true, expand bookmark names into the corresponding bookmark\n\
 # path: if the bookmark is \"name=/path\", \"name\" will be interpreted\n\
 # as /path. TAB completion is also available for bookmark names.\n\
-ExpandBookmarks=false\n\n"
+ExpandBookmarks=%s\n\n"
 
 	    "# In light mode, extra filetype checks (except those provided by\n\
 # the d_type field of the dirent structure (see readdir(3))\n\
@@ -810,7 +817,24 @@ ExpandBookmarks=false\n\n"
 # is readable by the current user, if it is executable, SUID, SGID, if a\n\
 # symlink is broken, and so on. The file extension check is ignored as\n\
 # well, so that the color per extension feature is disabled.\n\
-LightMode=false\n\n");
+LightMode=%s\n\n",
+
+		DEF_MAX_PATH,
+		DEF_WELCOME_MESSAGE == 1 ? "true" : "false",
+		DEF_SPLASH_SCREEN == 1 ? "true" : "false",
+		DEF_SHOW_HIDDEN == 1 ? "true" : "false",
+		DEF_LONG_VIEW == 1 ? "true" : "false",
+		DEF_LOGS_ENABLED == 1 ? "true" : "false",
+		DEF_MIN_NAME_TRIM,
+		DEF_MIN_JUMP_RANK,
+		DEF_MAX_JUMP_TOTAL_RANK,
+		DEF_EXT_CMD_OK == 1 ? "true" : "false",
+		DEF_CD_ON_QUIT == 1 ? "true" : "false",
+		DEF_AUTOCD == 1 ? "true" : "false",
+		DEF_AUTO_OPEN == 1 ? "true" : "false",
+		DEF_EXPAND_BOOKMARKS == 1 ? "true" : "false",
+		DEF_LIGHT_MODE == 1 ? "true" : "false"
+		);
 
 	fprintf(config_fp,
 	    "# If running with colors, append directory indicator and files counter\n\
@@ -820,10 +844,10 @@ LightMode=false\n\n");
 # for for executable files, and '?' for unknown file types. Bear in mind\n\
 # that when running in light mode the check for executable files won't be\n\
 # performed, and thereby no inidicator will be added to executable files.\n\
-Classify=true\n\n"
+Classify=%s\n\n"
 
 	    "# Should the Selection Box be shared among different profiles?\n\
-ShareSelbox=false\n\n"
+ShareSelbox=%s\n\n"
 
 	    "# Choose the resource opener to open files with their default associated\n\
 # application. If not set, 'lira', CLiFM's built-in opener, is used.\n\
@@ -842,27 +866,27 @@ TerminalCmd='%s'\n\n"
 # 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version\n\
 # (name if note available) 8 = extension, 9 = inode, 10 = owner, 11 = group\n\
 # NOTE: the 'version' method is not available on FreeBSD\n\
-Sort=1\n\
+Sort=%d\n\
 # By default, CliFM sorts files from less to more (ex: from 'a' to 'z' if\n\
 # using the \"name\" method). To invert this ordering, set SortReverse to\n\
 # true (you can also use the --sort-reverse option or the 'st' command)\n\
-SortReverse=false\n\n"
+SortReverse=%s\n\n"
 
-	    "Tips=true\n\
-ListFoldersFirst=true\n\
-CdListsAutomatically=true\n\
-CaseSensitiveList=false\n\
-CaseSensitiveDirJump=true\n\
-CaseSensitivePathComp=true\n\
-Unicode=true\n\
-Pager=false\n\
-MaxHistory=1000\n\
-MaxDirhist=100\n\
-MaxLog=500\n\
-DiskUsage=false\n\n"
+	    "Tips=%s\n\
+ListFoldersFirst=%s\n\
+CdListsAutomatically=%s\n\
+CaseSensitiveList=%s\n\
+CaseSensitiveDirJump=%s\n\
+CaseSensitivePathComp=%s\n\
+Unicode=%s\n\
+Pager=%s\n\
+MaxHistory=%d\n\
+MaxDirhist=%d\n\
+MaxLog=%d\n\
+DiskUsage=%s\n\n"
 
 	    "# If set to true, clear the screen before listing files\n\
-ClearScreen=true\n\n"
+ClearScreen=%s\n\n"
 
 	    "# If not specified, StartingPath defaults to the current working\n\
 # directory.\n\
@@ -870,18 +894,39 @@ StartingPath=\n\n"
 
 	    "# If set to true, start CliFM in the last visited directory (and in the\n\
 # last used workspace). This option overrides StartingPath.\n\
-RestoreLastPath=false\n\n"
+RestoreLastPath=%s\n\n"
 
 	    "# If set to true, the 'r' command executes 'trash' instead of 'rm' to\n\
 # prevent accidental deletions.\n\
-TrashAsRm=false\n\n"
+TrashAsRm=%s\n\n"
 
 	    "# Set readline editing mode: 0 for vi and 1 for emacs (default).\n\
-RlEditMode=1\n\n"
+RlEditMode=%d\n\n"
 
 	    "#END OF OPTIONS\n\n",
 
-	    DEFAULT_TERM_CMD);
+		DEF_CLASSIFY == 1 ? "true" : "false",
+		DEF_SHARE_SELBOX == 1 ? "true" : "false",
+		DEFAULT_TERM_CMD,
+		DEF_SORT,
+		DEF_SORT_REVERSE == 1 ? "true" : "false",
+		DEF_TIPS == 1 ? "true" : "false",
+		DEF_LIST_FOLDERS_FIRST == 1 ? "true" : "false",
+		DEF_CD_LISTS_ON_THE_FLY == 1 ? "true" : "false",
+		DEF_CASE_SENSITIVE == 1 ? "true" : "false",
+		DEF_CASE_SENS_DIRJUMP == 1 ? "true" : "false",
+		DEF_CASE_SENS_PATH_COMP == 1 ? "true" : "false",
+		DEF_UNICODE == 1 ? "true" : "false",
+		DEF_PAGER == 1 ? "true" : "false",
+		DEF_MAX_HIST,
+		DEF_MAX_DIRHIST,
+		DEF_MAX_LOG,
+		DEF_DISK_USAGE == 1 ? "true" : "false",
+		DEF_CLEAR_SCREEN == 1 ? "true" : "false",
+		DEF_RESTORE_LAST_PATH == 1 ? "true" : "false",
+		DEF_TRASRM == 1 ? "true" : "false",
+		DEF_RL_EDIT_MODE
+		);
 
 	fputs(
 
@@ -946,7 +991,9 @@ create_def_cscheme(void)
 		    "ExtColors=\"%s\"\n\n"
 
 		    "DirIconsColor=\"00;33\"\n",
-	    DEF_FILE_COLORS, DEF_IFACE_COLORS, DEF_EXT_COLORS);
+	    DEF_FILE_COLORS,
+	    DEF_IFACE_COLORS,
+	    DEF_EXT_COLORS);
 
 	fclose(fp);
 

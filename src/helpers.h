@@ -267,68 +267,14 @@ nm=01;32:bm=01;36:"
 
 #define DEF_DIR_ICO_C "\x1b[00;33m"
 
-/* Default options */
-#define DEF_SPLASH_SCREEN 0
-#define DEF_WELCOME_MESSAGE 1
-#define DEF_SHOW_HIDDEN 0
-#define DEF_SORT 1
-#define DEF_FILES_COUNTER 1
-#define DEF_LONG_VIEW 0
-#define DEF_EXT_CMD_OK 1
-#define DEF_PAGER 0
-#define DEF_MAX_HIST 1000
-#define DEF_MAX_DIRHIST 100
-#define DEF_MAX_LOG 500
-#define DEF_CLEAR_SCREEN 1
-#define DEF_LIST_FOLDERS_FIRST 1
-#define DEF_CD_LISTS_ON_THE_FLY 1
-#define DEF_CASE_SENSITIVE 0
-#define DEF_UNICODE 1
-#define DEF_MAX_PATH 40
-#define DEF_LOGS_ENABLED 0
-#define DEF_DIV_LINE_CHAR '='
-#define DEF_LIGHT_MODE 0
-#define DEF_CLASSIFY 1
-#define DEF_SHARE_SELBOX 0
-#define DEF_SORT 1
-#define DEF_SORT_REVERSE 0
-#define DEF_TIPS 1
-#define DEF_AUTOCD 1
-#define DEF_AUTO_OPEN 1
-#define DEF_DIRHIST_MAP 0
-#define DEF_DISK_USAGE 0
-#define DEF_RESTORE_LAST_PATH 0
-#define DEF_EXPAND_BOOKMARKS 0
-#define DEF_ONLY_DIRS 0
-#define DEF_CD_ON_QUIT 0
-#define DEF_COLORS 1
-#define MAX_WS 8
-#define DEF_CUR_WS 0
-#define DEF_TRASRM 0
-#define DEF_NOELN 0
-#define DEF_MIN_NAME_TRIM 20
-#define DEF_CASE_SENS_DIRJUMP 1
-#define DEF_CASE_SENS_PATH_COMP 1
-#define DEF_MIN_JUMP_RANK 10
-#define DEF_MAX_JUMP_TOTAL_RANK 100000
-#define DEF_CWD_IN_TITLE 0
 #define UNSET -1
-#define DEF_MAX_FILES UNSET
 
 /* Macros for the cp and mv cmds */
 #define CP_CP 0
 #define CP_ADVCP 1
 #define CP_WCP 2
-#define DEF_CP_CMD CP_CP
 #define MV_MV 0
 #define MV_ADVMV 1
-#define DEF_MV_CMD MV_MV
-
-/* Macros for the colors_list function */
-#define NO_ELN 0
-#define NO_PAD 0
-#define PRINT_NEWLINE 1
-#define NO_NEWLINE 0
 
 /* Sort macros */
 #define SNONE 0
@@ -344,6 +290,70 @@ nm=01;32:bm=01;36:"
 #define SOWN 10
 #define SGRP 11
 #define SORT_TYPES 11
+
+/* Default options */
+#define DEF_AUTOCD 1
+#define DEF_AUTO_OPEN 1
+#define DEF_CASE_SENSITIVE 0
+#define DEF_CASE_SENS_DIRJUMP 1
+#define DEF_CASE_SENS_PATH_COMP 1
+#define DEF_CD_LISTS_ON_THE_FLY 1
+#define DEF_CD_ON_QUIT 0
+#define DEF_CLASSIFY 1
+#define DEF_CLEAR_SCREEN 1
+#define DEF_COLOR_SCHEME "default"
+#define DEF_COLORS 1
+#define DEF_CP_CMD CP_CP
+#define DEF_CUR_WS 0
+#define DEF_CWD_IN_TITLE 0
+#define DEF_DIRHIST_MAP 0
+#define DEF_DISK_USAGE 0
+#define DEF_DIV_LINE_CHAR '-'
+#define DEF_EXPAND_BOOKMARKS 0
+#define DEF_EXT_CMD_OK 1
+#define DEF_FILES_COUNTER 1
+#define DEF_LIGHT_MODE 0
+#define DEF_LIST_FOLDERS_FIRST 1
+#define DEF_LOGS_ENABLED 0
+#define DEF_LONG_VIEW 0
+#define DEF_MAX_DIRHIST 100
+#define DEF_MAX_FILES UNSET
+#define DEF_MAX_HIST 1000
+#define DEF_MAX_JUMP_TOTAL_RANK 100000
+#define DEF_MAX_LOG 500
+#define DEF_MAX_PATH 40
+#define DEF_MIN_JUMP_RANK 10
+#define DEF_MIN_NAME_TRIM 20
+#define DEF_MV_CMD MV_MV
+#define DEF_NOELN 0
+#define DEF_ONLY_DIRS 0
+#define DEF_PAGER 0
+#define DEF_RESTORE_LAST_PATH 0
+#define DEF_RL_EDIT_MODE 1
+#define DEF_SHARE_SELBOX 0
+#define DEF_SHOW_HIDDEN 0
+#define DEF_SHOW_BACKUP_FILES 1
+#define DEF_SORT SNAME
+#define DEF_SORT_REVERSE 0
+#define DEF_SPLASH_SCREEN 0
+#define DEF_TIPS 1
+#define DEF_TRASRM 0
+#define DEF_UNICODE 1
+#define DEF_WELCOME_MESSAGE 1
+
+#define MAX_WS 8
+
+#define DEFAULT_PROMPT "\\[\\e[0;37m\\][\\[\\e[0;36m\\]\\S\\[\\e[0;37m\\]]\\l \
+\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0;37m\\]\\z\\[\\e[0;34m\\] \
+\\$\\[\\e[0m\\] "
+
+#define DEFAULT_TERM_CMD "xterm -e"
+
+/* Macros for the colors_list function */
+#define NO_ELN 0
+#define NO_PAD 0
+#define PRINT_NEWLINE 1
+#define NO_NEWLINE 0
 
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR
@@ -361,14 +371,8 @@ nm=01;32:bm=01;36:"
 /* Max length of the properties string in long view mode */
 #define MAX_PROP_STR 55
 
-#define DEFAULT_PROMPT "\\[\\e[0;37m\\][\\[\\e[0;36m\\]\\S\\[\\e[0;37m\\]]\\l \
-\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0;37m\\]\\z\\[\\e[0;34m\\] \
-\\$\\[\\e[0m\\] "
-
 #define GRAL_USAGE "[-aAefFgGhiIlLmoOsSuUvxy] [-b FILE] [-c FILE] \
 [-k FILE] [-p PATH] [-P PROFILE] [-z METHOD]"
-
-#define DEFAULT_TERM_CMD "xterm -e"
 
 #define FALLBACK_SHELL "/bin/sh"
 #define FALLBACK_OPENER "xdg-open"
