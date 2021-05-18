@@ -1,4 +1,4 @@
-# Mimelist file example for CliFM
+# Mimelist file for CliFM
 # This mimelist covers the most common filetypes
 
 # Extensions
