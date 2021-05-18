@@ -1159,12 +1159,15 @@ create_config_files(void)
 	if (stat(MIME_FILE, &file_attrib) == 0)
 		return;
 
-	_err('n', PRINT_PROMPT, _("%s created a new MIME list file (%s). It is "
-				  "recommended to edit this file (entering 'mm edit' or pressing F6) to "
-				  "add the programs you use and remove those you don't. This will make "
-				  "the process of opening files faster and smoother\n"),
-			PROGRAM_NAME,
-			MIME_FILE);
+	_err('n', PRINT_PROMPT, _("%s created a new MIME list file (%s) "
+			"importing MIME information from the system. It is "
+			"recommended to edit this file (entering 'mm edit' or "
+			"pressing F6) to add the programs you use and remove those "
+			"you don't. This will make the process of opening files "
+			"faster and smoother\n"
+			"A MIME list file covering the most common filetype "
+			"associations can be found in /usr/share/clifm/mimelist.example"),
+			PROGRAM_NAME, MIME_FILE);
 
 	/* Try importing MIME associations from the system, and in
 	 * case nothing can be imported, create an empty MIME list
