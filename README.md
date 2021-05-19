@@ -6,7 +6,7 @@
 [![clifm-git](https://img.shields.io/aur/version/clifm-git?color=1793d1&label=clifm-git&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/clifm/)
 [![clifm-colors-git](https://img.shields.io/aur/version/clifm-colors-git?color=1793d1&label=clifm-colors-git&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/clifm/)
 [![privacy](https://img.shields.io/badge/privacy-ok-green?style=for-the-badge)](https://en.wikipedia.org/wiki/Privacy-invasive_software)
-[![License](https://img.shields.io/github/license/leo-arch/clifm?color=red&style=for-the-badge)](https://github.com/leo-arch/clifm/blob/master/LICENSE)
+[![License](https://img.shields.io/github/license/leo-arch/clifm?color=red&style=for-the-badge)](https://github.com/leo-arch/clifm/blob/master/LICENSE) [![Join the chat at https://gitter.im/leo-arch/clifm](https://badges.gitter.im/leo-arch/clifm.svg)](https://gitter.im/leo-arch/clifm?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 <h3 align="center"><br><i>Did I say it's fast?</i></h3>
 <p align="center"><a href="https://mega.nz/embed/J8hEkCZZ#fGp0JtcDvFIWKmTc4cOp0iMrWRlbqs99THg8F7EmQWI"><img src="images/vid_thumb.png"></a></p>
