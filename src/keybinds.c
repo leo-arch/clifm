@@ -732,8 +732,6 @@ rl_open_mime(int count, int key)
 int
 rl_mountpoints(int count, int key)
 {
-	return EXIT_SUCCESS;
-
 	/* Call the function only if it's not already running */
 	kbind_busy = 1;
 	keybind_exec_cmd("mp");
