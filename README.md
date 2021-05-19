@@ -181,6 +181,9 @@ CliFM is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag).
 ## License
 This project is licensed under the GPL version 2 (or later) license. See the LICENSE file for details.
 
+## Contributing
+See the [contributing](https://github.com/leo-arch/clifm/blob/master/CONTRIBUTING.md) file.
+
 ## First steps
 
 Try the `help` command to learn more about CliFM. Once in the CliFM prompt, type `help` or `?`. To jump into the COMMANDS section in the manpage, simply enter `cmd` or press **F2**. Press **F1** to access the full manpage and **F3** to access the keybindings help page.
