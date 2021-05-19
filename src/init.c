@@ -1401,9 +1401,12 @@ get_path_programs(void)
 
 	/* Add internal commands */
 	/* Get amount of internal cmds (elements in INTERNAL_CMDS array) */
-	size_t internal_cmd_n = (sizeof(*INTERNAL_CMDS) /
-				    sizeof(INTERNAL_CMDS[0])) -
-				1;
+/*	size_t internal_cmd_n = (sizeof(*INTERNAL_CMDS) /
+				    sizeof(INTERNAL_CMDS[0])) - 1; */
+
+	size_t internal_cmd_n = 0;
+	while (INTERNAL_CMDS[internal_cmd_n])
+		internal_cmd_n++;
 
 	bin_commands = (char **)xnmalloc(total_cmd + internal_cmd_n +
 					     aliases_n + actions_n + 2,
