@@ -1449,7 +1449,8 @@ get_path_programs(void)
 			if (index != -1) {
 				bin_commands[l] = (char *)xnmalloc((size_t)index + 1,
 				    sizeof(char));
-				strncpy(bin_commands[l++], aliases[i], (size_t)index);
+				strncpy(bin_commands[l], aliases[i], (size_t)index);
+				bin_commands[l++][index] = '\0';
 			}
 		}
 	}
