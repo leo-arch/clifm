@@ -112,11 +112,17 @@ save_jumpdb(void)
 
 		int hours_since_last = (int)(now - jump_db[i].last_visit) / 60 / 60;
 
+		/* Do not remove directories visited in the last 24 hours, no
+		 * matter what their rank is */
 		tmp_rank = rank;
-		if (hours_since_last == 0) /* Last hour */
+		if (hours_since_last == 0) { /* Last hour */
 			rank = JHOUR(tmp_rank);
-		else if (hours_since_last <= 24) /* Last day */
+			jump_db[i].keep = 1;
+		}
+		else if (hours_since_last <= 24) { /* Last day */
 			rank = JDAY(tmp_rank);
+			jump_db[i].keep = 1;
+		}
 		else if (hours_since_last <= 168) /* Last week */
 			rank = JWEEK(tmp_rank);
 		else /* More than a week */
