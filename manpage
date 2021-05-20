@@ -39,19 +39,17 @@ CLIFM \- The KISS file manager
 .sp
 \fB15.\fR Standard input
 .sp
-\fB16.\fR Miscellaneous notes
+\fB16.\fR Note on speed
 .sp
-\fB17.\fR Note on speed
+\fB17.\fR Kangaroo frecency algorithm
 .sp
-\fB18.\fR Kangaroo frecency algorithm
+\fB18.\fR Environment
 .sp
-\fB19.\fR Environment
+\fB19.\fR Miscellaneous notes
 .sp
-\fB20.\fR Exit status
+\fB20.\fR Files
 .sp
-\fB21.\fR Files
-.sp
-\fB22.\fR Examples
+\fB21.\fR Examples
 
 .SH 1. GETTING HELP
 There are several ways of getting help in CliFM. Once in the program, enter '\fB?\fR' to see a minimal list of options, commands, and keybindings, or press \fBF1\fR to access this manpage, \fBF2\fR to go to the \fBCOMMANDS\fR section of this very manpage, or \fBF3\fR to go to the \fBKEYBOARD SHORTCUTS\fR section. A convenient way of getting full information about CliFM commands is via the '\fBih\fR' action, binded by default to the interactive help plugin (\fIihelp.sh\fR). Just type 'ih' to run the plugin (it depends on \fIfzf\fR) and select the command you want to obtain information on.
@@ -134,7 +132,7 @@ While the kernel console, which strictly speaking could be though of as a FM, do
 .sp
 Personally, since I just dislike GUI and bloated stuff, I really felt the need of an extended and improved way to manage my files in the CLI. Indeed, CliFM originated as an attempt to add a bookmarks function to the Bash shell, and then grew up from these humble beginnings. In between the CLI and traditional FM's, we have now CliFM, because, as the old Italian saying goes: "There is no two without three".
 .sp
-CliFM is thus not just another terminal FM (one of the many we can find out there), but a truly command line interface, shell\-like, and really text\-based FM. Indeed, we normally think of terminal FM's as curses\-based FM's, not because these notions are really the same, but because of the fact that most (if not all) FM's designed for the terminal are curses-based applications. Here is where CliFM excels: it is a NON\-curses terminal FM. In this sense, CliFM is a truly command line FM.
+CliFM is thus not just another terminal FM (one of the many we can find out there), but a truly command line interface, shell\-like, and really text\-based FM. Indeed, we normally think of terminal FM's as TUI or curses\-based FM's, not because these notions are really the same, but because of the fact that most (if not all) FM's designed for the terminal are curses-based applications. Here is where CliFM excels: it is a NON\-curses terminal FM. In this sense, CliFM is a truly command line FM.
 
 .SH 4. POSITIONAL ARGUMENTS
 .IP "\fBPATH\fR" 7
@@ -980,13 +978,13 @@ A bold red 'R' at the left of the prompt reminds the user that the program is ru
 
 .SH 11. BUILT\-IN EXPANSIONS
 .TP
-Besides the default TAB completion for command names and paths, you can also expand ELN's using the TAB key. Example: type 'o 12', press TAB, and it becomes 'o filename ', or, if 12 refers to a directory, 'o dir/'. CliFM uses a Bash\-style quoting system, so that this filename: "this is a test@version{1}" is expanded as follows: this\\ is\\ a\\ test\\@version\\{1\\}
+Besides the default TAB completion for command \fBnames and paths\fR, you can also expand \fBELN's\fR using the TAB key. Example: type 'o 12', press TAB, and it becomes 'o filename ', or, if 12 refers to a directory, 'o dir/'. CliFM uses a Bash\-style quoting system, so that this filename: "this is a test@version{1}" is expanded as follows: this\\ is\\ a\\ test\\@version\\{1\\}
 .TP
-CliFM will automatically expand the 'sel' keyword: 'sel' indeed amounts to 'file1 file2 file3 ...' In this way, you can use the 'sel' keyword with any command. If you want to set the executable bit on several files, for instance, simply select the files you want and then run this command: 'chmod +x sel'. Or, if you want to copy or move several files into some directory: 'cp sel 12', or 'mv sel 12' (provided the ELN 12 corresponds to a directory), respectivelly. If the destiny directory is ommited, selected files are copied into the current working directory, that is to say, 'mv sel' amounts to 'mv sel .'. To trash or remove selected files, simply run 'tr sel' or 'rm sel' respectivelly. The same goes for wildcards and braces: 'chmod +x *', for example, will set the excutable bit on all files (excluding hidden files) in the current working directory, while 'chmod +x file{1,2,3}' will do it for file1, file2, and file3 respectivelly.
+CliFM will automatically expand the \fB'sel' keyword\fR: 'sel' indeed amounts to 'file1 file2 file3 ...' In this way, you can use the 'sel' keyword with any command. If you want to set the executable bit on several files, for instance, simply select the files you want and then run this command: 'chmod +x sel'. Or, if you want to copy or move several files into some directory: 'cp sel 12', or 'mv sel 12' (provided the ELN 12 corresponds to a directory), respectivelly. If the destiny directory is ommited, selected files are copied into the current working directory, that is to say, 'mv sel' amounts to 'mv sel .'. To trash or remove selected files, simply run 'tr sel' or 'rm sel' respectivelly. The same goes for wildcards and braces: 'chmod +x *', for example, will set the excutable bit on all files (excluding hidden files) in the current working directory, while 'chmod +x file{1,2,3}' will do it for file1, file2, and file3 respectivelly.
 .TP
-ELN's and ELN ranges will be also automatically expanded, provided the corresponding ELN's actually exist, that is to say, provided some filename is listed on the screen under those numbers. For example: 'diff 1 118' will only expand '1', but not '118', if there is no ELN 118. In the same way, the range 1\-118 will only be expanded provided there are 118 or more elements listed on the screen. If this feature somehow conflicts with the command you want to run, say, 'chmod 644 ...', because the current amount of files is equal or larger than 644 (in which case CliFM will expand that number), then you can simply run the command as external: ';chmod 644...'
+ELN's and \fBELN ranges\fR will be also automatically expanded, provided the corresponding ELN's actually exist, that is to say, provided some filename is listed on the screen under those numbers. For example: 'diff 1 118' will only expand '1', but not '118', if there is no ELN 118. In the same way, the range 1\-118 will only be expanded provided there are 118 or more elements listed on the screen. If this feature somehow conflicts with the command you want to run, say, 'chmod 644 ...', because the current amount of files is equal or larger than 644 (in which case CliFM will expand that number), then you can simply run the command as external: ';chmod 644...'
 .TP
-TAB completion for bookmarks, color schemes, profiles and directory history (via the \fIjump\fR command) is also available. To make use of the bookmarks completion, make sure to specify some name for your bookmarks, since these names are used by the completion function. 
+TAB completion for \fBbookmarks, color schemes, profiles, sort method, and directory history\fR (via the \fIjump\fR command) is also available. To make use of the bookmarks completion, make sure to specify some name for your bookmarks, since these names are used by the completion function. 
 .TP
 Of course, combinations of all these features is also possbile. Example: 'cp sel file* 2 23\-31 .' will copy all selected files, plus all files whose name starts with "file", plus those files corresponding to the ELN's 2, and 23 to 31, into the current working directory.
 
@@ -1082,6 +1080,8 @@ NOTE 2: The \fIgit_status\fR plugin is not intended to be used as a normal plugi
 
  # PROMPT COMMANDS
  /usr/share/clifm/plugins/git_status.sh
+.TP
+Whereas this plugin provides basic Git integration, it could be easily modified (it is just a few lines long) to include whatever git function you might need.
 
 .SH 15. STANDARD INPUT (STDIN)
 CliFM is able to read and list paths from the input stream. Each path in the list should be an absolute path, terminated with a new line character (\\n) and stripped from extra characters not belonging to the path itself. The size of the input stream buffer is 262MiB (65536 paths, provided each path takes PATH_MAX bytes (4096 by default)).
@@ -1105,38 +1105,20 @@ You can also use stream redirection:
 .sp
 All operations performed on these symbolic links (provided the current working directory is the temporary directory where all these files are stored) will be performed on the target files and NOT on the symbolic links themselves.
 
-.SH 16. MISCELLANEOUS NOTES
-.TP
-For each of the internal commands (see the \fBCOMMANDS\fR section above) you can use the semicolon to execute them sequentially and/or the double ampersand to execute them conditionally. Example: 'cmd1; cmd2 && cmd3'. 
-.TP
-Though you can use here external commands as well, bear in mind that, whenever at least one internal command is involved in a chained list of commands, CliFM will take care of executing this list (simply because the system shell isn't able to understand any of these commands), so that no shell inter\-process function (like pipes), nor any stream redirection or shell expression (like IF blocks or FOR loops) will be available. However, the shell is still used to run single external commands found in the chained list, but in isolation from the remaining commands in this list.
-.TP
-As a rule of thumb, when using chained commands make sure to always expand ELN's to avoid undesired consequences. If, for instance, you issue this command: 'touch aaa && r 3', you will end up deleting a file you were not intended to delete, simple because after the successfull execution of the first command, the ELN 3 corresponds now to a different file.
-.TP
-CliFM is not limited to its own set of internal commands, like open, sel, trash, etc., but it can run any external command as well, provided external commands are allowed (see the \-x option, the 'ext' command, or the configuration file). By beginning the external command by a colon or a semicolon (':', ';') you tell CliFM not to parse the input string, but instead letting this task to the system shell. However, bear in mind that CliFM is not intended to be used as a shell, but as the file manager it is.
-.TP
-It depends on the terminal emulator you use to correctly display non\-ASCII characters and characters from the extended ASCII charset. If, for example, you create a file named "ñandú" (the spanish word for 'rhea'), it will be correctly displayed by the Linux console, Lxterminal, and Urxvt, but not thus by Xterm or Aterm.
-.TP
-CliFM will create \fI$HOME/.Xresources\fR, if it doesn't already exist, for keybindings to work correctly. However, some (and even all) of these keybindings might not work in some terminals, though they do work fine on the console (TTY), xvt\-like terminal emulators like Urxvt and Aterm, and xterm\-like ones. However, keybinding can be edited freely to make them work on any terminal emulator.
-.TP
-When dealing with filenames containing spaces, you can use both single and double quotes (ex: "this file" or 'this file') plus escape sequences (ex: this\\ file).
-.TP
-By default, CliFM starts in the current working directory. However, you can always specify a different path by passing it as an argument. Ex: clifm \-p /home/user/misc. You can also permanently set up the starting path in the CliFM configuration file. If the RestoreLastPath option is set to true, CliFM will start instead in the last visited directory (and in the last used workspace), unless the starting path (and optionally the workspace number) is specified via command line.
-.TP
-CliFM's default profile is "default". To create alternative profiles use the \-P option or the 'pf' command (see above).
-
-.SH 17. NOTE ON SPEED
+.SH 16. NOTE ON SPEED
 CliFM is by itself quite fast by default, but if speed is still an issue, it is possible to get some extra performance.
 .sp
 The two most time consuming features are:
- 1) The files counter, used to print the amount of files contained by listed directories. Disabling this option produces a nice performance boost.
- 2) In default mode, \fBfstatat\fR(3) and \fBaccess\fR(3) are used to gather information about listed files. Since these functions, especially when executed hundreds (or even thousands) of times, are quite time consuming, the \fIlight mode\fR was implemented as an alternative listing process omitting all calls to them. When running in light mode, however, only basic file classification is performed, namely, those provided by the \fId_type\fR field of a dirent struct (see \fBreaddir\fR(3)).
+
+ \fB1)\fR The files counter, used to print the amount of files contained by listed directories. Disabling this option produces a nice performance boost.
+
+ \fB2)\fR In default mode, \fBfstatat\fR(3) and \fBaccess\fR(3) are used to gather information about listed files. Since these functions, especially when executed hundreds (and even thousands) of times, are quite time consuming, the \fIlight mode\fR was implemented as an alternative listing process omitting all calls to them. When running in light mode, however, only basic file classification is performed, namely, those provided by the \fId_type\fR field of a dirent struct (see \fBreaddir\fR(3)).
 .sp
 Besides these two features, a few more things can be disabled to get some extra speed (though perhaps unnoticiable): icons (if enabled), columns, colors, and, if already running without colors, filetype indicators. Because listing lots of files could be expensive and time consuming, you can also try to limit the amount of files printed for each visited directory (see the \fImf\fR command above).
 .sp
 Despite the above, however, it is important to bear in mind that listing speed does not only depend on the program's code and enabled features, but also on the terminal emulator used. Old, basic terminal emulators like Xterm, Aterm, and the kernel built-in console are really slow compared to more modern ones like Urxvt, Lxterminal, ST, and Terminator, to name just a few.
 
-.SH 18. KANGAROO FRECENCY ALGORITHM
+.SH 17. KANGAROO FRECENCY ALGORITHM
 The directory jumper function is designed to learn the navigation habits of the user. The information is stored in a database (see the \fBFILES\fR section below) used to get the best match for a given string provided by the user. In this sense, Kangaroo is like a quick, smart, and evolved cd function.
 .sp
 The information stored in the database, always per directory, is:
@@ -1172,7 +1154,7 @@ Automatic maintenance is done on the database applying a few simple procedures:
 .sp
 The idea of 'frecency' was, as far as I know, first deviced and designed by Mozilla. See \fIhttps://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency\fR. However, it is also implemented, though using different algorithms, by different projects like \fBautojump\fR, \fBz.lua\fR, and \fBzoxide\fR.
 
-.SH 19. ENVIRONMENT
+.SH 18. ENVIRONMENT
 The following variables are read at initialization time:
 .TP
 .B CLIFM_FILE_COLORS
@@ -1207,14 +1189,47 @@ This variable contains the path of a pipe by means of which plugins can talk to 
 .sp
 The pipe (CLIFM_BUS) is deleted immediately after the execution of its content and recreated before running any other plugin.
 
-.SH 20. EXIT STATUS
-CliFM returns the exit status of the last executed command:
+.SH 19. MISCELLANEOUS NOTES
 .sp
-\fB0\fR		Successfull execution
-.sp
-\fB1\fR		Error
+\fBSequential and conditional execution of commands\fR:
 
-.SH 21. FILES
+For each of the internal commands (see the \fBCOMMANDS\fR section above) you can use the semicolon to execute them sequentially and/or the double ampersand to execute them conditionally. Example: 'cmd1; cmd2 && cmd3'. 
+.sp
+Though you can use here external commands as well, bear in mind that, whenever at least one internal command is involved in a chained list of commands, CliFM will take care of executing this list (simply because the system shell isn't able to understand any of these commands), so that no shell inter\-process function (like pipes), nor any stream redirection or shell expression (like IF blocks or FOR loops) will be available. However, the shell is still used to run single external commands found in the chained list, but in isolation from the remaining commands in this list.
+.sp
+As a rule of thumb, when using chained commands make sure to always expand ELN's to avoid undesired consequences. If, for instance, you issue this command: 'touch aaa && r 3', you will end up deleting a file you were not intended to delete, simple because after the successfull execution of the first command, the ELN 3 corresponds now to a different file.
+.sp
+
+\fBExternal commands\fR:
+
+CliFM is not limited to its own set of internal commands, like open, sel, trash, etc., but it can run any external command as well, provided external commands are allowed (see the \-x option, the 'ext' command, or the configuration file). By beginning the external command by a colon or a semicolon (':', ';') you tell CliFM not to parse the input string, but instead letting this task to the system shell. However, bear in mind that CliFM is not intended to be used as a shell, but as the file manager it is.
+.sp
+
+\fBTerminal emulators and non-ASCII characters\fR:
+
+It depends on the terminal emulator you use to correctly display non\-ASCII characters and characters from the extended ASCII charset. If, for example, you create a file named "ñandú" (the spanish word for 'rhea'), it will be correctly displayed by the Linux console, Lxterminal, and Urxvt, but not thus by Xterm or Aterm.
+.sp
+
+\fB.Xresources\fR:
+
+CliFM will create \fI$HOME/.Xresources\fR, if it doesn't already exist, for keybindings to work correctly. However, some (and even all) of these keybindings might not work in some terminals, though they do work fine on the console (TTY), xvt\-like terminal emulators like Urxvt and Aterm, and xterm\-like ones. However, keybinding can be edited freely to make them work on any terminal emulator.
+.sp
+
+\fBSpaces and escape codes\fR:
+
+When dealing with filenames containing spaces, you can use both single and double quotes (ex: "this file" or 'this file') plus escape sequences (ex: this\\ file).
+.sp
+
+\fBStarting path\fR:
+
+By default, CliFM starts in the current working directory. However, you can always specify a different path by passing it as positional parameter. Ex: clifm /home/user/misc. You can also permanently set up the starting path in the CliFM configuration file. If the RestoreLastPath option is set to true, CliFM will start instead in the last visited directory (and in the last used workspace), unless the starting path (and optionally the workspace number) is specified via command line.
+.sp
+
+\fBDefault profile\fR:
+
+CliFM's default profile is "default". To create alternative profiles use the \-P command line option or the 'pf add' command (see above).
+
+.SH 20. FILES
 .TP
 .B CONFIGURATION FILE
 The configuration file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/clifmrc\fR.
@@ -1222,59 +1237,47 @@ Here you can permanently set up CliFM options, add aliases and some prompt comma
 .sp
 A description for each option in the configuration file can be found in the configuration file itself.
 .TP
-
 .B PROFILE FILE
 The profile file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/profile.cfm\fR.
 In this file you can add those commands you want to be executed at startup. You can also permanently set here some custom variables, ex: 'dir="/path/to/folder"'. This variable may be used as a shorcut to that folder, for instance: 'cd $dir'. Custom variables could also be temporarily defined via the command prompt: Ex: user@hostname ~ $ var="This is a test". Temporary variables will be removed at program exit.
 .TP
-
 .B KEYBINDINGS FILE
 The keybindings file is \fI$XDG_CONFIG_HOME/clifm/keybindings\fR. This file is used to specify the keyboard shortcuts used for some ClifM's functions. The format for each kyebinding is always "keyseq:function", where 'keyseq' is an escape sequence in GNU emacs style. A more detailed explanation can be found in the keybindings file itself.
 .TP
-
 .B SCRIPTS DIRECTORY
 The directory used to store programs or scripts pointed to by actions (in other words, plugins) is \fI$XDG_CONFIG_HOME/clifm/scripts\fR.
 .TP
-
 .B COLORS DIRECTORY
 This directory, \fI$XDG_CONFIG_HOME/clifm/colors\fR, contains available color schemes as files with a .cfm extension. You can create as many color schemes as you want by just dropping them in this directory. The default color scheme file (default.cfm) could be used as a guide.
 .TP
-
 .B ACTIONS FILE
 The file used to define custom actions is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/actions.cfm\fR.
 .TP
-
 .B MIMELIST FILE:
 The mime list file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/mimelist.cfm\fR. It is a list of filetypes and file extensions and their associated applications used by \fIlira\fR.
 .TP
-
 .B BOOKMARKS FILE
 The bookmarks file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/bookmarks.cfm\fR
 Just the list of the user's bookmarks used by the bookmarks function.
 .TP
-
 .SH HISTORY FILE
 The history file is \fI~/.config/clifm/profiles/PROFILE/history.cfm\fR.
 A list of commands entered by the user and used by the history function.
 .TP
-
 .B COMMANDS LOG FILE
 The commands log file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/log.cfm\fR.
 The file contains a series of fields separated by a colon in the following way: 'date:user:current_dir:command. All commands executed as external will be logged.
 .TP
-
 .B MESSAGES LOG FILE
 The messages log file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/messages.cfm\fR.
 A file containing a list of system messages, either errors, warnings, or simple notices. The messages log format is: "[date] message".
 .TP
-
 .B KANGAROO DATABASE
 The directory jumer database is stored in \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/jump.cfm\fR.
 .TP
-
 \fBNOTE\fR: If \fB$XDG_CONFIG_HOME\fR is not set, \fB$HOME/.config/\fR is used instead.
 
-.SH 22. EXAMPLES
+.SH 21. EXAMPLES
 The following are just a few basic usage examples.
 
 \fBNOTE\fR: Always try TAB. TAB completeion is available for many things
@@ -1350,6 +1353,13 @@ NOTE: Recall to install \fBicons-in-terminal\fR before
 \fBq\fR: I'm tired, quit
 
 There is a lot more you can do, but this should be enough to get you started.
+
+.SH EXIT STATUS
+CliFM returns the exit status of the last executed command:
+.sp
+\fB0\fR		Successfull execution
+.sp
+\fB1\fR		Error
 
 .SH CONFORMING TO
 CliFM is C99 compliant, and, if compiled with the _BE_POSIX flag, it is POSIX.1-2008 conformant as well. If not, only two non-POSIX functions are used: \fBstatx\fR(2) (Linux specific), to get files birth time, and \fBstrverscmp\fR(3) (a GNU extension), to list files by version.
