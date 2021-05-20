@@ -271,4 +271,5 @@ NOTE: Recall to install `icons-in-terminal` before
 
 There is a lot more you can do, but this is enough to get you started.
 
+###
 Just try it and let me know. It gets better and better. I myself use it as my main, and indeed only, file manager; it couldn't be so bad, isn't it?
