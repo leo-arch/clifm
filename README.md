@@ -151,9 +151,11 @@ You'll find the corresponding packages on the AUR: the [stable](https://aur.arch
 
 Of course, you can also clone, build, and install the package using the PKGBUILD file:
 
-	$ git clone https://github.com/leo-arch/clifm.git
-	$ cd clifm
-	$ makepkg -si
+```
+$ git clone https://github.com/leo-arch/clifm.git
+$ cd clifm
+$ makepkg -si
+```
 
 ### Debian-based
 **NEW**: A .deb package (for x86_64) is now available in [Releases](https://github.com/leo-arch/clifm/releases).
@@ -162,12 +164,16 @@ Of course, you can also clone, build, and install the package using the PKGBUILD
 
 1. Clone the repository
 
-        $ git clone https://github.com/leo-arch/clifm.git
-        $ cd clifm
+```
+$ git clone https://github.com/leo-arch/clifm.git
+$ cd clifm
+```
 
-Run `make` as follows:
+2. Run `make` as follows:
 
-	$ sudo make install
+```
+$ sudo make install
+```
 
 You should find the binary file in `/usr/bin`, so that you can run it as any other program:
 
@@ -182,10 +188,10 @@ To uninstall `clifm` issue this command wherever the Makefile is located:
 CliFM is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag). It works on Linux and FreeBSD, on i686, x86_64, and ARM architectures.
 
 ## License
-This project is licensed under the GPL version 2 (or later) license. See the LICENSE file for details.
+This project is licensed under the GPL version 2 (or later) license. See the [LICENSE](https://github.com/leo-arch/clifm/blob/master/LICENSE) file for details.
 
 ## Contributing
-We welcome community contributions. Please see the [contributing](https://github.com/leo-arch/clifm/blob/master/CONTRIBUTING.md) file for details.
+We welcome community contributions. Please see the [CONTRIBUTING.md](https://github.com/leo-arch/clifm/blob/master/CONTRIBUTING.md) file for details.
 
 ## First steps
 
