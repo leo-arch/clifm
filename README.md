@@ -185,7 +185,7 @@ CliFM is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag).
 This project is licensed under the GPL version 2 (or later) license. See the LICENSE file for details.
 
 ## Contributing
-See the [contributing](https://github.com/leo-arch/clifm/blob/master/CONTRIBUTING.md) file.
+We welcome community contributions. Please see the [contributing](https://github.com/leo-arch/clifm/blob/master/CONTRIBUTING.md) file for details.
 
 ## First steps
 
