@@ -1148,9 +1148,14 @@ For example: if the query string is "test", /media/data/test will be matched. No
 Once all entries in the initial list of matches have been filtered via the above procedure and ranked, we can return the best ranked entry. The higher rank a directory has, the more priotity it has over the remaining entries in the initial list of matches.
 .sp
 Automatic maintenance is done on the database applying a few simple procedures:
- a) Each entry in the database is checked at startup to remove non-existent directories
+
+ a) Each entry in the database is checked at startup to remove non-existent directories.
+
  b) Once the rank of a directory falls below MinJumpRank (by default 10), it is forgotten and deleted from the database. The MinJumpRank value can be customized in the configuration file. To make non-frequently visited directories dissapear faster from the database, increase this value.
+
  c) Once the sum total of ranks reaches MaxJumpTotalRank (by default 100000), each individual rank is divided by a dynamic factor so that the total rank becomes less than or equal to MaxJumpTotalRank. If some rank falls in the process below MinJumpRank, it is removed from the database. MaxJumpTotalRank can be modified in the configuration file. The higher the value of MaxJumpTotalRank, the more time directories will be kept in the database.
+
+NOTE: Directories visited in the last 24 hours will not be removed from the database, no matter what their rank is.
 .sp
 The idea of 'frecency' was, as far as I know, first deviced and designed by Mozilla. See \fIhttps://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency\fR. However, it is also implemented, though using different algorithms, by different projects like \fBautojump\fR, \fBz.lua\fR, and \fBzoxide\fR.
 
