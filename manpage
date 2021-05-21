@@ -41,7 +41,7 @@ CLIFM \- The KISS file manager
 .sp
 \fB16.\fR Note on speed
 .sp
-\fB17.\fR Kangaroo frecency algorithm
+\fB17.\fR Kangaroo frequency algorithm
 .sp
 \fB18.\fR Environment
 .sp
@@ -67,21 +67,21 @@ With the \fBautomatic ELN expansion\fR feature you can use ELN's with external c
 .sp
   \fBd)\fR \fBBookmarks\fR: keep a list of your favorite directories, and even files, to get easy access to them. Example: enter 'bm' (or press Alt\-b) to open the bookmarks screen and then simply type a number or a shortcut name to access the desired bookmark.
 .sp
-  \fBe)\fR The \fBSelection Box\fR allows you to drop files and directories from different parts of the filesystem (even from different instances of CliFM) and then operate on them with just one command. Example: select a few files in one instance of the program (say 's 12; cd /media; s 2 5\-6') and then paste them somewhere else using a second instance ('v sel', 'paste sel' or Ctrl-Alt-v). Both wildcards (globbing) and regular expressions are suppported. Inverse matching is also allowed for patterns.
+  \fBe)\fR The \fBSelection Box\fR allows you to drop files and directories from different parts of the filesystem (even from different instances of CliFM) and then operate on them with just one command. Example: select a few files in one instance of the program (say 's 12; cd /media; s 2 5\-6') and then paste them somewhere else using a second instance ('v sel', 'paste sel' or Ctrl-Alt-v). Both wildcards (globbing) and regular expressions are supported. Inverse matching is also allowed for patterns.
 .sp
-  \fBf)\fR The \fBdirectory history\fR function (\fIback\fR and \fIforth\fR) keeps track of all visited directories, so that you can go back and forth to any of them by just entering 'b' or 'f' (or just pressing 'Alt\-j' and 'Alt\-k', or Shift\-Left and Shift\-Right, respectivelly). Another way of quickly navigating through visited directories is using Kangaroo, a built-in \fBdirectory jumper\fR function. See the \fIj\fR command below.
+  \fBf)\fR The \fBdirectory history\fR function (\fIback\fR and \fIforth\fR) keeps track of all visited directories, so that you can go back and forth to any of them by just entering 'b' or 'f' (or just pressing 'Alt\-j' and 'Alt\-k', or Shift\-Left and Shift\-Right, respectively). Another way of quickly navigating through visited directories is using Kangaroo, a built-in \fBdirectory jumper\fR function. See the \fIj\fR command below.
 .sp
-  \fBg)\fR An extensive list of \fBkeyboard shortcuts\fR make it even easier and faster to navigate and operate on your files. For example, instead of typing 'cd ..' to go back to the parent directory, or 's *' to select all files in the current directory, you can simply press Alt\-u (or Shift\-Up) and Alt\-a respectivelly.
+  \fBg)\fR An extensive list of \fBkeyboard shortcuts\fR make it even easier and faster to navigate and operate on your files. For example, instead of typing 'cd ..' to go back to the parent directory, or 's *' to select all files in the current directory, you can simply press Alt\-u (or Shift\-Up) and Alt\-a respectively.
 .sp
   \fBh)\fR The \fBquick search\fR function makes it really easy to quickly find the files you are looking for: just enter a slash followed by the string or regular expression you want (ex: '/myfile' or '/.*\.png'), that's all. Inverse search is also allowed by prepending an exclamation mark (!) to the search pattern.
 .sp
   \fBi)\fR \fBPlugins\fR: Build your own custom commands using executable files (shell scripts or binaries). Just drop an executable file (all languages are supported) in the plugins directory, tell CliFM to use this executable file via a custom action name, and use it as any other command.
 .sp
-  \fBj)\fR It is blazing \fBfast\fR and incredibly \fBlightweigth\fR. With a memory footprint below 5 MiB and a disk usage of 400 KiB, it can run on really old hardware. It is so simple that it doesn't require an X session nor any graphical environment at all, being able thus to perfectly run on the console (TTY) and even on a headless machine via a SSH or a telnet session. And if this is not enough, you can still use the \fBlight mode\fR to make it even faster.
+  \fBj)\fR It is blazing \fBfast\fR and incredibly \fBlightweight\fR. With a memory footprint below 5 MiB and a disk usage of 400 KiB, it can run on ancient hardware. It is so simple that it doesn't require an X session nor any graphical environment at all, being able thus to perfectly run on the console (TTY) and even on a headless machine via a SSH or a telnet session. And if this is not enough, you can still use the \fBlight mode\fR to make it even faster.
 .sp
   \fBi)\fR When running in \fBstealth mode\fR, it will leave not trace at all in the host system.
 .sp
-Because inspired in the \fBKISS\fR principle, CliFM is fundamentally aimed to be lightweight, fast, simple, and efficient. On Archlinux' notion of simplcity see: \fIhttps://wiki.archlinux.org/index.php/Arch_Linux#Simplicity\fR
+Because inspired in the \fBKISS\fR principle, CliFM is fundamentally aimed to be lightweight, fast, simple, and efficient. On Archlinux's notion of simplicity see: \fIhttps://wiki.archlinux.org/index.php/Arch_Linux#Simplicity\fR
 
 List of CliFM features:
 
@@ -128,7 +128,7 @@ List of CliFM features:
 .SH 3. RATIONALE
 When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the kernel built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There are no two without three".
 .sp
-While the kernel console, which strictly speaking could be though of as a FM, does not actually feel as one and lacks many features (like bookmarks, files selection, a trash system, a resource opener and the like), graphical FM's offer most of these features, but only at the expense of system resources (at the very least 20MiB of RAM and most of the time a graphical X session), in the case of GUI\-based ones, or hidding the command line (where the real power of the Unices lies), in the case of the curses\-based ones. Heavily inspired by the KISS principle ("Keep it Simple, Stupid"), CliFM was born as an attempt to get the best of both worlds: the speed, lightness, and efficiency of the CLI and the extra features of traditional FM's. It is aimed to be, briefly speaking, a wrapper of the CLI to extend and improve its functionality; CliFM feels, acts, and flies like the CLI, offering at the same time most of the useful features of modern FM's.
+While the kernel console, which strictly speaking could be thought of as a FM, does not actually feel as one and lacks many features (like bookmarks, files selection, a trash system, a resource opener and the like), graphical FM's offer most of these features, but only at the expense of system resources (at the very least 20MiB of RAM and most of the time a graphical X session), in the case of GUI\-based ones, or hiding the command line (where the real power of the Unix lies), in the case of the curses\-based ones. Heavily inspired by the KISS principle ("Keep it Simple, Stupid"), CliFM was born as an attempt to get the best of both worlds: the speed, lightness, and efficiency of the CLI and the extra features of traditional FM's. It is aimed to be, briefly speaking, a wrapper of the CLI to extend and improve its functionality; CliFM feels, acts, and flies like the CLI, offering at the same time most of the useful features of modern FM's.
 .sp
 Personally, since I just dislike GUI and bloated stuff, I really felt the need of an extended and improved way to manage my files in the CLI. Indeed, CliFM originated as an attempt to add a bookmarks function to the Bash shell, and then grew up from these humble beginnings. In between the CLI and traditional FM's, we have now CliFM, because, as the old Italian saying goes: "There is no two without three".
 .sp
@@ -259,7 +259,7 @@ list files and quit. It may be used in conjunction with \fB\-p\fR
 maximum number of visited directories to remember
 .TP
 .B \-\-max\-path\fR=NUM
-set the maximun number of characters after which the current directory in the prompt line will be abreviated to the directory base name (if \\z is used in the prompt)
+set the maximum number of characters after which the current directory in the prompt line will be abbreviated to the directory base name (if \\z is used in the prompt)
 .TP
 .B \-\-max\-files\fR=NUM
 list only up to NUM files. Use -1 to list all files (default). See the \fBmf\fR command for a more detailed description
@@ -325,13 +325,13 @@ the 'r' command executes the built-in 'trash' instead of 'rm' to prevent acciden
 Options precedence order: 1) command line; 2) configuration file; 3) default values.
 
 .SH 6. COMMANDS
-\fBNOTE:\fR ELN = Entry List Number. Example: in the line "12 openbox" (when listing files), 12 is the ELN corresponding to the file named "openbox". The slash followed by a number (/xx) after directories and symbolic links to directories (the files counter) indicates the amount of files contained by the corresponding directory, excluding self and parent directories ("." and ".." respectivelly).
+\fBNOTE:\fR ELN = Entry List Number. Example: in the line "12 openbox" (when listing files), 12 is the ELN corresponding to the file named "openbox". The slash followed by a number (/xx) after directories and symbolic links to directories (the files counter) indicates the amount of files contained by the corresponding directory, excluding self and parent directories ("." and ".." Respectively).
 .sp
 \fBNOTE 2:\fR In case of ELN-filename conflict the backslash can be used to prevent ELN expansion. For example, if we have at least two files and one of them in named "2", then CliFM cannot know in advance if the command refers to the ELN 2 or to the filename "2". In we want the ELN, we just write the ELN number, for example: 's 2'. But if we want the filename, we need to escape the filename using the backlash character: 's \\2'.
 .sp
-\fBNOTE 3:\fR CliFM now supports \fBfused parameters\fR for internal commands taking an ELN or range of ELN's as parameters. Much like short options for command line programs, you can drop or omit the space between internal commands and the corresponding ELN passed as argument. In general, you can write 'CMDELN' instead of 'CMD ELN'. For example: 'o12' or 's1-5' instead of 'o 12' and 's 1-5' respectivelly. Bear in mind, however, that in thus omitting the space char TAB completion for ELN's won't be available. If there is a file named 'o12' (more generally, CMDELN), and if you want to refer to this file instead of a CliFM command, escape the filename to prevent the split; for example: 's \\o12'.
+\fBNOTE 3:\fR CliFM now supports \fBfused parameters\fR for internal commands taking an ELN or range of ELN's as parameters. Much like short options for command line programs, you can drop or omit the space between internal commands and the corresponding ELN passed as argument. In general, you can write 'CMDELN' instead of 'CMD ELN'. For example: 'o12' or 's1-5' instead of 'o 12' and 's 1-5' respectively. Bear in mind, however, that in thus omitting the space char TAB completion for ELN's won't be available. If there is a file named 'o12' (more generally, CMDELN), and if you want to refer to this file instead of a CliFM command, escape the filename to prevent the split; for example: 's \\o12'.
 .sp
-\fBNOTE 4:\fR CliFM implements a \fBfastback\fR function, that is to say, the convertion of "... n" or "cmd ... n" into "../.. n" or "cmd ../.. n". In other words, subsequent dots after ".." will be converted each into "/..". For example, if you are in your home directory and type "..." or "cd ...", and since "..." amounts to "../..", you will be taken to the root directory. TAB completion is available for the fastback function: "....bin" -> TAB -> "../../../bin".
+\fBNOTE 4:\fR CliFM implements a \fBfastback\fR function, that is to say, the conversion of "... n" or "cmd ... n" into "../.. n" or "cmd ../.. n". In other words, subsequent dots after ".." will be converted each into "/..". For example, if you are in your home directory and type "..." or "cd ...", and since "..." amounts to "../..", you will be taken to the root directory. TAB completion is available for the fastback function: "....bin" -> TAB -> "../../../bin".
 
 .TP
 .B \fRFILE/DIR
@@ -344,7 +344,7 @@ Bear in mind that search patterns are evaluated first as glob expressions, and t
 .sp
 To search for files in any directory other than the current one, specify the directory name as a further argument. This argument (DIR) could be an absolute path, a relative path, or an ELN. For example, enter '/^A 7' to search for all files starting with 'A' in the directory corresponding to the ELN 7.
 .sp
-The result of the search could be further filtered by specifying a filter type: \-d, \-r, \-l, \-s, \-f, \-b, and \-c (directory, regular file, symbolic link, socket, FIFO/pipe, block device, and character device respectivelly). For example, '/[.-].*d$ \-d Documents/' will list all directories containing a dot or a dash and ending with 'd' in the directory named "Documents".
+The result of the search could be further filtered by specifying a filter type: \-d, \-r, \-l, \-s, \-f, \-b, and \-c (directory, regular file, symbolic link, socket, FIFO/pipe, block device, and character device respectively. For example, '/[.-].*d$ \-d Documents/' will list all directories containing a dot or a dash and ending with 'd' in the directory named "Documents".
 .sp
 The quick search function also supports invert search: prepend the exclamation mark (!) to negate a given search pattern. For example: "!.*s$ -d /etc" will match all directories in /etc NOT ending with 's', just as "!D*" will match all files in the current directory NOT starting with 'D'.
 .sp
@@ -385,7 +385,7 @@ To create multiple aliases for files at once, this is the recommended procedure:
  alias b1='file2'
  alias c1='file3'
 
-NOTE: Make sure alias names do not conflict with other commands, either internal or external. To bypass the conflicts check, performed automaically by the 'alias import' command, you can just edit the aliases file manually.
+NOTE: Make sure alias names do not conflict with other commands, either internal or external. To bypass the conflicts check, performed automatically by the 'alias import' command, you can just edit the aliases file manually.
 
 4) Finally, import this file with the \fIalias\fR function: 'alias import tmp_file'. Now, you can access any of these files by entering just a few caracters: a1, b1, and c1.
 .TP
@@ -415,19 +415,19 @@ Create symbolic links (in the current directory) for each specified file. The us
 .B bm, bookmarks \fR[a, add PATH] [d, del] [edit] [SHORTCUT, NAME]
 with no argument, open the bookmarks menu. Here you can cd into the desired bookmark by entering either its ELN, its shortcut or its name. In this screen you can also add, remove or edit your bookmarks by simply typing 'e' to edit the bookmarks file (which is simply a list of lines with this format: [shortcut]name:path. Ex: [d]documents:/home/user/documents).
 .sp
-If you want to add or remove a bookmark directly from the command line, use the 'a' and 'd' arguments respectivelly. Example: 'bm a /media/misc' or 'bm d'. You can also open a bookmark by typing 'bm shortcut' or 'bm name' (in which latter case TAB completion is available).
+If you want to add or remove a bookmark directly from the command line, use the 'a' and 'd' arguments respectively. Example: 'bm a /media/misc' or 'bm d'. You can also open a bookmark by typing 'bm shortcut' or 'bm name' (in which latter case TAB completion is available).
 .sp
 A handy use for the bookmarks function, provided the expand-bookmarks option is enabled, is to create bookmarks using short names, which will be later easily accessible via TAB completion.
 .TP
 .B br, bulk \fRELN/FILE ... n
 rename at once all files passed as arguments to the function. It accepts single and multiple filenames, wildcards, ELN ranges, and the 'sel' keyword. Example: 'br myfile 4\-10 sel'.
 .sp
-Each filename will be copied into a temporary file, which will be opened with the default text editor (via the \fImime\fR function), letting the user modify it. Once the file has been modified and saved, the modifications are printed on the screeen and the user is asked whether to proceed with the actual bulk renaming or not.
+Each filename will be copied into a temporary file, which will be opened with the default text editor (via the \fImime\fR function), letting the user modify it. Once the file has been modified and saved, the modifications are printed on the screen and the user is asked whether to proceed with the actual bulk renaming or not.
 .sp
 This built-in bulk rename function won't deal with deletions, replacements, file name conflicts and the like. For a smarter alternative use \fBqmv(1).
 .TP
 .B c, l [e, edit], m, md, r
-short for the following commands respectivelly: 'cp -iRp', 'ln -sn', 'mv -i', 'mkdir -p', and 'rm -I' (for files) or 'rm -dIr' (for directories). To use these commands without any of these arguments, or with any other argument you need, just use the non-abbreviated command, for instance, 'cp' instead of 'c'.
+short for the following commands respectively: 'cp -iRp', 'ln -sn', 'mv -i', 'mkdir -p', and 'rm -I' (for files) or 'rm -dIr' (for directories). To use these commands without any of these arguments, or with any other argument you need, just use the non-abbreviated command, for instance, 'cp' instead of 'c'.
 .sp
 CliFM supports \fIadvcp\fR and \fIwcp\fR to copy files (to add a progress bar to \fIcp\fR). To use them instead of \fIcp\fR set the corresponding option (cpCmd) in the configuration file. If \fIadvcp\fR is selected, the command used is 'advcp -giRp'. \fIwcp\fR takes no argument.
 .sp
@@ -439,7 +439,7 @@ The \fIln\fR command allows the use of the 'e, edit' option to modify the destin
 print the color codes list currently used for files listing.
 .TP
 .B cd \fR[ELN/DIR]
-when used with no argument, it changes the current directory to the default directory ($HOME). Otherwise, \fIcd\fR changes the current directory to the one specified by the first argument. You can use either ELN's or a string to indicate the directory you want. Ex: 'cd 12' or 'cd ~/media'. If \fIautocd\fR is enabled, 'cd 12' and 'cd ~/media' can be written as '12' and '~/media' respectivelly.
+when used with no argument, it changes the current directory to the default directory ($HOME). Otherwise, \fIcd\fR changes the current directory to the one specified by the first argument. You can use either ELN's or a string to indicate the directory you want. Ex: 'cd 12' or 'cd ~/media'. If \fIautocd\fR is enabled, 'cd 12' and 'cd ~/media' can be written as '12' and '~/media' respectively.
 .sp
 Unlike the shell 'cd' command, CliFM's built\-in \fIcd\fR function not only changes the current directory, but also lists its content (provided the option "cd lists automatically" is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of \fIcd\fR is much like this shell command: cd DIR && ls \-\-color=auto \-\-group\-directories\-first. Remote file systems are also supported: just enter 'cd ADDRESS [OPTIONS]'. For more information about this syntax see the description of the \fInet\fR command below.
 .TP
@@ -450,7 +450,7 @@ toggle columns on/off.
 show this list of commands. A more convenient way of getting information about CliFM commands is via the interactive help plugin (depends on \fIfzf\fR), by default binded to the "ihelp" action name. 
 .TP
 .B cs, colorschemes \fR[edit] [NAME]
-with no arguments, list available color schemes. Use the 'edit' option to open the configuration file of the current color scheme. Otherwise, just switch to the color scheme NAME. TAB completion is avaiable.
+with no arguments, list available color schemes. Use the 'edit' option to open the configuration file of the current color scheme. Otherwise, just switch to the color scheme NAME. TAB completion is available.
 .TP
 .B dc \fR[on, off, status]
 toggle the files counter function on/off.
@@ -502,7 +502,7 @@ toggle icons on/off
 .B j, jc, jl, jp \fR[STR ...], \fBjo\fR [NUM], \fBje\fR
 \fIj\fR is the fastest way of using Kangaroo, a \fBdirectory jumper\fR function to quickly navigate through the jump database (i.e. a database of visited directories).
 .sp
-With no argument, \fIj\fR just lists the entries in the jump database, printing the order number of the corresponding entry, the number of visits, the days since the first visit, the rank value, and the directory name itself (an asterisk next to the rank value means that the corresponding directory is bookmarked). Otherwise, it searchs for STR in the database and cd into the best ranked matching entry. Example: 'j D' will probably take you to /home/user/Downloads, provided this directory has been already visited and is the best ranked match in the database. For a more detailed description of the matching algorithm see the \fBKANGAROO FRECENCY ALGORITHM\fR section below. 
+With no argument, \fIj\fR just lists the entries in the jump database, printing the order number of the corresponding entry, the number of visits, the days since the first visit, the rank value, and the directory name itself (an asterisk next to the rank value means that the corresponding directory is bookmarked). Otherwise, it searches for STR in the database and cd into the best ranked matching entry. Example: 'j D' will probably take you to /home/user/Downloads, provided this directory has been already visited and is the best ranked match in the database. For a more detailed description of the matching algorithm see the \fBKANGAROO FREQUENCY ALGORITHM\fR section below. 
 .sp
 Multiple query strings could be passed to the function. For example, 'j et mo' will first check for 'et' in the jump database and then will further filter the search using the second parameter: 'mo'. It will most probably take you (again, provided the directory has been already visited and is the best ranked match) to /etc/modprobe.d directory. Bear in mind that if STR is an actual directory, \fIjump\fR will just cd into it without performing any query.
 .sp
@@ -518,7 +518,7 @@ Multiple query strings could be passed to the function. For example, 'j et mo' w
 .sp
 TAB completion is available for this function.
 .sp
-To reset or modify the jump database as you whish, simply open the jump file using the 'je' command, edit whatever needs to be edited, save changes, and close the editor.
+To reset or modify the jump database as you wish, simply open the jump file using the 'je' command, edit whatever needs to be edited, save changes, and close the editor.
 .sp
 An alternative way of navigating the jump database is using the jumper plugin (located in the plugins directory and binded by default to the "++" action name), which uses \fIfzf\fR to enable fuzzy searches. Just enter ++ to perform a fuzzy search over the jump database.
 .TP
@@ -526,7 +526,7 @@ An alternative way of navigating the jump database is using the jumper plugin (l
 with no argument, prints the current keyboard codes and their associated functions. To edit the keybindings file, use the 'edit' option. Use the 'default' option to set the default values.
 .TP
 .B lm \fR[on, off]
-Toggle the light mode on/off. This option, aimed to make files listing faster than the default mode, is especially usefull for really old hardware or when working on remote machines. For more details see the \fBNOTE ON SPEED\fR section below.
+Toggle the light mode on/off. This option, aimed to make files listing faster than the default mode, is especially useful for really old hardware or when working on remote machines. For more details see the \fBNOTE ON SPEED\fR section below.
 .TP
 .B log \fR[clear] [on, off, status]
 with no arguments, it prints the contents of the log file. If 'clear' is passed as argument, all the logs will be deleted. 'on', 'off', and 'status' enable, disable, and check the status of the \fIlog\fR function for the current session.
@@ -563,7 +563,7 @@ To access the remote file system via SMB, this scheme should be used instead: sm
 .sp
 \fBNOTE\fR: 'fusermount3' is Linux\-specific. On FreeBSD 'umount' should be used instead.
 .sp
-The underlying programs used here to mount these remote file systems are: \fBsshfs(1)\fR for SFTP, \fBmount.cifs(8)\fR for SMB, and \fBcurlftpfs(1)\fR for FTP. For more information regarding the options supported by each of them, consult the correposponding documentation.
+The underlying programs used here to mount these remote file systems are: \fBsshfs(1)\fR for SFTP, \fBmount.cifs(8)\fR for SMB, and \fBcurlftpfs(1)\fR for FTP. For more information regarding the options supported by each of them, consult the corresponding documentation.
 .TP
 .B o, open \fRELN/FILE [APPLICATION]
 open FILE, which can be either a directory, in which case it works just like the \fIcd\fR command (see above), a regular file, or a symbolic link to either of the two. For example: 'o 12', 'o filename', 'o /path/to/filename'.
@@ -582,7 +582,7 @@ print file properties for ELN/FILE. The output of this function is much like the
 print the current working directory.
 .TP
 .B pf, prof, profile \fR[ls, list] [set, add, del PROFILE]
-with no arguments, prints the name of the currently used profile. Use the 'ls' or 'list' option to list available profiles. To switch, add or delete a profile, use the 'set', 'add', and 'del' options respectivelly followed by the corresponding profile name. Bear in mind that, when switching profiles, command line arguments will be ignored.
+with no arguments, prints the name of the currently used profile. Use the 'ls' or 'list' option to list available profiles. To switch, add or delete a profile, use the 'set', 'add', and 'del' options respectively followed by the corresponding profile name. Bear in mind that, when switching profiles, command line arguments will be ignored.
 .TP
 .B pg, pager \fR[on, off, status]
 toggle \fBMas\fR, the built-in pager, on/off. Useful to list directories with hundreds or thousands of files, the pager will start working, if set to on, whenever the screen is not enough to list all files.
@@ -637,7 +637,7 @@ By default, files are sorted from less to more (ex: from 'a' to 'z' if using the
 .B t, tr, trash  \fR[ELN/FILE ... n] [ls, list] [clear] [del, rm]
 with no argument (or by passing the 'ls' option), it prints a list of currently trashed files. The 'clear' option removes all files from the trash can, while the 'del' option lists trashed files allowing you to remove one or more of them.
 .sp
-The trash directory is \fI$XDG_DATA_HOME/Trash\fR, usually \fI~/.local/share/Trash\fR. Since this trash system follows the freedesktop specification, it is able to handle files trashed by different Trash implementations.
+The trash directory is \fI$XDG_DATA_HOME/Trash\fR, usually \fI~/.local/share/Trash\fR. Since this trash system follows the Freedesktop specification, it is able to handle files trashed by different Trash implementations.
 .TP
 .B te \fRFILE(s)
 toggle executable bit (on user, group, and others) on FILE(s). It is equivalent to the -x and +x options for the shell \fBchmod\fR(1) command.
@@ -786,7 +786,7 @@ NOTE: C stands for Control, S for Shift, and M for the Meta key (the Alt key in 
 .TP
 NOTE 2: Some of these keybindings might not work on your terminal emulator, depending on the terminal settings. Some useful tips on this regard:
 .TP
-Kernel built-in console: Key sequences involving the Shift key (S-up, S-left, and S-right in our case) will just not work. Use the alternative key sequences instead: M-u, M-j, and M-k respectivelly.
+Kernel built-in console: Key sequences involving the Shift key (S-up, S-left, and S-right in our case) will just not work. Use the alternative key sequences instead: M-u, M-j, and M-k respectively
 .TP
 XTerm: Add the following lines to your \fI.Xresources\fR (or \fI.Xdefaults\fR) file:
  XTerm*eightBitInput: false
@@ -871,9 +871,9 @@ Colors are specified using the same format used by \fBdircolors(1)\fR and the LS
  ow = other writable directory
  ex = executable file
  ee = empty executable file
- ca = file with capabilites
+ ca = file with capabilities
  no = unknown filetype
- uf = unaccesible files (\fBfstatat\fR(3) error)
+ uf = unaccessible files (\fBfstatat\fR(3) error)
 
 .TP
 The following codes are used for different interface elements:
@@ -980,13 +980,13 @@ A bold red 'R' at the left of the prompt reminds the user that the program is ru
 .TP
 Besides the default TAB completion for command \fBnames and paths\fR, you can also expand \fBELN's\fR using the TAB key. Example: type 'o 12', press TAB, and it becomes 'o filename ', or, if 12 refers to a directory, 'o dir/'. CliFM uses a Bash\-style quoting system, so that this filename: "this is a test@version{1}" is expanded as follows: this\\ is\\ a\\ test\\@version\\{1\\}
 .TP
-CliFM will automatically expand the \fB'sel' keyword\fR: 'sel' indeed amounts to 'file1 file2 file3 ...' In this way, you can use the 'sel' keyword with any command. If you want to set the executable bit on several files, for instance, simply select the files you want and then run this command: 'chmod +x sel'. Or, if you want to copy or move several files into some directory: 'cp sel 12', or 'mv sel 12' (provided the ELN 12 corresponds to a directory), respectivelly. If the destiny directory is ommited, selected files are copied into the current working directory, that is to say, 'mv sel' amounts to 'mv sel .'. To trash or remove selected files, simply run 'tr sel' or 'rm sel' respectivelly. The same goes for wildcards and braces: 'chmod +x *', for example, will set the excutable bit on all files (excluding hidden files) in the current working directory, while 'chmod +x file{1,2,3}' will do it for file1, file2, and file3 respectivelly.
+CliFM will automatically expand the \fB'sel' keyword\fR: 'sel' indeed amounts to 'file1 file2 file3 ...' In this way, you can use the 'sel' keyword with any command. If you want to set the executable bit on several files, for instance, simply select the files you want and then run this command: 'chmod +x sel'. Or, if you want to copy or move several files into some directory: 'cp sel 12', or 'mv sel 12' (provided the ELN 12 corresponds to a directory), respectively. If the destiny directory is omitted, selected files are copied into the current working directory, that is to say, 'mv sel' amounts to 'mv sel .'. To trash or remove selected files, simply run 'tr sel' or 'rm sel' respectively. The same goes for wildcards and braces: 'chmod +x *', for example, will set the executable bit on all files (excluding hidden files) in the current working directory, while 'chmod +x file{1,2,3}' will do it for file1, file2, and file3 respectively.
 .TP
 ELN's and \fBELN ranges\fR will be also automatically expanded, provided the corresponding ELN's actually exist, that is to say, provided some filename is listed on the screen under those numbers. For example: 'diff 1 118' will only expand '1', but not '118', if there is no ELN 118. In the same way, the range 1\-118 will only be expanded provided there are 118 or more elements listed on the screen. If this feature somehow conflicts with the command you want to run, say, 'chmod 644 ...', because the current amount of files is equal or larger than 644 (in which case CliFM will expand that number), then you can simply run the command as external: ';chmod 644...'
 .TP
 TAB completion for \fBbookmarks, color schemes, profiles, sort method, and directory history\fR (via the \fIjump\fR command) is also available. To make use of the bookmarks completion, make sure to specify some name for your bookmarks, since these names are used by the completion function. 
 .TP
-Of course, combinations of all these features is also possbile. Example: 'cp sel file* 2 23\-31 .' will copy all selected files, plus all files whose name starts with "file", plus those files corresponding to the ELN's 2, and 23 to 31, into the current working directory.
+Of course, combinations of all these features is also possible. Example: 'cp sel file* 2 23\-31 .' will copy all selected files, plus all files whose name starts with "file", plus those files corresponding to the ELN's 2, and 23 to 31, into the current working directory.
 
 .SH 12. RESOURCE OPENER
 \fBLira\fR is CliFM's built-in resource opener, and is controlled via the \fImime\fR command (see above). File associations are stored in the MIME list file (see the \fBFILES\fR section below).
@@ -1044,7 +1044,7 @@ Plugins are just scripts or programs (written in any language) able to add, exte
  | fzfhist           | fzf                           |
  | fzfnav            | fzf                           |
  |   -archives       | atool, bsdtar or tar          |
- |   -images         | imagemagick, and uerbezug     |
+ |   -images         | imagemagick, and ueberzug     |
  |                       or viu or catimg or img2txt |
  |   -fonts          | fontpreview or fontforge      |
  |   -docs           | libreoffice, catdoc, odt2txt, |
@@ -1114,11 +1114,11 @@ The two most time consuming features are:
 
  \fB2)\fR In default mode, \fBfstatat\fR(3) and \fBaccess\fR(3) are used to gather information about listed files. Since these functions, especially when executed hundreds (and even thousands) of times, are quite time consuming, the \fIlight mode\fR was implemented as an alternative listing process omitting all calls to them. When running in light mode, however, only basic file classification is performed, namely, those provided by the \fId_type\fR field of a dirent struct (see \fBreaddir\fR(3)).
 .sp
-Besides these two features, a few more things can be disabled to get some extra speed (though perhaps unnoticiable): icons (if enabled), columns, colors, and, if already running without colors, filetype indicators. Because listing lots of files could be expensive and time consuming, you can also try to limit the amount of files printed for each visited directory (see the \fImf\fR command above).
+Besides these two features, a few more things can be disabled to get some extra speed (though perhaps unnoticeable): icons (if enabled), columns, colors, and, if already running without colors, filetype indicators. Because listing lots of files could be expensive and time consuming, you can also try to limit the amount of files printed for each visited directory (see the \fImf\fR command above).
 .sp
 Despite the above, however, it is important to bear in mind that listing speed does not only depend on the program's code and enabled features, but also on the terminal emulator used. Old, basic terminal emulators like Xterm, Aterm, and the kernel built-in console are really slow compared to more modern ones like Urxvt, Lxterminal, ST, and Terminator, to name just a few.
 
-.SH 17. KANGAROO FRECENCY ALGORITHM
+.SH 17. KANGAROO FREQUENCY ALGORITHM
 The directory jumper function is designed to learn the navigation habits of the user. The information is stored in a database (see the \fBFILES\fR section below) used to get the best match for a given string provided by the user. In this sense, Kangaroo is like a quick, smart, and evolved cd function.
 .sp
 The information stored in the database, always per directory, is:
@@ -1127,9 +1127,9 @@ The information stored in the database, always per directory, is:
  c) Date of the last visit
  d) The full path of each visited directory
 .sp
-With this information it is possible to construct a ranking of directories to offer the user the most accurate matches for each query string. The matching algorithm takes into account mainly two factors: frequency and recency (which is why this kind of algorithm is often called a \fBfrecency\fR algorithm).
+With this information it is possible to construct a ranking of directories to offer the user the most accurate matches for each query string. The matching algorithm takes into account mainly two factors: frequency and recency (which is why this kind of algorithm is often called a \fBfrequency\fR algorithm).
 .sp
-After getting an initial list of matches based on the query string(s) entered by the user, the frecency algorithm is applied on each entry in the list. The algorithm is quite simple: \fB(visits * 100) / days-since-first-visit\fR. As a result, we get the average of visits per day since the day of the first visit (what we call the directory rank).
+After getting an initial list of matches based on the query string(s) entered by the user, the frequency algorithm is applied on each entry in the list. The algorithm is quite simple: \fB(visits * 100) / days-since-first-visit\fR. As a result, we get the average of visits per day since the day of the first visit (what we call the directory rank).
 .sp
 There are however some further steps in the ranking process: \fBBonus points\fR. 
 .sp
@@ -1143,21 +1143,21 @@ If the last query string matches the \fBbasename\fR of a directory, the entry fo
 .sp
 In the same way, \fBpinned\fR directories get 1000 extra credits, \fBbookmarked directories\fR 500 credits, and directories currently in a \fBworkspace\fR 300 credits.
 .sp
-For example: if the query string is "test", /media/data/test will be matched. Now, if this directory was accessed within the last hour, and its rank was 200, it becomes 800. But, because the search string matches its basename, it gets 300 extra credits, and, if this directory is in adittion bookmarked and pinned, it gets 1500 extra credits. In this way the total rank of this directory in the matching process is 2600. In doing this, we have more chances of matching what the user actually wanted to match.
+For example: if the query string is "test", /media/data/test will be matched. Now, if this directory was accessed within the last hour, and its rank was 200, it becomes 800. But, because the search string matches its basename, it gets 300 extra credits, and, if this directory is in addition bookmarked and pinned, it gets 1500 extra credits. In this way the total rank of this directory in the matching process is 2600. In doing this, we have more chances of matching what the user actually wanted to match.
 .sp
-Once all entries in the initial list of matches have been filtered via the above procedure and ranked, we can return the best ranked entry. The higher rank a directory has, the more priotity it has over the remaining entries in the initial list of matches.
+Once all entries in the initial list of matches have been filtered via the above procedure and ranked, we can return the best ranked entry. The higher rank a directory has, the more priority it has over the remaining entries in the initial list of matches.
 .sp
 Automatic maintenance is done on the database applying a few simple procedures:
 
  a) Each entry in the database is checked at startup to remove non-existent directories.
 
- b) Once the rank of a directory falls below MinJumpRank (by default 10), it is forgotten and deleted from the database. The MinJumpRank value can be customized in the configuration file. To make non-frequently visited directories dissapear faster from the database, increase this value.
+ b) Once the rank of a directory falls below MinJumpRank (by default 10), it is forgotten and deleted from the database. The MinJumpRank value can be customized in the configuration file. To make non-frequently visited directories disappear quicker from the database, increase this value.
 
  c) Once the sum total of ranks reaches MaxJumpTotalRank (by default 100000), each individual rank is divided by a dynamic factor so that the total rank becomes less than or equal to MaxJumpTotalRank. If some rank falls in the process below MinJumpRank, it is removed from the database. MaxJumpTotalRank can be modified in the configuration file. The higher the value of MaxJumpTotalRank, the more time directories will be kept in the database.
 
 NOTE: Directories visited in the last 24 hours will not be removed from the database, no matter what their rank is.
 .sp
-The idea of 'frecency' was, as far as I know, first deviced and designed by Mozilla. See \fIhttps://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency\fR. However, it is also implemented, though using different algorithms, by different projects like \fBautojump\fR, \fBz.lua\fR, and \fBzoxide\fR.
+The idea of 'frequency' was, as far as I know, first devised and designed by Mozilla. See \fIhttps://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency\fR. However, it is also implemented, though using different algorithms, by different projects like \fBautojump\fR, \fBz.lua\fR, and \fBzoxide\fR.
 
 .SH 18. ENVIRONMENT
 The following variables are read at initialization time:
@@ -1202,7 +1202,7 @@ For each of the internal commands (see the \fBCOMMANDS\fR section above) you can
 .sp
 Though you can use here external commands as well, bear in mind that, whenever at least one internal command is involved in a chained list of commands, CliFM will take care of executing this list (simply because the system shell isn't able to understand any of these commands), so that no shell inter\-process function (like pipes), nor any stream redirection or shell expression (like IF blocks or FOR loops) will be available. However, the shell is still used to run single external commands found in the chained list, but in isolation from the remaining commands in this list.
 .sp
-As a rule of thumb, when using chained commands make sure to always expand ELN's to avoid undesired consequences. If, for instance, you issue this command: 'touch aaa && r 3', you will end up deleting a file you were not intended to delete, simple because after the successfull execution of the first command, the ELN 3 corresponds now to a different file.
+As a rule of thumb, when using chained commands make sure to always expand ELN's to avoid undesired consequences. If, for instance, you issue this command: 'touch aaa && r 3', you will end up deleting a file you were not intended to delete, simple because after the successful execution of the first command, the ELN 3 corresponds now to a different file.
 .sp
 
 \fBExternal commands\fR:
@@ -1212,7 +1212,7 @@ CliFM is not limited to its own set of internal commands, like open, sel, trash,
 
 \fBTerminal emulators and non-ASCII characters\fR:
 
-It depends on the terminal emulator you use to correctly display non\-ASCII characters and characters from the extended ASCII charset. If, for example, you create a file named "ñandú" (the spanish word for 'rhea'), it will be correctly displayed by the Linux console, Lxterminal, and Urxvt, but not thus by Xterm or Aterm.
+It depends on the terminal emulator you use to correctly display non\-ASCII characters and characters from the extended ASCII charset. If, for example, you create a file named "ñandú" (the Spanish word for 'rhea'), it will be correctly displayed by the Linux console, Lxterminal, and Urxvt, but not thus by Xterm or Aterm.
 .sp
 
 \fB.Xresources\fR:
@@ -1247,7 +1247,7 @@ The profile file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/profile.cfm\fR.
 In this file you can add those commands you want to be executed at startup. You can also permanently set here some custom variables, ex: 'dir="/path/to/folder"'. This variable may be used as a shorcut to that folder, for instance: 'cd $dir'. Custom variables could also be temporarily defined via the command prompt: Ex: user@hostname ~ $ var="This is a test". Temporary variables will be removed at program exit.
 .TP
 .B KEYBINDINGS FILE
-The keybindings file is \fI$XDG_CONFIG_HOME/clifm/keybindings\fR. This file is used to specify the keyboard shortcuts used for some ClifM's functions. The format for each kyebinding is always "keyseq:function", where 'keyseq' is an escape sequence in GNU emacs style. A more detailed explanation can be found in the keybindings file itself.
+The keybindings file is \fI$XDG_CONFIG_HOME/clifm/keybindings\fR. This file is used to specify the keyboard shortcuts used for some ClifM's functions. The format for each keybinding is always "keyseq:function", where 'keyseq' is an escape sequence in GNU emacs style. A more detailed explanation can be found in the keybindings file itself.
 .TP
 .B SCRIPTS DIRECTORY
 The directory used to store programs or scripts pointed to by actions (in other words, plugins) is \fI$XDG_CONFIG_HOME/clifm/scripts\fR.
@@ -1285,7 +1285,7 @@ The directory jumer database is stored in \fI$XDG_CONFIG_HOME/clifm/profiles/PRO
 .SH 21. EXAMPLES
 The following are just a few basic usage examples.
 
-\fBNOTE\fR: Always try TAB. TAB completeion is available for many things
+\fBNOTE\fR: Always try TAB. TAB completion is available for many things
 
 Get help:
 \fBF1\fR: manpage
@@ -1362,7 +1362,7 @@ There is a lot more you can do, but this should be enough to get you started.
 .SH EXIT STATUS
 CliFM returns the exit status of the last executed command:
 .sp
-\fB0\fR		Successfull execution
+\fB0\fR		Successful execution
 .sp
 \fB1\fR		Error
 
