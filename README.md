@@ -8,6 +8,7 @@
 [![privacy](https://img.shields.io/badge/privacy-ok-green?style=for-the-badge)](https://en.wikipedia.org/wiki/Privacy-invasive_software)
 [![License](https://img.shields.io/github/license/leo-arch/clifm?color=red&style=for-the-badge)](https://github.com/leo-arch/clifm/blob/master/LICENSE) 
 [![Gitter](https://img.shields.io/gitter/room/leo-arch/clifm?style=for-the-badge)](https://gitter.im/leo-arch/clifm)
+[![Wiki](https://img.shields.io/badge/documentation-wiki-orange?style=for-the-badge)](https://github.com/leo-arch/clifm/wiki)
 
 <h3 align="center"><br><i>Did I say it's fast?</i></h3>
 <p align="center"><a href="https://mega.nz/embed/J8hEkCZZ#fGp0JtcDvFIWKmTc4cOp0iMrWRlbqs99THg8F7EmQWI"><img src="images/vid_thumb.png"></a></p>
