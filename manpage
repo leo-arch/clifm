@@ -41,7 +41,7 @@ CLIFM \- The KISS file manager
 .sp
 \fB16.\fR Note on speed
 .sp
-\fB17.\fR Kangaroo frequency algorithm
+\fB17.\fR Kangaroo frecency algorithm
 .sp
 \fB18.\fR Environment
 .sp
@@ -1118,7 +1118,7 @@ Besides these two features, a few more things can be disabled to get some extra 
 .sp
 Despite the above, however, it is important to bear in mind that listing speed does not only depend on the program's code and enabled features, but also on the terminal emulator used. Old, basic terminal emulators like Xterm, Aterm, and the kernel built-in console are really slow compared to more modern ones like Urxvt, Lxterminal, ST, and Terminator, to name just a few.
 
-.SH 17. KANGAROO FREQUENCY ALGORITHM
+.SH 17. KANGAROO FRECENCY ALGORITHM
 The directory jumper function is designed to learn the navigation habits of the user. The information is stored in a database (see the \fBFILES\fR section below) used to get the best match for a given string provided by the user. In this sense, Kangaroo is like a quick, smart, and evolved cd function.
 .sp
 The information stored in the database, always per directory, is:
@@ -1127,7 +1127,7 @@ The information stored in the database, always per directory, is:
  c) Date of the last visit
  d) The full path of each visited directory
 .sp
-With this information it is possible to construct a ranking of directories to offer the user the most accurate matches for each query string. The matching algorithm takes into account mainly two factors: frequency and recency (which is why this kind of algorithm is often called a \fBfrequency\fR algorithm).
+With this information it is possible to construct a ranking of directories to offer the user the most accurate matches for each query string. The matching algorithm takes into account mainly two factors: frequency and recency (which is why this kind of algorithm is often called a \fBfrecency\fR algorithm).
 .sp
 After getting an initial list of matches based on the query string(s) entered by the user, the frequency algorithm is applied on each entry in the list. The algorithm is quite simple: \fB(visits * 100) / days-since-first-visit\fR. As a result, we get the average of visits per day since the day of the first visit (what we call the directory rank).
 .sp
@@ -1157,7 +1157,7 @@ Automatic maintenance is done on the database applying a few simple procedures:
 
 NOTE: Directories visited in the last 24 hours will not be removed from the database, no matter what their rank is.
 .sp
-The idea of 'frequency' was, as far as I know, first devised and designed by Mozilla. See \fIhttps://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency\fR. However, it is also implemented, though using different algorithms, by different projects like \fBautojump\fR, \fBz.lua\fR, and \fBzoxide\fR.
+The idea of 'frecency' was, as far as I know, first devised and designed by Mozilla. See \fIhttps://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency\fR. However, it is also implemented, though using different algorithms, by different projects like \fBautojump\fR, \fBz.lua\fR, and \fBzoxide\fR.
 
 .SH 18. ENVIRONMENT
 The following variables are read at initialization time:
