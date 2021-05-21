@@ -98,7 +98,7 @@ get_own_pid(void)
 		return pid;
 }
 
-/* returns pointer to username, exits if not found */
+/* Returns pointer to user data struct, exits if not found */
 struct user_t
 get_user(void)
 {
@@ -380,13 +380,14 @@ load_bookmarks(void)
 		char *tmp = strchr(line, ':');
 
 		/* No name either */
-		if (!tmp)
+		if (!tmp) {
 			bookmarks[bm_n].name = (char *)NULL;
-
-		else {
-			*tmp = '\0';
-			bookmarks[bm_n].name = savestring(line, strlen(line));
+			bookmarks[bm_n++].path = (char *)NULL;
+			continue;
 		}
+
+		*tmp = '\0';
+		bookmarks[bm_n].name = savestring(line, strlen(line));
 
 		if (!*(++tmp)) {
 			bookmarks[bm_n++].path = (char *)NULL;
@@ -1409,34 +1410,12 @@ get_path_programs(void)
 		internal_cmd_n++;
 
 	bin_commands = (char **)xnmalloc(total_cmd + internal_cmd_n +
-					     aliases_n + actions_n + 2,
-	    sizeof(char *));
+					     aliases_n + actions_n + 2, sizeof(char *));
 
 	i = (int)internal_cmd_n;
 	while (--i >= 0)
 		bin_commands[l++] = savestring(INTERNAL_CMDS[i],
 		    strlen(INTERNAL_CMDS[i]));
-
-	/* Add commands in PATH */
-	i = (int)path_n;
-	while (--i >= 0) {
-
-		if (cmd_n[i] <= 0)
-			continue;
-
-		j = cmd_n[i];
-		while (--j >= 0) {
-
-			bin_commands[l++] = savestring(commands_bin[i][j]->d_name,
-			    strlen(commands_bin[i][j]->d_name));
-			free(commands_bin[i][j]);
-		}
-
-		free(commands_bin[i]);
-	}
-
-	free(commands_bin);
-	free(cmd_n);
 
 	/* Now add aliases, if any */
 	if (aliases_n) {
@@ -1463,6 +1442,26 @@ get_path_programs(void)
 			    strlen(usr_actions[i].name));
 		}
 	}
+
+	/* And finally, add commands in PATH */
+	i = (int)path_n;
+	while (--i >= 0) {
+
+		if (cmd_n[i] <= 0)
+			continue;
+
+		j = cmd_n[i];
+		while (--j >= 0) {
+			bin_commands[l++] = savestring(commands_bin[i][j]->d_name,
+			    strlen(commands_bin[i][j]->d_name));
+			free(commands_bin[i][j]);
+		}
+
+		free(commands_bin[i]);
+	}
+
+	free(commands_bin);
+	free(cmd_n);
 
 	path_progsn = (size_t)l;
 	bin_commands[l] = (char *)NULL;

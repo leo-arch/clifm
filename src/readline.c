@@ -921,30 +921,26 @@ sort_num_generator(const char *text, int state)
 
 	int num_text = atoi(text);
 
-	struct sort_t {
-		char *name;
-		int num;
-	};
-
-	static struct sort_t sorts[] = {
-	    {"none", 0},
-	    {"name", 1},
-	    {"size", 2},
-	    {"atime", 3},
-	    {"btime", 4},
-	    {"ctime", 5},
-	    {"mtime", 6},
-	    {"version", 7},
-	    {"extension", 8},
-	    {"inode", 9},
-	    {"owner", 10},
-	    {"group", 11},
+	static char *sorts[] = {
+	    "none",
+	    "name",
+	    "size",
+	    "atime",
+	    "btime",
+	    "ctime",
+	    "mtime",
+	    "version",
+	    "extension",
+	    "inode",
+	    "owner",
+	    "group",
+	    NULL
 	};
 
 	/* Check list of currently displayed files for a match */
-	while (i <= SORT_TYPES && (name = sorts[i++].name) != NULL)
-		if (*name == *sorts[num_text].name
-		&& strcmp(name, sorts[num_text].name) == 0)
+	while (i <= SORT_TYPES && (name = sorts[i++]) != NULL)
+		if (*name == *sorts[num_text]
+		&& strcmp(name, sorts[num_text]) == 0)
 			return strdup(name);
 
 	return (char *)NULL;

@@ -636,11 +636,8 @@ parse_usrvar_value(const char *str, const char c)
 	char *tmp = (char *)NULL;
 	tmp = strchr(str, c);
 
-	/* Since we don't want c in our string, move on to the next char */
-	tmp++;
-
-	/* If nothing remains */
-	if (!tmp)
+	/* If no C or there's nothing after C */
+	if (!tmp || !*(++tmp))
 		return (char *)NULL;
 
 	/* Remove leading quotes */
@@ -648,7 +645,8 @@ parse_usrvar_value(const char *str, const char c)
 		tmp++;
 
 	/* Remove trailing spaces, tabs, new line chars, and quotes */
-	size_t tmp_len = strlen(tmp), i;
+	size_t tmp_len = strlen(tmp),
+		   i;
 
 	for (i = tmp_len - 1; tmp[i] && i > 0; i--) {
 
@@ -660,7 +658,7 @@ parse_usrvar_value(const char *str, const char c)
 			tmp[i] = '\0';
 	}
 
-	if (!tmp)
+	if (!*tmp)
 		return (char *)NULL;
 
 	/* Copy the result string into a buffer and return it */
@@ -875,7 +873,7 @@ list_mountpoints(void)
 
 	/* This should never happen: There should always be a mountpoint,
 	 * at least "/" */
-	if (mp_n <= 0) {
+	if (mp_n == 0) {
 		fputs(_("mp: There are no available mountpoints\n"), stdout);
 		return EXIT_SUCCESS;
 	}
@@ -922,8 +920,7 @@ list_mountpoints(void)
 	}
 
 	/* Free stuff and exit */
-	if (input)
-		free(input);
+	free(input);
 
 	int i = (int)mp_n;
 	while (--i >= 0)

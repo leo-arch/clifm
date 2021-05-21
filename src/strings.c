@@ -42,47 +42,6 @@
 char len_buf[CMD_LEN_MAX] __attribute__((aligned));
 #endif
 
-int
-xstrncmp(const char *s1, const char *s2, size_t n)
-{
-	if (!s1 || !s2)
-		return 256;
-
-	size_t c = 0;
-	while (*s1 && c++ < n) {
-		if (*s1 != *s2)
-			return (*s1 - *s2);
-		s1++;
-		s2++;
-	}
-
-	if (c == n)
-		return 0;
-
-	if (*s2)
-		return (0 - *s2);
-
-	return 0;
-}
-
-char *
-xstrncpy(char *buf, const char *restrict str, size_t n)
-{
-	if (!str)
-		return (char *)NULL;
-
-	size_t c = 0;
-	while (*str && c++ < n)
-		*(buf++) = *(str++);
-
-	*buf = '\0';
-
-	/*  size_t counter = 0;
-	while ((*buf++ = *str++) && counter++ < n); */
-
-	return buf;
-}
-
 /* Taken from NNN's source code: very clever */
 size_t
 xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
@@ -1852,10 +1811,7 @@ escape_str(const char *str)
 
 	buf[len] = '\0';
 
-	if (buf)
-		return buf;
-
-	return (char *)NULL;
+	return buf;
 }
 
 /* Get all substrings from STR using IFS as substring separator, and,
@@ -1942,11 +1898,11 @@ get_substr(char *str, const char ifs)
 
 	/* ################### EXPAND RANGES ######################*/
 
-	int afirst = 0, asecond = 0, ranges_ok = 0;
+	int afirst = 0, asecond = 0;
 
 	for (i = 0; substr[i]; i++) {
 		/* Check if substr is a valid range */
-		ranges_ok = 0;
+		int ranges_ok = 0;
 		/* If range, get both extremes of it */
 		for (j = 1; substr[i][j]; j++) {
 			if (substr[i][j] == '-') {

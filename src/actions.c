@@ -44,11 +44,15 @@
 int
 run_action(char *action, char **args)
 {
+	if (!action)
+		return EXIT_FAILURE;
+
 	int exit_status = EXIT_SUCCESS;
 	char *cmd = (char *)NULL;
-	size_t len = 0, action_len = strlen(action);
+	size_t len = 0,
+		   action_len = strlen(action);
 
-	/* #####################################
+		/* #####################################
 		 * #    1) CREATE CMD TO BE EXECUTED   #
 		 * ##################################### */
 
@@ -84,7 +88,7 @@ run_action(char *action, char **args)
 		strcat(cmd, args[i]);
 	}
 
-	/* ##############################
+			/* ##############################
 			 * #    2) CREATE A PIPE FILE   #
 			 * ############################## */
 
@@ -131,7 +135,7 @@ run_action(char *action, char **args)
 
 	free(cmd);
 
-	/* ########################################
+		/* ########################################
 		 * #    4) LET THE PARENT READ THE PIPE   #
 		 * ######################################## */
 

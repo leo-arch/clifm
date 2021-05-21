@@ -413,7 +413,6 @@ show_sel_files(void)
 		putchar('\n');
 		struct winsize w;
 		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-		int c;
 		size_t counter = 0;
 		unsigned short term_rows = w.ws_row;
 		term_rows -= 2;
@@ -422,7 +421,9 @@ show_sel_files(void)
 		for (i = 0; i < sel_n; i++) {
 			/*          if (pager && counter > (term_rows-2)) { */
 
+
 			if (pager && counter > (size_t)term_rows) {
+				int c;
 				switch (c = xgetchar()) {
 				/* Advance one line at a time */
 				case 66: /* fallthrough */ /* Down arrow */
@@ -736,7 +737,7 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 	}
 
 	char **matches = (char **)NULL;
-	int i, j = 0, k = 0;
+	int i, k = 0;
 	struct dirent **ent = (struct dirent **)NULL;
 
 	if (invert) {
@@ -750,7 +751,7 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 					continue;
 
 				int found = 0;
-				j = (int)gbuf.gl_pathc;
+				int j = (int)gbuf.gl_pathc;
 				while (--j >= 0) {
 					if (*file_info[i].name == *gbuf.gl_pathv[j]
 					&& strcmp(file_info[i].name, gbuf.gl_pathv[j]) == 0) {
@@ -781,7 +782,7 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 				if (filetype && ent[i]->d_type != filetype)
 					continue;
 
-				j = (int)gbuf.gl_pathc;
+				int j = (int)gbuf.gl_pathc;
 				while (--j >= 0) {
 					if (*ent[i]->d_name == *gbuf.gl_pathv[j]
 					&& strcmp(ent[i]->d_name, gbuf.gl_pathv[j]) == 0)

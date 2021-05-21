@@ -31,8 +31,9 @@ void *xnmalloc(size_t nmemb, size_t size);
 
 char xgetchar(void);
 
+/*
 char from_hex(char c);
-char to_hex(char c);
+char to_hex(char c); */
 int hex2int(char *str);
 int *get_hex_num(const char *str);
 

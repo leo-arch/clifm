@@ -64,7 +64,7 @@ handle_iso(char *file)
 		if (!operation)
 			continue;
 
-		if (operation && (!operation[0] || operation[1] != '\0')) {
+		if (!*operation || operation[1] != '\0') {
 			free(operation);
 			operation = (char *)NULL;
 			continue;
@@ -131,7 +131,7 @@ handle_iso(char *file)
 			if (!ext_path)
 				continue;
 
-			if (ext_path && !*ext_path) {
+			if (!*ext_path) {
 				free(ext_path);
 				ext_path = (char *)NULL;
 				continue;
@@ -694,7 +694,7 @@ archiver(char **args, char mode)
 				if (!operation)
 					continue;
 
-				if (operation && (!operation[0] || operation[1] != '\0')) {
+				if (!*operation || operation[1] != '\0') {
 					free(operation);
 					operation = (char *)NULL;
 					continue;
@@ -756,7 +756,7 @@ archiver(char **args, char mode)
 		if (!operation)
 			continue;
 
-		if (operation && (!operation[0] || operation[1] != '\0')) {
+		if (!*operation || operation[1] != '\0') {
 			free(operation);
 			operation = (char *)NULL;
 			continue;
@@ -877,7 +877,7 @@ archiver(char **args, char mode)
 				if (!ext_path)
 					continue;
 
-				if (ext_path && !*ext_path) {
+				if (!*ext_path) {
 					free(ext_path);
 					ext_path = (char *)NULL;
 					continue;
@@ -1101,7 +1101,7 @@ zstandard(char *in_file, char *out_file, char mode, char op)
 		if (!operation)
 			continue;
 
-		if (operation && (!operation[0] || operation[1] != '\0')) {
+		if (!*operation || operation[1] != '\0') {
 			free(operation);
 			operation = (char *)NULL;
 			continue;

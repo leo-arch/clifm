@@ -156,12 +156,13 @@ save_jumpdb(void)
 			}
 		}
 
-		jump_db[i].rank = rank;
-		total_rank += rank;
+/*		jump_db[i].rank = rank;
+		total_rank += rank; */
+		total_rank += jump_db[i].rank;
 	}
 
-	/* Once we have the total rank, check if we need to recude ranks,
-	 * and write entries into the database */
+	/* Once we have the total rank, check if we need to reduce ranks,
+	 * and then write entries into the database */
 	if (total_rank > max_jump_total_rank)
 		reduce = (total_rank / max_jump_total_rank) + 1;
 

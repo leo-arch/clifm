@@ -92,9 +92,9 @@ get_app(const char *mime, const char *ext)
 
 		size_t tmp_len = strlen(tmp);
 		app = (char *)xrealloc(app, (tmp_len + 1) * sizeof(char));
-		size_t app_len = 0;
+
 		while (*tmp) {
-			app_len = 0;
+			size_t app_len = 0;
 			/* Split the appplications line into substrings, if
 			 * any */
 			while (*tmp != '\0' && *tmp != ';' && *tmp != '\n' && *tmp != '\''

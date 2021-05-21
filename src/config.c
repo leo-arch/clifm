@@ -543,10 +543,8 @@ define_config_file_names(void)
 	 * Else, fall back to $HOME/.config */
 	char *xdg_config_home = getenv("XDG_CONFIG_HOME");
 
-	size_t xdg_config_home_len = 0;
-
 	if (xdg_config_home) {
-		xdg_config_home_len = strlen(xdg_config_home);
+		size_t xdg_config_home_len = strlen(xdg_config_home);
 
 		CONFIG_DIR_GRAL = (char *)xnmalloc(xdg_config_home_len + pnl_len + 2, sizeof(char));
 		sprintf(CONFIG_DIR_GRAL, "%s/%s", xdg_config_home, PNL);
@@ -1005,7 +1003,6 @@ create_def_cscheme(void)
 void
 create_config_files(void)
 {
-	int ret = -1;
 	struct stat file_attrib;
 
 			/* #############################
@@ -1023,7 +1020,7 @@ create_config_files(void)
 		sprintf(trash_info, "%s/info", TRASH_DIR);
 		char *cmd[] = {"mkdir", "-p", trash_files, trash_info, NULL};
 
-		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+		int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 		free(trash_files);
 		free(trash_info);
 

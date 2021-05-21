@@ -23,6 +23,7 @@ char
 
     /* Extensions */
     ICON_BINARY[] = OCT_FILE_BINARY,
+
     ICON_MANPAGE[] = FILE_MANPAGE,
     ICON_MAKEFILE[] = FILE_CMAKE,
     ICON_MARKDOWN[] = DEV_MARKDOWN,

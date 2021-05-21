@@ -571,10 +571,10 @@ properties_function(char **comm)
 
 	size_t i;
 	int exit_status = EXIT_SUCCESS;
-	int dir_size = 0;
+	int _dir_size = 0;
 
 	if (*comm[0] == 'p' && comm[0][1] == 'p' && !comm[0][2])
-		dir_size = 1;
+		_dir_size = 1;
 
 	/* If "pr file file..." */
 	for (i = 1; i <= args_n; i++) {
@@ -593,7 +593,7 @@ properties_function(char **comm)
 			free(deq_file);
 		}
 
-		if (get_properties(comm[i], dir_size) != 0)
+		if (get_properties(comm[i], _dir_size) != 0)
 			exit_status = EXIT_FAILURE;
 	}
 

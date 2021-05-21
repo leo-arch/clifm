@@ -76,11 +76,11 @@ is_acl(char *file)
 		return 0;
 
 	acl_t acl;
-	int entryid, num = 0;
 	acl = acl_get_file(file, ACL_TYPE_ACCESS);
 
 	if (acl) {
 		acl_entry_t entry;
+		int entryid, num = 0;
 
 		for (entryid = ACL_FIRST_ENTRY;; entryid = ACL_NEXT_ENTRY) {
 			if (acl_get_entry(acl, entryid, &entry) != 1)

@@ -49,7 +49,9 @@ search_glob(char **comm, int invert)
 	if (!comm || !comm[0])
 		return EXIT_FAILURE;
 
-	char *search_str = (char *)NULL, *search_path = (char *)NULL;
+	char *search_str = (char *)NULL,
+		 *search_path = (char *)NULL;
+
 	mode_t file_type = 0;
 	struct stat file_attrib;
 
@@ -187,10 +189,9 @@ search_glob(char **comm, int invert)
 
 	/* If search string is just "STR" (no glob chars), change it
 	 * to "*STR*" */
-	size_t search_str_len = 0;
 
 	if (!glob_char_found) {
-		search_str_len = strlen(comm[0]);
+		size_t search_str_len = strlen(comm[0]);
 
 		comm[0] = (char *)xrealloc(comm[0], (search_str_len + 2) *
 							sizeof(char));
@@ -229,7 +230,9 @@ search_glob(char **comm, int invert)
 	}
 
 	/* We have matches */
-	int last_column = 0, scandir_files = 0, found = 0, columns_n = 0;
+	int scandir_files = 0,
+		found = 0;
+
 	size_t flongest = 0;
 
 	/* We need to store pointers to matching filenames in array of
@@ -393,11 +396,14 @@ search_glob(char **comm, int invert)
 	/* Print the results using colors and columns */
 	if (found) {
 
+		int columns_n = 0,
+			last_column = 0;
+
 		struct winsize w;
 		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 		unsigned short tcols = w.ws_col;
 
-		if (flongest <= 0 || flongest > tcols)
+		if (flongest == 0 || flongest > tcols)
 			columns_n = 1;
 
 		else
@@ -686,8 +692,8 @@ search_regex(char **comm, int invert)
 	}
 
 	/* We have matches */
-	int last_column = 0;
-	size_t flongest = 0, total_cols = 0, type_ok = 0;
+	size_t flongest = 0,
+		   type_ok = 0;
 
 	size_t *files_len = (size_t *)xnmalloc(found + 1, sizeof(size_t));
 	int *match_type = (int *)xnmalloc(found + 1, sizeof(int));
@@ -739,11 +745,14 @@ search_regex(char **comm, int invert)
 
 	if (type_ok) {
 
+		int last_column = 0;
+		size_t total_cols = 0;
+
 		struct winsize w;
 		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 		unsigned short terminal_cols = w.ws_col;
 
-		if (flongest <= 0 || flongest > terminal_cols)
+		if (flongest == 0 || flongest > terminal_cols)
 			total_cols = 1;
 		else
 			total_cols = (size_t)terminal_cols / (flongest + 1);
@@ -752,7 +761,8 @@ search_regex(char **comm, int invert)
 			total_cols = type_ok;
 
 		/* cur_col: Current columns number */
-		size_t cur_col = 0, counter = 0;
+		size_t cur_col = 0,
+			   counter = 0;
 
 		for (i = 0; i < found; i++) {
 

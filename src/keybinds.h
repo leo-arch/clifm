@@ -28,7 +28,7 @@
 void readline_kbinds(void);
 int kbinds_function(char **args);
 char *find_key(char *function);
-int keybind_exec_cmd(char *str);
+/* int keybind_exec_cmd(char *str); */
 int load_keybinds(void);
 int rl_refresh(int count, int key);
 int rl_parent_dir(int count, int key);

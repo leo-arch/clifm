@@ -57,7 +57,8 @@ get_ext_color(const char *ext)
 		if (!ext_colors[i] || !*ext_colors[i] || !ext_colors[i][2])
 			continue;
 
-		char *p = (char *)ext, *q = ext_colors[i];
+		char *p = (char *)ext,
+			 *q = ext_colors[i];
 
 		/* +2 because stored extensions have this form: *.ext */
 		q += 2;
@@ -325,7 +326,8 @@ cschemes_function(char **args)
 int
 set_colors(const char *colorscheme, int env)
 {
-	char *filecolors = (char *)NULL, *extcolors = (char *)NULL,
+	char *filecolors = (char *)NULL,
+		 *extcolors = (char *)NULL,
 	     *ifacecolors = (char *)NULL;
 
 	*dir_ico_c = '\0';
@@ -352,7 +354,8 @@ set_colors(const char *colorscheme, int env)
 
 		if (!cur_cscheme) {
 			_err('w', PRINT_PROMPT, _("%s: %s: No such color scheme. "
-				"Falling back to the default one\n"), PROGRAM_NAME, colorscheme);
+				"Falling back to the default one\n"),
+				PROGRAM_NAME, colorscheme);
 
 			if (def_cscheme)
 				cur_cscheme = def_cscheme;
@@ -366,17 +369,17 @@ set_colors(const char *colorscheme, int env)
 		char *env_extcolors = getenv("CLIFM_EXT_COLORS");
 		char *env_ifacecolors = getenv("CLIFM_IFACE_COLORS");
 
-		if (env_filecolors && !filecolors)
+		if (env_filecolors)
 			filecolors = savestring(env_filecolors, strlen(env_filecolors));
 
 		env_filecolors = (char *)NULL;
 
-		if (env_extcolors && !extcolors)
+		if (env_extcolors)
 			extcolors = savestring(env_extcolors, strlen(env_extcolors));
 
 		env_extcolors = (char *)NULL;
 
-		if (env_ifacecolors && !ifacecolors)
+		if (env_ifacecolors)
 			ifacecolors = savestring(env_ifacecolors, strlen(env_ifacecolors));
 
 		env_ifacecolors = (char *)NULL;
@@ -387,7 +390,7 @@ set_colors(const char *colorscheme, int env)
 	 * COLORSCHEME file */
 
 		char *colorscheme_file = (char *)xnmalloc(strlen(COLORS_DIR)
-							+ strlen(colorscheme) + 6, sizeof(char));
+				+ (colorscheme ? strlen(colorscheme) : 7) + 6, sizeof(char));
 		sprintf(colorscheme_file, "%s/%s.cfm", COLORS_DIR,
 		    colorscheme ? colorscheme : "default");
 

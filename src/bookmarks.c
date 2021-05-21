@@ -383,15 +383,20 @@ bookmark_del(char *name)
 	/* Remove single bookmarks */
 	/* Open a temporary file */
 	char *tmp_file = (char *)NULL;
-	tmp_file = (char *)xcalloc(strlen(CONFIG_DIR) + 8, sizeof(char));
+	tmp_file = (char *)xnmalloc(strlen(CONFIG_DIR) + 8, sizeof(char));
 	sprintf(tmp_file, "%s/bm_tmp", CONFIG_DIR);
 
 	FILE *tmp_fp = fopen(tmp_file, "w+");
 	if (!tmp_fp) {
+
 		for (i = 0; i < bmn; i++)
 			free(bms[i]);
-
 		free(bms);
+
+		for (i = 0; del_elements[i]; i++)
+			free(del_elements[i]);
+		free(del_elements);
+
 		fclose(bm_fp);
 		fprintf(stderr, _("bookmarks: Error creating temporary file\n"));
 
@@ -432,17 +437,14 @@ bookmark_del(char *name)
 	}
 
 	free(lineb);
-	lineb = (char *)NULL;
 
 	/* Free stuff */
 	for (i = 0; del_elements[i]; i++)
 		free(del_elements[i]);
-
 	free(del_elements);
 
 	for (i = 0; i < bmn; i++)
 		free(bms[i]);
-
 	free(bms);
 
 	/* Close files */
@@ -454,7 +456,6 @@ bookmark_del(char *name)
 	unlink(BM_FILE);
 	rename(tmp_file, BM_FILE);
 	free(tmp_file);
-	tmp_file = (char *)NULL;
 
 	/* Update bookmark names for TAB completion */
 	/*  get_bm_names(); */

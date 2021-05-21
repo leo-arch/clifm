@@ -25,7 +25,7 @@
 #pragma once
 
 /* bookmarks.c */
-char **bm_prompt(void);
+/* char **bm_prompt(void); */
 int bookmark_add(char *file);
 int bookmark_del(char *name);
 int bookmarks_function(char **cmd);

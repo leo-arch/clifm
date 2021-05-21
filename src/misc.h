@@ -37,11 +37,11 @@ int hidden_function(char **comm);
 int list_commands(void);
 int list_mountpoints(void);
 int new_instance(char *dir, int sudo);
-char *parse_usrvar_value(const char *str, const char c);
+/* char *parse_usrvar_value(const char *str, const char c); */
 int pin_directory(char *dir);
 void print_tips(int all);
 void save_last_path(void);
-void save_pinned_dir(void);
+/* void save_pinned_dir(void); */
 int set_shell(char *str);
 void set_signals_to_ignore(void);
 void set_term_title(const char *str);

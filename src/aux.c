@@ -22,10 +22,6 @@
  * MA 02110-1301, USA.
  */
 
-/*  #######################
- *  #  CLIFM CUSTOM LIB   #
- *  ######################*/
-
 #include "helpers.h"
 
 #include <ctype.h>
@@ -42,32 +38,36 @@
 #include "exec.h"
 #include "misc.h"
 
-/* Given this value: \xA0\xA1\xA1, return an array of integers with
+/* Given this value: \xA0\xA1\xA2, return an array of integers with
  * the integer values for A0, A1, and A2 respectivelly */
 int *
 get_hex_num(const char *str)
 {
 	size_t i = 0;
-	int *hex_n = (int *)calloc(3, sizeof(int));
+	int *hex_n = (int *)xnmalloc(3, sizeof(int));
 
 	while (*str) {
 
-		if (*str == '\\') {
-
-			if (*(str + 1) == 'x') {
-				str += 2;
-				char *tmp = calloc(3, sizeof(char));
-				strncpy(tmp, str, 2);
-
-				if (i >= 3)
-					hex_n = xrealloc(hex_n, (i + 1) * sizeof(int *));
-
-				hex_n[i++] = hex2int(tmp);
-
-				free(tmp);
-			} else
-				break;
+		if (*str != '\\') {
+			str++;
+			continue;
 		}
+
+		if (*(str + 1) != 'x')
+			break;
+
+		str += 2;
+		char *tmp = xcalloc(3, sizeof(char));
+		strncpy(tmp, str, 2);
+
+		if (i >= 3)
+			hex_n = xrealloc(hex_n, (i + 1) * sizeof(int *));
+
+		hex_n[i++] = hex2int(tmp);
+
+		free(tmp);
+		tmp = (char *)NULL;
+
 		str++;
 	}
 
@@ -176,6 +176,10 @@ dir_size(char *dir)
 		return -1;
 
 	FILE *du_fp = fopen(DU_TMP_FILE, "w");
+
+	if (!du_fp)
+		return -1;
+
 	int stdout_bk = dup(STDOUT_FILENO); /* Save original stdout */
 	dup2(fileno(du_fp), STDOUT_FILENO); /* Redirect stdout to the desired
 																				 file */
@@ -248,11 +252,11 @@ get_link_ref(const char *link)
 char *
 xitoa(int n)
 {
-	static char buf[32] = {0};
-	int i = 30, rem;
-
 	if (!n)
 		return "0";
+
+	static char buf[32] = {0};
+	int i = 30, rem;
 
 	while (n && i) {
 		rem = n / 10;
@@ -264,7 +268,7 @@ xitoa(int n)
 	return &buf[++i];
 }
 
-/* some memory wrapper functions */
+/* Some memory wrapper functions */
 void *
 xrealloc(void *ptr, size_t size)
 {
@@ -308,7 +312,7 @@ xnmalloc(size_t nmemb, size_t size)
 	return new_ptr;
 }
 
-/* unlike getchar this does not wait for newline('\n')
+/* Unlike getchar this does not wait for newline('\n')
 https://stackoverflow.com/questions/12710582/how-can-i-capture-a-key-stroke-immediately-in-linux 
 */
 char
@@ -351,7 +355,7 @@ to_hex(char c)
 char *
 url_encode(char *str)
 {
-	if (!str || *str == 0x00)
+	if (!str || *str == '\0')
 		return (char *)NULL;
 
 	char *p;
@@ -374,7 +378,8 @@ url_encode(char *str)
 	pbuf = buf;
 
 	for (; *pstr; pstr++) {
-		if (isalnum(*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.' || *pstr == '~' || *pstr == '/')
+		if (isalnum(*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.'
+		|| *pstr == '~' || *pstr == '/')
 			/* Do not encode the above chars */
 			*pbuf++ = *pstr;
 		else {
@@ -392,7 +397,7 @@ url_encode(char *str)
 char *
 url_decode(char *str)
 {
-	if (!str || str[0] == 0x00)
+	if (!str || str[0] == '\0')
 		return (char *)NULL;
 
 	char *p = (char *)NULL;

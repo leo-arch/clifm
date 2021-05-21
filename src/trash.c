@@ -610,10 +610,9 @@ remove_from_trash(void)
 	}
 
 	/* If all args are numbers, and neither 'q' nor wildcard */
-	int rm_num;
 	for (i = 0; rm_elements[i]; i++) {
 
-		rm_num = atoi(rm_elements[i]);
+		int rm_num = atoi(rm_elements[i]);
 
 		if (rm_num <= 0 || rm_num > files_n) {
 			fprintf(stderr, _("%s: trash: %d: Invalid ELN\n"),
@@ -931,9 +930,8 @@ untrash_function(char **comm)
 	}
 
 	/* Undelete trashed files */
-	int undel_num;
 	for (i = 0; i < (size_t)undel_n; i++) {
-		undel_num = atoi(undel_elements[i]);
+		int undel_num = atoi(undel_elements[i]);
 
 		if (undel_num <= 0 || undel_num > trash_files_n) {
 			fprintf(stderr, _("%s: undel: %d: Invalid ELN\n"),

@@ -42,7 +42,7 @@ void get_path_programs(void);
 void unset_xargs(void);
 void external_arguments(int argc, char **argv);
 char *get_date(void);
-pid_t get_own_pid(void);
+/* pid_t get_own_pid(void); */
 struct user_t get_user(void);
 
 /* 
