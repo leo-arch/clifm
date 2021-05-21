@@ -95,7 +95,8 @@ CliFM source code consists of multiple C source files, being main.c the starting
 
 **E)** Whatever happens later, is just some function or operation invoked by the user and happening on top of the steps described above: opening a file or directory (via the open_function() and cd_function() functions, in file_operations.c and navigation.c respectivelly), opening a bookmark (bookmarks.c), opearting on files (file_operations.c), switching to a different profile (profiles.c), trashing a file (trash.c), searching for a file (search.c), running a plugin (actions.c), and so on.
 
-## 3) Hacking (work in progress)
+## 3) Hacking
+**Work in progress**
 
 Add a new command: exec.c
 
