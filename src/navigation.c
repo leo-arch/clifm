@@ -206,6 +206,8 @@ cd_function(char *new_path)
 
 	int exit_status = EXIT_SUCCESS;
 
+	add_to_dirhist(ws[cur_ws].path);
+
 	if (cd_lists_on_the_fly) {
 		free_dirlist();
 
@@ -213,7 +215,6 @@ cd_function(char *new_path)
 			exit_status = EXIT_FAILURE;
 	}
 
-	add_to_dirhist(ws[cur_ws].path);
 	add_to_jumpdb(ws[cur_ws].path);
 
 	return exit_status;
