@@ -43,7 +43,7 @@ _clifm ()
         -L
         --long-view
         -m
-        --dihist-map
+        --dirhist-map
         -o
         --no-list-on-the-fly
         -O
