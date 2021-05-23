@@ -60,6 +60,80 @@ xchmod(const char *file, mode_t mode)
 }
 
 int
+create_file(char **cmd)
+{
+	if (!cmd || !cmd[1] || strcmp(cmd[1], "--help") == 0) {
+		printf("Usage: n, new FILE DIR/ ...n\n");
+		return EXIT_FAILURE;
+	}
+
+	int exit_status = EXIT_SUCCESS;
+	int file_in_cwd = 0;
+
+	size_t i;
+	for (i = 1; cmd[i]; i++) {
+
+		if (strchr(cmd[i], '\\')) {
+			char *deq_str = dequote_str(cmd[i], 0);
+			if (!deq_str) {
+				_err('w', PRINT_PROMPT, _("%s: %s: Error dequoting filename\n"),
+					PROGRAM_NAME, cmd[i]);
+				continue;
+			}
+
+			strcpy(cmd[i], deq_str);
+			free(deq_str);
+		}
+
+		if (*cmd[i] == '~') {
+			char *exp_path = tilde_expand(cmd[i]);
+			if (exp_path) {
+				cmd[i] = (char *)xrealloc(cmd[i], (strlen(exp_path) + 1)
+											* sizeof(char));
+				strcpy(cmd[i], exp_path);
+				free(exp_path);
+			}
+		}
+
+		if (!strchr(cmd[i], '/'))
+			file_in_cwd = 1;
+
+		size_t cmd_len = strlen(cmd[i]);
+		if (cmd[i][cmd_len - 1] != '/') {
+
+			struct stat attr;
+			if (lstat(cmd[i], &attr) == 0) {
+				_err('w', PRINT_PROMPT, _("%s: %s: File exists\n"),
+					 PROGRAM_NAME, cmd[i]);
+				continue;
+			}
+
+			FILE *new_fp;
+			new_fp = fopen(cmd[i], "w+");
+
+			if (!new_fp) {
+				_err('w', PRINT_PROMPT, "new: '%s': %s\n", cmd[i],
+					strerror(errno));
+				exit_status = EXIT_FAILURE;
+			} else {
+				fclose(new_fp);
+			}
+		} else {
+			char *tmp_cmd[] = {"mkdir", "-p", cmd[i], NULL};
+			if (launch_execve(tmp_cmd, FOREGROUND, 0) != EXIT_SUCCESS)
+				exit_status = EXIT_FAILURE;
+		}
+	}
+
+	if (cd_lists_on_the_fly && file_in_cwd) {
+		free_dirlist();
+		exit_status = list_dir();
+	}
+
+	return exit_status;
+}
+
+int
 open_function(char **cmd)
 {
 	if (!cmd)

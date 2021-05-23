@@ -531,6 +531,13 @@ exec_cmd(char **comm)
 		}
 	}
 
+
+	/*     ############### NEW FILE ##################     */
+	else if (*comm[0] == 'n' && (!comm[0][1] || strcmp(comm[0], "new") == 0)) {
+		exit_code = create_file(comm);
+		return exit_code;
+	}
+
 	/*     ############### COPY AND MOVE ##################     */
 	else if ((*comm[0] == 'c' && (!comm[0][1] || (comm[0][1] == 'p'
 	&& !comm[0][2])))
@@ -633,6 +640,7 @@ exec_cmd(char **comm)
 	}
 
 	/*  ############### SOME SHELL CMD WRAPPERS ##################  */
+
 	else if ((*comm[0] == 'r' || *comm[0] == 'm' || *comm[0] == 't'
 	|| *comm[0] == 'l' || *comm[0] == 'c' || *comm[0] == 'u')
 	&& (strcmp(comm[0], "rm") == 0 || strcmp(comm[0], "mkdir") == 0
@@ -1063,10 +1071,10 @@ exec_cmd(char **comm)
 	}
 
 	/* #### NET #### */
-	else if (*comm[0] == 'n' && (!comm[0][1] || strcmp(comm[0], "net") == 0)) {
+	else if (*comm[0] == 'n' && (strcmp(comm[0], "net") == 0)) {
 
 		if (!comm[1]) {
-			puts(_("Usage: n, net [sftp, smb, ftp]://ADDRESS [OPTIONS]"));
+			puts(_("Usage: net [sftp, smb, ftp]://ADDRESS [OPTIONS]"));
 			return EXIT_SUCCESS;
 		}
 
@@ -1083,7 +1091,7 @@ exec_cmd(char **comm)
 								      : NULL);
 
 		else {
-			fputs(_("Usage: n, net [sftp, smb, ftp]://ADDRESS [OPTIONS]\n"),
+			fputs(_("Usage: net [sftp, smb, ftp]://ADDRESS [OPTIONS]\n"),
 			    stderr);
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
