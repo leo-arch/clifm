@@ -194,7 +194,7 @@ enable the directory history map to keep in view previous, current and next entr
 .B \-O, \-\-list\-on\-the\-fly
 \'cd\' changes directory and lists files on the fly (default)
 .TP
-.B \-p, \-\-path\fR=PATH
+.B \-p, \-\-path\fR=PATH (\fBdeprecated\fR: use positional parameters instead)
 use PATH as CliFM starting path. Default starting path is current working directory. If no workspace is specified via the \fB--workspace\fR option (see below), the first workspace (1) is used.
 .TP
 .B \-P, \-\-profile\fR=PROFILE
@@ -1291,6 +1291,10 @@ Get help:
 \fBF1\fR: manpage
 \fBF2\fR: keybindings
 \fBF3\fR: commands
+
+\fBCMD FILE(s)\fR: Create new files. Since CliFM is integrated into the system shell, you can use any of the shell commands you usually use to create new files. Ex: 'touch myfile' or 'nano myfile'
+
+\fBmd DIR(s)\fR: Create new directories
 
 \fB/etc\fR: Change directory to \fI/etc\fR
 
