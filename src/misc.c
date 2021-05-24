@@ -1604,7 +1604,8 @@ help_function(void)
  mm, mime [info ELN/FILE] [edit] (resource opener)\n\
  mp, mountpoints\n\
  msg, messages [clear]\n\
- n, net [smb, ftp, sftp]://ADDRESS [OPTIONS]\n\
+ n, new FILE DIR/ ...n\n\
+ net [smb, ftp, sftp]://ADDRESS [OPTIONS]\n\
  o, open [ELN/FILE] [APPLICATION]\n\
  opener [default] [APPLICATION]\n\
  p, pr, pp, prop [ELN/FILE ... n]\n\
