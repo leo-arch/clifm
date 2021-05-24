@@ -63,7 +63,7 @@ int
 create_file(char **cmd)
 {
 	if (cmd[1] && *cmd[1] == '-' && strcmp(cmd[1], "--help") == 0) {
-		printf("Usage: n, new FILE DIR/ ...n\n");
+		puts(_("Usage: n, new [FILE DIR/ ...n]"));
 		return EXIT_FAILURE;
 	}
 
@@ -76,6 +76,7 @@ create_file(char **cmd)
 		char *filename = (char *)NULL;
 
 		while (!filename) {
+			puts("End filename with slash to create a directory");
 			filename = rl_no_hist("Filename ('q' to quit): ");
 
 			if (!filename)
