@@ -36,7 +36,7 @@ CliFM is a completely command-line-based, shell-like file manager able to perfor
 
 - [x] The use of **short (and even one-character) commands**, and list numbers (**ELN's**) for filenames. For example, instead of typing: `cp file1 file2 file3 file4 dir/`, you can do this: `c 1-4 7`. Shorter and quicker. If the auto-cd and auto-open functions are enabled, which is the default, you can change to directories or open files by just entering the corresponding ELN. So, instead of `cd 12` or `o 12` you can just enter `12`; even shorter and quicker. As a plus, ELN's can also be used with external commands. Example: `diff 1 5` or `ls -l 12 14`. If numbers are a bit tricky to you, as they are to me, you can use the TAB key to expand the ELN to the corresponding filename. So, type `r 56`, then TAB, and it becomes `r filename`.
 
-- [x] **Bookmarks**: With CliFM bookmarks function, accessing your preferred files and/or directories could be as easy as this: `bm` (or `Alt-b`), to call the bookmarks function, and then `1` (or whatever is the ELN (or shortcut) corresponding to your bookmark).
+- [x] **Bookmarks**: With CliFM bookmarks function, accessing your preferred files and/or directories could be as easy as this: `bm` (or <kbd>Alt-b</kbd>), to call the bookmarks function, and then `1` (or whatever is the ELN (or shortcut) corresponding to your bookmark).
 
 ![bookmarks](images/bookmark.gif)
 
@@ -48,7 +48,7 @@ The selection function supports wildcards, regular expressions, inverse matching
 
 You can also use the 'sel' keyword with external commands. Example: `s 1-4 7 10 && file sel`.
 
-Of course, you can deselect some or all selected files whenever you want with the `desel` or `ds` command: `ds *`, or just press `Alt-d`.
+Of course, you can deselect some or all selected files whenever you want with the `desel` or `ds` command: `ds *`, or just press <kbd>Alt-d</kbd>.
 
 ![selection box](images/sel.gif)
  
@@ -126,7 +126,7 @@ Because file manager, but also half-shell, CliFM also provides the following fea
 - [x] Exclude certain groups of filenames via the files filter using regular expressions
 - [x] Up to eight workspaces
 - [x] Fused parameters for ELN's (`s1`, for example, works just as `s 1` )
-- [x] Advcpmv support (cp and mv with a progress bar)
+- [x] `Advcpmv` support (`cp` and `mv` with a progress bar)
 - [x] **NEW**: Four customizable keybindings for custom plugins
 - [x] Color schemes
 
@@ -197,10 +197,10 @@ We welcome community contributions. Please see the [CONTRIBUTING.md](https://git
 
 ## First steps
 
-Try the `help` command to learn more about CliFM. Once in the CliFM prompt, type `help` or `?`. To jump into the COMMANDS section in the manpage, simply enter `cmd` or press **F2**. Press **F1** to access the full manpage and **F3** to access the keybindings help page.
+Try the `help` command to learn more about CliFM. Once in the CliFM prompt, type `help` or `?`. To jump into the COMMANDS section in the manpage, simply enter `cmd` or press <kbd>F2</kbd>. Press <kbd>F1</kbd> to access the full manpage and <kbd>F3</kbd> to access the keybindings help page.
 
 ## A few basic usage examples
-NOTE: Always try `TAB`. `TAB` completeion is available for many things
+NOTE: Always try <kbd>TAB</kbd>. `TAB completion` is available for many things
 
 * `n myfile mydir/`: Create a new file named _myfile_ and a new directory named _mydir_. Since CliFM is integrated into the system shell, you can also use any of the commands you usually use to create new files. For example: `touch myfile` or `nano myfile`
 
@@ -210,17 +210,17 @@ NOTE: Always try `TAB`. `TAB` completeion is available for many things
 
 * `5`: Change to a directory in the current directory by ELN (say 5)
 
-TIP: Press `TAB` to make sure 5 is the directory you want
+TIP: Press <kbd>TAB</kbd> to make sure 5 is the directory you want
 
 * `j xproj`: Jump to _~/media/data/docs/work/mike/xproject_
 
 NOTE: This depends however on the database ranking. For more accuracy: `j mike xproj`
 
-* `b` or `Shift-left` or `Alt-j`: Go back to the directory you came from
+* `b` or <kbd>Shift-left</kbd> or <kbd>Alt-j</kbd>: Go back to the directory you came from
 
-NOTE: Enter 'f', or press Shift-right or Alt-k to go back to the first directory
+NOTE: Enter `f`, or press <kbd>Shift-right</kbd> or <kbd>Alt-k</kbd> to go back to the first directory
 
-* `Alt-l`: Change to detail/long view mode
+* <kbd>Alt-l</kbd>: Change to detail/long view mode
 
 * `p4`: Print the properties of the file whose ELN is 4
 
@@ -244,7 +244,7 @@ NOTE: Enter 'f', or press Shift-right or Alt-k to go back to the first directory
 
 * `12`: Open the file whose ELN is 12
 
-TIP: Press `TAB` to make sure 12 is the file you want
+TIP: Press <kbd>TAB</kbd> to make sure 12 is the file you want
 
 * `o myfile.txt application`, or just `application myfile.txt`: Open _myfile.txt_ with _application_
 
@@ -252,16 +252,16 @@ TIP: Press `TAB` to make sure 12 is the file you want
 
 * Open/Change to a bookmarked file:
 
-1) Press Ctrl-b to open the bookmarks screen
+1) Press <kbd>Ctrl-b</kbd> to open the bookmarks screen
 2) Enter the bookmark ELN (1 ... n) or its shortcut [xx]
 
-* `ws2` or `Alt-2`: Switch to workspace 2
+* `ws2` or <kbd>Alt-2</kbd>: Switch to workspace 2
 
-* `edit` or `F10`: View and/or edit the configuration file
+* `edit` or <kbd>F10</kbd>: View and/or edit the configuration file
 
 * `pf set test`: Change to profile _test_
 
-* `hf on` or `Alt-.`: Show hidden files
+* `hf on` or <kbd>Alt-.</kbd>: Show hidden files
 
 * `actions`: List available actions/plugins
 
