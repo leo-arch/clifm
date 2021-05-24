@@ -202,7 +202,7 @@ Try the `help` command to learn more about CliFM. Once in the CliFM prompt, type
 ## A few basic usage examples
 NOTE: Always try `TAB`. `TAB` completeion is available for many things
 
-* `CMD FILE(s)`: Create a new file using CMD. Since CliFM is integrated into the system shell, you can use any of the commands you usually use to create new files. For example: `touch myfile` or `nano myfile`
+* `n myfile mydir/`: Create a new file named _myfile_ and a new directory named _mydir_. Since CliFM is integrated into the system shell, you can also use any of the commands you usually use to create new files. For example: `touch myfile` or `nano myfile`
 
 * `md mydir`: Create a new directory named _mydir_
 
