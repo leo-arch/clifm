@@ -547,8 +547,11 @@ list available mountpoints and change the current working directory to the selec
 .B msg, messages \fR[clear]
 with no arguments, prints the list of messages in the current session. The 'clear' option tells CliFM to empty the messages list.
 .TP
-.B n, net \fR[smb, ftp, sftp]://ADDRESS [OPTIONS]
-Access a remote file system, either via SSH, FTP, or SMB protocols. To access the file system of a machine via SSH, use the following URI scheme: sftp://[USER@]HOST:[/REMOTE\-DIR] [PORT]. Bracketed elements are optional. If no user is specified, CliFM will attempt to login using the current local username. If no port is specified, the default port (22, if SSH) will be used.
+.B n, new \fRFILE DIR/ ...n
+create new files and/or directories. If a filename ends with a slash (/), it will be taken as a directory name and created via the shell command 'mkdir -p'. Else, it will be created via the 'touch' shell command. Ex: 'n myfile mydir/'.
+.TP
+.B net \fR[smb, ftp, sftp]://ADDRESS [OPTIONS]
+access a remote file system, either via SSH, FTP, or SMB protocols. To access the file system of a machine via SSH, use the following URI scheme: sftp://[USER@]HOST:[/REMOTE\-DIR] [PORT]. Bracketed elements are optional. If no user is specified, CliFM will attempt to login using the current local username. If no port is specified, the default port (22, if SSH) will be used.
 .sp
 To access the remote file system via SMB, this scheme should be used instead: smb://[USER@]HOST[/SHARE][/REMOTE\-DIR] [OPTIONS]. The URI scheme for FTP connections is this: ftp://HOST[:PORT] [OPTIONS]. Network resources are mounted in '/tmp/clifm/remote_dir', replacing all slashes in remote_dir by underscores. To disconnect from the remote machine, use 'fusermount3 \-u' for SSH, 'fusermount \-u' for FTP, and 'umount' for SMB, followed by the corresponding mountpoint. Examples:
 
@@ -1292,7 +1295,7 @@ Get help:
 \fBF2\fR: keybindings
 \fBF3\fR: commands
 
-\fBCMD FILE(s)\fR: Create new files. Since CliFM is integrated into the system shell, you can use any of the shell commands you usually use to create new files. Ex: 'touch myfile' or 'nano myfile'
+\fBn myfile mydir/\fR: Create a new file named 'myfile' and a new directory named 'mydir'. Since CliFM is integrated into the system shell, you can also use any of the shell commands you usually use to create new files. Ex: 'touch myfile' or 'nano myfile'
 
 \fBmd DIR(s)\fR: Create new directories
 
