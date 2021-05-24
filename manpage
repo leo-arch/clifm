@@ -702,6 +702,8 @@ CliFM offers three kinds of file filters:
 .TP
 \fBM\-h:\fR Show directory history
 .TP
+\fBM\-n:\fR Create new file or directory
+.TP
 \fBM\-s:\fR Open the Selection Box
 .TP
 \fBM\-a:\fR Select all files in the current working directory
