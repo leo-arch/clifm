@@ -1218,8 +1218,9 @@ rl_bm_sel(int count, int key)
 int
 rl_kbinds_help(int count, int key)
 {
-	char *cmd[] = {"man", "-P", "less -p ^\"KEYBOARD SHORTCUTS\"", PNL,
-					NULL};
+	char *cmd[] = {"man", "-P",
+				"less -p ^[0-9]+\\.[[:space:]]KEYBOARD[[:space:]]SHORTCUTS",
+				PNL, NULL};
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
@@ -1229,7 +1230,8 @@ rl_kbinds_help(int count, int key)
 int
 rl_cmds_help(int count, int key)
 {
-	char *cmd[] = {"man", "-P", "less -p ^COMMANDS", PNL, NULL};
+	char *cmd[] = {"man", "-P", "less -p ^[0-9]+\\.[[:space:]]COMMANDS",
+					PNL, NULL};
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
