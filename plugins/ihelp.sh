@@ -68,6 +68,8 @@ mf @
 mm, mime@
 mp, mountpoints@
 msg, messages@
+n, new@
+net \[@
 o, open@
 opener @
 path, cwd@
