@@ -76,8 +76,8 @@ create_file(char **cmd)
 		char *filename = (char *)NULL;
 
 		while (!filename) {
-			puts("End filename with slash to create a directory");
-			filename = rl_no_hist("Filename ('q' to quit): ");
+			puts(_("End filename with a slash to create a directory"));
+			filename = rl_no_hist(_("Filename ('q' to quit): "));
 
 			if (!filename)
 				continue;
