@@ -185,6 +185,7 @@ readline_kbinds(void)
 		rl_bind_keyseq(find_key("workspace4"), rl_ws4);
 
 		/* Operations on files */
+		rl_bind_keyseq(find_key("create-file"), rl_create_file);
 		rl_bind_keyseq(find_key("bookmark-sel"), rl_bm_sel);
 		rl_bind_keyseq(find_key("archive-sel"), rl_archive_sel);
 		rl_bind_keyseq(find_key("open-sel"), rl_open_sel);
@@ -435,6 +436,19 @@ keybind_exec_cmd(char *str)
 	args_n = old_args;
 
 	return exit_status;
+}
+
+int
+rl_create_file(int count, int key)
+{
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	keybind_exec_cmd("n");
+
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
 }
 
 int

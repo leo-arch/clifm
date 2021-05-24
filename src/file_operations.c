@@ -62,13 +62,50 @@ xchmod(const char *file, mode_t mode)
 int
 create_file(char **cmd)
 {
-	if (!cmd || !cmd[1] || strcmp(cmd[1], "--help") == 0) {
+	if (cmd[1] && *cmd[1] == '-' && strcmp(cmd[1], "--help") == 0) {
 		printf("Usage: n, new FILE DIR/ ...n\n");
 		return EXIT_FAILURE;
 	}
 
 	int exit_status = EXIT_SUCCESS;
 	int file_in_cwd = 0;
+	int free_cmd = 0;
+
+	/* If no argument provided, ask the user for a filename */
+	if (!cmd[1]) {
+		char *filename = (char *)NULL;
+
+		while (!filename) {
+			filename = rl_no_hist("Filename ('q' to quit): ");
+
+			if (!filename)
+				continue;
+
+			if (!*filename) {
+				free(filename);
+				filename = (char *)NULL;
+				continue;
+			}
+		}
+
+		if (*filename == 'q' && !filename[1]) {
+			free(filename);
+			return EXIT_SUCCESS;
+		}
+
+		/* Once we have the filename, reconstruct the cmd array */
+		char **tmp_cmd = (char **)xnmalloc(args_n + 3, sizeof(char *));
+		tmp_cmd[0] = (char *)xnmalloc(2, sizeof(char));
+		*tmp_cmd[0] = 'n';
+		tmp_cmd[0][1] = '\0';
+		tmp_cmd[1] = (char *)xnmalloc(strlen(filename) + 1, sizeof(char));
+		strcpy(tmp_cmd[1], filename);
+		tmp_cmd[2] = (char *)NULL;
+		cmd = tmp_cmd;
+		free_cmd = 1;
+
+		free(filename);
+	}
 
 	/* Properly format filenames*/
 	size_t i;
@@ -152,6 +189,12 @@ create_file(char **cmd)
 
 	free(nfiles);
 	free(ndirs);
+
+	if (free_cmd) {
+		for (i = 0; cmd[i]; i++)
+			free(cmd[i]);
+		free(cmd);
+	}
 
 	if (exit_status == EXIT_SUCCESS && cd_lists_on_the_fly && file_in_cwd) {
 		free_dirlist();
