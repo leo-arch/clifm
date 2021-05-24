@@ -70,6 +70,7 @@ create_file(char **cmd)
 	int exit_status = EXIT_SUCCESS;
 	int file_in_cwd = 0;
 
+	/* Properly format filenames*/
 	size_t i;
 	for (i = 1; cmd[i]; i++) {
 
@@ -95,37 +96,64 @@ create_file(char **cmd)
 			}
 		}
 
-		if (!strchr(cmd[i], '/'))
+		/* If at least one filename lacks a slash (or it is the last char,
+		 * in which case we have a directory in CWD), we are creating a
+		 * file in CWD, and thereby we need to update the screen */
+		char *ret = strrchr(cmd[i], '/');
+		if (!ret || !*(ret + 1))
 			file_in_cwd = 1;
-
-		size_t cmd_len = strlen(cmd[i]);
-		if (cmd[i][cmd_len - 1] != '/') {
-
-			struct stat attr;
-			if (lstat(cmd[i], &attr) == 0) {
-				_err('w', PRINT_PROMPT, _("%s: %s: File exists\n"),
-					 PROGRAM_NAME, cmd[i]);
-				continue;
-			}
-
-			FILE *new_fp;
-			new_fp = fopen(cmd[i], "w+");
-
-			if (!new_fp) {
-				_err('w', PRINT_PROMPT, "new: '%s': %s\n", cmd[i],
-					strerror(errno));
-				exit_status = EXIT_FAILURE;
-			} else {
-				fclose(new_fp);
-			}
-		} else {
-			char *tmp_cmd[] = {"mkdir", "-p", cmd[i], NULL};
-			if (launch_execve(tmp_cmd, FOREGROUND, 0) != EXIT_SUCCESS)
-				exit_status = EXIT_FAILURE;
-		}
 	}
 
-	if (cd_lists_on_the_fly && file_in_cwd) {
+	/* Construct commands */
+	size_t files_num = i - 1;
+
+	char **nfiles = (char **)xnmalloc(files_num + 2, sizeof(char *));
+	char **ndirs = (char **)xnmalloc(files_num + 3, sizeof(char *));
+
+	/* Let's use 'touch' for files and 'mkdir -p' for dirs */
+	nfiles[0] = (char *)xnmalloc(6, sizeof(char));
+	strcpy(nfiles[0], "touch");
+
+	ndirs[0] = (char *)xnmalloc(6, sizeof(char));
+	strcpy(ndirs[0], "mkdir");
+
+	ndirs[1] = (char *)xnmalloc(3, sizeof(char));
+	strcpy(ndirs[1], "-p");
+
+	size_t cnfiles = 1,
+		   cndirs = 2;
+
+	for (i = 1; cmd[i]; i++) {
+		size_t cmd_len = strlen(cmd[i]);
+		/* Filenames ending with a slash are taken as dir names */
+		if (cmd[i][cmd_len - 1] == '/')
+			ndirs[cndirs++] = cmd[i];
+		else
+			nfiles[cnfiles++] = cmd[i];
+	}
+
+	ndirs[cndirs] = (char *)NULL;
+	nfiles[cnfiles] = (char *)NULL;
+
+	/* Execute commands */
+	if (cnfiles > 1) {
+		if (launch_execve(nfiles, FOREGROUND, 0) != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
+	}
+
+	if (cndirs > 2) {
+		if (launch_execve(ndirs, FOREGROUND, 0) != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
+	}
+
+	free(nfiles[0]);
+	free(ndirs[0]);
+	free(ndirs[1]);
+
+	free(nfiles);
+	free(ndirs);
+
+	if (exit_status == EXIT_SUCCESS && cd_lists_on_the_fly && file_in_cwd) {
 		free_dirlist();
 		exit_status = list_dir();
 	}
