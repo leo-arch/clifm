@@ -372,7 +372,7 @@ nm=01;32:bm=01;36:"
 #define MAX_PROP_STR 55
 
 #define GRAL_USAGE "[-aAefFgGhiIlLmoOsSuUvxy] [-b FILE] [-c FILE] \
-[-k FILE] [-p PATH] [-P PROFILE] [-z METHOD]"
+[-k FILE] [-P PROFILE] [-z METHOD] [PATH]"
 
 #define FALLBACK_SHELL "/bin/sh"
 #define FALLBACK_OPENER "xdg-open"

@@ -1470,7 +1470,8 @@ help_function(void)
 \n -m, --dihist-map\t\t enable the directory history map\
 \n -o, --no-list-on-the-fly\t 'cd' works as the shell 'cd' command\
 \n -O, --list-on-the-fly\t\t 'cd' lists files on the fly (default)\
-\n -p, --path PATH\t\t use PATH as %s starting path\
+\n -p, --path=PATH\t\t (Deprecated: use positional parameters instead)\
+\n              use PATH as %s starting path\
 \n -P, --profile=PROFILE\t\t use (or create) PROFILE as profile\
 \n -s, --splash \t\t\t enable the splash screen\
 \n -S, --stealth-mode \t\t leave no trace on the host system.\
