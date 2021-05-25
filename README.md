@@ -158,8 +158,12 @@ You can also take a look at some of these [basic usage examples](https://github.
 
 CliFM is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag). It works on Linux and FreeBSD, on i686, x86_64, and ARM architectures.
 
+---
+
 ## License
 This project is licensed under the GPL version 2 (or later) license. See the [LICENSE](https://github.com/leo-arch/clifm/blob/master/LICENSE) file for details.
+
+---
 
 ## Contributing
 We welcome community contributions. Please see the [CONTRIBUTING.md](https://github.com/leo-arch/clifm/blob/master/CONTRIBUTING.md) file for details.
