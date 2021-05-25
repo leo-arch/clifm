@@ -1,15 +1,23 @@
 <p align="center"><img src="images/clifm_300.png"></p>
-<h3 align="center">The KISS file manager: CLI-based, ultra-lightweight, lightning fast, and written in C</h3>
+<h2 align="center">The KISS, non-curses terminal file manager</h2>
+<h3 align="center">Written in C, fast, extensible, and lightweight as hell</h3>
+<h4 align="center"><a
+href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/bug_report.md">Report bug</a> &#xb7 <a
+href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/feature_request.md">Request feature</a> &#xb7 <a
+href="https://github.com/leo-arch/clifm/wiki">Explore documentation</a></h4>
 
-###
-[![clifm](https://img.shields.io/aur/version/clifm?color=1793d1&label=clifm&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/clifm/)
-[![clifm-git](https://img.shields.io/aur/version/clifm-git?color=1793d1&label=clifm-git&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/clifm/)
-[![clifm-colors-git](https://img.shields.io/aur/version/clifm-colors-git?color=1793d1&label=clifm-colors-git&logo=arch-linux&style=for-the-badge)](https://aur.archlinux.org/packages/clifm/)
-[![privacy](https://img.shields.io/badge/privacy-ok-green?style=for-the-badge)](https://en.wikipedia.org/wiki/Privacy-invasive_software)
-[![License](https://img.shields.io/github/license/leo-arch/clifm?color=red&style=for-the-badge)](https://github.com/leo-arch/clifm/blob/master/LICENSE) 
-[![Gitter](https://img.shields.io/gitter/room/leo-arch/clifm?style=for-the-badge)](https://gitter.im/leo-arch/clifm)
-[![Wiki](https://img.shields.io/badge/documentation-wiki-orange?style=for-the-badge)](https://github.com/leo-arch/clifm/wiki)
-![GitHub last commit (branch)](https://img.shields.io/github/last-commit/leo-arch/clifm/master?color=blue&style=for-the-badge)
+<br />
+<br />
+
+<p align="center">
+<a href="https://aur.archlinux.org/packages/clifm/"><img src="https://img.shields.io/aur/version/clifm?color=1793d1&label=clifm&logo=arch-linux&style=for-the-badge"/></a>
+<a href="https://aur.archlinux.org/packages/clifm/"><img src="https://img.shields.io/aur/version/clifm-git?color=1793d1&label=clifm-git&logo=arch-linux&style=for-the-badge"/></a>
+<a href="https://aur.archlinux.org/packages/clifm/"><img src="https://img.shields.io/aur/version/clifm-colors-git?color=1793d1&label=clifm-colors-git&logo=arch-linux&style=for-the-badge"/></a>
+<a href="https://en.wikipedia.org/wiki/Privacy-invasive_software"><img src="https://img.shields.io/badge/privacy-ok-green?style=for-the-badge"/></a>
+<a href="https://github.com/leo-arch/clifm/blob/master/LICENSE"><img src="https://img.shields.io/github/license/leo-arch/clifm?color=red&style=for-the-badge"/></a>
+<a href="https://gitter.im/leo-arch/clifm"><img src="https://img.shields.io/gitter/room/leo-arch/clifm?style=for-the-badge"/></a>
+<a><img src="https://img.shields.io/github/last-commit/leo-arch/clifm/master?color=blue&style=for-the-badge"/></a>
+</p>
 
 <h3 align="center"><br><i>Did I say it's fast?</i></h3>
 <p align="center"><a href="https://mega.nz/embed/J8hEkCZZ#fGp0JtcDvFIWKmTc4cOp0iMrWRlbqs99THg8F7EmQWI"><img src="images/vid_thumb.png"></a></p>
