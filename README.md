@@ -98,15 +98,15 @@ For a detailed explanation of each of these features consult the [wiki](https://
 
 ---
 
-## Installing CliFM:
+## Installing CliFM
 
-### Dependencies:
+### Dependencies
 
 `glibc` and `coreutils`, of course, but also `libcap`, `acl`, `file`, and `readline`. For Archlinux users, all these dependenciess are part of the `core` reposiroty. In Debian systems two packages must be installed before compilation: `libcap-dev` and `libreadline-dev`. In Fedora based systems you need `libcap-devel` and `readline-devel`.
 
 Optional dependencies: `sshfs`, `curlftpfs`, and `cifs-utils` (for remote filesystems support); `atool`, `archivemount`, `genisoimage`, `p7zip`, and `cdrtools` (for archiving and compression support), and `icons-in-terminal` to enable the icons feature.
 
-#### Arch Linux
+### Arch Linux
 
 You'll find the corresponding packages on the AUR: the [stable](https://aur.archlinux.org/packages/clifm) and the [development](https://aur.archlinux.org/packages/clifm-git) version. 
 
@@ -118,10 +118,10 @@ $ cd clifm
 $ makepkg -si
 ```
 
-#### Debian-based systems
+### Debian-based systems
 **NEW**: A .deb package (for x86_64) is now available in [Releases](https://github.com/leo-arch/clifm/releases).
 
-#### Other Linux distributions (or FreeBSD):
+### Other Linux distributions (or FreeBSD):
 
 1. Clone the repository
 
