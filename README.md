@@ -42,6 +42,7 @@ Those really used to the commands line (the very secret of Unix's power) will fi
 
 ## Description
 
+<h4 align="center">CliFM's interface</h4>
 <p align="center"><img src="images/icons_rounded.png"></p>
 
 CliFM is a completely command-line-based, shell-like file manager able to perform all the basic operations you may expect from any other file manager. Besides these common operations, such as copy, move, remove, etc, CliFM provides the following features:
