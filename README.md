@@ -95,7 +95,7 @@ CliFM is a completely command-line-based, shell-like file manager able to perfor
 * **NEW**: Fastback function
 * **NEW**: [Git integration](https://github.com/leo-arch/clifm/wiki/Advanced#git-integration)
 
-For a detailed explanation of each of these features consult the [wiki](https://github.com/leo-arch/clifm/wiki).
+For a detailed explanation of each of these features follow the corresponding links or consult the [wiki](https://github.com/leo-arch/clifm/wiki).
 
 ---
 
