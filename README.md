@@ -84,7 +84,7 @@ CliFM is a completely command-line-based, shell-like file manager able to perfor
 * Auto-cd and auto-open
 * Symlinks editor
 * Disk usage
-* CD on quit and file picker functions
+* [CD on quit](https://github.com/leo-arch/clifm/wiki/Advanced#cd-on-quit) and file picker functions
 * Read and list files form [standard input](https://github.com/leo-arch/clifm/wiki/Advanced#standard-input)
 * [Files filter](https://github.com/leo-arch/clifm/wiki/Advanced#file-filters)
 * Up to eight [workspaces](https://github.com/leo-arch/clifm/wiki/Specifics#workspaces)
