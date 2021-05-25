@@ -24,7 +24,9 @@ href="https://github.com/leo-arch/clifm/wiki">Explore documentation</a></h4>
 
 Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Dikiciyan)
 
-## Rationale
+---
+
+## Why?
 
 Why in this world do we need another file manager? In the first place, just because I can do it, write it, and learn (a lot) in the process, just because this is a free world, and very specially, a free community; and, needless to say, alternatives are at the heart of freedom.
 
@@ -36,128 +38,73 @@ Those really used to the commands line (the very secret of Unix's power) will fi
 
 ### Should all terminal file managers be curses-based file managers? CliFM is the answer to this question: No.
 
+---
+
 ## Description
 
-CliFM is a completely command-line-based, shell-like file manager able to perform all the basic operations you may expect from any other FM. Besides these common operations, such as copy, move, remove, etc, CliFM most distinctive features are:
+<p align="center"><img src="images/icons.png"></p>
 
-- [x] It is REALLY **CLI-based**. No GUI nor TUI or curses at all, just a command line. Since it does not need any GUI, it can run on the Linux built-in console and even on a SSH or any other remote session.
+CliFM is a completely command-line-based, shell-like file manager able to perform all the basic operations you may expect from any other file manager. Besides these common operations, such as copy, move, remove, etc, CliFM provides the following features:
 
-- [x] With a memory footprint below 5 MiB and a disk usage of 0.5 MiB, it is incredibly **lightweight and fast**, and as such, able to run on really old hardware.
+* It is really CLI-based. No GUI nor TUI or curses at all, just a command line. Since it does not need any GUI, it can run on the Linux built-in console and even on a SSH or any other remote session.
+* With a memory footprint below 5 MiB and a disk usage of 0.5 MiB, it is incredibly lightweight and fast, and as such, able to run on really old hardware.
+* The use of short (and even one-character) commands, and list numbers (ELN's) for filenames. 
+* Bookmarks
+* Files selection (even across multiple instances of the program)
+* Lira, a built-in resource opener (supports regular expressions)
+* Files search (supports both glob and regular expressions)
+* A Freedesktop compliant trash system
+* Extended color codes for file types and file extensions
+* Files counter for directories and symlinks to directories
+* Directory history map to keep in sight previous, current, and next entries in the directory history list
+* Plugins: PDF reader, image/video previews, wallpaper setter, music playlist, updates check, drag and drop, finder, jumper, clipboard, FZF navigation/file previewing (**NEW**: including support for Ranger's scope.sh file previewer script and pistol), FZF selection, interactive help, and search files by content via Ripgrep (**NEW**)
+* Stealth mode: Leave no trace on the host system. No file is read, no file is written.
+* Kangaroo, a built-in directory jumper function similar to `autojump`, `z.lua`, and `zoxide`.
+* Batch links
+* Icons support :smirk:
+* Unicode suppport
+* TAB-completion
+* Bash-like quoting system
+* History function
+* Shell commands execution
+* Glob and regular expressions, including inverse matching
+* Aliases
+* Logs
+* Prompt and profile commands (run commands with each new prompt or at program startup)
+* Bash-like prompt customization
+* Sequential and conditional commands execution 
+* User profiles
+* Customizable keyboard shortcuts
+* Mas, a built-in pager for files listing
+* Eleven sorting methods
+* Bulk rename
+* Archives and compression support (including Zstandard and ISO 9660)
+* Auto-cd and auto-open
+* Symlinks editor
+* Disk usage
+* CD on quit and file picker functions
+* Read and list files form standard input
+* Files filter
+* Up to eight workspaces
+* Fused parameters for ELN's (`s1`, for example, works just as `s 1` )
+* `Advcpmv` support (`cp` and `mv` with a progress bar)
+* Light mode (just in case it is not fast enough for you)
+* Color schemes
+* **NEW**: Four customizable keybindings for custom plugins
+* **NEW**: Fastback function
+* **NEW**: Git integration
 
-![fast](images/fast.gif)
+For a detailed explanation of each of these features consult the [wiki](https://github.com/leo-arch/clifm/wiki).
 
-- [x] The use of **short (and even one-character) commands**, and list numbers (**ELN's**) for filenames. For example, instead of typing: `cp file1 file2 file3 file4 dir/`, you can do this: `c 1-4 7`. Shorter and quicker. If the auto-cd and auto-open functions are enabled, which is the default, you can change to directories or open files by just entering the corresponding ELN. So, instead of `cd 12` or `o 12` you can just enter `12`; even shorter and quicker. As a plus, ELN's can also be used with external commands. Example: `diff 1 5` or `ls -l 12 14`. If numbers are a bit tricky to you, as they are to me, you can use the TAB key to expand the ELN to the corresponding filename. So, type `r 56`, then TAB, and it becomes `r filename`.
+---
 
-- [x] **Bookmarks**: With CliFM bookmarks function, accessing your preferred files and/or directories could be as easy as this: `bm` (or <kbd>Alt-b</kbd>), to call the bookmarks function, and then `1` (or whatever is the ELN (or shortcut) corresponding to your bookmark).
+## Installing CliFM
 
-![bookmarks](images/bookmark.gif)
-
-- [x] **Files selection**: the ability to select (and deselect) files from here and there, even in different instances of the program, and then operate on them as you whish via the Selection Box or the `sel` keyword. Example: `s 1 4 56 33` will send the files corresponding to these ELN's to the Selection Box. Then, by typing `sb` you can check the contents of the Selection Box. Let's suppose you want to copy a couple of files from your home directory to some distant path, say `/media/data/misc`. Instead of copying all these files individually, you just select the files and then tell the `paste` command where to copy them:
- 
-`s 1 2 3 6` (or `s 1-3 6`) and then `paste sel /media/data/misc` (`c sel /media/data/misc` does the same thing)
-
-The selection function supports wildcards, regular expressions, inverse matching, filetype filter and path specification. For example, to list all regular files in the /etc directory, except those ending with .conf, issue this command: `s !*.conf -r :/etc`, or, using a regular expression: `s !.*\.conf$ -r :/etc`.
-
-You can also use the 'sel' keyword with external commands. Example: `s 1-4 7 10 && file sel`.
-
-Of course, you can deselect some or all selected files whenever you want with the `desel` or `ds` command: `ds *`, or just press <kbd>Alt-d</kbd>.
-
-![selection box](images/sel.gif)
- 
-- [x] Open files without the need to specify any program. Via `lira` (the **built-in resource opener**), if no program was specified, CliFM will open the file with the default program associated to that kind of files. To open a file may be as simple as this: `o 12`, or `o 12 &` if you want it running in the background (with the auto-open function you can also just enter `12`, that's it). Of course, you can also set a custom resource opener (say, `xdg-open`, if you like).
-
-- [x] **Quick search**: type `/REGEX` and CliFM will list all matches for the corresponding REGEX pattern. Example: `/.*\.png$`
- will list all the PNG files in the current directory. If you want to search for files in another directory, just tell the search function where to search: `/.*\.png$ /media/images`. And, if you want to further filter the search, you still can specify what kind of files you want. For example: `/[.-].*d$ -d /etc` will list all directories (-d) in /etc containing a dot or a slash and ending with 'd'. The quick search function also supports invert search: prepend the exclamation mark (!) to negate or reverse a given search pattern. For example: `!.*s$ -d /etc` will match all directories in /etc NOT ending with 'd', just as `!D*` will match all files in the current directory not starting with 'D'.
-
-![quick search](images/search.gif)
-
-- [x] A Freedesktop compliant **trash system** to be able to recover deleted files.
-
-- [x] **Extended color codes**: Just like the `ls` command, CliFM uses customizable color codes to identify file types and extensions. However, and unlike `ls`, CliFM is also able to distinguish between empty and non-empty files or directories, broken and non-broken symlinks, files and directories with or without read permission, multi-hardlink files, and more. Once in CliFM, type `colors` or `cc` to see the list of currently used color codes.
-
-![colors](images/colors.png)
-
-- [x] **Files counter**: It also displays the amount of files contained by listed directories or symlinks to directories.
-
-![dirs](images/dirs.png)
-
-- [x] **Directory history map**: Keep in sight previous, current, and next entries in the directory history list for easiest and fastest navigation through visited directories.
-
-- [x] **PLUGINS via custom actions**: Use custom action names, as if they were any other command, to run programs or scripts written in any language and extend thus CliFM functionality to fit your needs. This is basically an easy way of building custom commands for CliFM.
-
-- [x] **Stealth mode:** Leave no trace on the host system. No file is read, no file is written.
-
-- [x] Quickly and easily navigate through the jump database (i.e. a list of visited directories) via **Kangaroo**, a built-in **directory jumper** function similar to autojump, z.lua, and zoxide.
-
-![dirjump](images/jump.gif)
-
-- [x] **Batch link**: Create multiple symbolic links at once.
-
-- [x] **Icons support** :smirk: (depends on the [icons-in-terminal](https://github.com/sebastiencs/icons-in-terminal) project)
-
-1) [Install](https://github.com/sebastiencs/icons-in-terminal#installation) icons-in-terminal.
-2) Run CliFM with the `--icons` command line option, or, once in the program, enter `icons on`.
-
-![icons](images/icons.png)
-
-- [x] **NEW: Fastback function**
-
-![fastback](images/fastback.png)
-
-- [x] **NEW: Git integration**
-
-![git](images/git_integration.png)
-
-Because file manager, but also half-shell, CliFM also provides the following features:
-
-- [x] Unicode suppport
-- [x] TAB-completion for commands, paths, ELN's, profiles, bookmarks, color schemes, and the directory jumper function
-- [x] Bash-like quoting system
-- [x] History function
-- [x] Shell commands execution
-- [x] Glob and regular expressions, including inverse matching
-- [x] Aliases
-- [x] Logs
-- [x] Prompt and profile commands (run commands with each new prompt or at program startup)
-- [x] Bash-like prompt customization
-- [x] Sequential and conditional commands execution 
-- [x] User profiles
-- [x] Customizable keyboard shortcuts
-- [x] Lira, a built-in resource opener supporting both extension and mimetype matching. **NEW**: Lira supports now regular expressions.
-- [x] Mas, a built-in pager for files listing
-- [x] Eleven sorting methods: name, size, atime, btime, ctime, mtime, version, extension, inode, owner, and group. It also supports reverse sorting.
-- [x] Bulk rename
-- [x] Archives and compression support (including Zstandard and ISO 9660)
-- [x] Auto-cd and auto-open
-- [x] Symlinks editor
-- [x] Disk usage
-- [x] CD on quit and file picker (as shell functions)
-- [x] Plugins: PDF reader, image/video previews, wallpaper setter, music playlist, updates check, drag and drop, finder, jumper, clipboard, FZF navigation/file previewing (**NEW**: including support for Ranger's scope.sh file previewer script and pistol), FZF selection, interactive help, and search files by content via Ripgrep (**NEW**)
-- [x] Batch links
-- [x] Read and list files form standard input
-- [x] Exclude certain groups of filenames via the files filter using regular expressions
-- [x] Up to eight workspaces
-- [x] Fused parameters for ELN's (`s1`, for example, works just as `s 1` )
-- [x] `Advcpmv` support (`cp` and `mv` with a progress bar)
-- [x] **NEW**: Four customizable keybindings for custom plugins
-- [x] Color schemes
-
-**NOTE:** By default, CliFM ships only one color scheme, but more are provided by [clifm-colors](https://github.com/leo-arch/clifm-colors). The package is also available in the [AUR](https://aur.archlinux.org/packages/clifm-colors-git).
-
-![colors](images/colors.gif)
-
-Finally, all CliFM options could be handled directly via command line, by passing parameters to the program, or via plain
-text configuration files, located in `$XDG_CONFIG_HOME/clifm/`.
-
-Insofar as it is heavily inspired by the KISS principle, CliFM is fundamentally aimed to be lightweight, fast, and simple. And if you think it's not fast enough, you can always try the **light mode** to make it even faster.
-
-## Dependencies:
+### Dependencies
 
 `glibc` and `coreutils`, of course, but also `libcap`, `acl`, `file`, and `readline`. For Archlinux users, all these dependenciess are part of the `core` reposiroty. In Debian systems two packages must be installed before compilation: `libcap-dev` and `libreadline-dev`. In Fedora based systems you need `libcap-devel` and `readline-devel`.
 
 Optional dependencies: `sshfs`, `curlftpfs`, and `cifs-utils` (for remote filesystems support); `atool`, `archivemount`, `genisoimage`, `p7zip`, and `cdrtools` (for archiving and compression support), and `icons-in-terminal` to enable the icons feature.
-
-## Compiling and Running CliFM:
 
 ### Arch Linux
 
@@ -171,7 +118,7 @@ $ cd clifm
 $ makepkg -si
 ```
 
-### Debian-based
+### Debian-based systems
 **NEW**: A .deb package (for x86_64) is now available in [Releases](https://github.com/leo-arch/clifm/releases).
 
 ### Other Linux distributions (or FreeBSD):
@@ -197,97 +144,30 @@ To uninstall `clifm` issue this command wherever the Makefile is located:
 
 	$ sudo make uninstall
 
+---
+
+## First steps
+
+Try the `help` command to learn more about CliFM. Once in the CliFM prompt, type `help` or `?`. To jump into the **COMMANDS** section in the manpage, simply enter `cmd` or press <kbd>F2</kbd>. Press <kbd>F1</kbd> to access the full manpage and <kbd>F3</kbd> to access the keybindings help page.
+
+You can also take a look at some of these [basic usage examples](https://github.com/leo-arch/clifm/wiki/Common-Operations#basic-usage-examples) to get you started.
+
+---
+
 ## Support
 
 CliFM is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag). It works on Linux and FreeBSD, on i686, x86_64, and ARM architectures.
 
+---
+
 ## License
 This project is licensed under the GPL version 2 (or later) license. See the [LICENSE](https://github.com/leo-arch/clifm/blob/master/LICENSE) file for details.
+
+---
 
 ## Contributing
 We welcome community contributions. Please see the [CONTRIBUTING.md](https://github.com/leo-arch/clifm/blob/master/CONTRIBUTING.md) file for details.
 
-## First steps
+---
 
-Try the `help` command to learn more about CliFM. Once in the CliFM prompt, type `help` or `?`. To jump into the COMMANDS section in the manpage, simply enter `cmd` or press <kbd>F2</kbd>. Press <kbd>F1</kbd> to access the full manpage and <kbd>F3</kbd> to access the keybindings help page.
-
-## A few basic usage examples
-NOTE: Always try <kbd>TAB</kbd>. `TAB completion` is available for many things
-
-* `n myfile mydir/`: Create a new file named _myfile_ and a new directory named _mydir_. Since CliFM is integrated into the system shell, you can also use any of the commands you usually use to create new files. For example: `touch myfile` or `nano myfile`
-
-* `md mydir`: Create a new directory named _mydir_
-
-* `/etc`: Change directory to _/etc_
-
-* `5`: Change to a directory in the current directory by ELN (say 5)
-
-TIP: Press <kbd>TAB</kbd> to make sure 5 is the directory you want
-
-* `j xproj`: Jump to _~/media/data/docs/work/mike/xproject_
-
-NOTE: This depends however on the database ranking. For more accuracy: `j mike xproj`
-
-* `b` or <kbd>Shift-left</kbd> or <kbd>Alt-j</kbd>: Go back to the directory you came from
-
-NOTE: Enter `f`, or press <kbd>Shift-right</kbd> or <kbd>Alt-k</kbd> to go back to the first directory
-
-* <kbd>Alt-l</kbd>: Change to detail/long view mode
-
-* `p4`: Print the properties of the file whose ELN is 4
-
-* `rf`: Reprint the list of files in the current directory
-
-* `s *.c :my_project/`: Select all c files in _my-project/_
-
-* `s 1-4 8 19-26`: Select multiple files in the current directory by ELN
-
-* `sb`: List selected files
-
-* `ds`: Deselect a few files
-
-* `md mydir && mydir`: Create a directory named _mydir_ and cd into it
-
-* `m sel`: Move selected files into the current directory
-
-* `r sel`: Remove all selected files
-
-* `myfile.txt`: Open _myfile.txt_ (with the default associated application)
-
-* `12`: Open the file whose ELN is 12
-
-TIP: Press <kbd>TAB</kbd> to make sure 12 is the file you want
-
-* `o myfile.txt application`, or just `application myfile.txt`: Open _myfile.txt_ with _application_
-
-* `bm add mydir`: Bookmark _mydir/_:
-
-* Open/Change to a bookmarked file:
-
-1) Press <kbd>Ctrl-b</kbd> to open the bookmarks screen
-2) Enter the bookmark ELN (1 ... n) or its shortcut [xx]
-
-* `ws2` or <kbd>Alt-2</kbd>: Switch to workspace 2
-
-* `edit` or <kbd>F10</kbd>: View and/or edit the configuration file
-
-* `pf set test`: Change to profile _test_
-
-* `hf on` or <kbd>Alt-.</kbd>: Show hidden files
-
-* `actions`: List available actions/plugins
-
-* `-`: Want file previews?
-
-NOTE: This runs the plugin `fzfnav.sh`. Take a look at the manpage for needed dependencies
-
-* `icons on`: Want icons?
-
-NOTE: Recall to install `icons-in-terminal` before
-
-* `q`: I'm tired, quit
-
-There is a lot more you can do, but this is enough to get you started.
-
-###
 Just try it and let me know. It gets better and better. I myself use it as my main, and indeed only, file manager; it couldn't be so bad, isn't it?
