@@ -46,11 +46,11 @@ Those really used to the commands line (the very secret of Unix's power) will fi
 
 CliFM is a completely command-line-based, shell-like file manager able to perform all the basic operations you may expect from any other file manager. Besides these common operations, such as copy, move, remove, etc, CliFM provides the following features:
 
-* It is [really CLI-based](https://github.com/leo-arch/clifm/wiki/Introduction#main-design-and-goals). No GUI nor TUI or curses at all, just a command line. Since it does not need any GUI, it can run on the Linux built-in console and even on a SSH or any other remote session.
+* It is [really CLI-based](https://github.com/leo-arch/clifm/wiki/Introduction#main-design-and-goals). No GUI nor TUI or curses at all, just a command line. Since it does not need any GUI, it can run on the kernel built-in console and even on a SSH or any other remote session.
 * With a memory footprint below 5 MiB and a disk usage of 0.5 MiB, it is incredibly lightweight and fast, and as such, able to run on really old hardware.
 * The use of short (and even one-character) [commands](https://github.com/leo-arch/clifm/wiki/Introduction#commands-short-summary), and list numbers ([ELN](https://github.com/leo-arch/clifm/wiki/Common-Operations)'s) for filenames. 
 * [Bookmarks](https://github.com/leo-arch/clifm/wiki/Common-Operations#bookmarks)
-* [Files selection](https://github.com/leo-arch/clifm/wiki/Common-Operations#selection) (even across multiple instances of the program)
+* [Files selection](https://github.com/leo-arch/clifm/wiki/Common-Operations#selection) (supports both glob and regular expressions and works even across multiple instances of the program)
 * [Lira](https://github.com/leo-arch/clifm/wiki/Specifics#resource-opener), a built-in resource opener (supports regular expressions)
 * [Files search](https://github.com/leo-arch/clifm/wiki/Common-Operations#searching) (supports both glob and regular expressions)
 * A Freedesktop compliant trash system
@@ -58,8 +58,9 @@ CliFM is a completely command-line-based, shell-like file manager able to perfor
 * Files counter for directories and symlinks to directories
 * Directory history map to keep in sight previous, current, and next entries in the directory history list
 * [Plugins](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
+* [Files preview](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) (via a native file previewer, but including support for [Ranger's scope.sh](https://github.com/ranger/ranger/blob/master/ranger/data/scope.sh) and [pistol](https://github.com/doronbehar/pistol) as well)
 * Stealth mode: Leave no trace on the host system. No file is read, no file is written.
-* [Kangaroo](https://github.com/leo-arch/clifm/wiki/Specifics#kangaroo-frecency-algorithm), a built-in directory jumper function similar to `autojump`, `z.lua`, and `zoxide`.
+* [Kangaroo](https://github.com/leo-arch/clifm/wiki/Specifics#kangaroo-frecency-algorithm), a built-in directory jumper function similar to [autojump](https://github.com/wting/autojump), [z.lua](https://github.com/skywind3000/z.lua), and [zoxide](https://github.com/ajeetdsouza/zoxide).
 * Batch links
 * [Icons](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk) support :smirk:
 * Unicode suppport
@@ -74,7 +75,7 @@ CliFM is a completely command-line-based, shell-like file manager able to perfor
 * Bash-like [prompt customization](https://github.com/leo-arch/clifm/wiki/Customization#the-prompt)
 * Sequential and conditional commands execution 
 * User profiles
-* Customizable [keyboard shortcuts](https://github.com/leo-arch/clifm/wiki/Introduction#keybindings)
+* Customizable [keyboard shortcuts](https://github.com/leo-arch/clifm/wiki/Customization#keybindings)
 * Mas, a built-in pager for files listing
 * Eleven sorting methods
 * Bulk rename
@@ -87,10 +88,10 @@ CliFM is a completely command-line-based, shell-like file manager able to perfor
 * [Files filter](https://github.com/leo-arch/clifm/wiki/Advanced#file-filters)
 * Up to eight workspaces
 * Fused parameters for ELN's (`s1`, for example, works just as `s 1` )
-* `Advcpmv` support (just `cp` and `mv` with a nice progress bar)
+* [Advcpmv](https://github.com/jarun/advcpmv) support (just `cp` and `mv` with a nice progress bar)
 * Light mode (just in case it is not fast enough for you)
 * [Color schemes](https://github.com/leo-arch/clifm/wiki/Customization#colors)
-* **NEW**: Four customizable keybindings for custom plugins
+* **NEW**: Four [customizable keybindings for custom plugins](https://github.com/leo-arch/clifm/wiki/Customization#keybindings)
 * **NEW**: Fastback function
 * **NEW**: [Git integration](https://github.com/leo-arch/clifm/wiki/Advanced#git-integration)
 
