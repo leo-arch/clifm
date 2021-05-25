@@ -68,10 +68,10 @@ CliFM is a completely command-line-based, shell-like file manager able to perfor
 * Bash-like quoting system
 * History function
 * Shell commands execution
-* Glob and regular expressions (including inverse matching)
-* Aliases
+* [Glob and regular expressions](https://github.com/leo-arch/clifm/wiki/Advanced#wildcards-and-regex) (including inverse matching)
+* [Aliases](https://github.com/leo-arch/clifm/wiki/Customization#aliases)
 * Logs
-* Prompt and profile commands (run commands with each new prompt or at program startup)
+* [Prompt and profile commands](https://github.com/leo-arch/clifm/wiki/Customization#profile-and-prompt-commands) (run commands with each new prompt or at program startup)
 * Bash-like [prompt customization](https://github.com/leo-arch/clifm/wiki/Customization#the-prompt)
 * Sequential and conditional commands execution 
 * User [profiles](https://github.com/leo-arch/clifm/wiki/Specifics#profiles)
