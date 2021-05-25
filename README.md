@@ -74,7 +74,7 @@ CliFM is a completely command-line-based, shell-like file manager able to perfor
 * Prompt and profile commands (run commands with each new prompt or at program startup)
 * Bash-like [prompt customization](https://github.com/leo-arch/clifm/wiki/Customization#the-prompt)
 * Sequential and conditional commands execution 
-* User profiles
+* User [profiles](https://github.com/leo-arch/clifm/wiki/Specifics#profiles)
 * Customizable [keyboard shortcuts](https://github.com/leo-arch/clifm/wiki/Customization#keybindings)
 * Mas, a built-in pager for files listing
 * Eleven sorting methods
@@ -86,7 +86,7 @@ CliFM is a completely command-line-based, shell-like file manager able to perfor
 * CD on quit and file picker functions
 * Read and list files form [standard input](https://github.com/leo-arch/clifm/wiki/Advanced#standard-input)
 * [Files filter](https://github.com/leo-arch/clifm/wiki/Advanced#file-filters)
-* Up to eight workspaces
+* Up to eight [workspaces](https://github.com/leo-arch/clifm/wiki/Specifics#workspaces)
 * Fused parameters for ELN's (`s1`, for example, works just as `s 1` )
 * [Advcpmv](https://github.com/jarun/advcpmv) support (just `cp` and `mv` with a nice progress bar)
 * Light mode (just in case it is not fast enough for you)
