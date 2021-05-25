@@ -34,7 +34,7 @@ Secondly, because I'm sure I'm not the only person in this world looking for a s
 
 In the third place, because this world deserves a **non-curses terminal file manager**. Unlike most terminal file managers out there, CliFM replaces the traditional curses interface by a simple command line interface. In this sense, CliFM is certainly a file manager, but also **a shell extension**. Almost everything you do on your shell can be done in this file manager as well: search for files, copy, rename, and trash some of them, but, at the same time, update/upgrade your system, add some cronjob, stop a service, and run nano (or vi, or emacs, if you like).
 
-Those really used to the commands line (the very secret of Unix's power) will find themselves quite comfortable with a purely command line file manager. And this for a very simple reason: the command line is still there.
+Those really used to the commands line (the very secret of Unix's power) will find themselves quite comfortable with a purely command line file manager. And this for a very simple reason: the command line is still there. We do not hide the shell!
 
 ### Should all terminal file managers be curses-based file managers? CliFM is the answer to this question: No.
 
