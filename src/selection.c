@@ -332,7 +332,7 @@ sel_function(char **args)
 		}
 	}
 
-	if (new_sel > 0) {
+	if (new_sel > 0 && xargs.stealth_mode != 1) {
 		if (save_sel() != EXIT_SUCCESS) {
 			_err('e', PRINT_PROMPT, _("%s: Error writing selected files "
 				"to the selections file\n"), PROGRAM_NAME);
