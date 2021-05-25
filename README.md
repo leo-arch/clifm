@@ -42,7 +42,7 @@ Those really used to the commands line (the very secret of Unix's power) will fi
 
 ## Description
 
-<p align="center"><img src="images/icons.png"></p>
+<p align="center"><img src="images/icons_rounded.png"></p>
 
 CliFM is a completely command-line-based, shell-like file manager able to perform all the basic operations you may expect from any other file manager. Besides these common operations, such as copy, move, remove, etc, CliFM provides the following features:
 
@@ -67,7 +67,7 @@ CliFM is a completely command-line-based, shell-like file manager able to perfor
 * Bash-like quoting system
 * History function
 * Shell commands execution
-* Glob and regular expressions, including inverse matching
+* Glob and regular expressions (including inverse matching)
 * Aliases
 * Logs
 * Prompt and profile commands (run commands with each new prompt or at program startup)
@@ -87,7 +87,7 @@ CliFM is a completely command-line-based, shell-like file manager able to perfor
 * Files filter
 * Up to eight workspaces
 * Fused parameters for ELN's (`s1`, for example, works just as `s 1` )
-* `Advcpmv` support (`cp` and `mv` with a progress bar)
+* `Advcpmv` support (just `cp` and `mv` with a nice progress bar)
 * Light mode (just in case it is not fast enough for you)
 * Color schemes
 * **NEW**: Four customizable keybindings for custom plugins
