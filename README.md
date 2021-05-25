@@ -48,19 +48,19 @@ CliFM is a completely command-line-based, shell-like file manager able to perfor
 
 * It is [really CLI-based](https://github.com/leo-arch/clifm/wiki/Introduction#main-design-and-goals). No GUI nor TUI or curses at all, just a command line. Since it does not need any GUI, it can run on the kernel built-in console and even on a SSH or any other remote session.
 * With a memory footprint below 5 MiB and a disk usage of 0.5 MiB, it is incredibly lightweight and fast, and as such, able to run on really old hardware.
-* The use of short (and even one-character) [commands](https://github.com/leo-arch/clifm/wiki/Introduction#commands-short-summary), and list numbers ([ELN](https://github.com/leo-arch/clifm/wiki/Common-Operations)'s) for filenames. 
+* The use of [short (and even one-character) commands](https://github.com/leo-arch/clifm/wiki/Introduction#commands-short-summary), and list numbers ([ELN](https://github.com/leo-arch/clifm/wiki/Common-Operations)'s) for filenames. 
 * [Bookmarks](https://github.com/leo-arch/clifm/wiki/Common-Operations#bookmarks)
 * [Files selection](https://github.com/leo-arch/clifm/wiki/Common-Operations#selection) (supports both glob and regular expressions and works even across multiple instances of the program)
-* [Lira](https://github.com/leo-arch/clifm/wiki/Specifics#resource-opener), a built-in resource opener (supports regular expressions)
+* [_Lira_](https://github.com/leo-arch/clifm/wiki/Specifics#resource-opener), a built-in resource opener (supports regular expressions)
 * [Files search](https://github.com/leo-arch/clifm/wiki/Common-Operations#searching) (supports both glob and regular expressions)
 * A Freedesktop compliant trash system
 * Extended [color codes](https://github.com/leo-arch/clifm/wiki/Customization#colors) for file types and file extensions
-* Files counter for directories and symlinks to directories
+* [Files counter](https://github.com/leo-arch/clifm/wiki/Introduction#interface) for directories and symlinks to directories
 * Directory history map to keep in sight previous, current, and next entries in the directory history list
 * [Plugins](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
-* [Files preview](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) (via a native file previewer, but including support for [Ranger's scope.sh](https://github.com/ranger/ranger/blob/master/ranger/data/scope.sh) and [pistol](https://github.com/doronbehar/pistol) as well)
+* [Files preview](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) (via _BFG_, a native file previewer, but including support for [Ranger's scope.sh](https://github.com/ranger/ranger/blob/master/ranger/data/scope.sh) and [pistol](https://github.com/doronbehar/pistol) as well)
 * Stealth mode: Leave no trace on the host system. No file is read, no file is written.
-* [Kangaroo](https://github.com/leo-arch/clifm/wiki/Specifics#kangaroo-frecency-algorithm), a built-in directory jumper function similar to [autojump](https://github.com/wting/autojump), [z.lua](https://github.com/skywind3000/z.lua), and [zoxide](https://github.com/ajeetdsouza/zoxide).
+* [_Kangaroo_](https://github.com/leo-arch/clifm/wiki/Specifics#kangaroo-frecency-algorithm), a built-in directory jumper function similar to [autojump](https://github.com/wting/autojump), [z.lua](https://github.com/skywind3000/z.lua), and [zoxide](https://github.com/ajeetdsouza/zoxide).
 * Batch links
 * [Icons](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk) support :smirk:
 * Unicode suppport
@@ -76,7 +76,7 @@ CliFM is a completely command-line-based, shell-like file manager able to perfor
 * Sequential and conditional commands execution 
 * User [profiles](https://github.com/leo-arch/clifm/wiki/Specifics#profiles)
 * Customizable [keyboard shortcuts](https://github.com/leo-arch/clifm/wiki/Customization#keybindings)
-* Mas, a built-in pager for files listing
+* _Mas_, a built-in pager for files listing
 * Eleven sorting methods
 * Bulk rename
 * Archives and compression support (including Zstandard and ISO 9660)
@@ -113,7 +113,7 @@ You'll find the corresponding packages on the AUR: the [stable](https://aur.arch
 
 Of course, you can also clone, build, and install the package using the PKGBUILD file:
 
-```
+```sh
 $ git clone https://github.com/leo-arch/clifm.git
 $ cd clifm
 $ makepkg -si
@@ -126,14 +126,14 @@ $ makepkg -si
 
 1. Clone the repository
 
-```
+```sh
 $ git clone https://github.com/leo-arch/clifm.git
 $ cd clifm
 ```
 
 2. Run `make` as follows:
 
-```
+```sh
 $ sudo make install
 ```
 
