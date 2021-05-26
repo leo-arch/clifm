@@ -60,7 +60,7 @@ CliFM is a completely command-line-based, shell-like file manager able to perfor
 * Directory history map to keep in sight previous, current, and next entries in the directory history list
 * [Plugins](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
 * [Files preview](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) (via _BFG_, a native file previewer, but including support for [Ranger's scope.sh](https://github.com/ranger/ranger/blob/master/ranger/data/scope.sh) and [pistol](https://github.com/doronbehar/pistol) as well)
-* Stealth mode: Leave no trace on the host system. No file is read, no file is written.
+* [Stealth mode](https://github.com/leo-arch/clifm/wiki/Advanced#stealth-mode): Leave no trace on the host system. No file is read, no file is written.
 * [_Kangaroo_](https://github.com/leo-arch/clifm/wiki/Specifics#kangaroo-frecency-algorithm), a built-in directory jumper function similar to [autojump](https://github.com/wting/autojump), [z.lua](https://github.com/skywind3000/z.lua), and [zoxide](https://github.com/ajeetdsouza/zoxide).
 * Batch links
 * [Icons](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk) support :smirk:
@@ -79,12 +79,12 @@ CliFM is a completely command-line-based, shell-like file manager able to perfor
 * Customizable [keyboard shortcuts](https://github.com/leo-arch/clifm/wiki/Customization#keybindings)
 * _Mas_, a built-in pager for files listing
 * Eleven sorting methods
-* Bulk rename
-* Archives and compression support (including Zstandard and ISO 9660)
+* [Bulk rename](https://github.com/leo-arch/clifm/wiki/Advanced#bulk-rename)
+* [Archiving and compression](https://github.com/leo-arch/clifm/wiki/Advanced#archives) support (including Zstandard and ISO 9660)
 * Auto-cd and auto-open
 * Symlinks editor
 * Disk usage
-* CD on quit and file picker functions
+* [CD on quit](https://github.com/leo-arch/clifm/wiki/Advanced#cd-on-quit) and [file picker](https://github.com/leo-arch/clifm/wiki/Advanced#file-picker) functions
 * Read and list files form [standard input](https://github.com/leo-arch/clifm/wiki/Advanced#standard-input)
 * [Files filter](https://github.com/leo-arch/clifm/wiki/Advanced#file-filters)
 * Up to eight [workspaces](https://github.com/leo-arch/clifm/wiki/Specifics#workspaces)
