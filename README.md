@@ -79,7 +79,7 @@ CliFM is a completely command-line-based, shell-like file manager able to perfor
 * Customizable [keyboard shortcuts](https://github.com/leo-arch/clifm/wiki/Customization#keybindings)
 * _Mas_, a built-in pager for files listing
 * Eleven sorting methods
-* Bulk rename
+* [Bulk rename](https://github.com/leo-arch/clifm/wiki/Advanced#bulk-rename)
 * Archives and compression support (including Zstandard and ISO 9660)
 * Auto-cd and auto-open
 * Symlinks editor
