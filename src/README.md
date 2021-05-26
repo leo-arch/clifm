@@ -124,7 +124,26 @@ Interface: `listing.c`
 
 Jumper: `jump.c`
 
-## 4) Plugins
+## 4) Compilation
+
+CliFM is compiled used `gcc` (`clang` and `tcc` work as well) as follows:
+
+1) For _Linux_:
+```sh
+gcc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -lreadline -lcap -lacl
+```
+
+2) For _FreeBSD_:
+
+```sh
+gcc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -lreadline -lintl
+```
+
+To produce a fully `POSIX-2008` compliant executable pass the `\_BE_POSIX` option to the compiler, that is, `-D_BE_POSIX`
+
+**NOTE**: Since compiling in this way only produces a binary file, it is necessary to manually copy the remaining files. See the `install` block of the [Makefile](https://github.com/leo-arch/clifm/blob/master/Makefile).
+
+## 5) Plugins
 
 CliFM plugins, that is, commands or set of commands executed by CLiFM, could be any executable file, be it a shell script, a binary file (C, Python, Go, Rust, or whatever programming language you like).
 
