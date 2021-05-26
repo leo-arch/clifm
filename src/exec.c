@@ -557,7 +557,7 @@ exec_cmd(char **comm)
 			if (*comm[0] == 'v' && comm[0][1] == 'v' && !comm[0][2])
 				copy_n_rename = 1;
 
-			comm[0] = (char *)xrealloc(comm[0], 12 * sizeof(char *));
+			comm[0] = (char *)xrealloc(comm[0], 12 * sizeof(char));
 			if (cp_cmd == CP_CP)
 				strcpy(comm[0], "cp -iRp");
 			else if (cp_cmd == CP_ADVCP)
@@ -567,7 +567,7 @@ exec_cmd(char **comm)
 		}
 
 		else if (*comm[0] == 'm' && !comm[0][1]) {
-			comm[0] = (char *)xrealloc(comm[0], 10 * sizeof(char *));
+			comm[0] = (char *)xrealloc(comm[0], 10 * sizeof(char));
 			if (mv_cmd == MV_MV)
 				strcpy(comm[0], "mv -i");
 			else
