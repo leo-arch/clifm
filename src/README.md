@@ -85,7 +85,7 @@ Make sure blank/empty lines do not contains TABS or spaces. In the same way, rem
 
 ### Plugins
 
-We mostly use `POSIX shell scripts`. In this case, always use `shellcheck` to check your plugins. However, plugins can be written in any other language.
+We mostly use `POSIX shell scripts`. In this case, always use `shellcheck` to check your plugins.
 
 ## 2) General code structure
 
@@ -103,7 +103,7 @@ CliFM source code consists of multiple C source files, being `main.c` the starti
 
 **D)** Listing
 
-This is the basic structure of CliFM: generally speaking, it is just a shell. In between, however, lots of things happen. Leaving aside the taforementioned functions, the most important one is listdir(), defined in listing.c. Everything related to listing files happens here: reading files in the current directory (via readdir(3)), getting file information (via the dirent struct returned by **readdir**(3) itself and **stat**(3)), sorting files (via **qsort**(3)), and storing all these information in a global struct (`file_info`) for future access, for example, to get file properties of a given entry.
+This is the basic structure of CliFM: generally speaking, it is just a shell. In between, however, lots of things happen. Leaving aside the above mentioned functions, the most important one is `listdir()`, defined in `listing.c`. Everything related to listing files happens here: reading files in the current directory (via **readdir**(3)), getting file information (via the dirent struct returned by **readdir**(3) itself and **stat**(3)), sorting files (via **qsort**(3)), and storing all these information in a global struct (`file_info`) for future access, for example, to get file properties of a given entry.
 
 **E)** Whatever happens later, is just some function or operation invoked by the user and happening on top of the steps described above: opening a file or directory (via the `open_function()` and `cd_function()` functions, in `file_operations.c` and `navigation.c` respectivelly), opening a bookmark (`bookmarks.c`), opearting on files (`file_operations.c`), switching to a different profile (`profiles.c`), trashing a file (`trash.c`), searching for a file (`search.c`), running a plugin (`actions.c`), and so on.
 
@@ -148,5 +148,4 @@ To produce a fully `POSIX-2008` compliant executable pass the `\_BE_POSIX` optio
 
 ## 5) Plugins
 
-CliFM plugins, that is, commands or set of commands executed by CLiFM, could be any executable file, be it a shell script, a binary file (C, Python, Go, Rust, or whatever programming language you like).
-
+CliFM plugins, that is, commands or set of commands executed by CLiFM, could be any executable file, be it a shell script, a binary file (C, Python, Go, Rust, or whatever programming language you like). See the [plugins](https://github.com/leo-arch/clifm/wiki/Advanced#plugins) section.
