@@ -298,7 +298,7 @@ const char *INTERNAL_CMDS[] = {
  * dynamically allocated arrays for them (which, on the other side,
  * would make the whole thing slower and more tedious) */
 
-/* Colors (filetype and interface) */
+/* Colors (file type and interface) */
 char di_c[MAX_COLOR], /* Directory */
     nd_c[MAX_COLOR],  /* No read directory */
     ed_c[MAX_COLOR],  /* Empty dir */

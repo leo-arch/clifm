@@ -706,7 +706,7 @@ DividingLineChar='%c'\n\n"
 # history list, showing previous, current, and next entries\n\
 DirhistMap=%s\n\n"
 
-	    "# Use a regex expression to exclude filenames when listing files.\n\
+	    "# Use a regex expression to exclude file names when listing files.\n\
 # Example: .*~$ to exclude backup files (ending with ~). Do not quote\n\
 # the regular expression\n\
 Filter=\n\n"
@@ -775,7 +775,7 @@ ShowHiddenFiles=%s\n\
 LongViewMode=%s\n\
 LogCmds=%s\n\n"
 
-	    "# Minimum length at which a filename can be trimmed in long view mode\n\
+	    "# Minimum length at which a file name can be trimmed in long view mode\n\
 # (including ELN length and spaces)\n\
 MinFilenameTrim=%d\n\n"
 
@@ -808,7 +808,7 @@ AutoOpen=%s\n\n"
 # as /path. TAB completion is also available for bookmark names.\n\
 ExpandBookmarks=%s\n\n"
 
-	    "# In light mode, extra filetype checks (except those provided by\n\
+	    "# In light mode, extra file type checks (except those provided by\n\
 # the d_type field of the dirent structure (see readdir(3))\n\
 # are disabled to speed up the listing process. stat(3) and access(3)\n\
 # are not executed at all, so that we cannot know in advance if a file\n\
@@ -837,7 +837,7 @@ LightMode=%s\n\n",
 	fprintf(config_fp,
 	    "# If running with colors, append directory indicator and files counter\n\
 # to directories. If running without colors (via the --no-colors option),\n\
-# append filetype indicator at the end of filenames: '/' for directories,\n\
+# append file type indicator at the end of file names: '/' for directories,\n\
 # '@' for symbolic links, '=' for sockets, '|' for FIFO/pipes, '*'\n\
 # for for executable files, and '?' for unknown file types. Bear in mind\n\
 # that when running in light mode the check for executable files won't be\n\
@@ -972,7 +972,7 @@ create_def_cscheme(void)
 	}
 
 	fprintf(fp, "# CliFM default color scheme\n\n\
-# FiletypeColors defines the color used for filetypes when listing files, \n\
+# FiletypeColors defines the color used for file types when listing files, \n\
 # just as InterfaceColors defines colors for CliFM interface. Both make\n\
 # use of the same format used by the LS_COLORS environment variable. Thus,\n\
 # \"di=01;34\" means that (non-empty) directories will be listed in bold blue.\n\
@@ -1211,7 +1211,7 @@ create_config_files(void)
 			"pressing F6) to add the programs you use and remove those "
 			"you don't. This will make the process of opening files "
 			"faster and smoother\n"
-			"The default MIME list file, covering the most common filetype "
+			"The default MIME list file, covering the most common file type "
 			"associations, can be found in %s.\n"),
 			PROGRAM_NAME, MIME_FILE, sys_mimelist);
 

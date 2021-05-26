@@ -426,7 +426,7 @@ list_dir_light(void)
 
 	size_t columns_n = 1;
 
-	/* Get the longest filename */
+	/* Get the longest file name */
 
 	if (columned || long_view) {
 		i = (int)n;
@@ -543,7 +543,7 @@ list_dir_light(void)
 						break;
 
 					/* If another key is pressed, go back one position.
-					 * Otherwise, some filenames won't be listed.*/
+					 * Otherwise, some file names won't be listed.*/
 					default:
 						i--;
 						fputs("\r\x1b[K\x1b[3J", stdout);
@@ -609,7 +609,7 @@ list_dir_light(void)
 		 * backwards, use the terminal scrollback function */
 		if (pager) {
 			/* Run the pager only once all columns and rows fitting in
-			 * the screen are filled with the corresponding filenames */
+			 * the screen are filled with the corresponding file names */
 			if (last_column && counter > columns_n * ((size_t)term_rows - 2)) {
 
 				printf("\x1b[7;97m--Mas--\x1b[0;49m");
@@ -661,7 +661,7 @@ list_dir_light(void)
 					break;
 
 				/* If another key is pressed, go back one position.
-				 * Otherwise, some filenames won't be listed.*/
+				 * Otherwise, some file names won't be listed.*/
 				default:
 					i--;
 					fputs("\r\x1b[K\x1b[3J", stdout);
@@ -768,7 +768,7 @@ list_dir_light(void)
 
 		if (!last_column) {
 
-			/* Add spaces needed to equate the longest filename length */
+			/* Add spaces needed to equate the longest file name length */
 			int cur_len = (int)file_info[i].eln_n + 1 + (icons ? 3 : 0)
 						+ (int)file_info[i].len + (ind_char ? 1 : 0);
 			if (classify) {
@@ -827,7 +827,7 @@ END:
 	return EXIT_SUCCESS;
 }
 
-/* List files in the current working directory. Uses filetype colors
+/* List files in the current working directory. Uses file type colors
  * and columns. Return zero on success or one on error */
 int
 list_dir(void)
@@ -1075,7 +1075,7 @@ list_dir(void)
 				}
 			}
 
-			/* No extension. Check icons for specific filenames */
+			/* No extension. Check icons for specific file names */
 			else if (icons)
 				get_file_icon(file_info[n].name, (int)n);
 
@@ -1151,7 +1151,7 @@ list_dir(void)
 
 	size_t columns_n = 1;
 
-	/* Get the longest filename */
+	/* Get the longest file name */
 	if (columned || long_view) {
 		i = (int)n;
 		while (--i >= 0) {
@@ -1198,7 +1198,7 @@ list_dir(void)
 	if (long_view) {
 		int space_left = term_cols - MAX_PROP_STR;
 		/* SPACE_LEFT is the max space that should be used to print the
-		 * filename (plus space char) */
+		 * file name (plus space char) */
 
 		/* Do not allow SPACE_LEFT to be less than MIN_NAME_TRIM,
 		 * especially because the result of the above operation could
@@ -1268,7 +1268,7 @@ list_dir(void)
 						break;
 
 					/* If another key is pressed, go back one position.
-					 * Otherwise, some filenames won't be listed.*/
+					 * Otherwise, some file names won't be listed.*/
 					default:
 						i--;
 						fputs("\r\x1b[K\x1b[3J", stdout);
@@ -1332,7 +1332,7 @@ list_dir(void)
 		 * backwards, use the terminal scrollback function */
 		if (pager) {
 			/* Run the pager only once all columns and rows fitting in
-			 * the screen are filled with the corresponding filenames */
+			 * the screen are filled with the corresponding file names */
 			if (last_column && counter > columns_n * ((size_t)term_rows - 2)) {
 
 				fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
@@ -1384,7 +1384,7 @@ list_dir(void)
 					break;
 
 				/* If another key is pressed, go back one position.
-				 * Otherwise, some filenames won't be listed.*/
+				 * Otherwise, some file names won't be listed.*/
 				default:
 					i--;
 					fputs("\r\x1b[K\x1b[3J", stdout);
@@ -1483,7 +1483,7 @@ list_dir(void)
 			}
 
 			if (classify) {
-				/* Append filetype indicator */
+				/* Append file type indicator */
 				switch (file_info[i].type) {
 
 				case DT_DIR:
@@ -1531,7 +1531,7 @@ list_dir(void)
 
 		if (!last_column) {
 
-			/* Add spaces needed to equate the longest filename length */
+			/* Add spaces needed to equate the longest file name length */
 			int cur_len = (int)file_info[i].eln_n + 1 + (icons ? 3 : 0) + (int)file_info[i].len + (ind_char ? 1 : 0);
 			if (file_info[i].dir && classify) {
 				cur_len += 2;

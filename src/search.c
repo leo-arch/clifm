@@ -42,7 +42,7 @@
 #include "navigation.h"
 #include "sort.h"
 
-/* List matching filenames in the specified directory */
+/* List matching file names in the specified directory */
 int
 search_glob(char **comm, int invert)
 {
@@ -56,7 +56,7 @@ search_glob(char **comm, int invert)
 	struct stat file_attrib;
 
 	/* If there are two arguments, the one starting with '-' is the
-	 * filetype and the other is the path */
+	 * file type and the other is the path */
 	if (comm[1] && comm[2]) {
 
 		if (comm[1][0] == '-') {
@@ -73,7 +73,7 @@ search_glob(char **comm, int invert)
 			search_path = comm[1];
 	}
 
-	/* If just one argument, '-' indicates filetype. Else, we have a
+	/* If just one argument, '-' indicates file type. Else, we have a
 	 * path */
 	else if (comm[1]) {
 
@@ -89,7 +89,7 @@ search_glob(char **comm, int invert)
 
 	if (file_type) {
 
-		/* Convert filetype into a macro that can be decoded by stat().
+		/* Convert file type into a macro that can be decoded by stat().
 		 * If file type is specified, matches will be checked against
 		 * this value */
 		switch (file_type) {
@@ -119,7 +119,7 @@ search_glob(char **comm, int invert)
 			break;
 
 		default:
-			fprintf(stderr, _("%s: '%c': aUnrecognized filetype\n"),
+			fprintf(stderr, _("%s: '%c': Unrecognized file type\n"),
 			    PROGRAM_NAME, (char)file_type);
 			return EXIT_FAILURE;
 		}
@@ -141,7 +141,7 @@ search_glob(char **comm, int invert)
 			char *deq_dir = dequote_str(search_path, 0);
 
 			if (!deq_dir) {
-				fprintf(stderr, _("%s: %s: Error dequoting filename\n"),
+				fprintf(stderr, _("%s: %s: Error dequoting file name\n"),
 				    PROGRAM_NAME, comm[1]);
 				return EXIT_FAILURE;
 			}
@@ -235,8 +235,8 @@ search_glob(char **comm, int invert)
 
 	size_t flongest = 0;
 
-	/* We need to store pointers to matching filenames in array of
-	 * pointers, just as the filename length (to construct the
+	/* We need to store pointers to matching file names in array of
+	 * pointers, just as the file name length (to construct the
 	 * columned output), and, if searching in CWD, its index (ELN)
 	 * in the dirlist array as well */
 	char **pfiles = (char **)NULL;
@@ -351,7 +351,7 @@ search_glob(char **comm, int invert)
 
 			pfiles[found] = globbed_files.gl_pathv[i];
 
-			/* Get the longest filename in the list */
+			/* Get the longest file name in the list */
 
 			/* If not searching in CWD, we only need to know the file's
 			 * length (no ELN) */
@@ -466,7 +466,7 @@ search_glob(char **comm, int invert)
 	return EXIT_SUCCESS;
 }
 
-/* List matching (or not marching, if inverse is set to 1) filenames
+/* List matching (or not marching, if inverse is set to 1) file names
  * in the specified directory */
 int
 search_regex(char **comm, int invert)
@@ -478,7 +478,7 @@ search_regex(char **comm, int invert)
 	mode_t file_type = 0;
 
 	/* If there are two arguments, the one starting with '-' is the
-	 * filetype and the other is the path */
+	 * file type and the other is the path */
 	if (comm[1] && comm[2]) {
 
 		if (*comm[1] == '-') {
@@ -495,7 +495,7 @@ search_regex(char **comm, int invert)
 			search_path = comm[1];
 	}
 
-	/* If just one argument, '-' indicates filetype. Else, we have a
+	/* If just one argument, '-' indicates file type. Else, we have a
 	 * path */
 	else if (comm[1]) {
 		if (*comm[1] == '-')
@@ -534,7 +534,7 @@ search_regex(char **comm, int invert)
 			break;
 
 		default:
-			fprintf(stderr, _("%s: '%c': Unrecognized filetype\n"),
+			fprintf(stderr, _("%s: '%c': Unrecognized file type\n"),
 			    PROGRAM_NAME, (char)file_type);
 			return EXIT_FAILURE;
 		}
@@ -552,7 +552,7 @@ search_regex(char **comm, int invert)
 			char *deq_dir = dequote_str(search_path, 0);
 
 			if (!deq_dir) {
-				fprintf(stderr, _("%s: %s: Error dequoting filename\n"),
+				fprintf(stderr, _("%s: %s: Error dequoting file name\n"),
 				    PROGRAM_NAME, comm[1]);
 				return EXIT_FAILURE;
 			}
@@ -698,7 +698,7 @@ search_regex(char **comm, int invert)
 	size_t *files_len = (size_t *)xnmalloc(found + 1, sizeof(size_t));
 	int *match_type = (int *)xnmalloc(found + 1, sizeof(int));
 
-	/* Get the longest filename in the list */
+	/* Get the longest file name in the list */
 	int j = (int)found;
 	while (--j >= 0) {
 

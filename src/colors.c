@@ -320,7 +320,7 @@ cschemes_function(char **args)
 	return EXIT_FAILURE;
 }
 
-/* Open the config file, get values for filetype and extension colors
+/* Open the config file, get values for file type and extension colors
  * and copy these values into the corresponding variable. If some value
  * is not found, or if it's a wrong value, the default is set. */
 int
@@ -881,7 +881,7 @@ set_colors(const char *colorscheme, int env)
 		 * colors. In this way, files listed for TAB completion will
 		 * use CliFM colors instead of system colors */
 
-		/* Strip CLiFM custom filetypes (nd, ne, nf, ed, ef, ee, uf,
+		/* Strip CLiFM custom file types (nd, ne, nf, ed, ef, ee, uf,
 		 * bm, el, mi, dl, tx, df, dc, wc, dh, li, ti, em, wm, nm, si,
 		 * and ca), from filecolors to construct a valid value for
 		 * LS_COLORS */
@@ -1512,7 +1512,7 @@ color_codes(void)
 		 "files contained by the corresponding directory, excluding "
 		 "self (.) and parent (..) directories.\n"));
 	printf(_("\nThe value in parentheses is the code that is to be used "
-		 "to modify the color of the corresponding filetype in the "
+		 "to modify the color of the corresponding file type in the "
 		 "color scheme file (in the \"FiletypeColors\" line), "
 		 "using the same ANSI style color format used by dircolors. "
 		 "By default, %s uses only 8 colors, but you can use 256 "

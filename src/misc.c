@@ -270,7 +270,7 @@ new_instance(char *dir, int sudo)
 	char *deq_dir = dequote_str(dir, 0);
 
 	if (!deq_dir) {
-		fprintf(stderr, _("%s: %s: Error dequoting filename\n"),
+		fprintf(stderr, _("%s: %s: Error dequoting file name\n"),
 		    PROGRAM_NAME, dir);
 		free(self);
 		return EXIT_FAILURE;
@@ -1457,7 +1457,7 @@ help_function(void)
 \n -b, --bookmarks-file=FILE\t specify an alternative bookmarks file\
 \n -c, --config-file=FILE\t\t specify an alternative configuration file\
 \n -e, --no-eln\t\t\t do not print ELN (entry list number) at \
-\n              the left of each filename \
+\n              the left of each file name \
 \n -f, --no-folders-first\t\t do not list folders first\
 \n -F, --folders-first\t\t list folders first (default)\
 \n -g, --pager\t\t\t enable the pager\
@@ -1481,7 +1481,7 @@ help_function(void)
 \n              default value. However, most settings can \
 \n              be controlled via command line options\
 \n -u, --no-unicode \t\t disable unicode\
-\n -U, --unicode \t\t\t enable unicode to correctly list filenames \
+\n -U, --unicode \t\t\t enable unicode to correctly list file names \
 \n              containing accents, tildes, umlauts, \
 \n              non-latin letters, etc. This option is \
 \n              enabled by default\
@@ -1531,10 +1531,10 @@ help_function(void)
 \n\t\t\t\tby just specifying the corresponding ELN \
 \n              (e.g. '12' instead of 'cd 12'). This \
 \n              option forces the use of 'cd'\
-\n     --no-classify\t\tDo not append filetype indicators\
+\n     --no-classify\t\tDo not append file type indicators\
 \n     --no-clear-screen\t\t do not clear the screen when listing \
 \n              directories\
-\n     --no-colors\t\t disable filetype colors for files listing \
+\n     --no-colors\t\t disable file type colors for files listing \
 \n     --no-columns\t\t disable columned files listing\
 \n     --no-files-counter\t\t disable the files counter for \
 \n              directories. This option is especially \

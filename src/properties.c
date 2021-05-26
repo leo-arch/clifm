@@ -504,7 +504,7 @@ print_entry_props(struct fileinfo *props, size_t max)
 	group = getgrgid(props->uid);
 	owner = getpwuid(props->gid); */
 
-	/*  If filename length is greater than max, truncate it
+	/*  If file name length is greater than max, truncate it
 	 * to max (later a tilde (~) will be appended to let the user know
 	 * the file name was truncated) */
 	char trim_name[NAME_MAX];
@@ -583,7 +583,7 @@ properties_function(char **comm)
 			char *deq_file = dequote_str(comm[i], 0);
 
 			if (!deq_file) {
-				fprintf(stderr, _("%s: %s: Error dequoting filename\n"),
+				fprintf(stderr, _("%s: %s: Error dequoting file name\n"),
 				    PROGRAM_NAME, comm[i]);
 				exit_status = EXIT_FAILURE;
 				continue;

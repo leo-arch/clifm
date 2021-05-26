@@ -368,7 +368,7 @@ exec_cmd(char **comm)
 			}
 		}
 
-		/* Deescape the string (only if filename) */
+		/* Deescape the string (only if file name) */
 		if (strchr(comm[0], '\\')) {
 			char *deq_str = dequote_str(comm[0], 0);
 			if (deq_str) {
@@ -1676,7 +1676,7 @@ exec_cmd(char **comm)
 		 * if the amount of files listed on the screen (ELN's) is larger
 		 * or equal than 644 and the user tries to issue this command:
 		 * "chmod 644 filename", CLIFM will take 644 to be an ELN, and
-		 * will thereby try to expand it into the corresponding filename,
+		 * will thereby try to expand it into the corresponding file name,
 		 * which is not what the user wants. To prevent this, simply run
 		 * the command as follows: ";chmod 644 filename" */
 

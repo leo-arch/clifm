@@ -558,7 +558,7 @@ archiver(char **args, char mode)
 					 "compression of multiple files into one single "
 					 "compressed file. Files will be compressed rather "
 					 "into multiple compressed files using original "
-					 "filenames\n"), bold, df_c);
+					 "file names\n"), bold, df_c);
 
 				for (i = 1; args[i]; i++) {
 					if (zstandard(args[i], NULL, 'c', 0) != EXIT_SUCCESS)
@@ -795,7 +795,7 @@ archiver(char **args, char mode)
 	case 'e': /* fallthrough */
 	case 'r': {
 
-		/* Store all filenames into one single variable */
+		/* Store all file names into one single variable */
 		size_t len = 1;
 		dec_files = (char *)xnmalloc(len, sizeof(char));
 		*dec_files = '\0';
@@ -829,7 +829,7 @@ archiver(char **args, char mode)
 
 				if (!deq_name) {
 					fprintf(stderr, _("archiver: %s: Error "
-							"dequoting filename\n"), args[i]);
+							"dequoting file name\n"), args[i]);
 					return EXIT_FAILURE;
 				}
 
@@ -1036,7 +1036,7 @@ zstandard(char *in_file, char *out_file, char mode, char op)
 	char *deq_file = dequote_str(in_file, 0);
 
 	if (!deq_file) {
-		fprintf(stderr, _("archiver: %s: Error dequoting filename\n"), in_file);
+		fprintf(stderr, _("archiver: %s: Error dequoting file name\n"), in_file);
 		return EXIT_FAILURE;
 	}
 

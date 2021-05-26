@@ -682,8 +682,8 @@ split_fusedcmd(char *str)
  * These expansions are the most import part of this function.
  */
 
-/* NOTE: Though filenames could consist of everything except of slash
- * and null characters, POSIX.1 recommends restricting filenames to
+/* NOTE: Though file names could consist of everything except of slash
+ * and null characters, POSIX.1 recommends restricting file names to
  * consist of the following characters: letters (a-z, A-Z), numbers
  * (0-9), period (.), dash (-), and underscore ( _ ).
 
@@ -945,7 +945,7 @@ parse_input_str(char *str)
 				&& strcmp(substr[i], bookmarks[j].name) == 0) {
 
 					/* Do not expand bookmark names that conflicts
-					 * with a filename in CWD */
+					 * with a file name in CWD */
 					int conflict = 0, k = (int)files;
 
 					while (--k >= 0) {
@@ -1082,7 +1082,7 @@ parse_input_str(char *str)
 				sel_array[j++] = savestring(substr[i], strlen(substr[i]));
 
 			for (i = 0; i < sel_n; i++) {
-				/* Escape selected filenames and copy them into tmp
+				/* Escape selected file names and copy them into tmp
 				 * array */
 				char *esc_str = escape_str(sel_elements[i]);
 
@@ -1093,7 +1093,7 @@ parse_input_str(char *str)
 				}
 
 				else {
-					fprintf(stderr, _("%s: %s: Error quoting filename\n"),
+					fprintf(stderr, _("%s: %s: Error quoting file name\n"),
 					    PROGRAM_NAME, sel_elements[j]);
 					/* Free elements selected thus far and and all the
 					 * input substrings */
@@ -1192,7 +1192,7 @@ parse_input_str(char *str)
 						for (j = 0; j < eln_as_file_n; j++) {
 							if (atoi(file_info[eln_as_file[j]].name) == num) {
 								conflict = num;
-								/* One conflicting filename is enough */
+								/* One conflicting file name is enough */
 								break;
 							}
 						}
@@ -1222,7 +1222,7 @@ parse_input_str(char *str)
 
 				if (num > 0 && num <= (int)files) {
 					/* Replace the ELN by the corresponding escaped
-					 * filename */
+					 * file name */
 					int j = num - 1;
 					char *esc_str = escape_str(file_info[j].name);
 
@@ -1247,7 +1247,7 @@ parse_input_str(char *str)
 
 					else {
 						fprintf(stderr, _("%s: %s: Error quoting "
-								"filename\n"),
+								"file name\n"),
 								PROGRAM_NAME, file_info[num - 1].name);
 						/* Free whatever was allocated thus far */
 
@@ -1337,11 +1337,11 @@ parse_input_str(char *str)
 	for (i = 0; substr[i]; i++) {
 
 		/* Do not perform any of the expansions below for selected
-		 * elements: they are full path filenames that, as such, do not
+		 * elements: they are full path file names that, as such, do not
 		 * need any expansion */
 		if (is_sel) { /* is_sel is true only for the current input and if
 			there was some "sel" keyword in it */
-			/* Strings between is_sel and sel_n are selected filenames */
+			/* Strings between is_sel and sel_n are selected file names */
 			if (i >= (size_t)is_sel && i <= sel_n)
 				continue;
 		}
@@ -1443,7 +1443,7 @@ parse_input_str(char *str)
 					|| strcmp(globbuf.gl_pathv[i], "..") == 0)
 						continue;
 
-					/* Escape the globbed filename and copy it */
+					/* Escape the globbed file name and copy it */
 					char *esc_str = escape_str(globbuf.gl_pathv[i]);
 
 					if (esc_str) {
@@ -1453,7 +1453,7 @@ parse_input_str(char *str)
 
 					else {
 						fprintf(stderr, _("%s: %s: Error quoting "
-							"filename\n"), PROGRAM_NAME, globbuf.gl_pathv[i]);
+							"file name\n"), PROGRAM_NAME, globbuf.gl_pathv[i]);
 						register size_t k = 0;
 
 						for (k = 0; k < j; k++)
@@ -1525,7 +1525,7 @@ parse_input_str(char *str)
 					word_cmd[j++] = savestring(substr[i], strlen(substr[i]));
 
 				for (i = 0; i < wordbuf.we_wordc; i++) {
-					/* Escape the globbed filename and copy it*/
+					/* Escape the globbed file name and copy it*/
 					char *esc_str = escape_str(wordbuf.we_wordv[i]);
 
 					if (esc_str) {
@@ -1535,7 +1535,7 @@ parse_input_str(char *str)
 
 					else {
 						fprintf(stderr, _("%s: %s: Error quoting "
-							"filename\n"), PROGRAM_NAME, wordbuf.we_wordv[i]);
+							"file name\n"), PROGRAM_NAME, wordbuf.we_wordv[i]);
 
 						register size_t k = 0;
 
@@ -2035,7 +2035,7 @@ get_substr(char *str, const char ifs)
 }
 
 /* This function simply deescapes whatever escaped chars it founds in
- * TEXT, so that readline can compare it to system filenames when
+ * TEXT, so that readline can compare it to system file names when
  * completing paths. Returns a string containing text without escape
  * sequences */
 char *

@@ -35,7 +35,7 @@
 #include "exec.h"
 #include "mime.h"
 
-/* Get application associated to a given MIME filetype or file extension.
+/* Get application associated to a given MIME file type or file extension.
  * Returns the first matching line in the MIME file or NULL if none is
  * found */
 char *
@@ -489,7 +489,7 @@ mime_open(char **args)
 	}
 
 	/* To the number of spaces/parametes we need to add the command itself,
-	 * the filename and the final NULL string (spaces + 3) */
+	 * the file name and the final NULL string (spaces + 3) */
 	char **cmd = (char **)xnmalloc(spaces + 3, sizeof(char *));
 
 	/* Rewind P to the beginning of APP */

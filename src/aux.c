@@ -220,7 +220,7 @@ dir_size(char *dir)
 	return retval;
 }
 
-/* Return the filetype of the file pointed to by LINK, or -1 in case of
+/* Return the file type of the file pointed to by LINK, or -1 in case of
  * error. Possible return values:
 S_IFDIR: 40000 (octal) / 16384 (decimal, integer)
 S_IFREG: 100000 / 32768

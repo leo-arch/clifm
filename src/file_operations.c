@@ -240,13 +240,13 @@ open_function(char **cmd)
 	 * will be opened */
 
 	char no_open_file = 1, file_type[128];
-	/* Reserve a good amount of bytes for filetype: it cannot be
+	/* Reserve a good amount of bytes for file type: it cannot be
 		  * known beforehand how many bytes the TRANSLATED string will
 		  * need */
 
 	switch ((file_attrib.st_mode & S_IFMT)) {
 	case S_IFBLK:
-		/* Store filetype to compose and print the error message, if
+		/* Store file type to compose and print the error message, if
 		 * necessary */
 		strcpy(file_type, _("block device"));
 		break;
@@ -355,7 +355,7 @@ edit_link(char *link)
 	if (!link || !*link)
 		return EXIT_FAILURE;
 
-	/* Dequote the filename, if necessary */
+	/* Dequote the file name, if necessary */
 	if (strchr(link, '\\')) {
 		char *tmp = dequote_str(link, 0);
 
@@ -426,7 +426,7 @@ edit_link(char *link)
 	autocd = autocd_status;
 	auto_open = auto_open_status;
 
-	/* If an ELN, replace by the corresponding filename */
+	/* If an ELN, replace by the corresponding file name */
 	if (is_number(new_path)) {
 		int i_new_path = atoi(new_path) - 1;
 		if (file_info[i_new_path].name) {
@@ -651,12 +651,12 @@ remove_file(char **args)
 			tmp = dequote_str(args[i], 0);
 
 			if (tmp) {
-				/* Start storing filenames in 3: 0 is for 'rm', and 1
+				/* Start storing file names in 3: 0 is for 'rm', and 1
 				 * and 2 for parameters, including end of parameters (--) */
 				rm_cmd[j++] = savestring(tmp, strlen(tmp));
 				free(tmp);
 			} else {
-				fprintf(stderr, "%s: %s: Error dequoting filename\n",
+				fprintf(stderr, "%s: %s: Error dequoting file name\n",
 				    PROGRAM_NAME, args[i]);
 				continue;
 			}
@@ -700,9 +700,9 @@ remove_file(char **args)
 
 /* Rename a bulk of files (ARGS) at once. Takes files to be renamed
  * as arguments, and returns zero on success and one on error. The
- * procedude is quite simple: filenames to be renamed are copied into
+ * procedude is quite simple: file names to be renamed are copied into
  * a temporary file, which is opened via the mime function and shown
- * to the user to modify it. Once the filenames have been modified and
+ * to the user to modify it. Once the file names have been modified and
  * saved, modifications are printed on the screen and the user is
  * asked whether to perform the actual bulk renaming (via mv) or not.
  * I took this bulk rename method, just because it is quite simple and
@@ -735,13 +735,13 @@ bulk_rename(char **args)
 	/* Copy all files to be renamed to the bulk file */
 	for (i = 1; args[i]; i++) {
 
-		/* Dequote filename, if necessary */
+		/* Dequote file name, if necessary */
 		if (strchr(args[i], '\\')) {
 			char *deq_file = dequote_str(args[i], 0);
 
 			if (!deq_file) {
 				fprintf(stderr, _("bulk: %s: Error dequoting "
-						  "filename\n"),
+						  "file name\n"),
 				    args[i]);
 				continue;
 			}
@@ -841,7 +841,7 @@ bulk_rename(char **args)
 		i++;
 	}
 
-	/* If no filename was modified */
+	/* If no file name was modified */
 	if (!modified) {
 		puts(_("bulk: Nothing to do"));
 

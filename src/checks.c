@@ -214,7 +214,7 @@ is_internal_c(const char *restrict cmd)
 
 /* Check cmd against a list of internal commands. Used by parse_input_str()
  * to know if it should perform additional expansions, like glob, regex,
- * tilde, and so on. Only internal commands dealing with filenames
+ * tilde, and so on. Only internal commands dealing with file names
  * should be checked here */
 int
 is_internal(const char *cmd)
@@ -344,7 +344,7 @@ check_regex(char *str)
 		p++;
 	}
 
-	/* And if STR is not a filename, take it as a possible regex */
+	/* And if STR is not a file name, take it as a possible regex */
 	if (char_found)
 		if (access(str, F_OK) == -1)
 			return EXIT_SUCCESS;

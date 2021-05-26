@@ -165,7 +165,7 @@ sel_function(char **args)
 	}
 
 	if (filetype) {
-		/* Convert filetype into a macro that can be decoded by stat().
+		/* Convert file type into a macro that can be decoded by stat().
 		 * If file type is specified, matches will be checked against
 		 * this value */
 		switch (filetype) {
@@ -192,7 +192,7 @@ sel_function(char **args)
 			break;
 
 		default:
-			fprintf(stderr, _("%s: '%c': Unrecognized filetype\n"),
+			fprintf(stderr, _("%s: '%c': Unrecognized file type\n"),
 			    PROGRAM_NAME, (char)filetype);
 			return EXIT_FAILURE;
 		}
@@ -442,7 +442,7 @@ show_sel_files(void)
 					pager = 0, reset_pager = 1; /* 'q' */
 					break;
 				/* If another key is pressed, go back one position.
-				 * Otherwise, some filenames won't be listed.*/
+				 * Otherwise, some file names won't be listed.*/
 				default:
 					i--;
 					continue;

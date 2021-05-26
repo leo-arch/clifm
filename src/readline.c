@@ -55,7 +55,7 @@ initialize_readline(void)
 	  * first entered string (if autocd and/or auto-open are enabled, check
 	  * for paths as well). The second and later entered strings will
 	  * be autocompleted with paths instead, just like in Bash, or with
-	  * listed filenames, in case of ELN's. I use a custom completion
+	  * listed file names, in case of ELN's. I use a custom completion
 	  * function to add command and ELN completion, since readline's
 	  * internal completer only performs path completion */
 
@@ -105,7 +105,7 @@ initialize_readline(void)
 	/* This function is executed inmediately before path completion. So,
 	 * if the string to be completed is, for instance, "user\ file" (see
 	 * the above comment), this function should return the dequoted
-	 * string so it won't conflict with system filenames: you want
+	 * string so it won't conflict with system file names: you want
 	 * "user file", because "user\ file" does not exist, and, in this
 	 * latter case, readline won't find any matches */
 	rl_filename_dequoting_function = dequote_str;
@@ -848,7 +848,7 @@ filenames_gen_text(const char *text, int state)
 	rl_filename_completion_desired = 1;
 	/* According to the GNU readline documention: "If it is set to a
 	 * non-zero value, directory names have a slash appended and
-	 * Readline attempts to quote completed filenames if they contain
+	 * Readline attempts to quote completed file names if they contain
 	 * any embedded word break characters." To make the quoting part
 	 * work I had to specify a custom quoting function (my_rl_quote) */
 	if (!state) { /* state is zero only the first time readline is

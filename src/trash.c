@@ -190,7 +190,7 @@ trash_function(char **comm)
 	else {
 
 		/* Create suffix from current date and time to create unique
-		 * filenames for trashed files */
+		 * file names for trashed files */
 		int exit_status = EXIT_SUCCESS;
 		time_t rawtime = time(NULL);
 		struct tm *tm = localtime(&rawtime);
@@ -330,7 +330,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 		filename = straftlst(file, '/');
 
 	if (!filename) {
-		fprintf(stderr, _("%s: trash: %s: Error getting filename\n"),
+		fprintf(stderr, _("%s: trash: %s: Error getting file name\n"),
 		    PROGRAM_NAME, file);
 		return EXIT_FAILURE;
 	}
@@ -1122,7 +1122,7 @@ wx_parent_check(char *file)
 		fprintf(stderr, _("%s: trash: %s (%s): Unsupported file type\n"),
 		    PROGRAM_NAME, file, ((file_attrib.st_mode & S_IFMT) == S_IFBLK)
 		    ? "Block device" : ((file_attrib.st_mode & S_IFMT) == S_IFCHR)
-		    ? "Character device" : "Unknown filetype");
+		    ? "Character device" : "Unknown file type");
 		exit_status = EXIT_FAILURE;
 		break;
 	}
