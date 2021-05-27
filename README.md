@@ -183,7 +183,3 @@ This project is licensed under the GPL version 2 (or later) license. See the [LI
 
 ## Contributing
 We welcome community contributions. Please see the [CONTRIBUTING.md](https://github.com/leo-arch/clifm/blob/master/CONTRIBUTING.md) file for details.
-
----
-
-Just try it and let me know. It gets better and better. I myself use it as my main, and indeed only, file manager; it couldn't be so bad, isn't it?
