@@ -1,4 +1,5 @@
-<p align="center"><img src="images/clifm_300.png"></p>
+<p align="center"><img src="images/logo/160x160.png"></p>
+<h1 align="center">CliFM</h1>
 <h2 align="center">The KISS, non-curses terminal file manager</h2>
 <h3 align="center">Written in C, fast, extensible, and lightweight as hell</h3>
 <h4 align="center"><a
