@@ -1,10 +1,14 @@
-<p align="center"><img src="images/logo/160x160.png"></p>
+<p align="center">
+	<a href="https://github.com/leo/clifm">
+		<img src="images/logo/clifm.svg" alt="CliFM logo" width="160" height="160">
+	</a>
+</p>
 <h1 align="center">CliFM</h1>
 <h2 align="center">The KISS, non-curses terminal file manager</h2>
 <h3 align="center">Written in C, fast, extensible, and lightweight as hell</h3>
 <h4 align="center"><a
-href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/bug_report.md">Report bug</a> &#xb7 <a
-href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/feature_request.md">Request feature</a> &#xb7 <a
+href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/bug_report.md">Report bug</a> · <a
+href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/feature_request.md">Request feature</a> · <a
 href="https://github.com/leo-arch/clifm/wiki">Explore documentation</a></h4>
 
 <br />
@@ -26,6 +30,15 @@ href="https://github.com/leo-arch/clifm/wiki">Explore documentation</a></h4>
 Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Dikiciyan)
 
 ---
+
+## Table of contents
+* [Why?](#why)
+* [Description](#description)
+* [Installing CliFM](#installing-clifm)
+* [First steps](#first-steps)
+* [Support](#support)
+* [License](#license)
+* [Contributing](#contributing)
 
 ## Why?
 
