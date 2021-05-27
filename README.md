@@ -182,4 +182,4 @@ This project is licensed under the GPL version 2 (or later) license. See the [LI
 ---
 
 ## Contributing
-We welcome community contributions. Please see the [CONTRIBUTING.md](https://github.com/leo-arch/clifm/blob/master/CONTRIBUTING.md) file for details.
+We welcome community contributions. Please see the [CONTRIBUTING](https://github.com/leo-arch/clifm/blob/master/CONTRIBUTING.md) file for details.
