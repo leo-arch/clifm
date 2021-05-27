@@ -1,10 +1,14 @@
-<p align="center"><img src="images/logo/160x160.png"></p>
+<p align="center">
+	<a href="https://github.com/leo/clifm">
+		<img src="images/logo/clifm.svg" alt="CliFM logo" width="160" height="160">
+	</a>
+</p>
 <h1 align="center">CliFM</h1>
 <h2 align="center">The KISS, non-curses terminal file manager</h2>
 <h3 align="center">Written in C, fast, extensible, and lightweight as hell</h3>
 <h4 align="center"><a
-href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/bug_report.md">Report bug</a> &#xb7 <a
-href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/feature_request.md">Request feature</a> &#xb7 <a
+href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/bug_report.md">Report bug</a> · <a
+href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/feature_request.md">Request feature</a> · <a
 href="https://github.com/leo-arch/clifm/wiki">Explore documentation</a></h4>
 
 <br />
@@ -20,10 +24,23 @@ href="https://github.com/leo-arch/clifm/wiki">Explore documentation</a></h4>
 <a><img src="https://img.shields.io/github/last-commit/leo-arch/clifm/master?color=blue&style=for-the-badge"/></a>
 </p>
 
+---
+
 <h3 align="center"><br><i>Did I say it's fast?</i></h3>
 <p align="center"><a href="https://mega.nz/embed/J8hEkCZZ#fGp0JtcDvFIWKmTc4cOp0iMrWRlbqs99THg8F7EmQWI"><img src="images/vid_thumb.png"></a></p>
 
 Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Dikiciyan)
+
+---
+
+## Table of contents
+* [Why?](#why)
+* [Description](#description)
+* [Installing CliFM](#installing-clifm)
+* [First steps](#first-steps)
+* [Support](#support)
+* [License](#license)
+* [Contributing](#contributing)
 
 ---
 
@@ -169,8 +186,4 @@ This project is licensed under the GPL version 2 (or later) license. See the [LI
 ---
 
 ## Contributing
-We welcome community contributions. Please see the [CONTRIBUTING.md](https://github.com/leo-arch/clifm/blob/master/CONTRIBUTING.md) file for details.
-
----
-
-Just try it and let me know. It gets better and better. I myself use it as my main, and indeed only, file manager; it couldn't be so bad, isn't it?
+We welcome community contributions. Please see the [CONTRIBUTING](https://github.com/leo-arch/clifm/blob/master/CONTRIBUTING.md) file for details.
