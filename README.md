@@ -1,5 +1,5 @@
 <p align="center">
-	<a href="https://github.com/leo/clifm">
+	<a href="https://github.com/leo-arch/clifm">
 		<img src="images/logo/clifm.svg" alt="CliFM logo" width="160" height="160">
 	</a>
 </p>
