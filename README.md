@@ -11,8 +11,7 @@ href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/bug_r
 href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/feature_request.md">Request feature</a> · <a
 href="https://github.com/leo-arch/clifm/wiki">Explore documentation</a></h4>
 
-<br />
-<br />
+---
 
 <p align="center">
 <a href="https://aur.archlinux.org/packages/clifm/"><img src="https://img.shields.io/aur/version/clifm?color=1793d1&label=clifm&logo=arch-linux&style=for-the-badge"/></a>
