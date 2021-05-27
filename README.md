@@ -24,6 +24,8 @@ href="https://github.com/leo-arch/clifm/wiki">Explore documentation</a></h4>
 <a><img src="https://img.shields.io/github/last-commit/leo-arch/clifm/master?color=blue&style=for-the-badge"/></a>
 </p>
 
+---
+
 <h3 align="center"><br><i>Did I say it's fast?</i></h3>
 <p align="center"><a href="https://mega.nz/embed/J8hEkCZZ#fGp0JtcDvFIWKmTc4cOp0iMrWRlbqs99THg8F7EmQWI"><img src="images/vid_thumb.png"></a></p>
 
@@ -39,6 +41,8 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 * [Support](#support)
 * [License](#license)
 * [Contributing](#contributing)
+
+---
 
 ## Why?
 
