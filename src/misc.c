@@ -1746,25 +1746,33 @@ version_function(void)
 void
 splash(void)
 {
-	printf("\n%s                         xux\n"
-	       "       :xuiiiinu:.......u@@@u........:xunninnu;\n"
-	       "    .xi#@@@@@@@@@n......x@@@l.......x#@@@@@@@@@:...........:;unnnu;\n"
-	       "  .:i@@@@lnx;x#@@i.......l@@@u.....x#@@lu;:;;..;;nnll#llnnl#@@@@@@#u.\n"
-	       "  .i@@@i:......::........;#@@#:....i@@@x......;@@@@@@@@@@@@@#iuul@@@n.\n"
-	       "  ;@@@#:..........:nin:...n@@@n....n@@@nunlll;;@@@@i;:xl@@@l:...:l@@@u.\n"
-	       "  ;#@@l...........x@@@l...;@@@#:...u@@@@@@@@@n:i@@@n....i@@@n....;#@@#;.\n"
-	       "  .l@@@;...........l@@@x...i@@@u...x@@@@iux;:..;#@@@x...:#@@@;....n@@@l.\n"
-	       "  .i@@@x...........u@@@i...;@@@l....l@@@;.......u@@@#:...;nin:.....l@@@u.\n"
-	       "  .n@@@i:..........:l@@@n...xnnx....u@@@i........i@@@i.............x@@@#:\n"
-	       "   :l@@@i...........:#@@@;..........:@@@@x.......:l@@@u.............n@@@n.\n"
-	       "    :l@@@i;.......unni@@@#:.:xnlli;..;@@@#:.......:l@@u.............:#@@n.\n"
-	       "     ;l@@@@#lnuxxi@@@i#@@@##@@@@@#;...xlln.         :.                ;:.\n"
-	       "      :xil@@@@@@@@@@l:u@@@@##lnx;.\n"
-	       "         .:xuuuunnu;...;ux;.",
-	    d_cyan);
+	printf("\n%s"
+"     .okkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkd. \n"
+"    'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkc\n"
+"    xkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk\n"
+"    xkkkkkc::::::::::::::::::dkkkkkkc:::::kkkkkk\n"
+"    xkkkkk'..................okkkkkk'.....kkkkkk\n"
+"    xkkkkk'..................okkkkkk'.....kkkkkk\n"
+"    xkkkkk'.....okkkkkk,.....okkkkkk'.....kkkkkk\n"
+"    xkkkkk'.....dkkkkkk;.....okkkkkk'.....kkkkkk\n"
+"    xkkkkk'.....dkkkkkk;.....okkkkkk'.....kkkkkk\n"
+"    xkkkkk'.....dkkkkkk;.....okkkkkk'.....kkkkkk\n"
+"    xkkkkk'.....dkkkkkk;.....okkkkkk'.....kkkkkk\n"
+"    xkkkkk'.....dkkkkkk;.....okkkkkk'.....kkkkkk\n"
+"    xkkkkk'.....dkkkkkk;.....okkkkkk'.....kkkkkk\n"
+"    xkkkkk'.....dkkkkkk;.....okkkkkk'.....kkkkkk\n"
+"    xkkkkk'.....dkkkkkk;.....okkkkkk'.....kkkkkk\n"
+"    xkkkkk'.....coooooo'.....:llllll......kkkkkk\n"
+"    xkkkkk'...............................kkkkkk\n"
+"    xkkkkk'...............................kkkkkk\n"
+"    xkkkkklccccccccccccccccccccccccccccccckkkkkk\n"
+"    lkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkx\n"
+"     ;kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkc \n"
+"        :c::::::::::::::::::::::::::::::::::.",
+	d_cyan);
 
-	printf(_("\n\t\t   %sThe anti-eye-candy/KISS file manager\n%s"),
-	    white, df_c);
+	printf(_("\n\n%s\t\t       CliFM\n\t%sThe anti-eye-candy/KISS file manager\n%s"),
+	    white, "\x1b[0m", df_c);
 
 	if (splash_screen) {
 		printf(_("\n\t\t\tPress any key to continue... "));
