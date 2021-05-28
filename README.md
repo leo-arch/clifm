@@ -40,6 +40,7 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 * [Support](#support)
 * [License](#license)
 * [Contributing](#contributing)
+* [Community](#community)
 
 ---
 
@@ -185,4 +186,9 @@ This project is licensed under the GPL version 2 (or later) license. See the [LI
 ---
 
 ## Contributing
-We welcome community contributions. Please see the [CONTRIBUTING](https://github.com/leo-arch/clifm/blob/master/CONTRIBUTING.md) file for details.
+We welcome community contributions. Please see our [contribution guidelines](https://github.com/leo-arch/clifm/blob/master/CONTRIBUTING.md) for details.
+
+---
+
+## Community
+Join our [Gitter discussion room](https://gitter.im/leo-arch/clifm) and let us know what you think: ideas, comments, observations and questions are always welcome.
