@@ -2,7 +2,7 @@
 Type=Application
 Name=clifm
 Comment=CliFM file manager
-Icon=utilities-terminal
+Icon=clifm
 Terminal=true
 Exec=clifm
 Categories=ConsoleOnly;System;FileTools;FileManager

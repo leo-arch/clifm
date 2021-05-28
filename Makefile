@@ -4,36 +4,46 @@
 
 OS := $(shell uname -s)
 
-SHELL = /bin/sh
-PREFIX = /usr/bin
-PROG = clifm
+SHELL ?= /bin/sh
+INSTALLPREFIX ?= /usr/bin
+DESKTOPPREFIX ?= /usr/share
+ICONPREFIX ?= $(DESKTOPPREFIX)/icons/hicolor
+PROG ?= clifm
+INSTALL ?= install
+CP ?= cp
+RM ?= rm
 
 build:
 	cd src && $(MAKE) build
 
 install: build
-	@install -Dm755 -- "${PROG}" "${PREFIX}"/
-	@rm -- ${PROG}
-	@mkdir -p /usr/share/man/man1
-	@install -g 0 -o 0 -Dm644 manpage /usr/share/man/man1/"${PROG}".1
-	@gzip /usr/share/man/man1/"${PROG}".1
-	@mkdir -p /usr/share/{bash-completion/completions,zsh/site-functions}
-	@install -g 0 -o 0 -Dm644 completions.bash /usr/share/bash-completion/completions/"${PROG}"
-	@install -g 0 -o 0 -Dm644 completions.zsh /usr/share/zsh/site-functions/_"${PROG}"
-	@install -g 0 -o 0 -Dm644 misc/mimelist.cfm /usr/share/${PROG}//mimelist.cfm
-	@mkdir -p /usr/share/locale/es/LC_MESSAGES
-	@install -g 0 -o 0 -Dm644 translations/spanish/"${PROG}".mo \
-	/usr/share/locale/es/LC_MESSAGES/"${PROG}".mo
-	@mkdir -p /usr/share/${PROG}
-	@cp -r plugins /usr/share/${PROG}
-	@cp -r functions /usr/share/${PROG}
-	@printf "Successfully installed ${PROG}\n"
+	@$(INSTALL) -m 0755 $(PROG) $(INSTALLPREFIX)
+	@$(RM) -- $(PROG)
+	@$(INSTALL) -m 0755 -d $(DESKTOPPREFIX)/$(PROG)
+	@$(INSTALL) -m 0755 -d $(DESKTOPPREFIX)/man/man1
+	@$(INSTALL) -m 0755 -d $(DESKTOPPREFIX)/bash-completion/completions
+	@$(INSTALL) -m 0755 -d $(DESKTOPPREFIX)/zsh/site-functions
+	@$(INSTALL) -m 0755 -d $(DESKTOPPREFIX)/icons/hicolor/scalable/apps
+	@$(INSTALL) -m 0755 -d $(DESKTOPPREFIX)/locale/es/LC_MESSAGES
+	@$(INSTALL) -m 0644 manpage $(DESKTOPPREFIX)/man/man1/$(PROG).1
+	@gzip $(DESKTOPPREFIX)/man/man1/$(PROG).1
+	@$(INSTALL) -m 0644 completions.bash $(DESKTOPPREFIX)/bash-completion/completions/$(PROG)
+	@$(INSTALL) -m 0644 completions.zsh $(DESKTOPPREFIX)/zsh/site-functions/_$(PROG)
+	@$(INSTALL) -m 0644 misc/mimelist.cfm $(DESKTOPPREFIX)/$(PROG)
+	@$(INSTALL) -m 0644 images/logo/$(PROG).svg $(ICONPREFIX)/scalable/apps
+	@$(INSTALL) -m 0644 translations/spanish/$(PROG).mo $(DESKTOPPREFIX)/locale/es/LC_MESSAGES/$(PROG).mo
+	@$(INSTALL) -m 0755 -d $(DESKTOPPREFIX)/$(PROG)/plugins
+	@$(INSTALL) -m 0755 -d $(DESKTOPPREFIX)/$(PROG)/functions
+	@$(INSTALL) -m 0644 plugins/* $(DESKTOPPREFIX)/$(PROG)/plugins
+	@$(INSTALL) -m 0644 functions/* $(DESKTOPPREFIX)/$(PROG)/functions
+	@printf "Successfully installed $(PROG)\n"
 
 uninstall:
-	@rm -- "${PREFIX}/${PROG}"
-	@rm /usr/share/man/man1/"${PROG}".1.gz
-	@rm /usr/share/locale/*/LC_MESSAGES/"${PROG}".mo
-	@rm /usr/share/bash-completion/completions/"${PROG}"
-	@rm /usr/share/zsh/site-functions/_"${PROG}"
-	@rm -r /usr/share/${PROG}
-	@printf "Successfully uninstalled ${PROG}\n"
+	@$(RM) -- $(INSTALLPREFIX)/$(PROG)
+	@$(RM) -- $(DESKTOPPREFIX)/man/man1/$(PROG).1.gz
+	@$(RM) -- $(DESKTOPPREFIX)/locale/*/LC_MESSAGES/$(PROG).mo
+	@$(RM) -- $(DESKTOPPREFIX)/bash-completion/completions/$(PROG)
+	@$(RM) -- $(DESKTOPPREFIX)/zsh/site-functions/_$(PROG)
+	@$(RM) -r -- $(DESKTOPPREFIX)/$(PROG)
+	@$(RM) -- $(ICONPREFIX)/scalable/apps/$(PROG).svg
+	@printf "Successfully uninstalled $(PROG)\n"
