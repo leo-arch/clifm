@@ -1,4 +1,4 @@
-## Contributing to CliFM
+## CliFM's Contribution Guidelines
 
 * The best way to contribute is taking a look at the currently open [issues](https://github.com/leo-arch/clifm/issues) and provide some help, or creating a new one pointing out bugs (make sure to provide enough information to make the bug reproducible) and suggesting missing or wanted features. We'll do our best to fix whatever is broken and to add/improve whatever is missing. Always bear in mind the [bugs](https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/bug_report.md) and [feature request](https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/feature_request.md) templates, and, in case of sending us some code or patch via a pull request, the [coding guidelines](https://github.com/leo-arch/clifm/blob/master/src/README.md).
 
