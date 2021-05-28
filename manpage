@@ -1076,6 +1076,7 @@ Plugins are just scripts or programs (written in any language) able to add, exte
  | vid_viewer        | ffmpegthumbnailer             |
  | wallpapper_setter | feh, xloadimage or hsetroot   |
  | git_status        | git                           |
+ | batch_create      |
  +-------------------+-------------------------------+
 
 .TP
