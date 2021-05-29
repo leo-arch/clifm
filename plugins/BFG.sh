@@ -131,6 +131,12 @@ handle_ext() {
 				fi
 			;;
 
+			svg)
+				convert -background none -size "$WIDTH"x"$HEIGHT" "$entry" \
+					"$PREVIEWDIR/${entry}.png"
+				"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.png" && exit 0
+			;;
+
 			torrent)
 				if [ "$(which transmission-show 2>/dev/null)" ]; then
 					transmission-show -- "$PWD/$entry" && exit 0
