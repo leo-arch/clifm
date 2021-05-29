@@ -485,6 +485,16 @@ exec_cmd(char **comm)
 	else if (*comm[0] == 'r' && ((comm[0][1] == 'f' && !comm[0][2])
 	|| strcmp(comm[0], "refresh") == 0)) {
 
+		/* Make sure CWD exists; if not, go up to the parent, and so
+		 * on */
+		while (xchdir(ws[cur_ws].path, SET_TITLE) != EXIT_SUCCESS) {
+			char *ret = strrchr(ws[cur_ws].path, '/');
+			if (ret && ret != ws[cur_ws].path)
+				*ret = '\0';
+			else
+				break;
+		}
+
 		if (cd_lists_on_the_fly) {
 			free_dirlist();
 			exit_code = list_dir();
