@@ -115,11 +115,11 @@ void *__dso_handle;
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR write(STDOUT_FILENO, "\033c", 3);
 
-#define VERSION "1.0"
+#define VERSION "1.1"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "April 10, 2021"
+#define DATE "May 29, 2021"
 #define LICENSE "GPL2+"
 
 /* Define flags for program options and internal use */
