@@ -130,11 +130,11 @@ Optional dependencies: `sshfs`, `curlftpfs`, and `cifs-utils` (for remote filesy
 
 You'll find the corresponding packages on the AUR: the [stable](https://aur.archlinux.org/packages/clifm) and the [development](https://aur.archlinux.org/packages/clifm-git) version. 
 
-Of course, you can also clone, build, and install the package using the PKGBUILD file:
+Of course, you can also clone, build, and install the package using the [PKGBUILD file](https://github.com/leo-arch/clifm/blob/master/misc/PKGBUILD):
 
 ```sh
 $ git clone https://github.com/leo-arch/clifm.git
-$ cd clifm
+$ cd clifm/misc
 $ makepkg -si
 ```
 
