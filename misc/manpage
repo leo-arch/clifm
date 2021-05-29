@@ -603,7 +603,7 @@ At program exit, the pinned file is written to a file in the configuration direc
 Gracefully quit CliFM. Use 'Q' to gracefully quit and enable the CD on quit functionality (write last visited directory to \fI$XDG_CONFIG/clifm/.last\fR to be later read by a shell function. See the \fBSHELL FUNCTIONS\fR section below).
 .TP
 .B rf, refresh
-refresh the screen, that is, reprint files in the current directory and update the prompt
+refresh the screen, that is, reprint files in the current directory and update the prompt. If the current directory is not accessible for any reason, \fIrf\fR will go up until it finds an accessible one and then will change to that directory.
 .TP
 .B rl, reload
 Reload all settings, except those passed as command line arguments, from the configuration file.
