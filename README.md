@@ -192,7 +192,7 @@ We welcome community contributions. Please see our [contribution guidelines](htt
 ---
 
 ## Community
-Join our [Gitter discussion room](https://gitter.im/leo-arch/clifm) and let us know what you think: ideas, comments, observations and questions are always welcome.
+Join our [Gitter discussion room](https://gitter.im/leo-arch/clifm) and let us know what you think: ideas, comments, observations and questions are always welcome. The [Discussions](https://github.com/leo-arch/clifm/discussions) section of this repo is also available.
 
 ---
 
