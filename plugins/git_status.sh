@@ -22,6 +22,11 @@
 #Is something stashed: git rev-parse --verify --quiet refs/stash
 #Non-commited/tracked local changes: git status | grep -q "nothing to commit" && echo "No" || echo "Yes" or git status -sb
 
+if [ -n "$1" ] && [ "$1" = "--help" ]; then
+	printf "Print current git status (if in a git repository). This script is intended to be executed as a prompt command. Add the absolute path to this plugin to the PROMPT COMMANDS section in the configuration file.\n"
+	exit 0
+fi
+
 [ "$(git rev-parse --is-inside-work-tree 2>/dev/null)" != "true" ] && exit 1
 
 git status -sb 2>/dev/null
