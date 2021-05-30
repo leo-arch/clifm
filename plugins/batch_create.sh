@@ -4,6 +4,7 @@
 # Written by L. Abramovich
 
 if [ -n "$1" ] && [ "$1" = "--help" ]; then
+	printf "Open a text editor to add files and/or directories to be created (file names endig with a slash will be taken as directory names). After saving the file and closing the editor, files will be created."
 	printf "%s\n" "Usage: $0"
 	exit 0
 fi
