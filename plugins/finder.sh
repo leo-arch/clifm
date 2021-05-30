@@ -8,8 +8,8 @@ ERROR=1
 
 if [ -n "$1" ] && ([ "$1" = "--help" ] || [ "$1" = "help" ]); then
 	name="$(basename "$0")"
-	printf "Find/open/cd files in the current directory\n"
-	printf "Usage: %s FILE\n" "$name"
+	printf "Find/open/cd files in the current directory using FZF/Rofi. Once found, press Enter to cd/open the desired file.\n"
+	printf "Usage: %s\n" "$name"
 	exit $SUCCESS
 fi
 
