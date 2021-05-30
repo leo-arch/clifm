@@ -470,6 +470,7 @@ extern struct bookmarks_t *bookmarks;
 struct fileinfo {
 	char *name;
 	char *color;
+	char *ext_color;
 	char *icon;
 	char *icon_color;
 	int eln_n;

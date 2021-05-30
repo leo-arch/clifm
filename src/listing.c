@@ -922,6 +922,7 @@ list_dir(void)
 		}
 
 		file_info[n].color = (char *)NULL;
+		file_info[n].ext_color = (char *)NULL;
 
 		/* Default icon for all files */
 		file_info[n].icon = DEF_FILE_ICON;
@@ -1067,9 +1068,11 @@ list_dir(void)
 					char *extcolor = get_ext_color(ext);
 
 					if (extcolor) {
-						char ext_color[MAX_COLOR];
-						sprintf(ext_color, "\x1b[%sm", extcolor);
-						file_info[n].color = ext_color;
+						file_info[n].ext_color = (char *)xnmalloc(
+									strlen(extcolor) + 4, sizeof(char));
+						sprintf(file_info[n].ext_color, "\x1b[%sm",
+								extcolor);
+						file_info[n].color = file_info[n].ext_color;
 						extcolor = (char *)NULL;
 					}
 				}
@@ -1599,8 +1602,11 @@ free_dirlist(void)
 
 	int i = (int)files;
 
-	while (--i >= 0)
+	while (--i >= 0) {
 		free(file_info[i].name);
+		if (file_info[i].ext_color)
+			free(file_info[i].ext_color);
+	}
 
 	free(file_info);
 	file_info = (struct fileinfo *)NULL;
