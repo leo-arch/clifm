@@ -126,7 +126,7 @@ Jumper: `jump.c`
 
 ## 4) Compilation
 
-CliFM is compiled used `gcc` (`clang` and `tcc` work as well) as follows:
+CliFM is compiled using `gcc` (`clang` and `tcc` work as well) as follows:
 
 1) For _Linux_:
 ```sh
@@ -139,10 +139,10 @@ gcc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -lreadline 
 gcc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -lreadline -lintl
 ```
 
-To produce a fully `POSIX-2008` compliant executable pass the `\_BE_POSIX` option to the compiler, that is, `-D_BE_POSIX`. Only two features are lost in this way:
+To produce a fully `POSIX.1-2008` compliant executable pass the `\_BE_POSIX` option to the compiler, that is, `-D_BE_POSIX`. Only two features are lost in this way:
 
-1) Files birth time: we get this information via **statx**(2), which is Linux specific.
-2) Version sort: we use here **versionsort**, which is a GNU extension.
+1) Files birth time: We get this information via **statx**(2), which is Linux specific.
+2) Version sort: We use here **versionsort**, which is a **GNU** extension.
 
 **NOTE**: Since compiling in this way only produces a binary file, it is necessary to manually copy the remaining files. See the `install` block of the [Makefile](https://github.com/leo-arch/clifm/blob/master/Makefile).
 
