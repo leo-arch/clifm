@@ -41,6 +41,7 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 * [License](#license)
 * [Contributing](#contributing)
 * [Community](#community)
+* [Our users](#our-users)
 
 ---
 
@@ -192,3 +193,11 @@ We welcome community contributions. Please see our [contribution guidelines](htt
 
 ## Community
 Join our [Gitter discussion room](https://gitter.im/leo-arch/clifm) and let us know what you think: ideas, comments, observations and questions are always welcome.
+
+---
+
+## Our users
+
+> I messed around with it some more and I think I had been looking for something like this for a long time, and had never put it in words. I used [other file managers] occasionally, but frequently just found myself doing most of my file administration from the CLI. I think this hits a nice sort of sweet spot right between the two. It feels less like a separate program and more like just putting your shell into "file management mode". ([Tuerda](https://www.reddit.com/r/commandline/comments/nnj5vl/clifm_11_is_here_with_new_features_and_a_decent/gzwfm25/?context=3))
+
+> Half way between a shell and a TUI file manager [...]. Nice tool, fluid, intuitive. I like the jump function. Well thought and done! ([Orduval](https://www.reddit.com/r/commandline/comments/n5j36f/clifm_the_kiss_file_manager_for_the_unix_terminal/gx5nxja/?context=3))
