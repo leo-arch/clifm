@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# CliFM plugin to find/open/cd files in CWD using fzf/Rofi
+# CliFM plugin to find/open/cd files in CWD using FZF/Rofi
 # Written by L. Abramovich
 
 SUCCESS=0
@@ -8,7 +8,7 @@ ERROR=1
 
 if [ -n "$1" ] && ([ "$1" = "--help" ] || [ "$1" = "help" ]); then
 	name="$(basename "$0")"
-	printf "find/open/cd files in the current directory\n"
+	printf "Find/open/cd files in the current directory\n"
 	printf "Usage: %s FILE\n" "$name"
 	exit $SUCCESS
 fi
@@ -20,7 +20,7 @@ elif [ "$(which rofi)" ]; then
 	finder="rofi"
 
 else
-	printf "CliFM: No finder found. Install either fzf or rofi\n" >&2
+	printf "CliFM: No finder found. Install either FZF or Rofi\n" >&2
 	exit $ERROR
 fi
 
