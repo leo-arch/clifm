@@ -660,8 +660,15 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "md") == 0 || strcmp(comm[0], "le") == 0)) {
 
 		if (*comm[0] == 'l' && !comm[0][1]) {
-			comm[0] = (char *)xrealloc(comm[0], 7 * sizeof(char *));
+			comm[0] = (char *)xrealloc(comm[0], 7 * sizeof(char));
 			strcpy(comm[0], "ln -sn");
+			if (comm[1]) {
+				char tmp[NAME_MAX];
+				strcpy(tmp, comm[1]);
+				comm[1] = (char *)xrealloc(comm[1], (strlen(tmp)
+							+ strlen(ws[cur_ws].path) + 2) * sizeof(char));
+				sprintf(comm[1], "%s/%s", ws[cur_ws].path, tmp);
+			}
 		}
 
 		else if (*comm[0] == 'r' && !comm[0][1]) {
@@ -670,7 +677,7 @@ exec_cmd(char **comm)
 		}
 
 		else if (*comm[0] == 'm' && comm[0][1] == 'd' && !comm[0][2]) {
-			comm[0] = (char *)xrealloc(comm[0], 9 * sizeof(char *));
+			comm[0] = (char *)xrealloc(comm[0], 9 * sizeof(char));
 			strcpy(comm[0], "mkdir -p");
 		}
 
