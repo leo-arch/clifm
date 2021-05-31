@@ -47,7 +47,7 @@ calculate_position() {
 EOF
 
 	 X=$((TERM_COLS - COLUMNS - 2))
-	 Y=1
+	 Y=2
 }
 
 uz_image() {

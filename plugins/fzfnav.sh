@@ -121,6 +121,11 @@ main() {
 	COLORS="$(tput colors)"
 	OPENER="clifm"
 	DIR_PREVIEWER="tree" # ls is another alternative
+	CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/clifm"
+
+	if ! [ -d "$CACHE_DIR" ]; then
+		mkdir -p "$CACHE_DIR"
+	fi
 
 	# We check here, at startup, for available applications so that we don't need
 	# to do it once and again each time a file is hovered
@@ -215,7 +220,7 @@ main() {
 	[ "$(which epub-thumbnailer 2>/dev/null)" ] && EPUBTHUMB_OK=1
 
 	if [ "$UEBERZUG_OK" -eq 1 ]; then
-		export FIFO_UEBERZUG="${XDG_CACHE_HOME:-$HOME/.cache}/clifm/ueberzug-${PPID}"
+		export FIFO_UEBERZUG="$CACHE_DIR/ueberzug-${PPID}"
 		trap uz_cleanup EXIT
 		start_ueberzug
 	fi
