@@ -5,7 +5,7 @@
 
 if [ -n "$1" ] && ([ "$1" = "--help" ] || [ "$1" = "help" ]); then
 	name="$(basename "$0")"
-	printf "Browse CliFM manpage via FZF\n"
+	printf "Browse CliFM COMMANDS section in the manpage via FZF\n"
 	printf "Usage: %s\n" "$name"
 	exit 0
 fi

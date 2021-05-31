@@ -5,7 +5,7 @@
 
 if [ -n "$1" ] && ([ "$1" = "--help" ] || [ "$1" = "help" ]); then
 	name="$(basename "$0")"
-	printf "Navigate CLiFM jump database\n"
+	printf "Navigate CLiFM jump database via FZF or Rofi. Press Enter to cd into the selected directory\n"
 	printf "Usage: %s\n" "$name"
 	exit 0
 fi
@@ -17,7 +17,7 @@ elif [ "$(which rofi)" ]; then
 	finder="rofi"
 
 else
-	printf "CliFM: No finder found. Install either fzf or rofi\n" >&2
+	printf "CliFM: No finder found. Install either FZF or Rofi\n" >&2
 	exit 1
 fi
 
