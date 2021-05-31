@@ -660,9 +660,14 @@ copy_plugins(void)
 	if (count_dir(usr_share_plugins_dir) <= 2)
 		return;
 
-	char *cp_comm[] = {"cp", "-r", usr_share_plugins_dir,
+	char *cp_cmd[] = {"cp", "-r", usr_share_plugins_dir,
 	    CONFIG_DIR_GRAL, NULL};
-	launch_execve(cp_comm, FOREGROUND, E_NOFLAG);
+	launch_execve(cp_cmd, FOREGROUND, E_NOFLAG);
+
+	char local_plugins_dir[] = "/usr/share/clifm/plugins/*.sh";
+
+	char *chmod_cmd[] = {"chmod", "+x", local_plugins_dir, NULL};
+	launch_execve(chmod_cmd, FOREGROUND, E_NOFLAG);
 }
 
 int
