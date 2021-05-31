@@ -662,9 +662,9 @@ exec_cmd(char **comm)
 		if (*comm[0] == 'l' && !comm[0][1]) {
 			comm[0] = (char *)xrealloc(comm[0], 7 * sizeof(char));
 			strcpy(comm[0], "ln -sn");
-			if (comm[1]) {
+			if (comm[1] && *comm[1] != '/') {
 				char tmp[NAME_MAX];
-				strcpy(tmp, comm[1]);
+				strncpy(tmp, comm[1], NAME_MAX);
 				comm[1] = (char *)xrealloc(comm[1], (strlen(tmp)
 							+ strlen(ws[cur_ws].path) + 2) * sizeof(char));
 				sprintf(comm[1], "%s/%s", ws[cur_ws].path, tmp);
