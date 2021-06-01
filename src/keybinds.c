@@ -268,6 +268,7 @@ readline_kbinds(void)
 		rl_bind_keyseq("\\C-\\M-k", rl_last_dir);
 
 		/* Operations on files */
+		rl_bind_keyseq("\\M-n", rl_create_file);
 		rl_bind_keyseq("\\C-\\M-b", rl_bm_sel);
 		rl_bind_keyseq("\\C-\\M-a", rl_archive_sel);
 		rl_bind_keyseq("\\C-\\M-g", rl_open_sel);

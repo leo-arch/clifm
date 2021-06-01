@@ -310,6 +310,7 @@ show-manpage:\\eOP\n\
 show-cmds:\\eOQ\n\
 show-kbinds:\\eOR\n\
 \n\
+create-file:\\C-n\n\
 new-instance:\\C-x\n\
 previous-profile:\\C-\\M-o\n\
 next-profile:\\C-\\M-p\n\
