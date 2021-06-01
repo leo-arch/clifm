@@ -718,7 +718,7 @@ DividingLineChar='%c'\n\n"
 DirhistMap=%s\n\n"
 
 		"# Use a regex expression to filter file names when listing files.\n\
-# Example: !.*~$ to exclude backup files (ending with ~), or ^\. to list \n\
+# Example: !.*~$ to exclude backup files (ending with ~), or ^\\. to list \n\
 # only hidden files. Do not quote the regular expression\n\
 Filter=\n\n"
 
