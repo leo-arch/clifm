@@ -664,6 +664,7 @@ copy_plugins(void)
 	    CONFIG_DIR_GRAL, NULL};
 	launch_execve(cp_cmd, FOREGROUND, E_NOFLAG);
 
+	/* Make plugins executable */
 	char local_plugins_dir[] = "/usr/share/clifm/plugins/*.sh";
 
 	char *chmod_cmd[] = {"chmod", "+x", local_plugins_dir, NULL};
