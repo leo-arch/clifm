@@ -311,6 +311,12 @@ readline_kbinds(void)
 		rl_bind_keyseq("\\M-m", rl_mountpoints);
 		rl_bind_keyseq("\\M-s", rl_selbox);
 
+		rl_bind_keyseq("\\M-p", rl_pinned_dir);
+		rl_bind_keyseq("\\M-1", rl_ws1);
+		rl_bind_keyseq("\\M-2", rl_ws2);
+		rl_bind_keyseq("\\M-3", rl_ws3);
+		rl_bind_keyseq("\\M-4", rl_ws4);
+
 		rl_bind_keyseq("\\e[24~", rl_quit);
 	}
 }

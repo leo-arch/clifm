@@ -299,6 +299,10 @@ root-dir2:\\e/\n\
 #root-dir3:\n\
 \n\
 pinned-dir:\\M-p\n\
+workspace1:\\M-1\n\
+workspace2:\\M-2\n\
+workspace3:\\M-3\n\
+workspace4:\\M-4\n\
 \n\
 # Help\n\
 # F1-3\n\
