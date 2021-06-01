@@ -62,6 +62,13 @@ check_env_filter(void)
 	if (!p)
 		return;
 
+	if (*p == '!') {
+		filter_rev = 1;
+		p++;
+	} else {
+		filter_rev = 0;
+	}
+	
 	filter = savestring(p, strlen(p));
 }
 

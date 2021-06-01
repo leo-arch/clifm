@@ -717,9 +717,9 @@ DividingLineChar='%c'\n\n"
 # history list, showing previous, current, and next entries\n\
 DirhistMap=%s\n\n"
 
-	    "# Use a regex expression to exclude file names when listing files.\n\
-# Example: .*~$ to exclude backup files (ending with ~). Do not quote\n\
-# the regular expression\n\
+		"# Use a regex expression to filter file names when listing files.\n\
+# Example: !.*~$ to exclude backup files (ending with ~), or ^\. to list \n\
+# only hidden files. Do not quote the regular expression\n\
 Filter=\n\n"
 
 	    "# Set the default copy command. Available options are: 0 = cp,\n\
@@ -1380,6 +1380,14 @@ read_config(void)
 
 			if (!*(++opt_str))
 				continue;
+
+			if (*opt_str == '!') {
+				filter_rev = 1;
+				opt_str++;
+				len--;
+			} else {
+				filter_rev = 0;
+			}
 
 			filter = savestring(opt_str, len);
 		}
