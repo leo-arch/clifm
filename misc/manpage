@@ -21,7 +21,7 @@ CLIFM \- The KISS file manager
 .sp
 \fB6.\fR Commands
 .sp
-\fB7.\fR File Filters
+\fB7.\fR Files Filters
 .sp
 \fB8.\fR Keyboard shortcuts
 .sp
@@ -479,10 +479,10 @@ toggle list folders first on/off.
 .B fs
 Print an extract from 'What is Free Software?', written by Richard Stallman.
 .TP
-.B ft, filter \fR[unset] [REGEX]
-with no argument, print the current filter. To remove the current filter use the 'unset' option. To set a new filter enter 'ft REGEX', for example: 'ft ^\.' to prevent hidden files from being listed, or 'ft .*~$' to exclude backup or temporary files.
+.B ft, filter \fR[unset] [[!]REGEX]
+with no argument, print the current filter. To remove the current filter use the 'unset' option. To set a new filter enter 'ft [!]REGEX'. Use the exclamation mark to reverse the behavior or a filter. For example: 'ft !^\.' will prevent hidden files from being listed, just as 'ft ^D' will list only files starting with 'D'.
 .sp
-The filter will be lost at program exit. To permanently set a files filter use the \fIFilter\fR option (in the configuration file). You can also use the CLIFM_FILTER environment variable (see below), though the value of this variable will be lost at system shutdown or reboot. 
+The filter will be lost at program exit. To permanently set a files filter use the \fIFilter\fR option (in the configuration file). You can also use the \fBCLIFM_FILTER\fR environment variable (see below), though the value of this variable will be lost at system shutdown or reboot.
 .TP
 .B hf, hidden \fR[on, off, status]
 toggle hidden files on/off.
