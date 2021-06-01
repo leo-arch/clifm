@@ -64,7 +64,8 @@ int
 filter_function(const char *arg)
 {
 	if (!arg) {
-		printf(_("Current filter: %s\n"), filter ? filter : "none");
+		printf(_("Current filter: %c%s\n"), filter_rev ? '!' : 0,
+				filter ? filter : "none");
 		return EXIT_SUCCESS;
 	}
 
@@ -79,6 +80,7 @@ filter_function(const char *arg)
 			filter = (char *)NULL;
 			regfree(&regex_exp);
 			puts(_("Filter unset"));
+			filter_rev = 0;
 		}
 
 		else
@@ -91,6 +93,13 @@ filter_function(const char *arg)
 		free(filter);
 
 	regfree(&regex_exp);
+
+	if (*arg == '!') {
+		filter_rev = 1;
+		arg++;
+	} else {
+		filter_rev = 0;
+	}
 
 	filter = savestring(arg, strlen(arg));
 

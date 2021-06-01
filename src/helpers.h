@@ -632,7 +632,8 @@ extern short
     home_ok,
     config_ok,
     trash_ok,
-    selfile_ok;
+    selfile_ok,
+    filter_rev;
 
 extern int
     max_hist,

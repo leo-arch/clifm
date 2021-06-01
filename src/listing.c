@@ -873,9 +873,15 @@ list_dir(void)
 		if (*ename == '.' && (!ename[1] || (ename[1] == '.' && !ename[2])))
 			continue;
 
-		/* Skip files matching FILTER */
-		if (filter && regexec(&regex_exp, ename, 0, NULL, 0) == EXIT_SUCCESS)
-			continue;
+		/* Filter files according to FILTER */
+		if (filter) {
+			if (regexec(&regex_exp, ename, 0, NULL, 0) == EXIT_SUCCESS) {
+				if (filter_rev)
+					continue;
+			} else if (!filter_rev) {
+				continue;
+			}
+		}
 
 		if (!show_hidden && *ename == '.')
 			continue;
