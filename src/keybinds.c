@@ -980,7 +980,9 @@ rl_paste_sel(int count, int key)
 		return EXIT_SUCCESS;
 
 	kb_shortcut = 1;
+	rl_deprep_terminal();
 	keybind_exec_cmd("c sel");
+	rl_prep_terminal(0);
 	kb_shortcut = 0;
 
 	rl_reset_line_state();
