@@ -662,12 +662,31 @@ exec_cmd(char **comm)
 		if (*comm[0] == 'l' && !comm[0][1]) {
 			comm[0] = (char *)xrealloc(comm[0], 7 * sizeof(char));
 			strcpy(comm[0], "ln -sn");
+
+			/* Make sure the symlink source is an absolute path */
 			if (comm[1] && *comm[1] != '/') {
-				char tmp[NAME_MAX];
-				strncpy(tmp, comm[1], NAME_MAX);
-				comm[1] = (char *)xrealloc(comm[1], (strlen(tmp)
-							+ strlen(ws[cur_ws].path) + 2) * sizeof(char));
-				sprintf(comm[1], "%s/%s", ws[cur_ws].path, tmp);
+
+				if (*comm[1] == '~') {
+					char *exp_source = tilde_expand(comm[1]);
+					if (exp_source) {
+						comm[1] = xrealloc(comm[1], (strlen(exp_source) + 1)
+											* sizeof(char));
+						strcpy(comm[1], exp_source);
+						free(exp_source);
+					}
+					else {
+						fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+								comm[1], strerror(errno));
+						exit_code = EXIT_FAILURE;
+						return EXIT_FAILURE;
+					}
+				} else {
+					char tmp[NAME_MAX];
+					strncpy(tmp, comm[1], NAME_MAX);
+					comm[1] = (char *)xrealloc(comm[1], (strlen(tmp)
+								+ strlen(ws[cur_ws].path) + 2) * sizeof(char));
+					sprintf(comm[1], "%s/%s", ws[cur_ws].path, tmp);
+				}
 			}
 		}
 
