@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-02 15:39-0300\n"
+"POT-Creation-Date: 2021-06-02 18:31-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -376,7 +376,7 @@ msgstr ""
 
 #: main.c:422
 #, c-format
-msgid "%s%s: [1;31mRunning as root. Be careful\n"
+msgid "%s%s: %sRunning as root. Be careful\n"
 msgstr ""
 
 #: archives.c:903
