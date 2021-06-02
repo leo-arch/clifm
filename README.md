@@ -52,19 +52,20 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 ## Why?
 
 Why another file manager? I can. \
-In the free world a free community find the alternative central to freedom, and a place to learn.
+In the free world, a free community finds alternatives central to freedom, and moreover, a place to learn.
 
-Whatever needs doing in the simplest possible, [KISS](https://en.wikipedia.org/wiki/KISS_principle) is a desired trait of a file-manager for the terminal. No GUI, no ncurses. \
-Just a command-line, shell-like file manager: 5 MiB RAM and 400 KiB disk space. \
+Whatever needs to be done in the simplest possible way: [KISS](https://en.wikipedia.org/wiki/KISS_principle) is a desired trait of a file-manager for the terminal. No GUI, no curses, but just a command-line, shell-like file manager: 5 MiB RAM and 400 KiB disk space.
+
 Willingness to try something different is all you need.
 
-Unlike most terminal file-managers out there, CliFM, replaces the traditional curses interface by a simple command-line interface. A file-manager, but also **a shell extension**. \
+Unlike most terminal file-managers out there, CliFM replaces the traditional curses interface by a simple command-line interface. It is a file-manager, but also **a shell extension**.
+
 Search for files, copy, rename, and trash some of them, but, at the same time, update/upgrade your system, add some cronjob, stop a service, and run nano (or vi, or emacs, if you like).
 
-Those familiar with the commands-line will a file-manager based on it a welcomed _addition_ to its functionality. \
-The command-line is still there. The command-prompt is never hidden.
+Those familiar with the command-line will find in a file-manager based on it a desirable _addition_ to its functionality. \
+The command-line is still there, never hidden.
 
-### Should all terminal file-managers be curses-based file managers? No.
+### Should all terminal file-managers be curses-based file-managers? No.
 
 ---
 
@@ -75,8 +76,7 @@ The command-line is still there. The command-prompt is never hidden.
 
 Features beyond copy, move, remove, etc:
 
-*[Really CLI-based](https://github.com/leo-arch/clifm/wiki/Introduction#main-design-and-goals). \
-No GUI nor TUI or curses at all, just a command-line. Since no GUI is needed, it can run on the kernel built-in console and even on a SSH or any other remote session.
+* [Really CLI-based](https://github.com/leo-arch/clifm/wiki/Introduction#main-design-and-goals). No GUI nor TUI or curses at all, just a command-line. Since no GUI is needed, it can run on the kernel built-in console and even on a SSH or any other remote session.
 * Memory footprint below 5 MiB and a disk usage of 0.5 MiB. Incredibly lightweight and fast even on really old hardware.
 * The use of [short (and even one-character) commands](https://github.com/leo-arch/clifm/wiki/Introduction#commands-short-summary), and list numbers ([ELN](https://github.com/leo-arch/clifm/wiki/Common-Operations)'s) for filenames. 
 * [Bookmarks](https://github.com/leo-arch/clifm/wiki/Common-Operations#bookmarks).
