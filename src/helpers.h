@@ -172,6 +172,7 @@ void *__dso_handle;
 #define gray "\x1b[1;30m"
 #define white "\x1b[1;37m"
 #define cyan "\x1b[1;36m"
+#define red "\x1b[1;31m"
 #define d_cyan "\x1b[0;36m"
 #define bold "\x1b[1m"
 #define NB "\x1b[49m"

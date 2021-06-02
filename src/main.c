@@ -419,8 +419,8 @@ main(int argc, char *argv[])
 
 	if (geteuid() == 0) {
 		flags |= ROOT_USR;
-		_err(0, PRINT_PROMPT, _("%s%s: \x1b[1;31mRunning as root. Be careful\n"),
-		    bold, PROGRAM_NAME);
+		_err(0, PRINT_PROMPT, _("%s%s: %sRunning as root. Be careful\n"),
+		    bold, PROGRAM_NAME, red);
 	}
 
 	/* Running in a graphical environment? */
