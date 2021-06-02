@@ -4,12 +4,12 @@
 	</a>
 </p>
 <h1 align="center">CliFM</h1>
-<h2 align="center">The KISS, non-curses terminal file manager</h2>
-<h3 align="center">Written in C, fast, extensible, and lightweight as hell</h3>
+<h2 align="center">Non-curses KISS file-manager for the terminal</h2>
+<h3 align="center">Fast, extensible, and light. Written in C.</h3>
 <h4 align="center"><a
 href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/bug_report.md">Report bug</a> · <a
 href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/feature_request.md">Request feature</a> · <a
-href="https://github.com/leo-arch/clifm/wiki">Explore documentation</a></h4>
+href="https://github.com/leo-arch/clifm/wiki">Browse the documentation</a></h4>
 
 ---
 
@@ -23,9 +23,9 @@ href="https://github.com/leo-arch/clifm/wiki">Explore documentation</a></h4>
 <a><img src="https://img.shields.io/github/last-commit/leo-arch/clifm/master?color=blue&style=for-the-badge"/></a>
 </p>
 
-<p align="right"><br><i>[...] I think I had been looking for something like this for a long time, and had never put it in words. I used [other file managers] occasionally, but frequently just found myself doing most of my file administration from the CLI. I think this hits a nice sort of sweet spot right between the two. It feels less like a separate program and more like just putting your shell into "file management mode".</i></p>
+<p align="right"><br><i>[…] I think I had been looking for something like this for a long time, and had never put it in words. I used [other file-managers] occasionally, but frequently just found myself doing most of my file administration from the CLI. I think this hits a nice sort of sweet spot right between the two. It feels less like a separate program and more like just putting your shell into "file-management mode".</i></p>
 <p align="right"><a href="https://www.reddit.com/r/commandline/comments/nnj5vl/clifm_11_is_here_with_new_features_and_a_decent/gzwfm25/?context=3">Tuesda</a></p>
-<p align="right"><br><i>Half way between a shell and a TUI file manager [...] Nice tool, fluid, intuitive.</i></p>
+<p align="right"><br><i>Halfway between a shell and a TUI file-manager […] Nice tool, fluid, intuitive.</i></p>
 <p align="right"><a href="https://www.reddit.com/r/commandline/comments/n5j36f/clifm_the_kiss_file_manager_for_the_unix_terminal/gx5nxja/?context=3">Orduval</a></p>
 
 ---
@@ -51,15 +51,21 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 
 ## Why?
 
-Why in this world do we need another file manager? In the first place, just because I can do it, write it, and learn (a lot) in the process, just because this is a free world, and very specially, a free community; and, needless to say, alternatives are at the heart of freedom.
+Why another file manager? I can. \
+In the free world, a free community finds alternatives central to freedom, and moreover, a place to learn.
 
-Secondly, because I'm sure I'm not the only person in this world looking for a simple [KISS](https://en.wikipedia.org/wiki/KISS_principle) file manager for the terminal: it just does whatever needs to be done in the simplest possible way. No GUI, no curses, but just a command line, shell-like file manager: 5MiB of RAM and 400KiB of disk space (plus some willingness to try something different and new) is all you need.
+Whatever needs to be done in the simplest possible way: [KISS](https://en.wikipedia.org/wiki/KISS_principle) is a desired trait of a file-manager for the terminal. No GUI, no curses, but just a command-line, shell-like file manager: 5 MiB RAM and 400 KiB disk space.
 
-In the third place, because this world deserves a **non-curses terminal file manager**. Unlike most terminal file managers out there, CliFM replaces the traditional curses interface by a simple command line interface. In this sense, CliFM is certainly a file manager, but also **a shell extension**. Almost everything you do on your shell can be done in this file manager as well: search for files, copy, rename, and trash some of them, but, at the same time, update/upgrade your system, add some cronjob, stop a service, and run nano (or vi, or emacs, if you like).
+Willingness to try something different is all you need.
 
-Those really used to the commands line (the very secret of Unix's power) will find themselves quite comfortable with a purely command line file manager. And this for a very simple reason: the command line is still there. We do not hide the shell!
+Unlike most terminal file-managers out there, CliFM replaces the traditional curses interface by a simple command-line interface. It is a file-manager, but also **a shell extension**.
 
-### Should all terminal file managers be curses-based file managers? CliFM is the answer to this question: No.
+Search for files, copy, rename, and trash some of them, but, at the same time, update/upgrade your system, add some cronjob, stop a service, and run nano (or vi, or emacs, if you like).
+
+Those familiar with the command-line will find in a file-manager based on it a desirable _addition_ to its functionality. \
+The command-line is still there, never hidden.
+
+### Should all terminal file-managers be curses-based file-managers? No.
 
 ---
 
@@ -68,58 +74,58 @@ Those really used to the commands line (the very secret of Unix's power) will fi
 <h4 align="center">CliFM's interface</h4>
 <p align="center"><img src="images/icons_rounded.png"></p>
 
-CliFM is a completely command-line-based, shell-like file manager able to perform all the basic operations you may expect from any other file manager. Besides these common operations, such as copy, move, remove, etc, CliFM provides the following features:
+Features beyond copy, move, remove, etc:
 
-* It is [really CLI-based](https://github.com/leo-arch/clifm/wiki/Introduction#main-design-and-goals). No GUI nor TUI or curses at all, just a command line. Since it does not need any GUI, it can run on the kernel built-in console and even on a SSH or any other remote session.
-* With a memory footprint below 5 MiB and a disk usage of 0.5 MiB, it is incredibly lightweight and fast, and as such, able to run on really old hardware.
+* [Really CLI-based](https://github.com/leo-arch/clifm/wiki/Introduction#main-design-and-goals). No GUI nor TUI or curses at all, just a command-line. Since no GUI is needed, it can run on the kernel built-in console and even on a SSH or any other remote session.
+* Memory footprint below 5 MiB and a disk usage of 0.5 MiB. Incredibly lightweight and fast even on really old hardware.
 * The use of [short (and even one-character) commands](https://github.com/leo-arch/clifm/wiki/Introduction#commands-short-summary), and list numbers ([ELN](https://github.com/leo-arch/clifm/wiki/Common-Operations)'s) for filenames. 
-* [Bookmarks](https://github.com/leo-arch/clifm/wiki/Common-Operations#bookmarks)
-* [Files selection](https://github.com/leo-arch/clifm/wiki/Common-Operations#selection) (supports both glob and regular expressions and works even across multiple instances of the program)
-* [_Lira_](https://github.com/leo-arch/clifm/wiki/Specifics#resource-opener), a built-in resource opener (supports regular expressions)
-* [Files search](https://github.com/leo-arch/clifm/wiki/Common-Operations#searching) (supports both glob and regular expressions)
-* A Freedesktop compliant trash system
-* Extended [color codes](https://github.com/leo-arch/clifm/wiki/Customization#colors) for file types and file extensions
-* [Files counter](https://github.com/leo-arch/clifm/wiki/Introduction#interface) for directories and symlinks to directories
-* Directory history map to keep in sight previous, current, and next entries in the directory history list
-* [Plugins](https://github.com/leo-arch/clifm/wiki/Advanced#plugins)
-* [Files preview](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) (via _BFG_, a native file previewer, but including support for [Ranger's scope.sh](https://github.com/ranger/ranger/blob/master/ranger/data/scope.sh) and [pistol](https://github.com/doronbehar/pistol) as well)
+* [Bookmarks](https://github.com/leo-arch/clifm/wiki/Common-Operations#bookmarks).
+* [Files selection](https://github.com/leo-arch/clifm/wiki/Common-Operations#selection) (supports both glob and regular expressions and works even across multiple instances of the program).
+* [_Lira_](https://github.com/leo-arch/clifm/wiki/Specifics#resource-opener), a built-in resource opener (supports regular expressions).
+* [File search](https://github.com/leo-arch/clifm/wiki/Common-Operations#searching) (supports both glob and regular expressions).
+* A Freedesktop-compliant trash system.
+* Extended [color codes](https://github.com/leo-arch/clifm/wiki/Customization#colors) for file-types and -extensions.
+* [File counter](https://github.com/leo-arch/clifm/wiki/Introduction#interface) for directories and symlinks to directories.
+* Directory history map to keep in sight previous, current, and next entries in the directory history list.
+* [Plugins](https://github.com/leo-arch/clifm/wiki/Advanced#plugins).
+* [File preview](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) (via _BFG_, a native file previewer, but including support for [Ranger's scope.sh](https://github.com/ranger/ranger/blob/master/ranger/data/scope.sh) and [pistol](https://github.com/doronbehar/pistol) as well).
 * [Stealth mode](https://github.com/leo-arch/clifm/wiki/Advanced#stealth-mode): Leave no trace on the host system. No file is read, no file is written.
 * [_Kangaroo_](https://github.com/leo-arch/clifm/wiki/Specifics#kangaroo-frecency-algorithm), a built-in directory jumper function similar to [autojump](https://github.com/wting/autojump), [z.lua](https://github.com/skywind3000/z.lua), and [zoxide](https://github.com/ajeetdsouza/zoxide).
-* Batch links
-* [Icons](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk) support :smirk:
-* Unicode suppport
-* [TAB-completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-and-completions)
-* Bash-like quoting system
-* History function
-* Shell commands execution
-* [Glob and regular expressions](https://github.com/leo-arch/clifm/wiki/Advanced#wildcards-and-regex) (including inverse matching)
-* [Aliases](https://github.com/leo-arch/clifm/wiki/Customization#aliases)
-* Logs
-* [Prompt and profile commands](https://github.com/leo-arch/clifm/wiki/Customization#profile-and-prompt-commands) (run commands with each new prompt or at program startup)
-* Bash-like [prompt customization](https://github.com/leo-arch/clifm/wiki/Customization#the-prompt)
-* Sequential and conditional commands execution 
-* [User profiles](https://github.com/leo-arch/clifm/wiki/Specifics#profiles)
-* Customizable [keyboard shortcuts](https://github.com/leo-arch/clifm/wiki/Customization#keybindings)
-* _Mas_, a built-in pager for files listing
-* Eleven sorting methods
-* [Bulk rename](https://github.com/leo-arch/clifm/wiki/Advanced#bulk-rename)
-* [Archiving and compression](https://github.com/leo-arch/clifm/wiki/Advanced#archives) support (including Zstandard and ISO 9660)
-* Auto-cd and auto-open
-* Symlinks editor
-* Disk usage
-* [CD on quit](https://github.com/leo-arch/clifm/wiki/Advanced#cd-on-quit) and [file picker](https://github.com/leo-arch/clifm/wiki/Advanced#file-picker) functions
-* Read and list files form [standard input](https://github.com/leo-arch/clifm/wiki/Advanced#standard-input)
-* [Files filter](https://github.com/leo-arch/clifm/wiki/Advanced#file-filters)
-* Up to eight [workspaces](https://github.com/leo-arch/clifm/wiki/Specifics#workspaces)
-* Fused parameters for ELN's (`s1`, for example, works just as `s 1` )
-* [Advcpmv](https://github.com/jarun/advcpmv) support (just `cp` and `mv` with a nice progress bar)
-* Light mode (just in case it is not fast enough for you)
-* [Color schemes](https://github.com/leo-arch/clifm/wiki/Customization#colors)
-* **NEW**: Four [customizable keybindings for custom plugins](https://github.com/leo-arch/clifm/wiki/Customization#keybindings)
-* **NEW**: Fastback function
-* **NEW**: [Git integration](https://github.com/leo-arch/clifm/wiki/Advanced#git-integration)
+* Batch links.
+* [Icons](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk) support :smirk:.
+* Unicode suppport.
+* [Tab-completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-and-completions).
+* Bash-like quoting system.
+* History function.
+* Shell commands execution.
+* [Glob and regular expressions](https://github.com/leo-arch/clifm/wiki/Advanced#wildcards-and-regex) (including inverse matching).
+* [Aliases](https://github.com/leo-arch/clifm/wiki/Customization#aliases).
+* Logs.
+* [Prompt and profile commands](https://github.com/leo-arch/clifm/wiki/Customization#profile-and-prompt-commands) (run commands with each new prompt or at program startup).
+* Bash-like [prompt customization](https://github.com/leo-arch/clifm/wiki/Customization#the-prompt).
+* Sequential and conditional commands execution .
+* [User profiles](https://github.com/leo-arch/clifm/wiki/Specifics#profiles).
+* Customizable [keyboard shortcuts](https://github.com/leo-arch/clifm/wiki/Customization#keybindings).
+* _Mas_, a built-in pager for files listing.
+* 11 sorting methods.
+* [Bulk renaming](https://github.com/leo-arch/clifm/wiki/Advanced#bulk-rename).
+* [Archiving and compression](https://github.com/leo-arch/clifm/wiki/Advanced#archives) support (including Zstandard and ISO 9660).
+* Auto-cd and auto-open.
+* Symlink editor.
+* Disk usage.
+* [CD on quit](https://github.com/leo-arch/clifm/wiki/Advanced#cd-on-quit) and [file picker](https://github.com/leo-arch/clifm/wiki/Advanced#file-picker) functions.
+* Read and list files form [standard input](https://github.com/leo-arch/clifm/wiki/Advanced#standard-input).
+* [Files filter](https://github.com/leo-arch/clifm/wiki/Advanced#file-filters).
+* Up to eight [workspaces](https://github.com/leo-arch/clifm/wiki/Specifics#workspaces).
+* Fused parameters for ELN's (`s1`, for example, works just as `s 1` ).
+* [Advanced Copy](https://github.com/jarun/advcpmv) support (just `cp` and `mv` with a nice progress bar).
+* Light mode (just in case it is not fast enough for you).
+* [Color schemes](https://github.com/leo-arch/clifm/wiki/Customization#colors).
+* **NEW**: Four [customizable keybindings for custom plugins](https://github.com/leo-arch/clifm/wiki/Customization#keybindings).
+* **NEW**: Fastback function.
+* **NEW**: [Git integration](https://github.com/leo-arch/clifm/wiki/Advanced#git-integration).
 
-For a detailed explanation of each of these features follow the corresponding links or consult the [wiki](https://github.com/leo-arch/clifm/wiki).
+For a detailed explanation of each of these features, follow the corresponding links or consult the [wiki](https://github.com/leo-arch/clifm/wiki).
 
 ---
 
@@ -127,9 +133,11 @@ For a detailed explanation of each of these features follow the corresponding li
 
 ### Dependencies
 
-`glibc` and `coreutils`, of course, but also `libcap`, `acl`, `file`, and `readline`. For Archlinux users, all these dependenciess are part of the `core` reposiroty. In Debian/Ubuntu systems three packages must be installed before compilation: `libcap-dev`, `libacl1-dev`, and `libreadline-dev`. In Fedora based systems you need `libcap-devel`, `libacl-devel`, and `readline-devel`.
+`glibc` and `coreutils`, of course, but also `libcap`, `acl`, `file`, and `readline`. \
+For Arch Linux users, all these dependenciess are part of the `core` reposiroty. \
+In Debian/Ubuntu systems three packages must be installed before compilation: `libcap-dev`, `libacl1-dev`, and `libreadline-dev`. In Fedora based systems you need `libcap-devel`, `libacl-devel`, and `readline-devel`.
 
-Optional dependencies: `sshfs`, `curlftpfs`, and `cifs-utils` (for remote filesystems support); `atool`, `archivemount`, `genisoimage`, `p7zip`, and `cdrtools` (for archiving and compression support), and `icons-in-terminal` to enable the icons feature.
+Optional dependencies: `sshfs`, `curlftpfs`, and `cifs-utils` (for remote-filesystem support); `atool`, `archivemount`, `genisoimage`, `p7zip`, and `cdrtools` (for archival and compression support), and `icons-in-terminal` to turn on icons.
 
 ### Arch Linux
 
@@ -165,7 +173,7 @@ You should find the binary file in `/usr/bin`, so that you can run it as any oth
 
 	$ clifm
 
-To uninstall `clifm` issue this command wherever the Makefile is located:
+To uninstall `clifm`, issue this command where the makefile is located:
 
 	$ sudo make uninstall
 
@@ -173,27 +181,33 @@ To uninstall `clifm` issue this command wherever the Makefile is located:
 
 ## First steps
 
-Try the `help` command to learn more about CliFM. Once in the CliFM prompt, type `help` or `?`. To jump into the **COMMANDS** section in the manpage, simply enter `cmd` or press <kbd>F2</kbd>. Press <kbd>F1</kbd> to access the full manpage and <kbd>F3</kbd> to access the keybindings help page.
+The `help` command teaches you about CliFM. \
+Once in the CliFM prompt, type `help` or `?`. \
+To jump into the **COMMANDS** section in the manpage, simply enter `cmd` or press <kbd>F2</kbd>. \
+Press <kbd>F1</kbd> to access the full manpage and <kbd>F3</kbd> to access the keybindings help-page.
 
-You can also take a look at some of these [basic usage examples](https://github.com/leo-arch/clifm/wiki/Common-Operations#basic-usage-examples) to get you started.
+You can also take a look at some of these [basic usage-examples](https://github.com/leo-arch/clifm/wiki/Common-Operations#basic-usage-examples) to get you started.
 
 ---
 
 ## Support
 
-CliFM is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag). It works on Linux and FreeBSD, on i686, x86_64, and ARM architectures.
+CliFM is C99 and POSIX-1.2008 compliant (if compiled with the `_BE_POSIX` flag). \
+It works on Linux and FreeBSD, on i686, x86_64, and ARM architectures.
 
 ---
 
 ## License
-This project is licensed under the GPL version 2 (or later) license. See the [LICENSE](https://github.com/leo-arch/clifm/blob/master/LICENSE) file for details.
+This project is licensed GPL version 2 (or later). \
+See the [LICENSE](https://github.com/leo-arch/clifm/blob/master/LICENSE) file for details.
 
 ---
 
 ## Contributing
-We welcome community contributions. Please see our [contribution guidelines](https://github.com/leo-arch/clifm/blob/master/CONTRIBUTING.md) for details.
+Yes. Please see our [contribution guidelines](https://github.com/leo-arch/clifm/blob/master/CONTRIBUTING.md) for details.
 
 ---
 
 ## Community
-Join our [Gitter discussion room](https://gitter.im/leo-arch/clifm) and let us know what you think: ideas, comments, observations and questions are always welcome. The [Discussions](https://github.com/leo-arch/clifm/discussions) section of this repo is also available.
+Join our [Gitter discussion room](https://gitter.im/leo-arch/clifm) and let us know what you think: ideas, comments, observations and questions are always welcome. \
+The [Discussions](https://github.com/leo-arch/clifm/discussions) section of this repo is also open to input.
