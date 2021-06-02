@@ -4,7 +4,7 @@
 
 * If you want to directly contribute to the project adding a feature, there a simple way to do this that do not involve getting your hands dirty with the source code: write a [plugin](https://github.com/leo-arch/clifm/wiki/Advanced#plugins) (in any language you know) and submit it via a pull request: plugins could be simple shell scripts of a few lines long.
 
-* For the time being, CliFM includes only a spanish translation (which is now out dated, by the way). New translations are a nice way to contribute (you can find the .pot file in [here](https://github.com/leo-arch/clifm/tree/master/translations)).
+* For the time being, CliFM includes only a spanish translation (which is now out dated, by the way). New translations are a nice way to contribute (you can find the .pot file in [here](https://github.com/leo-arch/clifm/tree/master/translations)). We are using [Hosted Weblate](https://hosted.weblate.org/projects/clifm/clifm/) as a translations platform.
 
 * Test it on other operating systems (working fine now on Linux and FreeBSD) and other architectures (successfully tested on i386, x86_64, and ARM).
 
