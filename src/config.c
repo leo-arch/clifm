@@ -892,9 +892,13 @@ Pager=%s\n\
 MaxHistory=%d\n\
 MaxDirhist=%d\n\
 MaxLog=%d\n\
-PrintSelfiles=%s\n\
-MaxPrintSelfiles=%d\n\
 DiskUsage=%s\n\n"
+
+		"# If set to true, always print the list of selected files. Since this\n\
+# list could become quite extensive, you can limit the number of printed entries\n\
+# using the MaxPrintSelfiles option (-1 = no limit)\n\
+PrintSelfiles=%s\n\
+MaxPrintSelfiles=%d\n\n"
 
 	    "# If set to true, clear the screen before listing files\n\
 ClearScreen=%s\n\n"
@@ -932,9 +936,9 @@ RlEditMode=%d\n\n"
 		DEF_MAX_HIST,
 		DEF_MAX_DIRHIST,
 		DEF_MAX_LOG,
+		DEF_DISK_USAGE == 1 ? "true" : "false",
 		DEF_PRINTSEL == 1 ? "true" : "false",
 		DEF_MAXPRINTSEL,
-		DEF_DISK_USAGE == 1 ? "true" : "false",
 		DEF_CLEAR_SCREEN == 1 ? "true" : "false",
 		DEF_RESTORE_LAST_PATH == 1 ? "true" : "false",
 		DEF_TRASRM == 1 ? "true" : "false",
