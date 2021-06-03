@@ -1,6 +1,6 @@
 <p align="center">
 	<a href="https://github.com/leo-arch/clifm">
-		<img src="images/logo/256x256b.png" alt="CliFM logo" width="160" height="160">
+		<img src="images/logo/256x256c.png" alt="CliFM logo" width="160" height="160">
 	</a>
 </p>
 <h1 align="center">CliFM</h1>
