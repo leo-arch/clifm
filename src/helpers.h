@@ -341,6 +341,8 @@ nm=01;32:bm=01;36:"
 #define DEF_TRASRM 0
 #define DEF_UNICODE 1
 #define DEF_WELCOME_MESSAGE 1
+#define DEF_PRINTSEL 0
+#define DEF_MAXPRINTSEL UNSET
 
 #define MAX_WS 8
 
@@ -547,6 +549,7 @@ struct param {
 	int case_sens_dirjump;
 	int case_sens_path_comp;
 	int cwd_in_title;
+	int printsel;
 };
 
 extern struct param xargs;
@@ -634,7 +637,8 @@ extern short
     config_ok,
     trash_ok,
     selfile_ok,
-    filter_rev;
+    filter_rev,
+    print_selfiles;
 
 extern int
     max_hist,
@@ -644,6 +648,7 @@ extern int
     max_files,
     min_jump_rank,
     max_jump_total_rank,
+    max_printselfiles,
 
     dirhist_cur_index,
     argc_bk,

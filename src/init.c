@@ -572,6 +572,7 @@ external_arguments(int argc, char **argv)
 	    {"case-ins-path-comp", no_argument, 0, 31},
 	    {"cwd-in-title", no_argument, 0, 32},
 	    {"open", required_argument, 0, 33},
+	    {"print-sel", no_argument, 0, 34},
 	    {0, 0, 0, 0}};
 
 	/* Increment whenever a new (only) long option is added */
@@ -761,6 +762,10 @@ external_arguments(int argc, char **argv)
 			path_value = optarg;
 			xargs.path = 1; */
 		} break;
+
+		case 34:
+			xargs.printsel = 1;
+			break;
 
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
@@ -1104,7 +1109,7 @@ unset_xargs(void)
 	xargs.no_dirjump = xargs.icons = xargs.no_colors = UNSET;
 	xargs.icons_use_file_color = xargs.no_columns = UNSET;
 	xargs.case_sens_dirjump = xargs.case_sens_path_comp = UNSET;
-	xargs.cwd_in_title = UNSET;
+	xargs.cwd_in_title = xargs.printsel = UNSET;
 }
 
 /* Keep track of attributes of the shell. Make sure the shell is running
@@ -1657,6 +1662,16 @@ check_options(void)
 		else
 			no_eln = xargs.noeln;
 	}
+
+	if (print_selfiles == UNSET) {
+		if (xargs.printsel == UNSET)
+			print_selfiles = DEF_PRINTSEL;
+		else
+			print_selfiles = xargs.printsel;
+	}
+
+	if (max_printselfiles == UNSET)
+		max_printselfiles = DEF_MAXPRINTSEL;
 
 	if (case_sens_dirjump == UNSET) {
 		if (xargs.case_sens_dirjump == UNSET)

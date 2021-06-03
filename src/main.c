@@ -105,9 +105,11 @@ short
     mv_cmd = UNSET,
     tr_as_rm = UNSET,
     no_eln = UNSET,
+    unicode = UNSET,
     min_name_trim = UNSET,
     case_sens_dirjump = UNSET,
     case_sens_path_comp = UNSET,
+	print_selfiles = UNSET,
 
     no_log = 0,
     internal_cmd = 0,
@@ -117,7 +119,6 @@ short
     is_sel = 0,
     sel_is_last = 0,
     kbind_busy = 0,
-    unicode = UNSET,
     dequoted = 0,
     mime_match = 0,
     sort_reverse = 0,
@@ -141,6 +142,7 @@ int
     max_files = UNSET,
     min_jump_rank = UNSET,
     max_jump_total_rank = UNSET,
+	max_printselfiles = UNSET,
 
     dirhist_cur_index = 0,
     argc_bk = 0,
@@ -574,6 +576,8 @@ main(int argc, char *argv[])
 
 	add_to_dirhist(ws[cur_ws].path);
 
+	get_sel_files();
+
 	/* Start listing as soon as possible to speed up startup time */
 	if (cd_lists_on_the_fly && isatty(STDIN_FILENO))
 		list_dir();
@@ -614,8 +618,6 @@ main(int argc, char *argv[])
 	get_path_programs();
 
 	get_prompt_cmds();
-
-	get_sel_files();
 
 	if (trash_ok) {
 		trash_n = count_dir(TRASH_FILES_DIR);

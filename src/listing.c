@@ -801,12 +801,12 @@ END:
 	if (reset_pager)
 		pager = 1;
 
+	if (max_files != UNSET && (int)files > max_files)
+		printf("%d/%zu\n", max_files, files);
+
 	/* Print a dividing line between the files list and the
 	 * prompt */
 	print_div_line();
-
-	if (max_files != UNSET && (int)files > max_files)
-		printf("%d/%zu\n", max_files, files);
 
 	if (dirhist_map) {
 		/* Print current, previous, and next entries */
@@ -820,6 +820,19 @@ END:
 
 	if (sort_switch)
 		print_sort_method();
+
+	if (print_selfiles) {
+		if (sel_n > 0) {
+			for (i = 0; i <
+			(max_printselfiles != UNSET ? max_printselfiles : sel_n); i++)
+				colors_list(sel_elements[i], 0, NO_PAD, PRINT_NEWLINE);
+
+			if (max_printselfiles != UNSET)
+				printf("%d/%zu\n", i, sel_n);
+
+			print_div_line();
+		}
+	}
 
 	/*  clock_t end = clock();
 	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC); */
@@ -1574,12 +1587,12 @@ END:
 	if (reset_pager)
 		pager = 1;
 
+	if (max_files != UNSET && (int)files > max_files)
+		printf("%d/%zu\n", max_files, files);
+
 	/* Print a dividing line between the files list and the
 	 * prompt */
 	print_div_line();
-
-	if (max_files != UNSET && (int)files > max_files)
-		printf("%d/%zu\n", max_files, files);
 
 	if (dirhist_map) {
 		/* Print current, previous, and next entries */
@@ -1593,6 +1606,19 @@ END:
 
 	if (sort_switch)
 		print_sort_method();
+
+	if (print_selfiles) {
+		if (sel_n > 0) {
+			for (i = 0; i <
+			(max_printselfiles != UNSET ? max_printselfiles : sel_n); i++)
+				colors_list(sel_elements[i], 0, NO_PAD, PRINT_NEWLINE);
+
+			if (max_printselfiles != UNSET)
+				printf("%d/%zu\n", i, sel_n);
+
+			print_div_line();
+		}
+	}
 
 	/*  clock_t end = clock();
 	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC); */

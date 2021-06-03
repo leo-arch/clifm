@@ -1558,6 +1558,7 @@ help_function(void)
 \n              FILE and exit\
 \n     --opener=APPLICATION\t resource opener to use instead of 'lira',\
 \n              %s built-in opener\
+\n     --print-sel\t\t keep the list of selected files in sight\
 \n     --restore-last-path\t save last visited directory to be \
 \n              restored in the next session\
 \n     --rl-vi-mode\t\t set readline to vi editing mode (defaults \

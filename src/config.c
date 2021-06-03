@@ -892,6 +892,8 @@ Pager=%s\n\
 MaxHistory=%d\n\
 MaxDirhist=%d\n\
 MaxLog=%d\n\
+PrintSelfiles=%s\n\
+MaxPrintSelfiles=%d\n\
 DiskUsage=%s\n\n"
 
 	    "# If set to true, clear the screen before listing files\n\
@@ -930,6 +932,8 @@ RlEditMode=%d\n\n"
 		DEF_MAX_HIST,
 		DEF_MAX_DIRHIST,
 		DEF_MAX_LOG,
+		DEF_PRINTSEL == 1 ? "true" : "false",
+		DEF_MAXPRINTSEL,
 		DEF_DISK_USAGE == 1 ? "true" : "false",
 		DEF_CLEAR_SCREEN == 1 ? "true" : "false",
 		DEF_RESTORE_LAST_PATH == 1 ? "true" : "false",
@@ -1195,7 +1199,6 @@ create_config_files(void)
 					    "wall=wallpaper_setter.sh\n"
 					    "dragon=dragondrop.sh\n"
 					    "bn=batch_create.sh\n"
-					    "bcp=batch_copy.sh\n"
 					    "+=finder.sh\n"
 					    "++=jumper.sh\n"
 					    "-=fzfnav.sh\n"
@@ -1366,6 +1369,28 @@ read_config(void)
 
 			else if (strncmp(opt_str, "false", 5) == 0)
 				case_sens_path_comp = 0;
+		}
+
+		else if (xargs.printsel == UNSET && *line == 'P'
+		&& strncmp(line, "PrintSelfiles=", 14) == 0) {
+
+			char opt_str[MAX_BOOL] = ""; /* false (5) + 1 */
+			ret = sscanf(line, "PrintSelfiles=%5s\n", opt_str);
+
+			if (ret == -1)
+				continue;
+
+			if (strncmp(opt_str, "true", 4) == 0)
+				print_selfiles = 1;
+
+			else if (strncmp(opt_str, "false", 5) == 0)
+				print_selfiles = 0;
+		}
+
+		else if (*line == 'M' && strncmp(line, "MaxPrintSelfiles=", 17) == 0) {
+			int opt_num = 0;
+			ret = sscanf(line, "MaxPrintSelfiles=%d\n", &opt_num);
+			max_printselfiles = opt_num;
 		}
 
 		else if (!filter && *line == 'F' && strncmp(line, "Filter=", 7) == 0) {
