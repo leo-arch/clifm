@@ -151,6 +151,35 @@ print_disk_usage(void)
 }
 
 void
+_print_selfiles(unsigned short term_rows)
+{
+	int limit = max_printselfiles;
+
+	if (max_printselfiles == 0) {
+		/* Never take more than half terminal height */
+		limit = (term_rows / 2) - 4;
+		/* 4 = 2 div lines, 2 prompt lines */
+
+		if (limit <= 0)
+			limit = 1;
+	}
+
+	if (limit > sel_n)
+		limit = (int)sel_n;
+
+	size_t i;
+	for (i = 0; i <
+	(max_printselfiles != UNSET ? limit : sel_n); i++) {
+		colors_list(sel_elements[i], 0, NO_PAD, PRINT_NEWLINE);
+	}
+
+	if (max_printselfiles != UNSET && limit < sel_n)
+		printf("%zu/%zu\n", i, sel_n);
+
+	print_div_line();
+}
+
+void
 print_dirhist_map(void)
 {
 	size_t i;
@@ -821,18 +850,8 @@ END:
 	if (sort_switch)
 		print_sort_method();
 
-	if (print_selfiles) {
-		if (sel_n > 0) {
-			for (i = 0; i <
-			(max_printselfiles != UNSET ? max_printselfiles : sel_n); i++)
-				colors_list(sel_elements[i], 0, NO_PAD, PRINT_NEWLINE);
-
-			if (max_printselfiles != UNSET)
-				printf("%d/%zu\n", i, sel_n);
-
-			print_div_line();
-		}
-	}
+	if (print_selfiles && sel_n > 0)
+		_print_selfiles(term_rows);
 
 	/*  clock_t end = clock();
 	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC); */
@@ -1607,18 +1626,8 @@ END:
 	if (sort_switch)
 		print_sort_method();
 
-	if (print_selfiles) {
-		if (sel_n > 0) {
-			for (i = 0; i <
-			(max_printselfiles != UNSET ? max_printselfiles : sel_n); i++)
-				colors_list(sel_elements[i], 0, NO_PAD, PRINT_NEWLINE);
-
-			if (max_printselfiles != UNSET)
-				printf("%d/%zu\n", i, sel_n);
-
-			print_div_line();
-		}
-	}
+	if (print_selfiles && sel_n > 0)
+		_print_selfiles(term_rows);
 
 	/*  clock_t end = clock();
 	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC); */
