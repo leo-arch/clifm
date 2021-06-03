@@ -4,7 +4,7 @@
 	</a>
 </p>
 <h1 align="center">CliFM</h1>
-<h2 align="center">Non-curses KISS file-manager for the terminal</h2>
+<h2 align="center">Non-curses, KISS file-manager for the terminal</h2>
 <h3 align="center">Fast, extensible, and light. Written in C.</h3>
 <h4 align="center"><a
 href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/bug_report.md">Report bug</a> · <a
@@ -54,7 +54,7 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 Why another file manager? I can. \
 In the free world, a free community finds alternatives central to freedom, and moreover, a place to learn.
 
-Whatever needs to be done in the simplest possible way: [KISS](https://en.wikipedia.org/wiki/KISS_principle) is a desired trait of a file-manager for the terminal. No GUI, no curses, but just a command-line, shell-like file manager: 5 MiB RAM and 400 KiB disk space.
+Whatever needs to be done, do it in the simplest possible way: [KISS](https://en.wikipedia.org/wiki/KISS_principle) is a desired trait of a file-manager for the terminal. No GUI, no curses, but just a command-line, shell-like file manager: 5 MiB RAM and 400 KiB disk space.
 
 Willingness to try something different is all you need.
 
