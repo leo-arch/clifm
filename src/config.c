@@ -895,8 +895,8 @@ MaxLog=%d\n\
 DiskUsage=%s\n\n"
 
 		"# If set to true, always print the list of selected files. Since this\n\
-# list could become quite extensive, you can limit the number of printed entries\n\
-# using the MaxPrintSelfiles option (-1 = no limit)\n\
+# list could become quite extensive, you can limit the number of printed \n\
+# entries using the MaxPrintSelfiles option (-1 = no limit)\n\
 PrintSelfiles=%s\n\
 MaxPrintSelfiles=%d\n\n"
 
