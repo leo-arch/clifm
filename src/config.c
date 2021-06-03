@@ -1195,6 +1195,7 @@ create_config_files(void)
 					    "wall=wallpaper_setter.sh\n"
 					    "dragon=dragondrop.sh\n"
 					    "bn=batch_create.sh\n"
+					    "bcp=batch_copy.sh\n"
 					    "+=finder.sh\n"
 					    "++=jumper.sh\n"
 					    "-=fzfnav.sh\n"
