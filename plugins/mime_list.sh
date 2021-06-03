@@ -17,6 +17,6 @@ while [ -z "$mime" ]; do
 	read -r mime
 done
 
-find . -maxdepth \1 -mindepth \1 | file -F'@' -N -n --mime-type -if- | grep "@\ .*${mime}" | cut -d"@" -f1 | cut -d"/" -f2-10
+find . -maxdepth \1 -mindepth \1 | file -F'@' -N -n --mime-type -if- | grep "@\ .*${mime}" | cut -d"@" -f1 | cut -d"/" -f2-10 | sort
 
 exit 0
