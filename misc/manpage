@@ -307,6 +307,9 @@ run as a stand-alone resource opener: open FILE and exit
 .B \-\-opener\fR=APPLICATION
 specify a resource opener to use. If opener is not set, \fIlira\fR will be used instead
 .TP
+.B \-\-print\-sel
+Keep in sight the list of selected files. Since this list could be quite extensive, the maximum number of selected files to print could be specified via the \fBMaxPrinSelfiles\fR option in the configuration file. Defaults to -1 (no limit).
+.TP
 .B \-\-restore\-last\-path
 save last visited directory for each workspace to be restored in the next session.
 .TP
