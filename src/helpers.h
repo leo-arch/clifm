@@ -342,7 +342,7 @@ nm=01;32:bm=01;36:"
 #define DEF_UNICODE 1
 #define DEF_WELCOME_MESSAGE 1
 #define DEF_PRINTSEL 0
-#define DEF_MAXPRINTSEL UNSET
+#define DEF_MAXPRINTSEL 0
 
 #define MAX_WS 8
 
