@@ -66,6 +66,7 @@ args=(
 	'--only-dirs[list only directories and symbolic links to directories]'
 	'--open[run as a stand-alone resource opener: open FILE and exit]'
 	'--opener=[resource opener to use instead of 'Lira', CliFM built-in opener]:opener:_command_names'
+	'--print-sel[always print the list of selected files]'
 	'--restore-last-path[save last visited directory to be restored in the next session]'
 	'--rl-vi-mode[set readline to vi editing mode (defaults to emacs editing mode)]'
 	'--share-selbox[make the Selection Box common to different profiles]'

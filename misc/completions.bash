@@ -97,6 +97,7 @@ _clifm ()
         --only-dirs
 		--open
         --opener
+		--print-sel
         --restore-last-path
         --rl-vi-mode
         --share-selbox
