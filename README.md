@@ -121,9 +121,9 @@ Features beyond copy, move, remove, etc:
 * [Advanced Copy](https://github.com/jarun/advcpmv) support (just `cp` and `mv` with a nice progress bar).
 * Light mode (just in case it is not fast enough for you).
 * [Color schemes](https://github.com/leo-arch/clifm/wiki/Customization#colors).
-* **NEW**: Four [customizable keybindings for custom plugins](https://github.com/leo-arch/clifm/wiki/Customization#keybindings).
-* **NEW**: Fastback function.
-* **NEW**: [Git integration](https://github.com/leo-arch/clifm/wiki/Advanced#git-integration).
+* Four [customizable keybindings for custom plugins](https://github.com/leo-arch/clifm/wiki/Customization#keybindings).
+* Fastback function.
+* [Git integration](https://github.com/leo-arch/clifm/wiki/Advanced#git-integration).
 
 For a detailed explanation of each of these features, follow the corresponding links or consult the [wiki](https://github.com/leo-arch/clifm/wiki).
 
@@ -152,7 +152,7 @@ $ makepkg -si
 ```
 
 ### Debian-based systems
-**NEW**: A .deb package (for x86_64) is now available in [Releases](https://github.com/leo-arch/clifm/releases).
+A .deb package (for x86_64) is available in [Releases](https://github.com/leo-arch/clifm/releases).
 
 ### Other Linux distributions (or FreeBSD):
 
