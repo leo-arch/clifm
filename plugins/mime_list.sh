@@ -17,6 +17,6 @@ while [ -z "$mime" ]; do
 	read -r mime
 done
 
-printf "%s" "ls -d --color=always $(find . -maxdepth 1 -mindepth 1 | cut -d"/" -f2 | file -if- | grep "$mime" | awk -F: '{print $1}')" > "$CLIFM_BUS"
+find . -maxdepth \1 -mindepth \1 | file -F'@' -N -n --mime-type -if- | grep "@\ .*${mime}" | cut -d"@" -f1 | cut -d"/" -f2-10
 
 exit 0
