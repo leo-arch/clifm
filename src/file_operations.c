@@ -199,7 +199,8 @@ create_file(char **cmd)
 
 	if (exit_status == EXIT_SUCCESS && cd_lists_on_the_fly && file_in_cwd) {
 		free_dirlist();
-		exit_status = list_dir();
+		if (list_dir() != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
 	}
 
 	return exit_status;
@@ -994,7 +995,7 @@ batch_link(char **args)
 		return EXIT_FAILURE;
 
 	if (!args[1] || (*args[1] == '-' && strcmp(args[1], "--help") == 0)) {
-		puts(_("Usage: bl [FILE(s)]"));
+		puts(_("Usage: bl FILE(s)"));
 		return EXIT_SUCCESS;
 	}
 
@@ -1007,6 +1008,7 @@ batch_link(char **args)
 
 		if (!*suffix) {
 			free(suffix);
+			suffix = (char *)NULL;
 			continue;
 		}
 	}
@@ -1019,10 +1021,9 @@ batch_link(char **args)
 	for (i = 1; args[i]; i++) {
 		char *linkname = (char *)NULL;
 
-		if (*suffix == 'n' && !suffix[1])
+		if (*suffix == 'n' && !suffix[1]) {
 			linkname = args[i];
-
-		else {
+		} else {
 			snprintf(tmp, NAME_MAX, "%s%s", args[i], suffix);
 			linkname = tmp;
 		}
