@@ -551,7 +551,7 @@ list available mountpoints and change the current working directory to the selec
 with no arguments, prints the list of messages in the current session. The 'clear' option tells CliFM to empty the messages list.
 .TP
 .B n, new \fR[FILE DIR/ ...n]
-create new files and/or directories. If a file name ends with a slash (/), it will be taken as a directory name and created via the shell command 'mkdir -p'. Else, it will be created via the 'touch' shell command. Ex: 'n myfile mydir/'. If no file name is specified, the user will be asked to provide one.
+create new files and/or directories. If a file name ends with a slash (/), it will be taken as a directory name and created via the shell command 'mkdir -p'. Else, it will be created via the 'touch' shell command. Ex: 'n myfile mydir/', to create a file named "myfile" and a directory named "mydir". If no file name is specified, the user will be asked for one.
 .TP
 .B net \fR[smb, ftp, sftp]://ADDRESS [OPTIONS]
 access a remote file system, either via SSH, FTP, or SMB protocols. To access the file system of a machine via SSH, use the following URI scheme: sftp://[USER@]HOST:[/REMOTE\-DIR] [PORT]. Bracketed elements are optional. If no user is specified, CliFM will attempt to login using the current local username. If no port is specified, the default port (22, if SSH) will be used.
