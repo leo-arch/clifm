@@ -65,13 +65,13 @@ _clifm ()
 		-w
 		--workspace
         -x
-        --ext-cmds
+        --no-ext-cmds
         -y
         --light-mode
         -z
 		--sort
-		--case-ins-dirjump
-		--case-ins-path-comp
+		--case-sens-dirjump
+		--case-sens-path-comp
         --cd-on-quit
 		--color-scheme
 		--cwd-in-title
