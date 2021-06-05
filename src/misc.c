@@ -1571,11 +1571,16 @@ help_function(void)
 				'rm' to prevent accidental deletions\n",
 	    PROGRAM_NAME, PROGRAM_NAME);
 
-	puts(_("\nBUILT-IN COMMANDS:\n\nThe following is just a list of available "
-	       "commands and possible parameters. For a complete description of "
-	       "each of these commands run 'cmd' (or press F2) or consult the "
-	       "manpage (F1). You can also try the 'ih' action to run the "
-	       "interactive help plugin (it depends on FZF). Just enter 'ih', that's it.\n"));
+	printf(_("\nBUILT-IN COMMANDS:\n\nThe following is just a brief list of "
+			"available commands and possible parameters.\n\nFor a complete "
+			"description of each of these commands run '%scmd%s' (or press "
+			"%sF2%s) or consult the %smanpage%s (%sF1%s).\n\nYou can also try "
+			"the '%sih%s' action to run the interactive help plugin (it "
+			"depends on FZF). Just enter 'ih', that's it.\n\nIt is also "
+			"recommended to consult the project's %swiki%s "
+			"(https://github.com/leo-arch/clifm/wiki)\n\n"),
+			bold, df_c, bold, df_c, bold, df_c, bold,
+			df_c, bold, df_c, bold, df_c);
 
 	puts(_("ELN/FILE/DIR (auto-open and autocd functions)\n\
  /PATTERN [DIR] [-filetype] [-x] (quick search)\n\
