@@ -535,7 +535,7 @@ external_arguments(int argc, char **argv)
 	    {"no-unicode", no_argument, 0, 'u'},
 	    {"version", no_argument, 0, 'v'},
 	    {"workspace", required_argument, 0, 'w'},
-	    {"ext-cmds", no_argument, 0, 'x'},
+	    {"no-ext-cmds", no_argument, 0, 'x'},
 	    {"light", no_argument, 0, 'y'},
 	    {"sort", required_argument, 0, 'z'},
 
@@ -568,8 +568,8 @@ external_arguments(int argc, char **argv)
 	    {"no-colors", no_argument, 0, 27},
 	    {"max-files", required_argument, 0, 28},
 	    {"trash-as-rm", no_argument, 0, 29},
-	    {"case-ins-dirjump", no_argument, 0, 30},
-	    {"case-ins-path-comp", no_argument, 0, 31},
+	    {"case-sens-dirjump", no_argument, 0, 30},
+	    {"case-sens-path-comp", no_argument, 0, 31},
 	    {"cwd-in-title", no_argument, 0, 32},
 	    {"open", required_argument, 0, 33},
 	    {"print-sel", no_argument, 0, 34},
@@ -723,11 +723,11 @@ external_arguments(int argc, char **argv)
 			break;
 
 		case 30:
-			xargs.case_sens_dirjump = case_sens_dirjump = 0;
+			xargs.case_sens_dirjump = case_sens_dirjump = 1;
 			break;
 
 		case 31:
-			xargs.case_sens_path_comp = case_sens_path_comp = 0;
+			xargs.case_sens_path_comp = case_sens_path_comp = 1;
 			break;
 
 		case 32:
@@ -895,7 +895,7 @@ external_arguments(int argc, char **argv)
 		} break;
 
 		case 'x':
-			ext_cmd_ok = xargs.ext = 1;
+			ext_cmd_ok = xargs.ext = 0;
 			break;
 
 		case 'y':

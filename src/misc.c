@@ -1496,7 +1496,7 @@ help_function(void)
 \n              enabled by default\
 \n -v, --version\t\t\t show version details and exit\
 \n -w, --workspace=NUM\t\t start in workspace NUM\
-\n -x, --ext-cmds\t\t\t allow the use of external commands\
+\n -x, --no-ext-cmds\t\t\t Disallow the use of external commands\
 \n -y, --light-mode\t\t enable the light mode\
 \n -z, --sort=METHOD\t\t sort files by METHOD, where METHOD \
 \n              could be: 0 = none, 1 = name, 2 = size, \
@@ -1506,9 +1506,9 @@ help_function(void)
 	    PNL, GRAL_USAGE, PROGRAM_NAME);
 
 	printf("\
-\n     --case-ins-dirjump\t consult the jump database ignoring \
-\n              case\
-\n     --case-ins-path-comp\t TAB complete paths ignoring case\
+\n     --case-sens-dirjump\t do not ignore case when consulting the \
+\n              jump database (via the 'j' command)\
+\n     --case-sens-path-comp\t enable case sensitive path completion\
 \n     --cd-on-quit\t\t write last visited path to \
 \n              $XDG_CONFIG_HOME/clifm/.last to be accessed\
 \n              later by a shell funtion. See the manpage\

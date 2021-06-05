@@ -780,10 +780,14 @@ mvCmd=%d\n\n"
 # whenever the current path is longer than MaxPath.\n\
 MaxPath=%d\n\n"
 
-	    "WelcomeMessage=%s\n\
-SplashScreen=%s\n\
-ShowHiddenFiles=%s\n\
-LongViewMode=%s\n\
+	    "WelcomeMessage=%s\n\n\
+# Print %s's logo screen at startup\n\
+SplashScreen=%s\n\n\
+ShowHiddenFiles=%s\n\n\
+# List files properties next to file names instead of just file names\n\
+LongViewMode=%s\n\n\
+# Keep a record of both external commands and internal commands able to\n\
+# modify the files system (e.g. 'r', 'c', 'm', and so on)\n\
 LogCmds=%s\n\n"
 
 	    "# Minimum length at which a file name can be trimmed in long view mode\n\
@@ -830,6 +834,7 @@ LightMode=%s\n\n",
 
 		DEF_MAX_PATH,
 		DEF_WELCOME_MESSAGE == 1 ? "true" : "false",
+		PROGRAM_NAME,
 		DEF_SPLASH_SCREEN == 1 ? "true" : "false",
 		DEF_SHOW_HIDDEN == 1 ? "true" : "false",
 		DEF_LONG_VIEW == 1 ? "true" : "false",
@@ -881,14 +886,21 @@ Sort=%d\n\
 # true (you can also use the --sort-reverse option or the 'st' command)\n\
 SortReverse=%s\n\n"
 
-	    "Tips=%s\n\
+	    "# Print a usage tip at startup\n\
+Tips=%s\n\n\
 ListFoldersFirst=%s\n\
-CdListsAutomatically=%s\n\
-CaseSensitiveList=%s\n\
-CaseSensitiveDirJump=%s\n\
-CaseSensitivePathComp=%s\n\
-Unicode=%s\n\
-Pager=%s\n\
+CdListsAutomatically=%s\n\n\
+# Enable case senstive listing for files in the current directory\n\
+CaseSensitiveList=%s\n\n\
+# Enable case sensitive lookup for the directory jumper function (via \n\
+# the 'j' command)\n\
+CaseSensitiveDirJump=%s\n\n\
+# Enable case sensitive completion for file names\n\
+CaseSensitivePathComp=%s\n\n\
+Unicode=%s\n\n\
+# Enable Mas, the files list pager (executed whenever the list of files\n\
+# does not fit in the screen)\n\
+Pager=%s\n\n\
 MaxHistory=%d\n\
 MaxDirhist=%d\n\
 MaxLog=%d\n\
