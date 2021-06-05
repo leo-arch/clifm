@@ -218,14 +218,20 @@ show version details and exit
 .B \-w, \-\-workspace\fR=NUM
 start in workspace NUM. By default, CliFM will recover last visited path for each workspace. However, you can override this behaviour using the \fB--path\fR option described above to start in workspace NUM and in path PATH. 
 .TP
-.B \-x, \-\-ext\-cmds
-allow the use of external, shell commands
+.B \-x, \-\-no\-ext\-cmds
+disallow the use of external, shell commands
 .TP
 .B \-y, \-\-light\-mode
 enable the light mode to speed up CliFM. See the \fBNOTE ON SPEED\fR section below.
 .TP
 .B \-z, \-\-sort\fR=METHOD
 sort files by METHOD, where METHOD could be on of the following numbers: 0 = none, 1 = name, 2 = size, 3 = atime, 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version (name if not available), 8 =  extension, 9 = inode, 10 = owner, 11 = group.
+.TP
+.B \-\-case\-sens\-dirjump
+do not ignore case when consulting the jump database (via the \fIj\fRcommand)
+.TP
+.B \-\-case\-sens\-path\-comp
+enable case sensitive path completion
 .TP
 .B \-\-cd\-on\-quit
 write last visited directory to \fI$XDG_CONFIG_HOME/clifm/.last\fR to be later accessed by the corresponding shell function at program exit. See the \fBSHELL FUNCTIONS\fR section below.
