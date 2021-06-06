@@ -52,10 +52,12 @@ CLIFM \- The KISS file manager
 \fB21.\fR Examples
 
 .SH 1. GETTING HELP
-There are several ways of getting help in CliFM. Once in the program, enter '\fB?\fR' to see a minimal list of options, commands, and keybindings, or press \fBF1\fR to access this manpage, \fBF2\fR to go to the \fBCOMMANDS\fR section of this very manpage, or \fBF3\fR to go to the \fBKEYBOARD SHORTCUTS\fR section. A convenient way of getting full information about CliFM commands is via the '\fBih\fR' action, bound by default to the interactive help plugin (\fIihelp.sh\fR). Just type 'ih' to run the plugin (it depends on \fIfzf\fR) and select the command you want to obtain information on.
+There are several ways of getting help in CliFM. Once in the program, enter '\fB?\fR' to see a minimal list of options, commands, and keybindings, or press \fBF1\fR to access this manpage, \fBF2\fR to go to the \fBCOMMANDS\fR section of this very manpage, or \fBF3\fR to go to the \fBKEYBOARD SHORTCUTS\fR section.
+.sp
+A convenient way of getting full information about CliFM commands is via the '\fBih\fR' action, bound by default to the interactive help plugin (\fIihelp.sh\fR). Just type 'ih' to run the plugin (it depends on \fIfzf\fR) and select the command you want to obtain information about.
 
 .SH 2. DESCRIPTION
-CliFM is a completely text\-based, \fBshell\-like\fR file manager (no GUI nor curses at all) able to perform all the basic operations you may expect from any other FM. However, its most distinguishing characteristics are:
+CliFM is a completely text\-based, \fBshell\-like\fR and non-curses file manager for the terminal able to perform all the basic operations you may expect from any other FM. However, its most distinguishing characteristics are:
 .sp
   \fBa)\fR An extensive and customizable list of \fBcolor codes\fR to easily identify file types and extensions.
 .sp
@@ -122,13 +124,15 @@ List of CliFM features:
   35) Files filter via regular expressions for the files list
   36) Up to eight workspaces
   37) Fused parameters support for ELN's
-  38) Advcpmv support (cp and mv with a progress bar). Depends on advcpmv (See \fIhttps://github.com/jarun/advcpmv\fR)
+  38) Advcpmv support (cp and mv with a nice progress bar). Depends on advcpmv (See \fIhttps://github.com/jarun/advcpmv\fR)
   39) Fastback function
 
 .SH 3. RATIONALE
 When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the kernel built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There are no two without three".
 .sp
-While the kernel console, which strictly speaking could be thought of as a FM, does not actually feel as one and lacks many features (like bookmarks, files selection, a trash system, a resource opener and the like), graphical FM's offer most of these features, but only at the expense of system resources (at the very least 20MiB of RAM and most of the time a graphical X session), in the case of GUI\-based ones, or hiding the command line (where the real power of the Unix lies), in the case of the curses\-based ones. Heavily inspired by the KISS principle ("Keep it Simple, Stupid"), CliFM was born as an attempt to get the best of both worlds: the speed, lightness, and efficiency of the CLI and the extra features of traditional FM's. It is aimed to be, briefly speaking, a wrapper of the CLI to extend and improve its functionality; CliFM feels, acts, and flies like the CLI, offering at the same time most of the useful features of modern FM's.
+While the kernel console, which strictly speaking could be thought of as a FM, does not actually feel as one and lacks many features (like bookmarks, files selection, a trash system, a resource opener and the like), graphical FM's offer most of these features, but only at the expense of system resources (at the very least 20MiB of RAM and most of the time a graphical X session), in the case of GUI\-based ones, or hiding the command line (where the real power of the Unix lies), in the case of the curses\-based ones.
+.sp
+Heavily inspired by the KISS principle ("Keep it Simple, Stupid"), CliFM was born as an attempt to get the best of both worlds: the speed, lightness, and efficiency of the CLI and the extra features of traditional FM's. It is aimed to be, briefly speaking, a wrapper of the CLI to extend and improve its functionality; CliFM feels, acts, and flies like the CLI, offering at the same time most of the useful features of modern FM's.
 .sp
 Personally, since I just dislike GUI and bloated stuff, I really felt the need of an extended and improved way to manage my files in the CLI. Indeed, CliFM originated as an attempt to add a bookmarks function to the Bash shell, and then grew up from these humble beginnings. In between the CLI and traditional FM's, we have now CliFM, because, as the old Italian saying goes: "There is no two without three".
 .sp
@@ -605,9 +609,11 @@ toggle \fBMas\fR, the built-in pager, on/off. Useful to list directories with hu
 Once in the pager, press the Down arrow key, Space or Enter to move downwards one line, or PageDown to move downwards an entire page. To go upwards, use the shortcuts provided by your terminal emulator, for example, Alt\-PageUp or Alt\-Up. Press 'c', 'p', or 'q' keys to stop the pager, and 'h' or '?' for help.
 .TP
 .B pin \fR[FILE/DIR]
-pin a file or a directory to be accessed later via the period (,) keyword. For example, run 'pin mydir' and then access "mydir" as follows: 'cd ,' where the period is automatically expanded to the pinned file, in this case "mydir". The period keyword could be used with any command, either internal or external, e.g, 'ls ,'.
+pin a file or a directory to be accessed later via the comma (,) keyword. For example, run 'pin mydir' and then access "mydir" as follows: 'cd ,' where the comma is automatically expanded to the pinned file, in this case "mydir". The comma keyword could be used with any command, either internal or external, e.g, 'ls ,'.
 .sp
-With no arguments, the function prints the current pinned file, if any. If an argument is given, it will be taken as a file name to be pinned. Running this command again, frees the previous pin and sets a new one. In other words, only one pin is supported at a time. An easy alternative to create as many pins or shortcuts as you want, and how you want, is to use the \fIalias\fR function. Bookmarks could also be used to achieve a very similar result.
+With no arguments, the \fIpin\fR command prints the current pinned file, if any. If an argument is given, it will be taken as a file name to be pinned. Running this command again, frees the previous pinned file and sets a new one. In other words, only one pin is supported at a time. 
+.sp
+An easy alternative to create as many pins or shortcuts as you want, and how you want, is to use the \fIalias\fR function. Bookmarks could also be used to achieve a very similar result.
 .sp
 At program exit, the pinned file is written to a file in the configuration directory (as .pin) to be loaded in the next session.
 .TP
