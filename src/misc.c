@@ -133,8 +133,8 @@ print_tips(int all)
 	    "'s *.c' or 's .*\\.c$'",
 	    "ELN's and the 'sel' keyword work for shell commands as well: "
 	    "'file 1 sel'",
-	    "Press TAB to automatically expand an ELN: 'o 2' -> TAB -> "
-	    "'o FILENAME'",
+	    "Press TAB to automatically expand an ELN: 's 2' -> TAB -> "
+	    "'s FILENAME'",
 	    "Easily copy everything in CWD into another directory: 's * "
 	    "&& c sel ELN/DIR'",
 	    "Use ranges (ELN-ELN) to easily move multiple files: 'm 3-12 "
@@ -161,11 +161,11 @@ print_tips(int all)
 	    "List available aliases by running 'alias'",
 	    "Create aliases to easily run your preferred commands",
 	    "Open and edit the configuration file with 'edit'",
-	    "Find a description for each CLiFM command by running 'cmd'",
+	    "Find a description for each CliFM command by running 'cmd'",
 	    "Print the currently used color codes list by entering 'cc'",
-	    "Press 'Alt-i' to toggle hidden files on/off",
+	    "Press 'Alt-i' or 'Alt-.' to toggle hidden files on/off",
 	    "List mountpoints by pressing 'Alt-m'",
-	    "Allow the use of shell commands with the -x option: 'clifm -x'",
+	    "Disallow the use of shell commands with the -x option: 'clifm -x'",
 	    "Go to the root directory by just pressing 'Alt-r'",
 	    "Go to the home directory by just pressing 'Alt-e'",
 	    "Press 'F8' to open and edit current color scheme",
@@ -216,13 +216,13 @@ print_tips(int all)
 	    "Change default keyboard shortcuts by editing the keybindings file (F9)",
 	    "Keep in sight previous and next visited directories enabling the "
 	    "DirhistMap option in the configuration file",
-	    "Leave no traces at all running in stealth mode",
+	    "Leave no traces at all running in stealth mode (-S)",
 	    "Pin a file via the 'pin' command and then use it with the "
 	    "period keyword (,). Ex: 'pin DIR' and then 'cd ,'",
 	    "Switch between color schemes using the 'cs' command",
 	    "Use the 'j' command to quickly navigate through visited "
 	    "directories",
-	    "Switch workspaces pressing Alt-[1-4]",
+	    "Switch workspaces by pressing Alt-[1-4]",
 	    "Use the 'ws' command to list available workspaces",
 	    "Take a look at available plugins using the 'actions' command",
 	    "Space is not needed: enter 'p12' instead of 'p 12'",
@@ -230,6 +230,9 @@ print_tips(int all)
 	    "to reverse the meaning of a pattern",
 	    "Enable the TrashAsRm option to prevent accidental deletions",
 	    "Don't like ELN's? Disable them using the -e option",
+	    "Use the 'n' command to create multiple files and/or directories",
+	    "Customize your prompt by adding prompt commands",
+	    "Need git integration? Consult the manpage",
 	    NULL};
 
 	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
