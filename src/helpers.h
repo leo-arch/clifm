@@ -374,7 +374,7 @@ nm=01;32:bm=01;36:"
 /* Max length of the properties string in long view mode */
 #define MAX_PROP_STR 55
 
-#define GRAL_USAGE "[-aAefFgGhiIlLmoOsSuUvxy] [-b FILE] [-c FILE] \
+#define GRAL_USAGE "[-aAefFgGhiIlLmoOsSuUvxy] [-b FILE] [-c FILE] [-D DIR] \
 [-k FILE] [-P PROFILE] [-z METHOD] [PATH]"
 
 #define FALLBACK_SHELL "/bin/sh"
@@ -704,6 +704,7 @@ extern char
     **sel_elements,
 
     *ACTIONS_FILE,
+	*alt_config_dir,
     *alt_bm_file,
     *alt_config_file,
     *alt_kbinds_file,

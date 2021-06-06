@@ -1468,6 +1468,7 @@ help_function(void)
 \n -A, --show-hidden\t\t show hidden files\
 \n -b, --bookmarks-file=FILE\t specify an alternative bookmarks file\
 \n -c, --config-file=FILE\t\t specify an alternative configuration file\
+\n -D, --config-dir=DIR\t\t specify an alternative configuration directory\
 \n -e, --no-eln\t\t\t do not print ELN (entry list number) at \
 \n              the left of each file name \
 \n -f, --no-folders-first\t\t do not list folders first\

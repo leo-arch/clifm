@@ -39,6 +39,7 @@
 #include "aux.h"
 #include "checks.h"
 #include "config.h"
+#include "exec.h"
 #include "init.h"
 #include "mime.h"
 #include "misc.h"
@@ -513,6 +514,7 @@ external_arguments(int argc, char **argv)
 	    {"show-hidden", no_argument, 0, 'A'},
 	    {"bookmarks-file", no_argument, 0, 'b'},
 	    {"config-file", no_argument, 0, 'c'},
+	    {"config-dir", required_argument, 0, 'D'},
 	    {"no-eln", no_argument, 0, 'e'},
 	    {"no-folders-first", no_argument, 0, 'f'},
 	    {"folders-first", no_argument, 0, 'F'},
@@ -582,12 +584,13 @@ external_arguments(int argc, char **argv)
 	/* Variables to store arguments to options (-c, -p and -P) */
 	char *path_value = (char *)NULL,
 		 *alt_profile_value = (char *)NULL,
+	     *alt_dir_value = (char *)NULL,
 	     *config_value = (char *)NULL,
 	     *kbinds_value = (char *)NULL,
 	     *bm_value = (char *)NULL;
 
 	while ((optc = getopt_long(argc, argv,
-		    "+aAb:c:efFgGhiIk:lLmoOp:P:sSUuvw:xyz:", longopts,
+		    "+aAb:c:D:efFgGhiIk:lLmoOp:P:sSUuvw:xyz:", longopts,
 		    (int *)0)) != EOF) {
 		/* ':' and '::' in the short options string means 'required' and
 		 * 'optional argument' respectivelly. Thus, 'p' and 'P' require
@@ -785,6 +788,10 @@ external_arguments(int argc, char **argv)
 		case 'c':
 			xargs.config = 1;
 			config_value = optarg;
+			break;
+
+		case 'D':
+			alt_dir_value = optarg;
 			break;
 
 		case 'e':
@@ -988,6 +995,43 @@ external_arguments(int argc, char **argv)
 			_err('n', PRINT_PROMPT, _("%s: Loaded alternative "
 						  "bookmarks file\n"), PROGRAM_NAME);
 		}
+	}
+
+	if (alt_dir_value) {
+		char *dir_exp = (char *)NULL;
+
+		if (*alt_dir_value == '~') {
+			dir_exp = tilde_expand(alt_dir_value);
+			alt_dir_value = dir_exp;
+		}
+
+		int dir_ok = 1;
+		struct stat attr;
+		if (stat(alt_dir_value, &attr) == -1) {
+			char *tmp_cmd[] = {"mkdir", "-p", alt_dir_value, NULL};
+			int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOSTDERR);
+			if (ret != EXIT_SUCCESS) {
+				_err('e', PRINT_PROMPT, _("%s: %s: Cannot create directory (error %d)\n"
+					"Falling back to default configuration directory\n"),
+					PROGRAM_NAME, alt_dir_value, ret);
+				dir_ok = 0;
+			}
+		}
+
+		if (access(alt_dir_value, W_OK) == -1) {
+			if (dir_ok) {
+				_err('e', PRINT_PROMPT, _("%s: %s: %s\n"
+					"Falling back to default configuration directory\n"),
+					PROGRAM_NAME, alt_dir_value, strerror(errno));
+			}
+		} else {
+			alt_config_dir = savestring(alt_dir_value, strlen(alt_dir_value));
+			_err(0, PRINT_PROMPT, _("%s: %s: Using alternative "
+				"configuration directory\n"), PROGRAM_NAME, alt_config_dir);
+		}
+
+		if (dir_exp)
+			free(dir_exp);
 	}
 
 	if (kbinds_value) {

@@ -544,22 +544,29 @@ define_config_file_names(void)
 {
 	size_t pnl_len = strlen(PNL);
 
-	/* If $XDG_CONFIG_HOME is set, use it for the config file.
-	 * Else, fall back to $HOME/.config */
-	char *xdg_config_home = getenv("XDG_CONFIG_HOME");
+	if (alt_config_dir) {
+		CONFIG_DIR_GRAL = (char *)xnmalloc(strlen(alt_config_dir) + pnl_len
+											+ 2, sizeof(char));
+		sprintf(CONFIG_DIR_GRAL, "%s/%s", alt_config_dir, PNL);
+		free(alt_config_dir);
+	} else {
+		/* If $XDG_CONFIG_HOME is set, use it for the config file.
+		 * Else, fall back to $HOME/.config */
+		char *xdg_config_home = getenv("XDG_CONFIG_HOME");
 
-	if (xdg_config_home) {
-		size_t xdg_config_home_len = strlen(xdg_config_home);
+		if (xdg_config_home) {
+			size_t xdg_config_home_len = strlen(xdg_config_home);
 
-		CONFIG_DIR_GRAL = (char *)xnmalloc(xdg_config_home_len + pnl_len + 2, sizeof(char));
-		sprintf(CONFIG_DIR_GRAL, "%s/%s", xdg_config_home, PNL);
+			CONFIG_DIR_GRAL = (char *)xnmalloc(xdg_config_home_len + pnl_len
+												+ 2, sizeof(char));
+			sprintf(CONFIG_DIR_GRAL, "%s/%s", xdg_config_home, PNL);
 
-		xdg_config_home = (char *)NULL;
-	}
-
-	else {
-		CONFIG_DIR_GRAL = (char *)xnmalloc(user.home_len + pnl_len + 11, sizeof(char));
-		sprintf(CONFIG_DIR_GRAL, "%s/.config/%s", user.home, PNL);
+			xdg_config_home = (char *)NULL;
+		} else {
+			CONFIG_DIR_GRAL = (char *)xnmalloc(user.home_len + pnl_len + 11,
+												sizeof(char));
+			sprintf(CONFIG_DIR_GRAL, "%s/.config/%s", user.home, PNL);
+		}
 	}
 
 	size_t config_gral_len = strlen(CONFIG_DIR_GRAL);
@@ -569,9 +576,7 @@ define_config_file_names(void)
 	if (alt_profile) {
 		CONFIG_DIR = (char *)xnmalloc(config_gral_len + strlen(alt_profile) + 11, sizeof(char));
 		sprintf(CONFIG_DIR, "%s/profiles/%s", CONFIG_DIR_GRAL, alt_profile);
-	}
-
-	else {
+	} else {
 		CONFIG_DIR = (char *)xnmalloc(config_gral_len + 18, sizeof(char));
 		sprintf(CONFIG_DIR, "%s/profiles/default", CONFIG_DIR_GRAL);
 	}
@@ -580,9 +585,7 @@ define_config_file_names(void)
 		KBINDS_FILE = savestring(alt_kbinds_file, strlen(alt_kbinds_file));
 		free(alt_kbinds_file);
 		alt_kbinds_file = (char *)NULL;
-	}
-
-	else {
+	} else {
 		/* Keybindings per user, not per profile */
 		KBINDS_FILE = (char *)xnmalloc(config_gral_len + 13, sizeof(char));
 		sprintf(KBINDS_FILE, "%s/keybindings", CONFIG_DIR_GRAL);
@@ -613,9 +616,7 @@ define_config_file_names(void)
 	if (!alt_bm_file) {
 		BM_FILE = (char *)xnmalloc(config_len + 15, sizeof(char));
 		sprintf(BM_FILE, "%s/bookmarks.cfm", CONFIG_DIR);
-	}
-
-	else {
+	} else {
 		BM_FILE = savestring(alt_bm_file, strlen(alt_bm_file));
 		free(alt_bm_file);
 		alt_bm_file = (char *)NULL;
@@ -630,9 +631,7 @@ define_config_file_names(void)
 	if (!alt_config_file) {
 		CONFIG_FILE = (char *)xnmalloc(config_len + pnl_len + 4, sizeof(char));
 		sprintf(CONFIG_FILE, "%s/%src", CONFIG_DIR, PNL);
-	}
-
-	else {
+	} else {
 		CONFIG_FILE = savestring(alt_config_file, strlen(alt_config_file));
 		free(alt_config_file);
 		alt_config_file = (char *)NULL;

@@ -200,6 +200,7 @@ char
 
     *ACTIONS_FILE = (char *)NULL,
     *alt_bm_file = (char *)NULL,
+    *alt_config_dir = (char *)NULL,
     *alt_config_file = (char *)NULL,
     *alt_kbinds_file = (char *)NULL,
     *alt_profile = (char *)NULL,
