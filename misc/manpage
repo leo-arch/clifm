@@ -138,9 +138,13 @@ Personally, since I just dislike GUI and bloated stuff, I really felt the need o
 .sp
 CliFM is thus not just another terminal FM (one of the many we can find out there), but a truly command line interface, shell\-like, and really text\-based FM. Indeed, we normally think of terminal FM's as TUI or curses\-based FM's, not because these notions are really the same, but because of the fact that most (if not all) FM's designed for the terminal are curses-based applications. Here is where CliFM excels: it is a NON\-curses terminal FM. In this sense, CliFM is a truly command line FM.
 
-.SH 4. POSITIONAL ARGUMENTS
-.IP "\fBPATH\fR" 7
-The first non-option parameter could be used to specify the starting path. Ex: 'clifm /etc'. If not specified, the first workspace will be used. To start in a different workspace, use the \fI\-w\fR option. Ex: 'clifm \-w4 /etc'.
+.SH 4. POSITIONAL PARAMETERS
+If the first non-option parameter is a directory, CliFM will start in this directory. Otherwise, if not a directory, it will open the file via the default associated application and exit (working thus as a stand-alone resource opener).
+.sp
+For example, by running 'clifm /etc/hosts', the \fIhosts\fR file will be opened and CliFM will immediately exit.
+.sp
+On the other side, the command 'clifm /etc' instructs CliFM to start in the directory \fI/etc\fR. If not specified, the first workspace will be used. To start in a different workspace, use the \fI\-w\fR option. For instance: 'clifm \-w4 /etc'.
+.sp
 
 .SH 5. OPTIONS
 .TP
@@ -315,7 +319,7 @@ disable the welcome message
 list only directories
 .TP
 .B \-\-open\fR=FILE
-run as a stand-alone resource opener: open FILE and exit
+run as a stand-alone resource opener: open FILE and exit. This option is deprecated: use positional parameters instead
 .TP
 .B \-\-opener\fR=APPLICATION
 specify a resource opener to use. If opener is not set, \fIlira\fR will be used instead
