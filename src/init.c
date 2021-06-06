@@ -964,17 +964,36 @@ external_arguments(int argc, char **argv)
 		}
 	}
 
-	/* Positional parameters */
+	/* Positional parameters. If a directory, use it as CliFM starting
+	 * path. Otherwise, open the file with the associated application
+	 * and exit */
 	int i = optind;
 	if (argv[i]) {
+
+		struct stat attr;
+
+		if (stat(argv[i], &attr) == -1) {
+			fprintf(stderr, "%s: %s: %s", PROGRAM_NAME, argv[i],
+			    strerror(errno));
+			exit(EXIT_FAILURE);
+		}
+
+		if ((attr.st_mode & S_IFMT) != S_IFDIR) {
+			TMP_DIR = (char *)xnmalloc(5, sizeof(char));
+			strcpy(TMP_DIR, "/tmp");
+			MIME_FILE = (char *)xnmalloc(PATH_MAX, sizeof(char));
+			snprintf(MIME_FILE, PATH_MAX,
+			    "%s/.config/clifm/profiles/%s/mimelist.cfm",
+			    getenv("HOME"), alt_profile ? alt_profile : "default");
+			char *cmd[] = {"mm", argv[i], NULL};
+			int ret = mime_open(cmd);
+			exit(ret);
+		}
+
 		flags |= START_PATH;
 		path_value = argv[i];
 		xargs.path = 1;
 	}
-	/*	while (argv[i]) {
-		printf("%d: %s\n", i, argv[i]);
-		i++;
-	} */
 
 	if (bm_value) {
 		char *bm_exp = (char *)NULL;
