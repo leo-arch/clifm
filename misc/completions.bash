@@ -20,6 +20,8 @@ _clifm ()
         --bookmarks-file
         -c
         --config-file
+		-D
+		--config-dir
 		-e
 		--no-eln
         -f

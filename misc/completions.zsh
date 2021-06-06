@@ -14,6 +14,7 @@ args=(
 	{-A,--show-hidden}'[show hidden files]'
 	{-b+,--bookmarks-file=}'[specify an alternative bookmarks file]:filename:_files'
 	{-c+,--config-file=}'[specify an alternative configuration file]:filename:_files'
+	{-D+,--config-dir=}'[specify an alternative configuration directory]:directory:_directories'
 	{-e,--no-eln}'[do not print ELN (entry list number) at the left of each filename]'
 	{-f,--no-folders-first}'[do not list folders first]'
 	{-F,--folders-first}'[list folders first (default)]'
