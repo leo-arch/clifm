@@ -117,12 +117,12 @@ Features beyond copy, move, remove, etc:
 * Read and list files form [standard input](https://github.com/leo-arch/clifm/wiki/Advanced#standard-input).
 * [Files filter](https://github.com/leo-arch/clifm/wiki/Advanced#file-filters).
 * Up to eight [workspaces](https://github.com/leo-arch/clifm/wiki/Specifics#workspaces).
-* [Fused parameters for ELN's](https://github.com/leo-arch/clifm/wiki/Introduction#commands-detailed-description).
+* [Fused parameters for ELN's](https://github.com/leo-arch/clifm/wiki/Introduction#fused-parameters).
 * [Advanced Copy](https://github.com/jarun/advcpmv) support (just `cp` and `mv` with a nice progress bar).
 * [Light mode](https://github.com/leo-arch/clifm/wiki/Specifics#speed-and-performance) (just in case it is not fast enough for you).
 * [Color schemes](https://github.com/leo-arch/clifm/wiki/Customization#colors).
 * Four [customizable keybindings for custom plugins](https://github.com/leo-arch/clifm/wiki/Customization#keybindings).
-* [Fastback function](https://github.com/leo-arch/clifm/wiki/Introduction#commands-detailed-description).
+* [Fastback function](https://github.com/leo-arch/clifm/wiki/Introduction#fastback-function).
 * [Git integration](https://github.com/leo-arch/clifm/wiki/Advanced#git-integration).
 
 For a detailed explanation of each of these features, follow the corresponding links or consult the [wiki](https://github.com/leo-arch/clifm/wiki).
