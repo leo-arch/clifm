@@ -856,7 +856,7 @@ LightMode=%s\n\n",
 # '@' for symbolic links, '=' for sockets, '|' for FIFO/pipes, '*'\n\
 # for for executable files, and '?' for unknown file types. Bear in mind\n\
 # that when running in light mode the check for executable files won't be\n\
-# performed, and thereby no inidicator will be added to executable files.\n\
+# performed, and thereby no indicator will be added to executable files.\n\
 Classify=%s\n\n"
 
 	    "# Should the Selection Box be shared among different profiles?\n\
@@ -889,7 +889,7 @@ SortReverse=%s\n\n"
 Tips=%s\n\n\
 ListFoldersFirst=%s\n\
 CdListsAutomatically=%s\n\n\
-# Enable case senstive listing for files in the current directory\n\
+# Enable case sensitive listing for files in the current directory\n\
 CaseSensitiveList=%s\n\n\
 # Enable case sensitive lookup for the directory jumper function (via \n\
 # the 'j' command)\n\
