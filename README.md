@@ -91,7 +91,7 @@ Features beyond copy, move, remove, etc:
 * [File preview](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) (via _BFG_, a native file previewer, but including support for [Ranger's scope.sh](https://github.com/ranger/ranger/blob/master/ranger/data/scope.sh) and [pistol](https://github.com/doronbehar/pistol) as well).
 * [Stealth mode](https://github.com/leo-arch/clifm/wiki/Advanced#stealth-mode): Leave no trace on the host system. No file is read, no file is written.
 * [_Kangaroo_](https://github.com/leo-arch/clifm/wiki/Specifics#kangaroo-frecency-algorithm), a built-in directory jumper function similar to [autojump](https://github.com/wting/autojump), [z.lua](https://github.com/skywind3000/z.lua), and [zoxide](https://github.com/ajeetdsouza/zoxide).
-* Batch links.
+* [Batch links](https://github.com/leo-arch/clifm/wiki/Introduction#bl-elnfile--n).
 * [Icons](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk) support :smirk:.
 * Unicode suppport.
 * [Tab-completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-and-completions).
@@ -107,10 +107,10 @@ Features beyond copy, move, remove, etc:
 * [User profiles](https://github.com/leo-arch/clifm/wiki/Specifics#profiles).
 * Customizable [keyboard shortcuts](https://github.com/leo-arch/clifm/wiki/Customization#keybindings).
 * _Mas_, a built-in pager for files listing.
-* 11 sorting methods.
+* [11 sorting methods](https://github.com/leo-arch/clifm/wiki/Introduction#st-sort-method-rev).
 * [Bulk renaming](https://github.com/leo-arch/clifm/wiki/Advanced#bulk-rename).
 * [Archiving and compression](https://github.com/leo-arch/clifm/wiki/Advanced#archives) support (including Zstandard and ISO 9660).
-* Auto-cd and auto-open.
+* [Auto-cd](https://github.com/leo-arch/clifm/wiki/Introduction#acd-autocd-on-off-status) and [auto-open](https://github.com/leo-arch/clifm/wiki/Introduction#ao-auto-open-on-off-status).
 * Symlink editor.
 * Disk usage.
 * [CD on quit](https://github.com/leo-arch/clifm/wiki/Advanced#cd-on-quit) and [file picker](https://github.com/leo-arch/clifm/wiki/Advanced#file-picker) functions.
