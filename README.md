@@ -119,7 +119,7 @@ Features beyond copy, move, remove, etc:
 * Up to eight [workspaces](https://github.com/leo-arch/clifm/wiki/Specifics#workspaces).
 * Fused parameters for ELN's (`s1`, for example, works just as `s 1` ).
 * [Advanced Copy](https://github.com/jarun/advcpmv) support (just `cp` and `mv` with a nice progress bar).
-* Light mode (just in case it is not fast enough for you).
+* [Light mode](https://github.com/leo-arch/clifm/wiki/Specifics#speed-and-performance) (just in case it is not fast enough for you).
 * [Color schemes](https://github.com/leo-arch/clifm/wiki/Customization#colors).
 * Four [customizable keybindings for custom plugins](https://github.com/leo-arch/clifm/wiki/Customization#keybindings).
 * Fastback function.
