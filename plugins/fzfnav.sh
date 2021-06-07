@@ -19,7 +19,7 @@
 # with FZF or open the last accepted file (Enter).
 # Press Esc to cancel and exit.
 
-if [ -n "$1" ] && ([ "$1" = "--help" ] || [ "$1" = "help" ]); then
+if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
 	name="$(basename "$0")"
 	printf "Navigate/preview files via FZF\n"
 	printf "Usage: %s\n" "$name"
@@ -110,131 +110,456 @@ $PWD" --marker="+" --preview-window=:wrap "$BORDERS" \
 main() {
 
 	if ! [ "$(which fzf 2>/dev/null)" ]; then
-		printf "CliFM: fzf: Command not found" >&2
+		printf "CliFM: fzf: Command not found\n" >&2
 		exit 1
 	fi
 
-	# This is the previewer script, similar to Ranger's scope.sh
-	BFG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/BFG.sh"
+	# The variables below are exported to the environment so that the
+	# previewer script, BFG.sh, executed from within FZF, can make use of
+	# them. Here we define which application should be used for different
+	# file types. The implementation for each application is defined in the
+	# BFG file.
 
-	UEBERZUG_OK=0
+	BFG_CFG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/BFG.cfg"
+
+			#################################################
+			#	1. GET VALUES FROM THE CONFIGURATION FILE	#
+			#################################################
+
+	PREV_IMGS=1
+	PLAY_MUSIC=1
+	export ANIMATE_GIFS=1
+	export FALLBACK_INFO=1
+
+	while read -r LINE; do
+		[ -z "$LINE" ] || [ "$(printf "%s" "$LINE" | cut -c1)" = "#" ] \
+		&& continue
+
+		option="$(printf "%s" "$LINE" | cut -d= -f1)"
+		value="$(printf "%s" "$LINE" | cut -d= -f2 | tr -d "\"" )"
+
+		case $option in
+			# CHECK GENERAL OPTIONS
+			BFG_FILE)
+				if [ -z "$value" ]; then
+					BFG_FILE=""
+				else
+					export BFG_FILE="$value"
+				fi ;;
+			CACHEDIR)
+				if [ -z "$value" ]; then
+					CACHEDIR=""
+				else
+					export CACHEDIR="$value"
+				fi ;;
+			PREVIEWDIR)
+				if [ -z "$value" ]; then
+					PREVIEDIR=""
+				else
+					export PREVIEDIR="$value"
+				fi ;;
+			OPENER)
+				if [ -z "$value" ]; then
+					OPENER=""
+				else
+					export OPENER="$value"
+				fi ;;
+			USE_SCOPE)
+				[ "$value" = 1 ] && export USE_SCOPE=1 ;;
+			SCOPE_FILE)
+				if [ -z "$value" ]; then
+					SCOPE_FILE=""
+				else
+					export OPENER="$value"
+				fi ;;
+			USE_PISTOL)
+				[ "$value" = 1 ] && export USE_PISTOL=1 ;;
+			PREVIEW_IMAGES)
+				[ "$value" != 1 ] && PREV_IMGS=0 ;;
+			PLAY_MUSIC)
+				[ "$value" != 1 ] && PLAY_MUSIC=0 ;;
+			ANIMATE_GIFS)
+				[ "$value" != 1 ] && ANIMATE_GIFS=0 ;;
+			FALLBACK_INFO)
+				[ "$value" != 1 ] && FALLBACK_INFO=0 ;;
+
+			# CHECK FILE TYPES
+			ARCHIVES)
+				ARCHIVES="$value"
+				case "$value" in
+				atool)
+					export ARCHIVER_CMD="atool"
+					export ARCHIVER_OPTS="-l" ;;
+				bsdtar)
+					export ARCHIVER_CMD="bsdtar"
+					export ARCHIVER_OPTS="-tvf" ;;
+				tar)
+					export ARCHIVER_CMD="tar"
+					export ARCHIVER_OPTS="-tvf" ;;
+				none) ;;
+				*) ARCHIVES="" ;;
+				esac
+			;;
+			BROWSER)
+				case "$value" in
+					w3m) export BROWSER="w3m" ;;
+					elinks) export BROWSER="elinks" ;;
+					linx) export BROWSER="linx" ;;
+					cat) export CAT_OK=1 ;;
+					none) export BROWSER="true";;
+					*) BROWSER="" ;;
+				esac
+			;;
+			DDJVU)
+				DDJVU="$value"
+				case "$value" in
+					ddjvu) export DDJVU_OK=1 ;;
+					ddjvutxt) export DDJVU_OK=1 ;;
+					none) ;;
+					*) DDJVU="";;
+				esac
+			;;
+			DIR)
+				case "$value" in
+					tree) export DIR_CMD="tree" ;;
+					ls) export DIR_CMD="ls" ;;
+					none) export DIR_CMD="true" ;;
+					*) DIR_CMD="" ;;
+				esac
+			;;
+			DOC)
+				DOC="$value"
+				case "$value" in
+					libreoffice) export LIBREOFFICE_OK=1 ;;
+					text) DOC="" && export DOCASTEXT=1 ;;
+					none) ;;
+					*) DOC="";;
+				esac
+			;;
+			EPUB)
+				EPUB="$value"
+				case "$value" in
+					epub-thumbnailer) export EPUBTHUMB_OK=1 ;;
+					none) ;;
+					*) EPUB="";;
+				esac
+			;;
+			FILEINFO)
+				FILEINFO="$value"
+				case "$value" in
+					exiftool) export EXIFTOOL_OK=1 ;;
+					none) ;;
+					*) FILEINFO="";;
+				esac
+			;;
+			FONTS)
+				FONTS="$value"
+				case "$value" in
+					fontpreview) export FONTPREVIEW_OK=1 ;;
+					fontimage) export FONTIMAGE_OK=1 ;;
+					none) ;;
+					*) FONTS="";;
+				esac
+			;;
+			IMG)
+				case "$value" in
+					ueberzug) export UEBERZUG_OK=1 ;;
+					viu|catimg|img2txt) export IMG_VIEWER="$value" ;;
+					none) export IMG_VIEWER="true" ;;
+					*) IMG_VIEWER="" ;;
+				esac
+			;;
+			JSON)
+				JSON="$value"
+				case "$value" in
+					python) export PYTHON_OK=1 ;;
+					jq) export JQ_OK=1 ;;
+					cat) export CAT_OK=1 ;;
+					none) ;;
+					*) JSON="" ;;
+				esac
+			;;
+			MARKDOWN)
+				MARKDOWN="$value"
+				case "$value" in
+					glow) export GLOW_OK=1 ;;
+					cat) export CAT_OK=1 ;;
+					none) ;;
+					*) MARKDOWN="" ;;
+				esac
+			;;
+			MEDIAINFO)
+				MEDIAINFO="$value"
+				case "$value" in
+					mediainfo) export MEDIAINFO_OK=1 ;;
+					none) ;;
+					*) MEDIAINFO="" ;;
+				esac
+			;;
+			MUSIC)
+				MUSIC="$value"
+				case "$value" in
+					ffplay) export FFPLAY_OK=1 ;;
+					mplayer) export MPLAYER_OK=1 ;;
+					mpv) export MPV_OK=1 ;;
+					none) ;;
+					*) MUSIC="" ;;
+				esac
+			;;
+			PDF)
+				PDF="$value"
+				case "$value" in
+					pdftoppm) export PDFTOPPM_OK=1 ;;
+					pdftotext) export PDFTOTEXT_OK=1 ;;
+					mutool) export MUTOOL_OK=1 ;;
+					none) ;;
+					*) PDF="" ;;
+				esac
+			;;
+			TEXT)
+				TEXT="$value"
+				case "$value" in
+					bat) export BAT_OK=1 ;;
+					highlight) export HIGHLIGHT_OK=1 ;;
+					pygmentize) export PYGMENTIZE_OK=1 ;; 
+					cat) export CAT_OK=1 ;;
+					none) ;;
+					*) TEXT="" ;;
+				esac
+			;;
+			VIDEO)
+				VIDEO="$value"
+				case "$value" in
+					ffmpegthumbnailer) export FFMPEGTHUMBN_OK=1 ;;
+					none) ;;
+					*) VIDEO="" ;;
+				esac
+			;;
+		esac
+	done < "$BFG_CFG_FILE"
+
+	export COLORS
 	COLORS="$(tput colors)"
-	OPENER="clifm"
-	DIR_PREVIEWER="tree" # ls is another alternative
-	CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/clifm"
 
-	if ! [ -d "$CACHE_DIR" ]; then
-		mkdir -p "$CACHE_DIR"
+	# This is the previewer script, similar to Ranger's scope.sh
+	if [ -z "$BFG_FILE" ]; then
+		export BFG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/BFG.sh"
 	fi
 
-	# We check here, at startup, for available applications so that we don't need
-	# to do it once and again each time a file is hovered
-	if [ -n "$DISPLAY" ]; then
-		if [ "$(which ueberzug 2>/dev/null)" ]; then
-			UEBERZUG_OK=1
-			IMG_VIEWER="ueberzug"
-		elif [ "$(which viu 2>/dev/null)" ]; then
-			IMG_VIEWER="viu"
-		elif [ "$(which catimg 2>/dev/null)" ]; then
-			IMG_VIEWER="catimg"
-		elif [ "$(which img2txt 2>/dev/null)" ]; then
-			IMG_VIEWER="img2txt"
+	[ -z "$OPENER" ] && export OPENER="clifm"
+
+	[ -z "$PREVIEWDIR" ] && export PREVIEWDIR="${XDG_CACHE_HOME:-$HOME/.cache}/clifm/previews"
+
+	! [ -d "$PREVIEWDIR" ] && mkdir -p "$PREVIEWDIR"
+
+	if [ "$USE_SCOPE" = 1 ]; then
+		[ -z "$SCOPE_FILE" ] && SCOPE_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/ranger/scope.sh"
+	fi
+
+	# If some value was not set in the config file, check for available
+	# applications
+
+		###############################################
+		#			2. CHECK INSTALLED APPS			  #
+		###############################################
+
+	# We check here, at startup, for available applications so that we
+	# don't need to do it once and again each time a file is hovered
+
+	# Directories
+
+	if [ -z "$DIR_CMD" ]; then
+		if [ "$(which tree)" ]; then
+			export DIR_CMD="tree"
+		else
+			export DIR_CMD="ls"
 		fi
-		# Überzug is not run directly, but through a function
-		[ "$IMG_VIEWER" = "ueberzug" ] && IMG_VIEWER="uz_image"
 	fi
 
-	if [ "$(which atool 2>/dev/null)" ]; then
-		ARCHIVER_CMD="atool"
-		ARCHIVER_OPTS="-l"
-	elif [ "$(which bsdtar 2>/dev/null)" ]; then
-		ARCHIVER_CMD="bsdtar"
-		ARCHIVER_OPTS="-tvf"
-	elif [ "$(which tar 2>/dev/null)" ]; then
-		ARCHIVER_CMD="tar"
-		ARCHIVER_OPTS="-tvf"
+	# Images
+	if [ "$PREV_IMGS" = 1 ] && [ -z "$IMG_VIEWER" ] && \
+	[ -n "$DISPLAY" ]; then
+		if [ "$(which ueberzug 2>/dev/null)" ]; then
+			export UEBERZUG_OK=1
+		elif [ "$(which viu 2>/dev/null)" ]; then
+			export IMG_VIEWER="viu"
+		elif [ "$(which catimg 2>/dev/null)" ]; then
+			export IMG_VIEWER="catimg"
+		elif [ "$(which img2txt 2>/dev/null)" ]; then
+			export IMG_VIEWER="img2txt"
+		fi
 	fi
 
-	if [ "$(which w3m 2>/dev/null)" ]; then
-		BROWSER="w3m"
-	elif [ "$(which linx 2>/dev/null)" ]; then
-		BROWSER="linx"
-	elif [ "$(which elinks 2>/dev/null)" ]; then
-		BROWSER="elinks"
-	elif [ "$(which pandoc 2>/dev/null)" ]; then
-		PANDOC_OK=1
+	# Überzug is not run directly, but through a function
+	if [ "$PREV_IMGS" = 1 ] && [ "$UEBERZUG_OK" = 1 ]; then
+		export IMG_VIEWER="uz_image"
 	fi
 
-	if [ "$(which ffplay 2>/dev/null)" ]; then
-		FFPLAY_OK=1
-	elif [ "$(which mplayer 2>/dev/null)" ]; then
-		MPLAYER_OK=1
-	elif [ "$(which mpv 2>/dev/null)" ]; then
-		MPV_OK=1
+	# Archives
+	if [ -z "$ARCHIVES" ]; then
+		if [ "$(which atool 2>/dev/null)" ]; then
+			export ARCHIVER_CMD="atool"
+			export ARCHIVER_OPTS="-l"
+		elif [ "$(which bsdtar 2>/dev/null)" ]; then
+			export ARCHIVER_CMD="bsdtar"
+			export ARCHIVER_OPTS="-tvf"
+		elif [ "$(which tar 2>/dev/null)" ]; then
+			export ARCHIVER_CMD="tar"
+			export ARCHIVER_OPTS="-tvf"
+		fi
 	fi
 
-	if [ "$(which exiftool 2>/dev/null)" ]; then
-		EXIFTOOL_OK=1
-	fi
-	if [ "$(which mediainfo 2>/dev/null)" ]; then
-		MEDIAINFO_OK=1
-	fi
-
-	if [ "$(which pdftoppm 2>/dev/null)" ]; then
-		PDFTOPPM_OK=1
-	elif [ "$(which pdftotext 2>/dev/null)" ]; then
-		PDFTOTEXT_OK=1
-	elif [ "$(which mutool 2>/dev/null)" ]; then
-		MUTOOL_OK=1
+	# Web
+	if [ -z "$BROWSER" ]; then
+		if [ "$(which w3m 2>/dev/null)" ]; then
+			export BROWSER="w3m"
+		elif [ "$(which linx 2>/dev/null)" ]; then
+			export BROWSER="linx"
+		elif [ "$(which elinks 2>/dev/null)" ]; then
+			export BROWSER="elinks"
+		fi
 	fi
 
-	if [ "$(which libreoffice 2>/dev/null)" ]; then
-		LIBREOFFICE_OK=1
-	elif [ "$(which catdoc 2>/dev/null)" ]; then
-		CATDOC_OK=1
+	# Music
+	if [ "$PLAY_MUSIC" = 1 ] && [ -z "$MUSIC" ]; then
+		if [ "$(which ffplay 2>/dev/null)" ]; then
+			export FFPLAY_OK=1
+		elif [ "$(which mplayer 2>/dev/null)" ]; then
+			export MPLAYER_OK=1
+		elif [ "$(which mpv 2>/dev/null)" ]; then
+			export MPV_OK=1
+		fi
 	fi
 
-	if [ "$(which bat 2>/dev/null)" ]; then
-		BAT_OK=1
-	elif [ "$(which highlight 2>/dev/null)" ]; then
-		HIGHLIGHT_OK=1
-	elif [ "$(which pygmentize 2>/dev/null)" ]; then
-		PYGMENTIZE_OK=1
+	# Video
+	if [ -z "$VIDEO" ]; then
+		if [ "$(which ffmpegthumbnailer 2>/dev/null)" ]; then
+			export FFMPEGTHUMB_OK=1
+		fi
 	fi
 
-	if [ "$(which ddjvu 2>/dev/null)" ]; then
-		DDJVU_OK=1
-	elif [ "$(which djvutxt 2>/dev/null)" ]; then
-		DJVUTXT_OK=1
+	# File information
+	if [ -z "$FILEINFO" ]; then
+		if [ "$(which exiftool 2>/dev/null)" ]; then
+			export EXIFTOOL_CMD=1
+		else
+			export FILE_OK=1
+		fi
 	fi
 
-	if [ "$(which fontpreview 2>/dev/null)" ]; then
-		FONTPREVIEW_OK=1
-	elif [ "$(which fontimage 2>/dev/null)" ]; then
-		FONTIMAGE_OK=1
+	if [ -z "$MEDIAINFO" ]; then
+		if [ "$(which mediainfo 2>/dev/null)" ]; then
+			export MEDIAINFO_OK=1
+		else
+			export FILE_OK=1
+		fi
 	fi
 
-	[ "$(which ffmpegthumbnailer 2>/dev/null)" ] && FFMPEGTHUMB_OK=1
-	[ "$(which convert 2>/dev/null)" ] && CONVERT_OK=1
-	[ "$(which glow 2>/dev/null)" ] && GLOW_OK=1
-	[ "$(which epub-thumbnailer 2>/dev/null)" ] && EPUBTHUMB_OK=1
+	# PDF
+	if [ -z "$PDF" ]; then
+		if [ "$(which pdftoppm 2>/dev/null)" ]; then
+			export PDFTOPPM_OK=1
+		elif [ "$(which pdftotext 2>/dev/null)" ]; then
+			export PDFTOTEXT_OK=1
+		elif [ "$(which mutool 2>/dev/null)" ]; then
+			export MUTOOL_CMD=1
+		fi
+	fi
 
-	if [ "$UEBERZUG_OK" -eq 1 ]; then
-		export FIFO_UEBERZUG="$CACHE_DIR/ueberzug-${PPID}"
+	# Office documents
+	if [ -z "$DOC" ]; then
+		if [ -z "$DOCASTEXT" ] && [ "$(which libreoffice 2>/dev/null)" ]; then
+			export LIBREOFFICE_OK=1
+		else
+			[ "$(which catdoc 2>/dev/null)" ] && export CATDOC_OK=1
+			[ "$(which odt2txt 2>/dev/null)" ] && export ODT2TXT_OK=1
+			[ "$(which xlsx2csv 2>/dev/null)" ] && export XLSX2CSV_OK=1
+			[ "$(which xls2csv 2>/dev/null)" ] && export XLS2CSV_OK=1
+			[ "$(which unzip 2>/dev/null)" ] && export UNZIP_OK=1
+		fi
+	fi
+
+	[ "$(which pandoc 2>/dev/null)" ] && export PANDOC_OK=1
+
+	# Syntax highlighting
+	if [ -z "$TEXT" ]; then
+		if [ "$(which bat 2>/dev/null)" ]; then
+			export BAT_OK=1
+		elif [ "$(which highlight 2>/dev/null)" ]; then
+			export HIGHLIGHT_OK=1
+		elif [ "$(which pygmentize 2>/dev/null)" ]; then
+			export PYGMENTIZE_OK=1
+		else
+			export CAT_OK=1
+		fi
+	fi
+
+	if [ -z "$JSON" ]; then
+		if [ "$(which python 2>/dev/null)" ]; then
+			export PYTHON_OK=1
+		elif [ "$(which jq 2>/dev/null)" ]; then
+			export JQ_OK=1
+		else
+			export CAT_OK=1
+		fi
+	fi
+
+	# Ddjvu
+	if [ -z "$DDJVU" ]; then
+		if [ "$(which ddjvu 2>/dev/null)" ]; then
+			export DDJVU_OK=1
+		elif [ "$(which djvutxt 2>/dev/null)" ]; then
+			export DDJVUTXT_OK=1
+		fi
+	fi
+
+	# Fonts
+	if [ -z "$FONTS" ]; then
+		if [ "$(which fontpreview 2>/dev/null)" ]; then
+			export FONTPREVIEW_OK=1
+		elif [ "$(which fontimage 2>/dev/null)" ]; then
+			export FONTIMAGE_OK=1
+		fi
+	fi
+
+	# Markdown
+	if [ -z "$MARKDOWN" ]; then
+		if [ "$(which glow 2>/dev/null)" ]; then
+			export GLOW_OK=1
+		fi
+	fi
+
+	# Epub
+	if [ -z "$EPUB" ]; then
+		if [ "$(which epub-thumbnailer 2>/dev/null)" ]; then
+			export EPUBTHUMB_OK=1
+		fi
+	fi
+
+	# Torrent
+	if [ "$(which transmission-show 2>/dev/null)" ]; then
+		export TRANSMISSION_OK=1
+	fi
+
+	# Used to convert some file types to images
+	[ "$(which convert 2>/dev/null)" ] && export CONVERT_OK=1
+
+	# Make sure we have file, use dto get files MIME type
+	[ "$(which file 2>/dev/null)" ] && export FILE_OK=1
+
+	if [ "$UEBERZUG_OK" = 1 ] ; then
+		CACHEDIR="${XDG_CACHE_HOME:-$HOME/.cache}/clifm"
+		! [ -d "$CACHEDIR" ] && mkdir -p "$CACHEDIR"
+		export FIFO_UEBERZUG="$CACHEDIR/ueberzug-${PPID}"
 		trap uz_cleanup EXIT
 		start_ueberzug
 	fi
 
 	TMP="$(mktemp /tmp/clifm.XXXXXX)"
 
-	# These variables are exported to the environment so that the previewer script:
-	# BFG.sh, executed from within FZF, can catch them all.
-	export IMG_VIEWER ARCHIVER_CMD ARCHIVER_OPTS BROWSER \
-	FFPLAY_OK MEDIAINFO_OK PDFTOPPM_OK FFMPEGTHUMB_OK CONVERT_OK \
-	LIBREOFFICE_OK HIGHLIGHT_OK FONTPREVIEW_OK BAT_OK EPUBTHUMB_OK DDJVU_OK \
-	MPLAYER_OK EXIFTOOL_OK GLOW_OK MPV_OK PDFTOTEXT_OK CATDOC_OK \
-	MUTOOL_OK PANDOC_OK COLORS PYGMENTIZE_OK DJVUTXT_OK UEBERZUG_OK \
-	HELP BFG_FILE DIR_PREVIEWER FONTIMAGE_OK
+				#####################################
+				#	 3. RUN FZF, WHICH CALLS BFG	#
+				#####################################
 
 	fcd "$@"
 

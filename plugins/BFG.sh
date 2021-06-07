@@ -1,8 +1,9 @@
 #!/bin/sh
 
 # BFG: This is CliFM's file previewer script. It is called by the fzfnav.sh
-# plugin for each hovered file. Variables for applications are exported by fzfnav
-# to prevent this script from checking the same applications once and again
+# plugin for each hovered file. Variables for available applications are
+# exported by fzfnav to prevent this script from checking the same
+# applications once and again
 
 # Written by L. Abramovich
 # License: GPL3
@@ -11,7 +12,7 @@
 # atool or bsdtar or tar: archives
 # convert (imagemagick), and ueberzug (recommended) or viu or catimg or img2txt: images
 # fontpreview or fontimage (fontforge): fonts
-# libreoffice, catdoc, odt2txt, pandoc: office documents
+# libreoffice, catdoc, odt2txt, xls2csv, xls2xcsv, pandoc: office documents
 # pdftoppm or pdftotext or mutool: PDF files
 # epub-thumbnailer: epub files
 # ddjvu (djvulibre) or djvutxt: DjVu files
@@ -25,19 +26,9 @@
 # transmission-cli: torrent files
 # exiftool or mediainfo or file: file information
 
-CACHEDIR="${XDG_CACHE_HOME:-$HOME/.cache}/clifm"
-PREVIEWDIR="$CACHEDIR/previews"
-
-! [ -d "$PREVIEWDIR" ] && mkdir -p "$PREVIEWDIR"
-
 # Default size for images
 WIDTH=1920
 HEIGHT=1080
-
-USE_SCOPE=0
-SCOPE_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/ranger/scope.sh"
-
-USE_PISTOL=0
 
 
 calculate_position() {
@@ -60,11 +51,13 @@ uz_clear() {
 }
 
 file_info() {
+	[ "$FALLBACK_INFO" = 0 ] && exit 0
+
 	[ -z "$1" ] && exit 1
 
 	entry="$1"
 
-	if [ "$(file -bL --mime-encoding "$entry")" = "binary" ]; then
+	if [ "$FILE_OK" = 1 ] && [ "$(file -bL --mime-encoding "$entry")" = "binary" ]; then
 		printf -- "--- \e[0;30;47mBinary file\e[0m ---\n"
 	fi
 
@@ -72,7 +65,7 @@ file_info() {
 		exiftool "$PWD/$entry" 2>/dev/null && exit 0
 	elif [ "$MEDIAINFO_OK" = 1 ]; then
 		mediainfo "$PWD/$entry" 2>/dev/null && exit 0
-	else
+	elif [ "$FILE_OK" = 1 ]; then
 		file -b "$entry" && exit 0
 	fi
 	exit 1
@@ -90,15 +83,15 @@ handle_ext() {
 		case "$ext" in
 			# Direct Stream Digital/Transfer (DSDIFF) and wavpack aren not
 			# detected by file(1).
-			dff|dsf|wv|wvc)
-				file_info "$entry" && exit 0
-			;;
+#			dff|dsf|wv|wvc)
+#				file_info "$entry" && exit 0
+#			;;
 
 			# Markdown files
 			md)
 				if [ "$GLOW_OK" = 1 ]; then
 					glow -s dark "$PWD/$entry" && exit 0
-				else
+				elif [ "$CAT_OK" =  1 ]; then
 					cat "$entry" && exit 0
 				fi
 			;;
@@ -107,8 +100,6 @@ handle_ext() {
 			xz)
 				if [ -n "$ARCHIVER_CMD" ]; then
 					"$ARCHIVER_CMD" "$ARCHIVER_OPTS" "$entry" && exit 0
-				else
-					file_info "$entry" && exit 0
 				fi
 			;;
 
@@ -116,32 +107,36 @@ handle_ext() {
 			html|xhtml|htm)
 				if [ -n "$BROWSER" ]; then
 					"$BROWSER" -dump "$entry" && exit 0
-				else
+				elif [ "$CAT_OK" = 1 ]; then
 					cat "$entry" && exit 0
 				fi
 			;;
 
 			json)
-				if [ "$(which python 2>/dev/null)" ]; then
+				if [ "$PYTHON_OK" = 1 ]; then
 					python -m json.tool -- "$entry" && exit 0
-				elif [ "$(which jq 2>/dev/null)" ]; then
+				elif [ "$JQ_OK" = 1 ]; then
 					jq --color-output . "$PWD/$entry" && exit 0
-				else
+				elif [ "$CAT_OK" = 1 ]; then
 					cat "$entry" && exit 0
 				fi
 			;;
 
 			svg)
+				[ -z "$IMG_VIEWER" ] && return
+				if [ -f "$PREVIEWDIR/${entryhash}.png" ]; then
+					"$IMG_VIEWER" "$PREVIEWDIR/${entryhash}.png" && exit 0
+				fi
+
+				[ -z "$CONVERT_OK" ] && return
 				convert -background none -size "$WIDTH"x"$HEIGHT" "$entry" \
-					"$PREVIEWDIR/${entry}.png"
-				"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.png" && exit 0
+					"$PREVIEWDIR/${entryhash}.png"
+				"$IMG_VIEWER" "${PREVIEWDIR}/${entryhash}.png" && exit 0
 			;;
 
 			torrent)
-				if [ "$(which transmission-show 2>/dev/null)" ]; then
+				if [ "$TRANSMISSION_OK" = 1 ]; then
 					transmission-show -- "$PWD/$entry" && exit 0
-				else
-					file_info "$entry" && exit 0
 				fi
 			;;
 
@@ -158,6 +153,9 @@ handle_ext() {
 }
 
 handle_mime() {
+
+	[ -z "$FILE_OK" ] && return
+
 	entry="$1"
 
 	mimetype="$(file --brief --dereference --mime-type "$entry")"
@@ -167,35 +165,42 @@ handle_mime() {
 		# Office documents
 		*officedocument*|*msword|*ms-excel|text/rtf|*.opendocument.*)
 
-			if [ -n "$IMG_VIEWER" ] && [ "$LIBREOFFICE_OK" = 1 ]; then
-				libreoffice --headless --convert-to jpg "$entry" \
-				--outdir "$PREVIEWDIR" > /dev/null 2>&1 && \
+			if [ -n "$IMG_VIEWER" ] && [ -z "$DOCASTEXT" ]; then
 
-				mv "$PREVIEWDIR/${entry%.*}.jpg" "$PREVIEWDIR/${entry}.jpg" && \
+				if [ -f "$PREVIEWDIR/${entryhash}.jpg" ]; then
+					"$IMG_VIEWER" "$PREVIEWDIR/${entryhash}.jpg" && exit 0
+				fi
 
-				"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg" && exit 0
+				if [ "$LIBREOFFICE_OK" = 1 ]; then
+
+					libreoffice --headless --convert-to jpg "$entry" \
+					--outdir "$PREVIEWDIR" > /dev/null 2>&1 && \
+
+					mv "$PREVIEWDIR/${entry%.*}.jpg" "$PREVIEWDIR/${entryhash}.jpg" && \
+					"$IMG_VIEWER" "${PREVIEWDIR}/${entryhash}.jpg" && exit 0
+				fi
 			fi
 
 			case "$ext" in
 				odt|ods|odp|sxw)
-					if [ "$(which odt2txt 2>/dev/null)" ]; then
+					if [ "$ODT2TXT_OK" = 1 ]; then
 						odt2txt "$PWD/$entry" && exit 0
-					elif [ "$(which pandoc 2>/dev/null)" ]; then
+					elif [ "$PANDOC_OK" = 1 ]; then
 						pandoc -s -t markdown -- "$PWD/$entry" && exit 0
 					fi
 				;;
 				xlsx)
-					if [ "$(which xlsx2csv 2>/dev/null)" ]; then
+					if [ "$XLSX2CSV_OK" = 1 ]; then
 						xlsx2csv -- "$PWD/$entry" && exit 0
 					fi
 				;;
 				xls)
-					if [ "$(which xlsx2csv 2>/dev/null)" ]; then
+					if [ "$XLSX2CSV_OK" = 1 ]; then
 						xls2csv -- "$PWD/$entry" && exit 0
 					fi
 				;;
 				docx)
-					if [ "$(which unzip 2>/dev/null)" ]; then
+					if [ "$UNZIP_OK" = 1 ]; then
 						unzip -p "$entry" | grep --text '<w:r' | \
 						sed 's/<w:p[^<\/]*>/ /g' | sed 's/<[^<]*>//g' | \
 						grep -v '^[[:space:]]*$' | sed G && \
@@ -203,7 +208,7 @@ handle_mime() {
 					fi
 				;;
 				*)
-					if [ "$(which catdoc 2>/dev/null)" ]; then
+					if [ -n "$CATDOC_OK" ]; then
 						catdoc "$entry" && exit 0
 					fi
 				;;
@@ -221,7 +226,7 @@ handle_mime() {
 				"$BROWSER" -dump "$entry" && exit 0
 			elif [ "$PANDOC_OK" = 1 ]; then
 				pandoc -s -t markdown -- "$entry" && exit 0
-			else
+			elif [ "$CAT_OK" = 1 ]; then
 				cat "$entry" && exit 0
 			fi
 		;;
@@ -242,7 +247,7 @@ handle_mime() {
 				else
 					pigmentize -f terminal "$entry" && exit 0
 				fi
-			else
+			elif [ "$CAT_OK" = 1 ]; then
 				cat "$entry" && exit 0
 			fi
 		;;
@@ -250,8 +255,11 @@ handle_mime() {
 		# DjVu
 		*/vnd.djvu)
 			if [ -n "$IMAGE_VIEWER" ] && [ "$DDJVU_OK" = 1 ]; then
-				ddjvu --format=tiff --page=1 "$entry" "$PREVIEWDIR/${entry}.jpg"
-				"$IMG_VIEWER" "$PREVIEWDIR/${entry}.jpg" && exit 0
+				if [ -f "$PREVIEWDIR/${entryhash}.jpg" ]; then
+					"$IMG_VIEWER" "$PREVIEWDIR/${entryhash}.jpg" && exit 0
+				fi
+				ddjvu --format=tiff --page=1 "$entry" "$PREVIEWDIR/${entryhash}.jpg"
+				"$IMG_VIEWER" "$PREVIEWDIR/${entryhash}.jpg" && exit 0
 			elif [ "$DJVUTXT_OK" = 1 ]; then
 				djvutxt "$PWD/entry" && exit 0
 			fi
@@ -260,18 +268,30 @@ handle_mime() {
 		# GIF files
 		*/gif)
 			if [ -z "$IMG_VIEWER" ] || [ -z "$CONVERT_OK" ]; then
-				file_info "$entry" && exit 0
+				return
 			fi
+
+			if [ "$ANIMATE_GIFS" = 0 ]; then
+				if [ -f "$PREVIEWDIR/${entryhash}.jpg" ]; then
+					"$IMG_VIEWER" "$PREVIEWDIR/${entryhash}.jpg" && exit 0
+				fi
+
+				convert -coalesce -resize "$WIDTH"x"$HEIGHT"\> "$entry"[0] \
+				"$PREVIEWDIR/$entryhash.jpg"
+				"$IMG_VIEWER" "$PREVIEWDIR/${entryhash}.jpg"
+				exit 0
+			fi
+
 			# Break down the gif into frames and show each frame, one each 0.1 secs
 #			printf "\n"
 			filename="$(printf "%s" "$entry" | tr ' ' '_')"
-			if [ ! -d "$PREVIEWDIR/$filename" ]; then
-				mkdir -p "$PREVIEWDIR/$filename" && \
+			if [ ! -d "$PREVIEWDIR/$entryhash" ]; then
+				mkdir -p "$PREVIEWDIR/$entryhash" && \
 				convert -coalesce -resize "$WIDTH"x"$HEIGHT"\> "$entry" \
-				"$PREVIEWDIR/$filename/${filename%.*}.jpg"
+				"$PREVIEWDIR/$entryhash/${filename%.*}.jpg"
 			fi
 			while true; do
-				for frame in $(find "$PREVIEWDIR/$filename"/*.jpg 2>/dev/null \
+				for frame in $(find "$PREVIEWDIR/$entryhash"/*.jpg 2>/dev/null \
 				| sort -V); do
 					"$IMG_VIEWER" "$frame"
 					sleep 0.1
@@ -287,27 +307,46 @@ handle_mime() {
 
 		# Postscript
 		application/postscript)
-			if [ -n "$IMG_VIEWER" ] && [ "$(which gs 2>/dev/null)" ]; then
+			[ -z "$IMG_VIEWER" ] && return
+
+			if [ -f "$PREVIEWDIR/${entryhash}.jpg" ]; then
+				"$IMG_VIEWER" "$PREVIEWDIR/${entryhash}.jpg" && exit 0
+			fi
+
+			if [ "$(which gs 2>/dev/null)" ]; then
 				gs -sDEVICE=jpeg -dJPEGQ=100 -dNOPAUSE -dBATCH -dSAFER -r300 \
-				-sOutputFile="$PREVIEWDIR/${entry}.jpg" "$entry" > /dev/null 2>&1 && \
-				"$IMG_VIEWER" "$PREVIEWDIR/${entry}.jpg" && exit 0
+				-sOutputFile="$PREVIEWDIR/${entryhash}.jpg" "$entry" > /dev/null 2>&1 && \
+				"$IMG_VIEWER" "$PREVIEWDIR/${entryhash}.jpg" && exit 0
 			fi
 		;;
 
 		# Epub
 		application/epub+zip|application/x-mobipocket-ebook|application/x-fictionbook+xml)
-			if [ -n "$IMG_VIEWER" ] || [ -n "$EPUBTHUMB_OK" ]; then
-				epub-thumbnailer "$entry" "$PREVIEWDIR/${entry}.jpg" \
+			[ -z "$IMG_VIEWER" ] && return
+
+			if [ -f "$PREVIEWDIR/${entryhash}.jpg" ]; then
+				"$IMG_VIEWER" "$PREVIEWDIR/${entryhash}.jpg" && exit 0
+			fi
+
+			if [ -n "$EPUBTHUMB_OK" ]; then
+				epub-thumbnailer "$entry" "$PREVIEWDIR/${entryhash}.jpg" \
 				"$WIDTH" "$HEIGHT" && \
-				"$IMG_VIEWER" "$PREVIEWDIR/${entry}.jpg" && exit 0
+				"$IMG_VIEWER" "$PREVIEWDIR/${entryhash}.jpg" && exit 0
 			fi
 		;;
 
 		# PDF
 		*/pdf)
-			if [ -n "$IMG_VIEWER" ] && [ "$PDFTOPPM_OK" = 1 ]; then
-				pdftoppm -jpeg -f 1 -singlefile "$entry" "$PREVIEWDIR/$entry" && \
-				"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg" && exit 0
+			[ -z "$IMG_VIEWER" ] && return
+
+			if [ -f "$PREVIEWDIR/${entryhash}.jpg" ] && \
+			[ "$PDFTOPPM_OK" = 1 ]; then
+				"$IMG_VIEWER" "$PREVIEWDIR/${entryhash}.jpg" && exit 0
+			fi
+
+			if [ "$PDFTOPPM_OK" = 1 ]; then
+				pdftoppm -jpeg -f 1 -singlefile "$entry" "$PREVIEWDIR/$entryhash" && \
+				"$IMG_VIEWER" "$PREVIEWDIR/${entryhash}.jpg" && exit 0
 			elif [ "$PDFTOTEXT_OK" = 1 ]; then
 				pdftotext -nopgbrk -layout -- "$entry" - | ${PAGER:=less} && exit 0
 			elif [ "$MUTOOL_OK" = 1 ]; then
@@ -331,28 +370,45 @@ handle_mime() {
 			elif [ "$MPV_OK" = 1 ]; then
 				mpv --no-video --quiet "$entry" &
 			fi
-			[ "$MEDIAINFO_OK" = 1 ] && mediainfo "$entry"
-			[ "$EXIFTOOL_OK" = 1 ] && exiftool "$entry"
+
+			if [ "$FALLBACK_INFO" = 1 ]; then
+				[ "$MEDIAINFO_OK" = 1 ] && mediainfo "$entry"
+				[ "$EXIFTOOL_OK" = 1 ] && exiftool "$entry"
+			fi
+
 			exit 0
 		;;
 
 		# Video
 		video/*)
-			if [ -n "$IMG_VIEWER" ] || [ -n "$FFMPEGTHUMB_OK" ]; then
-				ffmpegthumbnailer -i "$entry" -o "$PREVIEWDIR/${entry}.jpg" -s 0 \
+			[ -z "$IMG_VIEWER" ] && return
+
+			if [ -f "$PREVIEWDIR/${entryhash}.jpg" ]; then
+				"$IMG_VIEWER" "$PREVIEWDIR/${entryhash}.jpg" && exit 0
+			fi
+
+			if [ "$FFMPEGTHUMB_OK" = 1 ]; then
+				ffmpegthumbnailer -i "$entry" -o "$PREVIEWDIR/${entryhash}.jpg" -s 0 \
 				-q 5 2>/dev/null && \
-				"$IMG_VIEWER" "$PREVIEWDIR/${entry}.jpg" && exit 0
+				"$IMG_VIEWER" "$PREVIEWDIR/${entryhash}.jpg" && exit 0
 			fi
 		;;
 
 		# Fonts
 		font/*|application/font*|application/*opentype)
 			[ -z "$IMG_VIEWER" ] && return
+
+			if [ -f "${PREVIEWDIR}/${entryhash}.jpg" ]; then
+				"$IMG_VIEWER" "${PREVIEWDIR}/${entryhash}.jpg" && exit 0
+			elif [ -f "${PREVIEWDIR}/${entryhash}.png" ]; then
+				"$IMG_VIEWER" "${PREVIEWDIR}/${entryhash}.png" && exit 0
+			fi
+
 			if [ "$FONTPREVIEW_OK" = 1 ]; then
-				fontpreview -i "$entry" -o "$PREVIEWDIR/${entry}.jpg" && \
-				"$IMG_VIEWER" "$PREVIEWDIR/${entry}.jpg" && exit 0
+				fontpreview -i "$entry" -o "$PREVIEWDIR/${entryhash}.jpg" && \
+				"$IMG_VIEWER" "$PREVIEWDIR/${entryhash}.jpg" && exit 0
 			elif [ "$FONTIMAGE_OK" = 1 ]; then
-				png_file="$PREVIEWDIR/${entry}.png"
+				png_file="$PREVIEWDIR/${entryhash}.png"
 				if fontimage -o "$png_file" \
 						--width "500" --height "290" \
 						--pixelsize "45" \
@@ -413,7 +469,7 @@ main() {
 	# Directory
 	if [ -d "$entry" ]; then
 		path="$(printf "%s" "$(pwd)/$entry" | sed "s;//;/;")"
-		if [ "$DIR_PREVIEWER" = "tree" ]; then
+		if [ "$DIR_CMD" = "tree" ]; then
 			if [ "$COLORS" = 256 ]; then
 				tree -a "$path" && exit 0
 			else
@@ -428,17 +484,11 @@ main() {
 
 	printf "\n"
 
+	# Use hashes instead of file names for cached files
+	entryhash="$(md5sum "$entry" | cut -d' ' -f1)"
+
 	# Do not generate previews of previews
 	[ "$PWD" = "${PREVIEWDIR}" ] && entry="${entry%.*}"
-
-	# Use cached images whenever possible
-	if [ -n "$IMG_VIEWER" ]; then
-		if [ -f "${PREVIEWDIR}/${entry}.jpg" ]; then
-			"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.jpg" && exit 0
-		elif [ -f "${PREVIEWDIR}/${entry}.png" ]; then
-			"$IMG_VIEWER" "${PREVIEWDIR}/${entry}.png" && exit 0
-		fi
-	fi
 
 	handle_ext "$entry"
 	handle_mime "$entry"
