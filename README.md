@@ -106,7 +106,7 @@ Features beyond copy, move, remove, etc:
 * Sequential and conditional commands execution .
 * [User profiles](https://github.com/leo-arch/clifm/wiki/Specifics#profiles).
 * Customizable [keyboard shortcuts](https://github.com/leo-arch/clifm/wiki/Customization#keybindings).
-* _Mas_, a built-in pager for files listing.
+* _[Mas](https://github.com/leo-arch/clifm/wiki/Introduction#pg-pager-on-off-status)_, a built-in pager for files listing.
 * [11 sorting methods](https://github.com/leo-arch/clifm/wiki/Introduction#st-sort-method-rev).
 * [Bulk renaming](https://github.com/leo-arch/clifm/wiki/Advanced#bulk-rename).
 * [Archiving and compression](https://github.com/leo-arch/clifm/wiki/Advanced#archives) support (including Zstandard and ISO 9660).
