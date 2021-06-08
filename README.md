@@ -154,7 +154,7 @@ $ makepkg -si
 ### Debian-based systems
 A .deb package (for x86_64) is available in [Releases](https://github.com/leo-arch/clifm/releases).
 
-### Other Linux distributions (or FreeBSD):
+### Other Linux distributions or FreeBSD:
 
 1. Clone the repository
 
