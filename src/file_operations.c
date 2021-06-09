@@ -302,8 +302,7 @@ open_function(char **cmd)
 
 			int ret = launch_execve(tmp_cmd,
 			    strcmp(cmd[args_n], "&") == 0 ? BACKGROUND
-							  : FOREGROUND,
-			    E_NOSTDERR);
+							  : FOREGROUND, E_NOSTDERR);
 
 			if (ret != EXIT_SUCCESS)
 				return EXIT_FAILURE;

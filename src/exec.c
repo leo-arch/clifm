@@ -1641,9 +1641,11 @@ exec_cmd(char **comm)
 			else if (auto_open && (file_attrib.st_mode & S_IFMT) == S_IFREG) {
 				/* Make sure we have not an executable file */
 				if (!(file_attrib.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))) {
-
-					char *cmd[] = {"open", comm[0], (comm[1]) ? comm[1] : NULL, NULL};
+					char *cmd[] = {"open", comm[0], comm[1] ? comm[1] : NULL,
+									comm[2] ? comm[2] : NULL, NULL};
+					args_n++;
 					exit_code = open_function(cmd);
+					args_n--;
 					return exit_code;
 				}
 			}
