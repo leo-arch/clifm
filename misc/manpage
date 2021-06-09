@@ -355,7 +355,7 @@ Options precedence order: 1) command line; 2) configuration file; 3) default val
 
 .TP
 .B \fRFILE/DIR
-if the \fIautocd\fR and \fIauto-open\fR functions are enabled, which is the default value, open FILE or change directory to DIR. In other words, 'FILE' amounts to 'open FILE' or 'o FILE', and 'DIR' to 'cd DIR'. ELN's, of course, are allowed. Example: '12'. Unlike the \fIopen\fR function (see below), passing an opening application is not allowed.
+if the \fIautocd\fR and \fIauto-open\fR functions are enabled, which is the default value, open FILE or change directory to DIR. In other words, 'FILE' amounts to 'open FILE' or 'o FILE', and 'DIR' to 'cd DIR'. ELN's, of course, are allowed. Example: '12'.
 .TP
 .B /\fRPATTERN [\-filetype] [-x] [DIR]
 this is the quick search function. Just type '/' followed by a glob or regular (or extended regular) expression, and CliFM will list all matches in the current working directory. For example, both '/*.pdf' and '/.pdf$' expressions will list all PDF files in the current working directory, the former using wildcards, and the second a regular expression.
