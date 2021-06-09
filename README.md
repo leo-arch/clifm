@@ -24,7 +24,7 @@ href="https://github.com/leo-arch/clifm/wiki">Browse the documentation</a></h4>
 </p>
 
 <p align="right"><br><i>[…] I think I had been looking for something like this for a long time, and had never put it in words. I used [other file-managers] occasionally, but frequently just found myself doing most of my file administration from the CLI. I think this hits a nice sort of sweet spot right between the two. It feels less like a separate program and more like just putting your shell into "file-management mode".</i></p>
-<p align="right"><a href="https://www.reddit.com/r/commandline/comments/nnj5vl/clifm_11_is_here_with_new_features_and_a_decent/gzwfm25/?context=3">Tuesda</a></p>
+<p align="right"><a href="https://www.reddit.com/r/commandline/comments/nnj5vl/clifm_11_is_here_with_new_features_and_a_decent/gzwfm25/?context=3">Tuerda</a></p>
 <p align="right"><br><i>Halfway between a shell and a TUI file-manager […] Nice tool, fluid, intuitive.</i></p>
 <p align="right"><a href="https://www.reddit.com/r/commandline/comments/n5j36f/clifm_the_kiss_file_manager_for_the_unix_terminal/gx5nxja/?context=3">Orduval</a></p>
 
@@ -82,16 +82,16 @@ Features beyond copy, move, remove, etc:
 * [Bookmarks](https://github.com/leo-arch/clifm/wiki/Common-Operations#bookmarks).
 * [Files selection](https://github.com/leo-arch/clifm/wiki/Common-Operations#selection) (supports both glob and regular expressions and works even across multiple instances of the program).
 * [_Lira_](https://github.com/leo-arch/clifm/wiki/Specifics#resource-opener), a built-in resource opener (supports regular expressions).
-* [File search](https://github.com/leo-arch/clifm/wiki/Common-Operations#searching) (supports both glob and regular expressions).
-* A Freedesktop-compliant trash system.
+* [Files search](https://github.com/leo-arch/clifm/wiki/Common-Operations#searching) (supports both glob and regular expressions).
+* A built-in [Freedesktop-compliant trash system](https://github.com/leo-arch/clifm/wiki/Common-Operations#trashing-files).
 * Extended [color codes](https://github.com/leo-arch/clifm/wiki/Customization#colors) for file-types and -extensions.
-* [File counter](https://github.com/leo-arch/clifm/wiki/Introduction#interface) for directories and symlinks to directories.
+* [Files counter](https://github.com/leo-arch/clifm/wiki/Introduction#interface) for directories and symlinks to directories.
 * Directory history map to keep in sight previous, current, and next entries in the directory history list.
 * [Plugins](https://github.com/leo-arch/clifm/wiki/Advanced#plugins).
-* [File preview](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) (via _BFG_, a native file previewer, but including support for [Ranger's scope.sh](https://github.com/ranger/ranger/blob/master/ranger/data/scope.sh) and [pistol](https://github.com/doronbehar/pistol) as well).
+* [Files preview](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) (via _BFG_, a native file previewer, but including support for [Ranger's scope.sh](https://github.com/ranger/ranger/blob/master/ranger/data/scope.sh) and [pistol](https://github.com/doronbehar/pistol) as well).
 * [Stealth mode](https://github.com/leo-arch/clifm/wiki/Advanced#stealth-mode): Leave no trace on the host system. No file is read, no file is written.
 * [_Kangaroo_](https://github.com/leo-arch/clifm/wiki/Specifics#kangaroo-frecency-algorithm), a built-in directory jumper function similar to [autojump](https://github.com/wting/autojump), [z.lua](https://github.com/skywind3000/z.lua), and [zoxide](https://github.com/ajeetdsouza/zoxide).
-* Batch links.
+* [Batch links](https://github.com/leo-arch/clifm/wiki/Introduction#bl-elnfile--n).
 * [Icons](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk) support :smirk:.
 * Unicode suppport.
 * [Tab-completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-and-completions).
@@ -106,23 +106,23 @@ Features beyond copy, move, remove, etc:
 * Sequential and conditional commands execution .
 * [User profiles](https://github.com/leo-arch/clifm/wiki/Specifics#profiles).
 * Customizable [keyboard shortcuts](https://github.com/leo-arch/clifm/wiki/Customization#keybindings).
-* _Mas_, a built-in pager for files listing.
-* 11 sorting methods.
+* _[Mas](https://github.com/leo-arch/clifm/wiki/Introduction#pg-pager-on-off-status)_, a built-in pager for files listing.
+* [11 sorting methods](https://github.com/leo-arch/clifm/wiki/Introduction#st-sort-method-rev).
 * [Bulk renaming](https://github.com/leo-arch/clifm/wiki/Advanced#bulk-rename).
 * [Archiving and compression](https://github.com/leo-arch/clifm/wiki/Advanced#archives) support (including Zstandard and ISO 9660).
-* Auto-cd and auto-open.
-* Symlink editor.
+* [Auto-cd](https://github.com/leo-arch/clifm/wiki/Introduction#acd-autocd-on-off-status) and [auto-open](https://github.com/leo-arch/clifm/wiki/Introduction#ao-auto-open-on-off-status).
+* [Symlinks editor](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r).
 * Disk usage.
 * [CD on quit](https://github.com/leo-arch/clifm/wiki/Advanced#cd-on-quit) and [file picker](https://github.com/leo-arch/clifm/wiki/Advanced#file-picker) functions.
 * Read and list files form [standard input](https://github.com/leo-arch/clifm/wiki/Advanced#standard-input).
 * [Files filter](https://github.com/leo-arch/clifm/wiki/Advanced#file-filters).
 * Up to eight [workspaces](https://github.com/leo-arch/clifm/wiki/Specifics#workspaces).
-* Fused parameters for ELN's (`s1`, for example, works just as `s 1` ).
+* [Fused parameters for ELN's](https://github.com/leo-arch/clifm/wiki/Introduction#fused-parameters).
 * [Advanced Copy](https://github.com/jarun/advcpmv) support (just `cp` and `mv` with a nice progress bar).
-* Light mode (just in case it is not fast enough for you).
+* [Light mode](https://github.com/leo-arch/clifm/wiki/Specifics#speed-and-performance) (just in case it is not fast enough for you).
 * [Color schemes](https://github.com/leo-arch/clifm/wiki/Customization#colors).
 * Four [customizable keybindings for custom plugins](https://github.com/leo-arch/clifm/wiki/Customization#keybindings).
-* Fastback function.
+* [Fastback function](https://github.com/leo-arch/clifm/wiki/Introduction#fastback-function).
 * [Git integration](https://github.com/leo-arch/clifm/wiki/Advanced#git-integration).
 
 For a detailed explanation of each of these features, follow the corresponding links or consult the [wiki](https://github.com/leo-arch/clifm/wiki).
@@ -154,7 +154,7 @@ $ makepkg -si
 ### Debian-based systems
 A .deb package (for x86_64) is available in [Releases](https://github.com/leo-arch/clifm/releases).
 
-### Other Linux distributions (or FreeBSD):
+### Other Linux distributions or FreeBSD:
 
 1. Clone the repository
 
