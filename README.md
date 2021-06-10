@@ -141,9 +141,11 @@ Optional dependencies: `sshfs`, `curlftpfs`, and `cifs-utils` (for remote-filesy
 
 ### Arch Linux
 
-You'll find the corresponding packages on the AUR: the [stable](https://aur.archlinux.org/packages/clifm) and the [development](https://aur.archlinux.org/packages/clifm-git) version. 
+1. You'll find the corresponding packages on the AUR: the [stable](https://aur.archlinux.org/packages/clifm) and the [development](https://aur.archlinux.org/packages/clifm-git) version.
 
-Of course, you can also clone, build, and install the package using the [PKGBUILD file](https://github.com/leo-arch/clifm/blob/master/misc/PKGBUILD):
+2. A binary package is now available on the `chaotic-aur` repository. Follow the official [installation instructions](https://aur.chaotic.cx/).
+
+3. Of course, you can also clone, build, and install the package using the [PKGBUILD file](https://github.com/leo-arch/clifm/blob/master/misc/PKGBUILD):
 
 ```sh
 $ git clone https://github.com/leo-arch/clifm.git
@@ -205,6 +207,7 @@ See the [LICENSE](https://github.com/leo-arch/clifm/blob/master/LICENSE) file fo
 
 ## Contributing
 Yes. Please see our [contribution guidelines](https://github.com/leo-arch/clifm/blob/master/CONTRIBUTING.md) for details.
+[![Translation status](https://hosted.weblate.org/widgets/clifm/-/clifm/svg-badge.svg)](https://hosted.weblate.org/engage/clifm/?utm_source=widget) at Hosted Weblate.
 
 ---
 
