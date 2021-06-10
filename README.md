@@ -207,7 +207,7 @@ See the [LICENSE](https://github.com/leo-arch/clifm/blob/master/LICENSE) file fo
 
 ## Contributing
 Yes. Please see our [contribution guidelines](https://github.com/leo-arch/clifm/blob/master/CONTRIBUTING.md) for details.
-[![Translation status](https://hosted.weblate.org/widgets/remmina/-/remmina/svg-badge.svg)](https://hosted.weblate.org/engage/remmina/?utm_source=widget) at Hosted Weblate.
+[![Translation status](https://hosted.weblate.org/widgets/clifm/-/clifm/svg-badge.svg)](https://hosted.weblate.org/engage/clifm/?utm_source=widget) at Hosted Weblate.
 
 ---
 
