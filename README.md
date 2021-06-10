@@ -141,11 +141,11 @@ Optional dependencies: `sshfs`, `curlftpfs`, and `cifs-utils` (for remote-filesy
 
 ### Arch Linux
 
-You'll find the corresponding packages on the AUR: the [stable](https://aur.archlinux.org/packages/clifm) and the [development](https://aur.archlinux.org/packages/clifm-git) version.
+1. You'll find the corresponding packages on the AUR: the [stable](https://aur.archlinux.org/packages/clifm) and the [development](https://aur.archlinux.org/packages/clifm-git) version.
 
-A binary package is now available on the `chaotic-aur` repository. Follow the official [installation instructions](https://aur.chaotic.cx/).
+2. A binary package is now available on the `chaotic-aur` repository. Follow the official [installation instructions](https://aur.chaotic.cx/).
 
-Of course, you can also clone, build, and install the package using the [PKGBUILD file](https://github.com/leo-arch/clifm/blob/master/misc/PKGBUILD):
+3. Of course, you can also clone, build, and install the package using the [PKGBUILD file](https://github.com/leo-arch/clifm/blob/master/misc/PKGBUILD):
 
 ```sh
 $ git clone https://github.com/leo-arch/clifm.git
