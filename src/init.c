@@ -1115,30 +1115,35 @@ external_arguments(int argc, char **argv)
 
 	if ((flags & START_PATH) && path_value) {
 		char *path_exp = (char *)NULL;
+		char path_tmp[PATH_MAX];
 
 		if (*path_value == '~') {
 			path_exp = tilde_expand(path_value);
-			path_value = path_exp;
+			strncpy(path_tmp, path_exp, PATH_MAX - 1);
+		} else if (*path_value != '/') {
+			snprintf(path_tmp, PATH_MAX - 1, "%s/%s", getenv("PWD"), path_value);
+		} else {
+			strncpy(path_tmp, path_value, PATH_MAX - 1);
 		}
 
-		if (xchdir(path_value, SET_TITLE) == 0) {
+		if (xchdir(path_tmp, SET_TITLE) == 0) {
 			if (cur_ws == UNSET)
 				cur_ws = DEF_CUR_WS;
 			if (ws[cur_ws].path)
 				free(ws[cur_ws].path);
 
-			ws[cur_ws].path = savestring(path_value, strlen(path_value));
+			ws[cur_ws].path = savestring(path_tmp, strlen(path_tmp));
 		}
 
 		else { /* Error changing directory */
 			if (xargs.list_and_quit == 1) {
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-				    path_value, strerror(errno));
+				    path_tmp, strerror(errno));
 				exit(EXIT_FAILURE);
 			}
 
 			_err('w', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-			    path_value, strerror(errno));
+			    path_tmp, strerror(errno));
 		}
 
 		if (path_exp)
