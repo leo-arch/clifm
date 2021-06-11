@@ -55,7 +55,7 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 Why another file manager? I can. \
 In the free world, a free community finds alternatives central to freedom, and moreover, a place to learn.
 
-Whatever needs to be done, do it in the simplest possible way: [KISS](https://en.wikipedia.org/wiki/KISS_principle) is a desired trait of a file-manager for the terminal. No GUI, no curses, but just a command-line, shell-like file manager: 5 MiB RAM and 400 KiB disk space.
+Whatever needs to be done, do it in the simplest possible way: [KISS](https://en.wikipedia.org/wiki/KISS_principle) is a desired trait of a file-manager for the terminal. No GUI, no curses, but just a command-line, shell-like file manager: 5 MiB RAM and 500 KiB disk space.
 
 Willingness to try something different is all you need.
 
@@ -78,7 +78,7 @@ The command-line is still there, never hidden.
 Features beyond copy, move, remove, etc:
 
 * [Really CLI-based](https://github.com/leo-arch/clifm/wiki/Introduction#main-design-and-goals). No GUI nor TUI or curses at all, just a command-line. Since no GUI is needed, it can run on the kernel built-in console and even on a SSH or any other remote session.
-* Memory footprint below 5 MiB and a disk usage of 0.5 MiB. Incredibly lightweight and fast even on really old hardware.
+* Memory footprint below 5 MiB and a disk usage of 500 KiB. Incredibly lightweight and fast even on really old hardware.
 * The use of [short (and even one-character) commands](https://github.com/leo-arch/clifm/wiki/Introduction#commands-short-summary), and list numbers ([ELN](https://github.com/leo-arch/clifm/wiki/Common-Operations)'s) for filenames. 
 * [Bookmarks](https://github.com/leo-arch/clifm/wiki/Common-Operations#bookmarks).
 * [Files selection](https://github.com/leo-arch/clifm/wiki/Common-Operations#selection) (supports both glob and regular expressions and works even across multiple instances of the program).
@@ -134,19 +134,19 @@ For a detailed explanation of each of these features, follow the corresponding l
 
 ### Dependencies
 
-`glibc` and `coreutils`, of course, but also `libcap`, `acl`, `file`, and `readline`. \
+`glibc` and `coreutils`, of course, but also `libcap`, `acl`, and `readline`. \
 For Arch Linux users, all these dependenciess are part of the `core` repository. \
 In Debian/Ubuntu systems three packages must be installed before compilation: `libcap-dev`, `libacl1-dev`, and `libreadline-dev`. In Fedora based systems you need `libcap-devel`, `libacl-devel`, and `readline-devel`.
 
-Optional dependencies: `sshfs`, `curlftpfs`, and `cifs-utils` (for remote-filesystem support); `atool`, `archivemount`, `genisoimage`, `p7zip`, and `cdrtools` (for archival and compression support), and `icons-in-terminal` to turn on icons.
+Optional dependencies: `file` (to automatically open files via `Lira`), `sshfs`, `curlftpfs`, and `cifs-utils` (for remote-filesystem support); `atool`, `archivemount`, `genisoimage`, `p7zip`, and `cdrtools` (for archival and compression support), and `icons-in-terminal` to turn on icons.
 
 ### Arch Linux
 
-1. You'll find the corresponding packages on the AUR: the [stable](https://aur.archlinux.org/packages/clifm) and the [development](https://aur.archlinux.org/packages/clifm-git) version.
+* You'll find the corresponding packages on the AUR: the [stable](https://aur.archlinux.org/packages/clifm) and the [development](https://aur.archlinux.org/packages/clifm-git) version.
 
-2. A binary package is now available on the `chaotic-aur` repository. Follow the official [installation instructions](https://aur.chaotic.cx/).
+* A binary package is now available on the `chaotic-aur` repository. Follow the official [installation instructions](https://aur.chaotic.cx/).
 
-3. Of course, you can also clone, build, and install the package using the [PKGBUILD file](https://github.com/leo-arch/clifm/blob/master/misc/PKGBUILD):
+* Of course, you can also clone, build, and install the package using the [PKGBUILD file](https://github.com/leo-arch/clifm/blob/master/misc/PKGBUILD):
 
 ```sh
 $ git clone https://github.com/leo-arch/clifm.git
