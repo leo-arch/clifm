@@ -157,8 +157,8 @@ run_action(char *action, char **args)
 
 	close(rfd);
 
-	/* Wait for the child to finish. Otherwise, the process is left as
-	 * zombie */
+	/* Wait for the child to finish. Otherwise, the child is left as
+	 * zombie process */
 	int status = 0;
 	waitpid(pid, &status, 0);
 
