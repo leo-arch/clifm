@@ -493,11 +493,13 @@ print_entry_props(struct fileinfo *props, size_t max)
 	char mod_time[128];
 
 	if (props->ltime) {
-		struct tm *t = localtime(&props->ltime);
-		snprintf(mod_time, 128, "%d-%02d-%02d %02d:%02d", t->tm_year + 1900,
-		    t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min);
-	} else
+		struct tm t;
+		localtime_r(&props->ltime, &t);
+		snprintf(mod_time, 128, "%d-%02d-%02d %02d:%02d", t.tm_year + 1900,
+		    t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min);
+	} else {
 		strcpy(mod_time, "-               ");
+	}
 
 	/* Get owner and group names */
 	/*  struct group *group;
