@@ -138,7 +138,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 For Arch Linux users, all these dependenciess are part of the `core` repository. \
 In Debian/Ubuntu systems three packages must be installed before compilation: `libcap-dev`, `libacl1-dev`, and `libreadline-dev`. In Fedora based systems you need `libcap-devel`, `libacl-devel`, and `readline-devel`.
 
-Optional dependencies: `file` (to automatically open files via `Lira`), `sshfs`, `curlftpfs`, and `cifs-utils` (for remote-filesystem support); `atool`, `archivemount`, `genisoimage`, `p7zip`, and `cdrtools` (for archival and compression support), and `icons-in-terminal` to turn on icons.
+Optional dependencies: `file` (to automatically open files via `Lira`), `sshfs`, `curlftpfs`, and `cifs-utils` (for remote-filesystem support); `atool`, `archivemount`, `genisoimage`, `p7zip`, and `cdrtools` (for archiving and compression support), and `icons-in-terminal` to turn on icons.
 
 ### Arch Linux
 
