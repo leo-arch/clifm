@@ -58,10 +58,11 @@ regen_config(void)
 
 	if (config_found) {
 		time_t rawtime = time(NULL);
-		struct tm *t = localtime(&rawtime);
+		struct tm t;
+		localtime_r(&rawtime, &t);
 
 		char date[18];
-		strftime(date, 18, "%Y%m%d@%H:%M:%S", t);
+		strftime(date, 18, "%Y%m%d@%H:%M:%S", &t);
 
 		char *bk = (char *)xnmalloc(strlen(CONFIG_FILE) + strlen(date) + 2, sizeof(char));
 		sprintf(bk, "%s.%s", CONFIG_FILE, date);
@@ -136,9 +137,7 @@ edit_function(char **comm)
 			fprintf(stderr, _("%s: file: Command not found. Try "
 					"'edit APPLICATION'\n"), PROGRAM_NAME);
 			ret = EXIT_FAILURE;
-		}
-
-		else {
+		} else {
 			char *cmd[] = {"mime", CONFIG_FILE, NULL};
 			ret = mime_open(cmd);
 		}
@@ -204,9 +203,7 @@ set_sel_file(void)
 		SEL_FILE = (char *)xnmalloc(config_len + 9, sizeof(char));
 
 		sprintf(SEL_FILE, "%s/selbox", CONFIG_DIR);
-	}
-
-	else {
+	} else {
 		/* Common selection box is stored in the general
 		 * configuration directory */
 		SEL_FILE = (char *)xnmalloc(config_len + 17, sizeof(char));
@@ -443,9 +440,7 @@ create_tmp_files(void)
 			    sizeof(char));
 			sprintf(SEL_FILE, "%s/selbox_%s", TMP_DIR,
 			    (alt_profile) ? alt_profile : "default");
-		}
-
-		else {
+		} else {
 			SEL_FILE = (char *)xnmalloc(tmp_dir_len + 8, sizeof(char));
 			sprintf(SEL_FILE, "%s/selbox", TMP_DIR);
 		}
@@ -487,16 +482,13 @@ edit_xresources(void)
 
 	while (fgets(line, (int)sizeof(line), xresources_fp)) {
 
-		if (strncmp(line, "XTerm*eightBitInput: false",
-			26) == 0)
+		if (strncmp(line, "XTerm*eightBitInput: false", 26) == 0)
 			eight_bit = 1;
 
-		else if (strncmp(line, "XTerm*modifyCursorKeys: 1",
-			     25) == 0)
+		else if (strncmp(line, "XTerm*modifyCursorKeys: 1", 25) == 0)
 			cursor = 1;
 
-		else if (strncmp(line, "XTerm*modifyFunctionKeys: 1",
-			     27) == 0)
+		else if (strncmp(line, "XTerm*modifyFunctionKeys: 1", 27) == 0)
 			function = 1;
 	}
 
@@ -1135,9 +1127,7 @@ create_config_files(void)
 		if (!profile_fp) {
 			_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n", PROGRAM_NAME,
 			    PROFILE_FILE, strerror(errno));
-		}
-
-		else {
+		} else {
 			fprintf(profile_fp, _("#%s profile\n\
 #Write here the commands you want to be executed at startup\n\
 #Ex:\n#echo -e \"%s, the anti-eye-candy/KISS file manager\"\n"),
@@ -1173,7 +1163,7 @@ create_config_files(void)
 
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			_err('e', PRINT_PROMPT, _("%s: mkdir: Error creating plugins "
-						  "directory. The actions function is disabled\n"),
+				"directory. The actions function is disabled\n"),
 			    PROGRAM_NAME);
 		else
 			copy_plugins();
@@ -1189,9 +1179,7 @@ create_config_files(void)
 		if (!actions_fp) {
 			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 			    ACTIONS_FILE, strerror(errno));
-		}
-
-		else {
+		} else {
 			fprintf(actions_fp, "######################\n"
 					    "# %s actions file #\n"
 					    "######################\n\n"
@@ -1288,9 +1276,7 @@ create_bm_file(void)
 			_err('e', PRINT_PROMPT, "bookmarks: '%s': %s\n", BM_FILE,
 			    strerror(errno));
 			return EXIT_FAILURE;
-		}
-
-		else {
+		} else {
 			fprintf(fp, "### This is %s bookmarks file ###\n\n"
 				    "# Empty and commented lines are ommited\n"
 				    "# The bookmarks syntax is: [shortcut]name:path\n"

@@ -161,7 +161,7 @@ straft(char *str, const char c)
 	if (!q || !*(q + 1))
 		return (char *)NULL;
 
-	char *buf = (char *)malloc(strlen(q));
+	char *buf = (char *)malloc(strlen(q + 1) + 1);
 
 	if (!buf)
 		return (char *)NULL;
@@ -190,7 +190,7 @@ straftlst(char *str, const char c)
 	if (!q || !*(q + 1))
 		return (char *)NULL;
 
-	char *buf = (char *)malloc(strlen(q));
+	char *buf = (char *)malloc(strlen(q + 1) + 1);
 
 	if (!buf)
 		return (char *)NULL;

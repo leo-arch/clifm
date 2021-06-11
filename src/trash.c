@@ -172,37 +172,35 @@ trash_function(char **comm)
 			}
 
 			free(trash_files);
-		}
-
-		else
+		} else {
 			puts(_("trash: There are no trashed files"));
+		}
 
 		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
 			_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n",
 			    PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
 			return EXIT_FAILURE;
-		}
-
-		else
+		} else {
 			return EXIT_SUCCESS;
+		}
 	}
 
 	else {
-
 		/* Create suffix from current date and time to create unique
 		 * file names for trashed files */
 		int exit_status = EXIT_SUCCESS;
 		time_t rawtime = time(NULL);
-		struct tm *tm = localtime(&rawtime);
+		struct tm tm;
+		localtime_r(&rawtime, &tm);
 		char date[64] = "";
 
-		strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", tm);
+		strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", &tm);
 
 		char suffix[68] = "";
 
-		snprintf(suffix, 67, "%d%d%d%d%d%d", tm->tm_year + 1900,
-		    tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min,
-		    tm->tm_sec);
+		snprintf(suffix, 67, "%d%d%d%d%d%d", tm.tm_year + 1900,
+		    tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min,
+		    tm.tm_sec);
 
 		/* Remove file(s) from Trash */
 		if (strcmp(comm[1], "del") == 0 || strcmp(comm[1], "rm") == 0)
@@ -219,10 +217,9 @@ trash_function(char **comm)
 				char *deq_file = dequote_str(comm[i], 0);
 				char tmp_comm[PATH_MAX] = "";
 
-				if (deq_file[0] == '/') /* If absolute path */
+				if (deq_file[0] == '/') { /* If absolute path */
 					strcpy(tmp_comm, deq_file);
-
-				else { /* If relative path, add path to check against
+				} else { /* If relative path, add path to check against
 					TRASH_DIR */
 					snprintf(tmp_comm, PATH_MAX, "%s/%s", ws[cur_ws].path,
 					    deq_file);
@@ -240,8 +237,7 @@ trash_function(char **comm)
 
 				/* Do no trash TRASH_DIR itself nor anything inside it,
 				 * that is, already trashed files */
-				else if (strncmp(tmp_comm, TRASH_DIR,
-					     strlen(TRASH_DIR)) == 0) {
+				else if (strncmp(tmp_comm, TRASH_DIR, strlen(TRASH_DIR)) == 0) {
 					puts(_("trash: Use 'trash del' to remove trashed files"));
 					exit_status = EXIT_FAILURE;
 					free(deq_file);
@@ -262,8 +258,7 @@ trash_function(char **comm)
 				else {
 					if ((file_attrib.st_mode & S_IFMT) == S_IFBLK) {
 						fprintf(stderr, _("trash: %s: Cannot trash a "
-								  "block device\n"),
-						    deq_file);
+								"block device\n"), deq_file);
 						exit_status = EXIT_FAILURE;
 						free(deq_file);
 						continue;
@@ -271,8 +266,7 @@ trash_function(char **comm)
 
 					else if ((file_attrib.st_mode & S_IFMT) == S_IFCHR) {
 						fprintf(stderr, _("trash: %s: Cannot trash a "
-								  "character device\n"),
-						    deq_file);
+								"character device\n"), deq_file);
 						exit_status = EXIT_FAILURE;
 						free(deq_file);
 						continue;
@@ -280,7 +274,7 @@ trash_function(char **comm)
 				}
 
 				/* Once here, everything is fine: trash the file */
-				exit_status = trash_element(suffix, tm, deq_file);
+				exit_status = trash_element(suffix, &tm, deq_file);
 				/* The trash_element() function will take care of
 				 * printing error messages, if any */
 				free(deq_file);

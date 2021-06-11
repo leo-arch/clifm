@@ -333,26 +333,27 @@ decode_prompt(const char *line)
 			case 'd': /* Date: abrev_weak_day, abrev_month_day month_num */
 			{
 				time_t rawtime = time(NULL);
-				struct tm *tm = localtime(&rawtime);
+				struct tm tm;
+				localtime_r(&rawtime, &tm);
 				if (c == 't') {
 					char time[9] = "";
-					strftime(time, sizeof(time), "%H:%M:%S", tm);
+					strftime(time, sizeof(time), "%H:%M:%S", &tm);
 					temp = savestring(time, sizeof(time));
 				} else if (c == 'T') {
 					char time[9] = "";
-					strftime(time, sizeof(time), "%I:%M:%S", tm);
+					strftime(time, sizeof(time), "%I:%M:%S", &tm);
 					temp = savestring(time, sizeof(time));
 				} else if (c == 'A') {
 					char time[6] = "";
-					strftime(time, sizeof(time), "%H:%M", tm);
+					strftime(time, sizeof(time), "%H:%M", &tm);
 					temp = savestring(time, sizeof(time));
 				} else if (c == '@') {
 					char time[12] = "";
-					strftime(time, sizeof(time), "%I:%M:%S %p", tm);
+					strftime(time, sizeof(time), "%I:%M:%S %p", &tm);
 					temp = savestring(time, sizeof(time));
 				} else { /* c == 'd' */
 					char time[12] = "";
-					strftime(time, sizeof(time), "%a %b %d", tm);
+					strftime(time, sizeof(time), "%a %b %d", &tm);
 					temp = savestring(time, sizeof(time));
 				}
 				goto add_string;

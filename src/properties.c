@@ -233,13 +233,14 @@ get_properties(char *filename, int dsize)
 
 	/* Get modification time */
 	time_t time = (time_t)file_attrib.st_mtim.tv_sec;
-	struct tm *tm = localtime(&time);
+	struct tm tm;
+	localtime_r(&time, &tm);
 	char mod_time[128] = "";
 
 	if (time)
 		/* Store formatted (and localized) date-time string into
 		 * mod_time */
-		strftime(mod_time, sizeof(mod_time), "%b %d %H:%M:%S %Y", tm);
+		strftime(mod_time, sizeof(mod_time), "%b %d %H:%M:%S %Y", &tm);
 
 	else
 		mod_time[0] = '-';
@@ -289,24 +290,24 @@ get_properties(char *filename, int dsize)
 
 	/* Last access time */
 	time = (time_t)file_attrib.st_atim.tv_sec;
-	tm = localtime(&time);
+	localtime_r(&time, &tm);
 	char access_time[128] = "";
 
 	if (time)
 		/* Store formatted (and localized) date-time string into
 		 * access_time */
-		strftime(access_time, sizeof(access_time), "%b %d %H:%M:%S %Y", tm);
+		strftime(access_time, sizeof(access_time), "%b %d %H:%M:%S %Y", &tm);
 
 	else
 		access_time[0] = '-';
 
 	/* Last properties change time */
 	time = (time_t)file_attrib.st_ctim.tv_sec;
-	tm = localtime(&time);
+	localtime_r(&time, &tm);
 	char change_time[128] = "";
 
 	if (time)
-		strftime(change_time, sizeof(change_time), "%b %d %H:%M:%S %Y", tm);
+		strftime(change_time, sizeof(change_time), "%b %d %H:%M:%S %Y", &tm);
 
 	else
 		change_time[0] = '-';
@@ -314,7 +315,7 @@ get_properties(char *filename, int dsize)
 		/* Get creation (birth) time */
 #if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
 	time = file_attrib.st_birthtime;
-	tm = localtime(&time);
+	localtime_r(&time, &tm);
 	char creation_time[128] = "";
 
 	if (!time)
@@ -322,12 +323,12 @@ get_properties(char *filename, int dsize)
 
 	else
 		strftime(creation_time, sizeof(creation_time),
-		    "%b %d %H:%M:%S %Y", tm);
+		    "%b %d %H:%M:%S %Y", &tm);
 #elif defined(_STATX)
 	struct statx attrx;
 	statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attrx);
 	time = (time_t)attrx.stx_btime.tv_sec;
-	tm = localtime(&time);
+	localtime_r(&time, &tm);
 	char creation_time[128] = "";
 
 	if (!time)
@@ -335,7 +336,7 @@ get_properties(char *filename, int dsize)
 
 	else
 		strftime(creation_time, sizeof(creation_time),
-		    "%b %d %H:%M:%S %Y", tm);
+		    "%b %d %H:%M:%S %Y", &tm);
 #endif
 
 	switch (file_type) {

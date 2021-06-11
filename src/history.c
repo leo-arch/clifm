@@ -236,12 +236,13 @@ log_msg(char *_msg, int print)
 	else {
 		/* Write message to messages file: [date] msg */
 		time_t rawtime = time(NULL);
-		struct tm *tm = localtime(&rawtime);
+		struct tm tm;
+		localtime_r(&rawtime, &tm);
 		char date[64] = "";
 
-		strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", tm);
-		fprintf(msg_fp, "[%d-%d-%dT%d:%d:%d] ", tm->tm_year + 1900,
-		    tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
+		strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", &tm);
+		fprintf(msg_fp, "[%d-%d-%dT%d:%d:%d] ", tm.tm_year + 1900,
+		    tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
 		fputs(_msg, msg_fp);
 		fclose(msg_fp);
 	}
