@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include "aux.h"
@@ -119,8 +120,9 @@ run_action(char *action, char **args)
 	if (xargs.cwd_in_title == 1)
 		set_term_title(action);
 
-	if (fork() == EXIT_SUCCESS) {
+	pid_t pid = fork();
 
+	if (pid == 0) {
 		/* Child: write-only end of the pipe */
 		int wfd = open(fifo_path, O_WRONLY | O_CLOEXEC);
 
@@ -154,6 +156,11 @@ run_action(char *action, char **args)
 	while (buf_len == -1 && errno == EINTR);
 
 	close(rfd);
+
+	/* Wait for the child to finish. Otherwise, the process is left as
+	 * zombie */
+	int status = 0;
+	waitpid(pid, &status, 0);
 
 	/* If the pipe is empty */
 	if (!*buf) {
