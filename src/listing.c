@@ -287,6 +287,7 @@ list_dir_light(void)
 {
 	/*  clock_t start = clock(); */
 
+	/* Hide the cursor while listing */
 	printf("\x1b[?25l");
 
 	DIR *dir;
@@ -856,6 +857,7 @@ END:
 	if (print_selfiles && sel_n > 0)
 		_print_selfiles(term_rows);
 
+	/* Unhide the cursor */
 	printf("\x1b[?25h");
 
 	/*  clock_t end = clock();
@@ -877,6 +879,7 @@ list_dir(void)
 	if (light_mode)
 		return list_dir_light();
 
+	/* Hide the cursor while listing */
 	printf("\x1b[?25l");
 
 	DIR *dir;
@@ -1636,6 +1639,7 @@ END:
 	if (print_selfiles && sel_n > 0)
 		_print_selfiles(term_rows);
 
+	/* Unhide the cursor */
 	printf("\x1b[?25h");
 
 	/*  clock_t end = clock();
