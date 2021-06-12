@@ -287,6 +287,8 @@ list_dir_light(void)
 {
 	/*  clock_t start = clock(); */
 
+	printf("\x1b[?25l");
+
 	DIR *dir;
 
 	struct dirent *ent;
@@ -347,6 +349,7 @@ list_dir_light(void)
 		file_info[n].linkn = 1;
 		file_info[n].size = 1;
 		file_info[n].color = (char *)NULL;
+		file_info[n].ext_color = (char *)NULL;
 
 		file_info[n].icon = DEF_FILE_ICON;
 		file_info[n].icon_color = DEF_FILE_ICON_COLOR;
@@ -853,6 +856,8 @@ END:
 	if (print_selfiles && sel_n > 0)
 		_print_selfiles(term_rows);
 
+	printf("\x1b[?25h");
+
 	/*  clock_t end = clock();
 	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC); */
 
@@ -871,6 +876,8 @@ list_dir(void)
 
 	if (light_mode)
 		return list_dir_light();
+
+	printf("\x1b[?25l");
 
 	DIR *dir;
 
@@ -1628,6 +1635,8 @@ END:
 
 	if (print_selfiles && sel_n > 0)
 		_print_selfiles(term_rows);
+
+	printf("\x1b[?25h");
 
 	/*  clock_t end = clock();
 	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC); */
