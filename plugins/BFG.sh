@@ -477,7 +477,11 @@ main() {
 			fi
 		else
 			printf  "%s\n" "$path"
-			ls -p --color=always "${path}" && exit 0
+			if [ "$DIR_CMD" = "exa" ]; then
+				exa -G --group-directories-first --color=always "$path" && exit 0
+			else
+				ls -p --color=always "${path}" && exit 0
+			fi
 		fi
 		exit 1
 	fi

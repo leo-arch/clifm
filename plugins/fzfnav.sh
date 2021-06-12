@@ -223,6 +223,7 @@ main() {
 				case "$value" in
 					tree) export DIR_CMD="tree" ;;
 					ls) export DIR_CMD="ls" ;;
+					exa) export DIR_CMD="exa" ;;
 					none) export DIR_CMD="true" ;;
 					*) DIR_CMD="" ;;
 				esac
@@ -369,8 +370,10 @@ main() {
 	# Directories
 
 	if [ -z "$DIR_CMD" ]; then
-		if [ "$(which tree)" ]; then
+		if [ "$(which tree 2>/dev/null)" ]; then
 			export DIR_CMD="tree"
+		elif [ "$(which exa 2>/dev/null)" ]; then
+			export DIR_CMD="exa"
 		else
 			export DIR_CMD="ls"
 		fi
