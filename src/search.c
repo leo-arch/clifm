@@ -128,7 +128,7 @@ search_glob(char **comm, int invert)
 	if (recursive) {
 		char *cmd[] = {"find", (search_path && *search_path) ? search_path
 					: ".", "-name", comm[0] + 1, NULL};
-		launch_execve(cmd, FOREGROUND, E_NOFLAG);
+		launch_execve(cmd, FOREGROUND, E_NOSTDERR);
 		return EXIT_SUCCESS;
 	}
 
