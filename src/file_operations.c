@@ -96,13 +96,13 @@ dup_file(char *source, char *dest)
 	if (!dest) {
 		size_t source_len = strlen(source);
 
-		if (source[source_len - 1] == '/')
+		if (strcmp(source, "/") != 0 && source[source_len - 1] == '/')
 			source[source_len - 1] = '\0';
 
 		char *tmp = strrchr(source, '/');
 		char *source_name;
 
-		if (tmp && tmp + 1)
+		if (tmp && *(tmp + 1))
 			source_name = tmp + 1;
 		else
 			source_name = source;
