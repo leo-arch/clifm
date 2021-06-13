@@ -550,7 +550,11 @@ exec_cmd(char **comm)
 
 	/*     ############### DUPLICATE FILE ##################     */
 	else if (*comm[0] == 'd' && (!comm[0][1] || strcmp(comm[0], "dup") == 0)) {
-		exit_code = dup_file(comm[1] ? comm[1] : NULL, comm[2] ? comm[2] : NULL);
+		if (!comm[1] || (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)) {
+			puts("Usage: d, dup SOURCE [DEST]");
+			return EXIT_SUCCESS;
+		}
+		exit_code = dup_file(comm[1], comm[2] ? comm[2] : NULL);
 		return exit_code;
 	}
 
