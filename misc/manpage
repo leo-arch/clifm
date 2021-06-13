@@ -473,7 +473,7 @@ show this list of commands. A more convenient way of getting information about C
 with no arguments, list available color schemes. Use the 'edit' option to open the configuration file of the current color scheme. Otherwise, just switch to the color scheme NAME. TAB completion is available.
 .TP
 .B d, dup \fRSOURCE [DEST]
-Create a duplicate of SOURCE named DEST, where SOURCE could be either a directory or a file. If DEST is omitted, ".copy" will be appended to the basename of SOURCE and used as destination file. For example: 'd /my/file' will copy '/my/file' into the current directory as 'file.copy'.
+Create a duplicate of SOURCE named DEST, where SOURCE could be either a directory or a file. If DEST is omitted, ".copy" will be appended to the basename of SOURCE and used as destination file. For example: 'd /my/file' will copy '/my/file' into the current directory as 'file.copy'. If 'file.copy' already exists, a suffix with the curent date and time will be added: 'file.copy.YYYYMMDDHHMMSS'.
 .sp
 If \fBrsync\fR(1) is found, it will be used as follows: 'rsync -aczvAXHS --progress'. Else, \fBcp\fR(1) will be used: 'cp -a'.
 .TP
