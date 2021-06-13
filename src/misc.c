@@ -1604,7 +1604,7 @@ help_function(void)
  cl, columns [on, off]\n\
  cmd, commands\n\
  cs, colorscheme [edit] [COLORSCHEME]\n\
- d, dup SOURCE DEST\n\
+ d, dup SOURCE [DEST]\n\
  ds, desel [*, a, all]\n\
  edit [APPLICATION]\n\
  exp, export [ELN/FILE ...]\n\

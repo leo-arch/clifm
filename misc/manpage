@@ -472,6 +472,11 @@ show this list of commands. A more convenient way of getting information about C
 .B cs, colorschemes \fR[edit] [NAME]
 with no arguments, list available color schemes. Use the 'edit' option to open the configuration file of the current color scheme. Otherwise, just switch to the color scheme NAME. TAB completion is available.
 .TP
+.B d, dup \fRSOURCE [DEST]
+Create a duplicate of SOURCE named DEST, where SOURCE could be either a directory or a file. If DEST is omitted, SOURCE will be duplicated in the current directory as SOURCE.
+.sp
+If \fBrsync\fR(1) is found, it will be used as follows: 'rsync -aczvAXHS --progress'. Else, \fBcp\fR(1) will be used: 'cp -a'.
+.TP
 .B dc \fR[on, off, status]
 toggle the files counter function on/off.
 .TP
