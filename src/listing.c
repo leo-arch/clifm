@@ -297,6 +297,7 @@ list_dir_light(void)
 	if ((dir = opendir(ws[cur_ws].path)) == NULL) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
 		    strerror(errno));
+		printf("\x1b[?25h");
 		return EXIT_FAILURE;
 	}
 
@@ -438,6 +439,7 @@ list_dir_light(void)
 	if (n == 0) {
 		printf("%s. ..%s\n", colorize ? di_c : df_c, df_c);
 		free(file_info);
+		printf("\x1b[?25h");
 		if (closedir(dir) == -1)
 			return EXIT_FAILURE;
 		return EXIT_SUCCESS;
@@ -825,8 +827,10 @@ list_dir_light(void)
 		putchar('\n');
 
 END:
-	if (closedir(dir) == -1)
+	if (closedir(dir) == -1) {
+		printf("\x1b[?25h");
 		return EXIT_FAILURE;
+	}
 
 	if (xargs.list_and_quit == 1)
 		exit(exit_code);
@@ -890,6 +894,7 @@ list_dir(void)
 	if ((dir = opendir(ws[cur_ws].path)) == NULL) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
 		    strerror(errno));
+		printf("\x1b[?25h");
 		return EXIT_FAILURE;
 	}
 
@@ -1172,6 +1177,7 @@ list_dir(void)
 	if (n == 0) {
 		printf("%s. ..%s\n", colorize ? di_c : df_c, df_c);
 		free(file_info);
+		printf("\x1b[?25h");
 		if (closedir(dir) == -1)
 			return EXIT_FAILURE;
 		return EXIT_SUCCESS;
@@ -1607,8 +1613,10 @@ list_dir(void)
 				 * ######################### */
 
 END:
-	if (closedir(dir) == -1)
+	if (closedir(dir) == -1) {
+		printf("\x1b[?25h");
 		return EXIT_FAILURE;
+	}
 
 	if (xargs.list_and_quit == 1)
 		exit(exit_code);
