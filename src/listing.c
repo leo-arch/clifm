@@ -351,7 +351,7 @@ list_dir_light(void)
 		file_info[n].linkn = 1;
 		file_info[n].size = 1;
 		file_info[n].color = (char *)NULL;
-		file_info[n].ext_color = (char *)NULL;
+//		file_info[n].ext_color = (char *)NULL;
 
 		file_info[n].icon = DEF_FILE_ICON;
 		file_info[n].icon_color = DEF_FILE_ICON_COLOR;
@@ -1666,7 +1666,7 @@ free_dirlist(void)
 
 	while (--i >= 0) {
 		free(file_info[i].name);
-		if (file_info[i].ext_color)
+		if (!light_mode && file_info[i].ext_color)
 			free(file_info[i].ext_color);
 	}
 
