@@ -5,8 +5,8 @@
 </p>
 <h1 align="center">CliFM</h1>
 <h2 align="center">Non-curses, KISS file-manager for the terminal</h2>
-<h3 align="center">Fast, extensible, and light. Written in C.</h3>
-<h3 align="center">Linux, FreeBSD | x86, ARM.</h3>
+<h3 align="center">Fast, extensible, lightweight | Written in C</h3>
+<h3 align="center">Linux, FreeBSD | x86, ARM</h3>
 <h4 align="center"><a
 href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/bug_report.md">Report bug</a> · <a
 href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/feature_request.md">Request feature</a> · <a
