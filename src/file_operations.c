@@ -29,6 +29,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <time.h>
 #include <readline/readline.h>
 
 #include "archives.h"
@@ -110,6 +111,29 @@ dup_file(char *source, char *dest)
 		free_dest = 1;
 		dest = (char *)xnmalloc(strlen(source_name) + 6, sizeof(char));
 		sprintf(dest, "%s.copy", source_name);
+
+		struct stat attr;
+		if (stat(dest, &attr) == EXIT_SUCCESS) {
+			time_t rawtime = time(NULL);
+			struct tm tm;
+			localtime_r(&rawtime, &tm);
+			char date[64] = "";
+
+			strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", &tm);
+
+			char suffix[68] = "";
+
+			snprintf(suffix, 67, "%d%d%d%d%d%d", tm.tm_year + 1900,
+				tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min,
+				tm.tm_sec);
+
+			char tmp_dest[PATH_MAX];
+			strncpy(tmp_dest, dest, PATH_MAX);
+
+			dest = (char *)xrealloc(dest, (strlen(tmp_dest) + strlen(suffix) + 2)
+									* sizeof(char));
+			sprintf(dest, "%s.%s", tmp_dest, suffix);
+		}
 	}
 
 	char *rsync_path = get_cmd_path("rsync");
