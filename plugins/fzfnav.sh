@@ -76,6 +76,7 @@ fcd() {
 		file="$(printf "%s\n" "$lsd" | fzf \
 			--color="bg+:236,gutter:236,fg+:reverse,pointer:6,prompt:6,marker:2:bold,spinner:6:bold" \
 			--bind "right:accept,left:first+accept" \
+			--bind "insert:clear-query" \
 			--bind "home:first,end:last" \
 			--bind "ctrl-h:preview(printf %s \"$HELP\")" \
 			--bind "alt-p:toggle-preview" \
@@ -109,7 +110,7 @@ $PWD" --marker="+" --preview-window=:wrap "$BORDERS" \
 
 main() {
 
-	if ! [ "$(which fzf 2>/dev/null)" ]; then
+	if ! type fzf > /dev/null 2>&1; then
 		printf "CliFM: fzf: Command not found\n" >&2
 		exit 1
 	fi
@@ -370,9 +371,9 @@ main() {
 	# Directories
 
 	if [ -z "$DIR_CMD" ]; then
-		if [ "$(which tree 2>/dev/null)" ]; then
+		if type tree > /dev/null 2>&1; then
 			export DIR_CMD="tree"
-		elif [ "$(which exa 2>/dev/null)" ]; then
+		elif type exa > /dev/null 2>&1; then
 			export DIR_CMD="exa"
 		else
 			export DIR_CMD="ls"
@@ -382,13 +383,13 @@ main() {
 	# Images
 	if [ "$PREV_IMGS" = 1 ] && [ -z "$IMG_VIEWER" ] && \
 	[ -n "$DISPLAY" ]; then
-		if [ "$(which ueberzug 2>/dev/null)" ]; then
+		if type ueberzug > /dev/null 2>&1; then
 			export UEBERZUG_OK=1
-		elif [ "$(which viu 2>/dev/null)" ]; then
+		elif type viu > /dev/null 2>&1; then
 			export IMG_VIEWER="viu"
-		elif [ "$(which catimg 2>/dev/null)" ]; then
+		elif type catimg > /dev/null 2>&1; then
 			export IMG_VIEWER="catimg"
-		elif [ "$(which img2txt 2>/dev/null)" ]; then
+		elif type img2txt > /dev/null 2>&1; then
 			export IMG_VIEWER="img2txt"
 		fi
 	fi
@@ -400,13 +401,13 @@ main() {
 
 	# Archives
 	if [ -z "$ARCHIVES" ]; then
-		if [ "$(which atool 2>/dev/null)" ]; then
+		if type atool > /dev/null 2>&1; then
 			export ARCHIVER_CMD="atool"
 			export ARCHIVER_OPTS="-l"
-		elif [ "$(which bsdtar 2>/dev/null)" ]; then
+		elif type bsdtar > /dev/null 2>&1; then
 			export ARCHIVER_CMD="bsdtar"
 			export ARCHIVER_OPTS="-tvf"
-		elif [ "$(which tar 2>/dev/null)" ]; then
+		elif type tar > /dev/null 2>&1; then
 			export ARCHIVER_CMD="tar"
 			export ARCHIVER_OPTS="-tvf"
 		fi
@@ -414,36 +415,36 @@ main() {
 
 	# Web
 	if [ -z "$BROWSER" ]; then
-		if [ "$(which w3m 2>/dev/null)" ]; then
+		if type w3m > /dev/null 2>&1; then
 			export BROWSER="w3m"
-		elif [ "$(which linx 2>/dev/null)" ]; then
+		elif type linx > /dev/null 2>&1; then
 			export BROWSER="linx"
-		elif [ "$(which elinks 2>/dev/null)" ]; then
+		elif type elinks > /dev/null 2>&1; then
 			export BROWSER="elinks"
 		fi
 	fi
 
 	# Music
 	if [ "$PLAY_MUSIC" = 1 ] && [ -z "$MUSIC" ]; then
-		if [ "$(which ffplay 2>/dev/null)" ]; then
+		if type ffplay > /dev/null 2>&1; then
 			export FFPLAY_OK=1
-		elif [ "$(which mplayer 2>/dev/null)" ]; then
+		elif type mplayer > /dev/null 2>&1; then
 			export MPLAYER_OK=1
-		elif [ "$(which mpv 2>/dev/null)" ]; then
+		elif type mpv > /dev/null 2>&1; then
 			export MPV_OK=1
 		fi
 	fi
 
 	# Video
 	if [ -z "$VIDEO" ]; then
-		if [ "$(which ffmpegthumbnailer 2>/dev/null)" ]; then
+		if type ffmpegthumbnailer > /dev/null 2>&1; then
 			export FFMPEGTHUMB_OK=1
 		fi
 	fi
 
 	# File information
 	if [ -z "$FILEINFO" ]; then
-		if [ "$(which exiftool 2>/dev/null)" ]; then
+		if type exiftool > /dev/null 2>&1; then
 			export EXIFTOOL_CMD=1
 		else
 			export FILE_OK=1
@@ -451,7 +452,7 @@ main() {
 	fi
 
 	if [ -z "$MEDIAINFO" ]; then
-		if [ "$(which mediainfo 2>/dev/null)" ]; then
+		if type mediainfo > /dev/null 2>&1; then
 			export MEDIAINFO_OK=1
 		else
 			export FILE_OK=1
@@ -460,37 +461,37 @@ main() {
 
 	# PDF
 	if [ -z "$PDF" ]; then
-		if [ "$(which pdftoppm 2>/dev/null)" ]; then
+		if type pdftoppm > /dev/null 2>&1; then
 			export PDFTOPPM_OK=1
-		elif [ "$(which pdftotext 2>/dev/null)" ]; then
+		elif type pdftotext > /dev/null 2>&1; then
 			export PDFTOTEXT_OK=1
-		elif [ "$(which mutool 2>/dev/null)" ]; then
+		elif type mutool > /dev/null 2>&1; then
 			export MUTOOL_CMD=1
 		fi
 	fi
 
 	# Office documents
 	if [ -z "$DOC" ]; then
-		if [ -z "$DOCASTEXT" ] && [ "$(which libreoffice 2>/dev/null)" ]; then
+		if [ -z "$DOCASTEXT" ] && type libreoffice > /dev/null 2>&1; then
 			export LIBREOFFICE_OK=1
 		else
-			[ "$(which catdoc 2>/dev/null)" ] && export CATDOC_OK=1
-			[ "$(which odt2txt 2>/dev/null)" ] && export ODT2TXT_OK=1
-			[ "$(which xlsx2csv 2>/dev/null)" ] && export XLSX2CSV_OK=1
-			[ "$(which xls2csv 2>/dev/null)" ] && export XLS2CSV_OK=1
-			[ "$(which unzip 2>/dev/null)" ] && export UNZIP_OK=1
+			type catdoc > /dev/null 2>&1 && export CATDOC_OK=1
+			type odt2txt > /dev/null 2>&1 && export ODT2TXT_OK=1
+			type xlsx2csv > /dev/null 2>&1 && export XLSX2CSV_OK=1
+			type xls2csv > /dev/null 2>&1 && export XLS2CSV_OK=1
+			type unzip > /dev/null 2>&1 && export UNZIP_OK=1
 		fi
 	fi
 
-	[ "$(which pandoc 2>/dev/null)" ] && export PANDOC_OK=1
+	type pandoc > /dev/null 2>&1 && export PANDOC_OK=1
 
 	# Syntax highlighting
 	if [ -z "$TEXT" ]; then
-		if [ "$(which bat 2>/dev/null)" ]; then
+		if type bat > /dev/null 2>&1; then
 			export BAT_OK=1
-		elif [ "$(which highlight 2>/dev/null)" ]; then
+		elif type highlight > /dev/null 2>&1; then
 			export HIGHLIGHT_OK=1
-		elif [ "$(which pygmentize 2>/dev/null)" ]; then
+		elif type pygmentize > /dev/null 2>&1; then
 			export PYGMENTIZE_OK=1
 		else
 			export CAT_OK=1
@@ -498,9 +499,9 @@ main() {
 	fi
 
 	if [ -z "$JSON" ]; then
-		if [ "$(which python 2>/dev/null)" ]; then
+		if type python > /dev/null 2>&1; then
 			export PYTHON_OK=1
-		elif [ "$(which jq 2>/dev/null)" ]; then
+		elif type jq > /dev/null 2>&1; then
 			export JQ_OK=1
 		else
 			export CAT_OK=1
@@ -509,46 +510,47 @@ main() {
 
 	# Ddjvu
 	if [ -z "$DDJVU" ]; then
-		if [ "$(which ddjvu 2>/dev/null)" ]; then
+		if type ddjvu > /dev/null 2>&1; then
 			export DDJVU_OK=1
-		elif [ "$(which djvutxt 2>/dev/null)" ]; then
+		elif type djvutxt > /dev/null 2>&1; then
 			export DDJVUTXT_OK=1
 		fi
 	fi
 
 	# Fonts
 	if [ -z "$FONTS" ]; then
-		if [ "$(which fontpreview 2>/dev/null)" ]; then
+		if type fontpreview > /dev/null 2>&1; then
 			export FONTPREVIEW_OK=1
-		elif [ "$(which fontimage 2>/dev/null)" ]; then
+		elif type fontimage > /dev/null 2>&1; then
 			export FONTIMAGE_OK=1
 		fi
 	fi
 
 	# Markdown
 	if [ -z "$MARKDOWN" ]; then
-		if [ "$(which glow 2>/dev/null)" ]; then
+		if type glow > /dev/null 2>&1; then
 			export GLOW_OK=1
 		fi
 	fi
 
 	# Epub
+
 	if [ -z "$EPUB" ]; then
-		if [ "$(which epub-thumbnailer 2>/dev/null)" ]; then
+		if type epub-thumbnailer > /dev/null 2>&1; then
 			export EPUBTHUMB_OK=1
 		fi
 	fi
 
 	# Torrent
-	if [ "$(which transmission-show 2>/dev/null)" ]; then
+	if type transmission-show > /dev/null 2>&1; then
 		export TRANSMISSION_OK=1
 	fi
 
 	# Used to convert some file types to images
-	[ "$(which convert 2>/dev/null)" ] && export CONVERT_OK=1
+	type convert > /dev/null 2>&1 && export CONVERT_OK=1
 
 	# Make sure we have file, use dto get files MIME type
-	[ "$(which file 2>/dev/null)" ] && export FILE_OK=1
+	type file > /dev/null 2>&1 && export FILE_OK=1
 
 	if [ "$UEBERZUG_OK" = 1 ] ; then
 		CACHEDIR="${XDG_CACHE_HOME:-$HOME/.cache}/clifm"
