@@ -48,6 +48,7 @@ cd @
 cl, columns@
 cmd, commands@
 cs, colorscheme@
+d, dup@
 ds, desel@
 edit @
 exp, export@
