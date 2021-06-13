@@ -45,6 +45,7 @@
 #include "readline.h"
 #include "selection.h"
 
+/* Toggle executable bit on file */
 int
 xchmod(const char *file, mode_t mode)
 {
@@ -57,6 +58,53 @@ xchmod(const char *file, mode_t mode)
 	}
 
 	return EXIT_SUCCESS;
+}
+
+int
+dup_file(char *source, char *dest)
+{
+	if (!source || !*source)
+		return EXIT_FAILURE;
+
+	if (strchr(source, '\\')) {
+		char *deq_str = dequote_str(source, 0);
+		if (!deq_str) {
+			fprintf(stderr, "%s: %s: Error dequoting file name\n",
+				PROGRAM_NAME, source);
+			return EXIT_FAILURE;
+		}
+		strcpy(source, deq_str);
+		free(deq_str);
+	}
+
+	if (dest) {
+		if (strchr(dest, '\\')) {
+			char *deq_str = dequote_str(dest, 0);
+			if (!deq_str) {
+				fprintf(stderr, "%s: %s: Error dequoting file name\n",
+					PROGRAM_NAME, source);
+				return EXIT_FAILURE;
+			}
+			strcpy(dest, deq_str);
+			free(deq_str);
+		}
+	}
+
+	int exit_status =  EXIT_SUCCESS;
+
+	char *rsync_path = get_cmd_path("rsync");
+	if (rsync_path) {
+		char *cmd[] = {"rsync", "-aczvAXHS", "--progress", source, dest ? dest : ".", NULL};
+		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
+		free(rsync_path);
+	} else {
+		char *cmd[] = {"cp", "-a", source, dest ? dest : ".", NULL};
+		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
+	}
+
+	return exit_status;
 }
 
 int

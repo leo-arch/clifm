@@ -34,3 +34,4 @@ int edit_link(char *link);
 int open_function(char **cmd);
 int xchmod(const char *file, mode_t mode);
 int create_file(char **cmd);
+int dup_file(char*source, char *dest);

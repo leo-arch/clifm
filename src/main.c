@@ -244,6 +244,8 @@ size_t *ext_colors_len = (size_t *)NULL;
 /* This is not a comprehensive list of commands. It only lists
  * commands long version for TAB completion */
 const char *INTERNAL_CMDS[] = {
+	"dup",
+	"new",
     "alias",
     "open",
     "prop",

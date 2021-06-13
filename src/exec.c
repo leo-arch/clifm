@@ -548,6 +548,12 @@ exec_cmd(char **comm)
 		return exit_code;
 	}
 
+	/*     ############### DUPLICATE FILE ##################     */
+	else if (*comm[0] == 'd' && (!comm[0][1] || strcmp(comm[0], "dup") == 0)) {
+		exit_code = dup_file(comm[1] ? comm[1] : NULL, comm[2] ? comm[2] : NULL);
+		return exit_code;
+	}
+
 	/*     ############### COPY AND MOVE ##################     */
 	else if ((*comm[0] == 'c' && (!comm[0][1] || (comm[0][1] == 'p'
 	&& !comm[0][2])))

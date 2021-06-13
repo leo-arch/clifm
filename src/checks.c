@@ -138,6 +138,7 @@ is_internal_c(const char *restrict cmd)
 	    "cl", "columns",
 	    "cmd", "commands",
 	    "cs", "colorschemes",
+		"d", "dup",
 	    "ds", "desel",
 	    "edit",
 	    "exp", "export",
