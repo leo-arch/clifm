@@ -92,17 +92,40 @@ dup_file(char *source, char *dest)
 
 	int exit_status =  EXIT_SUCCESS;
 
+	int free_dest = 0;
+	if (!dest) {
+		size_t source_len = strlen(source);
+
+		if (source[source_len - 1] == '/')
+			source[source_len - 1] = '\0';
+
+		char *tmp = strrchr(source, '/');
+		char *source_name;
+
+		if (tmp && tmp + 1)
+			source_name = tmp + 1;
+		else
+			source_name = source;
+			
+		free_dest = 1;
+		dest = (char *)xnmalloc(strlen(source_name) + 6, sizeof(char));
+		sprintf(dest, "%s.copy", source_name);
+	}
+
 	char *rsync_path = get_cmd_path("rsync");
 	if (rsync_path) {
-		char *cmd[] = {"rsync", "-aczvAXHS", "--progress", source, dest ? dest : ".", NULL};
+		char *cmd[] = {"rsync", "-aczvAXHS", "--progress", source, dest, NULL};
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 		free(rsync_path);
 	} else {
-		char *cmd[] = {"cp", "-a", source, dest ? dest : ".", NULL};
+		char *cmd[] = {"cp", "-a", source, dest, NULL};
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 	}
+
+	if (free_dest)
+		free(dest);
 
 	return exit_status;
 }
