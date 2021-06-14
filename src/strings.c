@@ -906,6 +906,17 @@ parse_input_str(char *str)
 
 		register size_t j = 0;
 
+		/* Replace . and .. by absolute paths */
+		if (*substr[i] == '.' && (!substr[i][1] || (substr[i][1] == '.'
+		&& !substr[i][2]))) {
+			char *tmp = (char *)NULL;
+			tmp = realpath(substr[i], NULL);
+			substr[i] = (char *)xrealloc(substr[i], (strlen(tmp) + 1)
+											* sizeof(char));
+			strcpy(substr[i], tmp);
+			free(tmp);
+		}
+
 			/* ######################################
 			 * #     2.a) FASTBACK EXPANSION        #
 			 * ###################################### */
