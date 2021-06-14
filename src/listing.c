@@ -954,8 +954,7 @@ list_dir(void)
 
 		if (!unicode) {
 			file_info[n].len = (xstrsncpy(file_info[n].name, ename,
-						NAME_MAX + 1) -
-					    1);
+								NAME_MAX + 1) - 1);
 		} else {
 			xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
 			file_info[n].len = wc_xstrlen(ename);
@@ -1032,9 +1031,14 @@ list_dir(void)
 				if (*dir_ico_c)
 					file_info[n].icon_color = dir_ico_c;
 			}
-			files_counter
-			    ? (file_info[n].filesn = (count_dir(ename) - 2))
-			    : (file_info[n].filesn = 1);
+			if (files_counter)
+				file_info[n].filesn = count_dir(ename) - 2;
+			else {
+				if (access(ename, R_OK) == -1)
+					file_info[n].filesn = -1;
+				else
+					file_info[n].filesn = 1;
+			}
 			if (file_info[n].filesn > 0) { /* S_ISVTX*/
 				file_info[n].color = (attr.st_mode & 01000)
 							 ? ((attr.st_mode & 00002) ? tw_c : st_c)
