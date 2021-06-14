@@ -974,7 +974,7 @@ external_arguments(int argc, char **argv)
 
 		struct stat attr;
 
-		if (stat(argv[i], &attr) == -1) {
+		if (stat(tilde_expand(argv[i]), &attr) == -1) {
 			fprintf(stderr, "%s: %s: %s", PROGRAM_NAME, argv[i],
 			    strerror(errno));
 			exit(EXIT_FAILURE);
