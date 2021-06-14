@@ -138,10 +138,8 @@ xchdir(const char *dir, const int set_title)
 	int ret;
 	ret = chdir(dir);
 
-	if (set_title && ret == 0 && xargs.cwd_in_title == 1) {
-		if (*dir == '/' && dir[1] == 'h')
-			set_term_title(dir);
-	}
+	if (set_title && ret == 0 && xargs.cwd_in_title == 1)
+		set_term_title(dir);
 
 	return ret;
 }
