@@ -942,8 +942,7 @@ list_dir(void)
 		if (only_dirs && ent->d_type != DT_DIR)
 			continue;
 
-		if (fstatat(fd, ename, &attr, AT_SYMLINK_NOFOLLOW) == -1)
-			continue;
+		fstatat(fd, ename, &attr, AT_SYMLINK_NOFOLLOW);
 
 		if (count > ENTRY_N) {
 			count = 0;
