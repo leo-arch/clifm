@@ -615,7 +615,13 @@ split_fusedcmd(char *str)
 	if (!str || !*str || *str == ';' || *str == ':' || *str == '\\')
 		return (char *)NULL;
 
-	if (strchr(str, '/'))
+	char *space = strchr(str, ' ');
+	char *slash = strchr(str, '/');
+
+	if (!space && slash)
+		return (char *)NULL;
+
+	if (space && slash && slash < space)
 		return (char *)NULL;
 
 	/* The buffer size is the double of STR, just in case each subtr
