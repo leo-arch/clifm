@@ -338,10 +338,10 @@ list_dir_light(void)
 
 		file_info[n].name = (char *)xnmalloc(NAME_MAX + 1, sizeof(char));
 
-		if (!unicode)
+		if (!unicode) {
 			file_info[n].len = (xstrsncpy(file_info[n].name, ename,
 						NAME_MAX + 1) - 1);
-		else {
+		} else {
 			xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
 			file_info[n].len = wc_xstrlen(ename);
 		}
@@ -615,10 +615,9 @@ list_dir_light(void)
 	int last_column = 0;
 
 	/* Get possible amount of columns for the dirlist screen */
-	if (!columned)
+	if (!columned) {
 		columns_n = 1;
-
-	else {
+	} else {
 		columns_n = (size_t)term_cols / (longest + 1); /* +1 for the
 		space between file names */
 
@@ -712,8 +711,9 @@ list_dir_light(void)
 		if (++cur_cols == columns_n) {
 			cur_cols = 0;
 			last_column = 1;
-		} else
+		} else {
 			last_column = 0;
+		}
 
 		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
 
@@ -728,21 +728,23 @@ list_dir_light(void)
 				if (xargs.icons_use_file_color == 1)
 					file_info[i].icon_color = file_info[i].color;
 
-				if (no_eln)
+				if (no_eln) {
 					printf("%s%s %s%s%s", file_info[i].icon_color,
 					    file_info[i].icon, file_info[i].color,
 					    file_info[i].name, df_c);
-				else
+				} else {
 					printf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
 					    file_info[i].icon_color, file_info[i].icon,
 					    file_info[i].color, file_info[i].name, df_c);
+				}
 			} else {
-				if (no_eln)
+				if (no_eln) {
 					printf("%s%s%s", file_info[i].color,
 					    file_info[i].name, df_c);
-				else
+				} else {
 					printf("%s%d%s %s%s%s", el_c, i + 1, df_c,
 					    file_info[i].color, file_info[i].name, df_c);
+				}
 			}
 
 			if (file_info[i].dir && classify) {
@@ -752,6 +754,7 @@ list_dir_light(void)
 			}
 		}
 
+		/* No color */
 		else {
 			if (icons) {
 				if (no_eln)
@@ -759,9 +762,7 @@ list_dir_light(void)
 				else
 					printf("%s%d%s %s %s", el_c, i + 1, df_c,
 					    file_info[i].icon, file_info[i].name);
-			}
-
-			else {
+			} else {
 				if (no_eln)
 					printf("%s", file_info[i].name);
 				else
@@ -819,15 +820,16 @@ list_dir_light(void)
 			register int j;
 			for (j = diff + 1; j--;)
 				putchar(' ');
-		} else
+		} else {
 			putchar('\n');
+		}
 	}
 
 	if (!last_column)
 		putchar('\n');
 
 END:
-	if (closedir(dir) == -1) {
+	if (close_dir && closedir(dir) == -1) {
 		/* Unhide the cursor */
 		printf("\x1b[?25h");
 		return EXIT_FAILURE;
@@ -1000,7 +1002,7 @@ list_dir(void)
 		case SBTIME: {
 			struct statx attx;
 			if (statx(AT_FDCWD, ename, AT_SYMLINK_NOFOLLOW,
-				STATX_BTIME, &attx) == -1)
+			STATX_BTIME, &attx) == -1)
 				file_info[n].time = 0;
 			else
 				file_info[n].time = (time_t)attx.stx_btime.tv_sec;
@@ -1039,11 +1041,11 @@ list_dir(void)
 							 ? ((attr.st_mode & 00002) ? tw_c : st_c)
 							 : ((attr.st_mode & 00002) ? ow_c : di_c);
 				/* S_ISWOTH*/
-			} else if (file_info[n].filesn == 0)
+			} else if (file_info[n].filesn == 0) {
 				file_info[n].color = (attr.st_mode & 01000)
 							 ? ((attr.st_mode & 00002) ? tw_c : st_c)
 							 : ((attr.st_mode & 00002) ? ow_c : ed_c);
-			else {
+			} else {
 				file_info[n].color = nd_c;
 				file_info[n].icon = ICON_LOCK;
 				file_info[n].icon_color = YELLOW;
@@ -1477,23 +1479,25 @@ list_dir(void)
 
 			ind_char = 0;
 			if (icons) {
-				if (no_eln)
+				if (no_eln) {
 					printf("%s%s %s%s%s", file_info[i].icon_color,
 					    file_info[i].icon, file_info[i].color,
 					    file_info[i].name, df_c);
-				else
+				} else {
 					printf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
 					    file_info[i].icon_color, file_info[i].icon,
 					    file_info[i].color, file_info[i].name, df_c);
+				}
 			}
 
 			else {
-				if (no_eln)
+				if (no_eln) {
 					printf("%s%s%s", file_info[i].color,
 					    file_info[i].name, df_c);
-				else
+				} else {
 					printf("%s%d%s %s%s%s", el_c, i + 1, df_c,
 					    file_info[i].color, file_info[i].name, df_c);
+				}
 			}
 
 			if (classify) {
@@ -1527,9 +1531,9 @@ list_dir(void)
 			}
 
 			else {
-				if (no_eln)
+				if (no_eln) {
 					fputs(file_info[i].name, stdout);
-				else {
+				} else {
 					printf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
 					/*                  fputs(el_c, stdout);
 					fputs(xitoa(i + 1), stdout);
@@ -1601,8 +1605,9 @@ list_dir(void)
 			register int j;
 			for (j = diff + 1; j--;)
 				putchar(' ');
-		} else
+		} else {
 			putchar('\n');
+		}
 	}
 
 	if (!last_column)
