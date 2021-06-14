@@ -294,11 +294,14 @@ list_dir_light(void)
 
 	struct dirent *ent;
 
+	int reset_pager = 0;
+	int close_dir = 1;
+
 	if ((dir = opendir(ws[cur_ws].path)) == NULL) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
 		    strerror(errno));
-		printf("\x1b[?25h");
-		return EXIT_FAILURE;
+		close_dir = 0;
+		goto END;
 	}
 
 	errno = 0;
@@ -439,10 +442,7 @@ list_dir_light(void)
 	if (n == 0) {
 		printf("%s. ..%s\n", colorize ? di_c : df_c, df_c);
 		free(file_info);
-		printf("\x1b[?25h");
-		if (closedir(dir) == -1)
-			return EXIT_FAILURE;
-		return EXIT_SUCCESS;
+		goto END;
 	}
 
 	if (sort)
@@ -456,7 +456,7 @@ list_dir_light(void)
 	term_cols = w.ws_col; /* This one is global */
 	unsigned short term_rows = w.ws_row;
 
-	int reset_pager = 0, c, i;
+	int c, i;
 	register size_t counter = 0;
 
 	size_t columns_n = 1;
@@ -828,6 +828,7 @@ list_dir_light(void)
 
 END:
 	if (closedir(dir) == -1) {
+		/* Unhide the cursor */
 		printf("\x1b[?25h");
 		return EXIT_FAILURE;
 	}
@@ -891,11 +892,14 @@ list_dir(void)
 	struct dirent *ent;
 	struct stat attr;
 
+	int reset_pager = 0;
+	int close_dir = 1;
+
 	if ((dir = opendir(ws[cur_ws].path)) == NULL) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
 		    strerror(errno));
-		printf("\x1b[?25h");
-		return EXIT_FAILURE;
+		close_dir = 0;
+		goto END;
 	}
 
 	int fd = dirfd(dir);
@@ -1177,10 +1181,7 @@ list_dir(void)
 	if (n == 0) {
 		printf("%s. ..%s\n", colorize ? di_c : df_c, df_c);
 		free(file_info);
-		printf("\x1b[?25h");
-		if (closedir(dir) == -1)
-			return EXIT_FAILURE;
-		return EXIT_SUCCESS;
+		goto END;
 	}
 
 		/* #############################################
@@ -1202,7 +1203,6 @@ list_dir(void)
 	term_cols = w.ws_col; /* This one is global */
 	unsigned short term_rows = w.ws_row;
 
-	int reset_pager = 0;
 	int c, i;
 	register size_t counter = 0;
 
@@ -1613,7 +1613,8 @@ list_dir(void)
 				 * ######################### */
 
 END:
-	if (closedir(dir) == -1) {
+	if (close_dir && closedir(dir) == -1) {
+		/* Unhide the cursor */
 		printf("\x1b[?25h");
 		return EXIT_FAILURE;
 	}

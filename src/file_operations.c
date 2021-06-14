@@ -61,6 +61,7 @@ xchmod(const char *file, mode_t mode)
 	return EXIT_SUCCESS;
 }
 
+/* Create a duplicate of a file/dir using rsync or cp */
 int
 dup_file(char *source, char *dest)
 {
@@ -94,6 +95,9 @@ dup_file(char *source, char *dest)
 	int exit_status =  EXIT_SUCCESS;
 
 	int free_dest = 0;
+
+	/* If no dest, use source as file name: source.copy, and, if already
+	 * exists, source.copy.YYYYMMDDHHMMSS */
 	if (!dest) {
 		size_t source_len = strlen(source);
 
@@ -203,7 +207,7 @@ create_file(char **cmd)
 		free(filename);
 	}
 
-	/* Properly format filenames*/
+	/* Properly format filenames */
 	size_t i;
 	for (i = 1; cmd[i]; i++) {
 
