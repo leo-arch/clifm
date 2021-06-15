@@ -297,6 +297,14 @@ list_dir_light(void)
 	int reset_pager = 0;
 	int close_dir = 1;
 
+	/* Get terminal current amount of rows and columns */
+	struct winsize w;
+	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+	/* ws_col and ws_row are both unsigned short int according to
+	 * /bits/ioctl-types.h */
+	term_cols = w.ws_col; /* This one is global */
+	unsigned short term_rows = w.ws_row;
+
 	if ((dir = opendir(ws[cur_ws].path)) == NULL) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
 		    strerror(errno));
@@ -447,14 +455,6 @@ list_dir_light(void)
 
 	if (sort)
 		qsort(file_info, n, sizeof(*file_info), entrycmp);
-
-	/* Get terminal current amount of rows and columns */
-	struct winsize w;
-	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-	/* ws_col and ws_row are both unsigned short int according to
-	 * /bits/ioctl-types.h */
-	term_cols = w.ws_col; /* This one is global */
-	unsigned short term_rows = w.ws_row;
 
 	int c, i;
 	register size_t counter = 0;

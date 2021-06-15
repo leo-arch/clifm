@@ -132,7 +132,7 @@ dup_file(char *source, char *dest)
 				tm.tm_sec);
 
 			char tmp_dest[PATH_MAX];
-			strncpy(tmp_dest, dest, PATH_MAX);
+			strncpy(tmp_dest, dest, PATH_MAX - 1);
 
 			dest = (char *)xrealloc(dest, (strlen(tmp_dest) + strlen(suffix) + 2)
 									* sizeof(char));
