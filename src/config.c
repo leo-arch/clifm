@@ -661,10 +661,9 @@ copy_plugins(void)
 	launch_execve(cp_cmd, FOREGROUND, E_NOFLAG);
 
 	/* Make plugins executable */
-	char local_plugins_dir[] = "/usr/share/clifm/plugins/*.sh";
-
-	char *chmod_cmd[] = {"chmod", "+x", local_plugins_dir, NULL};
-	launch_execve(chmod_cmd, FOREGROUND, E_NOFLAG);
+	char chmod_cmd[PATH_MAX];
+	snprintf(chmod_cmd, PATH_MAX - 1, "chmod +x %s/plugins/*.sh", CONFIG_DIR_GRAL);
+	launch_execle(chmod_cmd);
 }
 
 int
