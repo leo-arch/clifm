@@ -5,6 +5,7 @@ clifm
 TODO/
 clifm-debian/
 test/
+.obs/
 
 # Object files
 *.o
