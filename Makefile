@@ -17,6 +17,7 @@ build:
 	cd src && $(MAKE) build
 
 install: build
+	@$(INSTALL) -m 0755 -d $(INSTALLPREFIX)
 	@$(INSTALL) -m 0755 $(PROG) $(INSTALLPREFIX)
 	@$(RM) -- $(PROG)
 	@$(INSTALL) -m 0755 -d $(DESKTOPPREFIX)/$(PROG)
