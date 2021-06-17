@@ -35,6 +35,7 @@
 #include "init.h"
 #include "listing.h"
 #include "misc.h"
+#include "navigation.h"
 #include "prompt.h"
 #include "trash.h"
 
@@ -43,6 +44,16 @@
 char *
 prompt(void)
 {
+	/* Make sure CWD exists; if not, go up to the parent, and so
+	 * on */
+	while (xchdir(ws[cur_ws].path, SET_TITLE) != EXIT_SUCCESS) {
+		char *ret = strrchr(ws[cur_ws].path, '/');
+		if (ret && ret != ws[cur_ws].path)
+			*ret = '\0';
+		else
+			break;
+	}
+
 	/* Remove all final slash(es) from path, if any */
 	size_t path_len = strlen(ws[cur_ws].path), i;
 
