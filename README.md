@@ -147,6 +147,8 @@ Ubuntu
 
 For Archlinux users, the latest stable release is also available on the [AUR](https://aur.archlinux.org/packages/clifm).
 
+For FreeBSD users, there is a package available in the [FreeBSD Ports Collection](https://www.freshports.org/misc/clifm)
+
 ## Compiling and Installing CliFM
 
 If you prefer to compile the package yourself (it should take less than a minute), or if you want to try the latest version, or if there is no binary package available for your distribution, follow these steps.
