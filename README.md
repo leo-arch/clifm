@@ -11,7 +11,7 @@
 href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/bug_report.md">Report bug</a> · <a
 href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/feature_request.md">Request feature</a> · <a
 href="https://github.com/leo-arch/clifm/wiki">Browse the documentation</a> · <a
-href="https://download.opensuse.org/repositories/home:/archcrack/">Downloads</a></h4>
+href="https://software.opensuse.org//download.html?project=home%3Aarchcrack&package=clifm">Downloads</a></h4>
 
 ---
 
@@ -23,7 +23,7 @@ href="https://download.opensuse.org/repositories/home:/archcrack/">Downloads</a>
 <a><img src="https://repology.org/badge/tiny-repos/clifm.svg" alt="Packaging status"></a>
 <a href="https://en.wikipedia.org/wiki/Privacy-invasive_software"><img src="https://img.shields.io/badge/privacy-ok-green?style=flat"/></a>
 <a href="https://gitter.im/leo-arch/clifm"><img src="https://img.shields.io/gitter/room/leo-arch/clifm?style=flat"/></a>
-<a href="https://download.opensuse.org/repositories/home:/archcrack/"><img src="https://img.shields.io/badge/CD-OBS-red?logo=opensuse&logoColor=white"/></a>
+<a href="https://software.opensuse.org//download.html?project=home%3Aarchcrack&package=clifm"><img src="https://img.shields.io/badge/CD-OBS-red?logo=opensuse&logoColor=white"/></a>
 </p>
 
 <p align="right"><br><i>[…] I think I had been looking for something like this for a long time, and had never put it in words. I used [other file-managers] occasionally, but frequently just found myself doing most of my file administration from the CLI. I think this hits a nice sort of sweet spot right between the two. It feels less like a separate program and more like just putting your shell into "file-management mode".</i></p>
@@ -134,7 +134,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 
 ## Installing CliFM
 
-Binary packages for some of the major Linux distributions are available via the [OpenSUSE Build System](https://download.opensuse.org/repositories/home:/archcrack/). 
+Binary packages for some of the major Linux distributions are available via the [OpenSUSE Build System](https://software.opensuse.org//download.html?project=home%3Aarchcrack&package=clifm). 
 
 This is the list of currently avaialable packages per distribution:
 
