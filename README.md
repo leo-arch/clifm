@@ -145,9 +145,11 @@ Fedora \
 OpenSUSE \
 Ubuntu
 
+For Archlinux users, the last released (stable) version is avaialble on the [AUR](https://aur.archlinux.org/packages/clifm).
+
 ## Compiling and Installing CliFM
 
-If you prefer to compile the package yourself (it should take less than a minute), or if there is no binary package available for your distribution, follow these steps.
+If you prefer to compile the package yourself (it should take less than a minute), or if you want to try the latest version, or if there is no binary package available for your distribution, follow these steps.
 
 ### Dependencies
 
@@ -159,7 +161,7 @@ Optional dependencies: `file` (to automatically open files via `Lira`), `sshfs`,
 
 ### Arch Linux
 
-* You'll find the corresponding packages on the AUR: the [stable](https://aur.archlinux.org/packages/clifm) and the [development](https://aur.archlinux.org/packages/clifm-git) version.
+* Just install the git, development version from the [AUR](https://aur.archlinux.org/packages/clifm-git).
 
 * A binary package is now available on the `chaotic-aur` repository. Follow the official [installation instructions](https://aur.chaotic.cx/).
 
