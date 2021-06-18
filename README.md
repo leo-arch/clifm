@@ -134,6 +134,19 @@ For a detailed explanation of each of these features, follow the corresponding l
 
 ## Installing CliFM
 
+Binary packages for some of the major Linux distributions are available via the [Opensuse Build System](https://download.opensuse.org/repositories/home:/archcrack/). 
+
+This is the list of currently avaialable packages per ditribution:
+
+Archlinux \
+CentOS \
+Debian \
+Fedora \
+OpenSUSE \
+Ubuntu
+
+## Compiling and Installing CliFM
+
 ### Dependencies
 
 `glibc` and `coreutils`, of course, but also `libcap`, `acl`, and `readline`. \
@@ -155,9 +168,6 @@ $ git clone https://github.com/leo-arch/clifm.git
 $ cd clifm/misc
 $ makepkg -si
 ```
-
-### Debian-based systems
-A .deb package (for x86_64) is available on the [Releases](https://github.com/leo-arch/clifm/releases) page.
 
 ### Other Linux distributions or FreeBSD:
 
