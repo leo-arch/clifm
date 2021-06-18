@@ -10,7 +10,8 @@
 <h4 align="center"><a
 href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/bug_report.md">Report bug</a> · <a
 href="https://github.com/leo-arch/clifm/blob/master/.github/ISSUE_TEMPLATE/feature_request.md">Request feature</a> · <a
-href="https://github.com/leo-arch/clifm/wiki">Browse the documentation</a></h4>
+href="https://github.com/leo-arch/clifm/wiki">Browse the documentation</a> · <a
+href="https://download.opensuse.org/repositories/home:/archcrack/">Downloads</a></h4>
 
 ---
 
