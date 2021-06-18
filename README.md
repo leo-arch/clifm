@@ -145,7 +145,7 @@ Fedora \
 OpenSUSE \
 Ubuntu
 
-For Archlinux users, the last released (stable) version is available on the [AUR](https://aur.archlinux.org/packages/clifm).
+For Archlinux users, the latest stable release is also available on the [AUR](https://aur.archlinux.org/packages/clifm).
 
 ## Compiling and Installing CliFM
 
