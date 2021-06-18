@@ -4,50 +4,65 @@
 
 OS := $(shell uname -s)
 
+PREFIX ?= /usr/local
+MANPREFIX ?= $(PREFIX)/share/man
+DESKTOPPREFIX ?= $(PREFIX)/share/applications
+DESKTOPICONPREFIX ?= $(PREFIX)/share/icons/hicolor
+DATADIR ?= $(PREFIX)/share
+
 SHELL ?= /bin/sh
-INSTALLPREFIX ?= /usr/bin
-DESKTOPPREFIX ?= /usr/share
-ICONPREFIX ?= $(DESKTOPPREFIX)/icons/hicolor
-PROG ?= clifm
 INSTALL ?= install
+BIN ?= clifm
 CP ?= cp
 RM ?= rm
 
-build:
-	cd src && $(MAKE) build
+SRCDIR = src/
+OBJS != ls $(SRCDIR)*.c | sed "s/.c\$$/.o/g"
+
+CFLAGS ?= -I/usr/local/include -O3 -fstack-protector-strong -march=native -Wall
+LIBS_Linux ?= -lreadline -lacl -lcap
+LIBS_FreeBSD ?= -L/usr/local/lib -lreadline -lintl
+
+build: ${OBJS}
+	@printf "Detected operating system: ";
+	@echo "$(OS)"
+	$(CC) -o $(BIN) ${OBJS} ${LIBS_${OS}} $(CFLAGS)
+
+clean:
+	rm -f $(SRC)*.o
 
 install: build
-	@$(INSTALL) -m 0755 -d $(DESTDIR)$(INSTALLPREFIX)
-	@$(INSTALL) -m 0755 $(PROG) $(DESTDIR)$(INSTALLPREFIX)
-	@$(RM) -- $(PROG)
-	@$(INSTALL) -m 0755 -d $(DESTDIR)$(DESKTOPPREFIX)/$(PROG)
-	@$(INSTALL) -m 0755 -d $(DESTDIR)$(DESKTOPPREFIX)/man/man1
-	@$(INSTALL) -m 0755 -d $(DESTDIR)$(DESKTOPPREFIX)/bash-completion/completions
-	@$(INSTALL) -m 0755 -d $(DESTDIR)$(DESKTOPPREFIX)/applications
-	@$(INSTALL) -m 0755 -d $(DESTDIR)$(DESKTOPPREFIX)/zsh/site-functions
-	@$(INSTALL) -m 0755 -d $(DESTDIR)$(DESKTOPPREFIX)/icons/hicolor/scalable/apps
-	@$(INSTALL) -m 0755 -d $(DESTDIR)$(DESKTOPPREFIX)/locale/es/LC_MESSAGES
-	@$(INSTALL) -m 0644 misc/manpage $(DESTDIR)$(DESKTOPPREFIX)/man/man1/$(PROG).1
-	@gzip $(DESTDIR)$(DESKTOPPREFIX)/man/man1/$(PROG).1
-	@$(INSTALL) -m 0644 misc/completions.bash $(DESTDIR)$(DESKTOPPREFIX)/bash-completion/completions/$(PROG)
-	@$(INSTALL) -m 0644 misc/completions.zsh $(DESTDIR)$(DESKTOPPREFIX)/zsh/site-functions/_$(PROG)
-	@$(INSTALL) -m 0644 misc/$(PROG).desktop $(DESTDIR)$(DESKTOPPREFIX)/applications
-	@$(INSTALL) -m 0644 misc/mimelist.cfm $(DESTDIR)$(DESKTOPPREFIX)/$(PROG)
-	@$(INSTALL) -m 0644 images/logo/$(PROG).svg $(DESTDIR)$(ICONPREFIX)/scalable/apps
-	@$(INSTALL) -m 0644 translations/spanish/$(PROG).mo $(DESTDIR)$(DESKTOPPREFIX)/locale/es/LC_MESSAGES/$(PROG).mo
-	@$(INSTALL) -m 0755 -d $(DESTDIR)$(DESKTOPPREFIX)/$(PROG)/plugins
-	@$(INSTALL) -m 0755 -d $(DESTDIR)$(DESKTOPPREFIX)/$(PROG)/functions
-	@$(INSTALL) -m 0644 plugins/* $(DESTDIR)$(DESKTOPPREFIX)/$(PROG)/plugins
-	@$(INSTALL) -m 0644 functions/* $(DESTDIR)$(DESKTOPPREFIX)/$(PROG)/functions
-	@printf "Successfully installed $(PROG)\n"
+	@$(INSTALL) -m 0755 -d $(DESTDIR)$(PREFIX)/bin
+	@$(INSTALL) -m 0755 $(BIN) $(DESTDIR)$(PREFIX)/bin
+	@$(RM) -- $(BIN)
+	@$(INSTALL) -m 0755 -d $(DESTDIR)$(DATADIR)/$(BIN)
+	@$(INSTALL) -m 0755 -d $(DESTDIR)$(MANPREFIX)/man1
+	@$(INSTALL) -m 0755 -d $(DESTDIR)$(DATADIR)/bash-completion/completions
+	@$(INSTALL) -m 0755 -d $(DESTDIR)$(DESKTOPPREFIX)
+	@$(INSTALL) -m 0755 -d $(DESTDIR)$(DATADIR)/zsh/site-functions
+	@$(INSTALL) -m 0755 -d $(DESTDIR)$(DESKTOPICONPREFIX)/scalable/apps
+	@$(INSTALL) -m 0755 -d $(DESTDIR)$(DATADIR)/locale/es/LC_MESSAGES
+	@$(INSTALL) -m 0644 misc/manpage $(DESTDIR)$(MANPREFIX)/man1/$(BIN).1
+	@gzip $(DESTDIR)$(MANPREFIX)/man1/$(BIN).1
+	@$(INSTALL) -m 0644 misc/completions.bash $(DESTDIR)$(DATADIR)/bash-completion/completions/$(BIN)
+	@$(INSTALL) -m 0644 misc/completions.zsh $(DESTDIR)$(DATADIR)/zsh/site-functions/_$(BIN)
+	@$(INSTALL) -m 0644 misc/$(BIN).desktop $(DESTDIR)$(DATADIR)/applications
+	@$(INSTALL) -m 0644 misc/mimelist.cfm $(DESTDIR)$(DATADIR)/$(BIN)
+	@$(INSTALL) -m 0644 images/logo/$(BIN).svg $(DESTDIR)$(DESKTOPICONPREFIX)/scalable/apps
+	@$(INSTALL) -m 0644 translations/spanish/$(BIN).mo $(DESTDIR)$(DATADIR)/locale/es/LC_MESSAGES/$(BIN).mo
+	@$(INSTALL) -m 0755 -d $(DESTDIR)$(DATADIR)/$(BIN)/plugins
+	@$(INSTALL) -m 0755 -d $(DESTDIR)$(DATADIR)/$(BIN)/functions
+	@$(INSTALL) -m 0644 plugins/* $(DESTDIR)$(DATADIR)/$(BIN)/plugins
+	@$(INSTALL) -m 0644 functions/* $(DESTDIR)$(DATADIR)/$(BIN)/functions
+	@printf "Successfully installed $(BIN)\n"
 
 uninstall:
-	@$(RM) -- $(DESTDIR)$(INSTALLPREFIX)/$(PROG)
-	@$(RM) -- $(DESTDIR)$(DESKTOPPREFIX)/man/man1/$(PROG).1.gz
-	@$(RM) -- $(DESTDIR)$(DESKTOPPREFIX)/locale/*/LC_MESSAGES/$(PROG).mo
-	@$(RM) -- $(DESTDIR)$(DESKTOPPREFIX)/bash-completion/completions/$(PROG)
-	@$(RM) -- $(DESTDIR)$(DESKTOPPREFIX)/zsh/site-functions/_$(PROG)
-	@$(RM) -- $(DESTDIR)$(DESKTOPPREFIX)/applications/$(PROG).desktop
-	@$(RM) -r -- $(DESTDIR)$(DESKTOPPREFIX)/$(PROG)
-	@$(RM) -- $(DESTDIR)$(ICONPREFIX)/scalable/apps/$(PROG).svg
-	@printf "Successfully uninstalled $(PROG)\n"
+	@$(RM) -- $(DESTDIR)$(PREFIX)/bin/$(BIN)
+	@$(RM) -- $(DESTDIR)$(MANPREFIX)/man1/$(BIN).1.gz
+	@$(RM) -- $(DESTDIR)$(DATADIR)/locale/*/LC_MESSAGES/$(BIN).mo
+	@$(RM) -- $(DESTDIR)$(DATADIR)/bash-completion/completions/$(BIN)
+	@$(RM) -- $(DESTDIR)$(DATADIR)/zsh/site-functions/_$(BIN)
+	@$(RM) -- $(DESTDIR)$(DATADIR)/applications/$(BIN).desktop
+	@$(RM) -r -- $(DESTDIR)$(DATADIR)/$(BIN)
+	@$(RM) -- $(DESTDIR)$(DESKTOPICONPREFIX)/scalable/apps/$(BIN).svg
+	@printf "Successfully uninstalled $(BIN)\n"
