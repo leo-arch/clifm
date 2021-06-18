@@ -147,6 +147,8 @@ Ubuntu
 
 ## Compiling and Installing CliFM
 
+If you prefer to compile the package yourself (it should take less than a minute), or if there is no binary package available for your distribution, follow these steps.
+
 ### Dependencies
 
 `glibc` and `coreutils`, of course, but also `libcap`, `acl`, and `readline`. \
