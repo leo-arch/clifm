@@ -477,7 +477,11 @@ main() {
 			fi
 		else
 			printf  "%s\n" "$path"
-			if [ "$DIR_CMD" = "exa" ]; then
+			if [ "$DIR_CMD" = "lsd" ]; then
+				lsd -A --group-dirs=first --color=always "$path" && exit 0
+			elif [ "$DIR_CMD" = "lsd-tree" ]; then
+				lsd -A --group-dirs=first --depth=1 --tree --color=always "$path" && exit 0
+			elif [ "$DIR_CMD" = "exa" ]; then
 				exa -G --group-directories-first --color=always "$path" && exit 0
 			else
 				ls -p --color=always "${path}" && exit 0
