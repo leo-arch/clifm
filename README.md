@@ -23,6 +23,7 @@ href="https://github.com/leo-arch/clifm/wiki">Browse the documentation</a></h4>
 <a href="https://gitter.im/leo-arch/clifm"><img src="https://img.shields.io/gitter/room/leo-arch/clifm?style=flat"/></a>
 <a><img src="https://img.shields.io/github/last-commit/leo-arch/clifm/master?color=blue&style=flat"/></a>
 <a href="https://github.com/leo-arch/clifm/actions/workflows/codeql-analysis.yml"><img src="https://github.com/leo-arch/clifm/actions/workflows/codeql-analysis.yml/badge.svg?branch=master"></a>
+<a><img src="https://repology.org/badge/tiny-repos/clifm.svg" alt="Packaging status"></a>
 </p>
 
 <p align="right"><br><i>[…] I think I had been looking for something like this for a long time, and had never put it in words. I used [other file-managers] occasionally, but frequently just found myself doing most of my file administration from the CLI. I think this hits a nice sort of sweet spot right between the two. It feels less like a separate program and more like just putting your shell into "file-management mode".</i></p>
@@ -133,6 +134,23 @@ For a detailed explanation of each of these features, follow the corresponding l
 
 ## Installing CliFM
 
+Binary packages for some of the major Linux distributions are available via the [Opensuse Build System](https://download.opensuse.org/repositories/home:/archcrack/). 
+
+This is the list of currently avaialable packages per ditribution:
+
+Archlinux \
+CentOS \
+Debian \
+Fedora \
+OpenSUSE \
+Ubuntu
+
+For Archlinux users, the last released (stable) version is avaialble on the [AUR](https://aur.archlinux.org/packages/clifm).
+
+## Compiling and Installing CliFM
+
+If you prefer to compile the package yourself (it should take less than a minute), or if you want to try the latest version, or if there is no binary package available for your distribution, follow these steps.
+
 ### Dependencies
 
 `glibc` and `coreutils`, of course, but also `libcap`, `acl`, and `readline`. \
@@ -143,7 +161,7 @@ Optional dependencies: `file` (to automatically open files via `Lira`), `sshfs`,
 
 ### Arch Linux
 
-* You'll find the corresponding packages on the AUR: the [stable](https://aur.archlinux.org/packages/clifm) and the [development](https://aur.archlinux.org/packages/clifm-git) version.
+* Just install the git, development version from the [AUR](https://aur.archlinux.org/packages/clifm-git).
 
 * A binary package is now available on the `chaotic-aur` repository. Follow the official [installation instructions](https://aur.chaotic.cx/).
 
@@ -154,9 +172,6 @@ $ git clone https://github.com/leo-arch/clifm.git
 $ cd clifm/misc
 $ makepkg -si
 ```
-
-### Debian-based systems
-A .deb package (for x86_64) is available on the [Releases](https://github.com/leo-arch/clifm/releases) page.
 
 ### Other Linux distributions or FreeBSD:
 
