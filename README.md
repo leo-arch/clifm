@@ -136,7 +136,7 @@ For a detailed explanation of each of these features, follow the corresponding l
 
 Binary packages for some of the major Linux distributions are available via the [OpenSUSE Build System](https://download.opensuse.org/repositories/home:/archcrack/). 
 
-This is the list of currently avaialable packages per ditribution:
+This is the list of currently avaialable packages per distribution:
 
 Archlinux \
 CentOS \
