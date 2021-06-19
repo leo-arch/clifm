@@ -31,7 +31,7 @@ build: ${OBJS}
 	$(CC) -o $(BIN) ${OBJS} ${LIBS_${OS}} $(CFLAGS)
 
 clean:
-	rm -f $(SRC)*.o
+	rm -f $(SRCDIR)*.o
 
 install: build
 	@$(INSTALL) -m 0755 -d $(DESTDIR)$(PREFIX)/bin
