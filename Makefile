@@ -4,15 +4,17 @@
 
 OS := $(shell uname -s)
 
+BIN ?= clifm
+
 PREFIX ?= /usr/local
 MANPREFIX ?= $(PREFIX)/share/man
-DESKTOPPREFIX ?= $(PREFIX)/share/applications
-DESKTOPICONPREFIX ?= $(PREFIX)/share/icons/hicolor
 DATADIR ?= $(PREFIX)/share
+DESKTOPPREFIX ?= $(DATADIR)/applications
+DESKTOPICONPREFIX ?= $(DATADIR)/icons/hicolor
+PROG_DATADIR ?= $(DATADIR)/$(BIN)
 
 SHELL ?= /bin/sh
 INSTALL ?= install
-BIN ?= clifm
 CP ?= cp
 RM ?= rm
 
@@ -46,14 +48,15 @@ install: build
 	@gzip $(DESTDIR)$(MANPREFIX)/man1/$(BIN).1
 	@$(INSTALL) -m 0644 misc/completions.bash $(DESTDIR)$(DATADIR)/bash-completion/completions/$(BIN)
 	@$(INSTALL) -m 0644 misc/completions.zsh $(DESTDIR)$(DATADIR)/zsh/site-functions/_$(BIN)
-	@$(INSTALL) -m 0644 misc/$(BIN).desktop $(DESTDIR)$(DATADIR)/applications
+	@$(INSTALL) -m 0644 misc/$(BIN).desktop $(DESTDIR)$(DESKTOPPREFIX)
 	@$(INSTALL) -m 0644 misc/mimelist.cfm $(DESTDIR)$(DATADIR)/$(BIN)
 	@$(INSTALL) -m 0644 images/logo/$(BIN).svg $(DESTDIR)$(DESKTOPICONPREFIX)/scalable/apps
 	@$(INSTALL) -m 0644 translations/spanish/$(BIN).mo $(DESTDIR)$(DATADIR)/locale/es/LC_MESSAGES/$(BIN).mo
-	@$(INSTALL) -m 0755 -d $(DESTDIR)$(DATADIR)/$(BIN)/plugins
-	@$(INSTALL) -m 0755 -d $(DESTDIR)$(DATADIR)/$(BIN)/functions
-	@$(INSTALL) -m 0644 plugins/* $(DESTDIR)$(DATADIR)/$(BIN)/plugins
-	@$(INSTALL) -m 0644 functions/* $(DESTDIR)$(DATADIR)/$(BIN)/functions
+	@$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/plugins
+	@$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/functions
+	@$(INSTALL) -m 0755 plugins/* $(DESTDIR)$(PROG_DATADIR)/plugins
+	@chmod 644 $(DESTDIR)$(PROG_DATADIR)/plugins/{BFG.cfg,kbgen.c}
+	@$(INSTALL) -m 0644 functions/* $(DESTDIR)$(PROG_DATADIR)/functions
 	@printf "Successfully installed $(BIN)\n"
 
 uninstall:
@@ -62,7 +65,7 @@ uninstall:
 	@$(RM) -- $(DESTDIR)$(DATADIR)/locale/*/LC_MESSAGES/$(BIN).mo
 	@$(RM) -- $(DESTDIR)$(DATADIR)/bash-completion/completions/$(BIN)
 	@$(RM) -- $(DESTDIR)$(DATADIR)/zsh/site-functions/_$(BIN)
-	@$(RM) -- $(DESTDIR)$(DATADIR)/applications/$(BIN).desktop
-	@$(RM) -r -- $(DESTDIR)$(DATADIR)/$(BIN)
+	@$(RM) -- $(DESTDIR)$(DESKTOPPREFIX)/$(BIN).desktop
+	@$(RM) -r -- $(DESTDIR)$(PROG_DATADIR)
 	@$(RM) -- $(DESTDIR)$(DESKTOPICONPREFIX)/scalable/apps/$(BIN).svg
 	@printf "Successfully uninstalled $(BIN)\n"
