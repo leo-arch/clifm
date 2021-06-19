@@ -76,8 +76,12 @@ get_data_dir(void)
 
 		char tmp[PATH_MAX];
 		snprintf(tmp, PATH_MAX - 1, "%s/share/%s", DATA_DIR, PNL);
-		if (stat(tmp, &attr) == EXIT_SUCCESS)
+		if (stat(tmp, &attr) == EXIT_SUCCESS) {
+			snprintf(tmp, PATH_MAX - 1, "%s/share", DATA_DIR);
+			DATA_DIR = (char *)xrealloc(DATA_DIR, (strlen(tmp) + 1) * sizeof(char));
+			strcpy(DATA_DIR, tmp);
 			return;
+		}
 	}
 
 	/* If not found, try common data dirs */
