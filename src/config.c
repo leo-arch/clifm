@@ -644,6 +644,7 @@ define_config_file_names(void)
 	return;
 }
 
+/*
 void
 copy_plugins(void)
 {
@@ -652,7 +653,7 @@ copy_plugins(void)
 
 	char usr_share_plugins_dir[] = "/usr/share/clifm/plugins";
 
-	/* Make sure the system pĺugins dir exists and is not empty */
+	// Make sure the system pĺugins dir exists and is not empty
 	if (count_dir(usr_share_plugins_dir) <= 2)
 		return;
 
@@ -660,11 +661,11 @@ copy_plugins(void)
 	    CONFIG_DIR_GRAL, NULL};
 	launch_execve(cp_cmd, FOREGROUND, E_NOFLAG);
 
-	/* Make plugins executable */
+	// Make plugins executable
 	char chmod_cmd[PATH_MAX];
-	snprintf(chmod_cmd, PATH_MAX - 1, "chmod +x %s/plugins/*.sh", CONFIG_DIR_GRAL);
+	snprintf(chmod_cmd, PATH_MAX - 1, "chmod +x %s/plugins/\*.sh", CONFIG_DIR_GRAL);
 	launch_execle(chmod_cmd);
-}
+} */
 
 int
 create_config(const char *file)
@@ -1164,8 +1165,8 @@ create_config_files(void)
 			_err('e', PRINT_PROMPT, _("%s: mkdir: Error creating plugins "
 				"directory. The actions function is disabled\n"),
 			    PROGRAM_NAME);
-		else
-			copy_plugins();
+/*		else
+			copy_plugins(); */
 	}
 
 				/* #####################
