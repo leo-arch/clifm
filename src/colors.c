@@ -256,10 +256,25 @@ cschemes_function(char **args)
 	}
 
 	if (*args[1] == 'e' && (!args[1][1] || strcmp(args[1], "edit") == 0)) {
-		char file[PATH_MAX] = "";
-		sprintf(file, "%s/%s.cfm", COLORS_DIR, cur_cscheme);
-
+		char file[PATH_MAX];
+		snprintf(file, PATH_MAX - 1, "%s/%s.cfm", COLORS_DIR, cur_cscheme);
 		struct stat attr;
+		if (stat(file, &attr) == -1) {
+			if (DATA_DIR) {
+				snprintf(file, PATH_MAX - 1, "%s/%s/colors/%s.cfm",
+						DATA_DIR, PNL, cur_cscheme);
+				if (access(file, W_OK) == -1) {
+					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+							file, strerror(errno));
+					return EXIT_FAILURE;
+				}
+			} else {
+				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+						file, strerror(errno));
+				return EXIT_FAILURE;
+			}
+		}
+
 		stat(file, &attr);
 		time_t mtime_bfr = (time_t)attr.st_mtime;
 
@@ -385,14 +400,23 @@ set_colors(const char *colorscheme, int env)
 		env_ifacecolors = (char *)NULL;
 	}
 
-	if (config_ok && (!filecolors || !extcolors || !ifacecolors)) {
+	if (!filecolors || !extcolors || !ifacecolors) {
 		/* Get color lines, for both file types and extensions, from
 	 * COLORSCHEME file */
 
-		char *colorscheme_file = (char *)xnmalloc(strlen(COLORS_DIR)
-				+ (colorscheme ? strlen(colorscheme) : 7) + 6, sizeof(char));
-		sprintf(colorscheme_file, "%s/%s.cfm", COLORS_DIR,
-		    colorscheme ? colorscheme : "default");
+		char colorscheme_file[PATH_MAX];
+		*colorscheme_file = '\0';
+		if (config_ok) {
+			snprintf(colorscheme_file, PATH_MAX - 1, "%s/%s.cfm", COLORS_DIR,
+				colorscheme ? colorscheme : "default");
+		}
+
+		/* If not in local dir, check system data dir as well */
+		struct stat attr;
+		if (DATA_DIR && (!*colorscheme_file || stat(colorscheme_file, &attr) == -1)) {
+			snprintf(colorscheme_file, PATH_MAX- 1, "%s/%s/colors/%s.cfm",
+				DATA_DIR, PNL, colorscheme ? colorscheme : "default");
+		}
 
 		FILE *fp_colors = fopen(colorscheme_file, "r");
 
@@ -521,7 +545,6 @@ set_colors(const char *colorscheme, int env)
 			if (!env) {
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 				    colorscheme_file, strerror(errno));
-				free(colorscheme_file);
 				return EXIT_FAILURE;
 			}
 
@@ -531,9 +554,6 @@ set_colors(const char *colorscheme, int env)
 					colorscheme);
 			}
 		}
-
-		free(colorscheme_file);
-		colorscheme_file = (char *)NULL;
 	}
 
 			/* ##############################
@@ -1406,29 +1426,71 @@ colors_list(const char *ent, const int i, const int pad, const int new_line)
 size_t
 get_colorschemes(void)
 {
-	if (!COLORS_DIR)
-		return 0;
-
 	struct stat attr;
-
-	if (stat(COLORS_DIR, &attr) == -1)
-		return 0;
-
-	int schemes_total = count_dir(COLORS_DIR);
-
-	if (schemes_total <= 2)
-		return 0;
-
-	color_schemes = (char **)xcalloc((size_t)schemes_total + 2, sizeof(char *));
-
+	int schemes_total = 0;
+	struct dirent *ent;
+	DIR *dir_p;
 	size_t i = 0;
 
-	DIR *dir_p;
-	struct dirent *ent;
+	if (COLORS_DIR && stat(COLORS_DIR, &attr) == EXIT_SUCCESS) {
 
-	/* count_dir already opened and read this directory succesfully,
-	 * so that we don't need to check opendir for errors */
-	dir_p = opendir(COLORS_DIR);
+		schemes_total = count_dir(COLORS_DIR) - 2;
+
+		if (schemes_total) {
+
+			color_schemes = (char **)xrealloc(color_schemes,
+							((size_t)schemes_total + 2) * sizeof(char *));
+
+			/* count_dir already opened and read this directory succesfully,
+			 * so that we don't need to check opendir for errors */
+			dir_p = opendir(COLORS_DIR);
+
+			while ((ent = readdir(dir_p)) != NULL) {
+
+				/* Skipp . and .. */
+				char *name = ent->d_name;
+
+				if (*name == '.' && (!name[1] || (name[1] == '.' && !name[2])))
+					continue;
+
+				char *ret = strchr(name, '.');
+
+				/* If the file contains not dot, or if its extension is not
+				 * .cfm, or if it's just a hidden file named ".cfm", skip it */
+				if (!ret || strcmp(ret, ".cfm") != 0 || ret == name)
+					continue;
+
+				*ret = '\0';
+
+				color_schemes[i++] = savestring(name, strlen(name));
+			}
+
+			closedir(dir_p);
+			color_schemes[i] = (char *)NULL;
+		}
+	}
+
+	if (!DATA_DIR)
+		return i;
+
+	char sys_colors_dir[PATH_MAX];
+	snprintf(sys_colors_dir, PATH_MAX - 1, "%s/%s/colors", DATA_DIR, PNL);
+
+	if (stat(sys_colors_dir, &attr) == -1)
+		return i;
+
+	int total_tmp = schemes_total;
+	schemes_total += (count_dir(sys_colors_dir) - 2);
+
+	if (schemes_total <= total_tmp)
+		return i;
+
+	color_schemes = (char **)xrealloc(color_schemes,
+					((size_t)schemes_total + 2) * sizeof(char *));
+
+	size_t i_tmp = i;
+
+	dir_p = opendir(sys_colors_dir);
 
 	while ((ent = readdir(dir_p)) != NULL) {
 
@@ -1442,18 +1504,29 @@ get_colorschemes(void)
 
 		/* If the file contains not dot, or if its extension is not
 		 * .cfm, or if it's just a hidden file named ".cfm", skip it */
-		if (!ret || strcmp(ret, ".cfm") != 0 || ret == name)
+		if (!ret || ret == name || strcmp(ret, ".cfm") != 0)
 			continue;
 
 		*ret = '\0';
 
+		size_t j;
+		int dup = 0;
+		for (j = 0; j < i_tmp; j++) {
+			if (*color_schemes[j] == *name && strcmp(name, color_schemes[j]) == 0) {
+				dup = 1;
+				break;
+			}
+		}
+
+		if (dup)
+			continue;
+
 		color_schemes[i++] = savestring(name, strlen(name));
 	}
 
-	color_schemes[i] = (char *)NULL;
-
 	closedir(dir_p);
-
+	color_schemes[i] = (char *)NULL;
+	
 	return i;
 }
 

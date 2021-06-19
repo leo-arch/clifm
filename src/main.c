@@ -209,6 +209,7 @@ char
     *CONFIG_DIR = (char *)NULL,
     *CONFIG_DIR_GRAL = (char *)NULL,
     *CONFIG_FILE = (char *)NULL,
+    *DATA_DIR = (char *)NULL,
     *cur_cscheme = (char *)NULL,
     *DIRHIST_FILE = (char *)NULL,
     *encoded_prompt = (char *)NULL,
@@ -384,11 +385,7 @@ main(int argc, char *argv[])
 	/* Use the locale specified by the environment */
 	setlocale(LC_ALL, "");
 
-	unicode = 1; /* always enable unicode */
-
-	/* Initialize gettext() for translations */
-	bindtextdomain("clifm", "/usr/share/locale");
-	textdomain("clifm");
+	unicode = DEF_UNICODE;
 
 	/* Store external arguments to be able to rerun external_arguments()
 	 * in case the user edits the config file, in which case the program
@@ -473,6 +470,22 @@ main(int argc, char *argv[])
 	set_sel_file();
 
 	create_tmp_files();
+
+	load_actions();
+	get_aliases();
+
+	/* Get the list of available applications in PATH to be used by my
+	 * custom TAB-completion function */
+	get_path_programs();
+
+	get_data_dir();
+
+	/* Initialize gettext() for translations */
+	char locale_dir[PATH_MAX];
+	snprintf(locale_dir, PATH_MAX - 1, "%s/locale", DATA_DIR
+			? DATA_DIR : "/usr/share");
+	bindtextdomain(PNL, locale_dir);
+	textdomain(PNL);
 
 	cschemes_n = get_colorschemes();
 
@@ -565,10 +578,13 @@ main(int argc, char *argv[])
 		fflush(stdout);
 	} else {
 		char *tmp = (char *)NULL;
+
 		if (ws[cur_ws].path[1] == 'h')
 			tmp = home_tilde(ws[cur_ws].path);
+
 		printf("\033]2;%s - %s\007", PROGRAM_NAME, tmp ? tmp : ws[cur_ws].path);
 		fflush(stdout);
+
 		if (tmp)
 			free(tmp);
 	}
@@ -595,8 +611,6 @@ main(int argc, char *argv[])
 	if (!jump_db || xargs.path == 1)
 		add_to_jumpdb(ws[cur_ws].path);
 
-	load_actions();
-
 	initialize_readline();
 
 	/* Copy the list of quote chars to a global variable to be used
@@ -613,12 +627,6 @@ main(int argc, char *argv[])
 				"Please edit the configuration file to specify a working "
 				"shell.\n"), PROGRAM_NAME, user.shell);
 	}
-
-	get_aliases();
-
-	/* Get the list of available applications in PATH to be used by my
-	 * custom TAB-completion function */
-	get_path_programs();
 
 	get_prompt_cmds();
 

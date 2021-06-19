@@ -1185,6 +1185,8 @@ free_stuff(void)
 			free(ws[i].path);
 	free(ws);
 
+	if (DATA_DIR)
+		free(DATA_DIR);
 	free(CONFIG_DIR_GRAL);
 	free(CONFIG_DIR);
 	free(TRASH_DIR);

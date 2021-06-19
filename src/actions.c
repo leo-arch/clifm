@@ -61,23 +61,34 @@ run_action(char *action, char **args)
 	if (action[action_len - 1] == '\n')
 		action[action_len - 1] = '\0';
 
+	int dir_path = 0;
 	if (strchr(action, '/')) {
-		len = action_len;
-		cmd = savestring(action, len);
-	}
-
-	/* If not a path, PLUGINS_DIR is assumed */
-	else {
-		len = action_len + strlen(PLUGINS_DIR) + 2;
-		cmd = (char *)xnmalloc(len, sizeof(char));
+		cmd = (char *)xnmalloc(strlen(action) + 1, sizeof(char));
+		strcpy(cmd, action);
+		dir_path = 1;
+	} else { /* If not a path, PLUGINS_DIR is assumed */
+		cmd = (char *)xnmalloc(action_len + strlen(PLUGINS_DIR) + 2,
+								sizeof(char));
 		sprintf(cmd, "%s/%s", PLUGINS_DIR, action);
 	}
 
 	/* Check if the action file exists and is executable */
-	if (access(cmd, F_OK | X_OK) == -1) {
-		fprintf(stderr, "actions: %s: %s\n", cmd, strerror(errno));
-		free(cmd);
-		return EXIT_FAILURE;
+	if (access(cmd, X_OK) == -1) {
+		/* If not in local dir, check system data dir as well */
+		if (DATA_DIR && !dir_path) {
+			cmd = (char *)xrealloc(cmd, (action_len + strlen(DATA_DIR)
+						+ strlen(PNL) + 11) * sizeof(char));
+			sprintf(cmd, "%s/%s/plugins/%s", DATA_DIR, PNL, action);
+			if (access(cmd, X_OK) == -1) {
+				fprintf(stderr, "actions: %s: %s\n", cmd, strerror(errno));
+				free(cmd);
+				return EXIT_FAILURE;
+			}
+		} else {
+			fprintf(stderr, "actions: %s: %s\n", cmd, strerror(errno));
+			free(cmd);
+			return EXIT_FAILURE;
+		}
 	}
 
 	/* Append arguments to command */
