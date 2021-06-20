@@ -57,49 +57,55 @@ struct user_t user;
 void
 get_data_dir(void)
 {
-	/* First, try to get data dir from executable's path */
-	DATA_DIR = get_cmd_path(PNL);
-	struct stat attr;
-
-	if (DATA_DIR) {
-		size_t j = strlen(DATA_DIR),
-			   count = 0;
-
-		while (--j >= 0) {
-			if (DATA_DIR[j] == '/')
-				count++;
-			if (count == 2) {
-				DATA_DIR[j] = '\0';
-				break;
-			}
-		}
-
-		char tmp[PATH_MAX];
-		snprintf(tmp, PATH_MAX - 1, "%s/share/%s", DATA_DIR, PNL);
-		if (stat(tmp, &attr) == EXIT_SUCCESS) {
-			snprintf(tmp, PATH_MAX - 1, "%s/share", DATA_DIR);
-			DATA_DIR = (char *)xrealloc(DATA_DIR, (strlen(tmp) + 1) * sizeof(char));
-			strcpy(DATA_DIR, tmp);
-			return;
-		}
-	}
-
-	/* If not found, try common data dirs */
+	/* First try standard values for DATADIR */
 	char *data_dirs[] = {
-		"/usr/share",
-		"/usr/local/share",
+		"/usr/shares",
+		"/usr/local/shares",
 		NULL };
 
+	struct stat attr;
 	size_t i;
+
 	for (i = 0; data_dirs[i]; i++) {
 		char tmp[PATH_MAX];
 		snprintf(tmp, PATH_MAX - 1, "%s/%s", data_dirs[i], PNL);
+
 		if (stat(tmp, &attr) == EXIT_SUCCESS) {
 			DATA_DIR = (char *)xrealloc(DATA_DIR, (strlen(data_dirs[i]) + 1)
 										* sizeof(char));
 			strcpy(DATA_DIR, data_dirs[i]);
 			break;
 		}
+	}
+
+	if (DATA_DIR)
+		return;
+
+	/* If not found, try to get DATADIR from executable's path */
+	DATA_DIR = get_cmd_path(PNL);
+
+	if (!DATA_DIR)
+		return;
+
+	size_t j = strlen(DATA_DIR),
+		   count = 0;
+
+	while (--j >= 0) {
+		if (DATA_DIR[j] == '/')
+			count++;
+		if (count == 2) {
+			DATA_DIR[j] = '\0';
+			break;
+		}
+	}
+
+	char tmp[PATH_MAX];
+	snprintf(tmp, PATH_MAX - 1, "%s/share/%s", DATA_DIR, PNL);
+	if (stat(tmp, &attr) == EXIT_SUCCESS) {
+		snprintf(tmp, PATH_MAX - 1, "%s/share", DATA_DIR);
+		DATA_DIR = (char *)xrealloc(DATA_DIR, (strlen(tmp) + 1) * sizeof(char));
+		strcpy(DATA_DIR, tmp);
+		return;
 	}
 }
 
