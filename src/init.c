@@ -59,8 +59,8 @@ get_data_dir(void)
 {
 	/* First try standard values for DATADIR */
 	char *data_dirs[] = {
-		"/usr/shares",
-		"/usr/local/shares",
+		"/usr/share",
+		"/usr/local/share",
 		NULL };
 
 	struct stat attr;
