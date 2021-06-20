@@ -54,6 +54,7 @@ install: build
 	$(INSTALL) -m 0644 translations/spanish/$(BIN).mo $(DESTDIR)$(DATADIR)/locale/es/LC_MESSAGES/$(BIN).mo
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/plugins
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/functions
+	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/colors
 	$(INSTALL) -m 0755 plugins/* $(DESTDIR)$(PROG_DATADIR)/plugins
 	chmod 644 $(DESTDIR)$(PROG_DATADIR)/plugins/{BFG.cfg,kbgen.c}
 	$(INSTALL) -m 0644 functions/* $(DESTDIR)$(PROG_DATADIR)/functions
