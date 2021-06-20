@@ -714,7 +714,7 @@ extern char
     *CONFIG_DIR,
     *CONFIG_DIR_GRAL,
     *CONFIG_FILE,
-	*DATA_DIR,
+    *DATA_DIR,
     *cur_cscheme,
     *DIRHIST_FILE,
     *encoded_prompt,

@@ -62,9 +62,7 @@ log_function(char **comm)
 			_err(0, NOPRINT_PROMPT, "%s: log: '%s': %s\n",
 			    PROGRAM_NAME, LOG_FILE, strerror(errno));
 			return EXIT_FAILURE;
-		}
-
-		else {
+		} else {
 			size_t line_size = 0;
 			char *line_buff = (char *)NULL;
 			ssize_t line_len = 0;
@@ -92,10 +90,9 @@ log_function(char **comm)
 
 		else if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
 
-			if (logs_enabled)
+			if (logs_enabled) {
 				puts(_("Logs already enabled"));
-
-			else {
+			} else {
 				logs_enabled = 1;
 				puts(_("Logs successfully enabled"));
 			}
@@ -109,9 +106,7 @@ log_function(char **comm)
 			if (!logs_enabled) {
 				puts(_("Logs already disabled"));
 				return EXIT_SUCCESS;
-			}
-
-			else {
+			} else {
 				puts(_("Logs succesfully disabled"));
 				logs_enabled = 0;
 			}
@@ -119,7 +114,6 @@ log_function(char **comm)
 	}
 
 	/* Construct the log line */
-
 	if (!last_cmd) {
 		if (!logs_enabled) {
 			/* When cmd logs are disabled, "log clear" and "log off" are
@@ -128,9 +122,7 @@ log_function(char **comm)
 			if (clear_log) {
 				last_cmd = (char *)xnmalloc(10, sizeof(char));
 				strcpy(last_cmd, "log clear");
-			}
-
-			else {
+			} else {
 				last_cmd = (char *)xnmalloc(8, sizeof(char));
 				strcpy(last_cmd, "log off");
 			}
@@ -174,9 +166,7 @@ log_function(char **comm)
 		    LOG_FILE, strerror(errno));
 		free(full_log);
 		return EXIT_FAILURE;
-	}
-
-	else { /* If LOG_FILE was correctly opened, write the log */
+	} else { /* If LOG_FILE was correctly opened, write the log */
 		fputs(full_log, log_fp);
 		free(full_log);
 		fclose(log_fp);
@@ -231,9 +221,7 @@ log_msg(char *_msg, int print)
 		fputs("Press any key to continue... ", stdout);
 		xgetchar();
 		putchar('\n');
-	}
-
-	else {
+	} else {
 		/* Write message to messages file: [date] msg */
 		time_t rawtime = time(NULL);
 		struct tm tm;
@@ -407,58 +395,57 @@ run_history_cmd(const char *cmd)
 	if (is_number(cmd)) {
 		int num = atoi(cmd);
 
-		if (num > 0 && num < (int)current_hist_n) {
-			size_t old_args = args_n;
-
-			if (record_cmd(history[num - 1]))
-				add_to_cmdhist(history[num - 1]);
-
-			char **cmd_hist = parse_input_str(history[num - 1]);
-
-			if (cmd_hist) {
-
-				char **alias_cmd = check_for_alias(cmd_hist);
-
-				if (alias_cmd) {
-					/* If an alias is found, the function frees cmd_hist
-					 * and returns alias_cmd in its place to be executed
-					 * by exec_cmd() */
-
-					if (exec_cmd(alias_cmd) != 0)
-						exit_status = EXIT_FAILURE;
-
-					for (i = 0; alias_cmd[i]; i++)
-						free(alias_cmd[i]);
-
-					free(alias_cmd);
-
-					alias_cmd = (char **)NULL;
-				}
-
-				else {
-					if (exec_cmd(cmd_hist) != 0)
-						exit_status = EXIT_FAILURE;
-
-					for (i = 0; cmd_hist[i]; i++)
-						free(cmd_hist[i]);
-
-					free(cmd_hist);
-				}
-
-				args_n = old_args;
-
-				return exit_status;
-			}
-			fprintf(stderr, _("%s: Error parsing history command\n"),
-			    PROGRAM_NAME);
-			return EXIT_FAILURE;
-		} else
+		if (num <= 0 || num >= (int)current_hist_n) {
 			fprintf(stderr, _("%s: !%d: event not found\n"), PROGRAM_NAME, num);
-		return EXIT_FAILURE;
+			return EXIT_FAILURE;
+		}
+
+		size_t old_args = args_n;
+
+		if (record_cmd(history[num - 1]))
+			add_to_cmdhist(history[num - 1]);
+
+		char **cmd_hist = parse_input_str(history[num - 1]);
+
+		if (!cmd_hist) {
+			fprintf(stderr, _("%s: Error parsing history command\n"),
+				PROGRAM_NAME);
+			return EXIT_FAILURE;
+		}
+
+		char **alias_cmd = check_for_alias(cmd_hist);
+
+		if (alias_cmd) {
+			/* If an alias is found, the function frees cmd_hist
+			 * and returns alias_cmd in its place to be executed
+			 * by exec_cmd() */
+
+			if (exec_cmd(alias_cmd) != 0)
+				exit_status = EXIT_FAILURE;
+
+			for (i = 0; alias_cmd[i]; i++)
+				free(alias_cmd[i]);
+
+			free(alias_cmd);
+
+			alias_cmd = (char **)NULL;
+		} else {
+			if (exec_cmd(cmd_hist) != 0)
+				exit_status = EXIT_FAILURE;
+
+			for (i = 0; cmd_hist[i]; i++)
+				free(cmd_hist[i]);
+
+			free(cmd_hist);
+		}
+
+		args_n = old_args;
+
+		return exit_status;
 	}
 
 	/* If "!!", execute the last command */
-	else if (*cmd == '!' && !cmd[1]) {
+	if (*cmd == '!' && !cmd[1]) {
 		size_t old_args = args_n;
 
 		if (record_cmd(history[current_hist_n - 1]))
@@ -466,43 +453,41 @@ run_history_cmd(const char *cmd)
 
 		char **cmd_hist = parse_input_str(history[current_hist_n - 1]);
 
-		if (cmd_hist) {
-
-			char **alias_cmd = check_for_alias(cmd_hist);
-
-			if (alias_cmd) {
-
-				if (exec_cmd(alias_cmd) != 0)
-					exit_status = EXIT_FAILURE;
-
-				for (i = 0; alias_cmd[i]; i++)
-					free(alias_cmd[i]);
-
-				free(alias_cmd);
-
-				alias_cmd = (char **)NULL;
-			}
-
-			else {
-				if (exec_cmd(cmd_hist) != 0)
-					exit_status = EXIT_FAILURE;
-
-				for (i = 0; cmd_hist[i]; i++)
-					free(cmd_hist[i]);
-
-				free(cmd_hist);
-			}
-
-			args_n = old_args;
-			return exit_status;
+		if (!cmd_hist) {
+			fprintf(stderr, _("%s: Error parsing history command\n"),
+				PROGRAM_NAME);
+			return EXIT_FAILURE;
 		}
-		fprintf(stderr, _("%s: Error parsing history command\n"),
-		    PROGRAM_NAME);
-		return EXIT_FAILURE;
+
+		char **alias_cmd = check_for_alias(cmd_hist);
+
+		if (alias_cmd) {
+
+			if (exec_cmd(alias_cmd) != 0)
+				exit_status = EXIT_FAILURE;
+
+			for (i = 0; alias_cmd[i]; i++)
+				free(alias_cmd[i]);
+
+			free(alias_cmd);
+
+			alias_cmd = (char **)NULL;
+		} else {
+			if (exec_cmd(cmd_hist) != 0)
+				exit_status = EXIT_FAILURE;
+
+			for (i = 0; cmd_hist[i]; i++)
+				free(cmd_hist[i]);
+
+			free(cmd_hist);
+		}
+
+		args_n = old_args;
+		return exit_status;
 	}
 
 	/* If "!-n" */
-	else if (*cmd == '-') {
+	if (*cmd == '-') {
 		/* If not number or zero or bigger than max... */
 		int acmd = atoi(cmd + 1);
 
@@ -513,8 +498,8 @@ run_history_cmd(const char *cmd)
 
 		size_t old_args = args_n;
 		char **cmd_hist = parse_input_str(history[current_hist_n - (size_t)acmd - 1]);
-		if (cmd_hist) {
 
+		if (cmd_hist) {
 			char **alias_cmd = check_for_alias(cmd_hist);
 
 			if (alias_cmd) {
@@ -527,9 +512,7 @@ run_history_cmd(const char *cmd)
 				free(alias_cmd);
 
 				alias_cmd = (char **)NULL;
-			}
-
-			else {
+			} else {
 				if (exec_cmd(cmd_hist) != 0)
 					exit_status = EXIT_FAILURE;
 
@@ -553,47 +536,44 @@ run_history_cmd(const char *cmd)
 		return EXIT_FAILURE;
 	}
 
-	else if ((*cmd >= 'a' && *cmd <= 'z') || (*cmd >= 'A' && *cmd <= 'Z')) {
+	if ((*cmd >= 'a' && *cmd <= 'z') || (*cmd >= 'A' && *cmd <= 'Z')) {
 
-		size_t len = strlen(cmd), old_args = args_n;
-		;
+		size_t len = strlen(cmd),
+				old_args = args_n;
 
 		for (i = 0; history[i]; i++) {
 
 			if (*cmd == *history[i] && strncmp(cmd, history[i], len) == 0) {
-
 				char **cmd_hist = parse_input_str(history[i]);
 
-				if (cmd_hist) {
+				if (!cmd_hist)
+					continue;
 
-					char **alias_cmd = check_for_alias(cmd_hist);
+				char **alias_cmd = check_for_alias(cmd_hist);
 
-					if (alias_cmd) {
+				if (alias_cmd) {
 
-						if (exec_cmd(alias_cmd) != EXIT_SUCCESS)
-							exit_status = EXIT_FAILURE;
+					if (exec_cmd(alias_cmd) != EXIT_SUCCESS)
+						exit_status = EXIT_FAILURE;
 
-						for (i = 0; alias_cmd[i]; i++)
-							free(alias_cmd[i]);
+					for (i = 0; alias_cmd[i]; i++)
+						free(alias_cmd[i]);
 
-						free(alias_cmd);
+					free(alias_cmd);
 
-						alias_cmd = (char **)NULL;
-					}
+					alias_cmd = (char **)NULL;
+				} else {
+					if (exec_cmd(cmd_hist) != EXIT_SUCCESS)
+						exit_status = EXIT_FAILURE;
 
-					else {
-						if (exec_cmd(cmd_hist) != EXIT_SUCCESS)
-							exit_status = EXIT_FAILURE;
+					for (i = 0; cmd_hist[i]; i++)
+						free(cmd_hist[i]);
 
-						for (i = 0; cmd_hist[i]; i++)
-							free(cmd_hist[i]);
-
-						free(cmd_hist);
-					}
-
-					args_n = old_args;
-					return exit_status;
+					free(cmd_hist);
 				}
+
+				args_n = old_args;
+				return exit_status;
 			}
 		}
 
@@ -602,13 +582,11 @@ run_history_cmd(const char *cmd)
 		return EXIT_FAILURE;
 	}
 
-	else {
-		printf(_("Usage:\n\
+	printf(_("Usage:\n\
 !!: Execute the last command.\n\
 !n: Execute the command number 'n' in the history list.\n\
 !-n: Execute the last-n command in the history list.\n"));
 		return EXIT_SUCCESS;
-	}
 }
 
 int
