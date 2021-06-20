@@ -37,7 +37,7 @@ install: build
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PREFIX)/bin
 	$(INSTALL) -m 0755 $(BIN) $(DESTDIR)$(PREFIX)/bin
 	$(RM) -- $(BIN)
-	$(INSTALL) -m 0755 -d $(DESTDIR)$(DATADIR)/$(BIN)
+	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(MANPREFIX)/man1
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(DATADIR)/bash-completion/completions
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(DESKTOPPREFIX)
@@ -49,7 +49,7 @@ install: build
 	$(INSTALL) -m 0644 misc/completions.bash $(DESTDIR)$(DATADIR)/bash-completion/completions/$(BIN)
 	$(INSTALL) -m 0644 misc/completions.zsh $(DESTDIR)$(DATADIR)/zsh/site-functions/_$(BIN)
 	$(INSTALL) -m 0644 misc/$(BIN).desktop $(DESTDIR)$(DESKTOPPREFIX)
-	$(INSTALL) -m 0644 misc/mimelist.cfm $(DESTDIR)$(DATADIR)/$(BIN)
+	$(INSTALL) -m 0644 misc/mimelist.cfm $(DESTDIR)$(PROG_DATADIR)
 	$(INSTALL) -m 0644 images/logo/$(BIN).svg $(DESTDIR)$(DESKTOPICONPREFIX)/scalable/apps
 	$(INSTALL) -m 0644 translations/spanish/$(BIN).mo $(DESTDIR)$(DATADIR)/locale/es/LC_MESSAGES/$(BIN).mo
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/plugins
