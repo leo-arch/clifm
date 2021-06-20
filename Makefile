@@ -15,15 +15,14 @@ PROG_DATADIR ?= $(DATADIR)/$(BIN)
 
 SHELL ?= /bin/sh
 INSTALL ?= install
-CP ?= cp
 RM ?= rm
 
 SRCDIR = src
 OBJS != ls $(SRCDIR)/*.c | sed "s/.c\$$/.o/g"
 
-CFLAGS ?= -I/usr/local/include -O3 -fstack-protector-strong -march=native -Wall
+CFLAGS ?= -O3 -fstack-protector-strong -march=native -Wall
 LIBS_Linux ?= -lreadline -lacl -lcap
-LIBS_FreeBSD ?= -L/usr/local/lib -lreadline -lintl
+LIBS_FreeBSD ?= -I/usr/local/include -L/usr/local/lib -lreadline -lintl
 
 build: ${OBJS}
 	@printf "Detected operating system: ";
@@ -32,7 +31,7 @@ build: ${OBJS}
 
 clean:
 	$(RM) -- $(BIN)
-	$(RM) -f $(SRCDIR)/*.o
+	$(RM) -f -- $(SRCDIR)/*.o
 
 install: build
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PREFIX)/bin
