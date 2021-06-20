@@ -18,8 +18,8 @@ INSTALL ?= install
 CP ?= cp
 RM ?= rm
 
-SRCDIR = src/
-OBJS != ls $(SRCDIR)*.c | sed "s/.c\$$/.o/g"
+SRCDIR = src
+OBJS != ls $(SRCDIR)/*.c | sed "s/.c\$$/.o/g"
 
 CFLAGS ?= -I/usr/local/include -O3 -fstack-protector-strong -march=native -Wall
 LIBS_Linux ?= -lreadline -lacl -lcap
@@ -31,12 +31,12 @@ build: ${OBJS}
 	$(CC) -o $(BIN) ${OBJS} ${LIBS_${OS}} $(CFLAGS)
 
 clean:
-	rm -f $(SRCDIR)*.o
+	$(RM) -- $(BIN)
+	$(RM) -f $(SRCDIR)/*.o
 
 install: build
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PREFIX)/bin
 	$(INSTALL) -m 0755 $(BIN) $(DESTDIR)$(PREFIX)/bin
-	$(RM) -- $(BIN)
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(MANPREFIX)/man1
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(DATADIR)/bash-completion/completions
@@ -45,7 +45,7 @@ install: build
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(DESKTOPICONPREFIX)/scalable/apps
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(DATADIR)/locale/es/LC_MESSAGES
 	$(INSTALL) -m 0644 misc/manpage $(DESTDIR)$(MANPREFIX)/man1/$(BIN).1
-	gzip $(DESTDIR)$(MANPREFIX)/man1/$(BIN).1
+	gzip -- $(DESTDIR)$(MANPREFIX)/man1/$(BIN).1
 	$(INSTALL) -m 0644 misc/completions.bash $(DESTDIR)$(DATADIR)/bash-completion/completions/$(BIN)
 	$(INSTALL) -m 0644 misc/completions.zsh $(DESTDIR)$(DATADIR)/zsh/site-functions/_$(BIN)
 	$(INSTALL) -m 0644 misc/$(BIN).desktop $(DESTDIR)$(DESKTOPPREFIX)
@@ -56,7 +56,7 @@ install: build
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/functions
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/colors
 	$(INSTALL) -m 0755 plugins/* $(DESTDIR)$(PROG_DATADIR)/plugins
-	chmod 644 $(DESTDIR)$(PROG_DATADIR)/plugins/{BFG.cfg,kbgen.c}
+	chmod 644 -- $(DESTDIR)$(PROG_DATADIR)/plugins/{BFG.cfg,kbgen.c}
 	$(INSTALL) -m 0644 functions/* $(DESTDIR)$(PROG_DATADIR)/functions
 	@printf "Successfully installed $(BIN)\n"
 
