@@ -1109,7 +1109,7 @@ Plugins are just scripts or programs (written in any language) able to add, exte
 
 .TP
 NOTE: The \fIfzfnav\fR plugin uses \fBfzf\fR(1) to navigate the file system and \fIBFG\fR (a script located in the plugins directory) to show previews. A configuration file (BFG.cfg, in the plugins directory itlsef) is provided to customize the previewer's behavior. 
-.sp
+.TP
 In addition to the built-in BFG previewer, \fIfzfnav\fR supports the use of both Ranger's \fIscope.sh\fR script and \fBpistol\fR. To use \fBscope\fR, just edit the \fIBFG\fR configuration file and set USE_SCOPE to 1 and SCOPE_FILE to the correct path of the \fIscope.sh\fR file (normally \fI$HOME/.config/ranger/scope.sh\fR). To use \fBpistol\fR instead, set USE_PISTOL to 1. 
 .TP
 NOTE 2: The \fIgit_status\fR plugin is not intended to be used as a normal plugin, that is, executed via an action name, but rather to be executed as a prompt command. Just add the path of the script to the \fBPROMPT COMMANDS\fR section in the configuration file:
@@ -1273,7 +1273,7 @@ CliFM's default profile is "default". To create alternative profiles use the \-P
 .SH 20. FILES
 .TP
 .B CONFIGURATION FILE
-The configuration file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/clifmrc\fR.
+The configuration file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/clifmrc\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/share/clifm\fR), and if not found, it will be created anew with default values.
 Here you can permanently set up CliFM options, add aliases and some prompt commands (which will be executed immediately before each new prompt line). Just recall that in order to use prompt commands you must allow the use of external commands. See the \-x option and the 'ext' command above.
 .sp
 A description for each option in the configuration file can be found in the configuration file itself.
@@ -1283,19 +1283,19 @@ The profile file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/profile.cfm\fR.
 In this file you can add those commands you want to be executed at startup. You can also permanently set here some custom variables, ex: 'dir="/path/to/folder"'. This variable may be used as a shortcut to that folder, for instance: 'cd $dir'. Custom variables could also be temporarily defined via the command prompt: Ex: user@hostname ~ $ var="This is a test". Temporary variables will be removed at program exit.
 .TP
 .B KEYBINDINGS FILE
-The keybindings file is \fI$XDG_CONFIG_HOME/clifm/keybindings\fR. This file is used to specify the keyboard shortcuts used for some ClifM's functions. The format for each keybinding is always "keyseq:function", where 'keyseq' is an escape sequence in GNU emacs style. A more detailed explanation can be found in the keybindings file itself.
+The keybindings file is \fI$XDG_CONFIG_HOME/clifm/keybindings\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/share/clifm\fR), and if not found, it will be created anew with default values. This file is used to specify the keyboard shortcuts used for some ClifM's functions. The format for each keybinding is always "keyseq:function", where 'keyseq' is an escape sequence in GNU emacs style. A more detailed explanation can be found in the keybindings file itself.
 .TP
-.B SCRIPTS DIRECTORY
-The directory used to store programs or scripts pointed to by actions (in other words, plugins) is \fI$XDG_CONFIG_HOME/clifm/scripts\fR.
+.B PLUGINS DIRECTORY
+The directory used to store programs or scripts pointed to by actions (in other words, plugins) is \fIDATADIR/clifm/plugins\fR (usually \fI/usr/share/clifm/plugins\fR). To edit these plugins copy them to \fI$XDG_CONFIG_HOME/clifm/plugins\fR and edit them to your liking. Plugins in this local directory take precedence over those in the system one.
 .TP
 .B COLORS DIRECTORY
-This directory, \fI$XDG_CONFIG_HOME/clifm/colors\fR, contains available color schemes as files with a .cfm extension. You can create as many color schemes as you want by just dropping them in this directory. The default color scheme file (default.cfm) could be used as a guide.
+This directory, \fI$DATADIR/clifm/colors\fR, contains available color schemes as files with a \fI.cfm\fR extension. You can create as many color schemes as you want by just dropping them in this directory. The default color scheme file (default.cfm) could be used as a guide. You can copy these color schemes to the local colors directory (\fI$XDG_CONFIG_HOME/clifm/colors\fR) and edit them to your liking. Color schemes in the local colors directory take precedence over those in the system directory.
 .TP
 .B ACTIONS FILE
-The file used to define custom actions is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/actions.cfm\fR.
+The file used to define custom actions is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/actions.cfm\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/share/clifm\fR), and if not found, it will be created anew with default values.
 .TP
 .B MIMELIST FILE:
-The mime list file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/mimelist.cfm\fR. It is a list of file types and file extensions and their associated applications used by \fIlira\fR.
+The mime list file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/mimelist.cfm\fR. It is a list of file types and file extensions and their associated applications used by \fIlira\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/share/clifm\fR).
 .TP
 .B BOOKMARKS FILE
 The bookmarks file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/bookmarks.cfm\fR
@@ -1316,7 +1316,7 @@ A file containing a list of system messages, either errors, warnings, or simple 
 .B KANGAROO DATABASE
 The directory jumper database is stored in \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/jump.cfm\fR.
 .TP
-\fBNOTE\fR: If \fB$XDG_CONFIG_HOME\fR is not set, \fB$HOME/.config/\fR is used instead.
+\fBNOTE\fR: If \fI$XDG_CONFIG_HOME\fR is not set, \fI$HOME/.config/\fR is used instead.
 
 .SH 21. EXAMPLES
 The following are just a few basic usage examples.
