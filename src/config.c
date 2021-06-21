@@ -228,7 +228,7 @@ create_kbinds_file(void)
 	/* If not, try to import it from DATADIR */
 	if (DATA_DIR) {
 		char sys_file[PATH_MAX];
-		snprintf(sys_file, PATH_MAX - 1, "%s/%s/keybindings", DATA_DIR, PNL);
+		snprintf(sys_file, PATH_MAX - 1, "%s/%s/keybindings.cfm", DATA_DIR, PNL);
 		if (stat(sys_file, &attr) == EXIT_SUCCESS) {
 			char *cmd[] = {"cp", sys_file, KBINDS_FILE, NULL};
 			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
@@ -592,8 +592,8 @@ define_config_file_names(void)
 		alt_kbinds_file = (char *)NULL;
 	} else {
 		/* Keybindings per user, not per profile */
-		KBINDS_FILE = (char *)xnmalloc(config_gral_len + 13, sizeof(char));
-		sprintf(KBINDS_FILE, "%s/keybindings", CONFIG_DIR_GRAL);
+		KBINDS_FILE = (char *)xnmalloc(config_gral_len + 17, sizeof(char));
+		sprintf(KBINDS_FILE, "%s/keybindings.cfm", CONFIG_DIR_GRAL);
 	}
 
 	COLORS_DIR = (char *)xnmalloc(config_gral_len + 8, sizeof(char));
