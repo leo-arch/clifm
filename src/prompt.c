@@ -176,9 +176,8 @@ prompt(void)
 	 * passed instead, 'print_msg' will be false and the message will
 	 * be printed in place by log_msg() itself, without waiting for
 	 * the next prompt */
-	if (print_msg) {
+	if (print_msg && msgs_n) {
 		fputs(messages[msgs_n - 1], stderr);
-
 		print_msg = 0; /* Print messages only once */
 	}
 

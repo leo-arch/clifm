@@ -591,8 +591,7 @@ mime_import(char *file)
 		/* Only store associations in the "Default Applications" section */
 		int da_found = 0;
 
-		while ((line_len = getline(&line, &line_size,
-			    sys_mime_fp)) > 0) {
+		while ((line_len = getline(&line, &line_size, sys_mime_fp)) > 0) {
 
 			if (!da_found && strncmp(line, "[Default Applications]", 22) == 0) {
 				da_found = 1;

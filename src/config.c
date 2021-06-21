@@ -232,7 +232,7 @@ create_kbinds_file(void)
 		return EXIT_FAILURE;
 	}
 
-	fprintf(fp, "# %s keybindings file\n\n\
+	fprintf(fp, "# Keybindings file for %s\n\n\
 # Use the 'kbgen' plugin (compile it first: gcc -o kbgen kbgen.c) to \n\
 # find out the escape code for the key or key sequence you want. Use \n\
 # either octal, hexadecimal codes or symbols.\n\
@@ -350,7 +350,7 @@ quit:\\e[24~\n\n\
 # 1) Make sure your plugin is in the plugins directory (or use any of the\n\
 # plugins in there)\n\
 # 2) Link pluginx to your plugin using the 'actions edit' command. Ex:\n\
-\"plugin1=myplugin.sh\"\n\
+# \"plugin1=myplugin.sh\"\n\
 # 3) Set a keybinding here for pluginx. Ex: \"plugin1:\\M-7\"\n\n\
 #plugin1:\n\
 #plugin2:\n\
@@ -1028,13 +1028,13 @@ create_def_cscheme(void)
 void
 create_config_files(void)
 {
-	struct stat file_attrib;
+	struct stat attr;
 
 			/* #############################
 			 * #        TRASH DIRS         #
 			 * ############################# */
 
-	if (stat(TRASH_DIR, &file_attrib) == -1) {
+	if (stat(TRASH_DIR, &attr) == -1) {
 		char *trash_files = (char *)NULL;
 		trash_files = (char *)xnmalloc(strlen(TRASH_DIR) + 7, sizeof(char));
 
@@ -1052,8 +1052,7 @@ create_config_files(void)
 		if (ret != EXIT_SUCCESS) {
 			trash_ok = 0;
 			_err('w', PRINT_PROMPT, _("%s: mkdir: '%s': Error creating trash "
-						  "directory. Trash function disabled\n"),
-			    PROGRAM_NAME, TRASH_DIR);
+				"directory. Trash function disabled\n"), PROGRAM_NAME, TRASH_DIR);
 		}
 	}
 
@@ -1061,8 +1060,7 @@ create_config_files(void)
 	else if (access(TRASH_DIR, W_OK) == -1) {
 		trash_ok = 0;
 		_err('w', PRINT_PROMPT, _("%s: '%s': Directory not writable. "
-					  "Trash function disabled\n"),
-		    PROGRAM_NAME, TRASH_DIR);
+				"Trash function disabled\n"), PROGRAM_NAME, TRASH_DIR);
 	}
 
 				/* ####################
@@ -1071,7 +1069,7 @@ create_config_files(void)
 
 	/* If the config directory doesn't exist, create it */
 	/* Use the GNU mkdir to let it handle parent directories */
-	if (stat(CONFIG_DIR, &file_attrib) == -1) {
+	if (stat(CONFIG_DIR, &attr) == -1) {
 		char *tmp_cmd[] = {"mkdir", "-p", CONFIG_DIR, NULL};
 
 		if (launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
@@ -1079,9 +1077,9 @@ create_config_files(void)
 			config_ok = 0;
 
 			_err('e', PRINT_PROMPT, _("%s: mkdir: '%s': Error creating "
-						  "configuration directory. Bookmarks, commands logs, and "
-						  "command history are disabled. Program messages won't be "
-						  "persistent. Using default options\n"),
+				"configuration directory. Bookmarks, commands logs, and "
+				"command history are disabled. Program messages won't be "
+				"persistent. Using default options\n"),
 			    PROGRAM_NAME, CONFIG_DIR);
 
 			return;
@@ -1094,10 +1092,9 @@ create_config_files(void)
 		config_ok = 0;
 
 		_err('e', PRINT_PROMPT, _("%s: '%s': Directory not writable. Bookmarks, "
-					  "commands logs, and commands history are disabled. Program messages "
-					  "won't be persistent. Using default options\n"),
-		    PROGRAM_NAME,
-		    CONFIG_DIR);
+			"commands logs, and commands history are disabled. Program messages "
+			"won't be persistent. Using default options\n"),
+		    PROGRAM_NAME, CONFIG_DIR);
 
 		return;
 	}
@@ -1106,11 +1103,9 @@ create_config_files(void)
 				 * #    CONFIG FILE    #
 				 * #####################*/
 
-	if (stat(CONFIG_FILE, &file_attrib) == -1) {
-
+	if (stat(CONFIG_FILE, &attr) == -1) {
 		if (create_config(CONFIG_FILE) == EXIT_SUCCESS)
 			config_ok = 1;
-
 		else
 			config_ok = 0;
 	}
@@ -1122,7 +1117,7 @@ create_config_files(void)
 				 * #    PROFILE FILE    #
 				 * ###################### */
 
-	if (stat(PROFILE_FILE, &file_attrib) == -1) {
+	if (stat(PROFILE_FILE, &attr) == -1) {
 
 		FILE *profile_fp = fopen(PROFILE_FILE, "w");
 
@@ -1131,8 +1126,8 @@ create_config_files(void)
 			    PROFILE_FILE, strerror(errno));
 		} else {
 			fprintf(profile_fp, _("#%s profile\n\
-#Write here the commands you want to be executed at startup\n\
-#Ex:\n#echo -e \"%s, the anti-eye-candy/KISS file manager\"\n"),
+# Write here the commands you want to be executed at startup\n\
+# Ex:\n#echo -e \"%s, the anti-eye-candy/KISS file manager\"\n"),
 			    PROGRAM_NAME, PROGRAM_NAME);
 			fclose(profile_fp);
 		}
@@ -1142,7 +1137,7 @@ create_config_files(void)
 				 * #    COLORS DIR     #
 				 * ##################### */
 
-	if (stat(COLORS_DIR, &file_attrib) == -1) {
+	if (stat(COLORS_DIR, &attr) == -1) {
 
 		char *cmd[] = {"mkdir", COLORS_DIR, NULL};
 
@@ -1160,7 +1155,7 @@ create_config_files(void)
 				 * #      PLUGINS      #
 				 * #####################*/
 
-	if (stat(PLUGINS_DIR, &file_attrib) == -1) {
+	if (stat(PLUGINS_DIR, &attr) == -1) {
 		char *cmd[] = {"mkdir", PLUGINS_DIR, NULL};
 
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
@@ -1171,98 +1166,93 @@ create_config_files(void)
 			copy_plugins(); */
 	}
 
-				/* #####################
-				 * #    ACTIONS FILE   #
-				 * #####################*/
+	create_actions_file(ACTIONS_FILE);
+	create_mime_file(MIME_FILE, 0);
+}
 
-	if (stat(ACTIONS_FILE, &file_attrib) == -1) {
-		FILE *actions_fp = fopen(ACTIONS_FILE, "w");
+int
+create_actions_file(const char *file)
+{
+	struct stat attr;
+	if (stat(file, &attr) == EXIT_SUCCESS)
+		return EXIT_SUCCESS;
 
-		if (!actions_fp) {
-			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-			    ACTIONS_FILE, strerror(errno));
-		} else {
-			fprintf(actions_fp, "######################\n"
-					    "# Actions file for %s #\n"
-					    "######################\n\n"
-					    "# Define here your custom actions. Actions are "
-					    "custom command names\n"
-					    "# bound to a executable file located in "
-					    "DATADIR/clifm/plugins\n"
-					    "# (usually /usr/share/clifm/plugins), or in "
-					    "$XDG_CONFIG_HOME/clifm/plugins.\n"
-					    "# Actions can be executed directly from "
-					    "%s command line, as if they\n"
-					    "# were any other command, and the associated "
-					    "file will be executed\n"
-					    "# instead. All parameters passed to the action "
-					    "command will be passed\n"
-					    "# to the corresponding plugin as well.\n\n"
-					    "i=img_viewer.sh\n"
-					    "kbgen=kbgen\n"
-					    "vid=vid_viewer.sh\n"
-					    "ptot=pdf_viewer.sh\n"
-					    "music=music_player.sh\n"
-					    "update=update.sh\n"
-					    "wall=wallpaper_setter.sh\n"
-					    "dragon=dragondrop.sh\n"
-					    "bn=batch_create.sh\n"
-					    "+=finder.sh\n"
-					    "++=jumper.sh\n"
-					    "-=fzfnav.sh\n"
-					    "*=fzfsel.sh\n"
-					    "**=fzfdesel.sh\n"
-					    "h=fzfhist.sh\n"
-					    "//=rgfind.sh\n"
-					    "ih=ihelp.sh\n",
-			    PROGRAM_NAME, PROGRAM_NAME);
+	FILE *actions_fp = fopen(file, "w");
 
-			fclose(actions_fp);
-		}
+	if (!actions_fp) {
+		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+		    file, strerror(errno));
+		return EXIT_FAILURE;
 	}
 
-				/* #####################
-				 * #     MIME FILE     #
-				 * #####################*/
+	fprintf(actions_fp, "######################\n"
+		"# Actions file for %s #\n"
+		"######################\n\n"
+		"# Define here your custom actions. Actions are "
+		"custom command names\n"
+		"# bound to a executable file located in "
+		"DATADIR/clifm/plugins\n"
+		"# (usually /usr/share/clifm/plugins), or in "
+		"$XDG_CONFIG_HOME/clifm/plugins.\n"
+		"# Actions can be executed directly from "
+		"%s command line, as if they\n"
+		"# were any other command, and the associated "
+		"file will be executed\n"
+		"# instead. All parameters passed to the action "
+		"command will be passed\n"
+		"# to the corresponding plugin as well.\n\n"
+		"i=img_viewer.sh\n"
+		"kbgen=kbgen\n"
+		"vid=vid_viewer.sh\n"
+		"ptot=pdf_viewer.sh\n"
+		"music=music_player.sh\n"
+		"update=update.sh\n"
+		"wall=wallpaper_setter.sh\n"
+		"dragon=dragondrop.sh\n"
+		"bn=batch_create.sh\n"
+		"+=finder.sh\n"
+		"++=jumper.sh\n"
+		"-=fzfnav.sh\n"
+		"*=fzfsel.sh\n"
+		"**=fzfdesel.sh\n"
+		"h=fzfhist.sh\n"
+		"//=rgfind.sh\n"
+		"ih=ihelp.sh\n",
+	    PROGRAM_NAME, PROGRAM_NAME);
 
-	if (stat(MIME_FILE, &file_attrib) == 0)
-		return;
+	fclose(actions_fp);
+	return EXIT_SUCCESS;
+}
 
-	char sys_mimelist[] = "/usr/share/clifm/mimelist.cfm";
+int
+create_mime_file(char *file, int new_prof)
+{
+	struct stat attr;
+	if (stat(file, &attr) == EXIT_SUCCESS)
+		return EXIT_SUCCESS;
 
-	_err('n', PRINT_PROMPT, _("%s created a new MIME list file (%s) "
+	char sys_mimelist[PATH_MAX];
+	snprintf(sys_mimelist, PATH_MAX - 1, "%s/%s/mimelist.cfm", DATA_DIR, PNL);
+
+	if (stat(sys_mimelist, &attr) == -1) {
+		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+			sys_mimelist, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	char *cmd[] = {"cp", "-f", sys_mimelist, file, NULL};
+	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS
+	&& !new_prof) {
+		_err('n', PRINT_PROMPT, _("%s created a new MIME list file (%s) "
 			"It is recommended to edit this file (entering 'mm edit' or "
 			"pressing F6) to add the programs you use and remove those "
 			"you don't. This will make the process of opening files "
-			"faster and smoother\n"
-			"The default MIME list file, covering the most common file type "
-			"associations, can be found in %s.\n"),
-			PROGRAM_NAME, MIME_FILE, sys_mimelist);
-
-	/* Try importing MIME associations from the system, and in
-	 * case nothing can be imported use the default mimelist.cfm file */
-	if (mime_import(MIME_FILE) == EXIT_SUCCESS)
-		return;
-
-	FILE *mime_fp = fopen(MIME_FILE, "w");
-
-	if (!mime_fp) {
-		_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n",
-			PROGRAM_NAME, MIME_FILE, strerror(errno));
-		return;
+			"faster and smoother\n"),
+			PROGRAM_NAME, file, sys_mimelist);
+		return EXIT_SUCCESS;
 	}
 
-	if (stat(sys_mimelist, &file_attrib) == -1) {
-		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-			sys_mimelist, strerror(errno));
-		fclose(mime_fp);
-		return;
-	}
-
-	char *cmd[] = {"cp", "-f", sys_mimelist, MIME_FILE, NULL};
-	launch_execve(cmd, FOREGROUND, E_NOFLAG);
-
-	fclose(mime_fp);
+	return EXIT_FAILURE;
 }
 
 int

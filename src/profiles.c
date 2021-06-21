@@ -414,28 +414,16 @@ profile_add(const char *prof)
 	}
 
 	/* If the config dir is fine, generate config file names */
-	int error_code = 0;
+	int exit_status = EXIT_SUCCESS;
 	size_t config_len = strlen(NCONFIG_DIR);
 
-	char *NCONFIG_FILE = (char *)xcalloc(config_len + pnl_len + 4,
+	char *NCONFIG_FILE = (char *)xnmalloc(config_len + pnl_len + 4,
 	    sizeof(char));
 	sprintf(NCONFIG_FILE, "%s/%src", NCONFIG_DIR, PNL);
-	char *NHIST_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
+	char *NHIST_FILE = (char *)xnmalloc(config_len + 13, sizeof(char));
 	sprintf(NHIST_FILE, "%s/history.cfm", NCONFIG_DIR);
-	char *NPROFILE_FILE = (char *)xcalloc(config_len + pnl_len + 10,
-	    sizeof(char));
-	sprintf(NPROFILE_FILE, "%s/%s_profile", NCONFIG_DIR, PNL);
-	char *NMIME_FILE = (char *)xcalloc(config_len + 14, sizeof(char));
+	char *NMIME_FILE = (char *)xnmalloc(config_len + 14, sizeof(char));
 	sprintf(NMIME_FILE, "%s/mimelist.cfm", NCONFIG_DIR);
-
-	/*  char *NMSG_LOG_FILE = (char *)xcalloc(config_len + 14, sizeof(char));
-	sprintf(NMSG_LOG_FILE, "%s/messages.cfm", NCONFIG_DIR);
-	char *NBM_FILE = (char *)xcalloc(config_len + 15, sizeof(char));
-	sprintf(NBM_FILE, "%s/bookmarks.cfm", NCONFIG_DIR);
-	char *NLOG_FILE = (char *)xcalloc(config_len + 9, sizeof(char));
-	sprintf(NLOG_FILE, "%s/log.cfm", NCONFIG_DIR);
-	char *NLOG_FILE_TMP = (char *)xcalloc(config_len + 13, sizeof(char));
-	sprintf(NLOG_FILE_TMP, "%s/log_tmp.cfm", NCONFIG_DIR); */
 
 	/* Create config files */
 
@@ -445,10 +433,8 @@ profile_add(const char *prof)
 	if (!hist_fp) {
 		fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME,
 		    NHIST_FILE, strerror(errno));
-		error_code = EXIT_FAILURE;
-	}
-
-	else {
+		exit_status = EXIT_FAILURE;
+	} else {
 		/* To avoid malloc errors in read_history(), do not create
 		 * an empty file */
 		fputs("edit\n", hist_fp);
@@ -456,86 +442,30 @@ profile_add(const char *prof)
 	}
 
 	/* #### CREATE THE MIME CONFIG FILE #### */
-	/* Try importing MIME associations from the system, and in case
-	 * nothing can be imported, create an empty MIME associations
-	 * file */
-	ret = mime_import(NMIME_FILE);
-
-	if (ret != EXIT_SUCCESS) {
-		FILE *mime_fp = fopen(NMIME_FILE, "w");
-
-		if (!mime_fp) {
-			fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME,
-									NMIME_FILE, strerror(errno));
-			error_code = EXIT_FAILURE;
-		}
-
-		else {
-			char sys_mimelist[] = "/usr/share/clifm/mimelist.cfm";
-
-			struct stat attr;
-			if (stat(sys_mimelist, &attr) == -1) {
-				_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-						sys_mimelist, strerror(errno));
-				error_code = EXIT_FAILURE;
-			}
-
-			else {
-
-				char *cmd[] = {"cp", "-f", sys_mimelist, NMIME_FILE, NULL};
-				launch_execve(cmd, FOREGROUND, E_NOFLAG);
-			}
-
-			fclose(mime_fp);
-		}
-	}
-
-	/* #### CREATE THE PROFILE FILE #### */
-	FILE *profile_fp = fopen(NPROFILE_FILE, "w");
-
-	if (!profile_fp) {
-		fprintf(stderr, _("%s: Error creating the profile file\n"),
-		    PROGRAM_NAME);
-		error_code = EXIT_FAILURE;
-	}
-
-	else {
-		fprintf(profile_fp, _("#%s profile\n"
-				"#Write here the commands you want to be executed at "
-				"startup\n#Ex:\n#echo -e \"%s, the anti-eye-candy/KISS "
-				"file manager\"\n"), PROGRAM_NAME, PROGRAM_NAME);
-		fclose(profile_fp);
-	}
+	create_mime_file(NMIME_FILE, 1);
 
 	/* #### CREATE THE CONFIG FILE #### */
-	error_code = create_config(NCONFIG_FILE);
+	exit_status = create_config(NCONFIG_FILE);
 
 	/* Free stuff */
-
 	free(NCONFIG_DIR);
 	free(NCONFIG_FILE);
-	/*  free(NBM_FILE);
-	free(NLOG_FILE);
-	free(NMSG_LOG_FILE);
-	free(NLOG_FILE_TMP); */
 	free(NHIST_FILE);
-	free(NPROFILE_FILE);
 	free(NMIME_FILE);
 
-	if (error_code == EXIT_SUCCESS) {
+	if (exit_status == EXIT_SUCCESS) {
 		printf(_("%s: '%s': Profile succesfully created\n"), PROGRAM_NAME, prof);
 
 		for (i = 0; profile_names[i]; i++)
 			free(profile_names[i]);
 
 		get_profile_names();
-	}
-
-	else
+	} else {
 		fprintf(stderr, _("%s: %s: Error creating profile\n"),
 		    PROGRAM_NAME, prof);
+	}
 
-	return error_code;
+	return exit_status;
 }
 
 int
