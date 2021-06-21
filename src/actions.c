@@ -63,7 +63,7 @@ run_action(char *action, char **args)
 
 	int dir_path = 0;
 	if (strchr(action, '/')) {
-		cmd = (char *)xnmalloc(strlen(action) + 1, sizeof(char));
+		cmd = (char *)xnmalloc(action_len + 1, sizeof(char));
 		strcpy(cmd, action);
 		dir_path = 1;
 	} else { /* If not a path, PLUGINS_DIR is assumed */
@@ -93,8 +93,9 @@ run_action(char *action, char **args)
 
 	/* Append arguments to command */
 	size_t i;
+	len = strlen(cmd);
 	for (i = 1; args[i]; i++) {
-		len += strlen(args[i]) + 2;
+		len += (strlen(args[i]) + 2);
 		cmd = (char *)xrealloc(cmd, len * sizeof(char));
 		strcat(cmd, " ");
 		strcat(cmd, args[i]);
