@@ -1,0 +1,238 @@
+		###########################################
+		#                  CLIFM                  #
+		#  The anti-eye-candy, KISS file manager  #
+		###########################################
+
+# This is the configuration file for CliFM
+
+# Color schemes are stored in the colors directory. By default,
+# the 'default' color scheme is used. Visit https://github.com/leo-arch/clifm-colors
+# to get a few more
+ColorScheme=default
+
+# The amount of files contained by a directory is informed next
+# to the directory name. However, this feature might slow things down when,
+# for example, listing files on a remote server. The filescounter can be
+# disabled here, via the --no-files-counter option, or using the 'fc'
+# command while in the program itself.
+FilesCounter=true
+
+# The character used to construct the line dividing the list of files and
+# the prompt. DividingLineChar accepts both literal characters (in single
+# quotes) and decimal numbers.
+DividingLineChar='-'
+
+# If set to true, print a map of the current position in the directory
+# history list, showing previous, current, and next entries
+DirhistMap=false
+
+# Use a regex expression to filter file names when listing files.
+# Example: !.*~$ to exclude backup files (ending with ~), or ^\. to list 
+# only hidden files. Do not quote the regular expression
+Filter=
+
+# Set the default copy command. Available options are: 0 = cp,
+# 1 = advcp, and 2 = wcp. Both 1 and 2 add a progress bar to cp.
+cpCmd=0
+
+# Set the default move command. Available options are: 0 = mv,
+# and 1 = advmv. 1 adds a progress bar to mv.
+mvCmd=0
+
+# The prompt line is built using string literals and/or one or more of
+# the following escape sequences:
+# \xnn: The character whose hexadecimal code is nn.
+# \e: Escape character
+# \h: The hostname, up to the first dot
+# \u: The username
+# \H: The full hostname
+# \n: A newline character
+# \r: A carriage return
+# \a: A bell character
+# \d: The date, in abbrevieted form (ex: 'Tue May 26')
+# \s: The name of the shell (everything after the last slash) currently used
+# by CliFM
+# \S: The number of the current workspace
+# \l: Print an 'L' if running in light mode
+# \P: Current profile name
+# \t: The time, in 24-hour HH:MM:SS format
+# \T: The time, in 12-hour HH:MM:SS format
+# \@: The time, in 12-hour am/pm format
+# \A: The time, in 24-hour HH:MM format
+# \w: The full current working directory, with $HOME abbreviated with a tilde
+# \W: The basename of $PWD, with $HOME abbreviated with a tilde
+# \p: A mix of the two above, it abbreviates the current working directory 
+# only if longer than PathMax (a value defined in the configuration file).
+# \z: Exit code of the last executed command. :) if success and :( in case of
+# error
+# \$ '#', if the effective user ID is 0, and '$' otherwise
+# \nnn: The character whose ASCII code is the octal value nnn
+# \\: A backslash
+# \[: Begin a sequence of non-printing characters. This is mostly used to
+# add color to the prompt line
+# \]: End a sequence of non-printing characters
+
+Prompt="\[\e[0;37m\][\[\e[0;36m\]\S\[\e[0;37m\]]\l \A \u:\H \[\e[00;36m\]\w\n\[\e[0;37m\]\z\[\e[0;34m\] \$\[\e[0m\] "
+
+# MaxPath is only used for the /p option of the prompt: the current working
+# directory will be abbreviated to its basename (everything after last slash)
+# whenever the current path is longer than MaxPath.
+MaxPath=40
+
+WelcomeMessage=true
+
+# Print CliFM's logo screen at startup
+SplashScreen=false
+
+ShowHiddenFiles=false
+
+# List files properties next to file names instead of just file names
+LongViewMode=false
+
+# Keep a record of both external commands and internal commands able to
+# modify the files system (e.g. 'r', 'c', 'm', and so on)
+LogCmds=false
+
+# Minimum length at which a file name can be trimmed in long view mode
+# (including ELN length and spaces)
+MinFilenameTrim=20
+
+# When a directory rank in the jump database is below MinJumpRank, it
+# will be forgotten
+MinJumpRank=10
+
+# When the sum of all ranks in the jump database reaches MaxJumpTotalRank,
+# all ranks will be reduced 10%, and those falling below MinJumpRank will
+# be deleted
+MaxJumpTotalRank=100000
+
+# Should CliFM be allowed to run external, shell commands?
+ExternalCommands=true
+
+# Write the last visited directory to $XDG_CONFIG_HOME/clifm/.last to be
+# later accessed by the corresponding shell function at program exit.
+# To enable this feature consult the manpage.
+CdOnQuit=false
+
+# If set to true, a command name that is the name of a directory or a
+# file is executed as if it were the argument to the the 'cd' or the 
+# 'open' commands respectivelly: 'cd DIR' works the same as just 'DIR'
+# and 'open FILE' works the same as just 'FILE'.
+Autocd=true
+AutoOpen=true
+
+# If set to true, expand bookmark names into the corresponding bookmark
+# path: if the bookmark is "name=/path", "name" will be interpreted
+# as /path. TAB completion is also available for bookmark names.
+ExpandBookmarks=false
+
+# In light mode, extra file type checks (except those provided by
+# the d_type field of the dirent structure (see readdir(3))
+# are disabled to speed up the listing process. stat(3) and access(3)
+# are not executed at all, so that we cannot know in advance if a file
+# is readable by the current user, if it is executable, SUID, SGID, if a
+# symlink is broken, and so on. The file extension check is ignored as
+# well, so that the color per extension feature is disabled.
+LightMode=false
+
+# If running with colors, append directory indicator and files counter
+# to directories. If running without colors (via the --no-colors option),
+# append file type indicator at the end of file names: '/' for directories,
+# '@' for symbolic links, '=' for sockets, '|' for FIFO/pipes, '*'
+# for for executable files, and '?' for unknown file types. Bear in mind
+# that when running in light mode the check for executable files won't be
+# performed, and thereby no indicator will be added to executable files.
+Classify=true
+
+# Should the Selection Box be shared among different profiles?
+ShareSelbox=false
+
+# Choose the resource opener to open files with their default associated
+# application. If not set, 'lira', CLiFM's built-in opener, is used.
+Opener=
+
+# Set the shell to be used when running external commands. Defaults to the
+# user's shell as specified in '/etc/passwd'.
+SystemShell=
+
+# Only used when opening a directory via a new CliFM instance (with the 'x'
+# command), this option specifies the command to be used to launch a
+# terminal emulator to run CliFM on it.
+TerminalCmd='xterm -e'
+
+# Choose sorting method: 0 = none, 1 = name, 2 = size, 3 = atime
+# 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version
+# (name if note available) 8 = extension, 9 = inode, 10 = owner, 11 = group
+# NOTE: the 'version' method is not available on FreeBSD
+Sort=1
+# By default, CliFM sorts files from less to more (ex: from 'a' to 'z' if
+# using the "name" method). To invert this ordering, set SortReverse to
+# true (you can also use the --sort-reverse option or the 'st' command)
+SortReverse=false
+
+# Print a usage tip at startup
+Tips=true
+
+ListFoldersFirst=true
+CdListsAutomatically=true
+
+# Enable case sensitive listing for files in the current directory
+CaseSensitiveList=false
+
+# Enable case sensitive lookup for the directory jumper function (via 
+# the 'j' command)
+CaseSensitiveDirJump=false
+
+# Enable case sensitive completion for file names
+CaseSensitivePathComp=false
+
+Unicode=true
+
+# Enable Mas, the files list pager (executed whenever the list of files
+# does not fit in the screen)
+Pager=false
+
+MaxHistory=1000
+MaxDirhist=100
+MaxLog=500
+DiskUsage=false
+
+# If set to true, always print the list of selected files. Since this
+# list could become quite extensive, you can limit the number of printed 
+# entries using the MaxPrintSelfiles option (-1 = no limit, 0 = auto (never
+# print more than half terminal height), or any custom value)
+PrintSelfiles=false
+MaxPrintSelfiles=0
+
+# If set to true, clear the screen before listing files
+ClearScreen=true
+
+# If not specified, StartingPath defaults to the current working
+# directory.
+StartingPath=
+
+# If set to true, start CliFM in the last visited directory (and in the
+# last used workspace). This option overrides StartingPath.
+RestoreLastPath=false
+
+# If set to true, the 'r' command executes 'trash' instead of 'rm' to
+# prevent accidental deletions.
+TrashAsRm=false
+
+# Set readline editing mode: 0 for vi and 1 for emacs (default).
+RlEditMode=1
+
+#END OF OPTIONS
+
+#ALIASES
+#alias ls='ls --color=auto -A'
+
+#PROMPT COMMANDS
+
+# Write below the commands you want to be executed before the prompt.
+# Ex:
+#/usr/share/clifm/plugins/git_status.sh
+#date | awk '{print $1", "$2,$3", "$4}'
+
+#END OF PROMPT COMMANDS
+
