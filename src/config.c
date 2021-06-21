@@ -644,29 +644,6 @@ define_config_file_names(void)
 	return;
 }
 
-/*
-void
-copy_plugins(void)
-{
-	if (!CONFIG_DIR_GRAL)
-		return;
-
-	char usr_share_plugins_dir[] = "/usr/share/clifm/plugins";
-
-	// Make sure the system pĺugins dir exists and is not empty
-	if (count_dir(usr_share_plugins_dir) <= 2)
-		return;
-
-	char *cp_cmd[] = {"cp", "-r", usr_share_plugins_dir,
-	    CONFIG_DIR_GRAL, NULL};
-	launch_execve(cp_cmd, FOREGROUND, E_NOFLAG);
-
-	// Make plugins executable
-	char chmod_cmd[PATH_MAX];
-	snprintf(chmod_cmd, PATH_MAX - 1, "chmod +x %s/plugins/\*.sh", CONFIG_DIR_GRAL);
-	launch_execle(chmod_cmd);
-} */
-
 int
 create_config(const char *file)
 {
@@ -1190,9 +1167,9 @@ create_actions_file(const char *file)
 		"######################\n\n"
 		"# Define here your custom actions. Actions are "
 		"custom command names\n"
-		"# bound to a executable file located in "
+		"# bound to a executable file located either in "
 		"DATADIR/clifm/plugins\n"
-		"# (usually /usr/share/clifm/plugins), or in "
+		"# (usually /usr/share/clifm/plugins) or in "
 		"$XDG_CONFIG_HOME/clifm/plugins.\n"
 		"# Actions can be executed directly from "
 		"%s command line, as if they\n"
