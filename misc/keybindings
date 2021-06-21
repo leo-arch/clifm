@@ -1,4 +1,4 @@
-# CliFM keybindings file
+# Keybindings file for CliFM
 
 # Use the 'kbgen' plugin (compile it first: gcc -o kbgen kbgen.c) to 
 # find out the escape code for the key o key sequence you want. Use 
