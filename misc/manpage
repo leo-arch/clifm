@@ -1023,7 +1023,7 @@ Of course, combinations of all these features is also possible. Example: 'cp sel
 .SH 12. RESOURCE OPENER
 \fBLira\fR is CliFM's built-in resource opener, and is controlled via the \fImime\fR command (see above). File associations are stored in the MIME list file (see the \fBFILES\fR section below).
 .TP
-When running for the first time, or whenever the MIME list file cannot be found, CliFM will import MIME definitions from the system (from those directories specified by the Freedesktop XDG MIME Applications specification) to try to stick to the user's preferences. However, a generic MIME definitions file is provided by CliFM itself and can be found in \fI/usr/share/clifm/mimelist.cfm\fR. You can copy this file to your profile directory and modify it to feet your needs following these simple syntax rules:
+When running for the first time, or whenever the MIME list file cannot be found, CliFM will copy the MIME definitions file from the DATADIR directory (usually \fI/usr/share/clifm/mimelist.cfm\fR) to the local configuration directory. This file follows these simple syntax rules:
 .TP
 Each line in the MIME list file consists of:
 .TP
