@@ -1,10 +1,11 @@
-# FiletypeColors defines the color used for filetypes when listing files, 
-# just as InterfaceColors defines colors for CliFM interface. Both make
-# use of the same format used by the LS_COLORS environment variable. Thus, 
-# "di=01;34" means that (non-empty) directories will be listed in bold blue.
+# FiletypeColors defines the color used for file types when listing files, 
+# just as InterfaceColors defines colors for CliFM's interface and ExtColors
+# for file extensions. They all make use of the same format used by the
+# LS_COLORS environment variable. Thus, "di=01;34" means that (non-empty)
+# directories will be listed in bold blue.
 # Color codes are traditional ANSI escape sequences less the escape char and 
 # the final 'm'. 8 bit, 256 colors, and RGB colors are supported.
-# For more information consult the manpage.
+# A detailed explanation of all these codes can be found in the manpage.
 
 #CliFM Default
 FiletypeColors="di=01;34:nd=01;31:ed=00;34:ne=00;31:fi=00;37:ef=00;33:nf=00;31:ln=01;36:mh=30;46:or=00;36:pi=00;35:so=01;35:bd=01;33:cd=01;37:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:ee=00;32:no=00;31;47:uf=34;47:"
