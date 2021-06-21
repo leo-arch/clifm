@@ -219,11 +219,24 @@ create_kbinds_file(void)
 	if (!config_ok)
 		return EXIT_FAILURE;
 
-	struct stat file_attrib;
+	struct stat attr;
 
-	if (stat(KBINDS_FILE, &file_attrib) != -1)
+	/* If the file already exists, do nothing */
+	if (stat(KBINDS_FILE, &attr) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
+	/* If not, try to import it from DATADIR */
+	if (DATA_DIR) {
+		char sys_file[PATH_MAX];
+		snprintf(sys_file, PATH_MAX - 1, "%s/%s/keybindings", DATA_DIR, PNL);
+		if (stat(sys_file, &attr) == EXIT_SUCCESS) {
+			char *cmd[] = {"cp", sys_file, KBINDS_FILE, NULL};
+			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
+				return EXIT_SUCCESS;
+		}
+	}
+
+	/* Else, create it */
 	FILE *fp = fopen(KBINDS_FILE, "w");
 
 	if (!fp) {
@@ -645,8 +658,22 @@ define_config_file_names(void)
 }
 
 int
-create_config(const char *file)
+create_config(char *file)
 {
+	struct stat attr;
+
+	/* First, try to import it from DATADIR */
+	if (DATA_DIR) {
+		char sys_file[PATH_MAX];
+		snprintf(sys_file, PATH_MAX - 1, "%s/%s/%src", DATA_DIR, PNL, PNL);
+		if (stat(sys_file, &attr) == EXIT_SUCCESS) {
+			char *cmd[] = {"cp", sys_file, file, NULL};
+			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
+				return EXIT_SUCCESS;
+		}
+	}
+
+	/* If not found, create it */
 	FILE *config_fp = fopen(file, "w");
 
 	if (!config_fp) {
@@ -1148,12 +1175,26 @@ create_config_files(void)
 }
 
 int
-create_actions_file(const char *file)
+create_actions_file(char *file)
 {
 	struct stat attr;
+
+	/* If the file already exists, do nothing */
 	if (stat(file, &attr) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
+	/* If not, try to import it from DATADIR */
+	if (DATA_DIR) {
+		char sys_file[PATH_MAX];
+		snprintf(sys_file, PATH_MAX - 1, "%s/%s/actions.cfm", DATA_DIR, PNL);
+		if (stat(sys_file, &attr) == EXIT_SUCCESS) {
+			char *cmd[] = {"cp", sys_file, file, NULL};
+			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
+				return EXIT_SUCCESS;
+		}
+	}
+
+	/* Else, create it */
 	FILE *actions_fp = fopen(file, "w");
 
 	if (!actions_fp) {
