@@ -234,7 +234,7 @@ create_kbinds_file(void)
 
 	fprintf(fp, "# %s keybindings file\n\n\
 # Use the 'kbgen' plugin (compile it first: gcc -o kbgen kbgen.c) to \n\
-# find out the escape code for the key o key sequence you want. Use \n\
+# find out the escape code for the key or key sequence you want. Use \n\
 # either octal, hexadecimal codes or symbols.\n\
 # Ex: For Alt-/ (in rxvt terminals) 'kbgen' will print the following \n\
 # lines:\n\
@@ -989,16 +989,17 @@ create_def_cscheme(void)
 
 	if (!fp) {
 		_err('w', PRINT_PROMPT, "%s: Error creating default color scheme "
-				"file\n", PROGRAM_NAME);
+			"file\n", PROGRAM_NAME);
 		free(cscheme_file);
 		return;
 	}
 
-	fprintf(fp, "# CliFM default color scheme\n\n\
-# FiletypeColors defines the color used for file types when listing files, \n\
-# just as InterfaceColors defines colors for CliFM interface. Both make\n\
-# use of the same format used by the LS_COLORS environment variable. Thus,\n\
-# \"di=01;34\" means that (non-empty) directories will be listed in bold blue.\n\
+	fprintf(fp, "# Default color scheme for %s\n\n\
+# FiletypeColors defines the color used for file types when listing files,\n\
+# just as InterfaceColors defines colors for CliFM's interface and ExtColors\n\
+# for file extensions. They all make use of the same format used by the\n\
+# LS_COLORS environment variable. Thus, \"di=01;34\" means that (non-empty)\n\
+# directories will be listed in bold blue.\n\
 # Color codes are traditional ANSI escape sequences less the escape char and\n\
 # the final 'm'. 8 bit, 256 colors, and RGB colors are supported.\n\
 # A detailed explanation of all these codes can be found in the manpage.\n\n"
@@ -1012,6 +1013,7 @@ create_def_cscheme(void)
 		    "ExtColors=\"%s\"\n\n"
 
 		    "DirIconsColor=\"00;33\"\n",
+		PROGRAM_NAME,
 	    DEF_FILE_COLORS,
 	    DEF_IFACE_COLORS,
 	    DEF_EXT_COLORS);
@@ -1181,16 +1183,18 @@ create_config_files(void)
 			    ACTIONS_FILE, strerror(errno));
 		} else {
 			fprintf(actions_fp, "######################\n"
-					    "# %s actions file #\n"
+					    "# Actions file for %s #\n"
 					    "######################\n\n"
 					    "# Define here your custom actions. Actions are "
 					    "custom command names\n"
-					    "# binded to a shell script located in "
-					    "$XDG_CONFIG_HOME/clifm/PROFILE/scripts.\n"
+					    "# bound to a executable file located in "
+					    "DATADIR/clifm/plugins\n"
+					    "# (usually /usr/share/clifm/plugins), or in "
+					    "$XDG_CONFIG_HOME/clifm/plugins.\n"
 					    "# Actions can be executed directly from "
 					    "%s command line, as if they\n"
 					    "# were any other command, and the associated "
-					    "script will be executed\n"
+					    "file will be executed\n"
 					    "# instead. All parameters passed to the action "
 					    "command will be passed\n"
 					    "# to the corresponding plugin as well.\n\n"
@@ -1277,7 +1281,7 @@ create_bm_file(void)
 			    strerror(errno));
 			return EXIT_FAILURE;
 		} else {
-			fprintf(fp, "### This is %s bookmarks file ###\n\n"
+			fprintf(fp, "### This is the bookmarks file for %s ###\n\n"
 				    "# Empty and commented lines are ommited\n"
 				    "# The bookmarks syntax is: [shortcut]name:path\n"
 				    "# Example:\n"
