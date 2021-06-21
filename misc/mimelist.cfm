@@ -1,5 +1,10 @@
 # Mimelist file for CliFM
+
 # This mimelist covers the most common filetypes
+# Commented and blank lines are omitted
+# It is recommended to edit this file leaving only applications you need to speed up the opening process
+# The file is read top to bottom and left to right; the first existent application will be used
+# Applications defined here are NOT desktop files, but commands (arguments could be used as well)
 
 # Extensions
 E:^djvu$=djview;zathura;evince;atril
@@ -9,12 +14,11 @@ E:^(cbr|cbz)$=zathura
 
 # MIME types
 # Web content
-^text/html$=iceweasel;surf;vimprobable;vimprobable2;qutebrowser;dwb;jumanji;luakit;uzbl;uzbl-tabbed;uzbl-browser;uzbl-core;midori;opera;firefox;seamonkey;chromium-browser;chromium;google-chrome;epiphany;konqueror;elinks;links2;links;w3m
+^text/html$=surf;vimprobable;vimprobable2;qutebrowser;dwb;jumanji;luakit;uzbl;uzbl-tabbed;uzbl-browser;uzbl-core;iceweasel;midori;opera;firefox;seamonkey;chromium-browser;chromium;google-chrome;epiphany;konqueror;elinks;links2;links;w3m
 
 # Text
-^text/xml$=geany
-^text/x-(c|shellscript|perl|script.python|makefile|fortran|java-source|javascript|pascal)$=geany
-(^text/.*|application/json|inode/x-empty)=leafpad;mousepad;kate;gedit;pluma;nano;vim;vi;emacs;ed
+#^text/x-(c|shellscript|perl|script.python|makefile|fortran|java-source|javascript|pascal)$=geany
+(^text/.*|application/json|inode/x-empty)=nano;vim;vi;emacs;ed;leafpad;mousepad;kate;gedit;pluma
 
 # Office documents
 ^application/.*(open|office)document.*=libreoffice;soffice;ooffice
@@ -24,11 +28,11 @@ E:^(cbr|cbz)$=zathura
 
 # Images
 ^image/gif$=animate
-^image/.*=gpicview;inkscape;display;imv;pqiv;sxiv;feh;mirage;ristretto;eog;eom;nomacs;geeqie;gwenview;gimp
+^image/.*=fim;feh;display;sxiv;imv;pqiv;gpicview;inkscape;mirage;ristretto;eog;eom;nomacs;geeqie;gwenview;gimp
 
 # Video and audio
-^video/.*=mpv;ffplay;mplayer;mplayer2;vlc;gmplayer;smplayer;totem
-^audio/.*=mpv;ffplay -nodisp -autoexit;mplayer;mplayer2;vlc;gmplayer;smplayer;totem
+^video/.*=ffplay;mplayer;mplayer2;mpv;vlc;gmplayer;smplayer;totem
+^audio/.*=ffplay -nodisp -autoexit;mplayer;mplayer2;mpv;vlc;gmplayer;smplayer;totem
 
 # Fonts
 ^fonts/.*=fontforge;fontpreview
