@@ -118,7 +118,7 @@ quit:\e[24~
 # 1) Make sure your plugin is in the plugins directory (or use any of the
 # plugins in there)
 # 2) Link pluginx to your plugin using the 'actions edit' command. Ex:
-"plugin1=myplugin.sh"
+# "plugin1=myplugin.sh"
 # 3) Set a keybinding here for pluginx. Ex: "plugin1:\M-7"
 
 #plugin1:
