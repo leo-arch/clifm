@@ -48,7 +48,7 @@ install: build
 	$(INSTALL) -m 0644 misc/completions.bash $(DESTDIR)$(DATADIR)/bash-completion/completions/$(BIN)
 	$(INSTALL) -m 0644 misc/completions.zsh $(DESTDIR)$(DATADIR)/zsh/site-functions/_$(BIN)
 	$(INSTALL) -m 0644 misc/$(BIN).desktop $(DESTDIR)$(DESKTOPPREFIX)
-	$(INSTALL) -m 0644 misc/{mimelist.cfm,keybindings,clifmrc,actions.cfm} $(DESTDIR)$(PROG_DATADIR)
+	$(INSTALL) -m 0644 misc/{mimelist.cfm,keybindings.cfm,clifmrc,actions.cfm} $(DESTDIR)$(PROG_DATADIR)
 	$(INSTALL) -m 0644 images/logo/$(BIN).svg $(DESTDIR)$(DESKTOPICONPREFIX)/scalable/apps
 	$(INSTALL) -m 0644 translations/spanish/$(BIN).mo $(DESTDIR)$(DATADIR)/locale/es/LC_MESSAGES/$(BIN).mo
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/plugins
