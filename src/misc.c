@@ -1664,7 +1664,7 @@ help_function(void)
  lm [on, off] (lightmode)\n\
  log [clear]\n\
  mf NUM (List up to NUM files)\n\
- mm, mime [info ELN/FILE] [edit] (resource opener)\n\
+ mm, mime [info ELN/FILE] [edit] [import] (resource opener)\n\
  mp, mountpoints\n\
  msg, messages [clear]\n\
  n, new FILE DIR/ ...n\n\
