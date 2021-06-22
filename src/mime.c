@@ -64,7 +64,20 @@ get_app(const char *mime, const char *ext)
 		if (*line == '#' || *line == '[' || *line == '\n')
 			continue;
 
-		char *tmp = strchr(line, '=');
+		char *p = line;
+		if (!(flags & GUI)) {
+			if (*p != '!' || *(p + 1) != 'X' || *(p + 2) != ':')
+				continue;
+			else
+				p += 3;
+		} else {
+			if (*p == '!' && *(p + 1) == 'X')
+				continue;
+			if (*p == 'X' && *(p + 1) == ':')
+				p += 2;
+		}
+
+		char *tmp = strchr(p, '=');
 
 		if (!tmp || !*(tmp + 1))
 			continue;
@@ -73,15 +86,14 @@ get_app(const char *mime, const char *ext)
 		*tmp = '\0';
 		regex_t regex;
 
-		if (ext && *line == 'E' && line[1] == ':') {
-			if (regcomp(&regex, line + 2, REG_NOSUB | REG_EXTENDED) == 0
+		if (ext && *p == 'E' && *(p + 1) == ':') {
+			if (regcomp(&regex, p + 2, REG_NOSUB | REG_EXTENDED) == 0
 			&& regexec(&regex, ext, 0, NULL, 0) == 0)
 				found = 1;
-		}
-
-		else if (regcomp(&regex, line, REG_NOSUB | REG_EXTENDED) == 0
-		&& regexec(&regex, mime, 0, NULL, 0) == 0)
+		} else if (regcomp(&regex, p, REG_NOSUB | REG_EXTENDED) == 0
+		&& regexec(&regex, mime, 0, NULL, 0) == 0) {
 			found = mime_match = 1;
+		}
 
 		regfree(&regex);
 
@@ -110,22 +122,12 @@ get_app(const char *mime, const char *ext)
 				char *file_path = (char *)NULL;
 				/* If app contains spaces, the command to check is
 				 * the string before the first space */
-				/*              int ret = strcntchr(app, ' ');
-
-				if (ret != -1) {
-					char *app_tmp = savestring(app, app_len);
-					app_tmp[ret] = '\0';
-					file_path = get_cmd_path(app_tmp);
-					free(app_tmp);
-				} */
 				char *ret = strchr(app, ' ');
 				if (ret) {
 					*ret = '\0';
 					file_path = get_cmd_path(app);
 					*ret = ' ';
-				}
-
-				else
+				} else
 					file_path = get_cmd_path(app);
 
 				if (file_path) {
@@ -134,9 +136,7 @@ get_app(const char *mime, const char *ext)
 					free(file_path);
 					file_path = (char *)NULL;
 					cmd_ok = 1;
-				}
-
-				else
+				} else
 					continue;
 			}
 
