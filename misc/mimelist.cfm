@@ -3,9 +3,9 @@
 # This mimelist covers the most common filetypes
 # Commented and blank lines are omitted
 # It is recommended to edit this file leaving only applications you need to speed up the opening process
-# The file is read top to bottom and left to right; the first existent application will be used
+# The file is read top to bottom and left to right; the first existent application found will be used
 # Applications defined here are NOT desktop files, but commands (arguments could be used as well)
-# Use 'E' if matching file extensions
+# Use 'E' to match file extensions instead of MIME types
 # Use 'X' to specify a GUI environment and '!X' for non-GUI environments, like the kernel built-in console
 # or a remote SSH session
 # Regular expressions are allowed for both file types and extensions
