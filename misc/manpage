@@ -322,7 +322,7 @@ list only directories
 run as a stand-alone resource opener: open FILE and exit. This option is deprecated: use positional parameters instead
 .TP
 .B \-\-opener\fR=APPLICATION
-specify a resource opener to use. If opener is not set, \fIlira\fR will be used instead
+specify a resource opener to use. If \fIopener\fR is not set, \fILira\fR will be used instead
 .TP
 .B \-\-print\-sel
 Always print the list of selected files. Since this list could be quite extensive, the maximum number of selected files to print could be specified via the \fBMaxPrinSelfiles\fR option in the configuration file. Defaults to 0 (auto, i.e. never take more than half terminal height). Use -1 to remove the limit or any other positive value.
@@ -563,8 +563,6 @@ List only up to NUM files. Use -1 to list all files (default). An indicator (lis
 This is \fILira\fR, CliFM's resource opener. The 'info' option prints the MIME information about ELN/FILENAME: its MIME type, its file extension, if any, and the application associated to this MIME type or file extension.
 .sp
 The 'edit' option allows you to edit and customize the MIME list file. So, if a file has no default associated application, first get its MIME info or its file extension (running 'mm info FILE'), and then add a value for it to the MIME list file using the 'edit' option ('mm edit' or F6). Check the \fBRESOURCE OPENER\fR section below for information about the mimelist file syntax.
-.sp
-
 .TP
 .B mp, mountpoints
 list available mountpoints and change the current working directory to the selected mountpoint.
@@ -1027,36 +1025,43 @@ When running for the first time, or whenever the MIME list file cannot be found,
 .TP
 Each line in the MIME list file consists of:
 .TP
-a) A left value, containing either a file extension or a MIME type to be matched. Regular expressions are supported;
+a) 'X' or '!X' to specify GUI and non-GUI environments.
+b) A left value, containing either a file extension or a MIME type to be matched. Regular expressions are supported;
 .TP
-b) A right value, a list of semicolon separated commands (and optionally the commands parameters) to be associated to the corresponding left value.
+c) A right value, a list of semicolon separated commands (and optionally the commands parameters) to be associated to the corresponding left value.
 .TP
 Note that the syntax departs here from the Freedesktop specification in that we do not rely on desktop files (mostly used by desktop environments), but rather on commands and parameters. In general thus, the syntax is this:
 
- MIME=CMD ARGS;CMD ARGS; ...
+ X:MIME=CMD ARGS;CMD ARGS; ...
 .TP
 or, for file extensions:
 
- E:EXT=CMD ARGS;CMD ARGS; ...
+ X:E:EXT=CMD ARGS;CMD ARGS; ...
+.TP
+Use '!X' to specify applications when running on non-graphical environments:
+ !X:E:EXT=CMD ARGS;CMD ARGS; ...
+
 .TP
 Examples:
 .TP
 Match single extension:
- E:^txt$:leafpad;nano
+ E:^txt$:leafpad;mousepad;kate;gedit
+ !E:^txt$:nano;vim;vi;emacs
+
 .TP
-Note the 'E' character: it indicates that this rule is intended to match a file extension and not a MIME type.
+Note the 'E' character: it indicates that this rule is intended to match a file extension and not a MIME type, just as 'X' means that this rule is aimed to graphical environments, and '!X' that the rule is aimed to non-graphical environments.
 .TP
 Match multiple extensions:
- E:^(sh|c|py|pl)$:geany;leafpad;nano
+ X:E:^(sh|c|py|pl)$:geany;leafpad;nano
 .TP
 Match single mimetype:
- ^audio/mp3$=ffplay -nodisp -autoexit;mpv;mplayer
+ X:^audio/mp3$=ffplay -nodisp -autoexit;mpv;mplayer
 .TP
 Match mutiple mimetypes:
- ^audio/.*=mplayer;mplayer2;vlc;gmplayer;smplayer;totem
+ X:^audio/.*=mplayer;mplayer2;vlc;gmplayer;smplayer;totem
 .TP
 In case of MIME types, you can also write the entire expression without relying on any regular expression. For example:
- text/plain=nano
+ !X:text/plain=nano
 .TP
 \fBLira\fR will check the file line by line, and if a matching line is found, and if at least one of the specified applications exists, this application will be used to open the corresponding associated file. Else, the next line will be checked. In other words, the precedence order is top to bottom (for lines) and left to right (for applications).
 
