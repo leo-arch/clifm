@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "archives.h"
 #include "aux.h"
@@ -272,8 +273,36 @@ mime_open(char **args)
 {
 	/* Check arguments */
 	if (!args[1] || (*args[1] == '-' && strcmp(args[1], "--help") == 0)) {
-		puts(_("Usage: mm, mime [info ELN/FILENAME] [edit]"));
+		puts(_("Usage: mm, mime [info ELN/FILENAME] [edit] [import]"));
 		return EXIT_FAILURE;
+	}
+
+	if (args[1] && *args[1] == 'i' && strcmp(args[1], "import") == 0) {
+		time_t rawtime = time(NULL);
+		struct tm tm;
+		localtime_r(&rawtime, &tm);
+		char date[64];
+		strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", &tm);
+
+		char suffix[68];
+		snprintf(suffix, 67, "%d%d%d%d%d%d", tm.tm_year + 1900,
+		    tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min,
+		    tm.tm_sec);
+
+		char new[PATH_MAX];
+		snprintf(new, PATH_MAX - 1, "%s.%s", MIME_FILE, suffix);
+		rename(MIME_FILE, new);
+
+		int mime_defs = mime_import(MIME_FILE);
+		if (mime_defs > 0) {
+			printf(_("%s: %d MIME definition(s) imported from the system. "
+				"Old MIME list file stored as %s\n"),
+				PROGRAM_NAME, mime_defs, new);
+			return EXIT_SUCCESS;
+		} else {
+			rename(new, MIME_FILE);
+			return EXIT_FAILURE;
+		}
 	}
 
 	/* Check the existence of the 'file' command. */
@@ -287,8 +316,10 @@ mime_open(char **args)
 	free(file_path_tmp);
 	file_path_tmp = (char *)NULL;
 
-	char *file_path = (char *)NULL, *deq_file = (char *)NULL;
-	int info = 0, file_index = 0;
+	char *file_path = (char *)NULL,
+		*deq_file = (char *)NULL;
+	int info = 0,
+		file_index = 0;
 
 	if (*args[1] == 'e' && strcmp(args[1], "edit") == 0) {
 		return mime_edit(args);
@@ -533,40 +564,38 @@ mime_open(char **args)
 	return ret;
 }
 
-/* Import MIME definitions from the system into FILE. This function will
- * only be executed if the MIME file is not found or when creating a new
- * profile. Returns zero if some association is found in the system
- * 'mimeapps.list' files, or one in case of error or no association
- * found */
+/* Import MIME definitions from the system and store them into FILE.
+ * Returns the amount of definitions found, if any, or -1 in case of error
+ * or no association found */
 int
 mime_import(char *file)
 {
-	/* Open the internal MIME file */
-	FILE *mime_fp = fopen(file, "w");
-
-	if (!mime_fp)
-		return EXIT_FAILURE;
-
-	/* If not in X, just specify a few basic associations to make sure
-	 * that at least 'mm edit' will work ('vi' should be installed in
-	 * almost any Unix computer) */
+	/* If not in X, exit) */
 	if (!(flags & GUI)) {
-		fputs("text/plain=nano;vim;vi;emacs;ed\n"
-		      "E:^cfm$=nano;vim;vi;emacs;ed\n", mime_fp);
-		fclose(mime_fp);
-		return EXIT_SUCCESS;
+		fprintf(stderr, _("%s: Nothing was imported. No graphical "
+						"environment found\n"), PROGRAM_NAME);
+		return (-1);
 	}
 
 	if (!user.home) {
-		fclose(mime_fp);
-		return EXIT_FAILURE;
+		fprintf(stderr, _("%s: Error getting home directory\n"), PROGRAM_NAME);
+		return (-1);
 	}
 
-	/* Create a list of possible paths for the 'mimeapps.list' file */
+	/* Open the local MIME file */
+	FILE *mime_fp = fopen(file, "w");
+
+	if (!mime_fp) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+		return (-1);
+	}
+
+	/* Create a list of possible paths for the 'mimeapps.list' file as
+	 * specified by the Freedesktop specification */
 	size_t home_len = strlen(user.home);
 	char *config_path = (char *)NULL, *local_path = (char *)NULL;
-	config_path = (char *)xcalloc(home_len + 23, sizeof(char));
-	local_path = (char *)xcalloc(home_len + 41, sizeof(char));
+	config_path = (char *)xnmalloc(home_len + 23, sizeof(char));
+	local_path = (char *)xnmalloc(home_len + 41, sizeof(char));
 	sprintf(config_path, "%s/.config/mimeapps.list", user.home);
 	sprintf(local_path, "%s/.local/share/applications/mimeapps.list", user.home);
 
@@ -578,6 +607,8 @@ mime_import(char *file)
 	/* Check each mimeapps.list file and store its associations into
 	 * FILE */
 	size_t i;
+	int mime_defs = 0;
+
 	for (i = 0; mime_paths[i]; i++) {
 
 		FILE *sys_mime_fp = fopen(mime_paths[i], "r");
@@ -611,6 +642,7 @@ mime_import(char *file)
 					line[index] = '\0';
 
 				fprintf(mime_fp, "%s\n", line);
+				mime_defs++;
 			}
 		}
 
@@ -620,21 +652,28 @@ mime_import(char *file)
 		fclose(sys_mime_fp);
 	}
 
+	free(config_path);
+	free(local_path);
+
+	if (mime_defs <= 0) {
+		fclose(mime_fp);
+		fprintf(stderr, _("%s: Nothing was imported. No MIME definitions "
+			"found\n"), PROGRAM_NAME);
+		return (-1);
+	}
+
 	/* Make sure there is an entry for text/plain and *.cfm files, so
 	 * that at least 'mm edit' will work. Gedit, kate, pluma, mousepad,
 	 * and leafpad, are the default text editors of Gnome, KDE, Mate,
 	 * XFCE, and LXDE respectivelly */
-	fputs("text/plain=gedit;kate;pluma;mousepad;leafpad;nano;vim;"
+	fputs("X:text/plain=gedit;kate;pluma;mousepad;leafpad;nano;vim;"
 	      "vi;emacs;ed\n"
-	      "E:^cfm$=gedit;kate;pluma;mousepad;leafpad;nano;vim;vi;"
+	      "X:E:^cfm$=gedit;kate;pluma;mousepad;leafpad;nano;vim;vi;"
 	      "emacs;ed\n", mime_fp);
 
 	fclose(mime_fp);
 
-	free(config_path);
-	free(local_path);
-
-	return EXIT_SUCCESS;
+	return mime_defs;
 }
 
 int
