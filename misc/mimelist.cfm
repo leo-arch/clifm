@@ -5,40 +5,48 @@
 # It is recommended to edit this file leaving only applications you need to speed up the opening process
 # The file is read top to bottom and left to right; the first existent application will be used
 # Applications defined here are NOT desktop files, but commands (arguments could be used as well)
+# Use 'E' if matching file extensions
+# Use 'X' to specify a GUI environment and '!X' for non-GUI environments, like the kernel built-in console
+# or a remote SSH session
+# Regular expressions are allowed for both file types and extensions
 
 # Extensions
-E:^djvu$=djview;zathura;evince;atril
-E:^epub$=mupdf;zathura;ebook-viewer
-E:^mobi$=ebook-viewer
-E:^(cbr|cbz)$=zathura
+X:E:^djvu$=djview;zathura;evince;atril
+X:E:^epub$=mupdf;zathura;ebook-viewer
+X:E:^mobi$=ebook-viewer
+X:E:^(cbr|cbz)$=zathura
 
-# MIME types
+### MIME types ###
+
 # Web content
-^text/html$=surf;vimprobable;vimprobable2;qutebrowser;dwb;jumanji;luakit;uzbl;uzbl-tabbed;uzbl-browser;uzbl-core;iceweasel;midori;opera;firefox;seamonkey;chromium-browser;chromium;google-chrome;epiphany;konqueror;elinks;links2;links;w3m
+X:^text/html$=surf;vimprobable;vimprobable2;qutebrowser;dwb;jumanji;luakit;uzbl;uzbl-tabbed;uzbl-browser;uzbl-core;iceweasel;midori;opera;firefox;seamonkey;chromium-browser;chromium;google-chrome;epiphany;konqueror;elinks;links2;links;w3m
+!X:^text/html$=elinks;links2;links;w3m
 
 # Text
-#^text/x-(c|shellscript|perl|script.python|makefile|fortran|java-source|javascript|pascal)$=geany
-(^text/.*|application/json|inode/x-empty)=nano;vim;vi;emacs;ed;leafpad;mousepad;kate;gedit;pluma
+#X:^text/x-(c|shellscript|perl|script.python|makefile|fortran|java-source|javascript|pascal)$=geany
+X:(^text/.*|application/json|inode/x-empty)=nano;vim;vi;emacs;ed;leafpad;mousepad;kate;gedit;pluma
+!X:(^text/.*|application/json|inode/x-empty)=nano;vim;vi;emacs;ed
 
 # Office documents
-^application/.*(open|office)document.*=libreoffice;soffice;ooffice
+X:^application/.*(open|office)document.*=libreoffice;soffice;ooffice
 
 # PDF
-.*/pdf$=mupdf;llpp;zathura;mupdf-x11;apvlv;xpdf;evince;atril;okular;epdfview;qpdfview
+X:.*/pdf$=mupdf;llpp;zathura;mupdf-x11;apvlv;xpdf;evince;atril;okular;epdfview;qpdfview
 
 # Images
-^image/gif$=animate
-^image/.*=fim;feh;display;sxiv;imv;pqiv;gpicview;inkscape;mirage;ristretto;eog;eom;nomacs;geeqie;gwenview;gimp
+X:^image/gif$=animate
+X:^image/.*=fim;feh;display;sxiv;imv;pqiv;gpicview;inkscape;mirage;ristretto;eog;eom;nomacs;geeqie;gwenview;gimp
+!X:^image/*=fim
 
 # Video and audio
-^video/.*=ffplay;mplayer;mplayer2;mpv;vlc;gmplayer;smplayer;totem
-^audio/.*=ffplay -nodisp -autoexit;mplayer;mplayer2;mpv;vlc;gmplayer;smplayer;totem
+X:^video/.*=ffplay;mplayer;mplayer2;mpv;vlc;gmplayer;smplayer;totem
+X:^audio/.*=ffplay -nodisp -autoexit;mplayer;mplayer2;mpv;vlc;gmplayer;smplayer;totem
 
 # Fonts
-^fonts/.*=fontforge;fontpreview
+X:^font/.*=fontforge;fontpreview
 
 # Torrent:
-application/x-bittorrent=rtorrent;transimission-gtk;transmission-qt;deluge-gtk;ktorrent
+X:application/x-bittorrent=rtorrent;transimission-gtk;transmission-qt;deluge-gtk;ktorrent
 
 # Fallback to another resource opener as last resource
 .*=xdg-open;mimeo;mimeopen -n;whippet -m;open;linopen;
