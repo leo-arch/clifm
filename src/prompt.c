@@ -592,7 +592,7 @@ decode_prompt(const char *line)
 	}
 
 	/* Remove trailing new line char, if any */
-	if (result[result_len - 1] == '\n')
+	if (result && result[result_len - 1] == '\n')
 		result[result_len - 1] = '\0';
 
 	return result;

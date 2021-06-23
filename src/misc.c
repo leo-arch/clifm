@@ -323,6 +323,7 @@ new_instance(char *dir, int sudo)
 		path_dir = (char *)xnmalloc(strlen(ws[cur_ws].path)
 							+ strlen(deq_dir) + 2, sizeof(char));
 		sprintf(path_dir, "%s/%s", ws[cur_ws].path, deq_dir);
+		free(deq_dir);
 	} else
 		path_dir = deq_dir;
 
@@ -401,10 +402,10 @@ new_instance(char *dir, int sudo)
 		}
 	}
 
-	if (*deq_dir != '/')
+//	if (*deq_dir != '/')
 		free(path_dir);
 
-	free(deq_dir);
+//	free(deq_dir);
 	free(self);
 
 	if (ret != EXIT_SUCCESS)

@@ -910,6 +910,9 @@ parse_input_str(char *str)
 
 	for (i = 0; i <= args_n; i++) {
 
+		if (!substr[i])
+			continue;
+
 		register size_t j = 0;
 
 		/* Replace . and .. by absolute paths */
@@ -1095,8 +1098,11 @@ parse_input_str(char *str)
 			char **sel_array = (char **)NULL;
 			sel_array = (char **)xnmalloc(args_n + sel_n + 2, sizeof(char *));
 
-			for (i = 0; i < (size_t)is_sel; i++)
+			for (i = 0; i < (size_t)is_sel; i++) {
+				if (!substr[i])
+					continue;
 				sel_array[j++] = savestring(substr[i], strlen(substr[i]));
+			}
 
 			for (i = 0; i < sel_n; i++) {
 				/* Escape selected file names and copy them into tmp
@@ -1173,6 +1179,9 @@ parse_input_str(char *str)
 
 	for (i = 0; i <= args_n; i++) {
 
+		if (!substr[i])
+			continue;
+
 				/* ##########################
 				 * #   2.f) ELN EXPANSION   #
 				 * ##########################*/
@@ -1185,14 +1194,14 @@ parse_input_str(char *str)
 
 		/* The 'sort', 'mf', 'ws', and 'jo' commands take digits as
 		 * arguments. So, do not expand ELN's in these cases */
-		if (strcmp(substr[0], "mf") != 0 && strcmp(substr[0], "st") != 0
-		&& strcmp(substr[0], "ws") != 0 && strcmp(substr[0], "sort") != 0
-		&& strcmp(substr[0], "jo") != 0) {
+		if (substr[0] && strcmp(substr[0], "mf") != 0
+		&& strcmp(substr[0], "st") != 0 && strcmp(substr[0], "ws") != 0
+		&& strcmp(substr[0], "sort") != 0 && strcmp(substr[0], "jo") != 0) {
 
 			if (is_number(substr[i])) {
 
 				/* Expand first word only if autocd is set to true */
-				if (i == 0 && !autocd && !auto_open)
+				if ((i == 0 && !autocd && !auto_open) || !substr[i])
 					continue;
 
 				int num = atoi(substr[i]);
@@ -1595,7 +1604,7 @@ parse_input_str(char *str)
 
 	free(word_array);
 
-	if ((*substr[0] == 'd' || *substr[0] == 'u')
+	if (substr[0] && (*substr[0] == 'd' || *substr[0] == 'u')
 	&& (strcmp(substr[0], "desel") == 0 || strcmp(substr[0], "undel") == 0
 	|| strcmp(substr[0], "untrash") == 0)) {
 

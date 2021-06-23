@@ -373,7 +373,9 @@ my_rl_path_completion(const char *text, int state)
 
 	match = 0;
 
-	size_t dirname_len = strlen(dirname);
+	size_t dirname_len = 0;
+	if (dirname)
+		dirname_len = strlen(dirname);
 
 	/* This block is used only in case of "/path/./" to remove the
 	 * ending "./" from dirname and to be able to perform thus the

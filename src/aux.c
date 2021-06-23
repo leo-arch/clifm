@@ -466,11 +466,11 @@ read_octal(char *str)
 int
 hex2int(char *str)
 {
-	int i, n[2];
+	int i, n[2] = { 0 };
 	for (i = 1; i >= 0; i--) {
-		if (str[i] >= '0' && str[i] <= '9')
-			n[i] = str[i] - 0x30;
-		else {
+		if (str[i] >= '0' && str[i] <= '9') {
+			n[i] = str[i] - '0';
+		} else {
 			switch (str[i]) {
 			case 'A':
 			case 'a':

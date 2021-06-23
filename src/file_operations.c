@@ -932,7 +932,7 @@ bulk_rename(char **args)
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
 
-		if (strcmp(args[i], line) != 0) {
+		if (args[i] && strcmp(args[i], line) != 0) {
 			printf("%s %s->%s %s\n", args[i], mi_c, df_c, line);
 			modified++;
 		}
@@ -1001,7 +1001,7 @@ bulk_rename(char **args)
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
 
-		if (strcmp(args[i], line) != 0) {
+		if (args[i] && strcmp(args[i], line) != 0) {
 			char *tmp_cmd[] = {"mv", args[i], line, NULL};
 
 			if (launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)

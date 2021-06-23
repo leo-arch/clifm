@@ -1404,6 +1404,8 @@ read_config(void)
 		else if (*line == 'M' && strncmp(line, "MaxPrintSelfiles=", 17) == 0) {
 			int opt_num = 0;
 			ret = sscanf(line, "MaxPrintSelfiles=%d\n", &opt_num);
+			if (ret == -1)
+				continue;
 			max_printselfiles = opt_num;
 		}
 
@@ -1517,8 +1519,7 @@ read_config(void)
 		else if (xargs.restore_last_path == UNSET && *line == 'R'
 		&& strncmp(line, "RestoreLastPath=", 16) == 0) {
 			char opt_str[MAX_BOOL] = "";
-			ret = sscanf(line, "RestoreLastPath=%5s\n",
-			    opt_str);
+			ret = sscanf(line, "RestoreLastPath=%5s\n", opt_str);
 			if (ret == -1)
 				continue;
 

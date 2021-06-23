@@ -196,11 +196,11 @@ remote_smb(char *address, char *options)
 			if (free_address)
 				free(raddress);
 
-			free(rmountpoint);
 			free(addr_tmp);
 
 			fprintf(stderr, _("%s: %s: Cannot create mountpoint\n"),
 			    PROGRAM_NAME, rmountpoint);
+			free(rmountpoint);
 
 			return EXIT_FAILURE;
 		}

@@ -602,6 +602,8 @@ set_colors(const char *colorscheme, int env)
 			case '\0': /* fallthrough */
 			case '\n': /* fallthrough */
 			case ':':
+				if (!buf)
+					break;
 				buf[len] = '\0';
 				ext_colors = (char **)xrealloc(ext_colors,
 				    (ext_colors_n + 1) * sizeof(char *));
@@ -697,6 +699,8 @@ set_colors(const char *colorscheme, int env)
 			case '\0': /* fallthrough */
 			case '\n': /* fallthrough */
 			case ':':
+				if (!buf)
+					break;
 				buf[len] = '\0';
 				colors = (char **)xrealloc(colors, (words + 1) * sizeof(char *));
 				colors[words++] = savestring(buf, len);
@@ -963,6 +967,8 @@ set_colors(const char *colorscheme, int env)
 			case '\0': /* fallthrough */
 			case '\n': /* fallthrough */
 			case ':':
+				if (!buf)
+					break;
 				buf[len] = '\0';
 				colors = (char **)xrealloc(colors, (words + 1) * sizeof(char *));
 				colors[words++] = savestring(buf, len);

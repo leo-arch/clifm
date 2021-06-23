@@ -442,10 +442,12 @@ profile_add(const char *prof)
 	}
 
 	/* #### CREATE THE MIME CONFIG FILE #### */
-	create_mime_file(NMIME_FILE, 1);
+	if (create_mime_file(NMIME_FILE, 1) != EXIT_SUCCESS)
+		exit_status = EXIT_FAILURE;
 
 	/* #### CREATE THE CONFIG FILE #### */
-	exit_status = create_config(NCONFIG_FILE);
+	if (create_config(NCONFIG_FILE) != EXIT_SUCCESS)
+		exit_status = EXIT_FAILURE;
 
 	/* Free stuff */
 	free(NCONFIG_DIR);

@@ -591,13 +591,15 @@ archiver(char **args, char mode)
 
 		/* Escape the string, if needed */
 		char *esc_name = escape_str(name);
-		free(name);
 
 		if (!esc_name) {
 			fprintf(stderr, _("archiver: %s: Error escaping string\n"),
 					name);
+			free(name);
 			return EXIT_FAILURE;
 		}
+
+		free(name);
 
 		/* Construct the command */
 		char *cmd = (char *)NULL;
