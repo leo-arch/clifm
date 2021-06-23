@@ -34,7 +34,7 @@ X:^application/.*(open|office)document.*=libreoffice;soffice;ooffice
 X:.*/pdf$=mupdf;llpp;zathura;mupdf-x11;apvlv;xpdf;evince;atril;okular;epdfview;qpdfview
 
 # Images
-X:^image/gif$=animate;pqiv
+X:^image/gif$=animate;pqiv;sxiv -a
 X:^image/.*=fim;feh;display;sxiv;imv;pqiv;gpicview;inkscape;mirage;ristretto;eog;eom;nomacs;geeqie;gwenview;gimp
 !X:^image/*=fim
 
