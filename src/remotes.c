@@ -172,9 +172,14 @@ remote_smb(char *address, char *options)
 	char *roptions = (char *)NULL;
 
 	if (ruser) {
-		roptions = (char *)xnmalloc(strlen(ruser) + strlen(options) + 11,
-															sizeof(char));
-		sprintf(roptions, "username=%s,%s", ruser, options);
+		if (options) {
+			roptions = (char *)xnmalloc(strlen(ruser) + strlen(options) + 11, sizeof(char));
+			sprintf(roptions, "username=%s,%s", ruser, options);
+		} else {
+			roptions = (char *)xnmalloc(strlen(ruser) + 11, sizeof(char));
+			sprintf(roptions, "username=%s", ruser);
+		}
+
 		free_options = 1;
 	} else
 		roptions = options;
