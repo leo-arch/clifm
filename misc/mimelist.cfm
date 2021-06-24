@@ -10,7 +10,8 @@
 # or a remote SSH session
 # Regular expressions are allowed for both file types and extensions
 
-# Extensions
+### File Extensions ###
+
 X:E:^djvu$=djview;zathura;evince;atril
 X:E:^epub$=mupdf;zathura;ebook-viewer
 X:E:^mobi$=ebook-viewer
@@ -19,8 +20,8 @@ X:E:^(cbr|cbz)$=zathura
 ### MIME types ###
 
 # Web content
-X:^text/html$=surf;vimprobable;vimprobable2;qutebrowser;dwb;jumanji;luakit;uzbl;uzbl-tabbed;uzbl-browser;uzbl-core;iceweasel;midori;opera;firefox;seamonkey;chromium-browser;chromium;google-chrome;epiphany;konqueror;elinks;links2;links;w3m
-!X:^text/html$=elinks;links2;links;w3m
+X:^text/html$=surf;vimprobable;vimprobable2;qutebrowser;dwb;jumanji;luakit;uzbl;uzbl-tabbed;uzbl-browser;uzbl-core;iceweasel;midori;opera;firefox;seamonkey;chromium-browser;chromium;google-chrome;epiphany;konqueror;elinks;links2;links;lynx;w3m
+!X:^text/html$=elinks;links2;links;lynx;w3m
 
 # Text
 #X:^text/x-(c|shellscript|perl|script.python|makefile|fortran|java-source|javascript|pascal)$=geany
