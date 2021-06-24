@@ -36,7 +36,7 @@ X:.*/pdf$=mupdf;llpp;zathura;mupdf-x11;apvlv;xpdf;evince;atril;okular;epdfview;q
 # Images
 X:^image/gif$=animate;pqiv;sxiv -a
 X:^image/.*=fim;feh;display;sxiv;imv;pqiv;gpicview;inkscape;mirage;ristretto;eog;eom;nomacs;geeqie;gwenview;gimp
-!X:^image/*=fim
+!X:^image/*=fim;img2txt;cacaview
 
 # Video and audio
 X:^video/.*=ffplay;mplayer;mplayer2;mpv;vlc;gmplayer;smplayer;totem
