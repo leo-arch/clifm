@@ -329,7 +329,7 @@ nm=01;32:bm=01;36:"
 #define DEF_NOELN 0
 #define DEF_ONLY_DIRS 0
 #define DEF_PAGER 0
-#define DEF_RESTORE_LAST_PATH 0
+#define DEF_RESTORE_LAST_PATH 1
 #define DEF_RL_EDIT_MODE 1
 #define DEF_SHARE_SELBOX 0
 #define DEF_SHOW_HIDDEN 0
