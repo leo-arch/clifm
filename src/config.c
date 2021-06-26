@@ -1259,14 +1259,15 @@ create_mime_file(char *file, int new_prof)
 	}
 
 	char *cmd[] = {"cp", "-f", sys_mimelist, file, NULL};
-	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS
-	&& !new_prof) {
-		_err('n', PRINT_PROMPT, _("%s created a new MIME list file (%s) "
-			"It is recommended to edit this file (entering 'mm edit' or "
-			"pressing F6) to add the programs you use and remove those "
-			"you don't. This will make the process of opening files "
-			"faster and smoother\n"),
-			PROGRAM_NAME, file, sys_mimelist);
+	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS) {
+		if (!new_prof) {
+			_err('n', PRINT_PROMPT, _("%s created a new MIME list file (%s) "
+				"It is recommended to edit this file (entering 'mm edit' or "
+				"pressing F6) to add the programs you use and remove those "
+				"you don't. This will make the process of opening files "
+				"faster and smoother\n"),
+				PROGRAM_NAME, file, sys_mimelist);
+		}
 		return EXIT_SUCCESS;
 	}
 
