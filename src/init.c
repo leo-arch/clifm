@@ -83,7 +83,7 @@ get_data_dir(void)
 
 /*	if (DATA_DIR)
 		return; */
-	return DATA_DIR;
+	return;
 
 	/* If not found, try to get DATADIR from executable's path */
 /*	DATA_DIR = get_cmd_path(PNL);
