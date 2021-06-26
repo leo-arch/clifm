@@ -79,9 +79,7 @@ remote_ftp(char *address, char *options)
 			free(rmountpoint);
 			return EXIT_FAILURE;
 		}
-	}
-
-	else if (count_dir(rmountpoint) > 2) {
+	} else if (count_dir(rmountpoint) > 2) {
 		fprintf(stderr, _("%s: %s: Mounpoint not empty\n"),
 		    PROGRAM_NAME, rmountpoint);
 		free(rmountpoint);
@@ -148,10 +146,9 @@ remote_smb(char *address, char *options)
 
 		raddress = savestring(tmp + 1, strlen(tmp + 1));
 		free_address = 1;
-	}
-
-	else
+	} else {
 		raddress = address;
+	}
 
 	char *addr_tmp = (char *)xnmalloc(strlen(raddress) + 3, sizeof(char));
 	sprintf(addr_tmp, "//%s", raddress);
@@ -172,12 +169,18 @@ remote_smb(char *address, char *options)
 	char *roptions = (char *)NULL;
 
 	if (ruser) {
-		roptions = (char *)xnmalloc(strlen(ruser) + strlen(options) + 11,
-															sizeof(char));
-		sprintf(roptions, "username=%s,%s", ruser, options);
+		if (options) {
+			roptions = (char *)xnmalloc(strlen(ruser) + strlen(options) + 11, sizeof(char));
+			sprintf(roptions, "username=%s,%s", ruser, options);
+		} else {
+			roptions = (char *)xnmalloc(strlen(ruser) + 10, sizeof(char));
+			sprintf(roptions, "username=%s", ruser);
+		}
+
 		free_options = 1;
-	} else
+	} else {
 		roptions = options;
+	}
 
 	/* Create the mountpoint, if it doesn't exist */
 	struct stat file_attrib;
@@ -234,9 +237,7 @@ remote_smb(char *address, char *options)
 		    rmountpoint, (roptions) ? "-o" : NULL,
 		    (roptions) ? roptions : NULL, NULL};
 		error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
-	}
-
-	else {
+	} else {
 		char *cmd[] = {"mount.cifs", addr_tmp, rmountpoint, (roptions) ? "-o"
 					: NULL, (roptions) ? roptions : NULL, NULL};
 		error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
@@ -354,9 +355,7 @@ remote_ssh(char *address, char *options)
 		char *cmd[] = {"sshfs", address, rmountpoint, (options) ? "-o"
 					: NULL, (options) ? options : NULL, NULL};
 		error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
-	}
-
-	else {
+	} else {
 		char *cmd[] = {"sudo", "sshfs", address, rmountpoint, "-o",
 		    "allow_other", (options) ? "-o" : NULL,
 		    (options) ? options : NULL, NULL};
