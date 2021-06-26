@@ -458,6 +458,7 @@ main(int argc, char *argv[])
 	 * is then checked by init_config */
 
 	check_env_filter();
+	get_data_dir();
 
 	/* Initialize program paths and files, set options from the config
 	 * file, if they were not already set via external arguments, and
@@ -477,8 +478,6 @@ main(int argc, char *argv[])
 	/* Get the list of available applications in PATH to be used by my
 	 * custom TAB-completion function */
 	get_path_programs();
-
-	get_data_dir();
 
 	/* Initialize gettext() for translations */
 	char locale_dir[PATH_MAX];
