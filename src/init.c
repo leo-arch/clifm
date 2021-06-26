@@ -1518,6 +1518,9 @@ load_pinned_dir(void)
 void
 get_path_programs(void)
 {
+	char cwd[PATH_MAX] = "";
+	getcwd(cwd, sizeof(cwd));
+
 	struct dirent ***commands_bin = (struct dirent ***)xnmalloc(
 	    path_n, sizeof(struct dirent));
 	int i, j, l = 0, total_cmd = 0;
@@ -1540,6 +1543,7 @@ get_path_programs(void)
 		if (cmd_n[i] > 0)
 			total_cmd += (size_t)cmd_n[i];
 	}
+	xchdir(cwd, NO_TITLE);
 
 	/* Add internal commands */
 	size_t internal_cmd_n = 0;
