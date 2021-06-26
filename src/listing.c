@@ -334,7 +334,7 @@ list_dir_light(void)
 
 		if (!show_hidden && *ename == '.')
 			continue;
-#if defined(__HAIKU__)
+#if !defined(_DIRENT_HAVE_D_TYPE)
 		struct stat attr;
 		if (stat(ename, &attr) == -1)
 			continue;
@@ -361,7 +361,7 @@ list_dir_light(void)
 		}
 
 		/* ################  */
-#if defined(__HAIKU__)
+#if !defined(_DIRENT_HAVE_D_TYPE)
 		switch (attr.st_mode & S_IFMT) {
 		case S_IFBLK: file_info[n].type = DT_BLK; break;
 		case S_IFCHR: file_info[n].type = DT_CHR; break;
@@ -970,7 +970,7 @@ list_dir(void)
 
 		fstatat(fd, ename, &attr, AT_SYMLINK_NOFOLLOW);
 
-#if defined(__HAIKU__)
+#if !defined(_DIRENT_HAVE_D_TYPE)
 		if (only_dirs && (attr.st_mode & S_IFMT) == S_IFDIR)
 #else
 		if (only_dirs && ent->d_type != DT_DIR)
@@ -995,7 +995,7 @@ list_dir(void)
 
 		file_info[n].exec = 0;
 
-#if defined(__HAIKU__)
+#if !defined(_DIRENT_HAVE_D_TYPE)
 		switch (attr.st_mode & S_IFMT) {
 		case S_IFBLK: file_info[n].type = DT_BLK; break;
 		case S_IFCHR: file_info[n].type = DT_CHR; break;

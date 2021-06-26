@@ -305,7 +305,7 @@ search_glob(char **comm, int invert)
 
 					if (!f) {
 
-#if defined(__HAIKU__)
+#if !defined(_DIRENT_HAVE_D_TYPE)
 						struct stat attr;
 						mode_t type;
 						if (lstat(ent[k]->d_name, &attr) == -1)
@@ -725,7 +725,7 @@ search_regex(char **comm, int invert)
 			match_type[j] = 0;
 
 			if (search_path) {
-#if defined(__HAIKU__)
+#if !defined(_DIRENT_HAVE_D_TYPE)
 				mode_t type;
 				struct stat attr;
 				if (lstat(reg_dirlist[regex_index[j]]->d_name, &attr) == -1)

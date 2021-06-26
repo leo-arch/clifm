@@ -35,10 +35,11 @@
 #include <sys/mount.h>
 #include <sys/sysctl.h>
 #endif
+/*
 #if defined(__HAIKU__)
 #include <private/libs/compat/freebsd_network/compat/sys/mount.h>
 #include <private/libs/compat/freebsd_network/compat/sys/sysctl.h>
-#endif
+#endif */
 #include <time.h>
 #include <unistd.h>
 #include <readline/readline.h>

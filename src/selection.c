@@ -779,7 +779,7 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 
 			i = ret;
 			while (--i >= 0) {
-#if defined(__HAIKU__)
+#if !defined(_DIRENT_HAVE_D_TYPE)
 				mode_t type;
 				struct stat attr;
 				if (lstat(ent[i]->d_name, &attr) == -1)

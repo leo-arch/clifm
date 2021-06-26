@@ -1135,7 +1135,7 @@ recur_perm_check(const char *dirname)
 {
 	DIR *dir;
 	struct dirent *ent;
-#if defined(__HAIKU__)
+#if !defined(_DIRENT_HAVE_D_TYPE)
 	struct stat attr;
 #endif
 
@@ -1144,7 +1144,7 @@ recur_perm_check(const char *dirname)
 
 	while ((ent = readdir(dir)) != NULL) {
 
-#if defined(__HAIKU__)
+#if !defined(_DIRENT_HAVE_D_TYPE)
 		if (lstat(ent->d_name, &attr) == -1)
 			continue;
 		if ((attr.st_mode & S_IFMT) == S_IFDIR) {
