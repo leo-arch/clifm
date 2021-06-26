@@ -81,11 +81,12 @@ get_data_dir(void)
 		}
 	}
 
-	if (DATA_DIR)
-		return;
+/*	if (DATA_DIR)
+		return; */
+	return DATA_DIR;
 
 	/* If not found, try to get DATADIR from executable's path */
-	DATA_DIR = get_cmd_path(PNL);
+/*	DATA_DIR = get_cmd_path(PNL);
 
 	if (!DATA_DIR)
 		return;
@@ -109,7 +110,7 @@ get_data_dir(void)
 		DATA_DIR = (char *)xrealloc(DATA_DIR, (strlen(tmp) + 1) * sizeof(char));
 		strcpy(DATA_DIR, tmp);
 		return;
-	}
+	} */
 }
 
 void
