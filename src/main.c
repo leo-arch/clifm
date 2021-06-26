@@ -370,7 +370,7 @@ main(int argc, char *argv[])
 
 	/* Though this program might perfectly work on other OSes, especially
 	 * Unixes, I just didn't make any test */
-#if !defined __linux__ && !defined linux && !defined __linux && !defined __gnu_linux__ && !defined __FreeBSD__
+#if !defined(__linux__) && !defined(linux) && !defined(__linux) && !defined(__gnu_linux__) && !defined(__FreeBSD__) && !defined(__HAIKU__)
 	fprintf(stderr, _("%s: Unsupported operating system\n"),
 	    PROGRAM_NAME);
 	exit(EXIT_FAILURE);
@@ -458,6 +458,7 @@ main(int argc, char *argv[])
 	 * is then checked by init_config */
 
 	check_env_filter();
+
 	get_data_dir();
 
 	/* Initialize program paths and files, set options from the config

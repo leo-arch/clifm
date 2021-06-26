@@ -33,7 +33,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#ifdef __linux__
+#if defined(__linux__) || defined(__HAIKU__)
 #include <sys/ioctl.h>
 #endif
 
@@ -779,7 +779,25 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 
 			i = ret;
 			while (--i >= 0) {
+#if defined(__HAIKU__)
+				mode_t type;
+				struct stat attr;
+				if (lstat(ent[i]->d_name, &attr) == -1)
+					continue;
+				switch (attr.st_mode & S_IFMT) {
+				case S_IFBLK: type = DT_BLK; break;
+				case S_IFCHR: type = DT_CHR; break;
+				case S_IFDIR: type = DT_DIR; break;
+				case S_IFIFO: type = DT_FIFO; break;
+				case S_IFLNK: type = DT_LNK; break;
+				case S_IFREG: type = DT_REG; break;
+				case S_IFSOCK: type = DT_SOCK; break;
+				default: type = DT_UNKNOWN; break;
+				}
+				if (filetype && type != filetype)
+#else
 				if (filetype && ent[i]->d_type != filetype)
+#endif
 					continue;
 
 				int j = (int)gbuf.gl_pathc;

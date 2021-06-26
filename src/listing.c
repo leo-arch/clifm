@@ -334,8 +334,14 @@ list_dir_light(void)
 
 		if (!show_hidden && *ename == '.')
 			continue;
-
+#if defined(__HAIKU__)
+		struct stat attr;
+		if (stat(ename, &attr) == -1)
+			continue;
+		if (only_dirs && (attr.st_mode & S_IFMT) != S_IFDIR)
+#else
 		if (only_dirs && ent->d_type != DT_DIR)
+#endif
 			continue;
 
 		if (count > ENTRY_N) {
@@ -355,9 +361,24 @@ list_dir_light(void)
 		}
 
 		/* ################  */
+#if defined(__HAIKU__)
+		switch (attr.st_mode & S_IFMT) {
+		case S_IFBLK: file_info[n].type = DT_BLK; break;
+		case S_IFCHR: file_info[n].type = DT_CHR; break;
+		case S_IFDIR: file_info[n].type = DT_DIR; break;
+		case S_IFIFO: file_info[n].type = DT_FIFO; break;
+		case S_IFLNK: file_info[n].type = DT_LNK; break;
+		case S_IFREG: file_info[n].type = DT_REG; break;
+		case S_IFSOCK: file_info[n].type = DT_SOCK; break;
+		default: file_info[n].type = DT_UNKNOWN; break;
+		}
+		file_info[n].dir = (file_info[n].type == DT_DIR) ? 1 : 0;
+		file_info[n].symlink = (file_info[n].type == DT_LNK) ? 1 : 0;
+#else
 		file_info[n].dir = (ent->d_type == DT_DIR) ? 1 : 0;
 		file_info[n].symlink = (ent->d_type == DT_LNK) ? 1 : 0;
 		file_info[n].type = ent->d_type;
+#endif
 		file_info[n].inode = ent->d_ino;
 		file_info[n].linkn = 1;
 		file_info[n].size = 1;
@@ -947,10 +968,14 @@ list_dir(void)
 		if (!show_hidden && *ename == '.')
 			continue;
 
-		if (only_dirs && ent->d_type != DT_DIR)
-			continue;
-
 		fstatat(fd, ename, &attr, AT_SYMLINK_NOFOLLOW);
+
+#if defined(__HAIKU__)
+		if (only_dirs && (attr.st_mode & S_IFMT) == S_IFDIR)
+#else
+		if (only_dirs && ent->d_type != DT_DIR)
+#endif
+			continue;
 
 		if (count > ENTRY_N) {
 			count = 0;
@@ -968,10 +993,27 @@ list_dir(void)
 			file_info[n].len = wc_xstrlen(ename);
 		}
 
+		file_info[n].exec = 0;
+
+#if defined(__HAIKU__)
+		switch (attr.st_mode & S_IFMT) {
+		case S_IFBLK: file_info[n].type = DT_BLK; break;
+		case S_IFCHR: file_info[n].type = DT_CHR; break;
+		case S_IFDIR: file_info[n].type = DT_DIR; break;
+		case S_IFIFO: file_info[n].type = DT_FIFO; break;
+		case S_IFLNK: file_info[n].type = DT_LNK; break;
+		case S_IFREG: file_info[n].type = DT_REG; break;
+		case S_IFSOCK: file_info[n].type = DT_SOCK; break;
+		default: file_info[n].type = DT_UNKNOWN; break;
+		}
+		file_info[n].dir = (file_info[n].type == DT_DIR) ? 1 : 0;
+		file_info[n].symlink = (file_info[n].type == DT_LNK) ? 1 : 0;
+#else
 		file_info[n].dir = (ent->d_type == DT_DIR) ? 1 : 0;
 		file_info[n].symlink = (ent->d_type == DT_LNK) ? 1 : 0;
-		file_info[n].exec = 0;
 		file_info[n].type = ent->d_type;
+#endif
+
 		file_info[n].inode = ent->d_ino;
 		file_info[n].linkn = attr.st_nlink;
 		file_info[n].size = attr.st_size;
