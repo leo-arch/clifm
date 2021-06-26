@@ -618,10 +618,10 @@ split_fusedcmd(char *str)
 	char *space = strchr(str, ' ');
 	char *slash = strchr(str, '/');
 
-	if (!space && slash)
+	if (!space && slash) /* If "/some/path/" */
 		return (char *)NULL;
 
-	if (space && slash && slash < space)
+	if (space && slash && slash < space) /* If "/some/string something" */
 		return (char *)NULL;
 
 	/* The buffer size is the double of STR, just in case each subtr
@@ -630,11 +630,33 @@ split_fusedcmd(char *str)
 
 	char *p = str, *pp = str;
 	char *q = buf;
+	char *s = (char *)NULL;
 	size_t c = 0;
 
 	while (*p) {
+		if (*p == ' ')
+			s = p; /* Pointer to last space */
+
 		/* Transform "cmdeln" into "cmd eln" */
 		if (*p >= '0' && *p <= '9' && c && *(p - 1) >= 'a' && *(p - 1) <= 'z') {
+
+			/* If a number, move from last to next space/nul looking for
+			 * a slash. If found, do nothing */
+			if (s) {
+				int _cont = 0;
+				char *ss = s + 1;
+				while (*ss && *ss != ' ') {
+					if (*ss == '/') {
+						_cont = 1;
+						break;
+					}
+					ss++;
+				}
+				if (_cont) {
+					*(q++) = *(p++);
+					continue;
+				}
+			}
 
 			char tmp = *p;
 			*p = '\0';
