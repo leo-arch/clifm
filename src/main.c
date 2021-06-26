@@ -459,6 +459,13 @@ main(int argc, char *argv[])
 
 	check_env_filter();
 
+	load_actions();
+	get_aliases();
+
+	/* Get the list of available applications in PATH to be used by my
+	 * custom TAB-completion function */
+	get_path_programs();
+
 	get_data_dir();
 
 	/* Initialize program paths and files, set options from the config
@@ -472,13 +479,6 @@ main(int argc, char *argv[])
 	set_sel_file();
 
 	create_tmp_files();
-
-	load_actions();
-	get_aliases();
-
-	/* Get the list of available applications in PATH to be used by my
-	 * custom TAB-completion function */
-	get_path_programs();
 
 	/* Initialize gettext() for translations */
 	char locale_dir[PATH_MAX];
