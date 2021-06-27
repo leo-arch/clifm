@@ -68,8 +68,9 @@ prompt(void)
 	}
 
 	if (welcome_message) {
-		printf(_("%sCliFM, the anti-eye-candy, KISS file manager%s\n"
-			 "Enter '?' or press F[1-3] for instructions.\n"), wc_c, df_c);
+		printf(_("%s%s > %s%s\n"
+			 "Enter '?' or press F[1-3] for instructions.\n"), wc_c,
+			 PROGRAM_NAME, PROG_DESC, df_c);
 		welcome_message = 0;
 	}
 

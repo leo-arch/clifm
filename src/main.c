@@ -416,8 +416,9 @@ main(int argc, char *argv[])
 				  "Trash, bookmarks, commands logs, and commands history are "
 				  "disabled. Program messages and selected files won't be "
 				  "persistent. Using default options\n"), PROGRAM_NAME);
-	} else
+	} else {
 		user_home_len = strlen(user.home);
+	}
 
 	if (geteuid() == 0) {
 		flags |= ROOT_USR;
@@ -531,21 +532,18 @@ main(int argc, char *argv[])
 		if (!*cwd || strlen(cwd) == 0) {
 			if (user_home)
 				ws[cur_ws].path = savestring(user_home, strlen(user_home));
-
 			else {
 				if (access("/", R_OK | X_OK) == -1) {
 					fprintf(stderr, "%s: /: %s\n", PROGRAM_NAME,
 					    strerror(errno));
 					exit(EXIT_FAILURE);
-				}
-
-				else
+				} else {
 					ws[cur_ws].path = savestring("/\0", 2);
+				}
 			}
-		}
-
-		else
+		} else {
 			ws[cur_ws].path = savestring(cwd, strlen(cwd));
+		}
 	}
 
 	/* Make path the CWD */
@@ -663,18 +661,14 @@ main(int argc, char *argv[])
 																	readline */
 			/* Limit the size of the history file to max_hist lines */
 			history_truncate_file(HIST_FILE, max_hist);
-		}
-
+		} else {
 		/* If the history file doesn't exist, create it */
-		else {
 			FILE *hist_fp = fopen(HIST_FILE, "w+");
 
 			if (!hist_fp) {
 				_err('w', PRINT_PROMPT, "%s: fopen: '%s': %s\n",
 				    PROGRAM_NAME, HIST_FILE, strerror(errno));
-			}
-
-			else {
+			} else {
 				/* To avoid malloc errors in read_history(), do not
 				 * create an empty file */
 				fputs("edit\n", hist_fp);
@@ -742,9 +736,7 @@ main(int argc, char *argv[])
 
 			free(alias_cmd);
 			alias_cmd = (char **)NULL;
-		}
-
-		else {
+		} else {
 			exec_cmd(cmd);
 
 			i = (int)args_n + 1;

@@ -111,6 +111,7 @@ void *__dso_handle;
 
 #define PROGRAM_NAME "CliFM"
 #define PNL "clifm" /* Program name lowercase */
+#define PROG_DESC "The KISS, non-curses file manager"
 /* #define TMP_DIR "/tmp/clifm" */
 /* If no formatting, puts (or write) is faster than printf */
 #define CLEAR write(STDOUT_FILENO, "\033c", 3);
