@@ -1,7 +1,7 @@
 
 			/*  ########################################
 			 *  #               CliFM                  #
-			 *  # The anti-eye-candy/KISS file manager #
+			 *  # The KISS/non-curses file manager #
 			 *  ######################################## */
 /* GPL2+ License 
  * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
