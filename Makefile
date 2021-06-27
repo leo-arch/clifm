@@ -2,7 +2,7 @@
 # Makefile for CliFM #
 ######################
 
-OS := $(shell uname -s)
+OS != uname -s
 
 BIN ?= clifm
 
@@ -18,16 +18,16 @@ INSTALL ?= install
 RM ?= rm
 
 SRCDIR = src
-OBJS != ls $(SRCDIR)/*.c | sed "s/.c\$$/.o/g"
+SRC = $(SRCDIR)/*.c
+HEADERS = $(SRCDIR)/*.h
 
 CFLAGS ?= -O3 -fstack-protector-strong -march=native -Wall
 LIBS_Linux ?= -lreadline -lacl -lcap
 LIBS_FreeBSD ?= -I/usr/local/include -L/usr/local/lib -lreadline -lintl
 
-build: ${OBJS}
-	@printf "Detected operating system: ";
-	@echo "$(OS)"
-	$(CC) -o $(BIN) ${OBJS} ${LIBS_${OS}} $(CFLAGS)
+build: $(SRC) $(HEADERS)
+	@printf "Detected operating system: %s\n" "$(OS)"
+	$(CC) -o $(BIN) $(SRC) $(CFLAGS) $(LDFLAGS) $(LIBS_$(OS))
 
 clean:
 	$(RM) -- $(BIN)
@@ -56,8 +56,8 @@ install: build
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/functions
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/colors
 	$(INSTALL) -m 0755 plugins/* $(DESTDIR)$(PROG_DATADIR)/plugins
-	chmod 644 -- $(DESTDIR)$(PROG_DATADIR)/plugins/BFG.cfg
-	chmod 644 -- $(DESTDIR)$(PROG_DATADIR)/plugins/kbgen.c
+	chmod 644 $(DESTDIR)$(PROG_DATADIR)/plugins/BFG.cfg
+	chmod 644 $(DESTDIR)$(PROG_DATADIR)/plugins/kbgen.c
 	$(INSTALL) -m 0644 misc/colors/*.cfm $(DESTDIR)$(PROG_DATADIR)/colors
 	$(INSTALL) -m 0644 functions/* $(DESTDIR)$(PROG_DATADIR)/functions
 	@printf "Successfully installed $(BIN)\n"
