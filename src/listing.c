@@ -336,7 +336,7 @@ list_dir_light(void)
 			continue;
 #if !defined(_DIRENT_HAVE_D_TYPE)
 		struct stat attr;
-		if (stat(ename, &attr) == -1)
+		if (lstat(ename, &attr) == -1)
 			continue;
 		if (only_dirs && (attr.st_mode & S_IFMT) != S_IFDIR)
 #else
