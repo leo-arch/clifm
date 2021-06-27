@@ -1607,6 +1607,8 @@ help_function(void)
 \n              counting files in directories is expensive\
 \n     --no-open-auto\t\t same as no-cd-auto, but for files\
 \n     --no-tips\t\t\t disable startup tips\
+\n     --no-restore-last-path\t save last visited directory to be \
+\n              restored in the next session\
 \n     --no-welcome-message\t disable the welcome message\
 \n     --only-dirs\t\t list only directories and symbolic links\
 \n              to directories\
@@ -1615,8 +1617,6 @@ help_function(void)
 \n     --opener=APPLICATION\t resource opener to use instead of 'lira',\
 \n              %s built-in opener\
 \n     --print-sel\t\t keep the list of selected files in sight\
-\n     --restore-last-path\t save last visited directory to be \
-\n              restored in the next session\
 \n     --rl-vi-mode\t\t set readline to vi editing mode (defaults \
 \n              to emacs editing mode)\
 \n     --share-selbox\t\t make the Selection Box common to \

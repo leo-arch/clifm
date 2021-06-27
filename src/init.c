@@ -607,7 +607,7 @@ external_arguments(int argc, char **argv)
 	    /* Only long options */
 	    {"no-cd-auto", no_argument, 0, 0},
 	    {"no-open-auto", no_argument, 0, 1},
-	    {"restore-last-path", no_argument, 0, 2},
+	    {"no-restore-last-path", no_argument, 0, 2},
 	    {"no-tips", no_argument, 0, 3},
 	    {"disk-usage", no_argument, 0, 4},
 	    {"no-classify", no_argument, 0, 6},
@@ -670,7 +670,7 @@ external_arguments(int argc, char **argv)
 			break;
 
 		case 2:
-			xargs.restore_last_path = restore_last_path = 1;
+			xargs.restore_last_path = restore_last_path = 0;
 			break;
 
 		case 3:
