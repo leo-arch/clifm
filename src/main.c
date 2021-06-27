@@ -421,7 +421,7 @@ main(int argc, char *argv[])
 
 	if (geteuid() == 0) {
 		flags |= ROOT_USR;
-		_err(0, PRINT_PROMPT, _("%s%s: %sRunning as root. Be careful\n"),
+		_err(0, PRINT_PROMPT, _("%s%s: %sRunning as root\n"),
 		    bold, PROGRAM_NAME, red);
 	}
 
