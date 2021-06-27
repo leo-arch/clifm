@@ -211,9 +211,7 @@ run_action(char *action, char **args)
 					free(alias_cmd[i]);
 
 				free(alias_cmd);
-			}
-
-			else {
+			} else {
 				exit_status = exec_cmd(_cmd);
 
 				for (i = 0; i <= args_n; i++)

@@ -1135,13 +1135,22 @@ recur_perm_check(const char *dirname)
 {
 	DIR *dir;
 	struct dirent *ent;
+#if !defined(_DIRENT_HAVE_D_TYPE)
+	struct stat attr;
+#endif
 
 	if (!(dir = opendir(dirname)))
 		return EXIT_FAILURE;
 
 	while ((ent = readdir(dir)) != NULL) {
 
+#if !defined(_DIRENT_HAVE_D_TYPE)
+		if (lstat(ent->d_name, &attr) == -1)
+			continue;
+		if ((attr.st_mode & S_IFMT) == S_IFDIR) {
+#else
 		if (ent->d_type == DT_DIR) {
+#endif
 			char dirpath[PATH_MAX] = "";
 
 			if (*ent->d_name == '.' && (!ent->d_name[1]

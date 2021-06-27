@@ -1249,6 +1249,9 @@ create_mime_file(char *file, int new_prof)
 	if (stat(file, &attr) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
+	if (!DATA_DIR)
+		return EXIT_FAILURE;
+
 	char sys_mimelist[PATH_MAX];
 	snprintf(sys_mimelist, PATH_MAX - 1, "%s/%s/mimelist.cfm", DATA_DIR, PNL);
 

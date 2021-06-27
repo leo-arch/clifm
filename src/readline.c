@@ -253,7 +253,6 @@ my_rl_path_completion(const char *text, int state)
 		tmp_text = dequote_str(p, 0);
 
 		free(p);
-
 		p = (char *)NULL;
 
 		if (!tmp_text)
@@ -303,7 +302,6 @@ my_rl_path_completion(const char *text, int state)
 		size_t text_len = strlen((tmp_text) ? tmp_text : text);
 		if (text_len)
 			filename = savestring((tmp_text) ? tmp_text : text, text_len);
-
 		else
 			filename = savestring("", 1);
 
@@ -312,13 +310,11 @@ my_rl_path_completion(const char *text, int state)
 
 		if (text_len)
 			dirname = savestring((tmp_text) ? tmp_text : text, text_len);
-
 		else
 			dirname = savestring("", 1);
 
 		if (dirname[0] == '.' && dirname[1] == '/')
 			exec = 1;
-
 		else
 			exec = 0;
 
@@ -328,10 +324,9 @@ my_rl_path_completion(const char *text, int state)
 		if (temp) {
 			strcpy(filename, ++temp);
 			*temp = '\0';
-		}
-
-		else
+		} else {
 			strcpy(dirname, ".");
+		}
 
 		/* We aren't done yet.  We also support the "~user" syntax. */
 
@@ -398,8 +393,33 @@ my_rl_path_completion(const char *text, int state)
 	/* ############### COMPLETION FILTER ################## */
 	/* #        This is the heart of the function         #
 	 * #################################################### */
+	mode_t type;
 
 	while (directory && (ent = readdir(directory))) {
+
+#if !defined(_DIRENT_HAVE_D_TYPE)
+		struct stat attr;
+		if (!dirname || (*dirname == '.' && !*(dirname + 1)))
+			strncpy(tmp, ent->d_name, PATH_MAX - 1);
+		else
+			snprintf(tmp, PATH_MAX - 1, "%s%s", dirname, ent->d_name);
+		if (lstat(tmp, &attr) == -1) {
+			continue;
+		}
+
+		switch (attr.st_mode & S_IFMT) {
+		case S_IFBLK: type = DT_BLK; break;
+		case S_IFCHR: type = DT_CHR; break;
+		case S_IFDIR: type = DT_DIR; break;
+		case S_IFIFO: type = DT_FIFO; break;
+		case S_IFLNK: type = DT_LNK; break;
+		case S_IFREG: type = DT_REG; break;
+		case S_IFSOCK: type = DT_SOCK; break;
+		default: type = DT_UNKNOWN; break;
+		}
+#else
+		type = ent->d_type;
+#endif
 
 		/* If the user entered nothing before TAB (ex: "cd [TAB]") */
 		if (!filename_len) {
@@ -413,11 +433,11 @@ my_rl_path_completion(const char *text, int state)
 			&& strncmp(rl_line_buffer, "cd ", 3) == 0) {
 				ret = -1;
 
-				switch (ent->d_type) {
+				switch (type) {
 				case DT_LNK:
-					if (dirname[0] == '.' && !dirname[1])
+					if (dirname[0] == '.' && !dirname[1]) {
 						ret = get_link_ref(ent->d_name);
-					else {
+					} else {
 						snprintf(tmp, PATH_MAX, "%s%s", dirname,
 						    ent->d_name);
 						ret = get_link_ref(tmp);
@@ -442,14 +462,13 @@ my_rl_path_completion(const char *text, int state)
 			&& (strncmp(rl_line_buffer, "o ", 2) == 0
 			|| strncmp(rl_line_buffer, "open ", 5) == 0)) {
 				ret = -1;
-				switch (ent->d_type) {
 
+				switch (type) {
 				case DT_LNK:
 
-					if (dirname[0] == '.' && !dirname[1])
+					if (dirname[0] == '.' && !dirname[1]) {
 						ret = get_link_ref(ent->d_name);
-
-					else {
+					} else {
 						snprintf(tmp, PATH_MAX, "%s%s", dirname,
 						    ent->d_name);
 						ret = get_link_ref(tmp);
@@ -478,21 +497,21 @@ my_rl_path_completion(const char *text, int state)
 			|| strncmp(rl_line_buffer, "tr ", 2) == 0
 			|| strncmp(rl_line_buffer, "trash ", 6) == 0)) {
 
-				if (ent->d_type != DT_BLK && ent->d_type != DT_CHR)
+				if (type != DT_BLK && type != DT_CHR)
 					match = 1;
 			}
 
 			/* If "./", list only executable regular files */
 			else if (exec) {
 
-				if (ent->d_type == DT_REG && access(ent->d_name, X_OK) == 0)
+				if (type == DT_REG && access(ent->d_name, X_OK) == 0)
 					match = 1;
 			}
 
 			/* If "/path/./", list only executable regular files */
 			else if (exec_path) {
 
-				if (ent->d_type == DT_REG) {
+				if (type == DT_REG) {
 					/* dir_tmp is dirname less "./", already
 					 * allocated before the while loop */
 					snprintf(tmp, PATH_MAX, "%s%s", dir_tmp,
@@ -526,13 +545,13 @@ my_rl_path_completion(const char *text, int state)
 			if (*rl_line_buffer == 'c'
 			&& strncmp(rl_line_buffer, "cd ", 3) == 0) {
 				ret = -1;
-				switch (ent->d_type) {
+
+				switch (type) {
 				case DT_LNK:
 
-					if (dirname[0] == '.' && !dirname[1])
+					if (dirname[0] == '.' && !dirname[1]) {
 						ret = get_link_ref(ent->d_name);
-
-					else {
+					} else {
 						snprintf(tmp, PATH_MAX, "%s%s", dirname,
 						    ent->d_name);
 						ret = get_link_ref(tmp);
@@ -556,7 +575,8 @@ my_rl_path_completion(const char *text, int state)
 			&& (strncmp(rl_line_buffer, "o ", 2) == 0
 			|| strncmp(rl_line_buffer, "open ", 5) == 0)) {
 				ret = -1;
-				switch (ent->d_type) {
+
+				switch (type) {
 				case DT_REG: /* fallthrough */
 				case DT_DIR:
 					match = 1;
@@ -566,9 +586,7 @@ my_rl_path_completion(const char *text, int state)
 
 					if (dirname[0] == '.' && !dirname[1]) {
 						ret = get_link_ref(ent->d_name);
-					}
-
-					else {
+					} else {
 						snprintf(tmp, PATH_MAX, "%s%s", dirname,
 						    ent->d_name);
 						ret = get_link_ref(tmp);
@@ -589,19 +607,19 @@ my_rl_path_completion(const char *text, int state)
 			|| strncmp(rl_line_buffer, "tr ", 3) == 0
 			|| strncmp(rl_line_buffer, "trash ", 6) == 0)) {
 
-				if (ent->d_type != DT_BLK && ent->d_type != DT_CHR)
+				if (type != DT_BLK && type != DT_CHR)
 					match = 1;
 			}
 
 			else if (exec) {
 
-				if (ent->d_type == DT_REG && access(ent->d_name, X_OK) == 0)
+				if (type == DT_REG && access(ent->d_name, X_OK) == 0)
 					match = 1;
 			}
 
 			else if (exec_path) {
 
-				if (ent->d_type == DT_REG) {
+				if (type == DT_REG) {
 					snprintf(tmp, PATH_MAX, "%s%s", dir_tmp, ent->d_name);
 					if (access(tmp, X_OK) == 0)
 						match = 1;
@@ -671,8 +689,7 @@ my_rl_path_completion(const char *text, int state)
 
 			else {
 				temp = (char *)xcalloc(strlen(users_dirname) +
-							   strlen(ent->d_name) + 1,
-				    sizeof(char));
+						strlen(ent->d_name) + 1, sizeof(char));
 				strcpy(temp, users_dirname);
 			}
 			strcat(temp, ent->d_name);
@@ -785,7 +802,7 @@ jump_entries_generator(const char *text, int state)
 	/* Check list of jump entries for a match */
 	while (i <= jump_n && (name = jump_db[i++].path) != NULL)
 		if (*name == *jump_db[num_text - 1].path && strcmp(name,
-										jump_db[num_text - 1].path) == 0)
+						jump_db[num_text - 1].path) == 0)
 			return strdup(name);
 
 	return (char *)NULL;

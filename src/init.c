@@ -61,6 +61,10 @@ get_data_dir(void)
 	char *data_dirs[] = {
 		"/usr/share",
 		"/usr/local/share",
+#if defined(__HAIKU__)
+		"/boot/system/non-packaged/data",
+		"/boot/system/data",
+#endif
 		NULL };
 
 	struct stat attr;
@@ -69,7 +73,6 @@ get_data_dir(void)
 	for (i = 0; data_dirs[i]; i++) {
 		char tmp[PATH_MAX];
 		snprintf(tmp, PATH_MAX - 1, "%s/%s", data_dirs[i], PNL);
-
 		if (stat(tmp, &attr) == EXIT_SUCCESS) {
 			DATA_DIR = (char *)xrealloc(DATA_DIR, (strlen(data_dirs[i]) + 1)
 										* sizeof(char));
@@ -81,7 +84,6 @@ get_data_dir(void)
 /*	if (DATA_DIR)
 		return; */
 	return;
-
 
 	/* If not found, try to get DATADIR from executable's path */
 /*	DATA_DIR = get_cmd_path(PNL);

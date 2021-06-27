@@ -27,7 +27,9 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
+#if !defined(__HAIKU__)
 #include <sys/acl.h>
+#endif
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -72,6 +74,10 @@ check_immutable_bit(char *file)
 int
 is_acl(char *file)
 {
+#if defined(__HAIKU__)
+	return 0;
+#else
+
 	if (!file || !*file)
 		return 0;
 
@@ -103,6 +109,7 @@ is_acl(char *file)
 		return 0;
 
 	return 0;
+#endif
 }
 
 /* Check whether a given string contains only digits. Returns 1 if true

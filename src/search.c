@@ -157,10 +157,9 @@ search_glob(char **comm, int invert)
 		/* If search is current directory */
 		if ((*search_path == '.' && !search_path[1]) ||
 		    (search_path[1] == ws[cur_ws].path[1]
-		    && strcmp(search_path, ws[cur_ws].path) == 0))
+		    && strcmp(search_path, ws[cur_ws].path) == 0)) {
 			search_path = (char *)NULL;
-
-		else if (xchdir(search_path, NO_TITLE) == -1) {
+		} else if (xchdir(search_path, NO_TITLE) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, search_path,
 			    strerror(errno));
 			return EXIT_FAILURE;
@@ -306,7 +305,26 @@ search_glob(char **comm, int invert)
 
 					if (!f) {
 
+#if !defined(_DIRENT_HAVE_D_TYPE)
+						struct stat attr;
+						mode_t type;
+						if (lstat(ent[k]->d_name, &attr) == -1)
+							continue;
+						switch (attr.st_mode & S_IFMT) {
+						case S_IFBLK: type = DT_BLK; break;
+						case S_IFCHR: type = DT_CHR; break;
+						case S_IFDIR: type = DT_DIR; break;
+						case S_IFIFO: type = DT_FIFO; break;
+						case S_IFLNK: type = DT_LNK; break;
+						case S_IFREG: type = DT_REG; break;
+						case S_IFSOCK: type = DT_SOCK; break;
+						default: type = DT_UNKNOWN; break;
+						}
+
+						if (file_type && type != file_type)
+#else
 						if (file_type && ent[k]->d_type != file_type)
+#endif
 							continue;
 
 						eln[found] = -1;
@@ -405,7 +423,6 @@ search_glob(char **comm, int invert)
 
 		if (flongest == 0 || flongest > tcols)
 			columns_n = 1;
-
 		else
 			columns_n = (int)(tcols / (flongest + 1));
 
@@ -708,12 +725,29 @@ search_regex(char **comm, int invert)
 			match_type[j] = 0;
 
 			if (search_path) {
-				if (reg_dirlist[regex_index[j]]->d_type != file_type)
+#if !defined(_DIRENT_HAVE_D_TYPE)
+				mode_t type;
+				struct stat attr;
+				if (lstat(reg_dirlist[regex_index[j]]->d_name, &attr) == -1)
 					continue;
-			}
-
-			else if (file_info[regex_index[j]].type != file_type)
+				switch (attr.st_mode & S_IFMT) {
+				case S_IFBLK: type = DT_BLK; break;
+				case S_IFCHR: type = DT_CHR; break;
+				case S_IFDIR: type = DT_DIR; break;
+				case S_IFIFO: type = DT_FIFO; break;
+				case S_IFLNK: type = DT_LNK; break;
+				case S_IFREG: type = DT_REG; break;
+				case S_IFSOCK: type = DT_SOCK; break;
+				default: type = DT_UNKNOWN; break;
+				}
+				if (type != file_type)
+#else
+				if (reg_dirlist[regex_index[j]]->d_type != file_type)
+#endif
+					continue;
+			} else if (file_info[regex_index[j]].type != file_type) {
 				continue;
+			}
 		}
 
 		/* Amount of non-filtered files */
@@ -725,8 +759,8 @@ search_regex(char **comm, int invert)
 		 * length (no ELN) */
 		if (search_path) {
 			files_len[j] = unicode ? wc_xstrlen(
-							reg_dirlist[regex_index[j]]->d_name)
-							: strlen(reg_dirlist[regex_index[j]]->d_name);
+					reg_dirlist[regex_index[j]]->d_name)
+					: strlen(reg_dirlist[regex_index[j]]->d_name);
 
 			if (files_len[j] > flongest)
 				flongest = files_len[j];
@@ -779,8 +813,9 @@ search_regex(char **comm, int invert)
 			if (cur_col == total_cols) {
 				last_column = 1;
 				cur_col = 0;
-			} else
+			} else {
 				last_column = 0;
+			}
 
 			/* Counter: Current amount of non-filtered files: if
 			 * COUNTER equals TYPE_OK (total amount of non-filtered

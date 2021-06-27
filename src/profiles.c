@@ -58,17 +58,27 @@ get_profile_names(void)
 	struct dirent **profs = (struct dirent **)NULL;
 	int files_n = scandir(pf_dir, &profs, NULL, xalphasort);
 
-	free(pf_dir);
-	pf_dir = (char *)NULL;
-
-	if (files_n == -1)
+	if (files_n == -1) {
+		free(pf_dir);
 		return EXIT_FAILURE;
+	}
 
 	size_t i, pf_n = 0;
+#if !defined(_DIRENT_HAVE_D_TYPE)
+	struct stat attr;
+#endif
 
 	for (i = 0; i < (size_t)files_n; i++) {
 
+#if !defined(_DIRENT_HAVE_D_TYPE)
+		char tmp[PATH_MAX];
+		snprintf(tmp, PATH_MAX - 1, "%s/%s", pf_dir,profs[i]->d_name);
+		if (lstat(tmp, &attr) == -1)
+			continue;
+		if ((attr.st_mode & S_IFMT) == S_IFDIR
+#else
 		if (profs[i]->d_type == DT_DIR
+#endif
 		    /* Discard ".", "..", and hidden dirs */
 		    && *profs[i]->d_name != '.') {
 			profile_names = (char **)xrealloc(profile_names, (pf_n + 1)
@@ -80,8 +90,8 @@ get_profile_names(void)
 		free(profs[i]);
 	}
 
+	free(pf_dir);
 	free(profs);
-	profs = (struct dirent **)NULL;
 
 	profile_names = (char **)xrealloc(profile_names, (pf_n + 1) * sizeof(char *));
 	profile_names[pf_n] = (char *)NULL;

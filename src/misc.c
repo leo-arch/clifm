@@ -35,6 +35,11 @@
 #include <sys/mount.h>
 #include <sys/sysctl.h>
 #endif
+/*
+#if defined(__HAIKU__)
+#include <private/libs/compat/freebsd_network/compat/sys/mount.h>
+#include <private/libs/compat/freebsd_network/compat/sys/sysctl.h>
+#endif */
 #include <time.h>
 #include <unistd.h>
 #include <readline/readline.h>
@@ -258,6 +263,9 @@ print_tips(int all)
 int
 new_instance(char *dir, int sudo)
 {
+#if defined(__HAIKU__)
+	return EXIT_FAILURE;
+#else
 	if (!term) {
 		fprintf(stderr, _("%s: Default terminal not set. Use the "
 				"configuration file to set one\n"), PROGRAM_NAME);
@@ -412,6 +420,7 @@ new_instance(char *dir, int sudo)
 		fprintf(stderr, _("%s: Error lauching new instance\n"), PROGRAM_NAME);
 
 	return ret;
+#endif /* !__HAIKU__ */
 }
 
 int
