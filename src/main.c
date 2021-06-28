@@ -573,20 +573,22 @@ main(int argc, char *argv[])
 	}
 
 	/* Set terminal window title */
-	if (xargs.cwd_in_title == 0) {
-		printf("\033]2;%s\007", PROGRAM_NAME);
-		fflush(stdout);
-	} else {
-		char *tmp = (char *)NULL;
+	if (flags & GUI) {
+		if (xargs.cwd_in_title == 0) {
+			printf("\033]2;%s\007", PROGRAM_NAME);
+			fflush(stdout);
+		} else {
+			char *tmp = (char *)NULL;
 
-		if (ws[cur_ws].path[1] == 'h')
-			tmp = home_tilde(ws[cur_ws].path);
+			if (ws[cur_ws].path[1] == 'h')
+				tmp = home_tilde(ws[cur_ws].path);
 
-		printf("\033]2;%s - %s\007", PROGRAM_NAME, tmp ? tmp : ws[cur_ws].path);
-		fflush(stdout);
+			printf("\033]2;%s - %s\007", PROGRAM_NAME, tmp ? tmp : ws[cur_ws].path);
+			fflush(stdout);
 
-		if (tmp)
-			free(tmp);
+			if (tmp)
+				free(tmp);
+		}
 	}
 
 	exec_profile();
