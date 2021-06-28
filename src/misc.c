@@ -264,6 +264,8 @@ int
 new_instance(char *dir, int sudo)
 {
 #if defined(__HAIKU__)
+	fprintf(stderr, _("%s: This function is not available on Haiku\n"),
+			PROGRAM_NAME);
 	return EXIT_FAILURE;
 #else
 	if (!term) {
@@ -332,8 +334,9 @@ new_instance(char *dir, int sudo)
 							+ strlen(deq_dir) + 2, sizeof(char));
 		sprintf(path_dir, "%s/%s", ws[cur_ws].path, deq_dir);
 		free(deq_dir);
-	} else
+	} else {
 		path_dir = deq_dir;
+	}
 
 	/*  char *cmd = (char *)xnmalloc(strlen(term) + strlen(self)
 								 + strlen(path_dir) + 13, sizeof(char));
@@ -392,9 +395,7 @@ new_instance(char *dir, int sudo)
 		for (size_t i = 0; tmp_cmd[i]; i++)
 			free(tmp_cmd[i]);
 		free(tmp_cmd);
-	}
-
-	else {
+	} else {
 		fprintf(stderr, _("%s: No option specified for '%s'\n"
 				"Trying '%s -e %s -p %s'\n"), PROGRAM_NAME, term,
 				term, self, ws[cur_ws].path);
@@ -402,18 +403,13 @@ new_instance(char *dir, int sudo)
 		if (sudo) {
 			char *cmd[] = {term, "-e", "sudo", self, "-p", path_dir, NULL};
 			ret = launch_execve(cmd, BACKGROUND, E_NOFLAG);
-		}
-
-		else {
+		} else {
 			char *cmd[] = {term, "-e", self, "-p", path_dir, NULL};
 			ret = launch_execve(cmd, BACKGROUND, E_NOFLAG);
 		}
 	}
 
-//	if (*deq_dir != '/')
-		free(path_dir);
-
-//	free(deq_dir);
+	free(path_dir);
 	free(self);
 
 	if (ret != EXIT_SUCCESS)
