@@ -43,8 +43,8 @@ remote_ftp(char *address, char *options)
 		return EXIT_SUCCESS;
 	}
 
-#if __FreeBSD__
-	fprintf(stderr, _("%s: FTP is not yet supported on FreeBSD\n"),
+#if __FreeBSD__ || __NetBSD__
+	fprintf(stderr, _("%s: FTP is not yet supported on BSD systems\n"),
 	    PROGRAM_NAME);
 	return EXIT_FAILURE;
 #endif
@@ -126,8 +126,8 @@ remote_smb(char *address, char *options)
 		return EXIT_SUCCESS;
 	}
 
-#if __FreeBSD__
-	fprintf(stderr, _("%s: SMB is not yet supported on FreeBSD\n"), PROGRAM_NAME);
+#if __FreeBSD__ || __NetBSD__
+	fprintf(stderr, _("%s: SMB is not yet supported on BSD systems\n"), PROGRAM_NAME);
 	return EXIT_FAILURE;
 #endif
 
@@ -290,8 +290,8 @@ remote_ssh(char *address, char *options)
 		return EXIT_SUCCESS;
 	}
 
-#if __FreeBSD__
-	fprintf(stderr, _("%s: SFTP is not yet supported on FreeBSD"),
+#if __FreeBSD__ || __NetBSD__
+	fprintf(stderr, _("%s: SFTP is not yet supported on BSD systems"),
 	    PROGRAM_NAME);
 	return EXIT_FAILURE;
 #endif

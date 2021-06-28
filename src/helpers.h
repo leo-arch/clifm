@@ -29,9 +29,12 @@
 #else
 #define _POSIX_C_SOURCE 200809L
 #define _DEFAULT_SOURCE
-#if __FreeBSD__
+#if defined(__FreeBSD__)
 #define __XSI_VISIBLE 700
 #define __BSD_VISIBLE 1
+#endif
+#ifdef __NetBSD__
+#define _NETBSD_SOURCE
 #endif
 #endif
 
@@ -44,7 +47,7 @@
 #include <regex.h>
 #include <stddef.h>
 #include <stdlib.h>
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__NetBSD__)
 #include <sys/time.h>
 #endif
 #ifdef __linux__

@@ -366,7 +366,7 @@ get_properties(char *filename, int dsize)
 	}
 
 	printf(_("\tBlocks: %ld"), file_attrib.st_blocks);
-#if __FreeBSD__
+#if defined(__FreeBSD__) || defined(__NetBSD__)
 	printf(_("\tIO Block: %d"), file_attrib.st_blksize);
 #else
 	printf(_("\tIO Block: %ld"), file_attrib.st_blksize);

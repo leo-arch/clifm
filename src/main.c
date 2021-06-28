@@ -35,8 +35,8 @@
 #include <sys/stat.h>
 #include <termios.h>
 #include <unistd.h>
-#include <readline/history.h>
 #include <readline/readline.h>
+#include <readline/history.h>
 
 #include "aux.h"
 #include "checks.h"
@@ -370,7 +370,9 @@ main(int argc, char *argv[])
 
 	/* Though this program might perfectly work on other OSes, especially
 	 * Unixes, I just didn't make any test */
-#if !defined(__linux__) && !defined(linux) && !defined(__linux) && !defined(__gnu_linux__) && !defined(__FreeBSD__) && !defined(__HAIKU__)
+#if !defined(__linux__) && !defined(linux) && !defined(__linux) \
+&& !defined(__gnu_linux__) && !defined(__FreeBSD__) \
+&& !defined(__NetBSD__) && !defined(__HAIKU__)
 	fprintf(stderr, _("%s: Unsupported operating system\n"),
 	    PROGRAM_NAME);
 	exit(EXIT_FAILURE);

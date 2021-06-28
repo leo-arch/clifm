@@ -29,6 +29,9 @@
 #include <termios.h>
 #include <unistd.h>
 #include <readline/readline.h>
+#ifdef __NetBSD__
+#include <string.h>
+#endif
 
 #include "aux.h"
 #include "config.h"
@@ -893,7 +896,7 @@ rl_lock(int count, int key)
 
 	rl_deprep_terminal();
 
-#if __FreeBSD__
+#if __FreeBSD__ || __NetBSD__
 	char *cmd[] = {"lock", NULL};
 	ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 #elif __linux__

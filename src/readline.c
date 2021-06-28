@@ -24,7 +24,7 @@
 
 #include "helpers.h"
 
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__NetBSD__)
 #include <sys/stat.h>
 #endif
 #include <dirent.h>
@@ -32,9 +32,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <readline/history.h>
 #include <readline/readline.h>
-
+#include <readline/history.h>
 
 #include "aux.h"
 #include "checks.h"

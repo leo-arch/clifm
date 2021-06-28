@@ -1748,7 +1748,7 @@ exec_cmd(char **comm)
 		 * that if the user uses a customized LS_COLORS, unsetting it
 		 * set its value to default, and the customization is lost. */
 
-#if __FreeBSD__
+#if defined(__FreeBSD__) || defined(__NetBSD__)
 		char *my_ls_colors = (char *)NULL, *p = (char *)NULL;
 		/* For some reason, when running on FreeBSD Valgrind complains
 		 * about overlapping source and destiny in setenv() if I just
@@ -1777,7 +1777,7 @@ exec_cmd(char **comm)
 		/* Restore LS_COLORS value to use CliFM colors */
 		setenv("LS_COLORS", my_ls_colors, 1);
 
-#if __FreeBSD__
+#if defined(__FreeBSD__) || defined(__NetBSD__)
 		free(my_ls_colors);
 #endif
 

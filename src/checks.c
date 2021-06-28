@@ -27,7 +27,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#if !defined(__HAIKU__)
+#if !defined(__HAIKU__) && !defined(__NetBSD__)
 #include <sys/acl.h>
 #endif
 #include <sys/stat.h>
@@ -74,7 +74,7 @@ check_immutable_bit(char *file)
 int
 is_acl(char *file)
 {
-#if defined(__HAIKU__)
+#if defined(__HAIKU__) || defined(__NetBSD__)
 	return 0;
 #else
 

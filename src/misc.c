@@ -31,7 +31,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
-#if defined(__FreeBSD__)
+#if defined(__FreeBSD__) || defined(__NetBSD__)
 #include <sys/mount.h>
 #include <sys/sysctl.h>
 #endif
@@ -283,7 +283,7 @@ new_instance(char *dir, int sudo)
 	char *self = realpath("/proc/self/exe", NULL);
 
 	if (!self) {
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) || defined(__NetBSD__)
 	const int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
 	char *self = malloc(PATH_MAX);
 	size_t len = PATH_MAX;
@@ -911,6 +911,9 @@ list_mountpoints(void)
 #elif defined(__FreeBSD__)
 	struct statfs *fslist;
 	mp_n = getmntinfo(&fslist, MNT_NOWAIT);
+#elif defined(__NetBSD__)
+	struct statvfs *fslist;
+	mp_n = getmntinfo(&fslist, MNT_NOWAIT);
 #endif
 
 	/* This should never happen: There should always be a mountpoint,
@@ -919,7 +922,7 @@ list_mountpoints(void)
 		fputs(_("mp: There are no available mountpoints\n"), stdout);
 		return EXIT_SUCCESS;
 	}
-#if defined(__FreeBSD__)
+#if defined(__FreeBSD__) || defined(__NetBSD__)
 	int j;
 	for (i = j = 0; i < mp_n; i++) {
 		/* Do not list all mountpoints, but only those corresponding

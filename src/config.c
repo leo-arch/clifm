@@ -487,7 +487,7 @@ edit_xresources(void)
 	/* Since I'm looking for very specific lines, which are
 	 * fixed lines far below MAX_LINE, I don't care to get
 	 * any of the remaining lines truncated */
-#if __FreeBSD__
+#if __FreeBSD__ || __NetBSD__
 	fseek(xresources_fp, 0, SEEK_SET);
 #endif
 	char line[256] = "";

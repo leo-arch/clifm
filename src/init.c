@@ -35,6 +35,9 @@
 #include <time.h>
 #include <unistd.h>
 #include <readline/readline.h>
+#ifdef __NetBSD__
+#include <ctype.h>
+#endif
 
 #include "aux.h"
 #include "checks.h"

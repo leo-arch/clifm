@@ -77,7 +77,7 @@ print_sort_method(void)
 	case SMTIME:
 		printf(_("mtime %s\n"), (sort_reverse) ? "[rev]" : "");
 		break;
-#if __FreeBSD__ || _BE_POSIX
+#if __FreeBSD__ || __NetBSD__ || _BE_POSIX
 	case SVER:
 		printf(_("version (not available: using 'name') %s\n"),
 		    (sort_reverse) ? "[rev]" : "");
