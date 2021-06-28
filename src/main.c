@@ -578,18 +578,7 @@ main(int argc, char *argv[])
 			printf("\033]2;%s\007", PROGRAM_NAME);
 			fflush(stdout);
 		} else {
-			char *tmp = (char *)NULL;
-
-#if !defined(__HAIKU__)
-			if (ws[cur_ws].path[1] == 'h')
-#endif
-				tmp = home_tilde(ws[cur_ws].path);
-
-			printf("\033]2;%s - %s\007", PROGRAM_NAME, tmp ? tmp : ws[cur_ws].path);
-			fflush(stdout);
-
-			if (tmp)
-				free(tmp);
+			set_term_title(ws[cur_ws].path);
 		}
 	}
 
