@@ -68,7 +68,7 @@ Search for files, copy, rename, and trash some of them, but, at the same time, u
 Those familiar with the command-line will find in a file-manager based on it a desirable _addition_ to its functionality. \
 The command-line is still there, never hidden.
 
-### Should all terminal file-managers be curses-based file-managers? No.
+### Should all terminal file managers be curses-based file managers? No.
 
 ---
 
