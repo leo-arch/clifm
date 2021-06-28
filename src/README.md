@@ -128,15 +128,27 @@ Jumper: `jump.c`
 
 CliFM is compiled using `gcc` (`clang` and `tcc` work as well) as follows:
 
-1) For _Linux_:
+1) _Linux_:
 ```sh
 gcc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -lreadline -lcap -lacl
 ```
 
-2) For _FreeBSD_:
+2) _FreeBSD_:
 
 ```sh
 gcc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -lreadline -lintl
+```
+
+3) _NetBSD_:
+
+```sh
+gcc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -I/usr/pkg/include -L/usr/pkg/lib -Wl,-R/usr/pkg/lib -lintl -lreadline
+```
+
+4) _Haiku_:
+
+```sh
+gcc -o clifm *.c -lreadline -lintl
 ```
 
 To produce a fully `POSIX.1-2008` compliant executable pass the `\_BE_POSIX` option to the compiler, that is, `-D_BE_POSIX`. Only two features are lost in this way:
