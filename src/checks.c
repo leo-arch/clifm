@@ -27,9 +27,18 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#if !defined(__HAIKU__) && !defined(__NetBSD__)
-#include <sys/acl.h>
-#endif
+
+#ifdef __NetBSD__
+# include <sys/param.h>
+# if __NetBSD_Prereq__(9,99,63)
+#  include <sys/acl.h>
+#  define _ACL_OK
+# endif /* __NetBSD_Prereq__ */
+#elif !defined(__HAIKU__)
+# include <sys/acl.h>
+# define _ACL_OK
+#endif /* __NetBSD__ */
+
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -45,7 +54,6 @@ check_immutable_bit(char *file)
 #if !defined(FS_IOC_GETFLAGS) || !defined(FS_IMMUTABLE_FL)
 	return 0;
 #else
-
 	int attr, fd, immut_flag = -1;
 
 	fd = open(file, O_RDONLY);
@@ -59,13 +67,13 @@ check_immutable_bit(char *file)
 		immut_flag = 1;
 	else
 		immut_flag = 0;
+
 	close(fd);
 
 	if (immut_flag)
 		return 1;
-	else
-		return 0;
 
+	return 0;
 #endif /* !defined(FS_IOC_GETFLAGS) || !defined(FS_IMMUTABLE_FL) */
 }
 
@@ -74,42 +82,36 @@ check_immutable_bit(char *file)
 int
 is_acl(char *file)
 {
-#if defined(__HAIKU__) || defined(__NetBSD__)
+#ifndef _ACL_OK
 	return 0;
 #else
-
 	if (!file || !*file)
 		return 0;
 
 	acl_t acl;
 	acl = acl_get_file(file, ACL_TYPE_ACCESS);
 
-	if (acl) {
-		acl_entry_t entry;
-		int entryid, num = 0;
-
-		for (entryid = ACL_FIRST_ENTRY;; entryid = ACL_NEXT_ENTRY) {
-			if (acl_get_entry(acl, entryid, &entry) != 1)
-				break;
-			num++;
-		}
-
-		acl_free(acl);
-
-		if (num > 3)
-			/* We have something else besides owner, group, and others,
-			 * that is, we have at least one ACL property */
-			return 1;
-		else
-			return 0;
-	}
-
-	else /* Error */
-		/* fprintf(stderr, "%s\n", strerror(errno)); */
+	if (!acl)
 		return 0;
 
+	acl_entry_t entry;
+	int entryid, num = 0;
+
+	for (entryid = ACL_FIRST_ENTRY;; entryid = ACL_NEXT_ENTRY) {
+		if (acl_get_entry(acl, entryid, &entry) != 1)
+			break;
+		num++;
+	}
+
+	acl_free(acl);
+
+	/* If num > 3 we have something else besides owner, group, and others,
+	 * that is, we have at least one ACL property */
+	if (num > 3)
+		return 1;
+
 	return 0;
-#endif
+#endif /* _ACL_OK */
 }
 
 /* Check whether a given string contains only digits. Returns 1 if true
