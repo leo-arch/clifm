@@ -180,7 +180,7 @@ main() {
 		case $option in
 			# CHECK GENERAL OPTIONS
 			LS)
-				if [ -z "$value" ] || [ "$value" = "gnu" ]; then
+				if [ ${value:-gnu} = gnu ]; then
 					export ls_cmd="ls -Ap --group-directories-first --color=always --indicator-style=none"
 				else
 					export ls_cmd="ls -Ap"
@@ -388,6 +388,11 @@ main() {
 
 	export COLORS
 	COLORS="$(tput colors)"
+
+	# Defaults to POSIX ls
+	if [ -z "$ls_cmd" ]; then
+		export ls_cmd="ls -Ap --group-directories-first --color=always --indicator-style=none"
+	fi
 
 	# This is the previewer script, similar to Ranger's scope.sh
 	if [ -z "$BFG_FILE" ]; then
