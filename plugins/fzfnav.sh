@@ -37,7 +37,7 @@ get_bfg_cfg_file() {
 	if [ -z "$FILE" ] || ! [ -f "$FILE" ]; then
 		FILE=""
 		if [ -n "$XDG_DATA_DIRS" ]; then
-			dirs="$(echo "$XDG_DATA_DIRS" | sed '/s/:/ /g')"
+			dirs="$(echo "$XDG_DATA_DIRS" | sed 's/:/ /g')"
 			for dir in $dirs; do
 				if [ -f "$dir/clifm/plugins/BFG.cfg" ]; then
 					FILE="$dir/clifm/plugins/BFG.cfg"
