@@ -31,6 +31,37 @@ uz_cleanup() {
     pkill -P $$ >/dev/null
 }
 
+get_bfg_cfg_file() {
+	FILE="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/BFG.cfg"
+
+	if [ -z "$FILE" ] || ! [ -f "$FILE" ]; then
+		FILE=""
+		if [ -n "$XDG_DATA_DIRS" ]; then
+			dirs="$(echo "$XDG_DATA_DIRS" | sed '/s/:/ /g')"
+			for dir in $dirs; do
+				if [ -f "$dir/clifm/plugins/BFG.cfg" ]; then
+					FILE="$dir/clifm/plugins/BFG.cfg"
+					break
+				fi
+			done
+		fi
+
+		if [ -z "$FILE" ]; then
+			if [ -f /usr/share/clifm/plugins/BFG.cfg ]; then
+				FILE="/usr/share/clifm/plugins/BFG.cfg"
+			elif [ -f /usr/local/share/clifm/plugins/BFG.cfg ]; then
+				FILE="/usr/local/share/clifm/plugins/BFG.cfg"
+			elif [ -f /boot/system/data/clifm/plugins/BFG.cfg ]; then
+				FILE="/boot/system/data/clifm/plugins/BFG.cfg"
+			elif [ -f /boot/system/non-packaged/data/clifm/plugins/BFG.cfg ]; then
+				FILE="/boot/system/non-packaged/data/clifm/plugins/BFG.cfg"
+			fi
+		fi
+	fi
+
+	[ -n "$FILE" ] && printf "%s\n" "$FILE"
+}
+
 start_ueberzug() {
 	mkfifo "$FIFO_UEBERZUG"
 	tail --follow "$FIFO_UEBERZUG" \
@@ -56,7 +87,9 @@ fcd() {
 		cd "$@" || return
 	fi
 
-	dir_color="$(dircolors -c | grep -o "[\':]di=....." | cut -d';' -f2)"
+	if type dircolors > /dev/null 2>&1; then
+		dir_color="$(dircolors -c | grep -o "[\':]di=....." | cut -d';' -f2)"
+	fi
 	[ -z "$dir_color" ] && dir_color="34"
 
 	# Make sure FZF interface won't be messed up when running on an 8 bit terminal
@@ -69,10 +102,11 @@ fcd() {
 
 	[ -n "$CLIFM" ] && fzf_prompt="CliFM "
 
+#--color="bg+:236,gutter:236,fg+:reverse,pointer:6,prompt:6,marker:2:bold,spinner:6:bold" \
+
 	# Keep FZF running until the user presses Esc or q
 	while true; do
-		lsd=$(printf "\033[0;%sm..\n" "$dir_color"; \
-		ls -Ap --group-directories-first --color=always --indicator-style=none)
+		lsd=$(printf "\033[0;%sm..\n" "$dir_color"; $ls_cmd)
 		file="$(printf "%s\n" "$lsd" | fzf \
 			--color="bg+:236,gutter:236,fg+:reverse,pointer:6,prompt:6,marker:2:bold,spinner:6:bold" \
 			--bind "right:accept,left:first+accept" \
@@ -121,7 +155,11 @@ main() {
 	# file types. The implementation for each application is defined in the
 	# BFG file.
 
-	BFG_CFG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/clifm/plugins/BFG.cfg"
+	BFG_CFG_FILE="$(get_bfg_cfg_file)"
+	if [ -z "$BFG_CFG_FILE" ]; then
+		printf "CliFM: BFG.cfg: No such file or directory\n" >&2
+		exit 1
+	fi
 
 			#################################################
 			#	1. GET VALUES FROM THE CONFIGURATION FILE	#
@@ -141,6 +179,12 @@ main() {
 
 		case $option in
 			# CHECK GENERAL OPTIONS
+			LS)
+				if [ -z "$value" ] || [ "$value" = "gnu" ]; then
+					export ls_cmd="ls -Ap --group-directories-first --color=always --indicator-style=none"
+				else
+					export ls_cmd="ls -Ap"
+				fi ;;
 			BFG_FILE)
 				if [ -z "$value" ]; then
 					BFG_FILE=""
