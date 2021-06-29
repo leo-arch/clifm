@@ -284,12 +284,11 @@ decode_prompt(const char *line)
 			}
 
 			case 'e': /* Escape char */
-				temp = xnmalloc(3, sizeof(char));
+				temp = xnmalloc(2, sizeof(char));
 				line++;
-				temp[0] = CTLESC;
 				/* 27 (dec) == 033 (octal) == 0x1b (hex) == \e */
-				temp[1] = 27;
-				temp[2] = '\0';
+				temp[0] = '\033';
+				temp[1] = '\0';
 				c = 0;
 				goto add_string;
 
@@ -490,11 +489,10 @@ decode_prompt(const char *line)
 			case '[': /* Begin a sequence of non-printing characters.
 			Mostly used to add color sequences. Ex: \[\033[1;34m\] */
 			case ']': /* End the sequence */
-				temp = xnmalloc(3, sizeof(char));
-				temp[0] = '\001';
-				temp[1] = (c == '[') ? RL_PROMPT_START_IGNORE
+				temp = xnmalloc(2, sizeof(char));
+				temp[0] = (c == '[') ? RL_PROMPT_START_IGNORE
 						     : RL_PROMPT_END_IGNORE;
-				temp[2] = '\0';
+				temp[1] = '\0';
 				goto add_string;
 
 			case '\\': /* Literal backslash */
