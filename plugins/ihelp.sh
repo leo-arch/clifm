@@ -10,34 +10,12 @@ if [ -n "$1" ] && ([ "$1" = "--help" ] || [ "$1" = "help" ]); then
 	exit 0
 fi
 
-get_man_file() {
-	FILE=""
-	if [ -n "$XDG_DATA_DIRS" ]; then
-		dirs="$(echo "$XDG_DATA_DIRS" | sed 's/:/ /g')"
-		for dir in $dirs; do
-			if [ -f "$dir/man/man1/clifm.1.gz" ]; then
-				FILE="$dir/man/man1/clifm.1.gz"
-				break
-			fi
-		done
-	fi
+if ! type man > /dev/null 2>&1; then
+	printf "CliFM: man: Command not found\n" >&2
+	exit 1
+fi
 
-	if [ -z "$FILE" ]; then
-		if [ -f /usr/share/man/man1/clifm.1.gz ]; then
-			FILE="/usr/share/man/man1/clifm.1.gz"
-		elif [ -f /usr/local/share/man/man1/clifm.1.gz ]; then
-			FILE="/usr/local/share/man/man1/clifm.1.gz"
-		elif [ -f /boot/system/data/man/man1/clifm.1.gz ]; then
-			FILE="/boot/system/data/man/man1/clifm.1.gz"
-		elif [ -f /boot/system/non-packaged/data/man/man1/clifm.1.gz ]; then
-			FILE="/boot/system/non-packaged/data/man/man1/clifm.1.gz"
-		fi
-	fi
-
-	printf "%s\n" "$FILE"
-}
-
-manpage="$(get_man_file)"
+manpage="$(man -w clifm)"
 
 if ! [ -f "$manpage" ]; then
 	printf "CliFM: no manpage found\n" >&2
