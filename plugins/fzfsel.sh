@@ -62,7 +62,18 @@ fi
 marksel_mode=0
 cmd="$1"
 
+OS="$(uname -s)"
+if [ -z "$OS" ]; then
+	printf "CLiFM: Unable to detect operating system\n" >&2
+	exit 1
+fi
+
 if [ -n "$cmd" ]; then
+
+	case "$OS" in
+		Linux) ls_cmd="ls --color=always --indicator=none" ;;
+		*) ls_cmd="ls" ;;
+	esac
 
 	if ! [ -f "$CLIFM_SELFILE" ]; then
 		printf "CliFM: There are no selected files\n" >&2
@@ -89,9 +100,7 @@ if [ -n "$cmd" ]; then
 	fi
 
 	marksel_mode=1
-	# shellcheck disable=SC2012
-	# shellcheck disable=SC2046
-	ls --color=always --indicator=none $(cat "$CLIFM_SELFILE") | \
+	$ls_cmd "$(cat "$CLIFM_SELFILE")" | \
 	fzf --multi --marker='*' --info=inline --keep-right \
 		--color "prompt:6,fg+:reverse,marker:2:bold,pointer:6,header:7" \
 		--bind "alt-down:toggle+down,insert:toggle+down" \
@@ -102,9 +111,12 @@ if [ -n "$cmd" ]; then
 		--reverse "$BORDERS" --ansi --prompt "CliFM> " > "$TMPFILE"
 
 else
+	case "$OS" in
+		Linux) ls_cmd="ls -A --group-directories-first --color=always" ;;
+		*) ls_cmd="ls -A"
+	esac
 	# shellcheck disable=SC2012
-	ls -A --group-directories-first --color=always | \
-	fzf --multi --marker='*' --info=inline \
+	$ls_cmd | fzf --multi --marker='*' --info=inline \
 		--color "prompt:6,fg+:reverse,marker:2:bold,pointer:6,header:7" \
 		--bind "alt-down:toggle+down,insert:toggle+down" \
 		--bind "alt-up:toggle+up" \
@@ -133,7 +145,7 @@ fi
 if [ -z "$DISPLAY" ]; then
 	clear
 else
-	tput rmcup
+	tput clear
 fi
 
 rm -f -- "$TMPFILE" > /dev/null 2>&1
