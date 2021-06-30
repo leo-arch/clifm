@@ -35,7 +35,7 @@ done
 if [ -z "$DISPLAY" ]; then
 	clear
 else
-	tput rmcup
+	tput clear
 fi
 
 exit 0

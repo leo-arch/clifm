@@ -98,7 +98,7 @@ rm -f -- "$BK_FILE" > /dev/null 2>&1
 if [ -z "$DISPLAY" ]; then
 	clear
 else
-	tput rmcup
+	tput clear
 fi
 
 exit 0
