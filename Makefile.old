@@ -7,9 +7,8 @@ OS != uname -s
 BIN ?= clifm
 
 PREFIX ?= /usr/local
+MANPREFIX ?= $(PREFIX)/share/man
 DATADIR ?= $(PREFIX)/share
-MANDIR ?= $(PREFIX)/man
-LOCALEDIR ?= $(DATADIR)/locale
 DESKTOPPREFIX ?= $(DATADIR)/applications
 DESKTOPICONPREFIX ?= $(DATADIR)/icons/hicolor
 PROG_DATADIR ?= $(DATADIR)/$(BIN)
@@ -39,21 +38,21 @@ install: build
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PREFIX)/bin
 	$(INSTALL) -m 0755 $(BIN) $(DESTDIR)$(PREFIX)/bin
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)
-	$(INSTALL) -m 0755 -d $(DESTDIR)$(MANDIR)/man1
+	$(INSTALL) -m 0755 -d $(DESTDIR)$(MANPREFIX)/man1
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(DATADIR)/bash-completion/completions
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(DESKTOPPREFIX)
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(DATADIR)/zsh/site-functions
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(DESKTOPICONPREFIX)/scalable/apps
-	$(INSTALL) -m 0755 -d $(DESTDIR)$(LOCALEDIR)/es/LC_MESSAGES
-	$(INSTALL) -m 0644 misc/manpage $(DESTDIR)$(MANDIR)/man1/$(BIN).1
-	gzip -- $(DESTDIR)$(MANDIR)/man1/$(BIN).1
+	$(INSTALL) -m 0755 -d $(DESTDIR)$(DATADIR)/locale/es/LC_MESSAGES
+	$(INSTALL) -m 0644 misc/manpage $(DESTDIR)$(MANPREFIX)/man1/$(BIN).1
+	gzip -- $(DESTDIR)$(MANPREFIX)/man1/$(BIN).1
 	$(INSTALL) -m 0644 misc/completions.bash $(DESTDIR)$(DATADIR)/bash-completion/completions/$(BIN)
 	$(INSTALL) -m 0644 misc/completions.zsh $(DESTDIR)$(DATADIR)/zsh/site-functions/_$(BIN)
 	$(INSTALL) -m 0644 misc/$(BIN).desktop $(DESTDIR)$(DESKTOPPREFIX)
 	$(INSTALL) -m 0644 misc/*.cfm $(DESTDIR)$(PROG_DATADIR)
 	$(INSTALL) -m 0644 misc/clifmrc $(DESTDIR)$(PROG_DATADIR)
 	$(INSTALL) -m 0644 images/logo/$(BIN).svg $(DESTDIR)$(DESKTOPICONPREFIX)/scalable/apps
-	$(INSTALL) -m 0644 translations/spanish/$(BIN).mo $(DESTDIR)$(LOCALEDIR)/es/LC_MESSAGES/$(BIN).mo
+	$(INSTALL) -m 0644 translations/spanish/$(BIN).mo $(DESTDIR)$(DATADIR)/locale/es/LC_MESSAGES/$(BIN).mo
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/plugins
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/functions
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/colors
@@ -66,7 +65,7 @@ install: build
 
 uninstall:
 	$(RM) -- $(DESTDIR)$(PREFIX)/bin/$(BIN)
-	$(RM) -- $(DESTDIR)$(MANDIR)/man1/$(BIN).1.gz
+	$(RM) -- $(DESTDIR)$(MANPREFIX)/man1/$(BIN).1.gz
 	$(RM) -- $(DESTDIR)$(DATADIR)/locale/*/LC_MESSAGES/$(BIN).mo
 	$(RM) -- $(DESTDIR)$(DATADIR)/bash-completion/completions/$(BIN)
 	$(RM) -- $(DESTDIR)$(DATADIR)/zsh/site-functions/_$(BIN)

@@ -1501,9 +1501,10 @@ hidden_function(char **comm)
 int
 list_commands(void)
 {
-	char *cmd[] = {"man", "-P", "less -p ^[0-9]+\\.[[:space:]]COMMANDS",
-					PNL, NULL};
-	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+	char cmd[PATH_MAX];
+	snprintf(cmd, PATH_MAX - 1, "export PAGER=\"less -p '^[0-9]+\\.[[:space:]]COMMANDS'\"; man %s\n",
+			PNL);
+	if (launch_execle(cmd) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
 	return EXIT_SUCCESS;
