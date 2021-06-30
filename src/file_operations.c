@@ -774,9 +774,17 @@ remove_file(char **args)
 
 	rm_cmd[0] = savestring("rm", 2);
 	if (dirs)
+#ifdef __NetBSD__
+		rm_cmd[1] = savestring("-dir", 4);
+#else
 		rm_cmd[1] = savestring("-dIr", 4);
+#endif
 	else
+#ifdef __NetBSD__
+		rm_cmd[1] = savestring("-i", 2);
+#else
 		rm_cmd[1] = savestring("-I", 2);
+#endif
 	rm_cmd[2] = savestring("--", 2);
 
 	if (launch_execve(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
