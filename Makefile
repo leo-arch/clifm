@@ -67,7 +67,7 @@ install: build
 uninstall:
 	$(RM) -- $(DESTDIR)$(PREFIX)/bin/$(BIN)
 	$(RM) -- $(DESTDIR)$(MANDIR)/man1/$(BIN).1.gz
-	$(RM) -- $(DESTDIR)$(DATADIR)/locale/*/LC_MESSAGES/$(BIN).mo
+	$(RM) -- $(DESTDIR)$(LOCALEDIR)/*/LC_MESSAGES/$(BIN).mo
 	$(RM) -- $(DESTDIR)$(DATADIR)/bash-completion/completions/$(BIN)
 	$(RM) -- $(DESTDIR)$(DATADIR)/zsh/site-functions/_$(BIN)
 	$(RM) -- $(DESTDIR)$(DESKTOPPREFIX)/$(BIN).desktop
