@@ -775,13 +775,13 @@ remove_file(char **args)
 	rm_cmd[0] = savestring("rm", 2);
 	if (dirs)
 #ifdef __NetBSD__
-		rm_cmd[1] = savestring("-dir", 4);
+		rm_cmd[1] = savestring("-r", 2);
 #else
 		rm_cmd[1] = savestring("-dIr", 4);
 #endif
 	else
 #ifdef __NetBSD__
-		rm_cmd[1] = savestring("-i", 2);
+		rm_cmd[1] = savestring("-f", 2);
 #else
 		rm_cmd[1] = savestring("-I", 2);
 #endif
