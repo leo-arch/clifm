@@ -180,10 +180,10 @@ main() {
 		case $option in
 			# CHECK GENERAL OPTIONS
 			LS)
-				if [ ${value:-gnu} = gnu ]; then
-					export ls_cmd="ls -Ap --group-directories-first --color=always --indicator-style=none"
-				else
+				if [ ${value:-posix} = posix ]; then
 					export ls_cmd="ls -Ap"
+				else
+					export ls_cmd="ls -Ap --group-directories-first --color=always --indicator-style=none"
 				fi ;;
 			BFG_FILE)
 				if [ -z "$value" ]; then
