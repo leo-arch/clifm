@@ -631,7 +631,7 @@ main() {
 	if [ -z "$DISPLAY" ]; then
 		clear
 	else
-		tput rmcup
+		tput clear
 	fi
 
 	[ -n "$CLIFM" ] && cat "$TMP" 2>/dev/null > "$CLIFM_BUS"

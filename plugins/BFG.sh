@@ -493,7 +493,11 @@ main() {
 	printf "\n"
 
 	# Use hashes instead of file names for cached files
-	entryhash="$(md5sum "$entry" | cut -d' ' -f1)"
+	if type md5sum > /dev/null 2>&1; then
+		entryhash="$(md5sum "$entry" | cut -d' ' -f1)"
+	elif type md5 > /dev/null 2>&1; then
+		entryhash="$(md5 -q "$entry")"
+	fi
 
 	# Do not generate previews of previews
 	[ "$PWD" = "${PREVIEWDIR}" ] && entry="${entry%.*}"
