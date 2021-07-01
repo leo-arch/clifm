@@ -63,8 +63,9 @@ save_sel(void)
 			fprintf(stderr, "%s: sel: %s: %s\n", PROGRAM_NAME,
 			    SEL_FILE, strerror(errno));
 			return EXIT_FAILURE;
-		} else
+		} else {
 			return EXIT_SUCCESS;
+		}
 	}
 
 	FILE *sel_fp = fopen(SEL_FILE, "w");
@@ -110,11 +111,10 @@ select_file(char *file)
 		sel_elements[sel_n++] = savestring(file, strlen(file));
 		sel_elements[sel_n] = (char *)NULL;
 		new_sel++;
-	}
-
-	else
+	} else {
 		fprintf(stderr, _("%s: sel: %s: Already selected\n"),
 		    PROGRAM_NAME, file);
+	}
 
 	return new_sel;
 }
@@ -284,12 +284,16 @@ sel_function(char **args)
 
 			if (*args[i] != '/') {
 				if (!sel_path) {
-					tmp = (char *)xnmalloc(strlen(ws[cur_ws].path)
-								+ strlen(args[i]) + 2, sizeof(char));
-					sprintf(tmp, "%s/%s", ws[cur_ws].path, args[i]);
-				}
-
-				else {
+					if (*ws[cur_ws].path == '/' && !*(ws[cur_ws].path + 1)) {
+						tmp = (char *)xnmalloc(strlen(args[i]) + 2,
+									sizeof(char));
+						sprintf(tmp, "/%s", args[i]);
+					} else {
+						tmp = (char *)xnmalloc(strlen(ws[cur_ws].path)
+									+ strlen(args[i]) + 2, sizeof(char));
+						sprintf(tmp, "%s/%s", ws[cur_ws].path, args[i]);
+					}
+				} else {
 					tmp = (char *)xnmalloc(strlen(dir) + strlen(args[i])
 													+ 2, sizeof(char));
 					sprintf(tmp, "%s/%s", dir, args[i]);
@@ -299,22 +303,20 @@ sel_function(char **args)
 				if (lstat(tmp, &fattr) == -1) {
 					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 					    args[i], strerror(errno));
-				} else
+				} else {
 					new_sel += select_file(tmp);
+				}
 				free(tmp);
-			}
-
-			else {
+			} else {
 				struct stat fattr;
 				if (lstat(args[i], &fattr) == -1) {
 					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 					    args[i], strerror(errno));
-				} else
+				} else {
 					new_sel += select_file(args[i]);
+				}
 			}
-		}
-
-		else {
+		} else {
 			/* We have a pattern */
 			/* GLOB */
 			int ret = -1;
@@ -327,8 +329,9 @@ sel_function(char **args)
 				    filetype);
 				if (ret > 0)
 					new_sel += ret;
-			} else
+			} else {
 				new_sel += ret;
+			}
 		}
 	}
 
@@ -369,11 +372,9 @@ sel_function(char **args)
 	}
 
 	/* Print entries */
-	if (sel_n > 10)
-		printf(_("%zu files are now in the Selection Box\n"),
-		    sel_n);
-
-	else if (sel_n > 0) {
+	if (sel_n > 10) {
+		printf(_("%zu files are now in the Selection Box\n"), sel_n);
+	} else if (sel_n > 0) {
 		printf(_("%zu selected %s:\n\n"), sel_n, (sel_n == 1) ? _("file")
 				: _("files"));
 
@@ -387,7 +388,6 @@ sel_function(char **args)
 
 	if (sel_n > 10)
 		printf(_("Total size: %s\n"), human_size);
-
 	else if (sel_n > 0)
 		printf(_("\n%s%sTotal size%s: %s\n"), df_c, bold, df_c, human_size);
 
@@ -406,10 +406,9 @@ show_sel_files(void)
 
 	int reset_pager = 0;
 
-	if (sel_n == 0)
+	if (sel_n == 0) {
 		puts(_("Empty"));
-
-	else {
+	} else {
 		putchar('\n');
 		struct winsize w;
 		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
@@ -419,9 +418,7 @@ show_sel_files(void)
 		size_t i;
 
 		for (i = 0; i < sel_n; i++) {
-			/*          if (pager && counter > (term_rows-2)) { */
-
-
+			/* if (pager && counter > (term_rows-2)) { */
 			if (pager && counter > (size_t)term_rows) {
 				int c;
 				switch (c = xgetchar()) {
@@ -545,9 +542,7 @@ deselect(char **comm)
 				free(desel_elements);
 
 				return EXIT_SUCCESS;
-			}
-
-			else if (strcmp(desel_elements[i], "*") == 0) {
+			} else if (strcmp(desel_elements[i], "*") == 0) {
 
 				/* Clear the sel array */
 				i = (int)sel_n;
@@ -574,9 +569,7 @@ deselect(char **comm)
 				}
 
 				return exit_status;
-			}
-
-			else {
+			} else {
 				printf(_("desel: '%s': Invalid element\n"), desel_elements[i]);
 				int j = (int)desel_n;
 
@@ -639,7 +632,6 @@ deselect(char **comm)
 
 				/* Sustract size from total size */
 				if (lstat(sel_elements[k], &desel_attrib) != -1) {
-
 					if ((desel_attrib.st_mode & S_IFMT) == S_IFDIR)
 						total_sel_size -= dir_size(sel_elements[k]);
 					else
@@ -763,9 +755,7 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 				if (!found)
 					matches[k++] = file_info[i].name;
 			}
-		}
-
-		else {
+		} else {
 			ret = scandir(sel_path, &ent, skip_files, xalphasort);
 
 			if (ret == -1) {
@@ -876,20 +866,23 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 			continue;
 
 		if (!sel_path) {
-
-			if (*matches[i] == '/')
+			if (*matches[i] == '/') {
 				new_sel += select_file(matches[i]);
-
-			else {
-				char *tmp = (char *)xnmalloc(strlen(ws[cur_ws].path)
-							+ strlen(matches[i]) + 2, sizeof(char));
-				sprintf(tmp, "%s/%s", ws[cur_ws].path, matches[i]);
+			} else {
+				char *tmp = (char *)NULL;
+				if (*ws[cur_ws].path == '/' && !*(ws[cur_ws].path + 1)) {
+					tmp = (char *)xnmalloc(strlen(matches[i]) + 2,
+								sizeof(char));
+					sprintf(tmp, "/%s", matches[i]);
+				} else {
+					tmp = (char *)xnmalloc(strlen(ws[cur_ws].path)
+								+ strlen(matches[i]) + 2, sizeof(char));
+					sprintf(tmp, "%s/%s", ws[cur_ws].path, matches[i]);
+				}
 				new_sel += select_file(tmp);
 				free(tmp);
 			}
-		}
-
-		else {
+		} else {
 			char *tmp = (char *)xnmalloc(strlen(sel_path)
 						+ strlen(matches[i]) + 2, sizeof(char));
 			sprintf(tmp, "%s/%s", sel_path, matches[i]);
@@ -944,18 +937,21 @@ sel_regex(char *str, const char *sel_path, mode_t filetype)
 				continue;
 
 			char tmp_path[PATH_MAX];
-			sprintf(tmp_path, "%s/%s", ws[cur_ws].path, file_info[i].name);
+			if (*ws[cur_ws].path == '/' && !*(ws[cur_ws].path + 1)) {
+				snprintf(tmp_path, PATH_MAX - 1, "/%s", file_info[i].name);
+			} else {
+				snprintf(tmp_path, PATH_MAX - 1, "%s/%s", ws[cur_ws].path,
+						file_info[i].name);
+			}
 
 			if (regexec(&regex, file_info[i].name, 0, NULL, 0) == EXIT_SUCCESS) {
 				if (!invert)
 					new_sel += select_file(tmp_path);
-			} else if (invert)
+			} else if (invert) {
 				new_sel += select_file(tmp_path);
+			}
 		}
-	}
-
-	else { /* Check pattern against files in SEL_PATH */
-
+	} else { /* Check pattern against files in SEL_PATH */
 		struct dirent **list = (struct dirent **)NULL;
 		int filesn = scandir(sel_path, &list, skip_files, xalphasort);
 
@@ -1013,10 +1009,9 @@ sel_regex(char *str, const char *sel_path, mode_t filetype)
 			if (regexec(&regex, list[i]->d_name, 0, NULL, 0) == EXIT_SUCCESS) {
 				if (!invert)
 					new_sel += select_file(tmp_path);
-			}
-
-			else if (invert)
+			} else if (invert) {
 				new_sel += select_file(tmp_path);
+			}
 
 			free(tmp_path);
 			free(list[i]);
