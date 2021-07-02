@@ -12,7 +12,7 @@ Once this is done, you might want to check and modify a few things from the resu
 
 ### C source
 
-FreeBSD compatibility: We try to keep CliFM working on FreeBSD (at the very least). So, when calling a function make sure it exists in FreeBSD. Check its syntax as well: GNU functions are not always identical to BSD ones.
+BSD compatibility: We try to keep CliFM working on BSD systems (at the very least). So, when calling a function make sure it exists on BSD systems, and, possible, make sure it is POSIX. Check its syntax as well: GNU functions are not always identical to BSD ones.
 
 Generally, try to stick as closely as possible to the `Linux kernel coding style`. See https://www.kernel.org/doc/html/v4.10/process/coding-style.html
 
@@ -31,14 +31,10 @@ Non-function statement blocks: Ex:
 ```c
 if (condition) {
 	...
-}
-
-else {
+} else {
 	...
 }
 ```
-
-NOTE: Regarding the else clauses, I do not follow here the kernel style. I just prefer it this way.
 
 Functions definition:
 
@@ -126,7 +122,7 @@ Jumper: `jump.c`
 
 ## 4) Compilation
 
-CliFM is compiled using `gcc` (`clang` and `tcc` work as well) as follows:
+CliFM is compiled using `(g)cc` (`clang` and `tcc` work as well) as follows:
 
 1) _Linux_:
 ```sh
