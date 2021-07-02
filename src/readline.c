@@ -24,7 +24,7 @@
 
 #include "helpers.h"
 
-#if defined(__FreeBSD__) || defined(__NetBSD__)
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #include <sys/stat.h>
 #endif
 #include <dirent.h>

@@ -31,7 +31,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
-#if defined(__FreeBSD__) || defined(__NetBSD__)
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #include <sys/mount.h>
 #include <sys/sysctl.h>
 #endif
@@ -267,6 +267,10 @@ new_instance(char *dir, int sudo)
 	fprintf(stderr, _("%s: This function is not available on Haiku\n"),
 			PROGRAM_NAME);
 	return EXIT_FAILURE;
+#elif defined(__OpenBSD__)
+	fprintf(stderr, _("%s: This function is not available on OpenBSD\n"),
+			PROGRAM_NAME);
+	return EXIT_FAILURE;
 #else
 	if (!term) {
 		fprintf(stderr, _("%s: Default terminal not set. Use the "
@@ -285,7 +289,7 @@ new_instance(char *dir, int sudo)
 	char *self = realpath("/proc/self/exe", NULL);
 
 	if (!self) {
-#elif defined(__FreeBSD__) || defined(__NetBSD__)
+#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 	const int mib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
 	char *self = malloc(PATH_MAX);
 	size_t len = PATH_MAX;
@@ -904,7 +908,7 @@ list_mountpoints(void)
 	line = (char *)NULL;
 	fclose(mp_fp);
 
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) || defined(__OpenBSD__)
 	struct statfs *fslist;
 	mp_n = getmntinfo(&fslist, MNT_NOWAIT);
 #elif defined(__NetBSD__)
@@ -918,7 +922,7 @@ list_mountpoints(void)
 		fputs(_("mp: There are no available mountpoints\n"), stdout);
 		return EXIT_SUCCESS;
 	}
-#if defined(__FreeBSD__) || defined(__NetBSD__)
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 	int j;
 	for (i = j = 0; i < mp_n; i++) {
 		/* Do not list all mountpoints, but only those corresponding

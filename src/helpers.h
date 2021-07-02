@@ -36,6 +36,9 @@
 #ifdef __NetBSD__
 #define _NETBSD_SOURCE
 #endif
+#ifdef __OpenBSD__
+#define _BSD_SOURCE
+#endif
 #endif
 
 /* Support large files on ARM or 32-bit machines */
@@ -47,7 +50,7 @@
 #include <regex.h>
 #include <stddef.h>
 #include <stdlib.h>
-#if defined(__FreeBSD__) || defined(__NetBSD__)
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #include <sys/time.h>
 #endif
 #ifdef __linux__

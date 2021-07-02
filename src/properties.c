@@ -259,7 +259,7 @@ get_properties(char *filename, int dsize)
 	    read_usr, write_usr, exec_usr, read_grp,
 	    write_grp, exec_grp, read_others, write_others,
 	    (sticky) ? 't' : exec_others,
-	    is_acl(filename) ? "+" : "", link_n,
+	    is_acl(filename) ? "+" : "", (size_t)link_n,
 	    (!owner) ? _("unknown") : owner->pw_name,
 	    (!group) ? _("unknown") : group->gr_name,
 	    (size_type) ? size_type : "?",
@@ -314,7 +314,11 @@ get_properties(char *filename, int dsize)
 
 		/* Get creation (birth) time */
 #if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
+#ifdef __OpenBSD__
+	time = file_attrib.__st_birthtim.tv_sec;
+#else
 	time = file_attrib.st_birthtime;
+#endif
 	localtime_r(&time, &tm);
 	char creation_time[128] = "";
 
@@ -364,15 +368,26 @@ get_properties(char *filename, int dsize)
 	default:
 		break;
 	}
-
+#ifdef __OpenBSD__
+	printf(_("\tBlocks: %lld"), file_attrib.st_blocks);
+#else
 	printf(_("\tBlocks: %ld"), file_attrib.st_blocks);
-#if defined(__FreeBSD__) || defined(__NetBSD__)
+#endif
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 	printf(_("\tIO Block: %d"), file_attrib.st_blksize);
 #else
 	printf(_("\tIO Block: %ld"), file_attrib.st_blksize);
 #endif
+#ifdef __OpenBSD__
+	printf(_("\tInode: %llu\n"), file_attrib.st_ino);
+#else
 	printf(_("\tInode: %zu\n"), file_attrib.st_ino);
+#endif
+#ifdef __OpenBSD__
+	printf(_("Device: %d"), file_attrib.st_dev);
+#else
 	printf(_("Device: %zu"), file_attrib.st_dev);
+#endif
 	printf(_("\tUid: %u (%s)"), file_attrib.st_uid, (!owner) ? _("unknown")
 			: owner->pw_name);
 	printf(_("\tGid: %u (%s)\n"), file_attrib.st_gid, (!group) ? _("unknown")

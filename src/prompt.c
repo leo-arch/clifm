@@ -26,7 +26,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#if !defined(__HAIKU__)
+#if !defined(__HAIKU__) && !defined(__OpenBSD__)
 #include <wordexp.h>
 #endif
 #include <readline/readline.h>
@@ -524,7 +524,7 @@ decode_prompt(const char *line)
 			if (c == '\'' || c == '"')
 				continue;
 
-#if !defined(__HAIKU__)
+#if !defined(__HAIKU__) && !defined(__OpenBSD__)
 			/* Command substitution */
 			if (c == '$' && *line == '(') {
 
@@ -586,7 +586,7 @@ decode_prompt(const char *line)
 				wordfree(&wordbuf);
 				continue;
 			}
-#endif /* __HAIKU__ */
+#endif /* __HAIKU__ && __OpenBSD__ */
 
 			result = (char *)xrealloc(result, (result_len + 2) * sizeof(char));
 			result[result_len++] = (char)c;

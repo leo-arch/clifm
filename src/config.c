@@ -487,38 +487,46 @@ edit_xresources(void)
 	/* Since I'm looking for very specific lines, which are
 	 * fixed lines far below MAX_LINE, I don't care to get
 	 * any of the remaining lines truncated */
-#if __FreeBSD__ || __NetBSD__
+#if __FreeBSD__ || __NetBSD__ || __OpenBSD__
 	fseek(xresources_fp, 0, SEEK_SET);
 #endif
 	char line[256] = "";
-	int eight_bit = 0, cursor = 0, function = 0;
+	int eight_bit = 0;
+#ifndef __OpenBSD__
+	int cursor = 0, function = 0;
+#endif
 
 	while (fgets(line, (int)sizeof(line), xresources_fp)) {
 
 		if (strncmp(line, "XTerm*eightBitInput: false", 26) == 0)
 			eight_bit = 1;
-
+#ifndef __OpenBSD__
 		else if (strncmp(line, "XTerm*modifyCursorKeys: 1", 25) == 0)
 			cursor = 1;
 
 		else if (strncmp(line, "XTerm*modifyFunctionKeys: 1", 27) == 0)
 			function = 1;
+#endif
 	}
 
+#ifndef __OpenBSD__
 	if (!eight_bit || !cursor || !function) {
+#else
+	if (!eight_bit) {
+#endif
 		/* Set the file position indicator at the end of
 		 * the file */
 		fseek(xresources_fp, 0L, SEEK_END);
 
 		if (!eight_bit)
 			fputs("\nXTerm*eightBitInput: false\n", xresources_fp);
-
+#ifndef __OpenBSD__
 		if (!cursor)
 			fputs("\nXTerm*modifyCursorKeys: 1\n", xresources_fp);
 
 		if (!function)
 			fputs("\nXTerm*modifyFunctionKeys: 1\n", xresources_fp);
-
+#endif
 		char *xrdb_path = get_cmd_path("xrdb");
 
 		if (xrdb_path) {
@@ -2078,6 +2086,7 @@ init_config(void)
 	if (xargs.stealth_mode != 1 && (flags & GUI)
 	&& strncmp(getenv("TERM"), "xterm", 5) == 0)
 		edit_xresources();
+
 }
 
 int

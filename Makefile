@@ -26,6 +26,7 @@ CFLAGS ?= -O3 -fstack-protector-strong -march=native -Wall
 LIBS_Linux ?= -lreadline -lacl -lcap
 LIBS_FreeBSD ?= -I/usr/local/include -L/usr/local/lib -lreadline -lintl
 LIBS_NetBSD ?= -I/usr/pkg/include -L/usr/pkg/lib -Wl,-R/usr/pkg/lib -lreadline -lintl
+LIBS_OpenBSD ?= -I/usr/local/include -L/usr/local/lib -lereadline -lintl
 
 build: $(SRC) $(HEADERS)
 	@printf "Detected operating system: %s\n" "$(OS)"

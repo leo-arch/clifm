@@ -181,8 +181,11 @@ save_jumpdb(void)
 			continue;
 
 		jump_num++;
-
+#ifndef __OpenBSD__
 		fprintf(fp, "%zu:%ld:%ld:%s\n", jump_db[i].visits,
+#else
+		fprintf(fp, "%zu:%lld:%lld:%s\n", jump_db[i].visits,
+#endif
 		    jump_db[i].first_visit, jump_db[i].last_visit,
 		    jump_db[i].path);
 	}

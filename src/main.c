@@ -372,7 +372,7 @@ main(int argc, char *argv[])
 	 * Unixes, I just didn't make any test */
 #if !defined(__linux__) && !defined(linux) && !defined(__linux) \
 && !defined(__gnu_linux__) && !defined(__FreeBSD__) \
-&& !defined(__NetBSD__) && !defined(__HAIKU__)
+&& !defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__HAIKU__)
 	fprintf(stderr, _("%s: Unsupported operating system\n"),
 	    PROGRAM_NAME);
 	exit(EXIT_FAILURE);

@@ -29,7 +29,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-
+#ifdef __OpenBSD__
+#include <strings.h>
+#endif
 #include "checks.h"
 #include "listing.h"
 
@@ -266,7 +268,7 @@ sort_function(char **arg)
 			printf(_("mtime %s\n"), (sort_reverse) ? "[rev]" : "");
 			break;
 		case SVER:
-#if __FreeBSD__ || __NetBSD__ || _BE_POSIX
+#if __FreeBSD__ || __NetBSD__ || __OpenBSD__ || _BE_POSIX
 			printf(_("name %s\n"), (sort_reverse) ? "[rev]" : "");
 #else
 			printf(_("version %s\n"), (sort_reverse) ? "[rev]" : "");

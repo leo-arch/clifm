@@ -34,7 +34,7 @@
 #  include <sys/acl.h>
 #  define _ACL_OK
 # endif /* __NetBSD_Prereq__ */
-#elif !defined(__HAIKU__)
+#elif !defined(__HAIKU__) && !defined(__OpenBSD__)
 # include <sys/acl.h>
 # define _ACL_OK
 #endif /* __NetBSD__ */

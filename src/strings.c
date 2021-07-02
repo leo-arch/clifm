@@ -29,7 +29,7 @@
 #include <string.h>
 #include <time.h>
 #include <wchar.h>
-#if !defined(__HAIKU__)
+#if !defined(__HAIKU__) && !defined(__OpenBSD__)
 #include <wordexp.h>
 #endif
 #include "aux.h"
@@ -1380,7 +1380,7 @@ parse_input_str(char *str)
 		 * ############################################### */
 
 	int *glob_array = (int *)xnmalloc(int_array_max, sizeof(int));
-#if !defined(__HAIKU__)
+#if !defined(__HAIKU__) && !defined(__OpenBSD__)
 	int *word_array = (int *)xnmalloc(int_array_max, sizeof(int));
 #endif
 	size_t glob_n = 0, word_n = 0;
@@ -1424,7 +1424,7 @@ parse_input_str(char *str)
 					glob_array[glob_n++] = (int)i;
 			}
 
-#if !defined(__HAIKU__)
+#if !defined(__HAIKU__) && !defined(__OpenBSD__)
 			/* Command substitution is made by wordexp() */
 			if (substr[i][j] == '$' && (substr[i][j + 1] == '('
 			|| substr[i][j + 1] == '{')) {
@@ -1552,7 +1552,7 @@ parse_input_str(char *str)
 		/* #############################################
 		 * #    4) COMMAND & PARAMETER SUBSTITUTION    #
 		 * ############################################# */
-#if !defined(__HAIKU__)
+#if !defined(__HAIKU__) && !defined(__OpenBSD__)
 	if (word_n) {
 
 		size_t old_pathc = 0;
