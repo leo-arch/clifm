@@ -145,7 +145,13 @@ gcc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -lreadline 
 gcc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -I/usr/pkg/include -L/usr/pkg/lib -Wl,-R/usr/pkg/lib -lintl -lreadline
 ```
 
-4) _Haiku_:
+4) _OpenBSD_:
+
+```sh
+cc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -I/usr/local/include -L/usr/local/lib -lereadline -lintl
+```
+
+5) _Haiku_:
 
 ```sh
 gcc -o clifm *.c -lreadline -lintl
