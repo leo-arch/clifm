@@ -309,6 +309,9 @@ disable the files counter for directories. This option is especially useful to s
 .B \-\-no\-open\-auto
 same as no-cd-auto, but for files instead of directories
 .TP
+.B \-\-no-restore\-last\-path
+By default, CliFM saves the last visited directory for each workspace to be restored in the next session. Use this option to disable this behavior.
+.TP
 .B \-\-no\-tips
 disable startup tips
 .TP
@@ -326,9 +329,6 @@ specify a resource opener to use. If \fIopener\fR is not set, \fILira\fR will be
 .TP
 .B \-\-print\-sel
 Always print the list of selected files. Since this list could be quite extensive, the maximum number of selected files to print could be specified via the \fBMaxPrinSelfiles\fR option in the configuration file. Defaults to 0 (auto, i.e. never take more than half terminal height). Use -1 to remove the limit or any other positive value.
-.TP
-.B \-\-no-restore\-last\-path
-By default, CliFM saves the last visited directory for each workspace to be restored in the next session. Use this option to disable this behavior.
 .TP
 .B \-\-rl\-vi\-mode
 set readline to vi editing mode (defaults to emacs editing mode)
