@@ -213,7 +213,7 @@ StartingPath=
 
 # If set to true, start CliFM in the last visited directory (and in the
 # last used workspace). This option overrides StartingPath.
-RestoreLastPath=false
+RestoreLastPath=true
 
 # If set to true, the 'r' command executes 'trash' instead of 'rm' to
 # prevent accidental deletions.
