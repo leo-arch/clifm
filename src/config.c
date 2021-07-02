@@ -473,8 +473,8 @@ edit_xresources(void)
 	/* Check if ~/.Xresources exists and eightBitInput is set to
 	 * false. If not, create the file and set the corresponding
 	 * value */
-	char xresources[PATH_MAX] = "";
-	sprintf(xresources, "%s/.Xresources", user.home);
+	char xresources[PATH_MAX];
+	snprintf(xresources, PATH_MAX - 1, "%s/.Xresources", user.home);
 
 	FILE *xresources_fp = fopen(xresources, "a+");
 
@@ -491,48 +491,37 @@ edit_xresources(void)
 	fseek(xresources_fp, 0, SEEK_SET);
 #endif
 	char line[256] = "";
-	int eight_bit = 0;
-#ifndef __OpenBSD__
-	int cursor = 0, function = 0;
-#endif
+	int eight_bit = 0,
+		cursor = 0,
+		function = 0;
 
 	while (fgets(line, (int)sizeof(line), xresources_fp)) {
 
 		if (strncmp(line, "XTerm*eightBitInput: false", 26) == 0)
 			eight_bit = 1;
-#ifndef __OpenBSD__
 		else if (strncmp(line, "XTerm*modifyCursorKeys: 1", 25) == 0)
 			cursor = 1;
-
 		else if (strncmp(line, "XTerm*modifyFunctionKeys: 1", 27) == 0)
 			function = 1;
-#endif
 	}
 
-#ifndef __OpenBSD__
 	if (!eight_bit || !cursor || !function) {
-#else
-	if (!eight_bit) {
-#endif
 		/* Set the file position indicator at the end of
 		 * the file */
 		fseek(xresources_fp, 0L, SEEK_END);
 
 		if (!eight_bit)
 			fputs("\nXTerm*eightBitInput: false\n", xresources_fp);
-#ifndef __OpenBSD__
 		if (!cursor)
 			fputs("\nXTerm*modifyCursorKeys: 1\n", xresources_fp);
-
 		if (!function)
 			fputs("\nXTerm*modifyFunctionKeys: 1\n", xresources_fp);
-#endif
-		char *xrdb_path = get_cmd_path("xrdb");
 
+		char *xrdb_path = get_cmd_path("xrdb");
 		if (xrdb_path) {
 			char *res_file = (char *)xnmalloc(user.home_len + 13, sizeof(char));
 			sprintf(res_file, "%s/.Xresources", user.home);
-			char *cmd[] = {"xrdb", "merge", res_file, NULL};
+			char *cmd[] = {"xrdb", "-merge", res_file, NULL};
 
 			launch_execve(cmd, FOREGROUND, E_NOFLAG);
 			free(res_file);
