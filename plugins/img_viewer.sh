@@ -3,39 +3,27 @@
 # Image thumbnails plugin for CliFM
 # Written by L. Abramovich
 
-SUCCESS=0
-ERROR=1
-
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "help" ]; then
 	name="$(basename "$0")"
-	printf "Display thumbails of FILE(s) or of files in DIR. Use '*' to preview all images files in the current directory and subdirectories.\n"
-	printf "Usage: %s [FILE... n] [DIR]\n" "$name"
+	printf "Display thumbails of FILE(s) or of files in DIR. Use '*' to preview \
+all image files in the current directory.
+Usage: %s [FILE... n] [DIR]\n" "$name"
 	exit $SUCCESS
 fi
 
-if [ -n "$CLIFM_IMG_VIEWER" ]; then
-	"$CLIFM_IMG_VIEWER" "$@"
+"$CLIFM_IMG_VIEWER" 2>/dev/null "$@"
+sxiv -aqt -- "$@" 2>/dev/null && exit 0
+feh -tZ -- "$@" 2>/dev/null && exit 0
 
-elif [ "$(which sxiv 2>/dev/null)" ]; then
-#	if [ -d "$1" ] || [ -h "$1" ] || [ -n "$2" ]; then
-#		sxiv -aqt -- "$@"
-#	else
-		sxiv -aqt -- "$@"
-#	fi
-
-elif [ "$(which feh 2>/dev/null)" ]; then
-	feh -tZ -- "$@"
-
-elif [ "$(which lsix 2>/dev/null)" ]; then
+if type lsix > /dev/null 2>&1; then
 	if [ -d "$1" ] || [ -h "$1" ]; then
-		lsix "$1"/*
+		lsix "$1"/*{jpg,png} && exit 0
 	else
-		lsix "$@"
+		lsix "$@" && exit 0
+	fi
+elif type img2sixel > /dev/null 2>&1; then
+	img2sixel "$@" && exit 0
 fi
 
-else
-	printf "CliFM: No image viewer found\n" >&2
-	exit $ERROR
-fi
-
-exit $SUCCESS
+printf "CliFM: No image viewer found\n" >&2
+exit 1
