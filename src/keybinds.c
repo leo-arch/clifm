@@ -902,11 +902,14 @@ rl_lock(int count, int key)
 
 #if __FreeBSD__ || __NetBSD__ || __OpenBSD__
 	char *cmd[] = {"lock", NULL};
-	ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
-#elif __linux__
+#elif __APPLE__
+	char *cmd[] = {"bashlock", NULL};
+#elif __HAIKU__
+	char *cmd[] = {"peaclock", NULL};
+#else
 	char *cmd[] = {"vlock", NULL};
-	ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 #endif
+	ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 
 	rl_prep_terminal(0);
 	rl_reset_line_state();

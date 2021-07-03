@@ -385,7 +385,16 @@ nm=01;32:bm=01;36:"
 [-k FILE] [-P PROFILE] [-z METHOD] [PATH]"
 
 #define FALLBACK_SHELL "/bin/sh"
+
+#ifdef __APPLE__
+#define FALLBACK_OPENER "/usr/bin/open"
+#elif defined __CYGWIN__
+#define FALLBACK_OPENER "cygstart"
+#elif __HAIKU__
+#define FALLBACK_OPENER "open"
+#else
 #define FALLBACK_OPENER "xdg-open"
+#endif
 
 #define itoa xitoa /* itoa does not exist in some OS's */
 /* #define atoi xatoi */
