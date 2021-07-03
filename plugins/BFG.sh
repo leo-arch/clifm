@@ -497,6 +497,10 @@ main() {
 		entryhash="$(md5sum "$entry" | cut -d' ' -f1)"
 	elif type md5 > /dev/null 2>&1; then
 		entryhash="$(md5 -q "$entry")"
+	else
+		printf "CliFM: No hashing application found. Either md5sum or md5 \
+are required\n" >&2
+		exit 1
 	fi
 
 	# Do not generate previews of previews
