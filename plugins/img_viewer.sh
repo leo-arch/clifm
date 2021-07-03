@@ -11,7 +11,7 @@ Usage: %s [FILE... n] [DIR]\n" "$name"
 	exit $SUCCESS
 fi
 
-"$CLIFM_IMG_VIEWER" 2>/dev/null "$@"
+"$CLIFM_IMG_VIEWER" "$@" 2>/dev/null && exit 0
 sxiv -aqt -- "$@" 2>/dev/null && exit 0
 feh -tZ -- "$@" 2>/dev/null && exit 0
 
