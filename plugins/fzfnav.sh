@@ -312,7 +312,7 @@ main() {
 			IMG)
 				case "$value" in
 					ueberzug) export UEBERZUG_OK=1 ;;
-					viu|catimg|img2txt) export IMG_VIEWER="$value" ;;
+					kitty|viu|catimg|img2txt) export IMG_VIEWER="$value" ;;
 					none) export IMG_VIEWER="true" ;;
 					*) IMG_VIEWER="" ;;
 				esac
@@ -369,7 +369,7 @@ main() {
 				case "$value" in
 					bat) export BAT_OK=1 ;;
 					highlight) export HIGHLIGHT_OK=1 ;;
-					pygmentize) export PYGMENTIZE_OK=1 ;; 
+					pygmentize) export PYGMENTIZE_OK=1 ;;
 					cat) export CAT_OK=1 ;;
 					none) ;;
 					*) TEXT="" ;;
@@ -445,6 +445,8 @@ main() {
 	[ -n "$DISPLAY" ]; then
 		if type ueberzug > /dev/null 2>&1; then
 			export UEBERZUG_OK=1
+		elif [ "$TERM" = "xterm-kitty" ]; then
+			export IMG_VIEWER="kitty"
 		elif type viu > /dev/null 2>&1; then
 			export IMG_VIEWER="viu"
 		elif type catimg > /dev/null 2>&1; then
