@@ -180,7 +180,7 @@ main() {
 		case $option in
 			# CHECK GENERAL OPTIONS
 			LS)
-				if [ ${value:-posix} = posix ]; then
+				if [ "${value:-posix}" = posix ]; then
 					export ls_cmd="ls -Ap"
 				else
 					export ls_cmd="ls -Ap --group-directories-first --color=always --indicator-style=none"
