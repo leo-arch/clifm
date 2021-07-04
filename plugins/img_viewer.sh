@@ -8,7 +8,7 @@ if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "help" ]; then
 	printf "Display thumbails of FILE(s) or of files in DIR. Use '*' to preview \
 all image files in the current directory.
 Usage: %s [FILE... n] [DIR]\n" "$name"
-	exit $SUCCESS
+	exit 0
 fi
 
 "$CLIFM_IMG_VIEWER" "$@" 2>/dev/null && exit 0
@@ -17,7 +17,7 @@ feh -tZ -- "$@" 2>/dev/null && exit 0
 
 if type lsix > /dev/null 2>&1; then
 	if [ -d "$1" ] || [ -h "$1" ]; then
-		lsix "$1"/*{jpg,png} && exit 0
+		lsix "$1"/* && exit 0
 	else
 		lsix "$@" && exit 0
 	fi
