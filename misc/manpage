@@ -1085,11 +1085,12 @@ Plugins are just scripts or programs (written in any language) able to add, exte
  | fzfhist           | fzf                           |
  | fzfnav            | fzf                           |
  |   -archives       | atool, bsdtar or tar          |
- |   -images         | imagemagick, and ueberzug     |
- |                       or viu or catimg or img2txt |
+ |   -images         | kitty terminal, imagemagick,  | 
+ |					 | and ueberzug or viu or catimg |
+ |					 | or img2txt					 |
  |   -fonts          | fontpreview or fontforge      |
  |   -docs           | libreoffice, catdoc, odt2txt, |
- |                       pandoc                      |
+ |                   | pandoc                        |
  |   -PDF            | pdftoppm, pdftotext or mutool |
  |   -epub           | epub-thumbnailer              |
  |   -DjVu           | djvulibre or djvutxt          |
