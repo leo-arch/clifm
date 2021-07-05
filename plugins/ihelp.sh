@@ -3,9 +3,9 @@
 # Interactive help plugin for CliFM
 # Written by L. Abramovich
 
-if [ -n "$1" ] && ([ "$1" = "--help" ] || [ "$1" = "help" ]); then
+if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
 	name="$(basename "$0")"
-	printf "Browse CliFM COMMANDS section in the manpage via FZF\n"
+	printf "Interactively browse the CliFM manpage via FZF or Rofi\n"
 	printf "Usage: %s\n" "$name"
 	exit 0
 fi
@@ -35,6 +35,27 @@ else
 fi
 
 CMDS="
+1. GETTING HELP@
+2. DESCRIPTION@
+3. RATIONALE@
+4. POSITIONAL PARAMETERS@
+5. OPTIONS@
+6. COMMANDS@
+7. FILES FILTERS@
+8. KEYBOARD SHORTCUTS@
+9. COLOR CODES@
+10. THE PROMPT@
+11. BUILT-IN EXPANSIONS@
+12. RESOURCE OPENER@
+13. SHELL FUNCTIONS@
+14. PLUGINS@
+15. STANDARD INPUT@
+16. NOTE ON SPEED
+17. KANGAROO FRECENCY ALGORITHM@
+18. ENVIRONMENT@
+19. MISCELLANEOUS NOTES@
+20. FILES@
+21. EXAMPĹES@
 FILE/DIR@
 /PATTERN@
 ;\[CMD\], :\[CMD\]@
@@ -49,7 +70,7 @@ bm, bookmarks@
 br, bulk@
 c, l@
 cc, colors@
-cd @
+cd \[ELN/DIR\]@
 cl, columns@
 cmd, commands@
 cs, colorscheme@
@@ -105,19 +126,20 @@ x, X@"
 
 a="-"
 
+# shellcheck disable=SC2046
 while [ -n "$a" ]; do
-
 	if [ "$filter" = "fzf" ]; then
 		a="$(printf "%s\n" "$CMDS" | sed 's/@//g' | fzf --prompt "CliFM> " --layout=reverse-list)"
-
 	else
 		a="$(printf "%s\n" "$CMDS" | sed 's/@//g' | rofi -dmenu -p "CliFM")"
 	fi
 
 	if [ -n "$a" ]; then
-		man -P "less -gp \"      $a\"" "$manpage"
+		export PAGER
+		if ! [ $(PAGER="less -gp \"      $a\""; man clifm 2>/dev/null) ]; then
+			PAGER="less -gp \"$a\""; man clifm
+		fi
 	fi
-
 done
 
 printf "\n"
