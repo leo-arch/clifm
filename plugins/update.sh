@@ -3,7 +3,7 @@
 # Plugins to check for CliFM's updates
 # Written by L. Abramovich
 
-if [ -n "$1" ] && ([ "$1" = "--help" ] || [ "$1" = "help" ]); then
+if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
 	name="$(basename "$0")"
 	printf "Check for CliFM updates\n"
 	printf "Usage: %s\n" "$name"

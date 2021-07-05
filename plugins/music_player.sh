@@ -6,7 +6,7 @@
 SUCCESS=0
 ERROR=1
 PLAYER="mplayer"
-OPTS="-playlist"
+#OPTS="-playlist"
 
 if [ -z "$1" ] || [ "$1" = "--help" ] || [ "$1" = "help" ]; then
 	name="$(basename "$0")"

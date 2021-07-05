@@ -5,7 +5,7 @@
 # Written by L. Abramovich
 # License: GPL3
 
-if [ -n "$1" ] && ([ "$1" = "--help" ] || [ "$1" = "help" ]); then
+if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
 	name="$(basename "$0")"
 	printf "Search files by content via Ripgrep and FZF\n"
 	printf "Usage: %s STRING|REGEXP\n" "$name"

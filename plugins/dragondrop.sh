@@ -17,7 +17,7 @@
 SUCCESS=0
 ERROR=1
 
-if [ -n "$1" ] && ([ "$1" = "--help" ] || [ "$1" = "help" ]); then
+if [ -n "$1" ] && { [ "$1" = "--help" ] || [ "$1" = "help" ]; }; then
 	name="$(basename "$0")"
 	printf "Drag and drop files\n"
 	printf "\nUsage: %s [FILE... n]\n" "$name"
