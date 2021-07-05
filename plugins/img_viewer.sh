@@ -17,7 +17,7 @@ feh -tZ -- "$@" 2>/dev/null && exit 0
 
 if type lsix > /dev/null 2>&1; then
 	if [ -d "$1" ] || [ -h "$1" ]; then
-		lsix "$1"/* && exit 0
+		lsix "$1"/*.png "$1"/*.jpg && exit 0
 	else
 		lsix "$@" && exit 0
 	fi
