@@ -312,7 +312,9 @@ main() {
 			IMG)
 				case "$value" in
 					ueberzug) export UEBERZUG_OK=1 ;;
-					kitty|viu|catimg|img2txt) export IMG_VIEWER="$value" ;;
+#					w3m|kitty|viu|catimg|img2txt|chafa)
+					kitty|viu|catimg|img2txt|chafa)
+						export IMG_VIEWER="$value" ;;
 					none) export IMG_VIEWER="true" ;;
 					*) IMG_VIEWER="" ;;
 				esac
@@ -451,6 +453,8 @@ main() {
 			export IMG_VIEWER="viu"
 		elif type catimg > /dev/null 2>&1; then
 			export IMG_VIEWER="catimg"
+		elif type chafa > /dev/null 2>&1; then
+			export IMG_VIEWER="chafa"
 		elif type img2txt > /dev/null 2>&1; then
 			export IMG_VIEWER="img2txt"
 		fi
@@ -641,4 +645,8 @@ main() {
 }
 
 main "$@"
+
+# Reset terminal settings
+printf "\033c"
+
 exit 0

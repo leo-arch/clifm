@@ -55,16 +55,36 @@ kitty_clear() {
 }
 
 preview_image() {
-	[ -z "$IMG_VIEWER" ] || [ -z "$1" ] && exit 1
+	[ -z "$IMG_VIEWER" ] || [ -z "$1" ] && return 1
 	img="$1"
 	case "$IMG_VIEWER" in
 		kitty)
 			calculate_position
 			kitty +kitten icat --silent --place "$COLUMNS"x"$LINES"@"$X"x"$Y" \
 				--transfer-mode=stream --align=left "$img" \
-				&& exit 0
+				&& return 0
 		;;
-		*) "$IMG_VIEWER" "$img" && exit 0 ;;
+#		w3m)
+#			calculate_position
+#			WIDTH=200
+#			HEIGHT=200
+#			X=360
+#			Y=15
+#			W3IMG_PATH="/usr/lib/w3m/w3mimgdisplay"
+#			# Clear image
+#			printf '6;%s;%s;%s;%s\n3;' "$X" "$Y" "$WIDTH" "$HEIGHT" | "$W3IMG_PATH"
+#			printf '0;1;%s;%s;%s;%s;;;;;%s\n4;\n3;' "$X" "$Y" "$WIDTH" "$HEIGHT" \
+#			"$img" | "$W3IMG_PATH" && return 0
+#		;;
+#		terminology)
+#			[ "$TERM_PROGRAM" != "terminology" ] && return 1
+#			tycat "$img" && return 0
+#		;;
+		catimg) catimg -H$LINES "$img" && return 0 ;;
+		img2txt) img2txt -H$LINES -W$((COLUMNS - 2)) "$img" && return 0 ;;
+		chafa) chafa -s "$((COLUMNS - 2))x$LINES" "$img" && return 0 ;;
+		viu) viu -h$LINES -w$((COLUMNS - 2)) "$img" && return 0 ;;
+		*) "$IMG_VIEWER" "$img" && return 0 ;;
 	esac
 }
 
@@ -143,13 +163,13 @@ handle_ext() {
 			svg)
 				[ -z "$IMG_VIEWER" ] && return
 				if [ -f "$PREVIEWDIR/${entryhash}.png" ]; then
-					preview_image "$PREVIEWDIR/${entryhash}.png"
+					preview_image "$PREVIEWDIR/${entryhash}.png" && exit 0
 				fi
 
 				[ -z "$CONVERT_OK" ] && return
 				convert -background none -size "$WIDTH"x"$HEIGHT" "$entry" \
 					"$PREVIEWDIR/${entryhash}.png"
-				preview_image "${PREVIEWDIR}/${entryhash}.png"
+				preview_image "${PREVIEWDIR}/${entryhash}.png" && exit 0
 			;;
 
 			torrent)
@@ -186,19 +206,19 @@ handle_mime() {
 			if [ -n "$IMG_VIEWER" ] && [ -z "$DOCASTEXT" ]; then
 
 				if [ -f "$PREVIEWDIR/${entryhash}.jpg" ]; then
-					preview_image "$PREVIEWDIR/${entryhash}.jpg"
+					preview_image "$PREVIEWDIR/${entryhash}.jpg" && exit 0
 				fi
 
 				if [ "$LIBREOFFICE_OK" = 1 ]; then
-
 					libreoffice --headless --convert-to jpg "$entry" \
 					--outdir "$PREVIEWDIR" > /dev/null 2>&1 && \
 
 					mv "$PREVIEWDIR/${entry%.*}.jpg" "$PREVIEWDIR/${entryhash}.jpg" && \
-					preview_image "${PREVIEWDIR}/${entryhash}.jpg"
+					preview_image "${PREVIEWDIR}/${entryhash}.jpg" && exit 0
 				fi
 			fi
 
+			# shellcheck disable=SC2153
 			case "$ext" in
 				odt|ods|odp|sxw)
 					if [ "$ODT2TXT_OK" = 1 ]; then
@@ -274,10 +294,10 @@ handle_mime() {
 		*/vnd.djvu)
 			if [ -n "$IMAGE_VIEWER" ] && [ "$DDJVU_OK" = 1 ]; then
 				if [ -f "$PREVIEWDIR/${entryhash}.jpg" ]; then
-					preview_image "$PREVIEWDIR/${entryhash}.jpg"
+					preview_image "$PREVIEWDIR/${entryhash}.jpg" && exit 0
 				fi
 				ddjvu --format=tiff --page=1 "$entry" "$PREVIEWDIR/${entryhash}.jpg"
-				preview_image "$PREVIEWDIR/${entryhash}.jpg"
+				preview_image "$PREVIEWDIR/${entryhash}.jpg" && exit 0
 			elif [ "$DJVUTXT_OK" = 1 ]; then
 				djvutxt "$PWD/entry" && exit 0
 			fi
@@ -295,16 +315,19 @@ handle_mime() {
 						&& exit 0
 				fi
 				if [ -f "$PREVIEWDIR/${entryhash}.jpg" ]; then
-					preview_image "$PREVIEWDIR/${entryhash}.jpg"
+					preview_image "$PREVIEWDIR/${entryhash}.jpg" && exit 0
 				fi
 
 				convert -coalesce -resize "$WIDTH"x"$HEIGHT"\> "$entry"[0] \
 				"$PREVIEWDIR/$entryhash.jpg"
-				preview_image "$PREVIEWDIR/${entryhash}.jpg"
+				preview_image "$PREVIEWDIR/${entryhash}.jpg" && exit 0
 				exit 0
 			fi
 
-			[ "$IMG_VIEWER" = "kitty" ] && preview_image "$PWD/$entry"
+			if [ "$IMG_VIEWER" = "kitty" ] || [ "$IMG_VIEWER" = "catimg" ] \
+			|| [ "$IMG_VIEWER" = "chafa" ]; then
+				preview_image "$PWD/$entry" && exit 0
+			fi
 
 			# Break down the gif into frames and show each frame, one each 0.1 secs
 #			printf "\n"
@@ -326,7 +349,7 @@ handle_mime() {
 
 		# Images
 		image/*)
-			preview_image "$PWD/$entry"
+			preview_image "$PWD/$entry" && exit 0
 		;;
 
 		# Postscript
@@ -334,13 +357,13 @@ handle_mime() {
 			[ -z "$IMG_VIEWER" ] && return
 
 			if [ -f "$PREVIEWDIR/${entryhash}.jpg" ]; then
-				preview_image "$PREVIEWDIR/${entryhash}.jpg"
+				preview_image "$PREVIEWDIR/${entryhash}.jpg" && exit 0
 			fi
 
 			if [ "$(which gs 2>/dev/null)" ]; then
 				gs -sDEVICE=jpeg -dJPEGQ=100 -dNOPAUSE -dBATCH -dSAFER -r300 \
 				-sOutputFile="$PREVIEWDIR/${entryhash}.jpg" "$entry" > /dev/null 2>&1 && \
-				preview_image "$PREVIEWDIR/${entryhash}.jpg"
+				preview_image "$PREVIEWDIR/${entryhash}.jpg" && exit 0
 			fi
 		;;
 
@@ -349,13 +372,13 @@ handle_mime() {
 			[ -z "$IMG_VIEWER" ] && return
 
 			if [ -f "$PREVIEWDIR/${entryhash}.jpg" ]; then
-				preview_image "$PREVIEWDIR/${entryhash}.jpg"
+				preview_image "$PREVIEWDIR/${entryhash}.jpg" && exit 0
 			fi
 
 			if [ -n "$EPUBTHUMB_OK" ]; then
 				epub-thumbnailer "$entry" "$PREVIEWDIR/${entryhash}.jpg" \
 				"$WIDTH" "$HEIGHT" && \
-				preview_image "$PREVIEWDIR/${entryhash}.jpg"
+				preview_image "$PREVIEWDIR/${entryhash}.jpg" && exit 0
 			fi
 		;;
 
@@ -365,12 +388,12 @@ handle_mime() {
 
 			if [ -f "$PREVIEWDIR/${entryhash}.jpg" ] && \
 			[ "$PDFTOPPM_OK" = 1 ]; then
-				preview_image "$PREVIEWDIR/${entryhash}.jpg"
+				preview_image "$PREVIEWDIR/${entryhash}.jpg" && exit 0
 			fi
 
 			if [ "$PDFTOPPM_OK" = 1 ]; then
 				pdftoppm -jpeg -f 1 -singlefile "$entry" "$PREVIEWDIR/$entryhash" && \
-				preview_image "$PREVIEWDIR/${entryhash}.jpg"
+				preview_image "$PREVIEWDIR/${entryhash}.jpg" && exit 0
 			elif [ "$PDFTOTEXT_OK" = 1 ]; then
 				pdftotext -nopgbrk -layout -- "$entry" - | ${PAGER:=less} && exit 0
 			elif [ "$MUTOOL_OK" = 1 ]; then
@@ -408,13 +431,13 @@ handle_mime() {
 			[ -z "$IMG_VIEWER" ] && return
 
 			if [ -f "$PREVIEWDIR/${entryhash}.jpg" ]; then
-				preview_image "$PREVIEWDIR/${entryhash}.jpg"
+				preview_image "$PREVIEWDIR/${entryhash}.jpg" && exit 0
 			fi
 
 			if [ "$FFMPEGTHUMB_OK" = 1 ]; then
 				ffmpegthumbnailer -i "$entry" -o "$PREVIEWDIR/${entryhash}.jpg" -s 0 \
 				-q 5 2>/dev/null && \
-				preview_image "$PREVIEWDIR/${entryhash}.jpg"
+				preview_image "$PREVIEWDIR/${entryhash}.jpg" && exit 0
 			fi
 		;;
 
@@ -423,14 +446,14 @@ handle_mime() {
 			[ -z "$IMG_VIEWER" ] && return
 
 			if [ -f "${PREVIEWDIR}/${entryhash}.jpg" ]; then
-				preview_image "${PREVIEWDIR}/${entryhash}.jpg"
+				preview_image "${PREVIEWDIR}/${entryhash}.jpg" && exit 0
 			elif [ -f "${PREVIEWDIR}/${entryhash}.png" ]; then
-				preview_image "${PREVIEWDIR}/${entryhash}.png"
+				preview_image "${PREVIEWDIR}/${entryhash}.png" && exit 0
 			fi
 
 			if [ "$FONTPREVIEW_OK" = 1 ]; then
 				fontpreview -i "$entry" -o "$PREVIEWDIR/${entryhash}.jpg" && \
-				preview_image "$PREVIEWDIR/${entryhash}.jpg"
+				preview_image "$PREVIEWDIR/${entryhash}.jpg" && exit 0
 			elif [ "$FONTIMAGE_OK" = 1 ]; then
 				png_file="$PREVIEWDIR/${entryhash}.png"
 				if fontimage -o "$png_file" \
@@ -445,7 +468,7 @@ handle_mime() {
 						--text " The quick brown fox jumps over the lazy dog." \
 						"$PWD/$entry" > /dev/null 2>&1;
 				then
-					preview_image "$png_file"
+					preview_image "$png_file" && exit 0
 				fi
 			fi
 		;;
