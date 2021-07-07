@@ -2,7 +2,7 @@
 
 /*
  * This file is part of CliFM
- * 
+ *
  * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
  * All rights reserved.
 
@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #ifdef __OpenBSD__
+typedef char *rl_cpvfunc_t;
 #include <ereadline/readline/readline.h>
 #else
 #include <readline/readline.h>
