@@ -38,6 +38,7 @@ void load_jumpdb(void);
 int load_bookmarks(void);
 int load_actions(void);
 int load_pinned_dir(void);
+int load_remotes(void);
 void get_path_programs(void);
 void unset_xargs(void);
 void external_arguments(int argc, char **argv);

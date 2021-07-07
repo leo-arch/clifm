@@ -54,6 +54,7 @@
 #include "prompt.h"
 #include "readline.h"
 #include "strings.h"
+#include "remotes.h"
 
 struct usrvar_t *usr_var = (struct usrvar_t *)NULL;
 struct actions_t *usr_actions = (struct actions_t *)NULL;
@@ -62,6 +63,7 @@ struct kbinds_t *kbinds = (struct kbinds_t *)NULL;
 struct jump_t *jump_db = (struct jump_t *)NULL;
 struct bookmarks_t *bookmarks = (struct bookmarks_t *)NULL;
 struct fileinfo *file_info = (struct fileinfo *)NULL;
+struct remote_t *remotes = (struct remote_t *)NULL;
 
 /* pmsg holds the current program message type */
 enum prog_msg pmsg = nomsg;
@@ -174,7 +176,8 @@ size_t
     bm_n = 0,
     cschemes_n = 0,
     jump_n = 0,
-    path_progsn = 0;
+    path_progsn = 0,
+    remotes_n = 0;
 
 struct termios shell_tmodes;
 off_t total_sel_size = 0;
@@ -227,6 +230,7 @@ char
     *PLUGINS_DIR = (char *)NULL,
     *PROFILE_FILE = (char *)NULL,
     *qc = (char *)NULL,
+    *REMOTES_FILE = (char *)NULL,
     *SEL_FILE = (char *)NULL,
     *STDIN_TMP_DIR = (char *)NULL,
     *sys_shell = (char *)NULL,
@@ -684,6 +688,8 @@ main(int argc, char *argv[])
 	get_profile_names();
 
 	load_pinned_dir();
+	load_remotes();
+	automount_remotes();
 
 	set_env();
 

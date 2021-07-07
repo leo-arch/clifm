@@ -965,6 +965,26 @@ sort_num_generator(const char *text, int state)
 }
 
 char *
+nets_generator(const char *text, int state)
+{
+	static int i;
+	static size_t len;
+	char *name;
+
+	if (!state) {
+		i = 0;
+		len = strlen(text);
+	}
+
+	while ((name = remotes[i++].name) != NULL) {
+		if (strncmp(name, text, len) == 0)
+			return strdup(name);
+	}
+
+	return (char *)NULL;
+}
+
+char *
 sort_name_generator(const char *text, int state)
 {
 	static int i;
@@ -1081,7 +1101,6 @@ my_rl_completion(const char *text, int start, int end)
 		|| ((rl_line_buffer[1] == 'c' || rl_line_buffer[1] == 'p')
 		&& rl_line_buffer[2] == ' ')
 		|| strncmp(rl_line_buffer, "jump ", 5) == 0))
-
 			matches = rl_completion_matches(text, &jump_generator);
 
 		/* ### BOOKMARKS COMPLETION ### */
@@ -1122,6 +1141,10 @@ my_rl_completion(const char *text, int start, int end)
 		&& (strncmp(rl_line_buffer, "st ", 3) == 0
 		|| strncmp(rl_line_buffer, "sort ", 5) == 0))
 			matches = rl_completion_matches(text, &sort_name_generator);
+
+		else if (*rl_line_buffer == 'n'
+		&& strncmp(rl_line_buffer, "net ", 4) == 0)
+			matches = rl_completion_matches(text, &nets_generator);
 	}
 
 	/* ### PATH COMPLETION ### */

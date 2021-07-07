@@ -50,3 +50,4 @@ size_t wc_xstrlen(const char *restrict str);
 int u8truncstr(char *restrict str, size_t n);
 size_t u8_xstrlen(const char *restrict str);
 char *remove_quotes(char *str);
+char *replace_substr(char *haystack, char *needle, char *rep);

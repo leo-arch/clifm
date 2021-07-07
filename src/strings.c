@@ -319,6 +319,42 @@ strbtw(char *str, const char a, const char b)
 	return buf;
 }
 
+/* Replace the first occurrence of NEEDLE in HAYSTACK by REP */
+char *
+replace_substr(char *haystack, char *needle, char *rep)
+{
+	if (!haystack || !*haystack || !needle || !*needle || !rep)
+		return (char *)NULL;
+
+	char *ret = strstr(haystack, needle);
+	if (!ret)
+		return (char *)NULL;
+
+	char *needle_end = ret + strlen(needle);
+	*ret = '\0';
+
+	if (*needle_end) {
+		size_t rem_len = strlen(needle_end);
+		char *rem = (char *)xnmalloc(rem_len + 1, sizeof(char));
+		strcpy(rem, needle_end);
+
+		char *new_str = (char *)xnmalloc(strlen(haystack) + strlen(rep)
+						+ rem_len + 1, sizeof(char));
+		strcpy(new_str, haystack);
+		strcat(new_str, rep);
+		strcat(new_str, rem);
+		free(rem);
+		return new_str;
+	}
+
+	char *new_str = (char *)xnmalloc(strlen(haystack) + strlen(rep)
+					+ 1, sizeof(char));
+	strcpy(new_str, haystack);
+	strcat(new_str, rep);
+
+	return new_str;
+}
+
 /* Generate a random string of LEN bytes using characters from CHARSET */
 char *
 gen_rand_str(size_t len)

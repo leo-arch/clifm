@@ -429,21 +429,8 @@ exec_cmd(char **comm)
 	if (*comm[0] == 'c' && comm[0][1] == 'd' && !comm[0][2]) {
 		if (!comm[1])
 			exit_code = cd_function(NULL);
-
 		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
 			puts(_("Usage: cd [ELN/DIR]"));
-
-		/* Remotes */
-		else if (*comm[1] == 's' && strncmp(comm[1], "sftp://", 7) == 0)
-			exit_code = remote_ssh(comm[1] + 7, (comm[2]) ? comm[2]
-								      : NULL);
-		else if (*comm[1] == 's' && strncmp(comm[1], "smb://", 6) == 0)
-			exit_code = remote_smb(comm[1] + 6, (comm[2]) ? comm[2]
-								      : NULL);
-		else if (*comm[1] == 'f' && strncmp(comm[1], "ftp://", 6) == 0)
-			exit_code = remote_ftp(comm[1] + 6, (comm[2]) ? comm[2]
-								      : NULL);
-
 		else
 			exit_code = cd_function(comm[1]);
 	}
@@ -455,24 +442,11 @@ exec_cmd(char **comm)
 			puts(_("Usage: o, open ELN/FILE [APPLICATION]"));
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
-		}
-
-		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
+		} else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
 			puts(_("Usage: o, open ELN/FILE [APPLICATION]"));
-
-		/* Remotes */
-		else if (*comm[1] == 's' && strncmp(comm[1], "sftp://", 7) == 0)
-			exit_code = remote_ssh(comm[1] + 7, (comm[2]) ? comm[2]
-								      : NULL);
-		else if (*comm[1] == 's' && strncmp(comm[1], "smb://", 6) == 0)
-			exit_code = remote_smb(comm[1] + 6, (comm[2]) ? comm[2]
-								      : NULL);
-		else if (*comm[1] == 'f' && strncmp(comm[1], "ftp://", 6) == 0)
-			exit_code = remote_ftp(comm[1] + 6, (comm[2]) ? comm[2]
-								      : NULL);
-
-		else
+		} else {
 			exit_code = open_function(comm);
+		}
 	}
 
 	/*   ############## DIRECTORY JUMPER ##################     */
@@ -486,7 +460,6 @@ exec_cmd(char **comm)
 	/*       ############### REFRESH ##################     */
 	else if (*comm[0] == 'r' && ((comm[0][1] == 'f' && !comm[0][2])
 	|| strcmp(comm[0], "refresh") == 0)) {
-
 		if (cd_lists_on_the_fly) {
 			free_dirlist();
 			exit_code = list_dir();
@@ -1093,32 +1066,8 @@ exec_cmd(char **comm)
 	}
 
 	/* #### NET #### */
-	else if (*comm[0] == 'n' && (strcmp(comm[0], "net") == 0)) {
-
-		if (!comm[1]) {
-			puts(_("Usage: net [sftp, smb, ftp]://ADDRESS [OPTIONS]"));
-			return EXIT_SUCCESS;
-		}
-
-		if (*comm[1] == 's' && strncmp(comm[1], "sftp://", 7) == 0)
-			exit_code = remote_ssh(comm[1] + 7, (comm[2]) ? comm[2]
-								      : NULL);
-
-		else if (*comm[1] == 's' && strncmp(comm[1], "smb://", 6) == 0)
-			exit_code = remote_smb(comm[1] + 6, (comm[2]) ? comm[2]
-								      : NULL);
-
-		else if (*comm[1] == 'f' && strncmp(comm[1], "ftp://", 6) == 0)
-			exit_code = remote_ftp(comm[1] + 6, (comm[2]) ? comm[2]
-								      : NULL);
-
-		else {
-			fputs(_("Usage: net [sftp, smb, ftp]://ADDRESS [OPTIONS]\n"),
-			    stderr);
-			exit_code = EXIT_FAILURE;
-			return EXIT_FAILURE;
-		}
-	}
+	else if (*comm[0] == 'n' && (strcmp(comm[0], "net") == 0))
+		exit_code = remotes_function(comm);
 
 	/* #### MIME #### */
 	else if (*comm[0] == 'm' && ((comm[0][1] == 'm' && !comm[0][2]) || strcmp(comm[0], "mime") == 0))

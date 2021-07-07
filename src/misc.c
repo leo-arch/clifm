@@ -55,6 +55,7 @@
 #include "navigation.h"
 #include "readline.h"
 #include "strings.h"
+#include "remotes.h"
 
 void
 set_term_title(const char *str)
@@ -1024,12 +1025,34 @@ save_pinned_dir(void)
 	return;
 }
 
+int
+free_remotes(int exit)
+{
+	if (exit)
+		autounmount_remotes();
+
+	int i;
+	for (i = 0; i < remotes_n; i++) {
+		free(remotes[i].name);
+		free(remotes[i].desc);
+		free(remotes[i].mountpoint);
+		free(remotes[i].mount_cmd);
+		free(remotes[i].unmount_cmd);		
+	}
+	free(remotes);
+	remotes_n = 0;
+
+	return EXIT_SUCCESS;
+}
+
 /* This function is called by atexit() to clear whatever is there at exit
  * time and avoid thus memory leaks */
 void
 free_stuff(void)
 {
 	int i = 0;
+
+	free_remotes(1);
 
 	if (STDIN_TMP_DIR) {
 		char *rm_cmd[] = {"rm", "-rd", "--", STDIN_TMP_DIR, NULL};
@@ -1218,6 +1241,7 @@ free_stuff(void)
 	free(ACTIONS_FILE);
 	free(KBINDS_FILE);
 	free(COLORS_DIR);
+	free(REMOTES_FILE);
 
 	/* Restore the color of the running terminal */
 	fputs("\x1b[0;39;49m", stdout);
@@ -1682,7 +1706,7 @@ help_function(void)
  mp, mountpoints\n\
  msg, messages [clear]\n\
  n, new FILE DIR/ ...n\n\
- net [smb, ftp, sftp]://ADDRESS [OPTIONS]\n\
+ net [NAME] [edit] [m, mount NAME] [u, unmount NAME]\n\
  o, open [ELN/FILE] [APPLICATION]\n\
  opener [default] [APPLICATION]\n\
  p, pr, pp, prop [ELN/FILE ... n]\n\

@@ -651,6 +651,9 @@ define_config_file_names(void)
 	ACTIONS_FILE = (char *)xnmalloc(config_len + 13, sizeof(char));
 	sprintf(ACTIONS_FILE, "%s/actions.cfm", CONFIG_DIR);
 
+	REMOTES_FILE = (char *)xnmalloc(config_len + 10, sizeof(char));
+	sprintf(REMOTES_FILE, "%s/nets.cfm", CONFIG_DIR);
+
 	return;
 }
 
@@ -1159,16 +1162,55 @@ create_config_files(void)
 	if (stat(PLUGINS_DIR, &attr) == -1) {
 		char *cmd[] = {"mkdir", PLUGINS_DIR, NULL};
 
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			_err('e', PRINT_PROMPT, _("%s: mkdir: Error creating plugins "
 				"directory. The actions function is disabled\n"),
 			    PROGRAM_NAME);
-/*		else
-			copy_plugins(); */
+		}
 	}
 
 	create_actions_file(ACTIONS_FILE);
 	create_mime_file(MIME_FILE, 0);
+	create_remotes_file();
+}
+
+int
+create_remotes_file(void)
+{
+	if (!REMOTES_FILE || !*REMOTES_FILE)
+		return EXIT_FAILURE;
+
+	struct stat attr;
+	if (stat(REMOTES_FILE, &attr) == EXIT_SUCCESS)
+		return EXIT_SUCCESS;
+
+	FILE *fp = fopen(REMOTES_FILE, "w");
+
+	if (!fp) {
+		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+		    REMOTES_FILE, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	fprintf(fp, "#####################################\n"
+		"# Remotes management file for %s #\n"
+		"#####################################\n\n"
+		"# Blank and commented lines are omitted\n\n"
+		"# Example:\n"
+		"# A name for this remote. It will be used by the 'net' command\n"
+		"# and will be available for TAB completion\n"
+		"# [work_smb]\n\n"
+		"# Comment=My work samba server\n"
+		"# Mountpoint=/home/user/.config/clifm/mounts/work_smb\n\n"
+		"# Use %%m as a placeholder for Mountpoint\n"
+		"# MountCmd=mount.cifs //WORK_IP/shared %%m -o OPTIONS\n"
+		"# UnmountCmd=umount %%m\n\n"
+		"# Automatically mount this remote at startup\n"
+		"# AutoMount=true\n\n"
+		"# Automatically unmount this remote at exit\n"
+		"# AutoUnmount=true\n\n", PROGRAM_NAME);
+	fclose(fp);
+	return EXIT_SUCCESS;
 }
 
 int
@@ -2110,7 +2152,10 @@ reload_config(void)
 	free(COLORS_DIR);
 	free(TMP_DIR);
 	free(SEL_FILE);
-	TMP_DIR = COLORS_DIR = SEL_FILE = (char *)NULL;
+	free(REMOTES_FILE);
+	TMP_DIR = COLORS_DIR = SEL_FILE = REMOTES_FILE = (char *)NULL;
+
+	free_remotes(0);
 
 	if (filter) {
 		regfree(&regex_exp);
@@ -2287,8 +2332,8 @@ reload_config(void)
 	get_prompt_cmds();
 
 	load_dirhist();
-
 	load_jumpdb();
+	load_remotes();
 
 	/* Set the current poistion of the dirhist index to the last
 	 * entry */

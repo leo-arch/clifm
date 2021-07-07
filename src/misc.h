@@ -31,6 +31,7 @@ int create_usr_var(char *str);
 int filter_function(const char *arg);
 void free_software(void);
 void free_stuff(void);
+void free_remotes(int exit);
 void handle_stdin(void);
 void help_function(void);
 int hidden_function(char **comm);

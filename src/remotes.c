@@ -1,4 +1,4 @@
-/* remote.c -- function wrappers for smb, ftp, and ssh */
+/* remote.c -- functions to manage remotes */
 
 /*
  * This file is part of CliFM
@@ -33,357 +33,282 @@
 #include "exec.h"
 #include "listing.h"
 #include "navigation.h"
+#include "history.h"
+#include "mime.h"
+#include "misc.h"
+#include "jump.h"
 
 int
-remote_ftp(char *address, char *options)
+remotes_list(void)
 {
-	if (xargs.stealth_mode == 1) {
-		printf("%s: Access to remote filesystems is disabled in "
-		       "stealth mode\n", PROGRAM_NAME);
+	if (!remotes_n) {
+		printf(_("%s: No remotes defined\n"), PROGRAM_NAME);
 		return EXIT_SUCCESS;
 	}
 
-#if __FreeBSD__ || __NetBSD__ || __OpenBSD__
-	fprintf(stderr, _("%s: FTP is not yet supported on BSD systems\n"),
-	    PROGRAM_NAME);
-	return EXIT_FAILURE;
-#endif
-
-	if (!address || !*address)
-		return EXIT_FAILURE;
-
-	char *tmp_addr = savestring(address, strlen(address));
-
-	char *p = tmp_addr;
-	while (*p) {
-		if (*p == '/')
-			*p = '_';
-		p++;
+	size_t i;
+	for (i = 0; i < remotes_n; i++) {
+		if (!remotes[i].name)
+			continue;
+		printf(_("Name: %s\n"), remotes[i].name);
+		if (remotes[i].desc)
+			printf(_(" Comment: %s\n"), remotes[i].desc);
+		if (remotes[i].mountpoint)
+			printf(_(" Mountpoint: %s\n"), remotes[i].mountpoint);
+		if (remotes[i].mount_cmd)
+			printf(_(" Mount command: %s\n"), remotes[i].mount_cmd);
+		if (remotes[i].unmount_cmd)
+			printf(_(" Unmount command: %s\n"), remotes[i].unmount_cmd);
+		printf(_(" Auto-unmount: %s\n"), (remotes[i].auto_unmount == 0)
+				? _("false") : _("true"));
+		printf(_(" Auto-mount: %s\n"), (remotes[i].auto_mount == 0)
+				? _("false") : _("true"));
+		printf(_(" Mounted: %s\n"), (remotes[i].mounted == 0) ? _("No")
+				: _("Yes"));
+		if (i < remotes_n - 1)
+			puts("");
 	}
-
-	char *rmountpoint = (char *)xnmalloc(strlen(TMP_DIR) + strlen(tmp_addr) + 9,
-										sizeof(char));
-
-	sprintf(rmountpoint, "%s/remote/%s", TMP_DIR, tmp_addr);
-	free(tmp_addr);
-
-	struct stat file_attrib;
-
-	if (stat(rmountpoint, &file_attrib) == -1) {
-
-		char *mkdir_cmd[] = {"mkdir", "-p", rmountpoint, NULL};
-
-		if (launch_execve(mkdir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-			fprintf(stderr, _("%s: %s: Cannot create mountpoint\n"),
-			    PROGRAM_NAME, rmountpoint);
-			free(rmountpoint);
-			return EXIT_FAILURE;
-		}
-	} else if (count_dir(rmountpoint) > 2) {
-		fprintf(stderr, _("%s: %s: Mounpoint not empty\n"),
-		    PROGRAM_NAME, rmountpoint);
-		free(rmountpoint);
-		return EXIT_FAILURE;
-	}
-
-	/* CurlFTPFS does not require sudo */
-	char *cmd[] = {"curlftpfs", address, rmountpoint, (options) ? "-o"
-					: NULL, (options) ? options : NULL, NULL};
-	int error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
-
-	if (error_code) {
-		free(rmountpoint);
-		return EXIT_FAILURE;
-	}
-
-	if (xchdir(rmountpoint, SET_TITLE) != 0) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rmountpoint,
-		    strerror(errno));
-		free(rmountpoint);
-		return EXIT_FAILURE;
-	}
-
-	free(ws[cur_ws].path);
-	ws[cur_ws].path = savestring(rmountpoint, strlen(rmountpoint));
-
-	free(rmountpoint);
-
-	if (cd_lists_on_the_fly) {
-		free_dirlist();
-		if (list_dir() != EXIT_SUCCESS)
-			error_code = EXIT_FAILURE;
-	}
-
-	return error_code;
+	return EXIT_SUCCESS;
 }
 
 int
-remote_smb(char *address, char *options)
+remotes_mount(char *name)
 {
-	if (xargs.stealth_mode == 1) {
-		printf("%s: Access to remote filesystems is disabled in "
-		       "stealth mode\n", PROGRAM_NAME);
-		return EXIT_SUCCESS;
-	}
-
-#if __FreeBSD__ || __NetBSD__ || __OpenBSD__
-	fprintf(stderr, _("%s: SMB is not yet supported on BSD systems\n"), PROGRAM_NAME);
-	return EXIT_FAILURE;
-#endif
-
-	/* smb://[USER@]HOST[/SERVICE][/REMOTE-DIR] */
-
-	if (!address || !*address)
+	if (!name || !*name)
 		return EXIT_FAILURE;
 
-	int free_address = 0;
-	char *ruser = (char *)NULL, *raddress = (char *)NULL;
-	char *tmp = strchr(address, '@');
+	int i = remotes_n,
+		found = 0;
+	while (--i >= 0) {
+		if (*remotes[i].name == *name && strcmp(remotes[i].name, name) == 0) {
+			found = 1;
+			break;
+		}
+	}
 
-	if (tmp) {
-		*tmp = '\0';
-		ruser = savestring(address, strlen(address));
+	if (!found) {
+		fprintf(stderr, _("%s: %s: No such remote\n"), PROGRAM_NAME, name);
+		return EXIT_FAILURE;
+	}
 
-		raddress = savestring(tmp + 1, strlen(tmp + 1));
-		free_address = 1;
+	if (!remotes[i].mount_cmd) {
+		fprintf(stderr, _("%s: No mount command found for '%s'\n"),
+			PROGRAM_NAME, remotes[i].name);
+		return EXIT_FAILURE;
+	}
+
+	if (!remotes[i].mountpoint) {
+		fprintf(stderr, _("%s: No mountpoint specified for '%s'\n"),
+			PROGRAM_NAME, remotes[i].name);
+		return EXIT_FAILURE;
+	}
+
+	struct stat attr;
+	if (lstat(remotes[i].mountpoint, &attr) == -1) {
+		char *cmd[] = {"mkdir", "-p", remotes[i].mountpoint, NULL};
+		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+			fprintf(stderr, _("%s: %s: %s\n"), PROGRAM_NAME,
+					remotes[i].mountpoint, strerror(errno));
+			return EXIT_FAILURE;
+		}
+	}
+
+	if (count_dir(remotes[i].mountpoint) <= 2
+	&& launch_execle(remotes[i].mount_cmd) != EXIT_SUCCESS)
+		return EXIT_FAILURE;
+
+	if (xchdir(remotes[i].mountpoint, SET_TITLE) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+				remotes[i].mountpoint, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	int exit_status = EXIT_SUCCESS;
+	if (cd_lists_on_the_fly) {
+		free(ws[cur_ws].path);
+		ws[cur_ws].path = savestring(remotes[i].mountpoint,
+							strlen(remotes[i].mountpoint));
+		add_to_jumpdb(ws[cur_ws].path);
+		add_to_dirhist(ws[cur_ws].path);
+		free_dirlist();
+		if (list_dir() != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
 	} else {
-		raddress = address;
+		printf(_("%s: %s: Remote mounted on %s\n"), PROGRAM_NAME,
+				remotes[i].name, remotes[i].mountpoint);
 	}
 
-	char *addr_tmp = (char *)xnmalloc(strlen(raddress) + 3, sizeof(char));
-	sprintf(addr_tmp, "//%s", raddress);
+	remotes[i].mounted = 1;
+	return EXIT_SUCCESS;
+}
 
-	char *p = raddress;
+int
+remotes_unmount(char *name)
+{
+	if (!name || !*name)
+		return EXIT_FAILURE;
 
-	while (*p) {
-		if (*p == '/')
-			*p = '_';
-		p++;
+	int i = remotes_n,
+		found = 0;
+
+	while (--i >= 0) {
+		if (*name == *remotes[i].name && strcmp(name, remotes[i].name) == 0) {
+			found = 1;
+			break;
+		}
 	}
 
-	char *rmountpoint = (char *)xnmalloc(strlen(raddress) + strlen(TMP_DIR) + 9,
-										sizeof(char));
-	sprintf(rmountpoint, "%s/remote/%s", TMP_DIR, raddress);
+	if (!found) {
+		fprintf(stderr, _("%s: %s: No such remote\n"), PROGRAM_NAME,
+				remotes[i].name);
+		return EXIT_FAILURE;
+	}
 
-	int free_options = 0;
-	char *roptions = (char *)NULL;
+	if (!remotes[i].mountpoint) {
+		fprintf(stderr, _("%s: No mountpoint specified for '%s'\n"), PROGRAM_NAME,
+				remotes[i].name);
+		return EXIT_FAILURE;
+	}
 
-	if (ruser) {
-		if (options) {
-			roptions = (char *)xnmalloc(strlen(ruser) + strlen(options) + 11, sizeof(char));
-			sprintf(roptions, "username=%s,%s", ruser, options);
+	if (!remotes[i].unmount_cmd) {
+		fprintf(stderr, _("%s: No unmount command found for '%s'\n"),
+			PROGRAM_NAME, remotes[i].name);
+		return EXIT_FAILURE;
+	}
+
+	if (launch_execle(remotes[i].unmount_cmd) != EXIT_SUCCESS)
+		return EXIT_FAILURE;
+
+	remotes[i].mounted = 0;
+	return EXIT_SUCCESS;
+}
+
+int
+remotes_edit(char *app)
+{
+	if (!REMOTES_FILE)
+		return EXIT_FAILURE;
+
+	struct stat attr;
+	if (stat(REMOTES_FILE, &attr) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, REMOTES_FILE,
+				strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	time_t mtime_bfr = (time_t)attr.st_mtime;
+
+	int ret = EXIT_SUCCESS;
+	if (app) {
+		char *cmd[] = {app, REMOTES_FILE, NULL};
+		ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+	} else {
+		if (!(flags & FILE_CMD_OK)) {
+			fprintf(stderr, _("%s: file: Command not found. Try "
+					"'edit APPLICATION'\n"), PROGRAM_NAME);
+			ret = EXIT_FAILURE;
 		} else {
-			roptions = (char *)xnmalloc(strlen(ruser) + 10, sizeof(char));
-			sprintf(roptions, "username=%s", ruser);
-		}
-
-		free_options = 1;
-	} else {
-		roptions = options;
-	}
-
-	/* Create the mountpoint, if it doesn't exist */
-	struct stat file_attrib;
-
-	if (stat(rmountpoint, &file_attrib) == -1) {
-		char *mkdir_cmd[] = {"mkdir", "-p", rmountpoint, NULL};
-
-		if (launch_execve(mkdir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-
-			if (free_options)
-				free(roptions);
-
-			if (ruser)
-				free(ruser);
-
-			if (free_address)
-				free(raddress);
-
-			free(addr_tmp);
-
-			fprintf(stderr, _("%s: %s: Cannot create mountpoint\n"),
-			    PROGRAM_NAME, rmountpoint);
-			free(rmountpoint);
-
-			return EXIT_FAILURE;
+			char *cmd[] = {"mime", REMOTES_FILE, NULL};
+			ret = mime_open(cmd);
 		}
 	}
 
-	/* If the mountpoint already exists, check if it is empty */
-	else if (count_dir(rmountpoint) > 2) {
-		fprintf(stderr, _("%s: %s: Mountpoint not empty\n"),
-		    PROGRAM_NAME, rmountpoint);
-
-		if (free_options)
-			free(roptions);
-
-		if (ruser)
-			free(ruser);
-
-		if (free_address)
-			free(raddress);
-
-		free(rmountpoint);
-		free(addr_tmp);
-
+	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
+
+	stat(REMOTES_FILE, &attr);
+
+	if (mtime_bfr != (time_t)attr.st_mtime) {
+		free_remotes(0);
+		load_remotes();
 	}
 
-	int error_code = 1;
-
-	/* Create and execute the SMB command */
-	if (!(flags & ROOT_USR)) {
-		char *cmd[] = {"sudo", "-u", "root", "mount.cifs", addr_tmp,
-		    rmountpoint, (roptions) ? "-o" : NULL,
-		    (roptions) ? roptions : NULL, NULL};
-		error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
-	} else {
-		char *cmd[] = {"mount.cifs", addr_tmp, rmountpoint, (roptions) ? "-o"
-					: NULL, (roptions) ? roptions : NULL, NULL};
-		error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
-	}
-
-	if (free_options)
-		free(roptions);
-
-	if (ruser)
-		free(ruser);
-
-	if (free_address)
-		free(raddress);
-
-	free(addr_tmp);
-
-	if (error_code) {
-		free(rmountpoint);
-		return EXIT_FAILURE;
-	}
-
-	/* If successfully mounted, chdir into mountpoint */
-	if (xchdir(rmountpoint, SET_TITLE) != 0) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rmountpoint,
-		    strerror(errno));
-		free(rmountpoint);
-		return EXIT_FAILURE;
-	}
-
-	free(ws[cur_ws].path);
-	ws[cur_ws].path = savestring(rmountpoint, strlen(rmountpoint));
-
-	free(rmountpoint);
-
-	if (cd_lists_on_the_fly) {
-		free_dirlist();
-		if (list_dir() != EXIT_SUCCESS)
-			error_code = EXIT_FAILURE;
-	}
-
-	return error_code;
+	return EXIT_SUCCESS;
 }
 
 int
-remote_ssh(char *address, char *options)
+remotes_function(char **args)
 {
-	if (xargs.stealth_mode == 1) {
-		printf("%s: Access to remote filesystems is disabled in "
-		       "stealth mode\n", PROGRAM_NAME);
+	if (!args[1])
+		return remotes_list();
+
+	if (*args[1] == '-' && strcmp(args[1], "--help") == 0) {
+		puts(_("Usage: net [NAME] [edit] [m, mount NAME] [u, unmount NAME]"));
 		return EXIT_SUCCESS;
 	}
 
-#if __FreeBSD__ || __NetBSD__ || __OpenBSD__
-	fprintf(stderr, _("%s: SFTP is not yet supported on BSD systems"),
-	    PROGRAM_NAME);
-	return EXIT_FAILURE;
-#endif
-
-	if (!config_ok)
-		return EXIT_FAILURE;
-
-	/*  char *sshfs_path = get_cmd_path("sshfs");
-	if (!sshfs_path) {
-		fprintf(stderr, _("%s: sshfs: Program not found.\n"),
-				PROGRAM_NAME);
-		return EXIT_FAILURE;
-	} */
-
-	if (!address || !*address)
-		return EXIT_FAILURE;
-
-	/* Create mountpoint */
-	char *rname = savestring(address, strlen(address));
-
-	/* Replace all slashes in address by underscore to construct the
-	 * mounpoint name */
-	char *p = rname;
-	while (*p) {
-		if (*p == '/')
-			*p = '_';
-		p++;
+	if (*args[1] == 'e' && strcmp(args[1], "edit") == 0) {
+		if (args[2])
+			return remotes_edit(args[2]);
+		return remotes_edit(NULL);
 	}
 
-	char *rmountpoint = (char *)xnmalloc(strlen(TMP_DIR) + strlen(rname) + 9,
-											sizeof(char));
-	sprintf(rmountpoint, "%s/remote/%s", TMP_DIR, rname);
-	free(rname);
-
-	/* If the mountpoint doesn't exist, create it */
-	struct stat file_attrib;
-	if (stat(rmountpoint, &file_attrib) == -1) {
-		char *mkdir_cmd[] = {"mkdir", "-p", rmountpoint, NULL};
-
-		if (launch_execve(mkdir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-			fprintf(stderr, _("%s: %s: Cannot create mountpoint\n"),
-			    PROGRAM_NAME, rmountpoint);
-			free(rmountpoint);
+	if (*args[1] == 'u' && (!*(args[1] + 1) || strcmp(args[1], "unmount") == 0)) {
+		if (!args[2]) {
+			fputs("Usage: net [NAME] [edit] [m, mount NAME] [u, unmount NAME]\n",
+				stderr);
 			return EXIT_FAILURE;
+		}
+		return remotes_unmount(args[2]);
+	}
+
+	if (*args[1] == 'm' && (!*(args[1] + 1) || strcmp(args[1], "mount") == 0)) {
+		if (!args[2]) {
+			fputs("Usage: net [NAME] [edit] [m, mount NAME] [u, unmount NAME]\n",
+				stderr);
+			return EXIT_FAILURE;
+		}
+		return remotes_mount(args[2]);
+	}
+
+	return remotes_mount(args[1]);
+}
+
+int
+automount_remotes(void)
+{
+	if (!remotes_n)
+		return EXIT_SUCCESS;
+
+	int i = remotes_n,
+		exit_status = EXIT_SUCCESS;
+	while (--i >= 0) {
+		if (remotes[i].name && remotes[i].auto_mount == 1
+		&& remotes[i].mountpoint && remotes[i].mount_cmd) {
+			printf(_("%s: Mounting remote...\n"), remotes[i].name);
+			struct stat attr;
+			if (stat(remotes[i].mountpoint, &attr) == -1) {
+				char *cmd[] = {"mkdir", "-p", remotes[i].mountpoint, NULL};
+				if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+					continue;
+			}
+			if (launch_execle(remotes[i].mount_cmd) != EXIT_SUCCESS)
+				exit_status = EXIT_FAILURE;
+			else
+				remotes[i].mounted = 1;
 		}
 	}
 
-	/* If it exists, make sure it is not populated */
-	else if (count_dir(rmountpoint) > 2) {
-		fprintf(stderr, _("%s: %s: Mounpoint not empty\n"),
-		    PROGRAM_NAME, rmountpoint);
-		free(rmountpoint);
-		return EXIT_FAILURE;
+	return exit_status;
+}
+
+int
+autounmount_remotes(void)
+{
+	if (!remotes_n)
+		return EXIT_SUCCESS;
+
+	int i = remotes_n,
+		exit_status = EXIT_SUCCESS;
+	while (--i >= 0) {
+		if (remotes[i].name && remotes[i].auto_unmount == 1
+		&& remotes[i].mountpoint && remotes[i].unmount_cmd
+		&& remotes[i].mounted) {
+			printf(_("%s: Unmounting remote...\n"), remotes[i].name);
+			if (launch_execle(remotes[i].unmount_cmd) != EXIT_SUCCESS)
+				exit_status = EXIT_FAILURE;
+		}
 	}
 
-	/* Construct the command */
-
-	int error_code = 1;
-
-	if ((flags & ROOT_USR)) {
-		char *cmd[] = {"sshfs", address, rmountpoint, (options) ? "-o"
-					: NULL, (options) ? options : NULL, NULL};
-		error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
-	} else {
-		char *cmd[] = {"sudo", "sshfs", address, rmountpoint, "-o",
-		    "allow_other", (options) ? "-o" : NULL,
-		    (options) ? options : NULL, NULL};
-		error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
-	}
-
-	if (error_code != EXIT_SUCCESS) {
-		free(rmountpoint);
-		return EXIT_FAILURE;
-	}
-
-	/* If successfully mounted, chdir into mountpoint */
-	if (xchdir(rmountpoint, SET_TITLE) != 0) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rmountpoint,
-		    strerror(errno));
-		free(rmountpoint);
-		return EXIT_FAILURE;
-	}
-
-	free(ws[cur_ws].path);
-	ws[cur_ws].path = savestring(rmountpoint, strlen(rmountpoint));
-	free(rmountpoint);
-
-	if (cd_lists_on_the_fly) {
-		free_dirlist();
-		if (list_dir() != EXIT_SUCCESS)
-			error_code = EXIT_FAILURE;
-	}
-
-	return error_code;
+	return exit_status;
 }

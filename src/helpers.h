@@ -581,6 +581,20 @@ struct param {
 
 extern struct param xargs;
 
+/* Struct to store remotes information */
+struct remote_t {
+	char *name;
+	char *desc;
+	char *mountpoint;
+	char *mount_cmd;
+	char *unmount_cmd;
+	int auto_unmount;
+	int auto_mount;
+	int mounted; 
+};
+
+extern struct remote_t *remotes;
+
 /* A list of possible program messages. Each value tells the prompt what
  * to do with error messages: either to print an E, W, or N char at the
  * beginning of the prompt, or nothing (nomsg) */
@@ -706,7 +720,8 @@ extern size_t
     bm_n,
     cschemes_n,
     jump_n,
-    path_progsn;
+    path_progsn,
+    remotes_n;
 
 extern struct termios shell_tmodes;
 extern off_t total_sel_size;
@@ -759,6 +774,7 @@ extern char
     *PLUGINS_DIR,
     *PROFILE_FILE,
     *qc,
+    *REMOTES_FILE,
     *SEL_FILE,
     *STDIN_TMP_DIR,
     *term,

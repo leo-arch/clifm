@@ -564,6 +564,164 @@ load_actions(void)
 	return EXIT_SUCCESS;
 }
 
+/* Load remotes information from FILE */
+int
+load_remotes(void)
+{
+	if (!REMOTES_FILE || !*REMOTES_FILE)
+		return EXIT_FAILURE;
+
+	if (xargs.stealth_mode == 1) {
+		fprintf(stderr, "%s: The net function is disabled in stealth mode\n",
+				PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	struct stat attr;
+	if (stat(REMOTES_FILE, &attr) == -1) {
+		fprintf(stderr, "%s: %s\n", REMOTES_FILE, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	FILE *fp = fopen(REMOTES_FILE, "r");
+	if (!fp) {
+		fprintf(stderr, "%s: %s\n", REMOTES_FILE, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	size_t n = 0;
+	remotes = (struct remote_t *)xnmalloc(n + 1, sizeof(struct remote_t));
+	remotes[n].name = (char *)NULL;
+	remotes[n].desc = (char *)NULL;
+	remotes[n].mountpoint = (char *)NULL;
+	remotes[n].mount_cmd = (char *)NULL;
+	remotes[n].unmount_cmd = (char *)NULL;
+	remotes[n].auto_unmount = 0;
+	remotes[n].auto_mount = 0;
+	remotes[n].mounted = 0;
+
+	size_t line_sz = 0;
+	char *line = (char *)NULL;
+	ssize_t line_len = 0;
+
+	while ((line_len = getline(&line, &line_sz, fp)) > 0) {
+		if (!*line || *line == '#' || *line == '\n')
+			continue;
+		if (*line == '[') {
+			if (remotes[n].name)
+				n++;
+			remotes = (struct remote_t *)xrealloc(
+					remotes, (n + 2) * sizeof(struct remote_t));
+
+			remotes[n].name = (char *)NULL;
+			remotes[n].desc = (char *)NULL;
+			remotes[n].mountpoint = (char *)NULL;
+			remotes[n].mount_cmd = (char *)NULL;
+			remotes[n].unmount_cmd = (char *)NULL;
+			remotes[n].auto_unmount = 0;
+			remotes[n].auto_mount = 0;
+			remotes[n].mounted = 0;
+
+			char *name = strbtw(line, '[', ']');
+			if (!name)
+				continue;
+			if (!*name) {
+				free(name);
+				name = (char *)NULL;
+				continue;
+			}
+			remotes[n].name = (char *)xrealloc(remotes[n].name,
+							(strlen(name) + 1) * sizeof(char));
+			strcpy(remotes[n].name, name);
+			free(name);
+			name = (char *)NULL;
+		}
+
+		if (!remotes[n].name)
+			continue;
+
+		char *ret = strchr(line, '=');
+		if (!ret)
+			continue;
+		if (!*(++ret))
+			continue;
+
+		size_t ret_len = strlen(ret);
+		if (ret[ret_len - 1] == '\n')
+			ret[--ret_len] = '\0';
+
+		if (strncmp(line, "Comment=", 8) == 0) {
+			remotes[n].desc = (char *)xrealloc(remotes[n].desc,
+							(ret_len + 1) * sizeof(char));
+			strcpy(remotes[n].desc, ret);
+		} else if (strncmp(line, "Mountpoint=", 11) == 0) {
+			char *tmp = (char *)NULL; 
+			if (*ret == '~')
+				tmp = tilde_expand(ret);
+			remotes[n].mountpoint = (char *)xrealloc(remotes[n].mountpoint,
+								((tmp ? strlen(tmp) : ret_len) + 1)
+								* sizeof(char));
+			strcpy(remotes[n].mountpoint, tmp ? tmp : ret);
+			free(tmp);
+		} else if (strncmp(line, "MountCmd=", 9) == 0) {
+			int replaced = 0;
+			if (remotes[n].mountpoint) {
+				char *rep = replace_substr(ret, "%m", remotes[n].mountpoint);
+				if (rep) {
+					remotes[n].mount_cmd = (char *)xrealloc(
+										remotes[n].mount_cmd,
+										(strlen(rep) + 1) * sizeof(char));
+					strcpy(remotes[n].mount_cmd, rep);
+					free(rep);
+					replaced = 1;
+				}
+			}
+
+			if (!replaced) {
+				remotes[n].mount_cmd = (char *)xrealloc(remotes[n].mount_cmd,
+									(ret_len + 1) * sizeof(char));
+				strcpy(remotes[n].mount_cmd, ret);
+			}
+		} else if (strncmp(line, "UnmountCmd=", 11) == 0) {
+			int replaced = 0;
+			if (remotes[n].mountpoint) {
+				char *rep = replace_substr(ret, "%m", remotes[n].mountpoint);
+				if (rep) {
+					remotes[n].unmount_cmd = (char *)xrealloc(
+									remotes[n].unmount_cmd,
+									(strlen(rep) + 1) * sizeof(char));
+					strcpy(remotes[n].unmount_cmd, rep);
+					free(rep);
+					replaced = 1;
+				}
+			}
+
+			if (!replaced) {
+				remotes[n].mount_cmd = (char *)xrealloc(remotes[n].unmount_cmd,
+									(ret_len + 1) * sizeof(char));
+				strcpy(remotes[n].unmount_cmd, ret);
+			}
+		} else if (strncmp(line, "AutoUnmount=", 12) == 0) {
+			if (strcmp(ret, "true") == 0)
+				remotes[n].auto_unmount = 1;
+		} else if (strncmp(line, "AutoMount=", 10) == 0) {
+			if (strcmp(ret, "true") == 0)
+				remotes[n].auto_mount = 1;
+		}
+	}
+
+	free(line);
+	fclose(fp);
+
+	if (remotes[n].name) {
+		++n;
+		remotes[n].name = (char *)NULL;
+	}
+
+	remotes_n = n;
+	return EXIT_SUCCESS;
+}
+
 /* Evaluate external arguments, if any, and change initial variables to
  * its corresponding value */
 void
