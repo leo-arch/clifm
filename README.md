@@ -77,7 +77,7 @@ The command-line is still there, never hidden.
 <h4 align="center">CliFM's interface</h4>
 <p align="center"><img src="images/icons_rounded.png"></p>
 
-Features beyond copy, move, remove, etc:
+Features beyond common file operations, such as copy, move, remove, etc.:
 
 * [Really CLI-based](https://github.com/leo-arch/clifm/wiki/Introduction#main-design-and-goals). No GUI nor TUI or curses at all, just a command-line. Since no GUI is needed, it can run on the kernel built-in console and even on a SSH or any other remote session.
 * Memory footprint below 5 MiB and a disk usage of 500 KiB. Incredibly lightweight and fast even on really old hardware.
