@@ -127,6 +127,7 @@ Features beyond copy, move, remove, etc:
 * Four [customizable keybindings for custom plugins](https://github.com/leo-arch/clifm/wiki/Customization#keybindings).
 * [Fastback function](https://github.com/leo-arch/clifm/wiki/Introduction#fastback-function).
 * [Git integration](https://github.com/leo-arch/clifm/wiki/Advanced#git-integration).
+* [Remote file systems management](https://github.com/leo-arch/clifm/wiki/Introduction#net-name-edit-m-mount-name-u-unmount-name).
 
 For a detailed explanation of each of these features, follow the corresponding links or consult the [wiki](https://github.com/leo-arch/clifm/wiki).
 
