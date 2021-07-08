@@ -26,8 +26,8 @@ pkgver() {
 }
 
 build() {
-  cd "$srcdir/$_pkgname/src"
-  gcc -O3 -s -fstack-protector-strong -march=native -Wall -o "$_pkgname" *.c -lreadline -lacl -lcap
+  cd "$srcdir/$_pkgname"
+  make build
 }
 
 package() {
