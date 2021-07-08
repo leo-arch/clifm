@@ -139,7 +139,7 @@ remotes_mount(char *name)
 	}
 
 	remotes[i].mounted = 1;
-	return EXIT_SUCCESS;
+	return exit_status;
 }
 
 int
