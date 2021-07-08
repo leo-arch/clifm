@@ -126,6 +126,7 @@ List of CliFM features:
   37) Fused parameters support for ELN's
   38) Advcpmv support (cp and mv with a nice progress bar). Depends on advcpmv (See \fIhttps://github.com/jarun/advcpmv\fR)
   39) Fastback function
+  40) Remote file systems management
 
 .SH 3. RATIONALE
 When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the kernel built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There are no two without three".
@@ -577,23 +578,30 @@ with no arguments, prints the list of messages in the current session. The 'clea
 .B n, new \fR[FILE DIR/ ...n]
 create new files and/or directories. If a file name ends with a slash (/), it will be taken as a directory name and created via the shell command 'mkdir -p'. Else, it will be created via the 'touch' shell command. Ex: 'n myfile mydir/', to create a file named "myfile" and a directory named "mydir". If no file name is specified, the user will be asked for one.
 .TP
-.B net \fR[smb, ftp, sftp]://ADDRESS [OPTIONS]
-access a remote file system, either via SSH, FTP, or SMB protocols. To access the file system of a machine via SSH, use the following URI scheme: sftp://[USER@]HOST:[/REMOTE\-DIR] [PORT]. Bracketed elements are optional. If no user is specified, CliFM will attempt to login using the current local username. If no port is specified, the default port (22, if SSH) will be used.
+.B net net \fR[NAME] [edit] [m, mount NAME] [u, unmount NAME]
+\fBThe configuration file\fR
 .sp
-To access the remote file system via SMB, this scheme should be used instead: smb://[USER@]HOST[/SHARE][/REMOTE\-DIR] [OPTIONS]. The URI scheme for FTP connections is this: ftp://HOST[:PORT] [OPTIONS]. Network resources are mounted in '/tmp/clifm/remote_dir', replacing all slashes in remote_dir by underscores. To disconnect from the remote machine, use 'fusermount3 \-u' for SSH, 'fusermount \-u' for FTP, and 'umount' for SMB, followed by the corresponding mountpoint. Examples:
-
-  net sftp://john@192.168.0.25:Documents/misc port=2222
-  fusermount3 \-u /tmp/clifm/remote/john@192.168.0.25:Documents_misc
- 
-  net smb://192.168.1.34/share username=laura,password=my_pass
-  umount /tmp/clifm/remote/192.168.0.34_share
-
-  net ftp://192.168.0.123:2121 user=me:mypass
-  fusermount \-u /tmp/clifm/remote/192.168.0.123:2121
+The \fInet\fR command manages connections to remote systems via a simple samba-like configuration file (\fI$HOME/.config/clifm/profiles/PROFILE/nets.cfm\fR). Here you can specify multiple remotes and options for each of these remotes. Syntax example for this file:
 .sp
-\fBNOTE\fR: 'fusermount3' is Linux\-specific. On FreeBSD 'umount' should be used instead.
+ [remote_name] 
+ Comment=A nice descriptive comment
+ Mountpoint=/path/to/mountpoint
+ MountCmd=sudo mount.cifs //111.111.111.111/share %m -o OPTIONS
+ UnmountCmd=sudo umount %m
+ AutoUnmount=true (Auto-mount this remote at startup)
+ AutoMount=false (Auto-unmount this remote at exit)
 .sp
-The underlying programs used here to mount these remote file systems are: \fBsshfs(1)\fR for SFTP, \fBmount.cifs(8)\fR for SMB, and \fBcurlftpfs(1)\fR for FTP. For more information regarding the options supported by each of them, consult the corresponding documentation.
+\fBNote\fR: \fI%m\fR could be used as a placeholder for \fIMountpoint\fR. \fI%m\fR will be replaced by the value of \fIMountpoint\fR.
+.sp
+\fBCommand syntax\fR
+.sp
+Without arguments, \fInet\fR lists the configuration for each remote available in the configuration file.
+.sp
+Use the \fIedit\fR option to edit the remotes configuration file. If no further argument is specified, the file will be opened with the current resource opener. However, you can pass an application as second parameter to open to configuration file. Example: 'net edit nano'.
+.sp
+If not already mounted, the \fIm\fR, \fImount\fR option mounts the specified remote using the mount command and the mounpoint specified in the confifuration file and automatically cd into the corresponding mountpoint. Example: \fInet m smb_work\fR. \fIm\fR, \fImount\fR could be omitted, so that \fInet smb_work\fR amounts to \fInet m smb_work\fR. TAB completion is available for this function.
+.sp
+The \fIu\fR, \fIunmount\fR option unmounts the specified remote using the unmount command specified in the configuration file. For example: \fInet u smb_work\fR. TAB completion is also available for this function.
 .TP
 .B o, open \fRELN/FILE [APPLICATION]
 open FILE, which can be either a directory, in which case it works just like the \fIcd\fR command (see above), a regular file, or a symbolic link to either of the two. For example: 'o 12', 'o filename', 'o /path/to/filename'.
