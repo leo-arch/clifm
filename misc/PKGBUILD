@@ -2,7 +2,7 @@
 
 pkgname=clifm-git
 _pkgname=clifm
-pkgver=1.1
+pkgver=1.1.r346.gec633a5
 pkgrel=1
 pkgdesc="The KISS, non-curses terminal file manager (development version)"
 arch=('i686' 'pentium4' 'x86_64' 'arm' 'aarch64' 'armv7h')
@@ -25,37 +25,7 @@ pkgver() {
   git describe --long --tags | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
 }
 
-build() {
-  cd "$srcdir/$_pkgname"
-  make build
-}
-
 package() {
   cd "$srcdir/$_pkgname"
-  install -m 0755 -d "$pkgdir/usr/bin"
-  install -m 0755 -d "$pkgdir/usr/share/man/man1"
-  install -m 0755 -d "$pkgdir/usr/share/applications"
-  install -m 0755 -d "$pkgdir/usr/share/bash-completion/completions"
-  install -m 0755 -d "$pkgdir/usr/share/zsh/site-functions"
-  install -m 0755 -d "$pkgdir/usr/share/locale/es/LC_MESSAGES"
-  install -m 0755 -d "$pkgdir/usr/share/icons/hicolor/scalable/apps"
-  install -m 0755 -d "$pkgdir/usr/share/$_pkgname"
-  install -m 0755 -d "$pkgdir/usr/share/$_pkgname/plugins"
-  install -m 0755 -d "$pkgdir/usr/share/$_pkgname/functions"
-  install -m 0755 -d "$pkgdir/usr/share/$_pkgname/colors"
-  install -m 0755 "src/$_pkgname" "$pkgdir/usr/bin"
-  install -m 0644 misc/manpage "$pkgdir/usr/share/man/man1/${_pkgname}.1"
-  gzip -9n "$pkgdir/usr/share/man/man1/${_pkgname}.1"
-  install -m 0644 misc/"${_pkgname}.desktop" "$pkgdir/usr/share/applications"
-  install -m 0644 misc/completions.bash "$pkgdir/usr/share/bash-completion/completions/$_pkgname"
-  install -m 0644 misc/completions.zsh "$pkgdir/usr/share/zsh/site-functions/_$_pkgname"
-  install -m 0644 "translations/spanish/${_pkgname}.mo" "$pkgdir/usr/share/locale/es/LC_MESSAGES/${_pkgname}.mo"
-  install -m 0644 "images/logo/${_pkgname}.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps"
-  install -m 0644 misc/*.cfm "$pkgdir/usr/share/$_pkgname"
-  install -m 0644 misc/clifmrc "$pkgdir/usr/share/$_pkgname"
-  install -m 0755 plugins/* "$pkgdir/usr/share/$_pkgname/plugins"
-  chmod 0644 "$pkgdir/usr/share/$_pkgname"/plugins/BFG.cfg
-  chmod 0644 "$pkgdir/usr/share/$_pkgname"/plugins/kbgen.c
-  install -m 0644 colors/* "$pkgdir/usr/share/$_pkgname/colors"
-  install -m 0644 functions/* "$pkgdir/usr/share/$_pkgname/functions"
+  make DESTDIR="${pkgdir}" PREFIX=/usr install
 }
