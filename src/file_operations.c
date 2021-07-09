@@ -45,6 +45,7 @@
 #include "navigation.h"
 #include "readline.h"
 #include "selection.h"
+#include "messages.h"
 
 /* Toggle executable bit on file */
 int
@@ -162,7 +163,7 @@ int
 create_file(char **cmd)
 {
 	if (cmd[1] && *cmd[1] == '-' && strcmp(cmd[1], "--help") == 0) {
-		puts(_("Usage: n, new [FILE DIR/ ...n]"));
+		puts(_(NEW_USAGE));
 		return EXIT_FAILURE;
 	}
 
@@ -411,8 +412,8 @@ open_function(char **cmd)
 
 		else if (!(flags & FILE_CMD_OK)) {
 			fprintf(stderr, _("%s: file: Command not found. Specify an "
-					"application to open the file\nUsage: "
-					"open ELN/FILENAME [APPLICATION]\n"), PROGRAM_NAME);
+					"application to open the file\n%s\n"), PROGRAM_NAME,
+					_(OPEN_USAGE));
 			return EXIT_FAILURE;
 		}
 
@@ -1101,7 +1102,7 @@ batch_link(char **args)
 		return EXIT_FAILURE;
 
 	if (!args[1] || (*args[1] == '-' && strcmp(args[1], "--help") == 0)) {
-		puts(_("Usage: bl FILE(s)"));
+		puts(_(BL_USAGE));
 		return EXIT_SUCCESS;
 	}
 

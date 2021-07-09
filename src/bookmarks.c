@@ -38,6 +38,7 @@
 #include "init.h"
 #include "mime.h"
 #include "readline.h"
+#include "messages.h"
 
 int
 bookmarks_function(char **cmd)
@@ -68,7 +69,7 @@ bookmarks_function(char **cmd)
 	if (*cmd[1] == 'a' && (!cmd[1][1] || strcmp(cmd[1], "add") == 0)) {
 
 		if (!cmd[2]) {
-			printf(_("Usage: bookmarks, bm [a, add PATH]\n"));
+			puts(_(BOOKMARKS_USAGE));
 			return EXIT_SUCCESS;
 		}
 

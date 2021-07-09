@@ -34,6 +34,7 @@
 #endif
 #include "checks.h"
 #include "listing.h"
+#include "messages.h"
 
 int
 skip_nonexec(const struct dirent *ent)
@@ -217,10 +218,8 @@ xalphasort(const struct dirent **a, const struct dirent **b)
 	 * function faster */
 	if ((*a)->d_name[0] > (*b)->d_name[0])
 		ret = 1;
-
 	else if ((*a)->d_name[0] < (*b)->d_name[0])
 		ret = -1;
-
 	else
 		ret = strcmp((*a)->d_name, (*b)->d_name);
 
@@ -371,12 +370,7 @@ sort_function(char **arg)
 
 	/* If arg1 is a number but is not in the range 0-SORT_TYPES,
 	 * error */
-
-	fputs(_("Usage: st [METHOD] [rev]\nMETHOD: 0 = none, "
-		"1 = name, 2 = size, 3 = atime, 4 = btime, "
-		"5 = ctime, 6 = mtime, 7 = version, 8 = extension, "
-		"9 = inode, 10 = owner, 11 = group\nBoth numbers and names are "
-		"allowed\n"), stderr);
+	fprintf(stderr, "%s\n", _(SORT_USAGE));
 
 	return EXIT_FAILURE;
 }

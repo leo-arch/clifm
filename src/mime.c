@@ -35,6 +35,7 @@
 #include "checks.h"
 #include "exec.h"
 #include "mime.h"
+#include "messages.h"
 
 /* Get application associated to a given MIME file type or file extension.
  * Returns the first matching line in the MIME file or NULL if none is
@@ -273,7 +274,7 @@ mime_open(char **args)
 {
 	/* Check arguments */
 	if (!args[1] || (*args[1] == '-' && strcmp(args[1], "--help") == 0)) {
-		puts(_("Usage: mm, mime [info ELN/FILENAME] [edit] [import]"));
+		puts(_(MIME_USAGE));
 		return EXIT_FAILURE;
 	}
 
@@ -328,7 +329,7 @@ mime_open(char **args)
 	else if (*args[1] == 'i' && strcmp(args[1], "info") == 0) {
 
 		if (!args[2]) {
-			fputs(_("Usage: mm, mime info FILENAME\n"), stderr);
+			fprintf(stderr, "%s\n", _(MIME_USAGE));
 			return EXIT_FAILURE;
 		}
 
@@ -438,10 +439,9 @@ mime_open(char **args)
 
 	if (!app) {
 
-		if (info)
+		if (info) {
 			fputs(_("Associated application: None\n"), stderr);
-
-		else {
+		} else {
 
 			/* If an archive/compressed file, run the archiver function */
 			if (is_compressed(file_path, 1) == 0) {
@@ -457,11 +457,10 @@ mime_open(char **args)
 					free(ext);
 
 				return exit_status;
-			}
-
-			else
+			} else {
 				fprintf(stderr, _("%s: %s: No associated application "
 						"found\n"), PROGRAM_NAME, args[1]);
+			}
 		}
 
 		free(file_path);
@@ -541,10 +540,9 @@ mime_open(char **args)
 			if (*pp)
 				cmd[pos++] = savestring(pp, strlen(pp));
 			pp = ++p;
-		}
-
-		else
+		} else {
 			p++;
+		}
 	}
 
 	cmd[pos++] = savestring(file_path, strlen(file_path));
@@ -689,9 +687,7 @@ mime_edit(char **args)
 			exit_status = EXIT_FAILURE;
 		}
 
-	}
-
-	else {
+	} else {
 		char *cmd[] = {args[2], MIME_FILE, NULL};
 		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;

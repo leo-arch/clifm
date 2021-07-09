@@ -37,6 +37,7 @@
 #include "mime.h"
 #include "misc.h"
 #include "jump.h"
+#include "messages.h"
 
 int
 remotes_list(void)
@@ -71,34 +72,47 @@ remotes_list(void)
 	return EXIT_SUCCESS;
 }
 
+/* Get the index of the remote named NAME from the remotes list */
 int
-remotes_mount(char *name)
+get_remote(char *name)
 {
-	if (!name || !*name)
-		return EXIT_FAILURE;
-
 	int i = remotes_n,
 		found = 0;
+
 	while (--i >= 0) {
-		if (*remotes[i].name == *name && strcmp(remotes[i].name, name) == 0) {
+		if (*name == *remotes[i].name && strcmp(name, remotes[i].name) == 0) {
 			found = 1;
 			break;
 		}
 	}
 
 	if (!found) {
-		fprintf(stderr, _("%s: %s: No such remote\n"), PROGRAM_NAME, name);
-		return EXIT_FAILURE;
-	}
-
-	if (!remotes[i].mount_cmd) {
-		fprintf(stderr, _("%s: No mount command found for '%s'\n"),
-			PROGRAM_NAME, remotes[i].name);
-		return EXIT_FAILURE;
+		fprintf(stderr, _("%s: %s: No such remote\n"), PROGRAM_NAME,
+				remotes[i].name);
+		return -1;
 	}
 
 	if (!remotes[i].mountpoint) {
-		fprintf(stderr, _("%s: No mountpoint specified for '%s'\n"),
+		fprintf(stderr, _("%s: No mountpoint specified for '%s'\n"), PROGRAM_NAME,
+				remotes[i].name);
+		return -1;
+	}
+
+	return i;
+}
+
+int
+remotes_mount(char *name)
+{
+	if (!name || !*name)
+		return EXIT_FAILURE;
+
+	int i = get_remote(name);
+	if (i == -1)
+		return EXIT_FAILURE;
+
+	if (!remotes[i].mount_cmd) {
+		fprintf(stderr, _("%s: No mount command specified for '%s'\n"),
 			PROGRAM_NAME, remotes[i].name);
 		return EXIT_FAILURE;
 	}
@@ -148,27 +162,9 @@ remotes_unmount(char *name)
 	if (!name || !*name)
 		return EXIT_FAILURE;
 
-	int i = remotes_n,
-		found = 0;
-
-	while (--i >= 0) {
-		if (*name == *remotes[i].name && strcmp(name, remotes[i].name) == 0) {
-			found = 1;
-			break;
-		}
-	}
-
-	if (!found) {
-		fprintf(stderr, _("%s: %s: No such remote\n"), PROGRAM_NAME,
-				remotes[i].name);
+	int i = get_remote(name);
+	if (i == -1)
 		return EXIT_FAILURE;
-	}
-
-	if (!remotes[i].mountpoint) {
-		fprintf(stderr, _("%s: No mountpoint specified for '%s'\n"), PROGRAM_NAME,
-				remotes[i].name);
-		return EXIT_FAILURE;
-	}
 
 	if (!remotes[i].unmount_cmd) {
 		fprintf(stderr, _("%s: No unmount command found for '%s'\n"),
@@ -205,7 +201,7 @@ remotes_edit(char *app)
 	} else {
 		if (!(flags & FILE_CMD_OK)) {
 			fprintf(stderr, _("%s: file: Command not found. Try "
-					"'edit APPLICATION'\n"), PROGRAM_NAME);
+					"'net edit APPLICATION'\n"), PROGRAM_NAME);
 			ret = EXIT_FAILURE;
 		} else {
 			char *cmd[] = {"mime", REMOTES_FILE, NULL};
@@ -216,7 +212,11 @@ remotes_edit(char *app)
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
-	stat(REMOTES_FILE, &attr);
+	if (stat(REMOTES_FILE, &attr) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, REMOTES_FILE,
+				strerror(errno));
+		return EXIT_FAILURE;
+	}
 
 	if (mtime_bfr != (time_t)attr.st_mtime) {
 		free_remotes(0);
@@ -233,7 +233,7 @@ remotes_function(char **args)
 		return remotes_list();
 
 	if (*args[1] == '-' && strcmp(args[1], "--help") == 0) {
-		puts(_("Usage: net [NAME] [edit] [m, mount NAME] [u, unmount NAME]"));
+		puts(_(NET_USAGE));
 		return EXIT_SUCCESS;
 	}
 
@@ -245,8 +245,7 @@ remotes_function(char **args)
 
 	if (*args[1] == 'u' && (!*(args[1] + 1) || strcmp(args[1], "unmount") == 0)) {
 		if (!args[2]) {
-			fputs("Usage: net [NAME] [edit] [m, mount NAME] [u, unmount NAME]\n",
-				stderr);
+			fprintf(stderr, "%s\n", _(NET_USAGE));
 			return EXIT_FAILURE;
 		}
 		return remotes_unmount(args[2]);
@@ -254,8 +253,7 @@ remotes_function(char **args)
 
 	if (*args[1] == 'm' && (!*(args[1] + 1) || strcmp(args[1], "mount") == 0)) {
 		if (!args[2]) {
-			fputs("Usage: net [NAME] [edit] [m, mount NAME] [u, unmount NAME]\n",
-				stderr);
+			fprintf(stderr, "%s\n", _(NET_USAGE));
 			return EXIT_FAILURE;
 		}
 		return remotes_mount(args[2]);

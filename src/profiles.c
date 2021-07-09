@@ -45,6 +45,7 @@
 #include "navigation.h"
 #include "profiles.h"
 #include "sort.h"
+#include "messages.h"
 
 int
 get_profile_names(void)
@@ -112,7 +113,7 @@ profile_function(char **comm)
 
 	if (comm[1]) {
 		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
-			puts(_("Usage: pf, prof, profile [ls, list] [set, add, del PROFILE]"));
+			puts(_(PROFILES_USAGE));
 
 		/* List profiles */
 		else if (comm[1] && (strcmp(comm[1], "ls") == 0
@@ -131,7 +132,7 @@ profile_function(char **comm)
 			}
 
 			else {
-				fputs("Usage: pf, prof, profile add PROFILE\n", stderr);
+				fprintf(stderr, "%s\n", PROFILES_USAGE);
 				exit_status = EXIT_FAILURE;
 			}
 
@@ -140,7 +141,7 @@ profile_function(char **comm)
 			if (comm[2])
 				exit_status = profile_del(comm[2]);
 			else {
-				fputs("Usage: pf, prof, profile del PROFILE\n", stderr);
+				fprintf(stderr, "%s\n", PROFILES_USAGE);
 				exit_status = EXIT_FAILURE;
 			}
 
@@ -151,17 +152,14 @@ profile_function(char **comm)
 				exit_status = profile_set(comm[2]);
 
 			else {
-				fputs("Usage: pf, prof, profile set PROFILE\n", stderr);
+				fprintf(stderr, "%s\n", PROFILES_USAGE);
 				exit_status = EXIT_FAILURE;
 			}
 		}
 
 		/* None of the above == error */
 		else {
-
-			fputs(_("Usage: pf, prof, profile [set, add, del PROFILE]\n"),
-			    stderr);
-
+			fprintf(stderr, "%s\n", PROFILES_USAGE);
 			exit_status = EXIT_FAILURE;
 		}
 	}

@@ -47,6 +47,7 @@ typedef char *rl_cpvfunc_t;
 #include "misc.h"
 #include "profiles.h"
 #include "prompt.h"
+#include "messages.h"
 
 int
 kbinds_reset(void)
@@ -126,7 +127,7 @@ kbinds_function(char **args)
 	}
 
 	if (*args[1] == '-' && strcmp(args[1], "--help") == 0) {
-		puts(_("Usage: kb, keybinds [edit] [reset]"));
+		puts(_(KB_USAGE));
 		return EXIT_SUCCESS;
 	}
 
@@ -136,7 +137,7 @@ kbinds_function(char **args)
 	if (*args[1] == 'r' && strcmp(args[1], "reset") == 0)
 		return kbinds_reset();
 
-	fputs(_("Usage: kb, keybinds [edit] [reset]\n"), stderr);
+	fprintf(stderr, "%s\n", _(KB_USAGE));
 	return EXIT_FAILURE;
 }
 

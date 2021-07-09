@@ -37,6 +37,7 @@
 #include "listing.h"
 #include "misc.h"
 #include "navigation.h"
+#include "messages.h"
 
 int
 workspaces(char *str)
@@ -54,7 +55,7 @@ workspaces(char *str)
 	}
 
 	if (*str == '-' && strcmp(str, "--help") == 0) {
-		puts(_("Usage: ws [NUM, +, -]"));
+		puts(_(WS_USAGE));
 		return EXIT_SUCCESS;
 	}
 
@@ -73,16 +74,12 @@ workspaces(char *str)
 
 		if (tmp_ws == cur_ws)
 			return EXIT_FAILURE;
-	}
-
-	else if (*str == '+' && !str[1]) {
+	} else if (*str == '+' && !str[1]) {
 		if ((cur_ws + 1) < MAX_WS)
 			tmp_ws = cur_ws + 1;
 		else
 			return EXIT_FAILURE;
-	}
-
-	else if (*str == '-' && !str[1]) {
+	} else if (*str == '-' && !str[1]) {
 		if ((cur_ws - 1) >= 0)
 			tmp_ws = cur_ws - 1;
 		else
@@ -91,11 +88,10 @@ workspaces(char *str)
 
 	/* If new workspace has no path yet, copy the path of the current
 	 * workspace */
-	if (!ws[tmp_ws].path)
+	if (!ws[tmp_ws].path) {
 		ws[tmp_ws].path = savestring(ws[cur_ws].path,
 		    strlen(ws[cur_ws].path));
-
-	else if (access(ws[tmp_ws].path, R_OK | X_OK) != EXIT_SUCCESS) {
+	} else if (access(ws[tmp_ws].path, R_OK | X_OK) != EXIT_SUCCESS) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[tmp_ws].path,
 		    strerror(errno));
 		free(ws[tmp_ws].path);
@@ -280,9 +276,7 @@ surf_hist(char **comm)
 		int i;
 		for (i = 0; i < dirhist_total_index; i++) {
 			if (i == dirhist_cur_index)
-				printf("%d %s%s%s\n", i + 1, dh_c,
-				    old_pwd[i], df_c);
-
+				printf("%d %s%s%s\n", i + 1, dh_c, old_pwd[i], df_c);
 			else
 				printf("%d %s\n", i + 1, old_pwd[i]);
 		}
@@ -327,16 +321,17 @@ surf_hist(char **comm)
 					free_dirlist();
 					exit_status = list_dir();
 				}
-			}
-
-			else
+			} else {
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 				    old_pwd[atoi_comm - 1], strerror(errno));
-		} else
+			}
+		} else {
 			fprintf(stderr, _("history: %d: No such ELN\n"),
 			    atoi(comm[1] + 1));
-	} else
-		fputs(_("history: Usage: b/f [hist] [clear] [!ELN]\n"), stderr);
+		}
+	} else {
+		fprintf(stderr, "%s\n", _(DIRHIST_USAGE));
+	}
 
 	return exit_status;
 }
@@ -350,7 +345,7 @@ back_function(char **comm)
 
 	if (comm[1]) {
 		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
-			puts(_("Usage: back, b [h, hist] [clear] [!ELN]"));
+			puts(_(BACK_USAGE));
 			return EXIT_SUCCESS;
 		}
 
@@ -399,7 +394,7 @@ forth_function(char **comm)
 
 	if (comm[1]) {
 		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
-			puts(_("Usage: forth, f [h, hist] [clear] [!ELN]"));
+			puts(_(FORTH_USAGE));
 			return EXIT_SUCCESS;
 		}
 

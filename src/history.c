@@ -36,6 +36,7 @@
 #include "history.h"
 #include "init.h"
 #include "misc.h"
+#include "messages.h"
 
 /* Log COMM into LOG_FILE (global) */
 int
@@ -377,7 +378,7 @@ history_function(char **comm)
 	}
 
 	/* None of the above */
-	puts(_("Usage: history [clear] [-n]"));
+	puts(_(HISTORY_USAGE));
 
 	return EXIT_SUCCESS;
 }
@@ -582,10 +583,7 @@ run_history_cmd(const char *cmd)
 		return EXIT_FAILURE;
 	}
 
-	printf(_("Usage:\n\
-!!: Execute the last command.\n\
-!n: Execute the command number 'n' in the history list.\n\
-!-n: Execute the last-n command in the history list.\n"));
+	puts(_(HISTEXEC_USAGE));
 		return EXIT_SUCCESS;
 }
 

@@ -31,3 +31,4 @@ int remotes_mount(char *name);
 int remotes_list(void);
 int automount_remotes(void);
 int autounmount_remotes(void);
+int get_remotes(char *name);

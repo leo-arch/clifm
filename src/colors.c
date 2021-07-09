@@ -40,6 +40,7 @@
 #include "listing.h"
 #include "mime.h"
 #include "misc.h"
+#include "messages.h"
 
 /* Returns a pointer to the corresponding color code for EXT, if some
  * color was defined */
@@ -251,7 +252,7 @@ cschemes_function(char **args)
 	}
 
 	if (*args[1] == '-' && strcmp(args[1], "--help") == 0) {
-		puts(_("Usage: cs, colorschemes [edit] [COLORSCHEME]"));
+		puts(_(CS_USAGE));
 		return EXIT_SUCCESS;
 	}
 

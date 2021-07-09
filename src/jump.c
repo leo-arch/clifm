@@ -35,6 +35,7 @@
 #include "file_operations.h"
 #include "init.h"
 #include "navigation.h"
+#include "messages.h"
 
 int
 add_to_jumpdb(const char *dir)
@@ -359,7 +360,7 @@ dirjump(char **args)
 	}
 
 	if (args[1] && *args[1] == '-' && strcmp(args[1], "--help") == 0) {
-		puts(_("Usage: j, jc, jp, jl [STRING ...], jo [NUM], je"));
+		puts(_(JUMP_USAGE));
 		return EXIT_SUCCESS;
 	}
 
@@ -388,8 +389,7 @@ dirjump(char **args)
 	default:
 		fprintf(stderr, _("%s: '%c': Invalid option\n"), PROGRAM_NAME,
 				args[0][1]);
-		fputs(_("Usage: j, jc, jp, jl [STRING ...], jo [NUM], je\n"),
-		    stderr);
+		fprintf(stderr, "%s\n", _(JUMP_USAGE));
 		return EXIT_FAILURE;
 		break;
 	}
@@ -397,8 +397,7 @@ dirjump(char **args)
 	if (jump_opt == jorder) {
 
 		if (!args[1]) {
-			fputs(_("Usage: j, jc, jp, jl [STRING ...], jo [NUM], je\n"),
-			    stderr);
+			fprintf(stderr, "%s\n", _(JUMP_USAGE));
 			return EXIT_FAILURE;
 		}
 

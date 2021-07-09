@@ -46,6 +46,7 @@
 #include "readline.h"
 #include "selection.h"
 #include "sort.h"
+#include "messages.h"
 
 /* Save selected elements into a tmp file. Returns 1 if success and 0
  * if error. This function allows the user to work with multiple
@@ -127,8 +128,7 @@ sel_function(char **args)
 
 	if (!args[1] || (*args[1] == '-' && args[1][1] == '-'
 	&& strcmp(args[1], "--help") == 0)) {
-		puts(_("Usage: s, sel ELN/FILE... [[!]PATTERN] [-FILETYPE] "
-		       "[:PATH]"));
+		puts(_(SEL_USAGE));
 		return EXIT_SUCCESS;
 	}
 

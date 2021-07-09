@@ -56,6 +56,7 @@
 #include "readline.h"
 #include "strings.h"
 #include "remotes.h"
+#include "messages.h"
 
 void
 set_term_title(const char *str)
@@ -80,7 +81,7 @@ filter_function(const char *arg)
 	}
 
 	if (*arg == '-' && strcmp(arg, "--help") == 0) {
-		puts(_("Usage: ft, filter [unset] [REGEX]"));
+		puts(_(FILTER_USAGE));
 		return EXIT_SUCCESS;
 	}
 
@@ -1519,7 +1520,7 @@ hidden_function(char **comm)
 	}
 
 	else
-		fputs(_("Usage: hidden, hf [on, off, status]\n"), stderr);
+		fprintf(stderr, "%s\n", _(HF_USAGE));
 
 	return exit_status;
 }
