@@ -152,7 +152,7 @@ get_properties(char *filename, int dsize)
 			if (file_attrib.st_mode & S_IWOTH)
 				is_oth_w = 1;
 
-			int files_dir = count_dir(filename);
+			int files_dir = count_dir(filename, NO_CPOP);
 
 			color = sticky ? (is_oth_w ? tw_c : st_c) : is_oth_w ? ow_c
 				   : ((files_dir == 2 || files_dir == 0) ? ed_c : di_c);

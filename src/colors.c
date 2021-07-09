@@ -1380,7 +1380,7 @@ colors_list(const char *ent, const int i, const int pad, const int new_line)
 			if (file_attrib.st_mode & S_IWOTH)
 				is_oth_w = 1;
 
-			int files_dir = count_dir(ent);
+			int files_dir = count_dir(ent, NO_CPOP);
 
 			color = (file_attrib.st_mode & S_ISVTX) ? (is_oth_w
 					? tw_c : st_c) : (is_oth_w ? ow_c :
@@ -1441,7 +1441,7 @@ get_colorschemes(void)
 
 	if (COLORS_DIR && stat(COLORS_DIR, &attr) == EXIT_SUCCESS) {
 
-		schemes_total = count_dir(COLORS_DIR) - 2;
+		schemes_total = count_dir(COLORS_DIR, NO_CPOP) - 2;
 
 		if (schemes_total) {
 
@@ -1487,7 +1487,7 @@ get_colorschemes(void)
 		return i;
 
 	int total_tmp = schemes_total;
-	schemes_total += (count_dir(sys_colors_dir) - 2);
+	schemes_total += (count_dir(sys_colors_dir, NO_CPOP) - 2);
 
 	if (schemes_total <= total_tmp)
 		return i;

@@ -465,7 +465,6 @@ main(int argc, char *argv[])
 	 * is then checked by init_config */
 
 	check_env_filter();
-
 	get_data_dir();
 
 	/* Initialize program paths and files, set options from the config
@@ -473,13 +472,9 @@ main(int argc, char *argv[])
 	 * load sel elements, if any. All these configurations are made
 	 * per user basis */
 	init_config();
-
 	check_options();
-
 	set_sel_file();
-
 	create_tmp_files();
-
 	load_actions();
 	get_aliases();
 
@@ -495,11 +490,13 @@ main(int argc, char *argv[])
 	textdomain(PNL);
 
 	cschemes_n = get_colorschemes();
-
 	set_colors(usr_cscheme ? usr_cscheme : "default", 1);
 
 	free(usr_cscheme);
 	usr_cscheme = (char *)NULL;
+
+	load_remotes();
+	automount_remotes();
 
 	if (splash_screen) {
 		splash();
@@ -628,7 +625,7 @@ main(int argc, char *argv[])
 	get_prompt_cmds();
 
 	if (trash_ok) {
-		trash_n = count_dir(TRASH_FILES_DIR);
+		trash_n = count_dir(TRASH_FILES_DIR, NO_CPOP);
 		if (trash_n <= 2)
 			trash_n = 0;
 	}
@@ -688,8 +685,6 @@ main(int argc, char *argv[])
 	get_profile_names();
 
 	load_pinned_dir();
-	load_remotes();
-	automount_remotes();
 
 	set_env();
 

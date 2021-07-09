@@ -667,6 +667,8 @@ load_remotes(void)
 								* sizeof(char));
 			strcpy(remotes[n].mountpoint, tmp ? tmp : ret);
 			free(tmp);
+			if (count_dir(remotes[n].mountpoint, CPOP) > 2)
+				remotes[n].mounted = 1;
 		} else if (strncmp(line, "MountCmd=", 9) == 0) {
 			int replaced = 0;
 			if (remotes[n].mountpoint) {

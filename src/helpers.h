@@ -136,6 +136,11 @@ void *__dso_handle;
 #define SET_TITLE 1
 #define NO_TITLE 0
 
+/* Macros for the count_dir function. CPOP tells the function to only
+ * check if a given directory is populated (it has at least 3 files) */
+#define CPOP 1
+#define NO_CPOP 0
+
 /* Error codes, to be used by launch_exec functions */
 #define EXNULLERR 79
 #define EXFORKERR 81

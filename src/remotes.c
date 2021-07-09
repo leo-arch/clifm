@@ -87,8 +87,7 @@ get_remote(char *name)
 	}
 
 	if (!found) {
-		fprintf(stderr, _("%s: %s: No such remote\n"), PROGRAM_NAME,
-				remotes[i].name);
+		fprintf(stderr, _("%s: %s: No such remote\n"), PROGRAM_NAME, name);
 		return -1;
 	}
 
@@ -127,7 +126,7 @@ remotes_mount(char *name)
 		}
 	}
 
-	if (count_dir(remotes[i].mountpoint) <= 2
+	if (count_dir(remotes[i].mountpoint, CPOP) <= 2
 	&& launch_execle(remotes[i].mount_cmd) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
@@ -273,13 +272,15 @@ automount_remotes(void)
 	while (--i >= 0) {
 		if (remotes[i].name && remotes[i].auto_mount == 1
 		&& remotes[i].mountpoint && remotes[i].mount_cmd) {
-			printf(_("%s: Mounting remote...\n"), remotes[i].name);
 			struct stat attr;
 			if (stat(remotes[i].mountpoint, &attr) == -1) {
 				char *cmd[] = {"mkdir", "-p", remotes[i].mountpoint, NULL};
 				if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 					continue;
+			} else if (count_dir(remotes[i].mountpoint, CPOP) > 2) {
+				continue;
 			}
+			printf(_("%s: Mounting remote...\n"), remotes[i].name);
 			if (launch_execle(remotes[i].mount_cmd) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 			else
@@ -300,11 +301,20 @@ autounmount_remotes(void)
 		exit_status = EXIT_SUCCESS;
 	while (--i >= 0) {
 		if (remotes[i].name && remotes[i].auto_unmount == 1
-		&& remotes[i].mountpoint && remotes[i].unmount_cmd
-		&& remotes[i].mounted) {
+		&& remotes[i].mountpoint && remotes[i].unmount_cmd) {
+			if (count_dir(remotes[i].mountpoint, CPOP) <= 2)
+				continue;
+			int dir_change = 0;
+			if (*ws[cur_ws].path == *remotes[i].mountpoint
+			&& strcmp(remotes[i].mountpoint, ws[cur_ws].path) == 0) {
+				xchdir("/", NO_TITLE);
+				dir_change = 1;
+			}
 			printf(_("%s: Unmounting remote...\n"), remotes[i].name);
 			if (launch_execle(remotes[i].unmount_cmd) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
+			if (dir_change)
+				xchdir(ws[cur_ws].path, NO_TITLE);
 		}
 	}
 

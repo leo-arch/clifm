@@ -950,7 +950,7 @@ untrash_function(char **comm)
 	free(trash_files);
 
 	/* If some trashed file still remains, reload the undel screen */
-	trash_n = count_dir(TRASH_FILES_DIR);
+	trash_n = count_dir(TRASH_FILES_DIR, NO_CPOP);
 
 	if (trash_n <= 2)
 		trash_n = 0;
@@ -1018,7 +1018,7 @@ wx_parent_check(char *file)
 
 		/* Check the parent for appropriate permissions */
 		else if (access(parent, W_OK | X_OK) == 0) {
-			int files_n = count_dir(parent);
+			int files_n = count_dir(parent, NO_CPOP);
 
 			if (files_n > 2) {
 				/* I manually check here subdir because recur_perm_check()
@@ -1028,7 +1028,7 @@ wx_parent_check(char *file)
 				if (access(file, W_OK | X_OK) == 0) {
 					/* If subdir is ok and not empty, recusivelly check
 					 * subdir */
-					files_n = count_dir(file);
+					files_n = count_dir(file, NO_CPOP);
 
 					if (files_n > 2) {
 						/* Reset the recur_perm_check() error flag. See

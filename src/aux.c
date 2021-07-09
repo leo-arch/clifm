@@ -77,31 +77,36 @@ get_hex_num(const char *str)
 	return hex_n;
 }
 
-/* Count files in DIR_PATH, including self and parent. */
+/* Count files in DIR_PATH, including self and parent. If POP is set to 1,
+ * The function will just check if the directory is populated (it has at
+ * least 3 files, including self and parent)*/
 int
-count_dir(const char *dir_path) /* Readdir version */
+count_dir(const char *dir, int pop)
 {
-	if (!dir_path)
+	if (!dir)
 		return -1;
 
-	DIR *dir_p;
+	DIR *p;
 
-	if ((dir_p = opendir(dir_path)) == NULL) {
+	if ((p = opendir(dir)) == NULL) {
 		if (errno == ENOMEM)
 			exit(EXIT_FAILURE);
 		else
 			return -1;
 	}
 
-	int file_count = 0;
+	int c = 0;
 	struct dirent *ent;
 
-	while ((ent = readdir(dir_p)))
-		file_count++;
+	while ((ent = readdir(p))) {
+		c++;
+		if (pop && c > 2)
+			break;
+	}
 
-	closedir(dir_p);
+	closedir(p);
 
-	return file_count;
+	return c;
 }
 
 /* Get the path of a given command from the PATH environment variable.

@@ -47,5 +47,5 @@ off_t dir_size(char *dir);
 char *get_size_unit(off_t size);
 char *get_cmd_path(const char *cmd);
 
-int count_dir(const char *dir_path);
+int count_dir(const char *dir, int pop);
 char *xitoa(int n);

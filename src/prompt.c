@@ -93,7 +93,7 @@ prompt(void)
 
 	/* Update trash and sel file indicator on every prompt call */
 	if (trash_ok) {
-		trash_n = count_dir(TRASH_FILES_DIR);
+		trash_n = count_dir(TRASH_FILES_DIR, NO_CPOP);
 
 		if (trash_n <= 2)
 			trash_n = 0;

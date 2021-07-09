@@ -406,7 +406,7 @@ list_dir_light(void)
 			}
 
 			files_counter
-			    ? (file_info[n].filesn = (count_dir(ename) - 2))
+			    ? (file_info[n].filesn = (count_dir(ename, NO_CPOP) - 2))
 			    : (file_info[n].filesn = 1);
 
 			if (file_info[n].filesn > 0)
@@ -1086,7 +1086,7 @@ list_dir(void)
 					file_info[n].icon_color = dir_ico_c;
 			}
 			if (files_counter)
-				file_info[n].filesn = count_dir(ename) - 2;
+				file_info[n].filesn = count_dir(ename, NO_CPOP) - 2;
 			else {
 				if (access(ename, R_OK) == -1)
 					file_info[n].filesn = -1;
@@ -1119,7 +1119,7 @@ list_dir(void)
 				if (S_ISDIR(attrl.st_mode)) {
 					file_info[n].dir = 1;
 					files_counter
-					    ? (file_info[n].filesn = (count_dir(ename) - 2))
+					    ? (file_info[n].filesn = (count_dir(ename, NO_CPOP) - 2))
 					    : (file_info[n].filesn = 0);
 				}
 				file_info[n].color = ln_c;
