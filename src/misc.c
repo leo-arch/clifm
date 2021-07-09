@@ -353,7 +353,8 @@ new_instance(char *dir, int sudo)
 		path_dir = deq_dir;
 	}
 
-	char **tmp_term = (char **)NULL, **tmp_cmd = (char **)NULL;
+	char **tmp_term = (char **)NULL,
+		 **tmp_cmd = (char **)NULL;
 
 	if (strcntchr(term, ' ') != -1) {
 
@@ -366,7 +367,7 @@ new_instance(char *dir, int sudo)
 				;
 
 			size_t num = i;
-			tmp_cmd = (char **)xrealloc(tmp_cmd, (i + (sudo ? 5 : 4))
+			tmp_cmd = (char **)xrealloc(tmp_cmd, (i + (sudo ? 4 : 3))
 													* sizeof(char *));
 			for (i = 0; tmp_term[i]; i++) {
 				tmp_cmd[i] = savestring(tmp_term[i], strlen(tmp_term[i]));
@@ -387,8 +388,6 @@ new_instance(char *dir, int sudo)
 
 			tmp_cmd[i + plus] = (char *)xnmalloc(strlen(self) + 1, sizeof(char));
 			strcpy(tmp_cmd[i + plus++], self);
-			tmp_cmd[i + plus] = (char *)xnmalloc(3, sizeof(char));
-			strcpy(tmp_cmd[i + plus++], "-p\0");
 			tmp_cmd[i + plus] = (char *)xnmalloc(strlen(path_dir) + 1, sizeof(char));
 			strcpy(tmp_cmd[i + plus++], path_dir);
 			tmp_cmd[i + plus] = (char *)NULL;
@@ -405,14 +404,14 @@ new_instance(char *dir, int sudo)
 		free(tmp_cmd);
 	} else {
 		fprintf(stderr, _("%s: No option specified for '%s'\n"
-				"Trying '%s -e %s -p %s'\n"), PROGRAM_NAME, term,
+				"Trying '%s -e %s %s'\n"), PROGRAM_NAME, term,
 				term, self, ws[cur_ws].path);
 
 		if (sudo) {
-			char *cmd[] = {term, "-e", _sudo, self, "-p", path_dir, NULL};
+			char *cmd[] = {term, "-e", _sudo, self, path_dir, NULL};
 			ret = launch_execve(cmd, BACKGROUND, E_NOFLAG);
 		} else {
-			char *cmd[] = {term, "-e", self, "-p", path_dir, NULL};
+			char *cmd[] = {term, "-e", self, path_dir, NULL};
 			ret = launch_execve(cmd, BACKGROUND, E_NOFLAG);
 		}
 	}
