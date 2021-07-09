@@ -1658,14 +1658,15 @@ help_function(void)
 
 	printf(_("\nBUILT-IN COMMANDS:\n\nThe following is just a brief list of "
 			"available commands and possible parameters.\n\nFor a complete "
-			"description of each of these commands run '%scmd%s' (or press "
-			"%sF2%s) or consult the %smanpage%s (%sF1%s).\n\nYou can also try "
-			"the '%sih%s' action to run the interactive help plugin (it "
+			"description of each of these commands run '%scmd%s%s' (or press "
+			"%sF2%s%s) or consult the %smanpage%s%s (%sF1%s%s).\n\nYou can also try "
+			"the '%sih%s%s' action to run the interactive help plugin (it "
 			"depends on FZF). Just enter 'ih', that's it.\n\nIt is also "
-			"recommended to consult the project's %swiki%s "
+			"recommended to consult the project's %swiki%s%s "
 			"(https://github.com/leo-arch/clifm/wiki)\n\n"),
-			bold, df_c, bold, df_c, bold, df_c, bold,
-			df_c, bold, df_c, bold, df_c);
+			bold, "\033[0m", df_c, bold, "\033[0m", df_c, bold, "\033[0m",
+			df_c, bold, "\033[0m", df_c, bold, "\033[0m", df_c, bold,
+			"\033[0m", df_c);
 
 	puts(_("ELN/FILE/DIR (auto-open and autocd functions)\n\
  /PATTERN [DIR] [-filetype] [-x] (quick search)\n\

@@ -22,6 +22,9 @@
  * MA 02110-1301, USA.
 */
 
+#define GRAL_USAGE "[-aAefFgGhiIlLmoOsSuUvxy] [-b FILE] [-c FILE] [-D DIR] \
+[-k FILE] [-P PROFILE] [-z METHOD] [PATH]"
+
 #define ACTIONS_USAGE "Usage: actions [edit]"
 #define ALIAS_USAGE "Usage: alias [import FILE]"
 #define ARCHIVE_USAGE "Usage: ac, ad ELN/FILE ..."

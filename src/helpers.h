@@ -59,6 +59,7 @@
 
 #include "init.h"
 #include "strings.h"
+#include "messages.h"
 
 /* #define __SIZEOF_WCHAR_T__ 4 */
 
@@ -380,9 +381,6 @@ nm=01;32:bm=01;36:"
 
 /* Max length of the properties string in long view mode */
 #define MAX_PROP_STR 55
-
-#define GRAL_USAGE "[-aAefFgGhiIlLmoOsSuUvxy] [-b FILE] [-c FILE] [-D DIR] \
-[-k FILE] [-P PROFILE] [-z METHOD] [PATH]"
 
 #define FALLBACK_SHELL "/bin/sh"
 
