@@ -61,25 +61,6 @@
 #include "strings.h"
 #include "messages.h"
 
-/* #define __SIZEOF_WCHAR_T__ 4 */
-
-/* Linux */
-/* The only Linux-specific function I use, and the only function
- * requiring _GNU_SOURCE, is statx(), and only to get files creation
- * (birth) date in the properties function.
- * However, the statx() is conditionally added at compile time, so that,
- * if _BE_POSIX is defined (pass the -D_BE_POSIX option to the compiler),
- * the program will just ommit the call to the function, being thus
- * completely POSIX-2008 compliant. */
-
-/* DEFAULT_SOURCE enables strcasecmp() and realpath() functions,
-and DT_DIR (and company) and S_ISVTX macros */
-
-/* FreeBSD*/
-/* Up tp now, two features are disabled in FreeBSD: file capabilities and
- * immutable bit checks */
-/* Without this variable, TCC complains that __dso_handle is an
- * undefined symbol and won't compile */
 #if __TINYC__
 void *__dso_handle;
 #endif
@@ -119,8 +100,6 @@ void *__dso_handle;
 #define PROGRAM_NAME "CliFM"
 #define PNL "clifm" /* Program name lowercase */
 #define PROG_DESC "The KISS/non-curses file manager"
-/* #define TMP_DIR "/tmp/clifm" */
-/* If no formatting, puts (or write) is faster than printf */
 #define CLEAR write(STDOUT_FILENO, "\033c", 3);
 
 #define VERSION "1.1"
@@ -130,14 +109,9 @@ void *__dso_handle;
 #define DATE "May 29, 2021"
 #define LICENSE "GPL2+"
 
-/* Define flags for program options and internal use */
-/* Variable to hold all the flags (int == 4 bytes == 32 bits == 32 flags).
- * In case more flags are needed, use a long double variable
- * (16 bytes == 128 flags) and even several of these */
-
-/* Options flags: None of these are really useful. Just testing */
-#define FOLDERS_FIRST (1 << 1) /* 4 dec, 0x04 hex, 00000100 binary */
-#define HELP (1 << 2)	       /* and so on... */
+/* Options flags */
+#define FOLDERS_FIRST (1 << 1)
+#define HELP (1 << 2)
 #define HIDDEN (1 << 3)
 #define ON_THE_FLY (1 << 4)
 #define SPLASH (1 << 5)
@@ -151,7 +125,7 @@ void *__dso_handle;
 #define EXT_HELP (1 << 11)
 #define FILE_CMD_OK (1 << 12)
 #define GUI (1 << 13)
-#define IS_USRVAR_DEF (1 << 14) /* 18 dec, 0x12 hex, 00010010 binary */
+#define IS_USRVAR_DEF (1 << 14)
 
 /* Used by log_msg() to know wether to tell prompt() to print messages or
  * not */
@@ -170,13 +144,7 @@ void *__dso_handle;
 #define BACKGROUND 1
 #define FOREGROUND 0
 
-/* ###COLORS### */
-/* These are just a fixed color stuff in the interface. Remaining colors
- * are customizable and set via the config file */
-
-/* \x1b: hex value for escape char (alternative: ^[), dec == 27
- * \033: octal value for escape char
- * \e is non-standard */
+/* colors */
 #define gray "\x1b[1;30m"
 #define white "\x1b[1;37m"
 #define cyan "\x1b[1;36m"
@@ -395,8 +363,6 @@ nm=01;32:bm=01;36:"
 #endif
 
 #define itoa xitoa /* itoa does not exist in some OS's */
-/* #define atoi xatoi */
-/* #define alphasort xalphasort */
 #define _(String) gettext(String)
 
 #define ENTRY_N 64
