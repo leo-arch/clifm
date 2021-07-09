@@ -307,6 +307,21 @@ new_instance(char *dir, int sudo)
 		return EXIT_FAILURE;
 	}
 
+	char *_sudo = (char *)NULL;
+	if (sudo) {
+		_sudo = get_cmd_path("sudo");
+		if (!_sudo) {
+			_sudo = get_cmd_path("doas");
+			if (!_sudo) {
+				fprintf(stderr, "%s: No authentication program found. "
+						"Either sudo or doas is required\n",
+						PROGRAM_NAME);
+				free(self);
+				return EXIT_FAILURE;
+			}
+		}
+	}
+
 	char *deq_dir = dequote_str(dir, 0);
 
 	if (!deq_dir) {
@@ -344,13 +359,6 @@ new_instance(char *dir, int sudo)
 		path_dir = deq_dir;
 	}
 
-	/*  char *cmd = (char *)xnmalloc(strlen(term) + strlen(self)
-								 + strlen(path_dir) + 13, sizeof(char));
-	sprintf(cmd, "%s %s -p \"%s\" &", term, self, path_dir);
-
-	int ret = launch_execle(cmd);
-	free(cmd); */
-
 	char **tmp_term = (char **)NULL, **tmp_cmd = (char **)NULL;
 
 	if (strcntchr(term, ' ') != -1) {
@@ -379,7 +387,7 @@ new_instance(char *dir, int sudo)
 			if (sudo) {
 				tmp_cmd[i + plus] = (char *)xnmalloc(strlen(self) + 1,
 				    sizeof(char));
-				strcpy(tmp_cmd[i + plus], "sudo");
+				strcpy(tmp_cmd[i + plus], _sudo);
 				plus++;
 			}
 
@@ -407,7 +415,7 @@ new_instance(char *dir, int sudo)
 				term, self, ws[cur_ws].path);
 
 		if (sudo) {
-			char *cmd[] = {term, "-e", "sudo", self, "-p", path_dir, NULL};
+			char *cmd[] = {term, "-e", _sudo, self, "-p", path_dir, NULL};
 			ret = launch_execve(cmd, BACKGROUND, E_NOFLAG);
 		} else {
 			char *cmd[] = {term, "-e", self, "-p", path_dir, NULL};
@@ -415,6 +423,7 @@ new_instance(char *dir, int sudo)
 		}
 	}
 
+	free(_sudo);
 	free(path_dir);
 	free(self);
 

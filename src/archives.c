@@ -188,13 +188,26 @@ handle_iso(char *file)
 		}
 
 		/* Construct and execute cmd */
-		char *cmd[] = {"sudo", "mount", "-o", "loop", file,
+		char *sudo = get_cmd_path("sudo");
+		if (!sudo) {
+			sudo = get_cmd_path("doas");
+			if (!sudo) {
+				fprintf(stderr, "%s: No authentication program found. "
+						"Either sudo or doas is required\n", PROGRAM_NAME);
+				free(mountpoint);
+				return EXIT_FAILURE;
+			}
+		}
+		
+		char *cmd[] = {sudo, "mount", "-o", "loop", file,
 		    mountpoint, NULL};
 
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			free(mountpoint);
+			free(sudo);
 			return EXIT_FAILURE;
 		}
+		free(sudo);
 
 		/* List content of mountpoint */
 		if (xchdir(mountpoint, SET_TITLE) == -1) {
@@ -260,12 +273,25 @@ create_iso(char *in_file, char *out_file)
 		char *of_option = (char *)xnmalloc(strlen(out_file) + 4, sizeof(char));
 		sprintf(of_option, "of=%s", out_file);
 
-		char *cmd[] = {"sudo", "dd", if_option, of_option, "bs=64k",
+		char *sudo = get_cmd_path("sudo");
+		if (!sudo) {
+			sudo = get_cmd_path("doas");
+			if (!sudo) {
+				fprintf(stderr, "%s: No authentication program found. "
+						"Either sudo or doas is required\n", PROGRAM_NAME);
+				free(if_option);
+				free(of_option);
+				return EXIT_FAILURE;
+			}
+		}
+
+		char *cmd[] = {sudo, "dd", if_option, of_option, "bs=64k",
 		    "conv=noerror,sync", "status=progress", NULL};
 
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 
+		free(sudo);
 		free(if_option);
 		free(of_option);
 	}
