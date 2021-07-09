@@ -37,6 +37,7 @@
 #include "listing.h"
 #include "navigation.h"
 #include "readline.h"
+#include "checks.h"
 
 int zstandard(char *in_file, char *out_file, char mode, char op);
 
@@ -188,15 +189,10 @@ handle_iso(char *file)
 		}
 
 		/* Construct and execute cmd */
-		char *sudo = get_cmd_path("sudo");
+		char *sudo = get_sudo_path();
 		if (!sudo) {
-			sudo = get_cmd_path("doas");
-			if (!sudo) {
-				fprintf(stderr, "%s: No authentication program found. "
-						"Either sudo or doas is required\n", PROGRAM_NAME);
-				free(mountpoint);
-				return EXIT_FAILURE;
-			}
+			free(mountpoint);
+			return EXIT_FAILURE;
 		}
 		
 		char *cmd[] = {sudo, "mount", "-o", "loop", file,
@@ -273,16 +269,11 @@ create_iso(char *in_file, char *out_file)
 		char *of_option = (char *)xnmalloc(strlen(out_file) + 4, sizeof(char));
 		sprintf(of_option, "of=%s", out_file);
 
-		char *sudo = get_cmd_path("sudo");
+		char *sudo = get_sudo_path();
 		if (!sudo) {
-			sudo = get_cmd_path("doas");
-			if (!sudo) {
-				fprintf(stderr, "%s: No authentication program found. "
-						"Either sudo or doas is required\n", PROGRAM_NAME);
-				free(if_option);
-				free(of_option);
-				return EXIT_FAILURE;
-			}
+			free(if_option);
+			free(of_option);
+			return EXIT_FAILURE;
 		}
 
 		char *cmd[] = {sudo, "dd", if_option, of_option, "bs=64k",

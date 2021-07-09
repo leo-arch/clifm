@@ -309,16 +309,10 @@ new_instance(char *dir, int sudo)
 
 	char *_sudo = (char *)NULL;
 	if (sudo) {
-		_sudo = get_cmd_path("sudo");
+		_sudo = get_sudo_path();
 		if (!_sudo) {
-			_sudo = get_cmd_path("doas");
-			if (!_sudo) {
-				fprintf(stderr, "%s: No authentication program found. "
-						"Either sudo or doas is required\n",
-						PROGRAM_NAME);
-				free(self);
-				return EXIT_FAILURE;
-			}
+			free(self);
+			return EXIT_FAILURE;
 		}
 	}
 

@@ -46,6 +46,23 @@
 #include "aux.h"
 #include "misc.h"
 
+char *
+get_sudo_path(void)
+{
+	char *sudo = get_cmd_path("sudo");
+
+	if (!sudo) {
+		sudo = get_cmd_path("doas");
+		if (!sudo) {
+			fprintf(stderr, "%s: No authentication program found. "
+					"Either sudo or doas is required\n", PROGRAM_NAME);
+			return (char *)NULL;
+		}
+	}
+
+	return sudo;
+}
+
 /* Check a file's immutable bit. Returns 1 if true, zero if false, and
  * -1 in case of error */
 int
