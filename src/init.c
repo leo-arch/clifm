@@ -650,6 +650,10 @@ load_remotes(void)
 		if (ret[ret_len - 1] == '\n')
 			ret[--ret_len] = '\0';
 
+		char *deq_str = remove_quotes(ret);
+		if (deq_str)
+			ret = deq_str;
+
 		if (strncmp(line, "Comment=", 8) == 0) {
 			remotes[n].desc = (char *)xrealloc(remotes[n].desc,
 							(ret_len + 1) * sizeof(char));
