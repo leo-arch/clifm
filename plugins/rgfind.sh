@@ -38,4 +38,7 @@ else
 	tput clear
 fi
 
+# Reset terminal settings
+printf "\033c"
+
 exit 0
