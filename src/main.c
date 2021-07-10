@@ -372,8 +372,6 @@ main(int argc, char *argv[])
 	exit(EXIT_FAILURE);
 #endif
 
-	/* Though this program might perfectly work on other OSes, especially
-	 * Unixes, I just didn't make any test */
 #if !defined(__linux__) && !defined(linux) && !defined(__linux) \
 && !defined(__gnu_linux__) && !defined(__FreeBSD__) \
 && !defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__HAIKU__)
@@ -534,9 +532,9 @@ main(int argc, char *argv[])
 		getcwd(cwd, sizeof(cwd));
 
 		if (!*cwd || strlen(cwd) == 0) {
-			if (user_home)
+			if (user_home) {
 				ws[cur_ws].path = savestring(user_home, strlen(user_home));
-			else {
+			} else {
 				if (access("/", R_OK | X_OK) == -1) {
 					fprintf(stderr, "%s: /: %s\n", PROGRAM_NAME,
 					    strerror(errno));
@@ -585,11 +583,8 @@ main(int argc, char *argv[])
 	}
 
 	exec_profile();
-
 	load_dirhist();
-
 	add_to_dirhist(ws[cur_ws].path);
-
 	get_sel_files();
 
 	/* Start listing as soon as possible to speed up startup time */
@@ -597,11 +592,8 @@ main(int argc, char *argv[])
 		list_dir();
 
 	create_kbinds_file();
-
 	load_bookmarks();
-
 	load_keybinds();
-
 	load_jumpdb();
 	if (!jump_db || xargs.path == 1)
 		add_to_jumpdb(ws[cur_ws].path);
@@ -684,9 +676,7 @@ main(int argc, char *argv[])
 		file_cmd_check();
 
 	get_profile_names();
-
 	load_pinned_dir();
-
 	set_env();
 
 				/* ###########################
