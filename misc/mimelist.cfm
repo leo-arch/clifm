@@ -1,14 +1,22 @@
 # Mimelist file for CliFM
 
 # This mimelist covers the most common filetypes
+
 # Commented and blank lines are omitted
+
 # It is recommended to edit this file leaving only applications you need to speed up the opening process
 # The file is read top to bottom and left to right; the first existent application found will be used
 # Applications defined here are NOT desktop files, but commands (arguments could be used as well)
-# Use 'E' to match file extensions instead of MIME types
+
+# Use 'E' to match file extensions instead of MIME types.
+
 # Use 'X' to specify a GUI environment and '!X' for non-GUI environments, like the kernel built-in console
-# or a remote SSH session
-# Regular expressions are allowed for both file types and extensions
+# or a remote SSH session.
+
+# Regular expressions are allowed for both file types and extensions.
+
+# Use the %f placeholder to specify the position of the file name to be executed in the command. Example:
+# 'mpv %f --terminal=no'. If %f is not specified, the file name will be added to the end of the command. 
 
 ### File Extensions ###
 
