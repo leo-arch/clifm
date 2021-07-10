@@ -84,12 +84,14 @@ prompt(void)
 		}
 	}
 
+	fputs(NC_b, stdout);
+	fflush(stdout);
 	/* Execute prompt commands, if any, and only if external commands
 	 * are allowed */
-	if (ext_cmd_ok && prompt_cmds_n > 0)
-
+	if (ext_cmd_ok && prompt_cmds_n > 0) {
 		for (i = 0; i < prompt_cmds_n; i++)
 			launch_execle(prompt_cmds[i]);
+	}
 
 	/* Update trash and sel file indicator on every prompt call */
 	if (trash_ok) {
@@ -163,7 +165,6 @@ prompt(void)
 
 	char *the_prompt = (char *)xnmalloc(prompt_length, sizeof(char));
 
-	fputs(NC_b, stdout);
 	snprintf(the_prompt, prompt_length, "%s%s%s%s%s%s%s%s%s%s%s",
 	    (flags & ROOT_USR) ? "\001\x1b[1;31mR\x1b[0m\002" : "",
 	    (msgs_n && pmsg) ? msg_str : "", (xargs.stealth_mode == 1)
