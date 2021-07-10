@@ -162,8 +162,8 @@ prompt(void)
 	 * 1 = null terminating char */
 
 	char *the_prompt = (char *)xnmalloc(prompt_length, sizeof(char));
-	/*  char the_prompt[prompt_length]; */
 
+	fputs(NC_b, stdout);
 	snprintf(the_prompt, prompt_length, "%s%s%s%s%s%s%s%s%s%s%s",
 	    (flags & ROOT_USR) ? "\001\x1b[1;31mR\x1b[0m\002" : "",
 	    (msgs_n && pmsg) ? msg_str : "", (xargs.stealth_mode == 1)

@@ -398,12 +398,13 @@ main(int argc, char *argv[])
 	 * must rerun init_config(), get_aliases(), get_prompt_cmds(), and
 	 * then external_arguments() */
 	argc_bk = argc;
-	argv_bk = (char **)xnmalloc((size_t)argc, sizeof(char *));
+	argv_bk = (char **)xnmalloc((size_t)argc + 1, sizeof(char *));
 
 	register int i = argc;
 
 	while (--i >= 0)
 		argv_bk[i] = savestring(argv[i], strlen(argv[i]));
+	argv_bk[argc] = (char *)NULL;
 
 	atexit(free_stuff); /* free_stuff does some cleaning */
 
