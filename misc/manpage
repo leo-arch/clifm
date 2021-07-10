@@ -606,7 +606,9 @@ The \fIu\fR, \fIunmount\fR option unmounts the specified remote using the unmoun
 .B o, open \fRELN/FILE [APPLICATION]
 open FILE, which can be either a directory, in which case it works just like the \fIcd\fR command (see above), a regular file, or a symbolic link to either of the two. For example: 'o 12', 'o filename', 'o /path/to/filename'.
 .sp
-By default, the \fIopen\fR function will open files with the default application associated to them via \FbLira\fR, the built\-in resource opener (see the \fImime\fR command above). However, if you want to open a file with a different application, just add the application name as second argument, e.g. 'o 12 leafpad'. If you want to run the program in the background, simply add the ampersand character: 'o 12 &'.
+By default, the \fIopen\fR function will open files with the default application associated to them via \FbLira\fR, the built\-in resource opener (see the \fImime\fR command above). However, if you want to open a file with a different application, just add the application name as second argument, e.g. 'o 12 leafpad' or 'o12 leafpad'.
+.sp
+If you want to run the program in the background, simply add the ampersand character, as usual: 'o 12 &', 'o 12&', 'o12&' or (if auto-open is enabled) just '12&'.
 .sp
 If the file to be opened is an archive/compressed file, the archive function (see the \fIad\fR command above) will be executed instead.
 .TP
