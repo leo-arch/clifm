@@ -4,7 +4,7 @@
 	</a>
 </p>
 <h1 align="center">CliFM</h1>
-<h2 align="center">Non-curses, KISS file-manager for the terminal</h2>
+<h2 align="center">Non-curses, KISS file manager for the terminal</h2>
 <h3 align="center">Fast, extensible, lightweight | Written in C</h3>
 <h3 align="center">Linux, FreeBSD, NetBSD, OpenBSD, Haiku | x86, ARM</h3>
 <h4 align="center"><a
@@ -28,7 +28,7 @@ href="https://software.opensuse.org//download.html?project=home%3Aarchcrack&pack
 
 <p align="right"><br><i>[…] I think I had been looking for something like this for a long time, and had never put it in words. I used [other file-managers] occasionally, but frequently just found myself doing most of my file administration from the CLI. I think this hits a nice sort of sweet spot right between the two. It feels less like a separate program and more like just putting your shell into "file-management mode".</i></p>
 <p align="right"><a href="https://www.reddit.com/r/commandline/comments/nnj5vl/clifm_11_is_here_with_new_features_and_a_decent/gzwfm25/?context=3">Tuerda</a></p>
-<p align="right"><br><i>Halfway between a shell and a TUI file-manager […] Nice tool, fluid, intuitive.</i></p>
+<p align="right"><br><i>Halfway between a shell and a TUI file manager […] Nice tool, fluid, intuitive.</i></p>
 <p align="right"><a href="https://www.reddit.com/r/commandline/comments/n5j36f/clifm_the_kiss_file_manager_for_the_unix_terminal/gx5nxja/?context=3">Orduval</a></p>
 
 ---
@@ -57,18 +57,21 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 Why another file manager? I can. \
 In the free world, a free community finds alternatives central to freedom, and moreover, a place to learn.
 
-Whatever needs to be done, do it in the simplest possible way: [KISS](https://en.wikipedia.org/wiki/KISS_principle) is a desired trait of a file-manager for the terminal. No GUI, no curses, but just a command-line, shell-like file manager: 5 MiB RAM and 500 KiB disk space.
+Whatever needs to be done, do it in the simplest possible way: [KISS](https://en.wikipedia.org/wiki/KISS_principle) is a desired trait of a file manager for the terminal. No GUI, no curses, but just a command-line, shell-like file manager: 5 MiB RAM and 500 KiB disk space.
 
 Willingness to try something different is all you need.
 
-Unlike most terminal file-managers out there, CliFM replaces the traditional curses interface by a simple command-line interface. It is a file-manager, but also **a shell extension**.
+Unlike most terminal file managers out there, CliFM replaces the traditional curses interface (also known as TUI or text-menu based interface) by a simple command-line interface.<sup>1</sup> It is a file manager, but also **a shell extension**.
 
 Search for files, copy, rename, and trash some of them, but, at the same time, update/upgrade your system, add some cronjob, stop a service, and run nano (or vi, or emacs, if you like).
 
-Those familiar with the command-line will find in a file-manager based on it a desirable _addition_ to its functionality. \
+Those familiar with the command-line will find in a file manager based on it a desirable _addition_ to its functionality. \
 The command-line is still there, never hidden.
 
 ### Should all terminal file managers be curses-based file managers? No.
+
+---
+_<sup>1</sup>_ For a detailed explanation and comparison between these concepts see the [resources page](https://github.com/leo-arch/clifm/wiki/Resources#gui-tui-and-cli).
 
 ---
 
