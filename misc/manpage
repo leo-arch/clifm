@@ -1040,18 +1040,18 @@ Each line in the MIME list file consists of:
 a) 'X' or '!X' to specify GUI and non-GUI environments.
 b) A left value, containing either a file extension or a MIME type to be matched. Regular expressions are supported;
 .TP
-c) A right value, a list of semicolon separated commands (and optionally the commands parameters) to be associated to the corresponding left value.
+c) A right value, a list of semicolon separated commands (and optionally the commands parameters) to be associated to the corresponding left value. Use the %f placeholder to specify the position of the file name to be executed in the command, for example: 'mpv %f --terminal=no'. If the placeholder is not specified, the file name will be added to the end of the command string.
 .TP
 Note that the syntax departs here from the Freedesktop specification in that we do not rely on desktop files (mostly used by desktop environments), but rather on commands and parameters. In general thus, the syntax is this:
 
- X:MIME=CMD ARGS;CMD ARGS; ...
+ X:MIME=CMD [ARGS] [%f];CMD [ARGS] [%f]; ...
 .TP
 or, for file extensions:
 
- X:E:EXT=CMD ARGS;CMD ARGS; ...
+ X:E:EXT=CMD [ARGS] [%f];CMD [ARGS] [%f]; ...
 .TP
 Use '!X' to specify applications when running on non-graphical environments:
- !X:E:EXT=CMD ARGS;CMD ARGS; ...
+ !X:E:EXT=CMD [ARGS] [%f];CMD [ARGS] [%f]; ...
 
 .TP
 Examples:
@@ -1067,7 +1067,7 @@ Match multiple extensions:
  X:E:^(sh|c|py|pl)$:geany;leafpad;nano
 .TP
 Match single mimetype:
- X:^audio/mp3$=ffplay -nodisp -autoexit;mpv;mplayer
+ X:^audio/mp3$=mpv %f --terminal=no;ffplay -nodisp -autoexit;mpv;mplayer
 .TP
 Match mutiple mimetypes:
  X:^audio/.*=mplayer;mplayer2;vlc;gmplayer;smplayer;totem
