@@ -565,8 +565,7 @@ mime_open(char **args)
 
 	cmd[pos] = (char *)NULL;
 
-	int ret = launch_execve(cmd, (*args[args_num - 1] == '&'
-	&& !args[args_num - 1][1]) ? BACKGROUND : FOREGROUND, E_NOSTDERR);
+	int ret = launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
 
 	free(file_path);
 	free(app);

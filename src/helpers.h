@@ -648,7 +648,8 @@ extern short
     trash_ok,
     selfile_ok,
     filter_rev,
-    print_selfiles;
+    print_selfiles,
+    bg_proc;
 
 extern int
     max_hist,

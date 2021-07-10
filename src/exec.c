@@ -1685,6 +1685,13 @@ exec_cmd(char **comm)
 			}
 		}
 
+		/* Append final ampersand if background */
+		if (bg_proc) {
+			ext_cmd = (char *)xrealloc(ext_cmd, (ext_cmd_len + 2) * sizeof(char));
+			ext_cmd[ext_cmd_len] = '&';
+			ext_cmd[ext_cmd_len + 1] = '\0';
+		}
+
 		/* Since we modified LS_COLORS, store its current value and unset
 		 * it. Some shell commands use LS_COLORS to display their outputs
 		 * ("ls -l", for example, use the "no" value to print file

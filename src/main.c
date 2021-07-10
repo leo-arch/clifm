@@ -134,7 +134,8 @@ short
     config_ok = 1,
     trash_ok = 1,
     selfile_ok = 1,
-	filter_rev = 0;
+	filter_rev = 0,
+	bg_proc = 0;
 
 int
     max_hist = UNSET,

@@ -394,30 +394,23 @@ open_function(char **cmd)
 
 	/* At this point we know the file to be openend is either a regular
 	 * file or a symlink to a regular file. So, just open the file */
-
 	if (!cmd[2] || (*cmd[2] == '&' && !cmd[2][1])) {
 
 		if (opener) {
 			char *tmp_cmd[] = {opener, file, NULL};
-
-			int ret = launch_execve(tmp_cmd,
-			    strcmp(cmd[args_n], "&") == 0 ? BACKGROUND
+			int ret = launch_execve(tmp_cmd, bg_proc ? BACKGROUND
 							  : FOREGROUND, E_NOSTDERR);
 
 			if (ret != EXIT_SUCCESS)
 				return EXIT_FAILURE;
 
 			return EXIT_SUCCESS;
-		}
-
-		else if (!(flags & FILE_CMD_OK)) {
+		} else if (!(flags & FILE_CMD_OK)) {
 			fprintf(stderr, _("%s: file: Command not found. Specify an "
 					"application to open the file\n%s\n"), PROGRAM_NAME,
 					_(OPEN_USAGE));
 			return EXIT_FAILURE;
-		}
-
-		else {
+		} else {
 			int ret = mime_open(cmd);
 
 			/* The return value of mime_open could be zero
@@ -439,8 +432,7 @@ open_function(char **cmd)
 	/* If some application was specified to open the file */
 	char *tmp_cmd[] = {cmd[2], file, NULL};
 
-	int ret = launch_execve(tmp_cmd, (cmd[args_n]
-	&& strcmp(cmd[args_n], "&") == 0) ? BACKGROUND : FOREGROUND, E_NOSTDERR);
+	int ret = launch_execve(tmp_cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
 
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
