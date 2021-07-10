@@ -616,7 +616,7 @@ mime_import(char *file)
 #ifdef __Haiku__
 	fprintf(stderr, "%s: Importing MIME definitions is not supported on Haiku\n",
 			PROGRAM_NAME);
-	return EXIT_FAILURE;
+	return (-1);
 #endif
 	/* If not in X, exit) */
 	if (!(flags & GUI)) {
