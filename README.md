@@ -61,7 +61,7 @@ Whatever needs to be done, do it in the simplest possible way: [KISS](https://en
 
 Willingness to try something different is all you need.
 
-Unlike most terminal file managers out there, CliFM replaces the traditional curses interface by a simple command-line interface. It is a file manager, but also **a shell extension**.
+Unlike most terminal file managers out there, CliFM replaces the traditional curses interface (also known as TUI or text-menu based interface) by a simple command-line interface.<sup>1</sup> It is a file manager, but also **a shell extension**.
 
 Search for files, copy, rename, and trash some of them, but, at the same time, update/upgrade your system, add some cronjob, stop a service, and run nano (or vi, or emacs, if you like).
 
@@ -69,6 +69,9 @@ Those familiar with the command-line will find in a file manager based on it a d
 The command-line is still there, never hidden.
 
 ### Should all terminal file managers be curses-based file managers? No.
+
+---
+_<sup>1</sup>_ For a detailed explanation and comparison between these concepts see the [resources page](https://github.com/leo-arch/clifm/wiki/Resources#gui-tui-and-cli).
 
 ---
 
