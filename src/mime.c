@@ -129,8 +129,9 @@ get_app(const char *mime, const char *ext)
 					*ret = '\0';
 					file_path = get_cmd_path(app);
 					*ret = ' ';
-				} else
+				} else {
 					file_path = get_cmd_path(app);
+				}
 
 				if (file_path) {
 					/* If the app exists, break the loops and
@@ -138,8 +139,9 @@ get_app(const char *mime, const char *ext)
 					free(file_path);
 					file_path = (char *)NULL;
 					cmd_ok = 1;
-				} else
+				} else {
 					continue;
+				}
 			}
 
 			if (cmd_ok)
@@ -318,7 +320,7 @@ mime_open(char **args)
 	file_path_tmp = (char *)NULL;
 
 	char *file_path = (char *)NULL,
-		*deq_file = (char *)NULL;
+		 *deq_file = (char *)NULL;
 	int info = 0,
 		file_index = 0;
 
@@ -338,10 +340,9 @@ mime_open(char **args)
 			file_path = realpath(deq_file, NULL);
 			free(deq_file);
 			deq_file = (char *)NULL;
-		}
-
-		else
+		} else {
 			file_path = realpath(args[2], NULL);
+		}
 
 		if (!file_path) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[2],
@@ -367,10 +368,9 @@ mime_open(char **args)
 			file_path = realpath(deq_file, NULL);
 			free(deq_file);
 			deq_file = (char *)NULL;
-		}
-
-		else
+		} else {
 			file_path = realpath(args[1], NULL);
+		}
 
 		if (!file_path) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[1],
@@ -545,7 +545,24 @@ mime_open(char **args)
 		}
 	}
 
-	cmd[pos++] = savestring(file_path, strlen(file_path));
+	/* If %f placeholder is found, replace it by FILE_PATH. Else, append
+	 * FILE_PATH to the end of CMD */
+	int i = pos,
+		found = 0;
+	while (--i >= 0) {
+		if (*cmd[i] == '%' && *(cmd[i] + 1) == 'f') {
+			found = 1;
+			break;
+		}
+	}
+
+	if (found) {
+		cmd[i] = (char *)xrealloc(cmd[i], (strlen(file_path) + 1) * sizeof(char));
+		strcpy(cmd[i], file_path);
+	} else {
+		cmd[pos++] = savestring(file_path, strlen(file_path));
+	}
+
 	cmd[pos] = (char *)NULL;
 
 	int ret = launch_execve(cmd, (*args[args_num - 1] == '&'
@@ -554,7 +571,7 @@ mime_open(char **args)
 	free(file_path);
 	free(app);
 
-	int i = pos;
+	i = pos;
 	while (--i >= 0)
 		free(cmd[i]);
 	free(cmd);
