@@ -613,6 +613,11 @@ mime_open(char **args)
 int
 mime_import(char *file)
 {
+#ifdef __Haiku__
+	fprintf(stderr, "%s: Importing MIME definitions is not supported on Haiku\n",
+			PROGRAM_NAME);
+	return EXIT_FAILURE;
+#endif
 	/* If not in X, exit) */
 	if (!(flags & GUI)) {
 		fprintf(stderr, _("%s: Nothing was imported. No graphical "
@@ -645,10 +650,6 @@ mime_import(char *file)
 	char *mime_paths[] = {config_path, local_path,
 	    "/usr/local/share/applications/mimeapps.list",
 	    "/usr/share/applications/mimeapps.list",
-#if defined(__Haiku__)
-		"/boot/system/non-packaged/data",
-		"/boot/system/data",
-#endif
 	    "/etc/xdg/mimeapps.list", NULL};
 
 	/* Check each mimeapps.list file and store its associations into
