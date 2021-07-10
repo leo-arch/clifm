@@ -57,9 +57,9 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 Why another file manager? I can. \
 In the free world, a free community finds alternatives central to freedom, and moreover, a place to learn.
 
-Whatever needs to be done, do it in the simplest possible way: [KISS](https://en.wikipedia.org/wiki/KISS_principle) is a desired trait of a file manager for the terminal. No GUI, no curses, but just a command-line, shell-like file manager: 5 MiB RAM and 500 KiB disk space.
+Whatever needs to be done, do it in the simplest possible way: [KISS](https://en.wikipedia.org/wiki/KISS_principle) is a desired trait of a file manager for the terminal. No GUI, no TUI, but just a shell-like, **C**ommand **L**ine **I**nterface **F**ile **M**anager.
 
-Willingness to try something different is all you need.
+Besides 5 MiB RAM and 500 KiB disk space, willingness to try something different is all you need.
 
 Unlike most terminal file managers out there, CliFM replaces the traditional curses interface (also known as TUI or text-menu based interface) by a simple command-line interface.<sup>1</sup> It is a file manager, but also **a shell extension**.
 
@@ -68,10 +68,10 @@ Search for files, copy, rename, and trash some of them, but, at the same time, u
 Those familiar with the command-line will find in a file manager based on it a desirable _addition_ to its functionality. \
 The command-line is still there, never hidden.
 
-### Should all terminal file managers be curses-based file managers? No.
+### Should all terminal file managers be TUI file managers? No.
 
 ---
-_<sup>1</sup>_ For a detailed explanation and comparison between these concepts see the [resources page](https://github.com/leo-arch/clifm/wiki/Resources#gui-tui-and-cli).
+_<sup>1</sup>_ <i>For a detailed explanation and comparison between these concepts see the [resources page](https://github.com/leo-arch/clifm/wiki/Resources#gui-tui-and-cli) and the [introductory page](https://github.com/leo-arch/clifm/wiki/Introduction#what-is-clifm) of the Wiki</i>.
 
 ---
 
