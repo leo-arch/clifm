@@ -29,6 +29,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
+#include <readline/readline.h>
 
 #include "archives.h"
 #include "aux.h"
@@ -127,17 +128,45 @@ get_app(const char *mime, const char *ext)
 				char *ret = strchr(app, ' ');
 				if (ret) {
 					*ret = '\0';
-					file_path = get_cmd_path(app);
+					if (*app == '~') {
+						file_path = tilde_expand(app);
+						if (access(file_path, X_OK) != 0) {
+							free(file_path);
+							file_path = (char *)NULL;
+						}
+					}
+					else if (*app == '/') {
+						if (access(app, X_OK) == 0) {
+							file_path = app;
+						}
+					} else {
+						file_path = get_cmd_path(app);
+					}
 					*ret = ' ';
 				} else {
-					file_path = get_cmd_path(app);
+					if (*app == '~') {
+						file_path = tilde_expand(app);
+						if (access(file_path, X_OK) != 0) {
+							free(file_path);
+							file_path = (char *)NULL;
+						}
+					}
+					else if (*app == '/') {
+						if (access(app, X_OK) == 0) {
+							file_path = app;
+						}
+					} else {
+						file_path = get_cmd_path(app);
+					}
 				}
 
 				if (file_path) {
 					/* If the app exists, break the loops and
 					 * return it */
-					free(file_path);
-					file_path = (char *)NULL;
+					if (*app != '/') {
+						free(file_path);
+						file_path = (char *)NULL;
+					}
 					cmd_ok = 1;
 				} else {
 					continue;
