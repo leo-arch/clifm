@@ -65,7 +65,6 @@ get_properties(char *filename, int dsize)
 	char *size_type = get_size_unit(file_attrib.st_size);
 
 	/* Get file type (and color): */
-	int sticky = 0;
 	char file_type = 0;
 	char *linkname = (char *)NULL, *color = (char *)NULL;
 
@@ -145,6 +144,7 @@ get_properties(char *filename, int dsize)
 			color = nd_c;
 
 		else {
+			int sticky = 0;
 			int is_oth_w = 0;
 			if (file_attrib.st_mode & S_ISVTX)
 				sticky = 1;
@@ -227,6 +227,8 @@ get_properties(char *filename, int dsize)
 		(val & S_IXUSR) ? (exec_usr = 's') : (exec_usr = 'S');
 	if (file_attrib.st_mode & S_ISGID)
 		(val & S_IXGRP) ? (exec_grp = 's') : (exec_grp = 'S');
+	if (file_attrib.st_mode & S_ISVTX)
+		(val & S_IXOTH) ? (exec_others = 't'): (exec_others = 'T');
 
 	/* Get number of links to the file */
 	nlink_t link_n = file_attrib.st_nlink;
@@ -257,16 +259,16 @@ get_properties(char *filename, int dsize)
 	printf("(%04o)%c/%c%c%c/%c%c%c/%c%c%c%s %zu %s %s %s %s ",
 	    file_attrib.st_mode & 07777, file_type,
 	    read_usr, write_usr, exec_usr, read_grp,
-	    write_grp, exec_grp, read_others, write_others,
-	    (sticky) ? 't' : exec_others,
+	    write_grp, exec_grp, read_others, write_others, exec_others,
 	    is_acl(filename) ? "+" : "", (size_t)link_n,
 	    (!owner) ? _("unknown") : owner->pw_name,
 	    (!group) ? _("unknown") : group->gr_name,
 	    (size_type) ? size_type : "?",
 	    (mod_time[0] != '\0') ? mod_time : "?");
 
-	if (file_type && file_type != 'l')
+	if (file_type && file_type != 'l') {
 		printf("%s%s%s\n", color, filename, df_c);
+	}
 
 	else if (linkname) {
 		printf("%s%s%s -> %s\n", color, filename, df_c, linkname);
@@ -503,6 +505,8 @@ print_entry_props(struct fileinfo *props, size_t max)
 		(val & S_IXUSR) ? (exec_usr = 's') : (exec_usr = 'S');
 	if (props->mode & S_ISGID)
 		(val & S_IXGRP) ? (exec_grp = 's') : (exec_grp = 'S');
+	if (props->mode & S_ISVTX)
+		(val & S_IXOTH) ? (exec_others = 't'): (exec_others = 'T');
 
 	/* Get modification time */
 	char mod_time[128];
@@ -553,10 +557,6 @@ print_entry_props(struct fileinfo *props, size_t max)
 	if (pad < 0)
 		pad = 0;
 
-	int sticky = 0;
-	if (props->mode & S_ISVTX)
-		sticky = 1;
-
 	printf("%s%s%c%s%s%s%-*s%s%c %c/%c%c%c/%c%c%c/%c%c%c%s  "
 	       "%u:%u  %s  %s\n",
 	    colorize ? props->icon_color : "",
@@ -567,7 +567,7 @@ print_entry_props(struct fileinfo *props, size_t max)
 	    trim ? '~' : 0, file_type,
 	    read_usr, write_usr, exec_usr,
 	    read_grp, write_grp, exec_grp,
-	    read_others, write_others, sticky ? 't' : exec_others,
+	    read_others, write_others, exec_others,
 	    is_acl(props->name) ? "+" : "",
 	    /*          !owner ? _("?") : owner->pw_name,
 			!group ? _("?") : group->gr_name, */
