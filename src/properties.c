@@ -69,7 +69,6 @@ get_properties(char *filename, int dsize)
 	char *linkname = (char *)NULL, *color = (char *)NULL;
 
 	switch (file_attrib.st_mode & S_IFMT) {
-
 	case S_IFREG: {
 
 		char *ext = (char *)NULL;
@@ -78,13 +77,10 @@ get_properties(char *filename, int dsize)
 
 		if (access(filename, R_OK) == -1)
 			color = nf_c;
-
 		else if (file_attrib.st_mode & S_ISUID)
 			color = su_c;
-
 		else if (file_attrib.st_mode & S_ISGID)
 			color = sg_c;
-
 		else {
 #ifdef _LINUX_CAP
 			cap_t cap = cap_get_file(filename);
@@ -92,27 +88,21 @@ get_properties(char *filename, int dsize)
 			if (cap) {
 				color = ca_c;
 				cap_free(cap);
-			}
-
-			else if (file_attrib.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
+			} else if (file_attrib.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
 #else
-
 			if (file_attrib.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
 #endif
 
 				if (file_attrib.st_size == 0)
 					color = ee_c;
-
 				else
 					color = ex_c;
 			}
 
 			else if (file_attrib.st_size == 0)
 				color = ef_c;
-
 			else if (file_attrib.st_nlink > 1)
 				color = mh_c;
-
 			else {
 				ext = strrchr(filename, '.');
 
@@ -125,25 +115,21 @@ get_properties(char *filename, int dsize)
 						sprintf(ext_color, "\x1b[%sm", extcolor);
 						color = ext_color;
 						extcolor = (char *)NULL;
-					}
-
-					else /* No matching extension found */
+					} else  { /* No matching extension found */
 						color = fi_c;
-				}
-
-				else
+					}
+				} else {
 					color = fi_c;
+				}
 			}
 		}
 	} break;
-
 	case S_IFDIR:
 		file_type = 'd';
 
-		if (access(filename, R_OK | X_OK) != 0)
+		if (access(filename, R_OK | X_OK) != 0) {
 			color = nd_c;
-
-		else {
+		} else {
 			int sticky = 0;
 			int is_oth_w = 0;
 			if (file_attrib.st_mode & S_ISVTX)
@@ -159,7 +145,6 @@ get_properties(char *filename, int dsize)
 		}
 
 		break;
-
 	case S_IFLNK:
 		file_type = 'l';
 
@@ -170,27 +155,22 @@ get_properties(char *filename, int dsize)
 		else
 			color = or_c;
 		break;
-
 	case S_IFSOCK:
 		file_type = 's';
 		color = so_c;
 		break;
-
 	case S_IFBLK:
 		file_type = 'b';
 		color = bd_c;
 		break;
-
 	case S_IFCHR:
 		file_type = 'c';
 		color = cd_c;
 		break;
-
 	case S_IFIFO:
 		file_type = 'p';
 		color = pi_c;
 		break;
-
 	default:
 		file_type = '?';
 		color = no_c;
@@ -243,7 +223,6 @@ get_properties(char *filename, int dsize)
 		/* Store formatted (and localized) date-time string into
 		 * mod_time */
 		strftime(mod_time, sizeof(mod_time), "%b %d %H:%M:%S %Y", &tm);
-
 	else
 		mod_time[0] = '-';
 
@@ -268,28 +247,22 @@ get_properties(char *filename, int dsize)
 
 	if (file_type && file_type != 'l') {
 		printf("%s%s%s\n", color, filename, df_c);
-	}
-
-	else if (linkname) {
+	} else if (linkname) {
 		printf("%s%s%s -> %s\n", color, filename, df_c, linkname);
 		free(linkname);
-	}
-
-	else { /* Broken link */
+	} else { /* Broken link */
 		char link[PATH_MAX] = "";
 		ssize_t ret = readlink(filename, link, PATH_MAX);
 
 		if (ret) {
 			printf(_("%s%s%s -> %s (broken link)\n"), color, filename,
 			    df_c, link);
-		}
-
-		else
+		} else {
 			printf("%s%s%s -> ???\n", color, filename, df_c);
+		}
 	}
 
 	/* Stat information */
-
 	/* Last access time */
 	time = (time_t)file_attrib.st_atim.tv_sec;
 	localtime_r(&time, &tm);
@@ -299,7 +272,6 @@ get_properties(char *filename, int dsize)
 		/* Store formatted (and localized) date-time string into
 		 * access_time */
 		strftime(access_time, sizeof(access_time), "%b %d %H:%M:%S %Y", &tm);
-
 	else
 		access_time[0] = '-';
 
@@ -310,7 +282,6 @@ get_properties(char *filename, int dsize)
 
 	if (time)
 		strftime(change_time, sizeof(change_time), "%b %d %H:%M:%S %Y", &tm);
-
 	else
 		change_time[0] = '-';
 
@@ -326,7 +297,6 @@ get_properties(char *filename, int dsize)
 
 	if (!time)
 		creation_time[0] = '-';
-
 	else
 		strftime(creation_time, sizeof(creation_time),
 		    "%b %d %H:%M:%S %Y", &tm);
@@ -337,12 +307,12 @@ get_properties(char *filename, int dsize)
 	localtime_r(&time, &tm);
 	char creation_time[128] = "";
 
-	if (!time)
+	if (!time) {
 		creation_time[0] = '-';
-
-	else
+	} else {
 		strftime(creation_time, sizeof(creation_time),
 		    "%b %d %H:%M:%S %Y", &tm);
+	}
 #endif
 
 	switch (file_type) {
@@ -418,19 +388,16 @@ get_properties(char *filename, int dsize)
 				if (human_size) {
 					printf("%s\n", human_size);
 					free(human_size);
-				}
-
-				else
+				} else {
 					puts("?");
-			}
-
-			else
+				}
+			} else {
 				puts("?");
+			}
 		}
-	}
-
-	else
+	} else {
 		printf(_("Size: \t\t%s\n"), size_type ? size_type : "?");
+	}
 
 	if (size_type)
 		free(size_type);
