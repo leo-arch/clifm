@@ -92,10 +92,9 @@ filter_function(const char *arg)
 			regfree(&regex_exp);
 			puts(_("Filter unset"));
 			filter_rev = 0;
-		}
-
-		else
+		} else {
 			puts(_("No filter set"));
+		}
 
 		return EXIT_SUCCESS;
 	}
@@ -120,10 +119,9 @@ filter_function(const char *arg)
 		free(filter);
 		filter = (char *)NULL;
 		regfree(&regex_exp);
-	}
-
-	else
+	} else {
 		puts(_("New filter successfully set"));
+	}
 
 	return EXIT_SUCCESS;
 }
@@ -183,13 +181,13 @@ print_tips(int all)
 	    "Press 'F9' to open and edit the keybindings file",
 	    "Press 'F10' to open and edit the configuration file",
 	    "Press 'F11' to open and edit the bookmarks file",
-	    "Customize the starting path using the -p option: 'clifm -p PATH'",
-	    "Use the 'o' command to open files and directories: 'o 12'",
-	    "Bypass the resource opener specifying an application: 'o 12 "
+	    "Set the starting path: 'clifm PATH'",
+	    "Use the 'o' command to open files and directories: '12'",
+	    "Bypass the resource opener specifying an application: '12 "
 	    "leafpad'",
-	    "Open a file and send it to the background running 'o 24 &'",
+	    "Open a file and send it to the background running '24&'",
 	    "Create a custom prompt editing the configuration file",
-	    "Customize color codes using the configuration file",
+	    "Customize color codes via 'cs edit' command (F6)",
 	    "Open the bookmarks manager by just pressing 'Alt-b'",
 	    "Chain commands using ; and &&: 's 2 7-10; r sel'",
 	    "Add emojis to the prompt by copying them to the Prompt line "
@@ -242,7 +240,8 @@ print_tips(int all)
 	    "Enable the TrashAsRm option to prevent accidental deletions",
 	    "Don't like ELN's? Disable them using the -e option",
 	    "Use the 'n' command to create multiple files and/or directories",
-	    "Customize your prompt by adding prompt commands",
+	    "Customize your prompt by adding prompt commands via the 'edit' "
+	    "command (F10)",
 	    "Need git integration? Consult the manpage",
 	    NULL};
 
@@ -454,10 +453,9 @@ alias_import(char *file)
 
 		realpath(file_exp, rfile);
 		free(file_exp);
-	}
-
-	else
+	} else {
 		realpath(file, rfile);
+	}
 
 	if (rfile[0] == '\0') {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
@@ -549,9 +547,10 @@ alias_import(char *file)
 
 				/* Write the new alias into CLiFM config file */
 				fputs(line, config_fp);
-			} else
+			} else {
 				fprintf(stderr, _("%s: Alias already exists\n"),
 				    alias_name);
+			}
 
 			free(alias_name);
 		}
@@ -579,11 +578,10 @@ alias_import(char *file)
 
 	/* If some alias was found and imported, print the corresponding
 	 * message and update the aliases array */
-	if (alias_imported > 1)
+	if (alias_imported > 1) {
 		printf(_("%s: %zu aliases were successfully imported\n"),
 		    PROGRAM_NAME, alias_imported);
-
-	else
+	} else
 		printf(_("%s: 1 alias was successfully imported\n"), PROGRAM_NAME);
 
 	/* Add new aliases to the internal list of aliases */
@@ -824,7 +822,6 @@ set_shell(char *str)
 
 	if (full_path)
 		tmp = full_path;
-
 	else
 		tmp = str;
 
@@ -1013,11 +1010,10 @@ save_pinned_dir(void)
 
 		FILE *fp = fopen(pin_file, "w");
 
-		if (!fp)
+		if (!fp) {
 			fprintf(stderr, _("%s: Error storing pinned "
 					"directory\n"), PROGRAM_NAME);
-
-		else {
+		} else {
 			fprintf(fp, "%s", pinned_dir);
 			fclose(fp);
 		}
@@ -1434,17 +1430,14 @@ pin_directory(char *dir)
 	}
 
 	/* If absolute path */
-	if (*dir == '/')
+	if (*dir == '/') {
 		pinned_dir = savestring(dir, strlen(dir));
-
-	else { /* If relative path */
+	} else { /* If relative path */
 
 		if (strcmp(ws[cur_ws].path, "/") == 0) {
 			pinned_dir = (char *)xnmalloc(strlen(dir) + 2, sizeof(char));
 			sprintf(pinned_dir, "/%s", dir);
-		}
-
-		else {
+		} else {
 			pinned_dir = (char *)xnmalloc(strlen(dir)
 								+ strlen(ws[cur_ws].path) + 2, sizeof(char));
 			sprintf(pinned_dir, "%s/%s", ws[cur_ws].path, dir);
@@ -1495,11 +1488,10 @@ hidden_function(char **comm)
 {
 	int exit_status = EXIT_SUCCESS;
 
-	if (strcmp(comm[1], "status") == 0)
+	if (strcmp(comm[1], "status") == 0) {
 		printf(_("%s: Hidden files %s\n"), PROGRAM_NAME,
 		    (show_hidden) ? _("enabled") : _("disabled"));
-
-	else if (strcmp(comm[1], "off") == 0) {
+	} else if (strcmp(comm[1], "off") == 0) {
 		if (show_hidden == 1) {
 			show_hidden = 0;
 
@@ -1508,9 +1500,7 @@ hidden_function(char **comm)
 				exit_status = list_dir();
 			}
 		}
-	}
-
-	else if (strcmp(comm[1], "on") == 0) {
+	} else if (strcmp(comm[1], "on") == 0) {
 		if (show_hidden == 0) {
 			show_hidden = 1;
 
@@ -1519,10 +1509,9 @@ hidden_function(char **comm)
 				exit_status = list_dir();
 			}
 		}
-	}
-
-	else
+	} else {
 		fprintf(stderr, "%s\n", _(HF_USAGE));
+	}
 
 	return exit_status;
 }
@@ -1882,8 +1871,9 @@ splash(void)
 		printf(_("\n\t\t\tPress any key to continue... "));
 		xgetchar();
 		putchar('\n');
-	} else
+	} else {
 		putchar('\n');
+	}
 }
 
 void
