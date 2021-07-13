@@ -348,9 +348,7 @@ load_keybinds(void)
 		}
 
 		free(kbinds);
-
 		kbinds = (struct kbinds_t *)xnmalloc(1, sizeof(struct kbinds_t));
-
 		kbinds_n = 0;
 	}
 
@@ -381,7 +379,6 @@ load_keybinds(void)
 		/* Now copy left and right value of each keybind into the
 		 * keybinds struct */
 		kbinds = xrealloc(kbinds, (kbinds_n + 1) * sizeof(struct kbinds_t));
-
 		kbinds[kbinds_n].key = savestring(tmp + 1, strlen(tmp + 1));
 
 		*tmp = '\0';
@@ -485,7 +482,6 @@ rl_refresh(int count, int key)
 	if (clear_screen)
 		CLEAR;
 	keybind_exec_cmd("rf");
-
 	rl_reset_line_state();
 
 	return EXIT_SUCCESS;
@@ -494,86 +490,51 @@ rl_refresh(int count, int key)
 int
 rl_parent_dir(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
 	/* If already root dir, do nothing */
 	if (*ws[cur_ws].path == '/' && !ws[cur_ws].path[1])
 		return EXIT_SUCCESS;
 
-	keybind_exec_cmd("cd ..");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("cd ..");
 }
 
 int
 rl_root_dir(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
 	/* If already root dir, do nothing */
 	if (*ws[cur_ws].path == '/' && !ws[cur_ws].path[1])
 		return EXIT_SUCCESS;
 
-	keybind_exec_cmd("cd /");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("cd /");
 }
 
 int
 rl_home_dir(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
 	/* If already in home, do nothing */
 	if (*ws[cur_ws].path == *user.home && strcmp(ws[cur_ws].path, user.home) == 0)
 		return EXIT_SUCCESS;
 
-	keybind_exec_cmd("cd");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("cd");
 }
 
 int
 rl_next_dir(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
 	/* If already at the end of dir hist, do nothing */
 	if (dirhist_cur_index + 1 == dirhist_total_index)
 		return EXIT_SUCCESS;
 
-	keybind_exec_cmd("f");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("f");
 }
 
 int
 rl_first_dir(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
 	/* If already at the beginning of dir hist, do nothing */
 	if (dirhist_cur_index == 0)
 		return EXIT_SUCCESS;
 
-	keybind_exec_cmd("b !1");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("b !1");
 }
 
 int
@@ -589,7 +550,6 @@ rl_last_dir(int count, int key)
 	char cmd[PATH_MAX + 4];
 	sprintf(cmd, "b !%d", dirhist_total_index);
 	keybind_exec_cmd(cmd);
-
 	rl_reset_line_state();
 
 	return EXIT_SUCCESS;
@@ -598,18 +558,11 @@ rl_last_dir(int count, int key)
 int
 rl_previous_dir(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
 	/* If already at the beginning of dir hist, do nothing */
 	if (dirhist_cur_index == 0)
 		return EXIT_SUCCESS;
 
-	keybind_exec_cmd("b");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("b");
 }
 
 int
@@ -622,9 +575,7 @@ rl_long(int count, int key)
 
 	if (clear_screen)
 		CLEAR;
-
 	keybind_exec_cmd("rf");
-
 	rl_reset_line_state();
 
 	return EXIT_SUCCESS;
@@ -663,9 +614,7 @@ rl_light(int count, int key)
 
 	if (clear_screen)
 		CLEAR;
-
 	keybind_exec_cmd("rf");
-
 	rl_reset_line_state();
 
 	return EXIT_SUCCESS;
@@ -734,7 +683,6 @@ rl_mountpoints(int count, int key)
 	/* Call the function only if it's not already running */
 	kbind_busy = 1;
 	keybind_exec_cmd("mp");
-
 	rl_reset_line_state();
 
 	return EXIT_SUCCESS;
@@ -760,7 +708,6 @@ rl_bookmarks(int count, int key)
 
 	kbind_busy = 1;
 	keybind_exec_cmd("bm");
-
 	rl_reset_line_state();
 
 	return EXIT_SUCCESS;
@@ -785,7 +732,6 @@ rl_clear_line(int count, int key)
 	/* 2) Clear the readline buffer */
 	rl_delete_text(0, rl_end);
 	rl_end = rl_point = 0;
-
 	rl_reset_line_state();
 
 	return EXIT_SUCCESS;
@@ -879,7 +825,6 @@ rl_remove_sel(int count, int key)
 	kb_shortcut = 1;
 	keybind_exec_cmd("r sel");
 	kb_shortcut = 0;
-
 	rl_prep_terminal(0);
 	rl_reset_line_state();
 
@@ -895,7 +840,6 @@ rl_export_sel(int count, int key)
 	kb_shortcut = 1;
 	keybind_exec_cmd("exp sel");
 	kb_shortcut = 0;
-
 	rl_reset_line_state();
 
 	return EXIT_SUCCESS;
@@ -910,7 +854,6 @@ rl_move_sel(int count, int key)
 	kb_shortcut = 1;
 	keybind_exec_cmd("m sel");
 	kb_shortcut = 0;
-
 	rl_reset_line_state();
 
 	return EXIT_SUCCESS;
@@ -925,7 +868,6 @@ rl_rename_sel(int count, int key)
 	kb_shortcut = 1;
 	keybind_exec_cmd("br sel");
 	kb_shortcut = 0;
-
 	rl_reset_line_state();
 
 	return EXIT_SUCCESS;
@@ -942,7 +884,6 @@ rl_paste_sel(int count, int key)
 	keybind_exec_cmd("c sel");
 	rl_prep_terminal(0);
 	kb_shortcut = 0;
-
 	rl_reset_line_state();
 
 	return EXIT_SUCCESS;
@@ -977,9 +918,7 @@ rl_previous_profile(int count, int key)
 			&& strcmp(profile_names[i], "default") == 0) {
 				cur_prof = i;
 			}
-		}
-
-		else {
+		} else {
 			if (*alt_profile == *profile_names[i]
 			&& strcmp(alt_profile, profile_names[i]) == 0) {
 				cur_prof = i;
@@ -1026,9 +965,7 @@ rl_next_profile(int count, int key)
 			&& strcmp(profile_names[i], "default") == 0) {
 				cur_prof = i;
 			}
-		}
-
-		else {
+		} else {
 			if (*alt_profile == *profile_names[i]
 			&& strcmp(alt_profile, profile_names[i]) == 0) {
 				cur_prof = i;
@@ -1112,7 +1049,6 @@ rl_open_sel(int count, int key)
 	sprintf(cmd, "o %s", sel_elements[sel_n - 1]);
 
 	keybind_exec_cmd(cmd);
-
 	rl_reset_line_state();
 
 	return EXIT_SUCCESS;
@@ -1134,7 +1070,6 @@ rl_bm_sel(int count, int key)
 	sprintf(cmd, "bm a %s", sel_elements[sel_n - 1]);
 
 	keybind_exec_cmd(cmd);
-
 	rl_reset_line_state();
 
 	return EXIT_SUCCESS;
@@ -1185,11 +1120,7 @@ rl_pinned_dir(int count, int key)
 		return EXIT_SUCCESS;
 	}
 
-	keybind_exec_cmd(",");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd(",");
 }
 
 int

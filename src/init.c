@@ -35,6 +35,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <readline/readline.h>
+#include <readline/history.h>
 #ifdef __NetBSD__
 #include <ctype.h>
 #endif
@@ -49,12 +50,181 @@
 #include "navigation.h"
 #include "sort.h"
 #include "string.h"
+#include "history.h"
 
 struct user_t user;
 
 /* 
  * functions
  */
+
+int
+init_gettext(void)
+{
+	char locale_dir[PATH_MAX];
+	snprintf(locale_dir, PATH_MAX - 1, "%s/locale", DATA_DIR
+			? DATA_DIR : "/usr/share");
+	bindtextdomain(PNL, locale_dir);
+	textdomain(PNL);
+
+	return EXIT_SUCCESS;
+}
+
+int
+backup_argv(int argc, char **argv)
+{
+	argc_bk = argc;
+	argv_bk = (char **)xnmalloc((size_t)argc + 1, sizeof(char *));
+
+	register int i = argc;
+
+	while (--i >= 0)
+		argv_bk[i] = savestring(argv[i], strlen(argv[i]));
+	argv_bk[argc] = (char *)NULL;
+
+	return EXIT_SUCCESS;
+}
+
+int
+init_workspaces(void)
+{
+	ws = (struct ws_t *)xnmalloc(MAX_WS, sizeof(struct ws_t));
+	int i = MAX_WS;
+	while (--i >= 0)
+		ws[i].path = (char *)NULL;
+
+	return EXIT_SUCCESS;
+}
+
+int
+get_home(void)
+{
+	if (access(user.home, W_OK) == -1) {
+		/* If no user's home, or if it's not writable, there won't be
+		 * any config nor trash directory. These flags are used to
+		 * prevent functions from trying to access any of these
+		 * directories */
+		home_ok = config_ok = trash_ok = 0;
+		/* Print message: trash, bookmarks, command logs, commands
+		 * history and program messages won't be stored */
+		_err('e', PRINT_PROMPT, _("%s: Cannot access the home directory. "
+				  "Trash, bookmarks, commands logs, and commands history are "
+				  "disabled. Program messages and selected files won't be "
+				  "persistent. Using default options\n"), PROGRAM_NAME);
+	} else {
+		user_home_len = strlen(user.home);
+	}
+
+	return EXIT_SUCCESS;
+}
+
+int
+init_history(void)
+{
+	/* Limit the log files size */
+	check_file_size(LOG_FILE, max_log);
+	check_file_size(MSG_LOG_FILE, max_log);
+
+	/* Get history */
+	struct stat attr;
+	if (stat(HIST_FILE, &attr) == 0 && attr.st_size != 0) {
+		/* If the size condition is not included, and in case of a zero
+		 * size file, read_history() produces malloc errors */
+		/* Recover history from the history file */
+		read_history(HIST_FILE); /* This line adds more leaks to
+																readline */
+		/* Limit the size of the history file to max_hist lines */
+		history_truncate_file(HIST_FILE, max_hist);
+	} else {
+	/* If the history file doesn't exist, create it */
+		FILE *hist_fp = fopen(HIST_FILE, "w+");
+
+		if (!hist_fp) {
+			_err('w', PRINT_PROMPT, "%s: fopen: '%s': %s\n",
+			    PROGRAM_NAME, HIST_FILE, strerror(errno));
+		} else {
+			/* To avoid malloc errors in read_history(), do not
+			 * create an empty file */
+			fputs("edit\n", hist_fp);
+			/* There is no need to run read_history() here, since
+			 * the history file is still empty */
+			fclose(hist_fp);
+		}
+	}
+
+	return EXIT_SUCCESS;
+}
+
+int
+set_start_path(void)
+{
+	if (cur_ws == UNSET)
+		cur_ws = DEF_CUR_WS;
+
+	if (cur_ws > MAX_WS - 1) {
+		cur_ws = DEF_CUR_WS;
+		_err('w', PRINT_PROMPT, _("%s: %zu: Invalid workspace."
+			"\nFalling back to workspace %zu\n"), PROGRAM_NAME,
+		    cur_ws, cur_ws + 1);
+	}
+
+	/* If path was not set (neither in the config file nor via command
+	 * line nor via the RestoreLastPath option), set the default (CWD),
+	 * and if CWD is not set, use the user's home directory, and if the
+	 * home cannot be found either, try the root directory, and if
+	 * there's no access to the root dir either, exit.
+	 * Bear in mind that if you launch CliFM through a terminal emulator,
+	 * say xterm (xterm -e clifm), xterm will run a shell, say bash, and
+	 * the shell will read its config file. Now, if this config file
+	 * changes the CWD, this will be the CWD for CliFM */
+	if (!ws[cur_ws].path) {
+		char cwd[PATH_MAX] = "";
+
+		getcwd(cwd, sizeof(cwd));
+
+		if (!*cwd || strlen(cwd) == 0) {
+			if (user_home) {
+				ws[cur_ws].path = savestring(user_home, strlen(user_home));
+			} else {
+				if (access("/", R_OK | X_OK) == -1) {
+					fprintf(stderr, "%s: /: %s\n", PROGRAM_NAME,
+					    strerror(errno));
+					exit(EXIT_FAILURE);
+				} else {
+					ws[cur_ws].path = savestring("/\0", 2);
+				}
+			}
+		} else {
+			ws[cur_ws].path = savestring(cwd, strlen(cwd));
+		}
+	}
+
+	/* Make path the CWD */
+	/* If chdir(path) fails, set path to cwd, list files and print the
+	 * error message. If no access to CWD either, exit */
+	if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
+
+		_err('e', PRINT_PROMPT, "%s: chdir: '%s': %s\n", PROGRAM_NAME,
+		    ws[cur_ws].path, strerror(errno));
+
+		char cwd[PATH_MAX] = "";
+
+		if (getcwd(cwd, sizeof(cwd)) == NULL) {
+
+			_err(0, NOPRINT_PROMPT, _("%s: Fatal error! Failed "
+					"retrieving current working directory\n"), PROGRAM_NAME);
+
+			exit(EXIT_FAILURE);
+		}
+
+		if (ws[cur_ws].path)
+			free(ws[cur_ws].path);
+
+		ws[cur_ws].path = savestring(cwd, strlen(cwd));
+	}
+
+	return EXIT_SUCCESS;
+}
 
 /* Get the system data directory (usually /usr/share) */
 void

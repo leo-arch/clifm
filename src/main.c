@@ -250,59 +250,60 @@ size_t *ext_colors_len = (size_t *)NULL;
 /* This is not a comprehensive list of commands. It only lists
  * commands long version for TAB completion */
 const char *INTERNAL_CMDS[] = {
-	"dup",
-	"new",
+
+    "actions",
     "alias",
-    "open",
-    "prop",
+    "auto-open",
+    "autocd",
     "back",
+    "bookmarks",
+    "colors",
+    "colorschemes",
+    "columns",
+    "commands",
+    "desel",
+	"dup",
+    "edit",
+    "exit",
+    "export",
+    "filter",
+    "folders-first",
     "forth",
+    "help",
+    "hidden",
+    "history",
+    "icons",
+    "jump",
+    "keybinds",
+    "log",
+    "messages",
+    "mime",
+    "mountpoints",
     "move",
+	"new",
+    "open",
+    "opener",
+    "pager",
     "paste",
+    "path",
+    "pin",
+    "profile",
+    "prop",
+    "quit",
+    "refresh",
+    "reload",
     "sel",
     "selbox",
-    "desel",
-    "refresh",
-    "edit",
-    "history",
-    "hidden",
-    "path",
-    "help",
-    "commands",
-    "colors",
-    "version",
+    "shell",
+    "sort",
     "splash",
-    "folders-first",
-    "opener",
-    "exit",
-    "quit",
-    "pager",
+    "tips",
     "trash",
     "undel",
-    "messages",
-    "mountpoints",
-    "bookmarks",
-    "log",
-    "untrash",
     "unicode",
-    "profile",
-    "shell",
-    "mime",
-    "sort",
-    "tips",
-    "autocd",
-    "auto-open",
-    "actions",
-    "reload",
-    "export",
-    "keybinds",
-    "pin",
     "unpin",
-    "colorschemes",
-    "jump",
-    "icons",
-    "columns",
-    "filter",
+    "untrash",
+    "version",
     NULL};
 
 /* To store all the 39 color variables I use, with 46 bytes each, I need
@@ -369,15 +370,13 @@ main(int argc, char *argv[])
 	/* Though this program might perfectly work on other architectures,
 	 * I just didn't test anything beyond x86 and ARM */
 #if !defined __x86_64__ && !defined __i386__ && !defined __ARM_ARCH
-	fprintf(stderr, "Unsupported CPU architecture\n");
+	fprintf(stderr, "%s: Unsupported CPU architecture\n", PROGRAM_NAME);
 	exit(EXIT_FAILURE);
 #endif
 
-#if !defined(__linux__) && !defined(linux) && !defined(__linux) \
-&& !defined(__gnu_linux__) && !defined(__FreeBSD__) \
+#if !defined(__linux__) && !defined(__FreeBSD__) \
 && !defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__HAIKU__)
-	fprintf(stderr, _("%s: Unsupported operating system\n"),
-	    PROGRAM_NAME);
+	fprintf(stderr, _("%s: Unsupported operating system\n"), PROGRAM_NAME);
 	exit(EXIT_FAILURE);
 #endif
 
@@ -396,35 +395,14 @@ main(int argc, char *argv[])
 	 * in case the user edits the config file, in which case the program
 	 * must rerun init_config(), get_aliases(), get_prompt_cmds(), and
 	 * then external_arguments() */
-	argc_bk = argc;
-	argv_bk = (char **)xnmalloc((size_t)argc + 1, sizeof(char *));
+	backup_argv(argc, argv);
 
-	register int i = argc;
-
-	while (--i >= 0)
-		argv_bk[i] = savestring(argv[i], strlen(argv[i]));
-	argv_bk[argc] = (char *)NULL;
-
-	atexit(free_stuff); /* free_stuff does some cleaning */
+	/* free_stuff does some cleaning */
+	atexit(free_stuff);
 
 	/* Get user's home directory */
 	user = get_user();
-
-	if (access(user.home, W_OK) == -1) {
-		/* If no user's home, or if it's not writable, there won't be
-		 * any config nor trash directory. These flags are used to
-		 * prevent functions from trying to access any of these
-		 * directories */
-		home_ok = config_ok = trash_ok = 0;
-		/* Print message: trash, bookmarks, command logs, commands
-		 * history and program messages won't be stored */
-		_err('e', PRINT_PROMPT, _("%s: Cannot access the home directory. "
-				  "Trash, bookmarks, commands logs, and commands history are "
-				  "disabled. Program messages and selected files won't be "
-				  "persistent. Using default options\n"), PROGRAM_NAME);
-	} else {
-		user_home_len = strlen(user.home);
-	}
+	get_home();
 
 	if (geteuid() == 0) {
 		flags |= ROOT_USR;
@@ -445,15 +423,12 @@ main(int argc, char *argv[])
 	 * and get_cmd_path() */
 	path_n = (size_t)get_path_env();
 
+	init_workspaces();
+
 	/* Manage external arguments, but only if any: argc == 1 equates to
 	 * no argument, since this '1' is just the program invokation name.
 	 * External arguments will override initialization values
 	 * (init_config) */
-
-	ws = (struct ws_t *)xnmalloc(MAX_WS, sizeof(struct ws_t));
-	i = MAX_WS;
-	while (--i >= 0)
-		ws[i].path = (char *)NULL;
 
 	/* Set all external arguments flags to uninitialized state */
 	unset_xargs();
@@ -483,11 +458,7 @@ main(int argc, char *argv[])
 	get_path_programs();
 
 	/* Initialize gettext() for translations */
-	char locale_dir[PATH_MAX];
-	snprintf(locale_dir, PATH_MAX - 1, "%s/locale", DATA_DIR
-			? DATA_DIR : "/usr/share");
-	bindtextdomain(PNL, locale_dir);
-	textdomain(PNL);
+	init_gettext();
 
 	cschemes_n = get_colorschemes();
 	set_colors(usr_cscheme ? usr_cscheme : "default", 1);
@@ -504,74 +475,7 @@ main(int argc, char *argv[])
 		CLEAR;
 	}
 
-	/* Last path is overriden by the -p option in the command line */
-	if (restore_last_path)
-		get_last_path();
-
-	if (cur_ws == UNSET)
-		cur_ws = DEF_CUR_WS;
-
-	if (cur_ws > MAX_WS - 1) {
-		cur_ws = DEF_CUR_WS;
-		_err('w', PRINT_PROMPT, _("%s: %zu: Invalid workspace."
-			"\nFalling back to workspace %zu\n"), PROGRAM_NAME,
-		    cur_ws, cur_ws + 1);
-	}
-
-	/* If path was not set (neither in the config file nor via command
-	 * line nor via the RestoreLastPath option), set the default (CWD),
-	 * and if CWD is not set, use the user's home directory, and if the
-	 * home cannot be found either, try the root directory, and if
-	 * there's no access to the root dir either, exit.
-	 * Bear in mind that if you launch CliFM through a terminal emulator,
-	 * say xterm (xterm -e clifm), xterm will run a shell, say bash, and
-	 * the shell will read its config file. Now, if this config file
-	 * changes the CWD, this will be the CWD for CliFM */
-	if (!ws[cur_ws].path) {
-		char cwd[PATH_MAX] = "";
-
-		getcwd(cwd, sizeof(cwd));
-
-		if (!*cwd || strlen(cwd) == 0) {
-			if (user_home) {
-				ws[cur_ws].path = savestring(user_home, strlen(user_home));
-			} else {
-				if (access("/", R_OK | X_OK) == -1) {
-					fprintf(stderr, "%s: /: %s\n", PROGRAM_NAME,
-					    strerror(errno));
-					exit(EXIT_FAILURE);
-				} else {
-					ws[cur_ws].path = savestring("/\0", 2);
-				}
-			}
-		} else {
-			ws[cur_ws].path = savestring(cwd, strlen(cwd));
-		}
-	}
-
-	/* Make path the CWD */
-	/* If chdir(path) fails, set path to cwd, list files and print the
-	 * error message. If no access to CWD either, exit */
-	if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
-
-		_err('e', PRINT_PROMPT, "%s: chdir: '%s': %s\n", PROGRAM_NAME,
-		    ws[cur_ws].path, strerror(errno));
-
-		char cwd[PATH_MAX] = "";
-
-		if (getcwd(cwd, sizeof(cwd)) == NULL) {
-
-			_err(0, NOPRINT_PROMPT, _("%s: Fatal error! Failed "
-					"retrieving current working directory\n"), PROGRAM_NAME);
-
-			exit(EXIT_FAILURE);
-		}
-
-		if (ws[cur_ws].path)
-			free(ws[cur_ws].path);
-
-		ws[cur_ws].path = savestring(cwd, strlen(cwd));
-	}
+	set_start_path();
 
 	/* Set terminal window title */
 	if (flags & GUI) {
@@ -601,12 +505,6 @@ main(int argc, char *argv[])
 
 	initialize_readline();
 
-	/* Copy the list of quote chars to a global variable to be used
-	 * later by some of the program functions like split_str(),
-	 * my_rl_quote(), is_quote_char(), and my_rl_dequote() */
-	qc = savestring(rl_filename_quote_characters,
-	    strlen(rl_filename_quote_characters));
-
 	check_file_size(DIRHIST_FILE, max_dirhist);
 
 	/* Check whether we have a working shell */
@@ -634,40 +532,8 @@ main(int argc, char *argv[])
 	/* Initialize the shell */
 	init_shell();
 
-	if (config_ok) {
-
-		/* Limit the log files size */
-		check_file_size(LOG_FILE, max_log);
-		check_file_size(MSG_LOG_FILE, max_log);
-
-		/* Get history */
-		struct stat file_attrib;
-
-		if (stat(HIST_FILE, &file_attrib) == 0 && file_attrib.st_size != 0) {
-			/* If the size condition is not included, and in case of a zero
-			 * size file, read_history() produces malloc errors */
-			/* Recover history from the history file */
-			read_history(HIST_FILE); /* This line adds more leaks to
-																	readline */
-			/* Limit the size of the history file to max_hist lines */
-			history_truncate_file(HIST_FILE, max_hist);
-		} else {
-		/* If the history file doesn't exist, create it */
-			FILE *hist_fp = fopen(HIST_FILE, "w+");
-
-			if (!hist_fp) {
-				_err('w', PRINT_PROMPT, "%s: fopen: '%s': %s\n",
-				    PROGRAM_NAME, HIST_FILE, strerror(errno));
-			} else {
-				/* To avoid malloc errors in read_history(), do not
-				 * create an empty file */
-				fputs("edit\n", hist_fp);
-				/* There is no need to run read_history() here, since
-				 * the history file is still empty */
-				fclose(hist_fp);
-			}
-		}
-	}
+	if (config_ok)
+		init_history();
 
 	/* Store history into an array to be able to manipulate it */
 	get_history();
@@ -692,6 +558,7 @@ main(int argc, char *argv[])
 		 See https://brennan.io/2015/01/16/write-a-shell-in-c/
 		 */
 
+	int i;
 	/* 1) Infinite loop to keep the program running */
 	while (1) {
 

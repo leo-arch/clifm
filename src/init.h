@@ -44,6 +44,12 @@ void unset_xargs(void);
 void external_arguments(int argc, char **argv);
 char *get_date(void);
 void get_data_dir(void);
+int set_start_path(void);
+int init_history(void);
+int init_workspaces(void);
+int init_gettext(void);
+int get_home(void);
+int backup_argv(int argc, char **argv);
 /* pid_t get_own_pid(void); */
 struct user_t get_user(void);
 

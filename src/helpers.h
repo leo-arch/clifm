@@ -691,7 +691,8 @@ extern size_t
     cschemes_n,
     jump_n,
     path_progsn,
-    remotes_n;
+    remotes_n,
+    user_home_len;
 
 extern struct termios shell_tmodes;
 extern off_t total_sel_size;
@@ -752,7 +753,8 @@ extern char
     *TRASH_DIR,
     *TRASH_FILES_DIR,
     *TRASH_INFO_DIR,
-    *usr_cscheme;
+    *usr_cscheme,
+    *user_home;
 
 extern regex_t regex_exp;
 

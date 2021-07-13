@@ -112,6 +112,12 @@ initialize_readline(void)
 	/* Initialize the keyboard bindings function */
 	readline_kbinds();
 
+	/* Copy the list of quote chars to a global variable to be used
+	 * later by some of the program functions like split_str(),
+	 * my_rl_quote(), is_quote_char(), and my_rl_dequote() */
+	qc = savestring(rl_filename_quote_characters,
+	    strlen(rl_filename_quote_characters));
+
 	return EXIT_SUCCESS;
 }
 
