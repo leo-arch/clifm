@@ -394,6 +394,22 @@ load_keybinds(void)
 	return EXIT_SUCCESS;
 }
 
+int
+run_kb_cmd(char *cmd)
+{
+	if (!cmd || !*cmd)
+		return EXIT_FAILURE;
+
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	keybind_exec_cmd(cmd);
+	rl_reset_line_state();
+
+	return EXIT_SUCCESS;
+}
+
+/* Retrieve the key sequence associated to FUNCTION */
 char *
 find_key(char *function)
 {
@@ -457,14 +473,7 @@ keybind_exec_cmd(char *str)
 int
 rl_create_file(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd("n");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("n");
 }
 
 int
@@ -686,79 +695,37 @@ rl_hidden(int count, int key)
 int
 rl_open_config(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd("edit");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("edit");
 }
 
 int
 rl_open_keybinds(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd("kb edit");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("kb edit");
 }
 
 int
 rl_open_cscheme(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd("cs e");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("cs e");
 }
 
 int
 rl_open_bm_file(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd("bm edit");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("bm edit");
 }
 
 int
 rl_open_jump_db(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd("je");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("je");
 }
 
 int
 rl_open_mime(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd("mm edit");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("mm edit");
 }
 
 int
@@ -776,27 +743,13 @@ rl_mountpoints(int count, int key)
 int
 rl_select_all(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd("s ^");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("s ^");
 }
 
 int
 rl_deselect_all(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd("ds *");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("ds *");
 }
 
 int
@@ -816,14 +769,7 @@ rl_bookmarks(int count, int key)
 int
 rl_selbox(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd("ds");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("ds");
 }
 
 int
@@ -1117,79 +1063,37 @@ rl_next_profile(int count, int key)
 int
 rl_dirhist(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd("bh");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("bh");
 }
 
 int
 rl_archive_sel(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd("ac sel");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("ac sel");
 }
 
 int
 rl_new_instance(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd("x .");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("x .");
 }
 
 int
 rl_clear_msgs(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd("msg clear");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("msg clear");
 }
 
 int
 rl_trash_sel(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd("t sel");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("t sel");
 }
 
 int
 rl_untrash_all(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd("u *");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("u *");
 }
 
 int
@@ -1240,8 +1144,9 @@ int
 rl_kbinds_help(int count, int key)
 {
 	char cmd[PATH_MAX];
-	snprintf(cmd, PATH_MAX - 1, "export PAGER=\"less -p ^[0-9]+\\.[[:space:]]KEYBOARD[[:space:]]SHORTCUTS\"; man %s\n",
-			PNL);
+	snprintf(cmd, PATH_MAX - 1,
+		"export PAGER=\"less -p ^[0-9]+\\.[[:space:]]KEYBOARD[[:space:]]SHORTCUTS\"; man %s\n",
+		PNL);
 	if (launch_execle(cmd) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
@@ -1252,8 +1157,9 @@ int
 rl_cmds_help(int count, int key)
 {
 	char cmd[PATH_MAX];
-	snprintf(cmd, PATH_MAX - 1, "export PAGER=\"less -p ^[0-9]+\\.[[:space:]]COMMANDS\"; man %s\n",
-			PNL);
+	snprintf(cmd, PATH_MAX - 1,
+		"export PAGER=\"less -p ^[0-9]+\\.[[:space:]]COMMANDS\"; man %s\n",
+		PNL);
 	if (launch_execle(cmd) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
@@ -1289,103 +1195,47 @@ rl_pinned_dir(int count, int key)
 int
 rl_ws1(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd("ws 1");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("ws 1");
 }
 
 int
 rl_ws2(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd("ws 2");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("ws 2");
 }
 
 int
 rl_ws3(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd("ws 3");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("ws 3");
 }
 
 int
 rl_ws4(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd("ws 4");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("ws 4");
 }
 
 int
 rl_plugin1(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd("plugin1");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("plugin1");
 }
 
 int
 rl_plugin2(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd("plugin2");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("plugin2");
 }
 
 int
 rl_plugin3(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd("plugin3");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("plugin3");
 }
 
 int
 rl_plugin4(int count, int key)
 {
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd("plugin4");
-
-	rl_reset_line_state();
-
-	return EXIT_SUCCESS;
+	return run_kb_cmd("plugin4");
 }
