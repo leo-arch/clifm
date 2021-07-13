@@ -158,6 +158,10 @@ init_history(void)
 int
 set_start_path(void)
 {
+	/* Last path is overriden by positional parameters in the command line */
+	if (restore_last_path)
+		get_last_path();
+
 	if (cur_ws == UNSET)
 		cur_ws = DEF_CUR_WS;
 
