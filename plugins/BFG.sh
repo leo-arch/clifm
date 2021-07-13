@@ -281,9 +281,9 @@ handle_mime() {
 				fi
 			elif [ "$PYGMENTIZE_OK" = 1 ]; then
 				if [ "$COLORS" = 256 ]; then
-					pigmentize -f terminal256 "$entry" && exit 0
+					pygmentize -f terminal256 "$entry" && exit 0
 				else
-					pigmentize -f terminal "$entry" && exit 0
+					pygmentize -f terminal "$entry" && exit 0
 				fi
 			elif [ "$CAT_OK" = 1 ]; then
 				cat "$entry" && exit 0
