@@ -1,8 +1,9 @@
 
 			/*  ########################################
 			 *  #               CliFM                  #
-			 *  # The KISS/non-curses file manager #
+			 *  # 	The KISS/non-curses file manager   #
 			 *  ######################################## */
+
 /* GPL2+ License 
  * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
  * All rights reserved.
@@ -56,6 +57,8 @@
 #include "strings.h"
 #include "remotes.h"
 
+/* Globals */
+
 struct usrvar_t *usr_var = (struct usrvar_t *)NULL;
 struct actions_t *usr_actions = (struct actions_t *)NULL;
 struct ws_t *ws = (struct ws_t *)NULL;
@@ -67,12 +70,15 @@ struct remote_t *remotes = (struct remote_t *)NULL;
 
 /* pmsg holds the current program message type */
 enum prog_msg pmsg = nomsg;
-
 struct param xargs;
-
 unsigned short term_cols;
-
 int flags;
+struct termios shell_tmodes;
+off_t total_sel_size = 0;
+pid_t own_pid = 0;
+unsigned short term_cols = 0;
+regex_t regex_exp;
+size_t *ext_colors_len = (size_t *)NULL;
 
 short
     splash_screen = UNSET,
@@ -156,8 +162,6 @@ int
     jump_total_rank = 0,
     *eln_as_file = (int *)0;
 
-unsigned short term_cols = 0;
-
 size_t
     user_home_len = 0,
     args_n = 0,
@@ -179,10 +183,6 @@ size_t
     jump_n = 0,
     path_progsn = 0,
     remotes_n = 0;
-
-struct termios shell_tmodes;
-off_t total_sel_size = 0;
-pid_t own_pid = 0;
 
 char
     div_line_char = UNSET,
@@ -243,14 +243,9 @@ char
     *usr_cscheme = (char *)NULL,
     *user_home = (char *)NULL;
 
-regex_t regex_exp;
-
-size_t *ext_colors_len = (size_t *)NULL;
-
 /* This is not a comprehensive list of commands. It only lists
  * commands long version for TAB completion */
 const char *INTERNAL_CMDS[] = {
-
     "actions",
     "alias",
     "auto-open",
