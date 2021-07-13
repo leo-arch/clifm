@@ -400,7 +400,6 @@ main(int argc, char *argv[])
 	/* free_stuff does some cleaning */
 	atexit(free_stuff);
 
-	/* Get user's home directory */
 	user = get_user();
 	get_home();
 
@@ -425,14 +424,13 @@ main(int argc, char *argv[])
 
 	init_workspaces();
 
+	/* Set all external arguments flags to uninitialized state */
+	unset_xargs();
+
 	/* Manage external arguments, but only if any: argc == 1 equates to
 	 * no argument, since this '1' is just the program invokation name.
 	 * External arguments will override initialization values
 	 * (init_config) */
-
-	/* Set all external arguments flags to uninitialized state */
-	unset_xargs();
-
 	if (argc > 1)
 		external_arguments(argc, argv);
 	/* external_arguments is executed before init_config because, if
@@ -448,6 +446,7 @@ main(int argc, char *argv[])
 	 * per user basis */
 	init_config();
 	check_options();
+
 	set_sel_file();
 	create_tmp_files();
 	load_actions();
@@ -505,6 +504,7 @@ main(int argc, char *argv[])
 
 	initialize_readline();
 
+	/*Trim the directory history file if necessary */
 	check_file_size(DIRHIST_FILE, max_dirhist);
 
 	/* Check whether we have a working shell */
@@ -522,14 +522,12 @@ main(int argc, char *argv[])
 			trash_n = 0;
 	}
 
-	/* Get hostname */
 	if (gethostname(hostname, sizeof(hostname)) == -1) {
 		hostname[0] = '?';
 		hostname[1] = '\0';
 		_err('e', PRINT_PROMPT, _("%s: Error getting hostname\n"), PROGRAM_NAME);
 	}
 
-	/* Initialize the shell */
 	init_shell();
 
 	if (config_ok)
@@ -538,7 +536,7 @@ main(int argc, char *argv[])
 	/* Store history into an array to be able to manipulate it */
 	get_history();
 
-	/* Check if the 'file' command is available */
+	/* Check if the 'file' command is available: we need it for Lira */
 	if (!opener)
 		file_cmd_check();
 
