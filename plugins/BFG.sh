@@ -507,7 +507,11 @@ main() {
 		real_path="$(realpath "$entry")"
 		printf "%s \033[1;36m->\033[0m " "$entry"
 		if [ -e "$real_path" ]; then
-			ls -d --color=always "$real_path" && exit 0
+			if [ "$POSIX_LS" = 0 ]; then
+				ls -d --color=always "$real_path" && exit 0
+			else
+				ls -d "$real_path" && exit 0
+			fi
 		else
 			printf "%s\n\033[1;37mBroken link\033[0m" "$real_path" && exit 0
 		fi
@@ -532,7 +536,11 @@ main() {
 			elif [ "$DIR_CMD" = "exa" ]; then
 				exa -G --group-directories-first --color=always "$path" && exit 0
 			else
-				ls -p --color=always "${path}" && exit 0
+				if [ "$POSIX_LS" = 0 ]; then
+					ls -p --color=always "$path" && exit 0
+				else
+					ls -p "$path" && exit 0
+				fi
 			fi
 		fi
 		exit 1

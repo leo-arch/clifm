@@ -182,8 +182,10 @@ main() {
 			LS)
 				if [ "${value:-posix}" = posix ]; then
 					export ls_cmd="ls -Ap"
+					export POSIX_LS=1
 				else
 					export ls_cmd="ls -Ap --group-directories-first --color=always --indicator-style=none"
+					export POSIX_LS=0
 				fi ;;
 			BFG_FILE)
 				if [ -z "$value" ]; then
