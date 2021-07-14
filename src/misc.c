@@ -451,10 +451,18 @@ alias_import(char *file)
 			return EXIT_FAILURE;
 		}
 
-		realpath(file_exp, rfile);
+		if (realpath(file_exp, rfile) == NULL) {
+			free(file_exp);
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_exp,
+					strerror(errno));
+			return EXIT_FAILURE;
+		}
 		free(file_exp);
 	} else {
-		realpath(file, rfile);
+		if (realpath(file, rfile) == NULL) {
+			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+			return EXIT_FAILURE;
+		}
 	}
 
 	if (rfile[0] == '\0') {

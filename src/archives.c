@@ -378,7 +378,11 @@ check_iso(char *file)
 
 		if (file_fp) {
 			char line[255] = "";
-			fgets(line, (int)sizeof(line), file_fp);
+			if (fgets(line, (int)sizeof(line), file_fp) == NULL) {
+				fclose(file_fp);
+				unlink(ISO_TMP_FILE);
+				return EXIT_FAILURE;
+			}
 			char *ret = strstr(line, "ISO 9660");
 
 			if (ret)
@@ -486,7 +490,11 @@ is_compressed(char *file, int test_iso)
 
 		if (file_fp) {
 			char line[255];
-			fgets(line, (int)sizeof(line), file_fp);
+			if (fgets(line, (int)sizeof(line), file_fp) == NULL) {
+				fclose(file_fp);
+				unlink(ARCHIVER_TMP_FILE);
+				return EXIT_FAILURE;
+			}
 			char *ret = strstr(line, "archive");
 
 			if (ret)

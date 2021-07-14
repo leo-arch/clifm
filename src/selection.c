@@ -218,8 +218,13 @@ sel_function(char **args)
 
 		strcpy(tmp_dir, sel_path);
 
-		if (*sel_path == '.')
-			realpath(sel_path, tmp_dir);
+		if (*sel_path == '.') {
+			if (realpath(sel_path, tmp_dir) == NULL) {
+				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, sel_path,
+						strerror(errno));
+				return EXIT_FAILURE;
+			}
+		}
 
 		if (*sel_path == '~') {
 			char *exp_path = tilde_expand(sel_path);

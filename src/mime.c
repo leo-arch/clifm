@@ -272,7 +272,11 @@ get_mime(char *file)
 
 		if (file_fp) {
 			char line[255] = "";
-			fgets(line, (int)sizeof(line), file_fp);
+			if (fgets(line, (int)sizeof(line), file_fp) == NULL) {
+				fclose(file_fp);
+				unlink(MIME_TMP_FILE);
+				return (char *)NULL;
+			}
 			char *tmp = strrchr(line, ' ');
 
 			if (tmp) {

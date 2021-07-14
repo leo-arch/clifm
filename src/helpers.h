@@ -100,7 +100,7 @@ void *__dso_handle;
 #define PROGRAM_NAME "CliFM"
 #define PNL "clifm" /* Program name lowercase */
 #define PROG_DESC "The KISS/non-curses file manager"
-#define CLEAR if (write(STDOUT_FILENO,"\x1b[H\x1b[2J",7) <= 0) {}
+#define CLEAR if (write(STDOUT_FILENO, "\033c", 2) <= 0) {}
 #define VERSION "1.1"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"

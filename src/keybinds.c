@@ -727,7 +727,7 @@ rl_clear_line(int count, int key)
 
 	/* 1) Clear text typed so far (\x1b[2K) and move cursor to the
 	 * beginning of the current line (\r) */
-	write(STDOUT_FILENO, "\x1b[2K\r", 5);
+	if (write(STDOUT_FILENO, "\x1b[2K\r", 5) == -1) {}
 
 	/* 2) Clear the readline buffer */
 	rl_delete_text(0, rl_end);

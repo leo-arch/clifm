@@ -184,7 +184,7 @@ set_start_path(void)
 	if (!ws[cur_ws].path) {
 		char cwd[PATH_MAX] = "";
 
-		getcwd(cwd, sizeof(cwd));
+		if (getcwd(cwd, sizeof(cwd)) == NULL) {}
 
 		if (!*cwd || strlen(cwd) == 0) {
 			if (user_home) {
@@ -1831,7 +1831,11 @@ load_pinned_dir(void)
 	}
 
 	char line[PATH_MAX] = "";
-	fgets(line, (int)sizeof(line), fp);
+	if (fgets(line, (int)sizeof(line), fp) == NULL) {
+		free(pin_file);
+		fclose(fp);
+		return EXIT_FAILURE;
+	}
 
 	if (!*line || !strchr(line, '/')) {
 		free(pin_file);
@@ -1860,7 +1864,7 @@ void
 get_path_programs(void)
 {
 	char cwd[PATH_MAX] = "";
-	getcwd(cwd, sizeof(cwd));
+	if (getcwd(cwd, sizeof(cwd)) == NULL) {}
 
 	struct dirent ***commands_bin = (struct dirent ***)xnmalloc(
 	    path_n, sizeof(struct dirent));

@@ -207,7 +207,11 @@ dir_size(char *dir)
 			 * file size and could only take a few bytes, so that 32
 			 * bytes is more than enough */
 			char line[32] = "";
-			fgets(line, (int)sizeof(line), du_fp);
+			if (fgets(line, (int)sizeof(line), du_fp) == NULL) {
+				fclose(du_fp);
+				unlink(DU_TMP_FILE);
+				return -1;
+			}
 
 			char *file_size = strbfr(line, '\t');
 

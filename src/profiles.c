@@ -351,7 +351,7 @@ profile_set(const char *prof)
 
 	if (!ws[cur_ws].path) {
 		char cwd[PATH_MAX] = "";
-		getcwd(cwd, sizeof(cwd));
+		if (getcwd(cwd, sizeof(cwd)) == NULL) {}
 		if (!*cwd) {
 			fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
 			exit(EXIT_FAILURE);
