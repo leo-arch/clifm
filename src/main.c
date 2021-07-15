@@ -118,6 +118,7 @@ short
     case_sens_dirjump = UNSET,
     case_sens_path_comp = UNSET,
 	print_selfiles = UNSET,
+    suggestions = UNSET,
 
     no_log = 0,
     internal_cmd = 0,
@@ -241,6 +242,7 @@ char
     *TRASH_FILES_DIR = (char *)NULL,
     *TRASH_INFO_DIR = (char *)NULL,
     *usr_cscheme = (char *)NULL,
+	*suggestion_buf = (char *)NULL,
     *user_home = (char *)NULL;
 
 /* This is not a comprehensive list of commands. It only lists
@@ -340,6 +342,7 @@ char di_c[MAX_COLOR], /* Directory */
     wc_c[MAX_COLOR], /* Welcome message color */
     dh_c[MAX_COLOR], /* Dirhist index color */
     dl_c[MAX_COLOR], /* Dividing line index color */
+    as_c[MAX_COLOR], /* Auto-suggestions color */
 
     /* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */

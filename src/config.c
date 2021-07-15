@@ -813,6 +813,9 @@ CdOnQuit=%s\n\n"
 Autocd=%s\n\
 AutoOpen=%s\n\n"
 
+	    "# If set to true, enable ZSH-like auto-suggestions.\n\
+AutoSuggestions=%s\n\n"
+
 	    "# If set to true, expand bookmark names into the corresponding bookmark\n\
 # path: if the bookmark is \"name=/path\", \"name\" will be interpreted\n\
 # as /path. TAB completion is also available for bookmark names.\n\
@@ -841,6 +844,7 @@ LightMode=%s\n\n",
 		DEF_CD_ON_QUIT == 1 ? "true" : "false",
 		DEF_AUTOCD == 1 ? "true" : "false",
 		DEF_AUTO_OPEN == 1 ? "true" : "false",
+		DEF_SUGGESTIONS == 1 ? "true" : "false",
 		DEF_EXPAND_BOOKMARKS == 1 ? "true" : "false",
 		DEF_LIGHT_MODE == 1 ? "true" : "false"
 		);
@@ -1415,7 +1419,7 @@ read_config(void)
 		else if (xargs.case_sens_path_comp == UNSET && *line == 'C'
 		&& strncmp(line, "CaseSensitivePathComp=", 22) == 0) {
 
-			char opt_str[MAX_BOOL] = ""; /* false (5) + 1 */
+			char opt_str[MAX_BOOL] = "";
 			ret = sscanf(line, "CaseSensitivePathComp=%5s\n", opt_str);
 
 			if (ret == -1)
@@ -1428,10 +1432,26 @@ read_config(void)
 				case_sens_path_comp = 0;
 		}
 
+		else if (xargs.suggestions == UNSET && *line == 'A'
+		&& strncmp(line, "AutoSuggestions=", 16) == 0) {
+
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "AutoSuggestions=%5s\n", opt_str);
+
+			if (ret == -1)
+				continue;
+
+			if (strncmp(opt_str, "true", 4) == 0)
+				suggestions = 1;
+
+			else if (strncmp(opt_str, "false", 5) == 0)
+				suggestions = 0;
+		}
+
 		else if (xargs.printsel == UNSET && *line == 'P'
 		&& strncmp(line, "PrintSelfiles=", 14) == 0) {
 
-			char opt_str[MAX_BOOL] = ""; /* false (5) + 1 */
+			char opt_str[MAX_BOOL] = "";
 			ret = sscanf(line, "PrintSelfiles=%5s\n", opt_str);
 
 			if (ret == -1)
@@ -2155,6 +2175,9 @@ reload_config(void)
 	free(REMOTES_FILE);
 	TMP_DIR = COLORS_DIR = SEL_FILE = REMOTES_FILE = (char *)NULL;
 
+	free(suggestion_buf);
+	suggestion_buf = (char *)NULL;
+
 	free_remotes(0);
 
 	if (filter) {
@@ -2190,7 +2213,7 @@ reload_config(void)
 	light_mode = classify = cd_on_quit = columned = tr_as_rm = UNSET;
 	no_eln = min_name_trim = case_sens_dirjump = case_sens_path_comp = UNSET;
 	min_jump_rank = max_jump_total_rank = print_selfiles = UNSET;
-	max_printselfiles = UNSET;
+	max_printselfiles = suggestions = UNSET;
 
 	shell_terminal = no_log = internal_cmd = recur_perm_error_flag = 0;
 	is_sel = sel_is_last = print_msg = kbind_busy = dequoted = 0;
@@ -2200,7 +2223,6 @@ reload_config(void)
 	recur_perm_error_flag = is_sel = sel_is_last = print_msg = 0;
 
 	pmsg = nomsg;
-
 	home_ok = config_ok = trash_ok = selfile_ok = 1;
 
 	/* Set up config files and options */
@@ -2208,18 +2230,16 @@ reload_config(void)
 
 	/* If some option was not set, set it to the default value*/
 	check_options();
-
 	set_sel_file();
-
 	create_tmp_files();
-
 	set_colors(usr_cscheme ? usr_cscheme : "default", 1);
-
 	free(usr_cscheme);
 	usr_cscheme = (char *)NULL;
 
 	/* If some option was set via command line, keep that value
 	 * for any profile */
+	if (xargs.suggestions != UNSET)
+		suggestions = xargs.suggestions;
 	if (xargs.printsel != UNSET)
 		print_selfiles = xargs.printsel;
 	if (xargs.case_sens_dirjump != UNSET)
@@ -2328,9 +2348,7 @@ reload_config(void)
 	aliases_n = prompt_cmds_n = dirhist_total_index = 0;
 
 	get_aliases();
-
 	get_prompt_cmds();
-
 	load_dirhist();
 	load_jumpdb();
 	load_remotes();

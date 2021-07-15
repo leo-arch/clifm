@@ -154,6 +154,9 @@ readline_kbinds(void)
 			/* ##############################
 			 * #        KEYBINDINGS         #
 			 * ##############################*/
+
+	rl_bind_keyseq("\x1b[C", rl_accept_suggestion);
+
 	if (KBINDS_FILE) {
 		/* Help */
 		rl_bind_keyseq(find_key("show-manpage"), rl_manpage);
@@ -471,6 +474,33 @@ int
 rl_create_file(int count, int key)
 {
 	return run_kb_cmd("n");
+}
+
+int
+rl_accept_suggestion(int count, int key)
+{
+	if (kbind_busy) {
+		/* If not at the end of the typed string, just move the cursor
+		 * forward one column */
+		if (rl_point < rl_end)
+			rl_point++;
+		return EXIT_SUCCESS;
+	}
+
+	/* Only accept the current hint if the cursor is at the end of the line
+	 * typed so far */
+	if (rl_point == rl_end && suggestion_buf) {
+		rl_replace_line(suggestion_buf, 1);
+		/* Move the cursor to the end of the line */
+		rl_point = rl_end;
+		free(suggestion_buf);
+		suggestion_buf = (char *)NULL;
+	} else if (rl_point < rl_end) {
+		/* Just move the cursor forward one char */
+		rl_point++;
+	}
+
+	return EXIT_SUCCESS;
 }
 
 int

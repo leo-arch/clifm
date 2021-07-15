@@ -1581,7 +1581,7 @@ unset_xargs(void)
 	xargs.no_dirjump = xargs.icons = xargs.no_colors = UNSET;
 	xargs.icons_use_file_color = xargs.no_columns = UNSET;
 	xargs.case_sens_dirjump = xargs.case_sens_path_comp = UNSET;
-	xargs.cwd_in_title = xargs.printsel = UNSET;
+	xargs.cwd_in_title = xargs.printsel = xargs.suggestions = UNSET;
 }
 
 /* Keep track of attributes of the shell. Make sure the shell is running
@@ -2135,6 +2135,13 @@ check_options(void)
 			no_eln = DEF_NOELN;
 		else
 			no_eln = xargs.noeln;
+	}
+
+	if (suggestions == UNSET) {
+		if (xargs.suggestions == UNSET)
+			suggestions = DEF_SUGGESTIONS;
+		else
+			suggestions = xargs.suggestions;
 	}
 
 	if (print_selfiles == UNSET) {

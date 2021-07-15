@@ -178,7 +178,7 @@ ow=34;42:st=37;44:ex=01;32:ee=00;32:no=00;31;47:uf=34;47:"
 
 #define DEF_IFACE_COLORS "el=01;33:mi=01;36:dl=01;34:tx=00;37:df=00;37:\
 dc=00;37:wc=01;36:dh=00;36:li=01;32:si=01;34:ti=01;33:em=01;31:wm=01;33:\
-nm=01;32:bm=01;36:"
+nm=01;32:bm=01;36:as=02;35:"
 
 #define DEF_EXT_COLORS "*.tar=01;31:*.tgz=01;31:*.arc=01;31:\
 *.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:\
@@ -237,6 +237,7 @@ nm=01;32:bm=01;36:"
 #define DEF_DC_C "\x1b[00;37m"
 #define DEF_WC_C "\x1b[01;36m"
 #define DEF_DH_C "\x1b[00;36m"
+#define DEF_AS_C "\x1b[02;35m"
 
 #define DEF_TX_C "\001\x1b[00;37m\002"
 #define DEF_LI_C "\001\x1b[01;32m\002"
@@ -303,12 +304,14 @@ nm=01;32:bm=01;36:"
 #define DEF_MAX_JUMP_TOTAL_RANK 100000
 #define DEF_MAX_LOG 500
 #define DEF_MAX_PATH 40
+#define DEF_MAXPRINTSEL 0
 #define DEF_MIN_JUMP_RANK 10
 #define DEF_MIN_NAME_TRIM 20
 #define DEF_MV_CMD MV_MV
 #define DEF_NOELN 0
 #define DEF_ONLY_DIRS 0
 #define DEF_PAGER 0
+#define DEF_PRINTSEL 0
 #define DEF_RESTORE_LAST_PATH 1
 #define DEF_RL_EDIT_MODE 1
 #define DEF_SHARE_SELBOX 0
@@ -317,12 +320,11 @@ nm=01;32:bm=01;36:"
 #define DEF_SORT SNAME
 #define DEF_SORT_REVERSE 0
 #define DEF_SPLASH_SCREEN 0
+#define DEF_SUGGESTIONS 0
 #define DEF_TIPS 1
 #define DEF_TRASRM 0
 #define DEF_UNICODE 1
 #define DEF_WELCOME_MESSAGE 1
-#define DEF_PRINTSEL 0
-#define DEF_MAXPRINTSEL 0
 
 #define MAX_WS 8
 
@@ -545,6 +547,7 @@ struct param {
 	int case_sens_path_comp;
 	int cwd_in_title;
 	int printsel;
+	int suggestions;
 };
 
 extern struct param xargs;
@@ -641,6 +644,7 @@ extern short
     switch_cscheme,
     icons,
     copy_n_rename,
+    suggestions,
 
     home_ok,
     config_ok,
@@ -753,7 +757,8 @@ extern char
     *TRASH_FILES_DIR,
     *TRASH_INFO_DIR,
     *usr_cscheme,
-    *user_home;
+    *user_home,
+    *suggestion_buf;
 
 extern regex_t regex_exp;
 
@@ -802,6 +807,7 @@ extern char di_c[MAX_COLOR], /* Directory */
     wc_c[MAX_COLOR], /* Welcome message color */
     dh_c[MAX_COLOR], /* Dirhist index color */
     dl_c[MAX_COLOR], /* Dividing line index color */
+	as_c[MAX_COLOR], /* Auto-suggestions */
 
     /* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */

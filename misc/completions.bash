@@ -104,6 +104,7 @@ _clifm ()
         --rl-vi-mode
         --share-selbox
         --sort-reverse
+		--suggestions
 		--trash-as-rm
     )
 

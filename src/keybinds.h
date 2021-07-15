@@ -86,3 +86,4 @@ int rl_plugin1(int count, int key);
 int rl_plugin2(int count, int key);
 int rl_plugin3(int count, int key);
 int rl_plugin4(int count, int key);
+int rl_accept_suggestion(int count, int key);

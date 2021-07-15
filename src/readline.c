@@ -35,6 +35,8 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
+#include <errno.h>
+
 #include "aux.h"
 #include "checks.h"
 #include "keybinds.h"
@@ -101,6 +103,9 @@ initialize_readline(void)
 	 * https://thoughtbot.com/blog/tab-completion-in-gnu-readline*/
 	rl_char_is_quoted_p = quote_detector;
 
+	if (suggestions)
+		rl_getc_function = my_rl_getc;
+
 	/* This function is executed inmediately before path completion. So,
 	 * if the string to be completed is, for instance, "user\ file" (see
 	 * the above comment), this function should return the dequoted
@@ -119,6 +124,183 @@ initialize_readline(void)
 	    strlen(rl_filename_quote_characters));
 
 	return EXIT_SUCCESS;
+}
+
+/* Print the hint (STR), and move the cursor back to the original
+ * position */
+void
+print_suggestion(char *str, size_t buflen)
+{
+	free(suggestion_buf);
+	suggestion_buf = xnmalloc(strlen(str) + 1, sizeof(char));
+	strcpy(suggestion_buf, str);
+	printf("%s%s\x1b[39;49m%s", as_c, str + buflen, df_c);
+	printf("\x1b[%zuD", strlen(str + buflen));
+}
+
+/* Check if some hint is available. Return zero if true and one on error
+ * If true, the hint will be printed by print_hint() */
+int
+rl_suggestions(char c)
+{
+	char *tmp_buf = (char *)NULL;
+	if (rl_point != rl_end)
+		goto FAIL;
+
+	/* Append C (last char typed) to current readline buffer to
+	 * correctly find matches. At this point, readline didn't 
+	 * append this char yet */
+	size_t buflen = strlen(rl_line_buffer);
+	tmp_buf = (char *)xnmalloc(buflen + 2, sizeof(char));
+	sprintf(tmp_buf, "%s%c", rl_line_buffer, c);
+	int i;
+	int printed = 0;
+
+	/* Check command history */
+	i = current_hist_n;
+	while (--i >= 0) {
+		if (!history[i] || *tmp_buf != *history[i])
+			continue;
+		if (buflen && strncmp(tmp_buf, history[i], buflen + 1) == 0) {
+			print_suggestion(history[i], buflen);
+			printed = 1;
+			break;
+		}
+	}
+
+	if (printed)
+		goto SUCCESS;
+
+	/* Check file names in CWD */
+	i = files;
+	while (--i >= 0) {
+		if (!file_info[i].name || *tmp_buf != *file_info[i].name)
+			continue;
+		if (buflen && strncmp(tmp_buf, file_info[i].name, buflen + 1) == 0
+		&& file_info[i].len > buflen) {
+			print_suggestion(file_info[i].name, buflen);
+			printed = 1;
+			break;
+		}
+	}
+
+	if (printed)
+		goto SUCCESS;
+
+	/* Check commands in PATH and CliFM internals */
+	i = path_progsn;
+	while (--i >= 0) {
+		if (!bin_commands[i] || *tmp_buf != *bin_commands[i])
+			continue;
+		if (buflen && strncmp(tmp_buf, bin_commands[i], buflen + 1) == 0
+		&& strlen(bin_commands[i]) > buflen) {
+			print_suggestion(bin_commands[i], buflen);
+			printed = 1;
+			break;
+		}
+	}
+
+	if (printed)
+		goto SUCCESS;
+
+	if (!autocd)
+		goto FAIL;
+
+	/* Check jump database */
+/*	char *dir = strchr(tmp_buf, '/');
+	if (!dir)
+		return EXIT_FAILURE;
+
+	i = jump_n;
+	while (--i >= 0) {
+		if (!jump_db[i].path || *tmp_buf != *jump_db[i].path)
+			continue;
+		if (buflen && strncmp(tmp_buf, jump_db[i].path, buflen + 1) == 0
+		&& strlen(jump_db[i].path) > buflen) {
+			print_hint(jump_db[i].path, buflen);
+			printed = 1;
+			break;
+		}
+	}
+
+	if (printed) {
+		free(tmp_buf);
+		return EXIT_SUCCESS;
+	*/
+
+SUCCESS:
+	free(tmp_buf);
+	return EXIT_SUCCESS;
+
+FAIL:
+	free(tmp_buf);
+	return EXIT_FAILURE;
+}
+
+/* This function is automatically called by readline() to handle input */
+int
+my_rl_getc(FILE *stream)
+{
+	int result;
+	unsigned char c;
+
+#if defined(__GO32__)
+	if (isatty(0))
+		return (getkey() & 0x7F);
+#endif /* __GO32__ */
+
+	while(1) {
+		result = read(fileno(stream), &c, sizeof(unsigned char));
+		if (result == sizeof(unsigned char)) {
+			if (!rl_suggestions(c))
+				/* Forward delete line starting from cursor: remove
+				 * previous hint */
+				if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
+			return (c);
+		}
+
+		/* If zero characters are returned, then the file that we are
+		reading from is empty!  Return EOF in that case. */
+		if (result == 0)
+			return (EOF);
+
+#if defined(EWOULDBLOCK)
+		if (errno == EWOULDBLOCK) {
+			int xflags;
+
+			if ((xflags = fcntl(fileno(stream), F_GETFL, 0)) < 0)
+				return (EOF);
+			if (xflags & O_NDELAY) {
+				xflags &= ~O_NDELAY;
+				fcntl(fileno(stream), F_SETFL, flags);
+				continue;
+			}
+			continue;
+		}
+#endif /* EWOULDBLOCK */
+
+#if defined(_POSIX_VERSION) && defined(EAGAIN) && defined(O_NONBLOCK)
+		if (errno == EAGAIN) {
+			int xflags;
+
+			if ((xflags = fcntl(fileno(stream), F_GETFL, 0)) < 0)
+				return (EOF);
+			if (xflags & O_NONBLOCK) {
+				xflags &= ~O_NONBLOCK;
+				fcntl(fileno(stream), F_SETFL, flags);
+				continue;
+			}
+		}
+#endif /* _POSIX_VERSION && EAGAIN && O_NONBLOCK */
+
+#if !defined(__GO32__)
+      /* If the error that we received was SIGINT, then try again,
+	 this is simply an interrupted system call to read ().
+	 Otherwise, some error ocurred, also signifying EOF. */
+		if (errno != EINTR)
+			return (EOF);
+#endif /* !__GO32__ */
+	}
 }
 
 /* Simply check a single chartacter (c) against the quoting characters
@@ -1025,6 +1207,28 @@ sort_name_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
+/* Generate entries from the jump database (not using the j function)*/
+/*char *
+jump_gen(const char *text, int state)
+{
+	static int i;
+	static size_t len;
+	char *name;
+
+	if (!state) {
+		i = 0;
+		len = strlen(text);
+	}
+
+	while ((name = jump_db[i++].path) != NULL) {
+		if (case_sens_path_comp ? strncmp(name, text, len) == 0
+		: strncasecmp(name, text, len) == 0)
+			return strdup(name);
+	}
+
+	return (char *)NULL;
+} */
+
 char **
 my_rl_completion(const char *text, int start, int end)
 {
@@ -1053,9 +1257,13 @@ my_rl_completion(const char *text, int start, int end)
 					matches = rl_completion_matches(text, &filenames_gen_eln);
 			}
 
-			if (!matches && *text != '/') {
+			/* Compĺete with files in CWD */
+			if (!matches && *text != '/')
 				matches = rl_completion_matches(text, &filenames_gen_text);
-			}
+
+			/* Complete with entries in the jump database */
+/*			if (autocd && !matches)
+				matches = rl_completion_matches(text, &jump_gen); */
 		}
 
 		/* Bookmarks completion */

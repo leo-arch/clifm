@@ -1061,6 +1061,8 @@ free_stuff(void)
 
 	free_remotes(1);
 
+	free(suggestion_buf);
+
 	if (STDIN_TMP_DIR) {
 		char *rm_cmd[] = {"rm", "-rd", "--", STDIN_TMP_DIR, NULL};
 		launch_execve(rm_cmd, FOREGROUND, E_NOFLAG);
@@ -1651,6 +1653,7 @@ help_function(void)
 \n              different profiles\
 \n     --sort-reverse\t\t sort in reverse order, for example: z-a \
 \n              instead of a-z, which is the default order)\
+\n     --suggestions\t\t enable ZSH-like auto-suggestions\
 \n     --trash-as-rm\t\t the 'r' command executes 'trash' instead of \
 				'rm' to prevent accidental deletions\n",
 	    PROGRAM_NAME, PROGRAM_NAME);

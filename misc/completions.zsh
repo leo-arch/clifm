@@ -72,6 +72,7 @@ args=(
 	'--rl-vi-mode[set readline to vi editing mode (defaults to emacs editing mode)]'
 	'--share-selbox[make the Selection Box common to different profiles]'
 	'--sort-reverse[sort in reverse order]'
+	'--suggestions[enable ZSH-like auto-suggestions]'
 	'--trash-as-rm[the 'r' command executes 'trash' instead of 'rm']'
 	'*:filename:_files'
 )

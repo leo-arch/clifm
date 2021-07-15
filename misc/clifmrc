@@ -121,6 +121,9 @@ CdOnQuit=false
 Autocd=true
 AutoOpen=true
 
+# If set to true, enable ZSH-like auto-suggestions
+AutoSuggestions=false
+
 # If set to true, expand bookmark names into the corresponding bookmark
 # path: if the bookmark is "name=/path", "name" will be interpreted
 # as /path. TAB completion is also available for bookmark names.
