@@ -286,7 +286,7 @@ my_rl_getc(FILE *stream)
 	while(1) {
 		result = read(fileno(stream), &c, sizeof(unsigned char));
 		if (result == sizeof(unsigned char)) {
-			if (!rl_suggestions(c))
+			if (suggestions && !rl_suggestions(c))
 				/* Forward delete line starting from cursor: remove
 				 * previous hint */
 				if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}

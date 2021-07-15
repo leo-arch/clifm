@@ -491,7 +491,7 @@ rl_accept_suggestion(int count, int key)
 
 	/* Only accept the current hint if the cursor is at the end of the line
 	 * typed so far */
-	if (rl_point == rl_end && suggestion_buf) {
+	if (suggestions && rl_point == rl_end && suggestion_buf) {
 		rl_replace_line(suggestion_buf, 1);
 		/* Move the cursor to the end of the line */
 		rl_point = rl_end;
