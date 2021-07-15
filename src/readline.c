@@ -31,6 +31,9 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
+#ifdef __OpenBSD__
+#include <strings.h>
+#endif
 #include <unistd.h>
 #include <readline/readline.h>
 #include <readline/history.h>
@@ -162,6 +165,7 @@ rl_suggestions(char c)
 		if (!history[i] || *tmp_buf != *history[i])
 			continue;
 		if (buflen && strncmp(tmp_buf, history[i], buflen + 1) == 0) {
+//		&& strlen(history[i]) > buflen) {
 			print_suggestion(history[i], buflen);
 			printed = 1;
 			break;
@@ -176,7 +180,9 @@ rl_suggestions(char c)
 	while (--i >= 0) {
 		if (!file_info[i].name || *tmp_buf != *file_info[i].name)
 			continue;
-		if (buflen && strncmp(tmp_buf, file_info[i].name, buflen + 1) == 0
+		if (buflen && (case_sens_path_comp
+		? strncmp(tmp_buf, file_info[i].name, buflen + 1)
+		: strncasecmp(tmp_buf, file_info[i].name, buflen + 1)) == 0
 		&& file_info[i].len > buflen) {
 			print_suggestion(file_info[i].name, buflen);
 			printed = 1;
@@ -237,7 +243,8 @@ FAIL:
 	return EXIT_FAILURE;
 }
 
-/* This function is automatically called by readline() to handle input */
+/* This function is automatically called by readline() to handle input.
+ * Taken from Bash 1.14.7 and modified to fit our needs */
 int
 my_rl_getc(FILE *stream)
 {
