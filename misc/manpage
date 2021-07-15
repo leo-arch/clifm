@@ -33,23 +33,25 @@ CLIFM \- The KISS file manager
 .sp
 \fB12.\fR Resource opener
 .sp
-\fB13.\fR Shell functions
+\fB13.\fR Auto-suggestions
 .sp
-\fB14.\fR Plugins
+\fB14.\fR Shell functions
 .sp
-\fB15.\fR Standard input
+\fB15.\fR Plugins
 .sp
-\fB16.\fR Note on speed
+\fB16.\fR Standard input
 .sp
-\fB17.\fR Kangaroo frecency algorithm
+\fB17.\fR Note on speed
 .sp
-\fB18.\fR Environment
+\fB18.\fR Kangaroo frecency algorithm
 .sp
-\fB19.\fR Miscellaneous notes
+\fB19.\fR Environment
 .sp
-\fB20.\fR Files
+\fB20.\fR Miscellaneous notes
 .sp
-\fB21.\fR Examples
+\fB21.\fR Files
+.sp
+\fB22.\fR Examples
 
 .SH 1. GETTING HELP
 There are several ways of getting help in CliFM. Once in the program, enter '\fB?\fR' to see a minimal list of options, commands, and keybindings, or press \fBF1\fR to access this manpage, \fBF2\fR to go to the \fBCOMMANDS\fR section of this very manpage, or \fBF3\fR to go to the \fBKEYBOARD SHORTCUTS\fR section.
@@ -127,7 +129,7 @@ List of CliFM features:
   38) Advcpmv support (cp and mv with a nice progress bar). Depends on advcpmv (See \fIhttps://github.com/jarun/advcpmv\fR)
   39) Fastback function
   40) Remote file systems management
-  41) ZSH-like auto-suggestions system
+  41) Fish-like auto-suggestions system
 
 .SH 3. RATIONALE
 When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the kernel built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There are no two without three".
@@ -1084,10 +1086,23 @@ In case of MIME types, you can also write the entire expression without relying 
 .TP
 \fBLira\fR will check the file line by line, and if a matching line is found, and if at least one of the specified applications exists, this application will be used to open the corresponding associated file. Else, the next line will be checked. In other words, the precedence order is top to bottom (for lines) and left to right (for applications).
 
-.SH 13. SHELL FUNCTIONS
+.SH 13. AUTO-SUGGESTIONS
+CliFM includes a built-in auto-suggestions system (similar to that provided by the Fish shell). As you type, suggestions will be offered right after the current cursor position, by default in a dimmed magenta color (thought this could be customized via the color schemes file).
+
+The suggestions check order is the following:
+.sp
+a. Commands in the command history list (already used commands)
+.sp
+b. File names in the current working directory
+.sp
+c. Programs in \fBPATH\fR 
+
+To accept a suggestion, just press the Right arrow key: the cursor will move to the end of the suggested command and the suggestion color will change to that of the typed text; next, you can press Enter to execute the command as usual. Otherwise, if the Right key is not pressed, the suggestion will be ignored and you can continue typing whatever you want.
+
+.SH 14. SHELL FUNCTIONS
 CliFM includes a few shell functions to perform specific actions (cd-on-quit, file-picker, and subshell-notice). Take a look at the corresponding files, in \fI/usr/share/clifm/functions\fR, and follow the instructions. Needles to say, you can write your own functions.
 
-.SH 14. PLUGINS
+.SH 15. PLUGINS
 Plugins are just scripts or programs (written in any language) able to add, extend or improve CliFM functionalities. Though several plugins are provided at installation time (in the \fIplugins\fR directory), you can write your owns as you like, with any language you like, and for whatever goal you want. Writing plugins is generally quite easy; but your mileage may vary depending on what you are trying to achieve. A good place to start is examining the provide plugins and reading the \fIactions\fR command description, and the \fBENVIRONMENT\fR and \fBFILES\fR sections below.
 
  +-------------------+-------------------------------+
@@ -1101,8 +1116,8 @@ Plugins are just scripts or programs (written in any language) able to add, exte
  | fzfnav            | fzf                           |
  |   -archives       | atool, bsdtar or tar          |
  |   -images         | kitty terminal, imagemagick,  | 
- |					 | and ueberzug or viu or catimg |
- |					 | or img2txt					 |
+ |	             | and ueberzug or viu or catimg |
+ |		     | or img2txt                    |
  |   -fonts          | fontpreview or fontforge      |
  |   -docs           | libreoffice, catdoc, odt2txt, |
  |                   | pandoc                        |
@@ -1144,7 +1159,7 @@ NOTE 2: The \fIgit_status\fR plugin is not intended to be used as a normal plugi
 .TP
 Whereas this plugin provides basic Git integration, it could be easily modified (it is just a few lines long) to include whatever git function you might need.
 
-.SH 15. STANDARD INPUT (STDIN)
+.SH 16. STANDARD INPUT (STDIN)
 CliFM is able to read and list paths from the input stream. Each path in the list should be an absolute path, terminated with a new line character (\\n) and stripped from extra characters not belonging to the path itself. The size of the input stream buffer is 262MiB (65536 paths, provided each path takes PATH_MAX bytes (4096 by default)).
 .sp
 Each file passed via standard input will be stored as a symbolic link pointing to the original file in a temporary directory (which will be deleted at program exit) and listed on startup. Bear in mind that the restore last path function is disabled when listing in this way. Examples:
@@ -1166,7 +1181,7 @@ You can also use stream redirection:
 .sp
 All operations performed on these symbolic links (provided the current working directory is the temporary directory where all these files are stored) will be performed on the target files and NOT on the symbolic links themselves.
 
-.SH 16. NOTE ON SPEED
+.SH 17. NOTE ON SPEED
 CliFM is by itself quite fast by default, but if speed is still an issue, it is possible to get some extra performance.
 .sp
 The two most time consuming features are:
@@ -1179,7 +1194,7 @@ Besides these two features, a few more things can be disabled to get some extra 
 .sp
 Despite the above, however, it is important to bear in mind that listing speed does not only depend on the program's code and enabled features, but also on the terminal emulator used. Old, basic terminal emulators like Xterm, Aterm, and the kernel built-in console are really slow compared to more modern ones like Urxvt, Lxterminal, ST, and Terminator, to name just a few.
 
-.SH 17. KANGAROO FRECENCY ALGORITHM
+.SH 18. KANGAROO FRECENCY ALGORITHM
 The directory jumper function is designed to learn the navigation habits of the user. The information is stored in a database (see the \fBFILES\fR section below) used to get the best match for a given string provided by the user. In this sense, Kangaroo is like a quick, smart, and evolved cd function.
 .sp
 The information stored in the database, always per directory, is:
@@ -1220,7 +1235,7 @@ NOTE: Directories visited in the last 24 hours will not be removed from the data
 .sp
 The idea of 'frecency' was, as far as I know, first devised and designed by Mozilla. See \fIhttps://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency\fR. However, it is also implemented, though using different algorithms, by different projects like \fBautojump\fR, \fBz.lua\fR, and \fBzoxide\fR.
 
-.SH 18. ENVIRONMENT
+.SH 19. ENVIRONMENT
 The following variables are read at initialization time:
 .TP
 .B CLIFM_FILE_COLORS
@@ -1255,7 +1270,7 @@ This variable contains the path of a pipe by means of which plugins can talk to 
 .sp
 The pipe (CLIFM_BUS) is deleted immediately after the execution of its content and recreated before running any other plugin.
 
-.SH 19. MISCELLANEOUS NOTES
+.SH 20. MISCELLANEOUS NOTES
 .sp
 \fBSequential and conditional execution of commands\fR:
 
@@ -1295,7 +1310,7 @@ By default, CliFM starts in the current working directory. However, you can alwa
 
 CliFM's default profile is "default". To create alternative profiles use the \-P command line option or the 'pf add' command (see above).
 
-.SH 20. FILES
+.SH 21. FILES
 .TP
 .B CONFIGURATION FILE
 The configuration file is \fI$XDG_CONFIG_HOME/clifm/profiles/PROFILE/clifmrc\fR. It will be copied from \fIDATADIR/clifm\fR (usually \fI/usr/share/clifm\fR), and if not found, it will be created anew with default values.
@@ -1343,7 +1358,7 @@ The directory jumper database is stored in \fI$XDG_CONFIG_HOME/clifm/profiles/PR
 .TP
 \fBNOTE\fR: If \fI$XDG_CONFIG_HOME\fR is not set, \fI$HOME/.config/\fR is used instead.
 
-.SH 21. EXAMPLES
+.SH 22. EXAMPLES
 The following are just a few basic usage examples.
 
 \fBNOTE\fR: Always try TAB. TAB completion is available for many things
