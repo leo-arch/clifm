@@ -155,8 +155,6 @@ readline_kbinds(void)
 			 * #        KEYBINDINGS         #
 			 * ##############################*/
 
-	rl_bind_keyseq("\x1b[C", rl_accept_suggestion);
-
 	if (KBINDS_FILE) {
 		/* Help */
 		rl_bind_keyseq(find_key("show-manpage"), rl_manpage);
@@ -332,6 +330,10 @@ readline_kbinds(void)
 
 		rl_bind_keyseq("\\e[24~", rl_quit);
 	}
+
+	/* Bind Right arrow key to accept auto-suggestions */
+	rl_bind_keyseq("\x1b[C", rl_accept_suggestion);
+	rl_bind_keyseq("\x1bOC", rl_accept_suggestion); /* Haiku terminal */
 }
 
 /* Store keybinds from the keybinds file into a struct */

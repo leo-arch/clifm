@@ -979,6 +979,7 @@ external_arguments(int argc, char **argv)
 	    {"cwd-in-title", no_argument, 0, 32},
 	    {"open", required_argument, 0, 33},
 	    {"print-sel", no_argument, 0, 34},
+	    {"suggestions", no_argument, 0, 35},
 	    {0, 0, 0, 0}};
 
 	/* Increment whenever a new (only) long option is added */
@@ -1172,6 +1173,10 @@ external_arguments(int argc, char **argv)
 
 		case 34:
 			xargs.printsel = 1;
+			break;
+
+		case 35:
+			xargs.suggestions = suggestions = 1;
 			break;
 
 		case 'a':

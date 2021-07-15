@@ -146,6 +146,8 @@ print_suggestion(char *str, size_t buflen)
 int
 rl_suggestions(char c)
 {
+	static int esc = 4;
+
 	char *tmp_buf = (char *)NULL;
 	if (rl_point != rl_end)
 		goto FAIL;
@@ -156,16 +158,39 @@ rl_suggestions(char c)
 	size_t buflen = strlen(rl_line_buffer);
 	tmp_buf = (char *)xnmalloc(buflen + 2, sizeof(char));
 	sprintf(tmp_buf, "%s%c", rl_line_buffer, c);
+
+/* ####################### */
+/* Workaround to skip escape codes (mostly arrow keys) from being
+ * processed for suggestions. Count: 1) ESC (27), 2) Opening bracket (91),
+ * 3) Other char (A, B, C, and D for arrow keys). Only check suggestions
+ * at the fourth char after an ESC char
+ * On Haiku terminal, the sequence is: ESC O(79) A-D */
+	switch(*tmp_buf) {
+		case 27: esc = 0; /* ESC */
+		case 91: /* fallthrough */ /* [ */
+		case 79: esc++; break; /* O (Haiku terminal) */
+		default:
+			if (esc < 4)
+				esc++;
+			break;
+	}
+
+	if (esc < 4)
+		goto FAIL;
+/* ####################### */
+
 	int i;
 	int printed = 0;
 
 	/* Check command history */
 	i = current_hist_n;
 	while (--i >= 0) {
-		if (!history[i] || *tmp_buf != *history[i])
+		if (!history[i] || TOUPPER(*tmp_buf) != TOUPPER(*history[i]))
 			continue;
-		if (buflen && strncmp(tmp_buf, history[i], buflen + 1) == 0) {
-//		&& strlen(history[i]) > buflen) {
+		if (buflen + 1 && (case_sens_path_comp
+		? strncmp(tmp_buf, history[i], buflen + 1)
+		: strncasecmp(tmp_buf, history[i], buflen + 1)) == 0) {
+/*		&& strlen(history[i]) > buflen) { */
 			print_suggestion(history[i], buflen);
 			printed = 1;
 			break;
@@ -178,9 +203,9 @@ rl_suggestions(char c)
 	/* Check file names in CWD */
 	i = files;
 	while (--i >= 0) {
-		if (!file_info[i].name || *tmp_buf != *file_info[i].name)
+		if (!file_info[i].name || TOUPPER(*tmp_buf) != TOUPPER(*file_info[i].name))
 			continue;
-		if (buflen && (case_sens_path_comp
+		if (buflen + 1 && (case_sens_path_comp
 		? strncmp(tmp_buf, file_info[i].name, buflen + 1)
 		: strncasecmp(tmp_buf, file_info[i].name, buflen + 1)) == 0
 		&& file_info[i].len > buflen) {
@@ -198,7 +223,7 @@ rl_suggestions(char c)
 	while (--i >= 0) {
 		if (!bin_commands[i] || *tmp_buf != *bin_commands[i])
 			continue;
-		if (buflen && strncmp(tmp_buf, bin_commands[i], buflen + 1) == 0
+		if (buflen + 1 && strncmp(tmp_buf, bin_commands[i], buflen + 1) == 0
 		&& strlen(bin_commands[i]) > buflen) {
 			print_suggestion(bin_commands[i], buflen);
 			printed = 1;
@@ -240,6 +265,8 @@ SUCCESS:
 
 FAIL:
 	free(tmp_buf);
+	free(suggestion_buf);
+	suggestion_buf = (char *)NULL;
 	return EXIT_FAILURE;
 }
 
