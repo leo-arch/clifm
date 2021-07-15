@@ -127,6 +127,7 @@ List of CliFM features:
   38) Advcpmv support (cp and mv with a nice progress bar). Depends on advcpmv (See \fIhttps://github.com/jarun/advcpmv\fR)
   39) Fastback function
   40) Remote file systems management
+  41) ZSH-like auto-suggestions system
 
 .SH 3. RATIONALE
 When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the kernel built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There are no two without three".
@@ -339,6 +340,9 @@ make the Selection Box common (that is, accessible) to different profiles. By de
 .TP
 .B \-\-sort\-reverse
 sort in reverse order, for example: z-a instead of a-z, which is the default order
+.TP
+.B \-\-suggestions
+enable the auto-suggestions system
 .TP
 .B \-\-trash\-as\-rm
 the 'r' command executes the built-in 'trash' instead of 'rm' to prevent accidental deletions
@@ -922,6 +926,7 @@ Colors are specified using the same format used by \fBdircolors(1)\fR and the LS
 .TP
 The following codes are used for different interface elements:
 .sp
+ as = auto-suggestions string color
  bm = bookmarked directory in the bookmarks screen
  el = ELN color
  mi = misc indicators color (disk usage, sort method, bulk rename)
