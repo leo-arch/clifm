@@ -1552,7 +1552,7 @@ exec_cmd(char **comm)
 		exit(exit_code);
 	}
 
-	else if (*comm[0] == 'Q' && !comm[1]) {
+	else if (*comm[0] == 'Q' && !comm[0][1]) {
 		int i = (int)args_n + 1;
 		while (--i >= 0)
 			free(comm[i]);
