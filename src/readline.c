@@ -37,7 +37,6 @@
 #include <unistd.h>
 #include <readline/readline.h>
 #include <readline/history.h>
-
 #include <errno.h>
 
 #include "aux.h"
@@ -147,14 +146,17 @@ int
 rl_suggestions(char c)
 {
 	static int esc = 4;
-
 	char *tmp_buf = (char *)NULL;
-	if (rl_point != rl_end)
+//	suggestion_is_filename = 0;
+
+	/* Do nothing if the cursor is not at the end of the string or if
+	 * the string is empty (the user just pressed Enter) */
+	if (rl_point != rl_end || (rl_end == 0 && (c == 13 || c == 8 || c == 9)))
 		goto FAIL;
 
 	/* Append C (last char typed) to current readline buffer to
-	 * correctly find matches. At this point, readline didn't 
-	 * append this char yet */
+	 * correctly find matches. At this point (rl_getc), readline has
+	 * not appended this char to rl_line_buffer yet */
 	size_t buflen = strlen(rl_line_buffer);
 	tmp_buf = (char *)xnmalloc(buflen + 2, sizeof(char));
 	sprintf(tmp_buf, "%s%c", rl_line_buffer, c);
@@ -178,6 +180,12 @@ rl_suggestions(char c)
 	if (esc < 4)
 		goto FAIL;
 /* ####################### */
+
+/*	int j;
+	for (j = 0; j < strlen(tmp_buf); j++)
+		printf("'%d' (%d, %d)\n", tmp_buf[j], j, esc);
+	free(tmp_buf);
+	return EXIT_SUCCESS; */
 
 	int i;
 	int printed = 0;
@@ -210,6 +218,7 @@ rl_suggestions(char c)
 		: strncasecmp(tmp_buf, file_info[i].name, buflen + 1)) == 0
 		&& file_info[i].len > buflen) {
 			print_suggestion(file_info[i].name, buflen);
+//			suggestion_is_filename = 1;
 			printed = 1;
 			break;
 		}

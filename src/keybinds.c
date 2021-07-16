@@ -48,6 +48,7 @@ typedef char *rl_cpvfunc_t;
 #include "profiles.h"
 #include "prompt.h"
 #include "messages.h"
+#include "strings.h"
 
 int
 kbinds_reset(void)
@@ -331,7 +332,10 @@ readline_kbinds(void)
 		rl_bind_keyseq("\\e[24~", rl_quit);
 	}
 
-	/* Bind Right arrow key to accept auto-suggestions */
+	/* Bind Right arrow key and Ctrl-f to accept auto-suggestions */
+	/* Bind Right arrow key and Ctrl-f to accept auto-suggestions */
+	rl_bind_keyseq("\\C-f", rl_accept_suggestion);
+/*	rl_bind_keyseq("\\M-[C", rl_accept_suggestion); */
 	rl_bind_keyseq("\x1b[C", rl_accept_suggestion);
 	rl_bind_keyseq("\x1bOC", rl_accept_suggestion); /* Haiku terminal */
 }
@@ -492,7 +496,16 @@ rl_accept_suggestion(int count, int key)
 	/* Only accept the current hint if the cursor is at the end of the line
 	 * typed so far */
 	if (suggestions && rl_point == rl_end && suggestion_buf) {
-		rl_replace_line(suggestion_buf, 1);
+		if (suggestion_is_filename) {
+			suggestion_is_filename = 0;
+			char *tmp = escape_str(suggestion_buf);
+			if (*tmp) {
+				rl_replace_line(tmp, 1);
+				free(tmp);
+			}
+		} else {
+			rl_replace_line(suggestion_buf, 1);
+		}
 		/* Move the cursor to the end of the line */
 		rl_point = rl_end;
 		free(suggestion_buf);

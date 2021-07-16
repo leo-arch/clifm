@@ -645,6 +645,7 @@ extern short
     icons,
     copy_n_rename,
     suggestions,
+    suggestion_is_filename,
 
     home_ok,
     config_ok,
