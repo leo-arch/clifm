@@ -186,7 +186,7 @@ rl_suggestions(char c)
 	if (!esc && strchr(tmp_buf, '\x1b'))
 		esc = 1;
 
-	if (esc && c == 'C') {
+	if (esc && (c == 'C' || c == '~')) {
 		esc = 0;
 		goto SUCCESS;
 	}
