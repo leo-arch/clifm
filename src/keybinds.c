@@ -770,14 +770,10 @@ rl_clear_line(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	/* 1) Clear text typed so far (\x1b[2K) and move cursor to the
-	 * beginning of the current line (\r) */
-	if (write(STDOUT_FILENO, "\x1b[2K\r", 5) == -1) {}
-
-	/* 2) Clear the readline buffer */
-	rl_delete_text(0, rl_end);
-	rl_end = rl_point = 0;
-	rl_reset_line_state();
+	/* Clear the readline buffer */
+	rl_point = 0;
+	rl_delete_text(rl_point, rl_end);
+	rl_end = 0;
 
 	return EXIT_SUCCESS;
 }

@@ -147,7 +147,6 @@ rl_suggestions(char c)
 {
 	static int esc = 4;
 	char *tmp_buf = (char *)NULL;
-//	suggestion_is_filename = 0;
 
 	/* Do nothing if the cursor is not at the end of the string or if
 	 * the string is empty (the user just pressed Enter) */
@@ -218,7 +217,7 @@ rl_suggestions(char c)
 		: strncasecmp(tmp_buf, file_info[i].name, buflen + 1)) == 0
 		&& file_info[i].len > buflen) {
 			print_suggestion(file_info[i].name, buflen);
-//			suggestion_is_filename = 1;
+			suggestion_is_filename = 1;
 			printed = 1;
 			break;
 		}
