@@ -1097,7 +1097,7 @@ b. File names in the current working directory
 .sp
 c. Programs in \fBPATH\fR 
 
-To accept a suggestion, just press the Right arrow key: the cursor will move to the end of the suggested command and the suggestion color will change to that of the typed text; next, you can press Enter to execute the command as usual. Otherwise, if the Right key is not pressed, the suggestion will be ignored and you can continue typing whatever you want.
+To accept a suggestion, just press \fBCtrl-f\fR: the cursor will move to the end of the suggested command and the suggestion color will change to that of the typed text; next, you can press Enter to execute the command as usual. Otherwise, if Ctrl-f is not pressed, the suggestion will be ignored and you can continue editing the current command line however you want.
 
 .SH 14. SHELL FUNCTIONS
 CliFM includes a few shell functions to perform specific actions (cd-on-quit, file-picker, and subshell-notice). Take a look at the corresponding files, in \fI/usr/share/clifm/functions\fR, and follow the instructions. Needles to say, you can write your own functions.
