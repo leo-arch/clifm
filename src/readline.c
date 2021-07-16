@@ -145,7 +145,7 @@ print_suggestion(char *str, size_t buflen)
 int
 rl_suggestions(char c)
 {
-	static int esc = 4;
+	static int count = 4, esc = 0; // inst = 0;
 	char *tmp_buf = (char *)NULL;
 
 	/* Do nothing if the cursor is not at the end of the string or if
@@ -167,22 +167,34 @@ rl_suggestions(char c)
  * at the fourth char after an ESC char
  * On Haiku terminal, the sequence is: ESC O(79) A-D */
 	switch(*tmp_buf) {
-		case 27: esc = 0; /* ESC */
+		case 27: /* ESC */
+			count = esc = 1;
+			break;
 		case 91: /* fallthrough */ /* [ */
-		case 79: esc++; break; /* O (Haiku terminal) */
+		case 79: count++; break; /* O (Haiku terminal) */
 		default:
-			if (esc < 4)
-				esc++;
+			if (count < 4)
+				count++;
 			break;
 	}
 
-	if (esc < 4)
+	if (count < 4)
 		goto FAIL;
+
+	/* If the sequence includes an ESC char and a C, we most probably
+	 * have pressed the Right arrow key. Skip this one */
+	if (!esc && strchr(tmp_buf, '\x1b'))
+		esc = 1;
+
+	if (esc && c == 'C') {
+		esc = 0;
+		goto SUCCESS;
+	}
 /* ####################### */
 
 /*	int j;
 	for (j = 0; j < strlen(tmp_buf); j++)
-		printf("'%d' (%d, %d)\n", tmp_buf[j], j, esc);
+		printf("'%d' (%d, %d, %d, %d)\n", tmp_buf[j], j, count, esc, inst);
 	free(tmp_buf);
 	return EXIT_SUCCESS; */
 
