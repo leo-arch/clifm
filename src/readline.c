@@ -145,7 +145,7 @@ print_suggestion(char *str, size_t buflen)
 int
 rl_suggestions(char c)
 {
-	static int count = 4, esc = 0; // inst = 0;
+	static int count = 4, esc = 0;
 	char *tmp_buf = (char *)NULL;
 
 	/* Do nothing if the cursor is not at the end of the string or if
@@ -186,7 +186,7 @@ rl_suggestions(char c)
 	if (!esc && strchr(tmp_buf, '\x1b'))
 		esc = 1;
 
-	if (esc && (c == 'C' || c == '~')) {
+	if (esc && (c == 'C' || c == '~' || c == 'B' || c == 'D')) {
 		esc = 0;
 		goto SUCCESS;
 	}
@@ -306,9 +306,9 @@ my_rl_getc(FILE *stream)
 	while(1) {
 		result = read(fileno(stream), &c, sizeof(unsigned char));
 		if (result == sizeof(unsigned char)) {
-			if (suggestions && !rl_suggestions(c))
-				/* Forward delete line starting from cursor: remove
-				 * previous hint */
+			if (suggestions && !rl_suggestions(c) && rl_point == 0)
+				/* Delete line starting from current cursor position.
+				 * In other words, remove the previous suggestion */
 				if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
 			return (c);
 		}
