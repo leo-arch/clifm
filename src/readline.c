@@ -128,14 +128,15 @@ initialize_readline(void)
 	return EXIT_SUCCESS;
 }
 
-/* Print the hint (STR), and move the cursor back to the original
- * position */
+/* Clear the line, print the suggestion (STR), and move the cursor back
+ * to the original position */
 void
 print_suggestion(char *str, size_t buflen)
 {
 	free(suggestion_buf);
 	suggestion_buf = xnmalloc(strlen(str) + 1, sizeof(char));
 	strcpy(suggestion_buf, str);
+	if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
 	printf("%s%s\x1b[39;49m%s", as_c, str + buflen, df_c);
 	printf("\x1b[%zuD", strlen(str + buflen));
 }
@@ -149,7 +150,8 @@ rl_suggestions(char c)
 	char *tmp_buf = (char *)NULL;
 
 	/* Do nothing if the cursor is not at the end of the string or if
-	 * the string is empty (the user just pressed Enter) */
+	 * the string is empty (the user just pressed Enter (13)). Skip
+	 * backspace (8) and TAB (9) keys too */
 	if (rl_point != rl_end || (rl_end == 0 && (c == 13 || c == 8 || c == 9)))
 		goto FAIL;
 
@@ -182,11 +184,13 @@ rl_suggestions(char c)
 		goto FAIL;
 
 	/* If the sequence includes an ESC char and a C, we most probably
-	 * have pressed the Right arrow key. Skip this one */
+	 * have pressed the Right arrow key. Skip this one.
+	 * Skip the remianing arrow keys, HOME, DEL, INS, PGD, and PGU keys
+	 * as well */
 	if (!esc && strchr(tmp_buf, '\x1b'))
 		esc = 1;
 
-	if (esc && (c == 'C' || c == '~' || c == 'B' || c == 'D')) {
+	if (esc && (c == 'C' || c == '~' || c == 'B' || c == 'D' || c == 'A')) {
 		esc = 0;
 		goto SUCCESS;
 	}
@@ -306,6 +310,8 @@ my_rl_getc(FILE *stream)
 	while(1) {
 		result = read(fileno(stream), &c, sizeof(unsigned char));
 		if (result == sizeof(unsigned char)) {
+			/* The rl_point check prevent the suggestion from being
+			 * deleted by moving the cursor backwards */
 			if (suggestions && !rl_suggestions(c) && rl_point == 0)
 				/* Delete line starting from current cursor position.
 				 * In other words, remove the previous suggestion */
