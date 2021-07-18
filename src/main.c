@@ -137,6 +137,7 @@ short
     icons = 0,
     copy_n_rename = 0,
     suggestion_is_filename = 0,
+    suggestion_printed = 0,
 
     home_ok = 1,
     config_ok = 1,

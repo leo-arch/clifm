@@ -340,6 +340,14 @@ nm=01;32:bm=01;36:as=02;35:"
 #define PRINT_NEWLINE 1
 #define NO_NEWLINE 0
 
+/* A few key macros used by the auto-suggestions system */
+#define _ESC 27
+#define BS 8
+#define _TAB 9
+#define ENTER 13
+#define OP_BRACKET 91
+#define UC_O 79
+
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR
  * (Select Graphic Rendition) parameter, and, of course, the terminating
@@ -646,6 +654,7 @@ extern short
     copy_n_rename,
     suggestions,
     suggestion_is_filename,
+    suggestion_printed,
 
     home_ok,
     config_ok,

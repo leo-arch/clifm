@@ -2156,22 +2156,19 @@ dequote_str(char *text, int mt)
 	size_t len = 0;
 
 	while (*text) {
-
 		switch (*text) {
-
 		case '\\':
 			buf[len++] = *(++text);
 			break;
-
 		default:
 			buf[len++] = *text;
 			break;
 		}
-
+		if (!*text)
+			break;
 		text++;
 	}
 
 	buf[len] = '\0';
-
 	return buf;
 }

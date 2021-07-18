@@ -493,18 +493,28 @@ rl_accept_suggestion(int count, int key)
 		return EXIT_SUCCESS;
 	}
 
-	/* Only accept the current hint if the cursor is at the end of the line
-	 * typed so far */
+	/* Only accept the current suggestion if the cursor is at the end
+	 * of the line typed so far */
 	if (suggestions && rl_point == rl_end && suggestion_buf) {
+		suggestion_printed = 0;
 		if (suggestion_is_filename) {
 			suggestion_is_filename = 0;
-			char *tmp = escape_str(suggestion_buf);
-			if (*tmp) {
+			char *tmp = (char *)NULL;
+			char *ret = strchr(suggestion_buf, '\\');
+			if (!ret)
+				tmp = escape_str(suggestion_buf);
+			if (tmp) {
 				rl_replace_line(tmp, 1);
+/*				rl_delete_text(0, rl_end);
+				rl_point = rl_end = 0;
+				rl_insert_text(tmp); */
 				free(tmp);
 			}
 		} else {
 			rl_replace_line(suggestion_buf, 1);
+/*			rl_delete_text(0, rl_end);
+			rl_point = rl_end = 0;
+			rl_insert_text(suggestion_buf); */
 		}
 		/* Move the cursor to the end of the line */
 		rl_point = rl_end;

@@ -128,31 +128,60 @@ initialize_readline(void)
 	return EXIT_SUCCESS;
 }
 
-/* Clear the line, print the suggestion (STR), and move the cursor back
- * to the original position */
+/* Clear the line, print the suggestion (STR) at OFFSET, and move the
+ * cursor back to the original position */
 void
-print_suggestion(char *str, size_t buflen)
+print_suggestion(char *str, size_t offset)
 {
+	if (offset > 0)
+		offset--;
 	free(suggestion_buf);
 	suggestion_buf = xnmalloc(strlen(str) + 1, sizeof(char));
 	strcpy(suggestion_buf, str);
 	if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
-	printf("%s%s\x1b[39;49m%s", as_c, str + buflen, df_c);
-	printf("\x1b[%zuD", strlen(str + buflen));
+	printf("%s%s\x1b[39;49m%s", as_c, str + offset, df_c);
+	printf("\x1b[%zuD", wc_xstrlen(str + offset));
 }
 
-/* Check if some hint is available. Return zero if true and one on error
- * If true, the hint will be printed by print_hint() */
+/* Check if some suggestion is available. Return zero if true and one
+ * on error. If true, the suggestion will be printed by
+ * print_suggestion() */
 int
 rl_suggestions(char c)
 {
-	static int count = 4, esc = 0;
+	static int count = 4, __esc = 0;
 	char *tmp_buf = (char *)NULL;
+	int printed = 0;
 
-	/* Do nothing if the cursor is not at the end of the string or if
-	 * the string is empty (the user just pressed Enter (13)). Skip
-	 * backspace (8) and TAB (9) keys too */
-	if (rl_point != rl_end || (rl_end == 0 && (c == 13 || c == 8 || c == 9)))
+		/* ######################################
+		 * # 		  1) Filter input			#
+		 * ######################################*/
+
+	/* Do nothing if the cursor is not at the end of the string */
+	if (rl_point != rl_end) {
+		if (suggestion_buf) {
+			if (c != _ESC) {
+				if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
+				suggestion_printed = 0;
+			}
+		} else {
+			if (suggestion_printed && c != _ESC && c != 'A' && c != 'B'
+			&& c != 'C' && c != 'D' && c != OP_BRACKET && c != UC_O) {
+				if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
+				suggestion_printed = 0;
+			}
+		}
+		goto FAIL;
+	}
+
+	/* Do nothing if the string is empty (the user just pressed
+	 * Enter). Skip the TAB key too */
+	if (rl_end == 0 && (c == ENTER || c == _TAB))
+		goto FAIL;
+
+	/* Do nothing if the user pressed backspace and the cursor is at
+	 * the beginning of the line */
+	if (c == BS && rl_point == 0)
 		goto FAIL;
 
 	/* Append C (last char typed) to current readline buffer to
@@ -160,7 +189,14 @@ rl_suggestions(char c)
 	 * not appended this char to rl_line_buffer yet */
 	size_t buflen = strlen(rl_line_buffer);
 	tmp_buf = (char *)xnmalloc(buflen + 2, sizeof(char));
-	sprintf(tmp_buf, "%s%c", rl_line_buffer, c);
+	sprintf(tmp_buf, "%s%c", rl_line_buffer, (c != BS) ? c : 0);
+
+	/* In case of backspace, remove the last typed char and decrease
+	 * the buffer's length. Else, just increase it */
+	if (c == BS)
+		tmp_buf[buflen ? --buflen : buflen] = '\0';
+	else
+		buflen++;
 
 /* ####################### */
 /* Workaround to skip escape codes (mostly arrow keys) from being
@@ -169,11 +205,11 @@ rl_suggestions(char c)
  * at the fourth char after an ESC char
  * On Haiku terminal, the sequence is: ESC O(79) A-D */
 	switch(*tmp_buf) {
-		case 27: /* ESC */
-			count = esc = 1;
+		case _ESC:
+			count = __esc = 1;
 			break;
-		case 91: /* fallthrough */ /* [ */
-		case 79: count++; break; /* O (Haiku terminal) */
+		case OP_BRACKET: /* fallthrough */
+		case UC_O: count++; break; /* Haiku terminal */
 		default:
 			if (count < 4)
 				count++;
@@ -185,35 +221,33 @@ rl_suggestions(char c)
 
 	/* If the sequence includes an ESC char and a C, we most probably
 	 * have pressed the Right arrow key. Skip this one.
-	 * Skip the remianing arrow keys, HOME, DEL, INS, PGD, and PGU keys
+	 * Skip the remianing arrow keys, HOME, DEL, INS, PGDOWN, and PGUP keys
 	 * as well */
-	if (!esc && strchr(tmp_buf, '\x1b'))
-		esc = 1;
+	if (!__esc && strchr(tmp_buf, '\x1b'))
+		__esc = 1;
 
-	if (esc && (c == 'C' || c == '~' || c == 'B' || c == 'D' || c == 'A')) {
-		esc = 0;
+	if (__esc && (c == 'C' || c == '~' || c == 'B' || c == 'D' || c == 'A')) {
+		__esc = 0;
 		goto SUCCESS;
 	}
 /* ####################### */
 
-/*	int j;
-	for (j = 0; j < strlen(tmp_buf); j++)
-		printf("'%d' (%d, %d, %d, %d)\n", tmp_buf[j], j, count, esc, inst);
-	free(tmp_buf);
-	return EXIT_SUCCESS; */
+		/* ######################################
+		 * #	   2) Look for suggestions		#
+		 * ######################################*/
 
 	int i;
-	int printed = 0;
 
-	/* Check command history */
+	/* 2.a) Check command history */
 	i = current_hist_n;
+	suggestion_is_filename = 0;
 	while (--i >= 0) {
 		if (!history[i] || TOUPPER(*tmp_buf) != TOUPPER(*history[i]))
 			continue;
-		if (buflen + 1 && (case_sens_path_comp
-		? strncmp(tmp_buf, history[i], buflen + 1)
-		: strncasecmp(tmp_buf, history[i], buflen + 1)) == 0) {
-/*		&& strlen(history[i]) > buflen) { */
+		if (buflen && (case_sens_path_comp
+		? strncmp(tmp_buf, history[i], buflen)
+		: strncasecmp(tmp_buf, history[i], buflen)) == 0
+		&& strlen(history[i]) > buflen) {
 			print_suggestion(history[i], buflen);
 			printed = 1;
 			break;
@@ -223,17 +257,24 @@ rl_suggestions(char c)
 	if (printed)
 		goto SUCCESS;
 
-	/* Check file names in CWD */
+	/* 2.b) Check file names in CWD */
 	i = files;
 	while (--i >= 0) {
 		if (!file_info[i].name || TOUPPER(*tmp_buf) != TOUPPER(*file_info[i].name))
 			continue;
-		if (buflen + 1 && (case_sens_path_comp
-		? strncmp(tmp_buf, file_info[i].name, buflen + 1)
-		: strncasecmp(tmp_buf, file_info[i].name, buflen + 1)) == 0
+		if (buflen && (case_sens_path_comp
+		? strncmp(tmp_buf, file_info[i].name, buflen)
+		: strncasecmp(tmp_buf, file_info[i].name, buflen)) == 0
 		&& file_info[i].len > buflen) {
-			print_suggestion(file_info[i].name, buflen);
-			suggestion_is_filename = 1;
+			if (file_info[i].dir) {
+				char tmp[NAME_MAX + 2];
+				snprintf(tmp, NAME_MAX + 2, "%s/", file_info[i].name);
+				print_suggestion(tmp, buflen);
+			} else {
+				print_suggestion(file_info[i].name, buflen);
+			}
+			if (c != BS)
+				suggestion_is_filename = 1;
 			printed = 1;
 			break;
 		}
@@ -242,12 +283,42 @@ rl_suggestions(char c)
 	if (printed)
 		goto SUCCESS;
 
-	/* Check commands in PATH and CliFM internals */
+	/* 2.c) Check possible completions */
+	char **_matches = rl_completion_matches(tmp_buf, rl_completion_entry_function);
+	if (_matches) {
+		if (buflen) {
+			/* If only one match */
+			if (_matches[0] && *_matches[0]
+			&& strlen(_matches[0]) > buflen) {
+				print_suggestion(_matches[0], buflen);
+				if (c != BS)
+					suggestion_is_filename = 1;
+				printed = 1;
+			} else {
+				/* If multiple matches, suggest the first one */
+				if (c != '/' && _matches[1] && *_matches[1]
+				&& strlen(_matches[1]) > buflen) {
+					print_suggestion(_matches[1], buflen);
+					if (c != BS)
+						suggestion_is_filename = 1;
+					printed = 1;
+				}
+			}
+		}
+		for (i = 0; _matches[i]; i++)
+			free(_matches[i]);
+		free(_matches);
+	}
+
+	if (printed)
+		goto SUCCESS;
+
+	/* 2.d) Check commands in PATH and CliFM internals */
 	i = path_progsn;
 	while (--i >= 0) {
 		if (!bin_commands[i] || *tmp_buf != *bin_commands[i])
 			continue;
-		if (buflen + 1 && strncmp(tmp_buf, bin_commands[i], buflen + 1) == 0
+		if (buflen && strncmp(tmp_buf, bin_commands[i], buflen) == 0
 		&& strlen(bin_commands[i]) > buflen) {
 			print_suggestion(bin_commands[i], buflen);
 			printed = 1;
@@ -257,9 +328,30 @@ rl_suggestions(char c)
 
 	if (printed)
 		goto SUCCESS;
+/*	else if (!autocd)
+		goto FAIL; */
 
-	if (!autocd)
-		goto FAIL;
+		/* ######################################
+		 * # 	  3) No suggestion found		#
+		 * ######################################*/
+	else {
+		if (suggestion_buf) {
+			/* The rl_point check prevents the current suggestion from
+			 * being erased when moving the cursor backwards */
+			if (rl_point == 0) {
+				if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
+				suggestion_printed = 0;
+				goto FAIL;
+			} else if (!__esc) {
+				/* Clear current suggestion only if no escape char
+				 * is contained in the current input sequence */
+				if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
+				suggestion_printed = 0;
+				goto FAIL;
+			}
+		}
+		goto SUCCESS;
+	}
 
 	/* Check jump database */
 /*	char *dir = strchr(tmp_buf, '/');
@@ -272,7 +364,10 @@ rl_suggestions(char c)
 			continue;
 		if (buflen && strncmp(tmp_buf, jump_db[i].path, buflen + 1) == 0
 		&& strlen(jump_db[i].path) > buflen) {
-			print_hint(jump_db[i].path, buflen);
+			print_suggestion(jump_db[i].path, buflen);
+			suggestion_printed = 1;
+			if (c != BS)
+				suggestion_is_filename = 1;
 			printed = 1;
 			break;
 		}
@@ -284,6 +379,8 @@ rl_suggestions(char c)
 	*/
 
 SUCCESS:
+	if (printed)
+		suggestion_printed = 1;
 	free(tmp_buf);
 	return EXIT_SUCCESS;
 
@@ -312,10 +409,12 @@ my_rl_getc(FILE *stream)
 		if (result == sizeof(unsigned char)) {
 			/* The rl_point check prevent the suggestion from being
 			 * deleted by moving the cursor backwards */
-			if (suggestions && !rl_suggestions(c) && rl_point == 0)
+			if (suggestions)
+				rl_suggestions(c);
+//			if (suggestions && !rl_suggestions(c) && rl_point == 0)
 				/* Delete line starting from current cursor position.
 				 * In other words, remove the previous suggestion */
-				if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
+//				if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
 			return (c);
 		}
 
@@ -484,6 +583,8 @@ my_rl_quote(char *text, int mt, char *qp)
 char *
 my_rl_path_completion(const char *text, int state)
 {
+	if (!text || !*text)
+		return (char *)NULL;
 	/* state is zero before completion, and 1 ... n after getting
 	 * possible completions. Example:
 	 * cd Do[TAB] -> state 0
