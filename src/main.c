@@ -136,8 +136,10 @@ short
     switch_cscheme = 0,
     icons = 0,
     copy_n_rename = 0,
+
     suggestion_is_filename = 0,
     suggestion_printed = 0,
+    suggestion_offset = 0,
 
     home_ok = 1,
     config_ok = 1,
@@ -344,7 +346,9 @@ char di_c[MAX_COLOR], /* Directory */
     wc_c[MAX_COLOR], /* Welcome message color */
     dh_c[MAX_COLOR], /* Dirhist index color */
     dl_c[MAX_COLOR], /* Dividing line index color */
-    as_c[MAX_COLOR], /* Auto-suggestions color */
+    sh_c[MAX_COLOR], /* Auto-suggestions: history */
+    sf_c[MAX_COLOR], /* Auto-suggestions: filenames */
+    sc_c[MAX_COLOR], /* Auto-suggestions: commands */
 
     /* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */

@@ -173,6 +173,9 @@ void
 free_colors(void)
 {
 	/* Reset whatever value was loaded */
+	*sh_c = '\0';
+	*sf_c = '\0';
+	*sc_c = '\0';
 	*bm_c = '\0';
 	*dl_c = '\0';
 	*el_c = '\0';
@@ -670,6 +673,9 @@ set_colors(const char *colorscheme, int env)
 	if (!ifacecolors) {
 
 		/* Free and reset whatever value was loaded */
+		*sh_c = '\0';
+		*sf_c = '\0';
+		*sc_c = '\0';
 		*bm_c = '\0';
 		*dl_c = '\0';
 		*el_c = '\0';
@@ -685,7 +691,6 @@ set_colors(const char *colorscheme, int env)
 		*wm_c = '\0';
 		*nm_c = '\0';
 		*si_c = '\0';
-		*as_c = '\0';
 	}
 
 	else {
@@ -751,11 +756,25 @@ set_colors(const char *colorscheme, int env)
 					    colors[i] + 3);
 			}
 
-			else if (*colors[i] == 'a' && strncmp(colors[i], "as=", 3) == 0) {
+			else if (*colors[i] == 's' && strncmp(colors[i], "sh=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
-					*as_c = '\0';
+					*sh_c = '\0';
 				else
-					snprintf(as_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
+					snprintf(sh_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
+			}
+
+			else if (*colors[i] == 's' && strncmp(colors[i], "sf=", 3) == 0) {
+				if (!is_color_code(colors[i] + 3))
+					*sf_c = '\0';
+				else
+					snprintf(sf_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
+			}
+
+			else if (*colors[i] == 's' && strncmp(colors[i], "sc=", 3) == 0) {
+				if (!is_color_code(colors[i] + 3))
+					*sc_c = '\0';
+				else
+					snprintf(sc_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 			}
 
 			else if (*colors[i] == 'b' && strncmp(colors[i], "bm=", 3) == 0) {
@@ -928,8 +947,10 @@ set_colors(const char *colorscheme, int env)
 			&& (filecolors[i + 1] == 'd' || filecolors[i + 1] == 'f'
 			|| filecolors[i + 1] == 'e')) || (filecolors[i] == 'u'
 			&& filecolors[i + 1] == 'f') || (filecolors[i] == 'c'
-			&& filecolors[i + 1] == 'a') || (filecolors[i] == 'a'
-			&& filecolors[i + 1] == 's')) && filecolors[i + 2] == '=') {
+			&& filecolors[i + 1] == 'a') || (filecolors[i] == 's'
+			&& filecolors[i + 1] == 'h') || (filecolors[i] == 's'
+			&& filecolors[i + 1] == 'f') || (filecolors[i] == 's'
+			&& filecolors[i + 1] == 'c')) && filecolors[i + 2] == '=') {
 
 				/* If one of the above is found, move to the next
 				 * color code */
@@ -1034,11 +1055,23 @@ set_colors(const char *colorscheme, int env)
 				else
 					snprintf(wc_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 'a' && strncmp(colors[i], "as=", 3) == 0)
+			else if (*colors[i] == 's' && strncmp(colors[i], "sh=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
-					*as_c = '\0';
+					*sh_c = '\0';
 				else
-					snprintf(as_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
+					snprintf(sh_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
+
+			else if (*colors[i] == 's' && strncmp(colors[i], "sf=", 3) == 0)
+				if (!is_color_code(colors[i] + 3))
+					*sf_c = '\0';
+				else
+					snprintf(sf_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
+
+			else if (*colors[i] == 's' && strncmp(colors[i], "sc=", 3) == 0)
+				if (!is_color_code(colors[i] + 3))
+					*sc_c = '\0';
+				else
+					snprintf(sc_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
 			else if (*colors[i] == 'd' && strncmp(colors[i], "dh=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
@@ -1193,8 +1226,12 @@ set_colors(const char *colorscheme, int env)
 
 	/* If some color was not set or it was a wrong color code, set the
 	 * default */
-	if (!*as_c)
-		strcpy(as_c, DEF_AS_C);
+	if (!*sh_c)
+		strcpy(sh_c, DEF_SH_C);
+	if (!*sf_c)
+		strcpy(sf_c, DEF_SF_C);
+	if (!*sc_c)
+		strcpy(sc_c, DEF_SC_C);
 	if (!*el_c)
 		strcpy(el_c, DEF_EL_C);
 	if (!*mi_c)

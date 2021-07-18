@@ -178,7 +178,7 @@ ow=34;42:st=37;44:ex=01;32:ee=00;32:no=00;31;47:uf=34;47:"
 
 #define DEF_IFACE_COLORS "el=01;33:mi=01;36:dl=01;34:tx=00;37:df=00;37:\
 dc=00;37:wc=01;36:dh=00;36:li=01;32:si=01;34:ti=01;33:em=01;31:wm=01;33:\
-nm=01;32:bm=01;36:as=02;35:"
+nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:"
 
 #define DEF_EXT_COLORS "*.tar=01;31:*.tgz=01;31:*.arc=01;31:\
 *.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:\
@@ -237,7 +237,9 @@ nm=01;32:bm=01;36:as=02;35:"
 #define DEF_DC_C "\x1b[00;37m"
 #define DEF_WC_C "\x1b[01;36m"
 #define DEF_DH_C "\x1b[00;36m"
-#define DEF_AS_C "\x1b[02;35m"
+#define DEF_SH_C "\x1b[02;35m"
+#define DEF_SF_C "\x1b[04;36m"
+#define DEF_SC_C "\x1b[02;31m"
 
 #define DEF_TX_C "\001\x1b[00;37m\002"
 #define DEF_LI_C "\001\x1b[01;32m\002"
@@ -655,6 +657,7 @@ extern short
     suggestions,
     suggestion_is_filename,
     suggestion_printed,
+    suggestion_offset,
 
     home_ok,
     config_ok,
@@ -817,7 +820,9 @@ extern char di_c[MAX_COLOR], /* Directory */
     wc_c[MAX_COLOR], /* Welcome message color */
     dh_c[MAX_COLOR], /* Dirhist index color */
     dl_c[MAX_COLOR], /* Dividing line index color */
-	as_c[MAX_COLOR], /* Auto-suggestions */
+	sh_c[MAX_COLOR], /* Auto-suggestions: history */
+	sf_c[MAX_COLOR], /* Auto-suggestions: filenames */
+	sc_c[MAX_COLOR], /* Auto-suggestions: commands */
 
     /* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */

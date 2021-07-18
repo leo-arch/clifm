@@ -128,10 +128,17 @@ initialize_readline(void)
 	return EXIT_SUCCESS;
 }
 
-/* Clear the line, print the suggestion (STR) at OFFSET, and move the
- * cursor back to the original position */
 void
-print_suggestion(char *str, size_t offset)
+clear_suggestion(void)
+{
+	if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
+	suggestion_printed = 0;
+}
+
+/* Clear the line, print the suggestion (STR) at OFFSET in COLOR, and
+ * move the cursor back to the original position */
+void
+print_suggestion(const char *str, size_t offset, char *color)
 {
 	if (offset > 0)
 		offset--;
@@ -139,7 +146,7 @@ print_suggestion(char *str, size_t offset)
 	suggestion_buf = xnmalloc(strlen(str) + 1, sizeof(char));
 	strcpy(suggestion_buf, str);
 	if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
-	printf("%s%s\x1b[39;49m%s", as_c, str + offset, df_c);
+	printf("%s%s\x1b[39;49m%s", color, str + offset, df_c);
 	printf("\x1b[%zuD", wc_xstrlen(str + offset));
 }
 
@@ -161,16 +168,14 @@ rl_suggestions(char c)
 	if (rl_point != rl_end) {
 		if (suggestion_buf) {
 			if (c != _ESC) {
-				if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
-				suggestion_printed = 0;
+				clear_suggestion();
 			}
-		} else {
+		} /*else {
 			if (suggestion_printed && c != _ESC && c != 'A' && c != 'B'
 			&& c != 'C' && c != 'D' && c != OP_BRACKET && c != UC_O) {
-				if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
-				suggestion_printed = 0;
+				clear_suggestion();
 			}
-		}
+		} */
 		goto FAIL;
 	}
 
@@ -188,8 +193,22 @@ rl_suggestions(char c)
 	 * correctly find matches. At this point (rl_getc), readline has
 	 * not appended this char to rl_line_buffer yet */
 	size_t buflen = strlen(rl_line_buffer);
+	char *last_space = strrchr(rl_line_buffer, ' ');
+	if (!last_space || !*(++last_space)) {
+		last_space = (char *)NULL;
+		suggestion_offset = 0;
+	} else {
+		int j = buflen;
+		while (--j >= 0) {
+			if (rl_line_buffer[j] == ' ')
+				break;
+		}
+		suggestion_offset = j + 1;
+		buflen = strlen(last_space);
+	}
 	tmp_buf = (char *)xnmalloc(buflen + 2, sizeof(char));
-	sprintf(tmp_buf, "%s%c", rl_line_buffer, (c != BS) ? c : 0);
+	sprintf(tmp_buf, "%s%c", last_space ? last_space : rl_line_buffer,
+			(c != BS) ? c : 0);
 
 	/* In case of backspace, remove the last typed char and decrease
 	 * the buffer's length. Else, just increase it */
@@ -239,18 +258,20 @@ rl_suggestions(char c)
 	int i;
 
 	/* 2.a) Check command history */
-	i = current_hist_n;
-	suggestion_is_filename = 0;
-	while (--i >= 0) {
-		if (!history[i] || TOUPPER(*tmp_buf) != TOUPPER(*history[i]))
-			continue;
-		if (buflen && (case_sens_path_comp
-		? strncmp(tmp_buf, history[i], buflen)
-		: strncasecmp(tmp_buf, history[i], buflen)) == 0
-		&& strlen(history[i]) > buflen) {
-			print_suggestion(history[i], buflen);
-			printed = 1;
-			break;
+	if (!last_space) {
+		i = current_hist_n;
+		suggestion_is_filename = 0;
+		while (--i >= 0) {
+			if (!history[i] || TOUPPER(*tmp_buf) != TOUPPER(*history[i]))
+				continue;
+			if (buflen && (case_sens_path_comp
+			? strncmp(tmp_buf, history[i], buflen)
+			: strncasecmp(tmp_buf, history[i], buflen)) == 0
+			&& strlen(history[i]) > buflen) {
+				print_suggestion(history[i], buflen, sh_c);
+				printed = 1;
+				break;
+			}
 		}
 	}
 
@@ -269,9 +290,9 @@ rl_suggestions(char c)
 			if (file_info[i].dir) {
 				char tmp[NAME_MAX + 2];
 				snprintf(tmp, NAME_MAX + 2, "%s/", file_info[i].name);
-				print_suggestion(tmp, buflen);
+				print_suggestion(tmp, buflen, sf_c);
 			} else {
-				print_suggestion(file_info[i].name, buflen);
+				print_suggestion(file_info[i].name, buflen, sf_c);
 			}
 			if (c != BS)
 				suggestion_is_filename = 1;
@@ -290,7 +311,7 @@ rl_suggestions(char c)
 			/* If only one match */
 			if (_matches[0] && *_matches[0]
 			&& strlen(_matches[0]) > buflen) {
-				print_suggestion(_matches[0], buflen);
+				print_suggestion(_matches[0], buflen, sf_c);
 				if (c != BS)
 					suggestion_is_filename = 1;
 				printed = 1;
@@ -298,7 +319,7 @@ rl_suggestions(char c)
 				/* If multiple matches, suggest the first one */
 				if (c != '/' && _matches[1] && *_matches[1]
 				&& strlen(_matches[1]) > buflen) {
-					print_suggestion(_matches[1], buflen);
+					print_suggestion(_matches[1], buflen, sf_c);
 					if (c != BS)
 						suggestion_is_filename = 1;
 					printed = 1;
@@ -313,16 +334,19 @@ rl_suggestions(char c)
 	if (printed)
 		goto SUCCESS;
 
-	/* 2.d) Check commands in PATH and CliFM internals */
-	i = path_progsn;
-	while (--i >= 0) {
-		if (!bin_commands[i] || *tmp_buf != *bin_commands[i])
-			continue;
-		if (buflen && strncmp(tmp_buf, bin_commands[i], buflen) == 0
-		&& strlen(bin_commands[i]) > buflen) {
-			print_suggestion(bin_commands[i], buflen);
-			printed = 1;
-			break;
+	/* 2.d) Check commands in PATH and CliFM internals, but only
+	 * in the case of the first word */
+	if (!last_space) {
+		i = path_progsn;
+		while (--i >= 0) {
+			if (!bin_commands[i] || *tmp_buf != *bin_commands[i])
+				continue;
+			if (buflen && strncmp(tmp_buf, bin_commands[i], buflen) == 0
+			&& strlen(bin_commands[i]) > buflen) {
+				print_suggestion(bin_commands[i], buflen, sc_c);
+				printed = 1;
+				break;
+			}
 		}
 	}
 
@@ -339,14 +363,12 @@ rl_suggestions(char c)
 			/* The rl_point check prevents the current suggestion from
 			 * being erased when moving the cursor backwards */
 			if (rl_point == 0) {
-				if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
-				suggestion_printed = 0;
+				clear_suggestion();
 				goto FAIL;
 			} else if (!__esc) {
 				/* Clear current suggestion only if no escape char
 				 * is contained in the current input sequence */
-				if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
-				suggestion_printed = 0;
+				clear_suggestion();
 				goto FAIL;
 			}
 		}

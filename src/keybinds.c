@@ -497,6 +497,8 @@ rl_accept_suggestion(int count, int key)
 	 * of the line typed so far */
 	if (suggestions && rl_point == rl_end && suggestion_buf) {
 		suggestion_printed = 0;
+		rl_delete_text(suggestion_offset, rl_end);
+		rl_point = suggestion_offset;
 		if (suggestion_is_filename) {
 			suggestion_is_filename = 0;
 			char *tmp = (char *)NULL;
@@ -504,17 +506,15 @@ rl_accept_suggestion(int count, int key)
 			if (!ret)
 				tmp = escape_str(suggestion_buf);
 			if (tmp) {
-				rl_replace_line(tmp, 1);
-/*				rl_delete_text(0, rl_end);
-				rl_point = rl_end = 0;
-				rl_insert_text(tmp); */
+/*				rl_replace_line(tmp, 1); */
+				rl_insert_text(tmp);
 				free(tmp);
+			} else {
+				rl_insert_text(suggestion_buf);
 			}
 		} else {
-			rl_replace_line(suggestion_buf, 1);
-/*			rl_delete_text(0, rl_end);
-			rl_point = rl_end = 0;
-			rl_insert_text(suggestion_buf); */
+/*			rl_replace_line(suggestion_buf, 1); */
+			rl_insert_text(suggestion_buf);
 		}
 		/* Move the cursor to the end of the line */
 		rl_point = rl_end;
