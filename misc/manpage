@@ -930,7 +930,9 @@ Colors are specified using the same format used by \fBdircolors(1)\fR and the LS
 .TP
 The following codes are used for different interface elements:
 .sp
- as = auto-suggestions string color
+ sh = Commands history suggestions
+ sf = file and directory names suggestions
+ sc = Command names suggestions
  bm = bookmarked directory in the bookmarks screen
  el = ELN color
  mi = misc indicators color (disk usage, sort method, bulk rename)
@@ -1118,8 +1120,8 @@ Plugins are just scripts or programs (written in any language) able to add, exte
  | fzfnav            | fzf                           |
  |   -archives       | atool, bsdtar or tar          |
  |   -images         | kitty terminal, imagemagick,  | 
- |	             | and ueberzug or viu or catimg |
- |		     | or img2txt                    |
+ |		             | and ueberzug or viu or catimg |
+ |				     | or img2txt                    |
  |   -fonts          | fontpreview or fontforge      |
  |   -docs           | libreoffice, catdoc, odt2txt, |
  |                   | pandoc                        |
