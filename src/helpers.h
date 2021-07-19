@@ -350,6 +350,12 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:"
 #define OP_BRACKET 91
 #define UC_O 79
 
+/* Macros to specify suggestions type */
+#define NO_SUG 0
+#define HIST_SUG 1
+#define FILE_SUG 2
+#define CMD_SUG 4
+
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR
  * (Select Graphic Rendition) parameter, and, of course, the terminating
@@ -576,6 +582,14 @@ struct remote_t {
 
 extern struct remote_t *remotes;
 
+struct suggestions_t {
+	int type;
+    int printed;
+    int offset;
+};
+
+extern struct suggestions_t suggestion;
+
 /* A list of possible program messages. Each value tells the prompt what
  * to do with error messages: either to print an E, W, or N char at the
  * beginning of the prompt, or nothing (nomsg) */
@@ -655,9 +669,6 @@ extern short
     icons,
     copy_n_rename,
     suggestions,
-    suggestion_is_filename,
-    suggestion_printed,
-    suggestion_offset,
 
     home_ok,
     config_ok,

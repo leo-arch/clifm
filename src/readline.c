@@ -132,7 +132,7 @@ void
 clear_suggestion(void)
 {
 	if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
-	suggestion_printed = 0;
+	suggestion.printed = 0;
 }
 
 /* Clear the line, print the suggestion (STR) at OFFSET in COLOR, and
@@ -142,12 +142,117 @@ print_suggestion(const char *str, size_t offset, char *color)
 {
 	if (offset > 0)
 		offset--;
+
 	free(suggestion_buf);
 	suggestion_buf = xnmalloc(strlen(str) + 1, sizeof(char));
 	strcpy(suggestion_buf, str);
+
 	if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
 	printf("%s%s\x1b[39;49m%s", color, str + offset, df_c);
 	printf("\x1b[%zuD", wc_xstrlen(str + offset));
+}
+
+int
+check_completions(const char *str, const size_t len, const char c)
+{
+	int printed = 0;
+	char **_matches = rl_completion_matches(str, rl_completion_entry_function);
+
+	if (_matches) {
+		if (len) {
+			/* If only one match */
+			if (_matches[0] && *_matches[0]	&& strlen(_matches[0]) > len) {
+				print_suggestion(_matches[0], len, sf_c);
+				if (c != BS)
+					suggestion.type = FILE_SUG;
+				printed = 1;
+			} else {
+				/* If multiple matches, suggest the first one */
+				if (c != '/' && _matches[1] && *_matches[1]
+				&& strlen(_matches[1]) > len) {
+					print_suggestion(_matches[1], len, sf_c);
+					if (c != BS)
+						suggestion.type = FILE_SUG;
+					printed = 1;
+				}
+			}
+		}
+
+		size_t i;
+		for (i = 0; _matches[i]; i++)
+			free(_matches[i]);
+		free(_matches);
+	}
+
+	return printed;
+}
+
+int
+check_filenames(const char *str, const size_t len, const char c)
+{
+	int i = files;
+
+	while (--i >= 0) {
+		if (!file_info[i].name || TOUPPER(*str) != TOUPPER(*file_info[i].name))
+			continue;
+		if (len && (case_sens_path_comp	? strncmp(str, file_info[i].name, len)
+		: strncasecmp(str, file_info[i].name, len)) == 0
+		&& file_info[i].len > len) {
+			if (file_info[i].dir) {
+				char tmp[NAME_MAX + 2];
+				snprintf(tmp, NAME_MAX + 2, "%s/", file_info[i].name);
+				print_suggestion(tmp, len, sf_c);
+			} else {
+				print_suggestion(file_info[i].name, len, sf_c);
+			}
+			if (c != BS)
+				suggestion.type = FILE_SUG;
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+int
+check_history(const char *str, const size_t len)
+{
+	if (!str || !*str)
+		return 0;
+	int i = current_hist_n;
+
+	while (--i >= 0) {
+		if (!history[i] || TOUPPER(*str) != TOUPPER(*history[i]))
+			continue;
+		if (len && (case_sens_path_comp ? strncmp(str, history[i], len)
+		: strncasecmp(str, history[i], len)) == 0
+		&& strlen(history[i]) > len) {
+			print_suggestion(history[i], len, sh_c);
+			suggestion.type = HIST_SUG;
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+int
+check_cmds(const char *str, const size_t len)
+{
+	int i = path_progsn;
+
+	while (--i >= 0) {
+		if (!bin_commands[i] || *str != *bin_commands[i])
+			continue;
+		if (len && strncmp(str, bin_commands[i], len) == 0
+		&& strlen(bin_commands[i]) > len) {
+			print_suggestion(bin_commands[i], len, sc_c);
+			suggestion.type = CMD_SUG;
+			return 1;
+		}
+	}
+
+	return 0;
 }
 
 /* Check if some suggestion is available. Return zero if true and one
@@ -194,21 +299,22 @@ rl_suggestions(char c)
 	 * not appended this char to rl_line_buffer yet */
 	size_t buflen = strlen(rl_line_buffer);
 	char *last_space = strrchr(rl_line_buffer, ' ');
+	suggestion.offset = 0;
+
 	if (!last_space || !*(++last_space)) {
 		last_space = (char *)NULL;
-		suggestion_offset = 0;
-	} else {
+	} else if (suggestion.type != HIST_SUG) {
 		int j = buflen;
 		while (--j >= 0) {
 			if (rl_line_buffer[j] == ' ')
 				break;
 		}
-		suggestion_offset = j + 1;
+		suggestion.offset = j + 1;
 		buflen = strlen(last_space);
 	}
+
 	tmp_buf = (char *)xnmalloc(buflen + 2, sizeof(char));
-	sprintf(tmp_buf, "%s%c", last_space ? last_space : rl_line_buffer,
-			(c != BS) ? c : 0);
+	sprintf(tmp_buf, "%s%c", last_space ? last_space : rl_line_buffer, c);
 
 	/* In case of backspace, remove the last typed char and decrease
 	 * the buffer's length. Else, just increase it */
@@ -249,131 +355,65 @@ rl_suggestions(char c)
 		__esc = 0;
 		goto SUCCESS;
 	}
+
 /* ####################### */
 
 		/* ######################################
-		 * #	   2) Look for suggestions		#
+		 * #	  2) Search for suggestions		#
 		 * ######################################*/
 
-	int i;
+	char *buf_bk = (char *)xnmalloc(strlen(rl_line_buffer) + 2, sizeof(char));
+	sprintf(buf_bk, "%s%c", rl_line_buffer, c);
 
-	/* 2.a) Check command history */
-	if (!last_space) {
-		i = current_hist_n;
-		suggestion_is_filename = 0;
-		while (--i >= 0) {
-			if (!history[i] || TOUPPER(*tmp_buf) != TOUPPER(*history[i]))
-				continue;
-			if (buflen && (case_sens_path_comp
-			? strncmp(tmp_buf, history[i], buflen)
-			: strncasecmp(tmp_buf, history[i], buflen)) == 0
-			&& strlen(history[i]) > buflen) {
-				print_suggestion(history[i], buflen, sh_c);
-				printed = 1;
-				break;
-			}
-		}
+	if (suggestion_buf && suggestion.printed
+	&& strncmp(buf_bk, suggestion_buf, strlen(buf_bk)) == 0) {
+		printed = 1;
+		free(buf_bk);
+		goto SUCCESS;
 	}
 
+	/* 2.a) Check command history */
+	printed = check_history(buf_bk, strlen(buf_bk));
+	free(buf_bk);
 	if (printed)
 		goto SUCCESS;
 
 	/* 2.b) Check file names in CWD */
-	i = files;
-	while (--i >= 0) {
-		if (!file_info[i].name || TOUPPER(*tmp_buf) != TOUPPER(*file_info[i].name))
-			continue;
-		if (buflen && (case_sens_path_comp
-		? strncmp(tmp_buf, file_info[i].name, buflen)
-		: strncasecmp(tmp_buf, file_info[i].name, buflen)) == 0
-		&& file_info[i].len > buflen) {
-			if (file_info[i].dir) {
-				char tmp[NAME_MAX + 2];
-				snprintf(tmp, NAME_MAX + 2, "%s/", file_info[i].name);
-				print_suggestion(tmp, buflen, sf_c);
-			} else {
-				print_suggestion(file_info[i].name, buflen, sf_c);
-			}
-			if (c != BS)
-				suggestion_is_filename = 1;
-			printed = 1;
-			break;
-		}
-	}
-
+	printed = check_filenames(tmp_buf, strlen(tmp_buf), c);
 	if (printed)
 		goto SUCCESS;
 
 	/* 2.c) Check possible completions */
-	char **_matches = rl_completion_matches(tmp_buf, rl_completion_entry_function);
-	if (_matches) {
-		if (buflen) {
-			/* If only one match */
-			if (_matches[0] && *_matches[0]
-			&& strlen(_matches[0]) > buflen) {
-				print_suggestion(_matches[0], buflen, sf_c);
-				if (c != BS)
-					suggestion_is_filename = 1;
-				printed = 1;
-			} else {
-				/* If multiple matches, suggest the first one */
-				if (c != '/' && _matches[1] && *_matches[1]
-				&& strlen(_matches[1]) > buflen) {
-					print_suggestion(_matches[1], buflen, sf_c);
-					if (c != BS)
-						suggestion_is_filename = 1;
-					printed = 1;
-				}
-			}
-		}
-		for (i = 0; _matches[i]; i++)
-			free(_matches[i]);
-		free(_matches);
-	}
-
+	printed = check_completions(tmp_buf, strlen(tmp_buf), c);
 	if (printed)
 		goto SUCCESS;
 
 	/* 2.d) Check commands in PATH and CliFM internals, but only
 	 * in the case of the first word */
-	if (!last_space) {
-		i = path_progsn;
-		while (--i >= 0) {
-			if (!bin_commands[i] || *tmp_buf != *bin_commands[i])
-				continue;
-			if (buflen && strncmp(tmp_buf, bin_commands[i], buflen) == 0
-			&& strlen(bin_commands[i]) > buflen) {
-				print_suggestion(bin_commands[i], buflen, sc_c);
-				printed = 1;
-				break;
-			}
-		}
-	}
+	if (!last_space)
+		printed = check_cmds(tmp_buf, strlen(tmp_buf));
 
 	if (printed)
 		goto SUCCESS;
-/*	else if (!autocd)
-		goto FAIL; */
 
 		/* ######################################
 		 * # 	  3) No suggestion found		#
 		 * ######################################*/
-	else {
-		if (suggestion_buf) {
-			/* The rl_point check prevents the current suggestion from
-			 * being erased when moving the cursor backwards */
-			if (rl_point == 0) {
-				clear_suggestion();
-				goto FAIL;
-			} else if (!__esc) {
-				/* Clear current suggestion only if no escape char
-				 * is contained in the current input sequence */
-				clear_suggestion();
-				goto FAIL;
-			}
+
+	if (suggestion_buf) {
+		/* The rl_point check prevents the current suggestion from
+		 * being erased when moving the cursor backwards */
+		if (rl_point == 0) {
+			clear_suggestion();
+			goto FAIL;
+		} else if (!__esc) {
+			/* Clear current suggestion only if no escape char
+			 * is contained in the current input sequence */
+			clear_suggestion();
+			goto FAIL;
 		}
-		goto SUCCESS;
 	}
+	goto SUCCESS;
 
 	/* Check jump database */
 /*	char *dir = strchr(tmp_buf, '/');
@@ -387,9 +427,9 @@ rl_suggestions(char c)
 		if (buflen && strncmp(tmp_buf, jump_db[i].path, buflen + 1) == 0
 		&& strlen(jump_db[i].path) > buflen) {
 			print_suggestion(jump_db[i].path, buflen);
-			suggestion_printed = 1;
+			suggestion.printed = 1;
 			if (c != BS)
-				suggestion_is_filename = 1;
+				suggestion.type = FILE_SUG;
 			printed = 1;
 			break;
 		}
@@ -402,11 +442,14 @@ rl_suggestions(char c)
 
 SUCCESS:
 	if (printed)
-		suggestion_printed = 1;
+		suggestion.printed = 1;
+	else
+		suggestion.printed = 0;
 	free(tmp_buf);
 	return EXIT_SUCCESS;
 
 FAIL:
+	suggestion.printed = 0;
 	free(tmp_buf);
 	free(suggestion_buf);
 	suggestion_buf = (char *)NULL;
@@ -433,10 +476,6 @@ my_rl_getc(FILE *stream)
 			 * deleted by moving the cursor backwards */
 			if (suggestions)
 				rl_suggestions(c);
-//			if (suggestions && !rl_suggestions(c) && rl_point == 0)
-				/* Delete line starting from current cursor position.
-				 * In other words, remove the previous suggestion */
-//				if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
 			return (c);
 		}
 
@@ -506,11 +545,14 @@ is_quote_char(const char c)
 char *
 rl_no_hist(const char *prompt)
 {
+	int bk = suggestions;
+	suggestions = 0;
 	stifle_history(0); /* Prevent readline from using the history
 	setting */
 	char *input = readline(prompt);
 	unstifle_history();	 /* Reenable history */
 	read_history(HIST_FILE); /* Reload history lines from file */
+	suggestions = bk;
 
 	if (input) {
 

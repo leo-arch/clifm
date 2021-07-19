@@ -496,30 +496,36 @@ rl_accept_suggestion(int count, int key)
 	/* Only accept the current suggestion if the cursor is at the end
 	 * of the line typed so far */
 	if (suggestions && rl_point == rl_end && suggestion_buf) {
-		suggestion_printed = 0;
-		rl_delete_text(suggestion_offset, rl_end);
-		rl_point = suggestion_offset;
-		if (suggestion_is_filename) {
-			suggestion_is_filename = 0;
+		suggestion.printed = 0;
+		rl_delete_text(suggestion.offset, rl_end);
+		rl_point = suggestion.offset;
+
+		switch(suggestion.type) {
+
+		case FILE_SUG:
+			suggestion.type = NO_SUG;
 			char *tmp = (char *)NULL;
 			char *ret = strchr(suggestion_buf, '\\');
 			if (!ret)
 				tmp = escape_str(suggestion_buf);
 			if (tmp) {
-/*				rl_replace_line(tmp, 1); */
 				rl_insert_text(tmp);
 				free(tmp);
 			} else {
 				rl_insert_text(suggestion_buf);
 			}
-		} else {
-/*			rl_replace_line(suggestion_buf, 1); */
+			break;
+
+		default:
 			rl_insert_text(suggestion_buf);
+			break;
 		}
+
 		/* Move the cursor to the end of the line */
 		rl_point = rl_end;
 		free(suggestion_buf);
 		suggestion_buf = (char *)NULL;
+
 	} else if (rl_point < rl_end) {
 		/* Just move the cursor forward one char */
 		rl_point++;

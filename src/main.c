@@ -67,6 +67,7 @@ struct jump_t *jump_db = (struct jump_t *)NULL;
 struct bookmarks_t *bookmarks = (struct bookmarks_t *)NULL;
 struct fileinfo *file_info = (struct fileinfo *)NULL;
 struct remote_t *remotes = (struct remote_t *)NULL;
+struct suggestions_t suggestion;
 
 /* pmsg holds the current program message type */
 enum prog_msg pmsg = nomsg;
@@ -136,10 +137,6 @@ short
     switch_cscheme = 0,
     icons = 0,
     copy_n_rename = 0,
-
-    suggestion_is_filename = 0,
-    suggestion_printed = 0,
-    suggestion_offset = 0,
 
     home_ok = 1,
     config_ok = 1,
