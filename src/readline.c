@@ -255,6 +255,25 @@ check_cmds(const char *str, const size_t len)
 	return 0;
 }
 
+int
+check_jumpdb(const char *str, const size_t len)
+{
+	int i = jump_n;
+
+	while (--i >= 0) {
+		if (!jump_db[i].path || *str != *jump_db[i].path)
+			continue;
+		if (len && strncmp(str, jump_db[i].path, len) == 0
+		&& strlen(jump_db[i].path) > len) {
+			print_suggestion(jump_db[i].path, len, sf_c);
+			suggestion.type = FILE_SUG;
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 /* Check if some suggestion is available. Return zero if true and one
  * on error. If true, the suggestion will be printed by
  * print_suggestion() */
@@ -383,12 +402,17 @@ rl_suggestions(char c)
 	if (printed)
 		goto SUCCESS;
 
-	/* 2.c) Check possible completions */
+	/* 2.c) Check the jump database */
+	printed = check_jumpdb(tmp_buf, strlen(tmp_buf));
+	if (printed)
+		goto SUCCESS;
+
+	/* 2.d) Check possible completions */
 	printed = check_completions(tmp_buf, strlen(tmp_buf), c);
 	if (printed)
 		goto SUCCESS;
 
-	/* 2.d) Check commands in PATH and CliFM internals, but only
+	/* 2.e) Check commands in PATH and CliFM internals, but only
 	 * in the case of the first word */
 	if (!last_space)
 		printed = check_cmds(tmp_buf, strlen(tmp_buf));
