@@ -255,17 +255,17 @@ check_history(const char *str, const size_t len)
 		if (!history[i] || TOUPPER(*str) != TOUPPER(*history[i]))
 			continue;
 		char *ret = strrchr(history[i], ' ');
-		if (!ret) {
-			if (*history[i] != '/')
+		if (!ret) { /* No space */
+			if (*history[i] != '/') /* And no absolute path */
 				continue;
 		} else if (*(++ret)) {
-			if (*ret == '&') {
+			if (*ret == '&') { /* 'entry &' */
 				continue;
 			}
-		} else {
+		} else { /* Space is last char */
 			continue;
 		}
-		
+
 		if (len && (case_sens_path_comp ? strncmp(str, history[i], len)
 		: strncasecmp(str, history[i], len)) == 0
 		&& strlen(history[i]) > len) {
