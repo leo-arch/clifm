@@ -2213,7 +2213,7 @@ reload_config(void)
 	light_mode = classify = cd_on_quit = columned = tr_as_rm = UNSET;
 	no_eln = min_name_trim = case_sens_dirjump = case_sens_path_comp = UNSET;
 	min_jump_rank = max_jump_total_rank = print_selfiles = UNSET;
-	max_printselfiles = suggestions = UNSET;
+	max_printselfiles = suggestions = visible_prompt_len = UNSET;
 
 	shell_terminal = no_log = internal_cmd = recur_perm_error_flag = 0;
 	is_sel = sel_is_last = print_msg = kbind_busy = dequoted = 0;

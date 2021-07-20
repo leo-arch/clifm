@@ -24,8 +24,6 @@
 
 #pragma once
 
-#define DEL_LINE_FROM_CURSOR if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
-
 int initialize_readline(void);
 char *my_rl_path_completion(const char *text, int state);
 char **my_rl_completion(const char *text, int start, int end);

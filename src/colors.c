@@ -760,21 +760,24 @@ set_colors(const char *colorscheme, int env)
 				if (!is_color_code(colors[i] + 3))
 					*sh_c = '\0';
 				else
-					snprintf(sh_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
+					snprintf(sh_c, MAX_COLOR - 1, "\001\x1b[%sm\002",
+							colors[i] + 3);
 			}
 
 			else if (*colors[i] == 's' && strncmp(colors[i], "sf=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*sf_c = '\0';
 				else
-					snprintf(sf_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
+					snprintf(sf_c, MAX_COLOR - 1, "\001\x1b[%sm\002",
+							colors[i] + 3);
 			}
 
 			else if (*colors[i] == 's' && strncmp(colors[i], "sc=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*sc_c = '\0';
 				else
-					snprintf(sc_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
+					snprintf(sc_c, MAX_COLOR - 1, "\001\x1b[%sm\002",
+							colors[i] + 3);
 			}
 
 			else if (*colors[i] == 'b' && strncmp(colors[i], "bm=", 3) == 0) {
@@ -857,7 +860,8 @@ set_colors(const char *colorscheme, int env)
 				if (!is_color_code(colors[i] + 3))
 					*df_c = '\0';
 				else
-					snprintf(df_c, MAX_COLOR - 1, "\x1b[%s;49m", colors[i] + 3);
+					snprintf(df_c, MAX_COLOR - 1, "\001\x1b[%s;49m\002",
+							colors[i] + 3);
 			}
 
 			else if (*colors[i] == 'd' && strncmp(colors[i], "dc=", 3) == 0) {
@@ -1041,7 +1045,8 @@ set_colors(const char *colorscheme, int env)
 				if (!is_color_code(colors[i] + 3))
 					*df_c = '\0';
 				else
-					snprintf(df_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
+					snprintf(df_c, MAX_COLOR - 1, "\001\x1b[%sm\002",
+							colors[i] + 3);
 
 			else if (*colors[i] == 'd' && strncmp(colors[i], "dc=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
@@ -1059,19 +1064,22 @@ set_colors(const char *colorscheme, int env)
 				if (!is_color_code(colors[i] + 3))
 					*sh_c = '\0';
 				else
-					snprintf(sh_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
+					snprintf(sh_c, MAX_COLOR - 1, "\001\x1b[%sm\002",
+							colors[i] + 3);
 
 			else if (*colors[i] == 's' && strncmp(colors[i], "sf=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
 					*sf_c = '\0';
 				else
-					snprintf(sf_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
+					snprintf(sf_c, MAX_COLOR - 1, "\001\x1b[%sm\002",
+							colors[i] + 3);
 
 			else if (*colors[i] == 's' && strncmp(colors[i], "sc=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))
 					*sc_c = '\0';
 				else
-					snprintf(sc_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
+					snprintf(sc_c, MAX_COLOR - 1, "\001\x1b[%sm\002",
+							colors[i] + 3);
 
 			else if (*colors[i] == 'd' && strncmp(colors[i], "dh=", 3) == 0)
 				if (!is_color_code(colors[i] + 3))

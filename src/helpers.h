@@ -233,13 +233,10 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:"
 #define DEF_EL_C "\x1b[01;33m"
 #define DEF_MI_C "\x1b[01;36m"
 #define DEF_DL_C "\x1b[01;34m"
-#define DEF_DF_C "\x1b[00;37m"
+#define DEF_DF_C "\001\x1b[00;37m\002"
 #define DEF_DC_C "\x1b[00;37m"
 #define DEF_WC_C "\x1b[01;36m"
 #define DEF_DH_C "\x1b[00;36m"
-#define DEF_SH_C "\x1b[02;35m"
-#define DEF_SF_C "\x1b[04;36m"
-#define DEF_SC_C "\x1b[02;31m"
 
 #define DEF_TX_C "\001\x1b[00;37m\002"
 #define DEF_LI_C "\001\x1b[01;32m\002"
@@ -248,6 +245,15 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:"
 #define DEF_WM_C "\001\x1b[01;33m\002"
 #define DEF_NM_C "\001\x1b[01;32m\002"
 #define DEF_SI_C "\001\x1b[01;34m\002"
+
+#define DEF_SH_C "\001\x1b[02;35m\002"
+#define DEF_SF_C "\001\x1b[04;36m\002"
+#define DEF_SC_C "\001\x1b[02;31m\002"
+
+#define DLFC "\001\x1b[0K\002" /* Delete line from cursor */
+#define DLFC_LEN 6
+//#define SCP "\001\x1b[s\002" /* Save cursor position */
+//#define RCP "\001\x1b[u\002" /* Restore cursor position */
 
 #define DEF_DIR_ICO_C "\x1b[00;33m"
 
@@ -586,6 +592,7 @@ struct suggestions_t {
 	int type;
     int printed;
     int offset;
+	int lines;
 };
 
 extern struct suggestions_t suggestion;
@@ -695,7 +702,8 @@ extern int
     dirhist_total_index,
     trash_n,
     jump_total_rank,
-    *eln_as_file;
+    *eln_as_file,
+    visible_prompt_len;
 
 extern unsigned short term_cols;
 

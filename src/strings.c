@@ -27,6 +27,7 @@
 #include <glob.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <time.h>
 #include <wchar.h>
 #if !defined(__HAIKU__) && !defined(__OpenBSD__)
@@ -2171,4 +2172,53 @@ dequote_str(char *text, int mt)
 
 	buf[len] = '\0';
 	return buf;
+}
+
+int
+get_prompt_len(const char *str)
+{
+	if (!str || !*str)
+		return -1;
+
+	size_t i, j = 0;
+	char *tmp = (char *)xnmalloc(strlen(str) + 1, sizeof(char));
+
+	for (i = 0; str[i]; i++) {
+		if (isprint(str[i])) {
+			tmp[j++] = str[i];
+		} else {
+			if (str[i] == '\n') {
+				tmp[j++] = str[i];
+				continue;
+			}
+			int j = i;
+			/* Remove escape char, including color code sequences */
+			if (str[j] == 27) {
+				if (str[j + 1] == '[') {
+					for (; str[j] != 'm'; j++) {
+						if (str[j] == '\0') {
+							break;
+						}
+					}
+					if (str[j] == 'm')
+						i = j;
+				} else {
+					tmp[j++] = str[i];
+				}
+			} else {
+				tmp[j++] = str[i];
+			}
+		}
+	}
+
+	if (*tmp) {
+		tmp[j] = '\0';
+		char *ret = strrchr(tmp, '\n');
+		size_t tmp_len = wc_xstrlen(*(++ret) ? ret : tmp);
+		free(tmp);
+		return (int)tmp_len;
+	}
+
+	free(tmp);
+	return -1;
 }

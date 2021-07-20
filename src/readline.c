@@ -132,6 +132,14 @@ void
 clear_suggestion(void)
 {
 	if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
+	if (suggestion.lines) {
+		int i;
+		for (i = 1; i <= suggestion.lines; i++) {
+			printf("\x1b[1B");
+			if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
+		}
+		printf("\x1b[%dA", suggestion.lines);
+	}
 	suggestion.printed = 0;
 }
 
@@ -147,9 +155,30 @@ print_suggestion(const char *str, size_t offset, char *color)
 	suggestion_buf = xnmalloc(strlen(str) + 1, sizeof(char));
 	strcpy(suggestion_buf, str);
 
-	if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
-	printf("%s%s\x1b[39;49m%s", color, str + offset, df_c);
-	printf("\x1b[%zuD", wc_xstrlen(str + offset));
+	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {}
+/*	printf(SCP); // Save cursor position */
+	printf("%s%s\001\x1b[39;49m\002%s", color, str + offset, df_c);
+	int nlines = (int)wc_xstrlen(str + offset)
+				/ ((int)term_cols - visible_prompt_len - offset);
+	if (nlines > 0) {
+		suggestion.lines = nlines;
+		/* Move up %d lines */
+		printf("\x1b[%dF", nlines);
+		/* Move the cursor forward %d columns: the previous code sets
+		 * the cursor at the beginning of the line, so that we need to
+		 * move forward to go back to the original position */
+		printf("\x1b[%dC", visible_prompt_len + (int)offset);
+	} else {
+		suggestion.lines = 0;
+		/* Move the cursor backwards %d columns: the printf above left
+		 * the cursor at the end of the string */
+		printf("\x1b[%zuD", wc_xstrlen(str + offset));
+	}
+/*	printf(RCP); // Restore cursor position
+	int nline = (int)wc_xstrlen(str + offset) / (int)term_cols;
+	if (nline > 0)
+		printf("\x1b[%dF", nlines);
+	printf("\x1b[%zuD", wc_xstrlen(str + offset)); */
 }
 
 int
@@ -280,7 +309,7 @@ check_jumpdb(const char *str, const size_t len)
 int
 rl_suggestions(char c)
 {
-	static int count = 4, __esc = 0;
+	static int count = 6, __esc = 0;
 	char *tmp_buf = (char *)NULL;
 	int printed = 0;
 
@@ -347,6 +376,7 @@ rl_suggestions(char c)
  * processed for suggestions. Count: 1) ESC (27), 2) Opening bracket (91),
  * 3) Other char (A, B, C, and D for arrow keys). Only check suggestions
  * at the fourth char after an ESC char
+ * Extend from 4 to 6 to cover function keys as well.
  * On Haiku terminal, the sequence is: ESC O(79) A-D */
 	switch(*tmp_buf) {
 		case _ESC:
@@ -355,12 +385,12 @@ rl_suggestions(char c)
 		case OP_BRACKET: /* fallthrough */
 		case UC_O: count++; break; /* Haiku terminal */
 		default:
-			if (count < 4)
+			if (count < 6)
 				count++;
 			break;
 	}
 
-	if (count < 4)
+	if (count < 6)
 		goto FAIL;
 
 	/* If the sequence includes an ESC char and a C, we most probably
@@ -370,12 +400,15 @@ rl_suggestions(char c)
 	if (!__esc && strchr(tmp_buf, '\x1b'))
 		__esc = 1;
 
-	if (__esc && (c == 'C' || c == '~' || c == 'B' || c == 'D' || c == 'A')) {
+	if (__esc && (c == 'C' || c == '~' || c == 'B' || c == 'D'
+	|| c == 'A' || (c >= '0' && c <= '9'))) {
 		__esc = 0;
 		goto SUCCESS;
 	}
 
 /* ####################### */
+
+//	printf("'%d'", c);
 
 		/* ######################################
 		 * #	  2) Search for suggestions		#

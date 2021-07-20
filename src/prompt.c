@@ -147,6 +147,10 @@ prompt(void)
 		sprintf(decoded_prompt, "\001\x1b[0m\002> ");
 	}
 
+	if (visible_prompt_len == -1) {
+		visible_prompt_len = get_prompt_len(decoded_prompt);
+	}
+
 	size_t decoded_prompt_len;
 
 	if (unicode)
