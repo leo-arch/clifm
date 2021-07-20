@@ -249,6 +249,7 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:"
 #define DEF_SH_C "\001\x1b[02;35m\002"
 #define DEF_SF_C "\001\x1b[04;36m\002"
 #define DEF_SC_C "\001\x1b[02;31m\002"
+#define DEF_SX_C "\001\x1b[02;32m\002"
 
 #define DLFC "\001\x1b[0K\002" /* Delete line from cursor */
 #define DLFC_LEN 6
@@ -800,6 +801,8 @@ extern size_t *ext_colors_len;
  * commands long version for TAB completion */
 extern const char *INTERNAL_CMDS[];
 
+extern const char *PARAM_STR[];
+
 /* To store all the 39 color variables I use, with 46 bytes each, I need
  * a total of 1,8Kb. It's not much but it could be less if I'd use
  * dynamically allocated arrays for them (which, on the other side,
@@ -841,7 +844,8 @@ extern char di_c[MAX_COLOR], /* Directory */
     dl_c[MAX_COLOR], /* Dividing line index color */
 	sh_c[MAX_COLOR], /* Auto-suggestions: history */
 	sf_c[MAX_COLOR], /* Auto-suggestions: filenames */
-	sc_c[MAX_COLOR], /* Auto-suggestions: commands */
+	sc_c[MAX_COLOR], /* Auto-suggestions: external commands */
+	sx_c[MAX_COLOR], /* Auto-suggestions: internal commands and params */
 
     /* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */

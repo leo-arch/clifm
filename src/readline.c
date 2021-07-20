@@ -275,7 +275,10 @@ check_cmds(const char *str, const size_t len)
 			continue;
 		if (len && strncmp(str, bin_commands[i], len) == 0
 		&& strlen(bin_commands[i]) > len) {
-			print_suggestion(bin_commands[i], len, sc_c);
+			if (is_internal_c(bin_commands[i]))
+				print_suggestion(bin_commands[i], len, sx_c);
+			else
+				print_suggestion(bin_commands[i], len, sc_c);
 			suggestion.type = CMD_SUG;
 			return 1;
 		}
@@ -296,6 +299,24 @@ check_jumpdb(const char *str, const size_t len)
 		&& strlen(jump_db[i].path) > len) {
 			print_suggestion(jump_db[i].path, len, sf_c);
 			suggestion.type = FILE_SUG;
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+int
+check_int_params(const char *str, const size_t len)
+{
+	size_t i;
+	for (i = 0; PARAM_STR[i]; i++) {
+		if (*str != *PARAM_STR[i])
+			continue;
+		if (len && strncmp(str, PARAM_STR[i], len) == 0
+		&& strlen(PARAM_STR[i]) > len) {
+			print_suggestion(PARAM_STR[i], len, sx_c);
+			suggestion.type = HIST_SUG;
 			return 1;
 		}
 	}
@@ -408,8 +429,6 @@ rl_suggestions(char c)
 
 /* ####################### */
 
-//	printf("'%d'", c);
-
 		/* ######################################
 		 * #	  2) Search for suggestions		#
 		 * ######################################*/
@@ -417,6 +436,7 @@ rl_suggestions(char c)
 	char *buf_bk = (char *)xnmalloc(strlen(rl_line_buffer) + 2, sizeof(char));
 	sprintf(buf_bk, "%s%c", rl_line_buffer, c);
 
+	/* 2.a) Check already suggested string */
 	if (suggestion_buf && suggestion.printed
 	&& strncmp(buf_bk, suggestion_buf, strlen(buf_bk)) == 0) {
 		printed = 1;
@@ -424,28 +444,48 @@ rl_suggestions(char c)
 		goto SUCCESS;
 	}
 
-	/* 2.a) Check command history */
+	/* Suggest the sel keyword */
+	char *ret = strchr(buf_bk, ' ');
+	if (ret) {
+		if (c == 's') {
+			print_suggestion("sel", 1, sx_c);
+			suggestion.type = FILE_SUG;
+			free(buf_bk);
+			goto SUCCESS;
+		}
+	}
+
+	/* 2.b) Check parameters for CliFM commands */
+	if (ret) {
+		printed = check_int_params(buf_bk, strlen(buf_bk));
+		if (printed) {
+			free(buf_bk);
+			goto SUCCESS;
+		}
+	}
+
+	/* 2.c) Check command history */
 	printed = check_history(buf_bk, strlen(buf_bk));
 	free(buf_bk);
 	if (printed)
 		goto SUCCESS;
 
-	/* 2.b) Check file names in CWD */
+	/* 2.d) Check file names in CWD */
 	printed = check_filenames(tmp_buf, strlen(tmp_buf), c);
 	if (printed)
 		goto SUCCESS;
 
-	/* 2.c) Check the jump database */
+	/* 2.e) Check the jump database */
 	printed = check_jumpdb(tmp_buf, strlen(tmp_buf));
 	if (printed)
 		goto SUCCESS;
 
-	/* 2.d) Check possible completions */
+	/* 2.f) Check possible completions */
 	printed = check_completions(tmp_buf, strlen(tmp_buf), c);
 	if (printed)
 		goto SUCCESS;
 
-	/* 2.e) Check commands in PATH and CliFM internals, but only
+	/* 2.g) Check commands in PATH and CliFM internals, but only
 	 * in the case of the first word */
 	if (!last_space)
 		printed = check_cmds(tmp_buf, strlen(tmp_buf));
@@ -471,31 +511,6 @@ rl_suggestions(char c)
 		}
 	}
 	goto SUCCESS;
-
-	/* Check jump database */
-/*	char *dir = strchr(tmp_buf, '/');
-	if (!dir)
-		return EXIT_FAILURE;
-
-	i = jump_n;
-	while (--i >= 0) {
-		if (!jump_db[i].path || *tmp_buf != *jump_db[i].path)
-			continue;
-		if (buflen && strncmp(tmp_buf, jump_db[i].path, buflen + 1) == 0
-		&& strlen(jump_db[i].path) > buflen) {
-			print_suggestion(jump_db[i].path, buflen);
-			suggestion.printed = 1;
-			if (c != BS)
-				suggestion.type = FILE_SUG;
-			printed = 1;
-			break;
-		}
-	}
-
-	if (printed) {
-		free(tmp_buf);
-		return EXIT_SUCCESS;
-	*/
 
 SUCCESS:
 	if (printed)

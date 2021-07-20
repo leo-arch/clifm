@@ -176,6 +176,7 @@ free_colors(void)
 	*sh_c = '\0';
 	*sf_c = '\0';
 	*sc_c = '\0';
+	*sx_c = '\0';
 	*bm_c = '\0';
 	*dl_c = '\0';
 	*el_c = '\0';
@@ -671,11 +672,11 @@ set_colors(const char *colorscheme, int env)
 			 * ############################## */
 
 	if (!ifacecolors) {
-
 		/* Free and reset whatever value was loaded */
 		*sh_c = '\0';
 		*sf_c = '\0';
 		*sc_c = '\0';
+		*sx_c = '\0';
 		*bm_c = '\0';
 		*dl_c = '\0';
 		*el_c = '\0';
@@ -691,9 +692,7 @@ set_colors(const char *colorscheme, int env)
 		*wm_c = '\0';
 		*nm_c = '\0';
 		*si_c = '\0';
-	}
-
-	else {
+	} else {
 
 		char *p = ifacecolors, *buf = (char *)NULL,
 		     **colors = (char **)NULL;
@@ -777,6 +776,14 @@ set_colors(const char *colorscheme, int env)
 					*sc_c = '\0';
 				else
 					snprintf(sc_c, MAX_COLOR - 1, "\001\x1b[%sm\002",
+							colors[i] + 3);
+			}
+
+			else if (*colors[i] == 's' && strncmp(colors[i], "sx=", 3) == 0) {
+				if (!is_color_code(colors[i] + 3))
+					*sx_c = '\0';
+				else
+					snprintf(sx_c, MAX_COLOR - 1, "\001\x1b[%sm\002",
 							colors[i] + 3);
 			}
 
@@ -924,9 +931,7 @@ set_colors(const char *colorscheme, int env)
 		if (setenv("LS_COLORS", lsc, 1) == -1)
 			fprintf(stderr, _("%s: Error registering environment colors\n"),
 					PROGRAM_NAME);
-	}
-
-	else {
+	} else {
 		/* Set the LS_COLORS environment variable to use CliFM own
 		 * colors. In this way, files listed for TAB completion will
 		 * use CliFM colors instead of system colors */
@@ -954,7 +959,8 @@ set_colors(const char *colorscheme, int env)
 			&& filecolors[i + 1] == 'a') || (filecolors[i] == 's'
 			&& filecolors[i + 1] == 'h') || (filecolors[i] == 's'
 			&& filecolors[i + 1] == 'f') || (filecolors[i] == 's'
-			&& filecolors[i + 1] == 'c')) && filecolors[i + 2] == '=') {
+			&& filecolors[i + 1] == 'c') || (filecolors[i] == 's'
+			&& filecolors[i + 1] == 'x')) && filecolors[i + 2] == '=') {
 
 				/* If one of the above is found, move to the next
 				 * color code */
@@ -964,13 +970,11 @@ set_colors(const char *colorscheme, int env)
 			}
 
 			if (filecolors[i]) {
-
 				if (!rem)
 					ls_buf[buflen++] = filecolors[i];
-			}
-
-			else
+			} else {
 				break;
+			}
 
 			i++;
 		}
@@ -1079,6 +1083,13 @@ set_colors(const char *colorscheme, int env)
 					*sc_c = '\0';
 				else
 					snprintf(sc_c, MAX_COLOR - 1, "\001\x1b[%sm\002",
+							colors[i] + 3);
+
+			else if (*colors[i] == 's' && strncmp(colors[i], "sx=", 3) == 0)
+				if (!is_color_code(colors[i] + 3))
+					*sx_c = '\0';
+				else
+					snprintf(sx_c, MAX_COLOR - 1, "\001\x1b[%sm\002",
 							colors[i] + 3);
 
 			else if (*colors[i] == 'd' && strncmp(colors[i], "dh=", 3) == 0)
@@ -1240,6 +1251,8 @@ set_colors(const char *colorscheme, int env)
 		strcpy(sf_c, DEF_SF_C);
 	if (!*sc_c)
 		strcpy(sc_c, DEF_SC_C);
+	if (!*sx_c)
+		strcpy(sx_c, DEF_SX_C);
 	if (!*el_c)
 		strcpy(el_c, DEF_EL_C);
 	if (!*mi_c)
