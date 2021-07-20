@@ -444,6 +444,7 @@ rl_suggestions(char c)
 		goto SUCCESS;
 	}
 
+	/* 2.b) Check parameters for CliFM commands */
 	/* Suggest the sel keyword */
 	char *ret = strchr(buf_bk, ' ');
 	if (ret) {
@@ -455,7 +456,6 @@ rl_suggestions(char c)
 		}
 	}
 
-	/* 2.b) Check parameters for CliFM commands */
 	if (ret) {
 		printed = check_int_params(buf_bk, strlen(buf_bk));
 		if (printed) {
