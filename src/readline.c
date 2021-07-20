@@ -217,7 +217,7 @@ check_completions(const char *str, const size_t len, const char c)
 }
 
 int
-check_filenames(const char *str, const size_t len, const char c)
+check_filenames(const char *str, const size_t len, const char c, const int first_word)
 {
 	int i = files;
 
@@ -228,10 +228,15 @@ check_filenames(const char *str, const size_t len, const char c)
 		: strncasecmp(str, file_info[i].name, len)) == 0
 		&& file_info[i].len > len) {
 			if (file_info[i].dir) {
+				if (first_word && !autocd)
+					continue;
 				char tmp[NAME_MAX + 2];
 				snprintf(tmp, NAME_MAX + 2, "%s/", file_info[i].name);
 				print_suggestion(tmp, len, sf_c);
 			} else {
+				if (first_word && !auto_open) {
+					continue;
+				}
 				print_suggestion(file_info[i].name, len, sf_c);
 			}
 			if (c != BS)
@@ -257,6 +262,8 @@ check_history(const char *str, const size_t len)
 		char *ret = strrchr(history[i], ' ');
 		if (!ret) { /* No space */
 			if (*history[i] != '/') /* And no absolute path */
+				continue;
+			else if (!autocd && !auto_open)
 				continue;
 		} else if (*(++ret)) {
 			if (*ret == '&') { /* 'entry &' */
@@ -290,8 +297,10 @@ check_cmds(const char *str, const size_t len)
 		&& strlen(bin_commands[i]) > len) {
 			if (is_internal_c(bin_commands[i]))
 				print_suggestion(bin_commands[i], len, sx_c);
-			else
+			else if (ext_cmd_ok)
 				print_suggestion(bin_commands[i], len, sc_c);
+			else
+				continue;
 			suggestion.type = CMD_SUG;
 			return 1;
 		}
@@ -344,7 +353,8 @@ int
 rl_suggestions(char c)
 {
 	static int count = 6, __esc = 0;
-	char *tmp_buf = (char *)NULL;
+	char *last_word = (char *)NULL;
+	char *full_line = (char *)NULL;
 	int printed = 0;
 
 		/* ######################################
@@ -396,31 +406,31 @@ rl_suggestions(char c)
 		buflen = strlen(last_space);
 	}
 
-/*	tmp_buf = (char *)xnmalloc(buflen + 2, sizeof(char));
-	sprintf(tmp_buf, "%s%c", last_space ? last_space : rl_line_buffer, c); */
+/*	last_word = (char *)xnmalloc(buflen + 2, sizeof(char));
+	sprintf(last_word, "%s%c", last_space ? last_space : rl_line_buffer, c); */
 
 	if (last_space) {
 		if (*(++last_space)) {
 			buflen = strlen(last_space);
-			tmp_buf = (char *)xnmalloc(buflen + 2, sizeof(char));
-			sprintf(tmp_buf, "%s%c", last_space, c);
+			last_word = (char *)xnmalloc(buflen + 2, sizeof(char));
+			sprintf(last_word, "%s%c", last_space, c);
 			buflen++;
 		} else {
-			tmp_buf = (char *)xnmalloc(2, sizeof(char));
-			*tmp_buf = c;
-			tmp_buf[1] = '\0';
+			last_word = (char *)xnmalloc(2, sizeof(char));
+			*last_word = c;
+			last_word[1] = '\0';
 			buflen = 1;
 		}
 	} else {
-		tmp_buf = (char *)xnmalloc(buflen + 2, sizeof(char));
-		sprintf(tmp_buf, "%s%c", rl_line_buffer, c);
+		last_word = (char *)xnmalloc(buflen + 2, sizeof(char));
+		sprintf(last_word, "%s%c", rl_line_buffer, c);
 		buflen++;
 	}
 
 	/* In case of backspace, remove the last typed char and decrease
 	 * the buffer's length. Else, just increase it */
 	if (c == BS)
-		tmp_buf[buflen ? --buflen : buflen] = '\0';
+		last_word[buflen ? --buflen : buflen] = '\0';
 	else
 		buflen++;
 
@@ -431,7 +441,7 @@ rl_suggestions(char c)
  * at the fourth char after an ESC char
  * Extend from 4 to 6 to cover function keys as well.
  * On Haiku terminal, the sequence is: ESC O(79) A-D */
-	switch(*tmp_buf) {
+	switch(*last_word) {
 		case _ESC:
 			count = __esc = 1;
 			break;
@@ -450,7 +460,7 @@ rl_suggestions(char c)
 	 * have pressed the Right arrow key. Skip this one.
 	 * Skip the remianing arrow keys, HOME, DEL, INS, PGDOWN, and PGUP keys
 	 * as well */
-	if (!__esc && strchr(tmp_buf, '\x1b'))
+	if (!__esc && strchr(last_word, '\x1b'))
 		__esc = 1;
 
 	if (__esc && (c == 'C' || c == '~' || c == 'B' || c == 'D'
@@ -465,63 +475,74 @@ rl_suggestions(char c)
 		 * #	  2) Search for suggestions		#
 		 * ######################################*/
 
-	char *buf_bk = (char *)xnmalloc(strlen(rl_line_buffer) + 2, sizeof(char));
-	sprintf(buf_bk, "%s%c", rl_line_buffer, c);
+	full_line = (char *)xnmalloc(strlen(rl_line_buffer) + 2, sizeof(char));
+	sprintf(full_line, "%s%c", rl_line_buffer, c);
 
 	/* 2.a) Check already suggested string */
 	if (suggestion_buf && suggestion.printed
-	&& strncmp(buf_bk, suggestion_buf, strlen(buf_bk)) == 0) {
+	&& strncmp(full_line, suggestion_buf, strlen(full_line)) == 0) {
 		printed = 1;
-		free(buf_bk);
+		free(full_line);
 		goto SUCCESS;
 	}
 
-	/* 2.b) Check parameters for CliFM commands */
-	/* Suggest the sel keyword */
-	char *ret = strchr(buf_bk, ' ');
+	/* 2.b) Check CliFM internal parameters */
+	/* 2.b.1) Suggest the sel keyword only if not first word */
+	char *ret = strchr(full_line, ' ');
 	if (ret) {
-		size_t tmp_len = strlen(tmp_buf);
-		if (*tmp_buf == 's' && strncmp(tmp_buf, "sel", tmp_len) == 0) {
+		size_t tmp_len = strlen(last_word);
+		if (*last_word == 's' && strncmp(last_word, "sel", tmp_len) == 0) {
 			print_suggestion("sel", tmp_len, sx_c);
 			suggestion.type = CMD_SUG;
-			free(buf_bk);
+			free(full_line);
 			goto SUCCESS;
 		}
 	}
 
+	/* 2.b.2) Check commands fxed parameters */
 	if (ret) {
-		printed = check_int_params(buf_bk, strlen(buf_bk));
+		printed = check_int_params(full_line, strlen(full_line));
 		if (printed) {
-			free(buf_bk);
+			free(full_line);
 			goto SUCCESS;
 		}
 	}
 
-	/* 2.c) Check command history */
-	printed = check_history(buf_bk, strlen(buf_bk));
-	free(buf_bk);
+	/* 2.c) Check commands history */
+	printed = check_history(full_line, strlen(full_line));
+	free(full_line);
 	if (printed)
 		goto SUCCESS;
 
-	/* 2.d) Check file names in CWD */
-	printed = check_filenames(tmp_buf, strlen(tmp_buf), c);
-	if (printed)
-		goto SUCCESS;
+	/* Do not check dirs and filenames if first word and neither autocd
+	 * nor auto-open are enabled */
+	if (last_space || autocd || auto_open) {
+		/* 2.d) Check file names in CWD */
+		printed = check_filenames(last_word, strlen(last_word), c,
+					last_space ? 0 : 1);
+		if (printed)
+			goto SUCCESS;
 
-	/* 2.e) Check the jump database */
-	printed = check_jumpdb(tmp_buf, strlen(tmp_buf));
-	if (printed)
-		goto SUCCESS;
 
-	/* 2.f) Check possible completions */
-	printed = check_completions(tmp_buf, strlen(tmp_buf), c);
-	if (printed)
-		goto SUCCESS;
+		/* 2.e) Check the jump database */
+		/* We don't care about auto-open here: the jump function
+		 * deals with directories only */
+		if (last_space || autocd) {
+			printed = check_jumpdb(last_word, strlen(last_word));
+			if (printed)
+				goto SUCCESS;
+		}
 
-	/* 2.g) Check commands in PATH and CliFM internals, but only
-	 * in the case of the first word */
+		/* 2.f) Check possible completions */
+		printed = check_completions(last_word, strlen(last_word), c);
+		if (printed)
+			goto SUCCESS;
+	}
+
+	/* 2.g) Check commands in PATH and CliFM internals commands, but
+	 * only for the first word */
 	if (!last_space)
-		printed = check_cmds(tmp_buf, strlen(tmp_buf));
+		printed = check_cmds(last_word, strlen(last_word));
 
 	if (printed)
 		goto SUCCESS;
@@ -550,12 +571,12 @@ SUCCESS:
 		suggestion.printed = 1;
 	else
 		suggestion.printed = 0;
-	free(tmp_buf);
+	free(last_word);
 	return EXIT_SUCCESS;
 
 FAIL:
 	suggestion.printed = 0;
-	free(tmp_buf);
+	free(last_word);
 	free(suggestion_buf);
 	suggestion_buf = (char *)NULL;
 	return EXIT_FAILURE;
