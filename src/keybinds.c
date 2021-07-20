@@ -516,8 +516,13 @@ rl_accept_suggestion(int count, int key)
 			}
 			break;
 
+		case HIST_SUG:
+			rl_insert_text(suggestion_buf);
+			break;
+
 		default:
 			rl_insert_text(suggestion_buf);
+			rl_stuff_char(' ');
 			break;
 		}
 

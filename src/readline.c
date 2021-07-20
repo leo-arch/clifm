@@ -370,7 +370,8 @@ rl_suggestions(char c)
 	char *last_space = strrchr(rl_line_buffer, ' ');
 	suggestion.offset = 0;
 
-	if (!last_space || !*(++last_space)) {
+/*	if (!last_space || !*(++last_space)) { */
+	if (!last_space) {
 		last_space = (char *)NULL;
 	} else if (suggestion.type != HIST_SUG) {
 		int j = buflen;
@@ -382,8 +383,26 @@ rl_suggestions(char c)
 		buflen = strlen(last_space);
 	}
 
-	tmp_buf = (char *)xnmalloc(buflen + 2, sizeof(char));
-	sprintf(tmp_buf, "%s%c", last_space ? last_space : rl_line_buffer, c);
+/*	tmp_buf = (char *)xnmalloc(buflen + 2, sizeof(char));
+	sprintf(tmp_buf, "%s%c", last_space ? last_space : rl_line_buffer, c); */
+
+	if (last_space) {
+		if (*(++last_space)) {
+			buflen = strlen(last_space);
+			tmp_buf = (char *)xnmalloc(buflen + 2, sizeof(char));
+			sprintf(tmp_buf, "%s%c", last_space, c);
+			buflen++;
+		} else {
+			tmp_buf = (char *)xnmalloc(2, sizeof(char));
+			*tmp_buf = c;
+			tmp_buf[1] = '\0';
+			buflen = 1;
+		}
+	} else {
+		tmp_buf = (char *)xnmalloc(buflen + 2, sizeof(char));
+		sprintf(tmp_buf, "%s%c", rl_line_buffer, c);
+		buflen++;
+	}
 
 	/* In case of backspace, remove the last typed char and decrease
 	 * the buffer's length. Else, just increase it */
@@ -448,9 +467,10 @@ rl_suggestions(char c)
 	/* Suggest the sel keyword */
 	char *ret = strchr(buf_bk, ' ');
 	if (ret) {
-		if (c == 's') {
-			print_suggestion("sel", 1, sx_c);
-			suggestion.type = FILE_SUG;
+		size_t tmp_len = strlen(tmp_buf);
+		if (*tmp_buf == 's' && strncmp(tmp_buf, "sel", tmp_len) == 0) {
+			print_suggestion("sel", tmp_len, sx_c);
+			suggestion.type = CMD_SUG;
 			free(buf_bk);
 			goto SUCCESS;
 		}
