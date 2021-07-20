@@ -129,7 +129,7 @@ List of CliFM features:
   38) Advcpmv support (cp and mv with a nice progress bar). Depends on advcpmv (See \fIhttps://github.com/jarun/advcpmv\fR)
   39) Fastback function
   40) Remote file systems management
-  41) Fish-like auto-suggestions system
+  41) Fish-like suggestions system
 
 .SH 3. RATIONALE
 When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the kernel built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There are no two without three".
@@ -930,9 +930,10 @@ Colors are specified using the same format used by \fBdircolors(1)\fR and the LS
 .TP
 The following codes are used for different interface elements:
 .sp
- sh = Commands history suggestions
+ sh = commands history suggestions
  sf = file and directory names suggestions
- sc = Command names suggestions
+ sc = command names suggestions
+ sx = suggestions for internal commands and parameters
  bm = bookmarked directory in the bookmarks screen
  el = ELN color
  mi = misc indicators color (disk usage, sort method, bulk rename)
@@ -1091,17 +1092,23 @@ In case of MIME types, you can also write the entire expression without relying 
 \fBLira\fR will check the file line by line, and if a matching line is found, and if at least one of the specified applications exists, this application will be used to open the corresponding associated file. Else, the next line will be checked. In other words, the precedence order is top to bottom (for lines) and left to right (for applications).
 
 .SH 13. AUTO-SUGGESTIONS
-CliFM includes a built-in auto-suggestions system (similar to that provided by the Fish shell). As you type, suggestions will be offered right after the current cursor position, by default in a dimmed magenta color (thought this could be customized via the color schemes file).
+CliFM includes a built-in suggestions system (similar to that provided by the Fish shell). As you type, suggestions for possible completions will be offered right after the current cursor position.
 
 The suggestions check order is the following:
 .sp
-a. Commands in the command history list (already used commands)
+a. CliFM commands parameters (including the \fIsel\fR keyword)
 .sp
-b. File names in the current working directory
+b. Entries in the command history list (already used commands)
 .sp
-c. Programs in \fBPATH\fR 
+c. File names in the current working directory
+.sp
+d. Entries in the jump database
+.sp
+e. Program names in \fBPATH\fR 
 
-To accept a suggestion, just press \fBRight\fR or \fBCtrl-f\fR: the cursor will move to the end of the suggested command and the suggestion color will change to that of the typed text; next, you can press Enter to execute the command as usual. Otherwise, if the sggestion is not accepted, it will be simply ignored and you can continue editing the current command line however you want.
+To accept a suggestion, just press \fBRight\fR or \fBCtrl-f\fR: the cursor will move to the end of the suggested command and the suggestion color will change to that of the typed text; next, you can press Enter to execute the command as usual. Otherwise, if the suggestion is not accepted, it will be simply ignored and you can continue editing the current command line however you want.
+
+To customize the color of the suggestions see above the \fBCOLOR CODES\fR section.
 
 .SH 14. SHELL FUNCTIONS
 CliFM includes a few shell functions to perform specific actions (cd-on-quit, file-picker, and subshell-notice). Take a look at the corresponding files, in \fI/usr/share/clifm/functions\fR, and follow the instructions. Needles to say, you can write your own functions.
