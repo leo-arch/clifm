@@ -251,8 +251,21 @@ check_history(const char *str, const size_t len)
 	int i = current_hist_n;
 
 	while (--i >= 0) {
+		/* Try to suggest only useful entries */
 		if (!history[i] || TOUPPER(*str) != TOUPPER(*history[i]))
 			continue;
+		char *ret = strrchr(history[i], ' ');
+		if (!ret) {
+			if (*history[i] != '/')
+				continue;
+		} else if (*(++ret)) {
+			if (*ret == '&') {
+				continue;
+			}
+		} else {
+			continue;
+		}
+		
 		if (len && (case_sens_path_comp ? strncmp(str, history[i], len)
 		: strncasecmp(str, history[i], len)) == 0
 		&& strlen(history[i]) > len) {
