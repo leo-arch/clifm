@@ -131,22 +131,33 @@ initialize_readline(void)
 void
 clear_suggestion(void)
 {
-	if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
-	if (suggestion.lines) {
-		int i;
-		for (i = 1; i <= suggestion.lines; i++) {
-			printf("\x1b[1B");
+	/* Delete everything in the current line starting from the current
+	 * cursor position */
+	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {}
+
+	if (suggestion.lines > 1 && wc_xstrlen(rl_line_buffer) < term_cols) {
+		int i = suggestion.lines;
+		while (--i > 0) {
+			/* Move the cursor to the beginning of the next line */
+			if (write(STDOUT_FILENO, "\x1b[1E", 4) <= 0) {}
+			/* Delete the line */
 			if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
 		}
-		printf("\x1b[%dA", suggestion.lines);
+		/* Restore the cursor position */
+		printf("\x1b[%dC", visible_prompt_len + rl_point);
+		printf("\x1b[%dA", suggestion.lines - 1);
+		suggestion.lines = 0;
 	}
+
 	suggestion.printed = 0;
 }
 
 /* Clear the line, print the suggestion (STR) at OFFSET in COLOR, and
- * move the cursor back to the original position */
+ * move the cursor back to the original position.
+ * OFFSET marks the point in STR that is already typed: the suggestion
+ * will be printed starting from this point */
 void
-print_suggestion(const char *str, size_t offset, char *color)
+print_suggestion(const char *str, size_t offset, const char *color)
 {
 	if (offset > 0)
 		offset--;
@@ -155,30 +166,45 @@ print_suggestion(const char *str, size_t offset, char *color)
 	suggestion_buf = xnmalloc(strlen(str) + 1, sizeof(char));
 	strcpy(suggestion_buf, str);
 
+	size_t line_len = strlen(rl_line_buffer);
+
 	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {}
-/*	printf(SCP); // Save cursor position */
 	printf("%s%s\001\x1b[39;49m\002%s", color, str + offset, df_c);
-	int nlines = (int)wc_xstrlen(str + offset)
-				/ ((int)term_cols - visible_prompt_len - offset);
+
+	size_t suggestion_len = wc_xstrlen(str + offset);
+	size_t used_cols = visible_prompt_len + line_len + suggestion_len;
+	int nlines = 0;
+	if (used_cols > term_cols)
+		nlines = used_cols / (int)term_cols;
+
 	if (nlines > 0) {
-		suggestion.lines = nlines;
-		/* Move up %d lines */
-		printf("\x1b[%dF", nlines);
-		/* Move the cursor forward %d columns: the previous code sets
-		 * the cursor at the beginning of the line, so that we need to
-		 * move forward to go back to the original position */
-		printf("\x1b[%dC", visible_prompt_len + (int)offset);
+		suggestion.lines = nlines + 1;
+
+		if (visible_prompt_len + line_len <= term_cols) {
+			int forward = used_cols - suggestion_len;
+
+			/* Move the cursor up NLINES lines */
+			printf("\x1b[%dF", nlines);
+
+			/* Move the cursor forward %d columns: the previous printf set
+			 * the cursor at the beginning of the line, so that we need to
+			 * move forward to go back to the original position */
+			printf("\x1b[%dC", (forward > 0) ? forward : visible_prompt_len);
+		} else {
+			/* Move the cursor backwards %zu columns */
+			printf("\x1b[%zuD", wc_xstrlen(str + offset));
+		}
 	} else {
-		suggestion.lines = 0;
-		/* Move the cursor backwards %d columns: the printf above left
-		 * the cursor at the end of the string */
-		printf("\x1b[%zuD", wc_xstrlen(str + offset));
+		suggestion.lines = 1;
+
+		/* Move the cursor backwards %d columns: the last printf left
+		 * the cursor at the end of the string, so that we need to
+		 * move the cursor backwards */
+		if (used_cols == term_cols)
+			printf("\x1b[%zuD", wc_xstrlen(str + offset) - 1);
+		else
+			printf("\x1b[%zuD", wc_xstrlen(str + offset));
 	}
-/*	printf(RCP); // Restore cursor position
-	int nline = (int)wc_xstrlen(str + offset) / (int)term_cols;
-	if (nline > 0)
-		printf("\x1b[%dF", nlines);
-	printf("\x1b[%zuD", wc_xstrlen(str + offset)); */
 }
 
 int
@@ -378,12 +404,21 @@ rl_suggestions(char c)
 
 	/* Do nothing if the string is empty (the user just pressed
 	 * Enter). Skip the TAB key too */
-	if (rl_end == 0 && (c == ENTER || c == _TAB))
-		goto FAIL;
+/*	if (rl_end == 0 && (c == ENTER || c == _TAB))
+		goto FAIL; */
 
 	/* Do nothing if the user pressed backspace and the cursor is at
 	 * the beginning of the line */
-	if (c == BS && rl_point == 0)
+/*	if (c == BS && rl_point == 0)
+		goto FAIL; */
+
+	if (c == BS) {
+		if (suggestion.printed)
+			clear_suggestion();
+		goto FAIL;
+	}
+
+	if (c == ENTER || c == _TAB)
 		goto FAIL;
 
 	/* Append C (last char typed) to current readline buffer to
@@ -429,10 +464,10 @@ rl_suggestions(char c)
 
 	/* In case of backspace, remove the last typed char and decrease
 	 * the buffer's length. Else, just increase it */
-	if (c == BS)
+/*	if (c == BS)
 		last_word[buflen ? --buflen : buflen] = '\0';
 	else
-		buflen++;
+		buflen++; */
 
 /* ####################### */
 /* Workaround to skip escape codes (mostly arrow keys) from being
@@ -466,6 +501,8 @@ rl_suggestions(char c)
 	if (__esc && (c == 'C' || c == '~' || c == 'B' || c == 'D'
 	|| c == 'A' || (c >= '0' && c <= '9'))) {
 		__esc = 0;
+		/* Go to SUCCESS so that we don't remove the current suggestion,
+		 * if any, when moving the cursor through the printed line */
 		goto SUCCESS;
 	}
 

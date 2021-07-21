@@ -49,6 +49,7 @@ typedef char *rl_cpvfunc_t;
 #include "prompt.h"
 #include "messages.h"
 #include "strings.h"
+/*#include "readline.h" */
 
 int
 kbinds_reset(void)
@@ -791,10 +792,19 @@ rl_clear_line(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	/* Clear the readline buffer */
+/*	if (suggestion.printed) {
+		clear_suggestion();
+		suggestion.printed = 0;
+		suggestion.lines = 0;
+		free(suggestion_buf);
+		suggestion_buf = (char *)NULL;
+		rl_point = rl_end = 0 ;
+	} else { */
+		/* Clear the readline buffer */
 	rl_point = 0;
 	rl_delete_text(rl_point, rl_end);
 	rl_end = 0;
+//	}
 
 	return EXIT_SUCCESS;
 }

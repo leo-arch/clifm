@@ -2174,6 +2174,8 @@ dequote_str(char *text, int mt)
 	return buf;
 }
 
+/* Get the length of the visible prompt, excluding color codes and
+ * all non-printable chars */
 int
 get_prompt_len(const char *str)
 {
@@ -2214,7 +2216,7 @@ get_prompt_len(const char *str)
 	if (*tmp) {
 		tmp[j] = '\0';
 		char *ret = strrchr(tmp, '\n');
-		size_t tmp_len = wc_xstrlen(*(++ret) ? ret : tmp);
+		size_t tmp_len = wc_xstrlen((ret && *(++ret)) ? ret : tmp);
 		free(tmp);
 		return (int)tmp_len;
 	}

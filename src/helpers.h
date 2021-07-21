@@ -252,9 +252,8 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define DEF_SX_C "\001\x1b[02;32m\002"
 
 #define DLFC "\001\x1b[0K\002" /* Delete line from cursor */
-#define DLFC_LEN 6
-//#define SCP "\001\x1b[s\002" /* Save cursor position */
-//#define RCP "\001\x1b[u\002" /* Restore cursor position */
+#define CNL "\001\x1b[1E\002" /* Move the cursor to beginning next line*/
+#define DLFC_LEN 6 /* Length of the above escape codes */
 
 #define DEF_DIR_ICO_C "\x1b[00;33m"
 

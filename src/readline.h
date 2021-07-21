@@ -42,3 +42,4 @@ char *bookmarks_generator(const char *text, int state); */
 int is_quote_char(const char c);
 int my_rl_getc(FILE *stream);
 int rl_suggestions(char c);
+/* void clear_suggestion(void); */
