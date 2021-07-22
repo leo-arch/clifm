@@ -168,8 +168,8 @@ print_suggestion(const char *str, size_t offset, const char *color)
 
 	size_t line_len = strlen(rl_line_buffer);
 
-	printf("\x1b");
-	printf("7");
+	/* Save cursor horizontal position (ESC 7 or CSI s) */
+	printf("\x1b\x37");
 
 	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {}
 	printf("%s%s\001\x1b[39;49m\002%s", color, str + offset, df_c);
@@ -184,15 +184,17 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	if (cucs > term_cols)
 		slines = cucs / (int)term_cols;
 
-	printf("\x1b");
-	printf("8");
+	/* Restore cursor horizontal position */
+	printf("\x1b\x38");
 
-	if (cucs % term_cols == 0)
+	if (cucs % term_cols == 0 || cuc % term_cols == 0)
 		return;
 
+	/* Restore cursor vertical postion */
 	int diff = slines - clines;
-	if (diff > 0)
+	if (diff > 0) {
 		printf("\x1b[%dA", diff);
+	}
 
 	suggestion.lines = diff + 1;
 	return;
