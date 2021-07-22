@@ -497,8 +497,8 @@ rl_accept_suggestion(int count, int key)
 	/* Only accept the current suggestion if the cursor is at the end
 	 * of the line typed so far */
 	if (suggestions && rl_point == rl_end && suggestion_buf) {
-		suggestion.printed = 0;
 		rl_delete_text(suggestion.offset, rl_end);
+		suggestion.printed = 0;
 		rl_point = suggestion.offset;
 
 		switch(suggestion.type) {

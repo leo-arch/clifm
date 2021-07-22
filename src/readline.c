@@ -35,9 +35,16 @@
 #include <strings.h>
 #endif
 #include <unistd.h>
+#include <errno.h>
+
+#ifdef __OpenBSD__
+typedef char *rl_cpvfunc_t;
+#include <ereadline/readline/readline.h>
+#else
 #include <readline/readline.h>
 #include <readline/history.h>
-#include <errno.h>
+#endif
+
 
 #include "aux.h"
 #include "checks.h"
@@ -360,7 +367,7 @@ check_int_params(const char *str, const size_t len)
 		if (len && strncmp(str, PARAM_STR[i], len) == 0
 		&& strlen(PARAM_STR[i]) > len) {
 			print_suggestion(PARAM_STR[i], len, sx_c);
-			suggestion.type = HIST_SUG;
+			suggestion.type = INT_CMD;
 			return 1;
 		}
 	}
@@ -374,7 +381,8 @@ check_int_params(const char *str, const size_t len)
 int
 rl_suggestions(char c)
 {
-	static int count = 6, __esc = 0;
+/*	#define EC_MAX 4
+	static int count = EC_MAX, __esc = 0; */
 	char *last_word = (char *)NULL;
 	char *full_line = (char *)NULL;
 	int printed = 0;
@@ -383,20 +391,22 @@ rl_suggestions(char c)
 		 * # 		  1) Filter input			#
 		 * ######################################*/
 
+	if (rl_readline_state & RL_STATE_MOREINPUT) {
+//		printf("'%d'", c);
+		if (suggestion_buf)
+			goto SUCCESS;
+		goto FAIL;
+	}
+
 	/* Do nothing if the cursor is not at the end of the string */
-	if (rl_point != rl_end) {
+/*	if (rl_point != rl_end) {
 		if (suggestion_buf) {
 			if (c != _ESC) {
 				clear_suggestion();
 			}
-		} /*else {
-			if (suggestion_printed && c != _ESC && c != 'A' && c != 'B'
-			&& c != 'C' && c != 'D' && c != OP_BRACKET && c != UC_O) {
-				clear_suggestion();
-			}
-		} */
+		}
 		goto FAIL;
-	}
+	} */
 
 	/* Do nothing if the string is empty (the user just pressed
 	 * Enter). Skip the TAB key too */
@@ -408,14 +418,23 @@ rl_suggestions(char c)
 /*	if (c == BS && rl_point == 0)
 		goto FAIL; */
 
-	if (c == BS) {
-		if (suggestion.printed)
-			clear_suggestion();
-		goto FAIL;
-	}
+	switch(c) {
+		case BS:
+			if (suggestion.printed)
+				clear_suggestion();
+			goto FAIL;
 
-	if (c == ENTER || c == _TAB)
-		goto FAIL;
+		case ENTER:
+			goto FAIL;
+
+		case _TAB:
+			goto SUCCESS;
+
+//		case _ESC:
+//			goto SUCCESS;
+
+		default: break;
+	}
 
 	/* Append C (last char typed) to current readline buffer to
 	 * correctly find matches. At this point (rl_getc), readline has
@@ -427,7 +446,7 @@ rl_suggestions(char c)
 /*	if (!last_space || !*(++last_space)) { */
 	if (!last_space) {
 		last_space = (char *)NULL;
-	} else if (suggestion.type != HIST_SUG) {
+	} else if (suggestion.type != HIST_SUG && suggestion.type != INT_CMD) {
 		int j = buflen;
 		while (--j >= 0) {
 			if (rl_line_buffer[j] == ' ')
@@ -472,35 +491,39 @@ rl_suggestions(char c)
  * at the fourth char after an ESC char
  * Extend from 4 to 6 to cover function keys as well.
  * On Haiku terminal, the sequence is: ESC O(79) A-D */
-	switch(*last_word) {
+/*	switch(*last_word) {
 		case _ESC:
 			count = __esc = 1;
 			break;
-		case OP_BRACKET: /* fallthrough */
-		case UC_O: count++; break; /* Haiku terminal */
+		case OP_BRACKET: // fallthrough
+		case UC_O: count++; break; // Haiku terminal
 		default:
-			if (count < 6)
+			if (count < EC_MAX)
 				count++;
 			break;
 	}
 
-	if (count < 6)
+	if (count < EC_MAX) {
+		printf("'a:%s:%s:%c:%d:%d'", last_word, rl_line_buffer, c, __esc, count);
 		goto FAIL;
+	} */
+
+//	printf("'b:%s:%s:%c:%d:%d'", last_word, rl_line_buffer, c, __esc, count);
 
 	/* If the sequence includes an ESC char and a C, we most probably
 	 * have pressed the Right arrow key. Skip this one.
 	 * Skip the remianing arrow keys, HOME, DEL, INS, PGDOWN, and PGUP keys
 	 * as well */
-	if (!__esc && strchr(last_word, '\x1b'))
+/*	if (!__esc && strchr(last_word, '\x1b'))
 		__esc = 1;
 
 	if (__esc && (c == 'C' || c == '~' || c == 'B' || c == 'D'
 	|| c == 'A' || (c >= '0' && c <= '9'))) {
-		__esc = 0;
+		__esc = 0; */
 		/* Go to SUCCESS so that we don't remove the current suggestion,
 		 * if any, when moving the cursor through the printed line */
-		goto SUCCESS;
-	}
+//		goto SUCCESS;
+//	}
 
 /* ####################### */
 
@@ -532,7 +555,7 @@ rl_suggestions(char c)
 		}
 	}
 
-	/* 2.b.2) Check commands fxed parameters */
+	/* 2.b.2) Check commands fixed parameters */
 	if (ret) {
 		printed = check_int_params(full_line, strlen(full_line));
 		if (printed) {
@@ -590,12 +613,12 @@ rl_suggestions(char c)
 		if (rl_point == 0) {
 			clear_suggestion();
 			goto FAIL;
-		} else if (!__esc) {
+		} //else if (!__esc) {
 			/* Clear current suggestion only if no escape char
 			 * is contained in the current input sequence */
-			clear_suggestion();
-			goto FAIL;
-		}
+		//	clear_suggestion();
+		//	goto FAIL;
+		//}
 	}
 	goto SUCCESS;
 
@@ -1619,7 +1642,6 @@ my_rl_completion(const char *text, int start, int end)
 	char **matches = (char **)NULL;
 
 	if (start == 0) { /* Only for the first word entered in the prompt */
-
 		/* Commands completion */
 		if (end == 0) { /* If text is empty, do nothing */
 			/* Prevent readline from attempting path completion if
@@ -1662,7 +1684,6 @@ my_rl_completion(const char *text, int start, int end)
 
 	/* Second word or more */
 	else {
-
 		/* #### ELN AND JUMP ORDER EXPANSION ### */
 
 		/* Perform this check only if the first char of the string to be
@@ -1707,7 +1728,8 @@ my_rl_completion(const char *text, int start, int end)
 		|| rl_line_buffer[1] == 'o')
 		&& (strncmp(rl_line_buffer, "bm ", 3) == 0
 		|| strncmp(rl_line_buffer, "bookmarks ", 10) == 0)) {
-			rl_attempted_completion_over = 1;
+			if (suggestion.type != FILE_SUG)
+				rl_attempted_completion_over = 1;
 			matches = rl_completion_matches(text, &bookmarks_generator);
 		}
 
@@ -1727,7 +1749,8 @@ my_rl_completion(const char *text, int start, int end)
 		|| strncmp(rl_line_buffer, "profile set ", 12) == 0
 		|| strncmp(rl_line_buffer, "pf del ", 7) == 0
 		|| strncmp(rl_line_buffer, "profile del ", 12) == 0)) {
-			rl_attempted_completion_over = 1;
+			if (suggestion.type != FILE_SUG)
+				rl_attempted_completion_over = 1;
 			matches = rl_completion_matches(text, &profiles_generator);
 		}
 
