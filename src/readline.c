@@ -162,6 +162,9 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	if (offset > 0)
 		offset--;
 
+	if (suggestion.printed)
+		clear_suggestion();
+
 	free(suggestion_buf);
 	suggestion_buf = xnmalloc(strlen(str) + 1, sizeof(char));
 	strcpy(suggestion_buf, str);
