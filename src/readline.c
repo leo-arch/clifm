@@ -168,43 +168,34 @@ print_suggestion(const char *str, size_t offset, const char *color)
 
 	size_t line_len = strlen(rl_line_buffer);
 
+	printf("\x1b");
+	printf("7");
+
 	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {}
 	printf("%s%s\001\x1b[39;49m\002%s", color, str + offset, df_c);
 
 	size_t suggestion_len = wc_xstrlen(str + offset);
-	size_t used_cols = visible_prompt_len + line_len + suggestion_len;
-	int nlines = 0;
-	if (used_cols > term_cols)
-		nlines = used_cols / (int)term_cols;
+	size_t cuc = visible_prompt_len + line_len;
+	size_t cucs = cuc + suggestion_len;
+	int clines = 0, slines = 0;
 
-	if (nlines > 0) {
-		suggestion.lines = nlines + 1;
+	if (cuc > term_cols)
+		clines = cuc / (int)term_cols;
+	if (cucs > term_cols)
+		slines = cucs / (int)term_cols;
 
-		if (visible_prompt_len + line_len <= term_cols) {
-			int forward = used_cols - suggestion_len;
+	printf("\x1b");
+	printf("8");
 
-			/* Move the cursor up NLINES lines */
-			printf("\x1b[%dF", nlines);
+	if (cucs % term_cols == 0)
+		return;
 
-			/* Move the cursor forward %d columns: the previous printf set
-			 * the cursor at the beginning of the line, so that we need to
-			 * move forward to go back to the original position */
-			printf("\x1b[%dC", (forward > 0) ? forward : visible_prompt_len);
-		} else {
-			/* Move the cursor backwards %zu columns */
-			printf("\x1b[%zuD", wc_xstrlen(str + offset));
-		}
-	} else {
-		suggestion.lines = 1;
+	int diff = slines - clines;
+	if (diff > 0)
+		printf("\x1b[%dA", diff);
 
-		/* Move the cursor backwards %d columns: the last printf left
-		 * the cursor at the end of the string, so that we need to
-		 * move the cursor backwards */
-		if (used_cols == term_cols)
-			printf("\x1b[%zuD", wc_xstrlen(str + offset) - 1);
-		else
-			printf("\x1b[%zuD", wc_xstrlen(str + offset));
-	}
+	suggestion.lines = diff + 1;
+	return;
 }
 
 int
