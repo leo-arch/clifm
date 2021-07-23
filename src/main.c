@@ -73,11 +73,11 @@ struct suggestions_t suggestion;
 enum prog_msg pmsg = nomsg;
 struct param xargs;
 unsigned short term_cols;
-int flags;
-struct termios shell_tmodes;
+int flags, curcol = 0, currow = 0;
+struct termios shell_tmodes, orig_termios;
 off_t total_sel_size = 0;
 pid_t own_pid = 0;
-unsigned short term_cols = 0;
+unsigned short term_cols = 0, term_rows = 0;
 regex_t regex_exp;
 size_t *ext_colors_len = (size_t *)NULL;
 

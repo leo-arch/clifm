@@ -619,7 +619,10 @@ enum jump {
 
 /* pmsg holds the current program message type */
 extern enum prog_msg pmsg;
+extern struct termios orig_termios;
 
+extern int curcol;
+extern int currow;
 extern int flags;
 
 extern short
@@ -706,7 +709,7 @@ extern int
     *eln_as_file,
     visible_prompt_len;
 
-extern unsigned short term_cols;
+extern unsigned short term_cols, term_rows;
 
 extern size_t
     args_n,

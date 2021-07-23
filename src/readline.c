@@ -36,6 +36,7 @@
 #endif
 #include <unistd.h>
 #include <errno.h>
+#include <termios.h>
 
 #ifdef __OpenBSD__
 typedef char *rl_cpvfunc_t;
@@ -45,12 +46,101 @@ typedef char *rl_cpvfunc_t;
 #include <readline/history.h>
 #endif
 
-
 #include "aux.h"
 #include "checks.h"
 #include "keybinds.h"
 #include "navigation.h"
 #include "readline.h"
+
+/* The following three functions were taken from
+ * https://github.com/antirez/linenoise/blob/master/linenoise.c
+ * and modified to fir our needs: they are used to get current cursor
+ * position (both vertical and horizontal) by the suggestions system */
+
+/* Set the terminal into raw mode. Return 0 on success and -1 on error */
+int
+enable_raw_mode(int fd)
+{
+	struct termios raw;
+
+	if (!isatty(STDIN_FILENO))
+		goto FATAL;
+/*    if (!atexit_registered) {
+        atexit(linenoiseAtExit);
+        atexit_registered = 1;
+    } */
+	if (tcgetattr(fd, &orig_termios) == -1)
+		goto FATAL;
+
+	raw = orig_termios;  /* modify the original mode */
+	/* input modes: no break, no CR to NL, no parity check, no strip char,
+	 * * no start/stop output control. */
+	raw.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
+	/* output modes - disable post processing */
+	raw.c_oflag &= ~(OPOST);
+	/* control modes - set 8 bit chars */
+	raw.c_cflag |= (CS8);
+	/* local modes - choing off, canonical off, no extended functions,
+	 * no signal chars (^Z,^C) */
+	raw.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
+    /* control chars - set return condition: min number of bytes and timer.
+     * We want read to return every single byte, without timeout. */
+	raw.c_cc[VMIN] = 1; raw.c_cc[VTIME] = 0; /* 1 byte, no timer */
+
+	/* put terminal in raw mode after flushing */
+	if (tcsetattr(fd, TCSAFLUSH, &raw) < 0)
+		goto FATAL;
+
+	return 0;
+
+FATAL:
+	errno = ENOTTY;
+	return -1;
+}
+
+int
+disable_raw_mode(int fd)
+{
+	if (tcsetattr(fd,TCSAFLUSH,&orig_termios) != -1)
+		return EXIT_SUCCESS;
+	return EXIT_FAILURE;
+}
+
+/* Use the "ESC [6n" escape sequence to query the cursor position (both
+ * vertical and horizontal) and store both values into global variables.
+ * Return 0 on success and 1 on error */
+int
+get_cursor_position(int ifd, int ofd)
+{
+	char buf[32];
+	int cols, rows;
+	unsigned int i = 0;
+
+	/* Report cursor location */
+	if (write(ofd, "\x1b[6n", 4) != 4)
+		return EXIT_FAILURE;
+
+	/* Read the response: "ESC [ rows ; cols R" */
+	while (i < sizeof(buf) - 1) {
+		if (read(ifd, buf + i, 1) != 1)
+			break;
+		if (buf[i] == 'R')
+			break;
+		i++;
+	}
+	buf[i] = '\0';
+
+	/* Parse it */
+	if (buf[0] != _ESC || buf[1] != '[')
+		return EXIT_FAILURE;
+	if (sscanf(buf + 2, "%d;%d", &rows, &cols) != 2)
+		return EXIT_FAILURE;
+
+	currow = rows;
+	curcol = cols;
+
+	return EXIT_SUCCESS;
+}
 
 int
 initialize_readline(void)
@@ -138,11 +228,17 @@ initialize_readline(void)
 void
 clear_suggestion(void)
 {
+	/* Save cursor position */
+	enable_raw_mode(STDIN_FILENO);
+	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
+	disable_raw_mode(STDIN_FILENO);
+
 	/* Delete everything in the current line starting from the current
 	 * cursor position */
 	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {}
 
-	if (suggestion.lines > 1 && wc_xstrlen(rl_line_buffer) < term_cols) {
+/*	if (suggestion.lines > 1 && wc_xstrlen(rl_line_buffer) < term_cols) { */
+	if (suggestion.lines > 1) {
 		int i = suggestion.lines;
 		while (--i > 0) {
 			/* Move the cursor to the beginning of the next line */
@@ -151,8 +247,8 @@ clear_suggestion(void)
 			if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
 		}
 		/* Restore the cursor position */
-		printf("\x1b[%dC", visible_prompt_len + rl_point);
-		printf("\x1b[%dA", suggestion.lines - 1);
+		printf("\x1b[%d;%dH", currow, curcol);
+		fflush(stdout);
 		suggestion.lines = 0;
 	}
 
@@ -171,16 +267,25 @@ print_suggestion(const char *str, size_t offset, const char *color)
 
 	if (suggestion.printed)
 		clear_suggestion();
+/*	else
+		suggestion.printed = 1; */
 
+	size_t str_len = strlen(str);
 	free(suggestion_buf);
-	suggestion_buf = xnmalloc(strlen(str) + 1, sizeof(char));
+
+	/* Store the suggestion into a buffer to be used later by the
+	 * accept_suggestion function (keybinds.c) */
+	suggestion_buf = xnmalloc(str_len + 1, sizeof(char));
 	strcpy(suggestion_buf, str);
 
 	size_t line_len = strlen(rl_line_buffer);
 
-	/* Save cursor horizontal position (ESC 7 or CSI s) */
-	printf("\x1b\x37");
+	/* Save cursor position */
+	enable_raw_mode(STDIN_FILENO);
+	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
+	disable_raw_mode(STDIN_FILENO);
 
+	/* Erase whatever is after the cursor and print the suggestion */
 	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {}
 	printf("%s%s\001\x1b[39;49m\002%s", color, str + offset, df_c);
 
@@ -194,19 +299,20 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	if (cucs > term_cols)
 		slines = cucs / (int)term_cols;
 
-	/* Restore cursor horizontal position */
-	printf("\x1b\x38");
-
-	if (cucs % term_cols == 0 || cuc % term_cols == 0)
-		return;
-
-	/* Restore cursor vertical postion */
 	int diff = slines - clines;
-	if (diff > 0) {
-		printf("\x1b[%dA", diff);
-	}
+
+/*	int cucs_mod = cucs % term_cols; */
+	int cuc_mod = cuc % term_cols;
+
+	/* Update the row number, if needed */
+	if (diff > 0 && cuc_mod && currow == term_rows)
+		--currow;
+
+	/* Restore cursor position */
+	printf("\x1b[%d;%dH", currow, curcol);
 
 	suggestion.lines = diff + 1;
+
 	return;
 }
 
@@ -381,8 +487,6 @@ check_int_params(const char *str, const size_t len)
 int
 rl_suggestions(char c)
 {
-/*	#define EC_MAX 4
-	static int count = EC_MAX, __esc = 0; */
 	char *last_word = (char *)NULL;
 	char *full_line = (char *)NULL;
 	int printed = 0;
@@ -391,37 +495,19 @@ rl_suggestions(char c)
 		 * # 		  1) Filter input			#
 		 * ######################################*/
 
+	/* Skip escape sequences, mostly arrow keys */
 	if (rl_readline_state & RL_STATE_MOREINPUT) {
-//		printf("'%d'", c);
 		if (suggestion_buf)
 			goto SUCCESS;
 		goto FAIL;
 	}
 
-	/* Do nothing if the cursor is not at the end of the string */
-/*	if (rl_point != rl_end) {
-		if (suggestion_buf) {
-			if (c != _ESC) {
-				clear_suggestion();
-			}
-		}
-		goto FAIL;
-	} */
-
-	/* Do nothing if the string is empty (the user just pressed
-	 * Enter). Skip the TAB key too */
-/*	if (rl_end == 0 && (c == ENTER || c == _TAB))
-		goto FAIL; */
-
-	/* Do nothing if the user pressed backspace and the cursor is at
-	 * the beginning of the line */
-/*	if (c == BS && rl_point == 0)
-		goto FAIL; */
-
+	/* Skip backspace, Enter, and TAB keys */
 	switch(c) {
 		case BS:
-			if (suggestion.printed)
+			if (suggestion.printed) {
 				clear_suggestion();
+			}
 			goto FAIL;
 
 		case ENTER:
@@ -429,9 +515,6 @@ rl_suggestions(char c)
 
 		case _TAB:
 			goto SUCCESS;
-
-//		case _ESC:
-//			goto SUCCESS;
 
 		default: break;
 	}
@@ -443,7 +526,6 @@ rl_suggestions(char c)
 	char *last_space = strrchr(rl_line_buffer, ' ');
 	suggestion.offset = 0;
 
-/*	if (!last_space || !*(++last_space)) { */
 	if (!last_space) {
 		last_space = (char *)NULL;
 	} else if (suggestion.type != HIST_SUG && suggestion.type != INT_CMD) {
@@ -455,9 +537,6 @@ rl_suggestions(char c)
 		suggestion.offset = j + 1;
 		buflen = strlen(last_space);
 	}
-
-/*	last_word = (char *)xnmalloc(buflen + 2, sizeof(char));
-	sprintf(last_word, "%s%c", last_space ? last_space : rl_line_buffer, c); */
 
 	if (last_space) {
 		if (*(++last_space)) {
@@ -476,56 +555,6 @@ rl_suggestions(char c)
 		sprintf(last_word, "%s%c", rl_line_buffer, c);
 		buflen++;
 	}
-
-	/* In case of backspace, remove the last typed char and decrease
-	 * the buffer's length. Else, just increase it */
-/*	if (c == BS)
-		last_word[buflen ? --buflen : buflen] = '\0';
-	else
-		buflen++; */
-
-/* ####################### */
-/* Workaround to skip escape codes (mostly arrow keys) from being
- * processed for suggestions. Count: 1) ESC (27), 2) Opening bracket (91),
- * 3) Other char (A, B, C, and D for arrow keys). Only check suggestions
- * at the fourth char after an ESC char
- * Extend from 4 to 6 to cover function keys as well.
- * On Haiku terminal, the sequence is: ESC O(79) A-D */
-/*	switch(*last_word) {
-		case _ESC:
-			count = __esc = 1;
-			break;
-		case OP_BRACKET: // fallthrough
-		case UC_O: count++; break; // Haiku terminal
-		default:
-			if (count < EC_MAX)
-				count++;
-			break;
-	}
-
-	if (count < EC_MAX) {
-		printf("'a:%s:%s:%c:%d:%d'", last_word, rl_line_buffer, c, __esc, count);
-		goto FAIL;
-	} */
-
-//	printf("'b:%s:%s:%c:%d:%d'", last_word, rl_line_buffer, c, __esc, count);
-
-	/* If the sequence includes an ESC char and a C, we most probably
-	 * have pressed the Right arrow key. Skip this one.
-	 * Skip the remianing arrow keys, HOME, DEL, INS, PGDOWN, and PGUP keys
-	 * as well */
-/*	if (!__esc && strchr(last_word, '\x1b'))
-		__esc = 1;
-
-	if (__esc && (c == 'C' || c == '~' || c == 'B' || c == 'D'
-	|| c == 'A' || (c >= '0' && c <= '9'))) {
-		__esc = 0; */
-		/* Go to SUCCESS so that we don't remove the current suggestion,
-		 * if any, when moving the cursor through the printed line */
-//		goto SUCCESS;
-//	}
-
-/* ####################### */
 
 		/* ######################################
 		 * #	  2) Search for suggestions		#
@@ -607,20 +636,17 @@ rl_suggestions(char c)
 		 * # 	  3) No suggestion found		#
 		 * ######################################*/
 
+	/* Clear current suggestion, if any, only if no escape char is contained
+	 * in the current input sequence. This is mainly to avoid erasing
+	 * the suggestion if moving thought the text via the arrow keys */
 	if (suggestion_buf) {
-		/* The rl_point check prevents the current suggestion from
-		 * being erased when moving the cursor backwards */
-		if (rl_point == 0) {
+		if (!strchr(last_word, '\x1b')){
 			clear_suggestion();
 			goto FAIL;
-		} //else if (!__esc) {
-			/* Clear current suggestion only if no escape char
-			 * is contained in the current input sequence */
-		//	clear_suggestion();
-		//	goto FAIL;
-		//}
+		} else {
+			goto SUCCESS;
+		}
 	}
-	goto SUCCESS;
 
 SUCCESS:
 	if (printed)

@@ -302,8 +302,10 @@ list_dir_light(void)
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 	/* ws_col and ws_row are both unsigned short int according to
 	 * /bits/ioctl-types.h */
-	term_cols = w.ws_col; /* This one is global */
-	unsigned short term_rows = w.ws_row;
+
+	/* These two are global */
+	term_cols = w.ws_col;
+	term_rows = w.ws_row;
 
 	if ((dir = opendir(ws[cur_ws].path)) == NULL) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
@@ -921,10 +923,9 @@ list_dir(void)
 	/* Get terminal current amount of rows and columns */
 	struct winsize w;
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-	/* ws_col and ws_row are both unsigned short int according to
-	 * /bits/ioctl-types.h */
-	term_cols = w.ws_col; /* This one is global */
-	unsigned short term_rows = w.ws_row;
+	/* These two are global */
+	term_cols = w.ws_col;
+	term_rows = w.ws_row;
 
 	if ((dir = opendir(ws[cur_ws].path)) == NULL) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
