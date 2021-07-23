@@ -131,7 +131,7 @@ Features beyond common file operations, such as copy, move, remove, etc.:
 * [Fastback function](https://github.com/leo-arch/clifm/wiki/Introduction#fastback-function).
 * [Git integration](https://github.com/leo-arch/clifm/wiki/Advanced#git-integration).
 * **NEW**: [Remote file systems management](https://github.com/leo-arch/clifm/wiki/Introduction#net-name-edit-m-mount-name-u-unmount-name).
-* **NEW**: Fish-like [auto-suggestions system](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions) (under development).
+* **UPCOMING**: Fish-like [auto-suggestions system](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions).
 
 For a detailed explanation of each of these features, follow the corresponding links or consult the [wiki](https://github.com/leo-arch/clifm/wiki).
 
