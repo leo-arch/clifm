@@ -141,6 +141,27 @@ strcntchr(const char *str, const char c)
 	return -1;
 }
 
+/* Returns the index of the last appearance of c in str, if any, and
+ * -1 if c was not found or if no str */
+int
+strcntchrlst(const char *str, const char c)
+{
+	if (!str)
+		return -1;
+
+	register int i = 0;
+
+	int p = -1;
+	while (*str) {
+		if (*str == c)
+			p = i;
+		i++;
+		str++;
+	}
+
+	return p;
+}
+
 /* Returns the string after the first appearance of a given char, or
  * returns NULL if C is not found in STR or C is the last char in STR. */
 char *

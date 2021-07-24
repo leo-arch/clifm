@@ -65,10 +65,7 @@ enable_raw_mode(int fd)
 
 	if (!isatty(STDIN_FILENO))
 		goto FATAL;
-/*    if (!atexit_registered) {
-        atexit(linenoiseAtExit);
-        atexit_registered = 1;
-    } */
+
 	if (tcgetattr(fd, &orig_termios) == -1)
 		goto FATAL;
 
@@ -267,8 +264,6 @@ print_suggestion(const char *str, size_t offset, const char *color)
 
 	if (suggestion.printed)
 		clear_suggestion();
-/*	else
-		suggestion.printed = 1; */
 
 	size_t str_len = strlen(str);
 	free(suggestion_buf);
@@ -285,6 +280,8 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
 	disable_raw_mode(STDIN_FILENO);
 
+	int bk = rl_point;
+	rl_point = rl_end;
 	/* Erase whatever is after the cursor and print the suggestion */
 	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {}
 	printf("%s%s\001\x1b[39;49m\002%s", color, str + offset, df_c);
@@ -310,6 +307,14 @@ print_suggestion(const char *str, size_t offset, const char *color)
 
 	/* Restore cursor position */
 	printf("\x1b[%d;%dH", currow, curcol);
+
+	/* If the line is being edited and the cursor is not at the
+	 * end of the line, we want to keep that position instead of
+	 * moving it to the end */
+	if (suggestion.edited) {
+		rl_point = bk;
+		suggestion.edited = 0;
+	}
 
 	suggestion.lines = diff + 1;
 
@@ -481,15 +486,16 @@ check_int_params(const char *str, const size_t len)
 	return 0;
 }
 
-/* Check if some suggestion is available. Return zero if true and one
- * on error. If true, the suggestion will be printed by
- * print_suggestion() */
+/* Check for available suggestionse. Returns zero if true, one if not,
+ * and -1 if C was inserted before the end of the current line.
+ * If a suggestion is found, it will be printed by print_suggestion() */
 int
 rl_suggestions(char c)
 {
 	char *last_word = (char *)NULL;
 	char *full_line = (char *)NULL;
 	int printed = 0;
+	int inserted_c = 0;
 
 		/* ######################################
 		 * # 		  1) Filter input			#
@@ -519,13 +525,40 @@ rl_suggestions(char c)
 		default: break;
 	}
 
-	/* Append C (last char typed) to current readline buffer to
-	 * correctly find matches. At this point (rl_getc), readline has
-	 * not appended this char to rl_line_buffer yet */
+		/* ######################################
+		 * #	2) Handle last entered char		#
+		 * ######################################*/
+
+	/* If not at the end of line, insert C in the current cursor
+	 * position. Else, append it to current readline buffer to
+	 * correctly find matches: at this point (rl_getc), readline has
+	 * not appended this char to rl_line_buffer yet, so that we must
+	 * do it manually. Line editing is only allowed for the last word */
+	int s = strcntchrlst(rl_line_buffer, ' ');
+	if (rl_point != rl_end && rl_point > s && c != _ESC) {
+		char text[2];
+		text[0] = c;
+		text[1] = '\0';
+		rl_insert_text(text);
+		/* This flag is used to tell my_rl_getc not to append C to the
+		 * line buffer (rl_line_buffer), since it was already inserted
+		 * here */
+		inserted_c = 1;
+		suggestion.edited = 1;
+	}
+
 	size_t buflen = strlen(rl_line_buffer);
 	char *last_space = strrchr(rl_line_buffer, ' ');
 	suggestion.offset = 0;
 
+	/* We need a copy of the complete line */
+	full_line = (char *)xnmalloc(buflen + 2, sizeof(char));
+	if (inserted_c)
+		strcpy(full_line, rl_line_buffer);
+	else
+		sprintf(full_line, "%s%c", rl_line_buffer, c);
+
+	/* And a copy of the last entered word as well */
 	if (!last_space) {
 		last_space = (char *)NULL;
 	} else if (suggestion.type != HIST_SUG && suggestion.type != INT_CMD) {
@@ -542,28 +575,34 @@ rl_suggestions(char c)
 		if (*(++last_space)) {
 			buflen = strlen(last_space);
 			last_word = (char *)xnmalloc(buflen + 2, sizeof(char));
-			sprintf(last_word, "%s%c", last_space, c);
-			buflen++;
+			if (inserted_c)
+				strcpy(last_word, last_space);
+			else
+				sprintf(last_word, "%s%c", last_space, c);
 		} else {
 			last_word = (char *)xnmalloc(2, sizeof(char));
-			*last_word = c;
-			last_word[1] = '\0';
-			buflen = 1;
+			if (inserted_c) {
+				*last_word = '\0';
+			} else {
+				*last_word = c;
+				last_word[1] = '\0';
+			}
 		}
 	} else {
 		last_word = (char *)xnmalloc(buflen + 2, sizeof(char));
-		sprintf(last_word, "%s%c", rl_line_buffer, c);
-		buflen++;
+		if (inserted_c)
+			strcpy(last_word, rl_line_buffer);
+		else
+			sprintf(last_word, "%s%c", rl_line_buffer, c);
 	}
 
 		/* ######################################
-		 * #	  2) Search for suggestions		#
+		 * #	  3) Search for suggestions		#
 		 * ######################################*/
 
-	full_line = (char *)xnmalloc(strlen(rl_line_buffer) + 2, sizeof(char));
-	sprintf(full_line, "%s%c", rl_line_buffer, c);
+	size_t _len = 0;
 
-	/* 2.a) Check already suggested string */
+	/* 3.a) Check already suggested string */
 	if (suggestion_buf && suggestion.printed
 	&& strncmp(full_line, suggestion_buf, strlen(full_line)) == 0) {
 		printed = 1;
@@ -571,30 +610,38 @@ rl_suggestions(char c)
 		goto SUCCESS;
 	}
 
-	/* 2.b) Check CliFM internal parameters */
-	/* 2.b.1) Suggest the sel keyword only if not first word */
+	/* 3.b) Check CliFM internal parameters */
+	/* 3.b.1) Suggest the sel keyword only if not first word */
 	char *ret = strchr(full_line, ' ');
 	if (ret) {
-		size_t tmp_len = strlen(last_word);
-		if (*last_word == 's' && strncmp(last_word, "sel", tmp_len) == 0) {
-			print_suggestion("sel", tmp_len, sx_c);
+		_len = strlen(last_word);
+		if (inserted_c)
+			_len--;
+		if (*last_word == 's' && strncmp(last_word, "sel", _len) == 0) {
+			print_suggestion("sel", _len, sx_c);
 			suggestion.type = CMD_SUG;
 			free(full_line);
 			goto SUCCESS;
 		}
 	}
 
-	/* 2.b.2) Check commands fixed parameters */
+	/* 3.b.2) Check commands fixed parameters */
 	if (ret) {
-		printed = check_int_params(full_line, strlen(full_line));
+		_len = strlen(full_line);
+		if (inserted_c)
+			_len--;
+		printed = check_int_params(full_line, _len);
 		if (printed) {
 			free(full_line);
 			goto SUCCESS;
 		}
 	}
 
-	/* 2.c) Check commands history */
-	printed = check_history(full_line, strlen(full_line));
+	/* 3.c) Check commands history */
+	_len = strlen(full_line);
+	if (inserted_c)
+		_len--;
+	printed = check_history(full_line, _len);
 	free(full_line);
 	if (printed)
 		goto SUCCESS;
@@ -603,47 +650,61 @@ rl_suggestions(char c)
 	 * nor auto-open are enabled */
 	if (last_space || autocd || auto_open) {
 		/* 2.d) Check file names in CWD */
-		printed = check_filenames(last_word, strlen(last_word), c,
+		_len = strlen(last_word);
+		if (inserted_c)
+			_len--;
+		printed = check_filenames(last_word, _len, c,
 					last_space ? 0 : 1);
 		if (printed)
 			goto SUCCESS;
 
-
-		/* 2.e) Check the jump database */
+		/* 3.e) Check the jump database */
 		/* We don't care about auto-open here: the jump function
 		 * deals with directories only */
 		if (last_space || autocd) {
-			printed = check_jumpdb(last_word, strlen(last_word));
+			_len = strlen(last_word);
+			if (inserted_c)
+				_len--;
+			printed = check_jumpdb(last_word, _len);
 			if (printed)
 				goto SUCCESS;
 		}
 
-		/* 2.f) Check possible completions */
-		printed = check_completions(last_word, strlen(last_word), c);
+		/* 3.f) Check possible completions */
+		_len = strlen(last_word);
+		if (inserted_c)
+			_len--;
+		printed = check_completions(last_word, _len, c);
 		if (printed)
 			goto SUCCESS;
 	}
 
-	/* 2.g) Check commands in PATH and CliFM internals commands, but
+	/* 3.g) Check commands in PATH and CliFM internals commands, but
 	 * only for the first word */
-	if (!last_space)
-		printed = check_cmds(last_word, strlen(last_word));
+	if (!last_space) {
+		_len = strlen(last_word);
+		if (inserted_c)
+			_len--;
+		printed = check_cmds(last_word, _len);
+	}
 
 	if (printed)
 		goto SUCCESS;
 
 		/* ######################################
-		 * # 	  3) No suggestion found		#
+		 * # 	  4) No suggestion found		#
 		 * ######################################*/
 
 	/* Clear current suggestion, if any, only if no escape char is contained
 	 * in the current input sequence. This is mainly to avoid erasing
 	 * the suggestion if moving thought the text via the arrow keys */
-	if (suggestion_buf) {
+	if (suggestion.printed) {
 		if (!strchr(last_word, '\x1b')){
 			clear_suggestion();
 			goto FAIL;
 		} else {
+			// Go to SUCCESS so that we don't remove the suggestion
+			// buffer
 			goto SUCCESS;
 		}
 	}
@@ -654,6 +715,8 @@ SUCCESS:
 	else
 		suggestion.printed = 0;
 	free(last_word);
+	if (inserted_c)
+		return -1;
 	return EXIT_SUCCESS;
 
 FAIL:
@@ -661,6 +724,8 @@ FAIL:
 	free(last_word);
 	free(suggestion_buf);
 	suggestion_buf = (char *)NULL;
+	if (inserted_c)
+		return -1;
 	return EXIT_FAILURE;
 }
 
@@ -676,14 +741,18 @@ my_rl_getc(FILE *stream)
 	if (isatty(0))
 		return (getkey() & 0x7F);
 #endif /* __GO32__ */
-
 	while(1) {
 		result = read(fileno(stream), &c, sizeof(unsigned char));
 		if (result == sizeof(unsigned char)) {
-			/* The rl_point check prevent the suggestion from being
-			 * deleted by moving the cursor backwards */
 			if (suggestions)
-				rl_suggestions(c);
+				/* rl_suggestions returns -1 is C was insetrted before
+				 * the end of the current line, in which case we don't
+				 * want to return it here (otherwise, it would be added
+				 * to rl_line_buffer) */
+				if (rl_suggestions(c) == -1) {
+					rl_redisplay();
+					continue;
+				}
 			return (c);
 		}
 

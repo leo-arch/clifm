@@ -594,6 +594,7 @@ struct suggestions_t {
     int printed;
     int offset;
 	int lines;
+	int edited;
 };
 
 extern struct suggestions_t suggestion;
