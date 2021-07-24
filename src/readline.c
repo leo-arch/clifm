@@ -268,22 +268,28 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	size_t str_len = strlen(str);
 	free(suggestion_buf);
 
-	/* Store the suggestion into a buffer to be used later by the
-	 * accept_suggestion function (keybinds.c) */
+	/* Store the suggestion in a buffer to be used later by the
+	 * rl_accept_suggestion function (keybinds.c) */
 	suggestion_buf = xnmalloc(str_len + 1, sizeof(char));
 	strcpy(suggestion_buf, str);
 
 	size_t line_len = strlen(rl_line_buffer);
 
-	/* Save cursor position */
+	/* Save cursor position in two global variables: currow and curcol */
 	enable_raw_mode(STDIN_FILENO);
 	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
 	disable_raw_mode(STDIN_FILENO);
 
-	int bk = rl_point;
-	rl_point = rl_end;
-	/* Erase whatever is after the cursor and print the suggestion */
+	/* Erase whatever is after the cursor */
 	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {}
+
+	/* If not at the end of the line, move the cursor there */
+	if (suggestion.edited && rl_end > rl_point) {
+		printf("\x1b[%dC", rl_end - rl_point);
+		suggestion.edited = 0;
+	}
+
+	/* Print the suggestion */
 	printf("%s%s\001\x1b[39;49m\002%s", color, str + offset, df_c);
 
 	size_t suggestion_len = wc_xstrlen(str + offset);
@@ -307,14 +313,6 @@ print_suggestion(const char *str, size_t offset, const char *color)
 
 	/* Restore cursor position */
 	printf("\x1b[%d;%dH", currow, curcol);
-
-	/* If the line is being edited and the cursor is not at the
-	 * end of the line, we want to keep that position instead of
-	 * moving it to the end */
-	if (suggestion.edited) {
-		rl_point = bk;
-		suggestion.edited = 0;
-	}
 
 	suggestion.lines = diff + 1;
 
@@ -600,8 +598,6 @@ rl_suggestions(char c)
 		 * #	  3) Search for suggestions		#
 		 * ######################################*/
 
-	size_t _len = 0;
-
 	/* 3.a) Check already suggested string */
 	if (suggestion_buf && suggestion.printed
 	&& strncmp(full_line, suggestion_buf, strlen(full_line)) == 0) {
@@ -614,11 +610,9 @@ rl_suggestions(char c)
 	/* 3.b.1) Suggest the sel keyword only if not first word */
 	char *ret = strchr(full_line, ' ');
 	if (ret) {
-		_len = strlen(last_word);
-		if (inserted_c)
-			_len--;
-		if (*last_word == 's' && strncmp(last_word, "sel", _len) == 0) {
-			print_suggestion("sel", _len, sx_c);
+		size_t len = strlen(last_word);
+		if (*last_word == 's' && strncmp(last_word, "sel", len) == 0) {
+			print_suggestion("sel", len, sx_c);
 			suggestion.type = CMD_SUG;
 			free(full_line);
 			goto SUCCESS;
@@ -627,10 +621,7 @@ rl_suggestions(char c)
 
 	/* 3.b.2) Check commands fixed parameters */
 	if (ret) {
-		_len = strlen(full_line);
-		if (inserted_c)
-			_len--;
-		printed = check_int_params(full_line, _len);
+		printed = check_int_params(full_line, strlen(full_line));
 		if (printed) {
 			free(full_line);
 			goto SUCCESS;
@@ -638,10 +629,7 @@ rl_suggestions(char c)
 	}
 
 	/* 3.c) Check commands history */
-	_len = strlen(full_line);
-	if (inserted_c)
-		_len--;
-	printed = check_history(full_line, _len);
+	printed = check_history(full_line, strlen(full_line));
 	free(full_line);
 	if (printed)
 		goto SUCCESS;
@@ -650,10 +638,7 @@ rl_suggestions(char c)
 	 * nor auto-open are enabled */
 	if (last_space || autocd || auto_open) {
 		/* 2.d) Check file names in CWD */
-		_len = strlen(last_word);
-		if (inserted_c)
-			_len--;
-		printed = check_filenames(last_word, _len, c,
+		printed = check_filenames(last_word, strlen(last_word), c,
 					last_space ? 0 : 1);
 		if (printed)
 			goto SUCCESS;
@@ -662,31 +647,21 @@ rl_suggestions(char c)
 		/* We don't care about auto-open here: the jump function
 		 * deals with directories only */
 		if (last_space || autocd) {
-			_len = strlen(last_word);
-			if (inserted_c)
-				_len--;
-			printed = check_jumpdb(last_word, _len);
+			printed = check_jumpdb(last_word, strlen(last_word));
 			if (printed)
 				goto SUCCESS;
 		}
 
 		/* 3.f) Check possible completions */
-		_len = strlen(last_word);
-		if (inserted_c)
-			_len--;
-		printed = check_completions(last_word, _len, c);
+		printed = check_completions(last_word, strlen(last_word), c);
 		if (printed)
 			goto SUCCESS;
 	}
 
 	/* 3.g) Check commands in PATH and CliFM internals commands, but
 	 * only for the first word */
-	if (!last_space) {
-		_len = strlen(last_word);
-		if (inserted_c)
-			_len--;
-		printed = check_cmds(last_word, _len);
-	}
+	if (!last_space)
+		printed = check_cmds(last_word, strlen(last_word));
 
 	if (printed)
 		goto SUCCESS;
