@@ -1653,7 +1653,7 @@ help_function(void)
 \n              different profiles\
 \n     --sort-reverse\t\t sort in reverse order, for example: z-a \
 \n              instead of a-z, which is the default order)\
-\n     --suggestions\t\t enable ZSH-like auto-suggestions\
+\n     --suggestions\t\t enable auto-suggestions\
 \n     --trash-as-rm\t\t the 'r' command executes 'trash' instead of \
 				'rm' to prevent accidental deletions\n",
 	    PROGRAM_NAME, PROGRAM_NAME);
