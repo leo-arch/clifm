@@ -232,7 +232,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	 * move the cursor back to the correct position (the beginning
 	 * of the line) */
 	if (diff > 0 && cuc_mod && cucs_mod && currow == term_rows)
-		--currow;
+		currow -= diff;
 
 	/* Restore cursor position */
 	printf("\x1b[%d;%dH", currow, curcol);
