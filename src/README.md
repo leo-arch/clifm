@@ -118,7 +118,9 @@ TAB completion: `readline.c`
 
 Interface: `listing.c`
 
-Jumper: `jump.c`
+Directory jumper: `jump.c`
+
+Suggestions: `suggestions.c`
 
 ## 4) Compilation
 
