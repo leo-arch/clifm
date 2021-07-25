@@ -172,8 +172,8 @@ clear_suggestion(void)
 void
 print_suggestion(const char *str, size_t offset, const char *color)
 {
-	if (offset > 0)
-		offset--;
+/*	if (offset > 0)
+		offset--; */
 
 	if (suggestion.printed)
 		clear_suggestion();
@@ -205,7 +205,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	 * is the same (7 - 4 == 6 - 3 == 1) */
 
 	/* Print the suggestion */
-	printf("%s%s%s", color, str + offset, df_c);
+	printf("%s%s%s", color, str + (offset - 1), df_c);
 
 	/* Get the amount of lines taken by the suggestion (diff) */
 	size_t suggestion_len = wc_xstrlen(str + offset);
@@ -222,7 +222,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 
 	/* If the module is zero, the cursor is in the last column
 	 * of the terminal */
-/*	int cucs_mod = cucs % term_cols; */
+	int cucs_mod = cucs % term_cols;
 	int cuc_mod = cuc % term_cols;
 
 	/* Update the row number, if needed */
@@ -231,7 +231,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	 * to last_row - 1, so that we need to update the value to
 	 * move the cursor back to the correct position (the beginning
 	 * of the line) */
-	if (diff > 0 && cuc_mod && currow == term_rows)
+	if (diff > 0 && cuc_mod && cucs_mod && currow == term_rows)
 		--currow;
 
 	/* Restore cursor position */
