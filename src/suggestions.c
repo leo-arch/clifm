@@ -185,6 +185,12 @@ print_suggestion(const char *str, size_t offset, const char *color)
 
 	size_t str_len = strlen(str);
 	free(suggestion_buf);
+	suggestion_buf = (char *)NULL;
+
+	/* Do not print suggestions bigger than what the current terminal
+	 * window size can hold */
+	if (wc_xstrlen(str) > (term_cols * term_rows) - visible_prompt_len)
+		return;
 
 	/* Store the suggestion in a buffer to be used later by the
 	 * rl_accept_suggestion function (keybinds.c) */
@@ -234,6 +240,12 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	 * lines taken by the suggestion, so that we need to update the
 	 * value to move the cursor back to the correct row (the beginning
 	 * of the line) */
+	if (diff > term_rows) {
+/*		printf("\x1b[%dS", diff - term_rows); // Scroll up
+		printf("\x1b[%dA", diff - term_rows);
+		fflush(stdout); */
+		diff = term_rows;
+	}
 	if (diff > 0 && cuc_mod && cucs_mod && currow == term_rows)
 		currow -= diff;
 
@@ -293,7 +305,7 @@ check_completions(const char *str, const size_t len, const char c)
 		printed = 1;
 	} else {
 		/* If multiple matches, suggest the first one */
-		if (c != '/' && _matches[1] && *_matches[1]
+		if (_matches[1] && *_matches[1]
 		&& strlen(_matches[1]) > len) {
 			int append_slash = 0;
 			if (lstat(_matches[1], &attr) != -1) {
