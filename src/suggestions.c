@@ -299,9 +299,8 @@ check_filenames(const char *str, const size_t len, const char c, const int first
 				snprintf(tmp, NAME_MAX + 2, "%s/", file_info[i].name);
 				print_suggestion(tmp, len, sf_c);
 			} else {
-				if (first_word && !auto_open) {
+				if (first_word && !auto_open)
 					continue;
-				}
 				print_suggestion(file_info[i].name, len, sf_c);
 			}
 			if (c != BS)
@@ -478,7 +477,6 @@ rl_suggestions(char c)
 	size_t buflen = strlen(rl_line_buffer);
 	suggestion.full_line_len = buflen + 1;
 	char *last_space = strrchr(rl_line_buffer, ' ');
-	suggestion.offset = 0;
 
 	/* We need a copy of the complete line */
 	full_line = (char *)xnmalloc(buflen + 2, sizeof(char));
@@ -488,15 +486,17 @@ rl_suggestions(char c)
 		sprintf(full_line, "%s%c", rl_line_buffer, c);
 
 	/* And a copy of the last entered word as well */
+	int last_word_offset = 0;
+
 	if (!last_space) {
 		last_space = (char *)NULL;
-	} else if (suggestion.type != HIST_SUG && suggestion.type != INT_CMD) {
+	} else {
 		int j = buflen;
 		while (--j >= 0) {
 			if (rl_line_buffer[j] == ' ')
 				break;
 		}
-		suggestion.offset = j + 1;
+		last_word_offset = j + 1;
 		buflen = strlen(last_space);
 	}
 
@@ -533,6 +533,7 @@ rl_suggestions(char c)
 	if (suggestion_buf && suggestion.printed
 	&& strncmp(full_line, suggestion_buf, strlen(full_line)) == 0) {
 		printed = 1;
+		suggestion.offset = 0;
 		free(full_line);
 		goto SUCCESS;
 	}
@@ -544,6 +545,7 @@ rl_suggestions(char c)
 		size_t len = strlen(last_word);
 		if (*last_word == 's' && strncmp(last_word, "sel", len) == 0) {
 			print_suggestion("sel", len, sx_c);
+			suggestion.offset = last_word_offset;
 			suggestion.type = CMD_SUG;
 			printed = 1;
 			free(full_line);
@@ -555,6 +557,7 @@ rl_suggestions(char c)
 	if (ret) {
 		printed = check_int_params(full_line, strlen(full_line));
 		if (printed) {
+			suggestion.offset = last_word_offset;
 			free(full_line);
 			goto SUCCESS;
 		}
@@ -563,8 +566,10 @@ rl_suggestions(char c)
 	/* 3.c) Check commands history */
 	printed = check_history(full_line, strlen(full_line));
 	free(full_line);
-	if (printed)
+	if (printed) {
+		suggestion.offset = 0;
 		goto SUCCESS;
+	}
 
 	/* Do not check dirs and filenames if first word and neither autocd
 	 * nor auto-open are enabled */
@@ -572,30 +577,38 @@ rl_suggestions(char c)
 		/* 2.d) Check file names in CWD */
 		printed = check_filenames(last_word, strlen(last_word), c,
 					last_space ? 0 : 1);
-		if (printed)
+		if (printed) {
+			suggestion.offset = last_word_offset;
 			goto SUCCESS;
+		}
 
 		/* 3.e) Check the jump database */
 		/* We don't care about auto-open here: the jump function
 		 * deals with directories only */
 		if (last_space || autocd) {
 			printed = check_jumpdb(last_word, strlen(last_word));
-			if (printed)
+			if (printed) {
+				suggestion.offset = last_word_offset;
 				goto SUCCESS;
+			}
 		}
 
 		/* 3.f) Check possible completions */
 		printed = check_completions(last_word, strlen(last_word), c);
-		if (printed)
+		if (printed) {
+			suggestion.offset = last_word_offset;
 			goto SUCCESS;
+		}
 	}
 
 	/* 3.g) Check commands in PATH and CliFM internals commands, but
 	 * only for the first word */
 	if (!last_space)
 		printed = check_cmds(last_word, strlen(last_word));
-	if (printed)
+	if (printed) {
+		suggestion.offset = 0;
 		goto SUCCESS;
+	}
 
 		/* ######################################
 		 * # 	  4) No suggestion found		#
