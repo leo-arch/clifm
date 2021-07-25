@@ -59,10 +59,10 @@ enable_raw_mode(int fd)
 	struct termios raw;
 
 	if (!isatty(STDIN_FILENO))
-		goto FATAL;
+		goto FAIL;
 
 	if (tcgetattr(fd, &orig_termios) == -1)
-		goto FATAL;
+		goto FAIL;
 
 	raw = orig_termios;  /* modify the original mode */
 	/* input modes: no break, no CR to NL, no parity check, no strip char,
@@ -81,19 +81,19 @@ enable_raw_mode(int fd)
 
 	/* put terminal in raw mode after flushing */
 	if (tcsetattr(fd, TCSAFLUSH, &raw) < 0)
-		goto FATAL;
+		goto FAIL;
 
 	return 0;
 
-FATAL:
+FAIL:
 	errno = ENOTTY;
 	return -1;
 }
 
-int
+static int
 disable_raw_mode(int fd)
 {
-	if (tcsetattr(fd,TCSAFLUSH,&orig_termios) != -1)
+	if (tcsetattr(fd, TCSAFLUSH, &orig_termios) != -1)
 		return EXIT_SUCCESS;
 	return EXIT_FAILURE;
 }
@@ -101,16 +101,19 @@ disable_raw_mode(int fd)
 /* Use the "ESC [6n" escape sequence to query the cursor position (both
  * vertical and horizontal) and store both values into global variables.
  * Return 0 on success and 1 on error */
-int
+static int
 get_cursor_position(int ifd, int ofd)
 {
 	char buf[32];
 	int cols, rows;
 	unsigned int i = 0;
 
+	if (enable_raw_mode(ifd) == -1)
+		return EXIT_FAILURE;
+
 	/* Report cursor location */
 	if (write(ofd, "\x1b[6n", 4) != 4)
-		return EXIT_FAILURE;
+		goto FAIL;
 
 	/* Read the response: "ESC [ rows ; cols R" */
 	while (i < sizeof(buf) - 1) {
@@ -124,14 +127,19 @@ get_cursor_position(int ifd, int ofd)
 
 	/* Parse it */
 	if (buf[0] != _ESC || buf[1] != '[')
-		return EXIT_FAILURE;
+		goto FAIL;
 	if (sscanf(buf + 2, "%d;%d", &rows, &cols) != 2)
-		return EXIT_FAILURE;
+		goto FAIL;
 
 	currow = rows;
 	curcol = cols;
 
+	disable_raw_mode(ifd);
 	return EXIT_SUCCESS;
+
+FAIL:
+	disable_raw_mode(ifd);
+	return EXIT_FAILURE;
 }
 
 void
@@ -141,13 +149,10 @@ clear_suggestion(void)
 	 * cursor position */
 	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {}
 
-/*	if (suggestion.lines > 1 && wc_xstrlen(rl_line_buffer) < term_cols) { */
 	if (suggestion.lines > 1) {
 
 		/* Save cursor position */
-		enable_raw_mode(STDIN_FILENO);
 		get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
-		disable_raw_mode(STDIN_FILENO);
 
 		int i = suggestion.lines;
 		while (--i > 0) {
@@ -169,7 +174,7 @@ clear_suggestion(void)
  * move the cursor back to the original position.
  * OFFSET marks the point in STR that is already typed: the suggestion
  * will be printed starting from this point */
-void
+static void
 print_suggestion(const char *str, size_t offset, const char *color)
 {
 /*	if (offset > 0)
@@ -189,9 +194,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 /*	size_t line_len = strlen(rl_line_buffer); */
 
 	/* Save cursor position in two global variables: currow and curcol */
-	enable_raw_mode(STDIN_FILENO);
 	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
-	disable_raw_mode(STDIN_FILENO);
 
 	/* Erase everything after the cursor */
 	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {}
@@ -226,10 +229,10 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	int cuc_mod = cuc % term_cols;
 
 	/* Update the row number, if needed */
-	/* If the cursor is in the last row, printing a multi-line
-	 * suggestion will move the beginning of the current line
-	 * to last_row - 1, so that we need to update the value to
-	 * move the cursor back to the correct position (the beginning
+	/* If the cursor is in the last row, printing a multi-line suggestion
+	 * will move the beginning of the current line up the number of
+	 * lines taken by the suggestion, so that we need to update the
+	 * value to move the cursor back to the correct row (the beginning
 	 * of the line) */
 	if (diff > 0 && cuc_mod && cucs_mod && currow == term_rows)
 		currow -= diff;
@@ -237,15 +240,15 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	/* Restore cursor position */
 	printf("\x1b[%d;%dH", currow, curcol);
 
-	/* Store the amount of lines taken by the current suggestion
-	 * to be able to correctly remove it later (via the clear_suggestion
-	 * function) */
+	/* Store the amount of lines taken by the current command line
+	 * (including the suggestion's length) to be able to correctly
+	 * remove it later (via the clear_suggestion function) */
 	suggestion.lines = diff + 1;
 
 	return;
 }
 
-int
+static int
 check_completions(const char *str, const size_t len, const char c)
 {
 	int printed = 0;
@@ -262,16 +265,23 @@ check_completions(const char *str, const size_t len, const char c)
 
 	/* If only one match */
 	if (_matches[0] && *_matches[0]	&& strlen(_matches[0]) > len) {
+		int append_slash = 0;
 		if (lstat(_matches[0], &attr) != -1) {
-			if ((attr.st_mode & S_IFMT) == S_IFDIR)
+			if ((attr.st_mode & S_IFMT) == S_IFDIR) {
+				append_slash = 1;
 				suggestion.filetype = DT_DIR;
+			}
 		} else {
 			/* We have a partial completion. Set filetype to DT_DIR
 			 * so that the rl_accept_suggestion function won't append
 			 * a space after the file name */
 			suggestion.filetype = DT_DIR;
 		}
-		char *tmp = escape_str(_matches[0]);
+		char _tmp[NAME_MAX + 2];
+		*_tmp = '\0';
+		if (append_slash)
+			snprintf(_tmp, NAME_MAX + 2, "%s/", _matches[0]);
+		char *tmp = escape_str(*_tmp ? _tmp : _matches[0]);
 		if (tmp) {
 			print_suggestion(tmp, len, sf_c);
 			free(tmp);
@@ -285,13 +295,20 @@ check_completions(const char *str, const size_t len, const char c)
 		/* If multiple matches, suggest the first one */
 		if (c != '/' && _matches[1] && *_matches[1]
 		&& strlen(_matches[1]) > len) {
+			int append_slash = 0;
 			if (lstat(_matches[1], &attr) != -1) {
-				if ((attr.st_mode & S_IFMT) == S_IFDIR)
+				if ((attr.st_mode & S_IFMT) == S_IFDIR) {
+					append_slash = 1;
 					suggestion.filetype = DT_DIR;
+				}
 			} else {
 				suggestion.filetype = DT_DIR;
 			}
-			char *tmp = escape_str(_matches[1]);
+			char _tmp[NAME_MAX + 2];
+			*_tmp = '\0';
+			if (append_slash)
+				snprintf(_tmp, NAME_MAX + 2, "%s/", _matches[1]);
+			char *tmp = escape_str(*_tmp ? _tmp : _matches[1]);
 			if (tmp) {
 				print_suggestion(tmp, len, sf_c);
 				free(tmp);
@@ -312,7 +329,7 @@ FREE:
 	return printed;
 }
 
-int
+static int
 check_filenames(const char *str, const size_t len, const char c, const int first_word)
 {
 	int i = files;
@@ -357,7 +374,7 @@ check_filenames(const char *str, const size_t len, const char c, const int first
 	return 0;
 }
 
-int
+static int
 check_history(const char *str, const size_t len)
 {
 	if (!str || !*str)
@@ -394,7 +411,7 @@ check_history(const char *str, const size_t len)
 	return 0;
 }
 
-int
+static int
 check_cmds(const char *str, const size_t len)
 {
 	int i = path_progsn;
@@ -418,7 +435,7 @@ check_cmds(const char *str, const size_t len)
 	return 0;
 }
 
-int
+static int
 check_jumpdb(const char *str, const size_t len)
 {
 	int i = jump_n;
@@ -437,7 +454,7 @@ check_jumpdb(const char *str, const size_t len)
 	return 0;
 }
 
-int
+static int
 check_int_params(const char *str, const size_t len)
 {
 	size_t i;
@@ -576,7 +593,7 @@ rl_suggestions(char c)
 		 * #	  3) Search for suggestions		#
 		 * ######################################*/
 
-//	suggestion.filetype = DT_NONE;
+/*	suggestion.filetype = DT_NONE; */
 
 	/* 3.a) Check already suggested string */
 	if (suggestion_buf && suggestion.printed
