@@ -362,6 +362,7 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define FILE_SUG 2
 #define CMD_SUG 4
 #define INT_CMD 8
+#define COMP_SUG 16
 
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR
@@ -431,6 +432,8 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 # define DT_LNK 10
 # define DT_SOCK 12
 #endif
+
+#define DT_NONE 14
 
 				/** #########################
 				 *  #    GLOBAL VARIABLES   #
@@ -595,6 +598,7 @@ struct suggestions_t {
     int offset;
 	int lines;
 	int full_line_len;
+	int filetype;
 };
 
 extern struct suggestions_t suggestion;

@@ -37,6 +37,7 @@ typedef char *rl_cpvfunc_t;
 #ifdef __NetBSD__
 #include <string.h>
 #endif
+#include <dirent.h>
 
 #include "aux.h"
 #include "config.h"
@@ -504,8 +505,8 @@ rl_accept_suggestion(int count, int key)
 
 		switch(suggestion.type) {
 
-		case FILE_SUG:
-			suggestion.type = NO_SUG;
+		case COMP_SUG: /* fallthrough */
+		case FILE_SUG: {
 			char *tmp = (char *)NULL;
 			char *ret = strchr(suggestion_buf, '\\');
 			if (!ret)
@@ -515,6 +516,10 @@ rl_accept_suggestion(int count, int key)
 				free(tmp);
 			} else {
 				rl_insert_text(suggestion_buf);
+			}
+			if (suggestion.filetype != DT_DIR)
+				rl_stuff_char(' ');
+			suggestion.type = NO_SUG;
 			}
 			break;
 
@@ -538,6 +543,7 @@ rl_accept_suggestion(int count, int key)
 		rl_point++;
 	}
 
+//	suggestion.filetype = DT_NONE;
 	return EXIT_SUCCESS;
 }
 

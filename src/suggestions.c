@@ -24,9 +24,7 @@
 
 #include "helpers.h"
 
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #include <sys/stat.h>
-#endif
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
@@ -35,6 +33,7 @@
 #endif
 #include <unistd.h>
 #include <errno.h>
+#include <dirent.h>
 #include <termios.h>
 
 #ifdef __OpenBSD__
@@ -250,33 +249,53 @@ int
 check_completions(const char *str, const size_t len, const char c)
 {
 	int printed = 0;
+	size_t i;
 	char **_matches = rl_completion_matches(str, rl_completion_entry_function);
+	struct stat attr;
+	suggestion.filetype = DT_REG;
 
-	if (_matches) {
-		if (len) {
-			/* If only one match */
-			if (_matches[0] && *_matches[0]	&& strlen(_matches[0]) > len) {
-				print_suggestion(_matches[0], len, sf_c);
-				if (c != BS)
-					suggestion.type = FILE_SUG;
-				printed = 1;
-			} else {
-				/* If multiple matches, suggest the first one */
-				if (c != '/' && _matches[1] && *_matches[1]
-				&& strlen(_matches[1]) > len) {
-					print_suggestion(_matches[1], len, sf_c);
-					if (c != BS)
-						suggestion.type = FILE_SUG;
-					printed = 1;
-				}
-			}
+	if (!_matches)
+		return printed;
+
+	if (!len)
+		goto FREE;
+
+	/* If only one match */
+	if (_matches[0] && *_matches[0]	&& strlen(_matches[0]) > len) {
+		if (lstat(_matches[0], &attr) != -1) {
+			if ((attr.st_mode & S_IFMT) == S_IFDIR)
+				suggestion.filetype = DT_DIR;
+		} else {
+			/* We have a partial completion. Set filetype to DT_DIR
+			 * so that the rl_accept_suggestion function won't append
+			 * a space after the file name */
+			suggestion.filetype = DT_DIR;
 		}
-
-		size_t i;
-		for (i = 0; _matches[i]; i++)
-			free(_matches[i]);
-		free(_matches);
+		print_suggestion(_matches[0], len, sf_c);
+		if (c != BS)
+			suggestion.type = COMP_SUG;
+		printed = 1;
+	} else {
+		/* If multiple matches, suggest the first one */
+		if (c != '/' && _matches[1] && *_matches[1]
+		&& strlen(_matches[1]) > len) {
+			if (lstat(_matches[1], &attr) != -1) {
+				if ((attr.st_mode & S_IFMT) == S_IFDIR)
+					suggestion.filetype = DT_DIR;
+			} else {
+				suggestion.filetype = DT_DIR;
+			}
+			print_suggestion(_matches[1], len, sf_c);
+			if (c != BS)
+				suggestion.type = COMP_SUG;
+			printed = 1;
+		}
 	}
+
+FREE:
+	for (i = 0; _matches[i]; i++)
+		free(_matches[i]);
+	free(_matches);
 
 	return printed;
 }
@@ -295,10 +314,12 @@ check_filenames(const char *str, const size_t len, const char c, const int first
 			if (file_info[i].dir) {
 				if (first_word && !autocd)
 					continue;
+				suggestion.filetype = DT_DIR;
 				char tmp[NAME_MAX + 2];
 				snprintf(tmp, NAME_MAX + 2, "%s/", file_info[i].name);
 				print_suggestion(tmp, len, sf_c);
 			} else {
+				suggestion.filetype = DT_REG;
 				if (first_word && !auto_open)
 					continue;
 				print_suggestion(file_info[i].name, len, sf_c);
@@ -528,6 +549,8 @@ rl_suggestions(char c)
 		/* ######################################
 		 * #	  3) Search for suggestions		#
 		 * ######################################*/
+
+//	suggestion.filetype = DT_NONE;
 
 	/* 3.a) Check already suggested string */
 	if (suggestion_buf && suggestion.printed
