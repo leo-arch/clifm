@@ -197,6 +197,7 @@ is_internal_c(const char *restrict cmd)
 	    "pf", "prof", "profile",
 	    "pg", "pager",
 	    "pin", "unpin",
+		"quit",
 	    "r", "rm",
 	    "rf", "refresh",
 	    "rl", "reload",

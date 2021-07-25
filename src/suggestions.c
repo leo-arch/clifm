@@ -271,7 +271,13 @@ check_completions(const char *str, const size_t len, const char c)
 			 * a space after the file name */
 			suggestion.filetype = DT_DIR;
 		}
-		print_suggestion(_matches[0], len, sf_c);
+		char *tmp = escape_str(_matches[0]);
+		if (tmp) {
+			print_suggestion(tmp, len, sf_c);
+			free(tmp);
+		} else {
+			print_suggestion(_matches[0], len, sf_c);
+		}
 		if (c != BS)
 			suggestion.type = COMP_SUG;
 		printed = 1;
@@ -285,7 +291,13 @@ check_completions(const char *str, const size_t len, const char c)
 			} else {
 				suggestion.filetype = DT_DIR;
 			}
-			print_suggestion(_matches[1], len, sf_c);
+			char *tmp = escape_str(_matches[1]);
+			if (tmp) {
+				print_suggestion(tmp, len, sf_c);
+				free(tmp);
+			} else {
+				print_suggestion(_matches[1], len, sf_c);
+			}
 			if (c != BS)
 				suggestion.type = COMP_SUG;
 			printed = 1;
@@ -317,12 +329,24 @@ check_filenames(const char *str, const size_t len, const char c, const int first
 				suggestion.filetype = DT_DIR;
 				char tmp[NAME_MAX + 2];
 				snprintf(tmp, NAME_MAX + 2, "%s/", file_info[i].name);
-				print_suggestion(tmp, len, sf_c);
+				char *_tmp = escape_str(tmp);
+				if (_tmp) {
+					print_suggestion(_tmp, len, sf_c);
+					free(_tmp);
+				} else {
+					print_suggestion(tmp, len, sf_c);
+				}
 			} else {
-				suggestion.filetype = DT_REG;
 				if (first_word && !auto_open)
 					continue;
-				print_suggestion(file_info[i].name, len, sf_c);
+				suggestion.filetype = DT_REG;
+				char *tmp = escape_str(file_info[i].name);
+				if (tmp) {
+					print_suggestion(tmp, len, sf_c);
+					free(tmp);
+				} else {
+					print_suggestion(file_info[i].name, len, sf_c);
+				}
 			}
 			if (c != BS)
 				suggestion.type = FILE_SUG;
@@ -498,6 +522,8 @@ rl_suggestions(char c)
 	size_t buflen = strlen(rl_line_buffer);
 	suggestion.full_line_len = buflen + 1;
 	char *last_space = strrchr(rl_line_buffer, ' ');
+	if (last_space && *(last_space - 1) == '\\')
+		last_space = (char *)NULL;
 
 	/* We need a copy of the complete line */
 	full_line = (char *)xnmalloc(buflen + 2, sizeof(char));
@@ -580,7 +606,7 @@ rl_suggestions(char c)
 	if (ret) {
 		printed = check_int_params(full_line, strlen(full_line));
 		if (printed) {
-			suggestion.offset = last_word_offset;
+			suggestion.offset = 0;
 			free(full_line);
 			goto SUCCESS;
 		}
