@@ -1049,7 +1049,7 @@ set_colors(const char *colorscheme, int env)
 				if (!is_color_code(colors[i] + 3))
 					*df_c = '\0';
 				else
-					snprintf(df_c, MAX_COLOR - 1, "\001\x1b[%sm\002",
+					snprintf(df_c, MAX_COLOR - 1, "\001\x1b[%s;49m\002",
 							colors[i] + 3);
 
 			else if (*colors[i] == 'd' && strncmp(colors[i], "dc=", 3) == 0)

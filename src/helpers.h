@@ -233,11 +233,11 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define DEF_EL_C "\x1b[01;33m"
 #define DEF_MI_C "\x1b[01;36m"
 #define DEF_DL_C "\x1b[01;34m"
-#define DEF_DF_C "\001\x1b[00;37m\002"
 #define DEF_DC_C "\x1b[00;37m"
 #define DEF_WC_C "\x1b[01;36m"
 #define DEF_DH_C "\x1b[00;36m"
 
+#define DEF_DF_C "\001\x1b[00;37m\002"
 #define DEF_TX_C "\001\x1b[00;37m\002"
 #define DEF_LI_C "\001\x1b[01;32m\002"
 #define DEF_TI_C "\001\x1b[01;33m\002"
@@ -594,7 +594,7 @@ struct suggestions_t {
     int printed;
     int offset;
 	int lines;
-	int edited;
+	int full_line_len;
 };
 
 extern struct suggestions_t suggestion;

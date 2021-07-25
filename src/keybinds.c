@@ -50,6 +50,7 @@ typedef char *rl_cpvfunc_t;
 #include "messages.h"
 #include "strings.h"
 #include "readline.h"
+#include "suggestions.h"
 
 int
 kbinds_reset(void)
