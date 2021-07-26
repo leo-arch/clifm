@@ -149,6 +149,8 @@ FAIL:
 	return EXIT_FAILURE;
 }
 
+/* This function is only used before running a keybind command. We don't
+ * want the suggestion buffer after running a keybind */
 void
 free_suggestion(void)
 {
@@ -702,7 +704,8 @@ rl_suggestions(const char c)
 	size_t buflen = strlen(rl_line_buffer);
 	suggestion.full_line_len = buflen + 1;
 	char *last_space = strrchr(rl_line_buffer, ' ');
-	if (last_space && *(last_space - 1) == '\\')
+	if (last_space && last_space != rl_line_buffer
+	&& *(last_space - 1) == '\\')
 		last_space = (char *)NULL;
 
 	/* We need a copy of the complete line */
