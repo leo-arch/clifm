@@ -246,7 +246,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	/* If the module is zero, the cursor is in the last column
 	 * of the terminal */
 	int cucs_mod = cucs % term_cols;
-	int cuc_mod = cuc % term_cols;
+//	int cuc_mod = cuc % term_cols;
 
 	/* Update the row number, if needed */
 	/* If the cursor is in the last row, printing a multi-line suggestion
@@ -257,7 +257,8 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	if (diff > term_rows)
 		diff = term_rows;
 
-	if (diff > 0 && cuc_mod && cucs_mod && currow == term_rows)
+//	printf("'%d:%d:%d:%d'", diff, cuc_mod, cucs_mod, currow);
+	if (diff > 0 && cucs_mod && currow == term_rows)
 		currow -= diff;
 
 	/* Restore cursor position */
@@ -388,7 +389,6 @@ check_completions(const char *str, const size_t len, const char c)
 
 	if (!len)
 		goto FREE;
-
 	/* If only one match */
 	if (_matches[0] && *_matches[0]	&& strlen(_matches[0]) > len) {
 		int append_slash = 0;
@@ -419,7 +419,6 @@ check_completions(const char *str, const size_t len, const char c)
 		} else {
 			print_suggestion(_matches[0], len, color);
 		}
-
 		if (c != BS)
 			suggestion.type = COMP_SUG;
 
@@ -453,7 +452,6 @@ check_completions(const char *str, const size_t len, const char c)
 			} else {
 				print_suggestion(_matches[1], len, color);
 			}
-
 			if (c != BS)
 				suggestion.type = COMP_SUG;
 
@@ -602,8 +600,11 @@ check_jumpdb(const char *str, const size_t len)
 			continue;
 		if (len && strncmp(str, jump_db[i].path, len) == 0
 		&& strlen(jump_db[i].path) > len) {
-			print_suggestion(jump_db[i].path, len, color);
+			char tmp[NAME_MAX + 2];
+			snprintf(tmp, NAME_MAX + 2, "%s/", jump_db[i].path);
+			print_suggestion(tmp, len, color);
 			suggestion.type = FILE_SUG;
+			suggestion.filetype = DT_DIR;
 			return 1;
 		}
 	}
