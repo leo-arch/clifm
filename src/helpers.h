@@ -329,6 +329,7 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define DEF_SORT_REVERSE 0
 #define DEF_SPLASH_SCREEN 0
 #define DEF_SUGGESTIONS 0
+#define DEF_SUG_FILETYPE_COLOR 0
 #define DEF_TIPS 1
 #define DEF_TRASRM 0
 #define DEF_UNICODE 1
@@ -685,6 +686,7 @@ extern short
     icons,
     copy_n_rename,
     suggestions,
+    suggest_filetype_color,
 
     home_ok,
     config_ok,

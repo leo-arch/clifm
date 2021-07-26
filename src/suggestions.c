@@ -260,6 +260,25 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	return;
 }
 
+static char *
+get_comp_color(mode_t mode)
+{
+	char *c = (char *)NULL; 
+
+	switch(mode & S_IFMT) {
+		case S_IFDIR: c = di_c; break;
+		case S_IFREG: c = fi_c; break;
+		case S_IFLNK: c = ln_c; break;
+		case S_IFSOCK: c = so_c; break;
+		case S_IFBLK: c = bd_c; break;
+		case S_IFCHR: c = cd_c; break;
+		case S_IFIFO: c = pi_c; break;
+		default: c = no_c; break;
+	}
+
+	return c;
+}
+
 static int
 check_completions(const char *str, const size_t len, const char c)
 {
@@ -268,6 +287,7 @@ check_completions(const char *str, const size_t len, const char c)
 	char **_matches = rl_completion_matches(str, rl_completion_entry_function);
 	struct stat attr;
 	suggestion.filetype = DT_REG;
+	char *color = sf_c;
 
 	if (!_matches)
 		return printed;
@@ -278,27 +298,32 @@ check_completions(const char *str, const size_t len, const char c)
 	/* If only one match */
 	if (_matches[0] && *_matches[0]	&& strlen(_matches[0]) > len) {
 		int append_slash = 0;
+
 		if (lstat(_matches[0], &attr) != -1) {
 			if ((attr.st_mode & S_IFMT) == S_IFDIR) {
 				append_slash = 1;
 				suggestion.filetype = DT_DIR;
 			}
+			if (suggest_filetype_color)
+				color = get_comp_color(attr.st_mode);
 		} else {
 			/* We have a partial completion. Set filetype to DT_DIR
 			 * so that the rl_accept_suggestion function won't append
 			 * a space after the file name */
 			suggestion.filetype = DT_DIR;
 		}
+
 		char _tmp[NAME_MAX + 2];
 		*_tmp = '\0';
 		if (append_slash)
 			snprintf(_tmp, NAME_MAX + 2, "%s/", _matches[0]);
 		char *tmp = escape_str(*_tmp ? _tmp : _matches[0]);
+
 		if (tmp) {
-			print_suggestion(tmp, len, sf_c);
+			print_suggestion(tmp, len, color);
 			free(tmp);
 		} else {
-			print_suggestion(_matches[0], len, sf_c);
+			print_suggestion(_matches[0], len, color);
 		}
 		if (c != BS)
 			suggestion.type = COMP_SUG;
@@ -308,25 +333,31 @@ check_completions(const char *str, const size_t len, const char c)
 		if (_matches[1] && *_matches[1]
 		&& strlen(_matches[1]) > len) {
 			int append_slash = 0;
+
 			if (lstat(_matches[1], &attr) != -1) {
 				if ((attr.st_mode & S_IFMT) == S_IFDIR) {
 					append_slash = 1;
 					suggestion.filetype = DT_DIR;
 				}
+				if (suggest_filetype_color)
+					color = get_comp_color(attr.st_mode);
 			} else {
 				suggestion.filetype = DT_DIR;
 			}
+
 			char _tmp[NAME_MAX + 2];
 			*_tmp = '\0';
 			if (append_slash)
 				snprintf(_tmp, NAME_MAX + 2, "%s/", _matches[1]);
 			char *tmp = escape_str(*_tmp ? _tmp : _matches[1]);
+
 			if (tmp) {
-				print_suggestion(tmp, len, sf_c);
+				print_suggestion(tmp, len, color);
 				free(tmp);
 			} else {
-				print_suggestion(_matches[1], len, sf_c);
+				print_suggestion(_matches[1], len, color);
 			}
+
 			if (c != BS)
 				suggestion.type = COMP_SUG;
 			printed = 1;
@@ -345,6 +376,7 @@ static int
 check_filenames(const char *str, const size_t len, const char c, const int first_word)
 {
 	int i = files;
+	char *color = sf_c;
 
 	while (--i >= 0) {
 		if (!file_info[i].name || TOUPPER(*str) != TOUPPER(*file_info[i].name))
@@ -352,6 +384,8 @@ check_filenames(const char *str, const size_t len, const char c, const int first
 		if (len && (case_sens_path_comp	? strncmp(str, file_info[i].name, len)
 		: strncasecmp(str, file_info[i].name, len)) == 0
 		&& file_info[i].len > len) {
+			if (suggest_filetype_color)
+				color = file_info[i].color;
 			if (file_info[i].dir) {
 				if (first_word && !autocd)
 					continue;
@@ -360,10 +394,10 @@ check_filenames(const char *str, const size_t len, const char c, const int first
 				snprintf(tmp, NAME_MAX + 2, "%s/", file_info[i].name);
 				char *_tmp = escape_str(tmp);
 				if (_tmp) {
-					print_suggestion(_tmp, len, sf_c);
+					print_suggestion(_tmp, len, color);
 					free(_tmp);
 				} else {
-					print_suggestion(tmp, len, sf_c);
+					print_suggestion(tmp, len, color);
 				}
 			} else {
 				if (first_word && !auto_open)
@@ -371,10 +405,10 @@ check_filenames(const char *str, const size_t len, const char c, const int first
 				suggestion.filetype = DT_REG;
 				char *tmp = escape_str(file_info[i].name);
 				if (tmp) {
-					print_suggestion(tmp, len, sf_c);
+					print_suggestion(tmp, len, color);
 					free(tmp);
 				} else {
-					print_suggestion(file_info[i].name, len, sf_c);
+					print_suggestion(file_info[i].name, len, color);
 				}
 			}
 			if (c != BS)
@@ -451,13 +485,18 @@ static int
 check_jumpdb(const char *str, const size_t len)
 {
 	int i = jump_n;
+	char *color = (char *)NULL;
+	if (suggest_filetype_color)
+		color = di_c;
+	else
+		color = sf_c;
 
 	while (--i >= 0) {
 		if (!jump_db[i].path || *str != *jump_db[i].path)
 			continue;
 		if (len && strncmp(str, jump_db[i].path, len) == 0
 		&& strlen(jump_db[i].path) > len) {
-			print_suggestion(jump_db[i].path, len, sf_c);
+			print_suggestion(jump_db[i].path, len, color);
 			suggestion.type = FILE_SUG;
 			return 1;
 		}

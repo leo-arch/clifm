@@ -813,8 +813,12 @@ CdOnQuit=%s\n\n"
 Autocd=%s\n\
 AutoOpen=%s\n\n"
 
-	    "# If set to true, enable ZSH-like auto-suggestions.\n\
+	    "# If set to true, enable auto-suggestions.\n\
 AutoSuggestions=%s\n\n"
+
+	    "# If set to true, suggest file names using the corresponding\n\
+# file type color (set via the color scheme file).\n\
+SuggestFiletypeColor=%s\n\n"
 
 	    "# If set to true, expand bookmark names into the corresponding bookmark\n\
 # path: if the bookmark is \"name=/path\", \"name\" will be interpreted\n\
@@ -845,6 +849,7 @@ LightMode=%s\n\n",
 		DEF_AUTOCD == 1 ? "true" : "false",
 		DEF_AUTO_OPEN == 1 ? "true" : "false",
 		DEF_SUGGESTIONS == 1 ? "true" : "false",
+		DEF_SUG_FILETYPE_COLOR == 1 ? "true" : "false",
 		DEF_EXPAND_BOOKMARKS == 1 ? "true" : "false",
 		DEF_LIGHT_MODE == 1 ? "true" : "false"
 		);
@@ -1430,6 +1435,17 @@ read_config(void)
 
 			else if (strncmp(opt_str, "false", 5) == 0)
 				case_sens_path_comp = 0;
+		}
+
+		else if (*line == 'S' && strncmp(line, "SuggestFiletypeColor=", 21) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "SuggestFiletypeColor=%5s\n", opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "true", 4) == 0)
+				suggest_filetype_color = 1;
+			else if (strncmp(opt_str, "false", 5) == 0)
+				suggest_filetype_color = 0;
 		}
 
 		else if (xargs.suggestions == UNSET && *line == 'A'
@@ -2214,6 +2230,7 @@ reload_config(void)
 	no_eln = min_name_trim = case_sens_dirjump = case_sens_path_comp = UNSET;
 	min_jump_rank = max_jump_total_rank = print_selfiles = UNSET;
 	max_printselfiles = suggestions = visible_prompt_len = UNSET;
+	suggest_filetype_color = UNSET;
 
 	shell_terminal = no_log = internal_cmd = recur_perm_error_flag = 0;
 	is_sel = sel_is_last = print_msg = kbind_busy = dequoted = 0;

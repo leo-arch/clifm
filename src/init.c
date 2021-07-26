@@ -2149,6 +2149,9 @@ check_options(void)
 			suggestions = xargs.suggestions;
 	}
 
+	if (suggest_filetype_color == UNSET)
+		suggest_filetype_color = DEF_SUG_FILETYPE_COLOR;
+
 	if (print_selfiles == UNSET) {
 		if (xargs.printsel == UNSET)
 			print_selfiles = DEF_PRINTSEL;

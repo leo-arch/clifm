@@ -120,6 +120,7 @@ short
     case_sens_path_comp = UNSET,
 	print_selfiles = UNSET,
     suggestions = UNSET,
+    suggest_filetype_color = UNSET,
 
     no_log = 0,
     internal_cmd = 0,
