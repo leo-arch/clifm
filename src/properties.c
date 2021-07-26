@@ -74,8 +74,9 @@ get_properties(char *filename, int dsize)
 		char *ext = (char *)NULL;
 
 		file_type = '-';
-
-		if (access(filename, R_OK) == -1)
+		if (light_mode)
+			color = fi_c;
+		else if (access(filename, R_OK) == -1)
 			color = nf_c;
 		else if (file_attrib.st_mode & S_ISUID)
 			color = su_c;
@@ -127,7 +128,9 @@ get_properties(char *filename, int dsize)
 	case S_IFDIR:
 		file_type = 'd';
 
-		if (access(filename, R_OK | X_OK) != 0) {
+		if (light_mode)
+			color = di_c;
+		else if (access(filename, R_OK | X_OK) != 0) {
 			color = nd_c;
 		} else {
 			int sticky = 0;
@@ -138,7 +141,7 @@ get_properties(char *filename, int dsize)
 			if (file_attrib.st_mode & S_IWOTH)
 				is_oth_w = 1;
 
-			int files_dir = count_dir(filename, NO_CPOP);
+			int files_dir = count_dir(filename, CPOP);
 
 			color = sticky ? (is_oth_w ? tw_c : st_c) : is_oth_w ? ow_c
 				   : ((files_dir == 2 || files_dir == 0) ? ed_c : di_c);
@@ -148,12 +151,15 @@ get_properties(char *filename, int dsize)
 	case S_IFLNK:
 		file_type = 'l';
 
-		linkname = realpath(filename, (char *)NULL);
-
-		if (linkname)
+		if (light_mode) {
 			color = ln_c;
-		else
-			color = or_c;
+		} else {
+			linkname = realpath(filename, (char *)NULL);
+			if (linkname)
+				color = ln_c;
+			else
+				color = or_c;
+		}
 		break;
 	case S_IFSOCK:
 		file_type = 's';

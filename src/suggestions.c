@@ -36,6 +36,10 @@
 #include <dirent.h>
 #include <termios.h>
 
+#ifdef __linux__
+#include <sys/capability.h>
+#endif
+
 #ifdef __OpenBSD__
 typedef char *rl_cpvfunc_t;
 #include <ereadline/readline/readline.h>
@@ -46,6 +50,9 @@ typedef char *rl_cpvfunc_t;
 #include "suggestions.h"
 #include "aux.h"
 #include "checks.h"
+#include "colors.h"
+
+static int free_color = 0;
 
 /* The following three functions were taken from
  * https://github.com/antirez/linenoise/blob/master/linenoise.c
@@ -54,7 +61,7 @@ typedef char *rl_cpvfunc_t;
 
 /* Set the terminal into raw mode. Return 0 on success and -1 on error */
 static int
-enable_raw_mode(int fd)
+enable_raw_mode(const int fd)
 {
 	struct termios raw;
 
@@ -91,7 +98,7 @@ FAIL:
 }
 
 static int
-disable_raw_mode(int fd)
+disable_raw_mode(const int fd)
 {
 	if (tcsetattr(fd, TCSAFLUSH, &orig_termios) != -1)
 		return EXIT_SUCCESS;
@@ -102,7 +109,7 @@ disable_raw_mode(int fd)
  * vertical and horizontal) and store both values into global variables.
  * Return 0 on success and 1 on error */
 static int
-get_cursor_position(int ifd, int ofd)
+get_cursor_position(const int ifd, const int ofd)
 {
 	char buf[32];
 	int cols, rows;
@@ -177,9 +184,6 @@ clear_suggestion(void)
 static void
 print_suggestion(const char *str, size_t offset, const char *color)
 {
-/*	if (offset > 0)
-		offset--; */
-
 	if (suggestion.printed)
 		clear_suggestion();
 
@@ -240,12 +244,9 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	 * lines taken by the suggestion, so that we need to update the
 	 * value to move the cursor back to the correct row (the beginning
 	 * of the line) */
-	if (diff > term_rows) {
-/*		printf("\x1b[%dS", diff - term_rows); // Scroll up
-		printf("\x1b[%dA", diff - term_rows);
-		fflush(stdout); */
+	if (diff > term_rows)
 		diff = term_rows;
-	}
+
 	if (diff > 0 && cuc_mod && cucs_mod && currow == term_rows)
 		currow -= diff;
 
@@ -260,23 +261,102 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	return;
 }
 
+/* Used by the check_completions function to get file names color
+ * according to file type */
 static char *
-get_comp_color(mode_t mode)
+get_comp_color(const char *filename, const struct stat attr)
 {
-	char *c = (char *)NULL; 
+	char *color = no_c; 
 
-	switch(mode & S_IFMT) {
-		case S_IFDIR: c = di_c; break;
-		case S_IFREG: c = fi_c; break;
-		case S_IFLNK: c = ln_c; break;
-		case S_IFSOCK: c = so_c; break;
-		case S_IFBLK: c = bd_c; break;
-		case S_IFCHR: c = cd_c; break;
-		case S_IFIFO: c = pi_c; break;
-		default: c = no_c; break;
+	switch(attr.st_mode & S_IFMT) {
+	case S_IFDIR:
+		if (light_mode)
+			return di_c;
+		if (access(filename, R_OK | X_OK) != 0) {
+			color = nd_c;
+		} else {
+			int sticky = 0;
+			int is_oth_w = 0;
+			if (attr.st_mode & S_ISVTX)
+				sticky = 1;
+
+			if (attr.st_mode & S_IWOTH)
+				is_oth_w = 1;
+
+			int files_dir = count_dir(filename, CPOP);
+
+			color = sticky ? (is_oth_w ? tw_c : st_c) : is_oth_w ? ow_c
+				   : ((files_dir == 2 || files_dir == 0) ? ed_c : di_c);
+		}
+		break;
+
+	case S_IFREG:
+		if (light_mode)
+			return fi_c;
+		if (access(filename, R_OK) == -1)
+			color = nf_c;
+		else if (attr.st_mode & S_ISUID)
+			color = su_c;
+		else if (attr.st_mode & S_ISGID)
+			color = sg_c;
+		else {
+#ifdef _LINUX_CAP
+			cap_t cap = cap_get_file(filename);
+			if (cap) {
+				color = ca_c;
+				cap_free(cap);
+			} else if (attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
+#else
+			if (attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
+#endif
+				if (attr.st_size == 0)
+					color = ee_c;
+				else
+					color = ex_c;
+			} else if (attr.st_size == 0)
+				color = ef_c;
+			else if (attr.st_nlink > 1)
+				color = mh_c;
+			else {
+				char *ext = strrchr(filename, '.');
+				if (ext && ext != filename) {
+					char *extcolor = get_ext_color(ext);
+					if (extcolor) {
+						char *ext_color = (char *)xnmalloc(strlen(extcolor)
+											+ 4, sizeof(char));
+						sprintf(ext_color, "\x1b[%sm", extcolor);
+						color = ext_color;
+						free_color = 1;
+						extcolor = (char *)NULL;
+					} else  {
+						color = fi_c;
+					}
+				} else {
+					color = fi_c;
+				}
+			}
+		}
+		break;
+
+	case S_IFLNK: {
+		if (light_mode)
+			return ln_c;
+		char *linkname = realpath(filename, (char *)NULL);
+		if (linkname)
+			color = ln_c;
+		else
+			color = or_c;
+		}
+		break;
+
+	case S_IFSOCK: color = so_c; break;
+	case S_IFBLK: color = bd_c; break;
+	case S_IFCHR: color = cd_c; break;
+	case S_IFIFO: color = pi_c; break;
+	default: color = no_c; break;
 	}
 
-	return c;
+	return color;
 }
 
 static int
@@ -287,7 +367,11 @@ check_completions(const char *str, const size_t len, const char c)
 	char **_matches = rl_completion_matches(str, rl_completion_entry_function);
 	struct stat attr;
 	suggestion.filetype = DT_REG;
-	char *color = sf_c;
+	char *color = (char *)NULL;
+	if (suggest_filetype_color)
+		color = no_c;
+	else
+		color = sf_c;
 
 	if (!_matches)
 		return printed;
@@ -305,7 +389,7 @@ check_completions(const char *str, const size_t len, const char c)
 				suggestion.filetype = DT_DIR;
 			}
 			if (suggest_filetype_color)
-				color = get_comp_color(attr.st_mode);
+				color = get_comp_color(_matches[0], attr);
 		} else {
 			/* We have a partial completion. Set filetype to DT_DIR
 			 * so that the rl_accept_suggestion function won't append
@@ -325,8 +409,10 @@ check_completions(const char *str, const size_t len, const char c)
 		} else {
 			print_suggestion(_matches[0], len, color);
 		}
+
 		if (c != BS)
 			suggestion.type = COMP_SUG;
+
 		printed = 1;
 	} else {
 		/* If multiple matches, suggest the first one */
@@ -340,7 +426,7 @@ check_completions(const char *str, const size_t len, const char c)
 					suggestion.filetype = DT_DIR;
 				}
 				if (suggest_filetype_color)
-					color = get_comp_color(attr.st_mode);
+					color = get_comp_color(_matches[1], attr);
 			} else {
 				suggestion.filetype = DT_DIR;
 			}
@@ -360,6 +446,7 @@ check_completions(const char *str, const size_t len, const char c)
 
 			if (c != BS)
 				suggestion.type = COMP_SUG;
+
 			printed = 1;
 		}
 	}
@@ -369,6 +456,11 @@ FREE:
 		free(_matches[i]);
 	free(_matches);
 
+	if (free_color) {
+		free(color);
+		free_color = 0;
+	}
+
 	return printed;
 }
 
@@ -376,7 +468,11 @@ static int
 check_filenames(const char *str, const size_t len, const char c, const int first_word)
 {
 	int i = files;
-	char *color = sf_c;
+	char *color = (char *)NULL;
+	if (suggest_filetype_color)
+		color = no_c;
+	else
+		color = sf_c;
 
 	while (--i >= 0) {
 		if (!file_info[i].name || TOUPPER(*str) != TOUPPER(*file_info[i].name))
@@ -527,7 +623,7 @@ check_int_params(const char *str, const size_t len)
  * and -1 if C was inserted before the end of the current line.
  * If a suggestion is found, it will be printed by print_suggestion() */
 int
-rl_suggestions(char c)
+rl_suggestions(const char c)
 {
 	char *last_word = (char *)NULL;
 	char *full_line = (char *)NULL;
