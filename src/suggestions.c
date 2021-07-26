@@ -150,6 +150,14 @@ FAIL:
 }
 
 void
+free_suggestion(void)
+{
+	free(suggestion_buf);
+	suggestion_buf = (char *)NULL;
+	suggestion.printed = suggestion.lines = 0;
+}
+
+void
 clear_suggestion(void)
 {
 	/* Delete everything in the current line starting from the current
@@ -636,6 +644,14 @@ rl_suggestions(const char c)
 
 	/* Skip escape sequences, mostly arrow keys */
 	if (rl_readline_state & RL_STATE_MOREINPUT) {
+		/* Handle history events. If a suggestion has been printed and
+		 * a history event is triggered (usually via the Up and Down arrow
+		 * keys), the suggestion buffer won't be freed. Let's do it
+		 * here */
+		if ((c == 'A' || c == 'B') && suggestion_buf) {
+			clear_suggestion();
+			goto FAIL;
+		}
 		if (suggestion_buf) {
 			printed = 1;
 			goto SUCCESS;
@@ -646,7 +662,7 @@ rl_suggestions(const char c)
 	/* Skip backspace, Enter, and TAB keys */
 	switch(c) {
 		case BS:
-			if (suggestion.printed)
+			if (suggestion.printed && suggestion_buf)
 				clear_suggestion();
 			goto FAIL;
 

@@ -150,7 +150,6 @@ kbinds_function(char **args)
  * C-v, C-right arrow gives "[[1;5C", which here should be written like
  * this:
  * "\\x1b[1;5C" */
-
 void
 readline_kbinds(void)
 {
@@ -335,8 +334,7 @@ readline_kbinds(void)
 		rl_bind_keyseq("\\e[24~", rl_quit);
 	}
 
-	/* Bind Right arrow key and Ctrl-f to accept auto-suggestions */
-	/* Bind Right arrow key and Ctrl-f to accept auto-suggestions */
+	/* Bind Right arrow key and Ctrl-f to accept suggestions */
 	rl_bind_keyseq("\\C-f", rl_accept_suggestion);
 /*	rl_bind_keyseq("\\M-[C", rl_accept_suggestion); */
 	rl_bind_keyseq("\x1b[C", rl_accept_suggestion);
@@ -446,6 +444,9 @@ keybind_exec_cmd(char *str)
 	size_t old_args = args_n;
 	args_n = 0;
 
+	if (suggestion.printed && suggestion_buf)
+		free_suggestion();
+
 	int exit_status = EXIT_FAILURE;
 
 	char **cmd = parse_input_str(str);
@@ -543,7 +544,6 @@ rl_accept_suggestion(int count, int key)
 		rl_point++;
 	}
 
-//	suggestion.filetype = DT_NONE;
 	return EXIT_SUCCESS;
 }
 
@@ -661,6 +661,9 @@ rl_folders_first(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
+	if (suggestion.printed && suggestion_buf)
+		free_suggestion();
+
 	list_folders_first = list_folders_first ? 0 : 1;
 
 	if (cd_lists_on_the_fly) {
@@ -699,6 +702,9 @@ rl_hidden(int count, int key)
 {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
+
+	if (suggestion.printed && suggestion_buf)
+		free_suggestion();
 
 	show_hidden = show_hidden ? 0 : 1;
 
@@ -819,6 +825,9 @@ rl_sort_next(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
+	if (suggestion.printed && suggestion_buf)
+		free_suggestion();
+
 	sort++;
 	if (sort > SORT_TYPES)
 		sort = 0;
@@ -844,6 +853,9 @@ rl_sort_previous(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
+	if (suggestion.printed && suggestion_buf)
+		free_suggestion();
+
 	sort--;
 	if (sort < 0)
 		sort = SORT_TYPES;
@@ -867,6 +879,9 @@ int
 rl_lock(int count, int key)
 {
 	int ret = EXIT_SUCCESS;
+
+	if (suggestion.printed && suggestion_buf)
+		free_suggestion();
 
 	rl_deprep_terminal();
 
@@ -985,6 +1000,9 @@ rl_previous_profile(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
+	if (suggestion.printed && suggestion_buf)
+		free_suggestion();
+
 	int prev_prof, i, cur_prof = -1, total_profs = 0;
 	for (i = 0; profile_names[i]; i++) {
 		total_profs++;
@@ -1031,6 +1049,9 @@ rl_next_profile(int count, int key)
 {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
+
+	if (suggestion.printed && suggestion_buf)
+		free_suggestion();
 
 	int next_prof, i, cur_prof = -1, total_profs = 0;
 	for (i = 0; profile_names[i]; i++) {
@@ -1154,6 +1175,9 @@ rl_bm_sel(int count, int key)
 int
 rl_kbinds_help(int count, int key)
 {
+	if (suggestion.printed && suggestion_buf)
+		free_suggestion();
+
 	char cmd[PATH_MAX];
 	snprintf(cmd, PATH_MAX - 1,
 		"export PAGER=\"less -p ^[0-9]+\\.[[:space:]]KEYBOARD[[:space:]]SHORTCUTS\"; man %s\n",
@@ -1167,6 +1191,9 @@ rl_kbinds_help(int count, int key)
 int
 rl_cmds_help(int count, int key)
 {
+	if (suggestion.printed && suggestion_buf)
+		free_suggestion();
+
 	char cmd[PATH_MAX];
 	snprintf(cmd, PATH_MAX - 1,
 		"export PAGER=\"less -p ^[0-9]+\\.[[:space:]]COMMANDS\"; man %s\n",
@@ -1180,8 +1207,10 @@ rl_cmds_help(int count, int key)
 int
 rl_manpage(int count, int key)
 {
-	char *cmd[] = {"man", PNL, NULL};
+	if (suggestion.printed && suggestion_buf)
+		free_suggestion();
 
+	char *cmd[] = {"man", PNL, NULL};
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
