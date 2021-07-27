@@ -613,6 +613,52 @@ check_jumpdb(const char *str, const size_t len)
 }
 
 static int
+check_bookmarks(const char *str, const size_t len)
+{
+	int i = bm_n;
+	char *color = (char *)NULL;
+	struct stat attr;
+	if (!suggest_filetype_color)
+		color = sf_c;
+
+	while (--i >= 0) {
+		if (!bookmarks[i].path || *str != *bookmarks[i].path)
+			continue;
+		if (len && strncmp(str, bookmarks[i].path, len) == 0
+		&& strlen(bookmarks[i].path) > len) {
+			if (lstat(bookmarks[i].path, &attr) == -1)
+				continue;
+			else if ((attr.st_mode & S_IFMT) == S_IFDIR) {
+				char tmp[NAME_MAX + 2];
+				snprintf(tmp, NAME_MAX + 2, "%s/", bookmarks[i].path);
+				if (suggest_filetype_color)
+					color = di_c;
+				char *_tmp = escape_str(tmp);
+				print_suggestion(_tmp ? _tmp : tmp, len, color);
+				if (_tmp)
+					free(_tmp);
+				suggestion.type = FILE_SUG;
+				suggestion.filetype = DT_DIR;
+			} else {
+				if (suggest_filetype_color)
+					color = get_comp_color(bookmarks[i].path, attr);
+				char *_tmp = escape_str(bookmarks[i].path);
+				print_suggestion(_tmp ? _tmp : bookmarks[i].path, len,
+								color);
+				if (_tmp)
+					free(_tmp);
+				print_suggestion(bookmarks[i].path, len, color);
+				suggestion.type = FILE_SUG;
+				suggestion.filetype = DT_REG;
+			}
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+static int
 check_int_params(const char *str, const size_t len)
 {
 	size_t i;
@@ -796,6 +842,13 @@ rl_suggestions(const char c)
 		switch(suggestion_strategy[st]) {
 
 		case 'b': /* Bookmarks */
+			if (last_space || autocd || auto_open) {
+				printed = check_bookmarks(last_word, strlen(last_word));
+				if (printed) {
+					suggestion.offset = last_word_offset;
+					goto SUCCESS;
+				}
+			}
 			break;
 
 		case 'c': /* Possible completions */
