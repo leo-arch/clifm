@@ -59,10 +59,9 @@ kbinds_reset(void)
 	int exit_status = EXIT_SUCCESS;
 	struct stat file_attrib;
 
-	if (stat(KBINDS_FILE, &file_attrib) == -1)
+	if (stat(KBINDS_FILE, &file_attrib) == -1) {
 		exit_status = create_kbinds_file();
-
-	else {
+	} else {
 		char *cmd[] = {"rm", KBINDS_FILE, NULL};
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
 			exit_status = create_kbinds_file();
@@ -397,7 +396,6 @@ load_keybinds(void)
 	}
 
 	free(line);
-
 	return EXIT_SUCCESS;
 }
 
@@ -412,7 +410,6 @@ run_kb_cmd(char *cmd)
 
 	keybind_exec_cmd(cmd);
 	rl_reset_line_state();
-
 	return EXIT_SUCCESS;
 }
 
@@ -424,11 +421,9 @@ find_key(char *function)
 		return (char *)NULL;
 
 	int n = (int)kbinds_n;
-
 	while (--n >= 0) {
 		if (*function != *kbinds[n].function)
 			continue;
-
 		if (strcmp(function, kbinds[n].function) == 0)
 			return kbinds[n].key;
 	}
@@ -448,12 +443,10 @@ keybind_exec_cmd(char *str)
 		free_suggestion();
 
 	int exit_status = EXIT_FAILURE;
-
 	char **cmd = parse_input_str(str);
 	putchar('\n');
 
 	if (cmd) {
-
 		exit_status = exec_cmd(cmd);
 
 		/* While in the bookmarks or mountpoints screen, the kbind_busy
@@ -476,7 +469,6 @@ keybind_exec_cmd(char *str)
 	}
 
 	args_n = old_args;
-
 	return exit_status;
 }
 
@@ -557,7 +549,6 @@ rl_refresh(int count, int key)
 		CLEAR;
 	keybind_exec_cmd("rf");
 	rl_reset_line_state();
-
 	return EXIT_SUCCESS;
 }
 
@@ -567,7 +558,6 @@ rl_parent_dir(int count, int key)
 	/* If already root dir, do nothing */
 	if (*ws[cur_ws].path == '/' && !ws[cur_ws].path[1])
 		return EXIT_SUCCESS;
-
 	return run_kb_cmd("cd ..");
 }
 
@@ -577,7 +567,6 @@ rl_root_dir(int count, int key)
 	/* If already root dir, do nothing */
 	if (*ws[cur_ws].path == '/' && !ws[cur_ws].path[1])
 		return EXIT_SUCCESS;
-
 	return run_kb_cmd("cd /");
 }
 
@@ -587,7 +576,6 @@ rl_home_dir(int count, int key)
 	/* If already in home, do nothing */
 	if (*ws[cur_ws].path == *user.home && strcmp(ws[cur_ws].path, user.home) == 0)
 		return EXIT_SUCCESS;
-
 	return run_kb_cmd("cd");
 }
 
@@ -597,7 +585,6 @@ rl_next_dir(int count, int key)
 	/* If already at the end of dir hist, do nothing */
 	if (dirhist_cur_index + 1 == dirhist_total_index)
 		return EXIT_SUCCESS;
-
 	return run_kb_cmd("f");
 }
 
@@ -625,7 +612,6 @@ rl_last_dir(int count, int key)
 	sprintf(cmd, "b !%d", dirhist_total_index);
 	keybind_exec_cmd(cmd);
 	rl_reset_line_state();
-
 	return EXIT_SUCCESS;
 }
 
@@ -635,7 +621,6 @@ rl_previous_dir(int count, int key)
 	/* If already at the beginning of dir hist, do nothing */
 	if (dirhist_cur_index == 0)
 		return EXIT_SUCCESS;
-
 	return run_kb_cmd("b");
 }
 
@@ -651,7 +636,6 @@ rl_long(int count, int key)
 		CLEAR;
 	keybind_exec_cmd("rf");
 	rl_reset_line_state();
-
 	return EXIT_SUCCESS;
 }
 
@@ -677,7 +661,6 @@ rl_folders_first(int count, int key)
 	}
 
 	rl_reset_line_state();
-
 	return EXIT_SUCCESS;
 }
 
@@ -693,7 +676,6 @@ rl_light(int count, int key)
 		CLEAR;
 	keybind_exec_cmd("rf");
 	rl_reset_line_state();
-
 	return EXIT_SUCCESS;
 }
 
@@ -717,7 +699,6 @@ rl_hidden(int count, int key)
 	}
 
 	rl_reset_line_state();
-
 	return EXIT_SUCCESS;
 }
 
@@ -764,7 +745,6 @@ rl_mountpoints(int count, int key)
 	kbind_busy = 1;
 	keybind_exec_cmd("mp");
 	rl_reset_line_state();
-
 	return EXIT_SUCCESS;
 }
 
@@ -789,7 +769,6 @@ rl_bookmarks(int count, int key)
 	kbind_busy = 1;
 	keybind_exec_cmd("bm");
 	rl_reset_line_state();
-
 	return EXIT_SUCCESS;
 }
 
@@ -821,7 +800,6 @@ rl_clear_line(int count, int key)
 	rl_point = 0;
 	rl_delete_text(rl_point, rl_end);
 	rl_end = 0;
-
 	return EXIT_SUCCESS;
 }
 
@@ -849,7 +827,6 @@ rl_sort_next(int count, int key)
 	}
 
 	rl_reset_line_state();
-
 	return EXIT_SUCCESS;
 }
 
@@ -877,7 +854,6 @@ rl_sort_previous(int count, int key)
 	}
 
 	rl_reset_line_state();
-
 	return EXIT_SUCCESS;
 }
 
@@ -907,7 +883,6 @@ rl_lock(int count, int key)
 
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
-
 	return EXIT_SUCCESS;
 }
 
@@ -918,13 +893,11 @@ rl_remove_sel(int count, int key)
 		return EXIT_SUCCESS;
 
 	rl_deprep_terminal();
-
 	kb_shortcut = 1;
 	keybind_exec_cmd("r sel");
 	kb_shortcut = 0;
 	rl_prep_terminal(0);
 	rl_reset_line_state();
-
 	return EXIT_SUCCESS;
 }
 
@@ -938,7 +911,6 @@ rl_export_sel(int count, int key)
 	keybind_exec_cmd("exp sel");
 	kb_shortcut = 0;
 	rl_reset_line_state();
-
 	return EXIT_SUCCESS;
 }
 
@@ -952,7 +924,6 @@ rl_move_sel(int count, int key)
 	keybind_exec_cmd("m sel");
 	kb_shortcut = 0;
 	rl_reset_line_state();
-
 	return EXIT_SUCCESS;
 }
 
@@ -966,7 +937,6 @@ rl_rename_sel(int count, int key)
 	keybind_exec_cmd("br sel");
 	kb_shortcut = 0;
 	rl_reset_line_state();
-
 	return EXIT_SUCCESS;
 }
 
@@ -982,7 +952,6 @@ rl_paste_sel(int count, int key)
 	rl_prep_terminal(0);
 	kb_shortcut = 0;
 	rl_reset_line_state();
-
 	return EXIT_SUCCESS;
 }
 
@@ -996,7 +965,6 @@ rl_quit(int count, int key)
 	 * quits, but terminal input is not printed to STDOUT */
 	tcsetattr(STDIN_FILENO, TCSANOW, &shell_tmodes);
 	exit(EXIT_SUCCESS);
-
 	return EXIT_SUCCESS;
 }
 
@@ -1153,7 +1121,6 @@ rl_open_sel(int count, int key)
 
 	keybind_exec_cmd(cmd);
 	rl_reset_line_state();
-
 	return EXIT_SUCCESS;
 }
 
@@ -1174,7 +1141,6 @@ rl_bm_sel(int count, int key)
 
 	keybind_exec_cmd(cmd);
 	rl_reset_line_state();
-
 	return EXIT_SUCCESS;
 }
 
@@ -1190,7 +1156,6 @@ rl_kbinds_help(int count, int key)
 		PNL);
 	if (launch_execle(cmd) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
-
 	return EXIT_SUCCESS;
 }
 
@@ -1206,7 +1171,6 @@ rl_cmds_help(int count, int key)
 		PNL);
 	if (launch_execle(cmd) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
-
 	return EXIT_SUCCESS;
 }
 
@@ -1219,7 +1183,6 @@ rl_manpage(int count, int key)
 	char *cmd[] = {"man", PNL, NULL};
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
-
 	return EXIT_SUCCESS;
 }
 

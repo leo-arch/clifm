@@ -206,12 +206,38 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	if (wc_xstrlen(str) > (term_cols * term_rows) - visible_prompt_len)
 		return;
 
+	/* Get the amount of lines we need to print the suggestion */
+	size_t suggestion_len = wc_xstrlen(str + offset);
+	size_t cuc = visible_prompt_len + suggestion.full_line_len;
+	size_t cucs = cuc + suggestion_len;
+	int clines = 1,
+		slines = 1,
+		cuc_rem = 0,
+		cucs_rem = 0;
+
+	if (cuc > term_cols) {
+		clines = cuc / (int)term_cols;
+		cuc_rem = cuc % term_cols;
+		if (cuc_rem > 0)
+			clines++;
+	}
+
+	if (cucs > term_cols) {
+		slines = cucs / (int)term_cols;
+		cucs_rem = cucs % term_cols;
+		if (cucs_rem > 0)
+			slines++;
+	}
+
+	int diff = slines - clines;
+
+	if (diff > term_rows)
+		return;
+
 	/* Store the suggestion in a buffer to be used later by the
 	 * rl_accept_suggestion function (keybinds.c) */
 	suggestion_buf = xnmalloc(str_len + 1, sizeof(char));
 	strcpy(suggestion_buf, str);
-
-/*	size_t line_len = strlen(rl_line_buffer); */
 
 	/* Save cursor position in two global variables: currow and curcol */
 	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
@@ -230,42 +256,22 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	/* Print the suggestion */
 	printf("%s%s%s", color, str + (offset - 1), df_c);
 
-	/* Get the amount of lines taken by the suggestion (diff) */
-	size_t suggestion_len = wc_xstrlen(str + offset);
-	size_t cuc = visible_prompt_len + suggestion.full_line_len;
-	size_t cucs = cuc + suggestion_len;
-	int clines = 0, slines = 0;
-
-	if (cuc > term_cols)
-		clines = cuc / (int)term_cols;
-	if (cucs > term_cols)
-		slines = cucs / (int)term_cols;
-
-	int diff = slines - clines;
-
-	/* If the module is zero, the cursor is in the last column
-	 * of the terminal */
-	int cucs_mod = cucs % term_cols;
-//	int cuc_mod = cuc % term_cols;
-
 	/* Update the row number, if needed */
 	/* If the cursor is in the last row, printing a multi-line suggestion
 	 * will move the beginning of the current line up the number of
 	 * lines taken by the suggestion, so that we need to update the
 	 * value to move the cursor back to the correct row (the beginning
 	 * of the line) */
-	if (diff > term_rows)
-		diff = term_rows;
 
-//	printf("'%d:%d:%d:%d'", diff, cuc_mod, cucs_mod, currow);
-	if (diff > 0 && cucs_mod && currow == term_rows)
-		currow -= diff;
+	int old_currow = currow;
+	if (diff > 0 && currow + diff >= term_rows)
+		currow -= diff - (term_rows - old_currow);
 
 	/* Restore cursor position */
 	printf("\x1b[%d;%dH", currow, curcol);
 
 	/* Store the amount of lines taken by the current command line
-	 * (including the suggestion's length) to be able to correctly
+	 * (plus the suggestion's length) to be able to correctly
 	 * remove it later (via the clear_suggestion function) */
 	suggestion.lines = diff + 1;
 
@@ -686,6 +692,7 @@ rl_suggestions(const char c)
 	char *full_line = (char *)NULL;
 	int printed = 0;
 	int inserted_c = 0;
+//	static int msg_area = 0;
 
 		/* ######################################
 		 * # 		  1) Filter input			#
@@ -715,8 +722,21 @@ rl_suggestions(const char c)
 				clear_suggestion();
 			goto FAIL;
 
-		case ENTER:
+		case ENTER: /* fallthrough */
 			goto FAIL;
+/*		case SPACE:
+			if (msg_area) {
+				rl_restore_prompt();
+				rl_clear_message();
+				msg_area = 0;
+				if (c == ENTER)
+					goto FAIL;
+				break;
+			} else {
+				if (c == ENTER)
+					goto FAIL;
+				break;
+			} */
 
 		case _ESC: /* fallthrough */
 		case _TAB:
@@ -916,6 +936,25 @@ rl_suggestions(const char c)
 		/* ######################################
 		 * # 	  4) No suggestion found		#
 		 * ######################################*/
+
+/*	int k = bm_n;
+	while (--k >= 0) {
+		if (!bookmarks[k].name)
+			continue;
+		if (strncmp(last_word, bookmarks[k].name, strlen(last_word)) == 0) {
+			if (!bookmarks[k].path)
+				continue;
+			msg_area = 1;
+			rl_save_prompt();
+			rl_message("\001\x1b[0;36m(%s):\002\x1b[0m ", bookmarks[k].path);
+			break;
+		}
+	}
+
+	if (k < 0 && msg_area == 1) {
+		rl_restore_prompt();
+		rl_clear_message();
+	} */
 
 	/* Clear current suggestion, if any, only if no escape char is contained
 	 * in the current input sequence. This is mainly to avoid erasing
