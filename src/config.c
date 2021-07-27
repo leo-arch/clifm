@@ -1449,15 +1449,12 @@ read_config(void)
 				if (opt_str[s] != 'h' && opt_str[s] != 'f'
 				&& opt_str[s] != 'j' && opt_str[s] != 'c'
 				&& opt_str[s] != 'b' && opt_str[s] != '-') {
-					fail = 1;
-					break;
-				}
-				if (s != SUG_STRATS) {
+					printf("'a'");
 					fail = 1;
 					break;
 				}
 			}
-			if (fail)
+			if (fail || s != SUG_STRATS)
 				continue;
 			suggestion_strategy = savestring(opt_str, strlen(opt_str));
 		}
