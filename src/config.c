@@ -807,10 +807,12 @@ AutoJump=%s\n\n"
 AutoSuggestions=%s\n\n"
 
 	    "# Suggestion checks order. Available checks:\n\
+# b = Bookmarks\n\
 # c = Possible completions\n\
 # f = File names in current directory\n\
 # h = Commands history\n\
 # j = Jump database\n\
+# Use a dash (-) to skip a check. Ex: 'hfj-c' to skip the bookmarks check\n\
 SuggestionStrategy=%s\n\n"
 
 	    "# If set to true, suggest file names using the corresponding\n\
@@ -1445,11 +1447,12 @@ read_config(void)
 			size_t s = 0;
 			for (; opt_str[s]; s++) {
 				if (opt_str[s] != 'h' && opt_str[s] != 'f'
-				&& opt_str[s] != 'j' && opt_str[s] != 'c') {
+				&& opt_str[s] != 'j' && opt_str[s] != 'c'
+				&& opt_str[s] != 'b' && opt_str[s] != '-') {
 					fail = 1;
 					break;
 				}
-				if (s >= SUG_STRATS) {
+				if (s != SUG_STRATS) {
 					fail = 1;
 					break;
 				}

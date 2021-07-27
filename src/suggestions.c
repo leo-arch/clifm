@@ -795,7 +795,10 @@ rl_suggestions(const char c)
 	for (; st < SUG_STRATS; st++) {
 		switch(suggestion_strategy[st]) {
 
-		case 'c': /* Check possible completions */
+		case 'b': /* Bookmarks */
+			break;
+
+		case 'c': /* Possible completions */
 			if (last_space || autocd || auto_open) {
 				printed = check_completions(last_word, strlen(last_word), c);
 				if (printed) {
@@ -809,8 +812,8 @@ rl_suggestions(const char c)
 			/* Do not check dirs and filenames if first word and
 			 * neither autocd nor auto-open are enabled */
 			if (last_space || autocd || auto_open) {
-				printed = check_filenames(last_word, strlen(last_word), c,
-							last_space ? 0 : 1);
+				printed = check_filenames(last_word, strlen(last_word),
+							c, last_space ? 0 : 1);
 				if (printed) {
 					suggestion.offset = last_word_offset;
 					goto SUCCESS;
@@ -838,6 +841,8 @@ rl_suggestions(const char c)
 				}
 			}
 			break;
+
+		case '-': break; /* Ignore check */
 
 		default: break;
 		}
