@@ -121,8 +121,22 @@ CdOnQuit=false
 Autocd=true
 AutoOpen=true
 
+# If set to true, run the directory jumper function (if the input
+# string is neither an internal nor an external command) without the need to
+# use the j command: 'STR...' amounts to 'j STR...'. This option implies autocd.
+AutoJump=false
+
 # If set to true, enable auto-suggestions
 AutoSuggestions=false
+
+# Suggestion checks order. Available checks:
+# b = Bookmarks
+# c = Possible completions
+# f = File names in current directory
+# h = Commands history
+# j = Jump database
+# Use a dash (-) to skip a check. Ex: 'hfj-c' to skip the bookmarks check\n\
+SuggestionStrategy=hfjbc
 
 # If set to true, suggest file names using the corresponding
 # file type color (set via the color scheme file).
