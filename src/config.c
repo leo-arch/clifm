@@ -800,11 +800,18 @@ AutoOpen=%s\n\n"
 
 	    "# If set to true, run the directory jumper function (if the input\n\
 # string is neither an internal nor an external command) without the need to\n\
-use the j command: 'STR...' amounts to 'j STR...'. This option implies autocd.\n\
+# use the j command: 'STR...' amounts to 'j STR...'. This option implies autocd.\n\
 AutoJump=%s\n\n"
 
 	    "# If set to true, enable auto-suggestions.\n\
 AutoSuggestions=%s\n\n"
+
+	    "# Suggestion checks order. Available checks:\n\
+# c = Possible completions\n\
+# f = File names in current directory\n\
+# h = Commands history\n\
+# j = Jump database\n\
+SuggestionStrategy=%s\n\n"
 
 	    "# If set to true, suggest file names using the corresponding\n\
 # file type color (set via the color scheme file).\n\
@@ -840,6 +847,7 @@ LightMode=%s\n\n",
 		DEF_AUTO_OPEN == 1 ? "true" : "false",
 		DEF_AUTOJUMP == 1 ? "true" : "false",
 		DEF_SUGGESTIONS == 1 ? "true" : "false",
+		DEF_SUG_STRATEGY,
 		DEF_SUG_FILETYPE_COLOR == 1 ? "true" : "false",
 		DEF_EXPAND_BOOKMARKS == 1 ? "true" : "false",
 		DEF_LIGHT_MODE == 1 ? "true" : "false"
@@ -1425,6 +1433,30 @@ read_config(void)
 				suggestions = 1;
 			else if (strncmp(opt_str, "false", 5) == 0)
 				suggestions = 0;
+		}
+
+		else if (*line == 'S'
+		&& strncmp(line, "SuggestionStrategy=", 19) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "SuggestionStrategy=%5s\n", opt_str);
+			if (ret == -1)
+				continue;
+			int fail = 0;
+			size_t s = 0;
+			for (; opt_str[s]; s++) {
+				if (opt_str[s] != 'h' && opt_str[s] != 'f'
+				&& opt_str[s] != 'j' && opt_str[s] != 'c') {
+					fail = 1;
+					break;
+				}
+				if (s >= SUG_STRATS) {
+					fail = 1;
+					break;
+				}
+			}
+			if (fail)
+				continue;
+			suggestion_strategy = savestring(opt_str, strlen(opt_str));
 		}
 
 		else if (xargs.printsel == UNSET && *line == 'P'
@@ -2120,6 +2152,9 @@ reload_config(void)
 
 	free(suggestion_buf);
 	suggestion_buf = (char *)NULL;
+
+	free(suggestion_strategy);
+	suggestion_strategy = (char *)NULL;
 
 	free_remotes(0);
 

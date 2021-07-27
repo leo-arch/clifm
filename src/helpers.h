@@ -335,6 +335,8 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define DEF_TRASRM 0
 #define DEF_UNICODE 1
 #define DEF_WELCOME_MESSAGE 1
+#define DEF_SUG_STRATEGY "hfjc"
+#define SUG_STRATS 4
 
 #define MAX_WS 8
 
@@ -764,7 +766,7 @@ extern char
     **profile_names,
     **prompt_cmds,
     **sel_elements,
-
+  
     *ACTIONS_FILE,
 	*alt_config_dir,
     *alt_bm_file,
@@ -804,7 +806,8 @@ extern char
     *TRASH_INFO_DIR,
     *usr_cscheme,
     *user_home,
-    *suggestion_buf;
+    *suggestion_buf,
+    *suggestion_strategy;
 
 extern regex_t regex_exp;
 

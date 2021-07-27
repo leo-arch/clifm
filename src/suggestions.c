@@ -760,14 +760,11 @@ rl_suggestions(const char c)
 		 * #	  3) Search for suggestions		#
 		 * ######################################*/
 
-/*	suggestion.filetype = DT_NONE; */
-
 	/* 3.a) Check already suggested string */
 	if (suggestion_buf && suggestion.printed
 	&& strncmp(full_line, suggestion_buf, strlen(full_line)) == 0) {
 		printed = 1;
 		suggestion.offset = 0;
-		free(full_line);
 		goto SUCCESS;
 	}
 
@@ -781,7 +778,6 @@ rl_suggestions(const char c)
 			suggestion.offset = last_word_offset;
 			suggestion.type = CMD_SUG;
 			printed = 1;
-			free(full_line);
 			goto SUCCESS;
 		}
 	}
@@ -791,48 +787,64 @@ rl_suggestions(const char c)
 		printed = check_int_params(full_line, strlen(full_line));
 		if (printed) {
 			suggestion.offset = 0;
-			free(full_line);
 			goto SUCCESS;
 		}
 	}
 
-	/* 3.c) Check commands history */
-	printed = check_history(full_line, strlen(full_line));
-	free(full_line);
-	if (printed) {
-		suggestion.offset = 0;
-		goto SUCCESS;
-	}
+	size_t st = 0;
+	for (; st < SUG_STRATS; st++) {
+		switch(suggestion_strategy[st]) {
 
-	/* Do not check dirs and filenames if first word and neither autocd
-	 * nor auto-open are enabled */
-	if (last_space || autocd || auto_open) {
-		/* 2.d) Check file names in CWD */
-		printed = check_filenames(last_word, strlen(last_word), c,
-					last_space ? 0 : 1);
-		if (printed) {
-			suggestion.offset = last_word_offset;
-			goto SUCCESS;
-		}
+		case 'c': /* Check possible completions */
+			if (last_space || autocd || auto_open) {
+				printed = check_completions(last_word, strlen(last_word), c);
+				if (printed) {
+					suggestion.offset = last_word_offset;
+					goto SUCCESS;
+				}
+			}
+			break;
 
-		/* 3.e) Check the jump database */
-		/* We don't care about auto-open here: the jump function
-		 * deals with directories only */
-		if (last_space || autocd) {
-			printed = check_jumpdb(last_word, strlen(last_word));
+		case 'f': /* Check file names in CWD */
+			/* Do not check dirs and filenames if first word and
+			 * neither autocd nor auto-open are enabled */
+			if (last_space || autocd || auto_open) {
+				printed = check_filenames(last_word, strlen(last_word), c,
+							last_space ? 0 : 1);
+				if (printed) {
+					suggestion.offset = last_word_offset;
+					goto SUCCESS;
+				}
+			}
+			break;
+
+		case 'h':
+			/* Check commands history */
+			printed = check_history(full_line, strlen(full_line));
 			if (printed) {
-				suggestion.offset = last_word_offset;
+				suggestion.offset = 0;
 				goto SUCCESS;
 			}
-		}
+			break;
 
-		/* 3.f) Check possible completions */
-		printed = check_completions(last_word, strlen(last_word), c);
-		if (printed) {
-			suggestion.offset = last_word_offset;
-			goto SUCCESS;
+		case 'j': /* Check the jump database */
+			/* We don't care about auto-open here: the jump function
+			 * deals with directories only */
+			if (last_space || autocd) {
+				printed = check_jumpdb(last_word, strlen(last_word));
+				if (printed) {
+					suggestion.offset = last_word_offset;
+					goto SUCCESS;
+				}
+			}
+			break;
+
+		default: break;
 		}
 	}
+
+	free(full_line);
+	full_line = (char *)NULL;
 
 	/* 3.g) Check commands in PATH and CliFM internals commands, but
 	 * only for the first word */
@@ -863,6 +875,7 @@ rl_suggestions(const char c)
 	}
 
 SUCCESS:
+	free(full_line);
 	if (printed)
 		suggestion.printed = 1;
 	else

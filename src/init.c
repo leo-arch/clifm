@@ -2120,6 +2120,9 @@ check_options(void)
 			suggestions = xargs.suggestions;
 	}
 
+	if (!suggestion_strategy)
+		suggestion_strategy = savestring(DEF_SUG_STRATEGY, SUG_STRATS);
+
 	if (suggest_filetype_color == UNSET)
 		suggest_filetype_color = DEF_SUG_FILETYPE_COLOR;
 

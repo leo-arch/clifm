@@ -247,7 +247,8 @@ char
     *TRASH_INFO_DIR = (char *)NULL,
     *usr_cscheme = (char *)NULL,
 	*suggestion_buf = (char *)NULL,
-    *user_home = (char *)NULL;
+    *user_home = (char *)NULL,
+    *suggestion_strategy = (char *)NULL;
 
 /* This is not a comprehensive list of commands. It only lists
  * commands long version for TAB completion */

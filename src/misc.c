@@ -1060,8 +1060,8 @@ free_stuff(void)
 	int i = 0;
 
 	free_remotes(1);
-
 	free(suggestion_buf);
+	free(suggestion_strategy);
 
 	if (STDIN_TMP_DIR) {
 		char *rm_cmd[] = {"rm", "-rd", "--", STDIN_TMP_DIR, NULL};
