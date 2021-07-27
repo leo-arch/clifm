@@ -283,6 +283,7 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 
 /* Default options */
 #define DEF_AUTOCD 1
+#define DEF_AUTOJUMP 0
 #define DEF_AUTO_OPEN 1
 #define DEF_CASE_SENSITIVE 0
 #define DEF_CASE_SENS_DIRJUMP 0
@@ -575,6 +576,7 @@ struct param {
 	int cwd_in_title;
 	int printsel;
 	int suggestions;
+	int autojump;
 };
 
 extern struct param xargs;
@@ -687,6 +689,7 @@ extern short
     copy_n_rename,
     suggestions,
     suggest_filetype_color,
+    autojump,
 
     home_ok,
     config_ok,

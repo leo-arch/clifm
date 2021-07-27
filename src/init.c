@@ -77,7 +77,6 @@ backup_argv(int argc, char **argv)
 	argv_bk = (char **)xnmalloc((size_t)argc + 1, sizeof(char *));
 
 	register int i = argc;
-
 	while (--i >= 0)
 		argv_bk[i] = savestring(argv[i], strlen(argv[i]));
 	argv_bk[argc] = (char *)NULL;
@@ -212,7 +211,6 @@ set_start_path(void)
 		    ws[cur_ws].path, strerror(errno));
 
 		char cwd[PATH_MAX] = "";
-
 		if (getcwd(cwd, sizeof(cwd)) == NULL) {
 
 			_err(0, NOPRINT_PROMPT, _("%s: Fatal error! Failed "
@@ -328,7 +326,6 @@ get_date(void)
 	}
 
 	strftime(date, date_max, "%Y-%m-%dT%T%z", &tm);
-
 	return date;
 }
 
@@ -342,8 +339,7 @@ get_own_pid(void)
 
 	if (pid < 0)
 		return 0;
-	else
-		return pid;
+	return pid;
 }
 
 /* Returns pointer to user data struct, exits if not found */
@@ -355,7 +351,6 @@ get_user(void)
 	struct user_t tmp_user;
 
 	pw = getpwuid(geteuid());
-
 	if (!pw) {
 		_err('e', NOPRINT_PROMPT, "%s: Cannot detect user data. Exiting early",
 			PROGRAM_NAME);
@@ -374,7 +369,6 @@ get_user(void)
 
 	/* some extra stuff to do before exiting */
 	tmp_user.home_len = strlen(tmp_user.home);
-
 	return tmp_user;
 }
 
@@ -426,7 +420,6 @@ load_jumpdb(void)
 	ssize_t line_len = 0;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
-
 		if (!*line || *line == '\n')
 			continue;
 
@@ -435,7 +428,6 @@ load_jumpdb(void)
 				line[line_len - 1] = '\0';
 			if (is_number(line + 1))
 				jump_total_rank = atoi(line + 1);
-
 			continue;
 		}
 
@@ -451,7 +443,6 @@ load_jumpdb(void)
 			continue;
 
 		*tmp = '\0';
-
 		if (!*(++tmp))
 			continue;
 
@@ -501,7 +492,6 @@ load_jumpdb(void)
 	}
 
 	fclose(fp);
-
 	free(line);
 	free(JUMP_FILE);
 
@@ -528,7 +518,6 @@ load_bookmarks(void)
 		return EXIT_FAILURE;
 
 	FILE *bm_fp = fopen(BM_FILE, "r");
-
 	if (!bm_fp)
 		return EXIT_FAILURE;
 
@@ -536,10 +525,8 @@ load_bookmarks(void)
 	char tmp_line[256];
 
 	while (fgets(tmp_line, (int)sizeof(tmp_line), bm_fp)) {
-
 		if (!*tmp_line || *tmp_line == '#' || *tmp_line == '\n')
 			continue;
-
 		bm_total++;
 	}
 
@@ -552,13 +539,11 @@ load_bookmarks(void)
 
 	bookmarks = (struct bookmarks_t *)xnmalloc(bm_total + 1,
 	    sizeof(struct bookmarks_t));
-
 	size_t line_size = 0;
 	char *line = (char *)NULL;
 	ssize_t line_len = 0;
 
 	while ((line_len = getline(&line, &line_size, bm_fp)) > 0) {
-
 		if (!*line || *line == '\n' || *line == '#')
 			continue;
 
@@ -569,9 +554,7 @@ load_bookmarks(void)
 		if (*line == '/') {
 			bookmarks[bm_n].shortcut = (char *)NULL;
 			bookmarks[bm_n].name = (char *)NULL;
-
 			bookmarks[bm_n++].path = savestring(line, strlen(line));
-
 			continue;
 		}
 
@@ -597,15 +580,11 @@ load_bookmarks(void)
 			tmp = strchr(p, ':');
 
 			if (!tmp) {
-
 				bookmarks[bm_n].name = (char *)NULL;
-
 				if (*p)
 					bookmarks[bm_n++].path = savestring(p, strlen(p));
-
 				else
 					bookmarks[bm_n++].path = (char *)NULL;
-
 				continue;
 			}
 
@@ -618,13 +597,11 @@ load_bookmarks(void)
 			}
 
 			bookmarks[bm_n++].path = savestring(tmp, strlen(tmp));
-
 			continue;
 		}
 
 		/* No shortcut. Let's try with name */
 		bookmarks[bm_n].shortcut = (char *)NULL;
-
 		char *tmp = strchr(line, ':');
 
 		/* No name either */
@@ -640,10 +617,9 @@ load_bookmarks(void)
 		if (!*(++tmp)) {
 			bookmarks[bm_n++].path = (char *)NULL;
 			continue;
-		}
-
-		else
+		} else {
 			bookmarks[bm_n++].path = savestring(tmp, strlen(tmp));
+		}
 	}
 
 	free(line);
@@ -660,20 +636,16 @@ load_bookmarks(void)
 	 * currently not working */
 
 	size_t i, j = 0;
-
 	bookmark_names = (char **)xnmalloc(bm_n + 2, sizeof(char *));
 
 	for (i = 0; i < bm_n; i++) {
-
 		if (!bookmarks[i].name || !*bookmarks[i].name)
 			continue;
-
 		bookmark_names[j++] = savestring(bookmarks[i].name,
 		    strlen(bookmarks[i].name));
 	}
 
 	bookmark_names[j] = (char *)NULL;
-
 	return EXIT_SUCCESS;
 }
 
@@ -687,7 +659,6 @@ load_actions(void)
 	/* Free the actions struct array */
 	if (actions_n) {
 		int i = (int)actions_n;
-
 		while (--i >= 0) {
 			free(usr_actions[i].name);
 			free(usr_actions[i].value);
@@ -700,7 +671,6 @@ load_actions(void)
 
 	/* Open the actions file */
 	FILE *actions_fp = fopen(ACTIONS_FILE, "r");
-
 	if (!actions_fp)
 		return EXIT_FAILURE;
 
@@ -709,7 +679,6 @@ load_actions(void)
 	ssize_t line_len = 0;
 
 	while ((line_len = getline(&line, &line_size, actions_fp)) > 0) {
-
 		if (!line || !*line || *line == '#' || *line == '\n')
 			continue;
 
@@ -718,7 +687,6 @@ load_actions(void)
 
 		char *tmp = (char *)NULL;
 		tmp = strrchr(line, '=');
-
 		if (!tmp)
 			continue;
 
@@ -726,15 +694,12 @@ load_actions(void)
 		 * actions struct */
 		usr_actions = xrealloc(usr_actions, (size_t)(actions_n + 1)
 								* sizeof(struct actions_t));
-
 		usr_actions[actions_n].value = savestring(tmp + 1, strlen(tmp + 1));
 		*tmp = '\0';
-
 		usr_actions[actions_n++].name = savestring(line, strlen(line));
 	}
 
 	free(line);
-
 	return EXIT_SUCCESS;
 }
 
@@ -980,6 +945,7 @@ external_arguments(int argc, char **argv)
 	    {"open", required_argument, 0, 33},
 	    {"print-sel", no_argument, 0, 34},
 	    {"suggestions", no_argument, 0, 35},
+	    {"autojump", no_argument, 0, 36},
 	    {0, 0, 0, 0}};
 
 	/* Increment whenever a new (only) long option is added */
@@ -1177,6 +1143,10 @@ external_arguments(int argc, char **argv)
 
 		case 35:
 			xargs.suggestions = suggestions = 1;
+			break;
+
+		case 36:
+			xargs.autojump = autojump = 0;
 			break;
 
 		case 'a':
@@ -1587,6 +1557,7 @@ unset_xargs(void)
 	xargs.icons_use_file_color = xargs.no_columns = UNSET;
 	xargs.case_sens_dirjump = xargs.case_sens_path_comp = UNSET;
 	xargs.cwd_in_title = xargs.printsel = xargs.suggestions = UNSET;
+	xargs.autojump = UNSET;
 }
 
 /* Keep track of attributes of the shell. Make sure the shell is running
@@ -2363,6 +2334,15 @@ check_options(void)
 			auto_open = DEF_AUTO_OPEN;
 		else
 			auto_open = xargs.auto_open;
+	}
+
+	if (autojump == UNSET) {
+		if (xargs.autojump == UNSET)
+			autojump = DEF_AUTOJUMP;
+		else
+			autojump = xargs.autojump;
+		if (autojump == 1)
+			autocd = 1;
 	}
 
 	if (cd_on_quit == UNSET) {

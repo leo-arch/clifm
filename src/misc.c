@@ -1592,6 +1592,8 @@ help_function(void)
 	    PNL, GRAL_USAGE, PROGRAM_NAME);
 
 	printf("\
+\n     --autojump\t enable the autojump function (run the directory \
+\n              jumper omitting the j command: 'STR...' == 'j STR...')\
 \n     --case-sens-dirjump\t do not ignore case when consulting the \
 \n              jump database (via the 'j' command)\
 \n     --case-sens-path-comp\t enable case sensitive path completion\

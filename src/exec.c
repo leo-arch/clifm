@@ -64,6 +64,8 @@
 #include "trash.h"
 #include "messages.h"
 
+char **_comm = (char **)NULL;
+
 /* Run a command via execle() and refresh the screen in case of success */
 int
 run_and_refresh(char **comm)
@@ -1594,6 +1596,16 @@ exec_cmd(char **comm)
 					return exit_code;
 				}
 			}
+		}
+
+				/* ##########################
+				 * #     	AUTOJUMP	    #
+				 * ########################## */
+
+		if (autojump) {
+			exit_code = run_autojump(comm);
+			if (exit_code != -1)
+				return exit_code;
 		}
 
 	/* ####################################################

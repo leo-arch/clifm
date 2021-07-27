@@ -82,9 +82,7 @@ regen_config(void)
 		return EXIT_FAILURE;
 
 	printf(_("New configuration file written to '%s'\n"), CONFIG_FILE);
-
 	reload_config();
-
 	return EXIT_SUCCESS;
 }
 
@@ -122,7 +120,6 @@ edit_function(char **comm)
 	}
 
 	time_t mtime_bfr = (time_t)file_attrib.st_mtime;
-
 	int ret = EXIT_SUCCESS;
 
 	/* If there is an argument... */
@@ -153,7 +150,6 @@ edit_function(char **comm)
 
 	if (mtime_bfr != (time_t)file_attrib.st_mtime) {
 		/* Reload configuration only if the config file was modified */
-
 		reload_config();
 		welcome_message = 0;
 
@@ -220,7 +216,6 @@ create_kbinds_file(void)
 		return EXIT_FAILURE;
 
 	struct stat attr;
-
 	/* If the file already exists, do nothing */
 	if (stat(KBINDS_FILE, &attr) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
@@ -238,7 +233,6 @@ create_kbinds_file(void)
 
 	/* Else, create it */
 	FILE *fp = fopen(KBINDS_FILE, "w");
-
 	if (!fp) {
 		_err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, KBINDS_FILE,
 		    strerror(errno));
@@ -372,7 +366,6 @@ quit:\\e[24~\n\n\
 	    PROGRAM_NAME);
 
 	fclose(fp);
-
 	return EXIT_SUCCESS;
 }
 
@@ -394,11 +387,8 @@ create_tmp_files(void)
 	snprintf(TMP_DIR, pnl_len + 6, "/tmp/%s", PNL);
 
 	struct stat file_attrib;
-
 	if (stat(TMP_DIR, &file_attrib) == -1) {
-
 		char *md_cmd[] = {"mkdir", "-pm1777", TMP_DIR, NULL};
-
 		if (launch_execve(md_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			_err('e', PRINT_PROMPT, _("%s: '%s': Error creating temporary "
 					"directory\n"), PROGRAM_NAME, TMP_DIR);
@@ -414,9 +404,7 @@ create_tmp_files(void)
 	snprintf(TMP_DIR, pnl_len + user_len + 7, "/tmp/%s/%s", PNL, user.name);
 
 	if (stat(TMP_DIR, &file_attrib) == -1) {
-
 		char *md_cmd2[] = {"mkdir", "-pm700", TMP_DIR, NULL};
-
 		if (launch_execve(md_cmd2, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			selfile_ok = 0;
 			_err('e', PRINT_PROMPT, _("%s: '%s': Error creating temporary "
@@ -438,7 +426,6 @@ create_tmp_files(void)
 	/* If the config directory isn't available, define an alternative
 	 * selection file in /tmp */
 	if (!SEL_FILE && xargs.stealth_mode != 1) {
-
 		size_t tmp_dir_len = strlen(TMP_DIR);
 
 		if (!share_selbox) {
@@ -496,7 +483,6 @@ edit_xresources(void)
 		function = 0;
 
 	while (fgets(line, (int)sizeof(line), xresources_fp)) {
-
 		if (strncmp(line, "XTerm*eightBitInput: false", 26) == 0)
 			eight_bit = 1;
 		else if (strncmp(line, "XTerm*modifyCursorKeys: 1", 25) == 0)
@@ -537,7 +523,6 @@ edit_xresources(void)
 	}
 
 	fclose(xresources_fp);
-
 	return;
 }
 
@@ -813,6 +798,11 @@ CdOnQuit=%s\n\n"
 Autocd=%s\n\
 AutoOpen=%s\n\n"
 
+	    "# If set to true, run the directory jumper function (if the input\n\
+# string is neither an internal nor an external command) without the need to\n\
+use the j command: 'STR...' amounts to 'j STR...'. This option implies autocd.\n\
+AutoJump=%s\n\n"
+
 	    "# If set to true, enable auto-suggestions.\n\
 AutoSuggestions=%s\n\n"
 
@@ -848,6 +838,7 @@ LightMode=%s\n\n",
 		DEF_CD_ON_QUIT == 1 ? "true" : "false",
 		DEF_AUTOCD == 1 ? "true" : "false",
 		DEF_AUTO_OPEN == 1 ? "true" : "false",
+		DEF_AUTOJUMP == 1 ? "true" : "false",
 		DEF_SUGGESTIONS == 1 ? "true" : "false",
 		DEF_SUG_FILETYPE_COLOR == 1 ? "true" : "false",
 		DEF_EXPAND_BOOKMARKS == 1 ? "true" : "false",
@@ -976,7 +967,6 @@ RlEditMode=%d\n\n"
 	    config_fp);
 
 	fclose(config_fp);
-
 	return EXIT_SUCCESS;
 }
 
@@ -1032,9 +1022,7 @@ create_def_cscheme(void)
 	    DEF_EXT_COLORS);
 
 	fclose(fp);
-
 	free(cscheme_file);
-
 	return;
 }
 
@@ -1101,14 +1089,11 @@ create_config_files(void)
 
 	/* If it exists, check it is writable */
 	else if (access(CONFIG_DIR, W_OK) == -1) {
-
 		config_ok = 0;
-
 		_err('e', PRINT_PROMPT, _("%s: '%s': Directory not writable. Bookmarks, "
 			"commands logs, and commands history are disabled. Program messages "
 			"won't be persistent. Using default options\n"),
 		    PROGRAM_NAME, CONFIG_DIR);
-
 		return;
 	}
 
@@ -1131,9 +1116,7 @@ create_config_files(void)
 				 * ###################### */
 
 	if (stat(PROFILE_FILE, &attr) == -1) {
-
 		FILE *profile_fp = fopen(PROFILE_FILE, "w");
-
 		if (!profile_fp) {
 			_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n", PROGRAM_NAME,
 			    PROFILE_FILE, strerror(errno));
@@ -1151,9 +1134,7 @@ create_config_files(void)
 				 * ##################### */
 
 	if (stat(COLORS_DIR, &attr) == -1) {
-
 		char *cmd[] = {"mkdir", COLORS_DIR, NULL};
-
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			_err('w', PRINT_PROMPT, _("%s: mkdir: Error creating colors "
 				"directory. Using the default color scheme\n"),
@@ -1170,7 +1151,6 @@ create_config_files(void)
 
 	if (stat(PLUGINS_DIR, &attr) == -1) {
 		char *cmd[] = {"mkdir", PLUGINS_DIR, NULL};
-
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			_err('e', PRINT_PROMPT, _("%s: mkdir: Error creating plugins "
 				"directory. The actions function is disabled\n"),
@@ -1332,10 +1312,8 @@ create_bm_file(void)
 		return EXIT_FAILURE;
 
 	struct stat file_attrib;
-
 	if (stat(BM_FILE, &file_attrib) == -1) {
 		FILE *fp = fopen(BM_FILE, "w+");
-
 		if (!fp) {
 			_err('e', PRINT_PROMPT, "bookmarks: '%s': %s\n", BM_FILE,
 			    strerror(errno));
@@ -1360,7 +1338,6 @@ read_config(void)
 	int ret = -1;
 
 	FILE *config_fp = fopen(CONFIG_FILE, "r");
-
 	if (!config_fp) {
 		_err('e', PRINT_PROMPT, _("%s: fopen: '%s': %s. Using default values.\n"),
 		    PROGRAM_NAME, CONFIG_FILE, strerror(errno));
@@ -1376,10 +1353,8 @@ read_config(void)
 	char line[PATH_MAX + 15];
 
 	while (fgets(line, (int)sizeof(line), config_fp)) {
-
 		if (*line == '\n' || (*line == '#' && line[1] != 'E'))
 			continue;
-
 		if (*line == '#' && strncmp(line, "#END OF OPTIONS", 15) == 0)
 			break;
 
@@ -1388,7 +1363,6 @@ read_config(void)
 		 * set here */
 		else if (xargs.splash == UNSET && *line == 'S'
 		&& strncmp(line, "SplashScreen=", 13) == 0) {
-
 			char opt_str[MAX_BOOL] = ""; /* false (5) + 1 */
 			ret = sscanf(line, "SplashScreen=%5s\n", opt_str);
 			/* According to cppcheck: "sscanf() without field
@@ -1400,14 +1374,12 @@ read_config(void)
 
 			if (strncmp(opt_str, "true", 4) == 0)
 				splash_screen = 1;
-
 			else if (strncmp(opt_str, "false", 5) == 0)
 				splash_screen = 0;
 		}
 
 		else if (xargs.case_sens_dirjump == UNSET && *line == 'C'
 		&& strncmp(line, "CaseSensitiveDirJump=", 21) == 0) {
-
 			char opt_str[MAX_BOOL] = ""; /* false (5) + 1 */
 			ret = sscanf(line, "CaseSensitiveDirJump=%5s\n", opt_str);
 
@@ -1416,23 +1388,18 @@ read_config(void)
 
 			if (strncmp(opt_str, "true", 4) == 0)
 				case_sens_dirjump = 1;
-
 			else if (strncmp(opt_str, "false", 5) == 0)
 				case_sens_dirjump = 0;
 		}
 
 		else if (xargs.case_sens_path_comp == UNSET && *line == 'C'
 		&& strncmp(line, "CaseSensitivePathComp=", 22) == 0) {
-
 			char opt_str[MAX_BOOL] = "";
 			ret = sscanf(line, "CaseSensitivePathComp=%5s\n", opt_str);
-
 			if (ret == -1)
 				continue;
-
 			if (strncmp(opt_str, "true", 4) == 0)
 				case_sens_path_comp = 1;
-
 			else if (strncmp(opt_str, "false", 5) == 0)
 				case_sens_path_comp = 0;
 		}
@@ -1450,32 +1417,24 @@ read_config(void)
 
 		else if (xargs.suggestions == UNSET && *line == 'A'
 		&& strncmp(line, "AutoSuggestions=", 16) == 0) {
-
 			char opt_str[MAX_BOOL] = "";
 			ret = sscanf(line, "AutoSuggestions=%5s\n", opt_str);
-
 			if (ret == -1)
 				continue;
-
 			if (strncmp(opt_str, "true", 4) == 0)
 				suggestions = 1;
-
 			else if (strncmp(opt_str, "false", 5) == 0)
 				suggestions = 0;
 		}
 
 		else if (xargs.printsel == UNSET && *line == 'P'
 		&& strncmp(line, "PrintSelfiles=", 14) == 0) {
-
 			char opt_str[MAX_BOOL] = "";
 			ret = sscanf(line, "PrintSelfiles=%5s\n", opt_str);
-
 			if (ret == -1)
 				continue;
-
 			if (strncmp(opt_str, "true", 4) == 0)
 				print_selfiles = 1;
-
 			else if (strncmp(opt_str, "false", 5) == 0)
 				print_selfiles = 0;
 		}
@@ -1489,12 +1448,9 @@ read_config(void)
 		}
 
 		else if (!filter && *line == 'F' && strncmp(line, "Filter=", 7) == 0) {
-
 			char *opt_str = strchr(line, '=');
-
 			if (!opt_str)
 				continue;
-
 			size_t len = strlen(opt_str);
 			if (opt_str[len - 1] == '\n')
 				opt_str[len - 1] = '\0';
@@ -1514,7 +1470,6 @@ read_config(void)
 		}
 
 		else if (!usr_cscheme && *line == 'C' && strncmp(line, "ColorScheme=", 12) == 0) {
-
 			char *opt_str = (char *)NULL;
 			opt_str = strchr(line, '=');
 
@@ -1533,64 +1488,49 @@ read_config(void)
 
 		else if (xargs.light == UNSET && *line == 'L'
 		&& strncmp(line, "LightMode=", 10) == 0) {
-
 			char opt_str[MAX_BOOL] = "";
 			ret = sscanf(line, "LightMode=%5s\n", opt_str);
-
 			if (ret == -1)
 				continue;
-
 			if (strncmp(opt_str, "true", 4) == 0)
 				light_mode = 1;
-
 			else if (strncmp(opt_str, "false", 5) == 0)
 				light_mode = 0;
 		}
 
 		else if (xargs.trasrm == UNSET && *line == 'T'
 		&& strncmp(line, "TrashAsRm=", 10) == 0) {
-
 			char opt_str[MAX_BOOL] = "";
 			ret = sscanf(line, "TrashAsRm=%5s\n", opt_str);
-
 			if (ret == -1)
 				continue;
-
 			if (strncmp(opt_str, "true", 4) == 0)
 				tr_as_rm = 1;
-
 			else if (strncmp(opt_str, "false", 5) == 0)
 				tr_as_rm = 0;
 		}
 
 		else if (xargs.cd_on_quit == UNSET && *line == 'C'
 		&& strncmp(line, "CdOnQuit=", 9) == 0) {
-
 			char opt_str[MAX_BOOL] = "";
 			ret = sscanf(line, "CdOnQuit=%5s\n", opt_str);
-
 			if (ret == -1)
 				continue;
-
 			if (strncmp(opt_str, "true", 4) == 0)
 				cd_on_quit = 1;
-
 			else if (strncmp(opt_str, "false", 5) == 0)
 				cd_on_quit = 0;
 		}
 
 		else if (xargs.expand_bookmarks == UNSET && *line == 'E'
 		&& strncmp(line, "ExpandBookmarks=", 16) == 0) {
-
 			char opt_str[MAX_BOOL] = "";
 			ret = sscanf(line, "ExpandBookmarks=%5s\n",
 			    opt_str);
 			if (ret == -1)
 				continue;
-
 			if (strncmp(opt_str, "true", 4) == 0)
 				expand_bookmarks = 1;
-
 			else if (strncmp(opt_str, "false", 5) == 0)
 				expand_bookmarks = 0;
 		}
@@ -1601,29 +1541,22 @@ read_config(void)
 			ret = sscanf(line, "RestoreLastPath=%5s\n", opt_str);
 			if (ret == -1)
 				continue;
-
 			if (strncmp(opt_str, "true", 4) == 0)
 				restore_last_path = 1;
-
 			else if (strncmp(opt_str, "false", 5) == 0)
 				restore_last_path = 0;
 		}
 
 		else if (!opener && *line == 'O' && strncmp(line, "Opener=", 7) == 0) {
-
 			char *opt_str = (char *)NULL;
 			opt_str = straft(line, '=');
-
 			if (!opt_str)
 				continue;
-
 			char *tmp = remove_quotes(opt_str);
-
 			if (!tmp) {
 				free(opt_str);
 				continue;
 			}
-
 			opener = savestring(tmp, strlen(tmp));
 			free(opt_str);
 		}
@@ -1643,13 +1576,10 @@ read_config(void)
 		&& strncmp(line, "DiskUsage=", 10) == 0) {
 			char opt_str[MAX_BOOL] = "";
 			ret = sscanf(line, "DiskUsage=%5s\n", opt_str);
-
 			if (ret == -1)
 				continue;
-
 			if (strncmp(opt_str, "true", 4) == 0)
 				disk_usage = 1;
-
 			else if (strncmp(opt_str, "false", 5) == 0)
 				disk_usage = 0;
 		}
@@ -1658,13 +1588,10 @@ read_config(void)
 		&& strncmp(line, "Autocd=", 7) == 0) {
 			char opt_str[MAX_BOOL] = "";
 			ret = sscanf(line, "Autocd=%5s\n", opt_str);
-
 			if (ret == -1)
 				continue;
-
 			if (strncmp(opt_str, "true", 4) == 0)
 				autocd = 1;
-
 			else if (strncmp(opt_str, "false", 5) == 0)
 				autocd = 0;
 		}
@@ -1673,15 +1600,24 @@ read_config(void)
 		&& strncmp(line, "AutoOpen=", 9) == 0) {
 			char opt_str[MAX_BOOL] = "";
 			ret = sscanf(line, "AutoOpen=%5s\n", opt_str);
-
 			if (ret == -1)
 				continue;
-
 			if (strncmp(opt_str, "true", 4) == 0)
 				auto_open = 1;
-
 			else if (strncmp(opt_str, "false", 5) == 0)
 				auto_open = 0;
+		}
+
+		else if (xargs.autojump == UNSET && *line == 'A'
+		&& strncmp(line, "AutoJump=", 9) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "AutoJump=%5s\n", opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "true", 4) == 0)
+				autojump = autocd = 1;
+			else if (strncmp(opt_str, "false", 5) == 0)
+				autojump = 0;
 		}
 
 		else if (xargs.dirmap == UNSET && *line == 'D'
@@ -1917,13 +1853,9 @@ read_config(void)
 					free(opt_str);
 					continue;
 				}
-
 				user.shell = savestring(tmp, strlen(tmp));
-			}
-
-			else {
+			} else {
 				char *shell_path = get_cmd_path(tmp);
-
 				if (!shell_path) {
 					free(opt_str);
 					continue;
@@ -1932,12 +1864,10 @@ read_config(void)
 				user.shell = savestring(shell_path, strlen(shell_path));
 				free(shell_path);
 			}
-
 			free(opt_str);
 		}
 
 		else if (*line == 'T' && strncmp(line, "TerminalCmd=", 12) == 0) {
-
 			if (term) {
 				free(term);
 				term = (char *)NULL;
@@ -2046,8 +1976,9 @@ read_config(void)
 					div_line_char = DEF_DIV_LINE_CHAR;
 				else
 					div_line_char = (char)num;
-			} else
+			} else {
 				div_line_char = opt_c;
+			}
 		}
 
 		else if (*line == 'M' && strncmp(line, "MaxHistory=", 11) == 0) {
@@ -2120,14 +2051,11 @@ void
 init_config(void)
 {
 	if (xargs.stealth_mode == 1) {
-
 		_err(0, PRINT_PROMPT, _("%s: Running in stealth mode: trash, persistent "
 					"selection and directory history, just as bookmarks, logs and "
 					"configuration files, are disabled.\n"),
 		    PROGRAM_NAME);
-
 		config_ok = 0;
-
 		return;
 	}
 
@@ -2139,7 +2067,6 @@ init_config(void)
 		return;
 
 	define_config_file_names();
-
 	create_config_files();
 
 	if (config_ok)
@@ -2230,7 +2157,7 @@ reload_config(void)
 	no_eln = min_name_trim = case_sens_dirjump = case_sens_path_comp = UNSET;
 	min_jump_rank = max_jump_total_rank = print_selfiles = UNSET;
 	max_printselfiles = suggestions = visible_prompt_len = UNSET;
-	suggest_filetype_color = UNSET;
+	suggest_filetype_color = autojump = UNSET;
 
 	shell_terminal = no_log = internal_cmd = recur_perm_error_flag = 0;
 	is_sel = sel_is_last = print_msg = kbind_busy = dequoted = 0;
@@ -2333,6 +2260,10 @@ reload_config(void)
 		tips = xargs.tips;
 	if (xargs.icons != UNSET)
 		icons = xargs.icons;
+	if (xargs.autojump != UNSET)
+		autojump = xargs.autojump;
+	if (autojump)
+		autocd = 1;
 
 	/* Free the aliases and prompt_cmds arrays to be allocated again */
 	int i = dirhist_total_index;
@@ -2341,7 +2272,6 @@ reload_config(void)
 		free(old_pwd[i]);
 
 	free(old_pwd);
-
 	old_pwd = (char **)NULL;
 
 	if (jump_db) {
@@ -2353,7 +2283,6 @@ reload_config(void)
 	}
 
 	jump_n = 0;
-
 	i = (int)aliases_n;
 	while (--i >= 0)
 		free(aliases[i]);
@@ -2375,6 +2304,5 @@ reload_config(void)
 	dirhist_cur_index = dirhist_total_index - 1;
 
 	set_env();
-
 	return EXIT_SUCCESS;
 }

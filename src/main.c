@@ -100,6 +100,7 @@ short
     light_mode = UNSET,
     autocd = UNSET,
     auto_open = UNSET,
+	autojump = UNSET,
     dirhist_map = UNSET,
     restore_last_path = UNSET,
     pager = UNSET,

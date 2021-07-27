@@ -27,4 +27,5 @@
 int add_to_jumpdb(const char *dir);
 void save_jumpdb(void);
 int dirjump(char **args);
+int run_autojump(char **cmd);
 /* int edit_jumpdb(void); */

@@ -50,7 +50,6 @@ add_to_jumpdb(const char *dir)
 
 	int i = (int)jump_n, new_entry = 1;
 	while (--i >= 0) {
-
 		if (dir[1] == jump_db[i].path[1] && strcmp(jump_db[i].path, dir) == 0) {
 			jump_db[i].visits++;
 			jump_db[i].last_visit = time(NULL);
@@ -192,7 +191,6 @@ save_jumpdb(void)
 	}
 
 	fprintf(fp, "@%d\n", total_rank);
-
 	fclose(fp);
 	free(JUMP_FILE);
 }
@@ -210,7 +208,6 @@ edit_jumpdb(void)
 	sprintf(JUMP_FILE, "%s/jump.cfm", CONFIG_DIR);
 
 	struct stat attr;
-
 	if (stat(JUMP_FILE, &attr) == -1) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, JUMP_FILE,
 		    strerror(errno));
@@ -242,9 +239,7 @@ edit_jumpdb(void)
 	}
 
 	load_jumpdb();
-
 	free(JUMP_FILE);
-
 	return EXIT_SUCCESS;
 }
 
@@ -258,7 +253,6 @@ dirjump(char **args)
 	}
 
 	time_t now = time(NULL);
-
 	int reduce = 0;
 
 	/* If the sum total of ranks is greater than max, divide each entry
@@ -269,7 +263,6 @@ dirjump(char **args)
 	/* If no parameter, print the list of entries in the jump
 	 * database together with the corresponding information */
 	if (!args[1] && args[0][1] != 'e') {
-
 		if (!jump_n) {
 			printf("%s: Database still empty\n", PROGRAM_NAME);
 			return EXIT_SUCCESS;
@@ -344,13 +337,12 @@ dirjump(char **args)
 				    i + 1, jump_db[i].visits, days_since_first,
 				    hours_since_last, rank, BPW ? '*' : 0,
 				    jump_db[i].path, df_c);
-			}
-
-			else
+			} else {
 				printf("  %zu\t %zu\t %d\t %d\t%d%c\t%s \n", i + 1,
 				    jump_db[i].visits, days_since_first,
 				    hours_since_last, rank,
 				    BPW ? '*' : 0, jump_db[i].path);
+			}
 		}
 
 		printf("\nTotal rank: %zu/%d\nTotal visits: %zu\n", ranks_sum,
@@ -367,46 +359,30 @@ dirjump(char **args)
 	enum jump jump_opt = none;
 
 	switch (args[0][1]) {
-
-	case 'e':
-		return edit_jumpdb();
-	case 'c':
-		jump_opt = jchild;
-		break;
-	case 'p':
-		jump_opt = jparent;
-		break;
-	case 'o':
-		jump_opt = jorder;
-		break;
-	case 'l':
-		jump_opt = jlist;
-		break;
-	case '\0':
-		jump_opt = none;
-		break;
-
+	case 'e': return edit_jumpdb();
+	case 'c': jump_opt = jchild; break;
+	case 'p': jump_opt = jparent; break;
+	case 'o': jump_opt = jorder; break;
+	case 'l': jump_opt = jlist; break;
+	case '\0': jump_opt = none; break;
 	default:
 		fprintf(stderr, _("%s: '%c': Invalid option\n"), PROGRAM_NAME,
 				args[0][1]);
 		fprintf(stderr, "%s\n", _(JUMP_USAGE));
 		return EXIT_FAILURE;
-		break;
 	}
 
 	if (jump_opt == jorder) {
-
 		if (!args[1]) {
 			fprintf(stderr, "%s\n", _(JUMP_USAGE));
 			return EXIT_FAILURE;
 		}
 
-		if (!is_number(args[1]))
+		if (!is_number(args[1])) {
 			return cd_function(args[1]);
-
-		else {
-
+		} else {
 			int int_order = atoi(args[1]);
+
 			if (int_order <= 0 || int_order > (int)jump_n) {
 				fprintf(stderr, _("%s: %d: No such order number\n"),
 				    PROGRAM_NAME, int_order);
@@ -419,30 +395,32 @@ dirjump(char **args)
 
 	/* If ARG is an actual directory, just cd into it */
 	struct stat attr;
-
 	if (!args[2] && lstat(args[1], &attr) != -1)
 		return cd_function(args[1]);
 
 	/* Jump into a visited directory using ARGS as filter(s) */
 	size_t i;
 	int j, match = 0;
-
 	char **matches = (char **)xnmalloc(jump_n + 1, sizeof(char *));
+	char **needles = (char **)xnmalloc(jump_n + 1, sizeof(char *));
 	size_t *visits = (size_t *)xnmalloc(jump_n + 1, sizeof(size_t));
 	time_t *first = (time_t *)xnmalloc(jump_n + 1, sizeof(time_t));
 	time_t *last = (time_t *)xnmalloc(jump_n + 1, sizeof(time_t));
 
 	for (i = 1; args[i]; i++) {
-
 		/* 1) Using the first parameter, get a list of matches in the
 		 * database */
 		if (!match) {
-
 			j = (int)jump_n;
 			while (--j >= 0) {
-
-				if (case_sens_dirjump ? !strstr(jump_db[j].path, args[i])
-						      : !strcasestr(jump_db[j].path, args[i]))
+				/* Pointer to the beginning of the search str in the
+				 * jump entry. Used to search for subsequent search
+				 * strings starting from this position in the entry
+				 * and not before */
+				char *needle = case_sens_dirjump
+							? strstr(jump_db[j].path, args[i])
+							: strcasestr(jump_db[j].path, args[i]);
+				if (!needle)
 					continue;
 
 				/* Exclue CWD */
@@ -451,7 +429,6 @@ dirjump(char **args)
 					continue;
 
 				int exclude = 0;
-
 				/* Filter matches according to parent or
 				 * child options */
 				switch (jump_opt) {
@@ -464,9 +441,8 @@ dirjump(char **args)
 					if (!strstr(jump_db[j].path, ws[cur_ws].path))
 						exclude = 1;
 
-				case none:
-				default:
-					break;
+				case none: /* fallthrough */
+				default: break;
 				}
 
 				if (exclude)
@@ -475,6 +451,7 @@ dirjump(char **args)
 				visits[match] = jump_db[j].visits;
 				first[match] = jump_db[j].first_visit;
 				last[match] = jump_db[j].last_visit;
+				needles[match] = needle;
 				matches[match++] = jump_db[j].path;
 			}
 		}
@@ -485,14 +462,21 @@ dirjump(char **args)
 		else {
 			j = (int)match;
 			while (--j >= 0) {
-
-				if (!matches[j] || !*matches[j]
-				|| (case_sens_dirjump ? !strstr(matches[j], args[i])
-				: !strcasestr(matches[j], args[i]))) {
-
+				if (!matches[j] || !*matches[j]) {
 					matches[j] = (char *)NULL;
 					continue;
 				}
+
+				char *_needle = case_sens_dirjump
+						? strstr(needles[j] + 1, args[i])
+						: strcasestr(needles[j] + 1, args[i]);
+				if (!_needle) {
+					matches[j] = (char *)NULL;
+					continue;
+				}
+
+				/* Update the needle for the next search string */
+				needles[j] = _needle;
 			}
 		}
 	}
@@ -507,16 +491,14 @@ dirjump(char **args)
 
 	j = match;
 	while (--j >= 0) {
-
 		if (!matches[j])
 			continue;
 
 		found = 1;
 
-		if (jump_opt == jlist)
+		if (jump_opt == jlist) {
 			printf("%s\n", matches[j]);
-
-		else {
+		} else {
 			int days_since_first = (int)(now - first[j]) / 60 / 60 / 24;
 
 			/* Calculate the rank as frecency. The algorithm is based
@@ -584,17 +566,58 @@ dirjump(char **args)
 	}
 
 	if (!found) {
-		printf(_("%s: No matches found\n"), PROGRAM_NAME);
+		printf(_("%s: jump: No matches found\n"), PROGRAM_NAME);
 		exit_status = EXIT_FAILURE;
+	} else if (jump_opt != jlist) {
+		exit_status = cd_function(matches[best_ranked]);
 	}
 
-	else if (jump_opt != jlist)
-		exit_status = cd_function(matches[best_ranked]);
-
 	free(matches);
+	free(needles);
 	free(first);
 	free(last);
 	free(visits);
-
 	return exit_status;
+}
+
+/* This function is called if the autojump option is enabled. If the
+ * first word in CMD is not a program in PATH, append the j command to
+ * the current command line and run the dirjump function */
+int
+run_autojump(char **cmd)
+{
+	if (!cmd || !cmd[0] || !*cmd[0])
+		return -1;
+
+	char *ret = get_cmd_path(cmd[0]);
+	if (ret) {
+		free(ret);
+		return -1;
+	}
+
+	int i;
+
+	char **__cmd = (char **)xnmalloc(args_n + 3, sizeof(char *));
+	__cmd[0] = (char *)xnmalloc(2, sizeof(char));
+	*__cmd[0] = 'j';
+	__cmd[0][1] = '\0';
+
+	for (i = 0; i <= args_n; i++) {
+		__cmd[i + 1] = (char *)xnmalloc(strlen(cmd[i]) + 1,
+						sizeof(char));
+		strcpy(__cmd[i + 1], cmd[i]);
+	}
+
+	__cmd[args_n + 2] = (char *)NULL;
+
+	args_n++;
+	exit_code = dirjump(__cmd);
+	args_n--;
+
+	i = args_n + 2;
+	while (--i >= 0)
+		free(__cmd[i]);
+	free(__cmd);
+
+	return exit_code;
 }
