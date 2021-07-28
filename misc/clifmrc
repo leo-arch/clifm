@@ -134,11 +134,12 @@ AutoSuggestions=false
 # a = Aliases names\n\
 # b = Bookmarks names\n\
 # c = Possible completions\n\
+# e = ELN's
 # f = File names in current directory\n\
 # h = Commands history\n\
 # j = Jump database\n\
-# Use a dash (-) to skip a check. Ex: 'ahfj-c' to skip the bookmarks check\n\
-SuggestionStrategy=hfjbac
+# Use a dash (-) to skip a check. Ex: 'eahfj-c' to skip the bookmarks check\n\
+SuggestionStrategy=ehfjbac
 
 # If set to true, suggest file names using the corresponding
 # file type color (set via the color scheme file)
