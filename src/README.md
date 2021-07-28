@@ -120,7 +120,7 @@ Interface: `listing.c`
 
 Directory jumper: `jump.c`
 
-Suggestions: `suggestions.c`
+Suggestions: `suggestions.c` and `keybinds.c` (the `rl_accept_suggestion` function)
 
 ## 4) Compilation
 
