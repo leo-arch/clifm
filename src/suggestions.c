@@ -880,6 +880,9 @@ rl_suggestions(const char c)
 	 * not appended this char to rl_line_buffer yet, so that we must
 	 * do it manually. Line editing is only allowed for the last word */
 	int s = strcntchrlst(rl_line_buffer, ' ');
+	/* Do not take into account final spaces */
+	if (s >= 0 && !rl_line_buffer[s + 1])
+		s = -1;
 	if (rl_point != rl_end && rl_point > s && c != _ESC) {
 		char text[2];
 		text[0] = c;
