@@ -859,11 +859,13 @@ In case some of these keybindings are already used by your Window Manager, you o
 .TP
 The above are the default keyboard shortcuts. However, they can be freely modified using the 'kb edit' command (or pressing F9) or just editing the keybindings file (see the \fBFILES\fR section below) to your liking.
 .TP
-Since CliFM does not depend on the curses library, keybindings are set up via ANSI escape codes, for example, "\e[17~" for F6 key. The two main difficulties with ANSI escape codes are: 1) They are not intuitive at all, and 2) They vary depending on the terminal emulator used. This is why we provide a plugin (kbgen) to more easily configure your keybindings.
+Since CliFM does not depend on the curses library, keybindings are set up via ANSI escape codes, for example, "\e[17~" for the F6 key. The two main difficulties with ANSI escape codes are: 1) They are not intuitive at all, and 2) They vary depending on the terminal emulator used. This is why we provide a plugin (kbgen) to more easily configure your keybindings.
 .TP
 The plugin can be found in the plugins directory as a C source file. The first step, therefore, is to compile this source file to produce a binary file. Compile as follows:
 .TP
  gcc -o kbgen kbgen.c
+.TP
+\fBNote\fR: Depending on your system, you might need to link against the curses library adding either -lcurses or -lncurses to the line above. 
 .TP
 Now, just run the plugin entering './kbgen'. Use either octal, hexadecimal codes or symbols. Example: For F12 'kbgen' will print the following lines:
 .sp
@@ -885,7 +887,7 @@ GNU emacs escape sequences are also allowed (ex: "\\M-a", Alt-a in most keyboard
 .TP
 .B Readline keybindings
 .TP
-System readline keybindings for command line editing, such as Ctrl-a, to move the cursor to the beginning of the line, or Ctrl-e, to move it to the end, should work out of the box. Of course, you can modify readline keybindings using the \fI$HOME/.inputrc\fR file, either globally or for some specific terminal or application. In this latter case, it is possible to set keybindings specifically for CliFM using the \fIapplication\fR construct, that is, telling readline that the following keybindings apply only to CliFM. For example, to bind the function "kill-whole-line" to Ctrl-b, add the following lines to your .inputrc file:
+System readline keybindings for command line editing, such as \fICtrl-a\fR, to move the cursor to the beginning of the line, or \fICtrl-e\fR, to move it to the end, should work out of the box. Of course, you can modify readline keybindings using the \fI$HOME/.inputrc\fR file, either globally or for some specific terminal or application. In this latter case, it is possible to set keybindings specifically for CliFM using the \fIapplication\fR construct, that is, telling readline that the following keybindings apply only to CliFM. For example, to bind the function "kill-whole-line" to \fICtrl-b\fR, add the following lines to your \fI.inputrc\fR file:
 .sp
  $if clifm
  "\\C\-b": kill\-whole\-line
@@ -950,11 +952,11 @@ The following codes are used for different interface elements:
  nm = notice message indicator color
  si = stealth mode indicator color
 .TP
-Color codes are just traditional ANSI color codes less the escape character and the final 'm'. Thus, for instance, if you want non\-empty directories to be bold blue, add this to the \fIFiletypeColors\fR line in the corresponding color scheme file: di=01;34. If you want ELN's to be red, add this code to the \fIInterfaceColors\fR line: el=00;31
+Color codes are just traditional ANSI color codes less the escape character and the final 'm'. Thus, for instance, if you want non\-empty directories to be bold blue, add this to the \fIFiletypeColors\fR line in the corresponding color scheme file: \fBdi=01;34\fR. If you want ELN's to be red, add this code to the \fIInterfaceColors\fR line: \fBel=00;31\fR
 .TP
-Color codes can be used for file extensions as well using this format: *.ext=color. For example, to print C source files in bold green, add this to the \fIExtColors\fR line in the corresponding color scheme file: *.c=01;32
+Color codes can be used for file extensions as well using this format: *.ext=color. For example, to print C source files in bold green, add this to the \fIExtColors\fR line in the corresponding color scheme file: \fB*.c=01;32\fR
 .TP
-Though by default CliFM uses only 8 colors, you can use 256 and RGB colors as well. Example: fi=04;38;2;245;76;00;48;2;00;00;255 will print regular files underlined and using a bold orange RGB color on a blue background. In this case, just make sure to use a terminal emulator supporting RGB colors. To test your terminal color capabilities use the colors.sh script (in the plugins directory).
+Though by default CliFM uses only 8 colors, you can use 256 and RGB colors as well. Example: \fBfi=04;38;2;245;76;00;48;2;00;00;255\fR will print regular files underlined and using a bold orange RGB color on a blue background. In this case, just make sure to use a terminal emulator supporting RGB colors. To test your terminal color capabilities use the \fIcolors.sh\fR script (in the plugins directory).
 .TP
 File types and file extension colors, just as interface colors, are specified by the current color scheme and can be modified as you wish (see the \fIcs\fR command above).
 .TP
@@ -1016,7 +1018,7 @@ CliFM's prompt is built from the \fIPrompt\fR line in the configuration file fol
 \\]: End a sequence of non\-printing characters
 
 .TP
-By default, for example, CliFM's prompt line is this: "[\\[\\e[0;36m\\]\\S\\[\\e[0m\\]]\\l \\A \\u:\\H \\[\\e[0;36m\\]\\w\\n\\[\\e[0m\\]\\z\\[\\e[0;34m\\] \\$ \\[\\e[0m\\]", which once decoded should be something like this: 
+By default, for example, CliFM's prompt line is this: \fB[\\[\\e[0;36m\\]\\S\\[\\e[0m\\]]\\l \\A \\u:\\H \\[\\e[0;36m\\]\\w\\n\\[\\e[0m\\]\\z\\[\\e[0;34m\\] \\$ \\[\\e[0m\\]\fR, which once decoded should be something like this: 
 
  [1] 13:45 user:hostname /my/path
  :) $
@@ -1034,7 +1036,7 @@ A bold red 'R' at the left of the prompt reminds the user that the program is ru
 
 .SH 11. BUILT\-IN EXPANSIONS
 .TP
-Besides the default TAB completion for command \fBnames and paths\fR, you can also expand \fBELN's\fR using the TAB key. Example: type 'o 12', press TAB, and it becomes 'o filename ', or, if 12 refers to a directory, 'o dir/'. CliFM uses a Bash\-style quoting system, so that this file name: "this is a test@version{1}" is expanded as follows: this\\ is\\ a\\ test\\@version\\{1\\}
+Besides the default \fITAB completion\fR for command \fBnames and paths\fR, you can also expand \fBELN's\fR using the TAB key. Example: type 'o 12', press TAB, and it becomes 'o filename ', or, if 12 refers to a directory, 'o dir/'. CliFM uses a Bash\-style quoting system, so that this file name: "this is a test@version{1}" is expanded as follows: this\\ is\\ a\\ test\\@version\\{1\\}
 .TP
 CliFM will automatically expand the \fB'sel' keyword\fR: 'sel' indeed amounts to 'file1 file2 file3 ...' In this way, you can use the 'sel' keyword with any command. If you want to set the executable bit on several files, for instance, simply select the files you want and then run this command: 'chmod +x sel'. Or, if you want to copy or move several files into some directory: 'cp sel 12', or 'mv sel 12' (provided the ELN 12 corresponds to a directory), respectively. If the destiny directory is omitted, selected files are copied into the current working directory, that is to say, 'mv sel' amounts to 'mv sel .'. To trash or remove selected files, simply run 'tr sel' or 'rm sel' respectively. The same goes for wildcards and braces: 'chmod +x *', for example, will set the executable bit on all files (excluding hidden files) in the current working directory, while 'chmod +x file{1,2,3}' will do it for file1, file2, and file3 respectively.
 .TP
@@ -1043,6 +1045,8 @@ ELN's and \fBELN ranges\fR will be also automatically expanded, provided the cor
 TAB completion for \fBbookmarks, color schemes, profiles, sort method, and directory history\fR (via the \fIjump\fR command) is also available. To make use of the bookmarks completion, make sure to specify some name for your bookmarks, since these names are used by the completion function. 
 .TP
 Of course, combinations of all these features is also possible. Example: 'cp sel file* 2 23\-31 .' will copy all selected files, plus all files whose name starts with "file", plus those files corresponding to the ELN's 2, and 23 to 31, into the current working directory.
+.TP
+In addition to completions and expansions, an \fIauto-suggestions system\fR is also available. See the \fBAUTO-SUGGESTIONS\fR section below.
 
 .SH 12. RESOURCE OPENER
 \fBLira\fR is CliFM's built-in resource opener, and is controlled via the \fImime\fR command (see above). File associations are stored in the MIME list file (see the \fBFILES\fR section below).
@@ -1160,8 +1164,8 @@ Plugins are just scripts or programs (written in any language) able to add, exte
  | fzfnav            | fzf                           |
  |   -archives       | atool, bsdtar or tar          |
  |   -images         | kitty terminal, imagemagick,  | 
- |		             | and ueberzug or viu or catimg |
- |				     | or img2txt                    |
+ |                   | and ueberzug or viu or catimg |
+ |                   | or img2txt                    |
  |   -fonts          | fontpreview or fontforge      |
  |   -docs           | libreoffice, catdoc, odt2txt, |
  |                   | pandoc                        |
