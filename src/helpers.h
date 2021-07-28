@@ -335,8 +335,8 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define DEF_TRASRM 0
 #define DEF_UNICODE 1
 #define DEF_WELCOME_MESSAGE 1
-#define DEF_SUG_STRATEGY "hfjbac"
-#define SUG_STRATS 6
+#define DEF_SUG_STRATEGY "ehfjbac"
+#define SUG_STRATS 7
 
 #define MAX_WS 8
 
@@ -370,6 +370,7 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define COMP_SUG 5
 #define BOOKMARK_SUG 6
 #define ALIAS_SUG 7
+#define ELN_SUG 8
 
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR

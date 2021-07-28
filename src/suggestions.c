@@ -208,7 +208,8 @@ print_suggestion(const char *str, size_t offset, const char *color)
 
 	/* Get the amount of lines we need to print the suggestion */
 	size_t suggestion_len = wc_xstrlen(str + offset);
-	if (suggestion.type == BOOKMARK_SUG || suggestion.type == ALIAS_SUG)
+	if (suggestion.type == BOOKMARK_SUG || suggestion.type == ALIAS_SUG
+	|| suggestion.type == ELN_SUG)
 		/* 4 = 2 (two chars forward) + 2 (" >") */
 		suggestion.full_line_len += 4;
 	
@@ -257,7 +258,8 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	 * the difference between them, it doesn't matter: the result
 	 * is the same (7 - 4 == 6 - 3 == 1) */
 
-	if (suggestion.type == BOOKMARK_SUG || suggestion.type == ALIAS_SUG) {
+	if (suggestion.type == BOOKMARK_SUG || suggestion.type == ALIAS_SUG
+	|| suggestion.type == ELN_SUG) {
 		printf("\x1b[2C");
 		printf("\x1b[0;31m> \x1b[0m");
 	}
@@ -768,6 +770,36 @@ check_int_params(const char *str, const size_t len)
 }
 
 static int
+check_eln(const char *str, const size_t len)
+{
+	if (!str || !*str || !len)
+		return 0;
+
+	int n = atoi(str);
+	if (n < 1 || n > files || !file_info[n - 1].name)
+		return 0;
+
+	n--;
+	char *color = sf_c;
+	suggestion.type = ELN_SUG;
+	if (suggest_filetype_color)
+		color = file_info[n].color;
+
+	char tmp[NAME_MAX + 1];
+	*tmp = '\0';
+	if (file_info[n].dir) {
+		snprintf(tmp, NAME_MAX + 1, "%s/", file_info[n].name);
+		suggestion.filetype = DT_DIR;
+	} else {
+		suggestion.filetype = DT_REG;
+	}
+
+	print_suggestion(!*tmp ? file_info[n].name : tmp, 1, color);
+
+	return 1;
+}
+
+static int
 check_aliases(const char *str, const size_t len)
 {
 	if (!aliases_n)
@@ -1017,6 +1049,15 @@ rl_suggestions(const char c)
 				}
 			}
 			break;
+
+		case 'e': /* ELN's */
+			if (*last_word >= '1' && *last_word <= '9' && is_number(last_word)) {
+				printed = check_eln(last_word, strlen(last_word));
+				if (printed) {
+					suggestion.offset = last_word_offset;
+					goto SUCCESS;
+				}
+			}
 
 		case 'f': /* Check file names in CWD */
 			/* Do not check dirs and filenames if first word and

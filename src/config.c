@@ -811,10 +811,11 @@ AutoSuggestions=%s\n\n"
 # a = Aliases names\n\
 # b = Bookmarks names\n\
 # c = Possible completions\n\
+# e = ELN's\n\
 # f = File names in current directory\n\
 # h = Commands history\n\
 # j = Jump database\n\
-# Use a dash (-) to skip a check. Ex: 'ahfj-c' to skip the bookmarks check\n\
+# Use a dash (-) to skip a check. Ex: 'eahfj-c' to skip the bookmarks check\n\
 SuggestionStrategy=%s\n\n"
 
 	    "# If set to true, suggest file names using the corresponding\n\
@@ -1442,16 +1443,16 @@ read_config(void)
 		else if (*line == 'S'
 		&& strncmp(line, "SuggestionStrategy=", 19) == 0) {
 			char opt_str[SUG_STRATS + 1] = "";
-			ret = sscanf(line, "SuggestionStrategy=%6s\n", opt_str);
+			ret = sscanf(line, "SuggestionStrategy=%7s\n", opt_str);
 			if (ret == -1)
 				continue;
 			int fail = 0;
 			size_t s = 0;
 			for (; opt_str[s]; s++) {
 				if (opt_str[s] != 'a' && opt_str[s] != 'b'
-				&& opt_str[s] != 'c' && opt_str[s] != 'f'
-				&& opt_str[s] != 'h' && opt_str[s] != 'j'
-				&& opt_str[s] != '-') {
+				&& opt_str[s] != 'c' && opt_str[s] != 'e'
+				&& opt_str[s] != 'f' && opt_str[s] != 'h'
+				&& opt_str[s] != 'j' && opt_str[s] != '-') {
 					fail = 1;
 					break;
 				}

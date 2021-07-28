@@ -999,8 +999,11 @@ filenames_gen_eln(const char *text, int state)
 	/* Check list of currently displayed files for a match */
 	while (i < files && (name = file_info[i++].name) != NULL)
 		if (*name == *file_info[num_text - 1].name
-		&& strcmp(name, file_info[num_text - 1].name) == 0)
+		&& strcmp(name, file_info[num_text - 1].name) == 0) {
+			if (suggestion_buf)
+				clear_suggestion();
 			return strdup(name);
+		}
 
 	return (char *)NULL;
 }
