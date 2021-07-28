@@ -335,8 +335,8 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define DEF_TRASRM 0
 #define DEF_UNICODE 1
 #define DEF_WELCOME_MESSAGE 1
-#define DEF_SUG_STRATEGY "hfjbc"
-#define SUG_STRATS 5
+#define DEF_SUG_STRATEGY "hfjbac"
+#define SUG_STRATS 6
 
 #define MAX_WS 8
 

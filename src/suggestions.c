@@ -980,9 +980,20 @@ rl_suggestions(const char c)
 		}
 	}
 
+	/* 3.c) Execute the following check in the order specified by
+	 * suggestion_strategy (the value is taken form the configuration
+	 * file) */
 	size_t st = 0;
 	for (; st < SUG_STRATS; st++) {
 		switch(suggestion_strategy[st]) {
+
+		case 'a': /* Aliases */
+			printed = check_aliases(last_word, strlen(last_word));
+			if (printed) {
+				suggestion.offset = last_word_offset;
+				goto SUCCESS;
+			}
+			break;
 
 		case 'b': /* Bookmarks */
 			if (last_space || autocd || auto_open) {
@@ -1047,15 +1058,7 @@ rl_suggestions(const char c)
 	free(full_line);
 	full_line = (char *)NULL;
 
-	/* Check aliases */
-	printed = check_aliases(last_word, strlen(last_word));
-	if (printed) {
-		suggestion.offset = last_word_offset;
-		goto SUCCESS;
-	}
-		
-
-	/* 3.g) Check commands in PATH and CliFM internals commands, but
+	/* 3.d) Check commands in PATH and CliFM internals commands, but
 	 * only for the first word */
 	if (!last_space)
 		printed = check_cmds(last_word, strlen(last_word));
