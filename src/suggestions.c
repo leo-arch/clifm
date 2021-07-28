@@ -208,6 +208,10 @@ print_suggestion(const char *str, size_t offset, const char *color)
 
 	/* Get the amount of lines we need to print the suggestion */
 	size_t suggestion_len = wc_xstrlen(str + offset);
+	if (suggestion.type == BOOKMARK_SUG || suggestion.type == ALIAS_SUG)
+		/* 4 = 2 (two chars forward) + 2 (" >") */
+		suggestion.full_line_len += 4;
+	
 	size_t cuc = visible_prompt_len + suggestion.full_line_len;
 	size_t cucs = cuc + suggestion_len;
 	int clines = 1,
@@ -253,8 +257,14 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	 * the difference between them, it doesn't matter: the result
 	 * is the same (7 - 4 == 6 - 3 == 1) */
 
+	if (suggestion.type == BOOKMARK_SUG || suggestion.type == ALIAS_SUG) {
+		printf("\x1b[2C");
+		printf("\x1b[0;31m> \x1b[0m");
+	}
+
 	/* Print the suggestion */
 	printf("%s%s%s", color, str + (offset - 1), df_c);
+	fflush(stdout);
 
 	/* Update the row number, if needed */
 	/* If the cursor is in the last row, printing a multi-line suggestion
@@ -262,7 +272,6 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	 * lines taken by the suggestion, so that we need to update the
 	 * value to move the cursor back to the correct row (the beginning
 	 * of the line) */
-
 	int old_currow = currow;
 	if (diff > 0 && currow + diff >= term_rows)
 		currow -= diff - (term_rows - old_currow);
@@ -419,14 +428,15 @@ check_completions(const char *str, const size_t len, const char c)
 			snprintf(_tmp, NAME_MAX + 2, "%s/", _matches[0]);
 		char *tmp = escape_str(*_tmp ? _tmp : _matches[0]);
 
+		if (c != BS)
+			suggestion.type = COMP_SUG;
+
 		if (tmp) {
 			print_suggestion(tmp, len, color);
 			free(tmp);
 		} else {
 			print_suggestion(_matches[0], len, color);
 		}
-		if (c != BS)
-			suggestion.type = COMP_SUG;
 
 		printed = 1;
 	} else {
@@ -452,14 +462,15 @@ check_completions(const char *str, const size_t len, const char c)
 				snprintf(_tmp, NAME_MAX + 2, "%s/", _matches[1]);
 			char *tmp = escape_str(*_tmp ? _tmp : _matches[1]);
 
+			if (c != BS)
+				suggestion.type = COMP_SUG;
+
 			if (tmp) {
 				print_suggestion(tmp, len, color);
 				free(tmp);
 			} else {
 				print_suggestion(_matches[1], len, color);
 			}
-			if (c != BS)
-				suggestion.type = COMP_SUG;
 
 			printed = 1;
 		}
@@ -483,6 +494,7 @@ check_filenames(const char *str, const size_t len, const char c, const int first
 {
 	int i = files;
 	char *color = (char *)NULL;
+
 	if (suggest_filetype_color)
 		color = no_c;
 	else
@@ -496,12 +508,19 @@ check_filenames(const char *str, const size_t len, const char c, const int first
 		&& file_info[i].len > len) {
 			if (suggest_filetype_color)
 				color = file_info[i].color;
+
 			if (file_info[i].dir) {
 				if (first_word && !autocd)
 					continue;
+
 				suggestion.filetype = DT_DIR;
+
 				char tmp[NAME_MAX + 2];
 				snprintf(tmp, NAME_MAX + 2, "%s/", file_info[i].name);
+
+				if (c != BS)
+					suggestion.type = FILE_SUG;
+
 				char *_tmp = escape_str(tmp);
 				if (_tmp) {
 					print_suggestion(_tmp, len, color);
@@ -512,7 +531,11 @@ check_filenames(const char *str, const size_t len, const char c, const int first
 			} else {
 				if (first_word && !auto_open)
 					continue;
+
+				if (c != BS)
+					suggestion.type = FILE_SUG;
 				suggestion.filetype = DT_REG;
+
 				char *tmp = escape_str(file_info[i].name);
 				if (tmp) {
 					print_suggestion(tmp, len, color);
@@ -521,12 +544,9 @@ check_filenames(const char *str, const size_t len, const char c, const int first
 					print_suggestion(file_info[i].name, len, color);
 				}
 			}
-			if (c != BS)
-				suggestion.type = FILE_SUG;
 			return 1;
 		}
 	}
-
 	return 0;
 }
 
@@ -535,12 +555,13 @@ check_history(const char *str, const size_t len)
 {
 	if (!str || !*str)
 		return 0;
-	int i = current_hist_n;
 
+	int i = current_hist_n;
 	while (--i >= 0) {
 		/* Try to suggest only useful entries */
 		if (!history[i] || TOUPPER(*str) != TOUPPER(*history[i]))
 			continue;
+
 		char *ret = strrchr(history[i], ' ');
 		if (!ret) { /* No space */
 			if (*history[i] != '/') /* And no absolute path */
@@ -558,8 +579,8 @@ check_history(const char *str, const size_t len)
 		if (len && (case_sens_path_comp ? strncmp(str, history[i], len)
 		: strncasecmp(str, history[i], len)) == 0
 		&& strlen(history[i]) > len) {
-			print_suggestion(history[i], len, sh_c);
 			suggestion.type = HIST_SUG;
+			print_suggestion(history[i], len, sh_c);
 			return 1;
 		}
 	}
@@ -571,19 +592,21 @@ static int
 check_cmds(const char *str, const size_t len)
 {
 	int i = path_progsn;
-
 	while (--i >= 0) {
 		if (!bin_commands[i] || *str != *bin_commands[i])
 			continue;
+
 		if (len && strncmp(str, bin_commands[i], len) == 0
 		&& strlen(bin_commands[i]) > len) {
-			if (is_internal_c(bin_commands[i]))
+			if (is_internal_c(bin_commands[i])) {
+				suggestion.type = CMD_SUG;
 				print_suggestion(bin_commands[i], len, sx_c);
-			else if (ext_cmd_ok)
+			} else if (ext_cmd_ok) {
+				suggestion.type = CMD_SUG;
 				print_suggestion(bin_commands[i], len, sc_c);
-			else
+			} else {
 				continue;
-			suggestion.type = CMD_SUG;
+			}
 			return 1;
 		}
 	}
@@ -594,23 +617,26 @@ check_cmds(const char *str, const size_t len)
 static int
 check_jumpdb(const char *str, const size_t len)
 {
-	int i = jump_n;
 	char *color = (char *)NULL;
+
 	if (suggest_filetype_color)
 		color = di_c;
 	else
 		color = sf_c;
 
+	int i = jump_n;
 	while (--i >= 0) {
-		if (!jump_db[i].path || *str != *jump_db[i].path)
+		if (!jump_db[i].path || TOUPPER(*str) != TOUPPER(*jump_db[i].path))
 			continue;
-		if (len && strncmp(str, jump_db[i].path, len) == 0
+
+		if (len && (case_sens_path_comp ? strncmp(str, jump_db[i].path, len)
+		: strncasecmp(str, jump_db[i].path, len)) == 0
 		&& strlen(jump_db[i].path) > len) {
+			suggestion.type = FILE_SUG;
+			suggestion.filetype = DT_DIR;
 			char tmp[NAME_MAX + 2];
 			snprintf(tmp, NAME_MAX + 2, "%s/", jump_db[i].path);
 			print_suggestion(tmp, len, color);
-			suggestion.type = FILE_SUG;
-			suggestion.filetype = DT_DIR;
 			return 1;
 		}
 	}
@@ -618,6 +644,65 @@ check_jumpdb(const char *str, const size_t len)
 	return 0;
 }
 
+static int
+check_bookmarks(const char *str, const size_t len)
+{
+	if (!bm_n)
+		return 0;
+
+	char *color = (char *)NULL;
+	struct stat attr;
+	if (!suggest_filetype_color)
+		color = sf_c;
+
+	int i = bm_n;
+	while (--i >= 0) {
+		if (!bookmarks[i].name || TOUPPER(*str) != TOUPPER(*bookmarks[i].name))
+			continue;
+
+		if (len && (case_sens_path_comp ? strncmp(str, bookmarks[i].name, len)
+		: strncasecmp(str, bookmarks[i].name, len)) == 0) {
+			if (lstat(bookmarks[i].path, &attr) == -1)
+				continue;
+
+			else if ((attr.st_mode & S_IFMT) == S_IFDIR) {
+				suggestion.type = BOOKMARK_SUG;
+				suggestion.filetype = DT_DIR;
+
+				char tmp[PATH_MAX + 2];
+				size_t path_len = strlen(bookmarks[i].path);
+				if (bookmarks[i].path[path_len - 1] != '/')
+					snprintf(tmp, PATH_MAX + 2, "%s/", bookmarks[i].path);
+				else
+					strncpy(tmp, bookmarks[i].path, PATH_MAX + 2);
+
+				if (suggest_filetype_color)
+					color = di_c;
+
+				char *_tmp = escape_str(tmp);
+				print_suggestion(_tmp ? _tmp : tmp, 1, color);
+				if (_tmp)
+					free(_tmp);
+			} else {
+				suggestion.type = BOOKMARK_SUG;
+				suggestion.filetype = DT_REG;
+
+				if (suggest_filetype_color)
+					color = get_comp_color(bookmarks[i].path, attr);
+
+				char *_tmp = escape_str(bookmarks[i].path);
+				print_suggestion(_tmp ? _tmp : bookmarks[i].path, 1, color);
+				if (_tmp)
+					free(_tmp);
+			}
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+/*
 static int
 check_bookmarks(const char *str, const size_t len)
 {
@@ -662,7 +747,7 @@ check_bookmarks(const char *str, const size_t len)
 	}
 
 	return 0;
-}
+} */
 
 static int
 check_int_params(const char *str, const size_t len)
@@ -673,8 +758,8 @@ check_int_params(const char *str, const size_t len)
 			continue;
 		if (len && strncmp(str, PARAM_STR[i], len) == 0
 		&& strlen(PARAM_STR[i]) > len) {
-			print_suggestion(PARAM_STR[i], len, sx_c);
 			suggestion.type = INT_CMD;
+			print_suggestion(PARAM_STR[i], len, sx_c);
 			return 1;
 		}
 	}
@@ -682,7 +767,45 @@ check_int_params(const char *str, const size_t len)
 	return 0;
 }
 
-/* Check for available suggestionse. Returns zero if true, one if not,
+static int
+check_aliases(const char *str, const size_t len)
+{
+	if (!aliases_n)
+		return 0;
+
+	char *color = sc_c;
+
+	int i = aliases_n;
+	while (--i >= 0) {
+		if (!aliases[i])
+			continue;
+		char *p = aliases[i];
+		if (TOUPPER(*p) != TOUPPER(*str))
+			continue;
+		if ((case_sens_path_comp ? strncmp(p, str, len)
+		: strncasecmp(p, str, len)) != 0)
+			continue;
+		char *ret = strchr(p, '=');
+		if (!*(++ret))
+			continue;
+		if (!*(++ret))
+			continue;
+		size_t str_len = strlen(ret);
+		if (ret[str_len - 1] == '\n') {
+			ret[str_len - 1] = '\0';
+			str_len--;
+		}
+		if (ret[str_len - 1] == '\'' || ret[str_len - 1] == '"')
+			ret[str_len - 1] = '\0';
+		suggestion.type = ALIAS_SUG;
+		print_suggestion(ret, 1, color);
+		return 1;
+	}
+
+	return 0;
+}
+
+/* Check for available suggestions. Returns zero if true, one if not,
  * and -1 if C was inserted before the end of the current line.
  * If a suggestion is found, it will be printed by print_suggestion() */
 int
@@ -692,7 +815,7 @@ rl_suggestions(const char c)
 	char *full_line = (char *)NULL;
 	int printed = 0;
 	int inserted_c = 0;
-//	static int msg_area = 0;
+/*	static int msg_area = 0; */
 
 		/* ######################################
 		 * # 		  1) Filter input			#
@@ -923,6 +1046,14 @@ rl_suggestions(const char c)
 
 	free(full_line);
 	full_line = (char *)NULL;
+
+	/* Check aliases */
+	printed = check_aliases(last_word, strlen(last_word));
+	if (printed) {
+		suggestion.offset = last_word_offset;
+		goto SUCCESS;
+	}
+		
 
 	/* 3.g) Check commands in PATH and CliFM internals commands, but
 	 * only for the first word */

@@ -365,9 +365,11 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define NO_SUG 0
 #define HIST_SUG 1
 #define FILE_SUG 2
-#define CMD_SUG 4
-#define INT_CMD 8
-#define COMP_SUG 16
+#define CMD_SUG 3
+#define INT_CMD 4
+#define COMP_SUG 5
+#define BOOKMARK_SUG 6
+#define ALIAS_SUG 7
 
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR

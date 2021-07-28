@@ -496,8 +496,12 @@ rl_accept_suggestion(int count, int key)
 		suggestion.printed = 0;
 		rl_point = suggestion.offset;
 
+		if (suggestion.type == BOOKMARK_SUG || suggestion.type == ALIAS_SUG)
+			clear_suggestion();
+
 		switch(suggestion.type) {
 
+		case BOOKMARK_SUG: /* fallthrough */
 		case COMP_SUG: /* fallthrough */
 		case FILE_SUG: {
 			char *tmp = (char *)NULL;

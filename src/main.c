@@ -676,16 +676,13 @@ main(int argc, char *argv[])
 	int i;
 	/* 1) Infinite loop to keep the program running */
 	while (1) {
-
 		/* 2) Grab input string from the prompt */
 		char *input = prompt();
-
 		if (!input)
 			continue;
 
 		/* 3) Parse input string */
 		char **cmd = parse_input_str(input);
-
 		free(input);
 		input = (char *)NULL;
 
@@ -694,7 +691,6 @@ main(int argc, char *argv[])
 
 		/* 4) Execute input string */
 		char **alias_cmd = check_for_alias(cmd);
-
 		if (alias_cmd) {
 			/* If an alias is found, check_for_alias() frees cmd
 			 * and returns alias_cmd in its place to be executed by

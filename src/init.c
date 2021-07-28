@@ -1956,22 +1956,20 @@ get_aliases(void)
 	size_t line_size = 0;
 	ssize_t line_len = 0;
 
-	while ((line_len = getline(&line, &line_size,
-		    config_file_fp)) > 0) {
-
+	while ((line_len = getline(&line, &line_size, config_file_fp)) > 0) {
 		if (*line == 'a' && strncmp(line, "alias ", 6) == 0) {
 			char *alias_line = strchr(line, ' ');
 			if (alias_line) {
 				alias_line++;
-				aliases = (char **)xrealloc(aliases, (aliases_n + 1) * sizeof(char *));
+				aliases = (char **)xrealloc(aliases, (aliases_n + 1)
+							* sizeof(char *));
 				aliases[aliases_n++] = savestring(alias_line,
-				    strlen(alias_line));
+							strlen(alias_line));
 			}
 		}
 	}
 
 	free(line);
-
 	fclose(config_file_fp);
 }
 
