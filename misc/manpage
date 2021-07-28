@@ -931,8 +931,8 @@ Colors are specified using the same format used by \fBdircolors(1)\fR and the LS
 The following codes are used for different interface elements:
 .sp
  sh = commands history suggestions
- sf = file and directory names suggestions
- sc = command names suggestions
+ sf = Bookmarks, file and directory names suggestions
+ sc = Aliases and command names suggestions
  sx = suggestions for internal commands and parameters
  bm = bookmarked directory in the bookmarks screen
  el = ELN color
@@ -1094,9 +1094,9 @@ In case of MIME types, you can also write the entire expression without relying 
 .SH 13. AUTO-SUGGESTIONS
 CliFM includes a built-in suggestions system (similar to that provided by the Fish shell). As you type, suggestions for possible completions will be offered right after the current cursor position.
 
-The suggestions check order is the following:
+The following checks are availabe (the order can be customized, see below):
 .sp
-a. CliFM commands parameters (including the \fIsel\fR keyword)
+a. CliFM commands and parameters (including the \fIsel\fR keyword)
 .sp
 b. Entries in the command history list (already used commands)
 .sp
@@ -1104,11 +1104,30 @@ c. File names in the current working directory
 .sp
 d. Entries in the jump database
 .sp
-e. Program names in \fBPATH\fR 
+e. Aliases names
+.sp
+f. Bookmarks names
+.sp
+g. Program names in \fBPATH\fR 
 
 To accept a suggestion, just press \fBRight\fR or \fBCtrl-f\fR: the cursor will move to the end of the suggested command and the suggestion color will change to that of the typed text; next, you can press Enter to execute the command as usual. Otherwise, if the suggestion is not accepted, it will be simply ignored and you can continue editing the current command line however you want.
 
-To customize the color of the suggestions see above the \fBCOLOR CODES\fR section.
+Bear in mind that suggestions for aliases and bookmarks names do not work as the remaining suggestions: they do not suggest possible completions for the current input, but rather the value pointed to by it. For example, if you have a bookmark whose name is 'mystuff' pointing to '/home/user/Documents/mystuff', typing 'mys' will suggest the path corresponding to 'mystuff'. Press 'Right' or 'Ctrl-f' to accept the suggestion, in which case the text typed so far will be replaced by the suggestion.
+
+The order of the suggestions checks could be customized via the \fISuggestionStrategy\fR option in the configuration file. Each check is assigned a lowercase letter:
+
+ a = Aliases names
+ b = Bookmark names
+ c = Possible completions
+ f = Files in the current directory
+ h = Entries in the commands history
+ j = Entries in the jump database
+
+The value taken by \fISuggestionStrategy\fR is a string of six(6) characters containing the above letters. The letters order in this string specifies the order in which the suggestion checks will be performed. For example, to perform all checks in the same order above, the value of the string should be \fBabcdfhj\fR (without quotes). Or, if you prefer to run the history check first: \fBhabcfj\fR. Finally, you can ignore one or more checks using a dash (-). So, to ignore the bookmarks and aliases checks, set \fISuggestionStrategy\fR to \fBh--cfj\fR. The default value for this option is \fBhfjbac\fR.
+
+\fBNote\fR: The check for program names in \fBPATH\fR is always executed at last, except when the ExternalCommands option is disabled, in which case suggestions for them are simply not displayed.
+
+To customize the color of the suggestions see the \fBCOLOR CODES\fR section above.
 
 .SH 14. SHELL FUNCTIONS
 CliFM includes a few shell functions to perform specific actions (cd-on-quit, file-picker, and subshell-notice). Take a look at the corresponding files, in \fI/usr/share/clifm/functions\fR, and follow the instructions. Needles to say, you can write your own functions.
