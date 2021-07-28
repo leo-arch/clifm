@@ -65,7 +65,7 @@ CliFM is a completely text\-based, \fBshell\-like\fR and non-curses file manager
 .sp
   \fBb)\fR The use of \fBshort (and even one\-character commands) and numbers\fR (ELN's) instead of file names. Enter 'o 12', for instance, to open a file with your default text editor or to change to the desired directory. If the \fBautocd\fR and \fBauto-open\fR functions (see below \fIac\fR and \fIad\fR commands) are enabled, which is the default, you only need to enter the ELN to open the file or change to directory: instead of 'o 12', just enter '12'.
 .sp
-With the \fBautomatic ELN expansion\fR feature you can use ELN's with external commands as well. 'diff 12 5', for example, will run 'diff' over the files corresponding to ELN's 12 and 5. \fBRanges\fR are also accepted, for example: 'rm 1\-12' or 'r 1\-12'. Since numbers could be a bit tricky when it comes to listed files, \fBTAB completion\fR is available for ELN's, just as for commands, paths, profiles, and bookmarks.
+With the \fBautomatic ELN expansion\fR feature you can use ELN's with external commands as well. 'diff 12 5', for example, will run 'diff' over the files corresponding to ELN's 12 and 5. \fBRanges\fR are also accepted, for example: 'rm 1\-12' or 'r 1\-12'. Since numbers could be a bit tricky when it comes to listed files, \fBTAB completion\fR is available for ELN's, just as for commands, paths, profiles, and bookmarks. A powerful \fBauto-suggestions\fR system (heavily inspired on the Fish shell) was developed with this very purpose in mind.
 .sp
   \fBc)\fR \fBAutomatic files listing\fR: Unlike the shell 'cd' command, CliFM's built\-in \fIcd\fR function automatically lists files in the new directory.
 .sp
@@ -83,7 +83,7 @@ With the \fBautomatic ELN expansion\fR feature you can use ELN's with external c
 .sp
   \fBj)\fR It is blazing \fBfast\fR and incredibly \fBlightweight\fR. With a memory footprint below 5 MiB and a disk usage of 400 KiB, it can run on ancient hardware. It is so simple that it doesn't require an X session nor any graphical environment at all, being able thus to perfectly run on the console (TTY) and even on a headless machine via a SSH or a telnet session. And if this is not enough, you can still use the \fBlight mode\fR to make it even faster.
 .sp
-  \fBi)\fR When running in \fBstealth mode\fR, it will leave not trace at all in the host system.
+  \fBi)\fR When running in \fBstealth mode\fR, it will leave not trace at all on the host system.
 .sp
 Because inspired in the \fBKISS\fR principle, CliFM is fundamentally aimed to be lightweight, fast, simple, and efficient. On Archlinux's notion of simplicity see: \fIhttps://wiki.archlinux.org/index.php/Arch_Linux#Simplicity\fR
 
@@ -129,18 +129,18 @@ List of CliFM features:
   38) Advcpmv support (cp and mv with a nice progress bar). Depends on advcpmv (See \fIhttps://github.com/jarun/advcpmv\fR)
   39) Fastback function
   40) Remote file systems management
-  41) Fish-like suggestions system
+  41) Fish-like auto-suggestions system
 
 .SH 3. RATIONALE
-When it comes to software, Unix/GNU\-Linux is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the kernel built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a curses\-based one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There are no two without three".
+When it comes to software, Unix and FLOSS is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the kernel built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a TUI (curses\-based) one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There are no two without three".
 .sp
-While the kernel console, which strictly speaking could be thought of as a FM, does not actually feel as one and lacks many features (like bookmarks, files selection, a trash system, a resource opener and the like), graphical FM's offer most of these features, but only at the expense of system resources (at the very least 20MiB of RAM and most of the time a graphical X session), in the case of GUI\-based ones, or hiding the command line (where the real power of the Unix lies), in the case of the curses\-based ones.
+While the kernel console, which strictly speaking could be thought of as a FM, does not actually feel as one and lacks many features (like bookmarks, files selection, a trash system, a resource opener and the like), graphical FM's offer most of these features, but only at the expense of system resources (at the very least 20MiB of RAM and most of the time a graphical X session), in the case of GUI\-based ones, or hiding the command line (where the real power of the Unix lies), in the case of TUI ones.
 .sp
 Heavily inspired by the KISS principle ("Keep it Simple, Stupid"), CliFM was born as an attempt to get the best of both worlds: the speed, lightness, and efficiency of the CLI and the extra features of traditional FM's. It is aimed to be, briefly speaking, a wrapper of the CLI to extend and improve its functionality; CliFM feels, acts, and flies like the CLI, offering at the same time most of the useful features of modern FM's.
 .sp
 Personally, since I just dislike GUI and bloated stuff, I really felt the need of an extended and improved way to manage my files in the CLI. Indeed, CliFM originated as an attempt to add a bookmarks function to the Bash shell, and then grew up from these humble beginnings. In between the CLI and traditional FM's, we have now CliFM, because, as the old Italian saying goes: "There is no two without three".
 .sp
-CliFM is thus not just another terminal FM (one of the many we can find out there), but a truly command line interface, shell\-like, and really text\-based FM. Indeed, we normally think of terminal FM's as TUI or curses\-based FM's, not because these notions are really the same, but because of the fact that most (if not all) FM's designed for the terminal are curses-based applications. Here is where CliFM excels: it is a NON\-curses terminal FM. In this sense, CliFM is a truly command line FM.
+CliFM is thus not just another terminal FM (one of the many we can find out there), but a truly command line interface, shell\-like, and really text\-based FM. Indeed, we normally think of terminal FM's as TUI or curses\-based FM's, not because these notions are really the same, but because of the fact that most (if not all) FM's designed for the terminal are TUI applications. Here is where CliFM excels: it is a NON\-curses, NON-TUI terminal FM. In this sense, CliFM is a truly \fBC\fRommand\-\fBli\fRne \fBFM\fR.
 
 .SH 4. POSITIONAL PARAMETERS
 If the first non-option parameter is a directory, CliFM will start in this directory. Otherwise, if not a directory, it will open the file via the default associated application and exit (working thus as a stand-alone resource opener).
