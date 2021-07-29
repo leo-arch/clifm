@@ -347,7 +347,7 @@ bookmarks:\\M-b\n\
 select-all:\\M-a\n\
 deselect-all:\\M-d\n\
 mountpoints:\\M-m\n\
-folders-first:\\M-f\\M-f\n\
+folders-first:\\M-g\n\
 selbox:\\M-s\n\
 lock:\\M-o\n\
 # F6-12\n\

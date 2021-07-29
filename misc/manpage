@@ -735,7 +735,7 @@ CliFM offers three kinds of file filters:
 .TP
 \fBM\-c:\fR Clear the current command line buffer
 .TP
-\fBM\-f\-M\-f:\fR Toggle list\-folders\-first on/off
+\fBM\-g:\fR Toggle list\-folders\-first on/off
 .TP
 \fBC\-r:\fR Refresh the screen (reprint files in current directory and update prompt)
 .TP
