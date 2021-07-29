@@ -65,7 +65,7 @@ CliFM is a completely text\-based, \fBshell\-like\fR and non-curses file manager
 .sp
   \fBb)\fR The use of \fBshort (and even one\-character commands) and numbers\fR (ELN's) instead of file names. Enter 'o 12', for instance, to open a file with your default text editor or to change to the desired directory. If the \fBautocd\fR and \fBauto-open\fR functions (see below \fIac\fR and \fIad\fR commands) are enabled, which is the default, you only need to enter the ELN to open the file or change to directory: instead of 'o 12', just enter '12'.
 .sp
-With the \fBautomatic ELN expansion\fR feature you can use ELN's with external commands as well. 'diff 12 5', for example, will run 'diff' over the files corresponding to ELN's 12 and 5. \fBRanges\fR are also accepted, for example: 'rm 1\-12' or 'r 1\-12'. Since numbers could be a bit tricky when it comes to listed files, \fBTAB completion\fR is available for ELN's, just as for commands, paths, profiles, and bookmarks. A powerful \fBauto-suggestions\fR system (heavily inspired on the Fish shell) was developed with this very purpose in mind.
+With the \fBautomatic ELN expansion\fR feature you can use ELN's with external commands as well. 'diff 12 5', for example, will run 'diff' over the files corresponding to ELN's 12 and 5. \fBRanges\fR are also accepted, for example: 'rm 1\-12' or 'r 1\-12'. Since numbers could be a bit tricky when it comes to listed files, \fBTAB completion\fR is available for ELN's, just as for commands, paths, profiles, and bookmarks. \fIGemini\fR, a powerful \fBauto-suggestions\fR system (heavily inspired on the Fish shell), was developed with this very purpose in mind.
 .sp
   \fBc)\fR \fBAutomatic files listing\fR: Unlike the shell 'cd' command, CliFM's built\-in \fIcd\fR function automatically lists files in the new directory.
 .sp
@@ -109,7 +109,7 @@ List of CliFM features:
   18) Startup and prompt commands
   19) User profiles
   20) Commands sequential and conditional execution
-  21) Lira, a built-in resource opener
+  21) \fILira\fR, a built-in resource opener
   22) Eleven sorting methods and reverse sorting
   23) Bulk rename
   24) Archiving and compression support
@@ -120,7 +120,7 @@ List of CliFM features:
   29) Command substitution and regular expressions for all internal commands
   30) Theming support via color schemes
   31) Privacy oriented
-  32) Kangaroo, a built\-in directory jumper function
+  32) \fIKangaroo\fR, a built\-in directory jumper function
   33) Icons support (depends on icons\-in\-terminal: \fIhttps://github.com/sebastiencs/icons\-in\-terminal\fR)
   34) Batch symbolic links
   35) Files filter via regular expressions for the files list
@@ -129,7 +129,7 @@ List of CliFM features:
   38) Advcpmv support (cp and mv with a nice progress bar). Depends on advcpmv (See \fIhttps://github.com/jarun/advcpmv\fR)
   39) Fastback function
   40) Remote file systems management
-  41) Fish-like auto-suggestions system
+  41) \fIGemini\fR, a Fish-like auto-suggestions system
 
 .SH 3. RATIONALE
 When it comes to software, Unix and FLOSS is no doubt the land of Freedom, and Freedom, so to say, is the elder sister of Choice and Alternative. Now, regarding File Managers (FM), broadly understood as a computer program providing a user interface to manage files and directories, we either stick to the CLI or Command Line Interface (the kernel built\-in console or a terminal emulator running a bare shell) or choose rather some kind of graphical alternative (be it a GUI program, in the strictest sense, or a TUI (curses\-based) one). In between, however, there is nothing, or at least, almost nothing. But as the old Italian saying goes: "There are no two without three".
@@ -729,9 +729,9 @@ CliFM offers three kinds of file filters:
 
 .SH 8. KEYBOARD SHORTCUTS
 .TP
-\fBRight\fR, \fBC-f:\fR Accept the current suggestion
+\fBRight\fR, \fBC-f:\fR Accept the entire current suggestion
 .TP
-\fBAlt-Right\fR, \fBM-f:\fR Accept the first word of the current suggestion
+\fBAlt-Right\fR, \fBM-f:\fR Accept only the first word of the current suggestion
 .TP
 \fBM\-c:\fR Clear the current command line buffer
 .TP
@@ -866,7 +866,7 @@ The plugin can be found in the plugins directory as a C source file. The first s
 .TP
  gcc -o kbgen kbgen.c
 .TP
-\fBNote\fR: Depending on your system, you might need to link against the curses library adding either -lcurses or -lncurses to the line above. 
+\fBNote\fR: Depending on your system, you might need to link against the curses library adding either \fB-lcurses\fR or \fB-lncurses\fR to the above line. 
 .TP
 Now, just run the plugin entering './kbgen'. Use either octal, hexadecimal codes or symbols. Example: For F12 'kbgen' will print the following lines:
 .sp
@@ -1097,7 +1097,7 @@ In case of MIME types, you can also write the entire expression without relying 
 \fBLira\fR will check the file line by line, and if a matching line is found, and if at least one of the specified applications exists, this application will be used to open the corresponding associated file. Else, the next line will be checked. In other words, the precedence order is top to bottom (for lines) and left to right (for applications).
 
 .SH 13. AUTO-SUGGESTIONS
-CliFM includes a built-in suggestions system (similar to that provided by the Fish shell). As you type, suggestions for possible completions will be offered right after the current cursor position.
+\fIGemini\fR is a built-in suggestions system (similar to that provided by the Fish shell). As you type, \fIGemini\fR will suggest possible completions right after the current cursor position.
 
 The following checks are availabe (the order can be customized, see below):
 .sp
@@ -1117,7 +1117,9 @@ g. Bookmarks names
 .sp
 h. Program names in \fBPATH\fR 
 
-To accept a suggestion, just press \fBRight\fR or \fBCtrl-f\fR: the cursor will move to the end of the suggested command and the suggestion color will change to that of the typed text; next, you can press Enter to execute the command as usual. Otherwise, if the suggestion is not accepted, it will be simply ignored and you can continue editing the current command line however you want.
+To accept the entire suggestion, just press \fBRight\fR or \fBCtrl-f\fR: the cursor will move to the end of the suggested command and the suggestion color will change to that of the typed text; next, you can press Enter to execute the command as usual. Otherwise, if the suggestion is not accepted, it will be simply ignored and you can continue editing the current command line however you want.
+
+To aceppt the first suggested word only, press rather \fBAlt-Right\fR or \fBAlt-f\fR
 
 Bear in mind that suggestions for ELN's, aliases and bookmarks names do not work as the remaining suggestions: they do not suggest possible completions for the current input, but rather the value pointed to by it. For example, if you type "12" and the current list of files includes a file name whose ELN is '12', the file name corresponding to this ELN will be printed next to "12" as follows: \fB12_ > filename\fR (where the underscore is the current cursor position). Press 'Right' or 'Ctrl-f' to accept the suggestion, in which case the text typed so far will be replaced by the suggestion.
 
@@ -1423,9 +1425,9 @@ Get help:
 
 \fB/etc\fR: Change directory to \fI/etc\fR
 
-\fB5\fR: Change to the directory in the current directory whose ELN is 5
+\fB5\fR: Change-to/open the directory/file in the current directory whose ELN is 5
 .sp
-TIP: Press TAB to make sure 5 is the directory you want
+TIP: Press TAB to make sure 5 is the file you want. If the suggestions system is enabled, just pay attention to the suggestion
 
 \fBj xproj\fR: Jump to \fI~/media/data/docs/work/mike/xproject\fR:
 .sp
@@ -1456,9 +1458,6 @@ NOTE: Enter \fBf\fR, or press \fBShift+right\fR or \fBAlt+k\fR to go back to the
 \fBr sel\fR: Remove all selected files
 
 \fBmyfile.txt\fR: Open \fImyfile.txt\fR (with the default associated application)
-
-\fB12\fR: Open the file whose ELN is 12
-TIP: Press TAB to make sure 12 is the file you want
 
 \fBo myfile.txt application\fR or \fBapplication myfile.txt\fR: Open \fImyfile.txt\fB using "application"
 
