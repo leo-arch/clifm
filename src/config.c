@@ -266,31 +266,31 @@ create_kbinds_file(void)
 \n\
 # Alt-j\n\
 previous-dir:\\M-j\n\
-# Shift-left (rxvt)\n\
+# Shift-Left (rxvt)\n\
 previous-dir2:\\e[d\n\
-# Shift-left (xterm)\n\
+# Shift-Left (xterm)\n\
 previous-dir3:\\e[2D\n\
-# Shift-left (others)\n\
+# Shift-Left (others)\n\
 previous-dir4:\\e[1;2D\n\
 \n\
 # Alt-k\n\
 next-dir:\\M-k\n\
 # Shift-right (rxvt)\n\
 next-dir2:\\e[c\n\
-# Shift-right (xterm)\n\
+# Shift-Right (xterm)\n\
 next-dir3:\\e[2C\n\
-# Shift-right (others)\n\
+# Shift-Right (others)\n\
 next-dir4:\\e[1;2C\n\
 first-dir:\\C-\\M-j\n\
 last-dir:\\C-\\M-k\n\
 \n\
 # Alt-u\n\
 parent-dir:\\M-u\n\
-# Shift-up (rxvt)\n\
+# Shift-Up (rxvt)\n\
 parent-dir2:\\e[a\n\
-# Shift-up (xterm)\n\
+# Shift-Up (xterm)\n\
 parent-dir3:\\e[2A\n\
-# Shift-up (others)\n\
+# Shift-Up (others)\n\
 parent-dir4:\\e[1;2A\n\
 \n\
 # Alt-e\n\
@@ -347,7 +347,7 @@ bookmarks:\\M-b\n\
 select-all:\\M-a\n\
 deselect-all:\\M-d\n\
 mountpoints:\\M-m\n\
-folders-first:\\M-f\n\
+folders-first:\\M-f\\M-f\n\
 selbox:\\M-s\n\
 lock:\\M-o\n\
 # F6-12\n\

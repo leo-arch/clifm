@@ -729,9 +729,13 @@ CliFM offers three kinds of file filters:
 
 .SH 8. KEYBOARD SHORTCUTS
 .TP
+\fBRight\fR, \fBC-f:\fR Accept the current suggestion
+.TP
+\fBAlt-Right\fR, \fBM-f:\fR Accept the first word of the current suggestion
+.TP
 \fBM\-c:\fR Clear the current command line buffer
 .TP
-\fBM\-f:\fR Toggle list\-folders\-first on/off
+\fBM\-f\-M\-f:\fR Toggle list\-folders\-first on/off
 .TP
 \fBC\-r:\fR Refresh the screen (reprint files in current directory and update prompt)
 .TP
@@ -831,9 +835,6 @@ CliFM offers three kinds of file filters:
 .TP
 \fBF12:\fR Quit
 .TP
-\fBRight\fR, \fBC-f:\fR Accept the current suggestion
-.TP
-
 NOTE: C stands for Control, S for Shift, and M for the Meta key (the Alt key in most keyboards).
 .TP
 NOTE 2: Some of these keybindings might not work on your terminal emulator, depending on the terminal settings. Some useful tips on this regard:

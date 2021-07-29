@@ -321,7 +321,7 @@ readline_kbinds(void)
 		rl_bind_keyseq("\\M-.", rl_hidden);
 		rl_bind_keyseq("\\M-l", rl_long);
 		rl_bind_keyseq("\\M-y", rl_light);
-		rl_bind_keyseq("\\M-f", rl_folders_first);
+		rl_bind_keyseq("\\M-f\\M-f", rl_folders_first);
 		rl_bind_keyseq("\\M-z", rl_sort_previous);
 		rl_bind_keyseq("\\M-x", rl_sort_next);
 

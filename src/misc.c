@@ -1741,8 +1741,10 @@ help_function(void)
  x, X [ELN/DIR] (new instance)\n"));
 
 	printf(_("DEFAULT KEYBOARD SHORTCUTS:\n\n"
-		 " M-c: Clear the current command line buffer\n\
- M-f: Toggle list-folders-first on/off\n\
+		 "Right, C-f: Accept the entire suggestion\n\
+ M-Right, M-f: Accept the first suggested word\n\
+ M-c: Clear the current command line buffer\n\
+ M-f-M-f: Toggle list-folders-first on/off\n\
  C-r: Refresh the screen\n\
  M-l: Toggle long view mode on/off\n\
  M-m: List mountpoints\n\
