@@ -247,7 +247,7 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define DEF_SI_C "\001\x1b[01;34m\002"
 
 #define DEF_SH_C "\001\x1b[02;35m\002"
-#define DEF_SF_C "\001\x1b[04;36m\002"
+#define DEF_SF_C "\001\x1b[02;04;36m\002"
 #define DEF_SC_C "\001\x1b[02;31m\002"
 #define DEF_SX_C "\001\x1b[02;32m\002"
 

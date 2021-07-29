@@ -1136,7 +1136,7 @@ The value taken by \fISuggestionStrategy\fR is a string of six(6) characters con
 
 Suggestions will be printed using one of the following color codes (see the \fBCOLOR CODES\fR section above):
 
-\fIsf\fR: Used for file and directory names. This includes suggestions for ELN's, bookmarks names, files in the current directory, and possible completions. Default value: 04;36 (underlined cyan)
+\fIsf\fR: Used for file and directory names. This includes suggestions for ELN's, bookmarks names, files in the current directory, and possible completions. Default value: 02;04;36 (dimmed underlined cyan)
 
 \fIsh\fR: Used for entries in the commands history. Default value: 02;35 (dimmed magenta)
 
