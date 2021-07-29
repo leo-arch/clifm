@@ -98,7 +98,12 @@ edit_function(char **comm)
 		return EXIT_SUCCESS;
 	}
 
-	if (comm[1] && strcmp(comm[1], "gen") == 0)
+	if (comm[1] && *comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
+		printf("%s\n", EDIT_USAGE);
+		return EXIT_SUCCESS;
+	}
+
+	if (comm[1] && *comm[1] == 'r' && strcmp(comm[1], "reset") == 0)
 		return regen_config();
 
 	if (!config_ok) {

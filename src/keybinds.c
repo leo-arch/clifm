@@ -140,6 +140,11 @@ kbinds_function(char **args)
 	if (*args[1] == 'r' && strcmp(args[1], "reset") == 0)
 		return kbinds_reset();
 
+	if (*args[1] == 'r' && strcmp(args[1], "readline") == 0) {
+		rl_function_dumper(1);
+		return EXIT_SUCCESS;
+	}
+
 	fprintf(stderr, "%s\n", _(KB_USAGE));
 	return EXIT_FAILURE;
 }

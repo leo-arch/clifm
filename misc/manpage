@@ -492,8 +492,8 @@ toggle the files counter function on/off.
 .B ds, desel \fR[*, a, all]
 deselect one or more selected elements. You can also deselect all selected elements at once by passing '*', 'a' or 'all' to the function.
 .TP
-.B edit \fR[gen] [APPLICATION]
-edit the main configuration file (F10 key is also available). If an application is specified, it will be used to open the configuration file. Use the 'gen' option to generate a fresh configuration file and make a copy of the old one (named clifmrc.YYYYMMDD@HH:MM:SS).
+.B edit \fR[reset] [APPLICATION]
+edit the main configuration file (F10 key is also available). If an application is specified, it will be used to open the configuration file. Use the 'reset' option to generate a fresh configuration file and create a backup copy of the old one (named clifmrc.YYYYMMDD@HH:MM:SS).
 .TP
 .B exp, export [FILE ...]
 with no argument, export the list of files in the current working directory to a temporary file. Otherwise, export only those specified as further arguments: they could be directories, file names, ELN's or some search expression like "*.c".
@@ -556,8 +556,8 @@ To reset or modify the jump database as you wish, simply open the jump file usin
 .sp
 An alternative way of navigating the jump database is using the jumper plugin (located in the plugins directory and bound by default to the "++" action name), which uses \fIfzf\fR to enable fuzzy searches. Just enter ++ to perform a fuzzy search over the jump database.
 .TP
-.B kb, keybinds [edit] [default]
-with no argument, prints the current keyboard codes and their associated functions. To edit the keybindings file, use the 'edit' option. Use the 'default' option to set the default values.
+.B kb, keybinds [edit] [reset] [readline]
+with no argument, prints the current keyboard codes and their associated functions. To edit the keybindings file, use the 'edit' option. If you somehow messed up your keybindings, use the 'reset' option to create a fresh keybindings file with the default values. To list readline keybindings, use the 'readline' option. Bear in mind that these keybindings are not provided by CliFM, but by readline itself, and as such depend on the system settings (they can be customized however via the '~/.inputrc' file).
 .TP
 .B lm \fR[on, off]
 Toggle the light mode on/off. This option, aimed to make files listing faster than the default mode, is especially useful for really old hardware or when working on remote machines. For more details see the \fBNOTE ON SPEED\fR section below.

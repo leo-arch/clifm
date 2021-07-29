@@ -1692,7 +1692,7 @@ help_function(void)
  cs, colorscheme [edit] [COLORSCHEME]\n\
  d, dup SOURCE [DEST]\n\
  ds, desel [*, a, all]\n\
- edit [APPLICATION]\n\
+ edit [APPLICATION] [reset]\n\
  exp, export [ELN/FILE ...]\n\
  ext [on, off, status]\n\
  f, forth [h, hist] [clear] [!ELN]\n\
@@ -1704,7 +1704,7 @@ help_function(void)
  history [clear] [-n]\n\
  icons [on, off]\n\
  j, jc, jp, jl [STRING ...] jo [NUM], je (directory jumper function)\n\
- kb, keybinds [edit] [reset]\n\
+ kb, keybinds [edit] [reset] [readline]\n\
  lm [on, off] (lightmode)\n\
  log [clear]\n\
  mf NUM (List up to NUM files)\n\
