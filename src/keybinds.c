@@ -494,7 +494,13 @@ rl_create_file(int count, int key)
 int
 rl_accept_first_word(int count, int key)
 {
-	accept_first_word = 1;
+	/* Accepting the first suggested word is not supported for ELN's,
+	 * bookmarks and aliases names */
+	if (suggestion.type != ELN_SUG && suggestion.type != BOOKMARK_SUG
+	&& suggestion.type != ALIAS_SUG) {
+		accept_first_word = 1;
+		suggestion.type = FIRST_WORD;
+	}
 	return rl_accept_suggestion(count, key);
 }
 
@@ -517,15 +523,37 @@ rl_accept_suggestion(int count, int key)
 		return EXIT_SUCCESS;
 	}
 
-	char *s = (char *)NULL;
+	/* If accepting the first suggested word, accept only up to next
+	 * slash or space */
+	char *s = (char *)NULL, _s = 0;
+	int slash = 0;
 	if (accept_first_word) {
 		size_t i = 0;
-		while (*(suggestion_buf + rl_point + i) == ' ')
+		char *p = suggestion_buf + (rl_point - suggestion.offset);
+		while (*(p + i) == ' ')
 			i++;
-		s = strchr(suggestion_buf + rl_point + i, ' ');
-		if (s && *(s + 1) && s != suggestion_buf + rl_point) {
+
+		/* Trim the suggestion up to first slash or space */
+		s = strchr(p + i, '/');
+		if (!s) {
+			s = strchr(p + i, ' ');
+		} else if (*(++s)) {
+			/* In case of slash, keep a copy of the next char: we cannot
+			 * know in advance what is after the slash */
+			_s = *s;
+			slash = 1;
+		} else {
+			s = (char *)NULL;
+		}
+
+		if (s && *(s + 1) && s != p) {
 			*s = '\0';
 		} else {
+			/* Last word */
+			size_t len = strlen(suggestion_buf);
+			if (suggestion_buf[len - 1] != '/')
+				suggestion.type = NO_SUG;
+			clear_suggestion();
 			accept_first_word = 0;
 		}
 	}
@@ -559,6 +587,10 @@ rl_accept_suggestion(int count, int key)
 		}
 		break;
 
+	case FIRST_WORD:
+		rl_insert_text(suggestion_buf);
+		break;
+
 	case HIST_SUG:
 		rl_insert_text(suggestion_buf);
 		break;
@@ -576,8 +608,13 @@ rl_accept_suggestion(int count, int key)
 		free(suggestion_buf);
 		suggestion_buf = (char *)NULL;
 	} else {
-		if (s)
-			*s = ' ';
+		if (s) {
+			/* Reinsert the char we removed to print only the first word */
+			if (slash)
+				*s = _s;
+			else
+				*s = ' ';
+		}
 		accept_first_word = 0;
 	}
 

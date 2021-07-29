@@ -371,6 +371,7 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define BOOKMARK_SUG 6
 #define ALIAS_SUG 7
 #define ELN_SUG 8
+#define FIRST_WORD 9
 
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR
