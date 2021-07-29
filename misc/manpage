@@ -731,7 +731,7 @@ CliFM offers three kinds of file filters:
 .TP
 \fBRight\fR, \fBC-f:\fR Accept the entire current suggestion
 .TP
-\fBAlt-Right\fR, \fBM-f:\fR Accept only the first word of the current suggestion
+\fBAlt-Right\fR, \fBM-f:\fR Accept only the first word of the current suggestion (up to first slash or space)
 .TP
 \fBM\-c:\fR Clear the current command line buffer
 .TP
@@ -1119,7 +1119,7 @@ h. Program names in \fBPATH\fR
 
 To accept the entire suggestion, just press \fBRight\fR or \fBCtrl-f\fR: the cursor will move to the end of the suggested command and the suggestion color will change to that of the typed text; next, you can press Enter to execute the command as usual. Otherwise, if the suggestion is not accepted, it will be simply ignored and you can continue editing the current command line however you want.
 
-To aceppt the first suggested word only, press rather \fBAlt-Right\fR or \fBAlt-f\fR
+To aceppt the first suggested word only (up to first slash or space), press rather \fBAlt-Right\fR or \fBAlt-f\fR. Not available for ELN's, aliases and bookmarks names.
 
 Bear in mind that suggestions for ELN's, aliases and bookmarks names do not work as the remaining suggestions: they do not suggest possible completions for the current input, but rather the value pointed to by it. For example, if you type "12" and the current list of files includes a file name whose ELN is '12', the file name corresponding to this ELN will be printed next to "12" as follows: \fB12_ > filename\fR (where the underscore is the current cursor position). Press 'Right' or 'Ctrl-f' to accept the suggestion, in which case the text typed so far will be replaced by the suggestion.
 
