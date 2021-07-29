@@ -904,10 +904,20 @@ rl_suggestions(char c)
 				break;
 			} */
 
-		case _ESC: /* fallthrough */
-		case _TAB:
+		case _ESC:
 			if (suggestion.printed)
 				printed = 1;
+			goto SUCCESS;
+
+		case _TAB:
+			if (suggestion.printed) {
+				if (suggestion.lines < 2) {
+					printed = 1;
+				} else {
+					clear_suggestion();
+					goto FAIL;
+				}
+			}
 			goto SUCCESS;
 
 		default: break;
