@@ -53,6 +53,8 @@ typedef char *rl_cpvfunc_t;
 #include "readline.h"
 #include "suggestions.h"
 
+int accept_first_word = 0;
+
 int
 kbinds_reset(void)
 {
@@ -338,11 +340,17 @@ readline_kbinds(void)
 		rl_bind_keyseq("\\e[24~", rl_quit);
 	}
 
-	/* Bind Right arrow key and Ctrl-f to accept suggestions */
+	/* Bind Right arrow key and Ctrl-f to accept the whole suggestion */
 	rl_bind_keyseq("\\C-f", rl_accept_suggestion);
 /*	rl_bind_keyseq("\\M-[C", rl_accept_suggestion); */
 	rl_bind_keyseq("\x1b[C", rl_accept_suggestion);
 	rl_bind_keyseq("\x1bOC", rl_accept_suggestion); /* Haiku terminal */
+
+	/* Bind Alt-Right and Alt-f to accept the first suggested word */
+	rl_bind_keyseq("\x1b\x66", rl_accept_first_word);
+	rl_bind_keyseq("\x1b[3C", rl_accept_first_word);
+	rl_bind_keyseq("\x1b\x1b[C", rl_accept_first_word);
+	rl_bind_keyseq("\x1b[1;3C", rl_accept_first_word);
 }
 
 /* Store keybinds from the keybinds file into a struct */
@@ -484,6 +492,13 @@ rl_create_file(int count, int key)
 }
 
 int
+rl_accept_first_word(int count, int key)
+{
+	accept_first_word = 1;
+	return rl_accept_suggestion(count, key);
+}
+
+int
 rl_accept_suggestion(int count, int key)
 {
 	if (kbind_busy) {
@@ -496,55 +511,74 @@ rl_accept_suggestion(int count, int key)
 
 	/* Only accept the current suggestion if the cursor is at the end
 	 * of the line typed so far */
-	if (suggestions && rl_point == rl_end && suggestion_buf) {
-		rl_delete_text(suggestion.offset, rl_end);
-		suggestion.printed = 0;
-		rl_point = suggestion.offset;
+	if (!suggestions || rl_point != rl_end || !suggestion_buf) {
+		if (rl_point < rl_end)
+			rl_point++; /* Just move the cursor forward one column */
+		return EXIT_SUCCESS;
+	}
 
-		if (suggestion.type == BOOKMARK_SUG || suggestion.type == ALIAS_SUG
-		|| suggestion.type == ELN_SUG)
-			clear_suggestion();
-
-		switch(suggestion.type) {
-
-		case BOOKMARK_SUG: /* fallthrough */
-		case COMP_SUG: /* fallthrough */
-		case ELN_SUG: /* fallthrough */
-		case FILE_SUG: {
-			char *tmp = (char *)NULL;
-			char *ret = strchr(suggestion_buf, '\\');
-			if (!ret)
-				tmp = escape_str(suggestion_buf);
-			if (tmp) {
-				rl_insert_text(tmp);
-				free(tmp);
-			} else {
-				rl_insert_text(suggestion_buf);
-			}
-			if (suggestion.filetype != DT_DIR)
-				rl_stuff_char(' ');
-			suggestion.type = NO_SUG;
-			}
-			break;
-
-		case HIST_SUG:
-			rl_insert_text(suggestion_buf);
-			break;
-
-		default:
-			rl_insert_text(suggestion_buf);
-			rl_stuff_char(' ');
-			break;
+	char *s = (char *)NULL;
+	if (accept_first_word) {
+		size_t i = 0;
+		while (*(suggestion_buf + rl_point + i) == ' ')
+			i++;
+		s = strchr(suggestion_buf + rl_point + i, ' ');
+		if (s && *(s + 1) && s != suggestion_buf + rl_point) {
+			*s = '\0';
+		} else {
+			accept_first_word = 0;
 		}
+	}
 
-		/* Move the cursor to the end of the line */
-		rl_point = rl_end;
+	rl_delete_text(suggestion.offset, rl_end);
+	rl_point = suggestion.offset;
+
+	if (!accept_first_word && (suggestion.type == BOOKMARK_SUG
+	|| suggestion.type == ALIAS_SUG || suggestion.type == ELN_SUG))
+		clear_suggestion();
+
+	switch(suggestion.type) {
+
+	case BOOKMARK_SUG: /* fallthrough */
+	case COMP_SUG: /* fallthrough */
+	case ELN_SUG: /* fallthrough */
+	case FILE_SUG: {
+		char *tmp = (char *)NULL;
+		char *ret = strchr(suggestion_buf, '\\');
+		if (!ret)
+			tmp = escape_str(suggestion_buf);
+		if (tmp) {
+			rl_insert_text(tmp);
+			free(tmp);
+		} else {
+			rl_insert_text(suggestion_buf);
+		}
+		if (suggestion.filetype != DT_DIR)
+			rl_stuff_char(' ');
+		suggestion.type = NO_SUG;
+		}
+		break;
+
+	case HIST_SUG:
+		rl_insert_text(suggestion_buf);
+		break;
+
+	default:
+		rl_insert_text(suggestion_buf);
+		rl_stuff_char(' ');
+		break;
+	}
+
+	/* Move the cursor to the end of the line */
+	rl_point = rl_end;
+	if (!accept_first_word) {
+		suggestion.printed = 0;
 		free(suggestion_buf);
 		suggestion_buf = (char *)NULL;
-
-	} else if (rl_point < rl_end) {
-		/* Just move the cursor forward one char */
-		rl_point++;
+	} else {
+		if (s)
+			*s = ' ';
+		accept_first_word = 0;
 	}
 
 	return EXIT_SUCCESS;

@@ -841,7 +841,7 @@ check_aliases(const char *str, const size_t len)
  * and -1 if C was inserted before the end of the current line.
  * If a suggestion is found, it will be printed by print_suggestion() */
 int
-rl_suggestions(const char c)
+rl_suggestions(char c)
 {
 	char *last_word = (char *)NULL;
 	char *full_line = (char *)NULL;
@@ -870,8 +870,19 @@ rl_suggestions(const char c)
 		goto FAIL;
 	}
 
+	/* Some terminals like st and rxvt use the delete char (127)
+	 * for backspace. So, let's translate this char to the backspace
+	 * char (8) for readline */
+/*	if (c == 127)
+		c = BS; */
+
 	/* Skip backspace, Enter, and TAB keys */
 	switch(c) {
+		case 127: /* Delete key */
+			if (rl_point != rl_end && suggestion.printed)
+				clear_suggestion();
+			goto FAIL;
+
 		case BS:
 			if (suggestion.printed && suggestion_buf)
 				clear_suggestion();
