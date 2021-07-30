@@ -336,9 +336,9 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define DEF_UNICODE 1
 #define DEF_WELCOME_MESSAGE 1
 #ifdef __OpenBSD__
-#define DEF_SUDO_CMD "doas "
+#define DEF_SUDO_CMD "doas"
 #else
-#define DEF_SUDO_CMD "sudo "
+#define DEF_SUDO_CMD "sudo"
 #endif
 #define DEF_SUG_STRATEGY "ehfjbac"
 #define SUG_STRATS 7

@@ -487,28 +487,52 @@ keybind_exec_cmd(char *str)
 	return exit_status;
 }
 
+/* Prepend sudo/doas to the current input string */
 int
 rl_prepend_sudo(int count, int key)
 {
-	if (suggestion_buf)
-		clear_suggestion();
-
-	char *t = getenv("CLIFM_SUDO_CMD");
+	int free_s = 1;
 	size_t len = 0;
-	if (t)
+	char *t = getenv("CLIFM_SUDO_CMD"),
+		 *s = (char *)NULL;
+
+	if (t) {
 		len = strlen(t);
-	else
-		len = strlen(DEF_SUDO_CMD);
+		if (t[len - 1] != ' ') {
+			s = (char *)xnmalloc(len + 2, sizeof(char));
+			sprintf(s, "%s ", t);
+			len++;
+		} else {
+			s = t;
+			free_s = 0;
+		}
+	} else {
+		len = strlen(DEF_SUDO_CMD) + 1;
+		s = (char *)xnmalloc(len + 1, sizeof(char));
+		sprintf(s, "%s ", DEF_SUDO_CMD);
+	}
 	
 	int p = rl_point;
-	if (*rl_line_buffer == (t ? *t : *DEF_SUDO_CMD)
-	&& strncmp(rl_line_buffer, t ? t : DEF_SUDO_CMD, len) == 0) {
+	if (*rl_line_buffer == *s
+	&& strncmp(rl_line_buffer, s, len) == 0) {
 		rl_delete_text(0, len);
 		rl_point = p - len;
 	} else {
 		rl_point = 0;
-		rl_insert_text(t ? t : DEF_SUDO_CMD);
+		rl_insert_text(s);
 		rl_point = p + len;
+	}
+
+	if (free_s)
+		free(s);
+
+	if (suggestion.offset == 0 && suggestion_buf) {
+		int r = rl_point;
+		rl_point = rl_end;
+		clear_suggestion();
+		free(suggestion_buf);
+		suggestion_buf = (char *)NULL;
+		rl_point = r;
 	}
 	return EXIT_SUCCESS;
 }
