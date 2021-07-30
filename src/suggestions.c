@@ -167,7 +167,6 @@ clear_suggestion(void)
 	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {}
 
 	if (suggestion.lines > 1) {
-
 		/* Save cursor position */
 		get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
 
@@ -201,31 +200,25 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	free(suggestion_buf);
 	suggestion_buf = (char *)NULL;
 
+	/* Save cursor position in two global variables: currow and curcol */
+	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
+
 	/* Do not print suggestions bigger than what the current terminal
 	 * window size can hold */
-	if (wc_xstrlen(str) > (term_cols * term_rows) - visible_prompt_len)
+	if (wc_xstrlen(str + offset) > (term_cols * term_rows) - curcol)
 		return;
 
 	/* Get the amount of lines we need to print the suggestion */
-	size_t suggestion_len = wc_xstrlen(str + offset);
+	size_t cuc = curcol;
+
 	if (suggestion.type == BOOKMARK_SUG || suggestion.type == ALIAS_SUG
 	|| suggestion.type == ELN_SUG)
 		/* 4 = 2 (two chars forward) + 2 (" >") */
-		suggestion.full_line_len += 4;
-	
-	size_t cuc = visible_prompt_len + suggestion.full_line_len;
-	size_t cucs = cuc + suggestion_len;
-	int clines = 1,
-		slines = 1,
-		cuc_rem = 0,
-		cucs_rem = 0;
+		cuc += 4;
 
-	if (cuc > term_cols) {
-		clines = cuc / (int)term_cols;
-		cuc_rem = cuc % term_cols;
-		if (cuc_rem > 0)
-			clines++;
-	}
+	size_t suggestion_len = wc_xstrlen(str + offset);
+	size_t cucs = cuc + suggestion_len;
+	int slines = 1, cucs_rem = 0;
 
 	if (cucs > term_cols) {
 		slines = cucs / (int)term_cols;
@@ -234,18 +227,14 @@ print_suggestion(const char *str, size_t offset, const char *color)
 			slines++;
 	}
 
-	int diff = slines - clines;
-
-	if (diff > term_rows)
+	--slines;
+	if (slines > term_rows)
 		return;
 
 	/* Store the suggestion in a buffer to be used later by the
 	 * rl_accept_suggestion function (keybinds.c) */
 	suggestion_buf = xnmalloc(str_len + 1, sizeof(char));
 	strcpy(suggestion_buf, str);
-
-	/* Save cursor position in two global variables: currow and curcol */
-	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
 
 	/* Erase everything after the cursor */
 	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {}
@@ -260,6 +249,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 
 	if (suggestion.type == BOOKMARK_SUG || suggestion.type == ALIAS_SUG
 	|| suggestion.type == ELN_SUG) {
+		/* Move the cursor two columns to the right and print "> " */
 		printf("\x1b[2C");
 		printf("\x1b[0;31m> \x1b[0m");
 	}
@@ -275,8 +265,8 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	 * value to move the cursor back to the correct row (the beginning
 	 * of the line) */
 	int old_currow = currow;
-	if (diff > 0 && currow + diff >= term_rows)
-		currow -= diff - (term_rows - old_currow);
+	if (slines > 0 && currow + slines >= term_rows)
+		currow -= slines - (term_rows - old_currow);
 
 	/* Restore cursor position */
 	printf("\x1b[%d;%dH", currow, curcol);
@@ -284,7 +274,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	/* Store the amount of lines taken by the current command line
 	 * (plus the suggestion's length) to be able to correctly
 	 * remove it later (via the clear_suggestion function) */
-	suggestion.lines = diff + 1;
+	suggestion.lines = slines + 1;
 
 	return;
 }

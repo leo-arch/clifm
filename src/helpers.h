@@ -728,8 +728,7 @@ extern int
     dirhist_total_index,
     trash_n,
     jump_total_rank,
-    *eln_as_file,
-    visible_prompt_len;
+    *eln_as_file;
 
 extern unsigned short term_cols, term_rows;
 

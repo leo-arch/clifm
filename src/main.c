@@ -156,7 +156,6 @@ int
     min_jump_rank = UNSET,
     max_jump_total_rank = UNSET,
 	max_printselfiles = UNSET,
-    visible_prompt_len = UNSET,
 
     dirhist_cur_index = 0,
     argc_bk = 0,
