@@ -248,6 +248,7 @@ readline_kbinds(void)
 		rl_bind_keyseq(find_key("mountpoints"), rl_mountpoints);
 		rl_bind_keyseq(find_key("selbox"), rl_selbox);
 
+		rl_bind_keyseq(find_key("prepend-sudo"), rl_prepend_sudo);
 		/* Plugins */
 		rl_bind_keyseq(find_key("plugin1"), rl_plugin1);
 		rl_bind_keyseq(find_key("plugin2"), rl_plugin2);
@@ -309,6 +310,7 @@ readline_kbinds(void)
 		rl_bind_keyseq("\\e[21~", rl_open_config);
 		rl_bind_keyseq("\\e[23~", rl_open_bm_file);
 
+		rl_bind_keyseq("\\M-v", rl_prepend_sudo);
 		/* Settings */
 		rl_bind_keyseq("\\M-t", rl_clear_msgs);
 		/*      rl_bind_keyseq("", rl_next_profile);
@@ -483,6 +485,32 @@ keybind_exec_cmd(char *str)
 
 	args_n = old_args;
 	return exit_status;
+}
+
+int
+rl_prepend_sudo(int count, int key)
+{
+	if (suggestion_buf)
+		clear_suggestion();
+
+	char *t = getenv("CLIFM_SUDO_CMD");
+	size_t len = 0;
+	if (t)
+		len = strlen(t);
+	else
+		len = strlen(DEF_SUDO_CMD);
+	
+	int p = rl_point;
+	if (*rl_line_buffer == (t ? *t : *DEF_SUDO_CMD)
+	&& strncmp(rl_line_buffer, t ? t : DEF_SUDO_CMD, len) == 0) {
+		rl_delete_text(0, len);
+		rl_point = p - len;
+	} else {
+		rl_point = 0;
+		rl_insert_text(t ? t : DEF_SUDO_CMD);
+		rl_point = p + len;
+	}
+	return EXIT_SUCCESS;
 }
 
 int

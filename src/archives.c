@@ -128,10 +128,8 @@ handle_iso(char *file)
 
 		while (!ext_path) {
 			ext_path = rl_no_hist(_("Extraction path: "));
-
 			if (!ext_path)
 				continue;
-
 			if (!*ext_path) {
 				free(ext_path);
 				ext_path = (char *)NULL;
@@ -145,7 +143,6 @@ handle_iso(char *file)
 
 		/* Construct and execute cmd */
 		char *cmd[] = {"7z", "x", o_option, file, NULL};
-
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 
@@ -158,7 +155,6 @@ handle_iso(char *file)
 	case 'l': {
 		/* 7z l FILE */
 		char *cmd[] = {"7z", "l", file, NULL};
-
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 	} break;
@@ -171,18 +167,15 @@ handle_iso(char *file)
 
 		if (xargs.stealth_mode == 1) {
 			mountpoint = (char *)xnmalloc(strlen(file) + 19, sizeof(char));
-
 			sprintf(mountpoint, "/tmp/clifm-mounts/%s", file);
 		}
 
 		else {
 			mountpoint = (char *)xnmalloc(strlen(CONFIG_DIR) + strlen(file) + 9, sizeof(char));
-
 			sprintf(mountpoint, "%s/mounts/%s", CONFIG_DIR, file);
 		}
 
 		char *dir_cmd[] = {"mkdir", "-pm700", mountpoint, NULL};
-
 		if (launch_execve(dir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			free(mountpoint);
 			return EXIT_FAILURE;

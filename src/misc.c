@@ -1741,7 +1741,7 @@ help_function(void)
  x, X [ELN/DIR] (new instance)\n"));
 
 	printf(_("DEFAULT KEYBOARD SHORTCUTS:\n\n"
-		 "Right, C-f: Accept the entire suggestion\n\
+		 " Right, C-f: Accept the entire suggestion\n\
  M-Right, M-f: Accept the first suggested word\n\
  M-c: Clear the current command line buffer\n\
  M-g: Toggle list-folders-first on/off\n\

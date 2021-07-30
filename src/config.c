@@ -319,6 +319,7 @@ show-manpage:\\eOP\n\
 show-cmds:\\eOQ\n\
 show-kbinds:\\eOR\n\
 \n\
+prepend-sudo:\\M-v\n\
 create-file:\\M-n\n\
 new-instance:\\C-x\n\
 previous-profile:\\C-\\M-o\n\

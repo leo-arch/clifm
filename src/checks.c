@@ -49,15 +49,13 @@
 char *
 get_sudo_path(void)
 {
-	char *sudo = get_cmd_path("sudo");
+	char *p = getenv("CLIFM_SUDO_CMD");
+	char *sudo = get_cmd_path(p ? p : DEF_SUDO_CMD);
 
 	if (!sudo) {
-		sudo = get_cmd_path("doas");
-		if (!sudo) {
-			fprintf(stderr, "%s: No authentication program found. "
-					"Either sudo or doas is required\n", PROGRAM_NAME);
-			return (char *)NULL;
-		}
+		fprintf(stderr, _("%s: %s: No such file or directory\n"),
+				PROGRAM_NAME, p ? p : DEF_SUDO_CMD);
+		return (char *)NULL;
 	}
 
 	return sudo;
