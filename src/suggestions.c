@@ -849,7 +849,12 @@ rl_suggestions(char c)
 		 * a history event is triggered (usually via the Up and Down arrow
 		 * keys), the suggestion buffer won't be freed. Let's do it
 		 * here */
-		if ((c == 'A' || c == 'B') && suggestion_buf) {
+		if (c == '~' && rl_point != rl_end && suggestion.printed) {
+			/* This should be the delete key */
+			clear_suggestion();
+			goto FAIL;
+		}
+		else if ((c == 'A' || c == 'B') && suggestion_buf) {
 			clear_suggestion();
 			goto FAIL;
 		}
@@ -869,9 +874,9 @@ rl_suggestions(char c)
 	/* Skip backspace, Enter, and TAB keys */
 	switch(c) {
 		case 127: /* Delete key */
-			if (rl_point != rl_end && suggestion.printed)
+/*			if (rl_point != rl_end && suggestion.printed)
 				clear_suggestion();
-			goto FAIL;
+			goto FAIL; */
 
 		case BS:
 			if (suggestion.printed && suggestion_buf)
