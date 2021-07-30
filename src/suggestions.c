@@ -947,7 +947,8 @@ rl_suggestions(char c)
 		inserted_c = 1;
 	}
 
-	size_t buflen = strlen(rl_line_buffer);
+	size_t buflen = rl_end;
+/*	size_t buflen = strlen(rl_line_buffer); */
 	suggestion.full_line_len = buflen + 1;
 	char *last_space = strrchr(rl_line_buffer, ' ');
 	if (last_space && last_space != rl_line_buffer

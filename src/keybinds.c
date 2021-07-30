@@ -581,7 +581,7 @@ rl_accept_suggestion(int count, int key)
 			size_t len = strlen(suggestion_buf);
 			if (suggestion_buf[len - 1] != '/')
 				suggestion.type = NO_SUG;
-			clear_suggestion();
+/*			clear_suggestion(); */
 			accept_first_word = 0;
 		}
 	}

@@ -60,7 +60,6 @@ prompt(void)
 	size_t path_len = strlen(ws[cur_ws].path), i;
 
 	for (i = path_len - 1; ws[cur_ws].path[i] && i > 0; i--) {
-
 		if (ws[cur_ws].path[i] != '/')
 			break;
 		else
