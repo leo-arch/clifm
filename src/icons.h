@@ -3,7 +3,11 @@
 #ifndef ICONS_H
 #define ICONS_H
 
+#ifndef _NERD
 #include "icons-in-terminal.h"
+#else
+#include "icons-nerdfont.h"
+#endif
 
 struct icons_t {
 	char *name;
@@ -11,9 +15,10 @@ struct icons_t {
 	char *color;
 };
 
-/* Icon macros are defined in icons-in-terminal.h header file, provided by the
- * 'icons-in-terminal' project */
+/* Icon macros are defined in icons-in-terminal.h, provided by the
+ * 'icons-in-terminal' project, and icons-nerdfont.h */
 char
+#ifndef _NERD
     /* File types */
     ICON_DIR[] = FA_FOLDER,
     ICON_LOCK[] = FA_UNLOCK_ALT,
@@ -110,6 +115,104 @@ char
     ICON_GAMES[] = FA_GAMEPAD,
     ICON_DROPBOX[] = FA_DROPBOX,
     ICON_STEAM[] = FA_STEAM;
+#else
+    /* File types */
+    ICON_DIR[] = NERD_DIRECTORY,
+    ICON_LOCK[] = NERD_LOCK,
+    ICON_REG[] = NERD_FILE,
+    ICON_EXEC[] = NERD_EXEC,
+    ICON_LINK[] = NERD_LINK,
+
+    /* Extensions */
+    ICON_BINARY[] = NERD_BINARY,
+
+    ICON_MANPAGE[] = NERD_MANUAL,
+    ICON_MAKEFILE[] = NERD_MAKEFILE,
+    ICON_MARKDOWN[] = NERD_MARKDOWN,
+    ICON_DATABASE[] = NERD_DATABASE,
+    ICON_CONF[] = NERD_CONFIGURE,
+    ICON_DIFF[] = NERD_FILE, /* */
+    ICON_CODE[] = NERD_FILE, /* */
+    ICON_VIM[] = NERD_VIM,
+    ICON_NASM[] = NERD_FILE, /* */
+    ICON_JAVA[] = NERD_JAVA,
+    ICON_JAVASCRIPT[] = NERD_JAVASCRIPT,
+    ICON_SQLITE[] = NERD_FILE, /* */
+    ICON_ELF[] = NERD_LINUX,
+    ICON_HTML[] = NERD_HTML,
+    ICON_GO[] = NERD_GO,
+    ICON_PHP[] = NERD_PHP,
+    ICON_PERL[] = NERD_FILE, /* */
+    ICON_SCALA[] = NERD_SCALA,
+    ICON_MYSQL[] = NERD_MYSQL,
+    ICON_FSHARP[] = NERD_FSHARP,
+    ICON_LUA[] = NERD_LUA,
+    ICON_RUBY[] = NERD_RUBY,
+    ICON_CLOJURE[] = NERD_CLOJURE,
+    ICON_JULIA[] = NERD_JULIA,
+    ICON_HASKELL[] = NERD_HASKELL,
+    ICON_ELIXIR[] = NERD_ELIXIR,
+    ICON_ELECTRON[] = NERD_ELECTRON,
+    ICON_CSS[] = NERD_CSS3,
+    ICON_ELM[] = NERD_ELM,
+    ICON_ERLANG[] = NERD_ERLANG,
+    ICON_PATCH[] = NERD_FILE, /* */
+    ICON_IMG[] = NERD_PICTUREFILE,
+    ICON_VID[] = NERD_VIDEOFILE,
+    ICON_AUDIO[] = NERD_MUSICFILE,
+    ICON_PDF[] = NERD_PDF,
+    ICON_ARCHIVE[] = NERD_ARCHIVE,
+    ICON_CD[] = NERD_OPTICALDISK,
+    ICON_SCRIPT[] = NERD_SCRIPT,
+    ICON_TXT[] = NERD_TXT,
+    ICON_C[] = NERD_C,
+    ICON_CPP[] = NERD_CPLUSPLUS,
+    ICON_CSHARP[] = NERD_CSHARP,
+    ICON_PYTHON[] = NERD_PYTHON,
+    ICON_SWIFT[] = NERD_SWIFT,
+    ICON_COFFEE[] = NERD_COFFEE,
+    ICON_RUST[] = NERD_RUST,
+
+    ICON_OPENOFFICE[] = NERD_FILE, /* */
+
+    ICON_WINDOWS[] = NERD_WINDOWS,
+    ICON_WORD[] = NERD_WORDDOC,
+    ICON_EXCEL[] = NERD_EXCELDOC,
+    ICON_ACCESS[] = NERD_FILE, /* */
+    ICON_POWERPOINT[] = NERD_PPTDOC,
+    ICON_PHOTOSHOP[] = NERD_PHOTOSHOP,
+    ICON_COPYRIGHT[] = NERD_COPYRIGHT,
+    ICON_CONFIGURE[] = NERD_CONFIGURE,
+    ICON_HISTORY[] = NERD_HISTORY,
+    ICON_KEY[] = NERD_KEY,
+    ICON_FONT[] = NERD_FONT,
+    ICON_README[] = NERD_BOOK,
+    ICON_LIST[] = NERD_CHECKLIST,
+    ICON_COMMENTS[] = NERD_COMMENTS,
+    ICON_VISUALSTUDIO[] = NERD_VISUALSTUDIO,
+    ICON_POSTSCRIPT[] = NERD_FILE, /* */
+
+    ICON_ARCH[] = NERD_ARCHLINUX,
+    ICON_REDHAT[] = NERD_REDHAT,
+    ICON_DEBIAN[] = NERD_DEBIAN,
+
+    /* Dir names */
+    ICON_DESKTOP[] = NERD_DESKTOP,
+    ICON_DOCUMETS[] = NERD_BRIEFCASE,
+    ICON_DOWNLOADS[] = NERD_DOWNLOADS,
+    ICON_HOME[] = NERD_HOME,
+    ICON_TRASH[] = NERD_TRASH,
+    ICON_FAV[] = NERD_FAV,
+    ICON_MUSIC[] = NERD_MUSIC,
+    ICON_PICTURES[] = NERD_PICTURES,
+    ICON_VIDEOS[] = NERD_VIDEOS,
+    ICON_PUBLIC[] = NERD_PUBLIC,
+    ICON_TEMPLATES[] = NERD_TEMPLATES,
+    ICON_DOTGIT[] = NERD_GIT,
+    ICON_GAMES[] = NERD_GAMES,
+    ICON_DROPBOX[] = NERD_DROPBOX,
+    ICON_STEAM[] = NERD_STEAM;
+#endif
 
 #define BLUE "\x1b[0;34m"
 #define B_BLUE "\x1b[1;34m"
