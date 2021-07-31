@@ -76,7 +76,6 @@ prompt(void)
 	/* Print the tip of the day (only on first run) */
 	if (tips) {
 		static int first_run = 1;
-
 		if (first_run) {
 			print_tips(0);
 			first_run = 0;
@@ -95,7 +94,6 @@ prompt(void)
 	/* Update trash and sel file indicator on every prompt call */
 	if (trash_ok) {
 		trash_n = count_dir(TRASH_FILES_DIR, NO_CPOP);
-
 		if (trash_n <= 2)
 			trash_n = 0;
 	}
@@ -131,6 +129,24 @@ prompt(void)
 	}
 
 	/* Generate the prompt string */
+	if (prompt_style == CUSTOM_PROMPT_STYLE) {
+		/* Set environment variables with CliFM state information
+		 * (sel files, trash, stealth mode, messages) to be handled by
+		 * the prompt itself */
+		char _tmp[sizeof(int) + 1];
+		sprintf(_tmp, "%d", (int)sel_n);
+		setenv("CLIFM_STAT_SEL", _tmp, 1);
+		sprintf(_tmp, "%d", (int)trash_n);
+		setenv("CLIFM_STAT_TRASH", _tmp, 1);
+		sprintf(_tmp, "%d", (msgs_n && pmsg) ? (int)msgs_n : 0);
+		setenv("CLIFM_STAT_MSG", _tmp, 1);
+		sprintf(_tmp, "%d", cur_ws + 1);
+		setenv("CLIFM_STAT_WS", _tmp, 1);
+		sprintf(_tmp, "%d", exit_code);
+		setenv("CLIFM_STAT_EXIT", _tmp, 1);
+		setenv("CLIFM_STAT_ROOT", (flags & ROOT_USR) ? "1" : "0", 1);
+		setenv("CLIFM_STAT_STEALTH", (xargs.stealth_mode == 1) ? "1" : "0", 1);
+	}
 
 	/* First, grab and decode the prompt line of the config file (stored
 	 * in encoded_prompt at startup) */
@@ -140,23 +156,27 @@ prompt(void)
 	if (!decoded_prompt) {
 		fprintf(stderr, _("%s: Error decoding prompt line. Using an "
 				"emergency prompt\n"), PROGRAM_NAME);
-
 		decoded_prompt = (char *)xnmalloc(9, sizeof(char));
-
 		sprintf(decoded_prompt, "\001\x1b[0m\002> ");
 	}
 
 	size_t decoded_prompt_len;
 
-	if (unicode)
+	if (unicode || prompt_style == CUSTOM_PROMPT_STYLE)
 		decoded_prompt_len = u8_xstrlen(decoded_prompt);
 	else
 		decoded_prompt_len = strlen(decoded_prompt);
 
-	size_t prompt_length = (size_t)(decoded_prompt_len
-	+ (xargs.stealth_mode == 1 ? 16 : 0) + ((flags & ROOT_USR) ? 16 : 0)
-	+ (sel_n ? 16 : 0) + (trash_n ? 16 : 0) + ((msgs_n && pmsg) ? 16 : 0)
-	+ 6 + sizeof(tx_c) + 1);
+	size_t prompt_length = 0;
+
+	if (prompt_style == DEF_PROMPT_STYLE) {
+		prompt_length = (size_t)(decoded_prompt_len
+		+ (xargs.stealth_mode == 1 ? 16 : 0) + ((flags & ROOT_USR) ? 16 : 0)
+		+ (sel_n ? 16 : 0) + (trash_n ? 16 : 0) + ((msgs_n && pmsg) ? 16 : 0)
+		+ 6 + sizeof(tx_c) + 1);
+	} else {
+		prompt_length = (size_t)(decoded_prompt_len + 6 + sizeof(tx_c) + 1);
+	}
 
 	/* 16 = color_b({red,green,yellow}_b)+letter (sel, trash, msg)+NC_b;
 	 * 6 = NC_b
@@ -164,13 +184,18 @@ prompt(void)
 
 	char *the_prompt = (char *)xnmalloc(prompt_length, sizeof(char));
 
-	snprintf(the_prompt, prompt_length, "%s%s%s%s%s%s%s%s%s%s%s",
-	    (flags & ROOT_USR) ? "\001\x1b[1;31mR\x1b[0m\002" : "",
-	    (msgs_n && pmsg) ? msg_str : "", (xargs.stealth_mode == 1)
-	    ? si_c : "", (xargs.stealth_mode == 1) ? "S\001\x1b[0m\002"
-	    : "", (trash_n) ? ti_c : "", (trash_n) ? "T\001\x1b[0m\002" : "",
-	    (sel_n) ? li_c : "", (sel_n) ? "*\001\x1b[0m\002" : "", decoded_prompt,
-	    NC_b, tx_c);
+	if (prompt_style == DEF_PROMPT_STYLE) {
+		snprintf(the_prompt, prompt_length, "%s%s%s%s%s%s%s%s%s%s%s",
+			(flags & ROOT_USR) ? "\001\x1b[1;31mR\x1b[0m\002" : "",
+			(msgs_n && pmsg) ? msg_str : "", (xargs.stealth_mode == 1)
+			? si_c : "", (xargs.stealth_mode == 1) ? "S\001\x1b[0m\002"
+			: "", (trash_n) ? ti_c : "", (trash_n) ? "T\001\x1b[0m\002" : "",
+			(sel_n) ? li_c : "", (sel_n) ? "*\001\x1b[0m\002" : "",
+			decoded_prompt, NC_b, tx_c);
+	} else {
+		snprintf(the_prompt, prompt_length, "%s%s%s", decoded_prompt, NC_b,
+				tx_c);
+	}
 
 	free(decoded_prompt);
 

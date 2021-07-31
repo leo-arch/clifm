@@ -749,7 +749,14 @@ mvCmd=%d\n\n"
 # add color to the prompt line\n\
 # \\]: End a sequence of non-printing characters\n\n"
 
-	    "Prompt=\"%s\"\n\n",
+	    "Prompt=\"%s\"\n\n"
+
+	    "# If set to 'default', CliFM state information (selected files,\n\
+# trashed files, current workspace, messages, and stealth mode) will be printed\n\
+# to the left of the prompt. Otherwise, if set to 'custom', this information\n\
+# will be stored in environment variables to be handled by the prompt string\n\
+# itself. Consult the manpage for more information.\n\
+PromptStyle=default\n\n",
 
 	    COLORS_REPO,
 		DEF_COLOR_SCHEME,
@@ -1466,6 +1473,19 @@ read_config(void)
 			if (fail || s != SUG_STRATS)
 				continue;
 			suggestion_strategy = savestring(opt_str, strlen(opt_str));
+		}
+
+		else if (*line == 'P' && strncmp(line, "PromptStyle=", 12) == 0) {
+			char opt_str[8] = "";
+			ret = sscanf(line, "PromptStyle=%7s\n", opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "default", 7) == 0)
+				prompt_style = DEF_PROMPT_STYLE;
+			else if (strncmp(opt_str, "custom", 6) == 0)
+				prompt_style = CUSTOM_PROMPT_STYLE;
+			else
+				prompt_style = DEF_PROMPT_STYLE;
 		}
 
 		else if (xargs.printsel == UNSET && *line == 'P'
@@ -2200,7 +2220,7 @@ reload_config(void)
 	light_mode = classify = cd_on_quit = columned = tr_as_rm = UNSET;
 	no_eln = min_name_trim = case_sens_dirjump = case_sens_path_comp = UNSET;
 	min_jump_rank = max_jump_total_rank = print_selfiles = UNSET;
-	max_printselfiles = suggestions = UNSET;
+	max_printselfiles = suggestions = prompt_style = UNSET;
 	suggest_filetype_color = autojump = UNSET;
 
 	shell_terminal = no_log = internal_cmd = recur_perm_error_flag = 0;

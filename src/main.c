@@ -122,6 +122,7 @@ short
 	print_selfiles = UNSET,
     suggestions = UNSET,
     suggest_filetype_color = UNSET,
+	prompt_style = UNSET,
 
     no_log = 0,
     internal_cmd = 0,

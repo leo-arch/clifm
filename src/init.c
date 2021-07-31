@@ -2118,6 +2118,9 @@ check_options(void)
 			suggestions = xargs.suggestions;
 	}
 
+	if (prompt_style == UNSET)
+		prompt_style = DEF_PROMPT_STYLE;
+
 	if (!suggestion_strategy)
 		suggestion_strategy = savestring(DEF_SUG_STRATEGY, SUG_STRATS);
 
