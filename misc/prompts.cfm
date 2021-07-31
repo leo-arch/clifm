@@ -40,6 +40,8 @@
 # Simple
 #Prompt="[\u@\H] \w \$ "
 
+# The following prompts are built using a patched Nerdfont
+
 # Fireplace
 #Prompt="\[\e[00;31m\]┏\[\e[00;31m\]\[\e[00;37;41m\]\A\[\e[00;31;43m\]\[\e[00;30;43m\] \u:\H\[\e[00;33;41m\]\[\e[00;37;41m\] \w\[\e[00;31m\]\[\e[0m\]\n\[\e[00;31m\]┗ "
 
