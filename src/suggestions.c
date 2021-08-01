@@ -476,7 +476,7 @@ check_completions(const char *str, size_t len, const char c)
 				print_suggestion(tmp, len, color);
 				free(tmp);
 			} else {
-				print_suggestion(p ? p : _matches[1], len, color);
+				print_suggestion(_matches[1], len, color);
 			}
 
 			printed = 1;
