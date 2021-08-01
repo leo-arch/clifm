@@ -968,6 +968,7 @@ To see a colored list of the currently used file color codes run \fIcc\fR or \fI
 CliFM's prompt is built from the \fIPrompt\fR line in the configuration file following almost the same escape codes and rules used by the Bash prompt, except that it does not accept shell functions (like conditionals and loops). Command substitution (in the form $(cmd)), string literals, and escape codes can be used to build the prompt line and its colors. This is a list of supported escape codes:
 .TP
 \\xnn: The character whose hexadecimal code is nn.
+.TP
 \\e: Escape character
 .TP
 \\h: The hostname, up to the first ‘.’
@@ -1027,11 +1028,40 @@ By default, for example, CliFM's prompt line is this: \fB[\\[\\e[0;36m\\]\\S\\[\
 with the workspace number and the path printed in cyan and the dollar sign in blue.
 .TP
 A more "classic" prompt could be construed as follows:
+
  "\\u@\\U \\w> "
 .TP
 or, using now command substitution:
- "$(whoami)@$(hostname) $(pwd)> "
 
+ "$(whoami)@$(hostname) $(pwd)> "
+.TP
+
+\fBAdvanced prompt customization\fR
+.TP
+Besides commands substitution, which allows you to include in the prompt any information you like via shell scripts or simple shell commands, the use of Unicode characters allows you to build colorful and modern prompts.
+.TP
+Inserting Unicode characters in the prompt can be made in two ways:
+.TP
+\fBa)\fR Pasting the character itself using a text editor
+.TP
+\fBb)\fR Entering the hexadecimal code corresponding to the character. Use hexdump as follows to get the appropriate hex code:
+
+ echo -ne "[paste the char here]" | hexdump -C
+.TP
+The first line of the output will be something along these lines:
+
+ 00000000  ef ae 8a               |...|
+.TP
+In this case, the hex code is: "ef ae 8a". So, to insert this Unicode character in the prompt, add this code as follows:
+
+ Prompt="... \\xef\\xae\\x8a ..."
+.TP
+\fBNote\fR: Make sure you have installed a font able to display Unicode characters.
+.TP
+A few advanced prompt examples can be found in the prompts file in our Github site. Take a look at <https://github.com/leo-arch/clifm/wiki/Customization#the-prompt>
+
+.TP
+\fBPrompt notifications\fR
 .TP
 A bold red 'R' at the left of the prompt reminds the user that the program is running as root. A bold green asterisk indicates that there are elements in the Selection Box. In the same way, a yellow 'T' means that there are currently files in the trash can, just as a bold blue 'S' means that the program is running in stealth mode. Finally, CliFM makes use of three kind of messages: errors (a red 'E' at the left of the prompt), warnings (a yellow 'W'), and simple notices (a green 'N').
 
