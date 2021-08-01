@@ -378,13 +378,15 @@ get_comp_color(const char *filename, const struct stat attr)
 }
 
 static int
-check_completions(const char *str, const size_t len, const char c)
+check_completions(const char *str, size_t len, const char c)
 {
 	int printed = 0;
 	size_t i;
-	char **_matches = rl_completion_matches(str, rl_completion_entry_function);
 	struct stat attr;
+	char **_matches = rl_completion_matches(str, rl_completion_entry_function);
+
 	suggestion.filetype = DT_REG;
+
 	char *color = (char *)NULL;
 	if (suggest_filetype_color)
 		color = no_c;
@@ -396,23 +398,30 @@ check_completions(const char *str, const size_t len, const char c)
 
 	if (!len)
 		goto FREE;
+
 	/* If only one match */
 	if (_matches[0] && *_matches[0]	&& strlen(_matches[0]) > len) {
 		int append_slash = 0;
 
-		if (lstat(_matches[0], &attr) != -1) {
+		char *p = (char *)NULL;
+		if (*_matches[0] == '~')
+			p = tilde_expand(_matches[0]);
+
+		if (lstat(p ? p : _matches[0], &attr) != -1) {
 			if ((attr.st_mode & S_IFMT) == S_IFDIR) {
 				append_slash = 1;
 				suggestion.filetype = DT_DIR;
 			}
 			if (suggest_filetype_color)
-				color = get_comp_color(_matches[0], attr);
+				color = get_comp_color(p ? p : _matches[0], attr);
 		} else {
 			/* We have a partial completion. Set filetype to DT_DIR
 			 * so that the rl_accept_suggestion function won't append
 			 * a space after the file name */
 			suggestion.filetype = DT_DIR;
 		}
+
+		free(p);
 
 		char _tmp[NAME_MAX + 2];
 		*_tmp = '\0';
@@ -437,16 +446,22 @@ check_completions(const char *str, const size_t len, const char c)
 		&& strlen(_matches[1]) > len) {
 			int append_slash = 0;
 
-			if (lstat(_matches[1], &attr) != -1) {
+			char *p = (char *)NULL;
+			if (*_matches[1] == '~')
+				p = tilde_expand(_matches[1]);
+
+			if (lstat(p ? p : _matches[1], &attr) != -1) {
 				if ((attr.st_mode & S_IFMT) == S_IFDIR) {
 					append_slash = 1;
 					suggestion.filetype = DT_DIR;
 				}
 				if (suggest_filetype_color)
-					color = get_comp_color(_matches[1], attr);
+					color = get_comp_color(p ? p : _matches[1], attr);
 			} else {
 				suggestion.filetype = DT_DIR;
 			}
+
+			free(p);
 
 			char _tmp[NAME_MAX + 2];
 			*_tmp = '\0';
@@ -461,7 +476,7 @@ check_completions(const char *str, const size_t len, const char c)
 				print_suggestion(tmp, len, color);
 				free(tmp);
 			} else {
-				print_suggestion(_matches[1], len, color);
+				print_suggestion(p ? p : _matches[1], len, color);
 			}
 
 			printed = 1;
@@ -883,7 +898,7 @@ rl_suggestions(char c)
 				clear_suggestion();
 			goto FAIL;
 
-		case ENTER: /* fallthrough */
+		case ENTER:
 			goto FAIL;
 /*		case SPACE:
 			if (msg_area) {
