@@ -100,7 +100,7 @@ Features beyond common file operations, such as copy, move, remove, etc.:
 * [Batch links](https://github.com/leo-arch/clifm/wiki/Introduction#bl-elnfile--n).
 * [Icons](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk) support :smirk:.
 * Unicode suppport.
-* [Tab-completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-and-completions).
+* [Tab-completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions).
 * Bash-like quoting system.
 * History function.
 * Shell commands execution.
