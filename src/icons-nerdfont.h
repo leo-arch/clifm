@@ -87,7 +87,7 @@
 #define NERD_HISTORY       "\uf7d9"
 #define NERD_COPYRIGHT     "\uf1f9"
 #define NERD_KEY           "\uf80a"
-#define NERD_FONT          "\ufbd4"
+#define NERD_FONT          "\uf031"
 #define NERD_BOOK          "\uf405"
 #define NERD_CHECKLIST     "\uf45e"
 #define NERD_COMMENTS      "\uf086"
