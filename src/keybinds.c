@@ -614,11 +614,13 @@ rl_accept_suggestion(int count, int key)
 	rl_point = suggestion.offset;
 
 	if (!accept_first_word && (suggestion.type == BOOKMARK_SUG
-	|| suggestion.type == ALIAS_SUG || suggestion.type == ELN_SUG))
+	|| suggestion.type == ALIAS_SUG || suggestion.type == ELN_SUG
+	|| suggestion.type == JCMD_SUG || suggestion.type == JCMD_SUG_NOACD))
 		clear_suggestion();
 
 	switch(suggestion.type) {
 
+	case JCMD_SUG: /* fallthrough */
 	case BOOKMARK_SUG: /* fallthrough */
 	case COMP_SUG: /* fallthrough */
 	case ELN_SUG: /* fallthrough */
@@ -643,6 +645,7 @@ rl_accept_suggestion(int count, int key)
 		rl_insert_text(suggestion_buf);
 		break;
 
+	case JCMD_SUG_NOACD: /* fallthrough */
 	case HIST_SUG:
 		rl_insert_text(suggestion_buf);
 		break;

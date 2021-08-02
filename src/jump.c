@@ -68,7 +68,19 @@ add_to_jumpdb(const char *dir)
 	jump_db[jump_n].last_visit = now;
 	jump_db[jump_n].rank = 0;
 	jump_db[jump_n].keep = 0;
-	jump_db[jump_n++].path = savestring(dir, strlen(dir));
+
+	/* Append ending slash if necessary */
+	size_t dir_len = strlen(dir);
+	char *tmp = (char *)NULL;
+	if (dir[dir_len - 1] != '/') {
+		tmp = (char *)xnmalloc(dir_len + 2, sizeof(char));
+		sprintf(tmp, "%s/", dir);
+		dir_len++;
+	}
+		
+	jump_db[jump_n++].path = savestring(tmp ? tmp : dir, dir_len);
+	if (tmp)
+		free(tmp);
 
 	jump_db[jump_n].path = (char *)NULL;
 	jump_db[jump_n].visits = 0;
@@ -245,7 +257,7 @@ edit_jumpdb(void)
 
 /* Jump into best ranked directory matched by ARGS */
 int
-dirjump(char **args)
+dirjump(char **args, int mode)
 {
 	if (xargs.no_dirjump == 1) {
 		printf(_("%s: Directory jumper function disabled\n"), PROGRAM_NAME);
@@ -262,7 +274,7 @@ dirjump(char **args)
 
 	/* If no parameter, print the list of entries in the jump
 	 * database together with the corresponding information */
-	if (!args[1] && args[0][1] != 'e') {
+	if (mode == NO_SUG_JUMP && !args[1] && args[0][1] != 'e') {
 		if (!jump_n) {
 			printf("%s: Database still empty\n", PROGRAM_NAME);
 			return EXIT_SUCCESS;
@@ -351,7 +363,8 @@ dirjump(char **args)
 		return EXIT_SUCCESS;
 	}
 
-	if (args[1] && *args[1] == '-' && strcmp(args[1], "--help") == 0) {
+	if (mode == NO_SUG_JUMP && args[1] && *args[1] == '-'
+	&& strcmp(args[1], "--help") == 0) {
 		puts(_(JUMP_USAGE));
 		return EXIT_SUCCESS;
 	}
@@ -374,29 +387,51 @@ dirjump(char **args)
 
 	if (jump_opt == jorder) {
 		if (!args[1]) {
-			fprintf(stderr, "%s\n", _(JUMP_USAGE));
+			if (mode == NO_SUG_JUMP)
+				fprintf(stderr, "%s\n", _(JUMP_USAGE));
 			return EXIT_FAILURE;
 		}
 
 		if (!is_number(args[1])) {
-			return cd_function(args[1]);
+			if (mode == NO_SUG_JUMP)
+				return cd_function(args[1]);
+			else
+				return EXIT_FAILURE;
 		} else {
 			int int_order = atoi(args[1]);
 
 			if (int_order <= 0 || int_order > (int)jump_n) {
-				fprintf(stderr, _("%s: %d: No such order number\n"),
-				    PROGRAM_NAME, int_order);
+				if (mode == NO_SUG_JUMP) {
+					fprintf(stderr, _("%s: %d: No such order number\n"),
+						PROGRAM_NAME, int_order);
+				}
 				return EXIT_FAILURE;
 			}
 
-			return cd_function(jump_db[int_order - 1].path);
+			if (mode == NO_SUG_JUMP) {
+				return cd_function(jump_db[int_order - 1].path);
+			} else {
+				free(jump_suggestion);
+				jump_suggestion = xnmalloc(strlen(jump_db[int_order - 1].path)
+										+ 1, sizeof(char));
+				strcpy(jump_suggestion, jump_db[int_order - 1].path);
+				return EXIT_SUCCESS;
+			}
 		}
 	}
 
 	/* If ARG is an actual directory, just cd into it */
 	struct stat attr;
-	if (!args[2] && lstat(args[1], &attr) != -1)
-		return cd_function(args[1]);
+	if (!args[2] && lstat(args[1], &attr) != -1) {
+		if (mode == NO_SUG_JUMP)
+			return cd_function(args[1]);
+		else {
+			free(jump_suggestion);
+			jump_suggestion = xnmalloc(strlen(args[1]) + 1, sizeof(char));
+			strcpy(jump_suggestion, args[1]);
+			return EXIT_SUCCESS;
+		}
+	}
 
 	/* Jump into a visited directory using ARGS as filter(s) */
 	size_t i;
@@ -566,10 +601,18 @@ dirjump(char **args)
 	}
 
 	if (!found) {
-		printf(_("%s: jump: No matches found\n"), PROGRAM_NAME);
+		if (mode == NO_SUG_JUMP)
+			printf(_("%s: jump: No matches found\n"), PROGRAM_NAME);
 		exit_status = EXIT_FAILURE;
 	} else if (jump_opt != jlist) {
-		exit_status = cd_function(matches[best_ranked]);
+		if (mode == NO_SUG_JUMP) {
+			exit_status = cd_function(matches[best_ranked]);
+		} else {
+			free(jump_suggestion);
+			jump_suggestion = xnmalloc(strlen(matches[best_ranked]) + 1, sizeof(char));
+			strcpy(jump_suggestion, matches[best_ranked]);
+			exit_status = EXIT_SUCCESS;
+		}
 	}
 
 	free(matches);
@@ -611,7 +654,7 @@ run_autojump(char **cmd)
 	__cmd[args_n + 2] = (char *)NULL;
 
 	args_n++;
-	exit_code = dirjump(__cmd);
+	exit_code = dirjump(__cmd, NO_SUG_JUMP);
 	args_n--;
 
 	i = args_n + 2;

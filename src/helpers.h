@@ -377,6 +377,8 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define ALIAS_SUG 7
 #define ELN_SUG 8
 #define FIRST_WORD 9
+#define JCMD_SUG 10
+#define JCMD_SUG_NOACD 11
 
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR
@@ -394,9 +396,13 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 /* Max length of the properties string in long view mode */
 #define MAX_PROP_STR 55
 
-/* Macros fir the prompt style */
+/* Macros for the prompt style */
 #define DEF_PROMPT_STYLE 0
 #define CUSTOM_PROMPT_STYLE 1
+
+/* Macros for the dirjump function */
+#define SUG_JUMP 0
+#define NO_SUG_JUMP 1
 
 #define FALLBACK_SHELL "/bin/sh"
 
@@ -821,7 +827,8 @@ extern char
     *usr_cscheme,
     *user_home,
     *suggestion_buf,
-    *suggestion_strategy;
+    *suggestion_strategy,
+    *jump_suggestion;
 
 extern regex_t regex_exp;
 

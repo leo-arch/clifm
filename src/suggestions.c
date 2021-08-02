@@ -51,6 +51,7 @@ typedef char *rl_cpvfunc_t;
 #include "aux.h"
 #include "checks.h"
 #include "colors.h"
+#include "jump.h"
 
 static int free_color = 0;
 
@@ -210,11 +211,15 @@ print_suggestion(const char *str, size_t offset, const char *color)
 
 	/* Get the amount of lines we need to print the suggestion */
 	size_t cuc = curcol;
+	int baej = 0; /* Bookmark, alias, ELN, or jump */
 
 	if (suggestion.type == BOOKMARK_SUG || suggestion.type == ALIAS_SUG
-	|| suggestion.type == ELN_SUG)
+	|| suggestion.type == ELN_SUG || suggestion.type == JCMD_SUG
+	|| suggestion.type == JCMD_SUG_NOACD) {
 		/* 4 = 2 (two chars forward) + 2 (" >") */
 		cuc += 4;
+		baej = 1;
+	}
 
 	size_t suggestion_len = wc_xstrlen(str + offset);
 	size_t cucs = cuc + suggestion_len;
@@ -247,8 +252,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	 * the difference between them, it doesn't matter: the result
 	 * is the same (7 - 4 == 6 - 3 == 1) */
 
-	if (suggestion.type == BOOKMARK_SUG || suggestion.type == ALIAS_SUG
-	|| suggestion.type == ELN_SUG) {
+	if (baej) {
 		/* Move the cursor two columns to the right and print "> " */
 		printf("\x1b[2C");
 		printf("\x1b[0;31m> \x1b[0m");
@@ -842,6 +846,47 @@ check_aliases(const char *str, const size_t len)
 	return 0;
 }
 
+int
+check_jcmd(char *line)
+{
+	if (suggestion_buf)
+		clear_suggestion();
+
+	/* Split line into an array of substrings */
+	char **substr = get_substr(line, ' ');
+	if (!substr)
+		return 0;
+
+	/* Check the jump database for a match. If a match is found, it will
+	 * be stored in jump_suggestion (global) */
+	dirjump(substr, SUG_JUMP);
+
+	size_t i;
+	for (i = 0; substr[i]; i++)
+		free(substr[i]);
+	free(substr);
+
+	if (!jump_suggestion)
+		return 0;
+
+	suggestion.type = JCMD_SUG;
+	suggestion.filetype = DT_DIR;
+	if (!autocd) {
+		char *tmp = xnmalloc(strlen(jump_suggestion) + 4, sizeof(char));
+		sprintf(tmp, "cd %s", jump_suggestion);
+		print_suggestion(tmp, 1, suggest_filetype_color ? di_c : sf_c);
+		suggestion.type = JCMD_SUG_NOACD;
+		free(tmp);
+	} else {
+		print_suggestion(jump_suggestion, 1, suggest_filetype_color ? di_c
+					: sf_c);
+	}
+	suggestion.offset = 0;
+	free(jump_suggestion);
+	jump_suggestion = (char *)NULL;
+	return 1;
+}
+
 /* Check for available suggestions. Returns zero if true, one if not,
  * and -1 if C was inserted before the end of the current line.
  * If a suggestion is found, it will be printed by print_suggestion() */
@@ -1016,6 +1061,22 @@ rl_suggestions(char c)
 		 * #	  3) Search for suggestions		#
 		 * ######################################*/
 
+	char *lb = rl_line_buffer;
+	/* lb could be used to suggest stuff for other internal commands */
+
+	/* Suggestions for the j command */
+	if (*lb == 'j' && lb[1] && (lb[1] == ' '  || ((lb[1] == 'c'
+	|| lb[1] == 'o' || lb[1] == 'p') && lb[2] && lb[2] == ' '))) {
+		printed = check_jcmd(full_line);
+		if (printed)
+			goto SUCCESS;
+		else {
+			free(full_line);
+			full_line = (char *)NULL;
+			goto FAIL;
+		}
+	}
+
 	/* 3.a) Check already suggested string */
 	if (suggestion_buf && suggestion.printed
 	&& strncmp(full_line, suggestion_buf, strlen(full_line)) == 0) {
@@ -1030,10 +1091,10 @@ rl_suggestions(char c)
 	if (ret) {
 		size_t len = strlen(last_word);
 		if (*last_word == 's' && strncmp(last_word, "sel", len) == 0) {
-			print_suggestion("sel", len, sx_c);
-			suggestion.offset = last_word_offset;
 			suggestion.type = CMD_SUG;
+			suggestion.offset = last_word_offset;
 			printed = 1;
+			print_suggestion("sel", len, sx_c);
 			goto SUCCESS;
 		}
 	}
