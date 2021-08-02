@@ -1509,11 +1509,8 @@ get_colorschemes(void)
 	size_t i = 0;
 
 	if (COLORS_DIR && stat(COLORS_DIR, &attr) == EXIT_SUCCESS) {
-
 		schemes_total = count_dir(COLORS_DIR, NO_CPOP) - 2;
-
 		if (schemes_total) {
-
 			color_schemes = (char **)xrealloc(color_schemes,
 							((size_t)schemes_total + 2) * sizeof(char *));
 
@@ -1522,22 +1519,18 @@ get_colorschemes(void)
 			dir_p = opendir(COLORS_DIR);
 
 			while ((ent = readdir(dir_p)) != NULL) {
-
 				/* Skipp . and .. */
 				char *name = ent->d_name;
-
 				if (*name == '.' && (!name[1] || (name[1] == '.' && !name[2])))
 					continue;
 
 				char *ret = strchr(name, '.');
-
 				/* If the file contains not dot, or if its extension is not
 				 * .cfm, or if it's just a hidden file named ".cfm", skip it */
 				if (!ret || strcmp(ret, ".cfm") != 0 || ret == name)
 					continue;
 
 				*ret = '\0';
-
 				color_schemes[i++] = savestring(name, strlen(name));
 			}
 
@@ -1567,12 +1560,9 @@ get_colorschemes(void)
 	size_t i_tmp = i;
 
 	dir_p = opendir(sys_colors_dir);
-
 	while ((ent = readdir(dir_p)) != NULL) {
-
 		/* Skipp . and .. */
 		char *name = ent->d_name;
-
 		if (*name == '.' && (!name[1] || (name[1] == '.' && !name[2])))
 			continue;
 
@@ -1602,7 +1592,6 @@ get_colorschemes(void)
 
 	closedir(dir_p);
 	color_schemes[i] = (char *)NULL;
-	
 	return i;
 }
 

@@ -311,6 +311,16 @@ exec_cmd(char **comm)
 	 * executed command */
 	exit_code = EXIT_SUCCESS;
 
+				/* ##########################
+				 * #     	AUTOJUMP	    #
+				 * ########################## */
+
+	if (autojump) {
+		exit_code = run_autojump(comm);
+		if (exit_code != -1)
+			return exit_code;
+	}
+
 	/* Warn when using the ',' keyword and there's no pinned file */
 	int k = args_n + 1;
 	while (--k >= 0) {
@@ -359,7 +369,7 @@ exec_cmd(char **comm)
 	}
 
 				/* ###############################
-				 * #     AUTOCD & AUTOOPEN (1)   #
+				 * #    AUTOCD & AUTO-OPEN (1)   #
 				 * ############################### */
 
 	if (autocd || auto_open) {
@@ -1596,16 +1606,6 @@ exec_cmd(char **comm)
 					return exit_code;
 				}
 			}
-		}
-
-				/* ##########################
-				 * #     	AUTOJUMP	    #
-				 * ########################## */
-
-		if (autojump) {
-			exit_code = run_autojump(comm);
-			if (exit_code != -1)
-				return exit_code;
 		}
 
 	/* ####################################################

@@ -640,14 +640,17 @@ check_jumpdb(const char *str, const size_t len)
 		if (!jump_db[i].path || TOUPPER(*str) != TOUPPER(*jump_db[i].path))
 			continue;
 
+		size_t db_len = strlen(jump_db[i].path);
 		if (len && (case_sens_path_comp ? strncmp(str, jump_db[i].path, len)
 		: strncasecmp(str, jump_db[i].path, len)) == 0
-		&& strlen(jump_db[i].path) > len) {
+		&& db_len > len) {
 			suggestion.type = FILE_SUG;
 			suggestion.filetype = DT_DIR;
 			char tmp[NAME_MAX + 2];
-			snprintf(tmp, NAME_MAX + 2, "%s/", jump_db[i].path);
-			print_suggestion(tmp, len, color);
+			*tmp = '\0';
+			if (jump_db[i].path[db_len - 1] != '/')
+				snprintf(tmp, NAME_MAX + 2, "%s/", jump_db[i].path);
+			print_suggestion(*tmp ? tmp : jump_db[i].path, len, color);
 			return 1;
 		}
 	}
@@ -986,7 +989,8 @@ rl_suggestions(char c)
 	 * position. Else, append it to current readline buffer to
 	 * correctly find matches: at this point (rl_getc), readline has
 	 * not appended this char to rl_line_buffer yet, so that we must
-	 * do it manually. Line editing is only allowed for the last word */
+	 * do it manually.
+	 * Line editing is only allowed for the last word */
 	int s = strcntchrlst(rl_line_buffer, ' ');
 	/* Do not take into account final spaces */
 	if (s >= 0 && !rl_line_buffer[s + 1])
@@ -1064,17 +1068,43 @@ rl_suggestions(char c)
 	char *lb = rl_line_buffer;
 	/* lb could be used to suggest stuff for other internal commands */
 
-	/* Suggestions for the j command */
-	if (*lb == 'j' && lb[1] && (lb[1] == ' '  || ((lb[1] == 'c'
-	|| lb[1] == 'o' || lb[1] == 'p') && lb[2] && lb[2] == ' '))) {
-		printed = check_jcmd(full_line);
-		if (printed)
-			goto SUCCESS;
-		else {
-			free(full_line);
-			full_line = (char *)NULL;
-			goto FAIL;
+	switch(*lb) {
+/*	case 'c':
+		if (lb[1] && lb[1] == 's' && lb[2] && lb[2] == ' ') {
+			size_t i = 0, len = strlen(last_word);
+			for (; color_schemes[i]; i++) {
+				if (*last_word == *color_schemes[i]
+				&& strncmp(color_schemes[i], last_word, len) == 0) {
+					suggestion.type = CMD_SUG;
+					suggestion.offset = last_word_offset;
+					print_suggestion(color_schemes[i], len, sx_c);
+					printed = 1;
+					break;
+				}
+			}
+			if (printed) {
+				goto SUCCESS;
+			} else {
+				free(full_line);
+				full_line = (char *)NULL;
+				goto FAIL;
+			}
 		}
+		break; */
+
+	case 'j': /* Suggestions for the j command */
+		if (lb[1] && (lb[1] == ' '  || ((lb[1] == 'c'
+		|| lb[1] == 'o' || lb[1] == 'p') && lb[2] && lb[2] == ' '))) {
+			printed = check_jcmd(full_line);
+			if (printed) {
+				goto SUCCESS;
+			} else {
+				free(full_line);
+				full_line = (char *)NULL;
+				goto FAIL;
+			}
+		}
+		break;
 	}
 
 	/* 3.a) Check already suggested string */

@@ -69,18 +69,7 @@ add_to_jumpdb(const char *dir)
 	jump_db[jump_n].rank = 0;
 	jump_db[jump_n].keep = 0;
 
-	/* Append ending slash if necessary */
-	size_t dir_len = strlen(dir);
-	char *tmp = (char *)NULL;
-	if (dir[dir_len - 1] != '/') {
-		tmp = (char *)xnmalloc(dir_len + 2, sizeof(char));
-		sprintf(tmp, "%s/", dir);
-		dir_len++;
-	}
-		
-	jump_db[jump_n++].path = savestring(tmp ? tmp : dir, dir_len);
-	if (tmp)
-		free(tmp);
+	jump_db[jump_n++].path = savestring(dir, strlen(dir));
 
 	jump_db[jump_n].path = (char *)NULL;
 	jump_db[jump_n].visits = 0;
@@ -255,6 +244,26 @@ edit_jumpdb(void)
 	return EXIT_SUCCESS;
 }
 
+/* Save jump entry into the suggestions buffer */
+int
+save_suggestion(char *str)
+{
+	free(jump_suggestion);
+	size_t len = strlen(str);
+
+	int slash = 0;
+	if (str[len - 1] == '/')
+		slash = 1;
+
+	jump_suggestion = xnmalloc(len + (slash ? 1 : 2), sizeof(char));
+	if (!slash)
+		sprintf(jump_suggestion, "%s/", str);
+	else
+		strcpy(jump_suggestion, str);
+
+	return EXIT_SUCCESS;
+}
+
 /* Jump into best ranked directory matched by ARGS */
 int
 dirjump(char **args, int mode)
@@ -408,15 +417,9 @@ dirjump(char **args, int mode)
 				return EXIT_FAILURE;
 			}
 
-			if (mode == NO_SUG_JUMP) {
+			if (mode == NO_SUG_JUMP)
 				return cd_function(jump_db[int_order - 1].path);
-			} else {
-				free(jump_suggestion);
-				jump_suggestion = xnmalloc(strlen(jump_db[int_order - 1].path)
-										+ 1, sizeof(char));
-				strcpy(jump_suggestion, jump_db[int_order - 1].path);
-				return EXIT_SUCCESS;
-			}
+			return save_suggestion(jump_db[int_order - 1].path);
 		}
 	}
 
@@ -425,12 +428,7 @@ dirjump(char **args, int mode)
 	if (!args[2] && lstat(args[1], &attr) != -1) {
 		if (mode == NO_SUG_JUMP)
 			return cd_function(args[1]);
-		else {
-			free(jump_suggestion);
-			jump_suggestion = xnmalloc(strlen(args[1]) + 1, sizeof(char));
-			strcpy(jump_suggestion, args[1]);
-			return EXIT_SUCCESS;
-		}
+		return save_suggestion(args[1]);
 	}
 
 	/* Jump into a visited directory using ARGS as filter(s) */
@@ -605,14 +603,10 @@ dirjump(char **args, int mode)
 			printf(_("%s: jump: No matches found\n"), PROGRAM_NAME);
 		exit_status = EXIT_FAILURE;
 	} else if (jump_opt != jlist) {
-		if (mode == NO_SUG_JUMP) {
+		if (mode == NO_SUG_JUMP)
 			exit_status = cd_function(matches[best_ranked]);
-		} else {
-			free(jump_suggestion);
-			jump_suggestion = xnmalloc(strlen(matches[best_ranked]) + 1, sizeof(char));
-			strcpy(jump_suggestion, matches[best_ranked]);
-			exit_status = EXIT_SUCCESS;
-		}
+		else
+			exit_status = save_suggestion(matches[best_ranked]);
 	}
 
 	free(matches);
@@ -630,6 +624,9 @@ int
 run_autojump(char **cmd)
 {
 	if (!cmd || !cmd[0] || !*cmd[0])
+		return -1;
+
+	if (is_internal_c(cmd[0]))
 		return -1;
 
 	char *ret = get_cmd_path(cmd[0]);
