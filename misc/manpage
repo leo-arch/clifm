@@ -534,11 +534,13 @@ You can use the exclamation mark (!) to perform some history commands:
 toggle icons on/off
 .TP
 .B j, jc, jl, jp \fR[STR ...], \fBjo\fR [NUM], \fBje\fR
-\fIj\fR is the fastest way of using Kangaroo, a \fBdirectory jumper\fR function to quickly navigate through the jump database (i.e. a database of visited directories).
+\fIj\fR is the fastest way of using \fBKangaroo\fR, a \fBdirectory jumper\fR function to quickly navigate through the jump database (i.e. a database of visited directories).
 .sp
-With no argument, \fIj\fR just lists the entries in the jump database, printing the order number of the corresponding entry, the number of visits, the days since the first visit, the rank value, and the directory name itself (an asterisk next to the rank value means that the corresponding directory is bookmarked). Otherwise, it searches for STR in the database and cd into the best ranked matching entry. Example: 'j D' will probably take you to /home/user/Downloads, provided this directory has been already visited and is the best ranked match in the database. For a more detailed description of the matching algorithm see the \fBKANGAROO FREQUENCY ALGORITHM\fR section below. 
+With no argument, \fIj\fR just lists the entries in the jump database, printing the order number of the corresponding entry, the number of visits, the days since the first visit, the rank value, and the directory name itself (an asterisk next to the rank value means that the corresponding directory is bookmarked, the current directory in some workspace or pinned). Otherwise, it searches for STR in the database and cd into the best ranked matching entry. Example: 'j D' will probably take you to /home/user/Downloads, provided this directory has been already visited and is the best ranked match in the database. For a more detailed description of the matching algorithm see the \fBKANGAROO FREQUENCY ALGORITHM\fR section below. 
 .sp
 Multiple query strings could be passed to the function. For example, 'j et mo' will first check for 'et' in the jump database and then will further filter the search using the second parameter: 'mo'. It will most probably take you (again, provided the directory has been already visited and is the best ranked match) to /etc/modprobe.d directory. Bear in mind that if STR is an actual directory, \fIjump\fR will just cd into it without performing any query.
+.sp
+Since it is not always obvious or easy to know where exactly a query string will take you, CliFM (if the suggestions system is enabled) will print, at the right of the cursor, the path matched by \fBKangaroo\fR. If that is the actually intended path, just press the Right arrow key to accept the suggestion. Otherwise, it will be ignored.
 .sp
 \fIj\fR accepts five modifiers: 'e', 'p' 'c', 'o', and 'l', the first standing for "edit", the second for "parent", the third for "child", the fourth for "order", and the last one for 'list'. Thus, 'je' will open the jump database to be edited if needed; 'jc' will search for files querying only child directories relative to the current working directory, while 'jp' will do the same but for parent directories. 'jo' allows to specify an order number (the left most value in the jump list) instead of a string or a file name, in which case no matching process is performed. Finally, 'jl' just prints the matches for the given query string(s), but without changing the current directory. Examples:
 .sp
@@ -549,8 +551,6 @@ Multiple query strings could be passed to the function. For example, 'j et mo' w
 \'jo 13\' will cd into the path corresponding to the order number 13. TAB completion is available to expand order numbers into the corresponding paths.
 .sp
 \'jl foo\' will print all entries in the database matching the word "foo".
-.sp
-TAB completion is available for this function.
 .sp
 To reset or modify the jump database as you wish, simply open the jump file using the 'je' command, edit whatever needs to be edited, save changes, and close the editor.
 .sp
@@ -1151,7 +1151,7 @@ To accept the entire suggestion, just press \fBRight\fR or \fBCtrl-f\fR: the cur
 
 To aceppt the first suggested word only (up to first slash or space), press rather \fBAlt-Right\fR or \fBAlt-f\fR. Not available for ELN's, aliases and bookmarks names.
 
-Bear in mind that suggestions for ELN's, aliases and bookmarks names do not work as the remaining suggestions: they do not suggest possible completions for the current input, but rather the value pointed to by it. For example, if you type "12" and the current list of files includes a file name whose ELN is '12', the file name corresponding to this ELN will be printed next to "12" as follows: \fB12_ > filename\fR (where the underscore is the current cursor position). Press 'Right' or 'Ctrl-f' to accept the suggestion, in which case the text typed so far will be replaced by the suggestion.
+Bear in mind that suggestions for ELN's, aliases and bookmarks names, and the jump function (invoked by the \fIj\fR command) do not work as the remaining suggestions: they do not suggest possible completions for the current input, but rather the value pointed to by it. For example, if you type "12" and the current list of files includes a file name whose ELN is '12', the file name corresponding to this ELN will be printed next to "12" as follows: \fB12_ > filename\fR (where the underscore is the current cursor position). Press 'Right' or 'Ctrl-f' to accept the suggestion, in which case the text typed so far will be replaced by the suggestion.
 
 The order of the suggestions checks could be customized via the \fISuggestionStrategy\fR option in the configuration file. Each check is assigned a lowercase letter:
 
