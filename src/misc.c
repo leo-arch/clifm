@@ -356,14 +356,11 @@ new_instance(char *dir, int sudo)
 		 **tmp_cmd = (char **)NULL;
 
 	if (strcntchr(term, ' ') != -1) {
-
 		tmp_term = get_substr(term, ' ');
 
 		if (tmp_term) {
 			size_t i;
-
-			for (i = 0; tmp_term[i]; i++)
-				;
+			for (i = 0; tmp_term[i]; i++);
 
 			size_t num = i;
 			tmp_cmd = (char **)xrealloc(tmp_cmd, (i + (sudo ? 4 : 3))
@@ -375,7 +372,6 @@ new_instance(char *dir, int sudo)
 			free(tmp_term);
 
 			i = num - 1;
-
 			int plus = 1;
 
 			if (sudo) {
@@ -405,7 +401,6 @@ new_instance(char *dir, int sudo)
 		fprintf(stderr, _("%s: No option specified for '%s'\n"
 				"Trying '%s -e %s %s'\n"), PROGRAM_NAME, term,
 				term, self, ws[cur_ws].path);
-
 		if (sudo) {
 			char *cmd[] = {term, "-e", _sudo, self, path_dir, NULL};
 			ret = launch_execve(cmd, BACKGROUND, E_NOFLAG);
@@ -500,14 +495,12 @@ alias_import(char *file)
 	int first = 1;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
-
 		if (strncmp(line, "alias ", 6) == 0) {
 			alias_found++;
 
 			/* If alias name conflicts with some internal command,
 			 * skip it */
 			char *alias_name = strbtw(line, ' ', '=');
-
 			if (!alias_name)
 				continue;
 
@@ -523,10 +516,8 @@ alias_import(char *file)
 
 			/* Only accept single quoted aliases commands */
 			char *tmp = strchr(p, '=');
-
 			if (!tmp)
 				continue;
-
 			if (*(++tmp) != '\'') {
 				free(alias_name);
 				continue;
@@ -565,7 +556,6 @@ alias_import(char *file)
 	}
 
 	free(line);
-
 	fclose(fp);
 	fclose(config_fp);
 
@@ -589,8 +579,9 @@ alias_import(char *file)
 	if (alias_imported > 1) {
 		printf(_("%s: %zu aliases were successfully imported\n"),
 		    PROGRAM_NAME, alias_imported);
-	} else
+	} else {
 		printf(_("%s: 1 alias was successfully imported\n"), PROGRAM_NAME);
+	}
 
 	/* Add new aliases to the internal list of aliases */
 	get_aliases();
@@ -600,13 +591,11 @@ alias_import(char *file)
 
 		for (i = 0; bin_commands[i]; i++)
 			free(bin_commands[i]);
-
 		free(bin_commands);
 		bin_commands = (char **)NULL;
 	}
 
 	get_path_programs();
-
 	return EXIT_SUCCESS;
 }
 
@@ -622,7 +611,6 @@ save_last_path(void)
 	sprintf(last_dir, "%s/.last", CONFIG_DIR);
 
 	FILE *last_fp;
-
 	last_fp = fopen(last_dir, "w");
 
 	if (!last_fp) {
@@ -655,18 +643,14 @@ save_last_path(void)
 		    NULL};
 
 		launch_execve(cmd, FOREGROUND, E_NOFLAG);
-	}
-
-	/* If not cd on quit, remove the file */
-	else {
+	} else {
+		/* If not cd on quit, remove the file */
 		char *cmd[] = {"rm", "-f", last_dir_tmp, NULL};
-
 		launch_execve(cmd, FOREGROUND, E_NOFLAG);
 	}
 
 	free(last_dir_tmp);
 	free(last_dir);
-
 	return;
 }
 
@@ -693,11 +677,9 @@ parse_usrvar_value(const char *str, const char c)
 		   i;
 
 	for (i = tmp_len - 1; tmp[i] && i > 0; i--) {
-
 		if (tmp[i] != ' ' && tmp[i] != '\t' && tmp[i] != '"' && tmp[i] != '\''
 		&& tmp[i] != '\n')
 			break;
-
 		else
 			tmp[i] = '\0';
 	}
@@ -712,7 +694,6 @@ parse_usrvar_value(const char *str, const char c)
 
 	if (buf)
 		return buf;
-
 	return (char *)NULL;
 }
 
@@ -723,22 +704,17 @@ create_usr_var(char *str)
 	char *value = parse_usrvar_value(str, '=');
 
 	if (!name) {
-
 		if (value)
 			free(value);
-
 		fprintf(stderr, _("%s: Error getting variable name\n"),
 		    PROGRAM_NAME);
-
 		return EXIT_FAILURE;
 	}
 
 	if (!value) {
 		free(name);
-
 		fprintf(stderr, _("%s: Error getting variable value\n"),
 		    PROGRAM_NAME);
-
 		return EXIT_FAILURE;
 	}
 
@@ -748,7 +724,6 @@ create_usr_var(char *str)
 
 	free(name);
 	free(value);
-
 	return EXIT_SUCCESS;
 }
 
@@ -805,7 +780,6 @@ _err(int msg_type, int prompt, const char *format, ...)
 
 		log_msg(buf, (prompt) ? PRINT_PROMPT : NOPRINT_PROMPT);
 		free(buf);
-
 		return EXIT_SUCCESS;
 	}
 
@@ -877,7 +851,6 @@ list_mountpoints(void)
 	ssize_t line_len = 0;
 
 	while ((line_len = getline(&line, &line_size, mp_fp)) > 0) {
-
 		/* Do not list all mountpoints, but only those corresponding
 		 * to a block device (/dev) */
 		if (strncmp(line, "/dev/", 5) == 0) {
@@ -893,7 +866,6 @@ list_mountpoints(void)
 			/* Print only the first two fileds of each /proc/mounts
 			 * line */
 			while (str && counter < 2) {
-
 				if (counter == 1) { /* 1 == second field */
 					printf("%s%zu%s %s%s%s (%s)\n", el_c, mp_n + 1,
 					    df_c, (access(str, R_OK | X_OK) == 0) ? di_c : nd_c, str, df_c,
@@ -966,14 +938,12 @@ list_mountpoints(void)
 		if (atoi_num > 0 && atoi_num <= (int)mp_n) {
 
 			if (xchdir(mountpoints[atoi_num - 1], SET_TITLE) == EXIT_SUCCESS) {
-
 				free(ws[cur_ws].path);
 				ws[cur_ws].path = savestring(mountpoints[atoi_num - 1],
 				    strlen(mountpoints[atoi_num - 1]));
 
 				if (cd_lists_on_the_fly) {
 					free_dirlist();
-
 					if (list_dir() != EXIT_SUCCESS)
 						exit_status = EXIT_FAILURE;
 				}
@@ -1000,7 +970,6 @@ list_mountpoints(void)
 	i = (int)mp_n;
 	while (--i >= 0)
 		free(mountpoints[i]);
-
 	free(mountpoints);
 
 	return exit_status;
@@ -1017,7 +986,6 @@ save_pinned_dir(void)
 		sprintf(pin_file, "%s/.pin", CONFIG_DIR);
 
 		FILE *fp = fopen(pin_file, "w");
-
 		if (!fp) {
 			fprintf(stderr, _("%s: Error storing pinned "
 					"directory\n"), PROGRAM_NAME);
@@ -1324,9 +1292,7 @@ handle_stdin()
 	if (TMP_DIR) {
 		STDIN_TMP_DIR = (char *)xnmalloc(strlen(TMP_DIR) + 14, sizeof(char));
 		sprintf(STDIN_TMP_DIR, "%s/clifm.%s", TMP_DIR, rand_ext);
-	}
-
-	else {
+	} else {
 		STDIN_TMP_DIR = (char *)xnmalloc(18, sizeof(char));
 		sprintf(STDIN_TMP_DIR, "/tmp/clifm.%s", rand_ext);
 	}
@@ -1347,7 +1313,6 @@ handle_stdin()
 	char *p = buf, *q = buf;
 
 	while (*p) {
-
 		if (!*p || *p == '\n') {
 			*p = '\0';
 
@@ -1369,7 +1334,6 @@ handle_stdin()
 
 			if (*q != '/' || !q[1])
 				snprintf(source, PATH_MAX, "%s/%s", cwd, q);
-
 			else
 				strncpy(source, q, PATH_MAX);
 
@@ -1455,7 +1419,6 @@ pin_directory(char *dir)
 	}
 
 	printf(_("%s: Succesfully pinned '%s'\n"), PROGRAM_NAME, dir);
-
 	return EXIT_SUCCESS;
 }
 
@@ -1489,7 +1452,6 @@ unpin_dir(void)
 
 	free(pinned_dir);
 	pinned_dir = (char *)NULL;
-
 	return EXIT_SUCCESS;
 }
 
@@ -1846,8 +1808,7 @@ void
 version_function(void)
 {
 	printf(_("%s %s (%s), by %s\nContact: %s\nWebsite: "
-		 "%s\nLicense: %s\n"),
-	    PROGRAM_NAME, VERSION, DATE,
+		 "%s\nLicense: %s\n"), PROGRAM_NAME, VERSION, DATE,
 	    AUTHOR, CONTACT, WEBSITE, LICENSE);
 }
 
