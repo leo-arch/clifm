@@ -425,7 +425,7 @@ dirjump(char **args, int mode)
 
 	/* If ARG is an actual directory, just cd into it */
 	struct stat attr;
-	if (!args[2] && lstat(args[1], &attr) != -1) {
+	if (args[1] && !args[2] && lstat(args[1], &attr) != -1) {
 		if (mode == NO_SUG_JUMP)
 			return cd_function(args[1]);
 		return save_suggestion(args[1]);
@@ -439,10 +439,29 @@ dirjump(char **args, int mode)
 	size_t *visits = (size_t *)xnmalloc(jump_n + 1, sizeof(size_t));
 	time_t *first = (time_t *)xnmalloc(jump_n + 1, sizeof(time_t));
 	time_t *last = (time_t *)xnmalloc(jump_n + 1, sizeof(time_t));
+	int last_segment = 0, first_segment = 0;
 
 	for (i = 1; args[i]; i++) {
 		/* 1) Using the first parameter, get a list of matches in the
 		 * database */
+
+		/* If the query string ends with a slash, we want this query
+		 * string to match only the last segment of the path (i.e.,
+		 * there must be no slash after the match) */
+		size_t _len = strlen(args[i]);
+		if (args[i][_len - 1] == '/') {
+			args[i][_len - 1] = '\0';
+			last_segment = 1;
+			first_segment = 0;
+		} else if (args[i][_len - 1] == '\\') {
+			args[i][_len - 1] = '\0';
+			last_segment = 0;
+			first_segment = 1;
+		} else {
+			last_segment = 0;
+			first_segment = 0;
+		}
+
 		if (!match) {
 			j = (int)jump_n;
 			while (--j >= 0) {
@@ -453,8 +472,18 @@ dirjump(char **args, int mode)
 				char *needle = case_sens_dirjump
 							? strstr(jump_db[j].path, args[i])
 							: strcasestr(jump_db[j].path, args[i]);
-				if (!needle)
+				if (!needle || (last_segment && strchr(needle, '/')))
 					continue;
+
+				if (first_segment) {
+					char p = *needle;
+					*needle = '\0';
+					if (strrchr(jump_db[j].path, '/') != jump_db[j].path) {
+						*needle = p;
+						continue;
+					}
+					*needle = p;
+				}
 
 				/* Exclue CWD */
 				if (jump_db[j].path[1] == ws[cur_ws].path[1]
@@ -503,9 +532,21 @@ dirjump(char **args, int mode)
 				char *_needle = case_sens_dirjump
 						? strstr(needles[j] + 1, args[i])
 						: strcasestr(needles[j] + 1, args[i]);
-				if (!_needle) {
+
+				if (!_needle || (last_segment && strchr(_needle, '/'))){
 					matches[j] = (char *)NULL;
 					continue;
+				}
+
+				if (first_segment) {
+					char p = *_needle;
+					*_needle = '\0';
+					if (strrchr(matches[j], '/') != matches[j]) {
+						*_needle = p;
+						matches[j] = (char *)NULL;
+						continue;
+					}
+					*_needle = p;
 				}
 
 				/* Update the needle for the next search string */
