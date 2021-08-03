@@ -890,6 +890,27 @@ check_jcmd(char *line)
 	return 1;
 }
 
+/* Check if we must suggest --help for internal commands */
+int
+check_help(char *full_line, const char *last_word)
+{
+	char *ret = strchr(full_line, ' ');
+	if (!ret)
+		return 0;
+
+	*ret = '\0';
+	if (!is_internal_c(full_line))
+		return 0;
+
+	size_t len = strlen(last_word);
+	if (*last_word != '-' || strncmp(last_word, "--help", len) != 0)
+		return 0;
+
+	suggestion.type = CMD_SUG;
+	print_suggestion("--help", len, sx_c);
+	return 1;
+}
+
 /* Check for available suggestions. Returns zero if true, one if not,
  * and -1 if C was inserted before the end of the current line.
  * If a suggestion is found, it will be printed by print_suggestion() */
@@ -1222,8 +1243,12 @@ rl_suggestions(char c)
 		}
 	}
 
-	free(full_line);
-	full_line = (char *)NULL;
+	/* Let's suggest --help for internal commands */
+	printed = check_help(full_line, last_word);
+	if (printed) {
+		suggestion.offset = last_word_offset;
+		goto SUCCESS;
+	}
 
 	/* 3.d) Check commands in PATH and CliFM internals commands, but
 	 * only for the first word */
@@ -1263,10 +1288,10 @@ rl_suggestions(char c)
 	if (suggestion.printed) {
 		if (!strchr(last_word, '\x1b')) {
 			clear_suggestion();
+			free(full_line);
 			goto FAIL;
 		} else {
-			/* Go to SUCCESS so that we don't remove the suggestion
-			 * buffer */
+			/* Go to SUCCESS to avoid removing the suggestion buffer */
 			printed = 1;
 			goto SUCCESS;
 		}
