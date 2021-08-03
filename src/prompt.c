@@ -73,7 +73,7 @@ prompt(void)
 		welcome_message = 0;
 	}
 
-	/* Print the tip of the day (only on first run) */
+	/* Print the tip of the day (only for the first run) */
 	if (tips) {
 		static int first_run = 1;
 		if (first_run) {
@@ -112,19 +112,11 @@ prompt(void)
 		 * warning message, the prompt will always display the error
 		 * message sign: a red 'E'. */
 		switch (pmsg) {
-		case nomsg:
-			break;
-		case error:
-			sprintf(msg_str, "%sE%s", em_c, NC_b);
-			break;
-		case warning:
-			sprintf(msg_str, "%sW%s", wm_c, NC_b);
-			break;
-		case notice:
-			sprintf(msg_str, "%sN%s", nm_c, NC_b);
-			break;
-		default:
-			break;
+		case nomsg:	break;
+		case error:	sprintf(msg_str, "%sE%s", em_c, NC_b); break;
+		case warning: sprintf(msg_str, "%sW%s", wm_c, NC_b); break;
+		case notice: sprintf(msg_str, "%sN%s", nm_c, NC_b); break;
+		default: break;
 		}
 	}
 
@@ -217,14 +209,9 @@ prompt(void)
 	free(the_prompt);
 
 	if (!input)
-		/* Same as 'input == NULL': input is a pointer poiting to no
-	 * memory address whatsover */
 		return (char *)NULL;
 
 	if (!*input) {
-		/* input is not NULL, but a pointer poiting to a memory address
-	 * whose first byte is the null byte (\0). In other words, it is
-	 * an empty string */
 		free(input);
 		input = (char *)NULL;
 		return (char *)NULL;
@@ -235,7 +222,6 @@ prompt(void)
 	if (logs_enabled) {
 		if (last_cmd)
 			free(last_cmd);
-
 		last_cmd = savestring(input, strlen(input));
 	}
 
@@ -264,12 +250,10 @@ decode_prompt(const char *line)
 	int c;
 
 	while ((c = *line++)) {
-		/* We have a escape char */
+		/* We have an escape char */
 		if (c == '\\') {
-
 			/* Now move on to the next char */
 			c = *line;
-
 			switch (c) {
 
 			case 'z': /* Exit status of last executed command */
@@ -290,8 +274,7 @@ decode_prompt(const char *line)
 				int *hex = get_hex_num(line);
 				int n = 0, i = 0, j;
 				/* Count how many hex expressions were found */
-				while (hex[n++] != -1)
-					;
+				while (hex[n++] != -1);
 				n--;
 				/* 2 + n == CTLEST + 0x00 + amount of hex numbers*/
 				temp = xnmalloc(2 + (size_t)n, sizeof(char));
@@ -405,9 +388,8 @@ decode_prompt(const char *line)
 				temp = savestring(hostname, strlen(hostname));
 				if (c == 'h') {
 					int ret = strcntchr(hostname, '.');
-					if (ret != -1) {
+					if (ret != -1)
 						temp[ret] = '\0';
-					}
 				}
 				goto add_string;
 
@@ -452,9 +434,9 @@ decode_prompt(const char *line)
 				if (strncmp(ws[cur_ws].path, user.home,
 					user.home_len) == 0)
 					tmp_path = home_tilde(ws[cur_ws].path);
-				if (!tmp_path) {
+				if (!tmp_path)
 					tmp_path = ws[cur_ws].path;
-				} else
+				else
 					free_tmp_path = 1;
 
 				if (c == 'W') {
@@ -475,16 +457,15 @@ decode_prompt(const char *line)
 						char *ret = (char *)NULL;
 						ret = strrchr(tmp_path, '/');
 						if (!ret)
-							temp = savestring(tmp_path,
-							    strlen(tmp_path));
+							temp = savestring(tmp_path, strlen(tmp_path));
 						else
 							temp = savestring(ret + 1, strlen(ret) - 1);
-					} else
+					} else {
 						temp = savestring(tmp_path, strlen(tmp_path));
-				}
-
-				else /* If c == 'w' */
+					}
+				} else { /* If c == 'w' */
 					temp = savestring(tmp_path, strlen(tmp_path));
+				}
 
 				if (free_tmp_path)
 					free(tmp_path);
@@ -552,10 +533,8 @@ decode_prompt(const char *line)
 #if !defined(__HAIKU__) && !defined(__OpenBSD__)
 			/* Command substitution */
 			if (c == '$' && *line == '(') {
-
 				/* Look for the ending parenthesis */
 				int tmp = strcntchr(line, ')');
-
 				if (tmp == -1)
 					continue;
 

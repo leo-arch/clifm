@@ -154,7 +154,7 @@ my_rl_getc(FILE *stream)
 	while(1) {
 		result = read(fileno(stream), &c, sizeof(unsigned char));
 		if (result == sizeof(unsigned char)) {
-			if (suggestions)
+			if (suggestions) {
 				/* rl_suggestions returns -1 is C was insetrted before
 				 * the end of the current line, in which case we don't
 				 * want to return it here (otherwise, it would be added
@@ -163,6 +163,7 @@ my_rl_getc(FILE *stream)
 					rl_redisplay();
 					continue;
 				}
+			}
 			return (c);
 		}
 
@@ -578,7 +579,7 @@ my_rl_path_completion(const char *text, int state)
 
 					break;
 
-				case DT_REG:
+				case DT_REG: /* fallthrough */
 				case DT_DIR:
 					match = 1;
 					break;
@@ -647,7 +648,6 @@ my_rl_path_completion(const char *text, int state)
 
 				switch (type) {
 				case DT_LNK:
-
 					if (dirname[0] == '.' && !dirname[1]) {
 						ret = get_link_ref(ent->d_name);
 					} else {
@@ -658,15 +658,13 @@ my_rl_path_completion(const char *text, int state)
 
 					if (ret == S_IFDIR)
 						match = 1;
-
 					break;
 
 				case DT_DIR:
 					match = 1;
 					break;
 
-				default:
-					break;
+				default: break;
 				}
 			}
 
@@ -682,7 +680,6 @@ my_rl_path_completion(const char *text, int state)
 					break;
 
 				case DT_LNK:
-
 					if (dirname[0] == '.' && !dirname[1]) {
 						ret = get_link_ref(ent->d_name);
 					} else {
@@ -693,11 +690,9 @@ my_rl_path_completion(const char *text, int state)
 
 					if (ret == S_IFDIR || ret == S_IFREG)
 						match = 1;
-
 					break;
 
-				default:
-					break;
+				default: break;
 				}
 			}
 
@@ -705,19 +700,16 @@ my_rl_path_completion(const char *text, int state)
 			&& (strncmp(rl_line_buffer, "t ", 2) == 0
 			|| strncmp(rl_line_buffer, "tr ", 3) == 0
 			|| strncmp(rl_line_buffer, "trash ", 6) == 0)) {
-
 				if (type != DT_BLK && type != DT_CHR)
 					match = 1;
 			}
 
 			else if (exec) {
-
 				if (type == DT_REG && access(ent->d_name, X_OK) == 0)
 					match = 1;
 			}
 
 			else if (exec_path) {
-
 				if (type == DT_REG) {
 					snprintf(tmp, PATH_MAX, "%s%s", dir_tmp, ent->d_name);
 					if (access(tmp, X_OK) == 0)
@@ -771,7 +763,6 @@ my_rl_path_completion(const char *text, int state)
 
 		/* dirname && (strcmp(dirname, ".") != 0) */
 		if (dirname && (dirname[0] != '.' || dirname[1])) {
-
 			if (rl_complete_with_tilde_expansion && *users_dirname == '~') {
 				size_t dirlen = strlen(dirname);
 				temp = (char *)xcalloc(dirlen + strlen(ent->d_name) + 2,
@@ -784,9 +775,7 @@ my_rl_path_completion(const char *text, int state)
 					temp[dirlen] = '/';
 					temp[dirlen + 1] = '\0';
 				}
-			}
-
-			else {
+			} else {
 				temp = (char *)xcalloc(strlen(users_dirname) +
 						strlen(ent->d_name) + 1, sizeof(char));
 				strcpy(temp, users_dirname);
@@ -978,7 +967,7 @@ filenames_gen_text(const char *text, int state)
 	/* Check list of currently displayed files for a match */
 	while (i < files && (name = file_info[i++].name) != NULL)
 		if (case_sens_path_comp ? strncmp(name, text, len) == 0
-					: strncasecmp(name, text, len) == 0)
+		: strncasecmp(name, text, len) == 0)
 			return strdup(name);
 
 	return (char *)NULL;
@@ -998,13 +987,14 @@ filenames_gen_eln(const char *text, int state)
 	int num_text = atoi(text);
 
 	/* Check list of currently displayed files for a match */
-	while (i < files && (name = file_info[i++].name) != NULL)
+	while (i < files && (name = file_info[i++].name) != NULL) {
 		if (*name == *file_info[num_text - 1].name
 		&& strcmp(name, file_info[num_text - 1].name) == 0) {
 			if (suggestion_buf)
 				clear_suggestion();
 			return strdup(name);
 		}
+	}
 
 	return (char *)NULL;
 }
@@ -1059,10 +1049,11 @@ sort_num_generator(const char *text, int state)
 	};
 
 	/* Check list of currently displayed files for a match */
-	while (i <= SORT_TYPES && (name = sorts[i++]) != NULL)
+	while (i <= SORT_TYPES && (name = sorts[i++]) != NULL) {
 		if (*name == *sorts[num_text]
 		&& strcmp(name, sorts[num_text]) == 0)
 			return strdup(name);
+	}
 
 	return (char *)NULL;
 }
@@ -1198,7 +1189,6 @@ my_rl_completion(const char *text, int start, int end)
 		 * completed is a number in order to prevent an unnecessary call
 		 * to atoi */
 		if (*text >= '0' && *text <= '9') {
-
 			int num_text = atoi(text);
 
 			/* Dirjump: jo command */

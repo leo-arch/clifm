@@ -49,7 +49,6 @@ size_t
 xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 {
 	char *end = memccpy(dst, src, '\0', n);
-
 	if (!end) {
 		dst[n - 1] = '\0';
 		end = dst + n;
@@ -83,12 +82,10 @@ u8truncstr(char *restrict str, size_t n)
 	size_t len = 0;
 
 	while (*(str++)) {
-
 		/* Do not count continuation bytes (used by multibyte, that is,
 		 * wide or non-ASCII characters) */
 		if ((*str & 0xc0) != 0x80) {
 			len++;
-
 			if (len == n) {
 				*str = '\0';
 				return EXIT_SUCCESS;
@@ -190,7 +187,6 @@ straft(char *str, const char c)
 		return (char *)NULL;
 
 	strcpy(buf, q + 1);
-
 	return buf;
 }
 
@@ -219,7 +215,6 @@ straftlst(char *str, const char c)
 		return (char *)NULL;
 
 	strcpy(buf, q + 1);
-
 	return buf;
 }
 
@@ -258,9 +253,7 @@ strbfr(char *str, const char c)
 	}
 
 	strcpy(buf, str);
-
 	*q = c;
-
 	return buf;
 }
 
@@ -274,7 +267,6 @@ strbfrlst(char *str, const char c)
 		return (char *)NULL;
 
 	char *p = str, *q = (char *)NULL;
-
 	while (*p) {
 		if (*p == c)
 			q = p;
@@ -287,16 +279,13 @@ strbfrlst(char *str, const char c)
 	*q = 0x00;
 
 	char *buf = (char *)malloc((size_t)(q - str + 1));
-
 	if (!buf) {
 		*q = c;
 		return (char *)NULL;
 	}
 
 	strcpy(buf, str);
-
 	*q = c;
-
 	return buf;
 }
 
@@ -310,7 +299,6 @@ strbtw(char *str, const char a, const char b)
 		return (char *)NULL;
 
 	char *p = str, *pa = (char *)NULL, *pb = (char *)NULL;
-
 	while (*p) {
 		if (!pa) {
 			if (*p == a)
@@ -335,9 +323,7 @@ strbtw(char *str, const char a, const char b)
 	}
 
 	strcpy(buf, pa + 1);
-
 	*pb = b;
-
 	return buf;
 }
 
@@ -373,7 +359,6 @@ replace_substr(char *haystack, char *needle, char *rep)
 					+ 1, sizeof(char));
 	strcpy(new_str, haystack);
 	strcat(new_str, rep);
-
 	return new_str;
 }
 
@@ -402,7 +387,6 @@ gen_rand_str(size_t len)
 	}
 
 	*p = '\0';
-
 	return str;
 }
 
@@ -445,7 +429,6 @@ remove_quotes(char *str)
 
 	if (!blank)
 		return p;
-
 	return (char *)NULL;
 }
 
@@ -467,17 +450,14 @@ split_str(const char *str)
 	size_t buf_len = 0, words = 0, str_len = 0;
 	char *buf = (char *)NULL;
 	buf = (char *)xnmalloc(1, sizeof(char));
-	;
 	int quote = 0, close = 0;
 	char **substr = (char **)NULL;
 
 	while (*str) {
 		switch (*str) {
-
 		/* Command substitution */
 		case '$': /* fallthrough */
 		case '`':
-
 			/* Define the closing char: If "$(" then ')', else '`' */
 			if (*str == '$') {
 				/* If escaped, it has no special meaning */
@@ -485,10 +465,9 @@ split_str(const char *str)
 					buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
 					buf[buf_len++] = *str;
 					break;
-				}
-
-				else
+				} else {
 					close = ')';
+				}
 			}
 
 			else {
@@ -497,9 +476,7 @@ split_str(const char *str)
 					buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
 					buf[buf_len++] = *str;
 					break;
-				}
-
-				else {
+				} else {
 					/* If '`' advance one char. Otherwise the while
 					 * below will stop at first char, which is not
 					 * what we want */
@@ -528,7 +505,6 @@ split_str(const char *str)
 
 				while (--i >= 0)
 					free(substr[i]);
-
 				free(substr);
 
 				return (char **)NULL;
@@ -543,7 +519,7 @@ split_str(const char *str)
 
 			break;
 
-		case '\'':
+		case '\'': /* fallthrough */
 		case '"':
 			/* If the quote is escaped, it has no special meaning */
 			if (str_len && *(str - 1) == '\\') {
@@ -559,7 +535,6 @@ split_str(const char *str)
 			/* Copy into the buffer whatever is after the first quote
 			 * up to the last quote or NULL */
 			while (*str && *str != quote) {
-
 				/* If char has special meaning, escape it */
 				if (is_quote_char(*str)) {
 					buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
@@ -574,7 +549,6 @@ split_str(const char *str)
 			 * *str is a null byte there was not ending quote */
 			if (!*str) {
 				fprintf(stderr, _("%s: Missing '%c'\n"), PROGRAM_NAME, quote);
-
 				/* Free the current buffer and whatever was already
 				 * allocated */
 				free(buf);
@@ -583,9 +557,7 @@ split_str(const char *str)
 
 				while (--i >= 0)
 					free(substr[i]);
-
 				free(substr);
-
 				return (char **)NULL;
 			}
 			break;
@@ -595,7 +567,6 @@ split_str(const char *str)
 		case '\t':
 		case '\n':
 		case ' ':
-
 			/* If escaped, just copy it into the buffer */
 			if (str_len && *(str - 1) == '\\') {
 				buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
@@ -640,12 +611,11 @@ split_str(const char *str)
 	buf[buf_len] = '\0';
 
 	if (buf_len > 0) {
-
 		if (!words)
 			substr = (char **)xcalloc(words + 1, sizeof(char *));
-
 		else
 			substr = (char **)xrealloc(substr, (words + 1) * sizeof(char *));
+
 		substr[words] = savestring(buf, buf_len);
 		words++;
 	}
@@ -660,9 +630,7 @@ split_str(const char *str)
 
 		args_n = words - 1;
 		return substr;
-	}
-
-	else {
+	} else {
 		args_n = 0; /* Just in case, but I think it's not needed */
 		return (char **)NULL;
 	}
@@ -874,7 +842,6 @@ parse_input_str(char *str)
 	 * our internal commands and therefore cannot execute them); else,
 	 * if no internal command is found, let it to the system shell */
 	if (chaining || cond_cmd) {
-
 		/* User defined variables are always internal, so that there is
 		 * no need to check whatever else is in the command string */
 		if (flags & IS_USRVAR_DEF) {
@@ -891,7 +858,6 @@ parse_input_str(char *str)
 		/* Get each word (cmd) in STR */
 		buf = (char *)xcalloc(str_len + 1, sizeof(char));
 		for (j = 0; j < str_len; j++) {
-
 			while (str[j] && str[j] != ' ' && str[j] != ';' && str[j] != '&') {
 				buf[len++] = str[j++];
 			}
@@ -1005,12 +971,10 @@ parse_input_str(char *str)
 	int *range_array = (int *)xnmalloc(int_array_max, sizeof(int));
 
 	for (i = 0; i <= args_n; i++) {
-
 		if (!substr[i])
 			continue;
 
 		register size_t j = 0;
-
 		/* Replace . and .. by absolute paths */
 		if (*substr[i] == '.' && (!substr[i][1] || (substr[i][1] == '.'
 		&& !substr[i][2]))) {
@@ -1052,18 +1016,15 @@ parse_input_str(char *str)
 
 		/* Expand bookmark names into paths */
 		if (expand_bookmarks) {
-
 			int bm_exp = 0;
 
 			for (j = 0; j < bm_n; j++) {
-
 				if (bookmarks[j].name && *substr[i] == *bookmarks[j].name
 				&& strcmp(substr[i], bookmarks[j].name) == 0) {
 
 					/* Do not expand bookmark names that conflicts
 					 * with a file name in CWD */
 					int conflict = 0, k = (int)files;
-
 					while (--k >= 0) {
 						if (*bookmarks[j].name == *file_info[k].name
 						&& strcmp(bookmarks[j].name, file_info[k].name) == 0) {
@@ -1095,7 +1056,6 @@ parse_input_str(char *str)
 
 		/* Check for ranges */
 		for (j = 0; substr[i][j]; j++) {
-
 			/* If some alphabetic char, besides '-', is found in the
 			 * string, we have no range */
 			if (substr[i][j] != '-' && !_ISDIGIT(substr[i][j]))
@@ -1127,16 +1087,13 @@ parse_input_str(char *str)
 		for (r = 0; r < ranges_ok; r++) {
 			size_t ranges_n = 0;
 			int *ranges = expand_range(substr[range_array[r] +
-							  (int)old_ranges_n],
-			    1);
+							  (int)old_ranges_n], 1);
 			if (ranges) {
 				register size_t j = 0;
 
-				for (ranges_n = 0; ranges[ranges_n]; ranges_n++)
-					;
+				for (ranges_n = 0; ranges[ranges_n]; ranges_n++);
 
 				char **ranges_cmd = (char **)NULL;
-
 				ranges_cmd = (char **)xcalloc(args_n + ranges_n + 2,
 				    sizeof(char *));
 
@@ -1185,7 +1142,6 @@ parse_input_str(char *str)
 
 	/*  if (is_sel && *substr[0] != '/') { */
 	if (is_sel) {
-
 		if ((size_t)is_sel == args_n)
 			sel_is_last = 1;
 
@@ -1204,28 +1160,22 @@ parse_input_str(char *str)
 				/* Escape selected file names and copy them into tmp
 				 * array */
 				char *esc_str = escape_str(sel_elements[i]);
-
 				if (esc_str) {
 					sel_array[j++] = savestring(esc_str, strlen(esc_str));
 					free(esc_str);
 					esc_str = (char *)NULL;
-				}
-
-				else {
+				} else {
 					fprintf(stderr, _("%s: %s: Error quoting file name\n"),
 					    PROGRAM_NAME, sel_elements[j]);
 					/* Free elements selected thus far and and all the
 					 * input substrings */
 					register size_t k = 0;
-
 					for (k = 0; k < j; k++)
 						free(sel_array[k]);
-
 					free(sel_array);
 
 					for (k = 0; k <= args_n; k++)
 						free(substr[k]);
-
 					free(substr);
 
 					return (char **)NULL;
@@ -1258,10 +1208,8 @@ parse_input_str(char *str)
 			    kb_shortcut ? '\0' : '\n');
 
 			register size_t j = 0;
-
 			for (j = 0; j <= args_n; j++)
 				free(substr[j]);
-
 			free(substr);
 
 			return (char **)NULL;
@@ -1269,12 +1217,10 @@ parse_input_str(char *str)
 	}
 
 	int stdin_dir_ok = 0;
-
 	if (STDIN_TMP_DIR && strcmp(ws[cur_ws].path, STDIN_TMP_DIR) == 0)
 		stdin_dir_ok = 1;
 
 	for (i = 0; i <= args_n; i++) {
-
 		if (!substr[i])
 			continue;
 
@@ -1295,7 +1241,6 @@ parse_input_str(char *str)
 		&& strcmp(substr[0], "sort") != 0 && strcmp(substr[0], "jo") != 0) {
 
 			if (is_number(substr[i])) {
-
 				/* Expand first word only if autocd is set to true */
 				if ((i == 0 && !autocd && !auto_open) || !substr[i])
 					continue;
@@ -1307,7 +1252,6 @@ parse_input_str(char *str)
 				 * ELN */
 				if (eln_as_file_n) {
 					int conflict = 0;
-
 					if (eln_as_file_n > 1) {
 						size_t j;
 
@@ -1318,9 +1262,7 @@ parse_input_str(char *str)
 								break;
 							}
 						}
-					}
-
-					else {
+					} else {
 						if (atoi(file_info[eln_as_file[0]].name) == num)
 							conflict = num;
 					}
@@ -1330,14 +1272,12 @@ parse_input_str(char *str)
 
 						for (j = 0; j <= args_n; j++)
 							free(substr[j]);
-
 						free(substr);
 
 						fprintf(stderr, _("%s: %d: ELN-filename "
 							"conflict. Bypass internal expansions "
 							"to fix this issue: ';CMD "
 							"FILENAME'\n"), PROGRAM_NAME, conflict);
-
 						return (char **)NULL;
 					}
 				}
@@ -1349,15 +1289,12 @@ parse_input_str(char *str)
 					char *esc_str = escape_str(file_info[j].name);
 
 					if (esc_str) {
-
 						if (file_info[j].dir &&
 						    file_info[j].name[file_info[j].len - 1] != '/') {
 							substr[i] = (char *)xrealloc(substr[i],
 							    (strlen(esc_str) + 2) * sizeof(char));
 							sprintf(substr[i], "%s/", esc_str);
-						}
-
-						else {
+						} else {
 							substr[i] = (char *)xrealloc(substr[i],
 							    (strlen(esc_str) + 1) * sizeof(char));
 							strcpy(substr[i], esc_str);
@@ -1375,9 +1312,7 @@ parse_input_str(char *str)
 
 						for (j = 0; j <= (int)args_n; j++)
 							free(substr[j]);
-
 						free(substr);
-
 						return (char **)NULL;
 					}
 				}
@@ -1394,7 +1329,6 @@ parse_input_str(char *str)
 				int j = (int)usrvar_n;
 
 				while (--j >= 0) {
-
 					if (*var_name == *usr_var[j].name
 					&& strcmp(var_name, usr_var[j].name) == 0) {
 						substr[i] = (char *)xrealloc(substr[i],
@@ -1482,7 +1416,6 @@ parse_input_str(char *str)
 		}
 
 		register size_t j = 0;
-
 		for (j = 0; substr[i][j]; j++) {
 
 			/* Brace and wildcard expansion is made by glob()
@@ -1555,7 +1488,6 @@ parse_input_str(char *str)
 			if (globbuf.gl_pathc) {
 				register size_t j = 0;
 				char **glob_cmd = (char **)NULL;
-
 				glob_cmd = (char **)xcalloc(args_n + globbuf.gl_pathc + 1,
 											sizeof(char *));
 
@@ -1584,17 +1516,13 @@ parse_input_str(char *str)
 
 						for (k = 0; k < j; k++)
 							free(glob_cmd[k]);
-
 						free(glob_cmd);
 						glob_cmd = (char **)NULL;
 
 						for (k = 0; k <= args_n; k++)
 							free(substr[k]);
-
 						free(substr);
-
 						globfree(&globbuf);
-
 						return (char **)NULL;
 					}
 				}
@@ -1607,11 +1535,10 @@ parse_input_str(char *str)
 
 				for (i = 0; i <= args_n; i++)
 					free(substr[i]);
-
 				free(substr);
+
 				substr = glob_cmd;
 				glob_cmd = (char **)NULL;
-
 				args_n = j - 1;
 			}
 
@@ -1970,12 +1897,9 @@ get_substr(char *str, const char ifs)
 			if (!p) {
 				/* Free whatever was allocated so far */
 				size_t i;
-
 				for (i = 0; i < substr_n; i++)
 					free(substr[i]);
-
 				free(substr);
-
 				return (char **)NULL;
 			}
 			substr = (char **)p;
@@ -1983,12 +1907,9 @@ get_substr(char *str, const char ifs)
 
 			if (!p) {
 				size_t i;
-
 				for (i = 0; i < substr_n; i++)
 					free(substr[i]);
-
 				free(substr);
-
 				return (char **)NULL;
 			}
 
@@ -1996,8 +1917,9 @@ get_substr(char *str, const char ifs)
 			p = (char *)NULL;
 			strncpy(substr[substr_n++], buf, length);
 			length = 0;
-		} else
+		} else {
 			str++;
+		}
 	}
 
 	free(buf);
@@ -2009,13 +1931,10 @@ get_substr(char *str, const char ifs)
 	p = (char *)realloc(substr, (substr_n + 1) * sizeof(char *));
 
 	if (!p) {
-
 		for (i = 0; i < substr_n; i++)
 			free(substr[i]);
-
 		free(substr);
 		substr = (char **)NULL;
-
 		return (char **)NULL;
 	}
 
@@ -2092,15 +2011,13 @@ get_substr(char *str, const char ifs)
 		 * the buffer, if anything */
 		if (substr[i + 1]) {
 			next = k;
-
 			for (j = (i + 1); substr[j]; j++) {
 				rbuf[k++] = savestring(substr[j], strlen(substr[j]));
 			}
-		}
-
-		else /* If there's nothing after last range, there's no next
+		} else { /* If there's nothing after last range, there's no next
 		either */
 			next = 0;
+		}
 
 		/* Repopulate the original array with the expanded range and
 		 * remaining strings */
@@ -2116,13 +2033,11 @@ get_substr(char *str, const char ifs)
 		}
 
 		free(rbuf);
-
 		substr[j] = (char *)NULL;
 
 		/* Proceede only if there's something after the last range */
 		if (next)
 			i = next;
-
 		else
 			break;
 	}
@@ -2134,9 +2049,7 @@ get_substr(char *str, const char ifs)
 
 	for (i = 0; i < substr_n; i++) {
 		int duplicate = 0;
-
 		for (d = (i + 1); d < substr_n; d++) {
-
 			if (*substr[i] == *substr[d] && strcmp(substr[i], substr[d]) == 0) {
 				duplicate = 1;
 				break;
@@ -2154,10 +2067,8 @@ get_substr(char *str, const char ifs)
 	}
 
 	free(substr);
-
 	dstr = (char **)xrealloc(dstr, (len + 1) * sizeof(char *));
 	dstr[len] = (char *)NULL;
-
 	return dstr;
 }
 
