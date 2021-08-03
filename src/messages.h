@@ -81,5 +81,6 @@
 #define TRASH_USAGE "Usage: t, tr, trash [ELN/FILE ... n] [ls, list] [clear] [del, rm]"
 #define UNICODE_USAGE "Usage: unicode, uc [on, off, status]"
 #define UNTRASH_USAGE "Usage: u, undel, untrash [*, a, all]"
+#define WRAPPERS_USAGE "c, l, m, md, and r commands are wrappers for cp, ln, mv, mkdir, and rm shell commands respectivelly.\n\nWihtout option parameters:\nc -> cp -iRp\nl -> ln -sn\nm -> mv -i\nmd -> mkdir -p\nr (for directories) -> rm -dIr (\"rm -r\" on NetBSD and OpenBSD)\nr (for non-directories) -> rm -I (\"rm -f\" on NetBSD and OpenBSD).\n\nThe 'le' command is available to edit symbolic links: le LINK"
 #define WS_USAGE "Usage: ws [NUM, +, -]"
 #define X_USAGE "Usage: x, X [DIR]"

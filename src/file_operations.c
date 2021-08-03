@@ -450,7 +450,6 @@ edit_link(char *link)
 	/* Dequote the file name, if necessary */
 	if (strchr(link, '\\')) {
 		char *tmp = dequote_str(link, 0);
-
 		if (!tmp) {
 			fprintf(stderr, _("%s: %s: Error dequoting file\n"),
 			    PROGRAM_NAME, link);
@@ -463,7 +462,6 @@ edit_link(char *link)
 
 	/* Check we have a valid symbolic link */
 	struct stat file_attrib;
-
 	if (lstat(link, &file_attrib) == -1) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, link,
 		    strerror(errno));
@@ -478,11 +476,10 @@ edit_link(char *link)
 
 	/* Get file pointed to by symlink and report to the user */
 	char *real_path = realpath(link, NULL);
-
-	if (!real_path)
+	if (!real_path) {
 		printf(_("%s%s%s currently pointing to nowhere (broken link)\n"),
 		    or_c, link, df_c);
-	else {
+	} else {
 		printf(_("%s%s%s currently pointing to "), ln_c, link, df_c);
 		colors_list(real_path, NO_ELN, NO_PAD, PRINT_NEWLINE);
 		free(real_path);
@@ -490,7 +487,6 @@ edit_link(char *link)
 	}
 
 	char *new_path = (char *)NULL;
-
 	/* Enable autocd and auto-open (in case they are not already
 	 * enabled) to allow TAB completion for ELN's */
 	int autocd_status = autocd, auto_open_status = auto_open;
@@ -498,10 +494,8 @@ edit_link(char *link)
 
 	while (!new_path) {
 		new_path = rl_no_hist(_("New path ('q' to quit): "));
-
 		if (!new_path)
 			continue;
-
 		if (!*new_path) {
 			free(new_path);
 			new_path = (char *)NULL;
@@ -537,7 +531,6 @@ edit_link(char *link)
 	/* Dequote new path, if needed */
 	if (strchr(new_path, '\\')) {
 		char *tmp = dequote_str(new_path, 0);
-
 		if (!tmp) {
 			fprintf(stderr, _("%s: %s: Error dequoting file\n"),
 			    PROGRAM_NAME, new_path);
@@ -552,15 +545,12 @@ edit_link(char *link)
 	/* Check new_path existence and warn the user if it does not
 	 * exist */
 	if (lstat(new_path, &file_attrib) == -1) {
-
 		printf("'%s': %s\n", new_path, strerror(errno));
 		char *answer = (char *)NULL;
 		while (!answer) {
 			answer = rl_no_hist(_("Relink as a broken symbolic link? [y/n] "));
-
 			if (!answer)
 				continue;
-
 			if (!*answer) {
 				free(answer);
 				answer = (char *)NULL;
@@ -582,9 +572,7 @@ edit_link(char *link)
 			if (*answer == 'y') {
 				free(answer);
 				break;
-			}
-
-			else {
+			} else {
 				free(answer);
 				free(new_path);
 				return EXIT_SUCCESS;
@@ -727,7 +715,6 @@ remove_file(char **args)
 	int i, j = 3, dirs = 0;
 
 	for (i = 1; args[i]; i++) {
-
 		/* Check if at least one file is in the current directory. If not,
 		 * there is no need to refresh the screen */
 		if (!cwd) {
@@ -741,7 +728,6 @@ remove_file(char **args)
 		char *tmp = (char *)NULL;
 		if (strchr(args[i], '\\')) {
 			tmp = dequote_str(args[i], 0);
-
 			if (tmp) {
 				/* Start storing file names in 3: 0 is for 'rm', and 1
 				 * and 2 for parameters, including end of parameters (--) */
@@ -752,10 +738,9 @@ remove_file(char **args)
 				    PROGRAM_NAME, args[i]);
 				continue;
 			}
-		}
-
-		else
+		} else {
 			rm_cmd[j++] = savestring(args[i], strlen(args[i]));
+		}
 
 		struct stat attr;
 		if (!dirs && lstat(rm_cmd[j - 1], &attr) != -1
