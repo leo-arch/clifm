@@ -309,6 +309,8 @@ const char *INTERNAL_CMDS[] = {
     "version",
     NULL};
 
+/* Just a list of internal commands and fixed parameters for the
+ * auto-suggestions system */
 const char *PARAM_STR[] = {
 	"actions edit",
 	"autocd on",

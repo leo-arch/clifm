@@ -38,8 +38,7 @@ int create_remotes_file(void);
 int create_mime_file(char *file, int new_prof);
 int create_actions_file(char *file);
 int reload_config(void);
-/* void copy_plugins(void);
-void edit_xresources(void); */
+/* void copy_plugins(void); */
 void create_tmp_files(void);
 void set_sel_file(void);
 void set_env(void);

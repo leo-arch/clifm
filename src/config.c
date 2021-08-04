@@ -458,81 +458,6 @@ create_tmp_files(void)
 }
 
 void
-edit_xresources(void)
-{
-	if (xargs.stealth_mode == 1)
-		return;
-
-	/* Check if ~/.Xresources exists and eightBitInput is set to
-	 * false. If not, create the file and set the corresponding
-	 * value */
-	char xresources[PATH_MAX];
-	snprintf(xresources, PATH_MAX - 1, "%s/.Xresources", user.home);
-
-	FILE *xresources_fp = fopen(xresources, "a+");
-
-	if (!xresources_fp) {
-		_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n",
-		    PROGRAM_NAME, xresources, strerror(errno));
-		return;
-	}
-
-	/* Since I'm looking for very specific lines, which are
-	 * fixed lines far below MAX_LINE, I don't care to get
-	 * any of the remaining lines truncated */
-#if __FreeBSD__ || __NetBSD__ || __OpenBSD__
-	fseek(xresources_fp, 0, SEEK_SET);
-#endif
-	char line[256] = "";
-	int eight_bit = 0,
-		cursor = 0,
-		function = 0;
-
-	while (fgets(line, (int)sizeof(line), xresources_fp)) {
-		if (strncmp(line, "XTerm*eightBitInput: false", 26) == 0)
-			eight_bit = 1;
-		else if (strncmp(line, "XTerm*modifyCursorKeys: 1", 25) == 0)
-			cursor = 1;
-		else if (strncmp(line, "XTerm*modifyFunctionKeys: 1", 27) == 0)
-			function = 1;
-	}
-
-	if (!eight_bit || !cursor || !function) {
-		/* Set the file position indicator at the end of
-		 * the file */
-		fseek(xresources_fp, 0L, SEEK_END);
-
-		if (!eight_bit)
-			fputs("\nXTerm*eightBitInput: false\n", xresources_fp);
-		if (!cursor)
-			fputs("\nXTerm*modifyCursorKeys: 1\n", xresources_fp);
-		if (!function)
-			fputs("\nXTerm*modifyFunctionKeys: 1\n", xresources_fp);
-
-		char *xrdb_path = get_cmd_path("xrdb");
-		if (xrdb_path) {
-			char *res_file = (char *)xnmalloc(user.home_len + 13, sizeof(char));
-			sprintf(res_file, "%s/.Xresources", user.home);
-			char *cmd[] = {"xrdb", "-merge", res_file, NULL};
-
-			launch_execve(cmd, FOREGROUND, E_NOFLAG);
-			free(res_file);
-		}
-
-		_err('w', PRINT_PROMPT, _("%s: Restart your %s for changes to "
-					  "~/.Xresources to take effect. Otherwise, %s keybindings "
-					  "might not work as expected.\n"), PROGRAM_NAME,
-					  xrdb_path ? _("terminal") : _("X session"), PROGRAM_NAME);
-
-		if (xrdb_path)
-			free(xrdb_path);
-	}
-
-	fclose(xresources_fp);
-	return;
-}
-
-void
 define_config_file_names(void)
 {
 	size_t pnl_len = strlen(PNL);
@@ -2139,8 +2064,13 @@ init_config(void)
 	/* However, there is no need to do this if using the linux console,
 	 * since we are not in a graphical environment */
 	if (xargs.stealth_mode != 1 && (flags & GUI)
-	&& strncmp(getenv("TERM"), "xterm", 5) == 0)
-		edit_xresources();
+	&& strncmp(getenv("TERM"), "xterm", 5) == 0) {
+		printf("\x1b[?1036h"); /* metaSendsEscape = true */
+/*		printf("\x1b[?1034l"); // eightBitInput = false
+		printf("\x1b[>1;1m"); // modifyCursorKeys = 1
+		printf("\x1b[>2;1m"); // modifyFunctionKeys = 1
+		("\x1b[>1m" and "\x1b[>2m", reset to initial value) */
+	}
 
 }
 
