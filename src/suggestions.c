@@ -849,6 +849,7 @@ check_aliases(const char *str, const size_t len)
 	return 0;
 }
 
+/* Get a match from the jump database and print the suggestion */
 int
 check_jcmd(char *line)
 {
@@ -894,16 +895,16 @@ check_jcmd(char *line)
 int
 check_help(char *full_line, const char *last_word)
 {
+	size_t len = strlen(last_word);
+	if (strncmp(last_word, "--help", len) != 0)
+		return 0;
+
 	char *ret = strchr(full_line, ' ');
 	if (!ret)
 		return 0;
 
 	*ret = '\0';
 	if (!is_internal_c(full_line))
-		return 0;
-
-	size_t len = strlen(last_word);
-	if (*last_word != '-' || strncmp(last_word, "--help", len) != 0)
 		return 0;
 
 	suggestion.type = CMD_SUG;
@@ -1244,10 +1245,12 @@ rl_suggestions(char c)
 	}
 
 	/* Let's suggest --help for internal commands */
-	printed = check_help(full_line, last_word);
-	if (printed) {
-		suggestion.offset = last_word_offset;
-		goto SUCCESS;
+	if (*last_word == '-') {
+		printed = check_help(full_line, last_word);
+		if (printed) {
+			suggestion.offset = last_word_offset;
+			goto SUCCESS;
+		}
 	}
 
 	/* 3.d) Check commands in PATH and CliFM internals commands, but

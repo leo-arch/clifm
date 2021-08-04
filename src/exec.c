@@ -531,13 +531,13 @@ exec_cmd(char **comm)
 	else if ((*comm[0] == 'c' && (!comm[0][1] || (comm[0][1] == 'p'
 	&& !comm[0][2])))
 
-		 || (*comm[0] == 'm' && (!comm[0][1] || (comm[0][1] == 'v'
-		 && !comm[0][2])))
+		|| (*comm[0] == 'm' && (!comm[0][1] || (comm[0][1] == 'v'
+		&& !comm[0][2])))
 
-		 || (*comm[0] == 'v' && (!comm[0][1] || (comm[0][1] == 'v'
-		 && !comm[0][2])))
+		|| (*comm[0] == 'v' && (!comm[0][1] || (comm[0][1] == 'v'
+		&& !comm[0][2])))
 
-		 || (*comm[0] == 'p' && strcmp(comm[0], "paste") == 0)) {
+		|| (*comm[0] == 'p' && strcmp(comm[0], "paste") == 0)) {
 
 		if (((*comm[0] == 'c' || *comm[0] == 'v') && !comm[0][1])
 		|| (*comm[0] == 'v' && comm[0][1] == 'v' && !comm[0][2])
@@ -559,6 +559,10 @@ exec_cmd(char **comm)
 			else
 				strcpy(comm[0], "wcp");
 		} else if (*comm[0] == 'm' && !comm[0][1]) {
+			if (comm[1] && *comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
+				puts(_(WRAPPERS_USAGE));
+				return EXIT_SUCCESS;
+			}	
 			comm[0] = (char *)xrealloc(comm[0], 10 * sizeof(char));
 			if (mv_cmd == MV_MV)
 				strcpy(comm[0], "mv -i");
