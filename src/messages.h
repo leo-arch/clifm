@@ -35,6 +35,7 @@
 #define BOOKMARKS_USAGE "Handle bookmarks\nUsage: bm, bookmarks [a, add FILE] [d, del] [edit]"
 #define BULK_USAGE "Bulk rename files\nUsage: br, bulk ELN/FILE ..."
 #define CD_USAGE "Change current working directory\nUsage: cd [ELN/DIR]"
+#define COLORS_USAGE "Print a list of currently used color codes\nUsage: cc, colors"
 #define COLUMNS_USAGE "Set columned list of files on-off\nUsage: cl, columns [on, off]"
 #define CS_USAGE "Switch color schemes\nUsage: cs, colorschemes [edit] [COLORSCHEME]"
 #define DESEL_USAGE "Deselect one or more selected files\nUsage: desel, ds [*, a, all]"

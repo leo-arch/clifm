@@ -974,17 +974,12 @@ exec_cmd(char **comm)
 				puts(_("actions: No actions defined. Use the 'actions "
 				       "edit' command to add some"));
 			}
-		}
-
-		else if (strcmp(comm[1], "edit") == 0) {
+		} else if (strcmp(comm[1], "edit") == 0) {
 			exit_code = edit_actions();
 			return exit_code;
-		}
-
-		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
+		} else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
 			puts(_(ACTIONS_USAGE));
-
-		else {
+		} else {
 			fprintf(stderr, "%s\n", _(ACTIONS_USAGE));
 			exit_code = EXIT_FAILURE;
 			return EXIT_FAILURE;
@@ -1011,7 +1006,8 @@ exec_cmd(char **comm)
 	}
 
 	/*    ############### RELOAD ##################     */
-	else if (*comm[0] == 'r' && ((comm[0][1] == 'l' && !comm[0][2]) || strcmp(comm[0], "reload") == 0)) {
+	else if (*comm[0] == 'r' && ((comm[0][1] == 'l' && !comm[0][2])
+	|| strcmp(comm[0], "reload") == 0)) {
 		exit_code = reload_config();
 		welcome_message = 0;
 
@@ -1463,8 +1459,12 @@ exec_cmd(char **comm)
 		help_function();
 
 	else if (*comm[0] == 'c' && ((comm[0][1] == 'c' && !comm[0][2])
-	|| strcmp(comm[0], "colors") == 0))
-		color_codes();
+	|| strcmp(comm[0], "colors") == 0)) {
+		if (comm[1] && *comm[1] == '-' && strcmp(comm[1], "--help") == 0)
+			puts(_(COLORS_USAGE));
+		else
+			color_codes();
+	}
 
 	else if (*comm[0] == 'v' && (strcmp(comm[0], "ver") == 0
 	|| strcmp(comm[0], "version") == 0))

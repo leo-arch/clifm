@@ -54,13 +54,11 @@ get_ext_color(const char *ext)
 
 	int i = (int)ext_colors_n;
 	while (--i >= 0) {
-
 		if (!ext_colors[i] || !*ext_colors[i] || !ext_colors[i][2])
 			continue;
 
 		char *p = (char *)ext,
 			 *q = ext_colors[i];
-
 		/* +2 because stored extensions have this form: *.ext */
 		q += 2;
 
@@ -74,7 +72,6 @@ get_ext_color(const char *ext)
 
 		if (!match || *q != '=')
 			continue;
-
 		return ++q;
 	}
 
@@ -93,23 +90,17 @@ is_color_code(const char *str)
 	size_t digits = 0, semicolon = 0;
 
 	while (*str) {
-
-		if (*str >= '0' && *str <= '9')
+		if (*str >= '0' && *str <= '9') {
 			digits++;
-
-		else if (*str == ';') {
-
+		} else if (*str == ';') {
 			if (*(str + 1) == ';') /* Consecutive semicolons */
 				return 0;
-
 			digits = 0;
 			semicolon++;
-		}
-
+		} else if (*str != '\n') {
 		/* Neither digit nor semicolon */
-		else if (*str != '\n')
 			return 0;
-
+		}
 		str++;
 	}
 
@@ -121,7 +112,6 @@ is_color_code(const char *str)
 	/* At this point, we have a semicolon separated string of digits (3
 	 * consecutive max) with at most 12 fields. The only thing not
 	 * validated here are numbers themselves */
-
 	return 1;
 }
 
@@ -165,7 +155,6 @@ strip_color_line(const char *str, char mode)
 	}
 
 	buf[len] = '\0';
-
 	return buf;
 }
 
@@ -235,19 +224,14 @@ cschemes_function(char **args)
 		return EXIT_FAILURE;
 
 	if (!args[1]) {
-
 		if (!cschemes_n) {
 			printf(_("%s: No color schemes found\n"), PROGRAM_NAME);
 			return EXIT_SUCCESS;
 		}
-
 		size_t i;
-
 		for (i = 0; color_schemes[i]; i++) {
-
 			if (cur_cscheme == color_schemes[i])
 				printf("%s%s%s\n", mi_c, color_schemes[i], df_c);
-
 			else
 				printf("%s\n", color_schemes[i]);
 		}
@@ -287,9 +271,7 @@ cschemes_function(char **args)
 		int ret = mime_open(cmd);
 
 		if (ret != EXIT_FAILURE) {
-
 			stat(file, &attr);
-
 			if (mtime_bfr != (time_t)attr.st_mtime
 			&& set_colors(cur_cscheme, 0) == EXIT_SUCCESS
 			&& cd_lists_on_the_fly) {
@@ -309,17 +291,12 @@ cschemes_function(char **args)
 	}
 
 	size_t i, cs_found = 0;
-
 	for (i = 0; color_schemes[i]; i++) {
 		if (*args[1] == *color_schemes[i]
 		&& strcmp(args[1], color_schemes[i]) == 0) {
-
 			cs_found = 1;
-
 			if (set_colors(args[1], 0) == EXIT_SUCCESS) {
-
 				cur_cscheme = color_schemes[i];
-
 				switch_cscheme = 1;
 
 				if (cd_lists_on_the_fly) {
@@ -328,7 +305,6 @@ cschemes_function(char **args)
 				}
 
 				switch_cscheme = 0;
-
 				return EXIT_SUCCESS;
 			}
 		}
@@ -354,13 +330,9 @@ set_colors(const char *colorscheme, int env)
 
 	/* Set a pointer to the current color scheme */
 	if (colorscheme && *colorscheme && color_schemes) {
-
 		char *def_cscheme = (char *)NULL;
-
 		size_t i;
-
 		for (i = 0; color_schemes[i]; i++) {
-
 			if (*colorscheme == *color_schemes[i]
 			&& strcmp(colorscheme, color_schemes[i]) == 0) {
 				cur_cscheme = color_schemes[i];
@@ -393,12 +365,10 @@ set_colors(const char *colorscheme, int env)
 			filecolors = savestring(env_filecolors, strlen(env_filecolors));
 
 		env_filecolors = (char *)NULL;
-
 		if (env_extcolors)
 			extcolors = savestring(env_extcolors, strlen(env_extcolors));
 
 		env_extcolors = (char *)NULL;
-
 		if (env_ifacecolors)
 			ifacecolors = savestring(env_ifacecolors, strlen(env_ifacecolors));
 
@@ -424,7 +394,6 @@ set_colors(const char *colorscheme, int env)
 		}
 
 		FILE *fp_colors = fopen(colorscheme_file, "r");
-
 		if (fp_colors) {
 
 			/* If called from the color scheme function, reset all
@@ -440,7 +409,6 @@ set_colors(const char *colorscheme, int env)
 
 			while ((line_len = getline(&line, &line_size,
 				    fp_colors)) > 0) {
-
 				/* Interface colors */
 				if (!ifacecolors && *line == 'I'
 				&& strncmp(line, "InterfaceColors=", 16) == 0) {
@@ -451,9 +419,7 @@ set_colors(const char *colorscheme, int env)
 						continue;
 
 					opt_str++;
-
 					char *color_line = strip_color_line(opt_str, 't');
-
 					if (!color_line)
 						continue;
 
@@ -466,14 +432,12 @@ set_colors(const char *colorscheme, int env)
 				&& strncmp(line, "FiletypeColors=", 15) == 0) {
 					file_type_found = 1;
 					char *opt_str = strchr(line, '=');
-
 					if (!opt_str)
 						continue;
 
 					opt_str++;
 
 					char *color_line = strip_color_line(opt_str, 't');
-
 					if (!color_line)
 						continue;
 
@@ -485,14 +449,11 @@ set_colors(const char *colorscheme, int env)
 				if (!extcolors && *line == 'E' && strncmp(line, "ExtColors=", 10) == 0) {
 					ext_type_found = 1;
 					char *opt_str = strchr(line, '=');
-
 					if (!opt_str)
 						continue;
 
 					opt_str++;
-
 					char *color_line = strip_color_line(opt_str, 'x');
-
 					if (!color_line)
 						continue;
 
@@ -541,7 +502,6 @@ set_colors(const char *colorscheme, int env)
 
 			free(line);
 			line = (char *)NULL;
-
 			fclose(fp_colors);
 		}
 
@@ -551,9 +511,7 @@ set_colors(const char *colorscheme, int env)
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 				    colorscheme_file, strerror(errno));
 				return EXIT_FAILURE;
-			}
-
-			else {
+			} else {
 				_err('w', PRINT_PROMPT, _("%s: %s: No such color scheme. "
 					"Falling back to the default one\n"), PROGRAM_NAME,
 					colorscheme);
@@ -568,33 +526,25 @@ set_colors(const char *colorscheme, int env)
 	/* Split the colors line into substrings (one per color) */
 
 	if (!extcolors) {
-
 		/* Unload current extension colors */
 		if (ext_colors_n) {
 			int i = (int)ext_colors_n;
-
 			while (--i >= 0)
 				free(ext_colors[i]);
-
 			free(ext_colors);
 			ext_colors = (char **)NULL;
 			free(ext_colors_len);
 			ext_colors_n = 0;
 		}
-	}
-
-	else {
-
+	} else {
 		char *p = extcolors, *buf = (char *)NULL;
 		size_t len = 0;
 		int eol = 0;
 
 		if (ext_colors_n) {
 			int i = (int)ext_colors_n;
-
 			while (--i >= 0)
 				free(ext_colors[i]);
-
 			free(ext_colors);
 			ext_colors = (char **)NULL;
 			free(ext_colors_len);
@@ -651,7 +601,6 @@ set_colors(const char *colorscheme, int env)
 		int i = (int)ext_colors_n;
 		while (--i >= 0) {
 			char *ret = strrchr(ext_colors[i], '=');
-
 			if (!ret || !is_color_code(ret + 1)) {
 				*ext_colors[i] = '\0';
 				ext_colors_len[i] = 0;
@@ -659,7 +608,6 @@ set_colors(const char *colorscheme, int env)
 			}
 
 			size_t j, ext_len = 0;
-
 			for (j = 2; ext_colors[i][j] && ext_colors[i][j] != '='; j++)
 				ext_len++;
 
@@ -693,7 +641,6 @@ set_colors(const char *colorscheme, int env)
 		*nm_c = '\0';
 		*si_c = '\0';
 	} else {
-
 		char *p = ifacecolors, *buf = (char *)NULL,
 		     **colors = (char **)NULL;
 		size_t len = 0, words = 0;
@@ -743,16 +690,16 @@ set_colors(const char *colorscheme, int env)
 		int i = (int)words;
 		/* Set the color variables */
 		while (--i >= 0) {
-
 			if (*colors[i] == 't' && strncmp(colors[i], "tx=", 3) == 0) {
-				if (!is_color_code(colors[i] + 3))
+				if (!is_color_code(colors[i] + 3)) {
 					/* zero the corresponding variable as a flag for
 					 * the check after this for loop to prepare the
 					 * variable to hold the default color */
 					*tx_c = '\0';
-				else
+				} else {
 					snprintf(tx_c, MAX_COLOR + 2, "\001\x1b[%sm\002",
 					    colors[i] + 3);
+				}
 			}
 
 			else if (*colors[i] == 's' && strncmp(colors[i], "sh=", 3) == 0) {
@@ -947,7 +894,6 @@ set_colors(const char *colorscheme, int env)
 		ls_buf = (char *)xnmalloc(linec_len + 1, sizeof(char));
 
 		while (filecolors[i]) {
-
 			int rem = 0;
 
 			if ((int)i < (int)(linec_len - 3) && ((filecolors[i] == 'n'
@@ -965,8 +911,7 @@ set_colors(const char *colorscheme, int env)
 				/* If one of the above is found, move to the next
 				 * color code */
 				rem = 1;
-				for (i += 3; filecolors[i] && filecolors[i] != ':'; i++)
-					;
+				for (i += 3; filecolors[i] && filecolors[i] != ':'; i++);
 			}
 
 			if (filecolors[i]) {
@@ -1038,198 +983,197 @@ set_colors(const char *colorscheme, int env)
 		/* Set the color variables */
 		i = (int)words;
 		while (--i >= 0) {
-
-			if (*colors[i] == 'd' && strncmp(colors[i], "di=", 3) == 0)
+			if (*colors[i] == 'd' && strncmp(colors[i], "di=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*di_c = '\0';
 				else
 					snprintf(di_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 'd' && strncmp(colors[i], "df=", 3) == 0)
+			} else if (*colors[i] == 'd' && strncmp(colors[i], "df=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*df_c = '\0';
 				else
 					snprintf(df_c, MAX_COLOR - 1, "\001\x1b[%s;49m\002",
 							colors[i] + 3);
 
-			else if (*colors[i] == 'd' && strncmp(colors[i], "dc=", 3) == 0)
+			} else if (*colors[i] == 'd' && strncmp(colors[i], "dc=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*dc_c = '\0';
 				else
 					snprintf(dc_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 'w' && strncmp(colors[i], "wc=", 3) == 0)
+			} else if (*colors[i] == 'w' && strncmp(colors[i], "wc=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*wc_c = '\0';
 				else
 					snprintf(wc_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 's' && strncmp(colors[i], "sh=", 3) == 0)
+			} else if (*colors[i] == 's' && strncmp(colors[i], "sh=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*sh_c = '\0';
 				else
 					snprintf(sh_c, MAX_COLOR - 1, "\001\x1b[%sm\002",
 							colors[i] + 3);
 
-			else if (*colors[i] == 's' && strncmp(colors[i], "sf=", 3) == 0)
+			} else if (*colors[i] == 's' && strncmp(colors[i], "sf=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*sf_c = '\0';
 				else
 					snprintf(sf_c, MAX_COLOR - 1, "\001\x1b[%sm\002",
 							colors[i] + 3);
 
-			else if (*colors[i] == 's' && strncmp(colors[i], "sc=", 3) == 0)
+			} else if (*colors[i] == 's' && strncmp(colors[i], "sc=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*sc_c = '\0';
 				else
 					snprintf(sc_c, MAX_COLOR - 1, "\001\x1b[%sm\002",
 							colors[i] + 3);
 
-			else if (*colors[i] == 's' && strncmp(colors[i], "sx=", 3) == 0)
+			} else if (*colors[i] == 's' && strncmp(colors[i], "sx=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*sx_c = '\0';
 				else
 					snprintf(sx_c, MAX_COLOR - 1, "\001\x1b[%sm\002",
 							colors[i] + 3);
 
-			else if (*colors[i] == 'd' && strncmp(colors[i], "dh=", 3) == 0)
+			} else if (*colors[i] == 'd' && strncmp(colors[i], "dh=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*dh_c = '\0';
 				else
 					snprintf(dh_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
-			else if (*colors[i] == 'n' && strncmp(colors[i], "nd=", 3) == 0)
+			} else if (*colors[i] == 'n' && strncmp(colors[i], "nd=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*nd_c = '\0';
 				else
 					snprintf(nd_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 'e' && strncmp(colors[i], "ed=", 3) == 0)
+			} else if (*colors[i] == 'e' && strncmp(colors[i], "ed=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*ed_c = '\0';
 				else
 					snprintf(ed_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 'n' && strncmp(colors[i], "ne=", 3) == 0)
+			} else if (*colors[i] == 'n' && strncmp(colors[i], "ne=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*ne_c = '\0';
 				else
 					snprintf(ne_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 'f' && strncmp(colors[i], "fi=", 3) == 0)
+			} else if (*colors[i] == 'f' && strncmp(colors[i], "fi=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*fi_c = '\0';
 				else
 					snprintf(fi_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 'e' && strncmp(colors[i], "ef=", 3) == 0)
+			} else if (*colors[i] == 'e' && strncmp(colors[i], "ef=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*ef_c = '\0';
 				else
 					snprintf(ef_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 'n' && strncmp(colors[i], "nf=", 3) == 0)
+			} else if (*colors[i] == 'n' && strncmp(colors[i], "nf=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*nf_c = '\0';
 				else
 					snprintf(nf_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 'l' && strncmp(colors[i], "ln=", 3) == 0)
+			} else if (*colors[i] == 'l' && strncmp(colors[i], "ln=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*ln_c = '\0';
 				else
 					snprintf(ln_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 'o' && strncmp(colors[i], "or=", 3) == 0)
+			} else if (*colors[i] == 'o' && strncmp(colors[i], "or=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*or_c = '\0';
 				else
 					snprintf(or_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 'e' && strncmp(colors[i], "ex=", 3) == 0)
+			} else if (*colors[i] == 'e' && strncmp(colors[i], "ex=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*ex_c = '\0';
 				else
 					snprintf(ex_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 'e' && strncmp(colors[i], "ee=", 3) == 0)
+			} else if (*colors[i] == 'e' && strncmp(colors[i], "ee=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*ee_c = '\0';
 				else
 					snprintf(ee_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 'b' && strncmp(colors[i], "bd=", 3) == 0)
+			} else if (*colors[i] == 'b' && strncmp(colors[i], "bd=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*bd_c = '\0';
 				else
 					snprintf(bd_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 'c' && strncmp(colors[i], "cd=", 3) == 0)
+			} else if (*colors[i] == 'c' && strncmp(colors[i], "cd=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*cd_c = '\0';
 				else
 					snprintf(cd_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 'p' && strncmp(colors[i], "pi=", 3) == 0)
+			} else if (*colors[i] == 'p' && strncmp(colors[i], "pi=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*pi_c = '\0';
 				else
 					snprintf(pi_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 's' && strncmp(colors[i], "so=", 3) == 0)
+			} else if (*colors[i] == 's' && strncmp(colors[i], "so=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*so_c = '\0';
 				else
 					snprintf(so_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 's' && strncmp(colors[i], "su=", 3) == 0)
+			} else if (*colors[i] == 's' && strncmp(colors[i], "su=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*su_c = '\0';
 				else
 					snprintf(su_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 's' && strncmp(colors[i], "sg=", 3) == 0)
+			} else if (*colors[i] == 's' && strncmp(colors[i], "sg=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*sg_c = '\0';
 				else
 					snprintf(sg_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 't' && strncmp(colors[i], "tw=", 3) == 0)
+			} else if (*colors[i] == 't' && strncmp(colors[i], "tw=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*tw_c = '\0';
 				else
 					snprintf(tw_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 's' && strncmp(colors[i], "st=", 3) == 0)
+			} else if (*colors[i] == 's' && strncmp(colors[i], "st=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*st_c = '\0';
 				else
 					snprintf(st_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 'o' && strncmp(colors[i], "ow=", 3) == 0)
+			} else if (*colors[i] == 'o' && strncmp(colors[i], "ow=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*ow_c = '\0';
 				else
 					snprintf(ow_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 'c' && strncmp(colors[i], "ca=", 3) == 0)
+			} else if (*colors[i] == 'c' && strncmp(colors[i], "ca=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*ca_c = '\0';
 				else
 					snprintf(ca_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 'n' && strncmp(colors[i], "no=", 3) == 0)
+			} else if (*colors[i] == 'n' && strncmp(colors[i], "no=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*no_c = '\0';
 				else
 					snprintf(no_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 'm' && strncmp(colors[i], "mh=", 3) == 0)
+			} else if (*colors[i] == 'm' && strncmp(colors[i], "mh=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*mh_c = '\0';
 				else
 					snprintf(mh_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			else if (*colors[i] == 'u' && strncmp(colors[i], "uf=", 3) == 0) {
+			} else if (*colors[i] == 'u' && strncmp(colors[i], "uf=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*uf_c = '\0';
 				else
@@ -1352,18 +1296,15 @@ colors_list(const char *ent, const int i, const int pad, const int new_line)
 
 	if (i > 0) /* When listing files in CWD */
 		sprintf(index, "%d ", i);
-
 	else if (i == -1) /* ELN for entry could not be found */
 		sprintf(index, "? ");
-
+	else
 	/* When listing files NOT in CWD (called from search function and
 	 * first argument is a path: "/search_str /path") 'i' is zero. In
 	 * this case, no index should be printed at all */
-	else
 		index[0] = '\0';
 
 	struct stat file_attrib;
-
 	if (lstat(ent, &file_attrib) == -1) {
 		fprintf(stderr, "%s%s%s%s%-*s%s%s", el_c, index, df_c,
 		    uf_c, pad, ent, df_c, new_line ? "\n" : "");
@@ -1382,55 +1323,40 @@ colors_list(const char *ent, const int i, const int pad, const int new_line)
 	switch (file_attrib.st_mode & S_IFMT) {
 
 	case S_IFREG:
-
-		if (access(ent, R_OK) == -1)
+		if (access(ent, R_OK) == -1) {
 			color = nf_c;
-
-		else if (file_attrib.st_mode & S_ISUID) /* set uid file */
+		} else if (file_attrib.st_mode & S_ISUID) { /* set uid file */
 			color = su_c;
-
-		else if (file_attrib.st_mode & S_ISGID) /* set gid file */
+		} else if (file_attrib.st_mode & S_ISGID) { /* set gid file */
 			color = sg_c;
-
-		else {
+		} else {
 #ifdef _LINUX_CAP
 			cap = cap_get_file(ent);
-
 			if (cap) {
 				color = ca_c;
 				cap_free(cap);
-			}
-
-			else if (file_attrib.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
+			} else if (file_attrib.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
 #else
-
 			if (file_attrib.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
 #endif
 				if (file_attrib.st_size == 0)
 					color = ee_c;
 				else
 					color = ex_c;
-			}
-
-			else if (file_attrib.st_size == 0)
+			} else if (file_attrib.st_size == 0) {
 				color = ef_c;
-
-			else if (file_attrib.st_nlink > 1)
+			} else if (file_attrib.st_nlink > 1) {
 				color = mh_c;
-
-			else {
+			} else {
 				char *ext = (strrchr(ent, '.'));
-
 				if (ext) {
 					char *extcolor = get_ext_color(ext);
-
 					if (extcolor) {
 						snprintf(ext_color, MAX_COLOR, "\x1b[%sm",
 						    extcolor);
 						color = ext_color;
 						extcolor = (char *)NULL;
 					}
-
 					ext = (char *)NULL;
 				}
 			}
@@ -1439,11 +1365,9 @@ colors_list(const char *ent, const int i, const int pad, const int new_line)
 		break;
 
 	case S_IFDIR:
-
-		if (access(ent, R_OK | X_OK) != 0)
+		if (access(ent, R_OK | X_OK) != 0) {
 			color = nd_c;
-
-		else {
+		} else {
 			int is_oth_w = 0;
 
 			if (file_attrib.st_mode & S_IWOTH)
@@ -1458,44 +1382,28 @@ colors_list(const char *ent, const int i, const int pad, const int new_line)
 					 * /media/usb) the result will be zero. */
 					(files_dir == 2 || files_dir == 0) ? ed_c : di_c);
 		}
-
 		break;
 
 	case S_IFLNK:
 		linkname = realpath(ent, (char *)NULL);
-
 		if (linkname) {
 			color = ln_c;
 			free(linkname);
-		}
-
-		else
+		} else {
 			color = or_c;
-
+		}
 		break;
 
-	case S_IFIFO:
-		color = pi_c;
-		break;
-	case S_IFBLK:
-		color = bd_c;
-		break;
-	case S_IFCHR:
-		color = cd_c;
-		break;
-	case S_IFSOCK:
-		color = so_c;
-		break;
-
+	case S_IFIFO: color = pi_c; break;
+	case S_IFBLK: color = bd_c; break;
+	case S_IFCHR: color = cd_c; break;
+	case S_IFSOCK: color = so_c; break;
 	/* In case all the above conditions are false... */
-	default:
-		color = no_c;
-		break;
+	default: color = no_c; break;
 	}
 
 	printf("%s%s%s%s%s%s%s%-*s", el_c, index, df_c, color,
 	    ent, df_c, new_line ? "\n" : "", pad, "");
-
 	free(index);
 }
 
@@ -1517,7 +1425,6 @@ get_colorschemes(void)
 			/* count_dir already opened and read this directory succesfully,
 			 * so that we don't need to check opendir for errors */
 			dir_p = opendir(COLORS_DIR);
-
 			while ((ent = readdir(dir_p)) != NULL) {
 				/* Skipp . and .. */
 				char *name = ent->d_name;
@@ -1567,7 +1474,6 @@ get_colorschemes(void)
 			continue;
 
 		char *ret = strchr(name, '.');
-
 		/* If the file contains not dot, or if its extension is not
 		 * .cfm, or if it's just a hidden file named ".cfm", skip it */
 		if (!ret || ret == name || strcmp(ret, ".cfm") != 0)
@@ -1607,7 +1513,6 @@ color_codes(void)
 
 	if (ext_colors_n)
 		printf(_("%sFile type colors%s\n\n"), bold, df_c);
-
 	printf(_(" %sfile name%s: Directory with no read permission (nd)\n"),
 	    nd_c, df_c);
 	printf(_(" %sfile name%s: File with no read permission (nf)\n"),
@@ -1658,22 +1563,16 @@ color_codes(void)
 
 	if (ext_colors_n) {
 		size_t i, j;
-
 		printf(_("%sExtension colors%s\n\n"), bold, df_c);
 		for (i = 0; i < ext_colors_n; i++) {
 			char *ret = strrchr(ext_colors[i], '=');
-
 			if (!ret)
 				continue;
-
 			printf(" \x1b[%sm", ret + 1);
-
 			for (j = 0; ext_colors[i][j] != '='; j++)
 				putchar(ext_colors[i][j]);
-
 			puts("\x1b[0m");
 		}
-
 		putchar('\n');
 	}
 }
