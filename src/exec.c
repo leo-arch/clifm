@@ -1701,8 +1701,10 @@ exec_chained_cmds(char *cmd)
 		while (cmd[i] && cmd[i] != '&' && cmd[i] != ';')
 			str[len++] = cmd[i++];
 
-		if (!*str)
+		if (!*str) {
+			free(str);
 			continue;
+		}
 
 		/* Should we execute conditionally? */
 		if (cmd[i] == '&')
