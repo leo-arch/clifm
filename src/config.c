@@ -2063,8 +2063,7 @@ init_config(void)
 	 * xterm-like terminal emulators */
 	/* However, there is no need to do this if using the linux console,
 	 * since we are not in a graphical environment */
-	if (xargs.stealth_mode != 1 && (flags & GUI)
-	&& strncmp(getenv("TERM"), "xterm", 5) == 0) {
+	if ((flags & GUI) && strncmp(getenv("TERM"), "xterm", 5) == 0) {
 		printf("\x1b[?1036h"); /* metaSendsEscape = true */
 /*		printf("\x1b[?1034l"); // eightBitInput = false
 		printf("\x1b[>1;1m"); // modifyCursorKeys = 1
