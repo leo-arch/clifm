@@ -76,7 +76,6 @@ run_and_refresh(char **comm)
 	log_function(comm);
 
 	size_t i = 0, total_len = 0;
-
 	for (i = 0; i <= args_n; i++)
 		total_len += strlen(comm[i]);
 
@@ -98,11 +97,9 @@ run_and_refresh(char **comm)
 	/* If 'rm sel' and command is successful, deselect everything */
 	if (is_sel && *comm[0] == 'r' && comm[0][1] == 'm' && (!comm[0][2]
 	|| comm[0][2] == ' ')) {
-
 		int j = (int)sel_n;
 		while (--j >= 0)
 			free(sel_elements[j]);
-
 		sel_n = 0;
 		save_sel();
 	}
@@ -177,9 +174,7 @@ launch_execle(const char *cmd)
 	if (pid < 0) {
 		fprintf(stderr, "%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
 		return EXFORKERR;
-	}
-
-	else if (pid == 0) {
+	} else if (pid == 0) {
 		/* Reenable signals only for the child, in case they were
 		 * disabled for the parent */
 		signal(SIGHUP, SIG_DFL);
@@ -299,9 +294,6 @@ launch_execve(char **cmd, int bg, int xflags)
 int
 exec_cmd(char **comm)
 {
-	/*  if (!comm || *comm[0] == '\0')
-		return EXIT_FAILURE; */
-
 	fputs(df_c, stdout);
 
 	/* Exit flag. exit_code is zero (sucess) by default. In case of error
@@ -395,7 +387,6 @@ exec_cmd(char **comm)
 	 * is no second argument or if second argument is "&" */
 	if (*comm[0] != '/' && (autocd || auto_open) && (!comm[1]
 	|| (*comm[1] == '&' && !comm[1][1]))) {
-
 		char *tmp = comm[0];
 		size_t i, tmp_len = strlen(tmp);
 
@@ -804,7 +795,6 @@ exec_cmd(char **comm)
 			puts(_(BULK_USAGE));
 			return EXIT_SUCCESS;
 		}
-
 		exit_code = bulk_rename(comm);
 	}
 
@@ -815,7 +805,6 @@ exec_cmd(char **comm)
 			puts(_(SORT_USAGE));
 			return EXIT_SUCCESS;
 		}
-
 		exit_code = sort_function(comm);
 	}
 
@@ -831,7 +820,6 @@ exec_cmd(char **comm)
 			exit_code = archiver(comm, 'c');
 		else
 			exit_code = archiver(comm, 'd');
-
 		return exit_code;
 	}
 
@@ -1330,7 +1318,6 @@ exec_cmd(char **comm)
 					exit_code = EXIT_FAILURE;
 					return EXIT_FAILURE;
 				}
-
 				exit_code = alias_import(comm[2]);
 				return exit_code;
 			}
@@ -1657,7 +1644,6 @@ exec_cmd(char **comm)
 
 		if (launch_execle(ext_cmd) != EXIT_SUCCESS)
 			exit_code = EXIT_FAILURE;
-
 		free(ext_cmd);
 
 		/* Restore LS_COLORS value to use CliFM colors */
@@ -1669,7 +1655,7 @@ exec_cmd(char **comm)
 
 		/* Reload the list of available commands in PATH for TAB completion.
 		 * Why? If this list is not updated, whenever some new program is
-		 * installed, renamed, or removed from some of the pathsin PATH
+		 * installed, renamed, or removed from some of the paths in PATH
 		 * while in CliFM, this latter needs to be restarted in order
 		 * to be able to recognize the new program for TAB completion */
 
@@ -1678,9 +1664,7 @@ exec_cmd(char **comm)
 			j = (int)path_progsn;
 			while (--j >= 0)
 				free(bin_commands[j]);
-
 			free(bin_commands);
-
 			bin_commands = (char **)NULL;
 		}
 
@@ -1714,52 +1698,43 @@ exec_chained_cmds(char *cmd)
 
 		/* Get command */
 		str = (char *)xcalloc(strlen(cmd) + 1, sizeof(char));
-		while (cmd[i] && cmd[i] != '&' && cmd[i] != ';') {
+		while (cmd[i] && cmd[i] != '&' && cmd[i] != ';')
 			str[len++] = cmd[i++];
-		}
+
+		if (!*str)
+			continue;
 
 		/* Should we execute conditionally? */
 		if (cmd[i] == '&')
 			cond_exec = 1;
 
 		/* Execute the command */
-		if (str) {
-			char **tmp_cmd = parse_input_str(str);
-			free(str);
+		char **tmp_cmd = parse_input_str(str);
+		free(str);
 
-			if (tmp_cmd) {
-				int error_code = 0;
-				size_t j;
-				char **alias_cmd = check_for_alias(tmp_cmd);
-
-				if (alias_cmd) {
-
-					if (exec_cmd(alias_cmd) != 0)
-						error_code = 1;
-
-					for (j = 0; alias_cmd[j]; j++)
-						free(alias_cmd[j]);
-
-					free(alias_cmd);
-				}
-
-				else {
-
-					if (exec_cmd(tmp_cmd) != 0)
-						error_code = 1;
-
-					for (j = 0; j <= args_n; j++)
-						free(tmp_cmd[j]);
-
-					free(tmp_cmd);
-				}
-
-				/* Do not continue if the execution was condtional and
-				 * the previous command failed */
-				if (cond_exec && error_code)
-					break;
-			}
+		if (!tmp_cmd)
+			continue;
+		
+		int error_code = 0;
+		size_t j;
+		char **alias_cmd = check_for_alias(tmp_cmd);
+		if (alias_cmd) {
+			if (exec_cmd(alias_cmd) != 0)
+				error_code = 1;
+			for (j = 0; alias_cmd[j]; j++)
+				free(alias_cmd[j]);
+			free(alias_cmd);
+		} else {
+			if (exec_cmd(tmp_cmd) != 0)
+				error_code = 1;
+			for (j = 0; j <= args_n; j++)
+				free(tmp_cmd[j]);
+			free(tmp_cmd);
 		}
+		/* Do not continue if the execution was condtional and
+		 * the previous command failed */
+		if (cond_exec && error_code)
+			break;
 	}
 }
 
@@ -1770,7 +1745,6 @@ exec_profile(void)
 		return;
 
 	FILE *fp = fopen(PROFILE_FILE, "r");
-
 	if (!fp)
 		return;
 
@@ -1779,7 +1753,6 @@ exec_profile(void)
 	ssize_t line_len = 0;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
-
 		/* Skip empty and commented lines */
 		if (!*line || *line == '\n' || *line == '#')
 			continue;
@@ -1788,11 +1761,10 @@ exec_profile(void)
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
 
-		if (strchr(line, '=') && !_ISDIGIT(*line))
+		if (strchr(line, '=') && !_ISDIGIT(*line)) {
 			create_usr_var(line);
-
+		} else if (strlen(line) != 0) {
 		/* Parse line and execute it */
-		else if (strlen(line) != 0) {
 			args_n = 0;
 
 			char **cmds = parse_input_str(line);
@@ -1812,6 +1784,5 @@ exec_profile(void)
 	}
 
 	free(line);
-
 	fclose(fp);
 }
