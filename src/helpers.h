@@ -362,6 +362,7 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define BS 8
 #define _TAB 9
 #define ENTER 13
+#define DELETE 127
 /* #define OP_BRACKET 91
 #define UC_O 79
 #define SPACE 32 */

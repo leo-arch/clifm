@@ -956,9 +956,14 @@ rl_suggestions(char c)
 /*	if (c == 127)
 		c = BS; */
 
+	/* Skip control characters (0 - 31) except backspace (8), tab(9),
+	 * enter (13), and escape (27) */
+	if (c < 32 && c != BS && c != _TAB && c != ENTER && c != _ESC)
+		goto FAIL;
+
 	/* Skip backspace, Enter, and TAB keys */
 	switch(c) {
-		case 127: /* Delete key */
+		case DELETE:
 /*			if (rl_point != rl_end && suggestion.printed)
 				clear_suggestion();
 			goto FAIL; */
