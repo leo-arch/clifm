@@ -2058,12 +2058,10 @@ init_config(void)
 	if (config_ok)
 		read_config();
 
-	/* "XTerm*eightBitInput: false" must be set in HOME/.Xresources
-	 * to make some keybindings like Alt+letter work correctly in
-	 * xterm-like terminal emulators */
-	/* However, there is no need to do this if using the linux console,
-	 * since we are not in a graphical environment */
-	if ((flags & GUI) && strncmp(getenv("TERM"), "xterm", 5) == 0) {
+	if ((flags & GUI) && getenv("XTERM_VERSION")) {
+		/* If running Xterm, instruct it to send an escape code (27)
+		 * for Meta (Alt) key sequences. Otherwise, Alt keybindings won't
+		 * work */
 		printf("\x1b[?1036h"); /* metaSendsEscape = true */
 /*		printf("\x1b[?1034l"); // eightBitInput = false
 		printf("\x1b[>1;1m"); // modifyCursorKeys = 1
