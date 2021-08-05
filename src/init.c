@@ -206,7 +206,6 @@ set_start_path(void)
 	/* If chdir(path) fails, set path to cwd, list files and print the
 	 * error message. If no access to CWD either, exit */
 	if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
-
 		_err('e', PRINT_PROMPT, "%s: chdir: '%s': %s\n", PROGRAM_NAME,
 		    ws[cur_ws].path, strerror(errno));
 
@@ -384,7 +383,6 @@ load_jumpdb(void)
 	snprintf(JUMP_FILE, dir_len + 10, "%s/jump.cfm", CONFIG_DIR);
 
 	struct stat attr;
-
 	if (stat(JUMP_FILE, &attr) == -1) {
 		free(JUMP_FILE);
 		return;
@@ -523,7 +521,6 @@ load_bookmarks(void)
 
 	size_t bm_total = 0;
 	char tmp_line[256];
-
 	while (fgets(tmp_line, (int)sizeof(tmp_line), bm_fp)) {
 		if (!*tmp_line || *tmp_line == '#' || *tmp_line == '\n')
 			continue;
@@ -576,7 +573,6 @@ load_bookmarks(void)
 
 			tmp++;
 			p = tmp;
-
 			tmp = strchr(p, ':');
 
 			if (!tmp) {
@@ -950,7 +946,6 @@ external_arguments(int argc, char **argv)
 
 	/* Increment whenever a new (only) long option is added */
 	int long_opts = 33;
-
 	int optc;
 	/* Variables to store arguments to options (-c, -p and -P) */
 	char *path_value = (char *)NULL,
@@ -1110,7 +1105,6 @@ external_arguments(int argc, char **argv)
 
 		case 33: {
 			struct stat attr;
-
 			if (stat(optarg, &attr) == -1) {
 				fprintf(stderr, "%s: %s: %s", PROGRAM_NAME, optarg,
 				    strerror(errno));
@@ -1329,9 +1323,7 @@ external_arguments(int argc, char **argv)
 				fprintf(stderr, _("%s: invalid option -- '%c'\nUsage: "
 						  "%s %s\nTry '%s --help' for more information.\n"),
 				    PROGRAM_NAME, optopt, GRAL_USAGE, PNL, PNL);
-			}
-
-			else {
+			} else {
 				fprintf(stderr, _("%s: unknown option character '\\%x'\n"),
 				    PROGRAM_NAME, (unsigned int)optopt);
 			}
@@ -1348,9 +1340,7 @@ external_arguments(int argc, char **argv)
 	 * and exit */
 	int i = optind;
 	if (argv[i]) {
-
 		struct stat attr;
-
 		if (stat(tilde_expand(argv[i]), &attr) == -1) {
 			fprintf(stderr, "%s: %s: %s", PROGRAM_NAME, argv[i],
 			    strerror(errno));
@@ -1386,9 +1376,7 @@ external_arguments(int argc, char **argv)
 			_err('e', PRINT_PROMPT, _("%s: %s: %s\n"
 						  "Falling back to the default bookmarks file\n"),
 			    PROGRAM_NAME, bm_value, strerror(errno));
-		}
-
-		else {
+		} else {
 			alt_bm_file = savestring(bm_value, strlen(bm_value));
 			_err('n', PRINT_PROMPT, _("%s: Loaded alternative "
 						  "bookmarks file\n"), PROGRAM_NAME);
@@ -1434,7 +1422,6 @@ external_arguments(int argc, char **argv)
 
 	if (kbinds_value) {
 		char *kbinds_exp = (char *)NULL;
-
 		if (*kbinds_value == '~') {
 			kbinds_exp = tilde_expand(kbinds_value);
 			kbinds_value = kbinds_exp;
@@ -1450,9 +1437,7 @@ external_arguments(int argc, char **argv)
 						  "Falling back to the default keybindings file\n"),
 			    PROGRAM_NAME, kbinds_value, strerror(errno));
 			/*          xargs.config = -1; */
-		}
-
-		else {
+		} else {
 			alt_kbinds_file = savestring(kbinds_value, strlen(kbinds_value));
 			_err('n', PRINT_PROMPT, _("%s: Loaded alternative "
 				"keybindings file\n"), PROGRAM_NAME);
@@ -1480,9 +1465,7 @@ external_arguments(int argc, char **argv)
 				"Falling back to default\n"), PROGRAM_NAME,
 			    config_value, strerror(errno));
 			xargs.config = -1;
-		}
-
-		else {
+		} else {
 			alt_config_file = savestring(config_value, strlen(config_value));
 			_err('n', PRINT_PROMPT, _("%s: Loaded alternative "
 				"configuration file\n"), PROGRAM_NAME);
@@ -1512,9 +1495,7 @@ external_arguments(int argc, char **argv)
 				free(ws[cur_ws].path);
 
 			ws[cur_ws].path = savestring(path_tmp, strlen(path_tmp));
-		}
-
-		else { /* Error changing directory */
+		} else { /* Error changing directory */
 			if (xargs.list_and_quit == 1) {
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 				    path_tmp, strerror(errno));
@@ -1580,7 +1561,6 @@ init_shell(void)
 
 	/* Ignore interactive and job-control signals */
 	set_signals_to_ignore();
-
 	/* Put ourselves in our own process group */
 	own_pid = get_own_pid();
 
@@ -1597,10 +1577,8 @@ init_shell(void)
 
 	/* Grab control of the terminal */
 	tcsetpgrp(STDIN_FILENO, own_pid);
-
 	/* Save default terminal attributes for shell */
 	tcgetattr(STDIN_FILENO, &shell_tmodes);
-
 	return;
 }
 
@@ -1614,7 +1592,6 @@ get_sel_files(void)
 	/* First, clear the sel array, in case it was already used */
 	if (sel_n > 0) {
 		int i = (int)sel_n;
-
 		while (--i >= 0)
 			free(sel_elements[i]);
 	}
@@ -1625,7 +1602,6 @@ get_sel_files(void)
 
 	/* Open the tmp sel file and load its contents into the sel array */
 	FILE *sel_fp = fopen(SEL_FILE, "r");
-
 	/*  sel_elements = xcalloc(1, sizeof(char *)); */
 	if (!sel_fp)
 		return EXIT_FAILURE;
@@ -1633,9 +1609,7 @@ get_sel_files(void)
 	/* Since this file contains only paths, we can be sure no line
 	 * length will be larger than PATH_MAX */
 	char line[PATH_MAX] = "";
-
 	while (fgets(line, (int)sizeof(line), sel_fp)) {
-
 		size_t len = strlen(line);
 
 		if (line[len - 1] == '\n')
@@ -1649,7 +1623,6 @@ get_sel_files(void)
 	}
 
 	fclose(sel_fp);
-
 	return EXIT_SUCCESS;
 }
 
@@ -1659,7 +1632,6 @@ size_t
 get_path_env(void)
 {
 	size_t i = 0;
-
 	/* Get the value of the PATH env variable */
 	char *path_tmp = (char *)NULL;
 
@@ -1684,7 +1656,6 @@ get_path_env(void)
 
 		/* Store path in PATH in a tmp buffer */
 		char buf[PATH_MAX];
-
 		while (path_tmp[i] && path_tmp[i] != ':')
 			buf[length++] = path_tmp[i++];
 
@@ -1703,7 +1674,6 @@ get_path_env(void)
 	}
 
 	free(path_tmp);
-
 	return path_num;
 }
 
@@ -1745,7 +1715,6 @@ get_last_path(void)
 	char line[PATH_MAX] = "";
 
 	while (fgets(line, (int)sizeof(line), last_fp)) {
-
 		char *p = line;
 
 		if (!*p || !strchr(p, '/'))
@@ -1766,7 +1735,6 @@ get_last_path(void)
 		}
 
 		int ws_n = *p - '0';
-
 		if (cur && cur_ws == UNSET)
 			cur_ws = ws_n;
 
@@ -1776,7 +1744,6 @@ get_last_path(void)
 
 	fclose(last_fp);
 	free(last_file);
-
 	return EXIT_SUCCESS;
 }
 
@@ -1791,14 +1758,12 @@ load_pinned_dir(void)
 	sprintf(pin_file, "%s/.pin", CONFIG_DIR);
 
 	struct stat attr;
-
 	if (lstat(pin_file, &attr) == -1) {
 		free(pin_file);
 		return EXIT_FAILURE;
 	}
 
 	FILE *fp = fopen(pin_file, "r");
-
 	if (!fp) {
 		_err('w', PRINT_PROMPT, _("%s: Error retrieving pinned "
 			"directory\n"), PROGRAM_NAME);
@@ -1825,11 +1790,8 @@ load_pinned_dir(void)
 	}
 
 	pinned_dir = savestring(line, strlen(line));
-
 	fclose(fp);
-
 	free(pin_file);
-
 	return EXIT_SUCCESS;
 }
 
@@ -1849,7 +1811,6 @@ get_path_programs(void)
 
 	i = (int)path_n;
 	while (--i >= 0) {
-
 		if (!paths[i] || !*paths[i] || xchdir(paths[i], NO_TITLE) == -1) {
 			cmd_n[i] = 0;
 			continue;
@@ -1881,12 +1842,9 @@ get_path_programs(void)
 
 	/* Now add aliases, if any */
 	if (aliases_n) {
-
 		i = (int)aliases_n;
 		while (--i >= 0) {
-
 			int index = strcntchr(aliases[i], '=');
-
 			if (index != -1) {
 				bin_commands[l] = (char *)xnmalloc((size_t)index + 1,
 				    sizeof(char));
@@ -1908,7 +1866,6 @@ get_path_programs(void)
 	/* And finally, add commands in PATH */
 	i = (int)path_n;
 	while (--i >= 0) {
-
 		if (cmd_n[i] <= 0)
 			continue;
 
@@ -1924,7 +1881,6 @@ get_path_programs(void)
 
 	free(commands_bin);
 	free(cmd_n);
-
 	path_progsn = (size_t)l;
 	bin_commands[l] = (char *)NULL;
 }
@@ -1980,14 +1936,12 @@ load_dirhist(void)
 		return EXIT_FAILURE;
 
 	FILE *fp = fopen(DIRHIST_FILE, "r");
-
 	if (!fp)
 		return EXIT_FAILURE;
 
 	size_t dirs = 0;
 
 	char tmp_line[PATH_MAX];
-
 	while (fgets(tmp_line, (int)sizeof(tmp_line), fp))
 		dirs++;
 
@@ -2055,9 +2009,7 @@ get_prompt_cmds(void)
 	size_t line_size = 0;
 	ssize_t line_len = 0;
 
-	while ((line_len = getline(&line, &line_size,
-		    config_file_fp)) > 0) {
-
+	while ((line_len = getline(&line, &line_size, config_file_fp)) > 0) {
 		if (prompt_line_found) {
 			if (strncmp(line, "#END OF PROMPT", 14) == 0)
 				break;
@@ -2067,14 +2019,12 @@ get_prompt_cmds(void)
 				prompt_cmds[prompt_cmds_n++] = savestring(
 				    line, strlen(line));
 			}
-		}
-
-		else if (strncmp(line, "#PROMPT", 7) == 0)
+		} else if (strncmp(line, "#PROMPT", 7) == 0) {
 			prompt_line_found = 1;
+		}
 	}
 
 	free(line);
-
 	fclose(config_file_fp);
 }
 

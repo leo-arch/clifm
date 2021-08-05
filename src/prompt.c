@@ -125,7 +125,7 @@ prompt(void)
 		/* Set environment variables with CliFM state information
 		 * (sel files, trash, stealth mode, messages) to be handled by
 		 * the prompt itself */
-		char _tmp[sizeof(int) + 1];
+		char _tmp[32];
 		sprintf(_tmp, "%d", (int)sel_n);
 		setenv("CLIFM_STAT_SEL", _tmp, 1);
 		sprintf(_tmp, "%d", (int)trash_n);

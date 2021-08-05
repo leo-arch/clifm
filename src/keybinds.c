@@ -151,210 +151,6 @@ kbinds_function(char **args)
 	return EXIT_FAILURE;
 }
 
-/* To get the keyseq value for a given key do this in an Xterm terminal:
- * C-v and then press the key (or the key combination). So, for example,
- * C-v, C-right arrow gives "[[1;5C", which here should be written like
- * this:
- * "\\x1b[1;5C" */
-void
-readline_kbinds(void)
-{
-
-			/* ##############################
-			 * #        KEYBINDINGS         #
-			 * ##############################*/
-
-	if (KBINDS_FILE) {
-		/* Help */
-		rl_bind_keyseq(find_key("show-manpage"), rl_manpage);
-		rl_bind_keyseq(find_key("show-cmds"), rl_cmds_help);
-		rl_bind_keyseq(find_key("show-kbinds"), rl_kbinds_help);
-
-		/* Navigation */
-		/* Define multiple keybinds for different terminals:
-		 * rxvt, xterm, kernel console */
-		/*      rl_bind_keyseq("\\M-[D", rl_test); // Left arrow key
-		rl_bind_keyseq("\\M-+", rl_test); */
-		rl_bind_keyseq(find_key("parent-dir"), rl_parent_dir);
-		rl_bind_keyseq(find_key("parent-dir2"), rl_parent_dir);
-		rl_bind_keyseq(find_key("parent-dir3"), rl_parent_dir);
-		rl_bind_keyseq(find_key("parent-dir4"), rl_parent_dir);
-		rl_bind_keyseq(find_key("previous-dir"), rl_previous_dir);
-		rl_bind_keyseq(find_key("previous-dir2"), rl_previous_dir);
-		rl_bind_keyseq(find_key("previous-dir3"), rl_previous_dir);
-		rl_bind_keyseq(find_key("previous-dir4"), rl_previous_dir);
-		rl_bind_keyseq(find_key("next-dir"), rl_next_dir);
-		rl_bind_keyseq(find_key("next-dir2"), rl_next_dir);
-		rl_bind_keyseq(find_key("next-dir3"), rl_next_dir);
-		rl_bind_keyseq(find_key("next-dir4"), rl_next_dir);
-		rl_bind_keyseq(find_key("home-dir"), rl_home_dir);
-		rl_bind_keyseq(find_key("home-dir2"), rl_home_dir);
-		rl_bind_keyseq(find_key("home-dir3"), rl_home_dir);
-		rl_bind_keyseq(find_key("root-dir"), rl_root_dir);
-		rl_bind_keyseq(find_key("root-dir2"), rl_root_dir);
-		rl_bind_keyseq(find_key("root-dir3"), rl_root_dir);
-
-		rl_bind_keyseq(find_key("first-dir"), rl_first_dir);
-		rl_bind_keyseq(find_key("last-dir"), rl_last_dir);
-
-		rl_bind_keyseq(find_key("pinned-dir"), rl_pinned_dir);
-		rl_bind_keyseq(find_key("workspace1"), rl_ws1);
-		rl_bind_keyseq(find_key("workspace2"), rl_ws2);
-		rl_bind_keyseq(find_key("workspace3"), rl_ws3);
-		rl_bind_keyseq(find_key("workspace4"), rl_ws4);
-
-		/* Operations on files */
-		rl_bind_keyseq(find_key("create-file"), rl_create_file);
-		rl_bind_keyseq(find_key("bookmark-sel"), rl_bm_sel);
-		rl_bind_keyseq(find_key("archive-sel"), rl_archive_sel);
-		rl_bind_keyseq(find_key("open-sel"), rl_open_sel);
-		rl_bind_keyseq(find_key("export-sel"), rl_export_sel);
-		rl_bind_keyseq(find_key("move-sel"), rl_move_sel);
-		rl_bind_keyseq(find_key("rename-sel"), rl_rename_sel);
-		rl_bind_keyseq(find_key("remove-sel"), rl_remove_sel);
-		rl_bind_keyseq(find_key("trash-sel"), rl_trash_sel);
-		rl_bind_keyseq(find_key("untrash-all"), rl_untrash_all);
-		rl_bind_keyseq(find_key("paste-sel"), rl_paste_sel);
-		rl_bind_keyseq(find_key("select-all"), rl_select_all);
-		rl_bind_keyseq(find_key("deselect-all"), rl_deselect_all);
-
-		/* Config files */
-		rl_bind_keyseq(find_key("open-mime"), rl_open_mime);
-		rl_bind_keyseq(find_key("open-jump-db"), rl_open_jump_db);
-		rl_bind_keyseq(find_key("edit-color-scheme"), rl_open_cscheme);
-		rl_bind_keyseq(find_key("open-config"), rl_open_config);
-		rl_bind_keyseq(find_key("open-keybinds"), rl_open_keybinds);
-		rl_bind_keyseq(find_key("open-bookmarks"), rl_open_bm_file);
-
-		/* Settings */
-		rl_bind_keyseq(find_key("clear-msgs"), rl_clear_msgs);
-		rl_bind_keyseq(find_key("next-profile"), rl_next_profile);
-		rl_bind_keyseq(find_key("previous-profile"), rl_previous_profile);
-		rl_bind_keyseq(find_key("quit"), rl_quit);
-		rl_bind_keyseq(find_key("lock"), rl_lock);
-		rl_bind_keyseq(find_key("refresh-screen"), rl_refresh);
-		rl_bind_keyseq(find_key("clear-line"), rl_clear_line);
-		rl_bind_keyseq(find_key("toggle-hidden"), rl_hidden);
-		rl_bind_keyseq(find_key("toggle-hidden2"), rl_hidden);
-		rl_bind_keyseq(find_key("toggle-long"), rl_long);
-		rl_bind_keyseq(find_key("toggle-light"), rl_light);
-		rl_bind_keyseq(find_key("folders-first"), rl_folders_first);
-		rl_bind_keyseq(find_key("sort-previous"), rl_sort_previous);
-		rl_bind_keyseq(find_key("sort-next"), rl_sort_next);
-
-		rl_bind_keyseq(find_key("new-instance"), rl_new_instance);
-		rl_bind_keyseq(find_key("show-dirhist"), rl_dirhist);
-		rl_bind_keyseq(find_key("bookmarks"), rl_bookmarks);
-		rl_bind_keyseq(find_key("mountpoints"), rl_mountpoints);
-		rl_bind_keyseq(find_key("selbox"), rl_selbox);
-
-		rl_bind_keyseq(find_key("prepend-sudo"), rl_prepend_sudo);
-		/* Plugins */
-		rl_bind_keyseq(find_key("plugin1"), rl_plugin1);
-		rl_bind_keyseq(find_key("plugin2"), rl_plugin2);
-		rl_bind_keyseq(find_key("plugin3"), rl_plugin3);
-		rl_bind_keyseq(find_key("plugin4"), rl_plugin4);
-
-		rl_bind_keyseq(find_key("quit"), rl_quit);
-	}
-
-	/* If no kbinds file is found, set the defaults */
-	else {
-		/* Help */
-		rl_bind_keyseq("\\eOP", rl_manpage);
-		rl_bind_keyseq("\\eOQ", rl_cmds_help);
-		rl_bind_keyseq("\\eOR", rl_kbinds_help);
-
-		/* Navigation */
-		rl_bind_keyseq("\\M-u", rl_parent_dir);
-		rl_bind_keyseq("\\e[a", rl_parent_dir);
-		rl_bind_keyseq("\\e[2A", rl_parent_dir);
-		rl_bind_keyseq("\\e[1;2A", rl_parent_dir);
-		rl_bind_keyseq("\\M-j", rl_previous_dir);
-		rl_bind_keyseq("\\e[d", rl_previous_dir);
-		rl_bind_keyseq("\\e[2D", rl_previous_dir);
-		rl_bind_keyseq("\\e[1;2D", rl_previous_dir);
-		rl_bind_keyseq("\\M-k", rl_next_dir);
-		rl_bind_keyseq("\\e[c", rl_next_dir);
-		rl_bind_keyseq("\\e[2C", rl_next_dir);
-		rl_bind_keyseq("\\e[1;2C", rl_next_dir);
-		rl_bind_keyseq("\\M-e", rl_home_dir);
-		rl_bind_keyseq("\\e[7~", rl_home_dir);
-		rl_bind_keyseq("\\e[H", rl_home_dir);
-		rl_bind_keyseq("\\M-r", rl_root_dir);
-		rl_bind_keyseq("\\e/", rl_root_dir);
-
-		rl_bind_keyseq("\\C-\\M-j", rl_first_dir);
-		rl_bind_keyseq("\\C-\\M-k", rl_last_dir);
-
-		/* Operations on files */
-		rl_bind_keyseq("\\M-n", rl_create_file);
-		rl_bind_keyseq("\\C-\\M-b", rl_bm_sel);
-		rl_bind_keyseq("\\C-\\M-a", rl_archive_sel);
-		rl_bind_keyseq("\\C-\\M-g", rl_open_sel);
-		rl_bind_keyseq("\\C-\\M-e", rl_export_sel);
-		rl_bind_keyseq("\\C-\\M-n", rl_move_sel);
-		rl_bind_keyseq("\\C-\\M-r", rl_rename_sel);
-		rl_bind_keyseq("\\C-\\M-d", rl_remove_sel);
-		rl_bind_keyseq("\\C-\\M-t", rl_trash_sel);
-		rl_bind_keyseq("\\C-\\M-u", rl_untrash_all);
-		rl_bind_keyseq("\\C-\\M-v", rl_paste_sel);
-		rl_bind_keyseq("\\M-a", rl_select_all);
-		rl_bind_keyseq("\\M-d", rl_deselect_all);
-
-		/* Config files */
-		rl_bind_keyseq("\\e[17~", rl_open_mime);
-		rl_bind_keyseq("\\e[18~", rl_open_jump_db);
-		rl_bind_keyseq("\\e[19~", rl_open_cscheme);
-		rl_bind_keyseq("\\e[20~", rl_open_keybinds);
-		rl_bind_keyseq("\\e[21~", rl_open_config);
-		rl_bind_keyseq("\\e[23~", rl_open_bm_file);
-
-		rl_bind_keyseq("\\M-v", rl_prepend_sudo);
-		/* Settings */
-		rl_bind_keyseq("\\M-t", rl_clear_msgs);
-		/*      rl_bind_keyseq("", rl_next_profile);
-		rl_bind_keyseq("", rl_previous_profile); */
-		rl_bind_keyseq("\\e[24~", rl_quit);
-		rl_bind_keyseq("\\M-o", rl_lock);
-		rl_bind_keyseq("\\C-r", rl_refresh);
-		rl_bind_keyseq("\\M-c", rl_clear_line);
-		rl_bind_keyseq("\\M-i", rl_hidden);
-		rl_bind_keyseq("\\M-.", rl_hidden);
-		rl_bind_keyseq("\\M-l", rl_long);
-		rl_bind_keyseq("\\M-y", rl_light);
-		rl_bind_keyseq("\\M-g", rl_folders_first);
-		rl_bind_keyseq("\\M-z", rl_sort_previous);
-		rl_bind_keyseq("\\M-x", rl_sort_next);
-
-		rl_bind_keyseq("\\C-x", rl_new_instance);
-		rl_bind_keyseq("\\M-h", rl_dirhist);
-		rl_bind_keyseq("\\M-b", rl_bookmarks);
-		rl_bind_keyseq("\\M-m", rl_mountpoints);
-		rl_bind_keyseq("\\M-s", rl_selbox);
-
-		rl_bind_keyseq("\\M-p", rl_pinned_dir);
-		rl_bind_keyseq("\\M-1", rl_ws1);
-		rl_bind_keyseq("\\M-2", rl_ws2);
-		rl_bind_keyseq("\\M-3", rl_ws3);
-		rl_bind_keyseq("\\M-4", rl_ws4);
-
-		rl_bind_keyseq("\\e[24~", rl_quit);
-	}
-
-	/* Bind Right arrow key and Ctrl-f to accept the whole suggestion */
-	rl_bind_keyseq("\\C-f", rl_accept_suggestion);
-/*	rl_bind_keyseq("\\M-[C", rl_accept_suggestion); */
-	rl_bind_keyseq("\x1b[C", rl_accept_suggestion);
-	rl_bind_keyseq("\x1bOC", rl_accept_suggestion); /* Haiku terminal */
-
-	/* Bind Alt-Right and Alt-f to accept the first suggested word */
-	rl_bind_keyseq("\x1b\x66", rl_accept_first_word);
-	rl_bind_keyseq("\x1b[3C", rl_accept_first_word);
-	rl_bind_keyseq("\x1b\x1b[C", rl_accept_first_word);
-	rl_bind_keyseq("\x1b[1;3C", rl_accept_first_word);
-}
-
 /* Store keybinds from the keybinds file into a struct */
 int
 load_keybinds(void)
@@ -1380,4 +1176,208 @@ int
 rl_plugin4(int count, int key)
 {
 	return run_kb_cmd("plugin4");
+}
+
+/* To get the keyseq value for a given key do this in an Xterm terminal:
+ * C-v and then press the key (or the key combination). So, for example,
+ * C-v, C-right arrow gives "[[1;5C", which here should be written like
+ * this:
+ * "\\x1b[1;5C" */
+void
+readline_kbinds(void)
+{
+
+			/* ##############################
+			 * #        KEYBINDINGS         #
+			 * ##############################*/
+
+	if (KBINDS_FILE) {
+		/* Help */
+		rl_bind_keyseq(find_key("show-manpage"), rl_manpage);
+		rl_bind_keyseq(find_key("show-cmds"), rl_cmds_help);
+		rl_bind_keyseq(find_key("show-kbinds"), rl_kbinds_help);
+
+		/* Navigation */
+		/* Define multiple keybinds for different terminals:
+		 * rxvt, xterm, kernel console */
+		/*      rl_bind_keyseq("\\M-[D", rl_test); // Left arrow key
+		rl_bind_keyseq("\\M-+", rl_test); */
+		rl_bind_keyseq(find_key("parent-dir"), rl_parent_dir);
+		rl_bind_keyseq(find_key("parent-dir2"), rl_parent_dir);
+		rl_bind_keyseq(find_key("parent-dir3"), rl_parent_dir);
+		rl_bind_keyseq(find_key("parent-dir4"), rl_parent_dir);
+		rl_bind_keyseq(find_key("previous-dir"), rl_previous_dir);
+		rl_bind_keyseq(find_key("previous-dir2"), rl_previous_dir);
+		rl_bind_keyseq(find_key("previous-dir3"), rl_previous_dir);
+		rl_bind_keyseq(find_key("previous-dir4"), rl_previous_dir);
+		rl_bind_keyseq(find_key("next-dir"), rl_next_dir);
+		rl_bind_keyseq(find_key("next-dir2"), rl_next_dir);
+		rl_bind_keyseq(find_key("next-dir3"), rl_next_dir);
+		rl_bind_keyseq(find_key("next-dir4"), rl_next_dir);
+		rl_bind_keyseq(find_key("home-dir"), rl_home_dir);
+		rl_bind_keyseq(find_key("home-dir2"), rl_home_dir);
+		rl_bind_keyseq(find_key("home-dir3"), rl_home_dir);
+		rl_bind_keyseq(find_key("root-dir"), rl_root_dir);
+		rl_bind_keyseq(find_key("root-dir2"), rl_root_dir);
+		rl_bind_keyseq(find_key("root-dir3"), rl_root_dir);
+
+		rl_bind_keyseq(find_key("first-dir"), rl_first_dir);
+		rl_bind_keyseq(find_key("last-dir"), rl_last_dir);
+
+		rl_bind_keyseq(find_key("pinned-dir"), rl_pinned_dir);
+		rl_bind_keyseq(find_key("workspace1"), rl_ws1);
+		rl_bind_keyseq(find_key("workspace2"), rl_ws2);
+		rl_bind_keyseq(find_key("workspace3"), rl_ws3);
+		rl_bind_keyseq(find_key("workspace4"), rl_ws4);
+
+		/* Operations on files */
+		rl_bind_keyseq(find_key("create-file"), rl_create_file);
+		rl_bind_keyseq(find_key("bookmark-sel"), rl_bm_sel);
+		rl_bind_keyseq(find_key("archive-sel"), rl_archive_sel);
+		rl_bind_keyseq(find_key("open-sel"), rl_open_sel);
+		rl_bind_keyseq(find_key("export-sel"), rl_export_sel);
+		rl_bind_keyseq(find_key("move-sel"), rl_move_sel);
+		rl_bind_keyseq(find_key("rename-sel"), rl_rename_sel);
+		rl_bind_keyseq(find_key("remove-sel"), rl_remove_sel);
+		rl_bind_keyseq(find_key("trash-sel"), rl_trash_sel);
+		rl_bind_keyseq(find_key("untrash-all"), rl_untrash_all);
+		rl_bind_keyseq(find_key("paste-sel"), rl_paste_sel);
+		rl_bind_keyseq(find_key("select-all"), rl_select_all);
+		rl_bind_keyseq(find_key("deselect-all"), rl_deselect_all);
+
+		/* Config files */
+		rl_bind_keyseq(find_key("open-mime"), rl_open_mime);
+		rl_bind_keyseq(find_key("open-jump-db"), rl_open_jump_db);
+		rl_bind_keyseq(find_key("edit-color-scheme"), rl_open_cscheme);
+		rl_bind_keyseq(find_key("open-config"), rl_open_config);
+		rl_bind_keyseq(find_key("open-keybinds"), rl_open_keybinds);
+		rl_bind_keyseq(find_key("open-bookmarks"), rl_open_bm_file);
+
+		/* Settings */
+		rl_bind_keyseq(find_key("clear-msgs"), rl_clear_msgs);
+		rl_bind_keyseq(find_key("next-profile"), rl_next_profile);
+		rl_bind_keyseq(find_key("previous-profile"), rl_previous_profile);
+		rl_bind_keyseq(find_key("quit"), rl_quit);
+		rl_bind_keyseq(find_key("lock"), rl_lock);
+		rl_bind_keyseq(find_key("refresh-screen"), rl_refresh);
+		rl_bind_keyseq(find_key("clear-line"), rl_clear_line);
+		rl_bind_keyseq(find_key("toggle-hidden"), rl_hidden);
+		rl_bind_keyseq(find_key("toggle-hidden2"), rl_hidden);
+		rl_bind_keyseq(find_key("toggle-long"), rl_long);
+		rl_bind_keyseq(find_key("toggle-light"), rl_light);
+		rl_bind_keyseq(find_key("folders-first"), rl_folders_first);
+		rl_bind_keyseq(find_key("sort-previous"), rl_sort_previous);
+		rl_bind_keyseq(find_key("sort-next"), rl_sort_next);
+
+		rl_bind_keyseq(find_key("new-instance"), rl_new_instance);
+		rl_bind_keyseq(find_key("show-dirhist"), rl_dirhist);
+		rl_bind_keyseq(find_key("bookmarks"), rl_bookmarks);
+		rl_bind_keyseq(find_key("mountpoints"), rl_mountpoints);
+		rl_bind_keyseq(find_key("selbox"), rl_selbox);
+
+		rl_bind_keyseq(find_key("prepend-sudo"), rl_prepend_sudo);
+		/* Plugins */
+		rl_bind_keyseq(find_key("plugin1"), rl_plugin1);
+		rl_bind_keyseq(find_key("plugin2"), rl_plugin2);
+		rl_bind_keyseq(find_key("plugin3"), rl_plugin3);
+		rl_bind_keyseq(find_key("plugin4"), rl_plugin4);
+
+		rl_bind_keyseq(find_key("quit"), rl_quit);
+	}
+
+	/* If no kbinds file is found, set the defaults */
+	else {
+		/* Help */
+		rl_bind_keyseq("\\eOP", rl_manpage);
+		rl_bind_keyseq("\\eOQ", rl_cmds_help);
+		rl_bind_keyseq("\\eOR", rl_kbinds_help);
+
+		/* Navigation */
+		rl_bind_keyseq("\\M-u", rl_parent_dir);
+		rl_bind_keyseq("\\e[a", rl_parent_dir);
+		rl_bind_keyseq("\\e[2A", rl_parent_dir);
+		rl_bind_keyseq("\\e[1;2A", rl_parent_dir);
+		rl_bind_keyseq("\\M-j", rl_previous_dir);
+		rl_bind_keyseq("\\e[d", rl_previous_dir);
+		rl_bind_keyseq("\\e[2D", rl_previous_dir);
+		rl_bind_keyseq("\\e[1;2D", rl_previous_dir);
+		rl_bind_keyseq("\\M-k", rl_next_dir);
+		rl_bind_keyseq("\\e[c", rl_next_dir);
+		rl_bind_keyseq("\\e[2C", rl_next_dir);
+		rl_bind_keyseq("\\e[1;2C", rl_next_dir);
+		rl_bind_keyseq("\\M-e", rl_home_dir);
+		rl_bind_keyseq("\\e[7~", rl_home_dir);
+		rl_bind_keyseq("\\e[H", rl_home_dir);
+		rl_bind_keyseq("\\M-r", rl_root_dir);
+		rl_bind_keyseq("\\e/", rl_root_dir);
+
+		rl_bind_keyseq("\\C-\\M-j", rl_first_dir);
+		rl_bind_keyseq("\\C-\\M-k", rl_last_dir);
+
+		/* Operations on files */
+		rl_bind_keyseq("\\M-n", rl_create_file);
+		rl_bind_keyseq("\\C-\\M-b", rl_bm_sel);
+		rl_bind_keyseq("\\C-\\M-a", rl_archive_sel);
+		rl_bind_keyseq("\\C-\\M-g", rl_open_sel);
+		rl_bind_keyseq("\\C-\\M-e", rl_export_sel);
+		rl_bind_keyseq("\\C-\\M-n", rl_move_sel);
+		rl_bind_keyseq("\\C-\\M-r", rl_rename_sel);
+		rl_bind_keyseq("\\C-\\M-d", rl_remove_sel);
+		rl_bind_keyseq("\\C-\\M-t", rl_trash_sel);
+		rl_bind_keyseq("\\C-\\M-u", rl_untrash_all);
+		rl_bind_keyseq("\\C-\\M-v", rl_paste_sel);
+		rl_bind_keyseq("\\M-a", rl_select_all);
+		rl_bind_keyseq("\\M-d", rl_deselect_all);
+
+		/* Config files */
+		rl_bind_keyseq("\\e[17~", rl_open_mime);
+		rl_bind_keyseq("\\e[18~", rl_open_jump_db);
+		rl_bind_keyseq("\\e[19~", rl_open_cscheme);
+		rl_bind_keyseq("\\e[20~", rl_open_keybinds);
+		rl_bind_keyseq("\\e[21~", rl_open_config);
+		rl_bind_keyseq("\\e[23~", rl_open_bm_file);
+
+		rl_bind_keyseq("\\M-v", rl_prepend_sudo);
+		/* Settings */
+		rl_bind_keyseq("\\M-t", rl_clear_msgs);
+		/*      rl_bind_keyseq("", rl_next_profile);
+		rl_bind_keyseq("", rl_previous_profile); */
+		rl_bind_keyseq("\\e[24~", rl_quit);
+		rl_bind_keyseq("\\M-o", rl_lock);
+		rl_bind_keyseq("\\C-r", rl_refresh);
+		rl_bind_keyseq("\\M-c", rl_clear_line);
+		rl_bind_keyseq("\\M-i", rl_hidden);
+		rl_bind_keyseq("\\M-.", rl_hidden);
+		rl_bind_keyseq("\\M-l", rl_long);
+		rl_bind_keyseq("\\M-y", rl_light);
+		rl_bind_keyseq("\\M-g", rl_folders_first);
+		rl_bind_keyseq("\\M-z", rl_sort_previous);
+		rl_bind_keyseq("\\M-x", rl_sort_next);
+
+		rl_bind_keyseq("\\C-x", rl_new_instance);
+		rl_bind_keyseq("\\M-h", rl_dirhist);
+		rl_bind_keyseq("\\M-b", rl_bookmarks);
+		rl_bind_keyseq("\\M-m", rl_mountpoints);
+		rl_bind_keyseq("\\M-s", rl_selbox);
+
+		rl_bind_keyseq("\\M-p", rl_pinned_dir);
+		rl_bind_keyseq("\\M-1", rl_ws1);
+		rl_bind_keyseq("\\M-2", rl_ws2);
+		rl_bind_keyseq("\\M-3", rl_ws3);
+		rl_bind_keyseq("\\M-4", rl_ws4);
+
+		rl_bind_keyseq("\\e[24~", rl_quit);
+	}
+
+	/* Bind Right arrow key and Ctrl-f to accept the whole suggestion */
+	rl_bind_keyseq("\\C-f", rl_accept_suggestion);
+/*	rl_bind_keyseq("\\M-[C", rl_accept_suggestion); */
+	rl_bind_keyseq("\x1b[C", rl_accept_suggestion);
+	rl_bind_keyseq("\x1bOC", rl_accept_suggestion); /* Haiku terminal */
+
+	/* Bind Alt-Right and Alt-f to accept the first suggested word */
+	rl_bind_keyseq("\x1b\x66", rl_accept_first_word);
+	rl_bind_keyseq("\x1b[3C", rl_accept_first_word);
+	rl_bind_keyseq("\x1b\x1b[C", rl_accept_first_word);
+	rl_bind_keyseq("\x1b[1;3C", rl_accept_first_word);
 }
