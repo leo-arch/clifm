@@ -963,7 +963,7 @@ rl_suggestions(char c)
 
 	/* Skip backspace, Enter, and TAB keys */
 	switch(c) {
-		case DELETE:
+		case DELETE: /* fallthrough */
 /*			if (rl_point != rl_end && suggestion.printed)
 				clear_suggestion();
 			goto FAIL; */
@@ -974,6 +974,8 @@ rl_suggestions(char c)
 			goto FAIL;
 
 		case ENTER:
+			if (suggestion.printed && suggestion_buf)
+				clear_suggestion();
 			goto FAIL;
 /*		case SPACE:
 			if (msg_area) {

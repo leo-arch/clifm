@@ -574,6 +574,24 @@ define_config_file_names(void)
 }
 
 int
+import_rl_file(void)
+{
+	if (!DATA_DIR || !CONFIG_DIR_GRAL)
+		return EXIT_FAILURE;
+
+	struct stat attr;
+	char rl_file[PATH_MAX];
+	snprintf(rl_file, PATH_MAX - 1, "%s/%s/readline.cfm", DATA_DIR, PNL);
+	if (stat(rl_file, &attr) == EXIT_SUCCESS) {
+		char *cmd[] = {"cp", rl_file, CONFIG_DIR_GRAL, NULL};
+		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) == EXIT_SUCCESS)
+			return EXIT_SUCCESS;
+	}
+
+	return EXIT_FAILURE;
+}
+
+int
 create_config(char *file)
 {
 	struct stat attr;
@@ -928,19 +946,16 @@ create_def_cscheme(void)
 		return;
 
 	char *cscheme_file = (char *)xnmalloc(strlen(COLORS_DIR) + 13, sizeof(char));
-
 	sprintf(cscheme_file, "%s/default.cfm", COLORS_DIR);
 
 	/* If the file already exists, do nothing */
 	struct stat attr;
-
 	if (stat(cscheme_file, &attr) != -1) {
 		free(cscheme_file);
 		return;
 	}
 
 	FILE *fp = fopen(cscheme_file, "w+");
-
 	if (!fp) {
 		_err('w', PRINT_PROMPT, "%s: Error creating default color scheme "
 			"file\n", PROGRAM_NAME);
@@ -1023,17 +1038,13 @@ create_config_files(void)
 	/* Use the GNU mkdir to let it handle parent directories */
 	if (stat(CONFIG_DIR, &attr) == -1) {
 		char *tmp_cmd[] = {"mkdir", "-p", CONFIG_DIR, NULL};
-
 		if (launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-
 			config_ok = 0;
-
 			_err('e', PRINT_PROMPT, _("%s: mkdir: '%s': Error creating "
 				"configuration directory. Bookmarks, commands logs, and "
 				"command history are disabled. Program messages won't be "
 				"persistent. Using default options\n"),
 			    PROGRAM_NAME, CONFIG_DIR);
-
 			return;
 		}
 	}
@@ -1109,6 +1120,7 @@ create_config_files(void)
 		}
 	}
 
+	import_rl_file();
 	create_actions_file(ACTIONS_FILE);
 	create_mime_file(MIME_FILE, 0);
 	create_remotes_file();
@@ -1125,7 +1137,6 @@ create_remotes_file(void)
 		return EXIT_SUCCESS;
 
 	FILE *fp = fopen(REMOTES_FILE, "w");
-
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 		    REMOTES_FILE, strerror(errno));
@@ -1149,6 +1160,7 @@ create_remotes_file(void)
 		"# AutoMount=true\n\n"
 		"# Automatically unmount this remote at exit\n"
 		"# AutoUnmount=true\n\n", PROGRAM_NAME);
+
 	fclose(fp);
 	return EXIT_SUCCESS;
 }
@@ -1157,7 +1169,6 @@ int
 create_actions_file(char *file)
 {
 	struct stat attr;
-
 	/* If the file already exists, do nothing */
 	if (stat(file, &attr) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
@@ -1175,7 +1186,6 @@ create_actions_file(char *file)
 
 	/* Else, create it */
 	FILE *actions_fp = fopen(file, "w");
-
 	if (!actions_fp) {
 		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 		    file, strerror(errno));
@@ -2068,7 +2078,6 @@ init_config(void)
 		printf("\x1b[>2;1m"); // modifyFunctionKeys = 1
 		("\x1b[>1m" and "\x1b[>2m", reset to initial value) */
 	}
-
 }
 
 int

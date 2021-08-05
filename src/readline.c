@@ -61,8 +61,24 @@ initialize_readline(void)
 	/* #### INITIALIZE READLINE (what a hard beast to tackle!!) #### */
 
 	/* Set the name of the program using readline. Mostly used for
-	 * conditional constructs in $HOME/.inputrc */
+	 * conditional constructs in the inputrc file */
 	rl_readline_name = argv_bk[0];
+
+	/* Load readline initialization file. Check order:
+	 * INPUTRC env var
+	 * ~/.config/clifm/readline.cfm
+	 * ~/.inputrc
+	 * /etc/inputrc */
+	char *p = getenv("INPUTRC");
+	if (p) {
+		rl_read_init_file(p);
+	} else {
+		char *rl_file = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) + 14,
+							sizeof(char));
+		sprintf(rl_file, "%s/readline.cfm", CONFIG_DIR_GRAL);
+		rl_read_init_file(rl_file);
+		free(rl_file);
+	}
 
 	/* Enable tab auto-completion for commands (in PATH) in case of
 	  * first entered string (if autocd and/or auto-open are enabled, check
