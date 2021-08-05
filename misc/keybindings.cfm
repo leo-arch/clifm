@@ -102,7 +102,7 @@ bookmarks:\M-b
 select-all:\M-a
 deselect-all:\M-d
 mountpoints:\M-m
-folders-first:\M-f
+folders-first:\M-g
 selbox:\M-s
 lock:\M-o
 # F6-12
