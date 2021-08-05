@@ -843,11 +843,6 @@ NOTE 2: Some of these keybindings might not work on your terminal emulator, depe
 .TP
 Kernel built-in console: Key sequences involving the Shift key (S-up, S-left, and S-right in our case) will just not work. Use the alternative key sequences instead: M-u, M-j, and M-k respectively
 .TP
-XTerm: Add the following lines to your \fI.Xresources\fR (or \fI.Xdefaults\fR) file:
- XTerm*eightBitInput: false
- XTerm*modifyCursorKeys: 1
- XTerm*modifyFunctionKeys: 1
-.TP
 Konsole: Shift+left and Shift+right are not bound by default, so that you need to bind them manually. Go to Settings -> Edit current profile -> Keyboard -> Default (Xfree4), and add these values:
  Left+Shift	\\E[1;2D
  Right+Shift	\\E[1;2C
@@ -857,6 +852,10 @@ Terminology/Yakuake: Shift+left and Shift+right are already bound to other funct
 Of course, the above two procedures should be similar in case of keybinding issues in other terminal emulators.
 .TP
 In case some of these keybindings are already used by your Window Manager, you only need to unbind the key or rebind the corresponding function to another key. Since each Window Manager uses its own mechanisms to set/unset keybindings, you should consult the appropriate manual.
+.TP
+ST: For some reason, the delete key is not bound in the ST terminal. To fix this, add the following line to CliFM's profile file (see the \fBFILES\fR section) and restart CliFM:
+
+ tput smkx
 .TP
 \fBCustomizing keybindings\fR
 .TP
