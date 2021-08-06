@@ -853,10 +853,6 @@ Of course, the above two procedures should be similar in case of keybinding issu
 .TP
 In case some of these keybindings are already used by your Window Manager, you only need to unbind the key or rebind the corresponding function to another key. Since each Window Manager uses its own mechanisms to set/unset keybindings, you should consult the appropriate manual.
 .TP
-ST: For some reason, the delete key is not bound in the ST terminal. To fix this, add the following line to CliFM's profile file (see the \fBFILES\fR section) and restart CliFM:
-
- tput smkx
-.TP
 \fBCustomizing keybindings\fR
 .TP
 The above are the default keyboard shortcuts. However, they can be freely modified using the 'kb edit' command (or pressing F9) or just editing the keybindings file (see the \fBFILES\fR section below) to your liking.
