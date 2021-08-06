@@ -345,7 +345,8 @@ rl_accept_first_word(int count, int key)
 	/* Accepting the first suggested word is not supported for ELN's,
 	 * bookmarks and aliases names */
 	if (suggestion.type != ELN_SUG && suggestion.type != BOOKMARK_SUG
-	&& suggestion.type != ALIAS_SUG) {
+	&& suggestion.type != ALIAS_SUG && suggestion.type != JCMD_SUG
+	&& suggestion.type != JCMD_SUG_NOACD) {
 		accept_first_word = 1;
 		suggestion.type = FIRST_WORD;
 	}
