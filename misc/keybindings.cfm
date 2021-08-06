@@ -103,6 +103,7 @@ select-all:\M-a
 deselect-all:\M-d
 mountpoints:\M-m
 folders-first:\M-g
+prepend-sudo:\M-v
 selbox:\M-s
 lock:\M-o
 # F6-12
