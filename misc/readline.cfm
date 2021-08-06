@@ -37,11 +37,6 @@ $if mode=emacs
 "\x1b\x4f\x64": backward-word
 "\x1b\x4f\x63": forward-word
 
-"\e[1;5D": backward-word
-"\e[1;5C": forward-word
-"\e[5D": backward-word
-"\e[5C": forward-word
-
 # A few keybinds to avoid conflicts with CliFM specific keybinds
 "\C-r\C-r": re-read-init-file
 "\C-p\C-p": exchange-point-and-mark
