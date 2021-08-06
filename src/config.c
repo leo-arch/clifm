@@ -579,7 +579,12 @@ import_rl_file(void)
 	if (!DATA_DIR || !CONFIG_DIR_GRAL)
 		return EXIT_FAILURE;
 
+	char tmp[PATH_MAX];
+	sprintf(tmp, "%s/readline.cfm", CONFIG_DIR_GRAL);
 	struct stat attr;
+	if (lstat(tmp, &attr) == 0)
+		return EXIT_SUCCESS;
+
 	char rl_file[PATH_MAX];
 	snprintf(rl_file, PATH_MAX - 1, "%s/%s/readline.cfm", DATA_DIR, PNL);
 	if (stat(rl_file, &attr) == EXIT_SUCCESS) {
