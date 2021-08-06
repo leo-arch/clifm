@@ -1,12 +1,8 @@
-# CliFM readline initialization file
-
-# You can re-read the inputrc file with C-r C-r.
-# Lines beginning with '#' are comments.
+# Readline keybindings for CliFM
 
 # For the complete list of Readline options see:
 # https://www.gnu.org/software/bash/manual/html_node/Readline-Init-File-Syntax.html#Readline-Init-File-Syntax
 
-#$include ~/inputrc
 #$include /etc/inputrc
 
 # Color files by types
@@ -23,19 +19,30 @@ set menu-complete-display-prefix on
 set show-all-if-ambiguous on
 set completion-ignore-case on
 
-# Move between words with C-Left and C-Right
-$if term=rxvt
+set meta-flag on
+set input-meta on
+set output-meta on
+
+$if mode=emacs
+
+# For linux console and RH/Debian xterm
+"\e[5C": forward-word
+"\e[5D": backward-word
+"\e\e[C": forward-word
+"\e\e[D": backward-word
+"\e[1;5C": forward-word
+"\e[1;5D": backward-word
+
+# For rxvt
 "\x1b\x4f\x64": backward-word
 "\x1b\x4f\x63": forward-word
-$else
+
 "\e[1;5D": backward-word
 "\e[1;5C": forward-word
 "\e[5D": backward-word
 "\e[5C": forward-word
-$endif
 
-# A few keybindings redefinitions to avoid conflicts with CliFM
-# specific keybindings
+# A few keybinds to avoid conflicts with CliFM specific keybinds
 "\C-r\C-r": re-read-init-file
 "\C-p\C-p": exchange-point-and-mark
 "\C-zA": do-lowercase-version
@@ -65,6 +72,8 @@ $endif
 "\C-zY": do-lowercase-version
 "\C-zZ": do-lowercase-version
 
-# Enable history completion
+# History completion based on prefix
 "\e[A": history-search-backward
 "\e[B": history-search-forward
+
+$endif
