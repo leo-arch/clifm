@@ -383,18 +383,26 @@ rl_accept_suggestion(int count, int key)
 
 		/* Trim the suggestion up to first slash or space */
 		s = strchr(p + i, '/');
-		if (!s) {
-			s = strchr(p + i, ' ');
-		} else if (*(++s)) {
-			/* In case of slash, keep a copy of the next char: we cannot
-			 * know in advance what is after the slash */
-			_s = *s;
-			slash = 1;
+		char *sp = strchr(p + i, ' ');
+		if (s) {
+			if (sp && sp < s) {
+				s = sp;
+				slash = 0;
+			} else {
+				/* In case of slash, keep a copy of the next char: we
+				 * cannot know in advance what comes after the slash */
+				if (*(++s))
+					_s = *s;
+				slash = 1;
+			}
+		} else if (sp) {
+			s = sp;
+			slash = 0;
 		} else {
 			s = (char *)NULL;
 		}
 
-		if (s && *(s + 1) && s != p) {
+		if (s && (slash ? *s : *(s + 1)) && s != p) {
 			*s = '\0';
 		} else {
 			/* Last word */
