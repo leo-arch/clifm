@@ -389,8 +389,8 @@ rl_accept_suggestion(int count, int key)
 				s = sp;
 				slash = 0;
 			} else {
-				/* In case of slash, keep a copy of the next char: we
-				 * cannot know in advance what comes after the slash */
+				/* In case of slash, keep a copy of the next char, if any:
+				 * we cannot know in advance what comes after the slash */
 				if (*(++s))
 					_s = *s;
 				slash = 1;
@@ -398,8 +398,6 @@ rl_accept_suggestion(int count, int key)
 		} else if (sp) {
 			s = sp;
 			slash = 0;
-		} else {
-			s = (char *)NULL;
 		}
 
 		if (s && (slash ? *s : *(s + 1)) && s != p) {
@@ -445,10 +443,7 @@ rl_accept_suggestion(int count, int key)
 		}
 		break;
 
-	case FIRST_WORD:
-		rl_insert_text(suggestion_buf);
-		break;
-
+	case FIRST_WORD: /* fallthrough */
 	case JCMD_SUG_NOACD: /* fallthrough */
 	case HIST_SUG:
 		rl_insert_text(suggestion_buf);
