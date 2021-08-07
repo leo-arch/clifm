@@ -379,16 +379,24 @@ rl_accept_suggestion(int count, int key)
 	if (accept_first_word) {
 		size_t i = 0;
 		char *p = suggestion_buf + (rl_point - suggestion.offset);
+		/* Skip leading spaces */
 		while (*(p + i) == ' ')
 			i++;
 
 		/* Trim the suggestion up to first slash or space */
 		s = strchr(p + i, '/');
+		/* If the slash is immediately preceded by a space, move to
+		 * the next slash */
+		if (s && s != p && *(s - 1) == ' ') {
+			char *ss = strchr(s + 1, '/');
+			if (ss)
+				s = ss;
+		}
 		char *sp = strchr(p + i, ' ');
 		if (s) {
+			/* If there is a space somewhere before the slash */
 			if (sp && sp < s) {
 				s = sp;
-				slash = 0;
 			} else {
 				/* In case of slash, keep a copy of the next char, if any:
 				 * we cannot know in advance what comes after the slash */
@@ -398,13 +406,12 @@ rl_accept_suggestion(int count, int key)
 			}
 		} else if (sp) {
 			s = sp;
-			slash = 0;
 		}
 
 		if (s && (slash ? *s : *(s + 1)) && s != p) {
 			*s = '\0';
 		} else {
-			/* Last word */
+			/* Last word: neither space nor slash */
 			size_t len = strlen(suggestion_buf);
 			if (suggestion_buf[len - 1] != '/')
 				suggestion.type = NO_SUG;
