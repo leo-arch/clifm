@@ -155,6 +155,7 @@ void *__dso_handle;
 #define red "\x1b[1;31m"
 #define d_cyan "\x1b[0;36m"
 #define bold "\x1b[1m"
+#define NC "\x1b[0m"
 #define NB "\x1b[49m"
 
 #define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
@@ -237,7 +238,8 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define DEF_WC_C "\x1b[01;36m"
 #define DEF_DH_C "\x1b[00;36m"
 
-#define DEF_DF_C "\001\x1b[00;37m\002"
+#define DEF_DF_C "\x1b[00;37m"
+
 #define DEF_TX_C "\001\x1b[00;37m\002"
 #define DEF_LI_C "\001\x1b[01;32m\002"
 #define DEF_TI_C "\001\x1b[01;33m\002"
@@ -246,14 +248,14 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define DEF_NM_C "\001\x1b[01;32m\002"
 #define DEF_SI_C "\001\x1b[01;34m\002"
 
-#define DEF_SH_C "\001\x1b[02;35m\002"
-#define DEF_SF_C "\001\x1b[02;04;36m\002"
-#define DEF_SC_C "\001\x1b[02;31m\002"
-#define DEF_SX_C "\001\x1b[02;32m\002"
+#define DEF_SH_C "\x1b[02;35m"
+#define DEF_SF_C "\x1b[02;04;36m"
+#define DEF_SC_C "\x1b[02;31m"
+#define DEF_SX_C "\x1b[02;32m"
 
-#define DLFC "\001\x1b[0K\002" /* Delete line from cursor */
-#define CNL "\001\x1b[1E\002" /* Move the cursor to beginning next line*/
-#define DLFC_LEN 6 /* Length of the above escape codes */
+#define DLFC "\x1b[0K" /* Delete line from cursor */
+#define CNL "\x1b[1E" /* Move the cursor to beginning next line*/
+#define DLFC_LEN 4 /* Length of the above escape codes */
 
 #define DEF_DIR_ICO_C "\x1b[00;33m"
 

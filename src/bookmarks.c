@@ -155,7 +155,7 @@ bm_prompt(void)
 {
 	char *bm_sel = (char *)NULL;
 	printf(_("%s%s\nEnter '%c' to edit your bookmarks or '%c' to quit.\n"),
-	    NC_b, df_c, 'e', 'q');
+	    NC, df_c, 'e', 'q');
 
 	while (!bm_sel)
 		bm_sel = rl_no_hist(_("Choose a bookmark: "));

@@ -82,7 +82,7 @@ prompt(void)
 		}
 	}
 
-	fputs(NC_b, stdout);
+	fputs(NC, stdout);
 	fflush(stdout);
 	/* Execute prompt commands, if any, and only if external commands
 	 * are allowed */
