@@ -84,7 +84,6 @@ save_sel(void)
 	}
 
 	fclose(sel_fp);
-
 	return EXIT_SUCCESS;
 }
 
@@ -137,7 +136,6 @@ sel_function(char **args)
 	int i, ifiletype = 0, isel_path = 0, new_sel = 0;
 
 	for (i = 1; args[i]; i++) {
-
 		if (*args[i] == '-') {
 			ifiletype = i;
 			filetype = (mode_t) * (args[i] + 1);
@@ -150,7 +148,6 @@ sel_function(char **args)
 
 		if (*args[i] == '~') {
 			char *exp_path = tilde_expand(args[i]);
-
 			if (!exp_path) {
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[i],
 				    strerror(errno));
@@ -169,28 +166,13 @@ sel_function(char **args)
 		 * If file type is specified, matches will be checked against
 		 * this value */
 		switch (filetype) {
-		case 'd':
-			filetype = DT_DIR;
-			break;
-		case 'r':
-			filetype = DT_REG;
-			break;
-		case 'l':
-			filetype = DT_LNK;
-			break;
-		case 's':
-			filetype = DT_SOCK;
-			break;
-		case 'f':
-			filetype = DT_FIFO;
-			break;
-		case 'b':
-			filetype = DT_BLK;
-			break;
-		case 'c':
-			filetype = DT_CHR;
-			break;
-
+		case 'd': filetype = DT_DIR; break;
+		case 'r': filetype = DT_REG; break;
+		case 'l': filetype = DT_LNK; break;
+		case 's': filetype = DT_SOCK; break;
+		case 'f': filetype = DT_FIFO; break;
+		case 'b': filetype = DT_BLK; break;
+		case 'c': filetype = DT_CHR; break;
 		default:
 			fprintf(stderr, _("%s: '%c': Unrecognized file type\n"),
 			    PROGRAM_NAME, (char)filetype);
@@ -201,7 +183,6 @@ sel_function(char **args)
 	char dir[PATH_MAX];
 
 	if (sel_path) {
-
 		size_t sel_path_len = strlen(sel_path);
 		if (sel_path[sel_path_len - 1] == '/')
 			sel_path[sel_path_len - 1] = '\0';
@@ -260,15 +241,12 @@ sel_function(char **args)
 	char *pattern = (char *)NULL;
 
 	for (i = 1; args[i]; i++) {
-
 		if (i == ifiletype || i == isel_path)
 			continue;
-
 		/*      int invert = 0; */
 
 		if (check_regex(args[i]) == EXIT_SUCCESS) {
 			pattern = args[i];
-
 			if (*pattern == '!') {
 				pattern++;
 				/*  invert = 1; */
@@ -276,7 +254,6 @@ sel_function(char **args)
 		}
 
 		if (!pattern) {
-
 			if (strchr(args[i], '\\')) {
 				char *deq_str = dequote_str(args[i], 0);
 				if (deq_str) {
@@ -364,9 +341,7 @@ sel_function(char **args)
 
 	i = (int)sel_n;
 	while (--i >= 0) {
-
 		if (lstat(sel_elements[i], &sattr) != -1) {
-
 			/*          if ((sattr.st_mode & S_IFMT) == S_IFDIR) {
 				off_t dsize = dir_size(sel_elements[i]);
 				total_sel_size += dsize;
@@ -397,7 +372,6 @@ sel_function(char **args)
 		printf(_("\n%s%sTotal size%s: %s\n"), df_c, bold, df_c, human_size);
 
 	free(human_size);
-
 	return EXIT_SUCCESS;
 }
 
@@ -458,9 +432,7 @@ show_sel_files(void)
 		}
 
 		char *human_size = get_size_unit(total_sel_size);
-
 		printf(_("\n%s%sTotal size%s: %s\n"), df_c, bold, df_c, human_size);
-
 		free(human_size);
 	}
 
@@ -497,8 +469,8 @@ deselect(char **comm)
 
 	register int i;
 
-	if (clear_screen)
-		CLEAR;
+/*	if (clear_screen)
+		CLEAR; */
 
 	printf(_("%sSelection Box%s\n"), bold, df_c);
 
@@ -534,12 +506,9 @@ deselect(char **comm)
 
 	i = (int)desel_n;
 	while (--i >= 0) { /* Validation */
-
 		/* If not a number */
 		if (!is_number(desel_elements[i])) {
-
 			if (strcmp(desel_elements[i], "q") == 0) {
-
 				i = (int)desel_n;
 				while (--i >= 0)
 					free(desel_elements[i]);
@@ -577,12 +546,9 @@ deselect(char **comm)
 			} else {
 				printf(_("desel: '%s': Invalid element\n"), desel_elements[i]);
 				int j = (int)desel_n;
-
 				while (--j >= 0)
 					free(desel_elements[j]);
-
 				free(desel_elements);
-
 				return EXIT_FAILURE;
 			}
 		}
@@ -593,13 +559,10 @@ deselect(char **comm)
 
 			if (atoi_desel == 0 || (size_t)atoi_desel > sel_n) {
 				printf(_("desel: '%s': Invalid ELN\n"), desel_elements[i]);
-
 				int j = (int)desel_n;
 				while (--j >= 0)
 					free(desel_elements[j]);
-
 				free(desel_elements);
-
 				return EXIT_FAILURE;
 			}
 		}
@@ -632,9 +595,7 @@ deselect(char **comm)
 
 		k = (int)sel_n;
 		while (--k >= 0) {
-
 			if (strcmp(sel_elements[k], desel_path[i]) == 0) {
-
 				/* Sustract size from total size */
 				if (lstat(sel_elements[k], &desel_attrib) != -1) {
 					if ((desel_attrib.st_mode & S_IFMT) == S_IFDIR)
@@ -680,15 +641,12 @@ deselect(char **comm)
 		free(desel_path[i]);
 		free(desel_elements[i]);
 	}
-
 	free(desel_path);
 	free(desel_elements);
 
 	if (args_n > 0) {
-
 		for (i = 1; i <= (int)args_n; i++)
 			free(comm[i]);
-
 		comm = (char **)xrealloc(comm, 1 * sizeof(char *));
 		args_n = 0;
 	}
@@ -743,7 +701,6 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 
 			i = (int)files;
 			while (--i >= 0) {
-
 				if (filetype && file_info[i].type != filetype)
 					continue;
 
@@ -762,7 +719,6 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 			}
 		} else {
 			ret = scandir(sel_path, &ent, skip_files, xalphasort);
-
 			if (ret == -1) {
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 				    sel_path, strerror(errno));
@@ -815,40 +771,24 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 		if (filetype) {
 
 			switch (filetype) {
-			case DT_DIR:
-				t = S_IFDIR;
-				break;
-			case DT_REG:
-				t = S_IFREG;
-				break;
-			case DT_LNK:
-				t = S_IFLNK;
-				break;
-			case DT_SOCK:
-				t = S_IFSOCK;
-				break;
-			case DT_FIFO:
-				t = S_IFIFO;
-				break;
-			case DT_BLK:
-				t = S_IFBLK;
-				break;
-			case DT_CHR:
-				t = S_IFCHR;
-				break;
+			case DT_DIR: t = S_IFDIR; break;
+			case DT_REG: t = S_IFREG; break;
+			case DT_LNK: t = S_IFLNK; break;
+			case DT_SOCK: t = S_IFSOCK; break;
+			case DT_FIFO: t = S_IFIFO; break;
+			case DT_BLK: t = S_IFBLK; break;
+			case DT_CHR: t = S_IFCHR; break;
 			}
 		}
 
 		i = (int)gbuf.gl_pathc;
 		while (--i >= 0) {
-
 			/* We need to run stat(3) here, so that the d_type macros
 			 * won't work: convert them into st_mode macros */
 			if (filetype) {
 				struct stat attr;
 				if (lstat(gbuf.gl_pathv[i], &attr) == -1)
 					continue;
-
 				if ((attr.st_mode & S_IFMT) != t)
 					continue;
 			}
@@ -866,7 +806,6 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 
 	i = k;
 	while (--i >= 0) {
-
 		if (!matches[i])
 			continue;
 
@@ -937,7 +876,6 @@ sel_regex(char *str, const char *sel_path, mode_t filetype)
 	if (!sel_path) { /* Check pattern (STR) against files in CWD */
 		i = (int)files;
 		while (--i >= 0) {
-
 			if (filetype && file_info[i].type != filetype)
 				continue;
 
@@ -969,36 +907,20 @@ sel_regex(char *str, const char *sel_path, mode_t filetype)
 		if (filetype) {
 
 			switch (filetype) {
-			case DT_DIR:
-				t = S_IFDIR;
-				break;
-			case DT_REG:
-				t = S_IFREG;
-				break;
-			case DT_LNK:
-				t = S_IFLNK;
-				break;
-			case DT_SOCK:
-				t = S_IFSOCK;
-				break;
-			case DT_FIFO:
-				t = S_IFIFO;
-				break;
-			case DT_BLK:
-				t = S_IFBLK;
-				break;
-			case DT_CHR:
-				t = S_IFCHR;
-				break;
+			case DT_DIR: t = S_IFDIR; break;
+			case DT_REG: t = S_IFREG; break;
+			case DT_LNK: t = S_IFLNK; break;
+			case DT_SOCK: t = S_IFSOCK; break;
+			case DT_FIFO: t = S_IFIFO; break;
+			case DT_BLK: t = S_IFBLK; break;
+			case DT_CHR: t = S_IFCHR; break;
 			}
 		}
 
 		i = (int)filesn;
 		while (--i >= 0) {
-
 			if (filetype) {
 				struct stat attr;
-
 				if (lstat(list[i]->d_name, &attr) != -1) {
 					if ((attr.st_mode & S_IFMT) != t) {
 						free(list[i]);
@@ -1026,6 +948,5 @@ sel_regex(char *str, const char *sel_path, mode_t filetype)
 	}
 
 	regfree(&regex);
-
 	return new_sel;
 }

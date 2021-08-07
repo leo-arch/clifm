@@ -617,7 +617,7 @@ mime_open(char **args)
 int
 mime_import(char *file)
 {
-#ifdef __Haiku__
+#ifdef __HAIKU__
 	fprintf(stderr, "%s: Importing MIME definitions is not supported on Haiku\n",
 			PROGRAM_NAME);
 	return (-1);

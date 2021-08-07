@@ -72,7 +72,7 @@ initialize_readline(void)
 	char *p = getenv("INPUTRC");
 	if (p) {
 		rl_read_init_file(p);
-	} else {
+	} else if (CONFIG_DIR_GRAL) {
 		char *rl_file = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) + 14,
 							sizeof(char));
 		sprintf(rl_file, "%s/readline.cfm", CONFIG_DIR_GRAL);
@@ -810,6 +810,9 @@ my_rl_path_completion(const char *text, int state)
 char *
 bookmarks_generator(const char *text, int state)
 {
+	if (!bookmark_names)
+		return (char *)NULL;
+
 	static int i;
 	static size_t len;
 	char *name;
@@ -832,6 +835,9 @@ bookmarks_generator(const char *text, int state)
 char *
 hist_generator(const char *text, int state)
 {
+	if (!history)
+		return (char *)NULL;
+
 	static int i;
 	static size_t len;
 	char *name;
@@ -915,6 +921,9 @@ jump_entries_generator(const char *text, int state)
 char *
 cschemes_generator(const char *text, int state)
 {
+	if (!color_schemes)
+		return (char *)NULL;
+
 	static int i;
 	static size_t len;
 	char *name;
@@ -925,9 +934,6 @@ cschemes_generator(const char *text, int state)
 	} /* The state variable is zero only the first time the function is
 	called, and a non-zero positive in later calls. This means that i
 	and len will be necessarilly initialized the first time */
-
-	if (!color_schemes)
-		return (char *)NULL;
 
 	/* Look for color schemes in color_schemes for a match */
 	while ((name = color_schemes[i++]) != NULL) {
@@ -942,6 +948,9 @@ cschemes_generator(const char *text, int state)
 char *
 profiles_generator(const char *text, int state)
 {
+	if (!profile_names)
+		return (char *)NULL;
+
 	static int i;
 	static size_t len;
 	char *name;
@@ -1019,6 +1028,9 @@ filenames_gen_eln(const char *text, int state)
 char *
 bin_cmd_generator(const char *text, int state)
 {
+	if (!bin_commands)
+		return (char *)NULL;
+
 	static int i;
 	static size_t len;
 	char *name;
@@ -1077,6 +1089,9 @@ sort_num_generator(const char *text, int state)
 char *
 nets_generator(const char *text, int state)
 {
+	if (!remotes)
+		return (char *)NULL;
+
 	static int i;
 	static size_t len;
 	char *name;

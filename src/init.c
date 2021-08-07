@@ -1695,7 +1695,6 @@ get_last_path(void)
 	}
 
 	FILE *last_fp = fopen(last_file, "r");
-
 	if (!last_fp) {
 		_err('w', PRINT_PROMPT, _("%s: Error retrieving last "
 			"visited directory\n"), PROGRAM_NAME);
@@ -1713,13 +1712,10 @@ get_last_path(void)
 	} */
 
 	char line[PATH_MAX] = "";
-
 	while (fgets(line, (int)sizeof(line), last_fp)) {
 		char *p = line;
-
 		if (!*p || !strchr(p, '/'))
 			continue;
-
 		if (!strchr(p, ':'))
 			continue;
 
@@ -1973,11 +1969,8 @@ load_dirhist(void)
 	}
 
 	old_pwd[dirhist_total_index] = (char *)NULL;
-
 	free(line);
-
 	dirhist_cur_index = dirhist_total_index - 1;
-
 	return EXIT_SUCCESS;
 }
 

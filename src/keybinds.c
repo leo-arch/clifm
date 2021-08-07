@@ -91,7 +91,6 @@ kbinds_edit(void)
 		return EXIT_FAILURE;
 
 	struct stat file_attrib;
-
 	if (stat(KBINDS_FILE, &file_attrib) == -1) {
 		create_kbinds_file();
 		stat(KBINDS_FILE, &file_attrib);
@@ -106,13 +105,11 @@ kbinds_edit(void)
 		return EXIT_FAILURE;
 
 	stat(KBINDS_FILE, &file_attrib);
-
 	if (mtime_bfr == (time_t)file_attrib.st_mtime)
 		return EXIT_SUCCESS;
 
 	_err('n', PRINT_PROMPT, _("%s: Restart the program for changes to "
 				  "take effect\n"), PROGRAM_NAME);
-
 	return EXIT_SUCCESS;
 }
 
@@ -174,7 +171,6 @@ load_keybinds(void)
 
 	/* Open the keybinds file */
 	FILE *fp = fopen(KBINDS_FILE, "r");
-
 	if (!fp)
 		return EXIT_FAILURE;
 
@@ -183,7 +179,6 @@ load_keybinds(void)
 	ssize_t line_len = 0;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
-
 		if (!line || !*line || *line == '#' || *line == '\n')
 			continue;
 
@@ -192,7 +187,6 @@ load_keybinds(void)
 
 		char *tmp = (char *)NULL;
 		tmp = strchr(line, ':');
-
 		if (!tmp || !*(tmp + 1))
 			continue;
 

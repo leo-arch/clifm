@@ -525,6 +525,9 @@ main(int argc, char *argv[])
 	exit(EXIT_FAILURE);
 #endif
 
+	fputs(DEF_DF_C, stdout);
+	fflush(stdout);
+
 	/* If running the program locally, that is, not from a path in PATH,
 	 * remove the leading "./" to get the correct program invocation
 	 * name */
@@ -548,11 +551,8 @@ main(int argc, char *argv[])
 	user = get_user();
 	get_home();
 
-	if (geteuid() == 0) {
+	if (geteuid() == 0)
 		flags |= ROOT_USR;
-		_err(0, PRINT_PROMPT, _("%s%s: %sRunning as root\n"),
-		    bold, PROGRAM_NAME, red);
-	}
 
 	/* Running in a graphical environment? */
 #if __linux__
@@ -606,6 +606,14 @@ main(int argc, char *argv[])
 
 	cschemes_n = get_colorschemes();
 	set_colors(usr_cscheme ? usr_cscheme : "default", 1);
+
+	fputs(df_c, stdout);
+	fflush(stdout);
+
+	if (flags & ROOT_USR) {
+		_err(0, PRINT_PROMPT, _("%s%s: %sRunning as root%s\n"),
+			bold, PROGRAM_NAME, red, df_c);
+	}
 
 	free(usr_cscheme);
 	usr_cscheme = (char *)NULL;
