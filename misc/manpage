@@ -839,9 +839,24 @@ CliFM offers three kinds of file filters:
 .TP
 NOTE: C stands for Control, S for Shift, and M for the Meta key (the Alt key in most keyboards).
 .TP
-NOTE 2: Some of these keybindings might not work on your terminal emulator, depending on the terminal settings. Some useful tips on this regard:
+NOTE 2: Some of these keybindings might not work on your console/terminal emulator, depending on your system. Some useful tips on this regard:
+.TP
+Haiku terminal: Most of these keybindings won't work on the Haiku terminal, since Alt plays here the role Ctrl usually plays in most other systems (see the Haiku documentation). To fix this just set your custom keybindings.
 .TP
 Kernel built-in console: Key sequences involving the Shift key (S-up, S-left, and S-right in our case) will just not work. Use the alternative key sequences instead: M-u, M-j, and M-k respectively
+.TP
+NetBSD (wsvt25) and OpenBSD (vt220) kernel consoles: Key sequences involving the Alt key won't work out of the box. Here's how to make it work:
+
+ On OpenBSD:
+ 1) Copy /etc/examples/wsconsctl.conf to /etc (if it does not already exist)
+ 2) Add the metaesc flag to your current keyboard enconding. For example keyboard.encoding=us.metaesc
+ You might need to reboot the machine for changes to take effect.
+
+ On NetBSD:
+ Add the metaesc flag to your current encoding in /etc/wscons.conf. Example: encoding us.metaesc
+ You might need to reboot the machine for changes to take effect.
+
+
 .TP
 Konsole: Shift+left and Shift+right are not bound by default, so that you need to bind them manually. Go to Settings -> Edit current profile -> Keyboard -> Default (Xfree4), and add these values:
  Left+Shift	\\E[1;2D
