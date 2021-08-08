@@ -345,7 +345,6 @@ my_rl_quote(char *text, int mt, char *qp)
 
 	/* Escape whatever char that needs to be escaped */
 	for (tp = text; *tp; tp++) {
-
 		if (is_quote_char(*tp))
 			*p++ = '\\';
 
@@ -354,7 +353,6 @@ my_rl_quote(char *text, int mt, char *qp)
 
 	/* Add a final null byte to the string */
 	*p = '\0';
-
 	return r;
 }
 
@@ -377,18 +375,14 @@ my_rl_path_completion(const char *text, int state)
 
 	if (strchr(text, '\\')) {
 		char *p = savestring(text, strlen(text));
-
 		tmp_text = dequote_str(p, 0);
-
 		free(p);
 		p = (char *)NULL;
-
 		if (!tmp_text)
 			return (char *)NULL;
 	}
 
 	if (*text == '.' && text[1] == '.' && text[2] == '.') {
-
 		char *p = savestring(text, strlen(text));
 		tmp_text = fastback(p);
 
@@ -524,7 +518,6 @@ my_rl_path_completion(const char *text, int state)
 	mode_t type;
 
 	while (directory && (ent = readdir(directory))) {
-
 #if !defined(_DIRENT_HAVE_D_TYPE)
 		struct stat attr;
 		if (!dirname || (*dirname == '.' && !*(dirname + 1)))
@@ -551,7 +544,6 @@ my_rl_path_completion(const char *text, int state)
 
 		/* If the user entered nothing before TAB (ex: "cd [TAB]") */
 		if (!filename_len) {
-
 			/* Exclude "." and ".." as possible completions */
 			if (SELFORPARENT(ent->d_name))
 				continue;
@@ -593,7 +585,6 @@ my_rl_path_completion(const char *text, int state)
 
 				switch (type) {
 				case DT_LNK:
-
 					if (dirname[0] == '.' && !dirname[1]) {
 						ret = get_link_ref(ent->d_name);
 					} else {
@@ -608,12 +599,9 @@ my_rl_path_completion(const char *text, int state)
 					break;
 
 				case DT_REG: /* fallthrough */
-				case DT_DIR:
-					match = 1;
-					break;
+				case DT_DIR: match = 1; break;
 
-				default:
-					break;
+				default: break;
 				}
 			}
 
@@ -631,14 +619,12 @@ my_rl_path_completion(const char *text, int state)
 
 			/* If "./", list only executable regular files */
 			else if (exec) {
-
 				if (type == DT_REG && access(ent->d_name, X_OK) == 0)
 					match = 1;
 			}
 
 			/* If "/path/./", list only executable regular files */
 			else if (exec_path) {
-
 				if (type == DT_REG) {
 					/* dir_tmp is dirname less "./", already
 					 * allocated before the while loop */
@@ -688,9 +674,7 @@ my_rl_path_completion(const char *text, int state)
 						match = 1;
 					break;
 
-				case DT_DIR:
-					match = 1;
-					break;
+				case DT_DIR: match = 1; break;
 
 				default: break;
 				}
@@ -703,9 +687,7 @@ my_rl_path_completion(const char *text, int state)
 
 				switch (type) {
 				case DT_REG: /* fallthrough */
-				case DT_DIR:
-					match = 1;
-					break;
+				case DT_DIR: match = 1; break;
 
 				case DT_LNK:
 					if (dirname[0] == '.' && !dirname[1]) {
@@ -794,7 +776,7 @@ my_rl_path_completion(const char *text, int state)
 			if (rl_complete_with_tilde_expansion && *users_dirname == '~') {
 				size_t dirlen = strlen(dirname);
 				temp = (char *)xcalloc(dirlen + strlen(ent->d_name) + 2,
-															sizeof(char));
+									sizeof(char));
 				strcpy(temp, dirname);
 				/* Canonicalization cuts off any final slash present.
 				 * We need to add it back. */
@@ -809,10 +791,9 @@ my_rl_path_completion(const char *text, int state)
 				strcpy(temp, users_dirname);
 			}
 			strcat(temp, ent->d_name);
-		}
-
-		else
+		} else {
 			temp = savestring(ent->d_name, strlen(ent->d_name));
+		}
 
 		return (temp);
 	}
@@ -884,17 +865,14 @@ jump_generator(const char *text, int state)
 
 	/* Look for matches in the dirhist list */
 	while ((name = jump_db[i++].path) != NULL) {
-
 		/* Exclude CWD */
 		if (name[1] == ws[cur_ws].path[1] && strcmp(name, ws[cur_ws].path) == 0)
 			continue;
-
 		/* Filter by parent */
 		if (rl_line_buffer[1] == 'p') {
 			if (!strstr(ws[cur_ws].path, name))
 				continue;
 		}
-
 		/* Filter by child */
 		else if (rl_line_buffer[1] == 'c') {
 			if (!strstr(name, ws[cur_ws].path))
@@ -924,7 +902,7 @@ jump_entries_generator(const char *text, int state)
 	/* Check list of jump entries for a match */
 	while (i <= jump_n && (name = jump_db[i++].path) != NULL)
 		if (*name == *jump_db[num_text - 1].path && strcmp(name,
-						jump_db[num_text - 1].path) == 0)
+					jump_db[num_text - 1].path) == 0)
 			return strdup(name);
 
 	return (char *)NULL;
@@ -1071,7 +1049,6 @@ sort_num_generator(const char *text, int state)
 		i = 0;
 
 	int num_text = atoi(text);
-
 	static char *sorts[] = {
 	    "none",
 	    "name",
