@@ -141,6 +141,7 @@ initialize_readline(void)
 	if (suggestions && (flags & GUI)) {
 		rl_getc_function = my_rl_getc;
 	} else {
+		suggestions = 0;
 		_err('w', PRINT_PROMPT, _("%s: Suggestions are currently"
 				"not supported on the FreeBSD console\n"), PROGRAM_NAME);
 	}
