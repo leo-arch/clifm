@@ -131,8 +131,20 @@ initialize_readline(void)
 	 * https://thoughtbot.com/blog/tab-completion-in-gnu-readline*/
 	rl_char_is_quoted_p = quote_detector;
 
+#ifndef __FreeBSD__
 	if (suggestions)
 		rl_getc_function = my_rl_getc;
+#else
+	/* For the time being, suggestions do not work on the FreeBSD
+	 * console. The escape code to retrieve the current cursor
+	 * position doesn't seem to work */
+	if (suggestions && (flags & GUI)) {
+		rl_getc_function = my_rl_getc;
+	} else {
+		_err('w', PRINT_PROMPT, _("%s: Suggestions are currently"
+				"not supported on the FreeBSD console\n"), PROGRAM_NAME);
+	}
+#endif
 
 	/* This function is executed inmediately before path completion. So,
 	 * if the string to be completed is, for instance, "user\ file" (see
