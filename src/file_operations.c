@@ -94,7 +94,6 @@ dup_file(char *source, char *dest)
 	}
 
 	int exit_status =  EXIT_SUCCESS;
-
 	int free_dest = 0;
 
 	/* If no dest, use source as file name: source.copy, and, if already
@@ -155,7 +154,6 @@ dup_file(char *source, char *dest)
 
 	if (free_dest)
 		free(dest);
-
 	return exit_status;
 }
 
@@ -174,7 +172,6 @@ create_file(char **cmd)
 	/* If no argument provided, ask the user for a filename */
 	if (!cmd[1]) {
 		char *filename = (char *)NULL;
-
 		while (!filename) {
 			puts(_("End filename with a slash to create a directory"));
 			filename = rl_no_hist(_("Filename ('q' to quit): "));
@@ -204,14 +201,12 @@ create_file(char **cmd)
 		tmp_cmd[2] = (char *)NULL;
 		cmd = tmp_cmd;
 		free_cmd = 1;
-
 		free(filename);
 	}
 
 	/* Properly format filenames */
 	size_t i;
 	for (i = 1; cmd[i]; i++) {
-
 		if (strchr(cmd[i], '\\')) {
 			char *deq_str = dequote_str(cmd[i], 0);
 			if (!deq_str) {
@@ -258,8 +253,7 @@ create_file(char **cmd)
 	ndirs[1] = (char *)xnmalloc(3, sizeof(char));
 	strcpy(ndirs[1], "-p");
 
-	size_t cnfiles = 1,
-		   cndirs = 2;
+	size_t cnfiles = 1, cndirs = 2;
 
 	for (i = 1; cmd[i]; i++) {
 		size_t cmd_len = strlen(cmd[i]);
@@ -287,21 +281,19 @@ create_file(char **cmd)
 	free(nfiles[0]);
 	free(ndirs[0]);
 	free(ndirs[1]);
-
 	free(nfiles);
 	free(ndirs);
-
 	if (free_cmd) {
 		for (i = 0; cmd[i]; i++)
 			free(cmd[i]);
 		free(cmd);
 	}
 
-	if (exit_status == EXIT_SUCCESS && cd_lists_on_the_fly && file_in_cwd) {
+/*	if (exit_status == EXIT_SUCCESS && cd_lists_on_the_fly && file_in_cwd) {
 		free_dirlist();
 		if (list_dir() != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
-	}
+	} */
 
 	return exit_status;
 }
@@ -330,7 +322,6 @@ open_function(char **cmd)
 
 	/* Check file existence */
 	struct stat file_attrib;
-
 	if (stat(file, &file_attrib) == -1) {
 		fprintf(stderr, "%s: open: %s: %s\n", PROGRAM_NAME, cmd[1],
 		    strerror(errno));
@@ -346,35 +337,19 @@ open_function(char **cmd)
 		  * need */
 
 	switch ((file_attrib.st_mode & S_IFMT)) {
-	case S_IFBLK:
 		/* Store file type to compose and print the error message, if
 		 * necessary */
-		strcpy(file_type, _("block device"));
-		break;
-
-	case S_IFCHR:
-		strcpy(file_type, _("character device"));
-		break;
-
-	case S_IFSOCK:
-		strcpy(file_type, _("socket"));
-		break;
-
-	case S_IFIFO:
-		strcpy(file_type, _("FIFO/pipe"));
-		break;
-
-	case S_IFDIR:
-		return cd_function(file);
-
+	case S_IFBLK: strcpy(file_type, _("block device")); break;
+	case S_IFCHR: strcpy(file_type, _("character device")); break;
+	case S_IFSOCK: strcpy(file_type, _("socket")); break;
+	case S_IFIFO: strcpy(file_type, _("FIFO/pipe")); break;
+	case S_IFDIR: return cd_function(file);
 	case S_IFREG:
-
 		/* If an archive/compressed file, call archiver() */
 		if (is_compressed(file, 1) == 0) {
 			char *tmp_cmd[] = {"ad", file, NULL};
 			return archiver(tmp_cmd, 'd');
 		}
-
 		no_open_file = 0;
 		break;
 
@@ -395,15 +370,12 @@ open_function(char **cmd)
 	/* At this point we know the file to be openend is either a regular
 	 * file or a symlink to a regular file. So, just open the file */
 	if (!cmd[2] || (*cmd[2] == '&' && !cmd[2][1])) {
-
 		if (opener) {
 			char *tmp_cmd[] = {opener, file, NULL};
 			int ret = launch_execve(tmp_cmd, bg_proc ? BACKGROUND
 							  : FOREGROUND, E_NOSTDERR);
-
 			if (ret != EXIT_SUCCESS)
 				return EXIT_FAILURE;
-
 			return EXIT_SUCCESS;
 		} else if (!(flags & FILE_CMD_OK)) {
 			fprintf(stderr, _("%s: file: Command not found. Specify an "
@@ -412,7 +384,6 @@ open_function(char **cmd)
 			return EXIT_FAILURE;
 		} else {
 			int ret = mime_open(cmd);
-
 			/* The return value of mime_open could be zero
 			 * (EXIT_SUCCESS), if success, one (EXIT_FAILURE) if error
 			 * (in which case the following error message should be
@@ -431,9 +402,7 @@ open_function(char **cmd)
 
 	/* If some application was specified to open the file */
 	char *tmp_cmd[] = {cmd[2], file, NULL};
-
 	int ret = launch_execve(tmp_cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
-
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
@@ -588,13 +557,10 @@ edit_link(char *link)
 	}
 
 	real_path = realpath(link, NULL);
-
 	printf(_("%s%s%s successfully relinked to "), real_path ? ln_c
 												: or_c, link, df_c);
 	colors_list(new_path, NO_ELN, NO_PAD, PRINT_NEWLINE);
-
 	free(new_path);
-
 	if (real_path)
 		free(real_path);
 
@@ -662,7 +628,6 @@ copy_function(char **comm)
 					 : comm[args_n]);
 
 			char *ret_val = strrchr(sel_elements[j], '/');
-
 			char *tmp_str = (char *)xnmalloc(strlen(dest)
 								+ strlen(ret_val + 1) + 2, sizeof(char));
 
@@ -673,16 +638,13 @@ copy_function(char **comm)
 		}
 
 		tmp[j + 1] = (char *)NULL;
-
 		bulk_rename(tmp);
 
 		for (i = 0; tmp[i]; i++)
 			free(tmp[i]);
 
 		free(tmp);
-
 		copy_n_rename = 0;
-
 		return EXIT_SUCCESS;
 	}
 
@@ -690,18 +652,16 @@ copy_function(char **comm)
 	 * since sel files are note there anymore */
 	if (*comm[0] == 'm' && comm[0][1] == 'v'
 	&& (!comm[0][2] || comm[0][2] == ' ')) {
-
 		for (i = 0; i < sel_n; i++)
 			free(sel_elements[i]);
-
 		sel_n = 0;
 		save_sel();
 	}
 
-	if (cd_lists_on_the_fly) {
+/*	if (cd_lists_on_the_fly) {
 		free_dirlist();
 		list_dir();
-	}
+	} */
 
 	return EXIT_SUCCESS;
 }
@@ -767,17 +727,16 @@ remove_file(char **args)
 
 	if (launch_execve(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
-	else {
+/*	else {
 		if (cwd && cd_lists_on_the_fly && strcmp(args[1], "--help") != 0
 		&& strcmp(args[1], "--version") != 0) {
 			free_dirlist();
 			exit_status = list_dir();
 		}
-	}
+	} */
 
 	for (i = 0; rm_cmd[i]; i++)
 		free(rm_cmd[i]);
-
 	free(rm_cmd);
 
 	return exit_status;
@@ -839,7 +798,6 @@ bulk_rename(char **args)
 	}
 
 	arg_total = i;
-
 	fclose(bulk_fp);
 
 	/* Store the last modification time of the bulk file. This time
@@ -856,22 +814,17 @@ bulk_rename(char **args)
 	/* Compare the new modification time to the stored one: if they
 	 * match, nothing was modified */
 	stat(BULK_FILE, &file_attrib);
-
 	if (mtime_bfr == (time_t)file_attrib.st_mtime) {
-
 		puts(_("bulk: Nothing to do"));
-
 		if (unlink(BULK_FILE) == -1) {
 			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 			    BULK_FILE, strerror(errno));
 			exit_status = EXIT_FAILURE;
 		}
-
 		return exit_status;
 	}
 
 	bulk_fp = fopen(BULK_FILE, "r");
-
 	if (!bulk_fp) {
 		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", BULK_FILE,
 		    strerror(errno));
@@ -890,15 +843,11 @@ bulk_rename(char **args)
 		file_total++;
 
 	if (arg_total != file_total) {
-
 		fputs(_("bulk: Line mismatch in rename file\n"), stderr);
-
 		fclose(bulk_fp);
-
 		if (unlink(BULK_FILE) == -1)
 			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 			    BULK_FILE, strerror(errno));
-
 		return EXIT_FAILURE;
 	}
 
@@ -911,10 +860,8 @@ bulk_rename(char **args)
 	int modified = 0;
 
 	i = 1;
-
 	/* Print what would be done */
 	while ((line_len = getline(&line, &line_size, bulk_fp)) > 0) {
-
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
 
@@ -938,13 +885,11 @@ bulk_rename(char **args)
 
 		free(line);
 		fclose(bulk_fp);
-
 		return exit_status;
 	}
 
 	/* Ask the user for confirmation */
 	char *answer = (char *)NULL;
-
 	while (!answer) {
 		answer = readline(_("Continue? [y/N] "));
 
@@ -956,8 +901,7 @@ bulk_rename(char **args)
 
 		switch (*answer) {
 		case 'y': /* fallthrough */
-		case 'Y':
-			break;
+		case 'Y': break;
 
 		case 'n': /* fallthrough */
 		case 'N': /* fallthrough */
@@ -983,7 +927,6 @@ bulk_rename(char **args)
 
 	/* Compose the mv commands and execute them */
 	while ((line_len = getline(&line, &line_size, bulk_fp)) > 0) {
-
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
 
@@ -998,20 +941,18 @@ bulk_rename(char **args)
 	}
 
 	free(line);
-
 	fclose(bulk_fp);
-
 	if (unlink(BULK_FILE) == -1) {
 		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 		    BULK_FILE, strerror(errno));
 		exit_status = EXIT_FAILURE;
 	}
 
-	if (cd_lists_on_the_fly) {
+/*	if (cd_lists_on_the_fly) {
 		free_dirlist();
 		if (list_dir() != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
-	}
+	} */
 
 	return exit_status;
 }
@@ -1022,7 +963,6 @@ bulk_rename(char **args)
 char *export(char **filenames, int open)
 {
 	char *rand_ext = gen_rand_str(6);
-
 	if (!rand_ext)
 		return (char *)NULL;
 
@@ -1031,7 +971,6 @@ char *export(char **filenames, int open)
 	free(rand_ext);
 
 	FILE *fp = fopen(tmp_file, "w");
-
 	if (!fp) {
 		free(tmp_file);
 		return (char *)NULL;
@@ -1043,13 +982,10 @@ char *export(char **filenames, int open)
 	if (!filenames[1]) {
 		for (i = 0; file_info[i].name; i++)
 			fprintf(fp, "%s\n", file_info[i].name);
-	}
-
-	else {
+	} else {
 		for (i = 1; filenames[i]; i++) {
 			if (*filenames[i] == '.' && (!filenames[i][1] || (filenames[i][1] == '.' && !filenames[i][2])))
 				continue;
-
 			fprintf(fp, "%s\n", filenames[i]);
 		}
 	}
@@ -1060,13 +996,10 @@ char *export(char **filenames, int open)
 		return tmp_file;
 
 	char *cmd[] = {"mime", tmp_file, NULL};
-
 	int ret = mime_open(cmd);
-
-	if (ret == EXIT_SUCCESS)
+	if (ret == EXIT_SUCCESS) {
 		return tmp_file;
-
-	else {
+	} else {
 		free(tmp_file);
 		return (char *)NULL;
 	}
@@ -1086,10 +1019,8 @@ batch_link(char **args)
 	char *suffix = (char *)NULL;
 	while (!suffix) {
 		suffix = rl_no_hist(_("Enter links suffix ('n' for none): "));
-
 		if (!suffix)
 			continue;
-
 		if (!*suffix) {
 			free(suffix);
 			suffix = (char *)NULL;
@@ -1098,7 +1029,6 @@ batch_link(char **args)
 	}
 
 	size_t i;
-
 	int exit_status = EXIT_SUCCESS;
 	char tmp[NAME_MAX];
 
@@ -1121,12 +1051,12 @@ batch_link(char **args)
 		}
 	}
 
-	if (exit_status == EXIT_SUCCESS && cd_lists_on_the_fly) {
+/*	if (exit_status == EXIT_SUCCESS && cd_lists_on_the_fly) {
 		free_dirlist();
 
 		if (list_dir() != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
-	}
+	} */
 
 	free(suffix);
 	return exit_status;

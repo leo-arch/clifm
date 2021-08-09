@@ -503,6 +503,12 @@ char di_c[MAX_COLOR], /* Directory */
 
     dir_ico_c[MAX_COLOR]; /* Directories icon color */
 
+#ifdef LINUX_INOTIFY
+int inotify_fd, inotify_wd = -1;
+unsigned int INOTIFY_MASK = /* IN_ATTRIB | */ IN_CREATE | IN_DELETE | IN_DELETE_SELF
+			   | IN_MODIFY | IN_MOVE_SELF | IN_MOVED_FROM | IN_MOVED_TO;
+#endif
+
 			/**
 				 * #############################
 				 * #           MAIN            #
@@ -645,9 +651,17 @@ main(int argc, char *argv[])
 	get_sel_files();
 
 	/* Start listing as soon as possible to speed up startup time */
-	if (cd_lists_on_the_fly && isatty(STDIN_FILENO))
+	if (cd_lists_on_the_fly && isatty(STDIN_FILENO)) {
+#ifdef LINUX_INOTIFY
+		/* Initialize inotify */
+		inotify_fd = inotify_init1(IN_NONBLOCK);
+		if (inotify_fd < 0) {
+			_err('w', PRINT_PROMPT, "%s: inotify: %s\n", PROGRAM_NAME,
+				strerror(errno));
+		}
+#endif
 		list_dir();
-
+	}
 	create_kbinds_file();
 	load_bookmarks();
 	load_keybinds();

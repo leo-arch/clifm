@@ -49,3 +49,6 @@ void set_term_title(const char *str);
 void splash(void);
 int unpin_dir(void);
 void version_function(void);
+#ifdef LINUX_INOTIFY
+void read_inotify(void);
+#endif

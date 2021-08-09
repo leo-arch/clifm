@@ -43,6 +43,9 @@
 #include <time.h>
 #include <unistd.h>
 #include <readline/readline.h>
+#ifdef LINUX_INOTIFY
+#include <sys/inotify.h>
+#endif
 
 #include "aux.h"
 #include "bookmarks.h"
@@ -57,6 +60,42 @@
 #include "strings.h"
 #include "remotes.h"
 #include "messages.h"
+
+#ifdef LINUX_INOTIFY
+void
+read_inotify(void)
+{
+	unsigned int i;
+	struct inotify_event *event;
+	char inotify_buf[EVENT_BUF_LEN];
+
+	memset((void *)inotify_buf, 0x0, EVENT_BUF_LEN);
+	i = read(inotify_fd, inotify_buf, EVENT_BUF_LEN);
+
+	if (i <= 0)
+		return;
+
+	for (char *ptr = inotify_buf;
+	     ptr + ((struct inotify_event *)ptr)->len < inotify_buf + i;
+	     ptr += sizeof(struct inotify_event) + event->len) {
+		event = (struct inotify_event *)ptr;
+/*			DPRINTF_D(event->wd);
+		DPRINTF_D(event->mask); */
+		if (!event->wd)
+			break;
+
+		if (event->mask & INOTIFY_MASK) {
+			free_dirlist();
+			list_dir();
+//				puts("read_inotify");
+			break;
+		}
+	}
+/*		puts("inotify read done"); */
+
+	return;
+}
+#endif
 
 void
 set_term_title(const char *str)
@@ -1026,6 +1065,13 @@ void
 free_stuff(void)
 {
 	int i = 0;
+
+#ifdef LINUX_INOTIFY
+	/* Shutdown inotify */
+	if (inotify_wd >= 0)
+		inotify_rm_watch(inotify_fd, inotify_wd);
+	close(inotify_fd);
+#endif
 
 	free_remotes(1);
 	free(suggestion_buf);

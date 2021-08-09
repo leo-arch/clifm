@@ -291,12 +291,9 @@ list_dir_light(void)
 	printf("\x1b[?25l");
 
 	DIR *dir;
-
 	struct dirent *ent;
-
 	int reset_pager = 0;
 	int close_dir = 1;
-
 	/* Get terminal current amount of rows and columns */
 	struct winsize w;
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
@@ -314,6 +311,11 @@ list_dir_light(void)
 		goto END;
 	}
 
+#ifdef LINUX_INOTIFY
+	if (inotify_wd == -1)
+		inotify_wd = inotify_add_watch(inotify_fd, ws[cur_ws].path, INOTIFY_MASK);
+#endif
+
 	errno = 0;
 	longest = 0;
 	register unsigned int n = 0;
@@ -323,17 +325,13 @@ list_dir_light(void)
 	    sizeof(struct fileinfo));
 
 	while ((ent = readdir(dir))) {
-
 		char *ename = ent->d_name;
-
 		/* Skip self and parent directories */
 		if (*ename == '.' && (!ename[1] || (ename[1] == '.' && !ename[2])))
 			continue;
-
 		/* Skip files matching FILTER */
 		if (filter && regexec(&regex_exp, ename, 0, NULL, 0) == EXIT_SUCCESS)
 			continue;
-
 		if (!show_hidden && *ename == '.')
 			continue;
 #if !defined(_DIRENT_HAVE_D_TYPE)
@@ -430,33 +428,13 @@ list_dir_light(void)
 			file_info[n].color = ln_c;
 			break;
 
-		case DT_REG:
-			file_info[n].color = fi_c;
-			break;
-
-		case DT_SOCK:
-			file_info[n].color = so_c;
-			break;
-
-		case DT_FIFO:
-			file_info[n].color = pi_c;
-			break;
-
-		case DT_BLK:
-			file_info[n].color = bd_c;
-			break;
-
-		case DT_CHR:
-			file_info[n].color = cd_c;
-			break;
-
-		case DT_UNKNOWN:
-			file_info[n].color = uf_c;
-			break;
-
-		default:
-			file_info[n].color = df_c;
-			break;
+		case DT_REG: file_info[n].color = fi_c; break;
+		case DT_SOCK: file_info[n].color = so_c; break;
+		case DT_FIFO: file_info[n].color = pi_c; break;
+		case DT_BLK: file_info[n].color = bd_c; break;
+		case DT_CHR: file_info[n].color = cd_c; break;
+		case DT_UNKNOWN: file_info[n].color = uf_c; break;
+		default: file_info[n].color = df_c; break;
 		}
 
 		if (xargs.icons_use_file_color == 1 && icons)
@@ -467,7 +445,6 @@ list_dir_light(void)
 	}
 
 	file_info[n].name = (char *)NULL;
-
 	files = (size_t)n;
 
 	if (n == 0) {
@@ -485,7 +462,6 @@ list_dir_light(void)
 	size_t columns_n = 1;
 
 	/* Get the longest file name */
-
 	if (columned || long_view) {
 		i = (int)n;
 		while (--i >= 0) {
@@ -509,9 +485,7 @@ list_dir_light(void)
 					case DT_LNK:  /* fallthrough */
 					case DT_SOCK: /* fallthrough */
 					case DT_FIFO: /* fallthrough */
-					case DT_UNKNOWN:
-						total_len += 1;
-						break;
+					case DT_UNKNOWN: total_len += 1; break;
 					}
 				}
 			}
@@ -529,7 +503,6 @@ list_dir_light(void)
 				 * ######################## */
 
 	if (long_view) {
-
 		struct stat lattr;
 		int space_left = (int)term_cols - MAX_PROP_STR;
 
@@ -541,17 +514,13 @@ list_dir_light(void)
 
 		int k = (int)files;
 		for (i = 0; i < k; i++) {
-
 			if (max_files != UNSET && i == max_files)
 				break;
-
 			if (lstat(file_info[i].name, &lattr) == -1)
 				continue;
 
 			if (pager) {
-
 				if (counter > (size_t)(term_rows - 2)) {
-
 					fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 
 					switch (c = xgetchar()) {
@@ -583,7 +552,6 @@ list_dir_light(void)
 						fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 
 						i -= (term_rows - 1);
-
 						if (i < 0)
 							i = 0;
 
@@ -657,7 +625,6 @@ list_dir_light(void)
 	int nn = (int)n;
 	size_t cur_cols = 0;
 	for (i = 0; i < nn; i++) {
-
 		if (max_files != UNSET && i == max_files)
 			break;
 
@@ -668,7 +635,6 @@ list_dir_light(void)
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding file names */
 			if (last_column && counter > columns_n * ((size_t)term_rows - 2)) {
-
 				printf("\x1b[7;97m--Mas--\x1b[0;49m");
 
 				switch (c = xgetchar()) {
@@ -802,31 +768,16 @@ list_dir_light(void)
 						fputs(xitoa(file_info[i].filesn), stdout);
 					break;
 
-				case DT_FIFO:
-					putchar('|');
-					break;
-
-				case DT_LNK:
-					putchar('@');
-					break;
-
-				case DT_SOCK:
-					putchar('=');
-					break;
-
-				case DT_UNKNOWN:
-					putchar('?');
-					break;
-
-				default:
-					ind_char = 0;
-					break;
+				case DT_FIFO: putchar('|'); break;
+				case DT_LNK: putchar('@'); break;
+				case DT_SOCK: putchar('='); break;
+				case DT_UNKNOWN: putchar('?'); break;
+				default: ind_char = 0; break;
 				}
 			}
 		}
 
 		if (!last_column) {
-
 			/* Add spaces needed to equate the longest file name length */
 			int cur_len = (int)file_info[i].eln_n + 1 + (icons ? 3 : 0)
 						+ (int)file_info[i].len + (ind_char ? 1 : 0);
@@ -839,7 +790,6 @@ list_dir_light(void)
 			}
 
 			int diff = (int)longest - cur_len;
-
 			register int j;
 			for (j = diff + 1; j--;)
 				putchar(' ');
@@ -874,7 +824,6 @@ END:
 	if (dirhist_map) {
 		/* Print current, previous, and next entries */
 		print_dirhist_map();
-
 		print_div_line();
 	}
 
@@ -913,13 +862,10 @@ list_dir(void)
 	printf("\x1b[?25l");
 
 	DIR *dir;
-
 	struct dirent *ent;
 	struct stat attr;
-
 	int reset_pager = 0;
 	int close_dir = 1;
-
 	/* Get terminal current amount of rows and columns */
 	struct winsize w;
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
@@ -933,6 +879,11 @@ list_dir(void)
 		close_dir = 0;
 		goto END;
 	}
+
+#ifdef LINUX_INOTIFY
+	if (inotify_wd == -1)
+		inotify_wd = inotify_add_watch(inotify_fd, ws[cur_ws].path, INOTIFY_MASK);
+#endif
 
 	int fd = dirfd(dir);
 
@@ -949,9 +900,7 @@ list_dir(void)
 	    sizeof(struct fileinfo));
 
 	while ((ent = readdir(dir))) {
-
 		char *ename = ent->d_name;
-
 		/* Skip self and parent directories */
 		if (*ename == '.' && (!ename[1] || (ename[1] == '.' && !ename[2])))
 			continue;
@@ -1061,19 +1010,11 @@ list_dir(void)
 				file_info[n].time = (time_t)attx.stx_btime.tv_sec;
 		} break;
 #else
-		case SBTIME:
-			file_info[n].time = (time_t)attr.st_ctime;
-			break;
+		case SBTIME: file_info[n].time = (time_t)attr.st_ctime; break;
 #endif
-		case SCTIME:
-			file_info[n].time = (time_t)attr.st_ctime;
-			break;
-		case SMTIME:
-			file_info[n].time = (time_t)attr.st_mtime;
-			break;
-		default:
-			file_info[n].time = 0;
-			break;
+		case SCTIME: file_info[n].time = (time_t)attr.st_ctime;	break;
+		case SMTIME: file_info[n].time = (time_t)attr.st_mtime; break;
+		default: file_info[n].time = 0; break;
 		}
 
 		switch (file_info[n].type) {
@@ -1086,9 +1027,9 @@ list_dir(void)
 				if (*dir_ico_c)
 					file_info[n].icon_color = dir_ico_c;
 			}
-			if (files_counter)
+			if (files_counter) {
 				file_info[n].filesn = count_dir(ename, NO_CPOP) - 2;
-			else {
+			} else {
 				if (access(ename, R_OK) == -1)
 					file_info[n].filesn = -1;
 				else
@@ -1114,9 +1055,9 @@ list_dir(void)
 		case DT_LNK:
 			file_info[n].icon = ICON_LINK;
 			struct stat attrl;
-			if (fstatat(fd, ename, &attrl, 0) == -1)
+			if (fstatat(fd, ename, &attrl, 0) == -1) {
 				file_info[n].color = or_c;
-			else {
+			} else {
 				if (S_ISDIR(attrl.st_mode)) {
 					file_info[n].dir = 1;
 					files_counter
@@ -1162,16 +1103,13 @@ list_dir(void)
 					file_info[n].color = ee_c;
 				else
 					file_info[n].color = ex_c;
-			}
-
-			else if (file_info[n].size == 0)
+			} else if (file_info[n].size == 0) {
 				file_info[n].color = ef_c;
-
-			else if (file_info[n].linkn > 1) /* Multi-hardlink */
+			} else if (file_info[n].linkn > 1) { /* Multi-hardlink */
 				file_info[n].color = mh_c;
-
-			else /* Regular file */
+			} else { /* Regular file */
 				file_info[n].color = fi_c;
+			}
 
 			/* Check file extension */
 			char *ext = strrchr(file_info[n].name, '.');
@@ -1179,7 +1117,6 @@ list_dir(void)
 			if (ext && ext != file_info[n].name) {
 				if (icons)
 					get_ext_icon(ext, (int)n);
-
 				/* Check extension color only if some is defined */
 				if (ext_colors_n) {
 					char *extcolor = get_ext_color(ext);
@@ -1202,29 +1139,12 @@ list_dir(void)
 		} /* End of DT_REG block */
 		break;
 
-		case DT_SOCK:
-			file_info[n].color = so_c;
-			break;
-
-		case DT_FIFO:
-			file_info[n].color = pi_c;
-			break;
-
-		case DT_BLK:
-			file_info[n].color = bd_c;
-			break;
-
-		case DT_CHR:
-			file_info[n].color = cd_c;
-			break;
-
-		case DT_UNKNOWN:
-			file_info[n].color = uf_c;
-			break;
-
-		default:
-			file_info[n].color = df_c;
-			break;
+		case DT_SOCK: file_info[n].color = so_c; break;
+		case DT_FIFO: file_info[n].color = pi_c; break;
+		case DT_BLK: file_info[n].color = bd_c; break;
+		case DT_CHR: file_info[n].color = cd_c; break;
+		case DT_UNKNOWN: file_info[n].color = uf_c; break;
+		default: file_info[n].color = df_c; break;
 		}
 
 		if (xargs.icons_use_file_color == 1 && icons)
@@ -1235,7 +1155,6 @@ list_dir(void)
 	}
 
 	file_info[n].name = (char *)NULL;
-
 	files = n;
 
 	if (n == 0) {
@@ -1257,7 +1176,6 @@ list_dir(void)
 
 	int c, i;
 	register size_t counter = 0;
-
 	size_t columns_n = 1;
 
 	/* Get the longest file name */
@@ -1269,7 +1187,6 @@ list_dir(void)
 			total_len = file_info[i].eln_n + 1 + file_info[i].len;
 
 			if (!long_view && classify) {
-
 				if (file_info[i].dir)
 					total_len += 2;
 
@@ -1285,9 +1202,7 @@ list_dir(void)
 					case DT_LNK:  /* fallthrough */
 					case DT_SOCK: /* fallthrough */
 					case DT_FIFO: /* fallthrough */
-					case DT_UNKNOWN:
-						total_len += 1;
-						break;
+					case DT_UNKNOWN: total_len += 1; break;
 					}
 				}
 			}
@@ -1320,14 +1235,11 @@ list_dir(void)
 
 		int k = (int)files;
 		for (i = 0; i < k; i++) {
-
 			if (max_files != UNSET && i == max_files)
 				break;
 
 			if (pager) {
-
 				if (counter > (size_t)(term_rows - 2)) {
-
 					fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 
 					switch (c = xgetchar()) {
@@ -1335,18 +1247,17 @@ list_dir(void)
 					/* Advance one line at a time */
 					case 66: /* fallthrough */ /* Down arrow */
 					case 10: /* fallthrough */ /* Enter */
-					case 32:		   /* Space */
+					case 32: /* Space */
 						break;
 
 					/* Advance one page at a time */
-					case 126:
-						counter = 0; /* Page Down */
+					case 126:  /* Page Down */
+						counter = 0;
 						break;
 
 					case 63: /* fallthrough */ /* ? */
 					case 104: {		   /* h: Print pager help */
 						CLEAR;
-
 						fputs(_("?, h: help\n"
 							"Down arrow, Enter, Space: Advance one line\n"
 							"Page Down: Advance one page\n"
@@ -1359,7 +1270,6 @@ list_dir(void)
 						fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 
 						i -= (term_rows - 1);
-
 						if (i < 0)
 							i = 0;
 
@@ -1370,8 +1280,8 @@ list_dir(void)
 
 					/* Stop paging (and set a flag to reenable the pager
 					 * later) */
-					case 99:  /* 'c' */
-					case 112: /* 'p' */
+					case 99:  /* fallthrough */ /* 'c' */
+					case 112: /* fallthrough */ /* 'p' */
 					case 113:
 						pager = 0, reset_pager = 1; /* 'q' */
 						break;
@@ -1408,10 +1318,9 @@ list_dir(void)
 	int last_column = 0;
 
 	/* Get amount of columns needed to print files in CWD  */
-	if (!columned)
+	if (!columned) {
 		columns_n = 1;
-
-	else {
+	} else {
 		columns_n = (size_t)term_cols / (longest + 1); /* +1 for the
 		space between file names */
 
@@ -1428,7 +1337,6 @@ list_dir(void)
 	int nn = (int)n;
 	size_t cur_cols = 0;
 	for (i = 0; i < nn; i++) {
-
 		if (max_files != UNSET && i == max_files)
 			break;
 
@@ -1443,7 +1351,6 @@ list_dir(void)
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding file names */
 			if (last_column && counter > columns_n * ((size_t)term_rows - 2)) {
-
 				fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 
 				switch (c = xgetchar()) {
@@ -1451,13 +1358,12 @@ list_dir(void)
 				/* Advance one line at a time */
 				case 66: /* fallthrough */ /* Down arrow */
 				case 10: /* fallthrough */ /* Enter */
-				case 32:		   /* Space */
+				case 32: /* Space */
 					break;
 
 				/* Advance one page at a time */
-				case 126:
-					counter = 0; /* Page Down */
-					break;
+				case 126: /* Page Down */
+					counter = 0; break;
 
 				case 63: /* fallthrough */ /* ? */
 				case 104: {		   /* h: Print pager help */
@@ -1511,13 +1417,12 @@ list_dir(void)
 		if (++cur_cols == columns_n) {
 			cur_cols = 0;
 			last_column = 1;
-		} else
+		} else {
 			last_column = 0;
+		}
 
 		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
-
 		int ind_char = 1;
-
 		if (!classify)
 			ind_char = 0;
 
@@ -1526,7 +1431,6 @@ list_dir(void)
 			 * ################################# */
 
 		if (colorize) {
-
 			ind_char = 0;
 			if (icons) {
 				if (no_eln) {
@@ -1538,9 +1442,7 @@ list_dir(void)
 					    file_info[i].icon_color, file_info[i].icon,
 					    file_info[i].color, file_info[i].name, df_c);
 				}
-			}
-
-			else {
+			} else {
 				if (no_eln) {
 					printf("%s%s%s", file_info[i].color,
 					    file_info[i].name, df_c);
@@ -1578,9 +1480,7 @@ list_dir(void)
 				else
 					printf("%s%d%s %s %s", el_c, i + 1, df_c,
 					    file_info[i].icon, file_info[i].name);
-			}
-
-			else {
+			} else {
 				if (no_eln) {
 					fputs(file_info[i].name, stdout);
 				} else {
@@ -1604,19 +1504,15 @@ list_dir(void)
 						fputs(xitoa(file_info[i].filesn), stdout);
 					break;
 
-				case DT_FIFO:
-					putchar('|');
-					break;
-
 				case DT_LNK:
 					if (file_info[i].dir) {
 						ind_char = 0;
 						fputs(" /", stdout);
 						if (file_info[i].filesn > 0 && files_counter)
 							fputs(xitoa(file_info[i].filesn), stdout);
-					} else
+					} else {
 						putchar('@');
-
+					}
 					break;
 
 				case DT_REG:
@@ -1626,16 +1522,10 @@ list_dir(void)
 						ind_char = 0;
 					break;
 
-				case DT_SOCK:
-					putchar('=');
-					break;
-
-				case DT_UNKNOWN:
-					putchar('?');
-					break;
-
-				default:
-					ind_char = 0;
+				case DT_FIFO: putchar('|'); break;
+				case DT_SOCK: putchar('='); break;
+				case DT_UNKNOWN: putchar('?'); break;
+				default: ind_char = 0;
 				}
 			}
 		}
@@ -1651,7 +1541,6 @@ list_dir(void)
 			}
 
 			int diff = (int)longest - cur_len;
-
 			register int j;
 			for (j = diff + 1; j--;)
 				putchar(' ');
@@ -1690,7 +1579,6 @@ END:
 	if (dirhist_map) {
 		/* Print current, previous, and next entries */
 		print_dirhist_map();
-
 		print_div_line();
 	}
 

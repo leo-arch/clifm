@@ -55,6 +55,9 @@
 #endif
 #ifdef __linux__
 #include <linux/version.h>
+#include <sys/inotify.h>
+#include <sys/types.h>
+#define LINUX_INOTIFY
 #endif
 
 #include "init.h"
@@ -96,6 +99,15 @@ void *__dso_handle;
 #define _LINUX_CAP
 #endif /* LINUX_VERSION (2.6.24)*/
 #endif /* __linux__ */
+
+/* Event handling */
+#ifdef LINUX_INOTIFY
+#define NUM_EVENT_SLOTS 32 /* Make room for 32 events */
+#define EVENT_SIZE (sizeof(struct inotify_event))
+#define EVENT_BUF_LEN (EVENT_SIZE * NUM_EVENT_SLOTS)
+extern int inotify_fd, inotify_wd;
+extern unsigned int INOTIFY_MASK;
+#endif
 
 #define PROGRAM_NAME "CliFM"
 #define PNL "clifm" /* Program name lowercase */

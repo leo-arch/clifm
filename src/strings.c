@@ -276,7 +276,7 @@ strbfrlst(char *str, const char c)
 	if (!q || q == str)
 		return (char *)NULL;
 
-	*q = 0x00;
+	*q = '\0';
 
 	char *buf = (char *)malloc((size_t)(q - str + 1));
 	if (!buf) {
@@ -468,9 +468,7 @@ split_str(const char *str)
 				} else {
 					close = ')';
 				}
-			}
-
-			else {
+			} else {
 				/* If escaped, it has no special meaning */
 				if (str_len && *(str - 1) == '\\') {
 					buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
@@ -571,10 +569,8 @@ split_str(const char *str)
 			if (str_len && *(str - 1) == '\\') {
 				buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
 				buf[buf_len++] = *str;
-			}
-
-			/* If not escaped, break the string */
-			else {
+			} else {
+				/* If not escaped, break the string */
 				/* Add a terminating null byte to the buffer, and, if
 				 * not empty, dump the buffer into the substrings
 				 * array */
@@ -666,7 +662,6 @@ split_fusedcmd(char *str)
 
 		/* Transform "cmdeln" into "cmd eln" */
 		if (*p >= '0' && *p <= '9' && c && *(p - 1) >= 'a' && *(p - 1) <= 'z') {
-
 			/* If a number, move from last to next space/nul looking for
 			 * a slash. If found, do nothing */
 			if (s) {
@@ -713,7 +708,6 @@ split_fusedcmd(char *str)
 	/* Readjust the buffer size */
 	size_t len = strlen(buf);
 	buf = (char *)xrealloc(buf, (len + 1) * sizeof(char));
-
 	return buf;
 }
 
@@ -1302,9 +1296,7 @@ parse_input_str(char *str)
 
 						free(esc_str);
 						esc_str = (char *)NULL;
-					}
-
-					else {
+					} else {
 						fprintf(stderr, _("%s: %s: Error quoting "
 								"file name\n"),
 								PROGRAM_NAME, file_info[num - 1].name);
@@ -1327,7 +1319,6 @@ parse_input_str(char *str)
 			char *var_name = strchr(substr[i], '$');
 			if (var_name && *(++var_name)) {
 				int j = (int)usrvar_n;
-
 				while (--j >= 0) {
 					if (*var_name == *usr_var[j].name
 					&& strcmp(var_name, usr_var[j].name) == 0) {
@@ -1337,17 +1328,13 @@ parse_input_str(char *str)
 						break;
 					}
 				}
-			}
-
-			else {
+			} else {
 				fprintf(stderr, _("%s: %s: Error getting variable name\n"),
 						PROGRAM_NAME, substr[i]);
 				size_t j;
-
 				for (j = 0; j <= args_n; j++)
 					free(substr[j]);
 				free(substr);
-
 				return (char **)NULL;
 			}
 		}
@@ -1355,7 +1342,6 @@ parse_input_str(char *str)
 		/* We are in STDIN_TMP_DIR: Expand symlinks to target */
 		if (stdin_dir_ok) {
 			char *real_path = realpath(substr[i], NULL);
-
 			if (real_path) {
 				substr[i] = (char *)xrealloc(substr[i],
 				    (strlen(real_path) + 1) * sizeof(char));
@@ -1417,7 +1403,6 @@ parse_input_str(char *str)
 
 		register size_t j = 0;
 		for (j = 0; substr[i][j]; j++) {
-
 			/* Brace and wildcard expansion is made by glob()
 			 * as well */
 			if ((substr[i][j] == '*' || substr[i][j] == '?'
@@ -1495,7 +1480,6 @@ parse_input_str(char *str)
 					glob_cmd[j++] = savestring(substr[i], strlen(substr[i]));
 
 				for (i = 0; i < globbuf.gl_pathc; i++) {
-
 					/* Do not match "." or ".." */
 					if (strcmp(globbuf.gl_pathv[i], ".") == 0
 					|| strcmp(globbuf.gl_pathv[i], "..") == 0)
@@ -1503,17 +1487,13 @@ parse_input_str(char *str)
 
 					/* Escape the globbed file name and copy it */
 					char *esc_str = escape_str(globbuf.gl_pathv[i]);
-
 					if (esc_str) {
 						glob_cmd[j++] = savestring(esc_str, strlen(esc_str));
 						free(esc_str);
-					}
-
-					else {
+					} else {
 						fprintf(stderr, _("%s: %s: Error quoting "
 							"file name\n"), PROGRAM_NAME, globbuf.gl_pathv[i]);
 						register size_t k = 0;
-
 						for (k = 0; k < j; k++)
 							free(glob_cmd[k]);
 						free(glob_cmd);
@@ -1528,7 +1508,7 @@ parse_input_str(char *str)
 				}
 
 				for (i = (size_t)glob_array[g] + old_pathc + 1;
-				     i <= args_n; i++)
+				i <= args_n; i++)
 					glob_cmd[j++] = savestring(substr[i], strlen(substr[i]));
 
 				glob_cmd[j] = (char *)NULL;
@@ -1554,9 +1534,7 @@ parse_input_str(char *str)
 		 * ############################################# */
 #if !defined(__HAIKU__) && !defined(__OpenBSD__)
 	if (word_n) {
-
 		size_t old_pathc = 0;
-
 		register size_t w = 0;
 		for (w = 0; w < (size_t)word_n; w++) {
 			wordexp_t wordbuf;
@@ -1573,54 +1551,44 @@ parse_input_str(char *str)
 				word_cmd = (char **)xcalloc(args_n + wordbuf.we_wordc + 1,
 											sizeof(char *));
 
-				for (i = 0; i < ((size_t)word_array[w] + old_pathc);
-				     i++)
+				for (i = 0; i < ((size_t)word_array[w] + old_pathc); i++)
 					word_cmd[j++] = savestring(substr[i], strlen(substr[i]));
 
 				for (i = 0; i < wordbuf.we_wordc; i++) {
 					/* Escape the globbed file name and copy it*/
 					char *esc_str = escape_str(wordbuf.we_wordv[i]);
-
 					if (esc_str) {
 						word_cmd[j++] = savestring(esc_str, strlen(esc_str));
 						free(esc_str);
-					}
-
-					else {
+					} else {
 						fprintf(stderr, _("%s: %s: Error quoting "
 							"file name\n"), PROGRAM_NAME, wordbuf.we_wordv[i]);
 
 						register size_t k = 0;
-
 						for (k = 0; k < j; k++)
 							free(word_cmd[k]);
-
 						free(word_cmd);
 
 						word_cmd = (char **)NULL;
 
 						for (k = 0; k <= args_n; k++)
 							free(substr[k]);
-
 						free(substr);
-
 						return (char **)NULL;
 					}
 				}
 
 				for (i = (size_t)word_array[w] + old_pathc + 1;
-				     i <= args_n; i++)
+				i <= args_n; i++)
 					word_cmd[j++] = savestring(substr[i], strlen(substr[i]));
 
 				word_cmd[j] = (char *)NULL;
 
 				for (i = 0; i <= args_n; i++)
 					free(substr[i]);
-
 				free(substr);
 				substr = word_cmd;
 				word_cmd = (char **)NULL;
-
 				args_n = j - 1;
 			}
 
@@ -1635,11 +1603,9 @@ parse_input_str(char *str)
 	if (substr[0] && (*substr[0] == 'd' || *substr[0] == 'u')
 	&& (strcmp(substr[0], "desel") == 0 || strcmp(substr[0], "undel") == 0
 	|| strcmp(substr[0], "untrash") == 0)) {
-
 		/* Null terminate the input string array (again) */
 		substr = (char **)xrealloc(substr, (args_n + 2) * sizeof(char *));
 		substr[args_n + 1] = (char *)NULL;
-
 		return substr;
 	}
 
@@ -1651,11 +1617,9 @@ parse_input_str(char *str)
 		return substr;
 
 	char **regex_files = (char **)xnmalloc(files + args_n + 2, sizeof(char *));
-
 	size_t j, r_files = 0;
 
 	for (i = 0; substr[i]; i++) {
-
 		if (r_files > (files + args_n))
 			break;
 
@@ -1672,7 +1636,6 @@ parse_input_str(char *str)
 		}
 
 		regex_t regex;
-
 		if (regcomp(&regex, substr[i], REG_NOSUB | REG_EXTENDED) != EXIT_SUCCESS) {
 			/*          fprintf(stderr, "%s: %s: Invalid regular expression",
 					PROGRAM_NAME, substr[i]); */
@@ -1684,7 +1647,6 @@ parse_input_str(char *str)
 		int reg_found = 0;
 
 		for (j = 0; j < files; j++) {
-
 			if (regexec(&regex, file_info[j].name, 0, NULL, 0) == EXIT_SUCCESS) {
 				regex_files[r_files++] = file_info[j].name;
 				reg_found = 1;
@@ -1699,32 +1661,25 @@ parse_input_str(char *str)
 
 	if (r_files) {
 		regex_files[r_files] = (char *)NULL;
-
 		char **tmp_files = (char **)xnmalloc(r_files + 2, sizeof(char *));
 		size_t k = 0;
 		for (j = 0; regex_files[j]; j++)
 			tmp_files[k++] = savestring(regex_files[j], strlen(regex_files[j]));
-
 		tmp_files[k] = (char *)NULL;
 
 		for (j = 0; j <= args_n; j++)
 			free(substr[j]);
-
 		free(substr);
 
 		substr = tmp_files;
 		tmp_files = (char **)NULL;
-
 		args_n = k - 1;
-
 		free(tmp_files);
 	}
 
 	free(regex_files);
-
 	substr = (char **)xrealloc(substr, (args_n + 2) * sizeof(char *));
 	substr[args_n + 1] = (char *)NULL;
-
 	return substr;
 }
 
@@ -1744,17 +1699,13 @@ home_tilde(const char *new_path)
 		path_tilde = (char *)xnmalloc(2, sizeof(char));
 		path_tilde[0] = '~';
 		path_tilde[1] = '\0';
-	}
-
-	/* If path == HOME/file */
-	else if (new_path[1] == user.home[1]
+	} else if (new_path[1] == user.home[1]
 	&& strncmp(new_path, user.home, user.home_len) == 0) {
+		/* If path == HOME/file */
 		path_tilde = (char *)xnmalloc(strlen(new_path + user.home_len + 1) + 3,
 										sizeof(char));
 		sprintf(path_tilde, "~/%s", new_path + user.home_len + 1);
-	}
-
-	else {
+	} else {
 		path_tilde = (char *)xnmalloc(strlen(new_path) + 1, sizeof(char));
 		strcpy(path_tilde, new_path);
 	}
@@ -1804,13 +1755,10 @@ expand_range(char *str, int listdir)
 	free(second);
 
 	if (listdir) {
-
 		if (afirst <= 0 || afirst > (int)files || asecond <= 0
 		|| asecond > (int)files || afirst >= asecond)
 			return (int *)NULL;
-	}
-
-	else {
+	} else {
 		if (afirst >= asecond)
 			return (int *)NULL;
 	}
@@ -1819,7 +1767,6 @@ expand_range(char *str, int listdir)
 	buf = (int *)xcalloc((size_t)(asecond - afirst) + 2, sizeof(int));
 
 	size_t i, j = 0;
-
 	for (i = (size_t)afirst; i <= (size_t)asecond; i++)
 		buf[j++] = (int)i;
 
@@ -1864,7 +1811,6 @@ escape_str(const char *str)
 	}
 
 	buf[len] = '\0';
-
 	return buf;
 }
 
@@ -1885,7 +1831,6 @@ get_substr(char *str, const char ifs)
 	void *p = (char *)NULL;
 	size_t str_len = strlen(str);
 	size_t length = 0, substr_n = 0;
-
 	char *buf = (char *)xnmalloc(str_len + 1, sizeof(char));
 
 	while (*str) {
@@ -1954,12 +1899,10 @@ get_substr(char *str, const char ifs)
 			if (substr[i][j] == '-') {
 				/* Get strings before and after the dash */
 				char *first = strbfr(substr[i], '-');
-
 				if (!first)
 					break;
 
 				char *second = straft(substr[i], '-');
-
 				if (!second) {
 					free(first);
 					break;
@@ -1968,7 +1911,6 @@ get_substr(char *str, const char ifs)
 				/* Make sure it is a valid range */
 				if (is_number(first) && is_number(second)) {
 					afirst = atoi(first), asecond = atoi(second);
-
 					if (asecond <= afirst) {
 						free(first);
 						free(second);
