@@ -153,11 +153,10 @@ prompt(void)
 	}
 
 	size_t decoded_prompt_len;
-
-	if (unicode || prompt_style == CUSTOM_PROMPT_STYLE)
+/*	if (unicode || prompt_style == CUSTOM_PROMPT_STYLE)
 		decoded_prompt_len = u8_xstrlen(decoded_prompt);
-	else
-		decoded_prompt_len = strlen(decoded_prompt);
+	else */
+	decoded_prompt_len = strlen(decoded_prompt);
 
 	size_t prompt_length = 0;
 
