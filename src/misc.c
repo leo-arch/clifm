@@ -79,19 +79,15 @@ read_inotify(void)
 	     ptr + ((struct inotify_event *)ptr)->len < inotify_buf + i;
 	     ptr += sizeof(struct inotify_event) + event->len) {
 		event = (struct inotify_event *)ptr;
-/*			DPRINTF_D(event->wd);
-		DPRINTF_D(event->mask); */
 		if (!event->wd)
 			break;
 
 		if (event->mask & INOTIFY_MASK) {
 			free_dirlist();
 			list_dir();
-//				puts("read_inotify");
 			break;
 		}
 	}
-/*		puts("inotify read done"); */
 
 	return;
 }
@@ -479,7 +475,6 @@ alias_import(char *file)
 
 	if (*file == '~') {
 		char *file_exp = tilde_expand(file);
-
 		if (!file_exp) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
 			return EXIT_FAILURE;
@@ -511,7 +506,6 @@ alias_import(char *file)
 
 	/* Open the file to import aliases from */
 	FILE *fp = fopen(rfile, "r");
-
 	if (!fp) {
 		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, rfile, strerror(errno));
 		return EXIT_FAILURE;
@@ -519,7 +513,6 @@ alias_import(char *file)
 
 	/* Open CLiFM config file as well */
 	FILE *config_fp = fopen(CONFIG_FILE, "a");
-
 	if (!config_fp) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, CONFIG_FILE,
 		    strerror(errno));
@@ -627,7 +620,6 @@ alias_import(char *file)
 
 	/* Add new aliases to the commands list for TAB completion */
 	if (bin_commands) {
-
 		for (i = 0; bin_commands[i]; i++)
 			free(bin_commands[i]);
 		free(bin_commands);
@@ -651,7 +643,6 @@ save_last_path(void)
 
 	FILE *last_fp;
 	last_fp = fopen(last_dir, "w");
-
 	if (!last_fp) {
 		fprintf(stderr, _("%s: Error saving last visited "
 				  "directory\n"),
@@ -803,17 +794,10 @@ _err(int msg_type, int prompt, const char *format, ...)
 	if (buf) {
 		if (msg_type) {
 			switch (msg_type) {
-			case 'e':
-				pmsg = error;
-				break;
-			case 'w':
-				pmsg = warning;
-				break;
-			case 'n':
-				pmsg = notice;
-				break;
-			default:
-				pmsg = nomsg;
+			case 'e': pmsg = error; break;
+			case 'w': pmsg = warning; break;
+			case 'n': pmsg = notice; break;
+			default: pmsg = nomsg;
 			}
 		}
 
@@ -860,7 +844,6 @@ set_shell(char *str)
 
 	if (full_path)
 		free(full_path);
-
 	return EXIT_SUCCESS;
 }
 
@@ -870,7 +853,6 @@ list_mountpoints(void)
 {
 #if defined(__linux__)
 	FILE *mp_fp = fopen("/proc/mounts", "r");
-
 	if (!mp_fp) {
 		fprintf(stderr, "%s: mp: fopen: /proc/mounts: %s\n",
 				PROGRAM_NAME, strerror(errno));
@@ -967,15 +949,12 @@ list_mountpoints(void)
 	putchar('\n');
 	/* Ask the user and chdir into the selected mountpoint */
 	char *input = (char *)NULL;
-
 	while (!input)
 		input = rl_no_hist(_("Choose a mountpoint ('q' to quit): "));
 
 	if (!(*input == 'q' && *(input + 1) == '\0')) {
 		int atoi_num = atoi(input);
-
 		if (atoi_num > 0 && atoi_num <= (int)mp_n) {
-
 			if (xchdir(mountpoints[atoi_num - 1], SET_TITLE) == EXIT_SUCCESS) {
 				free(ws[cur_ws].path);
 				ws[cur_ws].path = savestring(mountpoints[atoi_num - 1],
@@ -989,9 +968,7 @@ list_mountpoints(void)
 
 				add_to_dirhist(ws[cur_ws].path);
 				add_to_jumpdb(ws[cur_ws].path);
-			}
-
-			else {
+			} else {
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 				    mountpoints[atoi_num - 1], strerror(errno));
 				exit_status = EXIT_FAILURE;
@@ -1372,12 +1349,10 @@ handle_stdin()
 
 			/* Construct source and destiny files */
 			char *tmp_file = strrchr(q, '/');
-
 			if (!tmp_file || !*(++tmp_file))
 				tmp_file = q;
 
 			char source[PATH_MAX + 1];
-
 			if (*q != '/' || !q[1])
 				snprintf(source, PATH_MAX, "%s/%s", cwd, q);
 			else
@@ -1413,7 +1388,6 @@ handle_stdin()
 		free(ws[cur_ws].path);
 
 	ws[cur_ws].path = savestring(STDIN_TMP_DIR, strlen(STDIN_TMP_DIR));
-
 	goto FREE_N_EXIT;
 
 FREE_N_EXIT:
@@ -1438,7 +1412,6 @@ pin_directory(char *dir)
 		return EXIT_FAILURE;
 
 	struct stat attr;
-
 	if (lstat(dir, &attr) == -1) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir, strerror(errno));
 		return EXIT_FAILURE;
@@ -1477,7 +1450,6 @@ unpin_dir(void)
 	}
 
 	if (CONFIG_DIR && xargs.stealth_mode != 1) {
-
 		int cmd_error = 0;
 		char *pin_file = (char *)xnmalloc(strlen(CONFIG_DIR) + 7, sizeof(char));
 		sprintf(pin_file, "%s/.pin", CONFIG_DIR);
@@ -1489,7 +1461,6 @@ unpin_dir(void)
 		}
 
 		free(pin_file);
-
 		if (cmd_error)
 			return EXIT_FAILURE;
 	}
@@ -1938,7 +1909,6 @@ bonus_function(void)
 	    NULL};
 
 	size_t num = (sizeof(phrases) / sizeof(phrases[0])) - 1;
-
 	srand((unsigned int)time(NULL));
 	puts(phrases[rand() % num]);
 }
