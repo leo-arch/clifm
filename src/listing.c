@@ -312,8 +312,9 @@ list_dir_light(void)
 	}
 
 #ifdef LINUX_INOTIFY
-	if (inotify_wd == -1)
-		inotify_wd = inotify_add_watch(inotify_fd, ws[cur_ws].path, INOTIFY_MASK);
+	if (inotify_wd >= 0)
+		inotify_rm_watch(inotify_fd, inotify_wd);
+	inotify_wd = inotify_add_watch(inotify_fd, ws[cur_ws].path, INOTIFY_MASK);
 #endif
 
 	errno = 0;
@@ -881,8 +882,9 @@ list_dir(void)
 	}
 
 #ifdef LINUX_INOTIFY
-	if (inotify_wd == -1)
-		inotify_wd = inotify_add_watch(inotify_fd, ws[cur_ws].path, INOTIFY_MASK);
+	if (inotify_wd >= 0)
+		inotify_rm_watch(inotify_fd, inotify_wd);
+	inotify_wd = inotify_add_watch(inotify_fd, ws[cur_ws].path, INOTIFY_MASK);
 #endif
 
 	int fd = dirfd(dir);

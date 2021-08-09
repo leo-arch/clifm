@@ -505,8 +505,8 @@ char di_c[MAX_COLOR], /* Directory */
 
 #ifdef LINUX_INOTIFY
 int inotify_fd, inotify_wd = -1;
-unsigned int INOTIFY_MASK = /* IN_ATTRIB | */ IN_CREATE | IN_DELETE | IN_DELETE_SELF
-			   | IN_MODIFY | IN_MOVE_SELF | IN_MOVED_FROM | IN_MOVED_TO;
+unsigned int INOTIFY_MASK = /*IN_ATTRIB |*/ IN_CREATE | IN_DELETE | IN_DELETE_SELF
+			| /*IN_MODIFY |*/ IN_MOVE_SELF | IN_MOVED_FROM | IN_MOVED_TO;
 #endif
 
 			/**
