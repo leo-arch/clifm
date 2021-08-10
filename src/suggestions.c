@@ -281,7 +281,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	/* Restore cursor position */
 	printf("\x1b[%d;%dH", currow, curcol);
 
-//	printf("'%zu:%zu:%zu:%d:%d'", cuc, wc_xstrlen(str + offset), cucs, slines, currow);
+/*	printf("'%zu:%zu:%zu:%d:%d'", cuc, wc_xstrlen(str + offset), cucs, slines, currow); */
 
 	/* Store the amount of lines taken by the current command line
 	 * (plus the suggestion's length) to be able to correctly
@@ -926,10 +926,14 @@ rl_suggestions(char c)
 		 * a history event is triggered (usually via the Up and Down arrow
 		 * keys), the suggestion buffer won't be freed. Let's do it
 		 * here */
-		if (c == '~' && rl_point != rl_end && suggestion.printed) {
-			/* This should be the delete key */
-			clear_suggestion();
-			goto FAIL;
+//		printf("'%d'", c);
+		if (c == '~') {
+			if (rl_point != rl_end && suggestion.printed) {
+				/* This should be the delete key */
+				clear_suggestion();
+				goto FAIL;
+			} else if (suggestion.printed)
+				clear_suggestion();
 		}
 		else if ((c == 'A' || c == 'B') && suggestion_buf) {
 			clear_suggestion();
