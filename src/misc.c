@@ -1522,7 +1522,9 @@ list_commands(void)
 void
 help_function(void)
 {
-	printf(_("%s %s (%s), by %s\n"), PROGRAM_NAME, VERSION, DATE, AUTHOR);
+	fputs("\x1b[0m", stdout);
+	printf(_("%s%s %s (%s), by %s\n"), (flags & EXT_HELP) ? "" : df_c,
+			PROGRAM_NAME, VERSION, DATE, AUTHOR);
 
 	printf(_("\nUSAGE: %s %s\n\
 \n -a, --no-hidden\t\t do not show hidden files (default)\
@@ -1641,15 +1643,12 @@ help_function(void)
 
 	printf(_("\nBUILT-IN COMMANDS:\n\nThe following is just a brief list of "
 			"available commands and possible parameters.\n\nFor a complete "
-			"description of each of these commands run '%scmd%s%s' (or press "
-			"%sF2%s%s) or consult the %smanpage%s%s (%sF1%s%s).\n\nYou can also try "
-			"the '%sih%s%s' action to run the interactive help plugin (it "
+			"description of each of these commands run 'cmd' (or press "
+			"F2) or consult the manpage (F1).\n\nYou can also try "
+			"the 'ih' action to run the interactive help plugin (it "
 			"depends on FZF). Just enter 'ih', that's it.\n\nIt is also "
-			"recommended to consult the project's %swiki%s%s "
-			"(https://github.com/leo-arch/clifm/wiki)\n\n"),
-			bold, "\033[0m", df_c, bold, "\033[0m", df_c, bold, "\033[0m",
-			df_c, bold, "\033[0m", df_c, bold, "\033[0m", df_c, bold,
-			"\033[0m", df_c);
+			"recommended to consult the project's wiki "
+			"(https://github.com/leo-arch/clifm/wiki)\n\n"));
 
 	puts(_("ELN/FILE/DIR (auto-open and autocd functions)\n\
  /PATTERN [DIR] [-filetype] [-x] (quick search)\n\

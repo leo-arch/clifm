@@ -1085,13 +1085,8 @@ external_arguments(int argc, char **argv)
 			config_value = optarg;
 			break;
 
-		case 'D':
-			alt_dir_value = optarg;
-			break;
-
-		case 'e':
-			xargs.noeln = no_eln = 1;
-			break;
+		case 'D': alt_dir_value = optarg; break;
+		case 'e': xargs.noeln = no_eln = 1;	break;
 
 		case 'f':
 			flags &= ~FOLDERS_FIRST;
@@ -1177,12 +1172,10 @@ external_arguments(int argc, char **argv)
 
 		case 'z': {
 			int arg = atoi(optarg);
-
 			if (!is_number(optarg) || arg < 0 || arg > SORT_TYPES)
 				sort = 1;
 			else
 				sort = arg;
-
 			xargs.sort = sort;
 		} break;
 
