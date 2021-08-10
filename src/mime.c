@@ -636,7 +636,6 @@ mime_import(char *file)
 
 	/* Open the local MIME file */
 	FILE *mime_fp = fopen(file, "w");
-
 	if (!mime_fp) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
 		return (-1);
@@ -662,7 +661,6 @@ mime_import(char *file)
 	int mime_defs = 0;
 
 	for (i = 0; mime_paths[i]; i++) {
-
 		FILE *sys_mime_fp = fopen(mime_paths[i], "r");
 		if (!sys_mime_fp)
 			continue;
@@ -670,12 +668,10 @@ mime_import(char *file)
 		size_t line_size = 0;
 		char *line = (char *)NULL;
 		ssize_t line_len = 0;
-
 		/* Only store associations in the "Default Applications" section */
 		int da_found = 0;
 
 		while ((line_len = getline(&line, &line_size, sys_mime_fp)) > 0) {
-
 			if (!da_found && strncmp(line, "[Default Applications]", 22) == 0) {
 				da_found = 1;
 				continue;
@@ -700,7 +696,6 @@ mime_import(char *file)
 
 		free(line);
 		line = (char *)NULL;
-
 		fclose(sys_mime_fp);
 	}
 
@@ -724,7 +719,6 @@ mime_import(char *file)
 	      "emacs;ed\n", mime_fp);
 
 	fclose(mime_fp);
-
 	return mime_defs;
 }
 
@@ -735,7 +729,6 @@ mime_edit(char **args)
 
 	if (!args[2]) {
 		char *cmd[] = {"mime", MIME_FILE, NULL};
-
 		if (mime_open(cmd) != 0) {
 			fputs(_("Try 'mm, mime edit APPLICATION'\n"), stderr);
 			exit_status = EXIT_FAILURE;

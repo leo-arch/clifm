@@ -512,12 +512,9 @@ deselect(char **comm)
 				i = (int)desel_n;
 				while (--i >= 0)
 					free(desel_elements[i]);
-
 				free(desel_elements);
-
 				return EXIT_SUCCESS;
 			} else if (strcmp(desel_elements[i], "*") == 0) {
-
 				/* Clear the sel array */
 				i = (int)sel_n;
 				while (--i >= 0)
@@ -556,7 +553,6 @@ deselect(char **comm)
 		/* If a number, check it's a valid ELN */
 		else {
 			int atoi_desel = atoi(desel_elements[i]);
-
 			if (atoi_desel == 0 || (size_t)atoi_desel > sel_n) {
 				printf(_("desel: '%s': Invalid ELN\n"), desel_elements[i]);
 				int j = (int)desel_n;

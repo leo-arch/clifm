@@ -128,7 +128,6 @@ strip_color_line(const char *str, char mode)
 	size_t len = 0;
 
 	switch (mode) {
-
 	case 't': /* di=01;31: */
 		while (*str) {
 			if ((*str >= '0' && *str <= '9') || (*str >= 'a' && *str <= 'z')

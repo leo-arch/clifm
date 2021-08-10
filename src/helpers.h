@@ -785,7 +785,7 @@ extern off_t total_sel_size;
 extern pid_t own_pid;
 
 extern char
-    div_line_char,
+    div_line_char[NAME_MAX],
     hostname[HOST_NAME_MAX],
 
     **aliases,

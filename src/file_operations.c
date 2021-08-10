@@ -642,7 +642,6 @@ copy_function(char **comm)
 
 		for (i = 0; tmp[i]; i++)
 			free(tmp[i]);
-
 		free(tmp);
 		copy_n_rename = 0;
 		return EXIT_SUCCESS;
@@ -738,7 +737,6 @@ remove_file(char **args)
 	for (i = 0; rm_cmd[i]; i++)
 		free(rm_cmd[i]);
 	free(rm_cmd);
-
 	return exit_status;
 }
 
@@ -767,7 +765,6 @@ bulk_rename(char **args)
 		sprintf(BULK_FILE, "%s/.bulk_rename", TMP_DIR);
 
 	FILE *bulk_fp;
-
 	bulk_fp = fopen(BULK_FILE, "w+");
 	if (!bulk_fp) {
 		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", BULK_FILE, strerror(errno));
@@ -778,18 +775,15 @@ bulk_rename(char **args)
 
 	/* Copy all files to be renamed to the bulk file */
 	for (i = 1; args[i]; i++) {
-
 		/* Dequote file name, if necessary */
 		if (strchr(args[i], '\\')) {
 			char *deq_file = dequote_str(args[i], 0);
-
 			if (!deq_file) {
 				fprintf(stderr, _("bulk: %s: Error dequoting "
 						  "file name\n"),
 				    args[i]);
 				continue;
 			}
-
 			strcpy(args[i], deq_file);
 			free(deq_file);
 		}
@@ -838,7 +832,6 @@ bulk_rename(char **args)
 	 * to be renamed */
 	size_t file_total = 1;
 	char tmp_line[256];
-
 	while (fgets(tmp_line, (int)sizeof(tmp_line), bulk_fp))
 		file_total++;
 
@@ -892,7 +885,6 @@ bulk_rename(char **args)
 	char *answer = (char *)NULL;
 	while (!answer) {
 		answer = readline(_("Continue? [y/N] "));
-
 		if (strlen(answer) > 1) {
 			free(answer);
 			answer = (char *)NULL;
@@ -1043,7 +1035,6 @@ batch_link(char **args)
 		}
 
 		char *ptr = strrchr(linkname, '/');
-
 		if (symlink(args[i], ptr ? ++ptr : linkname) == -1) {
 			exit_status = EXIT_FAILURE;
 			fprintf(stderr, _("%s: %s: Cannot create symlink: %s\n"),

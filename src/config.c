@@ -1313,7 +1313,7 @@ read_config(void)
 	if (xargs.rl_vi_mode == 1)
 		rl_vi_editing_mode(1, 0);
 
-	div_line_char = UNSET;
+	*div_line_char = '\0';
 #define MAX_BOOL 6
 	/* starting path(14) + PATH_MAX + \n(1)*/
 	char line[PATH_MAX + 15];
@@ -1968,17 +1968,15 @@ read_config(void)
 
 		else if (*line == 'D' && strncmp(line, "DividingLineChar=", 17) == 0) {
 			/* Accepts both chars and decimal integers */
-			char opt_c = -1;
-			sscanf(line, "DividingLineChar='%c'", &opt_c);
-			if (opt_c == -1) {
-				int num = -1;
-				sscanf(line, "DividingLineChar=%d", &num);
-				if (num == -1)
-					div_line_char = DEF_DIV_LINE_CHAR;
-				else
-					div_line_char = (char)num;
+			char opt_c[NAME_MAX];
+			*opt_c = '\0';
+			ret = sscanf(line, "DividingLineChar=%s", opt_c);
+			if (!*opt_c) {
+				div_line_char[0] = DEF_DIV_LINE_CHAR;
+				div_line_char[1] = '\0';
 			} else {
-				div_line_char = opt_c;
+				char *tmp = remove_quotes(opt_c);
+				strncpy(div_line_char, tmp ? tmp : opt_c, NAME_MAX);
 			}
 		}
 

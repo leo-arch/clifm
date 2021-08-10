@@ -93,30 +93,42 @@ print_sort_method(void)
 		printf(_("inode %s\n"), (sort_reverse) ? "[rev]" : "");
 		break;
 	case SOWN:
-		if (light_mode)
+		if (light_mode) {
 			printf(_("owner (not available: using 'name') %s\n"),
 			    (sort_reverse) ? "[rev]" : "");
-		else
+		} else {
 			printf(_("owner %s\n"), (sort_reverse) ? "[rev]" : "");
+		}
 		break;
 	case SGRP:
-		if (light_mode)
+		if (light_mode) {
 			printf(_("group (not available: using 'name') %s\n"),
 			    (sort_reverse) ? "[rev]" : "");
-		else
+		} else {
 			printf(_("group %s\n"), (sort_reverse) ? "[rev]" : "");
+		}
 		break;
 	}
 }
 
+/* Print the line divinding files and prompt using DIV_LINE_CHAR. If
+ * DIV_LINE_CHAR takes more than two columns to be printed (ASCII chars
+ * take only one, but unicode chars could take two), print exactly the
+ * content of DIV_LINE_CHAR. Otherwise, repeat DIV_LINE_CHAR to fulfill
+ * all terminal columns. */
 void
 print_div_line(void)
 {
 	fputs(dl_c, stdout);
 
-	int i;
-	for (i = (int)term_cols; i--;)
-		putchar(div_line_char);
+	size_t len = wc_xstrlen(div_line_char);
+	if (len <= 2) {
+		int i;
+		for (i = (int)term_cols / len; i--;)
+			fputs(div_line_char, stdout);
+	} else {
+		puts(div_line_char);
+	}
 
 	fputs(df_c, stdout);
 	fflush(stdout);
@@ -131,22 +143,18 @@ print_disk_usage(void)
 		return;
 
 	struct statvfs stat;
-
 	if (statvfs(ws[cur_ws].path, &stat) != EXIT_SUCCESS) {
 		_err('w', PRINT_PROMPT, "statvfs: %s\n", strerror(errno));
 		return;
 	}
 
 	char *free_space = get_size_unit((off_t)(stat.f_frsize * stat.f_bavail));
-
 	char *size = get_size_unit((off_t)(stat.f_blocks * stat.f_frsize));
-
 	printf("%s->%s %s/%s\n", mi_c, df_c, free_space ? free_space : "?",
 	    size ? size : "?");
 
 	free(free_space);
 	free(size);
-
 	return;
 }
 
@@ -159,7 +167,6 @@ _print_selfiles(unsigned short term_rows)
 		/* Never take more than half terminal height */
 		limit = (term_rows / 2) - 4;
 		/* 4 = 2 div lines, 2 prompt lines */
-
 		if (limit <= 0)
 			limit = 1;
 	}
@@ -168,10 +175,8 @@ _print_selfiles(unsigned short term_rows)
 		limit = (int)sel_n;
 
 	size_t i;
-	for (i = 0; i <
-	(max_printselfiles != UNSET ? limit : sel_n); i++) {
+	for (i = 0; i < (max_printselfiles != UNSET ? limit : sel_n); i++)
 		colors_list(sel_elements[i], 0, NO_PAD, PRINT_NEWLINE);
-	}
 
 	if (max_printselfiles != UNSET && limit < sel_n)
 		printf("%zu/%zu\n", i, sel_n);
@@ -183,9 +188,7 @@ void
 print_dirhist_map(void)
 {
 	size_t i;
-
 	for (i = 0; i < (size_t)dirhist_total_index; i++) {
-
 		if (i != (size_t)dirhist_cur_index)
 			continue;
 
@@ -211,9 +214,7 @@ get_file_icon(const char *file, int n)
 		return;
 
 	int i = (int)(sizeof(icon_filenames) / sizeof(struct icons_t));
-
 	while (--i >= 0) {
-
 		if (TOUPPER(*file) == TOUPPER(*icon_filenames[i].name)
 		&& strcasecmp(file, icon_filenames[i].name) == 0) {
 			file_info[n].icon = icon_filenames[i].icon;
@@ -236,9 +237,7 @@ get_dir_icon(const char *dir, int n)
 		return;
 
 	int i = (int)(sizeof(icon_dirnames) / sizeof(struct icons_t));
-
 	while (--i >= 0) {
-
 		if (TOUPPER(*dir) == TOUPPER(*icon_dirnames[i].name)
 		&& strcasecmp(dir, icon_dirnames[i].name) == 0) {
 			file_info[n].icon = icon_dirnames[i].icon;
@@ -262,14 +261,11 @@ get_ext_icon(const char *restrict ext, int n)
 	ext++;
 
 	int i = (int)(sizeof(icon_ext) / sizeof(struct icons_t));
-
 	while (--i >= 0) {
-
 		/* Tolower */
 		char c = (*ext >= 'A' && *ext <= 'Z')
 			     ? (*ext - 'A' + 'a')
 			     : *ext;
-
 		if (c == *icon_ext[i].name && strcasecmp(ext, icon_ext[i].name) == 0) {
 			file_info[n].icon = icon_ext[i].icon;
 			file_info[n].icon_color = icon_ext[i].color;
@@ -385,14 +381,11 @@ list_dir_light(void)
 		file_info[n].size = 1;
 		file_info[n].color = (char *)NULL;
 		file_info[n].ext_color = (char *)NULL;
-
 		file_info[n].icon = DEF_FILE_ICON;
 		file_info[n].icon_color = DEF_FILE_ICON_COLOR;
-
 		file_info[n].exec = 0;
 		file_info[n].ruser = 1;
 		file_info[n].filesn = 0;
-
 		file_info[n].time = 0;
 
 		switch (file_info[n].type) {
@@ -400,7 +393,6 @@ list_dir_light(void)
 		case DT_DIR:
 			if (icons) {
 				get_dir_icon(file_info[n].name, (int)n);
-
 				/* If set from the color scheme file */
 				if (*dir_ico_c)
 					file_info[n].icon_color = dir_ico_c;
@@ -410,13 +402,11 @@ list_dir_light(void)
 			    ? (file_info[n].filesn = (count_dir(ename, NO_CPOP) - 2))
 			    : (file_info[n].filesn = 1);
 
-			if (file_info[n].filesn > 0)
+			if (file_info[n].filesn > 0) {
 				file_info[n].color = di_c;
-
-			else if (file_info[n].filesn == 0)
+			} else if (file_info[n].filesn == 0) {
 				file_info[n].color = ed_c;
-
-			else {
+			} else {
 				file_info[n].color = nd_c;
 				file_info[n].icon = ICON_LOCK;
 				file_info[n].icon_color = YELLOW;
@@ -459,7 +449,6 @@ list_dir_light(void)
 
 	int c, i;
 	register size_t counter = 0;
-
 	size_t columns_n = 1;
 
 	/* Get the longest file name */
@@ -667,7 +656,6 @@ list_dir_light(void)
 					fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 
 					i -= ((term_rows * columns_n) - 1);
-
 					if (i < 0)
 						i = 0;
 
@@ -1609,7 +1597,6 @@ free_dirlist(void)
 		return;
 
 	int i = (int)files;
-
 	while (--i >= 0) {
 		free(file_info[i].name);
 		if (file_info[i].ext_color)

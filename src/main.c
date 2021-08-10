@@ -190,7 +190,7 @@ size_t
     remotes_n = 0;
 
 char
-    div_line_char = UNSET,
+    div_line_char[NAME_MAX],
     hostname[HOST_NAME_MAX],
 
     **aliases = (char **)NULL,
