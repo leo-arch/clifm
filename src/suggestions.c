@@ -926,7 +926,6 @@ rl_suggestions(char c)
 		 * a history event is triggered (usually via the Up and Down arrow
 		 * keys), the suggestion buffer won't be freed. Let's do it
 		 * here */
-//		printf("'%d'", c);
 		if (c == '~') {
 			if (rl_point != rl_end && suggestion.printed) {
 				/* This should be the delete key */
