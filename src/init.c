@@ -964,37 +964,15 @@ external_arguments(int argc, char **argv)
 		 * processing at the first non-option (and non-argument) */
 		switch (optc) {
 
-		case 0:
-			xargs.autocd = autocd = 0;
-			break;
+		case 0: xargs.autocd = autocd = 0; break;
+		case 1:	xargs.auto_open = auto_open = 0; break;
+		case 2:	xargs.restore_last_path = restore_last_path = 0; break;
+		case 3: xargs.tips = tips = 0; break;
+		case 4:	xargs.disk_usage = disk_usage = 1; break;
 
-		case 1:
-			xargs.auto_open = auto_open = 0;
-			break;
-
-		case 2:
-			xargs.restore_last_path = restore_last_path = 0;
-			break;
-
-		case 3:
-			xargs.tips = tips = 0;
-			break;
-
-		case 4:
-			xargs.disk_usage = disk_usage = 1;
-			break;
-
-		case 6:
-			xargs.classify = classify = 0;
-			break;
-
-		case 7:
-			xargs.share_selbox = share_selbox = 1;
-			break;
-
-		case 8:
-			xargs.rl_vi_mode = 1;
-			break;
+		case 6:	xargs.classify = classify = 0; break;
+		case 7:	xargs.share_selbox = share_selbox = 1; break;
+		case 8:	xargs.rl_vi_mode = 1; break;
 
 		case 9: {
 			if (!is_number(optarg))
@@ -1004,25 +982,12 @@ external_arguments(int argc, char **argv)
 				xargs.max_dirhist = max_dirhist = opt_int;
 		} break;
 
-		case 10:
-			xargs.sort_reverse = sort_reverse = 1;
-			break;
+		case 10: xargs.sort_reverse = sort_reverse = 1; break;
+		case 11: xargs.files_counter = files_counter = 0; break;
+		case 12: xargs.welcome_message = welcome_message = 0; break;
+		case 13: xargs.clear_screen = clear_screen = 0; break;
 
-		case 11:
-			xargs.files_counter = files_counter = 0;
-			break;
-
-		case 12:
-			xargs.welcome_message = welcome_message = 0;
-			break;
-
-		case 13:
-			xargs.clear_screen = clear_screen = 0;
-			break;
-
-		case 15:
-			xargs.logs = logs_enabled = 1;
-			break;
+		case 15: xargs.logs = logs_enabled = 1;	break;
 
 		case 16: {
 			if (!is_number(optarg))
@@ -1032,38 +997,14 @@ external_arguments(int argc, char **argv)
 				xargs.max_path = max_path = opt_int;
 		} break;
 
-		case 17:
-			opener = savestring(optarg, strlen(optarg));
-			break;
-
-		case 18:
-			xargs.expand_bookmarks = expand_bookmarks = 1;
-			break;
-
-		case 19:
-			xargs.only_dirs = only_dirs = 1;
-			break;
-
-		case 20:
-			xargs.list_and_quit = 1;
-			break;
-
-		case 21:
-			usr_cscheme = savestring(optarg, strlen(optarg));
-			break;
-
-		case 22:
-			xargs.cd_on_quit = cd_on_quit = 1;
-			break;
-
-		case 23:
-			xargs.no_dirjump = 1;
-			break;
-
-		case 24:
-			xargs.icons = icons = 1;
-			break;
-
+		case 17: opener = savestring(optarg, strlen(optarg)); break;
+		case 18: xargs.expand_bookmarks = expand_bookmarks = 1; break;
+		case 19: xargs.only_dirs = only_dirs = 1; break;
+		case 20: xargs.list_and_quit = 1; break;
+		case 21: usr_cscheme = savestring(optarg, strlen(optarg)); break;
+		case 22: xargs.cd_on_quit = cd_on_quit = 1; break;
+		case 23: xargs.no_dirjump = 1; break;
+		case 24: xargs.icons = icons = 1; break;
 		case 25:
 			xargs.icons = icons = 1;
 			xargs.icons_use_file_color = 1;
@@ -1087,21 +1028,10 @@ external_arguments(int argc, char **argv)
 				xargs.max_files = max_files = opt_int;
 			break;
 
-		case 29:
-			xargs.trasrm = tr_as_rm = 1;
-			break;
-
-		case 30:
-			xargs.case_sens_dirjump = case_sens_dirjump = 1;
-			break;
-
-		case 31:
-			xargs.case_sens_path_comp = case_sens_path_comp = 1;
-			break;
-
-		case 32:
-			xargs.cwd_in_title = 1;
-			break;
+		case 29: xargs.trasrm = tr_as_rm = 1; break;
+		case 30: xargs.case_sens_dirjump = case_sens_dirjump = 1; break;
+		case 31: xargs.case_sens_path_comp = case_sens_path_comp = 1; break;
+		case 32: xargs.cwd_in_title = 1; break;
 
 		case 33: {
 			struct stat attr;
@@ -1131,17 +1061,9 @@ external_arguments(int argc, char **argv)
 			xargs.path = 1; */
 		} break;
 
-		case 34:
-			xargs.printsel = 1;
-			break;
-
-		case 35:
-			xargs.suggestions = suggestions = 1;
-			break;
-
-		case 36:
-			xargs.autojump = autojump = 0;
-			break;
+		case 34: xargs.printsel = 1; break;
+		case 35: xargs.suggestions = suggestions = 1; break;
+		case 36: xargs.autojump = autojump = 0; break;
 
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
@@ -1181,13 +1103,8 @@ external_arguments(int argc, char **argv)
 			list_folders_first = xargs.ffirst = 1;
 			break;
 
-		case 'g':
-			pager = xargs.pager = 1;
-			break;
-
-		case 'G':
-			pager = xargs.pager = 0;
-			break;
+		case 'g': pager = xargs.pager = 1; break;
+		case 'G': pager = xargs.pager = 0; break;
 
 		case 'h':
 			flags |= HELP;
@@ -1206,21 +1123,10 @@ external_arguments(int argc, char **argv)
 			case_sensitive = xargs.sensitive = 1;
 			break;
 
-		case 'k':
-			kbinds_value = optarg;
-			break;
-
-		case 'l':
-			long_view = xargs.longview = 0;
-			break;
-
-		case 'L':
-			long_view = xargs.longview = 1;
-			break;
-
-		case 'm':
-			dirhist_map = xargs.dirmap = 1;
-			break;
+		case 'k': kbinds_value = optarg; break;
+		case 'l': long_view = xargs.longview = 0; break;
+		case 'L': long_view = xargs.longview = 1; break;
+		case 'm': dirhist_map = xargs.dirmap = 1; break;
 
 		case 'o':
 			flags &= ~ON_THE_FLY;
@@ -1248,17 +1154,9 @@ external_arguments(int argc, char **argv)
 			splash_screen = xargs.splash = 1;
 			break;
 
-		case 'S':
-			xargs.stealth_mode = 1;
-			break;
-
-		case 'u':
-			unicode = xargs.unicode = 0;
-			break;
-
-		case 'U':
-			unicode = xargs.unicode = 1;
-			break;
+		case 'S': xargs.stealth_mode = 1; break;
+		case 'u': unicode = xargs.unicode = 0; break;
+		case 'U': unicode = xargs.unicode = 1; break;
 
 		case 'v':
 			flags |= PRINT_VERSION;
@@ -1274,13 +1172,8 @@ external_arguments(int argc, char **argv)
 				cur_ws = iopt - 1;
 		} break;
 
-		case 'x':
-			ext_cmd_ok = xargs.ext = 0;
-			break;
-
-		case 'y':
-			light_mode = xargs.light = 1;
-			break;
+		case 'x': ext_cmd_ok = xargs.ext = 0; break;
+		case 'y': light_mode = xargs.light = 1; break;
 
 		case 'z': {
 			int arg = atoi(optarg);
@@ -1330,8 +1223,7 @@ external_arguments(int argc, char **argv)
 
 			exit(EXIT_FAILURE);
 
-		default:
-			break;
+		default: break;
 		}
 	}
 
@@ -1522,23 +1414,55 @@ external_arguments(int argc, char **argv)
 void
 unset_xargs(void)
 {
-	xargs.splash = xargs.hidden = xargs.longview = UNSET;
-	xargs.autocd = xargs.auto_open = xargs.ext = xargs.ffirst = UNSET;
-	xargs.sensitive = xargs.unicode = xargs.pager = xargs.path = UNSET;
-	xargs.light = xargs.cd_list_auto = xargs.sort = xargs.dirmap = UNSET;
-	xargs.config = xargs.stealth_mode = xargs.restore_last_path = UNSET;
-	xargs.tips = xargs.disk_usage = xargs.trasrm = UNSET;
-	xargs.classify = xargs.share_selbox = xargs.rl_vi_mode = UNSET;
-	xargs.max_dirhist = xargs.sort_reverse = xargs.files_counter = UNSET;
-	xargs.welcome_message = xargs.clear_screen = UNSET;
-	xargs.logs = xargs.max_path = xargs.bm_file = UNSET;
-	xargs.expand_bookmarks = xargs.only_dirs = xargs.noeln = UNSET;
-	xargs.list_and_quit = xargs.color_scheme = xargs.cd_on_quit = UNSET;
-	xargs.no_dirjump = xargs.icons = xargs.no_colors = UNSET;
-	xargs.icons_use_file_color = xargs.no_columns = UNSET;
-	xargs.case_sens_dirjump = xargs.case_sens_path_comp = UNSET;
-	xargs.cwd_in_title = xargs.printsel = xargs.suggestions = UNSET;
 	xargs.autojump = UNSET;
+	xargs.auto_open = UNSET;
+	xargs.autocd = UNSET;
+	xargs.bm_file = UNSET;
+	xargs.case_sens_dirjump = UNSET;
+	xargs.case_sens_path_comp = UNSET;
+	xargs.cd_list_auto = UNSET;
+	xargs.cd_on_quit = UNSET;
+	xargs.classify = UNSET;
+	xargs.clear_screen = UNSET;
+	xargs.color_scheme = UNSET;
+	xargs.config = UNSET;
+	xargs.cwd_in_title = UNSET;
+	xargs.dirmap = UNSET;
+	xargs.disk_usage = UNSET;
+	xargs.expand_bookmarks = UNSET;
+	xargs.ext = UNSET;
+	xargs.ffirst = UNSET;
+	xargs.files_counter = UNSET;
+	xargs.hidden = UNSET;
+	xargs.icons = UNSET;
+	xargs.icons_use_file_color = UNSET;
+	xargs.light = UNSET;
+	xargs.list_and_quit = UNSET;
+	xargs.logs = UNSET;
+	xargs.longview = UNSET;
+	xargs.max_dirhist = UNSET;
+	xargs.max_path = UNSET;
+	xargs.no_colors = UNSET;
+	xargs.no_columns = UNSET;
+	xargs.no_dirjump = UNSET;
+	xargs.noeln = UNSET;
+	xargs.only_dirs = UNSET;
+	xargs.path = UNSET;
+	xargs.pager = UNSET;
+	xargs.printsel = UNSET;
+	xargs.restore_last_path = UNSET;
+	xargs.rl_vi_mode = UNSET;
+	xargs.sensitive = UNSET;
+	xargs.share_selbox = UNSET;
+	xargs.sort = UNSET;
+	xargs.sort_reverse = UNSET;
+	xargs.splash = UNSET;
+	xargs.stealth_mode = UNSET;
+	xargs.suggestions = UNSET;
+	xargs.tips = UNSET;
+	xargs.trasrm = UNSET;
+	xargs.unicode = UNSET;
+	xargs.welcome_message = UNSET;
 }
 
 /* Keep track of attributes of the shell. Make sure the shell is running
