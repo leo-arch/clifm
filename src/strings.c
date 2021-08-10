@@ -60,16 +60,20 @@ xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 size_t
 wc_xstrlen(const char *restrict str)
 {
-	size_t len;
-#ifndef _BE_POSIX
+	size_t len, _len;
+/*#ifndef _BE_POSIX */
 	wchar_t *const wbuf = (wchar_t *)len_buf;
 
 	/* Convert multi-byte to wide char */
-	len = mbstowcs(wbuf, str, NAME_MAX);
-	len = wcswidth(wbuf, len);
-#else
+	_len = mbstowcs(wbuf, str, NAME_MAX);
+	int p = wcswidth(wbuf, _len);
+	if (p != -1)
+		len = p;
+	else
+		len = 0;
+/*#else
 	len = u8_xstrlen(str);
-#endif
+#endif */
 
 	return len;
 }

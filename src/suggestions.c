@@ -197,6 +197,9 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	if (suggestion.printed)
 		clear_suggestion();
 
+	if (offset)
+		--offset;
+
 	size_t str_len = strlen(str);
 	free(suggestion_buf);
 	suggestion_buf = (char *)NULL;
@@ -209,8 +212,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	if (wc_xstrlen(str + offset) > (term_cols * term_rows) - curcol)
 		return;
 
-	/* Get the amount of lines we need to print the suggestion */
-	size_t cuc = curcol;
+	size_t cuc = curcol; /* Current cursor column position*/
 	int baej = 0; /* Bookmark, alias, ELN, or jump */
 
 	if (suggestion.type == BOOKMARK_SUG || suggestion.type == ALIAS_SUG
@@ -223,6 +225,8 @@ print_suggestion(const char *str, size_t offset, const char *color)
 
 	size_t suggestion_len = wc_xstrlen(str + offset);
 	size_t cucs = cuc + suggestion_len;
+	/* slines: amount of lines we need to print the suggestion, including
+	 * the current line */
 	int slines = 1, cucs_rem = 0;
 
 	if (cucs > term_cols) {
@@ -232,7 +236,6 @@ print_suggestion(const char *str, size_t offset, const char *color)
 			slines++;
 	}
 
-	--slines;
 	if (slines > term_rows)
 		return;
 
@@ -241,7 +244,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	suggestion_buf = xnmalloc(str_len + 1, sizeof(char));
 	strcpy(suggestion_buf, str);
 
-	/* Erase everything after the cursor */
+	/* Erase everything after the current cursor position */
 	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {}
 
 	/* If not at the end of the line, move the cursor there */
@@ -259,7 +262,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	}
 
 	/* Print the suggestion */
-	printf("%s%s%s", color, str + (offset - 1), df_c);
+	printf("%s%s%s", color, str + offset, df_c);
 	fflush(stdout);
 
 	/* Update the row number, if needed */
@@ -269,17 +272,21 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	 * value to move the cursor back to the correct row (the beginning
 	 * of the line) */
 	int old_currow = currow;
-	if (slines > 0 && currow + slines >= term_rows)
-		currow -= slines - (term_rows - old_currow);
+	/* extra_rows: amount of extra rows we need to print the suggestion
+	 * (excluding the current row) */
+	int extra_rows = slines - 1;
+	if (extra_rows && old_currow + extra_rows >= term_rows)
+		currow -= extra_rows - (term_rows - old_currow);
 
 	/* Restore cursor position */
 	printf("\x1b[%d;%dH", currow, curcol);
 
+//	printf("'%zu:%zu:%zu:%d:%d'", cuc, wc_xstrlen(str + offset), cucs, slines, currow);
+
 	/* Store the amount of lines taken by the current command line
 	 * (plus the suggestion's length) to be able to correctly
 	 * remove it later (via the clear_suggestion function) */
-	suggestion.lines = slines + 1;
-
+	suggestion.lines = slines;
 	return;
 }
 

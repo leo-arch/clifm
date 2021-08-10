@@ -727,7 +727,7 @@ extern short
     suggestions,
     suggest_filetype_color,
     autojump,
-
+ 
     home_ok,
     config_ok,
     trash_ok,
