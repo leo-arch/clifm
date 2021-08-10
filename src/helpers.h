@@ -343,18 +343,18 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define DEF_SORT SNAME
 #define DEF_SORT_REVERSE 0
 #define DEF_SPLASH_SCREEN 0
-#define DEF_SUGGESTIONS 0
-#define DEF_SUG_FILETYPE_COLOR 0
-#define DEF_TIPS 1
-#define DEF_TRASRM 0
-#define DEF_UNICODE 1
-#define DEF_WELCOME_MESSAGE 1
 #ifdef __OpenBSD__
 #define DEF_SUDO_CMD "doas"
 #else
 #define DEF_SUDO_CMD "sudo"
 #endif
+#define DEF_SUG_FILETYPE_COLOR 0
 #define DEF_SUG_STRATEGY "ehfjbac"
+#define DEF_SUGGESTIONS 0
+#define DEF_TIPS 1
+#define DEF_TRASRM 0
+#define DEF_UNICODE 1
+#define DEF_WELCOME_MESSAGE 1
 #define SUG_STRATS 7
 
 #define MAX_WS 8
@@ -367,16 +367,16 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 
 /* Macros for the colors_list function */
 #define NO_ELN 0
+#define NO_NEWLINE 0
 #define NO_PAD 0
 #define PRINT_NEWLINE 1
-#define NO_NEWLINE 0
 
 /* A few key macros used by the auto-suggestions system */
 #define _ESC 27
-#define BS 8
 #define _TAB 9
-#define ENTER 13
+#define BS 8
 #define DELETE 127
+#define ENTER 13
 /* #define OP_BRACKET 91
 #define UC_O 79
 #define SPACE 32 */
@@ -533,27 +533,27 @@ extern struct bookmarks_t *bookmarks;
 
 /* Struct to store file information */
 struct fileinfo {
-	char *name;
 	char *color;
 	char *ext_color;
 	char *icon;
 	char *icon_color;
-	int eln_n;
-	int filesn; /* Number of files in subdir */
-	int symlink;
+	char *name;
 	int dir;
+	int eln_n;
 	int exec;
+	int filesn; /* Number of files in subdir */
 	int ruser; /* User read permission for dir */
+	int symlink;
 	size_t len;
-	mode_t type; /* Store d_type value */
 	mode_t mode; /* Store st_mode (for long view mode) */
+	mode_t type; /* Store d_type value */
 	ino_t inode;
 	off_t size;
 	uid_t uid;
 	gid_t gid;
 	nlink_t linkn;
-	time_t time;
 	time_t ltime; /* For long view mode */
+	time_t time;
 };
 
 extern struct fileinfo *file_info;
@@ -564,81 +564,81 @@ extern struct fileinfo *file_info;
  * fly (editing the config file) any option not specified in the command
  * line */
 struct param {
-	int splash;
-	int hidden;
-	int longview;
-	int cd_list_auto;
-	int autocd;
 	int auto_open;
-	int ext;
-	int ffirst;
-	int sensitive;
-	int unicode;
-	int pager;
-	int path;
-	int light;
-	int sort;
-	int dirmap;
-	int config;
-	int stealth_mode;
-	int restore_last_path;
-	int tips;
-	int disk_usage;
-	int classify;
-	int share_selbox;
-	int rl_vi_mode;
-	int max_dirhist;
-	int sort_reverse;
-	int files_counter;
-	int welcome_message;
-	int clear_screen;
-	int logs;
-	int max_path;
+	int autocd;
+	int autojump;
 	int bm_file;
-	int expand_bookmarks;
-	int only_dirs;
-	int list_and_quit;
-	int color_scheme;
-	int cd_on_quit;
-	int no_dirjump;
-	int icons;
-	int icons_use_file_color;
-	int no_columns;
-	int no_colors;
-	int max_files;
-	int trasrm;
-	int noeln;
 	int case_sens_dirjump;
 	int case_sens_path_comp;
+	int cd_list_auto;
+	int clear_screen;
+	int config;
 	int cwd_in_title;
+	int dirmap;
+	int disk_usage;
+	int cd_on_quit;
+	int classify;
+	int color_scheme;
+	int expand_bookmarks;
+	int ext;
+	int ffirst;
+	int files_counter;
+	int hidden;
+	int icons;
+	int icons_use_file_color;
+	int list_and_quit;
+	int light;
+	int logs;
+	int longview;
+	int max_dirhist;
+	int max_files;
+	int max_path;
+	int no_colors;
+	int no_columns;
+	int no_dirjump;
+	int noeln;
+	int only_dirs;
+	int pager;
+	int path;
 	int printsel;
+	int restore_last_path;
+	int rl_vi_mode;
+	int sensitive;
+	int share_selbox;
+	int sort;
+	int sort_reverse;
+	int splash;
+	int stealth_mode;
 	int suggestions;
-	int autojump;
+	int tips;
+	int trasrm;
+	int unicode;
+	int welcome_message;
 };
 
 extern struct param xargs;
 
 /* Struct to store remotes information */
 struct remote_t {
-	char *name;
 	char *desc;
-	char *mountpoint;
+	char *name;
 	char *mount_cmd;
+	char *mountpoint;
 	char *unmount_cmd;
-	int auto_unmount;
 	int auto_mount;
+	int auto_unmount;
 	int mounted; 
 };
 
 extern struct remote_t *remotes;
 
 struct suggestions_t {
-	int type;
-    int printed;
-    int offset;
-	int lines;
-	int full_line_len;
 	int filetype;
+	int full_line_len;
+	int lines;
+    int offset;
+    int printed;
+	int type;
 };
 
 extern struct suggestions_t suggestion;
@@ -666,119 +666,117 @@ enum jump {
 extern enum prog_msg pmsg;
 extern struct termios orig_termios;
 
-extern int curcol;
-extern int currow;
-extern int flags;
+extern int
+	curcol,
+	currow,
+	flags;
 
 extern short
-    splash_screen,
-    welcome_message,
-    show_hidden,
-    clear_screen,
-    disk_usage,
-    list_folders_first,
-    share_selbox,
-    long_view,
-    case_sensitive,
-    cd_lists_on_the_fly,
-    tips,
-    logs_enabled,
-    sort,
-    classify,
-    files_counter,
-    light_mode,
-    autocd,
     auto_open,
-    dirhist_map,
-    restore_last_path,
-    pager,
-    ext_cmd_ok,
-    expand_bookmarks,
-    only_dirs,
-    cd_on_quit,
-    columned,
-    colorize,
-    cur_ws,
-    cp_cmd,
-    mv_cmd,
-    tr_as_rm,
-    no_eln,
-    min_name_trim,
+    autocd,
+    autojump,
+    bg_proc,
+    case_sensitive,
     case_sens_dirjump,
     case_sens_path_comp,
-
-    no_log,
-    internal_cmd,
-    shell_terminal,
-    print_msg,
-    recur_perm_error_flag,
-    is_sel,
-    sel_is_last,
-    kbind_busy,
-    unicode,
+    cd_lists_on_the_fly,
+    cd_on_quit,
+    classify,
+    clear_screen,
+    colorize,
+    columned,
+    config_ok,
+    copy_n_rename,
+    cp_cmd,
+    cur_ws,
     dequoted,
+    dirhist_map,
+    disk_usage,
+    expand_bookmarks,
+    ext_cmd_ok,
+    files_counter,
+    filter_rev,
+    home_ok,
+    icons,
+    internal_cmd,
+    is_sel,
+    kb_shortcut,
+    kbind_busy,
+    light_mode,
+    list_folders_first,
+    logs_enabled,
+    long_view,
     mime_match,
+    min_name_trim,
+    mv_cmd,
+    no_eln,
+    no_log,
+    only_dirs,
+    pager,
+    print_msg,
+    print_selfiles,
+    prompt_style,
+    recur_perm_error_flag,
+    restore_last_path,
+    sel_is_last,
+    selfile_ok,
+    share_selbox,
+    shell_terminal,
+    show_hidden,
+    sort,
     sort_reverse,
     sort_switch,
-    kb_shortcut,
-    switch_cscheme,
-    icons,
-    copy_n_rename,
-    suggestions,
+    splash_screen,
     suggest_filetype_color,
-    autojump,
- 
-    home_ok,
-    config_ok,
+    suggestions,
+    switch_cscheme,
+    tips,
+    tr_as_rm,
     trash_ok,
-    selfile_ok,
-    filter_rev,
-    print_selfiles,
-    bg_proc,
-    prompt_style;
+    unicode,
+    welcome_message;
 
 extern int
-    max_hist,
-    max_log,
-    max_dirhist,
-    max_path,
-    max_files,
-    min_jump_rank,
-    max_jump_total_rank,
-    max_printselfiles,
-
-    dirhist_cur_index,
     argc_bk,
-    exit_code,
-    shell_is_interactive,
+    dirhist_cur_index,
     dirhist_total_index,
-    trash_n,
+    exit_code,
     jump_total_rank,
+    max_dirhist,
+    max_files,
+    max_hist,
+    max_jump_total_rank,
+    max_log,
+    max_path,
+    max_printselfiles,
+    min_jump_rank,
+    trash_n,
+    shell_is_interactive,
     *eln_as_file;
 
 extern unsigned short term_cols, term_rows;
 
 extern size_t
-    args_n,
-    sel_n,
-    msgs_n,
-    prompt_cmds_n,
-    path_n,
-    current_hist_n,
-    usrvar_n,
-    aliases_n,
-    longest,
-    files,
     actions_n,
-    ext_colors_n,
-    kbinds_n,
-    eln_as_file_n,
+    aliases_n,
+    args_n,
     bm_n,
     cschemes_n,
+    current_hist_n,
+    eln_as_file_n,
+    ext_colors_n,
+    files,
     jump_n,
+    kbinds_n,
+    longest,
+    msgs_n,
+    path_n,
     path_progsn,
+    prompt_cmds_n,
     remotes_n,
-    user_home_len;
+    sel_n,
+    user_home_len,
+    usrvar_n;
 
 extern struct termios shell_tmodes;
 extern off_t total_sel_size;
@@ -788,20 +786,6 @@ extern char
     div_line_char[NAME_MAX],
     hostname[HOST_NAME_MAX],
 
-    **aliases,
-    **argv_bk,
-    **bin_commands,
-    **bookmark_names,
-    **color_schemes,
-    **ext_colors,
-    **history,
-    **messages,
-    **old_pwd,
-    **paths,
-    **profile_names,
-    **prompt_cmds,
-    **sel_elements,
-  
     *ACTIONS_FILE,
 	*alt_config_dir,
     *alt_bm_file,
@@ -821,6 +805,7 @@ extern char
     *filter,
     *HIST_FILE,
     *KBINDS_FILE,
+    *jump_suggestion,
     *last_cmd,
     *LOG_FILE,
     *ls_colors_bk,
@@ -834,6 +819,8 @@ extern char
     *REMOTES_FILE,
     *SEL_FILE,
     *STDIN_TMP_DIR,
+    *suggestion_buf,
+    *suggestion_strategy,
     *term,
     *TMP_DIR,
     *TRASH_DIR,
@@ -841,18 +828,24 @@ extern char
     *TRASH_INFO_DIR,
     *usr_cscheme,
     *user_home,
-    *suggestion_buf,
-    *suggestion_strategy,
-    *jump_suggestion;
+
+    **aliases,
+    **argv_bk,
+    **bin_commands,
+    **bookmark_names,
+    **color_schemes,
+    **ext_colors,
+    **history,
+    **messages,
+    **old_pwd,
+    **paths,
+    **profile_names,
+    **prompt_cmds,
+    **sel_elements;
 
 extern regex_t regex_exp;
-
 extern size_t *ext_colors_len;
-
-/* This is not a comprehensive list of commands. It only lists
- * commands long version for TAB completion */
 extern const char *INTERNAL_CMDS[];
-
 extern const char *PARAM_STR[];
 
 /* To store all the 39 color variables I use, with 46 bytes each, I need
@@ -860,53 +853,56 @@ extern const char *PARAM_STR[];
  * dynamically allocated arrays for them (which, on the other side,
  * would make the whole thing slower and more tedious) */
 
-/* Colors (file type and interface) */
-extern char di_c[MAX_COLOR], /* Directory */
-    nd_c[MAX_COLOR],	     /* No read directory */
-    ed_c[MAX_COLOR],	     /* Empty dir */
-    ne_c[MAX_COLOR],	     /* No read empty dir */
-    fi_c[MAX_COLOR],	     /* Reg file */
-    ef_c[MAX_COLOR],	     /* Empty reg file */
-    nf_c[MAX_COLOR],	     /* No read file */
-    ln_c[MAX_COLOR],	     /* Symlink */
-    or_c[MAX_COLOR],	     /* Broken symlink */
-    pi_c[MAX_COLOR],	     /* FIFO, pipe */
-    so_c[MAX_COLOR],	     /* Socket */
+/* Colors */
+extern char
+	/* File types */
     bd_c[MAX_COLOR],	     /* Block device */
-    cd_c[MAX_COLOR],	     /* Char device */
-    su_c[MAX_COLOR],	     /* SUID file */
-    sg_c[MAX_COLOR],	     /* SGID file */
-    tw_c[MAX_COLOR],	     /* Sticky other writable */
-    st_c[MAX_COLOR],	     /* Sticky (not ow)*/
-    ow_c[MAX_COLOR],	     /* Other writable */
-    ex_c[MAX_COLOR],	     /* Executable */
-    ee_c[MAX_COLOR],	     /* Empty executable */
     ca_c[MAX_COLOR],	     /* Cap file */
-    no_c[MAX_COLOR],	     /* Unknown */
-    uf_c[MAX_COLOR],	     /* Non-'stat'able file */
+    cd_c[MAX_COLOR],	     /* Char device */
+    ee_c[MAX_COLOR],	     /* Empty executable */
+    ex_c[MAX_COLOR],	     /* Executable */
+    ef_c[MAX_COLOR],	     /* Empty reg file */
+    ed_c[MAX_COLOR],	     /* Empty dir */
+    fi_c[MAX_COLOR],	     /* Reg file */
+    di_c[MAX_COLOR],	     /* Directory */
+    ln_c[MAX_COLOR],	     /* Symlink */
     mh_c[MAX_COLOR],	     /* Multi-hardlink file */
+    nd_c[MAX_COLOR],	     /* No read directory */
+    ne_c[MAX_COLOR],	     /* No read empty dir */
+    nf_c[MAX_COLOR],	     /* No read file */
+    no_c[MAX_COLOR],	     /* Unknown */
+    or_c[MAX_COLOR],	     /* Broken symlink */
+    ow_c[MAX_COLOR],	     /* Other writable */
+    pi_c[MAX_COLOR],	     /* FIFO, pipe */
+    sg_c[MAX_COLOR],	     /* SGID file */
+    so_c[MAX_COLOR],	     /* Socket */
+    st_c[MAX_COLOR],	     /* Sticky (not ow)*/
+    su_c[MAX_COLOR],	     /* SUID file */
+    tw_c[MAX_COLOR],	     /* Sticky other writable */
+    uf_c[MAX_COLOR],	     /* Non-'stat'able file */
 
-    bm_c[MAX_COLOR], /* Bookmarked directory */
-    el_c[MAX_COLOR], /* ELN color */
-    mi_c[MAX_COLOR], /* Misc indicators color */
-    df_c[MAX_COLOR], /* Default color */
-    dc_c[MAX_COLOR], /* Files counter color */
-    wc_c[MAX_COLOR], /* Welcome message color */
-    dh_c[MAX_COLOR], /* Dirhist index color */
-    dl_c[MAX_COLOR], /* Dividing line index color */
-	sh_c[MAX_COLOR], /* Auto-suggestions: history */
-	sf_c[MAX_COLOR], /* Auto-suggestions: filenames */
-	sc_c[MAX_COLOR], /* Auto-suggestions: external commands */
-	sx_c[MAX_COLOR], /* Auto-suggestions: internal commands and params */
+	/* Interface */
+    bm_c[MAX_COLOR],	     /* Bookmarked directory */
+    dc_c[MAX_COLOR],	     /* Files counter color */
+    df_c[MAX_COLOR],	     /* Default color */
+    dh_c[MAX_COLOR],	     /* Dirhist index color */
+    dl_c[MAX_COLOR],	     /* Dividing line color */
+    el_c[MAX_COLOR],	     /* ELN color */
+    mi_c[MAX_COLOR],	     /* Misc indicators color */
+	sc_c[MAX_COLOR],	     /* Auto-suggestions: external commands */
+	sf_c[MAX_COLOR],	     /* Auto-suggestions: filenames */
+	sh_c[MAX_COLOR],	     /* Auto-suggestions: history */
+	sx_c[MAX_COLOR],	     /* Auto-suggestions: internal commands and params */
+    wc_c[MAX_COLOR],	     /* Welcome message color */
 
     /* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */
-    tx_c[MAX_COLOR + 2], /* Text color */
-    li_c[MAX_COLOR + 2], /* Sel indicator color */
-    ti_c[MAX_COLOR + 2], /* Trash indicator color */
     em_c[MAX_COLOR + 2], /* Error msg color */
-    wm_c[MAX_COLOR + 2], /* Warning msg color */
+    li_c[MAX_COLOR + 2], /* Sel indicator color */
     nm_c[MAX_COLOR + 2], /* Notice msg color */
+    ti_c[MAX_COLOR + 2], /* Trash indicator color */
+    tx_c[MAX_COLOR + 2], /* Text color */
     si_c[MAX_COLOR + 2], /* stealth indicator color */
+    wm_c[MAX_COLOR + 2], /* Warning msg color */
 
     dir_ico_c[MAX_COLOR]; /* Directories icon color */
