@@ -71,8 +71,11 @@ workspace4:\M-4
 # Help
 # F1-3
 show-manpage:\eOP
+show-manpage:\e[11~
 show-cmds:\eOQ
+show-cmds:\e[12~
 show-kbinds:\eOR
+show-kbinds:\e[13~
 
 create-file:\M-n
 new-instance:\C-x
