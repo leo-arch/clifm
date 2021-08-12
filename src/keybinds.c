@@ -39,6 +39,10 @@ typedef char *rl_cpvfunc_t;
 #endif
 #include <dirent.h>
 
+/*
+#include <curses.h>
+#include <term.h> */
+
 #include "aux.h"
 #include "config.h"
 #include "exec.h"
@@ -407,7 +411,8 @@ rl_accept_suggestion(int count, int key)
 		} else {
 			/* Last word: neither space nor slash */
 			size_t len = strlen(suggestion_buf);
-			if (suggestion_buf[len - 1] != '/')
+			if (suggestion_buf[len - 1] != '/'
+			&& suggestion_buf[len - 1] != ' ')
 				suggestion.type = NO_SUG;
 /*			clear_suggestion(); */
 			accept_first_word = 0;
@@ -722,7 +727,7 @@ rl_clear_line(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
-	if (suggestion.lines > term_rows) {
+	if (suggestion.nlines > term_rows) {
 		rl_on_new_line();
 		return EXIT_SUCCESS;
 	}
@@ -730,7 +735,7 @@ rl_clear_line(int count, int key)
 	if (suggestion_buf) {
 		clear_suggestion();
 		suggestion.printed = 0;
-		suggestion.lines = 0;
+		suggestion.nlines = 0;
 		free(suggestion_buf);
 		suggestion_buf = (char *)NULL;
 	}
@@ -1294,6 +1299,9 @@ readline_kbinds(void)
 		rl_bind_keyseq("\\eOP", rl_manpage);
 		rl_bind_keyseq("\\eOQ", rl_cmds_help);
 		rl_bind_keyseq("\\eOR", rl_kbinds_help);
+		rl_bind_keyseq("\\e[11~", rl_manpage);
+		rl_bind_keyseq("\\e[12~", rl_cmds_help);
+		rl_bind_keyseq("\\e[13~", rl_kbinds_help);
 
 		/* Navigation */
 		rl_bind_keyseq("\\M-u", rl_parent_dir);
@@ -1369,12 +1377,24 @@ readline_kbinds(void)
 		rl_bind_keyseq("\\e[24~", rl_quit);
 	}
 
+/*	char *term = getenv("TERM");
+	tgetent(NULL, term);
+	char *_right_arrow = tgetstr("nd", NULL);
+	char *s_right_arrow = tgetstr("%i", NULL);
+	char *s_left_arrow = tgetstr("#4", NULL); */
+
 	/* Bind Right arrow key and Ctrl-f to accept the whole suggestion */
+/*	rl_bind_keyseq(_right_arrow, rl_accept_suggestion);
+	rl_bind_key(6, rl_accept_suggestion);
+	rl_bind_keyseq(s_left_arrow, rl_previous_dir);
+	rl_bind_keyseq(s_right_arrow, rl_next_dir); */
+
 	rl_bind_keyseq("\\C-f", rl_accept_suggestion);
 	rl_bind_keyseq("\x1b[C", rl_accept_suggestion);
 	rl_bind_keyseq("\x1bOC", rl_accept_suggestion); /* Haiku terminal */
 
 	/* Bind Alt-Right and Alt-f to accept the first suggested word */
+/*	rl_bind_key(('f' | 0200), rl_accept_first_word); */ // Alt-f
 	rl_bind_keyseq("\x1b\x66", rl_accept_first_word);
 	rl_bind_keyseq("\x1b[3C", rl_accept_first_word);
 	rl_bind_keyseq("\x1b\x1b[C", rl_accept_first_word);

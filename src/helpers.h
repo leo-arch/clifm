@@ -635,7 +635,7 @@ extern struct remote_t *remotes;
 struct suggestions_t {
 	int filetype;
 	int full_line_len;
-	int lines;
+	int nlines;
     int offset;
     int printed;
 	int type;

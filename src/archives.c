@@ -56,15 +56,12 @@ handle_iso(char *file)
 		 "%s[t]%stest %s[m]%sount %s[q]%suit\n"), bold, df_c, bold,
 	    df_c, bold, df_c, bold, df_c, bold, df_c, bold, df_c);
 
-	char *operation = (char *)NULL;
 	char sel_op = 0;
-
+	char *operation = (char *)NULL;
 	while (!operation) {
 		operation = rl_no_hist(_("Operation: "));
-
 		if (!operation)
 			continue;
-
 		if (!*operation || operation[1] != '\0') {
 			free(operation);
 			operation = (char *)NULL;
@@ -125,7 +122,6 @@ handle_iso(char *file)
 	case 'E': {
 		/* 7z x -oDIR FILE (ask for DIR) */
 		char *ext_path = (char *)NULL;
-
 		while (!ext_path) {
 			ext_path = rl_no_hist(_("Extraction path: "));
 			if (!ext_path)
@@ -168,9 +164,7 @@ handle_iso(char *file)
 		if (xargs.stealth_mode == 1) {
 			mountpoint = (char *)xnmalloc(strlen(file) + 19, sizeof(char));
 			sprintf(mountpoint, "/tmp/clifm-mounts/%s", file);
-		}
-
-		else {
+		} else {
 			mountpoint = (char *)xnmalloc(strlen(CONFIG_DIR) + strlen(file) + 9, sizeof(char));
 			sprintf(mountpoint, "%s/mounts/%s", CONFIG_DIR, file);
 		}
@@ -190,7 +184,6 @@ handle_iso(char *file)
 		
 		char *cmd[] = {sudo, "mount", "-o", "loop", file,
 		    mountpoint, NULL};
-
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			free(mountpoint);
 			free(sudo);
@@ -215,8 +208,9 @@ handle_iso(char *file)
 			if (list_dir() != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 			add_to_dirhist(ws[cur_ws].path);
-		} else
+		} else {
 			printf("%s: Successfully mounted on %s\n", file, mountpoint);
+		}
 
 		free(mountpoint);
 	} break;
@@ -225,7 +219,6 @@ handle_iso(char *file)
 	case 't': {
 		/* 7z t FILE */
 		char *cmd[] = {"7z", "t", file, NULL};
-
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 	} break;
@@ -239,7 +232,6 @@ create_iso(char *in_file, char *out_file)
 {
 	int exit_status = EXIT_SUCCESS;
 	struct stat file_attrib;
-
 	if (lstat(in_file, &file_attrib) == -1) {
 		fprintf(stderr, "archiver: %s: %s\n", in_file, strerror(errno));
 		return EXIT_FAILURE;
@@ -248,14 +240,12 @@ create_iso(char *in_file, char *out_file)
 	/* If IN_FILE is a directory */
 	if ((file_attrib.st_mode & S_IFMT) == S_IFDIR) {
 		char *cmd[] = {"mkisofs", "-R", "-o", out_file, in_file, NULL};
-
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 	}
 
 	/* If IN_FILE is a block device */
 	else if ((file_attrib.st_mode & S_IFMT) == S_IFBLK) {
-
 		char *if_option = (char *)xnmalloc(strlen(in_file) + 4, sizeof(char));
 		sprintf(if_option, "if=%s", in_file);
 
@@ -271,7 +261,6 @@ create_iso(char *in_file, char *out_file)
 
 		char *cmd[] = {sudo, "dd", if_option, of_option, "bs=64k",
 		    "conv=noerror,sync", "status=progress", NULL};
-
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 
@@ -303,7 +292,6 @@ check_iso(char *file)
 
 	char ISO_TMP_FILE[PATH_MAX] = "";
 	char *rand_ext = gen_rand_str(6);
-
 	if (!rand_ext)
 		return -1;
 
@@ -311,11 +299,9 @@ check_iso(char *file)
 		sprintf(ISO_TMP_FILE, "/tmp/clifm-archiver.%s", rand_ext);
 	else
 		sprintf(ISO_TMP_FILE, "%s/archiver.%s", TMP_DIR, rand_ext);
-
 	free(rand_ext);
 
 	FILE *file_fp = fopen(ISO_TMP_FILE, "w");
-
 	if (!file_fp) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ISO_TMP_FILE,
 				strerror(errno));
@@ -323,7 +309,6 @@ check_iso(char *file)
 	}
 
 	FILE *file_fp_err = fopen("/dev/null", "w");
-
 	if (!file_fp_err) {
 		fprintf(stderr, "%s: /dev/null: %s\n", PROGRAM_NAME, strerror(errno));
 		fclose(file_fp);
@@ -366,9 +351,7 @@ check_iso(char *file)
 	int is_iso = 0;
 
 	if (access(ISO_TMP_FILE, F_OK) == 0) {
-
 		file_fp = fopen(ISO_TMP_FILE, "r");
-
 		if (file_fp) {
 			char line[255] = "";
 			if (fgets(line, (int)sizeof(line), file_fp) == NULL) {
@@ -377,10 +360,8 @@ check_iso(char *file)
 				return EXIT_FAILURE;
 			}
 			char *ret = strstr(line, "ISO 9660");
-
 			if (ret)
 				is_iso = 1;
-
 			fclose(file_fp);
 		}
 		unlink(ISO_TMP_FILE);
@@ -409,25 +390,20 @@ is_compressed(char *file, int test_iso)
 	}
 
 	char *rand_ext = gen_rand_str(6);
-
 	if (!rand_ext)
 		return -1;
 
 	char ARCHIVER_TMP_FILE[PATH_MAX];
-
 	if (xargs.stealth_mode == 1)
 		sprintf(ARCHIVER_TMP_FILE, "/tmp/clifm-archiver.%s", rand_ext);
-
 	else
 		sprintf(ARCHIVER_TMP_FILE, "%s/archiver.%s", TMP_DIR, rand_ext);
-
 	free(rand_ext);
 
 	if (access(ARCHIVER_TMP_FILE, F_OK) == 0)
 		unlink(ARCHIVER_TMP_FILE);
 
 	FILE *file_fp = fopen(ARCHIVER_TMP_FILE, "w");
-
 	if (!file_fp) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 		    ARCHIVER_TMP_FILE, strerror(errno));
@@ -435,7 +411,6 @@ is_compressed(char *file, int test_iso)
 	}
 
 	FILE *file_fp_err = fopen("/dev/null", "w");
-
 	if (!file_fp_err) {
 		fprintf(stderr, "%s: /dev/null: %s\n", PROGRAM_NAME, strerror(errno));
 		fclose(file_fp);
@@ -478,9 +453,7 @@ is_compressed(char *file, int test_iso)
 	int compressed = 0;
 
 	if (access(ARCHIVER_TMP_FILE, F_OK) == 0) {
-
 		file_fp = fopen(ARCHIVER_TMP_FILE, "r");
-
 		if (file_fp) {
 			char line[255];
 			if (fgets(line, (int)sizeof(line), file_fp) == NULL) {
@@ -490,18 +463,14 @@ is_compressed(char *file, int test_iso)
 			}
 			char *ret = strstr(line, "archive");
 
-			if (ret)
+			if (ret) {
 				compressed = 1;
-
-			else {
+			} else {
 				ret = strstr(line, "compressed");
-
-				if (ret)
+				if (ret) {
 					compressed = 1;
-
-				else if (test_iso) {
+				} else if (test_iso) {
 					ret = strstr(line, "ISO 9660");
-
 					if (ret)
 						compressed = 1;
 				}
@@ -546,10 +515,8 @@ archiver(char **args, char mode)
 		char *name = (char *)NULL;
 		while (!name) {
 			name = rl_no_hist(_("Filename ('q' to quit): "));
-
 			if (!name)
 				continue;
-
 			if (!*name) {
 				free(name);
 				name = (char *)NULL;
@@ -568,10 +535,8 @@ archiver(char **args, char mode)
 
 		char *ret = strrchr(name, '.');
 		if (strcmp(ret, ".zst") == 0) {
-
 			/* Multiple files */
 			if (args[2]) {
-
 				printf(_("\n%sNOTE%s: Zstandard does not support "
 					 "compression of multiple files into one single "
 					 "compressed file. Files will be compressed rather "
@@ -587,9 +552,7 @@ archiver(char **args, char mode)
 			/* Only one file */
 			else
 				exit_status = zstandard(args[1], name, 'c', 0);
-
 			free(name);
-
 			return exit_status;
 		}
 
@@ -609,7 +572,6 @@ archiver(char **args, char mode)
 
 		/* Escape the string, if needed */
 		char *esc_name = escape_str(name);
-
 		if (!esc_name) {
 			fprintf(stderr, _("archiver: %s: Error escaping string\n"),
 					name);
@@ -623,9 +585,7 @@ archiver(char **args, char mode)
 		char *cmd = (char *)NULL;
 		char *ext_ok = strchr(esc_name, '.');
 		size_t cmd_len = strlen(esc_name) + 10 + ((!ext_ok) ? 8 : 0);
-
 		cmd = (char *)xcalloc(cmd_len, sizeof(char));
-
 		/* If name has no extension, add the default */
 		sprintf(cmd, "atool -a %s%s", esc_name, (!ext_ok) ? ".tar.gz" : "");
 
@@ -641,7 +601,6 @@ archiver(char **args, char mode)
 
 		free(cmd);
 		free(esc_name);
-
 		return exit_status;
 	}
 
@@ -654,7 +613,6 @@ archiver(char **args, char mode)
 	/* Exit if at least one non-compressed file is found */
 	for (i = 1; args[i]; i++) {
 		char *deq = (char *)NULL;
-
 		if (strchr(args[i], '\\')) {
 			deq = dequote_str(args[i], 0);
 			strcpy(args[i], deq);
@@ -673,7 +631,6 @@ archiver(char **args, char mode)
 				 * ########################## */
 
 	char *ret = strrchr(args[1], '.');
-
 	if ((ret && strcmp(ret, ".iso") == 0) || check_iso(args[1]) == 0)
 		return handle_iso(args[1]);
 
@@ -698,10 +655,8 @@ archiver(char **args, char mode)
 	}
 
 	if (zst_index != -1) {
-
 		/* Multiple files */
 		if (files_num > 1) {
-
 			printf(_("%sNOTE%s: Using Zstandard\n"), bold, df_c);
 			printf(_("%s[e]%sxtract %s[t]%sest %s[i]%snfo %s[q]%suit\n"),
 			    bold, df_c, bold, df_c, bold, df_c, bold, df_c);
@@ -710,10 +665,8 @@ archiver(char **args, char mode)
 			char sel_op = 0;
 			while (!operation) {
 				operation = rl_no_hist(_("Operation: "));
-
 				if (!operation)
 					continue;
-
 				if (!*operation || operation[1] != '\0') {
 					free(operation);
 					operation = (char *)NULL;
@@ -751,7 +704,6 @@ archiver(char **args, char mode)
 		else {
 			if (zstandard(args[zst_index], NULL, 'd', 0) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
-
 			return exit_status;
 		}
 	}
@@ -772,10 +724,8 @@ archiver(char **args, char mode)
 
 	while (!operation) {
 		operation = rl_no_hist(_("Operation: "));
-
 		if (!operation)
 			continue;
-
 		if (!*operation || operation[1] != '\0') {
 			free(operation);
 			operation = (char *)NULL;
@@ -814,14 +764,12 @@ archiver(char **args, char mode)
 	switch (sel_op) {
 	case 'e': /* fallthrough */
 	case 'r': {
-
 		/* Store all file names into one single variable */
 		size_t len = 1;
 		dec_files = (char *)xnmalloc(len, sizeof(char));
 		*dec_files = '\0';
 
 		for (i = 1; args[i]; i++) {
-
 			/* Escape the string, if needed */
 			char *esc_name = escape_str(args[i]);
 			if (!esc_name)
@@ -831,22 +779,18 @@ archiver(char **args, char mode)
 			dec_files = (char *)xrealloc(dec_files, (len + 1) * sizeof(char));
 			strcat(dec_files, " ");
 			strcat(dec_files, esc_name);
-
 			free(esc_name);
 		}
 	} break;
 
-	case 'E':
-	case 'l':
+	case 'E': /* fallthtough */
+	case 'l': /* fallthtough */
 	case 'm': {
-
 		/* These operation won't be executed via the system shell,
 			 * so that we need to deescape files if necessary */
 		for (i = 1; args[i]; i++) {
-
 			if (strchr(args[i], '\\')) {
 				char *deq_name = dequote_str(args[i], 0);
-
 				if (!deq_name) {
 					fprintf(stderr, _("archiver: %s: Error "
 							"dequoting file name\n"), args[i]);
@@ -865,15 +809,10 @@ archiver(char **args, char mode)
 	 * ############################################### */
 
 	switch (sel_op) {
-
-		/* ########## EXTRACT ############## */
-
-	case 'e': {
+	case 'e': { /* ########## EXTRACT ############## */
 		char *cmd = (char *)NULL;
 		cmd = (char *)xnmalloc(strlen(dec_files) + 13, sizeof(char));
-
 		sprintf(cmd, "atool -x -e %s", dec_files);
-
 		if (launch_execle(cmd) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 
@@ -881,22 +820,16 @@ archiver(char **args, char mode)
 		free(dec_files);
 	} break;
 
-		/* ########## EXTRACT TO DIR ############## */
-
-	case 'E':
+	case 'E': /* ########## EXTRACT TO DIR ############## */
 		for (i = 1; args[i]; i++) {
-
 			/* Ask for extraction path */
 			printf(_("%sFile%s: %s\n"), bold, df_c, args[i]);
 
 			char *ext_path = (char *)NULL;
-
 			while (!ext_path) {
 				ext_path = rl_no_hist(_("Extraction path: "));
-
 				if (!ext_path)
 					continue;
-
 				if (!*ext_path) {
 					free(ext_path);
 					ext_path = (char *)NULL;
@@ -906,7 +839,6 @@ archiver(char **args, char mode)
 
 			/* Construct and execute cmd */
 			char *cmd[] = {"atool", "-X", ext_path, args[i], NULL};
-
 			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 
@@ -919,12 +851,10 @@ archiver(char **args, char mode)
 
 	case 'l':
 		for (i = 1; args[i]; i++) {
-
 			printf(_("%s%sFile%s: %s\n"), (i > 1) ? "\n" : "",
 			    bold, df_c, args[i]);
 
 			char *cmd[] = {"atool", "-l", args[i], NULL};
-
 			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
 		}
@@ -934,27 +864,20 @@ archiver(char **args, char mode)
 
 	case 'm':
 		for (i = 1; args[i]; i++) {
-
 			/* Create mountpoint */
 			char *mountpoint = (char *)NULL;
-
 			if (xargs.stealth_mode == 1) {
 				mountpoint = (char *)xnmalloc(strlen(args[i]) + 19,
 				    sizeof(char));
-
 				sprintf(mountpoint, "/tmp/clifm-mounts/%s",
 				    args[i]);
-			}
-
-			else {
+			} else {
 				mountpoint = (char *)xnmalloc(strlen(CONFIG_DIR) + strlen(args[i]) + 9, sizeof(char));
-
 				sprintf(mountpoint, "%s/mounts/%s", CONFIG_DIR,
 				    args[i]);
 			}
 
 			char *dir_cmd[] = {"mkdir", "-pm700", mountpoint, NULL};
-
 			if (launch_execve(dir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 				free(mountpoint);
 				return EXIT_FAILURE;
@@ -962,7 +885,6 @@ archiver(char **args, char mode)
 
 			/* Construct and execute cmd */
 			char *cmd[] = {"archivemount", args[i], mountpoint, NULL};
-
 			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 				free(mountpoint);
 				continue;
@@ -987,7 +909,6 @@ archiver(char **args, char mode)
 			ws[cur_ws].path = (char *)xcalloc(strlen(mountpoint) + 1,
 			    sizeof(char));
 			strcpy(ws[cur_ws].path, mountpoint);
-
 			free(mountpoint);
 
 			add_to_jumpdb(ws[cur_ws].path);
@@ -1012,13 +933,11 @@ archiver(char **args, char mode)
 			format = rl_no_hist(_("New format (Ex: .tar.xz): "));
 			if (!format)
 				continue;
-
 			if (!*format || (*format != '.' && *format != 'q')) {
 				free(format);
 				format = (char *)NULL;
 				continue;
 			}
-
 			if (*format == 'q' && format[1] == '\0') {
 				free(format);
 				free(dec_files);
@@ -1052,23 +971,18 @@ int
 zstandard(char *in_file, char *out_file, char mode, char op)
 {
 	int exit_status = EXIT_SUCCESS;
-
 	char *deq_file = dequote_str(in_file, 0);
-
 	if (!deq_file) {
 		fprintf(stderr, _("archiver: %s: Error dequoting file name\n"), in_file);
 		return EXIT_FAILURE;
 	}
 
 	if (mode == 'c') {
-
 		if (out_file) {
 			char *cmd[] = {"zstd", "-zo", out_file, deq_file, NULL};
 			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 				exit_status = EXIT_FAILURE;
-		}
-
-		else {
+		} else {
 			char *cmd[] = {"zstd", "-z", deq_file, NULL};
 
 			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
@@ -1087,21 +1001,13 @@ zstandard(char *in_file, char *out_file, char mode, char op)
 		char option[3] = "";
 
 		switch (op) {
-		case 'e':
-			strcpy(option, "-d");
-			break;
-		case 't':
-			strcpy(option, "-t");
-			break;
-		case 'i':
-			strcpy(option, "-l");
-			break;
+		case 'e': strcpy(option, "-d"); break;
+		case 't': strcpy(option, "-t"); break;
+		case 'i': strcpy(option, "-l"); break;
 		}
 
 		char *cmd[] = {"zstd", option, deq_file, NULL};
-
 		exit_status = launch_execve(cmd, FOREGROUND, E_NOFLAG);
-
 		free(deq_file);
 
 		if (exit_status != EXIT_SUCCESS)
@@ -1114,13 +1020,10 @@ zstandard(char *in_file, char *out_file, char mode, char op)
 	    bold, df_c, bold, df_c, bold, df_c, bold, df_c);
 
 	char *operation = (char *)NULL;
-
 	while (!operation) {
 		operation = rl_no_hist(_("Operation: "));
-
 		if (!operation)
 			continue;
-
 		if (!*operation || operation[1] != '\0') {
 			free(operation);
 			operation = (char *)NULL;
@@ -1160,6 +1063,5 @@ zstandard(char *in_file, char *out_file, char mode, char op)
 
 	free(operation);
 	free(deq_file);
-
 	return exit_status;
 }

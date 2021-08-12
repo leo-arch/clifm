@@ -598,7 +598,7 @@ copy_function(char **comm)
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
-	if (copy_n_rename) { /* pp */
+	if (copy_n_rename) { /* vv */
 		char **tmp = (char **)xnmalloc(sel_n + 3, sizeof(char *));
 		tmp[0] = savestring("br", 2);
 
@@ -884,7 +884,7 @@ bulk_rename(char **args)
 	/* Ask the user for confirmation */
 	char *answer = (char *)NULL;
 	while (!answer) {
-		answer = readline(_("Continue? [y/N] "));
+		answer = rl_no_hist(_("Continue? [y/N] "));
 		if (strlen(answer) > 1) {
 			free(answer);
 			answer = (char *)NULL;

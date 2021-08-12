@@ -157,7 +157,7 @@ free_suggestion(void)
 {
 	free(suggestion_buf);
 	suggestion_buf = (char *)NULL;
-	suggestion.printed = suggestion.lines = 0;
+	suggestion.printed = suggestion.nlines = 0;
 }
 
 void
@@ -167,11 +167,11 @@ clear_suggestion(void)
 	 * cursor position */
 	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {}
 
-	if (suggestion.lines > 1) {
+	if (suggestion.nlines > 1) {
 		/* Save cursor position */
 		get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
 
-		int i = suggestion.lines;
+		int i = suggestion.nlines;
 		while (--i > 0) {
 			/* Move the cursor to the beginning of the next line */
 			if (write(STDOUT_FILENO, "\x1b[1E", 4) <= 0) {}
@@ -181,7 +181,7 @@ clear_suggestion(void)
 		/* Restore cursor position */
 		printf("\x1b[%d;%dH", currow, curcol);
 		fflush(stdout);
-		suggestion.lines = 0;
+		suggestion.nlines = 0;
 	}
 
 	suggestion.printed = 0;
@@ -286,7 +286,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	/* Store the amount of lines taken by the current command line
 	 * (plus the suggestion's length) to be able to correctly
 	 * remove it later (via the clear_suggestion function) */
-	suggestion.lines = slines;
+	suggestion.nlines = slines;
 	return;
 }
 
@@ -945,16 +945,12 @@ rl_suggestions(char c)
 		goto FAIL;
 	}
 
-	/* Some terminals like st and rxvt use the delete char (127)
-	 * for backspace. So, let's translate this char to the backspace
-	 * char (8) for readline */
-/*	if (c == 127)
-		c = BS; */
-
 	/* Skip control characters (0 - 31) except backspace (8), tab(9),
 	 * enter (13), and escape (27) */
-	if (c < 32 && c != BS && c != _TAB && c != ENTER && c != _ESC)
-		goto FAIL;
+	if (c < 32 && c != BS && c != _TAB && c != ENTER && c != _ESC) {
+		printed = 1;
+		goto SUCCESS;
+	}
 
 	/* Skip backspace, Enter, and TAB keys */
 	switch(c) {
@@ -993,7 +989,7 @@ rl_suggestions(char c)
 
 		case _TAB:
 			if (suggestion.printed) {
-				if (suggestion.lines < 2) {
+				if (suggestion.nlines < 2) {
 					printed = 1;
 				} else {
 					clear_suggestion();

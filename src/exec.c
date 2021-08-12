@@ -530,12 +530,16 @@ exec_cmd(char **comm)
 				copy_n_rename = 1;
 
 			comm[0] = (char *)xrealloc(comm[0], 12 * sizeof(char));
-			if (cp_cmd == CP_CP)
-				strcpy(comm[0], "cp -iRp");
-			else if (cp_cmd == CP_ADVCP)
-				strcpy(comm[0], "advcp -giRp");
-			else
-				strcpy(comm[0], "wcp");
+			if (!copy_n_rename) {
+				if (cp_cmd == CP_CP)
+					strcpy(comm[0], "cp -iRp");
+				else if (cp_cmd == CP_ADVCP)
+					strcpy(comm[0], "advcp -giRp");
+				else
+					strcpy(comm[0], "wcp");
+			} else {
+				strcpy(comm[0], "cp");
+			}
 		} else if (*comm[0] == 'm' && !comm[0][1]) {
 			if (comm[1] && *comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
 				puts(_(WRAPPERS_USAGE));
