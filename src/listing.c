@@ -311,6 +311,21 @@ list_dir_light(void)
 	if (inotify_wd >= 0)
 		inotify_rm_watch(inotify_fd, inotify_wd);
 	inotify_wd = inotify_add_watch(inotify_fd, ws[cur_ws].path, INOTIFY_MASK);
+
+#elif defined(BSD_KQUEUE)
+	if (event_fd >= 0) {
+		close(event_fd);
+		event_fd = -1;
+	}
+#if defined(O_EVTONLY)
+	event_fd = open(ws[cur_ws].path, O_EVTONLY);
+#else
+	event_fd = open(ws[cur_ws].path, O_RDONLY);
+#endif
+	if (event_fd >= 0) {
+		EV_SET(&events_to_monitor[0], event_fd, EVFILT_VNODE,
+		       EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, ws[cur_ws].path);
+	}
 #endif
 
 	errno = 0;
@@ -840,7 +855,6 @@ int
 list_dir(void)
 {
 	/*  clock_t start = clock(); */
-
 	if (clear_screen)
 		CLEAR;
 
@@ -873,6 +887,21 @@ list_dir(void)
 	if (inotify_wd >= 0)
 		inotify_rm_watch(inotify_fd, inotify_wd);
 	inotify_wd = inotify_add_watch(inotify_fd, ws[cur_ws].path, INOTIFY_MASK);
+
+#elif defined(BSD_KQUEUE)
+	if (event_fd >= 0) {
+		close(event_fd);
+		event_fd = -1;
+	}
+#if defined(O_EVTONLY)
+	event_fd = open(ws[cur_ws].path, O_EVTONLY);
+#else
+	event_fd = open(ws[cur_ws].path, O_RDONLY);
+#endif
+	if (event_fd >= 0) {
+		EV_SET(&events_to_monitor[0], event_fd, EVFILT_VNODE,
+				EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, ws[cur_ws].path);
+	}
 #endif
 
 	int fd = dirfd(dir);

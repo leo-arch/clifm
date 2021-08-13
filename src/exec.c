@@ -641,7 +641,7 @@ exec_cmd(char **comm)
 			}
 		} else if (*comm[0] == 'r' && !comm[0][1]) {
 			exit_code = remove_file(comm);
-			goto CHECK_INOTIFY;
+			goto CHECK_EVENTS;
 		} else if (*comm[0] == 'm' && comm[0][1] == 'd' && !comm[0][2]) {
 			comm[0] = (char *)xrealloc(comm[0], 9 * sizeof(char));
 			strcpy(comm[0], "mkdir -p");
@@ -653,7 +653,7 @@ exec_cmd(char **comm)
 				return (exit_code = EXIT_FAILURE);
 			}
 			exit_code = edit_link(comm[1]);
-			goto CHECK_INOTIFY;
+			goto CHECK_EVENTS;
 		} else if (*comm[0] == 'l' && comm[0][1] == 'n' && !comm[0][2]) {
 			if (comm[1] && (strcmp(comm[1], "edit") == 0
 			|| strcmp(comm[1], "e") == 0)) {
@@ -662,7 +662,7 @@ exec_cmd(char **comm)
 					return (exit_code = EXIT_FAILURE);
 				}
 				exit_code = edit_link(comm[2]);
-				goto CHECK_INOTIFY;
+				goto CHECK_EVENTS;
 			}
 		}
 
@@ -1629,11 +1629,23 @@ exec_cmd(char **comm)
 		get_path_programs();
 	}
 
-CHECK_INOTIFY:
+CHECK_EVENTS:
+	if (cd_lists_on_the_fly) {
 #ifdef LINUX_INOTIFY
-	if (cd_lists_on_the_fly)
 		read_inotify();
+#elif defined(BSD_KQUEUE)
+		if (event_fd >= 0) {
+			struct kevent event_data[NUM_EVENT_SLOTS];
+			memset((void *)event_data, 0x0, sizeof(struct kevent)
+					* NUM_EVENT_SLOTS);
+			if (kevent(kq, events_to_monitor, NUM_EVENT_SLOTS, event_data,
+			NUM_EVENT_FDS, &gtimeout) > 0) {
+				free_dirlist();
+				list_dir();
+			}
+		}
 #endif
+	}
 	return exit_code;
 }
 

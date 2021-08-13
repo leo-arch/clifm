@@ -50,15 +50,18 @@
 #include <regex.h>
 #include <stddef.h>
 #include <stdlib.h>
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
-#include <sys/time.h>
-#endif
-#ifdef __linux__
+
+#if defined(__linux__)
 #include <linux/version.h>
 #include <sys/inotify.h>
 #include <sys/types.h>
 #define LINUX_INOTIFY
-#endif
+#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#include <sys/types.h>
+#include <sys/event.h>
+#include <sys/time.h>
+#define BSD_KQUEUE
+#endif /* __linux__ */
 
 #include "init.h"
 #include "strings.h"
@@ -107,7 +110,15 @@ void *__dso_handle;
 #define EVENT_BUF_LEN (EVENT_SIZE * NUM_EVENT_SLOTS)
 extern int inotify_fd, inotify_wd;
 extern unsigned int INOTIFY_MASK;
-#endif
+#elif defined(BSD_KQUEUE)
+#define NUM_EVENT_SLOTS 1
+#define NUM_EVENT_FDS 1
+static int kq, event_fd = -1;
+static struct kevent events_to_monitor[NUM_EVENT_FDS];
+static unsigned int KQUEUE_FFLAGS = NOTE_DELETE | NOTE_EXTEND | NOTE_LINK
+			    | NOTE_RENAME | NOTE_REVOKE | NOTE_WRITE;
+static struct timespec gtimeout;
+#endif /* LINUX_INOTIFY */
 
 #define PROGRAM_NAME "CliFM"
 #define PNL "clifm" /* Program name lowercase */
