@@ -113,10 +113,9 @@ extern unsigned int INOTIFY_MASK;
 #elif defined(BSD_KQUEUE)
 #define NUM_EVENT_SLOTS 1
 #define NUM_EVENT_FDS 1
-static int kq, event_fd = -1;
-static struct kevent events_to_monitor[NUM_EVENT_FDS];
-static unsigned int KQUEUE_FFLAGS = NOTE_DELETE | NOTE_EXTEND | NOTE_LINK
-			    | NOTE_RENAME | NOTE_REVOKE | NOTE_WRITE;
+extern int kq, event_fd;
+extern struct kevent events_to_monitor[];
+static unsigned int KQUEUE_FFLAGS;
 static struct timespec gtimeout;
 #endif /* LINUX_INOTIFY */
 

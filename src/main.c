@@ -518,6 +518,12 @@ char
 int inotify_fd, inotify_wd = -1;
 unsigned int INOTIFY_MASK = /*IN_ATTRIB |*/ IN_CREATE | IN_DELETE | IN_DELETE_SELF
 			| /*IN_MODIFY |*/ IN_MOVE_SELF | IN_MOVED_FROM | IN_MOVED_TO;
+#elif defined(BSD_KQUEUE)
+int kq, event_fd = -1;
+struct kevent events_to_monitor[NUM_EVENT_FDS];
+unsigned int KQUEUE_FFLAGS = NOTE_DELETE | NOTE_EXTEND | NOTE_LINK
+    | NOTE_RENAME | NOTE_REVOKE | NOTE_WRITE;
+static struct timespec gtimeout;
 #endif
 
 			/**
@@ -670,9 +676,16 @@ main(int argc, char *argv[])
 			_err('w', PRINT_PROMPT, "%s: inotify: %s\n", PROGRAM_NAME,
 				strerror(errno));
 		}
+#elif defined(BSD_KQUEUE)
+		kq = kqueue();
+		if (kq < 0) {
+			_err('w', PRINT_PROMPT, "%s: kqueue: %s\n", PROGRAM_NAME,
+				strerror(errno));
+		}
 #endif
 		list_dir();
 	}
+
 	create_kbinds_file();
 	load_bookmarks();
 	load_keybinds();
