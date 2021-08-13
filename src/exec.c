@@ -1636,10 +1636,10 @@ CHECK_EVENTS:
 #elif defined(BSD_KQUEUE)
 		if (event_fd >= 0) {
 			struct kevent event_data[NUM_EVENT_SLOTS];
-			memset((void *)event_data, 0x0, sizeof(struct kevent)
+			memset((void *)event_data, '\0', sizeof(struct kevent)
 					* NUM_EVENT_SLOTS);
-			if (kevent(kq, events_to_monitor, NUM_EVENT_SLOTS, event_data,
-			NUM_EVENT_FDS, &gtimeout) > 0) {
+			if (kevent(kq, NULL, NUM_EVENT_SLOTS, event_data,
+			NUM_EVENT_FDS, NULL)) {
 				free_dirlist();
 				list_dir();
 			}

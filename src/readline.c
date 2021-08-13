@@ -48,6 +48,7 @@ typedef char *rl_cpvfunc_t;
 #include <readline/history.h>
 #endif
 
+#include "misc.h"
 #include "aux.h"
 #include "checks.h"
 #include "keybinds.h"

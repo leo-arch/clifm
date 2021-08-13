@@ -115,8 +115,7 @@ extern unsigned int INOTIFY_MASK;
 #define NUM_EVENT_FDS 1
 extern int kq, event_fd;
 extern struct kevent events_to_monitor[];
-static unsigned int KQUEUE_FFLAGS;
-static struct timespec gtimeout;
+extern unsigned int KQUEUE_FFLAGS;
 #endif /* LINUX_INOTIFY */
 
 #define PROGRAM_NAME "CliFM"
