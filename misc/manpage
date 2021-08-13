@@ -278,7 +278,7 @@ enable icons. Suitable fonts are provided by the \fBicons-in-terminal\fR project
 Instead of an specific color, icons take the color of the corresponding file name (specified either via file type or via file extension). Useful when building custom color schemes. This option implies \fB--icons\fR.
 .TP
 .B \-\-list\-and\-quit
-list files and quit. It may be used in conjunction with \fB\-p\fR
+list files and quit. It may be used in conjunction parameter substitution. Ex: 'clifm --list-and-quit /etc'
 .TP
 .B \-\-max\-dirhist
 maximum number of visited directories to remember
