@@ -1,8 +1,10 @@
 # Coding suggestions for CliFM
 
-**NOTE**: To keep a consintent style, run `clang-format` over all source files, uncluding header files, using the `_clang-format` file (in `/src`) as the formatting model:
+**NOTE**: To keep a consintent style, run `clang-format` over all source files, including header files, using the `_clang-format` file (in `/src`) as the formatting model:
 
-	$ clang-format -i -style=file *.[hc]
+```sh
+$ clang-format -i -style=file *.[hc]
+```
 
 This command will reformat all c source and header files (`*.[hc]`) in place (`-i`) using the `_clang-format` file as model (`-style=file`).
 
@@ -46,7 +48,7 @@ function_name(argument, ... n)
 }
 ```
 
-NOTE: Writing the function name and arguments in a separate line makes it more easily searchable
+**NOTE**: Writing the function name and arguments in a separate line makes it more easily searchable
 
 Assignements:
 
