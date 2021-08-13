@@ -282,9 +282,8 @@ int
 list_dir_light(void)
 {
 	/*  clock_t start = clock(); */
-
 	/* Hide the cursor while listing */
-	printf("\x1b[?25l");
+	fputs("\x1b[?25l", stdout);
 
 	DIR *dir;
 	struct dirent *ent;
@@ -529,7 +528,6 @@ list_dir_light(void)
 					fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 
 					switch (c = xgetchar()) {
-
 					/* Advance one line at a time */
 					case 66: /* fallthrough */ /* Down arrow */
 					case 10: /* fallthrough */ /* Enter */
@@ -640,7 +638,7 @@ list_dir_light(void)
 			/* Run the pager only once all columns and rows fitting in
 			 * the screen are filled with the corresponding file names */
 			if (last_column && counter > columns_n * ((size_t)term_rows - 2)) {
-				printf("\x1b[7;97m--Mas--\x1b[0;49m");
+				fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 
 				switch (c = xgetchar()) {
 
@@ -709,7 +707,6 @@ list_dir_light(void)
 		}
 
 		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
-
 		int ind_char = 1;
 
 		if (!classify)
@@ -757,14 +754,13 @@ list_dir_light(void)
 					    file_info[i].icon, file_info[i].name);
 			} else {
 				if (no_eln)
-					printf("%s", file_info[i].name);
+					fputs(file_info[i].name, stdout);
 				else
 					printf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
 			}
 
 			if (classify) {
 				switch (file_info[i].type) {
-
 				case DT_DIR:
 					ind_char = 0;
 					fputs(" /", stdout);
@@ -794,9 +790,10 @@ list_dir_light(void)
 			}
 
 			int diff = (int)longest - cur_len;
-			register int j;
+			printf("\x1b[%dC", diff + 1);
+/*			register int j;
 			for (j = diff + 1; j--;)
-				putchar(' ');
+				putchar(' '); */
 		} else {
 			putchar('\n');
 		}
@@ -808,7 +805,7 @@ list_dir_light(void)
 END:
 	if (close_dir && closedir(dir) == -1) {
 		/* Unhide the cursor */
-		printf("\x1b[?25h");
+		fputs("\x1b[?25h", stdout);
 		return EXIT_FAILURE;
 	}
 
@@ -841,7 +838,7 @@ END:
 		_print_selfiles(term_rows);
 
 	/* Unhide the cursor */
-	printf("\x1b[?25h");
+	fputs("\x1b[?25h", stdout);
 
 	/*  clock_t end = clock();
 	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC); */
@@ -862,7 +859,7 @@ list_dir(void)
 		return list_dir_light();
 
 	/* Hide the cursor while listing */
-	printf("\x1b[?25l");
+	fputs("\x1b[?25l", stdout);
 
 	DIR *dir;
 	struct dirent *ent;
@@ -1262,7 +1259,6 @@ list_dir(void)
 					fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 
 					switch (c = xgetchar()) {
-
 					/* Advance one line at a time */
 					case 66: /* fallthrough */ /* Down arrow */
 					case 10: /* fallthrough */ /* Enter */
@@ -1373,7 +1369,6 @@ list_dir(void)
 				fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 
 				switch (c = xgetchar()) {
-
 				/* Advance one line at a time */
 				case 66: /* fallthrough */ /* Down arrow */
 				case 10: /* fallthrough */ /* Enter */
@@ -1474,7 +1469,6 @@ list_dir(void)
 			if (classify) {
 				/* Append directory indicator and files counter */
 				switch (file_info[i].type) {
-
 				case DT_DIR:
 					fputs(" /", stdout);
 					if (file_info[i].filesn > 0 && files_counter)
@@ -1515,7 +1509,6 @@ list_dir(void)
 			if (classify) {
 				/* Append file type indicator */
 				switch (file_info[i].type) {
-
 				case DT_DIR:
 					ind_char = 0;
 					fputs(" /", stdout);
@@ -1550,8 +1543,7 @@ list_dir(void)
 		}
 
 		if (!last_column) {
-
-			/* Add spaces needed to equate the longest file name length */
+			/* Pad the current file name to equate the longest file name length */
 			int cur_len = (int)file_info[i].eln_n + 1 + (icons ? 3 : 0) + (int)file_info[i].len + (ind_char ? 1 : 0);
 			if (file_info[i].dir && classify) {
 				cur_len += 2;
@@ -1560,9 +1552,11 @@ list_dir(void)
 			}
 
 			int diff = (int)longest - cur_len;
-			register int j;
+			/* Move the cursor %d columns to the right */
+			printf("\x1b[%dC", diff + 1);
+/*			register int j;
 			for (j = diff + 1; j--;)
-				putchar(' ');
+				putchar(' '); */
 		} else {
 			putchar('\n');
 		}
@@ -1578,7 +1572,7 @@ list_dir(void)
 END:
 	if (close_dir && closedir(dir) == -1) {
 		/* Unhide the cursor */
-		printf("\x1b[?25h");
+		fputs("\x1b[?25h", stdout);
 		return EXIT_FAILURE;
 	}
 
@@ -1611,7 +1605,7 @@ END:
 		_print_selfiles(term_rows);
 
 	/* Unhide the cursor */
-	printf("\x1b[?25h");
+	fputs("\x1b[?25h", stdout);
 
 	/*  clock_t end = clock();
 	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC); */
