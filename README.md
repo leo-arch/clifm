@@ -62,7 +62,7 @@ Whatever needs to be done, do it in the simplest possible way: [KISS](https://en
 
 Besides 5 MiB RAM and 500 KiB disk space, willingness to try something different is all you need.
 
-Unlike most terminal file managers out there, CliFM replaces the traditional curses interface (also known as TUI or text-menu based interface) by a simple command-line interface.<sup>1</sup> It is a file manager, but also **a shell extension**.
+Unlike most terminal file managers out there, CliFM replaces the traditional TUI interface (also known as curses or text-menu based interface) by a simple command-line interface.<sup>1</sup> It is a file manager, but also **a shell extension**.
 
 Search for files, copy, rename, and trash some of them, but, at the same time, update/upgrade your system, add some cronjob, stop a service, and run nano (or vi, or emacs, if you like).
 
