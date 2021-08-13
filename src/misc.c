@@ -851,6 +851,12 @@ set_shell(char *str)
 int
 list_mountpoints(void)
 {
+#if defined(__HAIKU__)
+	fprintf(stderr, "%s: Mountpoints: This feature is not available on Haiku\n",
+			PROGRAM_NAME);
+	return EXIT_FAILURE;
+#endif
+
 #if defined(__linux__)
 	FILE *mp_fp = fopen("/proc/mounts", "r");
 	if (!mp_fp) {
