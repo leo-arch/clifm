@@ -82,7 +82,7 @@ read_inotify(void)
 		if (!event->wd)
 			break;
 
-		if (event->mask & IN_CREATE)
+/*		if (event->mask & IN_CREATE)
 			puts("IN_CREATE");
 		if (event->mask & IN_DELETE)
 			puts("IN_DELETE");
@@ -93,7 +93,7 @@ read_inotify(void)
 		if (event->mask & IN_MOVED_FROM)
 			puts("IN_MOVED_FROM");
 		if (event->mask & IN_MOVED_TO)
-			puts("IN_MOVED_TO");
+			puts("IN_MOVED_TO"); */
 
 		if (event->mask & INOTIFY_MASK) {
 			free_dirlist();
