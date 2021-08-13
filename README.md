@@ -138,7 +138,8 @@ Features beyond common file operations, such as copy, move, remove, etc.:
 <p align="center"><img src="images/suggestions.gif"></a></p>
 
 ---
-For a detailed explanation of each of these features, follow the corresponding links or consult the [wiki](https://github.com/leo-arch/clifm/wiki).
+For a detailed explanation of each of these features, follow the corresponding links or consult the [wiki](https://github.com/leo-arch/clifm/wiki). \
+To enjoy of any of the features tagged as NEW, clone this repository and install the program via the Makefile. Follow the instructions below. 
 
 ---
 
