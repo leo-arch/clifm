@@ -56,7 +56,7 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 ## Why?
 
 Why another file manager? I can. \
-In the free world, a free community finds alternatives central to freedom, and moreover, a place to learn.
+In a free world, a free community finds alternatives central to freedom, and moreover, a place to learn.
 
 Whatever needs to be done, do it in the simplest possible way: [KISS](https://en.wikipedia.org/wiki/KISS_principle) is a desired trait of a file manager for the terminal. No GUI, no TUI, but just a shell-like, **C**ommand **L**ine **I**nterface **F**ile **M**anager.
 
