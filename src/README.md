@@ -6,7 +6,7 @@
 $ clang-format -i -style=file *.[hc]
 ```
 
-This command will reformat all c source and header files (`*.[hc]`) in place (`-i`) using the `_clang-format` file as model (`-style=file`).
+This command will reformat all C source and header files (`*.[hc]`) in place (`-i`) using the `_clang-format` file as model (`-style=file`).
 
 Once this is done, you might want to check and modify a few things from the resulting files, specially long `printf`'s and multi-line statements. Automatic formating in these cases is still not optimal.
 
@@ -14,7 +14,7 @@ Once this is done, you might want to check and modify a few things from the resu
 
 ### C source
 
-BSD compatibility: We try to keep CliFM working on BSD systems (at the very least). So, when calling a function make sure it exists on BSD systems, and, possible, make sure it is POSIX. Check its syntax as well: GNU functions are not always identical to BSD ones.
+BSD compatibility: We try to keep CliFM working on BSD systems (at the very least). So, when calling a function make sure it exists on BSD systems, and, if possible, make sure it is POSIX. Check its syntax as well: GNU functions are not always identical to BSD ones.
 
 Generally, try to stick as closely as possible to the `Linux kernel coding style`. See https://www.kernel.org/doc/html/v4.10/process/coding-style.html
 
@@ -70,7 +70,7 @@ return (char *)NULL;
 
 Prefer ASCII instead of Hex: Ex: `'\0'` instead of `0x00`
 
-Spacing: Write easily readable code. Generally, use blank lines between code blocks (this, however, depends on the code written so far). Just make it readable (the code won't be better for being tightly written)
+Spacing: Write easily readable code. Generally, use blank lines between code blocks (this, however, depends on the code written so far). Just make it readable (the code won't be better for being more tightly written)
 
 Max line legnth: `80 characters/columns`. If an statement exceeds this number, split it into multiple lines as follows:
 
@@ -103,7 +103,7 @@ CliFM source code consists of multiple C source files, being `main.c` the starti
 
 This is the basic structure of CliFM: generally speaking, it is just a shell. In between, however, lots of things happen. Leaving aside the above mentioned functions, the most important one is `listdir()`, defined in `listing.c`. Everything related to listing files happens here: reading files in the current directory (via **readdir**(3)), getting file information (via the dirent struct returned by **readdir**(3) itself and **stat**(3)), sorting files (via **qsort**(3)), and storing all these information in a global struct (`file_info`) for future access, for example, to get file properties of a given entry.
 
-**E)** Whatever happens later, is just some function or operation invoked by the user and happening on top of the steps described above: opening a file or directory (via the `open_function()` and `cd_function()` functions, in `file_operations.c` and `navigation.c` respectivelly), opening a bookmark (`bookmarks.c`), opearting on files (`file_operations.c`), switching to a different profile (`profiles.c`), trashing a file (`trash.c`), searching for a file (`search.c`), running a plugin (`actions.c`), and so on.
+**E)** Whatever happens later, is just some function or operation invoked by the user and happening on top of the steps described above: opening a file or directory (via the `open_function()` and `cd_function()` functions, in `file_operations.c` and `navigation.c` respectivelly), opening a bookmark (`bookmarks.c`), operating on files (`file_operations.c`), switching to a different profile (`profiles.c`), trashing a file (`trash.c`), searching for a file (`search.c`), running a plugin (`actions.c`), and so on.
 
 ## 3) Hacking
 **Work in progress**
