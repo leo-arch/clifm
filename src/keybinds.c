@@ -1390,9 +1390,10 @@ readline_kbinds(void)
 	rl_bind_keyseq(s_left_arrow, rl_previous_dir);
 	rl_bind_keyseq(s_right_arrow, rl_next_dir); */
 
+#ifndef __HAIKU__
 	rl_bind_keyseq("\\C-f", rl_accept_suggestion);
 	rl_bind_keyseq("\x1b[C", rl_accept_suggestion);
-	rl_bind_keyseq("\x1bOC", rl_accept_suggestion); /* Haiku terminal */
+	rl_bind_keyseq("\x1bOC", rl_accept_suggestion);
 
 	/* Bind Alt-Right and Alt-f to accept the first suggested word */
 /*	rl_bind_key(('f' | 0200), rl_accept_first_word); */ // Alt-f
@@ -1400,4 +1401,8 @@ readline_kbinds(void)
 	rl_bind_keyseq("\x1b[3C", rl_accept_first_word);
 	rl_bind_keyseq("\x1b\x1b[C", rl_accept_first_word);
 	rl_bind_keyseq("\x1b[1;3C", rl_accept_first_word);
+#else
+	rl_bind_keyseq("\x1bOC", rl_accept_suggestion);
+	rl_bind_keyseq("\\C-f", rl_accept_first_word);
+#endif
 }
