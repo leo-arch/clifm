@@ -76,11 +76,24 @@ read_inotify(void)
 		return;
 
 	for (char *ptr = inotify_buf;
-	     ptr + ((struct inotify_event *)ptr)->len < inotify_buf + i;
-	     ptr += sizeof(struct inotify_event) + event->len) {
+	ptr + ((struct inotify_event *)ptr)->len < inotify_buf + i;
+	ptr += sizeof(struct inotify_event) + event->len) {
 		event = (struct inotify_event *)ptr;
 		if (!event->wd)
 			break;
+
+		if (event->mask & IN_CREATE)
+			puts("IN_CREATE");
+		if (event->mask & IN_DELETE)
+			puts("IN_DELETE");
+		if (event->mask & IN_DELETE_SELF)
+			puts("IN_DELETE_SELF");
+		if (event->mask & IN_MOVE_SELF)
+			puts("IN_MOVE_SELF");
+		if (event->mask & IN_MOVED_FROM)
+			puts("IN_MOVED_FROM");
+		if (event->mask & IN_MOVED_TO)
+			puts("IN_MOVED_TO");
 
 		if (event->mask & INOTIFY_MASK) {
 			free_dirlist();
@@ -192,7 +205,7 @@ print_tips(int all)
 	    "Press 'Alt-l' to switch to long view mode",
 	    "Search for files using the slash command: '/*.png'",
 	    "The search function allows regular expressions: '/^c'",
-	    "Add a new bookmark by just entering 'bm ELN/FILE'",
+	    "Add a new bookmark by just entering 'bm a ELN/FILE'",
 	    "Use c, l, m, md, and r instead of cp, ln, mv, mkdir, and rm",
 	    "Access a remote file system using the 'net' command",
 	    "Manage default associated applications with the 'mime' command",
@@ -264,7 +277,7 @@ print_tips(int all)
 	    "Pin a file via the 'pin' command and then use it with the "
 	    "period keyword (,). Ex: 'pin DIR' and then 'cd ,'",
 	    "Switch between color schemes using the 'cs' command",
-	    "Use the 'j' command to quickly navigate through visited "
+	    "Try the 'j' command to quickly navigate through visited "
 	    "directories",
 	    "Switch workspaces by pressing Alt-[1-4]",
 	    "Use the 'ws' command to list available workspaces",
@@ -278,6 +291,10 @@ print_tips(int all)
 	    "Customize your prompt by adding prompt commands via the 'edit' "
 	    "command (F10)",
 	    "Need git integration? Consult the manpage",
+	    "Accept a given suggestion by pressing the Right arrow key",
+	    "Accept only the first suggested word by pressing Alt-f or Alt-Right",
+	    "Enter 'c sel' to copy selected files into the current directory",
+	    "Take a look at available plugins via the 'actions' command",
 	    NULL};
 
 	size_t tipsn = (sizeof(TIPS) / sizeof(TIPS[0])) - 1;
