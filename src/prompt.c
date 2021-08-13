@@ -67,9 +67,8 @@ prompt(void)
 	}
 
 	if (welcome_message) {
-		printf(_("%s%s > %s%s\n"
-			 "Enter '?' or press F[1-3] for instructions.\n"), wc_c,
-			 PROGRAM_NAME, PROG_DESC, df_c);
+		printf(_("%s%s > %s\n%s%s\n"), wc_c, PROGRAM_NAME, PROG_DESC,
+				df_c, _(HELP_MESSAGE));
 		welcome_message = 0;
 	}
 

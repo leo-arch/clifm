@@ -85,3 +85,9 @@
 #define WRAPPERS_USAGE "c (v, paste), l, m, md, and r commands are wrappers for cp, ln, mv, mkdir, and rm shell commands respectivelly.\n\nWithout option parameters:\nc -> cp -iRp\nl -> ln -sn\nm -> mv -i\nmd -> mkdir -p\nr (for directories) -> rm -dIr (\"rm -r\" on NetBSD and OpenBSD)\nr (for non-directories) -> rm -I (\"rm -f\" on NetBSD and OpenBSD)\nv, paste FILE -> c FILE .\n\nThe 'le' command is available to edit symbolic links: le LINK"
 #define WS_USAGE "Switch workspaces\nUsage: ws [NUM, +, -]"
 #define X_USAGE "Launch a new instance of CliFM on a new terminal window\nUsage: x, X [DIR]"
+
+#ifndef __HAIKU__
+#define HELP_MESSAGE "Enter '?' or press F1-F3 for instructions"
+#else
+#define HELP_MESSAGE "Enter '?' or press F5-F7 for instructions"
+#endif

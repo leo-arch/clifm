@@ -1134,6 +1134,7 @@ rl_pinned_dir(int count, int key)
 {
 	if (!pinned_dir) {
 		printf(_("%s: No pinned file\n"), PROGRAM_NAME);
+		rl_reset_line_state();
 		return EXIT_SUCCESS;
 	}
 
