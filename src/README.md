@@ -157,7 +157,7 @@ cc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -I/usr/local
 gcc -o clifm *.c -lreadline -lintl
 ```
 
-To produce a fully `POSIX.1-2008` compliant executable pass the `\_BE_POSIX` option to the compiler, that is, `-D_BE_POSIX`. Only two features are lost in this way:
+To produce a fully `POSIX.1-2008` compliant executable pass the `_BE_POSIX` option to the compiler, that is, `-D_BE_POSIX`. Only two features are lost in this way:
 
 1) Files birth time: We get this information via **statx**(2), which is Linux specific.
 2) Version sort: We use here **versionsort**, which is a **GNU** extension.
