@@ -40,6 +40,7 @@ install: build
 	$(INSTALL) -m 0644 misc/completions.bash $(DESTDIR)$(DATADIR)/bash-completion/completions/$(BIN)
 	$(INSTALL) -m 0644 misc/completions.zsh $(DESTDIR)$(DATADIR)/zsh/site-functions/_$(BIN)
 	$(INSTALL) -m 0644 misc/*.cfm $(DESTDIR)$(PROG_DATADIR)
+	$(INSTALL) -m 0644 misc/haiku/*.cfm $(DESTDIR)$(PROG_DATADIR)
 	$(INSTALL) -m 0644 misc/clifmrc $(DESTDIR)$(PROG_DATADIR)
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/plugins
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/functions
