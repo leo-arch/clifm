@@ -314,8 +314,8 @@ main() {
 			IMG)
 				case "$value" in
 					ueberzug) export UEBERZUG_OK=1 ;;
-#					w3m|kitty|viu|catimg|img2txt|chafa)
-					kitty|viu|catimg|img2txt|chafa)
+					w3m|kitty|viu|catimg|img2txt|chafa|pixterm)
+#					kitty|viu|catimg|img2txt|chafa)
 						export IMG_VIEWER="$value" ;;
 					none) export IMG_VIEWER="true" ;;
 					*) IMG_VIEWER="" ;;
@@ -451,6 +451,8 @@ main() {
 			export UEBERZUG_OK=1
 		elif [ "$TERM" = "xterm-kitty" ]; then
 			export IMG_VIEWER="kitty"
+		elif type pixterm > /dev/null 2>&1; then
+			export IMG_VIEWER="pixterm"
 		elif type viu > /dev/null 2>&1; then
 			export IMG_VIEWER="viu"
 		elif type catimg > /dev/null 2>&1; then

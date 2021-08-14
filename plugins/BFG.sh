@@ -64,28 +64,31 @@ preview_image() {
 				--transfer-mode=stream --align=left "$img" \
 				&& return 0
 		;;
-#		w3m)
-#			calculate_position
-#			WIDTH=200
-#			HEIGHT=200
-#			X=360
-#			Y=15
-#			W3IMG_PATH="/usr/lib/w3m/w3mimgdisplay"
-#			# Clear image
-#			printf '6;%s;%s;%s;%s\n3;' "$X" "$Y" "$WIDTH" "$HEIGHT" | "$W3IMG_PATH"
-#			printf '0;1;%s;%s;%s;%s;;;;;%s\n4;\n3;' "$X" "$Y" "$WIDTH" "$HEIGHT" \
-#			"$img" | "$W3IMG_PATH" && return 0
-#		;;
+		w3m)
+			calculate_position
+			WIDTH=200
+			HEIGHT=200
+			X=360
+			Y=15
+			W3IMG_PATH="/usr/lib/w3m/w3mimgdisplay"
+			# Clear image
+			printf '6;%s;%s;%s;%s\n3;' "$X" "$Y" "$WIDTH" "$HEIGHT" | "$W3IMG_PATH"
+			printf '0;1;%s;%s;%s;%s;;;;;%s\n4;\n3;' "$X" "$Y" "$WIDTH" "$HEIGHT" \
+			"$img" | "$W3IMG_PATH" && return 0
+		;;
 #		terminology)
 #			[ "$TERM_PROGRAM" != "terminology" ] && return 1
 #			tycat "$img" && return 0
 #		;;
+		pixterm) pixterm -s 2 -tc $((COLUMNS - 2)) "$img" && return 0 ;;
 		catimg) catimg -H$LINES "$img" && return 0 ;;
 		img2txt) img2txt -H$LINES -W$((COLUMNS - 2)) "$img" && return 0 ;;
-		chafa) chafa -s "$((COLUMNS - 2))x$LINES" "$img" && return 0 ;;
+		chafa) chafa -s "$((COLUMNS - 2))"x"$LINES" "$img" && return 0 ;;
 		viu) viu -h$LINES -w$((COLUMNS - 2)) "$img" && return 0 ;;
 		*) "$IMG_VIEWER" "$img" && return 0 ;;
 	esac
+
+	return 1
 }
 
 file_info() {
@@ -218,7 +221,6 @@ handle_mime() {
 				fi
 			fi
 
-			# shellcheck disable=SC2153
 			case "$ext" in
 				odt|ods|odp|sxw)
 					if [ "$ODT2TXT_OK" = 1 ]; then
@@ -281,9 +283,9 @@ handle_mime() {
 				fi
 			elif [ "$PYGMENTIZE_OK" = 1 ]; then
 				if [ "$COLORS" = 256 ]; then
-					pygmentize -f terminal256 "$entry" && exit 0
+					pigmentize -f terminal256 "$entry" && exit 0
 				else
-					pygmentize -f terminal "$entry" && exit 0
+					pigmentize -f terminal "$entry" && exit 0
 				fi
 			elif [ "$CAT_OK" = 1 ]; then
 				cat "$entry" && exit 0
@@ -536,7 +538,7 @@ main() {
 			elif [ "$DIR_CMD" = "exa" ]; then
 				exa -G --group-directories-first --color=always "$path" && exit 0
 			else
-				if [ "$POSIX_LS" = 0 ]; then
+				if [ "$POSIX_LS" =  0 ]; then
 					ls -p --color=always "$path" && exit 0
 				else
 					ls -p "$path" && exit 0
