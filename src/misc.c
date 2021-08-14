@@ -75,6 +75,7 @@ read_inotify(void)
 	if (i <= 0)
 		return;
 
+	int ignore_event = 0, refresh = 0;
 	for (char *ptr = inotify_buf;
 	ptr + ((struct inotify_event *)ptr)->len < inotify_buf + i;
 	ptr += sizeof(struct inotify_event) + event->len) {
@@ -82,9 +83,14 @@ read_inotify(void)
 		if (!event->wd)
 			break;
 
-/*		if (event->mask & IN_CREATE)
-			puts("IN_CREATE");
-		if (event->mask & IN_DELETE)
+		if (event->mask & IN_CREATE) {
+//			puts("IN_CREATE");
+			struct stat a;
+			if (stat(event->name, &a) != 0)
+				/* The file was created, but doesn't exist anymore */
+				ignore_event = 1;
+		}
+/*		if (event->mask & IN_DELETE)
 			puts("IN_DELETE");
 		if (event->mask & IN_DELETE_SELF)
 			puts("IN_DELETE_SELF");
@@ -93,13 +99,24 @@ read_inotify(void)
 		if (event->mask & IN_MOVED_FROM)
 			puts("IN_MOVED_FROM");
 		if (event->mask & IN_MOVED_TO)
-			puts("IN_MOVED_TO"); */
+			puts("IN_MOVED_TO");
+		if (event->mask & IN_IGNORED) {
+			puts("IN_IGNORED");
+//			printf("'%d'\n", *event->name ? *event->name : '0');
+		} */
 
-		if (event->mask & INOTIFY_MASK) {
-			free_dirlist();
-			list_dir();
-			break;
+//		if (files) {}
+
+		if (!ignore_event && (event->mask & INOTIFY_MASK)) {
+			refresh = 1;
+//			break;
 		}
+	}
+
+	if (refresh) {
+//		printf("refresh: %s\n", event->name);
+		free_dirlist();
+		list_dir();
 	}
 
 	return;
