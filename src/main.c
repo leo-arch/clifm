@@ -523,7 +523,7 @@ unsigned int INOTIFY_MASK = /*IN_ATTRIB |*/ IN_CREATE | IN_DELETE | IN_DELETE_SE
 int kq, event_fd = -1;
 struct kevent events_to_monitor[NUM_EVENT_FDS];
 unsigned int KQUEUE_FFLAGS = NOTE_DELETE | NOTE_EXTEND | NOTE_LINK
-    | NOTE_RENAME | NOTE_REVOKE | NOTE_WRITE;
+    | NOTE_RENAME /*| NOTE_REVOKE | NOTE_WRITE*/;
 #endif
 int watch = -1;
 

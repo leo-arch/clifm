@@ -84,7 +84,7 @@ read_inotify(void)
 			break;
 
 		if (event->mask & IN_CREATE) {
-//			puts("IN_CREATE");
+/*			puts("IN_CREATE"); */
 			struct stat a;
 			if (stat(event->name, &a) != 0)
 				/* The file was created, but doesn't exist anymore */
@@ -102,19 +102,13 @@ read_inotify(void)
 			puts("IN_MOVED_TO");
 		if (event->mask & IN_IGNORED) {
 			puts("IN_IGNORED");
-//			printf("'%d'\n", *event->name ? *event->name : '0');
 		} */
 
-//		if (files) {}
-
-		if (!ignore_event && (event->mask & INOTIFY_MASK)) {
+		if (!ignore_event && (event->mask & INOTIFY_MASK))
 			refresh = 1;
-//			break;
-		}
 	}
 
 	if (refresh) {
-//		printf("refresh: %s\n", event->name);
 		free_dirlist();
 		list_dir();
 	}
