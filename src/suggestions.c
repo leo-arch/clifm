@@ -197,19 +197,16 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	if (suggestion.printed)
 		clear_suggestion();
 
-	if (offset)
-		--offset;
-
-	size_t str_len = strlen(str);
 	free(suggestion_buf);
 	suggestion_buf = (char *)NULL;
 
-	/* Save cursor position in two global variables: currow and curcol */
+	/* Store cursor position in two global variables: currow and curcol */
 	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
 
 	/* Do not print suggestions bigger than what the current terminal
 	 * window size can hold */
-	if (wc_xstrlen(str + offset) > (term_cols * term_rows) - curcol)
+	size_t suggestion_len = wc_xstrlen(str + offset);
+	if (suggestion_len > (term_cols * term_rows) - curcol)
 		return;
 
 	size_t cuc = curcol; /* Current cursor column position*/
@@ -223,7 +220,6 @@ print_suggestion(const char *str, size_t offset, const char *color)
 		baej = 1;
 	}
 
-	size_t suggestion_len = wc_xstrlen(str + offset);
 	size_t cucs = cuc + suggestion_len;
 	/* slines: amount of lines we need to print the suggestion, including
 	 * the current line */
@@ -241,7 +237,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 
 	/* Store the suggestion in a buffer to be used later by the
 	 * rl_accept_suggestion function (keybinds.c) */
-	suggestion_buf = xnmalloc(str_len + 1, sizeof(char));
+	suggestion_buf = xnmalloc(strlen(str) + 1, sizeof(char));
 	strcpy(suggestion_buf, str);
 
 	/* Erase everything after the current cursor position */
@@ -262,7 +258,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	}
 
 	/* Print the suggestion */
-	printf("%s%s%s", color, str + offset, df_c);
+	printf("%s%s%s", color, str + offset - (offset ? 1 : 0), df_c);
 	fflush(stdout);
 
 	/* Update the row number, if needed */
@@ -280,8 +276,6 @@ print_suggestion(const char *str, size_t offset, const char *color)
 
 	/* Restore cursor position */
 	printf("\x1b[%d;%dH", currow, curcol);
-
-/*	printf("'%zu:%zu:%zu:%d:%d'", cuc, wc_xstrlen(str + offset), cucs, slines, currow); */
 
 	/* Store the amount of lines taken by the current command line
 	 * (plus the suggestion's length) to be able to correctly
@@ -774,9 +768,9 @@ check_int_params(const char *str, const size_t len)
 }
 
 static int
-check_eln(const char *str, const size_t len)
+check_eln(const char *str)
 {
-	if (!str || !*str || !len)
+	if (!str || !*str)
 		return 0;
 
 	int n = atoi(str);
@@ -1195,7 +1189,7 @@ rl_suggestions(char c)
 
 		case 'e': /* ELN's */
 			if (*last_word >= '1' && *last_word <= '9' && is_number(last_word)) {
-				printed = check_eln(last_word, strlen(last_word));
+				printed = check_eln(last_word);
 				if (printed) {
 					suggestion.offset = last_word_offset;
 					goto SUCCESS;
