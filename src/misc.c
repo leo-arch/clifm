@@ -90,9 +90,14 @@ read_inotify(void)
 				/* The file was created, but doesn't exist anymore */
 				ignore_event = 1;
 		}
-/*		if (event->mask & IN_DELETE)
-			puts("IN_DELETE");
-		if (event->mask & IN_DELETE_SELF)
+		if (event->mask & IN_DELETE) {
+/*			puts("IN_DELETE"); */
+			struct stat a;
+			if (stat(event->name, &a) == 0)
+				/* The file was removed, but is still there */
+				ignore_event = 1;
+		}
+/*		if (event->mask & IN_DELETE_SELF)
 			puts("IN_DELETE_SELF");
 		if (event->mask & IN_MOVE_SELF)
 			puts("IN_MOVE_SELF");
