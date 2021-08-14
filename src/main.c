@@ -524,6 +524,7 @@ struct kevent events_to_monitor[NUM_EVENT_FDS];
 unsigned int KQUEUE_FFLAGS = NOTE_DELETE | NOTE_EXTEND | NOTE_LINK
     | NOTE_RENAME | NOTE_REVOKE | NOTE_WRITE;
 #endif
+int watch = -1;
 
 			/**
 				 * #############################

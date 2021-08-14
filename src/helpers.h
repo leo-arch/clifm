@@ -117,6 +117,7 @@ extern int kq, event_fd;
 extern struct kevent events_to_monitor[];
 extern unsigned int KQUEUE_FFLAGS;
 #endif /* LINUX_INOTIFY */
+extern int watch;
 
 #define PROGRAM_NAME "CliFM"
 #define PNL "clifm" /* Program name lowercase */

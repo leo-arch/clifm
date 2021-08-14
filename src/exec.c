@@ -1630,22 +1630,28 @@ exec_cmd(char **comm)
 	}
 
 CHECK_EVENTS:
-	if (cd_lists_on_the_fly) {
+	if (!cd_lists_on_the_fly)
+		return exit_code;
+
 #ifdef LINUX_INOTIFY
+	if (watch)
 		read_inotify();
 #elif defined(BSD_KQUEUE)
-		if (event_fd >= 0) {
-			struct kevent event_data[NUM_EVENT_SLOTS];
-			memset((void *)event_data, '\0', sizeof(struct kevent)
-					* NUM_EVENT_SLOTS);
-			if (kevent(kq, NULL, NUM_EVENT_SLOTS, event_data,
-			NUM_EVENT_FDS, NULL)) {
-				free_dirlist();
-				list_dir();
-			}
+	if (watch && event_fd >= 0) {
+		struct kevent event_data[NUM_EVENT_SLOTS];
+		memset((void *)event_data, '\0', sizeof(struct kevent)
+				* NUM_EVENT_SLOTS);
+		if (kevent(kq, NULL, NUM_EVENT_SLOTS, event_data,
+		NUM_EVENT_FDS, NULL)) {
+			free_dirlist();
+			list_dir();
 		}
-#endif
 	}
+	if (event_fd >= 0) {
+		close(event_fd);
+		event_fd = -1;
+	}
+#endif
 	return exit_code;
 }
 

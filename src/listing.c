@@ -307,8 +307,10 @@ list_dir_light(void)
 	}
 
 #ifdef LINUX_INOTIFY
-	if (inotify_wd >= 0)
+	if (inotify_wd >= 0) {
 		inotify_rm_watch(inotify_fd, inotify_wd);
+		inotify_wd = -1;
+	}
 	inotify_wd = inotify_add_watch(inotify_fd, ws[cur_ws].path, INOTIFY_MASK);
 
 #elif defined(BSD_KQUEUE)
@@ -881,14 +883,20 @@ list_dir(void)
 	}
 
 #ifdef LINUX_INOTIFY
-	if (inotify_wd >= 0)
+	if (inotify_wd >= 0) {
 		inotify_rm_watch(inotify_fd, inotify_wd);
+		inotify_wd = -1;
+		watch = 0;
+	}
 	inotify_wd = inotify_add_watch(inotify_fd, ws[cur_ws].path, INOTIFY_MASK);
+	if (inotify_wd > 0)
+		watch = 1;
 
 #elif defined(BSD_KQUEUE)
 	if (event_fd >= 0) {
 		close(event_fd);
 		event_fd = -1;
+		watch = 0;
 	}
 #if defined(O_EVTONLY)
 	event_fd = open(ws[cur_ws].path, O_EVTONLY);
@@ -898,6 +906,7 @@ list_dir(void)
 	if (event_fd >= 0) {
 		EV_SET(&events_to_monitor[0], event_fd, EVFILT_VNODE,
 				EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, ws[cur_ws].path);
+		watch = 1;
 	}
 #endif
 

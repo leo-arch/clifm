@@ -69,7 +69,7 @@ read_inotify(void)
 	struct inotify_event *event;
 	char inotify_buf[EVENT_BUF_LEN];
 
-	memset((void *)inotify_buf, 0x0, EVENT_BUF_LEN);
+	memset((void *)inotify_buf, '\0', EVENT_BUF_LEN);
 	i = read(inotify_fd, inotify_buf, EVENT_BUF_LEN);
 
 	if (i <= 0)
@@ -1071,6 +1071,10 @@ free_stuff(void)
 	if (inotify_wd >= 0)
 		inotify_rm_watch(inotify_fd, inotify_wd);
 	close(inotify_fd);
+#elif defined(BSD_KQUEUE)
+	if (event_fd >= 0)
+		close(event_fd);
+	close(kq);
 #endif
 
 	free_remotes(1);
