@@ -921,8 +921,11 @@ rl_suggestions(char c)
 				/* This should be the delete key */
 				clear_suggestion();
 				goto FAIL;
-			} else if (suggestion.printed)
+			} else if (suggestion.printed) {
 				clear_suggestion();
+				free(suggestion_buf);
+				suggestion_buf = (char *)NULL;
+			}
 		}
 		/* Handle history events. If a suggestion has been printed and
 		 * a history event is triggered (usually via the Up and Down arrow
