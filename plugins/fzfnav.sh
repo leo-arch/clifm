@@ -271,6 +271,7 @@ main() {
 					tree) export DIR_CMD="tree" ;;
 					ls) export DIR_CMD="ls" ;;
 					exa) export DIR_CMD="exa" ;;
+					exa-tree) export DIR_CMD="exa-tree" ;;
 					lsd) export DIR_CMD="lsd" ;;
 					lsd-tree) export DIR_CMD="lsd-tree" ;;
 					none) export DIR_CMD="true" ;;
@@ -435,10 +436,10 @@ main() {
 	if [ -z "$DIR_CMD" ]; then
 		if type lsd > /dev/null 2>&1; then
 			export DIR_CMD="lsd-tree"
+		elif type exa > /dev/null 2>&1; then
+			export DIR_CMD="exa-tree"
 		elif type tree > /dev/null 2>&1; then
 			export DIR_CMD="tree"
-		elif type exa > /dev/null 2>&1; then
-			export DIR_CMD="exa"
 		else
 			export DIR_CMD="ls"
 		fi

@@ -916,10 +916,6 @@ rl_suggestions(char c)
 
 	/* Skip escape sequences, mostly arrow keys */
 	if (rl_readline_state & RL_STATE_MOREINPUT) {
-		/* Handle history events. If a suggestion has been printed and
-		 * a history event is triggered (usually via the Up and Down arrow
-		 * keys), the suggestion buffer won't be freed. Let's do it
-		 * here */
 		if (c == '~') {
 			if (rl_point != rl_end && suggestion.printed) {
 				/* This should be the delete key */
@@ -928,6 +924,10 @@ rl_suggestions(char c)
 			} else if (suggestion.printed)
 				clear_suggestion();
 		}
+		/* Handle history events. If a suggestion has been printed and
+		 * a history event is triggered (usually via the Up and Down arrow
+		 * keys), the suggestion buffer won't be freed. Let's do it
+		 * here */
 		else if ((c == 'A' || c == 'B') && suggestion_buf) {
 			clear_suggestion();
 			goto FAIL;

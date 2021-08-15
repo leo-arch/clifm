@@ -537,6 +537,8 @@ main() {
 				lsd -A --group-dirs=first --depth=1 --tree --color=always "$path" && exit 0
 			elif [ "$DIR_CMD" = "exa" ]; then
 				exa -G --group-directories-first --color=always "$path" && exit 0
+			elif [ "$DIR_CMD" = "exa-tree" ]; then
+				exa -G --group-directories-first --color=always --tree --level=1 "$path" && exit 0
 			else
 				if [ "$POSIX_LS" =  0 ]; then
 					ls -p --color=always "$path" && exit 0
