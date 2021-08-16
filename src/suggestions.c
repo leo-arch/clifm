@@ -919,7 +919,11 @@ rl_suggestions(char c)
 		if (c == '~') {
 			if (rl_point != rl_end && suggestion.printed) {
 				/* This should be the delete key */
+				printf("\x1b[%dC", rl_end - rl_point);
+				fflush(stdout);
 				clear_suggestion();
+				printf("\x1b[%dD", rl_end - rl_point);
+				fflush(stdout);
 				goto FAIL;
 			} else if (suggestion.printed) {
 				clear_suggestion();
@@ -957,8 +961,17 @@ rl_suggestions(char c)
 			goto FAIL; */
 
 		case BS:
-			if (suggestion.printed && suggestion_buf)
-				clear_suggestion();
+			if (suggestion.printed && suggestion_buf) {
+				if (rl_point != rl_end) {
+					printf("\x1b[%dC", rl_end - rl_point);
+					fflush(stdout);
+					clear_suggestion();
+					printf("\x1b[%dD", rl_end - rl_point);
+					fflush(stdout);
+				} else {
+					clear_suggestion();
+				}
+			}
 			goto FAIL;
 
 		case ENTER:
@@ -1041,9 +1054,7 @@ rl_suggestions(char c)
 	/* And a copy of the last entered word as well */
 	int last_word_offset = 0;
 
-	if (!last_space) {
-		last_space = (char *)NULL;
-	} else {
+	if (last_space) {
 		int j = buflen;
 		while (--j >= 0) {
 			if (rl_line_buffer[j] == ' ')
@@ -1051,11 +1062,9 @@ rl_suggestions(char c)
 		}
 		last_word_offset = j + 1;
 		buflen = strlen(last_space);
-	}
 
-	if (last_space) {
 		if (*(++last_space)) {
-			buflen = strlen(last_space);
+			buflen--;
 			last_word = (char *)xnmalloc(buflen + 2, sizeof(char));
 			if (inserted_c)
 				strcpy(last_word, last_space);
@@ -1083,10 +1092,10 @@ rl_suggestions(char c)
 		 * ######################################*/
 
 	char *lb = rl_line_buffer;
-	/* lb could be used to suggest stuff for other internal commands */
+	/* 3.a) Let's suggest specific stuff for internal commands */
 
 	switch(*lb) {
-/*	case 'c':
+	case 'c': /* Color schemes */
 		if (lb[1] && lb[1] == 's' && lb[2] && lb[2] == ' ') {
 			size_t i = 0, len = strlen(last_word);
 			for (; color_schemes[i]; i++) {
@@ -1107,9 +1116,9 @@ rl_suggestions(char c)
 				goto FAIL;
 			}
 		}
-		break; */
+		break;
 
-	case 'j': /* Suggestions for the j command */
+	case 'j': /* j command */
 		if (lb[1] && (lb[1] == ' '  || ((lb[1] == 'c'
 		|| lb[1] == 'o' || lb[1] == 'p') && lb[2] && lb[2] == ' '))) {
 			printed = check_jcmd(full_line);
@@ -1122,9 +1131,11 @@ rl_suggestions(char c)
 			}
 		}
 		break;
+
+	default: break;
 	}
 
-	/* 3.a) Check already suggested string */
+	/* 3.b) Check already suggested string */
 	if (suggestion_buf && suggestion.printed
 	&& strncmp(full_line, suggestion_buf, strlen(full_line)) == 0) {
 		printed = 1;
@@ -1132,8 +1143,8 @@ rl_suggestions(char c)
 		goto SUCCESS;
 	}
 
-	/* 3.b) Check CliFM internal parameters */
-	/* 3.b.1) Suggest the sel keyword only if not first word */
+	/* 3.c) Check CliFM internal parameters */
+	/* 3.c.1) Suggest the sel keyword only if not first word */
 	char *ret = strchr(full_line, ' ');
 	if (ret) {
 		size_t len = strlen(last_word);
@@ -1146,7 +1157,7 @@ rl_suggestions(char c)
 		}
 	}
 
-	/* 3.b.2) Check commands fixed parameters */
+	/* 3.c.2) Check commands fixed parameters */
 	if (ret) {
 		printed = check_int_params(full_line, strlen(full_line));
 		if (printed) {
@@ -1155,14 +1166,23 @@ rl_suggestions(char c)
 		}
 	}
 
-	/* 3.c) Execute the following check in the order specified by
+	/* 3.c.3) Let's suggest --help for internal commands */
+	if (*last_word == '-') {
+		printed = check_help(full_line, last_word);
+		if (printed) {
+			suggestion.offset = last_word_offset;
+			goto SUCCESS;
+		}
+	}
+
+	/* 3.d) Execute the following check in the order specified by
 	 * suggestion_strategy (the value is taken form the configuration
 	 * file) */
 	size_t st = 0;
 	for (; st < SUG_STRATS; st++) {
 		switch(suggestion_strategy[st]) {
 
-		case 'a': /* Aliases */
+		case 'a': /* 3.d.1) Aliases */
 			printed = check_aliases(last_word, strlen(last_word));
 			if (printed) {
 				suggestion.offset = last_word_offset;
@@ -1170,7 +1190,7 @@ rl_suggestions(char c)
 			}
 			break;
 
-		case 'b': /* Bookmarks */
+		case 'b': /* 3.d.2) Bookmarks */
 			if (last_space || autocd || auto_open) {
 				printed = check_bookmarks(last_word, strlen(last_word));
 				if (printed) {
@@ -1180,7 +1200,7 @@ rl_suggestions(char c)
 			}
 			break;
 
-		case 'c': /* Possible completions */
+		case 'c': /* 3.d.3) Possible completions */
 			if (last_space || autocd || auto_open) {
 				printed = check_completions(last_word, strlen(last_word), c);
 				if (printed) {
@@ -1190,7 +1210,7 @@ rl_suggestions(char c)
 			}
 			break;
 
-		case 'e': /* ELN's */
+		case 'e': /* 3.d.4) ELN's */
 			if (*last_word >= '1' && *last_word <= '9' && is_number(last_word)) {
 				printed = check_eln(last_word);
 				if (printed) {
@@ -1199,7 +1219,7 @@ rl_suggestions(char c)
 				}
 			}
 
-		case 'f': /* Check file names in CWD */
+		case 'f': /* 3.d.5) File names in CWD */
 			/* Do not check dirs and filenames if first word and
 			 * neither autocd nor auto-open are enabled */
 			if (last_space || autocd || auto_open) {
@@ -1212,8 +1232,7 @@ rl_suggestions(char c)
 			}
 			break;
 
-		case 'h':
-			/* Check commands history */
+		case 'h': /* 3.d.6) Commands history */
 			printed = check_history(full_line, strlen(full_line));
 			if (printed) {
 				suggestion.offset = 0;
@@ -1221,7 +1240,7 @@ rl_suggestions(char c)
 			}
 			break;
 
-		case 'j': /* Check the jump database */
+		case 'j': /* 3.d.7) Jump database */
 			/* We don't care about auto-open here: the jump function
 			 * deals with directories only */
 			if (last_space || autocd) {
@@ -1239,27 +1258,17 @@ rl_suggestions(char c)
 		}
 	}
 
-	/* Let's suggest --help for internal commands */
-	if (*last_word == '-') {
-		printed = check_help(full_line, last_word);
+	/* 3.e) Check commands in PATH and CliFM internals commands, but
+	 * only for the first word */
+	if (!last_space) {
+		printed = check_cmds(last_word, strlen(last_word));
 		if (printed) {
-			suggestion.offset = last_word_offset;
+			suggestion.offset = 0;
 			goto SUCCESS;
 		}
 	}
 
-	/* 3.d) Check commands in PATH and CliFM internals commands, but
-	 * only for the first word */
-	if (!last_space)
-		printed = check_cmds(last_word, strlen(last_word));
-	if (printed) {
-		suggestion.offset = 0;
-		goto SUCCESS;
-	}
-
-		/* ######################################
-		 * # 	  4) No suggestion found		#
-		 * ######################################*/
+	/* No suggestion found */
 
 /*	int k = bm_n;
 	while (--k >= 0) {
