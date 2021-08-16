@@ -122,7 +122,7 @@ Features beyond common file operations, such as copy, move, remove, etc.:
 * Disk usage.
 * [CD on quit](https://github.com/leo-arch/clifm/wiki/Advanced#cd-on-quit) and [file picker](https://github.com/leo-arch/clifm/wiki/Advanced#file-picker) functions.
 * Read and list files from [STDIN (standard input)](https://github.com/leo-arch/clifm/wiki/Advanced#standard-input).
-* [Files filter](https://github.com/leo-arch/clifm/wiki/Advanced#file-filters).
+* [Files filter](https://github.com/leo-arch/clifm/wiki/Advanced#files-filters).
 * [Up to eight workspaces](https://github.com/leo-arch/clifm/wiki/Specifics#workspaces).
 * [Fused parameters for ELN's](https://github.com/leo-arch/clifm/wiki/Introduction#fused-parameters).
 * [Advanced Copy](https://github.com/jarun/advcpmv) support (just `cp` and `mv` with a nice progress bar).
