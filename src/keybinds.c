@@ -1205,8 +1205,11 @@ readline_kbinds(void)
 	if (KBINDS_FILE) {
 		/* Help */
 		rl_bind_keyseq(find_key("show-manpage"), rl_manpage);
+		rl_bind_keyseq(find_key("show-manpage2"), rl_manpage);
 		rl_bind_keyseq(find_key("show-cmds"), rl_cmds_help);
+		rl_bind_keyseq(find_key("show-cmds2"), rl_cmds_help);
 		rl_bind_keyseq(find_key("show-kbinds"), rl_kbinds_help);
+		rl_bind_keyseq(find_key("show-kbinds2"), rl_kbinds_help);
 
 		/* Navigation */
 		/* Define multiple keybinds for different terminals:
@@ -1318,6 +1321,7 @@ readline_kbinds(void)
 		rl_bind_keyseq("\\e[2C", rl_next_dir);
 		rl_bind_keyseq("\\e[1;2C", rl_next_dir);
 		rl_bind_keyseq("\\M-e", rl_home_dir);
+		rl_bind_keyseq("\\e[1~", rl_home_dir);
 		rl_bind_keyseq("\\e[7~", rl_home_dir);
 		rl_bind_keyseq("\\e[H", rl_home_dir);
 		rl_bind_keyseq("\\M-r", rl_root_dir);

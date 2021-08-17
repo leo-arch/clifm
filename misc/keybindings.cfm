@@ -54,7 +54,8 @@ home-dir:\M-e
 home-dir2:\e[7~
 # Home key (xterm)
 home-dir3:\e[H
-home-dir4:
+# Home key (Emacs term)
+home-dir4:\e[1~
 
 # Alt-r
 root-dir:\M-r
@@ -71,11 +72,11 @@ workspace4:\M-4
 # Help
 # F1-3
 show-manpage:\eOP
-show-manpage:\e[11~
+show-manpage2:\e[11~
 show-cmds:\eOQ
-show-cmds:\e[12~
+show-cmds2:\e[12~
 show-kbinds:\eOR
-show-kbinds:\e[13~
+show-kbinds2:\e[13~
 
 create-file:\M-n
 new-instance:\C-x
