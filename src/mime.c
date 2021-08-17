@@ -196,21 +196,20 @@ get_app(const char *mime, const char *ext)
 }
 
 /* Get FILE's MIME type using the libmagic library */
-char *
+static char *
 xmagic(const char *file)
 {
 	if (!file || !*file)
 		return (char *)NULL;
 
-	magic_t cookie = magic_open(MAGIC_MIME_TYPE | MAGIC_SYMLINK | MAGIC_ERROR);
+	magic_t cookie = magic_open(MAGIC_MIME_TYPE | MAGIC_ERROR);
 	if (!cookie)
 		return (char *)NULL;
 
 	magic_load(cookie, NULL);
-	const char *mime = magic_file(cookie, file);
-	const char *err = magic_error(cookie);
 
-	if (err || !mime) {
+	const char *mime = magic_file(cookie, file);
+	if (!mime) {
 		magic_close(cookie);
 		return (char *)NULL;
 	}
@@ -221,6 +220,7 @@ xmagic(const char *file)
 	return str;
 }
 
+/*
 char *
 get_mime(char *file)
 {
@@ -254,10 +254,10 @@ get_mime(char *file)
 		return (char *)NULL;
 	}
 
-	int stdout_bk = dup(STDOUT_FILENO); /* Store original stdout */
-	int stderr_bk = dup(STDERR_FILENO); /* Store original stderr */
+	int stdout_bk = dup(STDOUT_FILENO); // Store original stdout
+	int stderr_bk = dup(STDERR_FILENO); // Store original stderr
 
-	/* Redirect stdout to the desired file */
+	// Redirect stdout to the desired file
 	if (dup2(fileno(file_fp), STDOUT_FILENO) == -1) {
 		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
 		fclose(file_fp);
@@ -265,7 +265,7 @@ get_mime(char *file)
 		return (char *)NULL;
 	}
 
-	/* Redirect stderr to /dev/null */
+	// Redirect stderr to /dev/null
 	if (dup2(fileno(file_fp_err), STDERR_FILENO) == -1) {
 		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
 		fclose(file_fp);
@@ -279,8 +279,8 @@ get_mime(char *file)
 	char *cmd[] = {"file", "--mime-type", file, NULL};
 	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 
-	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
-	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
+	dup2(stdout_bk, STDOUT_FILENO); // Restore original stdout
+	dup2(stderr_bk, STDERR_FILENO); // Restore original stderr
 	close(stdout_bk);
 	close(stderr_bk);
 
@@ -315,7 +315,7 @@ get_mime(char *file)
 	fclose(file_fp);
 	unlink(MIME_TMP_FILE);
 	return mime_type;
-}
+} */
 
 /* Open a file according to the application associated to its MIME type
  * or extension. It also accepts the 'info' and 'edit' arguments, the
