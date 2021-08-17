@@ -47,7 +47,7 @@
 #include "misc.h"
 
 /* Terminals known not to be able to handle escape sequences */
-static const char *UNSUPPORTED_TERM[] = {"dumb", "cons25", "emacs", NULL};
+static const char *UNSUPPORTED_TERM[] = {"dumb", /*"cons25",*/ "emacs", NULL};
 
 void
 check_term(void)

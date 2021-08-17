@@ -553,8 +553,8 @@ main(int argc, char *argv[])
 	check_term();
 
 	/* Set the default color */
-	fputs(DEF_DF_C, stdout);
-	fflush(stdout);
+/*	fputs(DEF_DF_C, stdout);
+	fflush(stdout); */
 
 	/* If running the program locally, that is, not from a path in PATH,
 	 * remove the leading "./" to get the correct program invocation
