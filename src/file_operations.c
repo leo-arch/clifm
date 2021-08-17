@@ -54,6 +54,8 @@ xchmod(const char *file, mode_t mode)
 	/* Set or unset S_IXUSR, S_IXGRP, and S_IXOTH */
 	(0100 & mode) ? (mode &= ~0111) : (mode |= 0111);
 
+	log_function(NULL);
+
 	if (chmod(file, mode) == -1) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
 		return EXIT_FAILURE;
@@ -68,6 +70,8 @@ dup_file(char *source, char *dest)
 {
 	if (!source || !*source)
 		return EXIT_FAILURE;
+
+	log_function(NULL);
 
 	if (strchr(source, '\\')) {
 		char *deq_str = dequote_str(source, 0);
@@ -164,6 +168,8 @@ create_file(char **cmd)
 		puts(_(NEW_USAGE));
 		return EXIT_FAILURE;
 	}
+
+	log_function(NULL);
 
 	int exit_status = EXIT_SUCCESS;
 	int file_in_cwd = 0;
@@ -416,6 +422,8 @@ edit_link(char *link)
 	if (!link || !*link)
 		return EXIT_FAILURE;
 
+	log_function(NULL);
+
 	/* Dequote the file name, if necessary */
 	if (strchr(link, '\\')) {
 		char *tmp = dequote_str(link, 0);
@@ -570,7 +578,7 @@ edit_link(char *link)
 int
 copy_function(char **comm)
 {
-	log_function(comm);
+	log_function(NULL);
 
 	if (!is_sel)
 		return run_and_refresh(comm);
@@ -670,6 +678,8 @@ remove_file(char **args)
 {
 	int cwd = 0, exit_status = EXIT_SUCCESS;
 
+	log_function(NULL);
+
 	char **rm_cmd = (char **)xnmalloc(args_n + 4, sizeof(char *));
 	int i, j = 3, dirs = 0;
 
@@ -755,6 +765,8 @@ bulk_rename(char **args)
 {
 	if (!args[1])
 		return EXIT_FAILURE;
+
+	log_function(NULL);
 
 	int exit_status = EXIT_SUCCESS;
 
@@ -1007,6 +1019,8 @@ batch_link(char **args)
 		puts(_(BL_USAGE));
 		return EXIT_SUCCESS;
 	}
+
+	log_function(NULL);
 
 	char *suffix = (char *)NULL;
 	while (!suffix) {
