@@ -195,6 +195,7 @@ get_app(const char *mime, const char *ext)
 	return (char *)NULL;
 }
 
+/* Get FILE's MIME type using the libmagic library */
 char *
 xmagic(const char *file)
 {
