@@ -549,6 +549,10 @@ main(int argc, char *argv[])
 	exit(EXIT_FAILURE);
 #endif
 
+	/* Make sure we are running on a supported terminal */
+	check_term();
+
+	/* Set the default color */
 	fputs(DEF_DF_C, stdout);
 	fflush(stdout);
 

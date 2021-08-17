@@ -37,3 +37,4 @@ int is_internal_c(const char *restrict cmd);
 int is_number(const char *restrict str);
 int is_acl(char *file);
 char *get_sudo_path(void);
+void check_term(void);

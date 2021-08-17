@@ -853,10 +853,12 @@ extern char
     **prompt_cmds,
     **sel_elements;
 
+extern const char
+	*INTERNAL_CMDS[],
+	*PARAM_STR[];
+
 extern regex_t regex_exp;
 extern size_t *ext_colors_len;
-extern const char *INTERNAL_CMDS[];
-extern const char *PARAM_STR[];
 
 /* To store all the 39 color variables I use, with 46 bytes each, I need
  * a total of 1,8Kb. It's not much but it could be less if I'd use

@@ -46,6 +46,32 @@
 #include "aux.h"
 #include "misc.h"
 
+/* Terminals known not to be able to handle escape sequences */
+static const char *UNSUPPORTED_TERM[] = {"dumb", "cons25", "emacs", NULL};
+
+void
+check_term(void)
+{
+	char *term = getenv("TERM");
+	if (!term) {
+		fprintf(stderr, _("%s: Error getting terminal type\n"), PROGRAM_NAME);
+		exit(EXIT_FAILURE);
+	}
+
+	int i;
+	for (i = 0; UNSUPPORTED_TERM[i]; i++) {
+		if (*term == *UNSUPPORTED_TERM[i]
+		&& strcmp(term, UNSUPPORTED_TERM[i]) == 0) {
+			fprintf(stderr, _("%s: '%s': Unsupported terminal. This "
+					"terminal cannot understand escape sequences\n"),
+					PROGRAM_NAME, UNSUPPORTED_TERM[i]);
+			exit(EXIT_FAILURE);
+		}
+	}
+
+	return;
+}
+
 char *
 get_sudo_path(void)
 {
