@@ -107,7 +107,7 @@ Features beyond common file operations, such as copy, move, remove, etc.:
 * Shell commands execution.
 * [Glob and regular expressions](https://github.com/leo-arch/clifm/wiki/Advanced#wildcards-and-regex) (including inverse matching).
 * [Aliases](https://github.com/leo-arch/clifm/wiki/Customization#aliases).
-* Logs.
+* [Logs](https://github.com/leo-arch/clifm/wiki/Introduction#log-clear-on-off-status).
 * [Prompt and profile commands](https://github.com/leo-arch/clifm/wiki/Customization#profile-and-prompt-commands) (run commands with each new prompt or at program startup).
 * [Bash-like prompt customization](https://github.com/leo-arch/clifm/wiki/Customization#the-prompt).
 * Sequential and conditional commands execution .
