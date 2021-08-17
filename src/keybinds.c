@@ -1231,6 +1231,7 @@ readline_kbinds(void)
 		rl_bind_keyseq(find_key("home-dir"), rl_home_dir);
 		rl_bind_keyseq(find_key("home-dir2"), rl_home_dir);
 		rl_bind_keyseq(find_key("home-dir3"), rl_home_dir);
+		rl_bind_keyseq(find_key("home-dir4"), rl_home_dir);
 		rl_bind_keyseq(find_key("root-dir"), rl_root_dir);
 		rl_bind_keyseq(find_key("root-dir2"), rl_root_dir);
 		rl_bind_keyseq(find_key("root-dir3"), rl_root_dir);
