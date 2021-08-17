@@ -31,6 +31,8 @@
 #include <time.h>
 #include <readline/readline.h>
 
+#include <magic.h>
+
 #include "archives.h"
 #include "aux.h"
 #include "checks.h"
@@ -48,7 +50,6 @@ get_app(const char *mime, const char *ext)
 		return (char *)NULL;
 
 	FILE *defs_fp = fopen(MIME_FILE, "r");
-
 	if (!defs_fp) {
 		fprintf(stderr, _("%s: %s: Error opening file\n"),
 		    PROGRAM_NAME, MIME_FILE);
@@ -81,7 +82,6 @@ get_app(const char *mime, const char *ext)
 		}
 
 		char *tmp = strchr(p, '=');
-
 		if (!tmp || !*(tmp + 1))
 			continue;
 
@@ -134,8 +134,7 @@ get_app(const char *mime, const char *ext)
 							free(file_path);
 							file_path = (char *)NULL;
 						}
-					}
-					else if (*app == '/') {
+					} else if (*app == '/') {
 						if (access(app, X_OK) == 0) {
 							file_path = app;
 						}
@@ -197,6 +196,31 @@ get_app(const char *mime, const char *ext)
 }
 
 char *
+xmagic(const char *file)
+{
+	if (!file || !*file)
+		return (char *)NULL;
+
+	magic_t cookie = magic_open(MAGIC_MIME_TYPE | MAGIC_SYMLINK | MAGIC_ERROR);
+	if (!cookie)
+		return (char *)NULL;
+
+	magic_load(cookie, NULL);
+	const char *mime = magic_file(cookie, file);
+	const char *err = magic_error(cookie);
+
+	if (err || !mime) {
+		magic_close(cookie);
+		return (char *)NULL;
+	}
+
+	char *str = (char *)xnmalloc(strlen(mime) + 1, sizeof(char));
+	strcpy(str, mime);
+	magic_close(cookie);
+	return str;
+}
+
+char *
 get_mime(char *file)
 {
 	if (!file || !*file) {
@@ -205,7 +229,6 @@ get_mime(char *file)
 	}
 
 	char *rand_ext = gen_rand_str(6);
-
 	if (!rand_ext)
 		return (char *)NULL;
 
@@ -217,7 +240,6 @@ get_mime(char *file)
 		unlink(MIME_TMP_FILE);
 
 	FILE *file_fp = fopen(MIME_TMP_FILE, "w");
-
 	if (!file_fp) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, MIME_TMP_FILE,
 		    strerror(errno));
@@ -225,7 +247,6 @@ get_mime(char *file)
 	}
 
 	FILE *file_fp_err = fopen("/dev/null", "w");
-
 	if (!file_fp_err) {
 		fprintf(stderr, "%s: /dev/null: %s\n", PROGRAM_NAME, strerror(errno));
 		fclose(file_fp);
@@ -265,39 +286,34 @@ get_mime(char *file)
 	if (ret != EXIT_SUCCESS)
 		return (char *)NULL;
 
-	char *mime_type = (char *)NULL;
+	if (access(MIME_TMP_FILE, F_OK) != 0)
+		return (char *)NULL;
 
-	if (access(MIME_TMP_FILE, F_OK) == 0) {
-		file_fp = fopen(MIME_TMP_FILE, "r");
-
-		if (file_fp) {
-			char line[255] = "";
-			if (fgets(line, (int)sizeof(line), file_fp) == NULL) {
-				fclose(file_fp);
-				unlink(MIME_TMP_FILE);
-				return (char *)NULL;
-			}
-			char *tmp = strrchr(line, ' ');
-
-			if (tmp) {
-				size_t len = strlen(tmp);
-
-				if (tmp[len - 1] == '\n')
-					tmp[len - 1] = '\0';
-
-				mime_type = savestring(tmp + 1, strlen(tmp) - 1);
-			}
-
-			fclose(file_fp);
-		}
-
+	file_fp = fopen(MIME_TMP_FILE, "r");
+	if (!file_fp) {
 		unlink(MIME_TMP_FILE);
+		return (char *)NULL;
 	}
 
-	if (mime_type)
-		return mime_type;
+	char *mime_type = (char *)NULL;
 
-	return (char *)NULL;
+	char line[255] = "";
+	if (fgets(line, (int)sizeof(line), file_fp) == NULL) {
+		fclose(file_fp);
+		unlink(MIME_TMP_FILE);
+		return (char *)NULL;
+	}
+	char *tmp = strrchr(line, ' ');
+	if (tmp) {
+		size_t len = strlen(tmp);
+		if (tmp[len - 1] == '\n')
+			tmp[len - 1] = '\0';
+		mime_type = savestring(tmp + 1, strlen(tmp) - 1);
+	}
+
+	fclose(file_fp);
+	unlink(MIME_TMP_FILE);
+	return mime_type;
 }
 
 /* Open a file according to the application associated to its MIME type
@@ -343,7 +359,6 @@ mime_open(char **args)
 
 	/* Check the existence of the 'file' command. */
 	char *file_path_tmp = (char *)NULL;
-
 	if ((file_path_tmp = get_cmd_path("file")) == NULL) {
 		fprintf(stderr, _("%s: file: Command not found\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
@@ -362,7 +377,6 @@ mime_open(char **args)
 	}
 
 	else if (*args[1] == 'i' && strcmp(args[1], "info") == 0) {
-
 		if (!args[2]) {
 			fprintf(stderr, "%s\n", _(MIME_USAGE));
 			return EXIT_FAILURE;
@@ -379,7 +393,7 @@ mime_open(char **args)
 
 		if (!file_path) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[2],
-			    (is_number(args[2]) == 1) ? "No such ELN" : strerror(errno));
+			    (is_number(args[2]) == 1) ? _("No such ELN") : strerror(errno));
 			return EXIT_FAILURE;
 		}
 
@@ -395,7 +409,6 @@ mime_open(char **args)
 	}
 
 	else {
-
 		if (strchr(args[1], '\\')) {
 			deq_file = dequote_str(args[1], 0);
 			file_path = realpath(deq_file, NULL);
@@ -434,7 +447,8 @@ mime_open(char **args)
 	}
 
 	/* Get file's mime-type */
-	char *mime = get_mime(file_path);
+//	char *mime = get_mime(file_path);
+	char *mime = xmagic(file_path);
 	if (!mime) {
 		fprintf(stderr, _("%s: Error getting mime-type\n"), PROGRAM_NAME);
 		free(file_path);
@@ -449,12 +463,10 @@ mime_open(char **args)
 	char *filename = strrchr(file_path, '/');
 	if (filename) {
 		filename++; /* Remove leading slash */
-
 		if (*filename == '.')
 			filename++; /* Skip leading dot if hidden */
 
 		char *ext_tmp = strrchr(filename, '.');
-
 		if (ext_tmp) {
 			ext_tmp++; /* Remove dot from extension */
 			ext = savestring(ext_tmp, strlen(ext_tmp));
@@ -469,18 +481,13 @@ mime_open(char **args)
 
 	/* Get default application for MIME or extension */
 	char *app = get_app(mime, ext);
-
 	if (!app) {
-
 		if (info) {
 			fputs(_("Associated application: None\n"), stderr);
 		} else {
-
 			/* If an archive/compressed file, run the archiver function */
 			if (is_compressed(file_path, 1) == 0) {
-
 				char *tmp_cmd[] = {"ad", file_path, NULL};
-
 				int exit_status = archiver(tmp_cmd, 'd');
 
 				free(file_path);
@@ -508,7 +515,6 @@ mime_open(char **args)
 	if (info) {
 		/* In case of "cmd args" print only cmd */
 		char *ret = strchr(app, ' ');
-
 		if (ret)
 			*ret = '\0';
 
@@ -534,8 +540,7 @@ mime_open(char **args)
 
 	/* Get number of arguments to check for final ampersand */
 	int args_num = 0;
-	for (args_num = 0; args[args_num]; args_num++)
-		;
+	for (args_num = 0; args[args_num]; args_num++);
 
 	/* Construct the command and run it */
 
@@ -561,7 +566,6 @@ mime_open(char **args)
 	/* Store each substring in APP into a two dimensional array (CMD) */
 	int pos = 0;
 	while (1) {
-
 		if (!*p) {
 			if (*pp)
 				cmd[pos++] = savestring(pp, strlen(pp));
@@ -607,7 +611,6 @@ mime_open(char **args)
 	while (--i >= 0)
 		free(cmd[i]);
 	free(cmd);
-
 	return ret;
 }
 
