@@ -172,7 +172,7 @@ create_file(char **cmd)
 	log_function(NULL);
 
 	int exit_status = EXIT_SUCCESS;
-	int file_in_cwd = 0;
+/*	int file_in_cwd = 0; */
 	int free_cmd = 0;
 
 	/* If no argument provided, ask the user for a filename */
@@ -238,9 +238,9 @@ create_file(char **cmd)
 		/* If at least one filename lacks a slash (or it is the last char,
 		 * in which case we have a directory in CWD), we are creating a
 		 * file in CWD, and thereby we need to update the screen */
-		char *ret = strrchr(cmd[i], '/');
+/*		char *ret = strrchr(cmd[i], '/');
 		if (!ret || !*(ret + 1))
-			file_in_cwd = 1;
+			file_in_cwd = 1; */
 	}
 
 	/* Construct commands */
