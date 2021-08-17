@@ -139,12 +139,14 @@ initialize_readline(void)
 	/* For the time being, suggestions do not work on the FreeBSD
 	 * console. The escape code to retrieve the current cursor
 	 * position doesn't seem to work */
-	if (suggestions && (flags & GUI)) {
-		rl_getc_function = my_rl_getc;
-	} else {
-		suggestions = 0;
-		_err('w', PRINT_PROMPT, _("%s: Suggestions are currently "
-			"not supported on the FreeBSD console\n"), PROGRAM_NAME);
+	if (suggestions) {
+		if (flags & GUI)) {
+			rl_getc_function = my_rl_getc;
+		} else {
+			suggestions = 0;
+			_err('w', PRINT_PROMPT, _("%s: Suggestions are currently "
+				"not supported on the FreeBSD console\n"), PROGRAM_NAME);
+		}
 	}
 #endif
 
