@@ -50,7 +50,6 @@ workspaces(char *str)
 			else
 				printf("%d: %s\n", i + 1, ws[i].path ? ws[i].path : "none");
 		}
-
 		return EXIT_SUCCESS;
 	}
 
@@ -63,7 +62,6 @@ workspaces(char *str)
 
 	if (is_number(str)) {
 		int istr = atoi(str);
-
 		if (istr <= 0 || istr > MAX_WS) {
 			fprintf(stderr, _("%s: %d: Invalid workspace number\n"),
 			    PROGRAM_NAME, istr);
@@ -106,7 +104,6 @@ workspaces(char *str)
 	}
 
 	cur_ws = tmp_ws;
-
 	int exit_status = EXIT_SUCCESS;
 
 	if (cd_lists_on_the_fly) {
@@ -115,7 +112,6 @@ workspaces(char *str)
 	}
 
 	add_to_dirhist(ws[cur_ws].path);
-
 	return exit_status;
 }
 
@@ -167,7 +163,6 @@ cd_function(char *new_path)
 	 * cd into the resolved path, and set the path variable to this
 	 * latter */
 	else {
-
 		if (strchr(new_path, '\\')) {
 			char *deq_path = dequote_str(new_path, 0);
 
@@ -178,7 +173,6 @@ cd_function(char *new_path)
 		}
 
 		char *real_path = realpath(new_path, NULL);
-
 		if (!real_path) {
 			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
 			    new_path, strerror(errno));
@@ -194,23 +188,19 @@ cd_function(char *new_path)
 
 		free(ws[cur_ws].path);
 		ws[cur_ws].path = savestring(real_path, strlen(real_path));
-
 		free(real_path);
 	}
 
 	int exit_status = EXIT_SUCCESS;
-
 	add_to_dirhist(ws[cur_ws].path);
 
 	if (cd_lists_on_the_fly) {
 		free_dirlist();
-
 		if (list_dir() != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 	}
 
 	add_to_jumpdb(ws[cur_ws].path);
-
 	return exit_status;
 }
 

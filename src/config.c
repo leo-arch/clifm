@@ -135,14 +135,14 @@ edit_function(char **comm)
 
 	/* If no application has been passed as 2nd argument */
 	else {
-		if (!(flags & FILE_CMD_OK)) {
+/*		if (!(flags & FILE_CMD_OK)) {
 			fprintf(stderr, _("%s: file: Command not found. Try "
 					"'edit APPLICATION'\n"), PROGRAM_NAME);
 			ret = EXIT_FAILURE;
-		} else {
+		} else { */
 			char *cmd[] = {"mime", CONFIG_FILE, NULL};
 			ret = mime_open(cmd);
-		}
+//		}
 	}
 
 	if (ret != EXIT_SUCCESS)

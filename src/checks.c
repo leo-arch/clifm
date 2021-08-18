@@ -362,6 +362,7 @@ digit_found(const char *str)
 
 /* Check if the 'file' command is available: it is needed by the mime
  * function */
+/*
 void
 file_cmd_check(void)
 {
@@ -376,7 +377,7 @@ file_cmd_check(void)
 
 	else
 		flags |= FILE_CMD_OK;
-}
+} */
 
 int
 check_regex(char *str)

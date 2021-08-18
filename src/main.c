@@ -734,8 +734,8 @@ main(int argc, char *argv[])
 	get_history();
 
 	/* Check if the 'file' command is available: we need it for Lira */
-	if (!opener)
-		file_cmd_check();
+/*	if (!opener)
+		file_cmd_check(); */
 
 	get_profile_names();
 	load_pinned_dir();

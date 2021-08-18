@@ -1283,8 +1283,8 @@ free_stuff(void)
 		free(prompt_cmds[i]);
 	free(prompt_cmds);
 
-	if (flags & FILE_CMD_OK)
-		free(file_cmd_path);
+/*	if (flags & FILE_CMD_OK)
+		free(file_cmd_path); */
 
 	if (msgs_n) {
 		i = (int)msgs_n;

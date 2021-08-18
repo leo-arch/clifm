@@ -198,14 +198,14 @@ remotes_edit(char *app)
 		char *cmd[] = {app, REMOTES_FILE, NULL};
 		ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
 	} else {
-		if (!(flags & FILE_CMD_OK)) {
+/*		if (!(flags & FILE_CMD_OK)) {
 			fprintf(stderr, _("%s: file: Command not found. Try "
 					"'net edit APPLICATION'\n"), PROGRAM_NAME);
 			ret = EXIT_FAILURE;
-		} else {
+		} else { */
 			char *cmd[] = {"mime", REMOTES_FILE, NULL};
 			ret = mime_open(cmd);
-		}
+//		}
 	}
 
 	if (ret != EXIT_SUCCESS)

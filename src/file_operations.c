@@ -310,18 +310,18 @@ open_function(char **cmd)
 	if (!cmd)
 		return EXIT_FAILURE;
 
-	if (strchr(cmd[1], '\\')) {
-		char *deq_path = (char *)NULL;
-		deq_path = dequote_str(cmd[1], 0);
+	if (*cmd[0] == 'o' && (!cmd[0][1] || strcmp(cmd[0], "open") == 0)) {
+		if (strchr(cmd[1], '\\')) {
+			char *deq_path = dequote_str(cmd[1], 0);
+			if (!deq_path) {
+				fprintf(stderr, _("%s: %s: Error dequoting filename\n"),
+					PROGRAM_NAME, cmd[1]);
+				return EXIT_FAILURE;
+			}
 
-		if (!deq_path) {
-			fprintf(stderr, _("%s: %s: Error dequoting filename\n"),
-			    PROGRAM_NAME, cmd[1]);
-			return EXIT_FAILURE;
+			strcpy(cmd[1], deq_path);
+			free(deq_path);
 		}
-
-		strcpy(cmd[1], deq_path);
-		free(deq_path);
 	}
 
 	char *file = cmd[1];
@@ -383,11 +383,11 @@ open_function(char **cmd)
 			if (ret != EXIT_SUCCESS)
 				return EXIT_FAILURE;
 			return EXIT_SUCCESS;
-		} else if (!(flags & FILE_CMD_OK)) {
+/*		} else if (!(flags & FILE_CMD_OK)) {
 			fprintf(stderr, _("%s: file: Command not found. Specify an "
 					"application to open the file\n%s\n"), PROGRAM_NAME,
 					_(OPEN_USAGE));
-			return EXIT_FAILURE;
+			return EXIT_FAILURE; */
 		} else {
 			int ret = mime_open(cmd);
 			/* The return value of mime_open could be zero

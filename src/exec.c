@@ -355,6 +355,7 @@ exec_cmd(char **comm)
 				 * #    AUTOCD & AUTO-OPEN (1)   #
 				 * ############################### */
 
+	char *deq_str = (char *)NULL;
 	if (autocd || auto_open) {
 		/* Expand tilde */
 		if (*comm[0] == '~') {
@@ -368,12 +369,12 @@ exec_cmd(char **comm)
 
 		/* Deescape the string (only if file name) */
 		if (strchr(comm[0], '\\')) {
-			char *deq_str = dequote_str(comm[0], 0);
-			if (deq_str) {
+			deq_str = dequote_str(comm[0], 0);
+/*			if (deq_str) {
 				if (access(deq_str, F_OK) == 0)
 					strcpy(comm[0], deq_str);
 				free(deq_str);
-			}
+			} */
 		}
 	}
 
@@ -387,10 +388,11 @@ exec_cmd(char **comm)
 			tmp[tmp_len - 1] = '\0';
 
 		for (i = files; i--;) {
-			if (*tmp != *file_info[i].name)
+			if ((deq_str ? *deq_str : *tmp) != *file_info[i].name)
 				continue;
-			if (strcmp(tmp, file_info[i].name) != 0)
+			if (strcmp(deq_str ? deq_str : tmp, file_info[i].name) != 0)
 				continue;
+			free(deq_str);
 			if (autocd && (file_info[i].type == DT_DIR || file_info[i].dir == 1)) {
 				return (exit_code = cd_function(tmp));
 			} else if (auto_open && (file_info[i].type == DT_REG

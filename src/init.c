@@ -182,7 +182,6 @@ set_start_path(void)
 	 * changes the CWD, this will be the CWD for CliFM */
 	if (!ws[cur_ws].path) {
 		char cwd[PATH_MAX] = "";
-
 		if (getcwd(cwd, sizeof(cwd)) == NULL) {}
 
 		if (!*cwd || strlen(cwd) == 0) {
@@ -211,16 +210,13 @@ set_start_path(void)
 
 		char cwd[PATH_MAX] = "";
 		if (getcwd(cwd, sizeof(cwd)) == NULL) {
-
 			_err(0, NOPRINT_PROMPT, _("%s: Fatal error! Failed "
 					"retrieving current working directory\n"), PROGRAM_NAME);
-
 			exit(EXIT_FAILURE);
 		}
 
 		if (ws[cur_ws].path)
 			free(ws[cur_ws].path);
-
 		ws[cur_ws].path = savestring(cwd, strlen(cwd));
 	}
 
@@ -294,7 +290,6 @@ check_env_filter(void)
 		return;
 
 	char *p = getenv("CLIFM_FILTER");
-
 	if (!p)
 		return;
 
@@ -345,7 +340,6 @@ get_own_pid(void)
 struct user_t
 get_user(void)
 {
-
 	struct passwd *pw;
 	struct user_t tmp_user;
 
@@ -389,7 +383,6 @@ load_jumpdb(void)
 	}
 
 	FILE *fp = fopen(JUMP_FILE, "r");
-
 	if (!fp) {
 		free(JUMP_FILE);
 		return;
@@ -420,7 +413,6 @@ load_jumpdb(void)
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
 		if (!*line || *line == '\n')
 			continue;
-
 		if (*line == '@') {
 			if (line[line_len - 1] == '\n')
 				line[line_len - 1] = '\0';
@@ -428,7 +420,6 @@ load_jumpdb(void)
 				jump_total_rank = atoi(line + 1);
 			continue;
 		}
-
 		if (*line < '0' || *line > '9')
 			continue;
 
@@ -436,7 +427,6 @@ load_jumpdb(void)
 			line[line_len - 1] = '\0';
 
 		char *tmp = strchr(line, ':');
-
 		if (!tmp)
 			continue;
 
@@ -543,7 +533,6 @@ load_bookmarks(void)
 	while ((line_len = getline(&line, &line_size, bm_fp)) > 0) {
 		if (!*line || *line == '\n' || *line == '#')
 			continue;
-
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
 
@@ -559,7 +548,6 @@ load_bookmarks(void)
 			char *p = line;
 			p++;
 			char *tmp = strchr(line, ']');
-
 			if (!tmp) {
 				bookmarks[bm_n].shortcut = (char *)NULL;
 				bookmarks[bm_n].name = (char *)NULL;
@@ -677,7 +665,6 @@ load_actions(void)
 	while ((line_len = getline(&line, &line_size, actions_fp)) > 0) {
 		if (!line || !*line || *line == '#' || *line == '\n')
 			continue;
-
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
 
@@ -810,8 +797,8 @@ load_remotes(void)
 				char *rep = replace_substr(ret, "%m", remotes[n].mountpoint);
 				if (rep) {
 					remotes[n].mount_cmd = (char *)xrealloc(
-										remotes[n].mount_cmd,
-										(strlen(rep) + 1) * sizeof(char));
+								remotes[n].mount_cmd,
+								(strlen(rep) + 1) * sizeof(char));
 					strcpy(remotes[n].mount_cmd, rep);
 					free(rep);
 					replaced = 1;
@@ -829,8 +816,8 @@ load_remotes(void)
 				char *rep = replace_substr(ret, "%m", remotes[n].mountpoint);
 				if (rep) {
 					remotes[n].unmount_cmd = (char *)xrealloc(
-									remotes[n].unmount_cmd,
-									(strlen(rep) + 1) * sizeof(char));
+							remotes[n].unmount_cmd,
+							(strlen(rep) + 1) * sizeof(char));
 					strcpy(remotes[n].unmount_cmd, rep);
 					free(rep);
 					replaced = 1;
@@ -839,7 +826,7 @@ load_remotes(void)
 
 			if (!replaced) {
 				remotes[n].mount_cmd = (char *)xrealloc(remotes[n].unmount_cmd,
-									(ret_len + 1) * sizeof(char));
+								(ret_len + 1) * sizeof(char));
 				strcpy(remotes[n].unmount_cmd, ret);
 			}
 		} else if (strncmp(line, "AutoUnmount=", 12) == 0) {
@@ -1570,12 +1557,10 @@ get_path_env(void)
 	/* Get each path in PATH */
 	size_t path_num = 0, length = 0;
 	for (i = 0; path_tmp[i]; i++) {
-
 		/* Store path in PATH in a tmp buffer */
 		char buf[PATH_MAX];
 		while (path_tmp[i] && path_tmp[i] != ':')
 			buf[length++] = path_tmp[i++];
-
 		buf[length] = '\0';
 
 		/* Make room in paths for a new path */
@@ -1874,13 +1859,10 @@ load_dirhist(void)
 	dirhist_total_index = 0;
 
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
-
 		if (!line || !*line || *line == '\n')
 			continue;
-
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
-
 		old_pwd[dirhist_total_index] = (char *)xnmalloc(line_len + 1, sizeof(char));
 		strcpy(old_pwd[dirhist_total_index++], line);
 	}

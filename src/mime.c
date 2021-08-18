@@ -29,6 +29,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
+#include <sys/stat.h>
 #include <readline/readline.h>
 
 #include <magic.h>
@@ -39,6 +40,7 @@
 #include "exec.h"
 #include "mime.h"
 #include "messages.h"
+#include "navigation.h"
 
 /* Get application associated to a given MIME file type or file extension.
  * Returns the first matching line in the MIME file or NULL if none is
@@ -359,14 +361,14 @@ mime_open(char **args)
 	}
 
 	/* Check the existence of the 'file' command. */
-	char *file_path_tmp = (char *)NULL;
+/*	char *file_path_tmp = (char *)NULL;
 	if ((file_path_tmp = get_cmd_path("file")) == NULL) {
 		fprintf(stderr, _("%s: file: Command not found\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
 	free(file_path_tmp);
-	file_path_tmp = (char *)NULL;
+	file_path_tmp = (char *)NULL; */
 
 	char *file_path = (char *)NULL,
 		 *deq_file = (char *)NULL;
@@ -410,14 +412,15 @@ mime_open(char **args)
 	}
 
 	else {
-		if (strchr(args[1], '\\')) {
+		/* Only dequote the file name if coming from the mime command */
+		if (*args[0] == 'm' && strchr(args[1], '\\')) {
 			deq_file = dequote_str(args[1], 0);
 			file_path = realpath(deq_file, NULL);
 			free(deq_file);
 			deq_file = (char *)NULL;
-		} else {
-			file_path = realpath(args[1], NULL);
 		}
+		if (!file_path)
+			file_path = realpath(args[1], NULL);
 
 		if (!file_path) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[1],
@@ -425,17 +428,22 @@ mime_open(char **args)
 			return -1;
 		}
 
+		struct stat a;
+		if (lstat(file_path, &a) == 0 && (a.st_mode & S_IFMT) == S_IFDIR) {
+			int _exit_status = cd_function(file_path);
+			free(file_path);
+			return _exit_status;
+		}
+
 		if (access(file_path, R_OK) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_path,
 			    strerror(errno));
-
 			free(file_path);
 			/* Since this function is called by open_function, and since
 			 * this latter prints an error message itself whenever the
 			 * exit code of mime_open is EXIT_FAILURE, and since we
 			 * don't want that message in this case, return -1 instead
 			 * to prevent that message from being printed */
-
 			return -1;
 		}
 
@@ -448,7 +456,7 @@ mime_open(char **args)
 	}
 
 	/* Get file's mime-type */
-//	char *mime = get_mime(file_path);
+/*	char *mime = get_mime(file_path); */
 	char *mime = xmagic(file_path);
 	if (!mime) {
 		fprintf(stderr, _("%s: Error getting mime-type\n"), PROGRAM_NAME);
@@ -684,12 +692,10 @@ mime_import(char *file)
 			if (da_found) {
 				if (*line == '[')
 					break;
-
 				if (*line == '#' || *line == '\n')
 					continue;
 
 				int index = strcntchr(line, '.');
-
 				if (index != -1)
 					line[index] = '\0';
 
