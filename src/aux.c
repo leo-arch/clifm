@@ -87,7 +87,6 @@ count_dir(const char *dir, int pop)
 		return -1;
 
 	DIR *p;
-
 	if ((p = opendir(dir)) == NULL) {
 		if (errno == ENOMEM)
 			exit(EXIT_FAILURE);
@@ -96,9 +95,9 @@ count_dir(const char *dir, int pop)
 	}
 
 	int c = 0;
-	struct dirent *ent;
+//	struct dirent *ent;
 
-	while ((ent = readdir(p))) {
+	while (readdir(p)) {
 		c++;
 		if (pop && c > 2)
 			break;

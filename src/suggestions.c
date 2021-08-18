@@ -392,6 +392,7 @@ check_completions(const char *str, size_t len, const char c)
 	char **_matches = rl_completion_matches(str, rl_completion_entry_function);
 
 	suggestion.filetype = DT_REG;
+	free_color = 0;
 
 	char *color = (char *)NULL;
 	if (suggest_filetype_color)

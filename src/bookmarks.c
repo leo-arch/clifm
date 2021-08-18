@@ -378,8 +378,6 @@ bookmark_del(char *name)
 	/* Dump into the tmp file everything except bookmarks marked for
 	 * deletion */
 
-	line_len = 0;
-	line_size = 0;
 	char *lineb = (char *)NULL;
 	while ((line_len = getline(&lineb, &line_size, bm_fp)) > 0) {
 		if (lineb[line_len - 1] == '\n')
@@ -466,9 +464,8 @@ bookmark_add(char *file)
 	char **bms = (char **)NULL;
 	size_t line_size = 0, i, bmn = 0;
 	char *line = (char *)NULL;
-	ssize_t line_len = 0;
 
-	while ((line_len = getline(&line, &line_size, bm_fp)) > 0) {
+	while (getline(&line, &line_size, bm_fp) > 0) {
 		if (!line || !*line || *line == '#' || *line == '\n')
 			continue;
 

@@ -64,9 +64,8 @@ log_function(char **comm)
 		} else {
 			size_t line_size = 0;
 			char *line_buff = (char *)NULL;
-			ssize_t line_len = 0;
 
-			while ((line_len = getline(&line_buff, &line_size, log_fp)) > 0)
+			while (getline(&line_buff, &line_size, log_fp) > 0)
 				fputs(line_buff, stdout);
 
 			free(line_buff);

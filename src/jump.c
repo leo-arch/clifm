@@ -94,7 +94,6 @@ save_jumpdb(void)
 	sprintf(JUMP_FILE, "%s/jump.cfm", CONFIG_DIR);
 
 	FILE *fp = fopen(JUMP_FILE, "w+");
-
 	if (!fp) {
 		free(JUMP_FILE);
 		return;
@@ -116,18 +115,19 @@ save_jumpdb(void)
 		/* Do not remove directories visited in the last 24 hours, no
 		 * matter what their rank is */
 		tmp_rank = rank;
-		if (hours_since_last == 0) { /* Last hour */
+		if (hours_since_last == 0) {			/* Last hour */
 			rank = JHOUR(tmp_rank);
 			jump_db[i].keep = 1;
-		}
-		else if (hours_since_last <= 24) { /* Last day */
+		} else if (hours_since_last <= 24) {	/* Last day */
 			rank = JDAY(tmp_rank);
 			jump_db[i].keep = 1;
-		}
-		else if (hours_since_last <= 168) /* Last week */
+		} else if (hours_since_last <= 168) {	/* Last week */
 			rank = JWEEK(tmp_rank);
-		else /* More than a week */
+		} else {								/* More than a week */
 			rank = JOLDER(tmp_rank);
+		}
+
+		jump_db[i].rank = rank;
 
 		/* Do not remove bookmarked, pinned, or workspaced directories */
 		/* Add bonus points */

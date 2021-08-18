@@ -61,9 +61,9 @@ get_app(const char *mime, const char *ext)
 	int found = 0, cmd_ok = 0;
 	size_t line_size = 0;
 	char *line = (char *)NULL, *app = (char *)NULL;
-	ssize_t line_len = 0;
+//	ssize_t line_len = 0;
 
-	while ((line_len = getline(&line, &line_size, defs_fp)) > 0) {
+	while (getline(&line, &line_size, defs_fp) > 0) {
 		found = mime_match = 0; /* Global variable to tell mime_open()
 		if the application is associated to the file's extension or MIME
 		type */
@@ -679,11 +679,10 @@ mime_import(char *file)
 
 		size_t line_size = 0;
 		char *line = (char *)NULL;
-		ssize_t line_len = 0;
 		/* Only store associations in the "Default Applications" section */
 		int da_found = 0;
 
-		while ((line_len = getline(&line, &line_size, sys_mime_fp)) > 0) {
+		while (getline(&line, &line_size, sys_mime_fp) > 0) {
 			if (!da_found && strncmp(line, "[Default Applications]", 22) == 0) {
 				da_found = 1;
 				continue;

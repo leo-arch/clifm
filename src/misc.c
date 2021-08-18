@@ -560,9 +560,9 @@ alias_import(char *file)
 		}
 
 		if (realpath(file_exp, rfile) == NULL) {
-			free(file_exp);
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_exp,
 					strerror(errno));
+			free(file_exp);
 			return EXIT_FAILURE;
 		}
 		free(file_exp);
@@ -601,11 +601,10 @@ alias_import(char *file)
 
 	size_t line_size = 0, i;
 	char *line = (char *)NULL;
-	ssize_t line_len = 0;
 	size_t alias_found = 0, alias_imported = 0;
 	int first = 1;
 
-	while ((line_len = getline(&line, &line_size, fp)) > 0) {
+	while (getline(&line, &line_size, fp) > 0) {
 		if (strncmp(line, "alias ", 6) == 0) {
 			alias_found++;
 
@@ -954,9 +953,8 @@ list_mountpoints(void)
 #if defined(__linux__)
 	size_t line_size = 0;
 	char *line = (char *)NULL;
-	ssize_t line_len = 0;
 
-	while ((line_len = getline(&line, &line_size, mp_fp)) > 0) {
+	while (getline(&line, &line_size, mp_fp) > 0) {
 		/* Do not list all mountpoints, but only those corresponding
 		 * to a block device (/dev) */
 		if (strncmp(line, "/dev/", 5) == 0) {

@@ -724,9 +724,8 @@ load_remotes(void)
 
 	size_t line_sz = 0;
 	char *line = (char *)NULL;
-	ssize_t line_len = 0;
 
-	while ((line_len = getline(&line, &line_sz, fp)) > 0) {
+	while (getline(&line, &line_sz, fp) > 0) {
 		if (!*line || *line == '#' || *line == '\n')
 			continue;
 		if (*line == '[') {
@@ -1808,9 +1807,8 @@ get_aliases(void)
 
 	char *line = (char *)NULL;
 	size_t line_size = 0;
-	ssize_t line_len = 0;
 
-	while ((line_len = getline(&line, &line_size, config_file_fp)) > 0) {
+	while (getline(&line, &line_size, config_file_fp) > 0) {
 		if (*line == 'a' && strncmp(line, "alias ", 6) == 0) {
 			char *alias_line = strchr(line, ' ');
 			if (alias_line) {
@@ -1909,7 +1907,7 @@ get_prompt_cmds(void)
 				prompt_cmds = (char **)xrealloc(prompt_cmds,
 				    (prompt_cmds_n + 1) * sizeof(char *));
 				prompt_cmds[prompt_cmds_n++] = savestring(
-				    line, strlen(line));
+				    line, line_len);
 			}
 		} else if (strncmp(line, "#PROMPT", 7) == 0) {
 			prompt_line_found = 1;

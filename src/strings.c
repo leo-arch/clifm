@@ -946,7 +946,7 @@ parse_input_str(char *str)
 					 * #     TRASH AS RM    #
 					 * ###################### */
 
-	if (tr_as_rm && *substr[0] == 'r' && !substr[0][1]) {
+	if (tr_as_rm && substr[0] && *substr[0] == 'r' && !substr[0][1]) {
 		substr[0] = (char *)xrealloc(substr[0], 3 * sizeof(char));
 		*substr[0] = 't';
 		substr[0][1] = 'r';

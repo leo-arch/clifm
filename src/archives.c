@@ -609,7 +609,7 @@ archiver(char **args, char mode)
 			if (!strchr(args[i], '\\')) {
 				_name = escape_str(args[i]);
 				if (!_name) {
-					fprintf(stderr, _("%s: Error escaping file name\n"), name);
+					fprintf(stderr, _("%s: Error escaping file name\n"), args[i]);
 					continue;
 				}
 			}

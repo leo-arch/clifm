@@ -1970,7 +1970,7 @@ read_config(void)
 			/* Accepts both chars and decimal integers */
 			char opt_c[NAME_MAX];
 			*opt_c = '\0';
-			ret = sscanf(line, "DividingLineChar=%s", opt_c);
+			sscanf(line, "DividingLineChar=%s", opt_c);
 			if (!*opt_c) {
 				div_line_char[0] = DEF_DIV_LINE_CHAR;
 				div_line_char[1] = '\0';

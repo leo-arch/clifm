@@ -399,8 +399,7 @@ show_sel_files(void)
 		for (i = 0; i < sel_n; i++) {
 			/* if (pager && counter > (term_rows-2)) { */
 			if (pager && counter > (size_t)term_rows) {
-				int c;
-				switch (c = xgetchar()) {
+				switch (xgetchar()) {
 				/* Advance one line at a time */
 				case 66: /* fallthrough */ /* Down arrow */
 				case 10: /* fallthrough */ /* Enter */

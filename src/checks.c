@@ -554,10 +554,8 @@ check_file_size(char *log_file, int max)
 	int i = 1;
 	size_t line_size = 0;
 	char *line_buff = (char *)NULL;
-	ssize_t line_len = 0;
 
-	while ((line_len = getline(&line_buff, &line_size, log_fp)) > 0) {
-
+	while (getline(&line_buff, &line_size, log_fp) > 0) {
 		/* Delete old entries = copy only new ones */
 		if (i++ >= logs_num - (max - 1))
 			fprintf(log_fp_tmp, "%s", line_buff);

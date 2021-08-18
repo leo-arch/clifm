@@ -463,7 +463,7 @@ list_dir_light(void)
 	if (sort)
 		qsort(file_info, n, sizeof(*file_info), entrycmp);
 
-	int c, i;
+	int i;
 	register size_t counter = 0;
 	size_t columns_n = 1;
 
@@ -529,7 +529,7 @@ list_dir_light(void)
 				if (counter > (size_t)(term_rows - 2)) {
 					fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 
-					switch (c = xgetchar()) {
+					switch (xgetchar()) {
 					/* Advance one line at a time */
 					case 66: /* fallthrough */ /* Down arrow */
 					case 10: /* fallthrough */ /* Enter */
@@ -642,7 +642,7 @@ list_dir_light(void)
 			if (last_column && counter > columns_n * ((size_t)term_rows - 2)) {
 				fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 
-				switch (c = xgetchar()) {
+				switch (xgetchar()) {
 
 				/* Advance one line at a time */
 				case 66: /* fallthrough */ /* Down arrow */
@@ -1204,7 +1204,7 @@ list_dir(void)
 		 * #    GET INFO TO PRINT COLUMNED OUTPUT   #
 		 * ########################################## */
 
-	int c, i;
+	int i;
 	register size_t counter = 0;
 	size_t columns_n = 1;
 
@@ -1272,7 +1272,7 @@ list_dir(void)
 				if (counter > (size_t)(term_rows - 2)) {
 					fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 
-					switch (c = xgetchar()) {
+					switch (xgetchar()) {
 					/* Advance one line at a time */
 					case 66: /* fallthrough */ /* Down arrow */
 					case 10: /* fallthrough */ /* Enter */
@@ -1382,7 +1382,7 @@ list_dir(void)
 			if (last_column && counter > columns_n * ((size_t)term_rows - 2)) {
 				fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 
-				switch (c = xgetchar()) {
+				switch (xgetchar()) {
 				/* Advance one line at a time */
 				case 66: /* fallthrough */ /* Down arrow */
 				case 10: /* fallthrough */ /* Enter */

@@ -211,7 +211,7 @@ my_rl_getc(FILE *stream)
 			if ((xflags = fcntl(fileno(stream), F_GETFL, 0)) < 0)
 				return (EOF);
 			if (xflags & O_NDELAY) {
-				xflags &= ~O_NDELAY;
+//				xflags &= ~O_NDELAY;
 				fcntl(fileno(stream), F_SETFL, flags);
 				continue;
 			}
@@ -226,7 +226,7 @@ my_rl_getc(FILE *stream)
 			if ((xflags = fcntl(fileno(stream), F_GETFL, 0)) < 0)
 				return (EOF);
 			if (xflags & O_NONBLOCK) {
-				xflags &= ~O_NONBLOCK;
+//				xflags &= ~O_NONBLOCK;
 				fcntl(fileno(stream), F_SETFL, flags);
 				continue;
 			}
