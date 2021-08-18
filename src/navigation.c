@@ -276,9 +276,9 @@ surf_hist(char **comm)
 		int i;
 		for (i = 0; i < dirhist_total_index; i++) {
 			if (i == dirhist_cur_index)
-				printf("%d %s%s%s\n", i + 1, dh_c, old_pwd[i], df_c);
+				printf("  %d  %s%s%s\n", i + 1, dh_c, old_pwd[i], df_c);
 			else
-				printf("%d %s\n", i + 1, old_pwd[i]);
+				printf("  %d  %s\n", i + 1, old_pwd[i]);
 		}
 
 		return EXIT_SUCCESS;
@@ -302,15 +302,11 @@ surf_hist(char **comm)
 		 * history list */
 		int atoi_comm = atoi(comm[1] + 1);
 		if (atoi_comm > 0 && atoi_comm <= dirhist_total_index) {
-
 			int ret = xchdir(old_pwd[atoi_comm - 1], SET_TITLE);
-
 			if (ret == 0) {
 				free(ws[cur_ws].path);
 				ws[cur_ws].path = (char *)xnmalloc(strlen(
-								       old_pwd[atoi_comm - 1]) +
-								       1,
-				    sizeof(char));
+						old_pwd[atoi_comm - 1]) + 1, sizeof(char));
 				strcpy(ws[cur_ws].path, old_pwd[atoi_comm - 1]);
 
 				dirhist_cur_index = atoi_comm - 1;
@@ -363,7 +359,6 @@ back_function(char **comm)
 	dirhist_cur_index--;
 
 	if (xchdir(old_pwd[dirhist_cur_index], SET_TITLE) == EXIT_SUCCESS) {
-
 		free(ws[cur_ws].path);
 		ws[cur_ws].path = savestring(old_pwd[dirhist_cur_index],
 		    strlen(old_pwd[dirhist_cur_index]));
@@ -376,11 +371,12 @@ back_function(char **comm)
 			free_dirlist();
 			exit_status = list_dir();
 		}
-	}
-
-	else
+	} else {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 		    old_pwd[dirhist_cur_index], strerror(errno));
+		if (dirhist_cur_index)
+			dirhist_cur_index--;
+	}
 
 	return exit_status;
 }
@@ -411,7 +407,6 @@ forth_function(char **comm)
 
 	int exit_status = EXIT_FAILURE;
 	if (xchdir(old_pwd[dirhist_cur_index], SET_TITLE) == EXIT_SUCCESS) {
-
 		free(ws[cur_ws].path);
 		ws[cur_ws].path = savestring(old_pwd[dirhist_cur_index],
 		    strlen(old_pwd[dirhist_cur_index]));
@@ -424,11 +419,12 @@ forth_function(char **comm)
 			free_dirlist();
 			exit_status = list_dir();
 		}
-	}
-
-	else
+	} else {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 		    old_pwd[dirhist_cur_index], strerror(errno));
+		if (dirhist_cur_index < dirhist_total_index)
+			dirhist_cur_index++;
+	}
 
 	return exit_status;
 }
