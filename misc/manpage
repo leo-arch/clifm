@@ -608,6 +608,8 @@ The \fInet\fR command manages connections to remote systems via a simple samba-l
 .sp
 \fBNote\fR: \fI%m\fR could be used as a placeholder for \fIMountpoint\fR. \fI%m\fR will be replaced by the value of \fIMountpoint\fR.
 .sp
+\fBNote 2\fR: Though originally intended to manage remote file systems, \fInet\fR can also manage \fBlocal file systems\fR. Just provide the appropriate mount and unmount commands.
+.sp
 \fBCommand syntax\fR
 .sp
 Without arguments, \fInet\fR lists the configuration for each remote available in the configuration file.
