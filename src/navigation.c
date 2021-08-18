@@ -275,12 +275,13 @@ surf_hist(char **comm)
 		/* Show the list of already visited directories */
 		int i;
 		for (i = 0; i < dirhist_total_index; i++) {
+			if (!old_pwd[i] || *old_pwd[i] == _ESC)
+				continue;
 			if (i == dirhist_cur_index)
 				printf("  %d  %s%s%s\n", i + 1, dh_c, old_pwd[i], df_c);
 			else
 				printf("  %d  %s\n", i + 1, old_pwd[i]);
 		}
-
 		return EXIT_SUCCESS;
 	}
 
@@ -288,10 +289,8 @@ surf_hist(char **comm)
 		int i = dirhist_total_index;
 		while (--i >= 0)
 			free(old_pwd[i]);
-
 		dirhist_cur_index = dirhist_total_index = 0;
 		add_to_dirhist(ws[cur_ws].path);
-
 		return EXIT_SUCCESS;
 	}
 
@@ -302,6 +301,11 @@ surf_hist(char **comm)
 		 * history list */
 		int atoi_comm = atoi(comm[1] + 1);
 		if (atoi_comm > 0 && atoi_comm <= dirhist_total_index) {
+			if (!old_pwd[atoi_comm - 1] || *old_pwd[atoi_comm - 1] == _ESC) {
+				fprintf(stderr, _("%s: Invalid history entry\n"), PROGRAM_NAME);
+				exit_status = EXIT_FAILURE;
+				return exit_status;
+			}
 			int ret = xchdir(old_pwd[atoi_comm - 1], SET_TITLE);
 			if (ret == 0) {
 				free(ws[cur_ws].path);
@@ -344,7 +348,6 @@ back_function(char **comm)
 			puts(_(BACK_USAGE));
 			return EXIT_SUCCESS;
 		}
-
 		return surf_hist(comm);
 	}
 
@@ -355,8 +358,14 @@ back_function(char **comm)
 		return EXIT_SUCCESS;
 
 	int exit_status = EXIT_FAILURE;
-
 	dirhist_cur_index--;
+
+	if (!old_pwd[dirhist_cur_index] || *old_pwd[dirhist_cur_index] == _ESC) {
+		if (dirhist_cur_index)
+			dirhist_cur_index--;
+		else
+			return exit_status;
+	}
 
 	if (xchdir(old_pwd[dirhist_cur_index], SET_TITLE) == EXIT_SUCCESS) {
 		free(ws[cur_ws].path);
@@ -364,7 +373,6 @@ back_function(char **comm)
 		    strlen(old_pwd[dirhist_cur_index]));
 
 		exit_status = EXIT_SUCCESS;
-
 		add_to_jumpdb(ws[cur_ws].path);
 
 		if (cd_lists_on_the_fly) {
@@ -374,6 +382,8 @@ back_function(char **comm)
 	} else {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 		    old_pwd[dirhist_cur_index], strerror(errno));
+		/* Invalidate this entry */
+		*old_pwd[dirhist_cur_index] = _ESC;
 		if (dirhist_cur_index)
 			dirhist_cur_index--;
 	}
@@ -393,7 +403,6 @@ forth_function(char **comm)
 			puts(_(FORTH_USAGE));
 			return EXIT_SUCCESS;
 		}
-
 		return surf_hist(comm);
 	}
 
@@ -403,16 +412,22 @@ forth_function(char **comm)
 	if (dirhist_cur_index + 1 >= dirhist_total_index)
 		return EXIT_SUCCESS;
 
+	int exit_status = EXIT_FAILURE;
 	dirhist_cur_index++;
 
-	int exit_status = EXIT_FAILURE;
+	if (!old_pwd[dirhist_cur_index] || *old_pwd[dirhist_cur_index] == _ESC) {
+		if (dirhist_cur_index < dirhist_total_index)
+			dirhist_cur_index++;
+		else
+			return exit_status;
+	}
+
 	if (xchdir(old_pwd[dirhist_cur_index], SET_TITLE) == EXIT_SUCCESS) {
 		free(ws[cur_ws].path);
 		ws[cur_ws].path = savestring(old_pwd[dirhist_cur_index],
 		    strlen(old_pwd[dirhist_cur_index]));
 
 		add_to_jumpdb(ws[cur_ws].path);
-
 		exit_status = EXIT_SUCCESS;
 
 		if (cd_lists_on_the_fly) {
@@ -422,6 +437,8 @@ forth_function(char **comm)
 	} else {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 		    old_pwd[dirhist_cur_index], strerror(errno));
+		/* Invalidate this entry */
+		*old_pwd[dirhist_cur_index] = _ESC;
 		if (dirhist_cur_index < dirhist_total_index)
 			dirhist_cur_index++;
 	}

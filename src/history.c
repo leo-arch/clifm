@@ -238,8 +238,12 @@ save_dirhist(void)
 	}
 
 	size_t i;
-	for (i = 0; old_pwd[i]; i++)
+	for (i = 0; i < dirhist_total_index; i++) {
+		/* Exclude invalid entries */
+		if (!old_pwd[i] || *old_pwd[i] == _ESC)
+			continue;
 		fprintf(fp, "%s\n", old_pwd[i]);
+	}
 
 	fclose(fp);
 	return EXIT_SUCCESS;
