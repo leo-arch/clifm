@@ -949,8 +949,12 @@ rl_suggestions(char c)
 	/* Skip control characters (0 - 31) except backspace (8), tab(9),
 	 * enter (13), and escape (27) */
 	if (c < 32 && c != BS && c != _TAB && c != ENTER && c != _ESC) {
-		printed = 1;
-		goto SUCCESS;
+		if (suggestion_buf) {
+			printed = 1;
+			goto SUCCESS;
+		} else {
+			goto FAIL;
+		}
 	}
 
 	/* Skip backspace, Enter, and TAB keys */
