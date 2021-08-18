@@ -51,4 +51,6 @@ int unpin_dir(void);
 void version_function(void);
 #ifdef LINUX_INOTIFY
 void read_inotify(void);
+#elif defined(BSD_KQUEUE)
+void read_kqueue(void);
 #endif

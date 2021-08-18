@@ -120,6 +120,52 @@ read_inotify(void)
 
 	return;
 }
+#elif defined(BSD_KQUEUE)
+void
+read_kqueue(void)
+{
+	struct kevent event_data[NUM_EVENT_SLOTS];
+	memset((void *)event_data, '\0', sizeof(struct kevent)
+			* NUM_EVENT_SLOTS);
+	int i, refresh = 0;
+
+	int count = kevent(kq, NULL, 0, event_data, 4096, &timeout);
+
+	for (i = 0; i < count; i++) {
+/*		if (event_data[i].fflags & NOTE_DELETE)
+			puts("NOTE_DELETE");
+		if (event_data[i].fflags & NOTE_WRITE)
+			puts("NOTE_WRITE");
+		if (event_data[i].fflags & NOTE_EXTEND)
+			puts("NOTE_EXTEND");
+		if (event_data[i].fflags & NOTE_ATTRIB)
+			puts("NOTE_ATTRIB");
+		if (event_data[i].fflags & NOTE_LINK)
+			puts("NOTE_LINK");
+		if (event_data[i].fflags & NOTE_RENAME)
+			puts("NOTE_RENAME");
+		if (event_data[i].fflags & NOTE_REVOKE)
+			puts("NOTE_REVOKE"); */
+
+		if (event_data[i].fflags & KQUEUE_FFLAGS) {
+			refresh = 1;
+			break;
+		}
+	}
+
+	if (refresh) {
+		free_dirlist();
+		if (list_dir() != EXIT_SUCCESS)
+			exit_code = EXIT_FAILURE;
+		return;
+	}
+
+	if (event_fd >= 0) {
+		close(event_fd);
+		event_fd = -1;
+		watch = 0;
+	}
+}
 #endif
 
 void

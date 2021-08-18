@@ -904,9 +904,14 @@ list_dir(void)
 	event_fd = open(ws[cur_ws].path, O_RDONLY);
 #endif
 	if (event_fd >= 0) {
+		/* Prepare for events */
 		EV_SET(&events_to_monitor[0], event_fd, EVFILT_VNODE,
 				EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, ws[cur_ws].path);
 		watch = 1;
+		/* Register events */
+		kevent(kq, events_to_monitor, NUM_EVENT_SLOTS,
+				NULL, 0, NULL);
+
 	}
 #endif
 

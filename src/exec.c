@@ -1637,21 +1637,10 @@ CHECK_EVENTS:
 	if (watch)
 		read_inotify();
 #elif defined(BSD_KQUEUE)
-	if (watch && event_fd >= 0) {
-		struct kevent event_data[NUM_EVENT_SLOTS];
-		memset((void *)event_data, '\0', sizeof(struct kevent)
-				* NUM_EVENT_SLOTS);
-		if (kevent(kq, NULL, NUM_EVENT_SLOTS, event_data,
-		NUM_EVENT_FDS, NULL)) {
-			free_dirlist();
-			list_dir();
-		}
-	}
-	if (event_fd >= 0) {
-		close(event_fd);
-		event_fd = -1;
-	}
+	if (watch && event_fd >= 0)
+		read_kqueue();
 #endif
+
 	return exit_code;
 }
 

@@ -111,11 +111,12 @@ void *__dso_handle;
 extern int inotify_fd, inotify_wd;
 extern unsigned int INOTIFY_MASK;
 #elif defined(BSD_KQUEUE)
-#define NUM_EVENT_SLOTS 1
-#define NUM_EVENT_FDS 1
+#define NUM_EVENT_SLOTS 10
+#define NUM_EVENT_FDS 10
 extern int kq, event_fd;
 extern struct kevent events_to_monitor[];
 extern unsigned int KQUEUE_FFLAGS;
+extern struct timespec timeout;
 #endif /* LINUX_INOTIFY */
 extern int watch;
 

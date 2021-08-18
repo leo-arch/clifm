@@ -516,14 +516,15 @@ char
 
 #ifdef LINUX_INOTIFY
 int inotify_fd, inotify_wd = -1;
-unsigned int INOTIFY_MASK = /*IN_ATTRIB |*/ IN_CREATE | IN_DELETE | IN_DELETE_SELF
-			| /*IN_MODIFY |*/ IN_MOVE_SELF | IN_MOVED_FROM | IN_MOVED_TO
-			| IN_EXCL_UNLINK ;
+unsigned int INOTIFY_MASK = /*IN_ATTRIB |*/ IN_CREATE | IN_DELETE
+	| IN_DELETE_SELF | /*IN_MODIFY |*/ IN_MOVE_SELF
+	| IN_MOVED_FROM | IN_MOVED_TO | IN_EXCL_UNLINK ;
 #elif defined(BSD_KQUEUE)
 int kq, event_fd = -1;
 struct kevent events_to_monitor[NUM_EVENT_FDS];
-unsigned int KQUEUE_FFLAGS = NOTE_DELETE | NOTE_EXTEND | NOTE_LINK
-    | NOTE_RENAME /*| NOTE_REVOKE | NOTE_WRITE*/;
+unsigned int KQUEUE_FFLAGS = NOTE_DELETE | NOTE_EXTEND| NOTE_LINK
+	| NOTE_RENAME | NOTE_REVOKE | NOTE_WRITE;
+struct timespec timeout;
 #endif
 int watch = -1;
 
