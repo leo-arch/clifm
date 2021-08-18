@@ -510,11 +510,11 @@ archiver(char **args, char mode)
 
 		/* Get archive name/type */
 
-		puts(_("Use extension to specify archive/compression type.\n"
-		       "Defaults to .tar.gz"));
+		puts(_("Use extension to specify archive/compression type "
+		       "(defaults to .tar.gz)\nExample: myarchive.xz"));
 		char *name = (char *)NULL;
 		while (!name) {
-			name = rl_no_hist(_("Filename ('q' to quit): "));
+			name = rl_no_hist(_("File name ('q' to quit): "));
 			if (!name)
 				continue;
 			if (!*name) {
@@ -526,6 +526,21 @@ archiver(char **args, char mode)
 			if (*name == 'q' && name[1] == '\0') {
 				free(name);
 				return EXIT_SUCCESS;
+			}
+
+			char *dot = strrchr(name, '.');
+			/* If no extension, add the default */
+			if (!dot) {
+				size_t name_len = strlen(name);
+				char *_tmp = (char *)xnmalloc(name_len + 1, sizeof(char));
+				strcpy(_tmp, name);
+				name = (char *)xrealloc(name, (name_len + 8) * sizeof(char));
+				sprintf(name, "%s.tar.gz", _tmp);
+				free(_tmp);
+			} else if (dot == name) { /* Dot is first char */
+				fprintf(stderr, _("Invalid file name\n"));
+				free(name);
+				name = (char *)NULL;
 			}
 		}
 
@@ -583,17 +598,26 @@ archiver(char **args, char mode)
 
 		/* Construct the command */
 		char *cmd = (char *)NULL;
-		char *ext_ok = strchr(esc_name, '.');
-		size_t cmd_len = strlen(esc_name) + 10 + ((!ext_ok) ? 8 : 0);
-		cmd = (char *)xcalloc(cmd_len, sizeof(char));
+		char *ext_ok = strrchr(esc_name, '.');
+		size_t cmd_len = strlen(esc_name) + 10 + (!ext_ok ? 8 : 0);
+		cmd = (char *)xnmalloc(cmd_len, sizeof(char));
 		/* If name has no extension, add the default */
-		sprintf(cmd, "atool -a %s%s", esc_name, (!ext_ok) ? ".tar.gz" : "");
+		sprintf(cmd, "atool -a %s%s", esc_name, !ext_ok ? ".tar.gz" : "");
 
 		for (i = 1; args[i]; i++) {
-			cmd_len += strlen(args[i]) + 1;
+			char *_name = (char *)NULL;
+			if (!strchr(args[i], '\\')) {
+				_name = escape_str(args[i]);
+				if (!_name) {
+					fprintf(stderr, _("%s: Error escaping file name\n"), name);
+					continue;
+				}
+			}
+			cmd_len += strlen(_name ? _name : args[i]) + 1;
 			cmd = (char *)xrealloc(cmd, (cmd_len + 1) * sizeof(char));
 			strcat(cmd, " ");
-			strcat(cmd, args[i]);
+			strcat(cmd, _name ? _name : args[i]);
+			free(_name);
 		}
 
 		if (launch_execle(cmd) != EXIT_SUCCESS)
