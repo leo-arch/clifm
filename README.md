@@ -103,7 +103,7 @@ Features beyond common file operations, such as copy, move, remove, etc.:
 * Unicode suppport.
 * [Tab-completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions).
 * Bash-like quoting system.
-* History function.
+* [Directory](https://github.com/leo-arch/clifm/wiki/Introduction#b-back-h-hist-clear-eln) and [commands](https://github.com/leo-arch/clifm/wiki/Introduction/#commands-history) history.
 * Shell commands execution.
 * [Glob and regular expressions](https://github.com/leo-arch/clifm/wiki/Advanced#wildcards-and-regex) (including inverse matching).
 * [Aliases](https://github.com/leo-arch/clifm/wiki/Customization#aliases).
