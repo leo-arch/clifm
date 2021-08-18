@@ -126,6 +126,8 @@ Suggestions: `suggestions.c` and `keybinds.c` (see the `rl_accept_suggestion` fu
 
 ## 4) Compilation
 
+**Note**: For the list of dependencies, see the [installation page](https://github.com/leo-arch/clifm/wiki/Introduction#installation).
+
 CliFM is compiled using `(g)cc` (`clang` and `tcc` work as well) as follows:
 
 1) _Linux_:
