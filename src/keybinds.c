@@ -435,9 +435,16 @@ rl_accept_suggestion(int count, int key)
 	case ELN_SUG: /* fallthrough */
 	case FILE_SUG: {
 		char *tmp = (char *)NULL;
-		char *ret = strchr(suggestion_buf, '\\');
-		if (!ret)
+		size_t i, isquote = 0;
+		for (i = 0; suggestion_buf[i]; i++) {
+			if (is_quote_char(suggestion_buf[i])) {
+				isquote = 1;
+				break;
+			}
+		}
+		if (isquote)
 			tmp = escape_str(suggestion_buf);
+
 		if (tmp) {
 			rl_insert_text(tmp);
 			free(tmp);

@@ -52,6 +52,7 @@ typedef char *rl_cpvfunc_t;
 #include "checks.h"
 #include "colors.h"
 #include "jump.h"
+#include "readline.h"
 
 static int free_color = 0;
 
@@ -793,7 +794,6 @@ check_eln(const char *str)
 	}
 
 	print_suggestion(!*tmp ? file_info[n].name : tmp, 1, color);
-
 	return 1;
 }
 
@@ -1136,7 +1136,7 @@ rl_suggestions(char c)
 	}
 
 	/* 3.b) Check already suggested string */
-	if (suggestion_buf && suggestion.printed
+	if (suggestion_buf && suggestion.printed && !_ISDIGIT(c)
 	&& strncmp(full_line, suggestion_buf, strlen(full_line)) == 0) {
 		printed = 1;
 		suggestion.offset = 0;
