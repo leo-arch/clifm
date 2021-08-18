@@ -307,7 +307,7 @@ history_function(char **comm)
 	if (args_n == 0) {
 		size_t i;
 		for (i = 0; i < current_hist_n; i++)
-			printf("%zu %s\n", i + 1, history[i]);
+			printf("  %zu  %s\n", i + 1, history[i]);
 		return EXIT_SUCCESS;
 	}
 
