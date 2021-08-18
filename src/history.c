@@ -656,7 +656,7 @@ record_cmd(char *input)
 		break;
 
 	case 'r': /* rf command */
-		if (*(p + 1) == 'f' && *(p + 2))
+		if (*(p + 1) == 'f' && !*(p + 2))
 			return 0;
 		break;
 
