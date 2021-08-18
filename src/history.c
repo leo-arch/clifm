@@ -628,8 +628,39 @@ record_cmd(char *input)
 	if (*p == ' ')
 		return 0;
 
-	/* Exit commands */
 	switch (*p) {
+	/* Do not record single ELN's */
+	case '0': /* fallthrough */
+	case '1': /* fallthrough */
+	case '2': /* fallthrough */
+	case '3': /* fallthrough */
+	case '4': /* fallthrough */
+	case '5': /* fallthrough */
+	case '6': /* fallthrough */
+	case '7': /* fallthrough */
+	case '8': /* fallthrough */
+	case '9':
+		if (is_number(p))
+			return 0;
+		break;
+
+	case '.': /* . */
+		if (!*(p + 1))
+			return 0;
+		break;
+
+	/* Do not record the history command itself */
+	case 'h':
+		if (*(p + 1) == 'i' && strcmp(p, "history") == 0)
+			return 0;
+		break;
+
+	case 'r': /* rf command */
+		if (*(p + 1) == 'f' && *(p + 2))
+			return 0;
+		break;
+
+	/* Do not record exit commands */
 	case 'q':
 		if (*(p + 1) == '\0' || strcmp(p, "quit") == 0)
 			return 0;
@@ -645,7 +676,7 @@ record_cmd(char *input)
 			return 0;
 		break;
 
-	case 'z':
+/*	case 'z':
 		if (*(p + 1) == 'z' && *(p + 2) == '\0')
 			return 0;
 		break;
@@ -658,7 +689,7 @@ record_cmd(char *input)
 	case 'c':
 		if (*(p + 1) == 'h' && strcmp(p, "chau") == 0)
 			return 0;
-		break;
+		break; */
 
 	default: break;
 	}
