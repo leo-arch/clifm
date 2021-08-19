@@ -114,7 +114,7 @@ Add a new prompt feature: `prompt.c`
 
 Modify/add keybindings: `keybindings.c`
 
-Icons: `icons.h` and `listing.c`
+Icons: `icons.h` and `listing.c`. Consult the [customizing icons](https://github.com/leo-arch/clifm/wiki/Advanced#customizing-icons) section
 
 TAB completion: `readline.c`
 
@@ -164,8 +164,9 @@ To produce a fully `POSIX.1-2008` compliant executable pass the `_BE_POSIX` opti
 1) Files birth time: We get this information via **statx**(2), which is Linux specific.
 2) Version sort: We use here **versionsort**, which is a **GNU** extension.
 
-To enable Nerdfont support for icons, pass the `_NERD` to the compiler. \
-To enable translations support via `gettext`, pass `_GETTEXT`.
+To enable Nerdfont support for icons, pass the `_NERD` option to the compiler (say, `clang ... -D_NERD ...`). \
+To enable translations support via `gettext`, pass `_GETTEXT`. \
+To disable icons support, pass `_NOICONS`.
 
 **NOTE**: Since compiling in this way only produces a binary file, it is necessary to manually copy the remaining files. See the `install` block of the [Makefile](https://github.com/leo-arch/clifm/blob/master/Makefile).
 
