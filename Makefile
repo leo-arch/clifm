@@ -45,7 +45,6 @@ install: build
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(DESKTOPPREFIX)
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(DATADIR)/zsh/site-functions
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(DESKTOPICONPREFIX)/scalable/apps
-	$(INSTALL) -m 0755 -d $(DESTDIR)$(LOCALEDIR)/es/LC_MESSAGES
 	$(INSTALL) -m 0644 misc/manpage $(DESTDIR)$(MANDIR)/man1/$(BIN).1
 	gzip -- $(DESTDIR)$(MANDIR)/man1/$(BIN).1
 	$(INSTALL) -m 0644 misc/completions.bash $(DESTDIR)$(DATADIR)/bash-completion/completions/$(BIN)
@@ -54,7 +53,6 @@ install: build
 	$(INSTALL) -m 0644 misc/*.cfm $(DESTDIR)$(PROG_DATADIR)
 	$(INSTALL) -m 0644 misc/clifmrc $(DESTDIR)$(PROG_DATADIR)
 	$(INSTALL) -m 0644 images/logo/$(BIN).svg $(DESTDIR)$(DESKTOPICONPREFIX)/scalable/apps
-	$(INSTALL) -m 0644 translations/spanish/$(BIN).mo $(DESTDIR)$(LOCALEDIR)/es/LC_MESSAGES/$(BIN).mo
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/plugins
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/functions
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PROG_DATADIR)/colors
