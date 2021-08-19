@@ -161,17 +161,23 @@ gcc -o clifm *.c -lreadline -lintl -lmagic
 
 ### Compiling features in/out
 
-CliFM allows you to enable or disable some features at compile time:
+CliFM allows you to enable or disable some features at compile time. Pass one or more of the following options to the compiler using the `-D` parameter. For example:
+```sh
+clang ... -D_BE_POSIX -D_NOICONS ...
+```
 
-To produce a fully `POSIX.1-2008` compliant executable pass the `_BE_POSIX` option to the compiler, that is, `-D_BE_POSIX`. Only two features are lost in this way:
+| Option | Description |
+| --- | --- |
+| `_BE_POSIX` | Build a fully `POSIX.1-2008` compliant executable<sup>1</sup> |
+| `_NERD` | Enable Nerdfont support for icons |
+| `_NO_GETTEXT` | Disable translations support via `gettext` |
+| `_NOICONS` | Disable icons support |
+| `_NO_SUGGESTIONS` | Disable suggestions support |
+| `_NOTRASH` | Disable trash support |
 
+<sup>1</sup> Only two features are lost in this way:
 1) Files birth time: We get this information via **statx**(2), which is Linux specific.
 2) Version sort: We use here **versionsort**, which is a **GNU** extension.
-
-To enable Nerdfont support for icons, pass the `_NERD` option to the compiler (say, `clang ... -D_NERD ...`). \
-To disable translations support via `gettext`, pass `_NO_GETTEXT`. \
-To disable icons support, pass `_NOICONS`. \
-To disable suggestions support, pass `_NO_SUGGESTIONS`.
 
 **NOTE**: Since compiling in this way only produces a binary file, it is necessary to manually copy the remaining files. See the `install` block of the [Makefile](https://github.com/leo-arch/clifm/blob/master/Makefile).
 
