@@ -159,6 +159,10 @@ cc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -I/usr/local
 gcc -o clifm *.c -lreadline -lintl -lmagic
 ```
 
+### Compiling features in/out
+
+CliFM allows you to enable or disable some features at compile time:
+
 To produce a fully `POSIX.1-2008` compliant executable pass the `_BE_POSIX` option to the compiler, that is, `-D_BE_POSIX`. Only two features are lost in this way:
 
 1) Files birth time: We get this information via **statx**(2), which is Linux specific.
@@ -166,7 +170,8 @@ To produce a fully `POSIX.1-2008` compliant executable pass the `_BE_POSIX` opti
 
 To enable Nerdfont support for icons, pass the `_NERD` option to the compiler (say, `clang ... -D_NERD ...`). \
 To disable translations support via `gettext`, pass `_NO_GETTEXT`. \
-To disable icons support, pass `_NOICONS`.
+To disable icons support, pass `_NOICONS`. \
+To disable suggestions support, pass `_NO_SUGGESTIONS`.
 
 **NOTE**: Since compiling in this way only produces a binary file, it is necessary to manually copy the remaining files. See the `install` block of the [Makefile](https://github.com/leo-arch/clifm/blob/master/Makefile).
 
