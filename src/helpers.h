@@ -444,7 +444,7 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 
 #define itoa xitoa /* itoa does not exist in some OS's */
 
-#ifdef _GETTEXT
+#ifndef _NO_GETTEXT
 #define _(String) gettext(String)
 #else
 #define _(String) String

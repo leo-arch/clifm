@@ -62,7 +62,7 @@ struct user_t user;
 int
 init_gettext(void)
 {
-#ifdef _GETTEXT
+#ifndef _NO_GETTEXT
 	char locale_dir[PATH_MAX];
 	snprintf(locale_dir, PATH_MAX - 1, "%s/locale", DATA_DIR
 			? DATA_DIR : "/usr/share");

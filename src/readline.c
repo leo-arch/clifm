@@ -140,7 +140,7 @@ initialize_readline(void)
 	 * console. The escape code to retrieve the current cursor
 	 * position doesn't seem to work */
 	if (suggestions) {
-		if (flags & GUI)) {
+		if (flags & GUI) {
 			rl_getc_function = my_rl_getc;
 		} else {
 			suggestions = 0;
@@ -211,7 +211,7 @@ my_rl_getc(FILE *stream)
 			if ((xflags = fcntl(fileno(stream), F_GETFL, 0)) < 0)
 				return (EOF);
 			if (xflags & O_NDELAY) {
-//				xflags &= ~O_NDELAY;
+/*				xflags &= ~O_NDELAY; */
 				fcntl(fileno(stream), F_SETFL, flags);
 				continue;
 			}
