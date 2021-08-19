@@ -55,7 +55,10 @@ typedef char *rl_cpvfunc_t;
 #include "messages.h"
 #include "strings.h"
 #include "readline.h"
+
+#ifndef _NO_SUGGESTIONS
 #include "suggestions.h"
+#endif
 
 int accept_first_word = 0;
 
@@ -248,8 +251,10 @@ keybind_exec_cmd(char *str)
 	size_t old_args = args_n;
 	args_n = 0;
 
+#ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
+#endif
 
 	int exit_status = EXIT_FAILURE;
 	char **cmd = parse_input_str(str);
@@ -320,6 +325,7 @@ rl_prepend_sudo(int count, int key)
 	if (free_s)
 		free(s);
 
+#ifndef _NO_SUGGESTIONS
 	if (suggestion.offset == 0 && suggestion_buf) {
 		int r = rl_point;
 		rl_point = rl_end;
@@ -328,6 +334,7 @@ rl_prepend_sudo(int count, int key)
 		suggestion_buf = (char *)NULL;
 		rl_point = r;
 	}
+#endif
 	return EXIT_SUCCESS;
 }
 
@@ -337,6 +344,7 @@ rl_create_file(int count, int key)
 	return run_kb_cmd("n");
 }
 
+#ifndef _NO_SUGGESTIONS
 int
 rl_accept_first_word(int count, int key)
 {
@@ -488,6 +496,7 @@ rl_accept_suggestion(int count, int key)
 
 	return EXIT_SUCCESS;
 }
+#endif /* !_NO_SUGGESTIONS */
 
 int
 rl_refresh(int count, int key)
@@ -595,8 +604,10 @@ rl_folders_first(int count, int key)
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
+#ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
+#endif
 
 	list_folders_first = list_folders_first ? 0 : 1;
 
@@ -634,10 +645,10 @@ rl_hidden(int count, int key)
 {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
-
+#ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
-
+#endif
 	show_hidden = show_hidden ? 0 : 1;
 
 	if (cd_lists_on_the_fly) {
@@ -733,7 +744,7 @@ rl_clear_line(int count, int key)
 {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
-
+#ifndef _NO_SUGGESTIONS
 	if (suggestion.nlines > term_rows) {
 		rl_on_new_line();
 		return EXIT_SUCCESS;
@@ -746,7 +757,7 @@ rl_clear_line(int count, int key)
 		free(suggestion_buf);
 		suggestion_buf = (char *)NULL;
 	}
-
+#endif
 	rl_point = 0;
 	rl_delete_text(rl_point, rl_end);
 	rl_end = 0;
@@ -758,10 +769,10 @@ rl_sort_next(int count, int key)
 {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
-
+#ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
-
+#endif
 	sort++;
 	if (sort > SORT_TYPES)
 		sort = 0;
@@ -785,10 +796,10 @@ rl_sort_previous(int count, int key)
 {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
-
+#ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
-
+#endif
 	sort--;
 	if (sort < 0)
 		sort = SORT_TYPES;
@@ -811,10 +822,10 @@ int
 rl_lock(int count, int key)
 {
 	int ret = EXIT_SUCCESS;
-
+#ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
-
+#endif
 	rl_deprep_terminal();
 
 #if __FreeBSD__ || __NetBSD__ || __OpenBSD__
@@ -923,10 +934,10 @@ rl_previous_profile(int count, int key)
 {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
-
+#ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
-
+#endif
 	int prev_prof, i, cur_prof = -1, total_profs = 0;
 	for (i = 0; profile_names[i]; i++) {
 		total_profs++;
@@ -973,10 +984,10 @@ rl_next_profile(int count, int key)
 {
 	if (kbind_busy)
 		return EXIT_SUCCESS;
-
+#ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
-
+#endif
 	int next_prof, i, cur_prof = -1, total_profs = 0;
 	for (i = 0; profile_names[i]; i++) {
 		total_profs++;
@@ -1097,9 +1108,10 @@ rl_bm_sel(int count, int key)
 int
 rl_kbinds_help(int count, int key)
 {
+#ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
-
+#endif
 	char cmd[PATH_MAX];
 	snprintf(cmd, PATH_MAX - 1,
 		"export PAGER=\"less -p ^[0-9]+\\.[[:space:]]KEYBOARD[[:space:]]SHORTCUTS\"; man %s\n",
@@ -1112,9 +1124,10 @@ rl_kbinds_help(int count, int key)
 int
 rl_cmds_help(int count, int key)
 {
+#ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
-
+#endif
 	char cmd[PATH_MAX];
 	snprintf(cmd, PATH_MAX - 1,
 		"export PAGER=\"less -p ^[0-9]+\\.[[:space:]]COMMANDS\"; man %s\n",
@@ -1127,9 +1140,10 @@ rl_cmds_help(int count, int key)
 int
 rl_manpage(int count, int key)
 {
+#ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
-
+#endif
 	char *cmd[] = {"man", PNL, NULL};
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
@@ -1402,6 +1416,7 @@ readline_kbinds(void)
 	rl_bind_keyseq(s_left_arrow, rl_previous_dir);
 	rl_bind_keyseq(s_right_arrow, rl_next_dir); */
 
+#ifndef _NO_SUGGESTIONS
 #ifndef __HAIKU__
 	rl_bind_keyseq("\\C-f", rl_accept_suggestion);
 	rl_bind_keyseq("\x1b[C", rl_accept_suggestion);
@@ -1416,5 +1431,6 @@ readline_kbinds(void)
 #else
 	rl_bind_keyseq("\x1bOC", rl_accept_suggestion);
 	rl_bind_keyseq("\\C-f", rl_accept_first_word);
-#endif
+#endif /* __HAIKU__ */
+#endif /* !_NO_SUGGESTIONS */
 }

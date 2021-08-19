@@ -54,7 +54,9 @@ typedef char *rl_cpvfunc_t;
 #include "keybinds.h"
 #include "navigation.h"
 #include "readline.h"
+#ifndef _NO_SUGGESTIONS
 #include "suggestions.h"
+#endif
 
 int
 initialize_readline(void)
@@ -131,7 +133,7 @@ initialize_readline(void)
 	 * Thanks to George Brocklehurst for pointing out this function:
 	 * https://thoughtbot.com/blog/tab-completion-in-gnu-readline*/
 	rl_char_is_quoted_p = quote_detector;
-
+#ifndef _NO_SUGGESTIONS
 #ifndef __FreeBSD__
 	if (suggestions)
 		rl_getc_function = my_rl_getc;
@@ -148,7 +150,8 @@ initialize_readline(void)
 				"not supported on the FreeBSD console\n"), PROGRAM_NAME);
 		}
 	}
-#endif
+#endif /* __FreeBSD__ */
+#endif /* _NO_SUGGESTIONS */
 
 	/* This function is executed inmediately before path completion. So,
 	 * if the string to be completed is, for instance, "user\ file" (see
@@ -170,6 +173,7 @@ initialize_readline(void)
 	return EXIT_SUCCESS;
 }
 
+#ifndef _NO_SUGGESTIONS
 /* This function is automatically called by readline() to handle input.
  * Taken from Bash 1.14.7 and modified to fit our needs. Used
  * to introduce the suggestions system */
@@ -242,6 +246,7 @@ my_rl_getc(FILE *stream)
 #endif /* !__GO32__ */
 	}
 }
+#endif /* _NO_SUGGESTIONS */
 
 /* Simply check a single chartacter (c) against the quoting characters
  * list defined in the qc global array (which takes its values from
@@ -1009,8 +1014,10 @@ filenames_gen_eln(const char *text, int state)
 	while (i < files && (name = file_info[i++].name) != NULL) {
 		if (*name == *file_info[num_text - 1].name
 		&& strcmp(name, file_info[num_text - 1].name) == 0) {
+#ifndef _NO_SUGGESTIONS
 			if (suggestion_buf)
 				clear_suggestion();
+#endif
 			return strdup(name);
 		}
 	}

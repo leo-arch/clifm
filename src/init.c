@@ -1002,8 +1002,8 @@ external_arguments(int argc, char **argv)
 #else
 		case 24: /* fallthrough */
 		case 25:
-			fprintf(stderr, "%s: This build has been compiled without icons "
-					"support\n", PROGRAM_NAME);
+			fprintf(stderr, _("%s: This build has been compiled without icons "
+					"support\n"), PROGRAM_NAME);
 			exit(EXIT_FAILURE);
 #endif
 		case 26:
@@ -1058,7 +1058,15 @@ external_arguments(int argc, char **argv)
 		} break;
 
 		case 34: xargs.printsel = 1; break;
-		case 35: xargs.suggestions = suggestions = 1; break;
+		case 35:
+#ifndef _NO_SUGGESTIONS
+			xargs.suggestions = suggestions = 1; break;
+#else
+			fprintf(stderr, _("%s: This build has been compiled without "
+					"suggestions support\n"), PROGRAM_NAME);
+			exit(EXIT_FAILURE);
+#endif
+
 		case 36: xargs.autojump = autojump = 0; break;
 
 		case 'a':
