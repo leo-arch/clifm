@@ -984,9 +984,13 @@ create_def_cscheme(void)
 
 		    "# Same as FiletypeColors, but for file extensions. The format is always\n\
 # *.EXT=COLOR\n"
+#ifndef _NOICONS
 		    "ExtColors=\"%s\"\n\n"
 
 		    "DirIconsColor=\"00;33\"\n",
+#else
+		    "ExtColors=\"%s\"\n\n",
+#endif
 		PROGRAM_NAME,
 	    DEF_FILE_COLORS,
 	    DEF_IFACE_COLORS,
@@ -2261,8 +2265,10 @@ reload_config(void)
 		only_dirs = xargs.only_dirs;
 	if (xargs.tips != UNSET)
 		tips = xargs.tips;
+#ifndef _NOICONS
 	if (xargs.icons != UNSET)
 		icons = xargs.icons;
+#endif
 	if (xargs.autojump != UNSET)
 		autojump = xargs.autojump;
 	if (autojump)

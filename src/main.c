@@ -118,7 +118,9 @@ short
     files_counter = UNSET,
 	filter_rev = 0,
     home_ok = 1,
+#ifndef _NOICON
     icons = 0,
+#endif
     internal_cmd = 0,
     is_sel = 0,
     kb_shortcut = 0,
@@ -512,7 +514,9 @@ char
     ti_c[MAX_COLOR + 2], /* Trash indicator color */
     tx_c[MAX_COLOR + 2], /* Text color */
 
+#ifndef _NOICON
     dir_ico_c[MAX_COLOR]; /* Directories icon color */
+#endif
 
 #ifdef LINUX_INOTIFY
 int inotify_fd, inotify_wd = -1;

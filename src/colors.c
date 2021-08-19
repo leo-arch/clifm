@@ -325,7 +325,9 @@ set_colors(const char *colorscheme, int env)
 		 *extcolors = (char *)NULL,
 	     *ifacecolors = (char *)NULL;
 
+#ifndef _NOICONS
 	*dir_ico_c = '\0';
+#endif
 
 	/* Set a pointer to the current color scheme */
 	if (colorscheme && *colorscheme && color_schemes) {
@@ -403,8 +405,14 @@ set_colors(const char *colorscheme, int env)
 			char *line = (char *)NULL;
 			ssize_t line_len = 0;
 			size_t line_size = 0;
-			int file_type_found = 0, ext_type_found = 0,
-			    iface_found = 0, dir_icon_found = 0;
+			int file_type_found = 0,
+				ext_type_found = 0,
+#ifndef _NOICONS
+			    iface_found = 0,
+			    dir_icon_found = 0;
+#else
+			    iface_found = 0;
+#endif
 
 			while ((line_len = getline(&line, &line_size,
 				    fp_colors)) > 0) {
@@ -413,7 +421,6 @@ set_colors(const char *colorscheme, int env)
 				&& strncmp(line, "InterfaceColors=", 16) == 0) {
 					iface_found = 1;
 					char *opt_str = strchr(line, '=');
-
 					if (!opt_str)
 						continue;
 
@@ -460,20 +467,18 @@ set_colors(const char *colorscheme, int env)
 					free(color_line);
 				}
 
+#ifndef _NOICONS
 				/* Dir icons Color */
 				if (*line == 'D' && strncmp(line, "DirIconsColor=", 14) == 0) {
 					dir_icon_found = 1;
 					char *opt_str = strchr(line, '=');
-
 					if (!opt_str)
 						continue;
-
 					if (!*(++opt_str))
 						continue;
 
 					if (*opt_str == '\'' || *opt_str == '"')
 						opt_str++;
-
 					if (!*opt_str)
 						continue;
 
@@ -493,9 +498,14 @@ set_colors(const char *colorscheme, int env)
 
 					sprintf(dir_ico_c, "\x1b[%sm", opt_str);
 				}
+#endif
 
 				if (file_type_found && ext_type_found
+#ifndef _NOICONS
 				&& iface_found && dir_icon_found)
+#else
+				&& iface_found)
+#endif
 					break;
 			}
 
@@ -1275,9 +1285,10 @@ set_colors(const char *colorscheme, int env)
 		strcpy(uf_c, DEF_UF_C);
 	if (!*mh_c)
 		strcpy(mh_c, DEF_MH_C);
-
+#ifndef _NOICONS
 	if (!*dir_ico_c)
 		strcpy(dir_ico_c, DEF_DIR_ICO_C);
+#endif
 
 	return EXIT_SUCCESS;
 }

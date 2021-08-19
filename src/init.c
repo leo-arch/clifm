@@ -993,12 +993,19 @@ external_arguments(int argc, char **argv)
 		case 21: usr_cscheme = savestring(optarg, strlen(optarg)); break;
 		case 22: xargs.cd_on_quit = cd_on_quit = 1; break;
 		case 23: xargs.no_dirjump = 1; break;
+#ifndef _NOICONS
 		case 24: xargs.icons = icons = 1; break;
 		case 25:
 			xargs.icons = icons = 1;
 			xargs.icons_use_file_color = 1;
 			break;
-
+#else
+		case 24: /* fallthrough */
+		case 25:
+			fprintf(stderr, "%s: This build has been compiled without icons "
+					"support\n", PROGRAM_NAME);
+			exit(EXIT_FAILURE);
+#endif
 		case 26:
 			xargs.no_columns = 1;
 			columned = 0;
@@ -1168,7 +1175,7 @@ external_arguments(int argc, char **argv)
 			xargs.sort = sort;
 		} break;
 
-		case '?': /* If some unrecognized option is found... */
+		case '?': /* If some unrecognized option was found... */
 
 			/* Options that requires an argument */
 			/* Short options */
@@ -1205,7 +1212,8 @@ external_arguments(int argc, char **argv)
 
 			exit(EXIT_FAILURE);
 
-		default: break;
+		default:
+			break;
 		}
 	}
 
@@ -1416,8 +1424,10 @@ unset_xargs(void)
 	xargs.ffirst = UNSET;
 	xargs.files_counter = UNSET;
 	xargs.hidden = UNSET;
+#ifndef _NOICONS
 	xargs.icons = UNSET;
 	xargs.icons_use_file_color = UNSET;
+#endif
 	xargs.light = UNSET;
 	xargs.list_and_quit = UNSET;
 	xargs.logs = UNSET;

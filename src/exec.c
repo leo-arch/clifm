@@ -837,8 +837,8 @@ exec_cmd(char **comm)
 		}
 		return exit_code;
 	}
-
 	else if (*comm[0] == 'i' && strcmp(comm[0], "icons") == 0) {
+#ifndef _NOICONS
 		if (!comm[1] || (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)) {
 			puts(_(ICONS_USAGE));
 		} else if (*comm[1] == 'o' && comm[1][1] == 'n' && !comm[1][2]) {
@@ -860,6 +860,11 @@ exec_cmd(char **comm)
 		}
 
 		return EXIT_SUCCESS;
+#else
+		fprintf(stderr, "%s: This build has been compiled without icons "
+				"support\n", PROGRAM_NAME);
+		return EXIT_SUCCESS;
+#endif /* _NOICONS */
 	}
 
 	else if (*comm[0] == 'c' && ((comm[0][1] == 's' && !comm[0][2])

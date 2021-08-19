@@ -551,8 +551,10 @@ extern struct bookmarks_t *bookmarks;
 struct fileinfo {
 	char *color;
 	char *ext_color;
+#ifndef _NOICON
 	char *icon;
 	char *icon_color;
+#endif
 	char *name;
 	int dir;
 	int eln_n;
@@ -600,7 +602,9 @@ struct param {
 	int ffirst;
 	int files_counter;
 	int hidden;
+#ifndef _NOICON
 	int icons;
+#endif
 	int icons_use_file_color;
 	int list_and_quit;
 	int light;
@@ -713,7 +717,9 @@ extern short
     files_counter,
     filter_rev,
     home_ok,
+#ifndef _NOICON
     icons,
+#endif
     internal_cmd,
     is_sel,
     kb_shortcut,
@@ -923,4 +929,6 @@ extern char
     si_c[MAX_COLOR + 2], /* stealth indicator color */
     wm_c[MAX_COLOR + 2], /* Warning msg color */
 
+#ifndef _NOICON
     dir_ico_c[MAX_COLOR]; /* Directories icon color */
+#endif

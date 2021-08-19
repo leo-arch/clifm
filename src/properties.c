@@ -52,9 +52,8 @@ get_properties(char *filename, int dsize)
 	if (filename[len - 1] == '/')
 		filename[len - 1] = '\0';
 
-	struct stat file_attrib;
-
 	/* Check file existence */
+	struct stat file_attrib;
 	if (lstat(filename, &file_attrib) == -1) {
 		fprintf(stderr, "%s: pr: '%s': %s\n", PROGRAM_NAME, filename,
 		    strerror(errno));
@@ -70,9 +69,7 @@ get_properties(char *filename, int dsize)
 
 	switch (file_attrib.st_mode & S_IFMT) {
 	case S_IFREG: {
-
 		char *ext = (char *)NULL;
-
 		file_type = '-';
 		if (light_mode)
 			color = fi_c;
@@ -85,7 +82,6 @@ get_properties(char *filename, int dsize)
 		else {
 #ifdef _LINUX_CAP
 			cap_t cap = cap_get_file(filename);
-
 			if (cap) {
 				color = ca_c;
 				cap_free(cap);
@@ -93,7 +89,6 @@ get_properties(char *filename, int dsize)
 #else
 			if (file_attrib.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
 #endif
-
 				if (file_attrib.st_size == 0)
 					color = ee_c;
 				else
@@ -106,11 +101,8 @@ get_properties(char *filename, int dsize)
 				color = mh_c;
 			else {
 				ext = strrchr(filename, '.');
-
 				if (ext) {
-
 					char *extcolor = get_ext_color(ext);
-
 					if (extcolor) {
 						char ext_color[MAX_COLOR] = "";
 						sprintf(ext_color, "\x1b[%sm", extcolor);
@@ -127,7 +119,6 @@ get_properties(char *filename, int dsize)
 	} break;
 	case S_IFDIR:
 		file_type = 'd';
-
 		if (light_mode)
 			color = di_c;
 		else if (access(filename, R_OK | X_OK) != 0) {
@@ -150,7 +141,6 @@ get_properties(char *filename, int dsize)
 		break;
 	case S_IFLNK:
 		file_type = 'l';
-
 		if (light_mode) {
 			color = ln_c;
 		} else {
@@ -161,8 +151,7 @@ get_properties(char *filename, int dsize)
 				color = or_c;
 		}
 		break;
-	case S_IFSOCK:
-		file_type = 's';
+	case S_IFSOCK: file_type = 's';
 		color = so_c;
 		break;
 	case S_IFBLK:
@@ -188,26 +177,17 @@ get_properties(char *filename, int dsize)
 	     read_others = '-', write_others = '-', exec_others = '-';
 
 	mode_t val = (file_attrib.st_mode & ~S_IFMT);
-	if (val & S_IRUSR)
-		read_usr = 'r';
-	if (val & S_IWUSR)
-		write_usr = 'w';
-	if (val & S_IXUSR)
-		exec_usr = 'x';
+	if (val & S_IRUSR) read_usr = 'r';
+	if (val & S_IWUSR) write_usr = 'w';
+	if (val & S_IXUSR) exec_usr = 'x';
 
-	if (val & S_IRGRP)
-		read_grp = 'r';
-	if (val & S_IWGRP)
-		write_grp = 'w';
-	if (val & S_IXGRP)
-		exec_grp = 'x';
+	if (val & S_IRGRP) read_grp = 'r';
+	if (val & S_IWGRP) write_grp = 'w';
+	if (val & S_IXGRP) exec_grp = 'x';
 
-	if (val & S_IROTH)
-		read_others = 'r';
-	if (val & S_IWOTH)
-		write_others = 'w';
-	if (val & S_IXOTH)
-		exec_others = 'x';
+	if (val & S_IROTH) read_others = 'r';
+	if (val & S_IWOTH) write_others = 'w';
+	if (val & S_IXOTH) exec_others = 'x';
 
 	if (file_attrib.st_mode & S_ISUID)
 		(val & S_IXUSR) ? (exec_usr = 's') : (exec_usr = 'S');
@@ -285,7 +265,6 @@ get_properties(char *filename, int dsize)
 	time = (time_t)file_attrib.st_ctim.tv_sec;
 	localtime_r(&time, &tm);
 	char change_time[128] = "";
-
 	if (time)
 		strftime(change_time, sizeof(change_time), "%b %d %H:%M:%S %Y", &tm);
 	else
@@ -300,7 +279,6 @@ get_properties(char *filename, int dsize)
 #endif
 	localtime_r(&time, &tm);
 	char creation_time[128] = "";
-
 	if (!time)
 		creation_time[0] = '-';
 	else
@@ -322,29 +300,14 @@ get_properties(char *filename, int dsize)
 #endif
 
 	switch (file_type) {
-	case 'd':
-		printf(_("Directory"));
-		break;
-	case 's':
-		printf(_("Socket"));
-		break;
-	case 'l':
-		printf(_("Symbolic link"));
-		break;
-	case 'b':
-		printf(_("Block special file"));
-		break;
-	case 'c':
-		printf(_("Character special file"));
-		break;
-	case 'p':
-		printf(_("Fifo"));
-		break;
-	case '-':
-		printf(_("Regular file"));
-		break;
-	default:
-		break;
+	case 'd': printf(_("Directory")); break;
+	case 's': printf(_("Socket")); break;
+	case 'l': printf(_("Symbolic link")); break;
+	case 'b': printf(_("Block special file")); break;
+	case 'c': printf(_("Character special file")); break;
+	case 'p': printf(_("Fifo")); break;
+	case '-': printf(_("Regular file")); break;
+	default: break;
 	}
 #ifdef __OpenBSD__
 	printf(_("\tBlocks: %lld"), file_attrib.st_blocks);
@@ -381,16 +344,12 @@ get_properties(char *filename, int dsize)
 #endif
 
 	/* Print size */
-
 	if ((file_attrib.st_mode & S_IFMT) == S_IFDIR) {
-
 		if (dsize) {
 			fputs(_("Total size: \t"), stdout);
 			off_t total_size = dir_size(filename);
-
 			if (total_size != -1) {
 				char *human_size = get_size_unit(total_size);
-
 				if (human_size) {
 					printf("%s\n", human_size);
 					free(human_size);
@@ -421,30 +380,14 @@ print_entry_props(struct fileinfo *props, size_t max)
 	char file_type = 0;
 
 	switch (props->mode & S_IFMT) {
-
-	case S_IFREG:
-		file_type = '-';
-		break;
-	case S_IFDIR:
-		file_type = 'd';
-		break;
-	case S_IFLNK:
-		file_type = 'l';
-		break;
-	case S_IFSOCK:
-		file_type = 's';
-		break;
-	case S_IFBLK:
-		file_type = 'b';
-		break;
-	case S_IFCHR:
-		file_type = 'c';
-		break;
-	case S_IFIFO:
-		file_type = 'p';
-		break;
-	default:
-		file_type = '?';
+	case S_IFREG: file_type = '-'; break;
+	case S_IFDIR: file_type = 'd'; break;
+	case S_IFLNK: file_type = 'l'; break;
+	case S_IFSOCK: file_type = 's'; break;
+	case S_IFBLK: file_type = 'b'; break;
+	case S_IFCHR: file_type = 'c'; break;
+	case S_IFIFO: file_type = 'p'; break;
+	default: file_type = '?';
 	}
 
 	/* Get file permissions */
@@ -453,26 +396,17 @@ print_entry_props(struct fileinfo *props, size_t max)
 	     read_others = '-', write_others = '-', exec_others = '-';
 
 	mode_t val = (props->mode & ~S_IFMT);
-	if (val & S_IRUSR)
-		read_usr = 'r';
-	if (val & S_IWUSR)
-		write_usr = 'w';
-	if (val & S_IXUSR)
-		exec_usr = 'x';
+	if (val & S_IRUSR) read_usr = 'r';
+	if (val & S_IWUSR) write_usr = 'w';
+	if (val & S_IXUSR) exec_usr = 'x';
 
-	if (val & S_IRGRP)
-		read_grp = 'r';
-	if (val & S_IWGRP)
-		write_grp = 'w';
-	if (val & S_IXGRP)
-		exec_grp = 'x';
+	if (val & S_IRGRP) read_grp = 'r';
+	if (val & S_IWGRP) write_grp = 'w';
+	if (val & S_IXGRP) exec_grp = 'x';
 
-	if (val & S_IROTH)
-		read_others = 'r';
-	if (val & S_IWOTH)
-		write_others = 'w';
-	if (val & S_IXOTH)
-		exec_others = 'x';
+	if (val & S_IROTH) read_others = 'r';
+	if (val & S_IWOTH) write_others = 'w';
+	if (val & S_IXOTH) exec_others = 'x';
 
 	if (props->mode & S_ISUID)
 		(val & S_IXUSR) ? (exec_usr = 's') : (exec_usr = 'S');
@@ -483,7 +417,6 @@ print_entry_props(struct fileinfo *props, size_t max)
 
 	/* Get modification time */
 	char mod_time[128];
-
 	if (props->ltime) {
 		struct tm t;
 		localtime_r(&props->ltime, &t);
@@ -506,10 +439,12 @@ print_entry_props(struct fileinfo *props, size_t max)
 	int trim = 0;
 
 	size_t cur_len = props->eln_n + 1 + props->len;
+#ifndef _NOICONS
 	if (icons) {
 		cur_len += 3;
 		max += 3;
 	}
+#endif
 
 	if (cur_len > max) {
 		int rest = (int)(cur_len - max);
@@ -524,16 +459,19 @@ print_entry_props(struct fileinfo *props, size_t max)
 
 	/* Calculate pad for each file */
 	int pad;
-
 	pad = (int)(max - cur_len);
-
 	if (pad < 0)
 		pad = 0;
 
+#ifndef _NOICONS
 	printf("%s%s%c%s%s%s%-*s%s%c %c/%c%c%c/%c%c%c/%c%c%c%s  "
 	       "%u:%u  %s  %s\n",
 	    colorize ? props->icon_color : "",
 	    icons ? props->icon : "", icons ? ' ' : 0,
+#else
+	printf("%s%s%s%-*s%s%c %c/%c%c%c/%c%c%c/%c%c%c%s  "
+	       "%u:%u  %s  %s\n",
+#endif
 	    colorize ? props->color : "",
 	    !trim ? props->name : trim_name,
 	    light_mode ? "" : df_c, pad, "", df_c,
@@ -569,10 +507,8 @@ properties_function(char **comm)
 
 	/* If "pr file file..." */
 	for (i = 1; i <= args_n; i++) {
-
 		if (strchr(comm[i], '\\')) {
 			char *deq_file = dequote_str(comm[i], 0);
-
 			if (!deq_file) {
 				fprintf(stderr, _("%s: %s: Error dequoting file name\n"),
 				    PROGRAM_NAME, comm[i]);
