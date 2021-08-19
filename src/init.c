@@ -58,16 +58,19 @@ struct user_t user;
  * functions
  */
 
+/* Initialize gettext for translations support */
 int
 init_gettext(void)
 {
+#ifdef _GETTEXT
 	char locale_dir[PATH_MAX];
 	snprintf(locale_dir, PATH_MAX - 1, "%s/locale", DATA_DIR
 			? DATA_DIR : "/usr/share");
 	bindtextdomain(PNL, locale_dir);
 	textdomain(PNL);
-
+#endif
 	return EXIT_SUCCESS;
+
 }
 
 int
