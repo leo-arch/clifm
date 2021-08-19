@@ -165,7 +165,7 @@ To produce a fully `POSIX.1-2008` compliant executable pass the `_BE_POSIX` opti
 2) Version sort: We use here **versionsort**, which is a **GNU** extension.
 
 To enable Nerdfont support for icons, pass the `_NERD` option to the compiler (say, `clang ... -D_NERD ...`). \
-To enable translations support via `gettext`, pass `_GETTEXT`. \
+To disable translations support via `gettext`, pass `_NO_GETTEXT`. \
 To disable icons support, pass `_NOICONS`.
 
 **NOTE**: Since compiling in this way only produces a binary file, it is necessary to manually copy the remaining files. See the `install` block of the [Makefile](https://github.com/leo-arch/clifm/blob/master/Makefile).
