@@ -1138,6 +1138,30 @@ rl_suggestions(char c)
 		}
 		break;
 
+	case 'p': /* Profiles */
+		if (lb[1] && lb[1] == 'f' && lb[2] && lb[2] == ' '
+		&& (strncmp(lb + 3, "set", 3) == 0 || strncmp(lb + 3, "del", 3) == 0)) {
+			size_t i = 0, len = strlen(last_word);
+			for (; profile_names[i]; i++) {
+				if (*last_word == *profile_names[i]
+				&& strncmp(profile_names[i], last_word, len) == 0) {
+					suggestion.type = CMD_SUG;
+					suggestion.offset = last_word_offset;
+					print_suggestion(profile_names[i], len, sx_c);
+					printed = 1;
+					break;
+				}
+			}
+			if (printed) {
+				goto SUCCESS;
+			} else {
+				free(full_line);
+				full_line = (char *)NULL;
+				goto FAIL;
+			}
+		}
+		break;
+
 	default: break;
 	}
 

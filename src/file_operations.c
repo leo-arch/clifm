@@ -32,7 +32,9 @@
 #include <time.h>
 #include <readline/readline.h>
 
+#ifndef _NO_ARCHIVING
 #include "archives.h"
+#endif
 #include "aux.h"
 #include "checks.h"
 #include "colors.h"
