@@ -379,9 +379,17 @@ open_function(char **cmd)
 	 * file or a symlink to a regular file. So, just open the file */
 	if (!cmd[2] || (*cmd[2] == '&' && !cmd[2][1])) {
 		if (opener) {
-			char *tmp_cmd[] = {opener, file, NULL};
-			int ret = launch_execve(tmp_cmd, bg_proc ? BACKGROUND
-							  : FOREGROUND, E_NOSTDERR);
+			int ret;
+			if (*opener == 'g' && strncmp(opener, "gio", 3) == 0
+			&& (!opener[3] || opener[3] == ' ')) {
+				char *tmp_cmd[] = {"gio", "open", file, NULL};
+				ret = launch_execve(tmp_cmd, bg_proc ? BACKGROUND
+						  : FOREGROUND, E_NOSTDERR);
+			} else {
+				char *tmp_cmd[] = {opener, file, NULL};
+				ret = launch_execve(tmp_cmd, bg_proc ? BACKGROUND
+						  : FOREGROUND, E_NOSTDERR);
+			}
 			if (ret != EXIT_SUCCESS)
 				return EXIT_FAILURE;
 			return EXIT_SUCCESS;

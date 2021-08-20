@@ -758,7 +758,7 @@ list_dir_light(void)
 				printf("%s%d%s %s%s%s", el_c, i + 1, df_c,
 				    file_info[i].color, file_info[i].name, df_c);
 			}
-#endif
+#endif /* !_NOICONS */
 
 			if (file_info[i].dir && classify) {
 				fputs(" /", stdout);
@@ -787,7 +787,7 @@ list_dir_light(void)
 				fputs(file_info[i].name, stdout);
 			else
 				printf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
-#endif
+#endif /* !_NOICONS */
 
 			if (classify) {
 				switch (file_info[i].type) {
@@ -945,7 +945,7 @@ list_dir(void)
 				NULL, 0, NULL);
 
 	}
-#endif
+#endif /* LINUX_INOTIFY */
 
 	int fd = dirfd(dir);
 
@@ -1544,7 +1544,7 @@ list_dir(void)
 				printf("%s%d%s %s%s%s", el_c, i + 1, df_c,
 				    file_info[i].color, file_info[i].name, df_c);
 			}
-#endif /* _NOICONS */
+#endif /* !_NOICONS */
 
 			if (classify) {
 				/* Append directory indicator and files counter */
@@ -1592,7 +1592,7 @@ list_dir(void)
 			} else {
 				printf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
 			}
-#endif /* _NOICONS */
+#endif /* !_NOICONS */
 
 			if (classify) {
 				/* Append file type indicator */
