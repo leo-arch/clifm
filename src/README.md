@@ -170,15 +170,18 @@ clang ... -D_BE_POSIX -D_NOICONS ...
 | --- | --- |
 | `_BE_POSIX` | Build a fully `POSIX.1-2008` compliant executable<sup>1</sup> |
 | `_NERD` | Enable Nerdfont support for icons |
-| `_NO_GETTEXT` | Disable translations support via `gettext` |
+| `_NO_GETTEXT` | Disable translations support (via `gettext`) |
 | `_NOICONS` | Disable icons support |
 | `_NO_SUGGESTIONS` | Disable suggestions support |
 | `_NOTRASH` | Disable trash support |
 | `_NO_ARCHIVING` | Disable archiving support |
+| `_NOMAGIC` | Allow compilation without `libmagic` dependency<sup>2</sup> |
 
 <sup>1</sup> Only two features are lost in this way:
 1) Files birth time: We get this information via **statx**(2), which is Linux specific.
 2) Version sort: We use here **versionsort**, which is a **GNU** extension.
+
+<sup>2</sup> Without `libmagic`, querying files MIME type implies grabing the output of the [**file**(1)](https://www.man7.org/linux/man-pages/man1/file.1.html) command, which of course is less optimus than directly querying the `libmagic` database itself (we need to run the command, redirect its output to a file, open the file, read it, close it, and then delete it). Though perhaps unnoticiable, this is an important difference.
 
 **NOTE**: Since compiling in this way only produces a binary file, it is necessary to manually copy the remaining files. See the `install` block of the [Makefile](https://github.com/leo-arch/clifm/blob/master/Makefile).
 
