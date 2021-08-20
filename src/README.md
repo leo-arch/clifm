@@ -189,4 +189,4 @@ clang ... -D_BE_POSIX -D_NOICONS ...
 
 ## 5) Plugins
 
-CliFM plugins, that is, commands or set of commands executed by CLiFM, could be any executable file, be it a shell script, a binary file (C, Python, Go, Rust, or whatever programming language you like). See the [plugins section](https://github.com/leo-arch/clifm/wiki/Advanced#plugins).
+CliFM plugins, that is, commands or set of commands executed by CliFM, could be any executable file, be it a shell script, a binary file (C, Python, Go, Rust, or whatever programming language you like). See the [plugins section](https://github.com/leo-arch/clifm/wiki/Advanced#plugins).
