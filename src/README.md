@@ -163,6 +163,19 @@ gcc -o clifm *.c -lreadline -lintl -lmagic
 
 **NOTE 2**: You can drop `-lmagic` if compiling with `_NOMAGIC`. In the same way, you can drop `-lintl` if compiling with `_NO_GETTEXT`. See below.
 
+**NOTE 3**: It is recommended to use [upx(1)](https://linux.die.net/man/1/upx) to significantly reduce (50-70%) the size of the executable file:
+
+```sh
+upx clifm
+```
+
+or
+```sh
+upx -qqq clifm
+```
+
+to supress all output.
+
 ### Compiling features in/out
 
 CliFM allows you to enable or disable some features at compile time. If for whatever reason you don't plan to use a certain feature, it is better to remove this feature from the resulting binary: you'll get a (bit) faster and smaller executable. To do this, pass one or more of the following options to the compiler using the `-D` parameter. For example, to get a POSIX compliant executable without icons support:
@@ -173,7 +186,6 @@ If compiling/installing rather via the Makefile:
 ```sh
 make _BE_POSIX=1 _NO_ICONS=1 install
 ```
-
 
 | Option | Description |
 | --- | --- |
