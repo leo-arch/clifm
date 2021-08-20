@@ -671,6 +671,12 @@ main(int argc, char *argv[])
 
 	set_start_path();
 
+	if (ws == (struct ws_t *)NULL || !ws[cur_ws].path || !*ws[cur_ws].path) {
+		_err(0, NOPRINT_PROMPT, _("%s: Fatal error! Failed "
+			"retrieving current working directory\n"), PROGRAM_NAME);
+		exit(EXIT_FAILURE);
+	}
+
 	/* Set terminal window title */
 	if (flags & GUI) {
 		if (xargs.cwd_in_title == 0) {

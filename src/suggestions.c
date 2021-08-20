@@ -395,7 +395,7 @@ check_completions(const char *str, size_t len, const char c)
 	suggestion.filetype = DT_REG;
 	free_color = 0;
 
-	char *color = (char *)NULL;
+	char *color = (char *)NULL, *_color = (char *)NULL;
 	if (suggest_filetype_color)
 		color = no_c;
 	else
@@ -463,8 +463,12 @@ check_completions(const char *str, size_t len, const char c)
 					append_slash = 1;
 					suggestion.filetype = DT_DIR;
 				}
-				if (suggest_filetype_color)
-					color = get_comp_color(p ? p : _matches[1], attr);
+
+				if (suggest_filetype_color) {
+					_color = get_comp_color(p ? p : _matches[1], attr);
+					if (_color)
+						color = _color;
+				}
 			} else {
 				suggestion.filetype = DT_DIR;
 			}
@@ -497,7 +501,7 @@ FREE:
 	free(_matches);
 
 	if (free_color) {
-		free(color);
+		free(_color);
 		free_color = 0;
 	}
 

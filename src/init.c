@@ -199,7 +199,7 @@ set_start_path(void)
 					    strerror(errno));
 					exit(EXIT_FAILURE);
 				} else {
-					ws[cur_ws].path = savestring("/\0", 2);
+					ws[cur_ws].path = savestring("/", 1);
 				}
 			}
 		} else {
