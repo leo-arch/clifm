@@ -1098,7 +1098,7 @@ rl_suggestions(char c)
 		 * ######################################*/
 
 	char *lb = rl_line_buffer;
-	/* 3.a) Let's suggest specific stuff for internal commands */
+	/* 3.a) Let's suggest non-fixed parameters for internal commands */
 
 	switch(*lb) {
 	case 'c': /* Color schemes */
@@ -1116,10 +1116,6 @@ rl_suggestions(char c)
 			}
 			if (printed) {
 				goto SUCCESS;
-			} else {
-				free(full_line);
-				full_line = (char *)NULL;
-				goto FAIL;
 			}
 		}
 		break;
@@ -1135,6 +1131,25 @@ rl_suggestions(char c)
 				full_line = (char *)NULL;
 				goto FAIL;
 			}
+		}
+		break;
+
+	case 'n': /* Remotes */
+		if (lb[1] && lb[1] == 'e' && lb[2] && lb[2] == 't' && lb[3]
+		&& lb[3] == ' ') {
+			size_t i = 0, len = strlen(last_word);
+			for (; remotes[i].name; i++) {
+				if (*last_word == *remotes[i].name
+				&& strncmp(remotes[i].name, last_word, len) == 0) {
+					suggestion.type = CMD_SUG;
+					suggestion.offset = last_word_offset;
+					print_suggestion(remotes[i].name, len, sx_c);
+					printed = 1;
+					break;
+				}
+			}
+			if (printed)
+				goto SUCCESS;
 		}
 		break;
 
