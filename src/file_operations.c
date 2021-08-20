@@ -357,8 +357,8 @@ open_function(char **cmd)
 			char *tmp_cmd[] = {"ad", file, NULL};
 			return archiver(tmp_cmd, 'd');
 		}
-		no_open_file = 0;
 #endif
+		no_open_file = 0;
 		break;
 
 	default:

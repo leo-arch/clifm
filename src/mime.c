@@ -32,7 +32,9 @@
 #include <sys/stat.h>
 #include <readline/readline.h>
 
+#ifndef _NOMAGIC
 #include <magic.h>
+#endif
 
 #include "archives.h"
 #include "aux.h"
@@ -197,6 +199,7 @@ get_app(const char *mime, const char *ext)
 	return (char *)NULL;
 }
 
+#ifndef _NOMAGIC
 /* Get FILE's MIME type using the libmagic library */
 static char *
 xmagic(const char *file)
@@ -222,7 +225,7 @@ xmagic(const char *file)
 	return str;
 }
 
-/*
+#else
 char *
 get_mime(char *file)
 {
@@ -256,10 +259,10 @@ get_mime(char *file)
 		return (char *)NULL;
 	}
 
-	int stdout_bk = dup(STDOUT_FILENO); // Store original stdout
-	int stderr_bk = dup(STDERR_FILENO); // Store original stderr
+	int stdout_bk = dup(STDOUT_FILENO); /* Store original stdout */
+	int stderr_bk = dup(STDERR_FILENO); /* Store original stderr */
 
-	// Redirect stdout to the desired file
+	/* Redirect stdout to the desired file */
 	if (dup2(fileno(file_fp), STDOUT_FILENO) == -1) {
 		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
 		fclose(file_fp);
@@ -267,7 +270,7 @@ get_mime(char *file)
 		return (char *)NULL;
 	}
 
-	// Redirect stderr to /dev/null
+	/* Redirect stderr to /dev/null */
 	if (dup2(fileno(file_fp_err), STDERR_FILENO) == -1) {
 		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
 		fclose(file_fp);
@@ -281,8 +284,8 @@ get_mime(char *file)
 	char *cmd[] = {"file", "--mime-type", file, NULL};
 	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
 
-	dup2(stdout_bk, STDOUT_FILENO); // Restore original stdout
-	dup2(stderr_bk, STDERR_FILENO); // Restore original stderr
+	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
+	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
 	close(stdout_bk);
 	close(stderr_bk);
 
@@ -317,7 +320,8 @@ get_mime(char *file)
 	fclose(file_fp);
 	unlink(MIME_TMP_FILE);
 	return mime_type;
-} */
+}
+#endif /* !_NOMAGIC */
 
 /* Open a file according to the application associated to its MIME type
  * or extension. It also accepts the 'info' and 'edit' arguments, the
@@ -456,8 +460,11 @@ mime_open(char **args)
 	}
 
 	/* Get file's mime-type */
-/*	char *mime = get_mime(file_path); */
+#ifndef _NOMAGIC
 	char *mime = xmagic(file_path);
+#else
+	char *mime = get_mime(file_path);
+#endif
 	if (!mime) {
 		fprintf(stderr, _("%s: Error getting mime-type\n"), PROGRAM_NAME);
 		free(file_path);

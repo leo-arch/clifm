@@ -1465,9 +1465,13 @@ unset_xargs(void)
 	xargs.sort_reverse = UNSET;
 	xargs.splash = UNSET;
 	xargs.stealth_mode = UNSET;
+#ifndef _NO_SUGGESTIONS
 	xargs.suggestions = UNSET;
+#endif
 	xargs.tips = UNSET;
+#ifndef _NOTRASH
 	xargs.trasrm = UNSET;
+#endif
 	xargs.unicode = UNSET;
 	xargs.welcome_message = UNSET;
 }

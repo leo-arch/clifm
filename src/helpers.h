@@ -629,9 +629,13 @@ struct param {
 	int sort_reverse;
 	int splash;
 	int stealth_mode;
+#ifndef _NO_SUGGESTIONS
 	int suggestions;
+#endif
 	int tips;
+#ifndef _NOTRASH
 	int trasrm;
+#endif
 	int unicode;
 	int welcome_message;
 };

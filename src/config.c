@@ -2197,8 +2197,10 @@ reload_config(void)
 
 	/* If some option was set via command line, keep that value
 	 * for any profile */
+#ifndef _NO_SUGGESTIONS
 	if (xargs.suggestions != UNSET)
 		suggestions = xargs.suggestions;
+#endif
 	if (xargs.printsel != UNSET)
 		print_selfiles = xargs.printsel;
 	if (xargs.case_sens_dirjump != UNSET)
