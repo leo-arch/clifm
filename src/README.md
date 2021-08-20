@@ -169,6 +169,11 @@ CliFM allows you to enable or disable some features at compile time. Pass one or
 ```sh
 clang ... -D_BE_POSIX -D_NOICONS ...
 ```
+If compiling/installing rather via the Makefile:
+```sh
+make _BE_POSIX=1 _NOICONS=1 install
+```
+
 
 | Option | Description |
 | --- | --- |
