@@ -161,7 +161,7 @@ gcc -o clifm *.c -lreadline -lintl -lmagic
 
 **NOTE**: Since compiling in this way only produces a binary file, it is necessary to manually copy the remaining files. See the `install` block of the [Makefile](https://github.com/leo-arch/clifm/blob/master/Makefile).
 
-**NOTE 2**: You can drop `lmagic` if compiling with `_NOMAGIC`. In the same way, you can drop `-lintl` if compiling with `_NO_GETTEXT`. See below.
+**NOTE 2**: You can drop `-lmagic` if compiling with `_NOMAGIC`. In the same way, you can drop `-lintl` if compiling with `_NO_GETTEXT`. See below.
 
 ### Compiling features in/out
 
