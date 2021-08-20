@@ -18,7 +18,7 @@ BSD compatibility: We try to keep CliFM working on BSD systems (at the very leas
 
 Generally, try to stick as closely as possible to the `Linux kernel coding style`. See https://www.kernel.org/doc/html/v4.10/process/coding-style.html
 
-Indentation: TABS
+Indentation: TABS (I use a width of 4, but you can use 8 if you like)
 
 Comments: C style only. Ex:
 
@@ -159,6 +159,10 @@ cc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -I/usr/local
 gcc -o clifm *.c -lreadline -lintl -lmagic
 ```
 
+**NOTE**: Since compiling in this way only produces a binary file, it is necessary to manually copy the remaining files. See the `install` block of the [Makefile](https://github.com/leo-arch/clifm/blob/master/Makefile).
+
+**NOTE 2**: You can drop `-lmagic` if compiling with `_NOMAGIC`. In the same way, you can drop `-lintl` if compiling with `_NO_GETTEXT`. See below.
+
 ### Compiling features in/out
 
 CliFM allows you to enable or disable some features at compile time. Pass one or more of the following options to the compiler using the `-D` parameter. For example:
@@ -170,18 +174,19 @@ clang ... -D_BE_POSIX -D_NOICONS ...
 | --- | --- |
 | `_BE_POSIX` | Build a fully `POSIX.1-2008` compliant executable<sup>1</sup> |
 | `_NERD` | Enable Nerdfont support for icons |
-| `_NO_GETTEXT` | Disable translations support via `gettext` |
+| `_NO_GETTEXT` | Disable translations support (via `gettext`) |
 | `_NOICONS` | Disable icons support |
 | `_NO_SUGGESTIONS` | Disable suggestions support |
 | `_NOTRASH` | Disable trash support |
 | `_NO_ARCHIVING` | Disable archiving support |
+| `_NOMAGIC` | Allow compilation without `libmagic` dependency<sup>2</sup> |
 
-<sup>1</sup> Only two features are lost in this way:
-1) Files birth time: We get this information via **statx**(2), which is Linux specific.
-2) Version sort: We use here **versionsort**, which is a **GNU** extension.
+<sup>1</sup> Only two features are lost:
+1) Files birth time: We get this information via [statx(2)](https://man7.org/linux/man-pages/man2/statx.2.html), which is Linux specific.
+2) Version sort: We use here [versionsort](https://man7.org/linux/man-pages/man3/scandir.3.html), which is a **GNU** extension.
 
-**NOTE**: Since compiling in this way only produces a binary file, it is necessary to manually copy the remaining files. See the `install` block of the [Makefile](https://github.com/leo-arch/clifm/blob/master/Makefile).
+<sup>2</sup> Without `libmagic`, querying files MIME type implies grabing the output of the [file(1)](https://www.man7.org/linux/man-pages/man1/file.1.html) command, which of course is less optimus than directly querying the `libmagic` database itself (we need to run the command, redirect its output to a file, open the file, read it, close it, and then delete it). Though perhaps unnoticiable, this is an important difference.
 
 ## 5) Plugins
 
-CliFM plugins, that is, commands or set of commands executed by CLiFM, could be any executable file, be it a shell script, a binary file (C, Python, Go, Rust, or whatever programming language you like). See the [plugins](https://github.com/leo-arch/clifm/wiki/Advanced#plugins) section.
+CliFM plugins, that is, commands or set of commands executed by CLiFM, could be any executable file, be it a shell script, a binary file (C, Python, Go, Rust, or whatever programming language you like). See the [plugins section](https://github.com/leo-arch/clifm/wiki/Advanced#plugins).
