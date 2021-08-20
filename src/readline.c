@@ -1257,8 +1257,10 @@ my_rl_completion(const char *text, int start, int end)
 		|| rl_line_buffer[1] == 'o')
 		&& (strncmp(rl_line_buffer, "bm ", 3) == 0
 		|| strncmp(rl_line_buffer, "bookmarks ", 10) == 0)) {
+#ifndef _NO_SUGGESTIONS
 			if (suggestion.type != FILE_SUG)
 				rl_attempted_completion_over = 1;
+#endif
 			matches = rl_completion_matches(text, &bookmarks_generator);
 		}
 
@@ -1278,8 +1280,10 @@ my_rl_completion(const char *text, int start, int end)
 		|| strncmp(rl_line_buffer, "profile set ", 12) == 0
 		|| strncmp(rl_line_buffer, "pf del ", 7) == 0
 		|| strncmp(rl_line_buffer, "profile del ", 12) == 0)) {
+#ifndef _NO_SUGGESTIONS
 			if (suggestion.type != FILE_SUG)
 				rl_attempted_completion_over = 1;
+#endif
 			matches = rl_completion_matches(text, &profiles_generator);
 		}
 

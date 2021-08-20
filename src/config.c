@@ -420,7 +420,6 @@ create_tmp_files(void)
 
 	/* If the directory exists, check it is writable */
 	else if (access(TMP_DIR, W_OK) == -1) {
-
 		if (!SEL_FILE) {
 			selfile_ok = 0;
 			_err('w', PRINT_PROMPT, "%s: '%s': Directory not writable. Selected "
@@ -514,7 +513,7 @@ define_config_file_names(void)
 
 	PLUGINS_DIR = (char *)xnmalloc(config_gral_len + 9, sizeof(char));
 	sprintf(PLUGINS_DIR, "%s/plugins", CONFIG_DIR_GRAL);
-
+#ifndef _NOTRASH
 	TRASH_DIR = (char *)xnmalloc(user.home_len + 20, sizeof(char));
 	sprintf(TRASH_DIR, "%s/.local/share/Trash", user.home);
 
@@ -525,7 +524,7 @@ define_config_file_names(void)
 
 	TRASH_INFO_DIR = (char *)xnmalloc(trash_len + 6, sizeof(char));
 	sprintf(TRASH_INFO_DIR, "%s/info", TRASH_DIR);
-
+#endif
 	size_t config_len = strlen(CONFIG_DIR);
 
 	DIRHIST_FILE = (char *)xnmalloc(config_len + 13, sizeof(char));
@@ -1009,7 +1008,7 @@ create_config_files(void)
 			/* #############################
 			 * #        TRASH DIRS         #
 			 * ############################# */
-
+#ifndef _NOTRASH
 	if (stat(TRASH_DIR, &attr) == -1) {
 		char *trash_files = (char *)NULL;
 		trash_files = (char *)xnmalloc(strlen(TRASH_DIR) + 7, sizeof(char));
@@ -1038,7 +1037,7 @@ create_config_files(void)
 		_err('w', PRINT_PROMPT, _("%s: '%s': Directory not writable. "
 				"Trash function disabled\n"), PROGRAM_NAME, TRASH_DIR);
 	}
-
+#endif
 				/* ####################
 				 * #    CONFIG DIR    #
 				 * #################### */
@@ -1373,7 +1372,7 @@ read_config(void)
 			else if (strncmp(opt_str, "false", 5) == 0)
 				case_sens_path_comp = 0;
 		}
-
+#ifndef _NO_SUGGESTIONS
 		else if (*line == 'S' && strncmp(line, "SuggestFiletypeColor=", 21) == 0) {
 			char opt_str[MAX_BOOL] = "";
 			ret = sscanf(line, "SuggestFiletypeColor=%5s\n", opt_str);
@@ -1418,7 +1417,7 @@ read_config(void)
 				continue;
 			suggestion_strategy = savestring(opt_str, strlen(opt_str));
 		}
-
+#endif
 		else if (*line == 'P' && strncmp(line, "PromptStyle=", 12) == 0) {
 			char opt_str[8] = "";
 			ret = sscanf(line, "PromptStyle=%7s\n", opt_str);
@@ -1502,7 +1501,7 @@ read_config(void)
 			else if (strncmp(opt_str, "false", 5) == 0)
 				light_mode = 0;
 		}
-
+#ifndef _NOTRASH
 		else if (xargs.trasrm == UNSET && *line == 'T'
 		&& strncmp(line, "TrashAsRm=", 10) == 0) {
 			char opt_str[MAX_BOOL] = "";
@@ -1514,7 +1513,7 @@ read_config(void)
 			else if (strncmp(opt_str, "false", 5) == 0)
 				tr_as_rm = 0;
 		}
-
+#endif
 		else if (xargs.cd_on_quit == UNSET && *line == 'C'
 		&& strncmp(line, "CdOnQuit=", 9) == 0) {
 			char opt_str[MAX_BOOL] = "";
@@ -2093,12 +2092,13 @@ reload_config(void)
 	/* Free everything */
 	free(CONFIG_DIR_GRAL);
 	free(CONFIG_DIR);
+	CONFIG_DIR = (char *)NULL;
+#ifndef _NOTRASH
 	free(TRASH_DIR);
 	free(TRASH_FILES_DIR);
 	free(TRASH_INFO_DIR);
-	CONFIG_DIR = TRASH_DIR = TRASH_FILES_DIR = (char *)NULL;
-	TRASH_INFO_DIR = (char *)NULL;
-
+	TRASH_DIR = TRASH_FILES_DIR = TRASH_INFO_DIR = (char *)NULL;
+#endif
 	free(BM_FILE);
 	free(LOG_FILE);
 	free(HIST_FILE);
@@ -2121,13 +2121,13 @@ reload_config(void)
 	free(SEL_FILE);
 	free(REMOTES_FILE);
 	TMP_DIR = COLORS_DIR = SEL_FILE = REMOTES_FILE = (char *)NULL;
-
+#ifndef _NO_SUGGESTIONS
 	free(suggestion_buf);
 	suggestion_buf = (char *)NULL;
 
 	free(suggestion_strategy);
 	suggestion_strategy = (char *)NULL;
-
+#endif
 	free_remotes(0);
 
 	if (filter) {
@@ -2160,11 +2160,19 @@ reload_config(void)
 	unicode = case_sensitive = cd_lists_on_the_fly = share_selbox = UNSET;
 	autocd = auto_open = restore_last_path = dirhist_map = UNSET;
 	disk_usage = tips = logs_enabled = sort = files_counter = UNSET;
-	light_mode = classify = cd_on_quit = columned = tr_as_rm = UNSET;
+	light_mode = classify = cd_on_quit = columned = UNSET;
 	no_eln = min_name_trim = case_sens_dirjump = case_sens_path_comp = UNSET;
 	min_jump_rank = max_jump_total_rank = print_selfiles = UNSET;
-	max_printselfiles = suggestions = prompt_style = UNSET;
-	suggest_filetype_color = autojump = UNSET;
+	max_printselfiles = prompt_style = autojump = UNSET;
+
+#ifndef _NO_SUGGESTIONS
+	suggestions = suggest_filetype_color = UNSET;
+#endif
+
+#ifndef _NOTRASH
+	tr_as_rm = UNSET;
+	trash_ok = 1;
+#endif
 
 	shell_terminal = no_log = internal_cmd = recur_perm_error_flag = 0;
 	is_sel = sel_is_last = print_msg = kbind_busy = dequoted = 0;
@@ -2174,7 +2182,7 @@ reload_config(void)
 	recur_perm_error_flag = is_sel = sel_is_last = print_msg = 0;
 
 	pmsg = nomsg;
-	home_ok = config_ok = trash_ok = selfile_ok = 1;
+	home_ok = config_ok = selfile_ok = 1;
 
 	/* Set up config files and options */
 	init_config();
@@ -2199,8 +2207,10 @@ reload_config(void)
 		case_sens_path_comp = xargs.case_sens_path_comp;
 	if (xargs.noeln != UNSET)
 		no_eln = xargs.noeln;
+#ifndef _NOTRASH
 	if (xargs.trasrm != UNSET)
 		tr_as_rm = xargs.trasrm;
+#endif
 	if (xargs.no_colors != UNSET)
 		colorize = xargs.no_colors;
 	if (xargs.no_columns != UNSET)

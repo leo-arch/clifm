@@ -22,6 +22,8 @@
  * MA 02110-1301, USA.
 */
 
+#ifndef _NOTRASH
+
 #include "helpers.h"
 
 #include <dirent.h>
@@ -1184,3 +1186,5 @@ recur_perm_check(const char *dirname)
 
 	return EXIT_SUCCESS;
 }
+#endif /* !_NOTRASH */
+

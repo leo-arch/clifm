@@ -61,7 +61,9 @@
 #include "selection.h"
 #include "sort.h"
 #include "strings.h"
+#ifndef _NOTRASH
 #include "trash.h"
+#endif
 #include "messages.h"
 
 char **_comm = (char **)NULL;
@@ -564,6 +566,7 @@ exec_cmd(char **comm)
 	/*         ############### TRASH ##################     */
 	else if (*comm[0] == 't' && (!comm[0][1] || strcmp(comm[0], "tr") == 0
 	|| strcmp(comm[0], "trash") == 0)) {
+#ifndef _NOTRASH
 		if (comm[1] && *comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
 			puts(_(TRASH_USAGE));
 			return EXIT_SUCCESS;
@@ -579,10 +582,16 @@ exec_cmd(char **comm)
 			if (save_sel() != 0)
 				exit_code = EXIT_FAILURE;
 		}
+#else
+		fprintf(stderr, "%s: This build has been compiled without "
+				"trash support\n", PROGRAM_NAME);
+		return EXIT_FAILURE;
+#endif /* !_NOTRASH */
 	}
-
+		
 	else if (*comm[0] == 'u' && (!comm[0][1] || strcmp(comm[0], "undel") == 0
 	|| strcmp(comm[0], "untrash") == 0)) {
+#ifndef _NOTRASH
 		if (comm[1] && *comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
 			puts(_(UNTRASH_USAGE));
 			return EXIT_SUCCESS;
@@ -593,6 +602,11 @@ exec_cmd(char **comm)
 		exit_code = untrash_function(comm);
 		rl_attempted_completion_function = my_rl_completion;
 		kbind_busy = 0;
+#else
+		fprintf(stderr, "%s: This build has been compiled without "
+				"trash support\n", PROGRAM_NAME);
+		return EXIT_FAILURE;
+#endif /* !_NOTRASH */
 	}
 
 	/*         ############### SELECTION ##################     */

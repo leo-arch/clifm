@@ -1138,9 +1138,10 @@ free_stuff(void)
 #endif
 
 	free_remotes(1);
+#ifndef _NO_SUGGESTIONS
 	free(suggestion_buf);
 	free(suggestion_strategy);
-
+#endif
 	if (STDIN_TMP_DIR) {
 		char *rm_cmd[] = {"rm", "-rd", "--", STDIN_TMP_DIR, NULL};
 		launch_execve(rm_cmd, FOREGROUND, E_NOFLAG);
@@ -1311,9 +1312,11 @@ free_stuff(void)
 	free(DATA_DIR);
 	free(CONFIG_DIR_GRAL);
 	free(CONFIG_DIR);
+#ifndef _NOTRASH
 	free(TRASH_DIR);
 	free(TRASH_FILES_DIR);
 	free(TRASH_INFO_DIR);
+#endif
 	free(TMP_DIR);
 	free(BM_FILE);
 	free(LOG_FILE);

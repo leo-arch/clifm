@@ -945,14 +945,14 @@ parse_input_str(char *str)
 					/* ######################
 					 * #     TRASH AS RM    #
 					 * ###################### */
-
+#ifndef _NOTRASH
 	if (tr_as_rm && substr[0] && *substr[0] == 'r' && !substr[0][1]) {
 		substr[0] = (char *)xrealloc(substr[0], 3 * sizeof(char));
 		*substr[0] = 't';
 		substr[0][1] = 'r';
 		substr[0][2] = '\0';
 	}
-
+#endif
 				/* ##############################
 				 * #   2) BUILTIN EXPANSIONS    #
 				 * ##############################

@@ -753,8 +753,10 @@ extern short
     suggestions,
     switch_cscheme,
     tips,
+#ifndef _NOTRASH
     tr_as_rm,
     trash_ok,
+#endif
     unicode,
     welcome_message;
 
@@ -841,13 +843,17 @@ extern char
     *REMOTES_FILE,
     *SEL_FILE,
     *STDIN_TMP_DIR,
+#ifndef _NO_SUGGESTIONS
     *suggestion_buf,
     *suggestion_strategy,
+#endif
     *term,
     *TMP_DIR,
+#ifndef _NOTRASH
     *TRASH_DIR,
     *TRASH_FILES_DIR,
     *TRASH_INFO_DIR,
+#endif
     *usr_cscheme,
     *user_home,
 

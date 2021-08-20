@@ -58,20 +58,20 @@ struct user_t user;
  * functions
  */
 
+#ifndef _NO_GETTEXT
 /* Initialize gettext for translations support */
 int
 init_gettext(void)
 {
-#ifndef _NO_GETTEXT
 	char locale_dir[PATH_MAX];
 	snprintf(locale_dir, PATH_MAX - 1, "%s/locale", DATA_DIR
 			? DATA_DIR : "/usr/share");
 	bindtextdomain(PNL, locale_dir);
 	textdomain(PNL);
-#endif
 	return EXIT_SUCCESS;
 
 }
+#endif
 
 int
 backup_argv(int argc, char **argv)
@@ -106,7 +106,10 @@ get_home(void)
 		 * any config nor trash directory. These flags are used to
 		 * prevent functions from trying to access any of these
 		 * directories */
-		home_ok = config_ok = trash_ok = 0;
+		home_ok = config_ok = 0;
+#ifndef _NOTRASH
+		trash_ok = 0;
+#endif
 		/* Print message: trash, bookmarks, command logs, commands
 		 * history and program messages won't be stored */
 		_err('e', PRINT_PROMPT, _("%s: Cannot access the home directory. "
@@ -1024,7 +1027,14 @@ external_arguments(int argc, char **argv)
 				xargs.max_files = max_files = opt_int;
 			break;
 
-		case 29: xargs.trasrm = tr_as_rm = 1; break;
+		case 29:
+#ifndef _NOTRASH
+			xargs.trasrm = tr_as_rm = 1; break;
+#else
+			fprintf(stderr, _("%s: This build has been compiled "
+				"without trash support\n"), PROGRAM_NAME);
+			exit(EXIT_FAILURE);
+#endif
 		case 30: xargs.case_sens_dirjump = case_sens_dirjump = 1; break;
 		case 31: xargs.case_sens_path_comp = case_sens_path_comp = 1; break;
 		case 32: xargs.cwd_in_title = 1; break;
@@ -1972,6 +1982,10 @@ check_options(void)
 			no_eln = xargs.noeln;
 	}
 
+	if (prompt_style == UNSET)
+		prompt_style = DEF_PROMPT_STYLE;
+
+#ifndef _NO_SUGGESTIONS
 	if (suggestions == UNSET) {
 		if (xargs.suggestions == UNSET)
 			suggestions = DEF_SUGGESTIONS;
@@ -1979,14 +1993,12 @@ check_options(void)
 			suggestions = xargs.suggestions;
 	}
 
-	if (prompt_style == UNSET)
-		prompt_style = DEF_PROMPT_STYLE;
-
 	if (!suggestion_strategy)
 		suggestion_strategy = savestring(DEF_SUG_STRATEGY, SUG_STRATS);
 
 	if (suggest_filetype_color == UNSET)
 		suggest_filetype_color = DEF_SUG_FILETYPE_COLOR;
+#endif
 
 	if (print_selfiles == UNSET) {
 		if (xargs.printsel == UNSET)
@@ -2011,14 +2023,14 @@ check_options(void)
 		else
 			case_sens_path_comp = xargs.case_sens_path_comp;
 	}
-
+#ifndef _NOTRASH
 	if (tr_as_rm == UNSET) {
 		if (xargs.trasrm == UNSET)
 			tr_as_rm = DEF_TRASRM;
 		else
 			tr_as_rm = xargs.trasrm;
 	}
-
+#endif
 	if (only_dirs == UNSET) {
 		if (xargs.only_dirs == UNSET)
 			only_dirs = DEF_ONLY_DIRS;

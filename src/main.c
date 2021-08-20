@@ -67,8 +67,9 @@ struct jump_t *jump_db = (struct jump_t *)NULL;
 struct bookmarks_t *bookmarks = (struct bookmarks_t *)NULL;
 struct fileinfo *file_info = (struct fileinfo *)NULL;
 struct remote_t *remotes = (struct remote_t *)NULL;
+#ifndef _NO_SUGGESTIONS
 struct suggestions_t suggestion;
-
+#endif
 /* pmsg holds the current program message type */
 enum prog_msg pmsg = nomsg;
 struct param xargs;
@@ -154,8 +155,10 @@ short
     suggestions = UNSET,
     suggest_filetype_color = UNSET,
     switch_cscheme = 0,
+#ifndef _NOTRASH
     tr_as_rm = UNSET,
     trash_ok = 1,
+#endif
     unicode = UNSET,
     welcome_message = UNSET;
 
@@ -236,14 +239,18 @@ char
     *REMOTES_FILE = (char *)NULL,
     *SEL_FILE = (char *)NULL,
     *STDIN_TMP_DIR = (char *)NULL,
+#ifndef _NO_SUGGESTIONS
 	*suggestion_buf = (char *)NULL,
     *suggestion_strategy = (char *)NULL,
+#endif
     *sys_shell = (char *)NULL,
     *term = (char *)NULL,
     *TMP_DIR = (char *)NULL,
+#ifndef _NOTRASH
     *TRASH_DIR = (char *)NULL,
     *TRASH_FILES_DIR = (char *)NULL,
     *TRASH_INFO_DIR = (char *)NULL,
+#endif
     *usr_cscheme = (char *)NULL,
     *user_home = (char *)NULL,
 
@@ -635,7 +642,9 @@ main(int argc, char *argv[])
 	get_path_programs();
 
 	/* Initialize gettext() for translations */
+#ifndef _NO_GETTEXT
 	init_gettext();
+#endif
 
 	cschemes_n = get_colorschemes();
 	set_colors(usr_cscheme ? usr_cscheme : "default", 1);
@@ -716,13 +725,13 @@ main(int argc, char *argv[])
 	}
 
 	get_prompt_cmds();
-
+#ifndef _NOTRASH
 	if (trash_ok) {
 		trash_n = count_dir(TRASH_FILES_DIR, NO_CPOP);
 		if (trash_n <= 2)
 			trash_n = 0;
 	}
-
+#endif
 	if (gethostname(hostname, sizeof(hostname)) == -1) {
 		hostname[0] = '?';
 		hostname[1] = '\0';
