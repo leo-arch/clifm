@@ -585,8 +585,7 @@ exec_cmd(char **comm)
 				exit_code = EXIT_FAILURE;
 		}
 #else
-		fprintf(stderr, "%s: This build has been compiled without "
-				"trash support\n", PROGRAM_NAME);
+		fprintf(stderr, _("%s: trash: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 		return EXIT_FAILURE;
 #endif /* !_NOTRASH */
 	}
@@ -605,8 +604,7 @@ exec_cmd(char **comm)
 		rl_attempted_completion_function = my_rl_completion;
 		kbind_busy = 0;
 #else
-		fprintf(stderr, "%s: This build has been compiled without "
-				"trash support\n", PROGRAM_NAME);
+		fprintf(stderr, _("%s: trash: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 		return EXIT_FAILURE;
 #endif /* !_NOTRASH */
 	}
@@ -818,8 +816,7 @@ exec_cmd(char **comm)
 		else
 			exit_code = archiver(comm, 'd');
 #else
-		fprintf(stderr, _("%s: This build has been compiled without "
-				"archiving support\n"), PROGRAM_NAME);
+		fprintf(stderr, _("%s: archiving: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 		return EXIT_FAILURE;
 #endif
 	}
@@ -883,8 +880,7 @@ exec_cmd(char **comm)
 
 		return EXIT_SUCCESS;
 #else
-		fprintf(stderr, "%s: This build has been compiled without icons "
-				"support\n", PROGRAM_NAME);
+		fprintf(stderr, _("%s: icons: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 		return EXIT_SUCCESS;
 #endif /* _NOICONS */
 	}

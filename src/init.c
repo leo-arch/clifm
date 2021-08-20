@@ -1005,8 +1005,7 @@ external_arguments(int argc, char **argv)
 #else
 		case 24: /* fallthrough */
 		case 25:
-			fprintf(stderr, _("%s: This build has been compiled without icons "
-					"support\n"), PROGRAM_NAME);
+			fprintf(stderr, _("%s: icons: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 			exit(EXIT_FAILURE);
 #endif
 		case 26:
@@ -1031,8 +1030,7 @@ external_arguments(int argc, char **argv)
 #ifndef _NOTRASH
 			xargs.trasrm = tr_as_rm = 1; break;
 #else
-			fprintf(stderr, _("%s: This build has been compiled "
-				"without trash support\n"), PROGRAM_NAME);
+		fprintf(stderr, _("%s: trash: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 			exit(EXIT_FAILURE);
 #endif
 		case 30: xargs.case_sens_dirjump = case_sens_dirjump = 1; break;
@@ -1072,8 +1070,7 @@ external_arguments(int argc, char **argv)
 #ifndef _NO_SUGGESTIONS
 			xargs.suggestions = suggestions = 1; break;
 #else
-			fprintf(stderr, _("%s: This build has been compiled without "
-					"suggestions support\n"), PROGRAM_NAME);
+		fprintf(stderr, _("%s: suggestions: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 			exit(EXIT_FAILURE);
 #endif
 

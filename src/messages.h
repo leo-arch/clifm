@@ -66,6 +66,7 @@
 #define MOUNPOINTS_USAGE "List and change to a mountpoint\nUsage: mp, mountpoints"
 #define NET_USAGE "Handle network resources\nUsage: net [NAME] [edit] [m, mount NAME] [u, unmount NAME]"
 #define NEW_USAGE "Create a new file or directory\nUsage: n, new [FILE DIR/ ...n]"
+#define NOT_AVAILABLE "This feature has been disabled at compile time"
 #define OPEN_USAGE "Open a file\nUsage: o, open ELN/FILE [APPLICATION]"
 #define OPENER_USAGE "Set the resource opener\nUsage: opener APPLICATION"
 #define PAGER_USAGE "Set the files list pager on-off\nUsage: pager, pg [on, off, status]"
