@@ -133,6 +133,7 @@ Features beyond common file operations, such as copy, move, remove, etc.:
 * [Git integration](https://github.com/leo-arch/clifm/wiki/Advanced#git-integration).
 * **NEW**: [Remote file systems management](https://github.com/leo-arch/clifm/wiki/Introduction#net-name-edit-m-mount-name-u-unmount-name).
 * **NEW**: _[Gemini](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)_, a Fish-like auto-suggestions system. Try it running CliFM with the `--suggestions` option.
+* **NEW**: [Compile features in/out](https://github.com/leo-arch/clifm/blob/master/src/README.md#compiling-features-inout).
 
 <h4 align="center"><br><i>Gemini in action</i></h4>
 <p align="center"><img src="images/suggestions.gif"></a></p>
