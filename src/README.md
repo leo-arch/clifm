@@ -174,6 +174,7 @@ clang ... -D_BE_POSIX -D_NOICONS ...
 | `_NOICONS` | Disable icons support |
 | `_NO_SUGGESTIONS` | Disable suggestions support |
 | `_NOTRASH` | Disable trash support |
+| `_NO_ARCHIVING` | Disable archiving support |
 
 <sup>1</sup> Only two features are lost in this way:
 1) Files birth time: We get this information via **statx**(2), which is Linux specific.

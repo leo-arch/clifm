@@ -494,6 +494,7 @@ mime_open(char **args)
 		if (info) {
 			fputs(_("Associated application: None\n"), stderr);
 		} else {
+#ifndef _NO_ARCHIVING
 			/* If an archive/compressed file, run the archiver function */
 			if (is_compressed(file_path, 1) == 0) {
 				char *tmp_cmd[] = {"ad", file_path, NULL};
@@ -510,6 +511,10 @@ mime_open(char **args)
 				fprintf(stderr, _("%s: %s: No associated application "
 						"found\n"), PROGRAM_NAME, args[1]);
 			}
+#else
+			fprintf(stderr, _("%s: %s: No associated application "
+					"found\n"), PROGRAM_NAME, args[1]);
+#endif
 		}
 
 		free(file_path);

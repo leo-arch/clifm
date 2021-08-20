@@ -37,7 +37,9 @@
 #include <readline/readline.h>
 
 #include "actions.h"
+#ifndef _NO_ARCHIVING
 #include "archives.h"
+#endif
 #include "aux.h"
 #include "bookmarks.h"
 #include "checks.h"
@@ -805,6 +807,7 @@ exec_cmd(char **comm)
 	/*   ################ ARCHIVER ##################     */
 	else if (*comm[0] == 'a' && ((comm[0][1] == 'c' || comm[0][1] == 'd')
 	&& !comm[0][2])) {
+#ifndef _NO_ARCHIVING
 		if (!comm[1] || (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)) {
 			puts(_(ARCHIVE_USAGE));
 			return EXIT_SUCCESS;
@@ -814,6 +817,11 @@ exec_cmd(char **comm)
 			exit_code = archiver(comm, 'c');
 		else
 			exit_code = archiver(comm, 'd');
+#else
+		fprintf(stderr, _("%s: This build has been compiled without "
+				"archiving support\n"), PROGRAM_NAME);
+		return EXIT_FAILURE;
+#endif
 	}
 
 	/* ##################################################

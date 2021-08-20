@@ -351,12 +351,14 @@ open_function(char **cmd)
 	case S_IFIFO: strcpy(file_type, _("FIFO/pipe")); break;
 	case S_IFDIR: return cd_function(file);
 	case S_IFREG:
+#ifndef _NO_ARCHIVING
 		/* If an archive/compressed file, call archiver() */
 		if (is_compressed(file, 1) == 0) {
 			char *tmp_cmd[] = {"ad", file, NULL};
 			return archiver(tmp_cmd, 'd');
 		}
 		no_open_file = 0;
+#endif
 		break;
 
 	default:

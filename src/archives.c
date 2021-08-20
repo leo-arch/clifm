@@ -21,6 +21,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA 02110-1301, USA.
 */
+#ifndef _NO_ARCHIVING
 
 #include "helpers.h"
 
@@ -1089,3 +1090,5 @@ zstandard(char *in_file, char *out_file, char mode, char op)
 	free(deq_file);
 	return exit_status;
 }
+#endif /* !_NO_ARCHIVING */
+
