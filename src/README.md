@@ -167,11 +167,11 @@ gcc -o clifm *.c -lreadline -lintl -lmagic
 
 CliFM allows you to enable or disable some features at compile time. Pass one or more of the following options to the compiler using the `-D` parameter. For example:
 ```sh
-clang ... -D_BE_POSIX -D_NOICONS ...
+clang ... -D_BE_POSIX -D_NO_ICONS ...
 ```
 If compiling/installing rather via the Makefile:
 ```sh
-make _BE_POSIX=1 _NOICONS=1 install
+make _BE_POSIX=1 _NO_ICONS=1 install
 ```
 
 
@@ -179,12 +179,12 @@ make _BE_POSIX=1 _NOICONS=1 install
 | --- | --- |
 | `_BE_POSIX` | Build a fully `POSIX.1-2008` compliant executable<sup>1</sup> |
 | `_NERD` | Enable Nerdfont support for icons |
-| `_NO_GETTEXT` | Disable translations support (via `gettext`) |
-| `_NOICONS` | Disable icons support |
-| `_NO_SUGGESTIONS` | Disable suggestions support |
-| `_NOTRASH` | Disable trash support |
 | `_NO_ARCHIVING` | Disable archiving support |
-| `_NOMAGIC` | Allow compilation without `libmagic` dependency<sup>2</sup> |
+| `_NO_GETTEXT` | Disable translations support (via `gettext`) |
+| `_NO_ICONS` | Disable icons support |
+| `_NO_MAGIC` | Allow compilation without `libmagic` dependency<sup>2</sup> |
+| `_NO_SUGGESTIONS` | Disable suggestions support |
+| `_NO_TRASH` | Disable trash support |
 
 <sup>1</sup> Only two features are lost:
 1) Files birth time: We get this information via [statx(2)](https://man7.org/linux/man-pages/man2/statx.2.html), which is Linux specific.

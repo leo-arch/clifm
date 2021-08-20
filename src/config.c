@@ -513,7 +513,7 @@ define_config_file_names(void)
 
 	PLUGINS_DIR = (char *)xnmalloc(config_gral_len + 9, sizeof(char));
 	sprintf(PLUGINS_DIR, "%s/plugins", CONFIG_DIR_GRAL);
-#ifndef _NOTRASH
+#ifndef _NO_TRASH
 	TRASH_DIR = (char *)xnmalloc(user.home_len + 20, sizeof(char));
 	sprintf(TRASH_DIR, "%s/.local/share/Trash", user.home);
 
@@ -983,7 +983,7 @@ create_def_cscheme(void)
 
 		    "# Same as FiletypeColors, but for file extensions. The format is always\n\
 # *.EXT=COLOR\n"
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 		    "ExtColors=\"%s\"\n\n"
 
 		    "DirIconsColor=\"00;33\"\n",
@@ -1008,7 +1008,7 @@ create_config_files(void)
 			/* #############################
 			 * #        TRASH DIRS         #
 			 * ############################# */
-#ifndef _NOTRASH
+#ifndef _NO_TRASH
 	if (stat(TRASH_DIR, &attr) == -1) {
 		char *trash_files = (char *)NULL;
 		trash_files = (char *)xnmalloc(strlen(TRASH_DIR) + 7, sizeof(char));
@@ -1417,7 +1417,7 @@ read_config(void)
 				continue;
 			suggestion_strategy = savestring(opt_str, strlen(opt_str));
 		}
-#endif
+#endif /* !_NO_SUGGESTIONS */
 		else if (*line == 'P' && strncmp(line, "PromptStyle=", 12) == 0) {
 			char opt_str[8] = "";
 			ret = sscanf(line, "PromptStyle=%7s\n", opt_str);
@@ -1501,7 +1501,7 @@ read_config(void)
 			else if (strncmp(opt_str, "false", 5) == 0)
 				light_mode = 0;
 		}
-#ifndef _NOTRASH
+#ifndef _NO_TRASH
 		else if (xargs.trasrm == UNSET && *line == 'T'
 		&& strncmp(line, "TrashAsRm=", 10) == 0) {
 			char opt_str[MAX_BOOL] = "";
@@ -2093,7 +2093,7 @@ reload_config(void)
 	free(CONFIG_DIR_GRAL);
 	free(CONFIG_DIR);
 	CONFIG_DIR = (char *)NULL;
-#ifndef _NOTRASH
+#ifndef _NO_TRASH
 	free(TRASH_DIR);
 	free(TRASH_FILES_DIR);
 	free(TRASH_INFO_DIR);
@@ -2169,7 +2169,7 @@ reload_config(void)
 	suggestions = suggest_filetype_color = UNSET;
 #endif
 
-#ifndef _NOTRASH
+#ifndef _NO_TRASH
 	tr_as_rm = UNSET;
 	trash_ok = 1;
 #endif
@@ -2209,7 +2209,7 @@ reload_config(void)
 		case_sens_path_comp = xargs.case_sens_path_comp;
 	if (xargs.noeln != UNSET)
 		no_eln = xargs.noeln;
-#ifndef _NOTRASH
+#ifndef _NO_TRASH
 	if (xargs.trasrm != UNSET)
 		tr_as_rm = xargs.trasrm;
 #endif
@@ -2277,7 +2277,7 @@ reload_config(void)
 		only_dirs = xargs.only_dirs;
 	if (xargs.tips != UNSET)
 		tips = xargs.tips;
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 	if (xargs.icons != UNSET)
 		icons = xargs.icons;
 #endif

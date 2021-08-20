@@ -551,7 +551,7 @@ extern struct bookmarks_t *bookmarks;
 struct fileinfo {
 	char *color;
 	char *ext_color;
-#ifndef _NOICON
+#ifndef _NO_ICONS
 	char *icon;
 	char *icon_color;
 #endif
@@ -602,7 +602,7 @@ struct param {
 	int ffirst;
 	int files_counter;
 	int hidden;
-#ifndef _NOICON
+#ifndef _NO_ICONS
 	int icons;
 #endif
 	int icons_use_file_color;
@@ -633,7 +633,7 @@ struct param {
 	int suggestions;
 #endif
 	int tips;
-#ifndef _NOTRASH
+#ifndef _NO_TRASH
 	int trasrm;
 #endif
 	int unicode;
@@ -721,7 +721,7 @@ extern short
     files_counter,
     filter_rev,
     home_ok,
-#ifndef _NOICON
+#ifndef _NO_ICONS
     icons,
 #endif
     internal_cmd,
@@ -757,7 +757,7 @@ extern short
     suggestions,
     switch_cscheme,
     tips,
-#ifndef _NOTRASH
+#ifndef _NO_TRASH
     tr_as_rm,
     trash_ok,
 #endif
@@ -853,7 +853,7 @@ extern char
 #endif
     *term,
     *TMP_DIR,
-#ifndef _NOTRASH
+#ifndef _NO_TRASH
     *TRASH_DIR,
     *TRASH_FILES_DIR,
     *TRASH_INFO_DIR,
@@ -929,6 +929,10 @@ extern char
 	sx_c[MAX_COLOR],	     /* Auto-suggestions: internal commands and params */
     wc_c[MAX_COLOR],	     /* Welcome message color */
 
+#ifndef _NO_ICONS
+    dir_ico_c[MAX_COLOR], /* Directories icon color */
+#endif
+
     /* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */
     em_c[MAX_COLOR + 2], /* Error msg color */
@@ -937,8 +941,4 @@ extern char
     ti_c[MAX_COLOR + 2], /* Trash indicator color */
     tx_c[MAX_COLOR + 2], /* Text color */
     si_c[MAX_COLOR + 2], /* stealth indicator color */
-    wm_c[MAX_COLOR + 2], /* Warning msg color */
-
-#ifndef _NOICON
-    dir_ico_c[MAX_COLOR]; /* Directories icon color */
-#endif
+    wm_c[MAX_COLOR + 2]; /* Warning msg color */

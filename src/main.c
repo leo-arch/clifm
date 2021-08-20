@@ -119,7 +119,7 @@ short
     files_counter = UNSET,
 	filter_rev = 0,
     home_ok = 1,
-#ifndef _NOICONS
+#ifndef _NO_ICONS
     icons = 0,
 #endif
     internal_cmd = 0,
@@ -155,7 +155,7 @@ short
     suggestions = UNSET,
     suggest_filetype_color = UNSET,
     switch_cscheme = 0,
-#ifndef _NOTRASH
+#ifndef _NO_TRASH
     tr_as_rm = UNSET,
     trash_ok = 1,
 #endif
@@ -246,7 +246,7 @@ char
     *sys_shell = (char *)NULL,
     *term = (char *)NULL,
     *TMP_DIR = (char *)NULL,
-#ifndef _NOTRASH
+#ifndef _NO_TRASH
     *TRASH_DIR = (char *)NULL,
     *TRASH_FILES_DIR = (char *)NULL,
     *TRASH_INFO_DIR = (char *)NULL,
@@ -511,6 +511,10 @@ char
     sx_c[MAX_COLOR], /* Auto-suggestions: internal commands and params */
     wc_c[MAX_COLOR], /* Welcome message color */
 
+#ifndef _NO_ICONS
+    dir_ico_c[MAX_COLOR], /* Directories icon color */
+#endif
+
     /* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */
     em_c[MAX_COLOR + 2], /* Error msg color */
@@ -519,10 +523,6 @@ char
     wm_c[MAX_COLOR + 2], /* Warning msg color */
     si_c[MAX_COLOR + 2], /* stealth indicator color */
     ti_c[MAX_COLOR + 2], /* Trash indicator color */
-    tx_c[MAX_COLOR + 2], /* Text color */
-#ifndef _NOICONS
-    dir_ico_c[MAX_COLOR], /* Directories icon color */
-#endif
     tx_c[MAX_COLOR + 2]; /* Text color */
 
 #ifdef LINUX_INOTIFY
@@ -725,7 +725,7 @@ main(int argc, char *argv[])
 	}
 
 	get_prompt_cmds();
-#ifndef _NOTRASH
+#ifndef _NO_TRASH
 	if (trash_ok) {
 		trash_n = count_dir(TRASH_FILES_DIR, NO_CPOP);
 		if (trash_n <= 2)

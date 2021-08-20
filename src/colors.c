@@ -325,7 +325,7 @@ set_colors(const char *colorscheme, int env)
 		 *extcolors = (char *)NULL,
 	     *ifacecolors = (char *)NULL;
 
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 	*dir_ico_c = '\0';
 #endif
 
@@ -407,7 +407,7 @@ set_colors(const char *colorscheme, int env)
 			size_t line_size = 0;
 			int file_type_found = 0,
 				ext_type_found = 0,
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 			    iface_found = 0,
 			    dir_icon_found = 0;
 #else
@@ -467,7 +467,7 @@ set_colors(const char *colorscheme, int env)
 					free(color_line);
 				}
 
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 				/* Dir icons Color */
 				if (*line == 'D' && strncmp(line, "DirIconsColor=", 14) == 0) {
 					dir_icon_found = 1;
@@ -498,10 +498,10 @@ set_colors(const char *colorscheme, int env)
 
 					sprintf(dir_ico_c, "\x1b[%sm", opt_str);
 				}
-#endif
+#endif /* !_NO_ICONS */
 
 				if (file_type_found && ext_type_found
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 				&& iface_found && dir_icon_found)
 #else
 				&& iface_found)
@@ -1285,7 +1285,7 @@ set_colors(const char *colorscheme, int env)
 		strcpy(uf_c, DEF_UF_C);
 	if (!*mh_c)
 		strcpy(mh_c, DEF_MH_C);
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 	if (!*dir_ico_c)
 		strcpy(dir_ico_c, DEF_DIR_ICO_C);
 #endif

@@ -44,7 +44,7 @@
 #include "properties.h"
 #include "sort.h"
 
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 #include "icons.h"
 #endif
 
@@ -208,7 +208,7 @@ print_dirhist_map(void)
 	}
 }
 
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 /* Set the icon field to the corresponding icon for FILE. If not found,
  * set the default icon */
 void
@@ -277,7 +277,7 @@ get_ext_icon(const char *restrict ext, int n)
 		}
 	}
 }
-#endif /* _NOICONS */
+#endif /* _NO_ICONS */
 
 /* List files in the current working directory (global variable 'path').
  * Unlike list_dir(), however, this function uses no color and runs
@@ -359,7 +359,7 @@ list_dir_light(void)
 		if (only_dirs && (attr.st_mode & S_IFMT) != S_IFDIR)
 #else
 		if (only_dirs && ent->d_type != DT_DIR)
-#endif
+#endif /* !_DIRENT_HAVE_D_TYPE */
 			continue;
 
 		if (count > ENTRY_N) {
@@ -396,7 +396,7 @@ list_dir_light(void)
 		file_info[n].dir = (ent->d_type == DT_DIR) ? 1 : 0;
 		file_info[n].symlink = (ent->d_type == DT_LNK) ? 1 : 0;
 		file_info[n].type = ent->d_type;
-#endif
+#endif /* !_DIRENT_HAVE_D_TYPE */
 		file_info[n].inode = ent->d_ino;
 		file_info[n].linkn = 1;
 		file_info[n].size = 1;
@@ -406,14 +406,14 @@ list_dir_light(void)
 		file_info[n].ruser = 1;
 		file_info[n].filesn = 0;
 		file_info[n].time = 0;
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 		file_info[n].icon = DEF_FILE_ICON;
 		file_info[n].icon_color = DEF_FILE_ICON_COLOR;
 #endif
 		switch (file_info[n].type) {
 
 		case DT_DIR:
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 			if (icons) {
 				get_dir_icon(file_info[n].name, (int)n);
 				/* If set from the color scheme file */
@@ -432,7 +432,7 @@ list_dir_light(void)
 				file_info[n].color = ed_c;
 			} else {
 				file_info[n].color = nd_c;
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 				file_info[n].icon = ICON_LOCK;
 				file_info[n].icon_color = YELLOW;
 #endif
@@ -441,7 +441,7 @@ list_dir_light(void)
 			break;
 
 		case DT_LNK:
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 			file_info[n].icon = ICON_LINK;
 #endif
 			file_info[n].color = ln_c;
@@ -456,7 +456,7 @@ list_dir_light(void)
 		default: file_info[n].color = df_c; break;
 		}
 
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 		if (xargs.icons_use_file_color == 1 && icons)
 			file_info[n].icon_color = file_info[n].color;
 #endif
@@ -513,7 +513,7 @@ list_dir_light(void)
 			if (total_len > longest)
 				longest = total_len;
 		}
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 		if (icons && !long_view && columned)
 			longest += 3;
 #endif
@@ -731,7 +731,7 @@ list_dir_light(void)
 
 		if (colorize) {
 			ind_char = 0;
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 			if (icons) {
 				if (xargs.icons_use_file_color == 1)
 					file_info[i].icon_color = file_info[i].color;
@@ -761,7 +761,7 @@ list_dir_light(void)
 				printf("%s%d%s %s%s%s", el_c, i + 1, df_c,
 				    file_info[i].color, file_info[i].name, df_c);
 			}
-#endif /* !_NOICONS */
+#endif /* !_NO_ICONS */
 
 			if (file_info[i].dir && classify) {
 				fputs(" /", stdout);
@@ -772,7 +772,7 @@ list_dir_light(void)
 
 		/* No color */
 		else {
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 			if (icons) {
 				if (no_eln)
 					printf("%s %s", file_info[i].icon, file_info[i].name);
@@ -790,7 +790,7 @@ list_dir_light(void)
 				fputs(file_info[i].name, stdout);
 			else
 				printf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
-#endif /* !_NOICONS */
+#endif /* !_NO_ICONS */
 
 			if (classify) {
 				switch (file_info[i].type) {
@@ -812,7 +812,7 @@ list_dir_light(void)
 
 		if (!last_column) {
 			/* Add spaces needed to equate the longest file name length */
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 			int cur_len = (int)file_info[i].eln_n + 1 + (icons ? 3 : 0)
 #else
 			int cur_len = (int)file_info[i].eln_n + 1
@@ -1046,7 +1046,7 @@ list_dir(void)
 		file_info[n].color = (char *)NULL;
 		file_info[n].ext_color = (char *)NULL;
 
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 		/* Default icon for all files */
 		file_info[n].icon = DEF_FILE_ICON;
 		file_info[n].icon_color = DEF_FILE_ICON_COLOR;
@@ -1087,7 +1087,7 @@ list_dir(void)
 		switch (file_info[n].type) {
 
 		case DT_DIR:
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 			if (icons) {
 				get_dir_icon(file_info[n].name, (int)n);
 
@@ -1095,7 +1095,7 @@ list_dir(void)
 				if (*dir_ico_c)
 					file_info[n].icon_color = dir_ico_c;
 			}
-#endif /* _NOICONS */
+#endif /* _NO_ICONS */
 			if (files_counter) {
 				file_info[n].filesn = count_dir(ename, NO_CPOP) - 2;
 			} else {
@@ -1115,7 +1115,7 @@ list_dir(void)
 							 : ((attr.st_mode & 00002) ? ow_c : ed_c);
 			} else {
 				file_info[n].color = nd_c;
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 				file_info[n].icon = ICON_LOCK;
 				file_info[n].icon_color = YELLOW;
 #endif
@@ -1124,7 +1124,7 @@ list_dir(void)
 			break;
 
 		case DT_LNK: {
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 			file_info[n].icon = ICON_LINK;
 #endif
 			struct stat attrl;
@@ -1149,7 +1149,7 @@ list_dir(void)
 			/* Do not perform the access check if the user is root */
 			if (!(flags & ROOT_USR)
 			&& access(file_info[n].name, F_OK | R_OK) == -1) {
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 				file_info[n].icon = ICON_LOCK;
 				file_info[n].icon_color = YELLOW;
 #endif
@@ -1157,13 +1157,13 @@ list_dir(void)
 			} else if (attr.st_mode & 04000) { /* SUID */
 				file_info[n].exec = 1;
 				file_info[n].color = su_c;
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 				file_info[n].icon = ICON_EXEC;
 #endif
 			} else if (attr.st_mode & 02000) { /* SGID */
 				file_info[n].exec = 1;
 				file_info[n].color = sg_c;
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 				file_info[n].icon = ICON_EXEC;
 #endif
 			}
@@ -1178,7 +1178,7 @@ list_dir(void)
 			else if ((attr.st_mode & 00100) /* Exec */
 				 || (attr.st_mode & 00010) || (attr.st_mode & 00001)) {
 				file_info[n].exec = 1;
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 				file_info[n].icon = ICON_EXEC;
 #endif
 				if (file_info[n].size == 0)
@@ -1197,7 +1197,7 @@ list_dir(void)
 			char *ext = strrchr(file_info[n].name, '.');
 			/* Make sure not to take a hidden file for a file extension */
 			if (ext && ext != file_info[n].name) {
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 				if (icons)
 					get_ext_icon(ext, (int)n);
 #endif
@@ -1216,7 +1216,7 @@ list_dir(void)
 				}
 			}
 
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 			/* No extension. Check icons for specific file names */
 			else if (icons)
 				get_file_icon(file_info[n].name, (int)n);
@@ -1233,7 +1233,7 @@ list_dir(void)
 		default: file_info[n].color = df_c; break;
 		}
 
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 		if (xargs.icons_use_file_color == 1 && icons)
 			file_info[n].icon_color = file_info[n].color;
 #endif
@@ -1299,7 +1299,7 @@ list_dir(void)
 				longest = total_len;
 		}
 
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 		if (icons && !long_view && columned)
 			longest += 3;
 #endif
@@ -1520,7 +1520,7 @@ list_dir(void)
 
 		if (colorize) {
 			ind_char = 0;
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 			if (icons) {
 				if (no_eln) {
 					printf("%s%s %s%s%s", file_info[i].icon_color,
@@ -1547,7 +1547,7 @@ list_dir(void)
 				printf("%s%d%s %s%s%s", el_c, i + 1, df_c,
 				    file_info[i].color, file_info[i].name, df_c);
 			}
-#endif /* !_NOICONS */
+#endif /* !_NO_ICONS */
 
 			if (classify) {
 				/* Append directory indicator and files counter */
@@ -1570,7 +1570,7 @@ list_dir(void)
 
 		/* No color */
 		else {
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 			if (icons) {
 				if (no_eln)
 					printf("%s %s", file_info[i].icon, file_info[i].name);
@@ -1595,7 +1595,7 @@ list_dir(void)
 			} else {
 				printf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
 			}
-#endif /* !_NOICONS */
+#endif /* !_NO_ICONS */
 
 			if (classify) {
 				/* Append file type indicator */
@@ -1635,7 +1635,7 @@ list_dir(void)
 
 		if (!last_column) {
 			/* Pad the current file name to equate the longest file name length */
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 			int cur_len = (int)file_info[i].eln_n + 1 + (icons ? 3 : 0) + (int)file_info[i].len + (ind_char ? 1 : 0);
 #else
 			int cur_len = (int)file_info[i].eln_n + 1 + (int)file_info[i].len + (ind_char ? 1 : 0);

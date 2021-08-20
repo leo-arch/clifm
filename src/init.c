@@ -107,7 +107,7 @@ get_home(void)
 		 * prevent functions from trying to access any of these
 		 * directories */
 		home_ok = config_ok = 0;
-#ifndef _NOTRASH
+#ifndef _NO_TRASH
 		trash_ok = 0;
 #endif
 		/* Print message: trash, bookmarks, command logs, commands
@@ -996,7 +996,7 @@ external_arguments(int argc, char **argv)
 		case 21: usr_cscheme = savestring(optarg, strlen(optarg)); break;
 		case 22: xargs.cd_on_quit = cd_on_quit = 1; break;
 		case 23: xargs.no_dirjump = 1; break;
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 		case 24: xargs.icons = icons = 1; break;
 		case 25:
 			xargs.icons = icons = 1;
@@ -1027,7 +1027,7 @@ external_arguments(int argc, char **argv)
 			break;
 
 		case 29:
-#ifndef _NOTRASH
+#ifndef _NO_TRASH
 			xargs.trasrm = tr_as_rm = 1; break;
 #else
 		fprintf(stderr, _("%s: trash: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
@@ -1439,7 +1439,7 @@ unset_xargs(void)
 	xargs.ffirst = UNSET;
 	xargs.files_counter = UNSET;
 	xargs.hidden = UNSET;
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 	xargs.icons = UNSET;
 	xargs.icons_use_file_color = UNSET;
 #endif
@@ -1469,7 +1469,7 @@ unset_xargs(void)
 	xargs.suggestions = UNSET;
 #endif
 	xargs.tips = UNSET;
-#ifndef _NOTRASH
+#ifndef _NO_TRASH
 	xargs.trasrm = UNSET;
 #endif
 	xargs.unicode = UNSET;
@@ -2024,7 +2024,7 @@ check_options(void)
 		else
 			case_sens_path_comp = xargs.case_sens_path_comp;
 	}
-#ifndef _NOTRASH
+#ifndef _NO_TRASH
 	if (tr_as_rm == UNSET) {
 		if (xargs.trasrm == UNSET)
 			tr_as_rm = DEF_TRASRM;

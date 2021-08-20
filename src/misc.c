@@ -1312,7 +1312,7 @@ free_stuff(void)
 	free(DATA_DIR);
 	free(CONFIG_DIR_GRAL);
 	free(CONFIG_DIR);
-#ifndef _NOTRASH
+#ifndef _NO_TRASH
 	free(TRASH_DIR);
 	free(TRASH_FILES_DIR);
 	free(TRASH_INFO_DIR);

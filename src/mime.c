@@ -32,7 +32,7 @@
 #include <sys/stat.h>
 #include <readline/readline.h>
 
-#ifndef _NOMAGIC
+#ifndef _NO_MAGIC
 #include <magic.h>
 #endif
 
@@ -199,7 +199,7 @@ get_app(const char *mime, const char *ext)
 	return (char *)NULL;
 }
 
-#ifndef _NOMAGIC
+#ifndef _NO_MAGIC
 /* Get FILE's MIME type using the libmagic library */
 static char *
 xmagic(const char *file)
@@ -321,7 +321,7 @@ get_mime(char *file)
 	unlink(MIME_TMP_FILE);
 	return mime_type;
 }
-#endif /* !_NOMAGIC */
+#endif /* !_NO_MAGIC */
 
 /* Open a file according to the application associated to its MIME type
  * or extension. It also accepts the 'info' and 'edit' arguments, the
@@ -460,7 +460,7 @@ mime_open(char **args)
 	}
 
 	/* Get file's mime-type */
-#ifndef _NOMAGIC
+#ifndef _NO_MAGIC
 	char *mime = xmagic(file_path);
 #else
 	char *mime = get_mime(file_path);

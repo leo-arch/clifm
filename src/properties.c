@@ -439,7 +439,7 @@ print_entry_props(struct fileinfo *props, size_t max)
 	int trim = 0;
 
 	size_t cur_len = props->eln_n + 1 + props->len;
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 	if (icons) {
 		cur_len += 3;
 		max += 3;
@@ -463,7 +463,7 @@ print_entry_props(struct fileinfo *props, size_t max)
 	if (pad < 0)
 		pad = 0;
 
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 	printf("%s%s%c%s%s%s%-*s%s%c %c/%c%c%c/%c%c%c/%c%c%c%s  "
 	       "%u:%u  %s  %s\n",
 	    colorize ? props->icon_color : "",

@@ -63,7 +63,7 @@
 #include "selection.h"
 #include "sort.h"
 #include "strings.h"
-#ifndef _NOTRASH
+#ifndef _NO_TRASH
 #include "trash.h"
 #endif
 #include "messages.h"
@@ -568,7 +568,7 @@ exec_cmd(char **comm)
 	/*         ############### TRASH ##################     */
 	else if (*comm[0] == 't' && (!comm[0][1] || strcmp(comm[0], "tr") == 0
 	|| strcmp(comm[0], "trash") == 0)) {
-#ifndef _NOTRASH
+#ifndef _NO_TRASH
 		if (comm[1] && *comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
 			puts(_(TRASH_USAGE));
 			return EXIT_SUCCESS;
@@ -587,12 +587,12 @@ exec_cmd(char **comm)
 #else
 		fprintf(stderr, _("%s: trash: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 		return EXIT_FAILURE;
-#endif /* !_NOTRASH */
+#endif /* !_NO_TRASH */
 	}
 		
 	else if (*comm[0] == 'u' && (!comm[0][1] || strcmp(comm[0], "undel") == 0
 	|| strcmp(comm[0], "untrash") == 0)) {
-#ifndef _NOTRASH
+#ifndef _NO_TRASH
 		if (comm[1] && *comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
 			puts(_(UNTRASH_USAGE));
 			return EXIT_SUCCESS;
@@ -606,7 +606,7 @@ exec_cmd(char **comm)
 #else
 		fprintf(stderr, _("%s: trash: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 		return EXIT_FAILURE;
-#endif /* !_NOTRASH */
+#endif /* !_NO_TRASH */
 	}
 
 	/*         ############### SELECTION ##################     */
@@ -857,7 +857,7 @@ exec_cmd(char **comm)
 		return exit_code;
 	}
 	else if (*comm[0] == 'i' && strcmp(comm[0], "icons") == 0) {
-#ifndef _NOICONS
+#ifndef _NO_ICONS
 		if (!comm[1] || (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)) {
 			puts(_(ICONS_USAGE));
 		} else if (*comm[1] == 'o' && comm[1][1] == 'n' && !comm[1][2]) {
@@ -882,7 +882,7 @@ exec_cmd(char **comm)
 #else
 		fprintf(stderr, _("%s: icons: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
 		return EXIT_SUCCESS;
-#endif /* _NOICONS */
+#endif /* _NO_ICONS */
 	}
 
 	else if (*comm[0] == 'c' && ((comm[0][1] == 's' && !comm[0][2])

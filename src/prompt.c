@@ -39,7 +39,7 @@
 #include "misc.h"
 #include "navigation.h"
 #include "prompt.h"
-#ifndef _NOTRASH
+#ifndef _NO_TRASH
 #include "trash.h"
 #else
 #include <time.h>
@@ -93,7 +93,7 @@ prompt(void)
 		for (i = 0; i < prompt_cmds_n; i++)
 			launch_execle(prompt_cmds[i]);
 	}
-#ifndef _NOTRASH
+#ifndef _NO_TRASH
 	/* Update trash and sel file indicator on every prompt call */
 	if (trash_ok) {
 		trash_n = count_dir(TRASH_FILES_DIR, NO_CPOP);
