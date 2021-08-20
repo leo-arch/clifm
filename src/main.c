@@ -119,7 +119,7 @@ short
     files_counter = UNSET,
 	filter_rev = 0,
     home_ok = 1,
-#ifndef _NOICON
+#ifndef _NOICONS
     icons = 0,
 #endif
     internal_cmd = 0,
@@ -520,10 +520,10 @@ char
     si_c[MAX_COLOR + 2], /* stealth indicator color */
     ti_c[MAX_COLOR + 2], /* Trash indicator color */
     tx_c[MAX_COLOR + 2], /* Text color */
-
-#ifndef _NOICON
-    dir_ico_c[MAX_COLOR]; /* Directories icon color */
+#ifndef _NOICONS
+    dir_ico_c[MAX_COLOR], /* Directories icon color */
 #endif
+    tx_c[MAX_COLOR + 2]; /* Text color */
 
 #ifdef LINUX_INOTIFY
 int inotify_fd, inotify_wd = -1;

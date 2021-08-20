@@ -24,10 +24,6 @@
 
 #include "helpers.h"
 
-#ifndef _NOICON
-#include "icons.h"
-#endif
-
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
@@ -47,6 +43,10 @@
 #include "misc.h"
 #include "properties.h"
 #include "sort.h"
+
+#ifndef _NOICONS
+#include "icons.h"
+#endif
 
 void
 print_sort_method(void)
@@ -402,13 +402,14 @@ list_dir_light(void)
 		file_info[n].size = 1;
 		file_info[n].color = (char *)NULL;
 		file_info[n].ext_color = (char *)NULL;
-		file_info[n].icon = DEF_FILE_ICON;
-		file_info[n].icon_color = DEF_FILE_ICON_COLOR;
 		file_info[n].exec = 0;
 		file_info[n].ruser = 1;
 		file_info[n].filesn = 0;
 		file_info[n].time = 0;
-
+#ifndef _NOICONS
+		file_info[n].icon = DEF_FILE_ICON;
+		file_info[n].icon_color = DEF_FILE_ICON_COLOR;
+#endif
 		switch (file_info[n].type) {
 
 		case DT_DIR:
@@ -419,7 +420,7 @@ list_dir_light(void)
 				if (*dir_ico_c)
 					file_info[n].icon_color = dir_ico_c;
 			}
-#endif /* _NOICONS */
+#endif
 
 			files_counter
 			    ? (file_info[n].filesn = (count_dir(ename, NO_CPOP) - 2))
@@ -431,8 +432,10 @@ list_dir_light(void)
 				file_info[n].color = ed_c;
 			} else {
 				file_info[n].color = nd_c;
+#ifndef _NOICONS
 				file_info[n].icon = ICON_LOCK;
 				file_info[n].icon_color = YELLOW;
+#endif
 			}
 
 			break;
@@ -456,7 +459,7 @@ list_dir_light(void)
 #ifndef _NOICONS
 		if (xargs.icons_use_file_color == 1 && icons)
 			file_info[n].icon_color = file_info[n].color;
-#endif /* _NOICONS */
+#endif
 
 		n++;
 		count++;

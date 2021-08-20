@@ -7,7 +7,7 @@
 #include "icons-in-terminal.h"
 #else
 #include "icons-nerdfont.h"
-#endif
+#endif /* !_NERD */
 
 struct icons_t {
 	char *name;
@@ -212,7 +212,7 @@ char
     ICON_GAMES[] = NERD_GAMES,
     ICON_DROPBOX[] = NERD_DROPBOX,
     ICON_STEAM[] = NERD_STEAM;
-#endif
+#endif /* !_NERD */
 
 #define BLUE "\x1b[0;34m"
 #define B_BLUE "\x1b[1;34m"
@@ -457,4 +457,4 @@ struct icons_t icon_filenames[] = {
     {"TODO", ICON_LIST, WHITE},
 };
 
-#endif /* ICONS_H */
+#endif /* !ICONS_H */
