@@ -18,7 +18,7 @@ BSD compatibility: We try to keep CliFM working on BSD systems (at the very leas
 
 Generally, try to stick as closely as possible to the `Linux kernel coding style`. See https://www.kernel.org/doc/html/v4.10/process/coding-style.html
 
-Indentation: TABS
+Indentation: TABS (I use a width of 4, but you can use 8 if you like)
 
 Comments: C style only. Ex:
 
@@ -159,6 +159,8 @@ cc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -I/usr/local
 gcc -o clifm *.c -lreadline -lintl -lmagic
 ```
 
+**NOTE**: Since compiling in this way only produces a binary file, it is necessary to manually copy the remaining files. See the `install` block of the [Makefile](https://github.com/leo-arch/clifm/blob/master/Makefile).
+
 ### Compiling features in/out
 
 CliFM allows you to enable or disable some features at compile time. Pass one or more of the following options to the compiler using the `-D` parameter. For example:
@@ -182,8 +184,6 @@ clang ... -D_BE_POSIX -D_NOICONS ...
 2) Version sort: We use here **versionsort**, which is a **GNU** extension.
 
 <sup>2</sup> Without `libmagic`, querying files MIME type implies grabing the output of the [**file**(1)](https://www.man7.org/linux/man-pages/man1/file.1.html) command, which of course is less optimus than directly querying the `libmagic` database itself (we need to run the command, redirect its output to a file, open the file, read it, close it, and then delete it). Though perhaps unnoticiable, this is an important difference.
-
-**NOTE**: Since compiling in this way only produces a binary file, it is necessary to manually copy the remaining files. See the `install` block of the [Makefile](https://github.com/leo-arch/clifm/blob/master/Makefile).
 
 ## 5) Plugins
 
