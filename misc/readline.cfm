@@ -15,6 +15,8 @@ set mark-symlinked-directories on
 set colored-completion-prefix on
 # Color the common prefix in menu-complete
 set menu-complete-display-prefix on
+# Enable paste protection
+set enable-bracketed-paste on
 
 set show-all-if-ambiguous on
 set completion-ignore-case on
