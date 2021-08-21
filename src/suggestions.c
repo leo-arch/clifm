@@ -225,11 +225,11 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	size_t cucs = cuc + suggestion_len;
 	/* slines: amount of lines we need to print the suggestion, including
 	 * the current line */
-	int slines = 1, cucs_rem = 0;
+	int slines = 1;
 
 	if (cucs > term_cols) {
 		slines = cucs / (int)term_cols;
-		cucs_rem = cucs % term_cols;
+		int cucs_rem = cucs % term_cols;
 		if (cucs_rem > 0)
 			slines++;
 	}
@@ -1106,7 +1106,7 @@ rl_suggestions(char c)
 
 	switch(*lb) {
 	case 'c': /* Color schemes */
-		if (lb[1] && lb[1] == 's' && lb[2] && lb[2] == ' ') {
+		if (lb[1] == 's' && lb[2] == ' ') {
 			size_t i = 0, len = strlen(last_word);
 			for (; color_schemes[i]; i++) {
 				if (*last_word == *color_schemes[i]
@@ -1125,8 +1125,8 @@ rl_suggestions(char c)
 		break;
 
 	case 'j': /* j command */
-		if (lb[1] && (lb[1] == ' '  || ((lb[1] == 'c'
-		|| lb[1] == 'o' || lb[1] == 'p') && lb[2] && lb[2] == ' '))) {
+		if (lb[1] == ' '  || ((lb[1] == 'c'	|| lb[1] == 'o'
+		|| lb[1] == 'p') && lb[2] == ' ')) {
 			printed = check_jcmd(full_line);
 			if (printed) {
 				goto SUCCESS;
@@ -1139,8 +1139,7 @@ rl_suggestions(char c)
 		break;
 
 	case 'n': /* Remotes */
-		if (lb[1] && lb[1] == 'e' && lb[2] && lb[2] == 't' && lb[3]
-		&& lb[3] == ' ') {
+		if (lb[1] == 'e' && lb[2] == 't' && lb[3] == ' ') {
 			size_t i = 0, len = strlen(last_word);
 			for (; remotes[i].name; i++) {
 				if (*last_word == *remotes[i].name

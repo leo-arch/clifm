@@ -392,18 +392,18 @@ show_sel_files(void)
 		struct winsize w;
 		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 		size_t counter = 0;
-		unsigned short term_rows = w.ws_row;
-		term_rows -= 2;
+		unsigned short t_rows = w.ws_row;
+		t_rows -= 2;
 		size_t i;
 
 		for (i = 0; i < sel_n; i++) {
 			/* if (pager && counter > (term_rows-2)) { */
-			if (pager && counter > (size_t)term_rows) {
+			if (pager && counter > (size_t)t_rows) {
 				switch (xgetchar()) {
 				/* Advance one line at a time */
 				case 66: /* fallthrough */ /* Down arrow */
 				case 10: /* fallthrough */ /* Enter */
-				case 32:		   /* Space */
+				case 32: /* Space */
 					break;
 				/* Advance one page at a time */
 				case 126:
@@ -426,8 +426,7 @@ show_sel_files(void)
 			}
 
 			counter++;
-			colors_list(sel_elements[i], (int)i + 1, NO_PAD,
-			    PRINT_NEWLINE);
+			colors_list(sel_elements[i], (int)i + 1, NO_PAD, PRINT_NEWLINE);
 		}
 
 		char *human_size = get_size_unit(total_sel_size);

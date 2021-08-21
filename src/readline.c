@@ -402,9 +402,7 @@ my_rl_path_completion(const char *text, int state)
 			return (char *)NULL;
 	}
 
-	/* Perhaps I should add bookmarks here */
-
-	int rl_complete_with_tilde_expansion = 0;
+/*	int rl_complete_with_tilde_expansion = 0; */
 	/* ~/Doc -> /home/user/Doc */
 
 	static DIR *directory;
@@ -782,23 +780,23 @@ my_rl_path_completion(const char *text, int state)
 
 		/* dirname && (strcmp(dirname, ".") != 0) */
 		if (dirname && (dirname[0] != '.' || dirname[1])) {
-			if (rl_complete_with_tilde_expansion && *users_dirname == '~') {
+/*			if (rl_complete_with_tilde_expansion && *users_dirname == '~') {
 				size_t dirlen = strlen(dirname);
-				temp = (char *)xcalloc(dirlen + strlen(ent->d_name) + 2,
+				temp = (char *)xnmalloc(dirlen + strlen(ent->d_name) + 2,
 									sizeof(char));
 				strcpy(temp, dirname);
-				/* Canonicalization cuts off any final slash present.
-				 * We need to add it back. */
+				// Canonicalization cuts off any final slash present.
+				// We need to add it back.
 
 				if (dirname[dirlen - 1] != '/') {
 					temp[dirlen] = '/';
 					temp[dirlen + 1] = '\0';
 				}
-			} else {
-				temp = (char *)xcalloc(strlen(users_dirname) +
-						strlen(ent->d_name) + 1, sizeof(char));
-				strcpy(temp, users_dirname);
-			}
+			} else { */
+			temp = (char *)xnmalloc(strlen(users_dirname) +
+					strlen(ent->d_name) + 1, sizeof(char));
+			strcpy(temp, users_dirname);
+/*			} */
 			strcat(temp, ent->d_name);
 		} else {
 			temp = savestring(ent->d_name, strlen(ent->d_name));

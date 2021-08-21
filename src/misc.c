@@ -972,8 +972,8 @@ list_mountpoints(void)
 			while (str && counter < 2) {
 				if (counter == 1) { /* 1 == second field */
 					printf("%s%zu%s %s%s%s (%s)\n", el_c, mp_n + 1,
-					    df_c, (access(str, R_OK | X_OK) == 0) ? di_c : nd_c, str, df_c,
-					    device);
+					    df_c, (access(str, R_OK | X_OK) == 0) ? di_c : nd_c,
+					    str, df_c, device);
 					/* Store the second field (mountpoint) into an
 					 * array */
 					mountpoints = (char **)xrealloc(mountpoints,
@@ -1014,8 +1014,8 @@ list_mountpoints(void)
 		 * to a block device (/dev) */
 		if (strncmp(fslist[i].f_mntfromname, "/dev/", 5) == 0) {
 			printf("%s%u%s %s%s%s (%s)\n", el_c, j + 1, df_c,
-			    (access(fslist[i].f_mntonname, R_OK | X_OK)
-			    == 0) ? di_c : nd_c, fslist[i].f_mntonname,
+			    (access(fslist[i].f_mntonname, R_OK | X_OK) == 0)
+			    ? di_c : nd_c, fslist[i].f_mntonname,
 			    df_c, fslist[i].f_mntfromname);
 			/* Store the mountpoint into an array */
 			mountpoints = (char **)xrealloc(mountpoints,

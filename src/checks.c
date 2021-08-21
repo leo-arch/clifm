@@ -52,16 +52,16 @@ static const char *UNSUPPORTED_TERM[] = {"dumb", /*"cons25",*/ "emacs", NULL};
 void
 check_term(void)
 {
-	char *term = getenv("TERM");
-	if (!term) {
+	char *_term = getenv("TERM");
+	if (!_term) {
 		fprintf(stderr, _("%s: Error getting terminal type\n"), PROGRAM_NAME);
 		exit(EXIT_FAILURE);
 	}
 
 	int i;
 	for (i = 0; UNSUPPORTED_TERM[i]; i++) {
-		if (*term == *UNSUPPORTED_TERM[i]
-		&& strcmp(term, UNSUPPORTED_TERM[i]) == 0) {
+		if (*_term == *UNSUPPORTED_TERM[i]
+		&& strcmp(_term, UNSUPPORTED_TERM[i]) == 0) {
 			fprintf(stderr, _("%s: '%s': Unsupported terminal. This "
 					"terminal cannot understand escape sequences\n"),
 					PROGRAM_NAME, UNSUPPORTED_TERM[i]);

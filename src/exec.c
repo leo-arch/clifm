@@ -195,7 +195,7 @@ launch_execle(const char *cmd)
 		_exit(errno);
 	}
 	/* Get command status */
-	else if (pid > 0) {
+	else {
 		/* The parent process calls waitpid() on the child */
 		if (waitpid(pid, &status, 0) > 0) {
 			if (WIFEXITED(status) && !WEXITSTATUS(status)) {
@@ -725,8 +725,7 @@ exec_cmd(char **comm)
 	/*    ############### PINNED FILE ##################     */
 	else if (*comm[0] == 'p' && strcmp(comm[0], "pin") == 0) {
 		if (comm[1]) {
-			if (*comm[1] == '-' && *comm[1] == '-'
-			&& strcmp(comm[1], "--help") == 0)
+			if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
 				puts(PIN_USAGE);
 			else
 				exit_code = pin_directory(comm[1]);

@@ -1317,7 +1317,7 @@ read_config(void)
 		rl_vi_editing_mode(1, 0);
 
 	*div_line_char = '\0';
-#define MAX_BOOL 6
+#define MAX_BOOL 6 /* false (5) + 1 */
 	/* starting path(14) + PATH_MAX + \n(1)*/
 	char line[PATH_MAX + 15];
 
@@ -1332,7 +1332,7 @@ read_config(void)
 		 * set here */
 		else if (xargs.splash == UNSET && *line == 'S'
 		&& strncmp(line, "SplashScreen=", 13) == 0) {
-			char opt_str[MAX_BOOL] = ""; /* false (5) + 1 */
+			char opt_str[MAX_BOOL] = "";
 			ret = sscanf(line, "SplashScreen=%5s\n", opt_str);
 			/* According to cppcheck: "sscanf() without field
 			 * width limits can crash with huge input data".
@@ -1349,7 +1349,7 @@ read_config(void)
 
 		else if (xargs.case_sens_dirjump == UNSET && *line == 'C'
 		&& strncmp(line, "CaseSensitiveDirJump=", 21) == 0) {
-			char opt_str[MAX_BOOL] = ""; /* false (5) + 1 */
+			char opt_str[MAX_BOOL] = "";
 			ret = sscanf(line, "CaseSensitiveDirJump=%5s\n", opt_str);
 
 			if (ret == -1)
@@ -1474,20 +1474,18 @@ read_config(void)
 		}
 
 		else if (!usr_cscheme && *line == 'C' && strncmp(line, "ColorScheme=", 12) == 0) {
-			char *opt_str = (char *)NULL;
-			opt_str = strchr(line, '=');
-
-			if (!opt_str)
+			char *opt = strchr(line, '=');
+			if (!opt)
 				continue;
 
-			size_t len = strlen(opt_str);
-			if (opt_str[len - 1] == '\n')
-				opt_str[len - 1] = '\0';
+			size_t len = strlen(opt);
+			if (opt[len - 1] == '\n')
+				opt[len - 1] = '\0';
 
-			if (!*(++opt_str))
+			if (!*(++opt))
 				continue;
 
-			usr_cscheme = savestring(opt_str, len);
+			usr_cscheme = savestring(opt, len);
 		}
 
 		else if (xargs.light == UNSET && *line == 'L'
@@ -1552,17 +1550,13 @@ read_config(void)
 		}
 
 		else if (!opener && *line == 'O' && strncmp(line, "Opener=", 7) == 0) {
-			char *opt_str = (char *)NULL;
-			opt_str = straft(line, '=');
-			if (!opt_str)
+			char *opt = strchr(line, '=');
+			if (!opt || !*opt || !*(++opt))
 				continue;
-			char *tmp = remove_quotes(opt_str);
-			if (!tmp) {
-				free(opt_str);
+			char *tmp = remove_quotes(opt);
+			if (!tmp)
 				continue;
-			}
 			opener = savestring(tmp, strlen(tmp));
-			free(opt_str);
 		}
 
 		else if (xargs.tips == UNSET && *line == 'T' && strncmp(line, "Tips=", 5) == 0) {
@@ -1842,33 +1836,26 @@ read_config(void)
 		else if (*line == 'S' && strncmp(line, "SystemShell=", 12) == 0) {
 			free(user.shell);
 			user.shell = (char *)NULL;
-			char *opt_str = straft(line, '=');
-			if (!opt_str)
+			char *opt = strchr(line, '=');
+			if (!opt || !*opt || !*(++opt))
 				continue;
 
-			char *tmp = remove_quotes(opt_str);
-			if (!tmp) {
-				free(opt_str);
+			char *tmp = remove_quotes(opt);
+			if (!tmp)
 				continue;
-			}
 
 			if (*tmp == '/') {
-				if (access(tmp, F_OK | X_OK) != 0) {
-					free(opt_str);
+				if (access(tmp, F_OK | X_OK) != 0)
 					continue;
-				}
 				user.shell = savestring(tmp, strlen(tmp));
 			} else {
 				char *shell_path = get_cmd_path(tmp);
-				if (!shell_path) {
-					free(opt_str);
+				if (!shell_path)
 					continue;
-				}
 
 				user.shell = savestring(shell_path, strlen(shell_path));
 				free(shell_path);
 			}
-			free(opt_str);
 		}
 
 		else if (*line == 'T' && strncmp(line, "TerminalCmd=", 12) == 0) {
@@ -1877,18 +1864,15 @@ read_config(void)
 				term = (char *)NULL;
 			}
 
-			char *opt_str = straft(line, '=');
-			if (!opt_str)
+			char *opt = strchr(line, '=');
+			if (!opt || !*opt || !*(++opt))
 				continue;
 
-			char *tmp = remove_quotes(opt_str);
-			if (!tmp) {
-				free(opt_str);
+			char *tmp = remove_quotes(opt);
+			if (!tmp)
 				continue;
-			}
 
 			term = savestring(tmp, strlen(tmp));
-			free(opt_str);
 		}
 
 		else if (xargs.ffirst == UNSET && *line == 'L'
@@ -1970,16 +1954,13 @@ read_config(void)
 		}
 
 		else if (*line == 'D' && strncmp(line, "DividingLineChar=", 17) == 0) {
-			/* Accepts both chars and decimal integers */
-			char opt_c[NAME_MAX];
-			*opt_c = '\0';
-			sscanf(line, "DividingLineChar=%s", opt_c);
-			if (!*opt_c) {
+			char *opt = strchr(line, '=');
+			if (!opt || !*opt || !*(++opt)) {
 				div_line_char[0] = DEF_DIV_LINE_CHAR;
 				div_line_char[1] = '\0';
 			} else {
-				char *tmp = remove_quotes(opt_c);
-				strncpy(div_line_char, tmp ? tmp : opt_c, NAME_MAX);
+				char *tmp = remove_quotes(opt);
+				strncpy(div_line_char, tmp ? tmp : opt, NAME_MAX);
 			}
 		}
 
@@ -2001,32 +1982,26 @@ read_config(void)
 
 		else if (xargs.path == UNSET && cur_ws == UNSET && *line == 'S'
 		&& strncmp(line, "StartingPath=", 13) == 0) {
-			char *opt_str = straft(line, '=');
-			if (!opt_str)
+			char *opt = strchr(line, '=');
+			if (!opt || !*opt || !*(++opt) )
 				continue;
 
-			char *tmp = remove_quotes(opt_str);
-			if (!tmp) {
-				free(opt_str);
+			char *tmp = remove_quotes(opt);
+			if (!tmp)
 				continue;
-			}
 
-			/* If starting path is not NULL, and exists,
-			 * and is a directory, and the user has
-			 * appropriate permissions, set path to starting
-			 * path. If any of these conditions is false,
-			 * path will be set to default, that is, CWD */
+			/* If starting path is not NULL, and exists, and is a
+			 * directory, and the user has appropriate permissions,
+			 * set path to starting path. If any of these conditions
+			 * is false, path will be set to default, that is, CWD */
 			if (xchdir(tmp, SET_TITLE) == 0) {
 				free(ws[cur_ws].path);
 				ws[cur_ws].path = savestring(tmp, strlen(tmp));
 			} else {
-				_err('w', PRINT_PROMPT, _("%s: '%s': %s. "
-							  "Using the current working directory "
-							  "as starting path\n"),
-				    PROGRAM_NAME,
-				    tmp, strerror(errno));
+				_err('w', PRINT_PROMPT, _("%s: '%s': %s. Using the "
+					"current working directory as starting path\n"),
+					PROGRAM_NAME, tmp, strerror(errno));
 			}
-			free(opt_str);
 		}
 	}
 
@@ -2034,7 +2009,6 @@ read_config(void)
 
 	if (filter) {
 		ret = regcomp(&regex_exp, filter, REG_NOSUB | REG_EXTENDED);
-
 		if (ret != EXIT_SUCCESS) {
 			_err('w', PRINT_PROMPT, _("%s: '%s': Invalid regular "
 				  "expression\n"), PROGRAM_NAME, filter);
@@ -2201,6 +2175,14 @@ reload_config(void)
 	if (xargs.suggestions != UNSET)
 		suggestions = xargs.suggestions;
 #endif
+#ifndef _NO_TRASH
+	if (xargs.trasrm != UNSET)
+		tr_as_rm = xargs.trasrm;
+#endif
+#ifndef _NO_ICONS
+	if (xargs.icons != UNSET)
+		icons = xargs.icons;
+#endif
 	if (xargs.printsel != UNSET)
 		print_selfiles = xargs.printsel;
 	if (xargs.case_sens_dirjump != UNSET)
@@ -2209,10 +2191,6 @@ reload_config(void)
 		case_sens_path_comp = xargs.case_sens_path_comp;
 	if (xargs.noeln != UNSET)
 		no_eln = xargs.noeln;
-#ifndef _NO_TRASH
-	if (xargs.trasrm != UNSET)
-		tr_as_rm = xargs.trasrm;
-#endif
 	if (xargs.no_colors != UNSET)
 		colorize = xargs.no_colors;
 	if (xargs.no_columns != UNSET)
@@ -2277,10 +2255,6 @@ reload_config(void)
 		only_dirs = xargs.only_dirs;
 	if (xargs.tips != UNSET)
 		tips = xargs.tips;
-#ifndef _NO_ICONS
-	if (xargs.icons != UNSET)
-		icons = xargs.icons;
-#endif
 	if (xargs.autojump != UNSET)
 		autojump = xargs.autojump;
 	if (autojump)
@@ -2288,7 +2262,6 @@ reload_config(void)
 
 	/* Free the aliases and prompt_cmds arrays to be allocated again */
 	int i = dirhist_total_index;
-
 	while (--i >= 0)
 		free(old_pwd[i]);
 
