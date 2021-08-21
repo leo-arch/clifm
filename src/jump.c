@@ -177,7 +177,7 @@ save_jumpdb(void)
 			}
 
 			/* Forget directories ranked below MIN_JUMP_RANK */
-			if (jump_db[i].keep != 1 && jump_db[i].rank < min_jump_rank {
+			if (jump_db[i].keep != 1 && jump_db[i].rank < min_jump_rank) {
 				/* Discount from TOTAL_RANK the rank of the now forgotten
 				 * directory to keep this total up to date */
 				total_rank -= jump_db[i].rank;
