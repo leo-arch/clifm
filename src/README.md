@@ -169,13 +169,6 @@ gcc -o clifm *.c -lreadline -lintl -lmagic
 upx clifm
 ```
 
-or
-```sh
-upx -qqq clifm
-```
-
-to supress all output.
-
 ### Compiling features in/out
 
 CliFM allows you to enable or disable some features at compile time. If for whatever reason you don't plan to use a certain feature, it is better to remove this feature from the resulting binary: you'll get a (bit) faster and smaller executable. To do this, pass one or more of the following options to the compiler using the `-D` parameter. For example, to get a POSIX compliant executable without icons support:
@@ -194,14 +187,14 @@ make _BE_POSIX=1 _NO_ICONS=1 install
 | `_NO_ARCHIVING` | Disable archiving support |
 | `_NO_GETTEXT` | Disable translations support (via `gettext`) |
 | `_NO_ICONS` | Disable icons support |
-| `_NO_LIRA` | Disable [Lira]() support |
+| `_NO_LIRA` | Disable [Lira](https://github.com/leo-arch/clifm/wiki/Specifics#resource-opener) support |
 | `_NO_MAGIC` | Allow compilation without `libmagic` dependency<sup>2</sup> |
 | `_NO_SUGGESTIONS` | Disable suggestions support |
 | `_NO_TRASH` | Disable trash support |
 
 <sup>1</sup> Only two features are lost:
 1) Files birth time: We get this information via [statx(2)](https://man7.org/linux/man-pages/man2/statx.2.html), which is Linux specific.
-2) Version sort: We use here [versionsort](https://man7.org/linux/man-pages/man3/scandir.3.html), which is a **GNU** extension.
+2) Version sort: We use here [versionsort](https://man7.org/linux/man-pages/man3/scandir.3.html), a GNU extension.
 
 <sup>2</sup> Without `libmagic`, querying files MIME type implies grabing the output of the [file(1)](https://www.man7.org/linux/man-pages/man1/file.1.html) command, which of course is less optimus than directly querying the `libmagic` database itself (we need to run the command, redirect its output to a file, open the file, read it, close it, and then delete it). Though perhaps unnoticiable, this is an important difference.
 
