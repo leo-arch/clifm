@@ -252,10 +252,7 @@ edit_actions(void)
 
 	time_t mtime_bfr = (time_t)file_attrib.st_mtime;
 
-	char *cmd[] = {"mm", ACTIONS_FILE, NULL};
-
-	int ret = mime_open(cmd);
-
+	int ret = open_file(ACTIONS_FILE);
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 

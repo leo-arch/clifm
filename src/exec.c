@@ -922,8 +922,8 @@ exec_cmd(char **comm)
 			free(opener);
 			opener = (char *)NULL;
 		}
-		if (strcmp(comm[1], "default") != 0) {
-			opener = (char *)xcalloc(strlen(comm[1]) + 1, sizeof(char));
+		if (strcmp(comm[1], "default") != 0 && strcmp(comm[1], "lira") != 0) {
+			opener = (char *)xnmalloc(strlen(comm[1]) + 1, sizeof(char));
 			strcpy(opener, comm[1]);
 		}
 		printf(_("opener: Opener set to '%s'\n"), (opener) ? opener
@@ -1021,8 +1021,15 @@ exec_cmd(char **comm)
 		return (exit_code = remotes_function(comm));
 
 	/* #### MIME #### */
-	else if (*comm[0] == 'm' && ((comm[0][1] == 'm' && !comm[0][2]) || strcmp(comm[0], "mime") == 0))
+	else if (*comm[0] == 'm' && ((comm[0][1] == 'm' && !comm[0][2])
+	|| strcmp(comm[0], "mime") == 0)) {
+#ifndef _NO_LIRA
 		return (exit_code = mime_open(comm));
+#else
+		fprintf(stderr, _("%s: Lira: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
+		return EXIT_FAILURE;
+#endif
+	}
 
 	else if (*comm[0] == 'l' && comm[0][1] == 's' && !comm[0][2] && !cd_lists_on_the_fly) {
 		free_dirlist();

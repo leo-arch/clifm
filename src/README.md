@@ -194,6 +194,7 @@ make _BE_POSIX=1 _NO_ICONS=1 install
 | `_NO_ARCHIVING` | Disable archiving support |
 | `_NO_GETTEXT` | Disable translations support (via `gettext`) |
 | `_NO_ICONS` | Disable icons support |
+| `_NO_LIRA` | Disable [Lira]() support |
 | `_NO_MAGIC` | Allow compilation without `libmagic` dependency<sup>2</sup> |
 | `_NO_SUGGESTIONS` | Disable suggestions support |
 | `_NO_TRASH` | Disable trash support |

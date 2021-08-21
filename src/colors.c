@@ -41,6 +41,7 @@
 #include "mime.h"
 #include "misc.h"
 #include "messages.h"
+#include "file_operations.h"
 
 /* Returns a pointer to the corresponding color code for EXT, if some
  * color was defined */
@@ -266,15 +267,12 @@ cschemes_function(char **args)
 		stat(file, &attr);
 		time_t mtime_bfr = (time_t)attr.st_mtime;
 
-		char *cmd[] = {"mm", file, NULL};
-		int ret = mime_open(cmd);
-
+		int ret = open_file(file);
 		if (ret != EXIT_FAILURE) {
 			stat(file, &attr);
 			if (mtime_bfr != (time_t)attr.st_mtime
 			&& set_colors(cur_cscheme, 0) == EXIT_SUCCESS
 			&& cd_lists_on_the_fly) {
-
 				free_dirlist();
 				list_dir();
 			}

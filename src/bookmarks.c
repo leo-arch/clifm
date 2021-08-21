@@ -651,23 +651,15 @@ edit_bookmarks(char *cmd)
 	int exit_status = EXIT_SUCCESS;
 
 	if (!cmd) {
-		if (opener) {
-			char *tmp_cmd[] = {opener, BM_FILE, NULL};
-			if (launch_execve(tmp_cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS) {
-				fprintf(stderr, _("%s: Cannot open the bookmarks file"),
-						PROGRAM_NAME);
-				exit_status = EXIT_FAILURE;
-			}
-		} else {
-			char *tmp_cmd[] = {"mm", BM_FILE, NULL};
-			exit_status = mime_open(tmp_cmd);
-		}
+		exit_status = open_file(BM_FILE);
 	} else {
 		char *tmp_cmd[] = {cmd, BM_FILE, NULL};
-		int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOSTDERR);
-		if (ret != EXIT_SUCCESS)
+		if (launch_execve(tmp_cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 	}
+
+	if (exit_status == EXIT_FAILURE)
+		fprintf(stderr, _("%s: Cannot open the bookmarks file"), PROGRAM_NAME);
 
 	return exit_status;
 }

@@ -38,6 +38,7 @@
 #include "misc.h"
 #include "jump.h"
 #include "messages.h"
+#include "file_operations.h"
 
 int
 remotes_list(void)
@@ -198,14 +199,7 @@ remotes_edit(char *app)
 		char *cmd[] = {app, REMOTES_FILE, NULL};
 		ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
 	} else {
-/*		if (!(flags & FILE_CMD_OK)) {
-			fprintf(stderr, _("%s: file: Command not found. Try "
-					"'net edit APPLICATION'\n"), PROGRAM_NAME);
-			ret = EXIT_FAILURE;
-		} else { */
-			char *cmd[] = {"mime", REMOTES_FILE, NULL};
-			ret = mime_open(cmd);
-//		}
+		ret = open_file(REMOTES_FILE);
 	}
 
 	if (ret != EXIT_SUCCESS)

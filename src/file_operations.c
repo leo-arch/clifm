@@ -49,6 +49,40 @@
 #include "selection.h"
 #include "messages.h"
 
+/* Open a file via OPENER, if set, or via LIRA. If not compiled with
+ * Lira support, fallback to open (Haiku), or xdg-open. Returns zero
+ * on success and one on failure */
+int
+open_file(char *file)
+{
+	if (!file || !*file)
+		return EXIT_FAILURE;
+
+	int exit_status = EXIT_SUCCESS;
+
+	if (opener) {
+		char *cmd[] = {opener, file, NULL};
+		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
+	} else {
+#ifndef _NO_LIRA
+		char *cmd[] = {"mm", file, NULL};
+		exit_status = mime_open(cmd);
+#else
+		/* Fallback to (xdg-)open */
+#ifdef __HAIKU__
+		char *cmd[] = {"open", file, NULL};
+#else
+		char *cmd[] = {"xdg-open", file, NULL};
+#endif /* __HAIKU__ */
+		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
+#endif /* _NO_LIRA */
+	}
+
+	return exit_status;
+}
+
 /* Toggle executable bit on file */
 int
 xchmod(const char *file, mode_t mode)
@@ -329,8 +363,8 @@ open_function(char **cmd)
 	char *file = cmd[1];
 
 	/* Check file existence */
-	struct stat file_attrib;
-	if (stat(file, &file_attrib) == -1) {
+	struct stat attr;
+	if (stat(file, &attr) == -1) {
 		fprintf(stderr, "%s: open: %s: %s\n", PROGRAM_NAME, cmd[1],
 		    strerror(errno));
 		return EXIT_FAILURE;
@@ -344,7 +378,7 @@ open_function(char **cmd)
 		  * known beforehand how many bytes the TRANSLATED string will
 		  * need */
 
-	switch ((file_attrib.st_mode & S_IFMT)) {
+	switch ((attr.st_mode & S_IFMT)) {
 		/* Store file type to compose and print the error message, if
 		 * necessary */
 	case S_IFBLK: strcpy(file_type, _("block device")); break;
@@ -380,42 +414,13 @@ open_function(char **cmd)
 	/* At this point we know the file to be openend is either a regular
 	 * file or a symlink to a regular file. So, just open the file */
 	if (!cmd[2] || (*cmd[2] == '&' && !cmd[2][1])) {
-		if (opener) {
-			int ret;
-			if (*opener == 'g' && strncmp(opener, "gio", 3) == 0
-			&& (!opener[3] || opener[3] == ' ')) {
-				char *tmp_cmd[] = {"gio", "open", file, NULL};
-				ret = launch_execve(tmp_cmd, bg_proc ? BACKGROUND
-						  : FOREGROUND, E_NOSTDERR);
-			} else {
-				char *tmp_cmd[] = {opener, file, NULL};
-				ret = launch_execve(tmp_cmd, bg_proc ? BACKGROUND
-						  : FOREGROUND, E_NOSTDERR);
-			}
-			if (ret != EXIT_SUCCESS)
-				return EXIT_FAILURE;
-			return EXIT_SUCCESS;
-/*		} else if (!(flags & FILE_CMD_OK)) {
-			fprintf(stderr, _("%s: file: Command not found. Specify an "
-					"application to open the file\n%s\n"), PROGRAM_NAME,
-					_(OPEN_USAGE));
-			return EXIT_FAILURE; */
-		} else {
-			int ret = mime_open(cmd);
-			/* The return value of mime_open could be zero
-			 * (EXIT_SUCCESS), if success, one (EXIT_FAILURE) if error
-			 * (in which case the following error message should be
-			 * printed), and -1 if no access permission, in which case
-			 * no error message should be printed, since the
-			 * corresponding message is printed by mime_open itself */
-			if (ret == EXIT_FAILURE) {
-				fputs("Add a new entry to the mimelist file ('mime "
-				      "edit' or F6) or run 'open FILE APPLICATION'\n", stderr);
-				return EXIT_FAILURE;
-			}
-
-			return EXIT_SUCCESS;
+		int ret = open_file(file);
+		if (!opener && ret == EXIT_FAILURE) {
+			fputs("Add a new entry to the mimelist file ('mime "
+			      "edit' or F6) or run 'open FILE APPLICATION'\n", stderr);
+			return EXIT_FAILURE;
 		}
+		return ret;
 	}
 
 	/* If some application was specified to open the file */
@@ -821,18 +826,18 @@ bulk_rename(char **args)
 	/* Store the last modification time of the bulk file. This time
 	 * will be later compared to the modification time of the same
 	 * file after shown to the user */
-	struct stat file_attrib;
-	stat(BULK_FILE, &file_attrib);
-	time_t mtime_bfr = (time_t)file_attrib.st_mtime;
+	struct stat attr;
+	stat(BULK_FILE, &attr);
+	time_t mtime_bfr = (time_t)attr.st_mtime;
 
 	/* Open the bulk file via the mime function */
-	char *cmd[] = {"mm", BULK_FILE, NULL};
-	mime_open(cmd);
+	if (open_file(BULK_FILE) != EXIT_SUCCESS)
+		return EXIT_FAILURE;
 
 	/* Compare the new modification time to the stored one: if they
 	 * match, nothing was modified */
-	stat(BULK_FILE, &file_attrib);
-	if (mtime_bfr == (time_t)file_attrib.st_mtime) {
+	stat(BULK_FILE, &attr);
+	if (mtime_bfr == (time_t)attr.st_mtime) {
 		puts(_("bulk: Nothing to do"));
 		if (unlink(BULK_FILE) == -1) {
 			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
@@ -1011,8 +1016,7 @@ char *export(char **filenames, int open)
 	if (!open)
 		return tmp_file;
 
-	char *cmd[] = {"mime", tmp_file, NULL};
-	int ret = mime_open(cmd);
+	int ret = open_file(tmp_file);
 	if (ret == EXIT_SUCCESS) {
 		return tmp_file;
 	} else {

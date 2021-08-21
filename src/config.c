@@ -42,6 +42,7 @@
 #include "mime.h"
 #include "misc.h"
 #include "navigation.h"
+#include "file_operations.h"
 
 /* Regenerate the configuration file and create a back up of the old
  * one */
@@ -131,18 +132,9 @@ edit_function(char **comm)
 	if (comm[1]) {
 		char *cmd[] = {comm[1], CONFIG_FILE, NULL};
 		ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
-	}
-
-	/* If no application has been passed as 2nd argument */
-	else {
-/*		if (!(flags & FILE_CMD_OK)) {
-			fprintf(stderr, _("%s: file: Command not found. Try "
-					"'edit APPLICATION'\n"), PROGRAM_NAME);
-			ret = EXIT_FAILURE;
-		} else { */
-			char *cmd[] = {"mime", CONFIG_FILE, NULL};
-			ret = mime_open(cmd);
-//		}
+	} else {
+		/* If no application was passed as 2nd argument */
+		ret = open_file(CONFIG_FILE);
 	}
 
 	if (ret != EXIT_SUCCESS)

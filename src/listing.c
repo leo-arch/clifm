@@ -1665,16 +1665,14 @@ list_dir(void)
 				 * ######################### */
 
 END:
-	if (close_dir && closedir(dir) == -1) {
-		/* Unhide the cursor */
-		fputs("\x1b[?25h", stdout);
-		return EXIT_FAILURE;
-	}
+	/* Unhide the cursor */
+	fputs("\x1b[?25h", stdout);
 
-	if (xargs.list_and_quit == 1) {
-		fputs("\x1b[?25h", stdout);
+	if (close_dir && closedir(dir) == -1)
+		return EXIT_FAILURE;
+
+	if (xargs.list_and_quit == 1)
 		exit(exit_code);
-	}
 
 	if (reset_pager)
 		pager = 1;
@@ -1700,9 +1698,6 @@ END:
 
 	if (print_selfiles && sel_n > 0)
 		_print_selfiles(term_rows);
-
-	/* Unhide the cursor */
-	fputs("\x1b[?25h", stdout);
 
 	/*  clock_t end = clock();
 	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC); */

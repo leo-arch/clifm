@@ -55,6 +55,7 @@ typedef char *rl_cpvfunc_t;
 #include "messages.h"
 #include "strings.h"
 #include "readline.h"
+#include "file_operations.h"
 
 #ifndef _NO_SUGGESTIONS
 #include "suggestions.h"
@@ -105,9 +106,7 @@ kbinds_edit(void)
 
 	time_t mtime_bfr = (time_t)file_attrib.st_mtime;
 
-	char *cmd[] = {"mm", KBINDS_FILE, NULL};
-	int ret = mime_open(cmd);
-
+	int ret = open_file(KBINDS_FILE);
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 

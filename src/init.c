@@ -51,6 +51,7 @@
 #include "sort.h"
 #include "string.h"
 #include "history.h"
+#include "file_operations.h"
 
 struct user_t user;
 
@@ -1052,8 +1053,7 @@ external_arguments(int argc, char **argv)
 				snprintf(MIME_FILE, PATH_MAX,
 				    "%s/.config/clifm/profiles/%s/mimelist.cfm",
 				    getenv("HOME"), alt_profile ? alt_profile : "default");
-				char *cmd[] = {"mm", optarg, NULL};
-				int ret = mime_open(cmd);
+				int ret = open_file(optarg);
 				exit(ret);
 			}
 
@@ -1238,9 +1238,17 @@ external_arguments(int argc, char **argv)
 	int i = optind;
 	if (argv[i]) {
 		struct stat attr;
-		if (stat(tilde_expand(argv[i]), &attr) == -1) {
-			fprintf(stderr, "%s: %s: %s", PROGRAM_NAME, argv[i],
-			    strerror(errno));
+		char *_exp_path = tilde_expand(argv[i]);
+		if (_exp_path) {
+			if (stat(_exp_path, &attr) == -1) {
+				fprintf(stderr, "%s: %s: %s", PROGRAM_NAME, _exp_path,
+					strerror(errno));
+				free(_exp_path);
+				exit(EXIT_FAILURE);
+			}
+			free(_exp_path);
+		} else {
+			fprintf(stderr, _("%s: Error expanding tilde\n"), PROGRAM_NAME);
 			exit(EXIT_FAILURE);
 		}
 
@@ -1251,8 +1259,7 @@ external_arguments(int argc, char **argv)
 			snprintf(MIME_FILE, PATH_MAX,
 			    "%s/.config/clifm/profiles/%s/mimelist.cfm",
 			    getenv("HOME"), alt_profile ? alt_profile : "default");
-			char *cmd[] = {"mm", argv[i], NULL};
-			int ret = mime_open(cmd);
+			int ret = open_file(argv[i]);
 			exit(ret);
 		}
 

@@ -22,6 +22,8 @@
  * MA 02110-1301, USA.
 */
 
+#ifndef _NO_LIRA
+
 #include "helpers.h"
 
 #include <errno.h>
@@ -763,3 +765,4 @@ mime_edit(char **args)
 
 	return exit_status;
 }
+#endif /* !_NO_LIRA */
