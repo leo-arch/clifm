@@ -72,7 +72,7 @@ HELP="Usage:
 Type in the prompt to filter the current list of files. Regular expressions are \
 allowed.
 
-At exit (pressing q) CliFM will change to the last directory visited with FZF or \
+At exit (pressing Ctrl-q) CliFM will change to the last directory visited with FZF or \
 open the last accepted file (Enter). Press Esc to cancel and exit.
 
 Keybindings:
@@ -112,16 +112,16 @@ fcd() {
 			--bind "right:accept,left:first+accept" \
 			--bind "insert:clear-query" \
 			--bind "home:first,end:last" \
-			--bind "ctrl-h:preview(printf %s \"$HELP\")" \
+			--bind "alt-h:preview(printf %s \"$HELP\")" \
 			--bind "alt-p:toggle-preview" \
 			--bind "shift-up:preview-up" \
 			--bind "shift-down:preview-down" \
 			--bind "alt-up:preview-page-up" \
 			--bind "alt-down:preview-page-down" \
 			--bind "esc:execute(rm $TMP)+abort" \
-			--bind "q:abort" \
+			--bind "ctrl-q:abort" \
 			--ansi --prompt="${fzf_prompt}> " --reverse --no-clear \
-			--no-info --keep-right --multi --header="Press 'Ctrl+h' for help
+			--no-info --keep-right --multi --header="Press 'Alt-h' for help
 $PWD" --marker="+" --preview-window=:wrap "$BORDERS" \
 			--preview "printf \"\033[2J\"; $BFG_FILE {}")"
 
