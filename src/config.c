@@ -1952,7 +1952,7 @@ read_config(void)
 				div_line_char[1] = '\0';
 			} else {
 				char *tmp = remove_quotes(opt);
-				strncpy(div_line_char, tmp ? tmp : opt, NAME_MAX);
+				strncpy(div_line_char, tmp ? tmp : opt, NAME_MAX - 1);
 			}
 		}
 

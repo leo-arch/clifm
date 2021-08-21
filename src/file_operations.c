@@ -140,7 +140,6 @@ dup_file(char *source, char *dest)
 	 * exists, source.copy.YYYYMMDDHHMMSS */
 	if (!dest) {
 		size_t source_len = strlen(source);
-
 		if (strcmp(source, "/") != 0 && source[source_len - 1] == '/')
 			source[source_len - 1] = '\0';
 
@@ -162,18 +161,15 @@ dup_file(char *source, char *dest)
 			struct tm tm;
 			localtime_r(&rawtime, &tm);
 			char date[64] = "";
-
 			strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", &tm);
 
 			char suffix[68] = "";
-
 			snprintf(suffix, 67, "%d%d%d%d%d%d", tm.tm_year + 1900,
 				tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min,
 				tm.tm_sec);
 
 			char tmp_dest[PATH_MAX];
 			strncpy(tmp_dest, dest, PATH_MAX - 1);
-
 			dest = (char *)xrealloc(dest, (strlen(tmp_dest) + strlen(suffix) + 2)
 									* sizeof(char));
 			sprintf(dest, "%s.%s", tmp_dest, suffix);
@@ -293,7 +289,9 @@ create_file(char **cmd)
 	strcpy(ndirs[0], "mkdir");
 
 	ndirs[1] = (char *)xnmalloc(3, sizeof(char));
-	strcpy(ndirs[1], "-p");
+	ndirs[1][0] = '-';
+	ndirs[1][1] = 'p';
+	ndirs[1][2] = '\0';
 
 	size_t cnfiles = 1, cndirs = 2;
 

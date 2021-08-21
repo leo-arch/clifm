@@ -402,6 +402,7 @@ set_colors(const char *colorscheme, int env)
 
 			char *line = (char *)NULL;
 			size_t line_size = 0;
+			ssize_t line_len = 0;
 			int file_type_found = 0,
 				ext_type_found = 0,
 #ifndef _NO_ICONS
@@ -411,7 +412,7 @@ set_colors(const char *colorscheme, int env)
 			    iface_found = 0;
 #endif
 
-			while (getline(&line, &line_size, fp_colors) > 0) {
+			while ((line_len = getline(&line, &line_size, fp_colors)) > 0) {
 				/* Interface colors */
 				if (!ifacecolors && *line == 'I'
 				&& strncmp(line, "InterfaceColors=", 16) == 0) {

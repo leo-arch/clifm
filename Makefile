@@ -49,7 +49,7 @@ CFLAGS += -D_NO_ICONS
 endif
 
 ifdef _NO_LIRA
-CFLAGS += -D_NO_LIRA
+CFLAGS += -D_NO_LIRA -D_NO_MAGIC
 endif
 
 ifdef _NO_MAGIC
