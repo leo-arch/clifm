@@ -36,28 +36,32 @@ ifdef _NO_ARCHIVING
 CFLAGS += -D_NO_ARCHIVING
 endif
 
+ifdef _NERD
+CFLAGS += -D_NERD
+endif
+
 ifdef _NO_GETTEXT
 CFLAGS += -D_NO_GETTEXT
+endif
+
+ifdef _NO_ICONS
+CFLAGS += -D_NO_ICONS
+endif
+
+ifdef _NO_LIRA
+CFLAGS += -D_NO_LIRA
+endif
+
+ifdef _NO_MAGIC
+CFLAGS += -D_NO_MAGIC
 endif
 
 ifdef _NO_SUGGESTIONS
 CFLAGS += -D_NO_SUGGESTIONS
 endif
 
-ifdef _NERD
-CFLAGS += -D_NERD
-endif
-
-ifdef _NOICONS
-CFLAGS += -D_NOICONS
-endif
-
-ifdef _NOMAGIC
-CFLAGS += -D_NOMAGIC
-endif
-
-ifdef _NOTRASH
-CFLAGS += -D_NOTRASH
+ifdef _NO_TRASH
+CFLAGS += -D_NO_TRASH
 endif
 
 build: $(SRC) $(HEADERS)
