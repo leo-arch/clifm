@@ -1671,8 +1671,10 @@ END:
 		return EXIT_FAILURE;
 	}
 
-	if (xargs.list_and_quit == 1)
+	if (xargs.list_and_quit == 1) {
+		fputs("\x1b[?25h", stdout);
 		exit(exit_code);
+	}
 
 	if (reset_pager)
 		pager = 1;
