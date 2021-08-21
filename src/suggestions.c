@@ -1157,8 +1157,8 @@ rl_suggestions(char c)
 		break;
 
 	case 'p': /* Profiles */
-		if (lb[1] && lb[1] == 'f' && lb[2] && lb[2] == ' '
-		&& (strncmp(lb + 3, "set", 3) == 0 || strncmp(lb + 3, "del", 3) == 0)) {
+		if (lb[1] == 'f' && lb[2] == ' ' && (strncmp(lb + 3, "set", 3) == 0
+		|| strncmp(lb + 3, "del", 3) == 0)) {
 			size_t i = 0, len = strlen(last_word);
 			for (; profile_names[i]; i++) {
 				if (*last_word == *profile_names[i]
@@ -1206,6 +1206,7 @@ rl_suggestions(char c)
 	}
 
 	/* 3.c.2) Check commands fixed parameters */
+	// cppcheck-suppress duplicateCondition
 	if (ret) {
 		printed = check_int_params(full_line, strlen(full_line));
 		if (printed) {

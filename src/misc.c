@@ -65,7 +65,7 @@
 void
 read_inotify(void)
 {
-	unsigned int i;
+	int i;
 	struct inotify_event *event;
 	char inotify_buf[EVENT_BUF_LEN];
 
@@ -533,6 +533,7 @@ new_instance(char *dir, int sudo)
 
 	return ret;
 #endif /* !__HAIKU__ */
+// cppcheck-suppress syntaxError
 }
 
 int
@@ -1003,6 +1004,7 @@ list_mountpoints(void)
 
 	/* This should never happen: There should always be a mountpoint,
 	 * at least "/" */
+	// cppcheck-suppress knownConditionTrueFalse
 	if (mp_n == 0) {
 		fputs(_("mp: There are no available mountpoints\n"), stdout);
 		return EXIT_SUCCESS;

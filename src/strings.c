@@ -384,9 +384,8 @@ gen_rand_str(size_t len)
 		return (char *)NULL;
 	}
 
-	int i;
 	while (len--) {
-		i = rand() % (sizeof(charset) - 1);
+		int i = rand() % (sizeof(charset) - 1);
 		*p++ = charset[i];
 	}
 

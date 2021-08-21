@@ -264,10 +264,10 @@ xitoa(int n)
 		return "0";
 
 	static char buf[32] = {0};
-	int i = 30, rem;
+	int i = 30;
 
 	while (n && i) {
-		rem = n / 10;
+		int rem = n / 10;
 		buf[i] = '0' + (n - (rem * 10));
 		n = rem;
 		--i;

@@ -85,7 +85,6 @@ add_to_jumpdb(const char *dir)
 void
 save_jumpdb(void)
 {
-
 	if (xargs.no_dirjump == 1 || !config_ok || !CONFIG_DIR || !jump_db
 	|| jump_n == 0)
 		return;
@@ -170,16 +169,21 @@ save_jumpdb(void)
 	int jump_num = 0;
 
 	for (i = 0; i < (int)jump_n; i++) {
+		if (total_rank > max_jump_total_rank) {
+			/* Once we reach MAX_JUMP_TOTAL_RANK, start forgetting */
+			if (reduce) {
+				tmp_rank = jump_db[i].rank;
+				jump_db[i].rank = tmp_rank / reduce;
+			}
 
-		if (reduce) {
-			tmp_rank = jump_db[i].rank;
-			jump_db[i].rank = tmp_rank / reduce;
+			/* Forget directories ranked below MIN_JUMP_RANK */
+			if (jump_db[i].keep != 1 && jump_db[i].rank < min_jump_rank {
+				/* Discount from TOTAL_RANK the rank of the now forgotten
+				 * directory to keep this total up to date */
+				total_rank -= jump_db[i].rank;
+				continue;
+			}
 		}
-
-		/* Forget directories ranked below MIN_JUMP_RANK */
-		if (jump_db[i].keep != 1 && (jump_db[i].rank <= 0
-		|| jump_db[i].rank < min_jump_rank))
-			continue;
 
 		jump_num++;
 #ifndef __OpenBSD__
