@@ -104,9 +104,8 @@ if (ret && *(++ret))
 Always perform bound checks. Either make sure the destination buffer is big enough to hold the source string or truncate the source string to fit your buffer via some of the `n` functions (`strncpy(3)`, `strncat(3)`, `snprintf(3)`, etc):
 
 ```c
-char *buf = (char *)malloc(strlen(src) + 1);
-if (buf)
-	strcpy(buf, src);
+char *buf = (char *)xnmalloc(strlen(src) + 1, sizeof(char));
+strcpy(buf, src);
 ```
 
 or (using a safe version of `strncpy(3)`)
