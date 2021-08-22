@@ -236,7 +236,7 @@ save_dirhist(void)
 		return EXIT_FAILURE;
 	}
 
-	size_t i;
+	int i;
 	for (i = 0; i < dirhist_total_index; i++) {
 		/* Exclude invalid entries */
 		if (!old_pwd[i] || *old_pwd[i] == _ESC)

@@ -208,7 +208,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	/* Do not print suggestions bigger than what the current terminal
 	 * window size can hold */
 	size_t suggestion_len = wc_xstrlen(str + offset);
-	if (suggestion_len > (term_cols * term_rows) - curcol)
+	if ((int)suggestion_len > (term_cols * term_rows) - curcol)
 		return;
 
 	size_t cuc = curcol; /* Current cursor column position*/
@@ -781,7 +781,7 @@ check_eln(const char *str)
 		return 0;
 
 	int n = atoi(str);
-	if (n < 1 || n > files || !file_info[n - 1].name)
+	if (n < 1 || n > (int)files || !file_info[n - 1].name)
 		return 0;
 
 	n--;

@@ -687,7 +687,7 @@ run_autojump(char **cmd)
 	*__cmd[0] = 'j';
 	__cmd[0][1] = '\0';
 
-	for (i = 0; i <= args_n; i++) {
+	for (i = 0; i <= (int)args_n; i++) {
 		__cmd[i + 1] = (char *)xnmalloc(strlen(cmd[i]) + 1,
 						sizeof(char));
 		strcpy(__cmd[i + 1], cmd[i]);
@@ -699,7 +699,7 @@ run_autojump(char **cmd)
 	exit_code = dirjump(__cmd, NO_SUG_JUMP);
 	args_n--;
 
-	i = args_n + 2;
+	i = (int)args_n + 2;
 	while (--i >= 0)
 		free(__cmd[i]);
 	free(__cmd);

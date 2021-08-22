@@ -1107,7 +1107,7 @@ free_remotes(int exit)
 	if (exit)
 		autounmount_remotes();
 
-	int i;
+	size_t i;
 	for (i = 0; i < remotes_n; i++) {
 		free(remotes[i].name);
 		free(remotes[i].desc);

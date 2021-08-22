@@ -174,14 +174,14 @@ _print_selfiles(unsigned short term_rows)
 			limit = 1;
 	}
 
-	if (limit > sel_n)
+	if (limit > (int)sel_n)
 		limit = (int)sel_n;
 
 	size_t i;
 	for (i = 0; i < (max_printselfiles != UNSET ? limit : sel_n); i++)
 		colors_list(sel_elements[i], 0, NO_PAD, PRINT_NEWLINE);
 
-	if (max_printselfiles != UNSET && limit < sel_n)
+	if (max_printselfiles != UNSET && limit < (int)sel_n)
 		printf("%zu/%zu\n", i, sel_n);
 
 	print_div_line();
