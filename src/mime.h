@@ -26,5 +26,3 @@
 
 /* mime.c */
 int mime_open(char **args);
-int mime_import(char *file);
-int mime_edit(char **args);

@@ -257,7 +257,7 @@ fastback(const char *str)
 	return q;
 }
 
-int
+static int
 surf_hist(char **comm)
 {
 	if (*comm[1] == 'h' && (strcmp(comm[1], "h") == 0

@@ -42,7 +42,7 @@
 #include "checks.h"
 #include "colors.h"
 
-int
+static int
 get_properties(char *filename, int dsize)
 {
 	if (!filename || !*filename)

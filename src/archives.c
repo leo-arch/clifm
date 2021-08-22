@@ -40,9 +40,9 @@
 #include "readline.h"
 #include "checks.h"
 
-int zstandard(char *in_file, char *out_file, char mode, char op);
+static int zstandard(char *in_file, char *out_file, char mode, char op);
 
-int
+static int
 handle_iso(char *file)
 {
 	int exit_status = EXIT_SUCCESS;
@@ -228,7 +228,7 @@ handle_iso(char *file)
 	return exit_status;
 }
 
-int
+static int
 create_iso(char *in_file, char *out_file)
 {
 	int exit_status = EXIT_SUCCESS;
@@ -283,7 +283,7 @@ create_iso(char *in_file, char *out_file)
 /* Run the 'file' command on FILE and look for "ISO 9660" and
  * string in its output. Returns zero if found, one if not, and -1
  * in case of error */
-int
+static int
 check_iso(char *file)
 {
 	if (!file || !*file) {

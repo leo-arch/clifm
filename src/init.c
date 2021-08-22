@@ -330,7 +330,7 @@ get_date(void)
 	return date;
 }
 
-pid_t
+static pid_t
 get_own_pid(void)
 {
 	pid_t pid;

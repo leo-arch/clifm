@@ -249,7 +249,7 @@ edit_jumpdb(void)
 }
 
 /* Save jump entry into the suggestions buffer */
-int
+static int
 save_suggestion(char *str)
 {
 	free(jump_suggestion);

@@ -25,10 +25,5 @@
 #pragma once
 
 int remotes_function(char **args);
-int remotes_edit(void);
-int remotes_unmount(char *name);
-int remotes_mount(char *name);
-int remotes_list(void);
 int automount_remotes(void);
 int autounmount_remotes(void);
-int get_remotes(char *name);

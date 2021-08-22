@@ -87,7 +87,7 @@ save_sel(void)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 select_file(char *file)
 {
 	if (!file || !*file)
@@ -116,6 +116,293 @@ select_file(char *file)
 		    PROGRAM_NAME, file);
 	}
 
+	return new_sel;
+}
+
+static int
+sel_glob(char *str, const char *sel_path, mode_t filetype)
+{
+	if (!str || !*str)
+		return -1;
+
+	glob_t gbuf;
+	char *pattern = str;
+	int invert = 0, ret = -1;
+
+	if (*pattern == '!') {
+		pattern++;
+		invert = 1;
+	}
+
+	ret = glob(pattern, 0, NULL, &gbuf);
+
+	if (ret == GLOB_NOSPACE || ret == GLOB_ABORTED) {
+		globfree(&gbuf);
+		return -1;
+	}
+
+	if (ret == GLOB_NOMATCH) {
+		globfree(&gbuf);
+		return 0;
+	}
+
+	char **matches = (char **)NULL;
+	int i, k = 0;
+	struct dirent **ent = (struct dirent **)NULL;
+
+	if (invert) {
+		if (!sel_path) {
+			matches = (char **)xnmalloc(files + 2, sizeof(char *));
+
+			i = (int)files;
+			while (--i >= 0) {
+				if (filetype && file_info[i].type != filetype)
+					continue;
+
+				int found = 0;
+				int j = (int)gbuf.gl_pathc;
+				while (--j >= 0) {
+					if (*file_info[i].name == *gbuf.gl_pathv[j]
+					&& strcmp(file_info[i].name, gbuf.gl_pathv[j]) == 0) {
+						found = 1;
+						break;
+					}
+				}
+
+				if (!found)
+					matches[k++] = file_info[i].name;
+			}
+		} else {
+			ret = scandir(sel_path, &ent, skip_files, xalphasort);
+			if (ret == -1) {
+				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+				    sel_path, strerror(errno));
+				globfree(&gbuf);
+				return -1;
+			}
+
+			matches = (char **)xnmalloc((size_t)ret + 2, sizeof(char *));
+
+			i = ret;
+			while (--i >= 0) {
+#if !defined(_DIRENT_HAVE_D_TYPE)
+				mode_t type;
+				struct stat attr;
+				if (lstat(ent[i]->d_name, &attr) == -1)
+					continue;
+				switch (attr.st_mode & S_IFMT) {
+				case S_IFBLK: type = DT_BLK; break;
+				case S_IFCHR: type = DT_CHR; break;
+				case S_IFDIR: type = DT_DIR; break;
+				case S_IFIFO: type = DT_FIFO; break;
+				case S_IFLNK: type = DT_LNK; break;
+				case S_IFREG: type = DT_REG; break;
+				case S_IFSOCK: type = DT_SOCK; break;
+				default: type = DT_UNKNOWN; break;
+				}
+				if (filetype && type != filetype)
+#else
+				if (filetype && ent[i]->d_type != filetype)
+#endif
+					continue;
+
+				int j = (int)gbuf.gl_pathc;
+				while (--j >= 0) {
+					if (*ent[i]->d_name == *gbuf.gl_pathv[j]
+					&& strcmp(ent[i]->d_name, gbuf.gl_pathv[j]) == 0)
+						break;
+				}
+
+				if (!gbuf.gl_pathv[j])
+					matches[k++] = ent[i]->d_name;
+			}
+		}
+	}
+
+	else {
+		matches = (char **)xnmalloc(gbuf.gl_pathc + 2,
+		    sizeof(char *));
+		mode_t t = 0;
+		if (filetype) {
+
+			switch (filetype) {
+			case DT_DIR: t = S_IFDIR; break;
+			case DT_REG: t = S_IFREG; break;
+			case DT_LNK: t = S_IFLNK; break;
+			case DT_SOCK: t = S_IFSOCK; break;
+			case DT_FIFO: t = S_IFIFO; break;
+			case DT_BLK: t = S_IFBLK; break;
+			case DT_CHR: t = S_IFCHR; break;
+			}
+		}
+
+		i = (int)gbuf.gl_pathc;
+		while (--i >= 0) {
+			/* We need to run stat(3) here, so that the d_type macros
+			 * won't work: convert them into st_mode macros */
+			if (filetype) {
+				struct stat attr;
+				if (lstat(gbuf.gl_pathv[i], &attr) == -1)
+					continue;
+				if ((attr.st_mode & S_IFMT) != t)
+					continue;
+			}
+
+			if (*gbuf.gl_pathv[i] == '.' && (!gbuf.gl_pathv[i][1]
+			|| (gbuf.gl_pathv[i][1] == '.' && !gbuf.gl_pathv[i][2])))
+				continue;
+
+			matches[k++] = gbuf.gl_pathv[i];
+		}
+	}
+
+	matches[k] = (char *)NULL;
+	int new_sel = 0;
+
+	i = k;
+	while (--i >= 0) {
+		if (!matches[i])
+			continue;
+
+		if (!sel_path) {
+			if (*matches[i] == '/') {
+				new_sel += select_file(matches[i]);
+			} else {
+				char *tmp = (char *)NULL;
+				if (*ws[cur_ws].path == '/' && !*(ws[cur_ws].path + 1)) {
+					tmp = (char *)xnmalloc(strlen(matches[i]) + 2,
+								sizeof(char));
+					sprintf(tmp, "/%s", matches[i]);
+				} else {
+					tmp = (char *)xnmalloc(strlen(ws[cur_ws].path)
+								+ strlen(matches[i]) + 2, sizeof(char));
+					sprintf(tmp, "%s/%s", ws[cur_ws].path, matches[i]);
+				}
+				new_sel += select_file(tmp);
+				free(tmp);
+			}
+		} else {
+			char *tmp = (char *)xnmalloc(strlen(sel_path)
+						+ strlen(matches[i]) + 2, sizeof(char));
+			sprintf(tmp, "%s/%s", sel_path, matches[i]);
+			new_sel += select_file(tmp);
+			free(tmp);
+		}
+	}
+
+	free(matches);
+	globfree(&gbuf);
+
+	if (invert && sel_path) {
+		i = ret;
+		while (--i >= 0)
+			free(ent[i]);
+		free(ent);
+	}
+
+	return new_sel;
+}
+
+static int
+sel_regex(char *str, const char *sel_path, mode_t filetype)
+{
+	if (!str || !*str)
+		return -1;
+
+	char *pattern = str;
+
+	int invert = 0;
+	if (*pattern == '!') {
+		pattern++;
+		invert = 1;
+	}
+
+	regex_t regex;
+	if (regcomp(&regex, pattern, REG_NOSUB | REG_EXTENDED) != EXIT_SUCCESS) {
+		fprintf(stderr, _("%s: sel: %s: Invalid regular "
+				"expression\n"), PROGRAM_NAME, str);
+
+		regfree(&regex);
+		return -1;
+	}
+
+	int new_sel = 0, i;
+
+	if (!sel_path) { /* Check pattern (STR) against files in CWD */
+		i = (int)files;
+		while (--i >= 0) {
+			if (filetype && file_info[i].type != filetype)
+				continue;
+
+			char tmp_path[PATH_MAX];
+			if (*ws[cur_ws].path == '/' && !*(ws[cur_ws].path + 1)) {
+				snprintf(tmp_path, PATH_MAX - 1, "/%s", file_info[i].name);
+			} else {
+				snprintf(tmp_path, PATH_MAX - 1, "%s/%s", ws[cur_ws].path,
+						file_info[i].name);
+			}
+
+			if (regexec(&regex, file_info[i].name, 0, NULL, 0) == EXIT_SUCCESS) {
+				if (!invert)
+					new_sel += select_file(tmp_path);
+			} else if (invert) {
+				new_sel += select_file(tmp_path);
+			}
+		}
+	} else { /* Check pattern against files in SEL_PATH */
+		struct dirent **list = (struct dirent **)NULL;
+		int filesn = scandir(sel_path, &list, skip_files, xalphasort);
+
+		if (filesn == -1) {
+			fprintf(stderr, "sel: %s: %s\n", sel_path, strerror(errno));
+			return -1;
+		}
+
+		mode_t t = 0;
+		if (filetype) {
+
+			switch (filetype) {
+			case DT_DIR: t = S_IFDIR; break;
+			case DT_REG: t = S_IFREG; break;
+			case DT_LNK: t = S_IFLNK; break;
+			case DT_SOCK: t = S_IFSOCK; break;
+			case DT_FIFO: t = S_IFIFO; break;
+			case DT_BLK: t = S_IFBLK; break;
+			case DT_CHR: t = S_IFCHR; break;
+			}
+		}
+
+		i = (int)filesn;
+		while (--i >= 0) {
+			if (filetype) {
+				struct stat attr;
+				if (lstat(list[i]->d_name, &attr) != -1) {
+					if ((attr.st_mode & S_IFMT) != t) {
+						free(list[i]);
+						continue;
+					}
+				}
+			}
+
+			char *tmp_path = (char *)xnmalloc(strlen(sel_path)
+							+ strlen(list[i]->d_name) + 2, sizeof(char));
+			sprintf(tmp_path, "%s/%s", sel_path, list[i]->d_name);
+
+			if (regexec(&regex, list[i]->d_name, 0, NULL, 0) == EXIT_SUCCESS) {
+				if (!invert)
+					new_sel += select_file(tmp_path);
+			} else if (invert) {
+				new_sel += select_file(tmp_path);
+			}
+
+			free(tmp_path);
+			free(list[i]);
+		}
+
+		free(list);
+	}
+
+	regfree(&regex);
 	return new_sel;
 }
 
@@ -656,291 +943,4 @@ deselect(char **comm)
 			exit_status = EXIT_FAILURE;
 
 	return exit_status;
-}
-
-int
-sel_glob(char *str, const char *sel_path, mode_t filetype)
-{
-	if (!str || !*str)
-		return -1;
-
-	glob_t gbuf;
-	char *pattern = str;
-	int invert = 0, ret = -1;
-
-	if (*pattern == '!') {
-		pattern++;
-		invert = 1;
-	}
-
-	ret = glob(pattern, 0, NULL, &gbuf);
-
-	if (ret == GLOB_NOSPACE || ret == GLOB_ABORTED) {
-		globfree(&gbuf);
-		return -1;
-	}
-
-	if (ret == GLOB_NOMATCH) {
-		globfree(&gbuf);
-		return 0;
-	}
-
-	char **matches = (char **)NULL;
-	int i, k = 0;
-	struct dirent **ent = (struct dirent **)NULL;
-
-	if (invert) {
-		if (!sel_path) {
-			matches = (char **)xnmalloc(files + 2, sizeof(char *));
-
-			i = (int)files;
-			while (--i >= 0) {
-				if (filetype && file_info[i].type != filetype)
-					continue;
-
-				int found = 0;
-				int j = (int)gbuf.gl_pathc;
-				while (--j >= 0) {
-					if (*file_info[i].name == *gbuf.gl_pathv[j]
-					&& strcmp(file_info[i].name, gbuf.gl_pathv[j]) == 0) {
-						found = 1;
-						break;
-					}
-				}
-
-				if (!found)
-					matches[k++] = file_info[i].name;
-			}
-		} else {
-			ret = scandir(sel_path, &ent, skip_files, xalphasort);
-			if (ret == -1) {
-				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-				    sel_path, strerror(errno));
-				globfree(&gbuf);
-				return -1;
-			}
-
-			matches = (char **)xnmalloc((size_t)ret + 2, sizeof(char *));
-
-			i = ret;
-			while (--i >= 0) {
-#if !defined(_DIRENT_HAVE_D_TYPE)
-				mode_t type;
-				struct stat attr;
-				if (lstat(ent[i]->d_name, &attr) == -1)
-					continue;
-				switch (attr.st_mode & S_IFMT) {
-				case S_IFBLK: type = DT_BLK; break;
-				case S_IFCHR: type = DT_CHR; break;
-				case S_IFDIR: type = DT_DIR; break;
-				case S_IFIFO: type = DT_FIFO; break;
-				case S_IFLNK: type = DT_LNK; break;
-				case S_IFREG: type = DT_REG; break;
-				case S_IFSOCK: type = DT_SOCK; break;
-				default: type = DT_UNKNOWN; break;
-				}
-				if (filetype && type != filetype)
-#else
-				if (filetype && ent[i]->d_type != filetype)
-#endif
-					continue;
-
-				int j = (int)gbuf.gl_pathc;
-				while (--j >= 0) {
-					if (*ent[i]->d_name == *gbuf.gl_pathv[j]
-					&& strcmp(ent[i]->d_name, gbuf.gl_pathv[j]) == 0)
-						break;
-				}
-
-				if (!gbuf.gl_pathv[j])
-					matches[k++] = ent[i]->d_name;
-			}
-		}
-	}
-
-	else {
-		matches = (char **)xnmalloc(gbuf.gl_pathc + 2,
-		    sizeof(char *));
-		mode_t t = 0;
-		if (filetype) {
-
-			switch (filetype) {
-			case DT_DIR: t = S_IFDIR; break;
-			case DT_REG: t = S_IFREG; break;
-			case DT_LNK: t = S_IFLNK; break;
-			case DT_SOCK: t = S_IFSOCK; break;
-			case DT_FIFO: t = S_IFIFO; break;
-			case DT_BLK: t = S_IFBLK; break;
-			case DT_CHR: t = S_IFCHR; break;
-			}
-		}
-
-		i = (int)gbuf.gl_pathc;
-		while (--i >= 0) {
-			/* We need to run stat(3) here, so that the d_type macros
-			 * won't work: convert them into st_mode macros */
-			if (filetype) {
-				struct stat attr;
-				if (lstat(gbuf.gl_pathv[i], &attr) == -1)
-					continue;
-				if ((attr.st_mode & S_IFMT) != t)
-					continue;
-			}
-
-			if (*gbuf.gl_pathv[i] == '.' && (!gbuf.gl_pathv[i][1]
-			|| (gbuf.gl_pathv[i][1] == '.' && !gbuf.gl_pathv[i][2])))
-				continue;
-
-			matches[k++] = gbuf.gl_pathv[i];
-		}
-	}
-
-	matches[k] = (char *)NULL;
-	int new_sel = 0;
-
-	i = k;
-	while (--i >= 0) {
-		if (!matches[i])
-			continue;
-
-		if (!sel_path) {
-			if (*matches[i] == '/') {
-				new_sel += select_file(matches[i]);
-			} else {
-				char *tmp = (char *)NULL;
-				if (*ws[cur_ws].path == '/' && !*(ws[cur_ws].path + 1)) {
-					tmp = (char *)xnmalloc(strlen(matches[i]) + 2,
-								sizeof(char));
-					sprintf(tmp, "/%s", matches[i]);
-				} else {
-					tmp = (char *)xnmalloc(strlen(ws[cur_ws].path)
-								+ strlen(matches[i]) + 2, sizeof(char));
-					sprintf(tmp, "%s/%s", ws[cur_ws].path, matches[i]);
-				}
-				new_sel += select_file(tmp);
-				free(tmp);
-			}
-		} else {
-			char *tmp = (char *)xnmalloc(strlen(sel_path)
-						+ strlen(matches[i]) + 2, sizeof(char));
-			sprintf(tmp, "%s/%s", sel_path, matches[i]);
-			new_sel += select_file(tmp);
-			free(tmp);
-		}
-	}
-
-	free(matches);
-	globfree(&gbuf);
-
-	if (invert && sel_path) {
-		i = ret;
-		while (--i >= 0)
-			free(ent[i]);
-		free(ent);
-	}
-
-	return new_sel;
-}
-
-int
-sel_regex(char *str, const char *sel_path, mode_t filetype)
-{
-	if (!str || !*str)
-		return -1;
-
-	char *pattern = str;
-
-	int invert = 0;
-	if (*pattern == '!') {
-		pattern++;
-		invert = 1;
-	}
-
-	regex_t regex;
-	if (regcomp(&regex, pattern, REG_NOSUB | REG_EXTENDED) != EXIT_SUCCESS) {
-		fprintf(stderr, _("%s: sel: %s: Invalid regular "
-				"expression\n"), PROGRAM_NAME, str);
-
-		regfree(&regex);
-		return -1;
-	}
-
-	int new_sel = 0, i;
-
-	if (!sel_path) { /* Check pattern (STR) against files in CWD */
-		i = (int)files;
-		while (--i >= 0) {
-			if (filetype && file_info[i].type != filetype)
-				continue;
-
-			char tmp_path[PATH_MAX];
-			if (*ws[cur_ws].path == '/' && !*(ws[cur_ws].path + 1)) {
-				snprintf(tmp_path, PATH_MAX - 1, "/%s", file_info[i].name);
-			} else {
-				snprintf(tmp_path, PATH_MAX - 1, "%s/%s", ws[cur_ws].path,
-						file_info[i].name);
-			}
-
-			if (regexec(&regex, file_info[i].name, 0, NULL, 0) == EXIT_SUCCESS) {
-				if (!invert)
-					new_sel += select_file(tmp_path);
-			} else if (invert) {
-				new_sel += select_file(tmp_path);
-			}
-		}
-	} else { /* Check pattern against files in SEL_PATH */
-		struct dirent **list = (struct dirent **)NULL;
-		int filesn = scandir(sel_path, &list, skip_files, xalphasort);
-
-		if (filesn == -1) {
-			fprintf(stderr, "sel: %s: %s\n", sel_path, strerror(errno));
-			return -1;
-		}
-
-		mode_t t = 0;
-		if (filetype) {
-
-			switch (filetype) {
-			case DT_DIR: t = S_IFDIR; break;
-			case DT_REG: t = S_IFREG; break;
-			case DT_LNK: t = S_IFLNK; break;
-			case DT_SOCK: t = S_IFSOCK; break;
-			case DT_FIFO: t = S_IFIFO; break;
-			case DT_BLK: t = S_IFBLK; break;
-			case DT_CHR: t = S_IFCHR; break;
-			}
-		}
-
-		i = (int)filesn;
-		while (--i >= 0) {
-			if (filetype) {
-				struct stat attr;
-				if (lstat(list[i]->d_name, &attr) != -1) {
-					if ((attr.st_mode & S_IFMT) != t) {
-						free(list[i]);
-						continue;
-					}
-				}
-			}
-
-			char *tmp_path = (char *)xnmalloc(strlen(sel_path)
-							+ strlen(list[i]->d_name) + 2, sizeof(char));
-			sprintf(tmp_path, "%s/%s", sel_path, list[i]->d_name);
-
-			if (regexec(&regex, list[i]->d_name, 0, NULL, 0) == EXIT_SUCCESS) {
-				if (!invert)
-					new_sel += select_file(tmp_path);
-			} else if (invert) {
-				new_sel += select_file(tmp_path);
-			}
-
-			free(tmp_path);
-			free(list[i]);
-		}
-
-		free(list);
-	}
-
-	regfree(&regex);
-	return new_sel;
 }

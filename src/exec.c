@@ -120,7 +120,7 @@ run_and_refresh(char **comm)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 run_in_foreground(pid_t pid)
 {
 	int status = 0;
@@ -151,7 +151,7 @@ run_in_foreground(pid_t pid)
 	return EXIT_FAILURE; /* Never reached */
 }
 
-void
+static void
 run_in_background(pid_t pid)
 {
 	int status = 0;

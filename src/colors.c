@@ -82,7 +82,7 @@ get_ext_color(const char *ext)
 /* Check if STR has the format of a color code string (a number or a
  * semicolon list (max 12 fields) of numbers of at most 3 digits each).
  * Returns 1 if true and 0 if false. */
-int
+static int
 is_color_code(const char *str)
 {
 	if (!str || !*str)
@@ -119,7 +119,7 @@ is_color_code(const char *str)
 /* Strip color lines from the config file (FiletypeColors, if mode is
  * 't', and ExtColors, if mode is 'x') returning the same string
  * containing only allowed characters */
-char *
+static char *
 strip_color_line(const char *str, char mode)
 {
 	if (!str || !*str)
@@ -158,7 +158,7 @@ strip_color_line(const char *str, char mode)
 	return buf;
 }
 
-void
+static void
 free_colors(void)
 {
 	/* Reset whatever value was loaded */

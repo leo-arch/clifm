@@ -45,200 +45,10 @@
 #include <time.h>
 #endif
 
-/* Print the prompt and return the string entered by the user (to be
- * parsed later by parse_input_str()) */
-char *
-prompt(void)
-{
-	/* Make sure CWD exists; if not, go up to the parent, and so
-	 * on */
-	while (xchdir(ws[cur_ws].path, SET_TITLE) != EXIT_SUCCESS) {
-		char *ret = strrchr(ws[cur_ws].path, '/');
-		if (ret && ret != ws[cur_ws].path)
-			*ret = '\0';
-		else
-			break;
-	}
-
-	/* Remove all final slash(es) from path, if any */
-	size_t path_len = strlen(ws[cur_ws].path), i;
-
-	for (i = path_len - 1; ws[cur_ws].path[i] && i > 0; i--) {
-		if (ws[cur_ws].path[i] != '/')
-			break;
-		else
-			ws[cur_ws].path[i] = '\0';
-	}
-
-	if (welcome_message) {
-		printf(_("%s%s > %s\n%s%s\n"), wc_c, PROGRAM_NAME, PROG_DESC,
-				df_c, _(HELP_MESSAGE));
-		welcome_message = 0;
-	}
-
-	/* Print the tip of the day (only for the first run) */
-	if (tips) {
-		static int first_run = 1;
-		if (first_run) {
-			print_tips(0);
-			first_run = 0;
-		}
-	}
-
-	fputs(df_c, stdout);
-	fflush(stdout);
-	/* Execute prompt commands, if any, and only if external commands
-	 * are allowed */
-	if (ext_cmd_ok && prompt_cmds_n > 0) {
-		for (i = 0; i < prompt_cmds_n; i++)
-			launch_execle(prompt_cmds[i]);
-	}
-#ifndef _NO_TRASH
-	/* Update trash and sel file indicator on every prompt call */
-	if (trash_ok) {
-		trash_n = count_dir(TRASH_FILES_DIR, NO_CPOP);
-		if (trash_n <= 2)
-			trash_n = 0;
-	}
-#endif
-	get_sel_files();
-
-	/* Messages are categorized in three groups: errors, warnings, and
-	 * notices. The kind of message should be specified by the function
-	 * printing the message itself via a global enum: pmsg, with the
-	 * following values: nomsg, error, warning, and notice. */
-	char msg_str[MAX_COLOR + 1 + 16] = "";
-
-	if (msgs_n) {
-		/* Errors take precedence over warnings, and warnings over
-		 * notices. That is to say, if there is an error message AND a
-		 * warning message, the prompt will always display the error
-		 * message sign: a red 'E'. */
-		switch (pmsg) {
-		case nomsg:	break;
-		case error:	sprintf(msg_str, "%sE%s", em_c, NC_b); break;
-		case warning: sprintf(msg_str, "%sW%s", wm_c, NC_b); break;
-		case notice: sprintf(msg_str, "%sN%s", nm_c, NC_b); break;
-		default: break;
-		}
-	}
-
-	/* Generate the prompt string */
-	if (prompt_style == CUSTOM_PROMPT_STYLE) {
-		/* Set environment variables with CliFM state information
-		 * (sel files, trash, stealth mode, messages) to be handled by
-		 * the prompt itself */
-		char _tmp[32];
-		sprintf(_tmp, "%d", (int)sel_n);
-		setenv("CLIFM_STAT_SEL", _tmp, 1);
-		sprintf(_tmp, "%d", (int)trash_n);
-		setenv("CLIFM_STAT_TRASH", _tmp, 1);
-		sprintf(_tmp, "%d", (msgs_n && pmsg) ? (int)msgs_n : 0);
-		setenv("CLIFM_STAT_MSG", _tmp, 1);
-		sprintf(_tmp, "%d", cur_ws + 1);
-		setenv("CLIFM_STAT_WS", _tmp, 1);
-		sprintf(_tmp, "%d", exit_code);
-		setenv("CLIFM_STAT_EXIT", _tmp, 1);
-		setenv("CLIFM_STAT_ROOT", (flags & ROOT_USR) ? "1" : "0", 1);
-		setenv("CLIFM_STAT_STEALTH", (xargs.stealth_mode == 1) ? "1" : "0", 1);
-	}
-
-	/* First, grab and decode the prompt line of the config file (stored
-	 * in encoded_prompt at startup) */
-	char *decoded_prompt = decode_prompt(encoded_prompt);
-
-	/* Emergency prompt, just in case decode_prompt fails */
-	if (!decoded_prompt) {
-		fprintf(stderr, _("%s: Error decoding prompt line. Using an "
-				"emergency prompt\n"), PROGRAM_NAME);
-		decoded_prompt = (char *)xnmalloc(9, sizeof(char));
-		sprintf(decoded_prompt, "\001\x1b[0m\002> ");
-	}
-
-	size_t decoded_prompt_len;
-/*	if (unicode || prompt_style == CUSTOM_PROMPT_STYLE)
-		decoded_prompt_len = u8_xstrlen(decoded_prompt);
-	else */
-	decoded_prompt_len = strlen(decoded_prompt);
-
-	size_t prompt_length = 0;
-
-	if (prompt_style == DEF_PROMPT_STYLE) {
-		prompt_length = (size_t)(decoded_prompt_len
-		+ (xargs.stealth_mode == 1 ? 16 : 0) + ((flags & ROOT_USR) ? 16 : 0)
-		+ (sel_n ? 16 : 0) + (trash_n ? 16 : 0) + ((msgs_n && pmsg) ? 16 : 0)
-		+ 6 + sizeof(tx_c) + 1);
-	} else {
-		prompt_length = (size_t)(decoded_prompt_len + 6 + sizeof(tx_c) + 1);
-	}
-
-	/* 16 = color_b({red,green,yellow}_b)+letter (sel, trash, msg)+NC_b;
-	 * 6 = NC_b
-	 * 1 = null terminating char */
-
-	char *the_prompt = (char *)xnmalloc(prompt_length, sizeof(char));
-
-	if (prompt_style == DEF_PROMPT_STYLE) {
-		snprintf(the_prompt, prompt_length, "%s%s%s%s%s%s%s%s%s%s%s",
-			(flags & ROOT_USR) ? "\001\x1b[1;31mR\x1b[0m\002" : "",
-			(msgs_n && pmsg) ? msg_str : "", (xargs.stealth_mode == 1)
-			? si_c : "", (xargs.stealth_mode == 1) ? "S\001\x1b[0m\002"
-			: "", (trash_n) ? ti_c : "", (trash_n) ? "T\001\x1b[0m\002" : "",
-			(sel_n) ? li_c : "", (sel_n) ? "*\001\x1b[0m\002" : "",
-			decoded_prompt, NC_b, tx_c);
-	} else {
-		snprintf(the_prompt, prompt_length, "%s%s%s", decoded_prompt, NC_b,
-				tx_c);
-	}
-
-	free(decoded_prompt);
-
-	/* Print error messages, if any. 'print_errors' is set to true by
-	 * log_msg() with the PRINT_PROMPT flag. If NOPRINT_PROMPT is
-	 * passed instead, 'print_msg' will be false and the message will
-	 * be printed in place by log_msg() itself, without waiting for
-	 * the next prompt */
-	if (print_msg && msgs_n) {
-		fputs(messages[msgs_n - 1], stderr);
-		print_msg = 0; /* Print messages only once */
-	}
-
-	args_n = 0;
-
-	/* Print the prompt and get user input */
-	char *input = (char *)NULL;
-	input = readline(the_prompt);
-	free(the_prompt);
-
-	if (!input)
-		return (char *)NULL;
-
-	if (!*input) {
-		free(input);
-		input = (char *)NULL;
-		return (char *)NULL;
-	}
-
-	/* Keep a literal copy of the last entered command to compose the
-	 * commands log, if needed and enabled */
-	if (logs_enabled) {
-		if (last_cmd)
-			free(last_cmd);
-		last_cmd = savestring(input, strlen(input));
-	}
-
-	/* Do not record empty lines, exit, history commands, consecutively
-	 * equal inputs, or lines starting with space */
-	if (record_cmd(input))
-		add_to_cmdhist(input);
-
-	return input;
-}
-
 /* Decode the prompt string (encoded_prompt global variable) taken from
  * the configuration file. Based on the decode_prompt_string function
  * found in an old bash release (1.14.7). */
-char *
+static char *
 decode_prompt(const char *line)
 {
 	if (!line)
@@ -605,4 +415,194 @@ decode_prompt(const char *line)
 		result[result_len - 1] = '\0';
 
 	return result;
+}
+
+/* Print the prompt and return the string entered by the user (to be
+ * parsed later by parse_input_str()) */
+char *
+prompt(void)
+{
+	/* Make sure CWD exists; if not, go up to the parent, and so
+	 * on */
+	while (xchdir(ws[cur_ws].path, SET_TITLE) != EXIT_SUCCESS) {
+		char *ret = strrchr(ws[cur_ws].path, '/');
+		if (ret && ret != ws[cur_ws].path)
+			*ret = '\0';
+		else
+			break;
+	}
+
+	/* Remove all final slash(es) from path, if any */
+	size_t path_len = strlen(ws[cur_ws].path), i;
+
+	for (i = path_len - 1; ws[cur_ws].path[i] && i > 0; i--) {
+		if (ws[cur_ws].path[i] != '/')
+			break;
+		else
+			ws[cur_ws].path[i] = '\0';
+	}
+
+	if (welcome_message) {
+		printf(_("%s%s > %s\n%s%s\n"), wc_c, PROGRAM_NAME, PROG_DESC,
+				df_c, _(HELP_MESSAGE));
+		welcome_message = 0;
+	}
+
+	/* Print the tip of the day (only for the first run) */
+	if (tips) {
+		static int first_run = 1;
+		if (first_run) {
+			print_tips(0);
+			first_run = 0;
+		}
+	}
+
+	fputs(df_c, stdout);
+	fflush(stdout);
+	/* Execute prompt commands, if any, and only if external commands
+	 * are allowed */
+	if (ext_cmd_ok && prompt_cmds_n > 0) {
+		for (i = 0; i < prompt_cmds_n; i++)
+			launch_execle(prompt_cmds[i]);
+	}
+#ifndef _NO_TRASH
+	/* Update trash and sel file indicator on every prompt call */
+	if (trash_ok) {
+		trash_n = count_dir(TRASH_FILES_DIR, NO_CPOP);
+		if (trash_n <= 2)
+			trash_n = 0;
+	}
+#endif
+	get_sel_files();
+
+	/* Messages are categorized in three groups: errors, warnings, and
+	 * notices. The kind of message should be specified by the function
+	 * printing the message itself via a global enum: pmsg, with the
+	 * following values: nomsg, error, warning, and notice. */
+	char msg_str[MAX_COLOR + 1 + 16] = "";
+
+	if (msgs_n) {
+		/* Errors take precedence over warnings, and warnings over
+		 * notices. That is to say, if there is an error message AND a
+		 * warning message, the prompt will always display the error
+		 * message sign: a red 'E'. */
+		switch (pmsg) {
+		case nomsg:	break;
+		case error:	sprintf(msg_str, "%sE%s", em_c, NC_b); break;
+		case warning: sprintf(msg_str, "%sW%s", wm_c, NC_b); break;
+		case notice: sprintf(msg_str, "%sN%s", nm_c, NC_b); break;
+		default: break;
+		}
+	}
+
+	/* Generate the prompt string */
+	if (prompt_style == CUSTOM_PROMPT_STYLE) {
+		/* Set environment variables with CliFM state information
+		 * (sel files, trash, stealth mode, messages) to be handled by
+		 * the prompt itself */
+		char _tmp[32];
+		sprintf(_tmp, "%d", (int)sel_n);
+		setenv("CLIFM_STAT_SEL", _tmp, 1);
+		sprintf(_tmp, "%d", (int)trash_n);
+		setenv("CLIFM_STAT_TRASH", _tmp, 1);
+		sprintf(_tmp, "%d", (msgs_n && pmsg) ? (int)msgs_n : 0);
+		setenv("CLIFM_STAT_MSG", _tmp, 1);
+		sprintf(_tmp, "%d", cur_ws + 1);
+		setenv("CLIFM_STAT_WS", _tmp, 1);
+		sprintf(_tmp, "%d", exit_code);
+		setenv("CLIFM_STAT_EXIT", _tmp, 1);
+		setenv("CLIFM_STAT_ROOT", (flags & ROOT_USR) ? "1" : "0", 1);
+		setenv("CLIFM_STAT_STEALTH", (xargs.stealth_mode == 1) ? "1" : "0", 1);
+	}
+
+	/* First, grab and decode the prompt line of the config file (stored
+	 * in encoded_prompt at startup) */
+	char *decoded_prompt = decode_prompt(encoded_prompt);
+
+	/* Emergency prompt, just in case decode_prompt fails */
+	if (!decoded_prompt) {
+		fprintf(stderr, _("%s: Error decoding prompt line. Using an "
+				"emergency prompt\n"), PROGRAM_NAME);
+		decoded_prompt = (char *)xnmalloc(9, sizeof(char));
+		sprintf(decoded_prompt, "\001\x1b[0m\002> ");
+	}
+
+	size_t decoded_prompt_len;
+/*	if (unicode || prompt_style == CUSTOM_PROMPT_STYLE)
+		decoded_prompt_len = u8_xstrlen(decoded_prompt);
+	else */
+	decoded_prompt_len = strlen(decoded_prompt);
+
+	size_t prompt_length = 0;
+
+	if (prompt_style == DEF_PROMPT_STYLE) {
+		prompt_length = (size_t)(decoded_prompt_len
+		+ (xargs.stealth_mode == 1 ? 16 : 0) + ((flags & ROOT_USR) ? 16 : 0)
+		+ (sel_n ? 16 : 0) + (trash_n ? 16 : 0) + ((msgs_n && pmsg) ? 16 : 0)
+		+ 6 + sizeof(tx_c) + 1);
+	} else {
+		prompt_length = (size_t)(decoded_prompt_len + 6 + sizeof(tx_c) + 1);
+	}
+
+	/* 16 = color_b({red,green,yellow}_b)+letter (sel, trash, msg)+NC_b;
+	 * 6 = NC_b
+	 * 1 = null terminating char */
+
+	char *the_prompt = (char *)xnmalloc(prompt_length, sizeof(char));
+
+	if (prompt_style == DEF_PROMPT_STYLE) {
+		snprintf(the_prompt, prompt_length, "%s%s%s%s%s%s%s%s%s%s%s",
+			(flags & ROOT_USR) ? "\001\x1b[1;31mR\x1b[0m\002" : "",
+			(msgs_n && pmsg) ? msg_str : "", (xargs.stealth_mode == 1)
+			? si_c : "", (xargs.stealth_mode == 1) ? "S\001\x1b[0m\002"
+			: "", (trash_n) ? ti_c : "", (trash_n) ? "T\001\x1b[0m\002" : "",
+			(sel_n) ? li_c : "", (sel_n) ? "*\001\x1b[0m\002" : "",
+			decoded_prompt, NC_b, tx_c);
+	} else {
+		snprintf(the_prompt, prompt_length, "%s%s%s", decoded_prompt, NC_b,
+				tx_c);
+	}
+
+	free(decoded_prompt);
+
+	/* Print error messages, if any. 'print_errors' is set to true by
+	 * log_msg() with the PRINT_PROMPT flag. If NOPRINT_PROMPT is
+	 * passed instead, 'print_msg' will be false and the message will
+	 * be printed in place by log_msg() itself, without waiting for
+	 * the next prompt */
+	if (print_msg && msgs_n) {
+		fputs(messages[msgs_n - 1], stderr);
+		print_msg = 0; /* Print messages only once */
+	}
+
+	args_n = 0;
+
+	/* Print the prompt and get user input */
+	char *input = (char *)NULL;
+	input = readline(the_prompt);
+	free(the_prompt);
+
+	if (!input)
+		return (char *)NULL;
+
+	if (!*input) {
+		free(input);
+		input = (char *)NULL;
+		return (char *)NULL;
+	}
+
+	/* Keep a literal copy of the last entered command to compose the
+	 * commands log, if needed and enabled */
+	if (logs_enabled) {
+		if (last_cmd)
+			free(last_cmd);
+		last_cmd = savestring(input, strlen(input));
+	}
+
+	/* Do not record empty lines, exit, history commands, consecutively
+	 * equal inputs, or lines starting with space */
+	if (record_cmd(input))
+		add_to_cmdhist(input);
+
+	return input;
 }

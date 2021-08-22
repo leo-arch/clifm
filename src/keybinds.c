@@ -210,41 +210,9 @@ load_keybinds(void)
 	return EXIT_SUCCESS;
 }
 
-int
-run_kb_cmd(char *cmd)
-{
-	if (!cmd || !*cmd)
-		return EXIT_FAILURE;
-
-	if (kbind_busy)
-		return EXIT_SUCCESS;
-
-	keybind_exec_cmd(cmd);
-	rl_reset_line_state();
-	return EXIT_SUCCESS;
-}
-
-/* Retrieve the key sequence associated to FUNCTION */
-char *
-find_key(char *function)
-{
-	if (!kbinds_n)
-		return (char *)NULL;
-
-	int n = (int)kbinds_n;
-	while (--n >= 0) {
-		if (*function != *kbinds[n].function)
-			continue;
-		if (strcmp(function, kbinds[n].function) == 0)
-			return kbinds[n].key;
-	}
-
-	return (char *)NULL;
-}
-
 /* Runs any command recognized by CliFM via a keybind. Example:
  * keybind_exec_cmd("sel *") */
-int
+static int
 keybind_exec_cmd(char *str)
 {
 	size_t old_args = args_n;
@@ -285,8 +253,40 @@ keybind_exec_cmd(char *str)
 	return exit_status;
 }
 
+static int
+run_kb_cmd(char *cmd)
+{
+	if (!cmd || !*cmd)
+		return EXIT_FAILURE;
+
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	keybind_exec_cmd(cmd);
+	rl_reset_line_state();
+	return EXIT_SUCCESS;
+}
+
+/* Retrieve the key sequence associated to FUNCTION */
+static char *
+find_key(char *function)
+{
+	if (!kbinds_n)
+		return (char *)NULL;
+
+	int n = (int)kbinds_n;
+	while (--n >= 0) {
+		if (*function != *kbinds[n].function)
+			continue;
+		if (strcmp(function, kbinds[n].function) == 0)
+			return kbinds[n].key;
+	}
+
+	return (char *)NULL;
+}
+
 /* Prepend sudo/doas to the current input string */
-int
+static int
 rl_prepend_sudo(int count, int key)
 {
 	int free_s = 1;
@@ -337,28 +337,14 @@ rl_prepend_sudo(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_create_file(int count, int key)
 {
 	return run_kb_cmd("n");
 }
 
 #ifndef _NO_SUGGESTIONS
-int
-rl_accept_first_word(int count, int key)
-{
-	/* Accepting the first suggested word is not supported for ELN's,
-	 * bookmarks and aliases names */
-	if (suggestion.type != ELN_SUG && suggestion.type != BOOKMARK_SUG
-	&& suggestion.type != ALIAS_SUG && suggestion.type != JCMD_SUG
-	&& suggestion.type != JCMD_SUG_NOACD) {
-		accept_first_word = 1;
-		suggestion.type = FIRST_WORD;
-	}
-	return rl_accept_suggestion(count, key);
-}
-
-int
+static int
 rl_accept_suggestion(int count, int key)
 {
 	if (kbind_busy) {
@@ -495,9 +481,23 @@ rl_accept_suggestion(int count, int key)
 
 	return EXIT_SUCCESS;
 }
+
+static int
+rl_accept_first_word(int count, int key)
+{
+	/* Accepting the first suggested word is not supported for ELN's,
+	 * bookmarks and aliases names */
+	if (suggestion.type != ELN_SUG && suggestion.type != BOOKMARK_SUG
+	&& suggestion.type != ALIAS_SUG && suggestion.type != JCMD_SUG
+	&& suggestion.type != JCMD_SUG_NOACD) {
+		accept_first_word = 1;
+		suggestion.type = FIRST_WORD;
+	}
+	return rl_accept_suggestion(count, key);
+}
 #endif /* !_NO_SUGGESTIONS */
 
-int
+static int
 rl_refresh(int count, int key)
 {
 	if (kbind_busy)
@@ -510,7 +510,7 @@ rl_refresh(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_parent_dir(int count, int key)
 {
 	/* If already root dir, do nothing */
@@ -519,7 +519,7 @@ rl_parent_dir(int count, int key)
 	return run_kb_cmd("cd ..");
 }
 
-int
+static int
 rl_root_dir(int count, int key)
 {
 	/* If already root dir, do nothing */
@@ -528,7 +528,7 @@ rl_root_dir(int count, int key)
 	return run_kb_cmd("cd /");
 }
 
-int
+static int
 rl_home_dir(int count, int key)
 {
 	/* If already in home, do nothing */
@@ -537,7 +537,7 @@ rl_home_dir(int count, int key)
 	return run_kb_cmd("cd");
 }
 
-int
+static int
 rl_next_dir(int count, int key)
 {
 	/* If already at the end of dir hist, do nothing */
@@ -546,7 +546,7 @@ rl_next_dir(int count, int key)
 	return run_kb_cmd("f");
 }
 
-int
+static int
 rl_first_dir(int count, int key)
 {
 	/* If already at the beginning of dir hist, do nothing */
@@ -556,7 +556,7 @@ rl_first_dir(int count, int key)
 	return run_kb_cmd("b !1");
 }
 
-int
+static int
 rl_last_dir(int count, int key)
 {
 	if (kbind_busy)
@@ -573,7 +573,7 @@ rl_last_dir(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_previous_dir(int count, int key)
 {
 	/* If already at the beginning of dir hist, do nothing */
@@ -582,7 +582,7 @@ rl_previous_dir(int count, int key)
 	return run_kb_cmd("b");
 }
 
-int
+static int
 rl_long(int count, int key)
 {
 	if (kbind_busy)
@@ -597,7 +597,7 @@ rl_long(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_folders_first(int count, int key)
 {
 	if (kbind_busy)
@@ -624,7 +624,7 @@ rl_folders_first(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_light(int count, int key)
 {
 	if (kbind_busy)
@@ -639,7 +639,7 @@ rl_light(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_hidden(int count, int key)
 {
 	if (kbind_busy)
@@ -662,43 +662,43 @@ rl_hidden(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_open_config(int count, int key)
 {
 	return run_kb_cmd("edit");
 }
 
-int
+static int
 rl_open_keybinds(int count, int key)
 {
 	return run_kb_cmd("kb edit");
 }
 
-int
+static int
 rl_open_cscheme(int count, int key)
 {
 	return run_kb_cmd("cs e");
 }
 
-int
+static int
 rl_open_bm_file(int count, int key)
 {
 	return run_kb_cmd("bm edit");
 }
 
-int
+static int
 rl_open_jump_db(int count, int key)
 {
 	return run_kb_cmd("je");
 }
 
-int
+static int
 rl_open_mime(int count, int key)
 {
 	return run_kb_cmd("mm edit");
 }
 
-int
+static int
 rl_mountpoints(int count, int key)
 {
 	/* Call the function only if it's not already running */
@@ -708,19 +708,19 @@ rl_mountpoints(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_select_all(int count, int key)
 {
 	return run_kb_cmd("s ^");
 }
 
-int
+static int
 rl_deselect_all(int count, int key)
 {
 	return run_kb_cmd("ds *");
 }
 
-int
+static int
 rl_bookmarks(int count, int key)
 {
 	if (kbind_busy)
@@ -732,13 +732,13 @@ rl_bookmarks(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_selbox(int count, int key)
 {
 	return run_kb_cmd("ds");
 }
 
-int
+static int
 rl_clear_line(int count, int key)
 {
 	if (kbind_busy)
@@ -763,7 +763,7 @@ rl_clear_line(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_sort_next(int count, int key)
 {
 	if (kbind_busy)
@@ -790,7 +790,7 @@ rl_sort_next(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_sort_previous(int count, int key)
 {
 	if (kbind_busy)
@@ -817,7 +817,7 @@ rl_sort_previous(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_lock(int count, int key)
 {
 	int ret = EXIT_SUCCESS;
@@ -846,7 +846,7 @@ rl_lock(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_remove_sel(int count, int key)
 {
 	if (kbind_busy)
@@ -861,7 +861,7 @@ rl_remove_sel(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_export_sel(int count, int key)
 {
 	if (kbind_busy)
@@ -874,7 +874,7 @@ rl_export_sel(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_move_sel(int count, int key)
 {
 	if (kbind_busy)
@@ -887,7 +887,7 @@ rl_move_sel(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_rename_sel(int count, int key)
 {
 	if (kbind_busy)
@@ -900,7 +900,7 @@ rl_rename_sel(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_paste_sel(int count, int key)
 {
 	if (kbind_busy)
@@ -915,7 +915,7 @@ rl_paste_sel(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_quit(int count, int key)
 {
 	if (kbind_busy)
@@ -928,7 +928,7 @@ rl_quit(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_previous_profile(int count, int key)
 {
 	if (kbind_busy)
@@ -978,7 +978,7 @@ rl_previous_profile(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_next_profile(int count, int key)
 {
 	if (kbind_busy)
@@ -1028,43 +1028,43 @@ rl_next_profile(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_dirhist(int count, int key)
 {
 	return run_kb_cmd("bh");
 }
 
-int
+static int
 rl_archive_sel(int count, int key)
 {
 	return run_kb_cmd("ac sel");
 }
 
-int
+static int
 rl_new_instance(int count, int key)
 {
 	return run_kb_cmd("x .");
 }
 
-int
+static int
 rl_clear_msgs(int count, int key)
 {
 	return run_kb_cmd("msg clear");
 }
 
-int
+static int
 rl_trash_sel(int count, int key)
 {
 	return run_kb_cmd("t sel");
 }
 
-int
+static int
 rl_untrash_all(int count, int key)
 {
 	return run_kb_cmd("u *");
 }
 
-int
+static int
 rl_open_sel(int count, int key)
 {
 	if (kbind_busy)
@@ -1084,7 +1084,7 @@ rl_open_sel(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_bm_sel(int count, int key)
 {
 	if (kbind_busy)
@@ -1104,7 +1104,7 @@ rl_bm_sel(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_kbinds_help(int count, int key)
 {
 #ifndef _NO_SUGGESTIONS
@@ -1120,7 +1120,7 @@ rl_kbinds_help(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_cmds_help(int count, int key)
 {
 #ifndef _NO_SUGGESTIONS
@@ -1136,7 +1136,7 @@ rl_cmds_help(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_manpage(int count, int key)
 {
 #ifndef _NO_SUGGESTIONS
@@ -1149,7 +1149,7 @@ rl_manpage(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 rl_pinned_dir(int count, int key)
 {
 	if (!pinned_dir) {
@@ -1161,49 +1161,49 @@ rl_pinned_dir(int count, int key)
 	return run_kb_cmd(",");
 }
 
-int
+static int
 rl_ws1(int count, int key)
 {
 	return run_kb_cmd("ws 1");
 }
 
-int
+static int
 rl_ws2(int count, int key)
 {
 	return run_kb_cmd("ws 2");
 }
 
-int
+static int
 rl_ws3(int count, int key)
 {
 	return run_kb_cmd("ws 3");
 }
 
-int
+static int
 rl_ws4(int count, int key)
 {
 	return run_kb_cmd("ws 4");
 }
 
-int
+static int
 rl_plugin1(int count, int key)
 {
 	return run_kb_cmd("plugin1");
 }
 
-int
+static int
 rl_plugin2(int count, int key)
 {
 	return run_kb_cmd("plugin2");
 }
 
-int
+static int
 rl_plugin3(int count, int key)
 {
 	return run_kb_cmd("plugin3");
 }
 
-int
+static int
 rl_plugin4(int count, int key)
 {
 	return run_kb_cmd("plugin4");

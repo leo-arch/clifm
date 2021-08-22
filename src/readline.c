@@ -58,126 +58,11 @@ typedef char *rl_cpvfunc_t;
 #include "suggestions.h"
 #endif
 
-int
-initialize_readline(void)
-{
-	/* #### INITIALIZE READLINE (what a hard beast to tackle!!) #### */
-
-	/* Set the name of the program using readline. Mostly used for
-	 * conditional constructs in the inputrc file */
-	rl_readline_name = argv_bk[0];
-
-	/* Load readline initialization file. Check order:
-	 * INPUTRC env var
-	 * ~/.config/clifm/readline.cfm
-	 * ~/.inputrc
-	 * /etc/inputrc */
-	char *p = getenv("INPUTRC");
-	if (p) {
-		rl_read_init_file(p);
-	} else if (CONFIG_DIR_GRAL) {
-		char *rl_file = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) + 14,
-							sizeof(char));
-		sprintf(rl_file, "%s/readline.cfm", CONFIG_DIR_GRAL);
-		rl_read_init_file(rl_file);
-		free(rl_file);
-	}
-
-	/* Enable tab auto-completion for commands (in PATH) in case of
-	  * first entered string (if autocd and/or auto-open are enabled, check
-	  * for paths as well). The second and later entered strings will
-	  * be autocompleted with paths instead, just like in Bash, or with
-	  * listed file names, in case of ELN's. I use a custom completion
-	  * function to add command and ELN completion, since readline's
-	  * internal completer only performs path completion */
-
-	/* Define a function for path completion.
-	 * NULL means to use filename_entry_function (), the default
-	 * filename completer. */
-	rl_completion_entry_function = my_rl_path_completion;
-
-	/* Pointer to alternative function to create matches.
-	 * Function is called with TEXT, START, and END.
-	 * START and END are indices in RL_LINE_BUFFER saying what the
-	 * boundaries of TEXT are.
-	 * If this function exists and returns NULL then call the value of
-	 * rl_completion_entry_function to try to match, otherwise use the
-	 * array of strings returned. */
-	rl_attempted_completion_function = my_rl_completion;
-	rl_ignore_completion_duplicates = 1;
-
-	/* I'm using here a custom quoting function. If not specified,
-	 * readline uses the default internal function. */
-	rl_filename_quoting_function = my_rl_quote;
-
-	/* Tell readline what char to use for quoting. This is only the
-	 * readline internal quoting function, and for custom ones, like the
-	 * one I use above. However, custom quoting functions, though they
-	 * need to define their own quoting chars, won't be called at all
-	 * if this variable isn't set. */
-	rl_completer_quote_characters = "\"'";
-	rl_completer_word_break_characters = " ";
-
-	/* Whenever readline finds any of the following chars, it will call
-	 * the quoting function */
-	rl_filename_quote_characters = " \t\n\"\\'`@$><=,;|&{[()]}?!*^";
-	/* According to readline documentation, the following string is
-	 * the default and the one used by Bash: " \t\n\"\\'`@$><=;|&{(" */
-
-	/* Executed immediately before calling the completer function, it
-	 * tells readline if a space char, which is a word break character
-	 * (see the above rl_completer_word_break_characters variable) is
-	 * quoted or not. If it is, readline then passes the whole string
-	 * to the completer function (ex: "user\ file"), and if not, only
-	 * wathever it found after the space char (ex: "file")
-	 * Thanks to George Brocklehurst for pointing out this function:
-	 * https://thoughtbot.com/blog/tab-completion-in-gnu-readline*/
-	rl_char_is_quoted_p = quote_detector;
-#ifndef _NO_SUGGESTIONS
-#ifndef __FreeBSD__
-	if (suggestions)
-		rl_getc_function = my_rl_getc;
-#else
-	/* For the time being, suggestions do not work on the FreeBSD
-	 * console. The escape code to retrieve the current cursor
-	 * position doesn't seem to work */
-	if (suggestions) {
-		if (flags & GUI) {
-			rl_getc_function = my_rl_getc;
-		} else {
-			suggestions = 0;
-			_err('w', PRINT_PROMPT, _("%s: Suggestions are currently "
-				"not supported on the FreeBSD console\n"), PROGRAM_NAME);
-		}
-	}
-#endif /* __FreeBSD__ */
-#endif /* _NO_SUGGESTIONS */
-
-	/* This function is executed inmediately before path completion. So,
-	 * if the string to be completed is, for instance, "user\ file" (see
-	 * the above comment), this function should return the dequoted
-	 * string so it won't conflict with system file names: you want
-	 * "user file", because "user\ file" does not exist, and, in this
-	 * latter case, readline won't find any matches */
-	rl_filename_dequoting_function = dequote_str;
-
-	/* Initialize the keyboard bindings function */
-	readline_kbinds();
-
-	/* Copy the list of quote chars to a global variable to be used
-	 * later by some of the program functions like split_str(),
-	 * my_rl_quote(), is_quote_char(), and my_rl_dequote() */
-	qc = savestring(rl_filename_quote_characters,
-	    strlen(rl_filename_quote_characters));
-
-	return EXIT_SUCCESS;
-}
-
 #ifndef _NO_SUGGESTIONS
 /* This function is automatically called by readline() to handle input.
  * Taken from Bash 1.14.7 and modified to fit our needs. Used
  * to introduce the suggestions system */
-int
+static int
 my_rl_getc(FILE *stream)
 {
 	int result;
@@ -312,7 +197,7 @@ rl_no_hist(const char *prompt)
 
 /* Used by readline to check if a char in the string being completed is
  * quoted or not */
-int
+static int
 quote_detector(char *line, int index)
 {
 	if (index > 0 && line[index - 1] == '\\' && !quote_detector(line, index - 1))
@@ -325,7 +210,7 @@ quote_detector(char *line, int index)
  * before any char listed in rl_filename_quote_characters.
  * Modified version of:
  * https://utcc.utoronto.ca/~cks/space/blog/programming/ReadlineQuotingExample*/
-char *
+static char *
 my_rl_quote(char *text, int mt, char *qp)
 {
 	/* NOTE: mt and qp arguments are not used here, but are required by
@@ -367,7 +252,7 @@ my_rl_quote(char *text, int mt, char *qp)
 
 /* This is the filename_completion_function() function of an old Bash
  * release (1.14.7) modified to fit CliFM needs */
-char *
+static char *
 my_rl_path_completion(const char *text, int state)
 {
 	if (!text || !*text)
@@ -807,7 +692,7 @@ my_rl_path_completion(const char *text, int state)
 }
 
 /* Used by bookmarks completion */
-char *
+static char *
 bookmarks_generator(const char *text, int state)
 {
 	if (!bookmark_names)
@@ -832,7 +717,7 @@ bookmarks_generator(const char *text, int state)
 }
 
 /* Used by history completion */
-char *
+static char *
 hist_generator(const char *text, int state)
 {
 	if (!history)
@@ -858,7 +743,7 @@ hist_generator(const char *text, int state)
 
 /* Expand string into matching path in the jump database. Used by
  * j, jc, and jp commands */
-char *
+static char *
 jump_generator(const char *text, int state)
 {
 	static int i;
@@ -895,7 +780,7 @@ jump_generator(const char *text, int state)
 
 /* Expand jump order number into the corresponding path. Used by the
  * jo command */
-char *
+static char *
 jump_entries_generator(const char *text, int state)
 {
 	static size_t i;
@@ -915,7 +800,7 @@ jump_entries_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
-char *
+static char *
 cschemes_generator(const char *text, int state)
 {
 	if (!color_schemes)
@@ -942,7 +827,7 @@ cschemes_generator(const char *text, int state)
 }
 
 /* Used by profiles completion */
-char *
+static char *
 profiles_generator(const char *text, int state)
 {
 	if (!profile_names)
@@ -969,7 +854,7 @@ profiles_generator(const char *text, int state)
 }
 
 /* Used by ELN expansion */
-char *
+static char *
 filenames_gen_text(const char *text, int state)
 {
 	static size_t i, len = 0;
@@ -996,7 +881,7 @@ filenames_gen_text(const char *text, int state)
 }
 
 /* Used by ELN expansion */
-char *
+static char *
 filenames_gen_eln(const char *text, int state)
 {
 	static size_t i;
@@ -1024,7 +909,7 @@ filenames_gen_eln(const char *text, int state)
 }
 
 /* Used by commands completion */
-char *
+static char *
 bin_cmd_generator(const char *text, int state)
 {
 	if (!bin_commands)
@@ -1047,7 +932,7 @@ bin_cmd_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
-char *
+static char *
 sort_num_generator(const char *text, int state)
 {
 	static size_t i;
@@ -1084,7 +969,7 @@ sort_num_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
-char *
+static char *
 nets_generator(const char *text, int state)
 {
 	if (!remotes)
@@ -1107,7 +992,7 @@ nets_generator(const char *text, int state)
 	return (char *)NULL;
 }
 
-char *
+static char *
 sort_name_generator(const char *text, int state)
 {
 	static int i;
@@ -1304,4 +1189,119 @@ my_rl_completion(const char *text, int start, int end)
 	/* If none of the above, readline will attempt
 	 * path completion instead via my custom my_rl_path_completion() */
 	return matches;
+}
+
+int
+initialize_readline(void)
+{
+	/* #### INITIALIZE READLINE (what a hard beast to tackle!!) #### */
+
+	/* Set the name of the program using readline. Mostly used for
+	 * conditional constructs in the inputrc file */
+	rl_readline_name = argv_bk[0];
+
+	/* Load readline initialization file. Check order:
+	 * INPUTRC env var
+	 * ~/.config/clifm/readline.cfm
+	 * ~/.inputrc
+	 * /etc/inputrc */
+	char *p = getenv("INPUTRC");
+	if (p) {
+		rl_read_init_file(p);
+	} else if (CONFIG_DIR_GRAL) {
+		char *rl_file = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) + 14,
+							sizeof(char));
+		sprintf(rl_file, "%s/readline.cfm", CONFIG_DIR_GRAL);
+		rl_read_init_file(rl_file);
+		free(rl_file);
+	}
+
+	/* Enable tab auto-completion for commands (in PATH) in case of
+	  * first entered string (if autocd and/or auto-open are enabled, check
+	  * for paths as well). The second and later entered strings will
+	  * be autocompleted with paths instead, just like in Bash, or with
+	  * listed file names, in case of ELN's. I use a custom completion
+	  * function to add command and ELN completion, since readline's
+	  * internal completer only performs path completion */
+
+	/* Define a function for path completion.
+	 * NULL means to use filename_entry_function (), the default
+	 * filename completer. */
+	rl_completion_entry_function = my_rl_path_completion;
+
+	/* Pointer to alternative function to create matches.
+	 * Function is called with TEXT, START, and END.
+	 * START and END are indices in RL_LINE_BUFFER saying what the
+	 * boundaries of TEXT are.
+	 * If this function exists and returns NULL then call the value of
+	 * rl_completion_entry_function to try to match, otherwise use the
+	 * array of strings returned. */
+	rl_attempted_completion_function = my_rl_completion;
+	rl_ignore_completion_duplicates = 1;
+
+	/* I'm using here a custom quoting function. If not specified,
+	 * readline uses the default internal function. */
+	rl_filename_quoting_function = my_rl_quote;
+
+	/* Tell readline what char to use for quoting. This is only the
+	 * readline internal quoting function, and for custom ones, like the
+	 * one I use above. However, custom quoting functions, though they
+	 * need to define their own quoting chars, won't be called at all
+	 * if this variable isn't set. */
+	rl_completer_quote_characters = "\"'";
+	rl_completer_word_break_characters = " ";
+
+	/* Whenever readline finds any of the following chars, it will call
+	 * the quoting function */
+	rl_filename_quote_characters = " \t\n\"\\'`@$><=,;|&{[()]}?!*^";
+	/* According to readline documentation, the following string is
+	 * the default and the one used by Bash: " \t\n\"\\'`@$><=;|&{(" */
+
+	/* Executed immediately before calling the completer function, it
+	 * tells readline if a space char, which is a word break character
+	 * (see the above rl_completer_word_break_characters variable) is
+	 * quoted or not. If it is, readline then passes the whole string
+	 * to the completer function (ex: "user\ file"), and if not, only
+	 * wathever it found after the space char (ex: "file")
+	 * Thanks to George Brocklehurst for pointing out this function:
+	 * https://thoughtbot.com/blog/tab-completion-in-gnu-readline*/
+	rl_char_is_quoted_p = quote_detector;
+#ifndef _NO_SUGGESTIONS
+#ifndef __FreeBSD__
+	if (suggestions)
+		rl_getc_function = my_rl_getc;
+#else
+	/* For the time being, suggestions do not work on the FreeBSD
+	 * console. The escape code to retrieve the current cursor
+	 * position doesn't seem to work */
+	if (suggestions) {
+		if (flags & GUI) {
+			rl_getc_function = my_rl_getc;
+		} else {
+			suggestions = 0;
+			_err('w', PRINT_PROMPT, _("%s: Suggestions are currently "
+				"not supported on the FreeBSD console\n"), PROGRAM_NAME);
+		}
+	}
+#endif /* __FreeBSD__ */
+#endif /* _NO_SUGGESTIONS */
+
+	/* This function is executed inmediately before path completion. So,
+	 * if the string to be completed is, for instance, "user\ file" (see
+	 * the above comment), this function should return the dequoted
+	 * string so it won't conflict with system file names: you want
+	 * "user file", because "user\ file" does not exist, and, in this
+	 * latter case, readline won't find any matches */
+	rl_filename_dequoting_function = dequote_str;
+
+	/* Initialize the keyboard bindings function */
+	readline_kbinds();
+
+	/* Copy the list of quote chars to a global variable to be used
+	 * later by some of the program functions like split_str(),
+	 * my_rl_quote(), is_quote_char(), and my_rl_dequote() */
+	qc = savestring(rl_filename_quote_characters,
+	    strlen(rl_filename_quote_characters));
+
+	return EXIT_SUCCESS;
 }

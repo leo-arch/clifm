@@ -49,7 +49,7 @@
 /* Get application associated to a given MIME file type or file extension.
  * Returns the first matching line in the MIME file or NULL if none is
  * found */
-char *
+static char *
 get_app(const char *mime, const char *ext)
 {
 	if (!mime)
@@ -228,7 +228,7 @@ xmagic(const char *file)
 }
 
 #else
-char *
+static char *
 get_mime(char *file)
 {
 	if (!file || !*file) {
@@ -324,6 +324,135 @@ get_mime(char *file)
 	return mime_type;
 }
 #endif /* !_NO_MAGIC */
+
+/* Import MIME definitions from the system and store them into FILE.
+ * Returns the amount of definitions found, if any, or -1 in case of error
+ * or no association found */
+static int
+mime_import(char *file)
+{
+#ifdef __HAIKU__
+	fprintf(stderr, "%s: Importing MIME definitions is not supported on Haiku\n",
+			PROGRAM_NAME);
+	return (-1);
+#endif
+	/* If not in X, exit) */
+	if (!(flags & GUI)) {
+		fprintf(stderr, _("%s: Nothing was imported. No graphical "
+						"environment found\n"), PROGRAM_NAME);
+		return (-1);
+	}
+
+	if (!user.home) {
+		fprintf(stderr, _("%s: Error getting home directory\n"), PROGRAM_NAME);
+		return (-1);
+	}
+
+	/* Open the local MIME file */
+	FILE *mime_fp = fopen(file, "w");
+	if (!mime_fp) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+		return (-1);
+	}
+
+	/* Create a list of possible paths for the 'mimeapps.list' file as
+	 * specified by the Freedesktop specification */
+	size_t home_len = strlen(user.home);
+	char *config_path = (char *)NULL, *local_path = (char *)NULL;
+	config_path = (char *)xnmalloc(home_len + 23, sizeof(char));
+	local_path = (char *)xnmalloc(home_len + 41, sizeof(char));
+	sprintf(config_path, "%s/.config/mimeapps.list", user.home);
+	sprintf(local_path, "%s/.local/share/applications/mimeapps.list", user.home);
+
+	char *mime_paths[] = {config_path, local_path,
+	    "/usr/local/share/applications/mimeapps.list",
+	    "/usr/share/applications/mimeapps.list",
+	    "/etc/xdg/mimeapps.list", NULL};
+
+	/* Check each mimeapps.list file and store its associations into
+	 * FILE */
+	size_t i;
+	int mime_defs = 0;
+
+	for (i = 0; mime_paths[i]; i++) {
+		FILE *sys_mime_fp = fopen(mime_paths[i], "r");
+		if (!sys_mime_fp)
+			continue;
+
+		size_t line_size = 0;
+		char *line = (char *)NULL;
+		/* Only store associations in the "Default Applications" section */
+		int da_found = 0;
+
+		while (getline(&line, &line_size, sys_mime_fp) > 0) {
+			if (!da_found && strncmp(line, "[Default Applications]", 22) == 0) {
+				da_found = 1;
+				continue;
+			}
+
+			if (da_found) {
+				if (*line == '[')
+					break;
+				if (*line == '#' || *line == '\n')
+					continue;
+
+				int index = strcntchr(line, '.');
+				if (index != -1)
+					line[index] = '\0';
+
+				fprintf(mime_fp, "%s\n", line);
+				mime_defs++;
+			}
+		}
+
+		free(line);
+		line = (char *)NULL;
+		fclose(sys_mime_fp);
+	}
+
+	free(config_path);
+	free(local_path);
+
+	if (mime_defs <= 0) {
+		fclose(mime_fp);
+		fprintf(stderr, _("%s: Nothing was imported. No MIME definitions "
+			"found\n"), PROGRAM_NAME);
+		return (-1);
+	}
+
+	/* Make sure there is an entry for text/plain and *.cfm files, so
+	 * that at least 'mm edit' will work. Gedit, kate, pluma, mousepad,
+	 * and leafpad, are the default text editors of Gnome, KDE, Mate,
+	 * XFCE, and LXDE respectivelly */
+	fputs("X:text/plain=gedit;kate;pluma;mousepad;leafpad;nano;vim;"
+	      "vi;emacs;ed\n"
+	      "X:E:^cfm$=gedit;kate;pluma;mousepad;leafpad;nano;vim;vi;"
+	      "emacs;ed\n", mime_fp);
+
+	fclose(mime_fp);
+	return mime_defs;
+}
+
+static int
+mime_edit(char **args)
+{
+	int exit_status = EXIT_SUCCESS;
+
+	if (!args[2]) {
+		char *cmd[] = {"mime", MIME_FILE, NULL};
+		if (mime_open(cmd) != 0) {
+			fputs(_("Try 'mm, mime edit APPLICATION'\n"), stderr);
+			exit_status = EXIT_FAILURE;
+		}
+
+	} else {
+		char *cmd[] = {args[2], MIME_FILE, NULL};
+		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
+			exit_status = EXIT_FAILURE;
+	}
+
+	return exit_status;
+}
 
 /* Open a file according to the application associated to its MIME type
  * or extension. It also accepts the 'info' and 'edit' arguments, the
@@ -635,134 +764,5 @@ mime_open(char **args)
 		free(cmd[i]);
 	free(cmd);
 	return ret;
-}
-
-/* Import MIME definitions from the system and store them into FILE.
- * Returns the amount of definitions found, if any, or -1 in case of error
- * or no association found */
-int
-mime_import(char *file)
-{
-#ifdef __HAIKU__
-	fprintf(stderr, "%s: Importing MIME definitions is not supported on Haiku\n",
-			PROGRAM_NAME);
-	return (-1);
-#endif
-	/* If not in X, exit) */
-	if (!(flags & GUI)) {
-		fprintf(stderr, _("%s: Nothing was imported. No graphical "
-						"environment found\n"), PROGRAM_NAME);
-		return (-1);
-	}
-
-	if (!user.home) {
-		fprintf(stderr, _("%s: Error getting home directory\n"), PROGRAM_NAME);
-		return (-1);
-	}
-
-	/* Open the local MIME file */
-	FILE *mime_fp = fopen(file, "w");
-	if (!mime_fp) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
-		return (-1);
-	}
-
-	/* Create a list of possible paths for the 'mimeapps.list' file as
-	 * specified by the Freedesktop specification */
-	size_t home_len = strlen(user.home);
-	char *config_path = (char *)NULL, *local_path = (char *)NULL;
-	config_path = (char *)xnmalloc(home_len + 23, sizeof(char));
-	local_path = (char *)xnmalloc(home_len + 41, sizeof(char));
-	sprintf(config_path, "%s/.config/mimeapps.list", user.home);
-	sprintf(local_path, "%s/.local/share/applications/mimeapps.list", user.home);
-
-	char *mime_paths[] = {config_path, local_path,
-	    "/usr/local/share/applications/mimeapps.list",
-	    "/usr/share/applications/mimeapps.list",
-	    "/etc/xdg/mimeapps.list", NULL};
-
-	/* Check each mimeapps.list file and store its associations into
-	 * FILE */
-	size_t i;
-	int mime_defs = 0;
-
-	for (i = 0; mime_paths[i]; i++) {
-		FILE *sys_mime_fp = fopen(mime_paths[i], "r");
-		if (!sys_mime_fp)
-			continue;
-
-		size_t line_size = 0;
-		char *line = (char *)NULL;
-		/* Only store associations in the "Default Applications" section */
-		int da_found = 0;
-
-		while (getline(&line, &line_size, sys_mime_fp) > 0) {
-			if (!da_found && strncmp(line, "[Default Applications]", 22) == 0) {
-				da_found = 1;
-				continue;
-			}
-
-			if (da_found) {
-				if (*line == '[')
-					break;
-				if (*line == '#' || *line == '\n')
-					continue;
-
-				int index = strcntchr(line, '.');
-				if (index != -1)
-					line[index] = '\0';
-
-				fprintf(mime_fp, "%s\n", line);
-				mime_defs++;
-			}
-		}
-
-		free(line);
-		line = (char *)NULL;
-		fclose(sys_mime_fp);
-	}
-
-	free(config_path);
-	free(local_path);
-
-	if (mime_defs <= 0) {
-		fclose(mime_fp);
-		fprintf(stderr, _("%s: Nothing was imported. No MIME definitions "
-			"found\n"), PROGRAM_NAME);
-		return (-1);
-	}
-
-	/* Make sure there is an entry for text/plain and *.cfm files, so
-	 * that at least 'mm edit' will work. Gedit, kate, pluma, mousepad,
-	 * and leafpad, are the default text editors of Gnome, KDE, Mate,
-	 * XFCE, and LXDE respectivelly */
-	fputs("X:text/plain=gedit;kate;pluma;mousepad;leafpad;nano;vim;"
-	      "vi;emacs;ed\n"
-	      "X:E:^cfm$=gedit;kate;pluma;mousepad;leafpad;nano;vim;vi;"
-	      "emacs;ed\n", mime_fp);
-
-	fclose(mime_fp);
-	return mime_defs;
-}
-
-int
-mime_edit(char **args)
-{
-	int exit_status = EXIT_SUCCESS;
-
-	if (!args[2]) {
-		char *cmd[] = {"mime", MIME_FILE, NULL};
-		if (mime_open(cmd) != 0) {
-			fputs(_("Try 'mm, mime edit APPLICATION'\n"), stderr);
-			exit_status = EXIT_FAILURE;
-		}
-
-	} else {
-		char *cmd[] = {args[2], MIME_FILE, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
-			exit_status = EXIT_FAILURE;
-	}
-
-	return exit_status;
 }
 #endif /* !_NO_LIRA */

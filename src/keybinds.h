@@ -24,11 +24,6 @@
 
 #pragma once
 
-/* keybinds.c */
 void readline_kbinds(void);
 int kbinds_function(char **args);
-char *find_key(char *function);
-int keybind_exec_cmd(char *str);
 int load_keybinds(void);
-int rl_accept_suggestion(int count, int key);
-int rl_accept_first_word(int count, int key);

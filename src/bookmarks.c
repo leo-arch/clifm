@@ -40,79 +40,6 @@
 #include "readline.h"
 #include "messages.h"
 
-int
-bookmarks_function(char **cmd)
-{
-	if (xargs.stealth_mode == 1) {
-		printf(_("%s: Access to configuration files is not allowed in "
-			 "stealth mode\n"), PROGRAM_NAME);
-		return EXIT_SUCCESS;
-	}
-
-	if (!config_ok) {
-		fprintf(stderr, _("Bookmarks function disabled\n"));
-		return EXIT_FAILURE;
-	}
-
-	/* If the bookmarks file doesn't exist, create it. NOTE: This file
-	 * should be created at startup (by get_bm_names()), but we check
-	 * it again here just in case it was meanwhile deleted for some
-	 * reason */
-
-	/* If no arguments */
-	if (!cmd[1])
-		return open_bookmark();
-
-	/* Check arguments */
-
-	/* Add a bookmark */
-	if (*cmd[1] == 'a' && (!cmd[1][1] || strcmp(cmd[1], "add") == 0)) {
-		if (!cmd[2]) {
-			puts(_(BOOKMARKS_USAGE));
-			return EXIT_SUCCESS;
-		}
-
-		if (access(cmd[2], F_OK) != 0) {
-			fprintf(stderr, _("Bookmarks: %s: %s\n"), cmd[2],
-			    strerror(errno));
-			return EXIT_FAILURE;
-		}
-
-		return bookmark_add(cmd[2]);
-	}
-
-	/* Delete bookmarks */
-	if (*cmd[1] == 'd' && (!cmd[1][1] || strcmp(cmd[1], "del") == 0))
-		return bookmark_del(cmd[2] ? cmd[2] : NULL);
-
-	/* Edit */
-	if (*cmd[1] == 'e' && (!cmd[1][1] || strcmp(cmd[1], "edit") == 0))
-		return edit_bookmarks(cmd[2] ? cmd[2] : NULL);
-
-	/* Shortcut or bm name */
-	size_t i;
-	for (i = 0; i < bm_n; i++) {
-		if ((bookmarks[i].shortcut && *cmd[1] == *bookmarks[i].shortcut
-			&& strcmp(cmd[1], bookmarks[i].shortcut) == 0)
-			|| (bookmarks[i].name && *cmd[1] == *bookmarks[i].name
-			&& strcmp(cmd[1], bookmarks[i].name) == 0)) {
-
-			if (bookmarks[i].path) {
-				char *tmp_cmd[] = {"o", bookmarks[i].path,
-				    cmd[2] ? cmd[2] : NULL, NULL};
-				return open_function(tmp_cmd);
-			}
-
-			fprintf(stderr, _("Bookmarks: %s: Invalid bookmark\n"),
-			    cmd[1]);
-			return EXIT_FAILURE;
-		}
-	}
-
-	fprintf(stderr, _("Bookmarks: %s: No such bookmark\n"), cmd[1]);
-	return EXIT_FAILURE;
-}
-
 void
 free_bookmarks(void)
 {
@@ -142,7 +69,7 @@ free_bookmarks(void)
 	return;
 }
 
-char **
+static char **
 bm_prompt(void)
 {
 	char *bm_sel = (char *)NULL;
@@ -157,7 +84,7 @@ bm_prompt(void)
 	return comm_bm;
 }
 
-int
+static int
 bookmark_del(char *name)
 {
 	FILE *bm_fp = NULL;
@@ -432,7 +359,7 @@ bookmark_del(char *name)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 bookmark_add(char *file)
 {
 	if (!file)
@@ -807,4 +734,77 @@ FREE_AND_EXIT : {
 	arg = (char **)NULL;
 	return exit_status;
 }
+}
+
+int
+bookmarks_function(char **cmd)
+{
+	if (xargs.stealth_mode == 1) {
+		printf(_("%s: Access to configuration files is not allowed in "
+			 "stealth mode\n"), PROGRAM_NAME);
+		return EXIT_SUCCESS;
+	}
+
+	if (!config_ok) {
+		fprintf(stderr, _("Bookmarks function disabled\n"));
+		return EXIT_FAILURE;
+	}
+
+	/* If the bookmarks file doesn't exist, create it. NOTE: This file
+	 * should be created at startup (by get_bm_names()), but we check
+	 * it again here just in case it was meanwhile deleted for some
+	 * reason */
+
+	/* If no arguments */
+	if (!cmd[1])
+		return open_bookmark();
+
+	/* Check arguments */
+
+	/* Add a bookmark */
+	if (*cmd[1] == 'a' && (!cmd[1][1] || strcmp(cmd[1], "add") == 0)) {
+		if (!cmd[2]) {
+			puts(_(BOOKMARKS_USAGE));
+			return EXIT_SUCCESS;
+		}
+
+		if (access(cmd[2], F_OK) != 0) {
+			fprintf(stderr, _("Bookmarks: %s: %s\n"), cmd[2],
+			    strerror(errno));
+			return EXIT_FAILURE;
+		}
+
+		return bookmark_add(cmd[2]);
+	}
+
+	/* Delete bookmarks */
+	if (*cmd[1] == 'd' && (!cmd[1][1] || strcmp(cmd[1], "del") == 0))
+		return bookmark_del(cmd[2] ? cmd[2] : NULL);
+
+	/* Edit */
+	if (*cmd[1] == 'e' && (!cmd[1][1] || strcmp(cmd[1], "edit") == 0))
+		return edit_bookmarks(cmd[2] ? cmd[2] : NULL);
+
+	/* Shortcut or bm name */
+	size_t i;
+	for (i = 0; i < bm_n; i++) {
+		if ((bookmarks[i].shortcut && *cmd[1] == *bookmarks[i].shortcut
+			&& strcmp(cmd[1], bookmarks[i].shortcut) == 0)
+			|| (bookmarks[i].name && *cmd[1] == *bookmarks[i].name
+			&& strcmp(cmd[1], bookmarks[i].name) == 0)) {
+
+			if (bookmarks[i].path) {
+				char *tmp_cmd[] = {"o", bookmarks[i].path,
+				    cmd[2] ? cmd[2] : NULL, NULL};
+				return open_function(tmp_cmd);
+			}
+
+			fprintf(stderr, _("Bookmarks: %s: Invalid bookmark\n"),
+			    cmd[1]);
+			return EXIT_FAILURE;
+		}
+	}
+
+	fprintf(stderr, _("Bookmarks: %s: No such bookmark\n"), cmd[1]);
+	return EXIT_FAILURE;
 }

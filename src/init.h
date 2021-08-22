@@ -50,7 +50,6 @@ int init_workspaces(void);
 int init_gettext(void);
 int get_home(void);
 int backup_argv(int argc, char **argv);
-/* pid_t get_own_pid(void); */
 struct user_t get_user(void);
 
 /* 

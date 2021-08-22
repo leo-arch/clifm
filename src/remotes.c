@@ -40,7 +40,7 @@
 #include "messages.h"
 #include "file_operations.h"
 
-int
+static int
 remotes_list(void)
 {
 	if (!remotes_n) {
@@ -74,7 +74,7 @@ remotes_list(void)
 }
 
 /* Get the index of the remote named NAME from the remotes list */
-int
+static int
 get_remote(char *name)
 {
 	int i = remotes_n,
@@ -101,7 +101,7 @@ get_remote(char *name)
 	return i;
 }
 
-int
+static int
 remotes_mount(char *name)
 {
 	if (!name || !*name)
@@ -156,7 +156,7 @@ remotes_mount(char *name)
 	return exit_status;
 }
 
-int
+static int
 remotes_unmount(char *name)
 {
 	if (!name || !*name)
@@ -179,7 +179,7 @@ remotes_unmount(char *name)
 	return EXIT_SUCCESS;
 }
 
-int
+static int
 remotes_edit(char *app)
 {
 	if (!REMOTES_FILE)

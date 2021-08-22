@@ -48,7 +48,7 @@
 #include "icons.h"
 #endif
 
-void
+static void
 print_sort_method(void)
 {
 	printf(_("%s->%s Sorted by: "), mi_c, df_c);
@@ -119,7 +119,7 @@ print_sort_method(void)
  * take only one, but unicode chars could take two), print exactly the
  * content of DIV_LINE_CHAR. Otherwise, repeat DIV_LINE_CHAR to fulfill
  * all terminal columns. */
-void
+static void
 print_div_line(void)
 {
 	fputs(dl_c, stdout);
@@ -139,7 +139,7 @@ print_div_line(void)
 
 /* Print free/total space for the filesystem of the current working
  * directory */
-void
+static void
 print_disk_usage(void)
 {
 	if (!ws || !ws[cur_ws].path || !*ws[cur_ws].path)
@@ -161,7 +161,7 @@ print_disk_usage(void)
 	return;
 }
 
-void
+static void
 _print_selfiles(unsigned short term_rows)
 {
 	int limit = max_printselfiles;
@@ -187,7 +187,7 @@ _print_selfiles(unsigned short term_rows)
 	print_div_line();
 }
 
-void
+static void
 print_dirhist_map(void)
 {
 	size_t i;
@@ -211,7 +211,7 @@ print_dirhist_map(void)
 #ifndef _NO_ICONS
 /* Set the icon field to the corresponding icon for FILE. If not found,
  * set the default icon */
-void
+static void
 get_file_icon(const char *file, int n)
 {
 	if (!file)
@@ -230,7 +230,7 @@ get_file_icon(const char *file, int n)
 
 /* Set the icon field to the corresponding icon for DIR. If not found,
  * set the default icon */
-void
+static void
 get_dir_icon(const char *dir, int n)
 {
 	/* Default values for directories */
@@ -253,7 +253,7 @@ get_dir_icon(const char *dir, int n)
 
 /* Set the icon field to the corresponding icon for EXT. If not found,
  * set the default icon */
-void
+static void
 get_ext_icon(const char *restrict ext, int n)
 {
 	file_info[n].icon = DEF_FILE_ICON;
@@ -283,7 +283,7 @@ get_ext_icon(const char *restrict ext, int n)
  * Unlike list_dir(), however, this function uses no color and runs
  * neither stat() nor count_dir(), which makes it quite faster. Return
  * zero on success or one on error */
-int
+static int
 list_dir_light(void)
 {
 	/*  clock_t start = clock(); */
