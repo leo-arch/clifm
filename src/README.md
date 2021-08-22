@@ -104,15 +104,15 @@ if (ret && *(++ret))
 Always perform bound checks. Either make sure the destination buffer is big enough to hold the source string or truncate the source string to fit your buffer via some of the `n` functions (`strncpy(3)`, `strncat(3)`, `snprintf(3)`, etc):
 
 ```c
-char *dest = (char *)malloc(strlen(src) + 1);
-if (dest)
-	strcpy(dest, src);
+char *buf = (char *)malloc(strlen(src) + 1);
+if (buf)
+	strcpy(buf, src);
 ```
 
-or
+or (using a safe version of `strncpy(3)`)
 ```c
-buf[PATH_MAX] = "";
-strncpy(buf, src, PATH_MAX - 1);
+buf[PATH_MAX];
+xstrsncpy(buf, src, PATH_MAX);
 ```
 
 These are just a few examples. There are plenty of resources out there on how to write good code.
