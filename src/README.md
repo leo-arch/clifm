@@ -50,7 +50,7 @@ function_name(argument, ... n)
 
 **NOTE**: Writing the function name and arguments in a separate line makes it more easily searchable
 
-Assignements:
+Assignements and comparissons (spaces around equal sign):
 
 ```c
 x = y
@@ -81,11 +81,37 @@ Max line legnth: `80 characters/columns`. If an statement exceeds this number, s
 
 Make sure blank/empty lines do not contains TABS or spaces. In the same way, remove ending TABS and spaces.
 
-### Plugins
+## 2) Code quality
 
-We mostly use `POSIX shell scripts`. In this case, always use `shellcheck` to check your plugins.
+A program should not only provide working features, but also well written, performant, and easily understandable code:
 
-## 2) General code structure
+**1)** Use the proper tool (and in the proper way) for the job: be as simple as possible and do not waste resources (they are highly valuable). For example: `strcmp(3)` is a standard and quite useful function. However, it is a good idea to prevent calling this function (possibily hundreds of times in a loop) if not needed. Before calling `strcmp` compare the first byte of the strings to be compared. If they do not match, there is no need to call the function:
+
+```c
+if (*str == *str2 && strcmp(str, str2) == 0)
+```
+
+In the same way, and for the same reason, use the cheapest function. If you do not need formatting, prefer `write(3)` or `fputs(3)` over `printf(3)`: they're faster.
+
+Use pointers whenever possible: this is one of the greatest advantages of C. For instance, if you need to get the basename of a directory, there is no need to copy the string in any way, neither manually nor via some other function. Just get a pointer to the last slash in the original string using `strrchr(3)`:
+
+```c
+char *ret = strrchr(str, '/');
+if (ret && *(++ret))
+	/* We have the directory basename */
+```
+
+These are just a few examples. There are plenty of resources out there on how to write good code.
+
+**2)** Manual memory management is another of the greatest (dis)advantages of C. Use a tool like `valgrind` to make sure your code is not leaking memory.
+
+**3)** Static analysis tools are an invaluable resource: use them! **Always** check your code via tools like `cppcheck`, `scan-build` or `splint`. Use them all if necessary. Once done, fix all warnings and errors (provided they are not false positives, of course).  
+
+When it comes to plugins, we mostly use `POSIX shell scripts`. In this case, always use `shellcheck` to check your plugins.
+
+**4**) Needless to say, pay attention to all compilation warnings (`clang` is quite good and clear at that) and fix them. Enable error and warning flags when testing your code. `-Wall` and `-Wextra` are usually enough.
+
+## 3) CliFM's general code structure
 
 CliFM source code consists of multiple C source files, being `main.c` the starting point and `helpers.h` the main header file. In `main.c` you'll find:
 
@@ -163,7 +189,7 @@ gcc -o clifm *.c -lreadline -lintl -lmagic
 
 **NOTE 2**: You can drop `-lmagic` if compiling with `_NOMAGIC`. In the same way, you can drop `-lintl` if compiling with `_NO_GETTEXT`. See below.
 
-**NOTE 3**: It is recommended to use [upx(1)](https://linux.die.net/man/1/upx) to significantly reduce (50-70%) the size of the executable file:
+**NOTE 3**: If the binary size is an issue, it is recommended to use [upx(1)](https://linux.die.net/man/1/upx) to significantly reduce (50-70%) the size of the executable file (at the expense of some performance):
 
 ```sh
 upx clifm
@@ -196,7 +222,7 @@ make _BE_POSIX=1 _NO_ICONS=1 install
 1) Files birth time: We get this information via [statx(2)](https://man7.org/linux/man-pages/man2/statx.2.html), which is Linux specific.
 2) Version sort: We use here [versionsort](https://man7.org/linux/man-pages/man3/scandir.3.html), a GNU extension.
 
-<sup>2</sup> Without `libmagic`, querying files MIME type implies grabing the output of the [file(1)](https://www.man7.org/linux/man-pages/man1/file.1.html) command, which of course is less optimus than directly querying the `libmagic` database itself (we need to run the command, redirect its output to a file, open the file, read it, close it, and then delete it). Though perhaps unnoticiable, this is an important difference.
+<sup>2</sup> Without `libmagic`, querying files MIME type implies grabing the output of the [file(1)](https://www.man7.org/linux/man-pages/man1/file.1.html) command, which of course is not as optimal as directly querying the `libmagic` database itself (we need to run the command, redirect its output to a file, open the file, read it, close it, and then delete it). Though perhaps unnoticiable, this is an important difference.
 
 ## 5) Plugins
 
