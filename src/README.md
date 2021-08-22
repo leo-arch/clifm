@@ -101,15 +101,31 @@ if (ret && *(++ret))
 	/* We have the directory basename */
 ```
 
+Always perform bound checks. Either make sure the destination buffer is big enough to hold the source string or truncate the source string to fit your buffer via some of the `n` functions (`strncpy(3)`, `strncat(3)`, `snprintf(3)`, etc):
+
+```c
+char *dest = (char *)malloc(strlen(src) + 1);
+if (dest)
+	strcpy(dest, src);
+```
+
+or
+```c
+buf[PATH_MAX] = "";
+strncpy(buf, src, PATH_MAX - 1);
+```
+
 These are just a few examples. There are plenty of resources out there on how to write good code.
 
-**2)** Manual memory management is another of the greatest (dis)advantages of C. Use a tool like `valgrind` to make sure your code is not leaking memory.
+**2)** Manual memory management is another of the greatest (dis)advantages of C. Use a tool like `valgrind` to make sure your code is not leaking memory. Free `malloc`'ed memory as soon as you don't need it any more.
 
 **3)** Static analysis tools are an invaluable resource: use them! **Always** check your code via tools like `cppcheck`, `scan-build` or `splint`. Use them all if necessary. Once done, fix all warnings and errors (provided they are not false positives, of course).  
 
 When it comes to plugins, we mostly use `POSIX shell scripts`. In this case, always use `shellcheck` to check your plugins.
 
 **4**) Needless to say, pay attention to all compilation warnings (`clang` is quite good and clear at that) and fix them. Enable error and warning flags when testing your code. `-Wall` and `-Wextra` are usually enough.
+
+**5**) If not obvious, comment what your code is trying to achieve: there is no good software without good documentation.
 
 ## 3) CliFM's general code structure
 
@@ -131,7 +147,7 @@ This is the basic structure of CliFM: generally speaking, it is just a shell. In
 
 **E)** Whatever happens later, is just some function or operation invoked by the user and happening on top of the steps described above: opening a file or directory (via the `open_function()` and `cd_function()` functions, in `file_operations.c` and `navigation.c` respectivelly), opening a bookmark (`bookmarks.c`), operating on files (`file_operations.c`), switching to a different profile (`profiles.c`), trashing a file (`trash.c`), searching for a file (`search.c`), running a plugin (`actions.c`), and so on.
 
-## 3) Hacking
+## 4) Hacking
 **Work in progress**
 
 Add a new command: `exec.c`
@@ -150,7 +166,7 @@ Directory jumper: `jump.c`
 
 Suggestions: `suggestions.c` and `keybinds.c` (see the `rl_accept_suggestion` function)
 
-## 4) Compilation
+## 5) Compilation
 
 **Note**: For the list of dependencies, see the [installation page](https://github.com/leo-arch/clifm/wiki/Introduction#installation).
 
@@ -224,6 +240,6 @@ make _BE_POSIX=1 _NO_ICONS=1 install
 
 <sup>2</sup> Without `libmagic`, querying files MIME type implies grabing the output of the [file(1)](https://www.man7.org/linux/man-pages/man1/file.1.html) command, which of course is not as optimal as directly querying the `libmagic` database itself (we need to run the command, redirect its output to a file, open the file, read it, close it, and then delete it). Though perhaps unnoticiable, this is an important difference.
 
-## 5) Plugins
+## 6) Plugins
 
 CliFM plugins, that is, commands or set of commands executed by CliFM, could be any executable file, be it a shell script, a binary file (C, Python, Go, Rust, or whatever programming language you like). See the [plugins section](https://github.com/leo-arch/clifm/wiki/Advanced#plugins).
