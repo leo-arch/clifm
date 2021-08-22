@@ -1418,7 +1418,7 @@ handle_stdin()
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		goto FREE_N_EXIT;
 
-	/* Get CWD: we need it to preppend it to relative paths */
+	/* Get CWD: we need it to prepend it to relative paths */
 	char *cwd = (char *)NULL;
 	cwd = getcwd(NULL, 0);
 	if (!cwd)
@@ -1444,14 +1444,14 @@ handle_stdin()
 			if (!tmp_file || !*(++tmp_file))
 				tmp_file = q;
 
-			char source[PATH_MAX + 1];
+			char source[PATH_MAX];
 			if (*q != '/' || !q[1])
 				snprintf(source, PATH_MAX, "%s/%s", cwd, q);
 			else
-				strncpy(source, q, PATH_MAX);
+				xstrsncpy(source, q, PATH_MAX);
 
 			char dest[PATH_MAX + 1];
-			sprintf(dest, "%s/%s", STDIN_TMP_DIR, tmp_file);
+			snprintf(dest, PATH_MAX, "%s/%s", STDIN_TMP_DIR, tmp_file);
 
 			if (symlink(source, dest) == -1)
 				_err('w', PRINT_PROMPT, "ln: '%s': %s\n", q, strerror(errno));

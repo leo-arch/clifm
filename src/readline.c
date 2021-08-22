@@ -299,7 +299,7 @@ my_rl_path_completion(const char *text, int state)
 	struct dirent *ent = (struct dirent *)NULL;
 	static int exec = 0, exec_path = 0;
 	static char *dir_tmp = (char *)NULL;
-	static char tmp[PATH_MAX] = "";
+	static char tmp[PATH_MAX];
 
 	/* If we don't have any state, then do some initialization. */
 	if (!state) {
@@ -413,9 +413,9 @@ my_rl_path_completion(const char *text, int state)
 #if !defined(_DIRENT_HAVE_D_TYPE)
 		struct stat attr;
 		if (!dirname || (*dirname == '.' && !*(dirname + 1)))
-			strncpy(tmp, ent->d_name, PATH_MAX - 1);
+			xstrsncpy(tmp, ent->d_name, PATH_MAX);
 		else
-			snprintf(tmp, PATH_MAX - 1, "%s%s", dirname, ent->d_name);
+			snprintf(tmp, PATH_MAX, "%s%s", dirname, ent->d_name);
 		if (lstat(tmp, &attr) == -1) {
 			continue;
 		}
@@ -450,8 +450,7 @@ my_rl_path_completion(const char *text, int state)
 					if (dirname[0] == '.' && !dirname[1]) {
 						ret = get_link_ref(ent->d_name);
 					} else {
-						snprintf(tmp, PATH_MAX, "%s%s", dirname,
-						    ent->d_name);
+						snprintf(tmp, PATH_MAX, "%s%s", dirname, ent->d_name);
 						ret = get_link_ref(tmp);
 					}
 
@@ -480,8 +479,7 @@ my_rl_path_completion(const char *text, int state)
 					if (dirname[0] == '.' && !dirname[1]) {
 						ret = get_link_ref(ent->d_name);
 					} else {
-						snprintf(tmp, PATH_MAX, "%s%s", dirname,
-						    ent->d_name);
+						snprintf(tmp, PATH_MAX, "%s%s", dirname, ent->d_name);
 						ret = get_link_ref(tmp);
 					}
 
@@ -520,8 +518,7 @@ my_rl_path_completion(const char *text, int state)
 				if (type == DT_REG) {
 					/* dir_tmp is dirname less "./", already
 					 * allocated before the while loop */
-					snprintf(tmp, PATH_MAX, "%s%s", dir_tmp,
-					    ent->d_name);
+					snprintf(tmp, PATH_MAX, "%s%s", dir_tmp, ent->d_name);
 
 					if (access(tmp, X_OK) == 0)
 						match = 1;
@@ -557,8 +554,7 @@ my_rl_path_completion(const char *text, int state)
 					if (dirname[0] == '.' && !dirname[1]) {
 						ret = get_link_ref(ent->d_name);
 					} else {
-						snprintf(tmp, PATH_MAX, "%s%s", dirname,
-						    ent->d_name);
+						snprintf(tmp, PATH_MAX, "%s%s", dirname, ent->d_name);
 						ret = get_link_ref(tmp);
 					}
 
@@ -585,8 +581,7 @@ my_rl_path_completion(const char *text, int state)
 					if (dirname[0] == '.' && !dirname[1]) {
 						ret = get_link_ref(ent->d_name);
 					} else {
-						snprintf(tmp, PATH_MAX, "%s%s", dirname,
-						    ent->d_name);
+						snprintf(tmp, PATH_MAX, "%s%s", dirname, ent->d_name);
 						ret = get_link_ref(tmp);
 					}
 

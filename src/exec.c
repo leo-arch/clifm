@@ -651,8 +651,8 @@ exec_cmd(char **comm)
 
 			/* Make sure the symlink source is always an absolute path */
 			if (comm[1] && *comm[1] != '/' && *comm[1] != '~') {
-				char tmp[NAME_MAX + 1];
-				strncpy(tmp, comm[1], NAME_MAX);
+				char tmp[NAME_MAX];
+				xstrsncpy(tmp, comm[1], NAME_MAX);
 				comm[1] = (char *)xrealloc(comm[1], (strlen(tmp)
 							+ strlen(ws[cur_ws].path) + 2) * sizeof(char));
 				sprintf(comm[1], "%s/%s", ws[cur_ws].path, tmp);

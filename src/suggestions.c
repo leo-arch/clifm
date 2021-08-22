@@ -681,7 +681,7 @@ check_bookmarks(const char *str, const size_t len)
 				if (bookmarks[i].path[path_len - 1] != '/')
 					snprintf(tmp, PATH_MAX + 2, "%s/", bookmarks[i].path);
 				else
-					strncpy(tmp, bookmarks[i].path, PATH_MAX + 2);
+					xstrsncpy(tmp, bookmarks[i].path, PATH_MAX + 2);
 
 				if (suggest_filetype_color)
 					color = di_c;

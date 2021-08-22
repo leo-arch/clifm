@@ -123,7 +123,7 @@ decode_prompt(const char *line)
 				char octal_string[4];
 				int n;
 
-				strncpy(octal_string, line, 3);
+				xstrsncpy(octal_string, line, 3);
 				octal_string[3] = '\0';
 
 				n = read_octal(octal_string);

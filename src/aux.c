@@ -57,8 +57,8 @@ get_hex_num(const char *str)
 			break;
 
 		str += 2;
-		char *tmp = xcalloc(3, sizeof(char));
-		strncpy(tmp, str, 2);
+		char *tmp = xnmalloc(3, sizeof(char));
+		xstrsncpy(tmp, str, 2);
 
 		if (i >= 3)
 			hex_n = xrealloc(hex_n, (i + 1) * sizeof(int *));

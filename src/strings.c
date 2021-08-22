@@ -1863,7 +1863,7 @@ get_substr(char *str, const char ifs)
 
 			substr[substr_n] = p;
 			p = (char *)NULL;
-			strncpy(substr[substr_n++], buf, length);
+			xstrsncpy(substr[substr_n++], buf, length);
 			length = 0;
 		} else {
 			str++;

@@ -1385,11 +1385,11 @@ external_arguments(int argc, char **argv)
 
 		if (*path_value == '~') {
 			path_exp = tilde_expand(path_value);
-			strncpy(path_tmp, path_exp, PATH_MAX - 1);
+			xstrsncpy(path_tmp, path_exp, PATH_MAX);
 		} else if (*path_value != '/') {
 			snprintf(path_tmp, PATH_MAX - 1, "%s/%s", getenv("PWD"), path_value);
 		} else {
-			strncpy(path_tmp, path_value, PATH_MAX - 1);
+			xstrsncpy(path_tmp, path_value, PATH_MAX);
 		}
 
 		if (xchdir(path_tmp, SET_TITLE) == 0) {
@@ -1784,7 +1784,7 @@ get_path_programs(void)
 			if (index != -1) {
 				bin_commands[l] = (char *)xnmalloc((size_t)index + 1,
 				    sizeof(char));
-				strncpy(bin_commands[l], aliases[i], (size_t)index);
+				xstrsncpy(bin_commands[l], aliases[i], (size_t)index);
 				bin_commands[l++][index] = '\0';
 			}
 		}
