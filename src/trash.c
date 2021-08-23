@@ -275,13 +275,13 @@ trash_clear(void)
 	struct dirent **trash_files = (struct dirent **)NULL;
 	int files_n = -1, exit_status = EXIT_SUCCESS;
 
-	if (xchdir(TRASH_FILES_DIR, NO_TITLE) == -1) {
+	if (xchdir(trash_files_dir, NO_TITLE) == -1) {
 		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME,
-		    TRASH_FILES_DIR, strerror(errno));
+		    trash_files_dir, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
-	files_n = scandir(TRASH_FILES_DIR, &trash_files, skip_files, xalphasort);
+	files_n = scandir(trash_files_dir, &trash_files, skip_files, xalphasort);
 
 	if (!files_n) {
 		puts(_("trash: There are no trashed files"));
@@ -296,17 +296,17 @@ trash_clear(void)
 		sprintf(info_file, "%s.trashinfo", trash_files[i]->d_name);
 
 		char *file1 = (char *)NULL;
-		file1 = (char *)xnmalloc(strlen(TRASH_FILES_DIR) +
+		file1 = (char *)xnmalloc(strlen(trash_files_dir) +
 					     strlen(trash_files[i]->d_name) + 2,
 		    sizeof(char));
 
-		sprintf(file1, "%s/%s", TRASH_FILES_DIR, trash_files[i]->d_name);
+		sprintf(file1, "%s/%s", trash_files_dir, trash_files[i]->d_name);
 
 		char *file2 = (char *)NULL;
-		file2 = (char *)xnmalloc(strlen(TRASH_INFO_DIR) +
+		file2 = (char *)xnmalloc(strlen(trash_info_dir) +
 					     strlen(info_file) + 2,
 		    sizeof(char));
-		sprintf(file2, "%s/%s", TRASH_INFO_DIR, info_file);
+		sprintf(file2, "%s/%s", trash_info_dir, info_file);
 
 		char *tmp_cmd[] = {"rm", "-r", file1, file2, NULL};
 
@@ -405,9 +405,9 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 
 	/* Copy the original file into the trash files directory */
 	char *dest = (char *)NULL;
-	dest = (char *)xnmalloc(strlen(TRASH_FILES_DIR) + strlen(file_suffix) + 2,
+	dest = (char *)xnmalloc(strlen(trash_files_dir) + strlen(file_suffix) + 2,
 							sizeof(char));
-	sprintf(dest, "%s/%s", TRASH_FILES_DIR, file_suffix);
+	sprintf(dest, "%s/%s", trash_files_dir, file_suffix);
 
 	char *tmp_cmd[] = {"cp", "-a", file, dest, NULL};
 
@@ -425,10 +425,10 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 	}
 
 	/* Generate the info file */
-	size_t info_file_len = strlen(TRASH_INFO_DIR) + strlen(file_suffix) + 12;
+	size_t info_file_len = strlen(trash_info_dir) + strlen(file_suffix) + 12;
 
 	char *info_file = (char *)xnmalloc(info_file_len, sizeof(char));
-	sprintf(info_file, "%s/%s.trashinfo", TRASH_INFO_DIR, file_suffix);
+	sprintf(info_file, "%s/%s.trashinfo", trash_info_dir, file_suffix);
 
 	FILE *info_fp = fopen(info_file, "w");
 
@@ -437,9 +437,9 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 		    strerror(errno));
 		/* Remove the trash file */
 		char *trash_file = (char *)NULL;
-		trash_file = (char *)xnmalloc(strlen(TRASH_FILES_DIR)
+		trash_file = (char *)xnmalloc(strlen(trash_files_dir)
 						+ strlen(file_suffix) + 2, sizeof(char));
-		sprintf(trash_file, "%s/%s", TRASH_FILES_DIR, file_suffix);
+		sprintf(trash_file, "%s/%s", trash_files_dir, file_suffix);
 
 		char *tmp_cmd2[] = {"rm", "-r", trash_file, NULL};
 
@@ -450,7 +450,7 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 		if (ret != EXIT_SUCCESS)
 			fprintf(stderr, _("%s: trash: %s/%s: Failed removing trash "
 				"file\nTry removing it manually\n"), PROGRAM_NAME,
-			    TRASH_FILES_DIR, file_suffix);
+			    trash_files_dir, file_suffix);
 
 		free(file_suffix);
 		free(info_file);
@@ -496,9 +496,9 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 		fprintf(stderr, _("%s: trash: %s: Failed removing file\n"),
 		    PROGRAM_NAME, file);
 		char *trash_file = (char *)NULL;
-		trash_file = (char *)xnmalloc(strlen(TRASH_FILES_DIR)
+		trash_file = (char *)xnmalloc(strlen(trash_files_dir)
 						+ strlen(file_suffix) + 2, sizeof(char));
-		sprintf(trash_file, "%s/%s", TRASH_FILES_DIR, file_suffix);
+		sprintf(trash_file, "%s/%s", trash_files_dir, file_suffix);
 
 		char *tmp_cmd4[] = {"rm", "-r", trash_file, info_file, NULL};
 		ret = launch_execve(tmp_cmd4, FOREGROUND, E_NOFLAG);
@@ -524,15 +524,15 @@ remove_from_trash(void)
 {
 	/* List trashed files */
 	/* Change CWD to the trash directory. Otherwise, scandir() will fail */
-	if (xchdir(TRASH_FILES_DIR, NO_TITLE) == -1) {
+	if (xchdir(trash_files_dir, NO_TITLE) == -1) {
 		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME,
-		    TRASH_FILES_DIR, strerror(errno));
+		    trash_files_dir, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	size_t i = 0;
 	struct dirent **trash_files = (struct dirent **)NULL;
-	int files_n = scandir(TRASH_FILES_DIR, &trash_files,
+	int files_n = scandir(trash_files_dir, &trash_files,
 					skip_files, (unicode) ? alphasort : (case_sensitive)
 					? xalphasort : alphasort_insensitive);
 
@@ -605,10 +605,10 @@ remove_from_trash(void)
 			size_t j;
 			for (j = 0; j < (size_t)files_n; j++) {
 
-				snprintf(rm_file, PATH_MAX, "%s/%s", TRASH_FILES_DIR,
+				snprintf(rm_file, PATH_MAX, "%s/%s", trash_files_dir,
 				    trash_files[j]->d_name);
 				snprintf(rm_info, PATH_MAX, "%s/%s.trashinfo",
-				    TRASH_INFO_DIR, trash_files[j]->d_name);
+				    trash_info_dir, trash_files[j]->d_name);
 
 				char *tmp_cmd[] = {"rm", "-r", rm_file, rm_info, NULL};
 
@@ -668,9 +668,9 @@ remove_from_trash(void)
 			continue;
 		}
 
-		snprintf(rm_file, PATH_MAX, "%s/%s", TRASH_FILES_DIR,
+		snprintf(rm_file, PATH_MAX, "%s/%s", trash_files_dir,
 		    trash_files[rm_num - 1]->d_name);
-		snprintf(rm_info, PATH_MAX, "%s/%s.trashinfo", TRASH_INFO_DIR,
+		snprintf(rm_info, PATH_MAX, "%s/%s.trashinfo", trash_info_dir,
 		    trash_files[rm_num - 1]->d_name);
 
 		char *tmp_cmd2[] = {"rm", "-r", rm_file, rm_info, NULL};
@@ -703,8 +703,8 @@ untrash_element(char *file)
 		return EXIT_FAILURE;
 
 	char undel_file[PATH_MAX] = "", undel_info[PATH_MAX] = "";
-	snprintf(undel_file, PATH_MAX, "%s/%s", TRASH_FILES_DIR, file);
-	snprintf(undel_info, PATH_MAX, "%s/%s.trashinfo", TRASH_INFO_DIR,
+	snprintf(undel_file, PATH_MAX, "%s/%s", trash_files_dir, file);
+	snprintf(undel_info, PATH_MAX, "%s/%s.trashinfo", trash_info_dir,
 	    file);
 
 	FILE *info_fp;
@@ -850,15 +850,15 @@ untrash_function(char **comm)
 	}
 
 	/* Change CWD to the trash directory to make scandir() work */
-	if (xchdir(TRASH_FILES_DIR, NO_TITLE) == -1) {
+	if (xchdir(trash_files_dir, NO_TITLE) == -1) {
 		_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n", PROGRAM_NAME,
-		    TRASH_FILES_DIR, strerror(errno));
+		    trash_files_dir, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	/* Get trashed files */
 	struct dirent **trash_files = (struct dirent **)NULL;
-	int trash_files_n = scandir(TRASH_FILES_DIR, &trash_files,
+	int trash_files_n = scandir(trash_files_dir, &trash_files,
 	    skip_files, (unicode) ? alphasort : (case_sensitive) ? xalphasort
 								 : alphasort_insensitive);
 	if (trash_files_n <= 0) {
@@ -1002,7 +1002,7 @@ untrash_function(char **comm)
 	free(trash_files);
 
 	/* If some trashed file still remains, reload the undel screen */
-	trash_n = count_dir(TRASH_FILES_DIR, NO_CPOP);
+	trash_n = count_dir(trash_files_dir, NO_CPOP);
 
 	if (trash_n <= 2)
 		trash_n = 0;
@@ -1024,20 +1024,20 @@ trash_function(char **comm)
 
 	/* Create trash dirs, if necessary */
 	/*  struct stat file_attrib;
-	if (stat (TRASH_DIR, &file_attrib) == -1) {
+	if (stat (trash_dir, &file_attrib) == -1) {
 		char *trash_files = NULL;
-		trash_files = xcalloc(strlen(TRASH_DIR) + 7, sizeof(char));
-		sprintf(trash_files, "%s/files", TRASH_DIR);
+		trash_files = xcalloc(strlen(trash_dir) + 7, sizeof(char));
+		sprintf(trash_files, "%s/files", trash_dir);
 		char *trash_info=NULL;
-		trash_info = xcalloc(strlen(TRASH_DIR) + 6, sizeof(char));
-		sprintf(trash_info, "%s/info", TRASH_DIR);
+		trash_info = xcalloc(strlen(trash_dir) + 6, sizeof(char));
+		sprintf(trash_info, "%s/info", trash_dir);
 		char *cmd[] = { "mkdir", "-p", trash_files, trash_info, NULL };
 		int ret = launch_execve (cmd, FOREGROUND, E_NOFLAG);
 		free(trash_files);
 		free(trash_info);
 		if (ret != EXIT_SUCCESS) {
 			_err(0, NOPRINT_PROMPT, _("%s: mkdir: '%s': Error creating "
-				 "trash directory\n"), PROGRAM_NAME, TRASH_DIR);
+				 "trash directory\n"), PROGRAM_NAME, trash_dir);
 			return;
 		}
 	} */
@@ -1054,14 +1054,14 @@ trash_function(char **comm)
 	if (!comm[1] || strcmp(comm[1], "ls") == 0 || strcmp(comm[1], "list") == 0) {
 		/* List files in the Trash/files dir */
 
-		if (xchdir(TRASH_FILES_DIR, NO_TITLE) == -1) {
+		if (xchdir(trash_files_dir, NO_TITLE) == -1) {
 			_err(0, NOPRINT_PROMPT, "%s: trash: %s: %s\n",
-			    PROGRAM_NAME, TRASH_FILES_DIR, strerror(errno));
+			    PROGRAM_NAME, trash_files_dir, strerror(errno));
 			return EXIT_FAILURE;
 		}
 
 		struct dirent **trash_files = (struct dirent **)NULL;
-		int files_n = scandir(TRASH_FILES_DIR, &trash_files,
+		int files_n = scandir(trash_files_dir, &trash_files,
 						skip_files, (unicode) ? alphasort : (case_sensitive)
 						? xalphasort : alphasort_insensitive);
 		if (files_n) {
@@ -1130,7 +1130,7 @@ trash_function(char **comm)
 				/* Some filters: you cannot trash wathever you want */
 				/* Do not trash any of the parent directories of TRASH_DIR,
 				 * that is, /, /home, ~/, ~/.local, ~/.local/share */
-				if (strncmp(tmp_comm, TRASH_DIR, strlen(tmp_comm)) == 0) {
+				if (strncmp(tmp_comm, trash_dir, strlen(tmp_comm)) == 0) {
 					fprintf(stderr, _("trash: Cannot trash '%s'\n"), tmp_comm);
 					exit_status = EXIT_FAILURE;
 					free(deq_file);
@@ -1139,7 +1139,7 @@ trash_function(char **comm)
 
 				/* Do no trash TRASH_DIR itself nor anything inside it,
 				 * that is, already trashed files */
-				else if (strncmp(tmp_comm, TRASH_DIR, strlen(TRASH_DIR)) == 0) {
+				else if (strncmp(tmp_comm, trash_dir, strlen(trash_dir)) == 0) {
 					puts(_("trash: Use 'trash del' to remove trashed files"));
 					exit_status = EXIT_FAILURE;
 					free(deq_file);

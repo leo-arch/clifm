@@ -246,12 +246,12 @@ cschemes_function(char **args)
 
 	if (*args[1] == 'e' && (!args[1][1] || strcmp(args[1], "edit") == 0)) {
 		char file[PATH_MAX];
-		snprintf(file, PATH_MAX - 1, "%s/%s.cfm", COLORS_DIR, cur_cscheme);
+		snprintf(file, PATH_MAX - 1, "%s/%s.cfm", colors_dir, cur_cscheme);
 		struct stat attr;
 		if (stat(file, &attr) == -1) {
-			if (DATA_DIR) {
+			if (data_dir) {
 				snprintf(file, PATH_MAX - 1, "%s/%s/colors/%s.cfm",
-						DATA_DIR, PNL, cur_cscheme);
+						data_dir, PNL, cur_cscheme);
 				if (access(file, W_OK) == -1) {
 					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
 							file, strerror(errno));
@@ -381,15 +381,15 @@ set_colors(const char *colorscheme, int env)
 		char colorscheme_file[PATH_MAX];
 		*colorscheme_file = '\0';
 		if (config_ok) {
-			snprintf(colorscheme_file, PATH_MAX - 1, "%s/%s.cfm", COLORS_DIR,
+			snprintf(colorscheme_file, PATH_MAX - 1, "%s/%s.cfm", colors_dir,
 				colorscheme ? colorscheme : "default");
 		}
 
 		/* If not in local dir, check system data dir as well */
 		struct stat attr;
-		if (DATA_DIR && (!*colorscheme_file || stat(colorscheme_file, &attr) == -1)) {
+		if (data_dir && (!*colorscheme_file || stat(colorscheme_file, &attr) == -1)) {
 			snprintf(colorscheme_file, PATH_MAX- 1, "%s/%s/colors/%s.cfm",
-				DATA_DIR, PNL, colorscheme ? colorscheme : "default");
+				data_dir, PNL, colorscheme ? colorscheme : "default");
 		}
 
 		FILE *fp_colors = fopen(colorscheme_file, "r");
@@ -1423,15 +1423,15 @@ get_colorschemes(void)
 	DIR *dir_p;
 	size_t i = 0;
 
-	if (COLORS_DIR && stat(COLORS_DIR, &attr) == EXIT_SUCCESS) {
-		schemes_total = count_dir(COLORS_DIR, NO_CPOP) - 2;
+	if (colors_dir && stat(colors_dir, &attr) == EXIT_SUCCESS) {
+		schemes_total = count_dir(colors_dir, NO_CPOP) - 2;
 		if (schemes_total) {
 			color_schemes = (char **)xrealloc(color_schemes,
 							((size_t)schemes_total + 2) * sizeof(char *));
 
 			/* count_dir already opened and read this directory succesfully,
 			 * so that we don't need to check opendir for errors */
-			dir_p = opendir(COLORS_DIR);
+			dir_p = opendir(colors_dir);
 			while ((ent = readdir(dir_p)) != NULL) {
 				/* Skipp . and .. */
 				char *name = ent->d_name;
@@ -1453,11 +1453,11 @@ get_colorschemes(void)
 		}
 	}
 
-	if (!DATA_DIR)
+	if (!data_dir)
 		return i;
 
 	char sys_colors_dir[PATH_MAX];
-	snprintf(sys_colors_dir, PATH_MAX - 1, "%s/%s/colors", DATA_DIR, PNL);
+	snprintf(sys_colors_dir, PATH_MAX - 1, "%s/%s/colors", data_dir, PNL);
 
 	if (stat(sys_colors_dir, &attr) == -1)
 		return i;

@@ -56,10 +56,10 @@ log_function(char **comm)
 	/* If the command was just 'log' */
 	if (comm && comm[0] && *comm[0] == 'l' && strcmp(comm[0], "log") == 0 && !comm[1]) {
 		FILE *log_fp;
-		log_fp = fopen(LOG_FILE, "r");
+		log_fp = fopen(log_file, "r");
 		if (!log_fp) {
 			_err(0, NOPRINT_PROMPT, "%s: log: '%s': %s\n",
-			    PROGRAM_NAME, LOG_FILE, strerror(errno));
+			    PROGRAM_NAME, log_file, strerror(errno));
 			return EXIT_FAILURE;
 		} else {
 			size_t line_size = 0;
@@ -140,15 +140,15 @@ log_function(char **comm)
 	/* If not 'log clear', append the log to the existing logs */
 
 	if (!clear_log)
-		log_fp = fopen(LOG_FILE, "a");
+		log_fp = fopen(log_file, "a");
 	else
 	/* Else, overwrite the log file leaving only the 'log clear'
 	 * command */
-		log_fp = fopen(LOG_FILE, "w+");
+		log_fp = fopen(log_file, "w+");
 
 	if (!log_fp) {
 		_err('e', PRINT_PROMPT, "%s: log: '%s': %s\n", PROGRAM_NAME,
-		    LOG_FILE, strerror(errno));
+		    log_file, strerror(errno));
 		free(full_log);
 		return EXIT_FAILURE;
 	} else { /* If LOG_FILE was correctly opened, write the log */
@@ -193,14 +193,14 @@ log_msg(char *_msg, int print)
 	/* If the config dir cannot be found or if msg log file isn't set
 	 * yet... This will happen if an error occurs before running
 	 * init_config(), for example, if the user's home cannot be found */
-	if (!config_ok || !MSG_LOG_FILE || !*MSG_LOG_FILE)
+	if (!config_ok || !msg_log_file || !*msg_log_file)
 		return;
 
-	FILE *msg_fp = fopen(MSG_LOG_FILE, "a");
+	FILE *msg_fp = fopen(msg_log_file, "a");
 	if (!msg_fp) {
 		/* Do not log this error: We might incur in an infinite loop
 		 * trying to access a file that cannot be accessed */
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, MSG_LOG_FILE,
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, msg_log_file,
 		    strerror(errno));
 		fputs("Press any key to continue... ", stdout);
 		xgetchar();
@@ -223,13 +223,13 @@ log_msg(char *_msg, int print)
 int
 save_dirhist(void)
 {
-	if (!DIRHIST_FILE)
+	if (!dirhist_file)
 		return EXIT_FAILURE;
 
 	if (!old_pwd || !old_pwd[0])
 		return EXIT_SUCCESS;
 
-	FILE *fp = fopen(DIRHIST_FILE, "w");
+	FILE *fp = fopen(dirhist_file, "w");
 	if (!fp) {
 		fprintf(stderr, _("%s: Could not save directory history: %s\n"),
 		    PROGRAM_NAME, strerror(errno));
@@ -316,10 +316,10 @@ history_function(char **comm)
 
 	/* If 'history clear', guess what, clear the history list! */
 	if (args_n == 1 && strcmp(comm[1], "clear") == 0) {
-		FILE *hist_fp = fopen(HIST_FILE, "w+");
+		FILE *hist_fp = fopen(hist_file, "w+");
 		if (!hist_fp) {
 			_err(0, NOPRINT_PROMPT, "%s: history: %s: %s\n",
-			    PROGRAM_NAME, HIST_FILE, strerror(errno));
+			    PROGRAM_NAME, hist_file, strerror(errno));
 			return EXIT_FAILURE;
 		}
 
@@ -329,8 +329,8 @@ history_function(char **comm)
 
 		/* Reset readline history */
 		clear_history();
-		read_history(HIST_FILE);
-		history_truncate_file(HIST_FILE, max_hist);
+		read_history(hist_file);
+		history_truncate_file(hist_file, max_hist);
 
 		/* Update the history array */
 		int exit_status = EXIT_SUCCESS;
@@ -558,10 +558,10 @@ get_history(void)
 		current_hist_n = 0;
 	}
 
-	FILE *hist_fp = fopen(HIST_FILE, "r");
+	FILE *hist_fp = fopen(hist_file, "r");
 	if (!hist_fp) {
 		_err('e', PRINT_PROMPT, "%s: history: '%s': %s\n",
-		    PROGRAM_NAME, HIST_FILE, strerror(errno));
+		    PROGRAM_NAME, hist_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -591,7 +591,7 @@ add_to_cmdhist(const char *cmd)
 	add_history(cmd);
 
 	if (config_ok)
-		append_history(1, HIST_FILE);
+		append_history(1, hist_file);
 
 	/* For us */
 	/* Add the new input to the history array */

@@ -1739,10 +1739,10 @@ exec_chained_cmds(char *cmd)
 void
 exec_profile(void)
 {
-	if (!config_ok || !PROFILE_FILE)
+	if (!config_ok || !profile_file)
 		return;
 
-	FILE *fp = fopen(PROFILE_FILE, "r");
+	FILE *fp = fopen(profile_file, "r");
 	if (!fp)
 		return;
 

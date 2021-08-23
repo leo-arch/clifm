@@ -55,10 +55,10 @@ get_app(const char *mime, const char *ext)
 	if (!mime)
 		return (char *)NULL;
 
-	FILE *defs_fp = fopen(MIME_FILE, "r");
+	FILE *defs_fp = fopen(mime_file, "r");
 	if (!defs_fp) {
 		fprintf(stderr, _("%s: %s: Error opening file\n"),
-		    PROGRAM_NAME, MIME_FILE);
+		    PROGRAM_NAME, mime_file);
 		return (char *)NULL;
 	}
 
@@ -439,14 +439,14 @@ mime_edit(char **args)
 	int exit_status = EXIT_SUCCESS;
 
 	if (!args[2]) {
-		char *cmd[] = {"mime", MIME_FILE, NULL};
+		char *cmd[] = {"mime", mime_file, NULL};
 		if (mime_open(cmd) != 0) {
 			fputs(_("Try 'mm, mime edit APPLICATION'\n"), stderr);
 			exit_status = EXIT_FAILURE;
 		}
 
 	} else {
-		char *cmd[] = {args[2], MIME_FILE, NULL};
+		char *cmd[] = {args[2], mime_file, NULL};
 		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 	}
@@ -480,17 +480,17 @@ mime_open(char **args)
 		    tm.tm_sec);
 
 		char new[PATH_MAX];
-		snprintf(new, PATH_MAX - 1, "%s.%s", MIME_FILE, suffix);
-		rename(MIME_FILE, new);
+		snprintf(new, PATH_MAX - 1, "%s.%s", mime_file, suffix);
+		rename(mime_file, new);
 
-		int mime_defs = mime_import(MIME_FILE);
+		int mime_defs = mime_import(mime_file);
 		if (mime_defs > 0) {
 			printf(_("%s: %d MIME definition(s) imported from the system. "
 				"Old MIME list file stored as %s\n"),
 				PROGRAM_NAME, mime_defs, new);
 			return EXIT_SUCCESS;
 		} else {
-			rename(new, MIME_FILE);
+			rename(new, mime_file);
 			return EXIT_FAILURE;
 		}
 	}

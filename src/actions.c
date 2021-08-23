@@ -67,18 +67,18 @@ run_action(char *action, char **args)
 		strcpy(cmd, action);
 		dir_path = 1;
 	} else { /* If not a path, PLUGINS_DIR is assumed */
-		cmd = (char *)xnmalloc(action_len + strlen(PLUGINS_DIR) + 2,
+		cmd = (char *)xnmalloc(action_len + strlen(plugins_dir) + 2,
 								sizeof(char));
-		sprintf(cmd, "%s/%s", PLUGINS_DIR, action);
+		sprintf(cmd, "%s/%s", plugins_dir, action);
 	}
 
 	/* Check if the action file exists and is executable */
 	if (access(cmd, X_OK) == -1) {
 		/* If not in local dir, check system data dir as well */
-		if (DATA_DIR && !dir_path) {
-			cmd = (char *)xrealloc(cmd, (action_len + strlen(DATA_DIR)
+		if (data_dir && !dir_path) {
+			cmd = (char *)xrealloc(cmd, (action_len + strlen(data_dir)
 						+ strlen(PNL) + 11) * sizeof(char));
-			sprintf(cmd, "%s/%s/plugins/%s", DATA_DIR, PNL, action);
+			sprintf(cmd, "%s/%s/plugins/%s", data_dir, PNL, action);
 			if (access(cmd, X_OK) == -1) {
 				fprintf(stderr, "actions: %s: %s\n", cmd, strerror(errno));
 				free(cmd);
@@ -113,7 +113,7 @@ run_action(char *action, char **args)
 	}
 
 	char fifo_path[PATH_MAX];
-	sprintf(fifo_path, "%s/.pipe.%s", TMP_DIR, rand_ext);
+	sprintf(fifo_path, "%s/.pipe.%s", tmp_dir, rand_ext);
 	free(rand_ext);
 
 	setenv("CLIFM_BUS", fifo_path, 1);
@@ -245,19 +245,19 @@ edit_actions(void)
 	/* Get actions file's current modification time */
 	struct stat file_attrib;
 
-	if (stat(ACTIONS_FILE, &file_attrib) == -1) {
-		fprintf(stderr, "actions: %s: %s\n", ACTIONS_FILE, strerror(errno));
+	if (stat(actions_file, &file_attrib) == -1) {
+		fprintf(stderr, "actions: %s: %s\n", actions_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	time_t mtime_bfr = (time_t)file_attrib.st_mtime;
 
-	int ret = open_file(ACTIONS_FILE);
+	int ret = open_file(actions_file);
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
 	/* Get modification time after opening the file */
-	stat(ACTIONS_FILE, &file_attrib);
+	stat(actions_file, &file_attrib);
 
 	/* If modification times differ, the file was modified after being
 	 * opened */

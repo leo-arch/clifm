@@ -1214,7 +1214,7 @@ parse_input_str(char *str)
 	}
 
 	int stdin_dir_ok = 0;
-	if (STDIN_TMP_DIR && strcmp(ws[cur_ws].path, STDIN_TMP_DIR) == 0)
+	if (stdin_tmp_dir && strcmp(ws[cur_ws].path, stdin_tmp_dir) == 0)
 		stdin_dir_ok = 1;
 
 	for (i = 0; i <= args_n; i++) {

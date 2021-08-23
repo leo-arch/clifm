@@ -50,11 +50,11 @@
 int
 get_profile_names(void)
 {
-	if (!CONFIG_DIR_GRAL)
+	if (!config_dir_gral)
 		return EXIT_FAILURE;
 
-	char *pf_dir = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) + 10, sizeof(char));
-	sprintf(pf_dir, "%s/profiles", CONFIG_DIR_GRAL);
+	char *pf_dir = (char *)xnmalloc(strlen(config_dir_gral) + 10, sizeof(char));
+	sprintf(pf_dir, "%s/profiles", config_dir_gral);
 
 	struct dirent **profs = (struct dirent **)NULL;
 	int files_n = scandir(pf_dir, &profs, NULL, xalphasort);
@@ -282,18 +282,18 @@ profile_set(const char *prof)
 
 	if (config_ok) {
 		/* Limit the log files size */
-		check_file_size(LOG_FILE, max_log);
-		check_file_size(MSG_LOG_FILE, max_log);
+		check_file_size(log_file, max_log);
+		check_file_size(msg_log_file, max_log);
 
 		/* Reset history */
-		if (access(HIST_FILE, F_OK | W_OK) == 0) {
+		if (access(hist_file, F_OK | W_OK) == 0) {
 			clear_history(); /* This is for readline */
-			read_history(HIST_FILE);
-			history_truncate_file(HIST_FILE, max_hist);
+			read_history(hist_file);
+			history_truncate_file(hist_file, max_hist);
 		}
 
 		else {
-			FILE *hist_fp = fopen(HIST_FILE, "w");
+			FILE *hist_fp = fopen(hist_file, "w");
 
 			if (hist_fp) {
 				fputs("edit\n", hist_fp);
@@ -405,42 +405,42 @@ profile_add(const char *prof)
 
 	size_t pnl_len = strlen(PNL);
 	/* ### GENERATE PROGRAM'S CONFIG DIRECTORY NAME ### */
-	char *NCONFIG_DIR = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) + strlen(prof) + 11, sizeof(char));
-	sprintf(NCONFIG_DIR, "%s/profiles/%s", CONFIG_DIR_GRAL, prof);
+	char *nconfig_dir = (char *)xnmalloc(strlen(config_dir_gral) + strlen(prof) + 11, sizeof(char));
+	sprintf(nconfig_dir, "%s/profiles/%s", config_dir_gral, prof);
 
 	/* #### CREATE THE CONFIG DIR #### */
-	char *tmp_cmd[] = {"mkdir", "-p", NCONFIG_DIR, NULL};
+	char *tmp_cmd[] = {"mkdir", "-p", nconfig_dir, NULL};
 	int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
 
 	if (ret != EXIT_SUCCESS) {
 		fprintf(stderr, _("%s: mkdir: %s: Error creating "
-			"configuration directory\n"), PROGRAM_NAME, NCONFIG_DIR);
+			"configuration directory\n"), PROGRAM_NAME, nconfig_dir);
 
-		free(NCONFIG_DIR);
+		free(nconfig_dir);
 
 		return EXIT_FAILURE;
 	}
 
 	/* If the config dir is fine, generate config file names */
 	int exit_status = EXIT_SUCCESS;
-	size_t config_len = strlen(NCONFIG_DIR);
+	size_t config_len = strlen(nconfig_dir);
 
-	char *NCONFIG_FILE = (char *)xnmalloc(config_len + pnl_len + 4,
+	char *nconfig_file = (char *)xnmalloc(config_len + pnl_len + 4,
 	    sizeof(char));
-	sprintf(NCONFIG_FILE, "%s/%src", NCONFIG_DIR, PNL);
-	char *NHIST_FILE = (char *)xnmalloc(config_len + 13, sizeof(char));
-	sprintf(NHIST_FILE, "%s/history.cfm", NCONFIG_DIR);
-	char *NMIME_FILE = (char *)xnmalloc(config_len + 14, sizeof(char));
-	sprintf(NMIME_FILE, "%s/mimelist.cfm", NCONFIG_DIR);
+	sprintf(nconfig_file, "%s/%src", nconfig_dir, PNL);
+	char *nhist_file = (char *)xnmalloc(config_len + 13, sizeof(char));
+	sprintf(nhist_file, "%s/history.cfm", nconfig_dir);
+	char *nmime_file = (char *)xnmalloc(config_len + 14, sizeof(char));
+	sprintf(nmime_file, "%s/mimelist.cfm", nconfig_dir);
 
 	/* Create config files */
 
 	/* #### CREATE THE HISTORY FILE #### */
-	FILE *hist_fp = fopen(NHIST_FILE, "w+");
+	FILE *hist_fp = fopen(nhist_file, "w+");
 
 	if (!hist_fp) {
 		fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME,
-		    NHIST_FILE, strerror(errno));
+		    nhist_file, strerror(errno));
 		exit_status = EXIT_FAILURE;
 	} else {
 		/* To avoid malloc errors in read_history(), do not create
@@ -450,18 +450,18 @@ profile_add(const char *prof)
 	}
 
 	/* #### CREATE THE MIME CONFIG FILE #### */
-	if (create_mime_file(NMIME_FILE, 1) != EXIT_SUCCESS)
+	if (create_mime_file(nmime_file, 1) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
 
 	/* #### CREATE THE CONFIG FILE #### */
-	if (create_config(NCONFIG_FILE) != EXIT_SUCCESS)
+	if (create_config(nconfig_file) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
 
 	/* Free stuff */
-	free(NCONFIG_DIR);
-	free(NCONFIG_FILE);
-	free(NHIST_FILE);
-	free(NMIME_FILE);
+	free(nconfig_dir);
+	free(nconfig_file);
+	free(nhist_file);
+	free(nmime_file);
 
 	if (exit_status == EXIT_SUCCESS) {
 		printf(_("%s: '%s': Profile succesfully created\n"), PROGRAM_NAME, prof);
@@ -505,9 +505,9 @@ profile_del(const char *prof)
 		return EXIT_FAILURE;
 	}
 
-	char *tmp = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) + strlen(prof) + 11,
+	char *tmp = (char *)xnmalloc(strlen(config_dir_gral) + strlen(prof) + 11,
 															sizeof(char));
-	sprintf(tmp, "%s/profiles/%s", CONFIG_DIR_GRAL, prof);
+	sprintf(tmp, "%s/profiles/%s", config_dir_gral, prof);
 
 	char *cmd[] = {"rm", "-r", tmp, NULL};
 	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);

@@ -85,16 +85,16 @@ add_to_jumpdb(const char *dir)
 void
 save_jumpdb(void)
 {
-	if (xargs.no_dirjump == 1 || !config_ok || !CONFIG_DIR || !jump_db
+	if (xargs.no_dirjump == 1 || !config_ok || !config_dir || !jump_db
 	|| jump_n == 0)
 		return;
 
-	char *JUMP_FILE = (char *)xnmalloc(strlen(CONFIG_DIR) + 10, sizeof(char));
-	sprintf(JUMP_FILE, "%s/jump.cfm", CONFIG_DIR);
+	char *jump_file = (char *)xnmalloc(strlen(config_dir) + 10, sizeof(char));
+	sprintf(jump_file, "%s/jump.cfm", config_dir);
 
-	FILE *fp = fopen(JUMP_FILE, "w+");
+	FILE *fp = fopen(jump_file, "w+");
 	if (!fp) {
-		free(JUMP_FILE);
+		free(jump_file);
 		return;
 	}
 
@@ -197,38 +197,38 @@ save_jumpdb(void)
 
 	fprintf(fp, "@%d\n", total_rank);
 	fclose(fp);
-	free(JUMP_FILE);
+	free(jump_file);
 }
 
 int
 edit_jumpdb(void)
 {
-	if (!config_ok || !CONFIG_DIR)
+	if (!config_ok || !config_dir)
 		return EXIT_FAILURE;
 
 	save_jumpdb();
 
-	char *JUMP_FILE = (char *)xnmalloc(strlen(CONFIG_DIR) + 10,
+	char *jump_file = (char *)xnmalloc(strlen(config_dir) + 10,
 	    sizeof(char));
-	sprintf(JUMP_FILE, "%s/jump.cfm", CONFIG_DIR);
+	sprintf(jump_file, "%s/jump.cfm", config_dir);
 
 	struct stat attr;
-	if (stat(JUMP_FILE, &attr) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, JUMP_FILE,
+	if (stat(jump_file, &attr) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, jump_file,
 		    strerror(errno));
-		free(JUMP_FILE);
+		free(jump_file);
 		return EXIT_FAILURE;
 	}
 
 	time_t mtime_bfr = (time_t)attr.st_mtime;
 
-	char *cmd[] = {"o", JUMP_FILE, NULL};
+	char *cmd[] = {"o", jump_file, NULL};
 	open_function(cmd);
 
-	stat(JUMP_FILE, &attr);
+	stat(jump_file, &attr);
 
 	if (mtime_bfr == (time_t)attr.st_mtime) {
-		free(JUMP_FILE);
+		free(jump_file);
 		return EXIT_SUCCESS;
 	}
 
@@ -244,7 +244,7 @@ edit_jumpdb(void)
 	}
 
 	load_jumpdb();
-	free(JUMP_FILE);
+	free(jump_file);
 	return EXIT_SUCCESS;
 }
 

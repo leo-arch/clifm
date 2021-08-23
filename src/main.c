@@ -206,50 +206,50 @@ char
     div_line_char[NAME_MAX],
     hostname[HOST_NAME_MAX],
 
-    *ACTIONS_FILE = (char *)NULL,
+    *actions_file = (char *)NULL,
     *alt_bm_file = (char *)NULL,
     *alt_config_dir = (char *)NULL,
     *alt_config_file = (char *)NULL,
     *alt_kbinds_file = (char *)NULL,
     *alt_profile = (char *)NULL,
-    *BM_FILE = (char *)NULL,
-    *COLORS_DIR = (char *)NULL,
-    *CONFIG_DIR = (char *)NULL,
-    *CONFIG_DIR_GRAL = (char *)NULL,
-    *CONFIG_FILE = (char *)NULL,
-    *DATA_DIR = (char *)NULL,
+    *bm_file = (char *)NULL,
+    *colors_dir = (char *)NULL,
+    *config_dir = (char *)NULL,
+    *config_dir_gral = (char *)NULL,
+    *config_file = (char *)NULL,
+    *data_dir = (char *)NULL,
     *cur_cscheme = (char *)NULL,
-    *DIRHIST_FILE = (char *)NULL,
+    *dirhist_file = (char *)NULL,
     *encoded_prompt = (char *)NULL,
     *file_cmd_path = (char *)NULL,
     *filter = (char *)NULL,
-    *HIST_FILE = (char *)NULL,
+    *hist_file = (char *)NULL,
     *jump_suggestion = (char *)NULL,
-    *KBINDS_FILE = (char *)NULL,
+    *kbinds_file = (char *)NULL,
     *last_cmd = (char *)NULL,
-    *LOG_FILE = (char *)NULL,
+    *log_file = (char *)NULL,
     *ls_colors_bk = (char *)NULL,
-    *MIME_FILE = (char *)NULL,
-    *MSG_LOG_FILE = (char *)NULL,
+    *mime_file = (char *)NULL,
+    *msg_log_file = (char *)NULL,
     *opener = (char *)NULL,
     *pinned_dir = (char *)NULL,
-    *PLUGINS_DIR = (char *)NULL,
-    *PROFILE_FILE = (char *)NULL,
+    *plugins_dir = (char *)NULL,
+    *profile_file = (char *)NULL,
     *qc = (char *)NULL,
-    *REMOTES_FILE = (char *)NULL,
-    *SEL_FILE = (char *)NULL,
-    *STDIN_TMP_DIR = (char *)NULL,
+    *remotes_file = (char *)NULL,
+    *sel_file = (char *)NULL,
+    *stdin_tmp_dir = (char *)NULL,
 #ifndef _NO_SUGGESTIONS
 	*suggestion_buf = (char *)NULL,
     *suggestion_strategy = (char *)NULL,
 #endif
     *sys_shell = (char *)NULL,
     *term = (char *)NULL,
-    *TMP_DIR = (char *)NULL,
+    *tmp_dir = (char *)NULL,
 #ifndef _NO_TRASH
-    *TRASH_DIR = (char *)NULL,
-    *TRASH_FILES_DIR = (char *)NULL,
-    *TRASH_INFO_DIR = (char *)NULL,
+    *trash_dir = (char *)NULL,
+    *trash_files_dir = (char *)NULL,
+    *trash_info_dir = (char *)NULL,
 #endif
     *usr_cscheme = (char *)NULL,
     *user_home = (char *)NULL,
@@ -721,7 +721,7 @@ main(int argc, char *argv[])
 	initialize_readline();
 
 	/*Trim the directory history file if necessary */
-	check_file_size(DIRHIST_FILE, max_dirhist);
+	check_file_size(dirhist_file, max_dirhist);
 
 	/* Check whether we have a working shell */
 	if (access(user.shell, X_OK) == -1) {
@@ -733,7 +733,7 @@ main(int argc, char *argv[])
 	get_prompt_cmds();
 #ifndef _NO_TRASH
 	if (trash_ok) {
-		trash_n = count_dir(TRASH_FILES_DIR, NO_CPOP);
+		trash_n = count_dir(trash_files_dir, NO_CPOP);
 		if (trash_n <= 2)
 			trash_n = 0;
 	}

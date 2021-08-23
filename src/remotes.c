@@ -182,12 +182,12 @@ remotes_unmount(char *name)
 static int
 remotes_edit(char *app)
 {
-	if (!REMOTES_FILE)
+	if (!remotes_file)
 		return EXIT_FAILURE;
 
 	struct stat attr;
-	if (stat(REMOTES_FILE, &attr) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, REMOTES_FILE,
+	if (stat(remotes_file, &attr) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, remotes_file,
 				strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -196,17 +196,17 @@ remotes_edit(char *app)
 
 	int ret = EXIT_SUCCESS;
 	if (app) {
-		char *cmd[] = {app, REMOTES_FILE, NULL};
+		char *cmd[] = {app, remotes_file, NULL};
 		ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
 	} else {
-		ret = open_file(REMOTES_FILE);
+		ret = open_file(remotes_file);
 	}
 
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
-	if (stat(REMOTES_FILE, &attr) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, REMOTES_FILE,
+	if (stat(remotes_file, &attr) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, remotes_file,
 				strerror(errno));
 		return EXIT_FAILURE;
 	}

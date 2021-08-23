@@ -161,7 +161,7 @@ rl_no_hist(const char *prompt)
 	setting */
 	char *input = readline(prompt);
 	unstifle_history();	 /* Reenable history */
-	read_history(HIST_FILE); /* Reload history lines from file */
+	read_history(hist_file); /* Reload history lines from file */
 	suggestions = bk;
 
 	if (input) {
@@ -1203,10 +1203,10 @@ initialize_readline(void)
 	char *p = getenv("INPUTRC");
 	if (p) {
 		rl_read_init_file(p);
-	} else if (CONFIG_DIR_GRAL) {
-		char *rl_file = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) + 14,
+	} else if (config_dir_gral) {
+		char *rl_file = (char *)xnmalloc(strlen(config_dir_gral) + 14,
 							sizeof(char));
-		sprintf(rl_file, "%s/readline.cfm", CONFIG_DIR_GRAL);
+		sprintf(rl_file, "%s/readline.cfm", config_dir_gral);
 		rl_read_init_file(rl_file);
 		free(rl_file);
 	}

@@ -166,8 +166,8 @@ handle_iso(char *file)
 			mountpoint = (char *)xnmalloc(strlen(file) + 19, sizeof(char));
 			sprintf(mountpoint, "/tmp/clifm-mounts/%s", file);
 		} else {
-			mountpoint = (char *)xnmalloc(strlen(CONFIG_DIR) + strlen(file) + 9, sizeof(char));
-			sprintf(mountpoint, "%s/mounts/%s", CONFIG_DIR, file);
+			mountpoint = (char *)xnmalloc(strlen(config_dir) + strlen(file) + 9, sizeof(char));
+			sprintf(mountpoint, "%s/mounts/%s", config_dir, file);
 		}
 
 		char *dir_cmd[] = {"mkdir", "-pm700", mountpoint, NULL};
@@ -299,7 +299,7 @@ check_iso(char *file)
 	if (xargs.stealth_mode == 1)
 		sprintf(ISO_TMP_FILE, "/tmp/clifm-archiver.%s", rand_ext);
 	else
-		sprintf(ISO_TMP_FILE, "%s/archiver.%s", TMP_DIR, rand_ext);
+		sprintf(ISO_TMP_FILE, "%s/archiver.%s", tmp_dir, rand_ext);
 	free(rand_ext);
 
 	FILE *file_fp = fopen(ISO_TMP_FILE, "w");
@@ -398,7 +398,7 @@ is_compressed(char *file, int test_iso)
 	if (xargs.stealth_mode == 1)
 		sprintf(ARCHIVER_TMP_FILE, "/tmp/clifm-archiver.%s", rand_ext);
 	else
-		sprintf(ARCHIVER_TMP_FILE, "%s/archiver.%s", TMP_DIR, rand_ext);
+		sprintf(ARCHIVER_TMP_FILE, "%s/archiver.%s", tmp_dir, rand_ext);
 	free(rand_ext);
 
 	if (access(ARCHIVER_TMP_FILE, F_OK) == 0)
@@ -897,9 +897,8 @@ archiver(char **args, char mode)
 				sprintf(mountpoint, "/tmp/clifm-mounts/%s",
 				    args[i]);
 			} else {
-				mountpoint = (char *)xnmalloc(strlen(CONFIG_DIR) + strlen(args[i]) + 9, sizeof(char));
-				sprintf(mountpoint, "%s/mounts/%s", CONFIG_DIR,
-				    args[i]);
+				mountpoint = (char *)xnmalloc(strlen(config_dir) + strlen(args[i]) + 9, sizeof(char));
+				sprintf(mountpoint, "%s/mounts/%s", config_dir, args[i]);
 			}
 
 			char *dir_cmd[] = {"mkdir", "-pm700", mountpoint, NULL};

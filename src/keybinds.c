@@ -69,10 +69,10 @@ kbinds_reset(void)
 	int exit_status = EXIT_SUCCESS;
 	struct stat file_attrib;
 
-	if (stat(KBINDS_FILE, &file_attrib) == -1) {
+	if (stat(kbinds_file, &file_attrib) == -1) {
 		exit_status = create_kbinds_file();
 	} else {
-		char *cmd[] = {"rm", KBINDS_FILE, NULL};
+		char *cmd[] = {"rm", kbinds_file, NULL};
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
 			exit_status = create_kbinds_file();
 		else
@@ -95,22 +95,22 @@ kbinds_edit(void)
 		return EXIT_SUCCESS;
 	}
 
-	if (!KBINDS_FILE)
+	if (!kbinds_file)
 		return EXIT_FAILURE;
 
 	struct stat file_attrib;
-	if (stat(KBINDS_FILE, &file_attrib) == -1) {
+	if (stat(kbinds_file, &file_attrib) == -1) {
 		create_kbinds_file();
-		stat(KBINDS_FILE, &file_attrib);
+		stat(kbinds_file, &file_attrib);
 	}
 
 	time_t mtime_bfr = (time_t)file_attrib.st_mtime;
 
-	int ret = open_file(KBINDS_FILE);
+	int ret = open_file(kbinds_file);
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
-	stat(KBINDS_FILE, &file_attrib);
+	stat(kbinds_file, &file_attrib);
 	if (mtime_bfr == (time_t)file_attrib.st_mtime)
 		return EXIT_SUCCESS;
 
@@ -176,7 +176,7 @@ load_keybinds(void)
 	}
 
 	/* Open the keybinds file */
-	FILE *fp = fopen(KBINDS_FILE, "r");
+	FILE *fp = fopen(kbinds_file, "r");
 	if (!fp)
 		return EXIT_FAILURE;
 
@@ -1222,7 +1222,7 @@ readline_kbinds(void)
 			 * #        KEYBINDINGS         #
 			 * ##############################*/
 
-	if (KBINDS_FILE) {
+	if (kbinds_file) {
 		/* Help */
 		rl_bind_keyseq(find_key("show-manpage"), rl_manpage);
 		rl_bind_keyseq(find_key("show-manpage2"), rl_manpage);

@@ -538,8 +538,8 @@ check_file_size(char *log_file, int max)
 		return;
 	}
 
-	char *tmp_file = (char *)xnmalloc(strlen(CONFIG_DIR) + 12, sizeof(char));
-	sprintf(tmp_file, "%s/log.%s", CONFIG_DIR, rand_ext);
+	char *tmp_file = (char *)xnmalloc(strlen(config_dir) + 12, sizeof(char));
+	sprintf(tmp_file, "%s/log.%s", config_dir, rand_ext);
 	free(rand_ext);
 
 	FILE *log_fp_tmp = fopen(tmp_file, "w+");

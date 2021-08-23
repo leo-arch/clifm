@@ -52,7 +52,7 @@ regen_config(void)
 	int config_found = 1;
 	struct stat config_attrib;
 
-	if (stat(CONFIG_FILE, &config_attrib) == -1) {
+	if (stat(config_file, &config_attrib) == -1) {
 		puts(_("No configuration file found"));
 		config_found = 0;
 	}
@@ -65,10 +65,10 @@ regen_config(void)
 		char date[18];
 		strftime(date, 18, "%Y%m%d@%H:%M:%S", &t);
 
-		char *bk = (char *)xnmalloc(strlen(CONFIG_FILE) + strlen(date) + 2, sizeof(char));
-		sprintf(bk, "%s.%s", CONFIG_FILE, date);
+		char *bk = (char *)xnmalloc(strlen(config_file) + strlen(date) + 2, sizeof(char));
+		sprintf(bk, "%s.%s", config_file, date);
 
-		char *cmd[] = {"mv", CONFIG_FILE, bk, NULL};
+		char *cmd[] = {"mv", config_file, bk, NULL};
 
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			free(bk);
@@ -79,10 +79,10 @@ regen_config(void)
 		free(bk);
 	}
 
-	if (create_config(CONFIG_FILE) != EXIT_SUCCESS)
+	if (create_config(config_file) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
-	printf(_("New configuration file written to '%s'\n"), CONFIG_FILE);
+	printf(_("New configuration file written to '%s'\n"), config_file);
 	reload_config();
 	return EXIT_SUCCESS;
 }
@@ -120,9 +120,9 @@ edit_function(char **comm)
 	 * program is running) clifmrc doesn't exist, call init_config()
 	 * to recreate the configuration file. Then run 'stat' again to
 	 * reread the attributes of the file */
-	if (stat(CONFIG_FILE, &file_attrib) == -1) {
-		create_config(CONFIG_FILE);
-		stat(CONFIG_FILE, &file_attrib);
+	if (stat(config_file, &file_attrib) == -1) {
+		create_config(config_file);
+		stat(config_file, &file_attrib);
 	}
 
 	time_t mtime_bfr = (time_t)file_attrib.st_mtime;
@@ -130,18 +130,18 @@ edit_function(char **comm)
 
 	/* If there is an argument... */
 	if (comm[1]) {
-		char *cmd[] = {comm[1], CONFIG_FILE, NULL};
+		char *cmd[] = {comm[1], config_file, NULL};
 		ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
 	} else {
 		/* If no application was passed as 2nd argument */
-		ret = open_file(CONFIG_FILE);
+		ret = open_file(config_file);
 	}
 
 	if (ret != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
 	/* Get modification time after opening the config file */
-	stat(CONFIG_FILE, &file_attrib);
+	stat(config_file, &file_attrib);
 	/* If modification times differ, the file was modified after being
 	 * opened */
 
@@ -172,35 +172,35 @@ set_env(void)
 	setenv("CLIFM", "1", 1);
 	setenv("CLIFM_PROFILE", alt_profile ? alt_profile : "default", 1);
 
-	if (SEL_FILE)
-		setenv("CLIFM_SELFILE", SEL_FILE, 1);
+	if (sel_file)
+		setenv("CLIFM_SELFILE", sel_file, 1);
 }
 
 /* Define the file for the Selection Box */
 void
 set_sel_file(void)
 {
-	if (SEL_FILE) {
-		free(SEL_FILE);
-		SEL_FILE = (char *)NULL;
+	if (sel_file) {
+		free(sel_file);
+		sel_file = (char *)NULL;
 	}
 
-	if (!CONFIG_DIR)
+	if (!config_dir)
 		return;
 
-	size_t config_len = strlen(CONFIG_DIR);
+	size_t config_len = strlen(config_dir);
 
 	if (!share_selbox) {
 		/* Private selection box is stored in the profile
 		 * directory */
-		SEL_FILE = (char *)xnmalloc(config_len + 9, sizeof(char));
+		sel_file = (char *)xnmalloc(config_len + 9, sizeof(char));
 
-		sprintf(SEL_FILE, "%s/selbox", CONFIG_DIR);
+		sprintf(sel_file, "%s/selbox", config_dir);
 	} else {
 		/* Common selection box is stored in the general
 		 * configuration directory */
-		SEL_FILE = (char *)xnmalloc(config_len + 17, sizeof(char));
-		sprintf(SEL_FILE, "%s/.config/%s/selbox", user.home, PNL);
+		sel_file = (char *)xnmalloc(config_len + 17, sizeof(char));
+		sprintf(sel_file, "%s/.config/%s/selbox", user.home, PNL);
 	}
 
 	return;
@@ -214,24 +214,24 @@ create_kbinds_file(void)
 
 	struct stat attr;
 	/* If the file already exists, do nothing */
-	if (stat(KBINDS_FILE, &attr) == EXIT_SUCCESS)
+	if (stat(kbinds_file, &attr) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
 	/* If not, try to import it from DATADIR */
-	if (DATA_DIR) {
+	if (data_dir) {
 		char sys_file[PATH_MAX];
-		snprintf(sys_file, PATH_MAX - 1, "%s/%s/keybindings.cfm", DATA_DIR, PNL);
+		snprintf(sys_file, PATH_MAX - 1, "%s/%s/keybindings.cfm", data_dir, PNL);
 		if (stat(sys_file, &attr) == EXIT_SUCCESS) {
-			char *cmd[] = {"cp", sys_file, KBINDS_FILE, NULL};
+			char *cmd[] = {"cp", sys_file, kbinds_file, NULL};
 			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
 				return EXIT_SUCCESS;
 		}
 	}
 
 	/* Else, create it */
-	FILE *fp = fopen(KBINDS_FILE, "w");
+	FILE *fp = fopen(kbinds_file, "w");
 	if (!fp) {
-		_err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, KBINDS_FILE,
+		_err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, kbinds_file,
 		    strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -376,9 +376,9 @@ create_actions_file(char *file)
 		return EXIT_SUCCESS;
 
 	/* If not, try to import it from DATADIR */
-	if (DATA_DIR) {
+	if (data_dir) {
 		char sys_file[PATH_MAX];
-		snprintf(sys_file, PATH_MAX - 1, "%s/%s/actions.cfm", DATA_DIR, PNL);
+		snprintf(sys_file, PATH_MAX - 1, "%s/%s/actions.cfm", data_dir, PNL);
 		if (stat(sys_file, &attr) == EXIT_SUCCESS) {
 			char *cmd[] = {"cp", sys_file, file, NULL};
 			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
@@ -447,15 +447,15 @@ create_tmp_files(void)
 	 * or modify them */
 
 	size_t user_len = strlen(user.name);
-	TMP_DIR = (char *)xnmalloc(pnl_len + user_len + 7, sizeof(char));
-	snprintf(TMP_DIR, pnl_len + 6, "/tmp/%s", PNL);
+	tmp_dir = (char *)xnmalloc(pnl_len + user_len + 7, sizeof(char));
+	snprintf(tmp_dir, pnl_len + 6, "/tmp/%s", PNL);
 
 	struct stat file_attrib;
-	if (stat(TMP_DIR, &file_attrib) == -1) {
-		char *md_cmd[] = {"mkdir", "-pm1777", TMP_DIR, NULL};
+	if (stat(tmp_dir, &file_attrib) == -1) {
+		char *md_cmd[] = {"mkdir", "-pm1777", tmp_dir, NULL};
 		if (launch_execve(md_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			_err('e', PRINT_PROMPT, _("%s: '%s': Error creating temporary "
-					"directory\n"), PROGRAM_NAME, TMP_DIR);
+					"directory\n"), PROGRAM_NAME, tmp_dir);
 		}
 	}
 
@@ -465,31 +465,31 @@ create_tmp_files(void)
 	 * restrictive permissions (700), since only the corresponding user
 	 * must be able to read and/or modify this list */
 
-	snprintf(TMP_DIR, pnl_len + user_len + 7, "/tmp/%s/%s", PNL, user.name);
+	snprintf(tmp_dir, pnl_len + user_len + 7, "/tmp/%s/%s", PNL, user.name);
 
-	if (stat(TMP_DIR, &file_attrib) == -1) {
-		char *md_cmd2[] = {"mkdir", "-pm700", TMP_DIR, NULL};
+	if (stat(tmp_dir, &file_attrib) == -1) {
+		char *md_cmd2[] = {"mkdir", "-pm700", tmp_dir, NULL};
 		if (launch_execve(md_cmd2, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			selfile_ok = 0;
 			_err('e', PRINT_PROMPT, _("%s: '%s': Error creating temporary "
-					"directory\n"), PROGRAM_NAME, TMP_DIR);
+					"directory\n"), PROGRAM_NAME, tmp_dir);
 		}
 	}
 
 	/* If the directory exists, check it is writable */
-	else if (access(TMP_DIR, W_OK) == -1) {
-		if (!SEL_FILE) {
+	else if (access(tmp_dir, W_OK) == -1) {
+		if (!sel_file) {
 			selfile_ok = 0;
 			_err('w', PRINT_PROMPT, "%s: '%s': Directory not writable. Selected "
 				"files will be lost after program exit\n",
-			    PROGRAM_NAME, TMP_DIR);
+			    PROGRAM_NAME, tmp_dir);
 		}
 	}
 
 	/* If the config directory isn't available, define an alternative
 	 * selection file in /tmp */
-	if (!SEL_FILE && xargs.stealth_mode != 1) {
-		size_t tmp_dir_len = strlen(TMP_DIR);
+	if (!sel_file && xargs.stealth_mode != 1) {
+		size_t tmp_dir_len = strlen(tmp_dir);
 
 		if (!share_selbox) {
 			size_t prof_len = 0;
@@ -499,18 +499,18 @@ create_tmp_files(void)
 			else
 				prof_len = 7; /* Lenght of "default" */
 
-			SEL_FILE = (char *)xnmalloc(tmp_dir_len + prof_len + 9,
+			sel_file = (char *)xnmalloc(tmp_dir_len + prof_len + 9,
 			    sizeof(char));
-			sprintf(SEL_FILE, "%s/selbox_%s", TMP_DIR,
+			sprintf(sel_file, "%s/selbox_%s", tmp_dir,
 			    (alt_profile) ? alt_profile : "default");
 		} else {
-			SEL_FILE = (char *)xnmalloc(tmp_dir_len + 8, sizeof(char));
-			sprintf(SEL_FILE, "%s/selbox", TMP_DIR);
+			sel_file = (char *)xnmalloc(tmp_dir_len + 8, sizeof(char));
+			sprintf(sel_file, "%s/selbox", tmp_dir);
 		}
 
 		_err('w', PRINT_PROMPT, _("%s: '%s': Using a temporary directory for "
 					  "the Selection Box. Selected files won't be persistent accros "
-					  "reboots"), PROGRAM_NAME, TMP_DIR);
+					  "reboots"), PROGRAM_NAME, tmp_dir);
 	}
 }
 
@@ -520,9 +520,9 @@ define_config_file_names(void)
 	size_t pnl_len = strlen(PNL);
 
 	if (alt_config_dir) {
-		CONFIG_DIR_GRAL = (char *)xnmalloc(strlen(alt_config_dir) + pnl_len
+		config_dir_gral = (char *)xnmalloc(strlen(alt_config_dir) + pnl_len
 											+ 2, sizeof(char));
-		sprintf(CONFIG_DIR_GRAL, "%s/%s", alt_config_dir, PNL);
+		sprintf(config_dir_gral, "%s/%s", alt_config_dir, PNL);
 		free(alt_config_dir);
 	} else {
 		/* If $XDG_CONFIG_HOME is set, use it for the config file.
@@ -532,100 +532,102 @@ define_config_file_names(void)
 		if (xdg_config_home) {
 			size_t xdg_config_home_len = strlen(xdg_config_home);
 
-			CONFIG_DIR_GRAL = (char *)xnmalloc(xdg_config_home_len + pnl_len
+			config_dir_gral = (char *)xnmalloc(xdg_config_home_len + pnl_len
 												+ 2, sizeof(char));
-			sprintf(CONFIG_DIR_GRAL, "%s/%s", xdg_config_home, PNL);
+			sprintf(config_dir_gral, "%s/%s", xdg_config_home, PNL);
 
 			xdg_config_home = (char *)NULL;
 		} else {
-			CONFIG_DIR_GRAL = (char *)xnmalloc(user.home_len + pnl_len + 11,
+			config_dir_gral = (char *)xnmalloc(user.home_len + pnl_len + 11,
 												sizeof(char));
-			sprintf(CONFIG_DIR_GRAL, "%s/.config/%s", user.home, PNL);
+			sprintf(config_dir_gral, "%s/.config/%s", user.home, PNL);
 		}
 	}
 
-	size_t config_gral_len = strlen(CONFIG_DIR_GRAL);
+	size_t config_gral_len = strlen(config_dir_gral);
 
 	/* alt_profile will not be NULL whenever the -P option is used
 	 * to run the program under an alternative profile */
 	if (alt_profile) {
-		CONFIG_DIR = (char *)xnmalloc(config_gral_len + strlen(alt_profile) + 11, sizeof(char));
-		sprintf(CONFIG_DIR, "%s/profiles/%s", CONFIG_DIR_GRAL, alt_profile);
+		config_dir = (char *)xnmalloc(config_gral_len + strlen(alt_profile) + 11, sizeof(char));
+		sprintf(config_dir, "%s/profiles/%s", config_dir_gral, alt_profile);
 	} else {
-		CONFIG_DIR = (char *)xnmalloc(config_gral_len + 18, sizeof(char));
-		sprintf(CONFIG_DIR, "%s/profiles/default", CONFIG_DIR_GRAL);
+		config_dir = (char *)xnmalloc(config_gral_len + 18, sizeof(char));
+		sprintf(config_dir, "%s/profiles/default", config_dir_gral);
 	}
 
 	if (alt_kbinds_file) {
-		KBINDS_FILE = savestring(alt_kbinds_file, strlen(alt_kbinds_file));
+		kbinds_file = savestring(alt_kbinds_file, strlen(alt_kbinds_file));
 		free(alt_kbinds_file);
 		alt_kbinds_file = (char *)NULL;
 	} else {
 		/* Keybindings per user, not per profile */
-		KBINDS_FILE = (char *)xnmalloc(config_gral_len + 17, sizeof(char));
-		sprintf(KBINDS_FILE, "%s/keybindings.cfm", CONFIG_DIR_GRAL);
+		kbinds_file = (char *)xnmalloc(config_gral_len + 17, sizeof(char));
+		sprintf(kbinds_file, "%s/keybindings.cfm", config_dir_gral);
 	}
 
-	COLORS_DIR = (char *)xnmalloc(config_gral_len + 8, sizeof(char));
-	sprintf(COLORS_DIR, "%s/colors", CONFIG_DIR_GRAL);
+	colors_dir = (char *)xnmalloc(config_gral_len + 8, sizeof(char));
+	sprintf(colors_dir, "%s/colors", config_dir_gral);
 
-	PLUGINS_DIR = (char *)xnmalloc(config_gral_len + 9, sizeof(char));
-	sprintf(PLUGINS_DIR, "%s/plugins", CONFIG_DIR_GRAL);
+	plugins_dir = (char *)xnmalloc(config_gral_len + 9, sizeof(char));
+	sprintf(plugins_dir, "%s/plugins", config_dir_gral);
+
 #ifndef _NO_TRASH
-	TRASH_DIR = (char *)xnmalloc(user.home_len + 20, sizeof(char));
-	sprintf(TRASH_DIR, "%s/.local/share/Trash", user.home);
+	trash_dir = (char *)xnmalloc(user.home_len + 20, sizeof(char));
+	sprintf(trash_dir, "%s/.local/share/Trash", user.home);
 
-	size_t trash_len = strlen(TRASH_DIR);
+	size_t trash_len = strlen(trash_dir);
 
-	TRASH_FILES_DIR = (char *)xnmalloc(trash_len + 7, sizeof(char));
-	sprintf(TRASH_FILES_DIR, "%s/files", TRASH_DIR);
+	trash_files_dir = (char *)xnmalloc(trash_len + 7, sizeof(char));
+	sprintf(trash_files_dir, "%s/files", trash_dir);
 
-	TRASH_INFO_DIR = (char *)xnmalloc(trash_len + 6, sizeof(char));
-	sprintf(TRASH_INFO_DIR, "%s/info", TRASH_DIR);
+	trash_info_dir = (char *)xnmalloc(trash_len + 6, sizeof(char));
+	sprintf(trash_info_dir, "%s/info", trash_dir);
 #endif
-	size_t config_len = strlen(CONFIG_DIR);
 
-	DIRHIST_FILE = (char *)xnmalloc(config_len + 13, sizeof(char));
-	sprintf(DIRHIST_FILE, "%s/dirhist.cfm", CONFIG_DIR);
+	size_t config_len = strlen(config_dir);
+
+	dirhist_file = (char *)xnmalloc(config_len + 13, sizeof(char));
+	sprintf(dirhist_file, "%s/dirhist.cfm", config_dir);
 
 	if (!alt_bm_file) {
-		BM_FILE = (char *)xnmalloc(config_len + 15, sizeof(char));
-		sprintf(BM_FILE, "%s/bookmarks.cfm", CONFIG_DIR);
+		bm_file = (char *)xnmalloc(config_len + 15, sizeof(char));
+		sprintf(bm_file, "%s/bookmarks.cfm", config_dir);
 	} else {
-		BM_FILE = savestring(alt_bm_file, strlen(alt_bm_file));
+		bm_file = savestring(alt_bm_file, strlen(alt_bm_file));
 		free(alt_bm_file);
 		alt_bm_file = (char *)NULL;
 	}
 
-	LOG_FILE = (char *)xnmalloc(config_len + 9, sizeof(char));
-	sprintf(LOG_FILE, "%s/log.cfm", CONFIG_DIR);
+	log_file = (char *)xnmalloc(config_len + 9, sizeof(char));
+	sprintf(log_file, "%s/log.cfm", config_dir);
 
-	HIST_FILE = (char *)xnmalloc(config_len + 13, sizeof(char));
-	sprintf(HIST_FILE, "%s/history.cfm", CONFIG_DIR);
+	hist_file = (char *)xnmalloc(config_len + 13, sizeof(char));
+	sprintf(hist_file, "%s/history.cfm", config_dir);
 
 	if (!alt_config_file) {
-		CONFIG_FILE = (char *)xnmalloc(config_len + pnl_len + 4, sizeof(char));
-		sprintf(CONFIG_FILE, "%s/%src", CONFIG_DIR, PNL);
+		config_file = (char *)xnmalloc(config_len + pnl_len + 4, sizeof(char));
+		sprintf(config_file, "%s/%src", config_dir, PNL);
 	} else {
-		CONFIG_FILE = savestring(alt_config_file, strlen(alt_config_file));
+		config_file = savestring(alt_config_file, strlen(alt_config_file));
 		free(alt_config_file);
 		alt_config_file = (char *)NULL;
 	}
 
-	PROFILE_FILE = (char *)xnmalloc(config_len + 13, sizeof(char));
-	sprintf(PROFILE_FILE, "%s/profile.cfm", CONFIG_DIR);
+	profile_file = (char *)xnmalloc(config_len + 13, sizeof(char));
+	sprintf(profile_file, "%s/profile.cfm", config_dir);
 
-	MSG_LOG_FILE = (char *)xnmalloc(config_len + 14, sizeof(char));
-	sprintf(MSG_LOG_FILE, "%s/messages.cfm", CONFIG_DIR);
+	msg_log_file = (char *)xnmalloc(config_len + 14, sizeof(char));
+	sprintf(msg_log_file, "%s/messages.cfm", config_dir);
 
-	MIME_FILE = (char *)xnmalloc(config_len + 14, sizeof(char));
-	sprintf(MIME_FILE, "%s/mimelist.cfm", CONFIG_DIR);
+	mime_file = (char *)xnmalloc(config_len + 14, sizeof(char));
+	sprintf(mime_file, "%s/mimelist.cfm", config_dir);
 
-	ACTIONS_FILE = (char *)xnmalloc(config_len + 13, sizeof(char));
-	sprintf(ACTIONS_FILE, "%s/actions.cfm", CONFIG_DIR);
+	actions_file = (char *)xnmalloc(config_len + 13, sizeof(char));
+	sprintf(actions_file, "%s/actions.cfm", config_dir);
 
-	REMOTES_FILE = (char *)xnmalloc(config_len + 10, sizeof(char));
-	sprintf(REMOTES_FILE, "%s/nets.cfm", CONFIG_DIR);
+	remotes_file = (char *)xnmalloc(config_len + 10, sizeof(char));
+	sprintf(remotes_file, "%s/nets.cfm", config_dir);
 
 	return;
 }
@@ -633,19 +635,19 @@ define_config_file_names(void)
 static int
 import_rl_file(void)
 {
-	if (!DATA_DIR || !CONFIG_DIR_GRAL)
+	if (!data_dir || !config_dir_gral)
 		return EXIT_FAILURE;
 
 	char tmp[PATH_MAX];
-	sprintf(tmp, "%s/readline.cfm", CONFIG_DIR_GRAL);
+	sprintf(tmp, "%s/readline.cfm", config_dir_gral);
 	struct stat attr;
 	if (lstat(tmp, &attr) == 0)
 		return EXIT_SUCCESS;
 
 	char rl_file[PATH_MAX];
-	snprintf(rl_file, PATH_MAX - 1, "%s/%s/readline.cfm", DATA_DIR, PNL);
+	snprintf(rl_file, PATH_MAX - 1, "%s/%s/readline.cfm", data_dir, PNL);
 	if (stat(rl_file, &attr) == EXIT_SUCCESS) {
-		char *cmd[] = {"cp", rl_file, CONFIG_DIR_GRAL, NULL};
+		char *cmd[] = {"cp", rl_file, config_dir_gral, NULL};
 		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) == EXIT_SUCCESS)
 			return EXIT_SUCCESS;
 	}
@@ -659,9 +661,9 @@ create_config(char *file)
 	struct stat attr;
 
 	/* First, try to import it from DATADIR */
-	if (DATA_DIR) {
+	if (data_dir) {
 		char sys_file[PATH_MAX];
-		snprintf(sys_file, PATH_MAX - 1, "%s/%s/%src", DATA_DIR, PNL, PNL);
+		snprintf(sys_file, PATH_MAX - 1, "%s/%s/%src", data_dir, PNL, PNL);
 		if (stat(sys_file, &attr) == EXIT_SUCCESS) {
 			char *cmd[] = {"cp", sys_file, file, NULL};
 			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
@@ -1004,11 +1006,11 @@ RlEditMode=%d\n\n"
 static void
 create_def_cscheme(void)
 {
-	if (!COLORS_DIR)
+	if (!colors_dir)
 		return;
 
-	char *cscheme_file = (char *)xnmalloc(strlen(COLORS_DIR) + 13, sizeof(char));
-	sprintf(cscheme_file, "%s/default.cfm", COLORS_DIR);
+	char *cscheme_file = (char *)xnmalloc(strlen(colors_dir) + 13, sizeof(char));
+	sprintf(cscheme_file, "%s/default.cfm", colors_dir);
 
 	/* If the file already exists, do nothing */
 	struct stat attr;
@@ -1061,17 +1063,17 @@ create_def_cscheme(void)
 static int
 create_remotes_file(void)
 {
-	if (!REMOTES_FILE || !*REMOTES_FILE)
+	if (!remotes_file || !*remotes_file)
 		return EXIT_FAILURE;
 
 	struct stat attr;
-	if (stat(REMOTES_FILE, &attr) == EXIT_SUCCESS)
+	if (stat(remotes_file, &attr) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
-	FILE *fp = fopen(REMOTES_FILE, "w");
+	FILE *fp = fopen(remotes_file, "w");
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-		    REMOTES_FILE, strerror(errno));
+		    remotes_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1106,15 +1108,15 @@ create_config_files(void)
 			 * #        TRASH DIRS         #
 			 * ############################# */
 #ifndef _NO_TRASH
-	if (stat(TRASH_DIR, &attr) == -1) {
+	if (stat(trash_dir, &attr) == -1) {
 		char *trash_files = (char *)NULL;
-		trash_files = (char *)xnmalloc(strlen(TRASH_DIR) + 7, sizeof(char));
+		trash_files = (char *)xnmalloc(strlen(trash_dir) + 7, sizeof(char));
 
-		sprintf(trash_files, "%s/files", TRASH_DIR);
+		sprintf(trash_files, "%s/files", trash_dir);
 		char *trash_info = (char *)NULL;
-		trash_info = (char *)xnmalloc(strlen(TRASH_DIR) + 6, sizeof(char));
+		trash_info = (char *)xnmalloc(strlen(trash_dir) + 6, sizeof(char));
 
-		sprintf(trash_info, "%s/info", TRASH_DIR);
+		sprintf(trash_info, "%s/info", trash_dir);
 		char *cmd[] = {"mkdir", "-p", trash_files, trash_info, NULL};
 
 		int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
@@ -1124,15 +1126,15 @@ create_config_files(void)
 		if (ret != EXIT_SUCCESS) {
 			trash_ok = 0;
 			_err('w', PRINT_PROMPT, _("%s: mkdir: '%s': Error creating trash "
-				"directory. Trash function disabled\n"), PROGRAM_NAME, TRASH_DIR);
+				"directory. Trash function disabled\n"), PROGRAM_NAME, trash_dir);
 		}
 	}
 
 	/* If it exists, check it is writable */
-	else if (access(TRASH_DIR, W_OK) == -1) {
+	else if (access(trash_dir, W_OK) == -1) {
 		trash_ok = 0;
 		_err('w', PRINT_PROMPT, _("%s: '%s': Directory not writable. "
-				"Trash function disabled\n"), PROGRAM_NAME, TRASH_DIR);
+				"Trash function disabled\n"), PROGRAM_NAME, trash_dir);
 	}
 #endif
 				/* ####################
@@ -1141,26 +1143,26 @@ create_config_files(void)
 
 	/* If the config directory doesn't exist, create it */
 	/* Use the GNU mkdir to let it handle parent directories */
-	if (stat(CONFIG_DIR, &attr) == -1) {
-		char *tmp_cmd[] = {"mkdir", "-p", CONFIG_DIR, NULL};
+	if (stat(config_dir, &attr) == -1) {
+		char *tmp_cmd[] = {"mkdir", "-p", config_dir, NULL};
 		if (launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			config_ok = 0;
 			_err('e', PRINT_PROMPT, _("%s: mkdir: '%s': Error creating "
 				"configuration directory. Bookmarks, commands logs, and "
 				"command history are disabled. Program messages won't be "
 				"persistent. Using default options\n"),
-			    PROGRAM_NAME, CONFIG_DIR);
+			    PROGRAM_NAME, config_dir);
 			return;
 		}
 	}
 
 	/* If it exists, check it is writable */
-	else if (access(CONFIG_DIR, W_OK) == -1) {
+	else if (access(config_dir, W_OK) == -1) {
 		config_ok = 0;
 		_err('e', PRINT_PROMPT, _("%s: '%s': Directory not writable. Bookmarks, "
 			"commands logs, and commands history are disabled. Program messages "
 			"won't be persistent. Using default options\n"),
-		    PROGRAM_NAME, CONFIG_DIR);
+		    PROGRAM_NAME, config_dir);
 		return;
 	}
 
@@ -1168,8 +1170,8 @@ create_config_files(void)
 				 * #    CONFIG FILE    #
 				 * #####################*/
 
-	if (stat(CONFIG_FILE, &attr) == -1) {
-		if (create_config(CONFIG_FILE) == EXIT_SUCCESS)
+	if (stat(config_file, &attr) == -1) {
+		if (create_config(config_file) == EXIT_SUCCESS)
 			config_ok = 1;
 		else
 			config_ok = 0;
@@ -1182,11 +1184,11 @@ create_config_files(void)
 				 * #    PROFILE FILE    #
 				 * ###################### */
 
-	if (stat(PROFILE_FILE, &attr) == -1) {
-		FILE *profile_fp = fopen(PROFILE_FILE, "w");
+	if (stat(profile_file, &attr) == -1) {
+		FILE *profile_fp = fopen(profile_file, "w");
 		if (!profile_fp) {
 			_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n", PROGRAM_NAME,
-			    PROFILE_FILE, strerror(errno));
+			    profile_file, strerror(errno));
 		} else {
 			fprintf(profile_fp, _("#%s profile\n\
 # Write here the commands you want to be executed at startup\n\
@@ -1200,8 +1202,8 @@ create_config_files(void)
 				 * #    COLORS DIR     #
 				 * ##################### */
 
-	if (stat(COLORS_DIR, &attr) == -1) {
-		char *cmd[] = {"mkdir", COLORS_DIR, NULL};
+	if (stat(colors_dir, &attr) == -1) {
+		char *cmd[] = {"mkdir", colors_dir, NULL};
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			_err('w', PRINT_PROMPT, _("%s: mkdir: Error creating colors "
 				"directory. Using the default color scheme\n"),
@@ -1216,8 +1218,8 @@ create_config_files(void)
 				 * #      PLUGINS      #
 				 * #####################*/
 
-	if (stat(PLUGINS_DIR, &attr) == -1) {
-		char *cmd[] = {"mkdir", PLUGINS_DIR, NULL};
+	if (stat(plugins_dir, &attr) == -1) {
+		char *cmd[] = {"mkdir", plugins_dir, NULL};
 		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
 			_err('e', PRINT_PROMPT, _("%s: mkdir: Error creating plugins "
 				"directory. The actions function is disabled\n"),
@@ -1226,8 +1228,8 @@ create_config_files(void)
 	}
 
 	import_rl_file();
-	create_actions_file(ACTIONS_FILE);
-	create_mime_file(MIME_FILE, 0);
+	create_actions_file(actions_file);
+	create_mime_file(mime_file, 0);
 	create_remotes_file();
 }
 
@@ -1238,11 +1240,11 @@ create_mime_file(char *file, int new_prof)
 	if (stat(file, &attr) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
-	if (!DATA_DIR)
+	if (!data_dir)
 		return EXIT_FAILURE;
 
 	char sys_mimelist[PATH_MAX];
-	snprintf(sys_mimelist, PATH_MAX - 1, "%s/%s/mimelist.cfm", DATA_DIR, PNL);
+	snprintf(sys_mimelist, PATH_MAX - 1, "%s/%s/mimelist.cfm", data_dir, PNL);
 
 	if (stat(sys_mimelist, &attr) == -1) {
 		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
@@ -1269,14 +1271,14 @@ create_mime_file(char *file, int new_prof)
 int
 create_bm_file(void)
 {
-	if (!BM_FILE)
+	if (!bm_file)
 		return EXIT_FAILURE;
 
 	struct stat file_attrib;
-	if (stat(BM_FILE, &file_attrib) == -1) {
-		FILE *fp = fopen(BM_FILE, "w+");
+	if (stat(bm_file, &file_attrib) == -1) {
+		FILE *fp = fopen(bm_file, "w+");
 		if (!fp) {
-			_err('e', PRINT_PROMPT, "bookmarks: '%s': %s\n", BM_FILE,
+			_err('e', PRINT_PROMPT, "bookmarks: '%s': %s\n", bm_file,
 			    strerror(errno));
 			return EXIT_FAILURE;
 		} else {
@@ -1285,7 +1287,7 @@ create_bm_file(void)
 				    "# The bookmarks syntax is: [shortcut]name:path\n"
 				    "# Example:\n"
 				    "[c]clifm:%s\n",
-			    PROGRAM_NAME, CONFIG_DIR ? CONFIG_DIR : "path/to/file");
+			    PROGRAM_NAME, config_dir ? config_dir : "path/to/file");
 			fclose(fp);
 		}
 	}
@@ -1298,10 +1300,10 @@ read_config(void)
 {
 	int ret = -1;
 
-	FILE *config_fp = fopen(CONFIG_FILE, "r");
+	FILE *config_fp = fopen(config_file, "r");
 	if (!config_fp) {
 		_err('e', PRINT_PROMPT, _("%s: fopen: '%s': %s. Using default values.\n"),
-		    PROGRAM_NAME, CONFIG_FILE, strerror(errno));
+		    PROGRAM_NAME, config_file, strerror(errno));
 		return;
 	}
 
@@ -2059,37 +2061,39 @@ static void
 reset_variables(void)
 {
 	/* Free everything */
-	free(CONFIG_DIR_GRAL);
-	free(CONFIG_DIR);
-	CONFIG_DIR = CONFIG_DIR_GRAL = (char *)NULL;
+	free(config_dir_gral);
+	free(config_dir);
+	config_dir = config_dir_gral = (char *)NULL;
+
 #ifndef _NO_TRASH
-	free(TRASH_DIR);
-	free(TRASH_FILES_DIR);
-	free(TRASH_INFO_DIR);
-	TRASH_DIR = TRASH_FILES_DIR = TRASH_INFO_DIR = (char *)NULL;
+	free(trash_dir);
+	free(trash_files_dir);
+	free(trash_info_dir);
+	trash_dir = trash_files_dir = trash_info_dir = (char *)NULL;
 #endif
-	free(BM_FILE);
-	free(LOG_FILE);
-	free(HIST_FILE);
-	free(DIRHIST_FILE);
-	BM_FILE = LOG_FILE = HIST_FILE = DIRHIST_FILE = (char *)NULL;
 
-	free(CONFIG_FILE);
-	free(PROFILE_FILE);
-	free(MSG_LOG_FILE);
-	CONFIG_FILE = PROFILE_FILE = MSG_LOG_FILE = (char *)NULL;
+	free(bm_file);
+	free(log_file);
+	free(hist_file);
+	free(dirhist_file);
+	bm_file = log_file = hist_file = dirhist_file = (char *)NULL;
 
-	free(MIME_FILE);
-	free(PLUGINS_DIR);
-	free(ACTIONS_FILE);
-	free(KBINDS_FILE);
-	MIME_FILE = PLUGINS_DIR = ACTIONS_FILE = KBINDS_FILE = (char *)NULL;
+	free(config_file);
+	free(profile_file);
+	free(msg_log_file);
+	config_file = profile_file = msg_log_file = (char *)NULL;
 
-	free(COLORS_DIR);
-	free(TMP_DIR);
-	free(SEL_FILE);
-	free(REMOTES_FILE);
-	TMP_DIR = COLORS_DIR = SEL_FILE = REMOTES_FILE = (char *)NULL;
+	free(mime_file);
+	free(plugins_dir);
+	free(actions_file);
+	free(kbinds_file);
+	mime_file = plugins_dir = actions_file = kbinds_file = (char *)NULL;
+
+	free(colors_dir);
+	free(tmp_dir);
+	free(sel_file);
+	free(remotes_file);
+	tmp_dir = colors_dir = sel_file = remotes_file = (char *)NULL;
 
 #ifndef _NO_SUGGESTIONS
 	free(suggestion_buf);

@@ -88,7 +88,7 @@ static int
 bookmark_del(char *name)
 {
 	FILE *bm_fp = NULL;
-	bm_fp = fopen(BM_FILE, "r");
+	bm_fp = fopen(bm_file, "r");
 	if (!bm_fp)
 		return EXIT_FAILURE;
 
@@ -237,15 +237,15 @@ bookmark_del(char *name)
 		if (strcmp(del_elements[i], "*") == 0) {
 			/* Create a backup copy of the bookmarks file, just in case */
 			char *bk_file = (char *)NULL;
-			bk_file = (char *)xcalloc(strlen(CONFIG_DIR) + 14,
+			bk_file = (char *)xcalloc(strlen(config_dir) + 14,
 			    sizeof(char));
-			sprintf(bk_file, "%s/bookmarks.bk", CONFIG_DIR);
-			char *tmp_cmd[] = {"cp", BM_FILE, bk_file, NULL};
+			sprintf(bk_file, "%s/bookmarks.bk", config_dir);
+			char *tmp_cmd[] = {"cp", bm_file, bk_file, NULL};
 
 			int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
 			/* Remove the bookmarks file, free stuff, and exit */
 			if (ret == EXIT_SUCCESS) {
-				unlink(BM_FILE);
+				unlink(bm_file);
 				printf(_("bookmarks: All bookmarks were deleted\n "
 					 "However, a backup copy was created (%s)\n"), bk_file);
 				free(bk_file);
@@ -280,8 +280,8 @@ bookmark_del(char *name)
 	/* Remove single bookmarks */
 	/* Open a temporary file */
 	char *tmp_file = (char *)NULL;
-	tmp_file = (char *)xnmalloc(strlen(CONFIG_DIR) + 8, sizeof(char));
-	sprintf(tmp_file, "%s/bm_tmp", CONFIG_DIR);
+	tmp_file = (char *)xnmalloc(strlen(config_dir) + 8, sizeof(char));
+	sprintf(tmp_file, "%s/bm_tmp", config_dir);
 
 	FILE *tmp_fp = fopen(tmp_file, "w+");
 	if (!tmp_fp) {
@@ -343,8 +343,8 @@ bookmark_del(char *name)
 
 	/* Remove the old bookmarks file and make the tmp file the new
 	 * bookmarks file*/
-	unlink(BM_FILE);
-	rename(tmp_file, BM_FILE);
+	unlink(bm_file);
+	rename(tmp_file, bm_file);
 	free(tmp_file);
 
 	/* Update bookmark names for TAB completion */
@@ -378,7 +378,7 @@ bookmark_add(char *file)
 
 	/* Check if FILE is an available path */
 
-	FILE *bm_fp = fopen(BM_FILE, "r");
+	FILE *bm_fp = fopen(bm_file, "r");
 	if (!bm_fp) {
 		fprintf(stderr, _("bookmarks: Error opening the bookmarks file\n"));
 		if (mod_file)
@@ -543,7 +543,7 @@ bookmark_add(char *file)
 
 	/* Once we have the bookmark line, write it to the bookmarks file */
 
-	bm_fp = fopen(BM_FILE, "a+");
+	bm_fp = fopen(bm_file, "a+");
 	if (!bm_fp) {
 		fprintf(stderr, _("bookmarks: Error opening the bookmarks file\n"));
 		free(tmp);
@@ -578,9 +578,9 @@ edit_bookmarks(char *cmd)
 	int exit_status = EXIT_SUCCESS;
 
 	if (!cmd) {
-		exit_status = open_file(BM_FILE);
+		exit_status = open_file(bm_file);
 	} else {
-		char *tmp_cmd[] = {cmd, BM_FILE, NULL};
+		char *tmp_cmd[] = {cmd, bm_file, NULL};
 		if (launch_execve(tmp_cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 	}
@@ -652,12 +652,12 @@ open_bookmark(void)
 
 	/* Case "edit" */
 	if (*arg[0] == 'e' && (!arg[0][1] || strcmp(arg[0], "edit") == 0)) {
-		stat(BM_FILE, &file_attrib);
+		stat(bm_file, &file_attrib);
 		time_t mtime_bfr = (time_t)file_attrib.st_mtime;
 
 		edit_bookmarks(arg[1] ? arg[1] : NULL);
 
-		stat(BM_FILE, &file_attrib);
+		stat(bm_file, &file_attrib);
 		if (mtime_bfr != (time_t)file_attrib.st_mtime) {
 			free_bookmarks();
 			load_bookmarks();

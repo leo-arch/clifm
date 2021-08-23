@@ -65,8 +65,8 @@ int
 init_gettext(void)
 {
 	char locale_dir[PATH_MAX];
-	snprintf(locale_dir, PATH_MAX - 1, "%s/locale", DATA_DIR
-			? DATA_DIR : "/usr/share");
+	snprintf(locale_dir, PATH_MAX - 1, "%s/locale", data_dir
+			? data_dir : "/usr/share");
 	bindtextdomain(PNL, locale_dir);
 	textdomain(PNL);
 	return EXIT_SUCCESS;
@@ -128,26 +128,26 @@ int
 init_history(void)
 {
 	/* Limit the log files size */
-	check_file_size(LOG_FILE, max_log);
-	check_file_size(MSG_LOG_FILE, max_log);
+	check_file_size(log_file, max_log);
+	check_file_size(msg_log_file, max_log);
 
 	/* Get history */
 	struct stat attr;
-	if (stat(HIST_FILE, &attr) == 0 && attr.st_size != 0) {
+	if (stat(hist_file, &attr) == 0 && attr.st_size != 0) {
 		/* If the size condition is not included, and in case of a zero
 		 * size file, read_history() produces malloc errors */
 		/* Recover history from the history file */
-		read_history(HIST_FILE); /* This line adds more leaks to
+		read_history(hist_file); /* This line adds more leaks to
 																readline */
 		/* Limit the size of the history file to max_hist lines */
-		history_truncate_file(HIST_FILE, max_hist);
+		history_truncate_file(hist_file, max_hist);
 	} else {
 	/* If the history file doesn't exist, create it */
-		FILE *hist_fp = fopen(HIST_FILE, "w+");
+		FILE *hist_fp = fopen(hist_file, "w+");
 
 		if (!hist_fp) {
 			_err('w', PRINT_PROMPT, "%s: fopen: '%s': %s\n",
-			    PROGRAM_NAME, HIST_FILE, strerror(errno));
+			    PROGRAM_NAME, hist_file, strerror(errno));
 		} else {
 			/* To avoid malloc errors in read_history(), do not
 			 * create an empty file */
@@ -251,41 +251,41 @@ get_data_dir(void)
 		char tmp[PATH_MAX];
 		snprintf(tmp, PATH_MAX - 1, "%s/%s", data_dirs[i], PNL);
 		if (stat(tmp, &attr) == EXIT_SUCCESS) {
-			DATA_DIR = (char *)xrealloc(DATA_DIR, (strlen(data_dirs[i]) + 1)
+			data_dir = (char *)xrealloc(data_dir, (strlen(data_dirs[i]) + 1)
 										* sizeof(char));
-			strcpy(DATA_DIR, data_dirs[i]);
+			strcpy(data_dir, data_dirs[i]);
 			break;
 		}
 	}
 
-/*	if (DATA_DIR)
+/*	if (data_dir)
 		return; */
 	return;
 
 	/* If not found, try to get DATADIR from executable's path */
-/*	DATA_DIR = get_cmd_path(PNL);
+/*	data_dir = get_cmd_path(PNL);
 
-	if (!DATA_DIR)
+	if (!data_dir)
 		return;
 
-	size_t j = strlen(DATA_DIR),
+	size_t j = strlen(data_dir),
 		   count = 0;
 
 	while (--j >= 0) {
-		if (DATA_DIR[j] == '/')
+		if (data_dir[j] == '/')
 			count++;
 		if (count == 2) {
-			DATA_DIR[j] = '\0';
+			data_dir[j] = '\0';
 			break;
 		}
 	}
 
 	char tmp[PATH_MAX];
-	snprintf(tmp, PATH_MAX - 1, "%s/share/%s", DATA_DIR, PNL);
+	snprintf(tmp, PATH_MAX - 1, "%s/share/%s", data_dir, PNL);
 	if (stat(tmp, &attr) == EXIT_SUCCESS) {
-		snprintf(tmp, PATH_MAX - 1, "%s/share", DATA_DIR);
-		DATA_DIR = (char *)xrealloc(DATA_DIR, (strlen(tmp) + 1) * sizeof(char));
-		strcpy(DATA_DIR, tmp);
+		snprintf(tmp, PATH_MAX - 1, "%s/share", data_dir);
+		data_dir = (char *)xrealloc(data_dir, (strlen(tmp) + 1) * sizeof(char));
+		strcpy(data_dir, tmp);
 		return;
 	} */
 }
@@ -376,22 +376,22 @@ get_user(void)
 void
 load_jumpdb(void)
 {
-	if (xargs.no_dirjump == 1 || !config_ok || !CONFIG_DIR)
+	if (xargs.no_dirjump == 1 || !config_ok || !config_dir)
 		return;
 
-	size_t dir_len = strlen(CONFIG_DIR);
-	char *JUMP_FILE = (char *)xnmalloc(dir_len + 10, sizeof(char));
-	snprintf(JUMP_FILE, dir_len + 10, "%s/jump.cfm", CONFIG_DIR);
+	size_t dir_len = strlen(config_dir);
+	char *jump_file = (char *)xnmalloc(dir_len + 10, sizeof(char));
+	snprintf(jump_file, dir_len + 10, "%s/jump.cfm", config_dir);
 
 	struct stat attr;
-	if (stat(JUMP_FILE, &attr) == -1) {
-		free(JUMP_FILE);
+	if (stat(jump_file, &attr) == -1) {
+		free(jump_file);
 		return;
 	}
 
-	FILE *fp = fopen(JUMP_FILE, "r");
+	FILE *fp = fopen(jump_file, "r");
 	if (!fp) {
-		free(JUMP_FILE);
+		free(jump_file);
 		return;
 	}
 
@@ -404,7 +404,7 @@ load_jumpdb(void)
 	}
 
 	if (!jump_lines) {
-		free(JUMP_FILE);
+		free(jump_file);
 		fclose(fp);
 		return;
 	}
@@ -488,7 +488,7 @@ load_jumpdb(void)
 
 	fclose(fp);
 	free(line);
-	free(JUMP_FILE);
+	free(jump_file);
 
 	if (!jump_n) {
 		free(jump_db);
@@ -509,10 +509,10 @@ load_bookmarks(void)
 	if (create_bm_file() == EXIT_FAILURE)
 		return EXIT_FAILURE;
 
-	if (!BM_FILE)
+	if (!bm_file)
 		return EXIT_FAILURE;
 
-	FILE *bm_fp = fopen(BM_FILE, "r");
+	FILE *bm_fp = fopen(bm_file, "r");
 	if (!bm_fp)
 		return EXIT_FAILURE;
 
@@ -661,7 +661,7 @@ load_actions(void)
 	}
 
 	/* Open the actions file */
-	FILE *actions_fp = fopen(ACTIONS_FILE, "r");
+	FILE *actions_fp = fopen(actions_file, "r");
 	if (!actions_fp)
 		return EXIT_FAILURE;
 
@@ -697,7 +697,7 @@ load_actions(void)
 int
 load_remotes(void)
 {
-	if (!REMOTES_FILE || !*REMOTES_FILE)
+	if (!remotes_file || !*remotes_file)
 		return EXIT_FAILURE;
 
 	if (xargs.stealth_mode == 1) {
@@ -707,14 +707,14 @@ load_remotes(void)
 	}
 
 	struct stat attr;
-	if (stat(REMOTES_FILE, &attr) == -1) {
-		fprintf(stderr, "%s: %s\n", REMOTES_FILE, strerror(errno));
+	if (stat(remotes_file, &attr) == -1) {
+		fprintf(stderr, "%s: %s\n", remotes_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
-	FILE *fp = fopen(REMOTES_FILE, "r");
+	FILE *fp = fopen(remotes_file, "r");
 	if (!fp) {
-		fprintf(stderr, "%s: %s\n", REMOTES_FILE, strerror(errno));
+		fprintf(stderr, "%s: %s\n", remotes_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1047,10 +1047,10 @@ external_arguments(int argc, char **argv)
 			}
 
 			if ((attr.st_mode & S_IFMT) != S_IFDIR) {
-				TMP_DIR = (char *)xnmalloc(5, sizeof(char));
-				strcpy(TMP_DIR, "/tmp");
-				MIME_FILE = (char *)xnmalloc(PATH_MAX, sizeof(char));
-				snprintf(MIME_FILE, PATH_MAX,
+				tmp_dir = (char *)xnmalloc(5, sizeof(char));
+				strcpy(tmp_dir, "/tmp");
+				mime_file = (char *)xnmalloc(PATH_MAX, sizeof(char));
+				snprintf(mime_file, PATH_MAX,
 				    "%s/.config/clifm/profiles/%s/mimelist.cfm",
 				    getenv("HOME"), alt_profile ? alt_profile : "default");
 				int ret = open_file(optarg);
@@ -1253,10 +1253,10 @@ external_arguments(int argc, char **argv)
 		}
 
 		if ((attr.st_mode & S_IFMT) != S_IFDIR) {
-			TMP_DIR = (char *)xnmalloc(5, sizeof(char));
-			strcpy(TMP_DIR, "/tmp");
-			MIME_FILE = (char *)xnmalloc(PATH_MAX, sizeof(char));
-			snprintf(MIME_FILE, PATH_MAX,
+			tmp_dir = (char *)xnmalloc(5, sizeof(char));
+			strcpy(tmp_dir, "/tmp");
+			mime_file = (char *)xnmalloc(PATH_MAX, sizeof(char));
+			snprintf(mime_file, PATH_MAX,
 			    "%s/.config/clifm/profiles/%s/mimelist.cfm",
 			    getenv("HOME"), alt_profile ? alt_profile : "default");
 			int ret = open_file(argv[i]);
@@ -1543,7 +1543,7 @@ get_sel_files(void)
 	sel_n = 0;
 
 	/* Open the tmp sel file and load its contents into the sel array */
-	FILE *sel_fp = fopen(SEL_FILE, "r");
+	FILE *sel_fp = fopen(sel_file, "r");
 	/*  sel_elements = xcalloc(1, sizeof(char *)); */
 	if (!sel_fp)
 		return EXIT_FAILURE;
@@ -1622,11 +1622,11 @@ get_path_env(void)
 int
 get_last_path(void)
 {
-	if (!CONFIG_DIR)
+	if (!config_dir)
 		return EXIT_FAILURE;
 
-	char *last_file = (char *)xnmalloc(strlen(CONFIG_DIR) + 7, sizeof(char));
-	sprintf(last_file, "%s/.last", CONFIG_DIR);
+	char *last_file = (char *)xnmalloc(strlen(config_dir) + 7, sizeof(char));
+	sprintf(last_file, "%s/.last", config_dir);
 
 	struct stat last_attrib;
 	if (stat(last_file, &last_attrib) == -1) {
@@ -1690,8 +1690,8 @@ load_pinned_dir(void)
 	if (!config_ok)
 		return EXIT_FAILURE;
 
-	char *pin_file = (char *)xnmalloc(strlen(CONFIG_DIR) + 6, sizeof(char));
-	sprintf(pin_file, "%s/.pin", CONFIG_DIR);
+	char *pin_file = (char *)xnmalloc(strlen(config_dir) + 6, sizeof(char));
+	sprintf(pin_file, "%s/.pin", config_dir);
 
 	struct stat attr;
 	if (lstat(pin_file, &attr) == -1) {
@@ -1828,10 +1828,10 @@ get_aliases(void)
 		return;
 
 	FILE *config_file_fp;
-	config_file_fp = fopen(CONFIG_FILE, "r");
+	config_file_fp = fopen(config_file, "r");
 	if (!config_file_fp) {
 		_err('e', PRINT_PROMPT, "%s: alias: '%s': %s\n",
-		    PROGRAM_NAME, CONFIG_FILE, strerror(errno));
+		    PROGRAM_NAME, config_file, strerror(errno));
 		return;
 	}
 
@@ -1870,7 +1870,7 @@ load_dirhist(void)
 	if (!config_ok)
 		return EXIT_FAILURE;
 
-	FILE *fp = fopen(DIRHIST_FILE, "r");
+	FILE *fp = fopen(dirhist_file, "r");
 	if (!fp)
 		return EXIT_FAILURE;
 
@@ -1917,10 +1917,10 @@ get_prompt_cmds(void)
 		return;
 
 	FILE *config_file_fp;
-	config_file_fp = fopen(CONFIG_FILE, "r");
+	config_file_fp = fopen(config_file, "r");
 	if (!config_file_fp) {
 		_err('e', PRINT_PROMPT, "%s: prompt: '%s': %s\n",
-		    PROGRAM_NAME, CONFIG_FILE, strerror(errno));
+		    PROGRAM_NAME, config_file, strerror(errno));
 		return;
 	}
 

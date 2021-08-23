@@ -60,20 +60,20 @@ save_sel(void)
 		return EXIT_FAILURE;
 
 	if (sel_n == 0) {
-		if (unlink(SEL_FILE) == -1) {
+		if (unlink(sel_file) == -1) {
 			fprintf(stderr, "%s: sel: %s: %s\n", PROGRAM_NAME,
-			    SEL_FILE, strerror(errno));
+			    sel_file, strerror(errno));
 			return EXIT_FAILURE;
 		} else {
 			return EXIT_SUCCESS;
 		}
 	}
 
-	FILE *sel_fp = fopen(SEL_FILE, "w");
+	FILE *sel_fp = fopen(sel_file, "w");
 
 	if (!sel_fp) {
 		_err(0, NOPRINT_PROMPT, "%s: sel: %s: %s\n", PROGRAM_NAME,
-		    SEL_FILE, strerror(errno));
+		    sel_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 

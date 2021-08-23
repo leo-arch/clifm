@@ -789,7 +789,7 @@ bulk_rename(char **args)
 	if (xargs.stealth_mode == 1)
 		sprintf(BULK_FILE, "/tmp/.clifm_bulk_rename");
 	else
-		sprintf(BULK_FILE, "%s/.bulk_rename", TMP_DIR);
+		sprintf(BULK_FILE, "%s/.bulk_rename", tmp_dir);
 
 	FILE *bulk_fp;
 	bulk_fp = fopen(BULK_FILE, "w+");
@@ -985,8 +985,8 @@ char *export(char **filenames, int open)
 	if (!rand_ext)
 		return (char *)NULL;
 
-	char *tmp_file = (char *)xnmalloc(strlen(TMP_DIR) + 14, sizeof(char));
-	sprintf(tmp_file, "%s/.clifm%s", TMP_DIR, rand_ext);
+	char *tmp_file = (char *)xnmalloc(strlen(tmp_dir) + 14, sizeof(char));
+	sprintf(tmp_file, "%s/.clifm%s", tmp_dir, rand_ext);
 	free(rand_ext);
 
 	FILE *fp = fopen(tmp_file, "w");

@@ -592,9 +592,9 @@ alias_import(char *file)
 	}
 
 	/* Open CLiFM config file as well */
-	FILE *config_fp = fopen(CONFIG_FILE, "a");
+	FILE *config_fp = fopen(config_file, "a");
 	if (!config_fp) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, CONFIG_FILE,
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, config_file,
 		    strerror(errno));
 		fclose(fp);
 		return EXIT_FAILURE;
@@ -714,11 +714,11 @@ alias_import(char *file)
 void
 save_last_path(void)
 {
-	if (!config_ok || !CONFIG_DIR)
+	if (!config_ok || !config_dir)
 		return;
 
-	char *last_dir = (char *)xnmalloc(strlen(CONFIG_DIR) + 7, sizeof(char));
-	sprintf(last_dir, "%s/.last", CONFIG_DIR);
+	char *last_dir = (char *)xnmalloc(strlen(config_dir) + 7, sizeof(char));
+	sprintf(last_dir, "%s/.last", config_dir);
 
 	FILE *last_fp;
 	last_fp = fopen(last_dir, "w");
@@ -744,8 +744,8 @@ save_last_path(void)
 
 	fclose(last_fp);
 
-	char *last_dir_tmp = xnmalloc(strlen(CONFIG_DIR_GRAL) + 7, sizeof(char *));
-	sprintf(last_dir_tmp, "%s/.last", CONFIG_DIR_GRAL);
+	char *last_dir_tmp = xnmalloc(strlen(config_dir_gral) + 7, sizeof(char *));
+	sprintf(last_dir_tmp, "%s/.last", config_dir_gral);
 
 	if (cd_on_quit) {
 		char *cmd[] = {"cp", "-p", last_dir, last_dir_tmp,
@@ -1082,9 +1082,9 @@ save_pinned_dir(void)
 {
 	if (pinned_dir && config_ok) {
 
-		char *pin_file = (char *)xnmalloc(strlen(CONFIG_DIR) + 7,
+		char *pin_file = (char *)xnmalloc(strlen(config_dir) + 7,
 		    sizeof(char));
-		sprintf(pin_file, "%s/.pin", CONFIG_DIR);
+		sprintf(pin_file, "%s/.pin", config_dir);
 
 		FILE *fp = fopen(pin_file, "w");
 		if (!fp) {
@@ -1139,34 +1139,38 @@ free_stuff(void)
 	close(kq);
 #endif
 
-	free_remotes(1);
-#ifndef _NO_SUGGESTIONS
-	free(suggestion_buf);
-	free(suggestion_strategy);
-#endif
-	if (STDIN_TMP_DIR) {
-		char *rm_cmd[] = {"rm", "-rd", "--", STDIN_TMP_DIR, NULL};
-		launch_execve(rm_cmd, FOREGROUND, E_NOFLAG);
-		free(STDIN_TMP_DIR);
-	}
-
-	if (color_schemes) {
-		for (i = 0; color_schemes[i]; i++)
-			free(color_schemes[i]);
-
-		free(color_schemes);
-	}
 	if (xargs.stealth_mode != 1) {
 		save_pinned_dir();
 		save_jumpdb();
 	}
 
-	if (jump_db) {
+	save_dirhist();
 
+	if (restore_last_path || cd_on_quit)
+		save_last_path();
+
+	free(alt_profile);
+	free_bookmarks();
+	free(encoded_prompt);
+	free_dirlist();
+	free(opener);
+
+	if (stdin_tmp_dir) {
+		char *rm_cmd[] = {"rm", "-rd", "--", stdin_tmp_dir, NULL};
+		launch_execve(rm_cmd, FOREGROUND, E_NOFLAG);
+		free(stdin_tmp_dir);
+	}
+
+	if (color_schemes) {
+		for (i = 0; color_schemes[i]; i++)
+			free(color_schemes[i]);
+		free(color_schemes);
+	}
+
+	if (jump_db) {
 		i = (int)jump_n;
 		while (--i >= 0)
 			free(jump_db[i].path);
-
 		free(jump_db);
 	}
 
@@ -1178,35 +1182,18 @@ free_stuff(void)
 		free(filter);
 	}
 
-	free_bookmarks();
-
 	if (eln_as_file_n)
 		free(eln_as_file);
-
-	save_dirhist();
-
-	if (restore_last_path || cd_on_quit)
-		save_last_path();
 
 	if (ext_colors_n)
 		free(ext_colors_len);
 
-	if (opener)
-		free(opener);
-
-	if (encoded_prompt)
-		free(encoded_prompt);
 
 	if (profile_names) {
 		for (i = 0; profile_names[i]; i++)
 			free(profile_names[i]);
 		free(profile_names);
 	}
-
-	if (alt_profile)
-		free(alt_profile);
-
-	free_dirlist();
 
 	if (sel_n > 0) {
 		i = (int)sel_n;
@@ -1226,7 +1213,6 @@ free_stuff(void)
 		i = (int)path_n;
 		while (--i >= 0)
 			free(paths[i]);
-
 		free(paths);
 	}
 
@@ -1234,7 +1220,6 @@ free_stuff(void)
 		i = (int)current_hist_n;
 		while (--i >= 0)
 			free(history[i]);
-
 		free(history);
 	}
 
@@ -1242,7 +1227,6 @@ free_stuff(void)
 		i = argc_bk;
 		while (--i >= 0)
 			free(argv_bk[i]);
-
 		free(argv_bk);
 	}
 
@@ -1301,39 +1285,46 @@ free_stuff(void)
 		free(ext_colors);
 	}
 
-	free(user.name);
-	free(user.home);
-	free(user.shell);
-
 	i = MAX_WS;
 	while (--i >= 0)
 		if (ws[i].path)
 			free(ws[i].path);
 	free(ws);
 
-	free(DATA_DIR);
-	free(CONFIG_DIR_GRAL);
-	free(CONFIG_DIR);
-#ifndef _NO_TRASH
-	free(TRASH_DIR);
-	free(TRASH_FILES_DIR);
-	free(TRASH_INFO_DIR);
+	free(actions_file);
+	free(bm_file);
+	free(data_dir);
+	free(colors_dir);
+	free(config_dir_gral);
+	free(config_dir);
+	free(config_file);
+	free(dirhist_file);
+	free(hist_file);
+	free(kbinds_file);
+	free(log_file);
+	free(mime_file);
+	free(msg_log_file);
+	free(plugins_dir);
+	free(profile_file);
+	free(remotes_file);
+
+	free_remotes(1);
+
+#ifndef _NO_SUGGESTIONS
+	free(suggestion_buf);
+	free(suggestion_strategy);
 #endif
-	free(TMP_DIR);
-	free(BM_FILE);
-	free(LOG_FILE);
-	free(HIST_FILE);
-	free(DIRHIST_FILE);
-	free(CONFIG_FILE);
-	free(PROFILE_FILE);
-	free(MSG_LOG_FILE);
-	free(SEL_FILE);
-	free(MIME_FILE);
-	free(PLUGINS_DIR);
-	free(ACTIONS_FILE);
-	free(KBINDS_FILE);
-	free(COLORS_DIR);
-	free(REMOTES_FILE);
+
+	free(sel_file);
+	free(tmp_dir);
+	free(user.name);
+	free(user.home);
+	free(user.shell);
+#ifndef _NO_TRASH
+	free(trash_dir);
+	free(trash_files_dir);
+	free(trash_info_dir);
+#endif
 
 	/* Restore the color of the running terminal */
 	fputs("\x1b[0;39;49m", stdout);
@@ -1404,17 +1395,17 @@ handle_stdin()
 	if (!rand_ext)
 		goto FREE_N_EXIT;
 
-	if (TMP_DIR) {
-		STDIN_TMP_DIR = (char *)xnmalloc(strlen(TMP_DIR) + 14, sizeof(char));
-		sprintf(STDIN_TMP_DIR, "%s/clifm.%s", TMP_DIR, rand_ext);
+	if (tmp_dir) {
+		stdin_tmp_dir = (char *)xnmalloc(strlen(tmp_dir) + 14, sizeof(char));
+		sprintf(stdin_tmp_dir, "%s/clifm.%s", tmp_dir, rand_ext);
 	} else {
-		STDIN_TMP_DIR = (char *)xnmalloc(18, sizeof(char));
-		sprintf(STDIN_TMP_DIR, "/tmp/clifm.%s", rand_ext);
+		stdin_tmp_dir = (char *)xnmalloc(18, sizeof(char));
+		sprintf(stdin_tmp_dir, "/tmp/clifm.%s", rand_ext);
 	}
 
 	free(rand_ext);
 
-	char *cmd[] = {"mkdir", "-p", STDIN_TMP_DIR, NULL};
+	char *cmd[] = {"mkdir", "-p", stdin_tmp_dir, NULL};
 	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		goto FREE_N_EXIT;
 
@@ -1451,7 +1442,7 @@ handle_stdin()
 				xstrsncpy(source, q, PATH_MAX);
 
 			char dest[PATH_MAX + 1];
-			snprintf(dest, PATH_MAX, "%s/%s", STDIN_TMP_DIR, tmp_file);
+			snprintf(dest, PATH_MAX, "%s/%s", stdin_tmp_dir, tmp_file);
 
 			if (symlink(source, dest) == -1)
 				_err('w', PRINT_PROMPT, "ln: '%s': %s\n", q, strerror(errno));
@@ -1463,11 +1454,11 @@ handle_stdin()
 	}
 
 	/* chdir to tmp dir and update path var */
-	if (xchdir(STDIN_TMP_DIR, SET_TITLE) == -1) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, STDIN_TMP_DIR,
+	if (xchdir(stdin_tmp_dir, SET_TITLE) == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, stdin_tmp_dir,
 		    strerror(errno));
 
-		char *rm_cmd[] = {"rm", "-drf", STDIN_TMP_DIR, NULL};
+		char *rm_cmd[] = {"rm", "-drf", stdin_tmp_dir, NULL};
 		launch_execve(rm_cmd, FOREGROUND, E_NOFLAG);
 
 		free(cwd);
@@ -1479,7 +1470,7 @@ handle_stdin()
 	if (ws[cur_ws].path)
 		free(ws[cur_ws].path);
 
-	ws[cur_ws].path = savestring(STDIN_TMP_DIR, strlen(STDIN_TMP_DIR));
+	ws[cur_ws].path = savestring(stdin_tmp_dir, strlen(stdin_tmp_dir));
 	goto FREE_N_EXIT;
 
 FREE_N_EXIT:
@@ -1541,10 +1532,10 @@ unpin_dir(void)
 		return EXIT_SUCCESS;
 	}
 
-	if (CONFIG_DIR && xargs.stealth_mode != 1) {
+	if (config_dir && xargs.stealth_mode != 1) {
 		int cmd_error = 0;
-		char *pin_file = (char *)xnmalloc(strlen(CONFIG_DIR) + 7, sizeof(char));
-		sprintf(pin_file, "%s/.pin", CONFIG_DIR);
+		char *pin_file = (char *)xnmalloc(strlen(config_dir) + 7, sizeof(char));
+		sprintf(pin_file, "%s/.pin", config_dir);
 
 		if (unlink(pin_file) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, pin_file,
@@ -1948,8 +1939,8 @@ splash(void)
 "        :c::::::::::::::::::::::::::::::::::.",
 	d_cyan);
 
-	printf(_("\n\n%s\t\t       CliFM\n\t%sThe anti-eye-candy/KISS file manager\n%s"),
-	    white, "\x1b[0m", df_c);
+	printf(_("\n\n%s%s\t\t       CliFM%s\n\tThe KISS/non-curses file manager\n"),
+	    df_c, bold, df_c);
 
 	if (splash_screen) {
 		printf(_("\n\t\t\tPress any key to continue... "));
