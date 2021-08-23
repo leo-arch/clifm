@@ -1765,7 +1765,7 @@ get_path_programs(void)
 
 	/* Add internal commands */
 	size_t internal_cmd_n = 0;
-	while (INTERNAL_CMDS[internal_cmd_n])
+	while (internal_cmds[internal_cmd_n])
 		internal_cmd_n++;
 
 	bin_commands = (char **)xnmalloc(total_cmd + internal_cmd_n +
@@ -1773,8 +1773,8 @@ get_path_programs(void)
 
 	i = (int)internal_cmd_n;
 	while (--i >= 0)
-		bin_commands[l++] = savestring(INTERNAL_CMDS[i],
-		    strlen(INTERNAL_CMDS[i]));
+		bin_commands[l++] = savestring(internal_cmds[i],
+		    strlen(internal_cmds[i]));
 
 	/* Now add aliases, if any */
 	if (aliases_n) {

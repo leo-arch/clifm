@@ -876,8 +876,8 @@ extern char
     **sel_elements;
 
 extern const char
-	*INTERNAL_CMDS[],
-	*PARAM_STR[];
+	*internal_cmds[],
+	*param_str[];
 
 extern regex_t regex_exp;
 extern size_t *ext_colors_len;

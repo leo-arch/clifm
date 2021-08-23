@@ -760,13 +760,13 @@ static int
 check_int_params(const char *str, const size_t len)
 {
 	size_t i;
-	for (i = 0; PARAM_STR[i]; i++) {
-		if (*str != *PARAM_STR[i])
+	for (i = 0; param_str[i]; i++) {
+		if (*str != *param_str[i])
 			continue;
-		if (len && strncmp(str, PARAM_STR[i], len) == 0
-		&& strlen(PARAM_STR[i]) > len) {
+		if (len && strncmp(str, param_str[i], len) == 0
+		&& strlen(param_str[i]) > len) {
 			suggestion.type = INT_CMD;
-			print_suggestion(PARAM_STR[i], len, sx_c);
+			print_suggestion(param_str[i], len, sx_c);
 			return 1;
 		}
 	}

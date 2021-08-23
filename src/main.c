@@ -270,7 +270,7 @@ char
 
 /* This is not a comprehensive list of commands. It only lists
  * commands long version for TAB completion */
-const char *INTERNAL_CMDS[] = {
+const char *internal_cmds[] = {
     "actions",
     "alias",
     "auto-open",
@@ -328,7 +328,7 @@ const char *INTERNAL_CMDS[] = {
 
 /* Just a list of internal commands and fixed parameters for the
  * auto-suggestions system */
-const char *PARAM_STR[] = {
+const char *param_str[] = {
 	"actions edit",
 	"autocd on",
 	"acd on",
