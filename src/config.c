@@ -2187,7 +2187,7 @@ reset_variables(void)
 	home_ok = 1;
 	selfile_ok = 1;
 
-	pmsg = nomsg;
+	pmsg = NOMSG;
 
 	return;
 }

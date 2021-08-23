@@ -671,19 +671,19 @@ extern struct suggestions_t suggestion;
  * to do with error messages: either to print an E, W, or N char at the
  * beginning of the prompt, or nothing (nomsg) */
 enum prog_msg {
-	nomsg = 0,
-	error = 1,
-	warning = 2,
-	notice = 4
+	NOMSG = 0,
+	ERROR = 1,
+	WARNING = 2,
+	NOTICE = 4
 };
 
 /* Enumeration for the dirjump function options */
 enum jump {
-	none = 0,
-	jparent = 1,
-	jchild = 2,
-	jorder = 4,
-	jlist = 8
+	NONE = 0,
+	JPARENT = 1,
+	JCHILD = 2,
+	JORDER = 4,
+	JLIST = 8
 };
 
 /* pmsg holds the current program message type */

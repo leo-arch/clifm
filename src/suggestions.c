@@ -256,7 +256,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	if (baej) {
 		/* Move the cursor two columns to the right and print "> " */
 		printf("\x1b[2C");
-		printf("\x1b[0;31m> \x1b[0m");
+		printf("%s> \x1b[0m", mi_c);
 	}
 
 	/* Print the suggestion */
@@ -431,11 +431,11 @@ check_completions(const char *str, size_t len, const char c)
 
 		free(p);
 
-		char _tmp[NAME_MAX + 2];
-		*_tmp = '\0';
+		char t[NAME_MAX + 2];
+		*t = '\0';
 		if (append_slash)
-			snprintf(_tmp, NAME_MAX + 2, "%s/", _matches[0]);
-		char *tmp = escape_str(*_tmp ? _tmp : _matches[0]);
+			snprintf(t, NAME_MAX + 2, "%s/", _matches[0]);
+		char *tmp = escape_str(*t ? t : _matches[0]);
 
 		if (c != BS)
 			suggestion.type = COMP_SUG;

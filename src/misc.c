@@ -873,10 +873,10 @@ _err(int msg_type, int prompt, const char *format, ...)
 	if (buf) {
 		if (msg_type) {
 			switch (msg_type) {
-			case 'e': pmsg = error; break;
-			case 'w': pmsg = warning; break;
-			case 'n': pmsg = notice; break;
-			default: pmsg = nomsg;
+			case 'e': pmsg = ERROR; break;
+			case 'w': pmsg = WARNING; break;
+			case 'n': pmsg = NOTICE; break;
+			default: pmsg = NOMSG;
 			}
 		}
 

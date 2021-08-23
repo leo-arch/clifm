@@ -1276,7 +1276,7 @@ exec_cmd(char **comm)
 				free(messages[i]);
 
 			msgs_n = 0;
-			pmsg = nomsg;
+			pmsg = NOMSG;
 		} else {
 			if (msgs_n) {
 				size_t i;

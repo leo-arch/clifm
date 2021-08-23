@@ -533,11 +533,11 @@ archiver(char **args, char mode)
 			/* If no extension, add the default */
 			if (!dot) {
 				size_t name_len = strlen(name);
-				char *_tmp = (char *)xnmalloc(name_len + 1, sizeof(char));
-				strcpy(_tmp, name);
+				char *t = (char *)xnmalloc(name_len + 1, sizeof(char));
+				strcpy(t, name);
 				name = (char *)xrealloc(name, (name_len + 8) * sizeof(char));
-				sprintf(name, "%s.tar.gz", _tmp);
-				free(_tmp);
+				sprintf(name, "%s.tar.gz", t);
+				free(t);
 			} else if (dot == name) { /* Dot is first char */
 				fprintf(stderr, _("Invalid file name\n"));
 				free(name);

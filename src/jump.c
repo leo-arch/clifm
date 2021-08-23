@@ -272,6 +272,9 @@ save_suggestion(char *str)
 int
 dirjump(char **args, int mode)
 {
+/*	if (!args || !*args[0])
+		return EXIT_FAILURE; */
+
 	if (xargs.no_dirjump == 1) {
 		printf(_("%s: Directory jumper function disabled\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
@@ -322,12 +325,12 @@ dirjump(char **args, int mode)
 			else /* More than a week */
 				rank = JOLDER(tmp_rank);
 
-			int j = (int)bm_n, BPW = 0; /* Bookmarked, pinned or workspace */
+			int j = (int)bm_n, bpw = 0; /* Bookmarked, pinned or workspace */
 			while (--j >= 0) {
 				if (bookmarks[j].path[1] == jump_db[i].path[1]
 				&& strcmp(bookmarks[j].path, jump_db[i].path) == 0) {
 					rank += BOOKMARK_BONUS;
-					BPW = 1;
+					bpw = 1;
 					break;
 				}
 			}
@@ -335,7 +338,7 @@ dirjump(char **args, int mode)
 			if (pinned_dir && pinned_dir[1] == jump_db[i].path[1]
 			&& strcmp(pinned_dir, jump_db[i].path) == 0) {
 				rank += PINNED_BONUS;
-				BPW = 1;
+				bpw = 1;
 			}
 
 			j = MAX_WS;
@@ -343,7 +346,7 @@ dirjump(char **args, int mode)
 				if (ws[j].path && ws[j].path[1] == jump_db[i].path[1]
 				&& strcmp(jump_db[i].path, ws[j].path) == 0) {
 					rank += WORKSPACE_BONUS;
-					BPW = 1;
+					bpw = 1;
 					break;
 				}
 			}
@@ -360,13 +363,13 @@ dirjump(char **args, int mode)
 			&& strcmp(ws[cur_ws].path, jump_db[i].path) == 0) {
 				printf("  %s%zu\t %zu\t %d\t %d\t%d%c\t%s%s \n", mi_c,
 				    i + 1, jump_db[i].visits, days_since_first,
-				    hours_since_last, rank, BPW ? '*' : 0,
+				    hours_since_last, rank, bpw ? '*' : 0,
 				    jump_db[i].path, df_c);
 			} else {
 				printf("  %zu\t %zu\t %d\t %d\t%d%c\t%s \n", i + 1,
 				    jump_db[i].visits, days_since_first,
 				    hours_since_last, rank,
-				    BPW ? '*' : 0, jump_db[i].path);
+				    bpw ? '*' : 0, jump_db[i].path);
 			}
 		}
 
@@ -382,15 +385,15 @@ dirjump(char **args, int mode)
 		return EXIT_SUCCESS;
 	}
 
-	enum jump jump_opt = none;
+	enum jump jump_opt = NONE;
 
 	switch (args[0][1]) {
 	case 'e': return edit_jumpdb();
-	case 'c': jump_opt = jchild; break;
-	case 'p': jump_opt = jparent; break;
-	case 'o': jump_opt = jorder; break;
-	case 'l': jump_opt = jlist; break;
-	case '\0': jump_opt = none; break;
+	case 'c': jump_opt = JCHILD; break;
+	case 'p': jump_opt = JPARENT; break;
+	case 'o': jump_opt = JORDER; break;
+	case 'l': jump_opt = JLIST; break;
+	case '\0': jump_opt = NONE; break;
 	default:
 		fprintf(stderr, _("%s: '%c': Invalid option\n"), PROGRAM_NAME,
 				args[0][1]);
@@ -398,7 +401,7 @@ dirjump(char **args, int mode)
 		return EXIT_FAILURE;
 	}
 
-	if (jump_opt == jorder) {
+	if (jump_opt == JORDER) {
 		if (!args[1]) {
 			if (mode == NO_SUG_JUMP)
 				fprintf(stderr, "%s\n", _(JUMP_USAGE));
@@ -498,16 +501,16 @@ dirjump(char **args, int mode)
 				/* Filter matches according to parent or
 				 * child options */
 				switch (jump_opt) {
-				case jparent:
+				case JPARENT:
 					if (!strstr(ws[cur_ws].path, jump_db[j].path))
 						exclude = 1;
 					break;
 
-				case jchild:
+				case JCHILD:
 					if (!strstr(jump_db[j].path, ws[cur_ws].path))
 						exclude = 1;
 
-				case none: /* fallthrough */
+				case NONE: /* fallthrough */
 				default: break;
 				}
 
@@ -574,7 +577,7 @@ dirjump(char **args, int mode)
 
 		found = 1;
 
-		if (jump_opt == jlist) {
+		if (jump_opt == JLIST) {
 			printf("%s\n", matches[j]);
 		} else {
 			int days_since_first = (int)(now - first[j]) / 60 / 60 / 24;
@@ -647,7 +650,7 @@ dirjump(char **args, int mode)
 		if (mode == NO_SUG_JUMP)
 			printf(_("%s: jump: No matches found\n"), PROGRAM_NAME);
 		exit_status = EXIT_FAILURE;
-	} else if (jump_opt != jlist) {
+	} else if (jump_opt != JLIST) {
 		if (mode == NO_SUG_JUMP)
 			exit_status = cd_function(matches[best_ranked]);
 		else

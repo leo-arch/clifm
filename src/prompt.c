@@ -478,7 +478,7 @@ prompt(void)
 	/* Messages are categorized in three groups: errors, warnings, and
 	 * notices. The kind of message should be specified by the function
 	 * printing the message itself via a global enum: pmsg, with the
-	 * following values: nomsg, error, warning, and notice. */
+	 * following values: NOMSG, ERROR, WARNING, and NOTICE. */
 	char msg_str[MAX_COLOR + 1 + 16] = "";
 
 	if (msgs_n) {
@@ -487,10 +487,10 @@ prompt(void)
 		 * warning message, the prompt will always display the error
 		 * message sign: a red 'E'. */
 		switch (pmsg) {
-		case nomsg:	break;
-		case error:	sprintf(msg_str, "%sE%s", em_c, NC_b); break;
-		case warning: sprintf(msg_str, "%sW%s", wm_c, NC_b); break;
-		case notice: sprintf(msg_str, "%sN%s", nm_c, NC_b); break;
+		case NOMSG:	break;
+		case ERROR:	sprintf(msg_str, "%sE%s", em_c, NC_b); break;
+		case WARNING: sprintf(msg_str, "%sW%s", wm_c, NC_b); break;
+		case NOTICE: sprintf(msg_str, "%sN%s", nm_c, NC_b); break;
 		default: break;
 		}
 	}
@@ -500,17 +500,17 @@ prompt(void)
 		/* Set environment variables with CliFM state information
 		 * (sel files, trash, stealth mode, messages) to be handled by
 		 * the prompt itself */
-		char _tmp[32];
-		sprintf(_tmp, "%d", (int)sel_n);
-		setenv("CLIFM_STAT_SEL", _tmp, 1);
-		sprintf(_tmp, "%d", (int)trash_n);
-		setenv("CLIFM_STAT_TRASH", _tmp, 1);
-		sprintf(_tmp, "%d", (msgs_n && pmsg) ? (int)msgs_n : 0);
-		setenv("CLIFM_STAT_MSG", _tmp, 1);
-		sprintf(_tmp, "%d", cur_ws + 1);
-		setenv("CLIFM_STAT_WS", _tmp, 1);
-		sprintf(_tmp, "%d", exit_code);
-		setenv("CLIFM_STAT_EXIT", _tmp, 1);
+		char t[32];
+		sprintf(t, "%d", (int)sel_n);
+		setenv("CLIFM_STAT_SEL", t, 1);
+		sprintf(t, "%d", (int)trash_n);
+		setenv("CLIFM_STAT_TRASH", t, 1);
+		sprintf(t, "%d", (msgs_n && pmsg) ? (int)msgs_n : 0);
+		setenv("CLIFM_STAT_MSG", t, 1);
+		sprintf(t, "%d", cur_ws + 1);
+		setenv("CLIFM_STAT_WS", t, 1);
+		sprintf(t, "%d", exit_code);
+		setenv("CLIFM_STAT_EXIT", t, 1);
 		setenv("CLIFM_STAT_ROOT", (flags & ROOT_USR) ? "1" : "0", 1);
 		setenv("CLIFM_STAT_STEALTH", (xargs.stealth_mode == 1) ? "1" : "0", 1);
 	}

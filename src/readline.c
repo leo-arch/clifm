@@ -416,6 +416,7 @@ my_rl_path_completion(const char *text, int state)
 			xstrsncpy(tmp, ent->d_name, PATH_MAX);
 		else
 			snprintf(tmp, PATH_MAX, "%s%s", dirname, ent->d_name);
+
 		if (lstat(tmp, &attr) == -1) {
 			continue;
 		}

@@ -71,7 +71,7 @@ struct remote_t *remotes = (struct remote_t *)NULL;
 struct suggestions_t suggestion;
 #endif
 /* pmsg holds the current program message type */
-enum prog_msg pmsg = nomsg;
+enum prog_msg pmsg = NOMSG;
 struct param xargs;
 unsigned short term_cols;
 

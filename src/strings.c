@@ -1851,7 +1851,7 @@ get_substr(char *str, const char ifs)
 				return (char **)NULL;
 			}
 			substr = (char **)p;
-			p = (char *)calloc(length + 1, sizeof(char));
+			p = (char *)malloc(length + 1);
 
 			if (!p) {
 				size_t i;
@@ -1863,7 +1863,7 @@ get_substr(char *str, const char ifs)
 
 			substr[substr_n] = p;
 			p = (char *)NULL;
-			xstrsncpy(substr[substr_n++], buf, length);
+			xstrsncpy(substr[substr_n++], buf, length + 1);
 			length = 0;
 		} else {
 			str++;
@@ -1877,7 +1877,6 @@ get_substr(char *str, const char ifs)
 
 	size_t i = 0, j = 0;
 	p = (char *)realloc(substr, (substr_n + 1) * sizeof(char *));
-
 	if (!p) {
 		for (i = 0; i < substr_n; i++)
 			free(substr[i]);
@@ -1938,9 +1937,8 @@ get_substr(char *str, const char ifs)
 		/* If a valid range */
 		size_t k = 0, next = 0;
 		char **rbuf = (char **)NULL;
-		rbuf = (char **)xcalloc((substr_n + (size_t)(asecond - afirst) + 1),
+		rbuf = (char **)xnmalloc((substr_n + (size_t)(asecond - afirst) + 1),
 								sizeof(char *));
-
 		/* Copy everything before the range expression
 		 * into the buffer */
 		for (j = 0; j < i; j++)
@@ -1948,7 +1946,7 @@ get_substr(char *str, const char ifs)
 
 		/* Copy the expanded range into the buffer */
 		for (j = (size_t)afirst; j <= (size_t)asecond; j++) {
-			rbuf[k] = (char *)xcalloc((size_t)DIGINUM((int)j) + 1, sizeof(char));
+			rbuf[k] = (char *)xnmalloc((size_t)DIGINUM((int)j) + 1, sizeof(char));
 			sprintf(rbuf[k++], "%zu", j);
 		}
 
@@ -1976,8 +1974,8 @@ get_substr(char *str, const char ifs)
 			substr[j] = savestring(rbuf[j], strlen(rbuf[j]));
 			free(rbuf[j]);
 		}
-
 		free(rbuf);
+
 		substr[j] = (char *)NULL;
 
 		/* Proceede only if there's something after the last range */
