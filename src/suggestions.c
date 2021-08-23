@@ -1009,7 +1009,10 @@ rl_suggestions(char c)
 
 		case _TAB:
 			if (suggestion.printed) {
-				if (suggestion.nlines < 2) {
+				if (suggestion.nlines < 2 && suggestion.type != ELN_SUG
+				&& suggestion.type != BOOKMARK_SUG
+				&& suggestion.type != ALIAS_SUG
+				&& suggestion.type != JCMD_SUG) {
 					printed = 1;
 				} else {
 					clear_suggestion();
