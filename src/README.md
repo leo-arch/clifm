@@ -20,6 +20,8 @@ Generally, try to stick as closely as possible to the `Linux kernel coding style
 
 Indentation: TABS (I use a width of 4, but you can use 8 if you like)
 
+Naming convention: Linux kernel style
+
 Comments: C style only. Ex:
 
 ```c
@@ -113,6 +115,8 @@ or (using a safe version of `strncpy(3)`)
 buf[PATH_MAX];
 xstrsncpy(buf, src, PATH_MAX);
 ```
+
+**Note**: Both `xstrsncpy` and `xnmalloc` are provided by CliFM itself.
 
 These are just a few examples. There are plenty of resources out there on how to write good code.
 
