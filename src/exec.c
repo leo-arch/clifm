@@ -1061,7 +1061,11 @@ exec_cmd(char **comm)
 	/* #### MAX FILES #### */
 	else if (*comm[0] == 'm' && comm[0][1] == 'f' && !comm[0][2]) {
 		if (!comm[1]) {
-			printf(_("Max files: %d\n"), max_files);
+			printf(_("Max files: %d"), max_files);
+			if (max_files == -1)
+				puts(" (no limit)");
+			else
+				putchar('\n');
 			return EXIT_SUCCESS;
 		}
 

@@ -48,13 +48,14 @@ char len_buf[CMD_LEN_MAX] __attribute__((aligned));
 size_t
 xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 {
+	n++;
 	char *end = memccpy(dst, src, '\0', n);
 	if (!end) {
 		dst[n - 1] = '\0';
 		end = dst + n;
 	}
 
-	return end - dst;
+	return end - dst - 1;
 }
 
 size_t
@@ -1863,7 +1864,7 @@ get_substr(char *str, const char ifs)
 
 			substr[substr_n] = p;
 			p = (char *)NULL;
-			xstrsncpy(substr[substr_n++], buf, length + 1);
+			xstrsncpy(substr[substr_n++], buf, length);
 			length = 0;
 		} else {
 			str++;

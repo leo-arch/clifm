@@ -371,10 +371,10 @@ list_dir_light(void)
 		file_info[n].name = (char *)xnmalloc(NAME_MAX + 1, sizeof(char));
 
 		if (!unicode) {
-			file_info[n].len = (xstrsncpy(file_info[n].name, ename,
-						NAME_MAX + 1) - 1);
+			file_info[n].len = xstrsncpy(file_info[n].name, ename,
+						NAME_MAX);
 		} else {
-			xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
+			xstrsncpy(file_info[n].name, ename, NAME_MAX);
 			file_info[n].len = wc_xstrlen(ename);
 		}
 
@@ -510,8 +510,12 @@ list_dir_light(void)
 				}
 			}
 
-			if (total_len > longest)
-				longest = total_len;
+			if (total_len > longest) {
+				if (max_files == UNSET)
+					longest = total_len;
+				else if (i < max_files)
+					longest = total_len;
+			}
 		}
 #ifndef _NO_ICONS
 		if (icons && !long_view && columned)
@@ -1001,10 +1005,9 @@ list_dir(void)
 		file_info[n].name = (char *)xnmalloc(NAME_MAX + 1, sizeof(char));
 
 		if (!unicode) {
-			file_info[n].len = (xstrsncpy(file_info[n].name, ename,
-								NAME_MAX + 1) - 1);
+			file_info[n].len = xstrsncpy(file_info[n].name, ename, NAME_MAX);
 		} else {
-			xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
+			xstrsncpy(file_info[n].name, ename, NAME_MAX);
 			file_info[n].len = wc_xstrlen(ename);
 		}
 
@@ -1295,8 +1298,14 @@ list_dir(void)
 				}
 			}
 
-			if (total_len > longest)
-				longest = total_len;
+			if (total_len > longest) {
+				if (max_files == UNSET)
+					longest = total_len;
+				/* If MAX_FILES is set, get longest file name from
+				 * the first MAX_FILES file names */
+				else if (i < max_files)
+					longest = total_len;
+			}
 		}
 
 #ifndef _NO_ICONS
