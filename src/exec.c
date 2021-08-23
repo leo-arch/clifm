@@ -1063,7 +1063,7 @@ exec_cmd(char **comm)
 		if (!comm[1]) {
 			printf(_("Max files: %d"), max_files);
 			if (max_files == -1)
-				puts(" (no limit)");
+				puts(_(" (no limit)"));
 			else
 				putchar('\n');
 			return EXIT_SUCCESS;
