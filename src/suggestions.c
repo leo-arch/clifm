@@ -1108,6 +1108,25 @@ rl_suggestions(char c)
 	/* 3.a) Let's suggest non-fixed parameters for internal commands */
 
 	switch(*lb) {
+	case 'b': /* Bookmarks names */
+		if (lb[1] == 'm' && lb[2] == ' ' && strncmp(lb + 3, "add", 3) != 0) {
+			size_t i = 0, len = strlen(last_word);
+			for (; bookmark_names[i]; i++) {
+				if (*last_word == *bookmark_names[i]
+				&& strncmp(bookmark_names[i], last_word, len) == 0) {
+					suggestion.type = CMD_SUG;
+					suggestion.offset = last_word_offset;
+					print_suggestion(bookmark_names[i], len, sx_c);
+					printed = 1;
+					break;
+				}
+			}
+			if (printed) {
+				goto SUCCESS;
+			}
+		}
+		break;
+
 	case 'c': /* Color schemes */
 		if (lb[1] == 's' && lb[2] == ' ') {
 			size_t i = 0, len = strlen(last_word);
@@ -1195,10 +1214,10 @@ rl_suggestions(char c)
 	}
 
 	/* 3.c) Check CliFM internal parameters */
-	/* 3.c.1) Suggest the sel keyword only if not first word */
 	char *ret = strchr(full_line, ' ');
 	if (ret) {
 		size_t len = strlen(last_word);
+		/* 3.c.1) Suggest the sel keyword only if not first word */
 		if (*last_word == 's' && strncmp(last_word, "sel", len) == 0) {
 			suggestion.type = CMD_SUG;
 			suggestion.offset = last_word_offset;
@@ -1206,11 +1225,8 @@ rl_suggestions(char c)
 			print_suggestion("sel", len, sx_c);
 			goto SUCCESS;
 		}
-	}
 
-	/* 3.c.2) Check commands fixed parameters */
-	// cppcheck-suppress duplicateCondition
-	if (ret) {
+		/* 3.c.2) Check commands fixed parameters */
 		printed = check_int_params(full_line, strlen(full_line));
 		if (printed) {
 			suggestion.offset = 0;
