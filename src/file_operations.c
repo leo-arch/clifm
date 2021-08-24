@@ -204,7 +204,9 @@ create_file(char **cmd)
 	log_function(NULL);
 
 	int exit_status = EXIT_SUCCESS;
-/*	int file_in_cwd = 0; */
+#ifdef __HAIKU__
+	int file_in_cwd = 0;
+#endif
 	int free_cmd = 0;
 
 	/* If no argument provided, ask the user for a filename */
@@ -267,12 +269,14 @@ create_file(char **cmd)
 			}
 		}
 
+#ifdef __HAIKU__
 		/* If at least one filename lacks a slash (or it is the last char,
 		 * in which case we have a directory in CWD), we are creating a
 		 * file in CWD, and thereby we need to update the screen */
-/*		char *ret = strrchr(cmd[i], '/');
+		char *ret = strrchr(cmd[i], '/');
 		if (!ret || !*(ret + 1))
 			file_in_cwd = 1; */
+#endif
 	}
 
 	/* Construct commands */
@@ -329,11 +333,13 @@ create_file(char **cmd)
 		free(cmd);
 	}
 
-/*	if (exit_status == EXIT_SUCCESS && cd_lists_on_the_fly && file_in_cwd) {
+#ifdef __HAIKU__
+	if (exit_status == EXIT_SUCCESS && cd_lists_on_the_fly && file_in_cwd) {
 		free_dirlist();
 		if (list_dir() != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
-	} */
+	}
+#ifdef __HAIKU__
 
 	return exit_status;
 }
@@ -680,10 +686,12 @@ copy_function(char **comm)
 		save_sel();
 	}
 
-/*	if (cd_lists_on_the_fly) {
+#ifdef __HAIKU__
+	if (cd_lists_on_the_fly) {
 		free_dirlist();
 		list_dir();
-	} */
+	}
+#endif
 
 	return EXIT_SUCCESS;
 }
@@ -751,13 +759,15 @@ remove_file(char **args)
 
 	if (launch_execve(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
-/*	else {
+#ifdef __HAIKU__
+	else {
 		if (cwd && cd_lists_on_the_fly && strcmp(args[1], "--help") != 0
 		&& strcmp(args[1], "--version") != 0) {
 			free_dirlist();
 			exit_status = list_dir();
 		}
-	} */
+	}
+#endif
 
 	for (i = 0; rm_cmd[i]; i++)
 		free(rm_cmd[i]);
@@ -967,11 +977,13 @@ bulk_rename(char **args)
 		exit_status = EXIT_FAILURE;
 	}
 
-/*	if (cd_lists_on_the_fly) {
+#ifdef __HAIKU__
+	if (cd_lists_on_the_fly) {
 		free_dirlist();
 		if (list_dir() != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
-	} */
+	}
+#endif
 
 	return exit_status;
 }
@@ -1070,12 +1082,14 @@ batch_link(char **args)
 		}
 	}
 
-/*	if (exit_status == EXIT_SUCCESS && cd_lists_on_the_fly) {
+#ifdef __HAIKU__
+	if (exit_status == EXIT_SUCCESS && cd_lists_on_the_fly) {
 		free_dirlist();
 
 		if (list_dir() != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
-	} */
+	}
+#endif
 
 	free(suffix);
 	return exit_status;

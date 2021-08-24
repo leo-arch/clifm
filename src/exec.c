@@ -108,14 +108,13 @@ run_and_refresh(char **comm)
 		save_sel();
 	}
 
-	/* When should the screen actually be refreshed:
-	* 1) Creation or removal of file (in current files list)
-	* 2) The contents of a directory (in current files list) changed */
-/*	if (cd_lists_on_the_fly && strcmp(comm[1], "--help") != 0
+#ifdef __HAIKU__
+	if (cd_lists_on_the_fly && strcmp(comm[1], "--help") != 0
 	&& strcmp(comm[1], "--version") != 0) {
 		free_dirlist();
 		list_dir();
-	} */
+	}
+#endif
 
 	return EXIT_SUCCESS;
 }
@@ -512,6 +511,13 @@ exec_cmd(char **comm)
 		}
 		exit_code = dup_file(comm[1], comm[2] ? comm[2] : NULL);
 	}
+
+#ifdef __HAIKU__
+	else if (strcmp(comm[0], "cp") == 0 || strcmp(comm[0], "rm") == 0
+	|| strcmp(comm[0], "mkdir") == 0 || strcmp(comm[0], "unlink") == 0
+	|| strcmp(comm[0], "touch") == 0)
+		return (exit_code = run_and_refresh(comm));
+#endif
 
 	/*     ############### COPY AND MOVE ##################     */
 	else if ((*comm[0] == 'c' && (!comm[0][1] || (comm[0][1] == 'p'

@@ -165,7 +165,6 @@ rl_no_hist(const char *prompt)
 	suggestions = bk;
 
 	if (input) {
-
 		/* Make sure input isn't empty string */
 		if (!*input) {
 			free(input);
