@@ -355,6 +355,8 @@ rl_accept_suggestion(int count, int key)
 		return EXIT_SUCCESS;
 	}
 
+	fputs(df_c, stdout);
+	
 	/* Only accept the current suggestion if the cursor is at the end
 	 * of the line typed so far */
 	if (!suggestions || rl_point != rl_end || !suggestion_buf) {

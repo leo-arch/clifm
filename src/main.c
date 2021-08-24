@@ -118,6 +118,7 @@ short
     ext_cmd_ok = UNSET,
     files_counter = UNSET,
 	filter_rev = 0,
+	highlight = UNSET,
     home_ok = 1,
 #ifndef _NO_ICONS
     icons = 0,

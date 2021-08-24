@@ -324,6 +324,7 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define DEF_EXPAND_BOOKMARKS 0
 #define DEF_EXT_CMD_OK 1
 #define DEF_FILES_COUNTER 1
+#define DEF_HIGHLIGHT 0
 #define DEF_LIGHT_MODE 0
 #define DEF_LIST_FOLDERS_FIRST 1
 #define DEF_LOGS_ENABLED 0
@@ -598,6 +599,7 @@ struct param {
 	int ffirst;
 	int files_counter;
 	int hidden;
+	int highlight;
 #ifndef _NO_ICONS
 	int icons;
 #endif
@@ -716,6 +718,7 @@ extern short
     ext_cmd_ok,
     files_counter,
     filter_rev,
+    highlight,
     home_ok,
 #ifndef _NO_ICONS
     icons,
@@ -877,6 +880,7 @@ extern const char
 
 extern regex_t regex_exp;
 extern size_t *ext_colors_len;
+extern char **environ;
 
 /* To store all the 39 color variables I use, with 46 bytes each, I need
  * a total of 1,8Kb. It's not much but it could be less if I'd use

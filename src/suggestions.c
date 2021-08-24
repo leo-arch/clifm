@@ -260,7 +260,8 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	}
 
 	/* Print the suggestion */
-	printf("%s%s%s", color, str + offset - (offset ? 1 : 0), df_c);
+//	printf("%s%s%s", color, str + offset - (offset ? 1 : 0), df_c);
+	printf("%s%s", color, str + offset - (offset ? 1 : 0));
 	fflush(stdout);
 
 	/* Update the row number, if needed */
@@ -842,7 +843,7 @@ check_aliases(const char *str, const size_t len)
 }
 
 /* Get a match from the jump database and print the suggestion */
-int
+static int
 check_jcmd(char *line)
 {
 	if (suggestion_buf)
@@ -884,7 +885,7 @@ check_jcmd(char *line)
 }
 
 /* Check if we must suggest --help for internal commands */
-int
+static int
 check_help(char *full_line, const char *last_word)
 {
 	size_t len = strlen(last_word);
@@ -904,6 +905,50 @@ check_help(char *full_line, const char *last_word)
 	return 1;
 }
 
+static int
+check_variables(const char *str, const size_t len)
+{
+	int printed = 0;
+	size_t i;
+	for (i = 0; environ[i]; i++) {
+		if (TOUPPER(*environ[i]) == TOUPPER(*str)
+		&& strncasecmp(str, environ[i], len) == 0) {
+			char *ret = strchr(environ[i], '=');
+			*ret = '\0';
+			suggestion.type = CMD_SUG;
+			char t[NAME_MAX + 1];
+			snprintf(t, NAME_MAX + 1, "$%s", environ[i]);
+			print_suggestion(t, len + 1, sh_c);
+			printed = 1;
+			*ret = '=';
+			break;
+		}
+	}
+
+	if (printed)
+		return 1;
+
+	if (!usrvar_n)
+		return 0;
+
+	for (i = 0; usr_var[i].name; i++) {
+		if (TOUPPER(*str) == TOUPPER(*usr_var[i].name)
+		&& strncasecmp(str, usr_var[i].name, len) == 0) {
+			suggestion.type = CMD_SUG;
+			char t[NAME_MAX + 1];
+			snprintf(t, NAME_MAX + 1, "$%s", usr_var[i].name);
+			print_suggestion(t, len + 1, sh_c);
+			printed = 1;
+			break;
+		}
+	}
+
+	if (printed)
+		return 1;
+
+	return 0;
+}
+
 /* Check for available suggestions. Returns zero if true, one if not,
  * and -1 if C was inserted before the end of the current line.
  * If a suggestion is found, it will be printed by print_suggestion() */
@@ -912,6 +957,7 @@ rl_suggestions(char c)
 {
 	char *last_word = (char *)NULL;
 	char *full_line = (char *)NULL;
+	char *cur_color = df_c;
 	int printed = 0;
 	int inserted_c = 0;
 /*	static int msg_area = 0; */
@@ -1100,8 +1146,104 @@ rl_suggestions(char c)
 			sprintf(last_word, "%s%c", rl_line_buffer, c);
 	}
 
-	if (*last_word == '-')
-		fputs("\x1b[0;36m", stdout);
+#ifndef _NO_HIGHLIGHT
+	/* Basic syntax highlighting */
+	static int restore_color = 0, quote = 0, quote_n = 0;
+
+	if (highlight && (!rl_end || rl_line_buffer[rl_end - 1] != '\\')) {
+		if (restore_color) {
+			fputs(df_c, stdout);
+			cur_color = df_c;
+			restore_color = 0;
+		}
+
+		/* Numbers */
+		if (c >= '0' && c <= '9') {
+			long a = strtol(last_word, NULL, 10);
+			if (a != 0) {
+				fputs(or_c, stdout);
+				cur_color = or_c;
+			} else {
+				fputs(df_c, stdout);
+				cur_color = df_c;
+			}
+		} else if (!quote) {
+			fputs(df_c, stdout);
+			cur_color = df_c;
+		}
+
+		switch(c) {
+/*		case '+': // fallthrough
+		case '-': // fallthrough
+		case '/': // Math operators 
+			fputs(ne_c, stdout);
+			cur_color = ne_c;
+			restore_color = 1;
+			break; */
+		case '*': /* fallthrough */
+		case '~': /* Expansion operators */
+			fputs(or_c, stdout);
+			cur_color = or_c;
+			restore_color = 1;
+			break;
+		case '#':
+			fputs(mi_c, stdout);
+			cur_color = mi_c;
+			break;
+		case '"': /* fallthrough */
+		case '\'': /* Quotation */
+			if (!quote) {
+				fputs(ef_c, stdout);
+				cur_color = ef_c;
+				quote = c;
+			}
+			if (c == quote)
+				quote_n++;
+			break;
+		case '|': /* fallthrough */
+		case '&': /* fallthrough */
+		case ';': /* Process operators */
+			restore_color = 1;
+			fputs(ee_c, stdout);
+			cur_color = ee_c;
+			break;
+		case '>':
+			restore_color = 1;
+			fputs(nf_c, stdout);
+			cur_color = nf_c;
+			break;
+		case '(': /* fallthrough */
+		case ')': /* fallthrough */
+		case '{': /* fallthrough */
+		case '}': /* fallthrough */
+		case '[': /* fallthrough */
+		case ']':
+			restore_color = 1;
+			fputs(or_c, stdout);
+			cur_color = or_c;
+			break;
+		default:
+			if (quote_n > 1 && rl_end && rl_line_buffer[rl_end - 1] == quote) {
+				fputs(df_c, stdout);
+				quote = quote_n = 0;
+				cur_color = df_c;
+			}
+			break;
+		}
+
+		switch(*last_word) {
+		case '-': /* Parameters */
+			fputs(or_c, stdout);
+			cur_color = or_c;
+			break;
+		case '$': /* Variable names */
+			fputs(ee_c, stdout);
+			cur_color = ee_c;
+			break;
+		default: break;
+		}
+	}
+#endif
 
 		/* ######################################
 		 * #	  3) Search for suggestions		#
@@ -1329,7 +1471,16 @@ rl_suggestions(char c)
 		}
 	}
 
-	/* 3.e) Check commands in PATH and CliFM internals commands, but
+	/* 3.e) Variable names, both environment and internal */
+	if (*last_word == '$') {
+		printed = check_variables(last_word + 1, strlen(last_word + 1));
+		if (printed) {
+			suggestion.offset = last_word_offset;
+			goto SUCCESS;
+		}
+	}
+
+	/* 3.f) Check commands in PATH and CliFM internals commands, but
 	 * only for the first word */
 	if (!last_space) {
 		size_t w_len = strlen(last_word);
@@ -1337,11 +1488,11 @@ rl_suggestions(char c)
 		if (printed) {
 			suggestion.offset = 0;
 			goto SUCCESS;
-		} else {
+		} /*else {
 			fputs("\x1b[0;31m", stdout);
 //			rl_replace_line(last_word, 0);
 //			rl_redisplay();
-		}
+		} */
 	}
 
 	/* No suggestion found */
@@ -1382,10 +1533,18 @@ rl_suggestions(char c)
 
 SUCCESS:
 	free(full_line);
-	if (printed)
+	if (printed) {
 		suggestion.printed = 1;
-	else
+		/* Restore color */
+		fputs("\x1b[0m", stdout);
+		if (cur_color) {
+			fputs(cur_color, stdout);
+		} else {
+			fputs(df_c, stdout);
+		}
+	} else {
 		suggestion.printed = 0;
+	}
 	free(last_word);
 	if (inserted_c)
 		return -1;

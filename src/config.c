@@ -2138,6 +2138,7 @@ reset_variables(void)
 	disk_usage = UNSET;
 	ext_cmd_ok = UNSET;
 	files_counter = UNSET;
+	highlight = UNSET;
 	light_mode = UNSET;
 	list_folders_first = UNSET;
 	logs_enabled = UNSET;

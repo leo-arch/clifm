@@ -935,6 +935,7 @@ external_arguments(int argc, char **argv)
 	    {"print-sel", no_argument, 0, 34},
 	    {"suggestions", no_argument, 0, 35},
 	    {"autojump", no_argument, 0, 36},
+	    {"highlight", no_argument, 0, 37},
 	    {0, 0, 0, 0}};
 
 	/* Increment whenever a new (only) long option is added */
@@ -1075,6 +1076,7 @@ external_arguments(int argc, char **argv)
 #endif
 
 		case 36: xargs.autojump = autojump = 0; break;
+		case 37: xargs.highlight = highlight = 1;
 
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
@@ -1446,6 +1448,7 @@ unset_xargs(void)
 	xargs.ffirst = UNSET;
 	xargs.files_counter = UNSET;
 	xargs.hidden = UNSET;
+	xargs.highlight = UNSET;
 #ifndef _NO_ICONS
 	xargs.icons = UNSET;
 	xargs.icons_use_file_color = UNSET;
@@ -1992,6 +1995,13 @@ check_options(void)
 
 	if (prompt_style == UNSET)
 		prompt_style = DEF_PROMPT_STYLE;
+
+	if (highlight == UNSET) {
+		if (xargs.highlight == UNSET)
+			highlight = DEF_HIGHLIGHT;
+		else
+			highlight = xargs.highlight;
+	}
 
 #ifndef _NO_SUGGESTIONS
 	if (suggestions == UNSET) {
