@@ -1519,7 +1519,7 @@ color_codes(void)
 	}
 
 	if (ext_colors_n)
-		printf(_("%sFile type colors%s\n\n"), bold, df_c);
+		printf(_("%sFile type colors%s\n\n"), BOLD, df_c);
 	printf(_(" %sfile name%s: Directory with no read permission (nd)\n"),
 	    nd_c, df_c);
 	printf(_(" %sfile name%s: File with no read permission (nf)\n"),
@@ -1570,7 +1570,7 @@ color_codes(void)
 
 	if (ext_colors_n) {
 		size_t i, j;
-		printf(_("%sExtension colors%s\n\n"), bold, df_c);
+		printf(_("%sExtension colors%s\n\n"), BOLD, df_c);
 		for (i = 0; i < ext_colors_n; i++) {
 			char *ret = strrchr(ext_colors[i], '=');
 			if (!ret)

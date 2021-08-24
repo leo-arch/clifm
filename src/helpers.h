@@ -171,13 +171,11 @@ extern int watch;
 #define BACKGROUND 1
 #define FOREGROUND 0
 
-/* colors */
-#define gray "\x1b[1;30m"
-#define white "\x1b[1;37m"
-#define cyan "\x1b[1;36m"
-#define red "\x1b[1;31m"
-#define d_cyan "\x1b[0;36m"
-#define bold "\x1b[1m"
+/* A few colors */
+#define GRAY "\x1b[1;30m"
+#define RED "\x1b[1;31m"
+#define D_CYAN "\x1b[0;36m"
+#define BOLD "\x1b[1m"
 #define NC "\x1b[0m"
 #define NB "\x1b[49m"
 

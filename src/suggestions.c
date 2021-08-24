@@ -1100,6 +1100,9 @@ rl_suggestions(char c)
 			sprintf(last_word, "%s%c", rl_line_buffer, c);
 	}
 
+	if (*last_word == '-')
+		fputs("\x1b[0;36m", stdout);
+
 		/* ######################################
 		 * #	  3) Search for suggestions		#
 		 * ######################################*/
@@ -1329,10 +1332,15 @@ rl_suggestions(char c)
 	/* 3.e) Check commands in PATH and CliFM internals commands, but
 	 * only for the first word */
 	if (!last_space) {
-		printed = check_cmds(last_word, strlen(last_word));
+		size_t w_len = strlen(last_word);
+		printed = check_cmds(last_word, w_len);
 		if (printed) {
 			suggestion.offset = 0;
 			goto SUCCESS;
+		} else {
+			fputs("\x1b[0;31m", stdout);
+//			rl_replace_line(last_word, 0);
+//			rl_redisplay();
 		}
 	}
 

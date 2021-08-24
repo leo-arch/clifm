@@ -174,7 +174,7 @@ bookmark_del(char *name)
 
 	/* If not name, list bookmarks and get user input */
 	else {
-		printf(_("%sBookmarks%s\n\n"), bold, df_c);
+		printf(_("%sBookmarks%s\n\n"), BOLD, df_c);
 
 		for (i = 0; i < bmn; i++)
 			printf("%s%zu %s%s%s\n", el_c, i + 1, bm_c, bms[i], df_c);
@@ -608,7 +608,7 @@ open_bookmark(void)
 	if (clear_screen)
 		CLEAR;
 
-	printf(_("%sBookmarks Manager%s\n\n"), bold, df_c);
+	printf(_("%sBookmarks Manager%s\n\n"), BOLD, df_c);
 
 	/* Print bookmarks taking into account the existence of shortcut,
 	 * name, and path for each bookmark */
@@ -638,8 +638,8 @@ open_bookmark(void)
 		}
 
 		printf("%s%zu%s %s%c%s%c%s %s%s%s\n", el_c, eln, df_c,
-		    bold, sc_ok ? '[' : 0, sc_ok ? bookmarks[i].shortcut : "",
-		    sc_ok ? ']' : 0, df_c, non_existent ? gray : (is_dir ? bm_c : fi_c),
+		    BOLD, sc_ok ? '[' : 0, sc_ok ? bookmarks[i].shortcut : "",
+		    sc_ok ? ']' : 0, df_c, non_existent ? GRAY : (is_dir ? bm_c : fi_c),
 		    name_ok ? bookmarks[i].name : bookmarks[i].path, df_c);
 	}
 

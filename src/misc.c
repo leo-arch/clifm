@@ -364,13 +364,13 @@ print_tips(int all)
 	if (all) {
 		size_t i;
 		for (i = 0; i < tipsn; i++)
-			printf("%sTIP %zu%s: %s\n", bold, i, df_c, TIPS[i]);
+			printf("%sTIP %zu%s: %s\n", BOLD, i, df_c, TIPS[i]);
 
 		return;
 	}
 
 	srand((unsigned int)time(NULL));
-	printf("%sTIP%s: %s\n", bold, df_c, TIPS[rand() % tipsn]);
+	printf("%sTIP%s: %s\n", BOLD, df_c, TIPS[rand() % tipsn]);
 }
 
 /* Open DIR in a new instance of the program (using TERM, set in the config
@@ -945,7 +945,7 @@ list_mountpoints(void)
 	}
 #endif
 
-	printf(_("%sMountpoints%s\n\n"), bold, df_c);
+	printf(_("%sMountpoints%s\n\n"), BOLD, df_c);
 
 	char **mountpoints = (char **)NULL;
 	size_t mp_n = 0;
@@ -1937,10 +1937,10 @@ splash(void)
 "    lkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkx\n"
 "     ;kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkc \n"
 "        :c::::::::::::::::::::::::::::::::::.",
-	d_cyan);
+	D_CYAN);
 
 	printf(_("\n\n%s%s\t\t       CliFM%s\n\tThe KISS/non-curses file manager\n"),
-	    df_c, bold, df_c);
+	    df_c, BOLD, df_c);
 
 	if (splash_screen) {
 		printf(_("\n\t\t\tPress any key to continue... "));

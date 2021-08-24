@@ -504,7 +504,7 @@ remove_from_trash(void)
 					? xalphasort : alphasort_insensitive);
 
 	if (files_n) {
-		printf(_("%sTrashed files%s\n\n"), bold, df_c);
+		printf(_("%sTrashed files%s\n\n"), BOLD, df_c);
 
 		for (i = 0; i < (size_t)files_n; i++)
 			colors_list(trash_files[i]->d_name, (int)i + 1, NO_PAD,
@@ -835,7 +835,7 @@ untrash_function(char **comm)
 	}
 
 	/* List trashed files */
-	printf(_("%sTrashed files%s\n\n"), bold, df_c);
+	printf(_("%sTrashed files%s\n\n"), BOLD, df_c);
 	size_t i;
 
 	for (i = 0; i < (size_t)trash_files_n; i++)

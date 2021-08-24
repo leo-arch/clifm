@@ -54,8 +54,8 @@ handle_iso(char *file)
 	 * test (t) */
 
 	printf(_("%s[e]%sxtract %s[E]%sxtract-to-dir %s[l]%sist "
-		 "%s[t]%stest %s[m]%sount %s[q]%suit\n"), bold, df_c, bold,
-	    df_c, bold, df_c, bold, df_c, bold, df_c, bold, df_c);
+		 "%s[t]%stest %s[m]%sount %s[q]%suit\n"), BOLD, df_c, BOLD,
+	    df_c, BOLD, df_c, BOLD, df_c, BOLD, df_c, BOLD, df_c);
 
 	char sel_op = 0;
 	char *operation = (char *)NULL;
@@ -557,7 +557,7 @@ archiver(char **args, char mode)
 					 "compression of multiple files into one single "
 					 "compressed file. Files will be compressed rather "
 					 "into multiple compressed files using original "
-					 "file names\n"), bold, df_c);
+					 "file names\n"), BOLD, df_c);
 
 				for (i = 1; args[i]; i++) {
 					if (zstandard(args[i], NULL, 'c', 0) != EXIT_SUCCESS)
@@ -682,9 +682,9 @@ archiver(char **args, char mode)
 	if (zst_index != -1) {
 		/* Multiple files */
 		if (files_num > 1) {
-			printf(_("%sNOTE%s: Using Zstandard\n"), bold, df_c);
+			printf(_("%sNOTE%s: Using Zstandard\n"), BOLD, df_c);
 			printf(_("%s[e]%sxtract %s[t]%sest %s[i]%snfo %s[q]%suit\n"),
-			    bold, df_c, bold, df_c, bold, df_c, bold, df_c);
+			    BOLD, df_c, BOLD, df_c, BOLD, df_c, BOLD, df_c);
 
 			char *operation = (char *)NULL;
 			char sel_op = 0;
@@ -741,8 +741,8 @@ archiver(char **args, char mode)
 	 * ################################ */
 
 	printf(_("%s[e]%sxtract %s[E]%sxtract-to-dir %s[l]%sist "
-		 "%s[m]%sount %s[r]%sepack %s[q]%suit\n"), bold, df_c, bold,
-	    df_c, bold, df_c, bold, df_c, bold, df_c, bold, df_c);
+		 "%s[m]%sount %s[r]%sepack %s[q]%suit\n"), BOLD, df_c, BOLD,
+	    df_c, BOLD, df_c, BOLD, df_c, BOLD, df_c, BOLD, df_c);
 
 	char *operation = (char *)NULL;
 	char sel_op = 0;
@@ -848,7 +848,7 @@ archiver(char **args, char mode)
 	case 'E': /* ########## EXTRACT TO DIR ############## */
 		for (i = 1; args[i]; i++) {
 			/* Ask for extraction path */
-			printf(_("%sFile%s: %s\n"), bold, df_c, args[i]);
+			printf(_("%sFile%s: %s\n"), BOLD, df_c, args[i]);
 
 			char *ext_path = (char *)NULL;
 			while (!ext_path) {
@@ -877,7 +877,7 @@ archiver(char **args, char mode)
 	case 'l':
 		for (i = 1; args[i]; i++) {
 			printf(_("%s%sFile%s: %s\n"), (i > 1) ? "\n" : "",
-			    bold, df_c, args[i]);
+			    BOLD, df_c, args[i]);
 
 			char *cmd[] = {"atool", "-l", args[i], NULL};
 			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
@@ -918,7 +918,7 @@ archiver(char **args, char mode)
 				 * one archive */
 			if (files_num > 1) {
 				printf(_("%s%s%s: Succesfully mounted on %s\n"),
-						bold, args[i], df_c, mountpoint);
+						BOLD, args[i], df_c, mountpoint);
 				free(mountpoint);
 				continue;
 			}
@@ -1041,7 +1041,7 @@ zstandard(char *in_file, char *out_file, char mode, char op)
 	}
 
 	printf(_("%s[e]%sxtract %s[t]%sest %s[i]%snfo %s[q]%suit\n"),
-	    bold, df_c, bold, df_c, bold, df_c, bold, df_c);
+	    BOLD, df_c, BOLD, df_c, BOLD, df_c, BOLD, df_c);
 
 	char *operation = (char *)NULL;
 	while (!operation) {

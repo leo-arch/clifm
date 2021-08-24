@@ -656,7 +656,7 @@ sel_function(char **args)
 	if (sel_n > 10)
 		printf(_("Total size: %s\n"), human_size);
 	else if (sel_n > 0)
-		printf(_("\n%s%sTotal size%s: %s\n"), df_c, bold, df_c, human_size);
+		printf(_("\n%s%sTotal size%s: %s\n"), df_c, BOLD, df_c, human_size);
 
 	free(human_size);
 	return EXIT_SUCCESS;
@@ -668,7 +668,7 @@ show_sel_files(void)
 	if (clear_screen)
 		CLEAR;
 
-	printf(_("%s%sSelection Box%s\n"), df_c, bold, df_c);
+	printf(_("%s%sSelection Box%s\n"), df_c, BOLD, df_c);
 
 	int reset_pager = 0;
 
@@ -717,7 +717,7 @@ show_sel_files(void)
 		}
 
 		char *human_size = get_size_unit(total_sel_size);
-		printf(_("\n%s%sTotal size%s: %s\n"), df_c, bold, df_c, human_size);
+		printf(_("\n%s%sTotal size%s: %s\n"), df_c, BOLD, df_c, human_size);
 		free(human_size);
 	}
 
@@ -757,7 +757,7 @@ deselect(char **comm)
 /*	if (clear_screen)
 		CLEAR; */
 
-	printf(_("%sSelection Box%s\n"), bold, df_c);
+	printf(_("%sSelection Box%s\n"), BOLD, df_c);
 
 	if (sel_n == 0) {
 		puts(_("Empty"));
@@ -770,7 +770,7 @@ deselect(char **comm)
 		colors_list(sel_elements[i], (int)i + 1, NO_PAD, PRINT_NEWLINE);
 
 	char *human_size = get_size_unit(total_sel_size);
-	printf(_("\n%s%sTotal size%s: %s\n"), df_c, bold, df_c, human_size);
+	printf(_("\n%s%sTotal size%s: %s\n"), df_c, BOLD, df_c, human_size);
 	free(human_size);
 
 	printf(_("\n%sEnter '%c' to quit.\n"), df_c, 'q');
