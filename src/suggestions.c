@@ -1161,8 +1161,8 @@ rl_suggestions(char c)
 		if (c >= '0' && c <= '9') {
 			long a = strtol(last_word, NULL, 10);
 			if (a != 0) {
-				fputs(or_c, stdout);
-				cur_color = or_c;
+				fputs(hn_c, stdout);
+				cur_color = hn_c;
 			} else {
 				fputs(df_c, stdout);
 				cur_color = df_c;
@@ -1182,19 +1182,19 @@ rl_suggestions(char c)
 			break; */
 		case '*': /* fallthrough */
 		case '~': /* Expansion operators */
-			fputs(or_c, stdout);
-			cur_color = or_c;
+			fputs(he_c, stdout);
+			cur_color = he_c;
 			restore_color = 1;
 			break;
 		case '#':
-			fputs(mi_c, stdout);
-			cur_color = mi_c;
+			fputs(hc_c, stdout);
+			cur_color = hc_c;
 			break;
 		case '"': /* fallthrough */
 		case '\'': /* Quotation */
 			if (!quote) {
-				fputs(ef_c, stdout);
-				cur_color = ef_c;
+				fputs(hq_c, stdout);
+				cur_color = hq_c;
 				quote = c;
 			}
 			if (c == quote)
@@ -1202,15 +1202,15 @@ rl_suggestions(char c)
 			break;
 		case '|': /* fallthrough */
 		case '&': /* fallthrough */
-		case ';': /* Process operators */
+		case ';': /* Process separators */
 			restore_color = 1;
-			fputs(ee_c, stdout);
-			cur_color = ee_c;
+			fputs(hs_c, stdout);
+			cur_color = hs_c;
 			break;
-		case '>':
+		case '>': /* Redirection */
 			restore_color = 1;
-			fputs(nf_c, stdout);
-			cur_color = nf_c;
+			fputs(hr_c, stdout);
+			cur_color = hr_c;
 			break;
 		case '(': /* fallthrough */
 		case ')': /* fallthrough */
@@ -1219,8 +1219,8 @@ rl_suggestions(char c)
 		case '[': /* fallthrough */
 		case ']':
 			restore_color = 1;
-			fputs(or_c, stdout);
-			cur_color = or_c;
+			fputs(hb_c, stdout);
+			cur_color = hb_c;
 			break;
 		default:
 			if (quote_n > 1 && rl_end && rl_line_buffer[rl_end - 1] == quote) {
@@ -1233,12 +1233,12 @@ rl_suggestions(char c)
 
 		switch(*last_word) {
 		case '-': /* Parameters */
-			fputs(or_c, stdout);
-			cur_color = or_c;
+			fputs(hp_c, stdout);
+			cur_color = hp_c;
 			break;
 		case '$': /* Variable names */
-			fputs(ee_c, stdout);
-			cur_color = ee_c;
+			fputs(hv_c, stdout);
+			cur_color = hv_c;
 			break;
 		default: break;
 		}

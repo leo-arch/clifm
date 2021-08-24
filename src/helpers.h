@@ -272,6 +272,16 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define DEF_SC_C "\x1b[02;31m"
 #define DEF_SX_C "\x1b[02;32m"
 
+#define DEF_HB_C "\x1b[00;36m"
+#define DEF_HC_C "\x1b[02;31m"
+#define DEF_HE_C "\x1b[00;36m"
+#define DEF_HN_C "\x1b[00;32m"
+#define DEF_HP_C "\x1b[02;36m"
+#define DEF_HQ_C "\x1b[00;33m"
+#define DEF_HR_C "\x1b[00;31m"
+#define DEF_HS_C "\x1b[00;32m"
+#define DEF_HV_C "\x1b[00;32m"
+
 #define DLFC "\x1b[0K" /* Delete line from cursor */
 #define CNL "\x1b[1E" /* Move the cursor to beginning next line*/
 #define DLFC_LEN 4 /* Length of the above escape codes */
@@ -599,7 +609,9 @@ struct param {
 	int ffirst;
 	int files_counter;
 	int hidden;
+#ifndef _NO_HIGHLIGHT
 	int highlight;
+#endif
 #ifndef _NO_ICONS
 	int icons;
 #endif
@@ -718,7 +730,9 @@ extern short
     ext_cmd_ok,
     files_counter,
     filter_rev,
+#ifndef _NO_HIGHLIGHT
     highlight,
+#endif
     home_ok,
 #ifndef _NO_ICONS
     icons,
@@ -923,6 +937,8 @@ extern char
     dl_c[MAX_COLOR],	     /* Dividing line color */
     el_c[MAX_COLOR],	     /* ELN color */
     mi_c[MAX_COLOR],	     /* Misc indicators color */
+
+	/* Suggestions */
 	sc_c[MAX_COLOR],	     /* Auto-suggestions: external commands */
 	sf_c[MAX_COLOR],	     /* Auto-suggestions: filenames */
 	sh_c[MAX_COLOR],	     /* Auto-suggestions: history */
@@ -932,6 +948,17 @@ extern char
 #ifndef _NO_ICONS
     dir_ico_c[MAX_COLOR], /* Directories icon color */
 #endif
+
+	/* Syntax highlighting */
+	hb_c[MAX_COLOR],		/* Brackets () [] {} */
+	hc_c[MAX_COLOR],		/* Comments */
+	he_c[MAX_COLOR],		/* Expansion operators: * ~ */
+	hn_c[MAX_COLOR],		/* Numbers */
+	hp_c[MAX_COLOR],		/* Parameters: - */
+	hq_c[MAX_COLOR],		/* Quoted strings */
+	hr_c[MAX_COLOR],		/* Redirection > */
+	hs_c[MAX_COLOR],		/* Process separators | & ; */
+	hv_c[MAX_COLOR],		/* Variables $ */
 
     /* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */

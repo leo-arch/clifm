@@ -506,6 +506,8 @@ char
     dl_c[MAX_COLOR], /* Dividing line index color */
     el_c[MAX_COLOR], /* ELN color */
     mi_c[MAX_COLOR], /* Misc indicators color */
+
+	/* Suggestions */
     sc_c[MAX_COLOR], /* Auto-suggestions: external commands */
     sh_c[MAX_COLOR], /* Auto-suggestions: history */
     sf_c[MAX_COLOR], /* Auto-suggestions: filenames */
@@ -515,6 +517,17 @@ char
 #ifndef _NO_ICONS
     dir_ico_c[MAX_COLOR], /* Directories icon color */
 #endif
+
+	/* Syntax highlighting */
+	hb_c[MAX_COLOR],		/* Brackets: () [] {} */
+	hc_c[MAX_COLOR],		/* Comments */
+	he_c[MAX_COLOR],		/* Expansion operators: * ~ */
+	hn_c[MAX_COLOR],		/* Numbers */
+	hp_c[MAX_COLOR],		/* Parameters: - */
+	hq_c[MAX_COLOR],		/* Quoted strings */
+	hr_c[MAX_COLOR],		/* Redirection: > */
+	hs_c[MAX_COLOR],		/* Process separators: | & ; */
+	hv_c[MAX_COLOR],		/* Variables: $ */
 
     /* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */

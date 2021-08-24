@@ -627,6 +627,15 @@ set_colors(const char *colorscheme, int env)
 
 	if (!ifacecolors) {
 		/* Free and reset whatever value was loaded */
+		*hb_c = '\0';
+		*hc_c = '\0';
+		*he_c = '\0';
+		*hn_c = '\0';
+		*hp_c = '\0';
+		*hq_c = '\0';
+		*hr_c = '\0';
+		*hs_c = '\0';
+		*hv_c = '\0';
 		*sh_c = '\0';
 		*sf_c = '\0';
 		*sc_c = '\0';
@@ -706,6 +715,78 @@ set_colors(const char *colorscheme, int env)
 					snprintf(tx_c, MAX_COLOR + 2, "\001\x1b[%sm\002",
 					    colors[i] + 3);
 				}
+			}
+
+			else if (*colors[i] == 'h' && strncmp(colors[i], "hb=", 3) == 0) {
+				if (!is_color_code(colors[i] + 3))
+					*hb_c = '\0';
+				else
+					snprintf(hb_c, MAX_COLOR - 1, "\x1b[%sm",
+							colors[i] + 3);
+			}
+
+			else if (*colors[i] == 'h' && strncmp(colors[i], "hc=", 3) == 0) {
+				if (!is_color_code(colors[i] + 3))
+					*hc_c = '\0';
+				else
+					snprintf(hc_c, MAX_COLOR - 1, "\x1b[%sm",
+							colors[i] + 3);
+			}
+
+			else if (*colors[i] == 'h' && strncmp(colors[i], "he=", 3) == 0) {
+				if (!is_color_code(colors[i] + 3))
+					*he_c = '\0';
+				else
+					snprintf(he_c, MAX_COLOR - 1, "\x1b[%sm",
+							colors[i] + 3);
+			}
+
+			else if (*colors[i] == 'h' && strncmp(colors[i], "hn=", 3) == 0) {
+				if (!is_color_code(colors[i] + 3))
+					*hn_c = '\0';
+				else
+					snprintf(hn_c, MAX_COLOR - 1, "\x1b[%sm",
+							colors[i] + 3);
+			}
+
+			else if (*colors[i] == 'h' && strncmp(colors[i], "hp=", 3) == 0) {
+				if (!is_color_code(colors[i] + 3))
+					*hp_c = '\0';
+				else
+					snprintf(hp_c, MAX_COLOR - 1, "\x1b[%sm",
+							colors[i] + 3);
+			}
+
+			else if (*colors[i] == 'h' && strncmp(colors[i], "hq=", 3) == 0) {
+				if (!is_color_code(colors[i] + 3))
+					*hq_c = '\0';
+				else
+					snprintf(hq_c, MAX_COLOR - 1, "\x1b[%sm",
+							colors[i] + 3);
+			}
+
+			else if (*colors[i] == 'h' && strncmp(colors[i], "hr=", 3) == 0) {
+				if (!is_color_code(colors[i] + 3))
+					*hr_c = '\0';
+				else
+					snprintf(hr_c, MAX_COLOR - 1, "\x1b[%sm",
+							colors[i] + 3);
+			}
+
+			else if (*colors[i] == 'h' && strncmp(colors[i], "hs=", 3) == 0) {
+				if (!is_color_code(colors[i] + 3))
+					*hs_c = '\0';
+				else
+					snprintf(hs_c, MAX_COLOR - 1, "\x1b[%sm",
+							colors[i] + 3);
+			}
+
+			else if (*colors[i] == 'h' && strncmp(colors[i], "hv=", 3) == 0) {
+				if (!is_color_code(colors[i] + 3))
+					*hv_c = '\0';
+				else
+					snprintf(hv_c, MAX_COLOR - 1, "\x1b[%sm",
+							colors[i] + 3);
 			}
 
 			else if (*colors[i] == 's' && strncmp(colors[i], "sh=", 3) == 0) {
@@ -912,7 +993,16 @@ set_colors(const char *colorscheme, int env)
 			&& filecolors[i + 1] == 'h') || (filecolors[i] == 's'
 			&& filecolors[i + 1] == 'f') || (filecolors[i] == 's'
 			&& filecolors[i + 1] == 'c') || (filecolors[i] == 's'
-			&& filecolors[i + 1] == 'x')) && filecolors[i + 2] == '=') {
+			&& filecolors[i + 1] == 'x') || (filecolors[i] == 'h'
+			&& filecolors[i + 1] == 'b') || (filecolors[i] == 'h'
+			&& filecolors[i + 1] == 'c') || (filecolors[i] == 'h'
+			&& filecolors[i + 1] == 'e') || (filecolors[i] == 'h'
+			&& filecolors[i + 1] == 'n') || (filecolors[i] == 'h'
+			&& filecolors[i + 1] == 'p') || (filecolors[i] == 'h'
+			&& filecolors[i + 1] == 'q') || (filecolors[i] == 'h'
+			&& filecolors[i + 1] == 'r') || (filecolors[i] == 'h'
+			&& filecolors[i + 1] == 's') || (filecolors[i] == 'h'
+			&& filecolors[i + 1] == 'v')) && filecolors[i + 2] == '=') {
 
 				/* If one of the above is found, move to the next
 				 * color code */
@@ -1008,7 +1098,7 @@ set_colors(const char *colorscheme, int env)
 				else
 					snprintf(dc_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-			} else if (*colors[i] == 'w' && strncmp(colors[i], "wc=", 3) == 0) {
+/*			} else if (*colors[i] == 'w' && strncmp(colors[i], "wc=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
 					*wc_c = '\0';
 				else
@@ -1040,7 +1130,7 @@ set_colors(const char *colorscheme, int env)
 					*sx_c = '\0';
 				else
 					snprintf(sx_c, MAX_COLOR - 1, "\x1b[%sm",
-							colors[i] + 3);
+							colors[i] + 3); */
 
 			} else if (*colors[i] == 'd' && strncmp(colors[i], "dh=", 3) == 0) {
 				if (!is_color_code(colors[i] + 3))
@@ -1195,6 +1285,25 @@ set_colors(const char *colorscheme, int env)
 
 	/* If some color was not set or it was a wrong color code, set the
 	 * default */
+	if (!*hb_c)
+		strcpy(hb_c, DEF_HB_C);
+	if (!*hc_c)
+		strcpy(hc_c, DEF_HC_C);
+	if (!*he_c)
+		strcpy(he_c, DEF_HE_C);
+	if (!*hn_c)
+		strcpy(hn_c, DEF_HN_C);
+	if (!*hp_c)
+		strcpy(hp_c, DEF_HP_C);
+	if (!*hq_c)
+		strcpy(hq_c, DEF_HQ_C);
+	if (!*hr_c)
+		strcpy(hr_c, DEF_HR_C);
+	if (!*hs_c)
+		strcpy(hs_c, DEF_HS_C);
+	if (!*hv_c)
+		strcpy(hv_c, DEF_HV_C);
+
 	if (!*sh_c)
 		strcpy(sh_c, DEF_SH_C);
 	if (!*sf_c)
@@ -1203,6 +1312,7 @@ set_colors(const char *colorscheme, int env)
 		strcpy(sc_c, DEF_SC_C);
 	if (!*sx_c)
 		strcpy(sx_c, DEF_SX_C);
+
 	if (!*el_c)
 		strcpy(el_c, DEF_EL_C);
 	if (!*mi_c)
