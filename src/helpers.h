@@ -163,7 +163,7 @@ extern int watch;
 #define CPOP 1
 #define NO_CPOP 0
 
-/* Error codes, to be used by launch_exec functions */
+/* Error codes, used by the launch_exec functions */
 #define EXNULLERR 79
 #define EXFORKERR 81
 #define EXCRASHERR 82
@@ -177,7 +177,6 @@ extern int watch;
 #define D_CYAN "\x1b[0;36m"
 #define BOLD "\x1b[1m"
 #define NC "\x1b[0m"
-#define NB "\x1b[49m"
 
 #define COLORS_REPO "https://github.com/leo-arch/clifm-colors"
 
@@ -185,10 +184,9 @@ extern int watch;
 /* \001 and \002 tell readline that color codes between them are
  * non-printing chars. This is specially useful for the prompt, i.e.,
  * when passing color codes to readline */
-#define NC_b "\001\x1b[0m\002"
-#define NB_b "\001\x1b[49m\002"
+#define RL_NC "\001\x1b[0m\002"
 
-/* Default colors */
+/* Default color definitions */
 #define DEF_LS_COLORS "di=01;34:fi=00;37:ln=01;36:mh=30;46:or=00;36:\
 pi=00;35:so=01;35:bd=01;33:cd=01;37:su=37;41:sg=30;43:st=37;44:\
 tw=30;42:ow=34;42:ex=01;32:no=31;47"

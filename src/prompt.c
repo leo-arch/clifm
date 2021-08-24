@@ -488,9 +488,9 @@ prompt(void)
 		 * message sign: a red 'E'. */
 		switch (pmsg) {
 		case NOMSG:	break;
-		case ERROR:	sprintf(msg_str, "%sE%s", em_c, NC_b); break;
-		case WARNING: sprintf(msg_str, "%sW%s", wm_c, NC_b); break;
-		case NOTICE: sprintf(msg_str, "%sN%s", nm_c, NC_b); break;
+		case ERROR:	sprintf(msg_str, "%sE%s", em_c, RL_NC); break;
+		case WARNING: sprintf(msg_str, "%sW%s", wm_c, RL_NC); break;
+		case NOTICE: sprintf(msg_str, "%sN%s", nm_c, RL_NC); break;
 		default: break;
 		}
 	}
@@ -544,8 +544,8 @@ prompt(void)
 		prompt_length = (size_t)(decoded_prompt_len + 6 + sizeof(tx_c) + 1);
 	}
 
-	/* 16 = color_b({red,green,yellow}_b)+letter (sel, trash, msg)+NC_b;
-	 * 6 = NC_b
+	/* 16 = color_b({red,green,yellow}_b)+letter (sel, trash, msg)+RL_NC;
+	 * 6 = RL_NC
 	 * 1 = null terminating char */
 
 	char *the_prompt = (char *)xnmalloc(prompt_length, sizeof(char));
@@ -557,9 +557,9 @@ prompt(void)
 			? si_c : "", (xargs.stealth_mode == 1) ? "S\001\x1b[0m\002"
 			: "", (trash_n) ? ti_c : "", (trash_n) ? "T\001\x1b[0m\002" : "",
 			(sel_n) ? li_c : "", (sel_n) ? "*\001\x1b[0m\002" : "",
-			decoded_prompt, NC_b, tx_c);
+			decoded_prompt, RL_NC, tx_c);
 	} else {
-		snprintf(the_prompt, prompt_length, "%s%s%s", decoded_prompt, NC_b,
+		snprintf(the_prompt, prompt_length, "%s%s%s", decoded_prompt, RL_NC,
 				tx_c);
 	}
 
