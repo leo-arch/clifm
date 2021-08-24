@@ -725,8 +725,7 @@ mvCmd=%d\n\n"
 
 	    "# The prompt line is built using string literals and/or one or more of\n\
 # the following escape sequences:\n"
-	    "# \\xnn: The character whose hexadecimal code is nn.\n\
-# \\e: Escape character\n\
+	    "# \\e: Escape character\n\
 # \\h: The hostname, up to the first dot\n\
 # \\u: The username\n\
 # \\H: The full hostname\n\

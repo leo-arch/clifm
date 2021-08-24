@@ -38,6 +38,7 @@
 #include "exec.h"
 #include "misc.h"
 
+/*
 static int
 hex2int(char *str)
 {
@@ -78,11 +79,11 @@ hex2int(char *str)
 	}
 
 	return ((n[0] * 16) + n[1]);
-}
+} */
 
 /* Given this value: \xA0\xA1\xA2, return an array of integers with
  * the integer values for A0, A1, and A2 respectivelly */
-int *
+/*int *
 get_hex_num(const char *str)
 {
 	size_t i = 0;
@@ -112,10 +113,10 @@ get_hex_num(const char *str)
 	}
 
 	hex_n = xrealloc(hex_n, (i + 1) * sizeof(int));
-	hex_n[i] = -1; /* -1 marks the end of the int array */
+	hex_n[i] = -1; // -1 marks the end of the int array
 
 	return hex_n;
-}
+} */
 
 /* Count files in DIR_PATH, including self and parent. If POP is set to 1,
  * The function will just check if the directory is populated (it has at

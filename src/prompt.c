@@ -75,33 +75,33 @@ decode_prompt(const char *line)
 				temp[2] = '\0';
 				goto add_string;
 
-			case 'x': /* Hex numbers */
+/*			case 'x': // Hex numbers
 			{
-				/* Go back one char, so that we have "\x ... n", which
-				 * is what the get_hex_num() requires */
+				// Go back one char, so that we have "\x ... n", which
+				// is what the get_hex_num() requires
 				line--;
-				/* get_hex_num returns an array on integers corresponding
-				 * to the hex codes found in line up to the fisrt non-hex
-				 * expression */
+				// get_hex_num returns an array on integers corresponding
+				// to the hex codes found in line up to the fisrt non-hex
+				// expression
 				int *hex = get_hex_num(line);
 				int n = 0, i = 0, j;
-				/* Count how many hex expressions were found */
+				// Count how many hex expressions were found
 				while (hex[n++] != -1);
 				n--;
-				/* 2 + n == CTLEST + 0x00 + amount of hex numbers*/
+				// 2 + n == CTLEST + 0x00 + amount of hex numbers
 				temp = xnmalloc(2 + (size_t)n, sizeof(char));
-				/* Construct the line: "\001hex1hex2...n0x00"*/
+				// Construct the line: "\001hex1hex2...n0x00"
 				temp[0] = CTLESC;
 				for (j = 1; j < (1 + n); j++)
 					temp[j] = (char)hex[i++];
 				temp[1 + n] = '\0';
-				/* Set the line pointer after the first non-hex
-				 * expression to continue processing */
+				// Set the line pointer after the first non-hex
+				// expression to continue processing
 				line += (i * 4);
 				c = 0;
 				free(hex);
 				goto add_string;
-			}
+			} */
 
 			case 'e': /* Escape char */
 				temp = xnmalloc(2, sizeof(char));
