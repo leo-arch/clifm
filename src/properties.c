@@ -349,7 +349,7 @@ get_properties(char *filename, int dsize)
 			fputs(_("Total size: \t"), stdout);
 			off_t total_size = dir_size(filename);
 			if (total_size != -1) {
-				char *human_size = get_size_unit(total_size);
+				char *human_size = get_size_unit(total_size * 1024);
 				if (human_size) {
 					printf("%s\n", human_size);
 					free(human_size);

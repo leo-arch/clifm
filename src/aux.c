@@ -38,6 +38,48 @@
 #include "exec.h"
 #include "misc.h"
 
+static int
+hex2int(char *str)
+{
+	int i, n[2] = { 0 };
+	for (i = 1; i >= 0; i--) {
+		if (str[i] >= '0' && str[i] <= '9') {
+			n[i] = str[i] - '0';
+		} else {
+			switch (str[i]) {
+			case 'A':
+			case 'a':
+				n[i] = 10;
+				break;
+			case 'B':
+			case 'b':
+				n[i] = 11;
+				break;
+			case 'C':
+			case 'c':
+				n[i] = 12;
+				break;
+			case 'D':
+			case 'd':
+				n[i] = 13;
+				break;
+			case 'E':
+			case 'e':
+				n[i] = 14;
+				break;
+			case 'F':
+			case 'f':
+				n[i] = 15;
+				break;
+			default:
+				break;
+			}
+		}
+	}
+
+	return ((n[0] * 16) + n[1]);
+}
+
 /* Given this value: \xA0\xA1\xA2, return an array of integers with
  * the integer values for A0, A1, and A2 respectivelly */
 int *
@@ -47,7 +89,6 @@ get_hex_num(const char *str)
 	int *hex_n = (int *)xnmalloc(3, sizeof(int));
 
 	while (*str) {
-
 		if (*str != '\\') {
 			str++;
 			continue;
@@ -67,7 +108,6 @@ get_hex_num(const char *str)
 
 		free(tmp);
 		tmp = (char *)NULL;
-
 		str++;
 	}
 
@@ -104,7 +144,6 @@ count_dir(const char *dir, int pop)
 	}
 
 	closedir(p);
-
 	return c;
 }
 
@@ -127,9 +166,7 @@ get_cmd_path(const char *cmd)
 			return cmd_path;
 	}
 
-	/* If cmd was not found */
 	free(cmd_path);
-
 	return (char *)NULL;
 }
 
@@ -168,6 +205,9 @@ get_size_unit(off_t size)
 off_t
 dir_size(char *dir)
 {
+	if (!dir)
+		return -1;
+
 	char *rand_ext = gen_rand_str(6);
 	if (!rand_ext)
 		return -1;
@@ -176,11 +216,7 @@ dir_size(char *dir)
 	sprintf(DU_TMP_FILE, "/tmp/du.%s", rand_ext);
 	free(rand_ext);
 
-	if (!dir)
-		return -1;
-
 	FILE *du_fp = fopen(DU_TMP_FILE, "w");
-
 	if (!du_fp)
 		return -1;
 
@@ -189,7 +225,7 @@ dir_size(char *dir)
 																				 file */
 	fclose(du_fp);
 
-	char *cmd[] = {"du", "--block-size=1", "-s", dir, NULL};
+	char *cmd[] = {"du", "-ks", dir, NULL};
 	launch_execve(cmd, FOREGROUND, E_NOSTDERR);
 
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
@@ -198,9 +234,7 @@ dir_size(char *dir)
 	off_t retval = -1;
 
 	if (access(DU_TMP_FILE, F_OK) == 0) {
-
 		du_fp = fopen(DU_TMP_FILE, "r");
-
 		if (du_fp) {
 			/* I only need here the first field of the line, which is a
 			 * file size and could only take a few bytes, so that 32
@@ -213,7 +247,6 @@ dir_size(char *dir)
 			}
 
 			char *file_size = strbfr(line, '\t');
-
 			if (file_size) {
 				retval = (off_t)atoll(file_size);
 				free(file_size);
@@ -387,10 +420,10 @@ url_encode(char *str)
 
 	for (; *pstr; pstr++) {
 		if (isalnum(*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.'
-		|| *pstr == '~' || *pstr == '/')
+		|| *pstr == '~' || *pstr == '/') {
 			/* Do not encode the above chars */
 			*pbuf++ = *pstr;
-		else {
+		} else {
 			/* Encode char to URL format. Example: space char to %20 */
 			*pbuf++ = '%';
 			*pbuf++ = to_hex(*pstr >> 4); /* Right shift operation */
@@ -431,8 +464,9 @@ url_decode(char *str)
 				*pbuf++ = from_hex(pstr[1]) << 4 | from_hex(pstr[2]);
 				pstr += 2;
 			}
-		} else
+		} else {
 			*pbuf++ = *pstr;
+		}
 	}
 
 	return buf;
@@ -456,7 +490,6 @@ read_octal(char *str)
 
 	int temp = num;
 	while (temp) {
-
 		/* Extracting last digit */
 		int last_digit = temp % 10;
 		temp = temp / 10;
@@ -464,51 +497,8 @@ read_octal(char *str)
 		/* Multiplying last digit with appropriate
 		 * base value and adding it to dec_value */
 		dec_value += last_digit * base;
-
 		base = base * 8;
 	}
 
 	return dec_value;
-}
-
-int
-hex2int(char *str)
-{
-	int i, n[2] = { 0 };
-	for (i = 1; i >= 0; i--) {
-		if (str[i] >= '0' && str[i] <= '9') {
-			n[i] = str[i] - '0';
-		} else {
-			switch (str[i]) {
-			case 'A':
-			case 'a':
-				n[i] = 10;
-				break;
-			case 'B':
-			case 'b':
-				n[i] = 11;
-				break;
-			case 'C':
-			case 'c':
-				n[i] = 12;
-				break;
-			case 'D':
-			case 'd':
-				n[i] = 13;
-				break;
-			case 'E':
-			case 'e':
-				n[i] = 14;
-				break;
-			case 'F':
-			case 'f':
-				n[i] = 15;
-				break;
-			default:
-				break;
-			}
-		}
-	}
-
-	return ((n[0] * 16) + n[1]);
 }
