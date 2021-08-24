@@ -339,7 +339,7 @@ create_file(char **cmd)
 		if (list_dir() != EXIT_SUCCESS)
 			exit_status = EXIT_FAILURE;
 	}
-#ifdef __HAIKU__
+#endif
 
 	return exit_status;
 }
