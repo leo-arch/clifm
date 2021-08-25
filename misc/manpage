@@ -271,6 +271,9 @@ enable program logs
 .B \-\-expand\-bookmarks
 expand bookmark names into the corresponding bookmark paths and enable TAB completion for bookmark names as well. If the bookmark is, .e.g. mybookmark=/my/path, "mybo" will be completed as "mybookmark", which will be interpreted then as "/my/path".
 .TP
+.B \-\-highlight
+enable syntax highlighting
+.TP
 .B \-\-icons
 enable icons. Suitable fonts are provided by the \fBicons-in-terminal\fR project.
 .TP
@@ -924,7 +927,7 @@ CliFM provides four customizable keybindings for custom plugins. The procedure f
 
 .SH 9. COLOR CODES
 .TP
-Colors are specified using the same format used by \fBdircolors(1)\fR and the LS_COLORS environment variable, namely, a colon separated list of codes with this general format: filetype=color. This is the list of file type codes:
+Colors are specified using the same format used by \fBdircolors(1)\fR and the LS_COLORS environment variable, namely, a colon separated list of codes with this general format: filetype=color. This is the list of \fBfile type codes\fR:
 .sp
  di = directory
  ed = empty directory
@@ -954,25 +957,41 @@ Colors are specified using the same format used by \fBdircolors(1)\fR and the LS
 .TP
 The following codes are used for different interface elements:
 .sp
+ \fBSyntax highlighting\fR
+ hb = brackets: () {} []
+ hc = comments: #comment
+ he = expansion operators: * ~
+ hn = numbers (including ELN's)
+ hp = command parameters: -p --parameter
+ hq = quoted strings: "str" 'str'
+ hr = redirection operator: >
+ hs = commands separator: | & ;
+ hv = variables names (environment and internal)
+
+ \fBSuggestions\fR
  sh = commands history suggestions
  sf = ELN's, bookmarks, file and directory names suggestions
  sc = aliases and command names suggestions
  sx = suggestions for internal commands and parameters
+
+ \fBDefault Prompt\fR
+ li = selected files
+ ti = trash indicator
+ em = error message indicator
+ wm = warning message indicator
+ nm = notice message indicator
+ si = stealth mode indicator
+
+ \fBMiscellaneous interface elements\fR
  bm = bookmarked directory in the bookmarks screen
  el = ELN color
- mi = misc indicators color (disk usage, sort method, bulk rename)
- tx = command line text color
+ mi = misc indicators (disk usage, sort method, bulk rename)
+ tx = command line text
  df = default color
- dc = files counter color
- wc = welcome message color
- dh = directory history index color
- dl = dividing line color
- li = selected files indicator color
- ti = trash indicator color
- em = error message indicator color
- wm = warning message indicator  color
- nm = notice message indicator color
- si = stealth mode indicator color
+ dc = files counter
+ wc = welcome message
+ dh = directory history index
+ dl = dividing line
 .TP
 Color codes are just traditional ANSI color codes less the escape character and the final 'm'. Thus, for instance, if you want non\-empty directories to be bold blue, add this to the \fIFiletypeColors\fR line in the corresponding color scheme file: \fBdi=01;34\fR. If you want ELN's to be red, add this code to the \fIInterfaceColors\fR line: \fBel=00;31\fR
 .TP

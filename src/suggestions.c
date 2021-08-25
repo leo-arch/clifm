@@ -1233,8 +1233,10 @@ rl_suggestions(char c)
 
 		switch(*last_word) {
 		case '-': /* Parameters */
-			fputs(hp_c, stdout);
-			cur_color = hp_c;
+			if (last_space) { /* Exclude first word */
+				fputs(hp_c, stdout);
+				cur_color = hp_c;
+			}
 			break;
 		case '$': /* Variable names */
 			fputs(hv_c, stdout);
@@ -1489,9 +1491,15 @@ rl_suggestions(char c)
 			suggestion.offset = 0;
 			goto SUCCESS;
 		} /*else {
+			rl_delete_text(0, rl_end);
+			rl_end = rl_point = 0; 
+			cur_color = nf_c;
 			fputs("\x1b[0;31m", stdout);
-//			rl_replace_line(last_word, 0);
-//			rl_redisplay();
+			fflush(stdout);
+			last_word[w_len - 1] = '\0';
+			rl_insert_text(last_word);
+			printed = 1;
+			goto SUCCESS;
 		} */
 	}
 

@@ -841,6 +841,8 @@ SuggestionStrategy=%s\n\n"
 # file type color (set via the color scheme file).\n\
 SuggestFiletypeColor=%s\n\n"
 
+"SyntaxHighlighting=%s\n\n"
+
 	    "# If set to true, expand bookmark names into the corresponding bookmark\n\
 # path: if the bookmark is \"name=/path\", \"name\" will be interpreted\n\
 # as /path. TAB completion is also available for bookmark names.\n\
@@ -873,6 +875,7 @@ LightMode=%s\n\n",
 		DEF_SUGGESTIONS == 1 ? "true" : "false",
 		DEF_SUG_STRATEGY,
 		DEF_SUG_FILETYPE_COLOR == 1 ? "true" : "false",
+		DEF_HIGHLIGHT == 1 ? "true" : "false",
 		DEF_EXPAND_BOOKMARKS == 1 ? "true" : "false",
 		DEF_LIGHT_MODE == 1 ? "true" : "false"
 		);
@@ -1576,6 +1579,18 @@ read_config(void)
 			}
 
 			filter = savestring(opt_str, len);
+		}
+
+		else if (xargs.highlight == UNSET && *line == 'S'
+		&& strncmp(line, "SyntaxHighlighting=", 19) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "SyntaxHighlighting=%5s\n", opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "true", 4) == 0)
+				highlight = 1;
+			else if (strncmp(opt_str, "false", 5) == 0)
+				highlight = 0;
 		}
 
 		else if (xargs.light == UNSET && *line == 'L'
