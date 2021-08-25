@@ -1581,6 +1581,7 @@ read_config(void)
 			filter = savestring(opt_str, len);
 		}
 
+#ifndef _NO_HIGHLIGHT
 		else if (xargs.highlight == UNSET && *line == 'S'
 		&& strncmp(line, "SyntaxHighlighting=", 19) == 0) {
 			char opt_str[MAX_BOOL] = "";
@@ -1592,6 +1593,7 @@ read_config(void)
 			else if (strncmp(opt_str, "false", 5) == 0)
 				highlight = 0;
 		}
+#endif
 
 		else if (xargs.light == UNSET && *line == 'L'
 		&& strncmp(line, "LightMode=", 10) == 0) {
@@ -2153,7 +2155,9 @@ reset_variables(void)
 	disk_usage = UNSET;
 	ext_cmd_ok = UNSET;
 	files_counter = UNSET;
+#ifndef _NO_HIGHLIGHT
 	highlight = UNSET;
+#endif
 	light_mode = UNSET;
 	list_folders_first = UNSET;
 	logs_enabled = UNSET;

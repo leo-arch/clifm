@@ -957,7 +957,6 @@ rl_suggestions(char c)
 {
 	char *last_word = (char *)NULL;
 	char *full_line = (char *)NULL;
-	char *cur_color = df_c;
 	int printed = 0;
 	int inserted_c = 0;
 /*	static int msg_area = 0; */
@@ -1145,107 +1144,6 @@ rl_suggestions(char c)
 		else
 			sprintf(last_word, "%s%c", rl_line_buffer, c);
 	}
-
-#ifndef _NO_HIGHLIGHT
-	/* Basic syntax highlighting */
-	static int restore_color = 0, quote = 0, quote_n = 0;
-
-	if (highlight && (!rl_end || rl_line_buffer[rl_end - 1] != '\\')) {
-		if (restore_color) {
-			fputs(df_c, stdout);
-			cur_color = df_c;
-			restore_color = 0;
-		}
-
-		/* Numbers */
-		if (c >= '0' && c <= '9') {
-			long a = strtol(last_word, NULL, 10);
-			if (a != 0) {
-				fputs(hn_c, stdout);
-				cur_color = hn_c;
-			} else {
-				fputs(df_c, stdout);
-				cur_color = df_c;
-			}
-		} else if (!quote) {
-			fputs(df_c, stdout);
-			cur_color = df_c;
-		}
-
-		switch(c) {
-/*		case '+': // fallthrough
-		case '-': // fallthrough
-		case '/': // Math operators 
-			fputs(ne_c, stdout);
-			cur_color = ne_c;
-			restore_color = 1;
-			break; */
-		case '*': /* fallthrough */
-		case '~': /* Expansion operators */
-			fputs(he_c, stdout);
-			cur_color = he_c;
-			restore_color = 1;
-			break;
-		case '#':
-			fputs(hc_c, stdout);
-			cur_color = hc_c;
-			break;
-		case '"': /* fallthrough */
-		case '\'': /* Quotation */
-			if (!quote) {
-				fputs(hq_c, stdout);
-				cur_color = hq_c;
-				quote = c;
-			}
-			if (c == quote)
-				quote_n++;
-			break;
-		case '|': /* fallthrough */
-		case '&': /* fallthrough */
-		case ';': /* Process separators */
-			restore_color = 1;
-			fputs(hs_c, stdout);
-			cur_color = hs_c;
-			break;
-		case '>': /* Redirection */
-			restore_color = 1;
-			fputs(hr_c, stdout);
-			cur_color = hr_c;
-			break;
-		case '(': /* fallthrough */
-		case ')': /* fallthrough */
-		case '{': /* fallthrough */
-		case '}': /* fallthrough */
-		case '[': /* fallthrough */
-		case ']':
-			restore_color = 1;
-			fputs(hb_c, stdout);
-			cur_color = hb_c;
-			break;
-		default:
-			if (quote_n > 1 && rl_end && rl_line_buffer[rl_end - 1] == quote) {
-				fputs(df_c, stdout);
-				quote = quote_n = 0;
-				cur_color = df_c;
-			}
-			break;
-		}
-
-		switch(*last_word) {
-		case '-': /* Parameters */
-			if (last_space) { /* Exclude first word */
-				fputs(hp_c, stdout);
-				cur_color = hp_c;
-			}
-			break;
-		case '$': /* Variable names */
-			fputs(hv_c, stdout);
-			cur_color = hv_c;
-			break;
-		default: break;
-		}
-	}
-#endif
 
 		/* ######################################
 		 * #	  3) Search for suggestions		#
@@ -1490,7 +1388,7 @@ rl_suggestions(char c)
 		if (printed) {
 			suggestion.offset = 0;
 			goto SUCCESS;
-		} /*else {
+		}/* else {
 			rl_delete_text(0, rl_end);
 			rl_end = rl_point = 0; 
 			cur_color = nf_c;
@@ -1498,8 +1396,8 @@ rl_suggestions(char c)
 			fflush(stdout);
 			last_word[w_len - 1] = '\0';
 			rl_insert_text(last_word);
-			printed = 1;
-			goto SUCCESS;
+//			printed = 1;
+			goto FAIL; 
 		} */
 	}
 
@@ -1545,11 +1443,7 @@ SUCCESS:
 		suggestion.printed = 1;
 		/* Restore color */
 		fputs("\x1b[0m", stdout);
-		if (cur_color) {
-			fputs(cur_color, stdout);
-		} else {
-			fputs(df_c, stdout);
-		}
+		fputs(df_c, stdout);
 	} else {
 		suggestion.printed = 0;
 	}

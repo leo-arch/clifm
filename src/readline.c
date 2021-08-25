@@ -58,6 +58,55 @@ typedef char *rl_cpvfunc_t;
 #include "suggestions.h"
 #endif
 
+#ifndef _NO_HIGHLIGHT
+static void
+rl_highlight(char ch)
+{
+	char *c = df_c;
+
+	if (ch >= '0' && ch <= '9') {
+		fputs(hn_c, stdout);
+		fflush(stdout);
+		return;
+	}
+
+	switch(ch) {
+	case '(': // fallthrough
+	case ')': // fallthrough
+	case '[': // fallthrough
+	case ']': // fallthrough
+	case '{': // fallthrough
+	case '}': c = hb_c; break;
+
+	case '#': c = hc_c; break;
+
+	case '-': c = hp_c; break;
+
+	case '"': // fallthrough
+	case '\'': c = hq_c; break;
+
+	case '~': // fallthrough
+	case '*': c = he_c; break;
+
+	case '$': c = hv_c; break;
+
+	case '>': c = hr_c; break;
+
+	case '&': // fallthrough
+	case ';': // fallthrough
+	case '|': c = hs_c; break;
+
+	case 13:
+	case ' ': c = df_c; break;
+
+	default: break;
+	}
+
+	fputs(c, stdout);
+	fflush(stdout);
+}
+#endif
+
 #ifndef _NO_SUGGESTIONS
 /* This function is automatically called by readline() to handle input.
  * Taken from Bash 1.14.7 and modified to fit our needs. Used
@@ -76,7 +125,7 @@ my_rl_getc(FILE *stream)
 		result = read(fileno(stream), &c, sizeof(unsigned char));
 		if (result == sizeof(unsigned char)) {
 			if (suggestions) {
-				/* rl_suggestions returns -1 is C was insetrted before
+				/* rl_suggestions returns -1 is C was inserted before
 				 * the end of the current line, in which case we don't
 				 * want to return it here (otherwise, it would be added
 				 * to rl_line_buffer) */
@@ -84,6 +133,10 @@ my_rl_getc(FILE *stream)
 					rl_redisplay();
 					continue;
 				}
+#ifndef _NO_HIGHLIGHT
+				if (highlight)
+					rl_highlight(c);
+#endif
 			}
 			return (c);
 		}
