@@ -915,7 +915,7 @@ check_variables(const char *str, const size_t len)
 		&& strncasecmp(str, environ[i], len) == 0) {
 			char *ret = strchr(environ[i], '=');
 			*ret = '\0';
-			suggestion.type = CMD_SUG;
+			suggestion.type = VAR_SUG;
 			char t[NAME_MAX + 1];
 			snprintf(t, NAME_MAX + 1, "$%s", environ[i]);
 			print_suggestion(t, len + 1, sh_c);
@@ -953,7 +953,7 @@ check_variables(const char *str, const size_t len)
  * and -1 if C was inserted before the end of the current line.
  * If a suggestion is found, it will be printed by print_suggestion() */
 int
-rl_suggestions(char c)
+rl_suggestions(const char c, const char *cur_color)
 {
 	char *last_word = (char *)NULL;
 	char *full_line = (char *)NULL;
@@ -1084,6 +1084,8 @@ rl_suggestions(char c)
 	if (s >= 0 && !rl_line_buffer[s + 1])
 		s = -1;
 	if (rl_point != rl_end && rl_point > s && c != _ESC) {
+//		if (suggestion.printed)
+//			clear_suggestion();
 		char text[2];
 		text[0] = c;
 		text[1] = '\0';
@@ -1443,7 +1445,10 @@ SUCCESS:
 		suggestion.printed = 1;
 		/* Restore color */
 		fputs("\x1b[0m", stdout);
-		fputs(df_c, stdout);
+		if (!cur_color)
+			fputs(df_c, stdout);
+		else
+			fputs(cur_color, stdout);
 	} else {
 		suggestion.printed = 0;
 	}

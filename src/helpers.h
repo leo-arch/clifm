@@ -412,6 +412,7 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define FIRST_WORD 9
 #define JCMD_SUG 10
 #define JCMD_SUG_NOACD 11 /* No auto-cd */
+#define VAR_SUG 12
 
 /* 46 == \x1b[00;38;02;000;000;000;00;48;02;000;000;000m\0 (24bit, RGB
  * true color format including foreground and background colors, the SGR

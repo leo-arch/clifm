@@ -458,6 +458,15 @@ rl_accept_suggestion(int count, int key)
 		rl_insert_text(suggestion_buf);
 		break;
 
+	case VAR_SUG:
+#ifndef _NO_HIGHLIGHT
+		if (highlight)
+			fputs(hv_c, stdout);
+#endif
+		rl_insert_text(suggestion_buf);
+		rl_stuff_char(' ');
+		break;
+
 	default:
 		rl_insert_text(suggestion_buf);
 		rl_stuff_char(' ');

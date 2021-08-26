@@ -577,6 +577,8 @@ prompt(void)
 
 	args_n = 0;
 
+	/* Restore forground color */
+	fputs(df_c, stdout);
 	/* Print the prompt and get user input */
 	char *input = (char *)NULL;
 	input = readline(the_prompt);

@@ -59,15 +59,22 @@ typedef char *rl_cpvfunc_t;
 #endif
 
 #ifndef _NO_HIGHLIGHT
-static void
-rl_highlight(char ch)
+static char *
+rl_highlight(const char ch)
 {
-	char *c = df_c;
+	static char *c = df_c;
+	static int skip = 0;
+	int d = 0;
+
+	if (rl_readline_state & RL_STATE_MOREINPUT) {
+		if (ch == 'A' || ch == 'B' || ch == 'C' || ch == 'D')
+			return (c);
+	}
 
 	if (ch >= '0' && ch <= '9') {
 		fputs(hn_c, stdout);
 		fflush(stdout);
-		return;
+		return (hn_c);
 	}
 
 	switch(ch) {
@@ -76,38 +83,92 @@ rl_highlight(char ch)
 	case '[': // fallthrough
 	case ']': // fallthrough
 	case '{': // fallthrough
-	case '}': c = hb_c; break;
+	case '}': c = hb_c;  skip = 0; d = 2; break;
 
-	case '#': c = hc_c; break;
+	case '#': c = hc_c; d = 1; skip = 0; break;
 
-	case '-': c = hp_c; break;
+	case '-': c = hp_c; d = 1; skip = 0; break;
 
 	case '"': // fallthrough
-	case '\'': c = hq_c; break;
+	case '\'':
+		c = hq_c;
+		size_t n = 0;
+		char *p = rl_line_buffer;
+		while (*p) {
+			if (*p == ch)
+				n++;
+			p++;
+		}
+		skip = 0;
+		if (++n % 2 != 0) { /* Opening quote */
+			/* Keep color until closing quote is entered */
+			d = 1;
+		} else { /* Closing quote */
+			/* Reset to default color */
+			c = df_c;
+			skip = 1;
+			d = 2;
+		}
+		break;
 
 	case '~': // fallthrough
-	case '*': c = he_c; break;
+	case '*': c = he_c;  skip = 0; d = 2; break;
 
-	case '$': c = hv_c; break;
+	case '$': c = hv_c; d = 1; skip = 0; break;
 
-	case '>': c = hr_c; break;
+	case '>': c = hr_c; skip = 0; d = 2; break;
 
 	case '&': // fallthrough
 	case ';': // fallthrough
-	case '|': c = hs_c; break;
+	case '|': c = hs_c; skip = 0; d = 2; break;
 
-	case 13:
-	case ' ': c = df_c; break;
+	case 127: // fallthrough
+	case BS:
+		if (rl_point == 0) {
+			c = df_c;
+			break;
+		}
+		break;
 
-	default: break;
+	case 13: c = df_c; skip = 0; break;
+	case ' ':
+		if (c != hq_c && c != hc_c) {
+			c = df_c;
+			skip = 0;
+		}
+		break;
+
+	default:
+		if (rl_point == rl_end)
+			break;
+		int m = rl_point;
+		while (m >= 0 && rl_line_buffer[m--] != ' ');
+		switch(rl_line_buffer[m < 0 ? (m + 1) : (m + 2)]) {
+		case '#': c = hc_c; d = 1; break;
+		case '\'':
+		case '"': c = hq_c; d = 1; break;
+		case '$': c = hv_c; d = 1; break;
+		case '-': c = hp_c; d = 1; break;
+		default: break;
+		}
 	}
 
-	fputs(c, stdout);
-	fflush(stdout);
+	if (!skip) {
+		fputs(c, stdout);
+		fflush(stdout);
+	}
+
+	if (d == 1)
+		skip = 1;
+	else if (d == 2) {
+		skip = 0;
+		c = df_c;
+	}
+
+	return (c);
 }
 #endif
 
-#ifndef _NO_SUGGESTIONS
 /* This function is automatically called by readline() to handle input.
  * Taken from Bash 1.14.7 and modified to fit our needs. Used
  * to introduce the suggestions system */
@@ -121,26 +182,37 @@ my_rl_getc(FILE *stream)
 	if (isatty(0))
 		return (getkey() & 0x7F);
 #endif /* __GO32__ */
+
+	char *cur_color = df_c;
 	while(1) {
 		result = read(fileno(stream), &c, sizeof(unsigned char));
 		if (result == sizeof(unsigned char)) {
+#ifndef _NO_HIGHLIGHT
+			if (highlight)
+				cur_color = rl_highlight(c);
+#endif /* _NO_HIGHLIGHT */
+
+#ifndef _NO_SUGGESTIONS
 			if (suggestions) {
 				/* rl_suggestions returns -1 is C was inserted before
 				 * the end of the current line, in which case we don't
 				 * want to return it here (otherwise, it would be added
 				 * to rl_line_buffer) */
-				if (rl_suggestions(c) == -1) {
+#ifdef __FreeBSD__
+			/* For the time being, suggestions do not work on the FreeBSD
+			 * console. The escape code to retrieve the current cursor
+			 * position doesn't seem to work */
+				if ((flags & GUI) && rl_suggestions(c, cur_color) == -1) {
+#else
+				if (rl_suggestions(c, cur_color) == -1) {
+#endif /* __FreeBSD__ */
 					rl_redisplay();
 					continue;
 				}
-#ifndef _NO_HIGHLIGHT
-				if (highlight)
-					rl_highlight(c);
-#endif
 			}
+#endif /* _NO_SUGGESTIONS */
 			return (c);
 		}
-
 		/* If zero characters are returned, then the file that we are
 		reading from is empty!  Return EOF in that case. */
 		if (result == 0)
@@ -184,7 +256,6 @@ my_rl_getc(FILE *stream)
 #endif /* !__GO32__ */
 	}
 }
-#endif /* _NO_SUGGESTIONS */
 
 /* Simply check a single chartacter (c) against the quoting characters
  * list defined in the qc global array (which takes its values from
@@ -485,7 +556,7 @@ my_rl_path_completion(const char *text, int state)
 		}
 #else
 		type = ent->d_type;
-#endif
+#endif /* !_DIRENT_HAVE_D_TYPE */
 
 		/* If the user entered nothing before TAB (ex: "cd [TAB]") */
 		if (!filename_len) {
@@ -1214,7 +1285,7 @@ my_rl_completion(const char *text, int start, int end)
 #ifndef _NO_SUGGESTIONS
 			if (suggestion.type != FILE_SUG)
 				rl_attempted_completion_over = 1;
-#endif
+#endif /* _NO_SUGGESTIONS */
 			matches = rl_completion_matches(text, &profiles_generator);
 		}
 
@@ -1314,25 +1385,9 @@ initialize_readline(void)
 	 * Thanks to George Brocklehurst for pointing out this function:
 	 * https://thoughtbot.com/blog/tab-completion-in-gnu-readline*/
 	rl_char_is_quoted_p = quote_detector;
-#ifndef _NO_SUGGESTIONS
-#ifndef __FreeBSD__
-	if (suggestions)
-		rl_getc_function = my_rl_getc;
-#else
-	/* For the time being, suggestions do not work on the FreeBSD
-	 * console. The escape code to retrieve the current cursor
-	 * position doesn't seem to work */
-	if (suggestions) {
-		if (flags & GUI) {
-			rl_getc_function = my_rl_getc;
-		} else {
-			suggestions = 0;
-			_err('w', PRINT_PROMPT, _("%s: Suggestions are currently "
-				"not supported on the FreeBSD console\n"), PROGRAM_NAME);
-		}
-	}
-#endif /* __FreeBSD__ */
-#endif /* _NO_SUGGESTIONS */
+
+	/* Define a function to handle suggestions and syntax highlighting */
+	rl_getc_function = my_rl_getc;
 
 	/* This function is executed inmediately before path completion. So,
 	 * if the string to be completed is, for instance, "user\ file" (see
