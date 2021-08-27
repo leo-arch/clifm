@@ -218,6 +218,7 @@ char
     *config_dir = (char *)NULL,
     *config_dir_gral = (char *)NULL,
     *config_file = (char *)NULL,
+	*cur_color = (char *)NULL,
     *data_dir = (char *)NULL,
     *cur_cscheme = (char *)NULL,
     *dirhist_file = (char *)NULL,

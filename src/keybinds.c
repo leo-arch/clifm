@@ -422,6 +422,9 @@ rl_accept_suggestion(int count, int key)
 	|| suggestion.type == JCMD_SUG || suggestion.type == JCMD_SUG_NOACD))
 		clear_suggestion();
 
+	if (*suggestion_buf == '#')
+		fputs(hc_c, stdout);
+
 	switch(suggestion.type) {
 
 	case JCMD_SUG: /* fallthrough */
@@ -759,6 +762,9 @@ rl_clear_line(int count, int key)
 		rl_on_new_line();
 		return EXIT_SUCCESS;
 	}
+
+	cur_color = df_c;
+	fputs(cur_color, stdout);
 
 	if (suggestion_buf) {
 		clear_suggestion();

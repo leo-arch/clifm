@@ -839,6 +839,7 @@ extern char
     *config_dir,
     *config_dir_gral,
     *config_file,
+	*cur_color,
     *data_dir,
     *cur_cscheme,
     *dirhist_file,

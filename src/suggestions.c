@@ -953,7 +953,7 @@ check_variables(const char *str, const size_t len)
  * and -1 if C was inserted before the end of the current line.
  * If a suggestion is found, it will be printed by print_suggestion() */
 int
-rl_suggestions(const char c, const char *cur_color)
+rl_suggestions(const char c)
 {
 	char *last_word = (char *)NULL;
 	char *full_line = (char *)NULL;

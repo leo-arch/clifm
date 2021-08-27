@@ -305,6 +305,9 @@ exec_cmd(char **comm)
 	 * executed command */
 	exit_code = EXIT_SUCCESS;
 
+	if (*comm[0] == '#')
+		return exit_code;
+
 				/* ##########################
 				 * #     	AUTOJUMP	    #
 				 * ########################## */
