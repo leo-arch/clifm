@@ -1226,6 +1226,20 @@ rl_plugin4(int count, int key)
 	return run_kb_cmd("plugin4");
 }
 
+/*
+static int
+rl_test(int count, int key)
+{
+	printf("test\n");
+	return EXIT_SUCCESS;
+}
+
+void
+add_func_to_rl(void)
+{
+	rl_add_defun("my-test", rl_test, -1);
+} */
+
 /* To get the keyseq value for a given key do this in an Xterm terminal:
  * C-v and then press the key (or the key combination). So, for example,
  * C-v, C-right arrow gives "[[1;5C", which here should be written like

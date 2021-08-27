@@ -24,6 +24,7 @@
 
 #pragma once
 
+void add_func_to_rl(void);
 void readline_kbinds(void);
 int kbinds_function(char **args);
 int load_keybinds(void);

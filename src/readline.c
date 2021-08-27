@@ -150,7 +150,7 @@ get_highlight_color(const char c, const size_t *qn, const int point)
 
 	case ENTER: p = df_c; break;
 
-	case ' ':
+	case ' ': return (char *)NULL;
 		// It works, but open_quote should be !open_quote
 		if (open_quote && cl != hc_c)
 			p = df_c;
@@ -197,10 +197,12 @@ rl_highlight(const char c)
 	char *cl = (char *)NULL;
 	int bk = rl_point;
 	rl_point = 0;
+
 	for (rl_point = 0; p[rl_point]; rl_point++)
 		cl = get_highlight_color(p[rl_point], qn, bk);
 
 	cl = get_highlight_color(c, qn, bk);
+
 	rl_point = bk;
 
 	int skip = 0;
@@ -1562,6 +1564,8 @@ initialize_readline(void)
 	/* Set the name of the program using readline. Mostly used for
 	 * conditional constructs in the inputrc file */
 	rl_readline_name = argv_bk[0];
+
+/*	add_func_to_rl(); */
 
 	/* Load readline initialization file. Check order:
 	 * INPUTRC env var
