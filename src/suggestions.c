@@ -1083,9 +1083,17 @@ rl_suggestions(const char c)
 	/* Do not take into account final spaces */
 	if (s >= 0 && !rl_line_buffer[s + 1])
 		s = -1;
-	if (rl_point != rl_end && rl_point > s && c != _ESC) {
-//		if (suggestion.printed)
-//			clear_suggestion();
+	if (rl_point != rl_end && c != _ESC) {
+		if (rl_point < s) {
+			if (suggestion.printed) {
+				printf("\x1b[%dC", rl_end - rl_point);
+				fflush(stdout);
+				clear_suggestion();
+				printf("\x1b[%dD", rl_end - rl_point);
+				fflush(stdout);
+				goto FAIL;
+			}
+		}
 		char text[2];
 		text[0] = c;
 		text[1] = '\0';
