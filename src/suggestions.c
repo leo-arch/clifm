@@ -949,6 +949,16 @@ check_variables(const char *str, const size_t len)
 	return 0;
 }
 
+static void
+remove_suggestion_not_end(void)
+{
+	printf("\x1b[%dC", rl_end - rl_point);
+	fflush(stdout);
+	clear_suggestion();
+	printf("\x1b[%dD", rl_end - rl_point);
+	fflush(stdout);
+}
+
 /* Check for available suggestions. Returns zero if true, one if not,
  * and -1 if C was inserted before the end of the current line.
  * If a suggestion is found, it will be printed by print_suggestion() */
@@ -970,11 +980,7 @@ rl_suggestions(const char c)
 		if (c == '~') {
 			if (rl_point != rl_end && suggestion.printed) {
 				/* This should be the delete key */
-				printf("\x1b[%dC", rl_end - rl_point);
-				fflush(stdout);
-				clear_suggestion();
-				printf("\x1b[%dD", rl_end - rl_point);
-				fflush(stdout);
+				remove_suggestion_not_end();
 				goto FAIL;
 			} else if (suggestion.printed) {
 				clear_suggestion();
@@ -1018,11 +1024,7 @@ rl_suggestions(const char c)
 		case BS:
 			if (suggestion.printed && suggestion_buf) {
 				if (rl_point != rl_end) {
-					printf("\x1b[%dC", rl_end - rl_point);
-					fflush(stdout);
-					clear_suggestion();
-					printf("\x1b[%dD", rl_end - rl_point);
-					fflush(stdout);
+					remove_suggestion_not_end();
 				} else {
 					clear_suggestion();
 				}
@@ -1086,11 +1088,7 @@ rl_suggestions(const char c)
 	if (rl_point != rl_end && c != _ESC) {
 		if (rl_point < s) {
 			if (suggestion.printed) {
-				printf("\x1b[%dC", rl_end - rl_point);
-				fflush(stdout);
-				clear_suggestion();
-				printf("\x1b[%dD", rl_end - rl_point);
-				fflush(stdout);
+				remove_suggestion_not_end();
 				goto FAIL;
 			}
 		}
