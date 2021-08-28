@@ -17,7 +17,47 @@ SRCDIR = src
 OBJS != ls $(SRCDIR)/*.c | sed "s/.c\$$/.o/g"
 
 #CFLAGS ?= -O3 -fstack-protector-strong -march=native -Wall
-LIBS ?= -lreadline -lintl
+LIBS ?= -lreadline
+
+ifdef _BE_POSIX
+LIBS += -D_BE_POSIX
+endif
+
+ifdef _NO_ARCHIVING
+LIBS += -D_NO_ARCHIVING
+endif
+
+ifdef _NERD
+LIBS += -D_NERD
+endif
+
+ifdef _NO_GETTEXT
+LIBS += -D_NO_GETTEXT
+else
+LIBS += -lintl
+endif
+
+ifdef _NO_ICONS
+LIBS += -D_NO_ICONS
+endif
+
+ifdef _NO_LIRA
+LIBS += -D_NO_LIRA -D_NO_MAGIC
+endif
+
+ifdef _NO_MAGIC
+LIBS += -D_NO_MAGIC
+else
+LIBS += -lmagic
+endif
+
+ifdef _NO_SUGGESTIONS
+LIBS += -D_NO_SUGGESTIONS
+endif
+
+ifdef _NO_TRASH
+LIBS += -D_NO_TRASH
+endif
 
 build: ${OBJS}
 	@printf "Detected operating system: ";
