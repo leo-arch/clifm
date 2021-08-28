@@ -1077,7 +1077,7 @@ external_arguments(int argc, char **argv)
 
 		case 36: xargs.autojump = autojump = 0; break;
 #ifndef _NO_HIGHLIGHT
-		case 37: xargs.highlight = highlight = 1;
+		case 37: xargs.highlight = highlight = 1; break;
 #endif
 
 		case 'a':
