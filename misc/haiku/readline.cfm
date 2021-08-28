@@ -38,7 +38,7 @@ $if mode=emacs
 #"\x1b\x4f\x63": forward-word
 
 #Disable some readline keybinds to prevent conflicts 
-"\C-i":
+#"\C-i":
 #"\C-m":
 "\C-d":
 "\C-x":
