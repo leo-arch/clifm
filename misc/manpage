@@ -1,4 +1,4 @@
-.TH "CLIFM" "1" "May 29, 2021" "CliFM 1.1" "CliFM Manual"
+.TH "CLIFM" "1" "Aug 28, 2021" "CliFM 1.2" "CliFM Manual"
 .nh
 .ad l
 
@@ -353,8 +353,8 @@ make the Selection Box common (that is, accessible) to different profiles. By de
 .B \-\-sort\-reverse
 sort in reverse order, for example: z-a instead of a-z, which is the default order
 .TP
-.B \-\-suggestions
-enable the auto-suggestions system
+.B \-\-no-suggestions
+disable the auto-suggestions system
 .TP
 .B \-\-trash\-as\-rm
 the 'r' command executes the built-in 'trash' instead of 'rm' to prevent accidental deletions

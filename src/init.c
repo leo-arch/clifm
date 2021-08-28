@@ -933,7 +933,7 @@ external_arguments(int argc, char **argv)
 	    {"cwd-in-title", no_argument, 0, 32},
 	    {"open", required_argument, 0, 33},
 	    {"print-sel", no_argument, 0, 34},
-	    {"suggestions", no_argument, 0, 35},
+	    {"no-suggestions", no_argument, 0, 35},
 	    {"autojump", no_argument, 0, 36},
 	    {"highlight", no_argument, 0, 37},
 	    {0, 0, 0, 0}};
@@ -1067,14 +1067,7 @@ external_arguments(int argc, char **argv)
 		} break;
 
 		case 34: xargs.printsel = 1; break;
-		case 35:
-#ifndef _NO_SUGGESTIONS
-			xargs.suggestions = suggestions = 1; break;
-#else
-		fprintf(stderr, _("%s: suggestions: %s\n"), PROGRAM_NAME, _(NOT_AVAILABLE));
-			exit(EXIT_FAILURE);
-#endif
-
+		case 35: xargs.suggestions = suggestions = 0; break;
 		case 36: xargs.autojump = autojump = 0; break;
 #ifndef _NO_HIGHLIGHT
 		case 37: xargs.highlight = highlight = 1; break;

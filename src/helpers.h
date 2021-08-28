@@ -103,6 +103,14 @@ void *__dso_handle;
 #endif /* LINUX_VERSION (2.6.24)*/
 #endif /* __linux__ */
 
+/* Define our own boolean type
+#undef bool
+#define bool signed char
+#undef TRUE
+#undef FALSE
+#define TRUE 1
+#define FALSE 0 */
+
 /* Event handling */
 #ifdef LINUX_INOTIFY
 #define NUM_EVENT_SLOTS 32 /* Make room for 32 events */
@@ -128,11 +136,11 @@ extern int watch;
 #else
 #define CLEAR fputs("\x1b[H\x1b[2J", stdout);
 #endif
-#define VERSION "1.1"
+#define VERSION "1.2"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "May 29, 2021"
+#define DATE "Aug 28, 2021"
 #define LICENSE "GPL2+"
 
 /* Options flags */
@@ -372,7 +380,7 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #endif
 #define DEF_SUG_FILETYPE_COLOR 0
 #define DEF_SUG_STRATEGY "ehfjbac"
-#define DEF_SUGGESTIONS 0
+#define DEF_SUGGESTIONS 1
 #define DEF_TIPS 1
 #define DEF_TRASRM 0
 #define DEF_UNICODE 1
