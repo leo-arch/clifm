@@ -87,7 +87,7 @@ get_cur_color(const int point)
 
 		if (t != -1)
 			break;
-		
+
 		--m;
 	}
 
@@ -446,15 +446,26 @@ my_rl_getc(FILE *stream)
 				 * to rl_line_buffer) */
 #ifdef __FreeBSD__
 			/* For the time being, suggestions do not work on the FreeBSD
-			 * console. The escape code to retrieve the current cursor
-			 * position doesn't seem to work */
-				if ((flags & GUI) && rl_suggestions(c) == -1) {
+			 * console (vt). The escape code to retrieve the current cursor
+			 * position doesn't seem to work. Switching the console to 'sc'
+			 * solves the issue */
+				if (flags & GUI) {
+					if (rl_suggestions(c) == -1) {
+						rl_redisplay();
+						continue;
+					}
+				} else if (getenv("CLIFM_FREEBSD_CONSOLE_SC")) {
+					if (rl_suggestions(c) == -1) {
+						rl_redisplay();
+						continue;
+					}
+				}
 #else
 				if (rl_suggestions(c) == -1) {
-#endif /* __FreeBSD__ */
 					rl_redisplay();
 					continue;
 				}
+#endif /* __FreeBSD__ */
 			}
 #endif /* _NO_SUGGESTIONS */
 			return (c);
