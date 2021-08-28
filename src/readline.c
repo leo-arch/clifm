@@ -62,6 +62,10 @@ typedef char *rl_cpvfunc_t;
 #define _SINGLE 0
 #define _DOUBLE 1
 
+#if !defined(_NO_SUGGESTIONS) && defined(__FreeBSD__)
+int freebsd_sc_console = 0;
+#endif /* __FreeBSD__ */
+
 static char *
 get_cur_color(const int point)
 {
@@ -454,11 +458,9 @@ my_rl_getc(FILE *stream)
 						rl_redisplay();
 						continue;
 					}
-				} else if (getenv("CLIFM_FREEBSD_CONSOLE_SC")) {
-					if (rl_suggestions(c) == -1) {
-						rl_redisplay();
-						continue;
-					}
+				} else if (freebsd_sc_console && rl_suggestions(c) == -1) {
+					rl_redisplay();
+					continue;
 				}
 #else
 				if (rl_suggestions(c) == -1) {
@@ -1664,6 +1666,11 @@ initialize_readline(void)
 	 * my_rl_quote(), is_quote_char(), and my_rl_dequote() */
 	qc = savestring(rl_filename_quote_characters,
 	    strlen(rl_filename_quote_characters));
+
+#if !defined(_NO_SUGGESTIONS) && defined(__FreeBSD__)
+	if (!(flags & GUI) && getenv("CLIFM_FREEBSD_CONSOLE_SC"))
+		freebsd_sc_console = 1;
+#endif 
 
 	return EXIT_SUCCESS;
 }
