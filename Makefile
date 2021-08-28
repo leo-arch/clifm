@@ -28,42 +28,6 @@ LIBS_FreeBSD ?= -I/usr/local/include -L/usr/local/lib -lreadline -lintl -lmagic
 LIBS_NetBSD ?= -I/usr/pkg/include -L/usr/pkg/lib -Wl,-R/usr/pkg/lib -lreadline -lintl -lmagic
 LIBS_OpenBSD ?= -I/usr/local/include -L/usr/local/lib -lereadline -lintl -lmagic
 
-ifdef _BE_POSIX
-CFLAGS += -D_BE_POSIX
-endif
-
-ifdef _NO_ARCHIVING
-CFLAGS += -D_NO_ARCHIVING
-endif
-
-ifdef _NERD
-CFLAGS += -D_NERD
-endif
-
-ifdef _NO_GETTEXT
-CFLAGS += -D_NO_GETTEXT
-endif
-
-ifdef _NO_ICONS
-CFLAGS += -D_NO_ICONS
-endif
-
-ifdef _NO_LIRA
-CFLAGS += -D_NO_LIRA -D_NO_MAGIC
-endif
-
-ifdef _NO_MAGIC
-CFLAGS += -D_NO_MAGIC
-endif
-
-ifdef _NO_SUGGESTIONS
-CFLAGS += -D_NO_SUGGESTIONS
-endif
-
-ifdef _NO_TRASH
-CFLAGS += -D_NO_TRASH
-endif
-
 build: $(SRC) $(HEADERS)
 	@printf "Detected operating system: %s\n" "$(OS)"
 	$(CC) -o $(BIN) $(SRC) $(CFLAGS) $(LDFLAGS) $(LIBS_$(OS))
