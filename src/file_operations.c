@@ -275,7 +275,7 @@ create_file(char **cmd)
 		 * file in CWD, and thereby we need to update the screen */
 		char *ret = strrchr(cmd[i], '/');
 		if (!ret || !*(ret + 1))
-			file_in_cwd = 1; */
+			file_in_cwd = 1;
 #endif
 	}
 

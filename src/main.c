@@ -669,7 +669,7 @@ main(int argc, char *argv[])
 
 	if (flags & ROOT_USR) {
 		_err(0, PRINT_PROMPT, _("%s%s: %sRunning as root%s\n"),
-			BOLD, PROGRAM_NAME, RED, df_c);
+			BOLD, PROGRAM_NAME, _RED, df_c);
 	}
 
 	free(usr_cscheme);
