@@ -271,9 +271,6 @@ enable program logs
 .B \-\-expand\-bookmarks
 expand bookmark names into the corresponding bookmark paths and enable TAB completion for bookmark names as well. If the bookmark is, .e.g. mybookmark=/my/path, "mybo" will be completed as "mybookmark", which will be interpreted then as "/my/path".
 .TP
-.B \-\-highlight
-enable syntax highlighting
-.TP
 .B \-\-icons
 enable icons. Suitable fonts are provided by the \fBicons-in-terminal\fR project.
 .TP
