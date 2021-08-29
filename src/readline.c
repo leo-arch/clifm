@@ -58,13 +58,14 @@ typedef char *rl_cpvfunc_t;
 #include "suggestions.h"
 #endif
 
-#ifndef _NO_HIGHLIGHT
-#define _SINGLE 0
-#define _DOUBLE 1
-
 #if !defined(_NO_SUGGESTIONS) && defined(__FreeBSD__)
 int freebsd_sc_console = 0;
 #endif /* __FreeBSD__ */
+
+/*
+#ifndef _NO_HIGHLIGHT
+#define _SINGLE 0
+#define _DOUBLE 1
 
 static char *
 get_cur_color(const int point)
@@ -220,7 +221,7 @@ rl_highlight(const char c)
 	}
 
 	return;
-}
+} */
 
 /*
 static void
@@ -417,8 +418,8 @@ END:
 
 	cur_color = c;
 	return;
-} */
-#endif
+}
+#endif */
 
 /* This function is automatically called by readline() to handle input.
  * Taken from Bash 1.14.7 and modified to fit our needs. Used
@@ -437,10 +438,10 @@ my_rl_getc(FILE *stream)
 	while(1) {
 		result = read(fileno(stream), &c, sizeof(unsigned char));
 		if (result == sizeof(unsigned char)) {
-#ifndef _NO_HIGHLIGHT
+/*#ifndef _NO_HIGHLIGHT
 			if (highlight)
 				rl_highlight(c);
-#endif /* _NO_HIGHLIGHT */
+#endif // _NO_HIGHLIGHT */
 
 #ifndef _NO_SUGGESTIONS
 			if (suggestions) {

@@ -1675,7 +1675,6 @@ help_function(void)
 \n              corresponding bookmark paths. TAB \
 \n              completion for bookmark names is also \
 \n              available\
-\n     --highlighting\t\t enable syntax highlighting\
 \n     --icons\t\t\t enable icons\
 \n     --icons-use-file-color\t icons color follows file color\
 \n     --list-and-quit\t\t list files and quit. It may be used\
