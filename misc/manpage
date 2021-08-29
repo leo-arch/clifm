@@ -278,7 +278,7 @@ enable syntax highlighting
 enable icons. Suitable fonts are provided by the \fBicons-in-terminal\fR project.
 .TP
 .B \-\-icons\-use\-file\-color
-Instead of an specific color, icons take the color of the corresponding file name (specified either via file type or via file extension). Useful when building custom color schemes. This option implies \fB--icons\fR.
+instead of an specific color, icons take the color of the corresponding file name (specified either via file type or via file extension). Useful when building custom color schemes. This option implies \fB--icons\fR.
 .TP
 .B \-\-list\-and\-quit
 list files and quit. It may be used in conjunction parameter substitution. Ex: 'clifm --list-and-quit /etc'
@@ -293,13 +293,13 @@ list only up to \fINUM\fR files. Use -1 to list all files (default). See the \fI
 set the maximum number of characters after which the current directory in the prompt line will be abbreviated to the directory base name (if \\z is used in the prompt)
 .TP
 .B \-\-no\-cd\-auto
-by default, CliFM changes to directories by just specifying the corresponding ELN (e.g. '12' instead of 'cd 12'). This option forces the use of 'cd'
+by default, CliFM changes to directories by just specifying the corresponding ELN (e.g. '12' instead of 'cd 12'). This option forces the use of \fIcd\fR
 .TP
 .B \-\-no\-dir\-jumper
 disable the directory jumper function
 .TP
 .B \-\-no-classify
-By default, CliFM appends a file type indicator character to file names when running with no colors (see the \fB--no-colors\fR option below) and both a directory indicator and a files counter for directories when running with colors. Classification characters are: 
+by default, CliFM appends a file type indicator character to file names when running with no colors (see the \fB--no-colors\fR option below) and both a directory indicator and a files counter for directories when running with colors. Classification characters are: 
  /n: directories (n = files counter)
  @: symbolic links
  |: fifo/pipes
@@ -324,7 +324,10 @@ disable the files counter for directories. This option is especially useful to s
 same as no-cd-auto, but for files instead of directories
 .TP
 .B \-\-no-restore\-last\-path
-By default, CliFM saves the last visited directory for each workspace to be restored in the next session. Use this option to disable this behavior.
+by default, CliFM saves the last visited directory for each workspace to be restored in the next session. Use this option to disable this behavior.
+.TP
+.B \-\-no-suggestions
+disable the auto-suggestions system
 .TP
 .B \-\-no\-tips
 disable startup tips
@@ -342,7 +345,7 @@ run as a stand-alone resource opener: open \fIFILE\fR and exit. This option is d
 specify a resource opener to use. If \fIopener\fR is not set, \fILira\fR will be used instead
 .TP
 .B \-\-print\-sel
-Always print the list of selected files. Since this list could be quite extensive, the maximum number of selected files to print could be specified via the \fBMaxPrintSelfiles\fR option in the configuration file. Defaults to 0 (auto, i.e. never take more than half terminal height). Use -1 to remove the limit or any other positive value.
+always print the list of selected files. Since this list could be quite extensive, the maximum number of selected files to print could be specified via the \fBMaxPrintSelfiles\fR option in the configuration file. Defaults to 0 (auto, i.e. never take more than half terminal height). Use -1 to remove the limit or any other positive value.
 .TP
 .B \-\-rl\-vi\-mode
 set readline to vi editing mode (defaults to emacs editing mode)
@@ -353,11 +356,8 @@ make the Selection Box common (that is, accessible) to different profiles. By de
 .B \-\-sort\-reverse
 sort in reverse order, for example: z-a instead of a-z, which is the default order
 .TP
-.B \-\-no-suggestions
-disable the auto-suggestions system
-.TP
 .B \-\-trash\-as\-rm
-the 'r' command executes the built-in 'trash' instead of 'rm' to prevent accidental deletions
+the \fIr\fR command executes the built-in 'trash' (see the \fIt\fR command) instead of \fBrm\fR(1) to prevent accidental deletions
 .TP
 Options precedence order: 1) command line; 2) configuration file; 3) default values.
 

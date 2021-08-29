@@ -121,9 +121,8 @@ int
 xchdir(const char *dir, const int set_title)
 {
 	DIR *dirp = opendir(dir);
-
 	if (!dirp)
-		return -1;
+		return (-1);
 
 	closedir(dirp);
 
@@ -140,9 +139,10 @@ xchdir(const char *dir, const int set_title)
 int
 cd_function(char *new_path)
 {
+	int exit_status = EXIT_SUCCESS;
+
 	/* If no argument, change to home */
 	if (!new_path || !*new_path) {
-
 		if (!user.home) {
 			fprintf(stderr, _("%s: cd: Home directory not found\n"),
 			    PROGRAM_NAME);
@@ -157,41 +157,41 @@ cd_function(char *new_path)
 
 		free(ws[cur_ws].path);
 		ws[cur_ws].path = savestring(user.home, strlen(user.home));
+
+		goto END;
 	}
 
 	/* If we have some argument, dequote it, resolve it with realpath(),
 	 * cd into the resolved path, and set the path variable to this
 	 * latter */
-	else {
-		if (strchr(new_path, '\\')) {
-			char *deq_path = dequote_str(new_path, 0);
+	if (strchr(new_path, '\\')) {
+		char *deq_path = dequote_str(new_path, 0);
 
-			if (deq_path) {
-				strcpy(new_path, deq_path);
-				free(deq_path);
-			}
+		if (deq_path) {
+			strcpy(new_path, deq_path);
+			free(deq_path);
 		}
-
-		char *real_path = realpath(new_path, NULL);
-		if (!real_path) {
-			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
-			    new_path, strerror(errno));
-			return EXIT_FAILURE;
-		}
-
-		if (xchdir(real_path, SET_TITLE) != EXIT_SUCCESS) {
-			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
-			    real_path, strerror(errno));
-			free(real_path);
-			return EXIT_FAILURE;
-		}
-
-		free(ws[cur_ws].path);
-		ws[cur_ws].path = savestring(real_path, strlen(real_path));
-		free(real_path);
 	}
 
-	int exit_status = EXIT_SUCCESS;
+	char *real_path = realpath(new_path, NULL);
+	if (!real_path) {
+		fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
+		    new_path, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	if (xchdir(real_path, SET_TITLE) != EXIT_SUCCESS) {
+		fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
+		    real_path, strerror(errno));
+		free(real_path);
+		return EXIT_FAILURE;
+	}
+
+	free(ws[cur_ws].path);
+	ws[cur_ws].path = savestring(real_path, strlen(real_path));
+	free(real_path);
+
+END:
 	add_to_dirhist(ws[cur_ws].path);
 
 	if (cd_lists_on_the_fly) {
