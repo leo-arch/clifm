@@ -131,16 +131,16 @@ Features beyond common file operations, such as copy, move, remove, etc.:
 * [Four customizable keybindings for custom plugins](https://github.com/leo-arch/clifm/wiki/Customization#keybindings).
 * [Fastback function](https://github.com/leo-arch/clifm/wiki/Introduction#fastback-function).
 * [Git integration](https://github.com/leo-arch/clifm/wiki/Advanced#git-integration).
-* **NEW**: [Remote file systems management](https://github.com/leo-arch/clifm/wiki/Introduction#net-name-edit-m-mount-name-u-unmount-name).
-* **NEW**: [Compile features in/out](https://github.com/leo-arch/clifm/blob/master/src/README.md#compiling-features-inout).
-* **NEW**: _[Gemini](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)_, a Fish-like auto-suggestions system.
+* [Remote file systems management](https://github.com/leo-arch/clifm/wiki/Introduction#net-name-edit-m-mount-name-u-unmount-name).
+* [Compile features in/out](https://github.com/leo-arch/clifm/blob/master/src/README.md#compiling-features-inout).
+* _[Gemini](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)_, a Fish-like auto-suggestions system.
 
 <h4 align="center"><br><i>Gemini in action</i></h4>
 <p align="center"><img src="images/suggestions.gif"></a></p>
 
 ---
 For a detailed explanation of each of these features, follow the corresponding links or consult the [wiki](https://github.com/leo-arch/clifm/wiki). \
-To enjoy of any of the features tagged as NEW, clone this repository and install the program via the Makefile. Follow the instructions below. 
+To enjoy of any of the features tagged as NEW, clone this repository and install the program via the Makefile. Follow the instructions below.
 
 ---
 
