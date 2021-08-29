@@ -844,11 +844,11 @@ list_dir_light(void)
 		putchar('\n');
 
 END:
-	if (close_dir && closedir(dir) == -1) {
-		/* Unhide the cursor */
-		fputs("\x1b[?25h", stdout);
+	/* Unhide the cursor */
+	fputs("\x1b[?25h", stdout);
+
+	if (close_dir && closedir(dir) == -1)
 		return EXIT_FAILURE;
-	}
 
 	if (xargs.list_and_quit == 1)
 		exit(exit_code);
