@@ -93,6 +93,7 @@ int
 check_immutable_bit(char *file)
 {
 #if !defined(FS_IOC_GETFLAGS) || !defined(FS_IMMUTABLE_FL)
+	UNUSED(file);
 	return 0;
 #else
 	int attr, fd, immut_flag = -1;
@@ -481,9 +482,9 @@ check_for_alias(char **args)
 	return (char **)NULL;
 }
 
-/* Keep only the last MAX records in LOG_FILE */
+/* Keep only the last MAX records in LOGFILE */
 void
-check_file_size(char *log_file, int max)
+check_file_size(char *logfile, int max)
 {
 	if (!config_ok)
 		return;
@@ -492,12 +493,12 @@ check_file_size(char *log_file, int max)
 	FILE *log_fp = (FILE *)NULL;
 	struct stat file_attrib;
 
-	if (stat(log_file, &file_attrib) == -1) {
-		log_fp = fopen(log_file, "w");
+	if (stat(logfile, &file_attrib) == -1) {
+		log_fp = fopen(logfile, "w");
 
 		if (!log_fp) {
 			_err(0, NOPRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-			    log_file, strerror(errno));
+			    logfile, strerror(errno));
 		} else
 			fclose(log_fp);
 
@@ -506,11 +507,11 @@ check_file_size(char *log_file, int max)
 	}
 
 	/* Once we know the files exists, keep only max logs */
-	log_fp = fopen(log_file, "r");
+	log_fp = fopen(logfile, "r");
 
 	if (!log_fp) {
 		_err(0, NOPRINT_PROMPT, "%s: log: %s: %s\n", PROGRAM_NAME,
-		    log_file, strerror(errno));
+		    logfile, strerror(errno));
 		return;
 	}
 
@@ -564,8 +565,8 @@ check_file_size(char *log_file, int max)
 	free(line_buff);
 	fclose(log_fp_tmp);
 	fclose(log_fp);
-	unlink(log_file);
-	rename(tmp_file, log_file);
+	unlink(logfile);
+	rename(tmp_file, logfile);
 	free(tmp_file);
 
 	return;
