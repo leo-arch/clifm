@@ -1377,10 +1377,11 @@ parse_input_str(char *str)
 		 * ############################################### */
 
 	int *glob_array = (int *)xnmalloc(int_array_max, sizeof(int));
+	size_t glob_n = 0;
 #if !defined(__HAIKU__) && !defined(__OpenBSD__)
 	int *word_array = (int *)xnmalloc(int_array_max, sizeof(int));
+	size_t word_n = 0;
 #endif
-	size_t glob_n = 0, word_n = 0;
 
 	for (i = 0; substr[i]; i++) {
 

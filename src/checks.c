@@ -125,6 +125,7 @@ int
 is_acl(char *file)
 {
 #ifndef _ACL_OK
+	UNUSED(file);
 	return 0;
 #else
 	if (!file || !*file)

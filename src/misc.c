@@ -379,10 +379,12 @@ int
 new_instance(char *dir, int sudo)
 {
 #if defined(__HAIKU__)
+	UNUSED(dir); UNUSED(sudo);
 	fprintf(stderr, _("%s: This function is not available on Haiku\n"),
 			PROGRAM_NAME);
 	return EXIT_FAILURE;
 #elif defined(__OpenBSD__)
+	UNUSED(dir); UNUSED(sudo);
 	fprintf(stderr, _("%s: This function is not available on OpenBSD\n"),
 			PROGRAM_NAME);
 	return EXIT_FAILURE;
@@ -999,10 +1001,10 @@ list_mountpoints(void)
 
 #elif defined(__FreeBSD__) || defined(__OpenBSD__)
 	struct statfs *fslist;
-	mp_n = getmntinfo(&fslist, MNT_NOWAIT);
+	mp_n = (size_t)getmntinfo(&fslist, MNT_NOWAIT);
 #elif defined(__NetBSD__)
 	struct statvfs *fslist;
-	mp_n = getmntinfo(&fslist, MNT_NOWAIT);
+	mp_n = (size_t)getmntinfo(&fslist, MNT_NOWAIT);
 #endif
 
 	/* This should never happen: There should always be a mountpoint,
@@ -1013,12 +1015,12 @@ list_mountpoints(void)
 		return EXIT_SUCCESS;
 	}
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
-	int j;
-	for (i = j = 0; i < mp_n; i++) {
+	size_t j;
+	for (i = j = 0; (size_t)i < mp_n; i++) {
 		/* Do not list all mountpoints, but only those corresponding
 		 * to a block device (/dev) */
 		if (strncmp(fslist[i].f_mntfromname, "/dev/", 5) == 0) {
-			printf("%s%u%s %s%s%s (%s)\n", el_c, j + 1, df_c,
+			printf("%s%zu%s %s%s%s (%s)\n", el_c, j + 1, df_c,
 			    (access(fslist[i].f_mntonname, R_OK | X_OK) == 0)
 			    ? di_c : nd_c, fslist[i].f_mntonname,
 			    df_c, fslist[i].f_mntfromname);
