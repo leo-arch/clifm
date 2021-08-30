@@ -130,6 +130,12 @@ When it comes to plugins, we mostly use `POSIX shell scripts`. In this case, alw
 
 **5**) If not obvious, comment what your code is trying to achieve: there is no good software without good documentation.
 
+**6**) Approved code must be compiled without any warning/error using the following compiler flags:
+
+```sh
+-Wall -Wextra -Werror -Wpedantic -Wshadow -Wformat=2 -Wformat-security -Wconversion -Wsign-conversion -fstack-protector-strong -fstack-clash-protection -fcf-protection -Wvla
+```
+
 ## 3) CliFM's general code structure
 
 CliFM source code consists of multiple C source files, being `main.c` the starting point and `helpers.h` the main header file. In `main.c` you'll find:
