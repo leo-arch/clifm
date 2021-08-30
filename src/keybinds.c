@@ -32,16 +32,16 @@ typedef char *rl_cpvfunc_t;
 #else
 #include <readline/readline.h>
 #endif
+#ifdef __TINYC__
+/* Silence a tcc warning. We don't use CTRL anyway */
+#undef CTRL
+#endif
 #include <termios.h>
 #include <unistd.h>
 #ifdef __NetBSD__
 #include <string.h>
 #endif
 #include <dirent.h>
-
-/*
-#include <curses.h>
-#include <term.h> */
 
 #include "aux.h"
 #include "config.h"
@@ -289,6 +289,7 @@ find_key(char *function)
 static int
 rl_prepend_sudo(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	int free_s = 1;
 	size_t len = 0;
 	char *t = getenv("CLIFM_SUDO_CMD"),
@@ -313,12 +314,12 @@ rl_prepend_sudo(int count, int key)
 	int p = rl_point;
 	if (*rl_line_buffer == *s
 	&& strncmp(rl_line_buffer, s, len) == 0) {
-		rl_delete_text(0, len);
-		rl_point = p - len;
+		rl_delete_text(0, (int)len);
+		rl_point = p - (int)len;
 	} else {
 		rl_point = 0;
 		rl_insert_text(s);
-		rl_point = p + len;
+		rl_point = p + (int)len;
 	}
 
 	if (free_s)
@@ -340,6 +341,7 @@ rl_prepend_sudo(int count, int key)
 static int
 rl_create_file(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	return run_kb_cmd("n");
 }
 
@@ -347,6 +349,7 @@ rl_create_file(int count, int key)
 static int
 rl_accept_suggestion(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	if (kbind_busy) {
 		/* If not at the end of the typed string, just move the cursor
 		 * forward one column */
@@ -514,6 +517,7 @@ rl_accept_first_word(int count, int key)
 static int
 rl_refresh(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -527,6 +531,7 @@ rl_refresh(int count, int key)
 static int
 rl_parent_dir(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	/* If already root dir, do nothing */
 	if (*ws[cur_ws].path == '/' && !ws[cur_ws].path[1])
 		return EXIT_SUCCESS;
@@ -536,6 +541,7 @@ rl_parent_dir(int count, int key)
 static int
 rl_root_dir(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	/* If already root dir, do nothing */
 	if (*ws[cur_ws].path == '/' && !ws[cur_ws].path[1])
 		return EXIT_SUCCESS;
@@ -545,6 +551,7 @@ rl_root_dir(int count, int key)
 static int
 rl_home_dir(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	/* If already in home, do nothing */
 	if (*ws[cur_ws].path == *user.home && strcmp(ws[cur_ws].path, user.home) == 0)
 		return EXIT_SUCCESS;
@@ -554,6 +561,7 @@ rl_home_dir(int count, int key)
 static int
 rl_next_dir(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	/* If already at the end of dir hist, do nothing */
 	if (dirhist_cur_index + 1 == dirhist_total_index)
 		return EXIT_SUCCESS;
@@ -563,6 +571,7 @@ rl_next_dir(int count, int key)
 static int
 rl_first_dir(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	/* If already at the beginning of dir hist, do nothing */
 	if (dirhist_cur_index == 0)
 		return EXIT_SUCCESS;
@@ -573,6 +582,7 @@ rl_first_dir(int count, int key)
 static int
 rl_last_dir(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -590,6 +600,7 @@ rl_last_dir(int count, int key)
 static int
 rl_previous_dir(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	/* If already at the beginning of dir hist, do nothing */
 	if (dirhist_cur_index == 0)
 		return EXIT_SUCCESS;
@@ -599,6 +610,7 @@ rl_previous_dir(int count, int key)
 static int
 rl_long(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -614,6 +626,7 @@ rl_long(int count, int key)
 static int
 rl_folders_first(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -641,6 +654,7 @@ rl_folders_first(int count, int key)
 static int
 rl_light(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -656,6 +670,7 @@ rl_light(int count, int key)
 static int
 rl_hidden(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 #ifndef _NO_SUGGESTIONS
@@ -679,42 +694,49 @@ rl_hidden(int count, int key)
 static int
 rl_open_config(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	return run_kb_cmd("edit");
 }
 
 static int
 rl_open_keybinds(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	return run_kb_cmd("kb edit");
 }
 
 static int
 rl_open_cscheme(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	return run_kb_cmd("cs e");
 }
 
 static int
 rl_open_bm_file(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	return run_kb_cmd("bm edit");
 }
 
 static int
 rl_open_jump_db(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	return run_kb_cmd("je");
 }
 
 static int
 rl_open_mime(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	return run_kb_cmd("mm edit");
 }
 
 static int
 rl_mountpoints(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	/* Call the function only if it's not already running */
 	kbind_busy = 1;
 	keybind_exec_cmd("mp");
@@ -725,18 +747,21 @@ rl_mountpoints(int count, int key)
 static int
 rl_select_all(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	return run_kb_cmd("s ^");
 }
 
 static int
 rl_deselect_all(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	return run_kb_cmd("ds *");
 }
 
 static int
 rl_bookmarks(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -749,12 +774,14 @@ rl_bookmarks(int count, int key)
 static int
 rl_selbox(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	return run_kb_cmd("ds");
 }
 
 static int
 rl_clear_line(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 #ifndef _NO_SUGGESTIONS
@@ -783,6 +810,7 @@ rl_clear_line(int count, int key)
 static int
 rl_sort_next(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 #ifndef _NO_SUGGESTIONS
@@ -810,6 +838,7 @@ rl_sort_next(int count, int key)
 static int
 rl_sort_previous(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 #ifndef _NO_SUGGESTIONS
@@ -837,6 +866,7 @@ rl_sort_previous(int count, int key)
 static int
 rl_lock(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	int ret = EXIT_SUCCESS;
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
@@ -866,6 +896,7 @@ rl_lock(int count, int key)
 static int
 rl_remove_sel(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -881,6 +912,7 @@ rl_remove_sel(int count, int key)
 static int
 rl_export_sel(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -894,6 +926,7 @@ rl_export_sel(int count, int key)
 static int
 rl_move_sel(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -907,6 +940,7 @@ rl_move_sel(int count, int key)
 static int
 rl_rename_sel(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -920,6 +954,7 @@ rl_rename_sel(int count, int key)
 static int
 rl_paste_sel(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -935,6 +970,7 @@ rl_paste_sel(int count, int key)
 static int
 rl_quit(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -948,6 +984,7 @@ rl_quit(int count, int key)
 static int
 rl_previous_profile(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 #ifndef _NO_SUGGESTIONS
@@ -998,6 +1035,7 @@ rl_previous_profile(int count, int key)
 static int
 rl_next_profile(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 #ifndef _NO_SUGGESTIONS
@@ -1048,42 +1086,49 @@ rl_next_profile(int count, int key)
 static int
 rl_dirhist(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	return run_kb_cmd("bh");
 }
 
 static int
 rl_archive_sel(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	return run_kb_cmd("ac sel");
 }
 
 static int
 rl_new_instance(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	return run_kb_cmd("x .");
 }
 
 static int
 rl_clear_msgs(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	return run_kb_cmd("msg clear");
 }
 
 static int
 rl_trash_sel(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	return run_kb_cmd("t sel");
 }
 
 static int
 rl_untrash_all(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	return run_kb_cmd("u *");
 }
 
 static int
 rl_open_sel(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1104,6 +1149,7 @@ rl_open_sel(int count, int key)
 static int
 rl_bm_sel(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	if (kbind_busy)
 		return EXIT_SUCCESS;
 
@@ -1124,6 +1170,7 @@ rl_bm_sel(int count, int key)
 static int
 rl_kbinds_help(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
@@ -1140,6 +1187,7 @@ rl_kbinds_help(int count, int key)
 static int
 rl_cmds_help(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
@@ -1156,6 +1204,7 @@ rl_cmds_help(int count, int key)
 static int
 rl_manpage(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 #ifndef _NO_SUGGESTIONS
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
@@ -1169,6 +1218,7 @@ rl_manpage(int count, int key)
 static int
 rl_pinned_dir(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	if (!pinned_dir) {
 		printf(_("%s: No pinned file\n"), PROGRAM_NAME);
 		rl_reset_line_state();
@@ -1181,48 +1231,56 @@ rl_pinned_dir(int count, int key)
 static int
 rl_ws1(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	return run_kb_cmd("ws 1");
 }
 
 static int
 rl_ws2(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	return run_kb_cmd("ws 2");
 }
 
 static int
 rl_ws3(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	return run_kb_cmd("ws 3");
 }
 
 static int
 rl_ws4(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	return run_kb_cmd("ws 4");
 }
 
 static int
 rl_plugin1(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	return run_kb_cmd("plugin1");
 }
 
 static int
 rl_plugin2(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	return run_kb_cmd("plugin2");
 }
 
 static int
 rl_plugin3(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	return run_kb_cmd("plugin3");
 }
 
 static int
 rl_plugin4(int count, int key)
 {
+	UNUSED(count); UNUSED(key);
 	return run_kb_cmd("plugin4");
 }
 
