@@ -34,6 +34,10 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #if defined(__linux__) || defined(__HAIKU__)
+#ifdef __TINYC__
+/* Silence a tcc warning. We don't use CTRL anyway */
+#undef CTRL
+#endif
 #include <sys/ioctl.h>
 #endif
 
@@ -474,7 +478,7 @@ sel_function(char **args)
 		if (sel_path[sel_path_len - 1] == '/')
 			sel_path[sel_path_len - 1] = '\0';
 
-		char *tmp_dir = xnmalloc(PATH_MAX + 1, sizeof(char));
+		char *tmpdir = xnmalloc(PATH_MAX + 1, sizeof(char));
 
 		if (strchr(sel_path, '\\')) {
 			char *deq_str = dequote_str(sel_path, 0);
@@ -484,10 +488,10 @@ sel_function(char **args)
 			}
 		}
 
-		strcpy(tmp_dir, sel_path);
+		strcpy(tmpdir, sel_path);
 
 		if (*sel_path == '.') {
-			if (realpath(sel_path, tmp_dir) == NULL) {
+			if (realpath(sel_path, tmpdir) == NULL) {
 				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, sel_path,
 						strerror(errno));
 				return EXIT_FAILURE;
@@ -498,19 +502,19 @@ sel_function(char **args)
 			char *exp_path = tilde_expand(sel_path);
 			if (!exp_path) {
 				fprintf(stderr, _("%s: Error expanding path\n"), PROGRAM_NAME);
-				free(tmp_dir);
+				free(tmpdir);
 				return EXIT_FAILURE;
 			}
-			strcpy(tmp_dir, exp_path);
+			strcpy(tmpdir, exp_path);
 			free(exp_path);
 		}
 
-		if (*tmp_dir != '/') {
-			snprintf(dir, PATH_MAX, "%s/%s", ws[cur_ws].path, tmp_dir);
+		if (*tmpdir != '/') {
+			snprintf(dir, PATH_MAX, "%s/%s", ws[cur_ws].path, tmpdir);
 		} else
-			strcpy(dir, tmp_dir);
+			strcpy(dir, tmpdir);
 
-		free(tmp_dir);
+		free(tmpdir);
 
 		if (access(dir, X_OK) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir,
@@ -740,7 +744,8 @@ deselect(char **comm)
 			while (--i >= 0)
 				free(sel_elements[i]);
 
-			sel_n = total_sel_size = 0;
+			sel_n = 0;
+			total_sel_size = 0;
 
 			if (save_sel() != 0)
 				return EXIT_FAILURE;
@@ -805,7 +810,8 @@ deselect(char **comm)
 				while (--i >= 0)
 					free(sel_elements[i]);
 
-				sel_n = total_sel_size = 0;
+				sel_n = 0;
+				total_sel_size = 0;
 
 				i = (int)desel_n;
 				while (--i >= 0)
@@ -904,14 +910,16 @@ deselect(char **comm)
 	 * be used anymore, for they contain the same value as the last
 	 * non-deselected element due to the above array rearrangement */
 	for (i = 1; i <= (int)desel_n; i++)
-		if ((int)(sel_n - i) >= 0 && sel_elements[sel_n - i])
-			free(sel_elements[sel_n - i]);
+		if (((int)sel_n - i) >= 0 && sel_elements[(int)sel_n - i])
+			free(sel_elements[(int)sel_n - i]);
 
 	/* Reallocate the sel array according to the new size */
 	sel_n = (sel_n - desel_n);
 
-	if ((int)sel_n < 0)
-		sel_n = total_sel_size = 0;
+	if ((int)sel_n < 0) {
+		sel_n = 0;
+		total_sel_size = 0;
+	}
 
 	if (sel_n)
 		sel_elements = (char **)xrealloc(sel_elements, sel_n * sizeof(char *));
