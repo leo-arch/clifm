@@ -55,7 +55,7 @@ xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 		end = dst + n;
 	}
 
-	return end - dst - 1;
+	return (size_t)(end - dst - 1);
 }
 
 size_t
@@ -69,7 +69,7 @@ wc_xstrlen(const char *restrict str)
 	_len = mbstowcs(wbuf, str, NAME_MAX);
 	int p = wcswidth(wbuf, _len);
 	if (p != -1)
-		len = p;
+		len = (size_t)p;
 	else
 		len = 0;
 /*#else
@@ -386,7 +386,7 @@ gen_rand_str(size_t len)
 	}
 
 	while (len--) {
-		int i = rand() % (sizeof(charset) - 1);
+		int i = rand() % (int)(sizeof(charset) - 1);
 		*p++ = charset[i];
 	}
 
@@ -2023,6 +2023,7 @@ get_substr(char *str, const char ifs)
 char *
 dequote_str(char *text, int mt)
 {
+	UNUSED(mt);
 	if (!text || !*text)
 		return (char *)NULL;
 

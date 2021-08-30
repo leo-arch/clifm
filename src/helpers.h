@@ -472,6 +472,7 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 
 #define ENTRY_N 64
 
+#define UNUSED(x) (void)x /* Just silence the compiler's warning */
 #define TOUPPER(ch) (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
 #define DIGINUM(n) (((n) < 10) ? 1 : ((n) < 100)      ? 2 \
 				 : ((n) < 1000)	      ? 3 \
@@ -681,11 +682,11 @@ extern struct remote_t *remotes;
 
 struct suggestions_t {
 	int filetype;
-	int full_line_len;
-	int nlines;
-    int offset;
     int printed;
 	int type;
+    int offset;
+	size_t full_line_len;
+	size_t nlines;
 };
 
 extern struct suggestions_t suggestion;
@@ -718,7 +719,7 @@ extern int
 	currow,
 	flags;
 
-extern short
+extern int
     auto_open,
     autocd,
     autojump,

@@ -268,7 +268,8 @@ search_glob(char **comm, int invert)
 						continue;
 
 					eln[found] = (int)(k + 1);
-					files_len[found] = file_info[k].len + file_info[k].eln_n + 1;
+					files_len[found] = file_info[k].len
+								+ (size_t)file_info[k].eln_n + 1;
 					if (files_len[found] > flongest)
 						flongest = files_len[found];
 
@@ -400,7 +401,8 @@ search_glob(char **comm, int invert)
 
 					eln[found] = (int)(j + 1);
 
-					files_len[found] = file_info[j].len + file_info[j].eln_n + 1;
+					files_len[found] = file_info[j].len
+							+ (size_t)file_info[j].eln_n + 1;
 
 					if (files_len[found] > flongest)
 						flongest = files_len[found];

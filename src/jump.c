@@ -303,7 +303,8 @@ dirjump(char **args, int mode)
 		       "used in some workspace\n"));
 		puts(_("Order\tVisits\tFirst\tLast\tRank\tDirectory"));
 
-		size_t i, ranks_sum = 0, visits_sum = 0;
+		size_t i;
+		int ranks_sum = 0, visits_sum = 0;
 
 		for (i = 0; i < jump_n; i++) {
 
@@ -357,7 +358,7 @@ dirjump(char **args, int mode)
 			}
 
 			ranks_sum += rank;
-			visits_sum += jump_db[i].visits;
+			visits_sum += (int)jump_db[i].visits;
 
 			if (ws[cur_ws].path[1] == jump_db[i].path[1]
 			&& strcmp(ws[cur_ws].path, jump_db[i].path) == 0) {
@@ -373,7 +374,7 @@ dirjump(char **args, int mode)
 			}
 		}
 
-		printf("\nTotal rank: %zu/%d\nTotal visits: %zu\n", ranks_sum,
+		printf("\nTotal rank: %d/%d\nTotal visits: %d\n", ranks_sum,
 		    max_jump_total_rank, visits_sum);
 
 		return EXIT_SUCCESS;

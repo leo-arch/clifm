@@ -25,7 +25,7 @@
 #pragma once
 
 void clear_suggestion(void);
-int rl_suggestions(const char c);
+int rl_suggestions(const unsigned char c);
 void free_suggestion(void);
 /*
 int enable_raw_mode(int fd);

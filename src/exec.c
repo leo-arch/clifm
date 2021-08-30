@@ -319,7 +319,7 @@ exec_cmd(char **comm)
 	}
 
 	/* Warn when using the ',' keyword and there's no pinned file */
-	int k = args_n + 1;
+	int k = (int)args_n + 1;
 	while (--k >= 0) {
 		if (*comm[k] == ',' && !comm[k][1]) {
 			fprintf(stderr, _("%s: No pinned file\n"), PROGRAM_NAME);
@@ -329,7 +329,7 @@ exec_cmd(char **comm)
 
 	/* User defined actions */
 	if (actions_n) {
-		int i = actions_n;
+		int i = (int)actions_n;
 		while (--i >= 0) {
 			if (*comm[0] == *usr_actions[i].name
 			&& strcmp(comm[0], usr_actions[i].name) == 0)

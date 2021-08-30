@@ -77,14 +77,14 @@ enable_raw_mode(const int fd)
 	raw = orig_termios;  /* modify the original mode */
 	/* input modes: no break, no CR to NL, no parity check, no strip char,
 	 * * no start/stop output control. */
-	raw.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
+	raw.c_iflag &= (tcflag_t)~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
 	/* output modes - disable post processing */
-	raw.c_oflag &= ~(OPOST);
+	raw.c_oflag &= (tcflag_t)~(OPOST);
 	/* control modes - set 8 bit chars */
 	raw.c_cflag |= (CS8);
 	/* local modes - choing off, canonical off, no extended functions,
 	 * no signal chars (^Z,^C) */
-	raw.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
+	raw.c_lflag &= (tcflag_t)~(ECHO | ICANON | IEXTEN | ISIG);
     /* control chars - set return condition: min number of bytes and timer.
      * We want read to return every single byte, without timeout. */
 	raw.c_cc[VMIN] = 1; raw.c_cc[VTIME] = 0; /* 1 byte, no timer */
@@ -159,7 +159,8 @@ free_suggestion(void)
 {
 	free(suggestion_buf);
 	suggestion_buf = (char *)NULL;
-	suggestion.printed = suggestion.nlines = 0;
+	suggestion.printed = 0;
+	suggestion.nlines = 0;
 }
 
 void
@@ -173,7 +174,7 @@ clear_suggestion(void)
 		/* Save cursor position */
 		get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
 
-		int i = suggestion.nlines;
+		int i = (int)suggestion.nlines;
 		while (--i > 0) {
 			/* Move the cursor to the beginning of the next line */
 			if (write(STDOUT_FILENO, "\x1b[1E", 4) <= 0) {}
@@ -211,7 +212,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	if ((int)suggestion_len > (term_cols * term_rows) - curcol)
 		return;
 
-	size_t cuc = curcol; /* Current cursor column position*/
+	size_t cuc = (size_t)curcol; /* Current cursor column position*/
 	int baej = 0; /* Bookmark, alias, ELN, or jump */
 
 	if (suggestion.type == BOOKMARK_SUG || suggestion.type == ALIAS_SUG
@@ -225,16 +226,16 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	size_t cucs = cuc + suggestion_len;
 	/* slines: amount of lines we need to print the suggestion, including
 	 * the current line */
-	int slines = 1;
+	size_t slines = 1;
 
 	if (cucs > term_cols) {
-		slines = cucs / (int)term_cols;
-		int cucs_rem = cucs % term_cols;
+		slines = cucs / (size_t)term_cols;
+		int cucs_rem = (int)cucs % term_cols;
 		if (cucs_rem > 0)
 			slines++;
 	}
 
-	if (slines > term_rows)
+	if (slines > (size_t)term_rows)
 		return;
 
 	/* Store the suggestion in a buffer to be used later by the
@@ -273,7 +274,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	int old_currow = currow;
 	/* extra_rows: amount of extra rows we need to print the suggestion
 	 * (excluding the current row) */
-	int extra_rows = slines - 1;
+	int extra_rows = (int)slines - 1;
 	if (extra_rows && old_currow + extra_rows >= term_rows)
 		currow -= extra_rows - (term_rows - old_currow);
 
@@ -386,7 +387,7 @@ get_comp_color(const char *filename, const struct stat attr)
 }
 
 static int
-check_completions(const char *str, size_t len, const char c)
+check_completions(const char *str, size_t len, const unsigned char c)
 {
 	int printed = 0;
 	size_t i;
@@ -510,9 +511,9 @@ FREE:
 }
 
 static int
-check_filenames(const char *str, const size_t len, const char c, const int first_word)
+check_filenames(const char *str, const size_t len, const unsigned char c, const int first_word)
 {
-	int i = files;
+	int i = (int)files;
 	char *color = (char *)NULL;
 
 	if (suggest_filetype_color)
@@ -576,7 +577,7 @@ check_history(const char *str, const size_t len)
 	if (!str || !*str || !len)
 		return 0;
 
-	int i = current_hist_n;
+	int i = (int)current_hist_n;
 	while (--i >= 0) {
 		if (!history[i] || TOUPPER(*str) != TOUPPER(*history[i]))
 			continue;
@@ -596,7 +597,7 @@ check_history(const char *str, const size_t len)
 static int
 check_cmds(const char *str, const size_t len)
 {
-	int i = path_progsn;
+	int i = (int)path_progsn;
 	while (--i >= 0) {
 		if (!bin_commands[i] || *str != *bin_commands[i])
 			continue;
@@ -629,7 +630,7 @@ check_jumpdb(const char *str, const size_t len)
 	else
 		color = sf_c;
 
-	int i = jump_n;
+	int i = (int)jump_n;
 	while (--i >= 0) {
 		if (!jump_db[i].path || TOUPPER(*str) != TOUPPER(*jump_db[i].path))
 			continue;
@@ -663,7 +664,7 @@ check_bookmarks(const char *str, const size_t len)
 	if (!suggest_filetype_color)
 		color = sf_c;
 
-	int i = bm_n;
+	int i = (int)bm_n;
 	while (--i >= 0) {
 		if (!bookmarks[i].name || TOUPPER(*str) != TOUPPER(*bookmarks[i].name))
 			continue;
@@ -812,7 +813,7 @@ check_aliases(const char *str, const size_t len)
 
 	char *color = sc_c;
 
-	int i = aliases_n;
+	int i = (int)aliases_n;
 	while (--i >= 0) {
 		if (!aliases[i])
 			continue;
@@ -963,7 +964,7 @@ remove_suggestion_not_end(void)
  * and -1 if C was inserted before the end of the current line.
  * If a suggestion is found, it will be printed by print_suggestion() */
 int
-rl_suggestions(const char c)
+rl_suggestions(const unsigned char c)
 {
 	char *last_word = (char *)NULL;
 	char *full_line = (char *)NULL;
@@ -1093,7 +1094,7 @@ rl_suggestions(const char c)
 			}
 		}
 		char text[2];
-		text[0] = c;
+		text[0] = (char)c;
 		text[1] = '\0';
 		rl_insert_text(text);
 		/* This flag is used to tell my_rl_getc not to append C to the
@@ -1102,7 +1103,7 @@ rl_suggestions(const char c)
 		inserted_c = 1;
 	}
 
-	size_t buflen = rl_end;
+	size_t buflen = (size_t)rl_end;
 /*	size_t buflen = strlen(rl_line_buffer); */
 	suggestion.full_line_len = buflen + 1;
 	char *last_space = strrchr(rl_line_buffer, ' ');
@@ -1121,7 +1122,7 @@ rl_suggestions(const char c)
 	int last_word_offset = 0;
 
 	if (last_space) {
-		int j = buflen;
+		int j = (int)buflen;
 		while (--j >= 0) {
 			if (rl_line_buffer[j] == ' ')
 				break;
@@ -1141,7 +1142,7 @@ rl_suggestions(const char c)
 			if (inserted_c) {
 				*last_word = '\0';
 			} else {
-				*last_word = c;
+				*last_word = (char)c;
 				last_word[1] = '\0';
 			}
 		}
@@ -1339,6 +1340,7 @@ rl_suggestions(const char c)
 					goto SUCCESS;
 				}
 			}
+			break;
 
 		case 'f': /* 3.d.5) File names in CWD */
 			/* Do not check dirs and filenames if first word and

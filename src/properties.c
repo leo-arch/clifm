@@ -176,7 +176,7 @@ get_properties(char *filename, int dsize)
 	     read_grp = '-', write_grp = '-', exec_grp = '-',
 	     read_others = '-', write_others = '-', exec_others = '-';
 
-	mode_t val = (file_attrib.st_mode & ~S_IFMT);
+	mode_t val = (file_attrib.st_mode & (mode_t)~S_IFMT);
 	if (val & S_IRUSR) read_usr = 'r';
 	if (val & S_IWUSR) write_usr = 'w';
 	if (val & S_IXUSR) exec_usr = 'x';
@@ -395,7 +395,7 @@ print_entry_props(struct fileinfo *props, size_t max)
 	     read_grp = '-', write_grp = '-', exec_grp = '-',
 	     read_others = '-', write_others = '-', exec_others = '-';
 
-	mode_t val = (props->mode & ~S_IFMT);
+	mode_t val = (props->mode & (mode_t)~S_IFMT);
 	if (val & S_IRUSR) read_usr = 'r';
 	if (val & S_IWUSR) write_usr = 'w';
 	if (val & S_IXUSR) exec_usr = 'x';
@@ -438,7 +438,7 @@ print_entry_props(struct fileinfo *props, size_t max)
 	char trim_name[NAME_MAX];
 	int trim = 0;
 
-	size_t cur_len = props->eln_n + 1 + props->len;
+	size_t cur_len = (size_t)props->eln_n + 1 + props->len;
 #ifndef _NO_ICONS
 	if (icons) {
 		cur_len += 3;
@@ -450,11 +450,14 @@ print_entry_props(struct fileinfo *props, size_t max)
 		int rest = (int)(cur_len - max);
 		trim = 1;
 		strcpy(trim_name, props->name);
+		int a = (int)props->len - rest - 1;
+		if (a < 0)
+			a = 0;
 		if (unicode)
-			u8truncstr(trim_name, (size_t)(props->len - rest - 1));
+			u8truncstr(trim_name, (size_t)(a));
 		else
-			trim_name[props->len - rest - 1] = '\0';
-		cur_len -= rest;
+			trim_name[a] = '\0';
+		cur_len -= (size_t)rest;
 	}
 
 	/* Calculate pad for each file */

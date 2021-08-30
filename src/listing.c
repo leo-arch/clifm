@@ -127,7 +127,7 @@ print_div_line(void)
 	size_t len = wc_xstrlen(div_line_char);
 	if (len <= 2) {
 		int i;
-		for (i = (int)term_cols / len; i--;)
+		for (i = (int)(term_cols / len); i--;)
 			fputs(div_line_char, stdout);
 	} else {
 		puts(div_line_char);
@@ -162,13 +162,13 @@ print_disk_usage(void)
 }
 
 static void
-_print_selfiles(unsigned short term_rows)
+_print_selfiles(unsigned short t_rows)
 {
 	int limit = max_printselfiles;
 
 	if (max_printselfiles == 0) {
 		/* Never take more than half terminal height */
-		limit = (term_rows / 2) - 4;
+		limit = (t_rows / 2) - 4;
 		/* 4 = 2 div lines, 2 prompt lines */
 		if (limit <= 0)
 			limit = 1;
@@ -177,12 +177,12 @@ _print_selfiles(unsigned short term_rows)
 	if (limit > (int)sel_n)
 		limit = (int)sel_n;
 
-	size_t i;
-	for (i = 0; i < (max_printselfiles != UNSET ? limit : sel_n); i++)
+	int i;
+	for (i = 0; i < (max_printselfiles != UNSET ? limit : (int)sel_n); i++)
 		colors_list(sel_elements[i], 0, NO_PAD, PRINT_NEWLINE);
 
 	if (max_printselfiles != UNSET && limit < (int)sel_n)
-		printf("%zu/%zu\n", i, sel_n);
+		printf("%d/%zu\n", i, sel_n);
 
 	print_div_line();
 }
@@ -487,7 +487,7 @@ list_dir_light(void)
 		while (--i >= 0) {
 			size_t total_len = 0;
 			file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
-			total_len = file_info[i].eln_n + 1 + file_info[i].len;
+			total_len = (size_t)file_info[i].eln_n + 1 + file_info[i].len;
 
 			if (!long_view && classify) {
 				if (file_info[i].dir)
@@ -689,7 +689,7 @@ list_dir_light(void)
 
 					fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 
-					i -= ((term_rows * columns_n) - 1);
+					i -= (int)((term_rows * columns_n) - 1);
 					if (i < 0)
 						i = 0;
 
@@ -1275,7 +1275,7 @@ list_dir(void)
 		while (--i >= 0) {
 			size_t total_len = 0;
 			file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
-			total_len = file_info[i].eln_n + 1 + file_info[i].len;
+			total_len = (size_t)file_info[i].eln_n + 1 + file_info[i].len;
 
 			if (!long_view && classify) {
 				if (file_info[i].dir)
@@ -1330,7 +1330,7 @@ list_dir(void)
 			space_left = min_name_trim;
 
 		if ((int)longest < space_left)
-			space_left = longest;
+			space_left = (int)longest;
 
 		int k = (int)files;
 		for (i = 0; i < k; i++) {
@@ -1477,7 +1477,7 @@ list_dir(void)
 
 					fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
 
-					i -= ((term_rows * columns_n) - 1);
+					i -= ((term_rows * (int)columns_n) - 1);
 
 					if (i < 0)
 						i = 0;

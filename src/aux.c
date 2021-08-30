@@ -175,15 +175,9 @@ get_cmd_path(const char *cmd)
 char *
 get_size_unit(off_t size)
 {
-	size_t max = 9;
+#define MAX_UNIT_SIZE 9
 	/* Max size type length == 9 == "1023.99K\0" */
-	char *p = malloc(max * sizeof(char));
-
-	if (!p)
-		return (char *)NULL;
-
-	char *str = p;
-	p = (char *)NULL;
+	char *str = xnmalloc(MAX_UNIT_SIZE, sizeof(char));
 
 	size_t n = 0;
 	float s = (float)size;
@@ -194,11 +188,12 @@ get_size_unit(off_t size)
 	}
 
 	int x = (int)s;
-	/* If x == s, then s is an interger; else, it's float
+	/* If s - x == 0, then S has no reminder (zero)
 	 * We don't want to print the reminder when it is zero */
 
 	const char *const u = "BKMGTPEZY";
-	snprintf(str, max, "%.*f%c", (s == x) ? 0 : 2, (double)s, u[n]);
+	snprintf(str, MAX_UNIT_SIZE, "%.*f%c", (s == 0 || s - (float)x == 0)
+			? 0 : 2, (double)s, u[n]);
 
 	return str;
 }
@@ -290,7 +285,7 @@ get_link_ref(const char *link)
 }
 
 /* Transform an integer (N) into a string of chars
- * this exists because some Operating systems do not suppoit itoa */
+ * This exists because some Operating systems do not support itoa */
 char *
 xitoa(int n)
 {
@@ -302,7 +297,7 @@ xitoa(int n)
 
 	while (n && i) {
 		int rem = n / 10;
-		buf[i] = '0' + (n - (rem * 10));
+		buf[i] = (char)('0' + (n - (rem * 10)));
 		n = rem;
 		--i;
 	}
@@ -365,9 +360,9 @@ xgetchar(void)
 
 	tcgetattr(STDIN_FILENO, &oldt);
 	newt = oldt;
-	newt.c_lflag &= ~(ICANON | ECHO);
+	newt.c_lflag &= (tcflag_t)~(ICANON | ECHO);
 	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-	ch = getchar();
+	ch = (char)getchar();
 	tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 
 	return ch;
@@ -382,7 +377,7 @@ xgetchar(void)
 char
 from_hex(char c)
 {
-	return isdigit(c) ? c - '0' : tolower(c) - 'a' + 10;
+	return isdigit(c) ? c - '0' : (char)(tolower(c) - 'a' + 10);
 }
 
 /* Converts an integer value to its hex form */
@@ -462,7 +457,7 @@ url_decode(char *str)
 			if (pstr[1] && pstr[2]) {
 				/* Decode URL code. Example: %20 to space char */
 				/* Left shift and bitwise OR operations */
-				*pbuf++ = from_hex(pstr[1]) << 4 | from_hex(pstr[2]);
+				*pbuf++ = (char)(from_hex(pstr[1]) << 4 | from_hex(pstr[2]));
 				pstr += 2;
 			}
 		} else {

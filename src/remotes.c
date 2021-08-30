@@ -77,7 +77,7 @@ remotes_list(void)
 static int
 get_remote(char *name)
 {
-	int i = remotes_n,
+	int i = (int)remotes_n,
 		found = 0;
 
 	while (--i >= 0) {
@@ -261,7 +261,7 @@ automount_remotes(void)
 	if (!remotes_n)
 		return EXIT_SUCCESS;
 
-	int i = remotes_n,
+	int i = (int)remotes_n,
 		exit_status = EXIT_SUCCESS;
 	while (--i >= 0) {
 		if (remotes[i].name && remotes[i].auto_mount == 1
@@ -291,7 +291,7 @@ autounmount_remotes(void)
 	if (!remotes_n)
 		return EXIT_SUCCESS;
 
-	int i = remotes_n,
+	int i = (int)remotes_n,
 		exit_status = EXIT_SUCCESS;
 	while (--i >= 0) {
 		if (remotes[i].name && remotes[i].auto_unmount == 1

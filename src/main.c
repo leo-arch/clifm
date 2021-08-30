@@ -93,7 +93,7 @@ unsigned short
 regex_t regex_exp;
 size_t *ext_colors_len = (size_t *)NULL;
 
-short
+int
     auto_open = UNSET,
     autocd = UNSET,
 	autojump = UNSET,

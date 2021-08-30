@@ -654,14 +654,13 @@ untrash_element(char *file)
 	if (!file)
 		return EXIT_FAILURE;
 
-	char undel_file[PATH_MAX] = "", undel_info[PATH_MAX] = "";
+	char undel_file[PATH_MAX], undel_info[PATH_MAX];
 	snprintf(undel_file, PATH_MAX, "%s/%s", trash_files_dir, file);
 	snprintf(undel_info, PATH_MAX, "%s/%s.trashinfo", trash_info_dir,
 	    file);
 
 	FILE *info_fp;
 	info_fp = fopen(undel_info, "r");
-
 	if (!info_fp) {
 		fprintf(stderr, _("%s: undel: Info file for '%s' not found. "
 				"Try restoring the file manually\n"), PROGRAM_NAME, file);
@@ -726,9 +725,8 @@ untrash_element(char *file)
 	}
 
 	if (access(parent, F_OK) != 0) {
-		fprintf(stderr, _("%s: undel: %s: No such file or "
-				  "directory\n"),
-		    PROGRAM_NAME, parent);
+		fprintf(stderr, _("%s: undel: %s: No such file or directory\n"),
+				PROGRAM_NAME, parent);
 		free(parent);
 		free(url_decoded);
 		return EXIT_FAILURE;
@@ -736,7 +734,7 @@ untrash_element(char *file)
 
 	if (access(parent, X_OK | W_OK) != 0) {
 		fprintf(stderr, _("%s: undel: %s: Permission denied\n"),
-		    PROGRAM_NAME, parent);
+				PROGRAM_NAME, parent);
 		free(parent);
 		free(url_decoded);
 		return EXIT_FAILURE;
@@ -754,17 +752,15 @@ untrash_element(char *file)
 		ret = launch_execve(tmp_cmd2, FOREGROUND, E_NOFLAG);
 
 		if (ret != EXIT_SUCCESS) {
-			fprintf(stderr, _("%s: undel: %s: Failed removing "
-					  "info file\n"),
-			    PROGRAM_NAME, undel_info);
+			fprintf(stderr, _("%s: undel: %s: Failed removing info file\n"),
+					PROGRAM_NAME, undel_info);
 			return EXIT_FAILURE;
 		} else {
 			return EXIT_SUCCESS;
 		}
 	} else {
-		fprintf(stderr, _("%s: undel: %s: Failed restoring trashed "
-				  "file\n"),
-		    PROGRAM_NAME, undel_file);
+		fprintf(stderr, _("%s: undel: %s: Failed restoring trashed file\n"),
+				PROGRAM_NAME, undel_file);
 		return EXIT_FAILURE;
 	}
 
@@ -799,7 +795,7 @@ untrash_function(char **comm)
 	struct dirent **trash_files = (struct dirent **)NULL;
 	int trash_files_n = scandir(trash_files_dir, &trash_files,
 	    skip_files, (unicode) ? alphasort : (case_sensitive) ? xalphasort
-								 : alphasort_insensitive);
+					 : alphasort_insensitive);
 	if (trash_files_n <= 0) {
 		puts(_("trash: There are no trashed files"));
 
@@ -814,7 +810,8 @@ untrash_function(char **comm)
 
 	int exit_status = EXIT_SUCCESS;
 	/* if "undel all" (or "u a" or "u *") */
-	if (comm[1] && (strcmp(comm[1], "*") == 0 || strcmp(comm[1], "a") == 0 || strcmp(comm[1], "all") == 0)) {
+	if (comm[1] && (strcmp(comm[1], "*") == 0 || strcmp(comm[1], "a") == 0
+	|| strcmp(comm[1], "all") == 0)) {
 		size_t j;
 		for (j = 0; j < (size_t)trash_files_n; j++) {
 			if (untrash_element(trash_files[j]->d_name) != 0)
@@ -907,7 +904,7 @@ untrash_function(char **comm)
 
 		if (undel_num <= 0 || undel_num > trash_files_n) {
 			fprintf(stderr, _("%s: undel: %d: Invalid ELN\n"),
-			    PROGRAM_NAME, undel_num);
+					PROGRAM_NAME, undel_num);
 			free(undel_elements[i]);
 			continue;
 		}
@@ -915,7 +912,6 @@ untrash_function(char **comm)
 		/* If valid ELN */
 		if (untrash_element(trash_files[undel_num - 1]->d_name) != 0)
 			exit_status = EXIT_FAILURE;
-
 		free(undel_elements[i]);
 	}
 

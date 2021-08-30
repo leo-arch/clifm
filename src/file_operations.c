@@ -88,7 +88,7 @@ int
 xchmod(const char *file, mode_t mode)
 {
 	/* Set or unset S_IXUSR, S_IXGRP, and S_IXOTH */
-	(0100 & mode) ? (mode &= ~0111) : (mode |= 0111);
+	(0100 & mode) ? (mode &= (mode_t)~0111) : (mode |= 0111);
 
 	log_function(NULL);
 

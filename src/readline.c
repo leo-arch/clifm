@@ -436,7 +436,7 @@ my_rl_getc(FILE *stream)
 #endif /* __GO32__ */
 
 	while(1) {
-		result = read(fileno(stream), &c, sizeof(unsigned char));
+		result = (int)read(fileno(stream), &c, sizeof(unsigned char));
 		if (result == sizeof(unsigned char)) {
 /*#ifndef _NO_HIGHLIGHT
 			if (highlight)
@@ -598,6 +598,7 @@ my_rl_quote(char *text, int mt, char *qp)
 {
 	/* NOTE: mt and qp arguments are not used here, but are required by
 	 * rl_filename_quoting_function */
+	UNUSED(mt); UNUSED(qp);
 
 	/*
 	 * How it works: P and R are pointers to the same memory location
