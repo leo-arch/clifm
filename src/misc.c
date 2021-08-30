@@ -1015,25 +1015,25 @@ list_mountpoints(void)
 		return EXIT_SUCCESS;
 	}
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
-	size_t j;
-	for (i = j = 0; (size_t)i < mp_n; i++) {
+	int j;
+	for (i = j = 0; i < (int)mp_n; i++) {
 		/* Do not list all mountpoints, but only those corresponding
 		 * to a block device (/dev) */
 		if (strncmp(fslist[i].f_mntfromname, "/dev/", 5) == 0) {
-			printf("%s%zu%s %s%s%s (%s)\n", el_c, j + 1, df_c,
+			printf("%s%d%s %s%s%s (%s)\n", el_c, j + 1, df_c,
 			    (access(fslist[i].f_mntonname, R_OK | X_OK) == 0)
 			    ? di_c : nd_c, fslist[i].f_mntonname,
 			    df_c, fslist[i].f_mntfromname);
 			/* Store the mountpoint into an array */
 			mountpoints = (char **)xrealloc(mountpoints,
-			    (j + 1) * sizeof(char *));
+			    (size_t)(j + 1) * sizeof(char *));
 			mountpoints[j++] = savestring(fslist[i].f_mntonname,
 			    strlen(fslist[i].f_mntonname));
 		}
 	}
 	/* Update filesystem counter as it would be used to free() the
 	 * mountpoints entries later (below) */
-	mp_n = j;
+	mp_n = (size_t)j;
 #endif
 
 	putchar('\n');

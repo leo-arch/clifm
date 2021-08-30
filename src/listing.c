@@ -268,8 +268,7 @@ get_ext_icon(const char *restrict ext, int n)
 	while (--i >= 0) {
 		/* Tolower */
 		char c = (*ext >= 'A' && *ext <= 'Z')
-			     ? (*ext - 'A' + 'a')
-			     : *ext;
+			     ? (char)(*ext - 'A' + 'a') : *ext;
 		if (c == *icon_ext[i].name && strcasecmp(ext, icon_ext[i].name) == 0) {
 			file_info[n].icon = icon_ext[i].icon;
 			file_info[n].icon_color = icon_ext[i].color;

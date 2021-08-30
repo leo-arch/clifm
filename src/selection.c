@@ -683,7 +683,7 @@ show_sel_files(void)
 		struct winsize w;
 		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 		size_t counter = 0;
-		unsigned short t_rows = w.ws_row;
+		int t_rows = (int)w.ws_row;
 		t_rows -= 2;
 		size_t i;
 

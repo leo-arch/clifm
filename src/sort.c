@@ -86,8 +86,8 @@ namecmp(const char *s1, const char *s2)
 	char ac = *s1, bc = *s2;
 
 	if (!case_sensitive) {
-		ac = TOUPPER(*s1);
-		bc = TOUPPER(*s2);
+		ac = (char)TOUPPER(*s1);
+		bc = (char)TOUPPER(*s2);
 	}
 
 	if (bc > ac)

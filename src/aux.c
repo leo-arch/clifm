@@ -377,7 +377,7 @@ xgetchar(void)
 char
 from_hex(char c)
 {
-	return isdigit(c) ? c - '0' : (char)(tolower(c) - 'a' + 10);
+	return (char)(isdigit(c) ? c - '0' : tolower(c) - 'a' + 10);
 }
 
 /* Converts an integer value to its hex form */
