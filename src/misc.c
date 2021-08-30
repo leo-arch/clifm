@@ -70,7 +70,7 @@ read_inotify(void)
 	char inotify_buf[EVENT_BUF_LEN];
 
 	memset((void *)inotify_buf, '\0', EVENT_BUF_LEN);
-	i = read(inotify_fd, inotify_buf, EVENT_BUF_LEN);
+	i = (int)read(inotify_fd, inotify_buf, EVENT_BUF_LEN);
 
 	if (i <= 0)
 		return;
@@ -370,7 +370,7 @@ print_tips(int all)
 	}
 
 	srand((unsigned int)time(NULL));
-	printf("%sTIP%s: %s\n", BOLD, df_c, TIPS[rand() % tipsn]);
+	printf("%sTIP%s: %s\n", BOLD, df_c, TIPS[rand() % (int)tipsn]);
 }
 
 /* Open DIR in a new instance of the program (using TERM, set in the config
@@ -473,11 +473,11 @@ new_instance(char *dir, int sudo)
 		tmp_term = get_substr(term, ' ');
 
 		if (tmp_term) {
-			size_t i;
+			int i;
 			for (i = 0; tmp_term[i]; i++);
 
-			size_t num = i;
-			tmp_cmd = (char **)xrealloc(tmp_cmd, (i + (sudo ? 4 : 3))
+			int num = i;
+			tmp_cmd = (char **)xrealloc(tmp_cmd, ((size_t)i + (sudo ? 4 : 3))
 													* sizeof(char *));
 			for (i = 0; tmp_term[i]; i++) {
 				tmp_cmd[i] = savestring(tmp_term[i], strlen(tmp_term[i]));
@@ -507,8 +507,8 @@ new_instance(char *dir, int sudo)
 
 	if (tmp_cmd) {
 		ret = launch_execve(tmp_cmd, BACKGROUND, E_NOFLAG);
-
-		for (size_t i = 0; tmp_cmd[i]; i++)
+		size_t i;
+		for (i = 0; tmp_cmd[i]; i++)
 			free(tmp_cmd[i]);
 		free(tmp_cmd);
 	} else {
@@ -843,6 +843,9 @@ create_usr_var(char *str)
  * prompt or rather in place. Based on littlstar's xasprintf
  * implementation:
  * https://github.com/littlstar/asprintf.c/blob/master/asprintf.c*/
+__attribute__((__format__(__printf__, 3, 0)))
+/* We use __attribute__ here to silence clang warning: "format string is
+ * not a string literal" */
 int
 _err(int msg_type, int prompt, const char *format, ...)
 {
@@ -1377,7 +1380,7 @@ handle_stdin()
 		if (input_len == 0)
 			break;
 
-		total_len += input_len;
+		total_len += (size_t)input_len;
 		chunks_n++;
 
 		/* Append a new chunk of memory to the buffer */
@@ -1992,5 +1995,5 @@ bonus_function(void)
 
 	size_t num = (sizeof(phrases) / sizeof(phrases[0])) - 1;
 	srand((unsigned int)time(NULL));
-	puts(phrases[rand() % num]);
+	puts(phrases[rand() % (int)num]);
 }
