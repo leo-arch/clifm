@@ -116,7 +116,7 @@ buf[PATH_MAX];
 xstrsncpy(buf, src, PATH_MAX);
 ```
 
-**Note**: Both `xstrsncpy` and `xnmalloc` are provided by CliFM itself.
+**Note**: Both `xstrsncpy` and `xnmalloc` are safe implementations of `strcpy(3)` and `malloc(3)` respectively and are provided by CliFM itself.
 
 These are just a few examples. There are plenty of resources out there on how to write good code.
 
@@ -126,15 +126,13 @@ These are just a few examples. There are plenty of resources out there on how to
 
 When it comes to plugins, we mostly use `POSIX shell scripts`. In this case, always use `shellcheck` to check your plugins.
 
-**4**) Needless to say, pay attention to all compilation warnings (`clang` is quite good and clear at that) and fix them. Enable error and warning flags when testing your code. `-Wall` and `-Wextra` are usually enough.
-
-**5**) If not obvious, comment what your code is trying to achieve: there is no good software without good documentation.
-
-**6**) Approved code must be compiled without any warning/error using the following compiler flags:
+**4**) Submitted code must be compiled without any warning/error using the following compiler flags:
 
 ```sh
 -Wall -Wextra -Werror -Wpedantic -Wshadow -Wformat=2 -Wformat-security -Wconversion -Wsign-conversion -fstack-protector-strong -fstack-clash-protection -fcf-protection -Wvla
 ```
+
+**5**) If not obvious, comment what your code is trying to achieve: there is no good software without good documentation.
 
 ## 3) CliFM's general code structure
 
