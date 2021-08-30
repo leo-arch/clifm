@@ -896,7 +896,7 @@ external_arguments(int argc, char **argv)
 	    {"version", no_argument, 0, 'v'},
 	    {"workspace", required_argument, 0, 'w'},
 	    {"no-ext-cmds", no_argument, 0, 'x'},
-	    {"light", no_argument, 0, 'y'},
+	    {"light-mode", no_argument, 0, 'y'},
 	    {"sort", required_argument, 0, 'z'},
 
 	    /* Only long options */
@@ -1759,7 +1759,7 @@ get_path_programs(void)
 		 * PATH disregarding if they exist or not. If paths[i] dir is
 		 * empty do not use it either */
 		if (cmd_n[i] > 0)
-			total_cmd += (size_t)cmd_n[i];
+			total_cmd += cmd_n[i];
 	}
 	xchdir(cwd, NO_TITLE);
 
@@ -1768,7 +1768,7 @@ get_path_programs(void)
 	while (internal_cmds[internal_cmd_n])
 		internal_cmd_n++;
 
-	bin_commands = (char **)xnmalloc(total_cmd + internal_cmd_n +
+	bin_commands = (char **)xnmalloc((size_t)total_cmd + internal_cmd_n +
 					     aliases_n + actions_n + 2, sizeof(char *));
 
 	i = (int)internal_cmd_n;
@@ -1900,7 +1900,8 @@ load_dirhist(void)
 			continue;
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
-		old_pwd[dirhist_total_index] = (char *)xnmalloc(line_len + 1, sizeof(char));
+		old_pwd[dirhist_total_index] = (char *)xnmalloc((size_t)line_len + 1,
+										sizeof(char));
 		strcpy(old_pwd[dirhist_total_index++], line);
 	}
 
@@ -1946,7 +1947,7 @@ get_prompt_cmds(void)
 				prompt_cmds = (char **)xrealloc(prompt_cmds,
 				    (prompt_cmds_n + 1) * sizeof(char *));
 				prompt_cmds[prompt_cmds_n++] = savestring(
-				    line, line_len);
+				    line, (size_t)line_len);
 			}
 		} else if (strncmp(line, "#PROMPT", 7) == 0) {
 			prompt_line_found = 1;
