@@ -84,7 +84,7 @@ _<sup>1</sup>_ <i>For a detailed explanation and comparison between these concep
 Features beyond common file operations, such as copy, move, remove, etc.:
 
 * [Really CLI-based](https://github.com/leo-arch/clifm/wiki/Introduction#main-design-and-goals). No GUI nor TUI (or curses) at all, just a command-line. It can run thereby on the kernel built-in console and even on a SSH or any other remote session.
-* Memory footprint below 5 MiB and a disk usage of 500 KiB. Incredibly lightweight and fast even on really old hardware.
+* Memory footprint below 5 MiB and a disk usage of 500 KiB. Incredibly lightweight and fast even on really old hardware. See the [performance section](https://github.com/leo-arch/clifm/wiki/Performance).
 * The use of [short (and even one-character) commands](https://github.com/leo-arch/clifm/wiki/Introduction#commands-short-summary), and [entry list numbers (ELN's)](https://github.com/leo-arch/clifm/wiki/Common-Operations) for file names. 
 * [Bookmarks](https://github.com/leo-arch/clifm/wiki/Common-Operations#bookmarks).
 * [Files selection](https://github.com/leo-arch/clifm/wiki/Common-Operations#selection) (supports both glob and regular expressions and works even across multiple instances of the program).
