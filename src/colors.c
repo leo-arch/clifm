@@ -374,10 +374,9 @@ set_colors(const char *colorscheme, int env)
 		env_ifacecolors = (char *)NULL;
 	}
 
-	if (!filecolors || !extcolors || !ifacecolors) {
+	if (xargs.stealth_mode != 1 && (!filecolors || !extcolors || !ifacecolors)) {
 		/* Get color lines, for both file types and extensions, from
 	 * COLORSCHEME file */
-
 		char colorscheme_file[PATH_MAX];
 		*colorscheme_file = '\0';
 		if (config_ok) {
