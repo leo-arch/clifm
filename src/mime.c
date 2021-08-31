@@ -55,6 +55,9 @@ get_app(const char *mime, const char *ext)
 	if (!mime)
 		return (char *)NULL;
 
+	if (!mime_file || !*mime_file)
+		return (char *)NULL;
+
 	FILE *defs_fp = fopen(mime_file, "r");
 	if (!defs_fp) {
 		fprintf(stderr, _("%s: %s: Error opening file\n"),

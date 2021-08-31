@@ -700,12 +700,6 @@ load_remotes(void)
 	if (!remotes_file || !*remotes_file)
 		return EXIT_FAILURE;
 
-	if (xargs.stealth_mode == 1) {
-		fprintf(stderr, "%s: The net function is disabled in stealth mode\n",
-				PROGRAM_NAME);
-		return EXIT_FAILURE;
-	}
-
 	struct stat attr;
 	if (stat(remotes_file, &attr) == -1) {
 		fprintf(stderr, "%s: %s\n", remotes_file, strerror(errno));
