@@ -535,6 +535,7 @@ extern struct actions_t *usr_actions;
 struct ws_t {
 	char *path;
 	int num;
+	int padding;
 };
 
 extern struct ws_t *ws;
@@ -675,7 +676,8 @@ struct remote_t {
 	char *unmount_cmd;
 	int auto_mount;
 	int auto_unmount;
-	int mounted; 
+	int mounted;
+	int padding;
 };
 
 extern struct remote_t *remotes;

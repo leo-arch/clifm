@@ -296,21 +296,22 @@ sort_function(char **arg)
 		struct sort_t {
 			const char *name;
 			int num;
+			int padding; /* Used only to properly align the struct */
 		};
 
 		static struct sort_t sorts[] = {
-		    {"none", 0},
-		    {"name", 1},
-		    {"size", 2},
-		    {"atime", 3},
-		    {"btime", 4},
-		    {"ctime", 5},
-		    {"mtime", 6},
-		    {"version", 7},
-		    {"extension", 8},
-		    {"inode", 9},
-		    {"owner", 10},
-		    {"group", 11},
+		    {"none", 0, 0},
+		    {"name", 1, 0},
+		    {"size", 2, 0},
+		    {"atime", 3, 0},
+		    {"btime", 4, 0},
+		    {"ctime", 5, 0},
+		    {"mtime", 6, 0},
+		    {"version", 7, 0},
+		    {"extension", 8, 0},
+		    {"inode", 9, 0},
+		    {"owner", 10, 0},
+		    {"group", 11, 0},
 		};
 
 		size_t i;
