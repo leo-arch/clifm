@@ -2044,6 +2044,9 @@ check_options(void)
 			tr_as_rm = xargs.trasrm;
 	}
 #endif
+	if (xargs.stealth_mode == 1 && !opener)
+		opener = savestring(FALLBACK_OPENER, strlen(FALLBACK_OPENER));
+
 	if (only_dirs == UNSET) {
 		if (xargs.only_dirs == UNSET)
 			only_dirs = DEF_ONLY_DIRS;
