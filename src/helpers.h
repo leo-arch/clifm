@@ -240,7 +240,7 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define DEF_ND_C "\x1b[01;31m"
 #define DEF_ED_C "\x1b[00;34m"
 #define DEF_NE_C "\x1b[00;31m"
-#define DEF_FI_C "\x1b[00;37m"
+#define DEF_FI_C "\x1b[0m"
 #define DEF_EF_C "\x1b[00;33m"
 #define DEF_NF_C "\x1b[00;31m"
 #define DEF_LN_C "\x1b[01;36m"
@@ -248,7 +248,7 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define DEF_PI_C "\x1b[00;35m"
 #define DEF_SO_C "\x1b[01;35m"
 #define DEF_BD_C "\x1b[01;33m"
-#define DEF_CD_C "\x1b[01;37m"
+#define DEF_CD_C "\x1b[1m"
 #define DEF_SU_C "\x1b[37;41m"
 #define DEF_SG_C "\x1b[30;43m"
 #define DEF_ST_C "\x1b[37;44m"
@@ -265,13 +265,13 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define DEF_EL_C "\x1b[01;33m"
 #define DEF_MI_C "\x1b[01;36m"
 #define DEF_DL_C "\x1b[01;34m"
-#define DEF_DC_C "\x1b[00;37m"
+#define DEF_DC_C "\x1b[0m"
 #define DEF_WC_C "\x1b[01;36m"
 #define DEF_DH_C "\x1b[00;36m"
 
-#define DEF_DF_C "\x1b[00;37m"
+#define DEF_DF_C "\x1b[0m"
 
-#define DEF_TX_C "\001\x1b[00;37m\002"
+#define DEF_TX_C "\001\x1b[0m\002"
 #define DEF_LI_C "\001\x1b[01;32m\002"
 #define DEF_TI_C "\001\x1b[01;33m\002"
 #define DEF_EM_C "\001\x1b[01;31m\002"
@@ -389,8 +389,8 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 
 #define MAX_WS 8
 
-#define DEFAULT_PROMPT "\\[\\e[0;37m\\][\\[\\e[0;36m\\]\\S\\[\\e[0;37m\\]]\\l \
-\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0;37m\\]\\z\\[\\e[0;34m\\] \
+#define DEFAULT_PROMPT "\\[\\e[0m\\][\\[\\e[0;36m\\]\\S\\[\\e[0m\\]]\\l \
+\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]\\z\\[\\e[0;34m\\] \
 \\$\\[\\e[0m\\] "
 
 #define DEFAULT_TERM_CMD "xterm -e"
