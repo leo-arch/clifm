@@ -1752,8 +1752,9 @@ get_path_programs(void)
 			continue;
 		}
 
-		cmd_n[i] = scandir(paths[i], &commands_bin[i], skip_nonexec,
-		    xalphasort);
+		cmd_n[i] = scandir(paths[i], &commands_bin[i],
+					(light_mode || (flags & ROOT_USR))
+					? NULL : skip_nonexec, xalphasort);
 		/* If paths[i] directory does not exist, scandir returns -1.
 		 * Fedora, for example, adds $HOME/bin and $HOME/.local/bin to
 		 * PATH disregarding if they exist or not. If paths[i] dir is
