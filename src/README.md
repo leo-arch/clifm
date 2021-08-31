@@ -132,6 +132,8 @@ When it comes to plugins, we mostly use `POSIX shell scripts`. In this case, alw
 -Wall -Wextra -Werror -Wpedantic -Wshadow -Wformat=2 -Wformat-security -Wconversion -Wsign-conversion -fstack-protector-strong -fstack-clash-protection -fcf-protection -Wvla
 ```
 
+To make sure your structs are properly aligned, add `-Wpadded` to detect misalignments and correct them by adding some padding if necessary. 
+
 **5**) If not obvious, comment what your code is trying to achieve: there is no good software without good documentation.
 
 ## 3) CliFM's general code structure
