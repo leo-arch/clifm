@@ -38,6 +38,19 @@
 #include <string.h>
 #include <sys/ioctl.h>
 
+#ifdef _LIST_SPEED
+#include <time.h>
+#endif
+
+#ifdef TOURBIN_QSORT
+#include "qsort.h"
+#define ENTLESS(i, j) (entrycmp(file_info + (i), file_indo + (j)) < 0)
+#define ENTSWAP(i, j) (swap_ent((i), (j)))
+#define ENTSORT(file_info, n, entrycmp) QSORT((n), ENTLESS, ENTSWAP)
+#else
+#define ENTSORT(file_info, n, entrycmp) qsort((file_info), (n), sizeof(*(file_info)), (entrycmp))
+#endif
+
 #include "aux.h"
 #include "colors.h"
 #include "misc.h"
@@ -285,7 +298,9 @@ get_ext_icon(const char *restrict ext, int n)
 static int
 list_dir_light(void)
 {
-	/*  clock_t start = clock(); */
+#ifdef _LIST_SPEED
+	clock_t start = clock();
+#endif
 	/* Hide the cursor while listing */
 	fputs("\x1b[?25l", stdout);
 
@@ -880,8 +895,10 @@ END:
 	/* Unhide the cursor */
 	fputs("\x1b[?25h", stdout);
 
-	/*  clock_t end = clock();
-	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC); */
+#ifdef _LIST_SPEED
+	clock_t end = clock();
+	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC);
+#endif
 
 	return EXIT_SUCCESS;
 }
@@ -891,7 +908,9 @@ END:
 int
 list_dir(void)
 {
-	/*  clock_t start = clock(); */
+#ifdef _LIST_SPEED
+	clock_t start = clock();
+#endif
 	if (clear_screen)
 		CLEAR;
 
@@ -1258,7 +1277,8 @@ list_dir(void)
 		 * ############################################# */
 
 	if (sort)
-		qsort(file_info, n, sizeof(*file_info), entrycmp);
+		ENTSORT(file_info, n, entrycmp);
+//		qsort(file_info, n, sizeof(*file_info), entrycmp);
 
 		/* ##########################################
 		 * #    GET INFO TO PRINT COLUMNED OUTPUT   #
@@ -1707,9 +1727,10 @@ END:
 	if (print_selfiles && sel_n > 0)
 		_print_selfiles(term_rows);
 
-	/*  clock_t end = clock();
-	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC); */
-
+#ifdef _LIST_SPEED
+	clock_t end = clock();
+	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC);
+#endif
 	return EXIT_SUCCESS;
 }
 
