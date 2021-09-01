@@ -489,7 +489,7 @@ list_dir_light(void)
 	}
 
 	if (sort)
-		qsort(file_info, n, sizeof(*file_info), entrycmp);
+		ENTSORT(file_info, n, entrycmp);
 
 	int i;
 	register size_t counter = 0;
@@ -1278,7 +1278,6 @@ list_dir(void)
 
 	if (sort)
 		ENTSORT(file_info, n, entrycmp);
-//		qsort(file_info, n, sizeof(*file_info), entrycmp);
 
 		/* ##########################################
 		 * #    GET INFO TO PRINT COLUMNED OUTPUT   #
