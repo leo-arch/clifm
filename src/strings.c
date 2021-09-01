@@ -658,17 +658,33 @@ split_fusedcmd(char *str)
 	char *p = str, *pp = str;
 	char *q = buf;
 	char *s = (char *)NULL;
+	size_t word_n = 1; /* We only allow splitting for first command word */
 	size_t c = 0;
 
 	while (*p) {
-		if (*p == ' ')
-			s = p; /* Pointer to last space */
+		switch(*p) {
+		case ' ':
+			s = p;
+			if (c && *(p - 1) != ' ' && *(p - 1) != '|'
+			&& *(p - 1) != '&' && *(p - 1) != ';')
+				word_n++;
+			break; /* Pointer to last space */
+		case '|': /* fallthrough */
+		case '&': /* fallthrough */
+		case ';': word_n = 1; break;
+		default: break;
+		}
 
 		/* Transform "cmdeln" into "cmd eln" */
 		if (*p >= '0' && *p <= '9' && c && *(p - 1) >= 'a' && *(p - 1) <= 'z') {
 			/* If a number, move from last to next space/nul looking for
 			 * a slash. If found, do nothing */
 			if (s) {
+				if (word_n > 1) {
+					*(q++) = *(p++);
+					continue;
+				}
+
 				int _cont = 0;
 				char *ss = s + 1;
 				while (*ss && *ss != ' ') {
