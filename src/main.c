@@ -59,6 +59,8 @@
 
 /* Globals */
 
+
+
 struct usrvar_t *usr_var = (struct usrvar_t *)NULL;
 struct actions_t *usr_actions = (struct actions_t *)NULL;
 struct ws_t *ws = (struct ws_t *)NULL;

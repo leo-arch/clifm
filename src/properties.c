@@ -43,7 +43,7 @@
 #include "colors.h"
 
 static int
-get_properties(char *filename, int dsize)
+get_properties(char *filename, const int dsize)
 {
 	if (!filename || !*filename)
 		return EXIT_FAILURE;
@@ -371,7 +371,7 @@ get_properties(char *filename, int dsize)
 }
 
 int
-print_entry_props(struct fileinfo *props, size_t max)
+print_entry_props(const struct fileinfo *props, size_t max)
 {
 	/* Get file size */
 	char *size_type = get_size_unit(props->size);

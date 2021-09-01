@@ -1651,7 +1651,7 @@ help_function(void)
 \n              enabled by default\
 \n -v, --version\t\t\t show version details and exit\
 \n -w, --workspace=NUM\t\t start in workspace NUM\
-\n -x, --no-ext-cmds\t\t\t Disallow the use of external commands\
+\n -x, --no-ext-cmds\t\t disallow the use of external commands\
 \n -y, --light-mode\t\t enable the light mode\
 \n -z, --sort=METHOD\t\t sort files by METHOD, where METHOD \
 \n              could be: 0 = none, 1 = name, 2 = size, \
@@ -1697,7 +1697,7 @@ help_function(void)
 \n\t\t\t\tby just specifying the corresponding ELN \
 \n              (e.g. '12' instead of 'cd 12'). This \
 \n              option forces the use of 'cd'\
-\n     --no-classify\t\tDo not append file type indicators\
+\n     --no-classify\t\t do not append file type indicators\
 \n     --no-clear-screen\t\t do not clear the screen when listing \
 \n              directories\
 \n     --no-colors\t\t disable file type colors for files listing \

@@ -26,4 +26,4 @@
 
 /* properties.c */
 int properties_function(char **comm);
-int print_entry_props(struct fileinfo *props, size_t max);
+int print_entry_props(const struct fileinfo *props, size_t max);
