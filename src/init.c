@@ -1731,32 +1731,37 @@ load_pinned_dir(void)
 void
 get_path_programs(void)
 {
-	char cwd[PATH_MAX] = "";
-	if (getcwd(cwd, sizeof(cwd)) == NULL) {}
-
-	struct dirent ***commands_bin = (struct dirent ***)xnmalloc(
-	    path_n, sizeof(struct dirent));
 	int i, j, l = 0, total_cmd = 0;
-	int *cmd_n = (int *)xnmalloc(path_n, sizeof(int));
+	int *cmd_n = (int *)0;
+	struct dirent ***commands_bin = (struct dirent ***)NULL;
 
-	i = (int)path_n;
-	while (--i >= 0) {
-		if (!paths[i] || !*paths[i] || xchdir(paths[i], NO_TITLE) == -1) {
-			cmd_n[i] = 0;
-			continue;
+	if (ext_cmd_ok) {
+		char cwd[PATH_MAX] = "";
+		if (getcwd(cwd, sizeof(cwd)) == NULL) {}
+
+		commands_bin = (struct dirent ***)xnmalloc(
+						path_n, sizeof(struct dirent));
+		cmd_n = (int *)xnmalloc(path_n, sizeof(int));
+
+		i = (int)path_n;
+		while (--i >= 0) {
+			if (!paths[i] || !*paths[i] || xchdir(paths[i], NO_TITLE) == -1) {
+				cmd_n[i] = 0;
+				continue;
+			}
+
+			cmd_n[i] = scandir(paths[i], &commands_bin[i],
+						(light_mode || (flags & ROOT_USR))
+						? NULL : skip_nonexec, xalphasort);
+			/* If paths[i] directory does not exist, scandir returns -1.
+			 * Fedora, for example, adds $HOME/bin and $HOME/.local/bin to
+			 * PATH disregarding if they exist or not. If paths[i] dir is
+			 * empty do not use it either */
+			if (cmd_n[i] > 0)
+				total_cmd += cmd_n[i];
 		}
-
-		cmd_n[i] = scandir(paths[i], &commands_bin[i],
-					(light_mode || (flags & ROOT_USR))
-					? NULL : skip_nonexec, xalphasort);
-		/* If paths[i] directory does not exist, scandir returns -1.
-		 * Fedora, for example, adds $HOME/bin and $HOME/.local/bin to
-		 * PATH disregarding if they exist or not. If paths[i] dir is
-		 * empty do not use it either */
-		if (cmd_n[i] > 0)
-			total_cmd += cmd_n[i];
+		xchdir(cwd, NO_TITLE);
 	}
-	xchdir(cwd, NO_TITLE);
 
 	/* Add internal commands */
 	size_t internal_cmd_n = 0;
@@ -1794,24 +1799,27 @@ get_path_programs(void)
 		}
 	}
 
-	/* And finally, add commands in PATH */
-	i = (int)path_n;
-	while (--i >= 0) {
-		if (cmd_n[i] <= 0)
-			continue;
+	if (ext_cmd_ok) {
+		/* And finally, add commands in PATH */
+		i = (int)path_n;
+		while (--i >= 0) {
+			if (cmd_n[i] <= 0)
+				continue;
 
-		j = cmd_n[i];
-		while (--j >= 0) {
-			bin_commands[l++] = savestring(commands_bin[i][j]->d_name,
-			    strlen(commands_bin[i][j]->d_name));
-			free(commands_bin[i][j]);
+			j = cmd_n[i];
+			while (--j >= 0) {
+				bin_commands[l++] = savestring(commands_bin[i][j]->d_name,
+					strlen(commands_bin[i][j]->d_name));
+				free(commands_bin[i][j]);
+			}
+
+			free(commands_bin[i]);
 		}
 
-		free(commands_bin[i]);
+		free(commands_bin);
+		free(cmd_n);
 	}
 
-	free(commands_bin);
-	free(cmd_n);
 	path_progsn = (size_t)l;
 	bin_commands[l] = (char *)NULL;
 }

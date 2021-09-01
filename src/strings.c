@@ -658,17 +658,18 @@ split_fusedcmd(char *str)
 	char *p = str, *pp = str;
 	char *q = buf;
 	char *s = (char *)NULL;
-	size_t word_n = 1; /* We only allow splitting for first command word */
+	size_t word_n = 1;
 	size_t c = 0;
 
 	while (*p) {
 		switch(*p) {
 		case ' ':
-			s = p;
+			/* We only allow splitting for first command word */
+			s = p; /* Pointer to last space */
 			if (c && *(p - 1) != ' ' && *(p - 1) != '|'
 			&& *(p - 1) != '&' && *(p - 1) != ';')
 				word_n++;
-			break; /* Pointer to last space */
+			break;
 		case '|': /* fallthrough */
 		case '&': /* fallthrough */
 		case ';': word_n = 1; break;
