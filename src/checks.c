@@ -72,6 +72,41 @@ check_term(void)
 	return;
 }
 
+/* Return 1 if current user has access to FILE. Otherwise, return zero */
+int
+check_file_access(struct fileinfo file)
+{
+	int f = 0; /* Hold file ownership flags */
+
+	mode_t val = (file.mode & (mode_t)~S_IFMT);
+	if (val & S_IRUSR) f |= R_USR;
+	if (val & S_IXUSR) f |= X_USR;
+
+	if (val & S_IRGRP) f |= R_GRP;
+	if (val & S_IXGRP) f |= X_GRP;
+
+	if (val & S_IROTH) f |= R_OTH;
+	if (val & S_IXOTH) f |= X_OTH;
+
+	if (file.dir) {
+		if ((f & R_USR) && (f & X_USR) && file.uid == user.uid)
+			return 1;
+		if ((f & R_GRP) && (f & X_GRP) && file.gid == user.gid)
+			return 1;
+		if ((f & R_OTH) && (f & X_OTH))
+			return 1;
+	} else {
+		if ((f & R_USR) && file.uid == user.uid)
+			return 1;
+		if ((f & R_GRP) && file.gid == user.gid)
+			return 1;
+		if (f & R_OTH)
+			return 1;
+	}
+
+	return 0;
+}
+
 char *
 get_sudo_path(void)
 {

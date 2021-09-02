@@ -352,22 +352,23 @@ get_user(void)
 
 	pw = getpwuid(geteuid());
 	if (!pw) {
-		_err('e', NOPRINT_PROMPT, "%s: Cannot detect user data. Exiting early",
+		_err('e', NOPRINT_PROMPT, _("%s: Cannot detect user data. Exiting early"),
 			PROGRAM_NAME);
 		exit(-1);
 	}
 
+	tmp_user.uid = pw->pw_uid;
+	tmp_user.gid = pw->pw_gid;
 	tmp_user.home = savestring(pw->pw_dir, strlen(pw->pw_dir));
 	tmp_user.name = savestring(pw->pw_name, strlen(pw->pw_name));
 	tmp_user.shell = savestring(pw->pw_shell, strlen(pw->pw_shell));
 
 	if (!tmp_user.home || !tmp_user.name || !tmp_user.shell) {
-		_err('e', NOPRINT_PROMPT, "%s: Cannot detect user data. Exiting",
+		_err('e', NOPRINT_PROMPT, _("%s: Cannot detect user data. Exiting"),
 			PROGRAM_NAME);
 		exit(-1);
 	}
 
-	/* some extra stuff to do before exiting */
 	tmp_user.home_len = strlen(tmp_user.home);
 	return tmp_user;
 }

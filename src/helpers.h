@@ -154,6 +154,14 @@ extern int watch;
 #define PRINT_VERSION (1 << 8)
 #define ALT_PROFILE (1 << 9)
 
+/* File ownership flags */
+#define R_USR (1 << 1)
+#define X_USR (1 << 2)
+#define R_GRP (1 << 3)
+#define X_GRP (1 << 4)
+#define R_OTH (1 << 5)
+#define X_OTH (1 << 6)
+
 /* Internal flags */
 #define ROOT_USR (1 << 10)
 #define EXT_HELP (1 << 11)
@@ -514,6 +522,18 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 				/** #########################
 				 *  #    GLOBAL VARIABLES   #
 				 *  ######################### */
+
+/* Struct to store information about current user */
+struct user_t {
+	char *home;
+	char *name;
+	char *shell;
+	size_t home_len;
+	uid_t uid;
+	gid_t gid;
+};
+
+extern struct user_t user;
 
 /* Struct to store user defined variables */
 struct usrvar_t {

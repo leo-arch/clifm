@@ -57,6 +57,8 @@
 #include "properties.h"
 #include "sort.h"
 
+#include "checks.h"
+
 #ifndef _NO_ICONS
 #include "icons.h"
 #endif
@@ -361,9 +363,17 @@ list_dir_light(void)
 		/* Skip self and parent directories */
 		if (*ename == '.' && (!ename[1] || (ename[1] == '.' && !ename[2])))
 			continue;
-		/* Skip files matching FILTER */
-		if (filter && regexec(&regex_exp, ename, 0, NULL, 0) == EXIT_SUCCESS)
-			continue;
+
+		/* Skip files according to FILTER */
+		if (filter) {
+			if (regexec(&regex_exp, ename, 0, NULL, 0) == EXIT_SUCCESS) {
+				if (filter_rev)
+					continue;
+			} else if (!filter_rev) {
+				continue;
+			}
+		}
+
 		if (!show_hidden && *ename == '.')
 			continue;
 #if !defined(_DIRENT_HAVE_D_TYPE)
@@ -385,8 +395,7 @@ list_dir_light(void)
 		file_info[n].name = (char *)xnmalloc(NAME_MAX + 1, sizeof(char));
 
 		if (!unicode) {
-			file_info[n].len = xstrsncpy(file_info[n].name, ename,
-						NAME_MAX);
+			file_info[n].len = xstrsncpy(file_info[n].name, ename, NAME_MAX);
 		} else {
 			xstrsncpy(file_info[n].name, ename, NAME_MAX);
 			file_info[n].len = wc_xstrlen(ename);
@@ -1054,7 +1063,13 @@ list_dir(void)
 		file_info[n].linkn = attr.st_nlink;
 		file_info[n].size = attr.st_size;
 
-		if (long_view) {
+		file_info[n].uid = attr.st_uid;
+		file_info[n].gid = attr.st_gid;
+		file_info[n].mode = attr.st_mode;
+		if (long_view)
+			file_info[n].ltime = (time_t)attr.st_mtim.tv_sec;
+
+/*		if (long_view) {
 			file_info[n].uid = attr.st_uid;
 			file_info[n].gid = attr.st_gid;
 			file_info[n].ltime = (time_t)attr.st_mtim.tv_sec;
@@ -1062,7 +1077,7 @@ list_dir(void)
 		} else if (sort == SOWN || sort == SGRP) {
 			file_info[n].uid = attr.st_uid;
 			file_info[n].gid = attr.st_gid;
-		}
+		} */
 
 		file_info[n].color = (char *)NULL;
 		file_info[n].ext_color = (char *)NULL;
@@ -1169,7 +1184,7 @@ list_dir(void)
 #endif
 			/* Do not perform the access check if the user is root */
 			if (!(flags & ROOT_USR)
-			&& access(file_info[n].name, F_OK | R_OK) == -1) {
+			&& check_file_access(file_info[n]) == 0) {
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_LOCK;
 				file_info[n].icon_color = YELLOW;

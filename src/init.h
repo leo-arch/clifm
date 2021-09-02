@@ -51,20 +51,3 @@ int init_gettext(void);
 int get_home(void);
 int backup_argv(int argc, char **argv);
 struct user_t get_user(void);
-
-/* 
- * some useful structs
-*/
-
-/* stores information regarding the user */
-struct user_t {
-	char *home;
-	size_t home_len;
-	char *name;
-	char *shell;
-};
-
-/*
- * some global variables
-*/
-extern struct user_t user;
