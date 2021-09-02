@@ -20,10 +20,10 @@ _clifm ()
         --bookmarks-file
         -c
         --config-file
-		-D
-		--config-dir
-		-e
-		--no-eln
+        -D
+        --config-dir
+        -e
+        --no-eln
         -f
         --no-folders-first
         -F
@@ -64,48 +64,51 @@ _clifm ()
         --unicode
         -v
         --version
-		-w
-		--workspace
+        -w
+        --workspace
         -x
         --no-ext-cmds
         -y
         --light-mode
         -z
-		--sort
-		--case-sens-dirjump
-		--case-sens-path-comp
+        --sort
+        --case-sens-dirjump
+        --case-sens-path-comp
         --cd-on-quit
-		--color-scheme
-		--cwd-in-title
+        --color-scheme
+        --cwd-in-title
         --disk-usage
         --enable-logs
         --expand-bookmarks
         --icons
-		--icons-use-file-color
+        --icons-use-file-color
         --list-and-quit
         --max-dirhist
-		--max-files
+        --max-files
         --max-path
         --no-dir-jumper
         --no-cd-auto
         --no-classify
         --no-clear-screen
-		--no-colors
-		--no-columns
+        --no-colors
+        --no-columns
+        --no-file-cap
+        --no-file-ext
         --no-files-counter
+        --no-follow-symlink
         --no-open-auto
         --no-tips
         --no-welcome-message
         --only-dirs
-		--open
+        --open
         --opener
-		--print-sel
+        --print-sel
         --restore-last-path
         --rl-vi-mode
         --share-selbox
         --sort-reverse
-		--suggestions
-		--trash-as-rm
+        --no-suggestions
+        --trash-as-rm
     )
 
     if [[ $prev == -b || $prev == -c || $prev == -k || $prev == -p ]]; then
