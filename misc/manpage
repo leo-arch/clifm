@@ -314,8 +314,17 @@ disable colors for files listing
 .B \-\-no\-columns
 disable columns for files listing
 .TP
+.B \-\-no\-file\-cap
+do not check files capabilities when listing files
+.TP
+.B \-\-no\-file\-ext
+do not check files extension when listing files
+.TP
 .B \-\-no\-files\-counter
 disable the files counter for directories. This option is especially useful to speed up the listing process; counting files in directories is particularly expensive
+.TP
+.B \-\-no\-follow\-symlink
+do not follow symbolic links when listing files
 .TP
 .B \-\-no\-open\-auto
 same as no-cd-auto, but for files instead of directories
