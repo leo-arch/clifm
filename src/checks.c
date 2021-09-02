@@ -74,7 +74,7 @@ check_term(void)
 
 /* Return 1 if current user has access to FILE. Otherwise, return zero */
 int
-check_file_access(struct fileinfo file)
+check_file_access(const struct fileinfo file)
 {
 	int f = 0; /* Hold file ownership flags */
 

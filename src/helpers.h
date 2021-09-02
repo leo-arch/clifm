@@ -341,6 +341,8 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define DEF_CASE_SENS_PATH_COMP 0
 #define DEF_CD_LISTS_ON_THE_FLY 1
 #define DEF_CD_ON_QUIT 0
+#define DEF_CHECK_CAP 1
+#define DEF_CHECK_EXT 1
 #define DEF_CLASSIFY 1
 #define DEF_CLEAR_SCREEN 1
 #define DEF_COLOR_SCHEME "default"
@@ -354,6 +356,7 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define DEF_EXPAND_BOOKMARKS 0
 #define DEF_EXT_CMD_OK 1
 #define DEF_FILES_COUNTER 1
+#define DEF_FOLLOW_SYMLINKS 1
 #define DEF_HIGHLIGHT 0
 #define DEF_LIGHT_MODE 0
 #define DEF_LIST_FOLDERS_FIRST 1
@@ -637,12 +640,15 @@ struct param {
 	int dirmap;
 	int disk_usage;
 	int cd_on_quit;
+	int check_cap;
+	int check_ext;
 	int classify;
 	int color_scheme;
 	int expand_bookmarks;
 	int ext;
 	int ffirst;
 	int files_counter;
+	int follow_symlinks;
 	int hidden;
 #ifndef _NO_HIGHLIGHT
 	int highlight;
@@ -751,6 +757,8 @@ extern int
     case_sens_path_comp,
     cd_lists_on_the_fly,
     cd_on_quit,
+	check_cap,
+	check_ext,
     classify,
     clear_screen,
     colorize,
@@ -766,6 +774,7 @@ extern int
     ext_cmd_ok,
     files_counter,
     filter_rev,
+	follow_symlinks,
 #ifndef _NO_HIGHLIGHT
     highlight,
 #endif

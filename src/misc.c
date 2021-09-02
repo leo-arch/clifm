@@ -1702,10 +1702,16 @@ help_function(void)
 \n              directories\
 \n     --no-colors\t\t disable file type colors for files listing \
 \n     --no-columns\t\t disable columned files listing\
+\n     --no-file-cap\t\t do not check files capabilities when\
+\n              listing files\
+\n     --no-file-ext\t\t do not check files extension when\
+\n              listing files\
 \n     --no-files-counter\t\t disable the files counter for \
 \n              directories. This option is especially \
 \n              useful to speed up the listing process; \
 \n              counting files in directories is expensive\
+\n     --no-follow-symlink\t do not follow symbolic links when\
+\n              listing files\
 \n     --no-open-auto\t\t same as no-cd-auto, but for files\
 \n     --no-tips\t\t\t disable startup tips\
 \n     --no-restore-last-path\t save last visited directory to be \

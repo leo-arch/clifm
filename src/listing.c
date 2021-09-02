@@ -1135,7 +1135,7 @@ list_dir(void)
 			if (files_counter) {
 				file_info[n].filesn = count_dir(ename, NO_CPOP) - 2;
 			} else {
-				if (access(ename, R_OK) == -1)
+				if (check_file_access(file_info[n]) == 0)
 					file_info[n].filesn = -1;
 				else
 					file_info[n].filesn = 1;
@@ -1163,6 +1163,10 @@ list_dir(void)
 #ifndef _NO_ICONS
 			file_info[n].icon = ICON_LINK;
 #endif
+			if (!follow_symlinks) {
+				file_info[n].color = ln_c;
+				break;
+			}
 			struct stat attrl;
 			if (fstatat(fd, ename, &attrl, 0) == -1) {
 				file_info[n].color = or_c;
@@ -1205,14 +1209,14 @@ list_dir(void)
 			}
 
 #ifdef _LINUX_CAP
-			else if ((cap = cap_get_file(ename))) {
+			else if (check_cap && (cap = cap_get_file(ename))) {
 				file_info[n].color = ca_c;
 				cap_free(cap);
 			}
 #endif
 
 			else if ((attr.st_mode & 00100) /* Exec */
-				 || (attr.st_mode & 00010) || (attr.st_mode & 00001)) {
+			|| (attr.st_mode & 00010) || (attr.st_mode & 00001)) {
 				file_info[n].exec = 1;
 #ifndef _NO_ICONS
 				file_info[n].icon = ICON_EXEC;
@@ -1230,7 +1234,9 @@ list_dir(void)
 			}
 
 			/* Check file extension */
-			char *ext = strrchr(file_info[n].name, '.');
+			char *ext = (char *)NULL;
+			if (check_ext)
+				ext = strrchr(file_info[n].name, '.');
 			/* Make sure not to take a hidden file for a file extension */
 			if (ext && ext != file_info[n].name) {
 #ifndef _NO_ICONS

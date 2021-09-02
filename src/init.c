@@ -931,6 +931,9 @@ external_arguments(int argc, char **argv)
 	    {"no-suggestions", no_argument, 0, 35},
 	    {"autojump", no_argument, 0, 36},
 	    {"highlight", no_argument, 0, 37},
+	    {"no-file-cap", no_argument, 0, 38},
+	    {"no-file-ext", no_argument, 0, 39},
+	    {"no-follow-symlink", no_argument, 0, 40},
 	    {0, 0, 0, 0}};
 
 	/* Increment whenever a new (only) long option is added */
@@ -1067,6 +1070,9 @@ external_arguments(int argc, char **argv)
 #ifndef _NO_HIGHLIGHT
 		case 37: xargs.highlight = highlight = 1; break;
 #endif
+		case 38: xargs.check_cap = check_cap = 0; break;
+		case 39: xargs.check_ext = check_ext = 0; break;
+		case 40: xargs.follow_symlinks = follow_symlinks = 0; break;
 
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
@@ -1975,6 +1981,15 @@ check_options(void)
 
 	if (cp_cmd == UNSET)
 		cp_cmd = DEF_CP_CMD;
+
+	if (check_cap == UNSET)
+		check_cap = DEF_CHECK_CAP;
+
+	if (check_ext == UNSET)
+		check_ext = DEF_CHECK_EXT;
+
+	if (follow_symlinks == UNSET)
+		follow_symlinks = DEF_FOLLOW_SYMLINKS;
 
 	if (mv_cmd == UNSET)
 		mv_cmd = DEF_MV_CMD;

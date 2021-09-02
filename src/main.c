@@ -105,6 +105,8 @@ int
     case_sensitive = UNSET,
     cd_lists_on_the_fly = UNSET,
     cd_on_quit = UNSET,
+	check_cap = UNSET,
+	check_ext = UNSET,
     classify = UNSET,
     clear_screen = UNSET,
     colorize = UNSET,
@@ -120,6 +122,7 @@ int
     ext_cmd_ok = UNSET,
     files_counter = UNSET,
 	filter_rev = 0,
+	follow_symlinks = UNSET,
 	highlight = UNSET,
     home_ok = 1,
 #ifndef _NO_ICONS

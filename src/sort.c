@@ -32,6 +32,8 @@
 #ifdef __OpenBSD__
 #include <strings.h>
 #endif
+//#include <sys/stat.h>
+
 #include "checks.h"
 #include "listing.h"
 #include "messages.h"
@@ -39,10 +41,29 @@
 int
 skip_nonexec(const struct dirent *ent)
 {
-	if (access(ent->d_name, R_OK) == -1)
+	if (access(ent->d_name, X_OK) == -1)
+		return 0;
+	return 1;
+
+/*	int f = 0; // Hold file ownership flags
+
+	struct stat a;
+	if (stat(ent->d_name, &a) == -1)
 		return 0;
 
-	return 1;
+	mode_t val = (a.st_mode & (mode_t)~S_IFMT);
+	if (val & S_IXUSR) f |= X_USR;
+	if (val & S_IXGRP) f |= X_GRP;
+	if (val & S_IXOTH) f |= X_OTH;
+
+	if ((f & X_USR) && a.st_uid == user.uid)
+		return 1;
+	if ((f & X_GRP) && a.st_gid == user.gid)
+		return 1;
+	if (f & X_OTH)
+		return 1;
+
+	return 0; */
 }
 
 int

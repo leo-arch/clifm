@@ -2148,6 +2148,8 @@ reset_variables(void)
 	case_sensitive = UNSET;
 	cd_lists_on_the_fly = UNSET;
 	cd_on_quit = UNSET;
+	check_cap = UNSET;
+	check_ext = UNSET;
 	classify = UNSET;
 	clear_screen = UNSET;
 	columned = UNSET;
@@ -2155,6 +2157,7 @@ reset_variables(void)
 	disk_usage = UNSET;
 	ext_cmd_ok = UNSET;
 	files_counter = UNSET;
+	follow_symlinks = UNSET;
 #ifndef _NO_HIGHLIGHT
 	highlight = UNSET;
 #endif
