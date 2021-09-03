@@ -602,7 +602,7 @@ with no arguments, prints the list of messages in the current session. The 'clea
 .B n, new \fR[FILE DIR/ ...n]
 create new files and/or directories. If a file name ends with a slash (/), it will be taken as a directory name and created via the shell command 'mkdir -p'. Else, it will be created via the 'touch' shell command. Ex: 'n myfile mydir/', to create a file named "myfile" and a directory named "mydir". If no file name is specified, the user will be asked for one.
 .TP
-.B net net \fR[NAME] [edit] [m, mount NAME] [u, unmount NAME]
+.B net \fR[NAME] [edit] [m, mount NAME] [u, unmount NAME]
 \fBThe configuration file\fR
 .sp
 The \fInet\fR command manages connections to remote systems via a simple samba-like configuration file (\fI$HOME/.config/clifm/profiles/PROFILE/nets.cfm\fR). Here you can specify multiple remotes and options for each of these remotes. Syntax example for this file:
