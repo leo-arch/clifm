@@ -107,7 +107,8 @@ get_home(void)
 		 * any config nor trash directory. These flags are used to
 		 * prevent functions from trying to access any of these
 		 * directories */
-		home_ok = config_ok = 0;
+		home_ok = 0;
+		config_ok = 0;
 #ifndef _NO_TRASH
 		trash_ok = 0;
 #endif
@@ -117,10 +118,10 @@ get_home(void)
 				  "Trash, bookmarks, commands logs, and commands history are "
 				  "disabled. Program messages and selected files won't be "
 				  "persistent. Using default options\n"), PROGRAM_NAME);
-	} else {
-		user_home_len = strlen(user.home);
+		return EXIT_FAILURE;
 	}
 
+	user_home_len = strlen(user.home);
 	return EXIT_SUCCESS;
 }
 
@@ -1299,8 +1300,8 @@ external_arguments(int argc, char **argv)
 			char *tmp_cmd[] = {"mkdir", "-p", alt_dir_value, NULL};
 			int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOSTDERR);
 			if (ret != EXIT_SUCCESS) {
-				_err('e', PRINT_PROMPT, _("%s: %s: Cannot create directory (error %d)\n"
-					"Falling back to default configuration directory\n"),
+				_err('e', PRINT_PROMPT, _("%s: %s: Cannot create directory "
+				"(error %d)\nFalling back to default configuration directory\n"),
 					PROGRAM_NAME, alt_dir_value, ret);
 				dir_ok = 0;
 			}
@@ -1415,9 +1416,7 @@ external_arguments(int argc, char **argv)
 	if ((flags & ALT_PROFILE) && alt_profile_value) {
 		if (alt_profile)
 			free(alt_profile);
-
-		alt_profile = savestring(alt_profile_value,
-		    strlen(alt_profile_value));
+		alt_profile = savestring(alt_profile_value, strlen(alt_profile_value));
 	}
 }
 
@@ -1431,6 +1430,8 @@ unset_xargs(void)
 	xargs.case_sens_dirjump = UNSET;
 	xargs.case_sens_path_comp = UNSET;
 	xargs.cd_list_auto = UNSET;
+	xargs.check_cap = UNSET;
+	xargs.check_ext = UNSET;
 	xargs.cd_on_quit = UNSET;
 	xargs.classify = UNSET;
 	xargs.clear_screen = UNSET;
@@ -1443,6 +1444,7 @@ unset_xargs(void)
 	xargs.ext = UNSET;
 	xargs.ffirst = UNSET;
 	xargs.files_counter = UNSET;
+	xargs.follow_symlinks = UNSET;
 	xargs.hidden = UNSET;
 #ifndef _NO_HIGHLIGHT
 	xargs.highlight = UNSET;
@@ -1580,14 +1582,14 @@ get_path_env(void)
 
 #if __linux__
 	for (i = 0; __environ[i]; i++) {
-		if (strncmp(__environ[i], "PATH", 4) == 0) {
+		if (*__environ[i] == 'P' && strncmp(__environ[i], "PATH", 4) == 0) {
 			path_tmp = straft(__environ[i], '=');
 			break;
 		}
 	}
-
 #else
-	path_tmp = savestring(getenv("PATH"), strlen(getenv("PATH")));
+	char *ptr = getenv("PATH");
+	path_tmp = savestring(ptr, strlen(ptr));
 #endif
 
 	if (!path_tmp)
@@ -1758,8 +1760,7 @@ get_path_programs(void)
 			}
 
 			cmd_n[i] = scandir(paths[i], &commands_bin[i],
-						(light_mode || (flags & ROOT_USR))
-						? NULL : skip_nonexec, xalphasort);
+						light_mode ? NULL : skip_nonexec, xalphasort);
 			/* If paths[i] directory does not exist, scandir returns -1.
 			 * Fedora, for example, adds $HOME/bin and $HOME/.local/bin to
 			 * PATH disregarding if they exist or not. If paths[i] dir is

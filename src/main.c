@@ -649,6 +649,7 @@ main(int argc, char *argv[])
 	 * file, if they were not already set via external arguments, and
 	 * load sel elements, if any. All these configurations are made
 	 * per user basis */
+
 	init_config();
 	check_options();
 
@@ -668,6 +669,8 @@ main(int argc, char *argv[])
 
 	cschemes_n = get_colorschemes();
 	set_colors(usr_cscheme ? usr_cscheme : "default", 1);
+	free(usr_cscheme);
+	usr_cscheme = (char *)NULL;
 
 	fputs(df_c, stdout);
 	fflush(stdout);
@@ -676,9 +679,6 @@ main(int argc, char *argv[])
 		_err(0, PRINT_PROMPT, _("%s%s: %sRunning as root%s\n"),
 			BOLD, PROGRAM_NAME, _RED, df_c);
 	}
-
-	free(usr_cscheme);
-	usr_cscheme = (char *)NULL;
 
 	load_remotes();
 	automount_remotes();
@@ -751,6 +751,7 @@ main(int argc, char *argv[])
 	}
 
 	get_prompt_cmds();
+
 #ifndef _NO_TRASH
 	if (trash_ok) {
 		trash_n = count_dir(trash_files_dir, NO_CPOP);
@@ -758,10 +759,12 @@ main(int argc, char *argv[])
 			trash_n = 0;
 	}
 #endif
+
 	if (gethostname(hostname, sizeof(hostname)) == -1) {
 		hostname[0] = '?';
 		hostname[1] = '\0';
-		_err('e', PRINT_PROMPT, _("%s: Error getting hostname\n"), PROGRAM_NAME);
+		_err('e', PRINT_PROMPT, _("%s: Error getting hostname\n"),
+			PROGRAM_NAME);
 	}
 
 	init_shell();

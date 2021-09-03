@@ -1318,7 +1318,7 @@ list_dir(void)
 
 			if (!long_view && classify) {
 				if (file_info[i].dir)
-					total_len += 2;
+					total_len++;
 
 				if (file_info[i].filesn > 0 && files_counter)
 					total_len += DIGINUM(file_info[i].filesn);
@@ -1327,7 +1327,7 @@ list_dir(void)
 					switch (file_info[i].type) {
 					case DT_REG:
 						if (file_info[i].exec)
-							total_len += 1;
+							total_len++;
 						break;
 					case DT_LNK:  /* fallthrough */
 					case DT_SOCK: /* fallthrough */
@@ -1601,14 +1601,14 @@ list_dir(void)
 				/* Append directory indicator and files counter */
 				switch (file_info[i].type) {
 				case DT_DIR:
-					fputs(" /", stdout);
+					putchar('/');
 					if (file_info[i].filesn > 0 && files_counter)
 						fputs(xitoa(file_info[i].filesn), stdout);
 					break;
 
 				case DT_LNK:
 					if (file_info[i].dir)
-						fputs(" /", stdout);
+					putchar('/');
 					if (file_info[i].filesn > 0 && files_counter)
 						fputs(xitoa(file_info[i].filesn), stdout);
 					break;
@@ -1650,7 +1650,7 @@ list_dir(void)
 				switch (file_info[i].type) {
 				case DT_DIR:
 					ind_char = 0;
-					fputs(" /", stdout);
+					putchar('/');
 					if (file_info[i].filesn > 0 && files_counter)
 						fputs(xitoa(file_info[i].filesn), stdout);
 					break;
@@ -1658,7 +1658,7 @@ list_dir(void)
 				case DT_LNK:
 					if (file_info[i].dir) {
 						ind_char = 0;
-						fputs(" /", stdout);
+						putchar('/');
 						if (file_info[i].filesn > 0 && files_counter)
 							fputs(xitoa(file_info[i].filesn), stdout);
 					} else {
@@ -1689,7 +1689,7 @@ list_dir(void)
 			int cur_len = (int)file_info[i].eln_n + 1 + (int)file_info[i].len + (ind_char ? 1 : 0);
 #endif
 			if (file_info[i].dir && classify) {
-				cur_len += 2;
+				cur_len++;
 				if (file_info[i].filesn > 0 && files_counter && file_info[i].ruser)
 					cur_len += DIGINUM((int)file_info[i].filesn);
 			}

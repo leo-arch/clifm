@@ -1290,11 +1290,13 @@ free_stuff(void)
 		free(ext_colors);
 	}
 
-	i = MAX_WS;
-	while (--i >= 0)
-		if (ws[i].path)
-			free(ws[i].path);
-	free(ws);
+	if (ws && ws[0].path) {
+		i = MAX_WS;
+		while (--i >= 0)
+			if (ws[i].path)
+				free(ws[i].path);
+		free(ws);
+	}
 
 	free(actions_file);
 	free(bm_file);

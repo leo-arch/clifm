@@ -436,6 +436,9 @@ create_actions_file(char *file)
 void
 create_tmp_files(void)
 {
+	if (!user.name)
+		return;
+
 	size_t pnl_len = strlen(PNL);
 
 	/* #### CHECK THE TMP DIR #### */

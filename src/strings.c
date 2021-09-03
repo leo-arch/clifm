@@ -1711,7 +1711,7 @@ parse_input_str(char *str)
 char *
 home_tilde(const char *new_path)
 {
-	if (!home_ok || !new_path || !*new_path)
+	if (!home_ok || !new_path || !*new_path || !user.home)
 		return (char *)NULL;
 
 	char *path_tilde = (char *)NULL;

@@ -192,7 +192,10 @@ decode_prompt(const char *line)
 			}
 
 			case 'u': /* User name */
-				temp = savestring(user.name, strlen(user.name));
+				if (!user.name)
+					temp = savestring("?", 1);
+				else
+					temp = savestring(user.name, strlen(user.name));
 				goto add_string;
 
 			case 'h': /* Hostname up to first '.' */
