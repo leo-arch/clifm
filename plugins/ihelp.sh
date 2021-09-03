@@ -141,7 +141,7 @@ while [ -n "$a" ]; do
 	fi
 
 	if [ -n "$a" ]; then
-		if [ "$(echo "$a" | grep ^[1-9].*)" ]; then
+		if echo "$a" | grep -q '^[1-9].*'; then
 			export PAGER="less -gp \"$a\""
 		else
 			export PAGER="less -gp \"  $a\""
