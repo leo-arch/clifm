@@ -34,6 +34,12 @@ else
 	exit 1
 fi
 
+tmp=""
+if [ -n "$MANPAGER" ]; then
+	tmp="$MANPAGER"
+	unset MANPAGER
+fi
+
 CMDS="
 1. GETTING HELP@
 2. DESCRIPTION@
@@ -56,7 +62,7 @@ CMDS="
 19. ENVIRONMENT@
 20. MISCELLANEOUS NOTES@
 21. FILES@
-22. EXAMPĹES@
+22. EXAMPLES@
 FILE/DIR@
 /PATTERN@
 ;\[CMD\], :\[CMD\]@
@@ -71,7 +77,7 @@ bm, bookmarks@
 br, bulk@
 c, l@
 cc, colors@
-cd \[ELN/DIR\]@
+cd @
 cl, columns@
 cmd, commands@
 cs, colorscheme@
@@ -105,8 +111,7 @@ pin @
 pf, prof, profile@
 pg, pager@
 p, pr, prop@
-q, quit, exit, zz@
-Q @
+q, quit, exit, Q@
 rl, reload@
 rf, refresh@
 s, sel@
@@ -122,7 +127,7 @@ uc, unicode@
 unpin @
 v, vv, paste@
 ver, version@
-ws @
+ws@
 x, X@"
 
 a="-"
@@ -136,13 +141,19 @@ while [ -n "$a" ]; do
 	fi
 
 	if [ -n "$a" ]; then
-		export PAGER
-		if ! [ $(PAGER="less -gp \"      $a\""; man clifm 2>/dev/null) ]; then
-			PAGER="less -gp \"$a\""; man clifm
+		if [ "$(echo "$a" | grep ^[1-9].*)" ]; then
+			export PAGER="less -gp \"$a\""
+		else
+			export PAGER="less -gp \"  $a\""
 		fi
+		man clifm
 	fi
 done
 
 printf "\n"
+
+if [ -n "$tmp" ]; then
+	export MANPAGER="$tmp"
+fi
 
 exit 0
