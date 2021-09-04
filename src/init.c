@@ -25,6 +25,7 @@
 #include "helpers.h"
 
 #include <errno.h>
+#include <fcntl.h>
 #include <getopt.h>
 #include <pwd.h>
 #include <signal.h>
@@ -385,15 +386,16 @@ load_jumpdb(void)
 	char *jump_file = (char *)xnmalloc(dir_len + 10, sizeof(char));
 	snprintf(jump_file, dir_len + 10, "%s/jump.cfm", config_dir);
 
-	struct stat attr;
-	if (stat(jump_file, &attr) == -1) {
+	int fd = open(jump_file, O_RDONLY);
+	if (fd == -1) {
 		free(jump_file);
 		return;
 	}
 
-	FILE *fp = fopen(jump_file, "r");
+	FILE *fp = fdopen(fd, "r");
 	if (!fp) {
 		free(jump_file);
+		close(fd);
 		return;
 	}
 
@@ -408,6 +410,7 @@ load_jumpdb(void)
 	if (!jump_lines) {
 		free(jump_file);
 		fclose(fp);
+		close(fd);
 		return;
 	}
 
@@ -489,6 +492,7 @@ load_jumpdb(void)
 	}
 
 	fclose(fp);
+	close(fd);
 	free(line);
 	free(jump_file);
 
