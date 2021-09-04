@@ -1175,11 +1175,26 @@ rl_kbinds_help(int count, int key)
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
 #endif
+
+	char *mp = (char *)NULL;
+	char *p = getenv("MANPAGER");
+	if (p) {
+		mp = (char *)xnmalloc(strlen(p) + 1, sizeof(char *));
+		strcpy(mp, p);
+		unsetenv("MANPAGER");
+	}
 	char cmd[PATH_MAX];
 	snprintf(cmd, PATH_MAX - 1,
 		"export PAGER=\"less -p ^[0-9]+\\.[[:space:]]KEYBOARD[[:space:]]SHORTCUTS\"; man %s\n",
 		PNL);
-	if (launch_execle(cmd) != EXIT_SUCCESS)
+	int ret = launch_execle(cmd) != EXIT_SUCCESS;
+
+	if (mp) {
+		setenv("MANPAGER", mp, 1);
+		free(mp);
+	}
+
+	if (!ret)
 		return EXIT_FAILURE;
 	return EXIT_SUCCESS;
 }
@@ -1192,11 +1207,26 @@ rl_cmds_help(int count, int key)
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
 #endif
+	
+	char *mp = (char *)NULL;
+	char *p = getenv("MANPAGER");
+	if (p) {
+		mp = (char *)xnmalloc(strlen(p) + 1, sizeof(char *));
+		strcpy(mp, p);
+		unsetenv("MANPAGER");
+	}
 	char cmd[PATH_MAX];
 	snprintf(cmd, PATH_MAX - 1,
 		"export PAGER=\"less -p ^[0-9]+\\.[[:space:]]COMMANDS\"; man %s\n",
 		PNL);
-	if (launch_execle(cmd) != EXIT_SUCCESS)
+	int ret = launch_execle(cmd) != EXIT_SUCCESS;
+
+	if (mp) {
+		setenv("MANPAGER", mp, 1);
+		free(mp);
+	}
+
+	if (!ret)
 		return EXIT_FAILURE;
 	return EXIT_SUCCESS;
 }
