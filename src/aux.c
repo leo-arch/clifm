@@ -39,10 +39,10 @@
 #include "exec.h"
 #include "misc.h"
 
-/* Return a file stream associated to a file descriptor (FD) for the file
- * named NAME */
+/* Open a file for read only. Return a file stream associated to a file
+ * descriptor (FD) for the file named NAME */
 FILE *
-open_fstream(char *name, int *fd)
+open_fstream_r(char *name, int *fd)
 {
 	if (!name || !*name)
 		return (FILE *)NULL;
@@ -52,6 +52,27 @@ open_fstream(char *name, int *fd)
 		return (FILE *)NULL;
 
 	FILE *fp = fdopen(*fd, "r");
+	if (!fp) {
+		close(*fd);
+		return (FILE *)NULL;
+	}
+
+	return fp;	
+}
+
+/* Create a file for writing. Return a file stream associated to a file
+ * descriptor (FD) for the file named NAME */
+FILE *
+open_fstream_w(char *name, int *fd)
+{
+	if (!name || !*name)
+		return (FILE *)NULL;
+
+	*fd = open(name, O_WRONLY | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
+	if (*fd == -1)
+		return (FILE *)NULL;
+
+	FILE *fp = fdopen(*fd, "w");
 	if (!fp) {
 		close(*fd);
 		return (FILE *)NULL;

@@ -518,92 +518,91 @@ check_for_alias(char **args)
 	return (char **)NULL;
 }
 
-/* Keep only the last MAX records in LOGFILE */
+/* Keep only the last MAX records in FILE */
 void
-check_file_size(char *logfile, int max)
+check_file_size(char *file, int max)
 {
 	if (!config_ok)
 		return;
 
 	/* Create the file, if it doesn't exist */
-	FILE *log_fp = (FILE *)NULL;
-	struct stat file_attrib;
+	FILE *fp = (FILE *)NULL;
+	struct stat attr;
 
-	if (stat(logfile, &file_attrib) == -1) {
-		log_fp = fopen(logfile, "w");
-
-		if (!log_fp) {
+	int fd;
+	if (stat(file, &attr) == -1) {
+		fp = open_fstream_w(file, &fd);
+		if (!fp) {
 			_err(0, NOPRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-			    logfile, strerror(errno));
-		} else
-			fclose(log_fp);
+			    file, strerror(errno));
+		} else {
+			close_fstream(fp, fd);
+		}
 
 		return; /* Return anyway, for, being a new empty file, there's
 		no need to truncate it */
 	}
 
-	/* Once we know the files exists, keep only max logs */
-	log_fp = fopen(logfile, "r");
-
-	if (!log_fp) {
+	/* Once we know the files exists, keep only MAX entries */
+	fp = open_fstream_r(file, &fd);
+	if (!fp) {
 		_err(0, NOPRINT_PROMPT, "%s: log: %s: %s\n", PROGRAM_NAME,
-		    logfile, strerror(errno));
+		    file, strerror(errno));
 		return;
 	}
 
-	int logs_num = 0, c;
+	int n = 0, c;
 
-	/* Count newline chars to get amount of lines in the log file */
-	while ((c = fgetc(log_fp)) != EOF) {
+	/* Count newline chars to get amount of lines in the file */
+	while ((c = fgetc(fp)) != EOF) {
 		if (c == '\n')
-			logs_num++;
+			n++;
 	}
 
-	if (logs_num <= max) {
-		fclose(log_fp);
+	if (n <= max) {
+		close_fstream(fp, fd);
 		return;
 	}
 
 	/* Set the file pointer to the beginning of the log file */
-	fseek(log_fp, 0, SEEK_SET);
+	fseek(fp, 0, SEEK_SET);
 
 	/* Create a temp file to store only newest logs */
 	char *rand_ext = gen_rand_str(6);
-
 	if (!rand_ext) {
-		fclose(log_fp);
+		close_fstream(fp, fd);
 		return;
 	}
 
-	char *tmp_file = (char *)xnmalloc(strlen(config_dir) + 12, sizeof(char));
-	sprintf(tmp_file, "%s/log.%s", config_dir, rand_ext);
+	char *tmp = (char *)xnmalloc(strlen(config_dir) + 12, sizeof(char));
+	sprintf(tmp, "%s/log.%s", config_dir, rand_ext);
 	free(rand_ext);
 
-	FILE *log_fp_tmp = fopen(tmp_file, "w+");
-
-	if (!log_fp_tmp) {
-		fprintf(stderr, "log: %s: %s", tmp_file, strerror(errno));
-		fclose(log_fp);
-		free(tmp_file);
+	int fdd;
+	FILE *fpp = open_fstream_w(tmp, &fdd);
+	if (!fpp) {
+		fprintf(stderr, "log: %s: %s", tmp, strerror(errno));
+		close_fstream(fp, fd);
+		free(tmp);
 		return;
 	}
 
 	int i = 1;
 	size_t line_size = 0;
-	char *line_buff = (char *)NULL;
+	char *line = (char *)NULL;
 
-	while (getline(&line_buff, &line_size, log_fp) > 0) {
+	while (getline(&line, &line_size, fp) > 0) {
 		/* Delete old entries = copy only new ones */
-		if (i++ >= logs_num - (max - 1))
-			fprintf(log_fp_tmp, "%s", line_buff);
+		if (i++ >= n - (max - 1))
+			fprintf(fpp, "%s", line);
 	}
 
-	free(line_buff);
-	fclose(log_fp_tmp);
-	fclose(log_fp);
-	unlink(logfile);
-	rename(tmp_file, logfile);
-	free(tmp_file);
+	free(line);
+	close_fstream(fpp, fdd);
+	close_fstream(fp, fd);
+	unlink(file);
+	rename(tmp, file);
+	free(tmp);
 
 	return;
 }

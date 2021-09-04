@@ -854,7 +854,7 @@ bulk_rename(char **args)
 	}
 
 	int fd;
-	fp = open_fstream(BULK_FILE, &fd);
+	fp = open_fstream_r(BULK_FILE, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", BULK_FILE,
 		    strerror(errno));

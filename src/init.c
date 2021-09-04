@@ -387,7 +387,7 @@ load_jumpdb(void)
 	snprintf(jump_file, dir_len + 10, "%s/jump.cfm", config_dir);
 
 	int fd;
-	FILE *fp = open_fstream(jump_file, &fd);
+	FILE *fp = open_fstream_r(jump_file, &fd);
 	if (!fp) {
 		free(jump_file);
 		return;
@@ -511,7 +511,7 @@ load_bookmarks(void)
 		return EXIT_FAILURE;
 
 	int fd;
-	FILE *fp = open_fstream(bm_file, &fd);
+	FILE *fp = open_fstream_r(bm_file, &fd);
 	if (!fp)
 		return EXIT_FAILURE;
 
@@ -661,7 +661,7 @@ load_actions(void)
 
 	/* Open the actions file */
 	int fd;
-	FILE *fp = open_fstream(actions_file, &fd);
+	FILE *fp = open_fstream_r(actions_file, &fd);
 	if (!fp)
 		return EXIT_FAILURE;
 
@@ -702,7 +702,7 @@ load_remotes(void)
 		return EXIT_FAILURE;
 
 	int fd;
-	FILE *fp = open_fstream(remotes_file, &fd);
+	FILE *fp = open_fstream_r(remotes_file, &fd);
 	if (!fp) {
 		fprintf(stderr, "%s: %s\n", remotes_file, strerror(errno));
 		return EXIT_FAILURE;
@@ -1541,7 +1541,7 @@ get_sel_files(void)
 
 	/* Open the tmp sel file and load its contents into the sel array */
 	int fd;
-	FILE *fp = open_fstream(sel_file, &fd);
+	FILE *fp = open_fstream_r(sel_file, &fd);
 	/*  sel_elements = xcalloc(1, sizeof(char *)); */
 	if (!fp)
 		return EXIT_FAILURE;
@@ -1627,7 +1627,7 @@ get_last_path(void)
 	sprintf(last_file, "%s/.last", config_dir);
 
 	int fd;
-	FILE *fp = open_fstream(last_file, &fd);
+	FILE *fp = open_fstream_r(last_file, &fd);
 	if (!fp) {
 		_err('w', PRINT_PROMPT, _("%s: Error retrieving last "
 			"visited directory\n"), PROGRAM_NAME);
@@ -1687,7 +1687,7 @@ load_pinned_dir(void)
 	sprintf(pin_file, "%s/.pin", config_dir);
 
 	int fd;
-	FILE *fp = open_fstream(pin_file, &fd);
+	FILE *fp = open_fstream_r(pin_file, &fd);
 	if (!fp) {
 /*		_err('w', PRINT_PROMPT, _("%s: Error retrieving pinned "
 			"directory\n"), PROGRAM_NAME); */
@@ -1824,7 +1824,7 @@ get_aliases(void)
 		return;
 
 	int fd;
-	FILE *fp = open_fstream(config_file, &fd);
+	FILE *fp = open_fstream_r(config_file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: alias: '%s': %s\n",
 		    PROGRAM_NAME, config_file, strerror(errno));
@@ -1867,7 +1867,7 @@ load_dirhist(void)
 		return EXIT_FAILURE;
 
 	int fd;
-	FILE *fp = open_fstream(dirhist_file, &fd);
+	FILE *fp = open_fstream_r(dirhist_file, &fd);
 	if (!fp)
 		return EXIT_FAILURE;
 
@@ -1916,7 +1916,7 @@ get_prompt_cmds(void)
 		return;
 
 	int fd;
-	FILE *fp = open_fstream(config_file, &fd);
+	FILE *fp = open_fstream_r(config_file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: prompt: '%s': %s\n",
 		    PROGRAM_NAME, config_file, strerror(errno));
