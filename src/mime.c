@@ -206,13 +206,14 @@ get_app(const char *mime, const char *ext)
 
 #ifndef _NO_MAGIC
 /* Get FILE's MIME type using the libmagic library */
-static char *
-xmagic(const char *file)
+char *
+xmagic(const char *file, const int query_mime)
 {
 	if (!file || !*file)
 		return (char *)NULL;
 
-	magic_t cookie = magic_open(MAGIC_MIME_TYPE | MAGIC_ERROR);
+	magic_t cookie = magic_open(query_mime ? (MAGIC_MIME_TYPE | MAGIC_ERROR)
+					: MAGIC_ERROR);
 	if (!cookie)
 		return (char *)NULL;
 
@@ -595,7 +596,7 @@ mime_open(char **args)
 
 	/* Get file's mime-type */
 #ifndef _NO_MAGIC
-	char *mime = xmagic(file_path);
+	char *mime = xmagic(file_path, MIME_TYPE);
 #else
 	char *mime = get_mime(file_path);
 #endif

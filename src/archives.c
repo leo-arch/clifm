@@ -40,6 +40,10 @@
 #include "readline.h"
 #include "checks.h"
 
+#ifndef _NO_MAGIC
+#include "mime.h"
+#endif
+
 static int zstandard(char *in_file, char *out_file, char mode, char op);
 
 static int
@@ -287,10 +291,25 @@ static int
 check_iso(char *file)
 {
 	if (!file || !*file) {
-		fputs(_("Error opening temporary file\n"), stderr);
+		fputs(_("Error querying file type\n"), stderr);
 		return -1;
 	}
 
+	int is_iso = 0;
+
+#ifndef _NO_MAGIC
+	char *t = xmagic(file, TEXT_DESC);
+	if (!t) {
+		fputs(_("Error querying file type\n"), stderr);
+		return (-1);
+	}
+
+	char *ret = strstr(t, "ISO 9660");
+	if (ret)
+		is_iso = 1;
+
+	free(t);
+#else
 	char iso_tmp_file[PATH_MAX] = "";
 	char *rand_ext = gen_rand_str(6);
 	if (!rand_ext)
@@ -350,8 +369,6 @@ check_iso(char *file)
 	if (retval != EXIT_SUCCESS)
 		return (-1);
 
-	int is_iso = 0;
-
 	if (access(iso_tmp_file, F_OK) == 0) {
 		fp = open_fstream_r(iso_tmp_file, &fd);
 		if (fp) {
@@ -368,6 +385,7 @@ check_iso(char *file)
 		}
 		unlink(iso_tmp_file);
 	}
+#endif /* !_NO_MAGIC */
 
 	if (is_iso)
 		return EXIT_SUCCESS;
@@ -387,10 +405,35 @@ int
 is_compressed(char *file, int test_iso)
 {
 	if (!file || !*file) {
-		fputs(_("Error opening temporary file\n"), stderr);
-		return -1;
+		fputs(_("Error querying file type\n"), stderr);
+		return (-1);
 	}
 
+	int compressed = 0;
+
+#ifndef _NO_MAGIC
+	char *t = xmagic(file, TEXT_DESC);
+	if (!t) {
+		fputs(_("Error querying file type\n"), stderr);
+		return (-1);
+	}
+
+	char *ret = strstr(t, "archive");
+	if (ret) {
+		compressed = 1;
+	} else {
+		ret = strstr(t, "compressed");
+		if (ret) {
+			compressed = 1;
+		} else if (test_iso) {
+			ret = strstr(t, "ISO 9660");
+			if (ret)
+				compressed = 1;
+		}
+	}
+
+	free(t);
+#else
 	char *rand_ext = gen_rand_str(6);
 	if (!rand_ext)
 		return (-1);
@@ -453,8 +496,6 @@ is_compressed(char *file, int test_iso)
 	if (retval != EXIT_SUCCESS)
 		return (-1);
 
-	int compressed = 0;
-
 	if (access(archiver_tmp_file, F_OK) == 0) {
 		fp = open_fstream_r(archiver_tmp_file, &fd);
 		if (fp) {
@@ -484,6 +525,7 @@ is_compressed(char *file, int test_iso)
 
 		unlink(archiver_tmp_file);
 	}
+#endif /* !_NO_MAGIC */
 
 	if (compressed)
 		return EXIT_SUCCESS;

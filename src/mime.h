@@ -26,3 +26,4 @@
 
 /* mime.c */
 int mime_open(char **args);
+char *xmagic(const char *file, const int mime);
