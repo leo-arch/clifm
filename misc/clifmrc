@@ -72,7 +72,7 @@ mvCmd=0
 # add color to the prompt line
 # \]: End a sequence of non-printing characters
 
-Prompt="\[\e[0;37m\][\[\e[0;36m\]\S\[\e[0;37m\]]\l \A \u:\H \[\e[00;36m\]\w\n\[\e[0;37m\]\z\[\e[0;34m\] \$\[\e[0m\] "
+Prompt="\[\e[0m\][\[\e[0;36m\]\S\[\e[0m\]]\l \A \u:\H \[\e[00;36m\]\w\n\[\e[0m\]\z\[\e[0;34m\] \$\[\e[0m\] "
 
 # If set to 'default', CliFM state information (selected files,
 # trashed files, current workspace, messages, and stealth mode) will be printed
@@ -128,13 +128,8 @@ CdOnQuit=false
 Autocd=true
 AutoOpen=true
 
-# If set to true, run the directory jumper function (if the input
-# string is neither an internal nor an external command) without the need to
-# use the j command: 'STR...' amounts to 'j STR...'. This option implies autocd.
-AutoJump=false
-
 # If set to true, enable auto-suggestions
-AutoSuggestions=false
+AutoSuggestions=true
 
 # The following checks will be performed in the order specified
 # by SuggestionStrategy. Available checks:
