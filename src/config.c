@@ -387,14 +387,15 @@ create_actions_file(char *file)
 	}
 
 	/* Else, create it */
-	FILE *actions_fp = fopen(file, "w");
-	if (!actions_fp) {
+	int fd;
+	FILE *fp = open_fstream_w(file, &fd);
+	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 		    file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
-	fprintf(actions_fp, "######################\n"
+	fprintf(fp, "######################\n"
 		"# Actions file for %s #\n"
 		"######################\n\n"
 		"# Define here your custom actions. Actions are "
@@ -429,7 +430,7 @@ create_actions_file(char *file)
 		"ih=ihelp.sh\n",
 	    PROGRAM_NAME, PROGRAM_NAME);
 
-	fclose(actions_fp);
+	close_fstream(fp, fd);
 	return EXIT_SUCCESS;
 }
 
@@ -1019,7 +1020,8 @@ create_def_cscheme(void)
 		return;
 	}
 
-	FILE *fp = fopen(cscheme_file, "w+");
+	int fd;
+	FILE *fp = open_fstream_w(cscheme_file, &fd);
 	if (!fp) {
 		_err('w', PRINT_PROMPT, "%s: Error creating default color scheme "
 			"file\n", PROGRAM_NAME);
@@ -1055,7 +1057,7 @@ create_def_cscheme(void)
 	    DEF_IFACE_COLORS,
 	    DEF_EXT_COLORS);
 
-	fclose(fp);
+	close_fstream(fp, fd);
 	free(cscheme_file);
 	return;
 }
