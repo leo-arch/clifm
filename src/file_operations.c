@@ -849,7 +849,7 @@ bulk_rename(char **args)
 	if (mtime_bfr == (time_t)attr.st_mtime) {
 		puts(_("bulk: Nothing to do"));
 		fd = open(bulk_file, O_WRONLY);
-		if (fd == 1) {
+		if (fd == -1) {
 			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
 				bulk_file, strerror(errno));
 			return EXIT_FAILURE;
