@@ -510,24 +510,25 @@ load_bookmarks(void)
 	if (!bm_file)
 		return EXIT_FAILURE;
 
-	FILE *bm_fp = fopen(bm_file, "r");
-	if (!bm_fp)
+	int fd;
+	FILE *fp = open_fstream(bm_file, &fd);
+	if (!fp)
 		return EXIT_FAILURE;
 
 	size_t bm_total = 0;
 	char tmp_line[256];
-	while (fgets(tmp_line, (int)sizeof(tmp_line), bm_fp)) {
+	while (fgets(tmp_line, (int)sizeof(tmp_line), fp)) {
 		if (!*tmp_line || *tmp_line == '#' || *tmp_line == '\n')
 			continue;
 		bm_total++;
 	}
 
 	if (!bm_total) {
-		fclose(bm_fp);
+		close_fstream(fp, fd);
 		return EXIT_SUCCESS;
 	}
 
-	fseek(bm_fp, 0L, SEEK_SET);
+	fseek(fp, 0L, SEEK_SET);
 
 	bookmarks = (struct bookmarks_t *)xnmalloc(bm_total + 1,
 	    sizeof(struct bookmarks_t));
@@ -535,7 +536,7 @@ load_bookmarks(void)
 	char *line = (char *)NULL;
 	ssize_t line_len = 0;
 
-	while ((line_len = getline(&line, &line_size, bm_fp)) > 0) {
+	while ((line_len = getline(&line, &line_size, fp)) > 0) {
 		if (!*line || *line == '\n' || *line == '#')
 			continue;
 		if (line[line_len - 1] == '\n')
@@ -612,7 +613,7 @@ load_bookmarks(void)
 	}
 
 	free(line);
-	fclose(bm_fp);
+	close_fstream(fp, fd);
 
 	if (!bm_n) {
 		free(bookmarks);
@@ -659,15 +660,16 @@ load_actions(void)
 	}
 
 	/* Open the actions file */
-	FILE *actions_fp = fopen(actions_file, "r");
-	if (!actions_fp)
+	int fd;
+	FILE *fp = open_fstream(actions_file, &fd);
+	if (!fp)
 		return EXIT_FAILURE;
 
 	size_t line_size = 0;
 	char *line = (char *)NULL;
 	ssize_t line_len = 0;
 
-	while ((line_len = getline(&line, &line_size, actions_fp)) > 0) {
+	while ((line_len = getline(&line, &line_size, fp)) > 0) {
 		if (!line || !*line || *line == '#' || *line == '\n')
 			continue;
 		if (line[line_len - 1] == '\n')
@@ -688,6 +690,7 @@ load_actions(void)
 	}
 
 	free(line);
+	close_fstream(fp, fd);
 	return EXIT_SUCCESS;
 }
 
@@ -698,13 +701,8 @@ load_remotes(void)
 	if (!remotes_file || !*remotes_file)
 		return EXIT_FAILURE;
 
-	struct stat attr;
-	if (stat(remotes_file, &attr) == -1) {
-		fprintf(stderr, "%s: %s\n", remotes_file, strerror(errno));
-		return EXIT_FAILURE;
-	}
-
-	FILE *fp = fopen(remotes_file, "r");
+	int fd;
+	FILE *fp = open_fstream(remotes_file, &fd);
 	if (!fp) {
 		fprintf(stderr, "%s: %s\n", remotes_file, strerror(errno));
 		return EXIT_FAILURE;
@@ -837,7 +835,7 @@ load_remotes(void)
 	}
 
 	free(line);
-	fclose(fp);
+	close_fstream(fp, fd);
 
 	if (remotes[n].name) {
 		++n;
@@ -1542,15 +1540,16 @@ get_sel_files(void)
 	sel_n = 0;
 
 	/* Open the tmp sel file and load its contents into the sel array */
-	FILE *sel_fp = fopen(sel_file, "r");
+	int fd;
+	FILE *fp = open_fstream(sel_file, &fd);
 	/*  sel_elements = xcalloc(1, sizeof(char *)); */
-	if (!sel_fp)
+	if (!fp)
 		return EXIT_FAILURE;
 
 	/* Since this file contains only paths, we can be sure no line
 	 * length will be larger than PATH_MAX */
 	char line[PATH_MAX] = "";
-	while (fgets(line, (int)sizeof(line), sel_fp)) {
+	while (fgets(line, (int)sizeof(line), fp)) {
 		size_t len = strlen(line);
 
 		if (line[len - 1] == '\n')
@@ -1563,7 +1562,7 @@ get_sel_files(void)
 		sel_elements[sel_n++] = savestring(line, len);
 	}
 
-	fclose(sel_fp);
+	close_fstream(fp, fd);
 	return EXIT_SUCCESS;
 }
 
@@ -1687,16 +1686,11 @@ load_pinned_dir(void)
 	char *pin_file = (char *)xnmalloc(strlen(config_dir) + 6, sizeof(char));
 	sprintf(pin_file, "%s/.pin", config_dir);
 
-	struct stat attr;
-	if (lstat(pin_file, &attr) == -1) {
-		free(pin_file);
-		return EXIT_FAILURE;
-	}
-
-	FILE *fp = fopen(pin_file, "r");
+	int fd;
+	FILE *fp = open_fstream(pin_file, &fd);
 	if (!fp) {
-		_err('w', PRINT_PROMPT, _("%s: Error retrieving pinned "
-			"directory\n"), PROGRAM_NAME);
+/*		_err('w', PRINT_PROMPT, _("%s: Error retrieving pinned "
+			"directory\n"), PROGRAM_NAME); */
 		free(pin_file);
 		return EXIT_FAILURE;
 	}
@@ -1704,13 +1698,13 @@ load_pinned_dir(void)
 	char line[PATH_MAX] = "";
 	if (fgets(line, (int)sizeof(line), fp) == NULL) {
 		free(pin_file);
-		fclose(fp);
+		close_fstream(fp, fd);
 		return EXIT_FAILURE;
 	}
 
 	if (!*line || !strchr(line, '/')) {
 		free(pin_file);
-		fclose(fp);
+		close_fstream(fp, fd);
 		return EXIT_FAILURE;
 	}
 
@@ -1720,7 +1714,7 @@ load_pinned_dir(void)
 	}
 
 	pinned_dir = savestring(line, strlen(line));
-	fclose(fp);
+	close_fstream(fp, fd);
 	free(pin_file);
 	return EXIT_SUCCESS;
 }
@@ -1829,9 +1823,9 @@ get_aliases(void)
 	if (!config_ok)
 		return;
 
-	FILE *config_file_fp;
-	config_file_fp = fopen(config_file, "r");
-	if (!config_file_fp) {
+	int fd;
+	FILE *fp = open_fstream(config_file, &fd);
+	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: alias: '%s': %s\n",
 		    PROGRAM_NAME, config_file, strerror(errno));
 		return;
@@ -1849,7 +1843,7 @@ get_aliases(void)
 	char *line = (char *)NULL;
 	size_t line_size = 0;
 
-	while (getline(&line, &line_size, config_file_fp) > 0) {
+	while (getline(&line, &line_size, fp) > 0) {
 		if (*line == 'a' && strncmp(line, "alias ", 6) == 0) {
 			char *alias_line = strchr(line, ' ');
 			if (alias_line) {
@@ -1863,7 +1857,7 @@ get_aliases(void)
 	}
 
 	free(line);
-	fclose(config_file_fp);
+	close_fstream(fp, fd);
 }
 
 int
@@ -1872,7 +1866,8 @@ load_dirhist(void)
 	if (!config_ok)
 		return EXIT_FAILURE;
 
-	FILE *fp = fopen(dirhist_file, "r");
+	int fd;
+	FILE *fp = open_fstream(dirhist_file, &fd);
 	if (!fp)
 		return EXIT_FAILURE;
 
@@ -1883,7 +1878,7 @@ load_dirhist(void)
 		dirs++;
 
 	if (!dirs) {
-		fclose(fp);
+		close_fstream(fp, fd);
 		return EXIT_SUCCESS;
 	}
 
@@ -1907,6 +1902,7 @@ load_dirhist(void)
 		strcpy(old_pwd[dirhist_total_index++], line);
 	}
 
+	close_fstream(fp, fd);
 	old_pwd[dirhist_total_index] = (char *)NULL;
 	free(line);
 	dirhist_cur_index = dirhist_total_index - 1;
@@ -1919,9 +1915,9 @@ get_prompt_cmds(void)
 	if (!config_ok)
 		return;
 
-	FILE *config_file_fp;
-	config_file_fp = fopen(config_file, "r");
-	if (!config_file_fp) {
+	int fd;
+	FILE *fp = open_fstream(config_file, &fd);
+	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: prompt: '%s': %s\n",
 		    PROGRAM_NAME, config_file, strerror(errno));
 		return;
@@ -1941,7 +1937,7 @@ get_prompt_cmds(void)
 	size_t line_size = 0;
 	ssize_t line_len = 0;
 
-	while ((line_len = getline(&line, &line_size, config_file_fp)) > 0) {
+	while ((line_len = getline(&line, &line_size, fp)) > 0) {
 		if (prompt_line_found) {
 			if (strncmp(line, "#END OF PROMPT", 14) == 0)
 				break;
@@ -1957,7 +1953,7 @@ get_prompt_cmds(void)
 	}
 
 	free(line);
-	fclose(config_file_fp);
+	close_fstream(fp, fd);
 }
 
 /* If some option was not set, set it to the default value */

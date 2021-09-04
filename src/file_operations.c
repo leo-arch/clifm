@@ -795,15 +795,14 @@ bulk_rename(char **args)
 
 	int exit_status = EXIT_SUCCESS;
 
-	char BULK_FILE[PATH_MAX] = "";
+	char BULK_FILE[PATH_MAX];
 	if (xargs.stealth_mode == 1)
 		sprintf(BULK_FILE, "/tmp/.clifm_bulk_rename");
 	else
 		sprintf(BULK_FILE, "%s/.bulk_rename", tmp_dir);
 
-	FILE *bulk_fp;
-	bulk_fp = fopen(BULK_FILE, "w+");
-	if (!bulk_fp) {
+	FILE *fp = fopen(BULK_FILE, "w+");
+	if (!fp) {
 		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", BULK_FILE, strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -817,19 +816,18 @@ bulk_rename(char **args)
 			char *deq_file = dequote_str(args[i], 0);
 			if (!deq_file) {
 				fprintf(stderr, _("bulk: %s: Error dequoting "
-						  "file name\n"),
-				    args[i]);
+						"file name\n"), args[i]);
 				continue;
 			}
 			strcpy(args[i], deq_file);
 			free(deq_file);
 		}
 
-		fprintf(bulk_fp, "%s\n", args[i]);
+		fprintf(fp, "%s\n", args[i]);
 	}
 
 	arg_total = i;
-	fclose(bulk_fp);
+	fclose(fp);
 
 	/* Store the last modification time of the bulk file. This time
 	 * will be later compared to the modification time of the same
@@ -855,26 +853,27 @@ bulk_rename(char **args)
 		return exit_status;
 	}
 
-	bulk_fp = fopen(BULK_FILE, "r");
-	if (!bulk_fp) {
+	int fd;
+	fp = open_fstream(BULK_FILE, &fd);
+	if (!fp) {
 		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", BULK_FILE,
 		    strerror(errno));
 		return EXIT_FAILURE;
 	}
 
 	/* Go back to the beginning of the bulk file */
-	fseek(bulk_fp, 0, SEEK_SET);
+	fseek(fp, 0, SEEK_SET);
 
 	/* Make sure there are as many lines in the bulk file as files
 	 * to be renamed */
 	size_t file_total = 1;
 	char tmp_line[256];
-	while (fgets(tmp_line, (int)sizeof(tmp_line), bulk_fp))
+	while (fgets(tmp_line, (int)sizeof(tmp_line), fp))
 		file_total++;
 
 	if (arg_total != file_total) {
 		fputs(_("bulk: Line mismatch in rename file\n"), stderr);
-		fclose(bulk_fp);
+		close_fstream(fp, fd);
 		if (unlink(BULK_FILE) == -1)
 			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 			    BULK_FILE, strerror(errno));
@@ -882,7 +881,7 @@ bulk_rename(char **args)
 	}
 
 	/* Go back to the beginning of the bulk file, again */
-	fseek(bulk_fp, 0L, SEEK_SET);
+	fseek(fp, 0L, SEEK_SET);
 
 	size_t line_size = 0;
 	char *line = (char *)NULL;
@@ -891,7 +890,7 @@ bulk_rename(char **args)
 
 	i = 1;
 	/* Print what would be done */
-	while ((line_len = getline(&line, &line_size, bulk_fp)) > 0) {
+	while ((line_len = getline(&line, &line_size, fp)) > 0) {
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
 
@@ -914,7 +913,7 @@ bulk_rename(char **args)
 		}
 
 		free(line);
-		fclose(bulk_fp);
+		close_fstream(fp, fd);
 		return exit_status;
 	}
 
@@ -937,7 +936,7 @@ bulk_rename(char **args)
 		case '\0':
 			free(answer);
 			free(line);
-			fclose(bulk_fp);
+			close_fstream(fp, fd);
 			return EXIT_SUCCESS;
 
 		default:
@@ -950,12 +949,12 @@ bulk_rename(char **args)
 	free(answer);
 
 	/* Once again */
-	fseek(bulk_fp, 0L, SEEK_SET);
+	fseek(fp, 0L, SEEK_SET);
 
 	i = 1;
 
 	/* Compose the mv commands and execute them */
-	while ((line_len = getline(&line, &line_size, bulk_fp)) > 0) {
+	while ((line_len = getline(&line, &line_size, fp)) > 0) {
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
 
@@ -970,7 +969,8 @@ bulk_rename(char **args)
 	}
 
 	free(line);
-	fclose(bulk_fp);
+	close_fstream(fp, fd);
+
 	if (unlink(BULK_FILE) == -1) {
 		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 		    BULK_FILE, strerror(errno));

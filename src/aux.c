@@ -39,6 +39,8 @@
 #include "exec.h"
 #include "misc.h"
 
+/* Return a file stream associated to a file descriptor (FD) for the file
+ * named NAME */
 FILE *
 open_fstream(char *name, int *fd)
 {
@@ -58,6 +60,7 @@ open_fstream(char *name, int *fd)
 	return fp;	
 }
 
+/* Close file stream FP and file descriptor FD */
 void
 close_fstream(FILE *fp, int fd)
 {
