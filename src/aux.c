@@ -259,18 +259,19 @@ dir_size(char *dir)
 	if (!rand_ext)
 		return -1;
 
-	char DU_TMP_FILE[15];
-	sprintf(DU_TMP_FILE, "/tmp/du.%s", rand_ext);
+	char file[15];
+	sprintf(file, "/tmp/du.%s", rand_ext);
 	free(rand_ext);
 
-	FILE *du_fp = fopen(DU_TMP_FILE, "w");
-	if (!du_fp)
+	int fd;
+	FILE *fp = open_fstream_w(file, &fd);
+	if (!fp)
 		return -1;
 
 	int stdout_bk = dup(STDOUT_FILENO); /* Save original stdout */
-	dup2(fileno(du_fp), STDOUT_FILENO); /* Redirect stdout to the desired
+	dup2(fileno(fp), STDOUT_FILENO); /* Redirect stdout to the desired
 																				 file */
-	fclose(du_fp);
+	close_fstream(fp, fd);
 
 	char *cmd[] = {"du", "-ks", dir, NULL};
 	launch_execve(cmd, FOREGROUND, E_NOSTDERR);
@@ -280,16 +281,16 @@ dir_size(char *dir)
 
 	off_t retval = -1;
 
-	if (access(DU_TMP_FILE, F_OK) == 0) {
-		du_fp = fopen(DU_TMP_FILE, "r");
-		if (du_fp) {
+	if (access(file, F_OK) == 0) {
+		fp = open_fstream_r(file, &fd);
+		if (fp) {
 			/* I only need here the first field of the line, which is a
 			 * file size and could only take a few bytes, so that 32
 			 * bytes is more than enough */
 			char line[32] = "";
-			if (fgets(line, (int)sizeof(line), du_fp) == NULL) {
-				fclose(du_fp);
-				unlink(DU_TMP_FILE);
+			if (fgets(line, (int)sizeof(line), fp) == NULL) {
+				close_fstream(fp, fd);
+				unlink(file);
 				return -1;
 			}
 
@@ -299,10 +300,10 @@ dir_size(char *dir)
 				free(file_size);
 			}
 
-			fclose(du_fp);
+			close_fstream(fp, fd);
 		}
 
-		unlink(DU_TMP_FILE);
+		unlink(file);
 	}
 
 	return retval;

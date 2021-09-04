@@ -291,52 +291,53 @@ check_iso(char *file)
 		return -1;
 	}
 
-	char ISO_TMP_FILE[PATH_MAX] = "";
+	char iso_tmp_file[PATH_MAX] = "";
 	char *rand_ext = gen_rand_str(6);
 	if (!rand_ext)
-		return -1;
+		return (-1);
 
 	if (xargs.stealth_mode == 1)
-		sprintf(ISO_TMP_FILE, "/tmp/clifm-archiver.%s", rand_ext);
+		sprintf(iso_tmp_file, "/tmp/clifm-archiver.%s", rand_ext);
 	else
-		sprintf(ISO_TMP_FILE, "%s/archiver.%s", tmp_dir, rand_ext);
+		sprintf(iso_tmp_file, "%s/archiver.%s", tmp_dir, rand_ext);
 	free(rand_ext);
 
-	FILE *file_fp = fopen(ISO_TMP_FILE, "w");
-	if (!file_fp) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ISO_TMP_FILE,
+	int fd;
+	FILE *fp = open_fstream_w(iso_tmp_file, &fd);
+	if (!fp) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, iso_tmp_file,
 				strerror(errno));
-		return -1;
+		return (-1);
 	}
 
-	FILE *file_fp_err = fopen("/dev/null", "w");
-	if (!file_fp_err) {
+	FILE *fpp = fopen("/dev/null", "w");
+	if (!fpp) {
 		fprintf(stderr, "%s: /dev/null: %s\n", PROGRAM_NAME, strerror(errno));
-		fclose(file_fp);
-		return -1;
+		close_fstream(fp, fd);
+		return (-1);
 	}
 
 	int stdout_bk = dup(STDOUT_FILENO); /* Store original stdout */
 	int stderr_bk = dup(STDERR_FILENO); /* Store original stderr */
 
 	/* Redirect stdout to the desired file */
-	if (dup2(fileno(file_fp), STDOUT_FILENO) == -1) {
+	if (dup2(fileno(fp), STDOUT_FILENO) == -1) {
 		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
-		fclose(file_fp);
-		fclose(file_fp_err);
-		return -1;
+		close_fstream(fp, fd);
+		fclose(fpp);
+		return (-1);
 	}
 
 	/* Redirect stderr to /dev/null */
-	if (dup2(fileno(file_fp_err), STDERR_FILENO) == -1) {
+	if (dup2(fileno(fpp), STDERR_FILENO) == -1) {
 		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
-		fclose(file_fp);
-		fclose(file_fp_err);
-		return -1;
+		close_fstream(fp, fd);
+		fclose(fpp);
+		return (-1);
 	}
 
-	fclose(file_fp);
-	fclose(file_fp_err);
+	close_fstream(fp, fd);
+	fclose(fpp);
 
 	char *cmd[] = {"file", "-b", file, NULL};
 	int retval = launch_execve(cmd, FOREGROUND, E_NOFLAG);
@@ -347,25 +348,25 @@ check_iso(char *file)
 	close(stderr_bk);
 
 	if (retval != EXIT_SUCCESS)
-		return -1;
+		return (-1);
 
 	int is_iso = 0;
 
-	if (access(ISO_TMP_FILE, F_OK) == 0) {
-		file_fp = fopen(ISO_TMP_FILE, "r");
-		if (file_fp) {
+	if (access(iso_tmp_file, F_OK) == 0) {
+		fp = open_fstream_r(iso_tmp_file, &fd);
+		if (fp) {
 			char line[255] = "";
-			if (fgets(line, (int)sizeof(line), file_fp) == NULL) {
-				fclose(file_fp);
-				unlink(ISO_TMP_FILE);
+			if (fgets(line, (int)sizeof(line), fp) == NULL) {
+				close_fstream(fp, fd);
+				unlink(iso_tmp_file);
 				return EXIT_FAILURE;
 			}
 			char *ret = strstr(line, "ISO 9660");
 			if (ret)
 				is_iso = 1;
-			fclose(file_fp);
+			close_fstream(fp, fd);
 		}
-		unlink(ISO_TMP_FILE);
+		unlink(iso_tmp_file);
 	}
 
 	if (is_iso)
@@ -392,29 +393,30 @@ is_compressed(char *file, int test_iso)
 
 	char *rand_ext = gen_rand_str(6);
 	if (!rand_ext)
-		return -1;
+		return (-1);
 
-	char ARCHIVER_TMP_FILE[PATH_MAX];
+	char archiver_tmp_file[PATH_MAX];
 	if (xargs.stealth_mode == 1)
-		sprintf(ARCHIVER_TMP_FILE, "/tmp/clifm-archiver.%s", rand_ext);
+		sprintf(archiver_tmp_file, "/tmp/clifm-archiver.%s", rand_ext);
 	else
-		sprintf(ARCHIVER_TMP_FILE, "%s/archiver.%s", tmp_dir, rand_ext);
+		sprintf(archiver_tmp_file, "%s/archiver.%s", tmp_dir, rand_ext);
 	free(rand_ext);
 
-	if (access(ARCHIVER_TMP_FILE, F_OK) == 0)
-		unlink(ARCHIVER_TMP_FILE);
+	if (access(archiver_tmp_file, F_OK) == 0)
+		unlink(archiver_tmp_file);
 
-	FILE *file_fp = fopen(ARCHIVER_TMP_FILE, "w");
-	if (!file_fp) {
+	int fd;
+	FILE *fp = open_fstream_w(archiver_tmp_file, &fd);
+	if (!fp) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-		    ARCHIVER_TMP_FILE, strerror(errno));
-		return -1;
+		    archiver_tmp_file, strerror(errno));
+		return (-1);
 	}
 
-	FILE *file_fp_err = fopen("/dev/null", "w");
-	if (!file_fp_err) {
+	FILE *fpp = fopen("/dev/null", "w");
+	if (!fpp) {
 		fprintf(stderr, "%s: /dev/null: %s\n", PROGRAM_NAME, strerror(errno));
-		fclose(file_fp);
+		close_fstream(fp, fd);
 		return -1;
 	}
 
@@ -422,23 +424,23 @@ is_compressed(char *file, int test_iso)
 	int stderr_bk = dup(STDERR_FILENO); /* Store original stderr */
 
 	/* Redirect stdout to the desired file */
-	if (dup2(fileno(file_fp), STDOUT_FILENO) == -1) {
+	if (dup2(fileno(fp), STDOUT_FILENO) == -1) {
 		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
-		fclose(file_fp);
-		fclose(file_fp_err);
-		return -1;
+		close_fstream(fp, fd);
+		fclose(fpp);
+		return (-1);
 	}
 
 	/* Redirect stderr to /dev/null */
-	if (dup2(fileno(file_fp_err), STDERR_FILENO) == -1) {
+	if (dup2(fileno(fpp), STDERR_FILENO) == -1) {
 		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
-		fclose(file_fp);
-		fclose(file_fp_err);
+		close_fstream(fp, fd);
+		fclose(fpp);
 		return -1;
 	}
 
-	fclose(file_fp);
-	fclose(file_fp_err);
+	close_fstream(fp, fd);
+	fclose(fpp);
 
 	char *cmd[] = {"file", "-b", file, NULL};
 	int retval = launch_execve(cmd, FOREGROUND, E_NOFLAG);
@@ -449,17 +451,17 @@ is_compressed(char *file, int test_iso)
 	close(stderr_bk);
 
 	if (retval != EXIT_SUCCESS)
-		return -1;
+		return (-1);
 
 	int compressed = 0;
 
-	if (access(ARCHIVER_TMP_FILE, F_OK) == 0) {
-		file_fp = fopen(ARCHIVER_TMP_FILE, "r");
-		if (file_fp) {
+	if (access(archiver_tmp_file, F_OK) == 0) {
+		fp = open_fstream_r(archiver_tmp_file, &fd);
+		if (fp) {
 			char line[255];
-			if (fgets(line, (int)sizeof(line), file_fp) == NULL) {
-				fclose(file_fp);
-				unlink(ARCHIVER_TMP_FILE);
+			if (fgets(line, (int)sizeof(line), fp) == NULL) {
+				close_fstream(fp, fd);
+				unlink(archiver_tmp_file);
 				return EXIT_FAILURE;
 			}
 			char *ret = strstr(line, "archive");
@@ -477,10 +479,10 @@ is_compressed(char *file, int test_iso)
 				}
 			}
 
-			fclose(file_fp);
+			close_fstream(fp, fd);
 		}
 
-		unlink(ARCHIVER_TMP_FILE);
+		unlink(archiver_tmp_file);
 	}
 
 	if (compressed)
