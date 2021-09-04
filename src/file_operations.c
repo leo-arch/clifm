@@ -1075,7 +1075,7 @@ batch_link(char **args)
 		}
 
 		char *ptr = strrchr(linkname, '/');
-		if (symlink(args[i], ptr ? ++ptr : linkname) == -1) {
+		if (symlinkat(args[i], AT_FDCWD, ptr ? ++ptr : linkname) == -1) {
 			exit_status = EXIT_FAILURE;
 			fprintf(stderr, _("%s: %s: Cannot create symlink: %s\n"),
 			    PROGRAM_NAME, ptr ? ptr : linkname, strerror(errno));
