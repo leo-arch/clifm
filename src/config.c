@@ -117,9 +117,9 @@ edit_function(char **comm)
 	struct stat file_attrib;
 
 	/* If, for some reason (like someone erasing the file while the
-	 * program is running) clifmrc doesn't exist, call init_config()
-	 * to recreate the configuration file. Then run 'stat' again to
-	 * reread the attributes of the file */
+	 * program is running) clifmrc doesn't exist, recreate the
+	 * configuration file. Then run 'stat' again to reread the attributes
+	 * of the file */
 	if (stat(config_file, &file_attrib) == -1) {
 		create_config(config_file);
 		stat(config_file, &file_attrib);
@@ -675,7 +675,8 @@ create_config(char *file)
 	}
 
 	/* If not found, create it */
-	FILE *config_fp = fopen(file, "w");
+	int fd;
+	FILE *config_fp = open_fstream_w(file, &fd);
 
 	if (!config_fp) {
 		fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
@@ -820,11 +821,6 @@ CdOnQuit=%s\n\n"
 Autocd=%s\n\
 AutoOpen=%s\n\n"
 
-	    "# If set to true, run the directory jumper function (if the input\n\
-# string is neither an internal nor an external command) without the need to\n\
-# use the j command: 'STR...' amounts to 'j STR...'. This option implies autocd.\n\
-AutoJump=%s\n\n"
-
 	    "# If set to true, enable auto-suggestions.\n\
 AutoSuggestions=%s\n\n"
 
@@ -874,7 +870,6 @@ LightMode=%s\n\n",
 		DEF_CD_ON_QUIT == 1 ? "true" : "false",
 		DEF_AUTOCD == 1 ? "true" : "false",
 		DEF_AUTO_OPEN == 1 ? "true" : "false",
-		DEF_AUTOJUMP == 1 ? "true" : "false",
 		DEF_SUGGESTIONS == 1 ? "true" : "false",
 		DEF_SUG_STRATEGY,
 		DEF_SUG_FILETYPE_COLOR == 1 ? "true" : "false",
@@ -1004,7 +999,7 @@ RlEditMode=%d\n\n"
 	    "#END OF PROMPT COMMANDS\n\n",
 	    config_fp);
 
-	fclose(config_fp);
+	close_fstream(config_fp, fd);
 	return EXIT_SUCCESS;
 }
 
@@ -1075,7 +1070,8 @@ create_remotes_file(void)
 	if (stat(remotes_file, &attr) == EXIT_SUCCESS)
 		return EXIT_SUCCESS;
 
-	FILE *fp = fopen(remotes_file, "w");
+	int fd;
+	FILE *fp = open_fstream_w(remotes_file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 		    remotes_file, strerror(errno));
@@ -1100,7 +1096,7 @@ create_remotes_file(void)
 		"# Automatically unmount this remote at exit\n"
 		"# AutoUnmount=true\n\n", PROGRAM_NAME);
 
-	fclose(fp);
+	close_fstream(fp, fd);
 	return EXIT_SUCCESS;
 }
 
@@ -1305,7 +1301,8 @@ read_config(void)
 {
 	int ret = -1;
 
-	FILE *config_fp = fopen(config_file, "r");
+	int fd;
+	FILE *config_fp = open_fstream_r(config_file, &fd);
 	if (!config_fp) {
 		_err('e', PRINT_PROMPT, _("%s: fopen: '%s': %s. Using default values.\n"),
 		    PROGRAM_NAME, config_file, strerror(errno));
@@ -2021,7 +2018,7 @@ read_config(void)
 		}
 	}
 
-	fclose(config_fp);
+	close_fstream(config_fp, fd);
 
 	if (filter) {
 		ret = regcomp(&regex_exp, filter, REG_NOSUB | REG_EXTENDED);
