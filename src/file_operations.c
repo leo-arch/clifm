@@ -832,42 +832,35 @@ bulk_rename(char **args)
 	arg_total = i;
 	close_fstream(fp, fd);
 
+	fp = open_fstream_r(bulk_file, &fd);
+	if (!fp) {
+		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", bulk_file, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
 	/* Store the last modification time of the bulk file. This time
 	 * will be later compared to the modification time of the same
 	 * file after shown to the user */
 	struct stat attr;
-	stat(bulk_file, &attr);
+	fstat(fd, &attr);
 	time_t mtime_bfr = (time_t)attr.st_mtime;
 
-	/* Open the bulk file via the mime function */
+	/* Open the bulk file */
 	if (open_file(bulk_file) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
 	/* Compare the new modification time to the stored one: if they
 	 * match, nothing was modified */
-	stat(bulk_file, &attr);
+	fstat(fd, &attr);
 	if (mtime_bfr == (time_t)attr.st_mtime) {
 		puts(_("bulk: Nothing to do"));
-		fd = open(bulk_file, O_WRONLY);
-		if (fd == -1) {
-			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
-				bulk_file, strerror(errno));
-			return EXIT_FAILURE;
-		}
 		if (unlinkat(fd, bulk_file, 0) == -1) {
 			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 			    bulk_file, strerror(errno));
 			exit_status = EXIT_FAILURE;
 		}
-		close(fd);
+		close_fstream(fp, fd);
 		return exit_status;
-	}
-
-	fp = open_fstream_r(bulk_file, &fd);
-	if (!fp) {
-		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", bulk_file,
-		    strerror(errno));
-		return EXIT_FAILURE;
 	}
 
 	/* Go back to the beginning of the bulk file */
@@ -914,13 +907,11 @@ bulk_rename(char **args)
 	/* If no file name was modified */
 	if (!modified) {
 		puts(_("bulk: Nothing to do"));
-
 		if (unlinkat(fd, bulk_file, 0) == -1) {
 			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 			    bulk_file, strerror(errno));
 			exit_status = EXIT_FAILURE;
 		}
-
 		free(line);
 		close_fstream(fp, fd);
 		return exit_status;
@@ -962,18 +953,18 @@ bulk_rename(char **args)
 
 	i = 1;
 
-	/* Compose the mv commands and execute them */
+	/* Rename each file */
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
 
+		int fdd = open(args[i], O_RDONLY);
 		if (args[i] && strcmp(args[i], line) != 0) {
-			char *tmp_cmd[] = {"mv", args[i], line, NULL};
-
-			if (launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+			if (renameat(fdd, args[i], AT_FDCWD, line) == -1)
 				exit_status = EXIT_FAILURE;
 		}
 
+		close(fdd);
 		i++;
 	}
 
