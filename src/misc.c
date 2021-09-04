@@ -581,24 +581,27 @@ alias_import(char *file)
 		return EXIT_FAILURE;
 	}
 
-	if (access(rfile, F_OK | R_OK) != 0) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rfile, strerror(errno));
-		return EXIT_FAILURE;
-	}
-
 	/* Open the file to import aliases from */
-	FILE *fp = fopen(rfile, "r");
-	if (!fp) {
-		fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME, rfile, strerror(errno));
+	int fd = open(rfile, O_RDONLY);
+	if (fd == -1) {
+		fprintf(stderr, "a%s: %s: %s\n", PROGRAM_NAME, rfile, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
-	/* Open CLiFM config file as well */
+	FILE *fp = fdopen(fd, "r");
+	if (!fp) {
+		fprintf(stderr, "b%s: '%s': %s\n", PROGRAM_NAME, rfile, strerror(errno));
+		close(fd);
+		return EXIT_FAILURE;
+	}
+
+	/* Open CliFM's config file as well */
 	FILE *config_fp = fopen(config_file, "a");
 	if (!config_fp) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, config_file,
 		    strerror(errno));
 		fclose(fp);
+		close(fd);
 		return EXIT_FAILURE;
 	}
 
@@ -608,7 +611,7 @@ alias_import(char *file)
 	int first = 1;
 
 	while (getline(&line, &line_size, fp) > 0) {
-		if (strncmp(line, "alias ", 6) == 0) {
+		if (*line == 'a' && strncmp(line, "alias ", 6) == 0) {
 			alias_found++;
 
 			/* If alias name conflicts with some internal command,
@@ -641,9 +644,8 @@ alias_import(char *file)
 
 			for (i = 0; i < aliases_n; i++) {
 				int alias_len = strcntchr(aliases[i], '=');
-
 				if (alias_len != -1 && strncmp(aliases[i], p,
-											(size_t)alias_len + 1) == 0) {
+								(size_t)alias_len + 1) == 0) {
 					exists = 1;
 					break;
 				}
@@ -670,6 +672,7 @@ alias_import(char *file)
 
 	free(line);
 	fclose(fp);
+	close(fd);
 	fclose(config_fp);
 
 	/* No alias was found in FILE */
@@ -691,7 +694,7 @@ alias_import(char *file)
 	 * message and update the aliases array */
 	if (alias_imported > 1) {
 		printf(_("%s: %zu aliases were successfully imported\n"),
-		    PROGRAM_NAME, alias_imported);
+				PROGRAM_NAME, alias_imported);
 	} else {
 		printf(_("%s: 1 alias was successfully imported\n"), PROGRAM_NAME);
 	}
