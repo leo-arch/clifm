@@ -33,10 +33,37 @@
 #include <sys/types.h>
 #include <termios.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #include "aux.h"
 #include "exec.h"
 #include "misc.h"
+
+FILE *
+open_fstream(char *name, int *fd)
+{
+	if (!name || !*name)
+		return (FILE *)NULL;
+
+	*fd = open(name, O_RDONLY);
+	if (*fd == -1)
+		return (FILE *)NULL;
+
+	FILE *fp = fdopen(*fd, "r");
+	if (!fp) {
+		close(*fd);
+		return (FILE *)NULL;
+	}
+
+	return fp;	
+}
+
+void
+close_fstream(FILE *fp, int fd)
+{
+	fclose(fp);
+	close(fd);
+}
 
 /*
 static int

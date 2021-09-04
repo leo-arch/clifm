@@ -582,16 +582,11 @@ alias_import(char *file)
 	}
 
 	/* Open the file to import aliases from */
-	int fd = open(rfile, O_RDONLY);
-	if (fd == -1) {
-		fprintf(stderr, "a%s: %s: %s\n", PROGRAM_NAME, rfile, strerror(errno));
-		return EXIT_FAILURE;
-	}
 
-	FILE *fp = fdopen(fd, "r");
+	int fd;
+	FILE *fp = open_fstream(rfile, &fd);
 	if (!fp) {
 		fprintf(stderr, "b%s: '%s': %s\n", PROGRAM_NAME, rfile, strerror(errno));
-		close(fd);
 		return EXIT_FAILURE;
 	}
 
@@ -600,8 +595,7 @@ alias_import(char *file)
 	if (!config_fp) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, config_file,
 		    strerror(errno));
-		fclose(fp);
-		close(fd);
+		close_fstream(fp, fd);
 		return EXIT_FAILURE;
 	}
 
@@ -671,8 +665,7 @@ alias_import(char *file)
 	}
 
 	free(line);
-	fclose(fp);
-	close(fd);
+	close_fstream(fp, fd);
 	fclose(config_fp);
 
 	/* No alias was found in FILE */

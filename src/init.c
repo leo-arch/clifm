@@ -386,16 +386,10 @@ load_jumpdb(void)
 	char *jump_file = (char *)xnmalloc(dir_len + 10, sizeof(char));
 	snprintf(jump_file, dir_len + 10, "%s/jump.cfm", config_dir);
 
-	int fd = open(jump_file, O_RDONLY);
-	if (fd == -1) {
-		free(jump_file);
-		return;
-	}
-
-	FILE *fp = fdopen(fd, "r");
+	int fd;
+	FILE *fp = open_fstream(jump_file, &fd);
 	if (!fp) {
 		free(jump_file);
-		close(fd);
 		return;
 	}
 
@@ -409,8 +403,7 @@ load_jumpdb(void)
 
 	if (!jump_lines) {
 		free(jump_file);
-		fclose(fp);
-		close(fd);
+		close_fstream(fp, fd);
 		return;
 	}
 
@@ -491,8 +484,7 @@ load_jumpdb(void)
 		jump_db[jump_n++].path = savestring(tmpc, strlen(tmpc));
 	}
 
-	fclose(fp);
-	close(fd);
+	close_fstream(fp, fd);
 	free(line);
 	free(jump_file);
 
@@ -1635,14 +1627,9 @@ get_last_path(void)
 	char *last_file = (char *)xnmalloc(strlen(config_dir) + 7, sizeof(char));
 	sprintf(last_file, "%s/.last", config_dir);
 
-	struct stat last_attrib;
-	if (stat(last_file, &last_attrib) == -1) {
-		free(last_file);
-		return EXIT_FAILURE;
-	}
-
-	FILE *last_fp = fopen(last_file, "r");
-	if (!last_fp) {
+	int fd;
+	FILE *fp = open_fstream(last_file, &fd);
+	if (!fp) {
 		_err('w', PRINT_PROMPT, _("%s: Error retrieving last "
 			"visited directory\n"), PROGRAM_NAME);
 		free(last_file);
@@ -1659,7 +1646,7 @@ get_last_path(void)
 	} */
 
 	char line[PATH_MAX] = "";
-	while (fgets(line, (int)sizeof(line), last_fp)) {
+	while (fgets(line, (int)sizeof(line), fp)) {
 		char *p = line;
 		if (!*p || !strchr(p, '/'))
 			continue;
@@ -1685,7 +1672,7 @@ get_last_path(void)
 			ws[ws_n].path = savestring(p + 2, strlen(p + 2));
 	}
 
-	fclose(last_fp);
+	close_fstream(fp, fd);
 	free(last_file);
 	return EXIT_SUCCESS;
 }
