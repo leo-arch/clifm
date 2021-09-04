@@ -598,10 +598,10 @@ check_file_size(char *file, int max)
 	}
 
 	free(line);
+	unlinkat(fd, file, 0);
+	renameat(fdd, tmp, fd, file);
 	close_fstream(fpp, fdd);
 	close_fstream(fp, fd);
-	unlink(file);
-	rename(tmp, file);
 	free(tmp);
 
 	return;

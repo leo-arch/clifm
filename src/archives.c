@@ -402,9 +402,6 @@ is_compressed(char *file, int test_iso)
 		sprintf(archiver_tmp_file, "%s/archiver.%s", tmp_dir, rand_ext);
 	free(rand_ext);
 
-	if (access(archiver_tmp_file, F_OK) == 0)
-		unlink(archiver_tmp_file);
-
 	int fd;
 	FILE *fp = open_fstream_w(archiver_tmp_file, &fd);
 	if (!fp) {
@@ -412,6 +409,9 @@ is_compressed(char *file, int test_iso)
 		    archiver_tmp_file, strerror(errno));
 		return (-1);
 	}
+
+/*	if (access(archiver_tmp_file, F_OK) == 0)
+		unlinkat(fd, archiver_tmp_file, 0); */
 
 	FILE *fpp = fopen("/dev/null", "w");
 	if (!fpp) {

@@ -32,6 +32,8 @@
 #include <time.h>
 #include <readline/readline.h>
 
+#include <fcntl.h>
+
 #ifndef _NO_ARCHIVING
 #include "archives.h"
 #endif
@@ -795,15 +797,16 @@ bulk_rename(char **args)
 
 	int exit_status = EXIT_SUCCESS;
 
-	char BULK_FILE[PATH_MAX];
+	char bulk_file[PATH_MAX];
 	if (xargs.stealth_mode == 1)
-		sprintf(BULK_FILE, "/tmp/.clifm_bulk_rename");
+		sprintf(bulk_file, "/tmp/.clifm_bulk_rename");
 	else
-		sprintf(BULK_FILE, "%s/.bulk_rename", tmp_dir);
+		sprintf(bulk_file, "%s/.bulk_rename", tmp_dir);
 
-	FILE *fp = fopen(BULK_FILE, "w+");
+	int fd;
+	FILE *fp = open_fstream_w(bulk_file, &fd);
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", BULK_FILE, strerror(errno));
+		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -827,36 +830,42 @@ bulk_rename(char **args)
 	}
 
 	arg_total = i;
-	fclose(fp);
+	close_fstream(fp, fd);
 
 	/* Store the last modification time of the bulk file. This time
 	 * will be later compared to the modification time of the same
 	 * file after shown to the user */
 	struct stat attr;
-	stat(BULK_FILE, &attr);
+	stat(bulk_file, &attr);
 	time_t mtime_bfr = (time_t)attr.st_mtime;
 
 	/* Open the bulk file via the mime function */
-	if (open_file(BULK_FILE) != EXIT_SUCCESS)
+	if (open_file(bulk_file) != EXIT_SUCCESS)
 		return EXIT_FAILURE;
 
 	/* Compare the new modification time to the stored one: if they
 	 * match, nothing was modified */
-	stat(BULK_FILE, &attr);
+	stat(bulk_file, &attr);
 	if (mtime_bfr == (time_t)attr.st_mtime) {
 		puts(_("bulk: Nothing to do"));
-		if (unlink(BULK_FILE) == -1) {
+		fd = open(bulk_file, O_WRONLY);
+		if (fd == 1) {
+			fprintf(stderr, "%s: '%s': %s\n", PROGRAM_NAME,
+				bulk_file, strerror(errno));
+			return EXIT_FAILURE;
+		}
+		if (unlinkat(fd, bulk_file, 0) == -1) {
 			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-			    BULK_FILE, strerror(errno));
+			    bulk_file, strerror(errno));
 			exit_status = EXIT_FAILURE;
 		}
+		close(fd);
 		return exit_status;
 	}
 
-	int fd;
-	fp = open_fstream_r(BULK_FILE, &fd);
+	fp = open_fstream_r(bulk_file, &fd);
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", BULK_FILE,
+		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", bulk_file,
 		    strerror(errno));
 		return EXIT_FAILURE;
 	}
@@ -873,10 +882,10 @@ bulk_rename(char **args)
 
 	if (arg_total != file_total) {
 		fputs(_("bulk: Line mismatch in rename file\n"), stderr);
-		close_fstream(fp, fd);
-		if (unlink(BULK_FILE) == -1)
+		if (unlinkat(fd, bulk_file, 0) == -1)
 			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-			    BULK_FILE, strerror(errno));
+			    bulk_file, strerror(errno));
+		close_fstream(fp, fd);
 		return EXIT_FAILURE;
 	}
 
@@ -906,9 +915,9 @@ bulk_rename(char **args)
 	if (!modified) {
 		puts(_("bulk: Nothing to do"));
 
-		if (unlink(BULK_FILE) == -1) {
+		if (unlinkat(fd, bulk_file, 0) == -1) {
 			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-			    BULK_FILE, strerror(errno));
+			    bulk_file, strerror(errno));
 			exit_status = EXIT_FAILURE;
 		}
 
@@ -969,13 +978,13 @@ bulk_rename(char **args)
 	}
 
 	free(line);
-	close_fstream(fp, fd);
 
-	if (unlink(BULK_FILE) == -1) {
+	if (unlinkat(fd, bulk_file, 0) == -1) {
 		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-		    BULK_FILE, strerror(errno));
+		    bulk_file, strerror(errno));
 		exit_status = EXIT_FAILURE;
 	}
+	close_fstream(fp, fd);
 
 #ifdef __HAIKU__
 	if (cd_lists_on_the_fly) {
