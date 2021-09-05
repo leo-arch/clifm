@@ -325,7 +325,7 @@ check_iso(char *file)
 	FILE *fp = open_fstream_w(iso_tmp_file, &fd);
 	if (!fp) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, iso_tmp_file,
-				strerror(__errno));
+				strerror(errno));
 		return (-1);
 	}
 
@@ -449,7 +449,7 @@ is_compressed(char *file, int test_iso)
 	FILE *fp = open_fstream_w(archiver_tmp_file, &fd);
 	if (!fp) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-		    archiver_tmp_file, strerror(__errno));
+		    archiver_tmp_file, strerror(errno));
 		return (-1);
 	}
 
