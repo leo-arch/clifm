@@ -24,9 +24,6 @@
 
 #pragma once
 
-/*
-char **split_str(const char *str);
-char *split_fusedcmd(char *str); */
 char **parse_input_str(char *str);
 char *savestring(const char *restrict str, size_t size);
 char **get_substr(char *str, const char ifs);

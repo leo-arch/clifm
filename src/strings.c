@@ -1,4 +1,4 @@
-/* strings.c -- misc string manipulation function */
+﻿/* strings.c -- misc string manipulation function */
 
 /*
  * This file is part of CliFM
@@ -636,7 +636,35 @@ split_str(const char *str)
 	}
 }
 
-char *
+/* Return 1 if STR contains only numbers of a range of number, and zero
+ * if not */
+static int
+check_fused_param(const char *str)
+{
+	char *p = (char *)str;
+	size_t c = 0, i = 0;
+	int ok = 1;
+
+	while (*p) {
+		if (i && *p == '-' && *(p - 1) >= '0' && *(p - 1) <= '9'
+		&& *(p + 1) >= '1' && *(p + 1) <= '9') {
+			c++;
+		} else if (*p == ' ') {
+			break;
+		} else if (*p < '0' || *p > '9') {
+			ok = 0;
+			break;
+		}
+		p++;
+		i++;
+	}
+
+	if (ok && c <= 1)
+		return 1;
+	return 0;
+}
+
+static char *
 split_fusedcmd(char *str)
 {
 	if (!str || !*str || *str == ';' || *str == ':' || *str == '\\')
@@ -677,7 +705,7 @@ split_fusedcmd(char *str)
 		}
 
 		/* Transform "cmdeln" into "cmd eln" */
-		if (*p >= '0' && *p <= '9' && c && *(p - 1) >= 'a' && *(p - 1) <= 'z') {
+		if (check_fused_param(p)) {
 			/* If a number, move from last to next space/nul looking for
 			 * a slash. If found, do nothing */
 			if (s) {
