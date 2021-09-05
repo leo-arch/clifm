@@ -146,7 +146,6 @@ init_history(void)
 	} else {
 	/* If the history file doesn't exist, create it */
 		FILE *hist_fp = fopen(hist_file, "w+");
-
 		if (!hist_fp) {
 			_err('w', PRINT_PROMPT, "%s: fopen: '%s': %s\n",
 			    PROGRAM_NAME, hist_file, strerror(errno));
@@ -704,7 +703,7 @@ load_remotes(void)
 	int fd;
 	FILE *fp = open_fstream_r(remotes_file, &fd);
 	if (!fp) {
-		fprintf(stderr, "%s: %s\n", remotes_file, strerror(errno));
+		fprintf(stderr, "%s: %s\n", remotes_file, strerror(__errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1687,8 +1686,6 @@ load_pinned_dir(void)
 	int fd;
 	FILE *fp = open_fstream_r(pin_file, &fd);
 	if (!fp) {
-/*		_err('w', PRINT_PROMPT, _("%s: Error retrieving pinned "
-			"directory\n"), PROGRAM_NAME); */
 		free(pin_file);
 		return EXIT_FAILURE;
 	}
@@ -1825,7 +1822,7 @@ get_aliases(void)
 	FILE *fp = open_fstream_r(config_file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: alias: '%s': %s\n",
-		    PROGRAM_NAME, config_file, strerror(errno));
+		    PROGRAM_NAME, config_file, strerror(__errno));
 		return;
 	}
 
@@ -1917,7 +1914,7 @@ get_prompt_cmds(void)
 	FILE *fp = open_fstream_r(config_file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: prompt: '%s': %s\n",
-		    PROGRAM_NAME, config_file, strerror(errno));
+		    PROGRAM_NAME, config_file, strerror(__errno));
 		return;
 	}
 

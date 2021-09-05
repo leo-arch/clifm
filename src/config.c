@@ -391,7 +391,7 @@ create_actions_file(char *file)
 	FILE *fp = open_fstream_w(file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-		    file, strerror(errno));
+		    file, strerror(__errno));
 		return EXIT_FAILURE;
 	}
 
@@ -680,7 +680,7 @@ create_config(char *file)
 	FILE *config_fp = open_fstream_w(file, &fd);
 
 	if (!config_fp) {
-		fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+		fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME, file, strerror(__errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1024,7 +1024,7 @@ create_def_cscheme(void)
 	FILE *fp = open_fstream_w(cscheme_file, &fd);
 	if (!fp) {
 		_err('w', PRINT_PROMPT, "%s: Error creating default color scheme "
-			"file\n", PROGRAM_NAME);
+			"file: %s\n", PROGRAM_NAME, strerror(__errno));
 		free(cscheme_file);
 		return;
 	}
@@ -1076,7 +1076,7 @@ create_remotes_file(void)
 	FILE *fp = open_fstream_w(remotes_file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-		    remotes_file, strerror(errno));
+		    remotes_file, strerror(__errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1307,7 +1307,7 @@ read_config(void)
 	FILE *config_fp = open_fstream_r(config_file, &fd);
 	if (!config_fp) {
 		_err('e', PRINT_PROMPT, _("%s: fopen: '%s': %s. Using default values.\n"),
-		    PROGRAM_NAME, config_file, strerror(errno));
+		    PROGRAM_NAME, config_file, strerror(__errno));
 		return;
 	}
 

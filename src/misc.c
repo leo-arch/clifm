@@ -586,7 +586,7 @@ alias_import(char *file)
 	int fd;
 	FILE *fp = open_fstream_r(rfile, &fd);
 	if (!fp) {
-		fprintf(stderr, "b%s: '%s': %s\n", PROGRAM_NAME, rfile, strerror(errno));
+		fprintf(stderr, "b%s: '%s': %s\n", PROGRAM_NAME, rfile, strerror(__errno));
 		return EXIT_FAILURE;
 	}
 
