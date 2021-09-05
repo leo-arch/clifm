@@ -393,30 +393,30 @@ exec_cmd(char **comm)
 		if (tmp[tmp_len - 1] == '/')
 			tmp[tmp_len - 1] = '\0';
 
-		int i = (int)files, found = 0;
+		int i = (int)files;
 		while (--i >= 0) {
 			if (*tmp != *file_info[i].name)
 				continue;
+
 			if (strcmp(tmp, file_info[i].name) != 0)
 				continue;
+
+			free(deq_str);
+			deq_str = (char *)NULL;
+
 			if (autocd && (file_info[i].type == DT_DIR || file_info[i].dir == 1)) {
-				exit_code = cd_function(tmp);
-				found = 1;
+				return (exit_code = cd_function(comm[0]));
 			} else if (auto_open && (file_info[i].type == DT_REG
 			|| file_info[i].type == DT_LNK)) {
 				char *cmd[] = {"open", comm[0],
 				    comm[1] ? comm[1] : NULL, NULL};
-				found = 1;
-				exit_code = open_function(cmd);
+				return (exit_code = open_function(cmd));
 			} else {
 				break;
 			}
-			if (found) {
-				free(deq_str);
-				return exit_code;
-			}	
 		}
 	}
+
 	free(deq_str);
 
 	/* The more often a function is used, the more on top should it be
