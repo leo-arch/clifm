@@ -757,6 +757,8 @@ CliFM offers three kinds of file filters:
 .TP
 \fBM\-g:\fR Toggle list\-folders\-first on/off
 .TP
+\fBM\-,:\fR Toggle list only directories on/off
+.TP
 \fBC\-r:\fR Refresh the screen (reprint files in current directory and update prompt)
 .TP
 \fBM\-t:\fR Clear program messages
