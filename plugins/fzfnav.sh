@@ -13,6 +13,8 @@
 # Left: go to parent directory
 # Right, Enter: cd into hovered directory or open hovered file and exit.
 # Home/end: go to first/last file
+# TAB: Select files
+# Ctrl-s: Confirm selection: send selected files to CliFM Selbox
 # Shift+up/down: Move one line up/down in the preview window
 # Alt+up/down: Move to the beginning/end in the preview window
 # At exit (pressing q) CliFM will change to the last directory visited
@@ -72,13 +74,15 @@ HELP="Usage:
 Type in the prompt to filter the current list of files. Regular expressions are \
 allowed.
 
-At exit (pressing Ctrl-q) CliFM will change to the last directory visited with FZF or \
+At exit (Ctrl-q) CliFM will change to the last directory visited or \
 open the last accepted file (Enter). Press Esc to cancel and exit.
 
 Keybindings:
 Left: go to parent directory
 Right or Enter: cd into hovered directory or open hovered file and exit
 Home/end: go to first/last file in the files list
+TAB: Select files
+Ctrl-s: Confirm selection (send them to CliFM Selection Box)
 Shift-up/down: Move one line up/down in the preview window
 Alt-up/down: Move to the beginning/end in the preview window"
 
@@ -109,6 +113,7 @@ fcd() {
 		lsd=$(printf "\033[0;%sm..\n" "$dir_color"; $ls_cmd)
 		file="$(printf "%s\n" "$lsd" | fzf \
 			--color="bg+:236,gutter:236,fg+:reverse,pointer:6,prompt:6,marker:2:bold,spinner:6:bold" \
+			--bind "ctrl-s:execute(touch $TMP_SEL)+accept" \
 			--bind "right:accept,left:first+accept" \
 			--bind "insert:clear-query" \
 			--bind "home:first,end:last" \
@@ -122,11 +127,27 @@ fcd() {
 			--bind "ctrl-q:abort" \
 			--ansi --prompt="${fzf_prompt}> " --reverse --no-clear \
 			--no-info --keep-right --multi --header="Press 'Alt-h' for help
-$PWD" --marker="+" --preview-window=:wrap "$BORDERS" \
+$PWD
+$FZF_HEADER" --marker="*" --preview-window=:wrap "$BORDERS" \
 			--preview "printf \"\033[2J\"; $BFG_FILE {}")"
 
 		# If FZF returned no file, exit
 		[ ${#file} -eq 0 ] && return 0
+
+		# If we have selected files, send them to CliFM Selbox
+		if [ -f "$TMP_SEL" ]; then
+			echo "$file" > "$TMP_SEL"
+			while read -r line; do
+				if ! grep -q "$PWD/$line" "$CLIFM_SELFILE"; then
+					printf "%s/%s\n" "$PWD" "$line" >> "$CLIFM_SELFILE"
+					c=$((c+1))
+				fi
+			done < "$TMP_SEL"
+			rm -rf -- "$TMP_SEL"
+			export FZF_HEADER="$c selected file(s)"
+			continue
+		fi
+
 		# If the returned file is a directory, just cd into it. Otherwise, open
 		# it via OPENER
 		if [ -d "${PWD}/$file" ]; then
@@ -155,6 +176,8 @@ main() {
 	# file types. The implementation for each application is defined in the
 	# BFG file.
 
+	export TMP_SEL="/tmp/fzfnav.sel"
+	rm -rf -- "$TMP_SEL"
 	BFG_CFG_FILE="$(get_bfg_cfg_file)"
 	if [ -z "$BFG_CFG_FILE" ]; then
 		printf "CliFM: BFG.cfg: No such file or directory\n" >&2
