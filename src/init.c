@@ -1787,11 +1787,11 @@ get_path_programs(void)
 		}
 	}
 
-	if (ext_cmd_ok) {
+	if (ext_cmd_ok && total_cmd) {
 		/* And finally, add commands in PATH */
 		i = (int)path_n;
 		while (--i >= 0) {
-			if (cmd_n[i] <= 0)
+			if (!cmd_n[i] || cmd_n[i] <= 0)
 				continue;
 
 			j = cmd_n[i];

@@ -955,6 +955,11 @@ bulk_rename(char **args)
 
 	/* Rename each file */
 	while ((line_len = getline(&line, &line_size, fp)) > 0) {
+		if (!args[i]) {
+			i++;
+			continue;
+		}
+
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
 
