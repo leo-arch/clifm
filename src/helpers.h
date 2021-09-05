@@ -774,7 +774,6 @@ extern int
     dequoted,
     dirhist_map,
     disk_usage,
-	__errno,
     expand_bookmarks,
     ext_cmd_ok,
     files_counter,

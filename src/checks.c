@@ -534,7 +534,7 @@ check_file_size(char *file, int max)
 		fp = open_fstream_w(file, &fd);
 		if (!fp) {
 			_err(0, NOPRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-			    file, strerror(__errno));
+			    file, strerror(errno));
 		} else {
 			close_fstream(fp, fd);
 		}
@@ -547,7 +547,7 @@ check_file_size(char *file, int max)
 	fp = open_fstream_r(file, &fd);
 	if (!fp) {
 		_err(0, NOPRINT_PROMPT, "%s: log: %s: %s\n", PROGRAM_NAME,
-		    file, strerror(__errno));
+		    file, strerror(errno));
 		return;
 	}
 
@@ -581,7 +581,7 @@ check_file_size(char *file, int max)
 	int fdd;
 	FILE *fpp = open_fstream_w(tmp, &fdd);
 	if (!fpp) {
-		fprintf(stderr, "log: %s: %s", tmp, strerror(__errno));
+		fprintf(stderr, "log: %s: %s", tmp, strerror(errno));
 		close_fstream(fp, fd);
 		free(tmp);
 		return;

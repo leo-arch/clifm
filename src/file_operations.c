@@ -806,7 +806,7 @@ bulk_rename(char **args)
 	int fd;
 	FILE *fp = open_fstream_w(bulk_file, &fd);
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", bulk_file, strerror(__errno));
+		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -834,7 +834,7 @@ bulk_rename(char **args)
 
 	fp = open_fstream_r(bulk_file, &fd);
 	if (!fp) {
-		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", bulk_file, strerror(__errno));
+		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 

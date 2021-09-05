@@ -582,11 +582,10 @@ alias_import(char *file)
 	}
 
 	/* Open the file to import aliases from */
-
 	int fd;
 	FILE *fp = open_fstream_r(rfile, &fd);
 	if (!fp) {
-		fprintf(stderr, "b%s: '%s': %s\n", PROGRAM_NAME, rfile, strerror(__errno));
+		fprintf(stderr, "b%s: '%s': %s\n", PROGRAM_NAME, rfile, strerror(errno));
 		return EXIT_FAILURE;
 	}
 

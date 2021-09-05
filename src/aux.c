@@ -48,14 +48,11 @@ open_fstream_r(char *name, int *fd)
 		return (FILE *)NULL;
 
 	*fd = open(name, O_RDONLY);
-	if (*fd == -1) {
-		__errno = errno;
+	if (*fd == -1)
 		return (FILE *)NULL;
-	}
 
 	FILE *fp = fdopen(*fd, "r");
 	if (!fp) {
-		__errno = errno;
 		close(*fd);
 		return (FILE *)NULL;
 	}
@@ -72,14 +69,11 @@ open_fstream_w(char *name, int *fd)
 		return (FILE *)NULL;
 
 	*fd = open(name, O_WRONLY | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
-	if (*fd == -1) {
-		__errno = errno;
+	if (*fd == -1)
 		return (FILE *)NULL;
-	}
 
 	FILE *fp = fdopen(*fd, "w");
 	if (!fp) {
-		__errno = errno;
 		close(*fd);
 		return (FILE *)NULL;
 	}

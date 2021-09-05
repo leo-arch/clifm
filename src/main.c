@@ -118,7 +118,6 @@ int
     dequoted = 0,
     dirhist_map = UNSET,
     disk_usage = UNSET,
-	__errno = 0,
     expand_bookmarks = UNSET,
     ext_cmd_ok = UNSET,
     files_counter = UNSET,

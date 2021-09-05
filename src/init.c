@@ -703,7 +703,7 @@ load_remotes(void)
 	int fd;
 	FILE *fp = open_fstream_r(remotes_file, &fd);
 	if (!fp) {
-		fprintf(stderr, "%s: %s\n", remotes_file, strerror(__errno));
+		fprintf(stderr, "%s: %s\n", remotes_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -1822,7 +1822,7 @@ get_aliases(void)
 	FILE *fp = open_fstream_r(config_file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: alias: '%s': %s\n",
-		    PROGRAM_NAME, config_file, strerror(__errno));
+		    PROGRAM_NAME, config_file, strerror(errno));
 		return;
 	}
 
@@ -1914,7 +1914,7 @@ get_prompt_cmds(void)
 	FILE *fp = open_fstream_r(config_file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "%s: prompt: '%s': %s\n",
-		    PROGRAM_NAME, config_file, strerror(__errno));
+		    PROGRAM_NAME, config_file, strerror(errno));
 		return;
 	}
 
