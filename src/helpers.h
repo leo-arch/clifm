@@ -136,11 +136,11 @@ extern int watch;
 #else
 #define CLEAR fputs("\x1b[H\x1b[2J", stdout);
 #endif
-#define VERSION "1.2.1"
+#define VERSION "1.2.2"
 #define AUTHOR "L. Abramovich"
 #define CONTACT "johndoe.arch@outlook.com"
 #define WEBSITE "https://github.com/leo-arch/clifm"
-#define DATE "Aug 28, 2021"
+#define DATE "Sep 5, 2021"
 #define LICENSE "GPL2+"
 
 /* Options flags */
