@@ -1314,14 +1314,41 @@ rl_plugin4(int count, int key)
 	return run_kb_cmd("plugin4");
 }
 
-/*
 static int
-rl_test(int count, int key)
+rl_onlydirs(int count, int key)
 {
-	printf("test\n");
-	return EXIT_SUCCESS;
+	UNUSED(count); UNUSED(key);
+
+	if (kbind_busy)
+		return EXIT_SUCCESS;
+
+	only_dirs = only_dirs ? 0 : 1;
+
+	int exit_status = EXIT_SUCCESS;
+	if (cd_lists_on_the_fly) {
+		if (clear_screen)
+			CLEAR;
+		free_dirlist();
+		putchar('\n');
+		exit_status = list_dir();
+	} else {
+		printf(_("%s: List only directories set to %s\n"),
+			PROGRAM_NAME, only_dirs ? _("true"): _("false"));
+	}
+
+	rl_reset_line_state();
+	return exit_status;
 }
 
+/*static int
+rl_test(int count, int key)
+{
+	UNUSED(count); UNUSED(key);
+	printf("test\n");
+	return EXIT_SUCCESS;
+} */
+
+/*
 void
 add_func_to_rl(void)
 {
@@ -1420,6 +1447,7 @@ readline_kbinds(void)
 		rl_bind_keyseq(find_key("folders-first"), rl_folders_first);
 		rl_bind_keyseq(find_key("sort-previous"), rl_sort_previous);
 		rl_bind_keyseq(find_key("sort-next"), rl_sort_next);
+		rl_bind_keyseq(find_key("only-dirs"), rl_onlydirs);
 
 		rl_bind_keyseq(find_key("new-instance"), rl_new_instance);
 		rl_bind_keyseq(find_key("show-dirhist"), rl_dirhist);
@@ -1512,6 +1540,7 @@ readline_kbinds(void)
 		rl_bind_keyseq("\\M-g", rl_folders_first);
 		rl_bind_keyseq("\\M-z", rl_sort_previous);
 		rl_bind_keyseq("\\M-x", rl_sort_next);
+		rl_bind_keyseq("\\M-,", rl_onlydirs);
 
 		rl_bind_keyseq("\\C-x", rl_new_instance);
 		rl_bind_keyseq("\\M-h", rl_dirhist);
