@@ -1629,8 +1629,6 @@ get_last_path(void)
 	int fd;
 	FILE *fp = open_fstream_r(last_file, &fd);
 	if (!fp) {
-		_err('w', PRINT_PROMPT, _("%s: Error retrieving last "
-			"visited directory\n"), PROGRAM_NAME);
 		free(last_file);
 		return EXIT_FAILURE;
 	}
