@@ -142,7 +142,6 @@ cd_function(char *new_path)
 {
 	/* If no argument, change to home */
 	if (!new_path || !*new_path) {
-
 		if (!user.home) {
 			fprintf(stderr, _("%s: cd: Home directory not found\n"),
 			    PROGRAM_NAME);

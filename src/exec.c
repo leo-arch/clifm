@@ -312,11 +312,11 @@ exec_cmd(char **comm)
 				 * #     	AUTOJUMP	    #
 				 * ########################## */
 
-	if (autojump) {
+/*	if (autojump) {
 		exit_code = run_autojump(comm);
 		if (exit_code != -1)
 			return exit_code;
-	}
+	} */
 
 	/* Warn when using the ',' keyword and there's no pinned file */
 	int k = (int)args_n + 1;
@@ -388,29 +388,36 @@ exec_cmd(char **comm)
 	 * is no second argument or if second argument is "&" */
 	if (*comm[0] != '/' && (autocd || auto_open) && (!comm[1]
 	|| (*comm[1] == '&' && !comm[1][1]))) {
-		char *tmp = comm[0];
-		size_t i, tmp_len = strlen(tmp);
+		char *tmp = deq_str ? deq_str : comm[0];
+		size_t tmp_len = strlen(tmp);
 		if (tmp[tmp_len - 1] == '/')
 			tmp[tmp_len - 1] = '\0';
 
-		for (i = files; i--;) {
-			if ((deq_str ? *deq_str : *tmp) != *file_info[i].name)
+		int i = (int)files, found = 0;
+		while (--i >= 0) {
+			if (*tmp != *file_info[i].name)
 				continue;
-			if (strcmp(deq_str ? deq_str : tmp, file_info[i].name) != 0)
+			if (strcmp(tmp, file_info[i].name) != 0)
 				continue;
-			free(deq_str);
 			if (autocd && (file_info[i].type == DT_DIR || file_info[i].dir == 1)) {
-				return (exit_code = cd_function(tmp));
+				exit_code = cd_function(tmp);
+				found = 1;
 			} else if (auto_open && (file_info[i].type == DT_REG
 			|| file_info[i].type == DT_LNK)) {
 				char *cmd[] = {"open", comm[0],
-				    (comm[1]) ? comm[1] : NULL, NULL};
-				return (exit_code = open_function(cmd));
+				    comm[1] ? comm[1] : NULL, NULL};
+				found = 1;
+				exit_code = open_function(cmd);
 			} else {
 				break;
 			}
+			if (found) {
+				free(deq_str);
+				return exit_code;
+			}	
 		}
 	}
+	free(deq_str);
 
 	/* The more often a function is used, the more on top should it be
 	 * in this if...else..if chain. It will be found faster this way. */
