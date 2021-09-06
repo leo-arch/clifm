@@ -1110,6 +1110,9 @@ A few advanced prompt examples can be found in the prompts file in our Github si
 .TP
 A bold red 'R' at the left of the prompt reminds the user that the program is running as root. A bold green asterisk indicates that there are elements in the Selection Box. In the same way, a yellow 'T' means that there are currently files in the trash can, just as a bold blue 'S' means that the program is running in stealth mode. Finally, CliFM makes use of three kind of messages: errors (a red 'E' at the left of the prompt), warnings (a yellow 'W'), and simple notices (a green 'N').
 .TP
+If \fIPromptStyle\fR is set to "custom" in the configuration file, the above notifications won't be printed by the prompt, and the information necessary to construct them will be exported to the envitonment to let your custom prompt handle them itself. See the \fBENVIRONMENT\fR section below.
+
+.TP
 \fBThe dividing line\fR
 .TP
 Though not strictly part of the prompt, the line dividing the current list of files and the prompt could be customized, via the \fIDividingLineChar\fR option in the configuration file, to fit your prompt design and/or color scheme.
@@ -1407,6 +1410,29 @@ This variable contains the path of a pipe by means of which plugins can talk to 
 \'echo "s *.png" > "$CLIFM_BUS"\' makes CliFM select all files in the current directory ending with ".png"
 .sp
 The pipe (CLIFM_BUS) is deleted immediately after the execution of its content and recreated before running any other plugin.
+.TP
+If \fIPromptStyle\fR is set to "custom" in the configuration file, the following variables are exported to the environment to be used, if needed, by your custom prompt:
+.TP
+.B CLIFM_STAT_SEL
+Current amount of selected files
+.TP
+.B CLIFM_STAT_TRASH
+Current amount of trashed files
+.TP
+.B CLIFM_STAT_MSG
+Current amount of system messages
+.TP
+.B CLIFM_STAT_WS
+Current workspace number
+.TP
+.B CLIFM_STAT_EXIT
+Exit code of the last executed command
+.TP
+.B CLIFM_STAT_ROOT
+1 if user is root (UID = 0), 0 otherwise
+.TP
+.B CLIFM_STAT_STEALTH
+1 if running in stealth mode, 0 otherwise
 
 .SH 20. MISCELLANEOUS NOTES
 .sp
