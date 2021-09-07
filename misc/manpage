@@ -484,9 +484,19 @@ The \fIln\fR command allows the use of the 'e, edit' option to modify the destin
 print the color codes list currently used for files listing.
 .TP
 .B cd \fR[ELN/DIR]
-when used with no argument, it changes the current directory to the default directory ($HOME). Otherwise, \fIcd\fR changes the current directory to the one specified by the first argument. You can use either ELN's or a string to indicate the directory you want. Ex: 'cd 12' or 'cd ~/media'. If \fIautocd\fR is enabled, 'cd 12' and 'cd ~/media' can be written as '12' and '~/media' respectively.
+Change the current working directory to ELN/DIR.
 .sp
-Unlike the shell 'cd' command, CliFM's built\-in \fIcd\fR function not only changes the current directory, but also lists its content (provided the option "cd lists automatically" is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of \fIcd\fR is much like this shell command: cd DIR && ls \-\-color=auto \-\-group\-directories\-first. Remote file systems are also supported: just enter 'cd ADDRESS [OPTIONS]'. For more information about this syntax see the description of the \fInet\fR command below.
+Directories check order:
+  1. If no argument, change to the home directory (\fBHOME\fR, or, if \fBHOME\fR is not set, the sixth field of the entry corresponding to the current user in \fI/etc/passwd\fR)
+  2. If argument is an absolute path (begins with a slash character), or the first component is dot (.) or dot-dot (..), convert to canonical form (via \fBrealpath\fR(3)) and, if a valid directory, change into that directory.
+  3. Check \fBCDPATH\fR environment variable and append /DIR to each of the paths specified here. If the result of the concatenation is a valid directory, change into it. 
+  4. Check directories in the current working directory. If a matching directory is found, change to it.
+.sp
+You can use either ELN's or a string to indicate the directory you want. Ex: 'cd 12' or 'cd ~/media'. If \fIautocd\fR is enabled (default), 'cd 12' and 'cd ~/media' could be written as '12' and '~/media' respectively as well.
+.sp
+Unlike the shell \fBcd\fR(1) command, CliFM's built\-in \fIcd\fR function not only changes the current directory, but also lists its content (provided the option \fICdListsAutomatically\fR is enabled, which is the default) according to a comprehensive list of color codes. By default, the output of \fIcd\fR is much like this shell command: cd DIR && ls \-\-color=auto \-\-group\-directories\-first.
+.sp
+Automatic files listing can be disabled either setting \fICdListsAutomatically\fR to "false" in the configuration file or running CliFM with the \fI-o\fR or \fI--no-list-on-the-fly\fR option.
 .TP
 .B cl, columns \fR[on, off]
 toggle columns on/off.
