@@ -9,8 +9,12 @@ jobs:
   run:
     runs-on: ubuntu-latest
     steps:
+      - name: Fetch
+        run: |
+          git clone https://github.com/leo-arch/clifm
+          cd clifm/misc/codecov
       - name: Upload
         uses: codecov/codecov-action@v1
         with:
-           files: misc/codecov/*.c.gcov
+           files: ./*.c.gcov
 #          files: ./lib.c.gcov
