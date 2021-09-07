@@ -46,7 +46,7 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 ---
 
 ## Table of contents
-*   [Why?](#why)
+*   [Rationale](#rationale)
 *   [Description](#description)
 *   [Installing CliFM](#installing-clifm)
 *   [First steps](#first-steps)
