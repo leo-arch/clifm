@@ -3,7 +3,7 @@
 **NOTE**: To keep a consintent style, run `clang-format` over all source files, including header files, using the `_clang-format` file (in `/src`) as the formatting model:
 
 ```sh
-$ clang-format -i -style=file *.[hc]
+clang-format -i -style=file *.[hc]
 ```
 
 This command will reformat all C source and header files (`*.[hc]`) in place (`-i`) using the `_clang-format` file as model (`-style=file`).
@@ -76,10 +76,12 @@ Spacing: Write easily readable code. Generally, use blank lines between code blo
 
 Max line legnth: `80 characters/columns`. If an statement exceeds this number, split it into multiple lines as follows:
 
-	if (condition)
-		printk(KERN_WARNING "Warning this is a long printk with "
-							"3 parameters a: %u b: %u "
-							"c: %u \n", a, b, c);
+```c
+if (condition)
+	printk(KERN_WARNING "Warning this is a long printk with "
+						"3 parameters a: %u b: %u "
+						"c: %u \n", a, b, c);
+```
 
 Make sure blank/empty lines do not contains TABS or spaces. In the same way, remove ending TABS and spaces.
 
@@ -143,9 +145,9 @@ CliFM source code consists of multiple C source files, being `main.c` the starti
 **A)** Initialization stuff, like loading config files (see `config.c`), command line options (parsed by the `external_arguments()` function, in `init.c`), readline and keybindings initialization (see `readline.c` and `keybindings.c`), bookmarks, workspaces, history, and the like.
 
 **B)** Once everything is correctly initialized, an infinite loop, structured as a basic shell, takes place:
- 1) Take input
- 2) Parse input
- 3) Execute command
+1)  Take input
+2)  Parse input
+3)  Execute command
  And take more input...
 
 **C)** The last step above (3) calls the `exec_cmd()` function (`in exec.c`) to find out what needs to be done based on the user's input. The structure of the `exec_cmd` function is a big if-else chain: if the command is internal, that is, one of CliFM's built-in commands, the corresponding function will be called and executed; if not, if it is rather an external command, it will be executed by the system shell (via `launch_execle()`, also in `exec.c`).
