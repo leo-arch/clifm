@@ -1,0 +1,3347 @@
+        -:    0:Source:suggestions.c
+        -:    1:/* suggestions.c -- functions to manage the suggestions system */
+        -:    2:
+        -:    3:/*
+        -:    4: * This file is part of CliFM
+        -:    5: * 
+        -:    6: * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
+        -:    7: * All rights reserved.
+        -:    8:
+        -:    9: * CliFM is free software; you can redistribute it and/or modify
+        -:   10: * it under the terms of the GNU General Public License as published by
+        -:   11: * the Free Software Foundation; either version 2 of the License, or
+        -:   12: * (at your option) any later version.
+        -:   13: *
+        -:   14: * CliFM is distributed in the hope that it will be useful,
+        -:   15: * but WITHOUT ANY WARRANTY; without even the implied warranty of
+        -:   16: * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        -:   17: * GNU General Public License for more details.
+        -:   18: *
+        -:   19: * You should have received a copy of the GNU General Public License
+        -:   20: * along with this program; if not, write to the Free Software
+        -:   21: * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+        -:   22: * MA 02110-1301, USA.
+        -:   23:*/
+        -:   24:#ifndef _NO_SUGGESTIONS
+        -:   25:
+        -:   26:#include "helpers.h"
+        -:   27:
+        -:   28:#include <sys/stat.h>
+        -:   29:#include <fcntl.h>
+        -:   30:#include <stdio.h>
+        -:   31:#include <string.h>
+        -:   32:#ifdef __OpenBSD__
+        -:   33:#include <strings.h>
+        -:   34:#endif
+        -:   35:#include <unistd.h>
+        -:   36:#include <errno.h>
+        -:   37:#include <dirent.h>
+        -:   38:#include <termios.h>
+        -:   39:
+        -:   40:#ifdef __linux__
+        -:   41:#include <sys/capability.h>
+        -:   42:#endif
+        -:   43:
+        -:   44:#ifdef __OpenBSD__
+        -:   45:typedef char *rl_cpvfunc_t;
+        -:   46:#include <ereadline/readline/readline.h>
+        -:   47:#else
+        -:   48:#include <readline/readline.h>
+        -:   49:#endif
+        -:   50:
+        -:   51:#include "suggestions.h"
+        -:   52:#include "aux.h"
+        -:   53:#include "checks.h"
+        -:   54:#include "colors.h"
+        -:   55:#include "jump.h"
+        -:   56:#include "readline.h"
+        -:   57:
+        -:   58:static int free_color = 0;
+        -:   59:
+        -:   60:/* The following three functions were taken from
+        -:   61: * https://github.com/antirez/linenoise/blob/master/linenoise.c
+        -:   62: * and modified to fir our needs: they are used to get current cursor
+        -:   63: * position (both vertical and horizontal) by the suggestions system */
+        -:   64:
+        -:   65:/* Set the terminal into raw mode. Return 0 on success and -1 on error */
+        -:   66:static int
+function enable_raw_mode called 873 returned 100% blocks executed 69%
+      873:   67:enable_raw_mode(const int fd)
+        -:   68:{
+        -:   69:	struct termios raw;
+        -:   70:
+      873:   71:	if (!isatty(STDIN_FILENO))
+      873:   71-block  0
+call    0 returned 873
+branch  1 taken 0 (fallthrough)
+branch  2 taken 873
+    #####:   72:		goto FAIL;
+    %%%%%:   72-block  0
+unconditional  0 never executed
+        -:   73:
+      873:   74:	if (tcgetattr(fd, &orig_termios) == -1)
+      873:   74-block  0
+call    0 returned 873
+branch  1 taken 0 (fallthrough)
+branch  2 taken 873
+    #####:   75:		goto FAIL;
+    %%%%%:   75-block  0
+unconditional  0 never executed
+        -:   76:
+      873:   77:	raw = orig_termios;  /* modify the original mode */
+        -:   78:	/* input modes: no break, no CR to NL, no parity check, no strip char,
+        -:   79:	 * * no start/stop output control. */
+      873:   80:	raw.c_iflag &= (tcflag_t)~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
+        -:   81:	/* output modes - disable post processing */
+      873:   82:	raw.c_oflag &= (tcflag_t)~(OPOST);
+        -:   83:	/* control modes - set 8 bit chars */
+      873:   84:	raw.c_cflag |= (CS8);
+        -:   85:	/* local modes - choing off, canonical off, no extended functions,
+        -:   86:	 * no signal chars (^Z,^C) */
+      873:   87:	raw.c_lflag &= (tcflag_t)~(ECHO | ICANON | IEXTEN | ISIG);
+        -:   88:    /* control chars - set return condition: min number of bytes and timer.
+        -:   89:     * We want read to return every single byte, without timeout. */
+      873:   90:	raw.c_cc[VMIN] = 1; raw.c_cc[VTIME] = 0; /* 1 byte, no timer */
+        -:   91:
+        -:   92:	/* put terminal in raw mode after flushing */
+      873:   93:	if (tcsetattr(fd, TCSAFLUSH, &raw) < 0)
+      873:   93-block  0
+call    0 returned 873
+branch  1 taken 0 (fallthrough)
+branch  2 taken 873
+    #####:   94:		goto FAIL;
+    %%%%%:   94-block  0
+unconditional  0 never executed
+        -:   95:
+      873:   96:	return 0;
+      873:   96-block  0
+unconditional  0 taken 873
+        -:   97:
+    #####:   98:FAIL:
+    #####:   99:	errno = ENOTTY;
+    #####:  100:	return -1;
+    %%%%%:  100-block  0
+unconditional  0 never executed
+        -:  101:}
+        -:  102:
+        -:  103:static int
+function disable_raw_mode called 873 returned 100% blocks executed 80%
+      873:  104:disable_raw_mode(const int fd)
+        -:  105:{
+      873:  106:	if (tcsetattr(fd, TCSAFLUSH, &orig_termios) != -1)
+      873:  106-block  0
+call    0 returned 873
+branch  1 taken 873 (fallthrough)
+branch  2 taken 0
+      873:  107:		return EXIT_SUCCESS;
+      873:  107-block  0
+unconditional  0 taken 873
+    #####:  108:	return EXIT_FAILURE;
+    %%%%%:  108-block  0
+unconditional  0 never executed
+        -:  109:}
+        -:  110:
+        -:  111:/* Use the "ESC [6n" escape sequence to query the cursor position (both
+        -:  112: * vertical and horizontal) and store both values into global variables.
+        -:  113: * Return 0 on success and 1 on error */
+        -:  114:static int
+function get_cursor_position called 873 returned 100% blocks executed 72%
+      873:  115:get_cursor_position(const int ifd, const int ofd)
+        -:  116:{
+        -:  117:	char buf[32];
+        -:  118:	int cols, rows;
+      873:  119:	unsigned int i = 0;
+        -:  120:
+      873:  121:	if (enable_raw_mode(ifd) == -1)
+      873:  121-block  0
+call    0 returned 873
+branch  1 taken 0 (fallthrough)
+branch  2 taken 873
+    #####:  122:		return EXIT_FAILURE;
+    %%%%%:  122-block  0
+unconditional  0 never executed
+        -:  123:
+        -:  124:	/* Report cursor location */
+      873:  125:	if (write(ofd, "\x1b[6n", 4) != 4)
+      873:  125-block  0
+call    0 returned 873
+branch  1 taken 0 (fallthrough)
+branch  2 taken 873
+    #####:  126:		goto FAIL;
+    %%%%%:  126-block  0
+unconditional  0 never executed
+        -:  127:
+        -:  128:	/* Read the response: "ESC [ rows ; cols R" */
+     6241:  129:	while (i < sizeof(buf) - 1) {
+      873:  129-block  0
+unconditional  0 taken 873
+     6241:  129-block  1
+branch  1 taken 6241
+branch  2 taken 0 (fallthrough)
+     6241:  130:		if (read(ifd, buf + i, 1) != 1)
+     6241:  130-block  0
+call    0 returned 6241
+branch  1 taken 0 (fallthrough)
+branch  2 taken 6241
+    #####:  131:			break;
+    %%%%%:  131-block  0
+unconditional  0 never executed
+     6241:  132:		if (buf[i] == 'R')
+     6241:  132-block  0
+branch  0 taken 873 (fallthrough)
+branch  1 taken 5368
+      873:  133:			break;
+      873:  133-block  0
+unconditional  0 taken 873
+     5368:  134:		i++;
+     5368:  134-block  0
+unconditional  0 taken 5368
+        -:  135:	}
+      873:  136:	buf[i] = '\0';
+        -:  137:
+        -:  138:	/* Parse it */
+      873:  139:	if (buf[0] != _ESC || buf[1] != '[')
+      873:  139-block  0
+branch  0 taken 873 (fallthrough)
+branch  1 taken 0
+      873:  139-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 873
+    #####:  140:		goto FAIL;
+    %%%%%:  140-block  0
+unconditional  0 never executed
+      873:  141:	if (sscanf(buf + 2, "%d;%d", &rows, &cols) != 2)
+      873:  141-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 873
+    #####:  142:		goto FAIL;
+    %%%%%:  142-block  0
+unconditional  0 never executed
+        -:  143:
+      873:  144:	currow = rows;
+      873:  145:	curcol = cols;
+        -:  146:
+      873:  147:	disable_raw_mode(ifd);
+      873:  147-block  0
+call    0 returned 873
+      873:  148:	return EXIT_SUCCESS;
+unconditional  0 taken 873
+        -:  149:
+    #####:  150:FAIL:
+    #####:  151:	disable_raw_mode(ifd);
+    %%%%%:  151-block  0
+call    0 never executed
+    #####:  152:	return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  153:}
+        -:  154:
+        -:  155:/* This function is only used before running a keybind command. We don't
+        -:  156: * want the suggestion buffer after running a keybind */
+        -:  157:void
+function free_suggestion called 1 returned 100% blocks executed 100%
+        1:  158:free_suggestion(void)
+        -:  159:{
+        1:  160:	free(suggestion_buf);
+        1:  161:	suggestion_buf = (char *)NULL;
+        1:  162:	suggestion.printed = 0;
+        1:  163:	suggestion.nlines = 0;
+        1:  164:}
+        -:  165:
+        -:  166:void
+function clear_suggestion called 843 returned 100% blocks executed 100%
+      843:  167:clear_suggestion(void)
+        -:  168:{
+        -:  169:	/* Delete everything in the current line starting from the current
+        -:  170:	 * cursor position */
+      843:  171:	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {}
+      843:  171-block  0
+call    0 returned 843
+        -:  172:
+      843:  173:	if (suggestion.nlines > 1) {
+branch  0 taken 11 (fallthrough)
+branch  1 taken 832
+        -:  174:		/* Save cursor position */
+       11:  175:		get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
+       11:  175-block  0
+call    0 returned 11
+        -:  176:
+       11:  177:		int i = (int)suggestion.nlines;
+       22:  178:		while (--i > 0) {
+unconditional  0 taken 11
+       22:  178-block  0
+branch  1 taken 11
+branch  2 taken 11 (fallthrough)
+        -:  179:			/* Move the cursor to the beginning of the next line */
+       11:  180:			if (write(STDOUT_FILENO, "\x1b[1E", 4) <= 0) {}
+       11:  180-block  0
+call    0 returned 11
+        -:  181:			/* Delete the line */
+       11:  182:			if (write(STDOUT_FILENO, "\x1b[0K", 4) <= 0) {}
+call    0 returned 11
+unconditional  1 taken 11
+        -:  183:		}
+        -:  184:		/* Restore cursor position */
+       11:  185:		printf("\x1b[%d;%dH", currow, curcol);
+       11:  185-block  0
+call    0 returned 11
+       11:  186:		fflush(stdout);
+call    0 returned 11
+       11:  187:		suggestion.nlines = 0;
+unconditional  0 taken 11
+        -:  188:	}
+        -:  189:
+      843:  190:	suggestion.printed = 0;
+      843:  191:}
+        -:  192:
+        -:  193:/* Clear the line, print the suggestion (STR) at OFFSET in COLOR, and
+        -:  194: * move the cursor back to the original position.
+        -:  195: * OFFSET marks the point in STR that is already typed: the suggestion
+        -:  196: * will be printed starting from this point */
+        -:  197:static void
+function print_suggestion called 862 returned 100% blocks executed 91%
+      862:  198:print_suggestion(const char *str, size_t offset, const char *color)
+        -:  199:{
+      862:  200:	if (suggestion.printed)
+      862:  200-block  0
+branch  0 taken 427 (fallthrough)
+branch  1 taken 435
+      427:  201:		clear_suggestion();
+      427:  201-block  0
+call    0 returned 427
+unconditional  1 taken 427
+        -:  202:
+      862:  203:	free(suggestion_buf);
+      862:  204:	suggestion_buf = (char *)NULL;
+        -:  205:
+        -:  206:	/* Store cursor position in two global variables: currow and curcol */
+      862:  207:	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
+      862:  207-block  0
+call    0 returned 862
+        -:  208:
+        -:  209:	/* Do not print suggestions bigger than what the current terminal
+        -:  210:	 * window size can hold */
+      862:  211:	size_t suggestion_len = wc_xstrlen(str + offset);
+call    0 returned 862
+      862:  212:	if ((int)suggestion_len > (term_cols * term_rows) - curcol)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 862
+    #####:  213:		return;
+    %%%%%:  213-block  0
+unconditional  0 never executed
+        -:  214:
+      862:  215:	size_t cuc = (size_t)curcol; /* Current cursor column position*/
+      862:  216:	int baej = 0; /* Bookmark, alias, ELN, or jump */
+        -:  217:
+      862:  218:	if (suggestion.type == BOOKMARK_SUG || suggestion.type == ALIAS_SUG
+      862:  218-block  0
+branch  0 taken 846 (fallthrough)
+branch  1 taken 16
+      846:  218-block  1
+branch  2 taken 840 (fallthrough)
+branch  3 taken 6
+      840:  219:	|| suggestion.type == ELN_SUG || suggestion.type == JCMD_SUG
+      840:  219-block  0
+branch  0 taken 760 (fallthrough)
+branch  1 taken 80
+      760:  219-block  1
+branch  2 taken 744 (fallthrough)
+branch  3 taken 16
+      744:  220:	|| suggestion.type == JCMD_SUG_NOACD) {
+      744:  220-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 744
+        -:  221:		/* 4 = 2 (two chars forward) + 2 (" >") */
+      118:  222:		cuc += 4;
+      118:  223:		baej = 1;
+      118:  223-block  0
+unconditional  0 taken 118
+        -:  224:	}
+        -:  225:
+      862:  226:	size_t cucs = cuc + suggestion_len;
+        -:  227:	/* slines: amount of lines we need to print the suggestion, including
+        -:  228:	 * the current line */
+      862:  229:	size_t slines = 1;
+        -:  230:
+      862:  231:	if (cucs > term_cols) {
+      862:  231-block  0
+branch  0 taken 11 (fallthrough)
+branch  1 taken 851
+       11:  232:		slines = cucs / (size_t)term_cols;
+       11:  233:		int cucs_rem = (int)cucs % term_cols;
+       11:  234:		if (cucs_rem > 0)
+       11:  234-block  0
+branch  0 taken 11 (fallthrough)
+branch  1 taken 0
+       11:  235:			slines++;
+       11:  235-block  0
+unconditional  0 taken 11
+        -:  236:	}
+        -:  237:
+      862:  238:	if (slines > (size_t)term_rows)
+      862:  238-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 862
+    #####:  239:		return;
+    %%%%%:  239-block  0
+unconditional  0 never executed
+        -:  240:
+        -:  241:	/* Store the suggestion in a buffer to be used later by the
+        -:  242:	 * rl_accept_suggestion function (keybinds.c) */
+      862:  243:	suggestion_buf = xnmalloc(strlen(str) + 1, sizeof(char));
+      862:  243-block  0
+call    0 returned 862
+      862:  244:	strcpy(suggestion_buf, str);
+        -:  245:
+        -:  246:	/* Erase everything after the current cursor position */
+      862:  247:	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {}
+call    0 returned 862
+        -:  248:
+        -:  249:	/* If not at the end of the line, move the cursor there */
+      862:  250:	if (rl_end > rl_point)
+branch  0 taken 2 (fallthrough)
+branch  1 taken 860
+        2:  251:		printf("\x1b[%dC", rl_end - rl_point);
+        2:  251-block  0
+call    0 returned 2
+unconditional  1 taken 2
+        -:  252:	/* rl_end and rl_point are not updated: they do not include
+        -:  253:	 * the last typed char. However, since we only care here about
+        -:  254:	 * the difference between them, it doesn't matter: the result
+        -:  255:	 * is the same (7 - 4 == 6 - 3 == 1) */
+        -:  256:
+      862:  257:	if (baej) {
+      862:  257-block  0
+branch  0 taken 118 (fallthrough)
+branch  1 taken 744
+        -:  258:		/* Move the cursor two columns to the right and print "> " */
+      118:  259:		printf("\x1b[2C");
+      118:  259-block  0
+call    0 returned 118
+      118:  260:		printf("%s> \x1b[0m", mi_c);
+call    0 returned 118
+unconditional  1 taken 118
+        -:  261:	}
+        -:  262:
+        -:  263:	/* Print the suggestion */
+        -:  264://	printf("%s%s%s", color, str + offset - (offset ? 1 : 0), df_c);
+     862*:  265:	printf("%s%s", color, str + offset - (offset ? 1 : 0));
+      862:  265-block  0
+branch  0 taken 862 (fallthrough)
+branch  1 taken 0
+      862:  265-block  1
+unconditional  2 taken 862
+    %%%%%:  265-block  2
+unconditional  3 never executed
+      862:  265-block  3
+call    4 returned 862
+      862:  266:	fflush(stdout);
+call    0 returned 862
+        -:  267:
+        -:  268:	/* Update the row number, if needed */
+        -:  269:	/* If the cursor is in the last row, printing a multi-line suggestion
+        -:  270:	 * will move the beginning of the current line up the number of
+        -:  271:	 * lines taken by the suggestion, so that we need to update the
+        -:  272:	 * value to move the cursor back to the correct row (the beginning
+        -:  273:	 * of the line) */
+      862:  274:	int old_currow = currow;
+        -:  275:	/* extra_rows: amount of extra rows we need to print the suggestion
+        -:  276:	 * (excluding the current row) */
+      862:  277:	int extra_rows = (int)slines - 1;
+      862:  278:	if (extra_rows && old_currow + extra_rows >= term_rows)
+branch  0 taken 11 (fallthrough)
+branch  1 taken 851
+       11:  278-block  0
+branch  2 taken 11 (fallthrough)
+branch  3 taken 0
+       11:  279:		currow -= extra_rows - (term_rows - old_currow);
+       11:  279-block  0
+unconditional  0 taken 11
+        -:  280:
+        -:  281:	/* Restore cursor position */
+      862:  282:	printf("\x1b[%d;%dH", currow, curcol);
+      862:  282-block  0
+call    0 returned 862
+        -:  283:
+        -:  284:	/* Store the amount of lines taken by the current command line
+        -:  285:	 * (plus the suggestion's length) to be able to correctly
+        -:  286:	 * remove it later (via the clear_suggestion function) */
+      862:  287:	suggestion.nlines = slines;
+      862:  288:	return;
+unconditional  0 taken 862
+        -:  289:}
+        -:  290:
+        -:  291:/* Used by the check_completions function to get file names color
+        -:  292: * according to file type */
+        -:  293:static char *
+function get_comp_color called 0 returned 0% blocks executed 0%
+    #####:  294:get_comp_color(const char *filename, const struct stat attr)
+        -:  295:{
+    #####:  296:	char *color = no_c; 
+        -:  297:
+    #####:  298:	switch(attr.st_mode & S_IFMT) {
+    %%%%%:  298-block  0
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+branch  6 never executed
+branch  7 never executed
+    #####:  299:	case S_IFDIR:
+    #####:  300:		if (light_mode)
+    %%%%%:  300-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  301:			return di_c;
+    %%%%%:  301-block  0
+unconditional  0 never executed
+    #####:  302:		if (access(filename, R_OK | X_OK) != 0) {
+    %%%%%:  302-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  303:			color = nd_c;
+    %%%%%:  303-block  0
+unconditional  0 never executed
+        -:  304:		} else {
+    #####:  305:			int sticky = 0;
+    #####:  306:			int is_oth_w = 0;
+    #####:  307:			if (attr.st_mode & S_ISVTX)
+    %%%%%:  307-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  308:				sticky = 1;
+    %%%%%:  308-block  0
+unconditional  0 never executed
+        -:  309:
+    #####:  310:			if (attr.st_mode & S_IWOTH)
+    %%%%%:  310-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  311:				is_oth_w = 1;
+    %%%%%:  311-block  0
+unconditional  0 never executed
+        -:  312:
+    #####:  313:			int files_dir = count_dir(filename, CPOP);
+    %%%%%:  313-block  0
+call    0 never executed
+        -:  314:
+    #####:  315:			color = sticky ? (is_oth_w ? tw_c : st_c) : is_oth_w ? ow_c
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  315-block  0
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  315-block  1
+unconditional  4 never executed
+    %%%%%:  315-block  2
+unconditional  5 never executed
+    %%%%%:  315-block  3
+unconditional  6 never executed
+    %%%%%:  315-block  4
+unconditional  7 never executed
+    %%%%%:  315-block  5
+unconditional  8 never executed
+    #####:  316:				   : ((files_dir == 2 || files_dir == 0) ? ed_c : di_c);
+    %%%%%:  316-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  316-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  316-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%:  316-block  3
+unconditional  6 never executed
+    %%%%%:  316-block  4
+unconditional  7 never executed
+    %%%%%:  316-block  5
+unconditional  8 never executed
+    %%%%%:  316-block  6
+unconditional  9 never executed
+        -:  317:		}
+    #####:  318:		break;
+    %%%%%:  318-block  0
+unconditional  0 never executed
+        -:  319:
+    #####:  320:	case S_IFREG:
+    #####:  321:		if (light_mode)
+    %%%%%:  321-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  322:			return fi_c;
+    %%%%%:  322-block  0
+unconditional  0 never executed
+    #####:  323:		if (access(filename, R_OK) == -1)
+    %%%%%:  323-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  324:			color = nf_c;
+    %%%%%:  324-block  0
+unconditional  0 never executed
+    #####:  325:		else if (attr.st_mode & S_ISUID)
+    %%%%%:  325-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  326:			color = su_c;
+    %%%%%:  326-block  0
+unconditional  0 never executed
+    #####:  327:		else if (attr.st_mode & S_ISGID)
+    %%%%%:  327-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  328:			color = sg_c;
+    %%%%%:  328-block  0
+unconditional  0 never executed
+        -:  329:		else {
+        -:  330:#ifdef _LINUX_CAP
+    #####:  331:			cap_t cap = cap_get_file(filename);
+    %%%%%:  331-block  0
+call    0 never executed
+    #####:  332:			if (cap) {
+branch  0 never executed
+branch  1 never executed
+    #####:  333:				color = ca_c;
+    #####:  334:				cap_free(cap);
+    %%%%%:  334-block  0
+call    0 never executed
+unconditional  1 never executed
+    #####:  335:			} else if (attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
+    %%%%%:  335-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  336:#else
+        -:  337:			if (attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
+        -:  338:#endif
+    #####:  339:				if (attr.st_size == 0)
+    %%%%%:  339-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  340:					color = ee_c;
+    %%%%%:  340-block  0
+unconditional  0 never executed
+        -:  341:				else
+    #####:  342:					color = ex_c;
+    %%%%%:  342-block  0
+unconditional  0 never executed
+    #####:  343:			} else if (attr.st_size == 0)
+    %%%%%:  343-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  344:				color = ef_c;
+    %%%%%:  344-block  0
+unconditional  0 never executed
+    #####:  345:			else if (attr.st_nlink > 1)
+    %%%%%:  345-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  346:				color = mh_c;
+    %%%%%:  346-block  0
+unconditional  0 never executed
+        -:  347:			else {
+    #####:  348:				char *ext = strrchr(filename, '.');
+    #####:  349:				if (ext && ext != filename) {
+    %%%%%:  349-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  349-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  349-block  2
+unconditional  4 never executed
+    #####:  350:					char *extcolor = get_ext_color(ext);
+    %%%%%:  350-block  0
+call    0 never executed
+    #####:  351:					if (extcolor) {
+branch  0 never executed
+branch  1 never executed
+    #####:  352:						char *ext_color = (char *)xnmalloc(strlen(extcolor)
+    %%%%%:  352-block  0
+call    0 never executed
+        -:  353:											+ 4, sizeof(char));
+    #####:  354:						sprintf(ext_color, "\x1b[%sm", extcolor);
+    #####:  355:						color = ext_color;
+    #####:  356:						free_color = 1;
+    #####:  357:						extcolor = (char *)NULL;
+unconditional  0 never executed
+        -:  358:					} else  {
+    #####:  359:						color = fi_c;
+    %%%%%:  359-block  0
+unconditional  0 never executed
+        -:  360:					}
+        -:  361:				} else {
+    #####:  362:					color = fi_c;
+    %%%%%:  362-block  0
+unconditional  0 never executed
+        -:  363:				}
+        -:  364:			}
+        -:  365:		}
+    #####:  366:		break;
+    %%%%%:  366-block  0
+unconditional  0 never executed
+        -:  367:
+    #####:  368:	case S_IFLNK: {
+    #####:  369:		if (light_mode)
+    %%%%%:  369-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  370:			return ln_c;
+    %%%%%:  370-block  0
+unconditional  0 never executed
+    #####:  371:		char *linkname = realpath(filename, (char *)NULL);
+    %%%%%:  371-block  0
+call    0 never executed
+    #####:  372:		if (linkname)
+branch  0 never executed
+branch  1 never executed
+    #####:  373:			color = ln_c;
+    %%%%%:  373-block  0
+unconditional  0 never executed
+        -:  374:		else
+    #####:  375:			color = or_c;
+    %%%%%:  375-block  0
+unconditional  0 never executed
+        -:  376:		}
+    #####:  377:		break;
+    %%%%%:  377-block  0
+unconditional  0 never executed
+        -:  378:
+    #####:  379:	case S_IFSOCK: color = so_c; break;
+    %%%%%:  379-block  0
+unconditional  0 never executed
+    #####:  380:	case S_IFBLK: color = bd_c; break;
+    %%%%%:  380-block  0
+unconditional  0 never executed
+    #####:  381:	case S_IFCHR: color = cd_c; break;
+    %%%%%:  381-block  0
+unconditional  0 never executed
+    #####:  382:	case S_IFIFO: color = pi_c; break;
+    %%%%%:  382-block  0
+unconditional  0 never executed
+    #####:  383:	default: color = no_c; break;
+    %%%%%:  383-block  0
+unconditional  0 never executed
+        -:  384:	}
+        -:  385:
+    #####:  386:	return color;
+    %%%%%:  386-block  0
+unconditional  0 never executed
+        -:  387:}
+        -:  388:
+        -:  389:static int
+function check_completions called 402 returned 100% blocks executed 70%
+      402:  390:check_completions(const char *str, size_t len, const unsigned char c)
+        -:  391:{
+      402:  392:	int printed = 0;
+        -:  393:	size_t i;
+        -:  394:	struct stat attr;
+      402:  395:	char **_matches = rl_completion_matches(str, rl_completion_entry_function);
+      402:  395-block  0
+call    0 returned 402
+        -:  396:
+      402:  397:	suggestion.filetype = DT_REG;
+      402:  398:	free_color = 0;
+        -:  399:
+      402:  400:	char *color = (char *)NULL, *_color = (char *)NULL;
+      402:  401:	if (suggest_filetype_color)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 402
+    #####:  402:		color = no_c;
+    %%%%%:  402-block  0
+unconditional  0 never executed
+        -:  403:	else
+      402:  404:		color = sf_c;
+      402:  404-block  0
+unconditional  0 taken 402
+        -:  405:
+      402:  406:	if (!_matches)
+      402:  406-block  0
+branch  0 taken 376 (fallthrough)
+branch  1 taken 26
+      376:  407:		return printed;
+      376:  407-block  0
+unconditional  0 taken 376
+        -:  408:
+       26:  409:	if (!len)
+       26:  409-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 26
+    #####:  410:		goto FREE;
+    %%%%%:  410-block  0
+unconditional  0 never executed
+        -:  411:
+        -:  412:	/* If only one match */
+       26:  413:	if (_matches[0] && *_matches[0]	&& strlen(_matches[0]) > len) {
+       26:  413-block  0
+branch  0 taken 26 (fallthrough)
+branch  1 taken 0
+       26:  413-block  1
+branch  2 taken 26 (fallthrough)
+branch  3 taken 0
+       26:  413-block  2
+branch  4 taken 2 (fallthrough)
+branch  5 taken 24
+        2:  414:		int append_slash = 0;
+        -:  415:
+        2:  416:		char *p = (char *)NULL;
+        2:  417:		if (*_matches[0] == '~')
+        2:  417-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:  418:			p = tilde_expand(_matches[0]);
+    %%%%%:  418-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  419:
+       2*:  420:		if (lstat(p ? p : _matches[0], &attr) != -1) {
+        2:  420-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  420-block  1
+unconditional  2 taken 2
+    %%%%%:  420-block  2
+unconditional  3 never executed
+        2:  420-block  3
+call    4 returned 2
+branch  5 taken 2 (fallthrough)
+branch  6 taken 0
+        2:  421:			if ((attr.st_mode & S_IFMT) == S_IFDIR) {
+        2:  421-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 1
+        1:  422:				append_slash = 1;
+        1:  423:				suggestion.filetype = DT_DIR;
+        1:  423-block  0
+unconditional  0 taken 1
+        -:  424:			}
+        2:  425:			if (suggest_filetype_color)
+        2:  425-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:  426:				color = get_comp_color(p ? p : _matches[0], attr);
+    %%%%%:  426-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  426-block  1
+unconditional  2 never executed
+    %%%%%:  426-block  2
+unconditional  3 never executed
+    %%%%%:  426-block  3
+call    4 never executed
+unconditional  5 never executed
+        -:  427:		} else {
+        -:  428:			/* We have a partial completion. Set filetype to DT_DIR
+        -:  429:			 * so that the rl_accept_suggestion function won't append
+        -:  430:			 * a space after the file name */
+    #####:  431:			suggestion.filetype = DT_DIR;
+    %%%%%:  431-block  0
+unconditional  0 never executed
+        -:  432:		}
+        -:  433:
+        2:  434:		free(p);
+        -:  435:
+        -:  436:		char t[NAME_MAX + 2];
+        2:  437:		*t = '\0';
+        2:  438:		if (append_slash)
+        2:  438-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 1
+        1:  439:			snprintf(t, NAME_MAX + 2, "%s/", _matches[0]);
+        1:  439-block  0
+unconditional  0 taken 1
+        2:  440:		char *tmp = escape_str(*t ? t : _matches[0]);
+        2:  440-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 1
+        1:  440-block  1
+unconditional  2 taken 1
+        1:  440-block  2
+unconditional  3 taken 1
+        2:  440-block  3
+call    4 returned 2
+        -:  441:
+        2:  442:		if (c != BS)
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  443:			suggestion.type = COMP_SUG;
+        2:  443-block  0
+unconditional  0 taken 2
+        -:  444:
+        2:  445:		if (tmp) {
+        2:  445-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  446:			print_suggestion(tmp, len, color);
+        2:  446-block  0
+call    0 returned 2
+        2:  447:			free(tmp);
+unconditional  0 taken 2
+        -:  448:		} else {
+    #####:  449:			print_suggestion(_matches[0], len, color);
+    %%%%%:  449-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  450:		}
+        -:  451:
+        2:  452:		printed = 1;
+        2:  452-block  0
+unconditional  0 taken 2
+        -:  453:	} else {
+        -:  454:		/* If multiple matches, suggest the first one */
+       24:  455:		if (_matches[1] && *_matches[1]
+       24:  455-block  0
+branch  0 taken 10 (fallthrough)
+branch  1 taken 14
+       14:  455-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 14
+       14:  456:		&& strlen(_matches[1]) > len) {
+       14:  456-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 10
+       10:  457:			int append_slash = 0;
+        -:  458:
+       10:  459:			char *p = (char *)NULL;
+       10:  460:			if (*_matches[1] == '~')
+       10:  460-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 10
+    #####:  461:				p = tilde_expand(_matches[1]);
+    %%%%%:  461-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  462:
+      10*:  463:			if (lstat(p ? p : _matches[1], &attr) != -1) {
+       10:  463-block  0
+branch  0 taken 10 (fallthrough)
+branch  1 taken 0
+       10:  463-block  1
+unconditional  2 taken 10
+    %%%%%:  463-block  2
+unconditional  3 never executed
+       10:  463-block  3
+call    4 returned 10
+branch  5 taken 10 (fallthrough)
+branch  6 taken 0
+       10:  464:				if ((attr.st_mode & S_IFMT) == S_IFDIR) {
+       10:  464-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 10
+    #####:  465:					append_slash = 1;
+    #####:  466:					suggestion.filetype = DT_DIR;
+    %%%%%:  466-block  0
+unconditional  0 never executed
+        -:  467:				}
+        -:  468:
+       10:  469:				if (suggest_filetype_color) {
+       10:  469-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 10
+    #####:  470:					_color = get_comp_color(p ? p : _matches[1], attr);
+    %%%%%:  470-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  470-block  1
+unconditional  2 never executed
+    %%%%%:  470-block  2
+unconditional  3 never executed
+    %%%%%:  470-block  3
+call    4 never executed
+    #####:  471:					if (_color)
+branch  0 never executed
+branch  1 never executed
+    #####:  472:						color = _color;
+    %%%%%:  472-block  0
+unconditional  0 never executed
+        -:  473:				}
+        -:  474:			} else {
+    #####:  475:				suggestion.filetype = DT_DIR;
+    %%%%%:  475-block  0
+unconditional  0 never executed
+        -:  476:			}
+        -:  477:
+       10:  478:			free(p);
+        -:  479:
+        -:  480:			char _tmp[NAME_MAX + 2];
+       10:  481:			*_tmp = '\0';
+       10:  482:			if (append_slash)
+       10:  482-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 10
+    #####:  483:				snprintf(_tmp, NAME_MAX + 2, "%s/", _matches[1]);
+    %%%%%:  483-block  0
+unconditional  0 never executed
+      10*:  484:			char *tmp = escape_str(*_tmp ? _tmp : _matches[1]);
+       10:  484-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 10
+    %%%%%:  484-block  1
+unconditional  2 never executed
+       10:  484-block  2
+unconditional  3 taken 10
+       10:  484-block  3
+call    4 returned 10
+        -:  485:
+       10:  486:			if (c != BS)
+branch  0 taken 10 (fallthrough)
+branch  1 taken 0
+       10:  487:				suggestion.type = COMP_SUG;
+       10:  487-block  0
+unconditional  0 taken 10
+        -:  488:
+       10:  489:			if (tmp) {
+       10:  489-block  0
+branch  0 taken 10 (fallthrough)
+branch  1 taken 0
+       10:  490:				print_suggestion(tmp, len, color);
+       10:  490-block  0
+call    0 returned 10
+       10:  491:				free(tmp);
+unconditional  0 taken 10
+        -:  492:			} else {
+    #####:  493:				print_suggestion(_matches[1], len, color);
+    %%%%%:  493-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  494:			}
+        -:  495:
+       10:  496:			printed = 1;
+       10:  496-block  0
+unconditional  0 taken 10
+        -:  497:		}
+        -:  498:	}
+        -:  499:
+      14*:  500:FREE:
+       10:  500-block  0
+unconditional  0 taken 10
+    %%%%%:  500-block  1
+unconditional  1 never executed
+        4:  500-block  2
+unconditional  2 taken 4
+     4153:  501:	for (i = 0; _matches[i]; i++)
+       26:  501-block  0
+unconditional  0 taken 26
+     4153:  501-block  1
+branch  1 taken 4127
+branch  2 taken 26 (fallthrough)
+     4127:  502:		free(_matches[i]);
+     4127:  502-block  0
+unconditional  0 taken 4127
+       26:  503:	free(_matches);
+        -:  504:
+       26:  505:	if (free_color) {
+       26:  505-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 26
+    #####:  506:		free(_color);
+    #####:  507:		free_color = 0;
+    %%%%%:  507-block  0
+unconditional  0 never executed
+        -:  508:	}
+        -:  509:
+       26:  510:	return printed;
+       26:  510-block  0
+unconditional  0 taken 26
+        -:  511:}
+        -:  512:
+        -:  513:static int
+function check_filenames called 446 returned 100% blocks executed 84%
+      446:  514:check_filenames(const char *str, const size_t len, const unsigned char c, const int first_word)
+        -:  515:{
+      446:  516:	int i = (int)files;
+      446:  517:	char *color = (char *)NULL;
+        -:  518:
+      446:  519:	if (suggest_filetype_color)
+      446:  519-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 446
+    #####:  520:		color = no_c;
+    %%%%%:  520-block  0
+unconditional  0 never executed
+        -:  521:	else
+      446:  522:		color = sf_c;
+      446:  522-block  0
+unconditional  0 taken 446
+        -:  523:
+    35844:  524:	while (--i >= 0) {
+      446:  524-block  0
+unconditional  0 taken 446
+    35844:  524-block  1
+branch  1 taken 35414
+branch  2 taken 430 (fallthrough)
+    35414:  525:		if (!file_info[i].name || TOUPPER(*str) != TOUPPER(*file_info[i].name))
+    35414:  525-block  0
+branch  0 taken 35414 (fallthrough)
+branch  1 taken 0
+    35414:  525-block  1
+branch  2 taken 24045 (fallthrough)
+branch  3 taken 11369
+    24045:  525-block  2
+branch  4 taken 24045 (fallthrough)
+branch  5 taken 0
+    24045:  525-block  3
+unconditional  6 taken 24045
+    11369:  525-block  4
+unconditional  7 taken 11369
+    35414:  525-block  5
+branch  8 taken 34440 (fallthrough)
+branch  9 taken 974
+    34440:  525-block  6
+branch 10 taken 34440 (fallthrough)
+branch 11 taken 0
+    34440:  525-block  7
+unconditional 12 taken 34440
+      974:  525-block  8
+unconditional 13 taken 974
+    35414:  525-block  9
+branch 14 taken 33676 (fallthrough)
+branch 15 taken 1738
+    33676:  526:			continue;
+    33676:  526-block  0
+unconditional  0 taken 33676
+    3476*:  527:		if (len && (case_sens_path_comp	? strncmp(str, file_info[i].name, len)
+     1738:  527-block  0
+branch  0 taken 1738 (fallthrough)
+branch  1 taken 0
+     1738:  527-block  1
+branch  2 taken 17 (fallthrough)
+branch  3 taken 1721
+    1738*:  528:		: strncasecmp(str, file_info[i].name, len)) == 0
+     1738:  528-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1738
+    %%%%%:  528-block  1
+unconditional  2 never executed
+     1738:  528-block  2
+unconditional  3 taken 1738
+       17:  529:		&& file_info[i].len > len) {
+       17:  529-block  0
+branch  0 taken 16 (fallthrough)
+branch  1 taken 1
+       16:  530:			if (suggest_filetype_color)
+       16:  530-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 16
+    #####:  531:				color = file_info[i].color;
+    %%%%%:  531-block  0
+unconditional  0 never executed
+        -:  532:
+       16:  533:			if (file_info[i].dir) {
+       16:  533-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 12
+       4*:  534:				if (first_word && !autocd)
+        4:  534-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4
+    %%%%%:  534-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  535:					continue;
+    %%%%%:  535-block  0
+unconditional  0 never executed
+        -:  536:
+        4:  537:				suggestion.filetype = DT_DIR;
+        -:  538:
+        -:  539:				char tmp[NAME_MAX + 2];
+        4:  540:				snprintf(tmp, NAME_MAX + 2, "%s/", file_info[i].name);
+        -:  541:
+        4:  542:				if (c != BS)
+        4:  542-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 0
+        4:  543:					suggestion.type = FILE_SUG;
+        4:  543-block  0
+unconditional  0 taken 4
+        -:  544:
+        4:  545:				char *_tmp = escape_str(tmp);
+        4:  545-block  0
+call    0 returned 4
+        4:  546:				if (_tmp) {
+branch  0 taken 4 (fallthrough)
+branch  1 taken 0
+        4:  547:					print_suggestion(_tmp, len, color);
+        4:  547-block  0
+call    0 returned 4
+        4:  548:					free(_tmp);
+unconditional  0 taken 4
+        -:  549:				} else {
+    #####:  550:					print_suggestion(tmp, len, color);
+    %%%%%:  550-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  551:				}
+        -:  552:			} else {
+      12*:  553:				if (first_word && !auto_open)
+       12:  553-block  0
+branch  0 taken 9 (fallthrough)
+branch  1 taken 3
+        9:  553-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 9
+    #####:  554:					continue;
+    %%%%%:  554-block  0
+unconditional  0 never executed
+        -:  555:
+       12:  556:				if (c != BS)
+       12:  556-block  0
+branch  0 taken 12 (fallthrough)
+branch  1 taken 0
+       12:  557:					suggestion.type = FILE_SUG;
+       12:  557-block  0
+unconditional  0 taken 12
+       12:  558:				suggestion.filetype = DT_REG;
+        -:  559:
+       12:  560:				char *tmp = escape_str(file_info[i].name);
+       12:  560-block  0
+call    0 returned 12
+       12:  561:				if (tmp) {
+branch  0 taken 12 (fallthrough)
+branch  1 taken 0
+       12:  562:					print_suggestion(tmp, len, color);
+       12:  562-block  0
+call    0 returned 12
+       12:  563:					free(tmp);
+unconditional  0 taken 12
+        -:  564:				} else {
+    #####:  565:					print_suggestion(file_info[i].name, len, color);
+    %%%%%:  565-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  566:				}
+        -:  567:			}
+       16:  568:			return 1;
+       16:  568-block  0
+unconditional  0 taken 16
+        -:  569:		}
+        -:  570:	}
+      430:  571:	return 0;
+      430:  571-block  0
+unconditional  0 taken 430
+        -:  572:}
+        -:  573:
+        -:  574:static int
+function check_history called 851 returned 100% blocks executed 92%
+      851:  575:check_history(const char *str, const size_t len)
+        -:  576:{
+      851:  577:	if (!str || !*str || !len)
+      851:  577-block  0
+branch  0 taken 851 (fallthrough)
+branch  1 taken 0
+      851:  577-block  1
+branch  2 taken 851 (fallthrough)
+branch  3 taken 0
+      851:  577-block  2
+branch  4 taken 0 (fallthrough)
+branch  5 taken 851
+    #####:  578:		return 0;
+    %%%%%:  578-block  0
+unconditional  0 never executed
+        -:  579:
+      851:  580:	int i = (int)current_hist_n;
+   505453:  581:	while (--i >= 0) {
+      851:  581-block  0
+unconditional  0 taken 851
+   505453:  581-block  1
+branch  1 taken 505007
+branch  2 taken 446 (fallthrough)
+   505007:  582:		if (!history[i] || TOUPPER(*str) != TOUPPER(*history[i]))
+   505007:  582-block  0
+branch  0 taken 505007 (fallthrough)
+branch  1 taken 0
+   505007:  582-block  1
+branch  2 taken 413020 (fallthrough)
+branch  3 taken 91987
+   413020:  582-block  2
+branch  4 taken 413020 (fallthrough)
+branch  5 taken 0
+   413020:  582-block  3
+unconditional  6 taken 413020
+    91987:  582-block  4
+unconditional  7 taken 91987
+   505007:  582-block  5
+branch  8 taken 361424 (fallthrough)
+branch  9 taken 143583
+   361424:  582-block  6
+branch 10 taken 361424 (fallthrough)
+branch 11 taken 0
+   361424:  582-block  7
+unconditional 12 taken 361424
+   143583:  582-block  8
+unconditional 13 taken 143583
+   505007:  582-block  9
+branch 14 taken 485155 (fallthrough)
+branch 15 taken 19852
+   485155:  583:			continue;
+   485155:  583-block  0
+unconditional  0 taken 485155
+        -:  584:
+   19852*:  585:		if ((case_sens_path_comp ? strncmp(str, history[i], len)
+    19852:  585-block  0
+branch  0 taken 1853 (fallthrough)
+branch  1 taken 17999
+   19852*:  586:		: strncasecmp(str, history[i], len)) == 0
+    19852:  586-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 19852
+    %%%%%:  586-block  1
+unconditional  2 never executed
+    19852:  586-block  2
+unconditional  3 taken 19852
+     1853:  587:		&& strlen(history[i]) > len) {
+     1853:  587-block  0
+branch  0 taken 405 (fallthrough)
+branch  1 taken 1448
+      405:  588:			suggestion.type = HIST_SUG;
+      405:  589:			print_suggestion(history[i], len, sh_c);
+      405:  589-block  0
+call    0 returned 405
+      405:  590:			return 1;
+unconditional  0 taken 405
+        -:  591:		}
+        -:  592:	}
+        -:  593:
+      446:  594:	return 0;
+      446:  594-block  0
+unconditional  0 taken 446
+        -:  595:}
+        -:  596:
+        -:  597:static int
+function check_cmds called 284 returned 100% blocks executed 94%
+      284:  598:check_cmds(const char *str, const size_t len)
+        -:  599:{
+      284:  600:	int i = (int)path_progsn;
+   861672:  601:	while (--i >= 0) {
+      284:  601-block  0
+unconditional  0 taken 284
+   861672:  601-block  1
+branch  1 taken 861547
+branch  2 taken 125 (fallthrough)
+   861547:  602:		if (!bin_commands[i] || *str != *bin_commands[i])
+   861547:  602-block  0
+branch  0 taken 861547 (fallthrough)
+branch  1 taken 0
+   861547:  602-block  1
+branch  2 taken 840121 (fallthrough)
+branch  3 taken 21426
+   840121:  603:			continue;
+   840121:  603-block  0
+unconditional  0 taken 840121
+        -:  604:
+    21426:  605:		if (len && strncmp(str, bin_commands[i], len) == 0
+    21426:  605-block  0
+branch  0 taken 21426 (fallthrough)
+branch  1 taken 0
+    21426:  605-block  1
+branch  2 taken 166 (fallthrough)
+branch  3 taken 21260
+      166:  606:		&& strlen(bin_commands[i]) > len) {
+      166:  606-block  0
+branch  0 taken 159 (fallthrough)
+branch  1 taken 7
+      159:  607:			if (is_internal_c(bin_commands[i])) {
+      159:  607-block  0
+call    0 returned 159
+branch  1 taken 4 (fallthrough)
+branch  2 taken 155
+        4:  608:				suggestion.type = CMD_SUG;
+        4:  609:				print_suggestion(bin_commands[i], len, sx_c);
+        4:  609-block  0
+call    0 returned 4
+unconditional  1 taken 4
+     155*:  610:			} else if (ext_cmd_ok) {
+      155:  610-block  0
+branch  0 taken 155 (fallthrough)
+branch  1 taken 0
+      155:  611:				suggestion.type = CMD_SUG;
+      155:  612:				print_suggestion(bin_commands[i], len, sc_c);
+      155:  612-block  0
+call    0 returned 155
+unconditional  1 taken 155
+        -:  613:			} else {
+    #####:  614:				continue;
+    %%%%%:  614-block  0
+unconditional  0 never executed
+        -:  615:			}
+      159:  616:			return 1;
+      159:  616-block  0
+unconditional  0 taken 159
+        -:  617:		}
+        -:  618:	}
+        -:  619:
+      125:  620:	return 0;
+      125:  620-block  0
+unconditional  0 taken 125
+        -:  621:}
+        -:  622:
+        -:  623:static int
+function check_jumpdb called 428 returned 100% blocks executed 84%
+      428:  624:check_jumpdb(const char *str, const size_t len)
+        -:  625:{
+      428:  626:	char *color = (char *)NULL;
+        -:  627:
+      428:  628:	if (suggest_filetype_color)
+      428:  628-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 428
+    #####:  629:		color = di_c;
+    %%%%%:  629-block  0
+unconditional  0 never executed
+        -:  630:	else
+      428:  631:		color = sf_c;
+      428:  631-block  0
+unconditional  0 taken 428
+        -:  632:
+      428:  633:	int i = (int)jump_n;
+    20833:  634:	while (--i >= 0) {
+      428:  634-block  0
+unconditional  0 taken 428
+    20833:  634-block  1
+branch  1 taken 20411
+branch  2 taken 422 (fallthrough)
+   20411*:  635:		if (!jump_db[i].path || TOUPPER(*str) != TOUPPER(*jump_db[i].path))
+    20411:  635-block  0
+branch  0 taken 20411 (fallthrough)
+branch  1 taken 0
+    20411:  635-block  1
+branch  2 taken 14810 (fallthrough)
+branch  3 taken 5601
+    14810:  635-block  2
+branch  4 taken 14810 (fallthrough)
+branch  5 taken 0
+    14810:  635-block  3
+unconditional  6 taken 14810
+     5601:  635-block  4
+unconditional  7 taken 5601
+    20411:  635-block  5
+branch  8 taken 0 (fallthrough)
+branch  9 taken 20411
+    %%%%%:  635-block  6
+branch 10 never executed
+branch 11 never executed
+    %%%%%:  635-block  7
+unconditional 12 never executed
+    20411:  635-block  8
+unconditional 13 taken 20411
+    20411:  635-block  9
+branch 14 taken 18686 (fallthrough)
+branch 15 taken 1725
+    18686:  636:			continue;
+    18686:  636-block  0
+unconditional  0 taken 18686
+        -:  637:
+     1725:  638:		size_t db_len = strlen(jump_db[i].path);
+    3450*:  639:		if (len && (case_sens_path_comp ? strncmp(str, jump_db[i].path, len)
+     1725:  639-block  0
+branch  0 taken 1725 (fallthrough)
+branch  1 taken 0
+     1725:  639-block  1
+branch  2 taken 15 (fallthrough)
+branch  3 taken 1710
+    1725*:  640:		: strncasecmp(str, jump_db[i].path, len)) == 0
+     1725:  640-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1725
+    %%%%%:  640-block  1
+unconditional  2 never executed
+     1725:  640-block  2
+unconditional  3 taken 1725
+       15:  641:		&& db_len > len) {
+       15:  641-block  0
+branch  0 taken 6 (fallthrough)
+branch  1 taken 9
+        6:  642:			suggestion.type = FILE_SUG;
+        6:  643:			suggestion.filetype = DT_DIR;
+        -:  644:			char tmp[NAME_MAX + 2];
+        6:  645:			*tmp = '\0';
+        6:  646:			if (jump_db[i].path[db_len - 1] != '/')
+        6:  646-block  0
+branch  0 taken 6 (fallthrough)
+branch  1 taken 0
+        6:  647:				snprintf(tmp, NAME_MAX + 2, "%s/", jump_db[i].path);
+        6:  647-block  0
+unconditional  0 taken 6
+       6*:  648:			print_suggestion(*tmp ? tmp : jump_db[i].path, len, color);
+        6:  648-block  0
+branch  0 taken 6 (fallthrough)
+branch  1 taken 0
+        6:  648-block  1
+unconditional  2 taken 6
+    %%%%%:  648-block  2
+unconditional  3 never executed
+        6:  648-block  3
+call    4 returned 6
+        6:  649:			return 1;
+unconditional  0 taken 6
+        -:  650:		}
+        -:  651:	}
+        -:  652:
+      422:  653:	return 0;
+      422:  653-block  0
+unconditional  0 taken 422
+        -:  654:}
+        -:  655:
+        -:  656:static int
+function check_bookmarks called 424 returned 100% blocks executed 73%
+      424:  657:check_bookmarks(const char *str, const size_t len)
+        -:  658:{
+      424:  659:	if (!bm_n)
+      424:  659-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 424
+    #####:  660:		return 0;
+    %%%%%:  660-block  0
+unconditional  0 never executed
+        -:  661:
+      424:  662:	char *color = (char *)NULL;
+        -:  663:	struct stat attr;
+      424:  664:	if (!suggest_filetype_color)
+      424:  664-block  0
+branch  0 taken 424 (fallthrough)
+branch  1 taken 0
+      424:  665:		color = sf_c;
+      424:  665-block  0
+unconditional  0 taken 424
+        -:  666:
+      424:  667:	int i = (int)bm_n;
+     9535:  668:	while (--i >= 0) {
+      424:  668-block  0
+unconditional  0 taken 424
+     9535:  668-block  1
+branch  1 taken 9127
+branch  2 taken 408 (fallthrough)
+     9127:  669:		if (!bookmarks[i].name || TOUPPER(*str) != TOUPPER(*bookmarks[i].name))
+     9127:  669-block  0
+branch  0 taken 7443 (fallthrough)
+branch  1 taken 1684
+     7443:  669-block  1
+branch  2 taken 5409 (fallthrough)
+branch  3 taken 2034
+     5409:  669-block  2
+branch  4 taken 5409 (fallthrough)
+branch  5 taken 0
+     5409:  669-block  3
+unconditional  6 taken 5409
+     2034:  669-block  4
+unconditional  7 taken 2034
+     7443:  669-block  5
+branch  8 taken 2480 (fallthrough)
+branch  9 taken 4963
+     2480:  669-block  6
+branch 10 taken 2480 (fallthrough)
+branch 11 taken 0
+     2480:  669-block  7
+unconditional 12 taken 2480
+     4963:  669-block  8
+unconditional 13 taken 4963
+     7443:  669-block  9
+branch 14 taken 7096 (fallthrough)
+branch 15 taken 347
+     8780:  670:			continue;
+     8780:  670-block  0
+unconditional  0 taken 8780
+        -:  671:
+     694*:  672:		if (len && (case_sens_path_comp ? strncmp(str, bookmarks[i].name, len)
+      347:  672-block  0
+branch  0 taken 347 (fallthrough)
+branch  1 taken 0
+      347:  672-block  1
+branch  2 taken 16 (fallthrough)
+branch  3 taken 331
+     347*:  673:		: strncasecmp(str, bookmarks[i].name, len)) == 0) {
+      347:  673-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 347
+    %%%%%:  673-block  1
+unconditional  2 never executed
+      347:  673-block  2
+unconditional  3 taken 347
+      16*:  674:			if (lstat(bookmarks[i].path, &attr) == -1)
+       16:  674-block  0
+call    0 returned 16
+branch  1 taken 0 (fallthrough)
+branch  2 taken 16
+    #####:  675:				continue;
+    %%%%%:  675-block  0
+unconditional  0 never executed
+        -:  676:
+       16:  677:			else if ((attr.st_mode & S_IFMT) == S_IFDIR) {
+       16:  677-block  0
+branch  0 taken 16 (fallthrough)
+branch  1 taken 0
+       16:  678:				suggestion.type = BOOKMARK_SUG;
+       16:  679:				suggestion.filetype = DT_DIR;
+        -:  680:
+        -:  681:				char tmp[PATH_MAX + 2];
+       16:  682:				size_t path_len = strlen(bookmarks[i].path);
+       16:  683:				if (bookmarks[i].path[path_len - 1] != '/')
+       16:  683-block  0
+branch  0 taken 14 (fallthrough)
+branch  1 taken 2
+       14:  684:					snprintf(tmp, PATH_MAX + 2, "%s/", bookmarks[i].path);
+       14:  684-block  0
+unconditional  0 taken 14
+        -:  685:				else
+        2:  686:					xstrsncpy(tmp, bookmarks[i].path, PATH_MAX + 2);
+        2:  686-block  0
+call    0 returned 2
+unconditional  1 taken 2
+        -:  687:
+       16:  688:				if (suggest_filetype_color)
+       16:  688-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 16
+    #####:  689:					color = di_c;
+    %%%%%:  689-block  0
+unconditional  0 never executed
+        -:  690:
+       16:  691:				char *_tmp = escape_str(tmp);
+       16:  691-block  0
+call    0 returned 16
+      16*:  692:				print_suggestion(_tmp ? _tmp : tmp, 1, color);
+branch  0 taken 0 (fallthrough)
+branch  1 taken 16
+    %%%%%:  692-block  0
+unconditional  2 never executed
+       16:  692-block  1
+unconditional  3 taken 16
+       16:  692-block  2
+call    4 returned 16
+       16:  693:				if (_tmp)
+branch  0 taken 16 (fallthrough)
+branch  1 taken 0
+       16:  694:					free(_tmp);
+       16:  694-block  0
+unconditional  0 taken 16
+        -:  695:			} else {
+    #####:  696:				suggestion.type = BOOKMARK_SUG;
+    #####:  697:				suggestion.filetype = DT_REG;
+        -:  698:
+    #####:  699:				if (suggest_filetype_color)
+    %%%%%:  699-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  700:					color = get_comp_color(bookmarks[i].path, attr);
+    %%%%%:  700-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  701:
+    #####:  702:				char *_tmp = escape_str(bookmarks[i].path);
+    %%%%%:  702-block  0
+call    0 never executed
+    #####:  703:				print_suggestion(_tmp ? _tmp : bookmarks[i].path, 1, color);
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  703-block  0
+unconditional  2 never executed
+    %%%%%:  703-block  1
+unconditional  3 never executed
+    %%%%%:  703-block  2
+call    4 never executed
+    #####:  704:				if (_tmp)
+branch  0 never executed
+branch  1 never executed
+    #####:  705:					free(_tmp);
+    %%%%%:  705-block  0
+unconditional  0 never executed
+        -:  706:			}
+       16:  707:			return 1;
+       16:  707-block  0
+unconditional  0 taken 16
+        -:  708:		}
+        -:  709:	}
+        -:  710:
+      408:  711:	return 0;
+      408:  711-block  0
+unconditional  0 taken 408
+        -:  712:}
+        -:  713:
+        -:  714:/*
+        -:  715:static int
+        -:  716:check_bookmarks(const char *str, const size_t len)
+        -:  717:{
+        -:  718:	int i = bm_n;
+        -:  719:	char *color = (char *)NULL;
+        -:  720:	struct stat attr;
+        -:  721:	if (!suggest_filetype_color)
+        -:  722:		color = sf_c;
+        -:  723:
+        -:  724:	while (--i >= 0) {
+        -:  725:		if (!bookmarks[i].path || *str != *bookmarks[i].path)
+        -:  726:			continue;
+        -:  727:		if (len && strncmp(str, bookmarks[i].path, len) == 0
+        -:  728:		&& strlen(bookmarks[i].path) > len) {
+        -:  729:			if (lstat(bookmarks[i].path, &attr) == -1)
+        -:  730:				continue;
+        -:  731:			else if ((attr.st_mode & S_IFMT) == S_IFDIR) {
+        -:  732:				char tmp[NAME_MAX + 2];
+        -:  733:				snprintf(tmp, NAME_MAX + 2, "%s/", bookmarks[i].path);
+        -:  734:				if (suggest_filetype_color)
+        -:  735:					color = di_c;
+        -:  736:				char *_tmp = escape_str(tmp);
+        -:  737:				print_suggestion(_tmp ? _tmp : tmp, len, color);
+        -:  738:				if (_tmp)
+        -:  739:					free(_tmp);
+        -:  740:				suggestion.type = FILE_SUG;
+        -:  741:				suggestion.filetype = DT_DIR;
+        -:  742:			} else {
+        -:  743:				if (suggest_filetype_color)
+        -:  744:					color = get_comp_color(bookmarks[i].path, attr);
+        -:  745:				char *_tmp = escape_str(bookmarks[i].path);
+        -:  746:				print_suggestion(_tmp ? _tmp : bookmarks[i].path, len,
+        -:  747:								color);
+        -:  748:				if (_tmp)
+        -:  749:					free(_tmp);
+        -:  750:				print_suggestion(bookmarks[i].path, len, color);
+        -:  751:				suggestion.type = FILE_SUG;
+        -:  752:				suggestion.filetype = DT_REG;
+        -:  753:			}
+        -:  754:			return 1;
+        -:  755:		}
+        -:  756:	}
+        -:  757:
+        -:  758:	return 0;
+        -:  759:} */
+        -:  760:
+        -:  761:static int
+function check_int_params called 347 returned 100% blocks executed 100%
+      347:  762:check_int_params(const char *str, const size_t len)
+        -:  763:{
+        -:  764:	size_t i;
+    40453:  765:	for (i = 0; param_str[i]; i++) {
+      347:  765-block  0
+unconditional  0 taken 347
+    40106:  765-block  1
+unconditional  1 taken 40106
+    40453:  765-block  2
+branch  2 taken 40186
+branch  3 taken 267 (fallthrough)
+    40186:  766:		if (*str != *param_str[i])
+    40186:  766-block  0
+branch  0 taken 37047 (fallthrough)
+branch  1 taken 3139
+    37047:  767:			continue;
+    37047:  767-block  0
+unconditional  0 taken 37047
+     3139:  768:		if (len && strncmp(str, param_str[i], len) == 0
+     3139:  768-block  0
+branch  0 taken 3139 (fallthrough)
+branch  1 taken 0
+     3139:  768-block  1
+branch  2 taken 90 (fallthrough)
+branch  3 taken 3049
+       90:  769:		&& strlen(param_str[i]) > len) {
+       90:  769-block  0
+branch  0 taken 80 (fallthrough)
+branch  1 taken 10
+       80:  770:			suggestion.type = INT_CMD;
+       80:  771:			print_suggestion(param_str[i], len, sx_c);
+       80:  771-block  0
+call    0 returned 80
+       80:  772:			return 1;
+unconditional  0 taken 80
+        -:  773:		}
+        -:  774:	}
+        -:  775:
+      267:  776:	return 0;
+      267:  776-block  0
+unconditional  0 taken 267
+        -:  777:}
+        -:  778:
+        -:  779:static int
+function check_eln called 80 returned 100% blocks executed 84%
+       80:  780:check_eln(const char *str)
+        -:  781:{
+       80:  782:	if (!str || !*str)
+       80:  782-block  0
+branch  0 taken 80 (fallthrough)
+branch  1 taken 0
+       80:  782-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 80
+    #####:  783:		return 0;
+    %%%%%:  783-block  0
+unconditional  0 never executed
+        -:  784:
+       80:  785:	int n = atoi(str);
+       80:  786:	if (n < 1 || n > (int)files || !file_info[n - 1].name)
+       80:  786-block  0
+branch  0 taken 80 (fallthrough)
+branch  1 taken 0
+       80:  786-block  1
+branch  2 taken 80 (fallthrough)
+branch  3 taken 0
+       80:  786-block  2
+branch  4 taken 0 (fallthrough)
+branch  5 taken 80
+    #####:  787:		return 0;
+    %%%%%:  787-block  0
+unconditional  0 never executed
+        -:  788:
+       80:  789:	n--;
+       80:  790:	char *color = sf_c;
+       80:  791:	suggestion.type = ELN_SUG;
+       80:  792:	if (suggest_filetype_color)
+       80:  792-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 80
+    #####:  793:		color = file_info[n].color;
+    %%%%%:  793-block  0
+unconditional  0 never executed
+        -:  794:
+        -:  795:	char tmp[NAME_MAX + 1];
+       80:  796:	*tmp = '\0';
+       80:  797:	if (file_info[n].dir) {
+       80:  797-block  0
+branch  0 taken 37 (fallthrough)
+branch  1 taken 43
+       37:  798:		snprintf(tmp, NAME_MAX + 1, "%s/", file_info[n].name);
+       37:  799:		suggestion.filetype = DT_DIR;
+       37:  799-block  0
+unconditional  0 taken 37
+        -:  800:	} else {
+       43:  801:		suggestion.filetype = DT_REG;
+       43:  801-block  0
+unconditional  0 taken 43
+        -:  802:	}
+        -:  803:
+       80:  804:	print_suggestion(!*tmp ? file_info[n].name : tmp, 1, color);
+       80:  804-block  0
+branch  0 taken 43 (fallthrough)
+branch  1 taken 37
+       43:  804-block  1
+unconditional  2 taken 43
+       37:  804-block  2
+unconditional  3 taken 37
+       80:  804-block  3
+call    4 returned 80
+       80:  805:	return 1;
+unconditional  0 taken 80
+        -:  806:}
+        -:  807:
+        -:  808:static int
+function check_aliases called 408 returned 100% blocks executed 85%
+      408:  809:check_aliases(const char *str, const size_t len)
+        -:  810:{
+      408:  811:	if (!aliases_n)
+      408:  811-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 405
+        3:  812:		return 0;
+        3:  812-block  0
+unconditional  0 taken 3
+        -:  813:
+      405:  814:	char *color = sc_c;
+        -:  815:
+      405:  816:	int i = (int)aliases_n;
+     2410:  817:	while (--i >= 0) {
+      405:  817-block  0
+unconditional  0 taken 405
+     2410:  817-block  1
+branch  1 taken 2011
+branch  2 taken 399 (fallthrough)
+    2011*:  818:		if (!aliases[i])
+     2011:  818-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2011
+    #####:  819:			continue;
+    %%%%%:  819-block  0
+unconditional  0 never executed
+     2011:  820:		char *p = aliases[i];
+    2011*:  821:		if (TOUPPER(*p) != TOUPPER(*str))
+     2011:  821-block  0
+branch  0 taken 2011 (fallthrough)
+branch  1 taken 0
+     2011:  821-block  1
+branch  2 taken 2011 (fallthrough)
+branch  3 taken 0
+     2011:  821-block  2
+unconditional  4 taken 2011
+    %%%%%:  821-block  3
+unconditional  5 never executed
+     2011:  821-block  4
+branch  6 taken 1446 (fallthrough)
+branch  7 taken 565
+     1446:  821-block  5
+branch  8 taken 1446 (fallthrough)
+branch  9 taken 0
+     1446:  821-block  6
+unconditional 10 taken 1446
+      565:  821-block  7
+unconditional 11 taken 565
+     2011:  821-block  8
+branch 12 taken 1948 (fallthrough)
+branch 13 taken 63
+     1948:  822:			continue;
+     1948:  822-block  0
+unconditional  0 taken 1948
+      63*:  823:		if ((case_sens_path_comp ? strncmp(p, str, len)
+       63:  823-block  0
+branch  0 taken 57 (fallthrough)
+branch  1 taken 6
+      63*:  824:		: strncasecmp(p, str, len)) != 0)
+       63:  824-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 63
+    %%%%%:  824-block  1
+unconditional  2 never executed
+       63:  824-block  2
+unconditional  3 taken 63
+       57:  825:			continue;
+       57:  825-block  0
+unconditional  0 taken 57
+        6:  826:		char *ret = strchr(p, '=');
+       6*:  827:		if (!*(++ret))
+        6:  827-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 6
+    #####:  828:			continue;
+    %%%%%:  828-block  0
+unconditional  0 never executed
+       6*:  829:		if (!*(++ret))
+        6:  829-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 6
+    #####:  830:			continue;
+    %%%%%:  830-block  0
+unconditional  0 never executed
+        6:  831:		size_t str_len = strlen(ret);
+        6:  832:		if (ret[str_len - 1] == '\n') {
+        6:  832-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 3
+        3:  833:			ret[str_len - 1] = '\0';
+        3:  834:			str_len--;
+        3:  834-block  0
+unconditional  0 taken 3
+        -:  835:		}
+        6:  836:		if (ret[str_len - 1] == '\'' || ret[str_len - 1] == '"')
+        6:  836-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 3
+        3:  836-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 3
+        3:  837:			ret[str_len - 1] = '\0';
+        3:  837-block  0
+unconditional  0 taken 3
+        6:  838:		suggestion.type = ALIAS_SUG;
+        6:  839:		print_suggestion(ret, 1, color);
+        6:  839-block  0
+call    0 returned 6
+        6:  840:		return 1;
+unconditional  0 taken 6
+        -:  841:	}
+        -:  842:
+      399:  843:	return 0;
+      399:  843-block  0
+unconditional  0 taken 399
+        -:  844:}
+        -:  845:
+        -:  846:/* Get a match from the jump database and print the suggestion */
+        -:  847:static int
+function check_jcmd called 30 returned 100% blocks executed 67%
+       30:  848:check_jcmd(char *line)
+        -:  849:{
+       30:  850:	if (suggestion_buf)
+       30:  850-block  0
+branch  0 taken 14 (fallthrough)
+branch  1 taken 16
+       14:  851:		clear_suggestion();
+       14:  851-block  0
+call    0 returned 14
+unconditional  1 taken 14
+        -:  852:
+        -:  853:	/* Split line into an array of substrings */
+       30:  854:	char **substr = get_substr(line, ' ');
+       30:  854-block  0
+call    0 returned 30
+       30:  855:	if (!substr)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 30
+    #####:  856:		return 0;
+    %%%%%:  856-block  0
+unconditional  0 never executed
+        -:  857:
+        -:  858:	/* Check the jump database for a match. If a match is found, it will
+        -:  859:	 * be stored in jump_suggestion (global) */
+       30:  860:	dirjump(substr, SUG_JUMP);
+       30:  860-block  0
+call    0 returned 30
+        -:  861:
+        -:  862:	size_t i;
+       90:  863:	for (i = 0; substr[i]; i++)
+unconditional  0 taken 30
+       90:  863-block  0
+branch  1 taken 60
+branch  2 taken 30 (fallthrough)
+       60:  864:		free(substr[i]);
+       60:  864-block  0
+unconditional  0 taken 60
+       30:  865:	free(substr);
+        -:  866:
+       30:  867:	if (!jump_suggestion)
+       30:  867-block  0
+branch  0 taken 14 (fallthrough)
+branch  1 taken 16
+       14:  868:		return 0;
+       14:  868-block  0
+unconditional  0 taken 14
+        -:  869:
+       16:  870:	suggestion.type = JCMD_SUG;
+       16:  871:	suggestion.filetype = DT_DIR;
+       16:  872:	if (!autocd) {
+       16:  872-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 16
+    #####:  873:		char *tmp = xnmalloc(strlen(jump_suggestion) + 4, sizeof(char));
+    %%%%%:  873-block  0
+call    0 never executed
+    #####:  874:		sprintf(tmp, "cd %s", jump_suggestion);
+    #####:  875:		print_suggestion(tmp, 1, suggest_filetype_color ? di_c : sf_c);
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  875-block  0
+unconditional  2 never executed
+    %%%%%:  875-block  1
+unconditional  3 never executed
+    %%%%%:  875-block  2
+call    4 never executed
+    #####:  876:		suggestion.type = JCMD_SUG_NOACD;
+    #####:  877:		free(tmp);
+unconditional  0 never executed
+        -:  878:	} else {
+      16*:  879:		print_suggestion(jump_suggestion, 1, suggest_filetype_color ? di_c
+       16:  879-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 16
+    %%%%%:  879-block  1
+unconditional  2 never executed
+       16:  879-block  2
+unconditional  3 taken 16
+       16:  879-block  3
+call    4 returned 16
+unconditional  5 taken 16
+        -:  880:					: sf_c);
+        -:  881:	}
+       16:  882:	suggestion.offset = 0;
+       16:  883:	free(jump_suggestion);
+       16:  884:	jump_suggestion = (char *)NULL;
+       16:  885:	return 1;
+       16:  885-block  0
+unconditional  0 taken 16
+        -:  886:}
+        -:  887:
+        -:  888:/* Check if we must suggest --help for internal commands */
+        -:  889:static int
+function check_help called 31 returned 100% blocks executed 90%
+       31:  890:check_help(char *full_line, const char *last_word)
+        -:  891:{
+       31:  892:	size_t len = strlen(last_word);
+       31:  893:	if (strncmp(last_word, "--help", len) != 0)
+       31:  893-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 28
+        3:  894:		return 0;
+        3:  894-block  0
+unconditional  0 taken 3
+        -:  895:
+       28:  896:	char *ret = strchr(full_line, ' ');
+       28:  897:	if (!ret)
+       28:  897-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 27
+        1:  898:		return 0;
+        1:  898-block  0
+unconditional  0 taken 1
+        -:  899:
+       27:  900:	*ret = '\0';
+       27:  901:	if (!is_internal_c(full_line))
+       27:  901-block  0
+call    0 returned 27
+branch  1 taken 0 (fallthrough)
+branch  2 taken 27
+    #####:  902:		return 0;
+    %%%%%:  902-block  0
+unconditional  0 never executed
+        -:  903:
+       27:  904:	suggestion.type = CMD_SUG;
+       27:  905:	print_suggestion("--help", len, sx_c);
+       27:  905-block  0
+call    0 returned 27
+       27:  906:	return 1;
+unconditional  0 taken 27
+        -:  907:}
+        -:  908:
+        -:  909:static int
+function check_variables called 0 returned 0% blocks executed 0%
+    #####:  910:check_variables(const char *str, const size_t len)
+        -:  911:{
+    #####:  912:	int printed = 0;
+        -:  913:	size_t i;
+    #####:  914:	for (i = 0; environ[i]; i++) {
+    %%%%%:  914-block  0
+unconditional  0 never executed
+    %%%%%:  914-block  1
+unconditional  1 never executed
+    %%%%%:  914-block  2
+branch  2 never executed
+branch  3 never executed
+    #####:  915:		if (TOUPPER(*environ[i]) == TOUPPER(*str)
+    %%%%%:  915-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  915-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  915-block  2
+unconditional  4 never executed
+    %%%%%:  915-block  3
+unconditional  5 never executed
+    %%%%%:  915-block  4
+branch  6 never executed
+branch  7 never executed
+    %%%%%:  915-block  5
+branch  8 never executed
+branch  9 never executed
+    %%%%%:  915-block  6
+unconditional 10 never executed
+    %%%%%:  915-block  7
+unconditional 11 never executed
+    %%%%%:  915-block  8
+branch 12 never executed
+branch 13 never executed
+    #####:  916:		&& strncasecmp(str, environ[i], len) == 0) {
+    %%%%%:  916-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  917:			char *ret = strchr(environ[i], '=');
+    #####:  918:			*ret = '\0';
+    #####:  919:			suggestion.type = VAR_SUG;
+        -:  920:			char t[NAME_MAX + 1];
+    #####:  921:			snprintf(t, NAME_MAX + 1, "$%s", environ[i]);
+    #####:  922:			print_suggestion(t, len + 1, sh_c);
+    %%%%%:  922-block  0
+call    0 never executed
+    #####:  923:			printed = 1;
+    #####:  924:			*ret = '=';
+    #####:  925:			break;
+unconditional  0 never executed
+        -:  926:		}
+        -:  927:	}
+        -:  928:
+    #####:  929:	if (printed)
+    %%%%%:  929-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  930:		return 1;
+    %%%%%:  930-block  0
+unconditional  0 never executed
+        -:  931:
+    #####:  932:	if (!usrvar_n)
+    %%%%%:  932-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  933:		return 0;
+    %%%%%:  933-block  0
+unconditional  0 never executed
+        -:  934:
+    #####:  935:	for (i = 0; usr_var[i].name; i++) {
+    %%%%%:  935-block  0
+unconditional  0 never executed
+    %%%%%:  935-block  1
+unconditional  1 never executed
+    %%%%%:  935-block  2
+branch  2 never executed
+branch  3 never executed
+    #####:  936:		if (TOUPPER(*str) == TOUPPER(*usr_var[i].name)
+    %%%%%:  936-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  936-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  936-block  2
+unconditional  4 never executed
+    %%%%%:  936-block  3
+unconditional  5 never executed
+    %%%%%:  936-block  4
+branch  6 never executed
+branch  7 never executed
+    %%%%%:  936-block  5
+branch  8 never executed
+branch  9 never executed
+    %%%%%:  936-block  6
+unconditional 10 never executed
+    %%%%%:  936-block  7
+unconditional 11 never executed
+    %%%%%:  936-block  8
+branch 12 never executed
+branch 13 never executed
+    #####:  937:		&& strncasecmp(str, usr_var[i].name, len) == 0) {
+    %%%%%:  937-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  938:			suggestion.type = CMD_SUG;
+        -:  939:			char t[NAME_MAX + 1];
+    #####:  940:			snprintf(t, NAME_MAX + 1, "$%s", usr_var[i].name);
+    #####:  941:			print_suggestion(t, len + 1, sh_c);
+    %%%%%:  941-block  0
+call    0 never executed
+    #####:  942:			printed = 1;
+    #####:  943:			break;
+unconditional  0 never executed
+        -:  944:		}
+        -:  945:	}
+        -:  946:
+    #####:  947:	if (printed)
+    %%%%%:  947-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  948:		return 1;
+    %%%%%:  948-block  0
+unconditional  0 never executed
+        -:  949:
+    #####:  950:	return 0;
+    %%%%%:  950-block  0
+unconditional  0 never executed
+        -:  951:}
+        -:  952:
+        -:  953:static void
+function remove_suggestion_not_end called 1 returned 100% blocks executed 100%
+        1:  954:remove_suggestion_not_end(void)
+        -:  955:{
+        1:  956:	printf("\x1b[%dC", rl_end - rl_point);
+        1:  956-block  0
+call    0 returned 1
+        1:  957:	fflush(stdout);
+call    0 returned 1
+        1:  958:	clear_suggestion();
+call    0 returned 1
+        1:  959:	printf("\x1b[%dD", rl_end - rl_point);
+call    0 returned 1
+        1:  960:	fflush(stdout);
+call    0 returned 1
+        1:  961:}
+        -:  962:
+        -:  963:/* Check for available suggestions. Returns zero if true, one if not,
+        -:  964: * and -1 if C was inserted before the end of the current line.
+        -:  965: * If a suggestion is found, it will be printed by print_suggestion() */
+        -:  966:int
+function rl_suggestions called 2893 returned 100% blocks executed 94%
+     2893:  967:rl_suggestions(const unsigned char c)
+        -:  968:{
+     2893:  969:	char *last_word = (char *)NULL;
+     2893:  970:	char *full_line = (char *)NULL;
+     2893:  971:	int printed = 0;
+     2893:  972:	int inserted_c = 0;
+        -:  973:/*	static int msg_area = 0; */
+        -:  974:
+        -:  975:		/* ######################################
+        -:  976:		 * # 		  1) Filter input			#
+        -:  977:		 * ######################################*/
+        -:  978:
+        -:  979:	/* Skip escape sequences, mostly arrow keys */
+     2893:  980:	if (rl_readline_state & RL_STATE_MOREINPUT) {
+     2893:  980-block  0
+branch  0 taken 513 (fallthrough)
+branch  1 taken 2380
+      513:  981:		if (c == '~') {
+      513:  981-block  0
+branch  0 taken 14 (fallthrough)
+branch  1 taken 499
+       14:  982:			if (rl_point != rl_end && suggestion.printed) {
+       14:  982-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 13
+        1:  982-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1
+        -:  983:				/* This should be the delete key */
+    #####:  984:				remove_suggestion_not_end();
+    %%%%%:  984-block  0
+call    0 never executed
+    #####:  985:				goto FAIL;
+unconditional  0 never executed
+       14:  986:			} else if (suggestion.printed) {
+       14:  986-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 14
+    #####:  987:				clear_suggestion();
+    %%%%%:  987-block  0
+call    0 never executed
+    #####:  988:				free(suggestion_buf);
+    #####:  989:				suggestion_buf = (char *)NULL;
+unconditional  0 never executed
+        -:  990:			}
+        -:  991:		}
+        -:  992:		/* Handle history events. If a suggestion has been printed and
+        -:  993:		 * a history event is triggered (usually via the Up and Down arrow
+        -:  994:		 * keys), the suggestion buffer won't be freed. Let's do it
+        -:  995:		 * here */
+      499:  996:		else if ((c == 'A' || c == 'B') && suggestion_buf) {
+      499:  996-block  0
+branch  0 taken 472 (fallthrough)
+branch  1 taken 27
+      472:  996-block  1
+branch  2 taken 11 (fallthrough)
+branch  3 taken 461
+       38:  996-block  2
+branch  4 taken 1 (fallthrough)
+branch  5 taken 37
+        1:  997:			clear_suggestion();
+        1:  997-block  0
+call    0 returned 1
+        1:  998:			goto FAIL;
+unconditional  0 taken 1
+        -:  999:		}
+      512: 1000:		if (suggestion_buf) {
+      512: 1000-block  0
+branch  0 taken 74 (fallthrough)
+branch  1 taken 438
+       74: 1001:			printed = 1;
+       74: 1002:			goto SUCCESS;
+       74: 1002-block  0
+unconditional  0 taken 74
+        -: 1003:		}
+      438: 1004:		goto FAIL;
+      438: 1004-block  0
+unconditional  0 taken 438
+        -: 1005:	}
+        -: 1006:
+        -: 1007:	/* Skip control characters (0 - 31) except backspace (8), tab(9),
+        -: 1008:	 * enter (13), and escape (27) */
+     2380: 1009:	if (c < 32 && c != BS && c != _TAB && c != ENTER && c != _ESC) {
+     2380: 1009-block  0
+branch  0 taken 868 (fallthrough)
+branch  1 taken 1512
+      868: 1009-block  1
+branch  2 taken 677 (fallthrough)
+branch  3 taken 191
+      677: 1009-block  2
+branch  4 taken 659 (fallthrough)
+branch  5 taken 18
+      659: 1009-block  3
+branch  6 taken 254 (fallthrough)
+branch  7 taken 405
+      254: 1009-block  4
+branch  8 taken 3 (fallthrough)
+branch  9 taken 251
+        3: 1010:		if (suggestion_buf) {
+        3: 1010-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####: 1011:			printed = 1;
+    #####: 1012:			goto SUCCESS;
+    %%%%%: 1012-block  0
+unconditional  0 never executed
+        -: 1013:		} else {
+        3: 1014:			goto FAIL;
+        3: 1014-block  0
+unconditional  0 taken 3
+        -: 1015:		}
+        -: 1016:	}
+        -: 1017:
+        -: 1018:	/* Skip backspace, Enter, and TAB keys */
+     2377: 1019:	switch(c) {
+     2377: 1019-block  0
+branch  0 taken 191
+branch  1 taken 405
+branch  2 taken 251
+branch  3 taken 18
+branch  4 taken 1512
+      191: 1020:		case DELETE: /* fallthrough */
+        -: 1021:/*			if (rl_point != rl_end && suggestion.printed)
+        -: 1022:				clear_suggestion();
+        -: 1023:			goto FAIL; */
+        -: 1024:
+        -: 1025:		case BS:
+      191: 1026:			if (suggestion.printed && suggestion_buf) {
+      191: 1026-block  0
+branch  0 taken 21 (fallthrough)
+branch  1 taken 170
+       21: 1026-block  1
+branch  2 taken 21 (fallthrough)
+branch  3 taken 0
+       21: 1027:				if (rl_point != rl_end) {
+       21: 1027-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 20
+        1: 1028:					remove_suggestion_not_end();
+        1: 1028-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -: 1029:				} else {
+       20: 1030:					clear_suggestion();
+       20: 1030-block  0
+call    0 returned 20
+unconditional  1 taken 20
+        -: 1031:				}
+        -: 1032:			}
+      191: 1033:			goto FAIL;
+      191: 1033-block  0
+unconditional  0 taken 191
+        -: 1034:
+      405: 1035:		case ENTER:
+      405: 1036:			if (suggestion.printed && suggestion_buf)
+      405: 1036-block  0
+branch  0 taken 279 (fallthrough)
+branch  1 taken 126
+      279: 1036-block  1
+branch  2 taken 279 (fallthrough)
+branch  3 taken 0
+      279: 1037:				clear_suggestion();
+      279: 1037-block  0
+call    0 returned 279
+unconditional  1 taken 279
+      405: 1038:			goto FAIL;
+      405: 1038-block  0
+unconditional  0 taken 405
+        -: 1039:/*		case SPACE:
+        -: 1040:			if (msg_area) {
+        -: 1041:				rl_restore_prompt();
+        -: 1042:				rl_clear_message();
+        -: 1043:				msg_area = 0;
+        -: 1044:				if (c == ENTER)
+        -: 1045:					goto FAIL;
+        -: 1046:				break;
+        -: 1047:			} else {
+        -: 1048:				if (c == ENTER)
+        -: 1049:					goto FAIL;
+        -: 1050:				break;
+        -: 1051:			} */
+        -: 1052:
+      251: 1053:		case _ESC:
+      251: 1054:			if (suggestion.printed)
+      251: 1054-block  0
+branch  0 taken 39 (fallthrough)
+branch  1 taken 212
+       39: 1055:				printed = 1;
+       39: 1055-block  0
+unconditional  0 taken 39
+      251: 1056:			goto SUCCESS;
+      251: 1056-block  0
+unconditional  0 taken 251
+        -: 1057:
+       18: 1058:		case _TAB:
+       18: 1059:			if (suggestion.printed) {
+       18: 1059-block  0
+branch  0 taken 8 (fallthrough)
+branch  1 taken 10
+        8: 1060:				if (suggestion.nlines < 2 && suggestion.type != ELN_SUG
+        8: 1060-block  0
+branch  0 taken 8 (fallthrough)
+branch  1 taken 0
+        8: 1060-block  1
+branch  2 taken 8 (fallthrough)
+branch  3 taken 0
+        8: 1061:				&& suggestion.type != BOOKMARK_SUG
+        8: 1061-block  0
+branch  0 taken 8 (fallthrough)
+branch  1 taken 0
+        8: 1062:				&& suggestion.type != ALIAS_SUG
+        8: 1062-block  0
+branch  0 taken 8 (fallthrough)
+branch  1 taken 0
+        8: 1063:				&& suggestion.type != JCMD_SUG) {
+        8: 1063-block  0
+branch  0 taken 7 (fallthrough)
+branch  1 taken 1
+        7: 1064:					printed = 1;
+        7: 1064-block  0
+unconditional  0 taken 7
+        -: 1065:				} else {
+        1: 1066:					clear_suggestion();
+        1: 1066-block  0
+call    0 returned 1
+        1: 1067:					goto FAIL;
+unconditional  0 taken 1
+        -: 1068:				}
+        -: 1069:			}
+       17: 1070:			goto SUCCESS;
+       17: 1070-block  0
+unconditional  0 taken 17
+        -: 1071:
+     1512: 1072:		default: break;
+     1512: 1072-block  0
+unconditional  0 taken 1512
+        -: 1073:	}
+        -: 1074:
+        -: 1075:		/* ######################################
+        -: 1076:		 * #	2) Handle last entered char		#
+        -: 1077:		 * ######################################*/
+        -: 1078:
+        -: 1079:	/* If not at the end of line, insert C in the current cursor
+        -: 1080:	 * position. Else, append it to current readline buffer to
+        -: 1081:	 * correctly find matches: at this point (rl_getc), readline has
+        -: 1082:	 * not appended this char to rl_line_buffer yet, so that we must
+        -: 1083:	 * do it manually.
+        -: 1084:	 * Line editing is only allowed for the last word */
+     1512: 1085:	int s = strcntchrlst(rl_line_buffer, ' ');
+     1512: 1085-block  0
+call    0 returned 1512
+        -: 1086:	/* Do not take into account final spaces */
+     1512: 1087:	if (s >= 0 && !rl_line_buffer[s + 1])
+branch  0 taken 487 (fallthrough)
+branch  1 taken 1025
+      487: 1087-block  0
+branch  2 taken 164 (fallthrough)
+branch  3 taken 323
+      164: 1088:		s = -1;
+      164: 1088-block  0
+unconditional  0 taken 164
+     1512: 1089:	if (rl_point != rl_end && c != _ESC) {
+     1512: 1089-block  0
+branch  0 taken 20 (fallthrough)
+branch  1 taken 1492
+       20: 1089-block  1
+branch  2 taken 20 (fallthrough)
+branch  3 taken 0
+       20: 1090:		if (rl_point < s) {
+       20: 1090-block  0
+branch  0 taken 6 (fallthrough)
+branch  1 taken 14
+        6: 1091:			if (suggestion.printed) {
+        6: 1091-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 6
+    #####: 1092:				remove_suggestion_not_end();
+    %%%%%: 1092-block  0
+call    0 never executed
+    #####: 1093:				goto FAIL;
+unconditional  0 never executed
+        -: 1094:			}
+        -: 1095:		}
+        -: 1096:		char text[2];
+       20: 1097:		text[0] = (char)c;
+       20: 1098:		text[1] = '\0';
+       20: 1099:		rl_insert_text(text);
+       20: 1099-block  0
+call    0 returned 20
+        -: 1100:		/* This flag is used to tell my_rl_getc not to append C to the
+        -: 1101:		 * line buffer (rl_line_buffer), since it was already inserted
+        -: 1102:		 * here */
+       20: 1103:		inserted_c = 1;
+unconditional  0 taken 20
+        -: 1104:	}
+        -: 1105:
+     1512: 1106:	size_t buflen = (size_t)rl_end;
+        -: 1107:/*	size_t buflen = strlen(rl_line_buffer); */
+     1512: 1108:	suggestion.full_line_len = buflen + 1;
+     1512: 1109:	char *last_space = strrchr(rl_line_buffer, ' ');
+     1512: 1110:	if (last_space && last_space != rl_line_buffer
+     1512: 1110-block  0
+branch  0 taken 487 (fallthrough)
+branch  1 taken 1025
+      487: 1110-block  1
+branch  2 taken 487 (fallthrough)
+branch  3 taken 0
+      487: 1111:	&& *(last_space - 1) == '\\')
+      487: 1111-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 487
+    #####: 1112:		last_space = (char *)NULL;
+    %%%%%: 1112-block  0
+unconditional  0 never executed
+        -: 1113:
+        -: 1114:	/* We need a copy of the complete line */
+     1512: 1115:	full_line = (char *)xnmalloc(buflen + 2, sizeof(char));
+     1512: 1115-block  0
+call    0 returned 1512
+     1512: 1116:	if (inserted_c)
+branch  0 taken 20 (fallthrough)
+branch  1 taken 1492
+       20: 1117:		strcpy(full_line, rl_line_buffer);
+       20: 1117-block  0
+unconditional  0 taken 20
+        -: 1118:	else
+     1492: 1119:		sprintf(full_line, "%s%c", rl_line_buffer, c);
+     1492: 1119-block  0
+unconditional  0 taken 1492
+        -: 1120:
+        -: 1121:	/* And a copy of the last entered word as well */
+     1512: 1122:	int last_word_offset = 0;
+        -: 1123:
+     1512: 1124:	if (last_space) {
+     1512: 1124-block  0
+branch  0 taken 487 (fallthrough)
+branch  1 taken 1025
+      487: 1125:		int j = (int)buflen;
+     1252: 1126:		while (--j >= 0) {
+      487: 1126-block  0
+unconditional  0 taken 487
+     1252: 1126-block  1
+branch  1 taken 1252
+branch  2 taken 0 (fallthrough)
+     1252: 1127:			if (rl_line_buffer[j] == ' ')
+     1252: 1127-block  0
+branch  0 taken 487 (fallthrough)
+branch  1 taken 765
+      487: 1128:				break;
+      487: 1128-block  0
+unconditional  0 taken 487
+        -: 1129:		}
+      487: 1130:		last_word_offset = j + 1;
+      487: 1131:		buflen = strlen(last_space);
+        -: 1132:
+      487: 1133:		if (*(++last_space)) {
+      487: 1133-block  0
+branch  0 taken 323 (fallthrough)
+branch  1 taken 164
+      323: 1134:			buflen--;
+      323: 1135:			last_word = (char *)xnmalloc(buflen + 2, sizeof(char));
+      323: 1135-block  0
+call    0 returned 323
+      323: 1136:			if (inserted_c)
+branch  0 taken 19 (fallthrough)
+branch  1 taken 304
+       19: 1137:				strcpy(last_word, last_space);
+       19: 1137-block  0
+unconditional  0 taken 19
+        -: 1138:			else
+      304: 1139:				sprintf(last_word, "%s%c", last_space, c);
+      304: 1139-block  0
+unconditional  0 taken 304
+        -: 1140:		} else {
+      164: 1141:			last_word = (char *)xnmalloc(2, sizeof(char));
+      164: 1141-block  0
+call    0 returned 164
+      164: 1142:			if (inserted_c) {
+branch  0 taken 1 (fallthrough)
+branch  1 taken 163
+        1: 1143:				*last_word = '\0';
+        1: 1143-block  0
+unconditional  0 taken 1
+        -: 1144:			} else {
+      163: 1145:				*last_word = (char)c;
+      163: 1146:				last_word[1] = '\0';
+      163: 1146-block  0
+unconditional  0 taken 163
+        -: 1147:			}
+        -: 1148:		}
+        -: 1149:	} else {
+     1025: 1150:		last_word = (char *)xnmalloc(buflen + 2, sizeof(char));
+     1025: 1150-block  0
+call    0 returned 1025
+     1025: 1151:		if (inserted_c)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1025
+    #####: 1152:			strcpy(last_word, rl_line_buffer);
+    %%%%%: 1152-block  0
+unconditional  0 never executed
+        -: 1153:		else
+     1025: 1154:			sprintf(last_word, "%s%c", rl_line_buffer, c);
+     1025: 1154-block  0
+unconditional  0 taken 1025
+        -: 1155:	}
+        -: 1156:
+        -: 1157:		/* ######################################
+        -: 1158:		 * #	  3) Search for suggestions		#
+        -: 1159:		 * ######################################*/
+        -: 1160:
+     1512: 1161:	char *lb = rl_line_buffer;
+        -: 1162:	/* 3.a) Let's suggest non-fixed parameters for internal commands */
+        -: 1163:
+     1512: 1164:	switch(*lb) {
+     1512: 1164-block  0
+branch  0 taken 68
+branch  1 taken 59
+branch  2 taken 49
+branch  3 taken 43
+branch  4 taken 104
+branch  5 taken 1189
+       68: 1165:	case 'b': /* Bookmarks names */
+       68: 1166:		if (lb[1] == 'm' && lb[2] == ' ' && strncmp(lb + 3, "add", 3) != 0) {
+       68: 1166-block  0
+branch  0 taken 44 (fallthrough)
+branch  1 taken 24
+       44: 1166-block  1
+branch  2 taken 37 (fallthrough)
+branch  3 taken 7
+       37: 1166-block  2
+branch  4 taken 34 (fallthrough)
+branch  5 taken 3
+       34: 1167:			size_t i = 0, len = strlen(last_word);
+      642: 1168:			for (; bookmark_names[i]; i++) {
+       34: 1168-block  0
+unconditional  0 taken 34
+      608: 1168-block  1
+unconditional  1 taken 608
+      642: 1168-block  2
+branch  2 taken 616
+branch  3 taken 26 (fallthrough)
+      616: 1169:				if (*last_word == *bookmark_names[i]
+      616: 1169-block  0
+branch  0 taken 14 (fallthrough)
+branch  1 taken 602
+       14: 1170:				&& strncmp(bookmark_names[i], last_word, len) == 0) {
+       14: 1170-block  0
+branch  0 taken 8 (fallthrough)
+branch  1 taken 6
+        8: 1171:					suggestion.type = CMD_SUG;
+        8: 1172:					suggestion.offset = last_word_offset;
+        8: 1173:					print_suggestion(bookmark_names[i], len, sx_c);
+        8: 1173-block  0
+call    0 returned 8
+        8: 1174:					printed = 1;
+        8: 1175:					break;
+unconditional  0 taken 8
+        -: 1176:				}
+        -: 1177:			}
+       34: 1178:			if (printed) {
+       34: 1178-block  0
+branch  0 taken 8 (fallthrough)
+branch  1 taken 26
+        8: 1179:				goto SUCCESS;
+        8: 1179-block  0
+unconditional  0 taken 8
+        -: 1180:			}
+        -: 1181:		}
+       60: 1182:		break;
+       60: 1182-block  0
+unconditional  0 taken 60
+        -: 1183:
+       59: 1184:	case 'c': /* Color schemes */
+       59: 1185:		if (lb[1] == 's' && lb[2] == ' ') {
+       59: 1185-block  0
+branch  0 taken 15 (fallthrough)
+branch  1 taken 44
+       15: 1185-block  1
+branch  2 taken 11 (fallthrough)
+branch  3 taken 4
+       11: 1186:			size_t i = 0, len = strlen(last_word);
+      174: 1187:			for (; color_schemes[i]; i++) {
+       11: 1187-block  0
+unconditional  0 taken 11
+      163: 1187-block  1
+unconditional  1 taken 163
+      174: 1187-block  2
+branch  2 taken 166
+branch  3 taken 8 (fallthrough)
+      166: 1188:				if (*last_word == *color_schemes[i]
+      166: 1188-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 163
+        3: 1189:				&& strncmp(color_schemes[i], last_word, len) == 0) {
+        3: 1189-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 0
+        3: 1190:					suggestion.type = CMD_SUG;
+        3: 1191:					suggestion.offset = last_word_offset;
+        3: 1192:					print_suggestion(color_schemes[i], len, sx_c);
+        3: 1192-block  0
+call    0 returned 3
+        3: 1193:					printed = 1;
+        3: 1194:					break;
+unconditional  0 taken 3
+        -: 1195:				}
+        -: 1196:			}
+       11: 1197:			if (printed) {
+       11: 1197-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 8
+        3: 1198:				goto SUCCESS;
+        3: 1198-block  0
+unconditional  0 taken 3
+        -: 1199:			}
+        -: 1200:		}
+       56: 1201:		break;
+       56: 1201-block  0
+unconditional  0 taken 56
+        -: 1202:
+       49: 1203:	case 'j': /* j command */
+       49: 1204:		if (lb[1] == ' '  || ((lb[1] == 'c'	|| lb[1] == 'o'
+       49: 1204-block  0
+branch  0 taken 26 (fallthrough)
+branch  1 taken 23
+       26: 1204-block  1
+branch  2 taken 18 (fallthrough)
+branch  3 taken 8
+       18: 1204-block  2
+branch  4 taken 18 (fallthrough)
+branch  5 taken 0
+       26: 1205:		|| lb[1] == 'p') && lb[2] == ' ')) {
+       18: 1205-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 16
+       10: 1205-block  1
+branch  2 taken 7 (fallthrough)
+branch  3 taken 3
+       30: 1206:			printed = check_jcmd(full_line);
+       30: 1206-block  0
+call    0 returned 30
+       30: 1207:			if (printed) {
+branch  0 taken 16 (fallthrough)
+branch  1 taken 14
+       16: 1208:				goto SUCCESS;
+       16: 1208-block  0
+unconditional  0 taken 16
+        -: 1209:			} else {
+       14: 1210:				free(full_line);
+       14: 1211:				full_line = (char *)NULL;
+       14: 1212:				goto FAIL;
+       14: 1212-block  0
+unconditional  0 taken 14
+        -: 1213:			}
+        -: 1214:		}
+       19: 1215:		break;
+       19: 1215-block  0
+unconditional  0 taken 19
+        -: 1216:
+       43: 1217:	case 'n': /* Remotes */
+       43: 1218:		if (lb[1] == 'e' && lb[2] == 't' && lb[3] == ' ') {
+       43: 1218-block  0
+branch  0 taken 18 (fallthrough)
+branch  1 taken 25
+       18: 1218-block  1
+branch  2 taken 12 (fallthrough)
+branch  3 taken 6
+       12: 1218-block  2
+branch  4 taken 8 (fallthrough)
+branch  5 taken 4
+        8: 1219:			size_t i = 0, len = strlen(last_word);
+       19: 1220:			for (; remotes[i].name; i++) {
+        8: 1220-block  0
+unconditional  0 taken 8
+       11: 1220-block  1
+unconditional  1 taken 11
+       19: 1220-block  2
+branch  2 taken 16
+branch  3 taken 3 (fallthrough)
+       16: 1221:				if (*last_word == *remotes[i].name
+       16: 1221-block  0
+branch  0 taken 6 (fallthrough)
+branch  1 taken 10
+        6: 1222:				&& strncmp(remotes[i].name, last_word, len) == 0) {
+        6: 1222-block  0
+branch  0 taken 5 (fallthrough)
+branch  1 taken 1
+        5: 1223:					suggestion.type = CMD_SUG;
+        5: 1224:					suggestion.offset = last_word_offset;
+        5: 1225:					print_suggestion(remotes[i].name, len, sx_c);
+        5: 1225-block  0
+call    0 returned 5
+        5: 1226:					printed = 1;
+        5: 1227:					break;
+unconditional  0 taken 5
+        -: 1228:				}
+        -: 1229:			}
+        8: 1230:			if (printed)
+        8: 1230-block  0
+branch  0 taken 5 (fallthrough)
+branch  1 taken 3
+        5: 1231:				goto SUCCESS;
+        5: 1231-block  0
+unconditional  0 taken 5
+        -: 1232:		}
+       38: 1233:		break;
+       38: 1233-block  0
+unconditional  0 taken 38
+        -: 1234:
+      104: 1235:	case 'p': /* Profiles */
+      104: 1236:		if (lb[1] == 'f' && lb[2] == ' ' && (strncmp(lb + 3, "set", 3) == 0
+      104: 1236-block  0
+branch  0 taken 46 (fallthrough)
+branch  1 taken 58
+       46: 1236-block  1
+branch  2 taken 42 (fallthrough)
+branch  3 taken 4
+       42: 1236-block  2
+branch  4 taken 34 (fallthrough)
+branch  5 taken 8
+       34: 1237:		|| strncmp(lb + 3, "del", 3) == 0)) {
+       34: 1237-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 32
+       10: 1238:			size_t i = 0, len = strlen(last_word);
+       37: 1239:			for (; profile_names[i]; i++) {
+       10: 1239-block  0
+unconditional  0 taken 10
+       27: 1239-block  1
+unconditional  1 taken 27
+       37: 1239-block  2
+branch  2 taken 33
+branch  3 taken 4 (fallthrough)
+       33: 1240:				if (*last_word == *profile_names[i]
+       33: 1240-block  0
+branch  0 taken 7 (fallthrough)
+branch  1 taken 26
+        7: 1241:				&& strncmp(profile_names[i], last_word, len) == 0) {
+        7: 1241-block  0
+branch  0 taken 6 (fallthrough)
+branch  1 taken 1
+        6: 1242:					suggestion.type = CMD_SUG;
+        6: 1243:					suggestion.offset = last_word_offset;
+        6: 1244:					print_suggestion(profile_names[i], len, sx_c);
+        6: 1244-block  0
+call    0 returned 6
+        6: 1245:					printed = 1;
+        6: 1246:					break;
+unconditional  0 taken 6
+        -: 1247:				}
+        -: 1248:			}
+       10: 1249:			if (printed) {
+       10: 1249-block  0
+branch  0 taken 6 (fallthrough)
+branch  1 taken 4
+        6: 1250:				goto SUCCESS;
+        6: 1250-block  0
+unconditional  0 taken 6
+        -: 1251:			} else {
+        4: 1252:				free(full_line);
+        4: 1253:				full_line = (char *)NULL;
+        4: 1254:				goto FAIL;
+        4: 1254-block  0
+unconditional  0 taken 4
+        -: 1255:			}
+        -: 1256:		}
+       94: 1257:		break;
+       94: 1257-block  0
+unconditional  0 taken 94
+        -: 1258:
+     1189: 1259:	default: break;
+     1189: 1259-block  0
+unconditional  0 taken 1189
+        -: 1260:	}
+        -: 1261:
+        -: 1262:	/* 3.b) Check already suggested string */
+     1456: 1263:	if (suggestion_buf && suggestion.printed && !_ISDIGIT(c)
+     1456: 1263-block  0
+branch  0 taken 893 (fallthrough)
+branch  1 taken 563
+      893: 1263-block  1
+branch  2 taken 893 (fallthrough)
+branch  3 taken 0
+      893: 1263-block  2
+branch  4 taken 847 (fallthrough)
+branch  5 taken 46
+      847: 1264:	&& strncmp(full_line, suggestion_buf, strlen(full_line)) == 0) {
+      847: 1264-block  0
+branch  0 taken 401 (fallthrough)
+branch  1 taken 446
+      401: 1265:		printed = 1;
+      401: 1266:		suggestion.offset = 0;
+      401: 1267:		goto SUCCESS;
+      401: 1267-block  0
+unconditional  0 taken 401
+        -: 1268:	}
+        -: 1269:
+        -: 1270:	/* 3.c) Check CliFM internal parameters */
+     1055: 1271:	char *ret = strchr(full_line, ' ');
+     1055: 1272:	if (ret) {
+     1055: 1272-block  0
+branch  0 taken 364 (fallthrough)
+branch  1 taken 691
+      364: 1273:		size_t len = strlen(last_word);
+        -: 1274:		/* 3.c.1) Suggest the sel keyword only if not first word */
+      364: 1275:		if (*last_word == 's' && strncmp(last_word, "sel", len) == 0) {
+      364: 1275-block  0
+branch  0 taken 41 (fallthrough)
+branch  1 taken 323
+       41: 1275-block  1
+branch  2 taken 17 (fallthrough)
+branch  3 taken 24
+       17: 1276:			suggestion.type = CMD_SUG;
+       17: 1277:			suggestion.offset = last_word_offset;
+       17: 1278:			printed = 1;
+       17: 1279:			print_suggestion("sel", len, sx_c);
+       17: 1279-block  0
+call    0 returned 17
+       17: 1280:			goto SUCCESS;
+unconditional  0 taken 17
+        -: 1281:		}
+        -: 1282:
+        -: 1283:		/* 3.c.2) Check commands fixed parameters */
+      347: 1284:		printed = check_int_params(full_line, strlen(full_line));
+      347: 1284-block  0
+call    0 returned 347
+      347: 1285:		if (printed) {
+branch  0 taken 80 (fallthrough)
+branch  1 taken 267
+       80: 1286:			suggestion.offset = 0;
+       80: 1287:			goto SUCCESS;
+       80: 1287-block  0
+unconditional  0 taken 80
+        -: 1288:		}
+        -: 1289:	}
+        -: 1290:
+        -: 1291:	/* 3.c.3) Let's suggest --help for internal commands */
+      958: 1292:	if (*last_word == '-') {
+      958: 1292-block  0
+branch  0 taken 31 (fallthrough)
+branch  1 taken 927
+       31: 1293:		printed = check_help(full_line, last_word);
+       31: 1293-block  0
+call    0 returned 31
+       31: 1294:		if (printed) {
+branch  0 taken 27 (fallthrough)
+branch  1 taken 4
+       27: 1295:			suggestion.offset = last_word_offset;
+       27: 1296:			goto SUCCESS;
+       27: 1296-block  0
+unconditional  0 taken 27
+        -: 1297:		}
+        -: 1298:	}
+        -: 1299:
+        -: 1300:	/* 3.d) Execute the following check in the order specified by
+        -: 1301:	 * suggestion_strategy (the value is taken form the configuration
+        -: 1302:	 * file) */
+      931: 1303:	size_t st = 0;
+     4282: 1304:	for (; st < SUG_STRATS; st++) {
+      931: 1304-block  0
+unconditional  0 taken 931
+     3351: 1304-block  1
+unconditional  1 taken 3351
+     4282: 1304-block  2
+branch  2 taken 3892
+branch  3 taken 390 (fallthrough)
+     3892: 1305:		switch(suggestion_strategy[st]) {
+     3892: 1305-block  0
+branch  0 taken 408
+branch  1 taken 424
+branch  2 taken 402
+branch  3 taken 931
+branch  4 taken 446
+branch  5 taken 851
+branch  6 taken 430
+branch  7 taken 0
+branch  8 taken 0
+        -: 1306:
+      408: 1307:		case 'a': /* 3.d.1) Aliases */
+      408: 1308:			printed = check_aliases(last_word, strlen(last_word));
+      408: 1308-block  0
+call    0 returned 408
+      408: 1309:			if (printed) {
+branch  0 taken 6 (fallthrough)
+branch  1 taken 402
+        6: 1310:				suggestion.offset = last_word_offset;
+        6: 1311:				goto SUCCESS;
+        6: 1311-block  0
+unconditional  0 taken 6
+        -: 1312:			}
+      402: 1313:			break;
+      402: 1313-block  0
+unconditional  0 taken 402
+        -: 1314:
+      424: 1315:		case 'b': /* 3.d.2) Bookmarks */
+      424: 1316:			if (last_space || autocd || auto_open) {
+      424: 1316-block  0
+branch  0 taken 291 (fallthrough)
+branch  1 taken 133
+      291: 1316-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 289
+        2: 1316-block  2
+branch  4 taken 2 (fallthrough)
+branch  5 taken 0
+      424: 1317:				printed = check_bookmarks(last_word, strlen(last_word));
+      424: 1317-block  0
+call    0 returned 424
+      424: 1318:				if (printed) {
+branch  0 taken 16 (fallthrough)
+branch  1 taken 408
+       16: 1319:					suggestion.offset = last_word_offset;
+       16: 1320:					goto SUCCESS;
+       16: 1320-block  0
+unconditional  0 taken 16
+        -: 1321:				}
+        -: 1322:			}
+      408: 1323:			break;
+      408: 1323-block  0
+unconditional  0 taken 408
+        -: 1324:
+      402: 1325:		case 'c': /* 3.d.3) Possible completions */
+      402: 1326:			if (last_space || autocd || auto_open) {
+      402: 1326-block  0
+branch  0 taken 285 (fallthrough)
+branch  1 taken 117
+      285: 1326-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 283
+        2: 1326-block  2
+branch  4 taken 2 (fallthrough)
+branch  5 taken 0
+      402: 1327:				printed = check_completions(last_word, strlen(last_word), c);
+      402: 1327-block  0
+call    0 returned 402
+      402: 1328:				if (printed) {
+branch  0 taken 12 (fallthrough)
+branch  1 taken 390
+       12: 1329:					suggestion.offset = last_word_offset;
+       12: 1330:					goto SUCCESS;
+       12: 1330-block  0
+unconditional  0 taken 12
+        -: 1331:				}
+        -: 1332:			}
+      390: 1333:			break;
+      390: 1333-block  0
+unconditional  0 taken 390
+        -: 1334:
+      931: 1335:		case 'e': /* 3.d.4) ELN's */
+      931: 1336:			if (*last_word >= '1' && *last_word <= '9' && is_number(last_word)) {
+      931: 1336-block  0
+branch  0 taken 852 (fallthrough)
+branch  1 taken 79
+      852: 1336-block  1
+branch  2 taken 95 (fallthrough)
+branch  3 taken 757
+       95: 1336-block  2
+call    4 returned 95
+branch  5 taken 80 (fallthrough)
+branch  6 taken 15
+       80: 1337:				printed = check_eln(last_word);
+       80: 1337-block  0
+call    0 returned 80
+       80: 1338:				if (printed) {
+branch  0 taken 80 (fallthrough)
+branch  1 taken 0
+       80: 1339:					suggestion.offset = last_word_offset;
+       80: 1340:					goto SUCCESS;
+       80: 1340-block  0
+unconditional  0 taken 80
+        -: 1341:				}
+        -: 1342:			}
+      851: 1343:			break;
+      851: 1343-block  0
+unconditional  0 taken 851
+        -: 1344:
+      446: 1345:		case 'f': /* 3.d.5) File names in CWD */
+        -: 1346:			/* Do not check dirs and filenames if first word and
+        -: 1347:			 * neither autocd nor auto-open are enabled */
+      446: 1348:			if (last_space || autocd || auto_open) {
+      446: 1348-block  0
+branch  0 taken 300 (fallthrough)
+branch  1 taken 146
+      300: 1348-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 298
+        2: 1348-block  2
+branch  4 taken 2 (fallthrough)
+branch  5 taken 0
+      446: 1349:				printed = check_filenames(last_word, strlen(last_word),
+      446: 1349-block  0
+call    0 returned 446
+        -: 1350:							c, last_space ? 0 : 1);
+      446: 1351:				if (printed) {
+branch  0 taken 16 (fallthrough)
+branch  1 taken 430
+       16: 1352:					suggestion.offset = last_word_offset;
+       16: 1353:					goto SUCCESS;
+       16: 1353-block  0
+unconditional  0 taken 16
+        -: 1354:				}
+        -: 1355:			}
+      430: 1356:			break;
+      430: 1356-block  0
+unconditional  0 taken 430
+        -: 1357:
+      851: 1358:		case 'h': /* 3.d.6) Commands history */
+      851: 1359:			printed = check_history(full_line, strlen(full_line));
+      851: 1359-block  0
+call    0 returned 851
+      851: 1360:			if (printed) {
+branch  0 taken 405 (fallthrough)
+branch  1 taken 446
+      405: 1361:				suggestion.offset = 0;
+      405: 1362:				goto SUCCESS;
+      405: 1362-block  0
+unconditional  0 taken 405
+        -: 1363:			}
+      446: 1364:			break;
+      446: 1364-block  0
+unconditional  0 taken 446
+        -: 1365:
+      430: 1366:		case 'j': /* 3.d.7) Jump database */
+        -: 1367:			/* We don't care about auto-open here: the jump function
+        -: 1368:			 * deals with directories only */
+      430: 1369:			if (last_space || autocd) {
+      430: 1369-block  0
+branch  0 taken 291 (fallthrough)
+branch  1 taken 139
+      291: 1369-block  1
+branch  2 taken 289 (fallthrough)
+branch  3 taken 2
+      428: 1370:				printed = check_jumpdb(last_word, strlen(last_word));
+      428: 1370-block  0
+call    0 returned 428
+      428: 1371:				if (printed) {
+branch  0 taken 6 (fallthrough)
+branch  1 taken 422
+        6: 1372:					suggestion.offset = last_word_offset;
+        6: 1373:					goto SUCCESS;
+        6: 1373-block  0
+unconditional  0 taken 6
+        -: 1374:				}
+        -: 1375:			}
+      424: 1376:			break;
+      424: 1376-block  0
+unconditional  0 taken 424
+        -: 1377:
+    #####: 1378:		case '-': break; /* Ignore check */
+    %%%%%: 1378-block  0
+unconditional  0 never executed
+        -: 1379:
+    #####: 1380:		default: break;
+    %%%%%: 1380-block  0
+unconditional  0 never executed
+        -: 1381:		}
+        -: 1382:	}
+        -: 1383:
+        -: 1384:	/* 3.e) Variable names, both environment and internal */
+      390: 1385:	if (*last_word == '$') {
+      390: 1385-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 390
+    #####: 1386:		printed = check_variables(last_word + 1, strlen(last_word + 1));
+    %%%%%: 1386-block  0
+call    0 never executed
+    #####: 1387:		if (printed) {
+branch  0 never executed
+branch  1 never executed
+    #####: 1388:			suggestion.offset = last_word_offset;
+    #####: 1389:			goto SUCCESS;
+    %%%%%: 1389-block  0
+unconditional  0 never executed
+        -: 1390:		}
+        -: 1391:	}
+        -: 1392:
+        -: 1393:	/* 3.f) Check commands in PATH and CliFM internals commands, but
+        -: 1394:	 * only for the first word */
+      390: 1395:	if (!last_space) {
+      390: 1395-block  0
+branch  0 taken 284 (fallthrough)
+branch  1 taken 106
+      284: 1396:		size_t w_len = strlen(last_word);
+      284: 1397:		printed = check_cmds(last_word, w_len);
+      284: 1397-block  0
+call    0 returned 284
+      284: 1398:		if (printed) {
+branch  0 taken 159 (fallthrough)
+branch  1 taken 125
+      159: 1399:			suggestion.offset = 0;
+      159: 1400:			goto SUCCESS;
+      159: 1400-block  0
+unconditional  0 taken 159
+        -: 1401:		}/* else {
+        -: 1402:			rl_delete_text(0, rl_end);
+        -: 1403:			rl_end = rl_point = 0; 
+        -: 1404:			cur_color = nf_c;
+        -: 1405:			fputs("\x1b[0;31m", stdout);
+        -: 1406:			fflush(stdout);
+        -: 1407:			last_word[w_len - 1] = '\0';
+        -: 1408:			rl_insert_text(last_word);
+        -: 1409://			printed = 1;
+        -: 1410:			goto FAIL; 
+        -: 1411:		} */
+        -: 1412:	}
+        -: 1413:
+        -: 1414:	/* No suggestion found */
+        -: 1415:
+        -: 1416:/*	int k = bm_n;
+        -: 1417:	while (--k >= 0) {
+        -: 1418:		if (!bookmarks[k].name)
+        -: 1419:			continue;
+        -: 1420:		if (strncmp(last_word, bookmarks[k].name, strlen(last_word)) == 0) {
+        -: 1421:			if (!bookmarks[k].path)
+        -: 1422:				continue;
+        -: 1423:			msg_area = 1;
+        -: 1424:			rl_save_prompt();
+        -: 1425:			rl_message("\001\x1b[0;36m(%s):\002\x1b[0m ", bookmarks[k].path);
+        -: 1426:			break;
+        -: 1427:		}
+        -: 1428:	}
+        -: 1429:
+        -: 1430:	if (k < 0 && msg_area == 1) {
+        -: 1431:		rl_restore_prompt();
+        -: 1432:		rl_clear_message();
+        -: 1433:	} */
+        -: 1434:
+        -: 1435:	/* Clear current suggestion, if any, only if no escape char is contained
+        -: 1436:	 * in the current input sequence. This is mainly to avoid erasing
+        -: 1437:	 * the suggestion if moving thought the text via the arrow keys */
+      231: 1438:	if (suggestion.printed) {
+      231: 1438-block  0
+branch  0 taken 149 (fallthrough)
+branch  1 taken 82
+       82: 1439:		if (!strchr(last_word, '\x1b')) {
+       82: 1439-block  0
+branch  0 taken 82 (fallthrough)
+branch  1 taken 0
+       82: 1440:			clear_suggestion();
+       82: 1440-block  0
+call    0 returned 82
+       82: 1441:			free(full_line);
+       82: 1442:			goto FAIL;
+unconditional  0 taken 82
+        -: 1443:		} else {
+        -: 1444:			/* Go to SUCCESS to avoid removing the suggestion buffer */
+    #####: 1445:			printed = 1;
+    #####: 1446:			goto SUCCESS;
+    %%%%%: 1446-block  0
+unconditional  0 never executed
+        -: 1447:		}
+        -: 1448:	}
+        -: 1449:
+      149: 1450:SUCCESS:
+      149: 1450-block  0
+unconditional  0 taken 149
+     1754: 1451:	free(full_line);
+     1754: 1452:	if (printed) {
+     1754: 1452-block  0
+branch  0 taken 1383 (fallthrough)
+branch  1 taken 371
+     1383: 1453:		suggestion.printed = 1;
+        -: 1454:		/* Restore color */
+     1383: 1455:		fputs("\x1b[0m", stdout);
+     1383: 1455-block  0
+call    0 returned 1383
+     1383: 1456:		if (!cur_color)
+branch  0 taken 241 (fallthrough)
+branch  1 taken 1142
+      241: 1457:			fputs(df_c, stdout);
+      241: 1457-block  0
+call    0 returned 241
+unconditional  1 taken 241
+        -: 1458:		else
+     1142: 1459:			fputs(cur_color, stdout);
+     1142: 1459-block  0
+call    0 returned 1142
+unconditional  1 taken 1142
+        -: 1460:	} else {
+      371: 1461:		suggestion.printed = 0;
+      371: 1461-block  0
+unconditional  0 taken 371
+        -: 1462:	}
+     1754: 1463:	free(last_word);
+     1754: 1464:	if (inserted_c)
+     1754: 1464-block  0
+branch  0 taken 16 (fallthrough)
+branch  1 taken 1738
+       16: 1465:		return -1;
+       16: 1465-block  0
+unconditional  0 taken 16
+     1738: 1466:	return EXIT_SUCCESS;
+     1738: 1466-block  0
+unconditional  0 taken 1738
+        -: 1467:
+     1139: 1468:FAIL:
+     1139: 1469:	suggestion.printed = 0;
+     1139: 1470:	free(last_word);
+     1139: 1471:	free(suggestion_buf);
+     1139: 1472:	suggestion_buf = (char *)NULL;
+     1139: 1473:	if (inserted_c)
+     1139: 1473-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 1135
+        4: 1474:		return -1;
+        4: 1474-block  0
+unconditional  0 taken 4
+     1135: 1475:	return EXIT_FAILURE;
+     1135: 1475-block  0
+unconditional  0 taken 1135
+        -: 1476:}
+        -: 1477:
+        -: 1478:#endif /* !_NO_SUGGESTIONS */

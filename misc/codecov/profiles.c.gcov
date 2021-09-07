@@ -46,1054 +46,982 @@
         -:   45:#include "navigation.h"
         -:   46:#include "profiles.h"
         -:   47:#include "sort.h"
-        -:   48:
-        -:   49:int
-function get_profile_names called 1 returned 100% blocks executed 89%
-        1:   50:get_profile_names(void)
-        -:   51:{
-        1:   52:	if (!CONFIG_DIR_GRAL)
-        1:   52-block  0
+        -:   48:#include "messages.h"
+        -:   49:
+        -:   50:int
+function get_profile_names called 6 returned 100% blocks executed 89%
+        6:   51:get_profile_names(void)
+        -:   52:{
+        6:   53:	if (!config_dir_gral)
+        6:   53-block  0
 branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####:   53:		return EXIT_FAILURE;
-    %%%%%:   53-block  0
+branch  1 taken 6
+    #####:   54:		return EXIT_FAILURE;
+    %%%%%:   54-block  0
 unconditional  0 never executed
-        -:   54:
-        1:   55:	char *pf_dir = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) + 10, sizeof(char));
-        1:   55-block  0
-call    0 returned 1
-        1:   56:	sprintf(pf_dir, "%s/profiles", CONFIG_DIR_GRAL);
-        -:   57:
-        1:   58:	struct dirent **profs = (struct dirent **)NULL;
-        1:   59:	int files_n = scandir(pf_dir, &profs, NULL, xalphasort);
-call    0 returned 1
-        -:   60:
-        1:   61:	free(pf_dir);
-        1:   62:	pf_dir = (char *)NULL;
-        -:   63:
-        1:   64:	if (files_n == -1)
+        -:   55:
+        6:   56:	char *pf_dir = (char *)xnmalloc(strlen(config_dir_gral) + 10, sizeof(char));
+        6:   56-block  0
+call    0 returned 6
+        6:   57:	sprintf(pf_dir, "%s/profiles", config_dir_gral);
+        -:   58:
+        6:   59:	struct dirent **profs = (struct dirent **)NULL;
+        6:   60:	int files_n = scandir(pf_dir, &profs, NULL, xalphasort);
+call    0 returned 6
+        -:   61:
+        6:   62:	if (files_n == -1) {
 branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####:   65:		return EXIT_FAILURE;
-    %%%%%:   65-block  0
+branch  1 taken 6
+    #####:   63:		free(pf_dir);
+    #####:   64:		return EXIT_FAILURE;
+    %%%%%:   64-block  0
 unconditional  0 never executed
+        -:   65:	}
         -:   66:
-        1:   67:	size_t i, pf_n = 0;
-        -:   68:
-        8:   69:	for (i = 0; i < (size_t)files_n; i++) {
-        1:   69-block  0
-unconditional  0 taken 1
-        8:   69-block  1
-branch  1 taken 7
-branch  2 taken 1 (fallthrough)
-        -:   70:
-        7:   71:		if (profs[i]->d_type == DT_DIR
-        7:   71-block  0
-branch  0 taken 7 (fallthrough)
+        6:   67:	size_t i, pf_n = 0;
+        -:   68:#if !defined(_DIRENT_HAVE_D_TYPE)
+        -:   69:	struct stat attr;
+        -:   70:#endif
+        -:   71:
+       45:   72:	for (i = 0; i < (size_t)files_n; i++) {
+        6:   72-block  0
+unconditional  0 taken 6
+       45:   72-block  1
+branch  1 taken 39
+branch  2 taken 6 (fallthrough)
+        -:   73:
+        -:   74:#if !defined(_DIRENT_HAVE_D_TYPE)
+        -:   75:		char tmp[PATH_MAX];
+        -:   76:		snprintf(tmp, PATH_MAX - 1, "%s/%s", pf_dir,profs[i]->d_name);
+        -:   77:		if (lstat(tmp, &attr) == -1)
+        -:   78:			continue;
+        -:   79:		if ((attr.st_mode & S_IFMT) == S_IFDIR
+        -:   80:#else
+       39:   81:		if (profs[i]->d_type == DT_DIR
+       39:   81-block  0
+branch  0 taken 39 (fallthrough)
 branch  1 taken 0
-        -:   72:		    /* Discard ".", "..", and hidden dirs */
-        7:   73:		    && *profs[i]->d_name != '.') {
-        7:   73-block  0
-branch  0 taken 5 (fallthrough)
-branch  1 taken 2
-        5:   74:			profile_names = (char **)xrealloc(profile_names, (pf_n + 1)
-        5:   74-block  0
-call    0 returned 5
-        -:   75:												* sizeof(char *));
-        5:   76:			profile_names[pf_n++] = savestring(profs[i]->d_name,
-unconditional  0 taken 5
-        5:   77:			    strlen(profs[i]->d_name));
-call    0 returned 5
-        -:   78:		}
-        -:   79:
-        7:   80:		free(profs[i]);
-        7:   80-block  0
-unconditional  0 taken 7
-        -:   81:	}
-        -:   82:
-        1:   83:	free(profs);
-        1:   84:	profs = (struct dirent **)NULL;
-        -:   85:
-        1:   86:	profile_names = (char **)xrealloc(profile_names, (pf_n + 1) * sizeof(char *));
-        1:   86-block  0
-call    0 returned 1
-        1:   87:	profile_names[pf_n] = (char *)NULL;
-        -:   88:
-        1:   89:	return EXIT_SUCCESS;
-unconditional  0 taken 1
-        -:   90:}
-        -:   91:
-        -:   92:int
-function profile_function called 0 returned 0% blocks executed 0%
-    #####:   93:profile_function(char **comm)
-        -:   94:{
-    #####:   95:	if (xargs.stealth_mode == 1) {
-    %%%%%:   95-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:   96:		printf("%s: The profile function is disabled in stealth mode\n",
-    %%%%%:   96-block  0
-call    0 never executed
-        -:   97:		    PROGRAM_NAME);
-    #####:   98:		return EXIT_SUCCESS;
-unconditional  0 never executed
-        -:   99:	}
-        -:  100:
-    #####:  101:	int exit_status = EXIT_SUCCESS;
+        -:   82:#endif
+        -:   83:		    /* Discard ".", "..", and hidden dirs */
+       39:   84:		    && *profs[i]->d_name != '.') {
+       39:   84-block  0
+branch  0 taken 27 (fallthrough)
+branch  1 taken 12
+       27:   85:			profile_names = (char **)xrealloc(profile_names, (pf_n + 1)
+       27:   85-block  0
+call    0 returned 27
+        -:   86:												* sizeof(char *));
+       27:   87:			profile_names[pf_n++] = savestring(profs[i]->d_name,
+unconditional  0 taken 27
+       27:   88:			    strlen(profs[i]->d_name));
+call    0 returned 27
+        -:   89:		}
+        -:   90:
+       39:   91:		free(profs[i]);
+       39:   91-block  0
+unconditional  0 taken 39
+        -:   92:	}
+        -:   93:
+        6:   94:	free(pf_dir);
+        6:   95:	free(profs);
+        -:   96:
+        6:   97:	profile_names = (char **)xrealloc(profile_names, (pf_n + 1) * sizeof(char *));
+        6:   97-block  0
+call    0 returned 6
+        6:   98:	profile_names[pf_n] = (char *)NULL;
+        -:   99:
+        6:  100:	return EXIT_SUCCESS;
+unconditional  0 taken 6
+        -:  101:}
         -:  102:
-    #####:  103:	if (comm[1]) {
-    %%%%%:  103-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  104:		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
-    %%%%%:  104-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  104-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  105:			puts(_("Usage: pf, prof, profile [ls, list] [set, add, del PROFILE]"));
-    %%%%%:  105-block  0
+        -:  103:int
+function profile_function called 4 returned 100% blocks executed 51%
+        4:  104:profile_function(char **comm)
+        -:  105:{
+        4:  106:	if (xargs.stealth_mode == 1) {
+        4:  106-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4
+    #####:  107:		printf("%s: The profile function is disabled in stealth mode\n",
+    %%%%%:  107-block  0
 call    0 never executed
-unconditional  1 never executed
-        -:  106:
-        -:  107:		/* List profiles */
-    #####:  108:		else if (comm[1] && (strcmp(comm[1], "ls") == 0
-    %%%%%:  108-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  108-block  1
+        -:  108:		    PROGRAM_NAME);
+    #####:  109:		return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  110:	}
+        -:  111:
+        4:  112:	int exit_status = EXIT_SUCCESS;
+        -:  113:
+        4:  114:	if (comm[1]) {
+        4:  114-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 0
+       4*:  115:		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
+        4:  115-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4
+    %%%%%:  115-block  1
 branch  2 never executed
 branch  3 never executed
-    #####:  109:		|| strcmp(comm[1], "list") == 0)) {
-    %%%%%:  109-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  109-block  1
+    #####:  116:			puts(_(PROFILES_USAGE));
+    %%%%%:  116-block  0
+call    0 never executed
+call    1 never executed
 unconditional  2 never executed
-        -:  110:			size_t i;
-        -:  111:
-    #####:  112:			for (i = 0; profile_names[i]; i++)
-    %%%%%:  112-block  0
+        -:  117:
+        -:  118:		/* List profiles */
+        4:  119:		else if (comm[1] && (strcmp(comm[1], "ls") == 0
+        4:  119-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 0
+        4:  119-block  1
+branch  2 taken 4 (fallthrough)
+branch  3 taken 0
+       4*:  120:		|| strcmp(comm[1], "list") == 0)) {
+        4:  120-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4
+    %%%%%:  120-block  1
+unconditional  2 never executed
+        -:  121:			size_t i;
+        -:  122:
+    #####:  123:			for (i = 0; profile_names[i]; i++)
+    %%%%%:  123-block  0
 unconditional  0 never executed
 unconditional  1 never executed
-    %%%%%:  112-block  1
+    %%%%%:  123-block  1
 branch  2 never executed
 branch  3 never executed
-    #####:  113:				printf("%s\n", profile_names[i]);
-    %%%%%:  113-block  0
-call    0 never executed
-        -:  114:		}
-        -:  115:
-        -:  116:		/* Create a new profile */
-    #####:  117:		else if (strcmp(comm[1], "add") == 0)
-    %%%%%:  117-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  118:
-    #####:  119:			if (comm[2]) {
-    %%%%%:  119-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  120:				exit_status = profile_add(comm[2]);
-    %%%%%:  120-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  121:			}
-        -:  122:
-        -:  123:			else {
-    #####:  124:				fputs("Usage: pf, prof, profile add PROFILE\n", stderr);
+    #####:  124:				printf("%s\n", profile_names[i]);
     %%%%%:  124-block  0
 call    0 never executed
-    #####:  125:				exit_status = EXIT_FAILURE;
+        -:  125:		}
+        -:  126:
+        -:  127:		/* Create a new profile */
+        4:  128:		else if (strcmp(comm[1], "add") == 0)
+        4:  128-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 3
+        -:  129:
+        1:  130:			if (comm[2]) {
+        1:  130-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  131:				exit_status = profile_add(comm[2]);
+        1:  131-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -:  132:			}
+        -:  133:
+        -:  134:			else {
+    #####:  135:				fprintf(stderr, "%s\n", PROFILES_USAGE);
+    %%%%%:  135-block  0
+call    0 never executed
+    #####:  136:				exit_status = EXIT_FAILURE;
 unconditional  0 never executed
-        -:  126:			}
-        -:  127:
-        -:  128:		/* Delete a profile */
-    #####:  129:		else if (*comm[1] == 'd' && strcmp(comm[1], "del") == 0)
-    %%%%%:  129-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  129-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  130:			if (comm[2])
-    %%%%%:  130-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  131:				exit_status = profile_del(comm[2]);
-    %%%%%:  131-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  132:			else {
-    #####:  133:				fputs("Usage: pf, prof, profile del PROFILE\n", stderr);
-    %%%%%:  133-block  0
-call    0 never executed
-    #####:  134:				exit_status = EXIT_FAILURE;
-unconditional  0 never executed
-        -:  135:			}
-        -:  136:
-        -:  137:		/* Switch to another profile */
-    #####:  138:		else if (*comm[1] == 's' && strcmp(comm[1], "set") == 0) {
-    %%%%%:  138-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  138-block  1
-branch  2 never executed
-branch  3 never executed
-        -:  139:
-    #####:  140:			if (comm[2])
-    %%%%%:  140-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  141:				exit_status = profile_set(comm[2]);
-    %%%%%:  141-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  142:
+        -:  137:			}
+        -:  138:
+        -:  139:		/* Delete a profile */
+        3:  140:		else if (*comm[1] == 'd' && strcmp(comm[1], "del") == 0)
+        3:  140-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 2
+        1:  140-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 0
+        1:  141:			if (comm[2])
+        1:  141-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  142:				exit_status = profile_del(comm[2]);
+        1:  142-block  0
+call    0 returned 1
+unconditional  1 taken 1
         -:  143:			else {
-    #####:  144:				fputs("Usage: pf, prof, profile set PROFILE\n", stderr);
+    #####:  144:				fprintf(stderr, "%s\n", PROFILES_USAGE);
     %%%%%:  144-block  0
 call    0 never executed
     #####:  145:				exit_status = EXIT_FAILURE;
 unconditional  0 never executed
         -:  146:			}
-        -:  147:		}
-        -:  148:
-        -:  149:		/* None of the above == error */
-        -:  150:		else {
-        -:  151:
-    #####:  152:			fputs(_("Usage: pf, prof, profile [set, add, del PROFILE]\n"),
-    %%%%%:  152-block  0
+        -:  147:
+        -:  148:		/* Switch to another profile */
+        2:  149:		else if (*comm[1] == 's' && strcmp(comm[1], "set") == 0) {
+        2:  149-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  149-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 0
+        -:  150:
+        2:  151:			if (comm[2])
+        2:  151-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  152:				exit_status = profile_set(comm[2]);
+        2:  152-block  0
+call    0 returned 2
+unconditional  1 taken 2
+        -:  153:
+        -:  154:			else {
+    #####:  155:				fprintf(stderr, "%s\n", PROFILES_USAGE);
+    %%%%%:  155-block  0
 call    0 never executed
-        -:  153:			    stderr);
-        -:  154:
-    #####:  155:			exit_status = EXIT_FAILURE;
+    #####:  156:				exit_status = EXIT_FAILURE;
 unconditional  0 never executed
-        -:  156:		}
-        -:  157:	}
-        -:  158:
-        -:  159:	/* If only "pr" print the current profile name */
-    #####:  160:	else if (!alt_profile)
-    %%%%%:  160-block  0
+        -:  157:			}
+        -:  158:		}
+        -:  159:
+        -:  160:		/* None of the above == error */
+        -:  161:		else {
+    #####:  162:			fprintf(stderr, "%s\n", PROFILES_USAGE);
+    %%%%%:  162-block  0
+call    0 never executed
+    #####:  163:			exit_status = EXIT_FAILURE;
+unconditional  0 never executed
+        -:  164:		}
+        -:  165:	}
+        -:  166:
+        -:  167:	/* If only "pr" print the current profile name */
+    #####:  168:	else if (!alt_profile)
+    %%%%%:  168-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  161:		printf("%s: profile: default\n", PROGRAM_NAME);
-    %%%%%:  161-block  0
+    #####:  169:		printf("%s: profile: default\n", PROGRAM_NAME);
+    %%%%%:  169-block  0
 call    0 never executed
 unconditional  1 never executed
-        -:  162:
-        -:  163:	else
-    #####:  164:		printf("%s: profile: '%s'\n", PROGRAM_NAME, alt_profile);
-    %%%%%:  164-block  0
+        -:  170:
+        -:  171:	else
+    #####:  172:		printf("%s: profile: '%s'\n", PROGRAM_NAME, alt_profile);
+    %%%%%:  172-block  0
 call    0 never executed
 unconditional  1 never executed
-        -:  165:
-    #####:  166:	return exit_status;
-    %%%%%:  166-block  0
-unconditional  0 never executed
-        -:  167:}
-        -:  168:
-        -:  169:/* Switch profile to PROF */
-        -:  170:int
-function profile_set called 0 returned 0% blocks executed 0%
-    #####:  171:profile_set(const char *prof)
-        -:  172:{
-    #####:  173:	if (xargs.stealth_mode == 1) {
-    %%%%%:  173-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  174:		printf("%s: The profile function is disabled in stealth mode\n",
-    %%%%%:  174-block  0
+        -:  173:
+        4:  174:	return exit_status;
+        4:  174-block  0
+unconditional  0 taken 4
+        -:  175:}
+        -:  176:
+        -:  177:/* Switch profile to PROF */
+        -:  178:int
+function profile_set called 9 returned 100% blocks executed 73%
+        9:  179:profile_set(const char *prof)
+        -:  180:{
+        9:  181:	if (xargs.stealth_mode == 1) {
+        9:  181-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 9
+    #####:  182:		printf("%s: The profile function is disabled in stealth mode\n",
+    %%%%%:  182-block  0
 call    0 never executed
-        -:  175:		    PROGRAM_NAME);
-    #####:  176:		return EXIT_SUCCESS;
+        -:  183:		    PROGRAM_NAME);
+    #####:  184:		return EXIT_SUCCESS;
 unconditional  0 never executed
-        -:  177:	}
-        -:  178:
-    #####:  179:	if (!prof)
-    %%%%%:  179-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  180:		return EXIT_FAILURE;
-    %%%%%:  180-block  0
-unconditional  0 never executed
-        -:  181:
-        -:  182:	/* Check if prof is a valid profile */
-    #####:  183:	int found = 0;
-        -:  184:	int i;
-        -:  185:
-    #####:  186:	for (i = 0; profile_names[i]; i++) {
-    %%%%%:  186-block  0
-unconditional  0 never executed
-    %%%%%:  186-block  1
-unconditional  1 never executed
-    %%%%%:  186-block  2
-branch  2 never executed
-branch  3 never executed
-        -:  187:
-    #####:  188:		if (*prof == *profile_names[i] && strcmp(prof, profile_names[i]) == 0) {
+        -:  185:	}
+        -:  186:
+        9:  187:	if (!prof)
+        9:  187-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 9
+    #####:  188:		return EXIT_FAILURE;
     %%%%%:  188-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  188-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  189:			found = 1;
-    #####:  190:			break;
-    %%%%%:  190-block  0
 unconditional  0 never executed
-        -:  191:		}
-        -:  192:	}
+        -:  189:
+        -:  190:	/* Check if prof is a valid profile */
+        9:  191:	int found = 0;
+        -:  192:	int i;
         -:  193:
-    #####:  194:	if (!found) {
-    %%%%%:  194-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  195:		fprintf(stderr, _("%s: %s: No such profile\nTo add a new "
-    %%%%%:  195-block  0
-call    0 never executed
-        -:  196:				  "profile enter 'pf add PROFILE'\n"),
-        -:  197:		    PROGRAM_NAME, prof);
-        -:  198:
-    #####:  199:		return EXIT_FAILURE;
-unconditional  0 never executed
+       21:  194:	for (i = 0; profile_names[i]; i++) {
+        9:  194-block  0
+unconditional  0 taken 9
+       12:  194-block  1
+unconditional  1 taken 12
+       21:  194-block  2
+branch  2 taken 21
+branch  3 taken 0 (fallthrough)
+        -:  195:
+       21:  196:		if (*prof == *profile_names[i] && strcmp(prof, profile_names[i]) == 0) {
+       21:  196-block  0
+branch  0 taken 12 (fallthrough)
+branch  1 taken 9
+       12:  196-block  1
+branch  2 taken 9 (fallthrough)
+branch  3 taken 3
+        9:  197:			found = 1;
+        9:  198:			break;
+        9:  198-block  0
+unconditional  0 taken 9
+        -:  199:		}
         -:  200:	}
         -:  201:
-        -:  202:	/* If changing to the current profile, do nothing */
-    #####:  203:	if ((!alt_profile && *prof == 'd' && strcmp(prof, "default") == 0)
+        9:  202:	if (!found) {
+        9:  202-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 9
+    #####:  203:		fprintf(stderr, _("%s: %s: No such profile\nTo add a new "
     %%%%%:  203-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  203-block  1
-branch  2 never executed
-branch  3 never executed
-    %%%%%:  203-block  2
-branch  4 never executed
-branch  5 never executed
-    #####:  204:	|| (alt_profile && *prof == *alt_profile && strcmp(prof, alt_profile) == 0)) {
-    %%%%%:  204-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  204-block  1
-branch  2 never executed
-branch  3 never executed
-    %%%%%:  204-block  2
-branch  4 never executed
-branch  5 never executed
-        -:  205:
-    #####:  206:		printf(_("%s: '%s' is the current profile\n"), PROGRAM_NAME,
-    %%%%%:  206-block  0
 call    0 never executed
-        -:  207:		    prof);
-        -:  208:
-    #####:  209:		return EXIT_SUCCESS;
+call    1 never executed
+        -:  204:				  "profile enter 'pf add PROFILE'\n"),
+        -:  205:		    PROGRAM_NAME, prof);
+        -:  206:
+    #####:  207:		return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  210:	}
-        -:  211:
-    #####:  212:	if (restore_last_path)
-    %%%%%:  212-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  213:		save_last_path();
-    %%%%%:  213-block  0
+        -:  208:	}
+        -:  209:
+        -:  210:	/* If changing to the current profile, do nothing */
+       9*:  211:	if ((!alt_profile && *prof == 'd' && strcmp(prof, "default") == 0)
+        9:  211-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 6
+        3:  211-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 3
+    %%%%%:  211-block  2
+branch  4 never executed
+branch  5 never executed
+        9:  212:	|| (alt_profile && *prof == *alt_profile && strcmp(prof, alt_profile) == 0)) {
+        9:  212-block  0
+branch  0 taken 6 (fallthrough)
+branch  1 taken 3
+        6:  212-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 4
+        2:  212-block  2
+branch  4 taken 0 (fallthrough)
+branch  5 taken 2
+        -:  213:
+    #####:  214:		printf(_("%s: '%s' is the current profile\n"), PROGRAM_NAME,
+    %%%%%:  214-block  0
 call    0 never executed
-unconditional  1 never executed
-        -:  214:
-    #####:  215:	if (alt_profile) {
-    %%%%%:  215-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  216:		free(alt_profile);
-    #####:  217:		alt_profile = (char *)NULL;
-    %%%%%:  217-block  0
+call    1 never executed
+        -:  215:		    prof);
+        -:  216:
+    #####:  217:		return EXIT_SUCCESS;
 unconditional  0 never executed
         -:  218:	}
         -:  219:
-        -:  220:	/* Set the new profile value */
-        -:  221:	/* Default profile == (alt_profile == NULL) */
-    #####:  222:	if (*prof != 'd' || strcmp(prof, "default") != 0)
-    %%%%%:  222-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  222-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  223:		alt_profile = savestring(prof, strlen(prof));
-    %%%%%:  223-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  224:
-        -:  225:	/* Reset everything */
-    #####:  226:	reload_config();
-    %%%%%:  226-block  0
-call    0 never executed
+        9:  220:	if (restore_last_path)
+        9:  220-block  0
+branch  0 taken 5 (fallthrough)
+branch  1 taken 4
+        5:  221:		save_last_path();
+        5:  221-block  0
+call    0 returned 5
+unconditional  1 taken 5
+        -:  222:
+        9:  223:	if (alt_profile) {
+        9:  223-block  0
+branch  0 taken 6 (fallthrough)
+branch  1 taken 3
+        6:  224:		free(alt_profile);
+        6:  225:		alt_profile = (char *)NULL;
+        6:  225-block  0
+unconditional  0 taken 6
+        -:  226:	}
         -:  227:
-        -:  228:	/* Check whether we have a working shell */
-    #####:  229:	if (access(user.shell, X_OK) == -1) {
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  230:		_err('w', PRINT_PROMPT, _("%s: %s: System shell not found. Please "
-    %%%%%:  230-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  231:				  "edit the configuration file to specify a working shell.\n"),
-        -:  232:				PROGRAM_NAME, user.shell);
-        -:  233:	}
-        -:  234:
-    #####:  235:	i = (int)usrvar_n;
-    #####:  236:	while (--i >= 0) {
-    %%%%%:  236-block  0
-unconditional  0 never executed
-    %%%%%:  236-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  237:		free(usr_var[i].name);
-    #####:  238:		free(usr_var[i].value);
+        -:  228:	/* Set the new profile value */
+        -:  229:	/* Default profile == (alt_profile == NULL) */
+        9:  230:	if (*prof != 'd' || strcmp(prof, "default") != 0)
+        9:  230-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 6
+        3:  230-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 3
+        6:  231:		alt_profile = savestring(prof, strlen(prof));
+        6:  231-block  0
+call    0 returned 6
+unconditional  1 taken 6
+        -:  232:
+        -:  233:	/* Reset everything */
+        9:  234:	reload_config();
+        9:  234-block  0
+call    0 returned 9
+        -:  235:
+        -:  236:	/* Check whether we have a working shell */
+        9:  237:	if (access(user.shell, X_OK) == -1) {
+call    0 returned 9
+branch  1 taken 0 (fallthrough)
+branch  2 taken 9
+    #####:  238:		_err('w', PRINT_PROMPT, _("%s: %s: System shell not found. Please "
     %%%%%:  238-block  0
-unconditional  0 never executed
-        -:  239:	}
-    #####:  240:	usrvar_n = 0;
-        -:  241:
-    #####:  242:	i = (int)kbinds_n;
-    #####:  243:	while (--i >= 0) {
-    %%%%%:  243-block  0
-unconditional  0 never executed
-    %%%%%:  243-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  244:		free(kbinds[i].function);
-    #####:  245:		free(kbinds[i].key);
-    %%%%%:  245-block  0
-unconditional  0 never executed
-        -:  246:	}
-    #####:  247:	kbinds_n = 0;
-        -:  248:
-    #####:  249:	i = (int)actions_n;
-    #####:  250:	while (--i >= 0) {
-    %%%%%:  250-block  0
-unconditional  0 never executed
-    %%%%%:  250-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  251:		free(usr_actions[i].name);
-    #####:  252:		free(usr_actions[i].value);
-    %%%%%:  252-block  0
-unconditional  0 never executed
-        -:  253:	}
-    #####:  254:	actions_n = 0;
-        -:  255:
-        -:  256:	/*  my_rl_unbind_functions();
-        -:  257:
-        -:  258:	create_kbinds_file();
-        -:  259:
-        -:  260:	load_keybinds();
-        -:  261:
-        -:  262:	rl_unbind_function_in_map(rl_hidden, rl_get_keymap());
-        -:  263:	rl_bind_keyseq(find_key("toggle-hidden"), rl_hidden);
-        -:  264:	my_rl_bind_functions(); */
-        -:  265:
-    #####:  266:	exec_profile();
-    %%%%%:  266-block  0
-call    0 never executed
-        -:  267:
-    #####:  268:	if (msgs_n) {
-branch  0 never executed
-branch  1 never executed
-    #####:  269:		i = (int)msgs_n;
-    #####:  270:		while (--i >= 0)
-    %%%%%:  270-block  0
-unconditional  0 never executed
-    %%%%%:  270-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  271:			free(messages[i]);
-    %%%%%:  271-block  0
-unconditional  0 never executed
-        -:  272:	}
-    #####:  273:	msgs_n = 0;
-        -:  274:
-    #####:  275:	if (config_ok) {
-    %%%%%:  275-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  276:		/* Limit the log files size */
-    #####:  277:		check_file_size(LOG_FILE, max_log);
-    %%%%%:  277-block  0
-call    0 never executed
-    #####:  278:		check_file_size(MSG_LOG_FILE, max_log);
-call    0 never executed
-        -:  279:
-        -:  280:		/* Reset history */
-    #####:  281:		if (access(HIST_FILE, F_OK | W_OK) == 0) {
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  282:			clear_history(); /* This is for readline */
-    %%%%%:  282-block  0
-call    0 never executed
-    #####:  283:			read_history(HIST_FILE);
-call    0 never executed
-    #####:  284:			history_truncate_file(HIST_FILE, max_hist);
-call    0 never executed
-unconditional  1 never executed
-        -:  285:		}
-        -:  286:
-        -:  287:		else {
-    #####:  288:			FILE *hist_fp = fopen(HIST_FILE, "w");
-    %%%%%:  288-block  0
-call    0 never executed
-        -:  289:
-    #####:  290:			if (hist_fp) {
-branch  0 never executed
-branch  1 never executed
-    #####:  291:				fputs("edit\n", hist_fp);
-    %%%%%:  291-block  0
-call    0 never executed
-    #####:  292:				fclose(hist_fp);
-call    0 never executed
-unconditional  1 never executed
-        -:  293:			}
-        -:  294:
-        -:  295:			else {
-    #####:  296:				_err('w', PRINT_PROMPT, _("%s: Error opening the "
-    %%%%%:  296-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  297:						"history file\n"), PROGRAM_NAME);
-        -:  298:			}
-        -:  299:		}
-        -:  300:
-    #####:  301:		get_history(); /* This is only for us */
-    %%%%%:  301-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  302:	}
-        -:  303:
-    #####:  304:	free_bookmarks();
-    %%%%%:  304-block  0
-call    0 never executed
-    #####:  305:	load_bookmarks();
-call    0 never executed
-        -:  306:
-    #####:  307:	load_actions();
-call    0 never executed
-        -:  308:
-        -:  309:	/* Reload PATH commands (actions are profile specific) */
-    #####:  310:	if (bin_commands) {
-branch  0 never executed
-branch  1 never executed
-        -:  311:
-    #####:  312:		for (i = 0; bin_commands[i]; i++)
-    %%%%%:  312-block  0
-unconditional  0 never executed
-    %%%%%:  312-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  313:			free(bin_commands[i]);
-    %%%%%:  313-block  0
-unconditional  0 never executed
-        -:  314:
-    #####:  315:		free(bin_commands);
-    #####:  316:		bin_commands = (char **)NULL;
-    %%%%%:  316-block  0
-unconditional  0 never executed
-        -:  317:	}
-        -:  318:
-    #####:  319:	if (paths) {
-    %%%%%:  319-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  320:
-    #####:  321:		i = (int)path_n;
-    #####:  322:		while (--i >= 0)
-    %%%%%:  322-block  0
-unconditional  0 never executed
-    %%%%%:  322-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  323:			free(paths[i]);
-    %%%%%:  323-block  0
-unconditional  0 never executed
-        -:  324:	}
-        -:  325:
-    #####:  326:	path_n = (size_t)get_path_env();
-    %%%%%:  326-block  0
-call    0 never executed
-        -:  327:
-    #####:  328:	get_path_programs();
-call    0 never executed
-        -:  329:
-    #####:  330:	i = MAX_WS;
-    #####:  331:	while (--i >= 0) {
-unconditional  0 never executed
-    %%%%%:  331-block  0
-branch  1 never executed
-branch  2 never executed
-    #####:  332:		free(ws[i].path);
-    #####:  333:		ws[i].path = (char *)NULL;
-    %%%%%:  333-block  0
-unconditional  0 never executed
-        -:  334:	}
-        -:  335:
-    #####:  336:	cur_ws = UNSET;
-        -:  337:
-    #####:  338:	if (restore_last_path)
-    %%%%%:  338-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  339:		get_last_path();
-    %%%%%:  339-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  340:
-    #####:  341:	if (cur_ws == UNSET)
-    %%%%%:  341-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  342:		cur_ws = DEF_CUR_WS;
-    %%%%%:  342-block  0
-unconditional  0 never executed
-        -:  343:
-    #####:  344:	if (!ws[cur_ws].path) {
-    %%%%%:  344-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  345:		char cwd[PATH_MAX] = "";
-    #####:  346:		getcwd(cwd, sizeof(cwd));
-    %%%%%:  346-block  0
-call    0 never executed
-    #####:  347:		if (!*cwd) {
-branch  0 never executed
-branch  1 never executed
-    #####:  348:			fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
-    %%%%%:  348-block  0
 call    0 never executed
 call    1 never executed
-    #####:  349:			exit(EXIT_FAILURE);
-call    0 never executed
-        -:  350:		}
-    #####:  351:		ws[cur_ws].path = savestring(cwd, strlen(cwd));
-    %%%%%:  351-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  352:	}
-        -:  353:
-    #####:  354:	if (xchdir(ws[cur_ws].path, SET_TITLE) == -1) {
-    %%%%%:  354-block  0
-call    0 never executed
+unconditional  2 never executed
+        -:  239:				  "edit the configuration file to specify a working shell.\n"),
+        -:  240:				PROGRAM_NAME, user.shell);
+        -:  241:	}
+        -:  242:
+        9:  243:	i = (int)usrvar_n;
+        9:  244:	while (--i >= 0) {
+        9:  244-block  0
+unconditional  0 taken 9
+        9:  244-block  1
+branch  1 taken 0
+branch  2 taken 9 (fallthrough)
+    #####:  245:		free(usr_var[i].name);
+    #####:  246:		free(usr_var[i].value);
+    %%%%%:  246-block  0
+unconditional  0 never executed
+        -:  247:	}
+        9:  248:	usrvar_n = 0;
+        -:  249:
+        9:  250:	i = (int)kbinds_n;
+       80:  251:	while (--i >= 0) {
+        9:  251-block  0
+unconditional  0 taken 9
+       80:  251-block  1
+branch  1 taken 71
+branch  2 taken 9 (fallthrough)
+       71:  252:		free(kbinds[i].function);
+       71:  253:		free(kbinds[i].key);
+       71:  253-block  0
+unconditional  0 taken 71
+        -:  254:	}
+        9:  255:	kbinds_n = 0;
+        -:  256:
+        9:  257:	i = (int)actions_n;
+      144:  258:	while (--i >= 0) {
+        9:  258-block  0
+unconditional  0 taken 9
+      144:  258-block  1
+branch  1 taken 135
+branch  2 taken 9 (fallthrough)
+      135:  259:		free(usr_actions[i].name);
+      135:  260:		free(usr_actions[i].value);
+      135:  260-block  0
+unconditional  0 taken 135
+        -:  261:	}
+        9:  262:	actions_n = 0;
+        -:  263:
+        -:  264:	/*  my_rl_unbind_functions();
+        -:  265:
+        -:  266:	create_kbinds_file();
+        -:  267:
+        -:  268:	load_keybinds();
+        -:  269:
+        -:  270:	rl_unbind_function_in_map(rl_hidden, rl_get_keymap());
+        -:  271:	rl_bind_keyseq(find_key("toggle-hidden"), rl_hidden);
+        -:  272:	my_rl_bind_functions(); */
+        -:  273:
+        9:  274:	exec_profile();
+        9:  274-block  0
+call    0 returned 9
+        -:  275:
+        9:  276:	if (msgs_n) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 9
+    #####:  277:		i = (int)msgs_n;
+    #####:  278:		while (--i >= 0)
+    %%%%%:  278-block  0
+unconditional  0 never executed
+    %%%%%:  278-block  1
 branch  1 never executed
 branch  2 never executed
-    #####:  355:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
+    #####:  279:			free(messages[i]);
+    %%%%%:  279-block  0
+unconditional  0 never executed
+        -:  280:	}
+        9:  281:	msgs_n = 0;
+        -:  282:
+        9:  283:	if (config_ok) {
+        9:  283-block  0
+branch  0 taken 9 (fallthrough)
+branch  1 taken 0
+        -:  284:		/* Limit the log files size */
+        9:  285:		check_file_size(log_file, max_log);
+        9:  285-block  0
+call    0 returned 9
+        9:  286:		check_file_size(msg_log_file, max_log);
+call    0 returned 9
+        -:  287:
+        -:  288:		/* Reset history */
+        9:  289:		if (access(hist_file, F_OK | W_OK) == 0) {
+call    0 returned 9
+branch  1 taken 9 (fallthrough)
+branch  2 taken 0
+        9:  290:			clear_history(); /* This is for readline */
+        9:  290-block  0
+call    0 returned 9
+        9:  291:			read_history(hist_file);
+call    0 returned 9
+        9:  292:			history_truncate_file(hist_file, max_hist);
+call    0 returned 9
+unconditional  1 taken 9
+        -:  293:		}
+        -:  294:
+        -:  295:		else {
+    #####:  296:			FILE *hist_fp = fopen(hist_file, "w");
+    %%%%%:  296-block  0
 call    0 never executed
-    #####:  356:		    strerror(errno));
+        -:  297:
+    #####:  298:			if (hist_fp) {
+branch  0 never executed
+branch  1 never executed
+    #####:  299:				fputs("edit\n", hist_fp);
+    %%%%%:  299-block  0
+call    0 never executed
+    #####:  300:				fclose(hist_fp);
+call    0 never executed
+unconditional  1 never executed
+        -:  301:			}
+        -:  302:
+        -:  303:			else {
+    #####:  304:				_err('w', PRINT_PROMPT, _("%s: Error opening the "
+    %%%%%:  304-block  0
+call    0 never executed
+call    1 never executed
+unconditional  2 never executed
+        -:  305:						"history file\n"), PROGRAM_NAME);
+        -:  306:			}
+        -:  307:		}
+        -:  308:
+        9:  309:		get_history(); /* This is only for us */
+        9:  309-block  0
+call    0 returned 9
+unconditional  1 taken 9
+        -:  310:	}
+        -:  311:
+        9:  312:	free_bookmarks();
+        9:  312-block  0
+call    0 returned 9
+        9:  313:	load_bookmarks();
+call    0 returned 9
+        -:  314:
+        9:  315:	load_actions();
+call    0 returned 9
+        -:  316:
+        -:  317:	/* Reload PATH commands (actions are profile specific) */
+        9:  318:	if (bin_commands) {
+branch  0 taken 9 (fallthrough)
+branch  1 taken 0
+        -:  319:
+    26284:  320:		for (i = 0; bin_commands[i]; i++)
+        9:  320-block  0
+unconditional  0 taken 9
+    26284:  320-block  1
+branch  1 taken 26275
+branch  2 taken 9 (fallthrough)
+    26275:  321:			free(bin_commands[i]);
+    26275:  321-block  0
+unconditional  0 taken 26275
+        -:  322:
+        9:  323:		free(bin_commands);
+        9:  324:		bin_commands = (char **)NULL;
+        9:  324-block  0
+unconditional  0 taken 9
+        -:  325:	}
+        -:  326:
+        9:  327:	if (paths) {
+        9:  327-block  0
+branch  0 taken 9 (fallthrough)
+branch  1 taken 0
+        -:  328:
+        9:  329:		i = (int)path_n;
+       63:  330:		while (--i >= 0)
+        9:  330-block  0
+unconditional  0 taken 9
+       63:  330-block  1
+branch  1 taken 54
+branch  2 taken 9 (fallthrough)
+       54:  331:			free(paths[i]);
+       54:  331-block  0
+unconditional  0 taken 54
+        -:  332:	}
+        -:  333:
+        9:  334:	path_n = (size_t)get_path_env();
+        9:  334-block  0
+call    0 returned 9
+        -:  335:
+        9:  336:	get_path_programs();
+call    0 returned 9
+        -:  337:
+        9:  338:	i = MAX_WS;
+       81:  339:	while (--i >= 0) {
+unconditional  0 taken 9
+       81:  339-block  0
+branch  1 taken 72
+branch  2 taken 9 (fallthrough)
+       72:  340:		free(ws[i].path);
+       72:  341:		ws[i].path = (char *)NULL;
+       72:  341-block  0
+unconditional  0 taken 72
+        -:  342:	}
+        -:  343:
+        9:  344:	cur_ws = UNSET;
+        -:  345:
+        9:  346:	if (restore_last_path)
+        9:  346-block  0
+branch  0 taken 5 (fallthrough)
+branch  1 taken 4
+        5:  347:		get_last_path();
+        5:  347-block  0
+call    0 returned 5
+unconditional  1 taken 5
+        -:  348:
+        9:  349:	if (cur_ws == UNSET)
+        9:  349-block  0
+branch  0 taken 5 (fallthrough)
+branch  1 taken 4
+        5:  350:		cur_ws = DEF_CUR_WS;
+        5:  350-block  0
+unconditional  0 taken 5
+        -:  351:
+        9:  352:	if (!ws[cur_ws].path) {
+        9:  352-block  0
+branch  0 taken 5 (fallthrough)
+branch  1 taken 4
+        5:  353:		char cwd[PATH_MAX] = "";
+        5:  354:		if (getcwd(cwd, sizeof(cwd)) == NULL) {}
+        5:  354-block  0
+call    0 returned 5
+        5:  355:		if (!*cwd) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 5
+    #####:  356:			fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
     %%%%%:  356-block  0
 call    0 never executed
-    #####:  357:		return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  358:	}
-        -:  359:
-    #####:  360:	int exit_status = EXIT_SUCCESS;
+call    1 never executed
+    #####:  357:			exit(EXIT_FAILURE);
+call    0 never executed
+        -:  358:		}
+        5:  359:		ws[cur_ws].path = savestring(cwd, strlen(cwd));
+        5:  359-block  0
+call    0 returned 5
+unconditional  1 taken 5
+        -:  360:	}
         -:  361:
-    #####:  362:	if (cd_lists_on_the_fly) {
-    %%%%%:  362-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  363:		free_dirlist();
-    %%%%%:  363-block  0
+        9:  362:	if (xchdir(ws[cur_ws].path, SET_TITLE) == -1) {
+        9:  362-block  0
+call    0 returned 9
+branch  1 taken 0 (fallthrough)
+branch  2 taken 9
+    #####:  363:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
 call    0 never executed
-    #####:  364:		exit_status = list_dir();
+    #####:  364:		    strerror(errno));
+    %%%%%:  364-block  0
 call    0 never executed
-unconditional  1 never executed
-        -:  365:	}
-        -:  366:
-    #####:  367:	return exit_status;
-    %%%%%:  367-block  0
+    #####:  365:		return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  368:}
+        -:  366:	}
+        -:  367:
+        9:  368:	int exit_status = EXIT_SUCCESS;
         -:  369:
-        -:  370:int
-function profile_add called 0 returned 0% blocks executed 0%
-    #####:  371:profile_add(const char *prof)
-        -:  372:{
-    #####:  373:	if (!prof)
-    %%%%%:  373-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  374:		return EXIT_FAILURE;
-    %%%%%:  374-block  0
+        9:  370:	if (cd_lists_on_the_fly) {
+        9:  370-block  0
+branch  0 taken 9 (fallthrough)
+branch  1 taken 0
+        9:  371:		free_dirlist();
+        9:  371-block  0
+call    0 returned 9
+        9:  372:		exit_status = list_dir();
+call    0 returned 9
+unconditional  1 taken 9
+        -:  373:	}
+        -:  374:
+        9:  375:	return exit_status;
+        9:  375-block  0
+unconditional  0 taken 9
+        -:  376:}
+        -:  377:
+        -:  378:int
+function profile_add called 1 returned 100% blocks executed 62%
+        1:  379:profile_add(const char *prof)
+        -:  380:{
+        1:  381:	if (!prof)
+        1:  381-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  382:		return EXIT_FAILURE;
+    %%%%%:  382-block  0
 unconditional  0 never executed
-        -:  375:
-    #####:  376:	int found = 0;
-        -:  377:	size_t i;
-        -:  378:
-    #####:  379:	for (i = 0; profile_names[i]; i++) {
-    %%%%%:  379-block  0
-unconditional  0 never executed
-    %%%%%:  379-block  1
-unconditional  1 never executed
-    %%%%%:  379-block  2
-branch  2 never executed
-branch  3 never executed
-        -:  380:
-    #####:  381:		if (*prof == *profile_names[i] && strcmp(prof, profile_names[i]) == 0) {
-    %%%%%:  381-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  381-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  382:			found = 1;
-    #####:  383:			break;
-    %%%%%:  383-block  0
-unconditional  0 never executed
-        -:  384:		}
-        -:  385:	}
+        -:  383:
+        1:  384:	int found = 0;
+        -:  385:	size_t i;
         -:  386:
-    #####:  387:	if (found) {
-    %%%%%:  387-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  388:		fprintf(stderr, _("%s: %s: Profile already exists\n"), PROGRAM_NAME, prof);
-    %%%%%:  388-block  0
-call    0 never executed
-    #####:  389:		return EXIT_FAILURE;
+        6:  387:	for (i = 0; profile_names[i]; i++) {
+        1:  387-block  0
+unconditional  0 taken 1
+        5:  387-block  1
+unconditional  1 taken 5
+        6:  387-block  2
+branch  2 taken 5
+branch  3 taken 1 (fallthrough)
+        -:  388:
+       5*:  389:		if (*prof == *profile_names[i] && strcmp(prof, profile_names[i]) == 0) {
+        5:  389-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 5
+    %%%%%:  389-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  390:			found = 1;
+    #####:  391:			break;
+    %%%%%:  391-block  0
 unconditional  0 never executed
-        -:  390:	}
-        -:  391:
-    #####:  392:	if (!home_ok) {
-    %%%%%:  392-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  393:		fprintf(stderr, _("%s: %s: Cannot create profile: Home "
-    %%%%%:  393-block  0
+        -:  392:		}
+        -:  393:	}
+        -:  394:
+        1:  395:	if (found) {
+        1:  395-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  396:		fprintf(stderr, _("%s: %s: Profile already exists\n"), PROGRAM_NAME, prof);
+    %%%%%:  396-block  0
 call    0 never executed
-        -:  394:				"directory not found\n"), PROGRAM_NAME, prof);
-    #####:  395:		return EXIT_FAILURE;
+call    1 never executed
+    #####:  397:		return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  396:	}
-        -:  397:
-    #####:  398:	size_t pnl_len = strlen(PNL);
-        -:  399:	/* ### GENERATE PROGRAM'S CONFIG DIRECTORY NAME ### */
-    #####:  400:	char *NCONFIG_DIR = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) + strlen(prof) + 11, sizeof(char));
-    %%%%%:  400-block  0
+        -:  398:	}
+        -:  399:
+        1:  400:	if (!home_ok) {
+        1:  400-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  401:		fprintf(stderr, _("%s: %s: Cannot create profile: Home "
+    %%%%%:  401-block  0
 call    0 never executed
-    #####:  401:	sprintf(NCONFIG_DIR, "%s/profiles/%s", CONFIG_DIR_GRAL, prof);
-        -:  402:
-        -:  403:	/* #### CREATE THE CONFIG DIR #### */
-    #####:  404:	char *tmp_cmd[] = {"mkdir", "-p", NCONFIG_DIR, NULL};
-    #####:  405:	int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
-call    0 never executed
-        -:  406:
-    #####:  407:	if (ret != EXIT_SUCCESS) {
-branch  0 never executed
-branch  1 never executed
-    #####:  408:		fprintf(stderr, _("%s: mkdir: %s: Error creating "
-    %%%%%:  408-block  0
-call    0 never executed
-        -:  409:			"configuration directory\n"), PROGRAM_NAME, NCONFIG_DIR);
+call    1 never executed
+        -:  402:				"directory not found\n"), PROGRAM_NAME, prof);
+    #####:  403:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  404:	}
+        -:  405:
+        1:  406:	size_t pnl_len = strlen(PNL);
+        -:  407:	/* ### GENERATE PROGRAM'S CONFIG DIRECTORY NAME ### */
+        1:  408:	char *nconfig_dir = (char *)xnmalloc(strlen(config_dir_gral) + strlen(prof) + 11, sizeof(char));
+        1:  408-block  0
+call    0 returned 1
+        1:  409:	sprintf(nconfig_dir, "%s/profiles/%s", config_dir_gral, prof);
         -:  410:
-    #####:  411:		free(NCONFIG_DIR);
-        -:  412:
-    #####:  413:		return EXIT_FAILURE;
+        -:  411:	/* #### CREATE THE CONFIG DIR #### */
+        1:  412:	char *tmp_cmd[] = {"mkdir", "-p", nconfig_dir, NULL};
+        1:  413:	int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
+call    0 returned 1
+        -:  414:
+        1:  415:	if (ret != EXIT_SUCCESS) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  416:		fprintf(stderr, _("%s: mkdir: %s: Error creating "
+    %%%%%:  416-block  0
+call    0 never executed
+call    1 never executed
+        -:  417:			"configuration directory\n"), PROGRAM_NAME, nconfig_dir);
+        -:  418:
+    #####:  419:		free(nconfig_dir);
+        -:  420:
+    #####:  421:		return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  414:	}
-        -:  415:
-        -:  416:	/* If the config dir is fine, generate config file names */
-    #####:  417:	int error_code = 0;
-    #####:  418:	size_t config_len = strlen(NCONFIG_DIR);
-        -:  419:
-    #####:  420:	char *NCONFIG_FILE = (char *)xcalloc(config_len + pnl_len + 4,
-    %%%%%:  420-block  0
+        -:  422:	}
+        -:  423:
+        -:  424:	/* If the config dir is fine, generate config file names */
+        1:  425:	int exit_status = EXIT_SUCCESS;
+        1:  426:	size_t config_len = strlen(nconfig_dir);
+        -:  427:
+        1:  428:	char *nconfig_file = (char *)xnmalloc(config_len + pnl_len + 4,
+        1:  428-block  0
+call    0 returned 1
+        -:  429:	    sizeof(char));
+        1:  430:	sprintf(nconfig_file, "%s/%src", nconfig_dir, PNL);
+        1:  431:	char *nhist_file = (char *)xnmalloc(config_len + 13, sizeof(char));
+call    0 returned 1
+        1:  432:	sprintf(nhist_file, "%s/history.cfm", nconfig_dir);
+        1:  433:	char *nmime_file = (char *)xnmalloc(config_len + 14, sizeof(char));
+call    0 returned 1
+        1:  434:	sprintf(nmime_file, "%s/mimelist.cfm", nconfig_dir);
+        -:  435:
+        -:  436:	/* Create config files */
+        -:  437:
+        -:  438:	/* #### CREATE THE HISTORY FILE #### */
+        1:  439:	FILE *hist_fp = fopen(nhist_file, "w+");
+call    0 returned 1
+        -:  440:
+        1:  441:	if (!hist_fp) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  442:		fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME,
 call    0 never executed
-        -:  421:	    sizeof(char));
-    #####:  422:	sprintf(NCONFIG_FILE, "%s/%src", NCONFIG_DIR, PNL);
-    #####:  423:	char *NHIST_FILE = (char *)xcalloc(config_len + 13, sizeof(char));
+    #####:  443:		    nhist_file, strerror(errno));
+    %%%%%:  443-block  0
 call    0 never executed
-    #####:  424:	sprintf(NHIST_FILE, "%s/history.cfm", NCONFIG_DIR);
-    #####:  425:	char *NPROFILE_FILE = (char *)xcalloc(config_len + pnl_len + 10,
-call    0 never executed
-        -:  426:	    sizeof(char));
-    #####:  427:	sprintf(NPROFILE_FILE, "%s/%s_profile", NCONFIG_DIR, PNL);
-    #####:  428:	char *NMIME_FILE = (char *)xcalloc(config_len + 14, sizeof(char));
-call    0 never executed
-    #####:  429:	sprintf(NMIME_FILE, "%s/mimelist.cfm", NCONFIG_DIR);
-        -:  430:
-        -:  431:	/*  char *NMSG_LOG_FILE = (char *)xcalloc(config_len + 14, sizeof(char));
-        -:  432:	sprintf(NMSG_LOG_FILE, "%s/messages.cfm", NCONFIG_DIR);
-        -:  433:	char *NBM_FILE = (char *)xcalloc(config_len + 15, sizeof(char));
-        -:  434:	sprintf(NBM_FILE, "%s/bookmarks.cfm", NCONFIG_DIR);
-        -:  435:	char *NLOG_FILE = (char *)xcalloc(config_len + 9, sizeof(char));
-        -:  436:	sprintf(NLOG_FILE, "%s/log.cfm", NCONFIG_DIR);
-        -:  437:	char *NLOG_FILE_TMP = (char *)xcalloc(config_len + 13, sizeof(char));
-        -:  438:	sprintf(NLOG_FILE_TMP, "%s/log_tmp.cfm", NCONFIG_DIR); */
-        -:  439:
-        -:  440:	/* Create config files */
-        -:  441:
-        -:  442:	/* #### CREATE THE HISTORY FILE #### */
-    #####:  443:	FILE *hist_fp = fopen(NHIST_FILE, "w+");
-call    0 never executed
-        -:  444:
-    #####:  445:	if (!hist_fp) {
-branch  0 never executed
-branch  1 never executed
-    #####:  446:		fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME,
-call    0 never executed
-    #####:  447:		    NHIST_FILE, strerror(errno));
-    %%%%%:  447-block  0
-call    0 never executed
-    #####:  448:		error_code = EXIT_FAILURE;
+    #####:  444:		exit_status = EXIT_FAILURE;
 unconditional  0 never executed
-        -:  449:	}
-        -:  450:
-        -:  451:	else {
-        -:  452:		/* To avoid malloc errors in read_history(), do not create
-        -:  453:		 * an empty file */
-    #####:  454:		fputs("edit\n", hist_fp);
+        -:  445:	} else {
+        -:  446:		/* To avoid malloc errors in read_history(), do not create
+        -:  447:		 * an empty file */
+        1:  448:		fputs("edit\n", hist_fp);
+        1:  448-block  0
+call    0 returned 1
+        1:  449:		fclose(hist_fp);
+call    0 returned 1
+unconditional  1 taken 1
+        -:  450:	}
+        -:  451:
+        -:  452:	/* #### CREATE THE MIME CONFIG FILE #### */
+        1:  453:	if (create_mime_file(nmime_file, 1) != EXIT_SUCCESS)
+        1:  453-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####:  454:		exit_status = EXIT_FAILURE;
     %%%%%:  454-block  0
-call    0 never executed
-    #####:  455:		fclose(hist_fp);
-call    0 never executed
-unconditional  1 never executed
-        -:  456:	}
-        -:  457:
-        -:  458:	/* #### CREATE THE MIME CONFIG FILE #### */
-        -:  459:	/* Try importing MIME associations from the system, and in case
-        -:  460:	 * nothing can be imported, create an empty MIME associations
-        -:  461:	 * file */
-    #####:  462:	ret = mime_import(NMIME_FILE);
-    %%%%%:  462-block  0
-call    0 never executed
-        -:  463:
-    #####:  464:	if (ret != EXIT_SUCCESS) {
-branch  0 never executed
-branch  1 never executed
-    #####:  465:		FILE *mime_fp = fopen(NMIME_FILE, "w");
-    %%%%%:  465-block  0
-call    0 never executed
-        -:  466:
-    #####:  467:		if (!mime_fp) {
-branch  0 never executed
-branch  1 never executed
-    #####:  468:			fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME,
-call    0 never executed
-    #####:  469:									NMIME_FILE, strerror(errno));
-    %%%%%:  469-block  0
-call    0 never executed
-    #####:  470:			error_code = EXIT_FAILURE;
 unconditional  0 never executed
-        -:  471:		}
-        -:  472:
-        -:  473:		else {
-    #####:  474:			char sys_mimelist[] = "/usr/share/clifm/mimelist.cfm";
-        -:  475:
-        -:  476:			struct stat attr;
-    #####:  477:			if (stat(sys_mimelist, &attr) == -1) {
-    %%%%%:  477-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  478:				_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
-call    0 never executed
-    #####:  479:						sys_mimelist, strerror(errno));
-    %%%%%:  479-block  0
-call    0 never executed
-    #####:  480:				error_code = EXIT_FAILURE;
+        -:  455:
+        -:  456:	/* #### CREATE THE CONFIG FILE #### */
+        1:  457:	if (create_config(nconfig_file) != EXIT_SUCCESS)
+        1:  457-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####:  458:		exit_status = EXIT_FAILURE;
+    %%%%%:  458-block  0
 unconditional  0 never executed
-        -:  481:			}
-        -:  482:
-        -:  483:			else {
-        -:  484:
-    #####:  485:				char *cmd[] = {"cp", "-f", sys_mimelist, NMIME_FILE, NULL};
-    #####:  486:				launch_execve(cmd, FOREGROUND, E_NOFLAG);
-    %%%%%:  486-block  0
+        -:  459:
+        -:  460:	/* Free stuff */
+        1:  461:	free(nconfig_dir);
+        1:  462:	free(nconfig_file);
+        1:  463:	free(nhist_file);
+        1:  464:	free(nmime_file);
+        -:  465:
+        1:  466:	if (exit_status == EXIT_SUCCESS) {
+        1:  466-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  467:		printf(_("%s: '%s': Profile succesfully created\n"), PROGRAM_NAME, prof);
+        1:  467-block  0
+call    0 returned 1
+call    1 returned 1
+        -:  468:
+        6:  469:		for (i = 0; profile_names[i]; i++)
+unconditional  0 taken 1
+        6:  469-block  0
+branch  1 taken 5
+branch  2 taken 1 (fallthrough)
+        5:  470:			free(profile_names[i]);
+        5:  470-block  0
+unconditional  0 taken 5
+        -:  471:
+        1:  472:		get_profile_names();
+        1:  472-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -:  473:	} else {
+    #####:  474:		fprintf(stderr, _("%s: %s: Error creating profile\n"),
+    %%%%%:  474-block  0
 call    0 never executed
-        -:  487:			}
-        -:  488:
-    #####:  489:			fclose(mime_fp);
-    %%%%%:  489-block  0
+call    1 never executed
+unconditional  2 never executed
+        -:  475:		    PROGRAM_NAME, prof);
+        -:  476:	}
+        -:  477:
+        1:  478:	return exit_status;
+        1:  478-block  0
+unconditional  0 taken 1
+        -:  479:}
+        -:  480:
+        -:  481:int
+function profile_del called 1 returned 100% blocks executed 70%
+        1:  482:profile_del(const char *prof)
+        -:  483:{
+        1:  484:	if (xargs.stealth_mode == 1) {
+        1:  484-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  485:		printf("%s: The profile function is disabled in stealth mode\n",
+    %%%%%:  485-block  0
 call    0 never executed
-        -:  490:		}
-        -:  491:	}
+        -:  486:		    PROGRAM_NAME);
+    #####:  487:		return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  488:	}
+        -:  489:
+        1:  490:	if (!prof)
+        1:  490-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  491:		return EXIT_FAILURE;
+    %%%%%:  491-block  0
+unconditional  0 never executed
         -:  492:
-        -:  493:	/* #### CREATE THE PROFILE FILE #### */
-    #####:  494:	FILE *profile_fp = fopen(NPROFILE_FILE, "w");
-    %%%%%:  494-block  0
+        -:  493:	/* Check if prof is a valid profile */
+        1:  494:	int found = 0;
+        -:  495:	size_t i;
+        2:  496:	for (i = 0; profile_names[i]; i++) {
+        1:  496-block  0
+unconditional  0 taken 1
+        1:  496-block  1
+unconditional  1 taken 1
+        2:  496-block  2
+branch  2 taken 2
+branch  3 taken 0 (fallthrough)
+        2:  497:		if (*prof == *profile_names[i] && strcmp(prof, profile_names[i]) == 0) {
+        2:  497-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 1
+        1:  497-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 0
+        1:  498:			found = 1;
+        1:  499:			break;
+        1:  499-block  0
+unconditional  0 taken 1
+        -:  500:		}
+        -:  501:	}
+        -:  502:
+        1:  503:	if (!found) {
+        1:  503-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  504:		fprintf(stderr, _("%s: %s: No such profile\n"), PROGRAM_NAME, prof);
+    %%%%%:  504-block  0
 call    0 never executed
-        -:  495:
-    #####:  496:	if (!profile_fp) {
-branch  0 never executed
-branch  1 never executed
-    #####:  497:		fprintf(stderr, _("%s: Error creating the profile file\n"),
-    %%%%%:  497-block  0
-call    0 never executed
-        -:  498:		    PROGRAM_NAME);
-    #####:  499:		error_code = EXIT_FAILURE;
+call    1 never executed
+    #####:  505:		return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  500:	}
-        -:  501:
-        -:  502:	else {
-    #####:  503:		fprintf(profile_fp, _("#%s profile\n"
-    %%%%%:  503-block  0
+        -:  506:	}
+        -:  507:
+        1:  508:	char *tmp = (char *)xnmalloc(strlen(config_dir_gral) + strlen(prof) + 11,
+        1:  508-block  0
+call    0 returned 1
+        -:  509:															sizeof(char));
+        1:  510:	sprintf(tmp, "%s/profiles/%s", config_dir_gral, prof);
+        -:  511:
+        1:  512:	char *cmd[] = {"rm", "-r", tmp, NULL};
+        1:  513:	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+call    0 returned 1
+        1:  514:	free(tmp);
+        -:  515:
+        1:  516:	if (ret == EXIT_SUCCESS) {
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  517:		printf(_("%s: '%s': Profile successfully removed\n"), PROGRAM_NAME, prof);
+        1:  517-block  0
+call    0 returned 1
+call    1 returned 1
+        -:  518:
+        7:  519:		for (i = 0; profile_names[i]; i++)
+unconditional  0 taken 1
+        7:  519-block  0
+branch  1 taken 6
+branch  2 taken 1 (fallthrough)
+        6:  520:			free(profile_names[i]);
+        6:  520-block  0
+unconditional  0 taken 6
+        -:  521:
+        1:  522:		get_profile_names();
+        1:  522-block  0
+call    0 returned 1
+        -:  523:
+        1:  524:		return EXIT_SUCCESS;
+unconditional  0 taken 1
+        -:  525:	}
+        -:  526:
+    #####:  527:	fprintf(stderr, _("%s: %s: Error removing profile\n"), PROGRAM_NAME, prof);
+    %%%%%:  527-block  0
 call    0 never executed
-        -:  504:				"#Write here the commands you want to be executed at "
-        -:  505:				"startup\n#Ex:\n#echo -e \"%s, the anti-eye-candy/KISS "
-        -:  506:				"file manager\"\n"), PROGRAM_NAME, PROGRAM_NAME);
-    #####:  507:		fclose(profile_fp);
-call    0 never executed
-unconditional  1 never executed
-        -:  508:	}
-        -:  509:
-        -:  510:	/* #### CREATE THE CONFIG FILE #### */
-    #####:  511:	error_code = create_config(NCONFIG_FILE);
-    %%%%%:  511-block  0
-call    0 never executed
-        -:  512:
-        -:  513:	/* Free stuff */
-        -:  514:
-    #####:  515:	free(NCONFIG_DIR);
-    #####:  516:	free(NCONFIG_FILE);
-        -:  517:	/*  free(NBM_FILE);
-        -:  518:	free(NLOG_FILE);
-        -:  519:	free(NMSG_LOG_FILE);
-        -:  520:	free(NLOG_FILE_TMP); */
-    #####:  521:	free(NHIST_FILE);
-    #####:  522:	free(NPROFILE_FILE);
-    #####:  523:	free(NMIME_FILE);
-        -:  524:
-    #####:  525:	if (error_code == EXIT_SUCCESS) {
-branch  0 never executed
-branch  1 never executed
-    #####:  526:		printf(_("%s: '%s': Profile succesfully created\n"), PROGRAM_NAME, prof);
-    %%%%%:  526-block  0
-call    0 never executed
-        -:  527:
-    #####:  528:		for (i = 0; profile_names[i]; i++)
+call    1 never executed
+    #####:  528:	return EXIT_FAILURE;
 unconditional  0 never executed
-    %%%%%:  528-block  0
-branch  1 never executed
-branch  2 never executed
-    #####:  529:			free(profile_names[i]);
-    %%%%%:  529-block  0
-unconditional  0 never executed
-        -:  530:
-    #####:  531:		get_profile_names();
-    %%%%%:  531-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  532:	}
-        -:  533:
-        -:  534:	else
-    #####:  535:		fprintf(stderr, _("%s: %s: Error creating profile\n"),
-    %%%%%:  535-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  536:		    PROGRAM_NAME, prof);
-        -:  537:
-    #####:  538:	return error_code;
-    %%%%%:  538-block  0
-unconditional  0 never executed
-        -:  539:}
-        -:  540:
-        -:  541:int
-function profile_del called 0 returned 0% blocks executed 0%
-    #####:  542:profile_del(const char *prof)
-        -:  543:{
-    #####:  544:	if (xargs.stealth_mode == 1) {
-    %%%%%:  544-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  545:		printf("%s: The profile function is disabled in stealth mode\n",
-    %%%%%:  545-block  0
-call    0 never executed
-        -:  546:		    PROGRAM_NAME);
-    #####:  547:		return EXIT_SUCCESS;
-unconditional  0 never executed
-        -:  548:	}
-        -:  549:
-    #####:  550:	if (!prof)
-    %%%%%:  550-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  551:		return EXIT_FAILURE;
-    %%%%%:  551-block  0
-unconditional  0 never executed
-        -:  552:
-        -:  553:	/* Check if prof is a valid profile */
-    #####:  554:	int found = 0;
-        -:  555:	size_t i;
-    #####:  556:	for (i = 0; profile_names[i]; i++) {
-    %%%%%:  556-block  0
-unconditional  0 never executed
-    %%%%%:  556-block  1
-unconditional  1 never executed
-    %%%%%:  556-block  2
-branch  2 never executed
-branch  3 never executed
-    #####:  557:		if (*prof == *profile_names[i] && strcmp(prof, profile_names[i]) == 0) {
-    %%%%%:  557-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  557-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  558:			found = 1;
-    #####:  559:			break;
-    %%%%%:  559-block  0
-unconditional  0 never executed
-        -:  560:		}
-        -:  561:	}
-        -:  562:
-    #####:  563:	if (!found) {
-    %%%%%:  563-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  564:		fprintf(stderr, _("%s: %s: No such profile\n"), PROGRAM_NAME, prof);
-    %%%%%:  564-block  0
-call    0 never executed
-    #####:  565:		return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  566:	}
-        -:  567:
-    #####:  568:	char *tmp = (char *)xnmalloc(strlen(CONFIG_DIR_GRAL) + strlen(prof) + 11,
-    %%%%%:  568-block  0
-call    0 never executed
-        -:  569:															sizeof(char));
-    #####:  570:	sprintf(tmp, "%s/profiles/%s", CONFIG_DIR_GRAL, prof);
-        -:  571:
-    #####:  572:	char *cmd[] = {"rm", "-r", tmp, NULL};
-    #####:  573:	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
-call    0 never executed
-    #####:  574:	free(tmp);
-        -:  575:
-    #####:  576:	if (ret == EXIT_SUCCESS) {
-branch  0 never executed
-branch  1 never executed
-    #####:  577:		printf(_("%s: '%s': Profile successfully removed\n"), PROGRAM_NAME, prof);
-    %%%%%:  577-block  0
-call    0 never executed
-        -:  578:
-    #####:  579:		for (i = 0; profile_names[i]; i++)
-unconditional  0 never executed
-    %%%%%:  579-block  0
-branch  1 never executed
-branch  2 never executed
-    #####:  580:			free(profile_names[i]);
-    %%%%%:  580-block  0
-unconditional  0 never executed
-        -:  581:
-    #####:  582:		get_profile_names();
-    %%%%%:  582-block  0
-call    0 never executed
-        -:  583:
-    #####:  584:		return EXIT_SUCCESS;
-unconditional  0 never executed
-        -:  585:	}
-        -:  586:
-    #####:  587:	fprintf(stderr, _("%s: %s: Error removing profile\n"), PROGRAM_NAME, prof);
-    %%%%%:  587-block  0
-call    0 never executed
-    #####:  588:	return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  589:}
+        -:  529:}

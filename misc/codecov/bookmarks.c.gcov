@@ -39,1891 +39,1818 @@
         -:   38:#include "init.h"
         -:   39:#include "mime.h"
         -:   40:#include "readline.h"
-        -:   41:
-        -:   42:int
-function bookmarks_function called 1 returned 100% blocks executed 12%
-        1:   43:bookmarks_function(char **cmd)
-        -:   44:{
-        1:   45:	if (xargs.stealth_mode == 1) {
-        1:   45-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####:   46:		printf(_("%s: Access to configuration files is not allowed in "
-    %%%%%:   46-block  0
-call    0 never executed
-        -:   47:			 "stealth mode\n"), PROGRAM_NAME);
-    #####:   48:		return EXIT_SUCCESS;
-unconditional  0 never executed
-        -:   49:	}
-        -:   50:
-        1:   51:	if (!config_ok) {
-        1:   51-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####:   52:		fprintf(stderr, _("Bookmarks function disabled\n"));
-    %%%%%:   52-block  0
-call    0 never executed
-    #####:   53:		return EXIT_FAILURE;
-unconditional  0 never executed
-        -:   54:	}
-        -:   55:
-        -:   56:	/* If the bookmarks file doesn't exist, create it. NOTE: This file
-        -:   57:	 * should be created at startup (by get_bm_names()), but we check
-        -:   58:	 * it again here just in case it was meanwhile deleted for some
-        -:   59:	 * reason */
-        -:   60:
-        -:   61:	/* If no arguments */
-        1:   62:	if (!cmd[1])
-        1:   62-block  0
+        -:   41:#include "messages.h"
+        -:   42:
+        -:   43:void
+function free_bookmarks called 21 returned 100% blocks executed 100%
+       21:   44:free_bookmarks(void)
+        -:   45:{
+       21:   46:	if (!bm_n)
+       21:   46-block  0
 branch  0 taken 1 (fallthrough)
+branch  1 taken 20
+        1:   47:		return;
+        1:   47-block  0
+unconditional  0 taken 1
+        -:   48:
+        -:   49:	size_t i;
+      336:   50:	for (i = 0; i < bm_n; i++) {
+       20:   50-block  0
+unconditional  0 taken 20
+      316:   50-block  1
+unconditional  1 taken 316
+      336:   50-block  2
+branch  2 taken 316
+branch  3 taken 20 (fallthrough)
+      316:   51:		if (bookmarks[i].shortcut)
+      316:   51-block  0
+branch  0 taken 316 (fallthrough)
 branch  1 taken 0
-        1:   63:		return open_bookmark();
-        1:   63-block  0
-call    0 returned 1
-unconditional  1 taken 1
-        -:   64:
-        -:   65:	/* Check arguments */
-        -:   66:
-        -:   67:	/* Add a bookmark */
-    #####:   68:	if (*cmd[1] == 'a' && (!cmd[1][1] || strcmp(cmd[1], "add") == 0)) {
-    %%%%%:   68-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:   68-block  1
-branch  2 never executed
-branch  3 never executed
-    %%%%%:   68-block  2
-branch  4 never executed
-branch  5 never executed
-        -:   69:
-    #####:   70:		if (!cmd[2]) {
-    %%%%%:   70-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:   71:			printf(_("Usage: bookmarks, bm [a, add PATH]\n"));
-    %%%%%:   71-block  0
-call    0 never executed
-    #####:   72:			return EXIT_SUCCESS;
-unconditional  0 never executed
-        -:   73:		}
-        -:   74:
-    #####:   75:		if (access(cmd[2], F_OK) != 0) {
-    %%%%%:   75-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:   76:			fprintf(stderr, _("Bookmarks: %s: %s\n"), cmd[2],
-call    0 never executed
-    #####:   77:			    strerror(errno));
-    %%%%%:   77-block  0
-call    0 never executed
-    #####:   78:			return EXIT_FAILURE;
-unconditional  0 never executed
-        -:   79:		}
-        -:   80:
-    #####:   81:		return bookmark_add(cmd[2]);
-    %%%%%:   81-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:   82:	}
-        -:   83:
-        -:   84:	/* Delete bookmarks */
-    #####:   85:	if (*cmd[1] == 'd' && (!cmd[1][1] || strcmp(cmd[1], "del") == 0))
-    %%%%%:   85-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:   85-block  1
-branch  2 never executed
-branch  3 never executed
-    %%%%%:   85-block  2
-branch  4 never executed
-branch  5 never executed
-    #####:   86:		return bookmark_del(cmd[2] ? cmd[2] : NULL);
-    %%%%%:   86-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:   87:
-        -:   88:	/* Edit */
-    #####:   89:	if (*cmd[1] == 'e' && (!cmd[1][1] || strcmp(cmd[1], "edit") == 0))
-    %%%%%:   89-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:   89-block  1
-branch  2 never executed
-branch  3 never executed
-    %%%%%:   89-block  2
-branch  4 never executed
-branch  5 never executed
-    #####:   90:		return edit_bookmarks(cmd[2] ? cmd[2] : NULL);
-    %%%%%:   90-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:   91:
-        -:   92:	/* Shortcut or bm name */
-        -:   93:	size_t i;
-    #####:   94:	for (i = 0; i < bm_n; i++) {
-    %%%%%:   94-block  0
-unconditional  0 never executed
-    %%%%%:   94-block  1
-unconditional  1 never executed
-    %%%%%:   94-block  2
-branch  2 never executed
-branch  3 never executed
-        -:   95:
-    #####:   96:		if ((bookmarks[i].shortcut && *cmd[1] == *bookmarks[i].shortcut
-    %%%%%:   96-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:   96-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:   97:			&& strcmp(cmd[1], bookmarks[i].shortcut) == 0)
-    %%%%%:   97-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:   98:			|| (bookmarks[i].name && *cmd[1] == *bookmarks[i].name
-    %%%%%:   98-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:   98-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:   99:			&& strcmp(cmd[1], bookmarks[i].name) == 0)) {
-    %%%%%:   99-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  100:
-    #####:  101:			if (bookmarks[i].path) {
-    %%%%%:  101-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  102:				char *tmp_cmd[] = {"o", bookmarks[i].path,
-        -:  103:				    cmd[2] ? cmd[2] : NULL, NULL};
-        -:  104:
-    #####:  105:				return open_function(tmp_cmd);
-    %%%%%:  105-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  106:			}
-        -:  107:
-    #####:  108:			fprintf(stderr, _("Bookmarks: %s: Invalid bookmark\n"),
-    #####:  109:			    cmd[1]);
-    %%%%%:  109-block  0
-call    0 never executed
-    #####:  110:			return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  111:		}
-        -:  112:	}
-        -:  113:
-    #####:  114:	fprintf(stderr, _("Bookmarks: %s: No such bookmark\n"), cmd[1]);
-    %%%%%:  114-block  0
-call    0 never executed
-        -:  115:
-    #####:  116:	return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  117:}
-        -:  118:
-        -:  119:void
-function free_bookmarks called 1 returned 100% blocks executed 94%
-        1:  120:free_bookmarks(void)
-        -:  121:{
-        1:  122:	if (!bm_n)
-        1:  122-block  0
+      316:   52:			free(bookmarks[i].shortcut);
+      316:   52-block  0
+unconditional  0 taken 316
+        -:   53:
+      316:   54:		if (bookmarks[i].name)
+      316:   54-block  0
+branch  0 taken 260 (fallthrough)
+branch  1 taken 56
+      260:   55:			free(bookmarks[i].name);
+      260:   55-block  0
+unconditional  0 taken 260
+        -:   56:
+      316:   57:		if (bookmarks[i].path)
+      316:   57-block  0
+branch  0 taken 316 (fallthrough)
+branch  1 taken 0
+      316:   58:			free(bookmarks[i].path);
+      316:   58-block  0
+unconditional  0 taken 316
+        -:   59:	}
+        -:   60:
+       20:   61:	free(bookmarks);
+       20:   62:	bookmarks = (struct bookmarks_t *)NULL;
+        -:   63:
+      280:   64:	for (i = 0; bookmark_names[i]; i++)
+       20:   64-block  0
+unconditional  0 taken 20
+      280:   64-block  1
+branch  1 taken 260
+branch  2 taken 20 (fallthrough)
+      260:   65:		free(bookmark_names[i]);
+      260:   65-block  0
+unconditional  0 taken 260
+       20:   66:	free(bookmark_names);
+       20:   67:	bookmark_names = (char **)NULL;
+       20:   68:	bm_n = 0;
+       20:   69:	return;
+       20:   69-block  0
+unconditional  0 taken 20
+        -:   70:}
+        -:   71:
+        -:   72:static char **
+function bm_prompt called 11 returned 100% blocks executed 100%
+       11:   73:bm_prompt(void)
+        -:   74:{
+       11:   75:	char *bm_sel = (char *)NULL;
+       11:   76:	printf(_("%s%s\nEnter '%c' to edit your bookmarks or '%c' to quit.\n"),
+       11:   76-block  0
+call    0 returned 11
+call    1 returned 11
+        -:   77:	    NC, df_c, 'e', 'q');
+        -:   78:
+       22:   79:	while (!bm_sel)
+unconditional  0 taken 11
+       22:   79-block  0
+branch  1 taken 11
+branch  2 taken 11 (fallthrough)
+       11:   80:		bm_sel = rl_no_hist(_("Choose a bookmark: "));
+       11:   80-block  0
+call    0 returned 11
+call    1 returned 11
+unconditional  2 taken 11
+        -:   81:
+       11:   82:	char **comm_bm = get_substr(bm_sel, ' ');
+       11:   82-block  0
+call    0 returned 11
+       11:   83:	free(bm_sel);
+       11:   84:	return comm_bm;
+unconditional  0 taken 11
+        -:   85:}
+        -:   86:
+        -:   87:static int
+function bookmark_del called 3 returned 100% blocks executed 54%
+        3:   88:bookmark_del(char *name)
+        -:   89:{
+        3:   90:	FILE *bm_fp = NULL;
+        3:   91:	bm_fp = fopen(bm_file, "r");
+        3:   91-block  0
+call    0 returned 3
+        3:   92:	if (!bm_fp)
 branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####:  123:		return;
-    %%%%%:  123-block  0
+branch  1 taken 3
+    #####:   93:		return EXIT_FAILURE;
+    %%%%%:   93-block  0
 unconditional  0 never executed
+        -:   94:
+        3:   95:	size_t i = 0;
+        -:   96:
+        -:   97:	/* Get bookmarks from file */
+        3:   98:	size_t line_size = 0;
+        3:   99:	char *line = (char *)NULL, **bms = (char **)NULL;
+        3:  100:	size_t bmn = 0;
+        3:  101:	ssize_t line_len = 0;
+        -:  102:
+       81:  103:	while ((line_len = getline(&line, &line_size, bm_fp)) > 0) {
+        3:  103-block  0
+unconditional  0 taken 3
+       81:  103-block  1
+call    1 returned 81
+branch  2 taken 78
+branch  3 taken 3 (fallthrough)
+       78:  104:		if (!line || !*line || *line == '#' || *line == '\n')
+       78:  104-block  0
+branch  0 taken 78 (fallthrough)
+branch  1 taken 0
+       78:  104-block  1
+branch  2 taken 78 (fallthrough)
+branch  3 taken 0
+       78:  104-block  2
+branch  4 taken 69 (fallthrough)
+branch  5 taken 9
+       69:  104-block  3
+branch  6 taken 0 (fallthrough)
+branch  7 taken 69
+        9:  105:			continue;
+        9:  105-block  0
+unconditional  0 taken 9
+        -:  106:
+       69:  107:		int slash = 0;
+      677:  108:		for (i = 0; i < (size_t)line_len; i++) {
+       69:  108-block  0
+unconditional  0 taken 69
+      608:  108-block  1
+unconditional  1 taken 608
+      677:  108-block  2
+branch  2 taken 677
+branch  3 taken 0 (fallthrough)
+      677:  109:			if (line[i] == '/') {
+      677:  109-block  0
+branch  0 taken 69 (fallthrough)
+branch  1 taken 608
+       69:  110:				slash = 1;
+       69:  111:				break;
+       69:  111-block  0
+unconditional  0 taken 69
+        -:  112:			}
+        -:  113:		}
+        -:  114:
+      69*:  115:		if (!slash)
+       69:  115-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 69
+    #####:  116:			continue;
+    %%%%%:  116-block  0
+unconditional  0 never executed
+        -:  117:
+       69:  118:		if (line[line_len - 1] == '\n')
+       69:  118-block  0
+branch  0 taken 69 (fallthrough)
+branch  1 taken 0
+       69:  119:			line[line_len - 1] = '\0';
+       69:  119-block  0
+unconditional  0 taken 69
+        -:  120:
+       69:  121:		bms = (char **)xrealloc(bms, (bmn + 1) * sizeof(char *));
+       69:  121-block  0
+call    0 returned 69
+       69:  122:		bms[bmn++] = savestring(line, (size_t)line_len);
+call    0 returned 69
+unconditional  1 taken 69
+        -:  123:	}
         -:  124:
-        -:  125:	size_t i;
-        -:  126:
-       23:  127:	for (i = 0; i < bm_n; i++) {
-        1:  127-block  0
-unconditional  0 taken 1
-       22:  127-block  1
-unconditional  1 taken 22
-       23:  127-block  2
-branch  2 taken 22
-branch  3 taken 1 (fallthrough)
-       22:  128:		if (bookmarks[i].shortcut)
-       22:  128-block  0
-branch  0 taken 22 (fallthrough)
-branch  1 taken 0
-       22:  129:			free(bookmarks[i].shortcut);
-       22:  129-block  0
-unconditional  0 taken 22
-        -:  130:
-       22:  131:		if (bookmarks[i].name)
-       22:  131-block  0
-branch  0 taken 18 (fallthrough)
-branch  1 taken 4
-       18:  132:			free(bookmarks[i].name);
-       18:  132-block  0
-unconditional  0 taken 18
-        -:  133:
-       22:  134:		if (bookmarks[i].path)
-       22:  134-block  0
-branch  0 taken 22 (fallthrough)
-branch  1 taken 0
-       22:  135:			free(bookmarks[i].path);
-       22:  135-block  0
-unconditional  0 taken 22
-        -:  136:	}
-        -:  137:
-        1:  138:	free(bookmarks);
-        1:  139:	bookmarks = (struct bookmarks_t *)NULL;
-        -:  140:
-       19:  141:	for (i = 0; bookmark_names[i]; i++)
-        1:  141-block  0
-unconditional  0 taken 1
-       19:  141-block  1
-branch  1 taken 18
-branch  2 taken 1 (fallthrough)
-       18:  142:		free(bookmark_names[i]);
-       18:  142-block  0
-unconditional  0 taken 18
-        -:  143:
-        1:  144:	free(bookmark_names);
-        1:  145:	bookmark_names = (char **)NULL;
-        -:  146:
-        1:  147:	bm_n = 0;
-        -:  148:
-        1:  149:	return;
-        1:  149-block  0
-unconditional  0 taken 1
-        -:  150:}
-        -:  151:
-        -:  152:char **
-function bm_prompt called 1 returned 100% blocks executed 100%
-        1:  153:bm_prompt(void)
-        -:  154:{
-        1:  155:	char *bm_sel = (char *)NULL;
-        1:  156:	printf(_("%s%s\nEnter '%c' to edit your bookmarks or '%c' to quit.\n"),
-        1:  156-block  0
-call    0 returned 1
-        -:  157:	    NC_b, df_c, 'e', 'q');
-        -:  158:
-        2:  159:	while (!bm_sel)
-unconditional  0 taken 1
-        2:  159-block  0
-branch  1 taken 1
-branch  2 taken 1 (fallthrough)
-        1:  160:		bm_sel = rl_no_hist(_("Choose a bookmark: "));
-        1:  160-block  0
-call    0 returned 1
-unconditional  1 taken 1
-        -:  161:
-        1:  162:	char **comm_bm = get_substr(bm_sel, ' ');
-        1:  162-block  0
-call    0 returned 1
-        1:  163:	free(bm_sel);
-        -:  164:
-        1:  165:	return comm_bm;
-unconditional  0 taken 1
-        -:  166:}
-        -:  167:
-        -:  168:int
-function bookmark_del called 0 returned 0% blocks executed 0%
-    #####:  169:bookmark_del(char *name)
-        -:  170:{
-    #####:  171:	FILE *bm_fp = NULL;
-    #####:  172:	bm_fp = fopen(BM_FILE, "r");
-    %%%%%:  172-block  0
+        3:  125:	free(line);
+        3:  126:	line = (char *)NULL;
+        -:  127:
+        3:  128:	if (!bmn) {
+        3:  128-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####:  129:		puts(_("bookmarks: There are no bookmarks"));
+    %%%%%:  129-block  0
 call    0 never executed
-    #####:  173:	if (!bm_fp)
-branch  0 never executed
-branch  1 never executed
-    #####:  174:		return EXIT_FAILURE;
-    %%%%%:  174-block  0
-unconditional  0 never executed
-        -:  175:
-    #####:  176:	size_t i = 0;
-        -:  177:
-        -:  178:	/* Get bookmarks from file */
-    #####:  179:	size_t line_size = 0;
-    #####:  180:	char *line = (char *)NULL, **bms = (char **)NULL;
-    #####:  181:	size_t bmn = 0;
-    #####:  182:	ssize_t line_len = 0;
-        -:  183:
-    #####:  184:	while ((line_len = getline(&line, &line_size, bm_fp)) > 0) {
-    %%%%%:  184-block  0
-unconditional  0 never executed
-    %%%%%:  184-block  1
 call    1 never executed
-branch  2 never executed
-branch  3 never executed
-    #####:  185:		if (!line || !*line || *line == '#' || *line == '\n')
-    %%%%%:  185-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  185-block  1
-branch  2 never executed
-branch  3 never executed
-    %%%%%:  185-block  2
+    #####:  130:		fclose(bm_fp);
+call    0 never executed
+    #####:  131:		return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  132:	}
+        -:  133:
+        3:  134:	char **del_elements = (char **)NULL;
+        3:  135:	int cmd_line = -1;
+        -:  136:	/* This variable let us know two things: a) bookmark name was
+        -:  137:	 * specified in command line; b) the index of this name in the
+        -:  138:	 * bookmarks array. It is initialized as -1 since the index name
+        -:  139:	 * could be zero */
+        -:  140:
+        3:  141:	if (name) {
+        3:  141-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 1
+       45:  142:		for (i = 0; i < bmn; i++) {
+        2:  142-block  0
+unconditional  0 taken 2
+       43:  142-block  1
+unconditional  1 taken 43
+       45:  142-block  2
+branch  2 taken 45
+branch  3 taken 0 (fallthrough)
+       45:  143:			char *bm_name = strbtw(bms[i], ']', ':');
+       45:  143-block  0
+call    0 returned 45
+       45:  144:			if (!bm_name)
+branch  0 taken 8 (fallthrough)
+branch  1 taken 37
+        8:  145:				continue;
+        8:  145-block  0
+unconditional  0 taken 8
+       37:  146:			if (strcmp(name, bm_name) == 0) {
+       37:  146-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 35
+        2:  147:				free(bm_name);
+        2:  148:				cmd_line = (int)i;
+        2:  149:				break;
+        2:  149-block  0
+unconditional  0 taken 2
+        -:  150:			}
+       35:  151:			free(bm_name);
+       35:  151-block  0
+unconditional  0 taken 35
+        -:  152:		}
+        -:  153:	}
+        -:  154:
+        -:  155:	/* If a valid bookmark name was passed in command line, copy the
+        -:  156:	 * corresponding bookmark index (plus 1, as if it were typed in the
+        -:  157:	 * bookmarks screen) to the del_elements array */
+        3:  158:	if (cmd_line != -1) {
+        3:  158-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 1
+        2:  159:		del_elements = (char **)xnmalloc(2, sizeof(char *));
+        2:  159-block  0
+call    0 returned 2
+       2*:  160:		del_elements[0] = (char *)xnmalloc((size_t)DIGINUM(cmd_line + 1) + 1, sizeof(char));
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  160-block  0
+branch  2 taken 0 (fallthrough)
+branch  3 taken 2
+    %%%%%:  160-block  1
 branch  4 never executed
 branch  5 never executed
-    %%%%%:  185-block  3
+    %%%%%:  160-block  2
 branch  6 never executed
 branch  7 never executed
-    #####:  186:			continue;
-    %%%%%:  186-block  0
-unconditional  0 never executed
-        -:  187:
-    #####:  188:		int slash = 0;
-    #####:  189:		for (i = 0; i < (size_t)line_len; i++) {
-    %%%%%:  189-block  0
-unconditional  0 never executed
-    %%%%%:  189-block  1
-unconditional  1 never executed
-    %%%%%:  189-block  2
-branch  2 never executed
-branch  3 never executed
-    #####:  190:			if (line[i] == '/') {
-    %%%%%:  190-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  191:				slash = 1;
-    #####:  192:				break;
-    %%%%%:  192-block  0
-unconditional  0 never executed
-        -:  193:			}
-        -:  194:		}
-        -:  195:
-    #####:  196:		if (!slash)
-    %%%%%:  196-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  197:			continue;
-    %%%%%:  197-block  0
-unconditional  0 never executed
-        -:  198:
-    #####:  199:		if (line[line_len - 1] == '\n')
-    %%%%%:  199-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  200:			line[line_len - 1] = '\0';
-    %%%%%:  200-block  0
-unconditional  0 never executed
-        -:  201:
-    #####:  202:		bms = (char **)xrealloc(bms, (bmn + 1) * sizeof(char *));
-    %%%%%:  202-block  0
-call    0 never executed
-    #####:  203:		bms[bmn++] = savestring(line, (size_t)line_len);
-call    0 never executed
-unconditional  1 never executed
-        -:  204:	}
-        -:  205:
-    #####:  206:	free(line);
-    #####:  207:	line = (char *)NULL;
-        -:  208:
-    #####:  209:	if (!bmn) {
-    %%%%%:  209-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  210:		puts(_("bookmarks: There are no bookmarks"));
-    %%%%%:  210-block  0
-call    0 never executed
-    #####:  211:		fclose(bm_fp);
-call    0 never executed
-    #####:  212:		return EXIT_SUCCESS;
-unconditional  0 never executed
-        -:  213:	}
-        -:  214:
-    #####:  215:	char **del_elements = (char **)NULL;
-    #####:  216:	int cmd_line = -1;
-        -:  217:	/* This variable let us know two things: a) bookmark name was
-        -:  218:	 * specified in command line; b) the index of this name in the
-        -:  219:	 * bookmarks array. It is initialized as -1 since the index name
-        -:  220:	 * could be zero */
-        -:  221:
-    #####:  222:	if (name) {
-    %%%%%:  222-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  223:		for (i = 0; i < bmn; i++) {
-    %%%%%:  223-block  0
-unconditional  0 never executed
-    %%%%%:  223-block  1
-unconditional  1 never executed
-    %%%%%:  223-block  2
-branch  2 never executed
-branch  3 never executed
-    #####:  224:			char *bm_name = strbtw(bms[i], ']', ':');
-    %%%%%:  224-block  0
-call    0 never executed
-        -:  225:
-    #####:  226:			if (!bm_name)
-branch  0 never executed
-branch  1 never executed
-    #####:  227:				continue;
-    %%%%%:  227-block  0
-unconditional  0 never executed
-        -:  228:
-    #####:  229:			if (strcmp(name, bm_name) == 0) {
-    %%%%%:  229-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  230:				free(bm_name);
-    #####:  231:				cmd_line = (int)i;
-    #####:  232:				break;
-    %%%%%:  232-block  0
-unconditional  0 never executed
-        -:  233:			}
-        -:  234:
-    #####:  235:			free(bm_name);
-    %%%%%:  235-block  0
-unconditional  0 never executed
-        -:  236:		}
-        -:  237:	}
-        -:  238:
-        -:  239:	/* If a valid bookmark name was passed in command line, copy the
-        -:  240:	 * corresponding bookmark index (plus 1, as if it were typed in the
-        -:  241:	 * bookmarks screen) to the del_elements array */
-    #####:  242:	if (cmd_line != -1) {
-    %%%%%:  242-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  243:		del_elements = (char **)xnmalloc(2, sizeof(char *));
-    %%%%%:  243-block  0
-call    0 never executed
-    #####:  244:		del_elements[0] = (char *)xnmalloc((size_t)DIGINUM(cmd_line + 1) + 1, sizeof(char));
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  244-block  0
-branch  2 never executed
-branch  3 never executed
-    %%%%%:  244-block  1
-branch  4 never executed
-branch  5 never executed
-    %%%%%:  244-block  2
-branch  6 never executed
-branch  7 never executed
-    %%%%%:  244-block  3
+    %%%%%:  160-block  3
 branch  8 never executed
 branch  9 never executed
-    %%%%%:  244-block  4
+    %%%%%:  160-block  4
 branch 10 never executed
 branch 11 never executed
-    %%%%%:  244-block  5
+    %%%%%:  160-block  5
 branch 12 never executed
 branch 13 never executed
-    %%%%%:  244-block  6
+    %%%%%:  160-block  6
 branch 14 never executed
 branch 15 never executed
-    %%%%%:  244-block  7
+    %%%%%:  160-block  7
 branch 16 never executed
 branch 17 never executed
-    %%%%%:  244-block  8
+    %%%%%:  160-block  8
 unconditional 18 never executed
-    %%%%%:  244-block  9
+    %%%%%:  160-block  9
 unconditional 19 never executed
-    %%%%%:  244-block 10
+    %%%%%:  160-block 10
 unconditional 20 never executed
-    %%%%%:  244-block 11
+    %%%%%:  160-block 11
 unconditional 21 never executed
-    %%%%%:  244-block 12
+    %%%%%:  160-block 12
 unconditional 22 never executed
-    %%%%%:  244-block 13
+    %%%%%:  160-block 13
 unconditional 23 never executed
-    %%%%%:  244-block 14
+    %%%%%:  160-block 14
 unconditional 24 never executed
-    %%%%%:  244-block 15
+    %%%%%:  160-block 15
 unconditional 25 never executed
-    %%%%%:  244-block 16
+    %%%%%:  160-block 16
 unconditional 26 never executed
-    %%%%%:  244-block 17
+    %%%%%:  160-block 17
 unconditional 27 never executed
-    %%%%%:  244-block 18
+    %%%%%:  160-block 18
 unconditional 28 never executed
-    %%%%%:  244-block 19
+    %%%%%:  160-block 19
 unconditional 29 never executed
-    %%%%%:  244-block 20
+    %%%%%:  160-block 20
 unconditional 30 never executed
-    %%%%%:  244-block 21
+    %%%%%:  160-block 21
 unconditional 31 never executed
-    %%%%%:  244-block 22
+    %%%%%:  160-block 22
 unconditional 32 never executed
-    %%%%%:  244-block 23
-unconditional 33 never executed
-    %%%%%:  244-block 24
-unconditional 34 never executed
-    %%%%%:  244-block 25
+        2:  160-block 23
+unconditional 33 taken 2
+        2:  160-block 24
+unconditional 34 taken 2
+    %%%%%:  160-block 25
 unconditional 35 never executed
-    %%%%%:  244-block 26
-call   36 never executed
-    #####:  245:		sprintf(del_elements[0], "%d", cmd_line + 1);
-    #####:  246:		del_elements[1] = (char *)NULL;
+        2:  160-block 26
+call   36 returned 2
+        2:  161:		sprintf(del_elements[0], "%d", cmd_line + 1);
+        2:  162:		del_elements[1] = (char *)NULL;
+unconditional  0 taken 2
+        -:  163:	}
+        -:  164:
+        -:  165:	/* If bookmark name was passed but it is not a valid bookmark */
+        1:  166:	else if (name) {
+        1:  166-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  167:		fprintf(stderr, _("bookmarks: %s: No such bookmark\n"), name);
+    %%%%%:  167-block  0
+call    0 never executed
+call    1 never executed
+    #####:  168:		for (i = 0; i < bmn; i++)
 unconditional  0 never executed
-        -:  247:	}
-        -:  248:
-        -:  249:	/* If bookmark name was passed but it is not a valid bookmark */
-    #####:  250:	else if (name) {
-    %%%%%:  250-block  0
+    %%%%%:  168-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:  169:			free(bms[i]);
+    %%%%%:  169-block  0
+unconditional  0 never executed
+    #####:  170:		free(bms);
+    #####:  171:		fclose(bm_fp);
+    %%%%%:  171-block  0
+call    0 never executed
+    #####:  172:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  173:	}
+        -:  174:
+        -:  175:	/* If not name, list bookmarks and get user input */
+        -:  176:	else {
+        1:  177:		printf(_("%sBookmarks%s\n\n"), BOLD, df_c);
+        1:  177-block  0
+call    0 returned 1
+call    1 returned 1
+        -:  178:
+       24:  179:		for (i = 0; i < bmn; i++)
+unconditional  0 taken 1
+unconditional  1 taken 23
+       24:  179-block  0
+branch  2 taken 23
+branch  3 taken 1 (fallthrough)
+       23:  180:			printf("%s%zu %s%s%s\n", el_c, i + 1, bm_c, bms[i], df_c);
+       23:  180-block  0
+call    0 returned 23
+        -:  181:
+        -:  182:		/* Get user input */
+        1:  183:		printf(_("\n%sEnter '%c' to quit.\n"), df_c, 'q');
+        1:  183-block  0
+call    0 returned 1
+call    1 returned 1
+        1:  184:		char *input = (char *)NULL;
+        2:  185:		while (!input)
+unconditional  0 taken 1
+        2:  185-block  0
+branch  1 taken 1
+branch  2 taken 1 (fallthrough)
+        1:  186:			input = rl_no_hist(_("Bookmark(s) to be deleted "
+        1:  186-block  0
+call    0 returned 1
+call    1 returned 1
+unconditional  2 taken 1
+        -:  187:								"(ex: 1 2-6, or *): "));
+        1:  188:		del_elements = get_substr(input, ' ');
+        1:  188-block  0
+call    0 returned 1
+        1:  189:		free(input);
+        1:  190:		input = (char *)NULL;
+        -:  191:
+        1:  192:		if (!del_elements) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  193:			for (i = 0; i < bmn; i++)
+    %%%%%:  193-block  0
+unconditional  0 never executed
+    %%%%%:  193-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  194:				free(bms[i]);
+    %%%%%:  194-block  0
+unconditional  0 never executed
+    #####:  195:			free(bms);
+    #####:  196:			fclose(bm_fp);
+    %%%%%:  196-block  0
+call    0 never executed
+    #####:  197:			fprintf(stderr, _("bookmarks: Error parsing input\n"));
+call    0 never executed
+call    1 never executed
+    #####:  198:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  199:		}
+        -:  200:	}
+        -:  201:
+        -:  202:	/* We have input */
+        -:  203:	/* If quit */
+        -:  204:	/* I inspect all substrings entered by the user for "q" before any
+        -:  205:	 * other value to prevent some accidental deletion, like "1 q", or
+        -:  206:	 * worst, "* q" */
+        6:  207:	for (i = 0; del_elements[i]; i++) {
+        3:  207-block  0
+unconditional  0 taken 3
+        3:  207-block  1
+unconditional  1 taken 3
+        6:  207-block  2
+branch  2 taken 3
+branch  3 taken 3 (fallthrough)
+        3:  208:		int quit = 0;
+        -:  209:
+        3:  210:		if (strcmp(del_elements[i], "q") == 0) {
+        3:  210-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####:  211:			quit = 1;
+    %%%%%:  211-block  0
+unconditional  0 never executed
+        3:  212:		} else if (is_number(del_elements[i]) && (atoi(del_elements[i]) <= 0
+        3:  212-block  0
+call    0 returned 3
+branch  1 taken 3 (fallthrough)
+branch  2 taken 0
+        3:  212-block  1
+branch  3 taken 3 (fallthrough)
+branch  4 taken 0
+        3:  213:		|| atoi(del_elements[i]) > (int)bmn)) {
+        3:  213-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####:  214:			fprintf(stderr, _("bookmarks: %s: No such bookmark\n"),
+call    0 never executed
+    #####:  215:			    del_elements[i]);
+    %%%%%:  215-block  0
+call    0 never executed
+    #####:  216:			quit = 1;
+unconditional  0 never executed
+        -:  217:		}
+        -:  218:
+        3:  219:		if (quit) {
+        3:  219-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####:  220:			for (i = 0; i < bmn; i++)
+    %%%%%:  220-block  0
+unconditional  0 never executed
+    %%%%%:  220-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  221:				free(bms[i]);
+    %%%%%:  221-block  0
+unconditional  0 never executed
+    #####:  222:			free(bms);
+        -:  223:
+    #####:  224:			for (i = 0; del_elements[i]; i++)
+    %%%%%:  224-block  0
+unconditional  0 never executed
+    %%%%%:  224-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  225:				free(del_elements[i]);
+    %%%%%:  225-block  0
+unconditional  0 never executed
+    #####:  226:			free(del_elements);
+    #####:  227:			fclose(bm_fp);
+    %%%%%:  227-block  0
+call    0 never executed
+    #####:  228:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  229:		}
+        -:  230:	}
+        -:  231:
+        -:  232:	/* If "*", simply remove the bookmarks file */
+        -:  233:	/* If there is some "*" in the input line (like "1 5 6-9 *"), it
+        -:  234:	 * makes no sense to remove singles bookmarks: Just delete all of
+        -:  235:	 * them at once */
+        6:  236:	for (i = 0; del_elements[i]; i++) {
+        3:  236-block  0
+unconditional  0 taken 3
+        3:  236-block  1
+unconditional  1 taken 3
+        6:  236-block  2
+branch  2 taken 3
+branch  3 taken 3 (fallthrough)
+        3:  237:		if (strcmp(del_elements[i], "*") == 0) {
+        3:  237-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+        -:  238:			/* Create a backup copy of the bookmarks file, just in case */
+    #####:  239:			char *bk_file = (char *)NULL;
+    #####:  240:			bk_file = (char *)xcalloc(strlen(config_dir) + 14,
+    %%%%%:  240-block  0
+call    0 never executed
+        -:  241:			    sizeof(char));
+    #####:  242:			sprintf(bk_file, "%s/bookmarks.bk", config_dir);
+    #####:  243:			char *tmp_cmd[] = {"cp", bm_file, bk_file, NULL};
+        -:  244:
+    #####:  245:			int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
+call    0 never executed
+        -:  246:			/* Remove the bookmarks file, free stuff, and exit */
+    #####:  247:			if (ret == EXIT_SUCCESS) {
 branch  0 never executed
 branch  1 never executed
-    #####:  251:		fprintf(stderr, _("bookmarks: %s: No such bookmark\n"), name);
-    %%%%%:  251-block  0
+    #####:  248:				unlink(bm_file);
+    %%%%%:  248-block  0
 call    0 never executed
-        -:  252:
-    #####:  253:		for (i = 0; i < bmn; i++)
+    #####:  249:				printf(_("bookmarks: All bookmarks were deleted\n "
+call    0 never executed
+call    1 never executed
+        -:  250:					 "However, a backup copy was created (%s)\n"), bk_file);
+    #####:  251:				free(bk_file);
+    #####:  252:				bk_file = (char *)NULL;
 unconditional  0 never executed
-    %%%%%:  253-block  0
-branch  1 never executed
-branch  2 never executed
-    #####:  254:			free(bms[i]);
+        -:  253:			} else {
+    #####:  254:				printf(_("bookmarks: Error creating backup file. No "
     %%%%%:  254-block  0
-unconditional  0 never executed
-        -:  255:
-    #####:  256:		free(bms);
-    #####:  257:		fclose(bm_fp);
-    %%%%%:  257-block  0
 call    0 never executed
-        -:  258:
-    #####:  259:		return EXIT_FAILURE;
+call    1 never executed
+unconditional  2 never executed
+        -:  255:					 "bookmark was deleted\n"));
+        -:  256:			}
+        -:  257:
+    #####:  258:			for (i = 0; i < bmn; i++)
+    %%%%%:  258-block  0
 unconditional  0 never executed
-        -:  260:	}
-        -:  261:
-        -:  262:	/* If not name, list bookmarks and get user input */
-        -:  263:	else {
-    #####:  264:		printf(_("%sBookmarks%s\n\n"), bold, df_c);
-    %%%%%:  264-block  0
-call    0 never executed
-        -:  265:
-    #####:  266:		for (i = 0; i < bmn; i++)
-unconditional  0 never executed
-unconditional  1 never executed
-    %%%%%:  266-block  0
-branch  2 never executed
-branch  3 never executed
-    #####:  267:			printf("%s%zu %s%s%s\n", el_c, i + 1, bm_c, bms[i], df_c);
-    %%%%%:  267-block  0
-call    0 never executed
-        -:  268:
-        -:  269:		/* Get user input */
-    #####:  270:		printf(_("\n%sEnter '%c' to quit.\n"), df_c, 'q');
-    %%%%%:  270-block  0
-call    0 never executed
-    #####:  271:		char *input = (char *)NULL;
-        -:  272:
-    #####:  273:		while (!input)
-unconditional  0 never executed
-    %%%%%:  273-block  0
+    %%%%%:  258-block  1
 branch  1 never executed
 branch  2 never executed
-    #####:  274:			input = rl_no_hist(_("Bookmark(s) to be deleted "
+    #####:  259:				free(bms[i]);
+    %%%%%:  259-block  0
+unconditional  0 never executed
+    #####:  260:			free(bms);
+        -:  261:
+    #####:  262:			for (i = 0; del_elements[i]; i++)
+    %%%%%:  262-block  0
+unconditional  0 never executed
+    %%%%%:  262-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  263:				free(del_elements[i]);
+    %%%%%:  263-block  0
+unconditional  0 never executed
+    #####:  264:			free(del_elements);
+        -:  265:
+    #####:  266:			fclose(bm_fp);
+    %%%%%:  266-block  0
+call    0 never executed
+        -:  267:			/* Update bookmark names for TAB completion */
+        -:  268:			/*          get_bm_names(); */
+    #####:  269:			free_bookmarks();
+call    0 never executed
+    #####:  270:			load_bookmarks();
+call    0 never executed
+        -:  271:
+        -:  272:			/* If the argument "*" was specified in command line */
+    #####:  273:			if (cmd_line != -1)
+branch  0 never executed
+branch  1 never executed
+    #####:  274:				fputs(_("All bookmarks succesfully removed\n"), stdout);
     %%%%%:  274-block  0
 call    0 never executed
-unconditional  1 never executed
-        -:  275:								"(ex: 1 2-6, or *): "));
-        -:  276:
-    #####:  277:		del_elements = get_substr(input, ' ');
-    %%%%%:  277-block  0
-call    0 never executed
-    #####:  278:		free(input);
-    #####:  279:		input = (char *)NULL;
-        -:  280:
-    #####:  281:		if (!del_elements) {
-branch  0 never executed
-branch  1 never executed
-        -:  282:
-    #####:  283:			for (i = 0; i < bmn; i++)
-    %%%%%:  283-block  0
+call    1 never executed
+unconditional  2 never executed
+        -:  275:
+    #####:  276:			return EXIT_SUCCESS;
+    %%%%%:  276-block  0
 unconditional  0 never executed
-    %%%%%:  283-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  284:				free(bms[i]);
-    %%%%%:  284-block  0
-unconditional  0 never executed
+        -:  277:		}
+        -:  278:	}
+        -:  279:
+        -:  280:	/* Remove single bookmarks */
+        -:  281:	/* Open a temporary file */
+        3:  282:	char *tmp_file = (char *)NULL;
+        3:  283:	tmp_file = (char *)xnmalloc(strlen(config_dir) + 8, sizeof(char));
+        3:  283-block  0
+call    0 returned 3
+        3:  284:	sprintf(tmp_file, "%s/bm_tmp", config_dir);
         -:  285:
-    #####:  286:			free(bms);
-    #####:  287:			fclose(bm_fp);
-    %%%%%:  287-block  0
-call    0 never executed
-    #####:  288:			fprintf(stderr, _("bookmarks: Error parsing input\n"));
-call    0 never executed
-        -:  289:
-    #####:  290:			return EXIT_FAILURE;
+        3:  286:	FILE *tmp_fp = fopen(tmp_file, "w+");
+call    0 returned 3
+        3:  287:	if (!tmp_fp) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####:  288:		for (i = 0; i < bmn; i++)
+    %%%%%:  288-block  0
 unconditional  0 never executed
-        -:  291:		}
-        -:  292:	}
-        -:  293:
-        -:  294:	/* We have input */
-        -:  295:	/* If quit */
-        -:  296:	/* I inspect all substrings entered by the user for "q" before any
-        -:  297:	 * other value to prevent some accidental deletion, like "1 q", or
-        -:  298:	 * worst, "* q" */
-    #####:  299:	for (i = 0; del_elements[i]; i++) {
-    %%%%%:  299-block  0
-unconditional  0 never executed
-    %%%%%:  299-block  1
-unconditional  1 never executed
-    %%%%%:  299-block  2
+    %%%%%:  288-block  1
+branch  1 never executed
 branch  2 never executed
-branch  3 never executed
-    #####:  300:		int quit = 0;
+    #####:  289:			free(bms[i]);
+    %%%%%:  289-block  0
+unconditional  0 never executed
+    #####:  290:		free(bms);
+        -:  291:
+    #####:  292:		for (i = 0; del_elements[i]; i++)
+    %%%%%:  292-block  0
+unconditional  0 never executed
+    %%%%%:  292-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  293:			free(del_elements[i]);
+    %%%%%:  293-block  0
+unconditional  0 never executed
+    #####:  294:		free(del_elements);
+        -:  295:
+    #####:  296:		fclose(bm_fp);
+    %%%%%:  296-block  0
+call    0 never executed
+    #####:  297:		fprintf(stderr, _("bookmarks: Error creating temporary file\n"));
+call    0 never executed
+call    1 never executed
+        -:  298:
+    #####:  299:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  300:	}
         -:  301:
-    #####:  302:		if (strcmp(del_elements[i], "q") == 0)
-    %%%%%:  302-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  303:			quit = 1;
-    %%%%%:  303-block  0
-unconditional  0 never executed
+        -:  302:	/* Go back to the beginning of the bookmarks file */
+        3:  303:	fseek(bm_fp, 0, SEEK_SET);
+        3:  303-block  0
+call    0 returned 3
         -:  304:
-    #####:  305:		else if (is_number(del_elements[i]) && (atoi(del_elements[i]) <= 0
-    %%%%%:  305-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    %%%%%:  305-block  1
-branch  3 never executed
-branch  4 never executed
-    #####:  306:		|| atoi(del_elements[i]) > (int)bmn)) {
-    %%%%%:  306-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  307:			fprintf(stderr, _("bookmarks: %s: No such bookmark\n"),
-    #####:  308:			    del_elements[i]);
-    %%%%%:  308-block  0
-call    0 never executed
-    #####:  309:			quit = 1;
+        -:  305:	/* Dump into the tmp file everything except bookmarks marked for
+        -:  306:	 * deletion */
+        -:  307:
+        3:  308:	char *lineb = (char *)NULL;
+       81:  309:	while ((line_len = getline(&lineb, &line_size, bm_fp)) > 0) {
+unconditional  0 taken 3
+       81:  309-block  0
+call    1 returned 81
+branch  2 taken 78
+branch  3 taken 3 (fallthrough)
+       78:  310:		if (lineb[line_len - 1] == '\n')
+       78:  310-block  0
+branch  0 taken 78 (fallthrough)
+branch  1 taken 0
+       78:  311:			lineb[line_len - 1] = '\0';
+       78:  311-block  0
+unconditional  0 taken 78
+        -:  312:
+       78:  313:		int bm_found = 0;
+        -:  314:		size_t j;
+        -:  315:
+      156:  316:		for (j = 0; del_elements[j]; j++) {
+       78:  316-block  0
+unconditional  0 taken 78
+       78:  316-block  1
+unconditional  1 taken 78
+      156:  316-block  2
+branch  2 taken 78
+branch  3 taken 78 (fallthrough)
+      78*:  317:			if (!is_number(del_elements[j]))
+       78:  317-block  0
+call    0 returned 78
+branch  1 taken 0 (fallthrough)
+branch  2 taken 78
+    #####:  318:				continue;
+    %%%%%:  318-block  0
 unconditional  0 never executed
-        -:  310:		}
-        -:  311:
-    #####:  312:		if (quit) {
-    %%%%%:  312-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  313:
-    #####:  314:			for (i = 0; i < bmn; i++)
-    %%%%%:  314-block  0
-unconditional  0 never executed
-    %%%%%:  314-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  315:				free(bms[i]);
-    %%%%%:  315-block  0
-unconditional  0 never executed
-        -:  316:
-    #####:  317:			free(bms);
-        -:  318:
-    #####:  319:			for (i = 0; del_elements[i]; i++)
-    %%%%%:  319-block  0
-unconditional  0 never executed
-    %%%%%:  319-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  320:				free(del_elements[i]);
-    %%%%%:  320-block  0
-unconditional  0 never executed
-        -:  321:
-    #####:  322:			free(del_elements);
-    #####:  323:			fclose(bm_fp);
-    %%%%%:  323-block  0
-call    0 never executed
-        -:  324:
-    #####:  325:			return EXIT_SUCCESS;
-unconditional  0 never executed
-        -:  326:		}
+       78:  319:			if (strcmp(bms[atoi(del_elements[j]) - 1], lineb) == 0)
+       78:  319-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 75
+        3:  320:				bm_found = 1;
+        3:  320-block  0
+unconditional  0 taken 3
+        -:  321:		}
+        -:  322:
+       78:  323:		if (bm_found)
+       78:  323-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 75
+        3:  324:			continue;
+        3:  324-block  0
+unconditional  0 taken 3
+        -:  325:
+       75:  326:		fprintf(tmp_fp, "%s\n", lineb);
+       75:  326-block  0
+call    0 returned 75
+unconditional  1 taken 75
         -:  327:	}
         -:  328:
-        -:  329:	/* If "*", simply remove the bookmarks file */
-        -:  330:	/* If there is some "*" in the input line (like "1 5 6-9 *"), it
-        -:  331:	 * makes no sense to remove singles bookmarks: Just delete all of
-        -:  332:	 * them at once */
-    #####:  333:	for (i = 0; del_elements[i]; i++) {
-    %%%%%:  333-block  0
+        3:  329:	free(lineb);
+        -:  330:
+        -:  331:	/* Free stuff */
+        6:  332:	for (i = 0; del_elements[i]; i++)
+        3:  332-block  0
+unconditional  0 taken 3
+        6:  332-block  1
+branch  1 taken 3
+branch  2 taken 3 (fallthrough)
+        3:  333:		free(del_elements[i]);
+        3:  333-block  0
+unconditional  0 taken 3
+        3:  334:	free(del_elements);
+        -:  335:
+       72:  336:	for (i = 0; i < bmn; i++)
+        3:  336-block  0
+unconditional  0 taken 3
+       72:  336-block  1
+branch  1 taken 69
+branch  2 taken 3 (fallthrough)
+       69:  337:		free(bms[i]);
+       69:  337-block  0
+unconditional  0 taken 69
+        3:  338:	free(bms);
+        -:  339:
+        -:  340:	/* Close files */
+        3:  341:	fclose(bm_fp);
+        3:  341-block  0
+call    0 returned 3
+        3:  342:	fclose(tmp_fp);
+call    0 returned 3
+        -:  343:
+        -:  344:	/* Remove the old bookmarks file and make the tmp file the new
+        -:  345:	 * bookmarks file*/
+        3:  346:	unlink(bm_file);
+call    0 returned 3
+        3:  347:	rename(tmp_file, bm_file);
+call    0 returned 3
+        3:  348:	free(tmp_file);
+        -:  349:
+        -:  350:	/* Update bookmark names for TAB completion */
+        -:  351:	/*  get_bm_names(); */
+        3:  352:	free_bookmarks();
+call    0 returned 3
+        3:  353:	load_bookmarks();
+call    0 returned 3
+        -:  354:
+        -:  355:	/* If the bookmark to be removed was specified in command line */
+        3:  356:	if (cmd_line != -1)
+branch  0 taken 2 (fallthrough)
+branch  1 taken 1
+        2:  357:		printf(_("Successfully removed '%s'\n"), name);
+        2:  357-block  0
+call    0 returned 2
+call    1 returned 2
+unconditional  2 taken 2
+        -:  358:
+        3:  359:	return EXIT_SUCCESS;
+        3:  359-block  0
+unconditional  0 taken 3
+        -:  360:}
+        -:  361:
+        -:  362:static int
+function bookmark_add called 2 returned 100% blocks executed 56%
+        2:  363:bookmark_add(char *file)
+        -:  364:{
+        2:  365:	if (!file)
+        2:  365-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:  366:		return EXIT_FAILURE;
+    %%%%%:  366-block  0
 unconditional  0 never executed
-    %%%%%:  333-block  1
-unconditional  1 never executed
-    %%%%%:  333-block  2
-branch  2 never executed
-branch  3 never executed
-        -:  334:
-    #####:  335:		if (strcmp(del_elements[i], "*") == 0) {
-    %%%%%:  335-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  336:			/* Create a backup copy of the bookmarks file, just in case */
-    #####:  337:			char *bk_file = (char *)NULL;
-    #####:  338:			bk_file = (char *)xcalloc(strlen(CONFIG_DIR) + 14,
-    %%%%%:  338-block  0
-call    0 never executed
-        -:  339:			    sizeof(char));
-    #####:  340:			sprintf(bk_file, "%s/bookmarks.bk", CONFIG_DIR);
-    #####:  341:			char *tmp_cmd[] = {"cp", BM_FILE, bk_file, NULL};
-        -:  342:
-    #####:  343:			int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
-call    0 never executed
-        -:  344:			/* Remove the bookmarks file, free stuff, and exit */
-        -:  345:
-    #####:  346:			if (ret == EXIT_SUCCESS) {
-branch  0 never executed
-branch  1 never executed
-    #####:  347:				unlink(BM_FILE);
-    %%%%%:  347-block  0
-call    0 never executed
-    #####:  348:				printf(_("bookmarks: All bookmarks were deleted\n "
-call    0 never executed
-        -:  349:					 "However, a backup copy was created (%s)\n"), bk_file);
-    #####:  350:				free(bk_file);
-    #####:  351:				bk_file = (char *)NULL;
-unconditional  0 never executed
-        -:  352:			}
-        -:  353:
-        -:  354:			else
-    #####:  355:				printf(_("bookmarks: Error creating backup file. No "
-    %%%%%:  355-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  356:					 "bookmark was deleted\n"));
-        -:  357:
-    #####:  358:			for (i = 0; i < bmn; i++)
-    %%%%%:  358-block  0
-unconditional  0 never executed
-    %%%%%:  358-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  359:				free(bms[i]);
-    %%%%%:  359-block  0
-unconditional  0 never executed
-        -:  360:
-    #####:  361:			free(bms);
-        -:  362:
-    #####:  363:			for (i = 0; del_elements[i]; i++)
-    %%%%%:  363-block  0
-unconditional  0 never executed
-    %%%%%:  363-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  364:				free(del_elements[i]);
-    %%%%%:  364-block  0
-unconditional  0 never executed
-        -:  365:
-    #####:  366:			free(del_elements);
         -:  367:
-    #####:  368:			fclose(bm_fp);
-    %%%%%:  368-block  0
-call    0 never executed
-        -:  369:
-        -:  370:			/* Update bookmark names for TAB completion */
-        -:  371:			/*          get_bm_names(); */
-    #####:  372:			free_bookmarks();
-call    0 never executed
-    #####:  373:			load_bookmarks();
-call    0 never executed
-        -:  374:
-        -:  375:			/* If the argument "*" was specified in command line */
-    #####:  376:			if (cmd_line != -1)
-branch  0 never executed
-branch  1 never executed
-    #####:  377:				fputs(_("All bookmarks succesfully removed\n"), stdout);
-    %%%%%:  377-block  0
-call    0 never executed
-unconditional  1 never executed
+        2:  368:	int mod_file = 0;
+        -:  369:	/* If not absolute path, prepend current path to file */
+        2:  370:	if (*file != '/') {
+        2:  370-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 1
+        1:  371:		char *tmp_file = (char *)NULL;
+        1:  372:		tmp_file = (char *)xnmalloc((strlen(ws[cur_ws].path) + strlen(file) + 2), sizeof(char));
+        1:  372-block  0
+call    0 returned 1
+        1:  373:		sprintf(tmp_file, "%s/%s", ws[cur_ws].path, file);
+        1:  374:		file = tmp_file;
+        1:  375:		tmp_file = (char *)NULL;
+        1:  376:		mod_file = 1;
+unconditional  0 taken 1
+        -:  377:	}
         -:  378:
-    #####:  379:			return EXIT_SUCCESS;
-    %%%%%:  379-block  0
-unconditional  0 never executed
-        -:  380:		}
-        -:  381:	}
-        -:  382:
-        -:  383:	/* Remove single bookmarks */
-        -:  384:	/* Open a temporary file */
-    #####:  385:	char *tmp_file = (char *)NULL;
-    #####:  386:	tmp_file = (char *)xcalloc(strlen(CONFIG_DIR) + 8, sizeof(char));
-    %%%%%:  386-block  0
+        -:  379:	/* Check if FILE is an available path */
+        -:  380:
+        2:  381:	FILE *bm_fp = fopen(bm_file, "r");
+        2:  381-block  0
+call    0 returned 2
+        2:  382:	if (!bm_fp) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:  383:		fprintf(stderr, _("bookmarks: Error opening the bookmarks file\n"));
+    %%%%%:  383-block  0
 call    0 never executed
-    #####:  387:	sprintf(tmp_file, "%s/bm_tmp", CONFIG_DIR);
-        -:  388:
-    #####:  389:	FILE *tmp_fp = fopen(tmp_file, "w+");
-call    0 never executed
-    #####:  390:	if (!tmp_fp) {
-branch  0 never executed
-branch  1 never executed
-    #####:  391:		for (i = 0; i < bmn; i++)
-    %%%%%:  391-block  0
-unconditional  0 never executed
-    %%%%%:  391-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  392:			free(bms[i]);
-    %%%%%:  392-block  0
-unconditional  0 never executed
-        -:  393:
-    #####:  394:		free(bms);
-    #####:  395:		fclose(bm_fp);
-    %%%%%:  395-block  0
-call    0 never executed
-    #####:  396:		fprintf(stderr, _("bookmarks: Error creating temporary file\n"));
-call    0 never executed
-        -:  397:
-    #####:  398:		return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  399:	}
-        -:  400:
-        -:  401:	/* Go back to the beginning of the bookmarks file */
-    #####:  402:	fseek(bm_fp, 0, SEEK_SET);
-    %%%%%:  402-block  0
-call    0 never executed
-        -:  403:
-        -:  404:	/* Dump into the tmp file everything except bookmarks marked for
-        -:  405:	 * deletion */
-        -:  406:
-    #####:  407:	line_len = 0;
-    #####:  408:	line_size = 0;
-    #####:  409:	char *lineb = (char *)NULL;
-        -:  410:
-    #####:  411:	while ((line_len = getline(&lineb, &line_size, bm_fp)) > 0) {
-unconditional  0 never executed
-    %%%%%:  411-block  0
 call    1 never executed
-branch  2 never executed
-branch  3 never executed
-        -:  412:
-    #####:  413:		if (lineb[line_len - 1] == '\n')
-    %%%%%:  413-block  0
+    #####:  384:		if (mod_file)
 branch  0 never executed
 branch  1 never executed
-    #####:  414:			lineb[line_len - 1] = '\0';
-    %%%%%:  414-block  0
+    #####:  385:			free(file);
+    %%%%%:  385-block  0
 unconditional  0 never executed
-        -:  415:
-    #####:  416:		int bm_found = 0;
-        -:  417:		size_t j;
-        -:  418:
-    #####:  419:		for (j = 0; del_elements[j]; j++) {
-    %%%%%:  419-block  0
+        -:  386:
+    #####:  387:		return EXIT_FAILURE;
+    %%%%%:  387-block  0
 unconditional  0 never executed
-    %%%%%:  419-block  1
-unconditional  1 never executed
-    %%%%%:  419-block  2
-branch  2 never executed
-branch  3 never executed
-        -:  420:
-    #####:  421:			if (!is_number(del_elements[j]))
-    %%%%%:  421-block  0
+        -:  388:	}
+        -:  389:
+        2:  390:	int dup = 0;
+        2:  391:	char **bms = (char **)NULL;
+        2:  392:	size_t line_size = 0, i, bmn = 0;
+        2:  393:	char *line = (char *)NULL;
+        -:  394:
+       52:  395:	while (getline(&line, &line_size, bm_fp) > 0) {
+        2:  395-block  0
+unconditional  0 taken 2
+       52:  395-block  1
+call    1 returned 52
+branch  2 taken 50
+branch  3 taken 2 (fallthrough)
+       50:  396:		if (!line || !*line || *line == '#' || *line == '\n')
+       50:  396-block  0
+branch  0 taken 50 (fallthrough)
+branch  1 taken 0
+       50:  396-block  1
+branch  2 taken 50 (fallthrough)
+branch  3 taken 0
+       50:  396-block  2
+branch  4 taken 44 (fallthrough)
+branch  5 taken 6
+       44:  396-block  3
+branch  6 taken 0 (fallthrough)
+branch  7 taken 44
+        6:  397:			continue;
+        6:  397-block  0
+unconditional  0 taken 6
+        -:  398:
+       44:  399:		char *tmp_line = (char *)NULL;
+       44:  400:		tmp_line = strchr(line, '/');
+       44:  401:		if (tmp_line) {
+       44:  401-block  0
+branch  0 taken 44 (fallthrough)
+branch  1 taken 0
+       44:  402:			size_t tmp_line_len = strlen(tmp_line);
+        -:  403:
+       44:  404:			if (tmp_line_len && tmp_line[tmp_line_len - 1] == '\n')
+       44:  404-block  0
+branch  0 taken 44 (fallthrough)
+branch  1 taken 0
+       44:  404-block  1
+branch  2 taken 44 (fallthrough)
+branch  3 taken 0
+       44:  405:				tmp_line[tmp_line_len - 1] = '\0';
+       44:  405-block  0
+unconditional  0 taken 44
+        -:  406:
+       44:  407:			if (strcmp(tmp_line, file) == 0) {
+       44:  407-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 44
+    #####:  408:				fprintf(stderr, _("bookmarks: %s: Path already "
+    %%%%%:  408-block  0
 call    0 never executed
+call    1 never executed
+        -:  409:						  "bookmarked\n"),
+        -:  410:				    file);
+    #####:  411:				dup = 1;
+    #####:  412:				break;
+unconditional  0 never executed
+        -:  413:			}
+        -:  414:
+       44:  415:			tmp_line = (char *)NULL;
+       44:  415-block  0
+unconditional  0 taken 44
+        -:  416:		}
+        -:  417:
+        -:  418:		/* Store lines: used later to check hotkeys */
+       44:  419:		bms = (char **)xrealloc(bms, (bmn + 1) * sizeof(char *));
+       44:  419-block  0
+call    0 returned 44
+       44:  420:		bms[bmn++] = savestring(line, strlen(line));
+call    0 returned 44
+unconditional  1 taken 44
+        -:  421:	}
+        -:  422:
+        2:  423:	free(line);
+        2:  424:	line = (char *)NULL;
+        2:  425:	fclose(bm_fp);
+        2:  425-block  0
+call    0 returned 2
+        -:  426:
+        2:  427:	if (dup) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:  428:		for (i = 0; i < bmn; i++)
+    %%%%%:  428-block  0
+unconditional  0 never executed
+    %%%%%:  428-block  1
 branch  1 never executed
 branch  2 never executed
-    #####:  422:				continue;
-    %%%%%:  422-block  0
-unconditional  0 never executed
-        -:  423:
-    #####:  424:			if (strcmp(bms[atoi(del_elements[j]) - 1], lineb) == 0)
-    %%%%%:  424-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  425:				bm_found = 1;
-    %%%%%:  425-block  0
-unconditional  0 never executed
-        -:  426:		}
-        -:  427:
-    #####:  428:		if (bm_found)
-    %%%%%:  428-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  429:			continue;
+    #####:  429:			free(bms[i]);
     %%%%%:  429-block  0
 unconditional  0 never executed
-        -:  430:
-    #####:  431:		fprintf(tmp_fp, "%s\n", lineb);
+    #####:  430:		free(bms);
+    #####:  431:		if (mod_file)
     %%%%%:  431-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  432:	}
-        -:  433:
-    #####:  434:	free(lineb);
-    #####:  435:	lineb = (char *)NULL;
-        -:  436:
-        -:  437:	/* Free stuff */
-    #####:  438:	for (i = 0; del_elements[i]; i++)
-    %%%%%:  438-block  0
-unconditional  0 never executed
-    %%%%%:  438-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  439:		free(del_elements[i]);
-    %%%%%:  439-block  0
-unconditional  0 never executed
-        -:  440:
-    #####:  441:	free(del_elements);
-        -:  442:
-    #####:  443:	for (i = 0; i < bmn; i++)
-    %%%%%:  443-block  0
-unconditional  0 never executed
-    %%%%%:  443-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  444:		free(bms[i]);
-    %%%%%:  444-block  0
-unconditional  0 never executed
-        -:  445:
-    #####:  446:	free(bms);
-        -:  447:
-        -:  448:	/* Close files */
-    #####:  449:	fclose(bm_fp);
-    %%%%%:  449-block  0
-call    0 never executed
-    #####:  450:	fclose(tmp_fp);
-call    0 never executed
-        -:  451:
-        -:  452:	/* Remove the old bookmarks file and make the tmp file the new
-        -:  453:	 * bookmarks file*/
-    #####:  454:	unlink(BM_FILE);
-call    0 never executed
-    #####:  455:	rename(tmp_file, BM_FILE);
-call    0 never executed
-    #####:  456:	free(tmp_file);
-    #####:  457:	tmp_file = (char *)NULL;
-        -:  458:
-        -:  459:	/* Update bookmark names for TAB completion */
-        -:  460:	/*  get_bm_names(); */
-    #####:  461:	free_bookmarks();
-call    0 never executed
-    #####:  462:	load_bookmarks();
-call    0 never executed
-        -:  463:
-        -:  464:	/* If the bookmark to be removed was specified in command line */
-    #####:  465:	if (cmd_line != -1)
 branch  0 never executed
 branch  1 never executed
-    #####:  466:		printf(_("Successfully removed '%s'\n"), name);
-    %%%%%:  466-block  0
+    #####:  432:			free(file);
+    %%%%%:  432-block  0
+unconditional  0 never executed
+    #####:  433:		return EXIT_FAILURE;
+    %%%%%:  433-block  0
+unconditional  0 never executed
+        -:  434:	}
+        -:  435:
+        -:  436:	/* If path is available */
+        -:  437:
+        2:  438:	char *name = (char *)NULL, *hk = (char *)NULL, *tmp = (char *)NULL;
+        -:  439:
+        -:  440:	/* Ask for data to construct the bookmark line. Both values could be
+        -:  441:	 * NULL */
+        2:  442:	puts(_("Bookmark line example: [sc]name:path"));
+        2:  442-block  0
+call    0 returned 2
+call    1 returned 2
+        2:  443:	hk = rl_no_hist("Shortcut: ");
+call    0 returned 2
+        -:  444:
+        -:  445:	/* Check if hotkey is available */
+        2:  446:	if (hk) {
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  447:		char *tmp_line = (char *)NULL;
+        -:  448:
+       46:  449:		for (i = 0; i < bmn; i++) {
+        2:  449-block  0
+unconditional  0 taken 2
+       44:  449-block  1
+unconditional  1 taken 44
+       46:  449-block  2
+branch  2 taken 44
+branch  3 taken 2 (fallthrough)
+       44:  450:			tmp_line = strbtw(bms[i], '[', ']');
+       44:  450-block  0
+call    0 returned 44
+       44:  451:			if (tmp_line) {
+branch  0 taken 44 (fallthrough)
+branch  1 taken 0
+       44:  452:				if (strcmp(hk, tmp_line) == 0) {
+       44:  452-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 44
+    #####:  453:					fprintf(stderr, _("bookmarks: %s: This shortcut is "
+    %%%%%:  453-block  0
 call    0 never executed
-unconditional  1 never executed
-        -:  467:
-    #####:  468:	return EXIT_SUCCESS;
+call    1 never executed
+        -:  454:							  "already in use\n"), hk);
+        -:  455:
+    #####:  456:					dup = 1;
+    #####:  457:					free(tmp_line);
+    #####:  458:					break;
+unconditional  0 never executed
+        -:  459:				}
+        -:  460:
+       44:  461:				free(tmp_line);
+       44:  461-block  0
+unconditional  0 taken 44
+        -:  462:			}
+        -:  463:		}
+        -:  464:	}
+        -:  465:
+        2:  466:	if (dup) {
+        2:  466-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:  467:		if (hk)
+    %%%%%:  467-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  468:			free(hk);
     %%%%%:  468-block  0
 unconditional  0 never executed
-        -:  469:}
-        -:  470:
-        -:  471:int
-function bookmark_add called 0 returned 0% blocks executed 0%
-    #####:  472:bookmark_add(char *file)
-        -:  473:{
-    #####:  474:	if (!file)
+    #####:  469:		for (i = 0; i < bmn; i++)
+    %%%%%:  469-block  0
+unconditional  0 never executed
+    %%%%%:  469-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  470:			free(bms[i]);
+    %%%%%:  470-block  0
+unconditional  0 never executed
+    #####:  471:		free(bms);
+    #####:  472:		if (mod_file)
+    %%%%%:  472-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  473:			free(file);
+    %%%%%:  473-block  0
+unconditional  0 never executed
+    #####:  474:		return EXIT_FAILURE;
     %%%%%:  474-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  475:		return EXIT_FAILURE;
-    %%%%%:  475-block  0
 unconditional  0 never executed
+        -:  475:	}
         -:  476:
-    #####:  477:	int mod_file = 0;
-        -:  478:	/* If not absolute path, prepend current path to file */
-    #####:  479:	if (*file != '/') {
-    %%%%%:  479-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  480:		char *tmp_file = (char *)NULL;
-    #####:  481:		tmp_file = (char *)xnmalloc((strlen(ws[cur_ws].path) + strlen(file) + 2), sizeof(char));
-    %%%%%:  481-block  0
+        2:  477:	name = rl_no_hist("Name: ");
+        2:  477-block  0
+call    0 returned 2
+        -:  478:
+        2:  479:	if (name) {
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        -:  480:		/* Check name is not duplicated */
+        2:  481:		char *tmp_line = (char *)NULL;
+       46:  482:		for (i = 0; i < bmn; i++) {
+        2:  482-block  0
+unconditional  0 taken 2
+       44:  482-block  1
+unconditional  1 taken 44
+       46:  482-block  2
+branch  2 taken 44
+branch  3 taken 2 (fallthrough)
+       44:  483:			tmp_line = strbtw(bms[i], ']', ':');
+       44:  483-block  0
+call    0 returned 44
+       44:  484:			if (tmp_line) {
+branch  0 taken 36 (fallthrough)
+branch  1 taken 8
+       36:  485:				if (strcmp(name, tmp_line) == 0) {
+       36:  485-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 36
+    #####:  486:					fprintf(stderr, _("bookmarks: %s: This name is "
+    %%%%%:  486-block  0
 call    0 never executed
-    #####:  482:		sprintf(tmp_file, "%s/%s", ws[cur_ws].path, file);
-    #####:  483:		file = tmp_file;
-    #####:  484:		tmp_file = (char *)NULL;
-    #####:  485:		mod_file = 1;
+call    1 never executed
+        -:  487:							  "already in use\n"), name);
+    #####:  488:					dup = 1;
+    #####:  489:					free(tmp_line);
+    #####:  490:					break;
 unconditional  0 never executed
-        -:  486:	}
-        -:  487:
-        -:  488:	/* Check if FILE is an available path */
-        -:  489:
-    #####:  490:	FILE *bm_fp = fopen(BM_FILE, "r");
-    %%%%%:  490-block  0
-call    0 never executed
-    #####:  491:	if (!bm_fp) {
-branch  0 never executed
-branch  1 never executed
-    #####:  492:		fprintf(stderr, _("bookmarks: Error opening the bookmarks file\n"));
-    %%%%%:  492-block  0
-call    0 never executed
-    #####:  493:		if (mod_file)
-branch  0 never executed
-branch  1 never executed
-    #####:  494:			free(file);
-    %%%%%:  494-block  0
-unconditional  0 never executed
+        -:  491:				}
+       36:  492:				free(tmp_line);
+       36:  492-block  0
+unconditional  0 taken 36
+        -:  493:			}
+        -:  494:		}
         -:  495:
-    #####:  496:		return EXIT_FAILURE;
-    %%%%%:  496-block  0
+        2:  496:		if (dup) {
+        2:  496-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:  497:			free(name);
+    #####:  498:			if (hk)
+    %%%%%:  498-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  499:				free(hk);
+    %%%%%:  499-block  0
 unconditional  0 never executed
-        -:  497:	}
-        -:  498:
-    #####:  499:	int dup = 0;
-    #####:  500:	char **bms = (char **)NULL;
-    #####:  501:	size_t line_size = 0, i, bmn = 0;
-    #####:  502:	char *line = (char *)NULL;
-    #####:  503:	ssize_t line_len = 0;
-        -:  504:
-    #####:  505:	while ((line_len = getline(&line, &line_size, bm_fp)) > 0) {
+    #####:  500:			for (i = 0; i < bmn; i++)
+    %%%%%:  500-block  0
+unconditional  0 never executed
+    %%%%%:  500-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  501:				free(bms[i]);
+    %%%%%:  501-block  0
+unconditional  0 never executed
+    #####:  502:			free(bms);
+    #####:  503:			if (mod_file)
+    %%%%%:  503-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  504:				free(file);
+    %%%%%:  504-block  0
+unconditional  0 never executed
+    #####:  505:			return EXIT_FAILURE;
     %%%%%:  505-block  0
 unconditional  0 never executed
-    %%%%%:  505-block  1
-call    1 never executed
-branch  2 never executed
-branch  3 never executed
-        -:  506:
-    #####:  507:		if (!line || !*line || *line == '#' || *line == '\n')
-    %%%%%:  507-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  507-block  1
-branch  2 never executed
-branch  3 never executed
-    %%%%%:  507-block  2
-branch  4 never executed
-branch  5 never executed
-    %%%%%:  507-block  3
-branch  6 never executed
-branch  7 never executed
-    #####:  508:			continue;
-    %%%%%:  508-block  0
+        -:  506:		}
+        -:  507:
+        -:  508:		/* Generate the bookmark line */
+        2:  509:		if (hk) { /* name AND hk */
+        2:  509-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  510:			tmp = (char *)xcalloc(strlen(hk) + strlen(name) + strlen(file) + 5, sizeof(char));
+        2:  510-block  0
+call    0 returned 2
+        2:  511:			sprintf(tmp, "[%s]%s:%s\n", hk, name, file);
+        2:  512:			free(hk);
+unconditional  0 taken 2
+        -:  513:		} else { /* Only name */
+    #####:  514:			tmp = (char *)xnmalloc(strlen(name) + strlen(file) + 3,
+    %%%%%:  514-block  0
+call    0 never executed
+        -:  515:			    sizeof(char));
+    #####:  516:			sprintf(tmp, "%s:%s\n", name, file);
 unconditional  0 never executed
-        -:  509:
-    #####:  510:		char *tmp_line = (char *)NULL;
-    #####:  511:		tmp_line = strchr(line, '/');
-        -:  512:
-    #####:  513:		if (tmp_line) {
-    %%%%%:  513-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  514:			size_t tmp_line_len = strlen(tmp_line);
-        -:  515:
-    #####:  516:			if (tmp_line_len && tmp_line[tmp_line_len - 1] == '\n')
-    %%%%%:  516-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  516-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  517:				tmp_line[tmp_line_len - 1] = '\0';
-    %%%%%:  517-block  0
-unconditional  0 never executed
+        -:  517:		}
         -:  518:
-    #####:  519:			if (strcmp(tmp_line, file) == 0) {
-    %%%%%:  519-block  0
+        2:  519:		free(name);
+        2:  520:		name = (char *)NULL;
+        2:  520-block  0
+unconditional  0 taken 2
+        -:  521:	}
+        -:  522:
+    #####:  523:	else if (hk) { /* Only hk */
+    %%%%%:  523-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  520:				fprintf(stderr, _("bookmarks: %s: Path already "
-    %%%%%:  520-block  0
+    #####:  524:		tmp = (char *)xnmalloc(strlen(hk) + strlen(file) + 4,
+    %%%%%:  524-block  0
 call    0 never executed
-        -:  521:						  "bookmarked\n"),
-        -:  522:				    file);
-    #####:  523:				dup = 1;
-    #####:  524:				break;
+        -:  525:		    sizeof(char));
+    #####:  526:		sprintf(tmp, "[%s]%s\n", hk, file);
+    #####:  527:		free(hk);
+    #####:  528:		hk = (char *)NULL;
 unconditional  0 never executed
-        -:  525:			}
-        -:  526:
-    #####:  527:			tmp_line = (char *)NULL;
-    %%%%%:  527-block  0
+        -:  529:	} else { /* Neither shortcut nor name: only path */
+    #####:  530:		tmp = (char *)xnmalloc(strlen(file) + 2, sizeof(char));
+    %%%%%:  530-block  0
+call    0 never executed
+    #####:  531:		sprintf(tmp, "%s\n", file);
 unconditional  0 never executed
-        -:  528:		}
-        -:  529:
-        -:  530:		/* Store lines: used later to check hotkeys */
-    #####:  531:		bms = (char **)xrealloc(bms, (bmn + 1) * sizeof(char *));
-    %%%%%:  531-block  0
-call    0 never executed
-    #####:  532:		bms[bmn++] = savestring(line, strlen(line));
-call    0 never executed
-unconditional  1 never executed
-        -:  533:	}
-        -:  534:
-    #####:  535:	free(line);
-    #####:  536:	line = (char *)NULL;
-    #####:  537:	fclose(bm_fp);
-    %%%%%:  537-block  0
-call    0 never executed
+        -:  532:	}
+        -:  533:
+       46:  534:	for (i = 0; i < bmn; i++)
+        2:  534-block  0
+unconditional  0 taken 2
+       46:  534-block  1
+branch  1 taken 44
+branch  2 taken 2 (fallthrough)
+       44:  535:		free(bms[i]);
+       44:  535-block  0
+unconditional  0 taken 44
+        2:  536:	free(bms);
+        2:  537:	bms = (char **)NULL;
         -:  538:
-    #####:  539:	if (dup) {
-branch  0 never executed
-branch  1 never executed
-    #####:  540:		for (i = 0; i < bmn; i++)
+        2:  539:	if (!tmp) {
+        2:  539-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:  540:		fprintf(stderr, _("bookmarks: Error generating the bookmark line\n"));
     %%%%%:  540-block  0
+call    0 never executed
+call    1 never executed
+    #####:  541:		return EXIT_FAILURE;
 unconditional  0 never executed
-    %%%%%:  540-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  541:			free(bms[i]);
-    %%%%%:  541-block  0
-unconditional  0 never executed
-        -:  542:
-    #####:  543:		free(bms);
-        -:  544:
-    #####:  545:		if (mod_file)
-    %%%%%:  545-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  546:			free(file);
-    %%%%%:  546-block  0
-unconditional  0 never executed
-        -:  547:
-    #####:  548:		return EXIT_FAILURE;
+        -:  542:	}
+        -:  543:
+        -:  544:	/* Once we have the bookmark line, write it to the bookmarks file */
+        -:  545:
+        2:  546:	bm_fp = fopen(bm_file, "a+");
+        2:  546-block  0
+call    0 returned 2
+        2:  547:	if (!bm_fp) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:  548:		fprintf(stderr, _("bookmarks: Error opening the bookmarks file\n"));
     %%%%%:  548-block  0
+call    0 never executed
+call    1 never executed
+    #####:  549:		free(tmp);
+    #####:  550:		return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  549:	}
-        -:  550:
-        -:  551:	/* If path is available */
+        -:  551:	}
         -:  552:
-    #####:  553:	char *name = (char *)NULL, *hk = (char *)NULL, *tmp = (char *)NULL;
-        -:  554:
-        -:  555:	/* Ask for data to construct the bookmark line. Both values could be
-        -:  556:	 * NULL */
-    #####:  557:	puts(_("Bookmark line example: [sc]name:path"));
+        2:  553:	if (mod_file)
+        2:  553-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 1
+        1:  554:		free(file);
+        1:  554-block  0
+unconditional  0 taken 1
+        -:  555:
+        2:  556:	if (fseek(bm_fp, 0L, SEEK_END) == -1) {
+        2:  556-block  0
+call    0 returned 2
+branch  1 taken 0 (fallthrough)
+branch  2 taken 2
+    #####:  557:		fprintf(stderr, _("bookmarks: Error opening the bookmarks file\n"));
     %%%%%:  557-block  0
 call    0 never executed
-    #####:  558:	hk = rl_no_hist("Shortcut: ");
+call    1 never executed
+    #####:  558:		free(tmp);
+    #####:  559:		fclose(bm_fp);
 call    0 never executed
-        -:  559:
-        -:  560:	/* Check if hotkey is available */
-    #####:  561:	if (hk) {
-branch  0 never executed
-branch  1 never executed
-    #####:  562:		char *tmp_line = (char *)NULL;
-        -:  563:
-    #####:  564:		for (i = 0; i < bmn; i++) {
-    %%%%%:  564-block  0
+    #####:  560:		return EXIT_FAILURE;
 unconditional  0 never executed
-    %%%%%:  564-block  1
-unconditional  1 never executed
-    %%%%%:  564-block  2
-branch  2 never executed
-branch  3 never executed
-    #####:  565:			tmp_line = strbtw(bms[i], '[', ']');
-    %%%%%:  565-block  0
-call    0 never executed
-        -:  566:
-    #####:  567:			if (tmp_line) {
-branch  0 never executed
-branch  1 never executed
-        -:  568:
-    #####:  569:				if (strcmp(hk, tmp_line) == 0) {
-    %%%%%:  569-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  570:					fprintf(stderr, _("bookmarks: %s: This shortcut is "
-    %%%%%:  570-block  0
-call    0 never executed
-        -:  571:							  "already in use\n"), hk);
-        -:  572:
-    #####:  573:					dup = 1;
-    #####:  574:					free(tmp_line);
-    #####:  575:					break;
-unconditional  0 never executed
-        -:  576:				}
-        -:  577:
-    #####:  578:				free(tmp_line);
-    %%%%%:  578-block  0
-unconditional  0 never executed
-        -:  579:			}
-        -:  580:		}
-        -:  581:	}
-        -:  582:
-    #####:  583:	if (dup) {
-    %%%%%:  583-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  584:		if (hk)
+        -:  561:	}
+        -:  562:
+        -:  563:	/* Everything is fine: add the new bookmark to the bookmarks file */
+        2:  564:	fprintf(bm_fp, "%s", tmp);
+        2:  564-block  0
+call    0 returned 2
+        2:  565:	fclose(bm_fp);
+call    0 returned 2
+        2:  566:	printf(_("File succesfully bookmarked\n"));
+call    0 returned 2
+call    1 returned 2
+        2:  567:	free(tmp);
+        -:  568:	/* Update bookmark names for TAB completion */
+        -:  569:	/*  get_bm_names();  */
+        2:  570:	free_bookmarks();
+call    0 returned 2
+        2:  571:	load_bookmarks();
+call    0 returned 2
+        2:  572:	return EXIT_SUCCESS;
+unconditional  0 taken 2
+        -:  573:}
+        -:  574:
+        -:  575:int
+function edit_bookmarks called 7 returned 100% blocks executed 45%
+        7:  576:edit_bookmarks(char *cmd)
+        -:  577:{
+        7:  578:	int exit_status = EXIT_SUCCESS;
+        -:  579:
+        7:  580:	if (!cmd) {
+        7:  580-block  0
+branch  0 taken 7 (fallthrough)
+branch  1 taken 0
+        7:  581:		exit_status = open_file(bm_file);
+        7:  581-block  0
+call    0 returned 7
+unconditional  1 taken 7
+        -:  582:	} else {
+    #####:  583:		char *tmp_cmd[] = {cmd, bm_file, NULL};
+    #####:  584:		if (launch_execve(tmp_cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
     %%%%%:  584-block  0
-branch  0 never executed
+call    0 never executed
 branch  1 never executed
-    #####:  585:			free(hk);
+branch  2 never executed
+    #####:  585:			exit_status = EXIT_FAILURE;
     %%%%%:  585-block  0
 unconditional  0 never executed
-        -:  586:
-    #####:  587:		for (i = 0; i < bmn; i++)
-    %%%%%:  587-block  0
-unconditional  0 never executed
-    %%%%%:  587-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  588:			free(bms[i]);
-    %%%%%:  588-block  0
-unconditional  0 never executed
-        -:  589:
-    #####:  590:		free(bms);
-        -:  591:
-    #####:  592:		if (mod_file)
-    %%%%%:  592-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  593:			free(file);
-    %%%%%:  593-block  0
-unconditional  0 never executed
-        -:  594:
-    #####:  595:		return EXIT_FAILURE;
-    %%%%%:  595-block  0
-unconditional  0 never executed
-        -:  596:	}
-        -:  597:
-    #####:  598:	name = rl_no_hist("Name: ");
-    %%%%%:  598-block  0
+        -:  586:	}
+        -:  587:
+        7:  588:	if (exit_status == EXIT_FAILURE)
+        7:  588-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 7
+    #####:  589:		fprintf(stderr, _("%s: Cannot open the bookmarks file"), PROGRAM_NAME);
+    %%%%%:  589-block  0
 call    0 never executed
-        -:  599:
-    #####:  600:	if (name) {
-branch  0 never executed
-branch  1 never executed
-        -:  601:		/* Check name is not duplicated */
-        -:  602:
-    #####:  603:		char *tmp_line = (char *)NULL;
-    #####:  604:		for (i = 0; i < bmn; i++) {
-    %%%%%:  604-block  0
-unconditional  0 never executed
-    %%%%%:  604-block  1
-unconditional  1 never executed
-    %%%%%:  604-block  2
-branch  2 never executed
-branch  3 never executed
-    #####:  605:			tmp_line = strbtw(bms[i], ']', ':');
-    %%%%%:  605-block  0
+call    1 never executed
+unconditional  2 never executed
+        -:  590:
+        7:  591:	return exit_status;
+        7:  591-block  0
+unconditional  0 taken 7
+        -:  592:}
+        -:  593:
+        -:  594:int
+function open_bookmark called 11 returned 100% blocks executed 78%
+       11:  595:open_bookmark(void)
+        -:  596:{
+        -:  597:	/* If no bookmarks */
+       11:  598:	if (bm_n == 0) {
+       11:  598-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 11
+    #####:  599:		printf(_("Bookmarks: There are no bookmarks\nEnter 'bm edit' "
+    %%%%%:  599-block  0
 call    0 never executed
-        -:  606:
-    #####:  607:			if (tmp_line) {
-branch  0 never executed
-branch  1 never executed
-        -:  608:
-    #####:  609:				if (strcmp(name, tmp_line) == 0) {
+call    1 never executed
+        -:  600:			 "or press F11 to edit the bookmarks file. You can "
+        -:  601:			 "also enter 'bm add PATH' to add a new bookmark\n"));
+    #####:  602:		return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  603:	}
+        -:  604:
+        -:  605:	/* We have bookmarks... */
+        -:  606:	struct stat file_attrib;
+        -:  607:
+       11:  608:	if (clear_screen)
+       11:  608-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 11
+    #####:  609:		CLEAR;
     %%%%%:  609-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  610:					fprintf(stderr, _("bookmarks: %s: This name is "
-    %%%%%:  610-block  0
 call    0 never executed
-        -:  611:							  "already in use\n"), name);
+unconditional  1 never executed
+        -:  610:
+       11:  611:	printf(_("%sBookmarks Manager%s\n\n"), BOLD, df_c);
+       11:  611-block  0
+call    0 returned 11
+call    1 returned 11
         -:  612:
-    #####:  613:					dup = 1;
-    #####:  614:					free(tmp_line);
-    #####:  615:					break;
+        -:  613:	/* Print bookmarks taking into account the existence of shortcut,
+        -:  614:	 * name, and path for each bookmark */
+       11:  615:	size_t i, eln = 0;
+        -:  616:
+      255:  617:	for (i = 0; i < bm_n; i++) {
+unconditional  0 taken 11
+      244:  617-block  0
+unconditional  1 taken 244
+      255:  617-block  1
+branch  2 taken 244
+branch  3 taken 11 (fallthrough)
+     244*:  618:		if (!bookmarks[i].path || !*bookmarks[i].path)
+      244:  618-block  0
+branch  0 taken 244 (fallthrough)
+branch  1 taken 0
+      244:  618-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 244
+    #####:  619:			continue;
+    %%%%%:  619-block  0
 unconditional  0 never executed
-        -:  616:				}
-    #####:  617:				free(tmp_line);
-    %%%%%:  617-block  0
-unconditional  0 never executed
-        -:  618:			}
-        -:  619:		}
-        -:  620:
-    #####:  621:		if (dup) {
-    %%%%%:  621-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  622:			free(name);
+      244:  620:		eln++;
+      244:  621:		int is_dir = 0, sc_ok = 0, name_ok = 0, non_existent = 0;
+      244:  622:		int path_ok = stat(bookmarks[i].path, &file_attrib);
+      244:  622-block  0
+call    0 returned 244
         -:  623:
-    #####:  624:			if (hk)
-    %%%%%:  624-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  625:				free(hk);
-    %%%%%:  625-block  0
-unconditional  0 never executed
+      244:  624:		if (bookmarks[i].shortcut)
+branch  0 taken 244 (fallthrough)
+branch  1 taken 0
+      244:  625:			sc_ok = 1;
+      244:  625-block  0
+unconditional  0 taken 244
         -:  626:
-    #####:  627:			for (i = 0; i < bmn; i++)
-    %%%%%:  627-block  0
-unconditional  0 never executed
-    %%%%%:  627-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  628:				free(bms[i]);
-    %%%%%:  628-block  0
-unconditional  0 never executed
+      244:  627:		if (bookmarks[i].name)
+      244:  627-block  0
+branch  0 taken 200 (fallthrough)
+branch  1 taken 44
+      200:  628:			name_ok = 1;
+      200:  628-block  0
+unconditional  0 taken 200
         -:  629:
-    #####:  630:			free(bms);
-        -:  631:
-    #####:  632:			if (mod_file)
-    %%%%%:  632-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  633:				free(file);
-    %%%%%:  633-block  0
-unconditional  0 never executed
-        -:  634:
-    #####:  635:			return EXIT_FAILURE;
-    %%%%%:  635-block  0
-unconditional  0 never executed
-        -:  636:		}
-        -:  637:
-        -:  638:		/* Generate the bookmark line */
-    #####:  639:		if (hk) { /* name AND hk */
-    %%%%%:  639-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  640:			tmp = (char *)xcalloc(strlen(hk) + strlen(name) + strlen(file) + 5, sizeof(char));
-    %%%%%:  640-block  0
-call    0 never executed
-    #####:  641:			sprintf(tmp, "[%s]%s:%s\n", hk, name, file);
-    #####:  642:			free(hk);
-unconditional  0 never executed
-        -:  643:		}
-        -:  644:
-        -:  645:		else { /* Only name */
-    #####:  646:			tmp = (char *)xnmalloc(strlen(name) + strlen(file) + 3,
-    %%%%%:  646-block  0
-call    0 never executed
-        -:  647:			    sizeof(char));
-    #####:  648:			sprintf(tmp, "%s:%s\n", name, file);
-unconditional  0 never executed
-        -:  649:		}
-        -:  650:
-    #####:  651:		free(name);
-    #####:  652:		name = (char *)NULL;
-    %%%%%:  652-block  0
-unconditional  0 never executed
-        -:  653:	}
-        -:  654:
-    #####:  655:	else if (hk) { /* Only hk */
-    %%%%%:  655-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  656:		tmp = (char *)xnmalloc(strlen(hk) + strlen(file) + 4,
-    %%%%%:  656-block  0
-call    0 never executed
-        -:  657:		    sizeof(char));
-    #####:  658:		sprintf(tmp, "[%s]%s\n", hk, file);
-    #####:  659:		free(hk);
-    #####:  660:		hk = (char *)NULL;
-unconditional  0 never executed
-        -:  661:	}
-        -:  662:
-        -:  663:	else { /* Neither shortcut nor name: only path */
-    #####:  664:		tmp = (char *)xnmalloc(strlen(file) + 2, sizeof(char));
-    %%%%%:  664-block  0
-call    0 never executed
-    #####:  665:		sprintf(tmp, "%s\n", file);
-unconditional  0 never executed
-        -:  666:	}
-        -:  667:
-    #####:  668:	for (i = 0; i < bmn; i++)
-    %%%%%:  668-block  0
-unconditional  0 never executed
-    %%%%%:  668-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  669:		free(bms[i]);
-    %%%%%:  669-block  0
-unconditional  0 never executed
-        -:  670:
-    #####:  671:	free(bms);
-        -:  672:
-    #####:  673:	bms = (char **)NULL;
-        -:  674:
-    #####:  675:	if (!tmp) {
-    %%%%%:  675-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  676:		fprintf(stderr, _("bookmarks: Error generating the bookmark line\n"));
-    %%%%%:  676-block  0
-call    0 never executed
-    #####:  677:		return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  678:	}
-        -:  679:
-        -:  680:	/* Once we have the bookmark line, write it to the bookmarks file */
-        -:  681:
-    #####:  682:	bm_fp = fopen(BM_FILE, "a+");
-    %%%%%:  682-block  0
-call    0 never executed
-    #####:  683:	if (!bm_fp) {
-branch  0 never executed
-branch  1 never executed
-    #####:  684:		fprintf(stderr, _("bookmarks: Error opening the bookmarks file\n"));
-    %%%%%:  684-block  0
-call    0 never executed
-    #####:  685:		free(tmp);
-    #####:  686:		return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  687:	}
-        -:  688:
-    #####:  689:	if (mod_file)
-    %%%%%:  689-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  690:		free(file);
-    %%%%%:  690-block  0
-unconditional  0 never executed
-        -:  691:
-    #####:  692:	if (fseek(bm_fp, 0L, SEEK_END) == -1) {
-    %%%%%:  692-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  693:		fprintf(stderr, _("bookmarks: Error opening the bookmarks file\n"));
-    %%%%%:  693-block  0
-call    0 never executed
-    #####:  694:		free(tmp);
-    #####:  695:		fclose(bm_fp);
-call    0 never executed
-    #####:  696:		return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  697:	}
-        -:  698:
-        -:  699:	/* Everything is fine: add the new bookmark to the bookmarks file */
-    #####:  700:	fprintf(bm_fp, "%s", tmp);
-    %%%%%:  700-block  0
-call    0 never executed
-    #####:  701:	fclose(bm_fp);
-call    0 never executed
-    #####:  702:	printf(_("File succesfully bookmarked\n"));
-call    0 never executed
-    #####:  703:	free(tmp);
-        -:  704:
-        -:  705:	/* Update bookmark names for TAB completion */
-        -:  706:	/*  get_bm_names();  */
-    #####:  707:	free_bookmarks();
-call    0 never executed
-    #####:  708:	load_bookmarks();
-call    0 never executed
-        -:  709:
-    #####:  710:	return EXIT_SUCCESS;
-unconditional  0 never executed
-        -:  711:}
-        -:  712:
-        -:  713:int
-function edit_bookmarks called 0 returned 0% blocks executed 0%
-    #####:  714:edit_bookmarks(char *cmd)
-        -:  715:{
-    #####:  716:	int exit_status = EXIT_SUCCESS;
-        -:  717:
-    #####:  718:	if (!cmd) {
-    %%%%%:  718-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  719:
-    #####:  720:		if (opener) {
-    %%%%%:  720-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  721:			char *tmp_cmd[] = {opener, BM_FILE, NULL};
-        -:  722:
-    #####:  723:			if (launch_execve(tmp_cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS) {
-    %%%%%:  723-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  724:				fprintf(stderr, _("%s: Cannot open the bookmarks file"),
-    %%%%%:  724-block  0
-call    0 never executed
-        -:  725:						PROGRAM_NAME);
-    #####:  726:				exit_status = EXIT_FAILURE;
-unconditional  0 never executed
-        -:  727:			}
-        -:  728:		}
-        -:  729:
-        -:  730:		else {
-    #####:  731:			char *tmp_cmd[] = {"mm", BM_FILE, NULL};
-        -:  732:
-    #####:  733:			exit_status = mime_open(tmp_cmd);
-    %%%%%:  733-block  0
-call    0 never executed
-        -:  734:		}
-        -:  735:	}
-        -:  736:
-        -:  737:	else {
-    #####:  738:		char *tmp_cmd[] = {cmd, BM_FILE, NULL};
-        -:  739:
-    #####:  740:		int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOSTDERR);
-    %%%%%:  740-block  0
-call    0 never executed
-        -:  741:
-    #####:  742:		if (ret != EXIT_SUCCESS)
-branch  0 never executed
-branch  1 never executed
-    #####:  743:			exit_status = EXIT_FAILURE;
-    %%%%%:  743-block  0
-unconditional  0 never executed
-        -:  744:	}
-        -:  745:
-    #####:  746:	return exit_status;
-    %%%%%:  746-block  0
-unconditional  0 never executed
-        -:  747:}
-        -:  748:
-        -:  749:int
-function open_bookmark called 1 returned 100% blocks executed 58%
-        1:  750:open_bookmark(void)
-        -:  751:{
-        -:  752:	/* If no bookmarks */
-        1:  753:	if (bm_n == 0) {
-        1:  753-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####:  754:		printf(_("Bookmarks: There are no bookmarks\nEnter 'bm edit' "
-    %%%%%:  754-block  0
-call    0 never executed
-        -:  755:			 "or press F11 to edit the bookmarks file. You can "
-        -:  756:			 "also enter 'bm add PATH' to add a new bookmark\n"));
-    #####:  757:		return EXIT_SUCCESS;
-unconditional  0 never executed
-        -:  758:	}
-        -:  759:
-        -:  760:	/* We have bookmarks... */
-        -:  761:	struct stat file_attrib;
-        -:  762:
-        1:  763:	if (clear_screen)
-        1:  763-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####:  764:		CLEAR;
-    %%%%%:  764-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  765:
-        1:  766:	printf(_("%sBookmarks Manager%s\n\n"), bold, df_c);
-        1:  766-block  0
-call    0 returned 1
-        -:  767:
-        -:  768:	/* Print bookmarks taking into account the existence of shortcut,
-        -:  769:	 * name, and path for each bookmark */
-        1:  770:	size_t i, eln = 0;
-        -:  771:
-       23:  772:	for (i = 0; i < bm_n; i++) {
-unconditional  0 taken 1
-       22:  772-block  0
-unconditional  1 taken 22
-       23:  772-block  1
-branch  2 taken 22
-branch  3 taken 1 (fallthrough)
-        -:  773:
-      22*:  774:		if (!bookmarks[i].path || !*bookmarks[i].path)
-       22:  774-block  0
-branch  0 taken 22 (fallthrough)
-branch  1 taken 0
-       22:  774-block  1
-branch  2 taken 0 (fallthrough)
-branch  3 taken 22
-    #####:  775:			continue;
-    %%%%%:  775-block  0
-unconditional  0 never executed
-        -:  776:
-       22:  777:		eln++;
-        -:  778:
-       22:  779:		int is_dir = 0, sc_ok = 0, name_ok = 0, non_existent = 0;
-        -:  780:
-       22:  781:		int path_ok = stat(bookmarks[i].path, &file_attrib);
-       22:  781-block  0
-call    0 returned 22
-        -:  782:
-       22:  783:		if (bookmarks[i].shortcut)
-branch  0 taken 22 (fallthrough)
-branch  1 taken 0
-       22:  784:			sc_ok = 1;
-       22:  784-block  0
-unconditional  0 taken 22
-        -:  785:
-       22:  786:		if (bookmarks[i].name)
-       22:  786-block  0
-branch  0 taken 18 (fallthrough)
-branch  1 taken 4
-       18:  787:			name_ok = 1;
-       18:  787-block  0
-unconditional  0 taken 18
-        -:  788:
-       22:  789:		if (path_ok == -1)
-       22:  789-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 22
-    #####:  790:			non_existent = 1;
-    %%%%%:  790-block  0
-unconditional  0 never executed
-        -:  791:
-        -:  792:		else {
-       22:  793:			switch ((file_attrib.st_mode & S_IFMT)) {
-       22:  793-block  0
-branch  0 taken 21
-branch  1 taken 1
+      244:  630:		if (path_ok == -1) {
+      244:  630-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 242
+        2:  631:			non_existent = 1;
+        2:  631-block  0
+unconditional  0 taken 2
+        -:  632:		} else {
+      242:  633:			switch ((file_attrib.st_mode & S_IFMT)) {
+      242:  633-block  0
+branch  0 taken 232
+branch  1 taken 10
 branch  2 taken 0
-        -:  794:
-       21:  795:			case S_IFDIR:
-       21:  796:				is_dir = 1;
-       21:  797:				break;
-       21:  797-block  0
-unconditional  0 taken 21
-        -:  798:
-        1:  799:			case S_IFREG:
-        1:  800:				break;
-        1:  800-block  0
-unconditional  0 taken 1
-        -:  801:
-    #####:  802:			default:
-    #####:  803:				non_existent = 1;
-    #####:  804:				break;
-    %%%%%:  804-block  0
+      232:  634:			case S_IFDIR: is_dir = 1; break;
+      232:  634-block  0
+unconditional  0 taken 232
+       10:  635:			case S_IFREG: break;
+       10:  635-block  0
+unconditional  0 taken 10
+    #####:  636:			default: non_existent = 1; break;
+    %%%%%:  636-block  0
 unconditional  0 never executed
-        -:  805:			}
-        -:  806:		}
-        -:  807:
-      88*:  808:		printf("%s%zu%s %s%c%s%c%s %s%s%s\n", el_c, eln, df_c,
-       22:  808-block  0
-branch  0 taken 18 (fallthrough)
-branch  1 taken 4
-       22:  808-block  1
-branch  2 taken 22 (fallthrough)
-branch  3 taken 0
-       22:  808-block  2
-unconditional  4 taken 22
-    %%%%%:  808-block  3
-unconditional  5 never executed
-       22:  808-block  4
-branch  6 taken 22 (fallthrough)
+        -:  637:			}
+        -:  638:		}
+        -:  639:
+     974*:  640:		printf("%s%zu%s %s%c%s%c%s %s%s%s\n", el_c, eln, df_c,
+      244:  640-block  0
+branch  0 taken 200 (fallthrough)
+branch  1 taken 44
+      244:  640-block  1
+branch  2 taken 242 (fallthrough)
+branch  3 taken 2
+      242:  640-block  2
+unconditional  4 taken 242
+        2:  640-block  3
+unconditional  5 taken 2
+      244:  640-block  4
+branch  6 taken 244 (fallthrough)
 branch  7 taken 0
-       22:  808-block  5
-unconditional  8 taken 22
-    %%%%%:  808-block  6
+      244:  640-block  5
+unconditional  8 taken 244
+    %%%%%:  640-block  6
 unconditional  9 never executed
-       22:  808-block  7
-branch 10 taken 22 (fallthrough)
+      244:  640-block  7
+branch 10 taken 244 (fallthrough)
 branch 11 taken 0
-    %%%%%:  808-block  8
+    %%%%%:  640-block  8
 unconditional 12 never executed
-       22:  808-block  9
-branch 13 taken 22 (fallthrough)
+      244:  640-block  9
+branch 13 taken 244 (fallthrough)
 branch 14 taken 0
-       22:  808-block 10
-unconditional 15 taken 22
-    %%%%%:  808-block 11
+      244:  640-block 10
+unconditional 15 taken 244
+    %%%%%:  640-block 11
 unconditional 16 never executed
-       22:  808-block 12
-call   17 returned 22
-unconditional 18 taken 22
-       22:  809:		    bold, sc_ok ? '[' : 0, sc_ok ? bookmarks[i].shortcut : "",
-       22:  809-block  0
-unconditional  0 taken 22
-       22:  810:		    sc_ok ? ']' : 0, df_c, non_existent ? gray : (is_dir ? bm_c : fi_c),
-       22:  810-block  0
-branch  0 taken 21 (fallthrough)
-branch  1 taken 1
-       21:  810-block  1
-unconditional  2 taken 21
-        1:  810-block  2
-unconditional  3 taken 1
-       22:  811:		    name_ok ? bookmarks[i].name : bookmarks[i].path, df_c);
-       18:  811-block  0
-unconditional  0 taken 18
-        4:  811-block  1
-unconditional  1 taken 4
-        -:  812:	}
-        -:  813:
-        -:  814:	/* User selection. Display the prompt */
-        1:  815:	char **arg = bm_prompt();
-        1:  815-block  0
-call    0 returned 1
-        -:  816:
-        1:  817:	if (!arg || !*arg)
-branch  0 taken 1 (fallthrough)
+      244:  640-block 12
+call   17 returned 244
+unconditional 18 taken 244
+      244:  641:		    BOLD, sc_ok ? '[' : 0, sc_ok ? bookmarks[i].shortcut : "",
+      244:  641-block  0
+unconditional  0 taken 244
+      242:  642:		    sc_ok ? ']' : 0, df_c, non_existent ? GRAY : (is_dir ? bm_c : fi_c),
+      242:  642-block  0
+branch  0 taken 232 (fallthrough)
+branch  1 taken 10
+      232:  642-block  1
+unconditional  2 taken 232
+       10:  642-block  2
+unconditional  3 taken 10
+      244:  643:		    name_ok ? bookmarks[i].name : bookmarks[i].path, df_c);
+      200:  643-block  0
+unconditional  0 taken 200
+       44:  643-block  1
+unconditional  1 taken 44
+        -:  644:	}
+        -:  645:
+        -:  646:	/* User selection. Display the prompt */
+       11:  647:	char **arg = bm_prompt();
+       11:  647-block  0
+call    0 returned 11
+       11:  648:	if (!arg || !*arg)
+branch  0 taken 11 (fallthrough)
 branch  1 taken 0
-        1:  817-block  0
+       11:  648-block  0
 branch  2 taken 0 (fallthrough)
-branch  3 taken 1
-    #####:  818:		return EXIT_FAILURE;
-    %%%%%:  818-block  0
+branch  3 taken 11
+    #####:  649:		return EXIT_FAILURE;
+    %%%%%:  649-block  0
 unconditional  0 never executed
-        -:  819:
-        1:  820:	int exit_status = EXIT_SUCCESS;
-        -:  821:
-        -:  822:	/* Case "edit" */
-       1*:  823:	if (*arg[0] == 'e' && (!arg[0][1] || strcmp(arg[0], "edit") == 0)) {
-        1:  823-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    %%%%%:  823-block  1
-branch  2 never executed
-branch  3 never executed
-    %%%%%:  823-block  2
+        -:  650:
+       11:  651:	int exit_status = EXIT_SUCCESS;
+        -:  652:
+        -:  653:	/* Case "edit" */
+      11*:  654:	if (*arg[0] == 'e' && (!arg[0][1] || strcmp(arg[0], "edit") == 0)) {
+       11:  654-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 8
+        3:  654-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 3
+    %%%%%:  654-block  2
 branch  4 never executed
 branch  5 never executed
-        -:  824:
-    #####:  825:		stat(BM_FILE, &file_attrib);
-    %%%%%:  825-block  0
-call    0 never executed
-    #####:  826:		time_t mtime_bfr = (time_t)file_attrib.st_mtime;
-        -:  827:
-    #####:  828:		edit_bookmarks(arg[1] ? arg[1] : NULL);
-call    0 never executed
-        -:  829:
-    #####:  830:		stat(BM_FILE, &file_attrib);
-call    0 never executed
-        -:  831:
-    #####:  832:		if (mtime_bfr != (time_t)file_attrib.st_mtime) {
-branch  0 never executed
-branch  1 never executed
-    #####:  833:			free_bookmarks();
-    %%%%%:  833-block  0
-call    0 never executed
-    #####:  834:			load_bookmarks();
-call    0 never executed
-unconditional  1 never executed
-        -:  835:		}
-        -:  836:
-    #####:  837:		for (i = 0; arg[i]; i++)
-    %%%%%:  837-block  0
-unconditional  0 never executed
-    %%%%%:  837-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  838:			free(arg[i]);
-    %%%%%:  838-block  0
-unconditional  0 never executed
-        -:  839:
-    #####:  840:		free(arg);
-        -:  841:
-    #####:  842:		arg = (char **)NULL;
-        -:  843:
-    #####:  844:		char *tmp_cmd[] = {"bm", NULL};
-    #####:  845:		bookmarks_function(tmp_cmd);
-    %%%%%:  845-block  0
-call    0 never executed
-        -:  846:
-    #####:  847:		return EXIT_SUCCESS;
-unconditional  0 never executed
-        -:  848:	}
-        -:  849:
-        -:  850:	/* Case "quit" */
-       1*:  851:	if (*arg[0] == 'q' && (!arg[0][1] || strcmp(arg[0], "quit") == 0))
-        1:  851-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    %%%%%:  851-block  1
-branch  2 never executed
-branch  3 never executed
-    %%%%%:  851-block  2
+        3:  655:		stat(bm_file, &file_attrib);
+        3:  655-block  0
+call    0 returned 3
+        3:  656:		time_t mtime_bfr = (time_t)file_attrib.st_mtime;
+        -:  657:
+        3:  658:		edit_bookmarks(arg[1] ? arg[1] : NULL);
+call    0 returned 3
+        -:  659:
+        3:  660:		stat(bm_file, &file_attrib);
+call    0 returned 3
+        3:  661:		if (mtime_bfr != (time_t)file_attrib.st_mtime) {
+branch  0 taken 3 (fallthrough)
+branch  1 taken 0
+        3:  662:			free_bookmarks();
+        3:  662-block  0
+call    0 returned 3
+        3:  663:			load_bookmarks();
+call    0 returned 3
+unconditional  1 taken 3
+        -:  664:		}
+        -:  665:
+        6:  666:		for (i = 0; arg[i]; i++)
+        3:  666-block  0
+unconditional  0 taken 3
+        6:  666-block  1
+branch  1 taken 3
+branch  2 taken 3 (fallthrough)
+        3:  667:			free(arg[i]);
+        3:  667-block  0
+unconditional  0 taken 3
+        3:  668:		free(arg);
+        -:  669:
+        3:  670:		arg = (char **)NULL;
+        -:  671:
+        3:  672:		char *tmp_cmd[] = {"bm", NULL};
+        3:  673:		bookmarks_function(tmp_cmd);
+        3:  673-block  0
+call    0 returned 3
+        3:  674:		return EXIT_SUCCESS;
+unconditional  0 taken 3
+        -:  675:	}
+        -:  676:
+        -:  677:	/* Case "quit" */
+       8*:  678:	if (*arg[0] == 'q' && (!arg[0][1] || strcmp(arg[0], "quit") == 0))
+        8:  678-block  0
+branch  0 taken 5 (fallthrough)
+branch  1 taken 3
+        5:  678-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 5
+    %%%%%:  678-block  2
 branch  4 never executed
 branch  5 never executed
-    #####:  852:		goto FREE_AND_EXIT;
-    %%%%%:  852-block  0
-unconditional  0 never executed
-        -:  853:
-        1:  854:	char *tmp_path = (char *)NULL;
-        -:  855:
-        -:  856:	/* Get the corresponding bookmark path */
-        -:  857:
-        -:  858:	/* If an ELN */
-        1:  859:	if (is_number(arg[0])) {
-        1:  859-block  0
-call    0 returned 1
-branch  1 taken 0 (fallthrough)
+        5:  679:		goto FREE_AND_EXIT;
+        5:  679-block  0
+unconditional  0 taken 5
+        -:  680:
+        3:  681:	char *tmp_path = (char *)NULL;
+        -:  682:
+        -:  683:	/* Get the corresponding bookmark path */
+        -:  684:	/* If an ELN */
+        3:  685:	if (is_number(arg[0])) {
+        3:  685-block  0
+call    0 returned 3
+branch  1 taken 2 (fallthrough)
 branch  2 taken 1
-        -:  860:
-    #####:  861:		int num = atoi(arg[0]);
-    #####:  862:		if (num <= 0 || (size_t)num > bm_n) {
-    %%%%%:  862-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  862-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  863:			fprintf(stderr, _("Bookmarks: %d: No such ELN\n"), num);
-    %%%%%:  863-block  0
+        2:  686:		int num = atoi(arg[0]);
+        2:  687:		if (num <= 0 || (size_t)num > bm_n) {
+        2:  687-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  687-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 2
+    #####:  688:			fprintf(stderr, _("Bookmarks: %d: No such ELN\n"), num);
+    %%%%%:  688-block  0
 call    0 never executed
-    #####:  864:			exit_status = EXIT_FAILURE;
-    #####:  865:			goto FREE_AND_EXIT;
+call    1 never executed
+    #####:  689:			exit_status = EXIT_FAILURE;
+    #####:  690:			goto FREE_AND_EXIT;
 unconditional  0 never executed
-        -:  866:		}
-        -:  867:
-        -:  868:		else
-    #####:  869:			tmp_path = bookmarks[num - 1].path;
-    %%%%%:  869-block  0
-unconditional  0 never executed
-        -:  870:	}
-        -:  871:
-        -:  872:	/* If string, check shortcuts and names */
-        -:  873:	else {
-        -:  874:
-        5:  875:		for (i = 0; i < bm_n; i++) {
-        1:  875-block  0
+        -:  691:		} else {
+        2:  692:			tmp_path = bookmarks[num - 1].path;
+        2:  692-block  0
+unconditional  0 taken 2
+        -:  693:		}
+        -:  694:	} else {
+        -:  695:	/* If string, check shortcuts and names */
+        5:  696:		for (i = 0; i < bm_n; i++) {
+        1:  696-block  0
 unconditional  0 taken 1
-        4:  875-block  1
+        4:  696-block  1
 unconditional  1 taken 4
-        5:  875-block  2
+        5:  696-block  2
 branch  2 taken 5
 branch  3 taken 0 (fallthrough)
-        -:  876:
-        5:  877:			if ((bookmarks[i].shortcut && *arg[0] == *bookmarks[i].shortcut
-        5:  877-block  0
+        5:  697:			if ((bookmarks[i].shortcut && *arg[0] == *bookmarks[i].shortcut
+        5:  697-block  0
 branch  0 taken 5 (fallthrough)
 branch  1 taken 0
-        5:  877-block  1
+        5:  697-block  1
 branch  2 taken 1 (fallthrough)
 branch  3 taken 4
-        1:  878:			&& strcmp(arg[0], bookmarks[i].shortcut) == 0)
-        1:  878-block  0
+        1:  698:			&& strcmp(arg[0], bookmarks[i].shortcut) == 0)
+        1:  698-block  0
 branch  0 taken 0 (fallthrough)
 branch  1 taken 1
-        4:  879:			|| (bookmarks[i].name && *arg[0] == *bookmarks[i].name
-        4:  879-block  0
+        4:  699:			|| (bookmarks[i].name && *arg[0] == *bookmarks[i].name
+        4:  699-block  0
 branch  0 taken 4 (fallthrough)
 branch  1 taken 0
-        4:  879-block  1
+        4:  699-block  1
 branch  2 taken 0 (fallthrough)
 branch  3 taken 4
-    #####:  880:			&& strcmp(arg[0], bookmarks[i].name) == 0)) {
-    %%%%%:  880-block  0
+    #####:  700:			&& strcmp(arg[0], bookmarks[i].name) == 0)) {
+    %%%%%:  700-block  0
 branch  0 never executed
 branch  1 never executed
-        -:  881:
-        1:  882:				if (bookmarks[i].path) {
-        1:  882-block  0
+        -:  701:
+        1:  702:				if (bookmarks[i].path) {
+        1:  702-block  0
 branch  0 taken 1 (fallthrough)
 branch  1 taken 0
-        1:  883:					char *tmp_cmd[] = {"o", bookmarks[i].path,
-        -:  884:					    arg[1] ? arg[1] : NULL,
-        -:  885:					    NULL};
-        -:  886:
-        1:  887:					exit_status = open_function(tmp_cmd);
-        1:  887-block  0
+        1:  703:					char *tmp_cmd[] = {"o", bookmarks[i].path,
+        -:  704:					    arg[1] ? arg[1] : NULL,
+        -:  705:					    NULL};
+        -:  706:
+        1:  707:					exit_status = open_function(tmp_cmd);
+        1:  707-block  0
 call    0 returned 1
-        1:  888:					goto FREE_AND_EXIT;
+        1:  708:					goto FREE_AND_EXIT;
 unconditional  0 taken 1
-        -:  889:				}
-        -:  890:
-    #####:  891:				fprintf(stderr, _("%s: %s: Invalid bookmark\n"),
-    %%%%%:  891-block  0
+        -:  709:				}
+        -:  710:
+    #####:  711:				fprintf(stderr, _("%s: %s: Invalid bookmark\n"),
+    %%%%%:  711-block  0
 call    0 never executed
-        -:  892:				    PROGRAM_NAME, arg[0]);
-    #####:  893:				exit_status = EXIT_FAILURE;
-    #####:  894:				goto FREE_AND_EXIT;
+call    1 never executed
+        -:  712:				    PROGRAM_NAME, arg[0]);
+    #####:  713:				exit_status = EXIT_FAILURE;
+    #####:  714:				goto FREE_AND_EXIT;
 unconditional  0 never executed
-        -:  895:			}
-        -:  896:		}
-        -:  897:	}
-        -:  898:
-    #####:  899:	if (!tmp_path) {
-    %%%%%:  899-block  0
+        -:  715:			}
+        -:  716:		}
+        -:  717:	}
+        -:  718:
+        2:  719:	if (!tmp_path) {
+        2:  719-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:  720:		fprintf(stderr, _("Bookmarks: %s: No such bookmark\n"),
+    %%%%%:  720-block  0
+call    0 never executed
+call    1 never executed
+        -:  721:		    arg[0]);
+    #####:  722:		exit_status = EXIT_FAILURE;
+    #####:  723:		goto FREE_AND_EXIT;
+unconditional  0 never executed
+        -:  724:	}
+        -:  725:
+        2:  726:	char *tmp_cmd[] = {"o", tmp_path, arg[1] ? arg[1] : NULL, NULL};
+        2:  727:	exit_status = open_function(tmp_cmd);
+        2:  727-block  0
+call    0 returned 2
+        2:  728:	goto FREE_AND_EXIT;
+unconditional  0 taken 2
+        -:  729:
+        8:  730:FREE_AND_EXIT : {
+       16:  731:	for (i = 0; arg[i]; i++)
+        8:  731-block  0
+unconditional  0 taken 8
+       16:  731-block  1
+branch  1 taken 8
+branch  2 taken 8 (fallthrough)
+        8:  732:		free(arg[i]);
+        8:  732-block  0
+unconditional  0 taken 8
+        8:  733:	free(arg);
+        8:  734:	arg = (char **)NULL;
+        8:  735:	return exit_status;
+        8:  735-block  0
+unconditional  0 taken 8
+        -:  736:}
+        -:  737:}
+        -:  738:
+        -:  739:int
+function bookmarks_function called 20 returned 100% blocks executed 44%
+       20:  740:bookmarks_function(char **cmd)
+        -:  741:{
+       20:  742:	if (xargs.stealth_mode == 1) {
+       20:  742-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 20
+    #####:  743:		printf(_("%s: Access to configuration files is not allowed in "
+    %%%%%:  743-block  0
+call    0 never executed
+call    1 never executed
+        -:  744:			 "stealth mode\n"), PROGRAM_NAME);
+    #####:  745:		return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  746:	}
+        -:  747:
+       20:  748:	if (!config_ok) {
+       20:  748-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 20
+    #####:  749:		fprintf(stderr, _("Bookmarks function disabled\n"));
+    %%%%%:  749-block  0
+call    0 never executed
+call    1 never executed
+    #####:  750:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  751:	}
+        -:  752:
+        -:  753:	/* If the bookmarks file doesn't exist, create it. NOTE: This file
+        -:  754:	 * should be created at startup (by get_bm_names()), but we check
+        -:  755:	 * it again here just in case it was meanwhile deleted for some
+        -:  756:	 * reason */
+        -:  757:
+        -:  758:	/* If no arguments */
+       20:  759:	if (!cmd[1])
+       20:  759-block  0
+branch  0 taken 11 (fallthrough)
+branch  1 taken 9
+       11:  760:		return open_bookmark();
+       11:  760-block  0
+call    0 returned 11
+unconditional  1 taken 11
+        -:  761:
+        -:  762:	/* Check arguments */
+        -:  763:
+        -:  764:	/* Add a bookmark */
+        9:  765:	if (*cmd[1] == 'a' && (!cmd[1][1] || strcmp(cmd[1], "add") == 0)) {
+        9:  765-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 7
+        2:  765-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 1
+        1:  765-block  2
+branch  4 taken 1 (fallthrough)
+branch  5 taken 0
+        2:  766:		if (!cmd[2]) {
+        2:  766-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:  767:			puts(_(BOOKMARKS_USAGE));
+    %%%%%:  767-block  0
+call    0 never executed
+call    1 never executed
+    #####:  768:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  769:		}
+        -:  770:
+        2:  771:		if (access(cmd[2], F_OK) != 0) {
+        2:  771-block  0
+call    0 returned 2
+branch  1 taken 0 (fallthrough)
+branch  2 taken 2
+    #####:  772:			fprintf(stderr, _("Bookmarks: %s: %s\n"), cmd[2],
+call    0 never executed
+call    1 never executed
+    #####:  773:			    strerror(errno));
+    %%%%%:  773-block  0
+call    0 never executed
+    #####:  774:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  775:		}
+        -:  776:
+        2:  777:		return bookmark_add(cmd[2]);
+        2:  777-block  0
+call    0 returned 2
+unconditional  1 taken 2
+        -:  778:	}
+        -:  779:
+        -:  780:	/* Delete bookmarks */
+        7:  781:	if (*cmd[1] == 'd' && (!cmd[1][1] || strcmp(cmd[1], "del") == 0))
+        7:  781-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 4
+        3:  781-block  1
+branch  2 taken 3 (fallthrough)
+branch  3 taken 0
+        3:  781-block  2
+branch  4 taken 3 (fallthrough)
+branch  5 taken 0
+        3:  782:		return bookmark_del(cmd[2] ? cmd[2] : NULL);
+        3:  782-block  0
+call    0 returned 3
+unconditional  1 taken 3
+        -:  783:
+        -:  784:	/* Edit */
+        4:  785:	if (*cmd[1] == 'e' && (!cmd[1][1] || strcmp(cmd[1], "edit") == 0))
+        4:  785-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 0
+        4:  785-block  1
+branch  2 taken 4 (fallthrough)
+branch  3 taken 0
+        4:  785-block  2
+branch  4 taken 4 (fallthrough)
+branch  5 taken 0
+        4:  786:		return edit_bookmarks(cmd[2] ? cmd[2] : NULL);
+        4:  786-block  0
+call    0 returned 4
+unconditional  1 taken 4
+        -:  787:
+        -:  788:	/* Shortcut or bm name */
+        -:  789:	size_t i;
+    #####:  790:	for (i = 0; i < bm_n; i++) {
+    %%%%%:  790-block  0
+unconditional  0 never executed
+    %%%%%:  790-block  1
+unconditional  1 never executed
+    %%%%%:  790-block  2
+branch  2 never executed
+branch  3 never executed
+    #####:  791:		if ((bookmarks[i].shortcut && *cmd[1] == *bookmarks[i].shortcut
+    %%%%%:  791-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  900:		fprintf(stderr, _("Bookmarks: %s: No such bookmark\n"),
-    %%%%%:  900-block  0
+    %%%%%:  791-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  792:			&& strcmp(cmd[1], bookmarks[i].shortcut) == 0)
+    %%%%%:  792-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  793:			|| (bookmarks[i].name && *cmd[1] == *bookmarks[i].name
+    %%%%%:  793-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  793-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  794:			&& strcmp(cmd[1], bookmarks[i].name) == 0)) {
+    %%%%%:  794-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  795:
+    #####:  796:			if (bookmarks[i].path) {
+    %%%%%:  796-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  797:				char *tmp_cmd[] = {"o", bookmarks[i].path,
+        -:  798:				    cmd[2] ? cmd[2] : NULL, NULL};
+    #####:  799:				return open_function(tmp_cmd);
+    %%%%%:  799-block  0
 call    0 never executed
-        -:  901:		    arg[0]);
-    #####:  902:		exit_status = EXIT_FAILURE;
-    #####:  903:		goto FREE_AND_EXIT;
-unconditional  0 never executed
-        -:  904:	}
-        -:  905:
-    #####:  906:	char *tmp_cmd[] = {"o", tmp_path, arg[1] ? arg[1] : NULL, NULL};
-        -:  907:
-    #####:  908:	exit_status = open_function(tmp_cmd);
-    %%%%%:  908-block  0
+unconditional  1 never executed
+        -:  800:			}
+        -:  801:
+    #####:  802:			fprintf(stderr, _("Bookmarks: %s: Invalid bookmark\n"),
 call    0 never executed
-    #####:  909:	goto FREE_AND_EXIT;
+    #####:  803:			    cmd[1]);
+    %%%%%:  803-block  0
+call    0 never executed
+    #####:  804:			return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  910:
-        1:  911:FREE_AND_EXIT : {
-        -:  912:
-        2:  913:	for (i = 0; arg[i]; i++)
-        1:  913-block  0
-unconditional  0 taken 1
-        2:  913-block  1
-branch  1 taken 1
-branch  2 taken 1 (fallthrough)
-        1:  914:		free(arg[i]);
-        1:  914-block  0
-unconditional  0 taken 1
-        -:  915:
-        1:  916:	free(arg);
-        -:  917:
-        1:  918:	arg = (char **)NULL;
-        -:  919:
-        1:  920:	return exit_status;
-        1:  920-block  0
-unconditional  0 taken 1
-        -:  921:}
-        -:  922:}
+        -:  805:		}
+        -:  806:	}
+        -:  807:
+    #####:  808:	fprintf(stderr, _("Bookmarks: %s: No such bookmark\n"), cmd[1]);
+    %%%%%:  808-block  0
+call    0 never executed
+call    1 never executed
+    #####:  809:	return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  810:}

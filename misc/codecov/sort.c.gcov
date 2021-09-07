@@ -30,581 +30,522 @@
         -:   29:#include <stdio.h>
         -:   30:#include <string.h>
         -:   31:#include <unistd.h>
-        -:   32:
-        -:   33:#include "checks.h"
-        -:   34:#include "listing.h"
-        -:   35:
-        -:   36:int
-function skip_nonexec called 7342 returned 100% blocks executed 100%
-     7342:   37:skip_nonexec(const struct dirent *ent)
-        -:   38:{
-     7342:   39:	if (access(ent->d_name, R_OK) == -1)
-     7342:   39-block  0
-call    0 returned 7342
-branch  1 taken 8 (fallthrough)
-branch  2 taken 7334
-        8:   40:		return 0;
-        8:   40-block  0
-unconditional  0 taken 8
-        -:   41:
-     7334:   42:	return 1;
-     7334:   42-block  0
-unconditional  0 taken 7334
-        -:   43:}
-        -:   44:
-        -:   45:int
-function skip_files called 0 returned 0% blocks executed 0%
-    #####:   46:skip_files(const struct dirent *ent)
-        -:   47:{
-        -:   48:	/* In case a directory isn't reacheable, like a failed
-        -:   49:	 * mountpoint... */
-        -:   50:	/*  struct stat file_attrib;
-        -:   51:
-        -:   52:	if (lstat(entry->d_name, &file_attrib) == -1) {
-        -:   53:		fprintf(stderr, _("stat: cannot access '%s': %s\n"),
-        -:   54:				entry->d_name, strerror(errno));
-        -:   55:		return 0;
-        -:   56:	} */
-        -:   57:
-        -:   58:	/* Skip "." and ".." */
-    #####:   59:	if (*ent->d_name == '.' && (!ent->d_name[1] || (ent->d_name[1] == '.' && !ent->d_name[2])))
-    %%%%%:   59-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:   59-block  1
-branch  2 never executed
-branch  3 never executed
-    %%%%%:   59-block  2
-branch  4 never executed
-branch  5 never executed
-    %%%%%:   59-block  3
-branch  6 never executed
-branch  7 never executed
-    #####:   60:		return 0;
-    %%%%%:   60-block  0
-unconditional  0 never executed
-        -:   61:
-        -:   62:	/* Skip files matching FILTER */
-    #####:   63:	if (filter && regexec(&regex_exp, ent->d_name, 0, NULL, 0) == EXIT_SUCCESS)
-    %%%%%:   63-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:   63-block  1
+        -:   32:#ifdef __OpenBSD__
+        -:   33:#include <strings.h>
+        -:   34:#endif
+        -:   35://#include <sys/stat.h>
+        -:   36:
+        -:   37:#include "checks.h"
+        -:   38:#include "listing.h"
+        -:   39:#include "messages.h"
+        -:   40:
+        -:   41:int
+function skip_nonexec called 73420 returned 100% blocks executed 100%
+    73420:   42:skip_nonexec(const struct dirent *ent)
+        -:   43:{
+    73420:   44:	if (access(ent->d_name, X_OK) == -1)
+    73420:   44-block  0
+call    0 returned 73420
+branch  1 taken 137 (fallthrough)
+branch  2 taken 73283
+      137:   45:		return 0;
+      137:   45-block  0
+unconditional  0 taken 137
+    73283:   46:	return 1;
+    73283:   46-block  0
+unconditional  0 taken 73283
+        -:   47:
+        -:   48:/*	int f = 0; // Hold file ownership flags
+        -:   49:
+        -:   50:	struct stat a;
+        -:   51:	if (stat(ent->d_name, &a) == -1)
+        -:   52:		return 0;
+        -:   53:
+        -:   54:	mode_t val = (a.st_mode & (mode_t)~S_IFMT);
+        -:   55:	if (val & S_IXUSR) f |= X_USR;
+        -:   56:	if (val & S_IXGRP) f |= X_GRP;
+        -:   57:	if (val & S_IXOTH) f |= X_OTH;
+        -:   58:
+        -:   59:	if ((f & X_USR) && a.st_uid == user.uid)
+        -:   60:		return 1;
+        -:   61:	if ((f & X_GRP) && a.st_gid == user.gid)
+        -:   62:		return 1;
+        -:   63:	if (f & X_OTH)
+        -:   64:		return 1;
+        -:   65:
+        -:   66:	return 0; */
+        -:   67:}
+        -:   68:
+        -:   69:int
+function skip_files called 33 returned 100% blocks executed 64%
+       33:   70:skip_files(const struct dirent *ent)
+        -:   71:{
+        -:   72:	/* In case a directory isn't reacheable, like a failed
+        -:   73:	 * mountpoint... */
+        -:   74:	/*  struct stat file_attrib;
+        -:   75:
+        -:   76:	if (lstat(entry->d_name, &file_attrib) == -1) {
+        -:   77:		fprintf(stderr, _("stat: cannot access '%s': %s\n"),
+        -:   78:				entry->d_name, strerror(errno));
+        -:   79:		return 0;
+        -:   80:	} */
+        -:   81:
+        -:   82:	/* Skip "." and ".." */
+       33:   83:	if (*ent->d_name == '.' && (!ent->d_name[1] || (ent->d_name[1] == '.' && !ent->d_name[2])))
+       33:   83-block  0
+branch  0 taken 14 (fallthrough)
+branch  1 taken 19
+       14:   83-block  1
+branch  2 taken 7 (fallthrough)
+branch  3 taken 7
+        7:   83-block  2
+branch  4 taken 7 (fallthrough)
+branch  5 taken 0
+        7:   83-block  3
+branch  6 taken 7 (fallthrough)
+branch  7 taken 0
+       14:   84:		return 0;
+       14:   84-block  0
+unconditional  0 taken 14
+        -:   85:
+        -:   86:	/* Skip files matching FILTER */
+      19*:   87:	if (filter && regexec(&regex_exp, ent->d_name, 0, NULL, 0) == EXIT_SUCCESS)
+       19:   87-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 19
+    %%%%%:   87-block  1
 call    2 never executed
 branch  3 never executed
 branch  4 never executed
-    #####:   64:		return 0;
-    %%%%%:   64-block  0
+    #####:   88:		return 0;
+    %%%%%:   88-block  0
 unconditional  0 never executed
-        -:   65:
-        -:   66:	/* If not hidden files */
-    #####:   67:	if (!show_hidden && *ent->d_name == '.')
-    %%%%%:   67-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:   67-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:   68:		return 0;
-    %%%%%:   68-block  0
-unconditional  0 never executed
-        -:   69:
-    #####:   70:	return 1;
-    %%%%%:   70-block  0
-unconditional  0 never executed
-        -:   71:}
-        -:   72:
-        -:   73:int
-function namecmp called 5442 returned 100% blocks executed 95%
-     5442:   74:namecmp(const char *s1, const char *s2)
-        -:   75:{
-        -:   76:	/* Do not take initial dot into account */
-     5442:   77:	if (*s1 == '.')
-     5442:   77-block  0
-branch  0 taken 1579 (fallthrough)
-branch  1 taken 3863
-     1579:   78:		s1++;
-     1579:   78-block  0
-unconditional  0 taken 1579
-        -:   79:
-     5442:   80:	if (*s2 == '.')
-     5442:   80-block  0
-branch  0 taken 1701 (fallthrough)
-branch  1 taken 3741
-     1701:   81:		s2++;
-     1701:   81-block  0
-unconditional  0 taken 1701
-        -:   82:
-     5442:   83:	char ac = *s1, bc = *s2;
-        -:   84:
-     5442:   85:	if (!case_sensitive) {
-     5442:   85-block  0
-branch  0 taken 5442 (fallthrough)
-branch  1 taken 0
-     5442:   86:		ac = TOUPPER(*s1);
-     5442:   86-block  0
-branch  0 taken 5046 (fallthrough)
-branch  1 taken 396
-     5046:   86-block  1
-branch  2 taken 5046 (fallthrough)
-branch  3 taken 0
-     5046:   86-block  2
-unconditional  4 taken 5046
-      396:   86-block  3
-unconditional  5 taken 396
-     5442:   87:		bc = TOUPPER(*s2);
-     5442:   87-block  0
-branch  0 taken 5108 (fallthrough)
-branch  1 taken 334
-     5108:   87-block  1
-branch  2 taken 5108 (fallthrough)
-branch  3 taken 0
-     5108:   87-block  2
-unconditional  4 taken 5108
-      334:   87-block  3
-unconditional  5 taken 334
-     5442:   87-block  4
-unconditional  6 taken 5442
-        -:   88:	}
         -:   89:
-     5442:   90:	if (bc > ac)
-     5442:   90-block  0
-branch  0 taken 1814 (fallthrough)
-branch  1 taken 3628
-     1814:   91:		return -1;
-     1814:   91-block  0
-unconditional  0 taken 1814
-        -:   92:
-     3628:   93:	if (bc < ac)
-     3628:   93-block  0
-branch  0 taken 1907 (fallthrough)
-branch  1 taken 1721
-     1907:   94:		return 1;
-     1907:   94-block  0
-unconditional  0 taken 1907
-        -:   95:
-     1721:   96:	if (!case_sensitive)
-     1721:   96-block  0
-branch  0 taken 1721 (fallthrough)
-branch  1 taken 0
-     1721:   97:		return strcasecmp(s1, s2);
-     1721:   97-block  0
-unconditional  0 taken 1721
-        -:   98:
-    #####:   99:	return strcmp(s1, s2);
-    %%%%%:   99-block  0
-unconditional  0 never executed
-        -:  100:}
-        -:  101:
-        -:  102:int
-function entrycmp called 5898 returned 100% blocks executed 21%
-     5898:  103:entrycmp(const void *a, const void *b)
-        -:  104:{
-     5898:  105:	const struct fileinfo *pa = (struct fileinfo *)a;
-     5898:  106:	const struct fileinfo *pb = (struct fileinfo *)b;
-        -:  107:
-     5898:  108:	if (list_folders_first) {
-     5898:  108-block  0
-branch  0 taken 5898 (fallthrough)
-branch  1 taken 0
-     5898:  109:		if (pb->dir != pa->dir) {
-     5898:  109-block  0
-branch  0 taken 456 (fallthrough)
-branch  1 taken 5442
-      456:  110:			if (pb->dir)
-      456:  110-block  0
-branch  0 taken 262 (fallthrough)
-branch  1 taken 194
-      262:  111:				return 1;
-      262:  111-block  0
-unconditional  0 taken 262
-        -:  112:
-      194:  113:			return -1;
-      194:  113-block  0
-unconditional  0 taken 194
-        -:  114:		}
-        -:  115:	}
-        -:  116:
-     5442:  117:	int ret = 0, st = sort;
-        -:  118:
-        -:  119:#ifndef _GNU_SOURCE
-        -:  120:	if (st == SVER)
-        -:  121:		st = SNAME;
-        -:  122:#endif
-        -:  123:
-    5442*:  124:	if (light_mode && (st == SOWN || st == SGRP))
-     5442:  124-block  0
+        -:   90:	/* If not hidden files */
+      19*:   91:	if (!show_hidden && *ent->d_name == '.')
+       19:   91-block  0
 branch  0 taken 0 (fallthrough)
-branch  1 taken 5442
-    %%%%%:  124-block  1
+branch  1 taken 19
+    %%%%%:   91-block  1
 branch  2 never executed
 branch  3 never executed
-    %%%%%:  124-block  2
-branch  4 never executed
-branch  5 never executed
-    #####:  125:		st = SNAME;
-    %%%%%:  125-block  0
+    #####:   92:		return 0;
+    %%%%%:   92-block  0
 unconditional  0 never executed
-        -:  126:
-     5442:  127:	switch (st) {
-     5442:  127-block  0
-branch  0 taken 0
+        -:   93:
+       19:   94:	return 1;
+       19:   94-block  0
+unconditional  0 taken 19
+        -:   95:}
+        -:   96:
+        -:   97:int
+function namecmp called 370705 returned 100% blocks executed 95%
+   370705:   98:namecmp(const char *s1, const char *s2)
+        -:   99:{
+        -:  100:	/* Do not take initial dot into account */
+   370705:  101:	if (*s1 == '.')
+   370705:  101-block  0
+branch  0 taken 7465 (fallthrough)
+branch  1 taken 363240
+     7465:  102:		s1++;
+     7465:  102-block  0
+unconditional  0 taken 7465
+        -:  103:
+   370705:  104:	if (*s2 == '.')
+   370705:  104-block  0
+branch  0 taken 8015 (fallthrough)
+branch  1 taken 362690
+     8015:  105:		s2++;
+     8015:  105-block  0
+unconditional  0 taken 8015
+        -:  106:
+   370705:  107:	char ac = *s1, bc = *s2;
+        -:  108:
+   370705:  109:	if (!case_sensitive) {
+   370705:  109-block  0
+branch  0 taken 370705 (fallthrough)
 branch  1 taken 0
+   370705:  110:		ac = (char)TOUPPER(*s1);
+   370705:  110-block  0
+branch  0 taken 365644 (fallthrough)
+branch  1 taken 5061
+   365644:  110-block  1
+branch  2 taken 365644 (fallthrough)
+branch  3 taken 0
+   365644:  110-block  2
+unconditional  4 taken 365644
+     5061:  110-block  3
+unconditional  5 taken 5061
+   370705:  111:		bc = (char)TOUPPER(*s2);
+   370705:  111-block  0
+branch  0 taken 365935 (fallthrough)
+branch  1 taken 4770
+   365935:  111-block  1
+branch  2 taken 365935 (fallthrough)
+branch  3 taken 0
+   365935:  111-block  2
+unconditional  4 taken 365935
+     4770:  111-block  3
+unconditional  5 taken 4770
+   370705:  111-block  4
+unconditional  6 taken 370705
+        -:  112:	}
+        -:  113:
+   370705:  114:	if (bc > ac)
+   370705:  114-block  0
+branch  0 taken 76140 (fallthrough)
+branch  1 taken 294565
+    76140:  115:		return -1;
+    76140:  115-block  0
+unconditional  0 taken 76140
+        -:  116:
+   294565:  117:	if (bc < ac)
+   294565:  117-block  0
+branch  0 taken 81327 (fallthrough)
+branch  1 taken 213238
+    81327:  118:		return 1;
+    81327:  118-block  0
+unconditional  0 taken 81327
+        -:  119:
+   213238:  120:	if (!case_sensitive)
+   213238:  120-block  0
+branch  0 taken 213238 (fallthrough)
+branch  1 taken 0
+   213238:  121:		return strcasecmp(s1, s2);
+   213238:  121-block  0
+unconditional  0 taken 213238
+        -:  122:
+    #####:  123:	return strcmp(s1, s2);
+    %%%%%:  123-block  0
+unconditional  0 never executed
+        -:  124:}
+        -:  125:
+        -:  126:int
+function entrycmp called 376432 returned 100% blocks executed 91%
+   376432:  127:entrycmp(const void *a, const void *b)
+        -:  128:{
+   376432:  129:	const struct fileinfo *pa = (struct fileinfo *)a;
+   376432:  130:	const struct fileinfo *pb = (struct fileinfo *)b;
+        -:  131:
+   376432:  132:	if (list_folders_first) {
+   376432:  132-block  0
+branch  0 taken 376136 (fallthrough)
+branch  1 taken 296
+   376136:  133:		if (pb->dir != pa->dir) {
+   376136:  133-block  0
+branch  0 taken 4206 (fallthrough)
+branch  1 taken 371930
+     4206:  134:			if (pb->dir)
+     4206:  134-block  0
+branch  0 taken 2234 (fallthrough)
+branch  1 taken 1972
+     2234:  135:				return 1;
+     2234:  135-block  0
+unconditional  0 taken 2234
+        -:  136:
+     1972:  137:			return -1;
+     1972:  137-block  0
+unconditional  0 taken 1972
+        -:  138:		}
+        -:  139:	}
+        -:  140:
+   372226:  141:	int ret = 0, st = sort;
+        -:  142:
+        -:  143:#ifndef _GNU_SOURCE
+        -:  144:	if (st == SVER)
+        -:  145:		st = SNAME;
+        -:  146:#endif
+        -:  147:
+   372226:  148:	if (light_mode && (st == SOWN || st == SGRP))
+   372226:  148-block  0
+branch  0 taken 12 (fallthrough)
+branch  1 taken 372214
+       12:  148-block  1
+branch  2 taken 12 (fallthrough)
+branch  3 taken 0
+       12:  148-block  2
+branch  4 taken 0 (fallthrough)
+branch  5 taken 12
+    #####:  149:		st = SNAME;
+    %%%%%:  149-block  0
+unconditional  0 never executed
+        -:  150:
+   372226:  151:	switch (st) {
+   372226:  151-block  0
+branch  0 taken 456
+branch  1 taken 917
+branch  2 taken 236
+branch  3 taken 237
+branch  4 taken 233
+branch  5 taken 233
+branch  6 taken 233
+branch  7 taken 369681
+        -:  152:
+      456:  153:	case SSIZE:
+      456:  154:		if (pa->size > pb->size)
+      456:  154-block  0
+branch  0 taken 70 (fallthrough)
+branch  1 taken 386
+       70:  155:			ret = 1;
+       70:  155-block  0
+unconditional  0 taken 70
+      386:  156:		else if (pa->size < pb->size)
+      386:  156-block  0
+branch  0 taken 75 (fallthrough)
+branch  1 taken 311
+       75:  157:			ret = -1;
+       75:  157-block  0
+unconditional  0 taken 75
+      456:  158:		break;
+      456:  158-block  0
+unconditional  0 taken 456
+        -:  159:
+      917:  160:	case SATIME: /* fallthrough */
+        -:  161:	case SBTIME: /* fallthrough */
+        -:  162:	case SCTIME: /* fallthrough */
+        -:  163:	case SMTIME:
+      917:  164:		if (pa->time > pb->time)
+      917:  164-block  0
+branch  0 taken 448 (fallthrough)
+branch  1 taken 469
+      448:  165:			ret = 1;
+      448:  165-block  0
+unconditional  0 taken 448
+      469:  166:		else if (pa->time < pb->time)
+      469:  166-block  0
+branch  0 taken 432 (fallthrough)
+branch  1 taken 37
+      432:  167:			ret = -1;
+      432:  167-block  0
+unconditional  0 taken 432
+      917:  168:		break;
+      917:  168-block  0
+unconditional  0 taken 917
+        -:  169:
+        -:  170:#ifdef _GNU_SOURCE
+      236:  171:	case SVER:
+      236:  172:		ret = strverscmp(pa->name, pb->name);
+      236:  173:		break;
+      236:  173-block  0
+unconditional  0 taken 236
+        -:  174:#endif
+        -:  175:
+      237:  176:	case SEXT: {
+      237:  177:		char *aext = (char *)NULL, *bext = (char *)NULL, *val;
+      237:  178:		val = strrchr(pa->name, '.');
+      237:  179:		if (val && val != pa->name)
+      237:  179-block  0
+branch  0 taken 181 (fallthrough)
+branch  1 taken 56
+      181:  179-block  1
+branch  2 taken 10 (fallthrough)
+branch  3 taken 171
+       10:  180:			aext = val + 1;
+       10:  180-block  0
+unconditional  0 taken 10
+        -:  181:
+      237:  182:		val = strrchr(pb->name, '.');
+      237:  183:		if (val && val != pb->name)
+      237:  183-block  0
+branch  0 taken 200 (fallthrough)
+branch  1 taken 37
+      200:  183-block  1
+branch  2 taken 22 (fallthrough)
+branch  3 taken 178
+       22:  184:			bext = val + 1;
+       22:  184-block  0
+unconditional  0 taken 22
+        -:  185:
+      237:  186:		if (aext || bext) {
+      237:  186-block  0
+branch  0 taken 227 (fallthrough)
+branch  1 taken 10
+      227:  186-block  1
+branch  2 taken 17 (fallthrough)
+branch  3 taken 210
+       27:  187:			if (!aext)
+       27:  187-block  0
+branch  0 taken 17 (fallthrough)
+branch  1 taken 10
+       17:  188:				ret = -1;
+       17:  188-block  0
+unconditional  0 taken 17
+       10:  189:			else if (!bext)
+       10:  189-block  0
+branch  0 taken 5 (fallthrough)
+branch  1 taken 5
+        5:  190:				ret = 1;
+        5:  190-block  0
+unconditional  0 taken 5
+        -:  191:
+        -:  192:			else
+        5:  193:				ret = strcasecmp(aext, bext);
+        5:  193-block  0
+unconditional  0 taken 5
+        -:  194:		}
+      237:  195:	} break;
+      237:  195-block  0
+unconditional  0 taken 237
+        -:  196:
+      233:  197:	case SINO:
+      233:  198:		if (pa->inode > pb->inode)
+      233:  198-block  0
+branch  0 taken 115 (fallthrough)
+branch  1 taken 118
+      115:  199:			ret = 1;
+      115:  199-block  0
+unconditional  0 taken 115
+      118:  200:		else if (pa->inode < pb->inode)
+      118:  200-block  0
+branch  0 taken 118 (fallthrough)
+branch  1 taken 0
+      118:  201:			ret = -1;
+      118:  201-block  0
+unconditional  0 taken 118
+      233:  202:		break;
+      233:  202-block  0
+unconditional  0 taken 233
+        -:  203:
+      233:  204:	case SOWN:
+      233:  205:		if (pa->uid > pb->uid)
+      233:  205-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 233
+    #####:  206:			ret = 1;
+    %%%%%:  206-block  0
+unconditional  0 never executed
+      233:  207:		else if (pa->uid < pb->uid)
+      233:  207-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 233
+    #####:  208:			ret = -1;
+    %%%%%:  208-block  0
+unconditional  0 never executed
+      233:  209:		break;
+      233:  209-block  0
+unconditional  0 taken 233
+        -:  210:
+      233:  211:	case SGRP:
+      233:  212:		if (pa->gid > pb->gid)
+      233:  212-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 233
+    #####:  213:			ret = 1;
+    %%%%%:  213-block  0
+unconditional  0 never executed
+      233:  214:		else if (pa->gid < pb->gid)
+      233:  214-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 233
+    #####:  215:			ret = -1;
+    %%%%%:  215-block  0
+unconditional  0 never executed
+      233:  216:		break;
+      233:  216-block  0
+unconditional  0 taken 233
+        -:  217:	}
+        -:  218:
+   372226:  219:	if (!ret)
+   372226:  219-block  0
+branch  0 taken 370705 (fallthrough)
+branch  1 taken 1521
+   370705:  220:		ret = namecmp(pa->name, pb->name);
+   370705:  220-block  0
+call    0 returned 370705
+unconditional  1 taken 370705
+        -:  221:
+   372226:  222:	if (!sort_reverse)
+   372226:  222-block  0
+branch  0 taken 371986 (fallthrough)
+branch  1 taken 240
+   371986:  223:		return ret;
+   371986:  223-block  0
+unconditional  0 taken 371986
+        -:  224:
+      240:  225:	return (ret - (ret * 2));
+      240:  225-block  0
+unconditional  0 taken 240
+        -:  226:}
+        -:  227:
+        -:  228:/* Same as alphasort, but is uses strcmp instead of sctroll, which is
+        -:  229: * slower. However, bear in mind that, unlike strcmp(), strcoll() is locale
+        -:  230: * aware. Use only with C and english locales */
+        -:  231:int
+function xalphasort called 759605 returned 100% blocks executed 89%
+   759605:  232:xalphasort(const struct dirent **a, const struct dirent **b)
+        -:  233:{
+   759605:  234:	int ret = 0;
+        -:  235:
+        -:  236:	/* The if statements prevent strcmp from running in every
+        -:  237:	 * call to the function (it will be called only if the first
+        -:  238:	 * character of the two strings is the same), which makes the
+        -:  239:	 * function faster */
+   759605:  240:	if ((*a)->d_name[0] > (*b)->d_name[0])
+   759605:  240-block  0
+branch  0 taken 160941 (fallthrough)
+branch  1 taken 598664
+   160941:  241:		ret = 1;
+   160941:  241-block  0
+unconditional  0 taken 160941
+   598664:  242:	else if ((*a)->d_name[0] < (*b)->d_name[0])
+   598664:  242-block  0
+branch  0 taken 151411 (fallthrough)
+branch  1 taken 447253
+   151411:  243:		ret = -1;
+   151411:  243-block  0
+unconditional  0 taken 151411
+        -:  244:	else
+   447253:  245:		ret = strcmp((*a)->d_name, (*b)->d_name);
+   447253:  245-block  0
+unconditional  0 taken 447253
+        -:  246:
+   759605:  247:	if (!sort_reverse)
+   759605:  247-block  0
+branch  0 taken 759605 (fallthrough)
+branch  1 taken 0
+   759605:  248:		return ret;
+   759605:  248-block  0
+unconditional  0 taken 759605
+        -:  249:
+        -:  250:	/* If sort_reverse, return the opposite value */
+    #####:  251:	return (ret - (ret * 2));
+    %%%%%:  251-block  0
+unconditional  0 never executed
+        -:  252:}
+        -:  253:
+        -:  254:int
+function sort_function called 9 returned 100% blocks executed 32%
+        9:  255:sort_function(char **arg)
+        -:  256:{
+        9:  257:	int exit_status = EXIT_FAILURE;
+        -:  258:
+        -:  259:	/* No argument: Just print current sorting method */
+        9:  260:	if (!arg[1]) {
+        9:  260-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 6
+        -:  261:
+        3:  262:		printf(_("Sorting method: "));
+        3:  262-block  0
+call    0 returned 3
+call    1 returned 3
+        -:  263:
+        3:  264:		switch (sort) {
+branch  0 taken 0
+branch  1 taken 3
 branch  2 taken 0
 branch  3 taken 0
 branch  4 taken 0
 branch  5 taken 0
 branch  6 taken 0
-branch  7 taken 5442
-        -:  128:
-    #####:  129:	case SSIZE:
-    #####:  130:		if (pa->size > pb->size)
-    %%%%%:  130-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  131:			ret = 1;
-    %%%%%:  131-block  0
-unconditional  0 never executed
-    #####:  132:		else if (pa->size < pb->size)
-    %%%%%:  132-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  133:			ret = -1;
-    %%%%%:  133-block  0
-unconditional  0 never executed
-    #####:  134:		break;
-    %%%%%:  134-block  0
-unconditional  0 never executed
-        -:  135:
-    #####:  136:	case SATIME: /* fallthrough */
-        -:  137:	case SBTIME: /* fallthrough */
-        -:  138:	case SCTIME: /* fallthrough */
-        -:  139:	case SMTIME:
-    #####:  140:		if (pa->time > pb->time)
-    %%%%%:  140-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  141:			ret = 1;
-    %%%%%:  141-block  0
-unconditional  0 never executed
-    #####:  142:		else if (pa->time < pb->time)
-    %%%%%:  142-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  143:			ret = -1;
-    %%%%%:  143-block  0
-unconditional  0 never executed
-    #####:  144:		break;
-    %%%%%:  144-block  0
-unconditional  0 never executed
-        -:  145:
-        -:  146:#ifdef _GNU_SOURCE
-    #####:  147:	case SVER:
-    #####:  148:		ret = strverscmp(pa->name, pb->name);
-    #####:  149:		break;
-    %%%%%:  149-block  0
-unconditional  0 never executed
-        -:  150:#endif
-        -:  151:
-    #####:  152:	case SEXT: {
-    #####:  153:		char *aext = (char *)NULL, *bext = (char *)NULL, *val;
-    #####:  154:		val = strrchr(pa->name, '.');
-    #####:  155:		if (val && val != pa->name)
-    %%%%%:  155-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  155-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  156:			aext = val + 1;
-    %%%%%:  156-block  0
-unconditional  0 never executed
-        -:  157:
-    #####:  158:		val = strrchr(pb->name, '.');
-    #####:  159:		if (val && val != pb->name)
-    %%%%%:  159-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  159-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  160:			bext = val + 1;
-    %%%%%:  160-block  0
-unconditional  0 never executed
-        -:  161:
-    #####:  162:		if (aext || bext) {
-    %%%%%:  162-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  162-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  163:			if (!aext)
-    %%%%%:  163-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  164:				ret = -1;
-    %%%%%:  164-block  0
-unconditional  0 never executed
-    #####:  165:			else if (!bext)
-    %%%%%:  165-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  166:				ret = 1;
-    %%%%%:  166-block  0
-unconditional  0 never executed
-        -:  167:
-        -:  168:			else
-    #####:  169:				ret = strcasecmp(aext, bext);
-    %%%%%:  169-block  0
-unconditional  0 never executed
-        -:  170:		}
-    #####:  171:	} break;
-    %%%%%:  171-block  0
-unconditional  0 never executed
-        -:  172:
-    #####:  173:	case SINO:
-    #####:  174:		if (pa->inode > pb->inode)
-    %%%%%:  174-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  175:			ret = 1;
-    %%%%%:  175-block  0
-unconditional  0 never executed
-    #####:  176:		else if (pa->inode < pb->inode)
-    %%%%%:  176-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  177:			ret = -1;
-    %%%%%:  177-block  0
-unconditional  0 never executed
-    #####:  178:		break;
-    %%%%%:  178-block  0
-unconditional  0 never executed
-        -:  179:
-    #####:  180:	case SOWN:
-    #####:  181:		if (pa->uid > pb->uid)
-    %%%%%:  181-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  182:			ret = 1;
-    %%%%%:  182-block  0
-unconditional  0 never executed
-    #####:  183:		else if (pa->uid < pb->uid)
-    %%%%%:  183-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  184:			ret = -1;
-    %%%%%:  184-block  0
-unconditional  0 never executed
-    #####:  185:		break;
-    %%%%%:  185-block  0
-unconditional  0 never executed
-        -:  186:
-    #####:  187:	case SGRP:
-    #####:  188:		if (pa->gid > pb->gid)
-    %%%%%:  188-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  189:			ret = 1;
-    %%%%%:  189-block  0
-unconditional  0 never executed
-    #####:  190:		else if (pa->gid < pb->gid)
-    %%%%%:  190-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  191:			ret = -1;
-    %%%%%:  191-block  0
-unconditional  0 never executed
-    #####:  192:		break;
-    %%%%%:  192-block  0
-unconditional  0 never executed
-        -:  193:	}
-        -:  194:
-     5442:  195:	if (!ret)
-     5442:  195-block  0
-branch  0 taken 5442 (fallthrough)
-branch  1 taken 0
-     5442:  196:		ret = namecmp(pa->name, pb->name);
-     5442:  196-block  0
-call    0 returned 5442
-unconditional  1 taken 5442
-        -:  197:
-     5442:  198:	if (!sort_reverse)
-     5442:  198-block  0
-branch  0 taken 5442 (fallthrough)
-branch  1 taken 0
-     5442:  199:		return ret;
-     5442:  199-block  0
-unconditional  0 taken 5442
-        -:  200:
-    #####:  201:	return (ret - (ret * 2));
-    %%%%%:  201-block  0
-unconditional  0 never executed
-        -:  202:}
-        -:  203:
-        -:  204:/* Same as alphasort, but is uses strcmp instead of sctroll, which is
-        -:  205: * slower. However, bear in mind that, unlike strcmp(), strcoll() is locale
-        -:  206: * aware. Use only with C and english locales */
-        -:  207:int
-function xalphasort called 76004 returned 100% blocks executed 89%
-    76004:  208:xalphasort(const struct dirent **a, const struct dirent **b)
-        -:  209:{
-    76004:  210:	int ret = 0;
-        -:  211:
-        -:  212:	/* The if statements prevent strcmp from running in every
-        -:  213:	 * call to the function (it will be called only if the first
-        -:  214:	 * character of the two strings is the same), which makes the
-        -:  215:	 * function faster */
-    76004:  216:	if ((*a)->d_name[0] > (*b)->d_name[0])
-    76004:  216-block  0
-branch  0 taken 16138 (fallthrough)
-branch  1 taken 59866
-    16138:  217:		ret = 1;
-    16138:  217-block  0
-unconditional  0 taken 16138
-        -:  218:
-    59866:  219:	else if ((*a)->d_name[0] < (*b)->d_name[0])
-    59866:  219-block  0
-branch  0 taken 15126 (fallthrough)
-branch  1 taken 44740
-    15126:  220:		ret = -1;
-    15126:  220-block  0
-unconditional  0 taken 15126
-        -:  221:
-        -:  222:	else
-    44740:  223:		ret = strcmp((*a)->d_name, (*b)->d_name);
-    44740:  223-block  0
-unconditional  0 taken 44740
-        -:  224:
-    76004:  225:	if (!sort_reverse)
-    76004:  225-block  0
-branch  0 taken 76004 (fallthrough)
-branch  1 taken 0
-    76004:  226:		return ret;
-    76004:  226-block  0
-unconditional  0 taken 76004
-        -:  227:
-        -:  228:	/* If sort_reverse, return the opposite value */
-    #####:  229:	return (ret - (ret * 2));
-    %%%%%:  229-block  0
-unconditional  0 never executed
-        -:  230:}
-        -:  231:
-        -:  232:int
-function sort_function called 0 returned 0% blocks executed 0%
-    #####:  233:sort_function(char **arg)
-        -:  234:{
-    #####:  235:	int exit_status = EXIT_FAILURE;
-        -:  236:
-        -:  237:	/* No argument: Just print current sorting method */
-    #####:  238:	if (!arg[1]) {
-    %%%%%:  238-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  239:
-    #####:  240:		printf(_("Sorting method: "));
-    %%%%%:  240-block  0
-call    0 never executed
-        -:  241:
-    #####:  242:		switch (sort) {
-branch  0 never executed
-branch  1 never executed
-branch  2 never executed
-branch  3 never executed
-branch  4 never executed
-branch  5 never executed
-branch  6 never executed
-branch  7 never executed
-branch  8 never executed
-branch  9 never executed
-branch 10 never executed
-branch 11 never executed
-branch 12 never executed
-    #####:  243:		case SNONE:
-    #####:  244:			printf(_("none %s\n"), (sort_reverse) ? "[rev]" : "");
-    %%%%%:  244-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  244-block  1
-unconditional  2 never executed
-    %%%%%:  244-block  2
-unconditional  3 never executed
-    %%%%%:  244-block  3
-call    4 never executed
-    #####:  245:			break;
-unconditional  0 never executed
-    #####:  246:		case SNAME:
-    #####:  247:			printf(_("name %s\n"), (sort_reverse) ? "[rev]" : "");
-    %%%%%:  247-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  247-block  1
-unconditional  2 never executed
-    %%%%%:  247-block  2
-unconditional  3 never executed
-    %%%%%:  247-block  3
-call    4 never executed
-    #####:  248:			break;
-unconditional  0 never executed
-    #####:  249:		case SSIZE:
-    #####:  250:			printf(_("size %s\n"), (sort_reverse) ? "[rev]" : "");
-    %%%%%:  250-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  250-block  1
-unconditional  2 never executed
-    %%%%%:  250-block  2
-unconditional  3 never executed
-    %%%%%:  250-block  3
-call    4 never executed
-    #####:  251:			break;
-unconditional  0 never executed
-    #####:  252:		case SATIME:
-    #####:  253:			printf(_("atime %s\n"), (sort_reverse) ? "[rev]" : "");
-    %%%%%:  253-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  253-block  1
-unconditional  2 never executed
-    %%%%%:  253-block  2
-unconditional  3 never executed
-    %%%%%:  253-block  3
-call    4 never executed
-    #####:  254:			break;
-unconditional  0 never executed
-    #####:  255:		case SBTIME:
-        -:  256:#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
-    #####:  257:			printf(_("btime %s\n"), (sort_reverse) ? "[rev]" : "");
-    %%%%%:  257-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  257-block  1
-unconditional  2 never executed
-    %%%%%:  257-block  2
-unconditional  3 never executed
-    %%%%%:  257-block  3
-call    4 never executed
-        -:  258:#else
-        -:  259:			printf(_("ctime %s\n"), (sort_reverse) ? "[rev]" : "");
-        -:  260:#endif
-    #####:  261:			break;
-unconditional  0 never executed
-    #####:  262:		case SCTIME:
-    #####:  263:			printf(_("ctime %s\n"), (sort_reverse) ? "[rev]" : "");
-    %%%%%:  263-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  263-block  1
-unconditional  2 never executed
-    %%%%%:  263-block  2
-unconditional  3 never executed
-    %%%%%:  263-block  3
-call    4 never executed
-    #####:  264:			break;
-unconditional  0 never executed
-    #####:  265:		case SMTIME:
-    #####:  266:			printf(_("mtime %s\n"), (sort_reverse) ? "[rev]" : "");
+branch  7 taken 0
+branch  8 taken 0
+branch  9 taken 0
+branch 10 taken 0
+branch 11 taken 0
+branch 12 taken 0
+    #####:  265:		case SNONE:
+    #####:  266:			printf(_("none %s\n"), (sort_reverse) ? "[rev]" : "");
     %%%%%:  266-block  0
 branch  0 never executed
 branch  1 never executed
@@ -614,13 +555,25 @@ unconditional  2 never executed
 unconditional  3 never executed
     %%%%%:  266-block  3
 call    4 never executed
+call    5 never executed
     #####:  267:			break;
 unconditional  0 never executed
-    #####:  268:		case SVER:
-        -:  269:#if __FreeBSD__ || _BE_POSIX
-        -:  270:			printf(_("name %s\n"), (sort_reverse) ? "[rev]" : "");
-        -:  271:#else
-    #####:  272:			printf(_("version %s\n"), (sort_reverse) ? "[rev]" : "");
+        3:  268:		case SNAME:
+        3:  269:			printf(_("name %s\n"), (sort_reverse) ? "[rev]" : "");
+        3:  269-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 2
+        1:  269-block  1
+unconditional  2 taken 1
+        2:  269-block  2
+unconditional  3 taken 2
+        3:  269-block  3
+call    4 returned 3
+call    5 returned 3
+        3:  270:			break;
+unconditional  0 taken 3
+    #####:  271:		case SSIZE:
+    #####:  272:			printf(_("size %s\n"), (sort_reverse) ? "[rev]" : "");
     %%%%%:  272-block  0
 branch  0 never executed
 branch  1 never executed
@@ -630,24 +583,26 @@ unconditional  2 never executed
 unconditional  3 never executed
     %%%%%:  272-block  3
 call    4 never executed
-        -:  273:#endif
-    #####:  274:			break;
+call    5 never executed
+    #####:  273:			break;
 unconditional  0 never executed
-    #####:  275:		case SEXT:
-    #####:  276:			printf(_("extension %s\n"), (sort_reverse) ? "[rev]" : "");
-    %%%%%:  276-block  0
+    #####:  274:		case SATIME:
+    #####:  275:			printf(_("atime %s\n"), (sort_reverse) ? "[rev]" : "");
+    %%%%%:  275-block  0
 branch  0 never executed
 branch  1 never executed
-    %%%%%:  276-block  1
+    %%%%%:  275-block  1
 unconditional  2 never executed
-    %%%%%:  276-block  2
+    %%%%%:  275-block  2
 unconditional  3 never executed
-    %%%%%:  276-block  3
+    %%%%%:  275-block  3
 call    4 never executed
-    #####:  277:			break;
+call    5 never executed
+    #####:  276:			break;
 unconditional  0 never executed
-    #####:  278:		case SINO:
-    #####:  279:			printf(_("inode %s\n"), (sort_reverse) ? "[rev]" : "");
+    #####:  277:		case SBTIME:
+        -:  278:#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
+    #####:  279:			printf(_("btime %s\n"), (sort_reverse) ? "[rev]" : "");
     %%%%%:  279-block  0
 branch  0 never executed
 branch  1 never executed
@@ -657,23 +612,14 @@ unconditional  2 never executed
 unconditional  3 never executed
     %%%%%:  279-block  3
 call    4 never executed
-    #####:  280:			break;
-unconditional  0 never executed
-    #####:  281:		case SOWN:
-    #####:  282:			printf(_("owner %s\n"), (sort_reverse) ? "[rev]" : "");
-    %%%%%:  282-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  282-block  1
-unconditional  2 never executed
-    %%%%%:  282-block  2
-unconditional  3 never executed
-    %%%%%:  282-block  3
-call    4 never executed
+call    5 never executed
+        -:  280:#else
+        -:  281:			printf(_("ctime %s\n"), (sort_reverse) ? "[rev]" : "");
+        -:  282:#endif
     #####:  283:			break;
 unconditional  0 never executed
-    #####:  284:		case SGRP:
-    #####:  285:			printf(_("group %s\n"), (sort_reverse) ? "[rev]" : "");
+    #####:  284:		case SCTIME:
+    #####:  285:			printf(_("ctime %s\n"), (sort_reverse) ? "[rev]" : "");
     %%%%%:  285-block  0
 branch  0 never executed
 branch  1 never executed
@@ -683,205 +629,291 @@ unconditional  2 never executed
 unconditional  3 never executed
     %%%%%:  285-block  3
 call    4 never executed
+call    5 never executed
     #####:  286:			break;
 unconditional  0 never executed
-        -:  287:		}
-        -:  288:
-    #####:  289:		return EXIT_SUCCESS;
-    %%%%%:  289-block  0
-unconditional  0 never executed
-        -:  290:	}
-        -:  291:
-        -:  292:	/* Argument is alphanumerical string */
-    #####:  293:	if (!is_number(arg[1])) {
-    %%%%%:  293-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-        -:  294:
-        -:  295:		struct sort_t {
-        -:  296:			const char *name;
-        -:  297:			int num;
-        -:  298:		};
-        -:  299:
-        -:  300:		static struct sort_t sorts[] = {
-        -:  301:		    {"none", 0},
-        -:  302:		    {"name", 1},
-        -:  303:		    {"size", 2},
-        -:  304:		    {"atime", 3},
-        -:  305:		    {"btime", 4},
-        -:  306:		    {"ctime", 5},
-        -:  307:		    {"mtime", 6},
-        -:  308:		    {"version", 7},
-        -:  309:		    {"extension", 8},
-        -:  310:		    {"inode", 9},
-        -:  311:		    {"owner", 10},
-        -:  312:		    {"group", 11},
-        -:  313:		};
-        -:  314:
-        -:  315:		size_t i;
-    #####:  316:		for (i = 0; i < sizeof(sorts) / sizeof(struct sort_t); i++) {
-    %%%%%:  316-block  0
-unconditional  0 never executed
-    %%%%%:  316-block  1
-unconditional  1 never executed
-    %%%%%:  316-block  2
-branch  2 never executed
-branch  3 never executed
-    #####:  317:			if (strcmp(arg[1], sorts[i].name) == 0) {
-    %%%%%:  317-block  0
+    #####:  287:		case SMTIME:
+    #####:  288:			printf(_("mtime %s\n"), (sort_reverse) ? "[rev]" : "");
+    %%%%%:  288-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  318:				sprintf(arg[1], "%d", sorts[i].num);
-    #####:  319:				break;
-    %%%%%:  319-block  0
+    %%%%%:  288-block  1
+unconditional  2 never executed
+    %%%%%:  288-block  2
+unconditional  3 never executed
+    %%%%%:  288-block  3
+call    4 never executed
+call    5 never executed
+    #####:  289:			break;
 unconditional  0 never executed
-        -:  320:			}
-        -:  321:		}
+    #####:  290:		case SVER:
+        -:  291:#if __FreeBSD__ || __NetBSD__ || __OpenBSD__ || _BE_POSIX
+        -:  292:			printf(_("name %s\n"), (sort_reverse) ? "[rev]" : "");
+        -:  293:#else
+    #####:  294:			printf(_("version %s\n"), (sort_reverse) ? "[rev]" : "");
+    %%%%%:  294-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  294-block  1
+unconditional  2 never executed
+    %%%%%:  294-block  2
+unconditional  3 never executed
+    %%%%%:  294-block  3
+call    4 never executed
+call    5 never executed
+        -:  295:#endif
+    #####:  296:			break;
+unconditional  0 never executed
+    #####:  297:		case SEXT:
+    #####:  298:			printf(_("extension %s\n"), (sort_reverse) ? "[rev]" : "");
+    %%%%%:  298-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  298-block  1
+unconditional  2 never executed
+    %%%%%:  298-block  2
+unconditional  3 never executed
+    %%%%%:  298-block  3
+call    4 never executed
+call    5 never executed
+    #####:  299:			break;
+unconditional  0 never executed
+    #####:  300:		case SINO:
+    #####:  301:			printf(_("inode %s\n"), (sort_reverse) ? "[rev]" : "");
+    %%%%%:  301-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  301-block  1
+unconditional  2 never executed
+    %%%%%:  301-block  2
+unconditional  3 never executed
+    %%%%%:  301-block  3
+call    4 never executed
+call    5 never executed
+    #####:  302:			break;
+unconditional  0 never executed
+    #####:  303:		case SOWN:
+    #####:  304:			printf(_("owner %s\n"), (sort_reverse) ? "[rev]" : "");
+    %%%%%:  304-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  304-block  1
+unconditional  2 never executed
+    %%%%%:  304-block  2
+unconditional  3 never executed
+    %%%%%:  304-block  3
+call    4 never executed
+call    5 never executed
+    #####:  305:			break;
+unconditional  0 never executed
+    #####:  306:		case SGRP:
+    #####:  307:			printf(_("group %s\n"), (sort_reverse) ? "[rev]" : "");
+    %%%%%:  307-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  307-block  1
+unconditional  2 never executed
+    %%%%%:  307-block  2
+unconditional  3 never executed
+    %%%%%:  307-block  3
+call    4 never executed
+call    5 never executed
+    #####:  308:			break;
+unconditional  0 never executed
+        -:  309:		}
+        -:  310:
+        3:  311:		return EXIT_SUCCESS;
+        3:  311-block  0
+unconditional  0 taken 3
+        -:  312:	}
+        -:  313:
+        -:  314:	/* Argument is alphanumerical string */
+        6:  315:	if (!is_number(arg[1])) {
+        6:  315-block  0
+call    0 returned 6
+branch  1 taken 4 (fallthrough)
+branch  2 taken 2
+        -:  316:
+        -:  317:		struct sort_t {
+        -:  318:			const char *name;
+        -:  319:			int num;
+        -:  320:			int padding; /* Used only to properly align the struct */
+        -:  321:		};
         -:  322:
-    #####:  323:		if (strcmp(arg[1], "rev") == 0) {
-    %%%%%:  323-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  324:
-    #####:  325:			if (sort_reverse)
-    %%%%%:  325-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  326:				sort_reverse = 0;
-    %%%%%:  326-block  0
+        -:  323:		static struct sort_t sorts[] = {
+        -:  324:		    {"none", 0, 0},
+        -:  325:		    {"name", 1, 0},
+        -:  326:		    {"size", 2, 0},
+        -:  327:		    {"atime", 3, 0},
+        -:  328:		    {"btime", 4, 0},
+        -:  329:		    {"ctime", 5, 0},
+        -:  330:		    {"mtime", 6, 0},
+        -:  331:		    {"version", 7, 0},
+        -:  332:		    {"extension", 8, 0},
+        -:  333:		    {"inode", 9, 0},
+        -:  334:		    {"owner", 10, 0},
+        -:  335:		    {"group", 11, 0},
+        -:  336:		};
+        -:  337:
+        -:  338:		size_t i;
+       52:  339:		for (i = 0; i < sizeof(sorts) / sizeof(struct sort_t); i++) {
+        4:  339-block  0
+unconditional  0 taken 4
+       48:  339-block  1
+unconditional  1 taken 48
+       52:  339-block  2
+branch  2 taken 48
+branch  3 taken 4 (fallthrough)
+       48:  340:			if (strcmp(arg[1], sorts[i].name) == 0) {
+       48:  340-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 48
+    #####:  341:				sprintf(arg[1], "%d", sorts[i].num);
+    #####:  342:				break;
+    %%%%%:  342-block  0
 unconditional  0 never executed
-        -:  327:			else
-    #####:  328:				sort_reverse = 1;
-    %%%%%:  328-block  0
-unconditional  0 never executed
-        -:  329:
-    #####:  330:			if (cd_lists_on_the_fly) {
-    %%%%%:  330-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  331:				/* sort_switch just tells list_dir() to print a line
-        -:  332:				 * with the current sorting method at the end of the
-        -:  333:				 * files list */
-    #####:  334:				sort_switch = 1;
-    #####:  335:				free_dirlist();
-    %%%%%:  335-block  0
-call    0 never executed
-    #####:  336:				exit_status = list_dir();
-call    0 never executed
-    #####:  337:				sort_switch = 0;
-unconditional  0 never executed
-        -:  338:			}
-        -:  339:
-    #####:  340:			return exit_status;
-    %%%%%:  340-block  0
-unconditional  0 never executed
-        -:  341:		}
-        -:  342:
-        -:  343:		/* If arg1 is not a number and is not "rev", the fputs()
-        -:  344:		 * above is executed */
-        -:  345:	}
-        -:  346:
-        -:  347:	/* Argument is a number */
-    #####:  348:	int int_arg = atoi(arg[1]);
-        -:  349:
-    #####:  350:	if (int_arg >= 0 && int_arg <= SORT_TYPES) {
-    %%%%%:  350-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  350-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  351:		sort = int_arg;
+        -:  343:			}
+        -:  344:		}
+        -:  345:
+        4:  346:		if (strcmp(arg[1], "rev") == 0) {
+        4:  346-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 0
+        -:  347:
+        4:  348:			if (sort_reverse)
+        4:  348-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 2
+        2:  349:				sort_reverse = 0;
+        2:  349-block  0
+unconditional  0 taken 2
+        -:  350:			else
+        2:  351:				sort_reverse = 1;
+        2:  351-block  0
+unconditional  0 taken 2
         -:  352:
-    #####:  353:		if (arg[2] && strcmp(arg[2], "rev") == 0) {
-    %%%%%:  353-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  353-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  354:			if (sort_reverse)
-    %%%%%:  354-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  355:				sort_reverse = 0;
-    %%%%%:  355-block  0
-unconditional  0 never executed
-        -:  356:			else
-    #####:  357:				sort_reverse = 1;
-    %%%%%:  357-block  0
-unconditional  0 never executed
-        -:  358:		}
-        -:  359:
-    #####:  360:		if (cd_lists_on_the_fly) {
-    %%%%%:  360-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  361:			sort_switch = 1;
-    #####:  362:			free_dirlist();
-    %%%%%:  362-block  0
-call    0 never executed
-    #####:  363:			exit_status = list_dir();
-call    0 never executed
-    #####:  364:			sort_switch = 0;
-unconditional  0 never executed
-        -:  365:		}
-        -:  366:
-    #####:  367:		return exit_status;
-    %%%%%:  367-block  0
-unconditional  0 never executed
+        4:  353:			if (cd_lists_on_the_fly) {
+        4:  353-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 0
+        -:  354:				/* sort_switch just tells list_dir() to print a line
+        -:  355:				 * with the current sorting method at the end of the
+        -:  356:				 * files list */
+        4:  357:				sort_switch = 1;
+        4:  358:				free_dirlist();
+        4:  358-block  0
+call    0 returned 4
+        4:  359:				exit_status = list_dir();
+call    0 returned 4
+        4:  360:				sort_switch = 0;
+unconditional  0 taken 4
+        -:  361:			}
+        -:  362:
+        4:  363:			return exit_status;
+        4:  363-block  0
+unconditional  0 taken 4
+        -:  364:		}
+        -:  365:
+        -:  366:		/* If arg1 is not a number and is not "rev", the fputs()
+        -:  367:		 * above is executed */
         -:  368:	}
         -:  369:
-        -:  370:	/* If arg1 is a number but is not in the range 0-SORT_TYPES,
-        -:  371:	 * error */
+        -:  370:	/* Argument is a number */
+        2:  371:	int int_arg = atoi(arg[1]);
         -:  372:
-    #####:  373:	fputs(_("Usage: st [METHOD] [rev]\nMETHOD: 0 = none, "
-    %%%%%:  373-block  0
-call    0 never executed
-        -:  374:		"1 = name, 2 = size, 3 = atime, 4 = btime, "
-        -:  375:		"5 = ctime, 6 = mtime, 7 = version, 8 = extension, "
-        -:  376:		"9 = inode, 10 = owner, 11 = group\nBoth numbers and names are "
-        -:  377:		"allowed\n"), stderr);
-        -:  378:
-    #####:  379:	return EXIT_FAILURE;
+        2:  373:	if (int_arg >= 0 && int_arg <= SORT_TYPES) {
+        2:  373-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  373-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 0
+        2:  374:		sort = int_arg;
+        -:  375:
+       2*:  376:		if (arg[2] && strcmp(arg[2], "rev") == 0) {
+        2:  376-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    %%%%%:  376-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  377:			if (sort_reverse)
+    %%%%%:  377-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  378:				sort_reverse = 0;
+    %%%%%:  378-block  0
 unconditional  0 never executed
-        -:  380:}
-        -:  381:
-        -:  382:/* This is a modification of the alphasort function that makes it case
-        -:  383: * insensitive. It also sorts without taking the initial dot of hidden
-        -:  384: * files into account. Note that strcasecmp() isn't locale aware. Use
-        -:  385: * only with C and english locales */
-        -:  386:int
-function alphasort_insensitive called 0 returned 0% blocks executed 0%
-    #####:  387:alphasort_insensitive(const struct dirent **a, const struct dirent **b)
-        -:  388:{
-    #####:  389:	int ret = strcasecmp(((*a)->d_name[0] == '.') ? (*a)->d_name + 1
-    %%%%%:  389-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  389-block  1
-unconditional  2 never executed
-    #####:  390:	: (*a)->d_name, ((*b)->d_name[0] == '.') ? (*b)->d_name + 1 : (*b)->d_name);
-    %%%%%:  390-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  390-block  1
-unconditional  2 never executed
-    %%%%%:  390-block  2
-unconditional  3 never executed
-    %%%%%:  390-block  3
-unconditional  4 never executed
-        -:  391:
-    #####:  392:	if (!sort_reverse)
-    %%%%%:  392-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  393:		return ret;
-    %%%%%:  393-block  0
+        -:  379:			else
+    #####:  380:				sort_reverse = 1;
+    %%%%%:  380-block  0
 unconditional  0 never executed
-        -:  394:
-    #####:  395:	return (ret - (ret * 2));
+        -:  381:		}
+        -:  382:
+        2:  383:		if (cd_lists_on_the_fly) {
+        2:  383-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  384:			sort_switch = 1;
+        2:  385:			free_dirlist();
+        2:  385-block  0
+call    0 returned 2
+        2:  386:			exit_status = list_dir();
+call    0 returned 2
+        2:  387:			sort_switch = 0;
+unconditional  0 taken 2
+        -:  388:		}
+        -:  389:
+        2:  390:		return exit_status;
+        2:  390-block  0
+unconditional  0 taken 2
+        -:  391:	}
+        -:  392:
+        -:  393:	/* If arg1 is a number but is not in the range 0-SORT_TYPES,
+        -:  394:	 * error */
+    #####:  395:	fprintf(stderr, "%s\n", _(SORT_USAGE));
     %%%%%:  395-block  0
+call    0 never executed
+call    1 never executed
+        -:  396:
+    #####:  397:	return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  396:}
+        -:  398:}
+        -:  399:
+        -:  400:/* This is a modification of the alphasort function that makes it case
+        -:  401: * insensitive. It also sorts without taking the initial dot of hidden
+        -:  402: * files into account. Note that strcasecmp() isn't locale aware. Use
+        -:  403: * only with C and english locales */
+        -:  404:int
+function alphasort_insensitive called 0 returned 0% blocks executed 0%
+    #####:  405:alphasort_insensitive(const struct dirent **a, const struct dirent **b)
+        -:  406:{
+    #####:  407:	int ret = strcasecmp(((*a)->d_name[0] == '.') ? (*a)->d_name + 1
+    %%%%%:  407-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  407-block  1
+unconditional  2 never executed
+    #####:  408:	: (*a)->d_name, ((*b)->d_name[0] == '.') ? (*b)->d_name + 1 : (*b)->d_name);
+    %%%%%:  408-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  408-block  1
+unconditional  2 never executed
+    %%%%%:  408-block  2
+unconditional  3 never executed
+    %%%%%:  408-block  3
+unconditional  4 never executed
+        -:  409:
+    #####:  410:	if (!sort_reverse)
+    %%%%%:  410-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  411:		return ret;
+    %%%%%:  411-block  0
+unconditional  0 never executed
+        -:  412:
+    #####:  413:	return (ret - (ret * 2));
+    %%%%%:  413-block  0
+unconditional  0 never executed
+        -:  414:}

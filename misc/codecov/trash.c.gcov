@@ -23,2155 +23,2115 @@
         -:   22: * MA 02110-1301, USA.
         -:   23:*/
         -:   24:
-        -:   25:#include "helpers.h"
+        -:   25:#ifndef _NO_TRASH
         -:   26:
-        -:   27:#include <dirent.h>
-        -:   28:#include <errno.h>
-        -:   29:#include <fcntl.h>
-        -:   30:#include <stdio.h>
-        -:   31:#include <string.h>
-        -:   32:#include <sys/stat.h>
-        -:   33:#include <time.h>
-        -:   34:#include <unistd.h>
-        -:   35:
-        -:   36:#include "aux.h"
-        -:   37:#include "checks.h"
-        -:   38:#include "colors.h"
-        -:   39:#include "exec.h"
-        -:   40:#include "misc.h"
-        -:   41:#include "navigation.h"
-        -:   42:#include "readline.h"
-        -:   43:#include "sort.h"
-        -:   44:#include "trash.h"
-        -:   45:
-        -:   46:int
-function trash_clear called 0 returned 0% blocks executed 0%
-    #####:   47:trash_clear(void)
-        -:   48:{
-    #####:   49:	struct dirent **trash_files = (struct dirent **)NULL;
-    #####:   50:	int files_n = -1, exit_status = EXIT_SUCCESS;
-        -:   51:
-    #####:   52:	if (xchdir(TRASH_FILES_DIR, NO_TITLE) == -1) {
-    %%%%%:   52-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:   53:		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME,
-call    0 never executed
-    #####:   54:		    TRASH_FILES_DIR, strerror(errno));
-    %%%%%:   54-block  0
-call    0 never executed
-    #####:   55:		return EXIT_FAILURE;
-unconditional  0 never executed
-        -:   56:	}
-        -:   57:
-    #####:   58:	files_n = scandir(TRASH_FILES_DIR, &trash_files, skip_files, xalphasort);
-    %%%%%:   58-block  0
-call    0 never executed
+        -:   27:#include "helpers.h"
+        -:   28:
+        -:   29:#include <dirent.h>
+        -:   30:#include <errno.h>
+        -:   31:#include <fcntl.h>
+        -:   32:#include <stdio.h>
+        -:   33:#include <string.h>
+        -:   34:#include <sys/stat.h>
+        -:   35:#include <time.h>
+        -:   36:#include <unistd.h>
+        -:   37:
+        -:   38:#include "aux.h"
+        -:   39:#include "checks.h"
+        -:   40:#include "colors.h"
+        -:   41:#include "exec.h"
+        -:   42:#include "misc.h"
+        -:   43:#include "navigation.h"
+        -:   44:#include "readline.h"
+        -:   45:#include "sort.h"
+        -:   46:#include "trash.h"
+        -:   47:
+        -:   48:/* Recursively check directory permissions (write and execute). Returns
+        -:   49: * zero if OK, and one if at least one subdirectory does not have
+        -:   50: * write/execute permissions */
+        -:   51:static int
+function recur_perm_check called 2 returned 100% blocks executed 65%
+        2:   52:recur_perm_check(const char *dirname)
+        -:   53:{
+        -:   54:	DIR *dir;
+        -:   55:	struct dirent *ent;
+        -:   56:#if !defined(_DIRENT_HAVE_D_TYPE)
+        -:   57:	struct stat attr;
+        -:   58:#endif
         -:   59:
-    #####:   60:	if (!files_n) {
-branch  0 never executed
-branch  1 never executed
-    #####:   61:		puts(_("trash: There are no trashed files"));
+        2:   60:	if (!(dir = opendir(dirname)))
+        2:   60-block  0
+call    0 returned 2
+branch  1 taken 0 (fallthrough)
+branch  2 taken 2
+    #####:   61:		return EXIT_FAILURE;
     %%%%%:   61-block  0
-call    0 never executed
-    #####:   62:		return EXIT_SUCCESS;
 unconditional  0 never executed
-        -:   63:	}
-        -:   64:
-        -:   65:	size_t i;
-        -:   66:
-    #####:   67:	for (i = 0; i < (size_t)files_n; i++) {
-    %%%%%:   67-block  0
-unconditional  0 never executed
-    %%%%%:   67-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:   68:		size_t info_file_len = strlen(trash_files[i]->d_name) + 11;
-    #####:   69:		char *info_file = (char *)xnmalloc(info_file_len, sizeof(char));
-    %%%%%:   69-block  0
-call    0 never executed
-    #####:   70:		sprintf(info_file, "%s.trashinfo", trash_files[i]->d_name);
-        -:   71:
-    #####:   72:		char *file1 = (char *)NULL;
-    #####:   73:		file1 = (char *)xnmalloc(strlen(TRASH_FILES_DIR) +
-    #####:   74:					     strlen(trash_files[i]->d_name) + 2,
-call    0 never executed
-        -:   75:		    sizeof(char));
+        -:   62:
+        8:   63:	while ((ent = readdir(dir)) != NULL) {
+        2:   63-block  0
+unconditional  0 taken 2
+        8:   63-block  1
+call    1 returned 8
+branch  2 taken 6
+branch  3 taken 2 (fallthrough)
+        -:   64:#if !defined(_DIRENT_HAVE_D_TYPE)
+        -:   65:		if (lstat(ent->d_name, &attr) == -1)
+        -:   66:			continue;
+        -:   67:		if ((attr.st_mode & S_IFMT) == S_IFDIR) {
+        -:   68:#else
+        6:   69:		if (ent->d_type == DT_DIR) {
+        6:   69-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 2
+        -:   70:#endif
+        4:   71:			char dirpath[PATH_MAX] = "";
+        -:   72:
+        4:   73:			if (*ent->d_name == '.' && (!ent->d_name[1]
+        4:   73-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 0
+        4:   73-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 2
+        2:   74:			|| (ent->d_name[1] == '.' && !ent->d_name[2])))
+        2:   74-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:   74-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 0
+        4:   75:				continue;
+        4:   75-block  0
+unconditional  0 taken 4
         -:   76:
-    #####:   77:		sprintf(file1, "%s/%s", TRASH_FILES_DIR, trash_files[i]->d_name);
+    #####:   77:			snprintf(dirpath, PATH_MAX, "%s/%s", dirname, ent->d_name);
         -:   78:
-    #####:   79:		char *file2 = (char *)NULL;
-    #####:   80:		file2 = (char *)xnmalloc(strlen(TRASH_INFO_DIR) +
-    #####:   81:					     strlen(info_file) + 2,
-call    0 never executed
-        -:   82:		    sizeof(char));
-    #####:   83:		sprintf(file2, "%s/%s", TRASH_INFO_DIR, info_file);
-        -:   84:
-    #####:   85:		char *tmp_cmd[] = {"rm", "-r", file1, file2, NULL};
-        -:   86:
-    #####:   87:		int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
-call    0 never executed
-        -:   88:
-    #####:   89:		free(file1);
-    #####:   90:		free(file2);
-        -:   91:
-    #####:   92:		if (ret != EXIT_SUCCESS) {
-branch  0 never executed
-branch  1 never executed
-    #####:   93:			fprintf(stderr, _("%s: trash: %s: Error removing "
-    #####:   94:				"trashed file\n"), PROGRAM_NAME, trash_files[i]->d_name);
-    %%%%%:   94-block  0
-call    0 never executed
-    #####:   95:			exit_status = EXIT_FAILURE;
-unconditional  0 never executed
-        -:   96:			/* If there is at least one error, return error */
-        -:   97:		}
-        -:   98:
-    #####:   99:		free(info_file);
-    #####:  100:		free(trash_files[i]);
-    %%%%%:  100-block  0
-unconditional  0 never executed
-        -:  101:	}
-        -:  102:
-    #####:  103:	free(trash_files);
-        -:  104:
-    #####:  105:	if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
-    %%%%%:  105-block  0
+    #####:   79:			if (access(dirpath, W_OK | X_OK) != 0) {
+    %%%%%:   79-block  0
 call    0 never executed
 branch  1 never executed
 branch  2 never executed
-    #####:  106:		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME,
-    #####:  107:		    ws[cur_ws].path, strerror(errno));
-    %%%%%:  107-block  0
+        -:   80:				/* recur_perm_error_flag needs to be a global variable.
+        -:   81:				  * Otherwise, since this function calls itself
+        -:   82:				  * recursivelly, the flag would be reset upon every
+        -:   83:				  * new call, without preserving the error code, which
+        -:   84:				  * is what the flag is aimed to do. On the other side,
+        -:   85:				  * if I use a local static variable for this flag, it
+        -:   86:				  * will never drop the error value, and all subsequent
+        -:   87:				  * calls to the function will allways return error
+        -:   88:				  * (even if there's no actual error) */
+    #####:   89:				recur_perm_error_flag = 1;
+    #####:   90:				fprintf(stderr, _("%s: Permission denied\n"), dirpath);
+    %%%%%:   90-block  0
 call    0 never executed
 call    1 never executed
-    #####:  108:		return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  109:	}
-        -:  110:
-    #####:  111:	return exit_status;
-    %%%%%:  111-block  0
-unconditional  0 never executed
-        -:  112:}
-        -:  113:
-        -:  114:int
-function trash_function called 0 returned 0% blocks executed 0%
-    #####:  115:trash_function(char **comm)
-        -:  116:{
-    #####:  117:	if (xargs.stealth_mode == 1) {
-    %%%%%:  117-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  118:		printf("%s: The trash function is disabled in "
-    %%%%%:  118-block  0
-call    0 never executed
-        -:  119:			"stealth mode\n", PROGRAM_NAME);
-    #####:  120:		return EXIT_SUCCESS;
-unconditional  0 never executed
-        -:  121:	}
-        -:  122:
-        -:  123:	/* Create trash dirs, if necessary */
-        -:  124:	/*  struct stat file_attrib;
-        -:  125:	if (stat (TRASH_DIR, &file_attrib) == -1) {
-        -:  126:		char *trash_files = NULL;
-        -:  127:		trash_files = xcalloc(strlen(TRASH_DIR) + 7, sizeof(char));
-        -:  128:		sprintf(trash_files, "%s/files", TRASH_DIR);
-        -:  129:		char *trash_info=NULL;
-        -:  130:		trash_info = xcalloc(strlen(TRASH_DIR) + 6, sizeof(char));
-        -:  131:		sprintf(trash_info, "%s/info", TRASH_DIR);
-        -:  132:		char *cmd[] = { "mkdir", "-p", trash_files, trash_info, NULL };
-        -:  133:		int ret = launch_execve (cmd, FOREGROUND, E_NOFLAG);
-        -:  134:		free(trash_files);
-        -:  135:		free(trash_info);
-        -:  136:		if (ret != EXIT_SUCCESS) {
-        -:  137:			_err(0, NOPRINT_PROMPT, _("%s: mkdir: '%s': Error creating "
-        -:  138:				 "trash directory\n"), PROGRAM_NAME, TRASH_DIR);
-        -:  139:			return;
-        -:  140:		}
-        -:  141:	} */
-        -:  142:
-    #####:  143:	if (!comm)
-    %%%%%:  143-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  144:		return EXIT_FAILURE;
-    %%%%%:  144-block  0
-unconditional  0 never executed
-        -:  145:
-    #####:  146:	if (!trash_ok || !config_ok) {
-    %%%%%:  146-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  146-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  147:		fprintf(stderr, _("%s: Trash function disabled\n"), PROGRAM_NAME);
-    %%%%%:  147-block  0
-call    0 never executed
-    #####:  148:		return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  149:	}
-        -:  150:
-        -:  151:	/* List trashed files ('tr' or 'tr ls') */
-    #####:  152:	if (!comm[1] || strcmp(comm[1], "ls") == 0 || strcmp(comm[1], "list") == 0) {
-    %%%%%:  152-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  152-block  1
-branch  2 never executed
-branch  3 never executed
-    %%%%%:  152-block  2
-branch  4 never executed
-branch  5 never executed
-        -:  153:		/* List files in the Trash/files dir */
-        -:  154:
-    #####:  155:		if (xchdir(TRASH_FILES_DIR, NO_TITLE) == -1) {
-    %%%%%:  155-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  156:			_err(0, NOPRINT_PROMPT, "%s: trash: %s: %s\n",
-call    0 never executed
-    #####:  157:			    PROGRAM_NAME, TRASH_FILES_DIR, strerror(errno));
-    %%%%%:  157-block  0
-call    0 never executed
-    #####:  158:			return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  159:		}
-        -:  160:
-    #####:  161:		struct dirent **trash_files = (struct dirent **)NULL;
-    #####:  162:		int files_n = scandir(TRASH_FILES_DIR, &trash_files,
-    %%%%%:  162-block  0
-unconditional  0 never executed
-    %%%%%:  162-block  1
-unconditional  1 never executed
-    %%%%%:  162-block  2
 unconditional  2 never executed
-    %%%%%:  162-block  3
-unconditional  3 never executed
-    %%%%%:  162-block  4
-call    4 never executed
-    #####:  163:						skip_files, (unicode) ? alphasort : (case_sensitive)
-    %%%%%:  163-block  0
+        -:   91:			}
+        -:   92:
+    #####:   93:			recur_perm_check(dirpath);
+    %%%%%:   93-block  0
+call    0 never executed
+        -:   94:		}
+        -:   95:	}
+        -:   96:
+        2:   97:	closedir(dir);
+        2:   97-block  0
+call    0 returned 2
+        -:   98:
+        2:   99:	if (recur_perm_error_flag)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:  100:		return EXIT_FAILURE;
+    %%%%%:  100-block  0
+unconditional  0 never executed
+        -:  101:
+        2:  102:	return EXIT_SUCCESS;
+        2:  102-block  0
+unconditional  0 taken 2
+        -:  103:}
+        -:  104:
+        -:  105:/* Check whether the current user has enough permissions (write, execute)
+        -:  106: * to modify the contents of the parent directory of 'file'. 'file' needs
+        -:  107: * to be an absolute path. Returns zero if yes and one if no. Useful to
+        -:  108: * know if a file can be removed from or copied into the parent. In case
+        -:  109: * FILE is a directory, the function checks all its subdirectories for
+        -:  110: * appropriate permissions, including the immutable bit */
+        -:  111:static int
+function wx_parent_check called 11 returned 100% blocks executed 49%
+       11:  112:wx_parent_check(char *file)
+        -:  113:{
+        -:  114:	struct stat file_attrib;
+       11:  115:	int exit_status = -1, ret = -1;
+       11:  116:	size_t file_len = strlen(file);
+        -:  117:
+       11:  118:	if (file[file_len - 1] == '/')
+       11:  118-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 8
+        3:  119:		file[file_len - 1] = '\0';
+        3:  119-block  0
+unconditional  0 taken 3
+        -:  120:
+       11:  121:	if (lstat(file, &file_attrib) == -1) {
+       11:  121-block  0
+call    0 returned 11
+branch  1 taken 0 (fallthrough)
+branch  2 taken 11
+    #####:  122:		fprintf(stderr, _("%s: No such file or directory\n"), file);
+    %%%%%:  122-block  0
+call    0 never executed
+call    1 never executed
+    #####:  123:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  124:	}
+        -:  125:
+       11:  126:	char *parent = strbfrlst(file, '/');
+       11:  126-block  0
+call    0 returned 11
+       11:  127:	if (!parent) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 11
+        -:  128:		/* strbfrlst() will return NULL if file's parent is root (/),
+        -:  129:		 * simply because in this case there's nothing before the last
+        -:  130:		 * slash. So, check if file's parent dir is root */
+    #####:  131:		if (file[0] == '/' && strcntchr(file + 1, '/') == -1) {
+    %%%%%:  131-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  164:						? xalphasort : alphasort_insensitive);
-    %%%%%:  164-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  165:		if (files_n) {
-branch  0 never executed
-branch  1 never executed
-        -:  166:			size_t i;
-        -:  167:
-    #####:  168:			for (i = 0; i < (size_t)files_n; i++) {
-    %%%%%:  168-block  0
-unconditional  0 never executed
-    %%%%%:  168-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  169:				colors_list(trash_files[i]->d_name, (int)i + 1, NO_PAD,
-    %%%%%:  169-block  0
+    %%%%%:  131-block  1
+call    2 never executed
+branch  3 never executed
+branch  4 never executed
+    #####:  132:			parent = (char *)xnmalloc(2, sizeof(char));
+    %%%%%:  132-block  0
 call    0 never executed
-        -:  170:							PRINT_NEWLINE);
-    #####:  171:				free(trash_files[i]);
+    #####:  133:			parent[0] = '/';
+    #####:  134:			parent[1] = '\0';
 unconditional  0 never executed
-        -:  172:			}
-        -:  173:
-    #####:  174:			free(trash_files);
-    %%%%%:  174-block  0
+        -:  135:		} else {
+    #####:  136:			fprintf(stderr, _("%s: %s: Error getting parent directory\n"),
+    %%%%%:  136-block  0
+call    0 never executed
+call    1 never executed
+        -:  137:					PROGRAM_NAME, file);
+    #####:  138:			return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  175:		}
-        -:  176:
-        -:  177:		else
-    #####:  178:			puts(_("trash: There are no trashed files"));
-    %%%%%:  178-block  0
+        -:  139:		}
+        -:  140:	}
+        -:  141:
+       11:  142:	switch (file_attrib.st_mode & S_IFMT) {
+       11:  142-block  0
+branch  0 taken 3
+branch  1 taken 6
+branch  2 taken 2
+branch  3 taken 0
+        3:  143:	case S_IFDIR:
+        3:  144:		ret = check_immutable_bit(file);
+        3:  144-block  0
+call    0 returned 3
+        -:  145:
+        3:  146:		if (ret == -1) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+        -:  147:			/* Error message is printed by check_immutable_bit() itself */
+    #####:  148:			exit_status = EXIT_FAILURE;
+    %%%%%:  148-block  0
+unconditional  0 never executed
+        3:  149:		} else if (ret == 1) {
+        3:  149-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####:  150:			fprintf(stderr, _("%s: Directory is immutable\n"), file);
+    %%%%%:  150-block  0
 call    0 never executed
-unconditional  1 never executed
-        -:  179:
-    #####:  180:		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
-    %%%%%:  180-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  181:			_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n",
-    #####:  182:			    PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
+call    1 never executed
+    #####:  151:			exit_status = EXIT_FAILURE;
+unconditional  0 never executed
+        3:  152:		} else if (access(parent, W_OK | X_OK) == 0) {
+        3:  152-block  0
+call    0 returned 3
+branch  1 taken 3 (fallthrough)
+branch  2 taken 0
+        -:  153:		/* Check the parent for appropriate permissions */
+        3:  154:			int files_n = count_dir(parent, NO_CPOP);
+        3:  154-block  0
+call    0 returned 3
+        -:  155:
+        3:  156:			if (files_n > 2) {
+branch  0 taken 3 (fallthrough)
+branch  1 taken 0
+        -:  157:				/* I manually check here subdir because recur_perm_check()
+        -:  158:				 * will only check the contents of subdir, but not subdir
+        -:  159:				 * itself */
+        -:  160:				/* If the parent is ok and not empty, check subdir */
+        3:  161:				if (access(file, W_OK | X_OK) == 0) {
+        3:  161-block  0
+call    0 returned 3
+branch  1 taken 3 (fallthrough)
+branch  2 taken 0
+        -:  162:					/* If subdir is ok and not empty, recusivelly check
+        -:  163:					 * subdir */
+        3:  164:					files_n = count_dir(file, NO_CPOP);
+        3:  164-block  0
+call    0 returned 3
+        -:  165:
+        3:  166:					if (files_n > 2) {
+branch  0 taken 2 (fallthrough)
+branch  1 taken 1
+        -:  167:						/* Reset the recur_perm_check() error flag. See
+        -:  168:						 * the note in the function block. */
+        2:  169:						recur_perm_error_flag = 0;
+        -:  170:
+        2:  171:						if (recur_perm_check(file) == 0) {
+        2:  171-block  0
+call    0 returned 2
+branch  1 taken 2 (fallthrough)
+branch  2 taken 0
+        2:  172:							exit_status = EXIT_SUCCESS;
+        2:  172-block  0
+unconditional  0 taken 2
+        -:  173:						} else {
+        -:  174:							/* recur_perm_check itself will print the
+        -:  175:							 * error messages */
+    #####:  176:							exit_status = EXIT_FAILURE;
+    %%%%%:  176-block  0
+unconditional  0 never executed
+        -:  177:						}
+        -:  178:					} else { /* Subdir is ok and empty */
+        1:  179:						exit_status = EXIT_SUCCESS;
+        1:  179-block  0
+unconditional  0 taken 1
+        -:  180:					}
+        -:  181:				} else { /* No permission for subdir */
+    #####:  182:					fprintf(stderr, _("%s: Permission denied\n"),
     %%%%%:  182-block  0
 call    0 never executed
 call    1 never executed
-    #####:  183:			return EXIT_FAILURE;
+        -:  183:					    file);
+    #####:  184:					exit_status = EXIT_FAILURE;
 unconditional  0 never executed
-        -:  184:		}
-        -:  185:
-        -:  186:		else
-    #####:  187:			return EXIT_SUCCESS;
-    %%%%%:  187-block  0
+        -:  185:				}
+        -:  186:			}
+        -:  187:
+        -:  188:			else
+    #####:  189:				exit_status = EXIT_SUCCESS;
+    %%%%%:  189-block  0
 unconditional  0 never executed
-        -:  188:	}
-        -:  189:
-        -:  190:	else {
-        -:  191:
-        -:  192:		/* Create suffix from current date and time to create unique
-        -:  193:		 * filenames for trashed files */
-    #####:  194:		int exit_status = EXIT_SUCCESS;
-    #####:  195:		time_t rawtime = time(NULL);
-    %%%%%:  195-block  0
+        -:  190:		} else { /* No permission for parent */
+    #####:  191:			fprintf(stderr, _("%s: Permission denied\n"), parent);
+    %%%%%:  191-block  0
 call    0 never executed
-    #####:  196:		struct tm *tm = localtime(&rawtime);
-call    0 never executed
-    #####:  197:		char date[64] = "";
+call    1 never executed
+    #####:  192:			exit_status = EXIT_FAILURE;
+unconditional  0 never executed
+        -:  193:		}
+        3:  194:		break;
+        3:  194-block  0
+unconditional  0 taken 3
+        -:  195:
+        6:  196:	case S_IFREG:
+        6:  197:		ret = check_immutable_bit(file);
+        6:  197-block  0
+call    0 returned 6
         -:  198:
-    #####:  199:		strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", tm);
-        -:  200:
-    #####:  201:		char suffix[68] = "";
-        -:  202:
-    #####:  203:		snprintf(suffix, 67, "%d%d%d%d%d%d", tm->tm_year + 1900,
-    #####:  204:		    tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min,
-        -:  205:		    tm->tm_sec);
-        -:  206:
-        -:  207:		/* Remove file(s) from Trash */
-    #####:  208:		if (strcmp(comm[1], "del") == 0 || strcmp(comm[1], "rm") == 0)
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  208-block  0
-branch  2 never executed
-branch  3 never executed
-    #####:  209:			exit_status = remove_from_trash();
-    %%%%%:  209-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  210:
-    #####:  211:		else if (strcmp(comm[1], "clear") == 0)
-    %%%%%:  211-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  212:			trash_clear();
-    %%%%%:  212-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  213:
-        -:  214:		else {
-        -:  215:			/* Trash files passed as arguments */
-        -:  216:			size_t i;
-        -:  217:
-    #####:  218:			for (i = 1; comm[i]; i++) {
-    %%%%%:  218-block  0
+        6:  199:		if (ret == -1) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 6
+        -:  200:			/* Error message is printed by check_immutable_bit()
+        -:  201:			 * itself */
+    #####:  202:			exit_status = EXIT_FAILURE;
+    %%%%%:  202-block  0
 unconditional  0 never executed
-    %%%%%:  218-block  1
-unconditional  1 never executed
-    %%%%%:  218-block  2
-branch  2 never executed
-branch  3 never executed
-    #####:  219:				char *deq_file = dequote_str(comm[i], 0);
-    %%%%%:  219-block  0
+        6:  203:		} else if (ret == 1) {
+        6:  203-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 6
+    #####:  204:			fprintf(stderr, _("%s: File is immutable\n"), file);
+    %%%%%:  204-block  0
 call    0 never executed
-    #####:  220:				char tmp_comm[PATH_MAX] = "";
-        -:  221:
-    #####:  222:				if (deq_file[0] == '/') /* If absolute path */
-branch  0 never executed
-branch  1 never executed
-    #####:  223:					strcpy(tmp_comm, deq_file);
-    %%%%%:  223-block  0
+call    1 never executed
+    #####:  205:			exit_status = EXIT_FAILURE;
 unconditional  0 never executed
-        -:  224:
-        -:  225:				else { /* If relative path, add path to check against
-        -:  226:					TRASH_DIR */
-    #####:  227:					snprintf(tmp_comm, PATH_MAX, "%s/%s", ws[cur_ws].path,
-    %%%%%:  227-block  0
+        6:  206:		} else if (parent) {
+        6:  206-block  0
+branch  0 taken 6 (fallthrough)
+branch  1 taken 0
+        6:  207:			if (access(parent, W_OK | X_OK) == 0) {
+        6:  207-block  0
+call    0 returned 6
+branch  1 taken 6 (fallthrough)
+branch  2 taken 0
+        6:  208:				exit_status = EXIT_SUCCESS;
+        6:  208-block  0
+unconditional  0 taken 6
+        -:  209:			} else {
+    #####:  210:				fprintf(stderr, _("%s: Permission denied\n"), parent);
+    %%%%%:  210-block  0
+call    0 never executed
+call    1 never executed
+    #####:  211:				exit_status = EXIT_FAILURE;
 unconditional  0 never executed
-        -:  228:					    deq_file);
-        -:  229:				}
+        -:  212:			}
+        -:  213:		}
+        -:  214:
+        6:  215:		break;
+        6:  215-block  0
+unconditional  0 taken 6
+        -:  216:
+        2:  217:	case S_IFSOCK:
+        -:  218:	case S_IFIFO:
+        -:  219:	case S_IFLNK:
+        -:  220:		/* Symlinks, sockets and pipes do not support immutable bit */
+        2:  221:		if (parent) {
+        2:  221-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  222:			if (access(parent, W_OK | X_OK) == 0) {
+        2:  222-block  0
+call    0 returned 2
+branch  1 taken 2 (fallthrough)
+branch  2 taken 0
+        2:  223:				exit_status = EXIT_SUCCESS;
+        2:  223-block  0
+unconditional  0 taken 2
+        -:  224:			} else {
+    #####:  225:				fprintf(stderr, _("%s: Permission denied\n"), parent);
+    %%%%%:  225-block  0
+call    0 never executed
+call    1 never executed
+    #####:  226:				exit_status = EXIT_FAILURE;
+unconditional  0 never executed
+        -:  227:			}
+        -:  228:		}
+        2:  229:		break;
+        2:  229-block  0
+unconditional  0 taken 2
         -:  230:
-        -:  231:				/* Some filters: you cannot trash wathever you want */
-        -:  232:				/* Do not trash any of the parent directories of TRASH_DIR,
-        -:  233:				 * that is, /, /home, ~/, ~/.local, ~/.local/share */
-    #####:  234:				if (strncmp(tmp_comm, TRASH_DIR, strlen(tmp_comm)) == 0) {
+        -:  231:	/* DO NOT TRASH BLOCK AND CHAR DEVICES */
+    #####:  232:	default:
+    #####:  233:		fprintf(stderr, _("%s: trash: %s (%s): Unsupported file type\n"),
+    %%%%%:  233-block  0
+unconditional  0 never executed
+    %%%%%:  233-block  1
+unconditional  1 never executed
+    %%%%%:  233-block  2
+call    2 never executed
+call    3 never executed
+    #####:  234:		    PROGRAM_NAME, file, ((file_attrib.st_mode & S_IFMT) == S_IFBLK)
     %%%%%:  234-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  235:					fprintf(stderr, _("trash: Cannot trash '%s'\n"), tmp_comm);
-    %%%%%:  235-block  0
-call    0 never executed
-    #####:  236:					exit_status = EXIT_FAILURE;
-    #####:  237:					free(deq_file);
-    #####:  238:					continue;
-unconditional  0 never executed
-    %%%%%:  238-block  0
-unconditional  1 never executed
-        -:  239:				}
-        -:  240:
-        -:  241:				/* Do no trash TRASH_DIR itself nor anything inside it,
-        -:  242:				 * that is, already trashed files */
-    #####:  243:				else if (strncmp(tmp_comm, TRASH_DIR,
-    %%%%%:  243-block  0
+    #####:  235:		    ? "Block device" : ((file_attrib.st_mode & S_IFMT) == S_IFCHR)
+    #####:  236:		    ? "Character device" : "Unknown file type");
+    %%%%%:  236-block  0
 branch  0 never executed
 branch  1 never executed
-        -:  244:					     strlen(TRASH_DIR)) == 0) {
-    #####:  245:					puts(_("trash: Use 'trash del' to remove trashed files"));
-    %%%%%:  245-block  0
-call    0 never executed
-    #####:  246:					exit_status = EXIT_FAILURE;
-    #####:  247:					free(deq_file);
-    #####:  248:					continue;
+    %%%%%:  236-block  1
+unconditional  2 never executed
+    %%%%%:  236-block  2
+unconditional  3 never executed
+    #####:  237:		exit_status = EXIT_FAILURE;
+    #####:  238:		break;
 unconditional  0 never executed
-        -:  249:				}
-        -:  250:
-        -:  251:				struct stat file_attrib;
+        -:  239:	}
+        -:  240:
+       11:  241:	if (parent)
+       11:  241-block  0
+branch  0 taken 11 (fallthrough)
+branch  1 taken 0
+       11:  242:		free(parent);
+       11:  242-block  0
+unconditional  0 taken 11
+        -:  243:
+       11:  244:	return exit_status;
+       11:  244-block  0
+unconditional  0 taken 11
+        -:  245:}
+        -:  246:
+        -:  247:static int
+function trash_clear called 0 returned 0% blocks executed 0%
+    #####:  248:trash_clear(void)
+        -:  249:{
+    #####:  250:	struct dirent **trash_files = (struct dirent **)NULL;
+    #####:  251:	int files_n = -1, exit_status = EXIT_SUCCESS;
         -:  252:
-    #####:  253:				if (lstat(deq_file, &file_attrib) == -1) {
+    #####:  253:	if (xchdir(trash_files_dir, NO_TITLE) == -1) {
     %%%%%:  253-block  0
 call    0 never executed
 branch  1 never executed
 branch  2 never executed
-    #####:  254:					fprintf(stderr, _("trash: %s: %s\n"), deq_file,
+    #####:  254:		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME,
 call    0 never executed
-    #####:  255:					    strerror(errno));
+    #####:  255:		    trash_files_dir, strerror(errno));
     %%%%%:  255-block  0
 call    0 never executed
-    #####:  256:					exit_status = EXIT_FAILURE;
-    #####:  257:					free(deq_file);
-    #####:  258:					continue;
+    #####:  256:		return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  259:				}
+        -:  257:	}
+        -:  258:
+    #####:  259:	files_n = scandir(trash_files_dir, &trash_files, skip_files, xalphasort);
+    %%%%%:  259-block  0
+call    0 never executed
         -:  260:
-        -:  261:				/* Do not trash block or character devices */
-        -:  262:				else {
-    #####:  263:					if ((file_attrib.st_mode & S_IFMT) == S_IFBLK) {
-    %%%%%:  263-block  0
+    #####:  261:	if (!files_n) {
 branch  0 never executed
 branch  1 never executed
-    #####:  264:						fprintf(stderr, _("trash: %s: Cannot trash a "
-    %%%%%:  264-block  0
+    #####:  262:		puts(_("trash: There are no trashed files"));
+    %%%%%:  262-block  0
 call    0 never executed
-        -:  265:								  "block device\n"),
-        -:  266:						    deq_file);
-    #####:  267:						exit_status = EXIT_FAILURE;
-    #####:  268:						free(deq_file);
-    #####:  269:						continue;
+call    1 never executed
+    #####:  263:		return EXIT_SUCCESS;
 unconditional  0 never executed
-        -:  270:					}
-        -:  271:
-    #####:  272:					else if ((file_attrib.st_mode & S_IFMT) == S_IFCHR) {
-    %%%%%:  272-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  273:						fprintf(stderr, _("trash: %s: Cannot trash a "
-    %%%%%:  273-block  0
-call    0 never executed
-        -:  274:								  "character device\n"),
-        -:  275:						    deq_file);
-    #####:  276:						exit_status = EXIT_FAILURE;
-    #####:  277:						free(deq_file);
-    #####:  278:						continue;
+        -:  264:	}
+        -:  265:
+        -:  266:	size_t i;
+    #####:  267:	for (i = 0; i < (size_t)files_n; i++) {
+    %%%%%:  267-block  0
 unconditional  0 never executed
-        -:  279:					}
-        -:  280:				}
-        -:  281:
-        -:  282:				/* Once here, everything is fine: trash the file */
-    #####:  283:				exit_status = trash_element(suffix, tm, deq_file);
-    %%%%%:  283-block  0
-call    0 never executed
-        -:  284:				/* The trash_element() function will take care of
-        -:  285:				 * printing error messages, if any */
-    #####:  286:				free(deq_file);
-unconditional  0 never executed
-        -:  287:			}
-        -:  288:		}
-        -:  289:
-    #####:  290:		return exit_status;
-    %%%%%:  290-block  0
-unconditional  0 never executed
-        -:  291:	}
-        -:  292:}
-        -:  293:
-        -:  294:int
-function trash_element called 0 returned 0% blocks executed 0%
-    #####:  295:trash_element(const char *suffix, struct tm *tm, char *file)
-        -:  296:{
-        -:  297:	/* Check file's existence */
-        -:  298:	struct stat file_attrib;
-        -:  299:
-    #####:  300:	if (lstat(file, &file_attrib) == -1) {
-    %%%%%:  300-block  0
-call    0 never executed
+    %%%%%:  267-block  1
 branch  1 never executed
 branch  2 never executed
-    #####:  301:		fprintf(stderr, "%s: trash: %s: %s\n", PROGRAM_NAME, file,
+    #####:  268:		size_t info_file_len = strlen(trash_files[i]->d_name) + 11;
+    #####:  269:		char *info_file = (char *)xnmalloc(info_file_len, sizeof(char));
+    %%%%%:  269-block  0
 call    0 never executed
-    #####:  302:		    strerror(errno));
+    #####:  270:		sprintf(info_file, "%s.trashinfo", trash_files[i]->d_name);
+        -:  271:
+    #####:  272:		char *file1 = (char *)NULL;
+    #####:  273:		file1 = (char *)xnmalloc(strlen(trash_files_dir) +
+    #####:  274:					strlen(trash_files[i]->d_name) + 2, sizeof(char));
+call    0 never executed
+        -:  275:
+    #####:  276:		sprintf(file1, "%s/%s", trash_files_dir, trash_files[i]->d_name);
+        -:  277:
+    #####:  278:		char *file2 = (char *)NULL;
+    #####:  279:		file2 = (char *)xnmalloc(strlen(trash_info_dir) +
+    #####:  280:					strlen(info_file) + 2, sizeof(char));
+call    0 never executed
+    #####:  281:		sprintf(file2, "%s/%s", trash_info_dir, info_file);
+        -:  282:
+    #####:  283:		char *tmp_cmd[] = {"rm", "-r", file1, file2, NULL};
+    #####:  284:		int ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
+call    0 never executed
+        -:  285:
+    #####:  286:		free(file1);
+    #####:  287:		free(file2);
+        -:  288:
+    #####:  289:		if (ret != EXIT_SUCCESS) {
+branch  0 never executed
+branch  1 never executed
+    #####:  290:			fprintf(stderr, _("%s: trash: %s: Error removing "
+call    0 never executed
+    #####:  291:				"trashed file\n"), PROGRAM_NAME, trash_files[i]->d_name);
+    %%%%%:  291-block  0
+call    0 never executed
+    #####:  292:			exit_status = EXIT_FAILURE;
+unconditional  0 never executed
+        -:  293:			/* If there is at least one error, return error */
+        -:  294:		}
+        -:  295:
+    #####:  296:		free(info_file);
+    #####:  297:		free(trash_files[i]);
+    %%%%%:  297-block  0
+unconditional  0 never executed
+        -:  298:	}
+        -:  299:
+    #####:  300:	free(trash_files);
+        -:  301:
+    #####:  302:	if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
     %%%%%:  302-block  0
 call    0 never executed
-    #####:  303:		return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  304:	}
-        -:  305:
-        -:  306:	/* Check whether the user has enough permissions to remove file */
-        -:  307:	/* If relative path */
-    #####:  308:	char full_path[PATH_MAX] = "";
-        -:  309:
-    #####:  310:	if (*file != '/') {
-    %%%%%:  310-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  311:		/* Construct absolute path for file */
-    #####:  312:		snprintf(full_path, PATH_MAX, "%s/%s", ws[cur_ws].path, file);
-    #####:  313:		if (wx_parent_check(full_path) != 0)
-    %%%%%:  313-block  0
-call    0 never executed
 branch  1 never executed
 branch  2 never executed
-    #####:  314:			return EXIT_FAILURE;
-    %%%%%:  314-block  0
+    #####:  303:		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME,
+    #####:  304:		    ws[cur_ws].path, strerror(errno));
+    %%%%%:  304-block  0
+call    0 never executed
+call    1 never executed
+    #####:  305:		return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  315:	}
+        -:  306:	}
+        -:  307:
+    #####:  308:	return exit_status;
+    %%%%%:  308-block  0
+unconditional  0 never executed
+        -:  309:}
+        -:  310:
+        -:  311:static int
+function trash_element called 11 returned 100% blocks executed 48%
+       11:  312:trash_element(const char *suffix, struct tm *tm, char *file)
+        -:  313:{
+        -:  314:	/* Check file's existence */
+        -:  315:	struct stat file_attrib;
         -:  316:
-        -:  317:	/* If absolute path */
-    #####:  318:	else if (wx_parent_check(file) != 0)
-    %%%%%:  318-block  0
+       11:  317:	if (lstat(file, &file_attrib) == -1) {
+       11:  317-block  0
+call    0 returned 11
+branch  1 taken 0 (fallthrough)
+branch  2 taken 11
+    #####:  318:		fprintf(stderr, "%s: trash: %s: %s\n", PROGRAM_NAME, file,
 call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  319:		return EXIT_FAILURE;
+    #####:  319:		    strerror(errno));
     %%%%%:  319-block  0
+call    0 never executed
+    #####:  320:		return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  320:
-    #####:  321:	int ret = -1;
+        -:  321:	}
         -:  322:
-        -:  323:	/* Create the trashed file name: orig_filename.suffix, where SUFFIX is
-        -:  324:	 * current date and time */
-    #####:  325:	char *filename = (char *)NULL;
+        -:  323:	/* Check whether the user has enough permissions to remove file */
+        -:  324:	/* If relative path */
+       11:  325:	char full_path[PATH_MAX] = "";
         -:  326:
-    #####:  327:	if (*file != '/') /* If relative path */
-    %%%%%:  327-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  328:		filename = straftlst(full_path, '/');
-    %%%%%:  328-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  329:	else /* If absolute path */
-    #####:  330:		filename = straftlst(file, '/');
-    %%%%%:  330-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  331:
-    #####:  332:	if (!filename) {
-    %%%%%:  332-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  333:		fprintf(stderr, _("%s: trash: %s: Error getting filename\n"),
-    %%%%%:  333-block  0
-call    0 never executed
-        -:  334:		    PROGRAM_NAME, file);
-    #####:  335:		return EXIT_FAILURE;
+       11:  327:	if (*file != '/') {
+       11:  327-block  0
+branch  0 taken 7 (fallthrough)
+branch  1 taken 4
+        -:  328:		/* Construct absolute path for file */
+        7:  329:		snprintf(full_path, PATH_MAX, "%s/%s", ws[cur_ws].path, file);
+        7:  330:		if (wx_parent_check(full_path) != 0)
+        7:  330-block  0
+call    0 returned 7
+branch  1 taken 0 (fallthrough)
+branch  2 taken 7
+    #####:  331:			return EXIT_FAILURE;
+    %%%%%:  331-block  0
 unconditional  0 never executed
-        -:  336:	}
-        -:  337:	/* If the length of the trashed file name (orig_filename.suffix) is
-        -:  338:	 * longer than NAME_MAX (255), trim the original filename, so that
-        -:  339:	 * (original_filename_len + 1 (dot) + suffix_len) won't be longer
-        -:  340:	 * than NAME_MAX */
-    #####:  341:	size_t filename_len = strlen(filename), suffix_len = strlen(suffix);
-    #####:  342:	int size = (int)(filename_len + suffix_len + 1) - NAME_MAX;
-        -:  343:
-    #####:  344:	if (size > 0) {
-    %%%%%:  344-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  345:		/* If SIZE is a positive value, that is, the trashed file name
-        -:  346:		 * exceeds NAME_MAX by SIZE bytes, reduce the original file name
-        -:  347:		 * SIZE bytes. Terminate the original file name (FILENAME) with
-        -:  348:		 * a tilde (~), to let the user know it is trimmed */
-    #####:  349:		filename[filename_len - (size_t)size - 1] = '~';
-    #####:  350:		filename[filename_len - (size_t)size] = '\0';
-    %%%%%:  350-block  0
+        4:  332:	} else if (wx_parent_check(file) != 0) {
+        4:  332-block  0
+call    0 returned 4
+branch  1 taken 0 (fallthrough)
+branch  2 taken 4
+        -:  333:	/* If absolute path */
+    #####:  334:		return EXIT_FAILURE;
+    %%%%%:  334-block  0
+unconditional  0 never executed
+        -:  335:	}
+        -:  336:
+       11:  337:	int ret = -1;
+        -:  338:
+        -:  339:	/* Create the trashed file name: orig_filename.suffix, where SUFFIX is
+        -:  340:	 * current date and time */
+       11:  341:	char *filename = (char *)NULL;
+       11:  342:	if (*file != '/') /* If relative path */
+       11:  342-block  0
+branch  0 taken 7 (fallthrough)
+branch  1 taken 4
+        7:  343:		filename = straftlst(full_path, '/');
+        7:  343-block  0
+call    0 returned 7
+unconditional  1 taken 7
+        -:  344:	else /* If absolute path */
+        4:  345:		filename = straftlst(file, '/');
+        4:  345-block  0
+call    0 returned 4
+unconditional  1 taken 4
+        -:  346:
+       11:  347:	if (!filename) {
+       11:  347-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 11
+    #####:  348:		fprintf(stderr, _("%s: trash: %s: Error getting file name\n"),
+    %%%%%:  348-block  0
+call    0 never executed
+call    1 never executed
+        -:  349:		    PROGRAM_NAME, file);
+    #####:  350:		return EXIT_FAILURE;
 unconditional  0 never executed
         -:  351:	}
-        -:  352:
-        -:  353:	/* 2 = dot + null byte */
-    #####:  354:	size_t file_suffix_len = filename_len + suffix_len + 2;
-    #####:  355:	char *file_suffix = (char *)xnmalloc(file_suffix_len, sizeof(char));
-    %%%%%:  355-block  0
-call    0 never executed
-        -:  356:	/* No need for memset. sprintf adds the terminating null byte by
-        -:  357:	 * itself */
-    #####:  358:	sprintf(file_suffix, "%s.%s", filename, suffix);
-        -:  359:
-        -:  360:	/* Copy the original file into the trash files directory */
-    #####:  361:	char *dest = (char *)NULL;
-    #####:  362:	dest = (char *)xnmalloc(strlen(TRASH_FILES_DIR) + strlen(file_suffix) + 2,
-call    0 never executed
-        -:  363:							sizeof(char));
-    #####:  364:	sprintf(dest, "%s/%s", TRASH_FILES_DIR, file_suffix);
-        -:  365:
-    #####:  366:	char *tmp_cmd[] = {"cp", "-a", file, dest, NULL};
-        -:  367:
-    #####:  368:	free(filename);
-        -:  369:
-    #####:  370:	ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
-call    0 never executed
-    #####:  371:	free(dest);
-    #####:  372:	dest = (char *)NULL;
-        -:  373:
-    #####:  374:	if (ret != EXIT_SUCCESS) {
-branch  0 never executed
-branch  1 never executed
-    #####:  375:		fprintf(stderr, _("%s: trash: %s: Failed copying file to "
-    %%%%%:  375-block  0
-call    0 never executed
-        -:  376:			"Trash\n"), PROGRAM_NAME, file);
-    #####:  377:		free(file_suffix);
-    #####:  378:		return EXIT_FAILURE;
+        -:  352:	/* If the length of the trashed file name (orig_filename.suffix) is
+        -:  353:	 * longer than NAME_MAX (255), trim the original filename, so that
+        -:  354:	 * (original_filename_len + 1 (dot) + suffix_len) won't be longer
+        -:  355:	 * than NAME_MAX */
+       11:  356:	size_t filename_len = strlen(filename), suffix_len = strlen(suffix);
+       11:  357:	int size = (int)(filename_len + suffix_len + 1) - NAME_MAX;
+        -:  358:
+       11:  359:	if (size > 0) {
+       11:  359-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 11
+        -:  360:		/* If SIZE is a positive value, that is, the trashed file name
+        -:  361:		 * exceeds NAME_MAX by SIZE bytes, reduce the original file name
+        -:  362:		 * SIZE bytes. Terminate the original file name (FILENAME) with
+        -:  363:		 * a tilde (~), to let the user know it is trimmed */
+    #####:  364:		filename[filename_len - (size_t)size - 1] = '~';
+    #####:  365:		filename[filename_len - (size_t)size] = '\0';
+    %%%%%:  365-block  0
 unconditional  0 never executed
-        -:  379:	}
+        -:  366:	}
+        -:  367:
+        -:  368:	/* 2 = dot + null byte */
+       11:  369:	size_t file_suffix_len = filename_len + suffix_len + 2;
+       11:  370:	char *file_suffix = (char *)xnmalloc(file_suffix_len, sizeof(char));
+       11:  370-block  0
+call    0 returned 11
+        -:  371:	/* No need for memset. sprintf adds the terminating null byte by
+        -:  372:	 * itself */
+       11:  373:	sprintf(file_suffix, "%s.%s", filename, suffix);
+        -:  374:
+        -:  375:	/* Copy the original file into the trash files directory */
+       11:  376:	char *dest = (char *)NULL;
+       11:  377:	dest = (char *)xnmalloc(strlen(trash_files_dir) + strlen(file_suffix) + 2,
+call    0 returned 11
+        -:  378:							sizeof(char));
+       11:  379:	sprintf(dest, "%s/%s", trash_files_dir, file_suffix);
         -:  380:
-        -:  381:	/* Generate the info file */
-    #####:  382:	size_t info_file_len = strlen(TRASH_INFO_DIR) + strlen(file_suffix) + 12;
-        -:  383:
-    #####:  384:	char *info_file = (char *)xnmalloc(info_file_len, sizeof(char));
-    %%%%%:  384-block  0
-call    0 never executed
-    #####:  385:	sprintf(info_file, "%s/%s.trashinfo", TRASH_INFO_DIR, file_suffix);
-        -:  386:
-    #####:  387:	FILE *info_fp = fopen(info_file, "w");
-call    0 never executed
+       11:  381:	char *tmp_cmd[] = {"cp", "-a", file, dest, NULL};
+        -:  382:
+       11:  383:	free(filename);
+        -:  384:
+       11:  385:	ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
+call    0 returned 11
+       11:  386:	free(dest);
+       11:  387:	dest = (char *)NULL;
         -:  388:
-    #####:  389:	if (!info_fp) { /* If error creating the info file */
-branch  0 never executed
-branch  1 never executed
-    #####:  390:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, info_file,
+       11:  389:	if (ret != EXIT_SUCCESS) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 11
+    #####:  390:		fprintf(stderr, _("%s: trash: %s: Failed copying file to "
+    %%%%%:  390-block  0
 call    0 never executed
-    #####:  391:		    strerror(errno));
-    %%%%%:  391-block  0
-call    0 never executed
-        -:  392:		/* Remove the trash file */
-    #####:  393:		char *trash_file = (char *)NULL;
-    #####:  394:		trash_file = (char *)xnmalloc(strlen(TRASH_FILES_DIR)
-    #####:  395:						+ strlen(file_suffix) + 2, sizeof(char));
-call    0 never executed
-    #####:  396:		sprintf(trash_file, "%s/%s", TRASH_FILES_DIR, file_suffix);
-        -:  397:
-    #####:  398:		char *tmp_cmd2[] = {"rm", "-r", trash_file, NULL};
-        -:  399:
-    #####:  400:		ret = launch_execve(tmp_cmd2, FOREGROUND, E_NOFLAG);
-call    0 never executed
+call    1 never executed
+        -:  391:			"Trash\n"), PROGRAM_NAME, file);
+    #####:  392:		free(file_suffix);
+    #####:  393:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  394:	}
+        -:  395:
+        -:  396:	/* Generate the info file */
+       11:  397:	size_t info_file_len = strlen(trash_info_dir) + strlen(file_suffix) + 12;
+        -:  398:
+       11:  399:	char *info_file = (char *)xnmalloc(info_file_len, sizeof(char));
+       11:  399-block  0
+call    0 returned 11
+       11:  400:	sprintf(info_file, "%s/%s.trashinfo", trash_info_dir, file_suffix);
         -:  401:
-    #####:  402:		free(trash_file);
-        -:  403:
-    #####:  404:		if (ret != EXIT_SUCCESS)
-branch  0 never executed
-branch  1 never executed
-    #####:  405:			fprintf(stderr, _("%s: trash: %s/%s: Failed removing trash "
+       11:  402:	FILE *info_fp = fopen(info_file, "w");
+call    0 returned 11
+       11:  403:	if (!info_fp) { /* If error creating the info file */
+branch  0 taken 0 (fallthrough)
+branch  1 taken 11
+    #####:  404:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, info_file,
+call    0 never executed
+    #####:  405:		    strerror(errno));
     %%%%%:  405-block  0
 call    0 never executed
-unconditional  1 never executed
-        -:  406:				"file\nTry removing it manually\n"), PROGRAM_NAME,
-        -:  407:			    TRASH_FILES_DIR, file_suffix);
-        -:  408:
-    #####:  409:		free(file_suffix);
-    #####:  410:		free(info_file);
+        -:  406:		/* Remove the trash file */
+    #####:  407:		char *trash_file = (char *)NULL;
+    #####:  408:		trash_file = (char *)xnmalloc(strlen(trash_files_dir)
+    #####:  409:						+ strlen(file_suffix) + 2, sizeof(char));
+call    0 never executed
+    #####:  410:		sprintf(trash_file, "%s/%s", trash_files_dir, file_suffix);
         -:  411:
-    #####:  412:		return EXIT_FAILURE;
-    %%%%%:  412-block  0
-unconditional  0 never executed
-        -:  413:	}
+    #####:  412:		char *tmp_cmd2[] = {"rm", "-r", trash_file, NULL};
+    #####:  413:		ret = launch_execve(tmp_cmd2, FOREGROUND, E_NOFLAG);
+call    0 never executed
         -:  414:
-        -:  415:	else { /* If info file was generated successfully */
-        -:  416:		/* Encode path to URL format (RF 2396) */
-    #####:  417:		char *url_str = (char *)NULL;
-        -:  418:
-    #####:  419:		if (*file != '/')
-    %%%%%:  419-block  0
+    #####:  415:		free(trash_file);
+        -:  416:
+    #####:  417:		if (ret != EXIT_SUCCESS)
 branch  0 never executed
 branch  1 never executed
-    #####:  420:			url_str = url_encode(full_path);
-    %%%%%:  420-block  0
+    #####:  418:			fprintf(stderr, _("%s: trash: %s/%s: Failed removing trash "
+    %%%%%:  418-block  0
 call    0 never executed
-unconditional  1 never executed
-        -:  421:		else
-    #####:  422:			url_str = url_encode(file);
-    %%%%%:  422-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  423:
-    #####:  424:		if (!url_str) {
-    %%%%%:  424-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  425:			fprintf(stderr, _("%s: trash: %s: Failed encoding path\n"),
+call    1 never executed
+unconditional  2 never executed
+        -:  419:				"file\nTry removing it manually\n"), PROGRAM_NAME,
+        -:  420:			    trash_files_dir, file_suffix);
+        -:  421:
+    #####:  422:		free(file_suffix);
+    #####:  423:		free(info_file);
+        -:  424:
+    #####:  425:		return EXIT_FAILURE;
     %%%%%:  425-block  0
-call    0 never executed
-        -:  426:			    PROGRAM_NAME, file);
-    #####:  427:			fclose(info_fp);
-call    0 never executed
-        -:  428:
-    #####:  429:			free(info_file);
-    #####:  430:			free(file_suffix);
-    #####:  431:			return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  432:		}
-        -:  433:
-        -:  434:		/* Write trashed file information into the info file */
-    #####:  435:		fprintf(info_fp,
-        -:  436:		    "[Trash Info]\nPath=%s\nDeletionDate=%d%d%dT%d:%d:%d\n",
-    #####:  437:		    url_str, tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-    %%%%%:  437-block  0
+        -:  426:	}
+        -:  427:
+        -:  428:	else { /* If info file was generated successfully */
+        -:  429:		/* Encode path to URL format (RF 2396) */
+       11:  430:		char *url_str = (char *)NULL;
+        -:  431:
+       11:  432:		if (*file != '/')
+       11:  432-block  0
+branch  0 taken 7 (fallthrough)
+branch  1 taken 4
+        7:  433:			url_str = url_encode(full_path);
+        7:  433-block  0
+call    0 returned 7
+unconditional  1 taken 7
+        -:  434:		else
+        4:  435:			url_str = url_encode(file);
+        4:  435-block  0
+call    0 returned 4
+unconditional  1 taken 4
+        -:  436:
+       11:  437:		if (!url_str) {
+       11:  437-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 11
+    #####:  438:			fprintf(stderr, _("%s: trash: %s: Failed encoding path\n"),
+    %%%%%:  438-block  0
 call    0 never executed
-        -:  438:		    tm->tm_hour, tm->tm_min, tm->tm_sec);
-    #####:  439:		fclose(info_fp);
+call    1 never executed
+        -:  439:			    PROGRAM_NAME, file);
+        -:  440:
+    #####:  441:			fclose(info_fp);
 call    0 never executed
-    #####:  440:		free(url_str);
-    #####:  441:		url_str = (char *)NULL;
-        -:  442:	}
-        -:  443:
-        -:  444:	/* Remove the file to be trashed */
-    #####:  445:	char *tmp_cmd3[] = {"rm", "-r", file, NULL};
-    #####:  446:	ret = launch_execve(tmp_cmd3, FOREGROUND, E_NOFLAG);
-call    0 never executed
-        -:  447:
-        -:  448:	/* If remove fails, remove trash and info files */
-    #####:  449:	if (ret != EXIT_SUCCESS) {
-branch  0 never executed
-branch  1 never executed
-    #####:  450:		fprintf(stderr, _("%s: trash: %s: Failed removing file\n"),
-    %%%%%:  450-block  0
-call    0 never executed
-        -:  451:		    PROGRAM_NAME, file);
-    #####:  452:		char *trash_file = (char *)NULL;
-    #####:  453:		trash_file = (char *)xnmalloc(strlen(TRASH_FILES_DIR)
-    #####:  454:						+ strlen(file_suffix) + 2, sizeof(char));
-call    0 never executed
-    #####:  455:		sprintf(trash_file, "%s/%s", TRASH_FILES_DIR, file_suffix);
+    #####:  442:			free(info_file);
+    #####:  443:			free(file_suffix);
+    #####:  444:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  445:		}
+        -:  446:
+        -:  447:		/* Write trashed file information into the info file */
+       11:  448:		fprintf(info_fp,
+        -:  449:		    "[Trash Info]\nPath=%s\nDeletionDate=%d%d%dT%d:%d:%d\n",
+       11:  450:		    url_str, tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+       11:  450-block  0
+call    0 returned 11
+        -:  451:		    tm->tm_hour, tm->tm_min, tm->tm_sec);
+       11:  452:		fclose(info_fp);
+call    0 returned 11
+       11:  453:		free(url_str);
+       11:  454:		url_str = (char *)NULL;
+        -:  455:	}
         -:  456:
-    #####:  457:		char *tmp_cmd4[] = {"rm", "-r", trash_file, info_file, NULL};
-    #####:  458:		ret = launch_execve(tmp_cmd4, FOREGROUND, E_NOFLAG);
-call    0 never executed
-    #####:  459:		free(trash_file);
+        -:  457:	/* Remove the file to be trashed */
+       11:  458:	char *tmp_cmd3[] = {"rm", "-r", file, NULL};
+       11:  459:	ret = launch_execve(tmp_cmd3, FOREGROUND, E_NOFLAG);
+call    0 returned 11
         -:  460:
-    #####:  461:		if (ret != EXIT_SUCCESS) {
+        -:  461:	/* If remove fails, remove trash and info files */
+       11:  462:	if (ret != EXIT_SUCCESS) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 11
+    #####:  463:		fprintf(stderr, _("%s: trash: %s: Failed removing file\n"),
+    %%%%%:  463-block  0
+call    0 never executed
+call    1 never executed
+        -:  464:		    PROGRAM_NAME, file);
+    #####:  465:		char *trash_file = (char *)NULL;
+    #####:  466:		trash_file = (char *)xnmalloc(strlen(trash_files_dir)
+    #####:  467:						+ strlen(file_suffix) + 2, sizeof(char));
+call    0 never executed
+    #####:  468:		sprintf(trash_file, "%s/%s", trash_files_dir, file_suffix);
+        -:  469:
+    #####:  470:		char *tmp_cmd4[] = {"rm", "-r", trash_file, info_file, NULL};
+    #####:  471:		ret = launch_execve(tmp_cmd4, FOREGROUND, E_NOFLAG);
+call    0 never executed
+    #####:  472:		free(trash_file);
+        -:  473:
+    #####:  474:		if (ret != EXIT_SUCCESS) {
 branch  0 never executed
 branch  1 never executed
-    #####:  462:			fprintf(stderr, _("%s: trash: Failed removing temporary "
-    %%%%%:  462-block  0
+    #####:  475:			fprintf(stderr, _("%s: trash: Failed removing temporary "
+    %%%%%:  475-block  0
 call    0 never executed
-        -:  463:					"files from Trash.\nTry removing them manually\n"),
-        -:  464:					PROGRAM_NAME);
-    #####:  465:			free(file_suffix);
-    #####:  466:			free(info_file);
-    #####:  467:			return EXIT_FAILURE;
+call    1 never executed
+        -:  476:					"files from Trash.\nTry removing them manually\n"),
+        -:  477:					PROGRAM_NAME);
+    #####:  478:			free(file_suffix);
+    #####:  479:			free(info_file);
+    #####:  480:			return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  468:		}
-        -:  469:	}
-        -:  470:
-    #####:  471:	free(info_file);
-    #####:  472:	free(file_suffix);
-    #####:  473:	return EXIT_SUCCESS;
-    %%%%%:  473-block  0
-unconditional  0 never executed
-        -:  474:}
-        -:  475:
-        -:  476:int
-function remove_from_trash called 0 returned 0% blocks executed 0%
-    #####:  477:remove_from_trash(void)
-        -:  478:{
-        -:  479:	/* List trashed files */
-        -:  480:	/* Change CWD to the trash directory. Otherwise, scandir() will fail */
-    #####:  481:	if (xchdir(TRASH_FILES_DIR, NO_TITLE) == -1) {
-    %%%%%:  481-block  0
+        -:  481:		}
+        -:  482:	}
+        -:  483:
+       11:  484:	free(info_file);
+       11:  485:	free(file_suffix);
+       11:  486:	return EXIT_SUCCESS;
+       11:  486-block  0
+unconditional  0 taken 11
+        -:  487:}
+        -:  488:
+        -:  489:static int
+function remove_from_trash called 1 returned 100% blocks executed 45%
+        1:  490:remove_from_trash(void)
+        -:  491:{
+        -:  492:	/* List trashed files */
+        -:  493:	/* Change CWD to the trash directory. Otherwise, scandir() will fail */
+        1:  494:	if (xchdir(trash_files_dir, NO_TITLE) == -1) {
+        1:  494-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####:  495:		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME,
 call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  482:		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME,
-call    0 never executed
-    #####:  483:		    TRASH_FILES_DIR, strerror(errno));
-    %%%%%:  483-block  0
-call    0 never executed
-    #####:  484:		return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  485:	}
-        -:  486:
-    #####:  487:	size_t i = 0;
-    #####:  488:	struct dirent **trash_files = (struct dirent **)NULL;
-    #####:  489:	int files_n = scandir(TRASH_FILES_DIR, &trash_files,
-    %%%%%:  489-block  0
-unconditional  0 never executed
-    %%%%%:  489-block  1
-unconditional  1 never executed
-    %%%%%:  489-block  2
-unconditional  2 never executed
-    %%%%%:  489-block  3
-unconditional  3 never executed
-    %%%%%:  489-block  4
-call    4 never executed
-    #####:  490:					skip_files, (unicode) ? alphasort : (case_sensitive)
-    %%%%%:  490-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  491:					? xalphasort : alphasort_insensitive);
-    %%%%%:  491-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  492:
-    #####:  493:	if (files_n) {
-branch  0 never executed
-branch  1 never executed
-    #####:  494:		printf(_("%sTrashed files%s\n\n"), bold, df_c);
-    %%%%%:  494-block  0
-call    0 never executed
-        -:  495:
-    #####:  496:		for (i = 0; i < (size_t)files_n; i++)
-unconditional  0 never executed
-unconditional  1 never executed
+    #####:  496:		    trash_files_dir, strerror(errno));
     %%%%%:  496-block  0
-branch  2 never executed
-branch  3 never executed
-    #####:  497:			colors_list(trash_files[i]->d_name, (int)i + 1, NO_PAD,
-    %%%%%:  497-block  0
 call    0 never executed
-        -:  498:			    PRINT_NEWLINE);
-        -:  499:	}
-        -:  500:
-        -:  501:	else {
-    #####:  502:		puts(_("trash: There are no trashed files"));
+    #####:  497:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  498:	}
+        -:  499:
+        1:  500:	size_t i = 0;
+        1:  501:	struct dirent **trash_files = (struct dirent **)NULL;
+       1*:  502:	int files_n = scandir(trash_files_dir, &trash_files,
     %%%%%:  502-block  0
+unconditional  0 never executed
+    %%%%%:  502-block  1
+unconditional  1 never executed
+    %%%%%:  502-block  2
+unconditional  2 never executed
+        1:  502-block  3
+unconditional  3 taken 1
+        1:  502-block  4
+call    4 returned 1
+        1:  503:					skip_files, (unicode) ? alphasort : (case_sensitive)
+        1:  503-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  504:					? xalphasort : alphasort_insensitive);
+    %%%%%:  504-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  505:
+        1:  506:	if (files_n) {
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  507:		printf(_("%sTrashed files%s\n\n"), BOLD, df_c);
+        1:  507-block  0
+call    0 returned 1
+call    1 returned 1
+        -:  508:
+        2:  509:		for (i = 0; i < (size_t)files_n; i++)
+unconditional  0 taken 1
+unconditional  1 taken 1
+        2:  509-block  0
+branch  2 taken 1
+branch  3 taken 1
+        1:  510:			colors_list(trash_files[i]->d_name, (int)i + 1, NO_PAD,
+        1:  510-block  0
+call    0 returned 1
+        -:  511:			    PRINT_NEWLINE);
+        -:  512:	} else {
+    #####:  513:		puts(_("trash: There are no trashed files"));
+    %%%%%:  513-block  0
 call    0 never executed
-        -:  503:
-        -:  504:		/* Restore CWD and return */
-    #####:  505:		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
+call    1 never executed
+        -:  514:		/* Restore CWD and return */
+    #####:  515:		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
 call    0 never executed
 branch  1 never executed
 branch  2 never executed
-    #####:  506:			_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n",
-    #####:  507:			    PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
-    %%%%%:  507-block  0
+    #####:  516:			_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n",
+    #####:  517:			    PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
+    %%%%%:  517-block  0
 call    0 never executed
 call    1 never executed
 unconditional  2 never executed
-        -:  508:		}
-        -:  509:
-    #####:  510:		return EXIT_SUCCESS;
-    %%%%%:  510-block  0
+        -:  518:		}
+        -:  519:
+    #####:  520:		return EXIT_SUCCESS;
+    %%%%%:  520-block  0
 unconditional  0 never executed
-        -:  511:	}
-        -:  512:
-        -:  513:	/* Restore CWD and continue */
-    #####:  514:	if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
-    %%%%%:  514-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  515:		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME,
-    #####:  516:		    ws[cur_ws].path, strerror(errno));
-    %%%%%:  516-block  0
+        -:  521:	}
+        -:  522:
+        -:  523:	/* Restore CWD and continue */
+        1:  524:	if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
+        1:  524-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####:  525:		_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n", PROGRAM_NAME,
+    #####:  526:		    ws[cur_ws].path, strerror(errno));
+    %%%%%:  526-block  0
 call    0 never executed
 call    1 never executed
-    #####:  517:		return EXIT_FAILURE;
+    #####:  527:		return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  518:	}
-        -:  519:
-        -:  520:	/* Get user input */
-    #####:  521:	printf(_("\n%sEnter 'q' to quit.\n"), df_c);
-    %%%%%:  521-block  0
-call    0 never executed
-    #####:  522:	char *line = (char *)NULL, **rm_elements = (char **)NULL;
-        -:  523:
-    #####:  524:	while (!line)
-unconditional  0 never executed
-    %%%%%:  524-block  0
-branch  1 never executed
-branch  2 never executed
-    #####:  525:		line = rl_no_hist(_("File(s) to be removed (ex: 1 2-6, or *): "));
-    %%%%%:  525-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  526:
-    #####:  527:	rm_elements = get_substr(line, ' ');
-    %%%%%:  527-block  0
-call    0 never executed
-    #####:  528:	free(line);
+        -:  528:	}
         -:  529:
-    #####:  530:	if (!rm_elements)
-branch  0 never executed
-branch  1 never executed
-    #####:  531:		return EXIT_FAILURE;
-    %%%%%:  531-block  0
-unconditional  0 never executed
-        -:  532:
-        -:  533:	/* Remove files */
-    #####:  534:	char rm_file[PATH_MAX] = "", rm_info[PATH_MAX] = "";
-    #####:  535:	int ret = -1, exit_status = EXIT_SUCCESS;
+        -:  530:	/* Get user input */
+        1:  531:	printf(_("\n%sEnter 'q' to quit.\n"), df_c);
+        1:  531-block  0
+call    0 returned 1
+call    1 returned 1
+        1:  532:	char *line = (char *)NULL, **rm_elements = (char **)NULL;
+        -:  533:
+        2:  534:	while (!line)
+unconditional  0 taken 1
+        2:  534-block  0
+branch  1 taken 1
+branch  2 taken 1 (fallthrough)
+        1:  535:		line = rl_no_hist(_("File(s) to be removed (ex: 1 2-6, or *): "));
+        1:  535-block  0
+call    0 returned 1
+call    1 returned 1
+unconditional  2 taken 1
         -:  536:
-        -:  537:	/* First check for exit, wildcard, and non-number args */
-    #####:  538:	for (i = 0; rm_elements[i]; i++) {
-    %%%%%:  538-block  0
-unconditional  0 never executed
-    %%%%%:  538-block  1
-unconditional  1 never executed
-    %%%%%:  538-block  2
-branch  2 never executed
-branch  3 never executed
+        1:  537:	rm_elements = get_substr(line, ' ');
+        1:  537-block  0
+call    0 returned 1
+        1:  538:	free(line);
         -:  539:
-        -:  540:		/* Quit */
-    #####:  541:		if (strcmp(rm_elements[i], "q") == 0) {
+        1:  540:	if (!rm_elements)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  541:		return EXIT_FAILURE;
     %%%%%:  541-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  542:			size_t j;
-        -:  543:
-    #####:  544:			for (j = 0; rm_elements[j]; j++)
-    %%%%%:  544-block  0
 unconditional  0 never executed
-    %%%%%:  544-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  545:				free(rm_elements[j]);
-    %%%%%:  545-block  0
-unconditional  0 never executed
+        -:  542:
+        -:  543:	/* Remove files */
+        1:  544:	char rm_file[PATH_MAX] = "", rm_info[PATH_MAX] = "";
+        1:  545:	int ret = -1, exit_status = EXIT_SUCCESS;
         -:  546:
-    #####:  547:			free(rm_elements);
-        -:  548:
-    #####:  549:			for (j = 0; j < (size_t)files_n; j++)
-    %%%%%:  549-block  0
+        -:  547:	/* First check for exit, wildcard, and non-number args */
+        2:  548:	for (i = 0; rm_elements[i]; i++) {
+        1:  548-block  0
+unconditional  0 taken 1
+        1:  548-block  1
+unconditional  1 taken 1
+        2:  548-block  2
+branch  2 taken 1
+branch  3 taken 1 (fallthrough)
+        -:  549:		/* Quit */
+        1:  550:		if (strcmp(rm_elements[i], "q") == 0) {
+        1:  550-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+        -:  551:			size_t j;
+    #####:  552:			for (j = 0; rm_elements[j]; j++)
+    %%%%%:  552-block  0
 unconditional  0 never executed
-    %%%%%:  549-block  1
+    %%%%%:  552-block  1
 branch  1 never executed
 branch  2 never executed
-    #####:  550:				free(trash_files[j]);
-    %%%%%:  550-block  0
+    #####:  553:				free(rm_elements[j]);
+    %%%%%:  553-block  0
 unconditional  0 never executed
-        -:  551:
-    #####:  552:			free(trash_files);
-        -:  553:
-    #####:  554:			return exit_status;
-    %%%%%:  554-block  0
+    #####:  554:			free(rm_elements);
+        -:  555:
+    #####:  556:			for (j = 0; j < (size_t)files_n; j++)
+    %%%%%:  556-block  0
 unconditional  0 never executed
-        -:  555:		}
-        -:  556:
-        -:  557:		/* Asterisk */
-    #####:  558:		else if (strcmp(rm_elements[i], "*") == 0) {
-    %%%%%:  558-block  0
-branch  0 never executed
+    %%%%%:  556-block  1
 branch  1 never executed
-        -:  559:			size_t j;
-    #####:  560:			for (j = 0; j < (size_t)files_n; j++) {
+branch  2 never executed
+    #####:  557:				free(trash_files[j]);
+    %%%%%:  557-block  0
+unconditional  0 never executed
+    #####:  558:			free(trash_files);
+        -:  559:
+    #####:  560:			return exit_status;
     %%%%%:  560-block  0
 unconditional  0 never executed
-    %%%%%:  560-block  1
+        -:  561:		}
+        -:  562:
+        -:  563:		/* Asterisk */
+        1:  564:		else if (strcmp(rm_elements[i], "*") == 0) {
+        1:  564-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+        -:  565:			size_t j;
+    #####:  566:			for (j = 0; j < (size_t)files_n; j++) {
+    %%%%%:  566-block  0
+unconditional  0 never executed
+    %%%%%:  566-block  1
 branch  1 never executed
 branch  2 never executed
-        -:  561:
-    #####:  562:				snprintf(rm_file, PATH_MAX, "%s/%s", TRASH_FILES_DIR,
-    #####:  563:				    trash_files[j]->d_name);
-    #####:  564:				snprintf(rm_info, PATH_MAX, "%s/%s.trashinfo",
-    #####:  565:				    TRASH_INFO_DIR, trash_files[j]->d_name);
-        -:  566:
-    #####:  567:				char *tmp_cmd[] = {"rm", "-r", rm_file, rm_info, NULL};
-        -:  568:
-    #####:  569:				ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
-    %%%%%:  569-block  0
+    #####:  567:				snprintf(rm_file, PATH_MAX, "%s/%s", trash_files_dir,
+    #####:  568:				    trash_files[j]->d_name);
+    #####:  569:				snprintf(rm_info, PATH_MAX, "%s/%s.trashinfo",
+    #####:  570:				    trash_info_dir, trash_files[j]->d_name);
+        -:  571:
+    #####:  572:				char *tmp_cmd[] = {"rm", "-r", rm_file, rm_info, NULL};
+        -:  573:
+    #####:  574:				ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
+    %%%%%:  574-block  0
 call    0 never executed
-        -:  570:
-    #####:  571:				if (ret != EXIT_SUCCESS) {
+    #####:  575:				if (ret != EXIT_SUCCESS) {
 branch  0 never executed
 branch  1 never executed
-    #####:  572:					fprintf(stderr, _("%s: trash: Error trashing %s\n"),
-    #####:  573:					    PROGRAM_NAME, trash_files[j]->d_name);
-    %%%%%:  573-block  0
+    #####:  576:					fprintf(stderr, _("%s: trash: Error trashing %s\n"),
 call    0 never executed
-    #####:  574:					exit_status = EXIT_FAILURE;
-unconditional  0 never executed
-        -:  575:				}
-        -:  576:
-    #####:  577:				free(trash_files[j]);
+    #####:  577:					    PROGRAM_NAME, trash_files[j]->d_name);
     %%%%%:  577-block  0
+call    0 never executed
+    #####:  578:					exit_status = EXIT_FAILURE;
 unconditional  0 never executed
-        -:  578:			}
-        -:  579:
-    #####:  580:			free(trash_files);
-        -:  581:
-    #####:  582:			for (j = 0; rm_elements[j]; j++)
-    %%%%%:  582-block  0
+        -:  579:				}
+        -:  580:
+    #####:  581:				free(trash_files[j]);
+    %%%%%:  581-block  0
 unconditional  0 never executed
-    %%%%%:  582-block  1
+        -:  582:			}
+        -:  583:
+    #####:  584:			free(trash_files);
+        -:  585:
+    #####:  586:			for (j = 0; rm_elements[j]; j++)
+    %%%%%:  586-block  0
+unconditional  0 never executed
+    %%%%%:  586-block  1
 branch  1 never executed
 branch  2 never executed
-    #####:  583:				free(rm_elements[j]);
-    %%%%%:  583-block  0
-unconditional  0 never executed
-        -:  584:
-    #####:  585:			free(rm_elements);
-        -:  586:
-    #####:  587:			return exit_status;
+    #####:  587:				free(rm_elements[j]);
     %%%%%:  587-block  0
 unconditional  0 never executed
-        -:  588:		}
-        -:  589:
-    #####:  590:		else if (!is_number(rm_elements[i])) {
-    %%%%%:  590-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-        -:  591:
-    #####:  592:			fprintf(stderr, _("%s: trash: %s: Invalid ELN\n"),
-    #####:  593:			    PROGRAM_NAME, rm_elements[i]);
-    %%%%%:  593-block  0
-call    0 never executed
-    #####:  594:			exit_status = EXIT_FAILURE;
+        -:  588:
+    #####:  589:			free(rm_elements);
+        -:  590:
+    #####:  591:			return exit_status;
+    %%%%%:  591-block  0
+unconditional  0 never executed
+        -:  592:		}
+        -:  593:
+        1:  594:		else if (!is_number(rm_elements[i])) {
+        1:  594-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
         -:  595:
-        -:  596:			size_t j;
-        -:  597:
-    #####:  598:			for (j = 0; rm_elements[j]; j++)
+    #####:  596:			fprintf(stderr, _("%s: trash: %s: Invalid ELN\n"),
+call    0 never executed
+    #####:  597:			    PROGRAM_NAME, rm_elements[i]);
+    %%%%%:  597-block  0
+call    0 never executed
+    #####:  598:			exit_status = EXIT_FAILURE;
+        -:  599:
+        -:  600:			size_t j;
+    #####:  601:			for (j = 0; rm_elements[j]; j++)
 unconditional  0 never executed
-    %%%%%:  598-block  0
+    %%%%%:  601-block  0
 branch  1 never executed
 branch  2 never executed
-    #####:  599:				free(rm_elements[j]);
-    %%%%%:  599-block  0
+    #####:  602:				free(rm_elements[j]);
+    %%%%%:  602-block  0
 unconditional  0 never executed
-        -:  600:
-    #####:  601:			free(rm_elements);
-        -:  602:
-    #####:  603:			for (j = 0; j < (size_t)files_n; j++)
-    %%%%%:  603-block  0
+    #####:  603:			free(rm_elements);
+        -:  604:
+    #####:  605:			for (j = 0; j < (size_t)files_n; j++)
+    %%%%%:  605-block  0
 unconditional  0 never executed
-    %%%%%:  603-block  1
+    %%%%%:  605-block  1
 branch  1 never executed
 branch  2 never executed
-    #####:  604:				free(trash_files[j]);
-    %%%%%:  604-block  0
+    #####:  606:				free(trash_files[j]);
+    %%%%%:  606-block  0
 unconditional  0 never executed
-        -:  605:
-    #####:  606:			free(trash_files);
-        -:  607:
-    #####:  608:			return exit_status;
-    %%%%%:  608-block  0
+    #####:  607:			free(trash_files);
+        -:  608:
+    #####:  609:			return exit_status;
+    %%%%%:  609-block  0
 unconditional  0 never executed
-        -:  609:		}
-        -:  610:	}
-        -:  611:
-        -:  612:	/* If all args are numbers, and neither 'q' nor wildcard */
-        -:  613:	int rm_num;
-    #####:  614:	for (i = 0; rm_elements[i]; i++) {
-    %%%%%:  614-block  0
-unconditional  0 never executed
-    %%%%%:  614-block  1
-unconditional  1 never executed
-    %%%%%:  614-block  2
-branch  2 never executed
-branch  3 never executed
-        -:  615:
-    #####:  616:		rm_num = atoi(rm_elements[i]);
-        -:  617:
-    #####:  618:		if (rm_num <= 0 || rm_num > files_n) {
+        -:  610:		}
+        -:  611:	}
+        -:  612:
+        -:  613:	/* If all args are numbers, and neither 'q' nor wildcard */
+        2:  614:	for (i = 0; rm_elements[i]; i++) {
+        1:  614-block  0
+unconditional  0 taken 1
+        1:  614-block  1
+unconditional  1 taken 1
+        2:  614-block  2
+branch  2 taken 1
+branch  3 taken 1 (fallthrough)
+        1:  615:		int rm_num = atoi(rm_elements[i]);
+        -:  616:
+       1*:  617:		if (rm_num <= 0 || rm_num > files_n) {
+        1:  617-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  617-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1
+    #####:  618:			fprintf(stderr, _("%s: trash: %d: Invalid ELN\n"),
     %%%%%:  618-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  618-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  619:			fprintf(stderr, _("%s: trash: %d: Invalid ELN\n"),
-    %%%%%:  619-block  0
 call    0 never executed
-        -:  620:			    PROGRAM_NAME, rm_num);
-    #####:  621:			free(rm_elements[i]);
-    #####:  622:			exit_status = EXIT_FAILURE;
-    #####:  623:			continue;
-unconditional  0 never executed
-        -:  624:		}
-        -:  625:
-    #####:  626:		snprintf(rm_file, PATH_MAX, "%s/%s", TRASH_FILES_DIR,
-    #####:  627:		    trash_files[rm_num - 1]->d_name);
-    #####:  628:		snprintf(rm_info, PATH_MAX, "%s/%s.trashinfo", TRASH_INFO_DIR,
-    #####:  629:		    trash_files[rm_num - 1]->d_name);
-        -:  630:
-    #####:  631:		char *tmp_cmd2[] = {"rm", "-r", rm_file, rm_info, NULL};
-        -:  632:
-    #####:  633:		ret = launch_execve(tmp_cmd2, FOREGROUND, E_NOFLAG);
-    %%%%%:  633-block  0
-call    0 never executed
-        -:  634:
-    #####:  635:		if (ret != EXIT_SUCCESS) {
-branch  0 never executed
-branch  1 never executed
-    #####:  636:			fprintf(stderr, _("%s: trash: Error trashing %s\n"),
-    #####:  637:			    PROGRAM_NAME, trash_files[rm_num - 1]->d_name);
-    %%%%%:  637-block  0
-call    0 never executed
-    #####:  638:			exit_status = EXIT_FAILURE;
-unconditional  0 never executed
-        -:  639:		}
-        -:  640:
-    #####:  641:		free(rm_elements[i]);
-    %%%%%:  641-block  0
-unconditional  0 never executed
-        -:  642:	}
-        -:  643:
-    #####:  644:	free(rm_elements);
-        -:  645:
-    #####:  646:	for (i = 0; i < (size_t)files_n; i++)
-    %%%%%:  646-block  0
-unconditional  0 never executed
-    %%%%%:  646-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  647:		free(trash_files[i]);
-    %%%%%:  647-block  0
-unconditional  0 never executed
-        -:  648:
-    #####:  649:	free(trash_files);
-        -:  650:
-    #####:  651:	return exit_status;
-    %%%%%:  651-block  0
-unconditional  0 never executed
-        -:  652:}
-        -:  653:
-        -:  654:int
-function untrash_element called 0 returned 0% blocks executed 0%
-    #####:  655:untrash_element(char *file)
-        -:  656:{
-    #####:  657:	if (!file)
-    %%%%%:  657-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  658:		return EXIT_FAILURE;
-    %%%%%:  658-block  0
-unconditional  0 never executed
-        -:  659:
-    #####:  660:	char undel_file[PATH_MAX] = "", undel_info[PATH_MAX] = "";
-    #####:  661:	snprintf(undel_file, PATH_MAX, "%s/%s", TRASH_FILES_DIR, file);
-    #####:  662:	snprintf(undel_info, PATH_MAX, "%s/%s.trashinfo", TRASH_INFO_DIR,
-        -:  663:	    file);
-        -:  664:
-        -:  665:	FILE *info_fp;
-    #####:  666:	info_fp = fopen(undel_info, "r");
-    %%%%%:  666-block  0
-call    0 never executed
-        -:  667:
-    #####:  668:	if (info_fp) {
-branch  0 never executed
-branch  1 never executed
-        -:  669:
-    #####:  670:		char *orig_path = (char *)NULL;
-        -:  671:		/* The max length for line is Path=(5) + PATH_MAX + \n(1) */
-        -:  672:		char line[PATH_MAX + 6];
-        -:  673:
-    #####:  674:		memset(line, '\0', PATH_MAX + 6);
-        -:  675:
-    #####:  676:		while (fgets(line, (int)sizeof(line), info_fp)) {
-    %%%%%:  676-block  0
-unconditional  0 never executed
-    %%%%%:  676-block  1
 call    1 never executed
-branch  2 never executed
-branch  3 never executed
-    #####:  677:			if (strncmp(line, "Path=", 5) == 0)
-    %%%%%:  677-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  678:				orig_path = straft(line, '=');
-    %%%%%:  678-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  679:		}
-        -:  680:
-    #####:  681:		fclose(info_fp);
-    %%%%%:  681-block  0
-call    0 never executed
-        -:  682:
-        -:  683:		/* If original path is NULL or empty, return error */
-    #####:  684:		if (!orig_path)
-branch  0 never executed
-branch  1 never executed
-    #####:  685:			return EXIT_FAILURE;
-    %%%%%:  685-block  0
+        -:  619:			    PROGRAM_NAME, rm_num);
+    #####:  620:			free(rm_elements[i]);
+    #####:  621:			exit_status = EXIT_FAILURE;
+    #####:  622:			continue;
 unconditional  0 never executed
-        -:  686:
-        -:  687:		/*      if (strcmp(orig_path, "") == 0) { */
-    #####:  688:		if (*orig_path == '\0') {
+        -:  623:		}
+        -:  624:
+        1:  625:		snprintf(rm_file, PATH_MAX, "%s/%s", trash_files_dir,
+        1:  626:		    trash_files[rm_num - 1]->d_name);
+        1:  627:		snprintf(rm_info, PATH_MAX, "%s/%s.trashinfo", trash_info_dir,
+        1:  628:		    trash_files[rm_num - 1]->d_name);
+        -:  629:
+        1:  630:		char *tmp_cmd2[] = {"rm", "-r", rm_file, rm_info, NULL};
+        -:  631:
+        1:  632:		ret = launch_execve(tmp_cmd2, FOREGROUND, E_NOFLAG);
+        1:  632-block  0
+call    0 returned 1
+        1:  633:		if (ret != EXIT_SUCCESS) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  634:			fprintf(stderr, _("%s: trash: Error trashing %s\n"),
+call    0 never executed
+    #####:  635:			    PROGRAM_NAME, trash_files[rm_num - 1]->d_name);
+    %%%%%:  635-block  0
+call    0 never executed
+    #####:  636:			exit_status = EXIT_FAILURE;
+unconditional  0 never executed
+        -:  637:		}
+        -:  638:
+        1:  639:		free(rm_elements[i]);
+        1:  639-block  0
+unconditional  0 taken 1
+        -:  640:	}
+        -:  641:
+        1:  642:	free(rm_elements);
+        -:  643:
+        2:  644:	for (i = 0; i < (size_t)files_n; i++)
+        1:  644-block  0
+unconditional  0 taken 1
+        2:  644-block  1
+branch  1 taken 1
+branch  2 taken 1 (fallthrough)
+        1:  645:		free(trash_files[i]);
+        1:  645-block  0
+unconditional  0 taken 1
+        1:  646:	free(trash_files);
+        -:  647:
+        1:  648:	return exit_status;
+        1:  648-block  0
+unconditional  0 taken 1
+        -:  649:}
+        -:  650:
+        -:  651:static int
+function untrash_element called 10 returned 100% blocks executed 52%
+       10:  652:untrash_element(char *file)
+        -:  653:{
+       10:  654:	if (!file)
+       10:  654-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 10
+    #####:  655:		return EXIT_FAILURE;
+    %%%%%:  655-block  0
+unconditional  0 never executed
+        -:  656:
+        -:  657:	char undel_file[PATH_MAX], undel_info[PATH_MAX];
+       10:  658:	snprintf(undel_file, PATH_MAX, "%s/%s", trash_files_dir, file);
+       10:  659:	snprintf(undel_info, PATH_MAX, "%s/%s.trashinfo", trash_info_dir,
+        -:  660:	    file);
+        -:  661:
+        -:  662:	FILE *info_fp;
+       10:  663:	info_fp = fopen(undel_info, "r");
+       10:  663-block  0
+call    0 returned 10
+       10:  664:	if (!info_fp) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 10
+    #####:  665:		fprintf(stderr, _("%s: undel: Info file for '%s' not found. "
+    %%%%%:  665-block  0
+call    0 never executed
+call    1 never executed
+        -:  666:				"Try restoring the file manually\n"), PROGRAM_NAME, file);
+    #####:  667:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  668:	}
+        -:  669:
+       10:  670:	char *orig_path = (char *)NULL;
+        -:  671:	/* The max length for line is Path=(5) + PATH_MAX + \n(1) */
+        -:  672:	char line[PATH_MAX + 6];
+       10:  673:	memset(line, '\0', PATH_MAX + 6);
+        -:  674:
+       40:  675:	while (fgets(line, (int)sizeof(line), info_fp)) {
+       10:  675-block  0
+unconditional  0 taken 10
+       40:  675-block  1
+call    1 returned 40
+branch  2 taken 30
+branch  3 taken 10 (fallthrough)
+       30:  676:		if (strncmp(line, "Path=", 5) == 0)
+       30:  676-block  0
+branch  0 taken 10 (fallthrough)
+branch  1 taken 20
+       10:  677:			orig_path = straft(line, '=');
+       10:  677-block  0
+call    0 returned 10
+unconditional  1 taken 10
+        -:  678:	}
+        -:  679:
+       10:  680:	fclose(info_fp);
+       10:  680-block  0
+call    0 returned 10
+        -:  681:
+        -:  682:	/* If original path is NULL or empty, return error */
+       10:  683:	if (!orig_path)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 10
+    #####:  684:		return EXIT_FAILURE;
+    %%%%%:  684-block  0
+unconditional  0 never executed
+        -:  685:
+       10:  686:	if (*orig_path == '\0') {
+       10:  686-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 10
+    #####:  687:		free(orig_path);
+    #####:  688:		return EXIT_FAILURE;
     %%%%%:  688-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  689:			free(orig_path);
-    #####:  690:			return EXIT_FAILURE;
-    %%%%%:  690-block  0
 unconditional  0 never executed
-        -:  691:		}
-        -:  692:
-        -:  693:		/* Remove new line char from original path, if any */
-    #####:  694:		size_t orig_path_len = strlen(orig_path);
-    #####:  695:		if (orig_path[orig_path_len - 1] == '\n')
-    %%%%%:  695-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  696:			orig_path[orig_path_len - 1] = '\0';
-    %%%%%:  696-block  0
+        -:  689:	}
+        -:  690:
+        -:  691:	/* Remove new line char from original path, if any */
+       10:  692:	size_t orig_path_len = strlen(orig_path);
+       10:  693:	if (orig_path[orig_path_len - 1] == '\n')
+       10:  693-block  0
+branch  0 taken 10 (fallthrough)
+branch  1 taken 0
+       10:  694:		orig_path[orig_path_len - 1] = '\0';
+       10:  694-block  0
+unconditional  0 taken 10
+        -:  695:
+        -:  696:	/* Decode original path's URL format */
+       10:  697:	char *url_decoded = url_decode(orig_path);
+       10:  697-block  0
+call    0 returned 10
+        -:  698:
+       10:  699:	if (!url_decoded) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 10
+    #####:  700:		fprintf(stderr, _("%s: undel: %s: Failed decoding path\n"),
+    %%%%%:  700-block  0
+call    0 never executed
+call    1 never executed
+        -:  701:		    PROGRAM_NAME, orig_path);
+    #####:  702:		free(orig_path);
+    #####:  703:		return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  697:
-        -:  698:		/* Decode original path's URL format */
-    #####:  699:		char *url_decoded = url_decode(orig_path);
-    %%%%%:  699-block  0
-call    0 never executed
-        -:  700:
-    #####:  701:		if (!url_decoded) {
+        -:  704:	}
+        -:  705:
+       10:  706:	free(orig_path);
+       10:  707:	orig_path = (char *)NULL;
+        -:  708:
+        -:  709:	/* Check existence and permissions of parent directory */
+       10:  710:	char *parent = (char *)NULL;
+       10:  711:	parent = strbfrlst(url_decoded, '/');
+       10:  711-block  0
+call    0 returned 10
+        -:  712:
+       10:  713:	if (!parent) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 10
+        -:  714:		/* strbfrlst() returns NULL is file's parent is root (simply
+        -:  715:		 * because there's nothing before last slash in this case).
+        -:  716:		 * So, check if file's parent is root. Else returns */
+    #####:  717:		if (url_decoded[0] == '/' && strcntchr(url_decoded + 1, '/') == -1) {
+    %%%%%:  717-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  702:			fprintf(stderr, _("%s: undel: %s: Failed decoding path\n"),
-    %%%%%:  702-block  0
-call    0 never executed
-        -:  703:			    PROGRAM_NAME, orig_path);
-    #####:  704:			free(orig_path);
-    #####:  705:			return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  706:		}
-        -:  707:
-    #####:  708:		free(orig_path);
-    #####:  709:		orig_path = (char *)NULL;
-        -:  710:
-        -:  711:		/* Check existence and permissions of parent directory */
-    #####:  712:		char *parent = (char *)NULL;
-    #####:  713:		parent = strbfrlst(url_decoded, '/');
-    %%%%%:  713-block  0
-call    0 never executed
-        -:  714:
-    #####:  715:		if (!parent) {
-branch  0 never executed
-branch  1 never executed
-        -:  716:			/* strbfrlst() returns NULL is file's parent is root (simply
-        -:  717:			 * because there's nothing before last slash in this case).
-        -:  718:			 * So, check if file's parent is root. Else returns */
-        -:  719:
-    #####:  720:			if (url_decoded[0] == '/' && strcntchr(url_decoded + 1, '/') == -1) {
-    %%%%%:  720-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  720-block  1
+    %%%%%:  717-block  1
 call    2 never executed
 branch  3 never executed
 branch  4 never executed
-    #####:  721:				parent = (char *)xnmalloc(2, sizeof(char));
-    %%%%%:  721-block  0
+    #####:  718:			parent = (char *)xnmalloc(2, sizeof(char));
+    %%%%%:  718-block  0
 call    0 never executed
-    #####:  722:				parent[0] = '/';
-    #####:  723:				parent[1] = '\0';
+    #####:  719:			parent[0] = '/';
+    #####:  720:			parent[1] = '\0';
 unconditional  0 never executed
-        -:  724:			}
-        -:  725:
-        -:  726:			else {
-    #####:  727:				free(url_decoded);
-    #####:  728:				return EXIT_FAILURE;
+        -:  721:		} else {
+    #####:  722:			free(url_decoded);
+    #####:  723:			return EXIT_FAILURE;
+    %%%%%:  723-block  0
+unconditional  0 never executed
+        -:  724:		}
+        -:  725:	}
+        -:  726:
+       10:  727:	if (access(parent, F_OK) != 0) {
+       10:  727-block  0
+call    0 returned 10
+branch  1 taken 0 (fallthrough)
+branch  2 taken 10
+    #####:  728:		fprintf(stderr, _("%s: undel: %s: No such file or directory\n"),
     %%%%%:  728-block  0
+call    0 never executed
+call    1 never executed
+        -:  729:				PROGRAM_NAME, parent);
+    #####:  730:		free(parent);
+    #####:  731:		free(url_decoded);
+    #####:  732:		return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  729:			}
-        -:  730:		}
-        -:  731:
-    #####:  732:		if (access(parent, F_OK) != 0) {
-    %%%%%:  732-block  0
+        -:  733:	}
+        -:  734:
+       10:  735:	if (access(parent, X_OK | W_OK) != 0) {
+       10:  735-block  0
+call    0 returned 10
+branch  1 taken 0 (fallthrough)
+branch  2 taken 10
+    #####:  736:		fprintf(stderr, _("%s: undel: %s: Permission denied\n"),
+    %%%%%:  736-block  0
 call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  733:			fprintf(stderr, _("%s: undel: %s: No such file or "
-    %%%%%:  733-block  0
-call    0 never executed
-        -:  734:					  "directory\n"),
-        -:  735:			    PROGRAM_NAME, parent);
-    #####:  736:			free(parent);
-    #####:  737:			free(url_decoded);
-    #####:  738:			return EXIT_FAILURE;
+call    1 never executed
+        -:  737:				PROGRAM_NAME, parent);
+    #####:  738:		free(parent);
+    #####:  739:		free(url_decoded);
+    #####:  740:		return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  739:		}
-        -:  740:
-    #####:  741:		if (access(parent, X_OK | W_OK) != 0) {
-    %%%%%:  741-block  0
+        -:  741:	}
+        -:  742:
+       10:  743:	free(parent);
+        -:  744:
+       10:  745:	char *tmp_cmd[] = {"cp", "-a", undel_file, url_decoded, NULL};
+       10:  746:	int ret = -1;
+       10:  747:	ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
+       10:  747-block  0
+call    0 returned 10
+       10:  748:	free(url_decoded);
+        -:  749:
+       10:  750:	if (ret == EXIT_SUCCESS) {
+branch  0 taken 10 (fallthrough)
+branch  1 taken 0
+       10:  751:		char *tmp_cmd2[] = {"rm", "-r", undel_file, undel_info, NULL};
+       10:  752:		ret = launch_execve(tmp_cmd2, FOREGROUND, E_NOFLAG);
+       10:  752-block  0
+call    0 returned 10
+        -:  753:
+       10:  754:		if (ret != EXIT_SUCCESS) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 10
+    #####:  755:			fprintf(stderr, _("%s: undel: %s: Failed removing info file\n"),
+    %%%%%:  755-block  0
 call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  742:			fprintf(stderr, _("%s: undel: %s: Permission denied\n"),
-    %%%%%:  742-block  0
-call    0 never executed
-        -:  743:			    PROGRAM_NAME, parent);
-    #####:  744:			free(parent);
-    #####:  745:			free(url_decoded);
-    #####:  746:			return EXIT_FAILURE;
+call    1 never executed
+        -:  756:					PROGRAM_NAME, undel_info);
+    #####:  757:			return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  747:		}
-        -:  748:
-    #####:  749:		free(parent);
-        -:  750:
-    #####:  751:		char *tmp_cmd[] = {"cp", "-a", undel_file, url_decoded, NULL};
-        -:  752:
-    #####:  753:		int ret = -1;
-    #####:  754:		ret = launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG);
-    %%%%%:  754-block  0
-call    0 never executed
-    #####:  755:		free(url_decoded);
-        -:  756:
-    #####:  757:		if (ret == EXIT_SUCCESS) {
-branch  0 never executed
-branch  1 never executed
-    #####:  758:			char *tmp_cmd2[] = {"rm", "-r", undel_file, undel_info, NULL};
-    #####:  759:			ret = launch_execve(tmp_cmd2, FOREGROUND, E_NOFLAG);
-    %%%%%:  759-block  0
-call    0 never executed
-        -:  760:
-    #####:  761:			if (ret != EXIT_SUCCESS) {
-branch  0 never executed
-branch  1 never executed
-    #####:  762:				fprintf(stderr, _("%s: undel: %s: Failed removing "
+        -:  758:		} else {
+       10:  759:			return EXIT_SUCCESS;
+       10:  759-block  0
+unconditional  0 taken 10
+        -:  760:		}
+        -:  761:	} else {
+    #####:  762:		fprintf(stderr, _("%s: undel: %s: Failed restoring trashed file\n"),
     %%%%%:  762-block  0
 call    0 never executed
-        -:  763:						  "info file\n"),
-        -:  764:				    PROGRAM_NAME, undel_info);
-    #####:  765:				return EXIT_FAILURE;
+call    1 never executed
+        -:  763:				PROGRAM_NAME, undel_file);
+    #####:  764:		return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  766:			}
-        -:  767:
-        -:  768:			else
-    #####:  769:				return EXIT_SUCCESS;
-    %%%%%:  769-block  0
-unconditional  0 never executed
-        -:  770:		}
-        -:  771:
-        -:  772:		else {
-    #####:  773:			fprintf(stderr, _("%s: undel: %s: Failed restoring trashed "
-    %%%%%:  773-block  0
+        -:  765:	}
+        -:  766:
+        -:  767:	return EXIT_FAILURE; /* Never reached */
+        -:  768:}
+        -:  769:
+        -:  770:int
+function untrash_function called 4 returned 100% blocks executed 54%
+        4:  771:untrash_function(char **comm)
+        -:  772:{
+        4:  773:	if (xargs.stealth_mode == 1) {
+        4:  773-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4
+    #####:  774:		printf("%s: The trash function is disabled in stealth mode\n",
+    %%%%%:  774-block  0
 call    0 never executed
-        -:  774:					  "file\n"),
-        -:  775:			    PROGRAM_NAME, undel_file);
-    #####:  776:			return EXIT_FAILURE;
+        -:  775:		    PROGRAM_NAME);
+    #####:  776:		return EXIT_SUCCESS;
 unconditional  0 never executed
-        -:  777:		}
-        -:  778:	}
-        -:  779:
-        -:  780:	else { /* !info_fp */
-    #####:  781:		fprintf(stderr, _("%s: undel: Info file for '%s' not found. "
-    %%%%%:  781-block  0
+        -:  777:	}
+        -:  778:
+        4:  779:	if (!comm)
+        4:  779-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4
+    #####:  780:		return EXIT_FAILURE;
+    %%%%%:  780-block  0
+unconditional  0 never executed
+        -:  781:
+        4:  782:	if (!trash_ok) {
+        4:  782-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4
+    #####:  783:		fprintf(stderr, _("%s: Trash function disabled\n"), PROGRAM_NAME);
+    %%%%%:  783-block  0
 call    0 never executed
-        -:  782:				  "Try restoring the file manually\n"),
-        -:  783:		    PROGRAM_NAME, file);
+call    1 never executed
     #####:  784:		return EXIT_FAILURE;
 unconditional  0 never executed
         -:  785:	}
         -:  786:
-        -:  787:	return EXIT_FAILURE; /* Never reached */
-        -:  788:}
-        -:  789:
-        -:  790:int
-function untrash_function called 0 returned 0% blocks executed 0%
-    #####:  791:untrash_function(char **comm)
-        -:  792:{
-    #####:  793:	if (xargs.stealth_mode == 1) {
-    %%%%%:  793-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  794:		printf("%s: The trash function is disabled in stealth mode\n",
-    %%%%%:  794-block  0
+        -:  787:	/* Change CWD to the trash directory to make scandir() work */
+        4:  788:	if (xchdir(trash_files_dir, NO_TITLE) == -1) {
+        4:  788-block  0
+call    0 returned 4
+branch  1 taken 0 (fallthrough)
+branch  2 taken 4
+    #####:  789:		_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n", PROGRAM_NAME,
 call    0 never executed
-        -:  795:		    PROGRAM_NAME);
-    #####:  796:		return EXIT_SUCCESS;
-unconditional  0 never executed
-        -:  797:	}
-        -:  798:
-    #####:  799:	if (!comm)
-    %%%%%:  799-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  800:		return EXIT_FAILURE;
-    %%%%%:  800-block  0
-unconditional  0 never executed
-        -:  801:
-    #####:  802:	if (!trash_ok) {
-    %%%%%:  802-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  803:		fprintf(stderr, _("%s: Trash function disabled\n"), PROGRAM_NAME);
-    %%%%%:  803-block  0
+    #####:  790:		    trash_files_dir, strerror(errno));
+    %%%%%:  790-block  0
 call    0 never executed
-    #####:  804:		return EXIT_FAILURE;
+    #####:  791:		return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  805:	}
-        -:  806:
-        -:  807:	/* Change CWD to the trash directory to make scandir() work */
-    #####:  808:	if (xchdir(TRASH_FILES_DIR, NO_TITLE) == -1) {
-    %%%%%:  808-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  809:		_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n", PROGRAM_NAME,
-call    0 never executed
-    #####:  810:		    TRASH_FILES_DIR, strerror(errno));
-    %%%%%:  810-block  0
-call    0 never executed
-    #####:  811:		return EXIT_FAILURE;
+        -:  792:	}
+        -:  793:
+        -:  794:	/* Get trashed files */
+        4:  795:	struct dirent **trash_files = (struct dirent **)NULL;
+       4*:  796:	int trash_files_n = scandir(trash_files_dir, &trash_files,
+    %%%%%:  796-block  0
 unconditional  0 never executed
-        -:  812:	}
-        -:  813:
-        -:  814:	/* Get trashed files */
-    #####:  815:	struct dirent **trash_files = (struct dirent **)NULL;
-    #####:  816:	int trash_files_n = scandir(TRASH_FILES_DIR, &trash_files,
-    %%%%%:  816-block  0
-unconditional  0 never executed
-    %%%%%:  816-block  1
+    %%%%%:  796-block  1
 unconditional  1 never executed
-    %%%%%:  816-block  2
+    %%%%%:  796-block  2
 unconditional  2 never executed
-    %%%%%:  816-block  3
-unconditional  3 never executed
-    %%%%%:  816-block  4
-call    4 never executed
-    #####:  817:	    skip_files, (unicode) ? alphasort : (case_sensitive) ? xalphasort
-    %%%%%:  817-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  817-block  1
+        4:  796-block  3
+unconditional  3 taken 4
+        4:  796-block  4
+call    4 returned 4
+       4*:  797:	    skip_files, (unicode) ? alphasort : (case_sensitive) ? xalphasort
+        4:  797-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4
+    %%%%%:  797-block  1
 branch  2 never executed
 branch  3 never executed
-        -:  818:								 : alphasort_insensitive);
-    #####:  819:	if (trash_files_n <= 0) {
-branch  0 never executed
-branch  1 never executed
-        -:  820:
-    #####:  821:		puts(_("trash: There are no trashed files"));
-    %%%%%:  821-block  0
-call    0 never executed
-        -:  822:
-    #####:  823:		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  824:			_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n",
-    #####:  825:			    PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
-    %%%%%:  825-block  0
+        -:  798:					 : alphasort_insensitive);
+        4:  799:	if (trash_files_n <= 0) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4
+    #####:  800:		puts(_("trash: There are no trashed files"));
+    %%%%%:  800-block  0
 call    0 never executed
 call    1 never executed
-    #####:  826:			return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  827:		}
-        -:  828:
-    #####:  829:		return EXIT_SUCCESS;
-    %%%%%:  829-block  0
-unconditional  0 never executed
-        -:  830:	}
-        -:  831:
-    #####:  832:	int exit_status = EXIT_SUCCESS;
-        -:  833:	/* if "undel all" (or "u a" or "u *") */
-    #####:  834:	if (comm[1] && (strcmp(comm[1], "*") == 0 || strcmp(comm[1], "a") == 0 || strcmp(comm[1], "all") == 0)) {
-    %%%%%:  834-block  0
-branch  0 never executed
+        -:  801:
+    #####:  802:		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
+call    0 never executed
 branch  1 never executed
-    %%%%%:  834-block  1
 branch  2 never executed
-branch  3 never executed
-    %%%%%:  834-block  2
+    #####:  803:			_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n",
+    #####:  804:			    PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
+    %%%%%:  804-block  0
+call    0 never executed
+call    1 never executed
+    #####:  805:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  806:		}
+        -:  807:
+    #####:  808:		return EXIT_SUCCESS;
+    %%%%%:  808-block  0
+unconditional  0 never executed
+        -:  809:	}
+        -:  810:
+        4:  811:	int exit_status = EXIT_SUCCESS;
+        -:  812:	/* if "undel all" (or "u a" or "u *") */
+       4*:  813:	if (comm[1] && (strcmp(comm[1], "*") == 0 || strcmp(comm[1], "a") == 0
+        4:  813-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 2
+        2:  813-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 2
+    %%%%%:  813-block  2
 branch  4 never executed
 branch  5 never executed
-    %%%%%:  834-block  3
-branch  6 never executed
-branch  7 never executed
-        -:  835:		size_t j;
-        -:  836:
-    #####:  837:		for (j = 0; j < (size_t)trash_files_n; j++) {
-    %%%%%:  837-block  0
-unconditional  0 never executed
-    %%%%%:  837-block  1
+    #####:  814:	|| strcmp(comm[1], "all") == 0)) {
+    %%%%%:  814-block  0
+branch  0 never executed
 branch  1 never executed
-branch  2 never executed
-        -:  838:
-    #####:  839:			if (untrash_element(trash_files[j]->d_name) != 0)
-    %%%%%:  839-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  840:				exit_status = EXIT_FAILURE;
-    %%%%%:  840-block  0
+        -:  815:		size_t j;
+       10:  816:		for (j = 0; j < (size_t)trash_files_n; j++) {
+        2:  816-block  0
+unconditional  0 taken 2
+       10:  816-block  1
+branch  1 taken 8
+branch  2 taken 2 (fallthrough)
+        8:  817:			if (untrash_element(trash_files[j]->d_name) != 0)
+        8:  817-block  0
+call    0 returned 8
+branch  1 taken 0 (fallthrough)
+branch  2 taken 8
+    #####:  818:				exit_status = EXIT_FAILURE;
+    %%%%%:  818-block  0
 unconditional  0 never executed
-        -:  841:
-    #####:  842:			free(trash_files[j]);
-    %%%%%:  842-block  0
-unconditional  0 never executed
-        -:  843:		}
-        -:  844:
-    #####:  845:		free(trash_files);
-        -:  846:
-    #####:  847:		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
-    %%%%%:  847-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  848:			_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n",
-    #####:  849:			    PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
-    %%%%%:  849-block  0
+        -:  819:
+        8:  820:			free(trash_files[j]);
+        8:  820-block  0
+unconditional  0 taken 8
+        -:  821:		}
+        -:  822:
+        2:  823:		free(trash_files);
+        -:  824:
+        2:  825:		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
+        2:  825-block  0
+call    0 returned 2
+branch  1 taken 0 (fallthrough)
+branch  2 taken 2
+    #####:  826:			_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n",
+    #####:  827:			    PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
+    %%%%%:  827-block  0
 call    0 never executed
 call    1 never executed
-    #####:  850:			return EXIT_FAILURE;
+    #####:  828:			return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  851:		}
-        -:  852:
-    #####:  853:		return exit_status;
-    %%%%%:  853-block  0
-unconditional  0 never executed
-        -:  854:	}
-        -:  855:
-        -:  856:	/* List trashed files */
-    #####:  857:	printf(_("%sTrashed files%s\n\n"), bold, df_c);
-    %%%%%:  857-block  0
+        -:  829:		}
+        -:  830:
+        2:  831:		return exit_status;
+        2:  831-block  0
+unconditional  0 taken 2
+        -:  832:	}
+        -:  833:
+        -:  834:	/* List trashed files */
+        2:  835:	printf(_("%sTrashed files%s\n\n"), BOLD, df_c);
+        2:  835-block  0
+call    0 returned 2
+call    1 returned 2
+        -:  836:	size_t i;
+        -:  837:
+        4:  838:	for (i = 0; i < (size_t)trash_files_n; i++)
+unconditional  0 taken 2
+unconditional  1 taken 2
+        4:  838-block  0
+branch  2 taken 2
+branch  3 taken 2 (fallthrough)
+        2:  839:		colors_list(trash_files[i]->d_name, (int)i + 1, NO_PAD,
+        2:  839-block  0
+call    0 returned 2
+        -:  840:		    PRINT_NEWLINE);
+        -:  841:
+        -:  842:	/* Go back to previous path */
+        2:  843:	if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
+        2:  843-block  0
+call    0 returned 2
+branch  1 taken 0 (fallthrough)
+branch  2 taken 2
+    #####:  844:		_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n", PROGRAM_NAME,
+    #####:  845:		    ws[cur_ws].path, strerror(errno));
+    %%%%%:  845-block  0
 call    0 never executed
-        -:  858:	size_t i;
-        -:  859:
-    #####:  860:	for (i = 0; i < (size_t)trash_files_n; i++)
+call    1 never executed
+    #####:  846:		return EXIT_FAILURE;
 unconditional  0 never executed
+        -:  847:	}
+        -:  848:
+        -:  849:	/* Get user input */
+        2:  850:	printf(_("\n%sEnter 'q' to quit.\n"), df_c);
+        2:  850-block  0
+call    0 returned 2
+call    1 returned 2
+        2:  851:	int undel_n = 0;
+        2:  852:	char *line = (char *)NULL, **undel_elements = (char **)NULL;
+        4:  853:	while (!line)
+unconditional  0 taken 2
+        4:  853-block  0
+branch  1 taken 2
+branch  2 taken 2 (fallthrough)
+        2:  854:		line = rl_no_hist(_("File(s) to be undeleted (ex: 1 2-6, or *): "));
+        2:  854-block  0
+call    0 returned 2
+call    1 returned 2
+unconditional  2 taken 2
+        -:  855:
+        2:  856:	undel_elements = get_substr(line, ' ');
+        2:  856-block  0
+call    0 returned 2
+        2:  857:	free(line);
+        2:  858:	line = (char *)NULL;
+        2:  859:	if (undel_elements) {
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        4:  860:		for (i = 0; undel_elements[i]; i++)
+        2:  860-block  0
+unconditional  0 taken 2
+        4:  860-block  1
+branch  1 taken 2
+branch  2 taken 2
+        2:  861:			undel_n++;
+        2:  861-block  0
+unconditional  0 taken 2
+        -:  862:	} else {
+    #####:  863:		return EXIT_FAILURE;
+    %%%%%:  863-block  0
+unconditional  0 never executed
+        -:  864:	}
+        -:  865:
+        -:  866:	/* First check for quit, *, and non-number args */
+        2:  867:	int free_and_return = 0;
+        -:  868:
+        4:  869:	for (i = 0; i < (size_t)undel_n; i++) {
+        2:  869-block  0
+unconditional  0 taken 2
+        2:  869-block  1
+unconditional  1 taken 2
+        4:  869-block  2
+branch  2 taken 2
+branch  3 taken 2 (fallthrough)
+        2:  870:		if (strcmp(undel_elements[i], "q") == 0) {
+        2:  870-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:  871:			free_and_return = 1;
+    %%%%%:  871-block  0
+unconditional  0 never executed
+        2:  872:		} else if (strcmp(undel_elements[i], "*") == 0) {
+        2:  872-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+        -:  873:			size_t j;
+        -:  874:
+    #####:  875:			for (j = 0; j < (size_t)trash_files_n; j++)
+    %%%%%:  875-block  0
+unconditional  0 never executed
+    %%%%%:  875-block  1
 unconditional  1 never executed
-    %%%%%:  860-block  0
+    %%%%%:  875-block  2
 branch  2 never executed
 branch  3 never executed
-    #####:  861:		colors_list(trash_files[i]->d_name, (int)i + 1, NO_PAD,
-    %%%%%:  861-block  0
-call    0 never executed
-        -:  862:		    PRINT_NEWLINE);
-        -:  863:
-        -:  864:	/* Go back to previous path */
-    #####:  865:	if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
-    %%%%%:  865-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  866:		_err(0, NOPRINT_PROMPT, "%s: undel: '%s': %s\n", PROGRAM_NAME,
-    #####:  867:		    ws[cur_ws].path, strerror(errno));
-    %%%%%:  867-block  0
-call    0 never executed
-call    1 never executed
-    #####:  868:		return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  869:	}
-        -:  870:
-        -:  871:	/* Get user input */
-    #####:  872:	printf(_("\n%sEnter 'q' to quit.\n"), df_c);
-    %%%%%:  872-block  0
-call    0 never executed
-    #####:  873:	int undel_n = 0;
-    #####:  874:	char *line = (char *)NULL, **undel_elements = (char **)NULL;
-    #####:  875:	while (!line)
-unconditional  0 never executed
-    %%%%%:  875-block  0
-branch  1 never executed
-branch  2 never executed
-    #####:  876:		line = rl_no_hist(_("File(s) to be undeleted (ex: 1 2-6, or *): "));
+    #####:  876:				if (untrash_element(trash_files[j]->d_name) != 0)
     %%%%%:  876-block  0
 call    0 never executed
-unconditional  1 never executed
-        -:  877:
-    #####:  878:	undel_elements = get_substr(line, ' ');
-    %%%%%:  878-block  0
-call    0 never executed
-    #####:  879:	free(line);
-    #####:  880:	line = (char *)NULL;
-    #####:  881:	if (undel_elements) {
-branch  0 never executed
-branch  1 never executed
-        -:  882:
-    #####:  883:		for (i = 0; undel_elements[i]; i++)
-    %%%%%:  883-block  0
-unconditional  0 never executed
-    %%%%%:  883-block  1
 branch  1 never executed
 branch  2 never executed
-    #####:  884:			undel_n++;
-    %%%%%:  884-block  0
+    #####:  877:					exit_status = EXIT_FAILURE;
+    %%%%%:  877-block  0
 unconditional  0 never executed
+        -:  878:
+    #####:  879:			free_and_return = 1;
+    %%%%%:  879-block  0
+unconditional  0 never executed
+        2:  880:		} else if (!is_number(undel_elements[i])) {
+        2:  880-block  0
+call    0 returned 2
+branch  1 taken 0 (fallthrough)
+branch  2 taken 2
+    #####:  881:			fprintf(stderr, _("undel: %s: Invalid ELN\n"), undel_elements[i]);
+    %%%%%:  881-block  0
+call    0 never executed
+call    1 never executed
+    #####:  882:			exit_status = EXIT_FAILURE;
+    #####:  883:			free_and_return = 1;
+unconditional  0 never executed
+        -:  884:		}
         -:  885:	}
         -:  886:
-        -:  887:	else
-    #####:  888:		return EXIT_FAILURE;
-    %%%%%:  888-block  0
+        -:  887:	/* Free and return if any of the above conditions is true */
+        2:  888:	if (free_and_return) {
+        2:  888-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:  889:		size_t j = 0;
+    #####:  890:		for (j = 0; j < (size_t)undel_n; j++)
+    %%%%%:  890-block  0
 unconditional  0 never executed
-        -:  889:
-        -:  890:	/* First check for quit, *, and non-number args */
-    #####:  891:	int free_and_return = 0;
-        -:  892:
-    #####:  893:	for (i = 0; i < (size_t)undel_n; i++) {
-    %%%%%:  893-block  0
-unconditional  0 never executed
-    %%%%%:  893-block  1
-unconditional  1 never executed
-    %%%%%:  893-block  2
+    %%%%%:  890-block  1
+branch  1 never executed
 branch  2 never executed
-branch  3 never executed
-        -:  894:
-    #####:  895:		if (strcmp(undel_elements[i], "q") == 0)
+    #####:  891:			free(undel_elements[j]);
+    %%%%%:  891-block  0
+unconditional  0 never executed
+    #####:  892:		free(undel_elements);
+        -:  893:
+    #####:  894:		for (j = 0; j < (size_t)trash_files_n; j++)
+    %%%%%:  894-block  0
+unconditional  0 never executed
+    %%%%%:  894-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  895:			free(trash_files[j]);
     %%%%%:  895-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  896:			free_and_return = 1;
-    %%%%%:  896-block  0
 unconditional  0 never executed
+    #####:  896:		free(trash_files);
         -:  897:
-    #####:  898:		else if (strcmp(undel_elements[i], "*") == 0) {
+    #####:  898:		return exit_status;
     %%%%%:  898-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  899:			size_t j;
+unconditional  0 never executed
+        -:  899:	}
         -:  900:
-    #####:  901:			for (j = 0; j < (size_t)trash_files_n; j++)
-    %%%%%:  901-block  0
-unconditional  0 never executed
-    %%%%%:  901-block  1
-unconditional  1 never executed
-    %%%%%:  901-block  2
-branch  2 never executed
-branch  3 never executed
-        -:  902:
-    #####:  903:				if (untrash_element(trash_files[j]->d_name) != 0)
-    %%%%%:  903-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  904:					exit_status = EXIT_FAILURE;
-    %%%%%:  904-block  0
-unconditional  0 never executed
-        -:  905:
-    #####:  906:			free_and_return = 1;
+        -:  901:	/* Undelete trashed files */
+        4:  902:	for (i = 0; i < (size_t)undel_n; i++) {
+        2:  902-block  0
+unconditional  0 taken 2
+        2:  902-block  1
+unconditional  1 taken 2
+        4:  902-block  2
+branch  2 taken 2
+branch  3 taken 2 (fallthrough)
+        2:  903:		int undel_num = atoi(undel_elements[i]);
+        -:  904:
+       2*:  905:		if (undel_num <= 0 || undel_num > trash_files_n) {
+        2:  905-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  905-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 2
+    #####:  906:			fprintf(stderr, _("%s: undel: %d: Invalid ELN\n"),
     %%%%%:  906-block  0
-unconditional  0 never executed
-        -:  907:		}
-        -:  908:
-    #####:  909:		else if (!is_number(undel_elements[i])) {
-    %%%%%:  909-block  0
 call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  910:			fprintf(stderr, _("undel: %s: Invalid ELN\n"), undel_elements[i]);
-    %%%%%:  910-block  0
-call    0 never executed
-    #####:  911:			exit_status = EXIT_FAILURE;
-    #####:  912:			free_and_return = 1;
+call    1 never executed
+        -:  907:					PROGRAM_NAME, undel_num);
+    #####:  908:			free(undel_elements[i]);
+    #####:  909:			continue;
 unconditional  0 never executed
-        -:  913:		}
-        -:  914:	}
-        -:  915:
-        -:  916:	/* Free and return if any of the above conditions is true */
-    #####:  917:	if (free_and_return) {
-    %%%%%:  917-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  918:		size_t j = 0;
+        -:  910:		}
+        -:  911:
+        -:  912:		/* If valid ELN */
+        2:  913:		if (untrash_element(trash_files[undel_num - 1]->d_name) != 0)
+        2:  913-block  0
+call    0 returned 2
+branch  1 taken 0 (fallthrough)
+branch  2 taken 2
+    #####:  914:			exit_status = EXIT_FAILURE;
+    %%%%%:  914-block  0
+unconditional  0 never executed
+        2:  915:		free(undel_elements[i]);
+        2:  915-block  0
+unconditional  0 taken 2
+        -:  916:	}
+        -:  917:
+        2:  918:	free(undel_elements);
         -:  919:
-    #####:  920:		for (j = 0; j < (size_t)undel_n; j++)
-    %%%%%:  920-block  0
-unconditional  0 never executed
-    %%%%%:  920-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  921:			free(undel_elements[j]);
-    %%%%%:  921-block  0
-unconditional  0 never executed
-        -:  922:
-    #####:  923:		free(undel_elements);
+        -:  920:	/* Free trashed files list */
+        4:  921:	for (i = 0; i < (size_t)trash_files_n; i++)
+        2:  921-block  0
+unconditional  0 taken 2
+        4:  921-block  1
+branch  1 taken 2
+branch  2 taken 2 (fallthrough)
+        2:  922:		free(trash_files[i]);
+        2:  922-block  0
+unconditional  0 taken 2
+        2:  923:	free(trash_files);
         -:  924:
-    #####:  925:		for (j = 0; j < (size_t)trash_files_n; j++)
-    %%%%%:  925-block  0
-unconditional  0 never executed
-    %%%%%:  925-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  926:			free(trash_files[j]);
-    %%%%%:  926-block  0
-unconditional  0 never executed
+        -:  925:	/* If some trashed file still remains, reload the undel screen */
+        2:  926:	trash_n = count_dir(trash_files_dir, NO_CPOP);
+        2:  926-block  0
+call    0 returned 2
         -:  927:
-    #####:  928:		free(trash_files);
-        -:  929:
-    #####:  930:		return exit_status;
-    %%%%%:  930-block  0
-unconditional  0 never executed
-        -:  931:	}
-        -:  932:
-        -:  933:	/* Undelete trashed files */
-        -:  934:	int undel_num;
-    #####:  935:	for (i = 0; i < (size_t)undel_n; i++) {
-    %%%%%:  935-block  0
-unconditional  0 never executed
-    %%%%%:  935-block  1
+        2:  928:	if (trash_n <= 2)
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  929:		trash_n = 0;
+        2:  929-block  0
+unconditional  0 taken 2
+        -:  930:
+        2:  931:	if (trash_n)
+        2:  931-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:  932:		untrash_function(comm);
+    %%%%%:  932-block  0
+call    0 never executed
 unconditional  1 never executed
-    %%%%%:  935-block  2
-branch  2 never executed
-branch  3 never executed
-    #####:  936:		undel_num = atoi(undel_elements[i]);
-        -:  937:
-    #####:  938:		if (undel_num <= 0 || undel_num > trash_files_n) {
-    %%%%%:  938-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  938-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  939:			fprintf(stderr, _("%s: undel: %d: Invalid ELN\n"),
-    %%%%%:  939-block  0
+        -:  933:
+        2:  934:	return exit_status;
+        2:  934-block  0
+unconditional  0 taken 2
+        -:  935:}
+        -:  936:
+        -:  937:int
+function trash_function called 8 returned 100% blocks executed 56%
+        8:  938:trash_function(char **comm)
+        -:  939:{
+        8:  940:	if (xargs.stealth_mode == 1) {
+        8:  940-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 8
+    #####:  941:		printf("%s: The trash function is disabled in "
+    %%%%%:  941-block  0
 call    0 never executed
-        -:  940:			    PROGRAM_NAME, undel_num);
-    #####:  941:			free(undel_elements[i]);
-    #####:  942:			continue;
+        -:  942:			"stealth mode\n", PROGRAM_NAME);
+    #####:  943:		return EXIT_SUCCESS;
 unconditional  0 never executed
-        -:  943:		}
-        -:  944:
-        -:  945:		/* If valid ELN */
-    #####:  946:		if (untrash_element(trash_files[undel_num - 1]->d_name) != 0)
-    %%%%%:  946-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  947:			exit_status = EXIT_FAILURE;
-    %%%%%:  947-block  0
-unconditional  0 never executed
-        -:  948:
-    #####:  949:		free(undel_elements[i]);
-    %%%%%:  949-block  0
-unconditional  0 never executed
-        -:  950:	}
-        -:  951:
-    #####:  952:	free(undel_elements);
-        -:  953:
-        -:  954:	/* Free trashed files list */
-    #####:  955:	for (i = 0; i < (size_t)trash_files_n; i++)
-    %%%%%:  955-block  0
-unconditional  0 never executed
-    %%%%%:  955-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  956:		free(trash_files[i]);
-    %%%%%:  956-block  0
-unconditional  0 never executed
-        -:  957:
-    #####:  958:	free(trash_files);
-        -:  959:
-        -:  960:	/* If some trashed file still remains, reload the undel screen */
-    #####:  961:	trash_n = count_dir(TRASH_FILES_DIR);
-    %%%%%:  961-block  0
-call    0 never executed
-        -:  962:
-    #####:  963:	if (trash_n <= 2)
-branch  0 never executed
-branch  1 never executed
-    #####:  964:		trash_n = 0;
-    %%%%%:  964-block  0
-unconditional  0 never executed
+        -:  944:	}
+        -:  945:
+        -:  946:	/* Create trash dirs, if necessary */
+        -:  947:	/*  struct stat file_attrib;
+        -:  948:	if (stat (trash_dir, &file_attrib) == -1) {
+        -:  949:		char *trash_files = NULL;
+        -:  950:		trash_files = xcalloc(strlen(trash_dir) + 7, sizeof(char));
+        -:  951:		sprintf(trash_files, "%s/files", trash_dir);
+        -:  952:		char *trash_info=NULL;
+        -:  953:		trash_info = xcalloc(strlen(trash_dir) + 6, sizeof(char));
+        -:  954:		sprintf(trash_info, "%s/info", trash_dir);
+        -:  955:		char *cmd[] = { "mkdir", "-p", trash_files, trash_info, NULL };
+        -:  956:		int ret = launch_execve (cmd, FOREGROUND, E_NOFLAG);
+        -:  957:		free(trash_files);
+        -:  958:		free(trash_info);
+        -:  959:		if (ret != EXIT_SUCCESS) {
+        -:  960:			_err(0, NOPRINT_PROMPT, _("%s: mkdir: '%s': Error creating "
+        -:  961:				 "trash directory\n"), PROGRAM_NAME, trash_dir);
+        -:  962:			return;
+        -:  963:		}
+        -:  964:	} */
         -:  965:
-    #####:  966:	if (trash_n)
-    %%%%%:  966-block  0
+        8:  966:	if (!comm)
+        8:  966-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 8
+    #####:  967:		return EXIT_FAILURE;
+    %%%%%:  967-block  0
+unconditional  0 never executed
+        -:  968:
+        8:  969:	if (!trash_ok || !config_ok) {
+        8:  969-block  0
+branch  0 taken 8 (fallthrough)
+branch  1 taken 0
+        8:  969-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 8
+    #####:  970:		fprintf(stderr, _("%s: Trash function disabled\n"), PROGRAM_NAME);
+    %%%%%:  970-block  0
+call    0 never executed
+call    1 never executed
+    #####:  971:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  972:	}
+        -:  973:
+        -:  974:	/* List trashed files ('tr' or 'tr ls') */
+        8:  975:	if (!comm[1] || strcmp(comm[1], "ls") == 0 || strcmp(comm[1], "list") == 0) {
+        8:  975-block  0
+branch  0 taken 7 (fallthrough)
+branch  1 taken 1
+        7:  975-block  1
+branch  2 taken 6 (fallthrough)
+branch  3 taken 1
+        6:  975-block  2
+branch  4 taken 0 (fallthrough)
+branch  5 taken 6
+        -:  976:		/* List files in the Trash/files dir */
+        2:  977:		if (xchdir(trash_files_dir, NO_TITLE) == -1) {
+        2:  977-block  0
+call    0 returned 2
+branch  1 taken 0 (fallthrough)
+branch  2 taken 2
+    #####:  978:			_err(0, NOPRINT_PROMPT, "%s: trash: %s: %s\n",
+call    0 never executed
+    #####:  979:			    PROGRAM_NAME, trash_files_dir, strerror(errno));
+    %%%%%:  979-block  0
+call    0 never executed
+    #####:  980:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  981:		}
+        -:  982:
+        2:  983:		struct dirent **trash_files = (struct dirent **)NULL;
+       2*:  984:		int files_n = scandir(trash_files_dir, &trash_files,
+    %%%%%:  984-block  0
+unconditional  0 never executed
+    %%%%%:  984-block  1
+unconditional  1 never executed
+    %%%%%:  984-block  2
+unconditional  2 never executed
+        2:  984-block  3
+unconditional  3 taken 2
+        2:  984-block  4
+call    4 returned 2
+        2:  985:						skip_files, (unicode) ? alphasort : (case_sensitive)
+        2:  985-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:  986:						? xalphasort : alphasort_insensitive);
+    %%%%%:  986-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  967:		untrash_function(comm);
-    %%%%%:  967-block  0
+        2:  987:		if (files_n) {
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        -:  988:			size_t i;
+       10:  989:			for (i = 0; i < (size_t)files_n; i++) {
+        2:  989-block  0
+unconditional  0 taken 2
+       10:  989-block  1
+branch  1 taken 8
+branch  2 taken 2 (fallthrough)
+        8:  990:				colors_list(trash_files[i]->d_name, (int)i + 1, NO_PAD,
+        8:  990-block  0
+call    0 returned 8
+        -:  991:							PRINT_NEWLINE);
+        8:  992:				free(trash_files[i]);
+unconditional  0 taken 8
+        -:  993:			}
+        -:  994:
+        2:  995:			free(trash_files);
+        2:  995-block  0
+unconditional  0 taken 2
+        -:  996:		} else {
+    #####:  997:			puts(_("trash: There are no trashed files"));
+    %%%%%:  997-block  0
+call    0 never executed
+call    1 never executed
+unconditional  2 never executed
+        -:  998:		}
+        -:  999:
+        2: 1000:		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
+        2: 1000-block  0
+call    0 returned 2
+branch  1 taken 0 (fallthrough)
+branch  2 taken 2
+    #####: 1001:			_err(0, NOPRINT_PROMPT, "%s: trash: '%s': %s\n",
+    #####: 1002:			    PROGRAM_NAME, ws[cur_ws].path, strerror(errno));
+    %%%%%: 1002-block  0
+call    0 never executed
+call    1 never executed
+    #####: 1003:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1004:		} else {
+        2: 1005:			return EXIT_SUCCESS;
+        2: 1005-block  0
+unconditional  0 taken 2
+        -: 1006:		}
+        -: 1007:	}
+        -: 1008:
+        -: 1009:	else {
+        -: 1010:		/* Create suffix from current date and time to create unique
+        -: 1011:		 * file names for trashed files */
+        6: 1012:		int exit_status = EXIT_SUCCESS;
+        6: 1013:		time_t rawtime = time(NULL);
+        6: 1013-block  0
+call    0 returned 6
+        -: 1014:		struct tm tm;
+        6: 1015:		localtime_r(&rawtime, &tm);
+call    0 returned 6
+        6: 1016:		char date[64] = "";
+        -: 1017:
+        6: 1018:		strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", &tm);
+        -: 1019:
+        6: 1020:		char suffix[68] = "";
+        -: 1021:
+        6: 1022:		snprintf(suffix, 67, "%d%d%d%d%d%d", tm.tm_year + 1900,
+        6: 1023:		    tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min,
+        -: 1024:		    tm.tm_sec);
+        -: 1025:
+        -: 1026:		/* Remove file(s) from Trash */
+        6: 1027:		if (strcmp(comm[1], "del") == 0 || strcmp(comm[1], "rm") == 0) {
+branch  0 taken 5 (fallthrough)
+branch  1 taken 1
+        5: 1027-block  0
+branch  2 taken 0 (fallthrough)
+branch  3 taken 5
+        1: 1028:			exit_status = remove_from_trash();
+        1: 1028-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        5: 1029:		} else if (strcmp(comm[1], "clear") == 0) {
+        5: 1029-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 5
+    #####: 1030:			trash_clear();
+    %%%%%: 1030-block  0
 call    0 never executed
 unconditional  1 never executed
-        -:  968:
-    #####:  969:	return exit_status;
-    %%%%%:  969-block  0
-unconditional  0 never executed
-        -:  970:}
-        -:  971:
-        -:  972:/* Check whether the current user has enough permissions (write, execute)
-        -:  973: * to modify the contents of the parent directory of 'file'. 'file' needs
-        -:  974: * to be an absolute path. Returns zero if yes and one if no. Useful to
-        -:  975: * know if a file can be removed from or copied into the parent. In case
-        -:  976: * FILE is a directory, the function checks all its subdirectories for
-        -:  977: * appropriate permissions, including the immutable bit */
-        -:  978:int
-function wx_parent_check called 0 returned 0% blocks executed 0%
-    #####:  979:wx_parent_check(char *file)
-        -:  980:{
-        -:  981:	struct stat file_attrib;
-    #####:  982:	int exit_status = -1, ret = -1;
-    #####:  983:	size_t file_len = strlen(file);
-        -:  984:
-    #####:  985:	if (file[file_len - 1] == '/')
-    %%%%%:  985-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  986:		file[file_len - 1] = '\0';
-    %%%%%:  986-block  0
-unconditional  0 never executed
-        -:  987:
-    #####:  988:	if (lstat(file, &file_attrib) == -1) {
-    %%%%%:  988-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  989:		fprintf(stderr, _("%s: No such file or directory\n"), file);
-    %%%%%:  989-block  0
-call    0 never executed
-    #####:  990:		return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  991:	}
-        -:  992:
-    #####:  993:	char *parent = strbfrlst(file, '/');
-    %%%%%:  993-block  0
-call    0 never executed
-    #####:  994:	if (!parent) {
-branch  0 never executed
-branch  1 never executed
-        -:  995:		/* strbfrlst() will return NULL if file's parent is root (/),
-        -:  996:		 * simply because in this case there's nothing before the last
-        -:  997:		 * slash. So, check if file's parent dir is root */
-    #####:  998:		if (file[0] == '/' && strcntchr(file + 1, '/') == -1) {
-    %%%%%:  998-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  998-block  1
-call    2 never executed
-branch  3 never executed
-branch  4 never executed
-    #####:  999:			parent = (char *)xnmalloc(2, sizeof(char));
-    %%%%%:  999-block  0
-call    0 never executed
-    #####: 1000:			parent[0] = '/';
-    #####: 1001:			parent[1] = '\0';
-unconditional  0 never executed
-        -: 1002:		}
-        -: 1003:
-        -: 1004:		else {
-    #####: 1005:			fprintf(stderr, _("%s: %s: Error getting parent directory\n"),
-    %%%%%: 1005-block  0
-call    0 never executed
-        -: 1006:					PROGRAM_NAME, file);
-    #####: 1007:			return EXIT_FAILURE;
-unconditional  0 never executed
-        -: 1008:		}
-        -: 1009:	}
-        -: 1010:
-    #####: 1011:	switch (file_attrib.st_mode & S_IFMT) {
-    %%%%%: 1011-block  0
-branch  0 never executed
-branch  1 never executed
-branch  2 never executed
-branch  3 never executed
-        -: 1012:
-        -: 1013:	/* DIRECTORY */
-    #####: 1014:	case S_IFDIR:
-    #####: 1015:		ret = check_immutable_bit(file);
-    %%%%%: 1015-block  0
-call    0 never executed
-        -: 1016:
-    #####: 1017:		if (ret == -1) {
-branch  0 never executed
-branch  1 never executed
-        -: 1018:			/* Error message is printed by check_immutable_bit() itself */
-    #####: 1019:			exit_status = EXIT_FAILURE;
-    %%%%%: 1019-block  0
-unconditional  0 never executed
-        -: 1020:		}
-        -: 1021:
-    #####: 1022:		else if (ret == 1) {
-    %%%%%: 1022-block  0
-branch  0 never executed
-branch  1 never executed
-    #####: 1023:			fprintf(stderr, _("%s: Directory is immutable\n"), file);
-    %%%%%: 1023-block  0
-call    0 never executed
-    #####: 1024:			exit_status = EXIT_FAILURE;
-unconditional  0 never executed
-        -: 1025:		}
-        -: 1026:
-        -: 1027:		/* Check the parent for appropriate permissions */
-    #####: 1028:		else if (access(parent, W_OK | X_OK) == 0) {
-    %%%%%: 1028-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####: 1029:			int files_n = count_dir(parent);
-    %%%%%: 1029-block  0
-call    0 never executed
-        -: 1030:
-    #####: 1031:			if (files_n > 2) {
-branch  0 never executed
-branch  1 never executed
-        -: 1032:				/* I manually check here subdir because recur_perm_check()
-        -: 1033:				 * will only check the contents of subdir, but not subdir
-        -: 1034:				 * itself */
-        -: 1035:				/* If the parent is ok and not empty, check subdir */
-    #####: 1036:				if (access(file, W_OK | X_OK) == 0) {
-    %%%%%: 1036-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-        -: 1037:					/* If subdir is ok and not empty, recusivelly check
-        -: 1038:					 * subdir */
-    #####: 1039:					files_n = count_dir(file);
-    %%%%%: 1039-block  0
-call    0 never executed
-        -: 1040:
-    #####: 1041:					if (files_n > 2) {
-branch  0 never executed
-branch  1 never executed
-        -: 1042:						/* Reset the recur_perm_check() error flag. See
-        -: 1043:						 * the note in the function block. */
-    #####: 1044:						recur_perm_error_flag = 0;
+        -: 1031:		} else {
+        -: 1032:			/* Trash files passed as arguments */
+        -: 1033:			size_t i;
+       16: 1034:			for (i = 1; comm[i]; i++) {
+        5: 1034-block  0
+unconditional  0 taken 5
+       11: 1034-block  1
+unconditional  1 taken 11
+       16: 1034-block  2
+branch  2 taken 11
+branch  3 taken 5 (fallthrough)
+       11: 1035:				char *deq_file = dequote_str(comm[i], 0);
+       11: 1035-block  0
+call    0 returned 11
+       11: 1036:				char tmp_comm[PATH_MAX] = "";
+        -: 1037:
+       11: 1038:				if (deq_file[0] == '/') { /* If absolute path */
+branch  0 taken 4 (fallthrough)
+branch  1 taken 7
+        4: 1039:					strcpy(tmp_comm, deq_file);
+        4: 1039-block  0
+unconditional  0 taken 4
+        -: 1040:				} else { /* If relative path, add path to check against
+        -: 1041:					TRASH_DIR */
+        7: 1042:					snprintf(tmp_comm, PATH_MAX, "%s/%s", ws[cur_ws].path,
+        7: 1042-block  0
+unconditional  0 taken 7
+        -: 1043:					    deq_file);
+        -: 1044:				}
         -: 1045:
-    #####: 1046:						if (recur_perm_check(file) == 0) {
-    %%%%%: 1046-block  0
+        -: 1046:				/* Some filters: you cannot trash wathever you want */
+        -: 1047:				/* Do not trash any of the parent directories of TRASH_DIR,
+        -: 1048:				 * that is, /, /home, ~/, ~/.local, ~/.local/share */
+      11*: 1049:				if (strncmp(tmp_comm, trash_dir, strlen(tmp_comm)) == 0) {
+       11: 1049-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 11
+    #####: 1050:					fprintf(stderr, _("trash: Cannot trash '%s'\n"), tmp_comm);
+    %%%%%: 1050-block  0
 call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####: 1047:							exit_status = EXIT_SUCCESS;
-    %%%%%: 1047-block  0
+call    1 never executed
+    #####: 1051:					exit_status = EXIT_FAILURE;
+    #####: 1052:					free(deq_file);
+    #####: 1053:					continue;
 unconditional  0 never executed
-        -: 1048:						}
-        -: 1049:
-        -: 1050:						else
-        -: 1051:							/* recur_perm_check itself will print the
-        -: 1052:							 * error messages */
-    #####: 1053:							exit_status = EXIT_FAILURE;
     %%%%%: 1053-block  0
-unconditional  0 never executed
-        -: 1054:					}
-        -: 1055:
-        -: 1056:					else /* Subdir is ok and empty */
-    #####: 1057:						exit_status = EXIT_SUCCESS;
+unconditional  1 never executed
+      11*: 1054:				} else if (strncmp(tmp_comm, trash_dir, strlen(trash_dir)) == 0) {
+       11: 1054-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 11
+        -: 1055:				/* Do no trash TRASH_DIR itself nor anything inside it,
+        -: 1056:				 * that is, already trashed files */
+    #####: 1057:					puts(_("trash: Use 'trash del' to remove trashed files"));
     %%%%%: 1057-block  0
-unconditional  0 never executed
-        -: 1058:				}
-        -: 1059:
-        -: 1060:				else { /* No permission for subdir */
-    #####: 1061:					fprintf(stderr, _("%s: Permission denied\n"),
-    %%%%%: 1061-block  0
 call    0 never executed
-        -: 1062:					    file);
-    #####: 1063:					exit_status = EXIT_FAILURE;
+call    1 never executed
+    #####: 1058:					exit_status = EXIT_FAILURE;
+    #####: 1059:					free(deq_file);
+    #####: 1060:					continue;
 unconditional  0 never executed
-        -: 1064:				}
-        -: 1065:			}
-        -: 1066:
-        -: 1067:			else
-    #####: 1068:				exit_status = EXIT_SUCCESS;
-    %%%%%: 1068-block  0
-unconditional  0 never executed
-        -: 1069:		}
-        -: 1070:
-        -: 1071:		else { /* No permission for parent */
-    #####: 1072:			fprintf(stderr, _("%s: Permission denied\n"), parent);
-    %%%%%: 1072-block  0
+        -: 1061:				}
+        -: 1062:
+        -: 1063:				struct stat file_attrib;
+      11*: 1064:				if (lstat(deq_file, &file_attrib) == -1) {
+       11: 1064-block  0
+call    0 returned 11
+branch  1 taken 0 (fallthrough)
+branch  2 taken 11
+    #####: 1065:					fprintf(stderr, _("trash: %s: %s\n"), deq_file,
 call    0 never executed
-    #####: 1073:			exit_status = EXIT_FAILURE;
+call    1 never executed
+    #####: 1066:					    strerror(errno));
+    %%%%%: 1066-block  0
+call    0 never executed
+    #####: 1067:					exit_status = EXIT_FAILURE;
+    #####: 1068:					free(deq_file);
+    #####: 1069:					continue;
 unconditional  0 never executed
-        -: 1074:		}
-    #####: 1075:		break;
-    %%%%%: 1075-block  0
+        -: 1070:				} else {
+        -: 1071:				/* Do not trash block or character devices */
+      11*: 1072:					if ((file_attrib.st_mode & S_IFMT) == S_IFBLK) {
+       11: 1072-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 11
+    #####: 1073:						fprintf(stderr, _("trash: %s: Cannot trash a "
+    %%%%%: 1073-block  0
+call    0 never executed
+call    1 never executed
+        -: 1074:								"block device\n"), deq_file);
+    #####: 1075:						exit_status = EXIT_FAILURE;
+    #####: 1076:						free(deq_file);
+    #####: 1077:						continue;
 unconditional  0 never executed
-        -: 1076:
-        -: 1077:	/* REGULAR FILE */
-    #####: 1078:	case S_IFREG:
-    #####: 1079:		ret = check_immutable_bit(file);
+      11*: 1078:					} else if ((file_attrib.st_mode & S_IFMT) == S_IFCHR) {
+       11: 1078-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 11
+    #####: 1079:						fprintf(stderr, _("trash: %s: Cannot trash a "
     %%%%%: 1079-block  0
 call    0 never executed
-        -: 1080:
-    #####: 1081:		if (ret == -1) {
-branch  0 never executed
-branch  1 never executed
-        -: 1082:			/* Error message is printed by check_immutable_bit()
-        -: 1083:			 * itself */
-    #####: 1084:			exit_status = EXIT_FAILURE;
-    %%%%%: 1084-block  0
-unconditional  0 never executed
-        -: 1085:		}
-        -: 1086:
-    #####: 1087:		else if (ret == 1) {
-    %%%%%: 1087-block  0
-branch  0 never executed
-branch  1 never executed
-    #####: 1088:			fprintf(stderr, _("%s: File is immutable\n"), file);
-    %%%%%: 1088-block  0
-call    0 never executed
-    #####: 1089:			exit_status = EXIT_FAILURE;
-unconditional  0 never executed
-        -: 1090:		}
-        -: 1091:
-    #####: 1092:		else if (parent) {
-    %%%%%: 1092-block  0
-branch  0 never executed
-branch  1 never executed
-        -: 1093:
-    #####: 1094:			if (access(parent, W_OK | X_OK) == 0)
-    %%%%%: 1094-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####: 1095:				exit_status = EXIT_SUCCESS;
-    %%%%%: 1095-block  0
-unconditional  0 never executed
-        -: 1096:
-        -: 1097:			else {
-    #####: 1098:				fprintf(stderr, _("%s: Permission denied\n"), parent);
-    %%%%%: 1098-block  0
-call    0 never executed
-    #####: 1099:				exit_status = EXIT_FAILURE;
-unconditional  0 never executed
-        -: 1100:			}
-        -: 1101:		}
-        -: 1102:
-    #####: 1103:		break;
-    %%%%%: 1103-block  0
-unconditional  0 never executed
-        -: 1104:
-        -: 1105:	/* SYMLINK, SOCKET, AND FIFO PIPE */
-    #####: 1106:	case S_IFSOCK:
-        -: 1107:	case S_IFIFO:
-        -: 1108:	case S_IFLNK:
-        -: 1109:		/* Symlinks, sockets and pipes do not support immutable bit */
-    #####: 1110:		if (parent) {
-    %%%%%: 1110-block  0
-branch  0 never executed
-branch  1 never executed
-        -: 1111:
-    #####: 1112:			if (access(parent, W_OK | X_OK) == 0)
-    %%%%%: 1112-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####: 1113:				exit_status = EXIT_SUCCESS;
-    %%%%%: 1113-block  0
-unconditional  0 never executed
-        -: 1114:
-        -: 1115:			else {
-    #####: 1116:				fprintf(stderr, _("%s: Permission denied\n"), parent);
-    %%%%%: 1116-block  0
-call    0 never executed
-    #####: 1117:				exit_status = EXIT_FAILURE;
-unconditional  0 never executed
-        -: 1118:			}
-        -: 1119:		}
-    #####: 1120:		break;
-    %%%%%: 1120-block  0
-unconditional  0 never executed
-        -: 1121:
-        -: 1122:	/* DO NOT TRASH BLOCK AND CHAR DEVICES */
-    #####: 1123:	default:
-    #####: 1124:		fprintf(stderr, _("%s: trash: %s (%s): Unsupported file type\n"),
-    %%%%%: 1124-block  0
-unconditional  0 never executed
-    %%%%%: 1124-block  1
-unconditional  1 never executed
-    %%%%%: 1124-block  2
-call    2 never executed
-    #####: 1125:		    PROGRAM_NAME, file, ((file_attrib.st_mode & S_IFMT) == S_IFBLK)
-    %%%%%: 1125-block  0
-branch  0 never executed
-branch  1 never executed
-    #####: 1126:		    ? "Block device" : ((file_attrib.st_mode & S_IFMT) == S_IFCHR)
-    #####: 1127:		    ? "Character device" : "Unknown filetype");
-    %%%%%: 1127-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%: 1127-block  1
-unconditional  2 never executed
-    %%%%%: 1127-block  2
-unconditional  3 never executed
-    #####: 1128:		exit_status = EXIT_FAILURE;
-    #####: 1129:		break;
-unconditional  0 never executed
-        -: 1130:	}
-        -: 1131:
-    #####: 1132:	if (parent)
-    %%%%%: 1132-block  0
-branch  0 never executed
-branch  1 never executed
-    #####: 1133:		free(parent);
-    %%%%%: 1133-block  0
-unconditional  0 never executed
-        -: 1134:
-    #####: 1135:	return exit_status;
-    %%%%%: 1135-block  0
-unconditional  0 never executed
-        -: 1136:}
-        -: 1137:
-        -: 1138:/* Recursively check directory permissions (write and execute). Returns
-        -: 1139: * zero if OK, and one if at least one subdirectory does not have
-        -: 1140: * write/execute permissions */
-        -: 1141:int
-function recur_perm_check called 0 returned 0% blocks executed 0%
-    #####: 1142:recur_perm_check(const char *dirname)
-        -: 1143:{
-        -: 1144:	DIR *dir;
-        -: 1145:	struct dirent *ent;
-        -: 1146:
-    #####: 1147:	if (!(dir = opendir(dirname)))
-    %%%%%: 1147-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####: 1148:		return EXIT_FAILURE;
-    %%%%%: 1148-block  0
-unconditional  0 never executed
-        -: 1149:
-    #####: 1150:	while ((ent = readdir(dir)) != NULL) {
-    %%%%%: 1150-block  0
-unconditional  0 never executed
-    %%%%%: 1150-block  1
 call    1 never executed
-branch  2 never executed
-branch  3 never executed
-        -: 1151:
-    #####: 1152:		if (ent->d_type == DT_DIR) {
-    %%%%%: 1152-block  0
-branch  0 never executed
-branch  1 never executed
-    #####: 1153:			char dirpath[PATH_MAX] = "";
-        -: 1154:
-    #####: 1155:			if (*ent->d_name == '.' && (!ent->d_name[1]
-    %%%%%: 1155-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%: 1155-block  1
-branch  2 never executed
-branch  3 never executed
-    #####: 1156:			|| (ent->d_name[1] == '.' && !ent->d_name[2])))
-    %%%%%: 1156-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%: 1156-block  1
-branch  2 never executed
-branch  3 never executed
-    #####: 1157:				continue;
-    %%%%%: 1157-block  0
+        -: 1080:								"character device\n"), deq_file);
+    #####: 1081:						exit_status = EXIT_FAILURE;
+    #####: 1082:						free(deq_file);
+    #####: 1083:						continue;
 unconditional  0 never executed
-        -: 1158:
-    #####: 1159:			snprintf(dirpath, PATH_MAX, "%s/%s", dirname, ent->d_name);
-        -: 1160:
-    #####: 1161:			if (access(dirpath, W_OK | X_OK) != 0) {
-    %%%%%: 1161-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-        -: 1162:				/* recur_perm_error_flag needs to be a global variable.
-        -: 1163:				  * Otherwise, since this function calls itself
-        -: 1164:				  * recursivelly, the flag would be reset upon every
-        -: 1165:				  * new call, without preserving the error code, which
-        -: 1166:				  * is what the flag is aimed to do. On the other side,
-        -: 1167:				  * if I use a local static variable for this flag, it
-        -: 1168:				  * will never drop the error value, and all subsequent
-        -: 1169:				  * calls to the function will allways return error
-        -: 1170:				  * (even if there's no actual error) */
-    #####: 1171:				recur_perm_error_flag = 1;
-    #####: 1172:				fprintf(stderr, _("%s: Permission denied\n"), dirpath);
-    %%%%%: 1172-block  0
-call    0 never executed
-unconditional  1 never executed
-        -: 1173:			}
-        -: 1174:
-    #####: 1175:			recur_perm_check(dirpath);
-    %%%%%: 1175-block  0
-call    0 never executed
-        -: 1176:		}
-        -: 1177:	}
-        -: 1178:
-    #####: 1179:	closedir(dir);
-    %%%%%: 1179-block  0
-call    0 never executed
-        -: 1180:
-    #####: 1181:	if (recur_perm_error_flag)
-branch  0 never executed
-branch  1 never executed
-    #####: 1182:		return EXIT_FAILURE;
-    %%%%%: 1182-block  0
-unconditional  0 never executed
-        -: 1183:
-    #####: 1184:	return EXIT_SUCCESS;
-    %%%%%: 1184-block  0
-unconditional  0 never executed
-        -: 1185:}
+        -: 1084:					}
+        -: 1085:				}
+        -: 1086:
+        -: 1087:				/* Once here, everything is fine: trash the file */
+       11: 1088:				exit_status = trash_element(suffix, &tm, deq_file);
+       11: 1088-block  0
+call    0 returned 11
+        -: 1089:				/* The trash_element() function will take care of
+        -: 1090:				 * printing error messages, if any */
+       11: 1091:				free(deq_file);
+unconditional  0 taken 11
+        -: 1092:			}
+        -: 1093:		}
+        -: 1094:
+        6: 1095:		return exit_status;
+        6: 1095-block  0
+unconditional  0 taken 6
+        -: 1096:	}
+        -: 1097:}
+        -: 1098:#endif /* !_NO_TRASH */
+        -: 1099:

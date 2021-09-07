@@ -1,5 +1,5 @@
         -:    0:Source:remotes.c
-        -:    1:/* remote.c -- function wrappers for smb, ftp, and ssh */
+        -:    1:/* remote.c -- functions to manage remotes */
         -:    2:
         -:    3:/*
         -:    4: * This file is part of CliFM
@@ -34,694 +34,741 @@
         -:   33:#include "exec.h"
         -:   34:#include "listing.h"
         -:   35:#include "navigation.h"
-        -:   36:
-        -:   37:int
-function remote_ftp called 0 returned 0% blocks executed 0%
-    #####:   38:remote_ftp(char *address, char *options)
-        -:   39:{
-    #####:   40:	if (xargs.stealth_mode == 1) {
-    %%%%%:   40-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:   41:		printf("%s: Access to remote filesystems is disabled in "
-    %%%%%:   41-block  0
+        -:   36:#include "history.h"
+        -:   37:#include "mime.h"
+        -:   38:#include "misc.h"
+        -:   39:#include "jump.h"
+        -:   40:#include "messages.h"
+        -:   41:#include "file_operations.h"
+        -:   42:
+        -:   43:static int
+function remotes_list called 5 returned 100% blocks executed 86%
+        5:   44:remotes_list(void)
+        -:   45:{
+        5:   46:	if (!remotes_n) {
+        5:   46-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 5
+    #####:   47:		printf(_("%s: No remotes defined\n"), PROGRAM_NAME);
+    %%%%%:   47-block  0
 call    0 never executed
-        -:   42:		       "stealth mode\n", PROGRAM_NAME);
-    #####:   43:		return EXIT_SUCCESS;
+call    1 never executed
+    #####:   48:		return EXIT_SUCCESS;
 unconditional  0 never executed
-        -:   44:	}
-        -:   45:
-        -:   46:#if __FreeBSD__
-        -:   47:	fprintf(stderr, _("%s: FTP is not yet supported on FreeBSD\n"),
-        -:   48:	    PROGRAM_NAME);
-        -:   49:	return EXIT_FAILURE;
-        -:   50:#endif
-        -:   51:
-    #####:   52:	if (!address || !*address)
-    %%%%%:   52-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:   52-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:   53:		return EXIT_FAILURE;
-    %%%%%:   53-block  0
+        -:   49:	}
+        -:   50:
+        -:   51:	size_t i;
+       15:   52:	for (i = 0; i < remotes_n; i++) {
+        5:   52-block  0
+unconditional  0 taken 5
+       10:   52-block  1
+unconditional  1 taken 10
+       15:   52-block  2
+branch  2 taken 10
+branch  3 taken 5 (fallthrough)
+      10*:   53:		if (!remotes[i].name)
+       10:   53-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 10
+    #####:   54:			continue;
+    %%%%%:   54-block  0
 unconditional  0 never executed
-        -:   54:
-    #####:   55:	char *tmp_addr = savestring(address, strlen(address));
-    %%%%%:   55-block  0
-call    0 never executed
-        -:   56:
-    #####:   57:	char *p = tmp_addr;
-    #####:   58:	while (*p) {
-unconditional  0 never executed
-    %%%%%:   58-block  0
-branch  1 never executed
-branch  2 never executed
-    #####:   59:		if (*p == '/')
-    %%%%%:   59-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:   60:			*p = '_';
-    %%%%%:   60-block  0
-unconditional  0 never executed
-    #####:   61:		p++;
-    %%%%%:   61-block  0
-unconditional  0 never executed
-        -:   62:	}
-        -:   63:
-    #####:   64:	char *rmountpoint = (char *)xnmalloc(strlen(TMP_DIR) + strlen(tmp_addr) + 9,
-    %%%%%:   64-block  0
-call    0 never executed
-        -:   65:										sizeof(char));
-        -:   66:
-    #####:   67:	sprintf(rmountpoint, "%s/remote/%s", TMP_DIR, tmp_addr);
-    #####:   68:	free(tmp_addr);
-        -:   69:
-        -:   70:	struct stat file_attrib;
-        -:   71:
-    #####:   72:	if (stat(rmountpoint, &file_attrib) == -1) {
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-        -:   73:
-    #####:   74:		char *mkdir_cmd[] = {"mkdir", "-p", rmountpoint, NULL};
-        -:   75:
-    #####:   76:		if (launch_execve(mkdir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-    %%%%%:   76-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:   77:			fprintf(stderr, _("%s: %s: Cannot create mountpoint\n"),
-    %%%%%:   77-block  0
-call    0 never executed
-        -:   78:			    PROGRAM_NAME, rmountpoint);
-    #####:   79:			free(rmountpoint);
-    #####:   80:			return EXIT_FAILURE;
-unconditional  0 never executed
-        -:   81:		}
-        -:   82:	}
-        -:   83:
-    #####:   84:	else if (count_dir(rmountpoint) > 2) {
-    %%%%%:   84-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:   85:		fprintf(stderr, _("%s: %s: Mounpoint not empty\n"),
-    %%%%%:   85-block  0
-call    0 never executed
-        -:   86:		    PROGRAM_NAME, rmountpoint);
-    #####:   87:		free(rmountpoint);
-    #####:   88:		return EXIT_FAILURE;
-unconditional  0 never executed
-        -:   89:	}
-        -:   90:
-        -:   91:	/* CurlFTPFS does not require sudo */
-    #####:   92:	char *cmd[] = {"curlftpfs", address, rmountpoint, (options) ? "-o"
-    #####:   93:					: NULL, (options) ? options : NULL, NULL};
-    %%%%%:   93-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:   93-block  1
-unconditional  2 never executed
-    %%%%%:   93-block  2
+       10:   55:		printf(_("Name: %s\n"), remotes[i].name);
+       10:   55-block  0
+call    0 returned 10
+call    1 returned 10
+       10:   56:		if (remotes[i].desc)
+branch  0 taken 10 (fallthrough)
+branch  1 taken 0
+       10:   57:			printf(_(" Comment: %s\n"), remotes[i].desc);
+       10:   57-block  0
+call    0 returned 10
+call    1 returned 10
+unconditional  2 taken 10
+       10:   58:		if (remotes[i].mountpoint)
+       10:   58-block  0
+branch  0 taken 10 (fallthrough)
+branch  1 taken 0
+       10:   59:			printf(_(" Mountpoint: %s\n"), remotes[i].mountpoint);
+       10:   59-block  0
+call    0 returned 10
+call    1 returned 10
+unconditional  2 taken 10
+       10:   60:		if (remotes[i].mount_cmd)
+       10:   60-block  0
+branch  0 taken 10 (fallthrough)
+branch  1 taken 0
+       10:   61:			printf(_(" Mount command: %s\n"), remotes[i].mount_cmd);
+       10:   61-block  0
+call    0 returned 10
+call    1 returned 10
+unconditional  2 taken 10
+       10:   62:		if (remotes[i].unmount_cmd)
+       10:   62-block  0
+branch  0 taken 10 (fallthrough)
+branch  1 taken 0
+       10:   63:			printf(_(" Unmount command: %s\n"), remotes[i].unmount_cmd);
+       10:   63-block  0
+call    0 returned 10
+call    1 returned 10
+unconditional  2 taken 10
+       20:   64:		printf(_(" Auto-unmount: %s\n"), (remotes[i].auto_unmount == 0)
+       10:   64-block  0
+branch  0 taken 8 (fallthrough)
+branch  1 taken 2
+       10:   64-block  1
+call    2 returned 10
+call    3 returned 10
+       10:   65:				? _("false") : _("true"));
+        8:   65-block  0
+call    0 returned 8
+unconditional  1 taken 8
+        2:   65-block  1
+call    2 returned 2
+unconditional  3 taken 2
+       20:   66:		printf(_(" Auto-mount: %s\n"), (remotes[i].auto_mount == 0)
+branch  0 taken 10 (fallthrough)
+branch  1 taken 0
+       10:   66-block  0
+call    2 returned 10
+call    3 returned 10
+      10*:   67:				? _("false") : _("true"));
+       10:   67-block  0
+call    0 returned 10
+unconditional  1 taken 10
+    %%%%%:   67-block  1
+call    2 never executed
 unconditional  3 never executed
-    #####:   94:	int error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
-    %%%%%:   94-block  0
+       10:   68:		printf(_(" Mounted: %s\n"), (remotes[i].mounted == 0) ? _("No")
+branch  0 taken 10 (fallthrough)
+branch  1 taken 0
+       10:   68-block  0
+call    2 returned 10
+unconditional  3 taken 10
+       10:   68-block  1
+call    4 returned 10
+call    5 returned 10
+    #####:   69:				: _("Yes"));
+    %%%%%:   69-block  0
 call    0 never executed
-        -:   95:
-    #####:   96:	if (error_code) {
-branch  0 never executed
-branch  1 never executed
-    #####:   97:		free(rmountpoint);
-    #####:   98:		return EXIT_FAILURE;
-    %%%%%:   98-block  0
+unconditional  1 never executed
+       10:   70:		if (i < remotes_n - 1)
+branch  0 taken 5 (fallthrough)
+branch  1 taken 5
+        5:   71:			puts("");
+        5:   71-block  0
+call    0 returned 5
+unconditional  1 taken 5
+        -:   72:	}
+        5:   73:	return EXIT_SUCCESS;
+        5:   73-block  0
+unconditional  0 taken 5
+        -:   74:}
+        -:   75:
+        -:   76:/* Get the index of the remote named NAME from the remotes list */
+        -:   77:static int
+function get_remote called 2 returned 100% blocks executed 60%
+        2:   78:get_remote(char *name)
+        -:   79:{
+        2:   80:	int i = (int)remotes_n,
+        2:   81:		found = 0;
+        -:   82:
+        2:   83:	while (--i >= 0) {
+        2:   83-block  0
+unconditional  0 taken 2
+        2:   83-block  1
+branch  1 taken 2
+branch  2 taken 0 (fallthrough)
+        2:   84:		if (*name == *remotes[i].name && strcmp(name, remotes[i].name) == 0) {
+        2:   84-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:   84-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 0
+        2:   85:			found = 1;
+        2:   86:			break;
+        2:   86-block  0
+unconditional  0 taken 2
+        -:   87:		}
+        -:   88:	}
+        -:   89:
+        2:   90:	if (!found) {
+        2:   90-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:   91:		fprintf(stderr, _("%s: %s: No such remote\n"), PROGRAM_NAME, name);
+    %%%%%:   91-block  0
+call    0 never executed
+call    1 never executed
+    #####:   92:		return -1;
+unconditional  0 never executed
+        -:   93:	}
+        -:   94:
+        2:   95:	if (!remotes[i].mountpoint) {
+        2:   95-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:   96:		fprintf(stderr, _("%s: No mountpoint specified for '%s'\n"), PROGRAM_NAME,
+call    0 never executed
+    #####:   97:				remotes[i].name);
+    %%%%%:   97-block  0
+call    0 never executed
+    #####:   98:		return -1;
 unconditional  0 never executed
         -:   99:	}
         -:  100:
-    #####:  101:	if (xchdir(rmountpoint, SET_TITLE) != 0) {
-    %%%%%:  101-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  102:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rmountpoint,
-call    0 never executed
-    #####:  103:		    strerror(errno));
-    %%%%%:  103-block  0
-call    0 never executed
-    #####:  104:		free(rmountpoint);
-    #####:  105:		return EXIT_FAILURE;
+        2:  101:	return i;
+        2:  101-block  0
+unconditional  0 taken 2
+        -:  102:}
+        -:  103:
+        -:  104:static int
+function remotes_mount called 1 returned 100% blocks executed 55%
+        1:  105:remotes_mount(char *name)
+        -:  106:{
+        1:  107:	if (!name || !*name)
+        1:  107-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  107-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1
+    #####:  108:		return EXIT_FAILURE;
+    %%%%%:  108-block  0
 unconditional  0 never executed
-        -:  106:	}
-        -:  107:
-    #####:  108:	free(ws[cur_ws].path);
-    #####:  109:	ws[cur_ws].path = savestring(rmountpoint, strlen(rmountpoint));
-    %%%%%:  109-block  0
+        -:  109:
+        1:  110:	int i = get_remote(name);
+        1:  110-block  0
+call    0 returned 1
+        1:  111:	if (i == -1)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  112:		return EXIT_FAILURE;
+    %%%%%:  112-block  0
+unconditional  0 never executed
+        -:  113:
+        1:  114:	if (!remotes[i].mount_cmd) {
+        1:  114-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  115:		fprintf(stderr, _("%s: No mount command specified for '%s'\n"),
 call    0 never executed
-        -:  110:
-    #####:  111:	free(rmountpoint);
-        -:  112:
-    #####:  113:	if (cd_lists_on_the_fly) {
-branch  0 never executed
-branch  1 never executed
-    #####:  114:		free_dirlist();
-    %%%%%:  114-block  0
-call    0 never executed
-    #####:  115:		if (list_dir() != EXIT_SUCCESS)
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  116:			error_code = EXIT_FAILURE;
+    #####:  116:			PROGRAM_NAME, remotes[i].name);
     %%%%%:  116-block  0
+call    0 never executed
+    #####:  117:		return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  117:	}
-        -:  118:
-    #####:  119:	return error_code;
-    %%%%%:  119-block  0
-unconditional  0 never executed
-        -:  120:}
-        -:  121:
-        -:  122:int
-function remote_smb called 0 returned 0% blocks executed 0%
-    #####:  123:remote_smb(char *address, char *options)
-        -:  124:{
-    #####:  125:	if (xargs.stealth_mode == 1) {
+        -:  118:	}
+        -:  119:
+        -:  120:	struct stat attr;
+        1:  121:	if (lstat(remotes[i].mountpoint, &attr) == -1) {
+        1:  121-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####:  122:		char *cmd[] = {"mkdir", "-p", remotes[i].mountpoint, NULL};
+    #####:  123:		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+    %%%%%:  123-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  124:			fprintf(stderr, _("%s: %s: %s\n"), PROGRAM_NAME,
+call    0 never executed
+    #####:  125:					remotes[i].mountpoint, strerror(errno));
     %%%%%:  125-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  126:		printf("%s: Access to remote filesystems is disabled in "
-    %%%%%:  126-block  0
 call    0 never executed
-        -:  127:		       "stealth mode\n", PROGRAM_NAME);
-    #####:  128:		return EXIT_SUCCESS;
+call    1 never executed
+    #####:  126:			return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  129:	}
-        -:  130:
-        -:  131:#if __FreeBSD__
-        -:  132:	fprintf(stderr, _("%s: SMB is not yet supported on FreeBSD\n"), PROGRAM_NAME);
-        -:  133:	return EXIT_FAILURE;
-        -:  134:#endif
-        -:  135:
-        -:  136:	/* smb://[USER@]HOST[/SERVICE][/REMOTE-DIR] */
-        -:  137:
-    #####:  138:	if (!address || !*address)
-    %%%%%:  138-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  138-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  139:		return EXIT_FAILURE;
-    %%%%%:  139-block  0
+        -:  127:		}
+        -:  128:	}
+        -:  129:
+        1:  130:	if (count_dir(remotes[i].mountpoint, CPOP) <= 2
+        1:  130-block  0
+call    0 returned 1
+branch  1 taken 1 (fallthrough)
+branch  2 taken 0
+        1:  131:	&& launch_execle(remotes[i].mount_cmd) != EXIT_SUCCESS)
+        1:  131-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####:  132:		return EXIT_FAILURE;
+    %%%%%:  132-block  0
 unconditional  0 never executed
-        -:  140:
-    #####:  141:	int free_address = 0;
-    #####:  142:	char *ruser = (char *)NULL, *raddress = (char *)NULL;
-    #####:  143:	char *tmp = strchr(address, '@');
-        -:  144:
-    #####:  145:	if (tmp) {
-    %%%%%:  145-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  146:		*tmp = '\0';
-    #####:  147:		ruser = savestring(address, strlen(address));
-    %%%%%:  147-block  0
+        -:  133:
+        1:  134:	if (xchdir(remotes[i].mountpoint, SET_TITLE) == -1) {
+        1:  134-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####:  135:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+    #####:  136:				remotes[i].mountpoint, strerror(errno));
+    %%%%%:  136-block  0
 call    0 never executed
-        -:  148:
-    #####:  149:		raddress = savestring(tmp + 1, strlen(tmp + 1));
-call    0 never executed
-    #####:  150:		free_address = 1;
+call    1 never executed
+    #####:  137:		return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  151:	}
-        -:  152:
-        -:  153:	else
-    #####:  154:		raddress = address;
-    %%%%%:  154-block  0
+        -:  138:	}
+        -:  139:
+        1:  140:	int exit_status = EXIT_SUCCESS;
+        1:  141:	if (cd_lists_on_the_fly) {
+        1:  141-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  142:		free(ws[cur_ws].path);
+        2:  143:		ws[cur_ws].path = savestring(remotes[i].mountpoint,
+        1:  144:							strlen(remotes[i].mountpoint));
+        1:  144-block  0
+call    0 returned 1
+        1:  145:		add_to_jumpdb(ws[cur_ws].path);
+call    0 returned 1
+        1:  146:		add_to_dirhist(ws[cur_ws].path);
+call    0 returned 1
+        1:  147:		free_dirlist();
+call    0 returned 1
+        1:  148:		if (list_dir() != EXIT_SUCCESS)
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####:  149:			exit_status = EXIT_FAILURE;
+    %%%%%:  149-block  0
 unconditional  0 never executed
-        -:  155:
-    #####:  156:	char *addr_tmp = (char *)xnmalloc(strlen(raddress) + 3, sizeof(char));
-    %%%%%:  156-block  0
+        -:  150:	} else {
+    #####:  151:		printf(_("%s: %s: Remote mounted on %s\n"), PROGRAM_NAME,
 call    0 never executed
-    #####:  157:	sprintf(addr_tmp, "//%s", raddress);
+unconditional  1 never executed
+    #####:  152:				remotes[i].name, remotes[i].mountpoint);
+    %%%%%:  152-block  0
+call    0 never executed
+        -:  153:	}
+        -:  154:
+        1:  155:	remotes[i].mounted = 1;
+        1:  156:	return exit_status;
+        1:  156-block  0
+unconditional  0 taken 1
+        -:  157:}
         -:  158:
-    #####:  159:	char *p = raddress;
-        -:  160:
-    #####:  161:	while (*p) {
-unconditional  0 never executed
-    %%%%%:  161-block  0
-branch  1 never executed
-branch  2 never executed
-    #####:  162:		if (*p == '/')
-    %%%%%:  162-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  163:			*p = '_';
+        -:  159:static int
+function remotes_unmount called 1 returned 100% blocks executed 60%
+        1:  160:remotes_unmount(char *name)
+        -:  161:{
+        1:  162:	if (!name || !*name)
+        1:  162-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  162-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1
+    #####:  163:		return EXIT_FAILURE;
     %%%%%:  163-block  0
 unconditional  0 never executed
-    #####:  164:		p++;
-    %%%%%:  164-block  0
-unconditional  0 never executed
-        -:  165:	}
-        -:  166:
-    #####:  167:	char *rmountpoint = (char *)xnmalloc(strlen(raddress) + strlen(TMP_DIR) + 9,
+        -:  164:
+        1:  165:	int i = get_remote(name);
+        1:  165-block  0
+call    0 returned 1
+        1:  166:	if (i == -1)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  167:		return EXIT_FAILURE;
     %%%%%:  167-block  0
-call    0 never executed
-        -:  168:										sizeof(char));
-    #####:  169:	sprintf(rmountpoint, "%s/remote/%s", TMP_DIR, raddress);
-        -:  170:
-    #####:  171:	int free_options = 0;
-    #####:  172:	char *roptions = (char *)NULL;
-        -:  173:
-    #####:  174:	if (ruser) {
-branch  0 never executed
-branch  1 never executed
-    #####:  175:		roptions = (char *)xnmalloc(strlen(ruser) + strlen(options) + 11,
-    %%%%%:  175-block  0
-call    0 never executed
-        -:  176:															sizeof(char));
-    #####:  177:		sprintf(roptions, "username=%s,%s", ruser, options);
-    #####:  178:		free_options = 1;
 unconditional  0 never executed
-        -:  179:	} else
-    #####:  180:		roptions = options;
-    %%%%%:  180-block  0
+        -:  168:
+        1:  169:	if (!remotes[i].unmount_cmd) {
+        1:  169-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  170:		fprintf(stderr, _("%s: No unmount command found for '%s'\n"),
+call    0 never executed
+    #####:  171:			PROGRAM_NAME, remotes[i].name);
+    %%%%%:  171-block  0
+call    0 never executed
+    #####:  172:		return EXIT_FAILURE;
 unconditional  0 never executed
+        -:  173:	}
+        -:  174:
+        1:  175:	if (launch_execle(remotes[i].unmount_cmd) != EXIT_SUCCESS)
+        1:  175-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####:  176:		return EXIT_FAILURE;
+    %%%%%:  176-block  0
+unconditional  0 never executed
+        -:  177:
+        1:  178:	remotes[i].mounted = 0;
+        1:  179:	return EXIT_SUCCESS;
+        1:  179-block  0
+unconditional  0 taken 1
+        -:  180:}
         -:  181:
-        -:  182:	/* Create the mountpoint, if it doesn't exist */
-        -:  183:	struct stat file_attrib;
-        -:  184:
-    #####:  185:	if (stat(rmountpoint, &file_attrib) == -1) {
-    %%%%%:  185-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  186:		char *mkdir_cmd[] = {"mkdir", "-p", rmountpoint, NULL};
+        -:  182:static int
+function remotes_edit called 3 returned 100% blocks executed 58%
+        3:  183:remotes_edit(char *app)
+        -:  184:{
+        3:  185:	if (!remotes_file)
+        3:  185-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####:  186:		return EXIT_FAILURE;
+    %%%%%:  186-block  0
+unconditional  0 never executed
         -:  187:
-    #####:  188:		if (launch_execve(mkdir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-    %%%%%:  188-block  0
+        -:  188:	struct stat attr;
+        3:  189:	if (stat(remotes_file, &attr) == -1) {
+        3:  189-block  0
+call    0 returned 3
+branch  1 taken 0 (fallthrough)
+branch  2 taken 3
+    #####:  190:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, remotes_file,
 call    0 never executed
-branch  1 never executed
-branch  2 never executed
-        -:  189:
-    #####:  190:			if (free_options)
-    %%%%%:  190-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  191:				free(roptions);
+    #####:  191:				strerror(errno));
     %%%%%:  191-block  0
-unconditional  0 never executed
-        -:  192:
-    #####:  193:			if (ruser)
-    %%%%%:  193-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  194:				free(ruser);
-    %%%%%:  194-block  0
-unconditional  0 never executed
-        -:  195:
-    #####:  196:			if (free_address)
-    %%%%%:  196-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  197:				free(raddress);
-    %%%%%:  197-block  0
-unconditional  0 never executed
-        -:  198:
-    #####:  199:			free(rmountpoint);
-    #####:  200:			free(addr_tmp);
-        -:  201:
-    #####:  202:			fprintf(stderr, _("%s: %s: Cannot create mountpoint\n"),
-    %%%%%:  202-block  0
 call    0 never executed
-        -:  203:			    PROGRAM_NAME, rmountpoint);
-        -:  204:
-    #####:  205:			return EXIT_FAILURE;
+    #####:  192:		return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  206:		}
-        -:  207:	}
-        -:  208:
-        -:  209:	/* If the mountpoint already exists, check if it is empty */
-    #####:  210:	else if (count_dir(rmountpoint) > 2) {
+        -:  193:	}
+        -:  194:
+        3:  195:	time_t mtime_bfr = (time_t)attr.st_mtime;
+        -:  196:
+        3:  197:	int ret = EXIT_SUCCESS;
+        3:  198:	if (app) {
+        3:  198-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####:  199:		char *cmd[] = {app, remotes_file, NULL};
+    #####:  200:		ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+    %%%%%:  200-block  0
+call    0 never executed
+        -:  201:	} else {
+        3:  202:		ret = open_file(remotes_file);
+        3:  202-block  0
+call    0 returned 3
+unconditional  1 taken 3
+        -:  203:	}
+        -:  204:
+        3:  205:	if (ret != EXIT_SUCCESS)
+        3:  205-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####:  206:		return EXIT_FAILURE;
+    %%%%%:  206-block  0
+unconditional  0 never executed
+        -:  207:
+        3:  208:	if (stat(remotes_file, &attr) == -1) {
+        3:  208-block  0
+call    0 returned 3
+branch  1 taken 0 (fallthrough)
+branch  2 taken 3
+    #####:  209:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, remotes_file,
+call    0 never executed
+    #####:  210:				strerror(errno));
     %%%%%:  210-block  0
 call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  211:		fprintf(stderr, _("%s: %s: Mountpoint not empty\n"),
-    %%%%%:  211-block  0
-call    0 never executed
-        -:  212:		    PROGRAM_NAME, rmountpoint);
+    #####:  211:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  212:	}
         -:  213:
-    #####:  214:		if (free_options)
-branch  0 never executed
-branch  1 never executed
-    #####:  215:			free(roptions);
-    %%%%%:  215-block  0
-unconditional  0 never executed
-        -:  216:
-    #####:  217:		if (ruser)
-    %%%%%:  217-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  218:			free(ruser);
-    %%%%%:  218-block  0
-unconditional  0 never executed
-        -:  219:
-    #####:  220:		if (free_address)
-    %%%%%:  220-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  221:			free(raddress);
-    %%%%%:  221-block  0
-unconditional  0 never executed
-        -:  222:
-    #####:  223:		free(rmountpoint);
-    #####:  224:		free(addr_tmp);
-        -:  225:
-    #####:  226:		return EXIT_FAILURE;
+        3:  214:	if (mtime_bfr != (time_t)attr.st_mtime) {
+        3:  214-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 1
+        2:  215:		free_remotes(0);
+        2:  215-block  0
+call    0 returned 2
+        2:  216:		load_remotes();
+call    0 returned 2
+unconditional  1 taken 2
+        -:  217:	}
+        -:  218:
+        3:  219:	return EXIT_SUCCESS;
+        3:  219-block  0
+unconditional  0 taken 3
+        -:  220:}
+        -:  221:
+        -:  222:int
+function remotes_function called 10 returned 100% blocks executed 47%
+       10:  223:remotes_function(char **args)
+        -:  224:{
+       10:  225:	if (xargs.stealth_mode == 1) {
+       10:  225-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 10
+    #####:  226:		fprintf(stderr, "%s: The net function is disabled in stealth mode\n",
     %%%%%:  226-block  0
-unconditional  0 never executed
-        -:  227:	}
-        -:  228:
-    #####:  229:	int error_code = 1;
-        -:  230:
-        -:  231:	/* Create and execute the SMB command */
-    #####:  232:	if (!(flags & ROOT_USR)) {
-    %%%%%:  232-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  233:		char *cmd[] = {"sudo", "-u", "root", "mount.cifs", addr_tmp,
-    #####:  234:		    rmountpoint, (roptions) ? "-o" : NULL,
-    %%%%%:  234-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  234-block  1
-unconditional  2 never executed
-    %%%%%:  234-block  2
-unconditional  3 never executed
-        -:  235:		    (roptions) ? roptions : NULL, NULL};
-    #####:  236:		error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
-    %%%%%:  236-block  0
 call    0 never executed
+        -:  227:				PROGRAM_NAME);
+    #####:  228:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  229:	}
+        -:  230:
+       10:  231:	if (!args[1])
+       10:  231-block  0
+branch  0 taken 5 (fallthrough)
+branch  1 taken 5
+        5:  232:		return remotes_list();
+        5:  232-block  0
+call    0 returned 5
+unconditional  1 taken 5
+        -:  233:
+       5*:  234:	if (*args[1] == '-' && strcmp(args[1], "--help") == 0) {
+        5:  234-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 5
+    %%%%%:  234-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  235:		puts(_(NET_USAGE));
+    %%%%%:  235-block  0
+call    0 never executed
+call    1 never executed
+    #####:  236:		return EXIT_SUCCESS;
+unconditional  0 never executed
         -:  237:	}
         -:  238:
-        -:  239:	else {
-    #####:  240:		char *cmd[] = {"mount.cifs", addr_tmp, rmountpoint, (roptions) ? "-o"
-    #####:  241:					: NULL, (roptions) ? roptions : NULL, NULL};
+        5:  239:	if (*args[1] == 'e' && strcmp(args[1], "edit") == 0) {
+        5:  239-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 1
+        4:  239-block  1
+branch  2 taken 3 (fallthrough)
+branch  3 taken 1
+        3:  240:		if (args[2])
+        3:  240-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####:  241:			return remotes_edit(args[2]);
     %%%%%:  241-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  241-block  1
-unconditional  2 never executed
-    %%%%%:  241-block  2
-unconditional  3 never executed
-    #####:  242:		error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
-    %%%%%:  242-block  0
 call    0 never executed
+unconditional  1 never executed
+        3:  242:		return remotes_edit(NULL);
+        3:  242-block  0
+call    0 returned 3
+unconditional  1 taken 3
         -:  243:	}
         -:  244:
-    #####:  245:	if (free_options)
-    %%%%%:  245-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  246:		free(roptions);
-    %%%%%:  246-block  0
+       2*:  245:	if (*args[1] == 'u' && (!*(args[1] + 1) || strcmp(args[1], "unmount") == 0)) {
+        2:  245-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 1
+        1:  245-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1
+    %%%%%:  245-block  2
+branch  4 never executed
+branch  5 never executed
+        1:  246:		if (!args[2]) {
+        1:  246-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  247:			fprintf(stderr, "%s\n", _(NET_USAGE));
+    %%%%%:  247-block  0
+call    0 never executed
+call    1 never executed
+    #####:  248:			return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  247:
-    #####:  248:	if (ruser)
-    %%%%%:  248-block  0
+        -:  249:		}
+        1:  250:		return remotes_unmount(args[2]);
+        1:  250-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -:  251:	}
+        -:  252:
+       1*:  253:	if (*args[1] == 'm' && (!*(args[1] + 1) || strcmp(args[1], "mount") == 0)) {
+        1:  253-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    %%%%%:  253-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  253-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  254:		if (!args[2]) {
+    %%%%%:  254-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  249:		free(ruser);
-    %%%%%:  249-block  0
+    #####:  255:			fprintf(stderr, "%s\n", _(NET_USAGE));
+    %%%%%:  255-block  0
+call    0 never executed
+call    1 never executed
+    #####:  256:			return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  250:
-    #####:  251:	if (free_address)
-    %%%%%:  251-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  252:		free(raddress);
-    %%%%%:  252-block  0
-unconditional  0 never executed
-        -:  253:
-    #####:  254:	free(addr_tmp);
-        -:  255:
-    #####:  256:	if (error_code) {
-    %%%%%:  256-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  257:		free(rmountpoint);
-    #####:  258:		return EXIT_FAILURE;
+        -:  257:		}
+    #####:  258:		return remotes_mount(args[2]);
     %%%%%:  258-block  0
-unconditional  0 never executed
+call    0 never executed
+unconditional  1 never executed
         -:  259:	}
         -:  260:
-        -:  261:	/* If successfully mounted, chdir into mountpoint */
-    #####:  262:	if (xchdir(rmountpoint, SET_TITLE) != 0) {
-    %%%%%:  262-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  263:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rmountpoint,
-call    0 never executed
-    #####:  264:		    strerror(errno));
-    %%%%%:  264-block  0
-call    0 never executed
-    #####:  265:		free(rmountpoint);
-    #####:  266:		return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  267:	}
-        -:  268:
-    #####:  269:	free(ws[cur_ws].path);
-    #####:  270:	ws[cur_ws].path = savestring(rmountpoint, strlen(rmountpoint));
-    %%%%%:  270-block  0
-call    0 never executed
-        -:  271:
-    #####:  272:	free(rmountpoint);
-        -:  273:
-    #####:  274:	if (cd_lists_on_the_fly) {
+        1:  261:	return remotes_mount(args[1]);
+        1:  261-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -:  262:}
+        -:  263:
+        -:  264:int
+function automount_remotes called 4 returned 100% blocks executed 30%
+        4:  265:automount_remotes(void)
+        -:  266:{
+        4:  267:	if (!remotes_n)
+        4:  267-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 3
+        1:  268:		return EXIT_SUCCESS;
+        1:  268-block  0
+unconditional  0 taken 1
+        -:  269:
+        3:  270:	int i = (int)remotes_n,
+        3:  271:		exit_status = EXIT_SUCCESS;
+        9:  272:	while (--i >= 0) {
+        3:  272-block  0
+unconditional  0 taken 3
+        9:  272-block  1
+branch  1 taken 6
+branch  2 taken 3 (fallthrough)
+        6:  273:		if (remotes[i].name && remotes[i].auto_mount == 1
+        6:  273-block  0
+branch  0 taken 6 (fallthrough)
+branch  1 taken 0
+        6:  273-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 6
+    #####:  274:		&& remotes[i].mountpoint && remotes[i].mount_cmd) {
+    %%%%%:  274-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  275:		free_dirlist();
-    %%%%%:  275-block  0
-call    0 never executed
-    #####:  276:		if (list_dir() != EXIT_SUCCESS)
+    %%%%%:  274-block  1
+branch  2 never executed
+branch  3 never executed
+        -:  275:			struct stat attr;
+    #####:  276:			if (stat(remotes[i].mountpoint, &attr) == -1) {
+    %%%%%:  276-block  0
 call    0 never executed
 branch  1 never executed
 branch  2 never executed
-    #####:  277:			error_code = EXIT_FAILURE;
-    %%%%%:  277-block  0
+    #####:  277:				char *cmd[] = {"mkdir", "-p", remotes[i].mountpoint, NULL};
+    #####:  278:				if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+    %%%%%:  278-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  279:					continue;
+    %%%%%:  279-block  0
 unconditional  0 never executed
-        -:  278:	}
-        -:  279:
-    #####:  280:	return error_code;
+    #####:  280:			} else if (count_dir(remotes[i].mountpoint, CPOP) > 2) {
     %%%%%:  280-block  0
-unconditional  0 never executed
-        -:  281:}
-        -:  282:
-        -:  283:int
-function remote_ssh called 0 returned 0% blocks executed 0%
-    #####:  284:remote_ssh(char *address, char *options)
-        -:  285:{
-    #####:  286:	if (xargs.stealth_mode == 1) {
-    %%%%%:  286-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  287:		printf("%s: Access to remote filesystems is disabled in "
-    %%%%%:  287-block  0
 call    0 never executed
-        -:  288:		       "stealth mode\n", PROGRAM_NAME);
-    #####:  289:		return EXIT_SUCCESS;
+branch  1 never executed
+branch  2 never executed
+    #####:  281:				continue;
+    %%%%%:  281-block  0
 unconditional  0 never executed
-        -:  290:	}
-        -:  291:
-        -:  292:#if __FreeBSD__
-        -:  293:	fprintf(stderr, _("%s: SFTP is not yet supported on FreeBSD"),
-        -:  294:	    PROGRAM_NAME);
-        -:  295:	return EXIT_FAILURE;
-        -:  296:#endif
-        -:  297:
-    #####:  298:	if (!config_ok)
-    %%%%%:  298-block  0
+        -:  282:			}
+    #####:  283:			printf(_("%s: Mounting remote...\n"), remotes[i].name);
+    %%%%%:  283-block  0
+call    0 never executed
+call    1 never executed
+    #####:  284:			if (launch_execle(remotes[i].mount_cmd) != EXIT_SUCCESS)
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  285:				exit_status = EXIT_FAILURE;
+    %%%%%:  285-block  0
+unconditional  0 never executed
+        -:  286:			else
+    #####:  287:				remotes[i].mounted = 1;
+    %%%%%:  287-block  0
+unconditional  0 never executed
+        -:  288:		}
+        -:  289:	}
+        -:  290:
+        3:  291:	return exit_status;
+        3:  291-block  0
+unconditional  0 taken 3
+        -:  292:}
+        -:  293:
+        -:  294:int
+function autounmount_remotes called 4 returned 100% blocks executed 33%
+        4:  295:autounmount_remotes(void)
+        -:  296:{
+        4:  297:	if (!remotes_n)
+        4:  297-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 3
+        1:  298:		return EXIT_SUCCESS;
+        1:  298-block  0
+unconditional  0 taken 1
+        -:  299:
+        3:  300:	int i = (int)remotes_n,
+        3:  301:		exit_status = EXIT_SUCCESS;
+        9:  302:	while (--i >= 0) {
+        3:  302-block  0
+unconditional  0 taken 3
+        9:  302-block  1
+branch  1 taken 6
+branch  2 taken 3 (fallthrough)
+        6:  303:		if (remotes[i].name && remotes[i].auto_unmount == 1
+        6:  303-block  0
+branch  0 taken 6 (fallthrough)
+branch  1 taken 0
+        6:  303-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 6
+    #####:  304:		&& remotes[i].mountpoint && remotes[i].unmount_cmd) {
+    %%%%%:  304-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  299:		return EXIT_FAILURE;
-    %%%%%:  299-block  0
+    %%%%%:  304-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  305:			if (count_dir(remotes[i].mountpoint, CPOP) <= 2)
+    %%%%%:  305-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  306:				continue;
+    %%%%%:  306-block  0
 unconditional  0 never executed
-        -:  300:
-        -:  301:	/*  char *sshfs_path = get_cmd_path("sshfs");
-        -:  302:	if (!sshfs_path) {
-        -:  303:		fprintf(stderr, _("%s: sshfs: Program not found.\n"),
-        -:  304:				PROGRAM_NAME);
-        -:  305:		return EXIT_FAILURE;
-        -:  306:	} */
-        -:  307:
-    #####:  308:	if (!address || !*address)
+    #####:  307:			int dir_change = 0;
+    #####:  308:			if (*ws[cur_ws].path == *remotes[i].mountpoint
     %%%%%:  308-block  0
 branch  0 never executed
 branch  1 never executed
-    %%%%%:  308-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  309:		return EXIT_FAILURE;
+    #####:  309:			&& strcmp(remotes[i].mountpoint, ws[cur_ws].path) == 0) {
     %%%%%:  309-block  0
-unconditional  0 never executed
-        -:  310:
-        -:  311:	/* Create mountpoint */
-    #####:  312:	char *rname = savestring(address, strlen(address));
-    %%%%%:  312-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  310:				xchdir("/", NO_TITLE);
+    %%%%%:  310-block  0
 call    0 never executed
-        -:  313:
-        -:  314:	/* Replace all slashes in address by underscore to construct the
-        -:  315:	 * mounpoint name */
-    #####:  316:	char *p = rname;
-    #####:  317:	while (*p) {
+    #####:  311:				dir_change = 1;
 unconditional  0 never executed
+        -:  312:			}
+    #####:  313:			printf(_("%s: Unmounting remote...\n"), remotes[i].name);
+    %%%%%:  313-block  0
+call    0 never executed
+call    1 never executed
+    #####:  314:			if (launch_execle(remotes[i].unmount_cmd) != EXIT_SUCCESS)
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  315:				exit_status = EXIT_FAILURE;
+    %%%%%:  315-block  0
+unconditional  0 never executed
+    #####:  316:			if (dir_change)
+    %%%%%:  316-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  317:				xchdir(ws[cur_ws].path, NO_TITLE);
     %%%%%:  317-block  0
-branch  1 never executed
-branch  2 never executed
-    #####:  318:		if (*p == '/')
-    %%%%%:  318-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  319:			*p = '_';
-    %%%%%:  319-block  0
-unconditional  0 never executed
-    #####:  320:		p++;
-    %%%%%:  320-block  0
-unconditional  0 never executed
-        -:  321:	}
-        -:  322:
-    #####:  323:	char *rmountpoint = (char *)xnmalloc(strlen(TMP_DIR) + strlen(rname) + 9,
-    %%%%%:  323-block  0
 call    0 never executed
-        -:  324:											sizeof(char));
-    #####:  325:	sprintf(rmountpoint, "%s/remote/%s", TMP_DIR, rname);
-    #####:  326:	free(rname);
-        -:  327:
-        -:  328:	/* If the mountpoint doesn't exist, create it */
-        -:  329:	struct stat file_attrib;
-    #####:  330:	if (stat(rmountpoint, &file_attrib) == -1) {
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  331:		char *mkdir_cmd[] = {"mkdir", "-p", rmountpoint, NULL};
-        -:  332:
-    #####:  333:		if (launch_execve(mkdir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-    %%%%%:  333-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  334:			fprintf(stderr, _("%s: %s: Cannot create mountpoint\n"),
-    %%%%%:  334-block  0
-call    0 never executed
-        -:  335:			    PROGRAM_NAME, rmountpoint);
-    #####:  336:			free(rmountpoint);
-    #####:  337:			return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  338:		}
-        -:  339:	}
-        -:  340:
-        -:  341:	/* If it exists, make sure it is not populated */
-    #####:  342:	else if (count_dir(rmountpoint) > 2) {
-    %%%%%:  342-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  343:		fprintf(stderr, _("%s: %s: Mounpoint not empty\n"),
-    %%%%%:  343-block  0
-call    0 never executed
-        -:  344:		    PROGRAM_NAME, rmountpoint);
-    #####:  345:		free(rmountpoint);
-    #####:  346:		return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  347:	}
-        -:  348:
-        -:  349:	/* Construct the command */
-        -:  350:
-    #####:  351:	int error_code = 1;
-        -:  352:
-    #####:  353:	if ((flags & ROOT_USR)) {
-    %%%%%:  353-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  354:		char *cmd[] = {"sshfs", address, rmountpoint, (options) ? "-o"
-    #####:  355:					: NULL, (options) ? options : NULL, NULL};
-    %%%%%:  355-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  355-block  1
-unconditional  2 never executed
-    %%%%%:  355-block  2
-unconditional  3 never executed
-    #####:  356:		error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
-    %%%%%:  356-block  0
-call    0 never executed
-        -:  357:	}
-        -:  358:
-        -:  359:	else {
-    #####:  360:		char *cmd[] = {"sudo", "sshfs", address, rmountpoint, "-o",
-    #####:  361:		    "allow_other", (options) ? "-o" : NULL,
-    %%%%%:  361-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  361-block  1
-unconditional  2 never executed
-    %%%%%:  361-block  2
-unconditional  3 never executed
-        -:  362:		    (options) ? options : NULL, NULL};
-    #####:  363:		error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
-    %%%%%:  363-block  0
-call    0 never executed
-        -:  364:	}
-        -:  365:
-    #####:  366:	if (error_code != EXIT_SUCCESS) {
-    %%%%%:  366-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  367:		free(rmountpoint);
-    #####:  368:		return EXIT_FAILURE;
-    %%%%%:  368-block  0
-unconditional  0 never executed
-        -:  369:	}
-        -:  370:
-        -:  371:	/* If successfully mounted, chdir into mountpoint */
-    #####:  372:	if (xchdir(rmountpoint, SET_TITLE) != 0) {
-    %%%%%:  372-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  373:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rmountpoint,
-call    0 never executed
-    #####:  374:		    strerror(errno));
-    %%%%%:  374-block  0
-call    0 never executed
-    #####:  375:		free(rmountpoint);
-    #####:  376:		return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  377:	}
-        -:  378:
-    #####:  379:	free(ws[cur_ws].path);
-    #####:  380:	ws[cur_ws].path = savestring(rmountpoint, strlen(rmountpoint));
-    %%%%%:  380-block  0
-call    0 never executed
-    #####:  381:	free(rmountpoint);
-        -:  382:
-    #####:  383:	if (cd_lists_on_the_fly) {
-branch  0 never executed
-branch  1 never executed
-    #####:  384:		free_dirlist();
-    %%%%%:  384-block  0
-call    0 never executed
-    #####:  385:		if (list_dir() != EXIT_SUCCESS)
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  386:			error_code = EXIT_FAILURE;
-    %%%%%:  386-block  0
-unconditional  0 never executed
-        -:  387:	}
-        -:  388:
-    #####:  389:	return error_code;
-    %%%%%:  389-block  0
-unconditional  0 never executed
-        -:  390:}
+unconditional  1 never executed
+        -:  318:		}
+        -:  319:	}
+        -:  320:
+        3:  321:	return exit_status;
+        3:  321-block  0
+unconditional  0 taken 3
+        -:  322:}

@@ -23,1280 +23,1467 @@
         -:   22: * MA 02110-1301, USA.
         -:   23:*/
         -:   24:
-        -:   25:#include "helpers.h"
+        -:   25:#ifndef _NO_LIRA
         -:   26:
-        -:   27:#include <errno.h>
-        -:   28:#include <stdio.h>
-        -:   29:#include <string.h>
-        -:   30:#include <unistd.h>
-        -:   31:
-        -:   32:#include "archives.h"
-        -:   33:#include "aux.h"
-        -:   34:#include "checks.h"
-        -:   35:#include "exec.h"
-        -:   36:#include "mime.h"
-        -:   37:
-        -:   38:/* Get application associated to a given MIME filetype or file extension.
-        -:   39: * Returns the first matching line in the MIME file or NULL if none is
-        -:   40: * found */
-        -:   41:char *
-function get_app called 1 returned 100% blocks executed 70%
-        1:   42:get_app(const char *mime, const char *ext)
-        -:   43:{
-        1:   44:	if (!mime)
-        1:   44-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####:   45:		return (char *)NULL;
-    %%%%%:   45-block  0
-unconditional  0 never executed
-        -:   46:
-        1:   47:	FILE *defs_fp = fopen(MIME_FILE, "r");
-        1:   47-block  0
-call    0 returned 1
+        -:   27:#include "helpers.h"
+        -:   28:
+        -:   29:#include <errno.h>
+        -:   30:#include <stdio.h>
+        -:   31:#include <string.h>
+        -:   32:#include <unistd.h>
+        -:   33:#include <time.h>
+        -:   34:#include <sys/stat.h>
+        -:   35:#include <readline/readline.h>
+        -:   36:
+        -:   37:#ifndef _NO_MAGIC
+        -:   38:#include <magic.h>
+        -:   39:#endif
+        -:   40:
+        -:   41:#include "archives.h"
+        -:   42:#include "aux.h"
+        -:   43:#include "checks.h"
+        -:   44:#include "exec.h"
+        -:   45:#include "mime.h"
+        -:   46:#include "messages.h"
+        -:   47:#include "navigation.h"
         -:   48:
-        1:   49:	if (!defs_fp) {
+        -:   49:/* Get application associated to a given MIME file type or file extension.
+        -:   50: * Returns the first matching line in the MIME file or NULL if none is
+        -:   51: * found */
+        -:   52:static char *
+function get_app called 40 returned 100% blocks executed 65%
+       40:   53:get_app(const char *mime, const char *ext)
+        -:   54:{
+       40:   55:	if (!mime)
+       40:   55-block  0
 branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####:   50:		fprintf(stderr, _("%s: %s: Error opening file\n"),
-    %%%%%:   50-block  0
-call    0 never executed
-        -:   51:		    PROGRAM_NAME, MIME_FILE);
-    #####:   52:		return (char *)NULL;
+branch  1 taken 40
+    #####:   56:		return (char *)NULL;
+    %%%%%:   56-block  0
 unconditional  0 never executed
-        -:   53:	}
-        -:   54:
-        1:   55:	int found = 0, cmd_ok = 0;
-        1:   56:	size_t line_size = 0;
-        1:   57:	char *line = (char *)NULL, *app = (char *)NULL;
-        1:   58:	ssize_t line_len = 0;
-        -:   59:
-       45:   60:	while ((line_len = getline(&line, &line_size, defs_fp)) > 0) {
-        1:   60-block  0
-unconditional  0 taken 1
-       45:   60-block  1
-call    1 returned 45
-branch  2 taken 45
+        -:   57:
+       40:   58:	if (!mime_file || !*mime_file)
+       40:   58-block  0
+branch  0 taken 40 (fallthrough)
+branch  1 taken 0
+       40:   58-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 40
+    #####:   59:		return (char *)NULL;
+    %%%%%:   59-block  0
+unconditional  0 never executed
+        -:   60:
+       40:   61:	FILE *defs_fp = fopen(mime_file, "r");
+       40:   61-block  0
+call    0 returned 40
+       40:   62:	if (!defs_fp) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 40
+    #####:   63:		fprintf(stderr, _("%s: %s: Error opening file\n"),
+    %%%%%:   63-block  0
+call    0 never executed
+call    1 never executed
+        -:   64:		    PROGRAM_NAME, mime_file);
+    #####:   65:		return (char *)NULL;
+unconditional  0 never executed
+        -:   66:	}
+        -:   67:
+       40:   68:	int found = 0, cmd_ok = 0;
+       40:   69:	size_t line_size = 0;
+       40:   70:	char *line = (char *)NULL, *app = (char *)NULL;
+        -:   71:/*	ssize_t line_len = 0; */
+        -:   72:
+      825:   73:	while (getline(&line, &line_size, defs_fp) > 0) {
+       40:   73-block  0
+unconditional  0 taken 40
+      825:   73-block  1
+call    1 returned 825
+branch  2 taken 825
 branch  3 taken 0 (fallthrough)
-       45:   61:		found = mime_match = 0; /* Global variable to tell mime_open()
-        -:   62:		if the application is associated to the file's extension or MIME
-        -:   63:		type */
-       45:   64:		if (*line == '#' || *line == '[' || *line == '\n')
-       45:   64-block  0
-branch  0 taken 31 (fallthrough)
-branch  1 taken 14
-       31:   64-block  1
-branch  2 taken 31 (fallthrough)
+      825:   74:		found = mime_match = 0; /* Global variable to tell mime_open()
+        -:   75:		if the application is associated to the file's extension or MIME
+        -:   76:		type */
+      825:   77:		if (*line == '#' || *line == '[' || *line == '\n')
+      825:   77-block  0
+branch  0 taken 538 (fallthrough)
+branch  1 taken 287
+      538:   77-block  1
+branch  2 taken 538 (fallthrough)
 branch  3 taken 0
-       31:   64-block  2
-branch  4 taken 10 (fallthrough)
-branch  5 taken 21
-       44:   65:			continue;
-       24:   65-block  0
-unconditional  0 taken 24
-       44:   65-block  1
-unconditional  1 taken 44
-        -:   66:
-       21:   67:		char *tmp = strchr(line, '=');
-        -:   68:
-      21*:   69:		if (!tmp || !*(tmp + 1))
-       21:   69-block  0
-branch  0 taken 21 (fallthrough)
-branch  1 taken 0
-       21:   69-block  1
-branch  2 taken 0 (fallthrough)
-branch  3 taken 21
-    #####:   70:			continue;
-    %%%%%:   70-block  0
-unconditional  0 never executed
-        -:   71:
-        -:   72:		/* Truncate line in '=' to get only the ext/mimetype pattern/string */
-       21:   73:		*tmp = '\0';
-        -:   74:		regex_t regex;
-        -:   75:
-      21*:   76:		if (ext && *line == 'E' && line[1] == ':') {
-       21:   76-block  0
+      538:   77-block  2
+branch  4 taken 127 (fallthrough)
+branch  5 taken 411
+      785:   78:			continue;
+      414:   78-block  0
+unconditional  0 taken 414
+      785:   78-block  1
+unconditional  1 taken 785
+        -:   79:
+      411:   80:		char *p = line;
+      411:   81:		if (!(flags & GUI)) {
+      411:   81-block  0
 branch  0 taken 0 (fallthrough)
-branch  1 taken 21
-    %%%%%:   76-block  1
-branch  2 never executed
-branch  3 never executed
-    %%%%%:   76-block  2
-branch  4 never executed
-branch  5 never executed
-    #####:   77:			if (regcomp(&regex, line + 2, REG_NOSUB | REG_EXTENDED) == 0
-    %%%%%:   77-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:   78:			&& regexec(&regex, ext, 0, NULL, 0) == 0)
-    %%%%%:   78-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:   79:				found = 1;
-    %%%%%:   79-block  0
-unconditional  0 never executed
-        -:   80:		}
-        -:   81:
-       21:   82:		else if (regcomp(&regex, line, REG_NOSUB | REG_EXTENDED) == 0
-       21:   82-block  0
-call    0 returned 21
-branch  1 taken 21 (fallthrough)
-branch  2 taken 0
-       21:   83:		&& regexec(&regex, mime, 0, NULL, 0) == 0)
-       21:   83-block  0
-call    0 returned 21
-branch  1 taken 1 (fallthrough)
-branch  2 taken 20
-        1:   84:			found = mime_match = 1;
-        1:   84-block  0
-unconditional  0 taken 1
-        -:   85:
-       21:   86:		regfree(&regex);
-       21:   86-block  0
-call    0 returned 21
-        -:   87:
-       21:   88:		if (!found)
-branch  0 taken 20 (fallthrough)
-branch  1 taken 1
-       20:   89:			continue;
-       20:   89-block  0
-unconditional  0 taken 20
-        -:   90:
-        1:   91:		tmp++; /* We don't want the '=' char */
-        -:   92:
-        1:   93:		size_t tmp_len = strlen(tmp);
-        1:   94:		app = (char *)xrealloc(app, (tmp_len + 1) * sizeof(char));
-        1:   94-block  0
-call    0 returned 1
-        1:   95:		size_t app_len = 0;
-        1:   96:		while (*tmp) {
-unconditional  0 taken 1
-        1:   96-block  0
-branch  1 taken 1
-branch  2 taken 0 (fallthrough)
-        1:   97:			app_len = 0;
-        -:   98:			/* Split the appplications line into substrings, if
-        -:   99:			 * any */
-       10:  100:			while (*tmp != '\0' && *tmp != ';' && *tmp != '\n' && *tmp != '\''
-        1:  100-block  0
-unconditional  0 taken 1
-        9:  100-block  1
-branch  1 taken 8 (fallthrough)
-branch  2 taken 1
-        8:  100-block  2
-branch  3 taken 8 (fallthrough)
-branch  4 taken 0
-        8:  100-block  3
-branch  5 taken 8 (fallthrough)
-branch  6 taken 0
-       17:  101:			&& *tmp != '"')
-        9:  101-block  0
-branch  0 taken 9 (fallthrough)
-branch  1 taken 0
-        8:  101-block  1
-branch  2 taken 8
-branch  3 taken 0 (fallthrough)
-        8:  102:				app[app_len++] = *(tmp++);
-        8:  102-block  0
-unconditional  0 taken 8
-        -:  103:
-        1:  104:			while (*tmp == ' ') /* Remove leading spaces */
-        1:  104-block  0
-unconditional  0 taken 1
-        1:  104-block  1
-branch  1 taken 0
-branch  2 taken 1 (fallthrough)
-    #####:  105:				tmp++;
-    %%%%%:  105-block  0
-unconditional  0 never executed
-        -:  106:
-        1:  107:			if (app_len) {
-        1:  107-block  0
-branch  0 taken 1 (fallthrough)
-branch  1 taken 0
-        1:  108:				app[app_len] = '\0';
-        -:  109:				/* Check each application existence */
-        1:  110:				char *file_path = (char *)NULL;
-        -:  111:				/* If app contains spaces, the command to check is
-        -:  112:				 * the string before the first space */
-        -:  113:				/*              int ret = strcntchr(app, ' ');
-        -:  114:
-        -:  115:				if (ret != -1) {
-        -:  116:					char *app_tmp = savestring(app, app_len);
-        -:  117:					app_tmp[ret] = '\0';
-        -:  118:					file_path = get_cmd_path(app_tmp);
-        -:  119:					free(app_tmp);
-        -:  120:				} */
-        1:  121:				char *ret = strchr(app, ' ');
-        1:  122:				if (ret) {
-        1:  122-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####:  123:					*ret = '\0';
-    #####:  124:					file_path = get_cmd_path(app);
-    %%%%%:  124-block  0
-call    0 never executed
-    #####:  125:					*ret = ' ';
-unconditional  0 never executed
-        -:  126:				}
-        -:  127:
-        -:  128:				else
-        1:  129:					file_path = get_cmd_path(app);
-        1:  129-block  0
-call    0 returned 1
-unconditional  1 taken 1
-        -:  130:
-       1*:  131:				if (file_path) {
-        1:  131-block  0
-branch  0 taken 1 (fallthrough)
-branch  1 taken 0
-        -:  132:					/* If the app exists, break the loops and
-        -:  133:					 * return it */
-        1:  134:					free(file_path);
-        1:  135:					file_path = (char *)NULL;
-        1:  136:					cmd_ok = 1;
-        1:  136-block  0
-unconditional  0 taken 1
-        -:  137:				}
-        -:  138:
-        -:  139:				else
-    #####:  140:					continue;
-    %%%%%:  140-block  0
-unconditional  0 never executed
-        -:  141:			}
-        -:  142:
-        1:  143:			if (cmd_ok)
-        1:  143-block  0
-branch  0 taken 1 (fallthrough)
-branch  1 taken 0
-        1:  144:				break;
-        1:  144-block  0
-unconditional  0 taken 1
-    #####:  145:			tmp++;
-    %%%%%:  145-block  0
-unconditional  0 never executed
-        -:  146:		}
-        -:  147:
-        1:  148:		if (cmd_ok)
-        1:  148-block  0
-branch  0 taken 1 (fallthrough)
-branch  1 taken 0
-        1:  149:			break;
-        1:  149-block  0
-unconditional  0 taken 1
-        -:  150:	}
-        -:  151:
-        1:  152:	free(line);
-        1:  153:	fclose(defs_fp);
-        1:  153-block  0
-call    0 returned 1
-        -:  154:
-        1:  155:	if (found) {
-branch  0 taken 1 (fallthrough)
-branch  1 taken 0
-        1:  156:		if (app)
-        1:  156-block  0
-branch  0 taken 1 (fallthrough)
-branch  1 taken 0
-        1:  157:			return app;
-        1:  157-block  0
-unconditional  0 taken 1
-        -:  158:	} else {
-    #####:  159:		if (app)
-    %%%%%:  159-block  0
+branch  1 taken 411
+    #####:   82:			if (*p != '!' || *(p + 1) != 'X' || *(p + 2) != ':')
+    %%%%%:   82-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  160:			free(app);
-    %%%%%:  160-block  0
-unconditional  0 never executed
-        -:  161:	}
-        -:  162:
-    #####:  163:	return (char *)NULL;
-    %%%%%:  163-block  0
-unconditional  0 never executed
-        -:  164:}
-        -:  165:
-        -:  166:char *
-function get_mime called 1 returned 100% blocks executed 65%
-        1:  167:get_mime(char *file)
-        -:  168:{
-        1:  169:	if (!file || !*file) {
-        1:  169-block  0
-branch  0 taken 1 (fallthrough)
-branch  1 taken 0
-        1:  169-block  1
-branch  2 taken 0 (fallthrough)
-branch  3 taken 1
-    #####:  170:		fputs(_("Error opening temporary file\n"), stderr);
-    %%%%%:  170-block  0
-call    0 never executed
-    #####:  171:		return (char *)NULL;
-unconditional  0 never executed
-        -:  172:	}
-        -:  173:
-        1:  174:	char *rand_ext = gen_rand_str(6);
-        1:  174-block  0
-call    0 returned 1
-        -:  175:
-        1:  176:	if (!rand_ext)
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####:  177:		return (char *)NULL;
-    %%%%%:  177-block  0
-unconditional  0 never executed
-        -:  178:
-        1:  179:	char MIME_TMP_FILE[PATH_MAX] = "";
-        1:  180:	sprintf(MIME_TMP_FILE, "%s/mime.%s", TMP_DIR, rand_ext);
-        1:  181:	free(rand_ext);
-        -:  182:
-        1:  183:	if (access(MIME_TMP_FILE, F_OK) == 0)
-        1:  183-block  0
-call    0 returned 1
-branch  1 taken 0 (fallthrough)
-branch  2 taken 1
-    #####:  184:		unlink(MIME_TMP_FILE);
-    %%%%%:  184-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  185:
-        1:  186:	FILE *file_fp = fopen(MIME_TMP_FILE, "w");
-        1:  186-block  0
-call    0 returned 1
-        -:  187:
-        1:  188:	if (!file_fp) {
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####:  189:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, MIME_TMP_FILE,
-call    0 never executed
-    #####:  190:		    strerror(errno));
-    %%%%%:  190-block  0
-call    0 never executed
-    #####:  191:		return (char *)NULL;
-unconditional  0 never executed
-        -:  192:	}
-        -:  193:
-        1:  194:	FILE *file_fp_err = fopen("/dev/null", "w");
-        1:  194-block  0
-call    0 returned 1
-        -:  195:
-        1:  196:	if (!file_fp_err) {
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####:  197:		fprintf(stderr, "%s: /dev/null: %s\n", PROGRAM_NAME, strerror(errno));
-    %%%%%:  197-block  0
-call    0 never executed
-call    1 never executed
-    #####:  198:		fclose(file_fp);
-call    0 never executed
-    #####:  199:		return (char *)NULL;
-unconditional  0 never executed
-        -:  200:	}
-        -:  201:
-        1:  202:	int stdout_bk = dup(STDOUT_FILENO); /* Store original stdout */
-        1:  202-block  0
-call    0 returned 1
-        1:  203:	int stderr_bk = dup(STDERR_FILENO); /* Store original stderr */
-call    0 returned 1
-        -:  204:
-        -:  205:	/* Redirect stdout to the desired file */
-        1:  206:	if (dup2(fileno(file_fp), STDOUT_FILENO) == -1) {
-call    0 returned 1
-call    1 returned 1
-branch  2 taken 0 (fallthrough)
-branch  3 taken 1
-    #####:  207:		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
-    %%%%%:  207-block  0
-call    0 never executed
-call    1 never executed
-    #####:  208:		fclose(file_fp);
-call    0 never executed
-    #####:  209:		fclose(file_fp_err);
-call    0 never executed
-    #####:  210:		return (char *)NULL;
-unconditional  0 never executed
-        -:  211:	}
-        -:  212:
-        -:  213:	/* Redirect stderr to /dev/null */
-        1:  214:	if (dup2(fileno(file_fp_err), STDERR_FILENO) == -1) {
-        1:  214-block  0
-call    0 returned 1
-call    1 returned 1
-branch  2 taken 0 (fallthrough)
-branch  3 taken 1
-    #####:  215:		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
-    %%%%%:  215-block  0
-call    0 never executed
-call    1 never executed
-    #####:  216:		fclose(file_fp);
-call    0 never executed
-    #####:  217:		fclose(file_fp_err);
-call    0 never executed
-    #####:  218:		return (char *)NULL;
-unconditional  0 never executed
-        -:  219:	}
-        -:  220:
-        1:  221:	fclose(file_fp);
-        1:  221-block  0
-call    0 returned 1
-        1:  222:	fclose(file_fp_err);
-call    0 returned 1
-        -:  223:
-        1:  224:	char *cmd[] = {"file", "--mime-type", file, NULL};
-        1:  225:	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
-call    0 returned 1
-        -:  226:
-        1:  227:	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
-call    0 returned 1
-        1:  228:	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
-call    0 returned 1
-        1:  229:	close(stdout_bk);
-call    0 returned 1
-        1:  230:	close(stderr_bk);
-call    0 returned 1
-        -:  231:
-        1:  232:	if (ret != EXIT_SUCCESS)
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####:  233:		return (char *)NULL;
-    %%%%%:  233-block  0
-unconditional  0 never executed
-        -:  234:
-        1:  235:	char *mime_type = (char *)NULL;
-        -:  236:
-        1:  237:	if (access(MIME_TMP_FILE, F_OK) == 0) {
-        1:  237-block  0
-call    0 returned 1
-branch  1 taken 1 (fallthrough)
-branch  2 taken 0
-        1:  238:		file_fp = fopen(MIME_TMP_FILE, "r");
-        1:  238-block  0
-call    0 returned 1
-        -:  239:
-        1:  240:		if (file_fp) {
-branch  0 taken 1 (fallthrough)
-branch  1 taken 0
-        1:  241:			char line[255] = "";
-        1:  242:			fgets(line, (int)sizeof(line), file_fp);
-        1:  242-block  0
-call    0 returned 1
-        1:  243:			char *tmp = strrchr(line, ' ');
-        -:  244:
-        1:  245:			if (tmp) {
-branch  0 taken 1 (fallthrough)
-branch  1 taken 0
-        1:  246:				size_t len = strlen(tmp);
-        -:  247:
-        1:  248:				if (tmp[len - 1] == '\n')
-        1:  248-block  0
-branch  0 taken 1 (fallthrough)
-branch  1 taken 0
-        1:  249:					tmp[len - 1] = '\0';
-        1:  249-block  0
-unconditional  0 taken 1
-        -:  250:
-        1:  251:				mime_type = savestring(tmp + 1, strlen(tmp) - 1);
-        1:  251-block  0
-call    0 returned 1
-unconditional  1 taken 1
-        -:  252:			}
-        -:  253:
-        1:  254:			fclose(file_fp);
-        1:  254-block  0
-call    0 returned 1
-        -:  255:		}
-        -:  256:
-        1:  257:		unlink(MIME_TMP_FILE);
-        1:  257-block  0
-call    0 returned 1
-unconditional  1 taken 1
-        -:  258:	}
-        -:  259:
-        1:  260:	if (mime_type)
-        1:  260-block  0
-branch  0 taken 1 (fallthrough)
-branch  1 taken 0
-        1:  261:		return mime_type;
-        1:  261-block  0
-unconditional  0 taken 1
-        -:  262:
-    #####:  263:	return (char *)NULL;
-    %%%%%:  263-block  0
-unconditional  0 never executed
-        -:  264:}
-        -:  265:
-        -:  266:/* Open a file according to the application associated to its MIME type
-        -:  267: * or extension. It also accepts the 'info' and 'edit' arguments, the
-        -:  268: * former providing MIME info about the corresponding file and the
-        -:  269: * latter opening the MIME list file */
-        -:  270:int
-function mime_open called 1 returned 100% blocks executed 38%
-        1:  271:mime_open(char **args)
-        -:  272:{
-        -:  273:	/* Check arguments */
-       1*:  274:	if (!args[1] || (*args[1] == '-' && strcmp(args[1], "--help") == 0)) {
-        1:  274-block  0
-branch  0 taken 1 (fallthrough)
-branch  1 taken 0
-        1:  274-block  1
-branch  2 taken 0 (fallthrough)
-branch  3 taken 1
-    %%%%%:  274-block  2
+    %%%%%:   82-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:   82-block  2
 branch  4 never executed
 branch  5 never executed
-    #####:  275:		puts(_("Usage: mm, mime [info ELN/FILENAME] [edit]"));
-    %%%%%:  275-block  0
-call    0 never executed
-    #####:  276:		return EXIT_FAILURE;
+    #####:   83:				continue;
+    %%%%%:   83-block  0
 unconditional  0 never executed
+        -:   84:			else
+    #####:   85:				p += 3;
+    %%%%%:   85-block  0
+unconditional  0 never executed
+        -:   86:		} else {
+      411:   87:			if (*p == '!' && *(p + 1) == 'X')
+      411:   87-block  0
+branch  0 taken 42 (fallthrough)
+branch  1 taken 369
+       42:   87-block  1
+branch  2 taken 42 (fallthrough)
+branch  3 taken 0
+       42:   88:				continue;
+       42:   88-block  0
+unconditional  0 taken 42
+      369:   89:			if (*p == 'X' && *(p + 1) == ':')
+      369:   89-block  0
+branch  0 taken 368 (fallthrough)
+branch  1 taken 1
+      368:   89-block  1
+branch  2 taken 368 (fallthrough)
+branch  3 taken 0
+      368:   90:				p += 2;
+      368:   90-block  0
+unconditional  0 taken 368
+        -:   91:		}
+        -:   92:
+      369:   93:		char *tmp = strchr(p, '=');
+     369*:   94:		if (!tmp || !*(tmp + 1))
+      369:   94-block  0
+branch  0 taken 369 (fallthrough)
+branch  1 taken 0
+      369:   94-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 369
+    #####:   95:			continue;
+    %%%%%:   95-block  0
+unconditional  0 never executed
+        -:   96:
+        -:   97:		/* Truncate line in '=' to get only the ext/mimetype pattern/string */
+      369:   98:		*tmp = '\0';
+        -:   99:		regex_t regex;
+        -:  100:
+      369:  101:		if (ext && *p == 'E' && *(p + 1) == ':') {
+      369:  101-block  0
+branch  0 taken 180 (fallthrough)
+branch  1 taken 189
+      180:  101-block  1
+branch  2 taken 100 (fallthrough)
+branch  3 taken 80
+      100:  101-block  2
+branch  4 taken 100 (fallthrough)
+branch  5 taken 0
+      100:  102:			if (regcomp(&regex, p + 2, REG_NOSUB | REG_EXTENDED) == 0
+      100:  102-block  0
+call    0 returned 100
+branch  1 taken 100 (fallthrough)
+branch  2 taken 0
+      100:  103:			&& regexec(&regex, ext, 0, NULL, 0) == 0)
+      100:  103-block  0
+call    0 returned 100
+branch  1 taken 0 (fallthrough)
+branch  2 taken 100
+    #####:  104:				found = 1;
+    %%%%%:  104-block  0
+unconditional  0 never executed
+      269:  105:		} else if (regcomp(&regex, p, REG_NOSUB | REG_EXTENDED) == 0
+      269:  105-block  0
+call    0 returned 269
+branch  1 taken 269 (fallthrough)
+branch  2 taken 0
+      269:  106:		&& regexec(&regex, mime, 0, NULL, 0) == 0) {
+      269:  106-block  0
+call    0 returned 269
+branch  1 taken 40 (fallthrough)
+branch  2 taken 229
+       40:  107:			found = mime_match = 1;
+       40:  107-block  0
+unconditional  0 taken 40
+        -:  108:		}
+        -:  109:
+      369:  110:		regfree(&regex);
+      369:  110-block  0
+call    0 returned 369
+        -:  111:
+      369:  112:		if (!found)
+branch  0 taken 329 (fallthrough)
+branch  1 taken 40
+      329:  113:			continue;
+      329:  113-block  0
+unconditional  0 taken 329
+        -:  114:
+       40:  115:		tmp++; /* We don't want the '=' char */
+        -:  116:
+       40:  117:		size_t tmp_len = strlen(tmp);
+       40:  118:		app = (char *)xrealloc(app, (tmp_len + 1) * sizeof(char));
+       40:  118-block  0
+call    0 returned 40
+        -:  119:
+       40:  120:		while (*tmp) {
+unconditional  0 taken 40
+       40:  120-block  0
+branch  1 taken 40
+branch  2 taken 0 (fallthrough)
+       40:  121:			size_t app_len = 0;
+        -:  122:			/* Split the appplications line into substrings, if
+        -:  123:			 * any */
+      361:  124:			while (*tmp != '\0' && *tmp != ';' && *tmp != '\n' && *tmp != '\''
+       40:  124-block  0
+unconditional  0 taken 40
+      321:  124-block  1
+branch  1 taken 281 (fallthrough)
+branch  2 taken 40
+      281:  124-block  2
+branch  3 taken 281 (fallthrough)
+branch  4 taken 0
+      281:  124-block  3
+branch  5 taken 281 (fallthrough)
+branch  6 taken 0
+      602:  125:			&& *tmp != '"')
+      321:  125-block  0
+branch  0 taken 321 (fallthrough)
+branch  1 taken 0
+      281:  125-block  1
+branch  2 taken 281
+branch  3 taken 0 (fallthrough)
+      281:  126:				app[app_len++] = *(tmp++);
+      281:  126-block  0
+unconditional  0 taken 281
+        -:  127:
+       40:  128:			while (*tmp == ' ') /* Remove leading spaces */
+       40:  128-block  0
+unconditional  0 taken 40
+       40:  128-block  1
+branch  1 taken 0
+branch  2 taken 40 (fallthrough)
+    #####:  129:				tmp++;
+    %%%%%:  129-block  0
+unconditional  0 never executed
+        -:  130:
+       40:  131:			if (app_len) {
+       40:  131-block  0
+branch  0 taken 40 (fallthrough)
+branch  1 taken 0
+       40:  132:				app[app_len] = '\0';
+        -:  133:				/* Check each application existence */
+       40:  134:				char *file_path = (char *)NULL;
+        -:  135:				/* If app contains spaces, the command to check is
+        -:  136:				 * the string before the first space */
+       40:  137:				char *ret = strchr(app, ' ');
+       40:  138:				if (ret) {
+       40:  138-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 40
+    #####:  139:					*ret = '\0';
+    #####:  140:					if (*app == '~') {
+    %%%%%:  140-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  141:						file_path = tilde_expand(app);
+    %%%%%:  141-block  0
+call    0 never executed
+    #####:  142:						if (access(file_path, X_OK) != 0) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  143:							free(file_path);
+    #####:  144:							file_path = (char *)NULL;
+    %%%%%:  144-block  0
+unconditional  0 never executed
+        -:  145:						}
+    #####:  146:					} else if (*app == '/') {
+    %%%%%:  146-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  147:						if (access(app, X_OK) == 0) {
+    %%%%%:  147-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  148:							file_path = app;
+    %%%%%:  148-block  0
+unconditional  0 never executed
+        -:  149:						}
+        -:  150:					} else {
+    #####:  151:						file_path = get_cmd_path(app);
+    %%%%%:  151-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  152:					}
+    #####:  153:					*ret = ' ';
+    %%%%%:  153-block  0
+unconditional  0 never executed
+        -:  154:				} else {
+       40:  155:					if (*app == '~') {
+       40:  155-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 40
+    #####:  156:						file_path = tilde_expand(app);
+    %%%%%:  156-block  0
+call    0 never executed
+    #####:  157:						if (access(file_path, X_OK) != 0) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  158:							free(file_path);
+    #####:  159:							file_path = (char *)NULL;
+    %%%%%:  159-block  0
+unconditional  0 never executed
+        -:  160:						}
+        -:  161:					}
+       40:  162:					else if (*app == '/') {
+       40:  162-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 40
+    #####:  163:						if (access(app, X_OK) == 0) {
+    %%%%%:  163-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  164:							file_path = app;
+    %%%%%:  164-block  0
+unconditional  0 never executed
+        -:  165:						}
+        -:  166:					} else {
+       40:  167:						file_path = get_cmd_path(app);
+       40:  167-block  0
+call    0 returned 40
+unconditional  1 taken 40
+        -:  168:					}
+        -:  169:				}
+        -:  170:
+      40*:  171:				if (file_path) {
+       40:  171-block  0
+branch  0 taken 40 (fallthrough)
+branch  1 taken 0
+        -:  172:					/* If the app exists, break the loops and
+        -:  173:					 * return it */
+       40:  174:					if (*app != '/') {
+       40:  174-block  0
+branch  0 taken 40 (fallthrough)
+branch  1 taken 0
+       40:  175:						free(file_path);
+       40:  176:						file_path = (char *)NULL;
+       40:  176-block  0
+unconditional  0 taken 40
+        -:  177:					}
+       40:  178:					cmd_ok = 1;
+       40:  178-block  0
+unconditional  0 taken 40
+        -:  179:				} else {
+    #####:  180:					continue;
+    %%%%%:  180-block  0
+unconditional  0 never executed
+        -:  181:				}
+        -:  182:			}
+        -:  183:
+       40:  184:			if (cmd_ok)
+       40:  184-block  0
+branch  0 taken 40 (fallthrough)
+branch  1 taken 0
+       40:  185:				break;
+       40:  185-block  0
+unconditional  0 taken 40
+    #####:  186:			tmp++;
+    %%%%%:  186-block  0
+unconditional  0 never executed
+        -:  187:		}
+        -:  188:
+       40:  189:		if (cmd_ok)
+       40:  189-block  0
+branch  0 taken 40 (fallthrough)
+branch  1 taken 0
+       40:  190:			break;
+       40:  190-block  0
+unconditional  0 taken 40
+        -:  191:	}
+        -:  192:
+       40:  193:	free(line);
+       40:  194:	fclose(defs_fp);
+       40:  194-block  0
+call    0 returned 40
+        -:  195:
+       40:  196:	if (found) {
+branch  0 taken 40 (fallthrough)
+branch  1 taken 0
+       40:  197:		if (app)
+       40:  197-block  0
+branch  0 taken 40 (fallthrough)
+branch  1 taken 0
+       40:  198:			return app;
+       40:  198-block  0
+unconditional  0 taken 40
+        -:  199:	} else {
+    #####:  200:		if (app)
+    %%%%%:  200-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  201:			free(app);
+    %%%%%:  201-block  0
+unconditional  0 never executed
+        -:  202:	}
+        -:  203:
+    #####:  204:	return (char *)NULL;
+    %%%%%:  204-block  0
+unconditional  0 never executed
+        -:  205:}
+        -:  206:
+        -:  207:#ifndef _NO_MAGIC
+        -:  208:/* Get FILE's MIME type using the libmagic library */
+        -:  209:char *
+function xmagic called 63 returned 100% blocks executed 78%
+       63:  210:xmagic(const char *file, const int query_mime)
+        -:  211:{
+       63:  212:	if (!file || !*file)
+       63:  212-block  0
+branch  0 taken 63 (fallthrough)
+branch  1 taken 0
+       63:  212-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 63
+    #####:  213:		return (char *)NULL;
+    %%%%%:  213-block  0
+unconditional  0 never executed
+        -:  214:
+       63:  215:	magic_t cookie = magic_open(query_mime ? (MAGIC_MIME_TYPE | MAGIC_ERROR)
+       63:  215-block  0
+branch  0 taken 40 (fallthrough)
+branch  1 taken 23
+       40:  215-block  1
+unconditional  2 taken 40
+       23:  215-block  2
+unconditional  3 taken 23
+       63:  215-block  3
+call    4 returned 63
+        -:  216:					: MAGIC_ERROR);
+       63:  217:	if (!cookie)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 63
+    #####:  218:		return (char *)NULL;
+    %%%%%:  218-block  0
+unconditional  0 never executed
+        -:  219:
+       63:  220:	magic_load(cookie, NULL);
+       63:  220-block  0
+call    0 returned 63
+        -:  221:
+       63:  222:	const char *mime = magic_file(cookie, file);
+call    0 returned 63
+       63:  223:	if (!mime) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 63
+    #####:  224:		magic_close(cookie);
+    %%%%%:  224-block  0
+call    0 never executed
+    #####:  225:		return (char *)NULL;
+unconditional  0 never executed
+        -:  226:	}
+        -:  227:
+       63:  228:	char *str = (char *)xnmalloc(strlen(mime) + 1, sizeof(char));
+       63:  228-block  0
+call    0 returned 63
+       63:  229:	strcpy(str, mime);
+       63:  230:	magic_close(cookie);
+call    0 returned 63
+       63:  231:	return str;
+unconditional  0 taken 63
+        -:  232:}
+        -:  233:
+        -:  234:#else
+        -:  235:static char *
+        -:  236:get_mime(char *file)
+        -:  237:{
+        -:  238:	if (!file || !*file) {
+        -:  239:		fputs(_("Error opening temporary file\n"), stderr);
+        -:  240:		return (char *)NULL;
+        -:  241:	}
+        -:  242:
+        -:  243:	char *rand_ext = gen_rand_str(6);
+        -:  244:	if (!rand_ext)
+        -:  245:		return (char *)NULL;
+        -:  246:
+        -:  247:	char MIME_TMP_FILE[PATH_MAX] = "";
+        -:  248:	sprintf(MIME_TMP_FILE, "%s/mime.%s", TMP_DIR, rand_ext);
+        -:  249:	free(rand_ext);
+        -:  250:
+        -:  251:	if (access(MIME_TMP_FILE, F_OK) == 0)
+        -:  252:		unlink(MIME_TMP_FILE);
+        -:  253:
+        -:  254:	FILE *file_fp = fopen(MIME_TMP_FILE, "w");
+        -:  255:	if (!file_fp) {
+        -:  256:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, MIME_TMP_FILE,
+        -:  257:		    strerror(errno));
+        -:  258:		return (char *)NULL;
+        -:  259:	}
+        -:  260:
+        -:  261:	FILE *file_fp_err = fopen("/dev/null", "w");
+        -:  262:	if (!file_fp_err) {
+        -:  263:		fprintf(stderr, "%s: /dev/null: %s\n", PROGRAM_NAME, strerror(errno));
+        -:  264:		fclose(file_fp);
+        -:  265:		return (char *)NULL;
+        -:  266:	}
+        -:  267:
+        -:  268:	int stdout_bk = dup(STDOUT_FILENO); /* Store original stdout */
+        -:  269:	int stderr_bk = dup(STDERR_FILENO); /* Store original stderr */
+        -:  270:
+        -:  271:	/* Redirect stdout to the desired file */
+        -:  272:	if (dup2(fileno(file_fp), STDOUT_FILENO) == -1) {
+        -:  273:		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+        -:  274:		fclose(file_fp);
+        -:  275:		fclose(file_fp_err);
+        -:  276:		return (char *)NULL;
         -:  277:	}
         -:  278:
-        -:  279:	/* Check the existence of the 'file' command. */
-        1:  280:	char *file_path_tmp = (char *)NULL;
-        -:  281:
-        1:  282:	if ((file_path_tmp = get_cmd_path("file")) == NULL) {
-        1:  282-block  0
-call    0 returned 1
-branch  1 taken 0 (fallthrough)
-branch  2 taken 1
-    #####:  283:		fprintf(stderr, _("%s: file: Command not found\n"), PROGRAM_NAME);
-    %%%%%:  283-block  0
-call    0 never executed
-    #####:  284:		return EXIT_FAILURE;
-unconditional  0 never executed
+        -:  279:	/* Redirect stderr to /dev/null */
+        -:  280:	if (dup2(fileno(file_fp_err), STDERR_FILENO) == -1) {
+        -:  281:		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+        -:  282:		fclose(file_fp);
+        -:  283:		fclose(file_fp_err);
+        -:  284:		return (char *)NULL;
         -:  285:	}
         -:  286:
-        1:  287:	free(file_path_tmp);
-        1:  288:	file_path_tmp = (char *)NULL;
+        -:  287:	fclose(file_fp);
+        -:  288:	fclose(file_fp_err);
         -:  289:
-        1:  290:	char *file_path = (char *)NULL, *deq_file = (char *)NULL;
-        1:  291:	int info = 0, file_index = 0;
+        -:  290:	char *cmd[] = {"file", "--mime-type", file, NULL};
+        -:  291:	int ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
         -:  292:
-       1*:  293:	if (*args[1] == 'e' && strcmp(args[1], "edit") == 0) {
-        1:  293-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    %%%%%:  293-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  294:		return mime_edit(args);
-    %%%%%:  294-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  295:	}
-        -:  296:
-       1*:  297:	else if (*args[1] == 'i' && strcmp(args[1], "info") == 0) {
-        1:  297-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    %%%%%:  297-block  1
-branch  2 never executed
-branch  3 never executed
-        -:  298:
-    #####:  299:		if (!args[2]) {
-    %%%%%:  299-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  300:			fputs(_("Usage: mm, mime info FILENAME\n"), stderr);
-    %%%%%:  300-block  0
-call    0 never executed
-    #####:  301:			return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  302:		}
+        -:  293:	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
+        -:  294:	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
+        -:  295:	close(stdout_bk);
+        -:  296:	close(stderr_bk);
+        -:  297:
+        -:  298:	if (ret != EXIT_SUCCESS)
+        -:  299:		return (char *)NULL;
+        -:  300:
+        -:  301:	if (access(MIME_TMP_FILE, F_OK) != 0)
+        -:  302:		return (char *)NULL;
         -:  303:
-    #####:  304:		if (strchr(args[2], '\\')) {
-    %%%%%:  304-block  0
+        -:  304:	file_fp = fopen(MIME_TMP_FILE, "r");
+        -:  305:	if (!file_fp) {
+        -:  306:		unlink(MIME_TMP_FILE);
+        -:  307:		return (char *)NULL;
+        -:  308:	}
+        -:  309:
+        -:  310:	char *mime_type = (char *)NULL;
+        -:  311:
+        -:  312:	char line[255] = "";
+        -:  313:	if (fgets(line, (int)sizeof(line), file_fp) == NULL) {
+        -:  314:		fclose(file_fp);
+        -:  315:		unlink(MIME_TMP_FILE);
+        -:  316:		return (char *)NULL;
+        -:  317:	}
+        -:  318:	char *tmp = strrchr(line, ' ');
+        -:  319:	if (tmp) {
+        -:  320:		size_t len = strlen(tmp);
+        -:  321:		if (tmp[len - 1] == '\n')
+        -:  322:			tmp[len - 1] = '\0';
+        -:  323:		mime_type = savestring(tmp + 1, strlen(tmp) - 1);
+        -:  324:	}
+        -:  325:
+        -:  326:	fclose(file_fp);
+        -:  327:	unlink(MIME_TMP_FILE);
+        -:  328:	return mime_type;
+        -:  329:}
+        -:  330:#endif /* !_NO_MAGIC */
+        -:  331:
+        -:  332:/* Import MIME definitions from the system and store them into FILE.
+        -:  333: * Returns the amount of definitions found, if any, or -1 in case of error
+        -:  334: * or no association found */
+        -:  335:static int
+function mime_import called 0 returned 0% blocks executed 0%
+    #####:  336:mime_import(char *file)
+        -:  337:{
+        -:  338:#ifdef __HAIKU__
+        -:  339:	fprintf(stderr, "%s: Importing MIME definitions is not supported on Haiku\n",
+        -:  340:			PROGRAM_NAME);
+        -:  341:	return (-1);
+        -:  342:#endif
+        -:  343:	/* If not in X, exit) */
+    #####:  344:	if (!(flags & GUI)) {
+    %%%%%:  344-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  305:			deq_file = dequote_str(args[2], 0);
-    %%%%%:  305-block  0
-call    0 never executed
-    #####:  306:			file_path = realpath(deq_file, NULL);
-call    0 never executed
-    #####:  307:			free(deq_file);
-    #####:  308:			deq_file = (char *)NULL;
-unconditional  0 never executed
-        -:  309:		}
-        -:  310:
-        -:  311:		else
-    #####:  312:			file_path = realpath(args[2], NULL);
-    %%%%%:  312-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  313:
-    #####:  314:		if (!file_path) {
-    %%%%%:  314-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  315:			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[2],
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  315-block  0
-unconditional  2 never executed
-    %%%%%:  315-block  1
-call    3 never executed
-    #####:  316:			    (is_number(args[2]) == 1) ? "No such ELN" : strerror(errno));
-    %%%%%:  316-block  0
-call    0 never executed
-    %%%%%:  316-block  1
-call    1 never executed
-unconditional  2 never executed
-    #####:  317:			return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  318:		}
-        -:  319:
-    #####:  320:		if (access(file_path, R_OK) == -1) {
-    %%%%%:  320-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  321:			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_path,
-call    0 never executed
-    #####:  322:			    strerror(errno));
-    %%%%%:  322-block  0
-call    0 never executed
-    #####:  323:			free(file_path);
-    #####:  324:			return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  325:		}
-        -:  326:
-    #####:  327:		info = 1;
-    #####:  328:		file_index = 2;
-    %%%%%:  328-block  0
-unconditional  0 never executed
-        -:  329:	}
-        -:  330:
-        -:  331:	else {
-        -:  332:
-        1:  333:		if (strchr(args[1], '\\')) {
-        1:  333-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####:  334:			deq_file = dequote_str(args[1], 0);
-    %%%%%:  334-block  0
-call    0 never executed
-    #####:  335:			file_path = realpath(deq_file, NULL);
-call    0 never executed
-    #####:  336:			free(deq_file);
-    #####:  337:			deq_file = (char *)NULL;
-unconditional  0 never executed
-        -:  338:		}
-        -:  339:
-        -:  340:		else
-        1:  341:			file_path = realpath(args[1], NULL);
-        1:  341-block  0
-call    0 returned 1
-unconditional  1 taken 1
-        -:  342:
-        1:  343:		if (!file_path) {
-        1:  343-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####:  344:			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[1],
-call    0 never executed
-    #####:  345:			    strerror(errno));
+    #####:  345:		fprintf(stderr, _("%s: Nothing was imported. No graphical "
     %%%%%:  345-block  0
 call    0 never executed
-    #####:  346:			return -1;
+call    1 never executed
+        -:  346:						"environment found\n"), PROGRAM_NAME);
+    #####:  347:		return (-1);
 unconditional  0 never executed
-        -:  347:		}
-        -:  348:
-        1:  349:		if (access(file_path, R_OK) == -1) {
-        1:  349-block  0
+        -:  348:	}
+        -:  349:
+    #####:  350:	if (!user.home) {
+    %%%%%:  350-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  351:		fprintf(stderr, _("%s: Error getting home directory\n"), PROGRAM_NAME);
+    %%%%%:  351-block  0
+call    0 never executed
+call    1 never executed
+    #####:  352:		return (-1);
+unconditional  0 never executed
+        -:  353:	}
+        -:  354:
+        -:  355:	/* Open the local MIME file */
+    #####:  356:	FILE *mime_fp = fopen(file, "w");
+    %%%%%:  356-block  0
+call    0 never executed
+    #####:  357:	if (!mime_fp) {
+branch  0 never executed
+branch  1 never executed
+    #####:  358:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+    %%%%%:  358-block  0
+call    0 never executed
+call    1 never executed
+    #####:  359:		return (-1);
+unconditional  0 never executed
+        -:  360:	}
+        -:  361:
+        -:  362:	/* Create a list of possible paths for the 'mimeapps.list' file as
+        -:  363:	 * specified by the Freedesktop specification */
+    #####:  364:	size_t home_len = strlen(user.home);
+    #####:  365:	char *config_path = (char *)NULL, *local_path = (char *)NULL;
+    #####:  366:	config_path = (char *)xnmalloc(home_len + 23, sizeof(char));
+    %%%%%:  366-block  0
+call    0 never executed
+    #####:  367:	local_path = (char *)xnmalloc(home_len + 41, sizeof(char));
+call    0 never executed
+    #####:  368:	sprintf(config_path, "%s/.config/mimeapps.list", user.home);
+    #####:  369:	sprintf(local_path, "%s/.local/share/applications/mimeapps.list", user.home);
+        -:  370:
+    #####:  371:	char *mime_paths[] = {config_path, local_path,
+        -:  372:	    "/usr/local/share/applications/mimeapps.list",
+        -:  373:	    "/usr/share/applications/mimeapps.list",
+        -:  374:	    "/etc/xdg/mimeapps.list", NULL};
+        -:  375:
+        -:  376:	/* Check each mimeapps.list file and store its associations into
+        -:  377:	 * FILE */
+        -:  378:	size_t i;
+    #####:  379:	int mime_defs = 0;
+        -:  380:
+    #####:  381:	for (i = 0; mime_paths[i]; i++) {
+unconditional  0 never executed
+    %%%%%:  381-block  0
+unconditional  1 never executed
+    %%%%%:  381-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  382:		FILE *sys_mime_fp = fopen(mime_paths[i], "r");
+    %%%%%:  382-block  0
+call    0 never executed
+    #####:  383:		if (!sys_mime_fp)
+branch  0 never executed
+branch  1 never executed
+    #####:  384:			continue;
+    %%%%%:  384-block  0
+unconditional  0 never executed
+        -:  385:
+    #####:  386:		size_t line_size = 0;
+    #####:  387:		char *line = (char *)NULL;
+        -:  388:		/* Only store associations in the "Default Applications" section */
+    #####:  389:		int da_found = 0;
+        -:  390:
+    #####:  391:		while (getline(&line, &line_size, sys_mime_fp) > 0) {
+    %%%%%:  391-block  0
+unconditional  0 never executed
+    %%%%%:  391-block  1
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:  392:			if (!da_found && strncmp(line, "[Default Applications]", 22) == 0) {
+    %%%%%:  392-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  392-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  393:				da_found = 1;
+    #####:  394:				continue;
+    %%%%%:  394-block  0
+unconditional  0 never executed
+        -:  395:			}
+        -:  396:
+    #####:  397:			if (da_found) {
+    %%%%%:  397-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  398:				if (*line == '[')
+    %%%%%:  398-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  399:					break;
+    %%%%%:  399-block  0
+unconditional  0 never executed
+    #####:  400:				if (*line == '#' || *line == '\n')
+    %%%%%:  400-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  400-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  401:					continue;
+    %%%%%:  401-block  0
+unconditional  0 never executed
+        -:  402:
+    #####:  403:				int index = strcntchr(line, '.');
+    %%%%%:  403-block  0
+call    0 never executed
+    #####:  404:				if (index != -1)
+branch  0 never executed
+branch  1 never executed
+    #####:  405:					line[index] = '\0';
+    %%%%%:  405-block  0
+unconditional  0 never executed
+        -:  406:
+    #####:  407:				fprintf(mime_fp, "%s\n", line);
+    %%%%%:  407-block  0
+call    0 never executed
+    #####:  408:				mime_defs++;
+unconditional  0 never executed
+        -:  409:			}
+        -:  410:		}
+        -:  411:
+    #####:  412:		free(line);
+    #####:  413:		line = (char *)NULL;
+    #####:  414:		fclose(sys_mime_fp);
+    %%%%%:  414-block  0
+call    0 never executed
+        -:  415:	}
+        -:  416:
+    #####:  417:	free(config_path);
+    #####:  418:	free(local_path);
+        -:  419:
+    #####:  420:	if (mime_defs <= 0) {
+    %%%%%:  420-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  421:		fclose(mime_fp);
+    %%%%%:  421-block  0
+call    0 never executed
+    #####:  422:		fprintf(stderr, _("%s: Nothing was imported. No MIME definitions "
+call    0 never executed
+call    1 never executed
+        -:  423:			"found\n"), PROGRAM_NAME);
+    #####:  424:		return (-1);
+unconditional  0 never executed
+        -:  425:	}
+        -:  426:
+        -:  427:	/* Make sure there is an entry for text/plain and *.cfm files, so
+        -:  428:	 * that at least 'mm edit' will work. Gedit, kate, pluma, mousepad,
+        -:  429:	 * and leafpad, are the default text editors of Gnome, KDE, Mate,
+        -:  430:	 * XFCE, and LXDE respectivelly */
+    #####:  431:	fputs("X:text/plain=gedit;kate;pluma;mousepad;leafpad;nano;vim;"
+    %%%%%:  431-block  0
+call    0 never executed
+        -:  432:	      "vi;emacs;ed\n"
+        -:  433:	      "X:E:^cfm$=gedit;kate;pluma;mousepad;leafpad;nano;vim;vi;"
+        -:  434:	      "emacs;ed\n", mime_fp);
+        -:  435:
+    #####:  436:	fclose(mime_fp);
+call    0 never executed
+    #####:  437:	return mime_defs;
+unconditional  0 never executed
+        -:  438:}
+        -:  439:
+        -:  440:static int
+function mime_edit called 1 returned 100% blocks executed 46%
+        1:  441:mime_edit(char **args)
+        -:  442:{
+        1:  443:	int exit_status = EXIT_SUCCESS;
+        -:  444:
+        1:  445:	if (!args[2]) {
+        1:  445-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  446:		char *cmd[] = {"mime", mime_file, NULL};
+        1:  447:		if (mime_open(cmd) != 0) {
+        1:  447-block  0
 call    0 returned 1
 branch  1 taken 0 (fallthrough)
 branch  2 taken 1
-    #####:  350:			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_path,
-call    0 never executed
-    #####:  351:			    strerror(errno));
-    %%%%%:  351-block  0
-call    0 never executed
-        -:  352:
-    #####:  353:			free(file_path);
-        -:  354:			/* Since this function is called by open_function, and since
-        -:  355:			 * this latter prints an error message itself whenever the
-        -:  356:			 * exit code of mime_open is EXIT_FAILURE, and since we
-        -:  357:			 * don't want that message in this case, return -1 instead
-        -:  358:			 * to prevent that message from being printed */
-        -:  359:
-    #####:  360:			return -1;
-unconditional  0 never executed
-        -:  361:		}
-        -:  362:
-        1:  363:		file_index = 1;
-        1:  363-block  0
-unconditional  0 taken 1
-        -:  364:	}
-        -:  365:
-        1:  366:	if (!file_path) {
-        1:  366-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####:  367:		fprintf(stderr, "%s: %s\n", args[file_index], strerror(errno));
-    %%%%%:  367-block  0
+    #####:  448:			fputs(_("Try 'mm, mime edit APPLICATION'\n"), stderr);
+    %%%%%:  448-block  0
 call    0 never executed
 call    1 never executed
-    #####:  368:		return EXIT_FAILURE;
+    #####:  449:			exit_status = EXIT_FAILURE;
 unconditional  0 never executed
-        -:  369:	}
-        -:  370:
-        -:  371:	/* Get file's mime-type */
-        1:  372:	char *mime = get_mime(file_path);
-        1:  372-block  0
-call    0 returned 1
-        1:  373:	if (!mime) {
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####:  374:		fprintf(stderr, _("%s: Error getting mime-type\n"), PROGRAM_NAME);
-    %%%%%:  374-block  0
-call    0 never executed
-    #####:  375:		free(file_path);
-    #####:  376:		return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  377:	}
-        -:  378:
-        1:  379:	if (info)
-        1:  379-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####:  380:		printf(_("MIME type: %s\n"), mime);
-    %%%%%:  380-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  381:
-        -:  382:	/* Get file extension, if any */
-        1:  383:	char *ext = (char *)NULL;
-        1:  384:	char *filename = strrchr(file_path, '/');
-        1:  385:	if (filename) {
-        1:  385-block  0
-branch  0 taken 1 (fallthrough)
-branch  1 taken 0
-        1:  386:		filename++; /* Remove leading slash */
-        -:  387:
-        1:  388:		if (*filename == '.')
-        1:  388-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####:  389:			filename++; /* Skip leading dot if hidden */
-    %%%%%:  389-block  0
-unconditional  0 never executed
-        -:  390:
-        1:  391:		char *ext_tmp = strrchr(filename, '.');
-        -:  392:
-        1:  393:		if (ext_tmp) {
-        1:  393-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####:  394:			ext_tmp++; /* Remove dot from extension */
-    #####:  395:			ext = savestring(ext_tmp, strlen(ext_tmp));
-    %%%%%:  395-block  0
-call    0 never executed
-    #####:  396:			ext_tmp = (char *)NULL;
-unconditional  0 never executed
-        -:  397:		}
-        -:  398:
-        1:  399:		filename = (char *)NULL;
-        1:  399-block  0
-unconditional  0 taken 1
-        -:  400:	}
-        -:  401:
-        1:  402:	if (info)
-        1:  402-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####:  403:		printf(_("Extension: %s\n"), ext ? ext : "None");
-    %%%%%:  403-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  403-block  1
-unconditional  2 never executed
-    %%%%%:  403-block  2
-unconditional  3 never executed
-    %%%%%:  403-block  3
-call    4 never executed
-unconditional  5 never executed
-        -:  404:
-        -:  405:	/* Get default application for MIME or extension */
-        1:  406:	char *app = get_app(mime, ext);
-        1:  406-block  0
-call    0 returned 1
-        -:  407:
-        1:  408:	if (!app) {
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-        -:  409:
-    #####:  410:		if (info)
-    %%%%%:  410-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  411:			fputs(_("Associated application: None\n"), stderr);
-    %%%%%:  411-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  412:
-        -:  413:		else {
-        -:  414:
-        -:  415:			/* If an archive/compressed file, run the archiver function */
-    #####:  416:			if (is_compressed(file_path, 1) == 0) {
-    %%%%%:  416-block  0
+        -:  450:		}
+        -:  451:
+        -:  452:	} else {
+    #####:  453:		char *cmd[] = {args[2], mime_file, NULL};
+    #####:  454:		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
+    %%%%%:  454-block  0
 call    0 never executed
 branch  1 never executed
 branch  2 never executed
-        -:  417:
-    #####:  418:				char *tmp_cmd[] = {"ad", file_path, NULL};
-        -:  419:
-    #####:  420:				int exit_status = archiver(tmp_cmd, 'd');
-    %%%%%:  420-block  0
-call    0 never executed
-        -:  421:
-    #####:  422:				free(file_path);
-    #####:  423:				free(mime);
-        -:  424:
-    #####:  425:				if (ext)
-branch  0 never executed
-branch  1 never executed
-    #####:  426:					free(ext);
-    %%%%%:  426-block  0
+    #####:  455:			exit_status = EXIT_FAILURE;
+    %%%%%:  455-block  0
 unconditional  0 never executed
-        -:  427:
-    #####:  428:				return exit_status;
-    %%%%%:  428-block  0
-unconditional  0 never executed
-        -:  429:			}
-        -:  430:
-        -:  431:			else
-    #####:  432:				fprintf(stderr, _("%s: %s: No associated application "
-    #####:  433:						"found\n"), PROGRAM_NAME, args[1]);
-    %%%%%:  433-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  434:		}
-        -:  435:
-    #####:  436:		free(file_path);
-    #####:  437:		free(mime);
-        -:  438:
-    #####:  439:		if (ext)
-    %%%%%:  439-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  440:			free(ext);
-    %%%%%:  440-block  0
-unconditional  0 never executed
-        -:  441:
-    #####:  442:		return EXIT_FAILURE;
-    %%%%%:  442-block  0
-unconditional  0 never executed
-        -:  443:	}
-        -:  444:
-        1:  445:	if (info) {
-        1:  445-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-        -:  446:		/* In case of "cmd args" print only cmd */
-    #####:  447:		char *ret = strchr(app, ' ');
-        -:  448:
-    #####:  449:		if (ret)
-    %%%%%:  449-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  450:			*ret = '\0';
-    %%%%%:  450-block  0
-unconditional  0 never executed
-        -:  451:
-    #####:  452:		printf(_("Associated application: %s (%s)\n"), app,
-    %%%%%:  452-block  0
-unconditional  0 never executed
-    %%%%%:  452-block  1
-unconditional  1 never executed
-    %%%%%:  452-block  2
-call    2 never executed
-    #####:  453:		    mime_match ? "MIME" : "ext");
-    %%%%%:  453-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  454:
-    #####:  455:		free(file_path);
-    #####:  456:		free(mime);
-    #####:  457:		free(app);
-        -:  458:
-    #####:  459:		if (ext)
-branch  0 never executed
-branch  1 never executed
-    #####:  460:			free(ext);
-    %%%%%:  460-block  0
-unconditional  0 never executed
-        -:  461:
-    #####:  462:		return EXIT_SUCCESS;
-    %%%%%:  462-block  0
-unconditional  0 never executed
-        -:  463:	}
-        -:  464:
-        1:  465:	free(mime);
-        -:  466:
-        1:  467:	if (ext)
-        1:  467-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####:  468:		free(ext);
-    %%%%%:  468-block  0
-unconditional  0 never executed
-        -:  469:
-        -:  470:	/* If not info, open the file with the associated application */
-        -:  471:
-        -:  472:	/* Get number of arguments to check for final ampersand */
-        1:  473:	int args_num = 0;
-        3:  474:	for (args_num = 0; args[args_num]; args_num++)
-        1:  474-block  0
+        -:  456:	}
+        -:  457:
+        1:  458:	return exit_status;
+        1:  458-block  0
 unconditional  0 taken 1
-        2:  474-block  1
-unconditional  1 taken 2
-        3:  474-block  2
-branch  2 taken 2
-branch  3 taken 1 (fallthrough)
-        -:  475:		;
-        -:  476:
-        -:  477:	/* Construct the command and run it */
-        -:  478:
-        -:  479:	/* Two pointers to store different positions in the APP string */
-        1:  480:	char *p = app;
-        1:  481:	char *pp = app;
-        -:  482:
-        -:  483:	/* The number of spaces in APP is (at least) the number of paramenters
-        -:  484:	 * passed to the command. Extra spaces will be ignored */
-        1:  485:	size_t spaces = 0;
-        9:  486:	while (*p) {
-        1:  486-block  0
-unconditional  0 taken 1
-        9:  486-block  1
-branch  1 taken 8
-branch  2 taken 1 (fallthrough)
-        8:  487:		if (*(p++) == ' ')
-        8:  487-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 8
-    #####:  488:			spaces++;
-    %%%%%:  488-block  0
-unconditional  0 never executed
-        -:  489:	}
-        -:  490:
-        -:  491:	/* To the number of spaces/parametes we need to add the command itself,
-        -:  492:	 * the filename and the final NULL string (spaces + 3) */
-        1:  493:	char **cmd = (char **)xnmalloc(spaces + 3, sizeof(char *));
-        1:  493-block  0
-call    0 returned 1
-        -:  494:
-        -:  495:	/* Rewind P to the beginning of APP */
-        1:  496:	p = pp;
-        -:  497:
-        -:  498:	/* Store each substring in APP into a two dimensional array (CMD) */
-        1:  499:	int pos = 0;
-unconditional  0 taken 1
-        -:  500:	while (1) {
-        -:  501:
-        9:  502:		if (!*p) {
-        9:  502-block  0
-branch  0 taken 1 (fallthrough)
-branch  1 taken 8
-        1:  503:			if (*pp)
-        1:  503-block  0
-branch  0 taken 1 (fallthrough)
+        -:  459:}
+        -:  460:
+        -:  461:/* Open a file according to the application associated to its MIME type
+        -:  462: * or extension. It also accepts the 'info' and 'edit' arguments, the
+        -:  463: * former providing MIME info about the corresponding file and the
+        -:  464: * latter opening the MIME list file */
+        -:  465:int
+function mime_open called 41 returned 100% blocks executed 54%
+       41:  466:mime_open(char **args)
+        -:  467:{
+        -:  468:	/* Check arguments */
+      41*:  469:	if (!args[1] || (*args[1] == '-' && strcmp(args[1], "--help") == 0)) {
+       41:  469-block  0
+branch  0 taken 41 (fallthrough)
 branch  1 taken 0
-        1:  504:				cmd[pos++] = savestring(pp, strlen(pp));
-        1:  504-block  0
+       41:  469-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 41
+    %%%%%:  469-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  470:		puts(_(MIME_USAGE));
+    %%%%%:  470-block  0
+call    0 never executed
+call    1 never executed
+    #####:  471:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  472:	}
+        -:  473:
+       41:  474:	if (args[1] && *args[1] == 'i' && strcmp(args[1], "import") == 0) {
+       41:  474-block  0
+branch  0 taken 41 (fallthrough)
+branch  1 taken 0
+       41:  474-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 40
+        1:  474-block  2
+branch  4 taken 0 (fallthrough)
+branch  5 taken 1
+    #####:  475:		time_t rawtime = time(NULL);
+    %%%%%:  475-block  0
+call    0 never executed
+        -:  476:		struct tm tm;
+    #####:  477:		localtime_r(&rawtime, &tm);
+call    0 never executed
+        -:  478:		char date[64];
+    #####:  479:		strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", &tm);
+        -:  480:
+        -:  481:		char suffix[68];
+    #####:  482:		snprintf(suffix, 67, "%d%d%d%d%d%d", tm.tm_year + 1900,
+    #####:  483:		    tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min,
+        -:  484:		    tm.tm_sec);
+        -:  485:
+        -:  486:		char new[PATH_MAX];
+    #####:  487:		snprintf(new, PATH_MAX - 1, "%s.%s", mime_file, suffix);
+    #####:  488:		rename(mime_file, new);
+call    0 never executed
+        -:  489:
+    #####:  490:		int mime_defs = mime_import(mime_file);
+call    0 never executed
+    #####:  491:		if (mime_defs > 0) {
+branch  0 never executed
+branch  1 never executed
+    #####:  492:			printf(_("%s: %d MIME definition(s) imported from the system. "
+    %%%%%:  492-block  0
+call    0 never executed
+call    1 never executed
+        -:  493:				"Old MIME list file stored as %s\n"),
+        -:  494:				PROGRAM_NAME, mime_defs, new);
+    #####:  495:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  496:		} else {
+    #####:  497:			rename(new, mime_file);
+    %%%%%:  497-block  0
+call    0 never executed
+    #####:  498:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  499:		}
+        -:  500:	}
+        -:  501:
+        -:  502:	/* Check the existence of the 'file' command. */
+        -:  503:/*	char *file_path_tmp = (char *)NULL;
+        -:  504:	if ((file_path_tmp = get_cmd_path("file")) == NULL) {
+        -:  505:		fprintf(stderr, _("%s: file: Command not found\n"), PROGRAM_NAME);
+        -:  506:		return EXIT_FAILURE;
+        -:  507:	}
+        -:  508:
+        -:  509:	free(file_path_tmp);
+        -:  510:	file_path_tmp = (char *)NULL; */
+        -:  511:
+       41:  512:	char *file_path = (char *)NULL,
+       41:  513:		 *deq_file = (char *)NULL;
+       41:  514:	int info = 0,
+       41:  515:		file_index = 0;
+        -:  516:
+       41:  517:	if (*args[1] == 'e' && strcmp(args[1], "edit") == 0) {
+       41:  517-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 40
+        1:  517-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 0
+        1:  518:		return mime_edit(args);
+        1:  518-block  0
 call    0 returned 1
 unconditional  1 taken 1
-        1:  505:			break;
-        1:  505-block  0
-unconditional  0 taken 1
-        -:  506:		}
-        -:  507:
-        8:  508:		if (*p == ' ') {
-        8:  508-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 8
-    #####:  509:			*p = '\0';
-    #####:  510:			if (*pp)
-    %%%%%:  510-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  511:				cmd[pos++] = savestring(pp, strlen(pp));
-    %%%%%:  511-block  0
-call    0 never executed
-unconditional  1 never executed
-    #####:  512:			pp = ++p;
-    %%%%%:  512-block  0
-unconditional  0 never executed
-        -:  513:		}
-        -:  514:
-        -:  515:		else
-        8:  516:			p++;
-        8:  516-block  0
-unconditional  0 taken 8
-        -:  517:	}
-        -:  518:
-        1:  519:	cmd[pos++] = savestring(file_path, strlen(file_path));
-        1:  519-block  0
-call    0 returned 1
-        1:  520:	cmd[pos] = (char *)NULL;
-        -:  521:
-       1*:  522:	int ret = launch_execve(cmd, (*args[args_num - 1] == '&'
+        -:  519:	}
+        -:  520:
+       40:  521:	else if (*args[1] == 'i' && strcmp(args[1], "info") == 0) {
+       40:  521-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 39
+        1:  521-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 0
+        1:  522:		if (!args[2]) {
+        1:  522-block  0
 branch  0 taken 0 (fallthrough)
 branch  1 taken 1
-    %%%%%:  522-block  0
-unconditional  2 never executed
-        1:  522-block  1
-unconditional  3 taken 1
-        1:  522-block  2
-call    4 returned 1
-    #####:  523:	&& !args[args_num - 1][1]) ? BACKGROUND : FOREGROUND, E_NOSTDERR);
+    #####:  523:			fprintf(stderr, "%s\n", _(MIME_USAGE));
     %%%%%:  523-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  524:
-        1:  525:	free(file_path);
-        1:  526:	free(app);
-        -:  527:
-        1:  528:	int i = pos;
-        3:  529:	while (--i >= 0)
-unconditional  0 taken 1
-        3:  529-block  0
-branch  1 taken 2
-branch  2 taken 1 (fallthrough)
-        2:  530:		free(cmd[i]);
-        2:  530-block  0
-unconditional  0 taken 2
-        1:  531:	free(cmd);
-        -:  532:
-        1:  533:	return ret;
-        1:  533-block  0
-unconditional  0 taken 1
-        -:  534:}
-        -:  535:
-        -:  536:/* Import MIME definitions from the system into FILE. This function will
-        -:  537: * only be executed if the MIME file is not found or when creating a new
-        -:  538: * profile. Returns zero if some association is found in the system
-        -:  539: * 'mimeapps.list' files, or one in case of error or no association
-        -:  540: * found */
-        -:  541:int
-function mime_import called 0 returned 0% blocks executed 0%
-    #####:  542:mime_import(char *file)
-        -:  543:{
-        -:  544:	/* Open the internal MIME file */
-    #####:  545:	FILE *mime_fp = fopen(file, "w");
-    %%%%%:  545-block  0
 call    0 never executed
-        -:  546:
-    #####:  547:	if (!mime_fp)
-branch  0 never executed
-branch  1 never executed
-    #####:  548:		return EXIT_FAILURE;
-    %%%%%:  548-block  0
-unconditional  0 never executed
-        -:  549:
-        -:  550:	/* If not in X, just specify a few basic associations to make sure
-        -:  551:	 * that at least 'mm edit' will work ('vi' should be installed in
-        -:  552:	 * almost any Unix computer) */
-    #####:  553:	if (!(flags & GUI)) {
-    %%%%%:  553-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  554:		fputs("text/plain=nano;vim;vi;emacs;ed\n"
-    %%%%%:  554-block  0
-call    0 never executed
-        -:  555:		      "E:^cfm$=nano;vim;vi;emacs;ed\n", mime_fp);
-    #####:  556:		fclose(mime_fp);
-call    0 never executed
-    #####:  557:		return EXIT_SUCCESS;
-unconditional  0 never executed
-        -:  558:	}
-        -:  559:
-    #####:  560:	if (!user.home) {
-    %%%%%:  560-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  561:		fclose(mime_fp);
-    %%%%%:  561-block  0
-call    0 never executed
-    #####:  562:		return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  563:	}
-        -:  564:
-        -:  565:	/* Create a list of possible paths for the 'mimeapps.list' file */
-    #####:  566:	size_t home_len = strlen(user.home);
-    #####:  567:	char *config_path = (char *)NULL, *local_path = (char *)NULL;
-    #####:  568:	config_path = (char *)xcalloc(home_len + 23, sizeof(char));
-    %%%%%:  568-block  0
-call    0 never executed
-    #####:  569:	local_path = (char *)xcalloc(home_len + 41, sizeof(char));
-call    0 never executed
-    #####:  570:	sprintf(config_path, "%s/.config/mimeapps.list", user.home);
-    #####:  571:	sprintf(local_path, "%s/.local/share/applications/mimeapps.list", user.home);
-        -:  572:
-    #####:  573:	char *mime_paths[] = {config_path, local_path,
-        -:  574:	    "/usr/local/share/applications/mimeapps.list",
-        -:  575:	    "/usr/share/applications/mimeapps.list",
-        -:  576:	    "/etc/xdg/mimeapps.list", NULL};
-        -:  577:
-        -:  578:	/* Check each mimeapps.list file and store its associations into
-        -:  579:	 * FILE */
-        -:  580:	size_t i;
-    #####:  581:	for (i = 0; mime_paths[i]; i++) {
-unconditional  0 never executed
-    %%%%%:  581-block  0
-unconditional  1 never executed
-    %%%%%:  581-block  1
-branch  2 never executed
-branch  3 never executed
-        -:  582:
-    #####:  583:		FILE *sys_mime_fp = fopen(mime_paths[i], "r");
-    %%%%%:  583-block  0
-call    0 never executed
-    #####:  584:		if (!sys_mime_fp)
-branch  0 never executed
-branch  1 never executed
-    #####:  585:			continue;
-    %%%%%:  585-block  0
-unconditional  0 never executed
-        -:  586:
-    #####:  587:		size_t line_size = 0;
-    #####:  588:		char *line = (char *)NULL;
-    #####:  589:		ssize_t line_len = 0;
-        -:  590:
-        -:  591:		/* Only store associations in the "Default Applications" section */
-    #####:  592:		int da_found = 0;
-        -:  593:
-    #####:  594:		while ((line_len = getline(&line, &line_size,
-    %%%%%:  594-block  0
-unconditional  0 never executed
-    %%%%%:  594-block  1
 call    1 never executed
-    #####:  595:			    sys_mime_fp)) > 0) {
-branch  0 never executed
-branch  1 never executed
-        -:  596:
-    #####:  597:			if (!da_found && strncmp(line, "[Default Applications]", 22) == 0) {
-    %%%%%:  597-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  597-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  598:				da_found = 1;
-    #####:  599:				continue;
-    %%%%%:  599-block  0
+    #####:  524:			return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  600:			}
-        -:  601:
-    #####:  602:			if (da_found) {
-    %%%%%:  602-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  603:				if (*line == '[')
-    %%%%%:  603-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  604:					break;
-    %%%%%:  604-block  0
-unconditional  0 never executed
-        -:  605:
-    #####:  606:				if (*line == '#' || *line == '\n')
-    %%%%%:  606-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  606-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  607:					continue;
-    %%%%%:  607-block  0
-unconditional  0 never executed
-        -:  608:
-    #####:  609:				int index = strcntchr(line, '.');
-    %%%%%:  609-block  0
+        -:  525:		}
+        -:  526:
+        1:  527:		if (strchr(args[2], '\\')) {
+        1:  527-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  528:			deq_file = dequote_str(args[2], 0);
+    %%%%%:  528-block  0
 call    0 never executed
-        -:  610:
-    #####:  611:				if (index != -1)
+    #####:  529:			file_path = realpath(deq_file, NULL);
+call    0 never executed
+    #####:  530:			free(deq_file);
+    #####:  531:			deq_file = (char *)NULL;
+unconditional  0 never executed
+        -:  532:		} else {
+        1:  533:			file_path = realpath(args[2], NULL);
+        1:  533-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -:  534:		}
+        -:  535:
+        1:  536:		if (!file_path) {
+        1:  536-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  537:			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[2],
 branch  0 never executed
 branch  1 never executed
-    #####:  612:					line[index] = '\0';
-    %%%%%:  612-block  0
+    %%%%%:  537-block  0
+call    2 never executed
+    #####:  538:			    (is_number(args[2]) == 1) ? _("No such ELN") : strerror(errno));
+    %%%%%:  538-block  0
+call    0 never executed
+    %%%%%:  538-block  1
+call    1 never executed
+unconditional  2 never executed
+    %%%%%:  538-block  2
+call    3 never executed
+unconditional  4 never executed
+    #####:  539:			return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  613:
-    #####:  614:				fprintf(mime_fp, "%s\n", line);
-    %%%%%:  614-block  0
+        -:  540:		}
+        -:  541:
+        1:  542:		if (access(file_path, R_OK) == -1) {
+        1:  542-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####:  543:			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_path,
+call    0 never executed
+    #####:  544:			    strerror(errno));
+    %%%%%:  544-block  0
+call    0 never executed
+    #####:  545:			free(file_path);
+    #####:  546:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  547:		}
+        -:  548:
+        1:  549:		info = 1;
+        1:  550:		file_index = 2;
+        1:  550-block  0
+unconditional  0 taken 1
+        -:  551:	}
+        -:  552:
+        -:  553:	else {
+        -:  554:		/* Only dequote the file name if coming from the mime command */
+       39:  555:		if (*args[0] == 'm' && strchr(args[1], '\\')) {
+       39:  555-block  0
+branch  0 taken 39 (fallthrough)
+branch  1 taken 0
+       39:  555-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 39
+    #####:  556:			deq_file = dequote_str(args[1], 0);
+    %%%%%:  556-block  0
+call    0 never executed
+    #####:  557:			file_path = realpath(deq_file, NULL);
+call    0 never executed
+    #####:  558:			free(deq_file);
+    #####:  559:			deq_file = (char *)NULL;
+unconditional  0 never executed
+        -:  560:		}
+       39:  561:		if (!file_path)
+       39:  561-block  0
+branch  0 taken 39 (fallthrough)
+branch  1 taken 0
+       39:  562:			file_path = realpath(args[1], NULL);
+       39:  562-block  0
+call    0 returned 39
+unconditional  1 taken 39
+        -:  563:
+       39:  564:		if (!file_path) {
+       39:  564-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 39
+    #####:  565:			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[1],
+call    0 never executed
+    #####:  566:			    strerror(errno));
+    %%%%%:  566-block  0
+call    0 never executed
+    #####:  567:			return -1;
+unconditional  0 never executed
+    %%%%%:  567-block  0
+unconditional  1 never executed
+        -:  568:		}
+        -:  569:
+        -:  570:		struct stat a;
+       39:  571:		if (lstat(file_path, &a) == 0 && (a.st_mode & S_IFMT) == S_IFDIR) {
+       39:  571-block  0
+call    0 returned 39
+branch  1 taken 39 (fallthrough)
+branch  2 taken 0
+       39:  571-block  1
+branch  3 taken 0 (fallthrough)
+branch  4 taken 39
+    #####:  572:			int _exit_status = cd_function(file_path, CD_PRINT_ERROR);
+    %%%%%:  572-block  0
+call    0 never executed
+    #####:  573:			free(file_path);
+    #####:  574:			return _exit_status;
+unconditional  0 never executed
+        -:  575:		}
+        -:  576:
+       39:  577:		if (access(file_path, R_OK) == -1) {
+       39:  577-block  0
+call    0 returned 39
+branch  1 taken 0 (fallthrough)
+branch  2 taken 39
+    #####:  578:			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file_path,
+call    0 never executed
+    #####:  579:			    strerror(errno));
+    %%%%%:  579-block  0
+call    0 never executed
+    #####:  580:			free(file_path);
+        -:  581:			/* Since this function is called by open_function, and since
+        -:  582:			 * this latter prints an error message itself whenever the
+        -:  583:			 * exit code of mime_open is EXIT_FAILURE, and since we
+        -:  584:			 * don't want that message in this case, return -1 instead
+        -:  585:			 * to prevent that message from being printed */
+    #####:  586:			return -1;
+unconditional  0 never executed
+        -:  587:		}
+        -:  588:
+       39:  589:		file_index = 1;
+       39:  589-block  0
+unconditional  0 taken 39
+        -:  590:	}
+        -:  591:
+       40:  592:	if (!file_path) {
+       40:  592-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 40
+    #####:  593:		fprintf(stderr, "%s: %s\n", args[file_index], strerror(errno));
+    %%%%%:  593-block  0
+call    0 never executed
+call    1 never executed
+    #####:  594:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  595:	}
+        -:  596:
+        -:  597:	/* Get file's mime-type */
+        -:  598:#ifndef _NO_MAGIC
+       40:  599:	char *mime = xmagic(file_path, MIME_TYPE);
+       40:  599-block  0
+call    0 returned 40
+        -:  600:#else
+        -:  601:	char *mime = get_mime(file_path);
+        -:  602:#endif
+       40:  603:	if (!mime) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 40
+    #####:  604:		fprintf(stderr, _("%s: Error getting mime-type\n"), PROGRAM_NAME);
+    %%%%%:  604-block  0
+call    0 never executed
+call    1 never executed
+    #####:  605:		free(file_path);
+    #####:  606:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  607:	}
+        -:  608:
+       40:  609:	if (info)
+       40:  609-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 39
+        1:  610:		printf(_("MIME type: %s\n"), mime);
+        1:  610-block  0
+call    0 returned 1
+call    1 returned 1
+unconditional  2 taken 1
+        -:  611:
+        -:  612:	/* Get file extension, if any */
+       40:  613:	char *ext = (char *)NULL;
+       40:  614:	char *filename = strrchr(file_path, '/');
+       40:  615:	if (filename) {
+       40:  615-block  0
+branch  0 taken 40 (fallthrough)
+branch  1 taken 0
+       40:  616:		filename++; /* Remove leading slash */
+       40:  617:		if (*filename == '.')
+       40:  617-block  0
+branch  0 taken 5 (fallthrough)
+branch  1 taken 35
+        5:  618:			filename++; /* Skip leading dot if hidden */
+        5:  618-block  0
+unconditional  0 taken 5
+        -:  619:
+       40:  620:		char *ext_tmp = strrchr(filename, '.');
+       40:  621:		if (ext_tmp) {
+       40:  621-block  0
+branch  0 taken 20 (fallthrough)
+branch  1 taken 20
+       20:  622:			ext_tmp++; /* Remove dot from extension */
+       20:  623:			ext = savestring(ext_tmp, strlen(ext_tmp));
+       20:  623-block  0
+call    0 returned 20
+       20:  624:			ext_tmp = (char *)NULL;
+unconditional  0 taken 20
+        -:  625:		}
+        -:  626:
+       40:  627:		filename = (char *)NULL;
+       40:  627-block  0
+unconditional  0 taken 40
+        -:  628:	}
+        -:  629:
+       40:  630:	if (info)
+       40:  630-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 39
+       1*:  631:		printf(_("Extension: %s\n"), ext ? ext : "None");
+        1:  631-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    %%%%%:  631-block  1
+unconditional  2 never executed
+        1:  631-block  2
+unconditional  3 taken 1
+        1:  631-block  3
+call    4 returned 1
+call    5 returned 1
+unconditional  6 taken 1
+        -:  632:
+        -:  633:	/* Get default application for MIME or extension */
+       40:  634:	char *app = get_app(mime, ext);
+       40:  634-block  0
+call    0 returned 40
+       40:  635:	if (!app) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 40
+    #####:  636:		if (info) {
+    %%%%%:  636-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  637:			fputs(_("Associated application: None\n"), stderr);
+    %%%%%:  637-block  0
+call    0 never executed
+call    1 never executed
+unconditional  2 never executed
+        -:  638:		} else {
+        -:  639:#ifndef _NO_ARCHIVING
+        -:  640:			/* If an archive/compressed file, run the archiver function */
+    #####:  641:			if (is_compressed(file_path, 1) == 0) {
+    %%%%%:  641-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  642:				char *tmp_cmd[] = {"ad", file_path, NULL};
+    #####:  643:				int exit_status = archiver(tmp_cmd, 'd');
+    %%%%%:  643-block  0
+call    0 never executed
+        -:  644:
+    #####:  645:				free(file_path);
+    #####:  646:				free(mime);
+        -:  647:
+    #####:  648:				if (ext)
+branch  0 never executed
+branch  1 never executed
+    #####:  649:					free(ext);
+    %%%%%:  649-block  0
+unconditional  0 never executed
+        -:  650:
+    #####:  651:				return exit_status;
+    %%%%%:  651-block  0
+unconditional  0 never executed
+        -:  652:			} else {
+    #####:  653:				fprintf(stderr, _("%s: %s: No associated application "
 call    0 never executed
 unconditional  1 never executed
-        -:  615:			}
-        -:  616:		}
-        -:  617:
-    #####:  618:		free(line);
-    #####:  619:		line = (char *)NULL;
-        -:  620:
-    #####:  621:		fclose(sys_mime_fp);
-    %%%%%:  621-block  0
+    #####:  654:						"found\n"), PROGRAM_NAME, args[1]);
+    %%%%%:  654-block  0
 call    0 never executed
-        -:  622:	}
-        -:  623:
-        -:  624:	/* Make sure there is an entry for text/plain and *.cfm files, so
-        -:  625:	 * that at least 'mm edit' will work. Gedit, kate, pluma, mousepad,
-        -:  626:	 * and leafpad, are the default text editors of Gnome, KDE, Mate,
-        -:  627:	 * XFCE, and LXDE respectivelly */
-    #####:  628:	fputs("text/plain=gedit;kate;pluma;mousepad;leafpad;nano;vim;"
-    %%%%%:  628-block  0
-call    0 never executed
-        -:  629:	      "vi;emacs;ed\n"
-        -:  630:	      "E:^cfm$=gedit;kate;pluma;mousepad;leafpad;nano;vim;vi;"
-        -:  631:	      "emacs;ed\n", mime_fp);
-        -:  632:
-    #####:  633:	fclose(mime_fp);
-call    0 never executed
-        -:  634:
-    #####:  635:	free(config_path);
-    #####:  636:	free(local_path);
-        -:  637:
-    #####:  638:	return EXIT_SUCCESS;
-unconditional  0 never executed
-        -:  639:}
-        -:  640:
-        -:  641:int
-function mime_edit called 0 returned 0% blocks executed 0%
-    #####:  642:mime_edit(char **args)
-        -:  643:{
-    #####:  644:	int exit_status = EXIT_SUCCESS;
-        -:  645:
-    #####:  646:	if (!args[2]) {
-    %%%%%:  646-block  0
+        -:  655:			}
+        -:  656:#else
+        -:  657:			fprintf(stderr, _("%s: %s: No associated application "
+        -:  658:					"found\n"), PROGRAM_NAME, args[1]);
+        -:  659:#endif
+        -:  660:		}
+        -:  661:
+    #####:  662:		free(file_path);
+    #####:  663:		free(mime);
+        -:  664:
+    #####:  665:		if (ext)
+    %%%%%:  665-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  647:		char *cmd[] = {"mime", MIME_FILE, NULL};
-        -:  648:
-    #####:  649:		if (mime_open(cmd) != 0) {
-    %%%%%:  649-block  0
-call    0 never executed
+    #####:  666:			free(ext);
+    %%%%%:  666-block  0
+unconditional  0 never executed
+        -:  667:
+    #####:  668:		return EXIT_FAILURE;
+    %%%%%:  668-block  0
+unconditional  0 never executed
+        -:  669:	}
+        -:  670:
+       40:  671:	if (info) {
+       40:  671-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 39
+        -:  672:		/* In case of "cmd args" print only cmd */
+        1:  673:		char *ret = strchr(app, ' ');
+        1:  674:		if (ret)
+        1:  674-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  675:			*ret = '\0';
+    %%%%%:  675-block  0
+unconditional  0 never executed
+        -:  676:
+       1*:  677:		printf(_("Associated application: %s (%s)\n"), app,
+        1:  677-block  0
+unconditional  0 taken 1
+    %%%%%:  677-block  1
+unconditional  1 never executed
+        1:  677-block  2
+call    2 returned 1
+call    3 returned 1
+        1:  678:		    mime_match ? "MIME" : "ext");
+        1:  678-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        -:  679:
+        1:  680:		free(file_path);
+        1:  681:		free(mime);
+        1:  682:		free(app);
+        -:  683:
+        1:  684:		if (ext)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  685:			free(ext);
+    %%%%%:  685-block  0
+unconditional  0 never executed
+        -:  686:
+        1:  687:		return EXIT_SUCCESS;
+        1:  687-block  0
+unconditional  0 taken 1
+        -:  688:	}
+        -:  689:
+       39:  690:	free(mime);
+        -:  691:
+       39:  692:	if (ext)
+       39:  692-block  0
+branch  0 taken 20 (fallthrough)
+branch  1 taken 19
+       20:  693:		free(ext);
+       20:  693-block  0
+unconditional  0 taken 20
+        -:  694:
+        -:  695:	/* If not info, open the file with the associated application */
+        -:  696:
+        -:  697:	/* Get number of arguments to check for final ampersand */
+       39:  698:	int args_num = 0;
+      117:  699:	for (args_num = 0; args[args_num]; args_num++);
+       39:  699-block  0
+unconditional  0 taken 39
+       78:  699-block  1
+unconditional  1 taken 78
+      117:  699-block  2
+branch  2 taken 78
+branch  3 taken 39 (fallthrough)
+        -:  700:
+        -:  701:	/* Construct the command and run it */
+        -:  702:
+        -:  703:	/* Two pointers to store different positions in the APP string */
+       39:  704:	char *p = app;
+       39:  705:	char *pp = app;
+        -:  706:
+        -:  707:	/* The number of spaces in APP is (at least) the number of paramenters
+        -:  708:	 * passed to the command. Extra spaces will be ignored */
+       39:  709:	size_t spaces = 0;
+      312:  710:	while (*p) {
+       39:  710-block  0
+unconditional  0 taken 39
+      312:  710-block  1
+branch  1 taken 273
+branch  2 taken 39 (fallthrough)
+      273:  711:		if (*(p++) == ' ')
+      273:  711-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 273
+    #####:  712:			spaces++;
+    %%%%%:  712-block  0
+unconditional  0 never executed
+        -:  713:	}
+        -:  714:
+        -:  715:	/* To the number of spaces/parametes we need to add the command itself,
+        -:  716:	 * the file name and the final NULL string (spaces + 3) */
+       39:  717:	char **cmd = (char **)xnmalloc(spaces + 3, sizeof(char *));
+       39:  717-block  0
+call    0 returned 39
+        -:  718:
+        -:  719:	/* Rewind P to the beginning of APP */
+       39:  720:	p = pp;
+        -:  721:
+        -:  722:	/* Store each substring in APP into a two dimensional array (CMD) */
+       39:  723:	int pos = 0;
+unconditional  0 taken 39
+        -:  724:	while (1) {
+      312:  725:		if (!*p) {
+      312:  725-block  0
+branch  0 taken 39 (fallthrough)
+branch  1 taken 273
+       39:  726:			if (*pp)
+       39:  726-block  0
+branch  0 taken 39 (fallthrough)
+branch  1 taken 0
+       39:  727:				cmd[pos++] = savestring(pp, strlen(pp));
+       39:  727-block  0
+call    0 returned 39
+unconditional  1 taken 39
+       39:  728:			break;
+       39:  728-block  0
+unconditional  0 taken 39
+        -:  729:		}
+        -:  730:
+      273:  731:		if (*p == ' ') {
+      273:  731-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 273
+    #####:  732:			*p = '\0';
+    #####:  733:			if (*pp)
+    %%%%%:  733-block  0
+branch  0 never executed
 branch  1 never executed
-branch  2 never executed
-    #####:  650:			fputs(_("Try 'mm, mime edit APPLICATION'\n"), stderr);
-    %%%%%:  650-block  0
+    #####:  734:				cmd[pos++] = savestring(pp, strlen(pp));
+    %%%%%:  734-block  0
 call    0 never executed
-    #####:  651:			exit_status = EXIT_FAILURE;
+unconditional  1 never executed
+    #####:  735:			pp = ++p;
+    %%%%%:  735-block  0
 unconditional  0 never executed
-        -:  652:		}
-        -:  653:
-        -:  654:	}
-        -:  655:
-        -:  656:	else {
-    #####:  657:		char *cmd[] = {args[2], MIME_FILE, NULL};
-    #####:  658:		if (launch_execve(cmd, FOREGROUND, E_NOSTDERR) != EXIT_SUCCESS)
-    %%%%%:  658-block  0
-call    0 never executed
-branch  1 never executed
+        -:  736:		} else {
+      273:  737:			p++;
+      273:  737-block  0
+unconditional  0 taken 273
+        -:  738:		}
+        -:  739:	}
+        -:  740:
+        -:  741:	/* If %f placeholder is found, replace it by FILE_PATH. Else, append
+        -:  742:	 * FILE_PATH to the end of CMD */
+       39:  743:	int i = pos,
+       39:  744:		found = 0;
+       78:  745:	while (--i >= 0) {
+       39:  745-block  0
+unconditional  0 taken 39
+       78:  745-block  1
+branch  1 taken 39
+branch  2 taken 39 (fallthrough)
+      39*:  746:		if (*cmd[i] == '%' && *(cmd[i] + 1) == 'f') {
+       39:  746-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 39
+    %%%%%:  746-block  1
 branch  2 never executed
-    #####:  659:			exit_status = EXIT_FAILURE;
-    %%%%%:  659-block  0
+branch  3 never executed
+    #####:  747:			found = 1;
+    #####:  748:			break;
+    %%%%%:  748-block  0
 unconditional  0 never executed
-        -:  660:	}
-        -:  661:
-    #####:  662:	return exit_status;
-    %%%%%:  662-block  0
+        -:  749:		}
+        -:  750:	}
+        -:  751:
+       39:  752:	if (found) {
+       39:  752-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 39
+    #####:  753:		cmd[i] = (char *)xrealloc(cmd[i], (strlen(file_path) + 1) * sizeof(char));
+    %%%%%:  753-block  0
+call    0 never executed
+    #####:  754:		strcpy(cmd[i], file_path);
 unconditional  0 never executed
-        -:  663:}
+        -:  755:	} else {
+       39:  756:		cmd[pos++] = savestring(file_path, strlen(file_path));
+       39:  756-block  0
+call    0 returned 39
+unconditional  1 taken 39
+        -:  757:	}
+        -:  758:
+       39:  759:	cmd[pos] = (char *)NULL;
+        -:  760:
+       39:  761:	int ret = launch_execve(cmd, bg_proc ? BACKGROUND : FOREGROUND, E_NOSTDERR);
+       39:  761-block  0
+call    0 returned 39
+        -:  762:
+       39:  763:	free(file_path);
+       39:  764:	free(app);
+        -:  765:
+       39:  766:	i = pos;
+      117:  767:	while (--i >= 0)
+unconditional  0 taken 39
+      117:  767-block  0
+branch  1 taken 78
+branch  2 taken 39 (fallthrough)
+       78:  768:		free(cmd[i]);
+       78:  768-block  0
+unconditional  0 taken 78
+       39:  769:	free(cmd);
+       39:  770:	return ret;
+       39:  770-block  0
+unconditional  0 taken 39
+        -:  771:}
+        -:  772:#endif /* !_NO_LIRA */

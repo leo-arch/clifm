@@ -36,1187 +36,1476 @@
         -:   35:#include "file_operations.h"
         -:   36:#include "init.h"
         -:   37:#include "navigation.h"
-        -:   38:
-        -:   39:int
-function add_to_jumpdb called 8 returned 100% blocks executed 65%
-        8:   40:add_to_jumpdb(const char *dir)
-        -:   41:{
-        8:   42:	if (xargs.no_dirjump == 1 || !dir || !*dir)
-        8:   42-block  0
-branch  0 taken 8 (fallthrough)
+        -:   38:#include "messages.h"
+        -:   39:
+        -:   40:int
+function add_to_jumpdb called 74 returned 100% blocks executed 85%
+       74:   41:add_to_jumpdb(const char *dir)
+        -:   42:{
+       74:   43:	if (xargs.no_dirjump == 1 || !dir || !*dir)
+       74:   43-block  0
+branch  0 taken 74 (fallthrough)
 branch  1 taken 0
-        8:   42-block  1
-branch  2 taken 8 (fallthrough)
+       74:   43-block  1
+branch  2 taken 74 (fallthrough)
 branch  3 taken 0
-        8:   42-block  2
+       74:   43-block  2
 branch  4 taken 0 (fallthrough)
-branch  5 taken 8
-    #####:   43:		return EXIT_FAILURE;
-    %%%%%:   43-block  0
+branch  5 taken 74
+    #####:   44:		return EXIT_FAILURE;
+    %%%%%:   44-block  0
 unconditional  0 never executed
-        -:   44:
-        8:   45:	if (!jump_db) {
-        8:   45-block  0
+        -:   45:
+       74:   46:	if (!jump_db) {
+       74:   46-block  0
 branch  0 taken 0 (fallthrough)
-branch  1 taken 8
-    #####:   46:		jump_db = (struct jump_t *)xnmalloc(1, sizeof(struct jump_t));
-    %%%%%:   46-block  0
+branch  1 taken 74
+    #####:   47:		jump_db = (struct jump_t *)xnmalloc(1, sizeof(struct jump_t));
+    %%%%%:   47-block  0
 call    0 never executed
-    #####:   47:		jump_n = 0;
+    #####:   48:		jump_n = 0;
 unconditional  0 never executed
-        -:   48:	}
-        -:   49:
-        8:   50:	int i = (int)jump_n, new_entry = 1;
-      259:   51:	while (--i >= 0) {
-        8:   51-block  0
-unconditional  0 taken 8
-      259:   51-block  1
-branch  1 taken 259
-branch  2 taken 0 (fallthrough)
-        -:   52:
-      259:   53:		if (dir[1] == jump_db[i].path[1] && strcmp(jump_db[i].path, dir) == 0) {
-      259:   53-block  0
-branch  0 taken 178 (fallthrough)
-branch  1 taken 81
-      178:   53-block  1
-branch  2 taken 8 (fallthrough)
-branch  3 taken 170
-        8:   54:			jump_db[i].visits++;
-        8:   55:			jump_db[i].last_visit = time(NULL);
-        8:   55-block  0
-call    0 returned 8
-        8:   56:			new_entry = 0;
-        8:   57:			break;
-unconditional  0 taken 8
+        -:   49:	}
+        -:   50:
+       74:   51:	int i = (int)jump_n, new_entry = 1;
+     1826:   52:	while (--i >= 0) {
+       74:   52-block  0
+unconditional  0 taken 74
+     1826:   52-block  1
+branch  1 taken 1816
+branch  2 taken 10 (fallthrough)
+     1816:   53:		if (dir[1] == jump_db[i].path[1] && strcmp(jump_db[i].path, dir) == 0) {
+     1816:   53-block  0
+branch  0 taken 1261 (fallthrough)
+branch  1 taken 555
+     1261:   53-block  1
+branch  2 taken 64 (fallthrough)
+branch  3 taken 1197
+       64:   54:			jump_db[i].visits++;
+       64:   55:			jump_db[i].last_visit = time(NULL);
+       64:   55-block  0
+call    0 returned 64
+       64:   56:			new_entry = 0;
+       64:   57:			break;
+unconditional  0 taken 64
         -:   58:		}
         -:   59:	}
         -:   60:
-        8:   61:	if (!new_entry)
-        8:   61-block  0
-branch  0 taken 8 (fallthrough)
-branch  1 taken 0
-        8:   62:		return EXIT_SUCCESS;
-        8:   62-block  0
-unconditional  0 taken 8
+       74:   61:	if (!new_entry)
+       74:   61-block  0
+branch  0 taken 64 (fallthrough)
+branch  1 taken 10
+       64:   62:		return EXIT_SUCCESS;
+       64:   62-block  0
+unconditional  0 taken 64
         -:   63:
-    #####:   64:	jump_db = (struct jump_t *)xrealloc(jump_db, (jump_n + 2) * sizeof(struct jump_t));
-    %%%%%:   64-block  0
-call    0 never executed
-    #####:   65:	jump_db[jump_n].visits = 1;
-    #####:   66:	time_t now = time(NULL);
-call    0 never executed
-    #####:   67:	jump_db[jump_n].first_visit = now;
-    #####:   68:	jump_db[jump_n].last_visit = now;
-    #####:   69:	jump_db[jump_n].rank = 0;
-    #####:   70:	jump_db[jump_n].keep = 0;
-    #####:   71:	jump_db[jump_n++].path = savestring(dir, strlen(dir));
-call    0 never executed
-        -:   72:
-    #####:   73:	jump_db[jump_n].path = (char *)NULL;
-    #####:   74:	jump_db[jump_n].visits = 0;
-    #####:   75:	jump_db[jump_n].rank = 0;
-    #####:   76:	jump_db[jump_n].keep = 0;
-    #####:   77:	jump_db[jump_n].first_visit = -1;
-    #####:   78:	jump_db[jump_n].last_visit = -1;
-        -:   79:
-    #####:   80:	return EXIT_SUCCESS;
-unconditional  0 never executed
-        -:   81:}
-        -:   82:
-        -:   83:/* Store the jump database into a file */
-        -:   84:void
-function save_jumpdb called 1 returned 100% blocks executed 85%
-        1:   85:save_jumpdb(void)
-        -:   86:{
-        -:   87:
-        1:   88:	if (xargs.no_dirjump == 1 || !config_ok || !CONFIG_DIR || !jump_db
-        1:   88-block  0
-branch  0 taken 1 (fallthrough)
+       10:   64:	jump_db = (struct jump_t *)xrealloc(jump_db, (jump_n + 2) * sizeof(struct jump_t));
+       10:   64-block  0
+call    0 returned 10
+       10:   65:	jump_db[jump_n].visits = 1;
+       10:   66:	time_t now = time(NULL);
+call    0 returned 10
+       10:   67:	jump_db[jump_n].first_visit = now;
+       10:   68:	jump_db[jump_n].last_visit = now;
+       10:   69:	jump_db[jump_n].rank = 0;
+       10:   70:	jump_db[jump_n].keep = 0;
+        -:   71:
+       10:   72:	jump_db[jump_n++].path = savestring(dir, strlen(dir));
+call    0 returned 10
+        -:   73:
+       10:   74:	jump_db[jump_n].path = (char *)NULL;
+       10:   75:	jump_db[jump_n].visits = 0;
+       10:   76:	jump_db[jump_n].rank = 0;
+       10:   77:	jump_db[jump_n].keep = 0;
+       10:   78:	jump_db[jump_n].first_visit = -1;
+       10:   79:	jump_db[jump_n].last_visit = -1;
+        -:   80:
+       10:   81:	return EXIT_SUCCESS;
+unconditional  0 taken 10
+        -:   82:}
+        -:   83:
+        -:   84:/* Store the jump database into a file */
+        -:   85:void
+function save_jumpdb called 5 returned 100% blocks executed 93%
+        5:   86:save_jumpdb(void)
+        -:   87:{
+        5:   88:	if (xargs.no_dirjump == 1 || !config_ok || !config_dir || !jump_db
+        5:   88-block  0
+branch  0 taken 5 (fallthrough)
 branch  1 taken 0
-        1:   88-block  1
-branch  2 taken 1 (fallthrough)
+        5:   88-block  1
+branch  2 taken 5 (fallthrough)
 branch  3 taken 0
-        1:   88-block  2
-branch  4 taken 1 (fallthrough)
+        5:   88-block  2
+branch  4 taken 5 (fallthrough)
 branch  5 taken 0
-        1:   88-block  3
-branch  6 taken 1 (fallthrough)
+        5:   88-block  3
+branch  6 taken 5 (fallthrough)
 branch  7 taken 0
-        1:   89:	|| jump_n == 0)
-        1:   89-block  0
+        5:   89:	|| jump_n == 0)
+        5:   89-block  0
 branch  0 taken 0 (fallthrough)
-branch  1 taken 1
+branch  1 taken 5
     #####:   90:		return;
     %%%%%:   90-block  0
 unconditional  0 never executed
         -:   91:
-        1:   92:	char *JUMP_FILE = (char *)xnmalloc(strlen(CONFIG_DIR) + 10, sizeof(char));
-        1:   92-block  0
-call    0 returned 1
-        1:   93:	sprintf(JUMP_FILE, "%s/jump.cfm", CONFIG_DIR);
+        5:   92:	char *jump_file = (char *)xnmalloc(strlen(config_dir) + 10, sizeof(char));
+        5:   92-block  0
+call    0 returned 5
+        5:   93:	sprintf(jump_file, "%s/jump.cfm", config_dir);
         -:   94:
-        1:   95:	FILE *fp = fopen(JUMP_FILE, "w+");
-call    0 returned 1
-        -:   96:
-        1:   97:	if (!fp) {
+        5:   95:	FILE *fp = fopen(jump_file, "w+");
+call    0 returned 5
+        5:   96:	if (!fp) {
 branch  0 taken 0 (fallthrough)
+branch  1 taken 5
+    #####:   97:		free(jump_file);
+    #####:   98:		return;
+    %%%%%:   98-block  0
+unconditional  0 never executed
+        -:   99:	}
+        -:  100:
+        5:  101:	int i, reduce = 0, tmp_rank = 0, total_rank = 0;
+        5:  102:	time_t now = time(NULL);
+        5:  102-block  0
+call    0 returned 5
+        -:  103:
+        -:  104:	/* Calculate both total rank sum and rank for each entry */
+        5:  105:	i = (int)jump_n;
+      195:  106:	while (--i >= 0) {
+unconditional  0 taken 5
+      195:  106-block  0
+branch  1 taken 190
+branch  2 taken 5 (fallthrough)
+        -:  107:
+      190:  108:		int days_since_first = (int)(now - jump_db[i].first_visit) / 60 / 60 / 24;
+      191:  109:		int rank = days_since_first > 1 ? ((int)jump_db[i].visits * 100)
+      190:  110:					/ days_since_first : ((int)jump_db[i].visits * 100);
+      190:  110-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 189
+        1:  110-block  1
+unconditional  2 taken 1
+      189:  110-block  2
+unconditional  3 taken 189
+        -:  111:
+      190:  112:		int hours_since_last = (int)(now - jump_db[i].last_visit) / 60 / 60;
+        -:  113:
+        -:  114:		/* Do not remove directories visited in the last 24 hours, no
+        -:  115:		 * matter what their rank is */
+      190:  116:		tmp_rank = rank;
+      190:  117:		if (hours_since_last == 0) {			/* Last hour */
+      190:  117-block  0
+branch  0 taken 23 (fallthrough)
+branch  1 taken 167
+       23:  118:			rank = JHOUR(tmp_rank);
+       23:  119:			jump_db[i].keep = 1;
+       23:  119-block  0
+unconditional  0 taken 23
+      167:  120:		} else if (hours_since_last <= 24) {	/* Last day */
+      167:  120-block  0
+branch  0 taken 134 (fallthrough)
+branch  1 taken 33
+      134:  121:			rank = JDAY(tmp_rank);
+      134:  122:			jump_db[i].keep = 1;
+      134:  122-block  0
+unconditional  0 taken 134
+       33:  123:		} else if (hours_since_last <= 168) {	/* Last week */
+       33:  123-block  0
+branch  0 taken 32 (fallthrough)
 branch  1 taken 1
-    #####:   98:		free(JUMP_FILE);
-    #####:   99:		return;
-    %%%%%:   99-block  0
-unconditional  0 never executed
-        -:  100:	}
-        -:  101:
-        1:  102:	int i, reduce = 0, tmp_rank = 0, total_rank = 0;
-        1:  103:	time_t now = time(NULL);
-        1:  103-block  0
-call    0 returned 1
-        -:  104:
-        -:  105:	/* Calculate both total rank sum and rank for each entry */
-        1:  106:	i = (int)jump_n;
-       39:  107:	while (--i >= 0) {
+       32:  124:			rank = JWEEK(tmp_rank);
+       32:  124-block  0
+unconditional  0 taken 32
+        -:  125:		} else {								/* More than a week */
+        1:  126:			rank = JOLDER(tmp_rank);
+        1:  126-block  0
 unconditional  0 taken 1
-       39:  107-block  0
-branch  1 taken 38
-branch  2 taken 1 (fallthrough)
-        -:  108:
-       38:  109:		int days_since_first = (int)(now - jump_db[i].first_visit) / 60 / 60 / 24;
-      38*:  110:		int rank = days_since_first > 1 ? ((int)jump_db[i].visits * 100)
-      38*:  111:					/ days_since_first : ((int)jump_db[i].visits * 100);
-       38:  111-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 38
-    %%%%%:  111-block  1
-unconditional  2 never executed
-       38:  111-block  2
-unconditional  3 taken 38
-        -:  112:
-       38:  113:		int hours_since_last = (int)(now - jump_db[i].last_visit) / 60 / 60;
-        -:  114:
-        -:  115:		/* Do not remove directories visited in the last 24 hours, no
-        -:  116:		 * matter what their rank is */
-       38:  117:		tmp_rank = rank;
-       38:  118:		if (hours_since_last == 0) { /* Last hour */
-       38:  118-block  0
-branch  0 taken 11 (fallthrough)
-branch  1 taken 27
-       11:  119:			rank = JHOUR(tmp_rank);
-       11:  120:			jump_db[i].keep = 1;
-       11:  120-block  0
-unconditional  0 taken 11
-        -:  121:		}
-       27:  122:		else if (hours_since_last <= 24) { /* Last day */
-       27:  122-block  0
-branch  0 taken 25 (fallthrough)
-branch  1 taken 2
-       25:  123:			rank = JDAY(tmp_rank);
-       25:  124:			jump_db[i].keep = 1;
-       25:  124-block  0
-unconditional  0 taken 25
-        -:  125:		}
-        2:  126:		else if (hours_since_last <= 168) /* Last week */
-        2:  126-block  0
-branch  0 taken 2 (fallthrough)
-branch  1 taken 0
-        2:  127:			rank = JWEEK(tmp_rank);
-        2:  127-block  0
-unconditional  0 taken 2
-        -:  128:		else /* More than a week */
-    #####:  129:			rank = JOLDER(tmp_rank);
-    %%%%%:  129-block  0
-unconditional  0 never executed
+        -:  127:		}
+        -:  128:
+      190:  129:		jump_db[i].rank = rank;
         -:  130:
         -:  131:		/* Do not remove bookmarked, pinned, or workspaced directories */
         -:  132:		/* Add bonus points */
-       38:  133:		int j = (int)bm_n;
-      786:  134:		while (--j >= 0) {
-       38:  134-block  0
-unconditional  0 taken 38
-      786:  134-block  1
-branch  1 taken 759
-branch  2 taken 27 (fallthrough)
-      759:  135:			if (bookmarks[j].path[1] == jump_db[i].path[1]
-      759:  135-block  0
-branch  0 taken 310 (fallthrough)
-branch  1 taken 449
-      310:  136:			&& strcmp(bookmarks[j].path, jump_db[i].path) == 0) {
-      310:  136-block  0
-branch  0 taken 11 (fallthrough)
-branch  1 taken 299
-       11:  137:				jump_db[i].rank += BOOKMARK_BONUS;
-       11:  138:				jump_db[i].keep = 1;
-       11:  139:				break;
-       11:  139-block  0
-unconditional  0 taken 11
+      190:  133:		int j = (int)bm_n;
+     3900:  134:		while (--j >= 0) {
+      190:  134-block  0
+unconditional  0 taken 190
+     3900:  134-block  1
+branch  1 taken 3758
+branch  2 taken 142 (fallthrough)
+     3758:  135:			if (bookmarks[j].path[1] == jump_db[i].path[1]
+     3758:  135-block  0
+branch  0 taken 1564 (fallthrough)
+branch  1 taken 2194
+     1564:  136:			&& strcmp(bookmarks[j].path, jump_db[i].path) == 0) {
+     1564:  136-block  0
+branch  0 taken 48 (fallthrough)
+branch  1 taken 1516
+       48:  137:				jump_db[i].rank += BOOKMARK_BONUS;
+       48:  138:				jump_db[i].keep = 1;
+       48:  139:				break;
+       48:  139-block  0
+unconditional  0 taken 48
         -:  140:			}
         -:  141:		}
         -:  142:
-      38*:  143:		if (pinned_dir && pinned_dir[1] == jump_db[i].path[1]
-       38:  143-block  0
+      190:  143:		if (pinned_dir && pinned_dir[1] == jump_db[i].path[1]
+      190:  143-block  0
+branch  0 taken 47 (fallthrough)
+branch  1 taken 143
+       47:  143-block  1
+branch  2 taken 36 (fallthrough)
+branch  3 taken 11
+       36:  144:		&& strcmp(pinned_dir, jump_db[i].path) == 0) {
+       36:  144-block  0
 branch  0 taken 0 (fallthrough)
-branch  1 taken 38
-    %%%%%:  143-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  144:		&& strcmp(pinned_dir, jump_db[i].path) == 0) {
-    %%%%%:  144-block  0
-branch  0 never executed
-branch  1 never executed
+branch  1 taken 36
     #####:  145:			jump_db[i].rank += PINNED_BONUS;
     #####:  146:			jump_db[i].keep = 1;
     %%%%%:  146-block  0
 unconditional  0 never executed
         -:  147:		}
         -:  148:
-       38:  149:		j = MAX_WS;
-      333:  150:		while (--j >= 0) {
-       38:  150-block  0
-unconditional  0 taken 38
-      333:  150-block  1
-branch  1 taken 298
-branch  2 taken 35 (fallthrough)
-      298:  151:			if (ws[j].path && ws[j].path[1] == jump_db[i].path[1]
-      298:  151-block  0
-branch  0 taken 146 (fallthrough)
-branch  1 taken 152
-      146:  151-block  1
-branch  2 taken 85 (fallthrough)
-branch  3 taken 61
-       85:  152:			&& strcmp(jump_db[i].path, ws[j].path) == 0) {
-       85:  152-block  0
-branch  0 taken 3 (fallthrough)
-branch  1 taken 82
-        3:  153:				jump_db[i].rank += WORKSPACE_BONUS;
-        3:  154:				jump_db[i].keep = 1;
-        3:  155:				break;
-        3:  155-block  0
-unconditional  0 taken 3
+      190:  149:		j = MAX_WS;
+     1669:  150:		while (--j >= 0) {
+      190:  150-block  0
+unconditional  0 taken 190
+     1669:  150-block  1
+branch  1 taken 1496
+branch  2 taken 173 (fallthrough)
+     1496:  151:			if (ws[j].path && ws[j].path[1] == jump_db[i].path[1]
+     1496:  151-block  0
+branch  0 taken 730 (fallthrough)
+branch  1 taken 766
+      730:  151-block  1
+branch  2 taken 554 (fallthrough)
+branch  3 taken 176
+      554:  152:			&& strcmp(jump_db[i].path, ws[j].path) == 0) {
+      554:  152-block  0
+branch  0 taken 17 (fallthrough)
+branch  1 taken 537
+       17:  153:				jump_db[i].rank += WORKSPACE_BONUS;
+       17:  154:				jump_db[i].keep = 1;
+       17:  155:				break;
+       17:  155-block  0
+unconditional  0 taken 17
         -:  156:			}
         -:  157:		}
         -:  158:
-       38:  159:		jump_db[i].rank = rank;
-       38:  160:		total_rank += rank;
-       38:  160-block  0
-unconditional  0 taken 38
-        -:  161:	}
-        -:  162:
-        -:  163:	/* Once we have the total rank, check if we need to recude ranks,
-        -:  164:	 * and write entries into the database */
-        1:  165:	if (total_rank > max_jump_total_rank)
-        1:  165-block  0
+        -:  159:/*		jump_db[i].rank = rank;
+        -:  160:		total_rank += rank; */
+      190:  161:		total_rank += jump_db[i].rank;
+      190:  161-block  0
+unconditional  0 taken 190
+        -:  162:	}
+        -:  163:
+        -:  164:	/* Once we have the total rank, check if we need to reduce ranks,
+        -:  165:	 * and then write entries into the database */
+        5:  166:	if (total_rank > max_jump_total_rank)
+        5:  166-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 1
+        4:  167:		reduce = (total_rank / max_jump_total_rank) + 1;
+        4:  167-block  0
+unconditional  0 taken 4
+        -:  168:
+        5:  169:	int jump_num = 0;
+        -:  170:
+      195:  171:	for (i = 0; i < (int)jump_n; i++) {
+        5:  171-block  0
+unconditional  0 taken 5
+      190:  171-block  1
+unconditional  1 taken 190
+      195:  171-block  2
+branch  2 taken 190
+branch  3 taken 5 (fallthrough)
+      190:  172:		if (total_rank > max_jump_total_rank) {
+      190:  172-block  0
+branch  0 taken 188 (fallthrough)
+branch  1 taken 2
+        -:  173:			/* Once we reach MAX_JUMP_TOTAL_RANK, start forgetting */
+      188:  174:			if (reduce) {
+      188:  174-block  0
+branch  0 taken 188 (fallthrough)
+branch  1 taken 0
+      188:  175:				tmp_rank = jump_db[i].rank;
+      188:  176:				jump_db[i].rank = tmp_rank / reduce;
+      188:  176-block  0
+unconditional  0 taken 188
+        -:  177:			}
+        -:  178:
+        -:  179:			/* Forget directories ranked below MIN_JUMP_RANK */
+     188*:  180:			if (jump_db[i].keep != 1 && jump_db[i].rank < min_jump_rank) {
+      188:  180-block  0
+branch  0 taken 27 (fallthrough)
+branch  1 taken 161
+       27:  180-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 27
+        -:  181:				/* Discount from TOTAL_RANK the rank of the now forgotten
+        -:  182:				 * directory to keep this total up to date */
+    #####:  183:				total_rank -= jump_db[i].rank;
+    #####:  184:				continue;
+    %%%%%:  184-block  0
+unconditional  0 never executed
+        -:  185:			}
+        -:  186:		}
+        -:  187:
+      190:  188:		jump_num++;
+        -:  189:#ifndef __OpenBSD__
+      190:  190:		fprintf(fp, "%zu:%ld:%ld:%s\n", jump_db[i].visits,
+        -:  191:#else
+        -:  192:		fprintf(fp, "%zu:%lld:%lld:%s\n", jump_db[i].visits,
+        -:  193:#endif
+      190:  194:		    jump_db[i].first_visit, jump_db[i].last_visit,
+      190:  195:		    jump_db[i].path);
+      190:  195-block  0
+call    0 returned 190
+unconditional  1 taken 190
+        -:  196:	}
+        -:  197:
+        5:  198:	fprintf(fp, "@%d\n", total_rank);
+        5:  198-block  0
+call    0 returned 5
+        5:  199:	fclose(fp);
+call    0 returned 5
+        5:  200:	free(jump_file);
+unconditional  0 taken 5
+        -:  201:}
+        -:  202:
+        -:  203:int
+function edit_jumpdb called 1 returned 100% blocks executed 52%
+        1:  204:edit_jumpdb(void)
+        -:  205:{
+        1:  206:	if (!config_ok || !config_dir)
+        1:  206-block  0
 branch  0 taken 1 (fallthrough)
 branch  1 taken 0
-        1:  166:		reduce = (total_rank / max_jump_total_rank) + 1;
-        1:  166-block  0
+        1:  206-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1
+    #####:  207:		return EXIT_FAILURE;
+    %%%%%:  207-block  0
+unconditional  0 never executed
+        -:  208:
+        1:  209:	save_jumpdb();
+        1:  209-block  0
+call    0 returned 1
+        -:  210:
+        1:  211:	char *jump_file = (char *)xnmalloc(strlen(config_dir) + 10,
+call    0 returned 1
+        -:  212:	    sizeof(char));
+        1:  213:	sprintf(jump_file, "%s/jump.cfm", config_dir);
+        -:  214:
+        -:  215:	struct stat attr;
+        1:  216:	if (stat(jump_file, &attr) == -1) {
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####:  217:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, jump_file,
+call    0 never executed
+    #####:  218:		    strerror(errno));
+    %%%%%:  218-block  0
+call    0 never executed
+    #####:  219:		free(jump_file);
+    #####:  220:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  221:	}
+        -:  222:
+        1:  223:	time_t mtime_bfr = (time_t)attr.st_mtime;
+        -:  224:
+        1:  225:	char *cmd[] = {"o", jump_file, NULL};
+        1:  226:	open_function(cmd);
+        1:  226-block  0
+call    0 returned 1
+        -:  227:
+        1:  228:	stat(jump_file, &attr);
+call    0 returned 1
+        -:  229:
+        1:  230:	if (mtime_bfr == (time_t)attr.st_mtime) {
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  231:		free(jump_file);
+        1:  232:		return EXIT_SUCCESS;
+        1:  232-block  0
 unconditional  0 taken 1
-        -:  167:
-        1:  168:	int jump_num = 0;
-        -:  169:
-       39:  170:	for (i = 0; i < (int)jump_n; i++) {
-        1:  170-block  0
-unconditional  0 taken 1
-       38:  170-block  1
-unconditional  1 taken 38
-       39:  170-block  2
-branch  2 taken 38
-branch  3 taken 1 (fallthrough)
-        -:  171:
-       38:  172:		if (reduce) {
-       38:  172-block  0
+        -:  233:	}
+        -:  234:
+    #####:  235:	if (jump_db) {
+    %%%%%:  235-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  236:		int i = (int)jump_n;
+        -:  237:
+    #####:  238:		while (--i >= 0)
+    %%%%%:  238-block  0
+unconditional  0 never executed
+    %%%%%:  238-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  239:			free(jump_db[i].path);
+    %%%%%:  239-block  0
+unconditional  0 never executed
+        -:  240:
+    #####:  241:		free(jump_db);
+    #####:  242:		jump_db = (struct jump_t *)NULL;
+    #####:  243:		jump_n = 0;
+    %%%%%:  243-block  0
+unconditional  0 never executed
+        -:  244:	}
+        -:  245:
+    #####:  246:	load_jumpdb();
+    %%%%%:  246-block  0
+call    0 never executed
+    #####:  247:	free(jump_file);
+    #####:  248:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  249:}
+        -:  250:
+        -:  251:/* Save jump entry into the suggestions buffer */
+        -:  252:static int
+function save_suggestion called 16 returned 100% blocks executed 73%
+       16:  253:save_suggestion(char *str)
+        -:  254:{
+       16:  255:	free(jump_suggestion);
+       16:  256:	size_t len = strlen(str);
+        -:  257:
+       16:  258:	int slash = 0;
+       16:  259:	if (str[len - 1] == '/')
+       16:  259-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 16
+    #####:  260:		slash = 1;
+    %%%%%:  260-block  0
+unconditional  0 never executed
+        -:  261:
+      16*:  262:	jump_suggestion = xnmalloc(len + (slash ? 1 : 2), sizeof(char));
+       16:  262-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 16
+    %%%%%:  262-block  1
+unconditional  2 never executed
+       16:  262-block  2
+unconditional  3 taken 16
+       16:  262-block  3
+call    4 returned 16
+       16:  263:	if (!slash)
+branch  0 taken 16 (fallthrough)
+branch  1 taken 0
+       16:  264:		sprintf(jump_suggestion, "%s/", str);
+       16:  264-block  0
+unconditional  0 taken 16
+        -:  265:	else
+    #####:  266:		strcpy(jump_suggestion, str);
+    %%%%%:  266-block  0
+unconditional  0 never executed
+        -:  267:
+       16:  268:	return EXIT_SUCCESS;
+       16:  268-block  0
+unconditional  0 taken 16
+        -:  269:}
+        -:  270:
+        -:  271:/* Jump into best ranked directory matched by ARGS */
+        -:  272:int
+function dirjump called 38 returned 100% blocks executed 71%
+       38:  273:dirjump(char **args, int mode)
+        -:  274:{
+        -:  275:/*	if (!args || !*args[0])
+        -:  276:		return EXIT_FAILURE; */
+        -:  277:
+       38:  278:	if (xargs.no_dirjump == 1) {
+       38:  278-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 38
+    #####:  279:		printf(_("%s: Directory jumper function disabled\n"), PROGRAM_NAME);
+    %%%%%:  279-block  0
+call    0 never executed
+call    1 never executed
+    #####:  280:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  281:	}
+        -:  282:
+       38:  283:	time_t now = time(NULL);
+       38:  283-block  0
+call    0 returned 38
+       38:  284:	int reduce = 0;
+        -:  285:
+        -:  286:	/* If the sum total of ranks is greater than max, divide each entry
+        -:  287:	 * to make the sum total less than or equal to max */
+       38:  288:	if (jump_total_rank > max_jump_total_rank)
 branch  0 taken 38 (fallthrough)
 branch  1 taken 0
-       38:  173:			tmp_rank = jump_db[i].rank;
-       38:  174:			jump_db[i].rank = tmp_rank / reduce;
-       38:  174-block  0
+       38:  289:		reduce = (jump_total_rank / max_jump_total_rank) + 1;
+       38:  289-block  0
 unconditional  0 taken 38
-        -:  175:		}
-        -:  176:
-        -:  177:		/* Forget directories ranked below MIN_JUMP_RANK */
-      38*:  178:		if (jump_db[i].keep != 1 && (jump_db[i].rank <= 0
-       38:  178-block  0
-branch  0 taken 2 (fallthrough)
-branch  1 taken 36
-        2:  178-block  1
-branch  2 taken 2 (fallthrough)
-branch  3 taken 0
-        2:  179:		|| jump_db[i].rank < min_jump_rank))
-        2:  179-block  0
+        -:  290:
+        -:  291:	/* If no parameter, print the list of entries in the jump
+        -:  292:	 * database together with the corresponding information */
+       38:  293:	if (mode == NO_SUG_JUMP && !args[1] && args[0][1] != 'e') {
+       38:  293-block  0
+branch  0 taken 8 (fallthrough)
+branch  1 taken 30
+        8:  293-block  1
+branch  2 taken 3 (fallthrough)
+branch  3 taken 5
+        3:  293-block  2
+branch  4 taken 2 (fallthrough)
+branch  5 taken 1
+        2:  294:		if (!jump_n) {
+        2:  294-block  0
 branch  0 taken 0 (fallthrough)
 branch  1 taken 2
-    #####:  180:			continue;
-    %%%%%:  180-block  0
-unconditional  0 never executed
-        -:  181:
-       38:  182:		jump_num++;
-        -:  183:
-       38:  184:		fprintf(fp, "%zu:%ld:%ld:%s\n", jump_db[i].visits,
-       38:  185:		    jump_db[i].first_visit, jump_db[i].last_visit,
-       38:  186:		    jump_db[i].path);
-       38:  186-block  0
-call    0 returned 38
-unconditional  1 taken 38
-        -:  187:	}
-        -:  188:
-        1:  189:	fprintf(fp, "@%d\n", total_rank);
-        1:  189-block  0
-call    0 returned 1
-        -:  190:
-        1:  191:	fclose(fp);
-call    0 returned 1
-        1:  192:	free(JUMP_FILE);
-unconditional  0 taken 1
-        -:  193:}
-        -:  194:
-        -:  195:int
-function edit_jumpdb called 0 returned 0% blocks executed 0%
-    #####:  196:edit_jumpdb(void)
-        -:  197:{
-    #####:  198:	if (!config_ok || !CONFIG_DIR)
-    %%%%%:  198-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  198-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  199:		return EXIT_FAILURE;
-    %%%%%:  199-block  0
-unconditional  0 never executed
-        -:  200:
-    #####:  201:	save_jumpdb();
-    %%%%%:  201-block  0
-call    0 never executed
-        -:  202:
-    #####:  203:	char *JUMP_FILE = (char *)xnmalloc(strlen(CONFIG_DIR) + 10,
-call    0 never executed
-        -:  204:	    sizeof(char));
-    #####:  205:	sprintf(JUMP_FILE, "%s/jump.cfm", CONFIG_DIR);
-        -:  206:
-        -:  207:	struct stat attr;
-        -:  208:
-    #####:  209:	if (stat(JUMP_FILE, &attr) == -1) {
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  210:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, JUMP_FILE,
-call    0 never executed
-    #####:  211:		    strerror(errno));
-    %%%%%:  211-block  0
-call    0 never executed
-    #####:  212:		free(JUMP_FILE);
-    #####:  213:		return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  214:	}
-        -:  215:
-    #####:  216:	time_t mtime_bfr = (time_t)attr.st_mtime;
-        -:  217:
-    #####:  218:	char *cmd[] = {"o", JUMP_FILE, NULL};
-    #####:  219:	open_function(cmd);
-    %%%%%:  219-block  0
-call    0 never executed
-        -:  220:
-    #####:  221:	stat(JUMP_FILE, &attr);
-call    0 never executed
-        -:  222:
-    #####:  223:	if (mtime_bfr == (time_t)attr.st_mtime) {
-branch  0 never executed
-branch  1 never executed
-    #####:  224:		free(JUMP_FILE);
-    #####:  225:		return EXIT_SUCCESS;
-    %%%%%:  225-block  0
-unconditional  0 never executed
-        -:  226:	}
-        -:  227:
-    #####:  228:	if (jump_db) {
-    %%%%%:  228-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  229:		int i = (int)jump_n;
-        -:  230:
-    #####:  231:		while (--i >= 0)
-    %%%%%:  231-block  0
-unconditional  0 never executed
-    %%%%%:  231-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  232:			free(jump_db[i].path);
-    %%%%%:  232-block  0
-unconditional  0 never executed
-        -:  233:
-    #####:  234:		free(jump_db);
-    #####:  235:		jump_db = (struct jump_t *)NULL;
-    #####:  236:		jump_n = 0;
-    %%%%%:  236-block  0
-unconditional  0 never executed
-        -:  237:	}
-        -:  238:
-    #####:  239:	load_jumpdb();
-    %%%%%:  239-block  0
-call    0 never executed
-        -:  240:
-    #####:  241:	free(JUMP_FILE);
-        -:  242:
-    #####:  243:	return EXIT_SUCCESS;
-unconditional  0 never executed
-        -:  244:}
-        -:  245:
-        -:  246:/* Jump into best ranked directory matched by ARGS */
-        -:  247:int
-function dirjump called 0 returned 0% blocks executed 0%
-    #####:  248:dirjump(char **args)
-        -:  249:{
-    #####:  250:	if (xargs.no_dirjump == 1) {
-    %%%%%:  250-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  251:		printf(_("%s: Directory jumper function disabled\n"), PROGRAM_NAME);
-    %%%%%:  251-block  0
-call    0 never executed
-    #####:  252:		return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  253:	}
-        -:  254:
-    #####:  255:	time_t now = time(NULL);
-    %%%%%:  255-block  0
-call    0 never executed
-        -:  256:
-    #####:  257:	int reduce = 0;
-        -:  258:
-        -:  259:	/* If the sum total of ranks is greater than max, divide each entry
-        -:  260:	 * to make the sum total less than or equal to max */
-    #####:  261:	if (jump_total_rank > max_jump_total_rank)
-branch  0 never executed
-branch  1 never executed
-    #####:  262:		reduce = (jump_total_rank / max_jump_total_rank) + 1;
-    %%%%%:  262-block  0
-unconditional  0 never executed
-        -:  263:
-        -:  264:	/* If no parameter, print the list of entries in the jump
-        -:  265:	 * database together with the corresponding information */
-    #####:  266:	if (!args[1] && args[0][1] != 'e') {
-    %%%%%:  266-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  266-block  1
-branch  2 never executed
-branch  3 never executed
-        -:  267:
-    #####:  268:		if (!jump_n) {
-    %%%%%:  268-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  269:			printf("%s: Database still empty\n", PROGRAM_NAME);
-    %%%%%:  269-block  0
-call    0 never executed
-    #####:  270:			return EXIT_SUCCESS;
-unconditional  0 never executed
-        -:  271:		}
-        -:  272:
-    #####:  273:		puts(_("NOTE: First time access is displayed in days, while last "
-    %%%%%:  273-block  0
-call    0 never executed
-        -:  274:		       "time access is displayed in hours"));
-    #####:  275:		puts(_("NOTE 2: An asterisk next rank values means that the "
-call    0 never executed
-        -:  276:		       "corresponding directory is bookmarked, pinned, or currently "
-        -:  277:		       "used in some workspace\n"));
-    #####:  278:		puts(_("Order\tVisits\tFirst\tLast\tRank\tDirectory"));
-call    0 never executed
-        -:  279:
-    #####:  280:		size_t i, ranks_sum = 0, visits_sum = 0;
-        -:  281:
-    #####:  282:		for (i = 0; i < jump_n; i++) {
-unconditional  0 never executed
-    %%%%%:  282-block  0
-unconditional  1 never executed
-    %%%%%:  282-block  1
-branch  2 never executed
-branch  3 never executed
-        -:  283:
-    #####:  284:			int days_since_first = (int)(now - jump_db[i].first_visit) / 60 / 60 / 24;
-    #####:  285:			int hours_since_last = (int)(now - jump_db[i].last_visit) / 60 / 60;
-        -:  286:
-        -:  287:			int rank;
-    #####:  288:			rank = days_since_first > 1
-    #####:  289:				   ? ((int)jump_db[i].visits * 100) / days_since_first
-    #####:  290:				   : (int)jump_db[i].visits * 100;
-    %%%%%:  290-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  290-block  1
-unconditional  2 never executed
-    %%%%%:  290-block  2
-unconditional  3 never executed
-        -:  291:
-    #####:  292:			int tmp_rank = rank;
-    #####:  293:			if (hours_since_last == 0) /* Last hour */
-    %%%%%:  293-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  294:				rank = JHOUR(tmp_rank);
-    %%%%%:  294-block  0
-unconditional  0 never executed
-    #####:  295:			else if (hours_since_last <= 24) /* Last day */
+    #####:  295:			printf("%s: Database still empty\n", PROGRAM_NAME);
     %%%%%:  295-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  296:				rank = JDAY(tmp_rank);
-    %%%%%:  296-block  0
+call    0 never executed
+    #####:  296:			return EXIT_SUCCESS;
 unconditional  0 never executed
-    #####:  297:			else if (hours_since_last <= 168) /* Last week */
-    %%%%%:  297-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  298:				rank = JWEEK(tmp_rank);
-    %%%%%:  298-block  0
+        -:  297:		}
+        -:  298:
+        2:  299:		puts(_("NOTE: First time access is displayed in days, while last "
+        2:  299-block  0
+call    0 returned 2
+call    1 returned 2
+        -:  300:		       "time access is displayed in hours"));
+        2:  301:		puts(_("NOTE 2: An asterisk next rank values means that the "
+call    0 returned 2
+call    1 returned 2
+        -:  302:		       "corresponding directory is bookmarked, pinned, or currently "
+        -:  303:		       "used in some workspace\n"));
+        2:  304:		puts(_("Order\tVisits\tFirst\tLast\tRank\tDirectory"));
+call    0 returned 2
+call    1 returned 2
+        -:  305:
+        -:  306:		size_t i;
+        2:  307:		int ranks_sum = 0, visits_sum = 0;
+        -:  308:
+       96:  309:		for (i = 0; i < jump_n; i++) {
+unconditional  0 taken 2
+       94:  309-block  0
+unconditional  1 taken 94
+       96:  309-block  1
+branch  2 taken 94
+branch  3 taken 2 (fallthrough)
+        -:  310:
+       94:  311:			int days_since_first = (int)(now - jump_db[i].first_visit) / 60 / 60 / 24;
+       94:  312:			int hours_since_last = (int)(now - jump_db[i].last_visit) / 60 / 60;
+        -:  313:
+        -:  314:			int rank;
+       94:  315:			rank = days_since_first > 1
+    #####:  316:				   ? ((int)jump_db[i].visits * 100) / days_since_first
+      94*:  317:				   : (int)jump_db[i].visits * 100;
+       94:  317-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 94
+    %%%%%:  317-block  1
+unconditional  2 never executed
+       94:  317-block  2
+unconditional  3 taken 94
+        -:  318:
+       94:  319:			int tmp_rank = rank;
+       94:  320:			if (hours_since_last == 0) /* Last hour */
+       94:  320-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 90
+        4:  321:				rank = JHOUR(tmp_rank);
+        4:  321-block  0
+unconditional  0 taken 4
+       90:  322:			else if (hours_since_last <= 24) /* Last day */
+       90:  322-block  0
+branch  0 taken 68 (fallthrough)
+branch  1 taken 22
+       68:  323:				rank = JDAY(tmp_rank);
+       68:  323-block  0
+unconditional  0 taken 68
+       22:  324:			else if (hours_since_last <= 168) /* Last week */
+       22:  324-block  0
+branch  0 taken 22 (fallthrough)
+branch  1 taken 0
+       22:  325:				rank = JWEEK(tmp_rank);
+       22:  325-block  0
+unconditional  0 taken 22
+        -:  326:			else /* More than a week */
+    #####:  327:				rank = JOLDER(tmp_rank);
+    %%%%%:  327-block  0
 unconditional  0 never executed
-        -:  299:			else /* More than a week */
-    #####:  300:				rank = JOLDER(tmp_rank);
-    %%%%%:  300-block  0
+        -:  328:
+       94:  329:			int j = (int)bm_n, bpw = 0; /* Bookmarked, pinned or workspace */
+     1948:  330:			while (--j >= 0) {
+       94:  330-block  0
+unconditional  0 taken 94
+     1948:  330-block  1
+branch  1 taken 1878
+branch  2 taken 70 (fallthrough)
+     1878:  331:				if (bookmarks[j].path[1] == jump_db[i].path[1]
+     1878:  331-block  0
+branch  0 taken 782 (fallthrough)
+branch  1 taken 1096
+      782:  332:				&& strcmp(bookmarks[j].path, jump_db[i].path) == 0) {
+      782:  332-block  0
+branch  0 taken 24 (fallthrough)
+branch  1 taken 758
+       24:  333:					rank += BOOKMARK_BONUS;
+       24:  334:					bpw = 1;
+       24:  335:					break;
+       24:  335-block  0
+unconditional  0 taken 24
+        -:  336:				}
+        -:  337:			}
+        -:  338:
+       94:  339:			if (pinned_dir && pinned_dir[1] == jump_db[i].path[1]
+       94:  339-block  0
+branch  0 taken 94 (fallthrough)
+branch  1 taken 0
+       94:  339-block  1
+branch  2 taken 72 (fallthrough)
+branch  3 taken 22
+       72:  340:			&& strcmp(pinned_dir, jump_db[i].path) == 0) {
+       72:  340-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 72
+    #####:  341:				rank += PINNED_BONUS;
+    #####:  342:				bpw = 1;
+    %%%%%:  342-block  0
 unconditional  0 never executed
-        -:  301:
-    #####:  302:			int j = (int)bm_n, BPW = 0; /* Bookmarked, pinned or workspace */
-    #####:  303:			while (--j >= 0) {
-    %%%%%:  303-block  0
-unconditional  0 never executed
-    %%%%%:  303-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  304:				if (bookmarks[j].path[1] == jump_db[i].path[1]
-    %%%%%:  304-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  305:				&& strcmp(bookmarks[j].path, jump_db[i].path) == 0) {
-    %%%%%:  305-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  306:					rank += BOOKMARK_BONUS;
-    #####:  307:					BPW = 1;
-    #####:  308:					break;
-    %%%%%:  308-block  0
-unconditional  0 never executed
-        -:  309:				}
-        -:  310:			}
-        -:  311:
-    #####:  312:			if (pinned_dir && pinned_dir[1] == jump_db[i].path[1]
-    %%%%%:  312-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  312-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  313:			&& strcmp(pinned_dir, jump_db[i].path) == 0) {
-    %%%%%:  313-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  314:				rank += PINNED_BONUS;
-    #####:  315:				BPW = 1;
-    %%%%%:  315-block  0
-unconditional  0 never executed
-        -:  316:			}
-        -:  317:
-    #####:  318:			j = MAX_WS;
-    #####:  319:			while (--j >= 0) {
-    %%%%%:  319-block  0
-unconditional  0 never executed
-    %%%%%:  319-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  320:				if (ws[j].path && ws[j].path[1] == jump_db[i].path[1]
-    %%%%%:  320-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  320-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  321:				&& strcmp(jump_db[i].path, ws[j].path) == 0) {
-    %%%%%:  321-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  322:					rank += WORKSPACE_BONUS;
-    #####:  323:					BPW = 1;
-    #####:  324:					break;
-    %%%%%:  324-block  0
-unconditional  0 never executed
-        -:  325:				}
-        -:  326:			}
-        -:  327:
-    #####:  328:			if (reduce) {
-    %%%%%:  328-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  329:				tmp_rank = rank;
-    #####:  330:				rank = tmp_rank / reduce;
-    %%%%%:  330-block  0
-unconditional  0 never executed
-        -:  331:			}
-        -:  332:
-    #####:  333:			ranks_sum += rank;
-    #####:  334:			visits_sum += jump_db[i].visits;
-        -:  335:
-    #####:  336:			if (ws[cur_ws].path[1] == jump_db[i].path[1]
-    %%%%%:  336-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  337:			&& strcmp(ws[cur_ws].path, jump_db[i].path) == 0) {
-    %%%%%:  337-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  338:				printf("  %s%zu\t %zu\t %d\t %d\t%d%c\t%s%s \n", mi_c,
-    %%%%%:  338-block  0
-unconditional  0 never executed
-    %%%%%:  338-block  1
+        -:  343:			}
+        -:  344:
+       94:  345:			j = MAX_WS;
+      826:  346:			while (--j >= 0) {
+       94:  346-block  0
+unconditional  0 taken 94
+      826:  346-block  1
+branch  1 taken 740
+branch  2 taken 86 (fallthrough)
+      740:  347:				if (ws[j].path && ws[j].path[1] == jump_db[i].path[1]
+      740:  347-block  0
+branch  0 taken 364 (fallthrough)
+branch  1 taken 376
+      364:  347-block  1
+branch  2 taken 276 (fallthrough)
+branch  3 taken 88
+      276:  348:				&& strcmp(jump_db[i].path, ws[j].path) == 0) {
+      276:  348-block  0
+branch  0 taken 8 (fallthrough)
+branch  1 taken 268
+        8:  349:					rank += WORKSPACE_BONUS;
+        8:  350:					bpw = 1;
+        8:  351:					break;
+        8:  351-block  0
+unconditional  0 taken 8
+        -:  352:				}
+        -:  353:			}
+        -:  354:
+       94:  355:			if (reduce) {
+       94:  355-block  0
+branch  0 taken 94 (fallthrough)
+branch  1 taken 0
+       94:  356:				tmp_rank = rank;
+       94:  357:				rank = tmp_rank / reduce;
+       94:  357-block  0
+unconditional  0 taken 94
+        -:  358:			}
+        -:  359:
+       94:  360:			ranks_sum += rank;
+       94:  361:			visits_sum += (int)jump_db[i].visits;
+        -:  362:
+       94:  363:			if (ws[cur_ws].path[1] == jump_db[i].path[1]
+       94:  363-block  0
+branch  0 taken 72 (fallthrough)
+branch  1 taken 22
+       72:  364:			&& strcmp(ws[cur_ws].path, jump_db[i].path) == 0) {
+       72:  364-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 70
+       2*:  365:				printf("  %s%zu\t %zu\t %d\t %d\t%d%c\t%s%s \n", mi_c,
+        2:  365-block  0
+unconditional  0 taken 2
+    %%%%%:  365-block  1
 unconditional  1 never executed
-    #####:  339:				    i + 1, jump_db[i].visits, days_since_first,
-    %%%%%:  339-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  340:				    hours_since_last, rank, BPW ? '*' : 0,
-    #####:  341:				    jump_db[i].path, df_c);
-    %%%%%:  341-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  342:			}
-        -:  343:
-        -:  344:			else
-    #####:  345:				printf("  %zu\t %zu\t %d\t %d\t%d%c\t%s \n", i + 1,
-    %%%%%:  345-block  0
-unconditional  0 never executed
-    %%%%%:  345-block  1
-unconditional  1 never executed
-    #####:  346:				    jump_db[i].visits, days_since_first,
-    %%%%%:  346-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  347:				    hours_since_last, rank,
-    #####:  348:				    BPW ? '*' : 0, jump_db[i].path);
-    %%%%%:  348-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  349:		}
-        -:  350:
-    #####:  351:		printf("\nTotal rank: %zu/%d\nTotal visits: %zu\n", ranks_sum,
-    %%%%%:  351-block  0
-call    0 never executed
-        -:  352:		    max_jump_total_rank, visits_sum);
-        -:  353:
-    #####:  354:		return EXIT_SUCCESS;
-unconditional  0 never executed
-        -:  355:	}
-        -:  356:
-    #####:  357:	if (args[1] && *args[1] == '-' && strcmp(args[1], "--help") == 0) {
-    %%%%%:  357-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  357-block  1
-branch  2 never executed
-branch  3 never executed
-    %%%%%:  357-block  2
-branch  4 never executed
-branch  5 never executed
-    #####:  358:		puts(_("Usage: j, jc, jp, jl [STRING ...], jo [NUM], je"));
-    %%%%%:  358-block  0
-call    0 never executed
-    #####:  359:		return EXIT_SUCCESS;
-unconditional  0 never executed
-        -:  360:	}
-        -:  361:
-    #####:  362:	enum jump jump_opt = none;
-        -:  363:
-    #####:  364:	switch (args[0][1]) {
-    %%%%%:  364-block  0
-branch  0 never executed
-branch  1 never executed
-branch  2 never executed
-branch  3 never executed
-branch  4 never executed
-branch  5 never executed
-branch  6 never executed
-        -:  365:
-    #####:  366:	case 'e':
-    #####:  367:		return edit_jumpdb();
-    %%%%%:  367-block  0
-call    0 never executed
-unconditional  1 never executed
-    #####:  368:	case 'c':
-    #####:  369:		jump_opt = jchild;
-    #####:  370:		break;
-    %%%%%:  370-block  0
-unconditional  0 never executed
-    #####:  371:	case 'p':
-    #####:  372:		jump_opt = jparent;
-    #####:  373:		break;
-    %%%%%:  373-block  0
-unconditional  0 never executed
-    #####:  374:	case 'o':
-    #####:  375:		jump_opt = jorder;
-    #####:  376:		break;
-    %%%%%:  376-block  0
-unconditional  0 never executed
-    #####:  377:	case 'l':
-    #####:  378:		jump_opt = jlist;
-    #####:  379:		break;
-    %%%%%:  379-block  0
-unconditional  0 never executed
-    #####:  380:	case '\0':
-    #####:  381:		jump_opt = none;
-    #####:  382:		break;
-    %%%%%:  382-block  0
-unconditional  0 never executed
-        -:  383:
-    #####:  384:	default:
-    #####:  385:		fprintf(stderr, _("%s: '%c': Invalid option\n"), PROGRAM_NAME,
-    #####:  386:				args[0][1]);
-    %%%%%:  386-block  0
-call    0 never executed
-    #####:  387:		fputs(_("Usage: j, jc, jp, jl [STRING ...], jo [NUM], je\n"),
-call    0 never executed
-        -:  388:		    stderr);
-    #####:  389:		return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  390:		break;
-        -:  391:	}
-        -:  392:
-    #####:  393:	if (jump_opt == jorder) {
-    %%%%%:  393-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  394:
-    #####:  395:		if (!args[1]) {
+        2:  366:				    i + 1, jump_db[i].visits, days_since_first,
+        2:  366-block  0
+call    0 returned 2
+unconditional  1 taken 2
+        -:  367:				    hours_since_last, rank, bpw ? '*' : 0,
+        2:  368:				    jump_db[i].path, df_c);
+        2:  368-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        -:  369:			} else {
+       92:  370:				printf("  %zu\t %zu\t %d\t %d\t%d%c\t%s \n", i + 1,
+       28:  370-block  0
+unconditional  0 taken 28
+       64:  370-block  1
+unconditional  1 taken 64
+       92:  371:				    jump_db[i].visits, days_since_first,
+       92:  371-block  0
+call    0 returned 92
+unconditional  1 taken 92
+        -:  372:				    hours_since_last, rank,
+       92:  373:				    bpw ? '*' : 0, jump_db[i].path);
+       92:  373-block  0
+branch  0 taken 28 (fallthrough)
+branch  1 taken 64
+        -:  374:			}
+        -:  375:		}
+        -:  376:
+        2:  377:		printf("\nTotal rank: %d/%d\nTotal visits: %d\n", ranks_sum,
+        2:  377-block  0
+call    0 returned 2
+        -:  378:		    max_jump_total_rank, visits_sum);
+        -:  379:
+        2:  380:		return EXIT_SUCCESS;
+unconditional  0 taken 2
+        -:  381:	}
+        -:  382:
+       36:  383:	if (mode == NO_SUG_JUMP && args[1] && *args[1] == '-'
+       36:  383-block  0
+branch  0 taken 6 (fallthrough)
+branch  1 taken 30
+        6:  383-block  1
+branch  2 taken 5 (fallthrough)
+branch  3 taken 1
+        5:  383-block  2
+branch  4 taken 1 (fallthrough)
+branch  5 taken 4
+        1:  384:	&& strcmp(args[1], "--help") == 0) {
+        1:  384-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  385:		puts(_(JUMP_USAGE));
+        1:  385-block  0
+call    0 returned 1
+call    1 returned 1
+        1:  386:		return EXIT_SUCCESS;
+unconditional  0 taken 1
+        -:  387:	}
+        -:  388:
+       35:  389:	enum jump jump_opt = NONE;
+        -:  390:
+       35:  391:	switch (args[0][1]) {
+       35:  391-block  0
+branch  0 taken 1
+branch  1 taken 6
+branch  2 taken 2
+branch  3 taken 0
+branch  4 taken 1
+branch  5 taken 25
+branch  6 taken 0
+        1:  392:	case 'e': return edit_jumpdb();
+        1:  392-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        6:  393:	case 'c': jump_opt = JCHILD; break;
+        6:  393-block  0
+unconditional  0 taken 6
+        2:  394:	case 'p': jump_opt = JPARENT; break;
+        2:  394-block  0
+unconditional  0 taken 2
+    #####:  395:	case 'o': jump_opt = JORDER; break;
     %%%%%:  395-block  0
+unconditional  0 never executed
+        1:  396:	case 'l': jump_opt = JLIST; break;
+        1:  396-block  0
+unconditional  0 taken 1
+       25:  397:	case '\0': jump_opt = NONE; break;
+       25:  397-block  0
+unconditional  0 taken 25
+    #####:  398:	default:
+    #####:  399:		fprintf(stderr, _("%s: '%c': Invalid option\n"), PROGRAM_NAME,
+call    0 never executed
+    #####:  400:				args[0][1]);
+    %%%%%:  400-block  0
+call    0 never executed
+    #####:  401:		fprintf(stderr, "%s\n", _(JUMP_USAGE));
+call    0 never executed
+call    1 never executed
+    #####:  402:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  403:	}
+        -:  404:
+       34:  405:	if (jump_opt == JORDER) {
+       34:  405-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 34
+    #####:  406:		if (!args[1]) {
+    %%%%%:  406-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  396:			fputs(_("Usage: j, jc, jp, jl [STRING ...], jo [NUM], je\n"),
-    %%%%%:  396-block  0
-call    0 never executed
-        -:  397:			    stderr);
-    #####:  398:			return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  399:		}
-        -:  400:
-    #####:  401:		if (!is_number(args[1]))
-    %%%%%:  401-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  402:			return cd_function(args[1]);
-    %%%%%:  402-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  403:
-        -:  404:		else {
-        -:  405:
-    #####:  406:			int int_order = atoi(args[1]);
-    #####:  407:			if (int_order <= 0 || int_order > (int)jump_n) {
+    #####:  407:			if (mode == NO_SUG_JUMP)
     %%%%%:  407-block  0
 branch  0 never executed
 branch  1 never executed
-    %%%%%:  407-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  408:				fprintf(stderr, _("%s: %d: No such order number\n"),
+    #####:  408:				fprintf(stderr, "%s\n", _(JUMP_USAGE));
     %%%%%:  408-block  0
 call    0 never executed
-        -:  409:				    PROGRAM_NAME, int_order);
-    #####:  410:				return EXIT_FAILURE;
+call    1 never executed
+unconditional  2 never executed
+    #####:  409:			return EXIT_FAILURE;
+    %%%%%:  409-block  0
 unconditional  0 never executed
-        -:  411:			}
-        -:  412:
-    #####:  413:			return cd_function(jump_db[int_order - 1].path);
+        -:  410:		}
+        -:  411:
+    #####:  412:		if (!is_number(args[1])) {
+    %%%%%:  412-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  413:			if (mode == NO_SUG_JUMP)
     %%%%%:  413-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  414:				return cd_function(args[1], CD_PRINT_ERROR);
+    %%%%%:  414-block  0
 call    0 never executed
 unconditional  1 never executed
-        -:  414:		}
-        -:  415:	}
-        -:  416:
-        -:  417:	/* If ARG is an actual directory, just cd into it */
-        -:  418:	struct stat attr;
+        -:  415:			else
+    #####:  416:				return EXIT_FAILURE;
+    %%%%%:  416-block  0
+unconditional  0 never executed
+        -:  417:		} else {
+    #####:  418:			int int_order = atoi(args[1]);
         -:  419:
-    #####:  420:	if (!args[2] && lstat(args[1], &attr) != -1)
+    #####:  420:			if (int_order <= 0 || int_order > (int)jump_n) {
     %%%%%:  420-block  0
 branch  0 never executed
 branch  1 never executed
     %%%%%:  420-block  1
-call    2 never executed
+branch  2 never executed
 branch  3 never executed
-branch  4 never executed
-    #####:  421:		return cd_function(args[1]);
+    #####:  421:				if (mode == NO_SUG_JUMP) {
     %%%%%:  421-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  422:
-        -:  423:	/* Jump into a visited directory using ARGS as filter(s) */
-        -:  424:	size_t i;
-    #####:  425:	int j, match = 0;
-        -:  426:
-    #####:  427:	char **matches = (char **)xnmalloc(jump_n + 1, sizeof(char *));
-    %%%%%:  427-block  0
-call    0 never executed
-    #####:  428:	size_t *visits = (size_t *)xnmalloc(jump_n + 1, sizeof(size_t));
-call    0 never executed
-    #####:  429:	time_t *first = (time_t *)xnmalloc(jump_n + 1, sizeof(time_t));
-call    0 never executed
-    #####:  430:	time_t *last = (time_t *)xnmalloc(jump_n + 1, sizeof(time_t));
-call    0 never executed
-        -:  431:
-    #####:  432:	for (i = 1; args[i]; i++) {
-unconditional  0 never executed
-    %%%%%:  432-block  0
-unconditional  1 never executed
-    %%%%%:  432-block  1
-branch  2 never executed
-branch  3 never executed
-        -:  433:
-        -:  434:		/* 1) Using the first parameter, get a list of matches in the
-        -:  435:		 * database */
-    #####:  436:		if (!match) {
-    %%%%%:  436-block  0
 branch  0 never executed
 branch  1 never executed
-        -:  437:
-    #####:  438:			j = (int)jump_n;
-    #####:  439:			while (--j >= 0) {
-    %%%%%:  439-block  0
-unconditional  0 never executed
-    %%%%%:  439-block  1
-branch  1 never executed
-branch  2 never executed
-        -:  440:
-    #####:  441:				if (case_sens_dirjump ? !strstr(jump_db[j].path, args[i])
-    %%%%%:  441-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  441-block  1
+    #####:  422:					fprintf(stderr, _("%s: %d: No such order number\n"),
+    %%%%%:  422-block  0
+call    0 never executed
+call    1 never executed
 unconditional  2 never executed
-    %%%%%:  441-block  2
-branch  3 never executed
-branch  4 never executed
-    #####:  442:						      : !strcasestr(jump_db[j].path, args[i]))
-    %%%%%:  442-block  0
+        -:  423:						PROGRAM_NAME, int_order);
+        -:  424:				}
+    #####:  425:				return EXIT_FAILURE;
+    %%%%%:  425-block  0
 unconditional  0 never executed
-    #####:  443:					continue;
-    %%%%%:  443-block  0
-unconditional  0 never executed
-        -:  444:
-        -:  445:				/* Exclue CWD */
-    #####:  446:				if (jump_db[j].path[1] == ws[cur_ws].path[1]
-    %%%%%:  446-block  0
+        -:  426:			}
+        -:  427:
+    #####:  428:			if (mode == NO_SUG_JUMP)
+    %%%%%:  428-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  447:				&& strcmp(jump_db[j].path, ws[cur_ws].path) == 0)
-    %%%%%:  447-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  448:					continue;
-    %%%%%:  448-block  0
-unconditional  0 never executed
-        -:  449:
-    #####:  450:				int exclude = 0;
+    #####:  429:				return cd_function(jump_db[int_order - 1].path, CD_PRINT_ERROR);
+    %%%%%:  429-block  0
+call    0 never executed
+unconditional  1 never executed
+    #####:  430:			return save_suggestion(jump_db[int_order - 1].path);
+    %%%%%:  430-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  431:		}
+        -:  432:	}
+        -:  433:
+        -:  434:	/* If ARG is an actual directory, just cd into it */
+        -:  435:	struct stat attr;
+       34:  436:	if (args[1] && !args[2] && lstat(args[1], &attr) != -1) {
+       34:  436-block  0
+branch  0 taken 34 (fallthrough)
+branch  1 taken 0
+       34:  436-block  1
+branch  2 taken 34 (fallthrough)
+branch  3 taken 0
+       34:  436-block  2
+call    4 returned 34
+branch  5 taken 1 (fallthrough)
+branch  6 taken 33
+        1:  437:		if (mode == NO_SUG_JUMP)
+        1:  437-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  438:			return cd_function(args[1], CD_PRINT_ERROR);
+        1:  438-block  0
+call    0 returned 1
+unconditional  1 taken 1
+    #####:  439:		return save_suggestion(args[1]);
+    %%%%%:  439-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  440:	}
+        -:  441:
+        -:  442:	/* Jump into a visited directory using ARGS as filter(s) */
+        -:  443:	size_t i;
+       33:  444:	int j, match = 0;
+       33:  445:	char **matches = (char **)xnmalloc(jump_n + 1, sizeof(char *));
+       33:  445-block  0
+call    0 returned 33
+       33:  446:	char **needles = (char **)xnmalloc(jump_n + 1, sizeof(char *));
+call    0 returned 33
+       33:  447:	size_t *visits = (size_t *)xnmalloc(jump_n + 1, sizeof(size_t));
+call    0 returned 33
+       33:  448:	time_t *first = (time_t *)xnmalloc(jump_n + 1, sizeof(time_t));
+call    0 returned 33
+       33:  449:	time_t *last = (time_t *)xnmalloc(jump_n + 1, sizeof(time_t));
+call    0 returned 33
+       33:  450:	int last_segment = 0, first_segment = 0;
         -:  451:
-        -:  452:				/* Filter matches according to parent or
-        -:  453:				 * child options */
-    #####:  454:				switch (jump_opt) {
-    %%%%%:  454-block  0
-branch  0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  455:				case jparent:
-    #####:  456:					if (!strstr(ws[cur_ws].path, jump_db[j].path))
-    %%%%%:  456-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  457:						exclude = 1;
-    %%%%%:  457-block  0
+       66:  452:	for (i = 1; args[i]; i++) {
+unconditional  0 taken 33
+       33:  452-block  0
+unconditional  1 taken 33
+       66:  452-block  1
+branch  2 taken 33
+branch  3 taken 33 (fallthrough)
+        -:  453:		/* 1) Using the first parameter, get a list of matches in the
+        -:  454:		 * database */
+        -:  455:
+        -:  456:		/* If the query string ends with a slash, we want this query
+        -:  457:		 * string to match only the last segment of the path (i.e.,
+        -:  458:		 * there must be no slash after the match) */
+       33:  459:		size_t _len = strlen(args[i]);
+       33:  460:		if (args[i][_len - 1] == '/') {
+       33:  460-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 32
+        1:  461:			args[i][_len - 1] = '\0';
+        1:  462:			last_segment = 1;
+        1:  463:			first_segment = 0;
+        1:  463-block  0
+unconditional  0 taken 1
+       32:  464:		} else if (args[i][_len - 1] == '\\') {
+       32:  464-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 32
+    #####:  465:			args[i][_len - 1] = '\0';
+    #####:  466:			last_segment = 0;
+    #####:  467:			first_segment = 1;
+    %%%%%:  467-block  0
 unconditional  0 never executed
-    #####:  458:					break;
-    %%%%%:  458-block  0
+        -:  468:		} else {
+       32:  469:			last_segment = 0;
+       32:  470:			first_segment = 0;
+       32:  470-block  0
+unconditional  0 taken 32
+        -:  471:		}
+        -:  472:
+       33:  473:		if (!match) {
+       33:  473-block  0
+branch  0 taken 33 (fallthrough)
+branch  1 taken 0
+       33:  474:			j = (int)jump_n;
+     1623:  475:			while (--j >= 0) {
+       33:  475-block  0
+unconditional  0 taken 33
+     1623:  475-block  1
+branch  1 taken 1590
+branch  2 taken 33
+        -:  476:				/* Pointer to the beginning of the search str in the
+        -:  477:				 * jump entry. Used to search for subsequent search
+        -:  478:				 * strings starting from this position in the entry
+        -:  479:				 * and not before */
+     1590:  480:				char *needle = case_sens_dirjump
+    #####:  481:							? strstr(jump_db[j].path, args[i])
+    %%%%%:  481-block  0
 unconditional  0 never executed
-        -:  459:
-    #####:  460:				case jchild:
-    #####:  461:					if (!strstr(jump_db[j].path, ws[cur_ws].path))
-    %%%%%:  461-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  462:						exclude = 1;
-    %%%%%:  462-block  0
-unconditional  0 never executed
-        -:  463:
-        -:  464:				case none:
-        -:  465:				default:
-    #####:  466:					break;
-    %%%%%:  466-block  0
-unconditional  0 never executed
-        -:  467:				}
-        -:  468:
-    #####:  469:				if (exclude)
-    %%%%%:  469-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  470:					continue;
-    %%%%%:  470-block  0
-unconditional  0 never executed
-        -:  471:
-    #####:  472:				visits[match] = jump_db[j].visits;
-    #####:  473:				first[match] = jump_db[j].first_visit;
-    #####:  474:				last[match] = jump_db[j].last_visit;
-    #####:  475:				matches[match++] = jump_db[j].path;
-    %%%%%:  475-block  0
-unconditional  0 never executed
-        -:  476:			}
-        -:  477:		}
-        -:  478:
-        -:  479:		/* 2) Once we have the list of matches, perform a reverse
-        -:  480:		 * matching process, that is, excluding non-matches,
-        -:  481:		 * using subsequent parameters */
-        -:  482:		else {
-    #####:  483:			j = (int)match;
-    #####:  484:			while (--j >= 0) {
-    %%%%%:  484-block  0
-unconditional  0 never executed
-    %%%%%:  484-block  1
-branch  1 never executed
-branch  2 never executed
+     1590:  482:							: strcasestr(jump_db[j].path, args[i]);
+     1590:  482-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1590
+     1590:  482-block  1
+unconditional  2 taken 1590
+     1590:  483:				if (!needle || (last_segment && strchr(needle, '/')))
+     1590:  483-block  0
+branch  0 taken 561 (fallthrough)
+branch  1 taken 1029
+      561:  483-block  1
+branch  2 taken 42 (fallthrough)
+branch  3 taken 519
+       42:  483-block  2
+branch  4 taken 40 (fallthrough)
+branch  5 taken 2
+     1069:  484:					continue;
+     1069:  484-block  0
+unconditional  0 taken 1069
         -:  485:
-    #####:  486:				if (!matches[j] || !*matches[j]
-    %%%%%:  486-block  0
+      521:  486:				if (first_segment) {
+      521:  486-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 521
+    #####:  487:					char p = *needle;
+    #####:  488:					*needle = '\0';
+    #####:  489:					if (strrchr(jump_db[j].path, '/') != jump_db[j].path) {
+    %%%%%:  489-block  0
 branch  0 never executed
 branch  1 never executed
-    %%%%%:  486-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  487:				|| (case_sens_dirjump ? !strstr(matches[j], args[i])
-    %%%%%:  487-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  487-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  488:				: !strcasestr(matches[j], args[i]))) {
-    %%%%%:  488-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  489:
-    #####:  490:					matches[j] = (char *)NULL;
-    #####:  491:					continue;
+    #####:  490:						*needle = p;
+    #####:  491:						continue;
     %%%%%:  491-block  0
 unconditional  0 never executed
-        -:  492:				}
-        -:  493:			}
-        -:  494:		}
-        -:  495:	}
-        -:  496:
-        -:  497:	/* 3) If something remains, we have at least one match */
-        -:  498:
-        -:  499:	/* 4) Further filter the list of matches by frecency, so that only
-        -:  500:	 * the best ranked directory will be returned */
-        -:  501:
-    #####:  502:	int found = 0, exit_status = EXIT_FAILURE,
-    #####:  503:	    best_ranked = 0, max = -1, k;
-        -:  504:
-    #####:  505:	j = match;
-    #####:  506:	while (--j >= 0) {
-    %%%%%:  506-block  0
+        -:  492:					}
+    #####:  493:					*needle = p;
+    %%%%%:  493-block  0
 unconditional  0 never executed
-    %%%%%:  506-block  1
+        -:  494:				}
+        -:  495:
+        -:  496:				/* Exclue CWD */
+      521:  497:				if (jump_db[j].path[1] == ws[cur_ws].path[1]
+      521:  497-block  0
+branch  0 taken 490 (fallthrough)
+branch  1 taken 31
+      490:  498:				&& strcmp(jump_db[j].path, ws[cur_ws].path) == 0)
+      490:  498-block  0
+branch  0 taken 16 (fallthrough)
+branch  1 taken 474
+       16:  499:					continue;
+       16:  499-block  0
+unconditional  0 taken 16
+        -:  500:
+      505:  501:				int exclude = 0;
+        -:  502:				/* Filter matches according to parent or
+        -:  503:				 * child options */
+      505:  504:				switch (jump_opt) {
+      505:  504-block  0
+branch  0 taken 74
+branch  1 taken 193
+branch  2 taken 238
+       74:  505:				case JPARENT:
+       74:  506:					if (!strstr(ws[cur_ws].path, jump_db[j].path))
+       74:  506-block  0
+branch  0 taken 72 (fallthrough)
+branch  1 taken 2
+       72:  507:						exclude = 1;
+       72:  507-block  0
+unconditional  0 taken 72
+       74:  508:					break;
+       74:  508-block  0
+unconditional  0 taken 74
+        -:  509:
+      193:  510:				case JCHILD:
+      193:  511:					if (!strstr(jump_db[j].path, ws[cur_ws].path))
+      193:  511-block  0
+branch  0 taken 177 (fallthrough)
+branch  1 taken 16
+      177:  512:						exclude = 1;
+      177:  512-block  0
+unconditional  0 taken 177
+        -:  513:
+        -:  514:				case NONE: /* fallthrough */
+      431:  515:				default: break;
+      431:  515-block  0
+unconditional  0 taken 431
+        -:  516:				}
+        -:  517:
+      505:  518:				if (exclude)
+      505:  518-block  0
+branch  0 taken 249 (fallthrough)
+branch  1 taken 256
+      249:  519:					continue;
+      249:  519-block  0
+unconditional  0 taken 249
+        -:  520:
+      256:  521:				visits[match] = jump_db[j].visits;
+      256:  522:				first[match] = jump_db[j].first_visit;
+      256:  523:				last[match] = jump_db[j].last_visit;
+      256:  524:				needles[match] = needle;
+      256:  525:				matches[match++] = jump_db[j].path;
+      256:  525-block  0
+unconditional  0 taken 256
+        -:  526:			}
+        -:  527:		}
+        -:  528:
+        -:  529:		/* 2) Once we have the list of matches, perform a reverse
+        -:  530:		 * matching process, that is, excluding non-matches,
+        -:  531:		 * using subsequent parameters */
+        -:  532:		else {
+    #####:  533:			j = (int)match;
+    #####:  534:			while (--j >= 0) {
+    %%%%%:  534-block  0
+unconditional  0 never executed
+    %%%%%:  534-block  1
 branch  1 never executed
 branch  2 never executed
-        -:  507:
-    #####:  508:		if (!matches[j])
-    %%%%%:  508-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  509:			continue;
-    %%%%%:  509-block  0
-unconditional  0 never executed
-        -:  510:
-    #####:  511:		found = 1;
-        -:  512:
-    #####:  513:		if (jump_opt == jlist)
-    %%%%%:  513-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  514:			printf("%s\n", matches[j]);
-    %%%%%:  514-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  515:
-        -:  516:		else {
-    #####:  517:			int days_since_first = (int)(now - first[j]) / 60 / 60 / 24;
-        -:  518:
-        -:  519:			/* Calculate the rank as frecency. The algorithm is based
-        -:  520:			 * on Mozilla, zoxide, and z.lua. See:
-        -:  521:			 * "https://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency"
-        -:  522:			 * "https://github.com/ajeetdsouza/zoxide/wiki/Algorithm#aging"
-        -:  523:			 * "https://github.com/skywind3000/z.lua#aging" */
-        -:  524:			int rank;
-    #####:  525:			rank = days_since_first > 0 ? ((int)visits[j] * 100)
-    #####:  526:					/ days_since_first : ((int)visits[j] * 100);
-    %%%%%:  526-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  526-block  1
-unconditional  2 never executed
-    %%%%%:  526-block  2
-unconditional  3 never executed
-        -:  527:
-    #####:  528:			int hours_since_last = (int)(now - last[j]) / 60 / 60;
-        -:  529:
-        -:  530:			/* Credit or penalty based on last directory access */
-    #####:  531:			int tmp_rank = rank;
-    #####:  532:			if (hours_since_last == 0) /* Last hour */
-    %%%%%:  532-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  533:				rank = JHOUR(tmp_rank);
-    %%%%%:  533-block  0
-unconditional  0 never executed
-    #####:  534:			else if (hours_since_last <= 24) /* Last day */
-    %%%%%:  534-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  535:				rank = JDAY(tmp_rank);
+    #####:  535:				if (!matches[j] || !*matches[j]) {
     %%%%%:  535-block  0
-unconditional  0 never executed
-    #####:  536:			else if (hours_since_last <= 168) /* Last week */
-    %%%%%:  536-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  537:				rank = JWEEK(tmp_rank);
-    %%%%%:  537-block  0
-unconditional  0 never executed
-        -:  538:			else /* More than a week */
-    #####:  539:				rank = JOLDER(tmp_rank);
-    %%%%%:  539-block  0
-unconditional  0 never executed
-        -:  540:
-        -:  541:			/* Matches in directory basename have extra credit */
-    #####:  542:			char *tmp = strrchr(matches[j], '/');
-    #####:  543:			if (tmp && *(++tmp)) {
-    %%%%%:  543-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  543-block  1
+    %%%%%:  535-block  1
 branch  2 never executed
 branch  3 never executed
-    #####:  544:				if (strstr(tmp, args[args_n]))
+    #####:  536:					matches[j] = (char *)NULL;
+    #####:  537:					continue;
+    %%%%%:  537-block  0
+unconditional  0 never executed
+        -:  538:				}
+        -:  539:
+    #####:  540:				char *_needle = case_sens_dirjump
+    #####:  541:						? strstr(needles[j] + 1, args[i])
+    %%%%%:  541-block  0
+unconditional  0 never executed
+    #####:  542:						: strcasestr(needles[j] + 1, args[i]);
+    %%%%%:  542-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  542-block  1
+unconditional  2 never executed
+        -:  543:
+    #####:  544:				if (!_needle || (last_segment && strchr(_needle, '/'))){
     %%%%%:  544-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  545:					rank += BASENAME_BONUS;
-    %%%%%:  545-block  0
-unconditional  0 never executed
-        -:  546:			}
-        -:  547:
-        -:  548:			/* Bookmarked directories have extra credit */
-    #####:  549:			k = (int)bm_n;
-    #####:  550:			while (--k >= 0) {
-    %%%%%:  550-block  0
-unconditional  0 never executed
-    %%%%%:  550-block  1
-branch  1 never executed
+    %%%%%:  544-block  1
 branch  2 never executed
-    #####:  551:				if (bookmarks[k].path[1] == matches[j][1]
-    %%%%%:  551-block  0
+branch  3 never executed
+    %%%%%:  544-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  545:					matches[j] = (char *)NULL;
+    #####:  546:					continue;
+    %%%%%:  546-block  0
+unconditional  0 never executed
+        -:  547:				}
+        -:  548:
+    #####:  549:				if (first_segment) {
+    %%%%%:  549-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  552:				&& strcmp(bookmarks[k].path, matches[j]) == 0) {
+    #####:  550:					char p = *_needle;
+    #####:  551:					*_needle = '\0';
+    #####:  552:					if (strrchr(matches[j], '/') != matches[j]) {
     %%%%%:  552-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  553:					rank += BOOKMARK_BONUS;
-    #####:  554:					break;
-    %%%%%:  554-block  0
+    #####:  553:						*_needle = p;
+    #####:  554:						matches[j] = (char *)NULL;
+    #####:  555:						continue;
+    %%%%%:  555-block  0
 unconditional  0 never executed
-        -:  555:				}
-        -:  556:			}
-        -:  557:
-    #####:  558:			if (pinned_dir && pinned_dir[1] == matches[j][1]
-    %%%%%:  558-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  558-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  559:			&& strcmp(pinned_dir, matches[j]) == 0)
-    %%%%%:  559-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  560:				rank += PINNED_BONUS;
-    %%%%%:  560-block  0
+        -:  556:					}
+    #####:  557:					*_needle = p;
+    %%%%%:  557-block  0
 unconditional  0 never executed
-        -:  561:
-    #####:  562:			k = MAX_WS;
-    #####:  563:			while (--k >= 0) {
-    %%%%%:  563-block  0
+        -:  558:				}
+        -:  559:
+        -:  560:				/* Update the needle for the next search string */
+    #####:  561:				needles[j] = _needle;
+    %%%%%:  561-block  0
 unconditional  0 never executed
-    %%%%%:  563-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  564:				if (ws[k].path && ws[k].path[1] == matches[j][1]
-    %%%%%:  564-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  564-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  565:				&& strcmp(ws[k].path, matches[j]) == 0) {
-    %%%%%:  565-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  566:					rank += WORKSPACE_BONUS;
-    #####:  567:					break;
-    %%%%%:  567-block  0
-unconditional  0 never executed
-        -:  568:				}
-        -:  569:			}
+        -:  562:			}
+        -:  563:		}
+        -:  564:	}
+        -:  565:
+        -:  566:	/* 3) If something remains, we have at least one match */
+        -:  567:
+        -:  568:	/* 4) Further filter the list of matches by frecency, so that only
+        -:  569:	 * the best ranked directory will be returned */
         -:  570:
-    #####:  571:			if (reduce) {
-    %%%%%:  571-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  572:				tmp_rank = rank;
-    #####:  573:				rank = tmp_rank / reduce;
-    %%%%%:  573-block  0
+       33:  571:	int found = 0, exit_status = EXIT_FAILURE,
+       33:  572:	    best_ranked = 0, max = -1, k;
+        -:  573:
+       33:  574:	j = match;
+      289:  575:	while (--j >= 0) {
+       33:  575-block  0
+unconditional  0 taken 33
+      289:  575-block  1
+branch  1 taken 256
+branch  2 taken 33 (fallthrough)
+     256*:  576:		if (!matches[j])
+      256:  576-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 256
+    #####:  577:			continue;
+    %%%%%:  577-block  0
 unconditional  0 never executed
-        -:  574:			}
-        -:  575:
-    #####:  576:			if (rank > max) {
-    %%%%%:  576-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  577:				max = rank;
-    #####:  578:				best_ranked = j;
-    %%%%%:  578-block  0
+        -:  578:
+      256:  579:		found = 1;
+        -:  580:
+      256:  581:		if (jump_opt == JLIST) {
+      256:  581-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 253
+        3:  582:			printf("%s\n", matches[j]);
+        3:  582-block  0
+call    0 returned 3
+unconditional  1 taken 3
+        -:  583:		} else {
+      253:  584:			int days_since_first = (int)(now - first[j]) / 60 / 60 / 24;
+        -:  585:
+        -:  586:			/* Calculate the rank as frecency. The algorithm is based
+        -:  587:			 * on Mozilla, zoxide, and z.lua. See:
+        -:  588:			 * "https://wiki.mozilla.org/User:Mconnor/Past/PlacesFrecency"
+        -:  589:			 * "https://github.com/ajeetdsouza/zoxide/wiki/Algorithm#aging"
+        -:  590:			 * "https://github.com/skywind3000/z.lua#aging" */
+        -:  591:			int rank;
+      367:  592:			rank = days_since_first > 0 ? ((int)visits[j] * 100)
+      253:  593:					/ days_since_first : ((int)visits[j] * 100);
+      253:  593-block  0
+branch  0 taken 114 (fallthrough)
+branch  1 taken 139
+      114:  593-block  1
+unconditional  2 taken 114
+      139:  593-block  2
+unconditional  3 taken 139
+        -:  594:
+      253:  595:			int hours_since_last = (int)(now - last[j]) / 60 / 60;
+        -:  596:
+        -:  597:			/* Credit or penalty based on last directory access */
+      253:  598:			int tmp_rank = rank;
+      253:  599:			if (hours_since_last == 0) /* Last hour */
+      253:  599-block  0
+branch  0 taken 29 (fallthrough)
+branch  1 taken 224
+       29:  600:				rank = JHOUR(tmp_rank);
+       29:  600-block  0
+unconditional  0 taken 29
+      224:  601:			else if (hours_since_last <= 24) /* Last day */
+      224:  601-block  0
+branch  0 taken 181 (fallthrough)
+branch  1 taken 43
+      181:  602:				rank = JDAY(tmp_rank);
+      181:  602-block  0
+unconditional  0 taken 181
+       43:  603:			else if (hours_since_last <= 168) /* Last week */
+       43:  603-block  0
+branch  0 taken 43 (fallthrough)
+branch  1 taken 0
+       43:  604:				rank = JWEEK(tmp_rank);
+       43:  604-block  0
+unconditional  0 taken 43
+        -:  605:			else /* More than a week */
+    #####:  606:				rank = JOLDER(tmp_rank);
+    %%%%%:  606-block  0
 unconditional  0 never executed
-        -:  579:			}
-        -:  580:		}
-        -:  581:	}
-        -:  582:
-    #####:  583:	if (!found) {
-    %%%%%:  583-block  0
+        -:  607:
+        -:  608:			/* Matches in directory basename have extra credit */
+      253:  609:			char *tmp = strrchr(matches[j], '/');
+      253:  610:			if (tmp && *(++tmp)) {
+      253:  610-block  0
+branch  0 taken 253 (fallthrough)
+branch  1 taken 0
+      253:  610-block  1
+branch  2 taken 253 (fallthrough)
+branch  3 taken 0
+      253:  611:				if (strstr(tmp, args[args_n]))
+      253:  611-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 252
+        1:  612:					rank += BASENAME_BONUS;
+        1:  612-block  0
+unconditional  0 taken 1
+        -:  613:			}
+        -:  614:
+        -:  615:			/* Bookmarked directories have extra credit */
+      253:  616:			k = (int)bm_n;
+     5387:  617:			while (--k >= 0) {
+      253:  617-block  0
+unconditional  0 taken 253
+     5387:  617-block  1
+branch  1 taken 5187
+branch  2 taken 200 (fallthrough)
+     5187:  618:				if (bookmarks[k].path[1] == matches[j][1]
+     5187:  618-block  0
+branch  0 taken 2489 (fallthrough)
+branch  1 taken 2698
+     2489:  619:				&& strcmp(bookmarks[k].path, matches[j]) == 0) {
+     2489:  619-block  0
+branch  0 taken 53 (fallthrough)
+branch  1 taken 2436
+       53:  620:					rank += BOOKMARK_BONUS;
+       53:  621:					break;
+       53:  621-block  0
+unconditional  0 taken 53
+        -:  622:				}
+        -:  623:			}
+        -:  624:
+      253:  625:			if (pinned_dir && pinned_dir[1] == matches[j][1]
+      253:  625-block  0
+branch  0 taken 253 (fallthrough)
+branch  1 taken 0
+      253:  625-block  1
+branch  2 taken 237 (fallthrough)
+branch  3 taken 16
+      237:  626:			&& strcmp(pinned_dir, matches[j]) == 0)
+      237:  626-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 237
+    #####:  627:				rank += PINNED_BONUS;
+    %%%%%:  627-block  0
+unconditional  0 never executed
+        -:  628:
+      253:  629:			k = MAX_WS;
+     2221:  630:			while (--k >= 0) {
+      253:  630-block  0
+unconditional  0 taken 253
+     2221:  630-block  1
+branch  1 taken 1987
+branch  2 taken 234 (fallthrough)
+     1987:  631:				if (ws[k].path && ws[k].path[1] == matches[j][1]
+     1987:  631-block  0
+branch  0 taken 975 (fallthrough)
+branch  1 taken 1012
+      975:  631-block  1
+branch  2 taken 911 (fallthrough)
+branch  3 taken 64
+      911:  632:				&& strcmp(ws[k].path, matches[j]) == 0) {
+      911:  632-block  0
+branch  0 taken 19 (fallthrough)
+branch  1 taken 892
+       19:  633:					rank += WORKSPACE_BONUS;
+       19:  634:					break;
+       19:  634-block  0
+unconditional  0 taken 19
+        -:  635:				}
+        -:  636:			}
+        -:  637:
+      253:  638:			if (reduce) {
+      253:  638-block  0
+branch  0 taken 253 (fallthrough)
+branch  1 taken 0
+      253:  639:				tmp_rank = rank;
+      253:  640:				rank = tmp_rank / reduce;
+      253:  640-block  0
+unconditional  0 taken 253
+        -:  641:			}
+        -:  642:
+      253:  643:			if (rank > max) {
+      253:  643-block  0
+branch  0 taken 28 (fallthrough)
+branch  1 taken 225
+       28:  644:				max = rank;
+       28:  645:				best_ranked = j;
+       28:  645-block  0
+unconditional  0 taken 28
+        -:  646:			}
+        -:  647:		}
+        -:  648:	}
+        -:  649:
+       33:  650:	if (!found) {
+       33:  650-block  0
+branch  0 taken 15 (fallthrough)
+branch  1 taken 18
+       15:  651:		if (mode == NO_SUG_JUMP)
+       15:  651-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 14
+        1:  652:			printf(_("%s: jump: No matches found\n"), PROGRAM_NAME);
+        1:  652-block  0
+call    0 returned 1
+call    1 returned 1
+unconditional  2 taken 1
+       15:  653:		exit_status = EXIT_FAILURE;
+       15:  653-block  0
+unconditional  0 taken 15
+       18:  654:	} else if (jump_opt != JLIST) {
+       18:  654-block  0
+branch  0 taken 17 (fallthrough)
+branch  1 taken 1
+       17:  655:		if (mode == NO_SUG_JUMP)
+       17:  655-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 16
+        1:  656:			exit_status = cd_function(matches[best_ranked], CD_PRINT_ERROR);
+        1:  656-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -:  657:		else
+       16:  658:			exit_status = save_suggestion(matches[best_ranked]);
+       16:  658-block  0
+call    0 returned 16
+unconditional  1 taken 16
+        -:  659:	}
+        -:  660:
+       33:  661:	free(matches);
+       33:  662:	free(needles);
+       33:  663:	free(first);
+       33:  664:	free(last);
+       33:  665:	free(visits);
+       33:  666:	return exit_status;
+       33:  666-block  0
+unconditional  0 taken 33
+        -:  667:}
+        -:  668:
+        -:  669:/* This function is called if the autojump option is enabled. If the
+        -:  670: * first word in CMD is not a program in PATH, append the j command to
+        -:  671: * the current command line and run the dirjump function */
+        -:  672:int
+function run_autojump called 0 returned 0% blocks executed 0%
+    #####:  673:run_autojump(char **cmd)
+        -:  674:{
+    #####:  675:	if (!cmd || !cmd[0] || !*cmd[0])
+    %%%%%:  675-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  584:		printf(_("%s: No matches found\n"), PROGRAM_NAME);
-    %%%%%:  584-block  0
+    %%%%%:  675-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  675-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  676:		return -1;
+    %%%%%:  676-block  0
+unconditional  0 never executed
+        -:  677:
+    #####:  678:	if (is_internal_c(cmd[0]))
+    %%%%%:  678-block  0
 call    0 never executed
-    #####:  585:		exit_status = EXIT_FAILURE;
+branch  1 never executed
+branch  2 never executed
+    #####:  679:		return -1;
+    %%%%%:  679-block  0
 unconditional  0 never executed
-        -:  586:	}
-        -:  587:
-    #####:  588:	else if (jump_opt != jlist)
-    %%%%%:  588-block  0
+        -:  680:
+    #####:  681:	char *ret = get_cmd_path(cmd[0]);
+    %%%%%:  681-block  0
+call    0 never executed
+    #####:  682:	if (ret) {
 branch  0 never executed
 branch  1 never executed
-    #####:  589:		exit_status = cd_function(matches[best_ranked]);
-    %%%%%:  589-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  590:
-    #####:  591:	free(matches);
-    #####:  592:	free(first);
-    #####:  593:	free(last);
-    #####:  594:	free(visits);
-        -:  595:
-    #####:  596:	return exit_status;
-    %%%%%:  596-block  0
+    #####:  683:		free(ret);
+    #####:  684:		return -1;
+    %%%%%:  684-block  0
 unconditional  0 never executed
-        -:  597:}
+        -:  685:	}
+        -:  686:
+        -:  687:	int i;
+        -:  688:
+    #####:  689:	char **__cmd = (char **)xnmalloc(args_n + 3, sizeof(char *));
+    %%%%%:  689-block  0
+call    0 never executed
+    #####:  690:	__cmd[0] = (char *)xnmalloc(2, sizeof(char));
+call    0 never executed
+    #####:  691:	*__cmd[0] = 'j';
+    #####:  692:	__cmd[0][1] = '\0';
+        -:  693:
+    #####:  694:	for (i = 0; i <= (int)args_n; i++) {
+unconditional  0 never executed
+    %%%%%:  694-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:  695:		__cmd[i + 1] = (char *)xnmalloc(strlen(cmd[i]) + 1,
+    %%%%%:  695-block  0
+call    0 never executed
+        -:  696:						sizeof(char));
+    #####:  697:		strcpy(__cmd[i + 1], cmd[i]);
+unconditional  0 never executed
+        -:  698:	}
+        -:  699:
+    #####:  700:	__cmd[args_n + 2] = (char *)NULL;
+        -:  701:
+    #####:  702:	args_n++;
+    #####:  703:	exit_code = dirjump(__cmd, NO_SUG_JUMP);
+    %%%%%:  703-block  0
+call    0 never executed
+    #####:  704:	args_n--;
+        -:  705:
+    #####:  706:	i = (int)args_n + 2;
+    #####:  707:	while (--i >= 0)
+unconditional  0 never executed
+    %%%%%:  707-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:  708:		free(__cmd[i]);
+    %%%%%:  708-block  0
+unconditional  0 never executed
+    #####:  709:	free(__cmd);
+        -:  710:
+    #####:  711:	return exit_code;
+    %%%%%:  711-block  0
+unconditional  0 never executed
+        -:  712:}

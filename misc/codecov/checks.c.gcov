@@ -28,908 +28,1131 @@
         -:   27:#include <errno.h>
         -:   28:#include <stdio.h>
         -:   29:#include <string.h>
-        -:   30:#include <sys/acl.h>
-        -:   31:#include <sys/stat.h>
-        -:   32:#include <sys/types.h>
-        -:   33:#include <unistd.h>
-        -:   34:
-        -:   35:#include "aux.h"
-        -:   36:#include "misc.h"
-        -:   37:
-        -:   38:/* Check a file's immutable bit. Returns 1 if true, zero if false, and
-        -:   39: * -1 in case of error */
-        -:   40:int
-function check_immutable_bit called 0 returned 0% blocks executed 0%
-    #####:   41:check_immutable_bit(char *file)
-        -:   42:{
-        -:   43:#if !defined(FS_IOC_GETFLAGS) || !defined(FS_IMMUTABLE_FL)
-    #####:   44:	return 0;
-    %%%%%:   44-block  0
-unconditional  0 never executed
-        -:   45:#else
-        -:   46:
-        -:   47:	int attr, fd, immut_flag = -1;
+        -:   30:
+        -:   31:#ifdef __NetBSD__
+        -:   32:# include <sys/param.h>
+        -:   33:# if __NetBSD_Prereq__(9,99,63)
+        -:   34:#  include <sys/acl.h>
+        -:   35:#  define _ACL_OK
+        -:   36:# endif /* __NetBSD_Prereq__ */
+        -:   37:#elif !defined(__HAIKU__) && !defined(__OpenBSD__)
+        -:   38:# include <sys/acl.h>
+        -:   39:# define _ACL_OK
+        -:   40:#endif /* __NetBSD__ */
+        -:   41:
+        -:   42:#include <sys/stat.h>
+        -:   43:#include <sys/types.h>
+        -:   44:#include <unistd.h>
+        -:   45:
+        -:   46:#include "aux.h"
+        -:   47:#include "misc.h"
         -:   48:
-        -:   49:	fd = open(file, O_RDONLY);
-        -:   50:	if (fd == -1) {
-        -:   51:		fprintf(stderr, "'%s': %s\n", file, strerror(errno));
-        -:   52:		return -1;
-        -:   53:	}
-        -:   54:
-        -:   55:	ioctl(fd, FS_IOC_GETFLAGS, &attr);
-        -:   56:	if (attr & FS_IMMUTABLE_FL)
-        -:   57:		immut_flag = 1;
-        -:   58:	else
-        -:   59:		immut_flag = 0;
-        -:   60:	close(fd);
-        -:   61:
-        -:   62:	if (immut_flag)
-        -:   63:		return 1;
-        -:   64:	else
-        -:   65:		return 0;
-        -:   66:
-        -:   67:#endif /* !defined(FS_IOC_GETFLAGS) || !defined(FS_IMMUTABLE_FL) */
-        -:   68:}
-        -:   69:
-        -:   70:/* Return 1 if FILE has some ACL property and zero if none
-        -:   71: * See: https://man7.org/tlpi/code/online/diff/acl/acl_view.c.html */
-        -:   72:int
-function is_acl called 0 returned 0% blocks executed 0%
-    #####:   73:is_acl(char *file)
-        -:   74:{
-    #####:   75:	if (!file || !*file)
-    %%%%%:   75-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:   75-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:   76:		return 0;
-    %%%%%:   76-block  0
-unconditional  0 never executed
-        -:   77:
-        -:   78:	acl_t acl;
-    #####:   79:	int entryid, num = 0;
-    #####:   80:	acl = acl_get_file(file, ACL_TYPE_ACCESS);
-    %%%%%:   80-block  0
+        -:   49:/* Terminals known not to be able to handle escape sequences */
+        -:   50:static const char *UNSUPPORTED_TERM[] = {"dumb", /*"cons25",*/ "emacs", NULL};
+        -:   51:
+        -:   52:void
+function check_term called 4 returned 100% blocks executed 53%
+        4:   53:check_term(void)
+        -:   54:{
+        4:   55:	char *_term = getenv("TERM");
+        4:   55-block  0
+call    0 returned 4
+        4:   56:	if (!_term) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4
+    #####:   57:		fprintf(stderr, _("%s: Error getting terminal type\n"), PROGRAM_NAME);
+    %%%%%:   57-block  0
 call    0 never executed
-        -:   81:
-    #####:   82:	if (acl) {
+call    1 never executed
+    #####:   58:		exit(EXIT_FAILURE);
+call    0 never executed
+        -:   59:	}
+        -:   60:
+        -:   61:	int i;
+       12:   62:	for (i = 0; UNSUPPORTED_TERM[i]; i++) {
+        4:   62-block  0
+unconditional  0 taken 4
+        8:   62-block  1
+unconditional  1 taken 8
+       12:   62-block  2
+branch  2 taken 8
+branch  3 taken 4 (fallthrough)
+        8:   63:		if (*_term == *UNSUPPORTED_TERM[i]
+        8:   63-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 8
+    #####:   64:		&& strcmp(_term, UNSUPPORTED_TERM[i]) == 0) {
+    %%%%%:   64-block  0
 branch  0 never executed
 branch  1 never executed
-        -:   83:		acl_entry_t entry;
+    #####:   65:			fprintf(stderr, _("%s: '%s': Unsupported terminal. This "
+    %%%%%:   65-block  0
+call    0 never executed
+call    1 never executed
+        -:   66:					"terminal cannot understand escape sequences\n"),
+        -:   67:					PROGRAM_NAME, UNSUPPORTED_TERM[i]);
+    #####:   68:			exit(EXIT_FAILURE);
+call    0 never executed
+        -:   69:		}
+        -:   70:	}
+        -:   71:
+        4:   72:	return;
+        4:   72-block  0
+unconditional  0 taken 4
+        -:   73:}
+        -:   74:
+        -:   75:/* Return 1 if current user has access to FILE. Otherwise, return zero */
+        -:   76:int
+function check_file_access called 33188 returned 100% blocks executed 76%
+    33188:   77:check_file_access(const struct fileinfo file)
+        -:   78:{
+    33188:   79:	int f = 0; /* Hold file ownership flags */
+        -:   80:
+    33188:   81:	mode_t val = (file.mode & (mode_t)~S_IFMT);
+    33188:   82:	if (val & S_IRUSR) f |= R_USR;
+    33188:   82-block  0
+branch  0 taken 33188 (fallthrough)
+branch  1 taken 0
+    33188:   82-block  1
+unconditional  2 taken 33188
+    33188:   83:	if (val & S_IXUSR) f |= X_USR;
+    33188:   83-block  0
+branch  0 taken 28281 (fallthrough)
+branch  1 taken 4907
+    28281:   83-block  1
+unconditional  2 taken 28281
         -:   84:
-    #####:   85:		for (entryid = ACL_FIRST_ENTRY;; entryid = ACL_NEXT_ENTRY) {
-    %%%%%:   85-block  0
-unconditional  0 never executed
-    #####:   86:			if (acl_get_entry(acl, entryid, &entry) != 1)
-    %%%%%:   86-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:   87:				break;
-    %%%%%:   87-block  0
-unconditional  0 never executed
-    #####:   88:			num++;
-    %%%%%:   88-block  0
-unconditional  0 never executed
-        -:   89:		}
+    33188:   85:	if (val & S_IRGRP) f |= R_GRP;
+    33188:   85-block  0
+branch  0 taken 28728 (fallthrough)
+branch  1 taken 4460
+    28728:   85-block  1
+unconditional  2 taken 28728
+    33188:   86:	if (val & S_IXGRP) f |= X_GRP;
+    33188:   86-block  0
+branch  0 taken 28245 (fallthrough)
+branch  1 taken 4943
+    28245:   86-block  1
+unconditional  2 taken 28245
+        -:   87:
+    33188:   88:	if (val & S_IROTH) f |= R_OTH;
+    33188:   88-block  0
+branch  0 taken 28715 (fallthrough)
+branch  1 taken 4473
+    28715:   88-block  1
+unconditional  2 taken 28715
+    33188:   89:	if (val & S_IXOTH) f |= X_OTH;
+    33188:   89-block  0
+branch  0 taken 28236 (fallthrough)
+branch  1 taken 4952
+    28236:   89-block  1
+unconditional  2 taken 28236
         -:   90:
-    #####:   91:		acl_free(acl);
-    %%%%%:   91-block  0
-call    0 never executed
-        -:   92:
-    #####:   93:		if (num > 3)
-branch  0 never executed
-branch  1 never executed
-        -:   94:			/* We have something else besides owner, group, and others,
-        -:   95:			 * that is, we have at least one ACL property */
-    #####:   96:			return 1;
-    %%%%%:   96-block  0
-unconditional  0 never executed
-        -:   97:		else
-    #####:   98:			return 0;
-    %%%%%:   98-block  0
-unconditional  0 never executed
-        -:   99:	}
-        -:  100:
-        -:  101:	else /* Error */
-        -:  102:		/* fprintf(stderr, "%s\n", strerror(errno)); */
-    #####:  103:		return 0;
-    %%%%%:  103-block  0
-unconditional  0 never executed
-        -:  104:
-        -:  105:	return 0;
-        -:  106:}
-        -:  107:
-        -:  108:/* Check whether a given string contains only digits. Returns 1 if true
-        -:  109: * and 0 if false. It does not work with negative numbers */
-        -:  110:int
-function is_number called 151 returned 100% blocks executed 100%
-      151:  111:is_number(const char *restrict str)
-        -:  112:{
-      977:  113:	for (; *str; str++)
-      151:  113-block  0
-unconditional  0 taken 151
-      826:  113-block  1
-unconditional  1 taken 826
-      977:  113-block  2
-branch  2 taken 848
-branch  3 taken 129 (fallthrough)
-      848:  114:		if (*str > '9' || *str < '0')
-      848:  114-block  0
-branch  0 taken 829 (fallthrough)
-branch  1 taken 19
-      829:  114-block  1
-branch  2 taken 3 (fallthrough)
-branch  3 taken 826
-       22:  115:			return 0;
-       22:  115-block  0
-unconditional  0 taken 22
-        -:  116:
-      129:  117:	return 1;
-      129:  117-block  0
-unconditional  0 taken 129
-        -:  118:}
-        -:  119:
-        -:  120:/* Check CMD against a list of internal commands */
-        -:  121:int
-function is_internal_c called 3 returned 100% blocks executed 47%
-        3:  122:is_internal_c(const char *restrict cmd)
-        -:  123:{
-        3:  124:	const char *int_cmds[] = {
-        -:  125:	    "?", "help",
-        -:  126:	    "ac", "ad",
-        -:  127:	    "acd", "autocd",
-        -:  128:	    "actions",
-        -:  129:	    "alias",
-        -:  130:	    "ao", "auto-open",
-        -:  131:	    "b", "back",
-        -:  132:	    "bh", "fh",
-        -:  133:	    "bm", "bookmarks",
-        -:  134:	    "br", "bulk",
-        -:  135:	    "c", "cp",
-        -:  136:	    "cc", "colors",
-        -:  137:	    "cd",
-        -:  138:	    "cl", "columns",
-        -:  139:	    "cmd", "commands",
-        -:  140:	    "cs", "colorschemes",
-        -:  141:	    "ds", "desel",
-        -:  142:	    "edit",
-        -:  143:	    "exp", "export",
-        -:  144:	    "ext",
-        -:  145:	    "f", "forth",
-        -:  146:	    "fc",
-        -:  147:	    "ff", "folders-first",
-        -:  148:	    "fs",
-        -:  149:	    "ft", "filter",
-        -:  150:	    "history",
-        -:  151:	    "hf", "hidden",
-        -:  152:	    "icons",
-        -:  153:	    "jump", "je", "jc", "jp", "jo",
-        -:  154:	    "kb", "keybinds",
-        -:  155:	    "l", "ln", "le",
-        -:  156:	    "lm",
-        -:  157:	    "log",
-        -:  158:	    "m", "mv",
-        -:  159:	    "md", "mkdir",
-        -:  160:	    "mf",
-        -:  161:	    "mm", "mime",
-        -:  162:	    "mp", "mountpoints",
-        -:  163:	    "msg", "messages",
-        -:  164:	    "n", "net",
-        -:  165:	    "o", "open",
-        -:  166:	    "opener",
-        -:  167:	    "p", "pp", "pr", "prop",
-        -:  168:	    "path", "cwd",
-        -:  169:	    "pf", "prof", "profile",
-        -:  170:	    "pg", "pager",
-        -:  171:	    "pin", "unpin",
-        -:  172:	    "r", "rm",
-        -:  173:	    "rf", "refresh",
-        -:  174:	    "rl", "reload",
-        -:  175:	    "s", "sel",
-        -:  176:	    "sb", "selbox",
-        -:  177:	    "shell",
-        -:  178:	    "splash",
-        -:  179:	    "st", "sort",
-        -:  180:	    "t", "tr", "trash",
-        -:  181:	    "te",
-        -:  182:	    "tips",
-        -:  183:	    "touch",
-        -:  184:	    "u", "undel", "untrash",
-        -:  185:	    "uc", "unicode",
-        -:  186:	    "unlink",
-        -:  187:	    "ver", "version",
-        -:  188:	    "ws",
-        -:  189:	    "x", "X",
-        -:  190:	    NULL};
-        -:  191:
-        3:  192:	int found = 0;
-        3:  193:	int i = (int)(sizeof(int_cmds) / sizeof(char *)) - 1;
-        -:  194:
-        9:  195:	while (--i >= 0) {
-        3:  195-block  0
-unconditional  0 taken 3
-        9:  195-block  1
-branch  1 taken 9
-branch  2 taken 0 (fallthrough)
-        9:  196:		if (*cmd == *int_cmds[i] && strcmp(cmd, int_cmds[i]) == 0) {
-        9:  196-block  0
+    33188:   91:	if (file.dir) {
+    33188:   91-block  0
 branch  0 taken 3 (fallthrough)
-branch  1 taken 6
-        3:  196-block  1
-branch  2 taken 3 (fallthrough)
-branch  3 taken 0
-        3:  197:			found = 1;
-        3:  198:			break;
-        3:  198-block  0
-unconditional  0 taken 3
-        -:  199:		}
-        -:  200:	}
-        -:  201:
-        3:  202:	if (found)
-        3:  202-block  0
+branch  1 taken 33185
+        3:   92:		if ((f & R_USR) && (f & X_USR) && file.uid == user.uid)
+        3:   92-block  0
 branch  0 taken 3 (fallthrough)
 branch  1 taken 0
-        3:  203:		return 1;
-        3:  203-block  0
+        3:   92-block  1
+branch  2 taken 3 (fallthrough)
+branch  3 taken 0
+        3:   92-block  2
+branch  4 taken 3 (fallthrough)
+branch  5 taken 0
+        3:   93:			return 1;
+        3:   93-block  0
 unconditional  0 taken 3
-        -:  204:
-        -:  205:	/* Check for the search and history functions as well */
-    #####:  206:	else if ((*cmd == '/' && access(cmd, F_OK) != 0) || (*cmd == '!'
-    %%%%%:  206-block  0
+    #####:   94:		if ((f & R_GRP) && (f & X_GRP) && file.gid == user.gid)
+    %%%%%:   94-block  0
 branch  0 never executed
 branch  1 never executed
-    %%%%%:  206-block  1
-call    2 never executed
-branch  3 never executed
-branch  4 never executed
-    %%%%%:  206-block  2
-branch  5 never executed
-branch  6 never executed
-    #####:  207:	&& (_ISDIGIT(cmd[1]) || (cmd[1] == '-' && _ISDIGIT(cmd[2]))
-    %%%%%:  207-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  207-block  1
+    %%%%%:   94-block  1
 branch  2 never executed
 branch  3 never executed
-    %%%%%:  207-block  2
+    %%%%%:   94-block  2
 branch  4 never executed
 branch  5 never executed
-    #####:  208:	|| cmd[1] == '!')))
-    %%%%%:  208-block  0
+    #####:   95:			return 1;
+    %%%%%:   95-block  0
+unconditional  0 never executed
+    #####:   96:		if ((f & R_OTH) && (f & X_OTH))
+    %%%%%:   96-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  209:		return 1;
-    %%%%%:  209-block  0
-unconditional  0 never executed
-        -:  210:
-    #####:  211:	return 0;
-    %%%%%:  211-block  0
-unconditional  0 never executed
-        -:  212:}
-        -:  213:
-        -:  214:/* Check cmd against a list of internal commands. Used by parse_input_str()
-        -:  215: * to know if it should perform additional expansions, like glob, regex,
-        -:  216: * tilde, and so on. Only internal commands dealing with filenames
-        -:  217: * should be checked here */
-        -:  218:int
-function is_internal called 22 returned 100% blocks executed 79%
-       22:  219:is_internal(const char *cmd)
-        -:  220:{
-       22:  221:	const char *int_cmds[] = {
-        -:  222:	    "cd",
-        -:  223:	    "o", "open",
-        -:  224:	    "s", "sel",
-        -:  225:	    "p", "pr", "prop",
-        -:  226:	    "r",
-        -:  227:	    "t", "tr", "trash",
-        -:  228:	    "mm", "mime",
-        -:  229:	    "bm", "bookmarks",
-        -:  230:	    "br", "bulk",
-        -:  231:	    "ac", "ad",
-        -:  232:	    "exp", "export",
-        -:  233:	    "pin",
-        -:  234:	    "jc", "jp",
-        -:  235:	    "bl", "le",
-        -:  236:	    "te",
-        -:  237:	    NULL};
-        -:  238:
-       22:  239:	int found = 0;
-       22:  240:	int i = (int)(sizeof(int_cmds) / sizeof(char *)) - 1;
-        -:  241:
-      610:  242:	while (--i >= 0) {
-       22:  242-block  0
-unconditional  0 taken 22
-      610:  242-block  1
-branch  1 taken 596
-branch  2 taken 14 (fallthrough)
-      596:  243:		if (*cmd == *int_cmds[i] && strcmp(cmd, int_cmds[i]) == 0) {
-      596:  243-block  0
-branch  0 taken 27 (fallthrough)
-branch  1 taken 569
-       27:  243-block  1
-branch  2 taken 8 (fallthrough)
-branch  3 taken 19
-        8:  244:			found = 1;
-        8:  245:			break;
-        8:  245-block  0
-unconditional  0 taken 8
-        -:  246:		}
-        -:  247:	}
-        -:  248:
-       22:  249:	if (found)
-       22:  249-block  0
-branch  0 taken 8 (fallthrough)
-branch  1 taken 14
-        8:  250:		return 1;
-        8:  250-block  0
-unconditional  0 taken 8
-        -:  251:
-        -:  252:	/* Check for the search function as well */
-      14*:  253:	else if (*cmd == '/' && access(cmd, F_OK) != 0)
-       14:  253-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 14
-    %%%%%:  253-block  1
-call    2 never executed
+    %%%%%:   96-block  1
+branch  2 never executed
 branch  3 never executed
-branch  4 never executed
-    #####:  254:		return 1;
-    %%%%%:  254-block  0
+    #####:   97:			return 1;
+    %%%%%:   97-block  0
 unconditional  0 never executed
-        -:  255:
-       14:  256:	return 0;
-       14:  256-block  0
-unconditional  0 taken 14
-        -:  257:}
-        -:  258:
-        -:  259:/* Return one if STR is a command in PATH or zero if not */
-        -:  260:int
-function is_bin_cmd called 3 returned 100% blocks executed 67%
-        3:  261:is_bin_cmd(const char *str)
-        -:  262:{
-        3:  263:	char *p = (char *)str, *q = (char *)str;
-        3:  264:	int index = 0, space_index = -1;
-        -:  265:
-       12:  266:	while (*p) {
-        3:  266-block  0
-unconditional  0 taken 3
-       12:  266-block  1
+        -:   98:	} else {
+    33185:   99:		if ((f & R_USR) && file.uid == user.uid)
+    33185:   99-block  0
+branch  0 taken 33185 (fallthrough)
+branch  1 taken 0
+    33185:   99-block  1
+branch  2 taken 4988 (fallthrough)
+branch  3 taken 28197
+     4988:  100:			return 1;
+     4988:  100-block  0
+unconditional  0 taken 4988
+    28197:  101:		if ((f & R_GRP) && file.gid == user.gid)
+    28197:  101-block  0
+branch  0 taken 28188 (fallthrough)
 branch  1 taken 9
-branch  2 taken 3 (fallthrough)
-        9:  267:		if (*p == ' ') {
-        9:  267-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 9
-    #####:  268:			*p = '\0';
-    #####:  269:			space_index = index;
-    #####:  270:			break;
-    %%%%%:  270-block  0
-unconditional  0 never executed
-        -:  271:		}
-        9:  272:		p++;
-        9:  273:		index++;
-        9:  273-block  0
-unconditional  0 taken 9
-        -:  274:	}
-        -:  275:
-        -:  276:	size_t i;
-    11241:  277:	for (i = 0; bin_commands[i]; i++) {
-        3:  277-block  0
-unconditional  0 taken 3
-    11238:  277-block  1
-unconditional  1 taken 11238
-    11241:  277-block  2
-branch  2 taken 11238
-branch  3 taken 3 (fallthrough)
-   11238*:  278:		if (*q == *bin_commands[i] && q[1] == bin_commands[i][1] && strcmp(q, bin_commands[i]) == 0) {
-    11238:  278-block  0
-branch  0 taken 192 (fallthrough)
-branch  1 taken 11046
-      192:  278-block  1
+    28188:  101-block  1
 branch  2 taken 0 (fallthrough)
-branch  3 taken 192
-    %%%%%:  278-block  2
-branch  4 never executed
-branch  5 never executed
-    #####:  279:			if (space_index != -1)
-    %%%%%:  279-block  0
+branch  3 taken 28188
+    #####:  102:			return 1;
+    %%%%%:  102-block  0
+unconditional  0 never executed
+    28197:  103:		if (f & R_OTH)
+    28197:  103-block  0
+branch  0 taken 28179 (fallthrough)
+branch  1 taken 18
+    28179:  104:			return 1;
+    28179:  104-block  0
+unconditional  0 taken 28179
+        -:  105:	}
+        -:  106:
+       18:  107:	return 0;
+       18:  107-block  0
+unconditional  0 taken 18
+        -:  108:}
+        -:  109:
+        -:  110:char *
+function get_sudo_path called 2 returned 100% blocks executed 50%
+        2:  111:get_sudo_path(void)
+        -:  112:{
+        2:  113:	char *p = getenv("CLIFM_SUDO_CMD");
+        2:  113-block  0
+call    0 returned 2
+       2*:  114:	char *sudo = get_cmd_path(p ? p : DEF_SUDO_CMD);
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    %%%%%:  114-block  0
+unconditional  2 never executed
+        2:  114-block  1
+unconditional  3 taken 2
+        2:  114-block  2
+call    4 returned 2
+        -:  115:
+        2:  116:	if (!sudo) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:  117:		fprintf(stderr, _("%s: %s: No such file or directory\n"),
+    %%%%%:  117-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  280:				q[space_index] = ' ';
-    %%%%%:  280-block  0
+    %%%%%:  117-block  1
+unconditional  2 never executed
+    %%%%%:  117-block  2
+unconditional  3 never executed
+    %%%%%:  117-block  3
+call    4 never executed
+call    5 never executed
+        -:  118:				PROGRAM_NAME, p ? p : DEF_SUDO_CMD);
+    #####:  119:		return (char *)NULL;
 unconditional  0 never executed
-    #####:  281:			return 1;
-    %%%%%:  281-block  0
+        -:  120:	}
+        -:  121:
+        2:  122:	return sudo;
+        2:  122-block  0
+unconditional  0 taken 2
+        -:  123:}
+        -:  124:
+        -:  125:/* Check a file's immutable bit. Returns 1 if true, zero if false, and
+        -:  126: * -1 in case of error */
+        -:  127:int
+function check_immutable_bit called 9 returned 100% blocks executed 100%
+        9:  128:check_immutable_bit(char *file)
+        -:  129:{
+        -:  130:#if !defined(FS_IOC_GETFLAGS) || !defined(FS_IMMUTABLE_FL)
+        -:  131:	UNUSED(file);
+        9:  132:	return 0;
+        9:  132-block  0
+unconditional  0 taken 9
+        -:  133:#else
+        -:  134:	int attr, fd, immut_flag = -1;
+        -:  135:
+        -:  136:	fd = open(file, O_RDONLY);
+        -:  137:	if (fd == -1) {
+        -:  138:		fprintf(stderr, "'%s': %s\n", file, strerror(errno));
+        -:  139:		return -1;
+        -:  140:	}
+        -:  141:
+        -:  142:	ioctl(fd, FS_IOC_GETFLAGS, &attr);
+        -:  143:	if (attr & FS_IMMUTABLE_FL)
+        -:  144:		immut_flag = 1;
+        -:  145:	else
+        -:  146:		immut_flag = 0;
+        -:  147:
+        -:  148:	close(fd);
+        -:  149:
+        -:  150:	if (immut_flag)
+        -:  151:		return 1;
+        -:  152:
+        -:  153:	return 0;
+        -:  154:#endif /* !defined(FS_IOC_GETFLAGS) || !defined(FS_IMMUTABLE_FL) */
+        -:  155:}
+        -:  156:
+        -:  157:/* Return 1 if FILE has some ACL property and zero if none
+        -:  158: * See: https://man7.org/tlpi/code/online/diff/acl/acl_view.c.html */
+        -:  159:int
+function is_acl called 217 returned 100% blocks executed 88%
+      217:  160:is_acl(char *file)
+        -:  161:{
+        -:  162:#ifndef _ACL_OK
+        -:  163:	UNUSED(file);
+        -:  164:	return 0;
+        -:  165:#else
+      217:  166:	if (!file || !*file)
+      217:  166-block  0
+branch  0 taken 217 (fallthrough)
+branch  1 taken 0
+      217:  166-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 217
+    #####:  167:		return 0;
+    %%%%%:  167-block  0
 unconditional  0 never executed
-        -:  282:		}
-        -:  283:	}
-        -:  284:
-        3:  285:	if (space_index != -1)
-        3:  285-block  0
+        -:  168:
+        -:  169:	acl_t acl;
+      217:  170:	acl = acl_get_file(file, ACL_TYPE_ACCESS);
+      217:  170-block  0
+call    0 returned 217
+        -:  171:
+      217:  172:	if (!acl)
+branch  0 taken 3 (fallthrough)
+branch  1 taken 214
+        3:  173:		return 0;
+        3:  173-block  0
+unconditional  0 taken 3
+        -:  174:
+        -:  175:	acl_entry_t entry;
+      214:  176:	int entryid, num = 0;
+        -:  177:
+      214:  178:	for (entryid = ACL_FIRST_ENTRY;; entryid = ACL_NEXT_ENTRY) {
+      214:  178-block  0
+unconditional  0 taken 214
+      856:  179:		if (acl_get_entry(acl, entryid, &entry) != 1)
+      856:  179-block  0
+call    0 returned 856
+branch  1 taken 214 (fallthrough)
+branch  2 taken 642
+      214:  180:			break;
+      214:  180-block  0
+unconditional  0 taken 214
+      642:  181:		num++;
+      642:  181-block  0
+unconditional  0 taken 642
+        -:  182:	}
+        -:  183:
+      214:  184:	acl_free(acl);
+      214:  184-block  0
+call    0 returned 214
+        -:  185:
+        -:  186:	/* If num > 3 we have something else besides owner, group, and others,
+        -:  187:	 * that is, we have at least one ACL property */
+      214:  188:	if (num > 3)
 branch  0 taken 0 (fallthrough)
-branch  1 taken 3
-    #####:  286:		q[space_index] = ' ';
-    %%%%%:  286-block  0
+branch  1 taken 214
+    #####:  189:		return 1;
+    %%%%%:  189-block  0
 unconditional  0 never executed
-        -:  287:
-        3:  288:	return 0;
-        3:  288-block  0
-unconditional  0 taken 3
-        -:  289:}
-        -:  290:
-        -:  291:/* Returns 0 if digit is found and preceded by a letter in STR, or one if not */
-        -:  292:int
-function digit_found called 22 returned 100% blocks executed 100%
-       22:  293:digit_found(const char *str)
-        -:  294:{
-       22:  295:	char *p = (char *)str;
-       22:  296:	int c = 0;
-        -:  297:
-       84:  298:	while (*p) {
-       22:  298-block  0
-unconditional  0 taken 22
-       84:  298-block  1
-branch  1 taken 65
-branch  2 taken 19 (fallthrough)
-       65:  299:		if (c++ && _ISDIGIT(*p) && _ISALPHA(*(p - 1)))
-       65:  299-block  0
-branch  0 taken 43 (fallthrough)
-branch  1 taken 22
-       43:  299-block  1
+        -:  190:
+      214:  191:	return 0;
+      214:  191-block  0
+unconditional  0 taken 214
+        -:  192:#endif /* _ACL_OK */
+        -:  193:}
+        -:  194:
+        -:  195:/* Check whether a given string contains only digits. Returns 1 if true
+        -:  196: * and 0 if false. It does not work with negative numbers */
+        -:  197:int
+function is_number called 3363 returned 100% blocks executed 100%
+     3363:  198:is_number(const char *restrict str)
+        -:  199:{
+    20924:  200:	for (; *str; str++)
+     3363:  200-block  0
+unconditional  0 taken 3363
+    17561:  200-block  1
+unconditional  1 taken 17561
+    20924:  200-block  2
+branch  2 taken 18196
+branch  3 taken 2728 (fallthrough)
+    18196:  201:		if (*str > '9' || *str < '0')
+    18196:  201-block  0
+branch  0 taken 17667 (fallthrough)
+branch  1 taken 529
+    17667:  201-block  1
+branch  2 taken 106 (fallthrough)
+branch  3 taken 17561
+      635:  202:			return 0;
+      635:  202-block  0
+unconditional  0 taken 635
+        -:  203:
+     2728:  204:	return 1;
+     2728:  204-block  0
+unconditional  0 taken 2728
+        -:  205:}
+        -:  206:
+        -:  207:/* Check CMD against a list of internal commands */
+        -:  208:int
+function is_internal_c called 190 returned 100% blocks executed 79%
+      190:  209:is_internal_c(const char *restrict cmd)
+        -:  210:{
+      190:  211:	const char *int_cmds[] = {
+        -:  212:	    "?", "help",
+        -:  213:	    "ac", "ad",
+        -:  214:	    "acd", "autocd",
+        -:  215:	    "actions",
+        -:  216:	    "alias",
+        -:  217:	    "ao", "auto-open",
+        -:  218:	    "b", "back",
+        -:  219:	    "bh", "fh",
+        -:  220:	    "bm", "bookmarks",
+        -:  221:	    "br", "bulk",
+        -:  222:	    "c", "cp",
+        -:  223:	    "cc", "colors",
+        -:  224:	    "cd",
+        -:  225:	    "cl", "columns",
+        -:  226:	    "cmd", "commands",
+        -:  227:	    "cs", "colorschemes",
+        -:  228:		"d", "dup",
+        -:  229:	    "ds", "desel",
+        -:  230:	    "edit",
+        -:  231:	    "exp", "export",
+        -:  232:	    "ext",
+        -:  233:	    "f", "forth",
+        -:  234:	    "fc",
+        -:  235:	    "ff", "folders-first",
+        -:  236:	    "fs",
+        -:  237:	    "ft", "filter",
+        -:  238:	    "history",
+        -:  239:	    "hf", "hidden",
+        -:  240:	    "icons",
+        -:  241:	    "jump", "je", "jc", "jp", "jo",
+        -:  242:	    "kb", "keybinds",
+        -:  243:	    "l", "ln", "le",
+        -:  244:	    "lm",
+        -:  245:	    "log",
+        -:  246:	    "m", "mv",
+        -:  247:	    "md", "mkdir",
+        -:  248:	    "mf",
+        -:  249:	    "mm", "mime",
+        -:  250:	    "mp", "mountpoints",
+        -:  251:	    "msg", "messages",
+        -:  252:	    "n", "new",
+        -:  253:	    "net",
+        -:  254:	    "o", "open",
+        -:  255:	    "opener",
+        -:  256:	    "p", "pp", "pr", "prop",
+        -:  257:	    "path", "cwd",
+        -:  258:		"paste",
+        -:  259:	    "pf", "prof", "profile",
+        -:  260:	    "pg", "pager",
+        -:  261:	    "pin", "unpin",
+        -:  262:		"quit",
+        -:  263:	    "r", "rm",
+        -:  264:	    "rf", "refresh",
+        -:  265:	    "rl", "reload",
+        -:  266:	    "s", "sel",
+        -:  267:	    "sb", "selbox",
+        -:  268:	    "shell",
+        -:  269:	    "splash",
+        -:  270:	    "st", "sort",
+        -:  271:	    "t", "tr", "trash",
+        -:  272:	    "te",
+        -:  273:	    "tips",
+        -:  274:	    "touch",
+        -:  275:	    "u", "undel", "untrash",
+        -:  276:	    "uc", "unicode",
+        -:  277:	    "unlink",
+        -:  278:		"v",
+        -:  279:	    "ver", "version",
+        -:  280:	    "ws",
+        -:  281:	    "x", "X",
+        -:  282:	    NULL};
+        -:  283:
+      190:  284:	int found = 0;
+      190:  285:	int i = (int)(sizeof(int_cmds) / sizeof(char *)) - 1;
+        -:  286:
+    21591:  287:	while (--i >= 0) {
+      190:  287-block  0
+unconditional  0 taken 190
+    21591:  287-block  1
+branch  1 taken 21435
+branch  2 taken 156 (fallthrough)
+    21435:  288:		if (*cmd == *int_cmds[i] && strcmp(cmd, int_cmds[i]) == 0) {
+    21435:  288-block  0
+branch  0 taken 1100 (fallthrough)
+branch  1 taken 20335
+     1100:  288-block  1
+branch  2 taken 34 (fallthrough)
+branch  3 taken 1066
+       34:  289:			found = 1;
+       34:  290:			break;
+       34:  290-block  0
+unconditional  0 taken 34
+        -:  291:		}
+        -:  292:	}
+        -:  293:
+      190:  294:	if (found)
+      190:  294-block  0
+branch  0 taken 34 (fallthrough)
+branch  1 taken 156
+       34:  295:		return 1;
+       34:  295-block  0
+unconditional  0 taken 34
+        -:  296:
+        -:  297:	/* Check for the search and history functions as well */
+      156:  298:	else if ((*cmd == '/' && access(cmd, F_OK) != 0) || (*cmd == '!'
+      156:  298-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 155
+        1:  298-block  1
+call    2 returned 1
+branch  3 taken 0 (fallthrough)
+branch  4 taken 1
+      155:  298-block  2
+branch  5 taken 0 (fallthrough)
+branch  6 taken 155
+    #####:  299:	&& (_ISDIGIT(cmd[1]) || (cmd[1] == '-' && _ISDIGIT(cmd[2]))
+    %%%%%:  299-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  299-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  299-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  300:	|| cmd[1] == '!')))
+    %%%%%:  300-block  0
+branch  0 never executed
+branch  1 never executed
+        1:  301:		return 1;
+        1:  301-block  0
+unconditional  0 taken 1
+        -:  302:
+      155:  303:	return 0;
+      155:  303-block  0
+unconditional  0 taken 155
+        -:  304:}
+        -:  305:
+        -:  306:/* Check cmd against a list of internal commands. Used by parse_input_str()
+        -:  307: * to know if it should perform additional expansions, like glob, regex,
+        -:  308: * tilde, and so on. Only internal commands dealing with file names
+        -:  309: * should be checked here */
+        -:  310:int
+function is_internal called 500 returned 100% blocks executed 100%
+      500:  311:is_internal(const char *cmd)
+        -:  312:{
+      500:  313:	const char *int_cmds[] = {
+        -:  314:	    "cd",
+        -:  315:	    "o", "open",
+        -:  316:	    "s", "sel",
+        -:  317:	    "p", "pr", "prop",
+        -:  318:	    "r",
+        -:  319:	    "t", "tr", "trash",
+        -:  320:	    "mm", "mime",
+        -:  321:	    "n", "new",
+        -:  322:	    "bm", "bookmarks",
+        -:  323:	    "br", "bulk",
+        -:  324:	    "ac", "ad",
+        -:  325:	    "exp", "export",
+        -:  326:	    "pin",
+        -:  327:	    "jc", "jp",
+        -:  328:	    "bl", "le",
+        -:  329:	    "te",
+        -:  330:	    NULL};
+        -:  331:
+      500:  332:	int found = 0;
+      500:  333:	int i = (int)(sizeof(int_cmds) / sizeof(char *)) - 1;
+        -:  334:
+    14626:  335:	while (--i >= 0) {
+      500:  335-block  0
+unconditional  0 taken 500
+    14626:  335-block  1
+branch  1 taken 14195
+branch  2 taken 431 (fallthrough)
+    14195:  336:		if (*cmd == *int_cmds[i] && strcmp(cmd, int_cmds[i]) == 0) {
+    14195:  336-block  0
+branch  0 taken 703 (fallthrough)
+branch  1 taken 13492
+      703:  336-block  1
+branch  2 taken 69 (fallthrough)
+branch  3 taken 634
+       69:  337:			found = 1;
+       69:  338:			break;
+       69:  338-block  0
+unconditional  0 taken 69
+        -:  339:		}
+        -:  340:	}
+        -:  341:
+      500:  342:	if (found)
+      500:  342-block  0
+branch  0 taken 69 (fallthrough)
+branch  1 taken 431
+       69:  343:		return 1;
+       69:  343-block  0
+unconditional  0 taken 69
+        -:  344:
+        -:  345:	/* Check for the search function as well */
+      431:  346:	else if (*cmd == '/' && access(cmd, F_OK) != 0)
+      431:  346-block  0
+branch  0 taken 22 (fallthrough)
+branch  1 taken 409
+       22:  346-block  1
+call    2 returned 22
+branch  3 taken 5 (fallthrough)
+branch  4 taken 17
+        5:  347:		return 1;
+        5:  347-block  0
+unconditional  0 taken 5
+        -:  348:
+      426:  349:	return 0;
+      426:  349-block  0
+unconditional  0 taken 426
+        -:  350:}
+        -:  351:
+        -:  352:/* Return one if STR is a command in PATH or zero if not */
+        -:  353:int
+function is_bin_cmd called 15 returned 100% blocks executed 94%
+       15:  354:is_bin_cmd(const char *str)
+        -:  355:{
+       15:  356:	char *p = (char *)str, *q = (char *)str;
+       15:  357:	int index = 0, space_index = -1;
+        -:  358:
+       85:  359:	while (*p) {
+       15:  359-block  0
+unconditional  0 taken 15
+       85:  359-block  1
+branch  1 taken 78
 branch  2 taken 7 (fallthrough)
-branch  3 taken 36
-        7:  299-block  2
-branch  4 taken 3 (fallthrough)
-branch  5 taken 4
-        3:  299-block  3
-branch  6 taken 3 (fallthrough)
-branch  7 taken 0
-        3:  300:			return 1;
-        3:  300-block  0
-unconditional  0 taken 3
-       62:  301:		p++;
-       62:  301-block  0
-unconditional  0 taken 62
-        -:  302:	}
-        -:  303:
-       19:  304:	return 0;
-       19:  304-block  0
-unconditional  0 taken 19
-        -:  305:}
-        -:  306:
-        -:  307:/* Check if the 'file' command is available: it is needed by the mime
-        -:  308: * function */
-        -:  309:void
-function file_cmd_check called 1 returned 100% blocks executed 80%
-        1:  310:file_cmd_check(void)
-        -:  311:{
-        1:  312:	file_cmd_path = get_cmd_path("file");
-        1:  312-block  0
-call    0 returned 1
-        -:  313:
-        1:  314:	if (!file_cmd_path) {
+       78:  360:		if (*p == ' ') {
+       78:  360-block  0
+branch  0 taken 8 (fallthrough)
+branch  1 taken 70
+        8:  361:			*p = '\0';
+        8:  362:			space_index = index;
+        8:  363:			break;
+        8:  363-block  0
+unconditional  0 taken 8
+        -:  364:		}
+       70:  365:		p++;
+       70:  366:		index++;
+       70:  366-block  0
+unconditional  0 taken 70
+        -:  367:	}
+        -:  368:
+        -:  369:	size_t i;
+    52503:  370:	for (i = 0; bin_commands[i]; i++) {
+       15:  370-block  0
+unconditional  0 taken 15
+    52488:  370-block  1
+unconditional  1 taken 52488
+    52503:  370-block  2
+branch  2 taken 52489
+branch  3 taken 14 (fallthrough)
+    52489:  371:		if (*q == *bin_commands[i] && q[1] == bin_commands[i][1] && strcmp(q, bin_commands[i]) == 0) {
+    52489:  371-block  0
+branch  0 taken 1970 (fallthrough)
+branch  1 taken 50519
+     1970:  371-block  1
+branch  2 taken 3 (fallthrough)
+branch  3 taken 1967
+        3:  371-block  2
+branch  4 taken 1 (fallthrough)
+branch  5 taken 2
+        1:  372:			if (space_index != -1)
+        1:  372-block  0
 branch  0 taken 0 (fallthrough)
 branch  1 taken 1
-    #####:  315:		flags &= ~FILE_CMD_OK;
-    #####:  316:		_err('n', PRINT_PROMPT, _("%s: 'file' command not found. "
-    %%%%%:  316-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  317:				  "Specify an application when opening files. Ex: 'o 12 nano' "
-        -:  318:				  "or just 'nano 12'\n"), PROGRAM_NAME);
-        -:  319:	}
-        -:  320:
-        -:  321:	else
-        1:  322:		flags |= FILE_CMD_OK;
-        1:  322-block  0
+    #####:  373:				q[space_index] = ' ';
+    %%%%%:  373-block  0
+unconditional  0 never executed
+        1:  374:			return 1;
+        1:  374-block  0
 unconditional  0 taken 1
-        1:  323:}
-        -:  324:
-        -:  325:int
-function check_regex called 13 returned 100% blocks executed 91%
-       13:  326:check_regex(char *str)
-        -:  327:{
-       13:  328:	if (!str || !*str)
-       13:  328-block  0
-branch  0 taken 13 (fallthrough)
-branch  1 taken 0
-       13:  328-block  1
-branch  2 taken 0 (fallthrough)
-branch  3 taken 13
-    #####:  329:		return EXIT_FAILURE;
-    %%%%%:  329-block  0
-unconditional  0 never executed
-        -:  330:
-       13:  331:	int char_found = 0;
-       13:  332:	char *p = str;
-        -:  333:
-       38:  334:	while (*p) {
-       13:  334-block  0
-unconditional  0 taken 13
-       38:  334-block  1
-branch  1 taken 29
-branch  2 taken 9 (fallthrough)
-        -:  335:		/* If STR contains at least one of the following chars */
-       29:  336:		if (*p == '*' || *p == '?' || *p == '[' || *p == '{' || *p == '^'
-       29:  336-block  0
-branch  0 taken 29 (fallthrough)
-branch  1 taken 0
-       29:  336-block  1
-branch  2 taken 29 (fallthrough)
-branch  3 taken 0
-       29:  336-block  2
-branch  4 taken 29 (fallthrough)
-branch  5 taken 0
-       29:  336-block  3
-branch  6 taken 29 (fallthrough)
-branch  7 taken 0
-       29:  336-block  4
-branch  8 taken 29 (fallthrough)
-branch  9 taken 0
-       29:  337:		|| *p == '.' || *p == '|' || *p == '+' || *p == '$') {
-       29:  337-block  0
-branch  0 taken 25 (fallthrough)
-branch  1 taken 4
-       25:  337-block  1
-branch  2 taken 25 (fallthrough)
-branch  3 taken 0
-       25:  337-block  2
-branch  4 taken 25 (fallthrough)
-branch  5 taken 0
-       25:  337-block  3
-branch  6 taken 0 (fallthrough)
-branch  7 taken 25
-        4:  338:			char_found = 1;
-        4:  339:			break;
-        4:  339-block  0
-unconditional  0 taken 4
-        -:  340:		}
-        -:  341:
-       25:  342:		p++;
-       25:  342-block  0
-unconditional  0 taken 25
-        -:  343:	}
-        -:  344:
-        -:  345:	/* And if STR is not a filename, take it as a possible regex */
-       13:  346:	if (char_found)
-       13:  346-block  0
-branch  0 taken 4 (fallthrough)
-branch  1 taken 9
-        4:  347:		if (access(str, F_OK) == -1)
-        4:  347-block  0
-call    0 returned 4
-branch  1 taken 0 (fallthrough)
-branch  2 taken 4
-    #####:  348:			return EXIT_SUCCESS;
-    %%%%%:  348-block  0
-unconditional  0 never executed
-        -:  349:
-       13:  350:	return EXIT_FAILURE;
-       13:  350-block  0
-unconditional  0 taken 13
-        -:  351:}
-        -:  352:
-        -:  353:/* Returns the parsed aliased command in an array of strings, if
-        -:  354: * matching alias is found, or NULL if not. */
-        -:  355:char **
-function check_for_alias called 17 returned 100% blocks executed 36%
-       17:  356:check_for_alias(char **args)
-        -:  357:{
-       17:  358:	if (!aliases_n || !aliases || !args)
-       17:  358-block  0
-branch  0 taken 17 (fallthrough)
-branch  1 taken 0
-       17:  358-block  1
-branch  2 taken 17 (fallthrough)
-branch  3 taken 0
-       17:  358-block  2
-branch  4 taken 0 (fallthrough)
-branch  5 taken 17
-    #####:  359:		return (char **)NULL;
-    %%%%%:  359-block  0
-unconditional  0 never executed
-        -:  360:
-       17:  361:	char *aliased_cmd = (char *)NULL;
-       17:  362:	size_t cmd_len = strlen(args[0]);
-        -:  363:	char tmp_cmd[PATH_MAX * 2 + 1];
-       17:  364:	snprintf(tmp_cmd, sizeof(tmp_cmd), "%s=", args[0]);
-        -:  365:
-       17:  366:	register int i = (int)aliases_n;
-      102:  367:	while (--i >= 0) {
-       17:  367-block  0
-unconditional  0 taken 17
-      102:  367-block  1
-branch  1 taken 85
-branch  2 taken 17 (fallthrough)
-        -:  368:
-      85*:  369:		if (!aliases[i])
-       85:  369-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 85
-    #####:  370:			continue;
-    %%%%%:  370-block  0
-unconditional  0 never executed
-        -:  371:		/* Look for this string: "command=", in the aliases file */
-        -:  372:		/* If a match is found */
-        -:  373:
-       85:  374:		if (*aliases[i] != *args[0] ||
-       85:  374-block  0
-branch  0 taken 3 (fallthrough)
-branch  1 taken 82
-        3:  375:		    strncmp(tmp_cmd, aliases[i], cmd_len + 1) != 0)
-        3:  375-block  0
-branch  0 taken 3 (fallthrough)
-branch  1 taken 0
-       85:  376:			continue;
-       85:  376-block  0
-unconditional  0 taken 85
+        -:  375:		}
+        -:  376:	}
         -:  377:
-        -:  378:		/* Get the aliased command */
-    #####:  379:		aliased_cmd = strbtw(aliases[i], '\'', '\'');
-    %%%%%:  379-block  0
-call    0 never executed
+       14:  378:	if (space_index != -1)
+       14:  378-block  0
+branch  0 taken 8 (fallthrough)
+branch  1 taken 6
+        8:  379:		q[space_index] = ' ';
+        8:  379-block  0
+unconditional  0 taken 8
         -:  380:
-    #####:  381:		if (!aliased_cmd)
-branch  0 never executed
-branch  1 never executed
-    #####:  382:			return (char **)NULL;
-    %%%%%:  382-block  0
-unconditional  0 never executed
+       14:  381:	return 0;
+       14:  381-block  0
+unconditional  0 taken 14
+        -:  382:}
         -:  383:
-    #####:  384:		if (!*aliased_cmd) { /* zero length */
-    %%%%%:  384-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  385:			free(aliased_cmd);
-    #####:  386:			return (char **)NULL;
-    %%%%%:  386-block  0
-unconditional  0 never executed
-        -:  387:		}
-        -:  388:
-    #####:  389:		args_n = 0; /* Reset args_n to be used by parse_input_str() */
+        -:  384:/* Returns 0 if digit is found and preceded by a letter in STR, or one if not */
+        -:  385:int
+function digit_found called 503 returned 100% blocks executed 100%
+      503:  386:digit_found(const char *str)
+        -:  387:{
+      503:  388:	char *p = (char *)str;
+      503:  389:	int c = 0;
         -:  390:
-        -:  391:		/* Parse the aliased cmd */
-    #####:  392:		char **alias_comm = parse_input_str(aliased_cmd);
-    %%%%%:  392-block  0
-call    0 never executed
-    #####:  393:		free(aliased_cmd);
-        -:  394:
-    #####:  395:		if (!alias_comm) {
-branch  0 never executed
-branch  1 never executed
-    #####:  396:			args_n = 0;
-    #####:  397:			fprintf(stderr, _("%s: Error parsing aliased command\n"), PROGRAM_NAME);
-    %%%%%:  397-block  0
-call    0 never executed
-    #####:  398:			return (char **)NULL;
-unconditional  0 never executed
-        -:  399:		}
-        -:  400:
-        -:  401:		register size_t j;
-        -:  402:
-        -:  403:		/* Add input parameters, if any, to alias_comm */
-    #####:  404:		if (args[1]) {
-    %%%%%:  404-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  405:			for (j = 1; args[j]; j++) {
-    %%%%%:  405-block  0
-unconditional  0 never executed
-    %%%%%:  405-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  406:				alias_comm = (char **)xrealloc(alias_comm,
-    #####:  407:				    (++args_n + 2) * sizeof(char *));
-    %%%%%:  407-block  0
-call    0 never executed
-    #####:  408:				alias_comm[args_n] = savestring(args[j],
-unconditional  0 never executed
-    #####:  409:				    strlen(args[j]));
-call    0 never executed
-        -:  410:			}
-        -:  411:		}
-        -:  412:
-        -:  413:		/* Add a terminating NULL string */
-    #####:  414:		alias_comm[args_n + 1] = (char *)NULL;
-        -:  415:
-        -:  416:		/* Free original command */
-    #####:  417:		for (j = 0; args[j]; j++)
-    %%%%%:  417-block  0
-unconditional  0 never executed
-    %%%%%:  417-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  418:			free(args[j]);
-    %%%%%:  418-block  0
-unconditional  0 never executed
-    #####:  419:		free(args);
-        -:  420:
-    #####:  421:		return alias_comm;
-    %%%%%:  421-block  0
-unconditional  0 never executed
-        -:  422:	}
-        -:  423:
-       17:  424:	return (char **)NULL;
-       17:  424-block  0
-unconditional  0 taken 17
-        -:  425:}
-        -:  426:
-        -:  427:/* Keep only the last MAX records in LOG_FILE */
-        -:  428:void
-function check_file_size called 3 returned 100% blocks executed 32%
-        3:  429:check_file_size(char *log_file, int max)
-        -:  430:{
-        3:  431:	if (!config_ok)
-        3:  431-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 3
-    #####:  432:		return;
-    %%%%%:  432-block  0
-unconditional  0 never executed
-        -:  433:
-        -:  434:	/* Create the file, if it doesn't exist */
-        3:  435:	FILE *log_fp = (FILE *)NULL;
-        -:  436:	struct stat file_attrib;
-        -:  437:
-        3:  438:	if (stat(log_file, &file_attrib) == -1) {
-        3:  438-block  0
-call    0 returned 3
-branch  1 taken 0 (fallthrough)
-branch  2 taken 3
-    #####:  439:		log_fp = fopen(log_file, "w");
-    %%%%%:  439-block  0
-call    0 never executed
-        -:  440:
-    #####:  441:		if (!log_fp) {
-branch  0 never executed
-branch  1 never executed
-    #####:  442:			_err(0, NOPRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
-call    0 never executed
-unconditional  1 never executed
-    #####:  443:			    log_file, strerror(errno));
-    %%%%%:  443-block  0
-call    0 never executed
-        -:  444:		} else
-    #####:  445:			fclose(log_fp);
-    %%%%%:  445-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  446:
-    #####:  447:		return; /* Return anyway, for, being a new empty file, there's
-    %%%%%:  447-block  0
-unconditional  0 never executed
-        -:  448:		no need to truncate it */
-        -:  449:	}
-        -:  450:
-        -:  451:	/* Once we know the files exists, keep only max logs */
-        3:  452:	log_fp = fopen(log_file, "r");
-        3:  452-block  0
-call    0 returned 3
-        -:  453:
-        3:  454:	if (!log_fp) {
-branch  0 taken 0 (fallthrough)
-branch  1 taken 3
-    #####:  455:		_err(0, NOPRINT_PROMPT, "%s: log: %s: %s\n", PROGRAM_NAME,
-call    0 never executed
-    #####:  456:		    log_file, strerror(errno));
-    %%%%%:  456-block  0
-call    0 never executed
-    #####:  457:		return;
-unconditional  0 never executed
-        -:  458:	}
-        -:  459:
-        3:  460:	int logs_num = 0, c;
-        -:  461:
-        -:  462:	/* Count newline chars to get amount of lines in the log file */
-    46072:  463:	while ((c = fgetc(log_fp)) != EOF) {
-        3:  463-block  0
-unconditional  0 taken 3
-    46072:  463-block  1
-call    1 returned 46072
-branch  2 taken 46069
-branch  3 taken 3 (fallthrough)
-    46069:  464:		if (c == '\n')
-    46069:  464-block  0
-branch  0 taken 666 (fallthrough)
-branch  1 taken 45403
-      666:  465:			logs_num++;
-      666:  465-block  0
-unconditional  0 taken 666
-        -:  466:	}
-        -:  467:
-        3:  468:	if (logs_num <= max) {
-        3:  468-block  0
-branch  0 taken 3 (fallthrough)
+     2458:  391:	while (*p) {
+      503:  391-block  0
+unconditional  0 taken 503
+     2458:  391-block  1
+branch  1 taken 1970
+branch  2 taken 488 (fallthrough)
+     1970:  392:		if (c++ && _ISDIGIT(*p) && _ISALPHA(*(p - 1)))
+     1970:  392-block  0
+branch  0 taken 1467 (fallthrough)
+branch  1 taken 503
+     1467:  392-block  1
+branch  2 taken 83 (fallthrough)
+branch  3 taken 1384
+       83:  392-block  2
+branch  4 taken 15 (fallthrough)
+branch  5 taken 68
+       15:  392-block  3
+branch  6 taken 15 (fallthrough)
+branch  7 taken 0
+       15:  393:			return 1;
+       15:  393-block  0
+unconditional  0 taken 15
+     1955:  394:		p++;
+     1955:  394-block  0
+unconditional  0 taken 1955
+        -:  395:	}
+        -:  396:
+      488:  397:	return 0;
+      488:  397-block  0
+unconditional  0 taken 488
+        -:  398:}
+        -:  399:
+        -:  400:/* Check if the 'file' command is available: it is needed by the mime
+        -:  401: * function */
+        -:  402:/*
+        -:  403:void
+        -:  404:file_cmd_check(void)
+        -:  405:{
+        -:  406:	file_cmd_path = get_cmd_path("file");
+        -:  407:
+        -:  408:	if (!file_cmd_path) {
+        -:  409:		flags &= ~FILE_CMD_OK;
+        -:  410:		_err('n', PRINT_PROMPT, _("%s: 'file' command not found. "
+        -:  411:				  "Specify an application when opening files. Ex: 'o 12 nano' "
+        -:  412:				  "or just 'nano 12'\n"), PROGRAM_NAME);
+        -:  413:	}
+        -:  414:
+        -:  415:	else
+        -:  416:		flags |= FILE_CMD_OK;
+        -:  417:} */
+        -:  418:
+        -:  419:int
+function check_regex called 141 returned 100% blocks executed 95%
+      141:  420:check_regex(char *str)
+        -:  421:{
+      141:  422:	if (!str || !*str)
+      141:  422-block  0
+branch  0 taken 141 (fallthrough)
 branch  1 taken 0
-        3:  469:		fclose(log_fp);
-        3:  469-block  0
-call    0 returned 3
-        3:  470:		return;
-unconditional  0 taken 3
-        -:  471:	}
-        -:  472:
-        -:  473:	/* Set the file pointer to the beginning of the log file */
-    #####:  474:	fseek(log_fp, 0, SEEK_SET);
-    %%%%%:  474-block  0
-call    0 never executed
-        -:  475:
-        -:  476:	/* Create a temp file to store only newest logs */
-    #####:  477:	char *rand_ext = gen_rand_str(6);
-call    0 never executed
-        -:  478:
-    #####:  479:	if (!rand_ext) {
-branch  0 never executed
-branch  1 never executed
-    #####:  480:		fclose(log_fp);
-    %%%%%:  480-block  0
-call    0 never executed
-    #####:  481:		return;
+      141:  422-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 141
+    #####:  423:		return EXIT_FAILURE;
+    %%%%%:  423-block  0
 unconditional  0 never executed
-        -:  482:	}
-        -:  483:
-    #####:  484:	char *tmp_file = (char *)xnmalloc(strlen(CONFIG_DIR) + 12, sizeof(char));
-    %%%%%:  484-block  0
+        -:  424:
+      141:  425:	int char_found = 0;
+      141:  426:	char *p = str;
+        -:  427:
+     1191:  428:	while (*p) {
+      141:  428-block  0
+unconditional  0 taken 141
+     1191:  428-block  1
+branch  1 taken 1069
+branch  2 taken 122 (fallthrough)
+        -:  429:		/* If STR contains at least one of the following chars */
+     1069:  430:		if (*p == '*' || *p == '?' || *p == '[' || *p == '{' || *p == '^'
+     1069:  430-block  0
+branch  0 taken 1063 (fallthrough)
+branch  1 taken 6
+     1063:  430-block  1
+branch  2 taken 1063 (fallthrough)
+branch  3 taken 0
+     1063:  430-block  2
+branch  4 taken 1063 (fallthrough)
+branch  5 taken 0
+     1063:  430-block  3
+branch  6 taken 1063 (fallthrough)
+branch  7 taken 0
+     1063:  430-block  4
+branch  8 taken 1062 (fallthrough)
+branch  9 taken 1
+     1062:  431:		|| *p == '.' || *p == '|' || *p == '+' || *p == '$') {
+     1062:  431-block  0
+branch  0 taken 1050 (fallthrough)
+branch  1 taken 12
+     1050:  431-block  1
+branch  2 taken 1050 (fallthrough)
+branch  3 taken 0
+     1050:  431-block  2
+branch  4 taken 1050 (fallthrough)
+branch  5 taken 0
+     1050:  431-block  3
+branch  6 taken 0 (fallthrough)
+branch  7 taken 1050
+       19:  432:			char_found = 1;
+       19:  433:			break;
+       19:  433-block  0
+unconditional  0 taken 19
+        -:  434:		}
+        -:  435:
+     1050:  436:		p++;
+     1050:  436-block  0
+unconditional  0 taken 1050
+        -:  437:	}
+        -:  438:
+        -:  439:	/* And if STR is not a file name, take it as a possible regex */
+      141:  440:	if (char_found)
+      141:  440-block  0
+branch  0 taken 19 (fallthrough)
+branch  1 taken 122
+       19:  441:		if (access(str, F_OK) == -1)
+       19:  441-block  0
+call    0 returned 19
+branch  1 taken 9 (fallthrough)
+branch  2 taken 10
+        9:  442:			return EXIT_SUCCESS;
+        9:  442-block  0
+unconditional  0 taken 9
+        -:  443:
+      132:  444:	return EXIT_FAILURE;
+      132:  444-block  0
+unconditional  0 taken 132
+        -:  445:}
+        -:  446:
+        -:  447:/* Returns the parsed aliased command in an array of strings, if
+        -:  448: * matching alias is found, or NULL if not. */
+        -:  449:char **
+function check_for_alias called 406 returned 100% blocks executed 38%
+      406:  450:check_for_alias(char **args)
+        -:  451:{
+      406:  452:	if (!aliases_n || !aliases || !args)
+      406:  452-block  0
+branch  0 taken 404 (fallthrough)
+branch  1 taken 2
+      404:  452-block  1
+branch  2 taken 404 (fallthrough)
+branch  3 taken 0
+      404:  452-block  2
+branch  4 taken 0 (fallthrough)
+branch  5 taken 404
+        2:  453:		return (char **)NULL;
+        2:  453-block  0
+unconditional  0 taken 2
+        -:  454:
+      404:  455:	char *aliased_cmd = (char *)NULL;
+      404:  456:	size_t cmd_len = strlen(args[0]);
+        -:  457:	char tmp_cmd[PATH_MAX * 2 + 1];
+      404:  458:	snprintf(tmp_cmd, sizeof(tmp_cmd), "%s=", args[0]);
+        -:  459:
+      404:  460:	register int i = (int)aliases_n;
+     2424:  461:	while (--i >= 0) {
+      404:  461-block  0
+unconditional  0 taken 404
+     2424:  461-block  1
+branch  1 taken 2020
+branch  2 taken 404 (fallthrough)
+        -:  462:
+    2020*:  463:		if (!aliases[i])
+     2020:  463-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2020
+    #####:  464:			continue;
+    %%%%%:  464-block  0
+unconditional  0 never executed
+        -:  465:		/* Look for this string: "command=", in the aliases file */
+        -:  466:		/* If a match is found */
+        -:  467:
+     2020:  468:		if (*aliases[i] != *args[0] ||
+     2020:  468-block  0
+branch  0 taken 81 (fallthrough)
+branch  1 taken 1939
+       81:  469:		    strncmp(tmp_cmd, aliases[i], cmd_len + 1) != 0)
+       81:  469-block  0
+branch  0 taken 81 (fallthrough)
+branch  1 taken 0
+     2020:  470:			continue;
+     2020:  470-block  0
+unconditional  0 taken 2020
+        -:  471:
+        -:  472:		/* Get the aliased command */
+    #####:  473:		aliased_cmd = strbtw(aliases[i], '\'', '\'');
+    %%%%%:  473-block  0
 call    0 never executed
-    #####:  485:	sprintf(tmp_file, "%s/log.%s", CONFIG_DIR, rand_ext);
-    #####:  486:	free(rand_ext);
-        -:  487:
-    #####:  488:	FILE *log_fp_tmp = fopen(tmp_file, "w+");
-call    0 never executed
-        -:  489:
-    #####:  490:	if (!log_fp_tmp) {
+        -:  474:
+    #####:  475:		if (!aliased_cmd)
 branch  0 never executed
 branch  1 never executed
-    #####:  491:		fprintf(stderr, "log: %s: %s", tmp_file, strerror(errno));
+    #####:  476:			return (char **)NULL;
+    %%%%%:  476-block  0
+unconditional  0 never executed
+        -:  477:
+    #####:  478:		if (!*aliased_cmd) { /* zero length */
+    %%%%%:  478-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  479:			free(aliased_cmd);
+    #####:  480:			return (char **)NULL;
+    %%%%%:  480-block  0
+unconditional  0 never executed
+        -:  481:		}
+        -:  482:
+    #####:  483:		args_n = 0; /* Reset args_n to be used by parse_input_str() */
+        -:  484:
+        -:  485:		/* Parse the aliased cmd */
+    #####:  486:		char **alias_comm = parse_input_str(aliased_cmd);
+    %%%%%:  486-block  0
+call    0 never executed
+    #####:  487:		free(aliased_cmd);
+        -:  488:
+    #####:  489:		if (!alias_comm) {
+branch  0 never executed
+branch  1 never executed
+    #####:  490:			args_n = 0;
+    #####:  491:			fprintf(stderr, _("%s: Error parsing aliased command\n"), PROGRAM_NAME);
     %%%%%:  491-block  0
 call    0 never executed
 call    1 never executed
-    #####:  492:		fclose(log_fp);
-call    0 never executed
-    #####:  493:		free(tmp_file);
-    #####:  494:		return;
+    #####:  492:			return (char **)NULL;
 unconditional  0 never executed
-        -:  495:	}
+        -:  493:		}
+        -:  494:
+        -:  495:		register size_t j;
         -:  496:
-    #####:  497:	int i = 1;
-    #####:  498:	size_t line_size = 0;
-    #####:  499:	char *line_buff = (char *)NULL;
-    #####:  500:	ssize_t line_len = 0;
-        -:  501:
-    #####:  502:	while ((line_len = getline(&line_buff, &line_size, log_fp)) > 0) {
-    %%%%%:  502-block  0
-unconditional  0 never executed
-    %%%%%:  502-block  1
-call    1 never executed
-branch  2 never executed
-branch  3 never executed
-        -:  503:
-        -:  504:		/* Delete old entries = copy only new ones */
-    #####:  505:		if (i++ >= logs_num - (max - 1))
-    %%%%%:  505-block  0
+        -:  497:		/* Add input parameters, if any, to alias_comm */
+    #####:  498:		if (args[1]) {
+    %%%%%:  498-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  506:			fprintf(log_fp_tmp, "%s", line_buff);
-    %%%%%:  506-block  0
+    #####:  499:			for (j = 1; args[j]; j++) {
+    %%%%%:  499-block  0
+unconditional  0 never executed
+    %%%%%:  499-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  500:				alias_comm = (char **)xrealloc(alias_comm,
+    #####:  501:				    (++args_n + 2) * sizeof(char *));
+    %%%%%:  501-block  0
+call    0 never executed
+    #####:  502:				alias_comm[args_n] = savestring(args[j],
+unconditional  0 never executed
+    #####:  503:				    strlen(args[j]));
+call    0 never executed
+        -:  504:			}
+        -:  505:		}
+        -:  506:
+        -:  507:		/* Add a terminating NULL string */
+    #####:  508:		alias_comm[args_n + 1] = (char *)NULL;
+        -:  509:
+        -:  510:		/* Free original command */
+    #####:  511:		for (j = 0; args[j]; j++)
+    %%%%%:  511-block  0
+unconditional  0 never executed
+    %%%%%:  511-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  512:			free(args[j]);
+    %%%%%:  512-block  0
+unconditional  0 never executed
+    #####:  513:		free(args);
+        -:  514:
+    #####:  515:		return alias_comm;
+    %%%%%:  515-block  0
+unconditional  0 never executed
+        -:  516:	}
+        -:  517:
+      404:  518:	return (char **)NULL;
+      404:  518-block  0
+unconditional  0 taken 404
+        -:  519:}
+        -:  520:
+        -:  521:/* Keep only the last MAX records in FILE */
+        -:  522:void
+function check_file_size called 30 returned 100% blocks executed 74%
+       30:  523:check_file_size(char *file, int max)
+        -:  524:{
+       30:  525:	if (!config_ok)
+       30:  525-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 30
+    #####:  526:		return;
+    %%%%%:  526-block  0
+unconditional  0 never executed
+        -:  527:
+        -:  528:	/* Create the file, if it doesn't exist */
+       30:  529:	FILE *fp = (FILE *)NULL;
+        -:  530:	struct stat attr;
+        -:  531:
+        -:  532:	int fd;
+       30:  533:	if (stat(file, &attr) == -1) {
+       30:  533-block  0
+call    0 returned 30
+branch  1 taken 2 (fallthrough)
+branch  2 taken 28
+        2:  534:		fp = open_fstream_w(file, &fd);
+        2:  534-block  0
+call    0 returned 2
+        2:  535:		if (!fp) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:  536:			_err(0, NOPRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 call    0 never executed
 unconditional  1 never executed
-        -:  507:	}
-        -:  508:
-    #####:  509:	free(line_buff);
-    #####:  510:	fclose(log_fp_tmp);
-    %%%%%:  510-block  0
+    #####:  537:			    file, strerror(errno));
+    %%%%%:  537-block  0
 call    0 never executed
-    #####:  511:	fclose(log_fp);
+        -:  538:		} else {
+        2:  539:			close_fstream(fp, fd);
+        2:  539-block  0
+call    0 returned 2
+unconditional  1 taken 2
+        -:  540:		}
+        -:  541:
+        2:  542:		return; /* Return anyway, for, being a new empty file, there's
+        2:  542-block  0
+unconditional  0 taken 2
+        -:  543:		no need to truncate it */
+        -:  544:	}
+        -:  545:
+        -:  546:	/* Once we know the files exists, keep only MAX entries */
+       28:  547:	fp = open_fstream_r(file, &fd);
+       28:  547-block  0
+call    0 returned 28
+       28:  548:	if (!fp) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 28
+    #####:  549:		_err(0, NOPRINT_PROMPT, "%s: log: %s: %s\n", PROGRAM_NAME,
 call    0 never executed
-    #####:  512:	unlink(log_file);
+    #####:  550:		    file, strerror(errno));
+    %%%%%:  550-block  0
 call    0 never executed
-    #####:  513:	rename(tmp_file, log_file);
-call    0 never executed
-    #####:  514:	free(tmp_file);
-        -:  515:
-    #####:  516:	return;
+    #####:  551:		return;
 unconditional  0 never executed
-        -:  517:}
+        -:  552:	}
+        -:  553:
+       28:  554:	int n = 0, c;
+        -:  555:
+        -:  556:	/* Count newline chars to get amount of lines in the file */
+   292651:  557:	while ((c = fgetc(fp)) != EOF) {
+       28:  557-block  0
+unconditional  0 taken 28
+   292651:  557-block  1
+call    1 returned 292651
+branch  2 taken 292623
+branch  3 taken 28 (fallthrough)
+   292623:  558:		if (c == '\n')
+   292623:  558-block  0
+branch  0 taken 4248 (fallthrough)
+branch  1 taken 288375
+     4248:  559:			n++;
+     4248:  559-block  0
+unconditional  0 taken 4248
+        -:  560:	}
+        -:  561:
+       28:  562:	if (n <= max) {
+       28:  562-block  0
+branch  0 taken 26 (fallthrough)
+branch  1 taken 2
+       26:  563:		close_fstream(fp, fd);
+       26:  563-block  0
+call    0 returned 26
+       26:  564:		return;
+unconditional  0 taken 26
+        -:  565:	}
+        -:  566:
+        -:  567:	/* Set the file pointer to the beginning of the log file */
+        2:  568:	fseek(fp, 0, SEEK_SET);
+        2:  568-block  0
+call    0 returned 2
+        -:  569:
+        -:  570:	/* Create a temp file to store only newest logs */
+        2:  571:	char *rand_ext = gen_rand_str(6);
+call    0 returned 2
+        2:  572:	if (!rand_ext) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:  573:		close_fstream(fp, fd);
+    %%%%%:  573-block  0
+call    0 never executed
+    #####:  574:		return;
+unconditional  0 never executed
+        -:  575:	}
+        -:  576:
+        2:  577:	char *tmp = (char *)xnmalloc(strlen(config_dir) + 12, sizeof(char));
+        2:  577-block  0
+call    0 returned 2
+        2:  578:	sprintf(tmp, "%s/log.%s", config_dir, rand_ext);
+        2:  579:	free(rand_ext);
+        -:  580:
+        -:  581:	int fdd;
+        2:  582:	FILE *fpp = open_fstream_w(tmp, &fdd);
+call    0 returned 2
+        2:  583:	if (!fpp) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:  584:		fprintf(stderr, "log: %s: %s", tmp, strerror(errno));
+    %%%%%:  584-block  0
+call    0 never executed
+call    1 never executed
+    #####:  585:		close_fstream(fp, fd);
+call    0 never executed
+    #####:  586:		free(tmp);
+    #####:  587:		return;
+unconditional  0 never executed
+        -:  588:	}
+        -:  589:
+        2:  590:	int i = 1;
+        2:  591:	size_t line_size = 0;
+        2:  592:	char *line = (char *)NULL;
+        -:  593:
+      522:  594:	while (getline(&line, &line_size, fp) > 0) {
+        2:  594-block  0
+unconditional  0 taken 2
+      522:  594-block  1
+call    1 returned 522
+branch  2 taken 520
+branch  3 taken 2 (fallthrough)
+        -:  595:		/* Delete old entries = copy only new ones */
+      520:  596:		if (i++ >= n - (max - 1))
+      520:  596-block  0
+branch  0 taken 200 (fallthrough)
+branch  1 taken 320
+      200:  597:			fprintf(fpp, "%s", line);
+      200:  597-block  0
+call    0 returned 200
+unconditional  1 taken 200
+        -:  598:	}
+        -:  599:
+        2:  600:	free(line);
+        2:  601:	unlinkat(fd, file, 0);
+        2:  601-block  0
+call    0 returned 2
+        2:  602:	renameat(fdd, tmp, fd, file);
+call    0 returned 2
+        2:  603:	close_fstream(fpp, fdd);
+call    0 returned 2
+        2:  604:	close_fstream(fp, fd);
+call    0 returned 2
+        2:  605:	free(tmp);
+        -:  606:
+        2:  607:	return;
+unconditional  0 taken 2
+        -:  608:}

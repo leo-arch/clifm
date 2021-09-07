@@ -30,854 +30,1035 @@
         -:   29:#include <stdio.h>
         -:   30:#include <string.h>
         -:   31:#include <unistd.h>
-        -:   32:
-        -:   33:#include "aux.h"
-        -:   34:#include "checks.h"
-        -:   35:#include "history.h"
-        -:   36:#include "jump.h"
-        -:   37:#include "listing.h"
-        -:   38:#include "misc.h"
-        -:   39:#include "navigation.h"
-        -:   40:
-        -:   41:int
-function workspaces called 3 returned 100% blocks executed 36%
-        3:   42:workspaces(char *str)
-        -:   43:{
-        3:   44:	if (!str || !*str) {
-        3:   44-block  0
-branch  0 taken 3 (fallthrough)
+        -:   32:#include <sys/stat.h>
+        -:   33:
+        -:   34:#include "aux.h"
+        -:   35:#include "checks.h"
+        -:   36:#include "history.h"
+        -:   37:#include "jump.h"
+        -:   38:#include "listing.h"
+        -:   39:#include "misc.h"
+        -:   40:#include "navigation.h"
+        -:   41:#include "messages.h"
+        -:   42:
+        -:   43:int
+function workspaces called 18 returned 100% blocks executed 53%
+       18:   44:workspaces(char *str)
+        -:   45:{
+       18:   46:	if (!str || !*str) {
+       18:   46-block  0
+branch  0 taken 18 (fallthrough)
 branch  1 taken 0
-        3:   44-block  1
+       18:   46-block  1
 branch  2 taken 0 (fallthrough)
-branch  3 taken 3
-        -:   45:		int i;
-    #####:   46:		for (i = 0; i < MAX_WS; i++) {
-    %%%%%:   46-block  0
+branch  3 taken 18
+        -:   47:		int i;
+    #####:   48:		for (i = 0; i < MAX_WS; i++) {
+    %%%%%:   48-block  0
 unconditional  0 never executed
-    %%%%%:   46-block  1
+    %%%%%:   48-block  1
 unconditional  1 never executed
-    %%%%%:   46-block  2
+    %%%%%:   48-block  2
 branch  2 never executed
 branch  3 never executed
-    #####:   47:			if (i == cur_ws)
-    %%%%%:   47-block  0
+    #####:   49:			if (i == cur_ws)
+    %%%%%:   49-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:   48:				printf("%s%d: %s%s\n", mi_c, i + 1, ws[i].path, df_c);
-    %%%%%:   48-block  0
+    #####:   50:				printf("%s%d: %s%s\n", mi_c, i + 1, ws[i].path, df_c);
+    %%%%%:   50-block  0
 call    0 never executed
 unconditional  1 never executed
-        -:   49:			else
-    #####:   50:				printf("%d: %s\n", i + 1, ws[i].path ? ws[i].path : "none");
-    %%%%%:   50-block  0
+        -:   51:			else
+    #####:   52:				printf("%d: %s\n", i + 1, ws[i].path ? ws[i].path : "none");
+    %%%%%:   52-block  0
 branch  0 never executed
 branch  1 never executed
-    %%%%%:   50-block  1
+    %%%%%:   52-block  1
 unconditional  2 never executed
-    %%%%%:   50-block  2
+    %%%%%:   52-block  2
 unconditional  3 never executed
-    %%%%%:   50-block  3
+    %%%%%:   52-block  3
 call    4 never executed
 unconditional  5 never executed
-        -:   51:		}
-        -:   52:
-    #####:   53:		return EXIT_SUCCESS;
-    %%%%%:   53-block  0
+        -:   53:		}
+    #####:   54:		return EXIT_SUCCESS;
+    %%%%%:   54-block  0
 unconditional  0 never executed
-        -:   54:	}
-        -:   55:
-       3*:   56:	if (*str == '-' && strcmp(str, "--help") == 0) {
-        3:   56-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 3
-    %%%%%:   56-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:   57:		puts(_("Usage: ws [NUM, +, -]"));
-    %%%%%:   57-block  0
-call    0 never executed
-    #####:   58:		return EXIT_SUCCESS;
-unconditional  0 never executed
-        -:   59:	}
-        -:   60:
-        3:   61:	int tmp_ws = 0;
-        -:   62:
-        3:   63:	if (is_number(str)) {
-        3:   63-block  0
-call    0 returned 3
-branch  1 taken 3 (fallthrough)
-branch  2 taken 0
-        3:   64:		int istr = atoi(str);
-        -:   65:
-        3:   66:		if (istr <= 0 || istr > MAX_WS) {
-        3:   66-block  0
-branch  0 taken 3 (fallthrough)
-branch  1 taken 0
-        3:   66-block  1
+        -:   55:	}
+        -:   56:
+       18:   57:	if (*str == '-' && strcmp(str, "--help") == 0) {
+       18:   57-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 17
+        1:   57-block  1
 branch  2 taken 0 (fallthrough)
-branch  3 taken 3
+branch  3 taken 1
+    #####:   58:		puts(_(WS_USAGE));
+    %%%%%:   58-block  0
+call    0 never executed
+call    1 never executed
+    #####:   59:		return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:   60:	}
+        -:   61:
+       18:   62:	int tmp_ws = 0;
+        -:   63:
+       18:   64:	if (is_number(str)) {
+       18:   64-block  0
+call    0 returned 18
+branch  1 taken 16 (fallthrough)
+branch  2 taken 2
+       16:   65:		int istr = atoi(str);
+       16:   66:		if (istr <= 0 || istr > MAX_WS) {
+       16:   66-block  0
+branch  0 taken 16 (fallthrough)
+branch  1 taken 0
+       16:   66-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 16
     #####:   67:			fprintf(stderr, _("%s: %d: Invalid workspace number\n"),
     %%%%%:   67-block  0
 call    0 never executed
+call    1 never executed
         -:   68:			    PROGRAM_NAME, istr);
     #####:   69:			return EXIT_FAILURE;
 unconditional  0 never executed
         -:   70:		}
         -:   71:
-        3:   72:		tmp_ws = istr - 1;
+       16:   72:		tmp_ws = istr - 1;
         -:   73:
-        3:   74:		if (tmp_ws == cur_ws)
-        3:   74-block  0
+       16:   74:		if (tmp_ws == cur_ws)
+       16:   74-block  0
 branch  0 taken 1 (fallthrough)
-branch  1 taken 2
+branch  1 taken 15
         1:   75:			return EXIT_FAILURE;
         1:   75-block  0
 unconditional  0 taken 1
-        -:   76:	}
-        -:   77:
-    #####:   78:	else if (*str == '+' && !str[1]) {
-    %%%%%:   78-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:   78-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:   79:		if ((cur_ws + 1) < MAX_WS)
-    %%%%%:   79-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:   80:			tmp_ws = cur_ws + 1;
+        2:   76:	} else if (*str == '+' && !str[1]) {
+        2:   76-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 1
+        1:   76-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 0
+        1:   77:		if ((cur_ws + 1) < MAX_WS)
+        1:   77-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:   78:			tmp_ws = cur_ws + 1;
+        1:   78-block  0
+unconditional  0 taken 1
+        -:   79:		else
+    #####:   80:			return EXIT_FAILURE;
     %%%%%:   80-block  0
 unconditional  0 never executed
-        -:   81:		else
-    #####:   82:			return EXIT_FAILURE;
-    %%%%%:   82-block  0
-unconditional  0 never executed
-        -:   83:	}
-        -:   84:
-    #####:   85:	else if (*str == '-' && !str[1]) {
-    %%%%%:   85-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:   85-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:   86:		if ((cur_ws - 1) >= 0)
-    %%%%%:   86-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:   87:			tmp_ws = cur_ws - 1;
-    %%%%%:   87-block  0
-unconditional  0 never executed
-        -:   88:		else
-    #####:   89:			return EXIT_FAILURE;
-    %%%%%:   89-block  0
-unconditional  0 never executed
-        -:   90:	}
-        -:   91:
-        -:   92:	/* If new workspace has no path yet, copy the path of the current
-        -:   93:	 * workspace */
-        2:   94:	if (!ws[tmp_ws].path)
-        2:   94-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 2
-    #####:   95:		ws[tmp_ws].path = savestring(ws[cur_ws].path,
-unconditional  0 never executed
-    #####:   96:		    strlen(ws[cur_ws].path));
-    %%%%%:   96-block  0
-call    0 never executed
-        -:   97:
-        2:   98:	else if (access(ws[tmp_ws].path, R_OK | X_OK) != EXIT_SUCCESS) {
-        2:   98-block  0
-call    0 returned 2
-branch  1 taken 0 (fallthrough)
-branch  2 taken 2
-    #####:   99:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[tmp_ws].path,
-call    0 never executed
-    #####:  100:		    strerror(errno));
-    %%%%%:  100-block  0
-call    0 never executed
-    #####:  101:		free(ws[tmp_ws].path);
-    #####:  102:		ws[tmp_ws].path = savestring(ws[cur_ws].path,
-unconditional  0 never executed
-    #####:  103:		    strlen(ws[cur_ws].path));
-call    0 never executed
-        -:  104:	}
-        -:  105:
-        2:  106:	if (xchdir(ws[tmp_ws].path, SET_TITLE) == -1) {
-        2:  106-block  0
-call    0 returned 2
-branch  1 taken 0 (fallthrough)
-branch  2 taken 2
-    #####:  107:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[tmp_ws].path,
-call    0 never executed
-    #####:  108:		    strerror(errno));
-    %%%%%:  108-block  0
-call    0 never executed
-    #####:  109:		return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  110:	}
-        -:  111:
-        2:  112:	cur_ws = tmp_ws;
-        -:  113:
-        2:  114:	int exit_status = EXIT_SUCCESS;
-        -:  115:
-        2:  116:	if (cd_lists_on_the_fly) {
-        2:  116-block  0
-branch  0 taken 2 (fallthrough)
+        1:   81:	} else if (*str == '-' && !str[1]) {
+        1:   81-block  0
+branch  0 taken 1 (fallthrough)
 branch  1 taken 0
-        2:  117:		free_dirlist();
-        2:  117-block  0
-call    0 returned 2
-        2:  118:		exit_status = list_dir();
-call    0 returned 2
-unconditional  1 taken 2
-        -:  119:	}
-        -:  120:
-        2:  121:	add_to_dirhist(ws[cur_ws].path);
-        2:  121-block  0
-call    0 returned 2
-        -:  122:
-        2:  123:	return exit_status;
-unconditional  0 taken 2
-        -:  124:}
-        -:  125:
-        -:  126:/* Make sure DIR exists, it is actually a directory and is readable.
-        -:  127: * Only then change directory */
-        -:  128:int
-function xchdir called 25 returned 100% blocks executed 69%
-       25:  129:xchdir(const char *dir, const int set_title)
-        -:  130:{
-       25:  131:	DIR *dirp = opendir(dir);
-       25:  131-block  0
-call    0 returned 25
-        -:  132:
-       25:  133:	if (!dirp)
-branch  0 taken 0 (fallthrough)
-branch  1 taken 25
-    #####:  134:		return -1;
-    %%%%%:  134-block  0
-unconditional  0 never executed
-        -:  135:
-       25:  136:	closedir(dirp);
-       25:  136-block  0
-call    0 returned 25
-        -:  137:
-        -:  138:	int ret;
-       25:  139:	ret = chdir(dir);
-call    0 returned 25
-        -:  140:
-       25:  141:	if (set_title && ret == 0 && xargs.cwd_in_title == 1) {
-branch  0 taken 10 (fallthrough)
-branch  1 taken 15
-       10:  141-block  0
-branch  2 taken 10 (fallthrough)
+        1:   81-block  1
+branch  2 taken 1 (fallthrough)
 branch  3 taken 0
-       10:  141-block  1
+        1:   82:		if ((cur_ws - 1) >= 0)
+        1:   82-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:   83:			tmp_ws = cur_ws - 1;
+        1:   83-block  0
+unconditional  0 taken 1
+        -:   84:		else
+    #####:   85:			return EXIT_FAILURE;
+    %%%%%:   85-block  0
+unconditional  0 never executed
+        -:   86:	}
+        -:   87:
+        -:   88:	/* If new workspace has no path yet, copy the path of the current
+        -:   89:	 * workspace */
+       17:   90:	if (!ws[tmp_ws].path) {
+       17:   90-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 17
+    #####:   91:		ws[tmp_ws].path = savestring(ws[cur_ws].path,
+unconditional  0 never executed
+    #####:   92:		    strlen(ws[cur_ws].path));
+    %%%%%:   92-block  0
+call    0 never executed
+       17:   93:	} else if (access(ws[tmp_ws].path, R_OK | X_OK) != EXIT_SUCCESS) {
+       17:   93-block  0
+call    0 returned 17
+branch  1 taken 0 (fallthrough)
+branch  2 taken 17
+    #####:   94:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[tmp_ws].path,
+call    0 never executed
+    #####:   95:		    strerror(errno));
+    %%%%%:   95-block  0
+call    0 never executed
+    #####:   96:		free(ws[tmp_ws].path);
+    #####:   97:		ws[tmp_ws].path = savestring(ws[cur_ws].path,
+unconditional  0 never executed
+    #####:   98:		    strlen(ws[cur_ws].path));
+call    0 never executed
+        -:   99:	}
+        -:  100:
+       17:  101:	if (xchdir(ws[tmp_ws].path, SET_TITLE) == -1) {
+       17:  101-block  0
+call    0 returned 17
+branch  1 taken 0 (fallthrough)
+branch  2 taken 17
+    #####:  102:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[tmp_ws].path,
+call    0 never executed
+    #####:  103:		    strerror(errno));
+    %%%%%:  103-block  0
+call    0 never executed
+    #####:  104:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  105:	}
+        -:  106:
+       17:  107:	cur_ws = tmp_ws;
+       17:  108:	int exit_status = EXIT_SUCCESS;
+        -:  109:
+       17:  110:	if (cd_lists_on_the_fly) {
+       17:  110-block  0
+branch  0 taken 17 (fallthrough)
+branch  1 taken 0
+       17:  111:		free_dirlist();
+       17:  111-block  0
+call    0 returned 17
+       17:  112:		exit_status = list_dir();
+call    0 returned 17
+unconditional  1 taken 17
+        -:  113:	}
+        -:  114:
+       17:  115:	add_to_dirhist(ws[cur_ws].path);
+       17:  115-block  0
+call    0 returned 17
+       17:  116:	return exit_status;
+unconditional  0 taken 17
+        -:  117:}
+        -:  118:
+        -:  119:/* Make sure DIR exists, it is actually a directory and is readable.
+        -:  120: * Only then change directory */
+        -:  121:int
+function xchdir called 786 returned 100% blocks executed 100%
+      786:  122:xchdir(const char *dir, const int set_title)
+        -:  123:{
+      786:  124:	DIR *dirp = opendir(dir);
+      786:  124-block  0
+call    0 returned 786
+        -:  125:
+      786:  126:	if (!dirp)
+branch  0 taken 9 (fallthrough)
+branch  1 taken 777
+        9:  127:		return -1;
+        9:  127-block  0
+unconditional  0 taken 9
+        -:  128:
+      777:  129:	closedir(dirp);
+      777:  129-block  0
+call    0 returned 777
+        -:  130:
+        -:  131:	int ret;
+      777:  132:	ret = chdir(dir);
+call    0 returned 777
+        -:  133:
+      777:  134:	if (set_title && ret == 0 && xargs.cwd_in_title == 1)
+branch  0 taken 611 (fallthrough)
+branch  1 taken 166
+      611:  134-block  0
+branch  2 taken 611 (fallthrough)
+branch  3 taken 0
+      611:  134-block  1
+branch  4 taken 607 (fallthrough)
+branch  5 taken 4
+      607:  135:		set_term_title(dir);
+      607:  135-block  0
+call    0 returned 607
+unconditional  1 taken 607
+        -:  136:
+      777:  137:	return ret;
+      777:  137-block  0
+unconditional  0 taken 777
+        -:  138:}
+        -:  139:
+        -:  140:static char *
+function check_cdpath called 332 returned 100% blocks executed 92%
+      332:  141:check_cdpath(char *name)
+        -:  142:{
+      332:  143:	if (cdpath_n == 0 || !name || !*name)
+      332:  143-block  0
+branch  0 taken 332 (fallthrough)
+branch  1 taken 0
+      332:  143-block  1
+branch  2 taken 332 (fallthrough)
+branch  3 taken 0
+      332:  143-block  2
 branch  4 taken 0 (fallthrough)
-branch  5 taken 10
-    #####:  142:		if (*dir == '/' && dir[1] == 'h')
-    %%%%%:  142-block  0
+branch  5 taken 332
+    #####:  144:		return (char *)NULL;
+    %%%%%:  144-block  0
+unconditional  0 never executed
+        -:  145:
+      332:  146:	if (*name == '/' || (*name == '.' && name[1] == '/')
+      332:  146-block  0
+branch  0 taken 310 (fallthrough)
+branch  1 taken 22
+      310:  146-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 308
+        2:  146-block  2
+branch  4 taken 2 (fallthrough)
+branch  5 taken 0
+      310:  147:	|| (*name == '.' && name[1] == '.' && name[2] == '/'))
+      310:  147-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 308
+        2:  147-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 1
+        1:  147-block  2
+branch  4 taken 1 (fallthrough)
+branch  5 taken 0
+       23:  148:		return (char *)NULL;
+       23:  148-block  0
+unconditional  0 taken 23
+        -:  149:
+        -:  150:	size_t i;
+        -:  151:	char t[PATH_MAX];
+      309:  152:	char *p = (char *)NULL;
+        -:  153:	struct stat attr;
+      919:  154:	for (i = 0; cdpaths[i]; i++) {
+      309:  154-block  0
+unconditional  0 taken 309
+      610:  154-block  1
+unconditional  1 taken 610
+      919:  154-block  2
+branch  2 taken 614
+branch  3 taken 305 (fallthrough)
+      614:  155:		size_t len = strlen(cdpaths[i]);
+      614:  156:		if (cdpaths[i][len - 1] == '/')
+      614:  156-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 614
+    #####:  157:			snprintf(t, PATH_MAX, "%s%s", cdpaths[i], name);
+    %%%%%:  157-block  0
+unconditional  0 never executed
+        -:  158:		else
+      614:  159:			snprintf(t, PATH_MAX, "%s/%s", cdpaths[i], name);
+      614:  159-block  0
+unconditional  0 taken 614
+      614:  160:		if (stat(t, &attr) != -1 && (attr.st_mode & S_IFMT) == S_IFDIR) {
+      614:  160-block  0
+call    0 returned 614
+branch  1 taken 4 (fallthrough)
+branch  2 taken 610
+        4:  160-block  1
+branch  3 taken 4 (fallthrough)
+branch  4 taken 0
+        4:  161:			p = (char *)xnmalloc(strlen(t) + 1, sizeof(char));
+        4:  161-block  0
+call    0 returned 4
+        4:  162:			strcpy(p, t);
+        4:  163:			break;
+unconditional  0 taken 4
+        -:  164:		}
+        -:  165:	}
+        -:  166:
+      309:  167:	return p;
+      309:  167-block  0
+unconditional  0 taken 309
+        -:  168:}
+        -:  169:
+        -:  170:/* Change CliFM working directory to NEW_PATH */
+        -:  171:int
+function cd_function called 336 returned 100% blocks executed 61%
+      336:  172:cd_function(char *new_path, const int print_error)
+        -:  173:{
+        -:  174:	/* If no argument, change to home */
+      336:  175:	if (!new_path || !*new_path) {
+      336:  175-block  0
+branch  0 taken 332 (fallthrough)
+branch  1 taken 4
+      332:  175-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 332
+        4:  176:		if (!user.home) {
+        4:  176-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4
+    #####:  177:			if (print_error) {
+    %%%%%:  177-block  0
 branch  0 never executed
 branch  1 never executed
-    %%%%%:  142-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  143:			set_term_title(dir);
-    %%%%%:  143-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  144:	}
-        -:  145:
-       25:  146:	return ret;
-       25:  146-block  0
-unconditional  0 taken 25
-        -:  147:}
-        -:  148:
-        -:  149:/* Change CliFM working directory to NEW_PATH */
-        -:  150:int
-function cd_function called 8 returned 100% blocks executed 59%
-        8:  151:cd_function(char *new_path)
-        -:  152:{
-        -:  153:	/* If no argument, change to home */
-        8:  154:	if (!new_path || !*new_path) {
-        8:  154-block  0
-branch  0 taken 4 (fallthrough)
-branch  1 taken 4
-        4:  154-block  1
-branch  2 taken 0 (fallthrough)
-branch  3 taken 4
-        -:  155:
-        4:  156:		if (!user.home) {
-        4:  156-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 4
-    #####:  157:			fprintf(stderr, _("%s: cd: Home directory not found\n"),
-    %%%%%:  157-block  0
-call    0 never executed
-        -:  158:			    PROGRAM_NAME);
-    #####:  159:			return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  160:		}
-        -:  161:
-        4:  162:		if (xchdir(user.home, SET_TITLE) != EXIT_SUCCESS) {
-        4:  162-block  0
-call    0 returned 4
-branch  1 taken 0 (fallthrough)
-branch  2 taken 4
-    #####:  163:			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
-call    0 never executed
-    #####:  164:			    user.home, strerror(errno));
-    %%%%%:  164-block  0
-call    0 never executed
-    #####:  165:			return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  166:		}
-        -:  167:
-        4:  168:		free(ws[cur_ws].path);
-        4:  169:		ws[cur_ws].path = savestring(user.home, strlen(user.home));
-        4:  169-block  0
-call    0 returned 4
-unconditional  1 taken 4
-        -:  170:	}
-        -:  171:
-        -:  172:	/* If we have some argument, dequote it, resolve it with realpath(),
-        -:  173:	 * cd into the resolved path, and set the path variable to this
-        -:  174:	 * latter */
-        -:  175:	else {
-        -:  176:
-        4:  177:		if (strchr(new_path, '\\')) {
-        4:  177-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 4
-    #####:  178:			char *deq_path = dequote_str(new_path, 0);
+    #####:  178:				fprintf(stderr, _("%s: cd: Home directory not found\n"),
     %%%%%:  178-block  0
 call    0 never executed
-        -:  179:
-    #####:  180:			if (deq_path) {
-branch  0 never executed
-branch  1 never executed
-    #####:  181:				strcpy(new_path, deq_path);
-    #####:  182:				free(deq_path);
-    %%%%%:  182-block  0
+call    1 never executed
+unconditional  2 never executed
+        -:  179:					PROGRAM_NAME);
+        -:  180:			}
+    #####:  181:			return EXIT_FAILURE;
+    %%%%%:  181-block  0
 unconditional  0 never executed
-        -:  183:			}
-        -:  184:		}
-        -:  185:
-        4:  186:		char *real_path = realpath(new_path, NULL);
-        4:  186-block  0
-call    0 returned 4
-        -:  187:
-        4:  188:		if (!real_path) {
-branch  0 taken 0 (fallthrough)
-branch  1 taken 4
-    #####:  189:			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
-call    0 never executed
-    #####:  190:			    new_path, strerror(errno));
-    %%%%%:  190-block  0
-call    0 never executed
-    #####:  191:			return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  192:		}
-        -:  193:
-        4:  194:		if (xchdir(real_path, SET_TITLE) != EXIT_SUCCESS) {
-        4:  194-block  0
+        -:  182:		}
+        -:  183:
+        4:  184:		if (xchdir(user.home, SET_TITLE) != EXIT_SUCCESS) {
+        4:  184-block  0
 call    0 returned 4
 branch  1 taken 0 (fallthrough)
 branch  2 taken 4
-    #####:  195:			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
+    #####:  185:			if (print_error) {
+    %%%%%:  185-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  186:				fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
 call    0 never executed
-    #####:  196:			    real_path, strerror(errno));
-    %%%%%:  196-block  0
+unconditional  1 never executed
+    #####:  187:					user.home, strerror(errno));
+    %%%%%:  187-block  0
 call    0 never executed
-    #####:  197:			free(real_path);
-    #####:  198:			return EXIT_FAILURE;
+        -:  188:			}
+    #####:  189:			return EXIT_FAILURE;
+    %%%%%:  189-block  0
 unconditional  0 never executed
-        -:  199:		}
-        -:  200:
-        4:  201:		free(ws[cur_ws].path);
-        4:  202:		ws[cur_ws].path = savestring(real_path, strlen(real_path));
-        4:  202-block  0
+        -:  190:		}
+        -:  191:
+        4:  192:		free(ws[cur_ws].path);
+        4:  193:		ws[cur_ws].path = savestring(user.home, strlen(user.home));
+        4:  193-block  0
 call    0 returned 4
-        -:  203:
-        4:  204:		free(real_path);
-unconditional  0 taken 4
-        -:  205:	}
-        -:  206:
-        8:  207:	int exit_status = EXIT_SUCCESS;
-        -:  208:
-        8:  209:	if (cd_lists_on_the_fly) {
-        8:  209-block  0
-branch  0 taken 8 (fallthrough)
-branch  1 taken 0
-        8:  210:		free_dirlist();
-        8:  210-block  0
-call    0 returned 8
-        -:  211:
-        8:  212:		if (list_dir() != EXIT_SUCCESS)
-call    0 returned 8
-branch  1 taken 0 (fallthrough)
-branch  2 taken 8
-    #####:  213:			exit_status = EXIT_FAILURE;
-    %%%%%:  213-block  0
-unconditional  0 never executed
-        -:  214:	}
-        -:  215:
-        8:  216:	add_to_dirhist(ws[cur_ws].path);
-        8:  216-block  0
-call    0 returned 8
-        8:  217:	add_to_jumpdb(ws[cur_ws].path);
-call    0 returned 8
-        -:  218:
-        8:  219:	return exit_status;
-unconditional  0 taken 8
-        -:  220:}
-        -:  221:
-        -:  222:/* Convert ... n into ../.. n */
-        -:  223:char *
-function fastback called 0 returned 0% blocks executed 0%
-    #####:  224:fastback(const char *str)
-        -:  225:{
-    #####:  226:	if (!str || !*str)
-    %%%%%:  226-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  226-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  227:		return (char *)NULL;
-    %%%%%:  227-block  0
-unconditional  0 never executed
-        -:  228:
-    #####:  229:	char *p = (char *)str;
-    #####:  230:	size_t dots = 0;
-        -:  231:
-    #####:  232:	char *rem = (char *)NULL;
-    #####:  233:	while (*p) {
-    %%%%%:  233-block  0
-unconditional  0 never executed
-    %%%%%:  233-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  234:		if (*p != '.') {
-    %%%%%:  234-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  235:			rem = p;
-    #####:  236:			break;
-    %%%%%:  236-block  0
-unconditional  0 never executed
-        -:  237:		}
-    #####:  238:		dots++;
-    #####:  239:		p++;
-    %%%%%:  239-block  0
-unconditional  0 never executed
-        -:  240:	}
-        -:  241:
-    #####:  242:	if (dots <= 2)
-    %%%%%:  242-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  243:		return (char *)NULL;
-    %%%%%:  243-block  0
-unconditional  0 never executed
-        -:  244:
-    #####:  245:	char *q = (char *)NULL;
-    #####:  246:	if (rem)
-    %%%%%:  246-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  247:		q = (char *)xnmalloc((dots * 3 + strlen(rem) + 2), sizeof(char));
-    %%%%%:  247-block  0
+unconditional  1 taken 4
+        -:  194:	}
+        -:  195:
+        -:  196:	/* If we have some argument, dequote it, resolve it with realpath(),
+        -:  197:	 * cd into the resolved path, and set the path variable to this
+        -:  198:	 * latter */
+        -:  199:	else {
+      332:  200:		if (strchr(new_path, '\\')) {
+      332:  200-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 332
+    #####:  201:			char *deq_path = dequote_str(new_path, 0);
+    %%%%%:  201-block  0
 call    0 never executed
-unconditional  1 never executed
-        -:  248:	else
-    #####:  249:		q = (char *)xnmalloc((dots * 3), sizeof(char));
-    %%%%%:  249-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  250:
-    #####:  251:	q[0] = '.';
-    #####:  252:	q[1] = '.';
-        -:  253:
-    #####:  254:	size_t i, c = 2;
-    #####:  255:	for (i = 2; c < dots;) {
-    %%%%%:  255-block  0
-unconditional  0 never executed
-    %%%%%:  255-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  256:		q[i++] = '/';
-    #####:  257:		q[i++] = '.';
-    #####:  258:		q[i++] = '.';
-    #####:  259:		c++;
-    %%%%%:  259-block  0
-unconditional  0 never executed
-        -:  260:	}
-        -:  261:
-    #####:  262:	q[i] = '\0';
-        -:  263:
-    #####:  264:	if (rem) {
-    %%%%%:  264-block  0
+    #####:  202:			if (deq_path) {
 branch  0 never executed
 branch  1 never executed
-    #####:  265:		if (*rem != '/') {
-    %%%%%:  265-block  0
+    #####:  203:				strcpy(new_path, deq_path);
+    #####:  204:				free(deq_path);
+    %%%%%:  204-block  0
+unconditional  0 never executed
+        -:  205:			}
+        -:  206:		}
+        -:  207:
+      332:  208:		char *p = check_cdpath(new_path);
+      332:  208-block  0
+call    0 returned 332
+      332:  209:		char *q = realpath(p ? p : new_path, NULL);
+branch  0 taken 4 (fallthrough)
+branch  1 taken 328
+        4:  209-block  0
+unconditional  2 taken 4
+      328:  209-block  1
+unconditional  3 taken 328
+      332:  209-block  2
+call    4 returned 332
+      332:  210:		if (!q) {
+branch  0 taken 284 (fallthrough)
+branch  1 taken 48
+      284:  211:			if (print_error) {
+      284:  211-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 284
+    #####:  212:				fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
 branch  0 never executed
 branch  1 never executed
-    #####:  266:			q[i] = '/';
-    #####:  267:			q[i + 1] = '\0';
-    %%%%%:  267-block  0
-unconditional  0 never executed
-        -:  268:		}
-    #####:  269:		strcat(q, rem);
-    %%%%%:  269-block  0
-unconditional  0 never executed
-        -:  270:	}
-        -:  271:
-    #####:  272:	return q;
-    %%%%%:  272-block  0
-unconditional  0 never executed
-        -:  273:}
-        -:  274:
-        -:  275:int
-function surf_hist called 0 returned 0% blocks executed 0%
-    #####:  276:surf_hist(char **comm)
-        -:  277:{
-    #####:  278:	if (*comm[1] == 'h' && (strcmp(comm[1], "h") == 0
-    %%%%%:  278-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  278-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  279:	|| strcmp(comm[1], "hist") == 0)) {
-    %%%%%:  279-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  280:		/* Show the list of already visited directories */
-        -:  281:		int i;
-    #####:  282:		for (i = 0; i < dirhist_total_index; i++) {
-    %%%%%:  282-block  0
-unconditional  0 never executed
-    %%%%%:  282-block  1
-unconditional  1 never executed
-    %%%%%:  282-block  2
-branch  2 never executed
-branch  3 never executed
-    #####:  283:			if (i == dirhist_cur_index)
-    %%%%%:  283-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  284:				printf("%d %s%s%s\n", i + 1, dh_c,
-    #####:  285:				    old_pwd[i], df_c);
-    %%%%%:  285-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  286:
-        -:  287:			else
-    #####:  288:				printf("%d %s\n", i + 1, old_pwd[i]);
-    %%%%%:  288-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  289:		}
-        -:  290:
-    #####:  291:		return EXIT_SUCCESS;
-    %%%%%:  291-block  0
-unconditional  0 never executed
-        -:  292:	}
-        -:  293:
-    #####:  294:	if (*comm[1] == 'c' && strcmp(comm[1], "clear") == 0) {
-    %%%%%:  294-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  294-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  295:		int i = dirhist_total_index;
-    #####:  296:		while (--i >= 0)
-    %%%%%:  296-block  0
-unconditional  0 never executed
-    %%%%%:  296-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  297:			free(old_pwd[i]);
-    %%%%%:  297-block  0
-unconditional  0 never executed
-        -:  298:
-    #####:  299:		dirhist_cur_index = dirhist_total_index = 0;
-    #####:  300:		add_to_dirhist(ws[cur_ws].path);
-    %%%%%:  300-block  0
-call    0 never executed
-        -:  301:
-    #####:  302:		return EXIT_SUCCESS;
-unconditional  0 never executed
-        -:  303:	}
-        -:  304:
-    #####:  305:	int exit_status = EXIT_FAILURE;
-        -:  306:
-    #####:  307:	if (*comm[1] == '!' && is_number(comm[1] + 1) == 1) {
-    %%%%%:  307-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  307-block  1
-call    2 never executed
-branch  3 never executed
-branch  4 never executed
-    %%%%%:  307-block  2
+    %%%%%:  212-block  0
+unconditional  2 never executed
+    %%%%%:  212-block  1
+unconditional  3 never executed
+    %%%%%:  212-block  2
+call    4 never executed
 unconditional  5 never executed
-        -:  308:		/* Go the the specified directory (first arg) in the directory
-        -:  309:		 * history list */
-    #####:  310:		int atoi_comm = atoi(comm[1] + 1);
-    #####:  311:		if (atoi_comm > 0 && atoi_comm <= dirhist_total_index) {
-    %%%%%:  311-block  0
+    #####:  213:					p ? p : new_path, strerror(errno));
+    %%%%%:  213-block  0
+call    0 never executed
+        -:  214:			}
+      284:  215:			free(p);
+      284:  216:			return EXIT_FAILURE;
+      284:  216-block  0
+unconditional  0 taken 284
+        -:  217:		}
+       48:  218:		free(p);
+        -:  219:
+       48:  220:		if (xchdir(q, SET_TITLE) != EXIT_SUCCESS) {
+       48:  220-block  0
+call    0 returned 48
+branch  1 taken 9 (fallthrough)
+branch  2 taken 39
+        9:  221:			if (print_error) {
+        9:  221-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 9
+    #####:  222:				fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
+call    0 never executed
+unconditional  1 never executed
+    #####:  223:					q, strerror(errno));
+    %%%%%:  223-block  0
+call    0 never executed
+        -:  224:			}
+        9:  225:			free(q);
+        9:  226:			return EXIT_FAILURE;
+        9:  226-block  0
+unconditional  0 taken 9
+        -:  227:		}
+        -:  228:
+       39:  229:		free(ws[cur_ws].path);
+       39:  230:		ws[cur_ws].path = savestring(q, strlen(q));
+       39:  230-block  0
+call    0 returned 39
+       39:  231:		free(q);
+unconditional  0 taken 39
+        -:  232:	}
+        -:  233:
+       43:  234:	int exit_status = EXIT_SUCCESS;
+       43:  235:	add_to_dirhist(ws[cur_ws].path);
+       43:  235-block  0
+call    0 returned 43
+        -:  236:
+       43:  237:	if (cd_lists_on_the_fly) {
+branch  0 taken 43 (fallthrough)
+branch  1 taken 0
+       43:  238:		free_dirlist();
+       43:  238-block  0
+call    0 returned 43
+       43:  239:		if (list_dir() != EXIT_SUCCESS)
+call    0 returned 43
+branch  1 taken 0 (fallthrough)
+branch  2 taken 43
+    #####:  240:			exit_status = EXIT_FAILURE;
+    %%%%%:  240-block  0
+unconditional  0 never executed
+        -:  241:	}
+        -:  242:
+       43:  243:	add_to_jumpdb(ws[cur_ws].path);
+       43:  243-block  0
+call    0 returned 43
+       43:  244:	return exit_status;
+unconditional  0 taken 43
+        -:  245:}
+        -:  246:
+        -:  247:/* Convert ... n into ../.. n */
+        -:  248:char *
+function fastback called 3 returned 100% blocks executed 68%
+        3:  249:fastback(const char *str)
+        -:  250:{
+        3:  251:	if (!str || !*str)
+        3:  251-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 0
+        3:  251-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 3
+    #####:  252:		return (char *)NULL;
+    %%%%%:  252-block  0
+unconditional  0 never executed
+        -:  253:
+        3:  254:	char *p = (char *)str;
+        3:  255:	size_t dots = 0;
+        -:  256:
+        3:  257:	char *rem = (char *)NULL;
+       12:  258:	while (*p) {
+        3:  258-block  0
+unconditional  0 taken 3
+       12:  258-block  1
+branch  1 taken 9
+branch  2 taken 3 (fallthrough)
+        9:  259:		if (*p != '.') {
+        9:  259-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 9
+    #####:  260:			rem = p;
+    #####:  261:			break;
+    %%%%%:  261-block  0
+unconditional  0 never executed
+        -:  262:		}
+        9:  263:		dots++;
+        9:  264:		p++;
+        9:  264-block  0
+unconditional  0 taken 9
+        -:  265:	}
+        -:  266:
+        3:  267:	if (dots <= 2)
+        3:  267-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####:  268:		return (char *)NULL;
+    %%%%%:  268-block  0
+unconditional  0 never executed
+        -:  269:
+        3:  270:	char *q = (char *)NULL;
+        3:  271:	if (rem)
+        3:  271-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####:  272:		q = (char *)xnmalloc((dots * 3 + strlen(rem) + 2), sizeof(char));
+    %%%%%:  272-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  273:	else
+        3:  274:		q = (char *)xnmalloc((dots * 3), sizeof(char));
+        3:  274-block  0
+call    0 returned 3
+unconditional  1 taken 3
+        -:  275:
+        3:  276:	q[0] = '.';
+        3:  277:	q[1] = '.';
+        -:  278:
+        3:  279:	size_t i, c = 2;
+        6:  280:	for (i = 2; c < dots;) {
+        3:  280-block  0
+unconditional  0 taken 3
+        6:  280-block  1
+branch  1 taken 3
+branch  2 taken 3 (fallthrough)
+        3:  281:		q[i++] = '/';
+        3:  282:		q[i++] = '.';
+        3:  283:		q[i++] = '.';
+        3:  284:		c++;
+        3:  284-block  0
+unconditional  0 taken 3
+        -:  285:	}
+        -:  286:
+        3:  287:	q[i] = '\0';
+        -:  288:
+        3:  289:	if (rem) {
+        3:  289-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####:  290:		if (*rem != '/') {
+    %%%%%:  290-block  0
 branch  0 never executed
 branch  1 never executed
-    %%%%%:  311-block  1
+    #####:  291:			q[i] = '/';
+    #####:  292:			q[i + 1] = '\0';
+    %%%%%:  292-block  0
+unconditional  0 never executed
+        -:  293:		}
+    #####:  294:		strcat(q, rem);
+    %%%%%:  294-block  0
+unconditional  0 never executed
+        -:  295:	}
+        -:  296:
+        3:  297:	return q;
+        3:  297-block  0
+unconditional  0 taken 3
+        -:  298:}
+        -:  299:
+        -:  300:static int
+function surf_hist called 2 returned 100% blocks executed 41%
+        2:  301:surf_hist(char **comm)
+        -:  302:{
+       2*:  303:	if (*comm[1] == 'h' && (strcmp(comm[1], "h") == 0
+        2:  303-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    %%%%%:  303-block  1
 branch  2 never executed
 branch  3 never executed
-    %%%%%:  311-block  2
-unconditional  4 never executed
-        -:  312:
-    #####:  313:			int ret = xchdir(old_pwd[atoi_comm - 1], SET_TITLE);
+    #####:  304:	|| strcmp(comm[1], "hist") == 0)) {
+    %%%%%:  304-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  305:		/* Print the list of already visited directories */
+        -:  306:		int i;
+    #####:  307:		for (i = 0; i < dirhist_total_index; i++) {
+    %%%%%:  307-block  0
+unconditional  0 never executed
+    %%%%%:  307-block  1
+unconditional  1 never executed
+    %%%%%:  307-block  2
+branch  2 never executed
+branch  3 never executed
+    #####:  308:			if (!old_pwd[i] || *old_pwd[i] == _ESC)
+    %%%%%:  308-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  308-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  309:				continue;
+    %%%%%:  309-block  0
+unconditional  0 never executed
+    #####:  310:			if (i == dirhist_cur_index)
+    %%%%%:  310-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  311:				printf("  %d  %s%s%s\n", i + 1, dh_c, old_pwd[i], df_c);
+    %%%%%:  311-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  312:			else
+    #####:  313:				printf("  %d  %s\n", i + 1, old_pwd[i]);
     %%%%%:  313-block  0
 call    0 never executed
-        -:  314:
-    #####:  315:			if (ret == 0) {
-branch  0 never executed
-branch  1 never executed
-    #####:  316:				free(ws[cur_ws].path);
-    #####:  317:				ws[cur_ws].path = (char *)xnmalloc(strlen(
-    #####:  318:								       old_pwd[atoi_comm - 1]) +
-    %%%%%:  318-block  0
-call    0 never executed
-        -:  319:								       1,
-        -:  320:				    sizeof(char));
-    #####:  321:				strcpy(ws[cur_ws].path, old_pwd[atoi_comm - 1]);
-        -:  322:
-    #####:  323:				dirhist_cur_index = atoi_comm - 1;
-        -:  324:
-    #####:  325:				exit_status = EXIT_SUCCESS;
-        -:  326:
-    #####:  327:				if (cd_lists_on_the_fly) {
-branch  0 never executed
-branch  1 never executed
-    #####:  328:					free_dirlist();
-    %%%%%:  328-block  0
-call    0 never executed
-    #####:  329:					exit_status = list_dir();
-call    0 never executed
 unconditional  1 never executed
-        -:  330:				}
-        -:  331:			}
-        -:  332:
-        -:  333:			else
-    #####:  334:				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-    #####:  335:				    old_pwd[atoi_comm - 1], strerror(errno));
+        -:  314:		}
+    #####:  315:		return EXIT_SUCCESS;
+    %%%%%:  315-block  0
+unconditional  0 never executed
+        -:  316:	}
+        -:  317:
+       2*:  318:	if (*comm[1] == 'c' && strcmp(comm[1], "clear") == 0) {
+        2:  318-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    %%%%%:  318-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  319:		int i = dirhist_total_index;
+    #####:  320:		while (--i >= 0)
+    %%%%%:  320-block  0
+unconditional  0 never executed
+    %%%%%:  320-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  321:			free(old_pwd[i]);
+    %%%%%:  321-block  0
+unconditional  0 never executed
+    #####:  322:		dirhist_cur_index = dirhist_total_index = 0;
+    #####:  323:		add_to_dirhist(ws[cur_ws].path);
+    %%%%%:  323-block  0
+call    0 never executed
+    #####:  324:		return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  325:	}
+        -:  326:
+        2:  327:	int exit_status = EXIT_FAILURE;
+        -:  328:
+        4:  329:	if (*comm[1] == '!' && is_number(comm[1] + 1) == 1) {
+        2:  329-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  329-block  1
+call    2 returned 2
+branch  3 taken 2 (fallthrough)
+branch  4 taken 0
+        2:  329-block  2
+unconditional  5 taken 2
+        -:  330:		/* Go the the specified directory (first arg) in the directory
+        -:  331:		 * history list */
+        2:  332:		int atoi_comm = atoi(comm[1] + 1);
+        4:  333:		if (atoi_comm > 0 && atoi_comm <= dirhist_total_index) {
+        2:  333-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  333-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 0
+        2:  333-block  2
+unconditional  4 taken 2
+        2:  334:			if (!old_pwd[atoi_comm - 1] || *old_pwd[atoi_comm - 1] == _ESC) {
+        2:  334-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  334-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 2
+    #####:  335:				fprintf(stderr, _("%s: Invalid history entry\n"), PROGRAM_NAME);
     %%%%%:  335-block  0
 call    0 never executed
 call    1 never executed
+    #####:  336:				exit_status = EXIT_FAILURE;
+    #####:  337:				return exit_status;
+unconditional  0 never executed
+        -:  338:			}
+        2:  339:			int ret = xchdir(old_pwd[atoi_comm - 1], SET_TITLE);
+        2:  339-block  0
+call    0 returned 2
+        2:  340:			if (ret == 0) {
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  341:				free(ws[cur_ws].path);
+        4:  342:				ws[cur_ws].path = (char *)xnmalloc(strlen(
+        2:  343:						old_pwd[atoi_comm - 1]) + 1, sizeof(char));
+        2:  343-block  0
+call    0 returned 2
+        2:  344:				strcpy(ws[cur_ws].path, old_pwd[atoi_comm - 1]);
+        -:  345:
+        2:  346:				dirhist_cur_index = atoi_comm - 1;
+        -:  347:
+        2:  348:				exit_status = EXIT_SUCCESS;
+        -:  349:
+        2:  350:				if (cd_lists_on_the_fly) {
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  351:					free_dirlist();
+        2:  351-block  0
+call    0 returned 2
+        2:  352:					exit_status = list_dir();
+call    0 returned 2
+unconditional  1 taken 2
+        -:  353:				}
+        -:  354:			} else {
+    #####:  355:				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+    #####:  356:				    old_pwd[atoi_comm - 1], strerror(errno));
+    %%%%%:  356-block  0
+call    0 never executed
+call    1 never executed
 unconditional  2 never executed
-        -:  336:		} else
-    #####:  337:			fprintf(stderr, _("history: %d: No such ELN\n"),
-    #####:  338:			    atoi(comm[1] + 1));
-    %%%%%:  338-block  0
+        -:  357:			}
+        -:  358:		} else {
+    #####:  359:			fprintf(stderr, _("history: %d: No such ELN\n"),
 call    0 never executed
 unconditional  1 never executed
-        -:  339:	} else
-    #####:  340:		fputs(_("history: Usage: b/f [hist] [clear] [!ELN]\n"), stderr);
-    %%%%%:  340-block  0
+    #####:  360:			    atoi(comm[1] + 1));
+    %%%%%:  360-block  0
 call    0 never executed
-unconditional  1 never executed
-        -:  341:
-    #####:  342:	return exit_status;
-    %%%%%:  342-block  0
-unconditional  0 never executed
-        -:  343:}
-        -:  344:
-        -:  345:/* Go back one entry in dirhist */
-        -:  346:int
-function back_function called 0 returned 0% blocks executed 0%
-    #####:  347:back_function(char **comm)
-        -:  348:{
-    #####:  349:	if (!comm)
-    %%%%%:  349-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  350:		return EXIT_FAILURE;
-    %%%%%:  350-block  0
-unconditional  0 never executed
-        -:  351:
-    #####:  352:	if (comm[1]) {
-    %%%%%:  352-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  353:		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
-    %%%%%:  353-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  353-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  354:			puts(_("Usage: back, b [h, hist] [clear] [!ELN]"));
-    %%%%%:  354-block  0
+        -:  361:		}
+        -:  362:	} else {
+    #####:  363:		fprintf(stderr, "%s\n", _(DIRHIST_USAGE));
+    %%%%%:  363-block  0
 call    0 never executed
-    #####:  355:			return EXIT_SUCCESS;
-unconditional  0 never executed
-        -:  356:		}
-        -:  357:
-    #####:  358:		return surf_hist(comm);
-    %%%%%:  358-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  359:	}
-        -:  360:
-        -:  361:	/* If just 'back', with no arguments */
-        -:  362:
-        -:  363:	/* If first path in current dirhist was reached, do nothing */
-    #####:  364:	if (dirhist_cur_index <= 0)
-    %%%%%:  364-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  365:		return EXIT_SUCCESS;
-    %%%%%:  365-block  0
-unconditional  0 never executed
-        -:  366:
-    #####:  367:	int exit_status = EXIT_FAILURE;
+call    1 never executed
+unconditional  2 never executed
+        -:  364:	}
+        -:  365:
+        2:  366:	return exit_status;
+        2:  366-block  0
+unconditional  0 taken 2
+        -:  367:}
         -:  368:
-    #####:  369:	dirhist_cur_index--;
-        -:  370:
-    #####:  371:	if (xchdir(old_pwd[dirhist_cur_index], SET_TITLE) == EXIT_SUCCESS) {
-    %%%%%:  371-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-        -:  372:
-    #####:  373:		free(ws[cur_ws].path);
-    #####:  374:		ws[cur_ws].path = savestring(old_pwd[dirhist_cur_index],
-    #####:  375:		    strlen(old_pwd[dirhist_cur_index]));
-    %%%%%:  375-block  0
-call    0 never executed
-        -:  376:
-    #####:  377:		exit_status = EXIT_SUCCESS;
-        -:  378:
-    #####:  379:		add_to_jumpdb(ws[cur_ws].path);
-call    0 never executed
-        -:  380:
-    #####:  381:		if (cd_lists_on_the_fly) {
-branch  0 never executed
-branch  1 never executed
-    #####:  382:			free_dirlist();
-    %%%%%:  382-block  0
-call    0 never executed
-    #####:  383:			exit_status = list_dir();
-call    0 never executed
-unconditional  1 never executed
-        -:  384:		}
-        -:  385:	}
-        -:  386:
-        -:  387:	else
-    #####:  388:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-    #####:  389:		    old_pwd[dirhist_cur_index], strerror(errno));
-    %%%%%:  389-block  0
-call    0 never executed
-call    1 never executed
-unconditional  2 never executed
-        -:  390:
-    #####:  391:	return exit_status;
-    %%%%%:  391-block  0
+        -:  369:/* Go back one entry in dirhist */
+        -:  370:int
+function back_function called 25 returned 100% blocks executed 57%
+       25:  371:back_function(char **comm)
+        -:  372:{
+       25:  373:	if (!comm)
+       25:  373-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 25
+    #####:  374:		return EXIT_FAILURE;
+    %%%%%:  374-block  0
 unconditional  0 never executed
-        -:  392:}
-        -:  393:
-        -:  394:/* Go forth one entry in dirhist */
-        -:  395:int
-function forth_function called 0 returned 0% blocks executed 0%
-    #####:  396:forth_function(char **comm)
-        -:  397:{
-    #####:  398:	if (!comm)
-    %%%%%:  398-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  399:		return EXIT_FAILURE;
-    %%%%%:  399-block  0
-unconditional  0 never executed
-        -:  400:
-    #####:  401:	if (comm[1]) {
-    %%%%%:  401-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  402:		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
-    %%%%%:  402-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  402-block  1
+        -:  375:
+       25:  376:	if (comm[1]) {
+       25:  376-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 23
+       2*:  377:		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
+        2:  377-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    %%%%%:  377-block  1
 branch  2 never executed
 branch  3 never executed
-    #####:  403:			puts(_("Usage: forth, f [h, hist] [clear] [!ELN]"));
-    %%%%%:  403-block  0
-call    0 never executed
-    #####:  404:			return EXIT_SUCCESS;
-unconditional  0 never executed
-        -:  405:		}
-        -:  406:
-    #####:  407:		return surf_hist(comm);
-    %%%%%:  407-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  408:	}
-        -:  409:
-        -:  410:	/* If just 'forth', with no arguments */
-        -:  411:
-        -:  412:	/* If last path in dirhist was reached, do nothing */
-    #####:  413:	if (dirhist_cur_index + 1 >= dirhist_total_index)
-    %%%%%:  413-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  414:		return EXIT_SUCCESS;
-    %%%%%:  414-block  0
-unconditional  0 never executed
-        -:  415:
-    #####:  416:	dirhist_cur_index++;
-        -:  417:
-    #####:  418:	int exit_status = EXIT_FAILURE;
-    #####:  419:	if (xchdir(old_pwd[dirhist_cur_index], SET_TITLE) == EXIT_SUCCESS) {
-    %%%%%:  419-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-        -:  420:
-    #####:  421:		free(ws[cur_ws].path);
-    #####:  422:		ws[cur_ws].path = savestring(old_pwd[dirhist_cur_index],
-    #####:  423:		    strlen(old_pwd[dirhist_cur_index]));
-    %%%%%:  423-block  0
-call    0 never executed
-        -:  424:
-    #####:  425:		add_to_jumpdb(ws[cur_ws].path);
-call    0 never executed
-        -:  426:
-    #####:  427:		exit_status = EXIT_SUCCESS;
-        -:  428:
-    #####:  429:		if (cd_lists_on_the_fly) {
-branch  0 never executed
-branch  1 never executed
-    #####:  430:			free_dirlist();
-    %%%%%:  430-block  0
-call    0 never executed
-    #####:  431:			exit_status = list_dir();
-call    0 never executed
-unconditional  1 never executed
-        -:  432:		}
-        -:  433:	}
-        -:  434:
-        -:  435:	else
-    #####:  436:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-    #####:  437:		    old_pwd[dirhist_cur_index], strerror(errno));
-    %%%%%:  437-block  0
+    #####:  378:			puts(_(BACK_USAGE));
+    %%%%%:  378-block  0
 call    0 never executed
 call    1 never executed
-unconditional  2 never executed
-        -:  438:
-    #####:  439:	return exit_status;
-    %%%%%:  439-block  0
+    #####:  379:			return EXIT_SUCCESS;
 unconditional  0 never executed
-        -:  440:}
+        -:  380:		}
+        2:  381:		return surf_hist(comm);
+        2:  381-block  0
+call    0 returned 2
+unconditional  1 taken 2
+        -:  382:	}
+        -:  383:
+        -:  384:	/* If just 'back', with no arguments */
+        -:  385:
+        -:  386:	/* If first path in current dirhist was reached, do nothing */
+       23:  387:	if (dirhist_cur_index <= 0)
+       23:  387-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 23
+    #####:  388:		return EXIT_SUCCESS;
+    %%%%%:  388-block  0
+unconditional  0 never executed
+        -:  389:
+       23:  390:	int exit_status = EXIT_FAILURE;
+       23:  391:	dirhist_cur_index--;
+        -:  392:
+       23:  393:	if (!old_pwd[dirhist_cur_index] || *old_pwd[dirhist_cur_index] == _ESC) {
+       23:  393-block  0
+branch  0 taken 23 (fallthrough)
+branch  1 taken 0
+       23:  393-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 23
+    #####:  394:		if (dirhist_cur_index)
+    %%%%%:  394-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  395:			dirhist_cur_index--;
+    %%%%%:  395-block  0
+unconditional  0 never executed
+        -:  396:		else
+    #####:  397:			return exit_status;
+    %%%%%:  397-block  0
+unconditional  0 never executed
+        -:  398:	}
+        -:  399:
+       23:  400:	if (xchdir(old_pwd[dirhist_cur_index], SET_TITLE) == EXIT_SUCCESS) {
+       23:  400-block  0
+call    0 returned 23
+branch  1 taken 23 (fallthrough)
+branch  2 taken 0
+       23:  401:		free(ws[cur_ws].path);
+       46:  402:		ws[cur_ws].path = savestring(old_pwd[dirhist_cur_index],
+       23:  403:		    strlen(old_pwd[dirhist_cur_index]));
+       23:  403-block  0
+call    0 returned 23
+        -:  404:
+       23:  405:		exit_status = EXIT_SUCCESS;
+       23:  406:		add_to_jumpdb(ws[cur_ws].path);
+call    0 returned 23
+        -:  407:
+       23:  408:		if (cd_lists_on_the_fly) {
+branch  0 taken 23 (fallthrough)
+branch  1 taken 0
+       23:  409:			free_dirlist();
+       23:  409-block  0
+call    0 returned 23
+       23:  410:			exit_status = list_dir();
+call    0 returned 23
+unconditional  1 taken 23
+        -:  411:		}
+        -:  412:	} else {
+    #####:  413:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+    #####:  414:		    old_pwd[dirhist_cur_index], strerror(errno));
+    %%%%%:  414-block  0
+call    0 never executed
+call    1 never executed
+        -:  415:		/* Invalidate this entry */
+    #####:  416:		*old_pwd[dirhist_cur_index] = _ESC;
+    #####:  417:		if (dirhist_cur_index)
+branch  0 never executed
+branch  1 never executed
+    #####:  418:			dirhist_cur_index--;
+    %%%%%:  418-block  0
+unconditional  0 never executed
+        -:  419:	}
+        -:  420:
+       23:  421:	return exit_status;
+       23:  421-block  0
+unconditional  0 taken 23
+        -:  422:}
+        -:  423:
+        -:  424:/* Go forth one entry in dirhist */
+        -:  425:int
+function forth_function called 3 returned 100% blocks executed 47%
+        3:  426:forth_function(char **comm)
+        -:  427:{
+        3:  428:	if (!comm)
+        3:  428-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####:  429:		return EXIT_FAILURE;
+    %%%%%:  429-block  0
+unconditional  0 never executed
+        -:  430:
+        3:  431:	if (comm[1]) {
+        3:  431-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####:  432:		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
+    %%%%%:  432-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  432-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  433:			puts(_(FORTH_USAGE));
+    %%%%%:  433-block  0
+call    0 never executed
+call    1 never executed
+    #####:  434:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  435:		}
+    #####:  436:		return surf_hist(comm);
+    %%%%%:  436-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  437:	}
+        -:  438:
+        -:  439:	/* If just 'forth', with no arguments */
+        -:  440:
+        -:  441:	/* If last path in dirhist was reached, do nothing */
+        3:  442:	if (dirhist_cur_index + 1 >= dirhist_total_index)
+        3:  442-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####:  443:		return EXIT_SUCCESS;
+    %%%%%:  443-block  0
+unconditional  0 never executed
+        -:  444:
+        3:  445:	int exit_status = EXIT_FAILURE;
+        3:  446:	dirhist_cur_index++;
+        -:  447:
+        3:  448:	if (!old_pwd[dirhist_cur_index] || *old_pwd[dirhist_cur_index] == _ESC) {
+        3:  448-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 0
+        3:  448-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 3
+    #####:  449:		if (dirhist_cur_index < dirhist_total_index)
+    %%%%%:  449-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  450:			dirhist_cur_index++;
+    %%%%%:  450-block  0
+unconditional  0 never executed
+        -:  451:		else
+    #####:  452:			return exit_status;
+    %%%%%:  452-block  0
+unconditional  0 never executed
+        -:  453:	}
+        -:  454:
+        3:  455:	if (xchdir(old_pwd[dirhist_cur_index], SET_TITLE) == EXIT_SUCCESS) {
+        3:  455-block  0
+call    0 returned 3
+branch  1 taken 3 (fallthrough)
+branch  2 taken 0
+        3:  456:		free(ws[cur_ws].path);
+        6:  457:		ws[cur_ws].path = savestring(old_pwd[dirhist_cur_index],
+        3:  458:		    strlen(old_pwd[dirhist_cur_index]));
+        3:  458-block  0
+call    0 returned 3
+        -:  459:
+        3:  460:		add_to_jumpdb(ws[cur_ws].path);
+call    0 returned 3
+        3:  461:		exit_status = EXIT_SUCCESS;
+        -:  462:
+        3:  463:		if (cd_lists_on_the_fly) {
+branch  0 taken 3 (fallthrough)
+branch  1 taken 0
+        3:  464:			free_dirlist();
+        3:  464-block  0
+call    0 returned 3
+        3:  465:			exit_status = list_dir();
+call    0 returned 3
+unconditional  1 taken 3
+        -:  466:		}
+        -:  467:	} else {
+    #####:  468:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+    #####:  469:		    old_pwd[dirhist_cur_index], strerror(errno));
+    %%%%%:  469-block  0
+call    0 never executed
+call    1 never executed
+        -:  470:		/* Invalidate this entry */
+    #####:  471:		*old_pwd[dirhist_cur_index] = _ESC;
+    #####:  472:		if (dirhist_cur_index < dirhist_total_index)
+branch  0 never executed
+branch  1 never executed
+    #####:  473:			dirhist_cur_index++;
+    %%%%%:  473-block  0
+unconditional  0 never executed
+        -:  474:	}
+        -:  475:
+        3:  476:	return exit_status;
+        3:  476-block  0
+unconditional  0 taken 3
+        -:  477:}

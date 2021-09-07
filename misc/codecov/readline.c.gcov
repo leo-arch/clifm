@@ -1,2239 +1,2955 @@
         -:    0:Source:readline.c
-        -:    1:/* readline.c -- functions the behaviour of readline, specially completions */
-        -:    2:
-        -:    3:/*
-        -:    4: * This file is part of CliFM
-        -:    5: * 
-        -:    6: * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
-        -:    7: * All rights reserved.
-        -:    8:
-        -:    9: * CliFM is free software; you can redistribute it and/or modify
-        -:   10: * it under the terms of the GNU General Public License as published by
-        -:   11: * the Free Software Foundation; either version 2 of the License, or
-        -:   12: * (at your option) any later version.
-        -:   13: *
-        -:   14: * CliFM is distributed in the hope that it will be useful,
-        -:   15: * but WITHOUT ANY WARRANTY; without even the implied warranty of
-        -:   16: * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-        -:   17: * GNU General Public License for more details.
-        -:   18: *
-        -:   19: * You should have received a copy of the GNU General Public License
-        -:   20: * along with this program; if not, write to the Free Software
-        -:   21: * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-        -:   22: * MA 02110-1301, USA.
-        -:   23:*/
-        -:   24:
-        -:   25:#include "helpers.h"
+        -:    1:/* readline.c -- functions to control the behaviour of readline,
+        -:    2: * specially completions. It also introduces the suggestions system
+        -:    3: * via my_rl_getc function */
+        -:    4:
+        -:    5:/*
+        -:    6: * This file is part of CliFM
+        -:    7: * 
+        -:    8: * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
+        -:    9: * All rights reserved.
+        -:   10:
+        -:   11: * CliFM is free software; you can redistribute it and/or modify
+        -:   12: * it under the terms of the GNU General Public License as published by
+        -:   13: * the Free Software Foundation; either version 2 of the License, or
+        -:   14: * (at your option) any later version.
+        -:   15: *
+        -:   16: * CliFM is distributed in the hope that it will be useful,
+        -:   17: * but WITHOUT ANY WARRANTY; without even the implied warranty of
+        -:   18: * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        -:   19: * GNU General Public License for more details.
+        -:   20: *
+        -:   21: * You should have received a copy of the GNU General Public License
+        -:   22: * along with this program; if not, write to the Free Software
+        -:   23: * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+        -:   24: * MA 02110-1301, USA.
+        -:   25:*/
         -:   26:
-        -:   27:#ifdef __FreeBSD__
-        -:   28:#include <sys/stat.h>
-        -:   29:#endif
-        -:   30:#include <dirent.h>
-        -:   31:#include <fcntl.h>
-        -:   32:#include <stdio.h>
-        -:   33:#include <string.h>
-        -:   34:#include <unistd.h>
-        -:   35:#include <readline/history.h>
-        -:   36:#include <readline/readline.h>
-        -:   37:
-        -:   38:
-        -:   39:#include "aux.h"
-        -:   40:#include "checks.h"
-        -:   41:#include "keybinds.h"
-        -:   42:#include "navigation.h"
-        -:   43:#include "readline.h"
-        -:   44:
-        -:   45:int
-function initialize_readline called 1 returned 100% blocks executed 100%
-        1:   46:initialize_readline(void)
-        -:   47:{
-        -:   48:	/* #### INITIALIZE READLINE (what a hard beast to tackle!!) #### */
-        -:   49:
-        -:   50:	/* Set the name of the program using readline. Mostly used for
-        -:   51:	 * conditional constructs in $HOME/.inputrc */
-        1:   52:	rl_readline_name = argv_bk[0];
-        -:   53:
-        -:   54:	/* Enable tab auto-completion for commands (in PATH) in case of
-        -:   55:	  * first entered string (if autocd and/or auto-open are enabled, check
-        -:   56:	  * for paths as well). The second and later entered strings will
-        -:   57:	  * be autocompleted with paths instead, just like in Bash, or with
-        -:   58:	  * listed filenames, in case of ELN's. I use a custom completion
-        -:   59:	  * function to add command and ELN completion, since readline's
-        -:   60:	  * internal completer only performs path completion */
-        -:   61:
-        -:   62:	/* Define a function for path completion.
-        -:   63:	 * NULL means to use filename_entry_function (), the default
-        -:   64:	 * filename completer. */
-        1:   65:	rl_completion_entry_function = my_rl_path_completion;
-        -:   66:
-        -:   67:	/* Pointer to alternative function to create matches.
-        -:   68:	 * Function is called with TEXT, START, and END.
-        -:   69:	 * START and END are indices in RL_LINE_BUFFER saying what the
-        -:   70:	 * boundaries of TEXT are.
-        -:   71:	 * If this function exists and returns NULL then call the value of
-        -:   72:	 * rl_completion_entry_function to try to match, otherwise use the
-        -:   73:	 * array of strings returned. */
-        1:   74:	rl_attempted_completion_function = my_rl_completion;
-        1:   75:	rl_ignore_completion_duplicates = 1;
-        -:   76:
-        -:   77:	/* I'm using here a custom quoting function. If not specified,
-        -:   78:	 * readline uses the default internal function. */
-        1:   79:	rl_filename_quoting_function = my_rl_quote;
-        -:   80:
-        -:   81:	/* Tell readline what char to use for quoting. This is only the
-        -:   82:	 * readline internal quoting function, and for custom ones, like the
-        -:   83:	 * one I use above. However, custom quoting functions, though they
-        -:   84:	 * need to define their own quoting chars, won't be called at all
-        -:   85:	 * if this variable isn't set. */
-        1:   86:	rl_completer_quote_characters = "\"'";
-        1:   87:	rl_completer_word_break_characters = " ";
-        -:   88:
-        -:   89:	/* Whenever readline finds any of the following chars, it will call
-        -:   90:	 * the quoting function */
-        1:   91:	rl_filename_quote_characters = " \t\n\"\\'`@$><=,;|&{[()]}?!*^";
-        -:   92:	/* According to readline documentation, the following string is
-        -:   93:	 * the default and the one used by Bash: " \t\n\"\\'`@$><=;|&{(" */
-        -:   94:
-        -:   95:	/* Executed immediately before calling the completer function, it
-        -:   96:	 * tells readline if a space char, which is a word break character
-        -:   97:	 * (see the above rl_completer_word_break_characters variable) is
-        -:   98:	 * quoted or not. If it is, readline then passes the whole string
-        -:   99:	 * to the completer function (ex: "user\ file"), and if not, only
-        -:  100:	 * wathever it found after the space char (ex: "file")
-        -:  101:	 * Thanks to George Brocklehurst for pointing out this function:
-        -:  102:	 * https://thoughtbot.com/blog/tab-completion-in-gnu-readline*/
-        1:  103:	rl_char_is_quoted_p = quote_detector;
-        -:  104:
-        -:  105:	/* This function is executed inmediately before path completion. So,
-        -:  106:	 * if the string to be completed is, for instance, "user\ file" (see
-        -:  107:	 * the above comment), this function should return the dequoted
-        -:  108:	 * string so it won't conflict with system filenames: you want
-        -:  109:	 * "user file", because "user\ file" does not exist, and, in this
-        -:  110:	 * latter case, readline won't find any matches */
-        1:  111:	rl_filename_dequoting_function = dequote_str;
+        -:   27:#include "helpers.h"
+        -:   28:
+        -:   29:#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+        -:   30:#include <sys/stat.h>
+        -:   31:#endif
+        -:   32:#include <dirent.h>
+        -:   33:#include <fcntl.h>
+        -:   34:#include <stdio.h>
+        -:   35:#include <string.h>
+        -:   36:#ifdef __OpenBSD__
+        -:   37:#include <strings.h>
+        -:   38:#endif
+        -:   39:#include <unistd.h>
+        -:   40:#include <errno.h>
+        -:   41:
+        -:   42:#ifdef __OpenBSD__
+        -:   43:typedef char *rl_cpvfunc_t;
+        -:   44:#include <ereadline/readline/readline.h>
+        -:   45:#include <ereadline/readline/history.h>
+        -:   46:#else
+        -:   47:#include <readline/readline.h>
+        -:   48:#include <readline/history.h>
+        -:   49:#endif
+        -:   50:
+        -:   51:#include "misc.h"
+        -:   52:#include "aux.h"
+        -:   53:#include "checks.h"
+        -:   54:#include "keybinds.h"
+        -:   55:#include "navigation.h"
+        -:   56:#include "readline.h"
+        -:   57:#ifndef _NO_SUGGESTIONS
+        -:   58:#include "suggestions.h"
+        -:   59:#endif
+        -:   60:
+        -:   61:#if !defined(_NO_SUGGESTIONS) && defined(__FreeBSD__)
+        -:   62:int freebsd_sc_console = 0;
+        -:   63:#endif /* __FreeBSD__ */
+        -:   64:
+        -:   65:/*
+        -:   66:#ifndef _NO_HIGHLIGHT
+        -:   67:#define _SINGLE 0
+        -:   68:#define _DOUBLE 1
+        -:   69:
+        -:   70:static char *
+        -:   71:get_cur_color(const int point)
+        -:   72:{
+        -:   73:	int m = point;
+        -:   74:	int sep = -1, sp = -1, t = -1;
+        -:   75:	char *c = (char *)NULL;
+        -:   76:	m--;
+        -:   77:
+        -:   78:
+        -:   79:	while (m >= 0) {
+        -:   80:		switch(rl_line_buffer[m]) {
+        -:   81:		case ' ': sp = m; break;
+        -:   82:		case '&': // fallthrough
+        -:   83:		case '|': // fallthrough
+        -:   84:		case ';': sep = m; break;
+        -:   85:		case '\'': // fallthrough
+        -:   86:		case '"': c = hq_c; t = m; break;
+        -:   87:		case '-': c = hp_c; t = m; break;
+        -:   88:		case '#': c = hc_c; t = m; break;
+        -:   89:		case '$': c = hv_c; t = m; break;
+        -:   90:		default: c = df_c; break;
+        -:   91:		}
+        -:   92:
+        -:   93:		if (t != -1)
+        -:   94:			break;
+        -:   95:
+        -:   96:		--m;
+        -:   97:	}
+        -:   98:
+        -:   99:	if (t != -1) {
+        -:  100:		if (c == hc_c || c == hq_c) {
+        -:  101:			if (t > sep)
+        -:  102:				return c;
+        -:  103:			else
+        -:  104:				return df_c;
+        -:  105:		} else {
+        -:  106:			if (t > sep && t > sp)
+        -:  107:				return c;
+        -:  108:			else
+        -:  109:				return df_c;
+        -:  110:		}
+        -:  111:	}
         -:  112:
-        -:  113:	/* Initialize the keyboard bindings function */
-        1:  114:	readline_kbinds();
-        1:  114-block  0
-call    0 returned 1
+        -:  113:	return df_c;
+        -:  114:}
         -:  115:
-        1:  116:	return EXIT_SUCCESS;
-unconditional  0 taken 1
-        -:  117:}
-        -:  118:
-        -:  119:/* Simply check a single chartacter (c) against the quoting characters
-        -:  120: * list defined in the qc global array (which takes its values from
-        -:  121: * rl_filename_quote_characters */
-        -:  122:int
-function is_quote_char called 39 returned 100% blocks executed 78%
-       39:  123:is_quote_char(const char c)
-        -:  124:{
-       39:  125:	if (c == '\0' || !qc)
-       39:  125-block  0
-branch  0 taken 39 (fallthrough)
-branch  1 taken 0
-       39:  125-block  1
-branch  2 taken 0 (fallthrough)
-branch  3 taken 39
-    #####:  126:		return -1;
-    %%%%%:  126-block  0
-unconditional  0 never executed
-        -:  127:
-       39:  128:	char *p = qc;
-        -:  129:
-     1053:  130:	while (*p) {
-       39:  130-block  0
-unconditional  0 taken 39
-     1053:  130-block  1
-branch  1 taken 1014
-branch  2 taken 39 (fallthrough)
-     1014:  131:		if (c == *(p++))
-     1014:  131-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1014
-    #####:  132:			return 1;
-    %%%%%:  132-block  0
-unconditional  0 never executed
-        -:  133:	}
-        -:  134:
-       39:  135:	return 0;
-       39:  135-block  0
-unconditional  0 taken 39
-        -:  136:}
-        -:  137:
-        -:  138:char *
-function rl_no_hist called 1 returned 100% blocks executed 79%
-        1:  139:rl_no_hist(const char *prompt)
-        -:  140:{
-        1:  141:	stifle_history(0); /* Prevent readline from using the history
-        1:  141-block  0
-call    0 returned 1
-        -:  142:	setting */
-        1:  143:	char *input = readline(prompt);
-call    0 returned 1
-        1:  144:	unstifle_history();	 /* Reenable history */
-call    0 returned 1
-        1:  145:	read_history(HIST_FILE); /* Reload history lines from file */
-call    0 returned 1
-        -:  146:
-        1:  147:	if (input) {
-branch  0 taken 1 (fallthrough)
-branch  1 taken 0
-        -:  148:
-        -:  149:		/* Make sure input isn't empty string */
-        1:  150:		if (!*input) {
-        1:  150-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####:  151:			free(input);
-    #####:  152:			return (char *)NULL;
-    %%%%%:  152-block  0
-unconditional  0 never executed
-        -:  153:		}
-        -:  154:
-        -:  155:		/* Check we have some non-blank char */
-        1:  156:		int no_blank = 0;
-        1:  157:		char *p = input;
-        -:  158:
-        1:  159:		while (*p) {
-        1:  159-block  0
-unconditional  0 taken 1
-        1:  159-block  1
-branch  1 taken 1
-branch  2 taken 0 (fallthrough)
-        1:  160:			if (*p != ' ' && *p != '\n' && *p != '\t') {
-        1:  160-block  0
-branch  0 taken 1 (fallthrough)
-branch  1 taken 0
-        1:  160-block  1
-branch  2 taken 1 (fallthrough)
-branch  3 taken 0
-        1:  160-block  2
-branch  4 taken 1 (fallthrough)
-branch  5 taken 0
-        1:  161:				no_blank = 1;
-        1:  162:				break;
-        1:  162-block  0
-unconditional  0 taken 1
-        -:  163:			}
-    #####:  164:			p++;
-    %%%%%:  164-block  0
-unconditional  0 never executed
-        -:  165:		}
-        -:  166:
-        1:  167:		if (!no_blank) {
-        1:  167-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####:  168:			free(input);
-    #####:  169:			return (char *)NULL;
-    %%%%%:  169-block  0
-unconditional  0 never executed
-        -:  170:		}
+        -:  116:static char *
+        -:  117:get_highlight_color(const char c, const size_t *qn, const int point)
+        -:  118:{
+        -:  119:	if (c >= '0' && c <= '9')
+        -:  120:		return hn_c;
+        -:  121:
+        -:  122:	char *cl = cur_color;
+        -:  123:	char *p = (char *)NULL;
+        -:  124:	static int open_quote = 0;
+        -:  125:
+        -:  126:	switch(c) {
+        -:  127:	case '{': // fallthrough
+        -:  128:	case '}': // fallthrough
+        -:  129:	case '(': // fallthrough
+        -:  130:	case ')': // fallthrough
+        -:  131:	case '[': // fallthrough
+        -:  132:	case ']': p = hb_c; break;
+        -:  133:
+        -:  134:	case '#': p = hc_c; break;
+        -:  135:	case '~': // fallthrough
+        -:  136:	case '*': p = he_c; break;
+        -:  137:	case '-': p = hp_c; break;
+        -:  138:
+        -:  139:	case '\'':
+        -:  140:	case '"':
+        -:  141:		if ((qn[(c == '\'' ? _SINGLE : _DOUBLE)] + 1) % 2 == 0) {
+        -:  142:			open_quote = 0;
+        -:  143:			p = df_c;
+        -:  144:		} else {
+        -:  145:			p = hq_c;
+        -:  146:			open_quote = 1;
+        -:  147:		}
+        -:  148:		break;
+        -:  149:
+        -:  150:	case '>': p = hr_c; break;
+        -:  151:	case '|': // fallthrough
+        -:  152:	case ';': // fallthrough
+        -:  153:	case '&': p = hs_c; break;
+        -:  154:	case '$': p = hv_c; break;
+        -:  155:
+        -:  156:	case ENTER: p = df_c; break;
+        -:  157:
+        -:  158:	case ' ': return (char *)NULL;
+        -:  159:		// It works, but open_quote should be !open_quote
+        -:  160:		if (open_quote && cl != hc_c)
+        -:  161:			p = df_c;
+        -:  162:		break;
+        -:  163:
+        -:  164:	default:
+        -:  165:		if (point < rl_end)
+        -:  166:			p = get_cur_color(point);
+        -:  167:		else if (open_quote && cl != hv_c && cl != hp_c && cl != hc_c)
+        -:  168:			p = df_c;
+        -:  169:		break;
+        -:  170:	}
         -:  171:
-        1:  172:		return input;
-        1:  172-block  0
-unconditional  0 taken 1
-        -:  173:	}
+        -:  172:	return p;
+        -:  173:}
         -:  174:
-    #####:  175:	return (char *)NULL;
-    %%%%%:  175-block  0
-unconditional  0 never executed
-        -:  176:}
-        -:  177:
-        -:  178:/* Used by readline to check if a char in the string being completed is
-        -:  179: * quoted or not */
-        -:  180:int
-function quote_detector called 0 returned 0% blocks executed 0%
-    #####:  181:quote_detector(char *line, int index)
-        -:  182:{
-    #####:  183:	if (index > 0 && line[index - 1] == '\\' && !quote_detector(line, index - 1))
-    %%%%%:  183-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  183-block  1
-branch  2 never executed
-branch  3 never executed
-    %%%%%:  183-block  2
-call    4 never executed
-branch  5 never executed
-branch  6 never executed
-    #####:  184:		return 1;
-    %%%%%:  184-block  0
-unconditional  0 never executed
-        -:  185:
-    #####:  186:	return 0;
-    %%%%%:  186-block  0
-unconditional  0 never executed
-        -:  187:}
+        -:  175:static void
+        -:  176:rl_highlight(const char c)
+        -:  177:{
+        -:  178:	if (rl_readline_state & RL_STATE_MOREINPUT)
+        -:  179:		return;
+        -:  180:
+        -:  181:	if (c < 32 && c != BS && c != ENTER)
+        -:  182:		return;
+        -:  183:
+        -:  184:	if (rl_end == 1 && (c == BS || c == 127)) {
+        -:  185:		cur_color = df_c;
+        -:  186:		return;
+        -:  187:	}
         -:  188:
-        -:  189:/* Performs bash-style filename quoting for readline (put a backslash
-        -:  190: * before any char listed in rl_filename_quote_characters.
-        -:  191: * Modified version of:
-        -:  192: * https://utcc.utoronto.ca/~cks/space/blog/programming/ReadlineQuotingExample*/
-        -:  193:char *
-function my_rl_quote called 0 returned 0% blocks executed 0%
-    #####:  194:my_rl_quote(char *text, int mt, char *qp)
-        -:  195:{
-        -:  196:	/* NOTE: mt and qp arguments are not used here, but are required by
-        -:  197:	 * rl_filename_quoting_function */
-        -:  198:
-        -:  199:	/*
-        -:  200:	 * How it works: P and R are pointers to the same memory location
-        -:  201:	 * initialized (calloced) twice as big as the line that needs to be
-        -:  202:	 * quoted (in case all chars in the line need to be quoted); TP is a
-        -:  203:	 * pointer to TEXT, which contains the string to be quoted. We move
-        -:  204:	 * through TP to find all chars that need to be quoted ("a's" becomes
-        -:  205:	 * "a\'s", for example). At this point we cannot return P, since this
-        -:  206:	 * pointer is at the end of the string, so that we return R instead,
-        -:  207:	 * which is at the beginning of the same string pointed to by P.
-        -:  208:	 * */
-    #####:  209:	char *r = (char *)NULL, *p = (char *)NULL, *tp = (char *)NULL;
+        -:  189:	int m = rl_point;
+        -:  190:	size_t qn[2] = {0};
+        -:  191:	m--;
+        -:  192:
+        -:  193:	while (m >= 0) {
+        -:  194:		if (rl_line_buffer[m] == '\'')
+        -:  195:			qn[_SINGLE]++;
+        -:  196:		else if (rl_line_buffer[m] == '"')
+        -:  197:			qn[_DOUBLE]++;
+        -:  198:		--m;
+        -:  199:	}
+        -:  200:
+        -:  201:	char *p = rl_line_buffer;
+        -:  202:	char *cl = (char *)NULL;
+        -:  203:	int bk = rl_point;
+        -:  204:	rl_point = 0;
+        -:  205:
+        -:  206:	for (rl_point = 0; p[rl_point]; rl_point++)
+        -:  207:		cl = get_highlight_color(p[rl_point], qn, bk);
+        -:  208:
+        -:  209:	cl = get_highlight_color(c, qn, bk);
         -:  210:
-    #####:  211:	size_t text_len = strlen(text);
-        -:  212:	/* Worst case: every character of text needs to be escaped. In this
-        -:  213:	 * case we need 2x text's bytes plus the NULL byte. */
-    #####:  214:	p = (char *)xnmalloc((text_len * 2) + 1, sizeof(char));
-    %%%%%:  214-block  0
-call    0 never executed
-    #####:  215:	r = p;
-        -:  216:
-    #####:  217:	if (r == NULL)
-branch  0 never executed
-branch  1 never executed
-    #####:  218:		return (char *)NULL;
-    %%%%%:  218-block  0
-unconditional  0 never executed
-        -:  219:
-        -:  220:	/* Escape whatever char that needs to be escaped */
-    #####:  221:	for (tp = text; *tp; tp++) {
-    %%%%%:  221-block  0
-unconditional  0 never executed
-    %%%%%:  221-block  1
-branch  1 never executed
-branch  2 never executed
+        -:  211:	rl_point = bk;
+        -:  212:
+        -:  213:	int skip = 0;
+        -:  214:	if ((c == '\'' && qn[_SINGLE] % 2 != 0)
+        -:  215:	|| (c == '"' && qn[_DOUBLE] % 2 != 0))
+        -:  216:		skip = 1;
+        -:  217:
+        -:  218:	if (!skip && cl) {
+        -:  219:		cur_color = cl;
+        -:  220:		fputs(cl, stdout);
+        -:  221:	}
         -:  222:
-    #####:  223:		if (is_quote_char(*tp))
-    %%%%%:  223-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  224:			*p++ = '\\';
-    %%%%%:  224-block  0
-unconditional  0 never executed
+        -:  223:	return;
+        -:  224:} */
         -:  225:
-    #####:  226:		*p++ = *tp;
-    %%%%%:  226-block  0
-unconditional  0 never executed
-        -:  227:	}
-        -:  228:
-        -:  229:	/* Add a final null byte to the string */
-    #####:  230:	*p = '\0';
-        -:  231:
-    #####:  232:	return r;
-    %%%%%:  232-block  0
-unconditional  0 never executed
-        -:  233:}
-        -:  234:
-        -:  235:/* This is the filename_completion_function() function of an old Bash
-        -:  236: * release (1.14.7) modified to fit CliFM needs */
-        -:  237:char *
-function my_rl_path_completion called 0 returned 0% blocks executed 0%
-    #####:  238:my_rl_path_completion(const char *text, int state)
-        -:  239:{
-        -:  240:	/* state is zero before completion, and 1 ... n after getting
-        -:  241:	 * possible completions. Example:
-        -:  242:	 * cd Do[TAB] -> state 0
-        -:  243:	 * cuments/ -> state 1
-        -:  244:	 * wnloads/ -> state 2
-        -:  245:	 * */
-        -:  246:
-        -:  247:	/* Dequote string to be completed (text), if necessary */
-        -:  248:	static char *tmp_text = (char *)NULL;
-        -:  249:
-    #####:  250:	if (strchr(text, '\\')) {
-    %%%%%:  250-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  251:		char *p = savestring(text, strlen(text));
-    %%%%%:  251-block  0
-call    0 never executed
-        -:  252:
-    #####:  253:		tmp_text = dequote_str(p, 0);
-call    0 never executed
-        -:  254:
-    #####:  255:		free(p);
-        -:  256:
-    #####:  257:		p = (char *)NULL;
-        -:  258:
-    #####:  259:		if (!tmp_text)
-branch  0 never executed
-branch  1 never executed
-    #####:  260:			return (char *)NULL;
-    %%%%%:  260-block  0
-unconditional  0 never executed
-        -:  261:	}
-        -:  262:
-    #####:  263:	if (*text == '.' && text[1] == '.' && text[2] == '.') {
-    %%%%%:  263-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  263-block  1
-branch  2 never executed
-branch  3 never executed
-    %%%%%:  263-block  2
-branch  4 never executed
-branch  5 never executed
-        -:  264:
-    #####:  265:		char *p = savestring(text, strlen(text));
-    %%%%%:  265-block  0
-call    0 never executed
-    #####:  266:		tmp_text = fastback(p);
-call    0 never executed
-        -:  267:
-    #####:  268:		free(p);
-    #####:  269:		p = (char *)NULL;
-        -:  270:
-    #####:  271:		if (!tmp_text)
-branch  0 never executed
-branch  1 never executed
-    #####:  272:			return (char *)NULL;
-    %%%%%:  272-block  0
-unconditional  0 never executed
-        -:  273:	}
-        -:  274:
-        -:  275:	/* Perhaps I should add bookmarks here */
-        -:  276:
-    #####:  277:	int rl_complete_with_tilde_expansion = 0;
-        -:  278:	/* ~/Doc -> /home/user/Doc */
-        -:  279:
-        -:  280:	static DIR *directory;
-        -:  281:	static char *filename = (char *)NULL;
-        -:  282:	static char *dirname = (char *)NULL;
-        -:  283:	static char *users_dirname = (char *)NULL;
-        -:  284:	static size_t filename_len;
-        -:  285:	static int match, ret;
-    #####:  286:	struct dirent *ent = (struct dirent *)NULL;
-        -:  287:	static int exec = 0, exec_path = 0;
-        -:  288:	static char *dir_tmp = (char *)NULL;
-        -:  289:	static char tmp[PATH_MAX] = "";
+        -:  226:/*
+        -:  227:static void
+        -:  228:rl_highlight(const char ch)
+        -:  229:{
+        -:  230:	char *c = cur_color;
+        -:  231:	static int skip = 0, open_quote = 0;
+        -:  232:	int d = 0;
+        -:  233:
+        -:  234:	if (rl_readline_state & RL_STATE_MOREINPUT)
+        -:  235:		return;
+        -:  236:
+        -:  237:	if (ch < 32 && ch != BS && ch != ENTER)
+        -:  238:		return;
+        -:  239:
+        -:  240:	if (rl_point == rl_end) {
+        -:  241:		if (ch >= '0' && ch <= '9') {
+        -:  242:			fputs(hn_c, stdout);
+        -:  243:			fflush(stdout);
+        -:  244:			cur_color = hn_c;
+        -:  245:			return;
+        -:  246:		}
+        -:  247:
+        -:  248:		switch(ch) {
+        -:  249:		case '(': // fallthrough
+        -:  250:		case ')': // fallthrough
+        -:  251:		case '[': // fallthrough
+        -:  252:		case ']': // fallthrough
+        -:  253:		case '{': // fallthrough
+        -:  254:		case '}': c = hb_c;  skip = 0; d = 2; break;
+        -:  255:
+        -:  256:		case '#': c = hc_c; d = 1; skip = 0; break;
+        -:  257:
+        -:  258:		case '-': c = hp_c; d = 1; skip = 0; break;
+        -:  259:
+        -:  260:		case '"': // fallthrough
+        -:  261:		case '\'':
+        -:  262:			c = hq_c;
+        -:  263:			size_t n = 0;
+        -:  264:			char *p = rl_line_buffer;
+        -:  265:			while (*p) {
+        -:  266:				if (*p == ch)
+        -:  267:					n++;
+        -:  268:				p++;
+        -:  269:			}
+        -:  270:			if (++n % 2 != 0) { // Opening quote
+        -:  271:				// Keep color until closing quote is entered
+        -:  272:				skip = 0;
+        -:  273:				d = 1;
+        -:  274:				open_quote = 1;
+        -:  275:			} else { // Closing quote
+        -:  276:				// Reset to default color
+        -:  277:				c = df_c;
+        -:  278:				skip = 1;
+        -:  279:				d = 2;
+        -:  280:				open_quote = 0;
+        -:  281:			}
+        -:  282:			break;
+        -:  283:
+        -:  284:		case '~': // fallthrough
+        -:  285:		case '*': c = he_c;  skip = 0; d = 2; break;
+        -:  286:
+        -:  287:		case '$': c = hv_c; d = 1; skip = 0; break;
+        -:  288:
+        -:  289:		case '>': c = hr_c; skip = 0; d = 2; break;
         -:  290:
-        -:  291:	/* If we don't have any state, then do some initialization. */
-    #####:  292:	if (!state) {
-    %%%%%:  292-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  293:		char *temp;
+        -:  291:		case '&': // fallthrough
+        -:  292:		case ';': // fallthrough
+        -:  293:		case '|': c = hs_c; skip = 0; d = 2; break;
         -:  294:
-    #####:  295:		if (dirname)
-    %%%%%:  295-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  296:			free(dirname);
-    %%%%%:  296-block  0
-unconditional  0 never executed
-    #####:  297:		if (filename)
-    %%%%%:  297-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  298:			free(filename);
-    %%%%%:  298-block  0
-unconditional  0 never executed
-    #####:  299:		if (users_dirname)
-    %%%%%:  299-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  300:			free(users_dirname);
-    %%%%%:  300-block  0
-unconditional  0 never executed
-        -:  301:
-        -:  302:		/* tmp_text is true whenever text was dequoted */
-    #####:  303:		size_t text_len = strlen((tmp_text) ? tmp_text : text);
-    %%%%%:  303-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  303-block  1
-unconditional  2 never executed
-    %%%%%:  303-block  2
-unconditional  3 never executed
-    #####:  304:		if (text_len)
-    %%%%%:  304-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  305:			filename = savestring((tmp_text) ? tmp_text : text, text_len);
-    %%%%%:  305-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  305-block  1
-unconditional  2 never executed
-    %%%%%:  305-block  2
-unconditional  3 never executed
-    %%%%%:  305-block  3
-call    4 never executed
-unconditional  5 never executed
-        -:  306:
-        -:  307:		else
-    #####:  308:			filename = savestring("", 1);
-    %%%%%:  308-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  309:
-    #####:  310:		if (!*text)
-    %%%%%:  310-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  311:			text = ".";
-    %%%%%:  311-block  0
-unconditional  0 never executed
-        -:  312:
-    #####:  313:		if (text_len)
-    %%%%%:  313-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  314:			dirname = savestring((tmp_text) ? tmp_text : text, text_len);
-    %%%%%:  314-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  314-block  1
-unconditional  2 never executed
-    %%%%%:  314-block  2
-unconditional  3 never executed
-    %%%%%:  314-block  3
-call    4 never executed
-unconditional  5 never executed
-        -:  315:
-        -:  316:		else
-    #####:  317:			dirname = savestring("", 1);
-    %%%%%:  317-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  318:
-    #####:  319:		if (dirname[0] == '.' && dirname[1] == '/')
-    %%%%%:  319-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  319-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  320:			exec = 1;
-    %%%%%:  320-block  0
-unconditional  0 never executed
-        -:  321:
-        -:  322:		else
-    #####:  323:			exec = 0;
-    %%%%%:  323-block  0
-unconditional  0 never executed
-        -:  324:
-        -:  325:		/* Get everything after last slash */
-    #####:  326:		temp = strrchr(dirname, '/');
-        -:  327:
-    #####:  328:		if (temp) {
-    %%%%%:  328-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  329:			strcpy(filename, ++temp);
-    #####:  330:			*temp = '\0';
-    %%%%%:  330-block  0
-unconditional  0 never executed
-        -:  331:		}
-        -:  332:
-        -:  333:		else
-    #####:  334:			strcpy(dirname, ".");
-    %%%%%:  334-block  0
-unconditional  0 never executed
+        -:  295:		case ENTER: c = df_c; skip = 0; break;
+        -:  296:		case ' ':
+        -:  297:			if (!open_quote && c != hc_c) {
+        -:  298:				c = df_c;
+        -:  299:				skip = 0;
+        -:  300:			}
+        -:  301:			break;
+        -:  302:		default:
+        -:  303:			if (c != hv_c && !open_quote)
+        -:  304:				c = df_c;
+        -:  305:			break;
+        -:  306:		}
+        -:  307:
+        -:  308:		if (rl_end == 1 && (ch == BS || ch == 127))
+        -:  309:			c = df_c;
+        -:  310:
+        -:  311:		goto END;
+        -:  312:	}
+        -:  313:
+        -:  314:	int m = rl_point;
+        -:  315:	int separator = -1;
+        -:  316:	int t = -1;
+        -:  317:	size_t q_count[2] = {0}, single = 0, _double = 1;
+        -:  318:	skip = 0;
+        -:  319:	m--;
+        -:  320:
+        -:  321:	while (m >= 0) {
+        -:  322:		if (rl_line_buffer[m] == '\'')
+        -:  323:			q_count[single]++;
+        -:  324:		if (rl_line_buffer[m] == '"')
+        -:  325:			q_count[_double]++;
+        -:  326:		--m;
+        -:  327:	}
+        -:  328:
+        -:  329:	m = rl_point;
+        -:  330:	if (rl_line_buffer[m] != '"' && rl_line_buffer[m] != '\'')
+        -:  331:		--m;
+        -:  332:	while (m >= 0) {
+        -:  333:		switch(rl_line_buffer[m]) {
+        -:  334:		case ' ': separator = m; break;
         -:  335:
-        -:  336:		/* We aren't done yet.  We also support the "~user" syntax. */
-        -:  337:
-        -:  338:		/* Save the version of the directory that the user typed. */
-    #####:  339:		size_t dirname_len = strlen(dirname);
-        -:  340:
-    #####:  341:		users_dirname = savestring(dirname, dirname_len);
-    %%%%%:  341-block  0
-call    0 never executed
-        -:  342:		/*      { */
-        -:  343:		char *temp_dirname;
-        -:  344:		int replace_dirname;
-        -:  345:
-    #####:  346:		temp_dirname = tilde_expand(dirname);
-call    0 never executed
-    #####:  347:		free(dirname);
-    #####:  348:		dirname = temp_dirname;
-        -:  349:
-    #####:  350:		replace_dirname = 0;
-        -:  351:
-    #####:  352:		if (rl_directory_completion_hook)
-branch  0 never executed
-branch  1 never executed
-    #####:  353:			replace_dirname = (*rl_directory_completion_hook)(&dirname);
-    %%%%%:  353-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  354:
-    #####:  355:		if (replace_dirname) {
-    %%%%%:  355-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  356:			free(users_dirname);
-    #####:  357:			users_dirname = savestring(dirname, dirname_len);
-    %%%%%:  357-block  0
-call    0 never executed
-unconditional  1 never executed
+        -:  336:		case '&': // fallthrough
+        -:  337:		case ';': // fallthrough
+        -:  338:		case '|': d = 1; c = df_c; break;
+        -:  339:
+        -:  340:		case '#': c = hc_c; d = 1; t = m; break;
+        -:  341:		case '\'':
+        -:  342:			if (q_count[single] % 2 != 0) {
+        -:  343:				c = hq_c;
+        -:  344:				d = 1;
+        -:  345:				t = m;
+        -:  346:			}
+        -:  347:			break;
+        -:  348:		case '"':
+        -:  349:			if (q_count[_double] % 2 != 0) {
+        -:  350:				c = hq_c;
+        -:  351:				d = 1;
+        -:  352:				t = m;
+        -:  353:			}
+        -:  354:			break;
+        -:  355:		case '$': c = hv_c; d = 1; t = m; break;
+        -:  356:		case '-': c = hp_c; d = 1; t = m; break;
+        -:  357:		default: c = df_c; break;
         -:  358:		}
-        -:  359:		/*      } */
-    #####:  360:		directory = opendir(dirname);
-    %%%%%:  360-block  0
-call    0 never executed
-    #####:  361:		filename_len = strlen(filename);
-        -:  362:
-    #####:  363:		rl_filename_completion_desired = 1;
-unconditional  0 never executed
-        -:  364:	}
+        -:  359:		--m;
+        -:  360:
+        -:  361:		if (d && c != hc_c && c != hq_c && separator > t) {
+        -:  362:			c = df_c;
+        -:  363:			continue;
+        -:  364:		}
         -:  365:
-    #####:  366:	if (tmp_text) {
-    %%%%%:  366-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  367:		free(tmp_text);
-    #####:  368:		tmp_text = (char *)NULL;
-    %%%%%:  368-block  0
-unconditional  0 never executed
-        -:  369:	}
-        -:  370:
-        -:  371:	/* Now that we have some state, we can read the directory. If we found
-        -:  372:	 * a match among files in dir, break the loop and print the match */
-        -:  373:
-    #####:  374:	match = 0;
+        -:  366:		if (d)
+        -:  367:			break;
+        -:  368:	}
+        -:  369:
+        -:  370:	if (rl_end == 1 && (ch == BS || ch == 127))
+        -:  371:		c = df_c;
+        -:  372:
+        -:  373:	if (t != -1)
+        -:  374:		goto END;
         -:  375:
-    #####:  376:	size_t dirname_len = strlen(dirname);
-        -:  377:
-        -:  378:	/* This block is used only in case of "/path/./" to remove the
-        -:  379:	 * ending "./" from dirname and to be able to perform thus the
-        -:  380:	 * executable check via access() */
-    #####:  381:	exec_path = 0;
-        -:  382:
-    #####:  383:	if (dirname_len > 2) {
-    %%%%%:  383-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  384:
-    #####:  385:		if (dirname[dirname_len - 3] == '/' && dirname[dirname_len - 2] == '.'
-    %%%%%:  385-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  385-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  386:		&& dirname[dirname_len - 1] == '/') {
-    %%%%%:  386-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  387:			dir_tmp = savestring(dirname, dirname_len);
-    %%%%%:  387-block  0
-call    0 never executed
-        -:  388:
-    #####:  389:			if (dir_tmp) {
-branch  0 never executed
-branch  1 never executed
-    #####:  390:				dir_tmp[dirname_len - 2] = '\0';
-    #####:  391:				exec_path = 1;
-    %%%%%:  391-block  0
-unconditional  0 never executed
-        -:  392:			}
-        -:  393:		}
-        -:  394:	}
-        -:  395:
-        -:  396:	/* ############### COMPLETION FILTER ################## */
-        -:  397:	/* #        This is the heart of the function         #
-        -:  398:	 * #################################################### */
-        -:  399:
-    #####:  400:	while (directory && (ent = readdir(directory))) {
-    %%%%%:  400-block  0
-unconditional  0 never executed
-    %%%%%:  400-block  1
-branch  1 never executed
-branch  2 never executed
-    %%%%%:  400-block  2
-call    3 never executed
-branch  4 never executed
-branch  5 never executed
-        -:  401:
-        -:  402:		/* If the user entered nothing before TAB (ex: "cd [TAB]") */
-    #####:  403:		if (!filename_len) {
-    %%%%%:  403-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  404:
-        -:  405:			/* Exclude "." and ".." as possible completions */
-    #####:  406:			if (SELFORPARENT(ent->d_name))
-    %%%%%:  406-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  406-block  1
-branch  2 never executed
-branch  3 never executed
-    %%%%%:  406-block  2
-branch  4 never executed
-branch  5 never executed
-    %%%%%:  406-block  3
-branch  6 never executed
-branch  7 never executed
-    #####:  407:				continue;
-    %%%%%:  407-block  0
-unconditional  0 never executed
-        -:  408:
-        -:  409:			/* If 'cd', match only dirs or symlinks to dir */
-    #####:  410:			if (*rl_line_buffer == 'c'
-    %%%%%:  410-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  411:			&& strncmp(rl_line_buffer, "cd ", 3) == 0) {
-    %%%%%:  411-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  412:				ret = -1;
-        -:  413:
-    #####:  414:				switch (ent->d_type) {
-    %%%%%:  414-block  0
-branch  0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  415:				case DT_LNK:
-    #####:  416:					if (dirname[0] == '.' && !dirname[1])
-    %%%%%:  416-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  416-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  417:						ret = get_link_ref(ent->d_name);
-    %%%%%:  417-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  418:					else {
-    #####:  419:						snprintf(tmp, PATH_MAX, "%s%s", dirname,
-    #####:  420:						    ent->d_name);
-    #####:  421:						ret = get_link_ref(tmp);
-    %%%%%:  421-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  422:					}
+        -:  376:	d = 0;
+        -:  377:	switch(ch) {
+        -:  378:	case '0': // fallthrough
+        -:  379:	case '1': // fallthrough
+        -:  380:	case '2': // fallthrough
+        -:  381:	case '3': // fallthrough
+        -:  382:	case '4': // fallthrough
+        -:  383:	case '5': // fallthrough
+        -:  384:	case '6': // fallthrough
+        -:  385:	case '7': // fallthrough
+        -:  386:	case '8': // fallthrough
+        -:  387:	case '9': c = hn_c;  skip = 0; d = 2; break;
+        -:  388:	case ' ': return;
+        -:  389:	case '(': // fallthrough
+        -:  390:	case ')': // fallthrough
+        -:  391:	case '[': // fallthrough
+        -:  392:	case ']': // fallthrough
+        -:  393:	case '{': // fallthrough
+        -:  394:	case '}': c = hb_c;  skip = 0; d = 2; break;
+        -:  395:	case '~': // fallthrough
+        -:  396:	case '*': c = he_c;  skip = 0; d = 2; break;
+        -:  397:	case '>': c = hr_c; skip = 0; d = 2; break;
+        -:  398:	case '&': // fallthrough
+        -:  399:	case ';': // fallthrough
+        -:  400:	case '|': c = hs_c; skip = 0; d = 2; break;
+        -:  401:	}
+        -:  402:
+        -:  403:	if (rl_end == 1 && (ch == BS || ch == 127))
+        -:  404:		c = df_c;
+        -:  405:
+        -:  406:END:
+        -:  407:	if (!skip) {
+        -:  408:		fputs(c, stdout);
+        -:  409:		fflush(stdout);
+        -:  410:	}
+        -:  411:
+        -:  412:	if (d == 1) {
+        -:  413:		skip = 1;
+        -:  414:	} else if (d == 2) {
+        -:  415:		skip = 0;
+        -:  416:		c = df_c;
+        -:  417:	}
+        -:  418:
+        -:  419:	cur_color = c;
+        -:  420:	return;
+        -:  421:}
+        -:  422:#endif */
         -:  423:
-    #####:  424:					if (ret == S_IFDIR)
-    %%%%%:  424-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  425:						match = 1;
-    %%%%%:  425-block  0
-unconditional  0 never executed
-        -:  426:
-    #####:  427:					break;
-    %%%%%:  427-block  0
-unconditional  0 never executed
-        -:  428:
-    #####:  429:				case DT_DIR:
-    #####:  430:					match = 1;
-    #####:  431:					break;
-    %%%%%:  431-block  0
-unconditional  0 never executed
+        -:  424:/* This function is automatically called by readline() to handle input.
+        -:  425: * Taken from Bash 1.14.7 and modified to fit our needs. Used
+        -:  426: * to introduce the suggestions system */
+        -:  427:static int
+function my_rl_getc called 2984 returned 100% blocks executed 34%
+     3004:  428:my_rl_getc(FILE *stream)
+        -:  429:{
+        -:  430:	int result;
+        -:  431:	unsigned char c;
         -:  432:
-    #####:  433:				default:
-    #####:  434:					break;
-    %%%%%:  434-block  0
-unconditional  0 never executed
-        -:  435:				}
-        -:  436:			}
+        -:  433:#if defined(__GO32__)
+        -:  434:	if (isatty(0))
+        -:  435:		return (getkey() & 0x7F);
+        -:  436:#endif /* __GO32__ */
         -:  437:
-        -:  438:			/* If 'open', allow only reg files, dirs, and symlinks */
-    #####:  439:			else if (*rl_line_buffer == 'o'
-    %%%%%:  439-block  0
+        -:  438:	while(1) {
+     3004:  439:		result = (int)read(fileno(stream), &c, sizeof(unsigned char));
+     3004:  439-block  0
+call    0 returned 3004
+call    1 returned 3004
+     3004:  440:		if (result == sizeof(unsigned char)) {
+branch  0 taken 3004 (fallthrough)
+branch  1 taken 0
+        -:  441:/*#ifndef _NO_HIGHLIGHT
+        -:  442:			if (highlight)
+        -:  443:				rl_highlight(c);
+        -:  444:#endif // _NO_HIGHLIGHT */
+        -:  445:
+        -:  446:#ifndef _NO_SUGGESTIONS
+     3004:  447:			if (suggestions) {
+     3004:  447-block  0
+branch  0 taken 2893 (fallthrough)
+branch  1 taken 111
+        -:  448:				/* rl_suggestions returns -1 is C was inserted before
+        -:  449:				 * the end of the current line, in which case we don't
+        -:  450:				 * want to return it here (otherwise, it would be added
+        -:  451:				 * to rl_line_buffer) */
+        -:  452:#ifdef __FreeBSD__
+        -:  453:			/* For the time being, suggestions do not work on the FreeBSD
+        -:  454:			 * console (vt). The escape code to retrieve the current cursor
+        -:  455:			 * position doesn't seem to work. Switching the console to 'sc'
+        -:  456:			 * solves the issue */
+        -:  457:				if (flags & GUI) {
+        -:  458:					if (rl_suggestions(c) == -1) {
+        -:  459:						rl_redisplay();
+        -:  460:						continue;
+        -:  461:					}
+        -:  462:				} else if (freebsd_sc_console && rl_suggestions(c) == -1) {
+        -:  463:					rl_redisplay();
+        -:  464:					continue;
+        -:  465:				}
+        -:  466:#else
+     2893:  467:				if (rl_suggestions(c) == -1) {
+     2893:  467-block  0
+call    0 returned 2893
+branch  1 taken 20 (fallthrough)
+branch  2 taken 2873
+       20:  468:					rl_redisplay();
+       20:  468-block  0
+call    0 returned 20
+       20:  469:					continue;
+unconditional  0 taken 20
+        -:  470:				}
+        -:  471:#endif /* __FreeBSD__ */
+        -:  472:			}
+        -:  473:#endif /* _NO_SUGGESTIONS */
+     2984:  474:			return (c);
+     2984:  474-block  0
+unconditional  0 taken 2984
+        -:  475:		}
+        -:  476:		/* If zero characters are returned, then the file that we are
+        -:  477:		reading from is empty!  Return EOF in that case. */
+    #####:  478:		if (result == 0)
+    %%%%%:  478-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  440:			&& (strncmp(rl_line_buffer, "o ", 2) == 0
-    %%%%%:  440-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  441:			|| strncmp(rl_line_buffer, "open ", 5) == 0)) {
-    %%%%%:  441-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  442:				ret = -1;
-    #####:  443:				switch (ent->d_type) {
-    %%%%%:  443-block  0
-branch  0 never executed
-branch  1 never executed
-branch  2 never executed
-        -:  444:
-    #####:  445:				case DT_LNK:
-        -:  446:
-    #####:  447:					if (dirname[0] == '.' && !dirname[1])
-    %%%%%:  447-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  447-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  448:						ret = get_link_ref(ent->d_name);
-    %%%%%:  448-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  449:
-        -:  450:					else {
-    #####:  451:						snprintf(tmp, PATH_MAX, "%s%s", dirname,
-    #####:  452:						    ent->d_name);
-    #####:  453:						ret = get_link_ref(tmp);
-    %%%%%:  453-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  454:					}
-        -:  455:
-    #####:  456:					if (ret == S_IFDIR || ret == S_IFREG)
-    %%%%%:  456-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  456-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  457:						match = 1;
-    %%%%%:  457-block  0
-unconditional  0 never executed
-        -:  458:
-    #####:  459:					break;
-    %%%%%:  459-block  0
-unconditional  0 never executed
-        -:  460:
-    #####:  461:				case DT_REG:
-        -:  462:				case DT_DIR:
-    #####:  463:					match = 1;
-    #####:  464:					break;
-    %%%%%:  464-block  0
-unconditional  0 never executed
-        -:  465:
-    #####:  466:				default:
-    #####:  467:					break;
-    %%%%%:  467-block  0
-unconditional  0 never executed
-        -:  468:				}
-        -:  469:			}
-        -:  470:
-        -:  471:			/* If 'trash', allow only reg files, dirs, symlinks, pipes
-        -:  472:			 * and sockets. You should not trash a block or a character
-        -:  473:			 * device */
-    #####:  474:			else if (*rl_line_buffer == 't'
-    %%%%%:  474-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  475:			&& (strncmp(rl_line_buffer, "t ", 2) == 0
-    %%%%%:  475-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  476:			|| strncmp(rl_line_buffer, "tr ", 2) == 0
-    %%%%%:  476-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  477:			|| strncmp(rl_line_buffer, "trash ", 6) == 0)) {
-    %%%%%:  477-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  478:
-    #####:  479:				if (ent->d_type != DT_BLK && ent->d_type != DT_CHR)
+    #####:  479:			return (EOF);
     %%%%%:  479-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  479-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  480:					match = 1;
-    %%%%%:  480-block  0
 unconditional  0 never executed
-        -:  481:			}
-        -:  482:
-        -:  483:			/* If "./", list only executable regular files */
-    #####:  484:			else if (exec) {
-    %%%%%:  484-block  0
+        -:  480:
+        -:  481:#if defined(EWOULDBLOCK)
+    #####:  482:		if (errno == EWOULDBLOCK) {
+    %%%%%:  482-block  0
 branch  0 never executed
 branch  1 never executed
-        -:  485:
-    #####:  486:				if (ent->d_type == DT_REG && access(ent->d_name, X_OK) == 0)
-    %%%%%:  486-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  486-block  1
-call    2 never executed
-branch  3 never executed
-branch  4 never executed
-    #####:  487:					match = 1;
-    %%%%%:  487-block  0
-unconditional  0 never executed
-        -:  488:			}
-        -:  489:
-        -:  490:			/* If "/path/./", list only executable regular files */
-    #####:  491:			else if (exec_path) {
-    %%%%%:  491-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  492:
-    #####:  493:				if (ent->d_type == DT_REG) {
-    %%%%%:  493-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  494:					/* dir_tmp is dirname less "./", already
-        -:  495:					 * allocated before the while loop */
-    #####:  496:					snprintf(tmp, PATH_MAX, "%s%s", dir_tmp,
-    #####:  497:					    ent->d_name);
-        -:  498:
-    #####:  499:					if (access(tmp, X_OK) == 0)
-    %%%%%:  499-block  0
+        -:  483:			int xflags;
+        -:  484:
+    #####:  485:			if ((xflags = fcntl(fileno(stream), F_GETFL, 0)) < 0)
+    %%%%%:  485-block  0
 call    0 never executed
-branch  1 never executed
+call    1 never executed
 branch  2 never executed
-    #####:  500:						match = 1;
+branch  3 never executed
+    #####:  486:				return (EOF);
+    %%%%%:  486-block  0
+unconditional  0 never executed
+    #####:  487:			if (xflags & O_NDELAY) {
+    %%%%%:  487-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  488:/*				xflags &= ~O_NDELAY; */
+    #####:  489:				fcntl(fileno(stream), F_SETFL, flags);
+    %%%%%:  489-block  0
+call    0 never executed
+call    1 never executed
+    #####:  490:				continue;
+unconditional  0 never executed
+        -:  491:			}
+    #####:  492:			continue;
+    %%%%%:  492-block  0
+unconditional  0 never executed
+        -:  493:		}
+        -:  494:#endif /* EWOULDBLOCK */
+        -:  495:
+        -:  496:#if defined(_POSIX_VERSION) && defined(EAGAIN) && defined(O_NONBLOCK)
+    #####:  497:		if (errno == EAGAIN) {
+    %%%%%:  497-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  498:			int xflags;
+        -:  499:
+    #####:  500:			if ((xflags = fcntl(fileno(stream), F_GETFL, 0)) < 0)
     %%%%%:  500-block  0
+call    0 never executed
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:  501:				return (EOF);
+    %%%%%:  501-block  0
 unconditional  0 never executed
-        -:  501:				}
-        -:  502:			}
-        -:  503:
-        -:  504:			/* No filter for everything else. Just print whatever is
-        -:  505:			 * there */
-        -:  506:			else
-    #####:  507:				match = 1;
-    %%%%%:  507-block  0
+    #####:  502:			if (xflags & O_NONBLOCK) {
+    %%%%%:  502-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  503://				xflags &= ~O_NONBLOCK;
+    #####:  504:				fcntl(fileno(stream), F_SETFL, flags);
+    %%%%%:  504-block  0
+call    0 never executed
+call    1 never executed
+    #####:  505:				continue;
 unconditional  0 never executed
-        -:  508:		}
+        -:  506:			}
+        -:  507:		}
+        -:  508:#endif /* _POSIX_VERSION && EAGAIN && O_NONBLOCK */
         -:  509:
-        -:  510:		/* If there is at least one char to complete (ex: "cd .[TAB]") */
-        -:  511:		else {
-        -:  512:			/* Check if possible completion match up to the length of
-        -:  513:			 * filename. */
-    #####:  514:			if (case_sens_path_comp) {
+        -:  510:#if !defined(__GO32__)
+        -:  511:      /* If the error that we received was SIGINT, then try again,
+        -:  512:	 this is simply an interrupted system call to read ().
+        -:  513:	 Otherwise, some error ocurred, also signifying EOF. */
+    #####:  514:		if (errno != EINTR)
     %%%%%:  514-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  515:				if (*ent->d_name != *filename
+    #####:  515:			return (EOF);
     %%%%%:  515-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  516:				|| (strncmp(filename, ent->d_name, filename_len) != 0))
-    %%%%%:  516-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  517:					continue;
-    %%%%%:  517-block  0
 unconditional  0 never executed
-        -:  518:			} else {
-    #####:  519:				if (TOUPPER(*ent->d_name) != TOUPPER(*filename)
-    %%%%%:  519-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  519-block  1
-branch  2 never executed
-branch  3 never executed
-    %%%%%:  519-block  2
-unconditional  4 never executed
-    %%%%%:  519-block  3
-unconditional  5 never executed
-    %%%%%:  519-block  4
-branch  6 never executed
-branch  7 never executed
-    %%%%%:  519-block  5
-branch  8 never executed
-branch  9 never executed
-    %%%%%:  519-block  6
-unconditional 10 never executed
-    %%%%%:  519-block  7
-unconditional 11 never executed
-    %%%%%:  519-block  8
-branch 12 never executed
-branch 13 never executed
-    #####:  520:				|| (strncasecmp(filename, ent->d_name, filename_len) != 0))
-    %%%%%:  520-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  521:					continue;
-    %%%%%:  521-block  0
-unconditional  0 never executed
-        -:  522:			}
-        -:  523:
-    #####:  524:			if (*rl_line_buffer == 'c'
-    %%%%%:  524-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  525:			&& strncmp(rl_line_buffer, "cd ", 3) == 0) {
-    %%%%%:  525-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  526:				ret = -1;
-    #####:  527:				switch (ent->d_type) {
+        -:  516:#endif /* !__GO32__ */
+        -:  517:	}
+        -:  518:}
+        -:  519:
+        -:  520:/* Simply check a single chartacter (c) against the quoting characters
+        -:  521: * list defined in the qc global array (which takes its values from
+        -:  522: * rl_filename_quote_characters */
+        -:  523:int
+function is_quote_char called 2622 returned 100% blocks executed 89%
+     2622:  524:is_quote_char(const char c)
+        -:  525:{
+     2622:  526:	if (c == '\0' || !qc)
+     2622:  526-block  0
+branch  0 taken 2622 (fallthrough)
+branch  1 taken 0
+     2622:  526-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 2622
+    #####:  527:		return -1;
     %%%%%:  527-block  0
-branch  0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  528:				case DT_LNK:
-        -:  529:
-    #####:  530:					if (dirname[0] == '.' && !dirname[1])
-    %%%%%:  530-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  530-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  531:						ret = get_link_ref(ent->d_name);
-    %%%%%:  531-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  532:
-        -:  533:					else {
-    #####:  534:						snprintf(tmp, PATH_MAX, "%s%s", dirname,
-    #####:  535:						    ent->d_name);
-    #####:  536:						ret = get_link_ref(tmp);
-    %%%%%:  536-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  537:					}
+unconditional  0 never executed
+        -:  528:
+     2622:  529:	char *p = qc;
+        -:  530:
+    70785:  531:	while (*p) {
+     2622:  531-block  0
+unconditional  0 taken 2622
+    70785:  531-block  1
+branch  1 taken 68164
+branch  2 taken 2621 (fallthrough)
+    68164:  532:		if (c == *(p++))
+    68164:  532-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 68163
+        1:  533:			return 1;
+        1:  533-block  0
+unconditional  0 taken 1
+        -:  534:	}
+        -:  535:
+     2621:  536:	return 0;
+     2621:  536-block  0
+unconditional  0 taken 2621
+        -:  537:}
         -:  538:
-    #####:  539:					if (ret == S_IFDIR)
-    %%%%%:  539-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  540:						match = 1;
-    %%%%%:  540-block  0
-unconditional  0 never executed
-        -:  541:
-    #####:  542:					break;
-    %%%%%:  542-block  0
-unconditional  0 never executed
-        -:  543:
-    #####:  544:				case DT_DIR:
-    #####:  545:					match = 1;
-    #####:  546:					break;
-    %%%%%:  546-block  0
-unconditional  0 never executed
-        -:  547:
-    #####:  548:				default:
-    #####:  549:					break;
-    %%%%%:  549-block  0
-unconditional  0 never executed
-        -:  550:				}
-        -:  551:			}
-        -:  552:
-    #####:  553:			else if (*rl_line_buffer == 'o'
-    %%%%%:  553-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  554:			&& (strncmp(rl_line_buffer, "o ", 2) == 0
-    %%%%%:  554-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  555:			|| strncmp(rl_line_buffer, "open ", 5) == 0)) {
+        -:  539:char *
+function rl_no_hist called 37 returned 100% blocks executed 79%
+       37:  540:rl_no_hist(const char *prompt)
+        -:  541:{
+       37:  542:	int bk = suggestions;
+       37:  543:	suggestions = 0;
+       37:  544:	stifle_history(0); /* Prevent readline from using the history
+       37:  544-block  0
+call    0 returned 37
+        -:  545:	setting */
+       37:  546:	char *input = readline(prompt);
+call    0 returned 37
+       37:  547:	unstifle_history();	 /* Reenable history */
+call    0 returned 37
+       37:  548:	read_history(hist_file); /* Reload history lines from file */
+call    0 returned 37
+       37:  549:	suggestions = bk;
+        -:  550:
+       37:  551:	if (input) {
+branch  0 taken 37 (fallthrough)
+branch  1 taken 0
+        -:  552:		/* Make sure input isn't empty string */
+       37:  553:		if (!*input) {
+       37:  553-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 37
+    #####:  554:			free(input);
+    #####:  555:			return (char *)NULL;
     %%%%%:  555-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  556:				ret = -1;
-    #####:  557:				switch (ent->d_type) {
-    %%%%%:  557-block  0
-branch  0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  558:				case DT_REG: /* fallthrough */
-        -:  559:				case DT_DIR:
-    #####:  560:					match = 1;
-    #####:  561:					break;
-    %%%%%:  561-block  0
 unconditional  0 never executed
-        -:  562:
-    #####:  563:				case DT_LNK:
-        -:  564:
-    #####:  565:					if (dirname[0] == '.' && !dirname[1]) {
-    %%%%%:  565-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  565-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  566:						ret = get_link_ref(ent->d_name);
-    %%%%%:  566-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  567:					}
-        -:  568:
-        -:  569:					else {
-    #####:  570:						snprintf(tmp, PATH_MAX, "%s%s", dirname,
-    #####:  571:						    ent->d_name);
-    #####:  572:						ret = get_link_ref(tmp);
+        -:  556:		}
+        -:  557:
+        -:  558:		/* Check we have some non-blank char */
+       37:  559:		int no_blank = 0;
+       37:  560:		char *p = input;
+        -:  561:
+       37:  562:		while (*p) {
+       37:  562-block  0
+unconditional  0 taken 37
+       37:  562-block  1
+branch  1 taken 37
+branch  2 taken 0 (fallthrough)
+       37:  563:			if (*p != ' ' && *p != '\n' && *p != '\t') {
+       37:  563-block  0
+branch  0 taken 37 (fallthrough)
+branch  1 taken 0
+       37:  563-block  1
+branch  2 taken 37 (fallthrough)
+branch  3 taken 0
+       37:  563-block  2
+branch  4 taken 37 (fallthrough)
+branch  5 taken 0
+       37:  564:				no_blank = 1;
+       37:  565:				break;
+       37:  565-block  0
+unconditional  0 taken 37
+        -:  566:			}
+    #####:  567:			p++;
+    %%%%%:  567-block  0
+unconditional  0 never executed
+        -:  568:		}
+        -:  569:
+       37:  570:		if (!no_blank) {
+       37:  570-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 37
+    #####:  571:			free(input);
+    #####:  572:			return (char *)NULL;
     %%%%%:  572-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  573:					}
-        -:  574:
-    #####:  575:					if (ret == S_IFDIR || ret == S_IFREG)
-    %%%%%:  575-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  575-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  576:						match = 1;
-    %%%%%:  576-block  0
 unconditional  0 never executed
+        -:  573:		}
+        -:  574:
+       37:  575:		return input;
+       37:  575-block  0
+unconditional  0 taken 37
+        -:  576:	}
         -:  577:
-    #####:  578:					break;
+    #####:  578:	return (char *)NULL;
     %%%%%:  578-block  0
 unconditional  0 never executed
-        -:  579:
-    #####:  580:				default:
-    #####:  581:					break;
-    %%%%%:  581-block  0
-unconditional  0 never executed
-        -:  582:				}
-        -:  583:			}
-        -:  584:
-    #####:  585:			else if (*rl_line_buffer == 't'
-    %%%%%:  585-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  586:			&& (strncmp(rl_line_buffer, "t ", 2) == 0
+        -:  579:}
+        -:  580:
+        -:  581:/* Used by readline to check if a char in the string being completed is
+        -:  582: * quoted or not */
+        -:  583:static int
+function quote_detector called 0 returned 0% blocks executed 0%
+    #####:  584:quote_detector(char *line, int index)
+        -:  585:{
+    #####:  586:	if (index > 0 && line[index - 1] == '\\' && !quote_detector(line, index - 1))
     %%%%%:  586-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  587:			|| strncmp(rl_line_buffer, "tr ", 3) == 0
-    %%%%%:  587-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  588:			|| strncmp(rl_line_buffer, "trash ", 6) == 0)) {
-    %%%%%:  588-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  589:
-    #####:  590:				if (ent->d_type != DT_BLK && ent->d_type != DT_CHR)
-    %%%%%:  590-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  590-block  1
+    %%%%%:  586-block  1
 branch  2 never executed
 branch  3 never executed
-    #####:  591:					match = 1;
-    %%%%%:  591-block  0
-unconditional  0 never executed
-        -:  592:			}
-        -:  593:
-    #####:  594:			else if (exec) {
-    %%%%%:  594-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  595:
-    #####:  596:				if (ent->d_type == DT_REG && access(ent->d_name, X_OK) == 0)
-    %%%%%:  596-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  596-block  1
-call    2 never executed
-branch  3 never executed
-branch  4 never executed
-    #####:  597:					match = 1;
-    %%%%%:  597-block  0
-unconditional  0 never executed
-        -:  598:			}
-        -:  599:
-    #####:  600:			else if (exec_path) {
-    %%%%%:  600-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  601:
-    #####:  602:				if (ent->d_type == DT_REG) {
-    %%%%%:  602-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  603:					snprintf(tmp, PATH_MAX, "%s%s", dir_tmp, ent->d_name);
-    #####:  604:					if (access(tmp, X_OK) == 0)
-    %%%%%:  604-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  605:						match = 1;
-    %%%%%:  605-block  0
-unconditional  0 never executed
-        -:  606:				}
-        -:  607:			}
-        -:  608:
-        -:  609:			else
-    #####:  610:				match = 1;
-    %%%%%:  610-block  0
-unconditional  0 never executed
-        -:  611:		}
-        -:  612:
-    #####:  613:		if (match)
-    %%%%%:  613-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  614:			break;
-    %%%%%:  614-block  0
-unconditional  0 never executed
-        -:  615:	}
-        -:  616:
-    #####:  617:	if (dir_tmp) { /* == exec_path */
-    %%%%%:  617-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  618:		free(dir_tmp);
-    #####:  619:		dir_tmp = (char *)NULL;
-    %%%%%:  619-block  0
-unconditional  0 never executed
-        -:  620:	}
-        -:  621:
-        -:  622:	/* readdir() returns NULL on reaching the end of directory stream.
-        -:  623:	 * So that if entry is NULL, we have no matches */
-        -:  624:
-    #####:  625:	if (!ent) { /* == !match */
-    %%%%%:  625-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  626:		if (directory) {
-    %%%%%:  626-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  627:			closedir(directory);
-    %%%%%:  627-block  0
-call    0 never executed
-    #####:  628:			directory = (DIR *)NULL;
-unconditional  0 never executed
-        -:  629:		}
-        -:  630:
-    #####:  631:		if (dirname) {
-    %%%%%:  631-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  632:			free(dirname);
-    #####:  633:			dirname = (char *)NULL;
-    %%%%%:  633-block  0
-unconditional  0 never executed
-        -:  634:		}
-        -:  635:
-    #####:  636:		if (filename) {
-    %%%%%:  636-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  637:			free(filename);
-    #####:  638:			filename = (char *)NULL;
-    %%%%%:  638-block  0
-unconditional  0 never executed
-        -:  639:		}
-        -:  640:
-    #####:  641:		if (users_dirname) {
-    %%%%%:  641-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  642:			free(users_dirname);
-    #####:  643:			users_dirname = (char *)NULL;
-    %%%%%:  643-block  0
-unconditional  0 never executed
-        -:  644:		}
-        -:  645:
-    #####:  646:		return (char *)NULL;
-    %%%%%:  646-block  0
-unconditional  0 never executed
-        -:  647:	}
-        -:  648:
-        -:  649:	/* We have a match */
-        -:  650:	else {
-    #####:  651:		char *temp = (char *)NULL;
-        -:  652:
-        -:  653:		/* dirname && (strcmp(dirname, ".") != 0) */
-    #####:  654:		if (dirname && (dirname[0] != '.' || dirname[1])) {
-    %%%%%:  654-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  654-block  1
-branch  2 never executed
-branch  3 never executed
-    %%%%%:  654-block  2
-branch  4 never executed
+    %%%%%:  586-block  2
+call    4 never executed
 branch  5 never executed
-        -:  655:
-    #####:  656:			if (rl_complete_with_tilde_expansion && *users_dirname == '~') {
-    %%%%%:  656-block  0
+branch  6 never executed
+    #####:  587:		return 1;
+    %%%%%:  587-block  0
+unconditional  0 never executed
+        -:  588:
+    #####:  589:	return 0;
+    %%%%%:  589-block  0
+unconditional  0 never executed
+        -:  590:}
+        -:  591:
+        -:  592:/* Performs bash-style filename quoting for readline (put a backslash
+        -:  593: * before any char listed in rl_filename_quote_characters.
+        -:  594: * Modified version of:
+        -:  595: * https://utcc.utoronto.ca/~cks/space/blog/programming/ReadlineQuotingExample*/
+        -:  596:static char *
+function my_rl_quote called 0 returned 0% blocks executed 0%
+    #####:  597:my_rl_quote(char *text, int mt, char *qp)
+        -:  598:{
+        -:  599:	/* NOTE: mt and qp arguments are not used here, but are required by
+        -:  600:	 * rl_filename_quoting_function */
+        -:  601:	UNUSED(mt); UNUSED(qp);
+        -:  602:
+        -:  603:	/*
+        -:  604:	 * How it works: P and R are pointers to the same memory location
+        -:  605:	 * initialized (calloced) twice as big as the line that needs to be
+        -:  606:	 * quoted (in case all chars in the line need to be quoted); TP is a
+        -:  607:	 * pointer to TEXT, which contains the string to be quoted. We move
+        -:  608:	 * through TP to find all chars that need to be quoted ("a's" becomes
+        -:  609:	 * "a\'s", for example). At this point we cannot return P, since this
+        -:  610:	 * pointer is at the end of the string, so that we return R instead,
+        -:  611:	 * which is at the beginning of the same string pointed to by P.
+        -:  612:	 * */
+    #####:  613:	char *r = (char *)NULL, *p = (char *)NULL, *tp = (char *)NULL;
+        -:  614:
+    #####:  615:	size_t text_len = strlen(text);
+        -:  616:	/* Worst case: every character of text needs to be escaped. In this
+        -:  617:	 * case we need 2x text's bytes plus the NULL byte. */
+    #####:  618:	p = (char *)xnmalloc((text_len * 2) + 1, sizeof(char));
+    %%%%%:  618-block  0
+call    0 never executed
+    #####:  619:	r = p;
+        -:  620:
+    #####:  621:	if (r == NULL)
 branch  0 never executed
 branch  1 never executed
-    %%%%%:  656-block  1
+    #####:  622:		return (char *)NULL;
+    %%%%%:  622-block  0
+unconditional  0 never executed
+        -:  623:
+        -:  624:	/* Escape whatever char that needs to be escaped */
+    #####:  625:	for (tp = text; *tp; tp++) {
+    %%%%%:  625-block  0
+unconditional  0 never executed
+    %%%%%:  625-block  1
+branch  1 never executed
 branch  2 never executed
-branch  3 never executed
-    %%%%%:  656-block  2
-unconditional  4 never executed
-    #####:  657:				size_t dirlen = strlen(dirname);
-    #####:  658:				temp = (char *)xcalloc(dirlen + strlen(ent->d_name) + 2,
-    %%%%%:  658-block  0
+    #####:  626:		if (is_quote_char(*tp))
+    %%%%%:  626-block  0
 call    0 never executed
-        -:  659:															sizeof(char));
-    #####:  660:				strcpy(temp, dirname);
-        -:  661:				/* Canonicalization cuts off any final slash present.
-        -:  662:				 * We need to add it back. */
-        -:  663:
-    #####:  664:				if (dirname[dirlen - 1] != '/') {
+branch  1 never executed
+branch  2 never executed
+    #####:  627:			*p++ = '\\';
+    %%%%%:  627-block  0
+unconditional  0 never executed
+        -:  628:
+    #####:  629:		*p++ = *tp;
+    %%%%%:  629-block  0
+unconditional  0 never executed
+        -:  630:	}
+        -:  631:
+        -:  632:	/* Add a final null byte to the string */
+    #####:  633:	*p = '\0';
+    #####:  634:	return r;
+    %%%%%:  634-block  0
+unconditional  0 never executed
+        -:  635:}
+        -:  636:
+        -:  637:/* This is the filename_completion_function() function of an old Bash
+        -:  638: * release (1.14.7) modified to fit CliFM needs */
+        -:  639:static char *
+function my_rl_path_completion called 4523 returned 100% blocks executed 48%
+     4523:  640:my_rl_path_completion(const char *text, int state)
+        -:  641:{
+     4523:  642:	if (!text || !*text)
+     4523:  642-block  0
+branch  0 taken 4523 (fallthrough)
+branch  1 taken 0
+     4523:  642-block  1
+branch  2 taken 9 (fallthrough)
+branch  3 taken 4514
+        9:  643:		return (char *)NULL;
+        9:  643-block  0
+unconditional  0 taken 9
+        -:  644:	/* state is zero before completion, and 1 ... n after getting
+        -:  645:	 * possible completions. Example:
+        -:  646:	 * cd Do[TAB] -> state 0
+        -:  647:	 * cuments/ -> state 1
+        -:  648:	 * wnloads/ -> state 2
+        -:  649:	 * */
+        -:  650:
+        -:  651:	/* Dequote string to be completed (text), if necessary */
+        -:  652:	static char *tmp_text = (char *)NULL;
+        -:  653:
+     4514:  654:	if (strchr(text, '\\')) {
+     4514:  654-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4514
+    #####:  655:		char *p = savestring(text, strlen(text));
+    %%%%%:  655-block  0
+call    0 never executed
+    #####:  656:		tmp_text = dequote_str(p, 0);
+call    0 never executed
+    #####:  657:		free(p);
+    #####:  658:		p = (char *)NULL;
+    #####:  659:		if (!tmp_text)
 branch  0 never executed
 branch  1 never executed
-    #####:  665:					temp[dirlen] = '/';
-    #####:  666:					temp[dirlen + 1] = '\0';
-    %%%%%:  666-block  0
+    #####:  660:			return (char *)NULL;
+    %%%%%:  660-block  0
 unconditional  0 never executed
-        -:  667:				}
-        -:  668:			}
+        -:  661:	}
+        -:  662:
+     4514:  663:	if (*text == '.' && text[1] == '.' && text[2] == '.') {
+     4514:  663-block  0
+branch  0 taken 6 (fallthrough)
+branch  1 taken 4508
+        6:  663-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 4
+        2:  663-block  2
+branch  4 taken 2 (fallthrough)
+branch  5 taken 0
+        2:  664:		char *p = savestring(text, strlen(text));
+        2:  664-block  0
+call    0 returned 2
+        2:  665:		tmp_text = fastback(p);
+call    0 returned 2
+        -:  666:
+        2:  667:		free(p);
+        2:  668:		p = (char *)NULL;
         -:  669:
-        -:  670:			else {
-    #####:  671:				temp = (char *)xcalloc(strlen(users_dirname) +
-    #####:  672:							   strlen(ent->d_name) + 1,
-    %%%%%:  672-block  0
-call    0 never executed
-        -:  673:				    sizeof(char));
-    #####:  674:				strcpy(temp, users_dirname);
+        2:  670:		if (!tmp_text)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:  671:			return (char *)NULL;
+    %%%%%:  671-block  0
 unconditional  0 never executed
-        -:  675:			}
-    #####:  676:			strcat(temp, ent->d_name);
-    %%%%%:  676-block  0
+        -:  672:	}
+        -:  673:
+        -:  674:/*	int rl_complete_with_tilde_expansion = 0; */
+        -:  675:	/* ~/Doc -> /home/user/Doc */
+        -:  676:
+        -:  677:	static DIR *directory;
+        -:  678:	static char *filename = (char *)NULL;
+        -:  679:	static char *dirname = (char *)NULL;
+        -:  680:	static char *users_dirname = (char *)NULL;
+        -:  681:	static size_t filename_len;
+        -:  682:	static int match, ret;
+     4514:  683:	struct dirent *ent = (struct dirent *)NULL;
+        -:  684:	static int exec = 0, exec_path = 0;
+        -:  685:	static char *dir_tmp = (char *)NULL;
+        -:  686:	static char tmp[PATH_MAX];
+        -:  687:
+        -:  688:	/* If we don't have any state, then do some initialization. */
+     4514:  689:	if (!state) {
+     4514:  689-block  0
+branch  0 taken 401 (fallthrough)
+branch  1 taken 4113
+        -:  690:		char *temp;
+        -:  691:
+      401:  692:		if (dirname)
+      401:  692-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 401
+    #####:  693:			free(dirname);
+    %%%%%:  693-block  0
 unconditional  0 never executed
-        -:  677:		}
-        -:  678:
-        -:  679:		else
-    #####:  680:			temp = savestring(ent->d_name, strlen(ent->d_name));
-    %%%%%:  680-block  0
+      401:  694:		if (filename)
+      401:  694-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 401
+    #####:  695:			free(filename);
+    %%%%%:  695-block  0
+unconditional  0 never executed
+      401:  696:		if (users_dirname)
+      401:  696-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 401
+    #####:  697:			free(users_dirname);
+    %%%%%:  697-block  0
+unconditional  0 never executed
+        -:  698:
+        -:  699:		/* tmp_text is true whenever text was dequoted */
+      401:  700:		size_t text_len = strlen((tmp_text) ? tmp_text : text);
+      401:  700-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 400
+        1:  700-block  1
+unconditional  2 taken 1
+      400:  700-block  2
+unconditional  3 taken 400
+      401:  701:		if (text_len)
+      401:  701-block  0
+branch  0 taken 401 (fallthrough)
+branch  1 taken 0
+      401:  702:			filename = savestring((tmp_text) ? tmp_text : text, text_len);
+      401:  702-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 400
+        1:  702-block  1
+unconditional  2 taken 1
+      400:  702-block  2
+unconditional  3 taken 400
+      401:  702-block  3
+call    4 returned 401
+unconditional  5 taken 401
+        -:  703:		else
+    #####:  704:			filename = savestring("", 1);
+    %%%%%:  704-block  0
 call    0 never executed
 unconditional  1 never executed
-        -:  681:
-    #####:  682:		return (temp);
-    %%%%%:  682-block  0
+        -:  705:
+      401:  706:		if (!*text)
+      401:  706-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 401
+    #####:  707:			text = ".";
+    %%%%%:  707-block  0
 unconditional  0 never executed
-        -:  683:	}
-        -:  684:}
-        -:  685:
-        -:  686:/* Used by bookmarks completion */
-        -:  687:char *
-function bookmarks_generator called 0 returned 0% blocks executed 0%
-    #####:  688:bookmarks_generator(const char *text, int state)
-        -:  689:{
-        -:  690:	static int i;
-        -:  691:	static size_t len;
-        -:  692:	char *name;
-        -:  693:
-    #####:  694:	if (!state) {
-    %%%%%:  694-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  695:		i = 0;
-    #####:  696:		len = strlen(text);
-    %%%%%:  696-block  0
+        -:  708:
+      401:  709:		if (text_len)
+      401:  709-block  0
+branch  0 taken 401 (fallthrough)
+branch  1 taken 0
+      401:  710:			dirname = savestring((tmp_text) ? tmp_text : text, text_len);
+      401:  710-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 400
+        1:  710-block  1
+unconditional  2 taken 1
+      400:  710-block  2
+unconditional  3 taken 400
+      401:  710-block  3
+call    4 returned 401
+unconditional  5 taken 401
+        -:  711:		else
+    #####:  712:			dirname = savestring("", 1);
+    %%%%%:  712-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  713:
+      401:  714:		if (dirname[0] == '.' && dirname[1] == '/')
+      401:  714-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 398
+        3:  714-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 3
+    #####:  715:			exec = 1;
+    %%%%%:  715-block  0
 unconditional  0 never executed
-        -:  697:	}
-        -:  698:
-        -:  699:	/* Look for bookmarks in bookmark names for a match */
-    #####:  700:	while ((name = bookmark_names[i++]) != NULL) {
-    %%%%%:  700-block  0
-unconditional  0 never executed
-    %%%%%:  700-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  701:		if (strncmp(name, text, len) == 0)
-    %%%%%:  701-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  702:			return strdup(name);
-    %%%%%:  702-block  0
-unconditional  0 never executed
-        -:  703:	}
-        -:  704:
-    #####:  705:	return (char *)NULL;
-    %%%%%:  705-block  0
-unconditional  0 never executed
-        -:  706:}
-        -:  707:
-        -:  708:/* Used by history completion */
-        -:  709:char *
-function hist_generator called 0 returned 0% blocks executed 0%
-    #####:  710:hist_generator(const char *text, int state)
-        -:  711:{
-        -:  712:	static int i;
-        -:  713:	static size_t len;
-        -:  714:	char *name;
-        -:  715:
-    #####:  716:	if (!state) {
-    %%%%%:  716-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  717:		i = 0;
-    #####:  718:		len = strlen(text);
-    %%%%%:  718-block  0
-unconditional  0 never executed
-        -:  719:	}
-        -:  720:
-        -:  721:	/* Look for cmd history entries for a match */
-    #####:  722:	while ((name = history[i++]) != NULL) {
-    %%%%%:  722-block  0
-unconditional  0 never executed
-    %%%%%:  722-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  723:		if (strncmp(name, text, len) == 0)
-    %%%%%:  723-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  724:			return strdup(name);
-    %%%%%:  724-block  0
-unconditional  0 never executed
-        -:  725:	}
-        -:  726:
-    #####:  727:	return (char *)NULL;
-    %%%%%:  727-block  0
-unconditional  0 never executed
-        -:  728:}
-        -:  729:
-        -:  730:/* Expand string into matching path in the jump database. Used by
-        -:  731: * j, jc, and jp commands */
-        -:  732:char *
-function jump_generator called 0 returned 0% blocks executed 0%
-    #####:  733:jump_generator(const char *text, int state)
-        -:  734:{
-        -:  735:	static int i;
-        -:  736:	char *name;
-        -:  737:
-    #####:  738:	if (!state)
-    %%%%%:  738-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  739:		i = 0;
-    %%%%%:  739-block  0
-unconditional  0 never executed
-        -:  740:
-    #####:  741:	if (!jump_db)
-    %%%%%:  741-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  742:		return (char *)NULL;
-    %%%%%:  742-block  0
-unconditional  0 never executed
-        -:  743:
-        -:  744:	/* Look for matches in the dirhist list */
-    #####:  745:	while ((name = jump_db[i++].path) != NULL) {
-    %%%%%:  745-block  0
-unconditional  0 never executed
-    %%%%%:  745-block  1
-branch  1 never executed
-branch  2 never executed
-        -:  746:
-        -:  747:		/* Exclude CWD */
-    #####:  748:		if (name[1] == ws[cur_ws].path[1] && strcmp(name, ws[cur_ws].path) == 0)
-    %%%%%:  748-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  748-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  749:			continue;
-    %%%%%:  749-block  0
-unconditional  0 never executed
-        -:  750:
-        -:  751:		/* Filter by parent */
-    #####:  752:		if (rl_line_buffer[1] == 'p') {
-    %%%%%:  752-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  753:			if (!strstr(ws[cur_ws].path, name))
-    %%%%%:  753-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  754:				continue;
-    %%%%%:  754-block  0
-unconditional  0 never executed
-        -:  755:		}
-        -:  756:
-        -:  757:		/* Filter by child */
-    #####:  758:		else if (rl_line_buffer[1] == 'c') {
-    %%%%%:  758-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  759:			if (!strstr(name, ws[cur_ws].path))
-    %%%%%:  759-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  760:				continue;
-    %%%%%:  760-block  0
-unconditional  0 never executed
-        -:  761:		}
-        -:  762:
-    #####:  763:		if (strstr(name, text))
-    %%%%%:  763-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  764:			return strdup(name);
-    %%%%%:  764-block  0
-unconditional  0 never executed
-        -:  765:	}
+        -:  716:		else
+      401:  717:			exec = 0;
+      401:  717-block  0
+unconditional  0 taken 401
+        -:  718:
+        -:  719:		/* Get everything after last slash */
+      401:  720:		temp = strrchr(dirname, '/');
+        -:  721:
+      401:  722:		if (temp) {
+      401:  722-block  0
+branch  0 taken 40 (fallthrough)
+branch  1 taken 361
+       40:  723:			strcpy(filename, ++temp);
+       40:  724:			*temp = '\0';
+       40:  724-block  0
+unconditional  0 taken 40
+        -:  725:		} else {
+      361:  726:			strcpy(dirname, ".");
+      361:  726-block  0
+unconditional  0 taken 361
+        -:  727:		}
+        -:  728:
+        -:  729:		/* We aren't done yet.  We also support the "~user" syntax. */
+        -:  730:
+        -:  731:		/* Save the version of the directory that the user typed. */
+      401:  732:		size_t dirname_len = strlen(dirname);
+        -:  733:
+      401:  734:		users_dirname = savestring(dirname, dirname_len);
+      401:  734-block  0
+call    0 returned 401
+        -:  735:		/*      { */
+        -:  736:		char *temp_dirname;
+        -:  737:		int replace_dirname;
+        -:  738:
+      401:  739:		temp_dirname = tilde_expand(dirname);
+call    0 returned 401
+      401:  740:		free(dirname);
+      401:  741:		dirname = temp_dirname;
+        -:  742:
+      401:  743:		replace_dirname = 0;
+        -:  744:
+      401:  745:		if (rl_directory_completion_hook)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 401
+    #####:  746:			replace_dirname = (*rl_directory_completion_hook)(&dirname);
+    %%%%%:  746-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  747:
+      401:  748:		if (replace_dirname) {
+      401:  748-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 401
+    #####:  749:			free(users_dirname);
+    #####:  750:			users_dirname = savestring(dirname, dirname_len);
+    %%%%%:  750-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  751:		}
+        -:  752:		/*      } */
+      401:  753:		directory = opendir(dirname);
+      401:  753-block  0
+call    0 returned 401
+      401:  754:		filename_len = strlen(filename);
+        -:  755:
+      401:  756:		rl_filename_completion_desired = 1;
+unconditional  0 taken 401
+        -:  757:	}
+        -:  758:
+     4514:  759:	if (tmp_text) {
+     4514:  759-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 4512
+        2:  760:		free(tmp_text);
+        2:  761:		tmp_text = (char *)NULL;
+        2:  761-block  0
+unconditional  0 taken 2
+        -:  762:	}
+        -:  763:
+        -:  764:	/* Now that we have some state, we can read the directory. If we found
+        -:  765:	 * a match among files in dir, break the loop and print the match */
         -:  766:
-    #####:  767:	return (char *)NULL;
-    %%%%%:  767-block  0
-unconditional  0 never executed
-        -:  768:}
-        -:  769:
-        -:  770:/* Expand jump order number into the corresponding path. Used by the
-        -:  771: * jo command */
-        -:  772:char *
-function jump_entries_generator called 0 returned 0% blocks executed 0%
-    #####:  773:jump_entries_generator(const char *text, int state)
-        -:  774:{
-        -:  775:	static size_t i;
-        -:  776:	char *name;
+     4514:  767:	match = 0;
+        -:  768:
+     4514:  769:	size_t dirname_len = 0;
+     4514:  770:	if (dirname)
+     4514:  770-block  0
+branch  0 taken 4514 (fallthrough)
+branch  1 taken 0
+     4514:  771:		dirname_len = strlen(dirname);
+     4514:  771-block  0
+unconditional  0 taken 4514
+        -:  772:
+        -:  773:	/* This block is used only in case of "/path/./" to remove the
+        -:  774:	 * ending "./" from dirname and to be able to perform thus the
+        -:  775:	 * executable check via access() */
+     4514:  776:	exec_path = 0;
         -:  777:
-    #####:  778:	if (!state)
-    %%%%%:  778-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  779:		i = 0;
-    %%%%%:  779-block  0
-unconditional  0 never executed
-        -:  780:
-    #####:  781:	int num_text = atoi(text);
-        -:  782:
-        -:  783:	/* Check list of jump entries for a match */
-    #####:  784:	while (i <= jump_n && (name = jump_db[i++].path) != NULL)
-    %%%%%:  784-block  0
-unconditional  0 never executed
-    %%%%%:  784-block  1
-branch  1 never executed
+     4514:  778:	if (dirname_len > 2) {
+     4514:  778-block  0
+branch  0 taken 4118 (fallthrough)
+branch  1 taken 396
+        -:  779:
+    4118*:  780:		if (dirname[dirname_len - 3] == '/' && dirname[dirname_len - 2] == '.'
+     4118:  780-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4118
+    %%%%%:  780-block  1
 branch  2 never executed
-    %%%%%:  784-block  2
 branch  3 never executed
-branch  4 never executed
-    #####:  785:		if (*name == *jump_db[num_text - 1].path && strcmp(name,
-    %%%%%:  785-block  0
+    #####:  781:		&& dirname[dirname_len - 1] == '/') {
+    %%%%%:  781-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  786:										jump_db[num_text - 1].path) == 0)
+    #####:  782:			dir_tmp = savestring(dirname, dirname_len);
+    %%%%%:  782-block  0
+call    0 never executed
+        -:  783:
+    #####:  784:			if (dir_tmp) {
+branch  0 never executed
+branch  1 never executed
+    #####:  785:				dir_tmp[dirname_len - 2] = '\0';
+    #####:  786:				exec_path = 1;
     %%%%%:  786-block  0
+unconditional  0 never executed
+        -:  787:			}
+        -:  788:		}
+        -:  789:	}
+        -:  790:
+        -:  791:	/* ############### COMPLETION FILTER ################## */
+        -:  792:	/* #        This is the heart of the function         #
+        -:  793:	 * #################################################### */
+        -:  794:	mode_t type;
+        -:  795:
+    75929:  796:	while (directory && (ent = readdir(directory))) {
+     4514:  796-block  0
+unconditional  0 taken 4514
+    75929:  796-block  1
+branch  1 taken 75923 (fallthrough)
+branch  2 taken 6
+    75923:  796-block  2
+call    3 returned 75923
+branch  4 taken 75528
+branch  5 taken 395 (fallthrough)
+        -:  797:#if !defined(_DIRENT_HAVE_D_TYPE)
+        -:  798:		struct stat attr;
+        -:  799:		if (!dirname || (*dirname == '.' && !*(dirname + 1)))
+        -:  800:			xstrsncpy(tmp, ent->d_name, PATH_MAX);
+        -:  801:		else
+        -:  802:			snprintf(tmp, PATH_MAX, "%s%s", dirname, ent->d_name);
+        -:  803:
+        -:  804:		if (lstat(tmp, &attr) == -1) {
+        -:  805:			continue;
+        -:  806:		}
+        -:  807:
+        -:  808:		switch (attr.st_mode & S_IFMT) {
+        -:  809:		case S_IFBLK: type = DT_BLK; break;
+        -:  810:		case S_IFCHR: type = DT_CHR; break;
+        -:  811:		case S_IFDIR: type = DT_DIR; break;
+        -:  812:		case S_IFIFO: type = DT_FIFO; break;
+        -:  813:		case S_IFLNK: type = DT_LNK; break;
+        -:  814:		case S_IFREG: type = DT_REG; break;
+        -:  815:		case S_IFSOCK: type = DT_SOCK; break;
+        -:  816:		default: type = DT_UNKNOWN; break;
+        -:  817:		}
+        -:  818:#else
+    75528:  819:		type = ent->d_type;
+        -:  820:#endif /* !_DIRENT_HAVE_D_TYPE */
+        -:  821:
+        -:  822:		/* If the user entered nothing before TAB (ex: "cd [TAB]") */
+    75528:  823:		if (!filename_len) {
+    75528:  823-block  0
+branch  0 taken 3561 (fallthrough)
+branch  1 taken 71967
+        -:  824:			/* Exclude "." and ".." as possible completions */
+     3561:  825:			if (SELFORPARENT(ent->d_name))
+     3561:  825-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 3559
+        2:  825-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 1
+        1:  825-block  2
+branch  4 taken 1 (fallthrough)
+branch  5 taken 0
+        1:  825-block  3
+branch  6 taken 1 (fallthrough)
+branch  7 taken 0
+        2:  826:				continue;
+        2:  826-block  0
+unconditional  0 taken 2
+        -:  827:
+        -:  828:			/* If 'cd', match only dirs or symlinks to dir */
+     3559:  829:			if (*rl_line_buffer == 'c'
+     3559:  829-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3559
+    #####:  830:			&& strncmp(rl_line_buffer, "cd ", 3) == 0) {
+    %%%%%:  830-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  787:			return strdup(name);
-    %%%%%:  787-block  0
-unconditional  0 never executed
-        -:  788:
-    #####:  789:	return (char *)NULL;
-    %%%%%:  789-block  0
-unconditional  0 never executed
-        -:  790:}
-        -:  791:
-        -:  792:char *
-function cschemes_generator called 0 returned 0% blocks executed 0%
-    #####:  793:cschemes_generator(const char *text, int state)
-        -:  794:{
-        -:  795:	static int i;
-        -:  796:	static size_t len;
-        -:  797:	char *name;
-        -:  798:
-    #####:  799:	if (!state) {
-    %%%%%:  799-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  800:		i = 0;
-    #####:  801:		len = strlen(text);
-    %%%%%:  801-block  0
-unconditional  0 never executed
-        -:  802:	} /* The state variable is zero only the first time the function is
-        -:  803:	called, and a non-zero positive in later calls. This means that i
-        -:  804:	and len will be necessarilly initialized the first time */
-        -:  805:
-    #####:  806:	if (!color_schemes)
-    %%%%%:  806-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  807:		return (char *)NULL;
-    %%%%%:  807-block  0
-unconditional  0 never executed
-        -:  808:
-        -:  809:	/* Look for color schemes in color_schemes for a match */
-    #####:  810:	while ((name = color_schemes[i++]) != NULL) {
-    %%%%%:  810-block  0
-unconditional  0 never executed
-    %%%%%:  810-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  811:		if (strncmp(name, text, len) == 0)
-    %%%%%:  811-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  812:			return strdup(name);
-    %%%%%:  812-block  0
-unconditional  0 never executed
-        -:  813:	}
-        -:  814:
-    #####:  815:	return (char *)NULL;
-    %%%%%:  815-block  0
-unconditional  0 never executed
-        -:  816:}
-        -:  817:
-        -:  818:/* Used by profiles completion */
-        -:  819:char *
-function profiles_generator called 0 returned 0% blocks executed 0%
-    #####:  820:profiles_generator(const char *text, int state)
-        -:  821:{
-        -:  822:	static int i;
-        -:  823:	static size_t len;
-        -:  824:	char *name;
-        -:  825:
-    #####:  826:	if (!state) {
-    %%%%%:  826-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  827:		i = 0;
-    #####:  828:		len = strlen(text);
-    %%%%%:  828-block  0
-unconditional  0 never executed
-        -:  829:	} /* The state variable is zero only the first time the function is
-        -:  830:	called, and a non-zero positive in later calls. This means that i
-        -:  831:	and len will be necessarilly initialized the first time */
+    #####:  831:				ret = -1;
         -:  832:
-        -:  833:	/* Look for profiles in profile_names for a match */
-    #####:  834:	while ((name = profile_names[i++]) != NULL) {
-    %%%%%:  834-block  0
-unconditional  0 never executed
-    %%%%%:  834-block  1
+    #####:  833:				switch (type) {
+    %%%%%:  833-block  0
+branch  0 never executed
 branch  1 never executed
 branch  2 never executed
-    #####:  835:		if (strncmp(name, text, len) == 0)
+    #####:  834:				case DT_LNK:
+    #####:  835:					if (dirname[0] == '.' && !dirname[1]) {
     %%%%%:  835-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  836:			return strdup(name);
+    %%%%%:  835-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  836:						ret = get_link_ref(ent->d_name);
     %%%%%:  836-block  0
-unconditional  0 never executed
-        -:  837:	}
-        -:  838:
-    #####:  839:	return (char *)NULL;
+call    0 never executed
+unconditional  1 never executed
+        -:  837:					} else {
+    #####:  838:						snprintf(tmp, PATH_MAX, "%s%s", dirname, ent->d_name);
+    #####:  839:						ret = get_link_ref(tmp);
     %%%%%:  839-block  0
-unconditional  0 never executed
-        -:  840:}
+call    0 never executed
+unconditional  1 never executed
+        -:  840:					}
         -:  841:
-        -:  842:/* Used by ELN expansion */
-        -:  843:char *
-function filenames_gen_text called 2 returned 100% blocks executed 92%
-        2:  844:filenames_gen_text(const char *text, int state)
-        -:  845:{
-        -:  846:	static size_t i, len = 0;
-        -:  847:	char *name;
-        2:  848:	rl_filename_completion_desired = 1;
-        -:  849:	/* According to the GNU readline documention: "If it is set to a
-        -:  850:	 * non-zero value, directory names have a slash appended and
-        -:  851:	 * Readline attempts to quote completed filenames if they contain
-        -:  852:	 * any embedded word break characters." To make the quoting part
-        -:  853:	 * work I had to specify a custom quoting function (my_rl_quote) */
-        2:  854:	if (!state) { /* state is zero only the first time readline is
-        2:  854-block  0
-branch  0 taken 1 (fallthrough)
-branch  1 taken 1
-        -:  855:	executed */
-        1:  856:		i = 0;
-        1:  857:		len = strlen(text);
-        1:  857-block  0
-unconditional  0 taken 1
-        -:  858:	}
-        -:  859:
-        -:  860:	/* Check list of currently displayed files for a match */
-       21:  861:	while (i < files && (name = file_info[i++].name) != NULL)
-        2:  861-block  0
-unconditional  0 taken 2
-       21:  861-block  1
-branch  1 taken 20 (fallthrough)
-branch  2 taken 1
-       20:  861-block  2
-branch  3 taken 20
-branch  4 taken 0 (fallthrough)
-      40*:  862:		if (case_sens_path_comp ? strncmp(name, text, len) == 0
-       20:  862-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 20
-    %%%%%:  862-block  1
-unconditional  2 never executed
-       20:  862-block  2
-branch  3 taken 1 (fallthrough)
-branch  4 taken 19
-       20:  863:					: strncasecmp(name, text, len) == 0)
-       20:  863-block  0
-unconditional  0 taken 20
-        1:  864:			return strdup(name);
-        1:  864-block  0
-unconditional  0 taken 1
-        -:  865:
-        1:  866:	return (char *)NULL;
-        1:  866-block  0
-unconditional  0 taken 1
-        -:  867:}
-        -:  868:
-        -:  869:/* Used by ELN expansion */
-        -:  870:char *
-function filenames_gen_eln called 0 returned 0% blocks executed 0%
-    #####:  871:filenames_gen_eln(const char *text, int state)
-        -:  872:{
-        -:  873:	static size_t i;
-        -:  874:	char *name;
-    #####:  875:	rl_filename_completion_desired = 1;
-        -:  876:
-    #####:  877:	if (!state)
-    %%%%%:  877-block  0
+    #####:  842:					if (ret == S_IFDIR)
+    %%%%%:  842-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  878:		i = 0;
-    %%%%%:  878-block  0
+    #####:  843:						match = 1;
+    %%%%%:  843-block  0
 unconditional  0 never executed
-        -:  879:
-    #####:  880:	int num_text = atoi(text);
-        -:  881:
-        -:  882:	/* Check list of currently displayed files for a match */
-    #####:  883:	while (i < files && (name = file_info[i++].name) != NULL)
-    %%%%%:  883-block  0
+        -:  844:
+    #####:  845:					break;
+    %%%%%:  845-block  0
 unconditional  0 never executed
-    %%%%%:  883-block  1
+        -:  846:
+    #####:  847:				case DT_DIR:
+    #####:  848:					match = 1;
+    #####:  849:					break;
+    %%%%%:  849-block  0
+unconditional  0 never executed
+        -:  850:
+    #####:  851:				default:
+    #####:  852:					break;
+    %%%%%:  852-block  0
+unconditional  0 never executed
+        -:  853:				}
+        -:  854:			}
+        -:  855:
+        -:  856:			/* If 'open', allow only reg files, dirs, and symlinks */
+     3559:  857:			else if (*rl_line_buffer == 'o'
+     3559:  857-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3559
+    #####:  858:			&& (strncmp(rl_line_buffer, "o ", 2) == 0
+    %%%%%:  858-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  859:			|| strncmp(rl_line_buffer, "open ", 5) == 0)) {
+    %%%%%:  859-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  860:				ret = -1;
+        -:  861:
+    #####:  862:				switch (type) {
+    %%%%%:  862-block  0
+branch  0 never executed
 branch  1 never executed
 branch  2 never executed
-    %%%%%:  883-block  2
+    #####:  863:				case DT_LNK:
+    #####:  864:					if (dirname[0] == '.' && !dirname[1]) {
+    %%%%%:  864-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  864-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  865:						ret = get_link_ref(ent->d_name);
+    %%%%%:  865-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  866:					} else {
+    #####:  867:						snprintf(tmp, PATH_MAX, "%s%s", dirname, ent->d_name);
+    #####:  868:						ret = get_link_ref(tmp);
+    %%%%%:  868-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  869:					}
+        -:  870:
+    #####:  871:					if (ret == S_IFDIR || ret == S_IFREG)
+    %%%%%:  871-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  871-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  872:						match = 1;
+    %%%%%:  872-block  0
+unconditional  0 never executed
+        -:  873:
+    #####:  874:					break;
+    %%%%%:  874-block  0
+unconditional  0 never executed
+        -:  875:
+    #####:  876:				case DT_REG: /* fallthrough */
+    #####:  877:				case DT_DIR: match = 1; break;
+    %%%%%:  877-block  0
+unconditional  0 never executed
+        -:  878:
+    #####:  879:				default: break;
+    %%%%%:  879-block  0
+unconditional  0 never executed
+        -:  880:				}
+        -:  881:			}
+        -:  882:
+        -:  883:			/* If 'trash', allow only reg files, dirs, symlinks, pipes
+        -:  884:			 * and sockets. You should not trash a block or a character
+        -:  885:			 * device */
+     3559:  886:			else if (*rl_line_buffer == 't'
+     3559:  886-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3559
+    #####:  887:			&& (strncmp(rl_line_buffer, "t ", 2) == 0
+    %%%%%:  887-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  888:			|| strncmp(rl_line_buffer, "tr ", 2) == 0
+    %%%%%:  888-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  889:			|| strncmp(rl_line_buffer, "trash ", 6) == 0)) {
+    %%%%%:  889-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  890:
+    #####:  891:				if (type != DT_BLK && type != DT_CHR)
+    %%%%%:  891-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  891-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  892:					match = 1;
+    %%%%%:  892-block  0
+unconditional  0 never executed
+        -:  893:			}
+        -:  894:
+        -:  895:			/* If "./", list only executable regular files */
+     3559:  896:			else if (exec) {
+     3559:  896-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3559
+    #####:  897:				if (type == DT_REG && access(ent->d_name, X_OK) == 0)
+    %%%%%:  897-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  897-block  1
+call    2 never executed
 branch  3 never executed
 branch  4 never executed
-    #####:  884:		if (*name == *file_info[num_text - 1].name
-    %%%%%:  884-block  0
+    #####:  898:					match = 1;
+    %%%%%:  898-block  0
+unconditional  0 never executed
+        -:  899:			}
+        -:  900:
+        -:  901:			/* If "/path/./", list only executable regular files */
+     3559:  902:			else if (exec_path) {
+     3559:  902-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3559
+    #####:  903:				if (type == DT_REG) {
+    %%%%%:  903-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  885:		&& strcmp(name, file_info[num_text - 1].name) == 0)
-    %%%%%:  885-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  886:			return strdup(name);
-    %%%%%:  886-block  0
-unconditional  0 never executed
-        -:  887:
-    #####:  888:	return (char *)NULL;
-    %%%%%:  888-block  0
-unconditional  0 never executed
-        -:  889:}
-        -:  890:
-        -:  891:/* Used by commands completion */
-        -:  892:char *
-function bin_cmd_generator called 0 returned 0% blocks executed 0%
-    #####:  893:bin_cmd_generator(const char *text, int state)
-        -:  894:{
-        -:  895:	static int i;
-        -:  896:	static size_t len;
-        -:  897:	char *name;
-        -:  898:
-    #####:  899:	if (!state) {
-    %%%%%:  899-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  900:		i = 0;
-    #####:  901:		len = strlen(text);
-    %%%%%:  901-block  0
-unconditional  0 never executed
-        -:  902:	}
-        -:  903:
-    #####:  904:	while ((name = bin_commands[i++]) != NULL) {
-    %%%%%:  904-block  0
-unconditional  0 never executed
-    %%%%%:  904-block  1
+        -:  904:					/* dir_tmp is dirname less "./", already
+        -:  905:					 * allocated before the while loop */
+    #####:  906:					snprintf(tmp, PATH_MAX, "%s%s", dir_tmp, ent->d_name);
+        -:  907:
+    #####:  908:					if (access(tmp, X_OK) == 0)
+    %%%%%:  908-block  0
+call    0 never executed
 branch  1 never executed
 branch  2 never executed
-    #####:  905:		if (*text == *name && strncmp(name, text, len) == 0)
-    %%%%%:  905-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  905-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  906:			return strdup(name);
-    %%%%%:  906-block  0
-unconditional  0 never executed
-        -:  907:	}
-        -:  908:
-    #####:  909:	return (char *)NULL;
+    #####:  909:						match = 1;
     %%%%%:  909-block  0
 unconditional  0 never executed
-        -:  910:}
-        -:  911:
-        -:  912:char *
-function sort_num_generator called 0 returned 0% blocks executed 0%
-    #####:  913:sort_num_generator(const char *text, int state)
-        -:  914:{
-        -:  915:	static size_t i;
-        -:  916:	char *name;
-    #####:  917:	rl_filename_completion_desired = 1;
+        -:  910:				}
+        -:  911:			}
+        -:  912:
+        -:  913:			/* No filter for everything else. Just print whatever is
+        -:  914:			 * there */
+        -:  915:			else
+     3559:  916:				match = 1;
+     3559:  916-block  0
+unconditional  0 taken 3559
+        -:  917:		}
         -:  918:
-    #####:  919:	if (!state)
-    %%%%%:  919-block  0
+        -:  919:		/* If there is at least one char to complete (ex: "cd .[TAB]") */
+        -:  920:		else {
+        -:  921:			/* Check if possible completion match up to the length of
+        -:  922:			 * filename. */
+    71967:  923:			if (case_sens_path_comp) {
+    71967:  923-block  0
+branch  0 taken 7 (fallthrough)
+branch  1 taken 71960
+        7:  924:				if (*ent->d_name != *filename
+        7:  924-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 7
+    #####:  925:				|| (strncmp(filename, ent->d_name, filename_len) != 0))
+    %%%%%:  925-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  920:		i = 0;
-    %%%%%:  920-block  0
-unconditional  0 never executed
-        -:  921:
-    #####:  922:	int num_text = atoi(text);
-        -:  923:
-        -:  924:	struct sort_t {
-        -:  925:		char *name;
-        -:  926:		int num;
-        -:  927:	};
-        -:  928:
-        -:  929:	static struct sort_t sorts[] = {
-        -:  930:	    {"none", 0},
-        -:  931:	    {"name", 1},
-        -:  932:	    {"size", 2},
-        -:  933:	    {"atime", 3},
-        -:  934:	    {"btime", 4},
-        -:  935:	    {"ctime", 5},
-        -:  936:	    {"mtime", 6},
-        -:  937:	    {"version", 7},
-        -:  938:	    {"extension", 8},
-        -:  939:	    {"inode", 9},
-        -:  940:	    {"owner", 10},
-        -:  941:	    {"group", 11},
-        -:  942:	};
-        -:  943:
-        -:  944:	/* Check list of currently displayed files for a match */
-    #####:  945:	while (i <= SORT_TYPES && (name = sorts[i++].name) != NULL)
-    %%%%%:  945-block  0
-unconditional  0 never executed
-    %%%%%:  945-block  1
+        7:  926:					continue;
+        7:  926-block  0
+unconditional  0 taken 7
+        -:  927:			} else {
+    71960:  928:				if (TOUPPER(*ent->d_name) != TOUPPER(*filename)
+    71960:  928-block  0
+branch  0 taken 69903 (fallthrough)
+branch  1 taken 2057
+    69903:  928-block  1
+branch  2 taken 69903 (fallthrough)
+branch  3 taken 0
+    69903:  928-block  2
+unconditional  4 taken 69903
+     2057:  928-block  3
+unconditional  5 taken 2057
+    71960:  928-block  4
+branch  6 taken 60573 (fallthrough)
+branch  7 taken 11387
+    60573:  928-block  5
+branch  8 taken 60573 (fallthrough)
+branch  9 taken 0
+    60573:  928-block  6
+unconditional 10 taken 60573
+    11387:  928-block  7
+unconditional 11 taken 11387
+    71960:  928-block  8
+branch 12 taken 2049 (fallthrough)
+branch 13 taken 69911
+     2049:  929:				|| (strncasecmp(filename, ent->d_name, filename_len) != 0))
+     2049:  929-block  0
+branch  0 taken 1495 (fallthrough)
+branch  1 taken 554
+    71406:  930:					continue;
+    71406:  930-block  0
+unconditional  0 taken 71406
+        -:  931:			}
+        -:  932:
+      554:  933:			if (*rl_line_buffer == 'c'
+      554:  933-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 554
+    #####:  934:			&& strncmp(rl_line_buffer, "cd ", 3) == 0) {
+    %%%%%:  934-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  935:				ret = -1;
+        -:  936:
+    #####:  937:				switch (type) {
+    %%%%%:  937-block  0
+branch  0 never executed
 branch  1 never executed
 branch  2 never executed
-    %%%%%:  945-block  2
+    #####:  938:				case DT_LNK:
+    #####:  939:					if (dirname[0] == '.' && !dirname[1]) {
+    %%%%%:  939-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  939-block  1
+branch  2 never executed
 branch  3 never executed
-branch  4 never executed
-    #####:  946:		if (*name == *sorts[num_text].name
+    #####:  940:						ret = get_link_ref(ent->d_name);
+    %%%%%:  940-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  941:					} else {
+    #####:  942:						snprintf(tmp, PATH_MAX, "%s%s", dirname, ent->d_name);
+    #####:  943:						ret = get_link_ref(tmp);
+    %%%%%:  943-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  944:					}
+        -:  945:
+    #####:  946:					if (ret == S_IFDIR)
     %%%%%:  946-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  947:		&& strcmp(name, sorts[num_text].name) == 0)
+    #####:  947:						match = 1;
     %%%%%:  947-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  948:			return strdup(name);
+unconditional  0 never executed
+    #####:  948:					break;
     %%%%%:  948-block  0
 unconditional  0 never executed
         -:  949:
-    #####:  950:	return (char *)NULL;
+    #####:  950:				case DT_DIR: match = 1; break;
     %%%%%:  950-block  0
 unconditional  0 never executed
-        -:  951:}
-        -:  952:
-        -:  953:char *
-function sort_name_generator called 0 returned 0% blocks executed 0%
-    #####:  954:sort_name_generator(const char *text, int state)
-        -:  955:{
-        -:  956:	static int i;
-        -:  957:	static size_t len;
-        -:  958:	char *name;
-        -:  959:
-    #####:  960:	if (!state) {
-    %%%%%:  960-block  0
+        -:  951:
+    #####:  952:				default: break;
+    %%%%%:  952-block  0
+unconditional  0 never executed
+        -:  953:				}
+        -:  954:			}
+        -:  955:
+      554:  956:			else if (*rl_line_buffer == 'o'
+      554:  956-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 554
+    #####:  957:			&& (strncmp(rl_line_buffer, "o ", 2) == 0
+    %%%%%:  957-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  961:		i = 0;
-    #####:  962:		len = strlen(text);
-    %%%%%:  962-block  0
+    #####:  958:			|| strncmp(rl_line_buffer, "open ", 5) == 0)) {
+    %%%%%:  958-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  959:				ret = -1;
+        -:  960:
+    #####:  961:				switch (type) {
+    %%%%%:  961-block  0
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  962:				case DT_REG: /* fallthrough */
+    #####:  963:				case DT_DIR: match = 1; break;
+    %%%%%:  963-block  0
 unconditional  0 never executed
-        -:  963:	}
         -:  964:
-        -:  965:	static char *sorts[] = {
-        -:  966:	    "none",
-        -:  967:	    "name",
-        -:  968:	    "size",
-        -:  969:	    "atime",
-        -:  970:	    "btime",
-        -:  971:	    "ctime",
-        -:  972:	    "mtime",
-        -:  973:	    "version",
-        -:  974:	    "extension",
-        -:  975:	    "inode",
-        -:  976:	    "owner",
-        -:  977:	    "group",
-        -:  978:	    NULL};
-        -:  979:
-    #####:  980:	while ((name = sorts[i++]) != NULL) {
-    %%%%%:  980-block  0
-unconditional  0 never executed
-    %%%%%:  980-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  981:		if (*text == *name && strncmp(name, text, len) == 0)
-    %%%%%:  981-block  0
+    #####:  965:				case DT_LNK:
+    #####:  966:					if (dirname[0] == '.' && !dirname[1]) {
+    %%%%%:  966-block  0
 branch  0 never executed
 branch  1 never executed
-    %%%%%:  981-block  1
+    %%%%%:  966-block  1
 branch  2 never executed
 branch  3 never executed
-    #####:  982:			return strdup(name);
+    #####:  967:						ret = get_link_ref(ent->d_name);
+    %%%%%:  967-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  968:					} else {
+    #####:  969:						snprintf(tmp, PATH_MAX, "%s%s", dirname, ent->d_name);
+    #####:  970:						ret = get_link_ref(tmp);
+    %%%%%:  970-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  971:					}
+        -:  972:
+    #####:  973:					if (ret == S_IFDIR || ret == S_IFREG)
+    %%%%%:  973-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  973-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  974:						match = 1;
+    %%%%%:  974-block  0
+unconditional  0 never executed
+    #####:  975:					break;
+    %%%%%:  975-block  0
+unconditional  0 never executed
+        -:  976:
+    #####:  977:				default: break;
+    %%%%%:  977-block  0
+unconditional  0 never executed
+        -:  978:				}
+        -:  979:			}
+        -:  980:
+      554:  981:			else if (*rl_line_buffer == 't'
+      554:  981-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 554
+    #####:  982:			&& (strncmp(rl_line_buffer, "t ", 2) == 0
     %%%%%:  982-block  0
-unconditional  0 never executed
-        -:  983:	}
-        -:  984:
-    #####:  985:	return (char *)NULL;
+branch  0 never executed
+branch  1 never executed
+    #####:  983:			|| strncmp(rl_line_buffer, "tr ", 3) == 0
+    %%%%%:  983-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  984:			|| strncmp(rl_line_buffer, "trash ", 6) == 0)) {
+    %%%%%:  984-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  985:				if (type != DT_BLK && type != DT_CHR)
     %%%%%:  985-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  985-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  986:					match = 1;
+    %%%%%:  986-block  0
 unconditional  0 never executed
-        -:  986:}
-        -:  987:
-        -:  988:char **
-function my_rl_completion called 1 returned 100% blocks executed 17%
-        1:  989:my_rl_completion(const char *text, int start, int end)
-        -:  990:{
-        1:  991:	char **matches = (char **)NULL;
-        -:  992:
-        1:  993:	if (start == 0) { /* Only for the first word entered in the prompt */
-        1:  993-block  0
-branch  0 taken 1 (fallthrough)
-branch  1 taken 0
-        -:  994:
-        -:  995:		/* Commands completion */
-        1:  996:		if (end == 0) { /* If text is empty, do nothing */
-        1:  996-block  0
+        -:  987:			}
+        -:  988:
+      554:  989:			else if (exec) {
+      554:  989-block  0
 branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-        -:  997:			/* Prevent readline from attempting path completion if
-        -:  998:			* rl_completion matches returns NULL */
-    #####:  999:			rl_attempted_completion_over = 1;
-    #####: 1000:			return (char **)NULL;
-    %%%%%: 1000-block  0
-unconditional  0 never executed
-        -: 1001:		}
-        -: 1002:
-        -: 1003:		/* History cmd completion */
-        1: 1004:		if (*text == '!')
-        1: 1004-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####: 1005:			matches = rl_completion_matches(text + 1, &hist_generator);
-    %%%%%: 1005-block  0
-call    0 never executed
-unconditional  1 never executed
-        -: 1006:
-        -: 1007:		/* If autocd or auto-open, try to expand ELN's first */
-       1*: 1008:		if (!matches && (autocd || auto_open)) {
-        1: 1008-block  0
-branch  0 taken 1 (fallthrough)
-branch  1 taken 0
-        1: 1008-block  1
-branch  2 taken 0 (fallthrough)
-branch  3 taken 1
-    %%%%%: 1008-block  2
+branch  1 taken 554
+    #####:  990:				if (type == DT_REG && access(ent->d_name, X_OK) == 0)
+    %%%%%:  990-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  990-block  1
+call    2 never executed
+branch  3 never executed
 branch  4 never executed
-branch  5 never executed
-        1: 1009:			if (*text >= '1' && *text <= '9') {
-        1: 1009-block  0
-branch  0 taken 1 (fallthrough)
+    #####:  991:					match = 1;
+    %%%%%:  991-block  0
+unconditional  0 never executed
+        -:  992:			}
+        -:  993:
+      554:  994:			else if (exec_path) {
+      554:  994-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 554
+    #####:  995:				if (type == DT_REG) {
+    %%%%%:  995-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  996:					snprintf(tmp, PATH_MAX, "%s%s", dir_tmp, ent->d_name);
+    #####:  997:					if (access(tmp, X_OK) == 0)
+    %%%%%:  997-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  998:						match = 1;
+    %%%%%:  998-block  0
+unconditional  0 never executed
+        -:  999:				}
+        -: 1000:			}
+        -: 1001:
+        -: 1002:			else
+      554: 1003:				match = 1;
+      554: 1003-block  0
+unconditional  0 taken 554
+        -: 1004:		}
+        -: 1005:
+     4113: 1006:		if (match)
+     4113: 1006-block  0
+branch  0 taken 4113 (fallthrough)
 branch  1 taken 0
-        1: 1009-block  1
-branch  2 taken 0 (fallthrough)
-branch  3 taken 1
-    #####: 1010:				int num_text = atoi(text);
-        -: 1011:
-    #####: 1012:				if (is_number(text) && num_text > 0 && num_text <= (int)files)
+     4113: 1007:			break;
+     4113: 1007-block  0
+unconditional  0 taken 4113
+        -: 1008:	}
+        -: 1009:
+     4514: 1010:	if (dir_tmp) { /* == exec_path */
+     4514: 1010-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4514
+    #####: 1011:		free(dir_tmp);
+    #####: 1012:		dir_tmp = (char *)NULL;
     %%%%%: 1012-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    %%%%%: 1012-block  1
-branch  3 never executed
-branch  4 never executed
-    %%%%%: 1012-block  2
-branch  5 never executed
-branch  6 never executed
-    #####: 1013:					matches = rl_completion_matches(text, &filenames_gen_eln);
-    %%%%%: 1013-block  0
-call    0 never executed
-unconditional  1 never executed
-        -: 1014:			}
-        -: 1015:
-        1: 1016:			if (!matches && *text != '/') {
-        1: 1016-block  0
-branch  0 taken 1 (fallthrough)
+unconditional  0 never executed
+        -: 1013:	}
+        -: 1014:
+        -: 1015:	/* readdir() returns NULL on reaching the end of directory stream.
+        -: 1016:	 * So that if entry is NULL, we have no matches */
+        -: 1017:
+     4514: 1018:	if (!ent) { /* == !match */
+     4514: 1018-block  0
+branch  0 taken 401 (fallthrough)
+branch  1 taken 4113
+      401: 1019:		if (directory) {
+      401: 1019-block  0
+branch  0 taken 395 (fallthrough)
+branch  1 taken 6
+      395: 1020:			closedir(directory);
+      395: 1020-block  0
+call    0 returned 395
+      395: 1021:			directory = (DIR *)NULL;
+unconditional  0 taken 395
+        -: 1022:		}
+        -: 1023:
+      401: 1024:		if (dirname) {
+      401: 1024-block  0
+branch  0 taken 401 (fallthrough)
 branch  1 taken 0
-        1: 1016-block  1
-branch  2 taken 1 (fallthrough)
-branch  3 taken 0
-        1: 1017:				matches = rl_completion_matches(text, &filenames_gen_text);
-        1: 1017-block  0
-call    0 returned 1
-unconditional  1 taken 1
-        -: 1018:			}
-        -: 1019:		}
-        -: 1020:
-        -: 1021:		/* Bookmarks completion */
-       1*: 1022:		if (!matches && (autocd || auto_open) && expand_bookmarks)
-        1: 1022-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    %%%%%: 1022-block  1
-branch  2 never executed
-branch  3 never executed
-    %%%%%: 1022-block  2
-branch  4 never executed
-branch  5 never executed
-    %%%%%: 1022-block  3
-branch  6 never executed
-branch  7 never executed
-    #####: 1023:			matches = rl_completion_matches(text, &bookmarks_generator);
-    %%%%%: 1023-block  0
-call    0 never executed
-unconditional  1 never executed
-        -: 1024:
-        -: 1025:		/* If neither autocd nor auto-open, try to complete with
-        -: 1026:		 * command names */
-        1: 1027:		if (!matches)
-        1: 1027-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 1
-    #####: 1028:			matches = rl_completion_matches(text, &bin_cmd_generator);
-    %%%%%: 1028-block  0
-call    0 never executed
-unconditional  1 never executed
-        -: 1029:	}
-        -: 1030:
-        -: 1031:	/* Second word or more */
-        -: 1032:	else {
+      401: 1025:			free(dirname);
+      401: 1026:			dirname = (char *)NULL;
+      401: 1026-block  0
+unconditional  0 taken 401
+        -: 1027:		}
+        -: 1028:
+      401: 1029:		if (filename) {
+      401: 1029-block  0
+branch  0 taken 401 (fallthrough)
+branch  1 taken 0
+      401: 1030:			free(filename);
+      401: 1031:			filename = (char *)NULL;
+      401: 1031-block  0
+unconditional  0 taken 401
+        -: 1032:		}
         -: 1033:
-        -: 1034:		/* #### ELN AND JUMP ORDER EXPANSION ### */
-        -: 1035:
-        -: 1036:		/* Perform this check only if the first char of the string to be
-        -: 1037:		 * completed is a number in order to prevent an unnecessary call
-        -: 1038:		 * to atoi */
-    #####: 1039:		if (*text >= '0' && *text <= '9') {
-    %%%%%: 1039-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%: 1039-block  1
-branch  2 never executed
-branch  3 never executed
-    %%%%%: 1039-block  2
-unconditional  4 never executed
-        -: 1040:
-    #####: 1041:			int num_text = atoi(text);
-        -: 1042:
-        -: 1043:			/* Dirjump: jo command */
-    #####: 1044:			if (*rl_line_buffer == 'j' && rl_line_buffer[1] == 'o'
-    %%%%%: 1044-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%: 1044-block  1
-branch  2 never executed
-branch  3 never executed
-    #####: 1045:			&& rl_line_buffer[2] == ' ') {
-    %%%%%: 1045-block  0
-branch  0 never executed
-branch  1 never executed
-    #####: 1046:				if (is_number(text) && num_text > 0 && num_text <= (int)jump_n) {
-    %%%%%: 1046-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    %%%%%: 1046-block  1
-branch  3 never executed
-branch  4 never executed
-    %%%%%: 1046-block  2
-branch  5 never executed
-branch  6 never executed
-    #####: 1047:					matches = rl_completion_matches(text,
-    %%%%%: 1047-block  0
-call    0 never executed
-unconditional  1 never executed
-        -: 1048:					    &jump_entries_generator);
-        -: 1049:				}
-        -: 1050:			}
-        -: 1051:
-        -: 1052:			/* Sort number expansion */
-    #####: 1053:			else if (*rl_line_buffer == 's'
-    %%%%%: 1053-block  0
-branch  0 never executed
-branch  1 never executed
-    #####: 1054:			&& (strncmp(rl_line_buffer, "st ", 3) == 0
-    %%%%%: 1054-block  0
-branch  0 never executed
-branch  1 never executed
-    #####: 1055:			|| strncmp(rl_line_buffer, "sort ", 5) == 0)
-    %%%%%: 1055-block  0
-branch  0 never executed
-branch  1 never executed
-    #####: 1056:			&& is_number(text) && num_text >= 0 && num_text <= SORT_TYPES)
-    %%%%%: 1056-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    %%%%%: 1056-block  1
-branch  3 never executed
-branch  4 never executed
-    %%%%%: 1056-block  2
-branch  5 never executed
-branch  6 never executed
-    #####: 1057:				matches = rl_completion_matches(text, &sort_num_generator);
-    %%%%%: 1057-block  0
-call    0 never executed
-unconditional  1 never executed
-        -: 1058:
-        -: 1059:			/* ELN expansion */
-    #####: 1060:			else if (is_number(text) && num_text > 0 && num_text <= (int)files)
-    %%%%%: 1060-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    %%%%%: 1060-block  1
-branch  3 never executed
-branch  4 never executed
-    %%%%%: 1060-block  2
-branch  5 never executed
-branch  6 never executed
-    #####: 1061:				matches = rl_completion_matches(text, &filenames_gen_eln);
-    %%%%%: 1061-block  0
-call    0 never executed
-unconditional  1 never executed
-        -: 1062:		}
-        -: 1063:
-        -: 1064:		/* ### DIRJUMP COMPLETION ### */
-        -: 1065:		/* j, jc, jp commands */
-    #####: 1066:		else if (*rl_line_buffer == 'j' && (rl_line_buffer[1] == ' '
-    %%%%%: 1066-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%: 1066-block  1
-branch  2 never executed
-branch  3 never executed
-    #####: 1067:		|| ((rl_line_buffer[1] == 'c' || rl_line_buffer[1] == 'p')
-    %%%%%: 1067-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%: 1067-block  1
-branch  2 never executed
-branch  3 never executed
-    #####: 1068:		&& rl_line_buffer[2] == ' ')
-    %%%%%: 1068-block  0
-branch  0 never executed
-branch  1 never executed
-    #####: 1069:		|| strncmp(rl_line_buffer, "jump ", 5) == 0))
-    %%%%%: 1069-block  0
-branch  0 never executed
-branch  1 never executed
-        -: 1070:
-    #####: 1071:			matches = rl_completion_matches(text, &jump_generator);
-    %%%%%: 1071-block  0
-call    0 never executed
-unconditional  1 never executed
-        -: 1072:
-        -: 1073:		/* ### BOOKMARKS COMPLETION ### */
-        -: 1074:
-    #####: 1075:		else if (*rl_line_buffer == 'b' && (rl_line_buffer[1] == 'm'
-    %%%%%: 1075-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%: 1075-block  1
-branch  2 never executed
-branch  3 never executed
-    #####: 1076:		|| rl_line_buffer[1] == 'o')
-    %%%%%: 1076-block  0
-branch  0 never executed
-branch  1 never executed
-    #####: 1077:		&& (strncmp(rl_line_buffer, "bm ", 3) == 0
-    %%%%%: 1077-block  0
-branch  0 never executed
-branch  1 never executed
-    #####: 1078:		|| strncmp(rl_line_buffer, "bookmarks ", 10) == 0)) {
-    %%%%%: 1078-block  0
-branch  0 never executed
-branch  1 never executed
-    #####: 1079:			rl_attempted_completion_over = 1;
-    #####: 1080:			matches = rl_completion_matches(text, &bookmarks_generator);
-    %%%%%: 1080-block  0
-call    0 never executed
-unconditional  1 never executed
-        -: 1081:		}
-        -: 1082:
-        -: 1083:		/* ### COLOR SCHEMES COMPLETION ### */
-    #####: 1084:		else if (*rl_line_buffer == 'c' && ((rl_line_buffer[1] == 's'
-    %%%%%: 1084-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%: 1084-block  1
-branch  2 never executed
-branch  3 never executed
-    #####: 1085:		&& rl_line_buffer[2] == ' ')
-    %%%%%: 1085-block  0
-branch  0 never executed
-branch  1 never executed
-    #####: 1086:		|| strncmp(rl_line_buffer, "colorschemes ", 13) == 0)) {
-    %%%%%: 1086-block  0
-branch  0 never executed
-branch  1 never executed
-    #####: 1087:			matches = rl_completion_matches(text,
-    %%%%%: 1087-block  0
-call    0 never executed
-unconditional  1 never executed
-        -: 1088:			    &cschemes_generator);
-        -: 1089:		}
-        -: 1090:
-        -: 1091:		/* ### PROFILES COMPLETION ### */
-        -: 1092:
-    #####: 1093:		else if (*rl_line_buffer == 'p' && (rl_line_buffer[1] == 'r'
-    %%%%%: 1093-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%: 1093-block  1
-branch  2 never executed
-branch  3 never executed
-    #####: 1094:		|| rl_line_buffer[1] == 'f')
-    %%%%%: 1094-block  0
-branch  0 never executed
-branch  1 never executed
-    #####: 1095:		&& (strncmp(rl_line_buffer, "pf set ", 7) == 0
-    %%%%%: 1095-block  0
-branch  0 never executed
-branch  1 never executed
-    #####: 1096:		|| strncmp(rl_line_buffer, "profile set ", 12) == 0
-    %%%%%: 1096-block  0
-branch  0 never executed
-branch  1 never executed
-    #####: 1097:		|| strncmp(rl_line_buffer, "pf del ", 7) == 0
-    %%%%%: 1097-block  0
-branch  0 never executed
-branch  1 never executed
-    #####: 1098:		|| strncmp(rl_line_buffer, "profile del ", 12) == 0)) {
-    %%%%%: 1098-block  0
-branch  0 never executed
-branch  1 never executed
-    #####: 1099:			rl_attempted_completion_over = 1;
-    #####: 1100:			matches = rl_completion_matches(text, &profiles_generator);
-    %%%%%: 1100-block  0
-call    0 never executed
-unconditional  1 never executed
-        -: 1101:		}
-        -: 1102:
-    #####: 1103:		else if (expand_bookmarks) {
+      401: 1034:		if (users_dirname) {
+      401: 1034-block  0
+branch  0 taken 401 (fallthrough)
+branch  1 taken 0
+      401: 1035:			free(users_dirname);
+      401: 1036:			users_dirname = (char *)NULL;
+      401: 1036-block  0
+unconditional  0 taken 401
+        -: 1037:		}
+        -: 1038:
+      401: 1039:		return (char *)NULL;
+      401: 1039-block  0
+unconditional  0 taken 401
+        -: 1040:	}
+        -: 1041:
+        -: 1042:	/* We have a match */
+        -: 1043:	else {
+     4113: 1044:		char *temp = (char *)NULL;
+        -: 1045:
+        -: 1046:		/* dirname && (strcmp(dirname, ".") != 0) */
+     4113: 1047:		if (dirname && (dirname[0] != '.' || dirname[1])) {
+     4113: 1047-block  0
+branch  0 taken 4113 (fallthrough)
+branch  1 taken 0
+     4113: 1047-block  1
+branch  2 taken 4 (fallthrough)
+branch  3 taken 4109
+        4: 1047-block  2
+branch  4 taken 1 (fallthrough)
+branch  5 taken 3
+        -: 1048:/*			if (rl_complete_with_tilde_expansion && *users_dirname == '~') {
+        -: 1049:				size_t dirlen = strlen(dirname);
+        -: 1050:				temp = (char *)xnmalloc(dirlen + strlen(ent->d_name) + 2,
+        -: 1051:									sizeof(char));
+        -: 1052:				strcpy(temp, dirname);
+        -: 1053:				// Canonicalization cuts off any final slash present.
+        -: 1054:				// We need to add it back.
+        -: 1055:
+        -: 1056:				if (dirname[dirlen - 1] != '/') {
+        -: 1057:					temp[dirlen] = '/';
+        -: 1058:					temp[dirlen + 1] = '\0';
+        -: 1059:				}
+        -: 1060:			} else { */
+     4110: 1061:			temp = (char *)xnmalloc(strlen(users_dirname) +
+     4110: 1062:					strlen(ent->d_name) + 1, sizeof(char));
+     4110: 1062-block  0
+call    0 returned 4110
+     4110: 1063:			strcpy(temp, users_dirname);
+        -: 1064:/*			} */
+     4110: 1065:			strcat(temp, ent->d_name);
+unconditional  0 taken 4110
+        -: 1066:		} else {
+        3: 1067:			temp = savestring(ent->d_name, strlen(ent->d_name));
+        3: 1067-block  0
+call    0 returned 3
+unconditional  1 taken 3
+        -: 1068:		}
+        -: 1069:
+     4113: 1070:		return (temp);
+     4113: 1070-block  0
+unconditional  0 taken 4113
+        -: 1071:	}
+        -: 1072:}
+        -: 1073:
+        -: 1074:/* Used by bookmarks completion */
+        -: 1075:static char *
+function bookmarks_generator called 41 returned 100% blocks executed 91%
+       41: 1076:bookmarks_generator(const char *text, int state)
+        -: 1077:{
+       41: 1078:	if (!bookmark_names)
+       41: 1078-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 41
+    #####: 1079:		return (char *)NULL;
+    %%%%%: 1079-block  0
+unconditional  0 never executed
+        -: 1080:
+        -: 1081:	static int i;
+        -: 1082:	static size_t len;
+        -: 1083:	char *name;
+        -: 1084:
+       41: 1085:	if (!state) {
+       41: 1085-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 38
+        3: 1086:		i = 0;
+        3: 1087:		len = strlen(text);
+        3: 1087-block  0
+unconditional  0 taken 3
+        -: 1088:	}
+        -: 1089:
+        -: 1090:	/* Look for bookmarks in bookmark names for a match */
+       60: 1091:	while ((name = bookmark_names[i++]) != NULL) {
+       41: 1091-block  0
+unconditional  0 taken 41
+       60: 1091-block  1
+branch  1 taken 57
+branch  2 taken 3 (fallthrough)
+       57: 1092:		if (strncmp(name, text, len) == 0)
+       57: 1092-block  0
+branch  0 taken 38 (fallthrough)
+branch  1 taken 19
+       38: 1093:			return strdup(name);
+       38: 1093-block  0
+call    0 returned 38
+unconditional  1 taken 38
+        -: 1094:	}
+        -: 1095:
+        3: 1096:	return (char *)NULL;
+        3: 1096-block  0
+unconditional  0 taken 3
+        -: 1097:}
+        -: 1098:
+        -: 1099:/* Used by history completion */
+        -: 1100:static char *
+function hist_generator called 0 returned 0% blocks executed 0%
+    #####: 1101:hist_generator(const char *text, int state)
+        -: 1102:{
+    #####: 1103:	if (!history)
     %%%%%: 1103-block  0
 branch  0 never executed
 branch  1 never executed
-    #####: 1104:			matches = rl_completion_matches(text, &bookmarks_generator);
+    #####: 1104:		return (char *)NULL;
     %%%%%: 1104-block  0
-call    0 never executed
-unconditional  1 never executed
-        -: 1105:		}
-        -: 1106:
-    #####: 1107:		else if (*rl_line_buffer == 's'
-    %%%%%: 1107-block  0
-branch  0 never executed
-branch  1 never executed
-    #####: 1108:		&& (strncmp(rl_line_buffer, "st ", 3) == 0
-    %%%%%: 1108-block  0
-branch  0 never executed
-branch  1 never executed
-    #####: 1109:		|| strncmp(rl_line_buffer, "sort ", 5) == 0))
-    %%%%%: 1109-block  0
-branch  0 never executed
-branch  1 never executed
-    #####: 1110:			matches = rl_completion_matches(text, &sort_name_generator);
+unconditional  0 never executed
+        -: 1105:
+        -: 1106:	static int i;
+        -: 1107:	static size_t len;
+        -: 1108:	char *name;
+        -: 1109:
+    #####: 1110:	if (!state) {
     %%%%%: 1110-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1111:		i = 0;
+    #####: 1112:		len = strlen(text);
+    %%%%%: 1112-block  0
+unconditional  0 never executed
+        -: 1113:	}
+        -: 1114:
+        -: 1115:	/* Look for cmd history entries for a match */
+    #####: 1116:	while ((name = history[i++]) != NULL) {
+    %%%%%: 1116-block  0
+unconditional  0 never executed
+    %%%%%: 1116-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 1117:		if (strncmp(name, text, len) == 0)
+    %%%%%: 1117-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1118:			return strdup(name);
+    %%%%%: 1118-block  0
 call    0 never executed
 unconditional  1 never executed
-        -: 1111:	}
-        -: 1112:
-        -: 1113:	/* ### PATH COMPLETION ### */
-        -: 1114:
-        -: 1115:	/* If none of the above, readline will attempt
-        -: 1116:	 * path completion instead via my custom my_rl_path_completion() */
-        1: 1117:	return matches;
-        1: 1117-block  0
+        -: 1119:	}
+        -: 1120:
+    #####: 1121:	return (char *)NULL;
+    %%%%%: 1121-block  0
+unconditional  0 never executed
+        -: 1122:}
+        -: 1123:
+        -: 1124:/* Expand string into matching path in the jump database. Used by
+        -: 1125: * j, jc, and jp commands */
+        -: 1126:static char *
+function jump_generator called 18 returned 100% blocks executed 75%
+       18: 1127:jump_generator(const char *text, int state)
+        -: 1128:{
+        -: 1129:	static int i;
+        -: 1130:	char *name;
+        -: 1131:
+       18: 1132:	if (!state)
+       18: 1132-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 17
+        1: 1133:		i = 0;
+        1: 1133-block  0
 unconditional  0 taken 1
-        -: 1118:}
+        -: 1134:
+       18: 1135:	if (!jump_db)
+       18: 1135-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 18
+    #####: 1136:		return (char *)NULL;
+    %%%%%: 1136-block  0
+unconditional  0 never executed
+        -: 1137:
+        -: 1138:	/* Look for matches in the dirhist list */
+       48: 1139:	while ((name = jump_db[i++].path) != NULL) {
+       18: 1139-block  0
+unconditional  0 taken 18
+       48: 1139-block  1
+branch  1 taken 47
+branch  2 taken 1 (fallthrough)
+        -: 1140:		/* Exclude CWD */
+       47: 1141:		if (name[1] == ws[cur_ws].path[1] && strcmp(name, ws[cur_ws].path) == 0)
+       47: 1141-block  0
+branch  0 taken 36 (fallthrough)
+branch  1 taken 11
+       36: 1141-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 35
+        1: 1142:			continue;
+        1: 1142-block  0
+unconditional  0 taken 1
+        -: 1143:		/* Filter by parent */
+       46: 1144:		if (rl_line_buffer[1] == 'p') {
+       46: 1144-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 46
+    #####: 1145:			if (!strstr(ws[cur_ws].path, name))
+    %%%%%: 1145-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1146:				continue;
+    %%%%%: 1146-block  0
+unconditional  0 never executed
+        -: 1147:		}
+        -: 1148:		/* Filter by child */
+       46: 1149:		else if (rl_line_buffer[1] == 'c') {
+       46: 1149-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 46
+    #####: 1150:			if (!strstr(name, ws[cur_ws].path))
+    %%%%%: 1150-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1151:				continue;
+    %%%%%: 1151-block  0
+unconditional  0 never executed
+        -: 1152:		}
+        -: 1153:
+       46: 1154:		if (strstr(name, text))
+       46: 1154-block  0
+branch  0 taken 17 (fallthrough)
+branch  1 taken 29
+       17: 1155:			return strdup(name);
+       17: 1155-block  0
+call    0 returned 17
+unconditional  1 taken 17
+        -: 1156:	}
+        -: 1157:
+        1: 1158:	return (char *)NULL;
+        1: 1158-block  0
+unconditional  0 taken 1
+        -: 1159:}
+        -: 1160:
+        -: 1161:/* Expand jump order number into the corresponding path. Used by the
+        -: 1162: * jo command */
+        -: 1163:static char *
+function jump_entries_generator called 0 returned 0% blocks executed 0%
+    #####: 1164:jump_entries_generator(const char *text, int state)
+        -: 1165:{
+        -: 1166:	static size_t i;
+        -: 1167:	char *name;
+        -: 1168:
+    #####: 1169:	if (!state)
+    %%%%%: 1169-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1170:		i = 0;
+    %%%%%: 1170-block  0
+unconditional  0 never executed
+        -: 1171:
+    #####: 1172:	int num_text = atoi(text);
+        -: 1173:
+        -: 1174:	/* Check list of jump entries for a match */
+    #####: 1175:	while (i <= jump_n && (name = jump_db[i++].path) != NULL)
+    %%%%%: 1175-block  0
+unconditional  0 never executed
+    %%%%%: 1175-block  1
+branch  1 never executed
+branch  2 never executed
+    %%%%%: 1175-block  2
+branch  3 never executed
+branch  4 never executed
+    #####: 1176:		if (*name == *jump_db[num_text - 1].path && strcmp(name,
+    %%%%%: 1176-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1177:					jump_db[num_text - 1].path) == 0)
+    %%%%%: 1177-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1178:			return strdup(name);
+    %%%%%: 1178-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1179:
+    #####: 1180:	return (char *)NULL;
+    %%%%%: 1180-block  0
+unconditional  0 never executed
+        -: 1181:}
+        -: 1182:
+        -: 1183:static char *
+function cschemes_generator called 21 returned 100% blocks executed 91%
+       21: 1184:cschemes_generator(const char *text, int state)
+        -: 1185:{
+       21: 1186:	if (!color_schemes)
+       21: 1186-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 21
+    #####: 1187:		return (char *)NULL;
+    %%%%%: 1187-block  0
+unconditional  0 never executed
+        -: 1188:
+        -: 1189:	static int i;
+        -: 1190:	static size_t len;
+        -: 1191:	char *name;
+        -: 1192:
+       21: 1193:	if (!state) {
+       21: 1193-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 20
+        1: 1194:		i = 0;
+        1: 1195:		len = strlen(text);
+        1: 1195-block  0
+unconditional  0 taken 1
+        -: 1196:	} /* The state variable is zero only the first time the function is
+        -: 1197:	called, and a non-zero positive in later calls. This means that i
+        -: 1198:	and len will be necessarilly initialized the first time */
+        -: 1199:
+        -: 1200:	/* Look for color schemes in color_schemes for a match */
+       21: 1201:	while ((name = color_schemes[i++]) != NULL) {
+       21: 1201-block  0
+unconditional  0 taken 21
+       21: 1201-block  1
+branch  1 taken 20
+branch  2 taken 1 (fallthrough)
+       20: 1202:		if (strncmp(name, text, len) == 0)
+       20: 1202-block  0
+branch  0 taken 20 (fallthrough)
+branch  1 taken 0
+       20: 1203:			return strdup(name);
+       20: 1203-block  0
+call    0 returned 20
+unconditional  1 taken 20
+        -: 1204:	}
+        -: 1205:
+        1: 1206:	return (char *)NULL;
+        1: 1206-block  0
+unconditional  0 taken 1
+        -: 1207:}
+        -: 1208:
+        -: 1209:/* Used by profiles completion */
+        -: 1210:static char *
+function profiles_generator called 8 returned 100% blocks executed 91%
+        8: 1211:profiles_generator(const char *text, int state)
+        -: 1212:{
+        8: 1213:	if (!profile_names)
+        8: 1213-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 8
+    #####: 1214:		return (char *)NULL;
+    %%%%%: 1214-block  0
+unconditional  0 never executed
+        -: 1215:
+        -: 1216:	static int i;
+        -: 1217:	static size_t len;
+        -: 1218:	char *name;
+        -: 1219:
+        8: 1220:	if (!state) {
+        8: 1220-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 6
+        2: 1221:		i = 0;
+        2: 1222:		len = strlen(text);
+        2: 1222-block  0
+unconditional  0 taken 2
+        -: 1223:	} /* The state variable is zero only the first time the function is
+        -: 1224:	called, and a non-zero positive in later calls. This means that i
+        -: 1225:	and len will be necessarilly initialized the first time */
+        -: 1226:
+        -: 1227:	/* Look for profiles in profile_names for a match */
+       13: 1228:	while ((name = profile_names[i++]) != NULL) {
+        8: 1228-block  0
+unconditional  0 taken 8
+       13: 1228-block  1
+branch  1 taken 11
+branch  2 taken 2 (fallthrough)
+       11: 1229:		if (strncmp(name, text, len) == 0)
+       11: 1229-block  0
+branch  0 taken 6 (fallthrough)
+branch  1 taken 5
+        6: 1230:			return strdup(name);
+        6: 1230-block  0
+call    0 returned 6
+unconditional  1 taken 6
+        -: 1231:	}
+        -: 1232:
+        2: 1233:	return (char *)NULL;
+        2: 1233-block  0
+unconditional  0 taken 2
+        -: 1234:}
+        -: 1235:
+        -: 1236:/* Used by ELN expansion */
+        -: 1237:static char *
+function filenames_gen_text called 7 returned 100% blocks executed 92%
+        7: 1238:filenames_gen_text(const char *text, int state)
+        -: 1239:{
+        -: 1240:	static size_t i, len = 0;
+        -: 1241:	char *name;
+        7: 1242:	rl_filename_completion_desired = 1;
+        -: 1243:	/* According to the GNU readline documention: "If it is set to a
+        -: 1244:	 * non-zero value, directory names have a slash appended and
+        -: 1245:	 * Readline attempts to quote completed file names if they contain
+        -: 1246:	 * any embedded word break characters." To make the quoting part
+        -: 1247:	 * work I had to specify a custom quoting function (my_rl_quote) */
+        7: 1248:	if (!state) { /* state is zero only the first time readline is
+        7: 1248-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 3
+        -: 1249:	executed */
+        4: 1250:		i = 0;
+        4: 1251:		len = strlen(text);
+        4: 1251-block  0
+unconditional  0 taken 4
+        -: 1252:	}
+        -: 1253:
+        -: 1254:	/* Check list of currently displayed files for a match */
+      132: 1255:	while (i < files && (name = file_info[i++].name) != NULL)
+        7: 1255-block  0
+unconditional  0 taken 7
+      132: 1255-block  1
+branch  1 taken 128 (fallthrough)
+branch  2 taken 4
+      128: 1255-block  2
+branch  3 taken 128
+branch  4 taken 0 (fallthrough)
+     256*: 1256:		if (case_sens_path_comp ? strncmp(name, text, len) == 0
+      128: 1256-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 128
+    %%%%%: 1256-block  1
+unconditional  2 never executed
+      128: 1256-block  2
+branch  3 taken 3 (fallthrough)
+branch  4 taken 125
+      128: 1257:		: strncasecmp(name, text, len) == 0)
+      128: 1257-block  0
+unconditional  0 taken 128
+        3: 1258:			return strdup(name);
+        3: 1258-block  0
+call    0 returned 3
+unconditional  1 taken 3
+        -: 1259:
+        4: 1260:	return (char *)NULL;
+        4: 1260-block  0
+unconditional  0 taken 4
+        -: 1261:}
+        -: 1262:
+        -: 1263:/* Used by ELN expansion */
+        -: 1264:static char *
+function filenames_gen_eln called 0 returned 0% blocks executed 0%
+    #####: 1265:filenames_gen_eln(const char *text, int state)
+        -: 1266:{
+        -: 1267:	static size_t i;
+        -: 1268:	char *name;
+    #####: 1269:	rl_filename_completion_desired = 1;
+        -: 1270:
+    #####: 1271:	if (!state)
+    %%%%%: 1271-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1272:		i = 0;
+    %%%%%: 1272-block  0
+unconditional  0 never executed
+        -: 1273:
+    #####: 1274:	int num_text = atoi(text);
+        -: 1275:
+        -: 1276:	/* Check list of currently displayed files for a match */
+    #####: 1277:	while (i < files && (name = file_info[i++].name) != NULL) {
+    %%%%%: 1277-block  0
+unconditional  0 never executed
+    %%%%%: 1277-block  1
+branch  1 never executed
+branch  2 never executed
+    %%%%%: 1277-block  2
+branch  3 never executed
+branch  4 never executed
+    #####: 1278:		if (*name == *file_info[num_text - 1].name
+    %%%%%: 1278-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1279:		&& strcmp(name, file_info[num_text - 1].name) == 0) {
+    %%%%%: 1279-block  0
+branch  0 never executed
+branch  1 never executed
+        -: 1280:#ifndef _NO_SUGGESTIONS
+    #####: 1281:			if (suggestion_buf)
+    %%%%%: 1281-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1282:				clear_suggestion();
+    %%%%%: 1282-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1283:#endif
+    #####: 1284:			return strdup(name);
+    %%%%%: 1284-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1285:		}
+        -: 1286:	}
+        -: 1287:
+    #####: 1288:	return (char *)NULL;
+    %%%%%: 1288-block  0
+unconditional  0 never executed
+        -: 1289:}
+        -: 1290:
+        -: 1291:/* Used by commands completion */
+        -: 1292:static char *
+function bin_cmd_generator called 2 returned 100% blocks executed 92%
+        2: 1293:bin_cmd_generator(const char *text, int state)
+        -: 1294:{
+        2: 1295:	if (!bin_commands)
+        2: 1295-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####: 1296:		return (char *)NULL;
+    %%%%%: 1296-block  0
+unconditional  0 never executed
+        -: 1297:
+        -: 1298:	static int i;
+        -: 1299:	static size_t len;
+        -: 1300:	char *name;
+        -: 1301:
+        2: 1302:	if (!state) {
+        2: 1302-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 1
+        1: 1303:		i = 0;
+        1: 1304:		len = strlen(text);
+        1: 1304-block  0
+unconditional  0 taken 1
+        -: 1305:	}
+        -: 1306:
+     3746: 1307:	while ((name = bin_commands[i++]) != NULL) {
+        2: 1307-block  0
+unconditional  0 taken 2
+     3746: 1307-block  1
+branch  1 taken 3745
+branch  2 taken 1 (fallthrough)
+     3745: 1308:		if (*text == *name && strncmp(name, text, len) == 0)
+     3745: 1308-block  0
+branch  0 taken 60 (fallthrough)
+branch  1 taken 3685
+       60: 1308-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 59
+        1: 1309:			return strdup(name);
+        1: 1309-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -: 1310:	}
+        -: 1311:
+        1: 1312:	return (char *)NULL;
+        1: 1312-block  0
+unconditional  0 taken 1
+        -: 1313:}
+        -: 1314:
+        -: 1315:static char *
+function sort_num_generator called 0 returned 0% blocks executed 0%
+    #####: 1316:sort_num_generator(const char *text, int state)
+        -: 1317:{
+        -: 1318:	static size_t i;
+        -: 1319:	char *name;
+    #####: 1320:	rl_filename_completion_desired = 1;
+        -: 1321:
+    #####: 1322:	if (!state)
+    %%%%%: 1322-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1323:		i = 0;
+    %%%%%: 1323-block  0
+unconditional  0 never executed
+        -: 1324:
+    #####: 1325:	int num_text = atoi(text);
+        -: 1326:	static char *sorts[] = {
+        -: 1327:	    "none",
+        -: 1328:	    "name",
+        -: 1329:	    "size",
+        -: 1330:	    "atime",
+        -: 1331:	    "btime",
+        -: 1332:	    "ctime",
+        -: 1333:	    "mtime",
+        -: 1334:	    "version",
+        -: 1335:	    "extension",
+        -: 1336:	    "inode",
+        -: 1337:	    "owner",
+        -: 1338:	    "group",
+        -: 1339:	    NULL
+        -: 1340:	};
+        -: 1341:
+        -: 1342:	/* Check list of currently displayed files for a match */
+    #####: 1343:	while (i <= SORT_TYPES && (name = sorts[i++]) != NULL) {
+    %%%%%: 1343-block  0
+unconditional  0 never executed
+    %%%%%: 1343-block  1
+branch  1 never executed
+branch  2 never executed
+    %%%%%: 1343-block  2
+branch  3 never executed
+branch  4 never executed
+    #####: 1344:		if (*name == *sorts[num_text]
+    %%%%%: 1344-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1345:		&& strcmp(name, sorts[num_text]) == 0)
+    %%%%%: 1345-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1346:			return strdup(name);
+    %%%%%: 1346-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1347:	}
+        -: 1348:
+    #####: 1349:	return (char *)NULL;
+    %%%%%: 1349-block  0
+unconditional  0 never executed
+        -: 1350:}
+        -: 1351:
+        -: 1352:static char *
+function nets_generator called 0 returned 0% blocks executed 0%
+    #####: 1353:nets_generator(const char *text, int state)
+        -: 1354:{
+    #####: 1355:	if (!remotes)
+    %%%%%: 1355-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1356:		return (char *)NULL;
+    %%%%%: 1356-block  0
+unconditional  0 never executed
+        -: 1357:
+        -: 1358:	static int i;
+        -: 1359:	static size_t len;
+        -: 1360:	char *name;
+        -: 1361:
+    #####: 1362:	if (!state) {
+    %%%%%: 1362-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1363:		i = 0;
+    #####: 1364:		len = strlen(text);
+    %%%%%: 1364-block  0
+unconditional  0 never executed
+        -: 1365:	}
+        -: 1366:
+    #####: 1367:	while ((name = remotes[i++].name) != NULL) {
+    %%%%%: 1367-block  0
+unconditional  0 never executed
+    %%%%%: 1367-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 1368:		if (strncmp(name, text, len) == 0)
+    %%%%%: 1368-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1369:			return strdup(name);
+    %%%%%: 1369-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1370:	}
+        -: 1371:
+    #####: 1372:	return (char *)NULL;
+    %%%%%: 1372-block  0
+unconditional  0 never executed
+        -: 1373:}
+        -: 1374:
+        -: 1375:static char *
+function sort_name_generator called 0 returned 0% blocks executed 0%
+    #####: 1376:sort_name_generator(const char *text, int state)
+        -: 1377:{
+        -: 1378:	static int i;
+        -: 1379:	static size_t len;
+        -: 1380:	char *name;
+        -: 1381:
+    #####: 1382:	if (!state) {
+    %%%%%: 1382-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1383:		i = 0;
+    #####: 1384:		len = strlen(text);
+    %%%%%: 1384-block  0
+unconditional  0 never executed
+        -: 1385:	}
+        -: 1386:
+        -: 1387:	static char *sorts[] = {
+        -: 1388:	    "none",
+        -: 1389:	    "name",
+        -: 1390:	    "size",
+        -: 1391:	    "atime",
+        -: 1392:	    "btime",
+        -: 1393:	    "ctime",
+        -: 1394:	    "mtime",
+        -: 1395:	    "version",
+        -: 1396:	    "extension",
+        -: 1397:	    "inode",
+        -: 1398:	    "owner",
+        -: 1399:	    "group",
+        -: 1400:	    NULL};
+        -: 1401:
+    #####: 1402:	while ((name = sorts[i++]) != NULL) {
+    %%%%%: 1402-block  0
+unconditional  0 never executed
+    %%%%%: 1402-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 1403:		if (*text == *name && strncmp(name, text, len) == 0)
+    %%%%%: 1403-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1403-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1404:			return strdup(name);
+    %%%%%: 1404-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1405:	}
+        -: 1406:
+    #####: 1407:	return (char *)NULL;
+    %%%%%: 1407-block  0
+unconditional  0 never executed
+        -: 1408:}
+        -: 1409:
+        -: 1410:/* Generate entries from the jump database (not using the j function)*/
+        -: 1411:/*char *
+        -: 1412:jump_gen(const char *text, int state)
+        -: 1413:{
+        -: 1414:	static int i;
+        -: 1415:	static size_t len;
+        -: 1416:	char *name;
+        -: 1417:
+        -: 1418:	if (!state) {
+        -: 1419:		i = 0;
+        -: 1420:		len = strlen(text);
+        -: 1421:	}
+        -: 1422:
+        -: 1423:	while ((name = jump_db[i++].path) != NULL) {
+        -: 1424:		if (case_sens_path_comp ? strncmp(name, text, len) == 0
+        -: 1425:		: strncasecmp(name, text, len) == 0)
+        -: 1426:			return strdup(name);
+        -: 1427:	}
+        -: 1428:
+        -: 1429:	return (char *)NULL;
+        -: 1430:} */
+        -: 1431:
+        -: 1432:char **
+function my_rl_completion called 19 returned 100% blocks executed 49%
+       19: 1433:my_rl_completion(const char *text, int start, int end)
+        -: 1434:{
+       19: 1435:	char **matches = (char **)NULL;
+        -: 1436:
+       19: 1437:	if (start == 0) { /* Only for the first word entered in the prompt */
+       19: 1437-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 15
+        -: 1438:		/* Commands completion */
+        4: 1439:		if (end == 0) { /* If text is empty, do nothing */
+        4: 1439-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4
+        -: 1440:			/* Prevent readline from attempting path completion if
+        -: 1441:			* rl_completion matches returns NULL */
+    #####: 1442:			rl_attempted_completion_over = 1;
+    #####: 1443:			return (char **)NULL;
+    %%%%%: 1443-block  0
+unconditional  0 never executed
+        -: 1444:		}
+        -: 1445:
+        -: 1446:		/* History cmd completion */
+        4: 1447:		if (*text == '!')
+        4: 1447-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4
+    #####: 1448:			matches = rl_completion_matches(text + 1, &hist_generator);
+    %%%%%: 1448-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1449:
+        -: 1450:		/* If autocd or auto-open, try to expand ELN's first */
+       4*: 1451:		if (!matches && (autocd || auto_open)) {
+        4: 1451-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 0
+        4: 1451-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 4
+    %%%%%: 1451-block  2
+branch  4 never executed
+branch  5 never executed
+        4: 1452:			if (*text >= '1' && *text <= '9') {
+        4: 1452-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 0
+        4: 1452-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 4
+    #####: 1453:				int num_text = atoi(text);
+        -: 1454:
+    #####: 1455:				if (is_number(text) && num_text > 0 && num_text <= (int)files)
+    %%%%%: 1455-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    %%%%%: 1455-block  1
+branch  3 never executed
+branch  4 never executed
+    %%%%%: 1455-block  2
+branch  5 never executed
+branch  6 never executed
+    #####: 1456:					matches = rl_completion_matches(text, &filenames_gen_eln);
+    %%%%%: 1456-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1457:			}
+        -: 1458:
+        -: 1459:			/* Compĺete with files in CWD */
+        4: 1460:			if (!matches && *text != '/')
+        4: 1460-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 0
+        4: 1460-block  1
+branch  2 taken 4 (fallthrough)
+branch  3 taken 0
+        4: 1461:				matches = rl_completion_matches(text, &filenames_gen_text);
+        4: 1461-block  0
+call    0 returned 4
+unconditional  1 taken 4
+        -: 1462:
+        -: 1463:			/* Complete with entries in the jump database */
+        -: 1464:/*			if (autocd && !matches)
+        -: 1465:				matches = rl_completion_matches(text, &jump_gen); */
+        -: 1466:		}
+        -: 1467:
+        -: 1468:		/* Bookmarks completion */
+       4*: 1469:		if (!matches && (autocd || auto_open) && expand_bookmarks)
+        4: 1469-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 3
+        1: 1469-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1
+    %%%%%: 1469-block  2
+branch  4 never executed
+branch  5 never executed
+        1: 1469-block  3
+branch  6 taken 0 (fallthrough)
+branch  7 taken 1
+    #####: 1470:			matches = rl_completion_matches(text, &bookmarks_generator);
+    %%%%%: 1470-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1471:
+        -: 1472:		/* If neither autocd nor auto-open, try to complete with
+        -: 1473:		 * command names */
+        4: 1474:		if (!matches)
+        4: 1474-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 3
+        1: 1475:			matches = rl_completion_matches(text, &bin_cmd_generator);
+        1: 1475-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -: 1476:	}
+        -: 1477:
+        -: 1478:	/* Second word or more */
+        -: 1479:	else {
+        -: 1480:		/* #### ELN AND JUMP ORDER EXPANSION ### */
+        -: 1481:
+        -: 1482:		/* Perform this check only if the first char of the string to be
+        -: 1483:		 * completed is a number in order to prevent an unnecessary call
+        -: 1484:		 * to atoi */
+      15*: 1485:		if (*text >= '0' && *text <= '9') {
+       15: 1485-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 12
+        3: 1485-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 3
+    %%%%%: 1485-block  2
+unconditional  4 never executed
+    #####: 1486:			int num_text = atoi(text);
+        -: 1487:
+        -: 1488:			/* Dirjump: jo command */
+    #####: 1489:			if (*rl_line_buffer == 'j' && rl_line_buffer[1] == 'o'
+    %%%%%: 1489-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1489-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1490:			&& rl_line_buffer[2] == ' ') {
+    %%%%%: 1490-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1491:				if (is_number(text) && num_text > 0 && num_text <= (int)jump_n) {
+    %%%%%: 1491-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    %%%%%: 1491-block  1
+branch  3 never executed
+branch  4 never executed
+    %%%%%: 1491-block  2
+branch  5 never executed
+branch  6 never executed
+    #####: 1492:					matches = rl_completion_matches(text,
+    %%%%%: 1492-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1493:					    &jump_entries_generator);
+        -: 1494:				}
+        -: 1495:			}
+        -: 1496:
+        -: 1497:			/* Sort number expansion */
+    #####: 1498:			else if (*rl_line_buffer == 's'
+    %%%%%: 1498-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1499:			&& (strncmp(rl_line_buffer, "st ", 3) == 0
+    %%%%%: 1499-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1500:			|| strncmp(rl_line_buffer, "sort ", 5) == 0)
+    %%%%%: 1500-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1501:			&& is_number(text) && num_text >= 0 && num_text <= SORT_TYPES)
+    %%%%%: 1501-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    %%%%%: 1501-block  1
+branch  3 never executed
+branch  4 never executed
+    %%%%%: 1501-block  2
+branch  5 never executed
+branch  6 never executed
+    #####: 1502:				matches = rl_completion_matches(text, &sort_num_generator);
+    %%%%%: 1502-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1503:
+        -: 1504:			/* ELN expansion */
+    #####: 1505:			else if (is_number(text) && num_text > 0 && num_text <= (int)files)
+    %%%%%: 1505-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    %%%%%: 1505-block  1
+branch  3 never executed
+branch  4 never executed
+    %%%%%: 1505-block  2
+branch  5 never executed
+branch  6 never executed
+    #####: 1506:				matches = rl_completion_matches(text, &filenames_gen_eln);
+    %%%%%: 1506-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1507:		}
+        -: 1508:
+        -: 1509:		/* ### DIRJUMP COMPLETION ### */
+        -: 1510:		/* j, jc, jp commands */
+       15: 1511:		else if (*rl_line_buffer == 'j' && (rl_line_buffer[1] == ' '
+       15: 1511-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 14
+        1: 1511-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1
+    #####: 1512:		|| ((rl_line_buffer[1] == 'c' || rl_line_buffer[1] == 'p')
+    %%%%%: 1512-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1512-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1513:		&& rl_line_buffer[2] == ' ')
+    %%%%%: 1513-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1514:		|| strncmp(rl_line_buffer, "jump ", 5) == 0))
+    %%%%%: 1514-block  0
+branch  0 never executed
+branch  1 never executed
+        1: 1515:			matches = rl_completion_matches(text, &jump_generator);
+        1: 1515-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -: 1516:
+        -: 1517:		/* ### BOOKMARKS COMPLETION ### */
+        -: 1518:
+       14: 1519:		else if (*rl_line_buffer == 'b' && (rl_line_buffer[1] == 'm'
+       14: 1519-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 11
+        3: 1519-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 3
+    #####: 1520:		|| rl_line_buffer[1] == 'o')
+    %%%%%: 1520-block  0
+branch  0 never executed
+branch  1 never executed
+        3: 1521:		&& (strncmp(rl_line_buffer, "bm ", 3) == 0
+        3: 1521-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####: 1522:		|| strncmp(rl_line_buffer, "bookmarks ", 10) == 0)) {
+    %%%%%: 1522-block  0
+branch  0 never executed
+branch  1 never executed
+        -: 1523:#ifndef _NO_SUGGESTIONS
+        3: 1524:			if (suggestion.type != FILE_SUG)
+        3: 1524-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 0
+        3: 1525:				rl_attempted_completion_over = 1;
+        3: 1525-block  0
+unconditional  0 taken 3
+        -: 1526:#endif
+        3: 1527:			matches = rl_completion_matches(text, &bookmarks_generator);
+        3: 1527-block  0
+call    0 returned 3
+unconditional  1 taken 3
+        -: 1528:		}
+        -: 1529:
+        -: 1530:		/* ### COLOR SCHEMES COMPLETION ### */
+       11: 1531:		else if (*rl_line_buffer == 'c' && ((rl_line_buffer[1] == 's'
+       11: 1531-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 10
+        1: 1531-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 0
+        1: 1532:		&& rl_line_buffer[2] == ' ')
+        1: 1532-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1533:		|| strncmp(rl_line_buffer, "colorschemes ", 13) == 0)) {
+    %%%%%: 1533-block  0
+branch  0 never executed
+branch  1 never executed
+        1: 1534:			matches = rl_completion_matches(text,
+        1: 1534-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -: 1535:			    &cschemes_generator);
+        -: 1536:		}
+        -: 1537:
+        -: 1538:		/* ### PROFILES COMPLETION ### */
+        -: 1539:
+       10: 1540:		else if (*rl_line_buffer == 'p' && (rl_line_buffer[1] == 'r'
+       10: 1540-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 6
+        4: 1540-block  1
+branch  2 taken 4 (fallthrough)
+branch  3 taken 0
+        4: 1541:		|| rl_line_buffer[1] == 'f')
+        4: 1541-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 0
+        4: 1542:		&& (strncmp(rl_line_buffer, "pf set ", 7) == 0
+        4: 1542-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 2
+        2: 1543:		|| strncmp(rl_line_buffer, "profile set ", 12) == 0
+        2: 1543-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2: 1544:		|| strncmp(rl_line_buffer, "pf del ", 7) == 0
+        2: 1544-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2: 1545:		|| strncmp(rl_line_buffer, "profile del ", 12) == 0)) {
+        2: 1545-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+        -: 1546:#ifndef _NO_SUGGESTIONS
+        2: 1547:			if (suggestion.type != FILE_SUG)
+        2: 1547-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2: 1548:				rl_attempted_completion_over = 1;
+        2: 1548-block  0
+unconditional  0 taken 2
+        -: 1549:#endif /* _NO_SUGGESTIONS */
+        2: 1550:			matches = rl_completion_matches(text, &profiles_generator);
+        2: 1550-block  0
+call    0 returned 2
+unconditional  1 taken 2
+        -: 1551:		}
+        -: 1552:
+        8: 1553:		else if (expand_bookmarks) {
+        8: 1553-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 8
+    #####: 1554:			matches = rl_completion_matches(text, &bookmarks_generator);
+    %%%%%: 1554-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1555:		}
+        -: 1556:
+        8: 1557:		else if (*rl_line_buffer == 's'
+        8: 1557-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 8
+    #####: 1558:		&& (strncmp(rl_line_buffer, "st ", 3) == 0
+    %%%%%: 1558-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1559:		|| strncmp(rl_line_buffer, "sort ", 5) == 0))
+    %%%%%: 1559-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1560:			matches = rl_completion_matches(text, &sort_name_generator);
+    %%%%%: 1560-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1561:
+        8: 1562:		else if (*rl_line_buffer == 'n'
+        8: 1562-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 8
+    #####: 1563:		&& strncmp(rl_line_buffer, "net ", 4) == 0)
+    %%%%%: 1563-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1564:			matches = rl_completion_matches(text, &nets_generator);
+    %%%%%: 1564-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1565:	}
+        -: 1566:
+        -: 1567:	/* ### PATH COMPLETION ### */
+        -: 1568:
+        -: 1569:	/* If none of the above, readline will attempt
+        -: 1570:	 * path completion instead via my custom my_rl_path_completion() */
+       19: 1571:	return matches;
+       19: 1571-block  0
+unconditional  0 taken 19
+        -: 1572:}
+        -: 1573:
+        -: 1574:int
+function initialize_readline called 4 returned 100% blocks executed 91%
+        4: 1575:initialize_readline(void)
+        -: 1576:{
+        -: 1577:	/* #### INITIALIZE READLINE (what a hard beast to tackle!!) #### */
+        -: 1578:
+        -: 1579:	/* Set the name of the program using readline. Mostly used for
+        -: 1580:	 * conditional constructs in the inputrc file */
+        4: 1581:	rl_readline_name = argv_bk[0];
+        -: 1582:
+        -: 1583:/*	add_func_to_rl(); */
+        -: 1584:
+        -: 1585:	/* Load readline initialization file. Check order:
+        -: 1586:	 * INPUTRC env var
+        -: 1587:	 * ~/.config/clifm/readline.cfm
+        -: 1588:	 * ~/.inputrc
+        -: 1589:	 * /etc/inputrc */
+        4: 1590:	char *p = getenv("INPUTRC");
+        4: 1590-block  0
+call    0 returned 4
+        4: 1591:	if (p) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4
+    #####: 1592:		rl_read_init_file(p);
+    %%%%%: 1592-block  0
+call    0 never executed
+unconditional  1 never executed
+        4: 1593:	} else if (config_dir_gral) {
+        4: 1593-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 0
+        4: 1594:		char *rl_file = (char *)xnmalloc(strlen(config_dir_gral) + 14,
+        4: 1594-block  0
+call    0 returned 4
+        -: 1595:							sizeof(char));
+        4: 1596:		sprintf(rl_file, "%s/readline.cfm", config_dir_gral);
+        4: 1597:		rl_read_init_file(rl_file);
+call    0 returned 4
+        4: 1598:		free(rl_file);
+unconditional  0 taken 4
+        -: 1599:	}
+        -: 1600:
+        -: 1601:	/* Enable tab auto-completion for commands (in PATH) in case of
+        -: 1602:	  * first entered string (if autocd and/or auto-open are enabled, check
+        -: 1603:	  * for paths as well). The second and later entered strings will
+        -: 1604:	  * be autocompleted with paths instead, just like in Bash, or with
+        -: 1605:	  * listed file names, in case of ELN's. I use a custom completion
+        -: 1606:	  * function to add command and ELN completion, since readline's
+        -: 1607:	  * internal completer only performs path completion */
+        -: 1608:
+        -: 1609:	/* Define a function for path completion.
+        -: 1610:	 * NULL means to use filename_entry_function (), the default
+        -: 1611:	 * filename completer. */
+        4: 1612:	rl_completion_entry_function = my_rl_path_completion;
+        -: 1613:
+        -: 1614:	/* Pointer to alternative function to create matches.
+        -: 1615:	 * Function is called with TEXT, START, and END.
+        -: 1616:	 * START and END are indices in RL_LINE_BUFFER saying what the
+        -: 1617:	 * boundaries of TEXT are.
+        -: 1618:	 * If this function exists and returns NULL then call the value of
+        -: 1619:	 * rl_completion_entry_function to try to match, otherwise use the
+        -: 1620:	 * array of strings returned. */
+        4: 1621:	rl_attempted_completion_function = my_rl_completion;
+        4: 1622:	rl_ignore_completion_duplicates = 1;
+        -: 1623:
+        -: 1624:	/* I'm using here a custom quoting function. If not specified,
+        -: 1625:	 * readline uses the default internal function. */
+        4: 1626:	rl_filename_quoting_function = my_rl_quote;
+        -: 1627:
+        -: 1628:	/* Tell readline what char to use for quoting. This is only the
+        -: 1629:	 * readline internal quoting function, and for custom ones, like the
+        -: 1630:	 * one I use above. However, custom quoting functions, though they
+        -: 1631:	 * need to define their own quoting chars, won't be called at all
+        -: 1632:	 * if this variable isn't set. */
+        4: 1633:	rl_completer_quote_characters = "\"'";
+        4: 1634:	rl_completer_word_break_characters = " ";
+        -: 1635:
+        -: 1636:	/* Whenever readline finds any of the following chars, it will call
+        -: 1637:	 * the quoting function */
+        4: 1638:	rl_filename_quote_characters = " \t\n\"\\'`@$><=,;|&{[()]}?!*^";
+        -: 1639:	/* According to readline documentation, the following string is
+        -: 1640:	 * the default and the one used by Bash: " \t\n\"\\'`@$><=;|&{(" */
+        -: 1641:
+        -: 1642:	/* Executed immediately before calling the completer function, it
+        -: 1643:	 * tells readline if a space char, which is a word break character
+        -: 1644:	 * (see the above rl_completer_word_break_characters variable) is
+        -: 1645:	 * quoted or not. If it is, readline then passes the whole string
+        -: 1646:	 * to the completer function (ex: "user\ file"), and if not, only
+        -: 1647:	 * wathever it found after the space char (ex: "file")
+        -: 1648:	 * Thanks to George Brocklehurst for pointing out this function:
+        -: 1649:	 * https://thoughtbot.com/blog/tab-completion-in-gnu-readline*/
+        4: 1650:	rl_char_is_quoted_p = quote_detector;
+        -: 1651:
+        -: 1652:	/* Define a function to handle suggestions and syntax highlighting */
+        4: 1653:	rl_getc_function = my_rl_getc;
+        -: 1654:
+        -: 1655:	/* This function is executed inmediately before path completion. So,
+        -: 1656:	 * if the string to be completed is, for instance, "user\ file" (see
+        -: 1657:	 * the above comment), this function should return the dequoted
+        -: 1658:	 * string so it won't conflict with system file names: you want
+        -: 1659:	 * "user file", because "user\ file" does not exist, and, in this
+        -: 1660:	 * latter case, readline won't find any matches */
+        4: 1661:	rl_filename_dequoting_function = dequote_str;
+        -: 1662:
+        -: 1663:	/* Initialize the keyboard bindings function */
+        4: 1664:	readline_kbinds();
+        4: 1664-block  0
+call    0 returned 4
+        -: 1665:
+        -: 1666:	/* Copy the list of quote chars to a global variable to be used
+        -: 1667:	 * later by some of the program functions like split_str(),
+        -: 1668:	 * my_rl_quote(), is_quote_char(), and my_rl_dequote() */
+        4: 1669:	qc = savestring(rl_filename_quote_characters,
+call    0 returned 4
+        -: 1670:	    strlen(rl_filename_quote_characters));
+        -: 1671:
+        -: 1672:#if !defined(_NO_SUGGESTIONS) && defined(__FreeBSD__)
+        -: 1673:	if (!(flags & GUI) && getenv("CLIFM_FREEBSD_CONSOLE_SC"))
+        -: 1674:		freebsd_sc_console = 1;
+        -: 1675:#endif 
+        -: 1676:
+        4: 1677:	return EXIT_SUCCESS;
+unconditional  0 taken 4
+        -: 1678:}

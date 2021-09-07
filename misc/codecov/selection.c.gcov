@@ -34,274 +34,722 @@
         -:   33:#include <string.h>
         -:   34:#include <sys/stat.h>
         -:   35:#include <unistd.h>
-        -:   36:#ifdef __linux__
-        -:   37:#include <sys/ioctl.h>
-        -:   38:#endif
-        -:   39:
-        -:   40:#include "aux.h"
-        -:   41:#include "checks.h"
-        -:   42:#include "colors.h"
-        -:   43:#include "listing.h"
-        -:   44:#include "misc.h"
-        -:   45:#include "navigation.h"
-        -:   46:#include "readline.h"
-        -:   47:#include "selection.h"
-        -:   48:#include "sort.h"
-        -:   49:
-        -:   50:/* Save selected elements into a tmp file. Returns 1 if success and 0
-        -:   51: * if error. This function allows the user to work with multiple
-        -:   52: * instances of the program: he/she can select some files in the
-        -:   53: * first instance and then execute a second one to operate on those
-        -:   54: * files as he/she whises. */
-        -:   55:int
-function save_sel called 4 returned 100% blocks executed 70%
-        4:   56:save_sel(void)
-        -:   57:{
-        4:   58:	if (!selfile_ok || !config_ok)
-        4:   58-block  0
-branch  0 taken 4 (fallthrough)
+        -:   36:#if defined(__linux__) || defined(__HAIKU__)
+        -:   37:#ifdef __TINYC__
+        -:   38:/* Silence a tcc warning. We don't use CTRL anyway */
+        -:   39:#undef CTRL
+        -:   40:#endif
+        -:   41:#include <sys/ioctl.h>
+        -:   42:#endif
+        -:   43:
+        -:   44:#include "aux.h"
+        -:   45:#include "checks.h"
+        -:   46:#include "colors.h"
+        -:   47:#include "listing.h"
+        -:   48:#include "misc.h"
+        -:   49:#include "navigation.h"
+        -:   50:#include "readline.h"
+        -:   51:#include "selection.h"
+        -:   52:#include "sort.h"
+        -:   53:#include "messages.h"
+        -:   54:
+        -:   55:/* Save selected elements into a tmp file. Returns 1 if success and 0
+        -:   56: * if error. This function allows the user to work with multiple
+        -:   57: * instances of the program: he/she can select some files in the
+        -:   58: * first instance and then execute a second one to operate on those
+        -:   59: * files as he/she whises. */
+        -:   60:int
+function save_sel called 27 returned 100% blocks executed 70%
+       27:   61:save_sel(void)
+        -:   62:{
+       27:   63:	if (!selfile_ok || !config_ok)
+       27:   63-block  0
+branch  0 taken 27 (fallthrough)
 branch  1 taken 0
-        4:   58-block  1
+       27:   63-block  1
 branch  2 taken 0 (fallthrough)
-branch  3 taken 4
-    #####:   59:		return EXIT_FAILURE;
-    %%%%%:   59-block  0
-unconditional  0 never executed
-        -:   60:
-        4:   61:	if (sel_n == 0) {
-        4:   61-block  0
-branch  0 taken 2 (fallthrough)
-branch  1 taken 2
-        2:   62:		if (unlink(SEL_FILE) == -1) {
-        2:   62-block  0
-call    0 returned 2
-branch  1 taken 0 (fallthrough)
-branch  2 taken 2
-    #####:   63:			fprintf(stderr, "%s: sel: %s: %s\n", PROGRAM_NAME,
-call    0 never executed
-    #####:   64:			    SEL_FILE, strerror(errno));
+branch  3 taken 27
+    #####:   64:		return EXIT_FAILURE;
     %%%%%:   64-block  0
-call    0 never executed
-    #####:   65:			return EXIT_FAILURE;
 unconditional  0 never executed
-        -:   66:		} else
-        2:   67:			return EXIT_SUCCESS;
-        2:   67-block  0
-unconditional  0 taken 2
-        -:   68:	}
-        -:   69:
-        2:   70:	FILE *sel_fp = fopen(SEL_FILE, "w");
-        2:   70-block  0
-call    0 returned 2
-        -:   71:
-        2:   72:	if (!sel_fp) {
-branch  0 taken 0 (fallthrough)
-branch  1 taken 2
-    #####:   73:		_err(0, NOPRINT_PROMPT, "%s: sel: %s: %s\n", PROGRAM_NAME,
+        -:   65:
+       27:   66:	if (sel_n == 0) {
+       27:   66-block  0
+branch  0 taken 12 (fallthrough)
+branch  1 taken 15
+       12:   67:		if (unlink(sel_file) == -1) {
+       12:   67-block  0
+call    0 returned 12
+branch  1 taken 0 (fallthrough)
+branch  2 taken 12
+    #####:   68:			fprintf(stderr, "%s: sel: %s: %s\n", PROGRAM_NAME,
 call    0 never executed
-    #####:   74:		    SEL_FILE, strerror(errno));
-    %%%%%:   74-block  0
+    #####:   69:			    sel_file, strerror(errno));
+    %%%%%:   69-block  0
 call    0 never executed
-    #####:   75:		return EXIT_FAILURE;
+    #####:   70:			return EXIT_FAILURE;
 unconditional  0 never executed
-        -:   76:	}
+        -:   71:		} else {
+       12:   72:			return EXIT_SUCCESS;
+       12:   72-block  0
+unconditional  0 taken 12
+        -:   73:		}
+        -:   74:	}
+        -:   75:
+       15:   76:	FILE *sel_fp = fopen(sel_file, "w");
+       15:   76-block  0
+call    0 returned 15
         -:   77:
-        -:   78:	size_t i;
-        8:   79:	for (i = 0; i < sel_n; i++) {
-        2:   79-block  0
-unconditional  0 taken 2
-unconditional  1 taken 6
-        8:   79-block  1
-branch  2 taken 6
-branch  3 taken 2 (fallthrough)
-        6:   80:		fputs(sel_elements[i], sel_fp);
-        6:   80-block  0
-call    0 returned 6
-        6:   81:		fputc('\n', sel_fp);
-call    0 returned 6
+       15:   78:	if (!sel_fp) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####:   79:		_err(0, NOPRINT_PROMPT, "%s: sel: %s: %s\n", PROGRAM_NAME,
+call    0 never executed
+    #####:   80:		    sel_file, strerror(errno));
+    %%%%%:   80-block  0
+call    0 never executed
+    #####:   81:		return EXIT_FAILURE;
+unconditional  0 never executed
         -:   82:	}
         -:   83:
-        2:   84:	fclose(sel_fp);
-        2:   84-block  0
-call    0 returned 2
-        -:   85:
-        2:   86:	return EXIT_SUCCESS;
+        -:   84:	size_t i;
+       57:   85:	for (i = 0; i < sel_n; i++) {
+       15:   85-block  0
+unconditional  0 taken 15
+unconditional  1 taken 42
+       57:   85-block  1
+branch  2 taken 42
+branch  3 taken 15 (fallthrough)
+       42:   86:		fputs(sel_elements[i], sel_fp);
+       42:   86-block  0
+call    0 returned 42
+       42:   87:		fputc('\n', sel_fp);
+call    0 returned 42
+        -:   88:	}
+        -:   89:
+       15:   90:	fclose(sel_fp);
+       15:   90-block  0
+call    0 returned 15
+       15:   91:	return EXIT_SUCCESS;
+unconditional  0 taken 15
+        -:   92:}
+        -:   93:
+        -:   94:static int
+function select_file called 38 returned 100% blocks executed 94%
+       38:   95:select_file(char *file)
+        -:   96:{
+       38:   97:	if (!file || !*file)
+       38:   97-block  0
+branch  0 taken 38 (fallthrough)
+branch  1 taken 0
+       38:   97-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 38
+    #####:   98:		return 0;
+    %%%%%:   98-block  0
+unconditional  0 never executed
+        -:   99:
+        -:  100:	/* Check if the selected element is already in the selection
+        -:  101:	 * box */
+       38:  102:	int exists = 0, new_sel = 0, j;
+        -:  103:
+       38:  104:	j = (int)sel_n;
+       91:  105:	while (--j >= 0) {
+       38:  105-block  0
+unconditional  0 taken 38
+       91:  105-block  1
+branch  1 taken 55
+branch  2 taken 36 (fallthrough)
+       55:  106:		if (*file == *sel_elements[j] && strcmp(sel_elements[j], file) == 0) {
+       55:  106-block  0
+branch  0 taken 55 (fallthrough)
+branch  1 taken 0
+       55:  106-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 53
+        2:  107:			exists = 1;
+        2:  108:			break;
+        2:  108-block  0
 unconditional  0 taken 2
-        -:   87:}
-        -:   88:
-        -:   89:int
-function select_file called 6 returned 100% blocks executed 80%
-        6:   90:select_file(char *file)
-        -:   91:{
-        6:   92:	if (!file || !*file)
-        6:   92-block  0
-branch  0 taken 6 (fallthrough)
+        -:  109:		}
+        -:  110:	}
+        -:  111:
+       38:  112:	if (!exists) {
+       38:  112-block  0
+branch  0 taken 36 (fallthrough)
+branch  1 taken 2
+       36:  113:		sel_elements = (char **)xrealloc(sel_elements, (sel_n + 2)
+       36:  113-block  0
+call    0 returned 36
+        -:  114:											* sizeof(char *));
+       36:  115:		sel_elements[sel_n++] = savestring(file, strlen(file));
+call    0 returned 36
+       36:  116:		sel_elements[sel_n] = (char *)NULL;
+       36:  117:		new_sel++;
+unconditional  0 taken 36
+        -:  118:	} else {
+        2:  119:		fprintf(stderr, _("%s: sel: %s: Already selected\n"),
+        2:  119-block  0
+call    0 returned 2
+call    1 returned 2
+unconditional  2 taken 2
+        -:  120:		    PROGRAM_NAME, file);
+        -:  121:	}
+        -:  122:
+       38:  123:	return new_sel;
+       38:  123-block  0
+unconditional  0 taken 38
+        -:  124:}
+        -:  125:
+        -:  126:static int
+function sel_glob called 7 returned 100% blocks executed 43%
+        7:  127:sel_glob(char *str, const char *sel_path, mode_t filetype)
+        -:  128:{
+        7:  129:	if (!str || !*str)
+        7:  129-block  0
+branch  0 taken 7 (fallthrough)
 branch  1 taken 0
-        6:   92-block  1
+        7:  129-block  1
 branch  2 taken 0 (fallthrough)
-branch  3 taken 6
-    #####:   93:		return 0;
-    %%%%%:   93-block  0
+branch  3 taken 7
+    #####:  130:		return -1;
+    %%%%%:  130-block  0
 unconditional  0 never executed
-        -:   94:
-        -:   95:	/* Check if the selected element is already in the selection
-        -:   96:	 * box */
-        6:   97:	int exists = 0, new_sel = 0, j;
-        -:   98:
-        6:   99:	j = (int)sel_n;
-       12:  100:	while (--j >= 0) {
-        6:  100-block  0
-unconditional  0 taken 6
-       12:  100-block  1
+        -:  131:
+        -:  132:	glob_t gbuf;
+        7:  133:	char *pattern = str;
+        7:  134:	int invert = 0, ret = -1;
+        -:  135:
+        7:  136:	if (*pattern == '!') {
+        7:  136-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 7
+    #####:  137:		pattern++;
+    #####:  138:		invert = 1;
+    %%%%%:  138-block  0
+unconditional  0 never executed
+        -:  139:	}
+        -:  140:
+        7:  141:	ret = glob(pattern, 0, NULL, &gbuf);
+        7:  141-block  0
+call    0 returned 7
+        -:  142:
+        7:  143:	if (ret == GLOB_NOSPACE || ret == GLOB_ABORTED) {
+branch  0 taken 7 (fallthrough)
+branch  1 taken 0
+        7:  143-block  0
+branch  2 taken 0 (fallthrough)
+branch  3 taken 7
+    #####:  144:		globfree(&gbuf);
+    %%%%%:  144-block  0
+call    0 never executed
+    #####:  145:		return -1;
+unconditional  0 never executed
+        -:  146:	}
+        -:  147:
+        7:  148:	if (ret == GLOB_NOMATCH) {
+        7:  148-block  0
+branch  0 taken 1 (fallthrough)
 branch  1 taken 6
-branch  2 taken 6 (fallthrough)
-        6:  101:		if (*file == *sel_elements[j] && strcmp(sel_elements[j], file) == 0) {
-        6:  101-block  0
-branch  0 taken 6 (fallthrough)
-branch  1 taken 0
-        6:  101-block  1
-branch  2 taken 0 (fallthrough)
-branch  3 taken 6
-    #####:  102:			exists = 1;
-    #####:  103:			break;
-    %%%%%:  103-block  0
+        1:  149:		globfree(&gbuf);
+        1:  149-block  0
+call    0 returned 1
+        1:  150:		return 0;
+unconditional  0 taken 1
+        -:  151:	}
+        -:  152:
+        6:  153:	char **matches = (char **)NULL;
+        6:  154:	int i, k = 0;
+        6:  155:	struct dirent **ent = (struct dirent **)NULL;
+        -:  156:
+        6:  157:	if (invert) {
+        6:  157-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 6
+    #####:  158:		if (!sel_path) {
+    %%%%%:  158-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  159:			matches = (char **)xnmalloc(files + 2, sizeof(char *));
+    %%%%%:  159-block  0
+call    0 never executed
+        -:  160:
+    #####:  161:			i = (int)files;
+    #####:  162:			while (--i >= 0) {
 unconditional  0 never executed
-        -:  104:		}
-        -:  105:	}
-        -:  106:
-        6:  107:	if (!exists) {
-        6:  107-block  0
-branch  0 taken 6 (fallthrough)
+    %%%%%:  162-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:  163:				if (filetype && file_info[i].type != filetype)
+    %%%%%:  163-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  163-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  164:					continue;
+    %%%%%:  164-block  0
+unconditional  0 never executed
+        -:  165:
+    #####:  166:				int found = 0;
+    #####:  167:				int j = (int)gbuf.gl_pathc;
+    #####:  168:				while (--j >= 0) {
+    %%%%%:  168-block  0
+unconditional  0 never executed
+    %%%%%:  168-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  169:					if (*file_info[i].name == *gbuf.gl_pathv[j]
+    %%%%%:  169-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  170:					&& strcmp(file_info[i].name, gbuf.gl_pathv[j]) == 0) {
+    %%%%%:  170-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  171:						found = 1;
+    #####:  172:						break;
+    %%%%%:  172-block  0
+unconditional  0 never executed
+        -:  173:					}
+        -:  174:				}
+        -:  175:
+    #####:  176:				if (!found)
+    %%%%%:  176-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  177:					matches[k++] = file_info[i].name;
+    %%%%%:  177-block  0
+unconditional  0 never executed
+        -:  178:			}
+        -:  179:		} else {
+    #####:  180:			ret = scandir(sel_path, &ent, skip_files, xalphasort);
+    %%%%%:  180-block  0
+call    0 never executed
+    #####:  181:			if (ret == -1) {
+branch  0 never executed
+branch  1 never executed
+    #####:  182:				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+call    0 never executed
+    #####:  183:				    sel_path, strerror(errno));
+    %%%%%:  183-block  0
+call    0 never executed
+    #####:  184:				globfree(&gbuf);
+call    0 never executed
+    #####:  185:				return -1;
+unconditional  0 never executed
+        -:  186:			}
+        -:  187:
+    #####:  188:			matches = (char **)xnmalloc((size_t)ret + 2, sizeof(char *));
+    %%%%%:  188-block  0
+call    0 never executed
+        -:  189:
+    #####:  190:			i = ret;
+    #####:  191:			while (--i >= 0) {
+unconditional  0 never executed
+    %%%%%:  191-block  0
+branch  1 never executed
+branch  2 never executed
+        -:  192:#if !defined(_DIRENT_HAVE_D_TYPE)
+        -:  193:				mode_t type;
+        -:  194:				struct stat attr;
+        -:  195:				if (lstat(ent[i]->d_name, &attr) == -1)
+        -:  196:					continue;
+        -:  197:				switch (attr.st_mode & S_IFMT) {
+        -:  198:				case S_IFBLK: type = DT_BLK; break;
+        -:  199:				case S_IFCHR: type = DT_CHR; break;
+        -:  200:				case S_IFDIR: type = DT_DIR; break;
+        -:  201:				case S_IFIFO: type = DT_FIFO; break;
+        -:  202:				case S_IFLNK: type = DT_LNK; break;
+        -:  203:				case S_IFREG: type = DT_REG; break;
+        -:  204:				case S_IFSOCK: type = DT_SOCK; break;
+        -:  205:				default: type = DT_UNKNOWN; break;
+        -:  206:				}
+        -:  207:				if (filetype && type != filetype)
+        -:  208:#else
+    #####:  209:				if (filetype && ent[i]->d_type != filetype)
+    %%%%%:  209-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  209-block  1
+branch  2 never executed
+branch  3 never executed
+        -:  210:#endif
+    #####:  211:					continue;
+    %%%%%:  211-block  0
+unconditional  0 never executed
+        -:  212:
+    #####:  213:				int j = (int)gbuf.gl_pathc;
+    #####:  214:				while (--j >= 0) {
+    %%%%%:  214-block  0
+unconditional  0 never executed
+    %%%%%:  214-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  215:					if (*ent[i]->d_name == *gbuf.gl_pathv[j]
+    %%%%%:  215-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  216:					&& strcmp(ent[i]->d_name, gbuf.gl_pathv[j]) == 0)
+    %%%%%:  216-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  217:						break;
+    %%%%%:  217-block  0
+unconditional  0 never executed
+        -:  218:				}
+        -:  219:
+    #####:  220:				if (!gbuf.gl_pathv[j])
+    %%%%%:  220-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  221:					matches[k++] = ent[i]->d_name;
+    %%%%%:  221-block  0
+unconditional  0 never executed
+        -:  222:			}
+        -:  223:		}
+        -:  224:	}
+        -:  225:
+        -:  226:	else {
+        6:  227:		matches = (char **)xnmalloc(gbuf.gl_pathc + 2,
+        6:  227-block  0
+call    0 returned 6
+        -:  228:		    sizeof(char *));
+        6:  229:		mode_t t = 0;
+        6:  230:		if (filetype) {
+branch  0 taken 2 (fallthrough)
+branch  1 taken 4
+        -:  231:
+        2:  232:			switch (filetype) {
+        2:  232-block  0
+branch  0 taken 2
 branch  1 taken 0
-        6:  108:		sel_elements = (char **)xrealloc(sel_elements, (sel_n + 2)
-        6:  108-block  0
-call    0 returned 6
-        -:  109:											* sizeof(char *));
-        6:  110:		sel_elements[sel_n++] = savestring(file, strlen(file));
-call    0 returned 6
-        6:  111:		sel_elements[sel_n] = (char *)NULL;
-        6:  112:		new_sel++;
+branch  2 taken 0
+branch  3 taken 0
+branch  4 taken 0
+branch  5 taken 0
+branch  6 taken 0
+branch  7 taken 0
+        2:  233:			case DT_DIR: t = S_IFDIR; break;
+        2:  233-block  0
+unconditional  0 taken 2
+    #####:  234:			case DT_REG: t = S_IFREG; break;
+    %%%%%:  234-block  0
+unconditional  0 never executed
+    #####:  235:			case DT_LNK: t = S_IFLNK; break;
+    %%%%%:  235-block  0
+unconditional  0 never executed
+    #####:  236:			case DT_SOCK: t = S_IFSOCK; break;
+    %%%%%:  236-block  0
+unconditional  0 never executed
+    #####:  237:			case DT_FIFO: t = S_IFIFO; break;
+    %%%%%:  237-block  0
+unconditional  0 never executed
+    #####:  238:			case DT_BLK: t = S_IFBLK; break;
+    %%%%%:  238-block  0
+unconditional  0 never executed
+    #####:  239:			case DT_CHR: t = S_IFCHR; break;
+    %%%%%:  239-block  0
+unconditional  0 never executed
+        -:  240:			}
+        -:  241:		}
+        -:  242:
+        6:  243:		i = (int)gbuf.gl_pathc;
+       26:  244:		while (--i >= 0) {
+        6:  244-block  0
 unconditional  0 taken 6
-        -:  113:	}
-        -:  114:
-        -:  115:	else
-    #####:  116:		fprintf(stderr, _("%s: sel: %s: Already selected\n"),
-    %%%%%:  116-block  0
+       26:  244-block  1
+branch  1 taken 20
+branch  2 taken 6 (fallthrough)
+        -:  245:			/* We need to run stat(3) here, so that the d_type macros
+        -:  246:			 * won't work: convert them into st_mode macros */
+       20:  247:			if (filetype) {
+       20:  247-block  0
+branch  0 taken 6 (fallthrough)
+branch  1 taken 14
+        -:  248:				struct stat attr;
+       6*:  249:				if (lstat(gbuf.gl_pathv[i], &attr) == -1)
+        6:  249-block  0
+call    0 returned 6
+branch  1 taken 0 (fallthrough)
+branch  2 taken 6
+       2*:  250:					continue;
+    %%%%%:  250-block  0
+unconditional  0 never executed
+        2:  250-block  1
+unconditional  1 taken 2
+        6:  251:				if ((attr.st_mode & S_IFMT) != t)
+        6:  251-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 4
+        2:  252:					continue;
+        2:  252-block  0
+unconditional  0 taken 2
+        -:  253:			}
+        -:  254:
+      18*:  255:			if (*gbuf.gl_pathv[i] == '.' && (!gbuf.gl_pathv[i][1]
+       18:  255-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 18
+    %%%%%:  255-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  256:			|| (gbuf.gl_pathv[i][1] == '.' && !gbuf.gl_pathv[i][2])))
+    %%%%%:  256-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  256-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  257:				continue;
+    %%%%%:  257-block  0
+unconditional  0 never executed
+        -:  258:
+       18:  259:			matches[k++] = gbuf.gl_pathv[i];
+       18:  259-block  0
+unconditional  0 taken 18
+        -:  260:		}
+        -:  261:	}
+        -:  262:
+        6:  263:	matches[k] = (char *)NULL;
+        6:  264:	int new_sel = 0;
+        -:  265:
+        6:  266:	i = k;
+       24:  267:	while (--i >= 0) {
+        6:  267-block  0
+unconditional  0 taken 6
+       24:  267-block  1
+branch  1 taken 18
+branch  2 taken 6 (fallthrough)
+      18*:  268:		if (!matches[i])
+       18:  268-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 18
+    #####:  269:			continue;
+    %%%%%:  269-block  0
+unconditional  0 never executed
+        -:  270:
+       18:  271:		if (!sel_path) {
+       18:  271-block  0
+branch  0 taken 11 (fallthrough)
+branch  1 taken 7
+       11:  272:			if (*matches[i] == '/') {
+       11:  272-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 11
+    #####:  273:				new_sel += select_file(matches[i]);
+    %%%%%:  273-block  0
 call    0 never executed
 unconditional  1 never executed
-        -:  117:		    PROGRAM_NAME, file);
-        -:  118:
-        6:  119:	return new_sel;
-        6:  119-block  0
-unconditional  0 taken 6
-        -:  120:}
-        -:  121:
-        -:  122:int
-function sel_function called 2 returned 100% blocks executed 37%
-        2:  123:sel_function(char **args)
-        -:  124:{
-        2:  125:	if (!args)
-        2:  125-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 2
-    #####:  126:		return EXIT_FAILURE;
-    %%%%%:  126-block  0
+        -:  274:			} else {
+       11:  275:				char *tmp = (char *)NULL;
+       11:  276:				if (*ws[cur_ws].path == '/' && !*(ws[cur_ws].path + 1)) {
+       11:  276-block  0
+branch  0 taken 11 (fallthrough)
+branch  1 taken 0
+       11:  276-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 11
+    #####:  277:					tmp = (char *)xnmalloc(strlen(matches[i]) + 2,
+    %%%%%:  277-block  0
+call    0 never executed
+        -:  278:								sizeof(char));
+    #####:  279:					sprintf(tmp, "/%s", matches[i]);
 unconditional  0 never executed
-        -:  127:
-       2*:  128:	if (!args[1] || (*args[1] == '-' && args[1][1] == '-'
-        2:  128-block  0
+        -:  280:				} else {
+       11:  281:					tmp = (char *)xnmalloc(strlen(ws[cur_ws].path)
+       11:  282:								+ strlen(matches[i]) + 2, sizeof(char));
+       11:  282-block  0
+call    0 returned 11
+       11:  283:					sprintf(tmp, "%s/%s", ws[cur_ws].path, matches[i]);
+unconditional  0 taken 11
+        -:  284:				}
+       11:  285:				new_sel += select_file(tmp);
+       11:  285-block  0
+call    0 returned 11
+       11:  286:				free(tmp);
+unconditional  0 taken 11
+        -:  287:			}
+        -:  288:		} else {
+        7:  289:			char *tmp = (char *)xnmalloc(strlen(sel_path)
+        7:  290:						+ strlen(matches[i]) + 2, sizeof(char));
+        7:  290-block  0
+call    0 returned 7
+        7:  291:			sprintf(tmp, "%s/%s", sel_path, matches[i]);
+        7:  292:			new_sel += select_file(tmp);
+call    0 returned 7
+        7:  293:			free(tmp);
+unconditional  0 taken 7
+        -:  294:		}
+        -:  295:	}
+        -:  296:
+        6:  297:	free(matches);
+        6:  298:	globfree(&gbuf);
+        6:  298-block  0
+call    0 returned 6
+        -:  299:
+       6*:  300:	if (invert && sel_path) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 6
+    %%%%%:  300-block  0
+branch  2 never executed
+branch  3 never executed
+    #####:  301:		i = ret;
+    #####:  302:		while (--i >= 0)
+    %%%%%:  302-block  0
+unconditional  0 never executed
+    %%%%%:  302-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  303:			free(ent[i]);
+    %%%%%:  303-block  0
+unconditional  0 never executed
+    #####:  304:		free(ent);
+    %%%%%:  304-block  0
+unconditional  0 never executed
+        -:  305:	}
+        -:  306:
+        6:  307:	return new_sel;
+        6:  307-block  0
+unconditional  0 taken 6
+        -:  308:}
+        -:  309:
+        -:  310:static int
+function sel_regex called 2 returned 100% blocks executed 39%
+        2:  311:sel_regex(char *str, const char *sel_path, mode_t filetype)
+        -:  312:{
+        2:  313:	if (!str || !*str)
+        2:  313-block  0
 branch  0 taken 2 (fallthrough)
 branch  1 taken 0
-        2:  128-block  1
+        2:  313-block  1
 branch  2 taken 0 (fallthrough)
 branch  3 taken 2
-    %%%%%:  128-block  2
-branch  4 never executed
-branch  5 never executed
-    #####:  129:	&& strcmp(args[1], "--help") == 0)) {
-    %%%%%:  129-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  130:		puts(_("Usage: s, sel ELN/FILE... [[!]PATTERN] [-FILETYPE] "
-    %%%%%:  130-block  0
-call    0 never executed
-        -:  131:		       "[:PATH]"));
-    #####:  132:		return EXIT_SUCCESS;
+    #####:  314:		return -1;
+    %%%%%:  314-block  0
 unconditional  0 never executed
-        -:  133:	}
-        -:  134:
-        2:  135:	char *sel_path = (char *)NULL;
-        2:  136:	mode_t filetype = 0;
-        2:  137:	int i, ifiletype = 0, isel_path = 0, new_sel = 0;
-        -:  138:
-        8:  139:	for (i = 1; args[i]; i++) {
-        2:  139-block  0
-unconditional  0 taken 2
-        6:  139-block  1
-unconditional  1 taken 6
-        8:  139-block  2
-branch  2 taken 6
-branch  3 taken 2 (fallthrough)
-        -:  140:
-        6:  141:		if (*args[i] == '-') {
-        6:  141-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 6
-    #####:  142:			ifiletype = i;
-    #####:  143:			filetype = (mode_t) * (args[i] + 1);
-    %%%%%:  143-block  0
-unconditional  0 never executed
-        -:  144:		}
-        -:  145:
-        6:  146:		if (*args[i] == ':') {
-        6:  146-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 6
-    #####:  147:			isel_path = i;
-    #####:  148:			sel_path = args[i] + 1;
-    %%%%%:  148-block  0
-unconditional  0 never executed
-        -:  149:		}
-        -:  150:
-        6:  151:		if (*args[i] == '~') {
-        6:  151-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 6
-    #####:  152:			char *exp_path = tilde_expand(args[i]);
-    %%%%%:  152-block  0
-call    0 never executed
-        -:  153:
-    #####:  154:			if (!exp_path) {
-branch  0 never executed
-branch  1 never executed
-    #####:  155:				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[i],
-call    0 never executed
-    #####:  156:				    strerror(errno));
-    %%%%%:  156-block  0
-call    0 never executed
-    #####:  157:				return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  158:			}
-        -:  159:
-    #####:  160:			args[i] = (char *)xrealloc(args[i], (strlen(exp_path) + 1) *
-    %%%%%:  160-block  0
-call    0 never executed
-        -:  161:								sizeof(char));
-    #####:  162:			strcpy(args[i], exp_path);
-    #####:  163:			free(exp_path);
-unconditional  0 never executed
-        -:  164:		}
-        -:  165:	}
-        -:  166:
-        2:  167:	if (filetype) {
-        2:  167-block  0
+        -:  315:
+        2:  316:	char *pattern = str;
+        -:  317:
+        2:  318:	int invert = 0;
+        2:  319:	if (*pattern == '!') {
+        2:  319-block  0
 branch  0 taken 0 (fallthrough)
 branch  1 taken 2
-        -:  168:		/* Convert filetype into a macro that can be decoded by stat().
-        -:  169:		 * If file type is specified, matches will be checked against
-        -:  170:		 * this value */
-    #####:  171:		switch (filetype) {
-    %%%%%:  171-block  0
+    #####:  320:		pattern++;
+    #####:  321:		invert = 1;
+    %%%%%:  321-block  0
+unconditional  0 never executed
+        -:  322:	}
+        -:  323:
+        -:  324:	regex_t regex;
+        2:  325:	if (regcomp(&regex, pattern, REG_NOSUB | REG_EXTENDED) != EXIT_SUCCESS) {
+        2:  325-block  0
+call    0 returned 2
+branch  1 taken 1 (fallthrough)
+branch  2 taken 1
+        1:  326:		fprintf(stderr, _("%s: sel: %s: Invalid regular "
+        1:  326-block  0
+call    0 returned 1
+call    1 returned 1
+        -:  327:				"expression\n"), PROGRAM_NAME, str);
+        -:  328:
+        1:  329:		regfree(&regex);
+call    0 returned 1
+        1:  330:		return -1;
+unconditional  0 taken 1
+        -:  331:	}
+        -:  332:
+        1:  333:	int new_sel = 0, i;
+        -:  334:
+        1:  335:	if (!sel_path) { /* Check pattern (STR) against files in CWD */
+        1:  335-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  336:		i = (int)files;
+        8:  337:		while (--i >= 0) {
+        1:  337-block  0
+unconditional  0 taken 1
+        8:  337-block  1
+branch  1 taken 7
+branch  2 taken 1
+       7*:  338:			if (filetype && file_info[i].type != filetype)
+        7:  338-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 7
+    %%%%%:  338-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  339:				continue;
+    %%%%%:  339-block  0
+unconditional  0 never executed
+        -:  340:
+        -:  341:			char tmp_path[PATH_MAX];
+        7:  342:			if (*ws[cur_ws].path == '/' && !*(ws[cur_ws].path + 1)) {
+        7:  342-block  0
+branch  0 taken 7 (fallthrough)
+branch  1 taken 0
+        7:  342-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 7
+    #####:  343:				snprintf(tmp_path, PATH_MAX - 1, "/%s", file_info[i].name);
+    %%%%%:  343-block  0
+unconditional  0 never executed
+        -:  344:			} else {
+        7:  345:				snprintf(tmp_path, PATH_MAX - 1, "%s/%s", ws[cur_ws].path,
+        7:  346:						file_info[i].name);
+        7:  346-block  0
+unconditional  0 taken 7
+        -:  347:			}
+        -:  348:
+        7:  349:			if (regexec(&regex, file_info[i].name, 0, NULL, 0) == EXIT_SUCCESS) {
+        7:  349-block  0
+call    0 returned 7
+branch  1 taken 7 (fallthrough)
+branch  2 taken 0
+        7:  350:				if (!invert)
+        7:  350-block  0
+branch  0 taken 7 (fallthrough)
+branch  1 taken 0
+        7:  351:					new_sel += select_file(tmp_path);
+        7:  351-block  0
+call    0 returned 7
+unconditional  1 taken 7
+    #####:  352:			} else if (invert) {
+    %%%%%:  352-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  353:				new_sel += select_file(tmp_path);
+    %%%%%:  353-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  354:			}
+        -:  355:		}
+        -:  356:	} else { /* Check pattern against files in SEL_PATH */
+    #####:  357:		struct dirent **list = (struct dirent **)NULL;
+    #####:  358:		int filesn = scandir(sel_path, &list, skip_files, xalphasort);
+    %%%%%:  358-block  0
+call    0 never executed
+        -:  359:
+    #####:  360:		if (filesn == -1) {
+branch  0 never executed
+branch  1 never executed
+    #####:  361:			fprintf(stderr, "sel: %s: %s\n", sel_path, strerror(errno));
+    %%%%%:  361-block  0
+call    0 never executed
+call    1 never executed
+    #####:  362:			return -1;
+unconditional  0 never executed
+        -:  363:		}
+        -:  364:
+    #####:  365:		mode_t t = 0;
+    #####:  366:		if (filetype) {
+    %%%%%:  366-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  367:
+    #####:  368:			switch (filetype) {
+    %%%%%:  368-block  0
 branch  0 never executed
 branch  1 never executed
 branch  2 never executed
@@ -310,1777 +758,1327 @@ branch  4 never executed
 branch  5 never executed
 branch  6 never executed
 branch  7 never executed
-    #####:  172:		case 'd':
-    #####:  173:			filetype = DT_DIR;
-    #####:  174:			break;
-    %%%%%:  174-block  0
+    #####:  369:			case DT_DIR: t = S_IFDIR; break;
+    %%%%%:  369-block  0
 unconditional  0 never executed
-    #####:  175:		case 'r':
-    #####:  176:			filetype = DT_REG;
-    #####:  177:			break;
-    %%%%%:  177-block  0
+    #####:  370:			case DT_REG: t = S_IFREG; break;
+    %%%%%:  370-block  0
 unconditional  0 never executed
-    #####:  178:		case 'l':
-    #####:  179:			filetype = DT_LNK;
-    #####:  180:			break;
-    %%%%%:  180-block  0
+    #####:  371:			case DT_LNK: t = S_IFLNK; break;
+    %%%%%:  371-block  0
 unconditional  0 never executed
-    #####:  181:		case 's':
-    #####:  182:			filetype = DT_SOCK;
-    #####:  183:			break;
-    %%%%%:  183-block  0
+    #####:  372:			case DT_SOCK: t = S_IFSOCK; break;
+    %%%%%:  372-block  0
 unconditional  0 never executed
-    #####:  184:		case 'f':
-    #####:  185:			filetype = DT_FIFO;
-    #####:  186:			break;
-    %%%%%:  186-block  0
-unconditional  0 never executed
-    #####:  187:		case 'b':
-    #####:  188:			filetype = DT_BLK;
-    #####:  189:			break;
-    %%%%%:  189-block  0
-unconditional  0 never executed
-    #####:  190:		case 'c':
-    #####:  191:			filetype = DT_CHR;
-    #####:  192:			break;
-    %%%%%:  192-block  0
-unconditional  0 never executed
-        -:  193:
-    #####:  194:		default:
-    #####:  195:			fprintf(stderr, _("%s: '%c': Unrecognized filetype\n"),
-    #####:  196:			    PROGRAM_NAME, (char)filetype);
-    %%%%%:  196-block  0
-call    0 never executed
-    #####:  197:			return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  198:		}
-        -:  199:	}
-        -:  200:
-        -:  201:	char dir[PATH_MAX];
-        -:  202:
-        2:  203:	if (sel_path) {
-        2:  203-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 2
-        -:  204:
-    #####:  205:		size_t sel_path_len = strlen(sel_path);
-    #####:  206:		if (sel_path[sel_path_len - 1] == '/')
-    %%%%%:  206-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  207:			sel_path[sel_path_len - 1] = '\0';
-    %%%%%:  207-block  0
-unconditional  0 never executed
-        -:  208:
-    #####:  209:		char *tmp_dir = xnmalloc(PATH_MAX + 1, sizeof(char));
-    %%%%%:  209-block  0
-call    0 never executed
-        -:  210:
-    #####:  211:		if (strchr(sel_path, '\\')) {
-branch  0 never executed
-branch  1 never executed
-    #####:  212:			char *deq_str = dequote_str(sel_path, 0);
-    %%%%%:  212-block  0
-call    0 never executed
-    #####:  213:			if (deq_str) {
-branch  0 never executed
-branch  1 never executed
-    #####:  214:				strcpy(sel_path, deq_str);
-    #####:  215:				free(deq_str);
-    %%%%%:  215-block  0
-unconditional  0 never executed
-        -:  216:			}
-        -:  217:		}
-        -:  218:
-    #####:  219:		strcpy(tmp_dir, sel_path);
-        -:  220:
-    #####:  221:		if (*sel_path == '.')
-    %%%%%:  221-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  222:			realpath(sel_path, tmp_dir);
-    %%%%%:  222-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  223:
-    #####:  224:		if (*sel_path == '~') {
-    %%%%%:  224-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  225:			char *exp_path = tilde_expand(sel_path);
-    %%%%%:  225-block  0
-call    0 never executed
-    #####:  226:			if (!exp_path) {
-branch  0 never executed
-branch  1 never executed
-    #####:  227:				fprintf(stderr, _("%s: Error expanding path\n"), PROGRAM_NAME);
-    %%%%%:  227-block  0
-call    0 never executed
-    #####:  228:				free(tmp_dir);
-    #####:  229:				return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  230:			}
-    #####:  231:			strcpy(tmp_dir, exp_path);
-    #####:  232:			free(exp_path);
-    %%%%%:  232-block  0
-unconditional  0 never executed
-        -:  233:		}
-        -:  234:
-    #####:  235:		if (*tmp_dir != '/') {
-    %%%%%:  235-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  236:			snprintf(dir, PATH_MAX, "%s/%s", ws[cur_ws].path, tmp_dir);
-    %%%%%:  236-block  0
-unconditional  0 never executed
-        -:  237:		} else
-    #####:  238:			strcpy(dir, tmp_dir);
-    %%%%%:  238-block  0
-unconditional  0 never executed
-        -:  239:
-    #####:  240:		free(tmp_dir);
-        -:  241:
-    #####:  242:		if (access(dir, X_OK) == -1) {
-    %%%%%:  242-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  243:			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir,
-call    0 never executed
-    #####:  244:			    strerror(errno));
-    %%%%%:  244-block  0
-call    0 never executed
-    #####:  245:			return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  246:		}
-        -:  247:
-    #####:  248:		if (xchdir(dir, NO_TITLE) == -1) {
-    %%%%%:  248-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  249:			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir,
-call    0 never executed
-    #####:  250:			    strerror(errno));
-    %%%%%:  250-block  0
-call    0 never executed
-    #####:  251:			return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  252:		}
-        -:  253:	}
-        -:  254:
-        2:  255:	char *pattern = (char *)NULL;
-        -:  256:
-        8:  257:	for (i = 1; args[i]; i++) {
-        2:  257-block  0
-unconditional  0 taken 2
-        6:  257-block  1
-unconditional  1 taken 6
-        8:  257-block  2
-branch  2 taken 6
-branch  3 taken 2 (fallthrough)
-        -:  258:
-       6*:  259:		if (i == ifiletype || i == isel_path)
-        6:  259-block  0
-branch  0 taken 6 (fallthrough)
-branch  1 taken 0
-        6:  259-block  1
-branch  2 taken 0 (fallthrough)
-branch  3 taken 6
-    #####:  260:			continue;
-    %%%%%:  260-block  0
-unconditional  0 never executed
-        -:  261:
-        -:  262:		/*      int invert = 0; */
-        -:  263:
-        6:  264:		if (check_regex(args[i]) == EXIT_SUCCESS) {
-        6:  264-block  0
-call    0 returned 6
-branch  1 taken 0 (fallthrough)
-branch  2 taken 6
-    #####:  265:			pattern = args[i];
-        -:  266:
-    #####:  267:			if (*pattern == '!') {
-    %%%%%:  267-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  268:				pattern++;
-    %%%%%:  268-block  0
-unconditional  0 never executed
-        -:  269:				/*  invert = 1; */
-        -:  270:			}
-        -:  271:		}
-        -:  272:
-        6:  273:		if (!pattern) {
-        6:  273-block  0
-branch  0 taken 6 (fallthrough)
-branch  1 taken 0
-        -:  274:
-        6:  275:			if (strchr(args[i], '\\')) {
-        6:  275-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 6
-    #####:  276:				char *deq_str = dequote_str(args[i], 0);
-    %%%%%:  276-block  0
-call    0 never executed
-    #####:  277:				if (deq_str) {
-branch  0 never executed
-branch  1 never executed
-    #####:  278:					strcpy(args[i], deq_str);
-    #####:  279:					free(deq_str);
-    %%%%%:  279-block  0
-unconditional  0 never executed
-        -:  280:				}
-        -:  281:			}
-        -:  282:
-        6:  283:			char *tmp = (char *)NULL;
-        -:  284:
-        6:  285:			if (*args[i] != '/') {
-        6:  285-block  0
-branch  0 taken 6 (fallthrough)
-branch  1 taken 0
-        6:  286:				if (!sel_path) {
-        6:  286-block  0
-branch  0 taken 6 (fallthrough)
-branch  1 taken 0
-        6:  287:					tmp = (char *)xnmalloc(strlen(ws[cur_ws].path)
-        6:  288:								+ strlen(args[i]) + 2, sizeof(char));
-        6:  288-block  0
-call    0 returned 6
-        6:  289:					sprintf(tmp, "%s/%s", ws[cur_ws].path, args[i]);
-unconditional  0 taken 6
-        -:  290:				}
-        -:  291:
-        -:  292:				else {
-    #####:  293:					tmp = (char *)xnmalloc(strlen(dir) + strlen(args[i])
-    %%%%%:  293-block  0
-call    0 never executed
-        -:  294:													+ 2, sizeof(char));
-    #####:  295:					sprintf(tmp, "%s/%s", dir, args[i]);
-unconditional  0 never executed
-        -:  296:				}
-        -:  297:
-        -:  298:				struct stat fattr;
-        6:  299:				if (lstat(tmp, &fattr) == -1) {
-        6:  299-block  0
-call    0 returned 6
-branch  1 taken 0 (fallthrough)
-branch  2 taken 6
-    #####:  300:					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-    #####:  301:					    args[i], strerror(errno));
-    %%%%%:  301-block  0
-call    0 never executed
-call    1 never executed
-unconditional  2 never executed
-        -:  302:				} else
-        6:  303:					new_sel += select_file(tmp);
-        6:  303-block  0
-call    0 returned 6
-unconditional  1 taken 6
-        6:  304:				free(tmp);
-        6:  304-block  0
-unconditional  0 taken 6
-        -:  305:			}
-        -:  306:
-        -:  307:			else {
-        -:  308:				struct stat fattr;
-    #####:  309:				if (lstat(args[i], &fattr) == -1) {
-    %%%%%:  309-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  310:					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-    #####:  311:					    args[i], strerror(errno));
-    %%%%%:  311-block  0
-call    0 never executed
-call    1 never executed
-unconditional  2 never executed
-        -:  312:				} else
-    #####:  313:					new_sel += select_file(args[i]);
-    %%%%%:  313-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  314:			}
-        -:  315:		}
-        -:  316:
-        -:  317:		else {
-        -:  318:			/* We have a pattern */
-        -:  319:			/* GLOB */
-    #####:  320:			int ret = -1;
-    #####:  321:			ret = sel_glob(args[i], sel_path ? dir : NULL,
-    %%%%%:  321-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  321-block  1
-unconditional  2 never executed
-    %%%%%:  321-block  2
-unconditional  3 never executed
-    %%%%%:  321-block  3
-call    4 never executed
-        -:  322:			    filetype ? filetype : 0);
-        -:  323:
-        -:  324:			/* If glob failed, try REGEX */
-    #####:  325:			if (ret <= 0) {
-branch  0 never executed
-branch  1 never executed
-    #####:  326:				ret = sel_regex(args[i], sel_path ? dir : NULL,
-    %%%%%:  326-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  326-block  1
-unconditional  2 never executed
-    %%%%%:  326-block  2
-unconditional  3 never executed
-    %%%%%:  326-block  3
-call    4 never executed
-        -:  327:				    filetype);
-    #####:  328:				if (ret > 0)
-branch  0 never executed
-branch  1 never executed
-    #####:  329:					new_sel += ret;
-    %%%%%:  329-block  0
-unconditional  0 never executed
-        -:  330:			} else
-    #####:  331:				new_sel += ret;
-    %%%%%:  331-block  0
-unconditional  0 never executed
-        -:  332:		}
-        -:  333:	}
-        -:  334:
-        2:  335:	if (new_sel > 0) {
-        2:  335-block  0
-branch  0 taken 2 (fallthrough)
-branch  1 taken 0
-        2:  336:		if (save_sel() != EXIT_SUCCESS) {
-        2:  336-block  0
-call    0 returned 2
-branch  1 taken 0 (fallthrough)
-branch  2 taken 2
-    #####:  337:			_err('e', PRINT_PROMPT, _("%s: Error writing selected files "
-    %%%%%:  337-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  338:				"to the selections file\n"), PROGRAM_NAME);
-        -:  339:		}
-        -:  340:	}
-        -:  341:
-       2*:  342:	if (sel_path && xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
-        2:  342-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 2
-    %%%%%:  342-block  1
-call    2 never executed
-branch  3 never executed
-branch  4 never executed
-    #####:  343:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
-call    0 never executed
-    #####:  344:		    strerror(errno));
-    %%%%%:  344-block  0
-call    0 never executed
-    #####:  345:		return EXIT_FAILURE;
-unconditional  0 never executed
-        -:  346:	}
-        -:  347:
-        2:  348:	if (new_sel <= 0) {
-        2:  348-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 2
-    #####:  349:		if (pattern)
-    %%%%%:  349-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  350:			fprintf(stderr, _("%s: No matches found\n"), PROGRAM_NAME);
-    %%%%%:  350-block  0
-call    0 never executed
-unconditional  1 never executed
-    #####:  351:		return EXIT_FAILURE;
-    %%%%%:  351-block  0
-unconditional  0 never executed
-        -:  352:	}
-        -:  353:
-        -:  354:	/* Get total size of sel files */
-        -:  355:	struct stat sattr;
-        -:  356:
-        2:  357:	i = (int)sel_n;
-        8:  358:	while (--i >= 0) {
-        2:  358-block  0
-unconditional  0 taken 2
-        8:  358-block  1
-branch  1 taken 6
-branch  2 taken 2 (fallthrough)
-        -:  359:
-        6:  360:		if (lstat(sel_elements[i], &sattr) != -1) {
-        6:  360-block  0
-call    0 returned 6
-branch  1 taken 6 (fallthrough)
-branch  2 taken 0
-        -:  361:
-        -:  362:			/*          if ((sattr.st_mode & S_IFMT) == S_IFDIR) {
-        -:  363:				off_t dsize = dir_size(sel_elements[i]);
-        -:  364:				total_sel_size += dsize;
-        -:  365:			}
-        -:  366:			else */
-        6:  367:			total_sel_size += sattr.st_size;
-        6:  367-block  0
-unconditional  0 taken 6
-        -:  368:		}
-        -:  369:	}
-        -:  370:
-        -:  371:	/* Print entries */
-        2:  372:	if (sel_n > 10)
-        2:  372-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 2
-    #####:  373:		printf(_("%zu files are now in the Selection Box\n"),
+    #####:  373:			case DT_FIFO: t = S_IFIFO; break;
     %%%%%:  373-block  0
+unconditional  0 never executed
+    #####:  374:			case DT_BLK: t = S_IFBLK; break;
+    %%%%%:  374-block  0
+unconditional  0 never executed
+    #####:  375:			case DT_CHR: t = S_IFCHR; break;
+    %%%%%:  375-block  0
+unconditional  0 never executed
+        -:  376:			}
+        -:  377:		}
+        -:  378:
+    #####:  379:		i = (int)filesn;
+    #####:  380:		while (--i >= 0) {
+    %%%%%:  380-block  0
+unconditional  0 never executed
+    %%%%%:  380-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  381:			if (filetype) {
+    %%%%%:  381-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  382:				struct stat attr;
+    #####:  383:				if (lstat(list[i]->d_name, &attr) != -1) {
+    %%%%%:  383-block  0
 call    0 never executed
-unconditional  1 never executed
-        -:  374:		    sel_n);
-        -:  375:
-        2:  376:	else if (sel_n > 0) {
-        2:  376-block  0
-branch  0 taken 2 (fallthrough)
-branch  1 taken 0
-       4*:  377:		printf(_("%zu selected %s:\n\n"), sel_n, (sel_n == 1) ? _("file")
-        2:  377-block  0
-branch  0 taken 0 (fallthrough)
-branch  1 taken 2
-    %%%%%:  377-block  1
-unconditional  2 never executed
-        2:  377-block  2
-call    3 returned 2
-        2:  378:				: _("files"));
-        2:  378-block  0
-unconditional  0 taken 2
-        -:  379:
-        8:  380:		for (i = 0; i < (int)sel_n; i++)
-unconditional  0 taken 2
-unconditional  1 taken 6
-        8:  380-block  0
-branch  2 taken 6
-branch  3 taken 2 (fallthrough)
-        6:  381:			colors_list(sel_elements[i], (int)i + 1, NO_PAD,
-        6:  381-block  0
-call    0 returned 6
-        -:  382:			    PRINT_NEWLINE);
-        -:  383:	}
-        -:  384:
-        -:  385:	/* Print total size */
-        2:  386:	char *human_size = get_size_unit(total_sel_size);
-        2:  386-block  0
-call    0 returned 2
-        -:  387:
-        2:  388:	if (sel_n > 10)
-branch  0 taken 0 (fallthrough)
-branch  1 taken 2
-    #####:  389:		printf(_("Total size: %s\n"), human_size);
-    %%%%%:  389-block  0
-call    0 never executed
-unconditional  1 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  384:					if ((attr.st_mode & S_IFMT) != t) {
+    %%%%%:  384-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  385:						free(list[i]);
+    #####:  386:						continue;
+    %%%%%:  386-block  0
+unconditional  0 never executed
+        -:  387:					}
+        -:  388:				}
+        -:  389:			}
         -:  390:
-        2:  391:	else if (sel_n > 0)
-        2:  391-block  0
-branch  0 taken 2 (fallthrough)
-branch  1 taken 0
-        2:  392:		printf(_("\n%s%sTotal size%s: %s\n"), df_c, bold, df_c, human_size);
-        2:  392-block  0
-call    0 returned 2
-unconditional  1 taken 2
-        -:  393:
-        2:  394:	free(human_size);
-        -:  395:
-        2:  396:	return EXIT_SUCCESS;
-        2:  396-block  0
-unconditional  0 taken 2
-        -:  397:}
-        -:  398:
-        -:  399:void
-function show_sel_files called 0 returned 0% blocks executed 0%
-    #####:  400:show_sel_files(void)
-        -:  401:{
-    #####:  402:	if (clear_screen)
-    %%%%%:  402-block  0
+    #####:  391:			char *tmp_path = (char *)xnmalloc(strlen(sel_path)
+    #####:  392:							+ strlen(list[i]->d_name) + 2, sizeof(char));
+    %%%%%:  392-block  0
+call    0 never executed
+    #####:  393:			sprintf(tmp_path, "%s/%s", sel_path, list[i]->d_name);
+        -:  394:
+    #####:  395:			if (regexec(&regex, list[i]->d_name, 0, NULL, 0) == EXIT_SUCCESS) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  396:				if (!invert)
+    %%%%%:  396-block  0
 branch  0 never executed
 branch  1 never executed
-    #####:  403:		CLEAR;
+    #####:  397:					new_sel += select_file(tmp_path);
+    %%%%%:  397-block  0
+call    0 never executed
+unconditional  1 never executed
+    #####:  398:			} else if (invert) {
+    %%%%%:  398-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  399:				new_sel += select_file(tmp_path);
+    %%%%%:  399-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  400:			}
+        -:  401:
+    #####:  402:			free(tmp_path);
+    #####:  403:			free(list[i]);
     %%%%%:  403-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  404:
-    #####:  405:	printf(_("%s%sSelection Box%s\n"), df_c, bold, df_c);
-    %%%%%:  405-block  0
-call    0 never executed
-        -:  406:
-    #####:  407:	int reset_pager = 0;
+unconditional  0 never executed
+        -:  404:		}
+        -:  405:
+    #####:  406:		free(list);
+    %%%%%:  406-block  0
+unconditional  0 never executed
+        -:  407:	}
         -:  408:
-    #####:  409:	if (sel_n == 0)
-branch  0 never executed
-branch  1 never executed
-    #####:  410:		puts(_("Empty"));
-    %%%%%:  410-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  411:
-        -:  412:	else {
-    #####:  413:		putchar('\n');
-    %%%%%:  413-block  0
-call    0 never executed
-        -:  414:		struct winsize w;
-    #####:  415:		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-call    0 never executed
-        -:  416:		int c;
-    #####:  417:		size_t counter = 0;
-    #####:  418:		unsigned short term_rows = w.ws_row;
-    #####:  419:		term_rows -= 2;
-        -:  420:		size_t i;
-        -:  421:
-    #####:  422:		for (i = 0; i < sel_n; i++) {
-unconditional  0 never executed
-    %%%%%:  422-block  0
-unconditional  1 never executed
-    %%%%%:  422-block  1
-branch  2 never executed
-branch  3 never executed
-        -:  423:			/*          if (pager && counter > (term_rows-2)) { */
-        -:  424:
-    #####:  425:			if (pager && counter > (size_t)term_rows) {
-    %%%%%:  425-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  425-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  426:				switch (c = xgetchar()) {
-    %%%%%:  426-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-branch  3 never executed
-branch  4 never executed
-        -:  427:				/* Advance one line at a time */
-    #####:  428:				case 66: /* fallthrough */ /* Down arrow */
-        -:  429:				case 10: /* fallthrough */ /* Enter */
-        -:  430:				case 32:		   /* Space */
-    #####:  431:					break;
-    %%%%%:  431-block  0
-unconditional  0 never executed
-        -:  432:				/* Advance one page at a time */
-    #####:  433:				case 126:
-    #####:  434:					counter = 0; /* Page Down */
-    #####:  435:					break;
-    %%%%%:  435-block  0
-unconditional  0 never executed
-        -:  436:				/* Stop paging (and set a flag to reenable the pager
-        -:  437:				 * later) */
-    #####:  438:				case 99: /* fallthrough */  /* 'c' */
-        -:  439:				case 112: /* fallthrough */ /* 'p' */
-        -:  440:				case 113:
-    #####:  441:					pager = 0, reset_pager = 1; /* 'q' */
-    #####:  442:					break;
-    %%%%%:  442-block  0
-unconditional  0 never executed
-        -:  443:				/* If another key is pressed, go back one position.
-        -:  444:				 * Otherwise, some filenames won't be listed.*/
-    #####:  445:				default:
-    #####:  446:					i--;
-    #####:  447:					continue;
-    %%%%%:  447-block  0
-unconditional  0 never executed
-        -:  448:					break;
-        -:  449:				}
-        -:  450:			}
-        -:  451:
-    #####:  452:			counter++;
-    #####:  453:			colors_list(sel_elements[i], (int)i + 1, NO_PAD,
-    %%%%%:  453-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  454:			    PRINT_NEWLINE);
-        -:  455:		}
-        -:  456:
-    #####:  457:		char *human_size = get_size_unit(total_sel_size);
-    %%%%%:  457-block  0
-call    0 never executed
-        -:  458:
-    #####:  459:		printf(_("\n%s%sTotal size%s: %s\n"), df_c, bold, df_c, human_size);
-call    0 never executed
-        -:  460:
-    #####:  461:		free(human_size);
-unconditional  0 never executed
-        -:  462:	}
-        -:  463:
-    #####:  464:	if (reset_pager)
-    %%%%%:  464-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  465:		pager = 1;
-    %%%%%:  465-block  0
-unconditional  0 never executed
-    #####:  466:}
-        -:  467:
-        -:  468:int
-function deselect called 2 returned 100% blocks executed 9%
-        2:  469:deselect(char **comm)
-        -:  470:{
-        2:  471:	if (!comm)
-        2:  471-block  0
+        1:  409:	regfree(&regex);
+        1:  409-block  0
+call    0 returned 1
+        1:  410:	return new_sel;
+unconditional  0 taken 1
+        -:  411:}
+        -:  412:
+        -:  413:int
+function sel_function called 13 returned 100% blocks executed 58%
+       13:  414:sel_function(char **args)
+        -:  415:{
+       13:  416:	if (!args)
+       13:  416-block  0
 branch  0 taken 0 (fallthrough)
-branch  1 taken 2
-    #####:  472:		return EXIT_FAILURE;
-    %%%%%:  472-block  0
+branch  1 taken 13
+    #####:  417:		return EXIT_FAILURE;
+    %%%%%:  417-block  0
 unconditional  0 never executed
-        -:  473:
-       2*:  474:	if (comm[1] && (strcmp(comm[1], "*") == 0 || strcmp(comm[1], "a") == 0
-        2:  474-block  0
-branch  0 taken 2 (fallthrough)
+        -:  418:
+      13*:  419:	if (!args[1] || (*args[1] == '-' && args[1][1] == '-'
+       13:  419-block  0
+branch  0 taken 13 (fallthrough)
 branch  1 taken 0
-        2:  474-block  1
+       13:  419-block  1
 branch  2 taken 0 (fallthrough)
-branch  3 taken 2
-    %%%%%:  474-block  2
+branch  3 taken 13
+    %%%%%:  419-block  2
 branch  4 never executed
 branch  5 never executed
-    #####:  475:	|| strcmp(comm[1], "all") == 0)) {
-    %%%%%:  475-block  0
+    #####:  420:	&& strcmp(args[1], "--help") == 0)) {
+    %%%%%:  420-block  0
 branch  0 never executed
 branch  1 never executed
-        -:  476:
-        2:  477:		if (sel_n > 0) {
-        2:  477-block  0
+    #####:  421:		puts(_(SEL_USAGE));
+    %%%%%:  421-block  0
+call    0 never executed
+call    1 never executed
+    #####:  422:		return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  423:	}
+        -:  424:
+       13:  425:	char *sel_path = (char *)NULL;
+       13:  426:	mode_t filetype = 0;
+       13:  427:	int i, ifiletype = 0, isel_path = 0, new_sel = 0;
+        -:  428:
+       38:  429:	for (i = 1; args[i]; i++) {
+       13:  429-block  0
+unconditional  0 taken 13
+       25:  429-block  1
+unconditional  1 taken 25
+       38:  429-block  2
+branch  2 taken 25
+branch  3 taken 13 (fallthrough)
+       25:  430:		if (*args[i] == '-') {
+       25:  430-block  0
 branch  0 taken 2 (fallthrough)
+branch  1 taken 23
+        2:  431:			ifiletype = i;
+        2:  432:			filetype = (mode_t) * (args[i] + 1);
+        2:  432-block  0
+unconditional  0 taken 2
+        -:  433:		}
+        -:  434:
+       25:  435:		if (*args[i] == ':') {
+       25:  435-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 22
+        3:  436:			isel_path = i;
+        3:  437:			sel_path = args[i] + 1;
+        3:  437-block  0
+unconditional  0 taken 3
+        -:  438:		}
+        -:  439:
+       25:  440:		if (*args[i] == '~') {
+       25:  440-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 25
+    #####:  441:			char *exp_path = tilde_expand(args[i]);
+    %%%%%:  441-block  0
+call    0 never executed
+    #####:  442:			if (!exp_path) {
+branch  0 never executed
+branch  1 never executed
+    #####:  443:				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[i],
+call    0 never executed
+    #####:  444:				    strerror(errno));
+    %%%%%:  444-block  0
+call    0 never executed
+    #####:  445:				return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  446:			}
+        -:  447:
+    #####:  448:			args[i] = (char *)xrealloc(args[i], (strlen(exp_path) + 1) *
+    %%%%%:  448-block  0
+call    0 never executed
+        -:  449:								sizeof(char));
+    #####:  450:			strcpy(args[i], exp_path);
+    #####:  451:			free(exp_path);
+unconditional  0 never executed
+        -:  452:		}
+        -:  453:	}
+        -:  454:
+       13:  455:	if (filetype) {
+       13:  455-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 11
+        -:  456:		/* Convert file type into a macro that can be decoded by stat().
+        -:  457:		 * If file type is specified, matches will be checked against
+        -:  458:		 * this value */
+        2:  459:		switch (filetype) {
+        2:  459-block  0
+branch  0 taken 2
 branch  1 taken 0
-        2:  478:			int i = (int)sel_n;
-        -:  479:
-        8:  480:			while (--i >= 0)
-        2:  480-block  0
+branch  2 taken 0
+branch  3 taken 0
+branch  4 taken 0
+branch  5 taken 0
+branch  6 taken 0
+branch  7 taken 0
+        2:  460:		case 'd': filetype = DT_DIR; break;
+        2:  460-block  0
 unconditional  0 taken 2
-        8:  480-block  1
-branch  1 taken 6
-branch  2 taken 2 (fallthrough)
-        6:  481:				free(sel_elements[i]);
-        6:  481-block  0
-unconditional  0 taken 6
+    #####:  461:		case 'r': filetype = DT_REG; break;
+    %%%%%:  461-block  0
+unconditional  0 never executed
+    #####:  462:		case 'l': filetype = DT_LNK; break;
+    %%%%%:  462-block  0
+unconditional  0 never executed
+    #####:  463:		case 's': filetype = DT_SOCK; break;
+    %%%%%:  463-block  0
+unconditional  0 never executed
+    #####:  464:		case 'f': filetype = DT_FIFO; break;
+    %%%%%:  464-block  0
+unconditional  0 never executed
+    #####:  465:		case 'b': filetype = DT_BLK; break;
+    %%%%%:  465-block  0
+unconditional  0 never executed
+    #####:  466:		case 'c': filetype = DT_CHR; break;
+    %%%%%:  466-block  0
+unconditional  0 never executed
+    #####:  467:		default:
+    #####:  468:			fprintf(stderr, _("%s: '%c': Unrecognized file type\n"),
+call    0 never executed
+    #####:  469:			    PROGRAM_NAME, (char)filetype);
+    %%%%%:  469-block  0
+call    0 never executed
+    #####:  470:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  471:		}
+        -:  472:	}
+        -:  473:
+        -:  474:	char dir[PATH_MAX];
+        -:  475:
+       13:  476:	if (sel_path) {
+       13:  476-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 10
+        3:  477:		size_t sel_path_len = strlen(sel_path);
+        3:  478:		if (sel_path[sel_path_len - 1] == '/')
+        3:  478-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####:  479:			sel_path[sel_path_len - 1] = '\0';
+    %%%%%:  479-block  0
+unconditional  0 never executed
+        -:  480:
+        3:  481:		char *tmpdir = xnmalloc(PATH_MAX + 1, sizeof(char));
+        3:  481-block  0
+call    0 returned 3
         -:  482:
-        2:  483:			sel_n = total_sel_size = 0;
-        -:  484:
-        2:  485:			if (save_sel() != 0)
-        2:  485-block  0
-call    0 returned 2
-branch  1 taken 0 (fallthrough)
-branch  2 taken 2
-    #####:  486:				return EXIT_FAILURE;
-    %%%%%:  486-block  0
-unconditional  0 never executed
-        -:  487:			else
-        2:  488:				return EXIT_SUCCESS;
-        2:  488-block  0
-unconditional  0 taken 2
-        -:  489:		} else {
-    #####:  490:			puts(_("desel: There are no selected files"));
-    %%%%%:  490-block  0
+        3:  483:		if (strchr(sel_path, '\\')) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####:  484:			char *deq_str = dequote_str(sel_path, 0);
+    %%%%%:  484-block  0
 call    0 never executed
-    #####:  491:			return EXIT_SUCCESS;
-unconditional  0 never executed
-        -:  492:		}
-        -:  493:	}
-        -:  494:
-        -:  495:	register int i;
-        -:  496:
-    #####:  497:	if (clear_screen)
-    %%%%%:  497-block  0
+    #####:  485:			if (deq_str) {
 branch  0 never executed
 branch  1 never executed
-    #####:  498:		CLEAR;
-    %%%%%:  498-block  0
+    #####:  486:				strcpy(sel_path, deq_str);
+    #####:  487:				free(deq_str);
+    %%%%%:  487-block  0
+unconditional  0 never executed
+        -:  488:			}
+        -:  489:		}
+        -:  490:
+        3:  491:		strcpy(tmpdir, sel_path);
+        -:  492:
+        3:  493:		if (*sel_path == '.') {
+        3:  493-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####:  494:			if (realpath(sel_path, tmpdir) == NULL) {
+    %%%%%:  494-block  0
 call    0 never executed
-unconditional  1 never executed
-        -:  499:
-    #####:  500:	printf(_("%sSelection Box%s\n"), bold, df_c);
-    %%%%%:  500-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:  495:				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, sel_path,
 call    0 never executed
-        -:  501:
-    #####:  502:	if (sel_n == 0) {
+    #####:  496:						strerror(errno));
+    %%%%%:  496-block  0
+call    0 never executed
+    #####:  497:				return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  498:			}
+        -:  499:		}
+        -:  500:
+        3:  501:		if (*sel_path == '~') {
+        3:  501-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####:  502:			char *exp_path = tilde_expand(sel_path);
+    %%%%%:  502-block  0
+call    0 never executed
+    #####:  503:			if (!exp_path) {
 branch  0 never executed
 branch  1 never executed
-    #####:  503:		puts(_("Empty"));
-    %%%%%:  503-block  0
+    #####:  504:				fprintf(stderr, _("%s: Error expanding path\n"), PROGRAM_NAME);
+    %%%%%:  504-block  0
 call    0 never executed
-    #####:  504:		return EXIT_SUCCESS;
+call    1 never executed
+    #####:  505:				free(tmpdir);
+    #####:  506:				return EXIT_FAILURE;
 unconditional  0 never executed
-        -:  505:	}
-        -:  506:
-    #####:  507:	putchar('\0');
-    %%%%%:  507-block  0
-call    0 never executed
-        -:  508:
-    #####:  509:	for (i = 0; i < (int)sel_n; i++)
-unconditional  0 never executed
-unconditional  1 never executed
+        -:  507:			}
+    #####:  508:			strcpy(tmpdir, exp_path);
+    #####:  509:			free(exp_path);
     %%%%%:  509-block  0
-branch  2 never executed
-branch  3 never executed
-    #####:  510:		colors_list(sel_elements[i], (int)i + 1, NO_PAD, PRINT_NEWLINE);
-    %%%%%:  510-block  0
-call    0 never executed
-        -:  511:
-    #####:  512:	char *human_size = get_size_unit(total_sel_size);
-    %%%%%:  512-block  0
-call    0 never executed
-    #####:  513:	printf(_("\n%s%sTotal size%s: %s\n"), df_c, bold, df_c, human_size);
-call    0 never executed
-    #####:  514:	free(human_size);
-        -:  515:
-    #####:  516:	printf(_("\n%sEnter '%c' to quit.\n"), df_c, 'q');
-call    0 never executed
-    #####:  517:	size_t desel_n = 0;
-    #####:  518:	char *line = NULL, **desel_elements = (char **)NULL;
-        -:  519:
-    #####:  520:	while (!line)
 unconditional  0 never executed
-    %%%%%:  520-block  0
-branch  1 never executed
-branch  2 never executed
-    #####:  521:		line = rl_no_hist(_("File(s) to be deselected (ex: 1 2-6, or *): "));
+        -:  510:		}
+        -:  511:
+        3:  512:		if (*tmpdir != '/') {
+        3:  512-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####:  513:			snprintf(dir, PATH_MAX, "%s/%s", ws[cur_ws].path, tmpdir);
+    %%%%%:  513-block  0
+unconditional  0 never executed
+        -:  514:		} else
+        3:  515:			strcpy(dir, tmpdir);
+        3:  515-block  0
+unconditional  0 taken 3
+        -:  516:
+        3:  517:		free(tmpdir);
+        -:  518:
+        3:  519:		if (access(dir, X_OK) == -1) {
+        3:  519-block  0
+call    0 returned 3
+branch  1 taken 0 (fallthrough)
+branch  2 taken 3
+    #####:  520:			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir,
+call    0 never executed
+    #####:  521:			    strerror(errno));
     %%%%%:  521-block  0
 call    0 never executed
-unconditional  1 never executed
-        -:  522:
-    #####:  523:	desel_elements = get_substr(line, ' ');
-    %%%%%:  523-block  0
+    #####:  522:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  523:		}
+        -:  524:
+        3:  525:		if (xchdir(dir, NO_TITLE) == -1) {
+        3:  525-block  0
+call    0 returned 3
+branch  1 taken 0 (fallthrough)
+branch  2 taken 3
+    #####:  526:			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, dir,
 call    0 never executed
-    #####:  524:	free(line);
-        -:  525:
-    #####:  526:	if (!desel_elements)
-branch  0 never executed
-branch  1 never executed
-    #####:  527:		return EXIT_FAILURE;
+    #####:  527:			    strerror(errno));
     %%%%%:  527-block  0
-unconditional  0 never executed
-        -:  528:
-    #####:  529:	for (i = 0; desel_elements[i]; i++)
-    %%%%%:  529-block  0
-unconditional  0 never executed
-    %%%%%:  529-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  530:		desel_n++;
-    %%%%%:  530-block  0
-unconditional  0 never executed
-        -:  531:
-    #####:  532:	i = (int)desel_n;
-    #####:  533:	while (--i >= 0) { /* Validation */
-    %%%%%:  533-block  0
-unconditional  0 never executed
-    %%%%%:  533-block  1
-branch  1 never executed
-branch  2 never executed
-        -:  534:
-        -:  535:		/* If not a number */
-    #####:  536:		if (!is_number(desel_elements[i])) {
-    %%%%%:  536-block  0
 call    0 never executed
-branch  1 never executed
-branch  2 never executed
-        -:  537:
-    #####:  538:			if (strcmp(desel_elements[i], "q") == 0) {
-    %%%%%:  538-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  539:
-    #####:  540:				i = (int)desel_n;
-    #####:  541:				while (--i >= 0)
-    %%%%%:  541-block  0
+    #####:  528:			return EXIT_FAILURE;
 unconditional  0 never executed
-    %%%%%:  541-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  542:					free(desel_elements[i]);
+        -:  529:		}
+        -:  530:	}
+        -:  531:
+       13:  532:	char *pattern = (char *)NULL;
+        -:  533:
+       38:  534:	for (i = 1; args[i]; i++) {
+       13:  534-block  0
+unconditional  0 taken 13
+       25:  534-block  1
+unconditional  1 taken 25
+       38:  534-block  2
+branch  2 taken 25
+branch  3 taken 13 (fallthrough)
+       25:  535:		if (i == ifiletype || i == isel_path)
+       25:  535-block  0
+branch  0 taken 23 (fallthrough)
+branch  1 taken 2
+       23:  535-block  1
+branch  2 taken 3 (fallthrough)
+branch  3 taken 20
+        5:  536:			continue;
+        5:  536-block  0
+unconditional  0 taken 5
+        -:  537:		/*      int invert = 0; */
+        -:  538:
+       20:  539:		if (check_regex(args[i]) == EXIT_SUCCESS) {
+       20:  539-block  0
+call    0 returned 20
+branch  1 taken 7 (fallthrough)
+branch  2 taken 13
+        7:  540:			pattern = args[i];
+        7:  541:			if (*pattern == '!') {
+        7:  541-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 7
+    #####:  542:				pattern++;
     %%%%%:  542-block  0
 unconditional  0 never executed
-        -:  543:
-    #####:  544:				free(desel_elements);
-        -:  545:
-    #####:  546:				return EXIT_SUCCESS;
-    %%%%%:  546-block  0
-unconditional  0 never executed
-        -:  547:			}
-        -:  548:
-    #####:  549:			else if (strcmp(desel_elements[i], "*") == 0) {
+        -:  543:				/*  invert = 1; */
+        -:  544:			}
+        -:  545:		}
+        -:  546:
+       20:  547:		if (!pattern) {
+       20:  547-block  0
+branch  0 taken 13 (fallthrough)
+branch  1 taken 7
+       13:  548:			if (strchr(args[i], '\\')) {
+       13:  548-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 13
+    #####:  549:				char *deq_str = dequote_str(args[i], 0);
     %%%%%:  549-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  550:
-        -:  551:				/* Clear the sel array */
-    #####:  552:				i = (int)sel_n;
-    #####:  553:				while (--i >= 0)
-    %%%%%:  553-block  0
-unconditional  0 never executed
-    %%%%%:  553-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  554:					free(sel_elements[i]);
-    %%%%%:  554-block  0
-unconditional  0 never executed
-        -:  555:
-    #####:  556:				sel_n = total_sel_size = 0;
-        -:  557:
-    #####:  558:				i = (int)desel_n;
-    #####:  559:				while (--i >= 0)
-    %%%%%:  559-block  0
-unconditional  0 never executed
-    %%%%%:  559-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  560:					free(desel_elements[i]);
-    %%%%%:  560-block  0
-unconditional  0 never executed
-        -:  561:
-    #####:  562:				int exit_status = EXIT_SUCCESS;
-        -:  563:
-    #####:  564:				if (save_sel() != 0)
-    %%%%%:  564-block  0
 call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  565:					exit_status = EXIT_FAILURE;
-    %%%%%:  565-block  0
-unconditional  0 never executed
-        -:  566:
-    #####:  567:				free(desel_elements);
-        -:  568:
-    #####:  569:				if (cd_lists_on_the_fly) {
-    %%%%%:  569-block  0
+    #####:  550:				if (deq_str) {
 branch  0 never executed
 branch  1 never executed
-    #####:  570:					free_dirlist();
+    #####:  551:					strcpy(args[i], deq_str);
+    #####:  552:					free(deq_str);
+    %%%%%:  552-block  0
+unconditional  0 never executed
+        -:  553:				}
+        -:  554:			}
+        -:  555:
+       13:  556:			char *tmp = (char *)NULL;
+        -:  557:
+       13:  558:			if (*args[i] != '/') {
+       13:  558-block  0
+branch  0 taken 13 (fallthrough)
+branch  1 taken 0
+       13:  559:				if (!sel_path) {
+       13:  559-block  0
+branch  0 taken 13 (fallthrough)
+branch  1 taken 0
+       13:  560:					if (*ws[cur_ws].path == '/' && !*(ws[cur_ws].path + 1)) {
+       13:  560-block  0
+branch  0 taken 13 (fallthrough)
+branch  1 taken 0
+       13:  560-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 13
+    #####:  561:						tmp = (char *)xnmalloc(strlen(args[i]) + 2,
+    %%%%%:  561-block  0
+call    0 never executed
+        -:  562:									sizeof(char));
+    #####:  563:						sprintf(tmp, "/%s", args[i]);
+unconditional  0 never executed
+        -:  564:					} else {
+       13:  565:						tmp = (char *)xnmalloc(strlen(ws[cur_ws].path)
+       13:  566:									+ strlen(args[i]) + 2, sizeof(char));
+       13:  566-block  0
+call    0 returned 13
+       13:  567:						sprintf(tmp, "%s/%s", ws[cur_ws].path, args[i]);
+unconditional  0 taken 13
+        -:  568:					}
+        -:  569:				} else {
+    #####:  570:					tmp = (char *)xnmalloc(strlen(dir) + strlen(args[i])
     %%%%%:  570-block  0
 call    0 never executed
-    #####:  571:					if (list_dir() != EXIT_SUCCESS)
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  572:						exit_status = EXIT_FAILURE;
-    %%%%%:  572-block  0
+        -:  571:													+ 2, sizeof(char));
+    #####:  572:					sprintf(tmp, "%s/%s", dir, args[i]);
 unconditional  0 never executed
         -:  573:				}
         -:  574:
-    #####:  575:				return exit_status;
-    %%%%%:  575-block  0
-unconditional  0 never executed
-        -:  576:			}
-        -:  577:
-        -:  578:			else {
-    #####:  579:				printf(_("desel: '%s': Invalid element\n"), desel_elements[i]);
-    %%%%%:  579-block  0
-call    0 never executed
-    #####:  580:				int j = (int)desel_n;
-        -:  581:
-    #####:  582:				while (--j >= 0)
-unconditional  0 never executed
-    %%%%%:  582-block  0
-branch  1 never executed
-branch  2 never executed
-    #####:  583:					free(desel_elements[j]);
-    %%%%%:  583-block  0
-unconditional  0 never executed
-        -:  584:
-    #####:  585:				free(desel_elements);
-        -:  586:
-    #####:  587:				return EXIT_FAILURE;
-    %%%%%:  587-block  0
-unconditional  0 never executed
-        -:  588:			}
-        -:  589:		}
-        -:  590:
-        -:  591:		/* If a number, check it's a valid ELN */
-        -:  592:		else {
-    #####:  593:			int atoi_desel = atoi(desel_elements[i]);
-        -:  594:
-    #####:  595:			if (atoi_desel == 0 || (size_t)atoi_desel > sel_n) {
-    %%%%%:  595-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  595-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  596:				printf(_("desel: '%s': Invalid ELN\n"), desel_elements[i]);
-    %%%%%:  596-block  0
-call    0 never executed
-        -:  597:
-    #####:  598:				int j = (int)desel_n;
-    #####:  599:				while (--j >= 0)
-unconditional  0 never executed
-    %%%%%:  599-block  0
-branch  1 never executed
-branch  2 never executed
-    #####:  600:					free(desel_elements[j]);
-    %%%%%:  600-block  0
-unconditional  0 never executed
-        -:  601:
-    #####:  602:				free(desel_elements);
-        -:  603:
-    #####:  604:				return EXIT_FAILURE;
-    %%%%%:  604-block  0
-unconditional  0 never executed
-        -:  605:			}
-        -:  606:		}
-        -:  607:	}
-        -:  608:
-        -:  609:	/* If a valid ELN and not asterisk... */
-        -:  610:	/* Store the full path of all the elements to be deselected in a new
-        -:  611:	 * array (desel_path). I need to do this because after the first
-        -:  612:	 * rearragement of the sel array, that is, after the removal of the
-        -:  613:	 * first element, the index of the next elements changed, and cannot
-        -:  614:	 * thereby be found by their index. The only way to find them is to
-        -:  615:	 * compare string by string */
-    #####:  616:	char **desel_path = (char **)NULL;
-    #####:  617:	desel_path = (char **)xnmalloc(desel_n, sizeof(char *));
-    %%%%%:  617-block  0
-call    0 never executed
-        -:  618:
-    #####:  619:	i = (int)desel_n;
-    #####:  620:	while (--i >= 0) {
-unconditional  0 never executed
-    %%%%%:  620-block  0
-branch  1 never executed
-branch  2 never executed
-    #####:  621:		int desel_int = atoi(desel_elements[i]);
-    #####:  622:		desel_path[i] = savestring(sel_elements[desel_int - 1],
-unconditional  0 never executed
-    #####:  623:		    strlen(sel_elements[desel_int - 1]));
-    %%%%%:  623-block  0
-call    0 never executed
-        -:  624:	}
-        -:  625:
-        -:  626:	/* Search the sel array for the path of the element to deselect and
-        -:  627:	 * store its index */
-        -:  628:	struct stat desel_attrib;
-        -:  629:
-    #####:  630:	i = (int)desel_n;
-    #####:  631:	while (--i >= 0) {
-    %%%%%:  631-block  0
-unconditional  0 never executed
-    %%%%%:  631-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  632:		int j, k, desel_index = 0;
-        -:  633:
-    #####:  634:		k = (int)sel_n;
-    #####:  635:		while (--k >= 0) {
-    %%%%%:  635-block  0
-unconditional  0 never executed
-    %%%%%:  635-block  1
-branch  1 never executed
-branch  2 never executed
-        -:  636:
-    #####:  637:			if (strcmp(sel_elements[k], desel_path[i]) == 0) {
-    %%%%%:  637-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  638:
-        -:  639:				/* Sustract size from total size */
-    #####:  640:				if (lstat(sel_elements[k], &desel_attrib) != -1) {
-    %%%%%:  640-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-        -:  641:
-    #####:  642:					if ((desel_attrib.st_mode & S_IFMT) == S_IFDIR)
-    %%%%%:  642-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  643:						total_sel_size -= dir_size(sel_elements[k]);
-    %%%%%:  643-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  644:					else
-    #####:  645:						total_sel_size -= desel_attrib.st_size;
-    %%%%%:  645-block  0
-unconditional  0 never executed
-        -:  646:				}
-        -:  647:
-    #####:  648:				desel_index = k;
-    #####:  649:				break;
-    %%%%%:  649-block  0
-unconditional  0 never executed
-        -:  650:			}
-        -:  651:		}
-        -:  652:
-        -:  653:		/* Once the index was found, rearrange the sel array removing the
-        -:  654:		 * deselected element (actually, moving each string after it to
-        -:  655:		 * the previous position) */
-    #####:  656:		for (j = desel_index; j < (int)(sel_n - 1); j++) {
-    %%%%%:  656-block  0
-unconditional  0 never executed
-    %%%%%:  656-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  657:			sel_elements[j] = (char *)xrealloc(sel_elements[j],
-    #####:  658:			    (strlen(sel_elements[j + 1]) + 1) * sizeof(char));
-    %%%%%:  658-block  0
-call    0 never executed
-    #####:  659:			strcpy(sel_elements[j], sel_elements[j + 1]);
-unconditional  0 never executed
-        -:  660:		}
-        -:  661:	}
-        -:  662:
-        -:  663:	/* Free the last DESEL_N elements from the old sel array. They won't
-        -:  664:	 * be used anymore, for they contain the same value as the last
-        -:  665:	 * non-deselected element due to the above array rearrangement */
-    #####:  666:	for (i = 1; i <= (int)desel_n; i++)
-    %%%%%:  666-block  0
-unconditional  0 never executed
-    %%%%%:  666-block  1
-unconditional  1 never executed
-    %%%%%:  666-block  2
-branch  2 never executed
-branch  3 never executed
-    #####:  667:		if ((int)(sel_n - i) >= 0 && sel_elements[sel_n - i])
-    %%%%%:  667-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  667-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  668:			free(sel_elements[sel_n - i]);
-    %%%%%:  668-block  0
-unconditional  0 never executed
-        -:  669:
-        -:  670:	/* Reallocate the sel array according to the new size */
-    #####:  671:	sel_n = (sel_n - desel_n);
-        -:  672:
-    #####:  673:	if ((int)sel_n < 0)
-    %%%%%:  673-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  674:		sel_n = total_sel_size = 0;
-    %%%%%:  674-block  0
-unconditional  0 never executed
-        -:  675:
-    #####:  676:	if (sel_n)
-    %%%%%:  676-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  677:		sel_elements = (char **)xrealloc(sel_elements, sel_n * sizeof(char *));
-    %%%%%:  677-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  678:
-        -:  679:	/* Deallocate local arrays */
-    #####:  680:	i = (int)desel_n;
-    #####:  681:	while (--i >= 0) {
-    %%%%%:  681-block  0
-unconditional  0 never executed
-    %%%%%:  681-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  682:		free(desel_path[i]);
-    #####:  683:		free(desel_elements[i]);
-    %%%%%:  683-block  0
-unconditional  0 never executed
-        -:  684:	}
-        -:  685:
-    #####:  686:	free(desel_path);
-    #####:  687:	free(desel_elements);
-        -:  688:
-    #####:  689:	if (args_n > 0) {
-    %%%%%:  689-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  690:
-    #####:  691:		for (i = 1; i <= (int)args_n; i++)
-    %%%%%:  691-block  0
-unconditional  0 never executed
-    %%%%%:  691-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  692:			free(comm[i]);
-    %%%%%:  692-block  0
-unconditional  0 never executed
-        -:  693:
-    #####:  694:		comm = (char **)xrealloc(comm, 1 * sizeof(char *));
-    %%%%%:  694-block  0
-call    0 never executed
-    #####:  695:		args_n = 0;
-unconditional  0 never executed
-        -:  696:	}
-        -:  697:
-    #####:  698:	int exit_status = EXIT_SUCCESS;
-        -:  699:
-    #####:  700:	if (save_sel() != 0)
-    %%%%%:  700-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  701:		exit_status = EXIT_FAILURE;
-    %%%%%:  701-block  0
-unconditional  0 never executed
-        -:  702:
-        -:  703:	/* If there is still some selected file, reload the desel screen */
-    #####:  704:	if (sel_n)
-    %%%%%:  704-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  705:		if (deselect(comm) != 0)
-    %%%%%:  705-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  706:			exit_status = EXIT_FAILURE;
-    %%%%%:  706-block  0
-unconditional  0 never executed
-        -:  707:
-    #####:  708:	return exit_status;
-    %%%%%:  708-block  0
-unconditional  0 never executed
-        -:  709:}
-        -:  710:
-        -:  711:int
-function sel_glob called 0 returned 0% blocks executed 0%
-    #####:  712:sel_glob(char *str, const char *sel_path, mode_t filetype)
-        -:  713:{
-    #####:  714:	if (!str || !*str)
-    %%%%%:  714-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  714-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  715:		return -1;
-    %%%%%:  715-block  0
-unconditional  0 never executed
-        -:  716:
-        -:  717:	glob_t gbuf;
-    #####:  718:	char *pattern = str;
-    #####:  719:	int invert = 0, ret = -1;
-        -:  720:
-    #####:  721:	if (*pattern == '!') {
-    %%%%%:  721-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  722:		pattern++;
-    #####:  723:		invert = 1;
-    %%%%%:  723-block  0
-unconditional  0 never executed
-        -:  724:	}
-        -:  725:
-    #####:  726:	ret = glob(pattern, 0, NULL, &gbuf);
-    %%%%%:  726-block  0
-call    0 never executed
-        -:  727:
-    #####:  728:	if (ret == GLOB_NOSPACE || ret == GLOB_ABORTED) {
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  728-block  0
-branch  2 never executed
-branch  3 never executed
-    #####:  729:		globfree(&gbuf);
-    %%%%%:  729-block  0
-call    0 never executed
-    #####:  730:		return -1;
-unconditional  0 never executed
-        -:  731:	}
-        -:  732:
-    #####:  733:	if (ret == GLOB_NOMATCH) {
-    %%%%%:  733-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  734:		globfree(&gbuf);
-    %%%%%:  734-block  0
-call    0 never executed
-    #####:  735:		return 0;
-unconditional  0 never executed
-        -:  736:	}
-        -:  737:
-    #####:  738:	char **matches = (char **)NULL;
-    #####:  739:	int i, j = 0, k = 0;
-    #####:  740:	struct dirent **ent = (struct dirent **)NULL;
-        -:  741:
-    #####:  742:	if (invert) {
-    %%%%%:  742-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  743:		if (!sel_path) {
-    %%%%%:  743-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  744:			matches = (char **)xnmalloc(files + 2, sizeof(char *));
-    %%%%%:  744-block  0
-call    0 never executed
-        -:  745:
-    #####:  746:			i = (int)files;
-    #####:  747:			while (--i >= 0) {
-unconditional  0 never executed
-    %%%%%:  747-block  0
-branch  1 never executed
-branch  2 never executed
-        -:  748:
-    #####:  749:				if (filetype && file_info[i].type != filetype)
-    %%%%%:  749-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  749-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  750:					continue;
-    %%%%%:  750-block  0
-unconditional  0 never executed
-        -:  751:
-    #####:  752:				int found = 0;
-    #####:  753:				j = (int)gbuf.gl_pathc;
-    #####:  754:				while (--j >= 0) {
-    %%%%%:  754-block  0
-unconditional  0 never executed
-    %%%%%:  754-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  755:					if (*file_info[i].name == *gbuf.gl_pathv[j]
-    %%%%%:  755-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  756:					&& strcmp(file_info[i].name, gbuf.gl_pathv[j]) == 0) {
-    %%%%%:  756-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  757:						found = 1;
-    #####:  758:						break;
-    %%%%%:  758-block  0
-unconditional  0 never executed
-        -:  759:					}
-        -:  760:				}
-        -:  761:
-    #####:  762:				if (!found)
-    %%%%%:  762-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  763:					matches[k++] = file_info[i].name;
-    %%%%%:  763-block  0
-unconditional  0 never executed
-        -:  764:			}
-        -:  765:		}
-        -:  766:
-        -:  767:		else {
-    #####:  768:			ret = scandir(sel_path, &ent, skip_files, xalphasort);
-    %%%%%:  768-block  0
-call    0 never executed
-        -:  769:
-    #####:  770:			if (ret == -1) {
-branch  0 never executed
-branch  1 never executed
-    #####:  771:				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
-call    0 never executed
-    #####:  772:				    sel_path, strerror(errno));
-    %%%%%:  772-block  0
-call    0 never executed
-    #####:  773:				globfree(&gbuf);
-call    0 never executed
-    #####:  774:				return -1;
-unconditional  0 never executed
-        -:  775:			}
-        -:  776:
-    #####:  777:			matches = (char **)xnmalloc((size_t)ret + 2, sizeof(char *));
-    %%%%%:  777-block  0
-call    0 never executed
-        -:  778:
-    #####:  779:			i = ret;
-    #####:  780:			while (--i >= 0) {
-unconditional  0 never executed
-    %%%%%:  780-block  0
-branch  1 never executed
-branch  2 never executed
-    #####:  781:				if (filetype && ent[i]->d_type != filetype)
-    %%%%%:  781-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  781-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  782:					continue;
-    %%%%%:  782-block  0
-unconditional  0 never executed
-        -:  783:
-    #####:  784:				j = (int)gbuf.gl_pathc;
-    #####:  785:				while (--j >= 0) {
-    %%%%%:  785-block  0
-unconditional  0 never executed
-    %%%%%:  785-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  786:					if (*ent[i]->d_name == *gbuf.gl_pathv[j]
-    %%%%%:  786-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  787:					&& strcmp(ent[i]->d_name, gbuf.gl_pathv[j]) == 0)
-    %%%%%:  787-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  788:						break;
-    %%%%%:  788-block  0
-unconditional  0 never executed
-        -:  789:				}
-        -:  790:
-    #####:  791:				if (!gbuf.gl_pathv[j])
-    %%%%%:  791-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  792:					matches[k++] = ent[i]->d_name;
-    %%%%%:  792-block  0
-unconditional  0 never executed
-        -:  793:			}
-        -:  794:		}
-        -:  795:	}
-        -:  796:
-        -:  797:	else {
-    #####:  798:		matches = (char **)xnmalloc(gbuf.gl_pathc + 2,
-    %%%%%:  798-block  0
-call    0 never executed
-        -:  799:		    sizeof(char *));
-    #####:  800:		mode_t t = 0;
-    #####:  801:		if (filetype) {
-branch  0 never executed
-branch  1 never executed
-        -:  802:
-    #####:  803:			switch (filetype) {
-    %%%%%:  803-block  0
-branch  0 never executed
-branch  1 never executed
-branch  2 never executed
-branch  3 never executed
-branch  4 never executed
-branch  5 never executed
-branch  6 never executed
-branch  7 never executed
-    #####:  804:			case DT_DIR:
-    #####:  805:				t = S_IFDIR;
-    #####:  806:				break;
-    %%%%%:  806-block  0
-unconditional  0 never executed
-    #####:  807:			case DT_REG:
-    #####:  808:				t = S_IFREG;
-    #####:  809:				break;
-    %%%%%:  809-block  0
-unconditional  0 never executed
-    #####:  810:			case DT_LNK:
-    #####:  811:				t = S_IFLNK;
-    #####:  812:				break;
-    %%%%%:  812-block  0
-unconditional  0 never executed
-    #####:  813:			case DT_SOCK:
-    #####:  814:				t = S_IFSOCK;
-    #####:  815:				break;
-    %%%%%:  815-block  0
-unconditional  0 never executed
-    #####:  816:			case DT_FIFO:
-    #####:  817:				t = S_IFIFO;
-    #####:  818:				break;
-    %%%%%:  818-block  0
-unconditional  0 never executed
-    #####:  819:			case DT_BLK:
-    #####:  820:				t = S_IFBLK;
-    #####:  821:				break;
-    %%%%%:  821-block  0
-unconditional  0 never executed
-    #####:  822:			case DT_CHR:
-    #####:  823:				t = S_IFCHR;
-    #####:  824:				break;
-    %%%%%:  824-block  0
-unconditional  0 never executed
-        -:  825:			}
-        -:  826:		}
-        -:  827:
-    #####:  828:		i = (int)gbuf.gl_pathc;
-    #####:  829:		while (--i >= 0) {
-    %%%%%:  829-block  0
-unconditional  0 never executed
-    %%%%%:  829-block  1
-branch  1 never executed
-branch  2 never executed
-        -:  830:
-        -:  831:			/* We need to run stat(3) here, so that the d_type macros
-        -:  832:			 * won't work: convert them into st_mode macros */
-    #####:  833:			if (filetype) {
-    %%%%%:  833-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  834:				struct stat attr;
-    #####:  835:				if (lstat(gbuf.gl_pathv[i], &attr) == -1)
-    %%%%%:  835-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  836:					continue;
-    %%%%%:  836-block  0
-unconditional  0 never executed
-    %%%%%:  836-block  1
-unconditional  1 never executed
-        -:  837:
-    #####:  838:				if ((attr.st_mode & S_IFMT) != t)
-    %%%%%:  838-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  839:					continue;
-    %%%%%:  839-block  0
-unconditional  0 never executed
-        -:  840:			}
-        -:  841:
-    #####:  842:			if (*gbuf.gl_pathv[i] == '.' && (!gbuf.gl_pathv[i][1]
-    %%%%%:  842-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  842-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  843:			|| (gbuf.gl_pathv[i][1] == '.' && !gbuf.gl_pathv[i][2])))
-    %%%%%:  843-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  843-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  844:				continue;
-    %%%%%:  844-block  0
-unconditional  0 never executed
-        -:  845:
-    #####:  846:			matches[k++] = gbuf.gl_pathv[i];
-    %%%%%:  846-block  0
-unconditional  0 never executed
-        -:  847:		}
-        -:  848:	}
-        -:  849:
-    #####:  850:	matches[k] = (char *)NULL;
-    #####:  851:	int new_sel = 0;
-        -:  852:
-    #####:  853:	i = k;
-    #####:  854:	while (--i >= 0) {
-    %%%%%:  854-block  0
-unconditional  0 never executed
-    %%%%%:  854-block  1
-branch  1 never executed
-branch  2 never executed
-        -:  855:
-    #####:  856:		if (!matches[i])
-    %%%%%:  856-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  857:			continue;
-    %%%%%:  857-block  0
-unconditional  0 never executed
-        -:  858:
-    #####:  859:		if (!sel_path) {
-    %%%%%:  859-block  0
-branch  0 never executed
-branch  1 never executed
-        -:  860:
-    #####:  861:			if (*matches[i] == '/')
-    %%%%%:  861-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  862:				new_sel += select_file(matches[i]);
-    %%%%%:  862-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  863:
-        -:  864:			else {
-    #####:  865:				char *tmp = (char *)xnmalloc(strlen(ws[cur_ws].path)
-    #####:  866:							+ strlen(matches[i]) + 2, sizeof(char));
-    %%%%%:  866-block  0
-call    0 never executed
-    #####:  867:				sprintf(tmp, "%s/%s", ws[cur_ws].path, matches[i]);
-    #####:  868:				new_sel += select_file(tmp);
-call    0 never executed
-    #####:  869:				free(tmp);
-unconditional  0 never executed
-        -:  870:			}
-        -:  871:		}
-        -:  872:
-        -:  873:		else {
-    #####:  874:			char *tmp = (char *)xnmalloc(strlen(sel_path)
-    #####:  875:						+ strlen(matches[i]) + 2, sizeof(char));
-    %%%%%:  875-block  0
-call    0 never executed
-    #####:  876:			sprintf(tmp, "%s/%s", sel_path, matches[i]);
-    #####:  877:			new_sel += select_file(tmp);
-call    0 never executed
-    #####:  878:			free(tmp);
-unconditional  0 never executed
-        -:  879:		}
-        -:  880:	}
-        -:  881:
-    #####:  882:	free(matches);
-    #####:  883:	globfree(&gbuf);
-    %%%%%:  883-block  0
-call    0 never executed
-        -:  884:
-    #####:  885:	if (invert && sel_path) {
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  885-block  0
-branch  2 never executed
-branch  3 never executed
-    #####:  886:		i = ret;
-    #####:  887:		while (--i >= 0)
-    %%%%%:  887-block  0
-unconditional  0 never executed
-    %%%%%:  887-block  1
-branch  1 never executed
-branch  2 never executed
-    #####:  888:			free(ent[i]);
-    %%%%%:  888-block  0
-unconditional  0 never executed
-    #####:  889:		free(ent);
-    %%%%%:  889-block  0
-unconditional  0 never executed
-        -:  890:	}
-        -:  891:
-    #####:  892:	return new_sel;
-    %%%%%:  892-block  0
-unconditional  0 never executed
-        -:  893:}
-        -:  894:
-        -:  895:int
-function sel_regex called 0 returned 0% blocks executed 0%
-    #####:  896:sel_regex(char *str, const char *sel_path, mode_t filetype)
-        -:  897:{
-    #####:  898:	if (!str || !*str)
-    %%%%%:  898-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  898-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  899:		return -1;
-    %%%%%:  899-block  0
-unconditional  0 never executed
-        -:  900:
-    #####:  901:	char *pattern = str;
-        -:  902:
-    #####:  903:	int invert = 0;
-    #####:  904:	if (*pattern == '!') {
-    %%%%%:  904-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  905:		pattern++;
-    #####:  906:		invert = 1;
-    %%%%%:  906-block  0
-unconditional  0 never executed
-        -:  907:	}
-        -:  908:
-        -:  909:	regex_t regex;
-    #####:  910:	if (regcomp(&regex, pattern, REG_NOSUB | REG_EXTENDED) != EXIT_SUCCESS) {
-    %%%%%:  910-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  911:		fprintf(stderr, _("%s: sel: %s: Invalid regular "
-    %%%%%:  911-block  0
-call    0 never executed
-        -:  912:				"expression\n"), PROGRAM_NAME, str);
-        -:  913:
-    #####:  914:		regfree(&regex);
-call    0 never executed
-    #####:  915:		return -1;
-unconditional  0 never executed
-        -:  916:	}
-        -:  917:
-    #####:  918:	int new_sel = 0, i;
-        -:  919:
-    #####:  920:	if (!sel_path) { /* Check pattern (STR) against files in CWD */
-    %%%%%:  920-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  921:		i = (int)files;
-    #####:  922:		while (--i >= 0) {
-    %%%%%:  922-block  0
-unconditional  0 never executed
-    %%%%%:  922-block  1
-branch  1 never executed
-branch  2 never executed
-        -:  923:
-    #####:  924:			if (filetype && file_info[i].type != filetype)
-    %%%%%:  924-block  0
-branch  0 never executed
-branch  1 never executed
-    %%%%%:  924-block  1
-branch  2 never executed
-branch  3 never executed
-    #####:  925:				continue;
-    %%%%%:  925-block  0
-unconditional  0 never executed
-        -:  926:
-        -:  927:			char tmp_path[PATH_MAX];
-    #####:  928:			sprintf(tmp_path, "%s/%s", ws[cur_ws].path, file_info[i].name);
-        -:  929:
-    #####:  930:			if (regexec(&regex, file_info[i].name, 0, NULL, 0) == EXIT_SUCCESS) {
-    %%%%%:  930-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  931:				if (!invert)
-    %%%%%:  931-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  932:					new_sel += select_file(tmp_path);
-    %%%%%:  932-block  0
-call    0 never executed
-unconditional  1 never executed
-    #####:  933:			} else if (invert)
-    %%%%%:  933-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  934:				new_sel += select_file(tmp_path);
-    %%%%%:  934-block  0
-call    0 never executed
-unconditional  1 never executed
-        -:  935:		}
-        -:  936:	}
-        -:  937:
-        -:  938:	else { /* Check pattern against files in SEL_PATH */
-        -:  939:
-    #####:  940:		struct dirent **list = (struct dirent **)NULL;
-    #####:  941:		int filesn = scandir(sel_path, &list, skip_files, xalphasort);
-    %%%%%:  941-block  0
-call    0 never executed
-        -:  942:
-    #####:  943:		if (filesn == -1) {
-branch  0 never executed
-branch  1 never executed
-    #####:  944:			fprintf(stderr, "sel: %s: %s\n", sel_path, strerror(errno));
-    %%%%%:  944-block  0
+        -:  575:				struct stat fattr;
+       13:  576:				if (lstat(tmp, &fattr) == -1) {
+       13:  576-block  0
+call    0 returned 13
+branch  1 taken 0 (fallthrough)
+branch  2 taken 13
+    #####:  577:					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+    #####:  578:					    args[i], strerror(errno));
+    %%%%%:  578-block  0
 call    0 never executed
 call    1 never executed
-    #####:  945:			return -1;
-unconditional  0 never executed
-        -:  946:		}
-        -:  947:
-    #####:  948:		mode_t t = 0;
-    #####:  949:		if (filetype) {
-    %%%%%:  949-block  0
-branch  0 never executed
+unconditional  2 never executed
+        -:  579:				} else {
+       13:  580:					new_sel += select_file(tmp);
+       13:  580-block  0
+call    0 returned 13
+unconditional  1 taken 13
+        -:  581:				}
+       13:  582:				free(tmp);
+       13:  582-block  0
+unconditional  0 taken 13
+        -:  583:			} else {
+        -:  584:				struct stat fattr;
+    #####:  585:				if (lstat(args[i], &fattr) == -1) {
+    %%%%%:  585-block  0
+call    0 never executed
 branch  1 never executed
-        -:  950:
-    #####:  951:			switch (filetype) {
-    %%%%%:  951-block  0
-branch  0 never executed
+branch  2 never executed
+    #####:  586:					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+    #####:  587:					    args[i], strerror(errno));
+    %%%%%:  587-block  0
+call    0 never executed
+call    1 never executed
+unconditional  2 never executed
+        -:  588:				} else {
+    #####:  589:					new_sel += select_file(args[i]);
+    %%%%%:  589-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  590:				}
+        -:  591:			}
+        -:  592:		} else {
+        -:  593:			/* We have a pattern */
+        -:  594:			/* GLOB */
+        7:  595:			int ret = -1;
+        7:  596:			ret = sel_glob(args[i], sel_path ? dir : NULL,
+        7:  596-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 4
+        3:  596-block  1
+unconditional  2 taken 3
+        4:  596-block  2
+unconditional  3 taken 4
+        7:  596-block  3
+call    4 returned 7
+        -:  597:			    filetype ? filetype : 0);
+        -:  598:
+        -:  599:			/* If glob failed, try REGEX */
+        7:  600:			if (ret <= 0) {
+branch  0 taken 2 (fallthrough)
+branch  1 taken 5
+        2:  601:				ret = sel_regex(args[i], sel_path ? dir : NULL,
+        2:  601-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 1
+        1:  601-block  1
+unconditional  2 taken 1
+        1:  601-block  2
+unconditional  3 taken 1
+        2:  601-block  3
+call    4 returned 2
+        -:  602:				    filetype);
+        2:  603:				if (ret > 0)
+branch  0 taken 1 (fallthrough)
+branch  1 taken 1
+        1:  604:					new_sel += ret;
+        1:  604-block  0
+unconditional  0 taken 1
+        -:  605:			} else {
+        5:  606:				new_sel += ret;
+        5:  606-block  0
+unconditional  0 taken 5
+        -:  607:			}
+        -:  608:		}
+        -:  609:	}
+        -:  610:
+       13:  611:	if (new_sel > 0 && xargs.stealth_mode != 1) {
+       13:  611-block  0
+branch  0 taken 12 (fallthrough)
+branch  1 taken 1
+       12:  611-block  1
+branch  2 taken 12 (fallthrough)
+branch  3 taken 0
+       12:  612:		if (save_sel() != EXIT_SUCCESS) {
+       12:  612-block  0
+call    0 returned 12
+branch  1 taken 0 (fallthrough)
+branch  2 taken 12
+    #####:  613:			_err('e', PRINT_PROMPT, _("%s: Error writing selected files "
+    %%%%%:  613-block  0
+call    0 never executed
+call    1 never executed
+unconditional  2 never executed
+        -:  614:				"to the selections file\n"), PROGRAM_NAME);
+        -:  615:		}
+        -:  616:	}
+        -:  617:
+       13:  618:	if (sel_path && xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
+       13:  618-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 10
+        3:  618-block  1
+call    2 returned 3
+branch  3 taken 0 (fallthrough)
+branch  4 taken 3
+    #####:  619:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
+call    0 never executed
+    #####:  620:		    strerror(errno));
+    %%%%%:  620-block  0
+call    0 never executed
+    #####:  621:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  622:	}
+        -:  623:
+       13:  624:	if (new_sel <= 0) {
+       13:  624-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 12
+        1:  625:		if (pattern)
+        1:  625-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  626:			fprintf(stderr, _("%s: No matches found\n"), PROGRAM_NAME);
+        1:  626-block  0
+call    0 returned 1
+call    1 returned 1
+unconditional  2 taken 1
+        1:  627:		return EXIT_FAILURE;
+        1:  627-block  0
+unconditional  0 taken 1
+        -:  628:	}
+        -:  629:
+        -:  630:	/* Get total size of sel files */
+        -:  631:	struct stat sattr;
+        -:  632:
+       12:  633:	i = (int)sel_n;
+       48:  634:	while (--i >= 0) {
+       12:  634-block  0
+unconditional  0 taken 12
+       48:  634-block  1
+branch  1 taken 36
+branch  2 taken 12 (fallthrough)
+       36:  635:		if (lstat(sel_elements[i], &sattr) != -1) {
+       36:  635-block  0
+call    0 returned 36
+branch  1 taken 36 (fallthrough)
+branch  2 taken 0
+        -:  636:			/*          if ((sattr.st_mode & S_IFMT) == S_IFDIR) {
+        -:  637:				off_t dsize = dir_size(sel_elements[i]);
+        -:  638:				total_sel_size += dsize;
+        -:  639:			}
+        -:  640:			else */
+       36:  641:			total_sel_size += sattr.st_size;
+       36:  641-block  0
+unconditional  0 taken 36
+        -:  642:		}
+        -:  643:	}
+        -:  644:
+        -:  645:	/* Print entries */
+       12:  646:	if (sel_n > 10) {
+       12:  646-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 12
+    #####:  647:		printf(_("%zu files are now in the Selection Box\n"), sel_n);
+    %%%%%:  647-block  0
+call    0 never executed
+call    1 never executed
+unconditional  2 never executed
+       12:  648:	} else if (sel_n > 0) {
+       12:  648-block  0
+branch  0 taken 12 (fallthrough)
+branch  1 taken 0
+       21:  649:		printf(_("%zu selected %s:\n\n"), sel_n, (sel_n == 1) ? _("file")
+       12:  649-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 9
+        3:  649-block  1
+call    2 returned 3
+unconditional  3 taken 3
+       12:  649-block  2
+call    4 returned 12
+call    5 returned 12
+        9:  650:				: _("files"));
+        9:  650-block  0
+call    0 returned 9
+unconditional  1 taken 9
+        -:  651:
+       48:  652:		for (i = 0; i < (int)sel_n; i++)
+unconditional  0 taken 12
+unconditional  1 taken 36
+       48:  652-block  0
+branch  2 taken 36
+branch  3 taken 12 (fallthrough)
+       36:  653:			colors_list(sel_elements[i], (int)i + 1, NO_PAD,
+       36:  653-block  0
+call    0 returned 36
+        -:  654:			    PRINT_NEWLINE);
+        -:  655:	}
+        -:  656:
+        -:  657:	/* Print total size */
+       12:  658:	char *human_size = get_size_unit(total_sel_size);
+       12:  658-block  0
+call    0 returned 12
+        -:  659:
+       12:  660:	if (sel_n > 10)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 12
+    #####:  661:		printf(_("Total size: %s\n"), human_size);
+    %%%%%:  661-block  0
+call    0 never executed
+call    1 never executed
+unconditional  2 never executed
+       12:  662:	else if (sel_n > 0)
+       12:  662-block  0
+branch  0 taken 12 (fallthrough)
+branch  1 taken 0
+       12:  663:		printf(_("\n%s%sTotal size%s: %s\n"), df_c, BOLD, df_c, human_size);
+       12:  663-block  0
+call    0 returned 12
+call    1 returned 12
+unconditional  2 taken 12
+        -:  664:
+       12:  665:	free(human_size);
+       12:  666:	return EXIT_SUCCESS;
+       12:  666-block  0
+unconditional  0 taken 12
+        -:  667:}
+        -:  668:
+        -:  669:void
+function show_sel_files called 1 returned 100% blocks executed 61%
+        1:  670:show_sel_files(void)
+        -:  671:{
+        1:  672:	if (clear_screen)
+        1:  672-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  673:		CLEAR;
+    %%%%%:  673-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  674:
+        1:  675:	printf(_("%s%sSelection Box%s\n"), df_c, BOLD, df_c);
+        1:  675-block  0
+call    0 returned 1
+call    1 returned 1
+        -:  676:
+        1:  677:	int reset_pager = 0;
+        -:  678:
+        1:  679:	if (sel_n == 0) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  680:		puts(_("Empty"));
+    %%%%%:  680-block  0
+call    0 never executed
+call    1 never executed
+unconditional  2 never executed
+        -:  681:	} else {
+        1:  682:		putchar('\n');
+        1:  682-block  0
+call    0 returned 1
+        -:  683:		struct winsize w;
+        1:  684:		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+call    0 returned 1
+        1:  685:		size_t counter = 0;
+        1:  686:		int t_rows = (int)w.ws_row;
+        1:  687:		t_rows -= 2;
+        -:  688:		size_t i;
+        -:  689:
+        2:  690:		for (i = 0; i < sel_n; i++) {
+unconditional  0 taken 1
+        1:  690-block  0
+unconditional  1 taken 1
+        2:  690-block  1
+branch  2 taken 1
+branch  3 taken 1 (fallthrough)
+        -:  691:			/* if (pager && counter > (term_rows-2)) { */
+       1*:  692:			if (pager && counter > (size_t)t_rows) {
+        1:  692-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    %%%%%:  692-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  693:				switch (xgetchar()) {
+    %%%%%:  693-block  0
+call    0 never executed
 branch  1 never executed
 branch  2 never executed
 branch  3 never executed
 branch  4 never executed
+        -:  694:				/* Advance one line at a time */
+    #####:  695:				case 66: /* fallthrough */ /* Down arrow */
+        -:  696:				case 10: /* fallthrough */ /* Enter */
+        -:  697:				case 32: /* Space */
+    #####:  698:					break;
+    %%%%%:  698-block  0
+unconditional  0 never executed
+        -:  699:				/* Advance one page at a time */
+    #####:  700:				case 126:
+    #####:  701:					counter = 0; /* Page Down */
+    #####:  702:					break;
+    %%%%%:  702-block  0
+unconditional  0 never executed
+        -:  703:				/* Stop paging (and set a flag to reenable the pager
+        -:  704:				 * later) */
+    #####:  705:				case 99: /* fallthrough */  /* 'c' */
+        -:  706:				case 112: /* fallthrough */ /* 'p' */
+        -:  707:				case 113:
+    #####:  708:					pager = 0, reset_pager = 1; /* 'q' */
+    #####:  709:					break;
+    %%%%%:  709-block  0
+unconditional  0 never executed
+        -:  710:				/* If another key is pressed, go back one position.
+        -:  711:				 * Otherwise, some file names won't be listed.*/
+    #####:  712:				default:
+    #####:  713:					i--;
+    #####:  714:					continue;
+    %%%%%:  714-block  0
+unconditional  0 never executed
+        -:  715:					break;
+        -:  716:				}
+        -:  717:			}
+        -:  718:
+        1:  719:			counter++;
+        1:  720:			colors_list(sel_elements[i], (int)i + 1, NO_PAD, PRINT_NEWLINE);
+        1:  720-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -:  721:		}
+        -:  722:
+        1:  723:		char *human_size = get_size_unit(total_sel_size);
+        1:  723-block  0
+call    0 returned 1
+        1:  724:		printf(_("\n%s%sTotal size%s: %s\n"), df_c, BOLD, df_c, human_size);
+call    0 returned 1
+call    1 returned 1
+        1:  725:		free(human_size);
+unconditional  0 taken 1
+        -:  726:	}
+        -:  727:
+        1:  728:	if (reset_pager)
+        1:  728-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  729:		pager = 1;
+    %%%%%:  729-block  0
+unconditional  0 never executed
+        1:  730:}
+        -:  731:
+        -:  732:int
+function deselect called 14 returned 100% blocks executed 73%
+       14:  733:deselect(char **comm)
+        -:  734:{
+       14:  735:	if (!comm)
+       14:  735-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 14
+    #####:  736:		return EXIT_FAILURE;
+    %%%%%:  736-block  0
+unconditional  0 never executed
+        -:  737:
+      14*:  738:	if (comm[1] && (strcmp(comm[1], "*") == 0 || strcmp(comm[1], "a") == 0
+       14:  738-block  0
+branch  0 taken 8 (fallthrough)
+branch  1 taken 6
+        8:  738-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 8
+    %%%%%:  738-block  2
+branch  4 never executed
 branch  5 never executed
-branch  6 never executed
-branch  7 never executed
-    #####:  952:			case DT_DIR:
-    #####:  953:				t = S_IFDIR;
-    #####:  954:				break;
-    %%%%%:  954-block  0
-unconditional  0 never executed
-    #####:  955:			case DT_REG:
-    #####:  956:				t = S_IFREG;
-    #####:  957:				break;
-    %%%%%:  957-block  0
-unconditional  0 never executed
-    #####:  958:			case DT_LNK:
-    #####:  959:				t = S_IFLNK;
-    #####:  960:				break;
-    %%%%%:  960-block  0
-unconditional  0 never executed
-    #####:  961:			case DT_SOCK:
-    #####:  962:				t = S_IFSOCK;
-    #####:  963:				break;
-    %%%%%:  963-block  0
-unconditional  0 never executed
-    #####:  964:			case DT_FIFO:
-    #####:  965:				t = S_IFIFO;
-    #####:  966:				break;
-    %%%%%:  966-block  0
-unconditional  0 never executed
-    #####:  967:			case DT_BLK:
-    #####:  968:				t = S_IFBLK;
-    #####:  969:				break;
-    %%%%%:  969-block  0
-unconditional  0 never executed
-    #####:  970:			case DT_CHR:
-    #####:  971:				t = S_IFCHR;
-    #####:  972:				break;
-    %%%%%:  972-block  0
-unconditional  0 never executed
-        -:  973:			}
-        -:  974:		}
-        -:  975:
-    #####:  976:		i = (int)filesn;
-    #####:  977:		while (--i >= 0) {
-    %%%%%:  977-block  0
-unconditional  0 never executed
-    %%%%%:  977-block  1
-branch  1 never executed
-branch  2 never executed
-        -:  978:
-    #####:  979:			if (filetype) {
-    %%%%%:  979-block  0
+    #####:  739:	|| strcmp(comm[1], "all") == 0)) {
+    %%%%%:  739-block  0
 branch  0 never executed
 branch  1 never executed
-        -:  980:				struct stat attr;
-        -:  981:
-    #####:  982:				if (lstat(list[i]->d_name, &attr) != -1) {
-    %%%%%:  982-block  0
-call    0 never executed
-branch  1 never executed
-branch  2 never executed
-    #####:  983:					if ((attr.st_mode & S_IFMT) != t) {
-    %%%%%:  983-block  0
-branch  0 never executed
-branch  1 never executed
-    #####:  984:						free(list[i]);
-    #####:  985:						continue;
-    %%%%%:  985-block  0
+        -:  740:
+        8:  741:		if (sel_n > 0) {
+        8:  741-block  0
+branch  0 taken 8 (fallthrough)
+branch  1 taken 0
+        8:  742:			int i = (int)sel_n;
+        -:  743:
+       29:  744:			while (--i >= 0)
+        8:  744-block  0
+unconditional  0 taken 8
+       29:  744-block  1
+branch  1 taken 21
+branch  2 taken 8 (fallthrough)
+       21:  745:				free(sel_elements[i]);
+       21:  745-block  0
+unconditional  0 taken 21
+        -:  746:
+        8:  747:			sel_n = 0;
+        8:  748:			total_sel_size = 0;
+        -:  749:
+        8:  750:			if (save_sel() != 0)
+        8:  750-block  0
+call    0 returned 8
+branch  1 taken 0 (fallthrough)
+branch  2 taken 8
+    #####:  751:				return EXIT_FAILURE;
+    %%%%%:  751-block  0
 unconditional  0 never executed
-        -:  986:					}
-        -:  987:				}
-        -:  988:			}
-        -:  989:
-    #####:  990:			char *tmp_path = (char *)xnmalloc(strlen(sel_path)
-    #####:  991:							+ strlen(list[i]->d_name) + 2, sizeof(char));
-    %%%%%:  991-block  0
+        -:  752:			else
+        8:  753:				return EXIT_SUCCESS;
+        8:  753-block  0
+unconditional  0 taken 8
+        -:  754:		} else {
+    #####:  755:			puts(_("desel: There are no selected files"));
+    %%%%%:  755-block  0
 call    0 never executed
-    #####:  992:			sprintf(tmp_path, "%s/%s", sel_path, list[i]->d_name);
-        -:  993:
-    #####:  994:			if (regexec(&regex, list[i]->d_name, 0, NULL, 0) == EXIT_SUCCESS) {
-call    0 never executed
+call    1 never executed
+    #####:  756:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  757:		}
+        -:  758:	}
+        -:  759:
+        -:  760:	register int i;
+        -:  761:
+        -:  762:/*	if (clear_screen)
+        -:  763:		CLEAR; */
+        -:  764:
+        6:  765:	printf(_("%sSelection Box%s\n"), BOLD, df_c);
+        6:  765-block  0
+call    0 returned 6
+call    1 returned 6
+        -:  766:
+        6:  767:	if (sel_n == 0) {
+branch  0 taken 1 (fallthrough)
+branch  1 taken 5
+        1:  768:		puts(_("Empty"));
+        1:  768-block  0
+call    0 returned 1
+call    1 returned 1
+        1:  769:		return EXIT_SUCCESS;
+unconditional  0 taken 1
+        -:  770:	}
+        -:  771:
+        5:  772:	putchar('\0');
+        5:  772-block  0
+call    0 returned 5
+        -:  773:
+       19:  774:	for (i = 0; i < (int)sel_n; i++)
+unconditional  0 taken 5
+unconditional  1 taken 14
+       19:  774-block  0
+branch  2 taken 14
+branch  3 taken 5 (fallthrough)
+       14:  775:		colors_list(sel_elements[i], (int)i + 1, NO_PAD, PRINT_NEWLINE);
+       14:  775-block  0
+call    0 returned 14
+        -:  776:
+        5:  777:	char *human_size = get_size_unit(total_sel_size);
+        5:  777-block  0
+call    0 returned 5
+        5:  778:	printf(_("\n%s%sTotal size%s: %s\n"), df_c, BOLD, df_c, human_size);
+call    0 returned 5
+call    1 returned 5
+        5:  779:	free(human_size);
+        -:  780:
+        5:  781:	printf(_("\n%sEnter '%c' to quit.\n"), df_c, 'q');
+call    0 returned 5
+call    1 returned 5
+        5:  782:	size_t desel_n = 0;
+        5:  783:	char *line = NULL, **desel_elements = (char **)NULL;
+        -:  784:
+       10:  785:	while (!line)
+unconditional  0 taken 5
+       10:  785-block  0
+branch  1 taken 5
+branch  2 taken 5 (fallthrough)
+        5:  786:		line = rl_no_hist(_("File(s) to be deselected (ex: 1 2-6, or *): "));
+        5:  786-block  0
+call    0 returned 5
+call    1 returned 5
+unconditional  2 taken 5
+        -:  787:
+        5:  788:	desel_elements = get_substr(line, ' ');
+        5:  788-block  0
+call    0 returned 5
+        5:  789:	free(line);
+        -:  790:
+        5:  791:	if (!desel_elements)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 5
+    #####:  792:		return EXIT_FAILURE;
+    %%%%%:  792-block  0
+unconditional  0 never executed
+        -:  793:
+       10:  794:	for (i = 0; desel_elements[i]; i++)
+        5:  794-block  0
+unconditional  0 taken 5
+       10:  794-block  1
+branch  1 taken 5
+branch  2 taken 5 (fallthrough)
+        5:  795:		desel_n++;
+        5:  795-block  0
+unconditional  0 taken 5
+        -:  796:
+        5:  797:	i = (int)desel_n;
+        9:  798:	while (--i >= 0) { /* Validation */
+        5:  798-block  0
+unconditional  0 taken 5
+        9:  798-block  1
+branch  1 taken 5
+branch  2 taken 4 (fallthrough)
+        -:  799:		/* If not a number */
+        5:  800:		if (!is_number(desel_elements[i])) {
+        5:  800-block  0
+call    0 returned 5
+branch  1 taken 1 (fallthrough)
+branch  2 taken 4
+        1:  801:			if (strcmp(desel_elements[i], "q") == 0) {
+        1:  801-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  802:				i = (int)desel_n;
+    #####:  803:				while (--i >= 0)
+    %%%%%:  803-block  0
+unconditional  0 never executed
+    %%%%%:  803-block  1
 branch  1 never executed
 branch  2 never executed
-    #####:  995:				if (!invert)
-    %%%%%:  995-block  0
-branch  0 never executed
+    #####:  804:					free(desel_elements[i]);
+    %%%%%:  804-block  0
+unconditional  0 never executed
+    #####:  805:				free(desel_elements);
+    #####:  806:				return EXIT_SUCCESS;
+    %%%%%:  806-block  0
+unconditional  0 never executed
+        1:  807:			} else if (strcmp(desel_elements[i], "*") == 0) {
+        1:  807-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        -:  808:				/* Clear the sel array */
+        1:  809:				i = (int)sel_n;
+        5:  810:				while (--i >= 0)
+        1:  810-block  0
+unconditional  0 taken 1
+        5:  810-block  1
+branch  1 taken 4
+branch  2 taken 1 (fallthrough)
+        4:  811:					free(sel_elements[i]);
+        4:  811-block  0
+unconditional  0 taken 4
+        -:  812:
+        1:  813:				sel_n = 0;
+        1:  814:				total_sel_size = 0;
+        -:  815:
+        1:  816:				i = (int)desel_n;
+        2:  817:				while (--i >= 0)
+        1:  817-block  0
+unconditional  0 taken 1
+        2:  817-block  1
+branch  1 taken 1
+branch  2 taken 1 (fallthrough)
+        1:  818:					free(desel_elements[i]);
+        1:  818-block  0
+unconditional  0 taken 1
+        -:  819:
+        1:  820:				int exit_status = EXIT_SUCCESS;
+        -:  821:
+        1:  822:				if (save_sel() != 0)
+        1:  822-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####:  823:					exit_status = EXIT_FAILURE;
+    %%%%%:  823-block  0
+unconditional  0 never executed
+        -:  824:
+        1:  825:				free(desel_elements);
+        -:  826:
+        1:  827:				if (cd_lists_on_the_fly) {
+        1:  827-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  828:					free_dirlist();
+        1:  828-block  0
+call    0 returned 1
+        1:  829:					if (list_dir() != EXIT_SUCCESS)
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####:  830:						exit_status = EXIT_FAILURE;
+    %%%%%:  830-block  0
+unconditional  0 never executed
+        -:  831:				}
+        -:  832:
+        1:  833:				return exit_status;
+        1:  833-block  0
+unconditional  0 taken 1
+        -:  834:			} else {
+    #####:  835:				printf(_("desel: '%s': Invalid element\n"), desel_elements[i]);
+    %%%%%:  835-block  0
+call    0 never executed
+call    1 never executed
+    #####:  836:				int j = (int)desel_n;
+    #####:  837:				while (--j >= 0)
+unconditional  0 never executed
+    %%%%%:  837-block  0
 branch  1 never executed
-    #####:  996:					new_sel += select_file(tmp_path);
-    %%%%%:  996-block  0
+branch  2 never executed
+    #####:  838:					free(desel_elements[j]);
+    %%%%%:  838-block  0
+unconditional  0 never executed
+    #####:  839:				free(desel_elements);
+    #####:  840:				return EXIT_FAILURE;
+    %%%%%:  840-block  0
+unconditional  0 never executed
+        -:  841:			}
+        -:  842:		}
+        -:  843:
+        -:  844:		/* If a number, check it's a valid ELN */
+        -:  845:		else {
+        4:  846:			int atoi_desel = atoi(desel_elements[i]);
+        4:  847:			if (atoi_desel == 0 || (size_t)atoi_desel > sel_n) {
+        4:  847-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 0
+        4:  847-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 4
+    #####:  848:				printf(_("desel: '%s': Invalid ELN\n"), desel_elements[i]);
+    %%%%%:  848-block  0
+call    0 never executed
+call    1 never executed
+    #####:  849:				int j = (int)desel_n;
+    #####:  850:				while (--j >= 0)
+unconditional  0 never executed
+    %%%%%:  850-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:  851:					free(desel_elements[j]);
+    %%%%%:  851-block  0
+unconditional  0 never executed
+    #####:  852:				free(desel_elements);
+    #####:  853:				return EXIT_FAILURE;
+    %%%%%:  853-block  0
+unconditional  0 never executed
+        -:  854:			}
+        -:  855:		}
+        -:  856:	}
+        -:  857:
+        -:  858:	/* If a valid ELN and not asterisk... */
+        -:  859:	/* Store the full path of all the elements to be deselected in a new
+        -:  860:	 * array (desel_path). I need to do this because after the first
+        -:  861:	 * rearragement of the sel array, that is, after the removal of the
+        -:  862:	 * first element, the index of the next elements changed, and cannot
+        -:  863:	 * thereby be found by their index. The only way to find them is to
+        -:  864:	 * compare string by string */
+        4:  865:	char **desel_path = (char **)NULL;
+        4:  866:	desel_path = (char **)xnmalloc(desel_n, sizeof(char *));
+        4:  866-block  0
+call    0 returned 4
+        -:  867:
+        4:  868:	i = (int)desel_n;
+        8:  869:	while (--i >= 0) {
+unconditional  0 taken 4
+        8:  869-block  0
+branch  1 taken 4
+branch  2 taken 4 (fallthrough)
+        4:  870:		int desel_int = atoi(desel_elements[i]);
+        4:  871:		desel_path[i] = savestring(sel_elements[desel_int - 1],
+unconditional  0 taken 4
+        4:  872:		    strlen(sel_elements[desel_int - 1]));
+        4:  872-block  0
+call    0 returned 4
+        -:  873:	}
+        -:  874:
+        -:  875:	/* Search the sel array for the path of the element to deselect and
+        -:  876:	 * store its index */
+        -:  877:	struct stat desel_attrib;
+        -:  878:
+        4:  879:	i = (int)desel_n;
+        8:  880:	while (--i >= 0) {
+        4:  880-block  0
+unconditional  0 taken 4
+        8:  880-block  1
+branch  1 taken 4
+branch  2 taken 4 (fallthrough)
+        4:  881:		int j, k, desel_index = 0;
+        -:  882:
+        4:  883:		k = (int)sel_n;
+       10:  884:		while (--k >= 0) {
+        4:  884-block  0
+unconditional  0 taken 4
+       10:  884-block  1
+branch  1 taken 10
+branch  2 taken 0 (fallthrough)
+       10:  885:			if (strcmp(sel_elements[k], desel_path[i]) == 0) {
+       10:  885-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 6
+        -:  886:				/* Sustract size from total size */
+        4:  887:				if (lstat(sel_elements[k], &desel_attrib) != -1) {
+        4:  887-block  0
+call    0 returned 4
+branch  1 taken 4 (fallthrough)
+branch  2 taken 0
+        4:  888:					if ((desel_attrib.st_mode & S_IFMT) == S_IFDIR)
+        4:  888-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4
+    #####:  889:						total_sel_size -= dir_size(sel_elements[k]);
+    %%%%%:  889-block  0
 call    0 never executed
 unconditional  1 never executed
-        -:  997:			}
-        -:  998:
-    #####:  999:			else if (invert)
-    %%%%%:  999-block  0
-branch  0 never executed
+        -:  890:					else
+        4:  891:						total_sel_size -= desel_attrib.st_size;
+        4:  891-block  0
+unconditional  0 taken 4
+        -:  892:				}
+        -:  893:
+        4:  894:				desel_index = k;
+        4:  895:				break;
+        4:  895-block  0
+unconditional  0 taken 4
+        -:  896:			}
+        -:  897:		}
+        -:  898:
+        -:  899:		/* Once the index was found, rearrange the sel array removing the
+        -:  900:		 * deselected element (actually, moving each string after it to
+        -:  901:		 * the previous position) */
+       10:  902:		for (j = desel_index; j < (int)(sel_n - 1); j++) {
+        4:  902-block  0
+unconditional  0 taken 4
+       10:  902-block  1
+branch  1 taken 6
+branch  2 taken 4 (fallthrough)
+       12:  903:			sel_elements[j] = (char *)xrealloc(sel_elements[j],
+        6:  904:			    (strlen(sel_elements[j + 1]) + 1) * sizeof(char));
+        6:  904-block  0
+call    0 returned 6
+        6:  905:			strcpy(sel_elements[j], sel_elements[j + 1]);
+unconditional  0 taken 6
+        -:  906:		}
+        -:  907:	}
+        -:  908:
+        -:  909:	/* Free the last DESEL_N elements from the old sel array. They won't
+        -:  910:	 * be used anymore, for they contain the same value as the last
+        -:  911:	 * non-deselected element due to the above array rearrangement */
+        8:  912:	for (i = 1; i <= (int)desel_n; i++)
+        4:  912-block  0
+unconditional  0 taken 4
+        4:  912-block  1
+unconditional  1 taken 4
+        8:  912-block  2
+branch  2 taken 4
+branch  3 taken 4 (fallthrough)
+        4:  913:		if (((int)sel_n - i) >= 0 && sel_elements[(int)sel_n - i])
+        4:  913-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 0
+        4:  913-block  1
+branch  2 taken 4 (fallthrough)
+branch  3 taken 0
+        4:  914:			free(sel_elements[(int)sel_n - i]);
+        4:  914-block  0
+unconditional  0 taken 4
+        -:  915:
+        -:  916:	/* Reallocate the sel array according to the new size */
+        4:  917:	sel_n = (sel_n - desel_n);
+        -:  918:
+        4:  919:	if ((int)sel_n < 0) {
+        4:  919-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4
+    #####:  920:		sel_n = 0;
+    #####:  921:		total_sel_size = 0;
+    %%%%%:  921-block  0
+unconditional  0 never executed
+        -:  922:	}
+        -:  923:
+        4:  924:	if (sel_n)
+        4:  924-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 1
+        3:  925:		sel_elements = (char **)xrealloc(sel_elements, sel_n * sizeof(char *));
+        3:  925-block  0
+call    0 returned 3
+unconditional  1 taken 3
+        -:  926:
+        -:  927:	/* Deallocate local arrays */
+        4:  928:	i = (int)desel_n;
+        8:  929:	while (--i >= 0) {
+        4:  929-block  0
+unconditional  0 taken 4
+        8:  929-block  1
+branch  1 taken 4
+branch  2 taken 4 (fallthrough)
+        4:  930:		free(desel_path[i]);
+        4:  931:		free(desel_elements[i]);
+        4:  931-block  0
+unconditional  0 taken 4
+        -:  932:	}
+        4:  933:	free(desel_path);
+        4:  934:	free(desel_elements);
+        -:  935:
+        4:  936:	if (args_n > 0) {
+        4:  936-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4
+    #####:  937:		for (i = 1; i <= (int)args_n; i++)
+    %%%%%:  937-block  0
+unconditional  0 never executed
+    %%%%%:  937-block  1
 branch  1 never executed
-    #####: 1000:				new_sel += select_file(tmp_path);
-    %%%%%: 1000-block  0
+branch  2 never executed
+    #####:  938:			free(comm[i]);
+    %%%%%:  938-block  0
+unconditional  0 never executed
+    #####:  939:		comm = (char **)xrealloc(comm, 1 * sizeof(char *));
+    %%%%%:  939-block  0
 call    0 never executed
-unconditional  1 never executed
-        -: 1001:
-    #####: 1002:			free(tmp_path);
-    #####: 1003:			free(list[i]);
-    %%%%%: 1003-block  0
+    #####:  940:		args_n = 0;
 unconditional  0 never executed
-        -: 1004:		}
-        -: 1005:
-    #####: 1006:		free(list);
-    %%%%%: 1006-block  0
+        -:  941:	}
+        -:  942:
+        4:  943:	int exit_status = EXIT_SUCCESS;
+        -:  944:
+        4:  945:	if (save_sel() != 0)
+        4:  945-block  0
+call    0 returned 4
+branch  1 taken 0 (fallthrough)
+branch  2 taken 4
+    #####:  946:		exit_status = EXIT_FAILURE;
+    %%%%%:  946-block  0
 unconditional  0 never executed
-        -: 1007:	}
-        -: 1008:
-    #####: 1009:	regfree(&regex);
-    %%%%%: 1009-block  0
-call    0 never executed
-        -: 1010:
-    #####: 1011:	return new_sel;
+        -:  947:
+        -:  948:	/* If there is still some selected file, reload the desel screen */
+        4:  949:	if (sel_n)
+        4:  949-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 1
+        3:  950:		if (deselect(comm) != 0)
+        3:  950-block  0
+call    0 returned 3
+branch  1 taken 0 (fallthrough)
+branch  2 taken 3
+    #####:  951:			exit_status = EXIT_FAILURE;
+    %%%%%:  951-block  0
 unconditional  0 never executed
-        -: 1012:}
+        -:  952:
+        4:  953:	return exit_status;
+        4:  953-block  0
+unconditional  0 taken 4
+        -:  954:}
