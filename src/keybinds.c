@@ -425,8 +425,11 @@ rl_accept_suggestion(int count, int key)
 	|| suggestion.type == JCMD_SUG || suggestion.type == JCMD_SUG_NOACD))
 		clear_suggestion();
 
+/*
+#ifndef _NO_HIGHLIGHT
 	if (*suggestion_buf == '#')
 		fputs(hc_c, stdout);
+#endif */
 
 	switch(suggestion.type) {
 
@@ -465,10 +468,11 @@ rl_accept_suggestion(int count, int key)
 		break;
 
 	case VAR_SUG:
+/*
 #ifndef _NO_HIGHLIGHT
 		if (highlight)
 			fputs(hv_c, stdout);
-#endif
+#endif */
 		rl_insert_text(suggestion_buf);
 		rl_stuff_char(' ');
 		break;
