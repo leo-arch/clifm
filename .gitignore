@@ -1,6 +1,11 @@
 # Main app
 clifm
 
+# Gcov files
+*.gcov
+*.gcda
+*.gcno
+
 # Misc
 TODO/
 clifm-debian/
