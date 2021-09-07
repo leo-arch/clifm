@@ -1,0 +1,16 @@
+name: Codecov
+on:
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+  schedule:
+    - cron: '22 7 * * 5'
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Upload
+        uses: codecov/codecov-action@v1
+        with:
+           files: misc/*.c.gcov
+#          files: ./lib.c.gcov
