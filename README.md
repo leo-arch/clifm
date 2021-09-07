@@ -104,7 +104,7 @@ Features beyond common file operations, such as copy, move, remove, etc.:
 *   [_Kangaroo_](https://github.com/leo-arch/clifm/wiki/Specifics#kangaroos-frecency-algorithm), a built-in directory jumper function similar to [autojump](https://github.com/wting/autojump), [z.lua](https://github.com/skywind3000/z.lua), and [zoxide](https://github.com/ajeetdsouza/zoxide).
 *   [Batch links](https://github.com/leo-arch/clifm/wiki/Introduction#bl-elnfile--n).
 *   [Icons support](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk) :smirk:.
-* Unicode suppport.
+*   Unicode suppport.
 *   [Tab-completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions).
 *   Bash-like quoting system.
 *   [Directory](https://github.com/leo-arch/clifm/wiki/Introduction#b-back-h-hist-clear-eln) and [commands](https://github.com/leo-arch/clifm/wiki/Introduction/#commands-history) history.
