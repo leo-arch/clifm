@@ -962,14 +962,11 @@ bulk_rename(char **args)
 
 		if (line[line_len - 1] == '\n')
 			line[line_len - 1] = '\0';
-
-		int fdd = open(args[i], O_RDONLY);
 		if (args[i] && strcmp(args[i], line) != 0) {
-			if (renameat(fdd, args[i], AT_FDCWD, line) == -1)
+			if (renameat(AT_FDCWD, args[i], AT_FDCWD, line) == -1)
 				exit_status = EXIT_FAILURE;
 		}
 
-		close(fdd);
 		i++;
 	}
 
