@@ -1,0 +1,481 @@
+        -:    0:Source:actions.c
+        -:    1:/* actions.c -- a few functions for the plugins systems */
+        -:    2:
+        -:    3:/*
+        -:    4: * This file is part of CliFM
+        -:    5: * 
+        -:    6: * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
+        -:    7: * All rights reserved.
+        -:    8:
+        -:    9: * CliFM is free software; you can redistribute it and/or modify
+        -:   10: * it under the terms of the GNU General Public License as published by
+        -:   11: * the Free Software Foundation; either version 2 of the License, or
+        -:   12: * (at your option) any later version.
+        -:   13: *
+        -:   14: * CliFM is distributed in the hope that it will be useful,
+        -:   15: * but WITHOUT ANY WARRANTY; without even the implied warranty of
+        -:   16: * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        -:   17: * GNU General Public License for more details.
+        -:   18: *
+        -:   19: * You should have received a copy of the GNU General Public License
+        -:   20: * along with this program; if not, write to the Free Software
+        -:   21: * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+        -:   22: * MA 02110-1301, USA.
+        -:   23:*/
+        -:   24:
+        -:   25:#include "helpers.h"
+        -:   26:
+        -:   27:#include <errno.h>
+        -:   28:#include <fcntl.h>
+        -:   29:#include <stdio.h>
+        -:   30:#include <string.h>
+        -:   31:#include <sys/stat.h>
+        -:   32:#include <unistd.h>
+        -:   33:
+        -:   34:#include "aux.h"
+        -:   35:#include "checks.h"
+        -:   36:#include "exec.h"
+        -:   37:#include "file_operations.h"
+        -:   38:#include "init.h"
+        -:   39:#include "mime.h"
+        -:   40:#include "misc.h"
+        -:   41:
+        -:   42:/* The core of this function was taken from NNN's run_selected_plugin
+        -:   43: * function and modified to fit our needs. Thanks NNN! */
+        -:   44:int
+function run_action called 0 returned 0% blocks executed 0%
+    #####:   45:run_action(char *action, char **args)
+        -:   46:{
+    #####:   47:	int exit_status = EXIT_SUCCESS;
+    #####:   48:	char *cmd = (char *)NULL;
+    #####:   49:	size_t len = 0, action_len = strlen(action);
+        -:   50:
+        -:   51:	/* #####################################
+        -:   52:		 * #    1) CREATE CMD TO BE EXECUTED   #
+        -:   53:		 * ##################################### */
+        -:   54:
+        -:   55:	/* Remove terminating new line char */
+    #####:   56:	if (action[action_len - 1] == '\n')
+    %%%%%:   56-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   57:		action[action_len - 1] = '\0';
+    %%%%%:   57-block  0
+unconditional  0 never executed
+        -:   58:
+    #####:   59:	if (strchr(action, '/')) {
+    %%%%%:   59-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   60:		len = action_len;
+    #####:   61:		cmd = savestring(action, len);
+    %%%%%:   61-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:   62:	}
+        -:   63:
+        -:   64:	/* If not a path, PLUGINS_DIR is assumed */
+        -:   65:	else {
+    #####:   66:		len = action_len + strlen(PLUGINS_DIR) + 2;
+    #####:   67:		cmd = (char *)xnmalloc(len, sizeof(char));
+    %%%%%:   67-block  0
+call    0 never executed
+    #####:   68:		sprintf(cmd, "%s/%s", PLUGINS_DIR, action);
+unconditional  0 never executed
+        -:   69:	}
+        -:   70:
+        -:   71:	/* Check if the action file exists and is executable */
+    #####:   72:	if (access(cmd, F_OK | X_OK) == -1) {
+    %%%%%:   72-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:   73:		fprintf(stderr, "actions: %s: %s\n", cmd, strerror(errno));
+    %%%%%:   73-block  0
+call    0 never executed
+call    1 never executed
+    #####:   74:		free(cmd);
+    #####:   75:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:   76:	}
+        -:   77:
+        -:   78:	/* Append arguments to command */
+        -:   79:	size_t i;
+    #####:   80:	for (i = 1; args[i]; i++) {
+    %%%%%:   80-block  0
+unconditional  0 never executed
+    %%%%%:   80-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:   81:		len += strlen(args[i]) + 2;
+    #####:   82:		cmd = (char *)xrealloc(cmd, len * sizeof(char));
+    %%%%%:   82-block  0
+call    0 never executed
+    #####:   83:		strcat(cmd, " ");
+    #####:   84:		strcat(cmd, args[i]);
+unconditional  0 never executed
+        -:   85:	}
+        -:   86:
+        -:   87:	/* ##############################
+        -:   88:			 * #    2) CREATE A PIPE FILE   #
+        -:   89:			 * ############################## */
+        -:   90:
+    #####:   91:	char *rand_ext = gen_rand_str(6);
+    %%%%%:   91-block  0
+call    0 never executed
+        -:   92:
+    #####:   93:	if (!rand_ext) {
+branch  0 never executed
+branch  1 never executed
+    #####:   94:		free(cmd);
+    #####:   95:		return EXIT_FAILURE;
+    %%%%%:   95-block  0
+unconditional  0 never executed
+        -:   96:	}
+        -:   97:
+        -:   98:	char fifo_path[PATH_MAX];
+    #####:   99:	sprintf(fifo_path, "%s/.pipe.%s", TMP_DIR, rand_ext);
+    #####:  100:	free(rand_ext);
+        -:  101:
+    #####:  102:	setenv("CLIFM_BUS", fifo_path, 1);
+    %%%%%:  102-block  0
+call    0 never executed
+        -:  103:
+    #####:  104:	if (mkfifo(fifo_path, 0600) != EXIT_SUCCESS) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  105:		free(cmd);
+    #####:  106:		printf("%s: %s\n", fifo_path, strerror(errno));
+    %%%%%:  106-block  0
+call    0 never executed
+call    1 never executed
+    #####:  107:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  108:	}
+        -:  109:
+        -:  110:	/* ################################################
+        -:  111:	 * #   3) EXEC CMD & LET THE CHILD WRITE TO PIPE  #
+        -:  112:	 * ################################################ */
+        -:  113:
+        -:  114:	/* Set terminal title to plugin name */
+    #####:  115:	if (xargs.cwd_in_title == 1)
+    %%%%%:  115-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  116:		set_term_title(action);
+    %%%%%:  116-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  117:
+    #####:  118:	if (fork() == EXIT_SUCCESS) {
+    %%%%%:  118-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:  119:
+        -:  120:		/* Child: write-only end of the pipe */
+    #####:  121:		int wfd = open(fifo_path, O_WRONLY | O_CLOEXEC);
+    %%%%%:  121-block  0
+call    0 never executed
+        -:  122:
+    #####:  123:		if (wfd == -1)
+branch  0 never executed
+branch  1 never executed
+    #####:  124:			_exit(EXIT_FAILURE);
+    %%%%%:  124-block  0
+call    0 never executed
+        -:  125:
+    #####:  126:		launch_execle(cmd);
+    %%%%%:  126-block  0
+call    0 never executed
+        -:  127:
+    #####:  128:		close(wfd);
+call    0 never executed
+    #####:  129:		_exit(EXIT_SUCCESS);
+call    0 never executed
+        -:  130:	}
+        -:  131:
+    #####:  132:	free(cmd);
+    %%%%%:  132-block  0
+unconditional  0 never executed
+        -:  133:
+        -:  134:	/* ########################################
+        -:  135:		 * #    4) LET THE PARENT READ THE PIPE   #
+        -:  136:		 * ######################################## */
+        -:  137:
+        -:  138:	/* Parent: read-only end of the pipe */
+        -:  139:	int rfd;
+        -:  140:
+        -:  141:	do
+    #####:  142:		rfd = open(fifo_path, O_RDONLY);
+    %%%%%:  142-block  0
+call    0 never executed
+    #####:  143:	while (rfd == -1 && errno == EINTR);
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  143-block  0
+branch  2 never executed
+branch  3 never executed
+        -:  144:
+    #####:  145:	char buf[PATH_MAX] = "";
+    #####:  146:	ssize_t buf_len = 0;
+    %%%%%:  146-block  0
+unconditional  0 never executed
+        -:  147:
+        -:  148:	do
+    #####:  149:		buf_len = read(rfd, buf, sizeof(buf));
+    %%%%%:  149-block  0
+call    0 never executed
+    #####:  150:	while (buf_len == -1 && errno == EINTR);
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  150-block  0
+branch  2 never executed
+branch  3 never executed
+        -:  151:
+    #####:  152:	close(rfd);
+    %%%%%:  152-block  0
+call    0 never executed
+        -:  153:
+        -:  154:	/* If the pipe is empty */
+    #####:  155:	if (!*buf) {
+branch  0 never executed
+branch  1 never executed
+    #####:  156:		unlink(fifo_path);
+    %%%%%:  156-block  0
+call    0 never executed
+    #####:  157:		if (xargs.cwd_in_title == 1)
+branch  0 never executed
+branch  1 never executed
+    #####:  158:			set_term_title(ws[cur_ws].path);
+    %%%%%:  158-block  0
+call    0 never executed
+unconditional  1 never executed
+    #####:  159:		return EXIT_SUCCESS;
+    %%%%%:  159-block  0
+unconditional  0 never executed
+        -:  160:	}
+        -:  161:
+    #####:  162:	if (buf[buf_len - 1] == '\n')
+    %%%%%:  162-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  163:		buf[buf_len - 1] = '\0';
+    %%%%%:  163-block  0
+unconditional  0 never executed
+        -:  164:
+        -:  165:	/* If a valid file */
+        -:  166:	struct stat attr;
+        -:  167:
+    #####:  168:	if (lstat(buf, &attr) != -1) {
+    %%%%%:  168-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  169:		char *o_cmd[] = {"o", buf, NULL};
+    #####:  170:		exit_status = open_function(o_cmd);
+    %%%%%:  170-block  0
+call    0 never executed
+        -:  171:	}
+        -:  172:
+        -:  173:	/* If not a file, take it as a command*/
+        -:  174:	else {
+    #####:  175:		size_t old_args = args_n;
+    #####:  176:		args_n = 0;
+        -:  177:
+    #####:  178:		char **_cmd = parse_input_str(buf);
+    %%%%%:  178-block  0
+call    0 never executed
+        -:  179:
+    #####:  180:		if (_cmd) {
+branch  0 never executed
+branch  1 never executed
+        -:  181:
+    #####:  182:			char **alias_cmd = check_for_alias(_cmd);
+    %%%%%:  182-block  0
+call    0 never executed
+        -:  183:
+    #####:  184:			if (alias_cmd) {
+branch  0 never executed
+branch  1 never executed
+    #####:  185:				exit_status = exec_cmd(alias_cmd);
+    %%%%%:  185-block  0
+call    0 never executed
+        -:  186:
+    #####:  187:				for (i = 0; alias_cmd[i]; i++)
+unconditional  0 never executed
+    %%%%%:  187-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:  188:					free(alias_cmd[i]);
+    %%%%%:  188-block  0
+unconditional  0 never executed
+        -:  189:
+    #####:  190:				free(alias_cmd);
+    %%%%%:  190-block  0
+unconditional  0 never executed
+        -:  191:			}
+        -:  192:
+        -:  193:			else {
+    #####:  194:				exit_status = exec_cmd(_cmd);
+    %%%%%:  194-block  0
+call    0 never executed
+        -:  195:
+    #####:  196:				for (i = 0; i <= args_n; i++)
+unconditional  0 never executed
+    %%%%%:  196-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:  197:					free(_cmd[i]);
+    %%%%%:  197-block  0
+unconditional  0 never executed
+        -:  198:
+    #####:  199:				free(_cmd);
+    %%%%%:  199-block  0
+unconditional  0 never executed
+        -:  200:			}
+        -:  201:		}
+        -:  202:
+    #####:  203:		args_n = old_args;
+    %%%%%:  203-block  0
+unconditional  0 never executed
+        -:  204:	}
+        -:  205:
+        -:  206:	/* Remove the pipe file */
+    #####:  207:	unlink(fifo_path);
+    %%%%%:  207-block  0
+call    0 never executed
+        -:  208:
+    #####:  209:	if (xargs.cwd_in_title == 1)
+branch  0 never executed
+branch  1 never executed
+    #####:  210:		set_term_title(ws[cur_ws].path);
+    %%%%%:  210-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  211:
+    #####:  212:	return exit_status;
+    %%%%%:  212-block  0
+unconditional  0 never executed
+        -:  213:}
+        -:  214:
+        -:  215:int
+function edit_actions called 0 returned 0% blocks executed 0%
+    #####:  216:edit_actions(void)
+        -:  217:{
+    #####:  218:	if (xargs.stealth_mode == 1) {
+    %%%%%:  218-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  219:		printf("%s: Access to configuration files is not allowed in "
+    %%%%%:  219-block  0
+call    0 never executed
+        -:  220:		       "stealth mode\n", PROGRAM_NAME);
+    #####:  221:		return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  222:	}
+        -:  223:
+        -:  224:	/* Get actions file's current modification time */
+        -:  225:	struct stat file_attrib;
+        -:  226:
+    #####:  227:	if (stat(ACTIONS_FILE, &file_attrib) == -1) {
+    %%%%%:  227-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  228:		fprintf(stderr, "actions: %s: %s\n", ACTIONS_FILE, strerror(errno));
+    %%%%%:  228-block  0
+call    0 never executed
+call    1 never executed
+    #####:  229:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  230:	}
+        -:  231:
+    #####:  232:	time_t mtime_bfr = (time_t)file_attrib.st_mtime;
+        -:  233:
+    #####:  234:	char *cmd[] = {"mm", ACTIONS_FILE, NULL};
+        -:  235:
+    #####:  236:	int ret = mime_open(cmd);
+    %%%%%:  236-block  0
+call    0 never executed
+        -:  237:
+    #####:  238:	if (ret != EXIT_SUCCESS)
+branch  0 never executed
+branch  1 never executed
+    #####:  239:		return EXIT_FAILURE;
+    %%%%%:  239-block  0
+unconditional  0 never executed
+        -:  240:
+        -:  241:	/* Get modification time after opening the file */
+    #####:  242:	stat(ACTIONS_FILE, &file_attrib);
+    %%%%%:  242-block  0
+call    0 never executed
+        -:  243:
+        -:  244:	/* If modification times differ, the file was modified after being
+        -:  245:	 * opened */
+    #####:  246:	if (mtime_bfr != (time_t)file_attrib.st_mtime) {
+branch  0 never executed
+branch  1 never executed
+        -:  247:
+        -:  248:		/* Reload the array of available actions */
+    #####:  249:		if (load_actions() != EXIT_SUCCESS)
+    %%%%%:  249-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  250:			return EXIT_FAILURE;
+    %%%%%:  250-block  0
+unconditional  0 never executed
+        -:  251:
+        -:  252:		/* Reload PATH commands as well to add new action(s) */
+    #####:  253:		if (bin_commands) {
+    %%%%%:  253-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  254:			size_t i;
+    #####:  255:			for (i = 0; bin_commands[i]; i++)
+    %%%%%:  255-block  0
+unconditional  0 never executed
+    %%%%%:  255-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  256:				free(bin_commands[i]);
+    %%%%%:  256-block  0
+unconditional  0 never executed
+        -:  257:
+    #####:  258:			free(bin_commands);
+    #####:  259:			bin_commands = (char **)NULL;
+    %%%%%:  259-block  0
+unconditional  0 never executed
+        -:  260:		}
+        -:  261:
+    #####:  262:		if (paths) {
+    %%%%%:  262-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  263:			size_t i;
+    #####:  264:			for (i = 0; i < path_n; i++)
+    %%%%%:  264-block  0
+unconditional  0 never executed
+    %%%%%:  264-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  265:				free(paths[i]);
+    %%%%%:  265-block  0
+unconditional  0 never executed
+        -:  266:		}
+        -:  267:
+    #####:  268:		path_n = (size_t)get_path_env();
+    %%%%%:  268-block  0
+call    0 never executed
+        -:  269:
+    #####:  270:		get_path_programs();
+call    0 never executed
+unconditional  1 never executed
+        -:  271:	}
+        -:  272:
+    #####:  273:	return EXIT_SUCCESS;
+    %%%%%:  273-block  0
+unconditional  0 never executed
+        -:  274:}

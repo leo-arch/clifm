@@ -1,0 +1,4328 @@
+        -:    0:Source:strings.c
+        -:    1:/* strings.c -- misc string manipulation function */
+        -:    2:
+        -:    3:/*
+        -:    4: * This file is part of CliFM
+        -:    5: * 
+        -:    6: * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
+        -:    7: * All rights reserved.
+        -:    8:
+        -:    9: * CliFM is free software; you can redistribute it and/or modify
+        -:   10: * it under the terms of the GNU General Public License as published by
+        -:   11: * the Free Software Foundation; either version 2 of the License, or
+        -:   12: * (at your option) any later version.
+        -:   13: *
+        -:   14: * CliFM is distributed in the hope that it will be useful,
+        -:   15: * but WITHOUT ANY WARRANTY; without even the implied warranty of
+        -:   16: * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        -:   17: * GNU General Public License for more details.
+        -:   18: *
+        -:   19: * You should have received a copy of the GNU General Public License
+        -:   20: * along with this program; if not, write to the Free Software
+        -:   21: * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+        -:   22: * MA 02110-1301, USA.
+        -:   23:*/
+        -:   24:
+        -:   25:#include "helpers.h"
+        -:   26:
+        -:   27:#include <glob.h>
+        -:   28:#include <stdio.h>
+        -:   29:#include <string.h>
+        -:   30:#include <time.h>
+        -:   31:#include <wchar.h>
+        -:   32:#include <wordexp.h>
+        -:   33:
+        -:   34:#include "aux.h"
+        -:   35:#include "checks.h"
+        -:   36:#include "exec.h"
+        -:   37:#include "navigation.h"
+        -:   38:#include "readline.h"
+        -:   39:
+        -:   40:#ifndef _BE_POSIX
+        -:   41:#define CMD_LEN_MAX (PATH_MAX + ((NAME_MAX + 1) << 1))
+        -:   42:char len_buf[CMD_LEN_MAX] __attribute__((aligned));
+        -:   43:#endif
+        -:   44:
+        -:   45:int
+function xstrncmp called 0 returned 0% blocks executed 0%
+    #####:   46:xstrncmp(const char *s1, const char *s2, size_t n)
+        -:   47:{
+    #####:   48:	if (!s1 || !s2)
+    %%%%%:   48-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   48-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:   49:		return 256;
+    %%%%%:   49-block  0
+unconditional  0 never executed
+        -:   50:
+    #####:   51:	size_t c = 0;
+    #####:   52:	while (*s1 && c++ < n) {
+    %%%%%:   52-block  0
+unconditional  0 never executed
+    %%%%%:   52-block  1
+branch  1 never executed
+branch  2 never executed
+    %%%%%:   52-block  2
+branch  3 never executed
+branch  4 never executed
+    #####:   53:		if (*s1 != *s2)
+    %%%%%:   53-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   54:			return (*s1 - *s2);
+    %%%%%:   54-block  0
+unconditional  0 never executed
+    #####:   55:		s1++;
+    #####:   56:		s2++;
+    %%%%%:   56-block  0
+unconditional  0 never executed
+        -:   57:	}
+        -:   58:
+    #####:   59:	if (c == n)
+    %%%%%:   59-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   60:		return 0;
+    %%%%%:   60-block  0
+unconditional  0 never executed
+        -:   61:
+    #####:   62:	if (*s2)
+    %%%%%:   62-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   63:		return (0 - *s2);
+    %%%%%:   63-block  0
+unconditional  0 never executed
+        -:   64:
+    #####:   65:	return 0;
+    %%%%%:   65-block  0
+unconditional  0 never executed
+        -:   66:}
+        -:   67:
+        -:   68:char *
+function xstrncpy called 0 returned 0% blocks executed 0%
+    #####:   69:xstrncpy(char *buf, const char *restrict str, size_t n)
+        -:   70:{
+    #####:   71:	if (!str)
+    %%%%%:   71-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   72:		return (char *)NULL;
+    %%%%%:   72-block  0
+unconditional  0 never executed
+        -:   73:
+    #####:   74:	size_t c = 0;
+    #####:   75:	while (*str && c++ < n)
+    %%%%%:   75-block  0
+unconditional  0 never executed
+    %%%%%:   75-block  1
+branch  1 never executed
+branch  2 never executed
+    %%%%%:   75-block  2
+branch  3 never executed
+branch  4 never executed
+    #####:   76:		*(buf++) = *(str++);
+    %%%%%:   76-block  0
+unconditional  0 never executed
+        -:   77:
+    #####:   78:	*buf = '\0';
+        -:   79:
+        -:   80:	/*  size_t counter = 0;
+        -:   81:	while ((*buf++ = *str++) && counter++ < n); */
+        -:   82:
+    #####:   83:	return buf;
+    %%%%%:   83-block  0
+unconditional  0 never executed
+        -:   84:}
+        -:   85:
+        -:   86:/* Taken from NNN's source code: very clever */
+        -:   87:size_t
+function xstrsncpy called 1078 returned 100% blocks executed 80%
+     1078:   88:xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
+        -:   89:{
+     1078:   90:	char *end = memccpy(dst, src, '\0', n);
+     1078:   90-block  0
+call    0 returned 1078
+        -:   91:
+     1078:   92:	if (!end) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1078
+    #####:   93:		dst[n - 1] = '\0';
+    #####:   94:		end = dst + n;
+    %%%%%:   94-block  0
+unconditional  0 never executed
+        -:   95:	}
+        -:   96:
+     1078:   97:	return end - dst;
+     1078:   97-block  0
+unconditional  0 taken 1078
+        -:   98:}
+        -:   99:
+        -:  100:size_t
+function wc_xstrlen called 1078 returned 100% blocks executed 100%
+     1078:  101:wc_xstrlen(const char *restrict str)
+        -:  102:{
+        -:  103:	size_t len;
+        -:  104:#ifndef _BE_POSIX
+     1078:  105:	wchar_t *const wbuf = (wchar_t *)len_buf;
+        -:  106:
+        -:  107:	/* Convert multi-byte to wide char */
+     1078:  108:	len = mbstowcs(wbuf, str, NAME_MAX);
+     1078:  108-block  0
+call    0 returned 1078
+     1078:  109:	len = wcswidth(wbuf, len);
+call    0 returned 1078
+        -:  110:#else
+        -:  111:	len = u8_xstrlen(str);
+        -:  112:#endif
+        -:  113:
+     1078:  114:	return len;
+unconditional  0 taken 1078
+        -:  115:}
+        -:  116:
+        -:  117:/* Truncate an UTF-8 string at length N. Returns zero if truncated and
+        -:  118: * one if not */
+        -:  119:int
+function u8truncstr called 0 returned 0% blocks executed 0%
+    #####:  120:u8truncstr(char *restrict str, size_t n)
+        -:  121:{
+    #####:  122:	size_t len = 0;
+        -:  123:
+    #####:  124:	while (*(str++)) {
+    %%%%%:  124-block  0
+unconditional  0 never executed
+    %%%%%:  124-block  1
+branch  1 never executed
+branch  2 never executed
+        -:  125:
+        -:  126:		/* Do not count continuation bytes (used by multibyte, that is,
+        -:  127:		 * wide or non-ASCII characters) */
+    #####:  128:		if ((*str & 0xc0) != 0x80) {
+    %%%%%:  128-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  129:			len++;
+        -:  130:
+    #####:  131:			if (len == n) {
+    %%%%%:  131-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  132:				*str = '\0';
+    #####:  133:				return EXIT_SUCCESS;
+    %%%%%:  133-block  0
+unconditional  0 never executed
+        -:  134:			}
+        -:  135:		}
+        -:  136:	}
+        -:  137:
+    #####:  138:	return EXIT_FAILURE;
+    %%%%%:  138-block  0
+unconditional  0 never executed
+        -:  139:}
+        -:  140:
+        -:  141:/* An strlen implementation able to handle unicode characters. Taken from:
+        -:  142:* https://stackoverflow.com/questions/5117393/number-of-character-cells-used-by-string
+        -:  143:* Explanation: strlen() counts bytes, not chars. Now, since ASCII chars
+        -:  144:* take each 1 byte, the amount of bytes equals the amount of chars.
+        -:  145:* However, non-ASCII or wide chars are multibyte chars, that is, one char
+        -:  146:* takes more than 1 byte, and this is why strlen() does not work as
+        -:  147:* expected for this kind of chars: a 6 chars string might take 12 or
+        -:  148:* more bytes */
+        -:  149:size_t
+function u8_xstrlen called 22 returned 100% blocks executed 100%
+       22:  150:u8_xstrlen(const char *restrict str)
+        -:  151:{
+       22:  152:	size_t len = 0;
+        -:  153:
+     2376:  154:	while (*(str++)) {
+       22:  154-block  0
+unconditional  0 taken 22
+     2376:  154-block  1
+branch  1 taken 2354
+branch  2 taken 22 (fallthrough)
+     2354:  155:		if ((*str & 0xc0) != 0x80)
+     2354:  155-block  0
+branch  0 taken 2354 (fallthrough)
+branch  1 taken 0
+     2354:  156:			len++;
+     2354:  156-block  0
+unconditional  0 taken 2354
+        -:  157:	}
+        -:  158:
+       22:  159:	return len;
+       22:  159-block  0
+unconditional  0 taken 22
+        -:  160:}
+        -:  161:
+        -:  162:/* Returns the index of the first appearance of c in str, if any, and
+        -:  163: * -1 if c was not found or if no str. NOTE: Same thing as strchr(),
+        -:  164: * except that returns an index, not a pointer */
+        -:  165:int
+function strcntchr called 12 returned 100% blocks executed 78%
+       12:  166:strcntchr(const char *str, const char c)
+        -:  167:{
+       12:  168:	if (!str)
+       12:  168-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 12
+    #####:  169:		return -1;
+    %%%%%:  169-block  0
+unconditional  0 never executed
+        -:  170:
+       12:  171:	register int i = 0;
+        -:  172:
+       52:  173:	while (*str) {
+       12:  173-block  0
+unconditional  0 taken 12
+       52:  173-block  1
+branch  1 taken 52
+branch  2 taken 0 (fallthrough)
+       52:  174:		if (*str == c)
+       52:  174-block  0
+branch  0 taken 12 (fallthrough)
+branch  1 taken 40
+       12:  175:			return i;
+       12:  175-block  0
+unconditional  0 taken 12
+       40:  176:		i++;
+       40:  177:		str++;
+       40:  177-block  0
+unconditional  0 taken 40
+        -:  178:	}
+        -:  179:
+    #####:  180:	return -1;
+    %%%%%:  180-block  0
+unconditional  0 never executed
+        -:  181:}
+        -:  182:
+        -:  183:/* Returns the string after the first appearance of a given char, or
+        -:  184: * returns NULL if C is not found in STR or C is the last char in STR. */
+        -:  185:char *
+function straft called 9 returned 100% blocks executed 81%
+        9:  186:straft(char *str, const char c)
+        -:  187:{
+        9:  188:	if (!str || !*str || !c)
+        9:  188-block  0
+branch  0 taken 9 (fallthrough)
+branch  1 taken 0
+        9:  188-block  1
+branch  2 taken 9 (fallthrough)
+branch  3 taken 0
+        9:  188-block  2
+branch  4 taken 0 (fallthrough)
+branch  5 taken 9
+    #####:  189:		return (char *)NULL;
+    %%%%%:  189-block  0
+unconditional  0 never executed
+        -:  190:
+        9:  191:	char *p = str, *q = (char *)NULL;
+        -:  192:
+       65:  193:	while (*p) {
+        9:  193-block  0
+unconditional  0 taken 9
+       65:  193-block  1
+branch  1 taken 65
+branch  2 taken 0 (fallthrough)
+       65:  194:		if (*p == c) {
+       65:  194-block  0
+branch  0 taken 9 (fallthrough)
+branch  1 taken 56
+        9:  195:			q = p;
+        9:  196:			break;
+        9:  196-block  0
+unconditional  0 taken 9
+        -:  197:		}
+       56:  198:		p++;
+       56:  198-block  0
+unconditional  0 taken 56
+        -:  199:	}
+        -:  200:
+        -:  201:	/* If C was not found or there is nothing after C */
+        9:  202:	if (!q || !*(q + 1))
+        9:  202-block  0
+branch  0 taken 9 (fallthrough)
+branch  1 taken 0
+        9:  202-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 9
+    #####:  203:		return (char *)NULL;
+    %%%%%:  203-block  0
+unconditional  0 never executed
+        -:  204:
+        9:  205:	char *buf = (char *)malloc(strlen(q));
+        -:  206:
+        9:  207:	if (!buf)
+        9:  207-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 9
+    #####:  208:		return (char *)NULL;
+    %%%%%:  208-block  0
+unconditional  0 never executed
+        -:  209:
+        9:  210:	strcpy(buf, q + 1);
+        -:  211:
+        9:  212:	return buf;
+        9:  212-block  0
+unconditional  0 taken 9
+        -:  213:}
+        -:  214:
+        -:  215:/* Returns the string after the last appearance of a given char, or
+        -:  216: * NULL if no match */
+        -:  217:char *
+function straftlst called 0 returned 0% blocks executed 0%
+    #####:  218:straftlst(char *str, const char c)
+        -:  219:{
+    #####:  220:	if (!str || !*str || !c)
+    %%%%%:  220-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  220-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  220-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  221:		return (char *)NULL;
+    %%%%%:  221-block  0
+unconditional  0 never executed
+        -:  222:
+    #####:  223:	char *p = str, *q = (char *)NULL;
+        -:  224:
+    #####:  225:	while (*p) {
+    %%%%%:  225-block  0
+unconditional  0 never executed
+    %%%%%:  225-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  226:		if (*p == c)
+    %%%%%:  226-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  227:			q = p;
+    %%%%%:  227-block  0
+unconditional  0 never executed
+    #####:  228:		p++;
+    %%%%%:  228-block  0
+unconditional  0 never executed
+        -:  229:	}
+        -:  230:
+    #####:  231:	if (!q || !*(q + 1))
+    %%%%%:  231-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  231-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  232:		return (char *)NULL;
+    %%%%%:  232-block  0
+unconditional  0 never executed
+        -:  233:
+    #####:  234:	char *buf = (char *)malloc(strlen(q));
+        -:  235:
+    #####:  236:	if (!buf)
+    %%%%%:  236-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  237:		return (char *)NULL;
+    %%%%%:  237-block  0
+unconditional  0 never executed
+        -:  238:
+    #####:  239:	strcpy(buf, q + 1);
+        -:  240:
+    #####:  241:	return buf;
+    %%%%%:  241-block  0
+unconditional  0 never executed
+        -:  242:}
+        -:  243:
+        -:  244:/* Returns the substring in str before the first appearance of c. If
+        -:  245: * not found, or C is the first char in STR, returns NULL */
+        -:  246:char *
+function strbfr called 2 returned 100% blocks executed 81%
+        2:  247:strbfr(char *str, const char c)
+        -:  248:{
+        2:  249:	if (!str || !*str || !c)
+        2:  249-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  249-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 0
+        2:  249-block  2
+branch  4 taken 0 (fallthrough)
+branch  5 taken 2
+    #####:  250:		return (char *)NULL;
+    %%%%%:  250-block  0
+unconditional  0 never executed
+        -:  251:
+        2:  252:	char *p = str, *q = (char *)NULL;
+        4:  253:	while (*p) {
+        2:  253-block  0
+unconditional  0 taken 2
+        4:  253-block  1
+branch  1 taken 4
+branch  2 taken 0 (fallthrough)
+        4:  254:		if (*p == c) {
+        4:  254-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 2
+        2:  255:			q = p; /* q is now a pointer to C in STR */
+        2:  256:			break;
+        2:  256-block  0
+unconditional  0 taken 2
+        -:  257:		}
+        2:  258:		p++;
+        2:  258-block  0
+unconditional  0 taken 2
+        -:  259:	}
+        -:  260:
+        -:  261:	/* C was not found or it was the first char in STR */
+        2:  262:	if (!q || q == str)
+        2:  262-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  262-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 2
+    #####:  263:		return (char *)NULL;
+    %%%%%:  263-block  0
+unconditional  0 never executed
+        -:  264:
+        2:  265:	*q = '\0';
+        -:  266:	/* Now C (because q points to C) is the null byte and STR ends in
+        -:  267:	 * C, which is what we want */
+        -:  268:
+        2:  269:	char *buf = (char *)malloc((size_t)(q - str + 1));
+        -:  270:
+        2:  271:	if (!buf) { /* Memory allocation error */
+        2:  271-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+        -:  272:		/* Give back to C its original value, so that STR is not
+        -:  273:		 * modified in the process */
+    #####:  274:		*q = c;
+    #####:  275:		return (char *)NULL;
+    %%%%%:  275-block  0
+unconditional  0 never executed
+        -:  276:	}
+        -:  277:
+        2:  278:	strcpy(buf, str);
+        -:  279:
+        2:  280:	*q = c;
+        -:  281:
+        2:  282:	return buf;
+        2:  282-block  0
+unconditional  0 taken 2
+        -:  283:}
+        -:  284:
+        -:  285:/* Get substring in STR before the last appearance of C. Returns
+        -:  286: * substring  if C is found and NULL if not (or if C was the first
+        -:  287: * char in STR). */
+        -:  288:char *
+function strbfrlst called 0 returned 0% blocks executed 0%
+    #####:  289:strbfrlst(char *str, const char c)
+        -:  290:{
+    #####:  291:	if (!str || !*str || !c)
+    %%%%%:  291-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  291-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  291-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  292:		return (char *)NULL;
+    %%%%%:  292-block  0
+unconditional  0 never executed
+        -:  293:
+    #####:  294:	char *p = str, *q = (char *)NULL;
+        -:  295:
+    #####:  296:	while (*p) {
+    %%%%%:  296-block  0
+unconditional  0 never executed
+    %%%%%:  296-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  297:		if (*p == c)
+    %%%%%:  297-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  298:			q = p;
+    %%%%%:  298-block  0
+unconditional  0 never executed
+    #####:  299:		p++;
+    %%%%%:  299-block  0
+unconditional  0 never executed
+        -:  300:	}
+        -:  301:
+    #####:  302:	if (!q || q == str)
+    %%%%%:  302-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  302-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  303:		return (char *)NULL;
+    %%%%%:  303-block  0
+unconditional  0 never executed
+        -:  304:
+    #####:  305:	*q = 0x00;
+        -:  306:
+    #####:  307:	char *buf = (char *)malloc((size_t)(q - str + 1));
+        -:  308:
+    #####:  309:	if (!buf) {
+    %%%%%:  309-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  310:		*q = c;
+    #####:  311:		return (char *)NULL;
+    %%%%%:  311-block  0
+unconditional  0 never executed
+        -:  312:	}
+        -:  313:
+    #####:  314:	strcpy(buf, str);
+        -:  315:
+    #####:  316:	*q = c;
+        -:  317:
+    #####:  318:	return buf;
+    %%%%%:  318-block  0
+unconditional  0 never executed
+        -:  319:}
+        -:  320:
+        -:  321:/* Returns the string between first ocurrence of A and the first
+        -:  322: * ocurrence of B in STR, or NULL if: there is nothing between A and
+        -:  323: * B, or A and/or B are not found */
+        -:  324:char *
+function strbtw called 0 returned 0% blocks executed 0%
+    #####:  325:strbtw(char *str, const char a, const char b)
+        -:  326:{
+    #####:  327:	if (!str || !*str || !a || !b)
+    %%%%%:  327-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  327-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  327-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%:  327-block  3
+branch  6 never executed
+branch  7 never executed
+    #####:  328:		return (char *)NULL;
+    %%%%%:  328-block  0
+unconditional  0 never executed
+        -:  329:
+    #####:  330:	char *p = str, *pa = (char *)NULL, *pb = (char *)NULL;
+        -:  331:
+    #####:  332:	while (*p) {
+    %%%%%:  332-block  0
+unconditional  0 never executed
+    %%%%%:  332-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  333:		if (!pa) {
+    %%%%%:  333-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  334:			if (*p == a)
+    %%%%%:  334-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  335:				pa = p;
+    %%%%%:  335-block  0
+unconditional  0 never executed
+    #####:  336:		} else if (*p == b) {
+    %%%%%:  336-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  337:			pb = p;
+    #####:  338:			break;
+    %%%%%:  338-block  0
+unconditional  0 never executed
+        -:  339:		}
+    #####:  340:		p++;
+    %%%%%:  340-block  0
+unconditional  0 never executed
+        -:  341:	}
+        -:  342:
+    #####:  343:	if (!pb)
+    %%%%%:  343-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  344:		return (char *)NULL;
+    %%%%%:  344-block  0
+unconditional  0 never executed
+        -:  345:
+    #####:  346:	*pb = '\0';
+        -:  347:
+    #####:  348:	char *buf = (char *)malloc((size_t)(pb - pa));
+        -:  349:
+    #####:  350:	if (!buf) {
+    %%%%%:  350-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  351:		*pb = b;
+    #####:  352:		return (char *)NULL;
+    %%%%%:  352-block  0
+unconditional  0 never executed
+        -:  353:	}
+        -:  354:
+    #####:  355:	strcpy(buf, pa + 1);
+        -:  356:
+    #####:  357:	*pb = b;
+        -:  358:
+    #####:  359:	return buf;
+    %%%%%:  359-block  0
+unconditional  0 never executed
+        -:  360:}
+        -:  361:
+        -:  362:/* Generate a random string of LEN bytes using characters from CHARSET */
+        -:  363:char *
+function gen_rand_str called 1 returned 100% blocks executed 83%
+        1:  364:gen_rand_str(size_t len)
+        -:  365:{
+        1:  366:	char charset[] = "0123456789#%-_"
+        -:  367:			 "abcdefghijklmnopqrstuvwxyz"
+        -:  368:			 "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        -:  369:
+        1:  370:	srand((unsigned int)time(NULL));
+        1:  370-block  0
+call    0 returned 1
+call    1 returned 1
+        -:  371:
+        1:  372:	char *str = (char *)malloc((len + 1) * sizeof(char));
+        1:  373:	char *p = str;
+        -:  374:
+        1:  375:	if (!p) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  376:		fprintf(stderr, "Error allocating %zu bytes\n", len);
+    %%%%%:  376-block  0
+call    0 never executed
+    #####:  377:		return (char *)NULL;
+unconditional  0 never executed
+        -:  378:	}
+        -:  379:
+        -:  380:	int i;
+        7:  381:	while (len--) {
+        1:  381-block  0
+unconditional  0 taken 1
+        7:  381-block  1
+branch  1 taken 6
+branch  2 taken 1 (fallthrough)
+        6:  382:		i = rand() % (sizeof(charset) - 1);
+        6:  382-block  0
+call    0 returned 6
+        6:  383:		*p++ = charset[i];
+unconditional  0 taken 6
+        -:  384:	}
+        -:  385:
+        1:  386:	*p = '\0';
+        -:  387:
+        1:  388:	return str;
+        1:  388-block  0
+unconditional  0 taken 1
+        -:  389:}
+        -:  390:
+        -:  391:/* Removes end of line char and quotes (single and double) from STR.
+        -:  392: * Returns a pointer to the modified STR if the result is non-blank
+        -:  393: * or NULL */
+        -:  394:char *
+function remove_quotes called 4 returned 100% blocks executed 88%
+        4:  395:remove_quotes(char *str)
+        -:  396:{
+        4:  397:	if (!str || !*str)
+        4:  397-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 0
+        4:  397-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 4
+    #####:  398:		return (char *)NULL;
+    %%%%%:  398-block  0
+unconditional  0 never executed
+        -:  399:
+        4:  400:	char *p = str;
+        4:  401:	size_t len = strlen(p);
+        -:  402:
+        4:  403:	if (len > 0 && p[len - 1] == '\n') {
+        4:  403-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 0
+        4:  403-block  1
+branch  2 taken 4 (fallthrough)
+branch  3 taken 0
+        4:  404:		p[len - 1] = '\0';
+        4:  405:		len--;
+        4:  405-block  0
+unconditional  0 taken 4
+        -:  406:	}
+        -:  407:
+        4:  408:	if (len > 0 && (p[len - 1] == '\'' || p[len - 1] == '"'))
+        4:  408-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 2
+        2:  408-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 1
+        1:  408-block  2
+branch  4 taken 0 (fallthrough)
+branch  5 taken 1
+        1:  409:		p[len - 1] = '\0';
+        1:  409-block  0
+unconditional  0 taken 1
+        -:  410:
+        4:  411:	if (*p == '\'' || *p == '"')
+        4:  411-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 1
+        3:  411-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 3
+        1:  412:		p++;
+        1:  412-block  0
+unconditional  0 taken 1
+        -:  413:
+        4:  414:	if (!*p)
+        4:  414-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 2
+        2:  415:		return (char *)NULL;
+        2:  415-block  0
+unconditional  0 taken 2
+        -:  416:
+        2:  417:	char *q = p;
+        2:  418:	int blank = 1;
+        -:  419:
+        2:  420:	while (*q) {
+        2:  420-block  0
+unconditional  0 taken 2
+        2:  420-block  1
+branch  1 taken 2
+branch  2 taken 0 (fallthrough)
+        2:  421:		if (*q != ' ' && *q != '\n' && *q != '\t') {
+        2:  421-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  421-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 0
+        2:  421-block  2
+branch  4 taken 2 (fallthrough)
+branch  5 taken 0
+        2:  422:			blank = 0;
+        2:  423:			break;
+        2:  423-block  0
+unconditional  0 taken 2
+        -:  424:		}
+    #####:  425:		q++;
+    %%%%%:  425-block  0
+unconditional  0 never executed
+        -:  426:	}
+        -:  427:
+        2:  428:	if (!blank)
+        2:  428-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  429:		return p;
+        2:  429-block  0
+unconditional  0 taken 2
+        -:  430:
+    #####:  431:	return (char *)NULL;
+    %%%%%:  431-block  0
+unconditional  0 never executed
+        -:  432:}
+        -:  433:
+        -:  434:/* This function takes a string as argument and split it into substrings
+        -:  435: * taking tab, new line char, and space as word delimiters, except when
+        -:  436: * they are preceded by a quote char (single or double quotes) or in
+        -:  437: * case of command substitution ($(cmd) or `cmd`), in which case
+        -:  438: * eveything after the corresponding closing char is taken as one single
+        -:  439: * string. It also escapes spaecial chars. It returns an array of
+        -:  440: * splitted strings (without leading and terminating spaces) or NULL if
+        -:  441: * str is NULL or if no substring was found, i.e., if str contains
+        -:  442: * only spaces. */
+        -:  443:char **
+function split_str called 22 returned 100% blocks executed 34%
+       22:  444:split_str(const char *str)
+        -:  445:{
+       22:  446:	if (!str)
+       22:  446-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 22
+    #####:  447:		return (char **)NULL;
+    %%%%%:  447-block  0
+unconditional  0 never executed
+        -:  448:
+       22:  449:	size_t buf_len = 0, words = 0, str_len = 0;
+       22:  450:	char *buf = (char *)NULL;
+       22:  451:	buf = (char *)xnmalloc(1, sizeof(char));
+       22:  451-block  0
+call    0 returned 22
+        -:  452:	;
+       22:  453:	int quote = 0, close = 0;
+       22:  454:	char **substr = (char **)NULL;
+        -:  455:
+       90:  456:	while (*str) {
+unconditional  0 taken 22
+       90:  456-block  0
+branch  1 taken 68
+branch  2 taken 22 (fallthrough)
+       68:  457:		switch (*str) {
+       68:  457-block  0
+branch  0 taken 0
+branch  1 taken 0
+branch  2 taken 8
+branch  3 taken 60
+        -:  458:
+        -:  459:		/* Command substitution */
+    #####:  460:		case '$': /* fallthrough */
+        -:  461:		case '`':
+        -:  462:
+        -:  463:			/* Define the closing char: If "$(" then ')', else '`' */
+    #####:  464:			if (*str == '$') {
+    %%%%%:  464-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  465:				/* If escaped, it has no special meaning */
+    #####:  466:				if ((str_len && *(str - 1) == '\\') || *(str + 1) != '(') {
+    %%%%%:  466-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  466-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  466-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  467:					buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
+    %%%%%:  467-block  0
+call    0 never executed
+    #####:  468:					buf[buf_len++] = *str;
+    #####:  469:					break;
+unconditional  0 never executed
+        -:  470:				}
+        -:  471:
+        -:  472:				else
+    #####:  473:					close = ')';
+    %%%%%:  473-block  0
+unconditional  0 never executed
+        -:  474:			}
+        -:  475:
+        -:  476:			else {
+        -:  477:				/* If escaped, it has no special meaning */
+    #####:  478:				if (str_len && *(str - 1) == '\\') {
+    %%%%%:  478-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  478-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  479:					buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
+    %%%%%:  479-block  0
+call    0 never executed
+    #####:  480:					buf[buf_len++] = *str;
+    #####:  481:					break;
+unconditional  0 never executed
+        -:  482:				}
+        -:  483:
+        -:  484:				else {
+        -:  485:					/* If '`' advance one char. Otherwise the while
+        -:  486:					 * below will stop at first char, which is not
+        -:  487:					 * what we want */
+    #####:  488:					close = *str;
+    #####:  489:					str++;
+    #####:  490:					buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
+    %%%%%:  490-block  0
+call    0 never executed
+    #####:  491:					buf[buf_len++] = '`';
+unconditional  0 never executed
+        -:  492:				}
+        -:  493:			}
+        -:  494:
+        -:  495:			/* Copy everything until null byte or closing char */
+    #####:  496:			while (*str && *str != close) {
+    %%%%%:  496-block  0
+unconditional  0 never executed
+    %%%%%:  496-block  1
+branch  1 never executed
+branch  2 never executed
+    %%%%%:  496-block  2
+branch  3 never executed
+branch  4 never executed
+    #####:  497:				buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
+    %%%%%:  497-block  0
+call    0 never executed
+    #####:  498:				buf[buf_len++] = *(str++);
+unconditional  0 never executed
+        -:  499:			}
+        -:  500:
+        -:  501:			/* If the while loop stopped with a null byte, there was
+        -:  502:			 * no ending close (either ')' or '`')*/
+    #####:  503:			if (!*str) {
+    %%%%%:  503-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  504:				fprintf(stderr, _("%s: Missing '%c'\n"), PROGRAM_NAME,
+    %%%%%:  504-block  0
+call    0 never executed
+        -:  505:				    close);
+        -:  506:
+    #####:  507:				free(buf);
+    #####:  508:				buf = (char *)NULL;
+    #####:  509:				int i = (int)words;
+        -:  510:
+    #####:  511:				while (--i >= 0)
+unconditional  0 never executed
+    %%%%%:  511-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:  512:					free(substr[i]);
+    %%%%%:  512-block  0
+unconditional  0 never executed
+        -:  513:
+    #####:  514:				free(substr);
+        -:  515:
+    #####:  516:				return (char **)NULL;
+    %%%%%:  516-block  0
+unconditional  0 never executed
+        -:  517:			}
+        -:  518:
+        -:  519:			/* Copy the closing char and add an space: this function
+        -:  520:			 * takes space as word breaking char, so that everything
+        -:  521:			 * in the buffer will be copied as one single word */
+    #####:  522:			buf = (char *)xrealloc(buf, (buf_len + 2) * sizeof(char *));
+    %%%%%:  522-block  0
+call    0 never executed
+    #####:  523:			buf[buf_len++] = *str;
+    #####:  524:			buf[buf_len] = ' ';
+        -:  525:
+    #####:  526:			break;
+unconditional  0 never executed
+        -:  527:
+    #####:  528:		case '\'':
+        -:  529:		case '"':
+        -:  530:			/* If the quote is escaped, it has no special meaning */
+    #####:  531:			if (str_len && *(str - 1) == '\\') {
+    %%%%%:  531-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  531-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  532:				buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
+    %%%%%:  532-block  0
+call    0 never executed
+    #####:  533:				buf[buf_len++] = *str;
+    #####:  534:				break;
+unconditional  0 never executed
+        -:  535:			}
+        -:  536:
+        -:  537:			/* If not escaped, move on to the next char */
+    #####:  538:			quote = *str;
+    #####:  539:			str++;
+        -:  540:
+        -:  541:			/* Copy into the buffer whatever is after the first quote
+        -:  542:			 * up to the last quote or NULL */
+    #####:  543:			while (*str && *str != quote) {
+    %%%%%:  543-block  0
+unconditional  0 never executed
+    %%%%%:  543-block  1
+branch  1 never executed
+branch  2 never executed
+    %%%%%:  543-block  2
+branch  3 never executed
+branch  4 never executed
+        -:  544:
+        -:  545:				/* If char has special meaning, escape it */
+    #####:  546:				if (is_quote_char(*str)) {
+    %%%%%:  546-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  547:					buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
+    %%%%%:  547-block  0
+call    0 never executed
+    #####:  548:					buf[buf_len++] = '\\';
+unconditional  0 never executed
+        -:  549:				}
+        -:  550:
+    #####:  551:				buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
+    %%%%%:  551-block  0
+call    0 never executed
+    #####:  552:				buf[buf_len++] = *(str++);
+unconditional  0 never executed
+        -:  553:			}
+        -:  554:
+        -:  555:			/* The above while breaks with NULL or quote, so that if
+        -:  556:			 * *str is a null byte there was not ending quote */
+    #####:  557:			if (!*str) {
+    %%%%%:  557-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  558:				fprintf(stderr, _("%s: Missing '%c'\n"), PROGRAM_NAME, quote);
+    %%%%%:  558-block  0
+call    0 never executed
+        -:  559:
+        -:  560:				/* Free the current buffer and whatever was already
+        -:  561:				 * allocated */
+    #####:  562:				free(buf);
+    #####:  563:				buf = (char *)NULL;
+    #####:  564:				int i = (int)words;
+        -:  565:
+    #####:  566:				while (--i >= 0)
+unconditional  0 never executed
+    %%%%%:  566-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:  567:					free(substr[i]);
+    %%%%%:  567-block  0
+unconditional  0 never executed
+        -:  568:
+    #####:  569:				free(substr);
+        -:  570:
+    #####:  571:				return (char **)NULL;
+    %%%%%:  571-block  0
+unconditional  0 never executed
+        -:  572:			}
+    #####:  573:			break;
+    %%%%%:  573-block  0
+unconditional  0 never executed
+        -:  574:
+        -:  575:		/* TAB, new line char, and space are taken as word breaking
+        -:  576:		 * characters */
+        8:  577:		case '\t':
+        -:  578:		case '\n':
+        -:  579:		case ' ':
+        -:  580:
+        -:  581:			/* If escaped, just copy it into the buffer */
+        8:  582:			if (str_len && *(str - 1) == '\\') {
+        8:  582-block  0
+branch  0 taken 8 (fallthrough)
+branch  1 taken 0
+        8:  582-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 8
+    #####:  583:				buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
+    %%%%%:  583-block  0
+call    0 never executed
+    #####:  584:				buf[buf_len++] = *str;
+unconditional  0 never executed
+        -:  585:			}
+        -:  586:
+        -:  587:			/* If not escaped, break the string */
+        -:  588:			else {
+        -:  589:				/* Add a terminating null byte to the buffer, and, if
+        -:  590:				 * not empty, dump the buffer into the substrings
+        -:  591:				 * array */
+        8:  592:				buf[buf_len] = '\0';
+        -:  593:
+        8:  594:				if (buf_len > 0) {
+        8:  594-block  0
+branch  0 taken 8 (fallthrough)
+branch  1 taken 0
+        8:  595:					substr = (char **)xrealloc(substr, (words + 1) * sizeof(char *));
+        8:  595-block  0
+call    0 returned 8
+        8:  596:					substr[words] = savestring(buf, buf_len);
+call    0 returned 8
+        8:  597:					words++;
+unconditional  0 taken 8
+        -:  598:				}
+        -:  599:
+        -:  600:				/* Clear te buffer to get a new string */
+        8:  601:				memset(buf, '\0', buf_len);
+        8:  602:				buf_len = 0;
+        8:  602-block  0
+unconditional  0 taken 8
+        -:  603:			}
+        8:  604:			break;
+        8:  604-block  0
+unconditional  0 taken 8
+        -:  605:
+        -:  606:		/* If neither a quote nor a breaking word char nor command
+        -:  607:		 * substitution, just dump it into the buffer */
+       60:  608:		default:
+       60:  609:			buf = (char *)xrealloc(buf, (buf_len + 1) * sizeof(char *));
+       60:  609-block  0
+call    0 returned 60
+       60:  610:			buf[buf_len++] = *str;
+       60:  611:			break;
+unconditional  0 taken 60
+        -:  612:		}
+        -:  613:
+       68:  614:		str++;
+       68:  615:		str_len++;
+       68:  615-block  0
+unconditional  0 taken 68
+        -:  616:	}
+        -:  617:
+        -:  618:	/* The while loop stops when the null byte is reached, so that the
+        -:  619:	 * last substring is not printed, but still stored in the buffer.
+        -:  620:	 * Therefore, we need to add it, if not empty, to our subtrings
+        -:  621:	 * array */
+       22:  622:	buf[buf_len] = '\0';
+        -:  623:
+       22:  624:	if (buf_len > 0) {
+       22:  624-block  0
+branch  0 taken 22 (fallthrough)
+branch  1 taken 0
+        -:  625:
+       22:  626:		if (!words)
+       22:  626-block  0
+branch  0 taken 14 (fallthrough)
+branch  1 taken 8
+       14:  627:			substr = (char **)xcalloc(words + 1, sizeof(char *));
+       14:  627-block  0
+call    0 returned 14
+unconditional  1 taken 14
+        -:  628:
+        -:  629:		else
+        8:  630:			substr = (char **)xrealloc(substr, (words + 1) * sizeof(char *));
+        8:  630-block  0
+call    0 returned 8
+unconditional  1 taken 8
+       22:  631:		substr[words] = savestring(buf, buf_len);
+       22:  631-block  0
+call    0 returned 22
+       22:  632:		words++;
+unconditional  0 taken 22
+        -:  633:	}
+        -:  634:
+       22:  635:	free(buf);
+       22:  636:	buf = (char *)NULL;
+        -:  637:
+       22:  638:	if (words) {
+       22:  638-block  0
+branch  0 taken 22 (fallthrough)
+branch  1 taken 0
+        -:  639:		/* Add a final null string to the array */
+       22:  640:		substr = (char **)xrealloc(substr, (words + 1) * sizeof(char *));
+       22:  640-block  0
+call    0 returned 22
+       22:  641:		substr[words] = (char *)NULL;
+        -:  642:
+       22:  643:		args_n = words - 1;
+       22:  644:		return substr;
+unconditional  0 taken 22
+        -:  645:	}
+        -:  646:
+        -:  647:	else {
+    #####:  648:		args_n = 0; /* Just in case, but I think it's not needed */
+    #####:  649:		return (char **)NULL;
+    %%%%%:  649-block  0
+unconditional  0 never executed
+        -:  650:	}
+        -:  651:}
+        -:  652:
+        -:  653:char *
+function split_fusedcmd called 3 returned 100% blocks executed 82%
+        3:  654:split_fusedcmd(char *str)
+        -:  655:{
+        3:  656:	if (!str || !*str || *str == ';' || *str == ':' || *str == '\\')
+        3:  656-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 0
+        3:  656-block  1
+branch  2 taken 3 (fallthrough)
+branch  3 taken 0
+        3:  656-block  2
+branch  4 taken 3 (fallthrough)
+branch  5 taken 0
+        3:  656-block  3
+branch  6 taken 3 (fallthrough)
+branch  7 taken 0
+        3:  656-block  4
+branch  8 taken 0 (fallthrough)
+branch  9 taken 3
+    #####:  657:		return (char *)NULL;
+    %%%%%:  657-block  0
+unconditional  0 never executed
+        -:  658:
+        3:  659:	if (strchr(str, '/'))
+        3:  659-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####:  660:		return (char *)NULL;
+    %%%%%:  660-block  0
+unconditional  0 never executed
+        -:  661:
+        -:  662:	/* The buffer size is the double of STR, just in case each subtr
+        -:  663:	 * needs to be splitted */
+        3:  664:	char *buf = (char *)xnmalloc(((strlen(str) * 2) + 2), sizeof(char));
+        3:  664-block  0
+call    0 returned 3
+        -:  665:
+        3:  666:	char *p = str, *pp = str;
+        3:  667:	char *q = buf;
+        3:  668:	size_t c = 0;
+        -:  669:
+       12:  670:	while (*p) {
+unconditional  0 taken 3
+       12:  670-block  0
+branch  1 taken 9
+branch  2 taken 3 (fallthrough)
+        -:  671:		/* Transform "cmdeln" into "cmd eln" */
+        9:  672:		if (*p >= '0' && *p <= '9' && c && *(p - 1) >= 'a' && *(p - 1) <= 'z') {
+        9:  672-block  0
+branch  0 taken 9 (fallthrough)
+branch  1 taken 0
+        9:  672-block  1
+branch  2 taken 3 (fallthrough)
+branch  3 taken 6
+        3:  672-block  2
+branch  4 taken 3 (fallthrough)
+branch  5 taken 0
+        3:  672-block  3
+branch  6 taken 3 (fallthrough)
+branch  7 taken 0
+        3:  672-block  4
+branch  8 taken 3 (fallthrough)
+branch  9 taken 0
+        -:  673:
+        3:  674:			char tmp = *p;
+        3:  675:			*p = '\0';
+        -:  676:
+       3*:  677:			if (!is_internal_c(pp)) {
+        3:  677-block  0
+call    0 returned 3
+branch  1 taken 0 (fallthrough)
+branch  2 taken 3
+    #####:  678:				*p = tmp;
+    #####:  679:				*(q++) = *(p++);
+    #####:  680:				continue;
+    %%%%%:  680-block  0
+unconditional  0 never executed
+        -:  681:			}
+        -:  682:
+        3:  683:			*p = tmp;
+        3:  684:			*(q++) = ' ';
+        3:  685:			*(q++) = *(p++);
+        3:  685-block  0
+unconditional  0 taken 3
+        -:  686:		}
+        -:  687:
+        -:  688:		else {
+       6*:  689:			if (*p == ' ' && *(p + 1))
+        6:  689-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 6
+    %%%%%:  689-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  690:				pp = p + 1;
+    %%%%%:  690-block  0
+unconditional  0 never executed
+        6:  691:			*(q++) = *(p++);
+        6:  691-block  0
+unconditional  0 taken 6
+        -:  692:		}
+        -:  693:
+        9:  694:		c++;
+        9:  694-block  0
+unconditional  0 taken 9
+        -:  695:	}
+        -:  696:
+        3:  697:	*q = '\0';
+        -:  698:
+        -:  699:	/* Readjust the buffer size */
+        3:  700:	size_t len = strlen(buf);
+        3:  701:	buf = (char *)xrealloc(buf, (len + 1) * sizeof(char));
+        3:  701-block  0
+call    0 returned 3
+        -:  702:
+        3:  703:	return buf;
+unconditional  0 taken 3
+        -:  704:}
+        -:  705:
+        -:  706:/*
+        -:  707: * This function is one of the keys of CliFM. It will perform a series of
+        -:  708: * actions:
+        -:  709: * 1) Take the string stored by readline and get its substrings without
+        -:  710: * spaces.
+        -:  711: * 2) In case of user defined variable (var=value), it will pass the
+        -:  712: * whole string to exec_cmd(), which will take care of storing the
+        -:  713: * variable;
+        -:  714: * 3) If the input string begins with ';' or ':' the whole string is
+        -:  715: * send to exec_cmd(), where it will be directly executed by the system
+        -:  716: * shell (via launch_execle()) to prevent all of the expansions made
+        -:  717: * here.
+        -:  718: * 4) The following expansions (especific to CLiFM) are performed here:
+        -:  719: * ELN's, "sel" keyword, ranges of numbers (ELN's), pinned dir and
+        -:  720: * bookmark names, and, for internal commands only, tilde, braces,
+        -:  721: * wildcards, command and paramenter substitution, and regex expansion
+        -:  722: * are performed here as well.
+        -:  723: * These expansions are the most import part of this function.
+        -:  724: */
+        -:  725:
+        -:  726:/* NOTE: Though filenames could consist of everything except of slash
+        -:  727: * and null characters, POSIX.1 recommends restricting filenames to
+        -:  728: * consist of the following characters: letters (a-z, A-Z), numbers
+        -:  729: * (0-9), period (.), dash (-), and underscore ( _ ).
+        -:  730:
+        -:  731: * NOTE 2: There is no any need to pass anything to this function, since
+        -:  732: * the input string I need here is already in the readline buffer. So,
+        -:  733: * instead of taking the buffer from a function parameter (str) I could
+        -:  734: * simply use rl_line_buffer. However, since I use this function to
+        -:  735: * parse other strings, like history lines, I need to keep the str
+        -:  736: * argument */
+        -:  737:char **
+function parse_input_str called 22 returned 100% blocks executed 32%
+       22:  738:parse_input_str(char *str)
+        -:  739:{
+       22:  740:	register size_t i = 0;
+       22:  741:	int fusedcmd_ok = 0;
+        -:  742:
+        -:  743:	/** ###################### */
+        -:  744:	/* Before splitting 'CMDNUM' into 'CMD NUM', make sure CMDNUM is not
+        -:  745:	 * a cmd in PATH (for example, md5sum) */
+       22:  746:	if (digit_found(str) && !is_bin_cmd(str)) {
+       22:  746-block  0
+call    0 returned 22
+branch  1 taken 3 (fallthrough)
+branch  2 taken 19
+        3:  746-block  1
+call    3 returned 3
+branch  4 taken 3 (fallthrough)
+branch  5 taken 0
+        3:  747:		char *p = split_fusedcmd(str);
+        3:  747-block  0
+call    0 returned 3
+        3:  748:		if (p) {
+branch  0 taken 3 (fallthrough)
+branch  1 taken 0
+        3:  749:			fusedcmd_ok = 1;
+        3:  750:			str = p;
+        3:  751:			p = (char *)NULL;
+        3:  751-block  0
+unconditional  0 taken 3
+        -:  752:		}
+        -:  753:	}
+        -:  754:	/** ###################### */
+        -:  755:
+        -:  756:	/* ########################################
+        -:  757:			* #    0) CHECK FOR SPECIAL FUNCTIONS    #
+        -:  758:			* ########################################*/
+        -:  759:
+       22:  760:	int chaining = 0, cond_cmd = 0, send_shell = 0;
+        -:  761:
+        -:  762:	/* ###########################
+        -:  763:				 * #  0.a) RUN AS EXTERNAL   #
+        -:  764:				 * ###########################*/
+        -:  765:
+        -:  766:	/* If invoking a command via ';' or ':' set the send_shell flag to
+        -:  767:	 * true and send the whole string to exec_cmd(), in which case no
+        -:  768:	 * expansion is made: the command is send to the system shell as
+        -:  769:	 * is. */
+       22:  770:	if (*str == ';' || *str == ':')
+       22:  770-block  0
+branch  0 taken 22 (fallthrough)
+branch  1 taken 0
+       22:  770-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 22
+    #####:  771:		send_shell = 1;
+    %%%%%:  771-block  0
+unconditional  0 never executed
+        -:  772:
+       22:  773:	if (!send_shell) {
+       22:  773-block  0
+branch  0 taken 22 (fallthrough)
+branch  1 taken 0
+       90:  774:		for (i = 0; str[i]; i++) {
+       22:  774-block  0
+unconditional  0 taken 22
+       68:  774-block  1
+unconditional  1 taken 68
+       90:  774-block  2
+branch  2 taken 68
+branch  3 taken 22 (fallthrough)
+        -:  775:
+        -:  776:				/* ##################################
+        -:  777:				 * #   0.b) CONDITIONAL EXECUTION   #
+        -:  778:				 * ##################################*/
+        -:  779:
+        -:  780:			/* Check for chained commands (cmd1;cmd2) */
+      68*:  781:			if (!chaining && str[i] == ';' && i > 0 && str[i - 1] != '\\')
+       68:  781-block  0
+branch  0 taken 68 (fallthrough)
+branch  1 taken 0
+       68:  781-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 68
+    %%%%%:  781-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%:  781-block  3
+branch  6 never executed
+branch  7 never executed
+    #####:  782:				chaining = 1;
+    %%%%%:  782-block  0
+unconditional  0 never executed
+        -:  783:
+        -:  784:			/* Check for conditional execution (cmd1 && cmd 2)*/
+      68*:  785:			if (!cond_cmd && str[i] == '&' && i > 0 && str[i - 1] != '\\'
+       68:  785-block  0
+branch  0 taken 68 (fallthrough)
+branch  1 taken 0
+       68:  785-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 68
+    %%%%%:  785-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%:  785-block  3
+branch  6 never executed
+branch  7 never executed
+    #####:  786:			&& str[i + 1] && str[i + 1] == '&')
+    %%%%%:  786-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  786-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  787:				cond_cmd = 1;
+    %%%%%:  787-block  0
+unconditional  0 never executed
+        -:  788:
+        -:  789:				/* ##################################
+        -:  790:				 * #   0.c) USER DEFINED VARIABLE   #
+        -:  791:				 * ##################################*/
+        -:  792:
+        -:  793:			/* If user defined variable send the whole string to
+        -:  794:			 * exec_cmd(), which will take care of storing the
+        -:  795:			 * variable. */
+      68*:  796:			if (!(flags & IS_USRVAR_DEF) && str[i] == '=' && i > 0
+       68:  796-block  0
+branch  0 taken 68 (fallthrough)
+branch  1 taken 0
+       68:  796-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 68
+    %%%%%:  796-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  797:			&& str[i - 1] != '\\' && str[0] != '=') {
+    %%%%%:  797-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  797-block  1
+branch  2 never executed
+branch  3 never executed
+        -:  798:				/* Remove leading spaces. This: '   a="test"' should be
+        -:  799:				 * taken as a valid variable declaration */
+    #####:  800:				char *p = str;
+    #####:  801:				while (*p == ' ' || *p == '\t')
+    %%%%%:  801-block  0
+unconditional  0 never executed
+    %%%%%:  801-block  1
+branch  1 never executed
+branch  2 never executed
+    %%%%%:  801-block  2
+branch  3 never executed
+branch  4 never executed
+    #####:  802:					p++;
+    %%%%%:  802-block  0
+unconditional  0 never executed
+        -:  803:
+        -:  804:				/* If first non-space is a number, it's not a variable
+        -:  805:				 * name */
+    #####:  806:				if (!_ISDIGIT(*p)) {
+    %%%%%:  806-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  807:					int space_found = 0;
+        -:  808:					/* If there are no spaces before '=', take it as a
+        -:  809:					 * variable. This check is done in order to avoid
+        -:  810:					 * taking as a variable things like:
+        -:  811:					 * 'ls -color=auto' */
+    #####:  812:					while (*p != '=') {
+    %%%%%:  812-block  0
+unconditional  0 never executed
+    %%%%%:  812-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  813:						if (*(p++) == ' ')
+    %%%%%:  813-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  814:							space_found = 1;
+    %%%%%:  814-block  0
+unconditional  0 never executed
+        -:  815:					}
+        -:  816:
+    #####:  817:					if (!space_found)
+    %%%%%:  817-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  818:						flags |= IS_USRVAR_DEF;
+    %%%%%:  818-block  0
+unconditional  0 never executed
+        -:  819:				}
+        -:  820:
+    #####:  821:				p = (char *)NULL;
+    %%%%%:  821-block  0
+unconditional  0 never executed
+        -:  822:			}
+        -:  823:		}
+        -:  824:	}
+        -:  825:
+        -:  826:	/* If chained commands, check each of them. If at least one of them
+        -:  827:	 * is internal, take care of the job (the system shell does not know
+        -:  828:	 * our internal commands and therefore cannot execute them); else,
+        -:  829:	 * if no internal command is found, let it to the system shell */
+       22:  830:	if (chaining || cond_cmd) {
+       22:  830-block  0
+branch  0 taken 22 (fallthrough)
+branch  1 taken 0
+       22:  830-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 22
+        -:  831:
+        -:  832:		/* User defined variables are always internal, so that there is
+        -:  833:		 * no need to check whatever else is in the command string */
+    #####:  834:		if (flags & IS_USRVAR_DEF) {
+    %%%%%:  834-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  835:			exec_chained_cmds(str);
+    %%%%%:  835-block  0
+call    0 never executed
+    #####:  836:			if (fusedcmd_ok)
+branch  0 never executed
+branch  1 never executed
+    #####:  837:				free(str);
+    %%%%%:  837-block  0
+unconditional  0 never executed
+    #####:  838:			return (char **)NULL;
+    %%%%%:  838-block  0
+unconditional  0 never executed
+        -:  839:		}
+        -:  840:
+    #####:  841:		register size_t j = 0;
+    #####:  842:		size_t str_len = strlen(str), len = 0, internal_ok = 0;
+    #####:  843:		char *buf = (char *)NULL;
+        -:  844:
+        -:  845:		/* Get each word (cmd) in STR */
+    #####:  846:		buf = (char *)xcalloc(str_len + 1, sizeof(char));
+    %%%%%:  846-block  0
+call    0 never executed
+    #####:  847:		for (j = 0; j < str_len; j++) {
+unconditional  0 never executed
+    %%%%%:  847-block  0
+branch  1 never executed
+branch  2 never executed
+        -:  848:
+    #####:  849:			while (str[j] && str[j] != ' ' && str[j] != ';' && str[j] != '&') {
+    %%%%%:  849-block  0
+unconditional  0 never executed
+    %%%%%:  849-block  1
+branch  1 never executed
+branch  2 never executed
+    %%%%%:  849-block  2
+branch  3 never executed
+branch  4 never executed
+    %%%%%:  849-block  3
+branch  5 never executed
+branch  6 never executed
+    %%%%%:  849-block  4
+branch  7 never executed
+branch  8 never executed
+    #####:  850:				buf[len++] = str[j++];
+    %%%%%:  850-block  0
+unconditional  0 never executed
+        -:  851:			}
+        -:  852:
+    #####:  853:			if (strcmp(buf, "&&") != 0) {
+    %%%%%:  853-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  854:				if (is_internal_c(buf)) {
+    %%%%%:  854-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  855:					internal_ok = 1;
+    #####:  856:					break;
+    %%%%%:  856-block  0
+unconditional  0 never executed
+        -:  857:				}
+        -:  858:			}
+        -:  859:
+    #####:  860:			memset(buf, '\0', len);
+    #####:  861:			len = 0;
+    %%%%%:  861-block  0
+unconditional  0 never executed
+        -:  862:		}
+        -:  863:
+    #####:  864:		free(buf);
+    #####:  865:		buf = (char *)NULL;
+        -:  866:
+    #####:  867:		if (internal_ok) {
+    %%%%%:  867-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  868:			exec_chained_cmds(str);
+    %%%%%:  868-block  0
+call    0 never executed
+    #####:  869:			if (fusedcmd_ok)
+branch  0 never executed
+branch  1 never executed
+    #####:  870:				free(str);
+    %%%%%:  870-block  0
+unconditional  0 never executed
+    #####:  871:			return (char **)NULL;
+    %%%%%:  871-block  0
+unconditional  0 never executed
+        -:  872:		}
+        -:  873:	}
+        -:  874:
+       22:  875:	if (flags & IS_USRVAR_DEF || send_shell) {
+       22:  875-block  0
+branch  0 taken 22 (fallthrough)
+branch  1 taken 0
+       22:  875-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 22
+        -:  876:		/* Remove leading spaces, again */
+    #####:  877:		char *p = str;
+    #####:  878:		while (*p == ' ' || *p == '\t')
+    %%%%%:  878-block  0
+unconditional  0 never executed
+    %%%%%:  878-block  1
+branch  1 never executed
+branch  2 never executed
+    %%%%%:  878-block  2
+branch  3 never executed
+branch  4 never executed
+    #####:  879:			p++;
+    %%%%%:  879-block  0
+unconditional  0 never executed
+        -:  880:
+    #####:  881:		args_n = 0;
+        -:  882:
+    #####:  883:		char **cmd = (char **)NULL;
+    #####:  884:		cmd = (char **)xnmalloc(2, sizeof(char *));
+    %%%%%:  884-block  0
+call    0 never executed
+    #####:  885:		cmd[0] = savestring(p, strlen(p));
+call    0 never executed
+    #####:  886:		cmd[1] = (char *)NULL;
+        -:  887:
+    #####:  888:		p = (char *)NULL;
+        -:  889:
+    #####:  890:		if (fusedcmd_ok)
+branch  0 never executed
+branch  1 never executed
+    #####:  891:			free(str);
+    %%%%%:  891-block  0
+unconditional  0 never executed
+        -:  892:
+    #####:  893:		return cmd;
+    %%%%%:  893-block  0
+unconditional  0 never executed
+        -:  894:		/* If ";cmd" or ":cmd" the whole input line will be send to
+        -:  895:		 * exec_cmd() and will be executed by the system shell via
+        -:  896:		 * execle(). Since we don't run split_str() here, dequoting
+        -:  897:		 * and deescaping is performed directly by the system shell */
+        -:  898:	}
+        -:  899:
+        -:  900:		/* ################################################
+        -:  901:		 * #     1) SPLIT INPUT STRING INTO SUBSTRINGS    #
+        -:  902:		 * ################################################ */
+        -:  903:
+        -:  904:	/* split_str() returns an array of strings without leading,
+        -:  905:	 * terminating and double spaces. */
+       22:  906:	char **substr = split_str(str);
+       22:  906-block  0
+call    0 returned 22
+        -:  907:
+        -:  908:	/** ###################### */
+       22:  909:	if (fusedcmd_ok) /* Just in case split_fusedcmd returned NULL */
+branch  0 taken 3 (fallthrough)
+branch  1 taken 19
+        3:  910:		free(str);
+        3:  910-block  0
+unconditional  0 taken 3
+        -:  911:	/** ###################### */
+        -:  912:
+        -:  913:	/* NOTE: isspace() not only checks for space, but also for new line,
+        -:  914:	 * carriage return, vertical and horizontal TAB. Be careful when
+        -:  915:	 * replacing this function. */
+        -:  916:
+       22:  917:	if (!substr)
+       22:  917-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 22
+    #####:  918:		return (char **)NULL;
+    %%%%%:  918-block  0
+unconditional  0 never executed
+        -:  919:
+        -:  920:					/* ######################
+        -:  921:					 * #     TRASH AS RM    #
+        -:  922:					 * ###################### */
+        -:  923:
+      22*:  924:	if (tr_as_rm && *substr[0] == 'r' && !substr[0][1]) {
+       22:  924-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 22
+    %%%%%:  924-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  924-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  925:		substr[0] = (char *)xrealloc(substr[0], 3 * sizeof(char));
+    %%%%%:  925-block  0
+call    0 never executed
+    #####:  926:		*substr[0] = 't';
+    #####:  927:		substr[0][1] = 'r';
+    #####:  928:		substr[0][2] = '\0';
+unconditional  0 never executed
+        -:  929:	}
+        -:  930:
+        -:  931:				/* ##############################
+        -:  932:				 * #   2) BUILTIN EXPANSIONS    #
+        -:  933:				 * ##############################
+        -:  934:
+        -:  935:	 * Ranges, sel, ELN, pinned dirs, bookmarks, and internal variables.
+        -:  936:	 * These expansions are specific to CliFM. To be able to use them
+        -:  937:	 * even with external commands, they must be expanded here, before
+        -:  938:	 * sending the input string, in case the command is external, to
+        -:  939:	 * the system shell */
+        -:  940:
+       22:  941:	is_sel = 0, sel_is_last = 0;
+        -:  942:
+       22:  943:	size_t int_array_max = 10, ranges_ok = 0;
+       22:  944:	int *range_array = (int *)xnmalloc(int_array_max, sizeof(int));
+       22:  944-block  0
+call    0 returned 22
+        -:  945:
+       52:  946:	for (i = 0; i <= args_n; i++) {
+unconditional  0 taken 22
+       30:  946-block  0
+unconditional  1 taken 30
+       52:  946-block  1
+branch  2 taken 30
+branch  3 taken 22 (fallthrough)
+        -:  947:
+       30:  948:		register size_t j = 0;
+        -:  949:
+        -:  950:			/* ######################################
+        -:  951:			 * #     2.a) FASTBACK EXPANSION        #
+        -:  952:			 * ###################################### */
+        -:  953:
+      30*:  954:		if (*substr[i] == '.' && substr[i][1] == '.' && substr[i][2] == '.') {
+       30:  954-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 30
+    %%%%%:  954-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  954-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  955:			char *tmp = fastback(substr[i]);
+    %%%%%:  955-block  0
+call    0 never executed
+    #####:  956:			if (tmp) {
+branch  0 never executed
+branch  1 never executed
+    #####:  957:				substr[i] = (char *)xrealloc(substr[i], (strlen(tmp) + 1)
+    %%%%%:  957-block  0
+call    0 never executed
+        -:  958:														* sizeof(char));
+    #####:  959:				strcpy(substr[i], tmp);
+    #####:  960:				free(tmp);
+unconditional  0 never executed
+        -:  961:			}
+        -:  962:		}
+        -:  963:
+        -:  964:			/* ######################################
+        -:  965:			 * #     2.b) PINNED DIR EXPANSION      #
+        -:  966:			 * ###################################### */
+        -:  967:
+      30*:  968:		if (*substr[i] == ',' && !substr[i][1] && pinned_dir) {
+       30:  968-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 30
+    %%%%%:  968-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  968-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  969:			substr[i] = (char *)xrealloc(substr[i], (strlen(pinned_dir) + 1)
+    %%%%%:  969-block  0
+call    0 never executed
+        -:  970:													* sizeof(char));
+    #####:  971:			strcpy(substr[i], pinned_dir);
+unconditional  0 never executed
+        -:  972:		}
+        -:  973:
+        -:  974:			/* ######################################
+        -:  975:			 * #      2.c) BOOKMARKS EXPANSION      #
+        -:  976:			 * ###################################### */
+        -:  977:
+        -:  978:		/* Expand bookmark names into paths */
+       30:  979:		if (expand_bookmarks) {
+       30:  979-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 30
+        -:  980:
+    #####:  981:			int bm_exp = 0;
+        -:  982:
+    #####:  983:			for (j = 0; j < bm_n; j++) {
+    %%%%%:  983-block  0
+unconditional  0 never executed
+    %%%%%:  983-block  1
+unconditional  1 never executed
+    %%%%%:  983-block  2
+branch  2 never executed
+branch  3 never executed
+        -:  984:
+    #####:  985:				if (bookmarks[j].name && *substr[i] == *bookmarks[j].name
+    %%%%%:  985-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  985-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  986:				&& strcmp(substr[i], bookmarks[j].name) == 0) {
+    %%%%%:  986-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  987:
+        -:  988:					/* Do not expand bookmark names that conflicts
+        -:  989:					 * with a filename in CWD */
+    #####:  990:					int conflict = 0, k = (int)files;
+        -:  991:
+    #####:  992:					while (--k >= 0) {
+    %%%%%:  992-block  0
+unconditional  0 never executed
+    %%%%%:  992-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  993:						if (*bookmarks[j].name == *file_info[k].name
+    %%%%%:  993-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  994:						&& strcmp(bookmarks[j].name, file_info[k].name) == 0) {
+    %%%%%:  994-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  995:							conflict = 1;
+    #####:  996:							break;
+    %%%%%:  996-block  0
+unconditional  0 never executed
+        -:  997:						}
+        -:  998:					}
+        -:  999:
+    #####: 1000:					if (!conflict && bookmarks[j].path) {
+    %%%%%: 1000-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1000-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1001:						substr[i] = (char *)xrealloc(substr[i],
+    #####: 1002:						    (strlen(bookmarks[j].path) + 1) * sizeof(char));
+    %%%%%: 1002-block  0
+call    0 never executed
+    #####: 1003:						strcpy(substr[i], bookmarks[j].path);
+        -: 1004:
+    #####: 1005:						bm_exp = 1;
+        -: 1006:
+    #####: 1007:						break;
+unconditional  0 never executed
+        -: 1008:					}
+        -: 1009:				}
+        -: 1010:			}
+        -: 1011:
+        -: 1012:			/* Do not perform further checks on the expanded bookmark */
+    #####: 1013:			if (bm_exp)
+    %%%%%: 1013-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1014:				continue;
+    %%%%%: 1014-block  0
+unconditional  0 never executed
+        -: 1015:		}
+        -: 1016:
+        -: 1017:		/* ############################################# */
+        -: 1018:
+       30: 1019:		size_t substr_len = strlen(substr[i]);
+        -: 1020:
+        -: 1021:		/* Check for ranges */
+       40: 1022:		for (j = 0; substr[i][j]; j++) {
+       30: 1022-block  0
+unconditional  0 taken 30
+       10: 1022-block  1
+unconditional  1 taken 10
+       40: 1022-block  2
+branch  2 taken 34
+branch  3 taken 6 (fallthrough)
+        -: 1023:
+        -: 1024:			/* If some alphabetic char, besides '-', is found in the
+        -: 1025:			 * string, we have no range */
+       34: 1026:			if (substr[i][j] != '-' && !_ISDIGIT(substr[i][j]))
+       34: 1026-block  0
+branch  0 taken 32 (fallthrough)
+branch  1 taken 2
+       32: 1026-block  1
+branch  2 taken 24 (fallthrough)
+branch  3 taken 8
+       24: 1027:				break;
+       24: 1027-block  0
+unconditional  0 taken 24
+        -: 1028:
+        -: 1029:			/* If a range is found, store its index */
+       10: 1030:			if (j > 0 && j < substr_len && substr[i][j] == '-' &&
+       10: 1030-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 6
+        4: 1030-block  1
+branch  2 taken 4 (fallthrough)
+branch  3 taken 0
+        4: 1030-block  2
+branch  4 taken 2 (fallthrough)
+branch  5 taken 2
+        2: 1031:			    _ISDIGIT(substr[i][j - 1]) && _ISDIGIT(substr[i][j + 1]))
+        2: 1031-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2: 1031-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 0
+        2: 1032:				if (ranges_ok < int_array_max)
+        2: 1032-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2: 1033:					range_array[ranges_ok++] = (int)i;
+        2: 1033-block  0
+unconditional  0 taken 2
+        -: 1034:		}
+        -: 1035:
+        -: 1036:		/* Expand 'sel' only as an argument, not as command */
+      30*: 1037:		if (i > 0 && *substr[i] == 's' && strcmp(substr[i], "sel") == 0)
+       30: 1037-block  0
+branch  0 taken 8 (fallthrough)
+branch  1 taken 22
+        8: 1037-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 8
+    %%%%%: 1037-block  2
+branch  4 never executed
+branch  5 never executed
+    #####: 1038:			is_sel = (short)i;
+    %%%%%: 1038-block  0
+unconditional  0 never executed
+        -: 1039:	}
+        -: 1040:
+        -: 1041:			/* ####################################
+        -: 1042:			 * #       2.d) RANGES EXPANSION      #
+        -: 1043:			 * ####################################*/
+        -: 1044:
+        -: 1045:	/* Expand expressions like "1-3" to "1 2 3" if all the numbers in
+        -: 1046:	  * the range correspond to an ELN */
+        -: 1047:
+       22: 1048:	if (ranges_ok) {
+       22: 1048-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 20
+        2: 1049:		size_t old_ranges_n = 0;
+        2: 1050:		register size_t r = 0;
+        -: 1051:
+        4: 1052:		for (r = 0; r < ranges_ok; r++) {
+        2: 1052-block  0
+unconditional  0 taken 2
+        4: 1052-block  1
+branch  1 taken 2
+branch  2 taken 2 (fallthrough)
+        2: 1053:			size_t ranges_n = 0;
+        2: 1054:			int *ranges = expand_range(substr[range_array[r] +
+        2: 1055:							  (int)old_ranges_n],
+        2: 1055-block  0
+call    0 returned 2
+        -: 1056:			    1);
+        2: 1057:			if (ranges) {
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2: 1058:				register size_t j = 0;
+        -: 1059:
+        8: 1060:				for (ranges_n = 0; ranges[ranges_n]; ranges_n++)
+        2: 1060-block  0
+unconditional  0 taken 2
+        6: 1060-block  1
+unconditional  1 taken 6
+        8: 1060-block  2
+branch  2 taken 6
+branch  3 taken 2 (fallthrough)
+        -: 1061:					;
+        -: 1062:
+        2: 1063:				char **ranges_cmd = (char **)NULL;
+        -: 1064:
+        2: 1065:				ranges_cmd = (char **)xcalloc(args_n + ranges_n + 2,
+        2: 1065-block  0
+call    0 returned 2
+        -: 1066:				    sizeof(char *));
+        -: 1067:
+        4: 1068:				for (i = 0; i < (size_t)range_array[r] + old_ranges_n; i++)
+unconditional  0 taken 2
+        4: 1068-block  0
+branch  1 taken 2
+branch  2 taken 2 (fallthrough)
+        2: 1069:					ranges_cmd[j++] = savestring(substr[i], strlen(substr[i]));
+        2: 1069-block  0
+call    0 returned 2
+unconditional  1 taken 2
+        -: 1070:
+        8: 1071:				for (i = 0; i < ranges_n; i++) {
+        2: 1071-block  0
+unconditional  0 taken 2
+        8: 1071-block  1
+branch  1 taken 6
+branch  2 taken 2 (fallthrough)
+       6*: 1072:					ranges_cmd[j] = (char *)xcalloc((size_t)DIGINUM(ranges[i])
+        6: 1072-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 6
+    %%%%%: 1072-block  1
+unconditional  2 never executed
+        6: 1072-block  2
+unconditional  3 taken 6
+        6: 1072-block  3
+call    4 returned 6
+    #####: 1073:													+ 1, sizeof(int));
+    %%%%%: 1073-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1073-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%: 1073-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%: 1073-block  3
+branch  6 never executed
+branch  7 never executed
+    %%%%%: 1073-block  4
+branch  8 never executed
+branch  9 never executed
+    %%%%%: 1073-block  5
+branch 10 never executed
+branch 11 never executed
+    %%%%%: 1073-block  6
+branch 12 never executed
+branch 13 never executed
+    %%%%%: 1073-block  7
+branch 14 never executed
+branch 15 never executed
+    %%%%%: 1073-block  8
+unconditional 16 never executed
+    %%%%%: 1073-block  9
+unconditional 17 never executed
+    %%%%%: 1073-block 10
+unconditional 18 never executed
+    %%%%%: 1073-block 11
+unconditional 19 never executed
+    %%%%%: 1073-block 12
+unconditional 20 never executed
+    %%%%%: 1073-block 13
+unconditional 21 never executed
+    %%%%%: 1073-block 14
+unconditional 22 never executed
+    %%%%%: 1073-block 15
+unconditional 23 never executed
+    %%%%%: 1073-block 16
+unconditional 24 never executed
+    %%%%%: 1073-block 17
+unconditional 25 never executed
+    %%%%%: 1073-block 18
+unconditional 26 never executed
+    %%%%%: 1073-block 19
+unconditional 27 never executed
+    %%%%%: 1073-block 20
+unconditional 28 never executed
+    %%%%%: 1073-block 21
+unconditional 29 never executed
+    %%%%%: 1073-block 22
+unconditional 30 never executed
+    %%%%%: 1073-block 23
+unconditional 31 never executed
+        6: 1074:					sprintf(ranges_cmd[j++], "%d", ranges[i]);
+unconditional  0 taken 6
+        -: 1075:				}
+        -: 1076:
+        2: 1077:				for (i = (size_t)range_array[r] + old_ranges_n + 1;
+        2: 1077-block  0
+unconditional  0 taken 2
+       2*: 1078:				     i <= args_n; i++) {
+        2: 1078-block  0
+branch  0 taken 0
+branch  1 taken 2 (fallthrough)
+    #####: 1079:					ranges_cmd[j++] = savestring(substr[i],
+unconditional  0 never executed
+    #####: 1080:					    strlen(substr[i]));
+    %%%%%: 1080-block  0
+call    0 never executed
+        -: 1081:				}
+        -: 1082:
+        2: 1083:				ranges_cmd[j] = NULL;
+        2: 1084:				free(ranges);
+        -: 1085:
+        6: 1086:				for (i = 0; i <= args_n; i++)
+        2: 1086-block  0
+unconditional  0 taken 2
+        6: 1086-block  1
+branch  1 taken 4
+branch  2 taken 2 (fallthrough)
+        4: 1087:					free(substr[i]);
+        4: 1087-block  0
+unconditional  0 taken 4
+        -: 1088:
+        2: 1089:				substr = (char **)xrealloc(substr, (args_n + ranges_n + 2)
+        2: 1089-block  0
+call    0 returned 2
+        -: 1090:													* sizeof(char *));
+        -: 1091:
+       10: 1092:				for (i = 0; i < j; i++) {
+unconditional  0 taken 2
+       10: 1092-block  0
+branch  1 taken 8
+branch  2 taken 2 (fallthrough)
+        8: 1093:					substr[i] = savestring(ranges_cmd[i], strlen(ranges_cmd[i]));
+        8: 1093-block  0
+call    0 returned 8
+        8: 1094:					free(ranges_cmd[i]);
+unconditional  0 taken 8
+        -: 1095:				}
+        -: 1096:
+        2: 1097:				free(ranges_cmd);
+        2: 1098:				args_n = j - 1;
+        2: 1098-block  0
+unconditional  0 taken 2
+        -: 1099:			}
+        -: 1100:
+        2: 1101:			old_ranges_n += (ranges_n - 1);
+        2: 1101-block  0
+unconditional  0 taken 2
+        -: 1102:		}
+        -: 1103:	}
+        -: 1104:
+       22: 1105:	free(range_array);
+        -: 1106:
+        -: 1107:				/* ##########################
+        -: 1108:				 * #   2.e) SEL EXPANSION   #
+        -: 1109:				 * ##########################*/
+        -: 1110:
+        -: 1111:	/*  if (is_sel && *substr[0] != '/') { */
+       22: 1112:	if (is_sel) {
+       22: 1112-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 22
+        -: 1113:
+    #####: 1114:		if ((size_t)is_sel == args_n)
+    %%%%%: 1114-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1115:			sel_is_last = 1;
+    %%%%%: 1115-block  0
+unconditional  0 never executed
+        -: 1116:
+    #####: 1117:		if (sel_n) {
+    %%%%%: 1117-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1118:			register size_t j = 0;
+    #####: 1119:			char **sel_array = (char **)NULL;
+    #####: 1120:			sel_array = (char **)xnmalloc(args_n + sel_n + 2, sizeof(char *));
+    %%%%%: 1120-block  0
+call    0 never executed
+        -: 1121:
+    #####: 1122:			for (i = 0; i < (size_t)is_sel; i++)
+unconditional  0 never executed
+    %%%%%: 1122-block  0
+branch  1 never executed
+branch  2 never executed
+    #####: 1123:				sel_array[j++] = savestring(substr[i], strlen(substr[i]));
+    %%%%%: 1123-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1124:
+    #####: 1125:			for (i = 0; i < sel_n; i++) {
+    %%%%%: 1125-block  0
+unconditional  0 never executed
+    %%%%%: 1125-block  1
+unconditional  1 never executed
+    %%%%%: 1125-block  2
+branch  2 never executed
+branch  3 never executed
+        -: 1126:				/* Escape selected filenames and copy them into tmp
+        -: 1127:				 * array */
+    #####: 1128:				char *esc_str = escape_str(sel_elements[i]);
+    %%%%%: 1128-block  0
+call    0 never executed
+        -: 1129:
+    #####: 1130:				if (esc_str) {
+branch  0 never executed
+branch  1 never executed
+    #####: 1131:					sel_array[j++] = savestring(esc_str, strlen(esc_str));
+    %%%%%: 1131-block  0
+call    0 never executed
+    #####: 1132:					free(esc_str);
+    #####: 1133:					esc_str = (char *)NULL;
+unconditional  0 never executed
+        -: 1134:				}
+        -: 1135:
+        -: 1136:				else {
+    #####: 1137:					fprintf(stderr, _("%s: %s: Error quoting filename\n"),
+    #####: 1138:					    PROGRAM_NAME, sel_elements[j]);
+    %%%%%: 1138-block  0
+call    0 never executed
+        -: 1139:					/* Free elements selected thus far and and all the
+        -: 1140:					 * input substrings */
+    #####: 1141:					register size_t k = 0;
+        -: 1142:
+    #####: 1143:					for (k = 0; k < j; k++)
+unconditional  0 never executed
+    %%%%%: 1143-block  0
+branch  1 never executed
+branch  2 never executed
+    #####: 1144:						free(sel_array[k]);
+    %%%%%: 1144-block  0
+unconditional  0 never executed
+        -: 1145:
+    #####: 1146:					free(sel_array);
+        -: 1147:
+    #####: 1148:					for (k = 0; k <= args_n; k++)
+    %%%%%: 1148-block  0
+unconditional  0 never executed
+    %%%%%: 1148-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 1149:						free(substr[k]);
+    %%%%%: 1149-block  0
+unconditional  0 never executed
+        -: 1150:
+    #####: 1151:					free(substr);
+        -: 1152:
+    #####: 1153:					return (char **)NULL;
+    %%%%%: 1153-block  0
+unconditional  0 never executed
+        -: 1154:				}
+        -: 1155:			}
+        -: 1156:
+    #####: 1157:			for (i = (size_t)is_sel + 1; i <= args_n; i++)
+    %%%%%: 1157-block  0
+unconditional  0 never executed
+    %%%%%: 1157-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 1158:				sel_array[j++] = savestring(substr[i], strlen(substr[i]));
+    %%%%%: 1158-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1159:
+    #####: 1160:			for (i = 0; i <= args_n; i++)
+    %%%%%: 1160-block  0
+unconditional  0 never executed
+    %%%%%: 1160-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 1161:				free(substr[i]);
+    %%%%%: 1161-block  0
+unconditional  0 never executed
+        -: 1162:
+    #####: 1163:			substr = (char **)xrealloc(substr, (args_n + sel_n + 2)
+    %%%%%: 1163-block  0
+call    0 never executed
+        -: 1164:										* sizeof(char *));
+        -: 1165:
+    #####: 1166:			for (i = 0; i < j; i++) {
+unconditional  0 never executed
+    %%%%%: 1166-block  0
+branch  1 never executed
+branch  2 never executed
+    #####: 1167:				substr[i] = savestring(sel_array[i], strlen(sel_array[i]));
+    %%%%%: 1167-block  0
+call    0 never executed
+    #####: 1168:				free(sel_array[i]);
+unconditional  0 never executed
+        -: 1169:			}
+        -: 1170:
+    #####: 1171:			free(sel_array);
+    #####: 1172:			substr[i] = (char *)NULL;
+    #####: 1173:			args_n = j - 1;
+    %%%%%: 1173-block  0
+unconditional  0 never executed
+        -: 1174:		}
+        -: 1175:
+        -: 1176:		else {
+        -: 1177:			/* 'sel' is an argument, but there are no selected files. */
+    #####: 1178:			fprintf(stderr, _("%c%s: There are no selected files%c"),
+    %%%%%: 1178-block  0
+unconditional  0 never executed
+    %%%%%: 1178-block  1
+unconditional  1 never executed
+    %%%%%: 1178-block  2
+unconditional  2 never executed
+    %%%%%: 1178-block  3
+unconditional  3 never executed
+    %%%%%: 1178-block  4
+call    4 never executed
+    #####: 1179:			    kb_shortcut ? '\n' : '\0', PROGRAM_NAME,
+    %%%%%: 1179-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1180:			    kb_shortcut ? '\0' : '\n');
+    %%%%%: 1180-block  0
+branch  0 never executed
+branch  1 never executed
+        -: 1181:
+    #####: 1182:			register size_t j = 0;
+        -: 1183:
+    #####: 1184:			for (j = 0; j <= args_n; j++)
+unconditional  0 never executed
+    %%%%%: 1184-block  0
+branch  1 never executed
+branch  2 never executed
+    #####: 1185:				free(substr[j]);
+    %%%%%: 1185-block  0
+unconditional  0 never executed
+        -: 1186:
+    #####: 1187:			free(substr);
+        -: 1188:
+    #####: 1189:			return (char **)NULL;
+    %%%%%: 1189-block  0
+unconditional  0 never executed
+        -: 1190:		}
+        -: 1191:	}
+        -: 1192:
+       22: 1193:	int stdin_dir_ok = 0;
+        -: 1194:
+      22*: 1195:	if (STDIN_TMP_DIR && strcmp(ws[cur_ws].path, STDIN_TMP_DIR) == 0)
+       22: 1195-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 22
+    %%%%%: 1195-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1196:		stdin_dir_ok = 1;
+    %%%%%: 1196-block  0
+unconditional  0 never executed
+        -: 1197:
+       56: 1198:	for (i = 0; i <= args_n; i++) {
+       22: 1198-block  0
+unconditional  0 taken 22
+       34: 1198-block  1
+unconditional  1 taken 34
+       56: 1198-block  2
+branch  2 taken 34
+branch  3 taken 22 (fallthrough)
+        -: 1199:
+        -: 1200:		/* ##########################
+        -: 1201:				 * #   2.f) ELN EXPANSION   #
+        -: 1202:				 * ##########################*/
+        -: 1203:
+        -: 1204:		/* If autocd is set to false, i must be bigger than zero because
+        -: 1205:		 * the first string in comm_array, the command name, should NOT
+        -: 1206:		 * be expanded, but only arguments. Otherwise, if the expanded
+        -: 1207:		 * ELN happens to be a program name as well, this program will
+        -: 1208:		 * be executed, and this, for sure, is to be avoided */
+        -: 1209:
+        -: 1210:		/* The 'sort', 'mf', 'ws', and 'jo' commands take digits as
+        -: 1211:		 * arguments. So, do not expand ELN's in these cases */
+       34: 1212:		if (strcmp(substr[0], "mf") != 0 && strcmp(substr[0], "st") != 0
+       34: 1212-block  0
+branch  0 taken 34 (fallthrough)
+branch  1 taken 0
+       34: 1212-block  1
+branch  2 taken 34 (fallthrough)
+branch  3 taken 0
+       34: 1213:		&& strcmp(substr[0], "ws") != 0 && strcmp(substr[0], "sort") != 0
+       34: 1213-block  0
+branch  0 taken 28 (fallthrough)
+branch  1 taken 6
+       28: 1213-block  1
+branch  2 taken 28 (fallthrough)
+branch  3 taken 0
+       28: 1214:		&& strcmp(substr[0], "jo") != 0) {
+       28: 1214-block  0
+branch  0 taken 28 (fallthrough)
+branch  1 taken 0
+        -: 1215:
+       28: 1216:			if (is_number(substr[i])) {
+       28: 1216-block  0
+call    0 returned 28
+branch  1 taken 7 (fallthrough)
+branch  2 taken 21
+        -: 1217:
+        -: 1218:				/* Expand first word only if autocd is set to true */
+       7*: 1219:				if (i == 0 && !autocd && !auto_open)
+        7: 1219-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 6
+        1: 1219-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1
+    %%%%%: 1219-block  2
+branch  4 never executed
+branch  5 never executed
+    #####: 1220:					continue;
+    %%%%%: 1220-block  0
+unconditional  0 never executed
+        -: 1221:
+        7: 1222:				int num = atoi(substr[i]);
+        -: 1223:				/* Expand numbers only if there is a corresponding ELN */
+        -: 1224:
+        -: 1225:				/* Do not expand ELN if there is a file named as the
+        -: 1226:				 * ELN */
+        7: 1227:				if (eln_as_file_n) {
+        7: 1227-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 7
+    #####: 1228:					int conflict = 0;
+        -: 1229:
+    #####: 1230:					if (eln_as_file_n > 1) {
+    %%%%%: 1230-block  0
+branch  0 never executed
+branch  1 never executed
+        -: 1231:						size_t j;
+        -: 1232:
+    #####: 1233:						for (j = 0; j < eln_as_file_n; j++) {
+    %%%%%: 1233-block  0
+unconditional  0 never executed
+    %%%%%: 1233-block  1
+unconditional  1 never executed
+    %%%%%: 1233-block  2
+branch  2 never executed
+branch  3 never executed
+    #####: 1234:							if (atoi(file_info[eln_as_file[j]].name) == num) {
+    %%%%%: 1234-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1235:								conflict = num;
+        -: 1236:								/* One conflicting filename is enough */
+    #####: 1237:								break;
+    %%%%%: 1237-block  0
+unconditional  0 never executed
+        -: 1238:							}
+        -: 1239:						}
+        -: 1240:					}
+        -: 1241:
+        -: 1242:					else {
+    #####: 1243:						if (atoi(file_info[eln_as_file[0]].name) == num)
+    %%%%%: 1243-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1244:							conflict = num;
+    %%%%%: 1244-block  0
+unconditional  0 never executed
+        -: 1245:					}
+        -: 1246:
+    #####: 1247:					if (conflict) {
+    %%%%%: 1247-block  0
+branch  0 never executed
+branch  1 never executed
+        -: 1248:						size_t j;
+        -: 1249:
+    #####: 1250:						for (j = 0; j <= args_n; j++)
+    %%%%%: 1250-block  0
+unconditional  0 never executed
+    %%%%%: 1250-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 1251:							free(substr[j]);
+    %%%%%: 1251-block  0
+unconditional  0 never executed
+        -: 1252:
+    #####: 1253:						free(substr);
+        -: 1254:
+    #####: 1255:						fprintf(stderr, _("%s: %d: ELN-filename "
+    %%%%%: 1255-block  0
+call    0 never executed
+        -: 1256:							"conflict. Bypass internal expansions "
+        -: 1257:							"to fix this issue: ';CMD "
+        -: 1258:							"FILENAME'\n"), PROGRAM_NAME, conflict);
+        -: 1259:
+    #####: 1260:						return (char **)NULL;
+unconditional  0 never executed
+        -: 1261:					}
+        -: 1262:				}
+        -: 1263:
+        7: 1264:				if (num > 0 && num <= (int)files) {
+        7: 1264-block  0
+branch  0 taken 7 (fallthrough)
+branch  1 taken 0
+        7: 1264-block  1
+branch  2 taken 7 (fallthrough)
+branch  3 taken 0
+        -: 1265:					/* Replace the ELN by the corresponding escaped
+        -: 1266:					 * filename */
+        7: 1267:					int j = num - 1;
+        7: 1268:					char *esc_str = escape_str(file_info[j].name);
+        7: 1268-block  0
+call    0 returned 7
+        -: 1269:
+        7: 1270:					if (esc_str) {
+branch  0 taken 7 (fallthrough)
+branch  1 taken 0
+        -: 1271:
+        7: 1272:						if (file_info[j].dir &&
+        7: 1272-block  0
+branch  0 taken 7 (fallthrough)
+branch  1 taken 0
+        7: 1273:						    file_info[j].name[file_info[j].len - 1] != '/') {
+        7: 1273-block  0
+branch  0 taken 7 (fallthrough)
+branch  1 taken 0
+       14: 1274:							substr[i] = (char *)xrealloc(substr[i],
+        7: 1275:							    (strlen(esc_str) + 2) * sizeof(char));
+        7: 1275-block  0
+call    0 returned 7
+        7: 1276:							sprintf(substr[i], "%s/", esc_str);
+unconditional  0 taken 7
+        -: 1277:						}
+        -: 1278:
+        -: 1279:						else {
+    #####: 1280:							substr[i] = (char *)xrealloc(substr[i],
+    #####: 1281:							    (strlen(esc_str) + 1) * sizeof(char));
+    %%%%%: 1281-block  0
+call    0 never executed
+    #####: 1282:							strcpy(substr[i], esc_str);
+unconditional  0 never executed
+        -: 1283:						}
+        -: 1284:
+        7: 1285:						free(esc_str);
+        7: 1286:						esc_str = (char *)NULL;
+        7: 1286-block  0
+unconditional  0 taken 7
+        -: 1287:					}
+        -: 1288:
+        -: 1289:					else {
+    #####: 1290:						fprintf(stderr, _("%s: %s: Error quoting "
+        -: 1291:								"filename\n"),
+    #####: 1292:								PROGRAM_NAME, file_info[num - 1].name);
+    %%%%%: 1292-block  0
+call    0 never executed
+        -: 1293:						/* Free whatever was allocated thus far */
+        -: 1294:
+    #####: 1295:						for (j = 0; j <= (int)args_n; j++)
+unconditional  0 never executed
+    %%%%%: 1295-block  0
+branch  1 never executed
+branch  2 never executed
+    #####: 1296:							free(substr[j]);
+    %%%%%: 1296-block  0
+unconditional  0 never executed
+        -: 1297:
+    #####: 1298:						free(substr);
+        -: 1299:
+    #####: 1300:						return (char **)NULL;
+    %%%%%: 1300-block  0
+unconditional  0 never executed
+        -: 1301:					}
+        -: 1302:				}
+        -: 1303:			}
+        -: 1304:		}
+        -: 1305:
+        -: 1306:		/* #############################################
+        -: 1307:		 * #   2.g) USER DEFINED VARIABLES EXPANSION   #
+        -: 1308:		 * #############################################*/
+        -: 1309:
+      34*: 1310:		if (substr[i][0] == '$' && substr[i][1] != '(' && substr[i][1] != '{') {
+       34: 1310-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 34
+    %%%%%: 1310-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%: 1310-block  2
+branch  4 never executed
+branch  5 never executed
+    #####: 1311:			char *var_name = strchr(substr[i], '$');
+    #####: 1312:			if (var_name && *(++var_name)) {
+    %%%%%: 1312-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1312-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%: 1312-block  2
+unconditional  4 never executed
+    #####: 1313:				int j = (int)usrvar_n;
+        -: 1314:
+    #####: 1315:				while (--j >= 0) {
+    %%%%%: 1315-block  0
+unconditional  0 never executed
+    %%%%%: 1315-block  1
+branch  1 never executed
+branch  2 never executed
+        -: 1316:
+    #####: 1317:					if (*var_name == *usr_var[j].name
+    %%%%%: 1317-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1318:					&& strcmp(var_name, usr_var[j].name) == 0) {
+    %%%%%: 1318-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1319:						substr[i] = (char *)xrealloc(substr[i],
+    #####: 1320:						    (strlen(usr_var[j].value) + 1) * sizeof(char));
+    %%%%%: 1320-block  0
+call    0 never executed
+    #####: 1321:						strcpy(substr[i], usr_var[j].value);
+    #####: 1322:						break;
+unconditional  0 never executed
+        -: 1323:					}
+        -: 1324:				}
+        -: 1325:			}
+        -: 1326:
+        -: 1327:			else {
+    #####: 1328:				fprintf(stderr, _("%s: %s: Error getting variable name\n"),
+    #####: 1329:						PROGRAM_NAME, substr[i]);
+    %%%%%: 1329-block  0
+call    0 never executed
+        -: 1330:				size_t j;
+        -: 1331:
+    #####: 1332:				for (j = 0; j <= args_n; j++)
+unconditional  0 never executed
+    %%%%%: 1332-block  0
+branch  1 never executed
+branch  2 never executed
+    #####: 1333:					free(substr[j]);
+    %%%%%: 1333-block  0
+unconditional  0 never executed
+    #####: 1334:				free(substr);
+        -: 1335:
+    #####: 1336:				return (char **)NULL;
+    %%%%%: 1336-block  0
+unconditional  0 never executed
+        -: 1337:			}
+        -: 1338:		}
+        -: 1339:
+        -: 1340:		/* We are in STDIN_TMP_DIR: Expand symlinks to target */
+       34: 1341:		if (stdin_dir_ok) {
+       34: 1341-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 34
+    #####: 1342:			char *real_path = realpath(substr[i], NULL);
+    %%%%%: 1342-block  0
+call    0 never executed
+        -: 1343:
+    #####: 1344:			if (real_path) {
+branch  0 never executed
+branch  1 never executed
+    #####: 1345:				substr[i] = (char *)xrealloc(substr[i],
+    #####: 1346:				    (strlen(real_path) + 1) * sizeof(char));
+    %%%%%: 1346-block  0
+call    0 never executed
+    #####: 1347:				strcpy(substr[i], real_path);
+    #####: 1348:				free(real_path);
+unconditional  0 never executed
+        -: 1349:			}
+        -: 1350:		}
+        -: 1351:	}
+        -: 1352:
+        -: 1353:	/* #### 3) NULL TERMINATE THE INPUT STRING ARRAY #### */
+       22: 1354:	substr = (char **)xrealloc(substr, sizeof(char *) * (args_n + 2));
+       22: 1354-block  0
+call    0 returned 22
+       22: 1355:	substr[args_n + 1] = (char *)NULL;
+        -: 1356:
+       22: 1357:	if (!is_internal(substr[0]))
+call    0 returned 22
+branch  1 taken 14 (fallthrough)
+branch  2 taken 8
+       14: 1358:		return substr;
+       14: 1358-block  0
+unconditional  0 taken 14
+        -: 1359:
+        -: 1360:	/* #############################################################
+        -: 1361:	 * #               ONLY FOR INTERNAL COMMANDS                  #
+        -: 1362:	 * #############################################################*/
+        -: 1363:
+        -: 1364:	/* Some functions of CliFM are purely internal, that is, they are not
+        -: 1365:	 * wrappers of a shell command and do not call the system shell at all.
+        -: 1366:	 * For this reason, some expansions normally made by the system shell
+        -: 1367:	 * must be made here (in the lobby [got it?]) in order to be able to
+        -: 1368:	 * understand these expansions at all. */
+        -: 1369:
+        -: 1370:		/* ###############################################
+        -: 1371:		 * #   3) WILDCARD, BRACE, AND TILDE EXPANSION   #
+        -: 1372:		 * ############################################### */
+        -: 1373:
+        8: 1374:	int *glob_array = (int *)xnmalloc(int_array_max, sizeof(int));
+        8: 1374-block  0
+call    0 returned 8
+        8: 1375:	int *word_array = (int *)xnmalloc(int_array_max, sizeof(int));
+call    0 returned 8
+        8: 1376:	size_t glob_n = 0, word_n = 0;
+        -: 1377:
+       23: 1378:	for (i = 0; substr[i]; i++) {
+unconditional  0 taken 8
+       15: 1378-block  0
+unconditional  1 taken 15
+       23: 1378-block  1
+branch  2 taken 15
+branch  3 taken 8 (fallthrough)
+        -: 1379:
+        -: 1380:		/* Do not perform any of the expansions below for selected
+        -: 1381:		 * elements: they are full path filenames that, as such, do not
+        -: 1382:		 * need any expansion */
+       15: 1383:		if (is_sel) { /* is_sel is true only for the current input and if
+       15: 1383-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+        -: 1384:			there was some "sel" keyword in it */
+        -: 1385:			/* Strings between is_sel and sel_n are selected filenames */
+    #####: 1386:			if (i >= (size_t)is_sel && i <= sel_n)
+    %%%%%: 1386-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1386-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1387:				continue;
+    %%%%%: 1387-block  0
+unconditional  0 never executed
+        -: 1388:		}
+        -: 1389:
+        -: 1390:		/* Ignore the first string of the search function: it will be
+        -: 1391:		 * expanded by the search function itself */
+      15*: 1392:		if (substr[0][0] == '/' && i == 0)
+       15: 1392-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    %%%%%: 1392-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1393:			continue;
+    %%%%%: 1393-block  0
+unconditional  0 never executed
+        -: 1394:
+        -: 1395:		/* Tilde expansion is made by glob() */
+       15: 1396:		if (*substr[i] == '~') {
+       15: 1396-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####: 1397:			if (glob_n < int_array_max)
+    %%%%%: 1397-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1398:				glob_array[glob_n++] = (int)i;
+    %%%%%: 1398-block  0
+unconditional  0 never executed
+        -: 1399:		}
+        -: 1400:
+       15: 1401:		register size_t j = 0;
+        -: 1402:
+       70: 1403:		for (j = 0; substr[i][j]; j++) {
+       15: 1403-block  0
+unconditional  0 taken 15
+       55: 1403-block  1
+unconditional  1 taken 55
+       70: 1403-block  2
+branch  2 taken 55
+branch  3 taken 15 (fallthrough)
+        -: 1404:
+        -: 1405:			/* Brace and wildcard expansion is made by glob()
+        -: 1406:			 * as well */
+       55: 1407:			if ((substr[i][j] == '*' || substr[i][j] == '?'
+       55: 1407-block  0
+branch  0 taken 55 (fallthrough)
+branch  1 taken 0
+       55: 1407-block  1
+branch  2 taken 55 (fallthrough)
+branch  3 taken 0
+       55: 1408:			|| substr[i][j] == '[' || substr[i][j] == '{')
+       55: 1408-block  0
+branch  0 taken 55 (fallthrough)
+branch  1 taken 0
+       55: 1408-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 55
+    #####: 1409:			&& substr[i][j + 1] != ' ') {
+    %%%%%: 1409-block  0
+branch  0 never executed
+branch  1 never executed
+        -: 1410:				/* Strings containing these characters are taken as
+        -: 1411:			 * wildacard patterns and are expanded by the glob
+        -: 1412:			 * function. See man (7) glob */
+    #####: 1413:				if (glob_n < int_array_max)
+    %%%%%: 1413-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1414:					glob_array[glob_n++] = (int)i;
+    %%%%%: 1414-block  0
+unconditional  0 never executed
+        -: 1415:			}
+        -: 1416:
+        -: 1417:			/* Command substitution is made by wordexp() */
+      55*: 1418:			if (substr[i][j] == '$' && (substr[i][j + 1] == '('
+       55: 1418-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 55
+    %%%%%: 1418-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1419:			|| substr[i][j + 1] == '{')) {
+    %%%%%: 1419-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1420:				if (word_n < int_array_max)
+    %%%%%: 1420-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1421:					word_array[word_n++] = (int)i;
+    %%%%%: 1421-block  0
+unconditional  0 never executed
+        -: 1422:			}
+        -: 1423:
+      55*: 1424:			if (substr[i][j] == '`' && substr[i][j + 1] != ' ') {
+       55: 1424-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 55
+    %%%%%: 1424-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1425:				if (word_n < int_array_max)
+    %%%%%: 1425-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1426:					word_array[word_n++] = (int)i;
+    %%%%%: 1426-block  0
+unconditional  0 never executed
+        -: 1427:			}
+        -: 1428:		}
+        -: 1429:	}
+        -: 1430:
+        -: 1431:	/* Do not expand if command is deselect, sel or untrash, just to
+        -: 1432:	 * allow the use of "*" for desel and untrash ("ds *" and "u *")
+        -: 1433:	 * and to let the sel function handle patterns itself */
+       8*: 1434:	if (glob_n && strcmp(substr[0], "s") != 0 && strcmp(substr[0], "sel") != 0
+        8: 1434-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 8
+    %%%%%: 1434-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%: 1434-block  2
+branch  4 never executed
+branch  5 never executed
+    #####: 1435:	&& strcmp(substr[0], "ds") != 0 && strcmp(substr[0], "desel") != 0
+    %%%%%: 1435-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1435-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1436:	&& strcmp(substr[0], "u") != 0 && strcmp(substr[0], "undel") != 0
+    %%%%%: 1436-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1436-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1437:	&& strcmp(substr[0], "untrash") != 0) {
+    %%%%%: 1437-block  0
+branch  0 never executed
+branch  1 never executed
+        -: 1438:		/* 1) Expand glob
+        -: 1439:		2) Create a new array, say comm_array_glob, large enough to store
+        -: 1440:		   the expanded glob and the remaining (non-glob) arguments
+        -: 1441:		   (args_n+gl_pathc)
+        -: 1442:		3) Copy into this array everything before the glob
+        -: 1443:		   (i=0;i<glob_char;i++)
+        -: 1444:		4) Copy the expanded elements (if none, copy the original element,
+        -: 1445:		   comm_array[glob_char])
+        -: 1446:		5) Copy the remaining elements (i=glob_char+1;i<=args_n;i++)
+        -: 1447:		6) Free the old comm_array and fill it with comm_array_glob
+        -: 1448:	  */
+    #####: 1449:		size_t old_pathc = 0;
+        -: 1450:		/* glob_array stores the index of the globbed strings. However,
+        -: 1451:		 * once the first expansion is done, the index of the next globbed
+        -: 1452:		 * string has changed. To recover the next globbed string, and
+        -: 1453:		 * more precisely, its index, we only need to add the amount of
+        -: 1454:		 * files matched by the previous instances of glob(). Example:
+        -: 1455:		 * if original indexes were 2 and 4, once 2 is expanded 4 stores
+        -: 1456:		 * now some of the files expanded in 2. But if we add to 4 the
+        -: 1457:		 * amount of files expanded in 2 (gl_pathc), we get now the
+        -: 1458:		 * original globbed string pointed by 4.
+        -: 1459:		*/
+    #####: 1460:		register size_t g = 0;
+    #####: 1461:		for (g = 0; g < (size_t)glob_n; g++) {
+    %%%%%: 1461-block  0
+unconditional  0 never executed
+    %%%%%: 1461-block  1
+unconditional  1 never executed
+    %%%%%: 1461-block  2
+branch  2 never executed
+branch  3 never executed
+        -: 1462:			glob_t globbuf;
+        -: 1463:
+    #####: 1464:			if (glob(substr[glob_array[g] + (int)old_pathc],
+    %%%%%: 1464-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -: 1465:				GLOB_BRACE | GLOB_TILDE, NULL, &globbuf) != EXIT_SUCCESS) {
+    #####: 1466:				globfree(&globbuf);
+    %%%%%: 1466-block  0
+call    0 never executed
+    #####: 1467:				continue;
+unconditional  0 never executed
+        -: 1468:			}
+        -: 1469:
+    #####: 1470:			if (globbuf.gl_pathc) {
+    %%%%%: 1470-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1471:				register size_t j = 0;
+    #####: 1472:				char **glob_cmd = (char **)NULL;
+        -: 1473:
+    #####: 1474:				glob_cmd = (char **)xcalloc(args_n + globbuf.gl_pathc + 1,
+    %%%%%: 1474-block  0
+call    0 never executed
+        -: 1475:											sizeof(char *));
+        -: 1476:
+    #####: 1477:				for (i = 0; i < ((size_t)glob_array[g] + old_pathc); i++)
+unconditional  0 never executed
+    %%%%%: 1477-block  0
+branch  1 never executed
+branch  2 never executed
+    #####: 1478:					glob_cmd[j++] = savestring(substr[i], strlen(substr[i]));
+    %%%%%: 1478-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1479:
+    #####: 1480:				for (i = 0; i < globbuf.gl_pathc; i++) {
+    %%%%%: 1480-block  0
+unconditional  0 never executed
+    %%%%%: 1480-block  1
+unconditional  1 never executed
+    %%%%%: 1480-block  2
+branch  2 never executed
+branch  3 never executed
+        -: 1481:
+        -: 1482:					/* Do not match "." or ".." */
+    #####: 1483:					if (strcmp(globbuf.gl_pathv[i], ".") == 0
+    %%%%%: 1483-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1484:					|| strcmp(globbuf.gl_pathv[i], "..") == 0)
+    %%%%%: 1484-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1485:						continue;
+    %%%%%: 1485-block  0
+unconditional  0 never executed
+        -: 1486:
+        -: 1487:					/* Escape the globbed filename and copy it */
+    #####: 1488:					char *esc_str = escape_str(globbuf.gl_pathv[i]);
+    %%%%%: 1488-block  0
+call    0 never executed
+        -: 1489:
+    #####: 1490:					if (esc_str) {
+branch  0 never executed
+branch  1 never executed
+    #####: 1491:						glob_cmd[j++] = savestring(esc_str, strlen(esc_str));
+    %%%%%: 1491-block  0
+call    0 never executed
+    #####: 1492:						free(esc_str);
+unconditional  0 never executed
+        -: 1493:					}
+        -: 1494:
+        -: 1495:					else {
+    #####: 1496:						fprintf(stderr, _("%s: %s: Error quoting "
+    #####: 1497:							"filename\n"), PROGRAM_NAME, globbuf.gl_pathv[i]);
+    %%%%%: 1497-block  0
+call    0 never executed
+    #####: 1498:						register size_t k = 0;
+        -: 1499:
+    #####: 1500:						for (k = 0; k < j; k++)
+unconditional  0 never executed
+    %%%%%: 1500-block  0
+branch  1 never executed
+branch  2 never executed
+    #####: 1501:							free(glob_cmd[k]);
+    %%%%%: 1501-block  0
+unconditional  0 never executed
+        -: 1502:
+    #####: 1503:						free(glob_cmd);
+    #####: 1504:						glob_cmd = (char **)NULL;
+        -: 1505:
+    #####: 1506:						for (k = 0; k <= args_n; k++)
+    %%%%%: 1506-block  0
+unconditional  0 never executed
+    %%%%%: 1506-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 1507:							free(substr[k]);
+    %%%%%: 1507-block  0
+unconditional  0 never executed
+        -: 1508:
+    #####: 1509:						free(substr);
+        -: 1510:
+    #####: 1511:						globfree(&globbuf);
+    %%%%%: 1511-block  0
+call    0 never executed
+        -: 1512:
+    #####: 1513:						return (char **)NULL;
+unconditional  0 never executed
+        -: 1514:					}
+        -: 1515:				}
+        -: 1516:
+    #####: 1517:				for (i = (size_t)glob_array[g] + old_pathc + 1;
+    %%%%%: 1517-block  0
+unconditional  0 never executed
+    #####: 1518:				     i <= args_n; i++)
+    %%%%%: 1518-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1519:					glob_cmd[j++] = savestring(substr[i], strlen(substr[i]));
+    %%%%%: 1519-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1520:
+    #####: 1521:				glob_cmd[j] = (char *)NULL;
+        -: 1522:
+    #####: 1523:				for (i = 0; i <= args_n; i++)
+    %%%%%: 1523-block  0
+unconditional  0 never executed
+    %%%%%: 1523-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 1524:					free(substr[i]);
+    %%%%%: 1524-block  0
+unconditional  0 never executed
+        -: 1525:
+    #####: 1526:				free(substr);
+    #####: 1527:				substr = glob_cmd;
+    #####: 1528:				glob_cmd = (char **)NULL;
+        -: 1529:
+    #####: 1530:				args_n = j - 1;
+    %%%%%: 1530-block  0
+unconditional  0 never executed
+        -: 1531:			}
+        -: 1532:
+    #####: 1533:			old_pathc += (globbuf.gl_pathc - 1);
+    #####: 1534:			globfree(&globbuf);
+    %%%%%: 1534-block  0
+call    0 never executed
+        -: 1535:		}
+        -: 1536:	}
+        -: 1537:
+        8: 1538:	free(glob_array);
+        -: 1539:
+        -: 1540:		/* #############################################
+        -: 1541:		 * #    4) COMMAND & PARAMETER SUBSTITUTION    #
+        -: 1542:		 * ############################################# */
+        -: 1543:
+        8: 1544:	if (word_n) {
+        8: 1544-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 8
+        -: 1545:
+    #####: 1546:		size_t old_pathc = 0;
+        -: 1547:
+    #####: 1548:		register size_t w = 0;
+    #####: 1549:		for (w = 0; w < (size_t)word_n; w++) {
+    %%%%%: 1549-block  0
+unconditional  0 never executed
+    %%%%%: 1549-block  1
+unconditional  1 never executed
+    %%%%%: 1549-block  2
+branch  2 never executed
+branch  3 never executed
+        -: 1550:			wordexp_t wordbuf;
+    #####: 1551:			if (wordexp(substr[word_array[w] + (int)old_pathc],
+    %%%%%: 1551-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -: 1552:				&wordbuf, 0) != EXIT_SUCCESS) {
+    #####: 1553:				wordfree(&wordbuf);
+    %%%%%: 1553-block  0
+call    0 never executed
+    #####: 1554:				continue;
+unconditional  0 never executed
+        -: 1555:			}
+        -: 1556:
+    #####: 1557:			if (wordbuf.we_wordc) {
+    %%%%%: 1557-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1558:				register size_t j = 0;
+    #####: 1559:				char **word_cmd = (char **)NULL;
+        -: 1560:
+    #####: 1561:				word_cmd = (char **)xcalloc(args_n + wordbuf.we_wordc + 1,
+    %%%%%: 1561-block  0
+call    0 never executed
+        -: 1562:											sizeof(char *));
+        -: 1563:
+    #####: 1564:				for (i = 0; i < ((size_t)word_array[w] + old_pathc);
+unconditional  0 never executed
+    %%%%%: 1564-block  0
+branch  1 never executed
+branch  2 never executed
+    #####: 1565:				     i++)
+    #####: 1566:					word_cmd[j++] = savestring(substr[i], strlen(substr[i]));
+    %%%%%: 1566-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1567:
+    #####: 1568:				for (i = 0; i < wordbuf.we_wordc; i++) {
+    %%%%%: 1568-block  0
+unconditional  0 never executed
+    %%%%%: 1568-block  1
+unconditional  1 never executed
+    %%%%%: 1568-block  2
+branch  2 never executed
+branch  3 never executed
+        -: 1569:					/* Escape the globbed filename and copy it*/
+    #####: 1570:					char *esc_str = escape_str(wordbuf.we_wordv[i]);
+    %%%%%: 1570-block  0
+call    0 never executed
+        -: 1571:
+    #####: 1572:					if (esc_str) {
+branch  0 never executed
+branch  1 never executed
+    #####: 1573:						word_cmd[j++] = savestring(esc_str, strlen(esc_str));
+    %%%%%: 1573-block  0
+call    0 never executed
+    #####: 1574:						free(esc_str);
+unconditional  0 never executed
+        -: 1575:					}
+        -: 1576:
+        -: 1577:					else {
+    #####: 1578:						fprintf(stderr, _("%s: %s: Error quoting "
+    #####: 1579:							"filename\n"), PROGRAM_NAME, wordbuf.we_wordv[i]);
+    %%%%%: 1579-block  0
+call    0 never executed
+        -: 1580:
+    #####: 1581:						register size_t k = 0;
+        -: 1582:
+    #####: 1583:						for (k = 0; k < j; k++)
+unconditional  0 never executed
+    %%%%%: 1583-block  0
+branch  1 never executed
+branch  2 never executed
+    #####: 1584:							free(word_cmd[k]);
+    %%%%%: 1584-block  0
+unconditional  0 never executed
+        -: 1585:
+    #####: 1586:						free(word_cmd);
+        -: 1587:
+    #####: 1588:						word_cmd = (char **)NULL;
+        -: 1589:
+    #####: 1590:						for (k = 0; k <= args_n; k++)
+    %%%%%: 1590-block  0
+unconditional  0 never executed
+    %%%%%: 1590-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 1591:							free(substr[k]);
+    %%%%%: 1591-block  0
+unconditional  0 never executed
+        -: 1592:
+    #####: 1593:						free(substr);
+        -: 1594:
+    #####: 1595:						return (char **)NULL;
+    %%%%%: 1595-block  0
+unconditional  0 never executed
+        -: 1596:					}
+        -: 1597:				}
+        -: 1598:
+    #####: 1599:				for (i = (size_t)word_array[w] + old_pathc + 1;
+    %%%%%: 1599-block  0
+unconditional  0 never executed
+    #####: 1600:				     i <= args_n; i++)
+    %%%%%: 1600-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1601:					word_cmd[j++] = savestring(substr[i], strlen(substr[i]));
+    %%%%%: 1601-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1602:
+    #####: 1603:				word_cmd[j] = (char *)NULL;
+        -: 1604:
+    #####: 1605:				for (i = 0; i <= args_n; i++)
+    %%%%%: 1605-block  0
+unconditional  0 never executed
+    %%%%%: 1605-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 1606:					free(substr[i]);
+    %%%%%: 1606-block  0
+unconditional  0 never executed
+        -: 1607:
+    #####: 1608:				free(substr);
+    #####: 1609:				substr = word_cmd;
+    #####: 1610:				word_cmd = (char **)NULL;
+        -: 1611:
+    #####: 1612:				args_n = j - 1;
+    %%%%%: 1612-block  0
+unconditional  0 never executed
+        -: 1613:			}
+        -: 1614:
+    #####: 1615:			old_pathc += (wordbuf.we_wordc - 1);
+    #####: 1616:			wordfree(&wordbuf);
+    %%%%%: 1616-block  0
+call    0 never executed
+        -: 1617:		}
+        -: 1618:	}
+        -: 1619:
+        8: 1620:	free(word_array);
+        -: 1621:
+        8: 1622:	if ((*substr[0] == 'd' || *substr[0] == 'u')
+        8: 1622-block  0
+branch  0 taken 8 (fallthrough)
+branch  1 taken 0
+        8: 1622-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 8
+    #####: 1623:	&& (strcmp(substr[0], "desel") == 0 || strcmp(substr[0], "undel") == 0
+    %%%%%: 1623-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1623-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1624:	|| strcmp(substr[0], "untrash") == 0)) {
+    %%%%%: 1624-block  0
+branch  0 never executed
+branch  1 never executed
+        -: 1625:
+        -: 1626:		/* Null terminate the input string array (again) */
+    #####: 1627:		substr = (char **)xrealloc(substr, (args_n + 2) * sizeof(char *));
+    %%%%%: 1627-block  0
+call    0 never executed
+    #####: 1628:		substr[args_n + 1] = (char *)NULL;
+        -: 1629:
+    #####: 1630:		return substr;
+unconditional  0 never executed
+        -: 1631:	}
+        -: 1632:
+        -: 1633:		/* #############################################
+        -: 1634:		 * #             5) REGEX EXPANSION            #
+        -: 1635:		 * ############################################# */
+        -: 1636:
+       8*: 1637:	if (*substr[0] == 's' && (!substr[0][1] || strcmp(substr[0], "sel") == 0))
+        8: 1637-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 6
+        2: 1637-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 2
+    %%%%%: 1637-block  2
+branch  4 never executed
+branch  5 never executed
+        2: 1638:		return substr;
+        2: 1638-block  0
+unconditional  0 taken 2
+        -: 1639:
+        6: 1640:	char **regex_files = (char **)xnmalloc(files + args_n + 2, sizeof(char *));
+        6: 1640-block  0
+call    0 returned 6
+        -: 1641:
+        6: 1642:	size_t j, r_files = 0;
+        -: 1643:
+       13: 1644:	for (i = 0; substr[i]; i++) {
+unconditional  0 taken 6
+        7: 1644-block  0
+unconditional  1 taken 7
+       13: 1644-block  1
+branch  2 taken 7
+branch  3 taken 6 (fallthrough)
+        -: 1645:
+        7: 1646:		if (r_files > (files + args_n))
+        7: 1646-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 7
+    #####: 1647:			break;
+    %%%%%: 1647-block  0
+unconditional  0 never executed
+        -: 1648:
+        -: 1649:		/* Ignore the first string of the search function: it will be
+        -: 1650:		 * expanded by the search function itself */
+       7*: 1651:		if (*substr[0] == '/') {
+        7: 1651-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 7
+    #####: 1652:			regex_files[r_files++] = substr[i];
+       7*: 1653:			continue;
+    %%%%%: 1653-block  0
+unconditional  0 never executed
+        7: 1653-block  1
+unconditional  1 taken 7
+        -: 1654:		}
+        -: 1655:
+        7: 1656:		if (check_regex(substr[i]) != EXIT_SUCCESS) {
+        7: 1656-block  0
+call    0 returned 7
+branch  1 taken 7 (fallthrough)
+branch  2 taken 0
+        7: 1657:			regex_files[r_files++] = substr[i];
+        7: 1658:			continue;
+        7: 1658-block  0
+unconditional  0 taken 7
+        -: 1659:		}
+        -: 1660:
+        -: 1661:		regex_t regex;
+        -: 1662:
+    #####: 1663:		if (regcomp(&regex, substr[i], REG_NOSUB | REG_EXTENDED) != EXIT_SUCCESS) {
+    %%%%%: 1663-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -: 1664:			/*          fprintf(stderr, "%s: %s: Invalid regular expression",
+        -: 1665:					PROGRAM_NAME, substr[i]); */
+    #####: 1666:			regfree(&regex);
+    %%%%%: 1666-block  0
+call    0 never executed
+    #####: 1667:			regex_files[r_files++] = substr[i];
+    #####: 1668:			continue;
+unconditional  0 never executed
+        -: 1669:		}
+        -: 1670:
+    #####: 1671:		int reg_found = 0;
+        -: 1672:
+    #####: 1673:		for (j = 0; j < files; j++) {
+    %%%%%: 1673-block  0
+unconditional  0 never executed
+    %%%%%: 1673-block  1
+unconditional  1 never executed
+    %%%%%: 1673-block  2
+branch  2 never executed
+branch  3 never executed
+        -: 1674:
+    #####: 1675:			if (regexec(&regex, file_info[j].name, 0, NULL, 0) == EXIT_SUCCESS) {
+    %%%%%: 1675-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1676:				regex_files[r_files++] = file_info[j].name;
+    #####: 1677:				reg_found = 1;
+    %%%%%: 1677-block  0
+unconditional  0 never executed
+        -: 1678:			}
+        -: 1679:		}
+        -: 1680:
+    #####: 1681:		if (!reg_found)
+    %%%%%: 1681-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1682:			regex_files[r_files++] = substr[i];
+    %%%%%: 1682-block  0
+unconditional  0 never executed
+        -: 1683:
+    #####: 1684:		regfree(&regex);
+    %%%%%: 1684-block  0
+call    0 never executed
+        -: 1685:	}
+        -: 1686:
+        6: 1687:	if (r_files) {
+        6: 1687-block  0
+branch  0 taken 6 (fallthrough)
+branch  1 taken 0
+        6: 1688:		regex_files[r_files] = (char *)NULL;
+        -: 1689:
+        6: 1690:		char **tmp_files = (char **)xnmalloc(r_files + 2, sizeof(char *));
+        6: 1690-block  0
+call    0 returned 6
+        6: 1691:		size_t k = 0;
+       13: 1692:		for (j = 0; regex_files[j]; j++)
+unconditional  0 taken 6
+       13: 1692-block  0
+branch  1 taken 7
+branch  2 taken 6 (fallthrough)
+        7: 1693:			tmp_files[k++] = savestring(regex_files[j], strlen(regex_files[j]));
+        7: 1693-block  0
+call    0 returned 7
+unconditional  1 taken 7
+        -: 1694:
+        6: 1695:		tmp_files[k] = (char *)NULL;
+        -: 1696:
+       13: 1697:		for (j = 0; j <= args_n; j++)
+        6: 1697-block  0
+unconditional  0 taken 6
+       13: 1697-block  1
+branch  1 taken 7
+branch  2 taken 6 (fallthrough)
+        7: 1698:			free(substr[j]);
+        7: 1698-block  0
+unconditional  0 taken 7
+        -: 1699:
+        6: 1700:		free(substr);
+        -: 1701:
+        6: 1702:		substr = tmp_files;
+        6: 1703:		tmp_files = (char **)NULL;
+        -: 1704:
+        6: 1705:		args_n = k - 1;
+        -: 1706:
+        6: 1707:		free(tmp_files);
+        6: 1707-block  0
+unconditional  0 taken 6
+        -: 1708:	}
+        -: 1709:
+        6: 1710:	free(regex_files);
+        -: 1711:
+        6: 1712:	substr = (char **)xrealloc(substr, (args_n + 2) * sizeof(char *));
+        6: 1712-block  0
+call    0 returned 6
+        6: 1713:	substr[args_n + 1] = (char *)NULL;
+        -: 1714:
+        6: 1715:	return substr;
+unconditional  0 taken 6
+        -: 1716:}
+        -: 1717:
+        -: 1718:/* Reduce "$HOME" to tilde ("~"). The new_path variable is always either
+        -: 1719: * "$HOME" or "$HOME/file", that's why there's no need to check for
+        -: 1720: * "/file" */
+        -: 1721:char *
+function home_tilde called 21 returned 100% blocks executed 81%
+       21: 1722:home_tilde(const char *new_path)
+        -: 1723:{
+       21: 1724:	if (!home_ok || !new_path || !*new_path)
+       21: 1724-block  0
+branch  0 taken 21 (fallthrough)
+branch  1 taken 0
+       21: 1724-block  1
+branch  2 taken 21 (fallthrough)
+branch  3 taken 0
+       21: 1724-block  2
+branch  4 taken 0 (fallthrough)
+branch  5 taken 21
+    #####: 1725:		return (char *)NULL;
+    %%%%%: 1725-block  0
+unconditional  0 never executed
+        -: 1726:
+       21: 1727:	char *path_tilde = (char *)NULL;
+        -: 1728:
+        -: 1729:	/* If path == HOME */
+       21: 1730:	if (new_path[1] == user.home[1] && strcmp(new_path, user.home) == 0) {
+       21: 1730-block  0
+branch  0 taken 21 (fallthrough)
+branch  1 taken 0
+       21: 1730-block  1
+branch  2 taken 16 (fallthrough)
+branch  3 taken 5
+       16: 1731:		path_tilde = (char *)xnmalloc(2, sizeof(char));
+       16: 1731-block  0
+call    0 returned 16
+       16: 1732:		path_tilde[0] = '~';
+       16: 1733:		path_tilde[1] = '\0';
+unconditional  0 taken 16
+        -: 1734:	}
+        -: 1735:
+        -: 1736:	/* If path == HOME/file */
+        5: 1737:	else if (new_path[1] == user.home[1]
+        5: 1737-block  0
+branch  0 taken 5 (fallthrough)
+branch  1 taken 0
+        5: 1738:	&& strncmp(new_path, user.home, user.home_len) == 0) {
+        5: 1738-block  0
+branch  0 taken 5 (fallthrough)
+branch  1 taken 0
+        5: 1739:		path_tilde = (char *)xnmalloc(strlen(new_path + user.home_len + 1) + 3,
+        5: 1739-block  0
+call    0 returned 5
+        -: 1740:										sizeof(char));
+        5: 1741:		sprintf(path_tilde, "~/%s", new_path + user.home_len + 1);
+unconditional  0 taken 5
+        -: 1742:	}
+        -: 1743:
+        -: 1744:	else {
+    #####: 1745:		path_tilde = (char *)xnmalloc(strlen(new_path) + 1, sizeof(char));
+    %%%%%: 1745-block  0
+call    0 never executed
+    #####: 1746:		strcpy(path_tilde, new_path);
+unconditional  0 never executed
+        -: 1747:	}
+        -: 1748:
+       21: 1749:	return path_tilde;
+       21: 1749-block  0
+unconditional  0 taken 21
+        -: 1750:}
+        -: 1751:
+        -: 1752:/* Expand a range of numbers given by str. It will expand the range
+        -: 1753: * provided that both extremes are numbers, bigger than zero, equal or
+        -: 1754: * smaller than the amount of files currently listed on the screen, and
+        -: 1755: * the second (right) extreme is bigger than the first (left). Returns
+        -: 1756: * an array of int's with the expanded range or NULL if one of the
+        -: 1757: * above conditions is not met */
+        -: 1758:int *
+function expand_range called 2 returned 100% blocks executed 73%
+        2: 1759:expand_range(char *str, int listdir)
+        -: 1760:{
+        2: 1761:	if (strcntchr(str, '-') == -1)
+        2: 1761-block  0
+call    0 returned 2
+branch  1 taken 0 (fallthrough)
+branch  2 taken 2
+    #####: 1762:		return (int *)NULL;
+    %%%%%: 1762-block  0
+unconditional  0 never executed
+        -: 1763:
+        2: 1764:	char *first = (char *)NULL;
+        2: 1765:	first = strbfr(str, '-');
+        2: 1765-block  0
+call    0 returned 2
+        -: 1766:
+        2: 1767:	if (!first)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####: 1768:		return (int *)NULL;
+    %%%%%: 1768-block  0
+unconditional  0 never executed
+        -: 1769:
+        2: 1770:	if (!is_number(first)) {
+        2: 1770-block  0
+call    0 returned 2
+branch  1 taken 0 (fallthrough)
+branch  2 taken 2
+    #####: 1771:		free(first);
+    #####: 1772:		return (int *)NULL;
+    %%%%%: 1772-block  0
+unconditional  0 never executed
+        -: 1773:	}
+        -: 1774:
+        2: 1775:	char *second = (char *)NULL;
+        2: 1776:	second = straft(str, '-');
+        2: 1776-block  0
+call    0 returned 2
+        -: 1777:
+        2: 1778:	if (!second) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####: 1779:		free(first);
+    #####: 1780:		return (int *)NULL;
+    %%%%%: 1780-block  0
+unconditional  0 never executed
+        -: 1781:	}
+        -: 1782:
+        2: 1783:	if (!is_number(second)) {
+        2: 1783-block  0
+call    0 returned 2
+branch  1 taken 0 (fallthrough)
+branch  2 taken 2
+    #####: 1784:		free(first);
+    #####: 1785:		free(second);
+    #####: 1786:		return (int *)NULL;
+    %%%%%: 1786-block  0
+unconditional  0 never executed
+        -: 1787:	}
+        -: 1788:
+        2: 1789:	int afirst = atoi(first), asecond = atoi(second);
+        2: 1790:	free(first);
+        2: 1791:	free(second);
+        -: 1792:
+        2: 1793:	if (listdir) {
+        2: 1793-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        -: 1794:
+        2: 1795:		if (afirst <= 0 || afirst > (int)files || asecond <= 0
+        2: 1795-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2: 1795-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 0
+        2: 1795-block  2
+branch  4 taken 2 (fallthrough)
+branch  5 taken 0
+        2: 1796:		|| asecond > (int)files || afirst >= asecond)
+        2: 1796-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2: 1796-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 2
+    #####: 1797:			return (int *)NULL;
+    %%%%%: 1797-block  0
+unconditional  0 never executed
+        -: 1798:	}
+        -: 1799:
+        -: 1800:	else {
+    #####: 1801:		if (afirst >= asecond)
+    %%%%%: 1801-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1802:			return (int *)NULL;
+    %%%%%: 1802-block  0
+unconditional  0 never executed
+        -: 1803:	}
+        -: 1804:
+        2: 1805:	int *buf = (int *)NULL;
+        2: 1806:	buf = (int *)xcalloc((size_t)(asecond - afirst) + 2, sizeof(int));
+        2: 1806-block  0
+call    0 returned 2
+        -: 1807:
+        2: 1808:	size_t i, j = 0;
+        -: 1809:
+        8: 1810:	for (i = (size_t)afirst; i <= (size_t)asecond; i++)
+unconditional  0 taken 2
+        8: 1810-block  0
+branch  1 taken 6
+branch  2 taken 2 (fallthrough)
+        6: 1811:		buf[j++] = (int)i;
+        6: 1811-block  0
+unconditional  0 taken 6
+        -: 1812:
+        2: 1813:	return buf;
+        2: 1813-block  0
+unconditional  0 taken 2
+        -: 1814:}
+        -: 1815:
+        -: 1816:/* used a lot.
+        -: 1817: * creates a copy of a string */
+        -: 1818:char *
+function savestring called 9218 returned 100% blocks executed 67%
+     9218: 1819:savestring(const char *restrict str, size_t size)
+        -: 1820:{
+     9218: 1821:	if (!str)
+     9218: 1821-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 9218
+    #####: 1822:		return (char *)NULL;
+    %%%%%: 1822-block  0
+unconditional  0 never executed
+        -: 1823:
+     9218: 1824:	char *ptr = (char *)NULL;
+     9218: 1825:	ptr = (char *)malloc((size + 1) * sizeof(char));
+        -: 1826:
+     9218: 1827:	if (!ptr)
+     9218: 1827-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 9218
+    #####: 1828:		return (char *)NULL;
+    %%%%%: 1828-block  0
+unconditional  0 never executed
+     9218: 1829:	strcpy(ptr, str);
+        -: 1830:
+     9218: 1831:	return ptr;
+     9218: 1831-block  0
+unconditional  0 taken 9218
+        -: 1832:}
+        -: 1833:
+        -: 1834:/* Take a string and returns the same string escaped. If nothing to be
+        -: 1835: * escaped, the original string is returned */
+        -: 1836:char *
+function escape_str called 7 returned 100% blocks executed 77%
+        7: 1837:escape_str(const char *str)
+        -: 1838:{
+        7: 1839:	if (!str)
+        7: 1839-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 7
+    #####: 1840:		return (char *)NULL;
+    %%%%%: 1840-block  0
+unconditional  0 never executed
+        -: 1841:
+        7: 1842:	size_t len = 0;
+        7: 1843:	char *buf = (char *)NULL;
+        -: 1844:
+        7: 1845:	buf = (char *)xnmalloc(strlen(str) * 2 + 1, sizeof(char));
+        7: 1845-block  0
+call    0 returned 7
+        -: 1846:
+       46: 1847:	while (*str) {
+unconditional  0 taken 7
+       46: 1847-block  0
+branch  1 taken 39
+branch  2 taken 7 (fallthrough)
+       39: 1848:		if (is_quote_char(*str))
+       39: 1848-block  0
+call    0 returned 39
+branch  1 taken 0 (fallthrough)
+branch  2 taken 39
+    #####: 1849:			buf[len++] = '\\';
+    %%%%%: 1849-block  0
+unconditional  0 never executed
+       39: 1850:		buf[len++] = *(str++);
+       39: 1850-block  0
+unconditional  0 taken 39
+        -: 1851:	}
+        -: 1852:
+        7: 1853:	buf[len] = '\0';
+        -: 1854:
+        7: 1855:	if (buf)
+        7: 1855-block  0
+branch  0 taken 7 (fallthrough)
+branch  1 taken 0
+        7: 1856:		return buf;
+        7: 1856-block  0
+unconditional  0 taken 7
+        -: 1857:
+    #####: 1858:	return (char *)NULL;
+    %%%%%: 1858-block  0
+unconditional  0 never executed
+        -: 1859:}
+        -: 1860:
+        -: 1861:/* Get all substrings from STR using IFS as substring separator, and,
+        -: 1862: * if there is a range, expand it. Returns an array containing all
+        -: 1863: * substrings in STR plus expandes ranges, or NULL if: STR is NULL or
+        -: 1864: * empty, STR contains only IFS(s), or in case of memory allocation
+        -: 1865: * error */
+        -: 1866:char **
+function get_substr called 1 returned 100% blocks executed 28%
+        1: 1867:get_substr(char *str, const char ifs)
+        -: 1868:{
+        1: 1869:	if (!str || *str == '\0')
+        1: 1869-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1869-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1
+    #####: 1870:		return (char **)NULL;
+    %%%%%: 1870-block  0
+unconditional  0 never executed
+        -: 1871:
+        -: 1872:	/* ############## SPLIT THE STRING #######################*/
+        -: 1873:
+        1: 1874:	char **substr = (char **)NULL;
+        1: 1875:	void *p = (char *)NULL;
+        1: 1876:	size_t str_len = strlen(str);
+        1: 1877:	size_t length = 0, substr_n = 0;
+        -: 1878:
+        1: 1879:	char *buf = (char *)xnmalloc(str_len + 1, sizeof(char));
+        1: 1879-block  0
+call    0 returned 1
+        -: 1880:
+        2: 1881:	while (*str) {
+unconditional  0 taken 1
+        2: 1881-block  0
+branch  1 taken 1
+branch  2 taken 1 (fallthrough)
+        2: 1882:		while (*str != ifs && *str != '\0' && length < (str_len + 1))
+        1: 1882-block  0
+unconditional  0 taken 1
+        2: 1882-block  1
+branch  1 taken 2 (fallthrough)
+branch  2 taken 0
+        2: 1882-block  2
+branch  3 taken 1 (fallthrough)
+branch  4 taken 1
+        1: 1882-block  3
+branch  5 taken 1
+branch  6 taken 0 (fallthrough)
+        1: 1883:			buf[length++] = *(str++);
+        1: 1883-block  0
+unconditional  0 taken 1
+        1: 1884:		if (length) {
+        1: 1884-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1885:			buf[length] = '\0';
+        1: 1886:			p = (char *)realloc(substr, (substr_n + 1) * sizeof(char *));
+        1: 1887:			if (!p) {
+        1: 1887-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+        -: 1888:				/* Free whatever was allocated so far */
+        -: 1889:				size_t i;
+        -: 1890:
+    #####: 1891:				for (i = 0; i < substr_n; i++)
+    %%%%%: 1891-block  0
+unconditional  0 never executed
+    %%%%%: 1891-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 1892:					free(substr[i]);
+    %%%%%: 1892-block  0
+unconditional  0 never executed
+        -: 1893:
+    #####: 1894:				free(substr);
+        -: 1895:
+    #####: 1896:				return (char **)NULL;
+    %%%%%: 1896-block  0
+unconditional  0 never executed
+        -: 1897:			}
+        1: 1898:			substr = (char **)p;
+        1: 1899:			p = (char *)calloc(length + 1, sizeof(char));
+        -: 1900:
+        1: 1901:			if (!p) {
+        1: 1901-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+        -: 1902:				size_t i;
+        -: 1903:
+    #####: 1904:				for (i = 0; i < substr_n; i++)
+    %%%%%: 1904-block  0
+unconditional  0 never executed
+    %%%%%: 1904-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 1905:					free(substr[i]);
+    %%%%%: 1905-block  0
+unconditional  0 never executed
+        -: 1906:
+    #####: 1907:				free(substr);
+        -: 1908:
+    #####: 1909:				return (char **)NULL;
+    %%%%%: 1909-block  0
+unconditional  0 never executed
+        -: 1910:			}
+        -: 1911:
+        1: 1912:			substr[substr_n] = p;
+        1: 1913:			p = (char *)NULL;
+        1: 1914:			strncpy(substr[substr_n++], buf, length);
+        1: 1915:			length = 0;
+        1: 1915-block  0
+unconditional  0 taken 1
+        -: 1916:		} else
+    #####: 1917:			str++;
+    %%%%%: 1917-block  0
+unconditional  0 never executed
+        -: 1918:	}
+        -: 1919:
+        1: 1920:	free(buf);
+        -: 1921:
+        1: 1922:	if (!substr_n)
+        1: 1922-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1923:		return (char **)NULL;
+    %%%%%: 1923-block  0
+unconditional  0 never executed
+        -: 1924:
+        1: 1925:	size_t i = 0, j = 0;
+        1: 1926:	p = (char *)realloc(substr, (substr_n + 1) * sizeof(char *));
+        -: 1927:
+        1: 1928:	if (!p) {
+        1: 1928-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+        -: 1929:
+    #####: 1930:		for (i = 0; i < substr_n; i++)
+    %%%%%: 1930-block  0
+unconditional  0 never executed
+    %%%%%: 1930-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 1931:			free(substr[i]);
+    %%%%%: 1931-block  0
+unconditional  0 never executed
+        -: 1932:
+    #####: 1933:		free(substr);
+    #####: 1934:		substr = (char **)NULL;
+        -: 1935:
+    #####: 1936:		return (char **)NULL;
+    %%%%%: 1936-block  0
+unconditional  0 never executed
+        -: 1937:	}
+        -: 1938:
+        1: 1939:	substr = (char **)p;
+        1: 1940:	p = (char *)NULL;
+        1: 1941:	substr[substr_n] = (char *)NULL;
+        -: 1942:
+        -: 1943:	/* ################### EXPAND RANGES ######################*/
+        -: 1944:
+        1: 1945:	int afirst = 0, asecond = 0, ranges_ok = 0;
+        -: 1946:
+        2: 1947:	for (i = 0; substr[i]; i++) {
+        1: 1947-block  0
+unconditional  0 taken 1
+        1: 1947-block  1
+unconditional  1 taken 1
+        2: 1947-block  2
+branch  2 taken 1
+branch  3 taken 1 (fallthrough)
+        -: 1948:		/* Check if substr is a valid range */
+        1: 1949:		ranges_ok = 0;
+        -: 1950:		/* If range, get both extremes of it */
+       1*: 1951:		for (j = 1; substr[i][j]; j++) {
+        1: 1951-block  0
+unconditional  0 taken 1
+    %%%%%: 1951-block  1
+unconditional  1 never executed
+        1: 1951-block  2
+branch  2 taken 0
+branch  3 taken 1 (fallthrough)
+    #####: 1952:			if (substr[i][j] == '-') {
+    %%%%%: 1952-block  0
+branch  0 never executed
+branch  1 never executed
+        -: 1953:				/* Get strings before and after the dash */
+    #####: 1954:				char *first = strbfr(substr[i], '-');
+    %%%%%: 1954-block  0
+call    0 never executed
+        -: 1955:
+    #####: 1956:				if (!first)
+branch  0 never executed
+branch  1 never executed
+    #####: 1957:					break;
+    %%%%%: 1957-block  0
+unconditional  0 never executed
+        -: 1958:
+    #####: 1959:				char *second = straft(substr[i], '-');
+    %%%%%: 1959-block  0
+call    0 never executed
+        -: 1960:
+    #####: 1961:				if (!second) {
+branch  0 never executed
+branch  1 never executed
+    #####: 1962:					free(first);
+    #####: 1963:					break;
+    %%%%%: 1963-block  0
+unconditional  0 never executed
+        -: 1964:				}
+        -: 1965:
+        -: 1966:				/* Make sure it is a valid range */
+    #####: 1967:				if (is_number(first) && is_number(second)) {
+    %%%%%: 1967-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    %%%%%: 1967-block  1
+call    3 never executed
+branch  4 never executed
+branch  5 never executed
+    #####: 1968:					afirst = atoi(first), asecond = atoi(second);
+        -: 1969:
+    #####: 1970:					if (asecond <= afirst) {
+    %%%%%: 1970-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1971:						free(first);
+    #####: 1972:						free(second);
+    #####: 1973:						break;
+    %%%%%: 1973-block  0
+unconditional  0 never executed
+        -: 1974:					}
+        -: 1975:
+        -: 1976:					/* We have a valid range */
+    #####: 1977:					ranges_ok = 1;
+    #####: 1978:					free(first);
+    #####: 1979:					free(second);
+    %%%%%: 1979-block  0
+unconditional  0 never executed
+        -: 1980:				} else {
+    #####: 1981:					free(first);
+    #####: 1982:					free(second);
+    #####: 1983:					break;
+    %%%%%: 1983-block  0
+unconditional  0 never executed
+        -: 1984:				}
+        -: 1985:			}
+        -: 1986:		}
+        -: 1987:
+        1: 1988:		if (!ranges_ok)
+        1: 1988-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1989:			continue;
+        1: 1989-block  0
+unconditional  0 taken 1
+        -: 1990:
+        -: 1991:		/* If a valid range */
+    #####: 1992:		size_t k = 0, next = 0;
+    #####: 1993:		char **rbuf = (char **)NULL;
+    #####: 1994:		rbuf = (char **)xcalloc((substr_n + (size_t)(asecond - afirst) + 1),
+    %%%%%: 1994-block  0
+call    0 never executed
+        -: 1995:								sizeof(char *));
+        -: 1996:
+        -: 1997:		/* Copy everything before the range expression
+        -: 1998:		 * into the buffer */
+    #####: 1999:		for (j = 0; j < i; j++)
+unconditional  0 never executed
+    %%%%%: 1999-block  0
+branch  1 never executed
+branch  2 never executed
+    #####: 2000:			rbuf[k++] = savestring(substr[j], strlen(substr[j]));
+    %%%%%: 2000-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 2001:
+        -: 2002:		/* Copy the expanded range into the buffer */
+    #####: 2003:		for (j = (size_t)afirst; j <= (size_t)asecond; j++) {
+    %%%%%: 2003-block  0
+unconditional  0 never executed
+    %%%%%: 2003-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 2004:			rbuf[k] = (char *)xcalloc((size_t)DIGINUM((int)j) + 1, sizeof(char));
+    %%%%%: 2004-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 2004-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%: 2004-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%: 2004-block  3
+branch  6 never executed
+branch  7 never executed
+    %%%%%: 2004-block  4
+branch  8 never executed
+branch  9 never executed
+    %%%%%: 2004-block  5
+branch 10 never executed
+branch 11 never executed
+    %%%%%: 2004-block  6
+branch 12 never executed
+branch 13 never executed
+    %%%%%: 2004-block  7
+branch 14 never executed
+branch 15 never executed
+    %%%%%: 2004-block  8
+branch 16 never executed
+branch 17 never executed
+    %%%%%: 2004-block  9
+unconditional 18 never executed
+    %%%%%: 2004-block 10
+unconditional 19 never executed
+    %%%%%: 2004-block 11
+unconditional 20 never executed
+    %%%%%: 2004-block 12
+unconditional 21 never executed
+    %%%%%: 2004-block 13
+unconditional 22 never executed
+    %%%%%: 2004-block 14
+unconditional 23 never executed
+    %%%%%: 2004-block 15
+unconditional 24 never executed
+    %%%%%: 2004-block 16
+unconditional 25 never executed
+    %%%%%: 2004-block 17
+unconditional 26 never executed
+    %%%%%: 2004-block 18
+unconditional 27 never executed
+    %%%%%: 2004-block 19
+unconditional 28 never executed
+    %%%%%: 2004-block 20
+unconditional 29 never executed
+    %%%%%: 2004-block 21
+unconditional 30 never executed
+    %%%%%: 2004-block 22
+unconditional 31 never executed
+    %%%%%: 2004-block 23
+unconditional 32 never executed
+    %%%%%: 2004-block 24
+unconditional 33 never executed
+    %%%%%: 2004-block 25
+unconditional 34 never executed
+    %%%%%: 2004-block 26
+unconditional 35 never executed
+    %%%%%: 2004-block 27
+call   36 never executed
+    #####: 2005:			sprintf(rbuf[k++], "%zu", j);
+unconditional  0 never executed
+        -: 2006:		}
+        -: 2007:
+        -: 2008:		/* Copy everything after the range expression into
+        -: 2009:		 * the buffer, if anything */
+    #####: 2010:		if (substr[i + 1]) {
+    %%%%%: 2010-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2011:			next = k;
+        -: 2012:
+    #####: 2013:			for (j = (i + 1); substr[j]; j++) {
+    %%%%%: 2013-block  0
+unconditional  0 never executed
+    %%%%%: 2013-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 2014:				rbuf[k++] = savestring(substr[j], strlen(substr[j]));
+    %%%%%: 2014-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 2015:			}
+        -: 2016:		}
+        -: 2017:
+        -: 2018:		else /* If there's nothing after last range, there's no next
+        -: 2019:		either */
+    #####: 2020:			next = 0;
+    %%%%%: 2020-block  0
+unconditional  0 never executed
+        -: 2021:
+        -: 2022:		/* Repopulate the original array with the expanded range and
+        -: 2023:		 * remaining strings */
+    #####: 2024:		substr_n = k;
+    #####: 2025:		for (j = 0; substr[j]; j++)
+    %%%%%: 2025-block  0
+unconditional  0 never executed
+    %%%%%: 2025-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 2026:			free(substr[j]);
+    %%%%%: 2026-block  0
+unconditional  0 never executed
+        -: 2027:
+    #####: 2028:		substr = (char **)xrealloc(substr, (substr_n + 1) * sizeof(char *));
+    %%%%%: 2028-block  0
+call    0 never executed
+        -: 2029:
+    #####: 2030:		for (j = 0; j < substr_n; j++) {
+unconditional  0 never executed
+    %%%%%: 2030-block  0
+branch  1 never executed
+branch  2 never executed
+    #####: 2031:			substr[j] = savestring(rbuf[j], strlen(rbuf[j]));
+    %%%%%: 2031-block  0
+call    0 never executed
+    #####: 2032:			free(rbuf[j]);
+unconditional  0 never executed
+        -: 2033:		}
+        -: 2034:
+    #####: 2035:		free(rbuf);
+        -: 2036:
+    #####: 2037:		substr[j] = (char *)NULL;
+        -: 2038:
+        -: 2039:		/* Proceede only if there's something after the last range */
+    #####: 2040:		if (next)
+    %%%%%: 2040-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2041:			i = next;
+    %%%%%: 2041-block  0
+unconditional  0 never executed
+        -: 2042:
+        -: 2043:		else
+    #####: 2044:			break;
+    %%%%%: 2044-block  0
+unconditional  0 never executed
+        -: 2045:	}
+        -: 2046:
+        -: 2047:	/* ############## REMOVE DUPLICATES ###############*/
+        -: 2048:
+        1: 2049:	char **dstr = (char **)NULL;
+        1: 2050:	size_t len = 0, d;
+        -: 2051:
+        2: 2052:	for (i = 0; i < substr_n; i++) {
+        1: 2052-block  0
+unconditional  0 taken 1
+        1: 2052-block  1
+unconditional  1 taken 1
+        2: 2052-block  2
+branch  2 taken 1
+branch  3 taken 1 (fallthrough)
+        1: 2053:		int duplicate = 0;
+        -: 2054:
+       1*: 2055:		for (d = (i + 1); d < substr_n; d++) {
+        1: 2055-block  0
+unconditional  0 taken 1
+    %%%%%: 2055-block  1
+unconditional  1 never executed
+        1: 2055-block  2
+branch  2 taken 0
+branch  3 taken 1 (fallthrough)
+        -: 2056:
+    #####: 2057:			if (*substr[i] == *substr[d] && strcmp(substr[i], substr[d]) == 0) {
+    %%%%%: 2057-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 2057-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 2058:				duplicate = 1;
+    #####: 2059:				break;
+    %%%%%: 2059-block  0
+unconditional  0 never executed
+        -: 2060:			}
+        -: 2061:		}
+        -: 2062:
+       1*: 2063:		if (duplicate) {
+        1: 2063-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 2064:			free(substr[i]);
+    #####: 2065:			continue;
+    %%%%%: 2065-block  0
+unconditional  0 never executed
+        -: 2066:		}
+        -: 2067:
+        1: 2068:		dstr = (char **)xrealloc(dstr, (len + 1) * sizeof(char *));
+        1: 2068-block  0
+call    0 returned 1
+        1: 2069:		dstr[len++] = savestring(substr[i], strlen(substr[i]));
+call    0 returned 1
+        1: 2070:		free(substr[i]);
+unconditional  0 taken 1
+        -: 2071:	}
+        -: 2072:
+        1: 2073:	free(substr);
+        -: 2074:
+        1: 2075:	dstr = (char **)xrealloc(dstr, (len + 1) * sizeof(char *));
+        1: 2075-block  0
+call    0 returned 1
+        1: 2076:	dstr[len] = (char *)NULL;
+        -: 2077:
+        1: 2078:	return dstr;
+unconditional  0 taken 1
+        -: 2079:}
+        -: 2080:
+        -: 2081:/* This function simply deescapes whatever escaped chars it founds in
+        -: 2082: * TEXT, so that readline can compare it to system filenames when
+        -: 2083: * completing paths. Returns a string containing text without escape
+        -: 2084: * sequences */
+        -: 2085:char *
+function dequote_str called 0 returned 0% blocks executed 0%
+    #####: 2086:dequote_str(char *text, int mt)
+        -: 2087:{
+    #####: 2088:	if (!text || !*text)
+    %%%%%: 2088-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 2088-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 2089:		return (char *)NULL;
+    %%%%%: 2089-block  0
+unconditional  0 never executed
+        -: 2090:
+        -: 2091:	/* At most, we need as many bytes as text (in case no escape sequence
+        -: 2092:	 * is found)*/
+    #####: 2093:	char *buf = (char *)NULL;
+    #####: 2094:	buf = (char *)xnmalloc(strlen(text) + 1, sizeof(char));
+    %%%%%: 2094-block  0
+call    0 never executed
+    #####: 2095:	size_t len = 0;
+        -: 2096:
+    #####: 2097:	while (*text) {
+unconditional  0 never executed
+    %%%%%: 2097-block  0
+branch  1 never executed
+branch  2 never executed
+        -: 2098:
+    #####: 2099:		switch (*text) {
+    %%%%%: 2099-block  0
+branch  0 never executed
+branch  1 never executed
+        -: 2100:
+    #####: 2101:		case '\\':
+    #####: 2102:			buf[len++] = *(++text);
+    #####: 2103:			break;
+    %%%%%: 2103-block  0
+unconditional  0 never executed
+        -: 2104:
+    #####: 2105:		default:
+    #####: 2106:			buf[len++] = *text;
+    #####: 2107:			break;
+    %%%%%: 2107-block  0
+unconditional  0 never executed
+        -: 2108:		}
+        -: 2109:
+    #####: 2110:		text++;
+    %%%%%: 2110-block  0
+unconditional  0 never executed
+        -: 2111:	}
+        -: 2112:
+    #####: 2113:	buf[len] = '\0';
+        -: 2114:
+    #####: 2115:	return buf;
+    %%%%%: 2115-block  0
+unconditional  0 never executed
+        -: 2116:}

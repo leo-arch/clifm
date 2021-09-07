@@ -1,0 +1,3973 @@
+        -:    0:Source:listing.c
+        -:    1:/* listing.c -- functions controlling what is listed on the screen */
+        -:    2:
+        -:    3:/*
+        -:    4: * This file is part of CliFM
+        -:    5: * 
+        -:    6: * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
+        -:    7: * All rights reserved.
+        -:    8:
+        -:    9: * CliFM is free software; you can redistribute it and/or modify
+        -:   10: * it under the terms of the GNU General Public License as published by
+        -:   11: * the Free Software Foundation; either version 2 of the License, or
+        -:   12: * (at your option) any later version.
+        -:   13: *
+        -:   14: * CliFM is distributed in the hope that it will be useful,
+        -:   15: * but WITHOUT ANY WARRANTY; without even the implied warranty of
+        -:   16: * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        -:   17: * GNU General Public License for more details.
+        -:   18: *
+        -:   19: * You should have received a copy of the GNU General Public License
+        -:   20: * along with this program; if not, write to the Free Software
+        -:   21: * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+        -:   22: * MA 02110-1301, USA.
+        -:   23:*/
+        -:   24:
+        -:   25:#include "helpers.h"
+        -:   26:#include "icons.h"
+        -:   27:
+        -:   28:#include <stdio.h>
+        -:   29:#include <sys/stat.h>
+        -:   30:#include <sys/statvfs.h>
+        -:   31:#include <sys/types.h>
+        -:   32:#include <unistd.h>
+        -:   33:#ifdef __linux__
+        -:   34:#include <sys/capability.h>
+        -:   35:#endif
+        -:   36:#include <dirent.h>
+        -:   37:#include <errno.h>
+        -:   38:#include <fcntl.h>
+        -:   39:#include <string.h>
+        -:   40:#include <sys/ioctl.h>
+        -:   41:
+        -:   42:#include "aux.h"
+        -:   43:#include "colors.h"
+        -:   44:#include "misc.h"
+        -:   45:#include "properties.h"
+        -:   46:#include "sort.h"
+        -:   47:
+        -:   48:void
+function print_sort_method called 0 returned 0% blocks executed 0%
+    #####:   49:print_sort_method(void)
+        -:   50:{
+    #####:   51:	printf(_("%s->%s Sorted by: "), mi_c, df_c);
+    %%%%%:   51-block  0
+call    0 never executed
+        -:   52:
+    #####:   53:	switch (sort) {
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+branch  6 never executed
+branch  7 never executed
+branch  8 never executed
+branch  9 never executed
+branch 10 never executed
+branch 11 never executed
+branch 12 never executed
+    #####:   54:	case SNONE:
+    #####:   55:		puts(_("none"));
+    %%%%%:   55-block  0
+call    0 never executed
+    #####:   56:		break;
+unconditional  0 never executed
+    #####:   57:	case SNAME:
+    #####:   58:		printf(_("name %s\n"), (sort_reverse) ? "[rev]" : "");
+    %%%%%:   58-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   58-block  1
+unconditional  2 never executed
+    %%%%%:   58-block  2
+unconditional  3 never executed
+    %%%%%:   58-block  3
+call    4 never executed
+    #####:   59:		break;
+unconditional  0 never executed
+    #####:   60:	case SSIZE:
+    #####:   61:		printf(_("size %s\n"), (sort_reverse) ? "[rev]" : "");
+    %%%%%:   61-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   61-block  1
+unconditional  2 never executed
+    %%%%%:   61-block  2
+unconditional  3 never executed
+    %%%%%:   61-block  3
+call    4 never executed
+    #####:   62:		break;
+unconditional  0 never executed
+    #####:   63:	case SATIME:
+    #####:   64:		printf(_("atime %s\n"), (sort_reverse) ? "[rev]" : "");
+    %%%%%:   64-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   64-block  1
+unconditional  2 never executed
+    %%%%%:   64-block  2
+unconditional  3 never executed
+    %%%%%:   64-block  3
+call    4 never executed
+    #####:   65:		break;
+unconditional  0 never executed
+    #####:   66:	case SBTIME:
+        -:   67:#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
+    #####:   68:		printf(_("btime %s\n"), (sort_reverse) ? "[rev]" : "");
+    %%%%%:   68-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   68-block  1
+unconditional  2 never executed
+    %%%%%:   68-block  2
+unconditional  3 never executed
+    %%%%%:   68-block  3
+call    4 never executed
+        -:   69:#else
+        -:   70:		printf(_("btime (not available: using 'ctime') %s\n"),
+        -:   71:		    (sort_reverse) ? "[rev]" : "");
+        -:   72:#endif
+    #####:   73:		break;
+unconditional  0 never executed
+    #####:   74:	case SCTIME:
+    #####:   75:		printf(_("ctime %s\n"), (sort_reverse) ? "[rev]" : "");
+    %%%%%:   75-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   75-block  1
+unconditional  2 never executed
+    %%%%%:   75-block  2
+unconditional  3 never executed
+    %%%%%:   75-block  3
+call    4 never executed
+    #####:   76:		break;
+unconditional  0 never executed
+    #####:   77:	case SMTIME:
+    #####:   78:		printf(_("mtime %s\n"), (sort_reverse) ? "[rev]" : "");
+    %%%%%:   78-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   78-block  1
+unconditional  2 never executed
+    %%%%%:   78-block  2
+unconditional  3 never executed
+    %%%%%:   78-block  3
+call    4 never executed
+    #####:   79:		break;
+unconditional  0 never executed
+        -:   80:#if __FreeBSD__ || _BE_POSIX
+        -:   81:	case SVER:
+        -:   82:		printf(_("version (not available: using 'name') %s\n"),
+        -:   83:		    (sort_reverse) ? "[rev]" : "");
+        -:   84:#else
+    #####:   85:	case SVER:
+    #####:   86:		printf(_("version %s\n"), (sort_reverse) ? "[rev]" : "");
+    %%%%%:   86-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   86-block  1
+unconditional  2 never executed
+    %%%%%:   86-block  2
+unconditional  3 never executed
+    %%%%%:   86-block  3
+call    4 never executed
+        -:   87:#endif
+    #####:   88:		break;
+unconditional  0 never executed
+    #####:   89:	case SEXT:
+    #####:   90:		printf(_("extension %s\n"), (sort_reverse) ? "[rev]" : "");
+    %%%%%:   90-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   90-block  1
+unconditional  2 never executed
+    %%%%%:   90-block  2
+unconditional  3 never executed
+    %%%%%:   90-block  3
+call    4 never executed
+    #####:   91:		break;
+unconditional  0 never executed
+    #####:   92:	case SINO:
+    #####:   93:		printf(_("inode %s\n"), (sort_reverse) ? "[rev]" : "");
+    %%%%%:   93-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   93-block  1
+unconditional  2 never executed
+    %%%%%:   93-block  2
+unconditional  3 never executed
+    %%%%%:   93-block  3
+call    4 never executed
+    #####:   94:		break;
+unconditional  0 never executed
+    #####:   95:	case SOWN:
+    #####:   96:		if (light_mode)
+    %%%%%:   96-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   97:			printf(_("owner (not available: using 'name') %s\n"),
+    %%%%%:   97-block  0
+unconditional  0 never executed
+    %%%%%:   97-block  1
+unconditional  1 never executed
+    %%%%%:   97-block  2
+call    2 never executed
+unconditional  3 never executed
+    #####:   98:			    (sort_reverse) ? "[rev]" : "");
+    %%%%%:   98-block  0
+branch  0 never executed
+branch  1 never executed
+        -:   99:		else
+    #####:  100:			printf(_("owner %s\n"), (sort_reverse) ? "[rev]" : "");
+    %%%%%:  100-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  100-block  1
+unconditional  2 never executed
+    %%%%%:  100-block  2
+unconditional  3 never executed
+    %%%%%:  100-block  3
+call    4 never executed
+unconditional  5 never executed
+    #####:  101:		break;
+    %%%%%:  101-block  0
+unconditional  0 never executed
+    #####:  102:	case SGRP:
+    #####:  103:		if (light_mode)
+    %%%%%:  103-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  104:			printf(_("group (not available: using 'name') %s\n"),
+    %%%%%:  104-block  0
+unconditional  0 never executed
+    %%%%%:  104-block  1
+unconditional  1 never executed
+    %%%%%:  104-block  2
+call    2 never executed
+unconditional  3 never executed
+    #####:  105:			    (sort_reverse) ? "[rev]" : "");
+    %%%%%:  105-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  106:		else
+    #####:  107:			printf(_("group %s\n"), (sort_reverse) ? "[rev]" : "");
+    %%%%%:  107-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  107-block  1
+unconditional  2 never executed
+    %%%%%:  107-block  2
+unconditional  3 never executed
+    %%%%%:  107-block  3
+call    4 never executed
+unconditional  5 never executed
+    #####:  108:		break;
+    %%%%%:  108-block  0
+unconditional  0 never executed
+        -:  109:	}
+    #####:  110:}
+        -:  111:
+        -:  112:void
+function print_div_line called 15 returned 100% blocks executed 100%
+       15:  113:print_div_line(void)
+        -:  114:{
+       15:  115:	fputs(dl_c, stdout);
+       15:  115-block  0
+call    0 returned 15
+        -:  116:
+        -:  117:	int i;
+     1140:  118:	for (i = (int)term_cols; i--;)
+unconditional  0 taken 15
+     1140:  118-block  0
+branch  1 taken 1125
+branch  2 taken 15 (fallthrough)
+     1125:  119:		putchar(div_line_char);
+     1125:  119-block  0
+call    0 returned 1125
+unconditional  1 taken 1125
+        -:  120:
+       15:  121:	fputs(df_c, stdout);
+       15:  121-block  0
+call    0 returned 15
+       15:  122:	fflush(stdout);
+call    0 returned 15
+       15:  123:}
+        -:  124:
+        -:  125:/* Print free/total space for the filesystem of the current working
+        -:  126: * directory */
+        -:  127:void
+function print_disk_usage called 0 returned 0% blocks executed 0%
+    #####:  128:print_disk_usage(void)
+        -:  129:{
+    #####:  130:	if (!ws || !ws[cur_ws].path || !*ws[cur_ws].path)
+    %%%%%:  130-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  130-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  130-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  131:		return;
+    %%%%%:  131-block  0
+unconditional  0 never executed
+        -:  132:
+        -:  133:	struct statvfs stat;
+        -:  134:
+    #####:  135:	if (statvfs(ws[cur_ws].path, &stat) != EXIT_SUCCESS) {
+    %%%%%:  135-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  136:		_err('w', PRINT_PROMPT, "statvfs: %s\n", strerror(errno));
+    %%%%%:  136-block  0
+call    0 never executed
+call    1 never executed
+    #####:  137:		return;
+unconditional  0 never executed
+        -:  138:	}
+        -:  139:
+    #####:  140:	char *free_space = get_size_unit((off_t)(stat.f_frsize * stat.f_bavail));
+    %%%%%:  140-block  0
+call    0 never executed
+        -:  141:
+    #####:  142:	char *size = get_size_unit((off_t)(stat.f_blocks * stat.f_frsize));
+call    0 never executed
+        -:  143:
+    #####:  144:	printf("%s->%s %s/%s\n", mi_c, df_c, free_space ? free_space : "?",
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  144-block  0
+unconditional  2 never executed
+    %%%%%:  144-block  1
+unconditional  3 never executed
+    %%%%%:  144-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%:  144-block  3
+unconditional  6 never executed
+    %%%%%:  144-block  4
+unconditional  7 never executed
+    %%%%%:  144-block  5
+call    8 never executed
+        -:  145:	    size ? size : "?");
+        -:  146:
+    #####:  147:	free(free_space);
+    #####:  148:	free(size);
+        -:  149:
+    #####:  150:	return;
+unconditional  0 never executed
+        -:  151:}
+        -:  152:
+        -:  153:void
+function print_dirhist_map called 0 returned 0% blocks executed 0%
+    #####:  154:print_dirhist_map(void)
+        -:  155:{
+        -:  156:	size_t i;
+        -:  157:
+    #####:  158:	for (i = 0; i < (size_t)dirhist_total_index; i++) {
+    %%%%%:  158-block  0
+unconditional  0 never executed
+    %%%%%:  158-block  1
+unconditional  1 never executed
+    %%%%%:  158-block  2
+branch  2 never executed
+branch  3 never executed
+        -:  159:
+    #####:  160:		if (i != (size_t)dirhist_cur_index)
+    %%%%%:  160-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  161:			continue;
+    %%%%%:  161-block  0
+unconditional  0 never executed
+        -:  162:
+    #####:  163:		if (i > 0 && old_pwd[i - 1])
+    %%%%%:  163-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  163-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  164:			printf("%zu %s\n", i, old_pwd[i - 1]);
+    %%%%%:  164-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  165:
+    #####:  166:		printf("%zu %s%s%s\n", i + 1, dh_c,
+    #####:  167:		    old_pwd[i], df_c);
+    %%%%%:  167-block  0
+call    0 never executed
+        -:  168:
+    #####:  169:		if (i + 1 < (size_t)dirhist_total_index && old_pwd[i + 1])
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  169-block  0
+branch  2 never executed
+branch  3 never executed
+    #####:  170:			printf("%zu %s\n", i + 2, old_pwd[i + 1]);
+    %%%%%:  170-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  171:
+    #####:  172:		break;
+    %%%%%:  172-block  0
+unconditional  0 never executed
+        -:  173:	}
+    #####:  174:}
+        -:  175:
+        -:  176:/* Set the icon field to the corresponding icon for FILE. If not found,
+        -:  177: * set the default icon */
+        -:  178:void
+function get_file_icon called 0 returned 0% blocks executed 0%
+    #####:  179:get_file_icon(const char *file, int n)
+        -:  180:{
+    #####:  181:	if (!file)
+    %%%%%:  181-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  182:		return;
+    %%%%%:  182-block  0
+unconditional  0 never executed
+        -:  183:
+    #####:  184:	int i = (int)(sizeof(icon_filenames) / sizeof(struct icons_t));
+        -:  185:
+    #####:  186:	while (--i >= 0) {
+    %%%%%:  186-block  0
+unconditional  0 never executed
+    %%%%%:  186-block  1
+branch  1 never executed
+branch  2 never executed
+        -:  187:
+    #####:  188:		if (TOUPPER(*file) == TOUPPER(*icon_filenames[i].name)
+    %%%%%:  188-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  188-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  188-block  2
+unconditional  4 never executed
+    %%%%%:  188-block  3
+unconditional  5 never executed
+    %%%%%:  188-block  4
+branch  6 never executed
+branch  7 never executed
+    %%%%%:  188-block  5
+branch  8 never executed
+branch  9 never executed
+    %%%%%:  188-block  6
+unconditional 10 never executed
+    %%%%%:  188-block  7
+unconditional 11 never executed
+    %%%%%:  188-block  8
+branch 12 never executed
+branch 13 never executed
+    #####:  189:		&& strcasecmp(file, icon_filenames[i].name) == 0) {
+    %%%%%:  189-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  190:			file_info[n].icon = icon_filenames[i].icon;
+    #####:  191:			file_info[n].icon_color = icon_filenames[i].color;
+    #####:  192:			break;
+    %%%%%:  192-block  0
+unconditional  0 never executed
+        -:  193:		}
+        -:  194:	}
+        -:  195:}
+        -:  196:
+        -:  197:/* Set the icon field to the corresponding icon for DIR. If not found,
+        -:  198: * set the default icon */
+        -:  199:void
+function get_dir_icon called 0 returned 0% blocks executed 0%
+    #####:  200:get_dir_icon(const char *dir, int n)
+        -:  201:{
+        -:  202:	/* Default values for directories */
+    #####:  203:	file_info[n].icon = DEF_DIR_ICON;
+    #####:  204:	file_info[n].icon_color = DEF_DIR_ICON_COLOR;
+        -:  205:
+    #####:  206:	if (!dir)
+    %%%%%:  206-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  207:		return;
+    %%%%%:  207-block  0
+unconditional  0 never executed
+        -:  208:
+    #####:  209:	int i = (int)(sizeof(icon_dirnames) / sizeof(struct icons_t));
+        -:  210:
+    #####:  211:	while (--i >= 0) {
+    %%%%%:  211-block  0
+unconditional  0 never executed
+    %%%%%:  211-block  1
+branch  1 never executed
+branch  2 never executed
+        -:  212:
+    #####:  213:		if (TOUPPER(*dir) == TOUPPER(*icon_dirnames[i].name)
+    %%%%%:  213-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  213-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  213-block  2
+unconditional  4 never executed
+    %%%%%:  213-block  3
+unconditional  5 never executed
+    %%%%%:  213-block  4
+branch  6 never executed
+branch  7 never executed
+    %%%%%:  213-block  5
+branch  8 never executed
+branch  9 never executed
+    %%%%%:  213-block  6
+unconditional 10 never executed
+    %%%%%:  213-block  7
+unconditional 11 never executed
+    %%%%%:  213-block  8
+branch 12 never executed
+branch 13 never executed
+    #####:  214:		&& strcasecmp(dir, icon_dirnames[i].name) == 0) {
+    %%%%%:  214-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  215:			file_info[n].icon = icon_dirnames[i].icon;
+    #####:  216:			file_info[n].icon_color = icon_dirnames[i].color;
+    #####:  217:			break;
+    %%%%%:  217-block  0
+unconditional  0 never executed
+        -:  218:		}
+        -:  219:	}
+        -:  220:}
+        -:  221:
+        -:  222:/* Set the icon field to the corresponding icon for EXT. If not found,
+        -:  223: * set the default icon */
+        -:  224:void
+function get_ext_icon called 0 returned 0% blocks executed 0%
+    #####:  225:get_ext_icon(const char *restrict ext, int n)
+        -:  226:{
+    #####:  227:	file_info[n].icon = DEF_FILE_ICON;
+    #####:  228:	file_info[n].icon_color = DEF_FILE_ICON_COLOR;
+        -:  229:
+    #####:  230:	if (!ext)
+    %%%%%:  230-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  231:		return;
+    %%%%%:  231-block  0
+unconditional  0 never executed
+        -:  232:
+    #####:  233:	ext++;
+        -:  234:
+    #####:  235:	int i = (int)(sizeof(icon_ext) / sizeof(struct icons_t));
+        -:  236:
+    #####:  237:	while (--i >= 0) {
+    %%%%%:  237-block  0
+unconditional  0 never executed
+    %%%%%:  237-block  1
+branch  1 never executed
+branch  2 never executed
+        -:  238:
+        -:  239:		/* Tolower */
+    #####:  240:		char c = (*ext >= 'A' && *ext <= 'Z')
+    %%%%%:  240-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  240-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  240-block  2
+unconditional  4 never executed
+    #####:  241:			     ? (*ext - 'A' + 'a')
+    %%%%%:  241-block  0
+unconditional  0 never executed
+        -:  242:			     : *ext;
+        -:  243:
+    #####:  244:		if (c == *icon_ext[i].name && strcasecmp(ext, icon_ext[i].name) == 0) {
+    %%%%%:  244-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  244-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  245:			file_info[n].icon = icon_ext[i].icon;
+    #####:  246:			file_info[n].icon_color = icon_ext[i].color;
+    #####:  247:			break;
+    %%%%%:  247-block  0
+unconditional  0 never executed
+        -:  248:		}
+        -:  249:	}
+        -:  250:}
+        -:  251:
+        -:  252:/* List files in the current working directory (global variable 'path').
+        -:  253: * Unlike list_dir(), however, this function uses no color and runs
+        -:  254: * neither stat() nor count_dir(), which makes it quite faster. Return
+        -:  255: * zero on success or one on error */
+        -:  256:int
+function list_dir_light called 0 returned 0% blocks executed 0%
+    #####:  257:list_dir_light(void)
+        -:  258:{
+        -:  259:	/*  clock_t start = clock(); */
+        -:  260:
+        -:  261:	DIR *dir;
+        -:  262:
+        -:  263:	struct dirent *ent;
+        -:  264:
+    #####:  265:	if ((dir = opendir(ws[cur_ws].path)) == NULL) {
+    %%%%%:  265-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  266:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
+call    0 never executed
+    #####:  267:		    strerror(errno));
+    %%%%%:  267-block  0
+call    0 never executed
+    #####:  268:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  269:	}
+        -:  270:
+    #####:  271:	errno = 0;
+    #####:  272:	longest = 0;
+    #####:  273:	register unsigned int n = 0;
+    #####:  274:	unsigned int total_dents = 0, count = 0;
+        -:  275:
+    #####:  276:	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2,
+    %%%%%:  276-block  0
+call    0 never executed
+        -:  277:	    sizeof(struct fileinfo));
+        -:  278:
+    #####:  279:	while ((ent = readdir(dir))) {
+unconditional  0 never executed
+    %%%%%:  279-block  0
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+        -:  280:
+    #####:  281:		char *ename = ent->d_name;
+        -:  282:
+        -:  283:		/* Skip self and parent directories */
+    #####:  284:		if (*ename == '.' && (!ename[1] || (ename[1] == '.' && !ename[2])))
+    %%%%%:  284-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  284-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  284-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%:  284-block  3
+branch  6 never executed
+branch  7 never executed
+    #####:  285:			continue;
+    %%%%%:  285-block  0
+unconditional  0 never executed
+        -:  286:
+        -:  287:		/* Skip files matching FILTER */
+    #####:  288:		if (filter && regexec(&regex_exp, ename, 0, NULL, 0) == EXIT_SUCCESS)
+    %%%%%:  288-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  288-block  1
+call    2 never executed
+branch  3 never executed
+branch  4 never executed
+    #####:  289:			continue;
+    %%%%%:  289-block  0
+unconditional  0 never executed
+        -:  290:
+    #####:  291:		if (!show_hidden && *ename == '.')
+    %%%%%:  291-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  291-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  292:			continue;
+    %%%%%:  292-block  0
+unconditional  0 never executed
+        -:  293:
+    #####:  294:		if (only_dirs && ent->d_type != DT_DIR)
+    %%%%%:  294-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  294-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  295:			continue;
+    %%%%%:  295-block  0
+unconditional  0 never executed
+        -:  296:
+    #####:  297:		if (count > ENTRY_N) {
+    %%%%%:  297-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  298:			count = 0;
+    #####:  299:			total_dents = n + ENTRY_N;
+    #####:  300:			file_info = xrealloc(file_info, (total_dents + 2) * sizeof(struct fileinfo));
+    %%%%%:  300-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  301:		}
+        -:  302:
+    #####:  303:		file_info[n].name = (char *)xnmalloc(NAME_MAX + 1, sizeof(char));
+    %%%%%:  303-block  0
+call    0 never executed
+        -:  304:
+    #####:  305:		if (!unicode)
+branch  0 never executed
+branch  1 never executed
+    #####:  306:			file_info[n].len = (xstrsncpy(file_info[n].name, ename,
+    %%%%%:  306-block  0
+call    0 never executed
+    #####:  307:						NAME_MAX + 1) - 1);
+unconditional  0 never executed
+        -:  308:		else {
+    #####:  309:			xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
+    %%%%%:  309-block  0
+call    0 never executed
+    #####:  310:			file_info[n].len = wc_xstrlen(ename);
+call    0 never executed
+unconditional  1 never executed
+        -:  311:		}
+        -:  312:
+        -:  313:		/* ################  */
+    #####:  314:		file_info[n].dir = (ent->d_type == DT_DIR) ? 1 : 0;
+    #####:  315:		file_info[n].symlink = (ent->d_type == DT_LNK) ? 1 : 0;
+    #####:  316:		file_info[n].type = ent->d_type;
+    #####:  317:		file_info[n].inode = ent->d_ino;
+    #####:  318:		file_info[n].linkn = 1;
+    #####:  319:		file_info[n].size = 1;
+    #####:  320:		file_info[n].color = (char *)NULL;
+        -:  321:
+    #####:  322:		file_info[n].icon = DEF_FILE_ICON;
+    #####:  323:		file_info[n].icon_color = DEF_FILE_ICON_COLOR;
+        -:  324:
+    #####:  325:		file_info[n].exec = 0;
+    #####:  326:		file_info[n].ruser = 1;
+    #####:  327:		file_info[n].filesn = 0;
+        -:  328:
+    #####:  329:		file_info[n].time = 0;
+        -:  330:
+    #####:  331:		switch (file_info[n].type) {
+    %%%%%:  331-block  0
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+branch  6 never executed
+branch  7 never executed
+branch  8 never executed
+        -:  332:
+    #####:  333:		case DT_DIR:
+    #####:  334:			if (icons) {
+    %%%%%:  334-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  335:				get_dir_icon(file_info[n].name, (int)n);
+    %%%%%:  335-block  0
+call    0 never executed
+        -:  336:
+        -:  337:				/* If set from the color scheme file */
+    #####:  338:				if (*dir_ico_c)
+branch  0 never executed
+branch  1 never executed
+    #####:  339:					file_info[n].icon_color = dir_ico_c;
+    %%%%%:  339-block  0
+unconditional  0 never executed
+        -:  340:			}
+        -:  341:
+        -:  342:			files_counter
+    #####:  343:			    ? (file_info[n].filesn = (count_dir(ename) - 2))
+    %%%%%:  343-block  0
+call    0 never executed
+    #####:  344:			    : (file_info[n].filesn = 1);
+    %%%%%:  344-block  0
+branch  0 never executed
+branch  1 never executed
+unconditional  2 never executed
+    %%%%%:  344-block  1
+unconditional  3 never executed
+        -:  345:
+    #####:  346:			if (file_info[n].filesn > 0)
+    %%%%%:  346-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  347:				file_info[n].color = di_c;
+    %%%%%:  347-block  0
+unconditional  0 never executed
+        -:  348:
+    #####:  349:			else if (file_info[n].filesn == 0)
+    %%%%%:  349-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  350:				file_info[n].color = ed_c;
+    %%%%%:  350-block  0
+unconditional  0 never executed
+        -:  351:
+        -:  352:			else {
+    #####:  353:				file_info[n].color = nd_c;
+    #####:  354:				file_info[n].icon = ICON_LOCK;
+    #####:  355:				file_info[n].icon_color = YELLOW;
+    %%%%%:  355-block  0
+unconditional  0 never executed
+        -:  356:			}
+        -:  357:
+    #####:  358:			break;
+    %%%%%:  358-block  0
+unconditional  0 never executed
+        -:  359:
+    #####:  360:		case DT_LNK:
+    #####:  361:			file_info[n].icon = ICON_LINK;
+    #####:  362:			file_info[n].color = ln_c;
+    #####:  363:			break;
+    %%%%%:  363-block  0
+unconditional  0 never executed
+        -:  364:
+    #####:  365:		case DT_REG:
+    #####:  366:			file_info[n].color = fi_c;
+    #####:  367:			break;
+    %%%%%:  367-block  0
+unconditional  0 never executed
+        -:  368:
+    #####:  369:		case DT_SOCK:
+    #####:  370:			file_info[n].color = so_c;
+    #####:  371:			break;
+    %%%%%:  371-block  0
+unconditional  0 never executed
+        -:  372:
+    #####:  373:		case DT_FIFO:
+    #####:  374:			file_info[n].color = pi_c;
+    #####:  375:			break;
+    %%%%%:  375-block  0
+unconditional  0 never executed
+        -:  376:
+    #####:  377:		case DT_BLK:
+    #####:  378:			file_info[n].color = bd_c;
+    #####:  379:			break;
+    %%%%%:  379-block  0
+unconditional  0 never executed
+        -:  380:
+    #####:  381:		case DT_CHR:
+    #####:  382:			file_info[n].color = cd_c;
+    #####:  383:			break;
+    %%%%%:  383-block  0
+unconditional  0 never executed
+        -:  384:
+    #####:  385:		case DT_UNKNOWN:
+    #####:  386:			file_info[n].color = uf_c;
+    #####:  387:			break;
+    %%%%%:  387-block  0
+unconditional  0 never executed
+        -:  388:
+    #####:  389:		default:
+    #####:  390:			file_info[n].color = df_c;
+    #####:  391:			break;
+    %%%%%:  391-block  0
+unconditional  0 never executed
+        -:  392:		}
+        -:  393:
+    #####:  394:		if (xargs.icons_use_file_color == 1 && icons)
+    %%%%%:  394-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  394-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  395:			file_info[n].icon_color = file_info[n].color;
+    %%%%%:  395-block  0
+unconditional  0 never executed
+        -:  396:
+    #####:  397:		n++;
+    #####:  398:		count++;
+    %%%%%:  398-block  0
+unconditional  0 never executed
+        -:  399:	}
+        -:  400:
+    #####:  401:	file_info[n].name = (char *)NULL;
+        -:  402:
+    #####:  403:	files = (size_t)n;
+        -:  404:
+    #####:  405:	if (n == 0) {
+    %%%%%:  405-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  406:		printf("%s. ..%s\n", colorize ? di_c : df_c, df_c);
+    %%%%%:  406-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  406-block  1
+unconditional  2 never executed
+    %%%%%:  406-block  2
+unconditional  3 never executed
+    %%%%%:  406-block  3
+call    4 never executed
+    #####:  407:		free(file_info);
+    #####:  408:		if (closedir(dir) == -1)
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  409:			return EXIT_FAILURE;
+    %%%%%:  409-block  0
+unconditional  0 never executed
+    #####:  410:		return EXIT_SUCCESS;
+    %%%%%:  410-block  0
+unconditional  0 never executed
+        -:  411:	}
+        -:  412:
+    #####:  413:	if (sort)
+    %%%%%:  413-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  414:		qsort(file_info, n, sizeof(*file_info), entrycmp);
+    %%%%%:  414-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  415:
+        -:  416:	/* Get terminal current amount of rows and columns */
+        -:  417:	struct winsize w;
+    #####:  418:	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    %%%%%:  418-block  0
+call    0 never executed
+        -:  419:	/* ws_col and ws_row are both unsigned short int according to
+        -:  420:	 * /bits/ioctl-types.h */
+    #####:  421:	term_cols = w.ws_col; /* This one is global */
+    #####:  422:	unsigned short term_rows = w.ws_row;
+        -:  423:
+    #####:  424:	int reset_pager = 0, c, i;
+    #####:  425:	register size_t counter = 0;
+        -:  426:
+    #####:  427:	size_t columns_n = 1;
+        -:  428:
+        -:  429:	/* Get the longest filename */
+        -:  430:
+    #####:  431:	if (columned || long_view) {
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  431-block  0
+branch  2 never executed
+branch  3 never executed
+    #####:  432:		i = (int)n;
+    #####:  433:		while (--i >= 0) {
+    %%%%%:  433-block  0
+unconditional  0 never executed
+    %%%%%:  433-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  434:			size_t total_len = 0;
+    #####:  435:			file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
+    %%%%%:  435-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  435-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  435-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%:  435-block  3
+branch  6 never executed
+branch  7 never executed
+    %%%%%:  435-block  4
+branch  8 never executed
+branch  9 never executed
+    %%%%%:  435-block  5
+branch 10 never executed
+branch 11 never executed
+    %%%%%:  435-block  6
+branch 12 never executed
+branch 13 never executed
+    %%%%%:  435-block  7
+branch 14 never executed
+branch 15 never executed
+    %%%%%:  435-block  8
+branch 16 never executed
+branch 17 never executed
+    %%%%%:  435-block  9
+branch 18 never executed
+branch 19 never executed
+    %%%%%:  435-block 10
+unconditional 20 never executed
+    %%%%%:  435-block 11
+unconditional 21 never executed
+    %%%%%:  435-block 12
+unconditional 22 never executed
+    %%%%%:  435-block 13
+unconditional 23 never executed
+    %%%%%:  435-block 14
+unconditional 24 never executed
+    %%%%%:  435-block 15
+unconditional 25 never executed
+    %%%%%:  435-block 16
+unconditional 26 never executed
+    %%%%%:  435-block 17
+unconditional 27 never executed
+    %%%%%:  435-block 18
+unconditional 28 never executed
+    %%%%%:  435-block 19
+unconditional 29 never executed
+    %%%%%:  435-block 20
+unconditional 30 never executed
+    %%%%%:  435-block 21
+unconditional 31 never executed
+    %%%%%:  435-block 22
+unconditional 32 never executed
+    %%%%%:  435-block 23
+unconditional 33 never executed
+    %%%%%:  435-block 24
+unconditional 34 never executed
+    %%%%%:  435-block 25
+unconditional 35 never executed
+    %%%%%:  435-block 26
+unconditional 36 never executed
+    %%%%%:  435-block 27
+unconditional 37 never executed
+    %%%%%:  435-block 28
+unconditional 38 never executed
+    %%%%%:  435-block 29
+unconditional 39 never executed
+    #####:  436:			total_len = file_info[i].eln_n + 1 + file_info[i].len;
+        -:  437:
+    #####:  438:			if (!long_view && classify) {
+    %%%%%:  438-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  438-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  439:				if (file_info[i].dir)
+    %%%%%:  439-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  440:					total_len += 2;
+    %%%%%:  440-block  0
+unconditional  0 never executed
+        -:  441:
+    #####:  442:				if (file_info[i].filesn > 0 && files_counter)
+    %%%%%:  442-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  442-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  443:					total_len += DIGINUM(file_info[i].filesn);
+    %%%%%:  443-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  443-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  443-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%:  443-block  3
+branch  6 never executed
+branch  7 never executed
+    %%%%%:  443-block  4
+branch  8 never executed
+branch  9 never executed
+    %%%%%:  443-block  5
+branch 10 never executed
+branch 11 never executed
+    %%%%%:  443-block  6
+branch 12 never executed
+branch 13 never executed
+    %%%%%:  443-block  7
+branch 14 never executed
+branch 15 never executed
+    %%%%%:  443-block  8
+branch 16 never executed
+branch 17 never executed
+    %%%%%:  443-block  9
+unconditional 18 never executed
+    %%%%%:  443-block 10
+unconditional 19 never executed
+    %%%%%:  443-block 11
+unconditional 20 never executed
+    %%%%%:  443-block 12
+unconditional 21 never executed
+    %%%%%:  443-block 13
+unconditional 22 never executed
+    %%%%%:  443-block 14
+unconditional 23 never executed
+    %%%%%:  443-block 15
+unconditional 24 never executed
+    %%%%%:  443-block 16
+unconditional 25 never executed
+    %%%%%:  443-block 17
+unconditional 26 never executed
+    %%%%%:  443-block 18
+unconditional 27 never executed
+    %%%%%:  443-block 19
+unconditional 28 never executed
+    %%%%%:  443-block 20
+unconditional 29 never executed
+    %%%%%:  443-block 21
+unconditional 30 never executed
+    %%%%%:  443-block 22
+unconditional 31 never executed
+    %%%%%:  443-block 23
+unconditional 32 never executed
+    %%%%%:  443-block 24
+unconditional 33 never executed
+    %%%%%:  443-block 25
+unconditional 34 never executed
+    %%%%%:  443-block 26
+unconditional 35 never executed
+    %%%%%:  443-block 27
+unconditional 36 never executed
+        -:  444:
+    #####:  445:				if (!file_info[i].dir && !colorize) {
+    %%%%%:  445-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  445-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  446:					switch (file_info[i].type) {
+    %%%%%:  446-block  0
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  447:					case DT_REG:
+    #####:  448:						if (file_info[i].exec)
+    %%%%%:  448-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  449:							total_len += 1;
+    %%%%%:  449-block  0
+unconditional  0 never executed
+    #####:  450:						break;
+    %%%%%:  450-block  0
+unconditional  0 never executed
+    #####:  451:					case DT_LNK:  /* fallthrough */
+        -:  452:					case DT_SOCK: /* fallthrough */
+        -:  453:					case DT_FIFO: /* fallthrough */
+        -:  454:					case DT_UNKNOWN:
+    #####:  455:						total_len += 1;
+    #####:  456:						break;
+    %%%%%:  456-block  0
+unconditional  0 never executed
+        -:  457:					}
+        -:  458:				}
+        -:  459:			}
+        -:  460:
+    #####:  461:			if (total_len > longest)
+    %%%%%:  461-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  462:				longest = total_len;
+    %%%%%:  462-block  0
+unconditional  0 never executed
+        -:  463:		}
+        -:  464:
+    #####:  465:		if (icons && !long_view && columned)
+    %%%%%:  465-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  465-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  465-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  466:			longest += 3;
+    %%%%%:  466-block  0
+unconditional  0 never executed
+        -:  467:	}
+        -:  468:
+        -:  469:				/* ########################
+        -:  470:				 * #    LONG VIEW MODE    #
+        -:  471:				 * ######################## */
+        -:  472:
+    #####:  473:	if (long_view) {
+    %%%%%:  473-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  474:
+        -:  475:		struct stat lattr;
+    #####:  476:		int space_left = (int)term_cols - MAX_PROP_STR;
+        -:  477:
+    #####:  478:		if (space_left < min_name_trim)
+    %%%%%:  478-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  479:			space_left = min_name_trim;
+    %%%%%:  479-block  0
+unconditional  0 never executed
+        -:  480:
+    #####:  481:		if ((int)longest < space_left)
+    %%%%%:  481-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  482:			space_left = (int)longest;
+    %%%%%:  482-block  0
+unconditional  0 never executed
+        -:  483:
+    #####:  484:		int k = (int)files;
+    #####:  485:		for (i = 0; i < k; i++) {
+    %%%%%:  485-block  0
+unconditional  0 never executed
+    %%%%%:  485-block  1
+unconditional  1 never executed
+    %%%%%:  485-block  2
+branch  2 never executed
+branch  3 never executed
+        -:  486:
+    #####:  487:			if (max_files != UNSET && i == max_files)
+    %%%%%:  487-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  487-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  488:				break;
+    %%%%%:  488-block  0
+unconditional  0 never executed
+        -:  489:
+    #####:  490:			if (lstat(file_info[i].name, &lattr) == -1)
+    %%%%%:  490-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  491:				continue;
+    %%%%%:  491-block  0
+unconditional  0 never executed
+        -:  492:
+    #####:  493:			if (pager) {
+    %%%%%:  493-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  494:
+    #####:  495:				if (counter > (size_t)(term_rows - 2)) {
+    %%%%%:  495-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  496:
+    #####:  497:					fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
+    %%%%%:  497-block  0
+call    0 never executed
+        -:  498:
+    #####:  499:					switch (c = xgetchar()) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+        -:  500:
+        -:  501:					/* Advance one line at a time */
+    #####:  502:					case 66: /* fallthrough */ /* Down arrow */
+        -:  503:					case 10: /* fallthrough */ /* Enter */
+        -:  504:					case 32:		   /* Space */
+    #####:  505:						break;
+    %%%%%:  505-block  0
+unconditional  0 never executed
+        -:  506:
+        -:  507:					/* Advance one page at a time */
+    #####:  508:					case 126:
+    #####:  509:						counter = 0; /* Page Down */
+    #####:  510:						break;
+    %%%%%:  510-block  0
+unconditional  0 never executed
+        -:  511:
+    #####:  512:					case 63: /* fallthrough */ /* ? */
+        -:  513:					case 104: {		   /* h: Print pager help */
+    #####:  514:						CLEAR;
+    %%%%%:  514-block  0
+call    0 never executed
+        -:  515:
+    #####:  516:						fputs(_("?, h: help\n"
+call    0 never executed
+        -:  517:							"Down arrow, Enter, Space: Advance one line\n"
+        -:  518:							"Page Down: Advance one page\n"
+        -:  519:							"q: Stop pagging\n"), stdout);
+        -:  520:
+    #####:  521:						int l = (int)term_rows - 5;
+    #####:  522:						while (--l >= 0)
+unconditional  0 never executed
+    %%%%%:  522-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:  523:							putchar('\n');
+    %%%%%:  523-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  524:
+    #####:  525:						fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
+    %%%%%:  525-block  0
+call    0 never executed
+        -:  526:
+    #####:  527:						i -= (term_rows - 1);
+        -:  528:
+    #####:  529:						if (i < 0)
+branch  0 never executed
+branch  1 never executed
+    #####:  530:							i = 0;
+    %%%%%:  530-block  0
+unconditional  0 never executed
+        -:  531:
+    #####:  532:						counter = 0;
+    #####:  533:						xgetchar();
+    %%%%%:  533-block  0
+call    0 never executed
+    #####:  534:						CLEAR;
+call    0 never executed
+    #####:  535:					} break;
+unconditional  0 never executed
+        -:  536:
+        -:  537:					/* Stop paging (and set a flag to reenable the pager
+        -:  538:					 * later) */
+    #####:  539:					case 99:  /* 'c' */
+        -:  540:					case 112: /* 'p' */
+        -:  541:					case 113:
+    #####:  542:						pager = 0, reset_pager = 1; /* 'q' */
+    #####:  543:						break;
+    %%%%%:  543-block  0
+unconditional  0 never executed
+        -:  544:
+        -:  545:					/* If another key is pressed, go back one position.
+        -:  546:					 * Otherwise, some filenames won't be listed.*/
+    #####:  547:					default:
+    #####:  548:						i--;
+    #####:  549:						fputs("\r\x1b[K\x1b[3J", stdout);
+    %%%%%:  549-block  0
+call    0 never executed
+    #####:  550:						continue;
+unconditional  0 never executed
+        -:  551:					}
+        -:  552:
+    #####:  553:					fputs("\r\x1b[K\x1b[3J", stdout);
+    %%%%%:  553-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  554:				}
+        -:  555:
+    #####:  556:				counter++;
+    %%%%%:  556-block  0
+unconditional  0 never executed
+        -:  557:			}
+        -:  558:
+    #####:  559:			file_info[i].uid = lattr.st_uid;
+    #####:  560:			file_info[i].gid = lattr.st_gid;
+    #####:  561:			file_info[i].ltime = (time_t)lattr.st_mtim.tv_sec;
+    #####:  562:			file_info[i].mode = lattr.st_mode;
+    #####:  563:			file_info[i].size = lattr.st_size;
+        -:  564:
+        -:  565:			/* Print ELN. The remaining part of the line will be
+        -:  566:			 * printed by print_entry_props() */
+    #####:  567:			if (!no_eln)
+    %%%%%:  567-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  568:				printf("%s%d%s ", el_c, i + 1, df_c);
+    %%%%%:  568-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  569:
+    #####:  570:			print_entry_props(&file_info[i], (size_t)space_left);
+    %%%%%:  570-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  571:		}
+        -:  572:
+    #####:  573:		goto END;
+    %%%%%:  573-block  0
+unconditional  0 never executed
+        -:  574:	}
+        -:  575:
+        -:  576:				/* ########################
+        -:  577:				 * #   NORMAL VIEW MODE   #
+        -:  578:				 * ######################## */
+        -:  579:
+    #####:  580:	int last_column = 0;
+        -:  581:
+        -:  582:	/* Get possible amount of columns for the dirlist screen */
+    #####:  583:	if (!columned)
+    %%%%%:  583-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  584:		columns_n = 1;
+    %%%%%:  584-block  0
+unconditional  0 never executed
+        -:  585:
+        -:  586:	else {
+    #####:  587:		columns_n = (size_t)term_cols / (longest + 1); /* +1 for the
+        -:  588:		space between file names */
+        -:  589:
+        -:  590:		/* If longest is bigger than terminal columns, columns_n will
+        -:  591:		 * be negative or zero. To avoid this: */
+    #####:  592:		if (columns_n < 1)
+    %%%%%:  592-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  593:			columns_n = 1;
+    %%%%%:  593-block  0
+unconditional  0 never executed
+        -:  594:
+        -:  595:		/* If we have only three files, we don't want four columns */
+    #####:  596:		if (columns_n > (size_t)n)
+    %%%%%:  596-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  597:			columns_n = (size_t)n;
+    %%%%%:  597-block  0
+unconditional  0 never executed
+        -:  598:	}
+        -:  599:
+    #####:  600:	int nn = (int)n;
+    #####:  601:	size_t cur_cols = 0;
+    #####:  602:	for (i = 0; i < nn; i++) {
+    %%%%%:  602-block  0
+unconditional  0 never executed
+    %%%%%:  602-block  1
+unconditional  1 never executed
+    %%%%%:  602-block  2
+branch  2 never executed
+branch  3 never executed
+        -:  603:
+    #####:  604:		if (max_files != UNSET && i == max_files)
+    %%%%%:  604-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  604-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  605:			break;
+    %%%%%:  605-block  0
+unconditional  0 never executed
+        -:  606:
+        -:  607:		/* A basic pager for directories containing large amount of
+        -:  608:		 * files. What's missing? It only goes downwards. To go
+        -:  609:		 * backwards, use the terminal scrollback function */
+    #####:  610:		if (pager) {
+    %%%%%:  610-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  611:			/* Run the pager only once all columns and rows fitting in
+        -:  612:			 * the screen are filled with the corresponding filenames */
+    #####:  613:			if (last_column && counter > columns_n * ((size_t)term_rows - 2)) {
+    %%%%%:  613-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  613-block  1
+branch  2 never executed
+branch  3 never executed
+        -:  614:
+    #####:  615:				printf("\x1b[7;97m--Mas--\x1b[0;49m");
+    %%%%%:  615-block  0
+call    0 never executed
+        -:  616:
+    #####:  617:				switch (c = xgetchar()) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+        -:  618:
+        -:  619:				/* Advance one line at a time */
+    #####:  620:				case 66: /* fallthrough */ /* Down arrow */
+        -:  621:				case 10: /* fallthrough */ /* Enter */
+        -:  622:				case 32:		   /* Space */
+    #####:  623:					break;
+    %%%%%:  623-block  0
+unconditional  0 never executed
+        -:  624:
+        -:  625:				/* Advance one page at a time */
+    #####:  626:				case 126:
+    #####:  627:					counter = 0; /* Page Down */
+    #####:  628:					break;
+    %%%%%:  628-block  0
+unconditional  0 never executed
+        -:  629:
+    #####:  630:				case 63: /* fallthrough */ /* ? */
+        -:  631:				case 104: {		   /* h: Print pager help */
+    #####:  632:					CLEAR;
+    %%%%%:  632-block  0
+call    0 never executed
+        -:  633:
+    #####:  634:					fputs(_("?, h: help\n"
+call    0 never executed
+        -:  635:						"Down arrow, Enter, Space: Advance one line\n"
+        -:  636:						"Page Down: Advance one page\n"
+        -:  637:						"q: Stop pagging\n"), stdout);
+        -:  638:
+    #####:  639:					int l = (int)term_rows - 5;
+    #####:  640:					while (--l >= 0)
+unconditional  0 never executed
+    %%%%%:  640-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:  641:						putchar('\n');
+    %%%%%:  641-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  642:
+    #####:  643:					fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
+    %%%%%:  643-block  0
+call    0 never executed
+        -:  644:
+    #####:  645:					i -= ((term_rows * columns_n) - 1);
+        -:  646:
+    #####:  647:					if (i < 0)
+branch  0 never executed
+branch  1 never executed
+    #####:  648:						i = 0;
+    %%%%%:  648-block  0
+unconditional  0 never executed
+        -:  649:
+    #####:  650:					counter = 0;
+    #####:  651:					xgetchar();
+    %%%%%:  651-block  0
+call    0 never executed
+    #####:  652:					CLEAR;
+call    0 never executed
+    #####:  653:				} break;
+unconditional  0 never executed
+        -:  654:
+        -:  655:				/* Stop paging (and set a flag to reenable the pager
+        -:  656:				 * later) */
+    #####:  657:				case 99:  /* 'c' */
+        -:  658:				case 112: /* 'p' */
+        -:  659:				case 113:
+    #####:  660:					pager = 0, reset_pager = 1; /* 'q' */
+    #####:  661:					break;
+    %%%%%:  661-block  0
+unconditional  0 never executed
+        -:  662:
+        -:  663:				/* If another key is pressed, go back one position.
+        -:  664:				 * Otherwise, some filenames won't be listed.*/
+    #####:  665:				default:
+    #####:  666:					i--;
+    #####:  667:					fputs("\r\x1b[K\x1b[3J", stdout);
+    %%%%%:  667-block  0
+call    0 never executed
+    #####:  668:					continue;
+unconditional  0 never executed
+        -:  669:				}
+        -:  670:
+    #####:  671:				fputs("\r\x1b[K\x1b[3J", stdout);
+    %%%%%:  671-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  672:			}
+        -:  673:
+    #####:  674:			counter++;
+    %%%%%:  674-block  0
+unconditional  0 never executed
+        -:  675:		}
+        -:  676:
+    #####:  677:		if (++cur_cols == columns_n) {
+    %%%%%:  677-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  678:			cur_cols = 0;
+    #####:  679:			last_column = 1;
+    %%%%%:  679-block  0
+unconditional  0 never executed
+        -:  680:		} else
+    #####:  681:			last_column = 0;
+    %%%%%:  681-block  0
+unconditional  0 never executed
+        -:  682:
+    #####:  683:		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
+    %%%%%:  683-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  683-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  683-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%:  683-block  3
+branch  6 never executed
+branch  7 never executed
+    %%%%%:  683-block  4
+branch  8 never executed
+branch  9 never executed
+    %%%%%:  683-block  5
+branch 10 never executed
+branch 11 never executed
+    %%%%%:  683-block  6
+branch 12 never executed
+branch 13 never executed
+    %%%%%:  683-block  7
+branch 14 never executed
+branch 15 never executed
+    %%%%%:  683-block  8
+branch 16 never executed
+branch 17 never executed
+    %%%%%:  683-block  9
+branch 18 never executed
+branch 19 never executed
+    %%%%%:  683-block 10
+unconditional 20 never executed
+    %%%%%:  683-block 11
+unconditional 21 never executed
+    %%%%%:  683-block 12
+unconditional 22 never executed
+    %%%%%:  683-block 13
+unconditional 23 never executed
+    %%%%%:  683-block 14
+unconditional 24 never executed
+    %%%%%:  683-block 15
+unconditional 25 never executed
+    %%%%%:  683-block 16
+unconditional 26 never executed
+    %%%%%:  683-block 17
+unconditional 27 never executed
+    %%%%%:  683-block 18
+unconditional 28 never executed
+    %%%%%:  683-block 19
+unconditional 29 never executed
+    %%%%%:  683-block 20
+unconditional 30 never executed
+    %%%%%:  683-block 21
+unconditional 31 never executed
+    %%%%%:  683-block 22
+unconditional 32 never executed
+    %%%%%:  683-block 23
+unconditional 33 never executed
+    %%%%%:  683-block 24
+unconditional 34 never executed
+    %%%%%:  683-block 25
+unconditional 35 never executed
+    %%%%%:  683-block 26
+unconditional 36 never executed
+    %%%%%:  683-block 27
+unconditional 37 never executed
+    %%%%%:  683-block 28
+unconditional 38 never executed
+    %%%%%:  683-block 29
+unconditional 39 never executed
+        -:  684:
+    #####:  685:		int ind_char = 1;
+        -:  686:
+    #####:  687:		if (!classify)
+    %%%%%:  687-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  688:			ind_char = 0;
+    %%%%%:  688-block  0
+unconditional  0 never executed
+        -:  689:
+    #####:  690:		if (colorize) {
+    %%%%%:  690-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  691:			ind_char = 0;
+    #####:  692:			if (icons) {
+    %%%%%:  692-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  693:				if (xargs.icons_use_file_color == 1)
+    %%%%%:  693-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  694:					file_info[i].icon_color = file_info[i].color;
+    %%%%%:  694-block  0
+unconditional  0 never executed
+        -:  695:
+    #####:  696:				if (no_eln)
+    %%%%%:  696-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  697:					printf("%s%s %s%s%s", file_info[i].icon_color,
+    #####:  698:					    file_info[i].icon, file_info[i].color,
+    #####:  699:					    file_info[i].name, df_c);
+    %%%%%:  699-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  700:				else
+    #####:  701:					printf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
+    #####:  702:					    file_info[i].icon_color, file_info[i].icon,
+    #####:  703:					    file_info[i].color, file_info[i].name, df_c);
+    %%%%%:  703-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  704:			} else {
+    #####:  705:				if (no_eln)
+    %%%%%:  705-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  706:					printf("%s%s%s", file_info[i].color,
+    #####:  707:					    file_info[i].name, df_c);
+    %%%%%:  707-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  708:				else
+    #####:  709:					printf("%s%d%s %s%s%s", el_c, i + 1, df_c,
+    #####:  710:					    file_info[i].color, file_info[i].name, df_c);
+    %%%%%:  710-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  711:			}
+        -:  712:
+    #####:  713:			if (file_info[i].dir && classify) {
+    %%%%%:  713-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  713-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  714:				fputs(" /", stdout);
+    %%%%%:  714-block  0
+call    0 never executed
+    #####:  715:				if (file_info[i].filesn > 0 && files_counter)
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  715-block  0
+branch  2 never executed
+branch  3 never executed
+    #####:  716:					fputs(xitoa(file_info[i].filesn), stdout);
+    %%%%%:  716-block  0
+call    0 never executed
+call    1 never executed
+unconditional  2 never executed
+        -:  717:			}
+        -:  718:		}
+        -:  719:
+        -:  720:		else {
+    #####:  721:			if (icons) {
+    %%%%%:  721-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  722:				if (no_eln)
+    %%%%%:  722-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  723:					printf("%s %s", file_info[i].icon, file_info[i].name);
+    %%%%%:  723-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  724:				else
+    #####:  725:					printf("%s%d%s %s %s", el_c, i + 1, df_c,
+    #####:  726:					    file_info[i].icon, file_info[i].name);
+    %%%%%:  726-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  727:			}
+        -:  728:
+        -:  729:			else {
+    #####:  730:				if (no_eln)
+    %%%%%:  730-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  731:					printf("%s", file_info[i].name);
+    %%%%%:  731-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  732:				else
+    #####:  733:					printf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
+    %%%%%:  733-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  734:			}
+        -:  735:
+    #####:  736:			if (classify) {
+    %%%%%:  736-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  737:				switch (file_info[i].type) {
+    %%%%%:  737-block  0
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+        -:  738:
+    #####:  739:				case DT_DIR:
+    #####:  740:					ind_char = 0;
+    #####:  741:					fputs(" /", stdout);
+    %%%%%:  741-block  0
+call    0 never executed
+    #####:  742:					if (file_info[i].filesn > 0 && files_counter)
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  742-block  0
+branch  2 never executed
+branch  3 never executed
+    #####:  743:						fputs(xitoa(file_info[i].filesn), stdout);
+    %%%%%:  743-block  0
+call    0 never executed
+call    1 never executed
+unconditional  2 never executed
+    #####:  744:					break;
+    %%%%%:  744-block  0
+unconditional  0 never executed
+        -:  745:
+    #####:  746:				case DT_FIFO:
+    #####:  747:					putchar('|');
+    %%%%%:  747-block  0
+call    0 never executed
+    #####:  748:					break;
+unconditional  0 never executed
+        -:  749:
+    #####:  750:				case DT_LNK:
+    #####:  751:					putchar('@');
+    %%%%%:  751-block  0
+call    0 never executed
+    #####:  752:					break;
+unconditional  0 never executed
+        -:  753:
+    #####:  754:				case DT_SOCK:
+    #####:  755:					putchar('=');
+    %%%%%:  755-block  0
+call    0 never executed
+    #####:  756:					break;
+unconditional  0 never executed
+        -:  757:
+    #####:  758:				case DT_UNKNOWN:
+    #####:  759:					putchar('?');
+    %%%%%:  759-block  0
+call    0 never executed
+    #####:  760:					break;
+unconditional  0 never executed
+        -:  761:
+    #####:  762:				default:
+    #####:  763:					ind_char = 0;
+    #####:  764:					break;
+    %%%%%:  764-block  0
+unconditional  0 never executed
+        -:  765:				}
+        -:  766:			}
+        -:  767:		}
+        -:  768:
+    #####:  769:		if (!last_column) {
+    %%%%%:  769-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  770:
+        -:  771:			/* Add spaces needed to equate the longest filename length */
+    #####:  772:			int cur_len = (int)file_info[i].eln_n + 1 + (icons ? 3 : 0)
+    %%%%%:  772-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  772-block  1
+unconditional  2 never executed
+    %%%%%:  772-block  2
+unconditional  3 never executed
+    #####:  773:						+ (int)file_info[i].len + (ind_char ? 1 : 0);
+    #####:  774:			if (classify) {
+    %%%%%:  774-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  775:				if (file_info[i].dir)
+    %%%%%:  775-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  776:					cur_len += 2;
+    %%%%%:  776-block  0
+unconditional  0 never executed
+    #####:  777:				if (file_info[i].filesn > 0 && files_counter
+    %%%%%:  777-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  777-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  778:				&& file_info[i].ruser)
+    %%%%%:  778-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  779:					cur_len += DIGINUM((int)file_info[i].filesn);
+    %%%%%:  779-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  779-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  779-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%:  779-block  3
+branch  6 never executed
+branch  7 never executed
+    %%%%%:  779-block  4
+branch  8 never executed
+branch  9 never executed
+    %%%%%:  779-block  5
+branch 10 never executed
+branch 11 never executed
+    %%%%%:  779-block  6
+branch 12 never executed
+branch 13 never executed
+    %%%%%:  779-block  7
+branch 14 never executed
+branch 15 never executed
+    %%%%%:  779-block  8
+branch 16 never executed
+branch 17 never executed
+    %%%%%:  779-block  9
+unconditional 18 never executed
+    %%%%%:  779-block 10
+unconditional 19 never executed
+    %%%%%:  779-block 11
+unconditional 20 never executed
+    %%%%%:  779-block 12
+unconditional 21 never executed
+    %%%%%:  779-block 13
+unconditional 22 never executed
+    %%%%%:  779-block 14
+unconditional 23 never executed
+    %%%%%:  779-block 15
+unconditional 24 never executed
+    %%%%%:  779-block 16
+unconditional 25 never executed
+    %%%%%:  779-block 17
+unconditional 26 never executed
+    %%%%%:  779-block 18
+unconditional 27 never executed
+    %%%%%:  779-block 19
+unconditional 28 never executed
+    %%%%%:  779-block 20
+unconditional 29 never executed
+    %%%%%:  779-block 21
+unconditional 30 never executed
+    %%%%%:  779-block 22
+unconditional 31 never executed
+    %%%%%:  779-block 23
+unconditional 32 never executed
+    %%%%%:  779-block 24
+unconditional 33 never executed
+    %%%%%:  779-block 25
+unconditional 34 never executed
+    %%%%%:  779-block 26
+unconditional 35 never executed
+    %%%%%:  779-block 27
+unconditional 36 never executed
+        -:  780:			}
+        -:  781:
+    #####:  782:			int diff = (int)longest - cur_len;
+        -:  783:
+        -:  784:			register int j;
+    #####:  785:			for (j = diff + 1; j--;)
+    %%%%%:  785-block  0
+unconditional  0 never executed
+    %%%%%:  785-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  786:				putchar(' ');
+    %%%%%:  786-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  787:		} else
+    #####:  788:			putchar('\n');
+    %%%%%:  788-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  789:	}
+        -:  790:
+    #####:  791:	if (!last_column)
+    %%%%%:  791-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  792:		putchar('\n');
+    %%%%%:  792-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  793:
+    #####:  794:END:
+    %%%%%:  794-block  0
+unconditional  0 never executed
+    #####:  795:	if (closedir(dir) == -1)
+    %%%%%:  795-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  796:		return EXIT_FAILURE;
+    %%%%%:  796-block  0
+unconditional  0 never executed
+        -:  797:
+    #####:  798:	if (xargs.list_and_quit == 1)
+    %%%%%:  798-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  799:		exit(exit_code);
+    %%%%%:  799-block  0
+call    0 never executed
+        -:  800:
+    #####:  801:	if (reset_pager)
+    %%%%%:  801-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  802:		pager = 1;
+    %%%%%:  802-block  0
+unconditional  0 never executed
+        -:  803:
+        -:  804:	/* Print a dividing line between the files list and the
+        -:  805:	 * prompt */
+    #####:  806:	print_div_line();
+    %%%%%:  806-block  0
+call    0 never executed
+        -:  807:
+    #####:  808:	if (max_files != UNSET && (int)files > max_files)
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  808-block  0
+branch  2 never executed
+branch  3 never executed
+    #####:  809:		printf("%d/%zu\n", max_files, files);
+    %%%%%:  809-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  810:
+    #####:  811:	if (dirhist_map) {
+    %%%%%:  811-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  812:		/* Print current, previous, and next entries */
+    #####:  813:		print_dirhist_map();
+    %%%%%:  813-block  0
+call    0 never executed
+        -:  814:
+    #####:  815:		print_div_line();
+call    0 never executed
+unconditional  1 never executed
+        -:  816:	}
+        -:  817:
+    #####:  818:	if (disk_usage)
+    %%%%%:  818-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  819:		print_disk_usage();
+    %%%%%:  819-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  820:
+    #####:  821:	if (sort_switch)
+    %%%%%:  821-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  822:		print_sort_method();
+    %%%%%:  822-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  823:
+        -:  824:	/*  clock_t end = clock();
+        -:  825:	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC); */
+        -:  826:
+    #####:  827:	return EXIT_SUCCESS;
+    %%%%%:  827-block  0
+unconditional  0 never executed
+        -:  828:}
+        -:  829:
+        -:  830:/* List files in the current working directory. Uses filetype colors
+        -:  831: * and columns. Return zero on success or one on error */
+        -:  832:int
+function list_dir called 15 returned 100% blocks executed 46%
+       15:  833:list_dir(void)
+        -:  834:{
+        -:  835:	/*  clock_t start = clock(); */
+        -:  836:
+       15:  837:	if (clear_screen)
+       15:  837-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####:  838:		CLEAR;
+    %%%%%:  838-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  839:
+       15:  840:	if (light_mode)
+       15:  840-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####:  841:		return list_dir_light();
+    %%%%%:  841-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  842:
+        -:  843:	DIR *dir;
+        -:  844:
+        -:  845:	struct dirent *ent;
+        -:  846:	struct stat attr;
+        -:  847:
+       15:  848:	if ((dir = opendir(ws[cur_ws].path)) == NULL) {
+       15:  848-block  0
+call    0 returned 15
+branch  1 taken 0 (fallthrough)
+branch  2 taken 15
+    #####:  849:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ws[cur_ws].path,
+call    0 never executed
+    #####:  850:		    strerror(errno));
+    %%%%%:  850-block  0
+call    0 never executed
+    #####:  851:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  852:	}
+        -:  853:
+       15:  854:	int fd = dirfd(dir);
+       15:  854-block  0
+call    0 returned 15
+        -:  855:
+        -:  856:		/* ##########################################
+        -:  857:		 * #    GATHER AND STORE FILE INFORMATION   #
+        -:  858:		 * ########################################## */
+        -:  859:
+       15:  860:	errno = 0;
+       15:  861:	longest = 0;
+       15:  862:	register unsigned int n = 0;
+       15:  863:	unsigned int total_dents = 0, count = 0;
+        -:  864:
+       15:  865:	file_info = (struct fileinfo *)xnmalloc(ENTRY_N + 2,
+call    0 returned 15
+        -:  866:	    sizeof(struct fileinfo));
+        -:  867:
+     1123:  868:	while ((ent = readdir(dir))) {
+unconditional  0 taken 15
+     1123:  868-block  0
+call    1 returned 1123
+branch  2 taken 1108
+branch  3 taken 15 (fallthrough)
+        -:  869:
+     1108:  870:		char *ename = ent->d_name;
+        -:  871:
+        -:  872:		/* Skip self and parent directories */
+     1108:  873:		if (*ename == '.' && (!ename[1] || (ename[1] == '.' && !ename[2])))
+     1108:  873-block  0
+branch  0 taken 466 (fallthrough)
+branch  1 taken 642
+      466:  873-block  1
+branch  2 taken 451 (fallthrough)
+branch  3 taken 15
+      451:  873-block  2
+branch  4 taken 15 (fallthrough)
+branch  5 taken 436
+       15:  873-block  3
+branch  6 taken 15 (fallthrough)
+branch  7 taken 0
+       30:  874:			continue;
+       30:  874-block  0
+unconditional  0 taken 30
+        -:  875:
+        -:  876:		/* Skip files matching FILTER */
+    1078*:  877:		if (filter && regexec(&regex_exp, ename, 0, NULL, 0) == EXIT_SUCCESS)
+     1078:  877-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1078
+    %%%%%:  877-block  1
+call    2 never executed
+branch  3 never executed
+branch  4 never executed
+    #####:  878:			continue;
+    %%%%%:  878-block  0
+unconditional  0 never executed
+        -:  879:
+    1078*:  880:		if (!show_hidden && *ename == '.')
+     1078:  880-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1078
+    %%%%%:  880-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  881:			continue;
+    %%%%%:  881-block  0
+unconditional  0 never executed
+        -:  882:
+    1078*:  883:		if (only_dirs && ent->d_type != DT_DIR)
+     1078:  883-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1078
+    %%%%%:  883-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  884:			continue;
+    %%%%%:  884-block  0
+unconditional  0 never executed
+        -:  885:
+    1078*:  886:		if (fstatat(fd, ename, &attr, AT_SYMLINK_NOFOLLOW) == -1)
+     1078:  886-block  0
+call    0 returned 1078
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1078
+    #####:  887:			continue;
+    %%%%%:  887-block  0
+unconditional  0 never executed
+        -:  888:
+     1078:  889:		if (count > ENTRY_N) {
+     1078:  889-block  0
+branch  0 taken 7 (fallthrough)
+branch  1 taken 1071
+        7:  890:			count = 0;
+        7:  891:			total_dents = n + ENTRY_N;
+        7:  892:			file_info = xrealloc(file_info, (total_dents + 2) * sizeof(struct fileinfo));
+        7:  892-block  0
+call    0 returned 7
+unconditional  1 taken 7
+        -:  893:		}
+        -:  894:
+     1078:  895:		file_info[n].name = (char *)xnmalloc(NAME_MAX + 1, sizeof(char));
+     1078:  895-block  0
+call    0 returned 1078
+        -:  896:
+     1078:  897:		if (!unicode) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1078
+    #####:  898:			file_info[n].len = (xstrsncpy(file_info[n].name, ename,
+    %%%%%:  898-block  0
+call    0 never executed
+    #####:  899:						NAME_MAX + 1) -
+unconditional  0 never executed
+        -:  900:					    1);
+        -:  901:		} else {
+     1078:  902:			xstrsncpy(file_info[n].name, ename, NAME_MAX + 1);
+     1078:  902-block  0
+call    0 returned 1078
+     1078:  903:			file_info[n].len = wc_xstrlen(ename);
+call    0 returned 1078
+unconditional  1 taken 1078
+        -:  904:		}
+        -:  905:
+     1078:  906:		file_info[n].dir = (ent->d_type == DT_DIR) ? 1 : 0;
+     1078:  907:		file_info[n].symlink = (ent->d_type == DT_LNK) ? 1 : 0;
+     1078:  908:		file_info[n].exec = 0;
+     1078:  909:		file_info[n].type = ent->d_type;
+     1078:  910:		file_info[n].inode = ent->d_ino;
+     1078:  911:		file_info[n].linkn = attr.st_nlink;
+     1078:  912:		file_info[n].size = attr.st_size;
+        -:  913:
+     1078:  914:		if (long_view) {
+     1078:  914-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1078
+    #####:  915:			file_info[n].uid = attr.st_uid;
+    #####:  916:			file_info[n].gid = attr.st_gid;
+    #####:  917:			file_info[n].ltime = (time_t)attr.st_mtim.tv_sec;
+    #####:  918:			file_info[n].mode = attr.st_mode;
+    %%%%%:  918-block  0
+unconditional  0 never executed
+     1078:  919:		} else if (sort == SOWN || sort == SGRP) {
+     1078:  919-block  0
+branch  0 taken 1078 (fallthrough)
+branch  1 taken 0
+     1078:  919-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1078
+    #####:  920:			file_info[n].uid = attr.st_uid;
+    #####:  921:			file_info[n].gid = attr.st_gid;
+    %%%%%:  921-block  0
+unconditional  0 never executed
+        -:  922:		}
+        -:  923:
+     1078:  924:		file_info[n].color = (char *)NULL;
+        -:  925:
+        -:  926:		/* Default icon for all files */
+     1078:  927:		file_info[n].icon = DEF_FILE_ICON;
+     1078:  928:		file_info[n].icon_color = DEF_FILE_ICON_COLOR;
+        -:  929:
+     1078:  930:		file_info[n].ruser = 1;
+     1078:  931:		file_info[n].filesn = 0;
+        -:  932:
+     1078:  933:		switch (sort) {
+     1078:  933-block  0
+branch  0 taken 0
+branch  1 taken 0
+branch  2 taken 0
+branch  3 taken 0
+branch  4 taken 1078
+    #####:  934:		case SATIME:
+    #####:  935:			file_info[n].time = (time_t)attr.st_atime;
+    #####:  936:			break;
+    %%%%%:  936-block  0
+unconditional  0 never executed
+        -:  937:#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
+        -:  938:		case SBTIME:
+        -:  939:			file_info[n].time = (time_t)attr.st_birthtime;
+        -:  940:			break;
+        -:  941:#elif defined(_STATX)
+    #####:  942:		case SBTIME: {
+        -:  943:			struct statx attx;
+    #####:  944:			if (statx(AT_FDCWD, ename, AT_SYMLINK_NOFOLLOW,
+    %%%%%:  944-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:  945:				STATX_BTIME, &attx) == -1)
+    #####:  946:				file_info[n].time = 0;
+    %%%%%:  946-block  0
+unconditional  0 never executed
+        -:  947:			else
+    #####:  948:				file_info[n].time = (time_t)attx.stx_btime.tv_sec;
+    %%%%%:  948-block  0
+unconditional  0 never executed
+    #####:  949:		} break;
+    %%%%%:  949-block  0
+unconditional  0 never executed
+        -:  950:#else
+        -:  951:		case SBTIME:
+        -:  952:			file_info[n].time = (time_t)attr.st_ctime;
+        -:  953:			break;
+        -:  954:#endif
+    #####:  955:		case SCTIME:
+    #####:  956:			file_info[n].time = (time_t)attr.st_ctime;
+    #####:  957:			break;
+    %%%%%:  957-block  0
+unconditional  0 never executed
+    #####:  958:		case SMTIME:
+    #####:  959:			file_info[n].time = (time_t)attr.st_mtime;
+    #####:  960:			break;
+    %%%%%:  960-block  0
+unconditional  0 never executed
+     1078:  961:		default:
+     1078:  962:			file_info[n].time = 0;
+     1078:  963:			break;
+     1078:  963-block  0
+unconditional  0 taken 1078
+        -:  964:		}
+        -:  965:
+     1078:  966:		switch (file_info[n].type) {
+     1078:  966-block  0
+branch  0 taken 379
+branch  1 taken 13
+branch  2 taken 686
+branch  3 taken 0
+branch  4 taken 0
+branch  5 taken 0
+branch  6 taken 0
+branch  7 taken 0
+branch  8 taken 0
+        -:  967:
+      379:  968:		case DT_DIR:
+      379:  969:			if (icons) {
+      379:  969-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 379
+    #####:  970:				get_dir_icon(file_info[n].name, (int)n);
+    %%%%%:  970-block  0
+call    0 never executed
+        -:  971:
+        -:  972:				/* If set from the color scheme file */
+    #####:  973:				if (*dir_ico_c)
+branch  0 never executed
+branch  1 never executed
+    #####:  974:					file_info[n].icon_color = dir_ico_c;
+    %%%%%:  974-block  0
+unconditional  0 never executed
+        -:  975:			}
+        -:  976:			files_counter
+      379:  977:			    ? (file_info[n].filesn = (count_dir(ename) - 2))
+      379:  977-block  0
+call    0 returned 379
+     758*:  978:			    : (file_info[n].filesn = 1);
+      379:  978-block  0
+branch  0 taken 379 (fallthrough)
+branch  1 taken 0
+unconditional  2 taken 379
+    %%%%%:  978-block  1
+unconditional  3 never executed
+      379:  979:			if (file_info[n].filesn > 0) { /* S_ISVTX*/
+      379:  979-block  0
+branch  0 taken 357 (fallthrough)
+branch  1 taken 22
+      357:  980:				file_info[n].color = (attr.st_mode & 01000)
+      357:  980-block  0
+unconditional  0 taken 357
+       1*:  981:							 ? ((attr.st_mode & 00002) ? tw_c : st_c)
+        1:  981-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  981-block  1
+unconditional  2 taken 1
+    %%%%%:  981-block  2
+unconditional  3 never executed
+     358*:  982:							 : ((attr.st_mode & 00002) ? ow_c : di_c);
+      357:  982-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 356
+        1:  982-block  1
+unconditional  2 taken 1
+      356:  982-block  2
+branch  3 taken 0 (fallthrough)
+branch  4 taken 356
+    %%%%%:  982-block  3
+unconditional  5 never executed
+      356:  982-block  4
+unconditional  6 taken 356
+      356:  982-block  5
+unconditional  7 taken 356
+        -:  983:				/* S_ISWOTH*/
+       22:  984:			} else if (file_info[n].filesn == 0)
+       22:  984-block  0
+branch  0 taken 20 (fallthrough)
+branch  1 taken 2
+       20:  985:				file_info[n].color = (attr.st_mode & 01000)
+       20:  985-block  0
+unconditional  0 taken 20
+       1*:  986:							 ? ((attr.st_mode & 00002) ? tw_c : st_c)
+        1:  986-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  986-block  1
+unconditional  2 taken 1
+    %%%%%:  986-block  2
+unconditional  3 never executed
+      21*:  987:							 : ((attr.st_mode & 00002) ? ow_c : ed_c);
+       20:  987-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 19
+        1:  987-block  1
+unconditional  2 taken 1
+       19:  987-block  2
+branch  3 taken 0 (fallthrough)
+branch  4 taken 19
+    %%%%%:  987-block  3
+unconditional  5 never executed
+       19:  987-block  4
+unconditional  6 taken 19
+       19:  987-block  5
+unconditional  7 taken 19
+        -:  988:			else {
+        2:  989:				file_info[n].color = nd_c;
+        2:  990:				file_info[n].icon = ICON_LOCK;
+        2:  991:				file_info[n].icon_color = YELLOW;
+        2:  991-block  0
+unconditional  0 taken 2
+        -:  992:			}
+        -:  993:
+      379:  994:			break;
+      379:  994-block  0
+unconditional  0 taken 379
+        -:  995:
+       13:  996:		case DT_LNK:
+       13:  997:			file_info[n].icon = ICON_LINK;
+        -:  998:			struct stat attrl;
+       13:  999:			if (fstatat(fd, ename, &attrl, 0) == -1)
+       13:  999-block  0
+call    0 returned 13
+branch  1 taken 0 (fallthrough)
+branch  2 taken 13
+    #####: 1000:				file_info[n].color = or_c;
+    %%%%%: 1000-block  0
+unconditional  0 never executed
+        -: 1001:			else {
+       13: 1002:				if (S_ISDIR(attrl.st_mode)) {
+       13: 1002-block  0
+branch  0 taken 13 (fallthrough)
+branch  1 taken 0
+       13: 1003:					file_info[n].dir = 1;
+        -: 1004:					files_counter
+       13: 1005:					    ? (file_info[n].filesn = (count_dir(ename) - 2))
+       13: 1005-block  0
+call    0 returned 13
+      26*: 1006:					    : (file_info[n].filesn = 0);
+       13: 1006-block  0
+branch  0 taken 13 (fallthrough)
+branch  1 taken 0
+unconditional  2 taken 13
+    %%%%%: 1006-block  1
+unconditional  3 never executed
+        -: 1007:				}
+       13: 1008:				file_info[n].color = ln_c;
+       13: 1008-block  0
+unconditional  0 taken 13
+        -: 1009:			}
+       13: 1010:			break;
+       13: 1010-block  0
+unconditional  0 taken 13
+        -: 1011:
+      686: 1012:		case DT_REG: {
+        -: 1013:#ifdef _LINUX_CAP
+        -: 1014:			cap_t cap;
+        -: 1015:#endif
+        -: 1016:			/* Do not perform the access check if the user is root */
+      686: 1017:			if (!(flags & ROOT_USR)
+      686: 1017-block  0
+branch  0 taken 686 (fallthrough)
+branch  1 taken 0
+      686: 1018:			&& access(file_info[n].name, F_OK | R_OK) == -1) {
+      686: 1018-block  0
+call    0 returned 686
+branch  1 taken 0 (fallthrough)
+branch  2 taken 686
+    #####: 1019:				file_info[n].color = nf_c;
+    #####: 1020:				file_info[n].icon = ICON_LOCK;
+    #####: 1021:				file_info[n].icon_color = YELLOW;
+    %%%%%: 1021-block  0
+unconditional  0 never executed
+      686: 1022:			} else if (attr.st_mode & 04000) { /* SUID */
+      686: 1022-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 686
+    #####: 1023:				file_info[n].exec = 1;
+    #####: 1024:				file_info[n].color = su_c;
+    #####: 1025:				file_info[n].icon = ICON_EXEC;
+    %%%%%: 1025-block  0
+unconditional  0 never executed
+      686: 1026:			} else if (attr.st_mode & 02000) { /* SGID */
+      686: 1026-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 686
+    #####: 1027:				file_info[n].exec = 1;
+    #####: 1028:				file_info[n].color = sg_c;
+    #####: 1029:				file_info[n].icon = ICON_EXEC;
+    %%%%%: 1029-block  0
+unconditional  0 never executed
+        -: 1030:			}
+        -: 1031:
+        -: 1032:#ifdef _LINUX_CAP
+      686: 1033:			else if ((cap = cap_get_file(ename))) {
+      686: 1033-block  0
+call    0 returned 686
+branch  1 taken 0 (fallthrough)
+branch  2 taken 686
+    #####: 1034:				file_info[n].color = ca_c;
+    #####: 1035:				cap_free(cap);
+    %%%%%: 1035-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1036:			}
+        -: 1037:#endif
+        -: 1038:
+      686: 1039:			else if ((attr.st_mode & 00100) /* Exec */
+      686: 1039-block  0
+branch  0 taken 674 (fallthrough)
+branch  1 taken 12
+      674: 1040:				 || (attr.st_mode & 00010) || (attr.st_mode & 00001)) {
+      674: 1040-block  0
+branch  0 taken 674 (fallthrough)
+branch  1 taken 0
+      674: 1040-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 674
+       12: 1041:				file_info[n].exec = 1;
+       12: 1042:				file_info[n].icon = ICON_EXEC;
+       12: 1043:				if (file_info[n].size == 0)
+       12: 1043-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 12
+    #####: 1044:					file_info[n].color = ee_c;
+    %%%%%: 1044-block  0
+unconditional  0 never executed
+        -: 1045:				else
+       12: 1046:					file_info[n].color = ex_c;
+       12: 1046-block  0
+unconditional  0 taken 12
+        -: 1047:			}
+        -: 1048:
+      674: 1049:			else if (file_info[n].size == 0)
+      674: 1049-block  0
+branch  0 taken 18 (fallthrough)
+branch  1 taken 656
+       18: 1050:				file_info[n].color = ef_c;
+       18: 1050-block  0
+unconditional  0 taken 18
+        -: 1051:
+      656: 1052:			else if (file_info[n].linkn > 1) /* Multi-hardlink */
+      656: 1052-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 656
+    #####: 1053:				file_info[n].color = mh_c;
+    %%%%%: 1053-block  0
+unconditional  0 never executed
+        -: 1054:
+        -: 1055:			else /* Regular file */
+      656: 1056:				file_info[n].color = fi_c;
+      656: 1056-block  0
+unconditional  0 taken 656
+        -: 1057:
+        -: 1058:			/* Check file extension */
+      686: 1059:			char *ext = strrchr(file_info[n].name, '.');
+        -: 1060:			/* Make sure not to take a hidden file for a file extension */
+      686: 1061:			if (ext && ext != file_info[n].name) {
+      686: 1061-block  0
+branch  0 taken 321 (fallthrough)
+branch  1 taken 365
+      321: 1061-block  1
+branch  2 taken 176 (fallthrough)
+branch  3 taken 145
+      176: 1062:				if (icons)
+      176: 1062-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 176
+    #####: 1063:					get_ext_icon(ext, (int)n);
+    %%%%%: 1063-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1064:
+        -: 1065:				/* Check extension color only if some is defined */
+      176: 1066:				if (ext_colors_n) {
+      176: 1066-block  0
+branch  0 taken 176 (fallthrough)
+branch  1 taken 0
+      176: 1067:					char *extcolor = get_ext_color(ext);
+      176: 1067-block  0
+call    0 returned 176
+        -: 1068:
+      176: 1069:					if (extcolor) {
+branch  0 taken 1 (fallthrough)
+branch  1 taken 175
+        -: 1070:						char ext_color[MAX_COLOR];
+        1: 1071:						sprintf(ext_color, "\x1b[%sm", extcolor);
+        1: 1072:						file_info[n].color = ext_color;
+        1: 1073:						extcolor = (char *)NULL;
+        1: 1073-block  0
+unconditional  0 taken 1
+        -: 1074:					}
+        -: 1075:				}
+        -: 1076:			}
+        -: 1077:
+        -: 1078:			/* No extension. Check icons for specific filenames */
+      510: 1079:			else if (icons)
+      510: 1079-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 510
+    #####: 1080:				get_file_icon(file_info[n].name, (int)n);
+    %%%%%: 1080-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1081:
+        -: 1082:		} /* End of DT_REG block */
+      686: 1083:		break;
+      686: 1083-block  0
+unconditional  0 taken 686
+        -: 1084:
+    #####: 1085:		case DT_SOCK:
+    #####: 1086:			file_info[n].color = so_c;
+    #####: 1087:			break;
+    %%%%%: 1087-block  0
+unconditional  0 never executed
+        -: 1088:
+    #####: 1089:		case DT_FIFO:
+    #####: 1090:			file_info[n].color = pi_c;
+    #####: 1091:			break;
+    %%%%%: 1091-block  0
+unconditional  0 never executed
+        -: 1092:
+    #####: 1093:		case DT_BLK:
+    #####: 1094:			file_info[n].color = bd_c;
+    #####: 1095:			break;
+    %%%%%: 1095-block  0
+unconditional  0 never executed
+        -: 1096:
+    #####: 1097:		case DT_CHR:
+    #####: 1098:			file_info[n].color = cd_c;
+    #####: 1099:			break;
+    %%%%%: 1099-block  0
+unconditional  0 never executed
+        -: 1100:
+    #####: 1101:		case DT_UNKNOWN:
+    #####: 1102:			file_info[n].color = uf_c;
+    #####: 1103:			break;
+    %%%%%: 1103-block  0
+unconditional  0 never executed
+        -: 1104:
+    #####: 1105:		default:
+    #####: 1106:			file_info[n].color = df_c;
+    #####: 1107:			break;
+    %%%%%: 1107-block  0
+unconditional  0 never executed
+        -: 1108:		}
+        -: 1109:
+    1078*: 1110:		if (xargs.icons_use_file_color == 1 && icons)
+     1078: 1110-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1078
+    %%%%%: 1110-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1111:			file_info[n].icon_color = file_info[n].color;
+    %%%%%: 1111-block  0
+unconditional  0 never executed
+        -: 1112:
+     1078: 1113:		n++;
+     1078: 1114:		count++;
+     1078: 1114-block  0
+unconditional  0 taken 1078
+        -: 1115:	}
+        -: 1116:
+       15: 1117:	file_info[n].name = (char *)NULL;
+        -: 1118:
+       15: 1119:	files = n;
+        -: 1120:
+       15: 1121:	if (n == 0) {
+       15: 1121-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####: 1122:		printf("%s. ..%s\n", colorize ? di_c : df_c, df_c);
+    %%%%%: 1122-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1122-block  1
+unconditional  2 never executed
+    %%%%%: 1122-block  2
+unconditional  3 never executed
+    %%%%%: 1122-block  3
+call    4 never executed
+    #####: 1123:		free(file_info);
+    #####: 1124:		if (closedir(dir) == -1)
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1125:			return EXIT_FAILURE;
+    %%%%%: 1125-block  0
+unconditional  0 never executed
+    #####: 1126:		return EXIT_SUCCESS;
+    %%%%%: 1126-block  0
+unconditional  0 never executed
+        -: 1127:	}
+        -: 1128:
+        -: 1129:		/* #############################################
+        -: 1130:		 * #    SORT FILES ACCORDING TO SORT METHOD    #
+        -: 1131:		 * ############################################# */
+        -: 1132:
+       15: 1133:	if (sort)
+       15: 1133-block  0
+branch  0 taken 15 (fallthrough)
+branch  1 taken 0
+       15: 1134:		qsort(file_info, n, sizeof(*file_info), entrycmp);
+       15: 1134-block  0
+call    0 returned 15
+unconditional  1 taken 15
+        -: 1135:
+        -: 1136:		/* ##########################################
+        -: 1137:		 * #    GET INFO TO PRINT COLUMNED OUTPUT   #
+        -: 1138:		 * ########################################## */
+        -: 1139:
+        -: 1140:	/* Get terminal current amount of rows and columns */
+        -: 1141:	struct winsize w;
+       15: 1142:	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+       15: 1142-block  0
+call    0 returned 15
+        -: 1143:	/* ws_col and ws_row are both unsigned short int according to
+        -: 1144:	 * /bits/ioctl-types.h */
+       15: 1145:	term_cols = w.ws_col; /* This one is global */
+       15: 1146:	unsigned short term_rows = w.ws_row;
+        -: 1147:
+       15: 1148:	int reset_pager = 0;
+        -: 1149:	int c, i;
+       15: 1150:	register size_t counter = 0;
+        -: 1151:
+       15: 1152:	size_t columns_n = 1;
+        -: 1153:
+        -: 1154:	/* Get the longest filename */
+      15*: 1155:	if (columned || long_view) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    %%%%%: 1155-block  0
+branch  2 never executed
+branch  3 never executed
+       15: 1156:		i = (int)n;
+     1093: 1157:		while (--i >= 0) {
+       15: 1157-block  0
+unconditional  0 taken 15
+     1093: 1157-block  1
+branch  1 taken 1078
+branch  2 taken 15 (fallthrough)
+     1078: 1158:			size_t total_len = 0;
+    1078*: 1159:			file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
+     1078: 1159-block  0
+branch  0 taken 1078 (fallthrough)
+branch  1 taken 0
+     1078: 1159-block  1
+branch  2 taken 943 (fallthrough)
+branch  3 taken 135
+      943: 1159-block  2
+branch  4 taken 251 (fallthrough)
+branch  5 taken 692
+      251: 1159-block  3
+branch  6 taken 0 (fallthrough)
+branch  7 taken 251
+    %%%%%: 1159-block  4
+branch  8 never executed
+branch  9 never executed
+    %%%%%: 1159-block  5
+branch 10 never executed
+branch 11 never executed
+    %%%%%: 1159-block  6
+branch 12 never executed
+branch 13 never executed
+    %%%%%: 1159-block  7
+branch 14 never executed
+branch 15 never executed
+    %%%%%: 1159-block  8
+branch 16 never executed
+branch 17 never executed
+    %%%%%: 1159-block  9
+branch 18 never executed
+branch 19 never executed
+    %%%%%: 1159-block 10
+unconditional 20 never executed
+    %%%%%: 1159-block 11
+unconditional 21 never executed
+    %%%%%: 1159-block 12
+unconditional 22 never executed
+    %%%%%: 1159-block 13
+unconditional 23 never executed
+    %%%%%: 1159-block 14
+unconditional 24 never executed
+    %%%%%: 1159-block 15
+unconditional 25 never executed
+    %%%%%: 1159-block 16
+unconditional 26 never executed
+    %%%%%: 1159-block 17
+unconditional 27 never executed
+    %%%%%: 1159-block 18
+unconditional 28 never executed
+    %%%%%: 1159-block 19
+unconditional 29 never executed
+    %%%%%: 1159-block 20
+unconditional 30 never executed
+    %%%%%: 1159-block 21
+unconditional 31 never executed
+    %%%%%: 1159-block 22
+unconditional 32 never executed
+      251: 1159-block 23
+unconditional 33 taken 251
+      251: 1159-block 24
+unconditional 34 taken 251
+      692: 1159-block 25
+unconditional 35 taken 692
+      943: 1159-block 26
+unconditional 36 taken 943
+      135: 1159-block 27
+unconditional 37 taken 135
+     1078: 1159-block 28
+unconditional 38 taken 1078
+    %%%%%: 1159-block 29
+unconditional 39 never executed
+     1078: 1160:			total_len = file_info[i].eln_n + 1 + file_info[i].len;
+        -: 1161:
+     1078: 1162:			if (!long_view && classify) {
+     1078: 1162-block  0
+branch  0 taken 1078 (fallthrough)
+branch  1 taken 0
+     1078: 1162-block  1
+branch  2 taken 1078 (fallthrough)
+branch  3 taken 0
+        -: 1163:
+     1078: 1164:				if (file_info[i].dir)
+     1078: 1164-block  0
+branch  0 taken 392 (fallthrough)
+branch  1 taken 686
+      392: 1165:					total_len += 2;
+      392: 1165-block  0
+unconditional  0 taken 392
+        -: 1166:
+     1078: 1167:				if (file_info[i].filesn > 0 && files_counter)
+     1078: 1167-block  0
+branch  0 taken 370 (fallthrough)
+branch  1 taken 708
+      370: 1167-block  1
+branch  2 taken 370 (fallthrough)
+branch  3 taken 0
+     370*: 1168:					total_len += DIGINUM(file_info[i].filesn);
+      370: 1168-block  0
+branch  0 taken 122 (fallthrough)
+branch  1 taken 248
+      122: 1168-block  1
+branch  2 taken 25 (fallthrough)
+branch  3 taken 97
+       25: 1168-block  2
+branch  4 taken 4 (fallthrough)
+branch  5 taken 21
+        4: 1168-block  3
+branch  6 taken 0 (fallthrough)
+branch  7 taken 4
+    %%%%%: 1168-block  4
+branch  8 never executed
+branch  9 never executed
+    %%%%%: 1168-block  5
+branch 10 never executed
+branch 11 never executed
+    %%%%%: 1168-block  6
+branch 12 never executed
+branch 13 never executed
+    %%%%%: 1168-block  7
+branch 14 never executed
+branch 15 never executed
+    %%%%%: 1168-block  8
+branch 16 never executed
+branch 17 never executed
+    %%%%%: 1168-block  9
+unconditional 18 never executed
+    %%%%%: 1168-block 10
+unconditional 19 never executed
+    %%%%%: 1168-block 11
+unconditional 20 never executed
+    %%%%%: 1168-block 12
+unconditional 21 never executed
+    %%%%%: 1168-block 13
+unconditional 22 never executed
+    %%%%%: 1168-block 14
+unconditional 23 never executed
+    %%%%%: 1168-block 15
+unconditional 24 never executed
+    %%%%%: 1168-block 16
+unconditional 25 never executed
+    %%%%%: 1168-block 17
+unconditional 26 never executed
+    %%%%%: 1168-block 18
+unconditional 27 never executed
+    %%%%%: 1168-block 19
+unconditional 28 never executed
+        4: 1168-block 20
+unconditional 29 taken 4
+        4: 1168-block 21
+unconditional 30 taken 4
+       21: 1168-block 22
+unconditional 31 taken 21
+       25: 1168-block 23
+unconditional 32 taken 25
+       97: 1168-block 24
+unconditional 33 taken 97
+      122: 1168-block 25
+unconditional 34 taken 122
+      248: 1168-block 26
+unconditional 35 taken 248
+      370: 1168-block 27
+unconditional 36 taken 370
+        -: 1169:
+     1078: 1170:				if (!file_info[i].dir && !colorize) {
+     1078: 1170-block  0
+branch  0 taken 686 (fallthrough)
+branch  1 taken 392
+      686: 1170-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 686
+    #####: 1171:					switch (file_info[i].type) {
+    %%%%%: 1171-block  0
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1172:					case DT_REG:
+    #####: 1173:						if (file_info[i].exec)
+    %%%%%: 1173-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1174:							total_len += 1;
+    %%%%%: 1174-block  0
+unconditional  0 never executed
+    #####: 1175:						break;
+    %%%%%: 1175-block  0
+unconditional  0 never executed
+    #####: 1176:					case DT_LNK:  /* fallthrough */
+        -: 1177:					case DT_SOCK: /* fallthrough */
+        -: 1178:					case DT_FIFO: /* fallthrough */
+        -: 1179:					case DT_UNKNOWN:
+    #####: 1180:						total_len += 1;
+    #####: 1181:						break;
+    %%%%%: 1181-block  0
+unconditional  0 never executed
+        -: 1182:					}
+        -: 1183:				}
+        -: 1184:			}
+        -: 1185:
+     1078: 1186:			if (total_len > longest)
+     1078: 1186-block  0
+branch  0 taken 79 (fallthrough)
+branch  1 taken 999
+       79: 1187:				longest = total_len;
+       79: 1187-block  0
+unconditional  0 taken 79
+        -: 1188:		}
+        -: 1189:
+      15*: 1190:		if (icons && !long_view && columned)
+       15: 1190-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    %%%%%: 1190-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%: 1190-block  2
+branch  4 never executed
+branch  5 never executed
+    #####: 1191:			longest += 3;
+    %%%%%: 1191-block  0
+unconditional  0 never executed
+        -: 1192:	}
+        -: 1193:
+        -: 1194:				/* ########################
+        -: 1195:				 * #    LONG VIEW MODE    #
+        -: 1196:				 * ######################## */
+        -: 1197:
+       15: 1198:	if (long_view) {
+       15: 1198-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####: 1199:		int space_left = term_cols - MAX_PROP_STR;
+        -: 1200:		/* SPACE_LEFT is the max space that should be used to print the
+        -: 1201:		 * filename (plus space char) */
+        -: 1202:
+        -: 1203:		/* Do not allow SPACE_LEFT to be less than MIN_NAME_TRIM,
+        -: 1204:		 * especially because the result of the above operation could
+        -: 1205:		 * be negative */
+    #####: 1206:		if (space_left < min_name_trim)
+    %%%%%: 1206-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1207:			space_left = min_name_trim;
+    %%%%%: 1207-block  0
+unconditional  0 never executed
+        -: 1208:
+    #####: 1209:		if ((int)longest < space_left)
+    %%%%%: 1209-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1210:			space_left = longest;
+    %%%%%: 1210-block  0
+unconditional  0 never executed
+        -: 1211:
+    #####: 1212:		int k = (int)files;
+    #####: 1213:		for (i = 0; i < k; i++) {
+    %%%%%: 1213-block  0
+unconditional  0 never executed
+    %%%%%: 1213-block  1
+unconditional  1 never executed
+    %%%%%: 1213-block  2
+branch  2 never executed
+branch  3 never executed
+        -: 1214:
+    #####: 1215:			if (max_files != UNSET && i == max_files)
+    %%%%%: 1215-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1215-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1216:				break;
+    %%%%%: 1216-block  0
+unconditional  0 never executed
+        -: 1217:
+    #####: 1218:			if (pager) {
+    %%%%%: 1218-block  0
+branch  0 never executed
+branch  1 never executed
+        -: 1219:
+    #####: 1220:				if (counter > (size_t)(term_rows - 2)) {
+    %%%%%: 1220-block  0
+branch  0 never executed
+branch  1 never executed
+        -: 1221:
+    #####: 1222:					fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
+    %%%%%: 1222-block  0
+call    0 never executed
+        -: 1223:
+    #####: 1224:					switch (c = xgetchar()) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+        -: 1225:
+        -: 1226:					/* Advance one line at a time */
+    #####: 1227:					case 66: /* fallthrough */ /* Down arrow */
+        -: 1228:					case 10: /* fallthrough */ /* Enter */
+        -: 1229:					case 32:		   /* Space */
+    #####: 1230:						break;
+    %%%%%: 1230-block  0
+unconditional  0 never executed
+        -: 1231:
+        -: 1232:					/* Advance one page at a time */
+    #####: 1233:					case 126:
+    #####: 1234:						counter = 0; /* Page Down */
+    #####: 1235:						break;
+    %%%%%: 1235-block  0
+unconditional  0 never executed
+        -: 1236:
+    #####: 1237:					case 63: /* fallthrough */ /* ? */
+        -: 1238:					case 104: {		   /* h: Print pager help */
+    #####: 1239:						CLEAR;
+    %%%%%: 1239-block  0
+call    0 never executed
+        -: 1240:
+    #####: 1241:						fputs(_("?, h: help\n"
+call    0 never executed
+        -: 1242:							"Down arrow, Enter, Space: Advance one line\n"
+        -: 1243:							"Page Down: Advance one page\n"
+        -: 1244:							"q: Stop pagging\n"), stdout);
+        -: 1245:
+    #####: 1246:						int l = (int)term_rows - 5;
+    #####: 1247:						while (--l >= 0)
+unconditional  0 never executed
+    %%%%%: 1247-block  0
+branch  1 never executed
+branch  2 never executed
+    #####: 1248:							putchar('\n');
+    %%%%%: 1248-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1249:
+    #####: 1250:						fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
+    %%%%%: 1250-block  0
+call    0 never executed
+        -: 1251:
+    #####: 1252:						i -= (term_rows - 1);
+        -: 1253:
+    #####: 1254:						if (i < 0)
+branch  0 never executed
+branch  1 never executed
+    #####: 1255:							i = 0;
+    %%%%%: 1255-block  0
+unconditional  0 never executed
+        -: 1256:
+    #####: 1257:						counter = 0;
+    #####: 1258:						xgetchar();
+    %%%%%: 1258-block  0
+call    0 never executed
+    #####: 1259:						CLEAR;
+call    0 never executed
+    #####: 1260:					} break;
+unconditional  0 never executed
+        -: 1261:
+        -: 1262:					/* Stop paging (and set a flag to reenable the pager
+        -: 1263:					 * later) */
+    #####: 1264:					case 99:  /* 'c' */
+        -: 1265:					case 112: /* 'p' */
+        -: 1266:					case 113:
+    #####: 1267:						pager = 0, reset_pager = 1; /* 'q' */
+    #####: 1268:						break;
+    %%%%%: 1268-block  0
+unconditional  0 never executed
+        -: 1269:
+        -: 1270:					/* If another key is pressed, go back one position.
+        -: 1271:					 * Otherwise, some filenames won't be listed.*/
+    #####: 1272:					default:
+    #####: 1273:						i--;
+    #####: 1274:						fputs("\r\x1b[K\x1b[3J", stdout);
+    %%%%%: 1274-block  0
+call    0 never executed
+    #####: 1275:						continue;
+unconditional  0 never executed
+        -: 1276:					}
+        -: 1277:
+    #####: 1278:					fputs("\r\x1b[K\x1b[3J", stdout);
+    %%%%%: 1278-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1279:				}
+        -: 1280:
+    #####: 1281:				counter++;
+    %%%%%: 1281-block  0
+unconditional  0 never executed
+        -: 1282:			}
+        -: 1283:
+        -: 1284:			/* Print ELN. The remaining part of the line will be
+        -: 1285:			 * printed by print_entry_props() */
+    #####: 1286:			if (!no_eln)
+    %%%%%: 1286-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1287:				printf("%s%d%s ", el_c, i + 1, df_c);
+    %%%%%: 1287-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1288:
+    #####: 1289:			print_entry_props(&file_info[i], (size_t)space_left);
+    %%%%%: 1289-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1290:		}
+        -: 1291:
+    #####: 1292:		goto END;
+    %%%%%: 1292-block  0
+unconditional  0 never executed
+        -: 1293:	}
+        -: 1294:
+        -: 1295:				/* ########################
+        -: 1296:				 * #   NORMAL VIEW MODE   #
+        -: 1297:				 * ######################## */
+        -: 1298:
+       15: 1299:	int last_column = 0;
+        -: 1300:
+        -: 1301:	/* Get amount of columns needed to print files in CWD  */
+       15: 1302:	if (!columned)
+       15: 1302-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####: 1303:		columns_n = 1;
+    %%%%%: 1303-block  0
+unconditional  0 never executed
+        -: 1304:
+        -: 1305:	else {
+       15: 1306:		columns_n = (size_t)term_cols / (longest + 1); /* +1 for the
+        -: 1307:		space between file names */
+        -: 1308:
+        -: 1309:		/* If longest is bigger than terminal columns, columns_n will
+        -: 1310:		 * be negative or zero. To avoid this: */
+       15: 1311:		if (columns_n < 1)
+       15: 1311-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####: 1312:			columns_n = 1;
+    %%%%%: 1312-block  0
+unconditional  0 never executed
+        -: 1313:
+        -: 1314:		/* If we have only three files, we don't want four columns */
+       15: 1315:		if (columns_n > (size_t)n)
+       15: 1315-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####: 1316:			columns_n = (size_t)n;
+    %%%%%: 1316-block  0
+unconditional  0 never executed
+        -: 1317:	}
+        -: 1318:
+       15: 1319:	int nn = (int)n;
+       15: 1320:	size_t cur_cols = 0;
+     1093: 1321:	for (i = 0; i < nn; i++) {
+       15: 1321-block  0
+unconditional  0 taken 15
+     1078: 1321-block  1
+unconditional  1 taken 1078
+     1093: 1321-block  2
+branch  2 taken 1078
+branch  3 taken 15 (fallthrough)
+        -: 1322:
+    1078*: 1323:		if (max_files != UNSET && i == max_files)
+     1078: 1323-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1078
+    %%%%%: 1323-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1324:			break;
+    %%%%%: 1324-block  0
+unconditional  0 never executed
+        -: 1325:
+        -: 1326:				/* ######################
+        -: 1327:				 * #   A SIMPLE PAGER   #
+        -: 1328:				 * ###################### */
+        -: 1329:
+        -: 1330:		/* A basic pager for directories containing large amount of
+        -: 1331:		 * files. What's missing? It only goes downwards. To go
+        -: 1332:		 * backwards, use the terminal scrollback function */
+     1078: 1333:		if (pager) {
+     1078: 1333-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1078
+        -: 1334:			/* Run the pager only once all columns and rows fitting in
+        -: 1335:			 * the screen are filled with the corresponding filenames */
+    #####: 1336:			if (last_column && counter > columns_n * ((size_t)term_rows - 2)) {
+    %%%%%: 1336-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1336-block  1
+branch  2 never executed
+branch  3 never executed
+        -: 1337:
+    #####: 1338:				fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
+    %%%%%: 1338-block  0
+call    0 never executed
+        -: 1339:
+    #####: 1340:				switch (c = xgetchar()) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+        -: 1341:
+        -: 1342:				/* Advance one line at a time */
+    #####: 1343:				case 66: /* fallthrough */ /* Down arrow */
+        -: 1344:				case 10: /* fallthrough */ /* Enter */
+        -: 1345:				case 32:		   /* Space */
+    #####: 1346:					break;
+    %%%%%: 1346-block  0
+unconditional  0 never executed
+        -: 1347:
+        -: 1348:				/* Advance one page at a time */
+    #####: 1349:				case 126:
+    #####: 1350:					counter = 0; /* Page Down */
+    #####: 1351:					break;
+    %%%%%: 1351-block  0
+unconditional  0 never executed
+        -: 1352:
+    #####: 1353:				case 63: /* fallthrough */ /* ? */
+        -: 1354:				case 104: {		   /* h: Print pager help */
+    #####: 1355:					CLEAR;
+    %%%%%: 1355-block  0
+call    0 never executed
+        -: 1356:
+    #####: 1357:					fputs(_("?, h: help\n"
+call    0 never executed
+        -: 1358:						"Down arrow, Enter, Space: Advance one line\n"
+        -: 1359:						"Page Down: Advance one page\n"
+        -: 1360:						"q: Stop pagging\n"), stdout);
+        -: 1361:
+    #####: 1362:					int l = (int)term_rows - 5;
+    #####: 1363:					while (--l >= 0)
+unconditional  0 never executed
+    %%%%%: 1363-block  0
+branch  1 never executed
+branch  2 never executed
+    #####: 1364:						putchar('\n');
+    %%%%%: 1364-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1365:
+    #####: 1366:					fputs("\x1b[7;97m--Mas--\x1b[0;49m", stdout);
+    %%%%%: 1366-block  0
+call    0 never executed
+        -: 1367:
+    #####: 1368:					i -= ((term_rows * columns_n) - 1);
+        -: 1369:
+    #####: 1370:					if (i < 0)
+branch  0 never executed
+branch  1 never executed
+    #####: 1371:						i = 0;
+    %%%%%: 1371-block  0
+unconditional  0 never executed
+        -: 1372:
+    #####: 1373:					counter = 0;
+    #####: 1374:					xgetchar();
+    %%%%%: 1374-block  0
+call    0 never executed
+    #####: 1375:					CLEAR;
+call    0 never executed
+    #####: 1376:				} break;
+unconditional  0 never executed
+        -: 1377:
+        -: 1378:				/* Stop paging (and set a flag to reenable the pager
+        -: 1379:				 * later) */
+    #####: 1380:				case 99: /* fallthrough */  /* 'c' */
+        -: 1381:				case 112: /* fallthrough */ /* 'p' */
+        -: 1382:				case 113:
+    #####: 1383:					pager = 0, reset_pager = 1; /* 'q' */
+    #####: 1384:					break;
+    %%%%%: 1384-block  0
+unconditional  0 never executed
+        -: 1385:
+        -: 1386:				/* If another key is pressed, go back one position.
+        -: 1387:				 * Otherwise, some filenames won't be listed.*/
+    #####: 1388:				default:
+    #####: 1389:					i--;
+    #####: 1390:					fputs("\r\x1b[K\x1b[3J", stdout);
+    %%%%%: 1390-block  0
+call    0 never executed
+    #####: 1391:					continue;
+unconditional  0 never executed
+        -: 1392:				}
+        -: 1393:
+    #####: 1394:				fputs("\r\x1b[K\x1b[3J", stdout);
+    %%%%%: 1394-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1395:			}
+        -: 1396:
+    #####: 1397:			counter++;
+    %%%%%: 1397-block  0
+unconditional  0 never executed
+        -: 1398:		}
+        -: 1399:
+        -: 1400:		/* Determine if current entry is in the last column, in which
+        -: 1401:		 * case a new line char will be appended */
+     1078: 1402:		if (++cur_cols == columns_n) {
+     1078: 1402-block  0
+branch  0 taken 588 (fallthrough)
+branch  1 taken 490
+      588: 1403:			cur_cols = 0;
+      588: 1404:			last_column = 1;
+      588: 1404-block  0
+unconditional  0 taken 588
+        -: 1405:		} else
+      490: 1406:			last_column = 0;
+      490: 1406-block  0
+unconditional  0 taken 490
+        -: 1407:
+    1078*: 1408:		file_info[i].eln_n = no_eln ? -1 : DIGINUM(i + 1);
+     1078: 1408-block  0
+branch  0 taken 1078 (fallthrough)
+branch  1 taken 0
+     1078: 1408-block  1
+branch  2 taken 943 (fallthrough)
+branch  3 taken 135
+      943: 1408-block  2
+branch  4 taken 251 (fallthrough)
+branch  5 taken 692
+      251: 1408-block  3
+branch  6 taken 0 (fallthrough)
+branch  7 taken 251
+    %%%%%: 1408-block  4
+branch  8 never executed
+branch  9 never executed
+    %%%%%: 1408-block  5
+branch 10 never executed
+branch 11 never executed
+    %%%%%: 1408-block  6
+branch 12 never executed
+branch 13 never executed
+    %%%%%: 1408-block  7
+branch 14 never executed
+branch 15 never executed
+    %%%%%: 1408-block  8
+branch 16 never executed
+branch 17 never executed
+    %%%%%: 1408-block  9
+branch 18 never executed
+branch 19 never executed
+    %%%%%: 1408-block 10
+unconditional 20 never executed
+    %%%%%: 1408-block 11
+unconditional 21 never executed
+    %%%%%: 1408-block 12
+unconditional 22 never executed
+    %%%%%: 1408-block 13
+unconditional 23 never executed
+    %%%%%: 1408-block 14
+unconditional 24 never executed
+    %%%%%: 1408-block 15
+unconditional 25 never executed
+    %%%%%: 1408-block 16
+unconditional 26 never executed
+    %%%%%: 1408-block 17
+unconditional 27 never executed
+    %%%%%: 1408-block 18
+unconditional 28 never executed
+    %%%%%: 1408-block 19
+unconditional 29 never executed
+    %%%%%: 1408-block 20
+unconditional 30 never executed
+    %%%%%: 1408-block 21
+unconditional 31 never executed
+    %%%%%: 1408-block 22
+unconditional 32 never executed
+      251: 1408-block 23
+unconditional 33 taken 251
+      251: 1408-block 24
+unconditional 34 taken 251
+      692: 1408-block 25
+unconditional 35 taken 692
+      943: 1408-block 26
+unconditional 36 taken 943
+      135: 1408-block 27
+unconditional 37 taken 135
+     1078: 1408-block 28
+unconditional 38 taken 1078
+    %%%%%: 1408-block 29
+unconditional 39 never executed
+        -: 1409:
+     1078: 1410:		int ind_char = 1;
+        -: 1411:
+     1078: 1412:		if (!classify)
+     1078: 1412-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1078
+    #####: 1413:			ind_char = 0;
+    %%%%%: 1413-block  0
+unconditional  0 never executed
+        -: 1414:
+        -: 1415:			/* #################################
+        -: 1416:			 * #    PRINT THE CURRENT ENTRY    #
+        -: 1417:			 * ################################# */
+        -: 1418:
+     1078: 1419:		if (colorize) {
+     1078: 1419-block  0
+branch  0 taken 1078 (fallthrough)
+branch  1 taken 0
+        -: 1420:
+     1078: 1421:			ind_char = 0;
+     1078: 1422:			if (icons) {
+     1078: 1422-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1078
+    #####: 1423:				if (no_eln)
+    %%%%%: 1423-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1424:					printf("%s%s %s%s%s", file_info[i].icon_color,
+    #####: 1425:					    file_info[i].icon, file_info[i].color,
+    #####: 1426:					    file_info[i].name, df_c);
+    %%%%%: 1426-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1427:				else
+    #####: 1428:					printf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
+    #####: 1429:					    file_info[i].icon_color, file_info[i].icon,
+    #####: 1430:					    file_info[i].color, file_info[i].name, df_c);
+    %%%%%: 1430-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1431:			}
+        -: 1432:
+        -: 1433:			else {
+     1078: 1434:				if (no_eln)
+     1078: 1434-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1078
+    #####: 1435:					printf("%s%s%s", file_info[i].color,
+    #####: 1436:					    file_info[i].name, df_c);
+    %%%%%: 1436-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1437:				else
+     1078: 1438:					printf("%s%d%s %s%s%s", el_c, i + 1, df_c,
+     1078: 1439:					    file_info[i].color, file_info[i].name, df_c);
+     1078: 1439-block  0
+call    0 returned 1078
+unconditional  1 taken 1078
+        -: 1440:			}
+        -: 1441:
+     1078: 1442:			if (classify) {
+     1078: 1442-block  0
+branch  0 taken 1078 (fallthrough)
+branch  1 taken 0
+        -: 1443:				/* Append directory indicator and files counter */
+     1078: 1444:				switch (file_info[i].type) {
+     1078: 1444-block  0
+branch  0 taken 379
+branch  1 taken 13
+branch  2 taken 686
+        -: 1445:
+      379: 1446:				case DT_DIR:
+      379: 1447:					fputs(" /", stdout);
+      379: 1447-block  0
+call    0 returned 379
+      379: 1448:					if (file_info[i].filesn > 0 && files_counter)
+branch  0 taken 357 (fallthrough)
+branch  1 taken 22
+      357: 1448-block  0
+branch  2 taken 357 (fallthrough)
+branch  3 taken 0
+      357: 1449:						fputs(xitoa(file_info[i].filesn), stdout);
+      357: 1449-block  0
+call    0 returned 357
+call    1 returned 357
+unconditional  2 taken 357
+      379: 1450:					break;
+      379: 1450-block  0
+unconditional  0 taken 379
+        -: 1451:
+       13: 1452:				case DT_LNK:
+       13: 1453:					if (file_info[i].dir)
+       13: 1453-block  0
+branch  0 taken 13 (fallthrough)
+branch  1 taken 0
+       13: 1454:						fputs(" /", stdout);
+       13: 1454-block  0
+call    0 returned 13
+unconditional  1 taken 13
+       13: 1455:					if (file_info[i].filesn > 0 && files_counter)
+       13: 1455-block  0
+branch  0 taken 13 (fallthrough)
+branch  1 taken 0
+       13: 1455-block  1
+branch  2 taken 13 (fallthrough)
+branch  3 taken 0
+       13: 1456:						fputs(xitoa(file_info[i].filesn), stdout);
+       13: 1456-block  0
+call    0 returned 13
+call    1 returned 13
+unconditional  2 taken 13
+       13: 1457:					break;
+       13: 1457-block  0
+unconditional  0 taken 13
+        -: 1458:				}
+        -: 1459:			}
+        -: 1460:		}
+        -: 1461:
+        -: 1462:		/* No color */
+        -: 1463:		else {
+    #####: 1464:			if (icons) {
+    %%%%%: 1464-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1465:				if (no_eln)
+    %%%%%: 1465-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1466:					printf("%s %s", file_info[i].icon, file_info[i].name);
+    %%%%%: 1466-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1467:				else
+    #####: 1468:					printf("%s%d%s %s %s", el_c, i + 1, df_c,
+    #####: 1469:					    file_info[i].icon, file_info[i].name);
+    %%%%%: 1469-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1470:			}
+        -: 1471:
+        -: 1472:			else {
+    #####: 1473:				if (no_eln)
+    %%%%%: 1473-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1474:					fputs(file_info[i].name, stdout);
+    %%%%%: 1474-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1475:				else {
+    #####: 1476:					printf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
+    %%%%%: 1476-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1477:					/*                  fputs(el_c, stdout);
+        -: 1478:					fputs(xitoa(i + 1), stdout);
+        -: 1479:					fputs(df_c, stdout);
+        -: 1480:					putchar(' ');
+        -: 1481:					fputs(file_info[i].name, stdout); */
+        -: 1482:				}
+        -: 1483:			}
+        -: 1484:
+    #####: 1485:			if (classify) {
+    %%%%%: 1485-block  0
+branch  0 never executed
+branch  1 never executed
+        -: 1486:				/* Append filetype indicator */
+    #####: 1487:				switch (file_info[i].type) {
+    %%%%%: 1487-block  0
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+branch  6 never executed
+        -: 1488:
+    #####: 1489:				case DT_DIR:
+    #####: 1490:					ind_char = 0;
+    #####: 1491:					fputs(" /", stdout);
+    %%%%%: 1491-block  0
+call    0 never executed
+    #####: 1492:					if (file_info[i].filesn > 0 && files_counter)
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1492-block  0
+branch  2 never executed
+branch  3 never executed
+    #####: 1493:						fputs(xitoa(file_info[i].filesn), stdout);
+    %%%%%: 1493-block  0
+call    0 never executed
+call    1 never executed
+unconditional  2 never executed
+    #####: 1494:					break;
+    %%%%%: 1494-block  0
+unconditional  0 never executed
+        -: 1495:
+    #####: 1496:				case DT_FIFO:
+    #####: 1497:					putchar('|');
+    %%%%%: 1497-block  0
+call    0 never executed
+    #####: 1498:					break;
+unconditional  0 never executed
+        -: 1499:
+    #####: 1500:				case DT_LNK:
+    #####: 1501:					if (file_info[i].dir) {
+    %%%%%: 1501-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1502:						ind_char = 0;
+    #####: 1503:						fputs(" /", stdout);
+    %%%%%: 1503-block  0
+call    0 never executed
+    #####: 1504:						if (file_info[i].filesn > 0 && files_counter)
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1504-block  0
+branch  2 never executed
+branch  3 never executed
+    #####: 1505:							fputs(xitoa(file_info[i].filesn), stdout);
+    %%%%%: 1505-block  0
+call    0 never executed
+call    1 never executed
+unconditional  2 never executed
+        -: 1506:					} else
+    #####: 1507:						putchar('@');
+    %%%%%: 1507-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1508:
+    #####: 1509:					break;
+    %%%%%: 1509-block  0
+unconditional  0 never executed
+        -: 1510:
+    #####: 1511:				case DT_REG:
+    #####: 1512:					if (file_info[i].exec)
+    %%%%%: 1512-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1513:						putchar('*');
+    %%%%%: 1513-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1514:					else
+    #####: 1515:						ind_char = 0;
+    %%%%%: 1515-block  0
+unconditional  0 never executed
+    #####: 1516:					break;
+    %%%%%: 1516-block  0
+unconditional  0 never executed
+        -: 1517:
+    #####: 1518:				case DT_SOCK:
+    #####: 1519:					putchar('=');
+    %%%%%: 1519-block  0
+call    0 never executed
+    #####: 1520:					break;
+unconditional  0 never executed
+        -: 1521:
+    #####: 1522:				case DT_UNKNOWN:
+    #####: 1523:					putchar('?');
+    %%%%%: 1523-block  0
+call    0 never executed
+    #####: 1524:					break;
+unconditional  0 never executed
+        -: 1525:
+    #####: 1526:				default:
+    #####: 1527:					ind_char = 0;
+    %%%%%: 1527-block  0
+unconditional  0 never executed
+        -: 1528:				}
+        -: 1529:			}
+        -: 1530:		}
+        -: 1531:
+     1078: 1532:		if (!last_column) {
+     1078: 1532-block  0
+branch  0 taken 490 (fallthrough)
+branch  1 taken 588
+        -: 1533:
+        -: 1534:			/* Add spaces needed to equate the longest filename length */
+     490*: 1535:			int cur_len = (int)file_info[i].eln_n + 1 + (icons ? 3 : 0) + (int)file_info[i].len + (ind_char ? 1 : 0);
+      490: 1535-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 490
+    %%%%%: 1535-block  1
+unconditional  2 never executed
+      490: 1535-block  2
+unconditional  3 taken 490
+      490: 1536:			if (file_info[i].dir && classify) {
+      490: 1536-block  0
+branch  0 taken 266 (fallthrough)
+branch  1 taken 224
+      266: 1536-block  1
+branch  2 taken 266 (fallthrough)
+branch  3 taken 0
+      266: 1537:				cur_len += 2;
+      266: 1538:				if (file_info[i].filesn > 0 && files_counter && file_info[i].ruser)
+      266: 1538-block  0
+branch  0 taken 254 (fallthrough)
+branch  1 taken 12
+      254: 1538-block  1
+branch  2 taken 254 (fallthrough)
+branch  3 taken 0
+      254: 1538-block  2
+branch  4 taken 254 (fallthrough)
+branch  5 taken 0
+     254*: 1539:					cur_len += DIGINUM((int)file_info[i].filesn);
+      254: 1539-block  0
+branch  0 taken 98 (fallthrough)
+branch  1 taken 156
+       98: 1539-block  1
+branch  2 taken 6 (fallthrough)
+branch  3 taken 92
+        6: 1539-block  2
+branch  4 taken 3 (fallthrough)
+branch  5 taken 3
+        3: 1539-block  3
+branch  6 taken 0 (fallthrough)
+branch  7 taken 3
+    %%%%%: 1539-block  4
+branch  8 never executed
+branch  9 never executed
+    %%%%%: 1539-block  5
+branch 10 never executed
+branch 11 never executed
+    %%%%%: 1539-block  6
+branch 12 never executed
+branch 13 never executed
+    %%%%%: 1539-block  7
+branch 14 never executed
+branch 15 never executed
+    %%%%%: 1539-block  8
+branch 16 never executed
+branch 17 never executed
+    %%%%%: 1539-block  9
+unconditional 18 never executed
+    %%%%%: 1539-block 10
+unconditional 19 never executed
+    %%%%%: 1539-block 11
+unconditional 20 never executed
+    %%%%%: 1539-block 12
+unconditional 21 never executed
+    %%%%%: 1539-block 13
+unconditional 22 never executed
+    %%%%%: 1539-block 14
+unconditional 23 never executed
+    %%%%%: 1539-block 15
+unconditional 24 never executed
+    %%%%%: 1539-block 16
+unconditional 25 never executed
+    %%%%%: 1539-block 17
+unconditional 26 never executed
+    %%%%%: 1539-block 18
+unconditional 27 never executed
+    %%%%%: 1539-block 19
+unconditional 28 never executed
+        3: 1539-block 20
+unconditional 29 taken 3
+        3: 1539-block 21
+unconditional 30 taken 3
+        3: 1539-block 22
+unconditional 31 taken 3
+        6: 1539-block 23
+unconditional 32 taken 6
+       92: 1539-block 24
+unconditional 33 taken 92
+       98: 1539-block 25
+unconditional 34 taken 98
+      156: 1539-block 26
+unconditional 35 taken 156
+      254: 1539-block 27
+unconditional 36 taken 254
+        -: 1540:			}
+        -: 1541:
+      490: 1542:			int diff = (int)longest - cur_len;
+        -: 1543:
+        -: 1544:			register int j;
+     5334: 1545:			for (j = diff + 1; j--;)
+      490: 1545-block  0
+unconditional  0 taken 490
+     5334: 1545-block  1
+branch  1 taken 4844
+branch  2 taken 490
+     4844: 1546:				putchar(' ');
+     4844: 1546-block  0
+call    0 returned 4844
+unconditional  1 taken 4844
+        -: 1547:		} else
+      588: 1548:			putchar('\n');
+      588: 1548-block  0
+call    0 returned 588
+unconditional  1 taken 588
+        -: 1549:	}
+        -: 1550:
+       15: 1551:	if (!last_column)
+       15: 1551-block  0
+branch  0 taken 12 (fallthrough)
+branch  1 taken 3
+        3: 1552:		putchar('\n');
+        3: 1552-block  0
+call    0 returned 3
+unconditional  1 taken 3
+        -: 1553:
+        -: 1554:				/* #########################
+        -: 1555:				 * #   POST LISTING STUFF  #
+        -: 1556:				 * ######################### */
+        -: 1557:
+       12: 1558:END:
+       12: 1558-block  0
+unconditional  0 taken 12
+       15: 1559:	if (closedir(dir) == -1)
+       15: 1559-block  0
+call    0 returned 15
+branch  1 taken 0 (fallthrough)
+branch  2 taken 15
+    #####: 1560:		return EXIT_FAILURE;
+    %%%%%: 1560-block  0
+unconditional  0 never executed
+        -: 1561:
+       15: 1562:	if (xargs.list_and_quit == 1)
+       15: 1562-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####: 1563:		exit(exit_code);
+    %%%%%: 1563-block  0
+call    0 never executed
+        -: 1564:
+       15: 1565:	if (reset_pager)
+       15: 1565-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####: 1566:		pager = 1;
+    %%%%%: 1566-block  0
+unconditional  0 never executed
+        -: 1567:
+        -: 1568:	/* Print a dividing line between the files list and the
+        -: 1569:	 * prompt */
+       15: 1570:	print_div_line();
+       15: 1570-block  0
+call    0 returned 15
+        -: 1571:
+      15*: 1572:	if (max_files != UNSET && (int)files > max_files)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    %%%%%: 1572-block  0
+branch  2 never executed
+branch  3 never executed
+    #####: 1573:		printf("%d/%zu\n", max_files, files);
+    %%%%%: 1573-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1574:
+       15: 1575:	if (dirhist_map) {
+       15: 1575-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+        -: 1576:		/* Print current, previous, and next entries */
+    #####: 1577:		print_dirhist_map();
+    %%%%%: 1577-block  0
+call    0 never executed
+        -: 1578:
+    #####: 1579:		print_div_line();
+call    0 never executed
+unconditional  1 never executed
+        -: 1580:	}
+        -: 1581:
+       15: 1582:	if (disk_usage)
+       15: 1582-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####: 1583:		print_disk_usage();
+    %%%%%: 1583-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1584:
+       15: 1585:	if (sort_switch)
+       15: 1585-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####: 1586:		print_sort_method();
+    %%%%%: 1586-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1587:
+        -: 1588:	/*  clock_t end = clock();
+        -: 1589:	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC); */
+        -: 1590:
+       15: 1591:	return EXIT_SUCCESS;
+       15: 1591-block  0
+unconditional  0 taken 15
+        -: 1592:}
+        -: 1593:
+        -: 1594:void
+function free_dirlist called 15 returned 100% blocks executed 88%
+       15: 1595:free_dirlist(void)
+        -: 1596:{
+       15: 1597:	if (!file_info || !files)
+       15: 1597-block  0
+branch  0 taken 15 (fallthrough)
+branch  1 taken 0
+       15: 1597-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 15
+    #####: 1598:		return;
+    %%%%%: 1598-block  0
+unconditional  0 never executed
+        -: 1599:
+       15: 1600:	int i = (int)files;
+        -: 1601:
+     1093: 1602:	while (--i >= 0)
+       15: 1602-block  0
+unconditional  0 taken 15
+     1093: 1602-block  1
+branch  1 taken 1078
+branch  2 taken 15 (fallthrough)
+     1078: 1603:		free(file_info[i].name);
+     1078: 1603-block  0
+unconditional  0 taken 1078
+        -: 1604:
+       15: 1605:	free(file_info);
+       15: 1606:	file_info = (struct fileinfo *)NULL;
+       15: 1606-block  0
+unconditional  0 taken 15
+        -: 1607:}

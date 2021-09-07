@@ -1,0 +1,859 @@
+        -:    0:Source:aux.c
+        -:    1:/* aux.c -- functions that do not fit in any other file */
+        -:    2:
+        -:    3:/*
+        -:    4: * This file is part of CliFM
+        -:    5: * 
+        -:    6: * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
+        -:    7: * All rights reserved.
+        -:    8:
+        -:    9: * CliFM is free software; you can redistribute it and/or modify
+        -:   10: * it under the terms of the GNU General Public License as published by
+        -:   11: * the Free Software Foundation; either version 2 of the License, or
+        -:   12: * (at your option) any later version.
+        -:   13: *
+        -:   14: * CliFM is distributed in the hope that it will be useful,
+        -:   15: * but WITHOUT ANY WARRANTY; without even the implied warranty of
+        -:   16: * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        -:   17: * GNU General Public License for more details.
+        -:   18: *
+        -:   19: * You should have received a copy of the GNU General Public License
+        -:   20: * along with this program; if not, write to the Free Software
+        -:   21: * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+        -:   22: * MA 02110-1301, USA.
+        -:   23: */
+        -:   24:
+        -:   25:/*  #######################
+        -:   26: *  #  CLIFM CUSTOM LIB   #
+        -:   27: *  ######################*/
+        -:   28:
+        -:   29:#include "helpers.h"
+        -:   30:
+        -:   31:#include <ctype.h>
+        -:   32:#include <dirent.h>
+        -:   33:#include <errno.h>
+        -:   34:#include <stdio.h>
+        -:   35:#include <string.h>
+        -:   36:#include <sys/stat.h>
+        -:   37:#include <sys/types.h>
+        -:   38:#include <termios.h>
+        -:   39:#include <unistd.h>
+        -:   40:
+        -:   41:#include "aux.h"
+        -:   42:#include "exec.h"
+        -:   43:#include "misc.h"
+        -:   44:
+        -:   45:/* Given this value: \xA0\xA1\xA1, return an array of integers with
+        -:   46: * the integer values for A0, A1, and A2 respectivelly */
+        -:   47:int *
+function get_hex_num called 0 returned 0% blocks executed 0%
+    #####:   48:get_hex_num(const char *str)
+        -:   49:{
+    #####:   50:	size_t i = 0;
+    #####:   51:	int *hex_n = (int *)calloc(3, sizeof(int));
+        -:   52:
+    #####:   53:	while (*str) {
+    %%%%%:   53-block  0
+unconditional  0 never executed
+    %%%%%:   53-block  1
+branch  1 never executed
+branch  2 never executed
+        -:   54:
+    #####:   55:		if (*str == '\\') {
+    %%%%%:   55-block  0
+branch  0 never executed
+branch  1 never executed
+        -:   56:
+    #####:   57:			if (*(str + 1) == 'x') {
+    %%%%%:   57-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   58:				str += 2;
+    #####:   59:				char *tmp = calloc(3, sizeof(char));
+    #####:   60:				strncpy(tmp, str, 2);
+        -:   61:
+    #####:   62:				if (i >= 3)
+    %%%%%:   62-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   63:					hex_n = xrealloc(hex_n, (i + 1) * sizeof(int *));
+    %%%%%:   63-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:   64:
+    #####:   65:				hex_n[i++] = hex2int(tmp);
+    %%%%%:   65-block  0
+call    0 never executed
+        -:   66:
+    #####:   67:				free(tmp);
+unconditional  0 never executed
+        -:   68:			} else
+    #####:   69:				break;
+    %%%%%:   69-block  0
+unconditional  0 never executed
+        -:   70:		}
+    #####:   71:		str++;
+    %%%%%:   71-block  0
+unconditional  0 never executed
+        -:   72:	}
+        -:   73:
+    #####:   74:	hex_n = xrealloc(hex_n, (i + 1) * sizeof(int));
+    %%%%%:   74-block  0
+call    0 never executed
+    #####:   75:	hex_n[i] = -1; /* -1 marks the end of the int array */
+        -:   76:
+    #####:   77:	return hex_n;
+unconditional  0 never executed
+        -:   78:}
+        -:   79:
+        -:   80:/* Count files in DIR_PATH, including self and parent. */
+        -:   81:int
+function count_dir called 422 returned 100% blocks executed 86%
+      422:   82:count_dir(const char *dir_path) /* Readdir version */
+        -:   83:{
+      422:   84:	if (!dir_path)
+      422:   84-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 422
+    #####:   85:		return -1;
+    %%%%%:   85-block  0
+unconditional  0 never executed
+        -:   86:
+        -:   87:	DIR *dir_p;
+        -:   88:
+      422:   89:	if ((dir_p = opendir(dir_path)) == NULL) {
+      422:   89-block  0
+call    0 returned 422
+branch  1 taken 2 (fallthrough)
+branch  2 taken 420
+        2:   90:		if (errno == ENOMEM)
+        2:   90-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:   91:			exit(EXIT_FAILURE);
+    %%%%%:   91-block  0
+call    0 never executed
+        -:   92:		else
+        2:   93:			return -1;
+        2:   93-block  0
+unconditional  0 taken 2
+        -:   94:	}
+        -:   95:
+      420:   96:	int file_count = 0;
+        -:   97:	struct dirent *ent;
+        -:   98:
+    25058:   99:	while ((ent = readdir(dir_p)))
+      420:   99-block  0
+unconditional  0 taken 420
+    25058:   99-block  1
+call    1 returned 25058
+branch  2 taken 24638
+branch  3 taken 420 (fallthrough)
+    24638:  100:		file_count++;
+    24638:  100-block  0
+unconditional  0 taken 24638
+        -:  101:
+      420:  102:	closedir(dir_p);
+      420:  102-block  0
+call    0 returned 420
+        -:  103:
+      420:  104:	return file_count;
+unconditional  0 taken 420
+        -:  105:}
+        -:  106:
+        -:  107:/* Get the path of a given command from the PATH environment variable.
+        -:  108: * It basically does the same as the 'which' Unix command */
+        -:  109:char *
+function get_cmd_path called 3 returned 100% blocks executed 89%
+        3:  110:get_cmd_path(const char *cmd)
+        -:  111:{
+        3:  112:	char *cmd_path = (char *)NULL;
+        -:  113:	size_t i;
+        -:  114:
+        3:  115:	cmd_path = (char *)xnmalloc(PATH_MAX + 1, sizeof(char));
+        3:  115-block  0
+call    0 returned 3
+        -:  116:
+        9:  117:	for (i = 0; i < path_n; i++) { /* Get each path from PATH */
+unconditional  0 taken 3
+        6:  117-block  0
+unconditional  1 taken 6
+        9:  117-block  1
+branch  2 taken 9
+branch  3 taken 0 (fallthrough)
+        -:  118:		/* Append cmd to each path and check if it exists and is
+        -:  119:		 * executable */
+        9:  120:		snprintf(cmd_path, PATH_MAX, "%s/%s", paths[i], cmd);
+        -:  121:
+        9:  122:		if (access(cmd_path, X_OK) == 0)
+        9:  122-block  0
+call    0 returned 9
+branch  1 taken 3 (fallthrough)
+branch  2 taken 6
+        3:  123:			return cmd_path;
+        3:  123-block  0
+unconditional  0 taken 3
+        -:  124:	}
+        -:  125:
+        -:  126:	/* If cmd was not found */
+    #####:  127:	free(cmd_path);
+        -:  128:
+    #####:  129:	return (char *)NULL;
+    %%%%%:  129-block  0
+unconditional  0 never executed
+        -:  130:}
+        -:  131:
+        -:  132:/* Convert FILE_SIZE to human readeable form */
+        -:  133:char *
+function get_size_unit called 2 returned 100% blocks executed 80%
+        2:  134:get_size_unit(off_t size)
+        -:  135:{
+        2:  136:	size_t max = 9;
+        -:  137:	/* Max size type length == 9 == "1023.99K\0" */
+        2:  138:	char *p = malloc(max * sizeof(char));
+        -:  139:
+        2:  140:	if (!p)
+        2:  140-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####:  141:		return (char *)NULL;
+    %%%%%:  141-block  0
+unconditional  0 never executed
+        -:  142:
+        2:  143:	char *str = p;
+        2:  144:	p = (char *)NULL;
+        -:  145:
+        2:  146:	size_t n = 0;
+        2:  147:	float s = (float)size;
+        -:  148:
+        4:  149:	while (s > 1024) {
+        2:  149-block  0
+unconditional  0 taken 2
+        4:  149-block  1
+branch  1 taken 2
+branch  2 taken 2 (fallthrough)
+        2:  150:		s = s / 1024;
+        2:  151:		++n;
+        2:  151-block  0
+unconditional  0 taken 2
+        -:  152:	}
+        -:  153:
+        2:  154:	int x = (int)s;
+        -:  155:	/* If x == s, then s is an interger; else, it's float
+        -:  156:	 * We don't want to print the reminder when it is zero */
+        -:  157:
+        2:  158:	const char *const u = "BKMGTPEZY";
+       2*:  159:	snprintf(str, max, "%.*f%c", (s == x) ? 0 : 2, (double)s, u[n]);
+        2:  159-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  159-block  1
+unconditional  2 taken 2
+    %%%%%:  159-block  2
+unconditional  3 never executed
+        -:  160:
+        2:  161:	return str;
+        2:  161-block  0
+unconditional  0 taken 2
+        -:  162:}
+        -:  163:
+        -:  164:off_t
+function dir_size called 0 returned 0% blocks executed 0%
+    #####:  165:dir_size(char *dir)
+        -:  166:{
+    #####:  167:	char *rand_ext = gen_rand_str(6);
+    %%%%%:  167-block  0
+call    0 never executed
+    #####:  168:	if (!rand_ext)
+branch  0 never executed
+branch  1 never executed
+    #####:  169:		return -1;
+    %%%%%:  169-block  0
+unconditional  0 never executed
+        -:  170:
+        -:  171:	char DU_TMP_FILE[15];
+    #####:  172:	sprintf(DU_TMP_FILE, "/tmp/du.%s", rand_ext);
+    #####:  173:	free(rand_ext);
+        -:  174:
+    #####:  175:	if (!dir)
+    %%%%%:  175-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  176:		return -1;
+    %%%%%:  176-block  0
+unconditional  0 never executed
+        -:  177:
+    #####:  178:	FILE *du_fp = fopen(DU_TMP_FILE, "w");
+    %%%%%:  178-block  0
+call    0 never executed
+    #####:  179:	int stdout_bk = dup(STDOUT_FILENO); /* Save original stdout */
+call    0 never executed
+    #####:  180:	dup2(fileno(du_fp), STDOUT_FILENO); /* Redirect stdout to the desired
+call    0 never executed
+call    1 never executed
+        -:  181:																				 file */
+    #####:  182:	fclose(du_fp);
+call    0 never executed
+        -:  183:
+    #####:  184:	char *cmd[] = {"du", "--block-size=1", "-s", dir, NULL};
+    #####:  185:	launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+call    0 never executed
+        -:  186:
+    #####:  187:	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
+call    0 never executed
+    #####:  188:	close(stdout_bk);
+call    0 never executed
+        -:  189:
+    #####:  190:	off_t retval = -1;
+        -:  191:
+    #####:  192:	if (access(DU_TMP_FILE, F_OK) == 0) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:  193:
+    #####:  194:		du_fp = fopen(DU_TMP_FILE, "r");
+    %%%%%:  194-block  0
+call    0 never executed
+        -:  195:
+    #####:  196:		if (du_fp) {
+branch  0 never executed
+branch  1 never executed
+        -:  197:			/* I only need here the first field of the line, which is a
+        -:  198:			 * file size and could only take a few bytes, so that 32
+        -:  199:			 * bytes is more than enough */
+    #####:  200:			char line[32] = "";
+    #####:  201:			fgets(line, (int)sizeof(line), du_fp);
+    %%%%%:  201-block  0
+call    0 never executed
+        -:  202:
+    #####:  203:			char *file_size = strbfr(line, '\t');
+call    0 never executed
+        -:  204:
+    #####:  205:			if (file_size) {
+branch  0 never executed
+branch  1 never executed
+    #####:  206:				retval = (off_t)atoll(file_size);
+    #####:  207:				free(file_size);
+    %%%%%:  207-block  0
+unconditional  0 never executed
+        -:  208:			}
+        -:  209:
+    #####:  210:			fclose(du_fp);
+    %%%%%:  210-block  0
+call    0 never executed
+        -:  211:		}
+        -:  212:
+    #####:  213:		unlink(DU_TMP_FILE);
+    %%%%%:  213-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  214:	}
+        -:  215:
+    #####:  216:	return retval;
+    %%%%%:  216-block  0
+unconditional  0 never executed
+        -:  217:}
+        -:  218:
+        -:  219:/* Return the filetype of the file pointed to by LINK, or -1 in case of
+        -:  220: * error. Possible return values:
+        -:  221:S_IFDIR: 40000 (octal) / 16384 (decimal, integer)
+        -:  222:S_IFREG: 100000 / 32768
+        -:  223:S_IFLNK: 120000 / 40960
+        -:  224:S_IFSOCK: 140000 / 49152
+        -:  225:S_IFBLK: 60000 / 24576
+        -:  226:S_IFCHR: 20000 / 8192
+        -:  227:S_IFIFO: 10000 / 4096
+        -:  228: * See the inode manpage */
+        -:  229:int
+function get_link_ref called 0 returned 0% blocks executed 0%
+    #####:  230:get_link_ref(const char *link)
+        -:  231:{
+    #####:  232:	if (!link)
+    %%%%%:  232-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  233:		return (-1);
+    %%%%%:  233-block  0
+unconditional  0 never executed
+        -:  234:
+    #####:  235:	char *linkname = realpath(link, (char *)NULL);
+    %%%%%:  235-block  0
+call    0 never executed
+    #####:  236:	if (linkname) {
+branch  0 never executed
+branch  1 never executed
+        -:  237:		struct stat file_attrib;
+    #####:  238:		stat(linkname, &file_attrib);
+    %%%%%:  238-block  0
+call    0 never executed
+    #####:  239:		free(linkname);
+    #####:  240:		return (int)(file_attrib.st_mode & S_IFMT);
+unconditional  0 never executed
+        -:  241:	}
+        -:  242:
+    #####:  243:	return (-1);
+    %%%%%:  243-block  0
+unconditional  0 never executed
+        -:  244:}
+        -:  245:
+        -:  246:/* Transform an integer (N) into a string of chars
+        -:  247: * this exists because some Operating systems do not suppoit itoa */
+        -:  248:char *
+function xitoa called 370 returned 100% blocks executed 88%
+      370:  249:xitoa(int n)
+        -:  250:{
+        -:  251:	static char buf[32] = {0};
+      370:  252:	int i = 30, rem;
+        -:  253:
+      370:  254:	if (!n)
+      370:  254-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 370
+    #####:  255:		return "0";
+    %%%%%:  255-block  0
+unconditional  0 never executed
+        -:  256:
+      891:  257:	while (n && i) {
+      370:  257-block  0
+unconditional  0 taken 370
+      891:  257-block  1
+branch  1 taken 521 (fallthrough)
+branch  2 taken 370
+      521:  257-block  2
+branch  3 taken 521
+branch  4 taken 0 (fallthrough)
+      521:  258:		rem = n / 10;
+      521:  259:		buf[i] = '0' + (n - (rem * 10));
+      521:  260:		n = rem;
+      521:  261:		--i;
+      521:  261-block  0
+unconditional  0 taken 521
+        -:  262:	}
+        -:  263:
+      370:  264:	return &buf[++i];
+      370:  264-block  0
+unconditional  0 taken 370
+        -:  265:}
+        -:  266:
+        -:  267:/* some memory wrapper functions */
+        -:  268:void *
+function xrealloc called 4124 returned 100% blocks executed 60%
+     4124:  269:xrealloc(void *ptr, size_t size)
+        -:  270:{
+     4124:  271:	void *new_ptr = realloc(ptr, size);
+        -:  272:
+     4124:  273:	if (!new_ptr) {
+     4124:  273-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4124
+    #####:  274:		free(ptr);
+    #####:  275:		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
+    %%%%%:  275-block  0
+call    0 never executed
+        -:  276:				PROGRAM_NAME, __func__, size);
+    #####:  277:		exit(EXIT_FAILURE);
+call    0 never executed
+        -:  278:	}
+        -:  279:
+     4124:  280:	return new_ptr;
+     4124:  280-block  0
+unconditional  0 taken 4124
+        -:  281:}
+        -:  282:
+        -:  283:void *
+function xcalloc called 48 returned 100% blocks executed 60%
+       48:  284:xcalloc(size_t nmemb, size_t size)
+        -:  285:{
+       48:  286:	void *new_ptr = calloc(nmemb, size);
+        -:  287:
+       48:  288:	if (!new_ptr) {
+       48:  288-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 48
+    #####:  289:		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
+    %%%%%:  289-block  0
+call    0 never executed
+        -:  290:				PROGRAM_NAME, __func__, nmemb * size);
+    #####:  291:		exit(EXIT_FAILURE);
+call    0 never executed
+        -:  292:	}
+        -:  293:
+       48:  294:	return new_ptr;
+       48:  294-block  0
+unconditional  0 taken 48
+        -:  295:}
+        -:  296:
+        -:  297:void *
+function xnmalloc called 1875 returned 100% blocks executed 60%
+     1875:  298:xnmalloc(size_t nmemb, size_t size)
+        -:  299:{
+     1875:  300:	void *new_ptr = malloc(nmemb * size);
+        -:  301:
+     1875:  302:	if (!new_ptr) {
+     1875:  302-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1875
+    #####:  303:		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
+    %%%%%:  303-block  0
+call    0 never executed
+        -:  304:				PROGRAM_NAME, __func__, nmemb * size);
+    #####:  305:		exit(EXIT_FAILURE);
+call    0 never executed
+        -:  306:	}
+        -:  307:
+     1875:  308:	return new_ptr;
+     1875:  308-block  0
+unconditional  0 taken 1875
+        -:  309:}
+        -:  310:
+        -:  311:/* unlike getchar this does not wait for newline('\n')
+        -:  312:https://stackoverflow.com/questions/12710582/how-can-i-capture-a-key-stroke-immediately-in-linux 
+        -:  313:*/
+        -:  314:char
+function xgetchar called 0 returned 0% blocks executed 0%
+    #####:  315:xgetchar(void)
+        -:  316:{
+        -:  317:	struct termios oldt, newt;
+        -:  318:	char ch;
+        -:  319:
+    #####:  320:	tcgetattr(STDIN_FILENO, &oldt);
+    %%%%%:  320-block  0
+call    0 never executed
+    #####:  321:	newt = oldt;
+    #####:  322:	newt.c_lflag &= ~(ICANON | ECHO);
+    #####:  323:	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+call    0 never executed
+    #####:  324:	ch = getchar();
+call    0 never executed
+    #####:  325:	tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+call    0 never executed
+        -:  326:
+    #####:  327:	return ch;
+unconditional  0 never executed
+        -:  328:}
+        -:  329:
+        -:  330:/* The following four functions (from_hex, to_hex, url_encode, and
+        -:  331: * url_decode) were taken from "http://www.geekhideout.com/urlcode.shtml"
+        -:  332: * and modified to comform to RFC 2395, as recommended by the
+        -:  333: * freedesktop trash specification */
+        -:  334:
+        -:  335:/* Converts a hex char to its integer value */
+        -:  336:char
+function from_hex called 0 returned 0% blocks executed 0%
+    #####:  337:from_hex(char c)
+        -:  338:{
+    #####:  339:	return isdigit(c) ? c - '0' : tolower(c) - 'a' + 10;
+    %%%%%:  339-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  339-block  1
+unconditional  2 never executed
+    %%%%%:  339-block  2
+unconditional  3 never executed
+    %%%%%:  339-block  3
+unconditional  4 never executed
+        -:  340:}
+        -:  341:
+        -:  342:/* Converts an integer value to its hex form */
+        -:  343:char
+function to_hex called 0 returned 0% blocks executed 0%
+    #####:  344:to_hex(char c)
+        -:  345:{
+        -:  346:	static char hex[] = "0123456789ABCDEF";
+    #####:  347:	return hex[c & 15];
+    %%%%%:  347-block  0
+unconditional  0 never executed
+        -:  348:}
+        -:  349:
+        -:  350:/* Returns a url-encoded version of str */
+        -:  351:char *
+function url_encode called 0 returned 0% blocks executed 0%
+    #####:  352:url_encode(char *str)
+        -:  353:{
+    #####:  354:	if (!str || *str == 0x00)
+    %%%%%:  354-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  354-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  355:		return (char *)NULL;
+    %%%%%:  355-block  0
+unconditional  0 never executed
+        -:  356:
+        -:  357:	char *p;
+    #####:  358:	p = (char *)calloc((strlen(str) * 3) + 1, sizeof(char));
+        -:  359:	/* The max lenght of our buffer is 3 times the length of STR plus
+        -:  360:	 * 1 extra byte for the null byte terminator: each char in STR will
+        -:  361:	 * be, if encoded, %XX (3 chars) */
+    #####:  362:	if (!p)
+    %%%%%:  362-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  363:		return (char *)NULL;
+    %%%%%:  363-block  0
+unconditional  0 never executed
+        -:  364:
+        -:  365:	char *buf;
+    #####:  366:	buf = p;
+    #####:  367:	p = (char *)NULL;
+        -:  368:
+        -:  369:	/* Copies of STR and BUF pointers to be able
+        -:  370:	 * to increase and/or decrease them without loosing the original
+        -:  371:	 * memory location */
+        -:  372:	char *pstr, *pbuf;
+    #####:  373:	pstr = str;
+    #####:  374:	pbuf = buf;
+        -:  375:
+    #####:  376:	for (; *pstr; pstr++) {
+    %%%%%:  376-block  0
+unconditional  0 never executed
+    %%%%%:  376-block  1
+unconditional  1 never executed
+    %%%%%:  376-block  2
+branch  2 never executed
+branch  3 never executed
+    #####:  377:		if (isalnum(*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.' || *pstr == '~' || *pstr == '/')
+    %%%%%:  377-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  377-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  377-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%:  377-block  3
+branch  6 never executed
+branch  7 never executed
+    %%%%%:  377-block  4
+branch  8 never executed
+branch  9 never executed
+    %%%%%:  377-block  5
+branch 10 never executed
+branch 11 never executed
+        -:  378:			/* Do not encode the above chars */
+    #####:  379:			*pbuf++ = *pstr;
+    %%%%%:  379-block  0
+unconditional  0 never executed
+        -:  380:		else {
+        -:  381:			/* Encode char to URL format. Example: space char to %20 */
+    #####:  382:			*pbuf++ = '%';
+    #####:  383:			*pbuf++ = to_hex(*pstr >> 4); /* Right shift operation */
+    %%%%%:  383-block  0
+call    0 never executed
+    #####:  384:			*pbuf++ = to_hex(*pstr & 15); /* Bitwise AND operation */
+call    0 never executed
+unconditional  1 never executed
+        -:  385:		}
+        -:  386:	}
+        -:  387:
+    #####:  388:	return buf;
+    %%%%%:  388-block  0
+unconditional  0 never executed
+        -:  389:}
+        -:  390:
+        -:  391:/* Returns a url-decoded version of str */
+        -:  392:char *
+function url_decode called 0 returned 0% blocks executed 0%
+    #####:  393:url_decode(char *str)
+        -:  394:{
+    #####:  395:	if (!str || str[0] == 0x00)
+    %%%%%:  395-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  395-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  396:		return (char *)NULL;
+    %%%%%:  396-block  0
+unconditional  0 never executed
+        -:  397:
+    #####:  398:	char *p = (char *)NULL;
+    #####:  399:	p = (char *)calloc(strlen(str) + 1, sizeof(char));
+        -:  400:	/* The decoded string will be at most as long as the encoded
+        -:  401:	 * string */
+        -:  402:
+    #####:  403:	if (!p)
+    %%%%%:  403-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  404:		return (char *)NULL;
+    %%%%%:  404-block  0
+unconditional  0 never executed
+        -:  405:
+        -:  406:	char *buf;
+    #####:  407:	buf = p;
+    #####:  408:	p = (char *)NULL;
+        -:  409:
+        -:  410:	char *pstr, *pbuf;
+    #####:  411:	pstr = str;
+    #####:  412:	pbuf = buf;
+    #####:  413:	for (; *pstr; pstr++) {
+    %%%%%:  413-block  0
+unconditional  0 never executed
+    %%%%%:  413-block  1
+unconditional  1 never executed
+    %%%%%:  413-block  2
+branch  2 never executed
+branch  3 never executed
+    #####:  414:		if (*pstr == '%') {
+    %%%%%:  414-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  415:			if (pstr[1] && pstr[2]) {
+    %%%%%:  415-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  415-block  1
+branch  2 never executed
+branch  3 never executed
+        -:  416:				/* Decode URL code. Example: %20 to space char */
+        -:  417:				/* Left shift and bitwise OR operations */
+    #####:  418:				*pbuf++ = from_hex(pstr[1]) << 4 | from_hex(pstr[2]);
+    %%%%%:  418-block  0
+call    0 never executed
+call    1 never executed
+    #####:  419:				pstr += 2;
+unconditional  0 never executed
+        -:  420:			}
+        -:  421:		} else
+    #####:  422:			*pbuf++ = *pstr;
+    %%%%%:  422-block  0
+unconditional  0 never executed
+        -:  423:	}
+        -:  424:
+    #####:  425:	return buf;
+    %%%%%:  425-block  0
+unconditional  0 never executed
+        -:  426:}
+        -:  427:
+        -:  428:/* Convert octal string into integer.
+        -:  429: * Taken from: https://www.geeksforgeeks.org/program-octal-decimal-conversion/
+        -:  430: * Used by decode_prompt() to make things like this work: \033[1;34m */
+        -:  431:int
+function read_octal called 0 returned 0% blocks executed 0%
+    #####:  432:read_octal(char *str)
+        -:  433:{
+    #####:  434:	if (!str)
+    %%%%%:  434-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  435:		return -1;
+    %%%%%:  435-block  0
+unconditional  0 never executed
+        -:  436:
+    #####:  437:	int n = atoi(str);
+    #####:  438:	int num = n;
+    #####:  439:	int dec_value = 0;
+        -:  440:
+        -:  441:	/* Initializing base value to 1, i.e 8^0 */
+    #####:  442:	int base = 1;
+        -:  443:
+    #####:  444:	int temp = num;
+    #####:  445:	while (temp) {
+    %%%%%:  445-block  0
+unconditional  0 never executed
+    %%%%%:  445-block  1
+branch  1 never executed
+branch  2 never executed
+        -:  446:
+        -:  447:		/* Extracting last digit */
+    #####:  448:		int last_digit = temp % 10;
+    #####:  449:		temp = temp / 10;
+        -:  450:
+        -:  451:		/* Multiplying last digit with appropriate
+        -:  452:		 * base value and adding it to dec_value */
+    #####:  453:		dec_value += last_digit * base;
+        -:  454:
+    #####:  455:		base = base * 8;
+    %%%%%:  455-block  0
+unconditional  0 never executed
+        -:  456:	}
+        -:  457:
+    #####:  458:	return dec_value;
+    %%%%%:  458-block  0
+unconditional  0 never executed
+        -:  459:}
+        -:  460:
+        -:  461:int
+function hex2int called 0 returned 0% blocks executed 0%
+    #####:  462:hex2int(char *str)
+        -:  463:{
+        -:  464:	int i, n[2];
+    #####:  465:	for (i = 1; i >= 0; i--) {
+    %%%%%:  465-block  0
+unconditional  0 never executed
+    %%%%%:  465-block  1
+unconditional  1 never executed
+    %%%%%:  465-block  2
+branch  2 never executed
+branch  3 never executed
+    #####:  466:		if (str[i] >= '0' && str[i] <= '9')
+    %%%%%:  466-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  466-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  467:			n[i] = str[i] - 0x30;
+    %%%%%:  467-block  0
+unconditional  0 never executed
+        -:  468:		else {
+    #####:  469:			switch (str[i]) {
+    %%%%%:  469-block  0
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+branch  6 never executed
+    #####:  470:			case 'A':
+        -:  471:			case 'a':
+    #####:  472:				n[i] = 10;
+    #####:  473:				break;
+    %%%%%:  473-block  0
+unconditional  0 never executed
+    #####:  474:			case 'B':
+        -:  475:			case 'b':
+    #####:  476:				n[i] = 11;
+    #####:  477:				break;
+    %%%%%:  477-block  0
+unconditional  0 never executed
+    #####:  478:			case 'C':
+        -:  479:			case 'c':
+    #####:  480:				n[i] = 12;
+    #####:  481:				break;
+    %%%%%:  481-block  0
+unconditional  0 never executed
+    #####:  482:			case 'D':
+        -:  483:			case 'd':
+    #####:  484:				n[i] = 13;
+    #####:  485:				break;
+    %%%%%:  485-block  0
+unconditional  0 never executed
+    #####:  486:			case 'E':
+        -:  487:			case 'e':
+    #####:  488:				n[i] = 14;
+    #####:  489:				break;
+    %%%%%:  489-block  0
+unconditional  0 never executed
+    #####:  490:			case 'F':
+        -:  491:			case 'f':
+    #####:  492:				n[i] = 15;
+    #####:  493:				break;
+    %%%%%:  493-block  0
+unconditional  0 never executed
+    #####:  494:			default:
+    #####:  495:				break;
+    %%%%%:  495-block  0
+unconditional  0 never executed
+        -:  496:			}
+        -:  497:		}
+        -:  498:	}
+        -:  499:
+    #####:  500:	return ((n[0] * 16) + n[1]);
+    %%%%%:  500-block  0
+unconditional  0 never executed
+        -:  501:}

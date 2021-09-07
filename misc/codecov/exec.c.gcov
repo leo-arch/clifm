@@ -1,0 +1,4774 @@
+        -:    0:Source:exec.c
+        -:    1:/* exec.c -- functions controlling the execution of programs */
+        -:    2:
+        -:    3:/*
+        -:    4: * This file is part of CliFM
+        -:    5: * 
+        -:    6: * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
+        -:    7: * All rights reserved.
+        -:    8:
+        -:    9: * CliFM is free software; you can redistribute it and/or modify
+        -:   10: * it under the terms of the GNU General Public License as published by
+        -:   11: * the Free Software Foundation; either version 2 of the License, or
+        -:   12: * (at your option) any later version.
+        -:   13: *
+        -:   14: * CliFM is distributed in the hope that it will be useful,
+        -:   15: * but WITHOUT ANY WARRANTY; without even the implied warranty of
+        -:   16: * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        -:   17: * GNU General Public License for more details.
+        -:   18: *
+        -:   19: * You should have received a copy of the GNU General Public License
+        -:   20: * along with this program; if not, write to the Free Software
+        -:   21: * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+        -:   22: * MA 02110-1301, USA.
+        -:   23:*/
+        -:   24:
+        -:   25:#include "helpers.h"
+        -:   26:
+        -:   27:#include <dirent.h>
+        -:   28:#include <errno.h>
+        -:   29:#include <fcntl.h>
+        -:   30:#include <stdio.h>
+        -:   31:#include <string.h>
+        -:   32:#include <sys/stat.h>
+        -:   33:#include <sys/wait.h>
+        -:   34:#include <unistd.h>
+        -:   35:#include <readline/readline.h>
+        -:   36:
+        -:   37:#include "actions.h"
+        -:   38:#include "archives.h"
+        -:   39:#include "aux.h"
+        -:   40:#include "bookmarks.h"
+        -:   41:#include "checks.h"
+        -:   42:#include "colors.h"
+        -:   43:#include "config.h"
+        -:   44:#include "exec.h"
+        -:   45:#include "file_operations.h"
+        -:   46:#include "history.h"
+        -:   47:#include "init.h"
+        -:   48:#include "jump.h"
+        -:   49:#include "keybinds.h"
+        -:   50:#include "listing.h"
+        -:   51:#include "mime.h"
+        -:   52:#include "misc.h"
+        -:   53:#include "navigation.h"
+        -:   54:#include "profiles.h"
+        -:   55:#include "properties.h"
+        -:   56:#include "readline.h"
+        -:   57:#include "remotes.h"
+        -:   58:#include "search.h"
+        -:   59:#include "selection.h"
+        -:   60:#include "sort.h"
+        -:   61:#include "strings.h"
+        -:   62:#include "trash.h"
+        -:   63:
+        -:   64:/* Run a command via execle() and refresh the screen in case of success */
+        -:   65:int
+function run_and_refresh called 0 returned 0% blocks executed 0%
+    #####:   66:run_and_refresh(char **comm)
+        -:   67:{
+    #####:   68:	if (!comm)
+    %%%%%:   68-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   69:		return EXIT_FAILURE;
+    %%%%%:   69-block  0
+unconditional  0 never executed
+        -:   70:
+    #####:   71:	log_function(comm);
+    %%%%%:   71-block  0
+call    0 never executed
+        -:   72:
+    #####:   73:	size_t i = 0, total_len = 0;
+        -:   74:
+    #####:   75:	for (i = 0; i <= args_n; i++)
+unconditional  0 never executed
+    %%%%%:   75-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:   76:		total_len += strlen(comm[i]);
+    %%%%%:   76-block  0
+unconditional  0 never executed
+        -:   77:
+    #####:   78:	char *tmp_cmd = (char *)NULL;
+    #####:   79:	tmp_cmd = (char *)xcalloc(total_len + (i + 1) + 1, sizeof(char));
+    %%%%%:   79-block  0
+call    0 never executed
+        -:   80:
+    #####:   81:	for (i = 0; i <= args_n; i++) {
+unconditional  0 never executed
+    %%%%%:   81-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:   82:		strcat(tmp_cmd, comm[i]);
+    #####:   83:		strcat(tmp_cmd, " ");
+    %%%%%:   83-block  0
+unconditional  0 never executed
+        -:   84:	}
+        -:   85:
+    #####:   86:	int ret = launch_execle(tmp_cmd);
+    %%%%%:   86-block  0
+call    0 never executed
+    #####:   87:	free(tmp_cmd);
+        -:   88:
+    #####:   89:	if (ret != EXIT_SUCCESS)
+branch  0 never executed
+branch  1 never executed
+    #####:   90:		return EXIT_FAILURE;
+    %%%%%:   90-block  0
+unconditional  0 never executed
+        -:   91:	/* Error messages will be printed by launch_execve() itself */
+        -:   92:
+        -:   93:	/* If 'rm sel' and command is successful, deselect everything */
+    #####:   94:	if (is_sel && *comm[0] == 'r' && comm[0][1] == 'm' && (!comm[0][2]
+    %%%%%:   94-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   94-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:   94-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%:   94-block  3
+branch  6 never executed
+branch  7 never executed
+    #####:   95:	|| comm[0][2] == ' ')) {
+    %%%%%:   95-block  0
+branch  0 never executed
+branch  1 never executed
+        -:   96:
+    #####:   97:		int j = (int)sel_n;
+    #####:   98:		while (--j >= 0)
+    %%%%%:   98-block  0
+unconditional  0 never executed
+    %%%%%:   98-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:   99:			free(sel_elements[j]);
+    %%%%%:   99-block  0
+unconditional  0 never executed
+        -:  100:
+    #####:  101:		sel_n = 0;
+    #####:  102:		save_sel();
+    %%%%%:  102-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  103:	}
+        -:  104:
+        -:  105:	/* When should the screen actually be refreshed:
+        -:  106:	* 1) Creation or removal of file (in current files list)
+        -:  107:	* 2) The contents of a directory (in current files list) changed */
+    #####:  108:	if (cd_lists_on_the_fly && strcmp(comm[1], "--help") != 0
+    %%%%%:  108-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  108-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  109:	&& strcmp(comm[1], "--version") != 0) {
+    %%%%%:  109-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  110:		free_dirlist();
+    %%%%%:  110-block  0
+call    0 never executed
+    #####:  111:		list_dir();
+call    0 never executed
+unconditional  1 never executed
+        -:  112:	}
+        -:  113:
+    #####:  114:	return EXIT_SUCCESS;
+    %%%%%:  114-block  0
+unconditional  0 never executed
+        -:  115:}
+        -:  116:
+        -:  117:int
+function run_in_foreground called 3 returned 100% blocks executed 50%
+        3:  118:run_in_foreground(pid_t pid)
+        -:  119:{
+        3:  120:	int status = 0;
+        -:  121:
+        -:  122:	/* The parent process calls waitpid() on the child */
+        3:  123:	if (waitpid(pid, &status, 0) > 0) {
+        3:  123-block  0
+call    0 returned 3
+branch  1 taken 3 (fallthrough)
+branch  2 taken 0
+        3:  124:		if (WIFEXITED(status) && !WEXITSTATUS(status)) {
+        3:  124-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 0
+        3:  124-block  1
+branch  2 taken 3 (fallthrough)
+branch  3 taken 0
+        -:  125:			/* The program terminated normally and executed successfully
+        -:  126:			 * (WEXITSTATUS(status) == 0) */
+        3:  127:			return EXIT_SUCCESS;
+        3:  127-block  0
+unconditional  0 taken 3
+    #####:  128:		} else if (WIFEXITED(status) && WEXITSTATUS(status)) {
+    %%%%%:  128-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  128-block  1
+branch  2 never executed
+branch  3 never executed
+        -:  129:			/* Program terminated normally, but returned a
+        -:  130:			 * non-zero status. Error codes should be printed by the
+        -:  131:			 * program itself */
+    #####:  132:			return WEXITSTATUS(status);
+    %%%%%:  132-block  0
+unconditional  0 never executed
+        -:  133:		} else {
+        -:  134:			/* The program didn't terminate normally. In this case too,
+        -:  135:			 * error codes should be printed by the program */
+    #####:  136:			return EXCRASHERR;
+    %%%%%:  136-block  0
+unconditional  0 never executed
+        -:  137:		}
+        -:  138:	} else {
+        -:  139:		/* waitpid() failed */
+    #####:  140:		fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME,
+call    0 never executed
+    #####:  141:		    strerror(errno));
+    %%%%%:  141-block  0
+call    0 never executed
+    #####:  142:		return errno;
+unconditional  0 never executed
+        -:  143:	}
+        -:  144:
+        -:  145:	return EXIT_FAILURE; /* Never reached */
+        -:  146:}
+        -:  147:
+        -:  148:void
+function run_in_background called 0 returned 0% blocks executed 0%
+    #####:  149:run_in_background(pid_t pid)
+        -:  150:{
+    #####:  151:	int status = 0;
+        -:  152:	/* Keep it in the background */
+    #####:  153:	waitpid(pid, &status, WNOHANG); /* or: kill(pid, SIGCONT); */
+    %%%%%:  153-block  0
+call    0 never executed
+    #####:  154:}
+        -:  155:
+        -:  156:/* Execute a command using the system shell (/bin/sh), which takes care
+        -:  157: * of special functions such as pipes and stream redirection, and special
+        -:  158: * chars like wildcards, quotes, and escape sequences. Use only when the
+        -:  159: * shell is needed; otherwise, launch_execve() should be used instead. */
+        -:  160:int
+function launch_execle called 67 returned 100% blocks executed 66%
+       67:  161:launch_execle(const char *cmd)
+        -:  162:{
+       67:  163:	if (!cmd)
+       67:  163-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 67
+    #####:  164:		return EXNULLERR;
+    %%%%%:  164-block  0
+unconditional  0 never executed
+        -:  165:
+        -:  166:	/* Reenable SIGCHLD, in case it was disabled. Otherwise, waitpid won't
+        -:  167:	 * be able to catch error codes coming from the child */
+       67:  168:	signal(SIGCHLD, SIG_DFL);
+       67:  168-block  0
+call    0 returned 67
+        -:  169:
+        -:  170:	int status;
+       67:  171:	pid_t pid = fork();
+call    0 returned 134
+      134:  172:	if (pid < 0) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 134
+    #####:  173:		fprintf(stderr, "%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
+    %%%%%:  173-block  0
+call    0 never executed
+call    1 never executed
+    #####:  174:		return EXFORKERR;
+unconditional  0 never executed
+        -:  175:	}
+        -:  176:
+      134:  177:	else if (pid == 0) {
+      134:  177-block  0
+branch  0 taken 67 (fallthrough)
+branch  1 taken 67
+        -:  178:		/* Reenable signals only for the child, in case they were
+        -:  179:		 * disabled for the parent */
+       67:  180:		signal(SIGHUP, SIG_DFL);
+       67:  180-block  0
+call    0 returned 67
+       67:  181:		signal(SIGINT, SIG_DFL);
+call    0 returned 67
+       67:  182:		signal(SIGQUIT, SIG_DFL);
+call    0 returned 67
+       67:  183:		signal(SIGTERM, SIG_DFL);
+call    0 returned 67
+        -:  184:
+        -:  185:		/* Get shell base name */
+       67:  186:		char *name = strrchr(user.shell, '/');
+        -:  187:
+      67*:  188:		execl(user.shell, name ? name + 1 : user.shell, "-c", cmd, NULL);
+branch  0 taken 67 (fallthrough)
+branch  1 taken 0
+       67:  188-block  0
+unconditional  2 taken 67
+    %%%%%:  188-block  1
+unconditional  3 never executed
+    #####:  189:		fprintf(stderr, "%s: %s: execle: %s\n", PROGRAM_NAME, user.shell,
+call    0 never executed
+       67:  190:		    strerror(errno));
+       67:  190-block  0
+call    0 returned 0
+    #####:  191:		_exit(errno);
+call    0 never executed
+        -:  192:	}
+        -:  193:	/* Get command status */
+       67:  194:	else if (pid > 0) {
+       67:  194-block  0
+branch  0 taken 67 (fallthrough)
+branch  1 taken 0
+        -:  195:		/* The parent process calls waitpid() on the child */
+       67:  196:		if (waitpid(pid, &status, 0) > 0) {
+       67:  196-block  0
+call    0 returned 67
+branch  1 taken 67 (fallthrough)
+branch  2 taken 0
+       67:  197:			if (WIFEXITED(status) && !WEXITSTATUS(status)) {
+       67:  197-block  0
+branch  0 taken 67 (fallthrough)
+branch  1 taken 0
+       67:  197-block  1
+branch  2 taken 47 (fallthrough)
+branch  3 taken 20
+        -:  198:				/* The program terminated normally and executed
+        -:  199:				 * successfully */
+       47:  200:				return EXIT_SUCCESS;
+       47:  200-block  0
+unconditional  0 taken 47
+       20:  201:			} else if (WIFEXITED(status) && WEXITSTATUS(status)) {
+       20:  201-block  0
+branch  0 taken 20 (fallthrough)
+branch  1 taken 0
+       20:  201-block  1
+branch  2 taken 20 (fallthrough)
+branch  3 taken 0
+        -:  202:				/* Either "command not found" (WEXITSTATUS(status) == 127),
+        -:  203:				 * "permission denied" (not executable) (WEXITSTATUS(status) ==
+        -:  204:				 * 126) or the program terminated normally, but returned a
+        -:  205:				 * non-zero status. These exit codes will be handled by the
+        -:  206:				 * system shell itself, since we're using here execle() */
+       20:  207:				return WEXITSTATUS(status);
+       20:  207-block  0
+unconditional  0 taken 20
+        -:  208:			} else {
+        -:  209:				/* The program didn't terminate normally */
+    #####:  210:				return EXCRASHERR;
+    %%%%%:  210-block  0
+unconditional  0 never executed
+        -:  211:			}
+        -:  212:		} else {
+        -:  213:			/* Waitpid() failed */
+    #####:  214:			fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME,
+call    0 never executed
+    #####:  215:			    strerror(errno));
+    %%%%%:  215-block  0
+call    0 never executed
+    #####:  216:			return errno;
+unconditional  0 never executed
+        -:  217:		}
+        -:  218:	}
+        -:  219:
+        -:  220:	/* Never reached */
+    #####:  221:	return EXIT_FAILURE;
+    %%%%%:  221-block  0
+unconditional  0 never executed
+        -:  222:}
+        -:  223:
+        -:  224:/* Execute a command and return the corresponding exit status. The exit
+        -:  225: * status could be: zero, if everything went fine, or a non-zero value
+        -:  226: * in case of error. The function takes as first arguement an array of
+        -:  227: * strings containing the command name to be executed and its arguments
+        -:  228: * (cmd), an integer (bg) specifying if the command should be
+        -:  229: * backgrounded (1) or not (0), and a flag to control file descriptors */
+        -:  230:int
+function launch_execve called 3 returned 100% blocks executed 69%
+        3:  231:launch_execve(char **cmd, int bg, int xflags)
+        -:  232:{
+        3:  233:	if (!cmd)
+        3:  233-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####:  234:		return EXNULLERR;
+    %%%%%:  234-block  0
+unconditional  0 never executed
+        -:  235:
+        -:  236:	/* Reenable SIGCHLD, in case it was disabled. Otherwise, waitpid
+        -:  237:	 * won't be able to catch error codes coming from the child. */
+        3:  238:	signal(SIGCHLD, SIG_DFL);
+        3:  238-block  0
+call    0 returned 3
+        -:  239:
+        3:  240:	pid_t pid = fork();
+call    0 returned 6
+        6:  241:	if (pid < 0) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 6
+    #####:  242:		fprintf(stderr, "%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
+    %%%%%:  242-block  0
+call    0 never executed
+call    1 never executed
+    #####:  243:		return errno;
+unconditional  0 never executed
+        -:  244:	}
+        -:  245:
+        6:  246:	else if (pid == 0) {
+        6:  246-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 3
+        3:  247:		if (!bg) {
+        3:  247-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 0
+        -:  248:			/* If the program runs in the foreground, reenable signals
+        -:  249:			 * only for the child, in case they were disabled for the
+        -:  250:			 * parent */
+        3:  251:			signal(SIGHUP, SIG_DFL);
+        3:  251-block  0
+call    0 returned 3
+        3:  252:			signal(SIGINT, SIG_DFL);
+call    0 returned 3
+        3:  253:			signal(SIGQUIT, SIG_DFL);
+call    0 returned 3
+        3:  254:			signal(SIGTERM, SIG_DFL);
+call    0 returned 3
+unconditional  1 taken 3
+        -:  255:		}
+        -:  256:
+        3:  257:		if (xflags) {
+        3:  257-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 2
+        1:  258:			int fd = open("/dev/null", O_WRONLY, 0200);
+        1:  258-block  0
+call    0 returned 1
+        -:  259:
+        1:  260:			if (xflags & E_NOSTDIN)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  261:				dup2(fd, STDIN_FILENO);
+    %%%%%:  261-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  262:
+        1:  263:			if (xflags & E_NOSTDOUT)
+        1:  263-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  264:				dup2(fd, STDOUT_FILENO);
+    %%%%%:  264-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  265:
+        1:  266:			if (xflags & E_NOSTDERR)
+        1:  266-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  267:				dup2(fd, STDERR_FILENO);
+        1:  267-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -:  268:
+        1:  269:			close(fd);
+        1:  269-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -:  270:		}
+        -:  271:
+        3:  272:		execvp(cmd[0], cmd);
+    #####:  273:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, cmd[0],
+call    0 never executed
+        3:  274:		    strerror(errno));
+        3:  274-block  0
+call    0 returned 0
+    #####:  275:		_exit(errno);
+call    0 never executed
+        -:  276:	}
+        -:  277:
+        -:  278:	/* Get command status (pid > 0) */
+        -:  279:	else {
+        3:  280:		if (bg) {
+        3:  280-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    #####:  281:			run_in_background(pid);
+    %%%%%:  281-block  0
+call    0 never executed
+    #####:  282:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  283:		} else
+        3:  284:			return run_in_foreground(pid);
+        3:  284-block  0
+call    0 returned 3
+unconditional  1 taken 3
+        -:  285:	}
+        -:  286:
+        -:  287:	/* Never reached */
+        -:  288:	return EXIT_FAILURE;
+        -:  289:}
+        -:  290:
+        -:  291:/* Take the command entered by the user, already splitted into substrings
+        -:  292: * by parse_input_str(), and call the corresponding function. Return zero
+        -:  293: * in case of success and one in case of error */
+        -:  294:int
+function exec_cmd called 22 returned 95% blocks executed 20%
+       22:  295:exec_cmd(char **comm)
+        -:  296:{
+        -:  297:	/*  if (!comm || *comm[0] == '\0')
+        -:  298:		return EXIT_FAILURE; */
+        -:  299:
+       22:  300:	fputs(df_c, stdout);
+       22:  300-block  0
+call    0 returned 22
+        -:  301:
+        -:  302:	/* Exit flag. exit_code is zero (sucess) by default. In case of error
+        -:  303:	 * in any of the functions below, it will be set to one (failure).
+        -:  304:	 * This will be the value returned by this function. Used by the \z
+        -:  305:	 * escape code in the prompt to print the exit status of the last
+        -:  306:	 * executed command */
+       22:  307:	exit_code = EXIT_SUCCESS;
+        -:  308:
+        -:  309:	/* Warn when using the ',' keyword and there's no pinned file */
+       22:  310:	int k = args_n + 1;
+       56:  311:	while (--k >= 0) {
+unconditional  0 taken 22
+       56:  311-block  0
+branch  1 taken 34
+branch  2 taken 22 (fallthrough)
+      34*:  312:		if (*comm[k] == ',' && !comm[k][1]) {
+       34:  312-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 34
+    %%%%%:  312-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  313:			fprintf(stderr, _("%s: No pinned file\n"), PROGRAM_NAME);
+    %%%%%:  313-block  0
+call    0 never executed
+    #####:  314:			exit_code = EXIT_FAILURE;
+    #####:  315:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  316:		}
+        -:  317:	}
+        -:  318:
+        -:  319:	/* User defined actions */
+       22:  320:	if (actions_n) {
+       22:  320-block  0
+branch  0 taken 22 (fallthrough)
+branch  1 taken 0
+       22:  321:		int i = actions_n;
+      528:  322:		while (--i >= 0) {
+       22:  322-block  0
+unconditional  0 taken 22
+      528:  322-block  1
+branch  1 taken 506
+branch  2 taken 22 (fallthrough)
+      506:  323:			if (*comm[0] == *usr_actions[i].name
+      506:  323-block  0
+branch  0 taken 15 (fallthrough)
+branch  1 taken 491
+       15:  324:			&& strcmp(comm[0], usr_actions[i].name) == 0) {
+       15:  324-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    #####:  325:				exit_code = run_action(usr_actions[i].value, comm);
+    %%%%%:  325-block  0
+call    0 never executed
+    #####:  326:				return exit_code;
+unconditional  0 never executed
+        -:  327:			}
+        -:  328:		}
+        -:  329:	}
+        -:  330:
+        -:  331:	/* User defined variables */
+       22:  332:	if (flags & IS_USRVAR_DEF) {
+       22:  332-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 22
+    #####:  333:		flags &= ~IS_USRVAR_DEF;
+        -:  334:
+    #####:  335:		exit_code = create_usr_var(comm[0]);
+    %%%%%:  335-block  0
+call    0 never executed
+    #####:  336:		return exit_code;
+unconditional  0 never executed
+        -:  337:	}
+        -:  338:
+       22:  339:	if (comm[0][0] == ';' || comm[0][0] == ':') {
+       22:  339-block  0
+branch  0 taken 22 (fallthrough)
+branch  1 taken 0
+       22:  339-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 22
+    #####:  340:		if (!comm[0][1]) {
+    %%%%%:  340-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  341:			/* If just ":" or ";", launch the default shell */
+    #####:  342:			char *cmd[] = {user.shell, NULL};
+    #####:  343:			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+    %%%%%:  343-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  344:				exit_code = EXIT_FAILURE;
+    %%%%%:  344-block  0
+unconditional  0 never executed
+    #####:  345:			return exit_code;
+    %%%%%:  345-block  0
+unconditional  0 never executed
+        -:  346:		}
+        -:  347:
+        -:  348:		/* If double semi colon or colon (or ";:" or ":;") */
+    #####:  349:		else if (comm[0][1] == ';' || comm[0][1] == ':') {
+    %%%%%:  349-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  349-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  350:			fprintf(stderr, _("%s: '%s': Syntax error\n"), PROGRAM_NAME, comm[0]);
+    %%%%%:  350-block  0
+call    0 never executed
+    #####:  351:			exit_code = EXIT_FAILURE;
+    #####:  352:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  353:		}
+        -:  354:	}
+        -:  355:
+        -:  356:				/* ###############################
+        -:  357:				 * #     AUTOCD & AUTOOPEN (1)   #
+        -:  358:				 * ############################### */
+        -:  359:
+      22*:  360:	if (autocd || auto_open) {
+       22:  360-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 22
+    %%%%%:  360-block  1
+branch  2 never executed
+branch  3 never executed
+        -:  361:		/* Expand tilde */
+       22:  362:		if (*comm[0] == '~') {
+       22:  362-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 22
+    #####:  363:			char *exp_path = tilde_expand(comm[0]);
+    %%%%%:  363-block  0
+call    0 never executed
+    #####:  364:			if (exp_path) {
+branch  0 never executed
+branch  1 never executed
+    #####:  365:				comm[0] = (char *)xrealloc(comm[0], (strlen(exp_path) + 1) * sizeof(char));
+    %%%%%:  365-block  0
+call    0 never executed
+    #####:  366:				strcpy(comm[0], exp_path);
+    #####:  367:				free(exp_path);
+unconditional  0 never executed
+        -:  368:			}
+        -:  369:		}
+        -:  370:
+        -:  371:		/* Deescape the string (only if filename) */
+       22:  372:		if (strchr(comm[0], '\\')) {
+       22:  372-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 22
+    #####:  373:			char *deq_str = dequote_str(comm[0], 0);
+    %%%%%:  373-block  0
+call    0 never executed
+    #####:  374:			if (deq_str) {
+branch  0 never executed
+branch  1 never executed
+    #####:  375:				if (access(deq_str, F_OK) == 0)
+    %%%%%:  375-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  376:					strcpy(comm[0], deq_str);
+    %%%%%:  376-block  0
+unconditional  0 never executed
+    #####:  377:				free(deq_str);
+    %%%%%:  377-block  0
+unconditional  0 never executed
+        -:  378:			}
+        -:  379:		}
+        -:  380:	}
+        -:  381:
+        -:  382:	/* Only autocd or auto-open here if not absolute path and if there
+        -:  383:	 * is no second argument or if second argument is "&" */
+      22*:  384:	if (*comm[0] != '/' && (autocd || auto_open) && (!comm[1]
+       22:  384-block  0
+branch  0 taken 22 (fallthrough)
+branch  1 taken 0
+       22:  384-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 22
+    %%%%%:  384-block  2
+branch  4 never executed
+branch  5 never executed
+       22:  384-block  3
+branch  6 taken 8 (fallthrough)
+branch  7 taken 14
+       8*:  385:	|| (*comm[1] == '&' && !comm[1][1]))) {
+        8:  385-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 8
+    %%%%%:  385-block  1
+branch  2 never executed
+branch  3 never executed
+        -:  386:
+       14:  387:		char *tmp = comm[0];
+       14:  388:		size_t i, tmp_len = strlen(tmp);
+        -:  389:
+       14:  390:		if (tmp[tmp_len - 1] == '/')
+       14:  390-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 12
+        2:  391:			tmp[tmp_len - 1] = '\0';
+        2:  391-block  0
+unconditional  0 taken 2
+        -:  392:
+     1021:  393:		for (i = files; i--;) {
+       14:  393-block  0
+unconditional  0 taken 14
+     1021:  393-block  1
+branch  1 taken 1009
+branch  2 taken 12 (fallthrough)
+        -:  394:
+     1009:  395:			if (*tmp != *file_info[i].name)
+     1009:  395-block  0
+branch  0 taken 966 (fallthrough)
+branch  1 taken 43
+      966:  396:				continue;
+      966:  396-block  0
+unconditional  0 taken 966
+        -:  397:
+       43:  398:			if (strcmp(tmp, file_info[i].name) != 0)
+       43:  398-block  0
+branch  0 taken 41 (fallthrough)
+branch  1 taken 2
+       41:  399:				continue;
+       41:  399-block  0
+unconditional  0 taken 41
+        -:  400:
+       2*:  401:			if (autocd && (file_info[i].type == DT_DIR || file_info[i].dir == 1)) {
+        2:  401-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  401-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 2
+    %%%%%:  401-block  2
+branch  4 never executed
+branch  5 never executed
+        2:  402:				exit_code = cd_function(tmp);
+        2:  402-block  0
+call    0 returned 2
+        2:  403:				return exit_code;
+unconditional  0 taken 2
+        -:  404:			}
+        -:  405:
+    #####:  406:			else if (auto_open && (file_info[i].type == DT_REG
+    %%%%%:  406-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  406-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  407:			|| file_info[i].type == DT_LNK)) {
+    %%%%%:  407-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  408:				char *cmd[] = {"open", comm[0],
+        -:  409:				    (comm[1]) ? comm[1] : NULL, NULL};
+    #####:  410:				exit_code = open_function(cmd);
+    %%%%%:  410-block  0
+call    0 never executed
+    #####:  411:				return exit_code;
+unconditional  0 never executed
+        -:  412:			}
+        -:  413:
+        -:  414:			else
+        -:  415:				break;
+        -:  416:		}
+        -:  417:	}
+        -:  418:
+        -:  419:	/* The more often a function is used, the more on top should it be
+        -:  420:	 * in this if...else..if chain. It will be found faster this way. */
+        -:  421:
+        -:  422:	/* ####################################################
+        -:  423:	 * #                 BUILTIN COMMANDS                 #
+        -:  424:	 * ####################################################*/
+        -:  425:
+        -:  426:	/*          ############### CD ##################     */
+       20:  427:	if (*comm[0] == 'c' && comm[0][1] == 'd' && !comm[0][2]) {
+       20:  427-block  0
+branch  0 taken 5 (fallthrough)
+branch  1 taken 15
+        5:  427-block  1
+branch  2 taken 5 (fallthrough)
+branch  3 taken 0
+        5:  427-block  2
+branch  4 taken 5 (fallthrough)
+branch  5 taken 0
+        5:  428:		if (!comm[1])
+        5:  428-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 1
+        4:  429:			exit_code = cd_function(NULL);
+        4:  429-block  0
+call    0 returned 4
+unconditional  1 taken 4
+        -:  430:
+       1*:  431:		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
+        1:  431-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    %%%%%:  431-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  432:			puts(_("Usage: cd [ELN/DIR]"));
+    %%%%%:  432-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  433:
+        -:  434:		/* Remotes */
+       1*:  435:		else if (*comm[1] == 's' && strncmp(comm[1], "sftp://", 7) == 0)
+        1:  435-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    %%%%%:  435-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  436:			exit_code = remote_ssh(comm[1] + 7, (comm[2]) ? comm[2]
+    %%%%%:  436-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  437:								      : NULL);
+       1*:  438:		else if (*comm[1] == 's' && strncmp(comm[1], "smb://", 6) == 0)
+        1:  438-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    %%%%%:  438-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  439:			exit_code = remote_smb(comm[1] + 6, (comm[2]) ? comm[2]
+    %%%%%:  439-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  440:								      : NULL);
+       1*:  441:		else if (*comm[1] == 'f' && strncmp(comm[1], "ftp://", 6) == 0)
+        1:  441-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    %%%%%:  441-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  442:			exit_code = remote_ftp(comm[1] + 6, (comm[2]) ? comm[2]
+    %%%%%:  442-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  443:								      : NULL);
+        -:  444:
+        -:  445:		else
+        1:  446:			exit_code = cd_function(comm[1]);
+        1:  446-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -:  447:	}
+        -:  448:
+        -:  449:	/*         ############### OPEN ##################     */
+      15*:  450:	else if (*comm[0] == 'o' && (!comm[0][1] || strcmp(comm[0], "open") == 0)) {
+       15:  450-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    %%%%%:  450-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  450-block  2
+branch  4 never executed
+branch  5 never executed
+        -:  451:
+    #####:  452:		if (!comm[1]) {
+    %%%%%:  452-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  453:			puts(_("Usage: o, open ELN/FILE [APPLICATION]"));
+    %%%%%:  453-block  0
+call    0 never executed
+    #####:  454:			exit_code = EXIT_FAILURE;
+    #####:  455:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  456:		}
+        -:  457:
+    #####:  458:		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
+    %%%%%:  458-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  458-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  459:			puts(_("Usage: o, open ELN/FILE [APPLICATION]"));
+    %%%%%:  459-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  460:
+        -:  461:		/* Remotes */
+    #####:  462:		else if (*comm[1] == 's' && strncmp(comm[1], "sftp://", 7) == 0)
+    %%%%%:  462-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  462-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  463:			exit_code = remote_ssh(comm[1] + 7, (comm[2]) ? comm[2]
+    %%%%%:  463-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  464:								      : NULL);
+    #####:  465:		else if (*comm[1] == 's' && strncmp(comm[1], "smb://", 6) == 0)
+    %%%%%:  465-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  465-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  466:			exit_code = remote_smb(comm[1] + 6, (comm[2]) ? comm[2]
+    %%%%%:  466-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  467:								      : NULL);
+    #####:  468:		else if (*comm[1] == 'f' && strncmp(comm[1], "ftp://", 6) == 0)
+    %%%%%:  468-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  468-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  469:			exit_code = remote_ftp(comm[1] + 6, (comm[2]) ? comm[2]
+    %%%%%:  469-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  470:								      : NULL);
+        -:  471:
+        -:  472:		else
+    #####:  473:			exit_code = open_function(comm);
+    %%%%%:  473-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  474:	}
+        -:  475:
+        -:  476:	/*   ############## DIRECTORY JUMPER ##################     */
+      15*:  477:	else if (*comm[0] == 'j' && (!comm[0][1] || ((comm[0][1] == 'c'
+       15:  477-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 15
+    %%%%%:  477-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  477-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  478:	|| comm[0][1] == 'p' || comm[0][1] == 'e' || comm[0][1] == 'o'
+    %%%%%:  478-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  478-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  478-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  479:	|| comm[0][1] == 'l') && !comm[0][2]))) {
+    %%%%%:  479-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  479-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  480:		exit_code = dirjump(comm);
+    %%%%%:  480-block  0
+call    0 never executed
+    #####:  481:		return exit_code;
+unconditional  0 never executed
+        -:  482:	}
+        -:  483:
+        -:  484:	/*       ############### REFRESH ##################     */
+       15:  485:	else if (*comm[0] == 'r' && ((comm[0][1] == 'f' && !comm[0][2])
+       15:  485-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 11
+        4:  485-block  1
+branch  2 taken 4 (fallthrough)
+branch  3 taken 0
+        4:  485-block  2
+branch  4 taken 0 (fallthrough)
+branch  5 taken 4
+    #####:  486:	|| strcmp(comm[0], "refresh") == 0)) {
+    %%%%%:  486-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  487:
+        4:  488:		if (cd_lists_on_the_fly) {
+        4:  488-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 0
+        4:  489:			free_dirlist();
+        4:  489-block  0
+call    0 returned 4
+        4:  490:			exit_code = list_dir();
+call    0 returned 4
+unconditional  1 taken 4
+        -:  491:		}
+        -:  492:	}
+        -:  493:
+        -:  494:	/*         ############### BOOKMARKS ##################     */
+       11:  495:	else if (*comm[0] == 'b' && ((comm[0][1] == 'm' && !comm[0][2])
+       11:  495-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 10
+        1:  495-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 0
+        1:  495-block  2
+branch  4 taken 0 (fallthrough)
+branch  5 taken 1
+    #####:  496:	|| strcmp(comm[0], "bookmarks") == 0)) {
+    %%%%%:  496-block  0
+branch  0 never executed
+branch  1 never executed
+       1*:  497:		if (comm[1] && strcmp(comm[1], "--help") == 0) {
+        1:  497-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    %%%%%:  497-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  498:			puts(_("Usage: bm, bookmarks [a, add FILE] [d, del] "
+    %%%%%:  498-block  0
+call    0 never executed
+        -:  499:			       "[edit]"));
+    #####:  500:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  501:		}
+        -:  502:		/* Disable keyboard shortcuts. Otherwise, the function will
+        -:  503:		 * still be waiting for input while the screen have been taken
+        -:  504:		 * by another function */
+        1:  505:		kbind_busy = 1;
+        -:  506:		/* Disable TAB completion while in Bookmarks */
+        1:  507:		rl_attempted_completion_function = NULL;
+        1:  508:		exit_code = bookmarks_function(comm);
+        1:  508-block  0
+call    0 returned 1
+        -:  509:		/* Reenable TAB completion */
+        1:  510:		rl_attempted_completion_function = my_rl_completion;
+        -:  511:		/* Reenable keyboard shortcuts */
+        1:  512:		kbind_busy = 0;
+unconditional  0 taken 1
+        -:  513:	}
+        -:  514:
+        -:  515:	/*       ############### BACK AND FORTH ##################     */
+      10*:  516:	else if (*comm[0] == 'b' && (!comm[0][1] || strcmp(comm[0], "back") == 0))
+       10:  516-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 10
+    %%%%%:  516-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  516-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  517:		exit_code = back_function(comm);
+    %%%%%:  517-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  518:
+      10*:  519:	else if (*comm[0] == 'f' && (!comm[0][1] || strcmp(comm[0], "forth") == 0))
+       10:  519-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 10
+    %%%%%:  519-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  519-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  520:		exit_code = forth_function(comm);
+    %%%%%:  520-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  521:
+      10*:  522:	else if ((*comm[0] == 'b' && comm[0][1] == 'h' && !comm[0][2])
+       10:  522-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 10
+    %%%%%:  522-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  522-block  2
+branch  4 never executed
+branch  5 never executed
+      10*:  523:	|| (*comm[0] == 'f' && comm[0][1] == 'h' && !comm[0][2])) {
+       10:  523-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 10
+    %%%%%:  523-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  523-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%:  523-block  3
+unconditional  6 never executed
+        -:  524:		int i;
+    #####:  525:		for (i = 0; i < dirhist_total_index; i++) {
+    %%%%%:  525-block  0
+unconditional  0 never executed
+    %%%%%:  525-block  1
+unconditional  1 never executed
+    %%%%%:  525-block  2
+branch  2 never executed
+branch  3 never executed
+    #####:  526:			if (i == dirhist_cur_index)
+    %%%%%:  526-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  527:				printf("%d %s%s%s\n", i + 1, dh_c,
+    #####:  528:				    old_pwd[i], df_c);
+    %%%%%:  528-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  529:			else
+    #####:  530:				printf("%d %s\n", i + 1, old_pwd[i]);
+    %%%%%:  530-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  531:		}
+        -:  532:	}
+        -:  533:
+        -:  534:	/*     ############### COPY AND MOVE ##################     */
+      10*:  535:	else if ((*comm[0] == 'c' && (!comm[0][1] || (comm[0][1] == 'p'
+       10:  535-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 10
+    %%%%%:  535-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  535-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  536:	&& !comm[0][2])))
+    %%%%%:  536-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  537:
+      10*:  538:		 || (*comm[0] == 'm' && (!comm[0][1] || (comm[0][1] == 'v'
+       10:  538-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 10
+    %%%%%:  538-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  538-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  539:		 && !comm[0][2])))
+    %%%%%:  539-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  540:
+      10*:  541:		 || (*comm[0] == 'v' && (!comm[0][1] || (comm[0][1] == 'v'
+       10:  541-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 10
+    %%%%%:  541-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  541-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  542:		 && !comm[0][2])))
+    %%%%%:  542-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  543:
+       10:  544:		 || (*comm[0] == 'p' && strcmp(comm[0], "paste") == 0)) {
+       10:  544-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 9
+        1:  544-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1
+        -:  545:
+    #####:  546:		if (((*comm[0] == 'c' || *comm[0] == 'v') && !comm[0][1])
+    %%%%%:  546-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  546-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  546-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  547:		|| (*comm[0] == 'v' && comm[0][1] == 'v' && !comm[0][2])
+    %%%%%:  547-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  547-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  547-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  548:		|| strcmp(comm[0], "paste") == 0) {
+    %%%%%:  548-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  549:
+    #####:  550:			if (*comm[0] == 'v' && comm[0][1] == 'v' && !comm[0][2])
+    %%%%%:  550-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  550-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  550-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  551:				copy_n_rename = 1;
+    %%%%%:  551-block  0
+unconditional  0 never executed
+        -:  552:
+    #####:  553:			comm[0] = (char *)xrealloc(comm[0], 12 * sizeof(char *));
+    %%%%%:  553-block  0
+call    0 never executed
+    #####:  554:			if (cp_cmd == CP_CP)
+branch  0 never executed
+branch  1 never executed
+    #####:  555:				strcpy(comm[0], "cp -iRp");
+    %%%%%:  555-block  0
+unconditional  0 never executed
+    #####:  556:			else if (cp_cmd == CP_ADVCP)
+    %%%%%:  556-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  557:				strcpy(comm[0], "advcp -giRp");
+    %%%%%:  557-block  0
+unconditional  0 never executed
+        -:  558:			else
+    #####:  559:				strcpy(comm[0], "wcp");
+    %%%%%:  559-block  0
+unconditional  0 never executed
+        -:  560:		}
+        -:  561:
+    #####:  562:		else if (*comm[0] == 'm' && !comm[0][1]) {
+    %%%%%:  562-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  562-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  563:			comm[0] = (char *)xrealloc(comm[0], 10 * sizeof(char *));
+    %%%%%:  563-block  0
+call    0 never executed
+    #####:  564:			if (mv_cmd == MV_MV)
+branch  0 never executed
+branch  1 never executed
+    #####:  565:				strcpy(comm[0], "mv -i");
+    %%%%%:  565-block  0
+unconditional  0 never executed
+        -:  566:			else
+    #####:  567:				strcpy(comm[0], "advmv -gi");
+    %%%%%:  567-block  0
+unconditional  0 never executed
+        -:  568:		}
+        -:  569:
+    #####:  570:		kbind_busy = 1;
+    #####:  571:		exit_code = copy_function(comm);
+    %%%%%:  571-block  0
+call    0 never executed
+    #####:  572:		kbind_busy = 0;
+unconditional  0 never executed
+        -:  573:	}
+        -:  574:
+        -:  575:	/*         ############### TRASH ##################     */
+      10*:  576:	else if (*comm[0] == 't' && (!comm[0][1] || strcmp(comm[0], "tr") == 0
+       10:  576-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 10
+    %%%%%:  576-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  576-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  577:	|| strcmp(comm[0], "trash") == 0)) {
+    %%%%%:  577-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  578:		if (comm[1] && strcmp(comm[1], "--help") == 0) {
+    %%%%%:  578-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  578-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  579:			puts(_("Usage: t, tr, trash [ELN/FILE ... n] "
+    %%%%%:  579-block  0
+call    0 never executed
+        -:  580:			       "[ls, list] [clear] [del, rm]"));
+    #####:  581:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  582:		}
+        -:  583:
+    #####:  584:		exit_code = trash_function(comm);
+    %%%%%:  584-block  0
+call    0 never executed
+        -:  585:
+    #####:  586:		if (is_sel) { /* If 'tr sel', deselect everything */
+branch  0 never executed
+branch  1 never executed
+    #####:  587:			int i = (int)sel_n;
+        -:  588:
+    #####:  589:			while (--i >= 0)
+    %%%%%:  589-block  0
+unconditional  0 never executed
+    %%%%%:  589-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  590:				free(sel_elements[i]);
+    %%%%%:  590-block  0
+unconditional  0 never executed
+        -:  591:
+    #####:  592:			sel_n = 0;
+        -:  593:
+    #####:  594:			if (save_sel() != 0)
+    %%%%%:  594-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  595:				exit_code = EXIT_FAILURE;
+    %%%%%:  595-block  0
+unconditional  0 never executed
+        -:  596:		}
+        -:  597:	}
+        -:  598:
+      10*:  599:	else if (*comm[0] == 'u' && (!comm[0][1] || strcmp(comm[0], "undel") == 0
+       10:  599-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 10
+    %%%%%:  599-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  599-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  600:	|| strcmp(comm[0], "untrash") == 0)) {
+    %%%%%:  600-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  601:		if (comm[1] && strcmp(comm[1], "--help") == 0) {
+    %%%%%:  601-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  601-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  602:			puts(_("Usage: u, undel, untrash [*, a, all]"));
+    %%%%%:  602-block  0
+call    0 never executed
+    #####:  603:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  604:		}
+        -:  605:
+    #####:  606:		kbind_busy = 1;
+    #####:  607:		rl_attempted_completion_function = NULL;
+    #####:  608:		exit_code = untrash_function(comm);
+    %%%%%:  608-block  0
+call    0 never executed
+    #####:  609:		rl_attempted_completion_function = my_rl_completion;
+    #####:  610:		kbind_busy = 0;
+unconditional  0 never executed
+        -:  611:	}
+        -:  612:
+        -:  613:	/*         ############### SELECTION ##################     */
+      10*:  614:	else if (*comm[0] == 's' && (!comm[0][1] || strcmp(comm[0], "sel") == 0))
+       10:  614-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 8
+        2:  614-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 2
+    %%%%%:  614-block  2
+branch  4 never executed
+branch  5 never executed
+        2:  615:		exit_code = sel_function(comm);
+        2:  615-block  0
+call    0 returned 2
+unconditional  1 taken 2
+        -:  616:
+       8*:  617:	else if (*comm[0] == 's' && (strcmp(comm[0], "sb") == 0
+        8:  617-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 8
+    %%%%%:  617-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  618:	|| strcmp(comm[0], "selbox") == 0))
+    %%%%%:  618-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  619:		show_sel_files();
+    %%%%%:  619-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  620:
+        8:  621:	else if (*comm[0] == 'd' && (strcmp(comm[0], "ds") == 0
+        8:  621-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 6
+        2:  621-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 2
+    #####:  622:	|| strcmp(comm[0], "desel") == 0)) {
+    %%%%%:  622-block  0
+branch  0 never executed
+branch  1 never executed
+        2:  623:		if (comm[1] && strcmp(comm[1], "--help") == 0) {
+        2:  623-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2:  623-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 2
+    #####:  624:			puts(_("Usage: desel, ds [*, a, all]"));
+    %%%%%:  624-block  0
+call    0 never executed
+    #####:  625:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  626:		}
+        -:  627:
+        2:  628:		kbind_busy = 1;
+        2:  629:		rl_attempted_completion_function = NULL;
+        2:  630:		exit_code = deselect(comm);
+        2:  630-block  0
+call    0 returned 2
+        2:  631:		rl_attempted_completion_function = my_rl_completion;
+        2:  632:		kbind_busy = 0;
+unconditional  0 taken 2
+        -:  633:	}
+        -:  634:
+        -:  635:	/*  ############### SOME SHELL CMD WRAPPERS ##################  */
+        6:  636:	else if ((*comm[0] == 'r' || *comm[0] == 'm' || *comm[0] == 't'
+        6:  636-block  0
+branch  0 taken 6 (fallthrough)
+branch  1 taken 0
+        6:  636-block  1
+branch  2 taken 6 (fallthrough)
+branch  3 taken 0
+        6:  636-block  2
+branch  4 taken 6 (fallthrough)
+branch  5 taken 0
+        6:  637:	|| *comm[0] == 'l' || *comm[0] == 'c' || *comm[0] == 'u')
+        6:  637-block  0
+branch  0 taken 6 (fallthrough)
+branch  1 taken 0
+        6:  637-block  1
+branch  2 taken 6 (fallthrough)
+branch  3 taken 0
+        6:  637-block  2
+branch  4 taken 0 (fallthrough)
+branch  5 taken 6
+    #####:  638:	&& (strcmp(comm[0], "rm") == 0 || strcmp(comm[0], "mkdir") == 0
+    %%%%%:  638-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  638-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  639:	|| strcmp(comm[0], "touch") == 0 || strcmp(comm[0], "ln") == 0
+    %%%%%:  639-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  639-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  640:	|| strcmp(comm[0], "chmod") == 0 || strcmp(comm[0], "unlink") == 0
+    %%%%%:  640-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  640-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  641:	|| strcmp(comm[0], "r") == 0 || strcmp(comm[0], "l") == 0
+    %%%%%:  641-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  641-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  642:	|| strcmp(comm[0], "md") == 0 || strcmp(comm[0], "le") == 0)) {
+    %%%%%:  642-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  642-block  1
+branch  2 never executed
+branch  3 never executed
+        -:  643:
+    #####:  644:		if (*comm[0] == 'l' && !comm[0][1]) {
+    %%%%%:  644-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  644-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  645:			comm[0] = (char *)xrealloc(comm[0], 7 * sizeof(char *));
+    %%%%%:  645-block  0
+call    0 never executed
+    #####:  646:			strcpy(comm[0], "ln -sn");
+unconditional  0 never executed
+        -:  647:		}
+        -:  648:
+    #####:  649:		else if (*comm[0] == 'r' && !comm[0][1]) {
+    %%%%%:  649-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  649-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  650:			exit_code = remove_file(comm);
+    %%%%%:  650-block  0
+call    0 never executed
+    #####:  651:			return exit_code;
+unconditional  0 never executed
+        -:  652:		}
+        -:  653:
+    #####:  654:		else if (*comm[0] == 'm' && comm[0][1] == 'd' && !comm[0][2]) {
+    %%%%%:  654-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  654-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  654-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  655:			comm[0] = (char *)xrealloc(comm[0], 9 * sizeof(char *));
+    %%%%%:  655-block  0
+call    0 never executed
+    #####:  656:			strcpy(comm[0], "mkdir -p");
+unconditional  0 never executed
+        -:  657:		}
+        -:  658:
+    #####:  659:		if (*comm[0] == 'l' && comm[0][1] == 'e' && !comm[0][2]) {
+    %%%%%:  659-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  659-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  659-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  660:			if (!comm[1]) {
+    %%%%%:  660-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  661:				fputs(_("Usage: le SYMLINK\n"), stderr);
+    %%%%%:  661-block  0
+call    0 never executed
+    #####:  662:				exit_code = EXIT_FAILURE;
+    #####:  663:				return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  664:			}
+        -:  665:
+    #####:  666:			exit_code = edit_link(comm[1]);
+    %%%%%:  666-block  0
+call    0 never executed
+    #####:  667:			return exit_code;
+unconditional  0 never executed
+        -:  668:		}
+        -:  669:
+    #####:  670:		else if (*comm[0] == 'l' && comm[0][1] == 'n' && !comm[0][2]) {
+    %%%%%:  670-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  670-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  670-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  671:			if (comm[1] && (strcmp(comm[1], "edit") == 0
+    %%%%%:  671-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  671-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  672:			|| strcmp(comm[1], "e") == 0)) {
+    %%%%%:  672-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  673:				if (!comm[2]) {
+    %%%%%:  673-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  674:					fputs(_("Usage: ln edit SYMLINK\n"), stderr);
+    %%%%%:  674-block  0
+call    0 never executed
+    #####:  675:					exit_code = EXIT_FAILURE;
+    #####:  676:					return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  677:				}
+    #####:  678:				exit_code = edit_link(comm[2]);
+    %%%%%:  678-block  0
+call    0 never executed
+    #####:  679:				return exit_code;
+unconditional  0 never executed
+        -:  680:			}
+        -:  681:		}
+        -:  682:
+    #####:  683:		kbind_busy = 1;
+    #####:  684:		exit_code = run_and_refresh(comm);
+    %%%%%:  684-block  0
+call    0 never executed
+    #####:  685:		kbind_busy = 0;
+unconditional  0 never executed
+        -:  686:	}
+        -:  687:
+        -:  688:	/*    ############### TOGGLE EXEC ##################     */
+       6*:  689:	else if (*comm[0] == 't' && comm[0][1] == 'e' && !comm[0][2]) {
+        6:  689-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 6
+    %%%%%:  689-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  689-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  690:		if (!comm[1] || (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)) {
+    %%%%%:  690-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  690-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  690-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  691:			puts(_("Usage: te FILE(s)"));
+    %%%%%:  691-block  0
+call    0 never executed
+    #####:  692:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  693:		}
+        -:  694:
+        -:  695:		size_t j;
+    #####:  696:		for (j = 1; comm[j]; j++) {
+    %%%%%:  696-block  0
+unconditional  0 never executed
+    %%%%%:  696-block  1
+unconditional  1 never executed
+    %%%%%:  696-block  2
+branch  2 never executed
+branch  3 never executed
+        -:  697:			struct stat attr;
+        -:  698:
+    #####:  699:			if (strchr(comm[j], '\\')) {
+    %%%%%:  699-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  700:				char *tmp = dequote_str(comm[j], 0);
+    %%%%%:  700-block  0
+call    0 never executed
+    #####:  701:				if (tmp) {
+branch  0 never executed
+branch  1 never executed
+    #####:  702:					strcpy(comm[j], tmp);
+    #####:  703:					free(tmp);
+    %%%%%:  703-block  0
+unconditional  0 never executed
+        -:  704:				}
+        -:  705:			}
+        -:  706:
+    #####:  707:			if (lstat(comm[j], &attr) == -1) {
+    %%%%%:  707-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  708:				fprintf(stderr, "stat: %s: %s\n", comm[j], strerror(errno));
+    %%%%%:  708-block  0
+call    0 never executed
+call    1 never executed
+    #####:  709:				exit_code = EXIT_FAILURE;
+    #####:  710:				continue;
+unconditional  0 never executed
+        -:  711:			}
+        -:  712:
+    #####:  713:			if (xchmod(comm[j], attr.st_mode) == -1)
+    %%%%%:  713-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  714:				exit_code = EXIT_FAILURE;
+    %%%%%:  714-block  0
+unconditional  0 never executed
+        -:  715:		}
+        -:  716:
+    #####:  717:		if (exit_code == EXIT_SUCCESS)
+    %%%%%:  717-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  718:			printf(_("%s: Toggled executable bit on %zu file(s)\n"),
+    %%%%%:  718-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  719:			    PROGRAM_NAME, args_n);
+        -:  720:
+    #####:  721:		return exit_code;
+    %%%%%:  721-block  0
+unconditional  0 never executed
+        -:  722:	}
+        -:  723:
+        -:  724:	/*    ############### PINNED FILE ##################     */
+        6:  725:	else if (*comm[0] == 'p' && strcmp(comm[0], "pin") == 0) {
+        6:  725-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 5
+        1:  725-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1
+        -:  726:
+    #####:  727:		if (comm[1]) {
+    %%%%%:  727-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  728:			if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
+    %%%%%:  728-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  728-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  729:				puts("Usage: pin FILE/DIR");
+    %%%%%:  729-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  730:			else
+    #####:  731:				exit_code = pin_directory(comm[1]);
+    %%%%%:  731-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  732:		}
+        -:  733:
+        -:  734:		else {
+    #####:  735:			if (pinned_dir)
+    %%%%%:  735-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  736:				printf(_("pinned file: %s\n"), pinned_dir);
+    %%%%%:  736-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  737:			else
+    #####:  738:				puts(_("No pinned file"));
+    %%%%%:  738-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  739:		}
+        -:  740:	}
+        -:  741:
+       6*:  742:	else if (*comm[0] == 'u' && strcmp(comm[0], "unpin") == 0)
+        6:  742-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 6
+    %%%%%:  742-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  743:		return (exit_code = unpin_dir());
+    %%%%%:  743-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  744:
+        -:  745:	/*    ############### PROPERTIES ##################     */
+        6:  746:	else if (*comm[0] == 'p' && (!comm[0][1] || strcmp(comm[0], "pr") == 0
+        6:  746-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 5
+        1:  746-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 0
+        1:  746-block  2
+branch  4 taken 1 (fallthrough)
+branch  5 taken 0
+        1:  747:	|| strcmp(comm[0], "pp") == 0 || strcmp(comm[0], "prop") == 0)) {
+        1:  747-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  747-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1
+    #####:  748:		if (!comm[1]) {
+    %%%%%:  748-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  749:			fputs(_("Usage: p, pr, pp, prop [ELN/FILE ... n]\n"),
+    %%%%%:  749-block  0
+call    0 never executed
+        -:  750:			    stderr);
+    #####:  751:			exit_code = EXIT_FAILURE;
+    #####:  752:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  753:		}
+        -:  754:
+    #####:  755:		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
+    %%%%%:  755-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  755-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  756:			puts(_("Usage: p, pr, pp, prop [ELN/FILE ... n]"));
+    %%%%%:  756-block  0
+call    0 never executed
+    #####:  757:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  758:		}
+        -:  759:
+    #####:  760:		exit_code = properties_function(comm);
+    %%%%%:  760-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  761:	}
+        -:  762:
+        -:  763:	/*     ############### SEARCH ##################     */
+       6*:  764:	else if (*comm[0] == '/' && access(comm[0], F_OK) != 0) {
+        6:  764-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 6
+    %%%%%:  764-block  1
+call    2 never executed
+branch  3 never executed
+branch  4 never executed
+        -:  765:		/* If not absolute path */
+        -:  766:		/* Try first globbing, and if no result, try regex */
+    #####:  767:		if (search_glob(comm, (comm[0][1] == '!') ? 1 : 0) == EXIT_FAILURE)
+    %%%%%:  767-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  768:			exit_code = search_regex(comm, (comm[0][1] == '!') ? 1 : 0);
+    %%%%%:  768-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  769:		else
+    #####:  770:			exit_code = EXIT_SUCCESS;
+    %%%%%:  770-block  0
+unconditional  0 never executed
+        -:  771:	}
+        -:  772:
+        -:  773:	/*      ############### HISTORY ##################     */
+       6*:  774:	else if (*comm[0] == '!' && comm[0][1] != ' ' && comm[0][1] != '\t'
+        6:  774-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 6
+    %%%%%:  774-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  774-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  775:	&& comm[0][1] != '\n' && comm[0][1] != '=' && comm[0][1] != '(')
+    %%%%%:  775-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  775-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  775-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  776:		exit_code = run_history_cmd(comm[0] + 1);
+    %%%%%:  776-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  777:
+        -:  778:	/*    ############### BATCH LINK ##################     */
+       6*:  779:	else if (*comm[0] == 'b' && comm[0][1] == 'l' && !comm[0][2]) {
+        6:  779-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 6
+    %%%%%:  779-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  779-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  780:		exit_code = batch_link(comm);
+    %%%%%:  780-block  0
+call    0 never executed
+    #####:  781:		return exit_code;
+unconditional  0 never executed
+        -:  782:	}
+        -:  783:
+        -:  784:	/*    ############### BULK RENAME ##################     */
+       6*:  785:	else if (*comm[0] == 'b' && ((comm[0][1] == 'r' && !comm[0][2])
+        6:  785-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 6
+    %%%%%:  785-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  785-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  786:	|| strcmp(comm[0], "bulk") == 0)) {
+    %%%%%:  786-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  787:
+    #####:  788:		if (!comm[1]) {
+    %%%%%:  788-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  789:			fputs(_("Usage: br, bulk ELN/FILE ...\n"), stderr);
+    %%%%%:  789-block  0
+call    0 never executed
+    #####:  790:			exit_code = EXIT_FAILURE;
+    #####:  791:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  792:		}
+        -:  793:
+    #####:  794:		if (strcmp(comm[1], "--help") == 0) {
+    %%%%%:  794-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  795:			puts(_("Usage: br, bulk ELN/FILE ..."));
+    %%%%%:  795-block  0
+call    0 never executed
+    #####:  796:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  797:		}
+        -:  798:
+    #####:  799:		exit_code = bulk_rename(comm);
+    %%%%%:  799-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  800:	}
+        -:  801:
+        -:  802:	/*      ################ SORT ##################     */
+       6*:  803:	else if (*comm[0] == 's' && ((comm[0][1] == 't' && !comm[0][2])
+        6:  803-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 6
+    %%%%%:  803-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  803-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  804:	|| strcmp(comm[0], "sort") == 0)) {
+    %%%%%:  804-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  805:		if (comm[1] && strcmp(comm[1], "--help") == 0) {
+    %%%%%:  805-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  805-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  806:			puts(_("Usage: st [METHOD] [rev]\nMETHOD: 0 = none, "
+    %%%%%:  806-block  0
+call    0 never executed
+        -:  807:			       "1 = name, 2 = size, 3 = atime, 4 = btime, "
+        -:  808:			       "5 = ctime, 6 = mtime, 7 = version, "
+        -:  809:			       "8 = extension, 9 = inode, 10 = owner, 11 = group"));
+    #####:  810:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  811:		}
+        -:  812:
+    #####:  813:		exit_code = sort_function(comm);
+    %%%%%:  813-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  814:	}
+        -:  815:
+        -:  816:	/*   ################ ARCHIVER ##################     */
+       6*:  817:	else if (*comm[0] == 'a' && ((comm[0][1] == 'c' || comm[0][1] == 'd')
+        6:  817-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 6
+    %%%%%:  817-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  817-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  818:	&& !comm[0][2])) {
+    %%%%%:  818-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  819:
+    #####:  820:		if (!comm[1] || (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)) {
+    %%%%%:  820-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  820-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  820-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  821:			puts(_("Usage: ac, ad ELN/FILE ..."));
+    %%%%%:  821-block  0
+call    0 never executed
+    #####:  822:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  823:		}
+        -:  824:
+    #####:  825:		if (comm[0][1] == 'c')
+    %%%%%:  825-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  826:			exit_code = archiver(comm, 'c');
+    %%%%%:  826-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  827:		else
+    #####:  828:			exit_code = archiver(comm, 'd');
+    %%%%%:  828-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  829:
+    #####:  830:		return exit_code;
+    %%%%%:  830-block  0
+unconditional  0 never executed
+        -:  831:	}
+        -:  832:
+        -:  833:	/* ##################################################
+        -:  834:	 * #                 MINOR FUNCTIONS                #
+        -:  835:	 * ##################################################*/
+        -:  836:
+        6:  837:	else if (*comm[0] == 'w' && comm[0][1] == 's' && !comm[0][2]) {
+        6:  837-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 3
+        3:  837-block  1
+branch  2 taken 3 (fallthrough)
+branch  3 taken 0
+        3:  837-block  2
+branch  4 taken 3 (fallthrough)
+branch  5 taken 0
+        3:  838:		exit_code = workspaces(comm[1] ? comm[1] : NULL);
+        3:  838-block  0
+call    0 returned 3
+        3:  839:		return exit_code;
+unconditional  0 taken 3
+        -:  840:	}
+        -:  841:
+       3*:  842:	else if (*comm[0] == 'f' && ((comm[0][1] == 't' && !comm[0][2])
+        3:  842-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    %%%%%:  842-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  842-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  843:	|| strcmp(comm[0], "filter") == 0)) {
+    %%%%%:  843-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  844:		exit_code = filter_function(comm[1]);
+    %%%%%:  844-block  0
+call    0 never executed
+    #####:  845:		return exit_code;
+unconditional  0 never executed
+        -:  846:	}
+        -:  847:
+       3*:  848:	else if (*comm[0] == 'c' && ((comm[0][1] == 'l' && !comm[0][2])
+        3:  848-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    %%%%%:  848-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  848-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  849:	|| strcmp(comm[0], "columns") == 0)) {
+    %%%%%:  849-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  850:		if (!comm[1] || (*comm[1] == '-' && strcmp(comm[1], "--help") == 0))
+    %%%%%:  850-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  850-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  850-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  851:			puts(_("Usage: cl, columns [on, off]"));
+    %%%%%:  851-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  852:
+    #####:  853:		else if (*comm[1] == 'o' && comm[1][1] == 'n' && !comm[1][2]) {
+    %%%%%:  853-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  853-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  853-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  854:			columned = 1;
+        -:  855:
+    #####:  856:			if (cd_lists_on_the_fly) {
+    %%%%%:  856-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  857:				free_dirlist();
+    %%%%%:  857-block  0
+call    0 never executed
+    #####:  858:				exit_code = list_dir();
+call    0 never executed
+unconditional  1 never executed
+        -:  859:			}
+        -:  860:		}
+        -:  861:
+    #####:  862:		else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
+    %%%%%:  862-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  862-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  863:			columned = 0;
+        -:  864:
+    #####:  865:			if (cd_lists_on_the_fly) {
+    %%%%%:  865-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  866:				free_dirlist();
+    %%%%%:  866-block  0
+call    0 never executed
+    #####:  867:				exit_code = list_dir();
+call    0 never executed
+unconditional  1 never executed
+        -:  868:			}
+        -:  869:		}
+        -:  870:
+        -:  871:		else {
+    #####:  872:			fputs(_("Usage: cl, columns [on, off]\n"), stderr);
+    %%%%%:  872-block  0
+call    0 never executed
+    #####:  873:			exit_code = EXIT_FAILURE;
+    #####:  874:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  875:		}
+        -:  876:	}
+        -:  877:
+       3*:  878:	else if (*comm[0] == 'i' && strcmp(comm[0], "icons") == 0) {
+        3:  878-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    %%%%%:  878-block  1
+branch  2 never executed
+branch  3 never executed
+        -:  879:
+    #####:  880:		if (!comm[1] || (*comm[1] == '-' && strcmp(comm[1], "--help") == 0))
+    %%%%%:  880-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  880-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  880-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  881:			puts(_("Usage: icons [on, off]"));
+    %%%%%:  881-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  882:
+    #####:  883:		else if (*comm[1] == 'o' && comm[1][1] == 'n' && !comm[1][2]) {
+    %%%%%:  883-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  883-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  883-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  884:			icons = 1;
+        -:  885:
+    #####:  886:			if (cd_lists_on_the_fly) {
+    %%%%%:  886-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  887:				free_dirlist();
+    %%%%%:  887-block  0
+call    0 never executed
+    #####:  888:				exit_code = list_dir();
+call    0 never executed
+unconditional  1 never executed
+        -:  889:			}
+        -:  890:		}
+        -:  891:
+    #####:  892:		else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
+    %%%%%:  892-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  892-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  893:			icons = 0;
+        -:  894:
+    #####:  895:			if (cd_lists_on_the_fly) {
+    %%%%%:  895-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  896:				free_dirlist();
+    %%%%%:  896-block  0
+call    0 never executed
+    #####:  897:				exit_code = list_dir();
+call    0 never executed
+unconditional  1 never executed
+        -:  898:			}
+        -:  899:		}
+        -:  900:
+        -:  901:		else {
+    #####:  902:			fputs(_("Usage: icons [on, off]\n"), stderr);
+    %%%%%:  902-block  0
+call    0 never executed
+    #####:  903:			exit_code = EXIT_FAILURE;
+    #####:  904:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  905:		}
+        -:  906:
+    #####:  907:		return EXIT_SUCCESS;
+    %%%%%:  907-block  0
+unconditional  0 never executed
+        -:  908:	}
+        -:  909:
+       3*:  910:	else if (*comm[0] == 'c' && ((comm[0][1] == 's' && !comm[0][2])
+        3:  910-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    %%%%%:  910-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  910-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  911:	|| strcmp(comm[0], "colorschemes") == 0)) {
+    %%%%%:  911-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  912:		exit_code = cschemes_function(comm);
+    %%%%%:  912-block  0
+call    0 never executed
+    #####:  913:		return exit_code;
+unconditional  0 never executed
+        -:  914:	}
+        -:  915:
+       3*:  916:	else if (*comm[0] == 'k' && ((comm[0][1] == 'b' && !comm[0][2])
+        3:  916-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    %%%%%:  916-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  916-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  917:	|| strcmp(comm[0], "keybinds") == 0)) {
+    %%%%%:  917-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  918:		exit_code = kbinds_function(comm);
+    %%%%%:  918-block  0
+call    0 never executed
+    #####:  919:		return exit_code;
+unconditional  0 never executed
+        -:  920:	}
+        -:  921:
+        3:  922:	else if (*comm[0] == 'e' && (strcmp(comm[0], "exp") == 0
+        3:  922-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 2
+        1:  922-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 0
+        1:  923:	|| strcmp(comm[0], "export") == 0)) {
+        1:  923-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+        -:  924:
+    #####:  925:		if (comm[1] && *comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
+    %%%%%:  925-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  925-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  925-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  926:			puts(_("Usage: exp, export [FILE(s)]"));
+    %%%%%:  926-block  0
+call    0 never executed
+    #####:  927:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  928:		}
+        -:  929:
+    #####:  930:		char *ret = export(comm, 1);
+    %%%%%:  930-block  0
+call    0 never executed
+        -:  931:
+    #####:  932:		if (ret) {
+branch  0 never executed
+branch  1 never executed
+    #####:  933:			printf("Files exported to: %s\n", ret);
+    %%%%%:  933-block  0
+call    0 never executed
+    #####:  934:			free(ret);
+    #####:  935:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  936:		}
+        -:  937:
+    #####:  938:		exit_code = EXIT_FAILURE;
+    #####:  939:		return EXIT_FAILURE;
+    %%%%%:  939-block  0
+unconditional  0 never executed
+        -:  940:	}
+        -:  941:
+       3*:  942:	else if (*comm[0] == 'o' && strcmp(comm[0], "opener") == 0) {
+        3:  942-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    %%%%%:  942-block  1
+branch  2 never executed
+branch  3 never executed
+        -:  943:
+    #####:  944:		if (!comm[1]) {
+    %%%%%:  944-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  945:			printf("opener: %s\n", (opener) ? opener : "lira (built-in)");
+    %%%%%:  945-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  945-block  1
+unconditional  2 never executed
+    %%%%%:  945-block  2
+unconditional  3 never executed
+    %%%%%:  945-block  3
+call    4 never executed
+    #####:  946:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  947:		}
+        -:  948:
+    #####:  949:		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
+    %%%%%:  949-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  949-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  950:			puts(_("Usage: opener APPLICATION"));
+    %%%%%:  950-block  0
+call    0 never executed
+    #####:  951:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  952:		}
+        -:  953:
+    #####:  954:		if (opener) {
+    %%%%%:  954-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  955:			free(opener);
+    #####:  956:			opener = (char *)NULL;
+    %%%%%:  956-block  0
+unconditional  0 never executed
+        -:  957:		}
+        -:  958:
+    #####:  959:		if (strcmp(comm[1], "default") != 0) {
+    %%%%%:  959-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  960:			opener = (char *)xcalloc(strlen(comm[1]) + 1, sizeof(char));
+    %%%%%:  960-block  0
+call    0 never executed
+    #####:  961:			strcpy(opener, comm[1]);
+unconditional  0 never executed
+        -:  962:		}
+        -:  963:
+    #####:  964:		printf(_("opener: Opener set to '%s'\n"), (opener) ? opener
+    %%%%%:  964-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  964-block  1
+unconditional  2 never executed
+    %%%%%:  964-block  2
+unconditional  3 never executed
+    %%%%%:  964-block  3
+call    4 never executed
+unconditional  5 never executed
+        -:  965:								   : "lira (built-in)");
+        -:  966:	}
+        -:  967:
+        -:  968:	/* #### TIPS #### */
+       3*:  969:	else if (*comm[0] == 't' && strcmp(comm[0], "tips") == 0)
+        3:  969-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    %%%%%:  969-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  970:		print_tips(1);
+    %%%%%:  970-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  971:
+        -:  972:	/* #### ACTIONS #### */
+       3*:  973:	else if (*comm[0] == 'a' && strcmp(comm[0], "actions") == 0) {
+        3:  973-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    %%%%%:  973-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  974:		if (!comm[1]) {
+    %%%%%:  974-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  975:			if (actions_n) {
+    %%%%%:  975-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  976:				size_t i;
+    #####:  977:				for (i = 0; i < actions_n; i++)
+    %%%%%:  977-block  0
+unconditional  0 never executed
+unconditional  1 never executed
+    %%%%%:  977-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  978:					printf("%s %s->%s %s\n", usr_actions[i].name,
+    #####:  979:					    mi_c, df_c, usr_actions[i].value);
+    %%%%%:  979-block  0
+call    0 never executed
+        -:  980:			} else {
+    #####:  981:				puts(_("actions: No actions defined. Use the 'actions "
+    %%%%%:  981-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  982:				       "edit' command to add some"));
+        -:  983:			}
+        -:  984:		}
+        -:  985:
+    #####:  986:		else if (strcmp(comm[1], "edit") == 0) {
+    %%%%%:  986-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  987:			exit_code = edit_actions();
+    %%%%%:  987-block  0
+call    0 never executed
+    #####:  988:			return exit_code;
+unconditional  0 never executed
+        -:  989:		}
+        -:  990:
+    #####:  991:		else if (strcmp(comm[1], "--help") == 0)
+    %%%%%:  991-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  992:			puts("Usage: actions [edit]");
+    %%%%%:  992-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  993:
+        -:  994:		else {
+    #####:  995:			fputs("Usage: actions [edit]\n", stderr);
+    %%%%%:  995-block  0
+call    0 never executed
+    #####:  996:			exit_code = EXIT_FAILURE;
+    #####:  997:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  998:		}
+        -:  999:	}
+        -: 1000:
+        -: 1001:	/* #### LIGHT MODE #### */
+       3*: 1002:	else if (*comm[0] == 'l' && comm[0][1] == 'm' && !comm[0][2]) {
+        3: 1002-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    %%%%%: 1002-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%: 1002-block  2
+branch  4 never executed
+branch  5 never executed
+    #####: 1003:		if (comm[1]) {
+    %%%%%: 1003-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1004:			if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
+    %%%%%: 1004-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1004-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1005:				light_mode = 1;
+    #####: 1006:				puts(_("Light mode is on"));
+    %%%%%: 1006-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1007:			}
+        -: 1008:
+    #####: 1009:			else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
+    %%%%%: 1009-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1009-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1010:				light_mode = 0;
+    #####: 1011:				puts(_("Light mode is off"));
+    %%%%%: 1011-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1012:			}
+        -: 1013:
+        -: 1014:			else {
+    #####: 1015:				puts(_("Usage: lm [on, off]"));
+    %%%%%: 1015-block  0
+call    0 never executed
+    #####: 1016:				exit_code = EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1017:			}
+        -: 1018:		}
+        -: 1019:
+        -: 1020:		else {
+    #####: 1021:			fputs(_("Usage: lm [on, off]\n"), stderr);
+    %%%%%: 1021-block  0
+call    0 never executed
+    #####: 1022:			exit_code = EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1023:		}
+        -: 1024:	}
+        -: 1025:
+        -: 1026:	/*    ############### RELOAD ##################     */
+       3*: 1027:	else if (*comm[0] == 'r' && ((comm[0][1] == 'l' && !comm[0][2]) || strcmp(comm[0], "reload") == 0)) {
+        3: 1027-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    %%%%%: 1027-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%: 1027-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%: 1027-block  3
+branch  6 never executed
+branch  7 never executed
+    #####: 1028:		exit_code = reload_config();
+    %%%%%: 1028-block  0
+call    0 never executed
+    #####: 1029:		welcome_message = 0;
+        -: 1030:
+    #####: 1031:		if (cd_lists_on_the_fly) {
+branch  0 never executed
+branch  1 never executed
+    #####: 1032:			free_dirlist();
+    %%%%%: 1032-block  0
+call    0 never executed
+    #####: 1033:			if (list_dir() != EXIT_SUCCESS)
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1034:				exit_code = EXIT_FAILURE;
+    %%%%%: 1034-block  0
+unconditional  0 never executed
+        -: 1035:		}
+        -: 1036:
+    #####: 1037:		return exit_code;
+    %%%%%: 1037-block  0
+unconditional  0 never executed
+        -: 1038:	}
+        -: 1039:
+        -: 1040:	/* #### NEW INSTANCE #### */
+       3*: 1041:	else if ((*comm[0] == 'x' || *comm[0] == 'X') && !comm[0][1]) {
+        3: 1041-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 0
+        3: 1041-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 3
+    %%%%%: 1041-block  2
+branch  4 never executed
+branch  5 never executed
+    #####: 1042:		if (comm[1]) {
+    %%%%%: 1042-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1043:			if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
+    %%%%%: 1043-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1043-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1044:				puts(_("Usage: x, X [DIR]"));
+    %%%%%: 1044-block  0
+call    0 never executed
+    #####: 1045:				return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1046:			}
+        -: 1047:
+    #####: 1048:			else if (*comm[0] == 'x')
+    %%%%%: 1048-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1049:				exit_code = new_instance(comm[1], 0);
+    %%%%%: 1049-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1050:			else /* Run as root */
+    #####: 1051:				exit_code = new_instance(comm[1], 1);
+    %%%%%: 1051-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1052:		}
+        -: 1053:
+        -: 1054:		/* Run new instance in CWD */
+        -: 1055:		else {
+    #####: 1056:			if (*comm[0] == 'x')
+    %%%%%: 1056-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1057:				exit_code = new_instance(ws[cur_ws].path, 0);
+    %%%%%: 1057-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1058:			else
+    #####: 1059:				exit_code = new_instance(ws[cur_ws].path, 1);
+    %%%%%: 1059-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1060:		}
+        -: 1061:
+    #####: 1062:		return exit_code;
+    %%%%%: 1062-block  0
+unconditional  0 never executed
+        -: 1063:	}
+        -: 1064:
+        -: 1065:	/* #### NET #### */
+       3*: 1066:	else if (*comm[0] == 'n' && (!comm[0][1] || strcmp(comm[0], "net") == 0)) {
+        3: 1066-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    %%%%%: 1066-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%: 1066-block  2
+branch  4 never executed
+branch  5 never executed
+        -: 1067:
+    #####: 1068:		if (!comm[1]) {
+    %%%%%: 1068-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1069:			puts(_("Usage: n, net [sftp, smb, ftp]://ADDRESS [OPTIONS]"));
+    %%%%%: 1069-block  0
+call    0 never executed
+    #####: 1070:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1071:		}
+        -: 1072:
+    #####: 1073:		if (*comm[1] == 's' && strncmp(comm[1], "sftp://", 7) == 0)
+    %%%%%: 1073-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1073-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1074:			exit_code = remote_ssh(comm[1] + 7, (comm[2]) ? comm[2]
+    %%%%%: 1074-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1075:								      : NULL);
+        -: 1076:
+    #####: 1077:		else if (*comm[1] == 's' && strncmp(comm[1], "smb://", 6) == 0)
+    %%%%%: 1077-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1077-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1078:			exit_code = remote_smb(comm[1] + 6, (comm[2]) ? comm[2]
+    %%%%%: 1078-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1079:								      : NULL);
+        -: 1080:
+    #####: 1081:		else if (*comm[1] == 'f' && strncmp(comm[1], "ftp://", 6) == 0)
+    %%%%%: 1081-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1081-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1082:			exit_code = remote_ftp(comm[1] + 6, (comm[2]) ? comm[2]
+    %%%%%: 1082-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1083:								      : NULL);
+        -: 1084:
+        -: 1085:		else {
+    #####: 1086:			fputs(_("Usage: n, net [sftp, smb, ftp]://ADDRESS [OPTIONS]\n"),
+    %%%%%: 1086-block  0
+call    0 never executed
+        -: 1087:			    stderr);
+    #####: 1088:			exit_code = EXIT_FAILURE;
+    #####: 1089:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1090:		}
+        -: 1091:	}
+        -: 1092:
+        -: 1093:	/* #### MIME #### */
+       3*: 1094:	else if (*comm[0] == 'm' && ((comm[0][1] == 'm' && !comm[0][2]) || strcmp(comm[0], "mime") == 0))
+        3: 1094-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    %%%%%: 1094-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%: 1094-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%: 1094-block  3
+branch  6 never executed
+branch  7 never executed
+    #####: 1095:		exit_code = mime_open(comm);
+    %%%%%: 1095-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1096:
+       3*: 1097:	else if (*comm[0] == 'l' && comm[0][1] == 's' && !comm[0][2] && !cd_lists_on_the_fly) {
+        3: 1097-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    %%%%%: 1097-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%: 1097-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%: 1097-block  3
+branch  6 never executed
+branch  7 never executed
+    #####: 1098:		free_dirlist();
+    %%%%%: 1098-block  0
+call    0 never executed
+    #####: 1099:		exit_code = list_dir();
+call    0 never executed
+        -: 1100:
+    #####: 1101:		if (get_sel_files() != EXIT_SUCCESS)
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1102:			exit_code = EXIT_FAILURE;
+    %%%%%: 1102-block  0
+unconditional  0 never executed
+        -: 1103:	}
+        -: 1104:
+        -: 1105:	/* #### PROFILE #### */
+       3*: 1106:	else if (*comm[0] == 'p' && ((comm[0][1] == 'f' && !comm[0][2]) || strcmp(comm[0], "prof") == 0 || strcmp(comm[0], "profile") == 0))
+        3: 1106-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 2
+        1: 1106-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1
+    %%%%%: 1106-block  2
+branch  4 never executed
+branch  5 never executed
+        1: 1106-block  3
+branch  6 taken 1 (fallthrough)
+branch  7 taken 0
+        1: 1106-block  4
+branch  8 taken 0 (fallthrough)
+branch  9 taken 1
+    #####: 1107:		exit_code = profile_function(comm);
+    %%%%%: 1107-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1108:
+        -: 1109:	/* #### MOUNTPOINTS #### */
+       3*: 1110:	else if (*comm[0] == 'm' && ((comm[0][1] == 'p' && !comm[0][2]) || strcmp(comm[0], "mountpoints") == 0)) {
+        3: 1110-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    %%%%%: 1110-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%: 1110-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%: 1110-block  3
+branch  6 never executed
+branch  7 never executed
+        -: 1111:
+    #####: 1112:		if (comm[1] && strcmp(comm[1], "--help") == 0)
+    %%%%%: 1112-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1112-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1113:			puts(_("Usage: mp, mountpoints"));
+    %%%%%: 1113-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1114:
+        -: 1115:		else {
+    #####: 1116:			kbind_busy = 1;
+    #####: 1117:			rl_attempted_completion_function = NULL;
+    #####: 1118:			exit_code = list_mountpoints();
+    %%%%%: 1118-block  0
+call    0 never executed
+    #####: 1119:			rl_attempted_completion_function = my_rl_completion;
+    #####: 1120:			kbind_busy = 0;
+unconditional  0 never executed
+        -: 1121:		}
+        -: 1122:	}
+        -: 1123:
+        -: 1124:	/* #### MAX FILES #### */
+       3*: 1125:	else if (*comm[0] == 'm' && comm[0][1] == 'f' && !comm[0][2]) {
+        3: 1125-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    %%%%%: 1125-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%: 1125-block  2
+branch  4 never executed
+branch  5 never executed
+    #####: 1126:		if (!comm[1]) {
+    %%%%%: 1126-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1127:			printf(_("Max files: %d\n"), max_files);
+    %%%%%: 1127-block  0
+call    0 never executed
+    #####: 1128:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1129:		}
+        -: 1130:
+    #####: 1131:		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
+    %%%%%: 1131-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1131-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1132:			puts(_("Usage: mf [NUM]"));
+    %%%%%: 1132-block  0
+call    0 never executed
+    #####: 1133:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1134:		}
+        -: 1135:
+    #####: 1136:		if (strcmp(comm[1], "-1") != 0 && !is_number(comm[1])) {
+    %%%%%: 1136-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1136-block  1
+call    2 never executed
+branch  3 never executed
+branch  4 never executed
+    #####: 1137:			fprintf(stderr, _("%s: Usage: mf [NUM]\n"), PROGRAM_NAME);
+    %%%%%: 1137-block  0
+call    0 never executed
+    #####: 1138:			exit_code = EXIT_FAILURE;
+    #####: 1139:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1140:		}
+        -: 1141:
+    #####: 1142:		int inum = atoi(comm[1]);
+    #####: 1143:		if (inum < -1) {
+    %%%%%: 1143-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1144:			max_files = inum;
+    #####: 1145:			fprintf(stderr, _("%s: %d: Invalid number\n"), PROGRAM_NAME,
+    %%%%%: 1145-block  0
+call    0 never executed
+        -: 1146:			    inum);
+    #####: 1147:			exit_code = EXIT_FAILURE;
+    #####: 1148:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1149:		}
+        -: 1150:
+    #####: 1151:		max_files = inum;
+    #####: 1152:		if (max_files == -1)
+    %%%%%: 1152-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1153:			puts(_("Max files unset"));
+    %%%%%: 1153-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1154:		else
+    #####: 1155:			printf(_("Max files set to %d\n"), max_files);
+    %%%%%: 1155-block  0
+call    0 never executed
+unconditional  1 never executed
+    #####: 1156:		return EXIT_SUCCESS;
+    %%%%%: 1156-block  0
+unconditional  0 never executed
+        -: 1157:	}
+        -: 1158:
+        -: 1159:	/* #### EXT #### */
+       3*: 1160:	else if (*comm[0] == 'e' && comm[0][1] == 'x' && comm[0][2] == 't'
+        3: 1160-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 2
+        1: 1160-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1
+    %%%%%: 1160-block  2
+branch  4 never executed
+branch  5 never executed
+    #####: 1161:	&& !comm[0][3]) {
+    %%%%%: 1161-block  0
+branch  0 never executed
+branch  1 never executed
+        -: 1162:
+    #####: 1163:		if (!comm[1]) {
+    %%%%%: 1163-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1164:			puts(_("Usage: ext [on, off, status]"));
+    %%%%%: 1164-block  0
+call    0 never executed
+    #####: 1165:			exit_code = EXIT_FAILURE;
+    #####: 1166:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1167:		}
+        -: 1168:
+    #####: 1169:		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
+    %%%%%: 1169-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1169-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1170:			puts(_("Usage: ext [on, off, status]"));
+    %%%%%: 1170-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1171:
+        -: 1172:		else {
+    #####: 1173:			if (*comm[1] == 's' && strcmp(comm[1], "status") == 0)
+    %%%%%: 1173-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1173-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1174:				printf(_("%s: External commands %s\n"), PROGRAM_NAME,
+    %%%%%: 1174-block  0
+call    0 never executed
+unconditional  1 never executed
+    #####: 1175:				    (ext_cmd_ok) ? _("enabled") : _("disabled"));
+    %%%%%: 1175-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1175-block  1
+unconditional  2 never executed
+    %%%%%: 1175-block  2
+unconditional  3 never executed
+        -: 1176:
+    #####: 1177:			else if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
+    %%%%%: 1177-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1177-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1178:				ext_cmd_ok = 1;
+    #####: 1179:				printf(_("%s: External commands enabled\n"), PROGRAM_NAME);
+    %%%%%: 1179-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1180:			}
+        -: 1181:
+    #####: 1182:			else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
+    %%%%%: 1182-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1182-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1183:				ext_cmd_ok = 0;
+    #####: 1184:				printf(_("%s: External commands disabled\n"), PROGRAM_NAME);
+    %%%%%: 1184-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1185:			}
+        -: 1186:
+        -: 1187:			else {
+    #####: 1188:				fputs(_("Usage: ext [on, off, status]\n"), stderr);
+    %%%%%: 1188-block  0
+call    0 never executed
+    #####: 1189:				exit_code = EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1190:			}
+        -: 1191:		}
+        -: 1192:	}
+        -: 1193:
+        -: 1194:	/* #### PAGER #### */
+       3*: 1195:	else if (*comm[0] == 'p' && ((comm[0][1] == 'g' && !comm[0][2])
+        3: 1195-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 2
+        1: 1195-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1
+    %%%%%: 1195-block  2
+branch  4 never executed
+branch  5 never executed
+        1: 1196:	|| strcmp(comm[0], "pager") == 0)) {
+        1: 1196-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+        -: 1197:
+    #####: 1198:		if (!comm[1]) {
+    %%%%%: 1198-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1199:			puts(_("Usage: pager, pg [on, off, status]"));
+    %%%%%: 1199-block  0
+call    0 never executed
+    #####: 1200:			exit_code = EXIT_FAILURE;
+    #####: 1201:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1202:		}
+        -: 1203:
+    #####: 1204:		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
+    %%%%%: 1204-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1204-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1205:			puts(_("Usage: pg, pager [on, off, status]"));
+    %%%%%: 1205-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1206:
+        -: 1207:		else {
+    #####: 1208:			if (*comm[1] == 's' && strcmp(comm[1], "status") == 0)
+    %%%%%: 1208-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1208-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1209:				printf(_("%s: Pager %s\n"), PROGRAM_NAME,
+    %%%%%: 1209-block  0
+call    0 never executed
+unconditional  1 never executed
+    #####: 1210:				    (pager) ? _("enabled") : _("disabled"));
+    %%%%%: 1210-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1210-block  1
+unconditional  2 never executed
+    %%%%%: 1210-block  2
+unconditional  3 never executed
+        -: 1211:
+    #####: 1212:			else if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
+    %%%%%: 1212-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1212-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1213:				pager = 1;
+    #####: 1214:				printf(_("%s: Pager enabled\n"), PROGRAM_NAME);
+    %%%%%: 1214-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1215:			}
+        -: 1216:
+    #####: 1217:			else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
+    %%%%%: 1217-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1217-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1218:				pager = 0;
+    #####: 1219:				printf(_("%s: Pager disabled\n"), PROGRAM_NAME);
+    %%%%%: 1219-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1220:			} else {
+    #####: 1221:				fputs(_("Usage: pg, pager [on, off, status]\n"), stderr);
+    %%%%%: 1221-block  0
+call    0 never executed
+    #####: 1222:				exit_code = EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1223:			}
+        -: 1224:		}
+        -: 1225:	}
+        -: 1226:
+        -: 1227:	/* #### FILES COUNTER #### */
+       3*: 1228:	else if (*comm[0] == 'f' && ((comm[0][1] == 'c' && !comm[0][2])
+        3: 1228-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    %%%%%: 1228-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%: 1228-block  2
+branch  4 never executed
+branch  5 never executed
+    #####: 1229:	|| strcmp(comm[0], "filescounter") == 0)) {
+    %%%%%: 1229-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1230:		if (!comm[1]) {
+    %%%%%: 1230-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1231:			fputs(_("Usage: fc, filescounter [on, off, status]"), stderr);
+    %%%%%: 1231-block  0
+call    0 never executed
+    #####: 1232:			exit_code = EXIT_FAILURE;
+    #####: 1233:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1234:		}
+        -: 1235:
+    #####: 1236:		if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
+    %%%%%: 1236-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1236-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1237:			files_counter = 1;
+    #####: 1238:			puts(_("Filescounter is enabled"));
+    %%%%%: 1238-block  0
+call    0 never executed
+    #####: 1239:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1240:		}
+        -: 1241:
+    #####: 1242:		if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
+    %%%%%: 1242-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1242-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1243:			files_counter = 0;
+    #####: 1244:			puts(_("Filescounter is disabled"));
+    %%%%%: 1244-block  0
+call    0 never executed
+    #####: 1245:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1246:		}
+        -: 1247:
+    #####: 1248:		if (*comm[1] == 's' && strcmp(comm[1], "status") == 0) {
+    %%%%%: 1248-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1248-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1249:			if (files_counter)
+    %%%%%: 1249-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1250:				puts(_("Filescounter is enabled"));
+    %%%%%: 1250-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1251:			else
+    #####: 1252:				puts(_("Filescounter is disabled"));
+    %%%%%: 1252-block  0
+call    0 never executed
+unconditional  1 never executed
+    #####: 1253:			return EXIT_SUCCESS;
+    %%%%%: 1253-block  0
+unconditional  0 never executed
+        -: 1254:		}
+        -: 1255:
+        -: 1256:		else {
+    #####: 1257:			fputs(_("Usage: fc, filescounter [on, off, status]\n"),
+    %%%%%: 1257-block  0
+call    0 never executed
+        -: 1258:			    stderr);
+    #####: 1259:			exit_code = EXIT_FAILURE;
+    #####: 1260:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1261:		}
+        -: 1262:	}
+        -: 1263:
+        -: 1264:	/* #### UNICODE #### */
+       3*: 1265:	else if (*comm[0] == 'u' && ((comm[0][1] == 'c' && !comm[0][2])
+        3: 1265-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    %%%%%: 1265-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%: 1265-block  2
+branch  4 never executed
+branch  5 never executed
+    #####: 1266:	|| strcmp(comm[0], "unicode") == 0)) {
+    %%%%%: 1266-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1267:		if (!comm[1]) {
+    %%%%%: 1267-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1268:			fputs(_("Usage: unicode, uc [on, off, status]\n"), stderr);
+    %%%%%: 1268-block  0
+call    0 never executed
+    #####: 1269:			exit_code = EXIT_FAILURE;
+    #####: 1270:			return EXIT_FAILURE;
+unconditional  0 never executed
+    #####: 1271:		} else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
+    %%%%%: 1271-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1271-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1272:			puts(_("Usage: unicode, uc [on, off, status]"));
+    %%%%%: 1272-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1273:
+        -: 1274:		else {
+    #####: 1275:			if (*comm[1] == 's' && strcmp(comm[1], "status") == 0)
+    %%%%%: 1275-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1275-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1276:				printf(_("%s: Unicode %s\n"), PROGRAM_NAME,
+    %%%%%: 1276-block  0
+call    0 never executed
+unconditional  1 never executed
+    #####: 1277:				    (unicode) ? _("enabled") : _("disabled"));
+    %%%%%: 1277-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1277-block  1
+unconditional  2 never executed
+    %%%%%: 1277-block  2
+unconditional  3 never executed
+        -: 1278:
+    #####: 1279:			else if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
+    %%%%%: 1279-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1279-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1280:				unicode = 1;
+    #####: 1281:				printf(_("%s: Unicode enabled\n"), PROGRAM_NAME);
+    %%%%%: 1281-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1282:			}
+        -: 1283:
+    #####: 1284:			else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
+    %%%%%: 1284-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1284-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1285:				unicode = 0;
+    #####: 1286:				printf(_("%s: Unicode disabled\n"), PROGRAM_NAME);
+    %%%%%: 1286-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1287:			}
+        -: 1288:
+        -: 1289:			else {
+    #####: 1290:				fputs(_("Usage: unicode, uc [on, off, status]\n"), stderr);
+    %%%%%: 1290-block  0
+call    0 never executed
+    #####: 1291:				exit_code = EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1292:			}
+        -: 1293:		}
+        -: 1294:	}
+        -: 1295:
+        -: 1296:	/* #### FOLDERS FIRST #### */
+       3*: 1297:	else if (*comm[0] == 'f' && ((comm[0][1] == 'f' && !comm[0][2])
+        3: 1297-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    %%%%%: 1297-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%: 1297-block  2
+branch  4 never executed
+branch  5 never executed
+    #####: 1298:	|| strcmp(comm[0], "folders-first") == 0)) {
+    %%%%%: 1298-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1298-block  1
+unconditional  2 never executed
+        -: 1299:
+    #####: 1300:		if (cd_lists_on_the_fly == 0)
+    %%%%%: 1300-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1301:			return EXIT_SUCCESS;
+    %%%%%: 1301-block  0
+unconditional  0 never executed
+        -: 1302:
+    #####: 1303:		if (!comm[1]) {
+    %%%%%: 1303-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1304:			fputs(_("Usage: ff, folders-first [on, off, status]\n"), stderr);
+    %%%%%: 1304-block  0
+call    0 never executed
+    #####: 1305:			exit_code = EXIT_FAILURE;
+    #####: 1306:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1307:		}
+        -: 1308:
+    #####: 1309:		if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
+    %%%%%: 1309-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1309-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1310:			puts(_("Usage: ff, folders-first [on, off, status]"));
+    %%%%%: 1310-block  0
+call    0 never executed
+    #####: 1311:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1312:		}
+        -: 1313:
+    #####: 1314:		int status = list_folders_first;
+        -: 1315:
+    #####: 1316:		if (*comm[1] == 's' && strcmp(comm[1], "status") == 0)
+    %%%%%: 1316-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1316-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1317:			printf(_("%s: Folders first %s\n"), PROGRAM_NAME,
+    %%%%%: 1317-block  0
+call    0 never executed
+unconditional  1 never executed
+    #####: 1318:			    (list_folders_first) ? _("enabled") : _("disabled"));
+    %%%%%: 1318-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1318-block  1
+unconditional  2 never executed
+    %%%%%: 1318-block  2
+unconditional  3 never executed
+        -: 1319:
+    #####: 1320:		else if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0)
+    %%%%%: 1320-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1320-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1321:			list_folders_first = 1;
+    %%%%%: 1321-block  0
+unconditional  0 never executed
+        -: 1322:
+    #####: 1323:		else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0)
+    %%%%%: 1323-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1323-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1324:			list_folders_first = 0;
+    %%%%%: 1324-block  0
+unconditional  0 never executed
+        -: 1325:
+        -: 1326:		else {
+    #####: 1327:			fputs(_("Usage: ff, folders-first [on, off, status]\n"), stderr);
+    %%%%%: 1327-block  0
+call    0 never executed
+    #####: 1328:			exit_code = EXIT_FAILURE;
+    #####: 1329:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1330:		}
+        -: 1331:
+    #####: 1332:		if (list_folders_first != status) {
+    %%%%%: 1332-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1333:			if (cd_lists_on_the_fly) {
+    %%%%%: 1333-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1334:				free_dirlist();
+    %%%%%: 1334-block  0
+call    0 never executed
+    #####: 1335:				exit_code = list_dir();
+call    0 never executed
+unconditional  1 never executed
+        -: 1336:			}
+        -: 1337:		}
+        -: 1338:	}
+        -: 1339:
+        -: 1340:	/* #### LOG #### */
+       3*: 1341:	else if (*comm[0] == 'l' && strcmp(comm[0], "log") == 0) {
+        3: 1341-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    %%%%%: 1341-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1342:		if (comm[1] && *comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
+    %%%%%: 1342-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1342-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%: 1342-block  2
+branch  4 never executed
+branch  5 never executed
+    #####: 1343:			puts(_("Usage: log [clear]"));
+    %%%%%: 1343-block  0
+call    0 never executed
+    #####: 1344:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1345:		}
+        -: 1346:
+        -: 1347:		/* I make this check here, and not in the function itself,
+        -: 1348:		 * because this function is also called by other instances of
+        -: 1349:		 * the program where no message should be printed */
+    #####: 1350:		if (!config_ok) {
+    %%%%%: 1350-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1351:			fprintf(stderr, _("%s: Log function disabled\n"), PROGRAM_NAME);
+    %%%%%: 1351-block  0
+call    0 never executed
+    #####: 1352:			exit_code = EXIT_FAILURE;
+    #####: 1353:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1354:		}
+        -: 1355:
+    #####: 1356:		exit_code = log_function(comm);
+    %%%%%: 1356-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1357:	}
+        -: 1358:
+        -: 1359:	/* #### MESSAGES #### */
+       3*: 1360:	else if (*comm[0] == 'm' && (strcmp(comm[0], "msg") == 0
+        3: 1360-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    %%%%%: 1360-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1361:	|| strcmp(comm[0], "messages") == 0)) {
+    %%%%%: 1361-block  0
+branch  0 never executed
+branch  1 never executed
+        -: 1362:
+    #####: 1363:		if (comm[1] && strcmp(comm[1], "--help") == 0) {
+    %%%%%: 1363-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1363-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1364:			puts(_("Usage: messages, msg [clear]"));
+    %%%%%: 1364-block  0
+call    0 never executed
+    #####: 1365:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1366:		}
+        -: 1367:
+    #####: 1368:		if (comm[1] && strcmp(comm[1], "clear") == 0) {
+    %%%%%: 1368-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1368-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1369:			if (!msgs_n) {
+    %%%%%: 1369-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1370:				printf(_("%s: There are no messages\n"), PROGRAM_NAME);
+    %%%%%: 1370-block  0
+call    0 never executed
+    #####: 1371:				return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1372:			}
+        -: 1373:
+        -: 1374:			size_t i;
+        -: 1375:
+    #####: 1376:			for (i = 0; i < (size_t)msgs_n; i++)
+    %%%%%: 1376-block  0
+unconditional  0 never executed
+    %%%%%: 1376-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 1377:				free(messages[i]);
+    %%%%%: 1377-block  0
+unconditional  0 never executed
+        -: 1378:
+    #####: 1379:			msgs_n = 0;
+    #####: 1380:			pmsg = nomsg;
+    %%%%%: 1380-block  0
+unconditional  0 never executed
+        -: 1381:		}
+        -: 1382:
+        -: 1383:		else {
+    #####: 1384:			if (msgs_n) {
+    %%%%%: 1384-block  0
+branch  0 never executed
+branch  1 never executed
+        -: 1385:				size_t i;
+    #####: 1386:				for (i = 0; i < (size_t)msgs_n; i++)
+    %%%%%: 1386-block  0
+unconditional  0 never executed
+unconditional  1 never executed
+    %%%%%: 1386-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1387:					printf("%s", messages[i]);
+    %%%%%: 1387-block  0
+call    0 never executed
+        -: 1388:			}
+        -: 1389:
+        -: 1390:			else
+    #####: 1391:				printf(_("%s: There are no messages\n"), PROGRAM_NAME);
+    %%%%%: 1391-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1392:		}
+        -: 1393:	}
+        -: 1394:
+        -: 1395:	/* #### ALIASES #### */
+       3*: 1396:	else if (*comm[0] == 'a' && strcmp(comm[0], "alias") == 0) {
+        3: 1396-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    %%%%%: 1396-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1397:		if (comm[1]) {
+    %%%%%: 1397-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1398:			if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
+    %%%%%: 1398-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1398-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1399:				puts(_("Usage: alias [import FILE]"));
+    %%%%%: 1399-block  0
+call    0 never executed
+    #####: 1400:				return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1401:			}
+        -: 1402:
+    #####: 1403:			else if (*comm[1] == 'i' && strcmp(comm[1], "import") == 0) {
+    %%%%%: 1403-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1403-block  1
+branch  2 never executed
+branch  3 never executed
+        -: 1404:
+    #####: 1405:				if (!comm[2]) {
+    %%%%%: 1405-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1406:					fprintf(stderr, _("Usage: alias import FILE\n"));
+    %%%%%: 1406-block  0
+call    0 never executed
+    #####: 1407:					exit_code = EXIT_FAILURE;
+    #####: 1408:					return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1409:				}
+        -: 1410:
+    #####: 1411:				exit_code = alias_import(comm[2]);
+    %%%%%: 1411-block  0
+call    0 never executed
+    #####: 1412:				return exit_code;
+unconditional  0 never executed
+        -: 1413:			}
+        -: 1414:		}
+        -: 1415:
+    #####: 1416:		if (aliases_n) {
+    %%%%%: 1416-block  0
+branch  0 never executed
+branch  1 never executed
+        -: 1417:			size_t i;
+    #####: 1418:			for (i = 0; i < aliases_n; i++)
+    %%%%%: 1418-block  0
+unconditional  0 never executed
+unconditional  1 never executed
+    %%%%%: 1418-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1419:				printf("%s", aliases[i]);
+    %%%%%: 1419-block  0
+call    0 never executed
+        -: 1420:		}
+        -: 1421:	}
+        -: 1422:
+        -: 1423:	/* #### SHELL #### */
+       3*: 1424:	else if (*comm[0] == 's' && strcmp(comm[0], "shell") == 0) {
+        3: 1424-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    %%%%%: 1424-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1425:		if (!comm[1]) {
+    %%%%%: 1425-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1426:			if (user.shell)
+    %%%%%: 1426-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1427:				printf("%s: shell: %s\n", PROGRAM_NAME, user.shell);
+    %%%%%: 1427-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1428:			else
+    #####: 1429:				printf(_("%s: shell: unknown\n"), PROGRAM_NAME);
+    %%%%%: 1429-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1430:		}
+        -: 1431:
+    #####: 1432:		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
+    %%%%%: 1432-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1432-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1433:			puts(_("Usage: shell [SHELL]"));
+    %%%%%: 1433-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1434:		else
+    #####: 1435:			exit_code = set_shell(comm[1]);
+    %%%%%: 1435-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1436:	}
+        -: 1437:
+        -: 1438:	/* #### EDIT #### */
+        3: 1439:	else if (*comm[0] == 'e' && strcmp(comm[0], "edit") == 0)
+        3: 1439-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 2
+        1: 1439-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 0
+        1: 1440:		exit_code = edit_function(comm);
+        1: 1440-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -: 1441:
+        -: 1442:	/* #### HISTORY #### */
+       2*: 1443:	else if (*comm[0] == 'h' && strcmp(comm[0], "history") == 0)
+        2: 1443-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    %%%%%: 1443-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1444:		exit_code = history_function(comm);
+    %%%%%: 1444-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1445:
+        -: 1446:	/* #### HIDDEN FILES #### */
+       2*: 1447:	else if (*comm[0] == 'h' && ((comm[0][1] == 'f' && !comm[0][2])
+        2: 1447-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    %%%%%: 1447-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%: 1447-block  2
+branch  4 never executed
+branch  5 never executed
+    #####: 1448:	|| strcmp(comm[0], "hidden") == 0)) {
+    %%%%%: 1448-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1449:		if (!comm[1]) {
+    %%%%%: 1449-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1450:			fputs(_("Usage: hidden, hf [on, off, status]\n"), stderr);
+    %%%%%: 1450-block  0
+call    0 never executed
+    #####: 1451:			exit_code = EXIT_FAILURE;
+    #####: 1452:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1453:		}
+        -: 1454:
+    #####: 1455:		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
+    %%%%%: 1455-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1455-block  1
+branch  2 never executed
+branch  3 never executed
+        -: 1456:			/* The same message is in hidden_function(), and printed
+        -: 1457:			 * whenever an invalid argument is entered */
+    #####: 1458:			puts(_("Usage: hidden, hf [on, off, status]"));
+    %%%%%: 1458-block  0
+call    0 never executed
+    #####: 1459:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1460:		} else
+    #####: 1461:			exit_code = hidden_function(comm);
+    %%%%%: 1461-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1462:	}
+        -: 1463:
+        -: 1464:	/* #### AUTOCD #### */
+       2*: 1465:	else if (*comm[0] == 'a' && (strcmp(comm[0], "acd") == 0
+        2: 1465-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    %%%%%: 1465-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1466:	|| strcmp(comm[0], "autocd") == 0)) {
+    %%%%%: 1466-block  0
+branch  0 never executed
+branch  1 never executed
+        -: 1467:
+    #####: 1468:		if (!comm[1]) {
+    %%%%%: 1468-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1469:			fputs(_("Usage: acd, autocd [on, off, status]\n"), stderr);
+    %%%%%: 1469-block  0
+call    0 never executed
+    #####: 1470:			exit_code = EXIT_FAILURE;
+    #####: 1471:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1472:		}
+        -: 1473:
+    #####: 1474:		if (strcmp(comm[1], "on") == 0) {
+    %%%%%: 1474-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1475:			autocd = 1;
+    #####: 1476:			printf(_("%s: autocd is enabled\n"), PROGRAM_NAME);
+    %%%%%: 1476-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1477:		}
+        -: 1478:
+    #####: 1479:		else if (strcmp(comm[1], "off") == 0) {
+    %%%%%: 1479-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1480:			autocd = 0;
+    #####: 1481:			printf(_("%s: autocd is disabled\n"), PROGRAM_NAME);
+    %%%%%: 1481-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1482:		}
+        -: 1483:
+    #####: 1484:		else if (strcmp(comm[1], "status") == 0) {
+    %%%%%: 1484-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1485:			if (autocd)
+    %%%%%: 1485-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1486:				printf(_("%s: autocd is enabled\n"), PROGRAM_NAME);
+    %%%%%: 1486-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1487:			else
+    #####: 1488:				printf(_("%s: autocd is disabled\n"), PROGRAM_NAME);
+    %%%%%: 1488-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1489:		}
+        -: 1490:
+    #####: 1491:		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
+    %%%%%: 1491-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1491-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1492:			puts(_("Usage: acd, autocd [on, off, status]"));
+    %%%%%: 1492-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1493:
+        -: 1494:		else {
+    #####: 1495:			fputs(_("Usage: acd, autocd [on, off, status]\n"), stderr);
+    %%%%%: 1495-block  0
+call    0 never executed
+    #####: 1496:			exit_code = EXIT_FAILURE;
+    #####: 1497:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1498:		}
+        -: 1499:	}
+        -: 1500:
+        -: 1501:	/* #### AUTO-OPEN #### */
+       2*: 1502:	else if (*comm[0] == 'a' && ((comm[0][1] == 'o' && !comm[0][2])
+        2: 1502-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    %%%%%: 1502-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%: 1502-block  2
+branch  4 never executed
+branch  5 never executed
+    #####: 1503:	|| strcmp(comm[0], "auto-open") == 0)) {
+    %%%%%: 1503-block  0
+branch  0 never executed
+branch  1 never executed
+        -: 1504:
+    #####: 1505:		if (!comm[1]) {
+    %%%%%: 1505-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1506:			fputs(_("Usage: ao, auto-open [on, off, status]\n"), stderr);
+    %%%%%: 1506-block  0
+call    0 never executed
+    #####: 1507:			exit_code = EXIT_FAILURE;
+    #####: 1508:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1509:		}
+        -: 1510:
+    #####: 1511:		if (strcmp(comm[1], "on") == 0) {
+    %%%%%: 1511-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1512:			auto_open = 1;
+    #####: 1513:			printf(_("%s: auto-open is enabled\n"), PROGRAM_NAME);
+    %%%%%: 1513-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1514:		}
+        -: 1515:
+    #####: 1516:		else if (strcmp(comm[1], "off") == 0) {
+    %%%%%: 1516-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1517:			auto_open = 0;
+    #####: 1518:			printf(_("%s: auto-open is disabled\n"), PROGRAM_NAME);
+    %%%%%: 1518-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1519:		}
+        -: 1520:
+    #####: 1521:		else if (strcmp(comm[1], "status") == 0) {
+    %%%%%: 1521-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1522:			if (auto_open)
+    %%%%%: 1522-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1523:				printf(_("%s: auto-open is enabled\n"), PROGRAM_NAME);
+    %%%%%: 1523-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1524:			else
+    #####: 1525:				printf(_("%s: auto-open is disabled\n"), PROGRAM_NAME);
+    %%%%%: 1525-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1526:		}
+        -: 1527:
+    #####: 1528:		else if (strcmp(comm[1], "--help") == 0)
+    %%%%%: 1528-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1529:			puts(_("Usage: ao, auto-open [on, off, status]"));
+    %%%%%: 1529-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1530:
+        -: 1531:		else {
+    #####: 1532:			fputs(_("Usage: ao, auto-open [on, off, status]\n"), stderr);
+    %%%%%: 1532-block  0
+call    0 never executed
+    #####: 1533:			exit_code = EXIT_FAILURE;
+    #####: 1534:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1535:		}
+        -: 1536:	}
+        -: 1537:
+        -: 1538:	/* #### COMMANDS #### */
+       2*: 1539:	else if (*comm[0] == 'c' && (strcmp(comm[0], "cmd") == 0
+        2: 1539-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    %%%%%: 1539-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1540:	|| strcmp(comm[0], "commands") == 0))
+    %%%%%: 1540-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1541:		exit_code = list_commands();
+    %%%%%: 1541-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1542:
+        -: 1543:	/* #### AND THESE ONES TOO #### */
+        -: 1544:	/* These functions just print stuff, so that the value of exit_code
+        -: 1545:	 * is always zero, that is to say, success */
+        2: 1546:	else if (strcmp(comm[0], "path") == 0 || strcmp(comm[0], "cwd") == 0)
+        2: 1546-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2: 1546-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 2
+    #####: 1547:		printf("%s\n", ws[cur_ws].path);
+    %%%%%: 1547-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1548:
+       2*: 1549:	else if ((*comm[0] == '?' && !comm[0][1]) || strcmp(comm[0], "help") == 0)
+        2: 1549-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    %%%%%: 1549-block  1
+branch  2 never executed
+branch  3 never executed
+        2: 1549-block  2
+branch  4 taken 0 (fallthrough)
+branch  5 taken 2
+    #####: 1550:		help_function();
+    %%%%%: 1550-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1551:
+       2*: 1552:	else if (*comm[0] == 'c' && ((comm[0][1] == 'c' && !comm[0][2])
+        2: 1552-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    %%%%%: 1552-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%: 1552-block  2
+branch  4 never executed
+branch  5 never executed
+    #####: 1553:	|| strcmp(comm[0], "colors") == 0))
+    %%%%%: 1553-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1554:		color_codes();
+    %%%%%: 1554-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1555:
+       2*: 1556:	else if (*comm[0] == 'v' && (strcmp(comm[0], "ver") == 0
+        2: 1556-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    %%%%%: 1556-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1557:	|| strcmp(comm[0], "version") == 0))
+    %%%%%: 1557-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1558:		version_function();
+    %%%%%: 1558-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1559:
+       2*: 1560:	else if (*comm[0] == 'f' && comm[0][1] == 's' && !comm[0][2])
+        2: 1560-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    %%%%%: 1560-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%: 1560-block  2
+branch  4 never executed
+branch  5 never executed
+    #####: 1561:		free_software();
+    %%%%%: 1561-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1562:
+       2*: 1563:	else if (*comm[0] == 'b' && strcmp(comm[0], "bonus") == 0)
+        2: 1563-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    %%%%%: 1563-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1564:		bonus_function();
+    %%%%%: 1564-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1565:
+       2*: 1566:	else if (*comm[0] == 's' && strcmp(comm[0], "splash") == 0)
+        2: 1566-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    %%%%%: 1566-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1567:		splash();
+    %%%%%: 1567-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1568:
+        -: 1569:	/* #### QUIT #### */
+        2: 1570:	else if ((*comm[0] == 'q' && !comm[0][1]) || strcmp(comm[0], "quit") == 0
+        2: 1570-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 1
+        1: 1570-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1
+        1: 1570-block  2
+branch  4 taken 1 (fallthrough)
+branch  5 taken 0
+        1: 1571:	|| strcmp(comm[0], "exit") == 0) {
+        1: 1571-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+        -: 1572:
+        -: 1573:		/* Free everything and exit */
+        1: 1574:		int i = (int)args_n + 1;
+        2: 1575:		while (--i >= 0)
+        1: 1575-block  0
+unconditional  0 taken 1
+        2: 1575-block  1
+branch  1 taken 1
+branch  2 taken 1 (fallthrough)
+        1: 1576:			free(comm[i]);
+        1: 1576-block  0
+unconditional  0 taken 1
+        1: 1577:		free(comm);
+        -: 1578:
+        1: 1579:		exit(exit_code);
+        1: 1579-block  0
+call    0 returned 0
+        -: 1580:	}
+        -: 1581:
+       1*: 1582:	else if (*comm[0] == 'Q' && !comm[1]) {
+        1: 1582-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    %%%%%: 1582-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1583:		int i = (int)args_n + 1;
+    #####: 1584:		while (--i >= 0)
+    %%%%%: 1584-block  0
+unconditional  0 never executed
+    %%%%%: 1584-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 1585:			free(comm[i]);
+    %%%%%: 1585-block  0
+unconditional  0 never executed
+    #####: 1586:		free(comm);
+        -: 1587:
+    #####: 1588:		cd_on_quit = 1;
+    #####: 1589:		exit(exit_code);
+    %%%%%: 1589-block  0
+call    0 never executed
+        -: 1590:	}
+        -: 1591:
+        -: 1592:	else {
+        -: 1593:
+        -: 1594:				/* ###############################
+        -: 1595:				 * #     AUTOCD & AUTOOPEN (2)   #
+        -: 1596:				 * ############################### */
+        -: 1597:
+        -: 1598:		struct stat file_attrib;
+        1: 1599:		if (stat(comm[0], &file_attrib) == 0) {
+        1: 1599-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####: 1600:			if ((file_attrib.st_mode & S_IFMT) == S_IFDIR) {
+    %%%%%: 1600-block  0
+branch  0 never executed
+branch  1 never executed
+        -: 1601:
+    #####: 1602:				if (autocd) {
+    %%%%%: 1602-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1603:					exit_code = cd_function(comm[0]);
+    %%%%%: 1603-block  0
+call    0 never executed
+    #####: 1604:					return exit_code;
+unconditional  0 never executed
+    %%%%%: 1604-block  0
+unconditional  1 never executed
+        -: 1605:				}
+        -: 1606:
+    #####: 1607:				fprintf(stderr, _("%s: %s: Is a directory\n"),
+    %%%%%: 1607-block  0
+call    0 never executed
+        -: 1608:						PROGRAM_NAME, comm[0]);
+    #####: 1609:				exit_code = EXIT_FAILURE;
+    #####: 1610:				return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1611:			}
+        -: 1612:
+    #####: 1613:			else if (auto_open && (file_attrib.st_mode & S_IFMT) == S_IFREG) {
+    %%%%%: 1613-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1613-block  1
+branch  2 never executed
+branch  3 never executed
+        -: 1614:				/* Make sure we have not an executable file */
+    #####: 1615:				if (!(file_attrib.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))) {
+    %%%%%: 1615-block  0
+branch  0 never executed
+branch  1 never executed
+        -: 1616:
+    #####: 1617:					char *cmd[] = {"open", comm[0], (comm[1]) ? comm[1] : NULL, NULL};
+    #####: 1618:					exit_code = open_function(cmd);
+    %%%%%: 1618-block  0
+call    0 never executed
+    #####: 1619:					return exit_code;
+unconditional  0 never executed
+        -: 1620:				}
+        -: 1621:			}
+        -: 1622:		}
+        -: 1623:
+        -: 1624:	/* ####################################################
+        -: 1625:	 * #                EXTERNAL/SHELL COMMANDS           #
+        -: 1626:	 * ####################################################*/
+        -: 1627:
+        -: 1628:		/* LOG EXTERNAL COMMANDS
+        -: 1629:		* 'no_log' will be true when running profile or prompt commands */
+        1: 1630:		if (!no_log)
+        1: 1630-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1631:			exit_code = log_function(comm);
+        1: 1631-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -: 1632:
+        -: 1633:		/* PREVENT UNGRACEFUL EXIT */
+        -: 1634:		/* Prevent the user from killing the program via the 'kill',
+        -: 1635:		 * 'pkill' or 'killall' commands, from within CliFM itself.
+        -: 1636:		 * Otherwise, the program will be forcefully terminated without
+        -: 1637:		 * freeing allocated memory */
+        1: 1638:		if ((*comm[0] == 'k' || *comm[0] == 'p') && (strcmp(comm[0], "kill") == 0 || strcmp(comm[0], "killall") == 0 || strcmp(comm[0], "pkill") == 0)) {
+        1: 1638-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1638-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 0
+        1: 1638-block  2
+branch  4 taken 1 (fallthrough)
+branch  5 taken 0
+        1: 1638-block  3
+branch  6 taken 1 (fallthrough)
+branch  7 taken 0
+        1: 1638-block  4
+branch  8 taken 0 (fallthrough)
+branch  9 taken 1
+        -: 1639:			size_t i;
+    #####: 1640:			for (i = 1; i <= args_n; i++) {
+    %%%%%: 1640-block  0
+unconditional  0 never executed
+    %%%%%: 1640-block  1
+unconditional  1 never executed
+    %%%%%: 1640-block  2
+branch  2 never executed
+branch  3 never executed
+    #####: 1641:				if ((strcmp(comm[0], "kill") == 0 && atoi(comm[i]) == (int)own_pid) || ((strcmp(comm[0], "killall") == 0 || strcmp(comm[0], "pkill") == 0) && strcmp(comm[i], argv_bk[0]) == 0)) {
+    %%%%%: 1641-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1641-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%: 1641-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%: 1641-block  3
+branch  6 never executed
+branch  7 never executed
+    %%%%%: 1641-block  4
+branch  8 never executed
+branch  9 never executed
+    #####: 1642:					fprintf(stderr, _("%s: To gracefully quit enter 'quit'\n"),
+    %%%%%: 1642-block  0
+call    0 never executed
+        -: 1643:							PROGRAM_NAME);
+    #####: 1644:					exit_code = EXIT_FAILURE;
+    #####: 1645:					return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1646:				}
+        -: 1647:			}
+        -: 1648:		}
+        -: 1649:
+        -: 1650:		/* CHECK WHETHER EXTERNAL COMMANDS ARE ALLOWED */
+        1: 1651:		if (!ext_cmd_ok) {
+        1: 1651-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1652:			fprintf(stderr, _("%s: External commands are not allowed. "
+    %%%%%: 1652-block  0
+call    0 never executed
+        -: 1653:					  "Run 'ext on' to enable them.\n"), PROGRAM_NAME);
+    #####: 1654:			exit_code = EXIT_FAILURE;
+    #####: 1655:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1656:		}
+        -: 1657:
+       1*: 1658:		if (*comm[0] == *argv_bk[0] && strcmp(comm[0], argv_bk[0]) == 0) {
+        1: 1658-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    %%%%%: 1658-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1659:			fprintf(stderr, "%s: Nested instances are not allowed\n",
+    %%%%%: 1659-block  0
+call    0 never executed
+        -: 1660:			    PROGRAM_NAME);
+    #####: 1661:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1662:		}
+        -: 1663:
+        -: 1664:		/*
+        -: 1665:		 * By making precede the command by a colon or a semicolon, the
+        -: 1666:		 * user can BYPASS CliFM parsing, expansions, and checks to be
+        -: 1667:		 * executed DIRECTLY by the system shell (execle). For example:
+        -: 1668:		 * if the amount of files listed on the screen (ELN's) is larger
+        -: 1669:		 * or equal than 644 and the user tries to issue this command:
+        -: 1670:		 * "chmod 644 filename", CLIFM will take 644 to be an ELN, and
+        -: 1671:		 * will thereby try to expand it into the corresponding filename,
+        -: 1672:		 * which is not what the user wants. To prevent this, simply run
+        -: 1673:		 * the command as follows: ";chmod 644 filename" */
+        -: 1674:
+        1: 1675:		if (*comm[0] == ':' || *comm[0] == ';') {
+        1: 1675-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1675-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1
+        -: 1676:			/* Remove the colon from the beginning of the first argument,
+        -: 1677:			 * that is, move the pointer to the next (second) position */
+    #####: 1678:			char *comm_tmp = savestring(comm[0] + 1, strlen(comm[0] + 1));
+    %%%%%: 1678-block  0
+call    0 never executed
+        -: 1679:			/* If string == ":" or ";" */
+    #####: 1680:			if (!comm_tmp || !*comm_tmp) {
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1680-block  0
+branch  2 never executed
+branch  3 never executed
+    #####: 1681:				fprintf(stderr, _("%s: '%c': Syntax error\n"),
+    #####: 1682:				    PROGRAM_NAME, *comm[0]);
+    %%%%%: 1682-block  0
+call    0 never executed
+    #####: 1683:				exit_code = EXIT_FAILURE;
+    #####: 1684:				if (comm_tmp)
+branch  0 never executed
+branch  1 never executed
+    #####: 1685:					free(comm_tmp);
+    %%%%%: 1685-block  0
+unconditional  0 never executed
+    #####: 1686:				return EXIT_FAILURE;
+    %%%%%: 1686-block  0
+unconditional  0 never executed
+        -: 1687:			} else {
+    #####: 1688:				strcpy(comm[0], comm_tmp);
+    #####: 1689:				free(comm_tmp);
+    %%%%%: 1689-block  0
+unconditional  0 never executed
+        -: 1690:			}
+        -: 1691:		}
+        -: 1692:
+        -: 1693:		/* #### RUN THE EXTERNAL COMMAND #### */
+        -: 1694:
+        -: 1695:		/* Store the command and each argument into a single array to be
+        -: 1696:		 * executed by execle() using the system shell (/bin/sh -c) */
+        1: 1697:		char *ext_cmd = (char *)NULL;
+        1: 1698:		size_t ext_cmd_len = strlen(comm[0]);
+        1: 1699:		ext_cmd = (char *)xnmalloc(ext_cmd_len + 1, sizeof(char));
+        1: 1699-block  0
+call    0 returned 1
+        1: 1700:		strcpy(ext_cmd, comm[0]);
+        -: 1701:
+        -: 1702:		register size_t i;
+        1: 1703:		if (args_n) { /* This will be false in case of ";cmd" or ":cmd" */
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+        -: 1704:
+    #####: 1705:			for (i = 1; i <= args_n; i++) {
+    %%%%%: 1705-block  0
+unconditional  0 never executed
+    %%%%%: 1705-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 1706:				ext_cmd_len += strlen(comm[i]) + 1;
+    #####: 1707:				ext_cmd = (char *)xrealloc(ext_cmd, (ext_cmd_len + 1) * sizeof(char));
+    %%%%%: 1707-block  0
+call    0 never executed
+    #####: 1708:				strcat(ext_cmd, " ");
+    #####: 1709:				strcat(ext_cmd, comm[i]);
+unconditional  0 never executed
+        -: 1710:			}
+        -: 1711:		}
+        -: 1712:
+        -: 1713:		/* Since we modified LS_COLORS, store its current value and unset
+        -: 1714:		 * it. Some shell commands use LS_COLORS to display their outputs
+        -: 1715:		 * ("ls -l", for example, use the "no" value to print file
+        -: 1716:		 * properties). So, we unset it to prevent wrong color output
+        -: 1717:		 * for external commands. The disadvantage of this procedure is
+        -: 1718:		 * that if the user uses a customized LS_COLORS, unsetting it
+        -: 1719:		 * set its value to default, and the customization is lost. */
+        -: 1720:
+        -: 1721:#if __FreeBSD__
+        -: 1722:		char *my_ls_colors = (char *)NULL, *p = (char *)NULL;
+        -: 1723:		/* For some reason, when running on FreeBSD Valgrind complains
+        -: 1724:		 * about overlapping source and destiny in setenv() if I just
+        -: 1725:		 * copy the address returned by getenv() instead of the string
+        -: 1726:		 * itself. Not sure why, but this makes the error go away */
+        -: 1727:		p = getenv("LS_COLORS");
+        -: 1728:		my_ls_colors = (char *)xnmalloc(strlen(p) + 1, sizeof(char *));
+        -: 1729:		strcpy(my_ls_colors, p);
+        -: 1730:		p = (char *)NULL;
+        -: 1731:
+        -: 1732:#else
+        -: 1733:		static char *my_ls_colors = (char *)NULL;
+        1: 1734:		my_ls_colors = getenv("LS_COLORS");
+        1: 1734-block  0
+call    0 returned 1
+        -: 1735:#endif
+        -: 1736:
+       1*: 1737:		if (ls_colors_bk && *ls_colors_bk != '\0')
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    %%%%%: 1737-block  0
+branch  2 never executed
+branch  3 never executed
+    #####: 1738:			setenv("LS_COLORS", ls_colors_bk, 1);
+    %%%%%: 1738-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1739:		else
+        1: 1740:			unsetenv("LS_COLORS");
+        1: 1740-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -: 1741:
+        1: 1742:		if (launch_execle(ext_cmd) != EXIT_SUCCESS)
+        1: 1742-block  0
+call    0 returned 1
+branch  1 taken 1 (fallthrough)
+branch  2 taken 0
+        1: 1743:			exit_code = EXIT_FAILURE;
+        1: 1743-block  0
+unconditional  0 taken 1
+        -: 1744:
+        1: 1745:		free(ext_cmd);
+        -: 1746:
+        -: 1747:		/* Restore LS_COLORS value to use CliFM colors */
+        1: 1748:		setenv("LS_COLORS", my_ls_colors, 1);
+        1: 1748-block  0
+call    0 returned 1
+        -: 1749:
+        -: 1750:#if __FreeBSD__
+        -: 1751:		free(my_ls_colors);
+        -: 1752:#endif
+        -: 1753:
+        -: 1754:		/* Reload the list of available commands in PATH for TAB completion.
+        -: 1755:		 * Why? If this list is not updated, whenever some new program is
+        -: 1756:		 * installed, renamed, or removed from some of the pathsin PATH
+        -: 1757:		 * while in CliFM, this latter needs to be restarted in order
+        -: 1758:		 * to be able to recognize the new program for TAB completion */
+        -: 1759:
+        -: 1760:		int j;
+        1: 1761:		if (bin_commands) {
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1762:			j = (int)path_progsn;
+     3747: 1763:			while (--j >= 0)
+        1: 1763-block  0
+unconditional  0 taken 1
+     3747: 1763-block  1
+branch  1 taken 3746
+branch  2 taken 1 (fallthrough)
+     3746: 1764:				free(bin_commands[j]);
+     3746: 1764-block  0
+unconditional  0 taken 3746
+        -: 1765:
+        1: 1766:			free(bin_commands);
+        -: 1767:
+        1: 1768:			bin_commands = (char **)NULL;
+        1: 1768-block  0
+unconditional  0 taken 1
+        -: 1769:		}
+        -: 1770:
+        1: 1771:		if (paths) {
+        1: 1771-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1772:			j = (int)path_n;
+        7: 1773:			while (--j >= 0)
+        1: 1773-block  0
+unconditional  0 taken 1
+        7: 1773-block  1
+branch  1 taken 6
+branch  2 taken 1 (fallthrough)
+        6: 1774:				free(paths[j]);
+        6: 1774-block  0
+unconditional  0 taken 6
+        -: 1775:		}
+        -: 1776:
+        1: 1777:		path_n = (size_t)get_path_env();
+        1: 1777-block  0
+call    0 returned 1
+        1: 1778:		get_path_programs();
+call    0 returned 1
+        -: 1779:	}
+        -: 1780:
+       16: 1781:	return exit_code;
+       16: 1781-block  0
+unconditional  0 taken 16
+        -: 1782:}
+        -: 1783:
+        -: 1784:/* Execute chained commands (cmd1;cmd2 and/or cmd1 && cmd2). The function
+        -: 1785: * is called by parse_input_str() if some non-quoted double ampersand or
+        -: 1786: * semicolon is found in the input string AND at least one of these
+        -: 1787: * chained commands is internal */
+        -: 1788:void
+function exec_chained_cmds called 0 returned 0% blocks executed 0%
+    #####: 1789:exec_chained_cmds(char *cmd)
+        -: 1790:{
+    #####: 1791:	if (!cmd)
+    %%%%%: 1791-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1792:		return;
+    %%%%%: 1792-block  0
+unconditional  0 never executed
+        -: 1793:
+    #####: 1794:	size_t i = 0, cmd_len = strlen(cmd);
+    #####: 1795:	for (i = 0; i < cmd_len; i++) {
+    %%%%%: 1795-block  0
+unconditional  0 never executed
+    %%%%%: 1795-block  1
+unconditional  1 never executed
+    %%%%%: 1795-block  2
+branch  2 never executed
+branch  3 never executed
+    #####: 1796:		char *str = (char *)NULL;
+    #####: 1797:		size_t len = 0, cond_exec = 0;
+        -: 1798:
+        -: 1799:		/* Get command */
+    #####: 1800:		str = (char *)xcalloc(strlen(cmd) + 1, sizeof(char));
+    %%%%%: 1800-block  0
+call    0 never executed
+    #####: 1801:		while (cmd[i] && cmd[i] != '&' && cmd[i] != ';') {
+unconditional  0 never executed
+    %%%%%: 1801-block  0
+branch  1 never executed
+branch  2 never executed
+    %%%%%: 1801-block  1
+branch  3 never executed
+branch  4 never executed
+    %%%%%: 1801-block  2
+branch  5 never executed
+branch  6 never executed
+    #####: 1802:			str[len++] = cmd[i++];
+    %%%%%: 1802-block  0
+unconditional  0 never executed
+        -: 1803:		}
+        -: 1804:
+        -: 1805:		/* Should we execute conditionally? */
+    #####: 1806:		if (cmd[i] == '&')
+    %%%%%: 1806-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1807:			cond_exec = 1;
+    %%%%%: 1807-block  0
+unconditional  0 never executed
+        -: 1808:
+        -: 1809:		/* Execute the command */
+    #####: 1810:		if (str) {
+    %%%%%: 1810-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1811:			char **tmp_cmd = parse_input_str(str);
+    %%%%%: 1811-block  0
+call    0 never executed
+    #####: 1812:			free(str);
+        -: 1813:
+    #####: 1814:			if (tmp_cmd) {
+branch  0 never executed
+branch  1 never executed
+    #####: 1815:				int error_code = 0;
+        -: 1816:				size_t j;
+    #####: 1817:				char **alias_cmd = check_for_alias(tmp_cmd);
+    %%%%%: 1817-block  0
+call    0 never executed
+        -: 1818:
+    #####: 1819:				if (alias_cmd) {
+branch  0 never executed
+branch  1 never executed
+        -: 1820:
+    #####: 1821:					if (exec_cmd(alias_cmd) != 0)
+    %%%%%: 1821-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1822:						error_code = 1;
+    %%%%%: 1822-block  0
+unconditional  0 never executed
+        -: 1823:
+    #####: 1824:					for (j = 0; alias_cmd[j]; j++)
+    %%%%%: 1824-block  0
+unconditional  0 never executed
+    %%%%%: 1824-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 1825:						free(alias_cmd[j]);
+    %%%%%: 1825-block  0
+unconditional  0 never executed
+        -: 1826:
+    #####: 1827:					free(alias_cmd);
+    %%%%%: 1827-block  0
+unconditional  0 never executed
+        -: 1828:				}
+        -: 1829:
+        -: 1830:				else {
+        -: 1831:
+    #####: 1832:					if (exec_cmd(tmp_cmd) != 0)
+    %%%%%: 1832-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1833:						error_code = 1;
+    %%%%%: 1833-block  0
+unconditional  0 never executed
+        -: 1834:
+    #####: 1835:					for (j = 0; j <= args_n; j++)
+    %%%%%: 1835-block  0
+unconditional  0 never executed
+    %%%%%: 1835-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 1836:						free(tmp_cmd[j]);
+    %%%%%: 1836-block  0
+unconditional  0 never executed
+        -: 1837:
+    #####: 1838:					free(tmp_cmd);
+    %%%%%: 1838-block  0
+unconditional  0 never executed
+        -: 1839:				}
+        -: 1840:
+        -: 1841:				/* Do not continue if the execution was condtional and
+        -: 1842:				 * the previous command failed */
+    #####: 1843:				if (cond_exec && error_code)
+    %%%%%: 1843-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1843-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1844:					break;
+    %%%%%: 1844-block  0
+unconditional  0 never executed
+        -: 1845:			}
+        -: 1846:		}
+        -: 1847:	}
+        -: 1848:}
+        -: 1849:
+        -: 1850:void
+function exec_profile called 1 returned 100% blocks executed 45%
+        1: 1851:exec_profile(void)
+        -: 1852:{
+        1: 1853:	if (!config_ok || !PROFILE_FILE)
+        1: 1853-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1853-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1
+    #####: 1854:		return;
+    %%%%%: 1854-block  0
+unconditional  0 never executed
+    %%%%%: 1854-block  1
+unconditional  1 never executed
+        -: 1855:
+        1: 1856:	FILE *fp = fopen(PROFILE_FILE, "r");
+        1: 1856-block  0
+call    0 returned 1
+        -: 1857:
+        1: 1858:	if (!fp)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1859:		return;
+    %%%%%: 1859-block  0
+unconditional  0 never executed
+        -: 1860:
+        1: 1861:	size_t line_size = 0;
+        1: 1862:	char *line = (char *)NULL;
+        1: 1863:	ssize_t line_len = 0;
+        -: 1864:
+        6: 1865:	while ((line_len = getline(&line, &line_size, fp)) > 0) {
+        1: 1865-block  0
+unconditional  0 taken 1
+        6: 1865-block  1
+call    1 returned 6
+branch  2 taken 5
+branch  3 taken 1 (fallthrough)
+        -: 1866:
+        -: 1867:		/* Skip empty and commented lines */
+        5: 1868:		if (!*line || *line == '\n' || *line == '#')
+        5: 1868-block  0
+branch  0 taken 5 (fallthrough)
+branch  1 taken 0
+        5: 1868-block  1
+branch  2 taken 5 (fallthrough)
+branch  3 taken 0
+        5: 1868-block  2
+branch  4 taken 5 (fallthrough)
+branch  5 taken 0
+        5: 1869:			continue;
+        5: 1869-block  0
+unconditional  0 taken 5
+        -: 1870:
+        -: 1871:		/* Remove trailing new line char */
+    #####: 1872:		if (line[line_len - 1] == '\n')
+    %%%%%: 1872-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1873:			line[line_len - 1] = '\0';
+    %%%%%: 1873-block  0
+unconditional  0 never executed
+        -: 1874:
+    #####: 1875:		if (strchr(line, '=') && !_ISDIGIT(*line))
+    %%%%%: 1875-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1875-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1876:			create_usr_var(line);
+    %%%%%: 1876-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1877:
+        -: 1878:		/* Parse line and execute it */
+    #####: 1879:		else if (strlen(line) != 0) {
+    %%%%%: 1879-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1880:			args_n = 0;
+        -: 1881:
+    #####: 1882:			char **cmds = parse_input_str(line);
+    %%%%%: 1882-block  0
+call    0 never executed
+        -: 1883:
+    #####: 1884:			if (cmds) {
+branch  0 never executed
+branch  1 never executed
+    #####: 1885:				no_log = 1;
+    #####: 1886:				exec_cmd(cmds);
+    %%%%%: 1886-block  0
+call    0 never executed
+    #####: 1887:				no_log = 0;
+    #####: 1888:				int i = (int)args_n + 1;
+    #####: 1889:				while (--i >= 0)
+unconditional  0 never executed
+    %%%%%: 1889-block  0
+branch  1 never executed
+branch  2 never executed
+    #####: 1890:					free(cmds[i]);
+    %%%%%: 1890-block  0
+unconditional  0 never executed
+    #####: 1891:				free(cmds);
+    #####: 1892:				cmds = (char **)NULL;
+    %%%%%: 1892-block  0
+unconditional  0 never executed
+        -: 1893:			}
+    #####: 1894:			args_n = 0;
+    %%%%%: 1894-block  0
+unconditional  0 never executed
+        -: 1895:		}
+        -: 1896:	}
+        -: 1897:
+        1: 1898:	free(line);
+        -: 1899:
+        1: 1900:	fclose(fp);
+        1: 1900-block  0
+call    0 returned 1
+        -: 1901:}

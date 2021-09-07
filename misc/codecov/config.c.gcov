@@ -1,0 +1,4329 @@
+        -:    0:Source:config.c
+        -:    1:/* config.c -- functions to define, create, and set configuration files */
+        -:    2:
+        -:    3:/*
+        -:    4: * This file is part of CliFM
+        -:    5: * 
+        -:    6: * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
+        -:    7: * All rights reserved.
+        -:    8:
+        -:    9: * CliFM is free software; you can redistribute it and/or modify
+        -:   10: * it under the terms of the GNU General Public License as published by
+        -:   11: * the Free Software Foundation; either version 2 of the License, or
+        -:   12: * (at your option) any later version.
+        -:   13: *
+        -:   14: * CliFM is distributed in the hope that it will be useful,
+        -:   15: * but WITHOUT ANY WARRANTY; without even the implied warranty of
+        -:   16: * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        -:   17: * GNU General Public License for more details.
+        -:   18: *
+        -:   19: * You should have received a copy of the GNU General Public License
+        -:   20: * along with this program; if not, write to the Free Software
+        -:   21: * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+        -:   22: * MA 02110-1301, USA.
+        -:   23:*/
+        -:   24:
+        -:   25:#include "helpers.h"
+        -:   26:
+        -:   27:#include <errno.h>
+        -:   28:#include <limits.h>
+        -:   29:#include <stdio.h>
+        -:   30:#include <readline/readline.h>
+        -:   31:#include <string.h>
+        -:   32:#include <sys/stat.h>
+        -:   33:#include <time.h>
+        -:   34:#include <unistd.h>
+        -:   35:
+        -:   36:#include "aux.h"
+        -:   37:#include "colors.h"
+        -:   38:#include "config.h"
+        -:   39:#include "exec.h"
+        -:   40:#include "init.h"
+        -:   41:#include "listing.h"
+        -:   42:#include "mime.h"
+        -:   43:#include "misc.h"
+        -:   44:#include "navigation.h"
+        -:   45:
+        -:   46:/* Regenerate the configuration file and create a back up of the old
+        -:   47: * one */
+        -:   48:int
+function regen_config called 0 returned 0% blocks executed 0%
+    #####:   49:regen_config(void)
+        -:   50:{
+    #####:   51:	int config_found = 1;
+        -:   52:	struct stat config_attrib;
+        -:   53:
+    #####:   54:	if (stat(CONFIG_FILE, &config_attrib) == -1) {
+    %%%%%:   54-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:   55:		puts(_("No configuration file found"));
+    %%%%%:   55-block  0
+call    0 never executed
+    #####:   56:		config_found = 0;
+unconditional  0 never executed
+        -:   57:	}
+        -:   58:
+    #####:   59:	if (config_found) {
+    %%%%%:   59-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   60:		time_t rawtime = time(NULL);
+    %%%%%:   60-block  0
+call    0 never executed
+    #####:   61:		struct tm *t = localtime(&rawtime);
+call    0 never executed
+        -:   62:
+        -:   63:		char date[18];
+    #####:   64:		strftime(date, 18, "%Y%m%d@%H:%M:%S", t);
+        -:   65:
+    #####:   66:		char *bk = (char *)xnmalloc(strlen(CONFIG_FILE) + strlen(date) + 2, sizeof(char));
+call    0 never executed
+    #####:   67:		sprintf(bk, "%s.%s", CONFIG_FILE, date);
+        -:   68:
+    #####:   69:		char *cmd[] = {"mv", CONFIG_FILE, bk, NULL};
+        -:   70:
+    #####:   71:		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:   72:			free(bk);
+    #####:   73:			return EXIT_FAILURE;
+    %%%%%:   73-block  0
+unconditional  0 never executed
+        -:   74:		}
+        -:   75:
+    #####:   76:		printf(_("Old configuration file stored as '%s'\n"), bk);
+    %%%%%:   76-block  0
+call    0 never executed
+    #####:   77:		free(bk);
+unconditional  0 never executed
+        -:   78:	}
+        -:   79:
+    #####:   80:	if (create_config(CONFIG_FILE) != EXIT_SUCCESS)
+    %%%%%:   80-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:   81:		return EXIT_FAILURE;
+    %%%%%:   81-block  0
+unconditional  0 never executed
+        -:   82:
+    #####:   83:	printf(_("New configuration file written to '%s'\n"), CONFIG_FILE);
+    %%%%%:   83-block  0
+call    0 never executed
+        -:   84:
+    #####:   85:	reload_config();
+call    0 never executed
+        -:   86:
+    #####:   87:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:   88:}
+        -:   89:
+        -:   90:/* Edit the config file, either via the mime function or via the first
+        -:   91: * passed argument (Ex: 'edit nano'). The 'gen' option regenerates
+        -:   92: * the configuration file and creates a back up of the old one. */
+        -:   93:int
+function edit_function called 1 returned 100% blocks executed 45%
+        1:   94:edit_function(char **comm)
+        -:   95:{
+        1:   96:	if (xargs.stealth_mode == 1) {
+        1:   96-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:   97:		printf(_("%s: Access to configuration files is not allowed in "
+    %%%%%:   97-block  0
+call    0 never executed
+        -:   98:			 "stealth mode\n"), PROGRAM_NAME);
+    #####:   99:		return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  100:	}
+        -:  101:
+       1*:  102:	if (comm[1] && strcmp(comm[1], "gen") == 0)
+        1:  102-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    %%%%%:  102-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  103:		return regen_config();
+    %%%%%:  103-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  104:
+        1:  105:	if (!config_ok) {
+        1:  105-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  106:		fprintf(stderr, _("%s: Cannot access the configuration file\n"),
+    %%%%%:  106-block  0
+call    0 never executed
+        -:  107:		    PROGRAM_NAME);
+    #####:  108:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  109:	}
+        -:  110:
+        -:  111:	/* Get modification time of the config file before opening it */
+        -:  112:	struct stat file_attrib;
+        -:  113:
+        -:  114:	/* If, for some reason (like someone erasing the file while the
+        -:  115:	 * program is running) clifmrc doesn't exist, call init_config()
+        -:  116:	 * to recreate the configuration file. Then run 'stat' again to
+        -:  117:	 * reread the attributes of the file */
+        1:  118:	if (stat(CONFIG_FILE, &file_attrib) == -1) {
+        1:  118-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####:  119:		create_config(CONFIG_FILE);
+    %%%%%:  119-block  0
+call    0 never executed
+    #####:  120:		stat(CONFIG_FILE, &file_attrib);
+call    0 never executed
+unconditional  1 never executed
+        -:  121:	}
+        -:  122:
+        1:  123:	time_t mtime_bfr = (time_t)file_attrib.st_mtime;
+        -:  124:
+        1:  125:	int ret = EXIT_SUCCESS;
+        -:  126:
+        -:  127:	/* If there is an argument... */
+        1:  128:	if (comm[1]) {
+        1:  128-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  129:		char *cmd[] = {comm[1], CONFIG_FILE, NULL};
+    #####:  130:		ret = launch_execve(cmd, FOREGROUND, E_NOSTDERR);
+    %%%%%:  130-block  0
+call    0 never executed
+        -:  131:	}
+        -:  132:
+        -:  133:	/* If no application has been passed as 2nd argument */
+        -:  134:	else {
+        1:  135:		if (!(flags & FILE_CMD_OK)) {
+        1:  135-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  136:			fprintf(stderr, _("%s: file: Command not found. Try "
+    %%%%%:  136-block  0
+call    0 never executed
+        -:  137:					"'edit APPLICATION'\n"), PROGRAM_NAME);
+    #####:  138:			ret = EXIT_FAILURE;
+unconditional  0 never executed
+        -:  139:		}
+        -:  140:
+        -:  141:		else {
+        1:  142:			char *cmd[] = {"mime", CONFIG_FILE, NULL};
+        1:  143:			ret = mime_open(cmd);
+        1:  143-block  0
+call    0 returned 1
+        -:  144:		}
+        -:  145:	}
+        -:  146:
+        1:  147:	if (ret != EXIT_SUCCESS)
+        1:  147-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  148:		return EXIT_FAILURE;
+    %%%%%:  148-block  0
+unconditional  0 never executed
+        -:  149:
+        -:  150:	/* Get modification time after opening the config file */
+        1:  151:	stat(CONFIG_FILE, &file_attrib);
+        1:  151-block  0
+call    0 returned 1
+        -:  152:	/* If modification times differ, the file was modified after being
+        -:  153:	 * opened */
+        -:  154:
+        1:  155:	if (mtime_bfr != (time_t)file_attrib.st_mtime) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+        -:  156:		/* Reload configuration only if the config file was modified */
+        -:  157:
+    #####:  158:		reload_config();
+    %%%%%:  158-block  0
+call    0 never executed
+    #####:  159:		welcome_message = 0;
+        -:  160:
+    #####:  161:		if (cd_lists_on_the_fly) {
+branch  0 never executed
+branch  1 never executed
+    #####:  162:			free_dirlist();
+    %%%%%:  162-block  0
+call    0 never executed
+    #####:  163:			ret = list_dir();
+call    0 never executed
+unconditional  1 never executed
+        -:  164:		}
+        -:  165:	}
+        -:  166:
+        1:  167:	return ret;
+        1:  167-block  0
+unconditional  0 taken 1
+        -:  168:}
+        -:  169:
+        -:  170:void
+function set_env called 1 returned 100% blocks executed 80%
+        1:  171:set_env(void)
+        -:  172:{
+        1:  173:	if (xargs.stealth_mode == 1)
+        1:  173-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  174:		return;
+    %%%%%:  174-block  0
+unconditional  0 never executed
+        -:  175:
+        -:  176:	/* Set a few environment variables, mostly useful to run custom
+        -:  177:	 * scripts via the actions function */
+        -:  178:	/* CLIFM env variable is set to one when CliFM is running, so that
+        -:  179:	 * external programs can determine if they were spawned by CliFM */
+        1:  180:	setenv("CLIFM", "1", 1);
+        1:  180-block  0
+call    0 returned 1
+       1*:  181:	setenv("CLIFM_PROFILE", alt_profile ? alt_profile : "default", 1);
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    %%%%%:  181-block  0
+unconditional  2 never executed
+        1:  181-block  1
+unconditional  3 taken 1
+        1:  181-block  2
+call    4 returned 1
+        -:  182:
+        1:  183:	if (SEL_FILE)
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  184:		setenv("CLIFM_SELFILE", SEL_FILE, 1);
+        1:  184-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -:  185:}
+        -:  186:
+        -:  187:/* Define the file for the Selection Box */
+        -:  188:void
+function set_sel_file called 1 returned 100% blocks executed 64%
+        1:  189:set_sel_file(void)
+        -:  190:{
+        1:  191:	if (SEL_FILE) {
+        1:  191-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  192:		free(SEL_FILE);
+    #####:  193:		SEL_FILE = (char *)NULL;
+    %%%%%:  193-block  0
+unconditional  0 never executed
+        -:  194:	}
+        -:  195:
+        1:  196:	if (!CONFIG_DIR)
+        1:  196-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  197:		return;
+    %%%%%:  197-block  0
+unconditional  0 never executed
+        -:  198:
+        1:  199:	size_t config_len = strlen(CONFIG_DIR);
+        -:  200:
+        1:  201:	if (!share_selbox) {
+        1:  201-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        -:  202:		/* Private selection box is stored in the profile
+        -:  203:		 * directory */
+        1:  204:		SEL_FILE = (char *)xnmalloc(config_len + 9, sizeof(char));
+        1:  204-block  0
+call    0 returned 1
+        -:  205:
+        1:  206:		sprintf(SEL_FILE, "%s/selbox", CONFIG_DIR);
+unconditional  0 taken 1
+        -:  207:	}
+        -:  208:
+        -:  209:	else {
+        -:  210:		/* Common selection box is stored in the general
+        -:  211:		 * configuration directory */
+    #####:  212:		SEL_FILE = (char *)xnmalloc(config_len + 17, sizeof(char));
+    %%%%%:  212-block  0
+call    0 never executed
+    #####:  213:		sprintf(SEL_FILE, "%s/.config/%s/selbox", user.home, PNL);
+unconditional  0 never executed
+        -:  214:	}
+        -:  215:
+        1:  216:	return;
+        1:  216-block  0
+unconditional  0 taken 1
+        -:  217:}
+        -:  218:
+        -:  219:int
+function create_kbinds_file called 1 returned 100% blocks executed 40%
+        1:  220:create_kbinds_file(void)
+        -:  221:{
+        1:  222:	if (!config_ok)
+        1:  222-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  223:		return EXIT_FAILURE;
+    %%%%%:  223-block  0
+unconditional  0 never executed
+        -:  224:
+        -:  225:	struct stat file_attrib;
+        -:  226:
+        1:  227:	if (stat(KBINDS_FILE, &file_attrib) != -1)
+        1:  227-block  0
+call    0 returned 1
+branch  1 taken 1 (fallthrough)
+branch  2 taken 0
+        1:  228:		return EXIT_SUCCESS;
+        1:  228-block  0
+unconditional  0 taken 1
+        -:  229:
+    #####:  230:	FILE *fp = fopen(KBINDS_FILE, "w");
+    %%%%%:  230-block  0
+call    0 never executed
+        -:  231:
+    #####:  232:	if (!fp) {
+branch  0 never executed
+branch  1 never executed
+    #####:  233:		_err('w', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME, KBINDS_FILE,
+call    0 never executed
+    #####:  234:		    strerror(errno));
+    %%%%%:  234-block  0
+call    0 never executed
+    #####:  235:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  236:	}
+        -:  237:
+    #####:  238:	fprintf(fp, "# %s keybindings file\n\n\
+    %%%%%:  238-block  0
+call    0 never executed
+        -:  239:# Use the 'kbgen' plugin (compile it first: gcc -o kbgen kbgen.c) to \n\
+        -:  240:# find out the escape code for the key o key sequence you want. Use \n\
+        -:  241:# either octal, hexadecimal codes or symbols.\n\
+        -:  242:# Ex: For Alt-/ (in rxvt terminals) 'kbgen' will print the following \n\
+        -:  243:# lines:\n\
+        -:  244:# Hex  | Oct | Symbol\n\
+        -:  245:# ---- | ---- | ------\n\
+        -:  246:# \\x1b | \\033 | ESC (\\e)\n\
+        -:  247:# \\x2f | \\057 | /\n\
+        -:  248:# In this case, the keybinding, if using symbols, is: \"\\e/:function\"\n\
+        -:  249:# In case you prefer the hex codes it would be: \\x1b\\x2f:function.\n\
+        -:  250:# GNU emacs escape sequences are also allowed (ex: \"\\M-a\", Alt-a\n\
+        -:  251:# in most keyboards, or \"\\C-r\" for Ctrl-r).\n\
+        -:  252:# Some codes, especially those involving keys like Ctrl or the arrow\n\
+        -:  253:# keys, vary depending on the terminal emulator and the system settings.\n\
+        -:  254:# These keybindings should be set up thus on a per terminal basis.\n\
+        -:  255:# You can also consult the terminfo database via the infocmp command.\n\
+        -:  256:# See terminfo(5) and infocmp(1).\n\
+        -:  257:\n\
+        -:  258:# Alt-j\n\
+        -:  259:previous-dir:\\M-j\n\
+        -:  260:# Shift-left (rxvt)\n\
+        -:  261:previous-dir2:\\e[d\n\
+        -:  262:# Shift-left (xterm)\n\
+        -:  263:previous-dir3:\\e[2D\n\
+        -:  264:# Shift-left (others)\n\
+        -:  265:previous-dir4:\\e[1;2D\n\
+        -:  266:\n\
+        -:  267:# Alt-k\n\
+        -:  268:next-dir:\\M-k\n\
+        -:  269:# Shift-right (rxvt)\n\
+        -:  270:next-dir2:\\e[c\n\
+        -:  271:# Shift-right (xterm)\n\
+        -:  272:next-dir3:\\e[2C\n\
+        -:  273:# Shift-right (others)\n\
+        -:  274:next-dir4:\\e[1;2C\n\
+        -:  275:first-dir:\\C-\\M-j\n\
+        -:  276:last-dir:\\C-\\M-k\n\
+        -:  277:\n\
+        -:  278:# Alt-u\n\
+        -:  279:parent-dir:\\M-u\n\
+        -:  280:# Shift-up (rxvt)\n\
+        -:  281:parent-dir2:\\e[a\n\
+        -:  282:# Shift-up (xterm)\n\
+        -:  283:parent-dir3:\\e[2A\n\
+        -:  284:# Shift-up (others)\n\
+        -:  285:parent-dir4:\\e[1;2A\n\
+        -:  286:\n\
+        -:  287:# Alt-e\n\
+        -:  288:home-dir:\\M-e\n\
+        -:  289:# Home key (rxvt)\n\
+        -:  290:home-dir2:\\e[7~\n\
+        -:  291:# Home key (xterm)\n\
+        -:  292:home-dir3:\\e[H\n\
+        -:  293:home-dir4:\n\
+        -:  294:\n\
+        -:  295:# Alt-r\n\
+        -:  296:root-dir:\\M-r\n\
+        -:  297:# Alt-/ (rxvt)\n\
+        -:  298:root-dir2:\\e/\n\
+        -:  299:#root-dir3:\n\
+        -:  300:\n\
+        -:  301:pinned-dir:\\M-p\n\
+        -:  302:\n\
+        -:  303:# Help\n\
+        -:  304:# F1-3\n\
+        -:  305:show-manpage:\\eOP\n\
+        -:  306:show-cmds:\\eOQ\n\
+        -:  307:show-kbinds:\\eOR\n\
+        -:  308:\n\
+        -:  309:new-instance:\\C-x\n\
+        -:  310:previous-profile:\\C-\\M-o\n\
+        -:  311:next-profile:\\C-\\M-p\n\
+        -:  312:archive-sel:\\C-\\M-a\n\
+        -:  313:rename-sel:\\C-\\M-r\n\
+        -:  314:remove-sel:\\C-\\M-d\n\
+        -:  315:trash-sel:\\C-\\M-t\n\
+        -:  316:untrash-all:\\C-\\M-u\n\
+        -:  317:paste-sel:\\C-\\M-v\n\
+        -:  318:move-sel:\\C-\\M-n\n\
+        -:  319:export-sel:\\C-\\M-e\n\
+        -:  320:open-sel:\\C-\\M-g\n\
+        -:  321:bookmark-sel:\\C-\\M-b\n\
+        -:  322:refresh-screen:\\C-r\n\
+        -:  323:clear-line:\\M-c\n\
+        -:  324:clear-msgs:\\M-t\n\
+        -:  325:show-dirhist:\\M-h\n\
+        -:  326:toggle-hidden:\\M-i\n\
+        -:  327:toggle-hidden2:\\M-.\n\
+        -:  328:toggle-light:\\M-y\n\
+        -:  329:toggle-long:\\M-l\n\
+        -:  330:sort-previous:\\M-z\n\
+        -:  331:sort-next:\\M-x\n\
+        -:  332:bookmarks:\\M-b\n\
+        -:  333:select-all:\\M-a\n\
+        -:  334:deselect-all:\\M-d\n\
+        -:  335:mountpoints:\\M-m\n\
+        -:  336:folders-first:\\M-f\n\
+        -:  337:selbox:\\M-s\n\
+        -:  338:lock:\\M-o\n\
+        -:  339:# F6-12\n\
+        -:  340:open-mime:\\e[17~\n\
+        -:  341:open-jump-db:\\e[18~\n\
+        -:  342:edit-color-scheme:\\e[19~\n\
+        -:  343:open-keybinds:\\e[20~\n\
+        -:  344:open-config:\\e[21~\n\
+        -:  345:open-bookmarks:\\e[23~\n\
+        -:  346:quit:\\e[24~\n\n\
+        -:  347:# Plugins\n\
+        -:  348:# 1) Make sure your plugin is in the plugins directory (or use any of the\n\
+        -:  349:# plugins in there)\n\
+        -:  350:# 2) Link pluginx to your plugin using the 'actions edit' command. Ex:\n\
+        -:  351:\"plugin1=myplugin.sh\"\n\
+        -:  352:# 3) Set a keybinding here for pluginx. Ex: \"plugin1:\\M-7\"\n\n\
+        -:  353:#plugin1:\n\
+        -:  354:#plugin2:\n\
+        -:  355:#plugin3:\n\
+        -:  356:#plugin4:\n",
+        -:  357:	    PROGRAM_NAME);
+        -:  358:
+    #####:  359:	fclose(fp);
+call    0 never executed
+        -:  360:
+    #####:  361:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  362:}
+        -:  363:
+        -:  364:void
+function create_tmp_files called 1 returned 100% blocks executed 28%
+        1:  365:create_tmp_files(void)
+        -:  366:{
+        1:  367:	size_t pnl_len = strlen(PNL);
+        -:  368:
+        -:  369:	/* #### CHECK THE TMP DIR #### */
+        -:  370:
+        -:  371:	/* If the temporary directory doesn't exist, create it. I create
+        -:  372:	 * the parent directory (/tmp/clifm) with 1777 permissions (world
+        -:  373:	 * writable with the sticky bit set), so that every user is able
+        -:  374:	 * to create files in here, but only the file's owner can remove
+        -:  375:	 * or modify them */
+        -:  376:
+        1:  377:	size_t user_len = strlen(user.name);
+        1:  378:	TMP_DIR = (char *)xnmalloc(pnl_len + user_len + 7, sizeof(char));
+        1:  378-block  0
+call    0 returned 1
+        1:  379:	snprintf(TMP_DIR, pnl_len + 6, "/tmp/%s", PNL);
+        -:  380:
+        -:  381:	struct stat file_attrib;
+        -:  382:
+        1:  383:	if (stat(TMP_DIR, &file_attrib) == -1) {
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+        -:  384:
+    #####:  385:		char *md_cmd[] = {"mkdir", "-pm1777", TMP_DIR, NULL};
+        -:  386:
+    #####:  387:		if (launch_execve(md_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+    %%%%%:  387-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  388:			_err('e', PRINT_PROMPT, _("%s: '%s': Error creating temporary "
+    %%%%%:  388-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  389:					"directory\n"), PROGRAM_NAME, TMP_DIR);
+        -:  390:		}
+        -:  391:	}
+        -:  392:
+        -:  393:	/* Once the parent directory exists, create the user's directory to
+        -:  394:	 * store the list of selected files:
+        -:  395:	 * TMP_DIR/clifm/username/.selbox_PROFILE. I use here very
+        -:  396:	 * restrictive permissions (700), since only the corresponding user
+        -:  397:	 * must be able to read and/or modify this list */
+        -:  398:
+        1:  399:	snprintf(TMP_DIR, pnl_len + user_len + 7, "/tmp/%s/%s", PNL, user.name);
+        -:  400:
+        1:  401:	if (stat(TMP_DIR, &file_attrib) == -1) {
+        1:  401-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+        -:  402:
+    #####:  403:		char *md_cmd2[] = {"mkdir", "-pm700", TMP_DIR, NULL};
+        -:  404:
+    #####:  405:		if (launch_execve(md_cmd2, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+    %%%%%:  405-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  406:			selfile_ok = 0;
+    #####:  407:			_err('e', PRINT_PROMPT, _("%s: '%s': Error creating temporary "
+    %%%%%:  407-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  408:					"directory\n"), PROGRAM_NAME, TMP_DIR);
+        -:  409:		}
+        -:  410:	}
+        -:  411:
+        -:  412:	/* If the directory exists, check it is writable */
+        1:  413:	else if (access(TMP_DIR, W_OK) == -1) {
+        1:  413-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+        -:  414:
+    #####:  415:		if (!SEL_FILE) {
+    %%%%%:  415-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  416:			selfile_ok = 0;
+    #####:  417:			_err('w', PRINT_PROMPT, "%s: '%s': Directory not writable. Selected "
+    %%%%%:  417-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  418:				"files will be lost after program exit\n",
+        -:  419:			    PROGRAM_NAME, TMP_DIR);
+        -:  420:		}
+        -:  421:	}
+        -:  422:
+        -:  423:	/* If the config directory isn't available, define an alternative
+        -:  424:	 * selection file in /tmp */
+       1*:  425:	if (!SEL_FILE && xargs.stealth_mode != 1) {
+        1:  425-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    %%%%%:  425-block  1
+branch  2 never executed
+branch  3 never executed
+        -:  426:
+    #####:  427:		size_t tmp_dir_len = strlen(TMP_DIR);
+        -:  428:
+    #####:  429:		if (!share_selbox) {
+    %%%%%:  429-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  430:			size_t prof_len = 0;
+        -:  431:
+    #####:  432:			if (alt_profile)
+    %%%%%:  432-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  433:				prof_len = strlen(alt_profile);
+    %%%%%:  433-block  0
+unconditional  0 never executed
+        -:  434:			else
+    #####:  435:				prof_len = 7; /* Lenght of "default" */
+    %%%%%:  435-block  0
+unconditional  0 never executed
+        -:  436:
+    #####:  437:			SEL_FILE = (char *)xnmalloc(tmp_dir_len + prof_len + 9,
+    %%%%%:  437-block  0
+call    0 never executed
+        -:  438:			    sizeof(char));
+    #####:  439:			sprintf(SEL_FILE, "%s/selbox_%s", TMP_DIR,
+    %%%%%:  439-block  0
+unconditional  0 never executed
+    %%%%%:  439-block  1
+unconditional  1 never executed
+    %%%%%:  439-block  2
+unconditional  2 never executed
+    #####:  440:			    (alt_profile) ? alt_profile : "default");
+branch  0 never executed
+branch  1 never executed
+        -:  441:		}
+        -:  442:
+        -:  443:		else {
+    #####:  444:			SEL_FILE = (char *)xnmalloc(tmp_dir_len + 8, sizeof(char));
+    %%%%%:  444-block  0
+call    0 never executed
+    #####:  445:			sprintf(SEL_FILE, "%s/selbox", TMP_DIR);
+unconditional  0 never executed
+        -:  446:		}
+        -:  447:
+    #####:  448:		_err('w', PRINT_PROMPT, _("%s: '%s': Using a temporary directory for "
+    %%%%%:  448-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  449:					  "the Selection Box. Selected files won't be persistent accros "
+        -:  450:					  "reboots"), PROGRAM_NAME, TMP_DIR);
+        -:  451:	}
+        1:  452:}
+        -:  453:
+        -:  454:void
+function edit_xresources called 0 returned 0% blocks executed 0%
+    #####:  455:edit_xresources(void)
+        -:  456:{
+    #####:  457:	if (xargs.stealth_mode == 1)
+    %%%%%:  457-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  458:		return;
+    %%%%%:  458-block  0
+unconditional  0 never executed
+        -:  459:
+        -:  460:	/* Check if ~/.Xresources exists and eightBitInput is set to
+        -:  461:	 * false. If not, create the file and set the corresponding
+        -:  462:	 * value */
+    #####:  463:	char xresources[PATH_MAX] = "";
+    #####:  464:	sprintf(xresources, "%s/.Xresources", user.home);
+        -:  465:
+    #####:  466:	FILE *xresources_fp = fopen(xresources, "a+");
+    %%%%%:  466-block  0
+call    0 never executed
+        -:  467:
+    #####:  468:	if (!xresources_fp) {
+branch  0 never executed
+branch  1 never executed
+    #####:  469:		_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n",
+call    0 never executed
+    #####:  470:		    PROGRAM_NAME, xresources, strerror(errno));
+    %%%%%:  470-block  0
+call    0 never executed
+    #####:  471:		return;
+unconditional  0 never executed
+        -:  472:	}
+        -:  473:
+        -:  474:	/* Since I'm looking for very specific lines, which are
+        -:  475:	 * fixed lines far below MAX_LINE, I don't care to get
+        -:  476:	 * any of the remaining lines truncated */
+        -:  477:#if __FreeBSD__
+        -:  478:	fseek(xresources_fp, 0, SEEK_SET);
+        -:  479:#endif
+    #####:  480:	char line[256] = "";
+    #####:  481:	int eight_bit = 0, cursor = 0, function = 0;
+        -:  482:
+    #####:  483:	while (fgets(line, (int)sizeof(line), xresources_fp)) {
+    %%%%%:  483-block  0
+unconditional  0 never executed
+    %%%%%:  483-block  1
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+        -:  484:
+    #####:  485:		if (strncmp(line, "XTerm*eightBitInput: false",
+    %%%%%:  485-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  486:			26) == 0)
+    #####:  487:			eight_bit = 1;
+    %%%%%:  487-block  0
+unconditional  0 never executed
+        -:  488:
+    #####:  489:		else if (strncmp(line, "XTerm*modifyCursorKeys: 1",
+    %%%%%:  489-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  490:			     25) == 0)
+    #####:  491:			cursor = 1;
+    %%%%%:  491-block  0
+unconditional  0 never executed
+        -:  492:
+    #####:  493:		else if (strncmp(line, "XTerm*modifyFunctionKeys: 1",
+    %%%%%:  493-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  494:			     27) == 0)
+    #####:  495:			function = 1;
+    %%%%%:  495-block  0
+unconditional  0 never executed
+        -:  496:	}
+        -:  497:
+    #####:  498:	if (!eight_bit || !cursor || !function) {
+    %%%%%:  498-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  498-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  498-block  2
+branch  4 never executed
+branch  5 never executed
+        -:  499:		/* Set the file position indicator at the end of
+        -:  500:		 * the file */
+    #####:  501:		fseek(xresources_fp, 0L, SEEK_END);
+    %%%%%:  501-block  0
+call    0 never executed
+        -:  502:
+    #####:  503:		if (!eight_bit)
+branch  0 never executed
+branch  1 never executed
+    #####:  504:			fputs("\nXTerm*eightBitInput: false\n", xresources_fp);
+    %%%%%:  504-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  505:
+    #####:  506:		if (!cursor)
+    %%%%%:  506-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  507:			fputs("\nXTerm*modifyCursorKeys: 1\n", xresources_fp);
+    %%%%%:  507-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  508:
+    #####:  509:		if (!function)
+    %%%%%:  509-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  510:			fputs("\nXTerm*modifyFunctionKeys: 1\n", xresources_fp);
+    %%%%%:  510-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  511:
+    #####:  512:		char *xrdb_path = get_cmd_path("xrdb");
+    %%%%%:  512-block  0
+call    0 never executed
+        -:  513:
+    #####:  514:		if (xrdb_path) {
+branch  0 never executed
+branch  1 never executed
+    #####:  515:			char *res_file = (char *)xnmalloc(user.home_len + 13, sizeof(char));
+    %%%%%:  515-block  0
+call    0 never executed
+    #####:  516:			sprintf(res_file, "%s/.Xresources", user.home);
+    #####:  517:			char *cmd[] = {"xrdb", "merge", res_file, NULL};
+        -:  518:
+    #####:  519:			launch_execve(cmd, FOREGROUND, E_NOFLAG);
+call    0 never executed
+    #####:  520:			free(res_file);
+unconditional  0 never executed
+        -:  521:		}
+        -:  522:
+    #####:  523:		_err('w', PRINT_PROMPT, _("%s: Restart your %s for changes to "
+    %%%%%:  523-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  523-block  1
+call    2 never executed
+        -:  524:					  "~/.Xresources to take effect. Otherwise, %s keybindings "
+        -:  525:					  "might not work as expected.\n"), PROGRAM_NAME,
+    #####:  526:					  xrdb_path ? _("terminal") : _("X session"), PROGRAM_NAME);
+    %%%%%:  526-block  0
+unconditional  0 never executed
+    %%%%%:  526-block  1
+unconditional  1 never executed
+        -:  527:
+    #####:  528:		if (xrdb_path)
+branch  0 never executed
+branch  1 never executed
+    #####:  529:			free(xrdb_path);
+    %%%%%:  529-block  0
+unconditional  0 never executed
+        -:  530:	}
+        -:  531:
+    #####:  532:	fclose(xresources_fp);
+    %%%%%:  532-block  0
+call    0 never executed
+        -:  533:
+    #####:  534:	return;
+unconditional  0 never executed
+        -:  535:}
+        -:  536:
+        -:  537:void
+function define_config_file_names called 1 returned 100% blocks executed 75%
+        1:  538:define_config_file_names(void)
+        -:  539:{
+        1:  540:	size_t pnl_len = strlen(PNL);
+        -:  541:
+        -:  542:	/* If $XDG_CONFIG_HOME is set, use it for the config file.
+        -:  543:	 * Else, fall back to $HOME/.config */
+        1:  544:	char *xdg_config_home = getenv("XDG_CONFIG_HOME");
+        1:  544-block  0
+call    0 returned 1
+        -:  545:
+        1:  546:	size_t xdg_config_home_len = 0;
+        -:  547:
+        1:  548:	if (xdg_config_home) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  549:		xdg_config_home_len = strlen(xdg_config_home);
+        -:  550:
+    #####:  551:		CONFIG_DIR_GRAL = (char *)xnmalloc(xdg_config_home_len + pnl_len + 2, sizeof(char));
+    %%%%%:  551-block  0
+call    0 never executed
+    #####:  552:		sprintf(CONFIG_DIR_GRAL, "%s/%s", xdg_config_home, PNL);
+        -:  553:
+    #####:  554:		xdg_config_home = (char *)NULL;
+unconditional  0 never executed
+        -:  555:	}
+        -:  556:
+        -:  557:	else {
+        1:  558:		CONFIG_DIR_GRAL = (char *)xnmalloc(user.home_len + pnl_len + 11, sizeof(char));
+        1:  558-block  0
+call    0 returned 1
+        1:  559:		sprintf(CONFIG_DIR_GRAL, "%s/.config/%s", user.home, PNL);
+unconditional  0 taken 1
+        -:  560:	}
+        -:  561:
+        1:  562:	size_t config_gral_len = strlen(CONFIG_DIR_GRAL);
+        -:  563:
+        -:  564:	/* alt_profile will not be NULL whenever the -P option is used
+        -:  565:	 * to run the program under an alternative profile */
+        1:  566:	if (alt_profile) {
+        1:  566-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  567:		CONFIG_DIR = (char *)xnmalloc(config_gral_len + strlen(alt_profile) + 11, sizeof(char));
+    %%%%%:  567-block  0
+call    0 never executed
+    #####:  568:		sprintf(CONFIG_DIR, "%s/profiles/%s", CONFIG_DIR_GRAL, alt_profile);
+unconditional  0 never executed
+        -:  569:	}
+        -:  570:
+        -:  571:	else {
+        1:  572:		CONFIG_DIR = (char *)xnmalloc(config_gral_len + 18, sizeof(char));
+        1:  572-block  0
+call    0 returned 1
+        1:  573:		sprintf(CONFIG_DIR, "%s/profiles/default", CONFIG_DIR_GRAL);
+unconditional  0 taken 1
+        -:  574:	}
+        -:  575:
+        1:  576:	if (alt_kbinds_file) {
+        1:  576-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  577:		KBINDS_FILE = savestring(alt_kbinds_file, strlen(alt_kbinds_file));
+    %%%%%:  577-block  0
+call    0 never executed
+    #####:  578:		free(alt_kbinds_file);
+    #####:  579:		alt_kbinds_file = (char *)NULL;
+unconditional  0 never executed
+        -:  580:	}
+        -:  581:
+        -:  582:	else {
+        -:  583:		/* Keybindings per user, not per profile */
+        1:  584:		KBINDS_FILE = (char *)xnmalloc(config_gral_len + 13, sizeof(char));
+        1:  584-block  0
+call    0 returned 1
+        1:  585:		sprintf(KBINDS_FILE, "%s/keybindings", CONFIG_DIR_GRAL);
+unconditional  0 taken 1
+        -:  586:	}
+        -:  587:
+        1:  588:	COLORS_DIR = (char *)xnmalloc(config_gral_len + 8, sizeof(char));
+        1:  588-block  0
+call    0 returned 1
+        1:  589:	sprintf(COLORS_DIR, "%s/colors", CONFIG_DIR_GRAL);
+        -:  590:
+        1:  591:	PLUGINS_DIR = (char *)xnmalloc(config_gral_len + 9, sizeof(char));
+call    0 returned 1
+        1:  592:	sprintf(PLUGINS_DIR, "%s/plugins", CONFIG_DIR_GRAL);
+        -:  593:
+        1:  594:	TRASH_DIR = (char *)xnmalloc(user.home_len + 20, sizeof(char));
+call    0 returned 1
+        1:  595:	sprintf(TRASH_DIR, "%s/.local/share/Trash", user.home);
+        -:  596:
+        1:  597:	size_t trash_len = strlen(TRASH_DIR);
+        -:  598:
+        1:  599:	TRASH_FILES_DIR = (char *)xnmalloc(trash_len + 7, sizeof(char));
+call    0 returned 1
+        1:  600:	sprintf(TRASH_FILES_DIR, "%s/files", TRASH_DIR);
+        -:  601:
+        1:  602:	TRASH_INFO_DIR = (char *)xnmalloc(trash_len + 6, sizeof(char));
+call    0 returned 1
+        1:  603:	sprintf(TRASH_INFO_DIR, "%s/info", TRASH_DIR);
+        -:  604:
+        1:  605:	size_t config_len = strlen(CONFIG_DIR);
+        -:  606:
+        1:  607:	DIRHIST_FILE = (char *)xnmalloc(config_len + 13, sizeof(char));
+call    0 returned 1
+        1:  608:	sprintf(DIRHIST_FILE, "%s/dirhist.cfm", CONFIG_DIR);
+        -:  609:
+        1:  610:	if (!alt_bm_file) {
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  611:		BM_FILE = (char *)xnmalloc(config_len + 15, sizeof(char));
+        1:  611-block  0
+call    0 returned 1
+        1:  612:		sprintf(BM_FILE, "%s/bookmarks.cfm", CONFIG_DIR);
+unconditional  0 taken 1
+        -:  613:	}
+        -:  614:
+        -:  615:	else {
+    #####:  616:		BM_FILE = savestring(alt_bm_file, strlen(alt_bm_file));
+    %%%%%:  616-block  0
+call    0 never executed
+    #####:  617:		free(alt_bm_file);
+    #####:  618:		alt_bm_file = (char *)NULL;
+unconditional  0 never executed
+        -:  619:	}
+        -:  620:
+        1:  621:	LOG_FILE = (char *)xnmalloc(config_len + 9, sizeof(char));
+        1:  621-block  0
+call    0 returned 1
+        1:  622:	sprintf(LOG_FILE, "%s/log.cfm", CONFIG_DIR);
+        -:  623:
+        1:  624:	HIST_FILE = (char *)xnmalloc(config_len + 13, sizeof(char));
+call    0 returned 1
+        1:  625:	sprintf(HIST_FILE, "%s/history.cfm", CONFIG_DIR);
+        -:  626:
+        1:  627:	if (!alt_config_file) {
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  628:		CONFIG_FILE = (char *)xnmalloc(config_len + pnl_len + 4, sizeof(char));
+        1:  628-block  0
+call    0 returned 1
+        1:  629:		sprintf(CONFIG_FILE, "%s/%src", CONFIG_DIR, PNL);
+unconditional  0 taken 1
+        -:  630:	}
+        -:  631:
+        -:  632:	else {
+    #####:  633:		CONFIG_FILE = savestring(alt_config_file, strlen(alt_config_file));
+    %%%%%:  633-block  0
+call    0 never executed
+    #####:  634:		free(alt_config_file);
+    #####:  635:		alt_config_file = (char *)NULL;
+unconditional  0 never executed
+        -:  636:	}
+        -:  637:
+        1:  638:	PROFILE_FILE = (char *)xnmalloc(config_len + 13, sizeof(char));
+        1:  638-block  0
+call    0 returned 1
+        1:  639:	sprintf(PROFILE_FILE, "%s/profile.cfm", CONFIG_DIR);
+        -:  640:
+        1:  641:	MSG_LOG_FILE = (char *)xnmalloc(config_len + 14, sizeof(char));
+call    0 returned 1
+        1:  642:	sprintf(MSG_LOG_FILE, "%s/messages.cfm", CONFIG_DIR);
+        -:  643:
+        1:  644:	MIME_FILE = (char *)xnmalloc(config_len + 14, sizeof(char));
+call    0 returned 1
+        1:  645:	sprintf(MIME_FILE, "%s/mimelist.cfm", CONFIG_DIR);
+        -:  646:
+        1:  647:	ACTIONS_FILE = (char *)xnmalloc(config_len + 13, sizeof(char));
+call    0 returned 1
+        1:  648:	sprintf(ACTIONS_FILE, "%s/actions.cfm", CONFIG_DIR);
+        -:  649:
+        1:  650:	return;
+unconditional  0 taken 1
+        -:  651:}
+        -:  652:
+        -:  653:void
+function copy_plugins called 0 returned 0% blocks executed 0%
+    #####:  654:copy_plugins(void)
+        -:  655:{
+    #####:  656:	if (!CONFIG_DIR_GRAL)
+    %%%%%:  656-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  657:		return;
+    %%%%%:  657-block  0
+unconditional  0 never executed
+    %%%%%:  657-block  1
+unconditional  1 never executed
+        -:  658:
+    #####:  659:	char usr_share_plugins_dir[] = "/usr/share/clifm/plugins";
+        -:  660:
+        -:  661:	/* Make sure the system pĺugins dir exists and is not empty */
+    #####:  662:	if (count_dir(usr_share_plugins_dir) <= 2)
+    %%%%%:  662-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  663:		return;
+    %%%%%:  663-block  0
+unconditional  0 never executed
+        -:  664:
+    #####:  665:	char *cp_comm[] = {"cp", "-r", usr_share_plugins_dir,
+        -:  666:	    CONFIG_DIR_GRAL, NULL};
+    #####:  667:	launch_execve(cp_comm, FOREGROUND, E_NOFLAG);
+    %%%%%:  667-block  0
+call    0 never executed
+        -:  668:}
+        -:  669:
+        -:  670:int
+function create_config called 0 returned 0% blocks executed 0%
+    #####:  671:create_config(const char *file)
+        -:  672:{
+    #####:  673:	FILE *config_fp = fopen(file, "w");
+    %%%%%:  673-block  0
+call    0 never executed
+        -:  674:
+    #####:  675:	if (!config_fp) {
+branch  0 never executed
+branch  1 never executed
+    #####:  676:		fprintf(stderr, "%s: fopen: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+    %%%%%:  676-block  0
+call    0 never executed
+call    1 never executed
+    #####:  677:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  678:	}
+        -:  679:
+        -:  680:	/* Do not translate anything in the config file */
+    #####:  681:	fprintf(config_fp,
+    %%%%%:  681-block  0
+call    0 never executed
+        -:  682:
+        -:  683:	    "\t\t###########################################\n\
+        -:  684:\t\t#                  CLIFM                  #\n\
+        -:  685:\t\t#  The anti-eye-candy, KISS file manager  #\n\
+        -:  686:\t\t###########################################\n\n"
+        -:  687:
+        -:  688:	    "# This is the configuration file for CliFM\n\n"
+        -:  689:
+        -:  690:	    "# Color schemes are stored in the colors directory. By default,\n\
+        -:  691:# the 'default' color scheme is used. Visit %s\n\
+        -:  692:# to get a few more\n\
+        -:  693:ColorScheme=%s\n\n"
+        -:  694:
+        -:  695:	    "# The amount of files contained by a directory is informed next\n\
+        -:  696:# to the directory name. However, this feature might slow things down when,\n\
+        -:  697:# for example, listing files on a remote server. The filescounter can be\n\
+        -:  698:# disabled here, via the --no-files-counter option, or using the 'fc'\n\
+        -:  699:# command while in the program itself.\n\
+        -:  700:FilesCounter=%s\n\n"
+        -:  701:
+        -:  702:	    "# The character used to construct the line dividing the list of files and\n\
+        -:  703:# the prompt. DividingLineChar accepts both literal characters (in single\n\
+        -:  704:# quotes) and decimal numbers.\n\
+        -:  705:DividingLineChar='%c'\n\n"
+        -:  706:
+        -:  707:	    "# If set to true, print a map of the current position in the directory\n\
+        -:  708:# history list, showing previous, current, and next entries\n\
+        -:  709:DirhistMap=%s\n\n"
+        -:  710:
+        -:  711:	    "# Use a regex expression to exclude filenames when listing files.\n\
+        -:  712:# Example: .*~$ to exclude backup files (ending with ~). Do not quote\n\
+        -:  713:# the regular expression\n\
+        -:  714:Filter=\n\n"
+        -:  715:
+        -:  716:	    "# Set the default copy command. Available options are: 0 = cp,\n\
+        -:  717:# 1 = advcp, and 2 = wcp. Both 1 and 2 add a progress bar to cp.\n\
+        -:  718:cpCmd=%d\n\n"
+        -:  719:
+        -:  720:	    "# Set the default move command. Available options are: 0 = mv,\n\
+        -:  721:# and 1 = advmv. 1 adds a progress bar to mv.\n\
+        -:  722:mvCmd=%d\n\n"
+        -:  723:
+        -:  724:	    "# The prompt line is built using string literals and/or one or more of\n\
+        -:  725:# the following escape sequences:\n"
+        -:  726:	    "# \\xnn: The character whose hexadecimal code is nn.\n\
+        -:  727:# \\e: Escape character\n\
+        -:  728:# \\h: The hostname, up to the first dot\n\
+        -:  729:# \\u: The username\n\
+        -:  730:# \\H: The full hostname\n\
+        -:  731:# \\n: A newline character\n\
+        -:  732:# \\r: A carriage return\n\
+        -:  733:# \\a: A bell character\n\
+        -:  734:# \\d: The date, in abbrevieted form (ex: 'Tue May 26')\n\
+        -:  735:# \\s: The name of the shell (everything after the last slash) currently used\n\
+        -:  736:# by CliFM\n\
+        -:  737:# \\S: The number of the current workspace\n\
+        -:  738:# \\l: Print an 'L' if running in light mode\n\
+        -:  739:# \\P: Current profile name\n\
+        -:  740:# \\t: The time, in 24-hour HH:MM:SS format\n\
+        -:  741:# \\T: The time, in 12-hour HH:MM:SS format\n\
+        -:  742:# \\@: The time, in 12-hour am/pm format\n\
+        -:  743:# \\A: The time, in 24-hour HH:MM format\n\
+        -:  744:# \\w: The full current working directory, with $HOME abbreviated with a tilde\n\
+        -:  745:# \\W: The basename of $PWD, with $HOME abbreviated with a tilde\n\
+        -:  746:# \\p: A mix of the two above, it abbreviates the current working directory \n\
+        -:  747:# only if longer than PathMax (a value defined in the configuration file).\n\
+        -:  748:# \\z: Exit code of the last executed command. :) if success and :( in case of\n\
+        -:  749:# error\n\
+        -:  750:# \\$ '#', if the effective user ID is 0, and '$' otherwise\n\
+        -:  751:# \\nnn: The character whose ASCII code is the octal value nnn\n\
+        -:  752:# \\\\: A backslash\n\
+        -:  753:# \\[: Begin a sequence of non-printing characters. This is mostly used to\n\
+        -:  754:# add color to the prompt line\n\
+        -:  755:# \\]: End a sequence of non-printing characters\n\n"
+        -:  756:
+        -:  757:	    "Prompt=\"%s\"\n\n",
+        -:  758:
+        -:  759:	    COLORS_REPO,
+        -:  760:		DEF_COLOR_SCHEME,
+        -:  761:		DEF_FILES_COUNTER == 1 ? "true" : "false",
+        -:  762:		DEF_DIV_LINE_CHAR,
+        -:  763:		DEF_DIRHIST_MAP == 1 ? "true" : "false",
+        -:  764:		DEF_CP_CMD,
+        -:  765:		DEF_MV_CMD,
+        -:  766:	    DEFAULT_PROMPT);
+        -:  767:
+    #####:  768:	fprintf(config_fp,
+call    0 never executed
+        -:  769:	    "# MaxPath is only used for the /p option of the prompt: the current working\n\
+        -:  770:# directory will be abbreviated to its basename (everything after last slash)\n\
+        -:  771:# whenever the current path is longer than MaxPath.\n\
+        -:  772:MaxPath=%d\n\n"
+        -:  773:
+        -:  774:	    "WelcomeMessage=%s\n\
+        -:  775:SplashScreen=%s\n\
+        -:  776:ShowHiddenFiles=%s\n\
+        -:  777:LongViewMode=%s\n\
+        -:  778:LogCmds=%s\n\n"
+        -:  779:
+        -:  780:	    "# Minimum length at which a filename can be trimmed in long view mode\n\
+        -:  781:# (including ELN length and spaces)\n\
+        -:  782:MinFilenameTrim=%d\n\n"
+        -:  783:
+        -:  784:	    "# When a directory rank in the jump database is below MinJumpRank, it\n\
+        -:  785:# will be forgotten\n\
+        -:  786:MinJumpRank=%d\n\n"
+        -:  787:
+        -:  788:	    "# When the sum of all ranks in the jump database reaches MaxJumpTotalRank,\n\
+        -:  789:# all ranks will be reduced 10%%, and those falling below MinJumpRank will\n\
+        -:  790:# be deleted\n\
+        -:  791:MaxJumpTotalRank=%d\n\n"
+        -:  792:
+        -:  793:	    "# Should CliFM be allowed to run external, shell commands?\n\
+        -:  794:ExternalCommands=%s\n\n"
+        -:  795:
+        -:  796:	    "# Write the last visited directory to $XDG_CONFIG_HOME/clifm/.last to be\n\
+        -:  797:# later accessed by the corresponding shell function at program exit.\n\
+        -:  798:# To enable this feature consult the manpage.\n\
+        -:  799:CdOnQuit=%s\n\n"
+        -:  800:
+        -:  801:	    "# If set to true, a command name that is the name of a directory or a\n\
+        -:  802:# file is executed as if it were the argument to the the 'cd' or the \n\
+        -:  803:# 'open' commands respectivelly: 'cd DIR' works the same as just 'DIR'\n\
+        -:  804:# and 'open FILE' works the same as just 'FILE'.\n\
+        -:  805:Autocd=%s\n\
+        -:  806:AutoOpen=%s\n\n"
+        -:  807:
+        -:  808:	    "# If set to true, expand bookmark names into the corresponding bookmark\n\
+        -:  809:# path: if the bookmark is \"name=/path\", \"name\" will be interpreted\n\
+        -:  810:# as /path. TAB completion is also available for bookmark names.\n\
+        -:  811:ExpandBookmarks=%s\n\n"
+        -:  812:
+        -:  813:	    "# In light mode, extra filetype checks (except those provided by\n\
+        -:  814:# the d_type field of the dirent structure (see readdir(3))\n\
+        -:  815:# are disabled to speed up the listing process. stat(3) and access(3)\n\
+        -:  816:# are not executed at all, so that we cannot know in advance if a file\n\
+        -:  817:# is readable by the current user, if it is executable, SUID, SGID, if a\n\
+        -:  818:# symlink is broken, and so on. The file extension check is ignored as\n\
+        -:  819:# well, so that the color per extension feature is disabled.\n\
+        -:  820:LightMode=%s\n\n",
+        -:  821:
+        -:  822:		DEF_MAX_PATH,
+        -:  823:		DEF_WELCOME_MESSAGE == 1 ? "true" : "false",
+        -:  824:		DEF_SPLASH_SCREEN == 1 ? "true" : "false",
+        -:  825:		DEF_SHOW_HIDDEN == 1 ? "true" : "false",
+        -:  826:		DEF_LONG_VIEW == 1 ? "true" : "false",
+        -:  827:		DEF_LOGS_ENABLED == 1 ? "true" : "false",
+        -:  828:		DEF_MIN_NAME_TRIM,
+        -:  829:		DEF_MIN_JUMP_RANK,
+        -:  830:		DEF_MAX_JUMP_TOTAL_RANK,
+        -:  831:		DEF_EXT_CMD_OK == 1 ? "true" : "false",
+        -:  832:		DEF_CD_ON_QUIT == 1 ? "true" : "false",
+        -:  833:		DEF_AUTOCD == 1 ? "true" : "false",
+        -:  834:		DEF_AUTO_OPEN == 1 ? "true" : "false",
+        -:  835:		DEF_EXPAND_BOOKMARKS == 1 ? "true" : "false",
+        -:  836:		DEF_LIGHT_MODE == 1 ? "true" : "false"
+        -:  837:		);
+        -:  838:
+    #####:  839:	fprintf(config_fp,
+call    0 never executed
+        -:  840:	    "# If running with colors, append directory indicator and files counter\n\
+        -:  841:# to directories. If running without colors (via the --no-colors option),\n\
+        -:  842:# append filetype indicator at the end of filenames: '/' for directories,\n\
+        -:  843:# '@' for symbolic links, '=' for sockets, '|' for FIFO/pipes, '*'\n\
+        -:  844:# for for executable files, and '?' for unknown file types. Bear in mind\n\
+        -:  845:# that when running in light mode the check for executable files won't be\n\
+        -:  846:# performed, and thereby no inidicator will be added to executable files.\n\
+        -:  847:Classify=%s\n\n"
+        -:  848:
+        -:  849:	    "# Should the Selection Box be shared among different profiles?\n\
+        -:  850:ShareSelbox=%s\n\n"
+        -:  851:
+        -:  852:	    "# Choose the resource opener to open files with their default associated\n\
+        -:  853:# application. If not set, 'lira', CLiFM's built-in opener, is used.\n\
+        -:  854:Opener=\n\n"
+        -:  855:
+        -:  856:	    "# Set the shell to be used when running external commands. Defaults to the\n\
+        -:  857:# user's shell as specified in '/etc/passwd'.\n\
+        -:  858:SystemShell=\n\n"
+        -:  859:
+        -:  860:	    "# Only used when opening a directory via a new CliFM instance (with the 'x'\n\
+        -:  861:# command), this option specifies the command to be used to launch a\n\
+        -:  862:# terminal emulator to run CliFM on it.\n\
+        -:  863:TerminalCmd='%s'\n\n"
+        -:  864:
+        -:  865:	    "# Choose sorting method: 0 = none, 1 = name, 2 = size, 3 = atime\n\
+        -:  866:# 4 = btime (ctime if not available), 5 = ctime, 6 = mtime, 7 = version\n\
+        -:  867:# (name if note available) 8 = extension, 9 = inode, 10 = owner, 11 = group\n\
+        -:  868:# NOTE: the 'version' method is not available on FreeBSD\n\
+        -:  869:Sort=%d\n\
+        -:  870:# By default, CliFM sorts files from less to more (ex: from 'a' to 'z' if\n\
+        -:  871:# using the \"name\" method). To invert this ordering, set SortReverse to\n\
+        -:  872:# true (you can also use the --sort-reverse option or the 'st' command)\n\
+        -:  873:SortReverse=%s\n\n"
+        -:  874:
+        -:  875:	    "Tips=%s\n\
+        -:  876:ListFoldersFirst=%s\n\
+        -:  877:CdListsAutomatically=%s\n\
+        -:  878:CaseSensitiveList=%s\n\
+        -:  879:CaseSensitiveDirJump=%s\n\
+        -:  880:CaseSensitivePathComp=%s\n\
+        -:  881:Unicode=%s\n\
+        -:  882:Pager=%s\n\
+        -:  883:MaxHistory=%d\n\
+        -:  884:MaxDirhist=%d\n\
+        -:  885:MaxLog=%d\n\
+        -:  886:DiskUsage=%s\n\n"
+        -:  887:
+        -:  888:	    "# If set to true, clear the screen before listing files\n\
+        -:  889:ClearScreen=%s\n\n"
+        -:  890:
+        -:  891:	    "# If not specified, StartingPath defaults to the current working\n\
+        -:  892:# directory.\n\
+        -:  893:StartingPath=\n\n"
+        -:  894:
+        -:  895:	    "# If set to true, start CliFM in the last visited directory (and in the\n\
+        -:  896:# last used workspace). This option overrides StartingPath.\n\
+        -:  897:RestoreLastPath=%s\n\n"
+        -:  898:
+        -:  899:	    "# If set to true, the 'r' command executes 'trash' instead of 'rm' to\n\
+        -:  900:# prevent accidental deletions.\n\
+        -:  901:TrashAsRm=%s\n\n"
+        -:  902:
+        -:  903:	    "# Set readline editing mode: 0 for vi and 1 for emacs (default).\n\
+        -:  904:RlEditMode=%d\n\n"
+        -:  905:
+        -:  906:	    "#END OF OPTIONS\n\n",
+        -:  907:
+        -:  908:		DEF_CLASSIFY == 1 ? "true" : "false",
+        -:  909:		DEF_SHARE_SELBOX == 1 ? "true" : "false",
+        -:  910:		DEFAULT_TERM_CMD,
+        -:  911:		DEF_SORT,
+        -:  912:		DEF_SORT_REVERSE == 1 ? "true" : "false",
+        -:  913:		DEF_TIPS == 1 ? "true" : "false",
+        -:  914:		DEF_LIST_FOLDERS_FIRST == 1 ? "true" : "false",
+        -:  915:		DEF_CD_LISTS_ON_THE_FLY == 1 ? "true" : "false",
+        -:  916:		DEF_CASE_SENSITIVE == 1 ? "true" : "false",
+        -:  917:		DEF_CASE_SENS_DIRJUMP == 1 ? "true" : "false",
+        -:  918:		DEF_CASE_SENS_PATH_COMP == 1 ? "true" : "false",
+        -:  919:		DEF_UNICODE == 1 ? "true" : "false",
+        -:  920:		DEF_PAGER == 1 ? "true" : "false",
+        -:  921:		DEF_MAX_HIST,
+        -:  922:		DEF_MAX_DIRHIST,
+        -:  923:		DEF_MAX_LOG,
+        -:  924:		DEF_DISK_USAGE == 1 ? "true" : "false",
+        -:  925:		DEF_CLEAR_SCREEN == 1 ? "true" : "false",
+        -:  926:		DEF_RESTORE_LAST_PATH == 1 ? "true" : "false",
+        -:  927:		DEF_TRASRM == 1 ? "true" : "false",
+        -:  928:		DEF_RL_EDIT_MODE
+        -:  929:		);
+        -:  930:
+    #####:  931:	fputs(
+call    0 never executed
+        -:  932:
+        -:  933:	    "#ALIASES\n\
+        -:  934:#alias ls='ls --color=auto -A'\n\n"
+        -:  935:
+        -:  936:	    "#PROMPT COMMANDS\n\n"
+        -:  937:	    "# Write below the commands you want to be executed before the prompt.\n\
+        -:  938:# Ex:\n\
+        -:  939:#/usr/share/clifm/plugins/git_status.sh\n\
+        -:  940:#date | awk '{print $1\", \"$2,$3\", \"$4}'\n\n"
+        -:  941:	    "#END OF PROMPT COMMANDS\n\n",
+        -:  942:	    config_fp);
+        -:  943:
+    #####:  944:	fclose(config_fp);
+call    0 never executed
+        -:  945:
+    #####:  946:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  947:}
+        -:  948:
+        -:  949:void
+function create_def_cscheme called 1 returned 100% blocks executed 47%
+        1:  950:create_def_cscheme(void)
+        -:  951:{
+        1:  952:	if (!COLORS_DIR)
+        1:  952-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  953:		return;
+    %%%%%:  953-block  0
+unconditional  0 never executed
+        -:  954:
+        1:  955:	char *cscheme_file = (char *)xnmalloc(strlen(COLORS_DIR) + 13, sizeof(char));
+        1:  955-block  0
+call    0 returned 1
+        -:  956:
+        1:  957:	sprintf(cscheme_file, "%s/default.cfm", COLORS_DIR);
+        -:  958:
+        -:  959:	/* If the file already exists, do nothing */
+        -:  960:	struct stat attr;
+        -:  961:
+        1:  962:	if (stat(cscheme_file, &attr) != -1) {
+call    0 returned 1
+branch  1 taken 1 (fallthrough)
+branch  2 taken 0
+        1:  963:		free(cscheme_file);
+        1:  964:		return;
+        1:  964-block  0
+unconditional  0 taken 1
+        -:  965:	}
+        -:  966:
+    #####:  967:	FILE *fp = fopen(cscheme_file, "w+");
+    %%%%%:  967-block  0
+call    0 never executed
+        -:  968:
+    #####:  969:	if (!fp) {
+branch  0 never executed
+branch  1 never executed
+    #####:  970:		_err('w', PRINT_PROMPT, "%s: Error creating default color scheme "
+    %%%%%:  970-block  0
+call    0 never executed
+        -:  971:				"file\n", PROGRAM_NAME);
+    #####:  972:		free(cscheme_file);
+    #####:  973:		return;
+unconditional  0 never executed
+        -:  974:	}
+        -:  975:
+    #####:  976:	fprintf(fp, "# CliFM default color scheme\n\n\
+    %%%%%:  976-block  0
+call    0 never executed
+        -:  977:# FiletypeColors defines the color used for filetypes when listing files, \n\
+        -:  978:# just as InterfaceColors defines colors for CliFM interface. Both make\n\
+        -:  979:# use of the same format used by the LS_COLORS environment variable. Thus,\n\
+        -:  980:# \"di=01;34\" means that (non-empty) directories will be listed in bold blue.\n\
+        -:  981:# Color codes are traditional ANSI escape sequences less the escape char and\n\
+        -:  982:# the final 'm'. 8 bit, 256 colors, and RGB colors are supported.\n\
+        -:  983:# A detailed explanation of all these codes can be found in the manpage.\n\n"
+        -:  984:
+        -:  985:		    "FiletypeColors=\"%s\"\n\n"
+        -:  986:
+        -:  987:		    "InterfaceColors=\"%s\"\n\n"
+        -:  988:
+        -:  989:		    "# Same as FiletypeColors, but for file extensions. The format is always\n\
+        -:  990:# *.EXT=COLOR\n"
+        -:  991:		    "ExtColors=\"%s\"\n\n"
+        -:  992:
+        -:  993:		    "DirIconsColor=\"00;33\"\n",
+        -:  994:	    DEF_FILE_COLORS,
+        -:  995:	    DEF_IFACE_COLORS,
+        -:  996:	    DEF_EXT_COLORS);
+        -:  997:
+    #####:  998:	fclose(fp);
+call    0 never executed
+        -:  999:
+    #####: 1000:	free(cscheme_file);
+        -: 1001:
+    #####: 1002:	return;
+unconditional  0 never executed
+        -: 1003:}
+        -: 1004:
+        -: 1005:void
+function create_config_files called 1 returned 100% blocks executed 30%
+        1: 1006:create_config_files(void)
+        -: 1007:{
+        1: 1008:	int ret = -1;
+        -: 1009:	struct stat file_attrib;
+        -: 1010:
+        -: 1011:			/* #############################
+        -: 1012:			 * #        TRASH DIRS         #
+        -: 1013:			 * ############################# */
+        -: 1014:
+        1: 1015:	if (stat(TRASH_DIR, &file_attrib) == -1) {
+        1: 1015-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####: 1016:		char *trash_files = (char *)NULL;
+    #####: 1017:		trash_files = (char *)xnmalloc(strlen(TRASH_DIR) + 7, sizeof(char));
+    %%%%%: 1017-block  0
+call    0 never executed
+        -: 1018:
+    #####: 1019:		sprintf(trash_files, "%s/files", TRASH_DIR);
+    #####: 1020:		char *trash_info = (char *)NULL;
+    #####: 1021:		trash_info = (char *)xnmalloc(strlen(TRASH_DIR) + 6, sizeof(char));
+call    0 never executed
+        -: 1022:
+    #####: 1023:		sprintf(trash_info, "%s/info", TRASH_DIR);
+    #####: 1024:		char *cmd[] = {"mkdir", "-p", trash_files, trash_info, NULL};
+        -: 1025:
+    #####: 1026:		ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+call    0 never executed
+    #####: 1027:		free(trash_files);
+    #####: 1028:		free(trash_info);
+        -: 1029:
+    #####: 1030:		if (ret != EXIT_SUCCESS) {
+branch  0 never executed
+branch  1 never executed
+    #####: 1031:			trash_ok = 0;
+    #####: 1032:			_err('w', PRINT_PROMPT, _("%s: mkdir: '%s': Error creating trash "
+    %%%%%: 1032-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1033:						  "directory. Trash function disabled\n"),
+        -: 1034:			    PROGRAM_NAME, TRASH_DIR);
+        -: 1035:		}
+        -: 1036:	}
+        -: 1037:
+        -: 1038:	/* If it exists, check it is writable */
+        1: 1039:	else if (access(TRASH_DIR, W_OK) == -1) {
+        1: 1039-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####: 1040:		trash_ok = 0;
+    #####: 1041:		_err('w', PRINT_PROMPT, _("%s: '%s': Directory not writable. "
+    %%%%%: 1041-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1042:					  "Trash function disabled\n"),
+        -: 1043:		    PROGRAM_NAME, TRASH_DIR);
+        -: 1044:	}
+        -: 1045:
+        -: 1046:				/* ####################
+        -: 1047:				 * #    CONFIG DIR    #
+        -: 1048:				 * #################### */
+        -: 1049:
+        -: 1050:	/* If the config directory doesn't exist, create it */
+        -: 1051:	/* Use the GNU mkdir to let it handle parent directories */
+        1: 1052:	if (stat(CONFIG_DIR, &file_attrib) == -1) {
+        1: 1052-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####: 1053:		char *tmp_cmd[] = {"mkdir", "-p", CONFIG_DIR, NULL};
+        -: 1054:
+    #####: 1055:		if (launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+    %%%%%: 1055-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -: 1056:
+    #####: 1057:			config_ok = 0;
+        -: 1058:
+    #####: 1059:			_err('e', PRINT_PROMPT, _("%s: mkdir: '%s': Error creating "
+    %%%%%: 1059-block  0
+call    0 never executed
+        -: 1060:						  "configuration directory. Bookmarks, commands logs, and "
+        -: 1061:						  "command history are disabled. Program messages won't be "
+        -: 1062:						  "persistent. Using default options\n"),
+        -: 1063:			    PROGRAM_NAME, CONFIG_DIR);
+        -: 1064:
+    #####: 1065:			return;
+unconditional  0 never executed
+        -: 1066:		}
+        -: 1067:	}
+        -: 1068:
+        -: 1069:	/* If it exists, check it is writable */
+        1: 1070:	else if (access(CONFIG_DIR, W_OK) == -1) {
+        1: 1070-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+        -: 1071:
+    #####: 1072:		config_ok = 0;
+        -: 1073:
+    #####: 1074:		_err('e', PRINT_PROMPT, _("%s: '%s': Directory not writable. Bookmarks, "
+    %%%%%: 1074-block  0
+call    0 never executed
+        -: 1075:					  "commands logs, and commands history are disabled. Program messages "
+        -: 1076:					  "won't be persistent. Using default options\n"),
+        -: 1077:		    PROGRAM_NAME,
+        -: 1078:		    CONFIG_DIR);
+        -: 1079:
+    #####: 1080:		return;
+unconditional  0 never executed
+        -: 1081:	}
+        -: 1082:
+        -: 1083:				/* #####################
+        -: 1084:				 * #    CONFIG FILE    #
+        -: 1085:				 * #####################*/
+        -: 1086:
+        1: 1087:	if (stat(CONFIG_FILE, &file_attrib) == -1) {
+        1: 1087-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+        -: 1088:
+    #####: 1089:		if (create_config(CONFIG_FILE) == EXIT_SUCCESS)
+    %%%%%: 1089-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1090:			config_ok = 1;
+    %%%%%: 1090-block  0
+unconditional  0 never executed
+        -: 1091:
+        -: 1092:		else
+    #####: 1093:			config_ok = 0;
+    %%%%%: 1093-block  0
+unconditional  0 never executed
+        -: 1094:	}
+        -: 1095:
+        1: 1096:	if (!config_ok)
+        1: 1096-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1097:		return;
+    %%%%%: 1097-block  0
+unconditional  0 never executed
+        -: 1098:
+        -: 1099:				/* ######################
+        -: 1100:				 * #    PROFILE FILE    #
+        -: 1101:				 * ###################### */
+        -: 1102:
+        1: 1103:	if (stat(PROFILE_FILE, &file_attrib) == -1) {
+        1: 1103-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+        -: 1104:
+    #####: 1105:		FILE *profile_fp = fopen(PROFILE_FILE, "w");
+    %%%%%: 1105-block  0
+call    0 never executed
+        -: 1106:
+    #####: 1107:		if (!profile_fp) {
+branch  0 never executed
+branch  1 never executed
+    #####: 1108:			_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n", PROGRAM_NAME,
+call    0 never executed
+unconditional  1 never executed
+    #####: 1109:			    PROFILE_FILE, strerror(errno));
+    %%%%%: 1109-block  0
+call    0 never executed
+        -: 1110:		}
+        -: 1111:
+        -: 1112:		else {
+    #####: 1113:			fprintf(profile_fp, _("#%s profile\n\
+    %%%%%: 1113-block  0
+call    0 never executed
+        -: 1114:#Write here the commands you want to be executed at startup\n\
+        -: 1115:#Ex:\n#echo -e \"%s, the anti-eye-candy/KISS file manager\"\n"),
+        -: 1116:			    PROGRAM_NAME, PROGRAM_NAME);
+    #####: 1117:			fclose(profile_fp);
+call    0 never executed
+unconditional  1 never executed
+        -: 1118:		}
+        -: 1119:	}
+        -: 1120:
+        -: 1121:				/* #####################
+        -: 1122:				 * #    COLORS DIR     #
+        -: 1123:				 * ##################### */
+        -: 1124:
+        1: 1125:	if (stat(COLORS_DIR, &file_attrib) == -1) {
+        1: 1125-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+        -: 1126:
+    #####: 1127:		char *cmd[] = {"mkdir", COLORS_DIR, NULL};
+        -: 1128:
+    #####: 1129:		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+    %%%%%: 1129-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1130:			_err('w', PRINT_PROMPT, _("%s: mkdir: Error creating colors "
+    %%%%%: 1130-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1131:				"directory. Using the default color scheme\n"),
+        -: 1132:			    PROGRAM_NAME);
+        -: 1133:		}
+        -: 1134:	}
+        -: 1135:
+        -: 1136:	/* Generate the default color scheme file */
+        1: 1137:	create_def_cscheme();
+        1: 1137-block  0
+call    0 returned 1
+        -: 1138:
+        -: 1139:				/* #####################
+        -: 1140:				 * #      PLUGINS      #
+        -: 1141:				 * #####################*/
+        -: 1142:
+        1: 1143:	if (stat(PLUGINS_DIR, &file_attrib) == -1) {
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####: 1144:		char *cmd[] = {"mkdir", PLUGINS_DIR, NULL};
+        -: 1145:
+    #####: 1146:		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+    %%%%%: 1146-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1147:			_err('e', PRINT_PROMPT, _("%s: mkdir: Error creating plugins "
+    %%%%%: 1147-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1148:						  "directory. The actions function is disabled\n"),
+        -: 1149:			    PROGRAM_NAME);
+        -: 1150:		else
+    #####: 1151:			copy_plugins();
+    %%%%%: 1151-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1152:	}
+        -: 1153:
+        -: 1154:				/* #####################
+        -: 1155:				 * #    ACTIONS FILE   #
+        -: 1156:				 * #####################*/
+        -: 1157:
+        1: 1158:	if (stat(ACTIONS_FILE, &file_attrib) == -1) {
+        1: 1158-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####: 1159:		FILE *actions_fp = fopen(ACTIONS_FILE, "w");
+    %%%%%: 1159-block  0
+call    0 never executed
+        -: 1160:
+    #####: 1161:		if (!actions_fp) {
+branch  0 never executed
+branch  1 never executed
+    #####: 1162:			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+call    0 never executed
+unconditional  1 never executed
+    #####: 1163:			    ACTIONS_FILE, strerror(errno));
+    %%%%%: 1163-block  0
+call    0 never executed
+        -: 1164:		}
+        -: 1165:
+        -: 1166:		else {
+    #####: 1167:			fprintf(actions_fp, "######################\n"
+    %%%%%: 1167-block  0
+call    0 never executed
+        -: 1168:					    "# %s actions file #\n"
+        -: 1169:					    "######################\n\n"
+        -: 1170:					    "# Define here your custom actions. Actions are "
+        -: 1171:					    "custom command names\n"
+        -: 1172:					    "# binded to a shell script located in "
+        -: 1173:					    "$XDG_CONFIG_HOME/clifm/PROFILE/scripts.\n"
+        -: 1174:					    "# Actions can be executed directly from "
+        -: 1175:					    "%s command line, as if they\n"
+        -: 1176:					    "# were any other command, and the associated "
+        -: 1177:					    "script will be executed\n"
+        -: 1178:					    "# instead. All parameters passed to the action "
+        -: 1179:					    "command will be passed\n"
+        -: 1180:					    "# to the action script as well.\n\n"
+        -: 1181:					    "i=img_viewer.sh\n"
+        -: 1182:					    "kbgen=kbgen\n"
+        -: 1183:					    "vid=vid_viewer.sh\n"
+        -: 1184:					    "ptot=pdf_viewer.sh\n"
+        -: 1185:					    "music=music_player.sh\n"
+        -: 1186:					    "update=update.sh\n"
+        -: 1187:					    "wall=wallpaper_setter.sh\n"
+        -: 1188:					    "dragon=dragondrop.sh\n"
+        -: 1189:					    "+=finder.sh\n"
+        -: 1190:					    "++=jumper.sh\n"
+        -: 1191:					    "-=fzfnav.sh\n"
+        -: 1192:					    "*=fzfsel.sh\n"
+        -: 1193:					    "**=fzfdesel.sh\n"
+        -: 1194:					    "h=fzfhist.sh\n"
+        -: 1195:					    "//=rgfind.sh\n"
+        -: 1196:					    "ih=ihelp.sh\n",
+        -: 1197:			    PROGRAM_NAME, PROGRAM_NAME);
+        -: 1198:
+    #####: 1199:			fclose(actions_fp);
+call    0 never executed
+unconditional  1 never executed
+        -: 1200:		}
+        -: 1201:	}
+        -: 1202:
+        -: 1203:				/* #####################
+        -: 1204:				 * #     MIME FILE     #
+        -: 1205:				 * #####################*/
+        -: 1206:
+        1: 1207:	if (stat(MIME_FILE, &file_attrib) == 0)
+        1: 1207-block  0
+call    0 returned 1
+branch  1 taken 1 (fallthrough)
+branch  2 taken 0
+        1: 1208:		return;
+        1: 1208-block  0
+unconditional  0 taken 1
+        -: 1209:
+    #####: 1210:	char sys_mimelist[] = "/usr/share/clifm/mimelist.cfm";
+        -: 1211:
+    #####: 1212:	_err('n', PRINT_PROMPT, _("%s created a new MIME list file (%s) "
+    %%%%%: 1212-block  0
+call    0 never executed
+        -: 1213:			"It is recommended to edit this file (entering 'mm edit' or "
+        -: 1214:			"pressing F6) to add the programs you use and remove those "
+        -: 1215:			"you don't. This will make the process of opening files "
+        -: 1216:			"faster and smoother\n"
+        -: 1217:			"The default MIME list file, covering the most common filetype "
+        -: 1218:			"associations, can be found in %s.\n"),
+        -: 1219:			PROGRAM_NAME, MIME_FILE, sys_mimelist);
+        -: 1220:
+        -: 1221:	/* Try importing MIME associations from the system, and in
+        -: 1222:	 * case nothing can be imported use the default mimelist.cfm file */
+    #####: 1223:	if (mime_import(MIME_FILE) == EXIT_SUCCESS)
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1224:		return;
+    %%%%%: 1224-block  0
+unconditional  0 never executed
+        -: 1225:
+    #####: 1226:	FILE *mime_fp = fopen(MIME_FILE, "w");
+    %%%%%: 1226-block  0
+call    0 never executed
+        -: 1227:
+    #####: 1228:	if (!mime_fp) {
+branch  0 never executed
+branch  1 never executed
+    #####: 1229:		_err('e', PRINT_PROMPT, "%s: fopen: '%s': %s\n",
+call    0 never executed
+    #####: 1230:			PROGRAM_NAME, MIME_FILE, strerror(errno));
+    %%%%%: 1230-block  0
+call    0 never executed
+    #####: 1231:		return;
+unconditional  0 never executed
+        -: 1232:	}
+        -: 1233:
+    #####: 1234:	if (stat(sys_mimelist, &file_attrib) == -1) {
+    %%%%%: 1234-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1235:		_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+call    0 never executed
+    #####: 1236:			sys_mimelist, strerror(errno));
+    %%%%%: 1236-block  0
+call    0 never executed
+    #####: 1237:		fclose(mime_fp);
+call    0 never executed
+    #####: 1238:		return;
+unconditional  0 never executed
+        -: 1239:	}
+        -: 1240:
+    #####: 1241:	char *cmd[] = {"cp", "-f", sys_mimelist, MIME_FILE, NULL};
+    #####: 1242:	launch_execve(cmd, FOREGROUND, E_NOFLAG);
+    %%%%%: 1242-block  0
+call    0 never executed
+        -: 1243:
+    #####: 1244:	fclose(mime_fp);
+call    0 never executed
+        -: 1245:}
+        -: 1246:
+        -: 1247:int
+function create_bm_file called 1 returned 100% blocks executed 35%
+        1: 1248:create_bm_file(void)
+        -: 1249:{
+        1: 1250:	if (!BM_FILE)
+        1: 1250-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1251:		return EXIT_FAILURE;
+    %%%%%: 1251-block  0
+unconditional  0 never executed
+        -: 1252:
+        -: 1253:	struct stat file_attrib;
+        -: 1254:
+        1: 1255:	if (stat(BM_FILE, &file_attrib) == -1) {
+        1: 1255-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####: 1256:		FILE *fp = fopen(BM_FILE, "w+");
+    %%%%%: 1256-block  0
+call    0 never executed
+        -: 1257:
+    #####: 1258:		if (!fp) {
+branch  0 never executed
+branch  1 never executed
+    #####: 1259:			_err('e', PRINT_PROMPT, "bookmarks: '%s': %s\n", BM_FILE,
+call    0 never executed
+    #####: 1260:			    strerror(errno));
+    %%%%%: 1260-block  0
+call    0 never executed
+    #####: 1261:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1262:		}
+        -: 1263:
+        -: 1264:		else {
+    #####: 1265:			fprintf(fp, "### This is %s bookmarks file ###\n\n"
+    %%%%%: 1265-block  0
+unconditional  0 never executed
+    %%%%%: 1265-block  1
+unconditional  1 never executed
+    %%%%%: 1265-block  2
+call    2 never executed
+        -: 1266:				    "# Empty and commented lines are ommited\n"
+        -: 1267:				    "# The bookmarks syntax is: [shortcut]name:path\n"
+        -: 1268:				    "# Example:\n"
+        -: 1269:				    "[c]clifm:%s\n",
+    #####: 1270:			    PROGRAM_NAME, CONFIG_DIR ? CONFIG_DIR : "path/to/file");
+    %%%%%: 1270-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1271:			fclose(fp);
+call    0 never executed
+unconditional  1 never executed
+        -: 1272:		}
+        -: 1273:	}
+        -: 1274:
+        1: 1275:	return EXIT_SUCCESS;
+        1: 1275-block  0
+unconditional  0 taken 1
+        -: 1276:}
+        -: 1277:
+        -: 1278:void
+function read_config called 1 returned 100% blocks executed 74%
+        1: 1279:read_config(void)
+        -: 1280:{
+        1: 1281:	int ret = -1;
+        -: 1282:
+        1: 1283:	FILE *config_fp = fopen(CONFIG_FILE, "r");
+        1: 1283-block  0
+call    0 returned 1
+        -: 1284:
+        1: 1285:	if (!config_fp) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1286:		_err('e', PRINT_PROMPT, _("%s: fopen: '%s': %s. Using default values.\n"),
+call    0 never executed
+    #####: 1287:		    PROGRAM_NAME, CONFIG_FILE, strerror(errno));
+    %%%%%: 1287-block  0
+call    0 never executed
+    #####: 1288:		return;
+unconditional  0 never executed
+        -: 1289:	}
+        -: 1290:
+        1: 1291:	if (xargs.rl_vi_mode == 1)
+        1: 1291-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1292:		rl_vi_editing_mode(1, 0);
+    %%%%%: 1292-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1293:
+        1: 1294:	div_line_char = UNSET;
+        -: 1295:#define MAX_BOOL 6
+        -: 1296:	/* starting path(14) + PATH_MAX + \n(1)*/
+        -: 1297:	char line[PATH_MAX + 15];
+        -: 1298:
+      262: 1299:	while (fgets(line, (int)sizeof(line), config_fp)) {
+        1: 1299-block  0
+unconditional  0 taken 1
+      262: 1299-block  1
+call    1 returned 262
+branch  2 taken 262
+branch  3 taken 0 (fallthrough)
+        -: 1300:
+      262: 1301:		if (*line == '\n' || (*line == '#' && line[1] != 'E'))
+      262: 1301-block  0
+branch  0 taken 214 (fallthrough)
+branch  1 taken 48
+      214: 1301-block  1
+branch  2 taken 150 (fallthrough)
+branch  3 taken 64
+      150: 1301-block  2
+branch  4 taken 149 (fallthrough)
+branch  5 taken 1
+      197: 1302:			continue;
+      197: 1302-block  0
+unconditional  0 taken 197
+        -: 1303:
+       65: 1304:		if (*line == '#' && strncmp(line, "#END OF OPTIONS", 15) == 0)
+       65: 1304-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 64
+        1: 1304-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1
+        -: 1305:			break;
+        -: 1306:
+        -: 1307:		/* Check for the xargs.splash flag. If -1, it was
+        -: 1308:		 * not set via command line, so that it must be
+        -: 1309:		 * set here */
+       64: 1310:		else if (xargs.splash == UNSET && *line == 'S'
+       64: 1310-block  0
+branch  0 taken 64 (fallthrough)
+branch  1 taken 0
+       64: 1310-block  1
+branch  2 taken 12 (fallthrough)
+branch  3 taken 52
+       13: 1311:		&& strncmp(line, "SplashScreen=", 13) == 0) {
+       12: 1311-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 11
+        1: 1311-block  1
+unconditional  2 taken 1
+        -: 1312:
+        1: 1313:			char opt_str[MAX_BOOL] = ""; /* false (5) + 1 */
+        1: 1314:			ret = sscanf(line, "SplashScreen=%5s\n", opt_str);
+        -: 1315:			/* According to cppcheck: "sscanf() without field
+        -: 1316:			 * width limits can crash with huge input data".
+        -: 1317:			 * Field width limits = %5s */
+        -: 1318:
+       1*: 1319:			if (ret == -1)
+        1: 1319-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1320:				continue;
+    %%%%%: 1320-block  0
+unconditional  0 never executed
+        -: 1321:
+        1: 1322:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1322-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1323:				splash_screen = 1;
+    %%%%%: 1323-block  0
+unconditional  0 never executed
+        -: 1324:
+        1: 1325:			else if (strncmp(opt_str, "false", 5) == 0)
+        1: 1325-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1326:				splash_screen = 0;
+        1: 1326-block  0
+unconditional  0 taken 1
+        -: 1327:		}
+        -: 1328:
+       63: 1329:		else if (xargs.case_sens_dirjump == UNSET && *line == 'C'
+       63: 1329-block  0
+branch  0 taken 63 (fallthrough)
+branch  1 taken 0
+       63: 1329-block  1
+branch  2 taken 8 (fallthrough)
+branch  3 taken 55
+        9: 1330:		&& strncmp(line, "CaseSensitiveDirJump=", 21) == 0) {
+        8: 1330-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 7
+        1: 1330-block  1
+unconditional  2 taken 1
+        -: 1331:
+        1: 1332:			char opt_str[MAX_BOOL] = ""; /* false (5) + 1 */
+        1: 1333:			ret = sscanf(line, "CaseSensitiveDirJump=%5s\n", opt_str);
+        -: 1334:
+       1*: 1335:			if (ret == -1)
+        1: 1335-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1336:				continue;
+    %%%%%: 1336-block  0
+unconditional  0 never executed
+        -: 1337:
+        1: 1338:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1338-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1339:				case_sens_dirjump = 1;
+    %%%%%: 1339-block  0
+unconditional  0 never executed
+        -: 1340:
+        1: 1341:			else if (strncmp(opt_str, "false", 5) == 0)
+        1: 1341-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1342:				case_sens_dirjump = 0;
+        1: 1342-block  0
+unconditional  0 taken 1
+        -: 1343:		}
+        -: 1344:
+       62: 1345:		else if (xargs.case_sens_path_comp == UNSET && *line == 'C'
+       62: 1345-block  0
+branch  0 taken 62 (fallthrough)
+branch  1 taken 0
+       62: 1345-block  1
+branch  2 taken 7 (fallthrough)
+branch  3 taken 55
+        8: 1346:		&& strncmp(line, "CaseSensitivePathComp=", 22) == 0) {
+        7: 1346-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 6
+        1: 1346-block  1
+unconditional  2 taken 1
+        -: 1347:
+        1: 1348:			char opt_str[MAX_BOOL] = ""; /* false (5) + 1 */
+        1: 1349:			ret = sscanf(line, "CaseSensitivePathComp=%5s\n", opt_str);
+        -: 1350:
+       1*: 1351:			if (ret == -1)
+        1: 1351-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1352:				continue;
+    %%%%%: 1352-block  0
+unconditional  0 never executed
+        -: 1353:
+        1: 1354:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1354-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1355:				case_sens_path_comp = 1;
+    %%%%%: 1355-block  0
+unconditional  0 never executed
+        -: 1356:
+        1: 1357:			else if (strncmp(opt_str, "false", 5) == 0)
+        1: 1357-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1358:				case_sens_path_comp = 0;
+        1: 1358-block  0
+unconditional  0 taken 1
+        -: 1359:		}
+        -: 1360:
+      61*: 1361:		else if (!filter && *line == 'F' && strncmp(line, "Filter=", 7) == 0) {
+       61: 1361-block  0
+branch  0 taken 61 (fallthrough)
+branch  1 taken 0
+       61: 1361-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 59
+        2: 1361-block  2
+branch  4 taken 1 (fallthrough)
+branch  5 taken 1
+        -: 1362:
+        1: 1363:			char *opt_str = strchr(line, '=');
+        -: 1364:
+       1*: 1365:			if (!opt_str)
+        1: 1365-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1366:				continue;
+    %%%%%: 1366-block  0
+unconditional  0 never executed
+        -: 1367:
+        1: 1368:			size_t len = strlen(opt_str);
+        1: 1369:			if (opt_str[len - 1] == '\n')
+        1: 1369-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1370:				opt_str[len - 1] = '\0';
+        1: 1370-block  0
+unconditional  0 taken 1
+        -: 1371:
+        1: 1372:			if (!*(++opt_str))
+        1: 1372-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1373:				continue;
+        1: 1373-block  0
+unconditional  0 taken 1
+        -: 1374:
+    #####: 1375:			filter = savestring(opt_str, len);
+    %%%%%: 1375-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1376:		}
+        -: 1377:
+       60: 1378:		else if (!usr_cscheme && *line == 'C' && strncmp(line, "ColorScheme=", 12) == 0) {
+       60: 1378-block  0
+branch  0 taken 5 (fallthrough)
+branch  1 taken 55
+        5: 1378-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 4
+        1: 1378-block  2
+branch  4 taken 1 (fallthrough)
+branch  5 taken 0
+        -: 1379:
+        1: 1380:			char *opt_str = (char *)NULL;
+        1: 1381:			opt_str = strchr(line, '=');
+        -: 1382:
+       1*: 1383:			if (!opt_str)
+        1: 1383-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1384:				continue;
+    %%%%%: 1384-block  0
+unconditional  0 never executed
+        -: 1385:
+        1: 1386:			size_t len = strlen(opt_str);
+        1: 1387:			if (opt_str[len - 1] == '\n')
+        1: 1387-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1388:				opt_str[len - 1] = '\0';
+        1: 1388-block  0
+unconditional  0 taken 1
+        -: 1389:
+       1*: 1390:			if (!*(++opt_str))
+        1: 1390-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1391:				continue;
+    %%%%%: 1391-block  0
+unconditional  0 never executed
+        -: 1392:
+        1: 1393:			usr_cscheme = savestring(opt_str, len);
+        1: 1393-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -: 1394:		}
+        -: 1395:
+       59: 1396:		else if (xargs.light == UNSET && *line == 'L'
+       59: 1396-block  0
+branch  0 taken 59 (fallthrough)
+branch  1 taken 0
+       59: 1396-block  1
+branch  2 taken 4 (fallthrough)
+branch  3 taken 55
+        5: 1397:		&& strncmp(line, "LightMode=", 10) == 0) {
+        4: 1397-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 3
+        1: 1397-block  1
+unconditional  2 taken 1
+        -: 1398:
+        1: 1399:			char opt_str[MAX_BOOL] = "";
+        1: 1400:			ret = sscanf(line, "LightMode=%5s\n", opt_str);
+        -: 1401:
+       1*: 1402:			if (ret == -1)
+        1: 1402-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1403:				continue;
+    %%%%%: 1403-block  0
+unconditional  0 never executed
+        -: 1404:
+        1: 1405:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1405-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1406:				light_mode = 1;
+    %%%%%: 1406-block  0
+unconditional  0 never executed
+        -: 1407:
+        1: 1408:			else if (strncmp(opt_str, "false", 5) == 0)
+        1: 1408-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1409:				light_mode = 0;
+        1: 1409-block  0
+unconditional  0 taken 1
+        -: 1410:		}
+        -: 1411:
+       58: 1412:		else if (xargs.trasrm == UNSET && *line == 'T'
+       58: 1412-block  0
+branch  0 taken 58 (fallthrough)
+branch  1 taken 0
+       58: 1412-block  1
+branch  2 taken 3 (fallthrough)
+branch  3 taken 55
+        4: 1413:		&& strncmp(line, "TrashAsRm=", 10) == 0) {
+        3: 1413-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 2
+        1: 1413-block  1
+unconditional  2 taken 1
+        -: 1414:
+        1: 1415:			char opt_str[MAX_BOOL] = "";
+        1: 1416:			ret = sscanf(line, "TrashAsRm=%5s\n", opt_str);
+        -: 1417:
+       1*: 1418:			if (ret == -1)
+        1: 1418-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1419:				continue;
+    %%%%%: 1419-block  0
+unconditional  0 never executed
+        -: 1420:
+        1: 1421:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1421-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1422:				tr_as_rm = 1;
+    %%%%%: 1422-block  0
+unconditional  0 never executed
+        -: 1423:
+        1: 1424:			else if (strncmp(opt_str, "false", 5) == 0)
+        1: 1424-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1425:				tr_as_rm = 0;
+        1: 1425-block  0
+unconditional  0 taken 1
+        -: 1426:		}
+        -: 1427:
+       57: 1428:		else if (xargs.cd_on_quit == UNSET && *line == 'C'
+       57: 1428-block  0
+branch  0 taken 57 (fallthrough)
+branch  1 taken 0
+       57: 1428-block  1
+branch  2 taken 5 (fallthrough)
+branch  3 taken 52
+        6: 1429:		&& strncmp(line, "CdOnQuit=", 9) == 0) {
+        5: 1429-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 4
+        1: 1429-block  1
+unconditional  2 taken 1
+        -: 1430:
+        1: 1431:			char opt_str[MAX_BOOL] = "";
+        1: 1432:			ret = sscanf(line, "CdOnQuit=%5s\n", opt_str);
+        -: 1433:
+       1*: 1434:			if (ret == -1)
+        1: 1434-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1435:				continue;
+    %%%%%: 1435-block  0
+unconditional  0 never executed
+        -: 1436:
+        1: 1437:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1437-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1438:				cd_on_quit = 1;
+    %%%%%: 1438-block  0
+unconditional  0 never executed
+        -: 1439:
+        1: 1440:			else if (strncmp(opt_str, "false", 5) == 0)
+        1: 1440-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1441:				cd_on_quit = 0;
+        1: 1441-block  0
+unconditional  0 taken 1
+        -: 1442:		}
+        -: 1443:
+       56: 1444:		else if (xargs.expand_bookmarks == UNSET && *line == 'E'
+       56: 1444-block  0
+branch  0 taken 56 (fallthrough)
+branch  1 taken 0
+       56: 1444-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 54
+        3: 1445:		&& strncmp(line, "ExpandBookmarks=", 16) == 0) {
+        2: 1445-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 1
+        1: 1445-block  1
+unconditional  2 taken 1
+        -: 1446:
+        1: 1447:			char opt_str[MAX_BOOL] = "";
+        1: 1448:			ret = sscanf(line, "ExpandBookmarks=%5s\n",
+        -: 1449:			    opt_str);
+       1*: 1450:			if (ret == -1)
+        1: 1450-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1451:				continue;
+    %%%%%: 1451-block  0
+unconditional  0 never executed
+        -: 1452:
+        1: 1453:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1453-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1454:				expand_bookmarks = 1;
+    %%%%%: 1454-block  0
+unconditional  0 never executed
+        -: 1455:
+        1: 1456:			else if (strncmp(opt_str, "false", 5) == 0)
+        1: 1456-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1457:				expand_bookmarks = 0;
+        1: 1457-block  0
+unconditional  0 taken 1
+        -: 1458:		}
+        -: 1459:
+       55: 1460:		else if (xargs.restore_last_path == UNSET && *line == 'R'
+       55: 1460-block  0
+branch  0 taken 55 (fallthrough)
+branch  1 taken 0
+       55: 1460-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 53
+        3: 1461:		&& strncmp(line, "RestoreLastPath=", 16) == 0) {
+        2: 1461-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 1
+        1: 1461-block  1
+unconditional  2 taken 1
+        1: 1462:			char opt_str[MAX_BOOL] = "";
+        1: 1463:			ret = sscanf(line, "RestoreLastPath=%5s\n",
+        -: 1464:			    opt_str);
+       1*: 1465:			if (ret == -1)
+        1: 1465-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1466:				continue;
+    %%%%%: 1466-block  0
+unconditional  0 never executed
+        -: 1467:
+        1: 1468:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1468-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1469:				restore_last_path = 1;
+        1: 1469-block  0
+unconditional  0 taken 1
+        -: 1470:
+    #####: 1471:			else if (strncmp(opt_str, "false", 5) == 0)
+    %%%%%: 1471-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1472:				restore_last_path = 0;
+    %%%%%: 1472-block  0
+unconditional  0 never executed
+        -: 1473:		}
+        -: 1474:
+      54*: 1475:		else if (!opener && *line == 'O' && strncmp(line, "Opener=", 7) == 0) {
+       54: 1475-block  0
+branch  0 taken 54 (fallthrough)
+branch  1 taken 0
+       54: 1475-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 53
+        1: 1475-block  2
+branch  4 taken 1 (fallthrough)
+branch  5 taken 0
+        -: 1476:
+        1: 1477:			char *opt_str = (char *)NULL;
+        1: 1478:			opt_str = straft(line, '=');
+        1: 1478-block  0
+call    0 returned 1
+        -: 1479:
+       1*: 1480:			if (!opt_str)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1481:				continue;
+    %%%%%: 1481-block  0
+unconditional  0 never executed
+        -: 1482:
+        1: 1483:			char *tmp = remove_quotes(opt_str);
+        1: 1483-block  0
+call    0 returned 1
+        -: 1484:
+        1: 1485:			if (!tmp) {
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1486:				free(opt_str);
+        1: 1487:				continue;
+        1: 1487-block  0
+unconditional  0 taken 1
+        -: 1488:			}
+        -: 1489:
+    #####: 1490:			opener = savestring(tmp, strlen(tmp));
+    %%%%%: 1490-block  0
+call    0 never executed
+    #####: 1491:			free(opt_str);
+unconditional  0 never executed
+        -: 1492:		}
+        -: 1493:
+       54: 1494:		else if (xargs.tips == UNSET && *line == 'T' && strncmp(line, "Tips=", 5) == 0) {
+       53: 1494-block  0
+branch  0 taken 53 (fallthrough)
+branch  1 taken 0
+       53: 1494-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 51
+        2: 1494-block  2
+branch  4 taken 1 (fallthrough)
+branch  5 taken 1
+        1: 1494-block  3
+unconditional  6 taken 1
+        1: 1495:			char opt_str[MAX_BOOL] = "";
+        1: 1496:			ret = sscanf(line, "Tips=%5s\n", opt_str);
+       1*: 1497:			if (ret == -1)
+        1: 1497-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1498:				continue;
+    %%%%%: 1498-block  0
+unconditional  0 never executed
+        1: 1499:			if (strncmp(opt_str, "false", 5) == 0)
+        1: 1499-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1500:				tips = 0;
+    %%%%%: 1500-block  0
+unconditional  0 never executed
+        1: 1501:			else if (strncmp(opt_str, "true", 4) == 0)
+        1: 1501-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1502:				tips = 1;
+        1: 1502-block  0
+unconditional  0 taken 1
+        -: 1503:		}
+        -: 1504:
+       52: 1505:		else if (xargs.disk_usage == UNSET && *line == 'D'
+       52: 1505-block  0
+branch  0 taken 52 (fallthrough)
+branch  1 taken 0
+       52: 1505-block  1
+branch  2 taken 3 (fallthrough)
+branch  3 taken 49
+        4: 1506:		&& strncmp(line, "DiskUsage=", 10) == 0) {
+        3: 1506-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 2
+        1: 1506-block  1
+unconditional  2 taken 1
+        1: 1507:			char opt_str[MAX_BOOL] = "";
+        1: 1508:			ret = sscanf(line, "DiskUsage=%5s\n", opt_str);
+        -: 1509:
+       1*: 1510:			if (ret == -1)
+        1: 1510-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1511:				continue;
+    %%%%%: 1511-block  0
+unconditional  0 never executed
+        -: 1512:
+        1: 1513:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1513-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1514:				disk_usage = 1;
+    %%%%%: 1514-block  0
+unconditional  0 never executed
+        -: 1515:
+        1: 1516:			else if (strncmp(opt_str, "false", 5) == 0)
+        1: 1516-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1517:				disk_usage = 0;
+        1: 1517-block  0
+unconditional  0 taken 1
+        -: 1518:		}
+        -: 1519:
+       51: 1520:		else if (xargs.autocd == UNSET && *line == 'A'
+       51: 1520-block  0
+branch  0 taken 51 (fallthrough)
+branch  1 taken 0
+       51: 1520-block  1
+branch  2 taken 4 (fallthrough)
+branch  3 taken 47
+        5: 1521:		&& strncmp(line, "Autocd=", 7) == 0) {
+        4: 1521-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 3
+        1: 1521-block  1
+unconditional  2 taken 1
+        1: 1522:			char opt_str[MAX_BOOL] = "";
+        1: 1523:			ret = sscanf(line, "Autocd=%5s\n", opt_str);
+        -: 1524:
+       1*: 1525:			if (ret == -1)
+        1: 1525-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1526:				continue;
+    %%%%%: 1526-block  0
+unconditional  0 never executed
+        -: 1527:
+        1: 1528:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1528-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1529:				autocd = 1;
+        1: 1529-block  0
+unconditional  0 taken 1
+        -: 1530:
+    #####: 1531:			else if (strncmp(opt_str, "false", 5) == 0)
+    %%%%%: 1531-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1532:				autocd = 0;
+    %%%%%: 1532-block  0
+unconditional  0 never executed
+        -: 1533:		}
+        -: 1534:
+       50: 1535:		else if (xargs.auto_open == UNSET && *line == 'A'
+       50: 1535-block  0
+branch  0 taken 50 (fallthrough)
+branch  1 taken 0
+       50: 1535-block  1
+branch  2 taken 3 (fallthrough)
+branch  3 taken 47
+        4: 1536:		&& strncmp(line, "AutoOpen=", 9) == 0) {
+        3: 1536-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 2
+        1: 1536-block  1
+unconditional  2 taken 1
+        1: 1537:			char opt_str[MAX_BOOL] = "";
+        1: 1538:			ret = sscanf(line, "AutoOpen=%5s\n", opt_str);
+        -: 1539:
+       1*: 1540:			if (ret == -1)
+        1: 1540-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1541:				continue;
+    %%%%%: 1541-block  0
+unconditional  0 never executed
+        -: 1542:
+        1: 1543:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1543-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1544:				auto_open = 1;
+        1: 1544-block  0
+unconditional  0 taken 1
+        -: 1545:
+    #####: 1546:			else if (strncmp(opt_str, "false", 5) == 0)
+    %%%%%: 1546-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1547:				auto_open = 0;
+    %%%%%: 1547-block  0
+unconditional  0 never executed
+        -: 1548:		}
+        -: 1549:
+       49: 1550:		else if (xargs.dirmap == UNSET && *line == 'D'
+       49: 1550-block  0
+branch  0 taken 49 (fallthrough)
+branch  1 taken 0
+       49: 1550-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 47
+        3: 1551:		&& strncmp(line, "DirhistMap=", 11) == 0) {
+        2: 1551-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 1
+        1: 1551-block  1
+unconditional  2 taken 1
+        1: 1552:			char opt_str[MAX_BOOL] = "";
+        1: 1553:			ret = sscanf(line, "DirhistMap=%5s\n", opt_str);
+       1*: 1554:			if (ret == -1)
+        1: 1554-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1555:				continue;
+    %%%%%: 1555-block  0
+unconditional  0 never executed
+        1: 1556:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1556-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1557:				dirhist_map = 1;
+    %%%%%: 1557-block  0
+unconditional  0 never executed
+        1: 1558:			else if (strncmp(opt_str, "false", 5) == 0)
+        1: 1558-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1559:				dirhist_map = 0;
+        1: 1559-block  0
+unconditional  0 taken 1
+        -: 1560:		}
+        -: 1561:
+       48: 1562:		else if (xargs.classify == UNSET && *line == 'C'
+       48: 1562-block  0
+branch  0 taken 48 (fallthrough)
+branch  1 taken 0
+       48: 1562-block  1
+branch  2 taken 4 (fallthrough)
+branch  3 taken 44
+        5: 1563:		&& strncmp(line, "Classify=", 9) == 0) {
+        4: 1563-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 3
+        1: 1563-block  1
+unconditional  2 taken 1
+        1: 1564:			char opt_str[MAX_BOOL] = "";
+        1: 1565:			ret = sscanf(line, "Classify=%5s\n", opt_str);
+       1*: 1566:			if (ret == -1)
+        1: 1566-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1567:				continue;
+    %%%%%: 1567-block  0
+unconditional  0 never executed
+        1: 1568:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1568-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1569:				classify = 1;
+        1: 1569-block  0
+unconditional  0 taken 1
+    #####: 1570:			else if (strncmp(opt_str, "false", 5) == 0)
+    %%%%%: 1570-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1571:				classify = 0;
+    %%%%%: 1571-block  0
+unconditional  0 never executed
+        -: 1572:		}
+        -: 1573:
+       47: 1574:		else if (xargs.share_selbox == UNSET && *line == 'S'
+       47: 1574-block  0
+branch  0 taken 47 (fallthrough)
+branch  1 taken 0
+       47: 1574-block  1
+branch  2 taken 11 (fallthrough)
+branch  3 taken 36
+       12: 1575:		&& strncmp(line, "ShareSelbox=", 12) == 0) {
+       11: 1575-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 10
+        1: 1575-block  1
+unconditional  2 taken 1
+        1: 1576:			char opt_str[MAX_BOOL] = "";
+        1: 1577:			ret = sscanf(line, "ShareSelbox=%5s\n", opt_str);
+       1*: 1578:			if (ret == -1)
+        1: 1578-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1579:				continue;
+    %%%%%: 1579-block  0
+unconditional  0 never executed
+        1: 1580:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1580-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1581:				share_selbox = 1;
+    %%%%%: 1581-block  0
+unconditional  0 never executed
+        1: 1582:			else if (strncmp(opt_str, "false", 5) == 0)
+        1: 1582-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1583:				share_selbox = 0;
+        1: 1583-block  0
+unconditional  0 taken 1
+        -: 1584:		}
+        -: 1585:
+       46: 1586:		else if (*line == 'M' && strncmp(line, "MinJumpRank=", 12) == 0) {
+       46: 1586-block  0
+branch  0 taken 8 (fallthrough)
+branch  1 taken 38
+        8: 1586-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 7
+        1: 1587:			int opt_num = 0;
+        1: 1588:			ret = sscanf(line, "MinJumpRank=%d\n", &opt_num);
+       1*: 1589:			if (ret == -1 || opt_num < INT_MIN || opt_num > INT_MAX)
+        1: 1589-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1590:				continue;
+    %%%%%: 1590-block  0
+unconditional  0 never executed
+        1: 1591:			min_jump_rank = opt_num;
+        1: 1591-block  0
+unconditional  0 taken 1
+        -: 1592:		}
+        -: 1593:
+       45: 1594:		else if (*line == 'M' && strncmp(line, "MaxJumpTotalRank=", 17) == 0) {
+       45: 1594-block  0
+branch  0 taken 7 (fallthrough)
+branch  1 taken 38
+        7: 1594-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 6
+        1: 1595:			int opt_num = 0;
+        1: 1596:			ret = sscanf(line, "MaxJumpTotalRank=%d\n", &opt_num);
+       1*: 1597:			if (ret == -1 || opt_num < INT_MIN || opt_num > INT_MAX)
+        1: 1597-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1598:				continue;
+    %%%%%: 1598-block  0
+unconditional  0 never executed
+        1: 1599:			max_jump_total_rank = opt_num;
+        1: 1599-block  0
+unconditional  0 taken 1
+        -: 1600:		}
+        -: 1601:
+       45: 1602:		else if (xargs.sort == UNSET && *line == 'S' && strncmp(line, "Sort=", 5) == 0) {
+       44: 1602-block  0
+branch  0 taken 44 (fallthrough)
+branch  1 taken 0
+       44: 1602-block  1
+branch  2 taken 10 (fallthrough)
+branch  3 taken 34
+       10: 1602-block  2
+branch  4 taken 1 (fallthrough)
+branch  5 taken 9
+        1: 1602-block  3
+unconditional  6 taken 1
+        1: 1603:			int opt_num = 0;
+        1: 1604:			ret = sscanf(line, "Sort=%d\n", &opt_num);
+       1*: 1605:			if (ret == -1)
+        1: 1605-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1606:				continue;
+    %%%%%: 1606-block  0
+unconditional  0 never executed
+        1: 1607:			if (opt_num >= 0 && opt_num <= SORT_TYPES)
+        1: 1607-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1607-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 0
+        1: 1608:				sort = opt_num;
+        1: 1608-block  0
+unconditional  0 taken 1
+        -: 1609:			else /* default (sort by name) */
+    #####: 1610:				sort = DEF_SORT;
+    %%%%%: 1610-block  0
+unconditional  0 never executed
+        -: 1611:		}
+        -: 1612:
+       44: 1613:		else if (*line == 'M' && strncmp(line, "MinFilenameTrim=", 16) == 0) {
+       43: 1613-block  0
+branch  0 taken 6 (fallthrough)
+branch  1 taken 37
+        6: 1613-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 5
+        1: 1613-block  2
+unconditional  4 taken 1
+        1: 1614:			int opt_num = 0;
+        1: 1615:			ret = sscanf(line, "MinFilenameTrim=%d\n", &opt_num);
+       1*: 1616:			if (ret == -1)
+        1: 1616-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1617:				continue;
+    %%%%%: 1617-block  0
+unconditional  0 never executed
+        1: 1618:			if (opt_num > 0)
+        1: 1618-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1619:				min_name_trim = opt_num;
+        1: 1619-block  0
+unconditional  0 taken 1
+        -: 1620:			else /* default */
+    #####: 1621:				min_name_trim = DEF_MIN_NAME_TRIM;
+    %%%%%: 1621-block  0
+unconditional  0 never executed
+        -: 1622:		}
+        -: 1623:
+       43: 1624:		else if (*line == 'c' && strncmp(line, "cpCmd=", 6) == 0) {
+       42: 1624-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 41
+        1: 1624-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 0
+        1: 1624-block  2
+unconditional  4 taken 1
+        1: 1625:			int opt_num = 0;
+        1: 1626:			ret = sscanf(line, "cpCmd=%d\n", &opt_num);
+       1*: 1627:			if (ret == -1)
+        1: 1627-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1628:				continue;
+    %%%%%: 1628-block  0
+unconditional  0 never executed
+        1: 1629:			if (opt_num >= 0 && opt_num <= 2)
+        1: 1629-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1629-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 0
+        1: 1630:				cp_cmd = opt_num;
+        1: 1630-block  0
+unconditional  0 taken 1
+        -: 1631:			else /* default (sort by name) */
+    #####: 1632:				cp_cmd = DEF_CP_CMD;
+    %%%%%: 1632-block  0
+unconditional  0 never executed
+        -: 1633:		}
+        -: 1634:
+       42: 1635:		else if (*line == 'm' && strncmp(line, "mvCmd=", 6) == 0) {
+       41: 1635-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 40
+        1: 1635-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 0
+        1: 1635-block  2
+unconditional  4 taken 1
+        1: 1636:			int opt_num = 0;
+        1: 1637:			ret = sscanf(line, "mvCmd=%d\n", &opt_num);
+       1*: 1638:			if (ret == -1)
+        1: 1638-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1639:				continue;
+    %%%%%: 1639-block  0
+unconditional  0 never executed
+       1*: 1640:			if (opt_num == 0 || opt_num == 1)
+        1: 1640-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    %%%%%: 1640-block  1
+branch  2 never executed
+branch  3 never executed
+        1: 1641:				mv_cmd = opt_num;
+        1: 1641-block  0
+unconditional  0 taken 1
+        -: 1642:			else /* default (sort by name) */
+    #####: 1643:				mv_cmd = DEF_MV_CMD;
+    %%%%%: 1643-block  0
+unconditional  0 never executed
+        -: 1644:		}
+        -: 1645:
+       40: 1646:		else if (*line == 'R' && strncmp(line, "RlEditMode=0", 12) == 0) {
+       40: 1646-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 39
+        1: 1646-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1
+    #####: 1647:			rl_vi_editing_mode(1, 0);
+    %%%%%: 1647-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1648:			/* By default, readline uses emacs editing
+        -: 1649:			 * mode */
+        -: 1650:		}
+        -: 1651:
+       40: 1652:		else if (xargs.max_dirhist == UNSET && *line == 'M'
+       40: 1652-block  0
+branch  0 taken 40 (fallthrough)
+branch  1 taken 0
+       40: 1652-block  1
+branch  2 taken 5 (fallthrough)
+branch  3 taken 35
+        6: 1653:		&& strncmp(line, "MaxDirhist=", 11) == 0) {
+        5: 1653-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 4
+        1: 1653-block  1
+unconditional  2 taken 1
+        1: 1654:			int opt_num = 0;
+        1: 1655:			ret = sscanf(line, "MaxDirhist=%d\n", &opt_num);
+       1*: 1656:			if (ret == -1)
+        1: 1656-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1657:				continue;
+    %%%%%: 1657-block  0
+unconditional  0 never executed
+        1: 1658:			if (opt_num >= 0)
+        1: 1658-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1659:				max_dirhist = opt_num;
+        1: 1659-block  0
+unconditional  0 taken 1
+        -: 1660:			else /* default */
+    #####: 1661:				max_dirhist = DEF_MAX_DIRHIST;
+    %%%%%: 1661-block  0
+unconditional  0 never executed
+        -: 1662:		}
+        -: 1663:
+       39: 1664:		else if (xargs.sort_reverse == UNSET && *line == 'S'
+       39: 1664-block  0
+branch  0 taken 39 (fallthrough)
+branch  1 taken 0
+       39: 1664-block  1
+branch  2 taken 9 (fallthrough)
+branch  3 taken 30
+       10: 1665:		&& strncmp(line, "SortReverse=", 12) == 0) {
+        9: 1665-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 8
+        1: 1665-block  1
+unconditional  2 taken 1
+        1: 1666:			char opt_str[MAX_BOOL] = "";
+        1: 1667:			ret = sscanf(line, "SortReverse=%5s\n", opt_str);
+       1*: 1668:			if (ret == -1)
+        1: 1668-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1669:				continue;
+    %%%%%: 1669-block  0
+unconditional  0 never executed
+        1: 1670:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1670-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1671:				sort_reverse = 1;
+    %%%%%: 1671-block  0
+unconditional  0 never executed
+        1: 1672:			else if (strncmp(opt_str, "false", 5) == 0)
+        1: 1672-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1673:				sort_reverse = 0;
+        1: 1673-block  0
+unconditional  0 taken 1
+        -: 1674:		}
+        -: 1675:
+       38: 1676:		else if (xargs.files_counter == UNSET && *line == 'F'
+       38: 1676-block  0
+branch  0 taken 38 (fallthrough)
+branch  1 taken 0
+       38: 1676-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 37
+        2: 1677:		&& strncmp(line, "FilesCounter=", 13) == 0) {
+        1: 1677-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1677-block  1
+unconditional  2 taken 1
+        1: 1678:			char opt_str[MAX_BOOL] = "";
+        1: 1679:			ret = sscanf(line, "FilesCounter=%5s\n", opt_str);
+       1*: 1680:			if (ret == -1)
+        1: 1680-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1681:				continue;
+    %%%%%: 1681-block  0
+unconditional  0 never executed
+        1: 1682:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1682-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1683:				files_counter = 1;
+        1: 1683-block  0
+unconditional  0 taken 1
+    #####: 1684:			else if (strncmp(opt_str, "false", 5) == 0)
+    %%%%%: 1684-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1685:				files_counter = 0;
+    %%%%%: 1685-block  0
+unconditional  0 never executed
+        -: 1686:		}
+        -: 1687:
+       37: 1688:		else if (xargs.welcome_message == UNSET && *line == 'W'
+       37: 1688-block  0
+branch  0 taken 37 (fallthrough)
+branch  1 taken 0
+       37: 1688-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 35
+        3: 1689:		&& strncmp(line, "WelcomeMessage=", 15) == 0) {
+        2: 1689-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 1
+        1: 1689-block  1
+unconditional  2 taken 1
+        1: 1690:			char opt_str[MAX_BOOL] = "";
+        1: 1691:			ret = sscanf(line, "WelcomeMessage=%5s\n",
+        -: 1692:			    opt_str);
+       1*: 1693:			if (ret == -1)
+        1: 1693-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1694:				continue;
+    %%%%%: 1694-block  0
+unconditional  0 never executed
+        1: 1695:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1695-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1696:				welcome_message = 1;
+        1: 1696-block  0
+unconditional  0 taken 1
+    #####: 1697:			else if (strncmp(opt_str, "false", 5) == 0)
+    %%%%%: 1697-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1698:				welcome_message = 0;
+    %%%%%: 1698-block  0
+unconditional  0 never executed
+        -: 1699:		}
+        -: 1700:
+       36: 1701:		else if (xargs.clear_screen == UNSET && *line == 'C'
+       36: 1701-block  0
+branch  0 taken 36 (fallthrough)
+branch  1 taken 0
+       36: 1701-block  1
+branch  2 taken 3 (fallthrough)
+branch  3 taken 33
+        4: 1702:		&& strncmp(line, "ClearScreen=", 12) == 0) {
+        3: 1702-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 2
+        1: 1702-block  1
+unconditional  2 taken 1
+        1: 1703:			char opt_str[MAX_BOOL] = "";
+        1: 1704:			ret = sscanf(line, "ClearScreen=%5s\n",
+        -: 1705:			    opt_str);
+       1*: 1706:			if (ret == -1)
+        1: 1706-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1707:				continue;
+    %%%%%: 1707-block  0
+unconditional  0 never executed
+        1: 1708:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1708-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1709:				clear_screen = 1;
+    %%%%%: 1709-block  0
+unconditional  0 never executed
+        1: 1710:			else if (strncmp(opt_str, "false", 5) == 0)
+        1: 1710-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1711:				clear_screen = 0;
+        1: 1711-block  0
+unconditional  0 taken 1
+        -: 1712:		}
+        -: 1713:
+       35: 1714:		else if (xargs.hidden == UNSET && *line == 'S'
+       35: 1714-block  0
+branch  0 taken 35 (fallthrough)
+branch  1 taken 0
+       35: 1714-block  1
+branch  2 taken 8 (fallthrough)
+branch  3 taken 27
+        9: 1715:		&& strncmp(line, "ShowHiddenFiles=", 16) == 0) {
+        8: 1715-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 7
+        1: 1715-block  1
+unconditional  2 taken 1
+        1: 1716:			char opt_str[MAX_BOOL] = "";
+        1: 1717:			ret = sscanf(line, "ShowHiddenFiles=%5s\n",
+        -: 1718:			    opt_str);
+       1*: 1719:			if (ret == -1)
+        1: 1719-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1720:				continue;
+    %%%%%: 1720-block  0
+unconditional  0 never executed
+        1: 1721:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1721-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1722:				show_hidden = 1;
+        1: 1722-block  0
+unconditional  0 taken 1
+    #####: 1723:			else if (strncmp(opt_str, "false", 5) == 0)
+    %%%%%: 1723-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1724:				show_hidden = 0;
+    %%%%%: 1724-block  0
+unconditional  0 never executed
+        -: 1725:		}
+        -: 1726:
+       34: 1727:		else if (xargs.longview == UNSET && *line == 'L'
+       34: 1727-block  0
+branch  0 taken 34 (fallthrough)
+branch  1 taken 0
+       34: 1727-block  1
+branch  2 taken 3 (fallthrough)
+branch  3 taken 31
+        4: 1728:		&& strncmp(line, "LongViewMode=", 13) == 0) {
+        3: 1728-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 2
+        1: 1728-block  1
+unconditional  2 taken 1
+        1: 1729:			char opt_str[MAX_BOOL] = "";
+        1: 1730:			ret = sscanf(line, "LongViewMode=%5s\n",
+        -: 1731:			    opt_str);
+       1*: 1732:			if (ret == -1)
+        1: 1732-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1733:				continue;
+    %%%%%: 1733-block  0
+unconditional  0 never executed
+        1: 1734:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1734-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1735:				long_view = 1;
+    %%%%%: 1735-block  0
+unconditional  0 never executed
+        1: 1736:			else if (strncmp(opt_str, "false", 5) == 0)
+        1: 1736-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1737:				long_view = 0;
+        1: 1737-block  0
+unconditional  0 taken 1
+        -: 1738:		}
+        -: 1739:
+       33: 1740:		else if (xargs.ext == UNSET && *line == 'E'
+       33: 1740-block  0
+branch  0 taken 33 (fallthrough)
+branch  1 taken 0
+       33: 1740-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 32
+        2: 1741:		&& strncmp(line, "ExternalCommands=", 17) == 0) {
+        1: 1741-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1741-block  1
+unconditional  2 taken 1
+        1: 1742:			char opt_str[MAX_BOOL] = "";
+        1: 1743:			ret = sscanf(line, "ExternalCommands=%5s\n",
+        -: 1744:			    opt_str);
+       1*: 1745:			if (ret == -1)
+        1: 1745-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1746:				continue;
+    %%%%%: 1746-block  0
+unconditional  0 never executed
+        1: 1747:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1747-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1748:				ext_cmd_ok = 1;
+        1: 1748-block  0
+unconditional  0 taken 1
+    #####: 1749:			else if (strncmp(opt_str, "false", 5) == 0)
+    %%%%%: 1749-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1750:				ext_cmd_ok = 0;
+    %%%%%: 1750-block  0
+unconditional  0 never executed
+        -: 1751:		}
+        -: 1752:
+       32: 1753:		else if (xargs.logs == UNSET && *line == 'L'
+       32: 1753-block  0
+branch  0 taken 32 (fallthrough)
+branch  1 taken 0
+       32: 1753-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 30
+        3: 1754:		&& strncmp(line, "LogCmds=", 8) == 0) {
+        2: 1754-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 1
+        1: 1754-block  1
+unconditional  2 taken 1
+        1: 1755:			char opt_str[MAX_BOOL] = "";
+        1: 1756:			ret = sscanf(line, "LogCmds=%5s\n", opt_str);
+       1*: 1757:			if (ret == -1)
+        1: 1757-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1758:				continue;
+    %%%%%: 1758-block  0
+unconditional  0 never executed
+        1: 1759:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1759-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1760:				logs_enabled = 1;
+    %%%%%: 1760-block  0
+unconditional  0 never executed
+        1: 1761:			else if (strncmp(opt_str, "false", 5) == 0)
+        1: 1761-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1762:				logs_enabled = 0;
+        1: 1762-block  0
+unconditional  0 taken 1
+        -: 1763:		}
+        -: 1764:
+       31: 1765:		else if (*line == 'S' && strncmp(line, "SystemShell=", 12) == 0) {
+       31: 1765-block  0
+branch  0 taken 7 (fallthrough)
+branch  1 taken 24
+        7: 1765-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 6
+        1: 1766:			free(user.shell);
+        1: 1767:			user.shell = (char *)NULL;
+        1: 1768:			char *opt_str = straft(line, '=');
+        1: 1768-block  0
+call    0 returned 1
+       1*: 1769:			if (!opt_str)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1770:				continue;
+    %%%%%: 1770-block  0
+unconditional  0 never executed
+        -: 1771:
+        1: 1772:			char *tmp = remove_quotes(opt_str);
+        1: 1772-block  0
+call    0 returned 1
+       1*: 1773:			if (!tmp) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1774:				free(opt_str);
+    #####: 1775:				continue;
+    %%%%%: 1775-block  0
+unconditional  0 never executed
+        -: 1776:			}
+        -: 1777:
+        1: 1778:			if (*tmp == '/') {
+        1: 1778-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+       1*: 1779:				if (access(tmp, F_OK | X_OK) != 0) {
+        1: 1779-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####: 1780:					free(opt_str);
+    #####: 1781:					continue;
+    %%%%%: 1781-block  0
+unconditional  0 never executed
+        -: 1782:				}
+        -: 1783:
+        1: 1784:				user.shell = savestring(tmp, strlen(tmp));
+        1: 1784-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -: 1785:			}
+        -: 1786:
+        -: 1787:			else {
+    #####: 1788:				char *shell_path = get_cmd_path(tmp);
+    %%%%%: 1788-block  0
+call    0 never executed
+        -: 1789:
+    #####: 1790:				if (!shell_path) {
+branch  0 never executed
+branch  1 never executed
+    #####: 1791:					free(opt_str);
+    #####: 1792:					continue;
+    %%%%%: 1792-block  0
+unconditional  0 never executed
+        -: 1793:				}
+        -: 1794:
+    #####: 1795:				user.shell = savestring(shell_path, strlen(shell_path));
+    %%%%%: 1795-block  0
+call    0 never executed
+    #####: 1796:				free(shell_path);
+unconditional  0 never executed
+        -: 1797:			}
+        -: 1798:
+        1: 1799:			free(opt_str);
+        1: 1799-block  0
+unconditional  0 taken 1
+        -: 1800:		}
+        -: 1801:
+       30: 1802:		else if (*line == 'T' && strncmp(line, "TerminalCmd=", 12) == 0) {
+       30: 1802-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 29
+        1: 1802-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 0
+        -: 1803:
+        1: 1804:			if (term) {
+        1: 1804-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1805:				free(term);
+    #####: 1806:				term = (char *)NULL;
+    %%%%%: 1806-block  0
+unconditional  0 never executed
+        -: 1807:			}
+        -: 1808:
+        1: 1809:			char *opt_str = straft(line, '=');
+        1: 1809-block  0
+call    0 returned 1
+       1*: 1810:			if (!opt_str)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1811:				continue;
+    %%%%%: 1811-block  0
+unconditional  0 never executed
+        -: 1812:
+        1: 1813:			char *tmp = remove_quotes(opt_str);
+        1: 1813-block  0
+call    0 returned 1
+       1*: 1814:			if (!tmp) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1815:				free(opt_str);
+    #####: 1816:				continue;
+    %%%%%: 1816-block  0
+unconditional  0 never executed
+        -: 1817:			}
+        -: 1818:
+        1: 1819:			term = savestring(tmp, strlen(tmp));
+        1: 1819-block  0
+call    0 returned 1
+        1: 1820:			free(opt_str);
+unconditional  0 taken 1
+        -: 1821:		}
+        -: 1822:
+       29: 1823:		else if (xargs.ffirst == UNSET && *line == 'L'
+       29: 1823-block  0
+branch  0 taken 29 (fallthrough)
+branch  1 taken 0
+       29: 1823-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 28
+        2: 1824:		&& strncmp(line, "ListFoldersFirst=", 17) == 0) {
+        1: 1824-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1824-block  1
+unconditional  2 taken 1
+        1: 1825:			char opt_str[MAX_BOOL] = "";
+        1: 1826:			ret = sscanf(line, "ListFoldersFirst=%5s\n",
+        -: 1827:			    opt_str);
+       1*: 1828:			if (ret == -1)
+        1: 1828-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1829:				continue;
+    %%%%%: 1829-block  0
+unconditional  0 never executed
+        1: 1830:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1830-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1831:				list_folders_first = 1;
+        1: 1831-block  0
+unconditional  0 taken 1
+    #####: 1832:			else if (strncmp(opt_str, "false", 5) == 0)
+    %%%%%: 1832-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1833:				list_folders_first = 0;
+    %%%%%: 1833-block  0
+unconditional  0 never executed
+        -: 1834:		}
+        -: 1835:
+       28: 1836:		else if (xargs.cd_list_auto == UNSET && *line == 'C'
+       28: 1836-block  0
+branch  0 taken 28 (fallthrough)
+branch  1 taken 0
+       28: 1836-block  1
+branch  2 taken 2 (fallthrough)
+branch  3 taken 26
+        3: 1837:		&& strncmp(line, "CdListsAutomatically=", 21) == 0) {
+        2: 1837-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 1
+        1: 1837-block  1
+unconditional  2 taken 1
+        1: 1838:			char opt_str[MAX_BOOL] = "";
+        1: 1839:			ret = sscanf(line, "CdListsAutomatically=%5s\n",
+        -: 1840:			    opt_str);
+       1*: 1841:			if (ret == -1)
+        1: 1841-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1842:				continue;
+    %%%%%: 1842-block  0
+unconditional  0 never executed
+        1: 1843:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1843-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1844:				cd_lists_on_the_fly = 1;
+        1: 1844-block  0
+unconditional  0 taken 1
+    #####: 1845:			else if (strncmp(opt_str, "false", 5) == 0)
+    %%%%%: 1845-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1846:				cd_lists_on_the_fly = 0;
+    %%%%%: 1846-block  0
+unconditional  0 never executed
+        -: 1847:		}
+        -: 1848:
+       27: 1849:		else if (xargs.sensitive == UNSET && *line == 'C'
+       27: 1849-block  0
+branch  0 taken 27 (fallthrough)
+branch  1 taken 0
+       27: 1849-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 26
+        2: 1850:		&& strncmp(line, "CaseSensitiveList=", 18) == 0) {
+        1: 1850-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1850-block  1
+unconditional  2 taken 1
+        1: 1851:			char opt_str[MAX_BOOL] = "";
+        1: 1852:			ret = sscanf(line, "CaseSensitiveList=%5s\n",
+        -: 1853:			    opt_str);
+       1*: 1854:			if (ret == -1)
+        1: 1854-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1855:				continue;
+    %%%%%: 1855-block  0
+unconditional  0 never executed
+        1: 1856:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1856-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1857:				case_sensitive = 1;
+    %%%%%: 1857-block  0
+unconditional  0 never executed
+        1: 1858:			else if (strncmp(opt_str, "false", 5) == 0)
+        1: 1858-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1859:				case_sensitive = 0;
+        1: 1859-block  0
+unconditional  0 taken 1
+        -: 1860:		}
+        -: 1861:
+       26: 1862:		else if (xargs.unicode == UNSET && *line == 'U'
+       26: 1862-block  0
+branch  0 taken 26 (fallthrough)
+branch  1 taken 0
+       26: 1862-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 25
+        2: 1863:		&& strncmp(line, "Unicode=", 8) == 0) {
+        1: 1863-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1863-block  1
+unconditional  2 taken 1
+        1: 1864:			char opt_str[MAX_BOOL] = "";
+        1: 1865:			ret = sscanf(line, "Unicode=%5s\n", opt_str);
+       1*: 1866:			if (ret == -1)
+        1: 1866-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1867:				continue;
+    %%%%%: 1867-block  0
+unconditional  0 never executed
+        1: 1868:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1868-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1869:				unicode = 1;
+        1: 1869-block  0
+unconditional  0 taken 1
+    #####: 1870:			else if (strncmp(opt_str, "false", 5) == 0)
+    %%%%%: 1870-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1871:				unicode = 0;
+    %%%%%: 1871-block  0
+unconditional  0 never executed
+        -: 1872:		}
+        -: 1873:
+       25: 1874:		else if (xargs.pager == UNSET && *line == 'P'
+       25: 1874-block  0
+branch  0 taken 25 (fallthrough)
+branch  1 taken 0
+       25: 1874-block  1
+branch  2 taken 4 (fallthrough)
+branch  3 taken 21
+        5: 1875:		&& strncmp(line, "Pager=", 6) == 0) {
+        4: 1875-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 3
+        1: 1875-block  1
+unconditional  2 taken 1
+        1: 1876:			char opt_str[MAX_BOOL] = "";
+        1: 1877:			ret = sscanf(line, "Pager=%5s\n", opt_str);
+       1*: 1878:			if (ret == -1)
+        1: 1878-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1879:				continue;
+    %%%%%: 1879-block  0
+unconditional  0 never executed
+        1: 1880:			if (strncmp(opt_str, "true", 4) == 0)
+        1: 1880-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1881:				pager = 1;
+    %%%%%: 1881-block  0
+unconditional  0 never executed
+        1: 1882:			else if (strncmp(opt_str, "false", 5) == 0)
+        1: 1882-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1883:				pager = 0;
+        1: 1883-block  0
+unconditional  0 taken 1
+        -: 1884:		}
+        -: 1885:
+       24: 1886:		else if (*line == 'P' && strncmp(line, "Prompt=", 7) == 0) {
+       24: 1886-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 21
+        3: 1886-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 2
+        1: 1887:			if (encoded_prompt)
+        1: 1887-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1888:				free(encoded_prompt);
+    %%%%%: 1888-block  0
+unconditional  0 never executed
+        1: 1889:			encoded_prompt = straft(line, '=');
+        1: 1889-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -: 1890:		}
+        -: 1891:
+       23: 1892:		else if (xargs.max_path == UNSET && *line == 'M'
+       23: 1892-block  0
+branch  0 taken 23 (fallthrough)
+branch  1 taken 0
+       23: 1892-block  1
+branch  2 taken 4 (fallthrough)
+branch  3 taken 19
+        4: 1893:		&& strncmp(line, "MaxPath=", 8) == 0) {
+        4: 1893-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 3
+        1: 1894:			int opt_num = 0;
+        1: 1895:			sscanf(line, "MaxPath=%d\n", &opt_num);
+       1*: 1896:			if (opt_num <= 0)
+        1: 1896-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1897:				continue;
+    %%%%%: 1897-block  0
+unconditional  0 never executed
+        1: 1898:			max_path = opt_num;
+        1: 1898-block  0
+unconditional  0 taken 1
+        -: 1899:		}
+        -: 1900:
+       23: 1901:		else if (*line == 'D' && strncmp(line, "DividingLineChar=", 17) == 0) {
+       22: 1901-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 21
+        1: 1901-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 0
+        1: 1901-block  2
+unconditional  4 taken 1
+        -: 1902:			/* Accepts both chars and decimal integers */
+        1: 1903:			char opt_c = -1;
+        1: 1904:			sscanf(line, "DividingLineChar='%c'", &opt_c);
+        1: 1905:			if (opt_c == -1) {
+        1: 1905-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1906:				int num = -1;
+    #####: 1907:				sscanf(line, "DividingLineChar=%d", &num);
+    #####: 1908:				if (num == -1)
+    %%%%%: 1908-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1909:					div_line_char = DEF_DIV_LINE_CHAR;
+    %%%%%: 1909-block  0
+unconditional  0 never executed
+        -: 1910:				else
+    #####: 1911:					div_line_char = (char)num;
+    %%%%%: 1911-block  0
+unconditional  0 never executed
+        -: 1912:			} else
+        1: 1913:				div_line_char = opt_c;
+        1: 1913-block  0
+unconditional  0 taken 1
+        -: 1914:		}
+        -: 1915:
+       21: 1916:		else if (*line == 'M' && strncmp(line, "MaxHistory=", 11) == 0) {
+       21: 1916-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 18
+        3: 1916-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 2
+        1: 1917:			int opt_num = 0;
+        1: 1918:			sscanf(line, "MaxHistory=%d\n", &opt_num);
+       1*: 1919:			if (opt_num <= 0)
+        1: 1919-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1920:				continue;
+    %%%%%: 1920-block  0
+unconditional  0 never executed
+        1: 1921:			max_hist = opt_num;
+        1: 1921-block  0
+unconditional  0 taken 1
+        -: 1922:		}
+        -: 1923:
+       20: 1924:		else if (*line == 'M' && strncmp(line, "MaxLog=", 7) == 0) {
+       20: 1924-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 18
+        2: 1924-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 1
+        1: 1925:			int opt_num = 0;
+        1: 1926:			sscanf(line, "MaxLog=%d\n", &opt_num);
+       1*: 1927:			if (opt_num <= 0)
+        1: 1927-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1928:				continue;
+    %%%%%: 1928-block  0
+unconditional  0 never executed
+        1: 1929:			max_log = opt_num;
+        1: 1929-block  0
+unconditional  0 taken 1
+        -: 1930:		}
+        -: 1931:
+       19: 1932:		else if (xargs.path == UNSET && cur_ws == UNSET && *line == 'S'
+       19: 1932-block  0
+branch  0 taken 19 (fallthrough)
+branch  1 taken 0
+       19: 1932-block  1
+branch  2 taken 19 (fallthrough)
+branch  3 taken 0
+       19: 1932-block  2
+branch  4 taken 6 (fallthrough)
+branch  5 taken 13
+        6: 1933:		&& strncmp(line, "StartingPath=", 13) == 0) {
+        6: 1933-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 5
+        1: 1934:			char *opt_str = straft(line, '=');
+        1: 1934-block  0
+call    0 returned 1
+       1*: 1935:			if (!opt_str)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1936:				continue;
+    %%%%%: 1936-block  0
+unconditional  0 never executed
+        -: 1937:
+        1: 1938:			char *tmp = remove_quotes(opt_str);
+        1: 1938-block  0
+call    0 returned 1
+        1: 1939:			if (!tmp) {
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1940:				free(opt_str);
+        1: 1941:				continue;
+        1: 1941-block  0
+unconditional  0 taken 1
+        -: 1942:			}
+        -: 1943:
+        -: 1944:			/* If starting path is not NULL, and exists,
+        -: 1945:			 * and is a directory, and the user has
+        -: 1946:			 * appropriate permissions, set path to starting
+        -: 1947:			 * path. If any of these conditions is false,
+        -: 1948:			 * path will be set to default, that is, CWD */
+    #####: 1949:			if (xchdir(tmp, SET_TITLE) == 0) {
+    %%%%%: 1949-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1950:				free(ws[cur_ws].path);
+    #####: 1951:				ws[cur_ws].path = savestring(tmp, strlen(tmp));
+    %%%%%: 1951-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1952:			} else {
+    #####: 1953:				_err('w', PRINT_PROMPT, _("%s: '%s': %s. "
+call    0 never executed
+unconditional  1 never executed
+        -: 1954:							  "Using the current working directory "
+        -: 1955:							  "as starting path\n"),
+        -: 1956:				    PROGRAM_NAME,
+    #####: 1957:				    tmp, strerror(errno));
+    %%%%%: 1957-block  0
+call    0 never executed
+        -: 1958:			}
+    #####: 1959:			free(opt_str);
+    %%%%%: 1959-block  0
+unconditional  0 never executed
+        -: 1960:		}
+        -: 1961:	}
+        -: 1962:
+        1: 1963:	fclose(config_fp);
+        1: 1963-block  0
+call    0 returned 1
+        -: 1964:
+        1: 1965:	if (filter) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1966:		ret = regcomp(&regex_exp, filter, REG_NOSUB | REG_EXTENDED);
+    %%%%%: 1966-block  0
+call    0 never executed
+        -: 1967:
+    #####: 1968:		if (ret != EXIT_SUCCESS) {
+branch  0 never executed
+branch  1 never executed
+    #####: 1969:			_err('w', PRINT_PROMPT, _("%s: '%s': Invalid regular "
+    %%%%%: 1969-block  0
+call    0 never executed
+        -: 1970:				  "expression\n"), PROGRAM_NAME, filter);
+    #####: 1971:			free(filter);
+    #####: 1972:			filter = (char *)NULL;
+    #####: 1973:			regfree(&regex_exp);
+call    0 never executed
+unconditional  1 never executed
+        -: 1974:		}
+        -: 1975:	}
+        -: 1976:
+        1: 1977:	return;
+        1: 1977-block  0
+unconditional  0 taken 1
+        -: 1978:}
+        -: 1979:
+        -: 1980:/* Set up CliFM directories and config files. Load the user's
+        -: 1981: * configuration from clifmrc */
+        -: 1982:void
+function init_config called 1 returned 100% blocks executed 75%
+        1: 1983:init_config(void)
+        -: 1984:{
+        1: 1985:	if (xargs.stealth_mode == 1) {
+        1: 1985-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+        -: 1986:
+    #####: 1987:		_err(0, PRINT_PROMPT, _("%s: Running in stealth mode: trash, persistent "
+    %%%%%: 1987-block  0
+call    0 never executed
+        -: 1988:					"selection and directory history, just as bookmarks, logs and "
+        -: 1989:					"configuration files, are disabled.\n"),
+        -: 1990:		    PROGRAM_NAME);
+        -: 1991:
+    #####: 1992:		config_ok = 0;
+        -: 1993:
+    #####: 1994:		return;
+unconditional  0 never executed
+        -: 1995:	}
+        -: 1996:
+        -: 1997:	/* Store a pointer to the current LS_COLORS value to be used by
+        -: 1998:	 * external commands */
+        1: 1999:	ls_colors_bk = getenv("LS_COLORS");
+        1: 1999-block  0
+call    0 returned 1
+        -: 2000:
+        1: 2001:	if (!home_ok)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 2002:		return;
+    %%%%%: 2002-block  0
+unconditional  0 never executed
+        -: 2003:
+        1: 2004:	define_config_file_names();
+        1: 2004-block  0
+call    0 returned 1
+        -: 2005:
+        1: 2006:	create_config_files();
+call    0 returned 1
+        -: 2007:
+        1: 2008:	if (config_ok)
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 2009:		read_config();
+        1: 2009-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -: 2010:
+        -: 2011:	/* "XTerm*eightBitInput: false" must be set in HOME/.Xresources
+        -: 2012:	 * to make some keybindings like Alt+letter work correctly in
+        -: 2013:	 * xterm-like terminal emulators */
+        -: 2014:	/* However, there is no need to do this if using the linux console,
+        -: 2015:	 * since we are not in a graphical environment */
+        1: 2016:	if (xargs.stealth_mode != 1 && (flags & GUI)
+        1: 2016-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 2016-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 0
+        1: 2017:	&& strncmp(getenv("TERM"), "xterm", 5) == 0)
+        1: 2017-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####: 2018:		edit_xresources();
+    %%%%%: 2018-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 2019:}
+        -: 2020:
+        -: 2021:int
+function reload_config called 0 returned 0% blocks executed 0%
+    #####: 2022:reload_config(void)
+        -: 2023:{
+        -: 2024:	/* Free everything */
+    #####: 2025:	free(CONFIG_DIR_GRAL);
+    #####: 2026:	free(CONFIG_DIR);
+    #####: 2027:	free(TRASH_DIR);
+    #####: 2028:	free(TRASH_FILES_DIR);
+    #####: 2029:	free(TRASH_INFO_DIR);
+    #####: 2030:	CONFIG_DIR = TRASH_DIR = TRASH_FILES_DIR = (char *)NULL;
+    #####: 2031:	TRASH_INFO_DIR = (char *)NULL;
+        -: 2032:
+    #####: 2033:	free(BM_FILE);
+    #####: 2034:	free(LOG_FILE);
+    #####: 2035:	free(HIST_FILE);
+    #####: 2036:	free(DIRHIST_FILE);
+    #####: 2037:	BM_FILE = LOG_FILE = HIST_FILE = DIRHIST_FILE = (char *)NULL;
+        -: 2038:
+    #####: 2039:	free(CONFIG_FILE);
+    #####: 2040:	free(PROFILE_FILE);
+    #####: 2041:	free(MSG_LOG_FILE);
+    #####: 2042:	CONFIG_FILE = PROFILE_FILE = MSG_LOG_FILE = (char *)NULL;
+        -: 2043:
+    #####: 2044:	free(MIME_FILE);
+    #####: 2045:	free(PLUGINS_DIR);
+    #####: 2046:	free(ACTIONS_FILE);
+    #####: 2047:	free(KBINDS_FILE);
+    #####: 2048:	MIME_FILE = PLUGINS_DIR = ACTIONS_FILE = KBINDS_FILE = (char *)NULL;
+        -: 2049:
+    #####: 2050:	free(COLORS_DIR);
+    #####: 2051:	free(TMP_DIR);
+    #####: 2052:	free(SEL_FILE);
+    #####: 2053:	TMP_DIR = COLORS_DIR = SEL_FILE = (char *)NULL;
+        -: 2054:
+    #####: 2055:	if (filter) {
+    %%%%%: 2055-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2056:		regfree(&regex_exp);
+    %%%%%: 2056-block  0
+call    0 never executed
+    #####: 2057:		free(filter);
+    #####: 2058:		filter = (char *)NULL;
+unconditional  0 never executed
+        -: 2059:	}
+        -: 2060:
+    #####: 2061:	if (opener) {
+    %%%%%: 2061-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2062:		free(opener);
+    #####: 2063:		opener = (char *)NULL;
+    %%%%%: 2063-block  0
+unconditional  0 never executed
+        -: 2064:	}
+        -: 2065:
+    #####: 2066:	if (encoded_prompt) {
+    %%%%%: 2066-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2067:		free(encoded_prompt);
+    #####: 2068:		encoded_prompt = (char *)NULL;
+    %%%%%: 2068-block  0
+unconditional  0 never executed
+        -: 2069:	}
+        -: 2070:
+    #####: 2071:	if (term) {
+    %%%%%: 2071-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2072:		free(term);
+    #####: 2073:		term = (char *)NULL;
+    %%%%%: 2073-block  0
+unconditional  0 never executed
+        -: 2074:	}
+        -: 2075:
+    #####: 2076:	free(user.shell);
+    #####: 2077:	user.shell = (char *)NULL;
+        -: 2078:
+        -: 2079:	/* Reset all variables */
+    #####: 2080:	splash_screen = welcome_message = ext_cmd_ok = pager = UNSET;
+    #####: 2081:	show_hidden = clear_screen = list_folders_first = long_view = UNSET;
+    #####: 2082:	unicode = case_sensitive = cd_lists_on_the_fly = share_selbox = UNSET;
+    #####: 2083:	autocd = auto_open = restore_last_path = dirhist_map = UNSET;
+    #####: 2084:	disk_usage = tips = logs_enabled = sort = files_counter = UNSET;
+    #####: 2085:	light_mode = classify = cd_on_quit = columned = tr_as_rm = UNSET;
+    #####: 2086:	no_eln = min_name_trim = case_sens_dirjump = case_sens_path_comp = UNSET;
+    #####: 2087:	min_jump_rank = max_jump_total_rank = UNSET;
+        -: 2088:
+    #####: 2089:	shell_terminal = no_log = internal_cmd = recur_perm_error_flag = 0;
+    #####: 2090:	is_sel = sel_is_last = print_msg = kbind_busy = dequoted = 0;
+    #####: 2091:	mime_match = sort_switch = sort_reverse = kbind_busy = 0;
+    #####: 2092:	shell_terminal = no_log = internal_cmd = dequoted = 0;
+    #####: 2093:	shell_is_interactive = recur_perm_error_flag = mime_match = 0;
+    #####: 2094:	recur_perm_error_flag = is_sel = sel_is_last = print_msg = 0;
+        -: 2095:
+    #####: 2096:	pmsg = nomsg;
+        -: 2097:
+    #####: 2098:	home_ok = config_ok = trash_ok = selfile_ok = 1;
+        -: 2099:
+        -: 2100:	/* Set up config files and options */
+    #####: 2101:	init_config();
+    %%%%%: 2101-block  0
+call    0 never executed
+        -: 2102:
+        -: 2103:	/* If some option was not set, set it to the default value*/
+    #####: 2104:	check_options();
+call    0 never executed
+        -: 2105:
+    #####: 2106:	set_sel_file();
+call    0 never executed
+        -: 2107:
+    #####: 2108:	create_tmp_files();
+call    0 never executed
+        -: 2109:
+    #####: 2110:	set_colors(usr_cscheme ? usr_cscheme : "default", 1);
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 2110-block  0
+unconditional  2 never executed
+    %%%%%: 2110-block  1
+unconditional  3 never executed
+    %%%%%: 2110-block  2
+call    4 never executed
+        -: 2111:
+    #####: 2112:	free(usr_cscheme);
+    #####: 2113:	usr_cscheme = (char *)NULL;
+        -: 2114:
+        -: 2115:	/* If some option was set via command line, keep that value
+        -: 2116:	 * for any profile */
+    #####: 2117:	if (xargs.case_sens_dirjump != UNSET)
+branch  0 never executed
+branch  1 never executed
+    #####: 2118:		case_sens_dirjump = xargs.case_sens_dirjump;
+    %%%%%: 2118-block  0
+unconditional  0 never executed
+    #####: 2119:	if (xargs.case_sens_path_comp != UNSET)
+    %%%%%: 2119-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2120:		case_sens_path_comp = xargs.case_sens_path_comp;
+    %%%%%: 2120-block  0
+unconditional  0 never executed
+    #####: 2121:	if (xargs.noeln != UNSET)
+    %%%%%: 2121-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2122:		no_eln = xargs.noeln;
+    %%%%%: 2122-block  0
+unconditional  0 never executed
+    #####: 2123:	if (xargs.trasrm != UNSET)
+    %%%%%: 2123-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2124:		tr_as_rm = xargs.trasrm;
+    %%%%%: 2124-block  0
+unconditional  0 never executed
+    #####: 2125:	if (xargs.no_colors != UNSET)
+    %%%%%: 2125-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2126:		colorize = xargs.no_colors;
+    %%%%%: 2126-block  0
+unconditional  0 never executed
+    #####: 2127:	if (xargs.no_columns != UNSET)
+    %%%%%: 2127-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2128:		columned = xargs.no_columns;
+    %%%%%: 2128-block  0
+unconditional  0 never executed
+    #####: 2129:	if (xargs.cd_on_quit != UNSET)
+    %%%%%: 2129-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2130:		cd_on_quit = xargs.cd_on_quit;
+    %%%%%: 2130-block  0
+unconditional  0 never executed
+    #####: 2131:	if (xargs.ext != UNSET)
+    %%%%%: 2131-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2132:		ext_cmd_ok = xargs.ext;
+    %%%%%: 2132-block  0
+unconditional  0 never executed
+    #####: 2133:	if (xargs.splash != UNSET)
+    %%%%%: 2133-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2134:		splash_screen = xargs.splash;
+    %%%%%: 2134-block  0
+unconditional  0 never executed
+    #####: 2135:	if (xargs.light != UNSET)
+    %%%%%: 2135-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2136:		light_mode = xargs.light;
+    %%%%%: 2136-block  0
+unconditional  0 never executed
+    #####: 2137:	if (xargs.sort != UNSET)
+    %%%%%: 2137-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2138:		sort = xargs.sort;
+    %%%%%: 2138-block  0
+unconditional  0 never executed
+    #####: 2139:	if (xargs.hidden != UNSET)
+    %%%%%: 2139-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2140:		show_hidden = xargs.hidden;
+    %%%%%: 2140-block  0
+unconditional  0 never executed
+    #####: 2141:	if (xargs.longview != UNSET)
+    %%%%%: 2141-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2142:		long_view = xargs.longview;
+    %%%%%: 2142-block  0
+unconditional  0 never executed
+    #####: 2143:	if (xargs.ffirst != UNSET)
+    %%%%%: 2143-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2144:		list_folders_first = xargs.ffirst;
+    %%%%%: 2144-block  0
+unconditional  0 never executed
+    #####: 2145:	if (xargs.cd_list_auto != UNSET)
+    %%%%%: 2145-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2146:		cd_lists_on_the_fly = xargs.cd_list_auto;
+    %%%%%: 2146-block  0
+unconditional  0 never executed
+    #####: 2147:	if (xargs.sensitive != UNSET)
+    %%%%%: 2147-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2148:		case_sensitive = xargs.sensitive;
+    %%%%%: 2148-block  0
+unconditional  0 never executed
+    #####: 2149:	if (xargs.unicode != UNSET)
+    %%%%%: 2149-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2150:		unicode = xargs.unicode;
+    %%%%%: 2150-block  0
+unconditional  0 never executed
+    #####: 2151:	if (xargs.pager != UNSET)
+    %%%%%: 2151-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2152:		pager = xargs.pager;
+    %%%%%: 2152-block  0
+unconditional  0 never executed
+    #####: 2153:	if (xargs.dirmap != UNSET)
+    %%%%%: 2153-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2154:		dirhist_map = xargs.dirmap;
+    %%%%%: 2154-block  0
+unconditional  0 never executed
+    #####: 2155:	if (xargs.autocd != UNSET)
+    %%%%%: 2155-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2156:		autocd = xargs.autocd;
+    %%%%%: 2156-block  0
+unconditional  0 never executed
+    #####: 2157:	if (xargs.auto_open != UNSET)
+    %%%%%: 2157-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2158:		auto_open = xargs.auto_open;
+    %%%%%: 2158-block  0
+unconditional  0 never executed
+    #####: 2159:	if (xargs.restore_last_path != UNSET)
+    %%%%%: 2159-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2160:		restore_last_path = xargs.restore_last_path;
+    %%%%%: 2160-block  0
+unconditional  0 never executed
+    #####: 2161:	if (xargs.tips != UNSET)
+    %%%%%: 2161-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2162:		tips = xargs.tips;
+    %%%%%: 2162-block  0
+unconditional  0 never executed
+    #####: 2163:	if (xargs.disk_usage != UNSET)
+    %%%%%: 2163-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2164:		disk_usage = xargs.disk_usage;
+    %%%%%: 2164-block  0
+unconditional  0 never executed
+    #####: 2165:	if (xargs.classify != UNSET)
+    %%%%%: 2165-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2166:		classify = xargs.classify;
+    %%%%%: 2166-block  0
+unconditional  0 never executed
+    #####: 2167:	if (xargs.share_selbox != UNSET)
+    %%%%%: 2167-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2168:		share_selbox = xargs.share_selbox;
+    %%%%%: 2168-block  0
+unconditional  0 never executed
+    #####: 2169:	if (xargs.max_dirhist != UNSET)
+    %%%%%: 2169-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2170:		max_dirhist = xargs.max_dirhist;
+    %%%%%: 2170-block  0
+unconditional  0 never executed
+    #####: 2171:	if (xargs.sort_reverse != UNSET)
+    %%%%%: 2171-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2172:		sort_reverse = xargs.sort_reverse;
+    %%%%%: 2172-block  0
+unconditional  0 never executed
+    #####: 2173:	if (xargs.files_counter != UNSET)
+    %%%%%: 2173-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2174:		files_counter = xargs.files_counter;
+    %%%%%: 2174-block  0
+unconditional  0 never executed
+    #####: 2175:	if (xargs.welcome_message != UNSET)
+    %%%%%: 2175-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2176:		welcome_message = xargs.welcome_message;
+    %%%%%: 2176-block  0
+unconditional  0 never executed
+    #####: 2177:	if (xargs.clear_screen != UNSET)
+    %%%%%: 2177-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2178:		clear_screen = xargs.clear_screen;
+    %%%%%: 2178-block  0
+unconditional  0 never executed
+    #####: 2179:	if (xargs.logs != UNSET)
+    %%%%%: 2179-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2180:		logs_enabled = xargs.logs;
+    %%%%%: 2180-block  0
+unconditional  0 never executed
+    #####: 2181:	if (xargs.max_path != UNSET)
+    %%%%%: 2181-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2182:		max_path = xargs.max_path;
+    %%%%%: 2182-block  0
+unconditional  0 never executed
+    #####: 2183:	if (xargs.expand_bookmarks != UNSET)
+    %%%%%: 2183-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2184:		expand_bookmarks = xargs.expand_bookmarks;
+    %%%%%: 2184-block  0
+unconditional  0 never executed
+    #####: 2185:	if (xargs.only_dirs != UNSET)
+    %%%%%: 2185-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2186:		only_dirs = xargs.only_dirs;
+    %%%%%: 2186-block  0
+unconditional  0 never executed
+    #####: 2187:	if (xargs.tips != UNSET)
+    %%%%%: 2187-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2188:		tips = xargs.tips;
+    %%%%%: 2188-block  0
+unconditional  0 never executed
+    #####: 2189:	if (xargs.icons != UNSET)
+    %%%%%: 2189-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2190:		icons = xargs.icons;
+    %%%%%: 2190-block  0
+unconditional  0 never executed
+        -: 2191:
+        -: 2192:	/* Free the aliases and prompt_cmds arrays to be allocated again */
+    #####: 2193:	int i = dirhist_total_index;
+        -: 2194:
+    #####: 2195:	while (--i >= 0)
+    %%%%%: 2195-block  0
+unconditional  0 never executed
+    %%%%%: 2195-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 2196:		free(old_pwd[i]);
+    %%%%%: 2196-block  0
+unconditional  0 never executed
+        -: 2197:
+    #####: 2198:	free(old_pwd);
+        -: 2199:
+    #####: 2200:	old_pwd = (char **)NULL;
+        -: 2201:
+    #####: 2202:	if (jump_db) {
+    %%%%%: 2202-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 2203:		for (i = 0; jump_db[i].path; i++)
+    %%%%%: 2203-block  0
+unconditional  0 never executed
+    %%%%%: 2203-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 2204:			free(jump_db[i].path);
+    %%%%%: 2204-block  0
+unconditional  0 never executed
+        -: 2205:
+    #####: 2206:		free(jump_db);
+    #####: 2207:		jump_db = (struct jump_t *)NULL;
+    %%%%%: 2207-block  0
+unconditional  0 never executed
+        -: 2208:	}
+        -: 2209:
+    #####: 2210:	jump_n = 0;
+        -: 2211:
+    #####: 2212:	i = (int)aliases_n;
+    #####: 2213:	while (--i >= 0)
+    %%%%%: 2213-block  0
+unconditional  0 never executed
+    %%%%%: 2213-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 2214:		free(aliases[i]);
+    %%%%%: 2214-block  0
+unconditional  0 never executed
+        -: 2215:
+    #####: 2216:	i = (int)prompt_cmds_n;
+    #####: 2217:	while (--i >= 0)
+    %%%%%: 2217-block  0
+unconditional  0 never executed
+    %%%%%: 2217-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 2218:		free(prompt_cmds[i]);
+    %%%%%: 2218-block  0
+unconditional  0 never executed
+        -: 2219:
+    #####: 2220:	aliases_n = prompt_cmds_n = dirhist_total_index = 0;
+        -: 2221:
+    #####: 2222:	get_aliases();
+    %%%%%: 2222-block  0
+call    0 never executed
+        -: 2223:
+    #####: 2224:	get_prompt_cmds();
+call    0 never executed
+        -: 2225:
+    #####: 2226:	load_dirhist();
+call    0 never executed
+        -: 2227:
+    #####: 2228:	load_jumpdb();
+call    0 never executed
+        -: 2229:
+        -: 2230:	/* Set the current poistion of the dirhist index to the last
+        -: 2231:	 * entry */
+    #####: 2232:	dirhist_cur_index = dirhist_total_index - 1;
+        -: 2233:
+    #####: 2234:	set_env();
+call    0 never executed
+        -: 2235:
+    #####: 2236:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 2237:}

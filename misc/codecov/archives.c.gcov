@@ -1,0 +1,2156 @@
+        -:    0:Source:archives.c
+        -:    1:/* archives.c -- archiving functions */
+        -:    2:
+        -:    3:/*
+        -:    4: * This file is part of CliFM
+        -:    5: * 
+        -:    6: * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
+        -:    7: * All rights reserved.
+        -:    8:
+        -:    9: * CliFM is free software; you can redistribute it and/or modify
+        -:   10: * it under the terms of the GNU General Public License as published by
+        -:   11: * the Free Software Foundation; either version 2 of the License, or
+        -:   12: * (at your option) any later version.
+        -:   13: *
+        -:   14: * CliFM is distributed in the hope that it will be useful,
+        -:   15: * but WITHOUT ANY WARRANTY; without even the implied warranty of
+        -:   16: * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        -:   17: * GNU General Public License for more details.
+        -:   18: *
+        -:   19: * You should have received a copy of the GNU General Public License
+        -:   20: * along with this program; if not, write to the Free Software
+        -:   21: * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+        -:   22: * MA 02110-1301, USA.
+        -:   23:*/
+        -:   24:
+        -:   25:#include "helpers.h"
+        -:   26:
+        -:   27:#include <errno.h>
+        -:   28:#include <stdio.h>
+        -:   29:#include <string.h>
+        -:   30:#include <sys/stat.h>
+        -:   31:#include <unistd.h>
+        -:   32:
+        -:   33:#include "aux.h"
+        -:   34:#include "exec.h"
+        -:   35:#include "history.h"
+        -:   36:#include "jump.h"
+        -:   37:#include "listing.h"
+        -:   38:#include "navigation.h"
+        -:   39:#include "readline.h"
+        -:   40:
+        -:   41:int zstandard(char *in_file, char *out_file, char mode, char op);
+        -:   42:
+        -:   43:int
+function handle_iso called 0 returned 0% blocks executed 0%
+    #####:   44:handle_iso(char *file)
+        -:   45:{
+    #####:   46:	int exit_status = EXIT_SUCCESS;
+        -:   47:
+        -:   48:	/* Use 7z to
+        -:   49:	 * list (l)
+        -:   50:	 * extract (e)
+        -:   51:	 * extrat to dir (x -oDIR FILE)
+        -:   52:	 * test (t) */
+        -:   53:
+    #####:   54:	printf(_("%s[e]%sxtract %s[E]%sxtract-to-dir %s[l]%sist "
+    %%%%%:   54-block  0
+call    0 never executed
+        -:   55:		 "%s[t]%stest %s[m]%sount %s[q]%suit\n"), bold, df_c, bold,
+        -:   56:	    df_c, bold, df_c, bold, df_c, bold, df_c, bold, df_c);
+        -:   57:
+    #####:   58:	char *operation = (char *)NULL;
+    #####:   59:	char sel_op = 0;
+        -:   60:
+    #####:   61:	while (!operation) {
+unconditional  0 never executed
+    %%%%%:   61-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:   62:		operation = rl_no_hist(_("Operation: "));
+    %%%%%:   62-block  0
+call    0 never executed
+        -:   63:
+    #####:   64:		if (!operation)
+branch  0 never executed
+branch  1 never executed
+    #####:   65:			continue;
+    %%%%%:   65-block  0
+unconditional  0 never executed
+        -:   66:
+    #####:   67:		if (operation && (!operation[0] || operation[1] != '\0')) {
+    %%%%%:   67-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   67-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:   67-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:   68:			free(operation);
+    #####:   69:			operation = (char *)NULL;
+    #####:   70:			continue;
+    %%%%%:   70-block  0
+unconditional  0 never executed
+        -:   71:		}
+        -:   72:
+    #####:   73:		switch (*operation) {
+    %%%%%:   73-block  0
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:   74:		case 'e': /* fallthrough */
+        -:   75:		case 'E': /* fallthrough */
+        -:   76:		case 'l': /* fallthrough */
+        -:   77:		case 'm': /* fallthrough */
+        -:   78:		case 't':
+    #####:   79:			sel_op = *operation;
+    #####:   80:			free(operation);
+    #####:   81:			break;
+    %%%%%:   81-block  0
+unconditional  0 never executed
+        -:   82:
+    #####:   83:		case 'q':
+    #####:   84:			free(operation);
+    #####:   85:			return EXIT_SUCCESS;
+    %%%%%:   85-block  0
+unconditional  0 never executed
+        -:   86:
+    #####:   87:		default:
+    #####:   88:			free(operation);
+    #####:   89:			operation = (char *)NULL;
+    #####:   90:			break;
+    %%%%%:   90-block  0
+unconditional  0 never executed
+        -:   91:		}
+        -:   92:
+    #####:   93:		if (sel_op)
+    %%%%%:   93-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   94:			break;
+    %%%%%:   94-block  0
+unconditional  0 never executed
+        -:   95:	}
+        -:   96:
+    #####:   97:	char *ret = strchr(file, '\\');
+    #####:   98:	if (ret) {
+    %%%%%:   98-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   99:		char *deq_file = dequote_str(file, 0);
+    %%%%%:   99-block  0
+call    0 never executed
+    #####:  100:		if (deq_file) {
+branch  0 never executed
+branch  1 never executed
+    #####:  101:			strcpy(file, deq_file);
+    #####:  102:			free(deq_file);
+    %%%%%:  102-block  0
+unconditional  0 never executed
+        -:  103:		}
+    #####:  104:		ret = (char *)NULL;
+    %%%%%:  104-block  0
+unconditional  0 never executed
+        -:  105:	}
+        -:  106:
+    #####:  107:	switch (sel_op) {
+    %%%%%:  107-block  0
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+        -:  108:
+        -:  109:	/* ########## EXTRACT #######*/
+    #####:  110:	case 'e': {
+        -:  111:		/* 7z x -oDIR FILE (use FILE as DIR) */
+    #####:  112:		char *o_option = (char *)xnmalloc(strlen(file) + 7, sizeof(char));
+    %%%%%:  112-block  0
+call    0 never executed
+    #####:  113:		sprintf(o_option, "-o%s.dir", file);
+        -:  114:
+        -:  115:		/* Construct and execute cmd */
+    #####:  116:		char *cmd[] = {"7z", "x", o_option, file, NULL};
+    #####:  117:		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  118:			exit_status = EXIT_FAILURE;
+    %%%%%:  118-block  0
+unconditional  0 never executed
+        -:  119:
+    #####:  120:		free(o_option);
+    #####:  121:	} break;
+    %%%%%:  121-block  0
+unconditional  0 never executed
+        -:  122:
+        -:  123:	/* ########## EXTRACT TO DIR ####### */
+    #####:  124:	case 'E': {
+        -:  125:		/* 7z x -oDIR FILE (ask for DIR) */
+    #####:  126:		char *ext_path = (char *)NULL;
+        -:  127:
+    #####:  128:		while (!ext_path) {
+    %%%%%:  128-block  0
+unconditional  0 never executed
+    %%%%%:  128-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  129:			ext_path = rl_no_hist(_("Extraction path: "));
+    %%%%%:  129-block  0
+call    0 never executed
+        -:  130:
+    #####:  131:			if (!ext_path)
+branch  0 never executed
+branch  1 never executed
+    #####:  132:				continue;
+    %%%%%:  132-block  0
+unconditional  0 never executed
+        -:  133:
+    #####:  134:			if (ext_path && !*ext_path) {
+    %%%%%:  134-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  134-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  135:				free(ext_path);
+    #####:  136:				ext_path = (char *)NULL;
+    #####:  137:				continue;
+    %%%%%:  137-block  0
+unconditional  0 never executed
+        -:  138:			}
+        -:  139:		}
+        -:  140:
+    #####:  141:		char *o_option = (char *)xnmalloc(strlen(ext_path) + 3,
+    %%%%%:  141-block  0
+call    0 never executed
+        -:  142:		    sizeof(char));
+    #####:  143:		sprintf(o_option, "-o%s", ext_path);
+        -:  144:
+        -:  145:		/* Construct and execute cmd */
+    #####:  146:		char *cmd[] = {"7z", "x", o_option, file, NULL};
+        -:  147:
+    #####:  148:		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  149:			exit_status = EXIT_FAILURE;
+    %%%%%:  149-block  0
+unconditional  0 never executed
+        -:  150:
+    #####:  151:		free(ext_path);
+    #####:  152:		free(o_option);
+    #####:  153:		ext_path = (char *)NULL;
+    #####:  154:	} break;
+    %%%%%:  154-block  0
+unconditional  0 never executed
+        -:  155:
+        -:  156:	/* ########## LIST ####### */
+    #####:  157:	case 'l': {
+        -:  158:		/* 7z l FILE */
+    #####:  159:		char *cmd[] = {"7z", "l", file, NULL};
+        -:  160:
+    #####:  161:		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+    %%%%%:  161-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  162:			exit_status = EXIT_FAILURE;
+    %%%%%:  162-block  0
+unconditional  0 never executed
+    #####:  163:	} break;
+    %%%%%:  163-block  0
+unconditional  0 never executed
+        -:  164:
+        -:  165:		/* ########## MOUNT ####### */
+        -:  166:
+    #####:  167:	case 'm': {
+        -:  168:		/* Create mountpoint */
+    #####:  169:		char *mountpoint = (char *)NULL;
+        -:  170:
+    #####:  171:		if (xargs.stealth_mode == 1) {
+    %%%%%:  171-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  172:			mountpoint = (char *)xnmalloc(strlen(file) + 19, sizeof(char));
+    %%%%%:  172-block  0
+call    0 never executed
+        -:  173:
+    #####:  174:			sprintf(mountpoint, "/tmp/clifm-mounts/%s", file);
+unconditional  0 never executed
+        -:  175:		}
+        -:  176:
+        -:  177:		else {
+    #####:  178:			mountpoint = (char *)xnmalloc(strlen(CONFIG_DIR) + strlen(file) + 9, sizeof(char));
+    %%%%%:  178-block  0
+call    0 never executed
+        -:  179:
+    #####:  180:			sprintf(mountpoint, "%s/mounts/%s", CONFIG_DIR, file);
+unconditional  0 never executed
+        -:  181:		}
+        -:  182:
+    #####:  183:		char *dir_cmd[] = {"mkdir", "-pm700", mountpoint, NULL};
+        -:  184:
+    #####:  185:		if (launch_execve(dir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+    %%%%%:  185-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  186:			free(mountpoint);
+    #####:  187:			return EXIT_FAILURE;
+    %%%%%:  187-block  0
+unconditional  0 never executed
+    %%%%%:  187-block  1
+unconditional  1 never executed
+        -:  188:		}
+        -:  189:
+        -:  190:		/* Construct and execute cmd */
+    #####:  191:		char *cmd[] = {"sudo", "mount", "-o", "loop", file,
+        -:  192:		    mountpoint, NULL};
+        -:  193:
+    #####:  194:		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+    %%%%%:  194-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  195:			free(mountpoint);
+    #####:  196:			return EXIT_FAILURE;
+    %%%%%:  196-block  0
+unconditional  0 never executed
+        -:  197:		}
+        -:  198:
+        -:  199:		/* List content of mountpoint */
+    #####:  200:		if (xchdir(mountpoint, SET_TITLE) == -1) {
+    %%%%%:  200-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  201:			fprintf(stderr, "archiver: %s: %s\n", mountpoint,
+call    0 never executed
+    #####:  202:			    strerror(errno));
+    %%%%%:  202-block  0
+call    0 never executed
+    #####:  203:			free(mountpoint);
+    #####:  204:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  205:		}
+        -:  206:
+    #####:  207:		free(ws[cur_ws].path);
+    #####:  208:		ws[cur_ws].path = savestring(mountpoint, strlen(mountpoint));
+    %%%%%:  208-block  0
+call    0 never executed
+    #####:  209:		add_to_jumpdb(ws[cur_ws].path);
+call    0 never executed
+        -:  210:
+    #####:  211:		if (cd_lists_on_the_fly) {
+branch  0 never executed
+branch  1 never executed
+    #####:  212:			free_dirlist();
+    %%%%%:  212-block  0
+call    0 never executed
+    #####:  213:			if (list_dir() != EXIT_SUCCESS)
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  214:				exit_status = EXIT_FAILURE;
+    %%%%%:  214-block  0
+unconditional  0 never executed
+    #####:  215:			add_to_dirhist(ws[cur_ws].path);
+    %%%%%:  215-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  216:		} else
+    #####:  217:			printf("%s: Successfully mounted on %s\n", file, mountpoint);
+    %%%%%:  217-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  218:
+    #####:  219:		free(mountpoint);
+    #####:  220:	} break;
+    %%%%%:  220-block  0
+unconditional  0 never executed
+        -:  221:
+        -:  222:	/* ########## TEST #######*/
+    #####:  223:	case 't': {
+        -:  224:		/* 7z t FILE */
+    #####:  225:		char *cmd[] = {"7z", "t", file, NULL};
+        -:  226:
+    #####:  227:		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+    %%%%%:  227-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  228:			exit_status = EXIT_FAILURE;
+    %%%%%:  228-block  0
+unconditional  0 never executed
+    #####:  229:	} break;
+    %%%%%:  229-block  0
+unconditional  0 never executed
+        -:  230:	}
+        -:  231:
+    #####:  232:	return exit_status;
+    %%%%%:  232-block  0
+unconditional  0 never executed
+        -:  233:}
+        -:  234:
+        -:  235:int
+function create_iso called 0 returned 0% blocks executed 0%
+    #####:  236:create_iso(char *in_file, char *out_file)
+        -:  237:{
+    #####:  238:	int exit_status = EXIT_SUCCESS;
+        -:  239:	struct stat file_attrib;
+        -:  240:
+    #####:  241:	if (lstat(in_file, &file_attrib) == -1) {
+    %%%%%:  241-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  242:		fprintf(stderr, "archiver: %s: %s\n", in_file, strerror(errno));
+    %%%%%:  242-block  0
+call    0 never executed
+call    1 never executed
+    #####:  243:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  244:	}
+        -:  245:
+        -:  246:	/* If IN_FILE is a directory */
+    #####:  247:	if ((file_attrib.st_mode & S_IFMT) == S_IFDIR) {
+    %%%%%:  247-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  248:		char *cmd[] = {"mkisofs", "-R", "-o", out_file, in_file, NULL};
+        -:  249:
+    #####:  250:		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+    %%%%%:  250-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  251:			exit_status = EXIT_FAILURE;
+    %%%%%:  251-block  0
+unconditional  0 never executed
+        -:  252:	}
+        -:  253:
+        -:  254:	/* If IN_FILE is a block device */
+    #####:  255:	else if ((file_attrib.st_mode & S_IFMT) == S_IFBLK) {
+    %%%%%:  255-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  256:
+    #####:  257:		char *if_option = (char *)xnmalloc(strlen(in_file) + 4, sizeof(char));
+    %%%%%:  257-block  0
+call    0 never executed
+    #####:  258:		sprintf(if_option, "if=%s", in_file);
+        -:  259:
+    #####:  260:		char *of_option = (char *)xnmalloc(strlen(out_file) + 4, sizeof(char));
+call    0 never executed
+    #####:  261:		sprintf(of_option, "of=%s", out_file);
+        -:  262:
+    #####:  263:		char *cmd[] = {"sudo", "dd", if_option, of_option, "bs=64k",
+        -:  264:		    "conv=noerror,sync", "status=progress", NULL};
+        -:  265:
+    #####:  266:		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  267:			exit_status = EXIT_FAILURE;
+    %%%%%:  267-block  0
+unconditional  0 never executed
+        -:  268:
+    #####:  269:		free(if_option);
+    #####:  270:		free(of_option);
+    %%%%%:  270-block  0
+unconditional  0 never executed
+        -:  271:	}
+        -:  272:
+        -:  273:	else {
+    #####:  274:		fprintf(stderr, "archiver: %s: Invalid file format\nFile "
+    %%%%%:  274-block  0
+call    0 never executed
+        -:  275:				"should be either a directory or a block device\n",
+        -:  276:				in_file);
+    #####:  277:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  278:	}
+        -:  279:
+    #####:  280:	return exit_status;
+    %%%%%:  280-block  0
+unconditional  0 never executed
+        -:  281:}
+        -:  282:
+        -:  283:/* Run the 'file' command on FILE and look for "ISO 9660" and
+        -:  284: * string in its output. Returns zero if found, one if not, and -1
+        -:  285: * in case of error */
+        -:  286:int
+function check_iso called 0 returned 0% blocks executed 0%
+    #####:  287:check_iso(char *file)
+        -:  288:{
+    #####:  289:	if (!file || !*file) {
+    %%%%%:  289-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  289-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  290:		fputs(_("Error opening temporary file\n"), stderr);
+    %%%%%:  290-block  0
+call    0 never executed
+    #####:  291:		return -1;
+unconditional  0 never executed
+        -:  292:	}
+        -:  293:
+    #####:  294:	char ISO_TMP_FILE[PATH_MAX] = "";
+    #####:  295:	char *rand_ext = gen_rand_str(6);
+    %%%%%:  295-block  0
+call    0 never executed
+        -:  296:
+    #####:  297:	if (!rand_ext)
+branch  0 never executed
+branch  1 never executed
+    #####:  298:		return -1;
+    %%%%%:  298-block  0
+unconditional  0 never executed
+        -:  299:
+    #####:  300:	if (xargs.stealth_mode == 1)
+    %%%%%:  300-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  301:		sprintf(ISO_TMP_FILE, "/tmp/clifm-archiver.%s", rand_ext);
+    %%%%%:  301-block  0
+unconditional  0 never executed
+        -:  302:	else
+    #####:  303:		sprintf(ISO_TMP_FILE, "%s/archiver.%s", TMP_DIR, rand_ext);
+    %%%%%:  303-block  0
+unconditional  0 never executed
+        -:  304:
+    #####:  305:	free(rand_ext);
+        -:  306:
+    #####:  307:	FILE *file_fp = fopen(ISO_TMP_FILE, "w");
+    %%%%%:  307-block  0
+call    0 never executed
+        -:  308:
+    #####:  309:	if (!file_fp) {
+branch  0 never executed
+branch  1 never executed
+    #####:  310:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, ISO_TMP_FILE,
+call    0 never executed
+    #####:  311:				strerror(errno));
+    %%%%%:  311-block  0
+call    0 never executed
+    #####:  312:		return -1;
+unconditional  0 never executed
+        -:  313:	}
+        -:  314:
+    #####:  315:	FILE *file_fp_err = fopen("/dev/null", "w");
+    %%%%%:  315-block  0
+call    0 never executed
+        -:  316:
+    #####:  317:	if (!file_fp_err) {
+branch  0 never executed
+branch  1 never executed
+    #####:  318:		fprintf(stderr, "%s: /dev/null: %s\n", PROGRAM_NAME, strerror(errno));
+    %%%%%:  318-block  0
+call    0 never executed
+call    1 never executed
+    #####:  319:		fclose(file_fp);
+call    0 never executed
+    #####:  320:		return -1;
+unconditional  0 never executed
+        -:  321:	}
+        -:  322:
+    #####:  323:	int stdout_bk = dup(STDOUT_FILENO); /* Store original stdout */
+    %%%%%:  323-block  0
+call    0 never executed
+    #####:  324:	int stderr_bk = dup(STDERR_FILENO); /* Store original stderr */
+call    0 never executed
+        -:  325:
+        -:  326:	/* Redirect stdout to the desired file */
+    #####:  327:	if (dup2(fileno(file_fp), STDOUT_FILENO) == -1) {
+call    0 never executed
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:  328:		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+    %%%%%:  328-block  0
+call    0 never executed
+call    1 never executed
+    #####:  329:		fclose(file_fp);
+call    0 never executed
+    #####:  330:		fclose(file_fp_err);
+call    0 never executed
+    #####:  331:		return -1;
+unconditional  0 never executed
+        -:  332:	}
+        -:  333:
+        -:  334:	/* Redirect stderr to /dev/null */
+    #####:  335:	if (dup2(fileno(file_fp_err), STDERR_FILENO) == -1) {
+    %%%%%:  335-block  0
+call    0 never executed
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:  336:		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+    %%%%%:  336-block  0
+call    0 never executed
+call    1 never executed
+    #####:  337:		fclose(file_fp);
+call    0 never executed
+    #####:  338:		fclose(file_fp_err);
+call    0 never executed
+    #####:  339:		return -1;
+unconditional  0 never executed
+        -:  340:	}
+        -:  341:
+    #####:  342:	fclose(file_fp);
+    %%%%%:  342-block  0
+call    0 never executed
+    #####:  343:	fclose(file_fp_err);
+call    0 never executed
+        -:  344:
+    #####:  345:	char *cmd[] = {"file", "-b", file, NULL};
+    #####:  346:	int retval = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+call    0 never executed
+        -:  347:
+    #####:  348:	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
+call    0 never executed
+    #####:  349:	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
+call    0 never executed
+    #####:  350:	close(stdout_bk);
+call    0 never executed
+    #####:  351:	close(stderr_bk);
+call    0 never executed
+        -:  352:
+    #####:  353:	if (retval != EXIT_SUCCESS)
+branch  0 never executed
+branch  1 never executed
+    #####:  354:		return -1;
+    %%%%%:  354-block  0
+unconditional  0 never executed
+        -:  355:
+    #####:  356:	int is_iso = 0;
+        -:  357:
+    #####:  358:	if (access(ISO_TMP_FILE, F_OK) == 0) {
+    %%%%%:  358-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:  359:
+    #####:  360:		file_fp = fopen(ISO_TMP_FILE, "r");
+    %%%%%:  360-block  0
+call    0 never executed
+        -:  361:
+    #####:  362:		if (file_fp) {
+branch  0 never executed
+branch  1 never executed
+    #####:  363:			char line[255] = "";
+    #####:  364:			fgets(line, (int)sizeof(line), file_fp);
+    %%%%%:  364-block  0
+call    0 never executed
+    #####:  365:			char *ret = strstr(line, "ISO 9660");
+        -:  366:
+    #####:  367:			if (ret)
+branch  0 never executed
+branch  1 never executed
+    #####:  368:				is_iso = 1;
+    %%%%%:  368-block  0
+unconditional  0 never executed
+        -:  369:
+    #####:  370:			fclose(file_fp);
+    %%%%%:  370-block  0
+call    0 never executed
+        -:  371:		}
+    #####:  372:		unlink(ISO_TMP_FILE);
+    %%%%%:  372-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  373:	}
+        -:  374:
+    #####:  375:	if (is_iso)
+    %%%%%:  375-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  376:		return EXIT_SUCCESS;
+    %%%%%:  376-block  0
+unconditional  0 never executed
+        -:  377:
+    #####:  378:	return EXIT_FAILURE;
+    %%%%%:  378-block  0
+unconditional  0 never executed
+        -:  379:}
+        -:  380:
+        -:  381:/* Run the 'file' command on FILE and look for "archive" and
+        -:  382: * "compressed" strings in its output. Returns zero if compressed,
+        -:  383: * one if not, and -1 in case of error.
+        -:  384: * test_iso is used to determine if ISO files should be checked as
+        -:  385: * well: this is the case when called from open_function() or
+        -:  386: * mime_open(), since both need to check compressed and ISOs as
+        -:  387: * well (and there is no need to run two functions (is_compressed and
+        -:  388: * check_iso), when we can run just one) */
+        -:  389:int
+function is_compressed called 0 returned 0% blocks executed 0%
+    #####:  390:is_compressed(char *file, int test_iso)
+        -:  391:{
+    #####:  392:	if (!file || !*file) {
+    %%%%%:  392-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  392-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  393:		fputs(_("Error opening temporary file\n"), stderr);
+    %%%%%:  393-block  0
+call    0 never executed
+    #####:  394:		return -1;
+unconditional  0 never executed
+        -:  395:	}
+        -:  396:
+    #####:  397:	char *rand_ext = gen_rand_str(6);
+    %%%%%:  397-block  0
+call    0 never executed
+        -:  398:
+    #####:  399:	if (!rand_ext)
+branch  0 never executed
+branch  1 never executed
+    #####:  400:		return -1;
+    %%%%%:  400-block  0
+unconditional  0 never executed
+        -:  401:
+        -:  402:	char ARCHIVER_TMP_FILE[PATH_MAX];
+        -:  403:
+    #####:  404:	if (xargs.stealth_mode == 1)
+    %%%%%:  404-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  405:		sprintf(ARCHIVER_TMP_FILE, "/tmp/clifm-archiver.%s", rand_ext);
+    %%%%%:  405-block  0
+unconditional  0 never executed
+        -:  406:
+        -:  407:	else
+    #####:  408:		sprintf(ARCHIVER_TMP_FILE, "%s/archiver.%s", TMP_DIR, rand_ext);
+    %%%%%:  408-block  0
+unconditional  0 never executed
+        -:  409:
+    #####:  410:	free(rand_ext);
+        -:  411:
+    #####:  412:	if (access(ARCHIVER_TMP_FILE, F_OK) == 0)
+    %%%%%:  412-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  413:		unlink(ARCHIVER_TMP_FILE);
+    %%%%%:  413-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  414:
+    #####:  415:	FILE *file_fp = fopen(ARCHIVER_TMP_FILE, "w");
+    %%%%%:  415-block  0
+call    0 never executed
+        -:  416:
+    #####:  417:	if (!file_fp) {
+branch  0 never executed
+branch  1 never executed
+    #####:  418:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+call    0 never executed
+    #####:  419:		    ARCHIVER_TMP_FILE, strerror(errno));
+    %%%%%:  419-block  0
+call    0 never executed
+    #####:  420:		return -1;
+unconditional  0 never executed
+        -:  421:	}
+        -:  422:
+    #####:  423:	FILE *file_fp_err = fopen("/dev/null", "w");
+    %%%%%:  423-block  0
+call    0 never executed
+        -:  424:
+    #####:  425:	if (!file_fp_err) {
+branch  0 never executed
+branch  1 never executed
+    #####:  426:		fprintf(stderr, "%s: /dev/null: %s\n", PROGRAM_NAME, strerror(errno));
+    %%%%%:  426-block  0
+call    0 never executed
+call    1 never executed
+    #####:  427:		fclose(file_fp);
+call    0 never executed
+    #####:  428:		return -1;
+unconditional  0 never executed
+        -:  429:	}
+        -:  430:
+    #####:  431:	int stdout_bk = dup(STDOUT_FILENO); /* Store original stdout */
+    %%%%%:  431-block  0
+call    0 never executed
+    #####:  432:	int stderr_bk = dup(STDERR_FILENO); /* Store original stderr */
+call    0 never executed
+        -:  433:
+        -:  434:	/* Redirect stdout to the desired file */
+    #####:  435:	if (dup2(fileno(file_fp), STDOUT_FILENO) == -1) {
+call    0 never executed
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:  436:		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+    %%%%%:  436-block  0
+call    0 never executed
+call    1 never executed
+    #####:  437:		fclose(file_fp);
+call    0 never executed
+    #####:  438:		fclose(file_fp_err);
+call    0 never executed
+    #####:  439:		return -1;
+unconditional  0 never executed
+        -:  440:	}
+        -:  441:
+        -:  442:	/* Redirect stderr to /dev/null */
+    #####:  443:	if (dup2(fileno(file_fp_err), STDERR_FILENO) == -1) {
+    %%%%%:  443-block  0
+call    0 never executed
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:  444:		fprintf(stderr, "%s: %s\n", PROGRAM_NAME, strerror(errno));
+    %%%%%:  444-block  0
+call    0 never executed
+call    1 never executed
+    #####:  445:		fclose(file_fp);
+call    0 never executed
+    #####:  446:		fclose(file_fp_err);
+call    0 never executed
+    #####:  447:		return -1;
+unconditional  0 never executed
+        -:  448:	}
+        -:  449:
+    #####:  450:	fclose(file_fp);
+    %%%%%:  450-block  0
+call    0 never executed
+    #####:  451:	fclose(file_fp_err);
+call    0 never executed
+        -:  452:
+    #####:  453:	char *cmd[] = {"file", "-b", file, NULL};
+    #####:  454:	int retval = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+call    0 never executed
+        -:  455:
+    #####:  456:	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
+call    0 never executed
+    #####:  457:	dup2(stderr_bk, STDERR_FILENO); /* Restore original stderr */
+call    0 never executed
+    #####:  458:	close(stdout_bk);
+call    0 never executed
+    #####:  459:	close(stderr_bk);
+call    0 never executed
+        -:  460:
+    #####:  461:	if (retval != EXIT_SUCCESS)
+branch  0 never executed
+branch  1 never executed
+    #####:  462:		return -1;
+    %%%%%:  462-block  0
+unconditional  0 never executed
+        -:  463:
+    #####:  464:	int compressed = 0;
+        -:  465:
+    #####:  466:	if (access(ARCHIVER_TMP_FILE, F_OK) == 0) {
+    %%%%%:  466-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:  467:
+    #####:  468:		file_fp = fopen(ARCHIVER_TMP_FILE, "r");
+    %%%%%:  468-block  0
+call    0 never executed
+        -:  469:
+    #####:  470:		if (file_fp) {
+branch  0 never executed
+branch  1 never executed
+        -:  471:			char line[255];
+    #####:  472:			fgets(line, (int)sizeof(line), file_fp);
+    %%%%%:  472-block  0
+call    0 never executed
+    #####:  473:			char *ret = strstr(line, "archive");
+        -:  474:
+    #####:  475:			if (ret)
+branch  0 never executed
+branch  1 never executed
+    #####:  476:				compressed = 1;
+    %%%%%:  476-block  0
+unconditional  0 never executed
+        -:  477:
+        -:  478:			else {
+    #####:  479:				ret = strstr(line, "compressed");
+        -:  480:
+    #####:  481:				if (ret)
+    %%%%%:  481-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  482:					compressed = 1;
+    %%%%%:  482-block  0
+unconditional  0 never executed
+        -:  483:
+    #####:  484:				else if (test_iso) {
+    %%%%%:  484-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  485:					ret = strstr(line, "ISO 9660");
+        -:  486:
+    #####:  487:					if (ret)
+    %%%%%:  487-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  488:						compressed = 1;
+    %%%%%:  488-block  0
+unconditional  0 never executed
+        -:  489:				}
+        -:  490:			}
+        -:  491:
+    #####:  492:			fclose(file_fp);
+    %%%%%:  492-block  0
+call    0 never executed
+        -:  493:		}
+        -:  494:
+    #####:  495:		unlink(ARCHIVER_TMP_FILE);
+    %%%%%:  495-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  496:	}
+        -:  497:
+    #####:  498:	if (compressed)
+    %%%%%:  498-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  499:		return EXIT_SUCCESS;
+    %%%%%:  499-block  0
+unconditional  0 never executed
+        -:  500:
+    #####:  501:	return EXIT_FAILURE;
+    %%%%%:  501-block  0
+unconditional  0 never executed
+        -:  502:}
+        -:  503:
+        -:  504:/* Handle archives and/or compressed files (ARGS) according to MODE:
+        -:  505: * 'c' for archiving/compression, and 'd' for dearchiving/decompression
+        -:  506: * (including listing, extracting, repacking, and mounting). Returns
+        -:  507: * zero on success and one on error. Depends on 'zstd' for Zdtandard
+        -:  508: * files 'atool' and 'archivemount' for the remaining types. */
+        -:  509:int
+function archiver called 0 returned 0% blocks executed 0%
+    #####:  510:archiver(char **args, char mode)
+        -:  511:{
+        -:  512:	size_t i;
+    #####:  513:	int exit_status = EXIT_SUCCESS;
+        -:  514:
+    #####:  515:	if (!args[1])
+    %%%%%:  515-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  516:		return EXIT_FAILURE;
+    %%%%%:  516-block  0
+unconditional  0 never executed
+        -:  517:
+    #####:  518:	if (mode == 'c') {
+    %%%%%:  518-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  519:
+        -:  520:			/* ##################################
+        -:  521:			 * #        1 - COMPRESSION         #
+        -:  522:			 * ##################################*/
+        -:  523:
+        -:  524:		/* Get archive name/type */
+        -:  525:
+    #####:  526:		puts(_("Use extension to specify archive/compression type.\n"
+    %%%%%:  526-block  0
+call    0 never executed
+        -:  527:		       "Defaults to .tar.gz"));
+    #####:  528:		char *name = (char *)NULL;
+    #####:  529:		while (!name) {
+unconditional  0 never executed
+    %%%%%:  529-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:  530:			name = rl_no_hist(_("Filename ('q' to quit): "));
+    %%%%%:  530-block  0
+call    0 never executed
+        -:  531:
+    #####:  532:			if (!name)
+branch  0 never executed
+branch  1 never executed
+    #####:  533:				continue;
+    %%%%%:  533-block  0
+unconditional  0 never executed
+        -:  534:
+    #####:  535:			if (!*name) {
+    %%%%%:  535-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  536:				free(name);
+    #####:  537:				name = (char *)NULL;
+    #####:  538:				continue;
+    %%%%%:  538-block  0
+unconditional  0 never executed
+        -:  539:			}
+        -:  540:
+    #####:  541:			if (*name == 'q' && name[1] == '\0') {
+    %%%%%:  541-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  541-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  542:				free(name);
+    #####:  543:				return EXIT_SUCCESS;
+    %%%%%:  543-block  0
+unconditional  0 never executed
+        -:  544:			}
+        -:  545:		}
+        -:  546:
+        -:  547:				/* ##########################
+        -:  548:				 * #        ZSTANDARD       #
+        -:  549:				 * ########################## */
+        -:  550:
+    #####:  551:		char *ret = strrchr(name, '.');
+    #####:  552:		if (strcmp(ret, ".zst") == 0) {
+    %%%%%:  552-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  553:
+        -:  554:			/* Multiple files */
+    #####:  555:			if (args[2]) {
+    %%%%%:  555-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  556:
+    #####:  557:				printf(_("\n%sNOTE%s: Zstandard does not support "
+    %%%%%:  557-block  0
+call    0 never executed
+        -:  558:					 "compression of multiple files into one single "
+        -:  559:					 "compressed file. Files will be compressed rather "
+        -:  560:					 "into multiple compressed files using original "
+        -:  561:					 "filenames\n"), bold, df_c);
+        -:  562:
+    #####:  563:				for (i = 1; args[i]; i++) {
+unconditional  0 never executed
+    %%%%%:  563-block  0
+unconditional  1 never executed
+    %%%%%:  563-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  564:					if (zstandard(args[i], NULL, 'c', 0) != EXIT_SUCCESS)
+    %%%%%:  564-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  565:						exit_status = EXIT_FAILURE;
+    %%%%%:  565-block  0
+unconditional  0 never executed
+        -:  566:				}
+        -:  567:			}
+        -:  568:
+        -:  569:			/* Only one file */
+        -:  570:			else
+    #####:  571:				exit_status = zstandard(args[1], name, 'c', 0);
+    %%%%%:  571-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  572:
+    #####:  573:			free(name);
+        -:  574:
+    #####:  575:			return exit_status;
+    %%%%%:  575-block  0
+unconditional  0 never executed
+        -:  576:		}
+        -:  577:
+        -:  578:				/* ##########################
+        -:  579:				 * #        ISO 9660        #
+        -:  580:				 * ########################## */
+        -:  581:
+    #####:  582:		if (strcmp(ret, ".iso") == 0) {
+    %%%%%:  582-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  583:			exit_status = create_iso(args[1], name);
+    %%%%%:  583-block  0
+call    0 never executed
+    #####:  584:			free(name);
+    #####:  585:			return exit_status;
+unconditional  0 never executed
+        -:  586:		}
+        -:  587:
+        -:  588:				/* ##########################
+        -:  589:				 * #          OTHERS        #
+        -:  590:				 * ########################## */
+        -:  591:
+        -:  592:		/* Escape the string, if needed */
+    #####:  593:		char *esc_name = escape_str(name);
+    %%%%%:  593-block  0
+call    0 never executed
+    #####:  594:		free(name);
+        -:  595:
+    #####:  596:		if (!esc_name) {
+branch  0 never executed
+branch  1 never executed
+    #####:  597:			fprintf(stderr, _("archiver: %s: Error escaping string\n"),
+    %%%%%:  597-block  0
+call    0 never executed
+        -:  598:					name);
+    #####:  599:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  600:		}
+        -:  601:
+        -:  602:		/* Construct the command */
+    #####:  603:		char *cmd = (char *)NULL;
+    #####:  604:		char *ext_ok = strchr(esc_name, '.');
+    #####:  605:		size_t cmd_len = strlen(esc_name) + 10 + ((!ext_ok) ? 8 : 0);
+    %%%%%:  605-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  605-block  1
+unconditional  2 never executed
+    %%%%%:  605-block  2
+unconditional  3 never executed
+        -:  606:
+    #####:  607:		cmd = (char *)xcalloc(cmd_len, sizeof(char));
+    %%%%%:  607-block  0
+call    0 never executed
+        -:  608:
+        -:  609:		/* If name has no extension, add the default */
+    #####:  610:		sprintf(cmd, "atool -a %s%s", esc_name, (!ext_ok) ? ".tar.gz" : "");
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  610-block  0
+unconditional  2 never executed
+    %%%%%:  610-block  1
+unconditional  3 never executed
+        -:  611:
+    #####:  612:		for (i = 1; args[i]; i++) {
+    %%%%%:  612-block  0
+unconditional  0 never executed
+    %%%%%:  612-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  613:			cmd_len += strlen(args[i]) + 1;
+    #####:  614:			cmd = (char *)xrealloc(cmd, (cmd_len + 1) * sizeof(char));
+    %%%%%:  614-block  0
+call    0 never executed
+    #####:  615:			strcat(cmd, " ");
+    #####:  616:			strcat(cmd, args[i]);
+unconditional  0 never executed
+        -:  617:		}
+        -:  618:
+    #####:  619:		if (launch_execle(cmd) != EXIT_SUCCESS)
+    %%%%%:  619-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  620:			exit_status = EXIT_FAILURE;
+    %%%%%:  620-block  0
+unconditional  0 never executed
+        -:  621:
+    #####:  622:		free(cmd);
+    #####:  623:		free(esc_name);
+        -:  624:
+    #####:  625:		return exit_status;
+    %%%%%:  625-block  0
+unconditional  0 never executed
+        -:  626:	}
+        -:  627:
+        -:  628:	/* mode == 'd' */
+        -:  629:
+        -:  630:			/* ##################################
+        -:  631:			 * #      2 - DECOMPRESSION         #
+        -:  632:			 * ##################################*/
+        -:  633:
+        -:  634:	/* Exit if at least one non-compressed file is found */
+    #####:  635:	for (i = 1; args[i]; i++) {
+    %%%%%:  635-block  0
+unconditional  0 never executed
+    %%%%%:  635-block  1
+unconditional  1 never executed
+    %%%%%:  635-block  2
+branch  2 never executed
+branch  3 never executed
+    #####:  636:		char *deq = (char *)NULL;
+        -:  637:
+    #####:  638:		if (strchr(args[i], '\\')) {
+    %%%%%:  638-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  639:			deq = dequote_str(args[i], 0);
+    %%%%%:  639-block  0
+call    0 never executed
+    #####:  640:			strcpy(args[i], deq);
+    #####:  641:			free(deq);
+unconditional  0 never executed
+        -:  642:		}
+        -:  643:
+    #####:  644:		if (is_compressed(args[i], 1) != 0) {
+    %%%%%:  644-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  645:			fprintf(stderr, _("archiver: %s: Not an archive/compressed file\n"),
+    #####:  646:					args[i]);
+    %%%%%:  646-block  0
+call    0 never executed
+    #####:  647:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  648:		}
+        -:  649:	}
+        -:  650:
+        -:  651:				/* ##########################
+        -:  652:				 * #        ISO 9660        #
+        -:  653:				 * ########################## */
+        -:  654:
+    #####:  655:	char *ret = strrchr(args[1], '.');
+        -:  656:
+    #####:  657:	if ((ret && strcmp(ret, ".iso") == 0) || check_iso(args[1]) == 0)
+    %%%%%:  657-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  657-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  657-block  2
+call    4 never executed
+branch  5 never executed
+branch  6 never executed
+    #####:  658:		return handle_iso(args[1]);
+    %%%%%:  658-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  659:
+        -:  660:				/* ##########################
+        -:  661:				 * #        ZSTANDARD       #
+        -:  662:				 * ########################## */
+        -:  663:
+        -:  664:	/* Check if we have at least one Zstandard file */
+        -:  665:
+    #####:  666:	int zst_index = -1;
+    #####:  667:	size_t files_num = 0;
+        -:  668:
+    #####:  669:	for (i = 1; args[i]; i++) {
+    %%%%%:  669-block  0
+unconditional  0 never executed
+    %%%%%:  669-block  1
+unconditional  1 never executed
+    %%%%%:  669-block  2
+branch  2 never executed
+branch  3 never executed
+    #####:  670:		files_num++;
+    #####:  671:		if (args[i][strlen(args[i]) - 1] == 't') {
+    %%%%%:  671-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  672:			char *retval = strrchr(args[i], '.');
+    #####:  673:			if (retval) {
+    %%%%%:  673-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  674:				if (strcmp(retval, ".zst") == 0)
+    %%%%%:  674-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  675:					zst_index = (int)i;
+    %%%%%:  675-block  0
+unconditional  0 never executed
+        -:  676:			}
+        -:  677:		}
+        -:  678:	}
+        -:  679:
+    #####:  680:	if (zst_index != -1) {
+    %%%%%:  680-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  681:
+        -:  682:		/* Multiple files */
+    #####:  683:		if (files_num > 1) {
+    %%%%%:  683-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  684:
+    #####:  685:			printf(_("%sNOTE%s: Using Zstandard\n"), bold, df_c);
+    %%%%%:  685-block  0
+call    0 never executed
+    #####:  686:			printf(_("%s[e]%sxtract %s[t]%sest %s[i]%snfo %s[q]%suit\n"),
+call    0 never executed
+        -:  687:			    bold, df_c, bold, df_c, bold, df_c, bold, df_c);
+        -:  688:
+    #####:  689:			char *operation = (char *)NULL;
+    #####:  690:			char sel_op = 0;
+    #####:  691:			while (!operation) {
+unconditional  0 never executed
+    %%%%%:  691-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:  692:				operation = rl_no_hist(_("Operation: "));
+    %%%%%:  692-block  0
+call    0 never executed
+        -:  693:
+    #####:  694:				if (!operation)
+branch  0 never executed
+branch  1 never executed
+    #####:  695:					continue;
+    %%%%%:  695-block  0
+unconditional  0 never executed
+        -:  696:
+    #####:  697:				if (operation && (!operation[0] || operation[1] != '\0')) {
+    %%%%%:  697-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  697-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  697-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  698:					free(operation);
+    #####:  699:					operation = (char *)NULL;
+    #####:  700:					continue;
+    %%%%%:  700-block  0
+unconditional  0 never executed
+        -:  701:				}
+        -:  702:
+    #####:  703:				switch (*operation) {
+    %%%%%:  703-block  0
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  704:				case 'e': /* fallthrough */
+        -:  705:				case 't': /* fallthrough */
+        -:  706:				case 'i':
+    #####:  707:					sel_op = *operation;
+    #####:  708:					break;
+    %%%%%:  708-block  0
+unconditional  0 never executed
+        -:  709:
+    #####:  710:				case 'q':
+    #####:  711:					free(operation);
+    #####:  712:					return EXIT_SUCCESS;
+    %%%%%:  712-block  0
+unconditional  0 never executed
+        -:  713:
+    #####:  714:				default:
+    #####:  715:					free(operation);
+    #####:  716:					operation = (char *)NULL;
+    #####:  717:					break;
+    %%%%%:  717-block  0
+unconditional  0 never executed
+        -:  718:				}
+        -:  719:			}
+        -:  720:
+    #####:  721:			for (i = 1; args[i]; i++) {
+    %%%%%:  721-block  0
+unconditional  0 never executed
+    %%%%%:  721-block  1
+unconditional  1 never executed
+    %%%%%:  721-block  2
+branch  2 never executed
+branch  3 never executed
+    #####:  722:				if (zstandard(args[i], NULL, 'd', sel_op) != EXIT_SUCCESS)
+    %%%%%:  722-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  723:					exit_status = EXIT_FAILURE;
+    %%%%%:  723-block  0
+unconditional  0 never executed
+        -:  724:			}
+        -:  725:
+    #####:  726:			free(operation);
+    #####:  727:			return exit_status;
+    %%%%%:  727-block  0
+unconditional  0 never executed
+        -:  728:		}
+        -:  729:
+        -:  730:		/* Just one file */
+        -:  731:		else {
+    #####:  732:			if (zstandard(args[zst_index], NULL, 'd', 0) != EXIT_SUCCESS)
+    %%%%%:  732-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  733:				exit_status = EXIT_FAILURE;
+    %%%%%:  733-block  0
+unconditional  0 never executed
+        -:  734:
+    #####:  735:			return exit_status;
+    %%%%%:  735-block  0
+unconditional  0 never executed
+        -:  736:		}
+        -:  737:	}
+        -:  738:
+        -:  739:				/* ##########################
+        -:  740:				 * #          OTHERS        #
+        -:  741:				 * ########################## */
+        -:  742:
+        -:  743:	/* 1) Get operation to be performed
+        -:  744:	 * ################################ */
+        -:  745:
+    #####:  746:	printf(_("%s[e]%sxtract %s[E]%sxtract-to-dir %s[l]%sist "
+    %%%%%:  746-block  0
+call    0 never executed
+        -:  747:		 "%s[m]%sount %s[r]%sepack %s[q]%suit\n"), bold, df_c, bold,
+        -:  748:	    df_c, bold, df_c, bold, df_c, bold, df_c, bold, df_c);
+        -:  749:
+    #####:  750:	char *operation = (char *)NULL;
+    #####:  751:	char sel_op = 0;
+        -:  752:
+    #####:  753:	while (!operation) {
+unconditional  0 never executed
+    %%%%%:  753-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:  754:		operation = rl_no_hist(_("Operation: "));
+    %%%%%:  754-block  0
+call    0 never executed
+        -:  755:
+    #####:  756:		if (!operation)
+branch  0 never executed
+branch  1 never executed
+    #####:  757:			continue;
+    %%%%%:  757-block  0
+unconditional  0 never executed
+        -:  758:
+    #####:  759:		if (operation && (!operation[0] || operation[1] != '\0')) {
+    %%%%%:  759-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  759-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  759-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  760:			free(operation);
+    #####:  761:			operation = (char *)NULL;
+    #####:  762:			continue;
+    %%%%%:  762-block  0
+unconditional  0 never executed
+        -:  763:		}
+        -:  764:
+    #####:  765:		switch (*operation) {
+    %%%%%:  765-block  0
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  766:		case 'e': /* fallthrough */
+        -:  767:		case 'E': /* fallthrough */
+        -:  768:		case 'l': /* fallthrough */
+        -:  769:		case 'm': /* fallthrough */
+        -:  770:		case 'r':
+    #####:  771:			sel_op = *operation;
+    #####:  772:			free(operation);
+    #####:  773:			break;
+    %%%%%:  773-block  0
+unconditional  0 never executed
+        -:  774:
+    #####:  775:		case 'q':
+    #####:  776:			free(operation);
+    #####:  777:			return EXIT_SUCCESS;
+    %%%%%:  777-block  0
+unconditional  0 never executed
+        -:  778:
+    #####:  779:		default:
+    #####:  780:			free(operation);
+    #####:  781:			operation = (char *)NULL;
+    #####:  782:			break;
+    %%%%%:  782-block  0
+unconditional  0 never executed
+        -:  783:		}
+        -:  784:
+    #####:  785:		if (sel_op)
+    %%%%%:  785-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  786:			break;
+    %%%%%:  786-block  0
+unconditional  0 never executed
+        -:  787:	}
+        -:  788:
+        -:  789:	/* 2) Prepare files based on operation
+        -:  790:	 * #################################### */
+        -:  791:
+    #####:  792:	char *dec_files = (char *)NULL;
+        -:  793:
+    #####:  794:	switch (sel_op) {
+    %%%%%:  794-block  0
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  795:	case 'e': /* fallthrough */
+        -:  796:	case 'r': {
+        -:  797:
+        -:  798:		/* Store all filenames into one single variable */
+    #####:  799:		size_t len = 1;
+    #####:  800:		dec_files = (char *)xnmalloc(len, sizeof(char));
+    %%%%%:  800-block  0
+call    0 never executed
+    #####:  801:		*dec_files = '\0';
+        -:  802:
+    #####:  803:		for (i = 1; args[i]; i++) {
+unconditional  0 never executed
+    %%%%%:  803-block  0
+unconditional  1 never executed
+    %%%%%:  803-block  1
+branch  2 never executed
+branch  3 never executed
+        -:  804:
+        -:  805:			/* Escape the string, if needed */
+    #####:  806:			char *esc_name = escape_str(args[i]);
+    %%%%%:  806-block  0
+call    0 never executed
+    #####:  807:			if (!esc_name)
+branch  0 never executed
+branch  1 never executed
+    #####:  808:				continue;
+    %%%%%:  808-block  0
+unconditional  0 never executed
+        -:  809:
+    #####:  810:			len += strlen(esc_name) + 1;
+    #####:  811:			dec_files = (char *)xrealloc(dec_files, (len + 1) * sizeof(char));
+    %%%%%:  811-block  0
+call    0 never executed
+    #####:  812:			strcat(dec_files, " ");
+    #####:  813:			strcat(dec_files, esc_name);
+        -:  814:
+    #####:  815:			free(esc_name);
+unconditional  0 never executed
+        -:  816:		}
+    #####:  817:	} break;
+    %%%%%:  817-block  0
+unconditional  0 never executed
+        -:  818:
+    #####:  819:	case 'E':
+        -:  820:	case 'l':
+        -:  821:	case 'm': {
+        -:  822:
+        -:  823:		/* These operation won't be executed via the system shell,
+        -:  824:			 * so that we need to deescape files if necessary */
+    #####:  825:		for (i = 1; args[i]; i++) {
+    %%%%%:  825-block  0
+unconditional  0 never executed
+    %%%%%:  825-block  1
+unconditional  1 never executed
+    %%%%%:  825-block  2
+branch  2 never executed
+branch  3 never executed
+        -:  826:
+    #####:  827:			if (strchr(args[i], '\\')) {
+    %%%%%:  827-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  828:				char *deq_name = dequote_str(args[i], 0);
+    %%%%%:  828-block  0
+call    0 never executed
+        -:  829:
+    #####:  830:				if (!deq_name) {
+branch  0 never executed
+branch  1 never executed
+    #####:  831:					fprintf(stderr, _("archiver: %s: Error "
+    #####:  832:							"dequoting filename\n"), args[i]);
+    %%%%%:  832-block  0
+call    0 never executed
+    #####:  833:					return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  834:				}
+        -:  835:
+    #####:  836:				strcpy(args[i], deq_name);
+    #####:  837:				free(deq_name);
+    #####:  838:				deq_name = (char *)NULL;
+    %%%%%:  838-block  0
+unconditional  0 never executed
+        -:  839:			}
+        -:  840:		}
+    #####:  841:	} break;
+    %%%%%:  841-block  0
+unconditional  0 never executed
+        -:  842:	}
+        -:  843:
+        -:  844:	/* 3) Construct and run the corresponding commands
+        -:  845:	 * ############################################### */
+        -:  846:
+    #####:  847:	switch (sel_op) {
+    %%%%%:  847-block  0
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+        -:  848:
+        -:  849:		/* ########## EXTRACT ############## */
+        -:  850:
+    #####:  851:	case 'e': {
+    #####:  852:		char *cmd = (char *)NULL;
+    #####:  853:		cmd = (char *)xnmalloc(strlen(dec_files) + 13, sizeof(char));
+    %%%%%:  853-block  0
+call    0 never executed
+        -:  854:
+    #####:  855:		sprintf(cmd, "atool -x -e %s", dec_files);
+        -:  856:
+    #####:  857:		if (launch_execle(cmd) != EXIT_SUCCESS)
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  858:			exit_status = EXIT_FAILURE;
+    %%%%%:  858-block  0
+unconditional  0 never executed
+        -:  859:
+    #####:  860:		free(cmd);
+    #####:  861:		free(dec_files);
+    #####:  862:	} break;
+    %%%%%:  862-block  0
+unconditional  0 never executed
+        -:  863:
+        -:  864:		/* ########## EXTRACT TO DIR ############## */
+        -:  865:
+    #####:  866:	case 'E':
+    #####:  867:		for (i = 1; args[i]; i++) {
+    %%%%%:  867-block  0
+unconditional  0 never executed
+    %%%%%:  867-block  1
+branch  1 never executed
+branch  2 never executed
+        -:  868:
+        -:  869:			/* Ask for extraction path */
+    #####:  870:			printf(_("%sFile%s: %s\n"), bold, df_c, args[i]);
+    %%%%%:  870-block  0
+call    0 never executed
+        -:  871:
+    #####:  872:			char *ext_path = (char *)NULL;
+        -:  873:
+    #####:  874:			while (!ext_path) {
+unconditional  0 never executed
+    %%%%%:  874-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:  875:				ext_path = rl_no_hist(_("Extraction path: "));
+    %%%%%:  875-block  0
+call    0 never executed
+        -:  876:
+    #####:  877:				if (!ext_path)
+branch  0 never executed
+branch  1 never executed
+    #####:  878:					continue;
+    %%%%%:  878-block  0
+unconditional  0 never executed
+        -:  879:
+    #####:  880:				if (ext_path && !*ext_path) {
+    %%%%%:  880-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  880-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  881:					free(ext_path);
+    #####:  882:					ext_path = (char *)NULL;
+    #####:  883:					continue;
+    %%%%%:  883-block  0
+unconditional  0 never executed
+        -:  884:				}
+        -:  885:			}
+        -:  886:
+        -:  887:			/* Construct and execute cmd */
+    #####:  888:			char *cmd[] = {"atool", "-X", ext_path, args[i], NULL};
+        -:  889:
+    #####:  890:			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+    %%%%%:  890-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  891:				exit_status = EXIT_FAILURE;
+    %%%%%:  891-block  0
+unconditional  0 never executed
+        -:  892:
+    #####:  893:			free(ext_path);
+    #####:  894:			ext_path = (char *)NULL;
+    %%%%%:  894-block  0
+unconditional  0 never executed
+        -:  895:		}
+    #####:  896:		break;
+    %%%%%:  896-block  0
+unconditional  0 never executed
+        -:  897:
+        -:  898:		/* ########## LIST ############## */
+        -:  899:
+    #####:  900:	case 'l':
+    #####:  901:		for (i = 1; args[i]; i++) {
+    %%%%%:  901-block  0
+unconditional  0 never executed
+    %%%%%:  901-block  1
+unconditional  1 never executed
+    %%%%%:  901-block  2
+branch  2 never executed
+branch  3 never executed
+        -:  902:
+    #####:  903:			printf(_("%s%sFile%s: %s\n"), (i > 1) ? "\n" : "",
+    %%%%%:  903-block  0
+unconditional  0 never executed
+    %%%%%:  903-block  1
+unconditional  1 never executed
+    %%%%%:  903-block  2
+call    2 never executed
+    #####:  904:			    bold, df_c, args[i]);
+    %%%%%:  904-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  905:
+    #####:  906:			char *cmd[] = {"atool", "-l", args[i], NULL};
+        -:  907:
+    #####:  908:			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  909:				exit_status = EXIT_FAILURE;
+    %%%%%:  909-block  0
+unconditional  0 never executed
+        -:  910:		}
+    #####:  911:		break;
+    %%%%%:  911-block  0
+unconditional  0 never executed
+        -:  912:
+        -:  913:		/* ########## MOUNT ############## */
+        -:  914:
+    #####:  915:	case 'm':
+    #####:  916:		for (i = 1; args[i]; i++) {
+    %%%%%:  916-block  0
+unconditional  0 never executed
+    %%%%%:  916-block  1
+unconditional  1 never executed
+    %%%%%:  916-block  2
+branch  2 never executed
+branch  3 never executed
+        -:  917:
+        -:  918:			/* Create mountpoint */
+    #####:  919:			char *mountpoint = (char *)NULL;
+        -:  920:
+    #####:  921:			if (xargs.stealth_mode == 1) {
+    %%%%%:  921-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  922:				mountpoint = (char *)xnmalloc(strlen(args[i]) + 19,
+    %%%%%:  922-block  0
+call    0 never executed
+        -:  923:				    sizeof(char));
+        -:  924:
+    #####:  925:				sprintf(mountpoint, "/tmp/clifm-mounts/%s",
+    #####:  926:				    args[i]);
+unconditional  0 never executed
+        -:  927:			}
+        -:  928:
+        -:  929:			else {
+    #####:  930:				mountpoint = (char *)xnmalloc(strlen(CONFIG_DIR) + strlen(args[i]) + 9, sizeof(char));
+    %%%%%:  930-block  0
+call    0 never executed
+        -:  931:
+    #####:  932:				sprintf(mountpoint, "%s/mounts/%s", CONFIG_DIR,
+    #####:  933:				    args[i]);
+unconditional  0 never executed
+        -:  934:			}
+        -:  935:
+    #####:  936:			char *dir_cmd[] = {"mkdir", "-pm700", mountpoint, NULL};
+        -:  937:
+    #####:  938:			if (launch_execve(dir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+    %%%%%:  938-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  939:				free(mountpoint);
+    #####:  940:				return EXIT_FAILURE;
+    %%%%%:  940-block  0
+unconditional  0 never executed
+    %%%%%:  940-block  1
+unconditional  1 never executed
+        -:  941:			}
+        -:  942:
+        -:  943:			/* Construct and execute cmd */
+    #####:  944:			char *cmd[] = {"archivemount", args[i], mountpoint, NULL};
+        -:  945:
+    #####:  946:			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+    %%%%%:  946-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  947:				free(mountpoint);
+    #####:  948:				continue;
+    %%%%%:  948-block  0
+unconditional  0 never executed
+    %%%%%:  948-block  1
+unconditional  1 never executed
+        -:  949:			}
+        -:  950:
+        -:  951:			/* List content of mountpoint if there is only
+        -:  952:				 * one archive */
+    #####:  953:			if (files_num > 1) {
+    %%%%%:  953-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  954:				printf(_("%s%s%s: Succesfully mounted on %s\n"),
+    #####:  955:						bold, args[i], df_c, mountpoint);
+    %%%%%:  955-block  0
+call    0 never executed
+    #####:  956:				free(mountpoint);
+    #####:  957:				continue;
+unconditional  0 never executed
+        -:  958:			}
+        -:  959:
+    #####:  960:			if (xchdir(mountpoint, SET_TITLE) == -1) {
+    %%%%%:  960-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  961:				fprintf(stderr, "archiver: %s: %s\n", mountpoint, strerror(errno));
+    %%%%%:  961-block  0
+call    0 never executed
+call    1 never executed
+    #####:  962:				free(mountpoint);
+    #####:  963:				return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  964:			}
+        -:  965:
+    #####:  966:			free(ws[cur_ws].path);
+    #####:  967:			ws[cur_ws].path = (char *)xcalloc(strlen(mountpoint) + 1,
+    %%%%%:  967-block  0
+call    0 never executed
+        -:  968:			    sizeof(char));
+    #####:  969:			strcpy(ws[cur_ws].path, mountpoint);
+        -:  970:
+    #####:  971:			free(mountpoint);
+        -:  972:
+    #####:  973:			add_to_jumpdb(ws[cur_ws].path);
+call    0 never executed
+        -:  974:
+    #####:  975:			if (cd_lists_on_the_fly) {
+branch  0 never executed
+branch  1 never executed
+    #####:  976:				free_dirlist();
+    %%%%%:  976-block  0
+call    0 never executed
+    #####:  977:				if (list_dir() != EXIT_SUCCESS)
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  978:					exit_status = EXIT_FAILURE;
+    %%%%%:  978-block  0
+unconditional  0 never executed
+    #####:  979:				add_to_dirhist(ws[cur_ws].path);
+    %%%%%:  979-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  980:			}
+        -:  981:		}
+    #####:  982:		break;
+    %%%%%:  982-block  0
+unconditional  0 never executed
+        -:  983:
+        -:  984:		/* ########## REPACK ############## */
+        -:  985:
+    #####:  986:	case 'r': {
+        -:  987:		/* Ask for new archive/compression format */
+    #####:  988:		puts(_("Enter 'q' to quit"));
+    %%%%%:  988-block  0
+call    0 never executed
+        -:  989:
+    #####:  990:		char *format = (char *)NULL;
+    #####:  991:		while (!format) {
+unconditional  0 never executed
+    %%%%%:  991-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:  992:			format = rl_no_hist(_("New format (Ex: .tar.xz): "));
+    %%%%%:  992-block  0
+call    0 never executed
+    #####:  993:			if (!format)
+branch  0 never executed
+branch  1 never executed
+    #####:  994:				continue;
+    %%%%%:  994-block  0
+unconditional  0 never executed
+        -:  995:
+    #####:  996:			if (!*format || (*format != '.' && *format != 'q')) {
+    %%%%%:  996-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  996-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  996-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  997:				free(format);
+    #####:  998:				format = (char *)NULL;
+    #####:  999:				continue;
+    %%%%%:  999-block  0
+unconditional  0 never executed
+        -: 1000:			}
+        -: 1001:
+    #####: 1002:			if (*format == 'q' && format[1] == '\0') {
+    %%%%%: 1002-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1002-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1003:				free(format);
+    #####: 1004:				free(dec_files);
+    #####: 1005:				return EXIT_SUCCESS;
+    %%%%%: 1005-block  0
+unconditional  0 never executed
+        -: 1006:			}
+        -: 1007:		}
+        -: 1008:
+        -: 1009:		/* Construct and execute cmd */
+    #####: 1010:		char *cmd = (char *)NULL;
+    #####: 1011:		cmd = (char *)xnmalloc(strlen(format) + strlen(dec_files) + 16, sizeof(char));
+    %%%%%: 1011-block  0
+call    0 never executed
+    #####: 1012:		sprintf(cmd, "arepack -F %s -e %s", format, dec_files);
+        -: 1013:
+    #####: 1014:		if (launch_execle(cmd) != EXIT_SUCCESS)
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1015:			exit_status = EXIT_FAILURE;
+    %%%%%: 1015-block  0
+unconditional  0 never executed
+        -: 1016:
+    #####: 1017:		free(format);
+    #####: 1018:		free(dec_files);
+    #####: 1019:		free(cmd);
+    #####: 1020:	} break;
+    %%%%%: 1020-block  0
+unconditional  0 never executed
+        -: 1021:	}
+        -: 1022:
+    #####: 1023:	return exit_status;
+    %%%%%: 1023-block  0
+unconditional  0 never executed
+        -: 1024:}
+        -: 1025:
+        -: 1026:/* If MODE is 'c', compress IN_FILE producing a zstandard compressed
+        -: 1027: * file named OUT_FILE. If MODE is 'd', extract, test or get
+        -: 1028: * information about IN_FILE. OP is used only for the 'd' mode: it
+        -: 1029: * tells if we have one or multiple file. Returns zero on success and
+        -: 1030: * one on error */
+        -: 1031:int
+function zstandard called 0 returned 0% blocks executed 0%
+    #####: 1032:zstandard(char *in_file, char *out_file, char mode, char op)
+        -: 1033:{
+    #####: 1034:	int exit_status = EXIT_SUCCESS;
+        -: 1035:
+    #####: 1036:	char *deq_file = dequote_str(in_file, 0);
+    %%%%%: 1036-block  0
+call    0 never executed
+        -: 1037:
+    #####: 1038:	if (!deq_file) {
+branch  0 never executed
+branch  1 never executed
+    #####: 1039:		fprintf(stderr, _("archiver: %s: Error dequoting filename\n"), in_file);
+    %%%%%: 1039-block  0
+call    0 never executed
+    #####: 1040:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1041:	}
+        -: 1042:
+    #####: 1043:	if (mode == 'c') {
+    %%%%%: 1043-block  0
+branch  0 never executed
+branch  1 never executed
+        -: 1044:
+    #####: 1045:		if (out_file) {
+    %%%%%: 1045-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1046:			char *cmd[] = {"zstd", "-zo", out_file, deq_file, NULL};
+    #####: 1047:			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+    %%%%%: 1047-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1048:				exit_status = EXIT_FAILURE;
+    %%%%%: 1048-block  0
+unconditional  0 never executed
+        -: 1049:		}
+        -: 1050:
+        -: 1051:		else {
+    #####: 1052:			char *cmd[] = {"zstd", "-z", deq_file, NULL};
+        -: 1053:
+    #####: 1054:			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+    %%%%%: 1054-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1055:				exit_status = EXIT_FAILURE;
+    %%%%%: 1055-block  0
+unconditional  0 never executed
+        -: 1056:		}
+        -: 1057:
+    #####: 1058:		free(deq_file);
+    #####: 1059:		return exit_status;
+    %%%%%: 1059-block  0
+unconditional  0 never executed
+        -: 1060:	}
+        -: 1061:
+        -: 1062:	/* mode == 'd' */
+        -: 1063:
+        -: 1064:	/* op is non-zero when multiple files, including at least one
+        -: 1065:	 * zst file, are passed to the archiver function */
+    #####: 1066:	if (op != 0) {
+    %%%%%: 1066-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1067:		char option[3] = "";
+        -: 1068:
+    #####: 1069:		switch (op) {
+    %%%%%: 1069-block  0
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####: 1070:		case 'e':
+    #####: 1071:			strcpy(option, "-d");
+    #####: 1072:			break;
+    %%%%%: 1072-block  0
+unconditional  0 never executed
+    #####: 1073:		case 't':
+    #####: 1074:			strcpy(option, "-t");
+    #####: 1075:			break;
+    %%%%%: 1075-block  0
+unconditional  0 never executed
+    #####: 1076:		case 'i':
+    #####: 1077:			strcpy(option, "-l");
+    #####: 1078:			break;
+    %%%%%: 1078-block  0
+unconditional  0 never executed
+        -: 1079:		}
+        -: 1080:
+    #####: 1081:		char *cmd[] = {"zstd", option, deq_file, NULL};
+        -: 1082:
+    #####: 1083:		exit_status = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+    %%%%%: 1083-block  0
+call    0 never executed
+        -: 1084:
+    #####: 1085:		free(deq_file);
+        -: 1086:
+    #####: 1087:		if (exit_status != EXIT_SUCCESS)
+branch  0 never executed
+branch  1 never executed
+    #####: 1088:			return EXIT_FAILURE;
+    %%%%%: 1088-block  0
+unconditional  0 never executed
+        -: 1089:
+    #####: 1090:		return EXIT_SUCCESS;
+    %%%%%: 1090-block  0
+unconditional  0 never executed
+        -: 1091:	}
+        -: 1092:
+    #####: 1093:	printf(_("%s[e]%sxtract %s[t]%sest %s[i]%snfo %s[q]%suit\n"),
+    %%%%%: 1093-block  0
+call    0 never executed
+        -: 1094:	    bold, df_c, bold, df_c, bold, df_c, bold, df_c);
+        -: 1095:
+    #####: 1096:	char *operation = (char *)NULL;
+        -: 1097:
+    #####: 1098:	while (!operation) {
+unconditional  0 never executed
+    %%%%%: 1098-block  0
+branch  1 never executed
+branch  2 never executed
+    #####: 1099:		operation = rl_no_hist(_("Operation: "));
+    %%%%%: 1099-block  0
+call    0 never executed
+        -: 1100:
+    #####: 1101:		if (!operation)
+branch  0 never executed
+branch  1 never executed
+    #####: 1102:			continue;
+    %%%%%: 1102-block  0
+unconditional  0 never executed
+        -: 1103:
+    #####: 1104:		if (operation && (!operation[0] || operation[1] != '\0')) {
+    %%%%%: 1104-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1104-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%: 1104-block  2
+branch  4 never executed
+branch  5 never executed
+    #####: 1105:			free(operation);
+    #####: 1106:			operation = (char *)NULL;
+    #####: 1107:			continue;
+    %%%%%: 1107-block  0
+unconditional  0 never executed
+        -: 1108:		}
+        -: 1109:
+    #####: 1110:		switch (*operation) {
+    %%%%%: 1110-block  0
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+    #####: 1111:		case 'e': {
+    #####: 1112:			char *cmd[] = {"zstd", "-d", deq_file, NULL};
+    #####: 1113:			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+    %%%%%: 1113-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1114:				exit_status = EXIT_FAILURE;
+    %%%%%: 1114-block  0
+unconditional  0 never executed
+    #####: 1115:		} break;
+    %%%%%: 1115-block  0
+unconditional  0 never executed
+        -: 1116:
+    #####: 1117:		case 't': {
+    #####: 1118:			char *cmd[] = {"zstd", "-t", deq_file, NULL};
+    #####: 1119:			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+    %%%%%: 1119-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1120:				exit_status = EXIT_FAILURE;
+    %%%%%: 1120-block  0
+unconditional  0 never executed
+    #####: 1121:		} break;
+    %%%%%: 1121-block  0
+unconditional  0 never executed
+        -: 1122:
+    #####: 1123:		case 'i': {
+    #####: 1124:			char *cmd[] = {"zstd", "-l", deq_file, NULL};
+    #####: 1125:			if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+    %%%%%: 1125-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1126:				exit_status = EXIT_FAILURE;
+    %%%%%: 1126-block  0
+unconditional  0 never executed
+    #####: 1127:		} break;
+    %%%%%: 1127-block  0
+unconditional  0 never executed
+        -: 1128:
+    #####: 1129:		case 'q':
+    #####: 1130:			free(operation);
+    #####: 1131:			free(deq_file);
+    #####: 1132:			return EXIT_SUCCESS;
+    %%%%%: 1132-block  0
+unconditional  0 never executed
+        -: 1133:
+    #####: 1134:		default:
+    #####: 1135:			free(operation);
+    #####: 1136:			operation = (char *)NULL;
+    #####: 1137:			break;
+    %%%%%: 1137-block  0
+unconditional  0 never executed
+        -: 1138:		}
+        -: 1139:	}
+        -: 1140:
+    #####: 1141:	free(operation);
+    #####: 1142:	free(deq_file);
+        -: 1143:
+    #####: 1144:	return exit_status;
+    %%%%%: 1144-block  0
+unconditional  0 never executed
+        -: 1145:}

@@ -1,0 +1,3723 @@
+        -:    0:Source:init.c
+        -:    1:/* init.c -- functions controlling the program initialization */
+        -:    2:
+        -:    3:/*
+        -:    4: * This file is part of CliFM
+        -:    5: * 
+        -:    6: * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
+        -:    7: * All rights reserved.
+        -:    8:
+        -:    9: * CliFM is free software; you can redistribute it and/or modify
+        -:   10: * it under the terms of the GNU General Public License as published by
+        -:   11: * the Free Software Foundation; either version 2 of the License, or
+        -:   12: * (at your option) any later version.
+        -:   13: *
+        -:   14: * CliFM is distributed in the hope that it will be useful,
+        -:   15: * but WITHOUT ANY WARRANTY; without even the implied warranty of
+        -:   16: * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        -:   17: * GNU General Public License for more details.
+        -:   18: *
+        -:   19: * You should have received a copy of the GNU General Public License
+        -:   20: * along with this program; if not, write to the Free Software
+        -:   21: * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+        -:   22: * MA 02110-1301, USA.
+        -:   23:*/
+        -:   24:
+        -:   25:#include "helpers.h"
+        -:   26:
+        -:   27:#include <errno.h>
+        -:   28:#include <getopt.h>
+        -:   29:#include <pwd.h>
+        -:   30:#include <signal.h>
+        -:   31:#include <stdio.h>
+        -:   32:#include <string.h>
+        -:   33:#include <sys/stat.h>
+        -:   34:#include <termios.h>
+        -:   35:#include <time.h>
+        -:   36:#include <unistd.h>
+        -:   37:#include <readline/readline.h>
+        -:   38:
+        -:   39:#include "aux.h"
+        -:   40:#include "checks.h"
+        -:   41:#include "config.h"
+        -:   42:#include "init.h"
+        -:   43:#include "mime.h"
+        -:   44:#include "misc.h"
+        -:   45:#include "navigation.h"
+        -:   46:#include "sort.h"
+        -:   47:#include "string.h"
+        -:   48:
+        -:   49:struct user_t user;
+        -:   50:
+        -:   51:/* 
+        -:   52: * functions
+        -:   53: */
+        -:   54:void
+function check_env_filter called 1 returned 100% blocks executed 62%
+        1:   55:check_env_filter(void)
+        -:   56:{
+        1:   57:	if (filter)
+        1:   57-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:   58:		return;
+    %%%%%:   58-block  0
+unconditional  0 never executed
+        -:   59:
+        1:   60:	char *p = getenv("CLIFM_FILTER");
+        1:   60-block  0
+call    0 returned 1
+        -:   61:
+        1:   62:	if (!p)
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:   63:		return;
+        1:   63-block  0
+unconditional  0 taken 1
+        -:   64:
+    #####:   65:	filter = savestring(p, strlen(p));
+    %%%%%:   65-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:   66:}
+        -:   67:
+        -:   68:char *
+function get_date called 0 returned 0% blocks executed 0%
+    #####:   69:get_date(void)
+        -:   70:{
+    #####:   71:	time_t rawtime = time(NULL);
+    %%%%%:   71-block  0
+call    0 never executed
+    #####:   72:	struct tm *tm = localtime(&rawtime);
+call    0 never executed
+    #####:   73:	size_t date_max = 128;
+        -:   74:
+    #####:   75:	char *p = (char *)malloc((date_max + 1) * sizeof(char)), *date;
+    #####:   76:	if (p) {
+branch  0 never executed
+branch  1 never executed
+    #####:   77:		date = p;
+    #####:   78:		p = (char *)NULL;
+    %%%%%:   78-block  0
+unconditional  0 never executed
+        -:   79:	} else
+    #####:   80:		return (char *)NULL;
+    %%%%%:   80-block  0
+unconditional  0 never executed
+        -:   81:
+    #####:   82:	strftime(date, date_max, "%Y-%m-%dT%T%z", tm);
+        -:   83:
+    #####:   84:	return date;
+    %%%%%:   84-block  0
+unconditional  0 never executed
+        -:   85:}
+        -:   86:
+        -:   87:pid_t
+function get_own_pid called 1 returned 100% blocks executed 80%
+        1:   88:get_own_pid(void)
+        -:   89:{
+        -:   90:	pid_t pid;
+        -:   91:
+        -:   92:	/* Get the process id */
+        1:   93:	pid = getpid();
+        1:   93-block  0
+call    0 returned 1
+        -:   94:
+        1:   95:	if (pid < 0)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:   96:		return 0;
+    %%%%%:   96-block  0
+unconditional  0 never executed
+        -:   97:	else
+        1:   98:		return pid;
+        1:   98-block  0
+unconditional  0 taken 1
+        -:   99:}
+        -:  100:
+        -:  101:/* returns pointer to username, exits if not found */
+        -:  102:struct user_t
+function get_user called 1 returned 100% blocks executed 73%
+        1:  103:get_user(void)
+        -:  104:{
+        -:  105:
+        -:  106:	struct passwd *pw;
+        -:  107:	struct user_t tmp_user;
+        -:  108:
+        1:  109:	pw = getpwuid(geteuid());
+        1:  109-block  0
+call    0 returned 1
+call    1 returned 1
+        -:  110:
+        1:  111:	if (!pw) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  112:		_err('e', NOPRINT_PROMPT, "%s: Cannot detect user data. Exiting early",
+    %%%%%:  112-block  0
+call    0 never executed
+        -:  113:			PROGRAM_NAME);
+    #####:  114:		exit(-1);
+call    0 never executed
+        -:  115:	}
+        -:  116:
+        1:  117:	tmp_user.home = savestring(pw->pw_dir, strlen(pw->pw_dir));
+        1:  117-block  0
+call    0 returned 1
+        1:  118:	tmp_user.name = savestring(pw->pw_name, strlen(pw->pw_name));
+call    0 returned 1
+        1:  119:	tmp_user.shell = savestring(pw->pw_shell, strlen(pw->pw_shell));
+call    0 returned 1
+        -:  120:
+        1:  121:	if (!tmp_user.home || !tmp_user.name || !tmp_user.shell) {
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  121-block  0
+branch  2 taken 1 (fallthrough)
+branch  3 taken 0
+        1:  121-block  1
+branch  4 taken 0 (fallthrough)
+branch  5 taken 1
+    #####:  122:		_err('e', NOPRINT_PROMPT, "%s: Cannot detect user data. Exiting",
+    %%%%%:  122-block  0
+call    0 never executed
+        -:  123:			PROGRAM_NAME);
+    #####:  124:		exit(-1);
+call    0 never executed
+        -:  125:	}
+        -:  126:
+        -:  127:	/* some extra stuff to do before exiting */
+        1:  128:	tmp_user.home_len = strlen(tmp_user.home);
+        -:  129:
+        1:  130:	return tmp_user;
+        1:  130-block  0
+unconditional  0 taken 1
+        -:  131:}
+        -:  132:
+        -:  133:/* Reconstruct the jump database from database file */
+        -:  134:void
+function load_jumpdb called 1 returned 100% blocks executed 77%
+        1:  135:load_jumpdb(void)
+        -:  136:{
+        1:  137:	if (xargs.no_dirjump == 1 || !config_ok || !CONFIG_DIR)
+        1:  137-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  137-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 0
+        1:  137-block  2
+branch  4 taken 0 (fallthrough)
+branch  5 taken 1
+    #####:  138:		return;
+    %%%%%:  138-block  0
+unconditional  0 never executed
+    %%%%%:  138-block  1
+unconditional  1 never executed
+        -:  139:
+        1:  140:	size_t dir_len = strlen(CONFIG_DIR);
+        1:  141:	char *JUMP_FILE = (char *)xnmalloc(dir_len + 10, sizeof(char));
+        1:  141-block  0
+call    0 returned 1
+        1:  142:	snprintf(JUMP_FILE, dir_len + 10, "%s/jump.cfm", CONFIG_DIR);
+        -:  143:
+        -:  144:	struct stat attr;
+        -:  145:
+        1:  146:	if (stat(JUMP_FILE, &attr) == -1) {
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####:  147:		free(JUMP_FILE);
+    #####:  148:		return;
+    %%%%%:  148-block  0
+unconditional  0 never executed
+        -:  149:	}
+        -:  150:
+        1:  151:	FILE *fp = fopen(JUMP_FILE, "r");
+        1:  151-block  0
+call    0 returned 1
+        -:  152:
+        1:  153:	if (!fp) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  154:		free(JUMP_FILE);
+    #####:  155:		return;
+    %%%%%:  155-block  0
+unconditional  0 never executed
+        -:  156:	}
+        -:  157:
+        -:  158:	char tmp_line[PATH_MAX];
+        1:  159:	size_t jump_lines = 0;
+        -:  160:
+       40:  161:	while (fgets(tmp_line, (int)sizeof(tmp_line), fp)) {
+        1:  161-block  0
+unconditional  0 taken 1
+       40:  161-block  1
+call    1 returned 40
+branch  2 taken 39
+branch  3 taken 1 (fallthrough)
+       39:  162:		if (*tmp_line != '\n' && *tmp_line >= '0' && *tmp_line <= '9')
+       39:  162-block  0
+branch  0 taken 39 (fallthrough)
+branch  1 taken 0
+       39:  162-block  1
+branch  2 taken 39 (fallthrough)
+branch  3 taken 0
+       39:  162-block  2
+branch  4 taken 38 (fallthrough)
+branch  5 taken 1
+       38:  163:			jump_lines++;
+       38:  163-block  0
+unconditional  0 taken 38
+        -:  164:	}
+        -:  165:
+        1:  166:	if (!jump_lines) {
+        1:  166-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  167:		free(JUMP_FILE);
+    #####:  168:		fclose(fp);
+    %%%%%:  168-block  0
+call    0 never executed
+    #####:  169:		return;
+unconditional  0 never executed
+        -:  170:	}
+        -:  171:
+        1:  172:	jump_db = (struct jump_t *)xnmalloc(jump_lines + 2, sizeof(struct jump_t));
+        1:  172-block  0
+call    0 returned 1
+        -:  173:
+        1:  174:	fseek(fp, 0L, SEEK_SET);
+call    0 returned 1
+        -:  175:
+        1:  176:	size_t line_size = 0;
+        1:  177:	char *line = (char *)NULL;
+        1:  178:	ssize_t line_len = 0;
+        -:  179:
+       40:  180:	while ((line_len = getline(&line, &line_size, fp)) > 0) {
+unconditional  0 taken 1
+       40:  180-block  0
+call    1 returned 40
+branch  2 taken 39
+branch  3 taken 1 (fallthrough)
+        -:  181:
+      39*:  182:		if (!*line || *line == '\n')
+       39:  182-block  0
+branch  0 taken 39 (fallthrough)
+branch  1 taken 0
+       39:  182-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 39
+    #####:  183:			continue;
+    %%%%%:  183-block  0
+unconditional  0 never executed
+        -:  184:
+       39:  185:		if (*line == '@') {
+       39:  185-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 38
+        1:  186:			if (line[line_len - 1] == '\n')
+        1:  186-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  187:				line[line_len - 1] = '\0';
+        1:  187-block  0
+unconditional  0 taken 1
+        1:  188:			if (is_number(line + 1))
+        1:  188-block  0
+call    0 returned 1
+branch  1 taken 1 (fallthrough)
+branch  2 taken 0
+        1:  189:				jump_total_rank = atoi(line + 1);
+        1:  189-block  0
+unconditional  0 taken 1
+        -:  190:
+        1:  191:			continue;
+        1:  191-block  0
+unconditional  0 taken 1
+        -:  192:		}
+        -:  193:
+      38*:  194:		if (*line < '0' || *line > '9')
+       38:  194-block  0
+branch  0 taken 38 (fallthrough)
+branch  1 taken 0
+       38:  194-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 38
+    #####:  195:			continue;
+    %%%%%:  195-block  0
+unconditional  0 never executed
+        -:  196:
+       38:  197:		if (line[line_len - 1] == '\n')
+       38:  197-block  0
+branch  0 taken 38 (fallthrough)
+branch  1 taken 0
+       38:  198:			line[line_len - 1] = '\0';
+       38:  198-block  0
+unconditional  0 taken 38
+        -:  199:
+       38:  200:		char *tmp = strchr(line, ':');
+        -:  201:
+      38*:  202:		if (!tmp)
+       38:  202-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 38
+    #####:  203:			continue;
+    %%%%%:  203-block  0
+unconditional  0 never executed
+        -:  204:
+       38:  205:		*tmp = '\0';
+        -:  206:
+      38*:  207:		if (!*(++tmp))
+       38:  207-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 38
+    #####:  208:			continue;
+    %%%%%:  208-block  0
+unconditional  0 never executed
+        -:  209:
+       38:  210:		int visits = 1;
+        -:  211:
+       38:  212:		if (is_number(line))
+       38:  212-block  0
+call    0 returned 38
+branch  1 taken 38 (fallthrough)
+branch  2 taken 0
+       38:  213:			visits = atoi(line);
+       38:  213-block  0
+unconditional  0 taken 38
+        -:  214:
+       38:  215:		char *tmpb = strchr(tmp, ':');
+      38*:  216:		if (!tmpb)
+       38:  216-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 38
+    #####:  217:			continue;
+    %%%%%:  217-block  0
+unconditional  0 never executed
+        -:  218:
+       38:  219:		*tmpb = '\0';
+        -:  220:
+      38*:  221:		if (!*(++tmpb))
+       38:  221-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 38
+    #####:  222:			continue;
+    %%%%%:  222-block  0
+unconditional  0 never executed
+        -:  223:
+       38:  224:		time_t first = 0;
+        -:  225:
+       38:  226:		if (is_number(tmp))
+       38:  226-block  0
+call    0 returned 38
+branch  1 taken 38 (fallthrough)
+branch  2 taken 0
+       38:  227:			first = (time_t)atoi(tmp);
+       38:  227-block  0
+unconditional  0 taken 38
+        -:  228:
+       38:  229:		char *tmpc = strchr(tmpb, ':');
+      38*:  230:		if (!tmpc)
+       38:  230-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 38
+    #####:  231:			continue;
+    %%%%%:  231-block  0
+unconditional  0 never executed
+        -:  232:
+       38:  233:		*tmpc = '\0';
+        -:  234:
+      38*:  235:		if (!*(++tmpc))
+       38:  235-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 38
+    #####:  236:			continue;
+    %%%%%:  236-block  0
+unconditional  0 never executed
+        -:  237:
+        -:  238:		/* Purge the database from non-existent directories */
+      38*:  239:		if (access(tmpc, F_OK) == -1)
+       38:  239-block  0
+call    0 returned 38
+branch  1 taken 0 (fallthrough)
+branch  2 taken 38
+    #####:  240:			continue;
+    %%%%%:  240-block  0
+unconditional  0 never executed
+        -:  241:
+       38:  242:		jump_db[jump_n].visits = (size_t)visits;
+       38:  243:		jump_db[jump_n].first_visit = first;
+        -:  244:
+       38:  245:		if (is_number(tmpb))
+       38:  245-block  0
+call    0 returned 38
+branch  1 taken 38 (fallthrough)
+branch  2 taken 0
+       38:  246:			jump_db[jump_n].last_visit = (time_t)atoi(tmpb);
+       38:  246-block  0
+unconditional  0 taken 38
+        -:  247:		else
+    #####:  248:			jump_db[jump_n].last_visit = 0; /* UNIX Epoch */
+    %%%%%:  248-block  0
+unconditional  0 never executed
+        -:  249:
+       38:  250:		jump_db[jump_n].keep = 0;
+       38:  251:		jump_db[jump_n].rank = 0;
+       38:  252:		jump_db[jump_n++].path = savestring(tmpc, strlen(tmpc));
+       38:  252-block  0
+call    0 returned 38
+unconditional  1 taken 38
+        -:  253:	}
+        -:  254:
+        1:  255:	fclose(fp);
+        1:  255-block  0
+call    0 returned 1
+        -:  256:
+        1:  257:	free(line);
+        1:  258:	free(JUMP_FILE);
+        -:  259:
+        1:  260:	if (!jump_n) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  261:		free(jump_db);
+    #####:  262:		jump_db = (struct jump_t *)NULL;
+    #####:  263:		return;
+    %%%%%:  263-block  0
+unconditional  0 never executed
+        -:  264:	}
+        -:  265:
+        1:  266:	jump_db[jump_n].path = (char *)NULL;
+        1:  267:	jump_db[jump_n].rank = 0;
+        1:  268:	jump_db[jump_n].keep = 0;
+        1:  269:	jump_db[jump_n].visits = 0;
+        1:  270:	jump_db[jump_n].first_visit = -1;
+        1:  270-block  0
+unconditional  0 taken 1
+        -:  271:}
+        -:  272:
+        -:  273:int
+function load_bookmarks called 1 returned 100% blocks executed 73%
+        1:  274:load_bookmarks(void)
+        -:  275:{
+        1:  276:	if (create_bm_file() == EXIT_FAILURE)
+        1:  276-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####:  277:		return EXIT_FAILURE;
+    %%%%%:  277-block  0
+unconditional  0 never executed
+        -:  278:
+        1:  279:	if (!BM_FILE)
+        1:  279-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  280:		return EXIT_FAILURE;
+    %%%%%:  280-block  0
+unconditional  0 never executed
+        -:  281:
+        1:  282:	FILE *bm_fp = fopen(BM_FILE, "r");
+        1:  282-block  0
+call    0 returned 1
+        -:  283:
+        1:  284:	if (!bm_fp)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  285:		return EXIT_FAILURE;
+    %%%%%:  285-block  0
+unconditional  0 never executed
+        -:  286:
+        1:  287:	size_t bm_total = 0;
+        -:  288:	char tmp_line[256];
+        -:  289:
+       27:  290:	while (fgets(tmp_line, (int)sizeof(tmp_line), bm_fp)) {
+        1:  290-block  0
+unconditional  0 taken 1
+       27:  290-block  1
+call    1 returned 27
+branch  2 taken 26
+branch  3 taken 1 (fallthrough)
+        -:  291:
+       26:  292:		if (!*tmp_line || *tmp_line == '#' || *tmp_line == '\n')
+       26:  292-block  0
+branch  0 taken 26 (fallthrough)
+branch  1 taken 0
+       26:  292-block  1
+branch  2 taken 22 (fallthrough)
+branch  3 taken 4
+       22:  292-block  2
+branch  4 taken 0 (fallthrough)
+branch  5 taken 22
+        4:  293:			continue;
+        4:  293-block  0
+unconditional  0 taken 4
+        -:  294:
+       22:  295:		bm_total++;
+       22:  295-block  0
+unconditional  0 taken 22
+        -:  296:	}
+        -:  297:
+        1:  298:	if (!bm_total) {
+        1:  298-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  299:		fclose(bm_fp);
+    %%%%%:  299-block  0
+call    0 never executed
+    #####:  300:		return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  301:	}
+        -:  302:
+        1:  303:	fseek(bm_fp, 0L, SEEK_SET);
+        1:  303-block  0
+call    0 returned 1
+        -:  304:
+        1:  305:	bookmarks = (struct bookmarks_t *)xnmalloc(bm_total + 1,
+call    0 returned 1
+        -:  306:	    sizeof(struct bookmarks_t));
+        -:  307:
+        1:  308:	size_t line_size = 0;
+        1:  309:	char *line = (char *)NULL;
+        1:  310:	ssize_t line_len = 0;
+        -:  311:
+       27:  312:	while ((line_len = getline(&line, &line_size, bm_fp)) > 0) {
+unconditional  0 taken 1
+       27:  312-block  0
+call    1 returned 27
+branch  2 taken 26
+branch  3 taken 1 (fallthrough)
+        -:  313:
+       26:  314:		if (!*line || *line == '\n' || *line == '#')
+       26:  314-block  0
+branch  0 taken 26 (fallthrough)
+branch  1 taken 0
+       26:  314-block  1
+branch  2 taken 26 (fallthrough)
+branch  3 taken 0
+       26:  314-block  2
+branch  4 taken 4 (fallthrough)
+branch  5 taken 22
+        4:  315:			continue;
+        4:  315-block  0
+unconditional  0 taken 4
+        -:  316:
+       22:  317:		if (line[line_len - 1] == '\n')
+       22:  317-block  0
+branch  0 taken 22 (fallthrough)
+branch  1 taken 0
+       22:  318:			line[line_len - 1] = '\0';
+       22:  318-block  0
+unconditional  0 taken 22
+        -:  319:
+        -:  320:		/* Neither hotkey nor name, but only a path */
+      22*:  321:		if (*line == '/') {
+       22:  321-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 22
+    #####:  322:			bookmarks[bm_n].shortcut = (char *)NULL;
+    #####:  323:			bookmarks[bm_n].name = (char *)NULL;
+        -:  324:
+    #####:  325:			bookmarks[bm_n++].path = savestring(line, strlen(line));
+    %%%%%:  325-block  0
+call    0 never executed
+        -:  326:
+    #####:  327:			continue;
+unconditional  0 never executed
+        -:  328:		}
+        -:  329:
+       22:  330:		if (*line == '[') {
+       22:  330-block  0
+branch  0 taken 22 (fallthrough)
+branch  1 taken 0
+       22:  331:			char *p = line;
+       22:  332:			p++;
+       22:  333:			char *tmp = strchr(line, ']');
+        -:  334:
+      22*:  335:			if (!tmp) {
+       22:  335-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 22
+    #####:  336:				bookmarks[bm_n].shortcut = (char *)NULL;
+    #####:  337:				bookmarks[bm_n].name = (char *)NULL;
+    #####:  338:				bookmarks[bm_n++].path = (char *)NULL;
+    #####:  339:				continue;
+    %%%%%:  339-block  0
+unconditional  0 never executed
+        -:  340:			}
+        -:  341:
+       22:  342:			*tmp = '\0';
+        -:  343:
+       22:  344:			bookmarks[bm_n].shortcut = savestring(p, strlen(p));
+       22:  344-block  0
+call    0 returned 22
+        -:  345:
+       22:  346:			tmp++;
+       22:  347:			p = tmp;
+        -:  348:
+       22:  349:			tmp = strchr(p, ':');
+        -:  350:
+       22:  351:			if (!tmp) {
+branch  0 taken 4 (fallthrough)
+branch  1 taken 18
+        -:  352:
+        4:  353:				bookmarks[bm_n].name = (char *)NULL;
+        -:  354:
+        4:  355:				if (*p)
+        4:  355-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 0
+        4:  356:					bookmarks[bm_n++].path = savestring(p, strlen(p));
+        4:  356-block  0
+call    0 returned 4
+unconditional  1 taken 4
+        -:  357:
+        -:  358:				else
+    #####:  359:					bookmarks[bm_n++].path = (char *)NULL;
+    %%%%%:  359-block  0
+unconditional  0 never executed
+        -:  360:
+        4:  361:				continue;
+        4:  361-block  0
+unconditional  0 taken 4
+        -:  362:			}
+        -:  363:
+       18:  364:			*tmp = '\0';
+       18:  365:			bookmarks[bm_n].name = savestring(p, strlen(p));
+       18:  365-block  0
+call    0 returned 18
+        -:  366:
+      18*:  367:			if (!*(++tmp)) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 18
+    #####:  368:				bookmarks[bm_n++].path = (char *)NULL;
+    #####:  369:				continue;
+    %%%%%:  369-block  0
+unconditional  0 never executed
+        -:  370:			}
+        -:  371:
+       18:  372:			bookmarks[bm_n++].path = savestring(tmp, strlen(tmp));
+       18:  372-block  0
+call    0 returned 18
+        -:  373:
+       18:  374:			continue;
+unconditional  0 taken 18
+        -:  375:		}
+        -:  376:
+        -:  377:		/* No shortcut. Let's try with name */
+    #####:  378:		bookmarks[bm_n].shortcut = (char *)NULL;
+        -:  379:
+    #####:  380:		char *tmp = strchr(line, ':');
+        -:  381:
+        -:  382:		/* No name either */
+    #####:  383:		if (!tmp)
+    %%%%%:  383-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  384:			bookmarks[bm_n].name = (char *)NULL;
+    %%%%%:  384-block  0
+unconditional  0 never executed
+        -:  385:
+        -:  386:		else {
+    #####:  387:			*tmp = '\0';
+    #####:  388:			bookmarks[bm_n].name = savestring(line, strlen(line));
+    %%%%%:  388-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  389:		}
+        -:  390:
+    #####:  391:		if (!*(++tmp)) {
+    %%%%%:  391-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  392:			bookmarks[bm_n++].path = (char *)NULL;
+    #####:  393:			continue;
+    %%%%%:  393-block  0
+unconditional  0 never executed
+        -:  394:		}
+        -:  395:
+        -:  396:		else
+    #####:  397:			bookmarks[bm_n++].path = savestring(tmp, strlen(tmp));
+    %%%%%:  397-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  398:	}
+        -:  399:
+        1:  400:	free(line);
+        1:  401:	fclose(bm_fp);
+        1:  401-block  0
+call    0 returned 1
+        -:  402:
+        1:  403:	if (!bm_n) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  404:		free(bookmarks);
+    #####:  405:		bookmarks = (struct bookmarks_t *)NULL;
+    #####:  406:		return EXIT_SUCCESS;
+    %%%%%:  406-block  0
+unconditional  0 never executed
+        -:  407:	}
+        -:  408:
+        -:  409:	/* bookmark_names array shouldn't exist: is only used for bookmark
+        -:  410:	 * completion. xbookmarks[i].name should be used instead, but is
+        -:  411:	 * currently not working */
+        -:  412:
+        1:  413:	size_t i, j = 0;
+        -:  414:
+        1:  415:	bookmark_names = (char **)xnmalloc(bm_n + 2, sizeof(char *));
+        1:  415-block  0
+call    0 returned 1
+        -:  416:
+       23:  417:	for (i = 0; i < bm_n; i++) {
+unconditional  0 taken 1
+       22:  417-block  0
+unconditional  1 taken 22
+       23:  417-block  1
+branch  2 taken 22
+branch  3 taken 1 (fallthrough)
+        -:  418:
+       22:  419:		if (!bookmarks[i].name || !*bookmarks[i].name)
+       22:  419-block  0
+branch  0 taken 18 (fallthrough)
+branch  1 taken 4
+       18:  419-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 18
+        4:  420:			continue;
+        4:  420-block  0
+unconditional  0 taken 4
+        -:  421:
+       18:  422:		bookmark_names[j++] = savestring(bookmarks[i].name,
+unconditional  0 taken 18
+       18:  423:		    strlen(bookmarks[i].name));
+       18:  423-block  0
+call    0 returned 18
+        -:  424:	}
+        -:  425:
+        1:  426:	bookmark_names[j] = (char *)NULL;
+        -:  427:
+        1:  428:	return EXIT_SUCCESS;
+        1:  428-block  0
+unconditional  0 taken 1
+        -:  429:}
+        -:  430:
+        -:  431:/* Store actions from the actions file into a struct */
+        -:  432:int
+function load_actions called 1 returned 100% blocks executed 73%
+        1:  433:load_actions(void)
+        -:  434:{
+        1:  435:	if (!config_ok)
+        1:  435-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  436:		return EXIT_FAILURE;
+    %%%%%:  436-block  0
+unconditional  0 never executed
+        -:  437:
+        -:  438:	/* Free the actions struct array */
+        1:  439:	if (actions_n) {
+        1:  439-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  440:		int i = (int)actions_n;
+        -:  441:
+    #####:  442:		while (--i >= 0) {
+    %%%%%:  442-block  0
+unconditional  0 never executed
+    %%%%%:  442-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  443:			free(usr_actions[i].name);
+    #####:  444:			free(usr_actions[i].value);
+    %%%%%:  444-block  0
+unconditional  0 never executed
+        -:  445:		}
+        -:  446:
+    #####:  447:		free(usr_actions);
+    #####:  448:		usr_actions = (struct actions_t *)xnmalloc(1, sizeof(struct actions_t));
+    %%%%%:  448-block  0
+call    0 never executed
+    #####:  449:		actions_n = 0;
+unconditional  0 never executed
+        -:  450:	}
+        -:  451:
+        -:  452:	/* Open the actions file */
+        1:  453:	FILE *actions_fp = fopen(ACTIONS_FILE, "r");
+        1:  453-block  0
+call    0 returned 1
+        -:  454:
+        1:  455:	if (!actions_fp)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  456:		return EXIT_FAILURE;
+    %%%%%:  456-block  0
+unconditional  0 never executed
+        -:  457:
+        1:  458:	size_t line_size = 0;
+        1:  459:	char *line = (char *)NULL;
+        1:  460:	ssize_t line_len = 0;
+        -:  461:
+       40:  462:	while ((line_len = getline(&line, &line_size, actions_fp)) > 0) {
+        1:  462-block  0
+unconditional  0 taken 1
+       40:  462-block  1
+call    1 returned 40
+branch  2 taken 39
+branch  3 taken 1 (fallthrough)
+        -:  463:
+       39:  464:		if (!line || !*line || *line == '#' || *line == '\n')
+       39:  464-block  0
+branch  0 taken 39 (fallthrough)
+branch  1 taken 0
+       39:  464-block  1
+branch  2 taken 39 (fallthrough)
+branch  3 taken 0
+       39:  464-block  2
+branch  4 taken 26 (fallthrough)
+branch  5 taken 13
+       26:  464-block  3
+branch  6 taken 3 (fallthrough)
+branch  7 taken 23
+       16:  465:			continue;
+       16:  465-block  0
+unconditional  0 taken 16
+        -:  466:
+       23:  467:		if (line[line_len - 1] == '\n')
+       23:  467-block  0
+branch  0 taken 23 (fallthrough)
+branch  1 taken 0
+       23:  468:			line[line_len - 1] = '\0';
+       23:  468-block  0
+unconditional  0 taken 23
+        -:  469:
+       23:  470:		char *tmp = (char *)NULL;
+       23:  471:		tmp = strrchr(line, '=');
+        -:  472:
+      23*:  473:		if (!tmp)
+       23:  473-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 23
+    #####:  474:			continue;
+    %%%%%:  474-block  0
+unconditional  0 never executed
+        -:  475:
+        -:  476:		/* Now copy left and right value of each action into the
+        -:  477:		 * actions struct */
+       23:  478:		usr_actions = xrealloc(usr_actions, (size_t)(actions_n + 1)
+       23:  478-block  0
+call    0 returned 23
+        -:  479:								* sizeof(struct actions_t));
+        -:  480:
+       23:  481:		usr_actions[actions_n].value = savestring(tmp + 1, strlen(tmp + 1));
+call    0 returned 23
+       23:  482:		*tmp = '\0';
+        -:  483:
+       23:  484:		usr_actions[actions_n++].name = savestring(line, strlen(line));
+call    0 returned 23
+unconditional  1 taken 23
+        -:  485:	}
+        -:  486:
+        1:  487:	free(line);
+        -:  488:
+        1:  489:	return EXIT_SUCCESS;
+        1:  489-block  0
+unconditional  0 taken 1
+        -:  490:}
+        -:  491:
+        -:  492:/* Evaluate external arguments, if any, and change initial variables to
+        -:  493: * its corresponding value */
+        -:  494:void
+function external_arguments called 0 returned 0% blocks executed 0%
+    #####:  495:external_arguments(int argc, char **argv)
+        -:  496:{
+        -:  497:	/* Disable automatic error messages to be able to handle them
+        -:  498:	 * myself via the '?' case in the switch */
+    #####:  499:	opterr = optind = 0;
+        -:  500:
+        -:  501:	/* Link long (--option) and short options (-o) for the getopt_long
+        -:  502:	 * function */
+        -:  503:	static struct option longopts[] = {
+        -:  504:	    {"no-hidden", no_argument, 0, 'a'},
+        -:  505:	    {"show-hidden", no_argument, 0, 'A'},
+        -:  506:	    {"bookmarks-file", no_argument, 0, 'b'},
+        -:  507:	    {"config-file", no_argument, 0, 'c'},
+        -:  508:	    {"no-eln", no_argument, 0, 'e'},
+        -:  509:	    {"no-folders-first", no_argument, 0, 'f'},
+        -:  510:	    {"folders-first", no_argument, 0, 'F'},
+        -:  511:	    {"pager", no_argument, 0, 'g'},
+        -:  512:	    {"no-pager", no_argument, 0, 'G'},
+        -:  513:	    {"help", no_argument, 0, 'h'},
+        -:  514:	    {"no-case-sensitive", no_argument, 0, 'i'},
+        -:  515:	    {"case-sensitive", no_argument, 0, 'I'},
+        -:  516:	    {"keybindings-file", no_argument, 0, 'k'},
+        -:  517:	    {"no-long-view", no_argument, 0, 'l'},
+        -:  518:	    {"long-view", no_argument, 0, 'L'},
+        -:  519:	    {"dirhist-map", no_argument, 0, 'm'},
+        -:  520:	    {"no-list-on-the-fly", no_argument, 0, 'o'},
+        -:  521:	    {"list-on-the-fly", no_argument, 0, 'O'},
+        -:  522:	    {"path", required_argument, 0, 'p'},
+        -:  523:	    {"profile", required_argument, 0, 'P'},
+        -:  524:	    {"splash", no_argument, 0, 's'},
+        -:  525:	    {"stealth-mode", no_argument, 0, 'S'},
+        -:  526:	    {"unicode", no_argument, 0, 'U'},
+        -:  527:	    {"no-unicode", no_argument, 0, 'u'},
+        -:  528:	    {"version", no_argument, 0, 'v'},
+        -:  529:	    {"workspace", required_argument, 0, 'w'},
+        -:  530:	    {"ext-cmds", no_argument, 0, 'x'},
+        -:  531:	    {"light", no_argument, 0, 'y'},
+        -:  532:	    {"sort", required_argument, 0, 'z'},
+        -:  533:
+        -:  534:	    /* Only long options */
+        -:  535:	    {"no-cd-auto", no_argument, 0, 0},
+        -:  536:	    {"no-open-auto", no_argument, 0, 1},
+        -:  537:	    {"restore-last-path", no_argument, 0, 2},
+        -:  538:	    {"no-tips", no_argument, 0, 3},
+        -:  539:	    {"disk-usage", no_argument, 0, 4},
+        -:  540:	    {"no-classify", no_argument, 0, 6},
+        -:  541:	    {"share-selbox", no_argument, 0, 7},
+        -:  542:	    {"rl-vi-mode", no_argument, 0, 8},
+        -:  543:	    {"max-dirhist", required_argument, 0, 9},
+        -:  544:	    {"sort-reverse", no_argument, 0, 10},
+        -:  545:	    {"no-files-counter", no_argument, 0, 11},
+        -:  546:	    {"no-welcome-message", no_argument, 0, 12},
+        -:  547:	    {"no-clear-screen", no_argument, 0, 13},
+        -:  548:	    {"enable-logs", no_argument, 0, 15},
+        -:  549:	    {"max-path", required_argument, 0, 16},
+        -:  550:	    {"opener", required_argument, 0, 17},
+        -:  551:	    {"expand-bookmarks", no_argument, 0, 18},
+        -:  552:	    {"only-dirs", no_argument, 0, 19},
+        -:  553:	    {"list-and-quit", no_argument, 0, 20},
+        -:  554:	    {"color-scheme", required_argument, 0, 21},
+        -:  555:	    {"cd-on-quit", no_argument, 0, 22},
+        -:  556:	    {"no-dir-jumper", no_argument, 0, 23},
+        -:  557:	    {"icons", no_argument, 0, 24},
+        -:  558:	    {"icons-use-file-color", no_argument, 0, 25},
+        -:  559:	    {"no-columns", no_argument, 0, 26},
+        -:  560:	    {"no-colors", no_argument, 0, 27},
+        -:  561:	    {"max-files", required_argument, 0, 28},
+        -:  562:	    {"trash-as-rm", no_argument, 0, 29},
+        -:  563:	    {"case-ins-dirjump", no_argument, 0, 30},
+        -:  564:	    {"case-ins-path-comp", no_argument, 0, 31},
+        -:  565:	    {"cwd-in-title", no_argument, 0, 32},
+        -:  566:	    {"open", required_argument, 0, 33},
+        -:  567:	    {0, 0, 0, 0}};
+        -:  568:
+        -:  569:	/* Increment whenever a new (only) long option is added */
+    #####:  570:	int long_opts = 33;
+        -:  571:
+        -:  572:	int optc;
+        -:  573:	/* Variables to store arguments to options (-c, -p and -P) */
+    #####:  574:	char *path_value = (char *)NULL,
+    #####:  575:		 *alt_profile_value = (char *)NULL,
+    #####:  576:	     *config_value = (char *)NULL,
+    #####:  577:	     *kbinds_value = (char *)NULL,
+    #####:  578:	     *bm_value = (char *)NULL;
+        -:  579:
+    #####:  580:	while ((optc = getopt_long(argc, argv,
+    %%%%%:  580-block  0
+unconditional  0 never executed
+    %%%%%:  580-block  1
+call    1 never executed
+        -:  581:		    "+aAb:c:efFgGhiIk:lLmoOp:P:sSUuvw:xyz:", longopts,
+    #####:  582:		    (int *)0)) != EOF) {
+branch  0 never executed
+branch  1 never executed
+        -:  583:		/* ':' and '::' in the short options string means 'required' and
+        -:  584:		 * 'optional argument' respectivelly. Thus, 'p' and 'P' require
+        -:  585:		 * an argument here. The plus char (+) tells getopt to stop
+        -:  586:		 * processing at the first non-option (and non-argument) */
+    #####:  587:		switch (optc) {
+    %%%%%:  587-block  0
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+branch  6 never executed
+branch  7 never executed
+branch  8 never executed
+branch  9 never executed
+branch 10 never executed
+branch 11 never executed
+branch 12 never executed
+branch 13 never executed
+branch 14 never executed
+branch 15 never executed
+branch 16 never executed
+branch 17 never executed
+branch 18 never executed
+branch 19 never executed
+branch 20 never executed
+branch 21 never executed
+branch 22 never executed
+branch 23 never executed
+branch 24 never executed
+branch 25 never executed
+branch 26 never executed
+branch 27 never executed
+branch 28 never executed
+branch 29 never executed
+branch 30 never executed
+branch 31 never executed
+branch 32 never executed
+branch 33 never executed
+branch 34 never executed
+branch 35 never executed
+branch 36 never executed
+branch 37 never executed
+branch 38 never executed
+branch 39 never executed
+branch 40 never executed
+branch 41 never executed
+branch 42 never executed
+branch 43 never executed
+branch 44 never executed
+branch 45 never executed
+branch 46 never executed
+branch 47 never executed
+branch 48 never executed
+branch 49 never executed
+branch 50 never executed
+branch 51 never executed
+branch 52 never executed
+branch 53 never executed
+branch 54 never executed
+branch 55 never executed
+branch 56 never executed
+branch 57 never executed
+branch 58 never executed
+branch 59 never executed
+branch 60 never executed
+branch 61 never executed
+branch 62 never executed
+        -:  588:
+    #####:  589:		case 0:
+    #####:  590:			xargs.autocd = autocd = 0;
+    #####:  591:			break;
+    %%%%%:  591-block  0
+unconditional  0 never executed
+        -:  592:
+    #####:  593:		case 1:
+    #####:  594:			xargs.auto_open = auto_open = 0;
+    #####:  595:			break;
+    %%%%%:  595-block  0
+unconditional  0 never executed
+        -:  596:
+    #####:  597:		case 2:
+    #####:  598:			xargs.restore_last_path = restore_last_path = 1;
+    #####:  599:			break;
+    %%%%%:  599-block  0
+unconditional  0 never executed
+        -:  600:
+    #####:  601:		case 3:
+    #####:  602:			xargs.tips = tips = 0;
+    #####:  603:			break;
+    %%%%%:  603-block  0
+unconditional  0 never executed
+        -:  604:
+    #####:  605:		case 4:
+    #####:  606:			xargs.disk_usage = disk_usage = 1;
+    #####:  607:			break;
+    %%%%%:  607-block  0
+unconditional  0 never executed
+        -:  608:
+    #####:  609:		case 6:
+    #####:  610:			xargs.classify = classify = 0;
+    #####:  611:			break;
+    %%%%%:  611-block  0
+unconditional  0 never executed
+        -:  612:
+    #####:  613:		case 7:
+    #####:  614:			xargs.share_selbox = share_selbox = 1;
+    #####:  615:			break;
+    %%%%%:  615-block  0
+unconditional  0 never executed
+        -:  616:
+    #####:  617:		case 8:
+    #####:  618:			xargs.rl_vi_mode = 1;
+    #####:  619:			break;
+    %%%%%:  619-block  0
+unconditional  0 never executed
+        -:  620:
+    #####:  621:		case 9: {
+    #####:  622:			if (!is_number(optarg))
+    %%%%%:  622-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  623:				break;
+    %%%%%:  623-block  0
+unconditional  0 never executed
+    #####:  624:			int opt_int = atoi(optarg);
+    #####:  625:			if (opt_int >= 0)
+    %%%%%:  625-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  626:				xargs.max_dirhist = max_dirhist = opt_int;
+    %%%%%:  626-block  0
+unconditional  0 never executed
+    #####:  627:		} break;
+    %%%%%:  627-block  0
+unconditional  0 never executed
+        -:  628:
+    #####:  629:		case 10:
+    #####:  630:			xargs.sort_reverse = sort_reverse = 1;
+    #####:  631:			break;
+    %%%%%:  631-block  0
+unconditional  0 never executed
+        -:  632:
+    #####:  633:		case 11:
+    #####:  634:			xargs.files_counter = files_counter = 0;
+    #####:  635:			break;
+    %%%%%:  635-block  0
+unconditional  0 never executed
+        -:  636:
+    #####:  637:		case 12:
+    #####:  638:			xargs.welcome_message = welcome_message = 0;
+    #####:  639:			break;
+    %%%%%:  639-block  0
+unconditional  0 never executed
+        -:  640:
+    #####:  641:		case 13:
+    #####:  642:			xargs.clear_screen = clear_screen = 0;
+    #####:  643:			break;
+    %%%%%:  643-block  0
+unconditional  0 never executed
+        -:  644:
+    #####:  645:		case 15:
+    #####:  646:			xargs.logs = logs_enabled = 1;
+    #####:  647:			break;
+    %%%%%:  647-block  0
+unconditional  0 never executed
+        -:  648:
+    #####:  649:		case 16: {
+    #####:  650:			if (!is_number(optarg))
+    %%%%%:  650-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  651:				break;
+    %%%%%:  651-block  0
+unconditional  0 never executed
+    #####:  652:			int opt_int = atoi(optarg);
+    #####:  653:			if (opt_int >= 0)
+    %%%%%:  653-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  654:				xargs.max_path = max_path = opt_int;
+    %%%%%:  654-block  0
+unconditional  0 never executed
+    #####:  655:		} break;
+    %%%%%:  655-block  0
+unconditional  0 never executed
+        -:  656:
+    #####:  657:		case 17:
+    #####:  658:			opener = savestring(optarg, strlen(optarg));
+    %%%%%:  658-block  0
+call    0 never executed
+    #####:  659:			break;
+unconditional  0 never executed
+        -:  660:
+    #####:  661:		case 18:
+    #####:  662:			xargs.expand_bookmarks = expand_bookmarks = 1;
+    #####:  663:			break;
+    %%%%%:  663-block  0
+unconditional  0 never executed
+        -:  664:
+    #####:  665:		case 19:
+    #####:  666:			xargs.only_dirs = only_dirs = 1;
+    #####:  667:			break;
+    %%%%%:  667-block  0
+unconditional  0 never executed
+        -:  668:
+    #####:  669:		case 20:
+    #####:  670:			xargs.list_and_quit = 1;
+    #####:  671:			break;
+    %%%%%:  671-block  0
+unconditional  0 never executed
+        -:  672:
+    #####:  673:		case 21:
+    #####:  674:			usr_cscheme = savestring(optarg, strlen(optarg));
+    %%%%%:  674-block  0
+call    0 never executed
+    #####:  675:			break;
+unconditional  0 never executed
+        -:  676:
+    #####:  677:		case 22:
+    #####:  678:			xargs.cd_on_quit = cd_on_quit = 1;
+    #####:  679:			break;
+    %%%%%:  679-block  0
+unconditional  0 never executed
+        -:  680:
+    #####:  681:		case 23:
+    #####:  682:			xargs.no_dirjump = 1;
+    #####:  683:			break;
+    %%%%%:  683-block  0
+unconditional  0 never executed
+        -:  684:
+    #####:  685:		case 24:
+    #####:  686:			xargs.icons = icons = 1;
+    #####:  687:			break;
+    %%%%%:  687-block  0
+unconditional  0 never executed
+        -:  688:
+    #####:  689:		case 25:
+    #####:  690:			xargs.icons = icons = 1;
+    #####:  691:			xargs.icons_use_file_color = 1;
+    #####:  692:			break;
+    %%%%%:  692-block  0
+unconditional  0 never executed
+        -:  693:
+    #####:  694:		case 26:
+    #####:  695:			xargs.no_columns = 1;
+    #####:  696:			columned = 0;
+    #####:  697:			break;
+    %%%%%:  697-block  0
+unconditional  0 never executed
+        -:  698:
+    #####:  699:		case 27:
+    #####:  700:			xargs.no_colors = 1;
+    #####:  701:			colorize = 0;
+    #####:  702:			break;
+    %%%%%:  702-block  0
+unconditional  0 never executed
+        -:  703:
+    #####:  704:		case 28:
+    #####:  705:			if (!is_number(optarg))
+    %%%%%:  705-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  706:				break;
+    %%%%%:  706-block  0
+unconditional  0 never executed
+    #####:  707:			int opt_int = atoi(optarg);
+    #####:  708:			if (opt_int >= 0)
+    %%%%%:  708-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  709:				xargs.max_files = max_files = opt_int;
+    %%%%%:  709-block  0
+unconditional  0 never executed
+    #####:  710:			break;
+    %%%%%:  710-block  0
+unconditional  0 never executed
+        -:  711:
+    #####:  712:		case 29:
+    #####:  713:			xargs.trasrm = tr_as_rm = 1;
+    #####:  714:			break;
+    %%%%%:  714-block  0
+unconditional  0 never executed
+        -:  715:
+    #####:  716:		case 30:
+    #####:  717:			xargs.case_sens_dirjump = case_sens_dirjump = 0;
+    #####:  718:			break;
+    %%%%%:  718-block  0
+unconditional  0 never executed
+        -:  719:
+    #####:  720:		case 31:
+    #####:  721:			xargs.case_sens_path_comp = case_sens_path_comp = 0;
+    #####:  722:			break;
+    %%%%%:  722-block  0
+unconditional  0 never executed
+        -:  723:
+    #####:  724:		case 32:
+    #####:  725:			xargs.cwd_in_title = 1;
+    #####:  726:			break;
+    %%%%%:  726-block  0
+unconditional  0 never executed
+        -:  727:
+    #####:  728:		case 33: {
+        -:  729:			struct stat attr;
+        -:  730:
+    #####:  731:			if (stat(optarg, &attr) == -1) {
+    %%%%%:  731-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  732:				fprintf(stderr, "%s: %s: %s", PROGRAM_NAME, optarg,
+call    0 never executed
+    #####:  733:				    strerror(errno));
+    %%%%%:  733-block  0
+call    0 never executed
+    #####:  734:				exit(EXIT_FAILURE);
+call    0 never executed
+        -:  735:			}
+        -:  736:
+    #####:  737:			if ((attr.st_mode & S_IFMT) != S_IFDIR) {
+    %%%%%:  737-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  738:				TMP_DIR = (char *)xnmalloc(5, sizeof(char));
+    %%%%%:  738-block  0
+call    0 never executed
+    #####:  739:				strcpy(TMP_DIR, "/tmp");
+    #####:  740:				MIME_FILE = (char *)xnmalloc(PATH_MAX, sizeof(char));
+call    0 never executed
+    #####:  741:				snprintf(MIME_FILE, PATH_MAX,
+    %%%%%:  741-block  0
+unconditional  0 never executed
+    %%%%%:  741-block  1
+unconditional  1 never executed
+    %%%%%:  741-block  2
+call    2 never executed
+        -:  742:				    "%s/.config/clifm/profiles/%s/mimelist.cfm",
+    #####:  743:				    getenv("HOME"), alt_profile ? alt_profile : "default");
+branch  0 never executed
+branch  1 never executed
+    #####:  744:				char *cmd[] = {"mm", optarg, NULL};
+    #####:  745:				int ret = mime_open(cmd);
+call    0 never executed
+    #####:  746:				exit(ret);
+call    0 never executed
+        -:  747:			}
+        -:  748:
+    #####:  749:			printf(_("%s: %s: Is a directory\n"), PROGRAM_NAME, optarg);
+    %%%%%:  749-block  0
+call    0 never executed
+    #####:  750:			exit(EXIT_FAILURE);
+call    0 never executed
+        -:  751:
+        -:  752:			/*			flags |= START_PATH;
+        -:  753:			path_value = optarg;
+        -:  754:			xargs.path = 1; */
+        -:  755:		} break;
+        -:  756:
+    #####:  757:		case 'a':
+    #####:  758:			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
+    #####:  759:			show_hidden = xargs.hidden = 0;
+    #####:  760:			break;
+    %%%%%:  760-block  0
+unconditional  0 never executed
+        -:  761:
+    #####:  762:		case 'A':
+    #####:  763:			flags |= HIDDEN; /* Add HIDDEN to 'flags' */
+    #####:  764:			show_hidden = xargs.hidden = 1;
+    #####:  765:			break;
+    %%%%%:  765-block  0
+unconditional  0 never executed
+        -:  766:
+    #####:  767:		case 'b':
+    #####:  768:			xargs.bm_file = 1;
+    #####:  769:			bm_value = optarg;
+    #####:  770:			break;
+    %%%%%:  770-block  0
+unconditional  0 never executed
+        -:  771:
+    #####:  772:		case 'c':
+    #####:  773:			xargs.config = 1;
+    #####:  774:			config_value = optarg;
+    #####:  775:			break;
+    %%%%%:  775-block  0
+unconditional  0 never executed
+        -:  776:
+    #####:  777:		case 'e':
+    #####:  778:			xargs.noeln = no_eln = 1;
+    #####:  779:			break;
+    %%%%%:  779-block  0
+unconditional  0 never executed
+        -:  780:
+    #####:  781:		case 'f':
+    #####:  782:			flags &= ~FOLDERS_FIRST;
+    #####:  783:			list_folders_first = xargs.ffirst = 0;
+    #####:  784:			break;
+    %%%%%:  784-block  0
+unconditional  0 never executed
+        -:  785:
+    #####:  786:		case 'F':
+    #####:  787:			flags |= FOLDERS_FIRST;
+    #####:  788:			list_folders_first = xargs.ffirst = 1;
+    #####:  789:			break;
+    %%%%%:  789-block  0
+unconditional  0 never executed
+        -:  790:
+    #####:  791:		case 'g':
+    #####:  792:			pager = xargs.pager = 1;
+    #####:  793:			break;
+    %%%%%:  793-block  0
+unconditional  0 never executed
+        -:  794:
+    #####:  795:		case 'G':
+    #####:  796:			pager = xargs.pager = 0;
+    #####:  797:			break;
+    %%%%%:  797-block  0
+unconditional  0 never executed
+        -:  798:
+    #####:  799:		case 'h':
+    #####:  800:			flags |= HELP;
+        -:  801:			/* Do not display "Press any key to continue" */
+    #####:  802:			flags |= EXT_HELP;
+    #####:  803:			help_function();
+    %%%%%:  803-block  0
+call    0 never executed
+    #####:  804:			exit(EXIT_SUCCESS);
+call    0 never executed
+        -:  805:
+    #####:  806:		case 'i':
+    #####:  807:			flags &= ~CASE_SENS;
+    #####:  808:			case_sensitive = xargs.sensitive = 0;
+    #####:  809:			break;
+    %%%%%:  809-block  0
+unconditional  0 never executed
+        -:  810:
+    #####:  811:		case 'I':
+    #####:  812:			flags |= CASE_SENS;
+    #####:  813:			case_sensitive = xargs.sensitive = 1;
+    #####:  814:			break;
+    %%%%%:  814-block  0
+unconditional  0 never executed
+        -:  815:
+    #####:  816:		case 'k':
+    #####:  817:			kbinds_value = optarg;
+    #####:  818:			break;
+    %%%%%:  818-block  0
+unconditional  0 never executed
+        -:  819:
+    #####:  820:		case 'l':
+    #####:  821:			long_view = xargs.longview = 0;
+    #####:  822:			break;
+    %%%%%:  822-block  0
+unconditional  0 never executed
+        -:  823:
+    #####:  824:		case 'L':
+    #####:  825:			long_view = xargs.longview = 1;
+    #####:  826:			break;
+    %%%%%:  826-block  0
+unconditional  0 never executed
+        -:  827:
+    #####:  828:		case 'm':
+    #####:  829:			dirhist_map = xargs.dirmap = 1;
+    #####:  830:			break;
+    %%%%%:  830-block  0
+unconditional  0 never executed
+        -:  831:
+    #####:  832:		case 'o':
+    #####:  833:			flags &= ~ON_THE_FLY;
+    #####:  834:			cd_lists_on_the_fly = xargs.cd_list_auto = 0;
+    #####:  835:			break;
+    %%%%%:  835-block  0
+unconditional  0 never executed
+        -:  836:
+    #####:  837:		case 'O':
+    #####:  838:			flags |= ON_THE_FLY;
+    #####:  839:			cd_lists_on_the_fly = xargs.cd_list_auto = 1;
+    #####:  840:			break;
+    %%%%%:  840-block  0
+unconditional  0 never executed
+        -:  841:
+    #####:  842:		case 'p':
+    #####:  843:			flags |= START_PATH;
+    #####:  844:			path_value = optarg;
+    #####:  845:			xargs.path = 1;
+    #####:  846:			break;
+    %%%%%:  846-block  0
+unconditional  0 never executed
+        -:  847:
+    #####:  848:		case 'P':
+    #####:  849:			flags |= ALT_PROFILE;
+    #####:  850:			alt_profile_value = optarg;
+    #####:  851:			break;
+    %%%%%:  851-block  0
+unconditional  0 never executed
+        -:  852:
+    #####:  853:		case 's':
+    #####:  854:			flags |= SPLASH;
+    #####:  855:			splash_screen = xargs.splash = 1;
+    #####:  856:			break;
+    %%%%%:  856-block  0
+unconditional  0 never executed
+        -:  857:
+    #####:  858:		case 'S':
+    #####:  859:			xargs.stealth_mode = 1;
+    #####:  860:			break;
+    %%%%%:  860-block  0
+unconditional  0 never executed
+        -:  861:
+    #####:  862:		case 'u':
+    #####:  863:			unicode = xargs.unicode = 0;
+    #####:  864:			break;
+    %%%%%:  864-block  0
+unconditional  0 never executed
+        -:  865:
+    #####:  866:		case 'U':
+    #####:  867:			unicode = xargs.unicode = 1;
+    #####:  868:			break;
+    %%%%%:  868-block  0
+unconditional  0 never executed
+        -:  869:
+    #####:  870:		case 'v':
+    #####:  871:			flags |= PRINT_VERSION;
+    #####:  872:			version_function();
+    %%%%%:  872-block  0
+call    0 never executed
+    #####:  873:			exit(EXIT_SUCCESS);
+call    0 never executed
+        -:  874:
+    #####:  875:		case 'w': {
+    #####:  876:			if (!is_number(optarg))
+    %%%%%:  876-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  877:				break;
+    %%%%%:  877-block  0
+unconditional  0 never executed
+    #####:  878:			int iopt = atoi(optarg);
+        -:  879:
+    #####:  880:			if (iopt >= 0 && iopt <= MAX_WS)
+    %%%%%:  880-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  880-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  881:				cur_ws = iopt - 1;
+    %%%%%:  881-block  0
+unconditional  0 never executed
+    #####:  882:		} break;
+    %%%%%:  882-block  0
+unconditional  0 never executed
+        -:  883:
+    #####:  884:		case 'x':
+    #####:  885:			ext_cmd_ok = xargs.ext = 1;
+    #####:  886:			break;
+    %%%%%:  886-block  0
+unconditional  0 never executed
+        -:  887:
+    #####:  888:		case 'y':
+    #####:  889:			light_mode = xargs.light = 1;
+    #####:  890:			break;
+    %%%%%:  890-block  0
+unconditional  0 never executed
+        -:  891:
+    #####:  892:		case 'z': {
+    #####:  893:			int arg = atoi(optarg);
+        -:  894:
+    #####:  895:			if (!is_number(optarg) || arg < 0 || arg > SORT_TYPES)
+    %%%%%:  895-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    %%%%%:  895-block  1
+branch  3 never executed
+branch  4 never executed
+    %%%%%:  895-block  2
+branch  5 never executed
+branch  6 never executed
+    #####:  896:				sort = 1;
+    %%%%%:  896-block  0
+unconditional  0 never executed
+        -:  897:			else
+    #####:  898:				sort = arg;
+    %%%%%:  898-block  0
+unconditional  0 never executed
+        -:  899:
+    #####:  900:			xargs.sort = sort;
+    #####:  901:		} break;
+    %%%%%:  901-block  0
+unconditional  0 never executed
+        -:  902:
+    #####:  903:		case '?': /* If some unrecognized option is found... */
+        -:  904:
+        -:  905:			/* Options that requires an argument */
+        -:  906:			/* Short options */
+    #####:  907:			switch (optopt) {
+    %%%%%:  907-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  908:			case 'b': /* fallthrough */
+        -:  909:			case 'c': /* fallthrough */
+        -:  910:			case 'k': /* fallthrough */
+        -:  911:			case 'p': /* fallthrough */
+        -:  912:			case 'P': /* fallthrough */
+        -:  913:			case 'w': /* fallthrough */
+        -:  914:			case 'z':
+    #####:  915:				fprintf(stderr, _("%s: option requires an argument -- "
+    %%%%%:  915-block  0
+call    0 never executed
+        -:  916:						  "'%c'\nTry '%s --help' for more information.\n"),
+        -:  917:				    PROGRAM_NAME, optopt, PNL);
+    #####:  918:				exit(EXIT_FAILURE);
+call    0 never executed
+        -:  919:			}
+        -:  920:
+        -:  921:			/* Long options */
+    #####:  922:			if (optopt >= 0 && optopt <= long_opts) {
+    %%%%%:  922-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  922-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  923:				fprintf(stderr, _("%s: option requires an argument\nTry '%s "
+    %%%%%:  923-block  0
+call    0 never executed
+        -:  924:					"--help' for more information.\n"), PROGRAM_NAME, PNL);
+    #####:  925:				exit(EXIT_FAILURE);
+call    0 never executed
+        -:  926:			}
+        -:  927:
+        -:  928:			/* If unknown option is printable... */
+    #####:  929:			if (isprint(optopt)) {
+    %%%%%:  929-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  930:				fprintf(stderr, _("%s: invalid option -- '%c'\nUsage: "
+    %%%%%:  930-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  931:						  "%s %s\nTry '%s --help' for more information.\n"),
+        -:  932:				    PROGRAM_NAME, optopt, GRAL_USAGE, PNL, PNL);
+        -:  933:			}
+        -:  934:
+        -:  935:			else {
+    #####:  936:				fprintf(stderr, _("%s: unknown option character '\\%x'\n"),
+    %%%%%:  936-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  937:				    PROGRAM_NAME, (unsigned int)optopt);
+        -:  938:			}
+        -:  939:
+    #####:  940:			exit(EXIT_FAILURE);
+    %%%%%:  940-block  0
+call    0 never executed
+        -:  941:
+    #####:  942:		default:
+    #####:  943:			break;
+    %%%%%:  943-block  0
+unconditional  0 never executed
+        -:  944:		}
+        -:  945:	}
+        -:  946:
+        -:  947:	/* Positional parameters */
+    #####:  948:	int i = optind;
+    #####:  949:	if (argv[i]) {
+    %%%%%:  949-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  950:		flags |= START_PATH;
+    #####:  951:		path_value = argv[i];
+    #####:  952:		xargs.path = 1;
+    %%%%%:  952-block  0
+unconditional  0 never executed
+        -:  953:	}
+        -:  954:	/*	while (argv[i]) {
+        -:  955:		printf("%d: %s\n", i, argv[i]);
+        -:  956:		i++;
+        -:  957:	} */
+        -:  958:
+    #####:  959:	if (bm_value) {
+    %%%%%:  959-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  960:		char *bm_exp = (char *)NULL;
+        -:  961:
+    #####:  962:		if (*bm_value == '~') {
+    %%%%%:  962-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  963:			bm_exp = tilde_expand(bm_value);
+    %%%%%:  963-block  0
+call    0 never executed
+    #####:  964:			bm_value = bm_exp;
+unconditional  0 never executed
+        -:  965:		}
+        -:  966:
+    #####:  967:		if (access(bm_value, R_OK) == -1) {
+    %%%%%:  967-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  968:			_err('e', PRINT_PROMPT, _("%s: %s: %s\n"
+call    0 never executed
+unconditional  1 never executed
+        -:  969:						  "Falling back to the default bookmarks file\n"),
+    #####:  970:			    PROGRAM_NAME, bm_value, strerror(errno));
+    %%%%%:  970-block  0
+call    0 never executed
+        -:  971:		}
+        -:  972:
+        -:  973:		else {
+    #####:  974:			alt_bm_file = savestring(bm_value, strlen(bm_value));
+    %%%%%:  974-block  0
+call    0 never executed
+    #####:  975:			_err('n', PRINT_PROMPT, _("%s: Loaded alternative "
+call    0 never executed
+unconditional  1 never executed
+        -:  976:						  "bookmarks file\n"), PROGRAM_NAME);
+        -:  977:		}
+        -:  978:	}
+        -:  979:
+    #####:  980:	if (kbinds_value) {
+    %%%%%:  980-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  981:		char *kbinds_exp = (char *)NULL;
+        -:  982:
+    #####:  983:		if (*kbinds_value == '~') {
+    %%%%%:  983-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  984:			kbinds_exp = tilde_expand(kbinds_value);
+    %%%%%:  984-block  0
+call    0 never executed
+    #####:  985:			kbinds_value = kbinds_exp;
+unconditional  0 never executed
+        -:  986:		}
+        -:  987:
+        -:  988:		/*      if (alt_kbinds_file) {
+        -:  989:			free(alt_kbinds_file);
+        -:  990:			alt_kbinds_file = (char *)NULL;
+        -:  991:		} */
+        -:  992:
+    #####:  993:		if (access(kbinds_value, R_OK) == -1) {
+    %%%%%:  993-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  994:			_err('e', PRINT_PROMPT, _("%s: %s: %s\n"
+call    0 never executed
+unconditional  1 never executed
+        -:  995:						  "Falling back to the default keybindings file\n"),
+    #####:  996:			    PROGRAM_NAME, kbinds_value, strerror(errno));
+    %%%%%:  996-block  0
+call    0 never executed
+        -:  997:			/*          xargs.config = -1; */
+        -:  998:		}
+        -:  999:
+        -: 1000:		else {
+    #####: 1001:			alt_kbinds_file = savestring(kbinds_value, strlen(kbinds_value));
+    %%%%%: 1001-block  0
+call    0 never executed
+    #####: 1002:			_err('n', PRINT_PROMPT, _("%s: Loaded alternative "
+call    0 never executed
+unconditional  1 never executed
+        -: 1003:				"keybindings file\n"), PROGRAM_NAME);
+        -: 1004:		}
+        -: 1005:
+    #####: 1006:		if (kbinds_exp)
+    %%%%%: 1006-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1007:			free(kbinds_exp);
+    %%%%%: 1007-block  0
+unconditional  0 never executed
+        -: 1008:	}
+        -: 1009:
+    #####: 1010:	if (xargs.config && config_value) {
+    %%%%%: 1010-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1010-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1011:		char *config_exp = (char *)NULL;
+        -: 1012:
+    #####: 1013:		if (*config_value == '~') {
+    %%%%%: 1013-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1014:			config_exp = tilde_expand(config_value);
+    %%%%%: 1014-block  0
+call    0 never executed
+    #####: 1015:			config_value = config_exp;
+unconditional  0 never executed
+        -: 1016:		}
+        -: 1017:
+        -: 1018:		/*      if (alt_config_file) {
+        -: 1019:			free(alt_config_file);
+        -: 1020:			alt_config_file = (char *)NULL;
+        -: 1021:		} */
+        -: 1022:
+    #####: 1023:		if (access(config_value, R_OK) == -1) {
+    %%%%%: 1023-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1024:			_err('e', PRINT_PROMPT, _("%s: %s: %s\n"
+call    0 never executed
+        -: 1025:				"Falling back to default\n"), PROGRAM_NAME,
+    #####: 1026:			    config_value, strerror(errno));
+    %%%%%: 1026-block  0
+call    0 never executed
+    #####: 1027:			xargs.config = -1;
+unconditional  0 never executed
+        -: 1028:		}
+        -: 1029:
+        -: 1030:		else {
+    #####: 1031:			alt_config_file = savestring(config_value, strlen(config_value));
+    %%%%%: 1031-block  0
+call    0 never executed
+    #####: 1032:			_err('n', PRINT_PROMPT, _("%s: Loaded alternative "
+call    0 never executed
+unconditional  1 never executed
+        -: 1033:				"configuration file\n"), PROGRAM_NAME);
+        -: 1034:		}
+        -: 1035:
+    #####: 1036:		if (config_exp)
+    %%%%%: 1036-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1037:			free(config_exp);
+    %%%%%: 1037-block  0
+unconditional  0 never executed
+        -: 1038:	}
+        -: 1039:
+    #####: 1040:	if ((flags & START_PATH) && path_value) {
+    %%%%%: 1040-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1040-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1041:		char *path_exp = (char *)NULL;
+        -: 1042:
+    #####: 1043:		if (*path_value == '~') {
+    %%%%%: 1043-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1044:			path_exp = tilde_expand(path_value);
+    %%%%%: 1044-block  0
+call    0 never executed
+    #####: 1045:			path_value = path_exp;
+unconditional  0 never executed
+        -: 1046:		}
+        -: 1047:
+    #####: 1048:		if (xchdir(path_value, SET_TITLE) == 0) {
+    %%%%%: 1048-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1049:			if (cur_ws == UNSET)
+    %%%%%: 1049-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1050:				cur_ws = DEF_CUR_WS;
+    %%%%%: 1050-block  0
+unconditional  0 never executed
+    #####: 1051:			if (ws[cur_ws].path)
+    %%%%%: 1051-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1052:				free(ws[cur_ws].path);
+    %%%%%: 1052-block  0
+unconditional  0 never executed
+        -: 1053:
+    #####: 1054:			ws[cur_ws].path = savestring(path_value, strlen(path_value));
+    %%%%%: 1054-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1055:		}
+        -: 1056:
+        -: 1057:		else { /* Error changing directory */
+    #####: 1058:			if (xargs.list_and_quit == 1) {
+    %%%%%: 1058-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1059:				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+call    0 never executed
+    #####: 1060:				    path_value, strerror(errno));
+    %%%%%: 1060-block  0
+call    0 never executed
+    #####: 1061:				exit(EXIT_FAILURE);
+call    0 never executed
+        -: 1062:			}
+        -: 1063:
+    #####: 1064:			_err('w', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME,
+call    0 never executed
+unconditional  1 never executed
+    #####: 1065:			    path_value, strerror(errno));
+    %%%%%: 1065-block  0
+call    0 never executed
+        -: 1066:		}
+        -: 1067:
+    #####: 1068:		if (path_exp)
+    %%%%%: 1068-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1069:			free(path_exp);
+    %%%%%: 1069-block  0
+unconditional  0 never executed
+        -: 1070:	}
+        -: 1071:
+    #####: 1072:	if ((flags & ALT_PROFILE) && alt_profile_value) {
+    %%%%%: 1072-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1072-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1073:		if (alt_profile)
+    %%%%%: 1073-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1074:			free(alt_profile);
+    %%%%%: 1074-block  0
+unconditional  0 never executed
+        -: 1075:
+    #####: 1076:		alt_profile = savestring(alt_profile_value,
+    %%%%%: 1076-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1077:		    strlen(alt_profile_value));
+        -: 1078:	}
+    #####: 1079:}
+        -: 1080:
+        -: 1081:void
+function unset_xargs called 1 returned 100% blocks executed 100%
+        1: 1082:unset_xargs(void)
+        -: 1083:{
+        1: 1084:	xargs.splash = xargs.hidden = xargs.longview = UNSET;
+        1: 1085:	xargs.autocd = xargs.auto_open = xargs.ext = xargs.ffirst = UNSET;
+        1: 1086:	xargs.sensitive = xargs.unicode = xargs.pager = xargs.path = UNSET;
+        1: 1087:	xargs.light = xargs.cd_list_auto = xargs.sort = xargs.dirmap = UNSET;
+        1: 1088:	xargs.config = xargs.stealth_mode = xargs.restore_last_path = UNSET;
+        1: 1089:	xargs.tips = xargs.disk_usage = xargs.trasrm = UNSET;
+        1: 1090:	xargs.classify = xargs.share_selbox = xargs.rl_vi_mode = UNSET;
+        1: 1091:	xargs.max_dirhist = xargs.sort_reverse = xargs.files_counter = UNSET;
+        1: 1092:	xargs.welcome_message = xargs.clear_screen = UNSET;
+        1: 1093:	xargs.logs = xargs.max_path = xargs.bm_file = UNSET;
+        1: 1094:	xargs.expand_bookmarks = xargs.only_dirs = xargs.noeln = UNSET;
+        1: 1095:	xargs.list_and_quit = xargs.color_scheme = xargs.cd_on_quit = UNSET;
+        1: 1096:	xargs.no_dirjump = xargs.icons = xargs.no_colors = UNSET;
+        1: 1097:	xargs.icons_use_file_color = xargs.no_columns = UNSET;
+        1: 1098:	xargs.case_sens_dirjump = xargs.case_sens_path_comp = UNSET;
+        1: 1099:	xargs.cwd_in_title = UNSET;
+        1: 1100:}
+        -: 1101:
+        -: 1102:/* Keep track of attributes of the shell. Make sure the shell is running
+        -: 1103: * interactively as the foreground job before proceeding.
+        -: 1104: * Taken from:
+        -: 1105: * https://www.gnu.org/software/libc/manual/html_node/Initializing-the-Shell.html#Initializing-the-Shell
+        -: 1106: * */
+        -: 1107:void
+function init_shell called 1 returned 100% blocks executed 62%
+        1: 1108:init_shell(void)
+        -: 1109:{
+        -: 1110:	/* If shell is not interactive */
+        1: 1111:	if (!isatty(STDIN_FILENO)) {
+        1: 1111-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####: 1112:		handle_stdin();
+    %%%%%: 1112-block  0
+call    0 never executed
+    #####: 1113:		return;
+unconditional  0 never executed
+        -: 1114:	}
+        -: 1115:
+        -: 1116:	/* Loop until we are in the foreground */
+        1: 1117:	while (tcgetpgrp(STDIN_FILENO) != (own_pid = getpgrp()))
+        1: 1117-block  0
+unconditional  0 taken 1
+        1: 1117-block  1
+call    1 returned 1
+call    2 returned 1
+branch  3 taken 0
+branch  4 taken 1 (fallthrough)
+    #####: 1118:		kill(-own_pid, SIGTTIN);
+    %%%%%: 1118-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1119:
+        -: 1120:	/* Ignore interactive and job-control signals */
+        1: 1121:	set_signals_to_ignore();
+        1: 1121-block  0
+call    0 returned 1
+        -: 1122:
+        -: 1123:	/* Put ourselves in our own process group */
+        1: 1124:	own_pid = get_own_pid();
+call    0 returned 1
+        -: 1125:
+        1: 1126:	if (flags & ROOT_USR) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+        -: 1127:		/* Make the shell pgid (process group id) equal to its pid */
+        -: 1128:		/* Without the setpgid line below, the program cannot be run
+        -: 1129:		 * with sudo, but it can be run nonetheless by the root user */
+    #####: 1130:		if (setpgid(own_pid, own_pid) < 0) {
+    %%%%%: 1130-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1131:			_err(0, NOPRINT_PROMPT, "%s: setpgid: %s\n", PROGRAM_NAME,
+call    0 never executed
+    #####: 1132:			    strerror(errno));
+    %%%%%: 1132-block  0
+call    0 never executed
+    #####: 1133:			exit(EXIT_FAILURE);
+call    0 never executed
+        -: 1134:		}
+        -: 1135:	}
+        -: 1136:
+        -: 1137:	/* Grab control of the terminal */
+        1: 1138:	tcsetpgrp(STDIN_FILENO, own_pid);
+        1: 1138-block  0
+call    0 returned 1
+        -: 1139:
+        -: 1140:	/* Save default terminal attributes for shell */
+        1: 1141:	tcgetattr(STDIN_FILENO, &shell_tmodes);
+call    0 returned 1
+        -: 1142:
+        1: 1143:	return;
+unconditional  0 taken 1
+        -: 1144:}
+        -: 1145:
+        -: 1146:/* Get current entries in the Selection Box, if any. */
+        -: 1147:int
+function get_sel_files called 23 returned 100% blocks executed 92%
+       23: 1148:get_sel_files(void)
+        -: 1149:{
+       23: 1150:	if (!selfile_ok || !config_ok)
+       23: 1150-block  0
+branch  0 taken 23 (fallthrough)
+branch  1 taken 0
+       23: 1150-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 23
+    #####: 1151:		return EXIT_FAILURE;
+    %%%%%: 1151-block  0
+unconditional  0 never executed
+        -: 1152:
+        -: 1153:	/* First, clear the sel array, in case it was already used */
+       23: 1154:	if (sel_n > 0) {
+       23: 1154-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 21
+        2: 1155:		int i = (int)sel_n;
+        -: 1156:
+        8: 1157:		while (--i >= 0)
+        2: 1157-block  0
+unconditional  0 taken 2
+        8: 1157-block  1
+branch  1 taken 6
+branch  2 taken 2 (fallthrough)
+        6: 1158:			free(sel_elements[i]);
+        6: 1158-block  0
+unconditional  0 taken 6
+        -: 1159:	}
+        -: 1160:
+        -: 1161:	/*  free(sel_elements); */
+        -: 1162:
+       23: 1163:	sel_n = 0;
+        -: 1164:
+        -: 1165:	/* Open the tmp sel file and load its contents into the sel array */
+       23: 1166:	FILE *sel_fp = fopen(SEL_FILE, "r");
+       23: 1166-block  0
+call    0 returned 23
+        -: 1167:
+        -: 1168:	/*  sel_elements = xcalloc(1, sizeof(char *)); */
+       23: 1169:	if (!sel_fp)
+branch  0 taken 21 (fallthrough)
+branch  1 taken 2
+       21: 1170:		return EXIT_FAILURE;
+       21: 1170-block  0
+unconditional  0 taken 21
+        -: 1171:
+        -: 1172:	/* Since this file contains only paths, we can be sure no line
+        -: 1173:	 * length will be larger than PATH_MAX */
+        2: 1174:	char line[PATH_MAX] = "";
+        -: 1175:
+        8: 1176:	while (fgets(line, (int)sizeof(line), sel_fp)) {
+        2: 1176-block  0
+unconditional  0 taken 2
+        8: 1176-block  1
+call    1 returned 8
+branch  2 taken 6
+branch  3 taken 2 (fallthrough)
+        -: 1177:
+        6: 1178:		size_t len = strlen(line);
+        -: 1179:
+        6: 1180:		if (line[len - 1] == '\n')
+        6: 1180-block  0
+branch  0 taken 6 (fallthrough)
+branch  1 taken 0
+        6: 1181:			line[len - 1] = '\0';
+        6: 1181-block  0
+unconditional  0 taken 6
+        -: 1182:
+       6*: 1183:		if (!*line || *line == '#')
+        6: 1183-block  0
+branch  0 taken 6 (fallthrough)
+branch  1 taken 0
+        6: 1183-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 6
+    #####: 1184:			continue;
+    %%%%%: 1184-block  0
+unconditional  0 never executed
+        -: 1185:
+        6: 1186:		sel_elements = (char **)xrealloc(sel_elements, (sel_n + 1) * sizeof(char *));
+        6: 1186-block  0
+call    0 returned 6
+        6: 1187:		sel_elements[sel_n++] = savestring(line, len);
+call    0 returned 6
+unconditional  1 taken 6
+        -: 1188:	}
+        -: 1189:
+        2: 1190:	fclose(sel_fp);
+        2: 1190-block  0
+call    0 returned 2
+        -: 1191:
+        2: 1192:	return EXIT_SUCCESS;
+unconditional  0 taken 2
+        -: 1193:}
+        -: 1194:
+        -: 1195:/* Store all paths in the PATH environment variable into a globally
+        -: 1196: * declared array (paths) */
+        -: 1197:size_t
+function get_path_env called 2 returned 100% blocks executed 95%
+        2: 1198:get_path_env(void)
+        -: 1199:{
+        2: 1200:	size_t i = 0;
+        -: 1201:
+        -: 1202:	/* Get the value of the PATH env variable */
+        2: 1203:	char *path_tmp = (char *)NULL;
+        -: 1204:
+        -: 1205:#if __linux__
+       48: 1206:	for (i = 0; __environ[i]; i++) {
+        2: 1206-block  0
+unconditional  0 taken 2
+       46: 1206-block  1
+unconditional  1 taken 46
+       48: 1206-block  2
+branch  2 taken 48
+branch  3 taken 0 (fallthrough)
+       48: 1207:		if (strncmp(__environ[i], "PATH", 4) == 0) {
+       48: 1207-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 46
+        2: 1208:			path_tmp = straft(__environ[i], '=');
+        2: 1208-block  0
+call    0 returned 2
+        2: 1209:			break;
+unconditional  0 taken 2
+        -: 1210:		}
+        -: 1211:	}
+        -: 1212:
+        -: 1213:#else
+        -: 1214:	path_tmp = savestring(getenv("PATH"), strlen(getenv("PATH")));
+        -: 1215:#endif
+        -: 1216:
+        2: 1217:	if (!path_tmp)
+        2: 1217-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 2
+    #####: 1218:		return 0;
+    %%%%%: 1218-block  0
+unconditional  0 never executed
+        -: 1219:
+        -: 1220:	/* Get each path in PATH */
+        2: 1221:	size_t path_num = 0, length = 0;
+       12: 1222:	for (i = 0; path_tmp[i]; i++) {
+        2: 1222-block  0
+unconditional  0 taken 2
+       10: 1222-block  1
+unconditional  1 taken 10
+       12: 1222-block  2
+branch  2 taken 12
+branch  3 taken 0 (fallthrough)
+        -: 1223:
+        -: 1224:		/* Store path in PATH in a tmp buffer */
+        -: 1225:		char buf[PATH_MAX];
+        -: 1226:
+      198: 1227:		while (path_tmp[i] && path_tmp[i] != ':')
+       12: 1227-block  0
+unconditional  0 taken 12
+      198: 1227-block  1
+branch  1 taken 196 (fallthrough)
+branch  2 taken 2
+      196: 1227-block  2
+branch  3 taken 186
+branch  4 taken 10 (fallthrough)
+      186: 1228:			buf[length++] = path_tmp[i++];
+      186: 1228-block  0
+unconditional  0 taken 186
+        -: 1229:
+       12: 1230:		buf[length] = '\0';
+        -: 1231:
+        -: 1232:		/* Make room in paths for a new path */
+       12: 1233:		paths = (char **)xrealloc(paths, (path_num + 1) * sizeof(char *));
+       12: 1233-block  0
+call    0 returned 12
+        -: 1234:
+        -: 1235:		/* Dump the buffer into the global paths array */
+       12: 1236:		paths[path_num] = savestring(buf, length);
+call    0 returned 12
+        -: 1237:
+       12: 1238:		path_num++;
+       12: 1239:		length = 0;
+       12: 1240:		if (!path_tmp[i])
+branch  0 taken 2 (fallthrough)
+branch  1 taken 10
+        2: 1241:			break;
+        2: 1241-block  0
+unconditional  0 taken 2
+        -: 1242:	}
+        -: 1243:
+        2: 1244:	free(path_tmp);
+        -: 1245:
+        2: 1246:	return path_num;
+        2: 1246-block  0
+unconditional  0 taken 2
+        -: 1247:}
+        -: 1248:
+        -: 1249:/* Set PATH to last visited directory and CUR_WS to last used
+        -: 1250: * workspace */
+        -: 1251:int
+function get_last_path called 1 returned 100% blocks executed 81%
+        1: 1252:get_last_path(void)
+        -: 1253:{
+        1: 1254:	if (!CONFIG_DIR)
+        1: 1254-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1255:		return EXIT_FAILURE;
+    %%%%%: 1255-block  0
+unconditional  0 never executed
+        -: 1256:
+        1: 1257:	char *last_file = (char *)xnmalloc(strlen(CONFIG_DIR) + 7, sizeof(char));
+        1: 1257-block  0
+call    0 returned 1
+        1: 1258:	sprintf(last_file, "%s/.last", CONFIG_DIR);
+        -: 1259:
+        -: 1260:	struct stat last_attrib;
+        1: 1261:	if (stat(last_file, &last_attrib) == -1) {
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####: 1262:		free(last_file);
+    #####: 1263:		return EXIT_FAILURE;
+    %%%%%: 1263-block  0
+unconditional  0 never executed
+        -: 1264:	}
+        -: 1265:
+        1: 1266:	FILE *last_fp = fopen(last_file, "r");
+        1: 1266-block  0
+call    0 returned 1
+        -: 1267:
+        1: 1268:	if (!last_fp) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1269:		_err('w', PRINT_PROMPT, _("%s: Error retrieving last "
+    %%%%%: 1269-block  0
+call    0 never executed
+        -: 1270:			"visited directory\n"), PROGRAM_NAME);
+    #####: 1271:		free(last_file);
+    #####: 1272:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1273:	}
+        -: 1274:
+        -: 1275:	/*  size_t i;
+        -: 1276:	for (i = 0; i < MAX_WS; i++) {
+        -: 1277:
+        -: 1278:		if (ws[i].path) {
+        -: 1279:			free(ws[i].path);
+        -: 1280:			ws[i].path = (char *)NULL;
+        -: 1281:		}
+        -: 1282:	} */
+        -: 1283:
+        1: 1284:	char line[PATH_MAX] = "";
+        -: 1285:
+        5: 1286:	while (fgets(line, (int)sizeof(line), last_fp)) {
+        1: 1286-block  0
+unconditional  0 taken 1
+        5: 1286-block  1
+call    1 returned 5
+branch  2 taken 4
+branch  3 taken 1 (fallthrough)
+        -: 1287:
+        4: 1288:		char *p = line;
+        -: 1289:
+       4*: 1290:		if (!*p || !strchr(p, '/'))
+        4: 1290-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 0
+        4: 1290-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 4
+    #####: 1291:			continue;
+    %%%%%: 1291-block  0
+unconditional  0 never executed
+        -: 1292:
+       4*: 1293:		if (!strchr(p, ':'))
+        4: 1293-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 4
+    #####: 1294:			continue;
+    %%%%%: 1294-block  0
+unconditional  0 never executed
+        -: 1295:
+        4: 1296:		size_t len = strlen(p);
+        4: 1297:		if (p[len - 1] == '\n')
+        4: 1297-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 0
+        4: 1298:			p[len - 1] = '\0';
+        4: 1298-block  0
+unconditional  0 taken 4
+        -: 1299:
+        4: 1300:		int cur = 0;
+        4: 1301:		if (*p == '*') {
+        4: 1301-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 3
+       1*: 1302:			if (!*(++p))
+        1: 1302-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1303:				continue;
+    %%%%%: 1303-block  0
+unconditional  0 never executed
+        1: 1304:			cur = 1;
+        1: 1304-block  0
+unconditional  0 taken 1
+        -: 1305:		}
+        -: 1306:
+        4: 1307:		int ws_n = *p - '0';
+        -: 1308:
+        4: 1309:		if (cur && cur_ws == UNSET)
+        4: 1309-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 3
+        1: 1309-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 0
+        1: 1310:			cur_ws = ws_n;
+        1: 1310-block  0
+unconditional  0 taken 1
+        -: 1311:
+        4: 1312:		if (ws_n >= 0 && ws_n < MAX_WS && !ws[ws_n].path)
+        4: 1312-block  0
+branch  0 taken 4 (fallthrough)
+branch  1 taken 0
+        4: 1312-block  1
+branch  2 taken 4 (fallthrough)
+branch  3 taken 0
+        4: 1312-block  2
+branch  4 taken 4 (fallthrough)
+branch  5 taken 0
+        4: 1313:			ws[ws_n].path = savestring(p + 2, strlen(p + 2));
+        4: 1313-block  0
+call    0 returned 4
+unconditional  1 taken 4
+        -: 1314:	}
+        -: 1315:
+        1: 1316:	fclose(last_fp);
+        1: 1316-block  0
+call    0 returned 1
+        1: 1317:	free(last_file);
+        -: 1318:
+        1: 1319:	return EXIT_SUCCESS;
+unconditional  0 taken 1
+        -: 1320:}
+        -: 1321:
+        -: 1322:/* Restore pinned dir from file */
+        -: 1323:int
+function load_pinned_dir called 1 returned 100% blocks executed 32%
+        1: 1324:load_pinned_dir(void)
+        -: 1325:{
+        1: 1326:	if (!config_ok)
+        1: 1326-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1327:		return EXIT_FAILURE;
+    %%%%%: 1327-block  0
+unconditional  0 never executed
+        -: 1328:
+        1: 1329:	char *pin_file = (char *)xnmalloc(strlen(CONFIG_DIR) + 6, sizeof(char));
+        1: 1329-block  0
+call    0 returned 1
+        1: 1330:	sprintf(pin_file, "%s/.pin", CONFIG_DIR);
+        -: 1331:
+        -: 1332:	struct stat attr;
+        -: 1333:
+        1: 1334:	if (lstat(pin_file, &attr) == -1) {
+call    0 returned 1
+branch  1 taken 1 (fallthrough)
+branch  2 taken 0
+        1: 1335:		free(pin_file);
+        1: 1336:		return EXIT_FAILURE;
+        1: 1336-block  0
+unconditional  0 taken 1
+        -: 1337:	}
+        -: 1338:
+    #####: 1339:	FILE *fp = fopen(pin_file, "r");
+    %%%%%: 1339-block  0
+call    0 never executed
+        -: 1340:
+    #####: 1341:	if (!fp) {
+branch  0 never executed
+branch  1 never executed
+    #####: 1342:		_err('w', PRINT_PROMPT, _("%s: Error retrieving pinned "
+    %%%%%: 1342-block  0
+call    0 never executed
+        -: 1343:			"directory\n"), PROGRAM_NAME);
+    #####: 1344:		free(pin_file);
+    #####: 1345:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1346:	}
+        -: 1347:
+    #####: 1348:	char line[PATH_MAX] = "";
+    #####: 1349:	fgets(line, (int)sizeof(line), fp);
+    %%%%%: 1349-block  0
+call    0 never executed
+        -: 1350:
+    #####: 1351:	if (!*line || !strchr(line, '/')) {
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1351-block  0
+branch  2 never executed
+branch  3 never executed
+    #####: 1352:		free(pin_file);
+    #####: 1353:		fclose(fp);
+    %%%%%: 1353-block  0
+call    0 never executed
+    #####: 1354:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1355:	}
+        -: 1356:
+    #####: 1357:	if (pinned_dir) {
+    %%%%%: 1357-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1358:		free(pinned_dir);
+    #####: 1359:		pinned_dir = (char *)NULL;
+    %%%%%: 1359-block  0
+unconditional  0 never executed
+        -: 1360:	}
+        -: 1361:
+    #####: 1362:	pinned_dir = savestring(line, strlen(line));
+    %%%%%: 1362-block  0
+call    0 never executed
+        -: 1363:
+    #####: 1364:	fclose(fp);
+call    0 never executed
+        -: 1365:
+    #####: 1366:	free(pin_file);
+        -: 1367:
+    #####: 1368:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1369:}
+        -: 1370:
+        -: 1371:/* Get the list of files in PATH, plus CliFM internal commands, and send
+        -: 1372: * them into an array to be read by my readline custom auto-complete
+        -: 1373: * function (my_rl_completion) */
+        -: 1374:void
+function get_path_programs called 2 returned 100% blocks executed 95%
+        2: 1375:get_path_programs(void)
+        -: 1376:{
+        2: 1377:	struct dirent ***commands_bin = (struct dirent ***)xnmalloc(
+        2: 1377-block  0
+call    0 returned 2
+        -: 1378:	    path_n, sizeof(struct dirent));
+        2: 1379:	int i, j, l = 0, total_cmd = 0;
+        2: 1380:	int *cmd_n = (int *)xnmalloc(path_n, sizeof(int));
+call    0 returned 2
+        -: 1381:
+        2: 1382:	i = (int)path_n;
+       14: 1383:	while (--i >= 0) {
+unconditional  0 taken 2
+       14: 1383-block  0
+branch  1 taken 12
+branch  2 taken 2 (fallthrough)
+        -: 1384:
+      12*: 1385:		if (!paths[i] || !*paths[i] || xchdir(paths[i], NO_TITLE) == -1) {
+       12: 1385-block  0
+branch  0 taken 12 (fallthrough)
+branch  1 taken 0
+       12: 1385-block  1
+branch  2 taken 12 (fallthrough)
+branch  3 taken 0
+       12: 1385-block  2
+call    4 returned 12
+branch  5 taken 0 (fallthrough)
+branch  6 taken 12
+    #####: 1386:			cmd_n[i] = 0;
+    #####: 1387:			continue;
+    %%%%%: 1387-block  0
+unconditional  0 never executed
+        -: 1388:		}
+        -: 1389:
+       12: 1390:		cmd_n[i] = scandir(paths[i], &commands_bin[i], skip_nonexec,
+       12: 1390-block  0
+call    0 returned 12
+        -: 1391:		    xalphasort);
+        -: 1392:		/* If paths[i] directory does not exist, scandir returns -1.
+        -: 1393:		 * Fedora, for example, adds $HOME/bin and $HOME/.local/bin to
+        -: 1394:		 * PATH disregarding if they exist or not. If paths[i] dir is
+        -: 1395:		 * empty do not use it either */
+       12: 1396:		if (cmd_n[i] > 0)
+branch  0 taken 12 (fallthrough)
+branch  1 taken 0
+       12: 1397:			total_cmd += (size_t)cmd_n[i];
+       12: 1397-block  0
+unconditional  0 taken 12
+        -: 1398:	}
+        -: 1399:
+        2: 1400:	xchdir(ws[cur_ws].path, NO_TITLE);
+        2: 1400-block  0
+call    0 returned 2
+        -: 1401:
+        -: 1402:	/* Add internal commands */
+        -: 1403:	/* Get amount of internal cmds (elements in INTERNAL_CMDS array) */
+        -: 1404:/*	size_t internal_cmd_n = (sizeof(*INTERNAL_CMDS) /
+        -: 1405:				    sizeof(INTERNAL_CMDS[0])) - 1; */
+        -: 1406:
+        2: 1407:	size_t internal_cmd_n = 0;
+      104: 1408:	while (INTERNAL_CMDS[internal_cmd_n])
+unconditional  0 taken 2
+      104: 1408-block  0
+branch  1 taken 102
+branch  2 taken 2 (fallthrough)
+      102: 1409:		internal_cmd_n++;
+      102: 1409-block  0
+unconditional  0 taken 102
+        -: 1410:
+        4: 1411:	bin_commands = (char **)xnmalloc(total_cmd + internal_cmd_n +
+        2: 1412:					     aliases_n + actions_n + 2,
+        2: 1412-block  0
+call    0 returned 2
+        -: 1413:	    sizeof(char *));
+        -: 1414:
+        2: 1415:	i = (int)internal_cmd_n;
+      104: 1416:	while (--i >= 0)
+unconditional  0 taken 2
+      104: 1416-block  0
+branch  1 taken 102
+branch  2 taken 2 (fallthrough)
+      102: 1417:		bin_commands[l++] = savestring(INTERNAL_CMDS[i],
+      102: 1417-block  0
+call    0 returned 102
+unconditional  1 taken 102
+        -: 1418:		    strlen(INTERNAL_CMDS[i]));
+        -: 1419:
+        -: 1420:	/* Add commands in PATH */
+        2: 1421:	i = (int)path_n;
+       14: 1422:	while (--i >= 0) {
+        2: 1422-block  0
+unconditional  0 taken 2
+       14: 1422-block  1
+branch  1 taken 12
+branch  2 taken 2 (fallthrough)
+        -: 1423:
+      12*: 1424:		if (cmd_n[i] <= 0)
+       12: 1424-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 12
+    #####: 1425:			continue;
+    %%%%%: 1425-block  0
+unconditional  0 never executed
+        -: 1426:
+       12: 1427:		j = cmd_n[i];
+     7346: 1428:		while (--j >= 0) {
+       12: 1428-block  0
+unconditional  0 taken 12
+     7346: 1428-block  1
+branch  1 taken 7334
+branch  2 taken 12 (fallthrough)
+        -: 1429:
+    14668: 1430:			bin_commands[l++] = savestring(commands_bin[i][j]->d_name,
+     7334: 1431:			    strlen(commands_bin[i][j]->d_name));
+     7334: 1431-block  0
+call    0 returned 7334
+     7334: 1432:			free(commands_bin[i][j]);
+unconditional  0 taken 7334
+        -: 1433:		}
+        -: 1434:
+       12: 1435:		free(commands_bin[i]);
+       12: 1435-block  0
+unconditional  0 taken 12
+        -: 1436:	}
+        -: 1437:
+        2: 1438:	free(commands_bin);
+        2: 1439:	free(cmd_n);
+        -: 1440:
+        -: 1441:	/* Now add aliases, if any */
+        2: 1442:	if (aliases_n) {
+        2: 1442-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        -: 1443:
+        2: 1444:		i = (int)aliases_n;
+       12: 1445:		while (--i >= 0) {
+        2: 1445-block  0
+unconditional  0 taken 2
+       12: 1445-block  1
+branch  1 taken 10
+branch  2 taken 2 (fallthrough)
+        -: 1446:
+       10: 1447:			int index = strcntchr(aliases[i], '=');
+       10: 1447-block  0
+call    0 returned 10
+        -: 1448:
+       10: 1449:			if (index != -1) {
+branch  0 taken 10 (fallthrough)
+branch  1 taken 0
+       10: 1450:				bin_commands[l] = (char *)xnmalloc((size_t)index + 1,
+       10: 1450-block  0
+call    0 returned 10
+        -: 1451:				    sizeof(char));
+       10: 1452:				strncpy(bin_commands[l], aliases[i], (size_t)index);
+       10: 1453:				bin_commands[l++][index] = '\0';
+unconditional  0 taken 10
+        -: 1454:			}
+        -: 1455:		}
+        -: 1456:	}
+        -: 1457:
+        -: 1458:	/* And user defined actions too, if any */
+        2: 1459:	if (actions_n) {
+        2: 1459-block  0
+branch  0 taken 2 (fallthrough)
+branch  1 taken 0
+        2: 1460:		i = (int)actions_n;
+       48: 1461:		while (--i >= 0) {
+        2: 1461-block  0
+unconditional  0 taken 2
+       48: 1461-block  1
+branch  1 taken 46
+branch  2 taken 2 (fallthrough)
+       46: 1462:			bin_commands[l++] = savestring(usr_actions[i].name,
+unconditional  0 taken 46
+       46: 1463:			    strlen(usr_actions[i].name));
+       46: 1463-block  0
+call    0 returned 46
+        -: 1464:		}
+        -: 1465:	}
+        -: 1466:
+        2: 1467:	path_progsn = (size_t)l;
+        2: 1468:	bin_commands[l] = (char *)NULL;
+        2: 1469:}
+        -: 1470:
+        -: 1471:void
+function get_aliases called 1 returned 100% blocks executed 64%
+        1: 1472:get_aliases(void)
+        -: 1473:{
+        1: 1474:	if (!config_ok)
+        1: 1474-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1475:		return;
+    %%%%%: 1475-block  0
+unconditional  0 never executed
+    %%%%%: 1475-block  1
+unconditional  1 never executed
+        -: 1476:
+        -: 1477:	FILE *config_file_fp;
+        1: 1478:	config_file_fp = fopen(CONFIG_FILE, "r");
+        1: 1478-block  0
+call    0 returned 1
+        1: 1479:	if (!config_file_fp) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1480:		_err('e', PRINT_PROMPT, "%s: alias: '%s': %s\n",
+call    0 never executed
+    #####: 1481:		    PROGRAM_NAME, CONFIG_FILE, strerror(errno));
+    %%%%%: 1481-block  0
+call    0 never executed
+    #####: 1482:		return;
+unconditional  0 never executed
+        -: 1483:	}
+        -: 1484:
+        1: 1485:	if (aliases_n) {
+        1: 1485-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1486:		int i = (int)aliases_n;
+    #####: 1487:		while (--i >= 0)
+    %%%%%: 1487-block  0
+unconditional  0 never executed
+    %%%%%: 1487-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 1488:			free(aliases[i]);
+    %%%%%: 1488-block  0
+unconditional  0 never executed
+    #####: 1489:		free(aliases);
+    #####: 1490:		aliases = (char **)NULL;
+    #####: 1491:		aliases_n = 0;
+    %%%%%: 1491-block  0
+unconditional  0 never executed
+        -: 1492:	}
+        -: 1493:
+        1: 1494:	char *line = (char *)NULL;
+        1: 1495:	size_t line_size = 0;
+        1: 1496:	ssize_t line_len = 0;
+        -: 1497:
+      279: 1498:	while ((line_len = getline(&line, &line_size,
+        1: 1498-block  0
+unconditional  0 taken 1
+      279: 1498-block  1
+call    1 returned 279
+      279: 1499:		    config_file_fp)) > 0) {
+branch  0 taken 278
+branch  1 taken 1 (fallthrough)
+        -: 1500:
+      278: 1501:		if (*line == 'a' && strncmp(line, "alias ", 6) == 0) {
+      278: 1501-block  0
+branch  0 taken 5 (fallthrough)
+branch  1 taken 273
+        5: 1501-block  1
+branch  2 taken 5 (fallthrough)
+branch  3 taken 0
+        5: 1502:			char *alias_line = strchr(line, ' ');
+        5: 1503:			if (alias_line) {
+        5: 1503-block  0
+branch  0 taken 5 (fallthrough)
+branch  1 taken 0
+        5: 1504:				alias_line++;
+        5: 1505:				aliases = (char **)xrealloc(aliases, (aliases_n + 1) * sizeof(char *));
+        5: 1505-block  0
+call    0 returned 5
+        5: 1506:				aliases[aliases_n++] = savestring(alias_line,
+call    0 returned 5
+unconditional  1 taken 5
+        -: 1507:				    strlen(alias_line));
+        -: 1508:			}
+        -: 1509:		}
+        -: 1510:	}
+        -: 1511:
+        1: 1512:	free(line);
+        -: 1513:
+        1: 1514:	fclose(config_file_fp);
+        1: 1514-block  0
+call    0 returned 1
+        -: 1515:}
+        -: 1516:
+        -: 1517:int
+function load_dirhist called 1 returned 100% blocks executed 82%
+        1: 1518:load_dirhist(void)
+        -: 1519:{
+        1: 1520:	if (!config_ok)
+        1: 1520-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1521:		return EXIT_FAILURE;
+    %%%%%: 1521-block  0
+unconditional  0 never executed
+        -: 1522:
+        1: 1523:	FILE *fp = fopen(DIRHIST_FILE, "r");
+        1: 1523-block  0
+call    0 returned 1
+        -: 1524:
+        1: 1525:	if (!fp)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1526:		return EXIT_FAILURE;
+    %%%%%: 1526-block  0
+unconditional  0 never executed
+        -: 1527:
+        1: 1528:	size_t dirs = 0;
+        -: 1529:
+        -: 1530:	char tmp_line[PATH_MAX];
+        -: 1531:
+      101: 1532:	while (fgets(tmp_line, (int)sizeof(tmp_line), fp))
+        1: 1532-block  0
+unconditional  0 taken 1
+      101: 1532-block  1
+call    1 returned 101
+branch  2 taken 100
+branch  3 taken 1 (fallthrough)
+      100: 1533:		dirs++;
+      100: 1533-block  0
+unconditional  0 taken 100
+        -: 1534:
+        1: 1535:	if (!dirs) {
+        1: 1535-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1536:		fclose(fp);
+    %%%%%: 1536-block  0
+call    0 never executed
+    #####: 1537:		return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1538:	}
+        -: 1539:
+        1: 1540:	old_pwd = (char **)xnmalloc(dirs + 2, sizeof(char *));
+        1: 1540-block  0
+call    0 returned 1
+        -: 1541:
+        1: 1542:	fseek(fp, 0L, SEEK_SET);
+call    0 returned 1
+        -: 1543:
+        1: 1544:	size_t line_size = 0;
+        1: 1545:	char *line = (char *)NULL;
+        1: 1546:	ssize_t line_len = 0;
+        -: 1547:
+        1: 1548:	dirhist_total_index = 0;
+        -: 1549:
+      101: 1550:	while ((line_len = getline(&line, &line_size, fp)) > 0) {
+unconditional  0 taken 1
+      101: 1550-block  0
+call    1 returned 101
+branch  2 taken 100
+branch  3 taken 1 (fallthrough)
+        -: 1551:
+     100*: 1552:		if (!line || !*line || *line == '\n')
+      100: 1552-block  0
+branch  0 taken 100 (fallthrough)
+branch  1 taken 0
+      100: 1552-block  1
+branch  2 taken 100 (fallthrough)
+branch  3 taken 0
+      100: 1552-block  2
+branch  4 taken 0 (fallthrough)
+branch  5 taken 100
+    #####: 1553:			continue;
+    %%%%%: 1553-block  0
+unconditional  0 never executed
+        -: 1554:
+      100: 1555:		if (line[line_len - 1] == '\n')
+      100: 1555-block  0
+branch  0 taken 100 (fallthrough)
+branch  1 taken 0
+      100: 1556:			line[line_len - 1] = '\0';
+      100: 1556-block  0
+unconditional  0 taken 100
+        -: 1557:
+      100: 1558:		old_pwd[dirhist_total_index] = (char *)xnmalloc(line_len + 1, sizeof(char));
+      100: 1558-block  0
+call    0 returned 100
+      100: 1559:		strcpy(old_pwd[dirhist_total_index++], line);
+unconditional  0 taken 100
+        -: 1560:	}
+        -: 1561:
+        1: 1562:	old_pwd[dirhist_total_index] = (char *)NULL;
+        -: 1563:
+        1: 1564:	free(line);
+        -: 1565:
+        1: 1566:	dirhist_cur_index = dirhist_total_index - 1;
+        -: 1567:
+        1: 1568:	return EXIT_SUCCESS;
+        1: 1568-block  0
+unconditional  0 taken 1
+        -: 1569:}
+        -: 1570:
+        -: 1571:void
+function get_prompt_cmds called 1 returned 100% blocks executed 68%
+        1: 1572:get_prompt_cmds(void)
+        -: 1573:{
+        1: 1574:	if (!config_ok)
+        1: 1574-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1575:		return;
+    %%%%%: 1575-block  0
+unconditional  0 never executed
+    %%%%%: 1575-block  1
+unconditional  1 never executed
+        -: 1576:
+        -: 1577:	FILE *config_file_fp;
+        1: 1578:	config_file_fp = fopen(CONFIG_FILE, "r");
+        1: 1578-block  0
+call    0 returned 1
+        1: 1579:	if (!config_file_fp) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1580:		_err('e', PRINT_PROMPT, "%s: prompt: '%s': %s\n",
+call    0 never executed
+    #####: 1581:		    PROGRAM_NAME, CONFIG_FILE, strerror(errno));
+    %%%%%: 1581-block  0
+call    0 never executed
+    #####: 1582:		return;
+unconditional  0 never executed
+        -: 1583:	}
+        -: 1584:
+        1: 1585:	if (prompt_cmds_n) {
+        1: 1585-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+        -: 1586:		size_t i;
+    #####: 1587:		for (i = 0; i < prompt_cmds_n; i++)
+    %%%%%: 1587-block  0
+unconditional  0 never executed
+    %%%%%: 1587-block  1
+branch  1 never executed
+branch  2 never executed
+    #####: 1588:			free(prompt_cmds[i]);
+    %%%%%: 1588-block  0
+unconditional  0 never executed
+    #####: 1589:		free(prompt_cmds);
+    #####: 1590:		prompt_cmds = (char **)NULL;
+    #####: 1591:		prompt_cmds_n = 0;
+    %%%%%: 1591-block  0
+unconditional  0 never executed
+        -: 1592:	}
+        -: 1593:
+        1: 1594:	int prompt_line_found = 0;
+        1: 1595:	char *line = (char *)NULL;
+        1: 1596:	size_t line_size = 0;
+        1: 1597:	ssize_t line_len = 0;
+        -: 1598:
+      278: 1599:	while ((line_len = getline(&line, &line_size,
+        1: 1599-block  0
+unconditional  0 taken 1
+      278: 1599-block  1
+call    1 returned 278
+      278: 1600:		    config_file_fp)) > 0) {
+branch  0 taken 278
+branch  1 taken 0 (fallthrough)
+        -: 1601:
+      278: 1602:		if (prompt_line_found) {
+      278: 1602-block  0
+branch  0 taken 7 (fallthrough)
+branch  1 taken 271
+        7: 1603:			if (strncmp(line, "#END OF PROMPT", 14) == 0)
+        7: 1603-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 6
+        1: 1604:				break;
+        1: 1604-block  0
+unconditional  0 taken 1
+        6: 1605:			if (*line != '#') {
+        6: 1605-block  0
+branch  0 taken 3 (fallthrough)
+branch  1 taken 3
+        6: 1606:				prompt_cmds = (char **)xrealloc(prompt_cmds,
+        3: 1607:				    (prompt_cmds_n + 1) * sizeof(char *));
+        3: 1607-block  0
+call    0 returned 3
+        3: 1608:				prompt_cmds[prompt_cmds_n++] = savestring(
+call    0 returned 3
+unconditional  1 taken 3
+        -: 1609:				    line, strlen(line));
+        -: 1610:			}
+        -: 1611:		}
+        -: 1612:
+      271: 1613:		else if (strncmp(line, "#PROMPT", 7) == 0)
+      271: 1613-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 270
+        1: 1614:			prompt_line_found = 1;
+        1: 1614-block  0
+unconditional  0 taken 1
+        -: 1615:	}
+        -: 1616:
+        1: 1617:	free(line);
+        -: 1618:
+        1: 1619:	fclose(config_file_fp);
+        1: 1619-block  0
+call    0 returned 1
+        -: 1620:}
+        -: 1621:
+        -: 1622:/* If some option was not set, set it to the default value */
+        -: 1623:void
+function check_options called 1 returned 100% blocks executed 32%
+        1: 1624:check_options(void)
+        -: 1625:{
+        1: 1626:	if (!usr_cscheme)
+        1: 1626-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1627:		usr_cscheme = savestring("default", 7);
+    %%%%%: 1627-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1628:
+        -: 1629:	/* Do no override command line options */
+        1: 1630:	if (xargs.cwd_in_title == UNSET)
+        1: 1630-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1631:		xargs.cwd_in_title = DEF_CWD_IN_TITLE;
+        1: 1631-block  0
+unconditional  0 taken 1
+        -: 1632:
+        1: 1633:	if (cp_cmd == UNSET)
+        1: 1633-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1634:		cp_cmd = DEF_CP_CMD;
+    %%%%%: 1634-block  0
+unconditional  0 never executed
+        -: 1635:
+        1: 1636:	if (mv_cmd == UNSET)
+        1: 1636-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1637:		mv_cmd = DEF_MV_CMD;
+    %%%%%: 1637-block  0
+unconditional  0 never executed
+        -: 1638:
+        1: 1639:	if (min_name_trim == UNSET)
+        1: 1639-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1640:		min_name_trim = DEF_MIN_NAME_TRIM;
+    %%%%%: 1640-block  0
+unconditional  0 never executed
+        -: 1641:
+        1: 1642:	if (min_jump_rank == UNSET)
+        1: 1642-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1643:		min_jump_rank = DEF_MIN_JUMP_RANK;
+    %%%%%: 1643-block  0
+unconditional  0 never executed
+        -: 1644:
+        1: 1645:	if (max_jump_total_rank == UNSET)
+        1: 1645-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1646:		max_jump_total_rank = DEF_MAX_JUMP_TOTAL_RANK;
+    %%%%%: 1646-block  0
+unconditional  0 never executed
+        -: 1647:
+        1: 1648:	if (no_eln == UNSET) {
+        1: 1648-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1649:		if (xargs.noeln == UNSET)
+        1: 1649-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1650:			no_eln = DEF_NOELN;
+        1: 1650-block  0
+unconditional  0 taken 1
+        -: 1651:		else
+    #####: 1652:			no_eln = xargs.noeln;
+    %%%%%: 1652-block  0
+unconditional  0 never executed
+        -: 1653:	}
+        -: 1654:
+        1: 1655:	if (case_sens_dirjump == UNSET) {
+        1: 1655-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1656:		if (xargs.case_sens_dirjump == UNSET)
+    %%%%%: 1656-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1657:			case_sens_dirjump = DEF_CASE_SENS_DIRJUMP;
+    %%%%%: 1657-block  0
+unconditional  0 never executed
+        -: 1658:		else
+    #####: 1659:			case_sens_dirjump = xargs.case_sens_dirjump;
+    %%%%%: 1659-block  0
+unconditional  0 never executed
+        -: 1660:	}
+        -: 1661:
+        1: 1662:	if (case_sens_path_comp == UNSET) {
+        1: 1662-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1663:		if (xargs.case_sens_path_comp == UNSET)
+    %%%%%: 1663-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1664:			case_sens_path_comp = DEF_CASE_SENS_PATH_COMP;
+    %%%%%: 1664-block  0
+unconditional  0 never executed
+        -: 1665:		else
+    #####: 1666:			case_sens_path_comp = xargs.case_sens_path_comp;
+    %%%%%: 1666-block  0
+unconditional  0 never executed
+        -: 1667:	}
+        -: 1668:
+        1: 1669:	if (tr_as_rm == UNSET) {
+        1: 1669-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1670:		if (xargs.trasrm == UNSET)
+    %%%%%: 1670-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1671:			tr_as_rm = DEF_TRASRM;
+    %%%%%: 1671-block  0
+unconditional  0 never executed
+        -: 1672:		else
+    #####: 1673:			tr_as_rm = xargs.trasrm;
+    %%%%%: 1673-block  0
+unconditional  0 never executed
+        -: 1674:	}
+        -: 1675:
+        1: 1676:	if (only_dirs == UNSET) {
+        1: 1676-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1677:		if (xargs.only_dirs == UNSET)
+        1: 1677-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1678:			only_dirs = DEF_ONLY_DIRS;
+        1: 1678-block  0
+unconditional  0 taken 1
+        -: 1679:		else
+    #####: 1680:			only_dirs = xargs.only_dirs;
+    %%%%%: 1680-block  0
+unconditional  0 never executed
+        -: 1681:	}
+        -: 1682:
+        1: 1683:	if (colorize == UNSET) {
+        1: 1683-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1684:		if (xargs.no_colors == UNSET)
+        1: 1684-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1: 1685:			colorize = DEF_COLORS;
+        1: 1685-block  0
+unconditional  0 taken 1
+        -: 1686:		else
+    #####: 1687:			colorize = xargs.no_colors;
+    %%%%%: 1687-block  0
+unconditional  0 never executed
+        -: 1688:	}
+        -: 1689:
+        1: 1690:	if (expand_bookmarks == UNSET) {
+        1: 1690-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1691:		if (xargs.expand_bookmarks == UNSET)
+    %%%%%: 1691-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1692:			expand_bookmarks = DEF_EXPAND_BOOKMARKS;
+    %%%%%: 1692-block  0
+unconditional  0 never executed
+        -: 1693:		else
+    #####: 1694:			expand_bookmarks = xargs.expand_bookmarks;
+    %%%%%: 1694-block  0
+unconditional  0 never executed
+        -: 1695:	}
+        -: 1696:
+        1: 1697:	if (splash_screen == UNSET) {
+        1: 1697-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1698:		if (xargs.splash == UNSET)
+    %%%%%: 1698-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1699:			splash_screen = DEF_SPLASH_SCREEN;
+    %%%%%: 1699-block  0
+unconditional  0 never executed
+        -: 1700:		else
+    #####: 1701:			splash_screen = xargs.splash;
+    %%%%%: 1701-block  0
+unconditional  0 never executed
+        -: 1702:	}
+        -: 1703:
+        1: 1704:	if (welcome_message == UNSET) {
+        1: 1704-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1705:		if (xargs.welcome_message == UNSET)
+    %%%%%: 1705-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1706:			welcome_message = DEF_WELCOME_MESSAGE;
+    %%%%%: 1706-block  0
+unconditional  0 never executed
+        -: 1707:		else
+    #####: 1708:			welcome_message = xargs.welcome_message;
+    %%%%%: 1708-block  0
+unconditional  0 never executed
+        -: 1709:	}
+        -: 1710:
+        1: 1711:	if (show_hidden == UNSET) {
+        1: 1711-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1712:		if (xargs.hidden == UNSET)
+    %%%%%: 1712-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1713:			show_hidden = DEF_SHOW_HIDDEN;
+    %%%%%: 1713-block  0
+unconditional  0 never executed
+        -: 1714:		else
+    #####: 1715:			show_hidden = xargs.hidden;
+    %%%%%: 1715-block  0
+unconditional  0 never executed
+        -: 1716:	}
+        -: 1717:
+        1: 1718:	if (files_counter == UNSET) {
+        1: 1718-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1719:		if (xargs.files_counter == UNSET)
+    %%%%%: 1719-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1720:			files_counter = DEF_FILES_COUNTER;
+    %%%%%: 1720-block  0
+unconditional  0 never executed
+        -: 1721:		else
+    #####: 1722:			files_counter = xargs.files_counter;
+    %%%%%: 1722-block  0
+unconditional  0 never executed
+        -: 1723:	}
+        -: 1724:
+        1: 1725:	if (long_view == UNSET) {
+        1: 1725-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1726:		if (xargs.longview == UNSET)
+    %%%%%: 1726-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1727:			long_view = DEF_LONG_VIEW;
+    %%%%%: 1727-block  0
+unconditional  0 never executed
+        -: 1728:		else
+    #####: 1729:			long_view = xargs.longview;
+    %%%%%: 1729-block  0
+unconditional  0 never executed
+        -: 1730:	}
+        -: 1731:
+        1: 1732:	if (ext_cmd_ok == UNSET) {
+        1: 1732-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1733:		if (xargs.ext == UNSET)
+    %%%%%: 1733-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1734:			ext_cmd_ok = DEF_EXT_CMD_OK;
+    %%%%%: 1734-block  0
+unconditional  0 never executed
+        -: 1735:		else
+    #####: 1736:			ext_cmd_ok = xargs.ext;
+    %%%%%: 1736-block  0
+unconditional  0 never executed
+        -: 1737:	}
+        -: 1738:
+        1: 1739:	if (pager == UNSET) {
+        1: 1739-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1740:		if (xargs.pager == UNSET)
+    %%%%%: 1740-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1741:			pager = DEF_PAGER;
+    %%%%%: 1741-block  0
+unconditional  0 never executed
+        -: 1742:		else
+    #####: 1743:			pager = xargs.pager;
+    %%%%%: 1743-block  0
+unconditional  0 never executed
+        -: 1744:	}
+        -: 1745:
+        1: 1746:	if (max_dirhist == UNSET) {
+        1: 1746-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1747:		if (xargs.max_dirhist == UNSET)
+    %%%%%: 1747-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1748:			max_dirhist = DEF_MAX_DIRHIST;
+    %%%%%: 1748-block  0
+unconditional  0 never executed
+        -: 1749:		else
+    #####: 1750:			max_dirhist = xargs.max_dirhist;
+    %%%%%: 1750-block  0
+unconditional  0 never executed
+        -: 1751:	}
+        -: 1752:
+        1: 1753:	if (clear_screen == UNSET) {
+        1: 1753-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1754:		if (xargs.clear_screen == UNSET)
+    %%%%%: 1754-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1755:			clear_screen = DEF_CLEAR_SCREEN;
+    %%%%%: 1755-block  0
+unconditional  0 never executed
+        -: 1756:		else
+    #####: 1757:			clear_screen = xargs.clear_screen;
+    %%%%%: 1757-block  0
+unconditional  0 never executed
+        -: 1758:	}
+        -: 1759:
+        1: 1760:	if (list_folders_first == UNSET) {
+        1: 1760-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1761:		if (xargs.ffirst == UNSET)
+    %%%%%: 1761-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1762:			list_folders_first = DEF_LIST_FOLDERS_FIRST;
+    %%%%%: 1762-block  0
+unconditional  0 never executed
+        -: 1763:		else
+    #####: 1764:			list_folders_first = xargs.ffirst;
+    %%%%%: 1764-block  0
+unconditional  0 never executed
+        -: 1765:	}
+        -: 1766:
+        1: 1767:	if (cd_lists_on_the_fly == UNSET) {
+        1: 1767-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1768:		if (xargs.cd_list_auto == UNSET)
+    %%%%%: 1768-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1769:			cd_lists_on_the_fly = DEF_CD_LISTS_ON_THE_FLY;
+    %%%%%: 1769-block  0
+unconditional  0 never executed
+        -: 1770:		else
+    #####: 1771:			cd_lists_on_the_fly = xargs.cd_list_auto;
+    %%%%%: 1771-block  0
+unconditional  0 never executed
+        -: 1772:	}
+        -: 1773:
+        1: 1774:	if (case_sensitive == UNSET) {
+        1: 1774-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1775:		if (xargs.sensitive == UNSET)
+    %%%%%: 1775-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1776:			case_sensitive = DEF_CASE_SENSITIVE;
+    %%%%%: 1776-block  0
+unconditional  0 never executed
+        -: 1777:		else
+    #####: 1778:			case_sensitive = xargs.sensitive;
+    %%%%%: 1778-block  0
+unconditional  0 never executed
+        -: 1779:	}
+        -: 1780:
+        1: 1781:	if (unicode == UNSET) {
+        1: 1781-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1782:		if (xargs.unicode == UNSET)
+    %%%%%: 1782-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1783:			unicode = DEF_UNICODE;
+    %%%%%: 1783-block  0
+unconditional  0 never executed
+        -: 1784:		else
+    #####: 1785:			unicode = xargs.unicode;
+    %%%%%: 1785-block  0
+unconditional  0 never executed
+        -: 1786:	}
+        -: 1787:
+        1: 1788:	if (max_path == UNSET) {
+        1: 1788-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1789:		if (xargs.max_path == UNSET)
+    %%%%%: 1789-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1790:			max_path = DEF_MAX_PATH;
+    %%%%%: 1790-block  0
+unconditional  0 never executed
+        -: 1791:		else
+    #####: 1792:			max_path = xargs.max_path;
+    %%%%%: 1792-block  0
+unconditional  0 never executed
+        -: 1793:	}
+        -: 1794:
+        1: 1795:	if (logs_enabled == UNSET) {
+        1: 1795-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1796:		if (xargs.logs == UNSET)
+    %%%%%: 1796-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1797:			logs_enabled = DEF_LOGS_ENABLED;
+    %%%%%: 1797-block  0
+unconditional  0 never executed
+        -: 1798:		else
+    #####: 1799:			logs_enabled = xargs.logs;
+    %%%%%: 1799-block  0
+unconditional  0 never executed
+        -: 1800:	}
+        -: 1801:
+        1: 1802:	if (light_mode == UNSET) {
+        1: 1802-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1803:		if (xargs.light == UNSET)
+    %%%%%: 1803-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1804:			light_mode = DEF_LIGHT_MODE;
+    %%%%%: 1804-block  0
+unconditional  0 never executed
+        -: 1805:		else
+    #####: 1806:			light_mode = xargs.light;
+    %%%%%: 1806-block  0
+unconditional  0 never executed
+        -: 1807:	}
+        -: 1808:
+        1: 1809:	if (classify == UNSET) {
+        1: 1809-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1810:		if (xargs.classify == UNSET)
+    %%%%%: 1810-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1811:			classify = DEF_CLASSIFY;
+    %%%%%: 1811-block  0
+unconditional  0 never executed
+        -: 1812:		else
+    #####: 1813:			classify = xargs.classify;
+    %%%%%: 1813-block  0
+unconditional  0 never executed
+        -: 1814:	}
+        -: 1815:
+        1: 1816:	if (share_selbox == UNSET) {
+        1: 1816-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1817:		if (xargs.share_selbox == UNSET)
+    %%%%%: 1817-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1818:			share_selbox = DEF_SHARE_SELBOX;
+    %%%%%: 1818-block  0
+unconditional  0 never executed
+        -: 1819:		else
+    #####: 1820:			share_selbox = xargs.share_selbox;
+    %%%%%: 1820-block  0
+unconditional  0 never executed
+        -: 1821:	}
+        -: 1822:
+        1: 1823:	if (sort == UNSET) {
+        1: 1823-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1824:		if (xargs.sort == UNSET)
+    %%%%%: 1824-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1825:			sort = DEF_SORT;
+    %%%%%: 1825-block  0
+unconditional  0 never executed
+        -: 1826:		else
+    #####: 1827:			sort = xargs.sort;
+    %%%%%: 1827-block  0
+unconditional  0 never executed
+        -: 1828:	}
+        -: 1829:
+        1: 1830:	if (sort_reverse == UNSET) {
+        1: 1830-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1831:		if (xargs.sort_reverse == UNSET)
+    %%%%%: 1831-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1832:			sort_reverse = DEF_SORT_REVERSE;
+    %%%%%: 1832-block  0
+unconditional  0 never executed
+        -: 1833:		else
+    #####: 1834:			sort_reverse = xargs.sort_reverse;
+    %%%%%: 1834-block  0
+unconditional  0 never executed
+        -: 1835:	}
+        -: 1836:
+        1: 1837:	if (tips == UNSET) {
+        1: 1837-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1838:		if (xargs.tips == UNSET)
+    %%%%%: 1838-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1839:			tips = DEF_TIPS;
+    %%%%%: 1839-block  0
+unconditional  0 never executed
+        -: 1840:		else
+    #####: 1841:			tips = xargs.tips;
+    %%%%%: 1841-block  0
+unconditional  0 never executed
+        -: 1842:	}
+        -: 1843:
+        1: 1844:	if (autocd == UNSET) {
+        1: 1844-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1845:		if (xargs.autocd == UNSET)
+    %%%%%: 1845-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1846:			autocd = DEF_AUTOCD;
+    %%%%%: 1846-block  0
+unconditional  0 never executed
+        -: 1847:		else
+    #####: 1848:			autocd = xargs.autocd;
+    %%%%%: 1848-block  0
+unconditional  0 never executed
+        -: 1849:	}
+        -: 1850:
+        1: 1851:	if (auto_open == UNSET) {
+        1: 1851-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1852:		if (xargs.auto_open == UNSET)
+    %%%%%: 1852-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1853:			auto_open = DEF_AUTO_OPEN;
+    %%%%%: 1853-block  0
+unconditional  0 never executed
+        -: 1854:		else
+    #####: 1855:			auto_open = xargs.auto_open;
+    %%%%%: 1855-block  0
+unconditional  0 never executed
+        -: 1856:	}
+        -: 1857:
+        1: 1858:	if (cd_on_quit == UNSET) {
+        1: 1858-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1859:		if (xargs.cd_on_quit == UNSET)
+    %%%%%: 1859-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1860:			cd_on_quit = DEF_CD_ON_QUIT;
+    %%%%%: 1860-block  0
+unconditional  0 never executed
+        -: 1861:		else
+    #####: 1862:			cd_on_quit = xargs.cd_on_quit;
+    %%%%%: 1862-block  0
+unconditional  0 never executed
+        -: 1863:	}
+        -: 1864:
+        1: 1865:	if (dirhist_map == UNSET) {
+        1: 1865-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1866:		if (xargs.dirmap == UNSET)
+    %%%%%: 1866-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1867:			dirhist_map = DEF_DIRHIST_MAP;
+    %%%%%: 1867-block  0
+unconditional  0 never executed
+        -: 1868:		else
+    #####: 1869:			dirhist_map = xargs.dirmap;
+    %%%%%: 1869-block  0
+unconditional  0 never executed
+        -: 1870:	}
+        -: 1871:
+        1: 1872:	if (disk_usage == UNSET) {
+        1: 1872-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1873:		if (xargs.disk_usage == UNSET)
+    %%%%%: 1873-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1874:			disk_usage = DEF_DISK_USAGE;
+    %%%%%: 1874-block  0
+unconditional  0 never executed
+        -: 1875:		else
+    #####: 1876:			disk_usage = xargs.disk_usage;
+    %%%%%: 1876-block  0
+unconditional  0 never executed
+        -: 1877:	}
+        -: 1878:
+        1: 1879:	if (restore_last_path == UNSET) {
+        1: 1879-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1880:		if (xargs.restore_last_path == UNSET)
+    %%%%%: 1880-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1881:			restore_last_path = DEF_RESTORE_LAST_PATH;
+    %%%%%: 1881-block  0
+unconditional  0 never executed
+        -: 1882:		else
+    #####: 1883:			restore_last_path = xargs.restore_last_path;
+    %%%%%: 1883-block  0
+unconditional  0 never executed
+        -: 1884:	}
+        -: 1885:
+        1: 1886:	if (div_line_char == UNSET)
+        1: 1886-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1887:		div_line_char = DEF_DIV_LINE_CHAR;
+    %%%%%: 1887-block  0
+unconditional  0 never executed
+        -: 1888:
+        1: 1889:	if (max_hist == UNSET)
+        1: 1889-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1890:		max_hist = DEF_MAX_HIST;
+    %%%%%: 1890-block  0
+unconditional  0 never executed
+        -: 1891:
+        1: 1892:	if (max_log == UNSET)
+        1: 1892-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1893:		max_log = DEF_MAX_LOG;
+    %%%%%: 1893-block  0
+unconditional  0 never executed
+        -: 1894:
+        1: 1895:	if (!user.shell) {
+        1: 1895-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1896:		struct user_t tmp_user = get_user();
+    %%%%%: 1896-block  0
+call    0 never executed
+    #####: 1897:		user.shell = tmp_user.shell;
+        -: 1898:
+        -: 1899:		/* We don't need these values of the user struct: free(d) them */
+    #####: 1900:		free(tmp_user.name);
+    #####: 1901:		free(tmp_user.home);
+        -: 1902:
+    #####: 1903:		if (!user.shell)
+branch  0 never executed
+branch  1 never executed
+    #####: 1904:			user.shell = savestring(FALLBACK_SHELL, strlen(FALLBACK_SHELL));
+    %%%%%: 1904-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1905:	}
+        -: 1906:
+        1: 1907:	if (!term)
+        1: 1907-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1908:		term = savestring(DEFAULT_TERM_CMD, strlen(DEFAULT_TERM_CMD));
+    %%%%%: 1908-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1909:
+        1: 1910:	if (!encoded_prompt)
+        1: 1910-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####: 1911:		encoded_prompt = savestring(DEFAULT_PROMPT, strlen(DEFAULT_PROMPT));
+    %%%%%: 1911-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1912:
+        -: 1913:	/* Since in stealth mode we have no access to the config file, we
+        -: 1914:	 * cannot use 'lira', since it relays on a file.
+        -: 1915:	 * Set it thus to xdg-open, if not already set via command line */
+       1*: 1916:	if (xargs.stealth_mode == 1 && !opener)
+        1: 1916-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    %%%%%: 1916-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1917:		opener = savestring(FALLBACK_OPENER, strlen(FALLBACK_OPENER));
+    %%%%%: 1917-block  0
+call    0 never executed
+unconditional  1 never executed
+        1: 1918:}

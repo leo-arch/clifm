@@ -1,0 +1,2587 @@
+        -:    0:Source:keybinds.c
+        -:    1:/* keybinds.c -- functions keybindings configuration */
+        -:    2:
+        -:    3:/*
+        -:    4: * This file is part of CliFM
+        -:    5: * 
+        -:    6: * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
+        -:    7: * All rights reserved.
+        -:    8:
+        -:    9: * CliFM is free software; you can redistribute it and/or modify
+        -:   10: * it under the terms of the GNU General Public License as published by
+        -:   11: * the Free Software Foundation; either version 2 of the License, or
+        -:   12: * (at your option) any later version.
+        -:   13: *
+        -:   14: * CliFM is distributed in the hope that it will be useful,
+        -:   15: * but WITHOUT ANY WARRANTY; without even the implied warranty of
+        -:   16: * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        -:   17: * GNU General Public License for more details.
+        -:   18: *
+        -:   19: * You should have received a copy of the GNU General Public License
+        -:   20: * along with this program; if not, write to the Free Software
+        -:   21: * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+        -:   22: * MA 02110-1301, USA.
+        -:   23:*/
+        -:   24:
+        -:   25:#include "helpers.h"
+        -:   26:
+        -:   27:#include <stdio.h>
+        -:   28:#include <sys/stat.h>
+        -:   29:#include <termios.h>
+        -:   30:#include <unistd.h>
+        -:   31:#include <readline/readline.h>
+        -:   32:
+        -:   33:#include "aux.h"
+        -:   34:#include "config.h"
+        -:   35:#include "exec.h"
+        -:   36:#include "keybinds.h"
+        -:   37:#include "listing.h"
+        -:   38:#include "mime.h"
+        -:   39:#include "misc.h"
+        -:   40:#include "profiles.h"
+        -:   41:#include "prompt.h"
+        -:   42:
+        -:   43:int
+function kbinds_reset called 0 returned 0% blocks executed 0%
+    #####:   44:kbinds_reset(void)
+        -:   45:{
+    #####:   46:	int exit_status = EXIT_SUCCESS;
+        -:   47:	struct stat file_attrib;
+        -:   48:
+    #####:   49:	if (stat(KBINDS_FILE, &file_attrib) == -1)
+    %%%%%:   49-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:   50:		exit_status = create_kbinds_file();
+    %%%%%:   50-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:   51:
+        -:   52:	else {
+    #####:   53:		char *cmd[] = {"rm", KBINDS_FILE, NULL};
+    #####:   54:		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) == EXIT_SUCCESS)
+    %%%%%:   54-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:   55:			exit_status = create_kbinds_file();
+    %%%%%:   55-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:   56:		else
+    #####:   57:			exit_status = EXIT_FAILURE;
+    %%%%%:   57-block  0
+unconditional  0 never executed
+        -:   58:	}
+        -:   59:
+    #####:   60:	if (exit_status == EXIT_SUCCESS)
+    %%%%%:   60-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   61:		_err('n', PRINT_PROMPT, _("%s: Restart the program for changes "
+    %%%%%:   61-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:   62:			"to take effect\n"), PROGRAM_NAME);
+        -:   63:
+    #####:   64:	return exit_status;
+    %%%%%:   64-block  0
+unconditional  0 never executed
+        -:   65:}
+        -:   66:
+        -:   67:static int
+function kbinds_edit called 0 returned 0% blocks executed 0%
+    #####:   68:kbinds_edit(void)
+        -:   69:{
+    #####:   70:	if (xargs.stealth_mode == 1) {
+    %%%%%:   70-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   71:		printf("%s: Access to configuration files is not allowed in "
+    %%%%%:   71-block  0
+call    0 never executed
+        -:   72:		       "stealth mode\n", PROGRAM_NAME);
+    #####:   73:		return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:   74:	}
+        -:   75:
+    #####:   76:	if (!KBINDS_FILE)
+    %%%%%:   76-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   77:		return EXIT_FAILURE;
+    %%%%%:   77-block  0
+unconditional  0 never executed
+        -:   78:
+        -:   79:	struct stat file_attrib;
+        -:   80:
+    #####:   81:	if (stat(KBINDS_FILE, &file_attrib) == -1) {
+    %%%%%:   81-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:   82:		create_kbinds_file();
+    %%%%%:   82-block  0
+call    0 never executed
+    #####:   83:		stat(KBINDS_FILE, &file_attrib);
+call    0 never executed
+unconditional  1 never executed
+        -:   84:	}
+        -:   85:
+    #####:   86:	time_t mtime_bfr = (time_t)file_attrib.st_mtime;
+        -:   87:
+    #####:   88:	char *cmd[] = {"mm", KBINDS_FILE, NULL};
+    #####:   89:	int ret = mime_open(cmd);
+    %%%%%:   89-block  0
+call    0 never executed
+        -:   90:
+    #####:   91:	if (ret != EXIT_SUCCESS)
+branch  0 never executed
+branch  1 never executed
+    #####:   92:		return EXIT_FAILURE;
+    %%%%%:   92-block  0
+unconditional  0 never executed
+        -:   93:
+    #####:   94:	stat(KBINDS_FILE, &file_attrib);
+    %%%%%:   94-block  0
+call    0 never executed
+        -:   95:
+    #####:   96:	if (mtime_bfr == (time_t)file_attrib.st_mtime)
+branch  0 never executed
+branch  1 never executed
+    #####:   97:		return EXIT_SUCCESS;
+    %%%%%:   97-block  0
+unconditional  0 never executed
+        -:   98:
+    #####:   99:	_err('n', PRINT_PROMPT, _("%s: Restart the program for changes to "
+    %%%%%:   99-block  0
+call    0 never executed
+        -:  100:				  "take effect\n"), PROGRAM_NAME);
+        -:  101:
+    #####:  102:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  103:}
+        -:  104:
+        -:  105:int
+function kbinds_function called 0 returned 0% blocks executed 0%
+    #####:  106:kbinds_function(char **args)
+        -:  107:{
+    #####:  108:	if (!args)
+    %%%%%:  108-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  109:		return EXIT_FAILURE;
+    %%%%%:  109-block  0
+unconditional  0 never executed
+        -:  110:
+    #####:  111:	if (!args[1]) {
+    %%%%%:  111-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  112:		size_t i;
+    #####:  113:		for (i = 0; i < kbinds_n; i++) {
+    %%%%%:  113-block  0
+unconditional  0 never executed
+unconditional  1 never executed
+    %%%%%:  113-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  114:			printf("%s: %s\n", kbinds[i].key, kbinds[i].function);
+    %%%%%:  114-block  0
+call    0 never executed
+        -:  115:		}
+        -:  116:
+    #####:  117:		return EXIT_SUCCESS;
+    %%%%%:  117-block  0
+unconditional  0 never executed
+        -:  118:	}
+        -:  119:
+    #####:  120:	if (*args[1] == '-' && strcmp(args[1], "--help") == 0) {
+    %%%%%:  120-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  120-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  121:		puts(_("Usage: kb, keybinds [edit] [reset]"));
+    %%%%%:  121-block  0
+call    0 never executed
+    #####:  122:		return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  123:	}
+        -:  124:
+    #####:  125:	if (*args[1] == 'e' && strcmp(args[1], "edit") == 0)
+    %%%%%:  125-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  125-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  126:		return kbinds_edit();
+    %%%%%:  126-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  127:
+    #####:  128:	if (*args[1] == 'r' && strcmp(args[1], "reset") == 0)
+    %%%%%:  128-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  128-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  129:		return kbinds_reset();
+    %%%%%:  129-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  130:
+    #####:  131:	fputs(_("Usage: kb, keybinds [edit] [reset]\n"), stderr);
+    %%%%%:  131-block  0
+call    0 never executed
+    #####:  132:	return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  133:}
+        -:  134:
+        -:  135:/* To get the keyseq value for a given key do this in an Xterm terminal:
+        -:  136: * C-v and then press the key (or the key combination). So, for example,
+        -:  137: * C-v, C-right arrow gives "[[1;5C", which here should be written like
+        -:  138: * this:
+        -:  139: * "\\x1b[1;5C" */
+        -:  140:
+        -:  141:void
+function readline_kbinds called 1 returned 100% blocks executed 71%
+        1:  142:readline_kbinds(void)
+        -:  143:{
+        -:  144:
+        -:  145:			/* ##############################
+        -:  146:			 * #        KEYBINDINGS         #
+        -:  147:			 * ##############################*/
+        1:  148:	if (KBINDS_FILE) {
+        1:  148-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        -:  149:		/* Help */
+        1:  150:		rl_bind_keyseq(find_key("show-manpage"), rl_manpage);
+        1:  150-block  0
+call    0 returned 1
+call    1 returned 1
+        1:  151:		rl_bind_keyseq(find_key("show-cmds"), rl_cmds_help);
+call    0 returned 1
+call    1 returned 1
+        1:  152:		rl_bind_keyseq(find_key("show-kbinds"), rl_kbinds_help);
+call    0 returned 1
+call    1 returned 1
+        -:  153:
+        -:  154:		/* Navigation */
+        -:  155:		/* Define multiple keybinds for different terminals:
+        -:  156:		 * rxvt, xterm, kernel console */
+        -:  157:		/*      rl_bind_keyseq("\\M-[D", rl_test); // Left arrow key
+        -:  158:		rl_bind_keyseq("\\M-+", rl_test); */
+        1:  159:		rl_bind_keyseq(find_key("parent-dir"), rl_parent_dir);
+call    0 returned 1
+call    1 returned 1
+        1:  160:		rl_bind_keyseq(find_key("parent-dir2"), rl_parent_dir);
+call    0 returned 1
+call    1 returned 1
+        1:  161:		rl_bind_keyseq(find_key("parent-dir3"), rl_parent_dir);
+call    0 returned 1
+call    1 returned 1
+        1:  162:		rl_bind_keyseq(find_key("parent-dir4"), rl_parent_dir);
+call    0 returned 1
+call    1 returned 1
+        1:  163:		rl_bind_keyseq(find_key("previous-dir"), rl_previous_dir);
+call    0 returned 1
+call    1 returned 1
+        1:  164:		rl_bind_keyseq(find_key("previous-dir2"), rl_previous_dir);
+call    0 returned 1
+call    1 returned 1
+        1:  165:		rl_bind_keyseq(find_key("previous-dir3"), rl_previous_dir);
+call    0 returned 1
+call    1 returned 1
+        1:  166:		rl_bind_keyseq(find_key("previous-dir4"), rl_previous_dir);
+call    0 returned 1
+call    1 returned 1
+        1:  167:		rl_bind_keyseq(find_key("next-dir"), rl_next_dir);
+call    0 returned 1
+call    1 returned 1
+        1:  168:		rl_bind_keyseq(find_key("next-dir2"), rl_next_dir);
+call    0 returned 1
+call    1 returned 1
+        1:  169:		rl_bind_keyseq(find_key("next-dir3"), rl_next_dir);
+call    0 returned 1
+call    1 returned 1
+        1:  170:		rl_bind_keyseq(find_key("next-dir4"), rl_next_dir);
+call    0 returned 1
+call    1 returned 1
+        1:  171:		rl_bind_keyseq(find_key("home-dir"), rl_home_dir);
+call    0 returned 1
+call    1 returned 1
+        1:  172:		rl_bind_keyseq(find_key("home-dir2"), rl_home_dir);
+call    0 returned 1
+call    1 returned 1
+        1:  173:		rl_bind_keyseq(find_key("home-dir3"), rl_home_dir);
+call    0 returned 1
+call    1 returned 1
+        1:  174:		rl_bind_keyseq(find_key("root-dir"), rl_root_dir);
+call    0 returned 1
+call    1 returned 1
+        1:  175:		rl_bind_keyseq(find_key("root-dir2"), rl_root_dir);
+call    0 returned 1
+call    1 returned 1
+        1:  176:		rl_bind_keyseq(find_key("root-dir3"), rl_root_dir);
+call    0 returned 1
+call    1 returned 1
+        -:  177:
+        1:  178:		rl_bind_keyseq(find_key("first-dir"), rl_first_dir);
+call    0 returned 1
+call    1 returned 1
+        1:  179:		rl_bind_keyseq(find_key("last-dir"), rl_last_dir);
+call    0 returned 1
+call    1 returned 1
+        -:  180:
+        1:  181:		rl_bind_keyseq(find_key("pinned-dir"), rl_pinned_dir);
+call    0 returned 1
+call    1 returned 1
+        1:  182:		rl_bind_keyseq(find_key("workspace1"), rl_ws1);
+call    0 returned 1
+call    1 returned 1
+        1:  183:		rl_bind_keyseq(find_key("workspace2"), rl_ws2);
+call    0 returned 1
+call    1 returned 1
+        1:  184:		rl_bind_keyseq(find_key("workspace3"), rl_ws3);
+call    0 returned 1
+call    1 returned 1
+        1:  185:		rl_bind_keyseq(find_key("workspace4"), rl_ws4);
+call    0 returned 1
+call    1 returned 1
+        -:  186:
+        -:  187:		/* Operations on files */
+        1:  188:		rl_bind_keyseq(find_key("bookmark-sel"), rl_bm_sel);
+call    0 returned 1
+call    1 returned 1
+        1:  189:		rl_bind_keyseq(find_key("archive-sel"), rl_archive_sel);
+call    0 returned 1
+call    1 returned 1
+        1:  190:		rl_bind_keyseq(find_key("open-sel"), rl_open_sel);
+call    0 returned 1
+call    1 returned 1
+        1:  191:		rl_bind_keyseq(find_key("export-sel"), rl_export_sel);
+call    0 returned 1
+call    1 returned 1
+        1:  192:		rl_bind_keyseq(find_key("move-sel"), rl_move_sel);
+call    0 returned 1
+call    1 returned 1
+        1:  193:		rl_bind_keyseq(find_key("rename-sel"), rl_rename_sel);
+call    0 returned 1
+call    1 returned 1
+        1:  194:		rl_bind_keyseq(find_key("remove-sel"), rl_remove_sel);
+call    0 returned 1
+call    1 returned 1
+        1:  195:		rl_bind_keyseq(find_key("trash-sel"), rl_trash_sel);
+call    0 returned 1
+call    1 returned 1
+        1:  196:		rl_bind_keyseq(find_key("untrash-all"), rl_untrash_all);
+call    0 returned 1
+call    1 returned 1
+        1:  197:		rl_bind_keyseq(find_key("paste-sel"), rl_paste_sel);
+call    0 returned 1
+call    1 returned 1
+        1:  198:		rl_bind_keyseq(find_key("select-all"), rl_select_all);
+call    0 returned 1
+call    1 returned 1
+        1:  199:		rl_bind_keyseq(find_key("deselect-all"), rl_deselect_all);
+call    0 returned 1
+call    1 returned 1
+        -:  200:
+        -:  201:		/* Config files */
+        1:  202:		rl_bind_keyseq(find_key("open-mime"), rl_open_mime);
+call    0 returned 1
+call    1 returned 1
+        1:  203:		rl_bind_keyseq(find_key("open-jump-db"), rl_open_jump_db);
+call    0 returned 1
+call    1 returned 1
+        1:  204:		rl_bind_keyseq(find_key("edit-color-scheme"), rl_open_cscheme);
+call    0 returned 1
+call    1 returned 1
+        1:  205:		rl_bind_keyseq(find_key("open-config"), rl_open_config);
+call    0 returned 1
+call    1 returned 1
+        1:  206:		rl_bind_keyseq(find_key("open-keybinds"), rl_open_keybinds);
+call    0 returned 1
+call    1 returned 1
+        1:  207:		rl_bind_keyseq(find_key("open-bookmarks"), rl_open_bm_file);
+call    0 returned 1
+call    1 returned 1
+        -:  208:
+        -:  209:		/* Settings */
+        1:  210:		rl_bind_keyseq(find_key("clear-msgs"), rl_clear_msgs);
+call    0 returned 1
+call    1 returned 1
+        1:  211:		rl_bind_keyseq(find_key("next-profile"), rl_next_profile);
+call    0 returned 1
+call    1 returned 1
+        1:  212:		rl_bind_keyseq(find_key("previous-profile"), rl_previous_profile);
+call    0 returned 1
+call    1 returned 1
+        1:  213:		rl_bind_keyseq(find_key("quit"), rl_quit);
+call    0 returned 1
+call    1 returned 1
+        1:  214:		rl_bind_keyseq(find_key("lock"), rl_lock);
+call    0 returned 1
+call    1 returned 1
+        1:  215:		rl_bind_keyseq(find_key("refresh-screen"), rl_refresh);
+call    0 returned 1
+call    1 returned 1
+        1:  216:		rl_bind_keyseq(find_key("clear-line"), rl_clear_line);
+call    0 returned 1
+call    1 returned 1
+        1:  217:		rl_bind_keyseq(find_key("toggle-hidden"), rl_hidden);
+call    0 returned 1
+call    1 returned 1
+        1:  218:		rl_bind_keyseq(find_key("toggle-hidden2"), rl_hidden);
+call    0 returned 1
+call    1 returned 1
+        1:  219:		rl_bind_keyseq(find_key("toggle-long"), rl_long);
+call    0 returned 1
+call    1 returned 1
+        1:  220:		rl_bind_keyseq(find_key("toggle-light"), rl_light);
+call    0 returned 1
+call    1 returned 1
+        1:  221:		rl_bind_keyseq(find_key("folders-first"), rl_folders_first);
+call    0 returned 1
+call    1 returned 1
+        1:  222:		rl_bind_keyseq(find_key("sort-previous"), rl_sort_previous);
+call    0 returned 1
+call    1 returned 1
+        1:  223:		rl_bind_keyseq(find_key("sort-next"), rl_sort_next);
+call    0 returned 1
+call    1 returned 1
+        -:  224:
+        1:  225:		rl_bind_keyseq(find_key("new-instance"), rl_new_instance);
+call    0 returned 1
+call    1 returned 1
+        1:  226:		rl_bind_keyseq(find_key("show-dirhist"), rl_dirhist);
+call    0 returned 1
+call    1 returned 1
+        1:  227:		rl_bind_keyseq(find_key("bookmarks"), rl_bookmarks);
+call    0 returned 1
+call    1 returned 1
+        1:  228:		rl_bind_keyseq(find_key("mountpoints"), rl_mountpoints);
+call    0 returned 1
+call    1 returned 1
+        1:  229:		rl_bind_keyseq(find_key("selbox"), rl_selbox);
+call    0 returned 1
+call    1 returned 1
+        -:  230:
+        -:  231:		/* Plugins */
+        1:  232:		rl_bind_keyseq(find_key("plugin1"), rl_plugin1);
+call    0 returned 1
+call    1 returned 1
+        1:  233:		rl_bind_keyseq(find_key("plugin2"), rl_plugin2);
+call    0 returned 1
+call    1 returned 1
+        1:  234:		rl_bind_keyseq(find_key("plugin3"), rl_plugin3);
+call    0 returned 1
+call    1 returned 1
+        1:  235:		rl_bind_keyseq(find_key("plugin4"), rl_plugin4);
+call    0 returned 1
+call    1 returned 1
+        -:  236:
+        1:  237:		rl_bind_keyseq(find_key("quit"), rl_quit);
+call    0 returned 1
+call    1 returned 1
+unconditional  2 taken 1
+        -:  238:	}
+        -:  239:
+        -:  240:	/* If no kbinds file is found, set the defaults */
+        -:  241:	else {
+        -:  242:		/* Help */
+    #####:  243:		rl_bind_keyseq("\\eOP", rl_manpage);
+    %%%%%:  243-block  0
+call    0 never executed
+    #####:  244:		rl_bind_keyseq("\\eOQ", rl_cmds_help);
+call    0 never executed
+    #####:  245:		rl_bind_keyseq("\\eOR", rl_kbinds_help);
+call    0 never executed
+        -:  246:
+        -:  247:		/* Navigation */
+    #####:  248:		rl_bind_keyseq("\\M-u", rl_parent_dir);
+call    0 never executed
+    #####:  249:		rl_bind_keyseq("\\e[a", rl_parent_dir);
+call    0 never executed
+    #####:  250:		rl_bind_keyseq("\\e[2A", rl_parent_dir);
+call    0 never executed
+    #####:  251:		rl_bind_keyseq("\\e[1;2A", rl_parent_dir);
+call    0 never executed
+    #####:  252:		rl_bind_keyseq("\\M-j", rl_previous_dir);
+call    0 never executed
+    #####:  253:		rl_bind_keyseq("\\e[d", rl_previous_dir);
+call    0 never executed
+    #####:  254:		rl_bind_keyseq("\\e[2D", rl_previous_dir);
+call    0 never executed
+    #####:  255:		rl_bind_keyseq("\\e[1;2D", rl_previous_dir);
+call    0 never executed
+    #####:  256:		rl_bind_keyseq("\\M-k", rl_next_dir);
+call    0 never executed
+    #####:  257:		rl_bind_keyseq("\\e[c", rl_next_dir);
+call    0 never executed
+    #####:  258:		rl_bind_keyseq("\\e[2C", rl_next_dir);
+call    0 never executed
+    #####:  259:		rl_bind_keyseq("\\e[1;2C", rl_next_dir);
+call    0 never executed
+    #####:  260:		rl_bind_keyseq("\\M-e", rl_home_dir);
+call    0 never executed
+    #####:  261:		rl_bind_keyseq("\\e[7~", rl_home_dir);
+call    0 never executed
+    #####:  262:		rl_bind_keyseq("\\e[H", rl_home_dir);
+call    0 never executed
+    #####:  263:		rl_bind_keyseq("\\M-r", rl_root_dir);
+call    0 never executed
+    #####:  264:		rl_bind_keyseq("\\e/", rl_root_dir);
+call    0 never executed
+        -:  265:
+    #####:  266:		rl_bind_keyseq("\\C-\\M-j", rl_first_dir);
+call    0 never executed
+    #####:  267:		rl_bind_keyseq("\\C-\\M-k", rl_last_dir);
+call    0 never executed
+        -:  268:
+        -:  269:		/* Operations on files */
+    #####:  270:		rl_bind_keyseq("\\C-\\M-b", rl_bm_sel);
+call    0 never executed
+    #####:  271:		rl_bind_keyseq("\\C-\\M-a", rl_archive_sel);
+call    0 never executed
+    #####:  272:		rl_bind_keyseq("\\C-\\M-g", rl_open_sel);
+call    0 never executed
+    #####:  273:		rl_bind_keyseq("\\C-\\M-e", rl_export_sel);
+call    0 never executed
+    #####:  274:		rl_bind_keyseq("\\C-\\M-n", rl_move_sel);
+call    0 never executed
+    #####:  275:		rl_bind_keyseq("\\C-\\M-r", rl_rename_sel);
+call    0 never executed
+    #####:  276:		rl_bind_keyseq("\\C-\\M-d", rl_remove_sel);
+call    0 never executed
+    #####:  277:		rl_bind_keyseq("\\C-\\M-t", rl_trash_sel);
+call    0 never executed
+    #####:  278:		rl_bind_keyseq("\\C-\\M-u", rl_untrash_all);
+call    0 never executed
+    #####:  279:		rl_bind_keyseq("\\C-\\M-v", rl_paste_sel);
+call    0 never executed
+    #####:  280:		rl_bind_keyseq("\\M-a", rl_select_all);
+call    0 never executed
+    #####:  281:		rl_bind_keyseq("\\M-d", rl_deselect_all);
+call    0 never executed
+        -:  282:
+        -:  283:		/* Config files */
+    #####:  284:		rl_bind_keyseq("\\e[17~", rl_open_mime);
+call    0 never executed
+    #####:  285:		rl_bind_keyseq("\\e[18~", rl_open_jump_db);
+call    0 never executed
+    #####:  286:		rl_bind_keyseq("\\e[19~", rl_open_cscheme);
+call    0 never executed
+    #####:  287:		rl_bind_keyseq("\\e[20~", rl_open_keybinds);
+call    0 never executed
+    #####:  288:		rl_bind_keyseq("\\e[21~", rl_open_config);
+call    0 never executed
+    #####:  289:		rl_bind_keyseq("\\e[23~", rl_open_bm_file);
+call    0 never executed
+        -:  290:
+        -:  291:		/* Settings */
+    #####:  292:		rl_bind_keyseq("\\M-t", rl_clear_msgs);
+call    0 never executed
+        -:  293:		/*      rl_bind_keyseq("", rl_next_profile);
+        -:  294:		rl_bind_keyseq("", rl_previous_profile); */
+    #####:  295:		rl_bind_keyseq("\\e[24~", rl_quit);
+call    0 never executed
+    #####:  296:		rl_bind_keyseq("\\M-o", rl_lock);
+call    0 never executed
+    #####:  297:		rl_bind_keyseq("\\C-r", rl_refresh);
+call    0 never executed
+    #####:  298:		rl_bind_keyseq("\\M-c", rl_clear_line);
+call    0 never executed
+    #####:  299:		rl_bind_keyseq("\\M-i", rl_hidden);
+call    0 never executed
+    #####:  300:		rl_bind_keyseq("\\M-.", rl_hidden);
+call    0 never executed
+    #####:  301:		rl_bind_keyseq("\\M-l", rl_long);
+call    0 never executed
+    #####:  302:		rl_bind_keyseq("\\M-y", rl_light);
+call    0 never executed
+    #####:  303:		rl_bind_keyseq("\\M-f", rl_folders_first);
+call    0 never executed
+    #####:  304:		rl_bind_keyseq("\\M-z", rl_sort_previous);
+call    0 never executed
+    #####:  305:		rl_bind_keyseq("\\M-x", rl_sort_next);
+call    0 never executed
+        -:  306:
+    #####:  307:		rl_bind_keyseq("\\C-x", rl_new_instance);
+call    0 never executed
+    #####:  308:		rl_bind_keyseq("\\M-h", rl_dirhist);
+call    0 never executed
+    #####:  309:		rl_bind_keyseq("\\M-b", rl_bookmarks);
+call    0 never executed
+    #####:  310:		rl_bind_keyseq("\\M-m", rl_mountpoints);
+call    0 never executed
+    #####:  311:		rl_bind_keyseq("\\M-s", rl_selbox);
+call    0 never executed
+        -:  312:
+    #####:  313:		rl_bind_keyseq("\\e[24~", rl_quit);
+call    0 never executed
+unconditional  1 never executed
+        -:  314:	}
+        1:  315:}
+        -:  316:
+        -:  317:/* Store keybinds from the keybinds file into a struct */
+        -:  318:int
+function load_keybinds called 1 returned 100% blocks executed 77%
+        1:  319:load_keybinds(void)
+        -:  320:{
+        1:  321:	if (!config_ok)
+        1:  321-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  322:		return EXIT_FAILURE;
+    %%%%%:  322-block  0
+unconditional  0 never executed
+        -:  323:
+        -:  324:	/* Free the keybinds struct array */
+        1:  325:	if (kbinds_n) {
+        1:  325-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  326:		int i = (int)kbinds_n;
+        -:  327:
+    #####:  328:		while (--i >= 0) {
+    %%%%%:  328-block  0
+unconditional  0 never executed
+    %%%%%:  328-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  329:			free(kbinds[i].function);
+    #####:  330:			free(kbinds[i].key);
+    %%%%%:  330-block  0
+unconditional  0 never executed
+        -:  331:		}
+        -:  332:
+    #####:  333:		free(kbinds);
+        -:  334:
+    #####:  335:		kbinds = (struct kbinds_t *)xnmalloc(1, sizeof(struct kbinds_t));
+    %%%%%:  335-block  0
+call    0 never executed
+        -:  336:
+    #####:  337:		kbinds_n = 0;
+unconditional  0 never executed
+        -:  338:	}
+        -:  339:
+        -:  340:	/* Open the keybinds file */
+        1:  341:	FILE *fp = fopen(KBINDS_FILE, "r");
+        1:  341-block  0
+call    0 returned 1
+        -:  342:
+        1:  343:	if (!fp)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  344:		return EXIT_FAILURE;
+    %%%%%:  344-block  0
+unconditional  0 never executed
+        -:  345:
+        1:  346:	size_t line_size = 0;
+        1:  347:	char *line = (char *)NULL;
+        1:  348:	ssize_t line_len = 0;
+        -:  349:
+      123:  350:	while ((line_len = getline(&line, &line_size, fp)) > 0) {
+        1:  350-block  0
+unconditional  0 taken 1
+      123:  350-block  1
+call    1 returned 123
+branch  2 taken 122
+branch  3 taken 1 (fallthrough)
+        -:  351:
+      122:  352:		if (!line || !*line || *line == '#' || *line == '\n')
+      122:  352-block  0
+branch  0 taken 122 (fallthrough)
+branch  1 taken 0
+      122:  352-block  1
+branch  2 taken 122 (fallthrough)
+branch  3 taken 0
+      122:  352-block  2
+branch  4 taken 73 (fallthrough)
+branch  5 taken 49
+       73:  352-block  3
+branch  6 taken 11 (fallthrough)
+branch  7 taken 62
+       60:  353:			continue;
+       60:  353-block  0
+unconditional  0 taken 60
+        -:  354:
+       62:  355:		if (line[line_len - 1] == '\n')
+       62:  355-block  0
+branch  0 taken 62 (fallthrough)
+branch  1 taken 0
+       62:  356:			line[line_len - 1] = '\0';
+       62:  356-block  0
+unconditional  0 taken 62
+        -:  357:
+       62:  358:		char *tmp = (char *)NULL;
+       62:  359:		tmp = strchr(line, ':');
+        -:  360:
+       62:  361:		if (!tmp || !*(tmp + 1))
+       62:  361-block  0
+branch  0 taken 61 (fallthrough)
+branch  1 taken 1
+       61:  361-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 60
+        2:  362:			continue;
+        2:  362-block  0
+unconditional  0 taken 2
+        -:  363:
+        -:  364:		/* Now copy left and right value of each keybind into the
+        -:  365:		 * keybinds struct */
+       60:  366:		kbinds = xrealloc(kbinds, (kbinds_n + 1) * sizeof(struct kbinds_t));
+       60:  366-block  0
+call    0 returned 60
+        -:  367:
+       60:  368:		kbinds[kbinds_n].key = savestring(tmp + 1, strlen(tmp + 1));
+call    0 returned 60
+        -:  369:
+       60:  370:		*tmp = '\0';
+        -:  371:
+       60:  372:		kbinds[kbinds_n++].function = savestring(line, strlen(line));
+call    0 returned 60
+unconditional  1 taken 60
+        -:  373:	}
+        -:  374:
+        1:  375:	free(line);
+        -:  376:
+        1:  377:	return EXIT_SUCCESS;
+        1:  377-block  0
+unconditional  0 taken 1
+        -:  378:}
+        -:  379:
+        -:  380:char *
+function find_key called 70 returned 100% blocks executed 90%
+       70:  381:find_key(char *function)
+        -:  382:{
+       70:  383:	if (!kbinds_n)
+       70:  383-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 70
+    #####:  384:		return (char *)NULL;
+    %%%%%:  384-block  0
+unconditional  0 never executed
+        -:  385:
+       70:  386:	int n = (int)kbinds_n;
+        -:  387:
+     2380:  388:	while (--n >= 0) {
+       70:  388-block  0
+unconditional  0 taken 70
+     2380:  388-block  1
+branch  1 taken 2371
+branch  2 taken 9 (fallthrough)
+     2371:  389:		if (*function != *kbinds[n].function)
+     2371:  389-block  0
+branch  0 taken 2119 (fallthrough)
+branch  1 taken 252
+     2119:  390:			continue;
+     2119:  390-block  0
+unconditional  0 taken 2119
+        -:  391:
+      252:  392:		if (strcmp(function, kbinds[n].function) == 0)
+      252:  392-block  0
+branch  0 taken 61 (fallthrough)
+branch  1 taken 191
+       61:  393:			return kbinds[n].key;
+       61:  393-block  0
+unconditional  0 taken 61
+        -:  394:	}
+        -:  395:
+        9:  396:	return (char *)NULL;
+        9:  396-block  0
+unconditional  0 taken 9
+        -:  397:}
+        -:  398:
+        -:  399:/* Runs any command recognized by CliFM via a keybind. Example:
+        -:  400: * keybind_exec_cmd("sel *") */
+        -:  401:int
+function keybind_exec_cmd called 5 returned 100% blocks executed 92%
+        5:  402:keybind_exec_cmd(char *str)
+        -:  403:{
+        5:  404:	size_t old_args = args_n;
+        5:  405:	args_n = 0;
+        -:  406:
+        5:  407:	int exit_status = EXIT_FAILURE;
+        -:  408:
+        5:  409:	char **cmd = parse_input_str(str);
+        5:  409-block  0
+call    0 returned 5
+        5:  410:	putchar('\n');
+call    0 returned 5
+        -:  411:
+        5:  412:	if (cmd) {
+branch  0 taken 5 (fallthrough)
+branch  1 taken 0
+        -:  413:
+        5:  414:		exit_status = exec_cmd(cmd);
+        5:  414-block  0
+call    0 returned 5
+        -:  415:
+        -:  416:		/* While in the bookmarks or mountpoints screen, the kbind_busy
+        -:  417:		 * flag will be set to 1 and no keybinding will work. Once the
+        -:  418:		 * corresponding function exited, set the kbind_busy flag to zero,
+        -:  419:		 * so that keybindings work again */
+        5:  420:		if (kbind_busy)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 5
+    #####:  421:			kbind_busy = 0;
+    %%%%%:  421-block  0
+unconditional  0 never executed
+        -:  422:
+        5:  423:		int i = (int)args_n + 1;
+       12:  424:		while (--i >= 0)
+        5:  424-block  0
+unconditional  0 taken 5
+       12:  424-block  1
+branch  1 taken 7
+branch  2 taken 5 (fallthrough)
+        7:  425:			free(cmd[i]);
+        7:  425-block  0
+unconditional  0 taken 7
+        5:  426:		free(cmd);
+        -:  427:
+        -:  428:		/* This call to prompt() just updates the prompt in case it was
+        -:  429:		 * modified, for example, in case of chdir, files selection, and
+        -:  430:		 * so on */
+        5:  431:		char *buf = prompt();
+        5:  431-block  0
+call    0 returned 5
+        5:  432:		free(buf);
+unconditional  0 taken 5
+        -:  433:	}
+        -:  434:
+        5:  435:	args_n = old_args;
+        -:  436:
+        5:  437:	return exit_status;
+        5:  437-block  0
+unconditional  0 taken 5
+        -:  438:}
+        -:  439:
+        -:  440:int
+function rl_refresh called 0 returned 0% blocks executed 0%
+    #####:  441:rl_refresh(int count, int key)
+        -:  442:{
+    #####:  443:	if (kbind_busy)
+    %%%%%:  443-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  444:		return EXIT_SUCCESS;
+    %%%%%:  444-block  0
+unconditional  0 never executed
+        -:  445:
+    #####:  446:	if (clear_screen)
+    %%%%%:  446-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  447:		CLEAR;
+    %%%%%:  447-block  0
+call    0 never executed
+unconditional  1 never executed
+    #####:  448:	keybind_exec_cmd("rf");
+    %%%%%:  448-block  0
+call    0 never executed
+        -:  449:
+    #####:  450:	rl_reset_line_state();
+call    0 never executed
+        -:  451:
+    #####:  452:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  453:}
+        -:  454:
+        -:  455:int
+function rl_parent_dir called 0 returned 0% blocks executed 0%
+    #####:  456:rl_parent_dir(int count, int key)
+        -:  457:{
+    #####:  458:	if (kbind_busy)
+    %%%%%:  458-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  459:		return EXIT_SUCCESS;
+    %%%%%:  459-block  0
+unconditional  0 never executed
+        -:  460:
+        -:  461:	/* If already root dir, do nothing */
+    #####:  462:	if (*ws[cur_ws].path == '/' && !ws[cur_ws].path[1])
+    %%%%%:  462-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  462-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  463:		return EXIT_SUCCESS;
+    %%%%%:  463-block  0
+unconditional  0 never executed
+        -:  464:
+    #####:  465:	keybind_exec_cmd("cd ..");
+    %%%%%:  465-block  0
+call    0 never executed
+        -:  466:
+    #####:  467:	rl_reset_line_state();
+call    0 never executed
+        -:  468:
+    #####:  469:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  470:}
+        -:  471:
+        -:  472:int
+function rl_root_dir called 1 returned 100% blocks executed 78%
+        1:  473:rl_root_dir(int count, int key)
+        -:  474:{
+        1:  475:	if (kbind_busy)
+        1:  475-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  476:		return EXIT_SUCCESS;
+    %%%%%:  476-block  0
+unconditional  0 never executed
+        -:  477:
+        -:  478:	/* If already root dir, do nothing */
+        1:  479:	if (*ws[cur_ws].path == '/' && !ws[cur_ws].path[1])
+        1:  479-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  479-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1
+    #####:  480:		return EXIT_SUCCESS;
+    %%%%%:  480-block  0
+unconditional  0 never executed
+        -:  481:
+        1:  482:	keybind_exec_cmd("cd /");
+        1:  482-block  0
+call    0 returned 1
+        -:  483:
+        1:  484:	rl_reset_line_state();
+call    0 returned 1
+        -:  485:
+        1:  486:	return EXIT_SUCCESS;
+unconditional  0 taken 1
+        -:  487:}
+        -:  488:
+        -:  489:int
+function rl_home_dir called 1 returned 100% blocks executed 78%
+        1:  490:rl_home_dir(int count, int key)
+        -:  491:{
+        1:  492:	if (kbind_busy)
+        1:  492-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  493:		return EXIT_SUCCESS;
+    %%%%%:  493-block  0
+unconditional  0 never executed
+        -:  494:
+        -:  495:	/* If already in home, do nothing */
+        1:  496:	if (*ws[cur_ws].path == *user.home && strcmp(ws[cur_ws].path, user.home) == 0)
+        1:  496-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  496-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1
+    #####:  497:		return EXIT_SUCCESS;
+    %%%%%:  497-block  0
+unconditional  0 never executed
+        -:  498:
+        1:  499:	keybind_exec_cmd("cd");
+        1:  499-block  0
+call    0 returned 1
+        -:  500:
+        1:  501:	rl_reset_line_state();
+call    0 returned 1
+        -:  502:
+        1:  503:	return EXIT_SUCCESS;
+unconditional  0 taken 1
+        -:  504:}
+        -:  505:
+        -:  506:int
+function rl_next_dir called 0 returned 0% blocks executed 0%
+    #####:  507:rl_next_dir(int count, int key)
+        -:  508:{
+    #####:  509:	if (kbind_busy)
+    %%%%%:  509-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  510:		return EXIT_SUCCESS;
+    %%%%%:  510-block  0
+unconditional  0 never executed
+        -:  511:
+        -:  512:	/* If already at the end of dir hist, do nothing */
+    #####:  513:	if (dirhist_cur_index + 1 == dirhist_total_index)
+    %%%%%:  513-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  514:		return EXIT_SUCCESS;
+    %%%%%:  514-block  0
+unconditional  0 never executed
+        -:  515:
+    #####:  516:	keybind_exec_cmd("f");
+    %%%%%:  516-block  0
+call    0 never executed
+        -:  517:
+    #####:  518:	rl_reset_line_state();
+call    0 never executed
+        -:  519:
+    #####:  520:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  521:}
+        -:  522:
+        -:  523:int
+function rl_first_dir called 0 returned 0% blocks executed 0%
+    #####:  524:rl_first_dir(int count, int key)
+        -:  525:{
+    #####:  526:	if (kbind_busy)
+    %%%%%:  526-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  527:		return EXIT_SUCCESS;
+    %%%%%:  527-block  0
+unconditional  0 never executed
+        -:  528:
+        -:  529:	/* If already at the beginning of dir hist, do nothing */
+    #####:  530:	if (dirhist_cur_index == 0)
+    %%%%%:  530-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  531:		return EXIT_SUCCESS;
+    %%%%%:  531-block  0
+unconditional  0 never executed
+        -:  532:
+    #####:  533:	keybind_exec_cmd("b !1");
+    %%%%%:  533-block  0
+call    0 never executed
+        -:  534:
+    #####:  535:	rl_reset_line_state();
+call    0 never executed
+        -:  536:
+    #####:  537:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  538:}
+        -:  539:
+        -:  540:int
+function rl_last_dir called 0 returned 0% blocks executed 0%
+    #####:  541:rl_last_dir(int count, int key)
+        -:  542:{
+    #####:  543:	if (kbind_busy)
+    %%%%%:  543-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  544:		return EXIT_SUCCESS;
+    %%%%%:  544-block  0
+unconditional  0 never executed
+        -:  545:
+        -:  546:	/* If already at the end of dir hist, do nothing */
+    #####:  547:	if (dirhist_cur_index + 1 == dirhist_total_index)
+    %%%%%:  547-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  548:		return EXIT_SUCCESS;
+    %%%%%:  548-block  0
+unconditional  0 never executed
+        -:  549:
+        -:  550:	char cmd[PATH_MAX + 4];
+    #####:  551:	sprintf(cmd, "b !%d", dirhist_total_index);
+    #####:  552:	keybind_exec_cmd(cmd);
+    %%%%%:  552-block  0
+call    0 never executed
+        -:  553:
+    #####:  554:	rl_reset_line_state();
+call    0 never executed
+        -:  555:
+    #####:  556:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  557:}
+        -:  558:
+        -:  559:int
+function rl_previous_dir called 0 returned 0% blocks executed 0%
+    #####:  560:rl_previous_dir(int count, int key)
+        -:  561:{
+    #####:  562:	if (kbind_busy)
+    %%%%%:  562-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  563:		return EXIT_SUCCESS;
+    %%%%%:  563-block  0
+unconditional  0 never executed
+        -:  564:
+        -:  565:	/* If already at the beginning of dir hist, do nothing */
+    #####:  566:	if (dirhist_cur_index == 0)
+    %%%%%:  566-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  567:		return EXIT_SUCCESS;
+    %%%%%:  567-block  0
+unconditional  0 never executed
+        -:  568:
+    #####:  569:	keybind_exec_cmd("b");
+    %%%%%:  569-block  0
+call    0 never executed
+        -:  570:
+    #####:  571:	rl_reset_line_state();
+call    0 never executed
+        -:  572:
+    #####:  573:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  574:}
+        -:  575:
+        -:  576:int
+function rl_long called 0 returned 0% blocks executed 0%
+    #####:  577:rl_long(int count, int key)
+        -:  578:{
+    #####:  579:	if (kbind_busy)
+    %%%%%:  579-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  580:		return EXIT_SUCCESS;
+    %%%%%:  580-block  0
+unconditional  0 never executed
+        -:  581:
+    #####:  582:	long_view = long_view ? 0 : 1;
+        -:  583:
+    #####:  584:	if (clear_screen)
+    %%%%%:  584-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  585:		CLEAR;
+    %%%%%:  585-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  586:
+    #####:  587:	keybind_exec_cmd("rf");
+    %%%%%:  587-block  0
+call    0 never executed
+        -:  588:
+    #####:  589:	rl_reset_line_state();
+call    0 never executed
+        -:  590:
+    #####:  591:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  592:}
+        -:  593:
+        -:  594:int
+function rl_folders_first called 0 returned 0% blocks executed 0%
+    #####:  595:rl_folders_first(int count, int key)
+        -:  596:{
+    #####:  597:	if (kbind_busy)
+    %%%%%:  597-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  598:		return EXIT_SUCCESS;
+    %%%%%:  598-block  0
+unconditional  0 never executed
+        -:  599:
+    #####:  600:	list_folders_first = list_folders_first ? 0 : 1;
+        -:  601:
+    #####:  602:	if (cd_lists_on_the_fly) {
+    %%%%%:  602-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  603:		if (clear_screen)
+    %%%%%:  603-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  604:			CLEAR;
+    %%%%%:  604-block  0
+call    0 never executed
+unconditional  1 never executed
+    #####:  605:		free_dirlist();
+    %%%%%:  605-block  0
+call    0 never executed
+        -:  606:		/* Without this putchar(), the first entries of the directories
+        -:  607:		 * list are printed in the prompt line */
+    #####:  608:		putchar('\n');
+call    0 never executed
+    #####:  609:		list_dir();
+call    0 never executed
+unconditional  1 never executed
+        -:  610:	}
+        -:  611:
+    #####:  612:	rl_reset_line_state();
+    %%%%%:  612-block  0
+call    0 never executed
+        -:  613:
+    #####:  614:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  615:}
+        -:  616:
+        -:  617:int
+function rl_light called 0 returned 0% blocks executed 0%
+    #####:  618:rl_light(int count, int key)
+        -:  619:{
+    #####:  620:	if (kbind_busy)
+    %%%%%:  620-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  621:		return EXIT_SUCCESS;
+    %%%%%:  621-block  0
+unconditional  0 never executed
+        -:  622:
+    #####:  623:	light_mode = light_mode ? 0 : 1;
+        -:  624:
+    #####:  625:	if (clear_screen)
+    %%%%%:  625-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  626:		CLEAR;
+    %%%%%:  626-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  627:
+    #####:  628:	keybind_exec_cmd("rf");
+    %%%%%:  628-block  0
+call    0 never executed
+        -:  629:
+    #####:  630:	rl_reset_line_state();
+call    0 never executed
+        -:  631:
+    #####:  632:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  633:}
+        -:  634:
+        -:  635:int
+function rl_hidden called 0 returned 0% blocks executed 0%
+    #####:  636:rl_hidden(int count, int key)
+        -:  637:{
+    #####:  638:	if (kbind_busy)
+    %%%%%:  638-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  639:		return EXIT_SUCCESS;
+    %%%%%:  639-block  0
+unconditional  0 never executed
+        -:  640:
+    #####:  641:	show_hidden = show_hidden ? 0 : 1;
+        -:  642:
+    #####:  643:	if (cd_lists_on_the_fly) {
+    %%%%%:  643-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  644:		if (clear_screen)
+    %%%%%:  644-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  645:			CLEAR;
+    %%%%%:  645-block  0
+call    0 never executed
+unconditional  1 never executed
+    #####:  646:		free_dirlist();
+    %%%%%:  646-block  0
+call    0 never executed
+    #####:  647:		putchar('\n');
+call    0 never executed
+    #####:  648:		list_dir();
+call    0 never executed
+unconditional  1 never executed
+        -:  649:	}
+        -:  650:
+    #####:  651:	rl_reset_line_state();
+    %%%%%:  651-block  0
+call    0 never executed
+        -:  652:
+    #####:  653:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  654:}
+        -:  655:
+        -:  656:int
+function rl_open_config called 1 returned 100% blocks executed 83%
+        1:  657:rl_open_config(int count, int key)
+        -:  658:{
+        1:  659:	if (kbind_busy)
+        1:  659-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  660:		return EXIT_SUCCESS;
+    %%%%%:  660-block  0
+unconditional  0 never executed
+        -:  661:
+        1:  662:	keybind_exec_cmd("edit");
+        1:  662-block  0
+call    0 returned 1
+        -:  663:
+        1:  664:	rl_reset_line_state();
+call    0 returned 1
+        -:  665:
+        1:  666:	return EXIT_SUCCESS;
+unconditional  0 taken 1
+        -:  667:}
+        -:  668:
+        -:  669:int
+function rl_open_keybinds called 0 returned 0% blocks executed 0%
+    #####:  670:rl_open_keybinds(int count, int key)
+        -:  671:{
+    #####:  672:	if (kbind_busy)
+    %%%%%:  672-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  673:		return EXIT_SUCCESS;
+    %%%%%:  673-block  0
+unconditional  0 never executed
+        -:  674:
+    #####:  675:	keybind_exec_cmd("kb edit");
+    %%%%%:  675-block  0
+call    0 never executed
+        -:  676:
+    #####:  677:	rl_reset_line_state();
+call    0 never executed
+        -:  678:
+    #####:  679:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  680:}
+        -:  681:
+        -:  682:int
+function rl_open_cscheme called 0 returned 0% blocks executed 0%
+    #####:  683:rl_open_cscheme(int count, int key)
+        -:  684:{
+    #####:  685:	if (kbind_busy)
+    %%%%%:  685-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  686:		return EXIT_SUCCESS;
+    %%%%%:  686-block  0
+unconditional  0 never executed
+        -:  687:
+    #####:  688:	keybind_exec_cmd("cs e");
+    %%%%%:  688-block  0
+call    0 never executed
+        -:  689:
+    #####:  690:	rl_reset_line_state();
+call    0 never executed
+        -:  691:
+    #####:  692:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  693:}
+        -:  694:
+        -:  695:int
+function rl_open_bm_file called 0 returned 0% blocks executed 0%
+    #####:  696:rl_open_bm_file(int count, int key)
+        -:  697:{
+    #####:  698:	if (kbind_busy)
+    %%%%%:  698-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  699:		return EXIT_SUCCESS;
+    %%%%%:  699-block  0
+unconditional  0 never executed
+        -:  700:
+    #####:  701:	keybind_exec_cmd("bm edit");
+    %%%%%:  701-block  0
+call    0 never executed
+        -:  702:
+    #####:  703:	rl_reset_line_state();
+call    0 never executed
+        -:  704:
+    #####:  705:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  706:}
+        -:  707:
+        -:  708:int
+function rl_open_jump_db called 0 returned 0% blocks executed 0%
+    #####:  709:rl_open_jump_db(int count, int key)
+        -:  710:{
+    #####:  711:	if (kbind_busy)
+    %%%%%:  711-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  712:		return EXIT_SUCCESS;
+    %%%%%:  712-block  0
+unconditional  0 never executed
+        -:  713:
+    #####:  714:	keybind_exec_cmd("je");
+    %%%%%:  714-block  0
+call    0 never executed
+        -:  715:
+    #####:  716:	rl_reset_line_state();
+call    0 never executed
+        -:  717:
+    #####:  718:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  719:}
+        -:  720:
+        -:  721:int
+function rl_open_mime called 0 returned 0% blocks executed 0%
+    #####:  722:rl_open_mime(int count, int key)
+        -:  723:{
+    #####:  724:	if (kbind_busy)
+    %%%%%:  724-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  725:		return EXIT_SUCCESS;
+    %%%%%:  725-block  0
+unconditional  0 never executed
+        -:  726:
+    #####:  727:	keybind_exec_cmd("mm edit");
+    %%%%%:  727-block  0
+call    0 never executed
+        -:  728:
+    #####:  729:	rl_reset_line_state();
+call    0 never executed
+        -:  730:
+    #####:  731:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  732:}
+        -:  733:
+        -:  734:int
+function rl_mountpoints called 0 returned 0% blocks executed 0%
+    #####:  735:rl_mountpoints(int count, int key)
+        -:  736:{
+        -:  737:	/* Call the function only if it's not already running */
+    #####:  738:	kbind_busy = 1;
+    #####:  739:	keybind_exec_cmd("mp");
+    %%%%%:  739-block  0
+call    0 never executed
+        -:  740:
+    #####:  741:	rl_reset_line_state();
+call    0 never executed
+        -:  742:
+    #####:  743:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  744:}
+        -:  745:
+        -:  746:int
+function rl_select_all called 0 returned 0% blocks executed 0%
+    #####:  747:rl_select_all(int count, int key)
+        -:  748:{
+    #####:  749:	if (kbind_busy)
+    %%%%%:  749-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  750:		return EXIT_SUCCESS;
+    %%%%%:  750-block  0
+unconditional  0 never executed
+        -:  751:
+    #####:  752:	keybind_exec_cmd("s ^");
+    %%%%%:  752-block  0
+call    0 never executed
+        -:  753:
+    #####:  754:	rl_reset_line_state();
+call    0 never executed
+        -:  755:
+    #####:  756:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  757:}
+        -:  758:
+        -:  759:int
+function rl_deselect_all called 1 returned 100% blocks executed 83%
+        1:  760:rl_deselect_all(int count, int key)
+        -:  761:{
+        1:  762:	if (kbind_busy)
+        1:  762-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  763:		return EXIT_SUCCESS;
+    %%%%%:  763-block  0
+unconditional  0 never executed
+        -:  764:
+        1:  765:	keybind_exec_cmd("ds *");
+        1:  765-block  0
+call    0 returned 1
+        -:  766:
+        1:  767:	rl_reset_line_state();
+call    0 returned 1
+        -:  768:
+        1:  769:	return EXIT_SUCCESS;
+unconditional  0 taken 1
+        -:  770:}
+        -:  771:
+        -:  772:int
+function rl_bookmarks called 1 returned 100% blocks executed 83%
+        1:  773:rl_bookmarks(int count, int key)
+        -:  774:{
+        1:  775:	if (kbind_busy)
+        1:  775-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  776:		return EXIT_SUCCESS;
+    %%%%%:  776-block  0
+unconditional  0 never executed
+        -:  777:
+        1:  778:	kbind_busy = 1;
+        1:  779:	keybind_exec_cmd("bm");
+        1:  779-block  0
+call    0 returned 1
+        -:  780:
+        1:  781:	rl_reset_line_state();
+call    0 returned 1
+        -:  782:
+        1:  783:	return EXIT_SUCCESS;
+unconditional  0 taken 1
+        -:  784:}
+        -:  785:
+        -:  786:int
+function rl_selbox called 0 returned 0% blocks executed 0%
+    #####:  787:rl_selbox(int count, int key)
+        -:  788:{
+    #####:  789:	if (kbind_busy)
+    %%%%%:  789-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  790:		return EXIT_SUCCESS;
+    %%%%%:  790-block  0
+unconditional  0 never executed
+        -:  791:
+    #####:  792:	keybind_exec_cmd("ds");
+    %%%%%:  792-block  0
+call    0 never executed
+        -:  793:
+    #####:  794:	rl_reset_line_state();
+call    0 never executed
+        -:  795:
+    #####:  796:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  797:}
+        -:  798:
+        -:  799:int
+function rl_clear_line called 0 returned 0% blocks executed 0%
+    #####:  800:rl_clear_line(int count, int key)
+        -:  801:{
+    #####:  802:	if (kbind_busy)
+    %%%%%:  802-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  803:		return EXIT_SUCCESS;
+    %%%%%:  803-block  0
+unconditional  0 never executed
+        -:  804:
+        -:  805:	/* 1) Clear text typed so far (\x1b[2K) and move cursor to the
+        -:  806:	 * beginning of the current line (\r) */
+    #####:  807:	write(STDOUT_FILENO, "\x1b[2K\r", 5);
+    %%%%%:  807-block  0
+call    0 never executed
+        -:  808:
+        -:  809:	/* 2) Clear the readline buffer */
+    #####:  810:	rl_delete_text(0, rl_end);
+call    0 never executed
+    #####:  811:	rl_end = rl_point = 0;
+        -:  812:
+    #####:  813:	rl_reset_line_state();
+call    0 never executed
+        -:  814:
+    #####:  815:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  816:}
+        -:  817:
+        -:  818:int
+function rl_sort_next called 0 returned 0% blocks executed 0%
+    #####:  819:rl_sort_next(int count, int key)
+        -:  820:{
+    #####:  821:	if (kbind_busy)
+    %%%%%:  821-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  822:		return EXIT_SUCCESS;
+    %%%%%:  822-block  0
+unconditional  0 never executed
+        -:  823:
+    #####:  824:	sort++;
+    #####:  825:	if (sort > SORT_TYPES)
+    %%%%%:  825-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  826:		sort = 0;
+    %%%%%:  826-block  0
+unconditional  0 never executed
+        -:  827:
+    #####:  828:	if (cd_lists_on_the_fly) {
+    %%%%%:  828-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  829:		if (clear_screen)
+    %%%%%:  829-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  830:			CLEAR;
+    %%%%%:  830-block  0
+call    0 never executed
+unconditional  1 never executed
+    #####:  831:		sort_switch = 1;
+    #####:  832:		free_dirlist();
+    %%%%%:  832-block  0
+call    0 never executed
+    #####:  833:		putchar('\n');
+call    0 never executed
+    #####:  834:		list_dir();
+call    0 never executed
+    #####:  835:		sort_switch = 0;
+unconditional  0 never executed
+        -:  836:	}
+        -:  837:
+    #####:  838:	rl_reset_line_state();
+    %%%%%:  838-block  0
+call    0 never executed
+        -:  839:
+    #####:  840:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  841:}
+        -:  842:
+        -:  843:int
+function rl_sort_previous called 0 returned 0% blocks executed 0%
+    #####:  844:rl_sort_previous(int count, int key)
+        -:  845:{
+    #####:  846:	if (kbind_busy)
+    %%%%%:  846-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  847:		return EXIT_SUCCESS;
+    %%%%%:  847-block  0
+unconditional  0 never executed
+        -:  848:
+    #####:  849:	sort--;
+    #####:  850:	if (sort < 0)
+    %%%%%:  850-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  851:		sort = SORT_TYPES;
+    %%%%%:  851-block  0
+unconditional  0 never executed
+        -:  852:
+    #####:  853:	if (cd_lists_on_the_fly) {
+    %%%%%:  853-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  854:		if (clear_screen)
+    %%%%%:  854-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  855:			CLEAR;
+    %%%%%:  855-block  0
+call    0 never executed
+unconditional  1 never executed
+    #####:  856:		sort_switch = 1;
+    #####:  857:		free_dirlist();
+    %%%%%:  857-block  0
+call    0 never executed
+    #####:  858:		putchar('\n');
+call    0 never executed
+    #####:  859:		list_dir();
+call    0 never executed
+    #####:  860:		sort_switch = 0;
+unconditional  0 never executed
+        -:  861:	}
+        -:  862:
+    #####:  863:	rl_reset_line_state();
+    %%%%%:  863-block  0
+call    0 never executed
+        -:  864:
+    #####:  865:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  866:}
+        -:  867:
+        -:  868:int
+function rl_lock called 0 returned 0% blocks executed 0%
+    #####:  869:rl_lock(int count, int key)
+        -:  870:{
+    #####:  871:	int ret = EXIT_SUCCESS;
+        -:  872:
+    #####:  873:	rl_deprep_terminal();
+    %%%%%:  873-block  0
+call    0 never executed
+        -:  874:
+        -:  875:#if __FreeBSD__
+        -:  876:	char *cmd[] = {"lock", NULL};
+        -:  877:	ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+        -:  878:#elif __linux__
+    #####:  879:	char *cmd[] = {"vlock", NULL};
+    #####:  880:	ret = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+call    0 never executed
+        -:  881:#endif
+        -:  882:
+    #####:  883:	rl_prep_terminal(0);
+call    0 never executed
+    #####:  884:	rl_reset_line_state();
+call    0 never executed
+        -:  885:
+    #####:  886:	if (ret != EXIT_SUCCESS)
+branch  0 never executed
+branch  1 never executed
+    #####:  887:		return EXIT_FAILURE;
+    %%%%%:  887-block  0
+unconditional  0 never executed
+        -:  888:
+    #####:  889:	return EXIT_SUCCESS;
+    %%%%%:  889-block  0
+unconditional  0 never executed
+        -:  890:}
+        -:  891:
+        -:  892:int
+function rl_remove_sel called 0 returned 0% blocks executed 0%
+    #####:  893:rl_remove_sel(int count, int key)
+        -:  894:{
+    #####:  895:	if (kbind_busy)
+    %%%%%:  895-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  896:		return EXIT_SUCCESS;
+    %%%%%:  896-block  0
+unconditional  0 never executed
+        -:  897:
+    #####:  898:	rl_deprep_terminal();
+    %%%%%:  898-block  0
+call    0 never executed
+        -:  899:
+    #####:  900:	kb_shortcut = 1;
+    #####:  901:	keybind_exec_cmd("r sel");
+call    0 never executed
+    #####:  902:	kb_shortcut = 0;
+        -:  903:
+    #####:  904:	rl_prep_terminal(0);
+call    0 never executed
+    #####:  905:	rl_reset_line_state();
+call    0 never executed
+        -:  906:
+    #####:  907:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  908:}
+        -:  909:
+        -:  910:int
+function rl_export_sel called 0 returned 0% blocks executed 0%
+    #####:  911:rl_export_sel(int count, int key)
+        -:  912:{
+    #####:  913:	if (kbind_busy)
+    %%%%%:  913-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  914:		return EXIT_SUCCESS;
+    %%%%%:  914-block  0
+unconditional  0 never executed
+        -:  915:
+    #####:  916:	kb_shortcut = 1;
+    #####:  917:	keybind_exec_cmd("exp sel");
+    %%%%%:  917-block  0
+call    0 never executed
+    #####:  918:	kb_shortcut = 0;
+        -:  919:
+    #####:  920:	rl_reset_line_state();
+call    0 never executed
+        -:  921:
+    #####:  922:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  923:}
+        -:  924:
+        -:  925:int
+function rl_move_sel called 0 returned 0% blocks executed 0%
+    #####:  926:rl_move_sel(int count, int key)
+        -:  927:{
+    #####:  928:	if (kbind_busy)
+    %%%%%:  928-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  929:		return EXIT_SUCCESS;
+    %%%%%:  929-block  0
+unconditional  0 never executed
+        -:  930:
+    #####:  931:	kb_shortcut = 1;
+    #####:  932:	keybind_exec_cmd("m sel");
+    %%%%%:  932-block  0
+call    0 never executed
+    #####:  933:	kb_shortcut = 0;
+        -:  934:
+    #####:  935:	rl_reset_line_state();
+call    0 never executed
+        -:  936:
+    #####:  937:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  938:}
+        -:  939:
+        -:  940:int
+function rl_rename_sel called 0 returned 0% blocks executed 0%
+    #####:  941:rl_rename_sel(int count, int key)
+        -:  942:{
+    #####:  943:	if (kbind_busy)
+    %%%%%:  943-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  944:		return EXIT_SUCCESS;
+    %%%%%:  944-block  0
+unconditional  0 never executed
+        -:  945:
+    #####:  946:	kb_shortcut = 1;
+    #####:  947:	keybind_exec_cmd("br sel");
+    %%%%%:  947-block  0
+call    0 never executed
+    #####:  948:	kb_shortcut = 0;
+        -:  949:
+    #####:  950:	rl_reset_line_state();
+call    0 never executed
+        -:  951:
+    #####:  952:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  953:}
+        -:  954:
+        -:  955:int
+function rl_paste_sel called 0 returned 0% blocks executed 0%
+    #####:  956:rl_paste_sel(int count, int key)
+        -:  957:{
+    #####:  958:	if (kbind_busy)
+    %%%%%:  958-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  959:		return EXIT_SUCCESS;
+    %%%%%:  959-block  0
+unconditional  0 never executed
+        -:  960:
+    #####:  961:	kb_shortcut = 1;
+    #####:  962:	keybind_exec_cmd("c sel");
+    %%%%%:  962-block  0
+call    0 never executed
+    #####:  963:	kb_shortcut = 0;
+        -:  964:
+    #####:  965:	rl_reset_line_state();
+call    0 never executed
+        -:  966:
+    #####:  967:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  968:}
+        -:  969:
+        -:  970:int
+function rl_quit called 0 returned 0% blocks executed 0%
+    #####:  971:rl_quit(int count, int key)
+        -:  972:{
+    #####:  973:	if (kbind_busy)
+    %%%%%:  973-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  974:		return EXIT_SUCCESS;
+    %%%%%:  974-block  0
+unconditional  0 never executed
+        -:  975:
+        -:  976:	/* Reset terminal attributes before exiting. Without this line, the program
+        -:  977:	 * quits, but terminal input is not printed to STDOUT */
+    #####:  978:	tcsetattr(STDIN_FILENO, TCSANOW, &shell_tmodes);
+    %%%%%:  978-block  0
+call    0 never executed
+    #####:  979:	exit(EXIT_SUCCESS);
+call    0 never executed
+        -:  980:
+        -:  981:	return EXIT_SUCCESS;
+        -:  982:}
+        -:  983:
+        -:  984:int
+function rl_previous_profile called 0 returned 0% blocks executed 0%
+    #####:  985:rl_previous_profile(int count, int key)
+        -:  986:{
+    #####:  987:	if (kbind_busy)
+    %%%%%:  987-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  988:		return EXIT_SUCCESS;
+    %%%%%:  988-block  0
+unconditional  0 never executed
+        -:  989:
+    #####:  990:	int prev_prof, i, cur_prof = -1, total_profs = 0;
+    #####:  991:	for (i = 0; profile_names[i]; i++) {
+    %%%%%:  991-block  0
+unconditional  0 never executed
+    %%%%%:  991-block  1
+unconditional  1 never executed
+    %%%%%:  991-block  2
+branch  2 never executed
+branch  3 never executed
+    #####:  992:		total_profs++;
+        -:  993:
+    #####:  994:		if (!alt_profile) {
+    %%%%%:  994-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  995:			if (*profile_names[i] == 'd'
+    %%%%%:  995-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  996:			&& strcmp(profile_names[i], "default") == 0) {
+    %%%%%:  996-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  997:				cur_prof = i;
+    %%%%%:  997-block  0
+unconditional  0 never executed
+        -:  998:			}
+        -:  999:		}
+        -: 1000:
+        -: 1001:		else {
+    #####: 1002:			if (*alt_profile == *profile_names[i]
+    %%%%%: 1002-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1003:			&& strcmp(alt_profile, profile_names[i]) == 0) {
+    %%%%%: 1003-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1004:				cur_prof = i;
+    %%%%%: 1004-block  0
+unconditional  0 never executed
+        -: 1005:			}
+        -: 1006:		}
+        -: 1007:	}
+        -: 1008:
+    #####: 1009:	if (cur_prof == -1 || !profile_names[cur_prof])
+    %%%%%: 1009-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1009-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1010:		return EXIT_FAILURE;
+    %%%%%: 1010-block  0
+unconditional  0 never executed
+        -: 1011:
+    #####: 1012:	prev_prof = cur_prof - 1;
+    #####: 1013:	total_profs--;
+        -: 1014:
+    #####: 1015:	if (prev_prof < 0 || !profile_names[prev_prof])
+    %%%%%: 1015-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1015-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1016:		prev_prof = total_profs;
+    %%%%%: 1016-block  0
+unconditional  0 never executed
+        -: 1017:
+    #####: 1018:	if (clear_screen) {
+    %%%%%: 1018-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1019:		CLEAR;
+    %%%%%: 1019-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1020:	} else
+    #####: 1021:		putchar('\n');
+    %%%%%: 1021-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1022:
+    #####: 1023:	if (profile_set(profile_names[prev_prof]) == EXIT_SUCCESS) {
+    %%%%%: 1023-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1024:		printf(_("%s->%s Switched to profile '%s'\n"), mi_c, df_c,
+    #####: 1025:		    profile_names[prev_prof]);
+    %%%%%: 1025-block  0
+call    0 never executed
+    #####: 1026:		char *input = prompt();
+call    0 never executed
+    #####: 1027:		free(input);
+unconditional  0 never executed
+        -: 1028:	}
+        -: 1029:
+    #####: 1030:	return EXIT_SUCCESS;
+    %%%%%: 1030-block  0
+unconditional  0 never executed
+        -: 1031:}
+        -: 1032:
+        -: 1033:int
+function rl_next_profile called 0 returned 0% blocks executed 0%
+    #####: 1034:rl_next_profile(int count, int key)
+        -: 1035:{
+    #####: 1036:	if (kbind_busy)
+    %%%%%: 1036-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1037:		return EXIT_SUCCESS;
+    %%%%%: 1037-block  0
+unconditional  0 never executed
+        -: 1038:
+    #####: 1039:	int next_prof, i, cur_prof = -1, total_profs = 0;
+    #####: 1040:	for (i = 0; profile_names[i]; i++) {
+    %%%%%: 1040-block  0
+unconditional  0 never executed
+    %%%%%: 1040-block  1
+unconditional  1 never executed
+    %%%%%: 1040-block  2
+branch  2 never executed
+branch  3 never executed
+    #####: 1041:		total_profs++;
+        -: 1042:
+    #####: 1043:		if (!alt_profile) {
+    %%%%%: 1043-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1044:			if (*profile_names[i] == 'd'
+    %%%%%: 1044-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1045:			&& strcmp(profile_names[i], "default") == 0) {
+    %%%%%: 1045-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1046:				cur_prof = i;
+    %%%%%: 1046-block  0
+unconditional  0 never executed
+        -: 1047:			}
+        -: 1048:		}
+        -: 1049:
+        -: 1050:		else {
+    #####: 1051:			if (*alt_profile == *profile_names[i]
+    %%%%%: 1051-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1052:			&& strcmp(alt_profile, profile_names[i]) == 0) {
+    %%%%%: 1052-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1053:				cur_prof = i;
+    %%%%%: 1053-block  0
+unconditional  0 never executed
+        -: 1054:			}
+        -: 1055:		}
+        -: 1056:	}
+        -: 1057:
+    #####: 1058:	if (cur_prof == -1 || !profile_names[cur_prof])
+    %%%%%: 1058-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1058-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1059:		return EXIT_FAILURE;
+    %%%%%: 1059-block  0
+unconditional  0 never executed
+        -: 1060:
+    #####: 1061:	next_prof = cur_prof + 1;
+    #####: 1062:	total_profs--;
+        -: 1063:
+    #####: 1064:	if (next_prof > (int)total_profs || !profile_names[next_prof])
+    %%%%%: 1064-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1064-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1065:		next_prof = 0;
+    %%%%%: 1065-block  0
+unconditional  0 never executed
+        -: 1066:
+    #####: 1067:	if (clear_screen) {
+    %%%%%: 1067-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1068:		CLEAR;
+    %%%%%: 1068-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1069:	} else
+    #####: 1070:		putchar('\n');
+    %%%%%: 1070-block  0
+call    0 never executed
+unconditional  1 never executed
+        -: 1071:
+    #####: 1072:	if (profile_set(profile_names[next_prof]) == EXIT_SUCCESS) {
+    %%%%%: 1072-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1073:		printf(_("%s->%s Switched to profile '%s'\n"), mi_c, df_c,
+    #####: 1074:		    profile_names[next_prof]);
+    %%%%%: 1074-block  0
+call    0 never executed
+    #####: 1075:		char *input = prompt();
+call    0 never executed
+    #####: 1076:		free(input);
+unconditional  0 never executed
+        -: 1077:	}
+        -: 1078:
+    #####: 1079:	return EXIT_SUCCESS;
+    %%%%%: 1079-block  0
+unconditional  0 never executed
+        -: 1080:}
+        -: 1081:
+        -: 1082:int
+function rl_dirhist called 0 returned 0% blocks executed 0%
+    #####: 1083:rl_dirhist(int count, int key)
+        -: 1084:{
+    #####: 1085:	if (kbind_busy)
+    %%%%%: 1085-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1086:		return EXIT_SUCCESS;
+    %%%%%: 1086-block  0
+unconditional  0 never executed
+        -: 1087:
+    #####: 1088:	keybind_exec_cmd("bh");
+    %%%%%: 1088-block  0
+call    0 never executed
+        -: 1089:
+    #####: 1090:	rl_reset_line_state();
+call    0 never executed
+        -: 1091:
+    #####: 1092:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1093:}
+        -: 1094:
+        -: 1095:int
+function rl_archive_sel called 0 returned 0% blocks executed 0%
+    #####: 1096:rl_archive_sel(int count, int key)
+        -: 1097:{
+    #####: 1098:	if (kbind_busy)
+    %%%%%: 1098-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1099:		return EXIT_SUCCESS;
+    %%%%%: 1099-block  0
+unconditional  0 never executed
+        -: 1100:
+    #####: 1101:	keybind_exec_cmd("ac sel");
+    %%%%%: 1101-block  0
+call    0 never executed
+        -: 1102:
+    #####: 1103:	rl_reset_line_state();
+call    0 never executed
+        -: 1104:
+    #####: 1105:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1106:}
+        -: 1107:
+        -: 1108:int
+function rl_new_instance called 0 returned 0% blocks executed 0%
+    #####: 1109:rl_new_instance(int count, int key)
+        -: 1110:{
+    #####: 1111:	if (kbind_busy)
+    %%%%%: 1111-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1112:		return EXIT_SUCCESS;
+    %%%%%: 1112-block  0
+unconditional  0 never executed
+        -: 1113:
+    #####: 1114:	keybind_exec_cmd("x .");
+    %%%%%: 1114-block  0
+call    0 never executed
+        -: 1115:
+    #####: 1116:	rl_reset_line_state();
+call    0 never executed
+        -: 1117:
+    #####: 1118:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1119:}
+        -: 1120:
+        -: 1121:int
+function rl_clear_msgs called 0 returned 0% blocks executed 0%
+    #####: 1122:rl_clear_msgs(int count, int key)
+        -: 1123:{
+    #####: 1124:	if (kbind_busy)
+    %%%%%: 1124-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1125:		return EXIT_SUCCESS;
+    %%%%%: 1125-block  0
+unconditional  0 never executed
+        -: 1126:
+    #####: 1127:	keybind_exec_cmd("msg clear");
+    %%%%%: 1127-block  0
+call    0 never executed
+        -: 1128:
+    #####: 1129:	rl_reset_line_state();
+call    0 never executed
+        -: 1130:
+    #####: 1131:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1132:}
+        -: 1133:
+        -: 1134:int
+function rl_trash_sel called 0 returned 0% blocks executed 0%
+    #####: 1135:rl_trash_sel(int count, int key)
+        -: 1136:{
+    #####: 1137:	if (kbind_busy)
+    %%%%%: 1137-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1138:		return EXIT_SUCCESS;
+    %%%%%: 1138-block  0
+unconditional  0 never executed
+        -: 1139:
+    #####: 1140:	keybind_exec_cmd("t sel");
+    %%%%%: 1140-block  0
+call    0 never executed
+        -: 1141:
+    #####: 1142:	rl_reset_line_state();
+call    0 never executed
+        -: 1143:
+    #####: 1144:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1145:}
+        -: 1146:
+        -: 1147:int
+function rl_untrash_all called 0 returned 0% blocks executed 0%
+    #####: 1148:rl_untrash_all(int count, int key)
+        -: 1149:{
+    #####: 1150:	if (kbind_busy)
+    %%%%%: 1150-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1151:		return EXIT_SUCCESS;
+    %%%%%: 1151-block  0
+unconditional  0 never executed
+        -: 1152:
+    #####: 1153:	keybind_exec_cmd("u *");
+    %%%%%: 1153-block  0
+call    0 never executed
+        -: 1154:
+    #####: 1155:	rl_reset_line_state();
+call    0 never executed
+        -: 1156:
+    #####: 1157:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1158:}
+        -: 1159:
+        -: 1160:int
+function rl_open_sel called 0 returned 0% blocks executed 0%
+    #####: 1161:rl_open_sel(int count, int key)
+        -: 1162:{
+    #####: 1163:	if (kbind_busy)
+    %%%%%: 1163-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1164:		return EXIT_SUCCESS;
+    %%%%%: 1164-block  0
+unconditional  0 never executed
+        -: 1165:
+    #####: 1166:	if (sel_n == 0 || !sel_elements[sel_n - 1]) {
+    %%%%%: 1166-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1166-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1167:		fprintf(stderr, _("\n%s: No selected files\n"), PROGRAM_NAME);
+    %%%%%: 1167-block  0
+call    0 never executed
+    #####: 1168:		rl_reset_line_state();
+call    0 never executed
+    #####: 1169:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1170:	}
+        -: 1171:
+        -: 1172:	char cmd[PATH_MAX + 3];
+    #####: 1173:	sprintf(cmd, "o %s", sel_elements[sel_n - 1]);
+        -: 1174:
+    #####: 1175:	keybind_exec_cmd(cmd);
+    %%%%%: 1175-block  0
+call    0 never executed
+        -: 1176:
+    #####: 1177:	rl_reset_line_state();
+call    0 never executed
+        -: 1178:
+    #####: 1179:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1180:}
+        -: 1181:
+        -: 1182:int
+function rl_bm_sel called 0 returned 0% blocks executed 0%
+    #####: 1183:rl_bm_sel(int count, int key)
+        -: 1184:{
+    #####: 1185:	if (kbind_busy)
+    %%%%%: 1185-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1186:		return EXIT_SUCCESS;
+    %%%%%: 1186-block  0
+unconditional  0 never executed
+        -: 1187:
+    #####: 1188:	if (sel_n == 0 || !sel_elements[sel_n - 1]) {
+    %%%%%: 1188-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%: 1188-block  1
+branch  2 never executed
+branch  3 never executed
+    #####: 1189:		fprintf(stderr, _("\n%s: No selected files\n"), PROGRAM_NAME);
+    %%%%%: 1189-block  0
+call    0 never executed
+    #####: 1190:		rl_reset_line_state();
+call    0 never executed
+    #####: 1191:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -: 1192:	}
+        -: 1193:
+        -: 1194:	char cmd[PATH_MAX + 6];
+    #####: 1195:	sprintf(cmd, "bm a %s", sel_elements[sel_n - 1]);
+        -: 1196:
+    #####: 1197:	keybind_exec_cmd(cmd);
+    %%%%%: 1197-block  0
+call    0 never executed
+        -: 1198:
+    #####: 1199:	rl_reset_line_state();
+call    0 never executed
+        -: 1200:
+    #####: 1201:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1202:}
+        -: 1203:
+        -: 1204:int
+function rl_kbinds_help called 0 returned 0% blocks executed 0%
+    #####: 1205:rl_kbinds_help(int count, int key)
+        -: 1206:{
+    #####: 1207:	char *cmd[] = {"man", "-P", "less -p ^\"KEYBOARD SHORTCUTS\"", PNL,
+        -: 1208:					NULL};
+    #####: 1209:	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+    %%%%%: 1209-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1210:		return EXIT_FAILURE;
+    %%%%%: 1210-block  0
+unconditional  0 never executed
+        -: 1211:
+    #####: 1212:	return EXIT_SUCCESS;
+    %%%%%: 1212-block  0
+unconditional  0 never executed
+        -: 1213:}
+        -: 1214:
+        -: 1215:int
+function rl_cmds_help called 0 returned 0% blocks executed 0%
+    #####: 1216:rl_cmds_help(int count, int key)
+        -: 1217:{
+    #####: 1218:	char *cmd[] = {"man", "-P", "less -p ^[0-9+]\\.[[:space:]]COMMANDS",
+        -: 1219:					PNL, NULL};
+    #####: 1220:	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+    %%%%%: 1220-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1221:		return EXIT_FAILURE;
+    %%%%%: 1221-block  0
+unconditional  0 never executed
+        -: 1222:
+    #####: 1223:	return EXIT_SUCCESS;
+    %%%%%: 1223-block  0
+unconditional  0 never executed
+        -: 1224:}
+        -: 1225:
+        -: 1226:int
+function rl_manpage called 0 returned 0% blocks executed 0%
+    #####: 1227:rl_manpage(int count, int key)
+        -: 1228:{
+    #####: 1229:	char *cmd[] = {"man", PNL, NULL};
+        -: 1230:
+    #####: 1231:	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+    %%%%%: 1231-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####: 1232:		return EXIT_FAILURE;
+    %%%%%: 1232-block  0
+unconditional  0 never executed
+        -: 1233:
+    #####: 1234:	return EXIT_SUCCESS;
+    %%%%%: 1234-block  0
+unconditional  0 never executed
+        -: 1235:}
+        -: 1236:
+        -: 1237:int
+function rl_pinned_dir called 0 returned 0% blocks executed 0%
+    #####: 1238:rl_pinned_dir(int count, int key)
+        -: 1239:{
+    #####: 1240:	if (!pinned_dir) {
+    %%%%%: 1240-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1241:		printf(_("%s: No pinned file\n"), PROGRAM_NAME);
+    %%%%%: 1241-block  0
+call    0 never executed
+    #####: 1242:		return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1243:	}
+        -: 1244:
+    #####: 1245:	keybind_exec_cmd(",");
+    %%%%%: 1245-block  0
+call    0 never executed
+        -: 1246:
+    #####: 1247:	rl_reset_line_state();
+call    0 never executed
+        -: 1248:
+    #####: 1249:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1250:}
+        -: 1251:
+        -: 1252:int
+function rl_ws1 called 0 returned 0% blocks executed 0%
+    #####: 1253:rl_ws1(int count, int key)
+        -: 1254:{
+    #####: 1255:	if (kbind_busy)
+    %%%%%: 1255-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1256:		return EXIT_SUCCESS;
+    %%%%%: 1256-block  0
+unconditional  0 never executed
+        -: 1257:
+    #####: 1258:	keybind_exec_cmd("ws 1");
+    %%%%%: 1258-block  0
+call    0 never executed
+        -: 1259:
+    #####: 1260:	rl_reset_line_state();
+call    0 never executed
+        -: 1261:
+    #####: 1262:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1263:}
+        -: 1264:
+        -: 1265:int
+function rl_ws2 called 0 returned 0% blocks executed 0%
+    #####: 1266:rl_ws2(int count, int key)
+        -: 1267:{
+    #####: 1268:	if (kbind_busy)
+    %%%%%: 1268-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1269:		return EXIT_SUCCESS;
+    %%%%%: 1269-block  0
+unconditional  0 never executed
+        -: 1270:
+    #####: 1271:	keybind_exec_cmd("ws 2");
+    %%%%%: 1271-block  0
+call    0 never executed
+        -: 1272:
+    #####: 1273:	rl_reset_line_state();
+call    0 never executed
+        -: 1274:
+    #####: 1275:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1276:}
+        -: 1277:
+        -: 1278:int
+function rl_ws3 called 0 returned 0% blocks executed 0%
+    #####: 1279:rl_ws3(int count, int key)
+        -: 1280:{
+    #####: 1281:	if (kbind_busy)
+    %%%%%: 1281-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1282:		return EXIT_SUCCESS;
+    %%%%%: 1282-block  0
+unconditional  0 never executed
+        -: 1283:
+    #####: 1284:	keybind_exec_cmd("ws 3");
+    %%%%%: 1284-block  0
+call    0 never executed
+        -: 1285:
+    #####: 1286:	rl_reset_line_state();
+call    0 never executed
+        -: 1287:
+    #####: 1288:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1289:}
+        -: 1290:
+        -: 1291:int
+function rl_ws4 called 0 returned 0% blocks executed 0%
+    #####: 1292:rl_ws4(int count, int key)
+        -: 1293:{
+    #####: 1294:	if (kbind_busy)
+    %%%%%: 1294-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1295:		return EXIT_SUCCESS;
+    %%%%%: 1295-block  0
+unconditional  0 never executed
+        -: 1296:
+    #####: 1297:	keybind_exec_cmd("ws 4");
+    %%%%%: 1297-block  0
+call    0 never executed
+        -: 1298:
+    #####: 1299:	rl_reset_line_state();
+call    0 never executed
+        -: 1300:
+    #####: 1301:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1302:}
+        -: 1303:
+        -: 1304:int
+function rl_plugin1 called 0 returned 0% blocks executed 0%
+    #####: 1305:rl_plugin1(int count, int key)
+        -: 1306:{
+    #####: 1307:	if (kbind_busy)
+    %%%%%: 1307-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1308:		return EXIT_SUCCESS;
+    %%%%%: 1308-block  0
+unconditional  0 never executed
+        -: 1309:
+    #####: 1310:	keybind_exec_cmd("plugin1");
+    %%%%%: 1310-block  0
+call    0 never executed
+        -: 1311:
+    #####: 1312:	rl_reset_line_state();
+call    0 never executed
+        -: 1313:
+    #####: 1314:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1315:}
+        -: 1316:
+        -: 1317:int
+function rl_plugin2 called 0 returned 0% blocks executed 0%
+    #####: 1318:rl_plugin2(int count, int key)
+        -: 1319:{
+    #####: 1320:	if (kbind_busy)
+    %%%%%: 1320-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1321:		return EXIT_SUCCESS;
+    %%%%%: 1321-block  0
+unconditional  0 never executed
+        -: 1322:
+    #####: 1323:	keybind_exec_cmd("plugin2");
+    %%%%%: 1323-block  0
+call    0 never executed
+        -: 1324:
+    #####: 1325:	rl_reset_line_state();
+call    0 never executed
+        -: 1326:
+    #####: 1327:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1328:}
+        -: 1329:
+        -: 1330:int
+function rl_plugin3 called 0 returned 0% blocks executed 0%
+    #####: 1331:rl_plugin3(int count, int key)
+        -: 1332:{
+    #####: 1333:	if (kbind_busy)
+    %%%%%: 1333-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1334:		return EXIT_SUCCESS;
+    %%%%%: 1334-block  0
+unconditional  0 never executed
+        -: 1335:
+    #####: 1336:	keybind_exec_cmd("plugin3");
+    %%%%%: 1336-block  0
+call    0 never executed
+        -: 1337:
+    #####: 1338:	rl_reset_line_state();
+call    0 never executed
+        -: 1339:
+    #####: 1340:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1341:}
+        -: 1342:
+        -: 1343:int
+function rl_plugin4 called 0 returned 0% blocks executed 0%
+    #####: 1344:rl_plugin4(int count, int key)
+        -: 1345:{
+    #####: 1346:	if (kbind_busy)
+    %%%%%: 1346-block  0
+branch  0 never executed
+branch  1 never executed
+    #####: 1347:		return EXIT_SUCCESS;
+    %%%%%: 1347-block  0
+unconditional  0 never executed
+        -: 1348:
+    #####: 1349:	keybind_exec_cmd("plugin4");
+    %%%%%: 1349-block  0
+call    0 never executed
+        -: 1350:
+    #####: 1351:	rl_reset_line_state();
+call    0 never executed
+        -: 1352:
+    #####: 1353:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -: 1354:}

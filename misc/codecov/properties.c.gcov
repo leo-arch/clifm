@@ -1,0 +1,1288 @@
+        -:    0:Source:properties.c
+        -:    1:/* properties.c -- functions to get files properties */
+        -:    2:
+        -:    3:/*
+        -:    4: * This file is part of CliFM
+        -:    5: * 
+        -:    6: * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
+        -:    7: * All rights reserved.
+        -:    8:
+        -:    9: * CliFM is free software; you can redistribute it and/or modify
+        -:   10: * it under the terms of the GNU General Public License as published by
+        -:   11: * the Free Software Foundation; either version 2 of the License, or
+        -:   12: * (at your option) any later version.
+        -:   13: *
+        -:   14: * CliFM is distributed in the hope that it will be useful,
+        -:   15: * but WITHOUT ANY WARRANTY; without even the implied warranty of
+        -:   16: * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        -:   17: * GNU General Public License for more details.
+        -:   18: *
+        -:   19: * You should have received a copy of the GNU General Public License
+        -:   20: * along with this program; if not, write to the Free Software
+        -:   21: * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+        -:   22: * MA 02110-1301, USA.
+        -:   23:*/
+        -:   24:
+        -:   25:#include "helpers.h"
+        -:   26:
+        -:   27:#include <errno.h>
+        -:   28:#include <stdio.h>
+        -:   29:#include <string.h>
+        -:   30:#include <sys/stat.h>
+        -:   31:#include <time.h>
+        -:   32:#include <unistd.h>
+        -:   33:#ifdef __linux__
+        -:   34:#include <sys/capability.h>
+        -:   35:#endif
+        -:   36:#include <fcntl.h>
+        -:   37:#include <grp.h>
+        -:   38:#include <pwd.h>
+        -:   39:#include <sys/types.h>
+        -:   40:
+        -:   41:#include "aux.h"
+        -:   42:#include "checks.h"
+        -:   43:#include "colors.h"
+        -:   44:
+        -:   45:int
+function get_properties called 0 returned 0% blocks executed 0%
+    #####:   46:get_properties(char *filename, int dsize)
+        -:   47:{
+    #####:   48:	if (!filename || !*filename)
+    %%%%%:   48-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   48-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:   49:		return EXIT_FAILURE;
+    %%%%%:   49-block  0
+unconditional  0 never executed
+        -:   50:
+    #####:   51:	size_t len = strlen(filename);
+    #####:   52:	if (filename[len - 1] == '/')
+    %%%%%:   52-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   53:		filename[len - 1] = '\0';
+    %%%%%:   53-block  0
+unconditional  0 never executed
+        -:   54:
+        -:   55:	struct stat file_attrib;
+        -:   56:
+        -:   57:	/* Check file existence */
+    #####:   58:	if (lstat(filename, &file_attrib) == -1) {
+    %%%%%:   58-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:   59:		fprintf(stderr, "%s: pr: '%s': %s\n", PROGRAM_NAME, filename,
+call    0 never executed
+    #####:   60:		    strerror(errno));
+    %%%%%:   60-block  0
+call    0 never executed
+    #####:   61:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:   62:	}
+        -:   63:
+        -:   64:	/* Get file size */
+    #####:   65:	char *size_type = get_size_unit(file_attrib.st_size);
+    %%%%%:   65-block  0
+call    0 never executed
+        -:   66:
+        -:   67:	/* Get file type (and color): */
+    #####:   68:	int sticky = 0;
+    #####:   69:	char file_type = 0;
+    #####:   70:	char *linkname = (char *)NULL, *color = (char *)NULL;
+        -:   71:
+    #####:   72:	switch (file_attrib.st_mode & S_IFMT) {
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+branch  6 never executed
+branch  7 never executed
+        -:   73:
+    #####:   74:	case S_IFREG: {
+        -:   75:
+    #####:   76:		char *ext = (char *)NULL;
+        -:   77:
+    #####:   78:		file_type = '-';
+        -:   79:
+    #####:   80:		if (access(filename, R_OK) == -1)
+    %%%%%:   80-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:   81:			color = nf_c;
+    %%%%%:   81-block  0
+unconditional  0 never executed
+        -:   82:
+    #####:   83:		else if (file_attrib.st_mode & S_ISUID)
+    %%%%%:   83-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   84:			color = su_c;
+    %%%%%:   84-block  0
+unconditional  0 never executed
+        -:   85:
+    #####:   86:		else if (file_attrib.st_mode & S_ISGID)
+    %%%%%:   86-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   87:			color = sg_c;
+    %%%%%:   87-block  0
+unconditional  0 never executed
+        -:   88:
+        -:   89:		else {
+        -:   90:#ifdef _LINUX_CAP
+    #####:   91:			cap_t cap = cap_get_file(filename);
+    %%%%%:   91-block  0
+call    0 never executed
+        -:   92:
+    #####:   93:			if (cap) {
+branch  0 never executed
+branch  1 never executed
+    #####:   94:				color = ca_c;
+    #####:   95:				cap_free(cap);
+    %%%%%:   95-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:   96:			}
+        -:   97:
+    #####:   98:			else if (file_attrib.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
+    %%%%%:   98-block  0
+branch  0 never executed
+branch  1 never executed
+        -:   99:#else
+        -:  100:
+        -:  101:			if (file_attrib.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
+        -:  102:#endif
+        -:  103:
+    #####:  104:				if (file_attrib.st_size == 0)
+    %%%%%:  104-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  105:					color = ee_c;
+    %%%%%:  105-block  0
+unconditional  0 never executed
+        -:  106:
+        -:  107:				else
+    #####:  108:					color = ex_c;
+    %%%%%:  108-block  0
+unconditional  0 never executed
+        -:  109:			}
+        -:  110:
+    #####:  111:			else if (file_attrib.st_size == 0)
+    %%%%%:  111-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  112:				color = ef_c;
+    %%%%%:  112-block  0
+unconditional  0 never executed
+        -:  113:
+    #####:  114:			else if (file_attrib.st_nlink > 1)
+    %%%%%:  114-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  115:				color = mh_c;
+    %%%%%:  115-block  0
+unconditional  0 never executed
+        -:  116:
+        -:  117:			else {
+    #####:  118:				ext = strrchr(filename, '.');
+        -:  119:
+    #####:  120:				if (ext) {
+    %%%%%:  120-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  121:
+    #####:  122:					char *extcolor = get_ext_color(ext);
+    %%%%%:  122-block  0
+call    0 never executed
+        -:  123:
+    #####:  124:					if (extcolor) {
+branch  0 never executed
+branch  1 never executed
+    #####:  125:						char ext_color[MAX_COLOR] = "";
+    #####:  126:						sprintf(ext_color, "\x1b[%sm", extcolor);
+    #####:  127:						color = ext_color;
+    #####:  128:						extcolor = (char *)NULL;
+    %%%%%:  128-block  0
+unconditional  0 never executed
+        -:  129:					}
+        -:  130:
+        -:  131:					else /* No matching extension found */
+    #####:  132:						color = fi_c;
+    %%%%%:  132-block  0
+unconditional  0 never executed
+        -:  133:				}
+        -:  134:
+        -:  135:				else
+    #####:  136:					color = fi_c;
+    %%%%%:  136-block  0
+unconditional  0 never executed
+        -:  137:			}
+        -:  138:		}
+    #####:  139:	} break;
+    %%%%%:  139-block  0
+unconditional  0 never executed
+        -:  140:
+    #####:  141:	case S_IFDIR:
+    #####:  142:		file_type = 'd';
+        -:  143:
+    #####:  144:		if (access(filename, R_OK | X_OK) != 0)
+    %%%%%:  144-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  145:			color = nd_c;
+    %%%%%:  145-block  0
+unconditional  0 never executed
+        -:  146:
+        -:  147:		else {
+    #####:  148:			int is_oth_w = 0;
+    #####:  149:			if (file_attrib.st_mode & S_ISVTX)
+    %%%%%:  149-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  150:				sticky = 1;
+    %%%%%:  150-block  0
+unconditional  0 never executed
+        -:  151:
+    #####:  152:			if (file_attrib.st_mode & S_IWOTH)
+    %%%%%:  152-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  153:				is_oth_w = 1;
+    %%%%%:  153-block  0
+unconditional  0 never executed
+        -:  154:
+    #####:  155:			int files_dir = count_dir(filename);
+    %%%%%:  155-block  0
+call    0 never executed
+        -:  156:
+    #####:  157:			color = sticky ? (is_oth_w ? tw_c : st_c) : is_oth_w ? ow_c
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  157-block  0
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  157-block  1
+unconditional  4 never executed
+    %%%%%:  157-block  2
+unconditional  5 never executed
+    %%%%%:  157-block  3
+unconditional  6 never executed
+    %%%%%:  157-block  4
+unconditional  7 never executed
+    %%%%%:  157-block  5
+unconditional  8 never executed
+    #####:  158:				   : ((files_dir == 2 || files_dir == 0) ? ed_c : di_c);
+    %%%%%:  158-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  158-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  158-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%:  158-block  3
+unconditional  6 never executed
+    %%%%%:  158-block  4
+unconditional  7 never executed
+    %%%%%:  158-block  5
+unconditional  8 never executed
+    %%%%%:  158-block  6
+unconditional  9 never executed
+        -:  159:		}
+        -:  160:
+    #####:  161:		break;
+    %%%%%:  161-block  0
+unconditional  0 never executed
+        -:  162:
+    #####:  163:	case S_IFLNK:
+    #####:  164:		file_type = 'l';
+        -:  165:
+    #####:  166:		linkname = realpath(filename, (char *)NULL);
+    %%%%%:  166-block  0
+call    0 never executed
+        -:  167:
+    #####:  168:		if (linkname)
+branch  0 never executed
+branch  1 never executed
+    #####:  169:			color = ln_c;
+    %%%%%:  169-block  0
+unconditional  0 never executed
+        -:  170:		else
+    #####:  171:			color = or_c;
+    %%%%%:  171-block  0
+unconditional  0 never executed
+    #####:  172:		break;
+    %%%%%:  172-block  0
+unconditional  0 never executed
+        -:  173:
+    #####:  174:	case S_IFSOCK:
+    #####:  175:		file_type = 's';
+    #####:  176:		color = so_c;
+    #####:  177:		break;
+    %%%%%:  177-block  0
+unconditional  0 never executed
+        -:  178:
+    #####:  179:	case S_IFBLK:
+    #####:  180:		file_type = 'b';
+    #####:  181:		color = bd_c;
+    #####:  182:		break;
+    %%%%%:  182-block  0
+unconditional  0 never executed
+        -:  183:
+    #####:  184:	case S_IFCHR:
+    #####:  185:		file_type = 'c';
+    #####:  186:		color = cd_c;
+    #####:  187:		break;
+    %%%%%:  187-block  0
+unconditional  0 never executed
+        -:  188:
+    #####:  189:	case S_IFIFO:
+    #####:  190:		file_type = 'p';
+    #####:  191:		color = pi_c;
+    #####:  192:		break;
+    %%%%%:  192-block  0
+unconditional  0 never executed
+        -:  193:
+    #####:  194:	default:
+    #####:  195:		file_type = '?';
+    #####:  196:		color = no_c;
+    %%%%%:  196-block  0
+unconditional  0 never executed
+        -:  197:	}
+        -:  198:
+        -:  199:	/* Get file permissions */
+    #####:  200:	char read_usr = '-', write_usr = '-', exec_usr = '-',
+    #####:  201:	     read_grp = '-', write_grp = '-', exec_grp = '-',
+    #####:  202:	     read_others = '-', write_others = '-', exec_others = '-';
+        -:  203:
+    #####:  204:	mode_t val = (file_attrib.st_mode & ~S_IFMT);
+    #####:  205:	if (val & S_IRUSR)
+    %%%%%:  205-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  206:		read_usr = 'r';
+    %%%%%:  206-block  0
+unconditional  0 never executed
+    #####:  207:	if (val & S_IWUSR)
+    %%%%%:  207-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  208:		write_usr = 'w';
+    %%%%%:  208-block  0
+unconditional  0 never executed
+    #####:  209:	if (val & S_IXUSR)
+    %%%%%:  209-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  210:		exec_usr = 'x';
+    %%%%%:  210-block  0
+unconditional  0 never executed
+        -:  211:
+    #####:  212:	if (val & S_IRGRP)
+    %%%%%:  212-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  213:		read_grp = 'r';
+    %%%%%:  213-block  0
+unconditional  0 never executed
+    #####:  214:	if (val & S_IWGRP)
+    %%%%%:  214-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  215:		write_grp = 'w';
+    %%%%%:  215-block  0
+unconditional  0 never executed
+    #####:  216:	if (val & S_IXGRP)
+    %%%%%:  216-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  217:		exec_grp = 'x';
+    %%%%%:  217-block  0
+unconditional  0 never executed
+        -:  218:
+    #####:  219:	if (val & S_IROTH)
+    %%%%%:  219-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  220:		read_others = 'r';
+    %%%%%:  220-block  0
+unconditional  0 never executed
+    #####:  221:	if (val & S_IWOTH)
+    %%%%%:  221-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  222:		write_others = 'w';
+    %%%%%:  222-block  0
+unconditional  0 never executed
+    #####:  223:	if (val & S_IXOTH)
+    %%%%%:  223-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  224:		exec_others = 'x';
+    %%%%%:  224-block  0
+unconditional  0 never executed
+        -:  225:
+    #####:  226:	if (file_attrib.st_mode & S_ISUID)
+    %%%%%:  226-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  227:		(val & S_IXUSR) ? (exec_usr = 's') : (exec_usr = 'S');
+    %%%%%:  227-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  227-block  1
+unconditional  2 never executed
+    %%%%%:  227-block  2
+unconditional  3 never executed
+    #####:  228:	if (file_attrib.st_mode & S_ISGID)
+    %%%%%:  228-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  229:		(val & S_IXGRP) ? (exec_grp = 's') : (exec_grp = 'S');
+    %%%%%:  229-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  229-block  1
+unconditional  2 never executed
+    %%%%%:  229-block  2
+unconditional  3 never executed
+        -:  230:
+        -:  231:	/* Get number of links to the file */
+    #####:  232:	nlink_t link_n = file_attrib.st_nlink;
+        -:  233:
+        -:  234:	/* Get modification time */
+    #####:  235:	time_t time = (time_t)file_attrib.st_mtim.tv_sec;
+    #####:  236:	struct tm *tm = localtime(&time);
+    %%%%%:  236-block  0
+call    0 never executed
+    #####:  237:	char mod_time[128] = "";
+        -:  238:
+    #####:  239:	if (time)
+branch  0 never executed
+branch  1 never executed
+        -:  240:		/* Store formatted (and localized) date-time string into
+        -:  241:		 * mod_time */
+    #####:  242:		strftime(mod_time, sizeof(mod_time), "%b %d %H:%M:%S %Y", tm);
+    %%%%%:  242-block  0
+unconditional  0 never executed
+        -:  243:
+        -:  244:	else
+    #####:  245:		mod_time[0] = '-';
+    %%%%%:  245-block  0
+unconditional  0 never executed
+        -:  246:
+        -:  247:	/* Get owner and group names */
+    #####:  248:	uid_t owner_id = file_attrib.st_uid; /* owner ID */
+    #####:  249:	gid_t group_id = file_attrib.st_gid; /* group ID */
+        -:  250:	struct group *group;
+        -:  251:	struct passwd *owner;
+    #####:  252:	group = getgrgid(group_id);
+    %%%%%:  252-block  0
+call    0 never executed
+    #####:  253:	owner = getpwuid(owner_id);
+call    0 never executed
+        -:  254:
+        -:  255:	/* Print file properties */
+    #####:  256:	printf("(%04o)%c/%c%c%c/%c%c%c/%c%c%c%s %zu %s %s %s %s ",
+    %%%%%:  256-block  0
+unconditional  0 never executed
+    %%%%%:  256-block  1
+unconditional  1 never executed
+    %%%%%:  256-block  2
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  256-block  3
+unconditional  4 never executed
+    %%%%%:  256-block  4
+unconditional  5 never executed
+    %%%%%:  256-block  5
+branch  6 never executed
+branch  7 never executed
+    %%%%%:  256-block  6
+unconditional  8 never executed
+    %%%%%:  256-block  7
+branch  9 never executed
+branch 10 never executed
+    %%%%%:  256-block  8
+unconditional 11 never executed
+branch 12 never executed
+branch 13 never executed
+    %%%%%:  256-block  9
+unconditional 14 never executed
+    %%%%%:  256-block 10
+unconditional 15 never executed
+    %%%%%:  256-block 11
+branch 16 never executed
+branch 17 never executed
+    %%%%%:  256-block 12
+unconditional 18 never executed
+    %%%%%:  256-block 13
+unconditional 19 never executed
+    #####:  257:	    file_attrib.st_mode & 07777, file_type,
+    %%%%%:  257-block  0
+call    0 never executed
+        -:  258:	    read_usr, write_usr, exec_usr, read_grp,
+        -:  259:	    write_grp, exec_grp, read_others, write_others,
+        -:  260:	    (sticky) ? 't' : exec_others,
+    #####:  261:	    is_acl(filename) ? "+" : "", link_n,
+    %%%%%:  261-block  0
+call    0 never executed
+    #####:  262:	    (!owner) ? _("unknown") : owner->pw_name,
+    %%%%%:  262-block  0
+unconditional  0 never executed
+    #####:  263:	    (!group) ? _("unknown") : group->gr_name,
+    %%%%%:  263-block  0
+unconditional  0 never executed
+        -:  264:	    (size_type) ? size_type : "?",
+    #####:  265:	    (mod_time[0] != '\0') ? mod_time : "?");
+branch  0 never executed
+branch  1 never executed
+        -:  266:
+    #####:  267:	if (file_type && file_type != 'l')
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  267-block  0
+branch  2 never executed
+branch  3 never executed
+    #####:  268:		printf("%s%s%s\n", color, filename, df_c);
+    %%%%%:  268-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  269:
+    #####:  270:	else if (linkname) {
+    %%%%%:  270-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  271:		printf("%s%s%s -> %s\n", color, filename, df_c, linkname);
+    %%%%%:  271-block  0
+call    0 never executed
+    #####:  272:		free(linkname);
+unconditional  0 never executed
+        -:  273:	}
+        -:  274:
+        -:  275:	else { /* Broken link */
+    #####:  276:		char link[PATH_MAX] = "";
+    #####:  277:		ssize_t ret = readlink(filename, link, PATH_MAX);
+    %%%%%:  277-block  0
+call    0 never executed
+        -:  278:
+    #####:  279:		if (ret) {
+branch  0 never executed
+branch  1 never executed
+    #####:  280:			printf(_("%s%s%s -> %s (broken link)\n"), color, filename,
+    %%%%%:  280-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  281:			    df_c, link);
+        -:  282:		}
+        -:  283:
+        -:  284:		else
+    #####:  285:			printf("%s%s%s -> ???\n", color, filename, df_c);
+    %%%%%:  285-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  286:	}
+        -:  287:
+        -:  288:	/* Stat information */
+        -:  289:
+        -:  290:	/* Last access time */
+    #####:  291:	time = (time_t)file_attrib.st_atim.tv_sec;
+    #####:  292:	tm = localtime(&time);
+    %%%%%:  292-block  0
+call    0 never executed
+    #####:  293:	char access_time[128] = "";
+        -:  294:
+    #####:  295:	if (time)
+branch  0 never executed
+branch  1 never executed
+        -:  296:		/* Store formatted (and localized) date-time string into
+        -:  297:		 * access_time */
+    #####:  298:		strftime(access_time, sizeof(access_time), "%b %d %H:%M:%S %Y", tm);
+    %%%%%:  298-block  0
+unconditional  0 never executed
+        -:  299:
+        -:  300:	else
+    #####:  301:		access_time[0] = '-';
+    %%%%%:  301-block  0
+unconditional  0 never executed
+        -:  302:
+        -:  303:	/* Last properties change time */
+    #####:  304:	time = (time_t)file_attrib.st_ctim.tv_sec;
+    #####:  305:	tm = localtime(&time);
+    %%%%%:  305-block  0
+call    0 never executed
+    #####:  306:	char change_time[128] = "";
+        -:  307:
+    #####:  308:	if (time)
+branch  0 never executed
+branch  1 never executed
+    #####:  309:		strftime(change_time, sizeof(change_time), "%b %d %H:%M:%S %Y", tm);
+    %%%%%:  309-block  0
+unconditional  0 never executed
+        -:  310:
+        -:  311:	else
+    #####:  312:		change_time[0] = '-';
+    %%%%%:  312-block  0
+unconditional  0 never executed
+        -:  313:
+        -:  314:		/* Get creation (birth) time */
+        -:  315:#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE)
+        -:  316:	time = file_attrib.st_birthtime;
+        -:  317:	tm = localtime(&time);
+        -:  318:	char creation_time[128] = "";
+        -:  319:
+        -:  320:	if (!time)
+        -:  321:		creation_time[0] = '-';
+        -:  322:
+        -:  323:	else
+        -:  324:		strftime(creation_time, sizeof(creation_time),
+        -:  325:		    "%b %d %H:%M:%S %Y", tm);
+        -:  326:#elif defined(_STATX)
+        -:  327:	struct statx attrx;
+    #####:  328:	statx(AT_FDCWD, filename, AT_SYMLINK_NOFOLLOW, STATX_BTIME, &attrx);
+    %%%%%:  328-block  0
+call    0 never executed
+    #####:  329:	time = (time_t)attrx.stx_btime.tv_sec;
+    #####:  330:	tm = localtime(&time);
+call    0 never executed
+    #####:  331:	char creation_time[128] = "";
+        -:  332:
+    #####:  333:	if (!time)
+branch  0 never executed
+branch  1 never executed
+    #####:  334:		creation_time[0] = '-';
+    %%%%%:  334-block  0
+unconditional  0 never executed
+        -:  335:
+        -:  336:	else
+    #####:  337:		strftime(creation_time, sizeof(creation_time),
+    %%%%%:  337-block  0
+unconditional  0 never executed
+        -:  338:		    "%b %d %H:%M:%S %Y", tm);
+        -:  339:#endif
+        -:  340:
+    #####:  341:	switch (file_type) {
+    %%%%%:  341-block  0
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+branch  6 never executed
+branch  7 never executed
+    #####:  342:	case 'd':
+    #####:  343:		printf(_("Directory"));
+    %%%%%:  343-block  0
+call    0 never executed
+    #####:  344:		break;
+unconditional  0 never executed
+    #####:  345:	case 's':
+    #####:  346:		printf(_("Socket"));
+    %%%%%:  346-block  0
+call    0 never executed
+    #####:  347:		break;
+unconditional  0 never executed
+    #####:  348:	case 'l':
+    #####:  349:		printf(_("Symbolic link"));
+    %%%%%:  349-block  0
+call    0 never executed
+    #####:  350:		break;
+unconditional  0 never executed
+    #####:  351:	case 'b':
+    #####:  352:		printf(_("Block special file"));
+    %%%%%:  352-block  0
+call    0 never executed
+    #####:  353:		break;
+unconditional  0 never executed
+    #####:  354:	case 'c':
+    #####:  355:		printf(_("Character special file"));
+    %%%%%:  355-block  0
+call    0 never executed
+    #####:  356:		break;
+unconditional  0 never executed
+    #####:  357:	case 'p':
+    #####:  358:		printf(_("Fifo"));
+    %%%%%:  358-block  0
+call    0 never executed
+    #####:  359:		break;
+unconditional  0 never executed
+    #####:  360:	case '-':
+    #####:  361:		printf(_("Regular file"));
+    %%%%%:  361-block  0
+call    0 never executed
+    #####:  362:		break;
+unconditional  0 never executed
+    #####:  363:	default:
+    #####:  364:		break;
+    %%%%%:  364-block  0
+unconditional  0 never executed
+        -:  365:	}
+        -:  366:
+    #####:  367:	printf(_("\tBlocks: %ld"), file_attrib.st_blocks);
+    %%%%%:  367-block  0
+call    0 never executed
+        -:  368:#if __FreeBSD__
+        -:  369:	printf(_("\tIO Block: %d"), file_attrib.st_blksize);
+        -:  370:#else
+    #####:  371:	printf(_("\tIO Block: %ld"), file_attrib.st_blksize);
+call    0 never executed
+        -:  372:#endif
+    #####:  373:	printf(_("\tInode: %zu\n"), file_attrib.st_ino);
+call    0 never executed
+    #####:  374:	printf(_("Device: %zu"), file_attrib.st_dev);
+call    0 never executed
+    #####:  375:	printf(_("\tUid: %u (%s)"), file_attrib.st_uid, (!owner) ? _("unknown")
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  375-block  0
+unconditional  2 never executed
+    %%%%%:  375-block  1
+unconditional  3 never executed
+    %%%%%:  375-block  2
+call    4 never executed
+        -:  376:			: owner->pw_name);
+    #####:  377:	printf(_("\tGid: %u (%s)\n"), file_attrib.st_gid, (!group) ? _("unknown")
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  377-block  0
+unconditional  2 never executed
+    %%%%%:  377-block  1
+unconditional  3 never executed
+    %%%%%:  377-block  2
+call    4 never executed
+        -:  378:			: group->gr_name);
+        -:  379:
+        -:  380:	/* Print file timestamps */
+    #####:  381:	printf(_("Access: \t%s\n"), access_time);
+call    0 never executed
+    #####:  382:	printf(_("Modify: \t%s\n"), mod_time);
+call    0 never executed
+    #####:  383:	printf(_("Change: \t%s\n"), change_time);
+call    0 never executed
+        -:  384:
+        -:  385:#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
+    #####:  386:	printf(_("Birth: \t\t%s\n"), creation_time);
+call    0 never executed
+        -:  387:#endif
+        -:  388:
+        -:  389:	/* Print size */
+        -:  390:
+    #####:  391:	if ((file_attrib.st_mode & S_IFMT) == S_IFDIR) {
+branch  0 never executed
+branch  1 never executed
+        -:  392:
+    #####:  393:		if (dsize) {
+    %%%%%:  393-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  394:			fputs(_("Total size: \t"), stdout);
+    %%%%%:  394-block  0
+call    0 never executed
+    #####:  395:			off_t total_size = dir_size(filename);
+call    0 never executed
+        -:  396:
+    #####:  397:			if (total_size != -1) {
+branch  0 never executed
+branch  1 never executed
+    #####:  398:				char *human_size = get_size_unit(total_size);
+    %%%%%:  398-block  0
+call    0 never executed
+        -:  399:
+    #####:  400:				if (human_size) {
+branch  0 never executed
+branch  1 never executed
+    #####:  401:					printf("%s\n", human_size);
+    %%%%%:  401-block  0
+call    0 never executed
+    #####:  402:					free(human_size);
+unconditional  0 never executed
+        -:  403:				}
+        -:  404:
+        -:  405:				else
+    #####:  406:					puts("?");
+    %%%%%:  406-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  407:			}
+        -:  408:
+        -:  409:			else
+    #####:  410:				puts("?");
+    %%%%%:  410-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  411:		}
+        -:  412:	}
+        -:  413:
+        -:  414:	else
+    #####:  415:		printf(_("Size: \t\t%s\n"), size_type ? size_type : "?");
+    %%%%%:  415-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  415-block  1
+unconditional  2 never executed
+    %%%%%:  415-block  2
+unconditional  3 never executed
+    %%%%%:  415-block  3
+call    4 never executed
+unconditional  5 never executed
+        -:  416:
+    #####:  417:	if (size_type)
+    %%%%%:  417-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  418:		free(size_type);
+    %%%%%:  418-block  0
+unconditional  0 never executed
+        -:  419:
+    #####:  420:	return EXIT_SUCCESS;
+    %%%%%:  420-block  0
+unconditional  0 never executed
+        -:  421:}
+        -:  422:
+        -:  423:int
+function print_entry_props called 0 returned 0% blocks executed 0%
+    #####:  424:print_entry_props(struct fileinfo *props, size_t max)
+        -:  425:{
+        -:  426:	/* Get file size */
+    #####:  427:	char *size_type = get_size_unit(props->size);
+    %%%%%:  427-block  0
+call    0 never executed
+        -:  428:
+        -:  429:	/* Get file type indicator */
+    #####:  430:	char file_type = 0;
+        -:  431:
+    #####:  432:	switch (props->mode & S_IFMT) {
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+branch  6 never executed
+branch  7 never executed
+        -:  433:
+    #####:  434:	case S_IFREG:
+    #####:  435:		file_type = '-';
+    #####:  436:		break;
+    %%%%%:  436-block  0
+unconditional  0 never executed
+    #####:  437:	case S_IFDIR:
+    #####:  438:		file_type = 'd';
+    #####:  439:		break;
+    %%%%%:  439-block  0
+unconditional  0 never executed
+    #####:  440:	case S_IFLNK:
+    #####:  441:		file_type = 'l';
+    #####:  442:		break;
+    %%%%%:  442-block  0
+unconditional  0 never executed
+    #####:  443:	case S_IFSOCK:
+    #####:  444:		file_type = 's';
+    #####:  445:		break;
+    %%%%%:  445-block  0
+unconditional  0 never executed
+    #####:  446:	case S_IFBLK:
+    #####:  447:		file_type = 'b';
+    #####:  448:		break;
+    %%%%%:  448-block  0
+unconditional  0 never executed
+    #####:  449:	case S_IFCHR:
+    #####:  450:		file_type = 'c';
+    #####:  451:		break;
+    %%%%%:  451-block  0
+unconditional  0 never executed
+    #####:  452:	case S_IFIFO:
+    #####:  453:		file_type = 'p';
+    #####:  454:		break;
+    %%%%%:  454-block  0
+unconditional  0 never executed
+    #####:  455:	default:
+    #####:  456:		file_type = '?';
+    %%%%%:  456-block  0
+unconditional  0 never executed
+        -:  457:	}
+        -:  458:
+        -:  459:	/* Get file permissions */
+    #####:  460:	char read_usr = '-', write_usr = '-', exec_usr = '-',
+    #####:  461:	     read_grp = '-', write_grp = '-', exec_grp = '-',
+    #####:  462:	     read_others = '-', write_others = '-', exec_others = '-';
+        -:  463:
+    #####:  464:	mode_t val = (props->mode & ~S_IFMT);
+    #####:  465:	if (val & S_IRUSR)
+    %%%%%:  465-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  466:		read_usr = 'r';
+    %%%%%:  466-block  0
+unconditional  0 never executed
+    #####:  467:	if (val & S_IWUSR)
+    %%%%%:  467-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  468:		write_usr = 'w';
+    %%%%%:  468-block  0
+unconditional  0 never executed
+    #####:  469:	if (val & S_IXUSR)
+    %%%%%:  469-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  470:		exec_usr = 'x';
+    %%%%%:  470-block  0
+unconditional  0 never executed
+        -:  471:
+    #####:  472:	if (val & S_IRGRP)
+    %%%%%:  472-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  473:		read_grp = 'r';
+    %%%%%:  473-block  0
+unconditional  0 never executed
+    #####:  474:	if (val & S_IWGRP)
+    %%%%%:  474-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  475:		write_grp = 'w';
+    %%%%%:  475-block  0
+unconditional  0 never executed
+    #####:  476:	if (val & S_IXGRP)
+    %%%%%:  476-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  477:		exec_grp = 'x';
+    %%%%%:  477-block  0
+unconditional  0 never executed
+        -:  478:
+    #####:  479:	if (val & S_IROTH)
+    %%%%%:  479-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  480:		read_others = 'r';
+    %%%%%:  480-block  0
+unconditional  0 never executed
+    #####:  481:	if (val & S_IWOTH)
+    %%%%%:  481-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  482:		write_others = 'w';
+    %%%%%:  482-block  0
+unconditional  0 never executed
+    #####:  483:	if (val & S_IXOTH)
+    %%%%%:  483-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  484:		exec_others = 'x';
+    %%%%%:  484-block  0
+unconditional  0 never executed
+        -:  485:
+    #####:  486:	if (props->mode & S_ISUID)
+    %%%%%:  486-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  487:		(val & S_IXUSR) ? (exec_usr = 's') : (exec_usr = 'S');
+    %%%%%:  487-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  487-block  1
+unconditional  2 never executed
+    %%%%%:  487-block  2
+unconditional  3 never executed
+    #####:  488:	if (props->mode & S_ISGID)
+    %%%%%:  488-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  489:		(val & S_IXGRP) ? (exec_grp = 's') : (exec_grp = 'S');
+    %%%%%:  489-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  489-block  1
+unconditional  2 never executed
+    %%%%%:  489-block  2
+unconditional  3 never executed
+        -:  490:
+        -:  491:	/* Get modification time */
+        -:  492:	char mod_time[128];
+        -:  493:
+    #####:  494:	if (props->ltime) {
+    %%%%%:  494-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  495:		struct tm *t = localtime(&props->ltime);
+    %%%%%:  495-block  0
+call    0 never executed
+    #####:  496:		snprintf(mod_time, 128, "%d-%02d-%02d %02d:%02d", t->tm_year + 1900,
+    #####:  497:		    t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min);
+unconditional  0 never executed
+        -:  498:	} else
+    #####:  499:		strcpy(mod_time, "-               ");
+    %%%%%:  499-block  0
+unconditional  0 never executed
+        -:  500:
+        -:  501:	/* Get owner and group names */
+        -:  502:	/*  struct group *group;
+        -:  503:	struct passwd *owner;
+        -:  504:	group = getgrgid(props->uid);
+        -:  505:	owner = getpwuid(props->gid); */
+        -:  506:
+        -:  507:	/*  If filename length is greater than max, truncate it
+        -:  508:	 * to max (later a tilde (~) will be appended to let the user know
+        -:  509:	 * the file name was truncated) */
+        -:  510:	char trim_name[NAME_MAX];
+    #####:  511:	int trim = 0;
+        -:  512:
+    #####:  513:	size_t cur_len = props->eln_n + 1 + props->len;
+    #####:  514:	if (icons) {
+    %%%%%:  514-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  515:		cur_len += 3;
+    #####:  516:		max += 3;
+    %%%%%:  516-block  0
+unconditional  0 never executed
+        -:  517:	}
+        -:  518:
+    #####:  519:	if (cur_len > max) {
+    %%%%%:  519-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  520:		int rest = (int)(cur_len - max);
+    #####:  521:		trim = 1;
+    #####:  522:		strcpy(trim_name, props->name);
+    #####:  523:		if (unicode)
+    %%%%%:  523-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  524:			u8truncstr(trim_name, (size_t)(props->len - rest - 1));
+    %%%%%:  524-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  525:		else
+    #####:  526:			trim_name[props->len - rest - 1] = '\0';
+    %%%%%:  526-block  0
+unconditional  0 never executed
+    #####:  527:		cur_len -= rest;
+    %%%%%:  527-block  0
+unconditional  0 never executed
+        -:  528:	}
+        -:  529:
+        -:  530:	/* Calculate pad for each file */
+        -:  531:	int pad;
+        -:  532:
+    #####:  533:	pad = (int)(max - cur_len);
+        -:  534:
+    #####:  535:	if (pad < 0)
+    %%%%%:  535-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  536:		pad = 0;
+    %%%%%:  536-block  0
+unconditional  0 never executed
+        -:  537:
+    #####:  538:	int sticky = 0;
+    #####:  539:	if (props->mode & S_ISVTX)
+    %%%%%:  539-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  540:		sticky = 1;
+    %%%%%:  540-block  0
+unconditional  0 never executed
+        -:  541:
+    #####:  542:	printf("%s%s%c%s%s%s%-*s%s%c %c/%c%c%c/%c%c%c/%c%c%c%s  "
+    %%%%%:  542-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  542-block  1
+unconditional  2 never executed
+    %%%%%:  542-block  2
+unconditional  3 never executed
+    %%%%%:  542-block  3
+unconditional  4 never executed
+    %%%%%:  542-block  4
+unconditional  5 never executed
+branch  6 never executed
+branch  7 never executed
+    %%%%%:  542-block  5
+unconditional  8 never executed
+    %%%%%:  542-block  6
+unconditional  9 never executed
+    %%%%%:  542-block  7
+branch 10 never executed
+branch 11 never executed
+    %%%%%:  542-block  8
+unconditional 12 never executed
+    %%%%%:  542-block  9
+unconditional 13 never executed
+    %%%%%:  542-block 10
+branch 14 never executed
+branch 15 never executed
+    %%%%%:  542-block 11
+unconditional 16 never executed
+    %%%%%:  542-block 12
+unconditional 17 never executed
+    %%%%%:  542-block 13
+unconditional 18 never executed
+    %%%%%:  542-block 14
+unconditional 19 never executed
+    %%%%%:  542-block 15
+branch 20 never executed
+branch 21 never executed
+    %%%%%:  542-block 16
+unconditional 22 never executed
+    %%%%%:  542-block 17
+unconditional 23 never executed
+    %%%%%:  542-block 18
+unconditional 24 never executed
+    %%%%%:  542-block 19
+unconditional 25 never executed
+    %%%%%:  542-block 20
+unconditional 26 never executed
+    %%%%%:  542-block 21
+unconditional 27 never executed
+    %%%%%:  542-block 22
+unconditional 28 never executed
+    %%%%%:  542-block 23
+unconditional 29 never executed
+    %%%%%:  542-block 24
+unconditional 30 never executed
+    %%%%%:  542-block 25
+unconditional 31 never executed
+    %%%%%:  542-block 26
+call   32 never executed
+        -:  543:	       "%u:%u  %s  %s\n",
+    #####:  544:	    colorize ? props->icon_color : "",
+    %%%%%:  544-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  545:	    icons ? props->icon : "", icons ? ' ' : 0,
+    %%%%%:  545-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  545-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  546:	    colorize ? props->color : "",
+    %%%%%:  546-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  547:	    !trim ? props->name : trim_name,
+    #####:  548:	    light_mode ? "" : df_c, pad, "", df_c,
+    %%%%%:  548-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  549:	    trim ? '~' : 0, file_type,
+        -:  550:	    read_usr, write_usr, exec_usr,
+        -:  551:	    read_grp, write_grp, exec_grp,
+        -:  552:	    read_others, write_others, sticky ? 't' : exec_others,
+    #####:  553:	    is_acl(props->name) ? "+" : "",
+    %%%%%:  553-block  0
+call    0 never executed
+        -:  554:	    /*          !owner ? _("?") : owner->pw_name,
+        -:  555:			!group ? _("?") : group->gr_name, */
+        -:  556:	    props->uid, props->gid,
+    #####:  557:	    *mod_time ? mod_time : "?",
+    %%%%%:  557-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  558:	    size_type ? size_type : "?");
+        -:  559:
+    #####:  560:	if (size_type)
+branch  0 never executed
+branch  1 never executed
+    #####:  561:		free(size_type);
+    %%%%%:  561-block  0
+unconditional  0 never executed
+        -:  562:
+    #####:  563:	return EXIT_SUCCESS;
+    %%%%%:  563-block  0
+unconditional  0 never executed
+        -:  564:}
+        -:  565:
+        -:  566:int
+function properties_function called 0 returned 0% blocks executed 0%
+    #####:  567:properties_function(char **comm)
+        -:  568:{
+    #####:  569:	if (!comm)
+    %%%%%:  569-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  570:		return EXIT_FAILURE;
+    %%%%%:  570-block  0
+unconditional  0 never executed
+        -:  571:
+        -:  572:	size_t i;
+    #####:  573:	int exit_status = EXIT_SUCCESS;
+    #####:  574:	int dir_size = 0;
+        -:  575:
+    #####:  576:	if (*comm[0] == 'p' && comm[0][1] == 'p' && !comm[0][2])
+    %%%%%:  576-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  576-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  576-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  577:		dir_size = 1;
+    %%%%%:  577-block  0
+unconditional  0 never executed
+        -:  578:
+        -:  579:	/* If "pr file file..." */
+    #####:  580:	for (i = 1; i <= args_n; i++) {
+    %%%%%:  580-block  0
+unconditional  0 never executed
+    %%%%%:  580-block  1
+unconditional  1 never executed
+    %%%%%:  580-block  2
+branch  2 never executed
+branch  3 never executed
+        -:  581:
+    #####:  582:		if (strchr(comm[i], '\\')) {
+    %%%%%:  582-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  583:			char *deq_file = dequote_str(comm[i], 0);
+    %%%%%:  583-block  0
+call    0 never executed
+        -:  584:
+    #####:  585:			if (!deq_file) {
+branch  0 never executed
+branch  1 never executed
+    #####:  586:				fprintf(stderr, _("%s: %s: Error dequoting filename\n"),
+    #####:  587:				    PROGRAM_NAME, comm[i]);
+    %%%%%:  587-block  0
+call    0 never executed
+    #####:  588:				exit_status = EXIT_FAILURE;
+    #####:  589:				continue;
+unconditional  0 never executed
+        -:  590:			}
+        -:  591:
+    #####:  592:			strcpy(comm[i], deq_file);
+    #####:  593:			free(deq_file);
+    %%%%%:  593-block  0
+unconditional  0 never executed
+        -:  594:		}
+        -:  595:
+    #####:  596:		if (get_properties(comm[i], dir_size) != 0)
+    %%%%%:  596-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  597:			exit_status = EXIT_FAILURE;
+    %%%%%:  597-block  0
+unconditional  0 never executed
+        -:  598:	}
+        -:  599:
+    #####:  600:	return exit_status;
+    %%%%%:  600-block  0
+unconditional  0 never executed
+        -:  601:}

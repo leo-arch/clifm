@@ -1,0 +1,1062 @@
+        -:    0:Source:main.c
+        -:    1:
+        -:    2:			/*  ########################################
+        -:    3:			 *  #               CliFM                  #
+        -:    4:			 *  # The anti-eye-candy/KISS file manager #
+        -:    5:			 *  ######################################## */
+        -:    6:/* GPL2+ License 
+        -:    7: * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
+        -:    8: * All rights reserved.
+        -:    9:
+        -:   10: * This program is free software; you can redistribute it and/or modify
+        -:   11: * it under the terms of the GNU General Public License as published by
+        -:   12: * the Free Software Foundation; either version 2 of the License, or
+        -:   13: * (at your option) any later version.
+        -:   14: *
+        -:   15: * This program is distributed in the hope that it will be useful,
+        -:   16: * but WITHOUT ANY WARRANTY; without even the implied warranty of
+        -:   17: * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        -:   18: * GNU General Public License for more details.
+        -:   19: *
+        -:   20: * You should have received a copy of the GNU General Public License
+        -:   21: * along with this program; if not, write to the Free Software
+        -:   22: * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+        -:   23: * MA 02110-1301, USA.
+        -:   24: *
+        -:   25: */
+        -:   26:
+        -:   27:#include "helpers.h"
+        -:   28:
+        -:   29:#include <errno.h>
+        -:   30:#include <libintl.h>
+        -:   31:#include <locale.h>
+        -:   32:#include <stdio.h>
+        -:   33:#include <stdlib.h>
+        -:   34:#include <string.h>
+        -:   35:#include <sys/stat.h>
+        -:   36:#include <termios.h>
+        -:   37:#include <unistd.h>
+        -:   38:#include <readline/history.h>
+        -:   39:#include <readline/readline.h>
+        -:   40:
+        -:   41:#include "aux.h"
+        -:   42:#include "checks.h"
+        -:   43:#include "colors.h"
+        -:   44:#include "config.h"
+        -:   45:#include "exec.h"
+        -:   46:#include "history.h"
+        -:   47:#include "init.h"
+        -:   48:#include "jump.h"
+        -:   49:#include "keybinds.h"
+        -:   50:#include "listing.h"
+        -:   51:#include "misc.h"
+        -:   52:#include "navigation.h"
+        -:   53:#include "profiles.h"
+        -:   54:#include "prompt.h"
+        -:   55:#include "readline.h"
+        -:   56:#include "strings.h"
+        -:   57:
+        -:   58:struct usrvar_t *usr_var = (struct usrvar_t *)NULL;
+        -:   59:struct actions_t *usr_actions = (struct actions_t *)NULL;
+        -:   60:struct ws_t *ws = (struct ws_t *)NULL;
+        -:   61:struct kbinds_t *kbinds = (struct kbinds_t *)NULL;
+        -:   62:struct jump_t *jump_db = (struct jump_t *)NULL;
+        -:   63:struct bookmarks_t *bookmarks = (struct bookmarks_t *)NULL;
+        -:   64:struct fileinfo *file_info = (struct fileinfo *)NULL;
+        -:   65:
+        -:   66:/* pmsg holds the current program message type */
+        -:   67:enum prog_msg pmsg = nomsg;
+        -:   68:
+        -:   69:struct param xargs;
+        -:   70:
+        -:   71:unsigned short term_cols;
+        -:   72:
+        -:   73:int flags;
+        -:   74:
+        -:   75:short
+        -:   76:    splash_screen = UNSET,
+        -:   77:    welcome_message = UNSET,
+        -:   78:    show_hidden = UNSET,
+        -:   79:    clear_screen = UNSET,
+        -:   80:    disk_usage = UNSET,
+        -:   81:    list_folders_first = UNSET,
+        -:   82:    share_selbox = UNSET,
+        -:   83:    long_view = UNSET,
+        -:   84:    case_sensitive = UNSET,
+        -:   85:    cd_lists_on_the_fly = UNSET,
+        -:   86:    tips = UNSET,
+        -:   87:    logs_enabled = UNSET,
+        -:   88:    sort = UNSET,
+        -:   89:    classify = UNSET,
+        -:   90:    files_counter = UNSET,
+        -:   91:    light_mode = UNSET,
+        -:   92:    autocd = UNSET,
+        -:   93:    auto_open = UNSET,
+        -:   94:    dirhist_map = UNSET,
+        -:   95:    restore_last_path = UNSET,
+        -:   96:    pager = UNSET,
+        -:   97:    ext_cmd_ok = UNSET,
+        -:   98:    expand_bookmarks = UNSET,
+        -:   99:    only_dirs = UNSET,
+        -:  100:    cd_on_quit = UNSET,
+        -:  101:    columned = UNSET,
+        -:  102:    colorize = UNSET,
+        -:  103:    cur_ws = UNSET,
+        -:  104:    cp_cmd = UNSET,
+        -:  105:    mv_cmd = UNSET,
+        -:  106:    tr_as_rm = UNSET,
+        -:  107:    no_eln = UNSET,
+        -:  108:    min_name_trim = UNSET,
+        -:  109:    case_sens_dirjump = UNSET,
+        -:  110:    case_sens_path_comp = UNSET,
+        -:  111:
+        -:  112:    no_log = 0,
+        -:  113:    internal_cmd = 0,
+        -:  114:    shell_terminal = 0,
+        -:  115:    print_msg = 0,
+        -:  116:    recur_perm_error_flag = 0,
+        -:  117:    is_sel = 0,
+        -:  118:    sel_is_last = 0,
+        -:  119:    kbind_busy = 0,
+        -:  120:    unicode = UNSET,
+        -:  121:    dequoted = 0,
+        -:  122:    mime_match = 0,
+        -:  123:    sort_reverse = 0,
+        -:  124:    sort_switch = 0,
+        -:  125:    kb_shortcut = 0,
+        -:  126:    switch_cscheme = 0,
+        -:  127:    icons = 0,
+        -:  128:    copy_n_rename = 0,
+        -:  129:
+        -:  130:    home_ok = 1,
+        -:  131:    config_ok = 1,
+        -:  132:    trash_ok = 1,
+        -:  133:    selfile_ok = 1;
+        -:  134:
+        -:  135:int
+        -:  136:    max_hist = UNSET,
+        -:  137:    max_log = UNSET,
+        -:  138:    max_dirhist = UNSET,
+        -:  139:    max_path = UNSET,
+        -:  140:    max_files = UNSET,
+        -:  141:    min_jump_rank = UNSET,
+        -:  142:    max_jump_total_rank = UNSET,
+        -:  143:
+        -:  144:    dirhist_cur_index = 0,
+        -:  145:    argc_bk = 0,
+        -:  146:    exit_code = 0,
+        -:  147:    shell_is_interactive = 0,
+        -:  148:    dirhist_total_index = 0,
+        -:  149:    trash_n = 0,
+        -:  150:    jump_total_rank = 0,
+        -:  151:    *eln_as_file = (int *)0;
+        -:  152:
+        -:  153:unsigned short term_cols = 0;
+        -:  154:
+        -:  155:size_t
+        -:  156:    user_home_len = 0,
+        -:  157:    args_n = 0,
+        -:  158:    sel_n = 0,
+        -:  159:    msgs_n = 0,
+        -:  160:    prompt_cmds_n = 0,
+        -:  161:    path_n = 0,
+        -:  162:    current_hist_n = 0,
+        -:  163:    usrvar_n = 0,
+        -:  164:    aliases_n = 0,
+        -:  165:    longest = 0,
+        -:  166:    files = 0,
+        -:  167:    actions_n = 0,
+        -:  168:    ext_colors_n = 0,
+        -:  169:    kbinds_n = 0,
+        -:  170:    eln_as_file_n = 0,
+        -:  171:    bm_n = 0,
+        -:  172:    cschemes_n = 0,
+        -:  173:    jump_n = 0,
+        -:  174:    path_progsn = 0;
+        -:  175:
+        -:  176:struct termios shell_tmodes;
+        -:  177:off_t total_sel_size = 0;
+        -:  178:pid_t own_pid = 0;
+        -:  179:
+        -:  180:char
+        -:  181:    div_line_char = UNSET,
+        -:  182:    hostname[HOST_NAME_MAX],
+        -:  183:
+        -:  184:    **aliases = (char **)NULL,
+        -:  185:    **argv_bk = (char **)NULL,
+        -:  186:    **bin_commands = (char **)NULL,
+        -:  187:    **bookmark_names = (char **)NULL,
+        -:  188:    **color_schemes = (char **)NULL,
+        -:  189:    **ext_colors = (char **)NULL,
+        -:  190:    **history = (char **)NULL,
+        -:  191:    **messages = (char **)NULL,
+        -:  192:    **old_pwd = (char **)NULL,
+        -:  193:    **paths = (char **)NULL,
+        -:  194:    **profile_names = (char **)NULL,
+        -:  195:    **prompt_cmds = (char **)NULL,
+        -:  196:    **sel_elements = (char **)NULL,
+        -:  197:
+        -:  198:    *ACTIONS_FILE = (char *)NULL,
+        -:  199:    *alt_bm_file = (char *)NULL,
+        -:  200:    *alt_config_file = (char *)NULL,
+        -:  201:    *alt_kbinds_file = (char *)NULL,
+        -:  202:    *alt_profile = (char *)NULL,
+        -:  203:    *BM_FILE = (char *)NULL,
+        -:  204:    *COLORS_DIR = (char *)NULL,
+        -:  205:    *CONFIG_DIR = (char *)NULL,
+        -:  206:    *CONFIG_DIR_GRAL = (char *)NULL,
+        -:  207:    *CONFIG_FILE = (char *)NULL,
+        -:  208:    *cur_cscheme = (char *)NULL,
+        -:  209:    *DIRHIST_FILE = (char *)NULL,
+        -:  210:    *encoded_prompt = (char *)NULL,
+        -:  211:    *file_cmd_path = (char *)NULL,
+        -:  212:    *filter = (char *)NULL,
+        -:  213:    *HIST_FILE = (char *)NULL,
+        -:  214:    *KBINDS_FILE = (char *)NULL,
+        -:  215:    *last_cmd = (char *)NULL,
+        -:  216:    *LOG_FILE = (char *)NULL,
+        -:  217:    *ls_colors_bk = (char *)NULL,
+        -:  218:    *MIME_FILE = (char *)NULL,
+        -:  219:    *MSG_LOG_FILE = (char *)NULL,
+        -:  220:    *opener = (char *)NULL,
+        -:  221:    *pinned_dir = (char *)NULL,
+        -:  222:    *PLUGINS_DIR = (char *)NULL,
+        -:  223:    *PROFILE_FILE = (char *)NULL,
+        -:  224:    *qc = (char *)NULL,
+        -:  225:    *SEL_FILE = (char *)NULL,
+        -:  226:    *STDIN_TMP_DIR = (char *)NULL,
+        -:  227:    *sys_shell = (char *)NULL,
+        -:  228:    *term = (char *)NULL,
+        -:  229:    *TMP_DIR = (char *)NULL,
+        -:  230:    *TRASH_DIR = (char *)NULL,
+        -:  231:    *TRASH_FILES_DIR = (char *)NULL,
+        -:  232:    *TRASH_INFO_DIR = (char *)NULL,
+        -:  233:    *usr_cscheme = (char *)NULL,
+        -:  234:    *user_home = (char *)NULL;
+        -:  235:
+        -:  236:regex_t regex_exp;
+        -:  237:
+        -:  238:size_t *ext_colors_len = (size_t *)NULL;
+        -:  239:
+        -:  240:/* This is not a comprehensive list of commands. It only lists
+        -:  241: * commands long version for TAB completion */
+        -:  242:const char *INTERNAL_CMDS[] = {
+        -:  243:    "alias",
+        -:  244:    "open",
+        -:  245:    "prop",
+        -:  246:    "back",
+        -:  247:    "forth",
+        -:  248:    "move",
+        -:  249:    "paste",
+        -:  250:    "sel",
+        -:  251:    "selbox",
+        -:  252:    "desel",
+        -:  253:    "refresh",
+        -:  254:    "edit",
+        -:  255:    "history",
+        -:  256:    "hidden",
+        -:  257:    "path",
+        -:  258:    "help",
+        -:  259:    "commands",
+        -:  260:    "colors",
+        -:  261:    "version",
+        -:  262:    "splash",
+        -:  263:    "folders-first",
+        -:  264:    "opener",
+        -:  265:    "exit",
+        -:  266:    "quit",
+        -:  267:    "pager",
+        -:  268:    "trash",
+        -:  269:    "undel",
+        -:  270:    "messages",
+        -:  271:    "mountpoints",
+        -:  272:    "bookmarks",
+        -:  273:    "log",
+        -:  274:    "untrash",
+        -:  275:    "unicode",
+        -:  276:    "profile",
+        -:  277:    "shell",
+        -:  278:    "mime",
+        -:  279:    "sort",
+        -:  280:    "tips",
+        -:  281:    "autocd",
+        -:  282:    "auto-open",
+        -:  283:    "actions",
+        -:  284:    "reload",
+        -:  285:    "export",
+        -:  286:    "keybinds",
+        -:  287:    "pin",
+        -:  288:    "unpin",
+        -:  289:    "colorschemes",
+        -:  290:    "jump",
+        -:  291:    "icons",
+        -:  292:    "columns",
+        -:  293:    "filter",
+        -:  294:    NULL};
+        -:  295:
+        -:  296:/* To store all the 39 color variables I use, with 46 bytes each, I need
+        -:  297: * a total of 1,8Kb. It's not much but it could be less if I'd use
+        -:  298: * dynamically allocated arrays for them (which, on the other side,
+        -:  299: * would make the whole thing slower and more tedious) */
+        -:  300:
+        -:  301:/* Colors (filetype and interface) */
+        -:  302:char di_c[MAX_COLOR], /* Directory */
+        -:  303:    nd_c[MAX_COLOR],  /* No read directory */
+        -:  304:    ed_c[MAX_COLOR],  /* Empty dir */
+        -:  305:    ne_c[MAX_COLOR],  /* No read empty dir */
+        -:  306:    fi_c[MAX_COLOR],  /* Reg file */
+        -:  307:    ef_c[MAX_COLOR],  /* Empty reg file */
+        -:  308:    nf_c[MAX_COLOR],  /* No read file */
+        -:  309:    ln_c[MAX_COLOR],  /* Symlink */
+        -:  310:    or_c[MAX_COLOR],  /* Broken symlink */
+        -:  311:    pi_c[MAX_COLOR],  /* FIFO, pipe */
+        -:  312:    so_c[MAX_COLOR],  /* Socket */
+        -:  313:    bd_c[MAX_COLOR],  /* Block device */
+        -:  314:    cd_c[MAX_COLOR],  /* Char device */
+        -:  315:    su_c[MAX_COLOR],  /* SUID file */
+        -:  316:    sg_c[MAX_COLOR],  /* SGID file */
+        -:  317:    tw_c[MAX_COLOR],  /* Sticky other writable */
+        -:  318:    st_c[MAX_COLOR],  /* Sticky (not ow)*/
+        -:  319:    ow_c[MAX_COLOR],  /* Other writable */
+        -:  320:    ex_c[MAX_COLOR],  /* Executable */
+        -:  321:    ee_c[MAX_COLOR],  /* Empty executable */
+        -:  322:    ca_c[MAX_COLOR],  /* Cap file */
+        -:  323:    no_c[MAX_COLOR],  /* Unknown */
+        -:  324:    uf_c[MAX_COLOR],  /* Non-'stat'able file */
+        -:  325:    mh_c[MAX_COLOR],  /* Multi-hardlink file */
+        -:  326:
+        -:  327:    bm_c[MAX_COLOR], /* Bookmarked directory */
+        -:  328:    el_c[MAX_COLOR], /* ELN color */
+        -:  329:    mi_c[MAX_COLOR], /* Misc indicators color */
+        -:  330:    df_c[MAX_COLOR], /* Default color */
+        -:  331:    dc_c[MAX_COLOR], /* Files counter color */
+        -:  332:    wc_c[MAX_COLOR], /* Welcome message color */
+        -:  333:    dh_c[MAX_COLOR], /* Dirhist index color */
+        -:  334:    dl_c[MAX_COLOR], /* Dividing line index color */
+        -:  335:
+        -:  336:    /* Colors used in the prompt, so that \001 and \002 needs to
+        -:  337:	 * be added. This is why MAX_COLOR + 2 */
+        -:  338:    tx_c[MAX_COLOR + 2], /* Text color */
+        -:  339:    li_c[MAX_COLOR + 2], /* Sel indicator color */
+        -:  340:    ti_c[MAX_COLOR + 2], /* Trash indicator color */
+        -:  341:    em_c[MAX_COLOR + 2], /* Error msg color */
+        -:  342:    wm_c[MAX_COLOR + 2], /* Warning msg color */
+        -:  343:    nm_c[MAX_COLOR + 2], /* Notice msg color */
+        -:  344:    si_c[MAX_COLOR + 2], /* stealth indicator color */
+        -:  345:
+        -:  346:    dir_ico_c[MAX_COLOR]; /* Directories icon color */
+        -:  347:
+        -:  348:			/**
+        -:  349:				 * #############################
+        -:  350:				 * #           MAIN            #
+        -:  351:				 * #############################
+        -:  352:				 * */
+        -:  353:
+        -:  354:int
+function main called 1 returned 0% blocks executed 64%
+        1:  355:main(int argc, char *argv[])
+        -:  356:{
+        -:  357:	/* Though this program might perfectly work on other architectures,
+        -:  358:	 * I just didn't test anything beyond x86 and ARM */
+        -:  359:#if !defined __x86_64__ && !defined __i386__ && !defined __ARM_ARCH
+        -:  360:	fprintf(stderr, "Unsupported CPU architecture\n");
+        -:  361:	exit(EXIT_FAILURE);
+        -:  362:#endif
+        -:  363:
+        -:  364:	/* Though this program might perfectly work on other OSes, especially
+        -:  365:	 * Unixes, I just didn't make any test */
+        -:  366:#if !defined __linux__ && !defined linux && !defined __linux && !defined __gnu_linux__ && !defined __FreeBSD__
+        -:  367:	fprintf(stderr, _("%s: Unsupported operating system\n"),
+        -:  368:	    PROGRAM_NAME);
+        -:  369:	exit(EXIT_FAILURE);
+        -:  370:#endif
+        -:  371:
+        -:  372:	/* If running the program locally, that is, not from a path in PATH,
+        -:  373:	 * remove the leading "./" to get the correct program invocation
+        -:  374:	 * name */
+        1:  375:	if (*argv[0] == '.' && *(argv[0] + 1) == '/')
+        1:  375-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  375-block  1
+branch  2 taken 1 (fallthrough)
+branch  3 taken 0
+        1:  376:		argv[0] += 2;
+        1:  376-block  0
+unconditional  0 taken 1
+        -:  377:
+        -:  378:	/* Use the locale specified by the environment */
+        1:  379:	setlocale(LC_ALL, "");
+        1:  379-block  0
+call    0 returned 1
+        -:  380:
+        1:  381:	unicode = 1; /* always enable unicode */
+        -:  382:
+        -:  383:	/* Initialize gettext() for translations */
+        1:  384:	bindtextdomain("clifm", "/usr/share/locale");
+call    0 returned 1
+        1:  385:	textdomain("clifm");
+call    0 returned 1
+        -:  386:
+        -:  387:	/* Store external arguments to be able to rerun external_arguments()
+        -:  388:	 * in case the user edits the config file, in which case the program
+        -:  389:	 * must rerun init_config(), get_aliases(), get_prompt_cmds(), and
+        -:  390:	 * then external_arguments() */
+        1:  391:	argc_bk = argc;
+        1:  392:	argv_bk = (char **)xnmalloc((size_t)argc, sizeof(char *));
+call    0 returned 1
+        -:  393:
+        1:  394:	register int i = argc;
+        -:  395:
+        2:  396:	while (--i >= 0)
+unconditional  0 taken 1
+        2:  396-block  0
+branch  1 taken 1
+branch  2 taken 1 (fallthrough)
+        1:  397:		argv_bk[i] = savestring(argv[i], strlen(argv[i]));
+        1:  397-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -:  398:
+        1:  399:	atexit(free_stuff); /* free_stuff does some cleaning */
+        1:  399-block  0
+call    0 returned 1
+        -:  400:
+        -:  401:	/* Get user's home directory */
+        1:  402:	user = get_user();
+call    0 returned 1
+        -:  403:
+        1:  404:	if (access(user.home, W_OK) == -1) {
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+        -:  405:		/* If no user's home, or if it's not writable, there won't be
+        -:  406:		 * any config nor trash directory. These flags are used to
+        -:  407:		 * prevent functions from trying to access any of these
+        -:  408:		 * directories */
+    #####:  409:		home_ok = config_ok = trash_ok = 0;
+        -:  410:		/* Print message: trash, bookmarks, command logs, commands
+        -:  411:		 * history and program messages won't be stored */
+    #####:  412:		_err('e', PRINT_PROMPT, _("%s: Cannot access the home directory. "
+    %%%%%:  412-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  413:				  "Trash, bookmarks, commands logs, and commands history are "
+        -:  414:				  "disabled. Program messages and selected files won't be "
+        -:  415:				  "persistent. Using default options\n"), PROGRAM_NAME);
+        -:  416:	} else
+        1:  417:		user_home_len = strlen(user.home);
+        1:  417-block  0
+unconditional  0 taken 1
+        -:  418:
+        1:  419:	if (geteuid() == 0) {
+        1:  419-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####:  420:		flags |= ROOT_USR;
+    #####:  421:		_err(0, PRINT_PROMPT, _("%s%s: \x1b[1;31mRunning as root. Be careful\n"),
+    %%%%%:  421-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  422:		    bold, PROGRAM_NAME);
+        -:  423:	}
+        -:  424:
+        -:  425:	/* Running in a graphical environment? */
+        -:  426:#if __linux__
+        1:  427:	if (getenv("DISPLAY") != NULL && strncmp(getenv("TERM"), "linux", 5) != 0)
+        1:  427-block  0
+call    0 returned 1
+branch  1 taken 1 (fallthrough)
+branch  2 taken 0
+        1:  427-block  1
+call    3 returned 1
+branch  4 taken 1 (fallthrough)
+branch  5 taken 0
+        -:  428:#else
+        -:  429:	if (getenv("DISPLAY") != NULL)
+        -:  430:#endif
+        1:  431:		flags |= GUI;
+        1:  431-block  0
+unconditional  0 taken 1
+        -:  432:
+        -:  433:	/* Get paths from PATH environment variable. These paths will be
+        -:  434:	 * used later by get_path_programs (for the autocomplete function)
+        -:  435:	 * and get_cmd_path() */
+        1:  436:	path_n = (size_t)get_path_env();
+        1:  436-block  0
+call    0 returned 1
+        -:  437:
+        -:  438:	/* Manage external arguments, but only if any: argc == 1 equates to
+        -:  439:	 * no argument, since this '1' is just the program invokation name.
+        -:  440:	 * External arguments will override initialization values
+        -:  441:	 * (init_config) */
+        -:  442:
+        1:  443:	ws = (struct ws_t *)xnmalloc(MAX_WS, sizeof(struct ws_t));
+call    0 returned 1
+        1:  444:	i = MAX_WS;
+        9:  445:	while (--i >= 0)
+unconditional  0 taken 1
+        9:  445-block  0
+branch  1 taken 8
+branch  2 taken 1 (fallthrough)
+        8:  446:		ws[i].path = (char *)NULL;
+        8:  446-block  0
+unconditional  0 taken 8
+        -:  447:
+        -:  448:	/* Set all external arguments flags to uninitialized state */
+        1:  449:	unset_xargs();
+        1:  449-block  0
+call    0 returned 1
+        -:  450:
+        1:  451:	if (argc > 1)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  452:		external_arguments(argc, argv);
+    %%%%%:  452-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  453:	/* external_arguments is executed before init_config because, if
+        -:  454:	 * specified (-P option), it sets the value of alt_profile, which
+        -:  455:	 * is then checked by init_config */
+        -:  456:
+        1:  457:	check_env_filter();
+        1:  457-block  0
+call    0 returned 1
+        -:  458:
+        -:  459:	/* Initialize program paths and files, set options from the config
+        -:  460:	 * file, if they were not already set via external arguments, and
+        -:  461:	 * load sel elements, if any. All these configurations are made
+        -:  462:	 * per user basis */
+        1:  463:	init_config();
+call    0 returned 1
+        -:  464:
+        1:  465:	check_options();
+call    0 returned 1
+        -:  466:
+        1:  467:	set_sel_file();
+call    0 returned 1
+        -:  468:
+        1:  469:	create_tmp_files();
+call    0 returned 1
+        -:  470:
+        1:  471:	cschemes_n = get_colorschemes();
+call    0 returned 1
+        -:  472:
+       1*:  473:	set_colors(usr_cscheme ? usr_cscheme : "default", 1);
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  473-block  0
+unconditional  2 taken 1
+    %%%%%:  473-block  1
+unconditional  3 never executed
+        1:  473-block  2
+call    4 returned 1
+        -:  474:
+        1:  475:	free(usr_cscheme);
+        1:  476:	usr_cscheme = (char *)NULL;
+        -:  477:
+        1:  478:	if (splash_screen) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  479:		splash();
+    %%%%%:  479-block  0
+call    0 never executed
+    #####:  480:		splash_screen = 0;
+    #####:  481:		CLEAR;
+call    0 never executed
+unconditional  1 never executed
+        -:  482:	}
+        -:  483:
+        -:  484:	/* Last path is overriden by the -p option in the command line */
+        1:  485:	if (restore_last_path)
+        1:  485-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  486:		get_last_path();
+        1:  486-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -:  487:
+        1:  488:	if (cur_ws == UNSET)
+        1:  488-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  489:		cur_ws = DEF_CUR_WS;
+    %%%%%:  489-block  0
+unconditional  0 never executed
+        -:  490:
+        1:  491:	if (cur_ws > MAX_WS - 1) {
+        1:  491-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  492:		cur_ws = DEF_CUR_WS;
+    #####:  493:		_err('w', PRINT_PROMPT, _("%s: %zu: Invalid workspace."
+    %%%%%:  493-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  494:			"\nFalling back to workspace %zu\n"), PROGRAM_NAME,
+        -:  495:		    cur_ws, cur_ws + 1);
+        -:  496:	}
+        -:  497:
+        -:  498:	/* If path was not set (neither in the config file nor via command
+        -:  499:	 * line nor via the RestoreLastPath option), set the default (CWD),
+        -:  500:	 * and if CWD is not set, use the user's home directory, and if the
+        -:  501:	 * home cannot be found either, try the root directory, and if
+        -:  502:	 * there's no access to the root dir either, exit.
+        -:  503:	 * Bear in mind that if you launch CliFM through a terminal emulator,
+        -:  504:	 * say xterm (xterm -e clifm), xterm will run a shell, say bash, and
+        -:  505:	 * the shell will read its config file. Now, if this config file
+        -:  506:	 * changes the CWD, this will be the CWD for CliFM */
+        1:  507:	if (!ws[cur_ws].path) {
+        1:  507-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  508:		char cwd[PATH_MAX] = "";
+        -:  509:
+    #####:  510:		getcwd(cwd, sizeof(cwd));
+    %%%%%:  510-block  0
+call    0 never executed
+        -:  511:
+    #####:  512:		if (!*cwd || strlen(cwd) == 0) {
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  512-block  0
+branch  2 never executed
+branch  3 never executed
+    #####:  513:			if (user_home)
+    %%%%%:  513-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  514:				ws[cur_ws].path = savestring(user_home, strlen(user_home));
+    %%%%%:  514-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  515:
+        -:  516:			else {
+    #####:  517:				if (access("/", R_OK | X_OK) == -1) {
+    %%%%%:  517-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  518:					fprintf(stderr, "%s: /: %s\n", PROGRAM_NAME,
+call    0 never executed
+    #####:  519:					    strerror(errno));
+    %%%%%:  519-block  0
+call    0 never executed
+    #####:  520:					exit(EXIT_FAILURE);
+call    0 never executed
+        -:  521:				}
+        -:  522:
+        -:  523:				else
+    #####:  524:					ws[cur_ws].path = savestring("/\0", 2);
+    %%%%%:  524-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  525:			}
+        -:  526:		}
+        -:  527:
+        -:  528:		else
+    #####:  529:			ws[cur_ws].path = savestring(cwd, strlen(cwd));
+    %%%%%:  529-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  530:	}
+        -:  531:
+        -:  532:	/* Make path the CWD */
+        -:  533:	/* If chdir(path) fails, set path to cwd, list files and print the
+        -:  534:	 * error message. If no access to CWD either, exit */
+        1:  535:	if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
+        1:  535-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+        -:  536:
+    #####:  537:		_err('e', PRINT_PROMPT, "%s: chdir: '%s': %s\n", PROGRAM_NAME,
+    #####:  538:		    ws[cur_ws].path, strerror(errno));
+    %%%%%:  538-block  0
+call    0 never executed
+call    1 never executed
+        -:  539:
+    #####:  540:		char cwd[PATH_MAX] = "";
+        -:  541:
+    #####:  542:		if (getcwd(cwd, sizeof(cwd)) == NULL) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:  543:
+    #####:  544:			_err(0, NOPRINT_PROMPT, _("%s: Fatal error! Failed "
+    %%%%%:  544-block  0
+call    0 never executed
+        -:  545:					"retrieving current working directory\n"), PROGRAM_NAME);
+        -:  546:
+    #####:  547:			exit(EXIT_FAILURE);
+call    0 never executed
+        -:  548:		}
+        -:  549:
+    #####:  550:		if (ws[cur_ws].path)
+    %%%%%:  550-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  551:			free(ws[cur_ws].path);
+    %%%%%:  551-block  0
+unconditional  0 never executed
+        -:  552:
+    #####:  553:		ws[cur_ws].path = savestring(cwd, strlen(cwd));
+    %%%%%:  553-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  554:	}
+        -:  555:
+        -:  556:	/* Set terminal window title */
+        1:  557:	if (xargs.cwd_in_title == 0) {
+        1:  557-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  558:		printf("\033]2;%s\007", PROGRAM_NAME);
+        1:  558-block  0
+call    0 returned 1
+        1:  559:		fflush(stdout);
+call    0 returned 1
+unconditional  1 taken 1
+        -:  560:	} else {
+    #####:  561:		char *tmp = (char *)NULL;
+    #####:  562:		if (ws[cur_ws].path[1] == 'h')
+    %%%%%:  562-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  563:			tmp = home_tilde(ws[cur_ws].path);
+    %%%%%:  563-block  0
+call    0 never executed
+unconditional  1 never executed
+    #####:  564:		printf("\033]2;%s - %s\007", PROGRAM_NAME, tmp ? tmp : ws[cur_ws].path);
+    %%%%%:  564-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  564-block  1
+unconditional  2 never executed
+    %%%%%:  564-block  2
+unconditional  3 never executed
+    %%%%%:  564-block  3
+call    4 never executed
+    #####:  565:		fflush(stdout);
+call    0 never executed
+    #####:  566:		if (tmp)
+branch  0 never executed
+branch  1 never executed
+    #####:  567:			free(tmp);
+    %%%%%:  567-block  0
+unconditional  0 never executed
+        -:  568:	}
+        -:  569:
+        1:  570:	exec_profile();
+        1:  570-block  0
+call    0 returned 1
+        -:  571:
+        1:  572:	load_dirhist();
+call    0 returned 1
+        -:  573:
+        1:  574:	add_to_dirhist(ws[cur_ws].path);
+call    0 returned 1
+        -:  575:
+        -:  576:	/* Start listing as soon as possible to speed up startup time */
+        1:  577:	if (cd_lists_on_the_fly && isatty(STDIN_FILENO))
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  577-block  0
+call    2 returned 1
+branch  3 taken 1 (fallthrough)
+branch  4 taken 0
+        1:  578:		list_dir();
+        1:  578-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -:  579:
+        1:  580:	create_kbinds_file();
+        1:  580-block  0
+call    0 returned 1
+        -:  581:
+        1:  582:	load_bookmarks();
+call    0 returned 1
+        -:  583:
+        1:  584:	load_keybinds();
+call    0 returned 1
+        -:  585:
+        1:  586:	load_jumpdb();
+call    0 returned 1
+        1:  587:	if (!jump_db || xargs.path == 1)
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  587-block  0
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1
+    #####:  588:		add_to_jumpdb(ws[cur_ws].path);
+    %%%%%:  588-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  589:
+        1:  590:	load_actions();
+        1:  590-block  0
+call    0 returned 1
+        -:  591:
+        1:  592:	initialize_readline();
+call    0 returned 1
+        -:  593:
+        -:  594:	/* Copy the list of quote chars to a global variable to be used
+        -:  595:	 * later by some of the program functions like split_str(),
+        -:  596:	 * my_rl_quote(), is_quote_char(), and my_rl_dequote() */
+        1:  597:	qc = savestring(rl_filename_quote_characters,
+call    0 returned 1
+        -:  598:	    strlen(rl_filename_quote_characters));
+        -:  599:
+        1:  600:	check_file_size(DIRHIST_FILE, max_dirhist);
+call    0 returned 1
+        -:  601:
+        -:  602:	/* Check whether we have a working shell */
+        1:  603:	if (access(user.shell, X_OK) == -1) {
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####:  604:		_err('w', PRINT_PROMPT, _("%s: %s: System shell not found. "
+    %%%%%:  604-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  605:				"Please edit the configuration file to specify a working "
+        -:  606:				"shell.\n"), PROGRAM_NAME, user.shell);
+        -:  607:	}
+        -:  608:
+        1:  609:	get_aliases();
+        1:  609-block  0
+call    0 returned 1
+        -:  610:
+        -:  611:	/* Get the list of available applications in PATH to be used by my
+        -:  612:	 * custom TAB-completion function */
+        1:  613:	get_path_programs();
+call    0 returned 1
+        -:  614:
+        1:  615:	get_prompt_cmds();
+call    0 returned 1
+        -:  616:
+        1:  617:	get_sel_files();
+call    0 returned 1
+        -:  618:
+        1:  619:	if (trash_ok) {
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  620:		trash_n = count_dir(TRASH_FILES_DIR);
+        1:  620-block  0
+call    0 returned 1
+        1:  621:		if (trash_n <= 2)
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  622:			trash_n = 0;
+        1:  622-block  0
+unconditional  0 taken 1
+        -:  623:	}
+        -:  624:
+        -:  625:	/* Get hostname */
+        1:  626:	if (gethostname(hostname, sizeof(hostname)) == -1) {
+        1:  626-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####:  627:		hostname[0] = '?';
+    #####:  628:		hostname[1] = '\0';
+    #####:  629:		_err('e', PRINT_PROMPT, _("%s: Error getting hostname\n"), PROGRAM_NAME);
+    %%%%%:  629-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  630:	}
+        -:  631:
+        -:  632:	/* Initialize the shell */
+        1:  633:	init_shell();
+        1:  633-block  0
+call    0 returned 1
+        -:  634:
+        1:  635:	if (config_ok) {
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        -:  636:
+        -:  637:		/* Limit the log files size */
+        1:  638:		check_file_size(LOG_FILE, max_log);
+        1:  638-block  0
+call    0 returned 1
+        1:  639:		check_file_size(MSG_LOG_FILE, max_log);
+call    0 returned 1
+        -:  640:
+        -:  641:		/* Get history */
+        -:  642:		struct stat file_attrib;
+        -:  643:
+        1:  644:		if (stat(HIST_FILE, &file_attrib) == 0 && file_attrib.st_size != 0) {
+call    0 returned 1
+branch  1 taken 1 (fallthrough)
+branch  2 taken 0
+        1:  644-block  0
+branch  3 taken 1 (fallthrough)
+branch  4 taken 0
+        -:  645:			/* If the size condition is not included, and in case of a zero
+        -:  646:			 * size file, read_history() produces malloc errors */
+        -:  647:			/* Recover history from the history file */
+        1:  648:			read_history(HIST_FILE); /* This line adds more leaks to
+        1:  648-block  0
+call    0 returned 1
+        -:  649:																	readline */
+        -:  650:			/* Limit the size of the history file to max_hist lines */
+        1:  651:			history_truncate_file(HIST_FILE, max_hist);
+call    0 returned 1
+unconditional  1 taken 1
+        -:  652:		}
+        -:  653:
+        -:  654:		/* If the history file doesn't exist, create it */
+        -:  655:		else {
+    #####:  656:			FILE *hist_fp = fopen(HIST_FILE, "w+");
+    %%%%%:  656-block  0
+call    0 never executed
+        -:  657:
+    #####:  658:			if (!hist_fp) {
+branch  0 never executed
+branch  1 never executed
+    #####:  659:				_err('w', PRINT_PROMPT, "%s: fopen: '%s': %s\n",
+call    0 never executed
+unconditional  1 never executed
+    #####:  660:				    PROGRAM_NAME, HIST_FILE, strerror(errno));
+    %%%%%:  660-block  0
+call    0 never executed
+        -:  661:			}
+        -:  662:
+        -:  663:			else {
+        -:  664:				/* To avoid malloc errors in read_history(), do not
+        -:  665:				 * create an empty file */
+    #####:  666:				fputs("edit\n", hist_fp);
+    %%%%%:  666-block  0
+call    0 never executed
+        -:  667:				/* There is no need to run read_history() here, since
+        -:  668:				 * the history file is still empty */
+    #####:  669:				fclose(hist_fp);
+call    0 never executed
+unconditional  1 never executed
+        -:  670:			}
+        -:  671:		}
+        -:  672:	}
+        -:  673:
+        -:  674:	/* Store history into an array to be able to manipulate it */
+        1:  675:	get_history();
+        1:  675-block  0
+call    0 returned 1
+        -:  676:
+        -:  677:	/* Check if the 'file' command is available */
+        1:  678:	if (!opener)
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  679:		file_cmd_check();
+        1:  679-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -:  680:
+        1:  681:	get_profile_names();
+        1:  681-block  0
+call    0 returned 1
+        -:  682:
+        1:  683:	load_pinned_dir();
+call    0 returned 1
+        -:  684:
+        1:  685:	set_env();
+call    0 returned 1
+unconditional  1 taken 1
+        -:  686:
+        -:  687:				/* ###########################
+        -:  688:				 * #   2) MAIN PROGRAM LOOP  #
+        -:  689:				 * ########################### */
+        -:  690:
+        -:  691:	/* This is the main structure of any basic shell
+        -:  692:		 1 - Infinite loop
+        -:  693:		 2 - Grab user input
+        -:  694:		 3 - Parse user input
+        -:  695:		 4 - Execute command
+        -:  696:		 See https://brennan.io/2015/01/16/write-a-shell-in-c/
+        -:  697:		 */
+        -:  698:
+        -:  699:	/* 1) Infinite loop to keep the program running */
+       16:  700:	while (1) {
+        -:  701:
+        -:  702:		/* 2) Grab input string from the prompt */
+       17:  703:		char *input = prompt();
+       17:  703-block  0
+call    0 returned 17
+        -:  704:
+      17*:  705:		if (!input)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 17
+    #####:  706:			continue;
+    %%%%%:  706-block  0
+unconditional  0 never executed
+        -:  707:
+        -:  708:		/* 3) Parse input string */
+       17:  709:		char **cmd = parse_input_str(input);
+       17:  709-block  0
+call    0 returned 17
+        -:  710:
+       17:  711:		free(input);
+       17:  712:		input = (char *)NULL;
+        -:  713:
+      17*:  714:		if (!cmd)
+branch  0 taken 0 (fallthrough)
+branch  1 taken 17
+    #####:  715:			continue;
+    %%%%%:  715-block  0
+unconditional  0 never executed
+        -:  716:
+        -:  717:		/* 4) Execute input string */
+       17:  718:		char **alias_cmd = check_for_alias(cmd);
+       17:  718-block  0
+call    0 returned 17
+        -:  719:
+       17:  720:		if (alias_cmd) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 17
+        -:  721:			/* If an alias is found, check_for_alias() frees cmd
+        -:  722:			 * and returns alias_cmd in its place to be executed by
+        -:  723:			 * exec_cmd() */
+    #####:  724:			exec_cmd(alias_cmd);
+    %%%%%:  724-block  0
+call    0 never executed
+        -:  725:
+    #####:  726:			for (i = 0; alias_cmd[i]; i++)
+unconditional  0 never executed
+    %%%%%:  726-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:  727:				free(alias_cmd[i]);
+    %%%%%:  727-block  0
+unconditional  0 never executed
+        -:  728:
+    #####:  729:			free(alias_cmd);
+    #####:  730:			alias_cmd = (char **)NULL;
+    %%%%%:  730-block  0
+unconditional  0 never executed
+        -:  731:		}
+        -:  732:
+        -:  733:		else {
+       17:  734:			exec_cmd(cmd);
+       17:  734-block  0
+call    0 returned 16
+        -:  735:
+       16:  736:			i = (int)args_n + 1;
+       42:  737:			while (--i >= 0)
+unconditional  0 taken 16
+       42:  737-block  0
+branch  1 taken 26
+branch  2 taken 16 (fallthrough)
+       26:  738:				free(cmd[i]);
+       26:  738-block  0
+unconditional  0 taken 26
+        -:  739:
+       16:  740:			free(cmd);
+       16:  741:			cmd = (char **)NULL;
+       16:  741-block  0
+unconditional  0 taken 16
+        -:  742:		}
+        -:  743:	}
+        -:  744:
+        -:  745:	return exit_code; /* Never reached */
+        -:  746:}

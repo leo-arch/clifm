@@ -1,0 +1,727 @@
+        -:    0:Source:remotes.c
+        -:    1:/* remote.c -- function wrappers for smb, ftp, and ssh */
+        -:    2:
+        -:    3:/*
+        -:    4: * This file is part of CliFM
+        -:    5: * 
+        -:    6: * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
+        -:    7: * All rights reserved.
+        -:    8:
+        -:    9: * CliFM is free software; you can redistribute it and/or modify
+        -:   10: * it under the terms of the GNU General Public License as published by
+        -:   11: * the Free Software Foundation; either version 2 of the License, or
+        -:   12: * (at your option) any later version.
+        -:   13: *
+        -:   14: * CliFM is distributed in the hope that it will be useful,
+        -:   15: * but WITHOUT ANY WARRANTY; without even the implied warranty of
+        -:   16: * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        -:   17: * GNU General Public License for more details.
+        -:   18: *
+        -:   19: * You should have received a copy of the GNU General Public License
+        -:   20: * along with this program; if not, write to the Free Software
+        -:   21: * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+        -:   22: * MA 02110-1301, USA.
+        -:   23:*/
+        -:   24:
+        -:   25:#include "helpers.h"
+        -:   26:
+        -:   27:#include <errno.h>
+        -:   28:#include <stdio.h>
+        -:   29:#include <string.h>
+        -:   30:#include <sys/stat.h>
+        -:   31:
+        -:   32:#include "aux.h"
+        -:   33:#include "exec.h"
+        -:   34:#include "listing.h"
+        -:   35:#include "navigation.h"
+        -:   36:
+        -:   37:int
+function remote_ftp called 0 returned 0% blocks executed 0%
+    #####:   38:remote_ftp(char *address, char *options)
+        -:   39:{
+    #####:   40:	if (xargs.stealth_mode == 1) {
+    %%%%%:   40-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   41:		printf("%s: Access to remote filesystems is disabled in "
+    %%%%%:   41-block  0
+call    0 never executed
+        -:   42:		       "stealth mode\n", PROGRAM_NAME);
+    #####:   43:		return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:   44:	}
+        -:   45:
+        -:   46:#if __FreeBSD__
+        -:   47:	fprintf(stderr, _("%s: FTP is not yet supported on FreeBSD\n"),
+        -:   48:	    PROGRAM_NAME);
+        -:   49:	return EXIT_FAILURE;
+        -:   50:#endif
+        -:   51:
+    #####:   52:	if (!address || !*address)
+    %%%%%:   52-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   52-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:   53:		return EXIT_FAILURE;
+    %%%%%:   53-block  0
+unconditional  0 never executed
+        -:   54:
+    #####:   55:	char *tmp_addr = savestring(address, strlen(address));
+    %%%%%:   55-block  0
+call    0 never executed
+        -:   56:
+    #####:   57:	char *p = tmp_addr;
+    #####:   58:	while (*p) {
+unconditional  0 never executed
+    %%%%%:   58-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:   59:		if (*p == '/')
+    %%%%%:   59-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   60:			*p = '_';
+    %%%%%:   60-block  0
+unconditional  0 never executed
+    #####:   61:		p++;
+    %%%%%:   61-block  0
+unconditional  0 never executed
+        -:   62:	}
+        -:   63:
+    #####:   64:	char *rmountpoint = (char *)xnmalloc(strlen(TMP_DIR) + strlen(tmp_addr) + 9,
+    %%%%%:   64-block  0
+call    0 never executed
+        -:   65:										sizeof(char));
+        -:   66:
+    #####:   67:	sprintf(rmountpoint, "%s/remote/%s", TMP_DIR, tmp_addr);
+    #####:   68:	free(tmp_addr);
+        -:   69:
+        -:   70:	struct stat file_attrib;
+        -:   71:
+    #####:   72:	if (stat(rmountpoint, &file_attrib) == -1) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:   73:
+    #####:   74:		char *mkdir_cmd[] = {"mkdir", "-p", rmountpoint, NULL};
+        -:   75:
+    #####:   76:		if (launch_execve(mkdir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+    %%%%%:   76-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:   77:			fprintf(stderr, _("%s: %s: Cannot create mountpoint\n"),
+    %%%%%:   77-block  0
+call    0 never executed
+        -:   78:			    PROGRAM_NAME, rmountpoint);
+    #####:   79:			free(rmountpoint);
+    #####:   80:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:   81:		}
+        -:   82:	}
+        -:   83:
+    #####:   84:	else if (count_dir(rmountpoint) > 2) {
+    %%%%%:   84-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:   85:		fprintf(stderr, _("%s: %s: Mounpoint not empty\n"),
+    %%%%%:   85-block  0
+call    0 never executed
+        -:   86:		    PROGRAM_NAME, rmountpoint);
+    #####:   87:		free(rmountpoint);
+    #####:   88:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:   89:	}
+        -:   90:
+        -:   91:	/* CurlFTPFS does not require sudo */
+    #####:   92:	char *cmd[] = {"curlftpfs", address, rmountpoint, (options) ? "-o"
+    #####:   93:					: NULL, (options) ? options : NULL, NULL};
+    %%%%%:   93-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   93-block  1
+unconditional  2 never executed
+    %%%%%:   93-block  2
+unconditional  3 never executed
+    #####:   94:	int error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+    %%%%%:   94-block  0
+call    0 never executed
+        -:   95:
+    #####:   96:	if (error_code) {
+branch  0 never executed
+branch  1 never executed
+    #####:   97:		free(rmountpoint);
+    #####:   98:		return EXIT_FAILURE;
+    %%%%%:   98-block  0
+unconditional  0 never executed
+        -:   99:	}
+        -:  100:
+    #####:  101:	if (xchdir(rmountpoint, SET_TITLE) != 0) {
+    %%%%%:  101-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  102:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rmountpoint,
+call    0 never executed
+    #####:  103:		    strerror(errno));
+    %%%%%:  103-block  0
+call    0 never executed
+    #####:  104:		free(rmountpoint);
+    #####:  105:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  106:	}
+        -:  107:
+    #####:  108:	free(ws[cur_ws].path);
+    #####:  109:	ws[cur_ws].path = savestring(rmountpoint, strlen(rmountpoint));
+    %%%%%:  109-block  0
+call    0 never executed
+        -:  110:
+    #####:  111:	free(rmountpoint);
+        -:  112:
+    #####:  113:	if (cd_lists_on_the_fly) {
+branch  0 never executed
+branch  1 never executed
+    #####:  114:		free_dirlist();
+    %%%%%:  114-block  0
+call    0 never executed
+    #####:  115:		if (list_dir() != EXIT_SUCCESS)
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  116:			error_code = EXIT_FAILURE;
+    %%%%%:  116-block  0
+unconditional  0 never executed
+        -:  117:	}
+        -:  118:
+    #####:  119:	return error_code;
+    %%%%%:  119-block  0
+unconditional  0 never executed
+        -:  120:}
+        -:  121:
+        -:  122:int
+function remote_smb called 0 returned 0% blocks executed 0%
+    #####:  123:remote_smb(char *address, char *options)
+        -:  124:{
+    #####:  125:	if (xargs.stealth_mode == 1) {
+    %%%%%:  125-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  126:		printf("%s: Access to remote filesystems is disabled in "
+    %%%%%:  126-block  0
+call    0 never executed
+        -:  127:		       "stealth mode\n", PROGRAM_NAME);
+    #####:  128:		return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  129:	}
+        -:  130:
+        -:  131:#if __FreeBSD__
+        -:  132:	fprintf(stderr, _("%s: SMB is not yet supported on FreeBSD\n"), PROGRAM_NAME);
+        -:  133:	return EXIT_FAILURE;
+        -:  134:#endif
+        -:  135:
+        -:  136:	/* smb://[USER@]HOST[/SERVICE][/REMOTE-DIR] */
+        -:  137:
+    #####:  138:	if (!address || !*address)
+    %%%%%:  138-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  138-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  139:		return EXIT_FAILURE;
+    %%%%%:  139-block  0
+unconditional  0 never executed
+        -:  140:
+    #####:  141:	int free_address = 0;
+    #####:  142:	char *ruser = (char *)NULL, *raddress = (char *)NULL;
+    #####:  143:	char *tmp = strchr(address, '@');
+        -:  144:
+    #####:  145:	if (tmp) {
+    %%%%%:  145-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  146:		*tmp = '\0';
+    #####:  147:		ruser = savestring(address, strlen(address));
+    %%%%%:  147-block  0
+call    0 never executed
+        -:  148:
+    #####:  149:		raddress = savestring(tmp + 1, strlen(tmp + 1));
+call    0 never executed
+    #####:  150:		free_address = 1;
+unconditional  0 never executed
+        -:  151:	}
+        -:  152:
+        -:  153:	else
+    #####:  154:		raddress = address;
+    %%%%%:  154-block  0
+unconditional  0 never executed
+        -:  155:
+    #####:  156:	char *addr_tmp = (char *)xnmalloc(strlen(raddress) + 3, sizeof(char));
+    %%%%%:  156-block  0
+call    0 never executed
+    #####:  157:	sprintf(addr_tmp, "//%s", raddress);
+        -:  158:
+    #####:  159:	char *p = raddress;
+        -:  160:
+    #####:  161:	while (*p) {
+unconditional  0 never executed
+    %%%%%:  161-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:  162:		if (*p == '/')
+    %%%%%:  162-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  163:			*p = '_';
+    %%%%%:  163-block  0
+unconditional  0 never executed
+    #####:  164:		p++;
+    %%%%%:  164-block  0
+unconditional  0 never executed
+        -:  165:	}
+        -:  166:
+    #####:  167:	char *rmountpoint = (char *)xnmalloc(strlen(raddress) + strlen(TMP_DIR) + 9,
+    %%%%%:  167-block  0
+call    0 never executed
+        -:  168:										sizeof(char));
+    #####:  169:	sprintf(rmountpoint, "%s/remote/%s", TMP_DIR, raddress);
+        -:  170:
+    #####:  171:	int free_options = 0;
+    #####:  172:	char *roptions = (char *)NULL;
+        -:  173:
+    #####:  174:	if (ruser) {
+branch  0 never executed
+branch  1 never executed
+    #####:  175:		roptions = (char *)xnmalloc(strlen(ruser) + strlen(options) + 11,
+    %%%%%:  175-block  0
+call    0 never executed
+        -:  176:															sizeof(char));
+    #####:  177:		sprintf(roptions, "username=%s,%s", ruser, options);
+    #####:  178:		free_options = 1;
+unconditional  0 never executed
+        -:  179:	} else
+    #####:  180:		roptions = options;
+    %%%%%:  180-block  0
+unconditional  0 never executed
+        -:  181:
+        -:  182:	/* Create the mountpoint, if it doesn't exist */
+        -:  183:	struct stat file_attrib;
+        -:  184:
+    #####:  185:	if (stat(rmountpoint, &file_attrib) == -1) {
+    %%%%%:  185-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  186:		char *mkdir_cmd[] = {"mkdir", "-p", rmountpoint, NULL};
+        -:  187:
+    #####:  188:		if (launch_execve(mkdir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+    %%%%%:  188-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:  189:
+    #####:  190:			if (free_options)
+    %%%%%:  190-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  191:				free(roptions);
+    %%%%%:  191-block  0
+unconditional  0 never executed
+        -:  192:
+    #####:  193:			if (ruser)
+    %%%%%:  193-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  194:				free(ruser);
+    %%%%%:  194-block  0
+unconditional  0 never executed
+        -:  195:
+    #####:  196:			if (free_address)
+    %%%%%:  196-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  197:				free(raddress);
+    %%%%%:  197-block  0
+unconditional  0 never executed
+        -:  198:
+    #####:  199:			free(rmountpoint);
+    #####:  200:			free(addr_tmp);
+        -:  201:
+    #####:  202:			fprintf(stderr, _("%s: %s: Cannot create mountpoint\n"),
+    %%%%%:  202-block  0
+call    0 never executed
+        -:  203:			    PROGRAM_NAME, rmountpoint);
+        -:  204:
+    #####:  205:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  206:		}
+        -:  207:	}
+        -:  208:
+        -:  209:	/* If the mountpoint already exists, check if it is empty */
+    #####:  210:	else if (count_dir(rmountpoint) > 2) {
+    %%%%%:  210-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  211:		fprintf(stderr, _("%s: %s: Mountpoint not empty\n"),
+    %%%%%:  211-block  0
+call    0 never executed
+        -:  212:		    PROGRAM_NAME, rmountpoint);
+        -:  213:
+    #####:  214:		if (free_options)
+branch  0 never executed
+branch  1 never executed
+    #####:  215:			free(roptions);
+    %%%%%:  215-block  0
+unconditional  0 never executed
+        -:  216:
+    #####:  217:		if (ruser)
+    %%%%%:  217-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  218:			free(ruser);
+    %%%%%:  218-block  0
+unconditional  0 never executed
+        -:  219:
+    #####:  220:		if (free_address)
+    %%%%%:  220-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  221:			free(raddress);
+    %%%%%:  221-block  0
+unconditional  0 never executed
+        -:  222:
+    #####:  223:		free(rmountpoint);
+    #####:  224:		free(addr_tmp);
+        -:  225:
+    #####:  226:		return EXIT_FAILURE;
+    %%%%%:  226-block  0
+unconditional  0 never executed
+        -:  227:	}
+        -:  228:
+    #####:  229:	int error_code = 1;
+        -:  230:
+        -:  231:	/* Create and execute the SMB command */
+    #####:  232:	if (!(flags & ROOT_USR)) {
+    %%%%%:  232-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  233:		char *cmd[] = {"sudo", "-u", "root", "mount.cifs", addr_tmp,
+    #####:  234:		    rmountpoint, (roptions) ? "-o" : NULL,
+    %%%%%:  234-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  234-block  1
+unconditional  2 never executed
+    %%%%%:  234-block  2
+unconditional  3 never executed
+        -:  235:		    (roptions) ? roptions : NULL, NULL};
+    #####:  236:		error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+    %%%%%:  236-block  0
+call    0 never executed
+        -:  237:	}
+        -:  238:
+        -:  239:	else {
+    #####:  240:		char *cmd[] = {"mount.cifs", addr_tmp, rmountpoint, (roptions) ? "-o"
+    #####:  241:					: NULL, (roptions) ? roptions : NULL, NULL};
+    %%%%%:  241-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  241-block  1
+unconditional  2 never executed
+    %%%%%:  241-block  2
+unconditional  3 never executed
+    #####:  242:		error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+    %%%%%:  242-block  0
+call    0 never executed
+        -:  243:	}
+        -:  244:
+    #####:  245:	if (free_options)
+    %%%%%:  245-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  246:		free(roptions);
+    %%%%%:  246-block  0
+unconditional  0 never executed
+        -:  247:
+    #####:  248:	if (ruser)
+    %%%%%:  248-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  249:		free(ruser);
+    %%%%%:  249-block  0
+unconditional  0 never executed
+        -:  250:
+    #####:  251:	if (free_address)
+    %%%%%:  251-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  252:		free(raddress);
+    %%%%%:  252-block  0
+unconditional  0 never executed
+        -:  253:
+    #####:  254:	free(addr_tmp);
+        -:  255:
+    #####:  256:	if (error_code) {
+    %%%%%:  256-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  257:		free(rmountpoint);
+    #####:  258:		return EXIT_FAILURE;
+    %%%%%:  258-block  0
+unconditional  0 never executed
+        -:  259:	}
+        -:  260:
+        -:  261:	/* If successfully mounted, chdir into mountpoint */
+    #####:  262:	if (xchdir(rmountpoint, SET_TITLE) != 0) {
+    %%%%%:  262-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  263:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rmountpoint,
+call    0 never executed
+    #####:  264:		    strerror(errno));
+    %%%%%:  264-block  0
+call    0 never executed
+    #####:  265:		free(rmountpoint);
+    #####:  266:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  267:	}
+        -:  268:
+    #####:  269:	free(ws[cur_ws].path);
+    #####:  270:	ws[cur_ws].path = savestring(rmountpoint, strlen(rmountpoint));
+    %%%%%:  270-block  0
+call    0 never executed
+        -:  271:
+    #####:  272:	free(rmountpoint);
+        -:  273:
+    #####:  274:	if (cd_lists_on_the_fly) {
+branch  0 never executed
+branch  1 never executed
+    #####:  275:		free_dirlist();
+    %%%%%:  275-block  0
+call    0 never executed
+    #####:  276:		if (list_dir() != EXIT_SUCCESS)
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  277:			error_code = EXIT_FAILURE;
+    %%%%%:  277-block  0
+unconditional  0 never executed
+        -:  278:	}
+        -:  279:
+    #####:  280:	return error_code;
+    %%%%%:  280-block  0
+unconditional  0 never executed
+        -:  281:}
+        -:  282:
+        -:  283:int
+function remote_ssh called 0 returned 0% blocks executed 0%
+    #####:  284:remote_ssh(char *address, char *options)
+        -:  285:{
+    #####:  286:	if (xargs.stealth_mode == 1) {
+    %%%%%:  286-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  287:		printf("%s: Access to remote filesystems is disabled in "
+    %%%%%:  287-block  0
+call    0 never executed
+        -:  288:		       "stealth mode\n", PROGRAM_NAME);
+    #####:  289:		return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  290:	}
+        -:  291:
+        -:  292:#if __FreeBSD__
+        -:  293:	fprintf(stderr, _("%s: SFTP is not yet supported on FreeBSD"),
+        -:  294:	    PROGRAM_NAME);
+        -:  295:	return EXIT_FAILURE;
+        -:  296:#endif
+        -:  297:
+    #####:  298:	if (!config_ok)
+    %%%%%:  298-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  299:		return EXIT_FAILURE;
+    %%%%%:  299-block  0
+unconditional  0 never executed
+        -:  300:
+        -:  301:	/*  char *sshfs_path = get_cmd_path("sshfs");
+        -:  302:	if (!sshfs_path) {
+        -:  303:		fprintf(stderr, _("%s: sshfs: Program not found.\n"),
+        -:  304:				PROGRAM_NAME);
+        -:  305:		return EXIT_FAILURE;
+        -:  306:	} */
+        -:  307:
+    #####:  308:	if (!address || !*address)
+    %%%%%:  308-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  308-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  309:		return EXIT_FAILURE;
+    %%%%%:  309-block  0
+unconditional  0 never executed
+        -:  310:
+        -:  311:	/* Create mountpoint */
+    #####:  312:	char *rname = savestring(address, strlen(address));
+    %%%%%:  312-block  0
+call    0 never executed
+        -:  313:
+        -:  314:	/* Replace all slashes in address by underscore to construct the
+        -:  315:	 * mounpoint name */
+    #####:  316:	char *p = rname;
+    #####:  317:	while (*p) {
+unconditional  0 never executed
+    %%%%%:  317-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:  318:		if (*p == '/')
+    %%%%%:  318-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  319:			*p = '_';
+    %%%%%:  319-block  0
+unconditional  0 never executed
+    #####:  320:		p++;
+    %%%%%:  320-block  0
+unconditional  0 never executed
+        -:  321:	}
+        -:  322:
+    #####:  323:	char *rmountpoint = (char *)xnmalloc(strlen(TMP_DIR) + strlen(rname) + 9,
+    %%%%%:  323-block  0
+call    0 never executed
+        -:  324:											sizeof(char));
+    #####:  325:	sprintf(rmountpoint, "%s/remote/%s", TMP_DIR, rname);
+    #####:  326:	free(rname);
+        -:  327:
+        -:  328:	/* If the mountpoint doesn't exist, create it */
+        -:  329:	struct stat file_attrib;
+    #####:  330:	if (stat(rmountpoint, &file_attrib) == -1) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  331:		char *mkdir_cmd[] = {"mkdir", "-p", rmountpoint, NULL};
+        -:  332:
+    #####:  333:		if (launch_execve(mkdir_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+    %%%%%:  333-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  334:			fprintf(stderr, _("%s: %s: Cannot create mountpoint\n"),
+    %%%%%:  334-block  0
+call    0 never executed
+        -:  335:			    PROGRAM_NAME, rmountpoint);
+    #####:  336:			free(rmountpoint);
+    #####:  337:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  338:		}
+        -:  339:	}
+        -:  340:
+        -:  341:	/* If it exists, make sure it is not populated */
+    #####:  342:	else if (count_dir(rmountpoint) > 2) {
+    %%%%%:  342-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  343:		fprintf(stderr, _("%s: %s: Mounpoint not empty\n"),
+    %%%%%:  343-block  0
+call    0 never executed
+        -:  344:		    PROGRAM_NAME, rmountpoint);
+    #####:  345:		free(rmountpoint);
+    #####:  346:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  347:	}
+        -:  348:
+        -:  349:	/* Construct the command */
+        -:  350:
+    #####:  351:	int error_code = 1;
+        -:  352:
+    #####:  353:	if ((flags & ROOT_USR)) {
+    %%%%%:  353-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  354:		char *cmd[] = {"sshfs", address, rmountpoint, (options) ? "-o"
+    #####:  355:					: NULL, (options) ? options : NULL, NULL};
+    %%%%%:  355-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  355-block  1
+unconditional  2 never executed
+    %%%%%:  355-block  2
+unconditional  3 never executed
+    #####:  356:		error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+    %%%%%:  356-block  0
+call    0 never executed
+        -:  357:	}
+        -:  358:
+        -:  359:	else {
+    #####:  360:		char *cmd[] = {"sudo", "sshfs", address, rmountpoint, "-o",
+    #####:  361:		    "allow_other", (options) ? "-o" : NULL,
+    %%%%%:  361-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  361-block  1
+unconditional  2 never executed
+    %%%%%:  361-block  2
+unconditional  3 never executed
+        -:  362:		    (options) ? options : NULL, NULL};
+    #####:  363:		error_code = launch_execve(cmd, FOREGROUND, E_NOFLAG);
+    %%%%%:  363-block  0
+call    0 never executed
+        -:  364:	}
+        -:  365:
+    #####:  366:	if (error_code != EXIT_SUCCESS) {
+    %%%%%:  366-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  367:		free(rmountpoint);
+    #####:  368:		return EXIT_FAILURE;
+    %%%%%:  368-block  0
+unconditional  0 never executed
+        -:  369:	}
+        -:  370:
+        -:  371:	/* If successfully mounted, chdir into mountpoint */
+    #####:  372:	if (xchdir(rmountpoint, SET_TITLE) != 0) {
+    %%%%%:  372-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  373:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, rmountpoint,
+call    0 never executed
+    #####:  374:		    strerror(errno));
+    %%%%%:  374-block  0
+call    0 never executed
+    #####:  375:		free(rmountpoint);
+    #####:  376:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  377:	}
+        -:  378:
+    #####:  379:	free(ws[cur_ws].path);
+    #####:  380:	ws[cur_ws].path = savestring(rmountpoint, strlen(rmountpoint));
+    %%%%%:  380-block  0
+call    0 never executed
+    #####:  381:	free(rmountpoint);
+        -:  382:
+    #####:  383:	if (cd_lists_on_the_fly) {
+branch  0 never executed
+branch  1 never executed
+    #####:  384:		free_dirlist();
+    %%%%%:  384-block  0
+call    0 never executed
+    #####:  385:		if (list_dir() != EXIT_SUCCESS)
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  386:			error_code = EXIT_FAILURE;
+    %%%%%:  386-block  0
+unconditional  0 never executed
+        -:  387:	}
+        -:  388:
+    #####:  389:	return error_code;
+    %%%%%:  389-block  0
+unconditional  0 never executed
+        -:  390:}

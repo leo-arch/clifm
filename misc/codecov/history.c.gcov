@@ -1,0 +1,1557 @@
+        -:    0:Source:history.c
+        -:    1:/* history.c -- functions for the history system */
+        -:    2:
+        -:    3:/*
+        -:    4: * This file is part of CliFM
+        -:    5: * 
+        -:    6: * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
+        -:    7: * All rights reserved.
+        -:    8:
+        -:    9: * CliFM is free software; you can redistribute it and/or modify
+        -:   10: * it under the terms of the GNU General Public License as published by
+        -:   11: * the Free Software Foundation; either version 2 of the License, or
+        -:   12: * (at your option) any later version.
+        -:   13: *
+        -:   14: * CliFM is distributed in the hope that it will be useful,
+        -:   15: * but WITHOUT ANY WARRANTY; without even the implied warranty of
+        -:   16: * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        -:   17: * GNU General Public License for more details.
+        -:   18: *
+        -:   19: * You should have received a copy of the GNU General Public License
+        -:   20: * along with this program; if not, write to the Free Software
+        -:   21: * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+        -:   22: * MA 02110-1301, USA.
+        -:   23:*/
+        -:   24:
+        -:   25:#include "helpers.h"
+        -:   26:
+        -:   27:#include <errno.h>
+        -:   28:#include <stdio.h>
+        -:   29:#include <string.h>
+        -:   30:#include <time.h>
+        -:   31:#include <readline/history.h>
+        -:   32:
+        -:   33:#include "aux.h"
+        -:   34:#include "checks.h"
+        -:   35:#include "exec.h"
+        -:   36:#include "history.h"
+        -:   37:#include "init.h"
+        -:   38:#include "misc.h"
+        -:   39:
+        -:   40:/* Log COMM into LOG_FILE (global) */
+        -:   41:int
+function log_function called 1 returned 100% blocks executed 6%
+        1:   42:log_function(char **comm)
+        -:   43:{
+        -:   44:	/* If cmd logs are disabled, allow only "log" commands */
+        1:   45:	if (!logs_enabled) {
+        1:   45-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:   46:		if (strcmp(comm[0], "log") != 0)
+        1:   46-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:   47:			return EXIT_SUCCESS;
+        1:   47-block  0
+unconditional  0 taken 1
+        -:   48:	}
+        -:   49:
+    #####:   50:	if (!config_ok)
+    %%%%%:   50-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   51:		return EXIT_FAILURE;
+    %%%%%:   51-block  0
+unconditional  0 never executed
+        -:   52:
+    #####:   53:	int clear_log = 0;
+        -:   54:
+        -:   55:	/* If the command was just 'log' */
+    #####:   56:	if (*comm[0] == 'l' && strcmp(comm[0], "log") == 0 && !comm[1]) {
+    %%%%%:   56-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   56-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:   56-block  2
+branch  4 never executed
+branch  5 never executed
+        -:   57:
+        -:   58:		FILE *log_fp;
+    #####:   59:		log_fp = fopen(LOG_FILE, "r");
+    %%%%%:   59-block  0
+call    0 never executed
+        -:   60:
+    #####:   61:		if (!log_fp) {
+branch  0 never executed
+branch  1 never executed
+    #####:   62:			_err(0, NOPRINT_PROMPT, "%s: log: '%s': %s\n",
+call    0 never executed
+    #####:   63:			    PROGRAM_NAME, LOG_FILE, strerror(errno));
+    %%%%%:   63-block  0
+call    0 never executed
+    #####:   64:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:   65:		}
+        -:   66:
+        -:   67:		else {
+    #####:   68:			size_t line_size = 0;
+    #####:   69:			char *line_buff = (char *)NULL;
+    #####:   70:			ssize_t line_len = 0;
+        -:   71:
+    #####:   72:			while ((line_len = getline(&line_buff, &line_size, log_fp)) > 0)
+    %%%%%:   72-block  0
+unconditional  0 never executed
+    %%%%%:   72-block  1
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:   73:				fputs(line_buff, stdout);
+    %%%%%:   73-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:   74:
+    #####:   75:			free(line_buff);
+        -:   76:
+    #####:   77:			fclose(log_fp);
+    %%%%%:   77-block  0
+call    0 never executed
+    #####:   78:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:   79:		}
+        -:   80:	}
+        -:   81:
+    #####:   82:	else if (*comm[0] == 'l' && strcmp(comm[0], "log") == 0 && comm[1]) {
+    %%%%%:   82-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   82-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:   82-block  2
+branch  4 never executed
+branch  5 never executed
+        -:   83:
+    #####:   84:		if (*comm[1] == 'c' && strcmp(comm[1], "clear") == 0)
+    %%%%%:   84-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   84-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:   85:			clear_log = 1;
+    %%%%%:   85-block  0
+unconditional  0 never executed
+        -:   86:
+    #####:   87:		else if (*comm[1] == 's' && strcmp(comm[1], "status") == 0) {
+    %%%%%:   87-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   87-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:   88:			printf(_("Logs %s\n"), (logs_enabled) ? _("enabled")
+    %%%%%:   88-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   88-block  1
+unconditional  2 never executed
+    %%%%%:   88-block  2
+call    3 never executed
+    #####:   89:							      : _("disabled"));
+    %%%%%:   89-block  0
+unconditional  0 never executed
+    #####:   90:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:   91:		}
+        -:   92:
+    #####:   93:		else if (*comm[1] == 'o' && strcmp(comm[1], "on") == 0) {
+    %%%%%:   93-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   93-block  1
+branch  2 never executed
+branch  3 never executed
+        -:   94:
+    #####:   95:			if (logs_enabled)
+    %%%%%:   95-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   96:				puts(_("Logs already enabled"));
+    %%%%%:   96-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:   97:
+        -:   98:			else {
+    #####:   99:				logs_enabled = 1;
+    #####:  100:				puts(_("Logs successfully enabled"));
+    %%%%%:  100-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  101:			}
+        -:  102:
+    #####:  103:			return EXIT_SUCCESS;
+    %%%%%:  103-block  0
+unconditional  0 never executed
+        -:  104:		}
+        -:  105:
+    #####:  106:		else if (*comm[1] == 'o' && strcmp(comm[1], "off") == 0) {
+    %%%%%:  106-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  106-block  1
+branch  2 never executed
+branch  3 never executed
+        -:  107:			/* If logs were already disabled, just exit. Otherwise, log
+        -:  108:			 * the "log off" command */
+    #####:  109:			if (!logs_enabled) {
+    %%%%%:  109-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  110:				puts(_("Logs already disabled"));
+    %%%%%:  110-block  0
+call    0 never executed
+    #####:  111:				return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  112:			}
+        -:  113:
+        -:  114:			else {
+    #####:  115:				puts(_("Logs succesfully disabled"));
+    %%%%%:  115-block  0
+call    0 never executed
+    #####:  116:				logs_enabled = 0;
+unconditional  0 never executed
+        -:  117:			}
+        -:  118:		}
+        -:  119:	}
+        -:  120:
+        -:  121:	/* Construct the log line */
+        -:  122:
+    #####:  123:	if (!last_cmd) {
+    %%%%%:  123-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  124:		if (!logs_enabled) {
+    %%%%%:  124-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  125:			/* When cmd logs are disabled, "log clear" and "log off" are
+        -:  126:			 * the only commands that can reach this code */
+        -:  127:
+    #####:  128:			if (clear_log) {
+    %%%%%:  128-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  129:				last_cmd = (char *)xnmalloc(10, sizeof(char));
+    %%%%%:  129-block  0
+call    0 never executed
+    #####:  130:				strcpy(last_cmd, "log clear");
+unconditional  0 never executed
+        -:  131:			}
+        -:  132:
+        -:  133:			else {
+    #####:  134:				last_cmd = (char *)xnmalloc(8, sizeof(char));
+    %%%%%:  134-block  0
+call    0 never executed
+    #####:  135:				strcpy(last_cmd, "log off");
+unconditional  0 never executed
+        -:  136:			}
+        -:  137:		}
+        -:  138:		/* last_cmd should never be NULL if logs are enabled (this
+        -:  139:		 * variable is set immediately after taking valid user input
+        -:  140:		 * in the prompt function). However ... */
+        -:  141:
+        -:  142:		else {
+    #####:  143:			last_cmd = (char *)xnmalloc(23, sizeof(char));
+    %%%%%:  143-block  0
+call    0 never executed
+    #####:  144:			strcpy(last_cmd, _("Error getting command!"));
+unconditional  0 never executed
+        -:  145:		}
+        -:  146:	}
+        -:  147:
+    #####:  148:	char *date = get_date();
+    %%%%%:  148-block  0
+call    0 never executed
+    #####:  149:	size_t log_len = strlen(date) + strlen(ws[cur_ws].path)
+    #####:  150:					+ strlen(last_cmd) + 6;
+    #####:  151:	char *full_log = (char *)xnmalloc(log_len, sizeof(char));
+call    0 never executed
+        -:  152:
+    #####:  153:	snprintf(full_log, log_len, "[%s] %s:%s\n", date, ws[cur_ws].path, last_cmd);
+        -:  154:
+    #####:  155:	free(date);
+        -:  156:
+    #####:  157:	free(last_cmd);
+    #####:  158:	last_cmd = (char *)NULL;
+        -:  159:
+        -:  160:	/* Write the log into LOG_FILE */
+        -:  161:	FILE *log_fp;
+        -:  162:	/* If not 'log clear', append the log to the existing logs */
+        -:  163:
+    #####:  164:	if (!clear_log)
+branch  0 never executed
+branch  1 never executed
+    #####:  165:		log_fp = fopen(LOG_FILE, "a");
+    %%%%%:  165-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  166:
+        -:  167:	/* Else, overwrite the log file leaving only the 'log clear'
+        -:  168:	 * command */
+        -:  169:	else
+    #####:  170:		log_fp = fopen(LOG_FILE, "w+");
+    %%%%%:  170-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  171:
+    #####:  172:	if (!log_fp) {
+    %%%%%:  172-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  173:		_err('e', PRINT_PROMPT, "%s: log: '%s': %s\n", PROGRAM_NAME,
+call    0 never executed
+    #####:  174:		    LOG_FILE, strerror(errno));
+    %%%%%:  174-block  0
+call    0 never executed
+    #####:  175:		free(full_log);
+    #####:  176:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  177:	}
+        -:  178:
+        -:  179:	else { /* If LOG_FILE was correctly opened, write the log */
+    #####:  180:		fputs(full_log, log_fp);
+    %%%%%:  180-block  0
+call    0 never executed
+    #####:  181:		free(full_log);
+    #####:  182:		fclose(log_fp);
+call    0 never executed
+        -:  183:
+    #####:  184:		return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  185:	}
+        -:  186:}
+        -:  187:
+        -:  188:/* Handle the error message MSG. Store MSG in an array of error
+        -:  189: * messages, write it into an error log file, and print it immediately
+        -:  190: * (if PRINT is zero (NOPRINT_PROMPT) or tell the next prompt, if PRINT
+        -:  191: * is one to do it (PRINT_PROMPT)). Messages wrote to the error log file
+        -:  192: * have the following format:
+        -:  193: * "[date] msg", where 'date' is YYYY-MM-DDTHH:MM:SS */
+        -:  194:void
+function log_msg called 0 returned 0% blocks executed 0%
+    #####:  195:log_msg(char *_msg, int print)
+        -:  196:{
+    #####:  197:	if (!_msg)
+    %%%%%:  197-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  198:		return;
+    %%%%%:  198-block  0
+unconditional  0 never executed
+        -:  199:
+    #####:  200:	size_t msg_len = strlen(_msg);
+    #####:  201:	if (msg_len == 0)
+    %%%%%:  201-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  202:		return;
+    %%%%%:  202-block  0
+unconditional  0 never executed
+        -:  203:
+        -:  204:	/* Store messages (for current session only) in an array, so that
+        -:  205:	 * the user can check them via the 'msg' command */
+    #####:  206:	msgs_n++;
+    #####:  207:	messages = (char **)xrealloc(messages, (size_t)(msgs_n + 1) * sizeof(char *));
+    %%%%%:  207-block  0
+call    0 never executed
+    #####:  208:	messages[msgs_n - 1] = savestring(_msg, msg_len);
+call    0 never executed
+    #####:  209:	messages[msgs_n] = (char *)NULL;
+        -:  210:
+    #####:  211:	if (print) /* PRINT_PROMPT */
+branch  0 never executed
+branch  1 never executed
+        -:  212:		/* The next prompt will take care of printing the message */
+    #####:  213:		print_msg = 1;
+    %%%%%:  213-block  0
+unconditional  0 never executed
+        -:  214:	else /* NOPRINT_PROMPT */
+        -:  215:		/* Print the message directly here */
+    #####:  216:		fputs(_msg, stderr);
+    %%%%%:  216-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  217:
+        -:  218:	/* If the config dir cannot be found or if msg log file isn't set
+        -:  219:	 * yet... This will happen if an error occurs before running
+        -:  220:	 * init_config(), for example, if the user's home cannot be found */
+    #####:  221:	if (!config_ok || !MSG_LOG_FILE || !*MSG_LOG_FILE)
+    %%%%%:  221-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  221-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  221-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  222:		return;
+    %%%%%:  222-block  0
+unconditional  0 never executed
+        -:  223:
+    #####:  224:	FILE *msg_fp = fopen(MSG_LOG_FILE, "a");
+    %%%%%:  224-block  0
+call    0 never executed
+        -:  225:
+    #####:  226:	if (!msg_fp) {
+branch  0 never executed
+branch  1 never executed
+        -:  227:		/* Do not log this error: We might incur in an infinite loop
+        -:  228:		 * trying to access a file that cannot be accessed */
+    #####:  229:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, MSG_LOG_FILE,
+call    0 never executed
+    #####:  230:		    strerror(errno));
+    %%%%%:  230-block  0
+call    0 never executed
+    #####:  231:		fputs("Press any key to continue... ", stdout);
+call    0 never executed
+    #####:  232:		xgetchar();
+call    0 never executed
+    #####:  233:		putchar('\n');
+call    0 never executed
+unconditional  1 never executed
+        -:  234:	}
+        -:  235:
+        -:  236:	else {
+        -:  237:		/* Write message to messages file: [date] msg */
+    #####:  238:		time_t rawtime = time(NULL);
+    %%%%%:  238-block  0
+call    0 never executed
+    #####:  239:		struct tm *tm = localtime(&rawtime);
+call    0 never executed
+    #####:  240:		char date[64] = "";
+        -:  241:
+    #####:  242:		strftime(date, sizeof(date), "%b %d %H:%M:%S %Y", tm);
+    #####:  243:		fprintf(msg_fp, "[%d-%d-%dT%d:%d:%d] ", tm->tm_year + 1900,
+    #####:  244:		    tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
+call    0 never executed
+    #####:  245:		fputs(_msg, msg_fp);
+call    0 never executed
+    #####:  246:		fclose(msg_fp);
+call    0 never executed
+        -:  247:	}
+        -:  248:}
+        -:  249:
+        -:  250:int
+function save_dirhist called 1 returned 100% blocks executed 71%
+        1:  251:save_dirhist(void)
+        -:  252:{
+        1:  253:	if (!DIRHIST_FILE)
+        1:  253-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  254:		return EXIT_FAILURE;
+    %%%%%:  254-block  0
+unconditional  0 never executed
+        -:  255:
+        1:  256:	if (!old_pwd || !old_pwd[0])
+        1:  256-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  256-block  1
+branch  2 taken 0 (fallthrough)
+branch  3 taken 1
+    #####:  257:		return EXIT_SUCCESS;
+    %%%%%:  257-block  0
+unconditional  0 never executed
+        -:  258:
+        1:  259:	FILE *fp = fopen(DIRHIST_FILE, "w");
+        1:  259-block  0
+call    0 returned 1
+        -:  260:
+        1:  261:	if (!fp) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  262:		fprintf(stderr, _("%s: Could not save directory history: %s\n"),
+call    0 never executed
+    #####:  263:		    PROGRAM_NAME, strerror(errno));
+    %%%%%:  263-block  0
+call    0 never executed
+    #####:  264:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  265:	}
+        -:  266:
+        -:  267:	size_t i;
+        -:  268:
+      110:  269:	for (i = 0; old_pwd[i]; i++)
+        1:  269-block  0
+unconditional  0 taken 1
+unconditional  1 taken 109
+      110:  269-block  1
+branch  2 taken 109
+branch  3 taken 1 (fallthrough)
+      109:  270:		fprintf(fp, "%s\n", old_pwd[i]);
+      109:  270-block  0
+call    0 returned 109
+        -:  271:
+        1:  272:	fclose(fp);
+        1:  272-block  0
+call    0 returned 1
+        -:  273:
+        1:  274:	return EXIT_SUCCESS;
+unconditional  0 taken 1
+        -:  275:}
+        -:  276:
+        -:  277:/* Add DIR_PATH to visited directory history (old_pwd) */
+        -:  278:void
+function add_to_dirhist called 11 returned 100% blocks executed 71%
+       11:  279:add_to_dirhist(const char *dir_path)
+        -:  280:{
+        -:  281:	/*  static size_t end_counter = 11, mid_counter = 11; */
+        -:  282:
+        -:  283:	/* If already at the end of dirhist, add new entry */
+       11:  284:	if (dirhist_cur_index + 1 >= dirhist_total_index) {
+       11:  284-block  0
+branch  0 taken 11 (fallthrough)
+branch  1 taken 0
+        -:  285:
+        -:  286:		/* Do not add anything if new path equals last entry in
+        -:  287:		 * directory history */
+       11:  288:		if ((dirhist_total_index - 1) >= 0 && old_pwd[dirhist_total_index - 1] && *(dir_path + 1) == *(old_pwd[dirhist_total_index - 1] + 1) && strcmp(dir_path, old_pwd[dirhist_total_index - 1]) == 0)
+       11:  288-block  0
+branch  0 taken 11 (fallthrough)
+branch  1 taken 0
+       11:  288-block  1
+branch  2 taken 11 (fallthrough)
+branch  3 taken 0
+       11:  288-block  2
+branch  4 taken 9 (fallthrough)
+branch  5 taken 2
+        9:  288-block  3
+branch  6 taken 2 (fallthrough)
+branch  7 taken 7
+        2:  289:			return;
+        2:  289-block  0
+unconditional  0 taken 2
+        -:  290:
+        -:  291:		/* Realloc only once per 10 operations */
+        -:  292:		/*      if (end_counter > 10) {
+        -:  293:			end_counter = 1; */
+        -:  294:		/* 20: Realloc dirhist_total + (2 * 10) */
+       18:  295:		old_pwd = (char **)xrealloc(old_pwd,
+        9:  296:		    (size_t)(dirhist_total_index + 2) * sizeof(char *));
+        9:  296-block  0
+call    0 returned 9
+        -:  297:		/*      }
+        -:  298:
+        -:  299:		end_counter++; */
+        -:  300:
+        9:  301:		dirhist_cur_index = dirhist_total_index;
+        9:  302:		old_pwd[dirhist_total_index++] = savestring(dir_path, strlen(dir_path));
+call    0 returned 9
+        9:  303:		old_pwd[dirhist_total_index] = (char *)NULL;
+unconditional  0 taken 9
+        -:  304:	}
+        -:  305:
+        -:  306:	/* I not at the end of dirhist, add previous AND new entry */
+        -:  307:	else {
+        -:  308:		/*      if (mid_counter > 10) {
+        -:  309:			mid_counter = 1; */
+        -:  310:		/* 30: Realloc dirhist_total + (3 * 10) */
+    #####:  311:		old_pwd = (char **)xrealloc(old_pwd,
+    #####:  312:		    (size_t)(dirhist_total_index + 3) * sizeof(char *));
+    %%%%%:  312-block  0
+call    0 never executed
+        -:  313:		/*      }
+        -:  314:
+        -:  315:		mid_counter++; */
+        -:  316:
+    #####:  317:		old_pwd[dirhist_total_index++] = savestring(
+    #####:  318:		    old_pwd[dirhist_cur_index],
+    #####:  319:		    strlen(old_pwd[dirhist_cur_index]));
+call    0 never executed
+        -:  320:
+    #####:  321:		dirhist_cur_index = dirhist_total_index;
+    #####:  322:		old_pwd[dirhist_total_index++] = savestring(dir_path, strlen(dir_path));
+call    0 never executed
+        -:  323:
+    #####:  324:		old_pwd[dirhist_total_index] = (char *)NULL;
+unconditional  0 never executed
+        -:  325:	}
+        -:  326:}
+        -:  327:
+        -:  328:int
+function history_function called 0 returned 0% blocks executed 0%
+    #####:  329:history_function(char **comm)
+        -:  330:{
+    #####:  331:	if (!config_ok) {
+    %%%%%:  331-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  332:		fprintf(stderr, _("%s: History function disabled\n"), PROGRAM_NAME);
+    %%%%%:  332-block  0
+call    0 never executed
+    #####:  333:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  334:	}
+        -:  335:
+        -:  336:	/* If no arguments, print the history list */
+    #####:  337:	if (args_n == 0) {
+    %%%%%:  337-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  338:		size_t i;
+    #####:  339:		for (i = 0; i < current_hist_n; i++)
+    %%%%%:  339-block  0
+unconditional  0 never executed
+unconditional  1 never executed
+    %%%%%:  339-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  340:			printf("%zu %s\n", i + 1, history[i]);
+    %%%%%:  340-block  0
+call    0 never executed
+    #####:  341:		return EXIT_SUCCESS;
+    %%%%%:  341-block  0
+unconditional  0 never executed
+        -:  342:	}
+        -:  343:
+        -:  344:	/* If 'history clear', guess what, clear the history list! */
+    #####:  345:	if (args_n == 1 && strcmp(comm[1], "clear") == 0) {
+    %%%%%:  345-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  345-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  346:		FILE *hist_fp = fopen(HIST_FILE, "w+");
+    %%%%%:  346-block  0
+call    0 never executed
+        -:  347:
+    #####:  348:		if (!hist_fp) {
+branch  0 never executed
+branch  1 never executed
+    #####:  349:			_err(0, NOPRINT_PROMPT, "%s: history: %s: %s\n",
+call    0 never executed
+    #####:  350:			    PROGRAM_NAME, HIST_FILE, strerror(errno));
+    %%%%%:  350-block  0
+call    0 never executed
+    #####:  351:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  352:		}
+        -:  353:
+        -:  354:		/* Do not create an empty file */
+    #####:  355:		fprintf(hist_fp, "%s %s\n", comm[0], comm[1]);
+    %%%%%:  355-block  0
+call    0 never executed
+    #####:  356:		fclose(hist_fp);
+call    0 never executed
+        -:  357:
+        -:  358:		/* Reset readline history */
+    #####:  359:		clear_history();
+call    0 never executed
+    #####:  360:		read_history(HIST_FILE);
+call    0 never executed
+    #####:  361:		history_truncate_file(HIST_FILE, max_hist);
+call    0 never executed
+        -:  362:
+        -:  363:		/* Update the history array */
+    #####:  364:		int exit_status = EXIT_SUCCESS;
+        -:  365:
+    #####:  366:		if (get_history() != 0)
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  367:			exit_status = EXIT_FAILURE;
+    %%%%%:  367-block  0
+unconditional  0 never executed
+        -:  368:
+    #####:  369:		if (log_function(comm) != 0)
+    %%%%%:  369-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  370:			exit_code = EXIT_FAILURE;
+    %%%%%:  370-block  0
+unconditional  0 never executed
+        -:  371:
+    #####:  372:		return exit_status;
+    %%%%%:  372-block  0
+unconditional  0 never executed
+        -:  373:	}
+        -:  374:
+        -:  375:	/* If 'history -n', print the last -n elements */
+    #####:  376:	if (args_n == 1 && comm[1][0] == '-' && is_number(comm[1] + 1)) {
+    %%%%%:  376-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  376-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  376-block  2
+call    4 never executed
+branch  5 never executed
+branch  6 never executed
+    #####:  377:		int num = atoi(comm[1] + 1);
+        -:  378:
+    #####:  379:		if (num < 0 || num > (int)current_hist_n)
+    %%%%%:  379-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  379-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  380:			num = (int)current_hist_n;
+    %%%%%:  380-block  0
+unconditional  0 never executed
+        -:  381:
+        -:  382:		size_t i;
+        -:  383:
+    #####:  384:		for (i = current_hist_n - (size_t)num; i < current_hist_n; i++)
+    %%%%%:  384-block  0
+unconditional  0 never executed
+unconditional  1 never executed
+    %%%%%:  384-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  385:			printf("%zu %s\n", i + 1, history[i]);
+    %%%%%:  385-block  0
+call    0 never executed
+        -:  386:
+    #####:  387:		return EXIT_SUCCESS;
+    %%%%%:  387-block  0
+unconditional  0 never executed
+        -:  388:	}
+        -:  389:
+        -:  390:	/* None of the above */
+    #####:  391:	puts(_("Usage: history [clear] [-n]"));
+    %%%%%:  391-block  0
+call    0 never executed
+        -:  392:
+    #####:  393:	return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  394:}
+        -:  395:
+        -:  396:/* Takes as argument the history cmd less the first exclamation mark.
+        -:  397: * Example: if exec_cmd() gets "!-10" it pass to this function "-10",
+        -:  398: * that is, comm + 1 */
+        -:  399:int
+function run_history_cmd called 0 returned 0% blocks executed 0%
+    #####:  400:run_history_cmd(const char *cmd)
+        -:  401:{
+        -:  402:	/* If "!n" */
+    #####:  403:	int exit_status = EXIT_SUCCESS;
+        -:  404:	size_t i;
+        -:  405:
+    #####:  406:	if (is_number(cmd)) {
+    %%%%%:  406-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  407:		int num = atoi(cmd);
+        -:  408:
+    #####:  409:		if (num > 0 && num < (int)current_hist_n) {
+    %%%%%:  409-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  409-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  410:			size_t old_args = args_n;
+        -:  411:
+    #####:  412:			if (record_cmd(history[num - 1]))
+    %%%%%:  412-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  413:				add_to_cmdhist(history[num - 1]);
+    %%%%%:  413-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  414:
+    #####:  415:			char **cmd_hist = parse_input_str(history[num - 1]);
+    %%%%%:  415-block  0
+call    0 never executed
+        -:  416:
+    #####:  417:			if (cmd_hist) {
+branch  0 never executed
+branch  1 never executed
+        -:  418:
+    #####:  419:				char **alias_cmd = check_for_alias(cmd_hist);
+    %%%%%:  419-block  0
+call    0 never executed
+        -:  420:
+    #####:  421:				if (alias_cmd) {
+branch  0 never executed
+branch  1 never executed
+        -:  422:					/* If an alias is found, the function frees cmd_hist
+        -:  423:					 * and returns alias_cmd in its place to be executed
+        -:  424:					 * by exec_cmd() */
+        -:  425:
+    #####:  426:					if (exec_cmd(alias_cmd) != 0)
+    %%%%%:  426-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  427:						exit_status = EXIT_FAILURE;
+    %%%%%:  427-block  0
+unconditional  0 never executed
+        -:  428:
+    #####:  429:					for (i = 0; alias_cmd[i]; i++)
+    %%%%%:  429-block  0
+unconditional  0 never executed
+    %%%%%:  429-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  430:						free(alias_cmd[i]);
+    %%%%%:  430-block  0
+unconditional  0 never executed
+        -:  431:
+    #####:  432:					free(alias_cmd);
+        -:  433:
+    #####:  434:					alias_cmd = (char **)NULL;
+    %%%%%:  434-block  0
+unconditional  0 never executed
+        -:  435:				}
+        -:  436:
+        -:  437:				else {
+    #####:  438:					if (exec_cmd(cmd_hist) != 0)
+    %%%%%:  438-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  439:						exit_status = EXIT_FAILURE;
+    %%%%%:  439-block  0
+unconditional  0 never executed
+        -:  440:
+    #####:  441:					for (i = 0; cmd_hist[i]; i++)
+    %%%%%:  441-block  0
+unconditional  0 never executed
+    %%%%%:  441-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  442:						free(cmd_hist[i]);
+    %%%%%:  442-block  0
+unconditional  0 never executed
+        -:  443:
+    #####:  444:					free(cmd_hist);
+    %%%%%:  444-block  0
+unconditional  0 never executed
+        -:  445:				}
+        -:  446:
+    #####:  447:				args_n = old_args;
+        -:  448:
+    #####:  449:				return exit_status;
+    %%%%%:  449-block  0
+unconditional  0 never executed
+        -:  450:			}
+    #####:  451:			fprintf(stderr, _("%s: Error parsing history command\n"),
+    %%%%%:  451-block  0
+call    0 never executed
+        -:  452:			    PROGRAM_NAME);
+    #####:  453:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  454:		} else
+    #####:  455:			fprintf(stderr, _("%s: !%d: event not found\n"), PROGRAM_NAME, num);
+    %%%%%:  455-block  0
+call    0 never executed
+    #####:  456:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  457:	}
+        -:  458:
+        -:  459:	/* If "!!", execute the last command */
+    #####:  460:	else if (*cmd == '!' && !cmd[1]) {
+    %%%%%:  460-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  460-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  461:		size_t old_args = args_n;
+        -:  462:
+    #####:  463:		if (record_cmd(history[current_hist_n - 1]))
+    %%%%%:  463-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  464:			add_to_cmdhist(history[current_hist_n - 1]);
+    %%%%%:  464-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  465:
+    #####:  466:		char **cmd_hist = parse_input_str(history[current_hist_n - 1]);
+    %%%%%:  466-block  0
+call    0 never executed
+        -:  467:
+    #####:  468:		if (cmd_hist) {
+branch  0 never executed
+branch  1 never executed
+        -:  469:
+    #####:  470:			char **alias_cmd = check_for_alias(cmd_hist);
+    %%%%%:  470-block  0
+call    0 never executed
+        -:  471:
+    #####:  472:			if (alias_cmd) {
+branch  0 never executed
+branch  1 never executed
+        -:  473:
+    #####:  474:				if (exec_cmd(alias_cmd) != 0)
+    %%%%%:  474-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  475:					exit_status = EXIT_FAILURE;
+    %%%%%:  475-block  0
+unconditional  0 never executed
+        -:  476:
+    #####:  477:				for (i = 0; alias_cmd[i]; i++)
+    %%%%%:  477-block  0
+unconditional  0 never executed
+    %%%%%:  477-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  478:					free(alias_cmd[i]);
+    %%%%%:  478-block  0
+unconditional  0 never executed
+        -:  479:
+    #####:  480:				free(alias_cmd);
+        -:  481:
+    #####:  482:				alias_cmd = (char **)NULL;
+    %%%%%:  482-block  0
+unconditional  0 never executed
+        -:  483:			}
+        -:  484:
+        -:  485:			else {
+    #####:  486:				if (exec_cmd(cmd_hist) != 0)
+    %%%%%:  486-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  487:					exit_status = EXIT_FAILURE;
+    %%%%%:  487-block  0
+unconditional  0 never executed
+        -:  488:
+    #####:  489:				for (i = 0; cmd_hist[i]; i++)
+    %%%%%:  489-block  0
+unconditional  0 never executed
+    %%%%%:  489-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  490:					free(cmd_hist[i]);
+    %%%%%:  490-block  0
+unconditional  0 never executed
+        -:  491:
+    #####:  492:				free(cmd_hist);
+    %%%%%:  492-block  0
+unconditional  0 never executed
+        -:  493:			}
+        -:  494:
+    #####:  495:			args_n = old_args;
+    #####:  496:			return exit_status;
+    %%%%%:  496-block  0
+unconditional  0 never executed
+        -:  497:		}
+    #####:  498:		fprintf(stderr, _("%s: Error parsing history command\n"),
+    %%%%%:  498-block  0
+call    0 never executed
+        -:  499:		    PROGRAM_NAME);
+    #####:  500:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  501:	}
+        -:  502:
+        -:  503:	/* If "!-n" */
+    #####:  504:	else if (*cmd == '-') {
+    %%%%%:  504-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  505:		/* If not number or zero or bigger than max... */
+    #####:  506:		int acmd = atoi(cmd + 1);
+        -:  507:
+    #####:  508:		if (!is_number(cmd + 1) || acmd == 0 || acmd > (int)current_hist_n - 1) {
+    %%%%%:  508-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    %%%%%:  508-block  1
+branch  3 never executed
+branch  4 never executed
+    %%%%%:  508-block  2
+branch  5 never executed
+branch  6 never executed
+    #####:  509:			fprintf(stderr, _("%s: !%s: Event not found\n"), PROGRAM_NAME, cmd);
+    %%%%%:  509-block  0
+call    0 never executed
+    #####:  510:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  511:		}
+        -:  512:
+    #####:  513:		size_t old_args = args_n;
+    #####:  514:		char **cmd_hist = parse_input_str(history[current_hist_n - (size_t)acmd - 1]);
+    %%%%%:  514-block  0
+call    0 never executed
+    #####:  515:		if (cmd_hist) {
+branch  0 never executed
+branch  1 never executed
+        -:  516:
+    #####:  517:			char **alias_cmd = check_for_alias(cmd_hist);
+    %%%%%:  517-block  0
+call    0 never executed
+        -:  518:
+    #####:  519:			if (alias_cmd) {
+branch  0 never executed
+branch  1 never executed
+    #####:  520:				if (exec_cmd(alias_cmd) != 0)
+    %%%%%:  520-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  521:					exit_status = EXIT_FAILURE;
+    %%%%%:  521-block  0
+unconditional  0 never executed
+        -:  522:
+    #####:  523:				for (i = 0; alias_cmd[i]; i++)
+    %%%%%:  523-block  0
+unconditional  0 never executed
+    %%%%%:  523-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  524:					free(alias_cmd[i]);
+    %%%%%:  524-block  0
+unconditional  0 never executed
+        -:  525:
+    #####:  526:				free(alias_cmd);
+        -:  527:
+    #####:  528:				alias_cmd = (char **)NULL;
+    %%%%%:  528-block  0
+unconditional  0 never executed
+        -:  529:			}
+        -:  530:
+        -:  531:			else {
+    #####:  532:				if (exec_cmd(cmd_hist) != 0)
+    %%%%%:  532-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  533:					exit_status = EXIT_FAILURE;
+    %%%%%:  533-block  0
+unconditional  0 never executed
+        -:  534:
+    #####:  535:				for (i = 0; cmd_hist[i]; i++)
+    %%%%%:  535-block  0
+unconditional  0 never executed
+    %%%%%:  535-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  536:					free(cmd_hist[i]);
+    %%%%%:  536-block  0
+unconditional  0 never executed
+        -:  537:
+    #####:  538:				free(cmd_hist);
+    %%%%%:  538-block  0
+unconditional  0 never executed
+        -:  539:			}
+        -:  540:
+    #####:  541:			if (record_cmd(history[current_hist_n - (size_t)acmd - 1]))
+    %%%%%:  541-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  542:				add_to_cmdhist(history[current_hist_n - (size_t)acmd - 1]);
+    %%%%%:  542-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  543:
+    #####:  544:			args_n = old_args;
+    #####:  545:			return exit_status;
+    %%%%%:  545-block  0
+unconditional  0 never executed
+        -:  546:		}
+        -:  547:
+    #####:  548:		if (record_cmd(history[current_hist_n - (size_t)acmd - 1]))
+    %%%%%:  548-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  549:			add_to_cmdhist(history[current_hist_n - (size_t)acmd - 1]);
+    %%%%%:  549-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  550:
+    #####:  551:		fprintf(stderr, _("%s: Error parsing history command\n"), PROGRAM_NAME);
+    %%%%%:  551-block  0
+call    0 never executed
+    #####:  552:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  553:	}
+        -:  554:
+    #####:  555:	else if ((*cmd >= 'a' && *cmd <= 'z') || (*cmd >= 'A' && *cmd <= 'Z')) {
+    %%%%%:  555-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  555-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  555-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%:  555-block  3
+branch  6 never executed
+branch  7 never executed
+        -:  556:
+    #####:  557:		size_t len = strlen(cmd), old_args = args_n;
+        -:  558:		;
+        -:  559:
+    #####:  560:		for (i = 0; history[i]; i++) {
+    %%%%%:  560-block  0
+unconditional  0 never executed
+    %%%%%:  560-block  1
+unconditional  1 never executed
+    %%%%%:  560-block  2
+branch  2 never executed
+branch  3 never executed
+        -:  561:
+    #####:  562:			if (*cmd == *history[i] && strncmp(cmd, history[i], len) == 0) {
+    %%%%%:  562-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  562-block  1
+branch  2 never executed
+branch  3 never executed
+        -:  563:
+    #####:  564:				char **cmd_hist = parse_input_str(history[i]);
+    %%%%%:  564-block  0
+call    0 never executed
+        -:  565:
+    #####:  566:				if (cmd_hist) {
+branch  0 never executed
+branch  1 never executed
+        -:  567:
+    #####:  568:					char **alias_cmd = check_for_alias(cmd_hist);
+    %%%%%:  568-block  0
+call    0 never executed
+        -:  569:
+    #####:  570:					if (alias_cmd) {
+branch  0 never executed
+branch  1 never executed
+        -:  571:
+    #####:  572:						if (exec_cmd(alias_cmd) != EXIT_SUCCESS)
+    %%%%%:  572-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  573:							exit_status = EXIT_FAILURE;
+    %%%%%:  573-block  0
+unconditional  0 never executed
+        -:  574:
+    #####:  575:						for (i = 0; alias_cmd[i]; i++)
+    %%%%%:  575-block  0
+unconditional  0 never executed
+    %%%%%:  575-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  576:							free(alias_cmd[i]);
+    %%%%%:  576-block  0
+unconditional  0 never executed
+        -:  577:
+    #####:  578:						free(alias_cmd);
+        -:  579:
+    #####:  580:						alias_cmd = (char **)NULL;
+    %%%%%:  580-block  0
+unconditional  0 never executed
+        -:  581:					}
+        -:  582:
+        -:  583:					else {
+    #####:  584:						if (exec_cmd(cmd_hist) != EXIT_SUCCESS)
+    %%%%%:  584-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  585:							exit_status = EXIT_FAILURE;
+    %%%%%:  585-block  0
+unconditional  0 never executed
+        -:  586:
+    #####:  587:						for (i = 0; cmd_hist[i]; i++)
+    %%%%%:  587-block  0
+unconditional  0 never executed
+    %%%%%:  587-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  588:							free(cmd_hist[i]);
+    %%%%%:  588-block  0
+unconditional  0 never executed
+        -:  589:
+    #####:  590:						free(cmd_hist);
+    %%%%%:  590-block  0
+unconditional  0 never executed
+        -:  591:					}
+        -:  592:
+    #####:  593:					args_n = old_args;
+    #####:  594:					return exit_status;
+    %%%%%:  594-block  0
+unconditional  0 never executed
+        -:  595:				}
+        -:  596:			}
+        -:  597:		}
+        -:  598:
+    #####:  599:		fprintf(stderr, _("%s: !%s: Event not found\n"), PROGRAM_NAME, cmd);
+    %%%%%:  599-block  0
+call    0 never executed
+        -:  600:
+    #####:  601:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  602:	}
+        -:  603:
+        -:  604:	else {
+    #####:  605:		printf(_("Usage:\n\
+    %%%%%:  605-block  0
+call    0 never executed
+        -:  606:!!: Execute the last command.\n\
+        -:  607:!n: Execute the command number 'n' in the history list.\n\
+        -:  608:!-n: Execute the last-n command in the history list.\n"));
+    #####:  609:		return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  610:	}
+        -:  611:}
+        -:  612:
+        -:  613:int
+function get_history called 1 returned 100% blocks executed 64%
+        1:  614:get_history(void)
+        -:  615:{
+        1:  616:	if (!config_ok)
+        1:  616-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  617:		return EXIT_FAILURE;
+    %%%%%:  617-block  0
+unconditional  0 never executed
+        -:  618:
+        1:  619:	if (current_hist_n == 0) /* Coming from main() */
+        1:  619-block  0
+branch  0 taken 1 (fallthrough)
+branch  1 taken 0
+        1:  620:		history = (char **)xcalloc(1, sizeof(char *));
+        1:  620-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -:  621:
+        -:  622:	else { /* Only true when comming from 'history clear' */
+        -:  623:		size_t i;
+        -:  624:
+    #####:  625:		for (i = 0; history[i]; i++)
+    %%%%%:  625-block  0
+unconditional  0 never executed
+    %%%%%:  625-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  626:			free(history[i]);
+    %%%%%:  626-block  0
+unconditional  0 never executed
+        -:  627:
+    #####:  628:		history = (char **)xrealloc(history, 1 * sizeof(char *));
+    %%%%%:  628-block  0
+call    0 never executed
+    #####:  629:		current_hist_n = 0;
+unconditional  0 never executed
+        -:  630:	}
+        -:  631:
+        1:  632:	FILE *hist_fp = fopen(HIST_FILE, "r");
+        1:  632-block  0
+call    0 returned 1
+        -:  633:
+        1:  634:	if (!hist_fp) {
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:  635:		_err('e', PRINT_PROMPT, "%s: history: '%s': %s\n",
+call    0 never executed
+    #####:  636:		    PROGRAM_NAME, HIST_FILE, strerror(errno));
+    %%%%%:  636-block  0
+call    0 never executed
+    #####:  637:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  638:	}
+        -:  639:
+        1:  640:	size_t line_size = 0;
+        1:  641:	char *line_buff = (char *)NULL;
+        1:  642:	ssize_t line_len = 0;
+        -:  643:
+     1001:  644:	while ((line_len = getline(&line_buff, &line_size, hist_fp)) > 0) {
+        1:  644-block  0
+unconditional  0 taken 1
+     1001:  644-block  1
+call    1 returned 1001
+branch  2 taken 1000
+branch  3 taken 1 (fallthrough)
+        -:  645:
+     1000:  646:		line_buff[line_len - 1] = '\0';
+        -:  647:
+     1000:  648:		history = (char **)xrealloc(history, (current_hist_n + 2) * sizeof(char *));
+     1000:  648-block  0
+call    0 returned 1000
+     1000:  649:		history[current_hist_n++] = savestring(line_buff, (size_t)line_len);
+call    0 returned 1000
+unconditional  1 taken 1000
+        -:  650:	}
+        -:  651:
+        1:  652:	history[current_hist_n] = (char *)NULL;
+        -:  653:
+        1:  654:	free(line_buff);
+        1:  655:	fclose(hist_fp);
+        1:  655-block  0
+call    0 returned 1
+        -:  656:
+        1:  657:	return EXIT_SUCCESS;
+unconditional  0 taken 1
+        -:  658:}
+        -:  659:
+        -:  660:void
+function add_to_cmdhist called 16 returned 100% blocks executed 89%
+       16:  661:add_to_cmdhist(const char *cmd)
+        -:  662:{
+       16:  663:	if (!cmd)
+       16:  663-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 16
+    #####:  664:		return;
+    %%%%%:  664-block  0
+unconditional  0 never executed
+        -:  665:
+        -:  666:	/* For readline */
+       16:  667:	add_history(cmd);
+       16:  667-block  0
+call    0 returned 16
+        -:  668:
+       16:  669:	if (config_ok)
+branch  0 taken 16 (fallthrough)
+branch  1 taken 0
+       16:  670:		append_history(1, HIST_FILE);
+       16:  670-block  0
+call    0 returned 16
+unconditional  1 taken 16
+        -:  671:
+        -:  672:	/* For us */
+        -:  673:	/* Add the new input to the history array */
+       16:  674:	size_t cmd_len = strlen(cmd);
+       16:  675:	history = (char **)xrealloc(history, (size_t)(current_hist_n + 2) * sizeof(char *));
+       16:  675-block  0
+call    0 returned 16
+       16:  676:	history[current_hist_n++] = savestring(cmd, cmd_len);
+call    0 returned 16
+        -:  677:
+       16:  678:	history[current_hist_n] = (char *)NULL;
+unconditional  0 taken 16
+        -:  679:}
+        -:  680:
+        -:  681:/* Returns 1 if INPUT should be stored in history and 0 if not */
+        -:  682:int
+function record_cmd called 22 returned 100% blocks executed 46%
+       22:  683:record_cmd(char *input)
+        -:  684:{
+        -:  685:	/* NULL input */
+       22:  686:	if (!input)
+       22:  686-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 22
+    #####:  687:		return 0;
+    %%%%%:  687-block  0
+unconditional  0 never executed
+        -:  688:
+        -:  689:	/* Blank lines */
+       22:  690:	unsigned int blank = 1;
+       22:  691:	char *p = input;
+        -:  692:
+       22:  693:	while (*p) {
+       22:  693-block  0
+unconditional  0 taken 22
+       22:  693-block  1
+branch  1 taken 22
+branch  2 taken 0 (fallthrough)
+       22:  694:		if (*p > ' ') {
+       22:  694-block  0
+branch  0 taken 22 (fallthrough)
+branch  1 taken 0
+       22:  695:			blank = 0;
+       22:  696:			break;
+       22:  696-block  0
+unconditional  0 taken 22
+        -:  697:		}
+    #####:  698:		p++;
+    %%%%%:  698-block  0
+unconditional  0 never executed
+        -:  699:	}
+        -:  700:
+       22:  701:	if (blank)
+       22:  701-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 22
+    #####:  702:		return 0;
+    %%%%%:  702-block  0
+unconditional  0 never executed
+        -:  703:
+        -:  704:	/* Rewind the pointer to the beginning of the input line */
+       22:  705:	p = input;
+        -:  706:
+        -:  707:	/* Commands starting with space */
+       22:  708:	if (*p == ' ')
+       22:  708-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 22
+    #####:  709:		return 0;
+    %%%%%:  709-block  0
+unconditional  0 never executed
+        -:  710:
+        -:  711:	/* Exit commands */
+       22:  712:	switch (*p) {
+       22:  712-block  0
+branch  0 taken 1
+branch  1 taken 0
+branch  2 taken 0
+branch  3 taken 0
+branch  4 taken 3
+branch  5 taken 3
+branch  6 taken 15
+        -:  713:
+        1:  714:	case 'q':
+       1*:  715:		if (*(p + 1) == '\0' || strcmp(p, "quit") == 0)
+        1:  715-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    %%%%%:  715-block  1
+branch  2 never executed
+branch  3 never executed
+        1:  716:			return 0;
+        1:  716-block  0
+unconditional  0 taken 1
+    #####:  717:		break;
+    %%%%%:  717-block  0
+unconditional  0 never executed
+        -:  718:
+    #####:  719:	case 'Q':
+    #####:  720:		if (*(p + 1) == '\0')
+    %%%%%:  720-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  721:			return 0;
+    %%%%%:  721-block  0
+unconditional  0 never executed
+    #####:  722:		break;
+    %%%%%:  722-block  0
+unconditional  0 never executed
+        -:  723:
+    #####:  724:	case 'e':
+    #####:  725:		if (*(p + 1) == 'x' && strcmp(p, "exit") == 0)
+    %%%%%:  725-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  725-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  726:			return 0;
+    %%%%%:  726-block  0
+unconditional  0 never executed
+    #####:  727:		break;
+    %%%%%:  727-block  0
+unconditional  0 never executed
+        -:  728:
+    #####:  729:	case 'z':
+    #####:  730:		if (*(p + 1) == 'z' && *(p + 2) == '\0')
+    %%%%%:  730-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  730-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  731:			return 0;
+    %%%%%:  731-block  0
+unconditional  0 never executed
+    #####:  732:		break;
+    %%%%%:  732-block  0
+unconditional  0 never executed
+        -:  733:
+        3:  734:	case 's':
+       3*:  735:		if (*(p + 1) == 'a' && strcmp(p, "salir") == 0)
+        3:  735-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    %%%%%:  735-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  736:			return 0;
+    %%%%%:  736-block  0
+unconditional  0 never executed
+        3:  737:		break;
+        3:  737-block  0
+unconditional  0 taken 3
+        -:  738:
+        3:  739:	case 'c':
+       3*:  740:		if (*(p + 1) == 'h' && strcmp(p, "chau") == 0)
+        3:  740-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 3
+    %%%%%:  740-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  741:			return 0;
+    %%%%%:  741-block  0
+unconditional  0 never executed
+        3:  742:		break;
+        3:  742-block  0
+unconditional  0 taken 3
+        -:  743:
+       15:  744:	default:
+       15:  745:		break;
+       15:  745-block  0
+unconditional  0 taken 15
+        -:  746:	}
+        -:  747:
+        -:  748:	/* History */
+      21*:  749:	if (*p == '!' && (_ISDIGIT(*(p + 1)) || (*(p + 1) == '-'
+       21:  749-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 21
+    %%%%%:  749-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  749-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  750:	&& _ISDIGIT(*(p + 2))) || ((*(p + 1) == '!') && *(p + 2) == '\0')))
+    %%%%%:  750-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  750-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  750-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  751:		return 0;
+    %%%%%:  751-block  0
+unconditional  0 never executed
+        -:  752:
+        -:  753:	/* Consequtively equal commands in history */
+       21:  754:	if (history && history[current_hist_n - 1]
+       21:  754-block  0
+branch  0 taken 21 (fallthrough)
+branch  1 taken 0
+       21:  754-block  1
+branch  2 taken 21 (fallthrough)
+branch  3 taken 0
+       21:  755:	&& *p == *history[current_hist_n - 1]
+       21:  755-block  0
+branch  0 taken 6 (fallthrough)
+branch  1 taken 15
+        6:  756:	&& strcmp(p, history[current_hist_n - 1]) == 0)
+        6:  756-block  0
+branch  0 taken 5 (fallthrough)
+branch  1 taken 1
+        5:  757:		return 0;
+        5:  757-block  0
+unconditional  0 taken 5
+        -:  758:
+       16:  759:	return 1;
+       16:  759-block  0
+unconditional  0 taken 16
+        -:  760:}

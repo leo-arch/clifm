@@ -1,0 +1,1752 @@
+        -:    0:Source:file_operations.c
+        -:    1:/* file_operations.c -- control multiple file operations */
+        -:    2:
+        -:    3:/*
+        -:    4: * This file is part of CliFM
+        -:    5: * 
+        -:    6: * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
+        -:    7: * All rights reserved.
+        -:    8:
+        -:    9: * CliFM is free software; you can redistribute it and/or modify
+        -:   10: * it under the terms of the GNU General Public License as published by
+        -:   11: * the Free Software Foundation; either version 2 of the License, or
+        -:   12: * (at your option) any later version.
+        -:   13: *
+        -:   14: * CliFM is distributed in the hope that it will be useful,
+        -:   15: * but WITHOUT ANY WARRANTY; without even the implied warranty of
+        -:   16: * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        -:   17: * GNU General Public License for more details.
+        -:   18: *
+        -:   19: * You should have received a copy of the GNU General Public License
+        -:   20: * along with this program; if not, write to the Free Software
+        -:   21: * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+        -:   22: * MA 02110-1301, USA.
+        -:   23:*/
+        -:   24:
+        -:   25:#include "helpers.h"
+        -:   26:
+        -:   27:#include <errno.h>
+        -:   28:#include <stdio.h>
+        -:   29:#include <string.h>
+        -:   30:#include <sys/stat.h>
+        -:   31:#include <unistd.h>
+        -:   32:#include <readline/readline.h>
+        -:   33:
+        -:   34:#include "archives.h"
+        -:   35:#include "aux.h"
+        -:   36:#include "checks.h"
+        -:   37:#include "colors.h"
+        -:   38:#include "exec.h"
+        -:   39:#include "file_operations.h"
+        -:   40:#include "history.h"
+        -:   41:#include "listing.h"
+        -:   42:#include "mime.h"
+        -:   43:#include "misc.h"
+        -:   44:#include "navigation.h"
+        -:   45:#include "readline.h"
+        -:   46:#include "selection.h"
+        -:   47:
+        -:   48:int
+function xchmod called 0 returned 0% blocks executed 0%
+    #####:   49:xchmod(const char *file, mode_t mode)
+        -:   50:{
+        -:   51:	/* Set or unset S_IXUSR, S_IXGRP, and S_IXOTH */
+    #####:   52:	(0100 & mode) ? (mode &= ~0111) : (mode |= 0111);
+    %%%%%:   52-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   52-block  1
+unconditional  2 never executed
+    %%%%%:   52-block  2
+unconditional  3 never executed
+        -:   53:
+    #####:   54:	if (chmod(file, mode) == -1) {
+    %%%%%:   54-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:   55:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+    %%%%%:   55-block  0
+call    0 never executed
+call    1 never executed
+    #####:   56:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:   57:	}
+        -:   58:
+    #####:   59:	return EXIT_SUCCESS;
+    %%%%%:   59-block  0
+unconditional  0 never executed
+        -:   60:}
+        -:   61:
+        -:   62:int
+function open_function called 1 returned 100% blocks executed 15%
+        1:   63:open_function(char **cmd)
+        -:   64:{
+        1:   65:	if (!cmd)
+        1:   65-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:   66:		return EXIT_FAILURE;
+    %%%%%:   66-block  0
+unconditional  0 never executed
+        -:   67:
+        1:   68:	if (strchr(cmd[1], '\\')) {
+        1:   68-block  0
+branch  0 taken 0 (fallthrough)
+branch  1 taken 1
+    #####:   69:		char *deq_path = (char *)NULL;
+    #####:   70:		deq_path = dequote_str(cmd[1], 0);
+    %%%%%:   70-block  0
+call    0 never executed
+        -:   71:
+    #####:   72:		if (!deq_path) {
+branch  0 never executed
+branch  1 never executed
+    #####:   73:			fprintf(stderr, _("%s: %s: Error dequoting filename\n"),
+    #####:   74:			    PROGRAM_NAME, cmd[1]);
+    %%%%%:   74-block  0
+call    0 never executed
+    #####:   75:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:   76:		}
+        -:   77:
+    #####:   78:		strcpy(cmd[1], deq_path);
+    #####:   79:		free(deq_path);
+    %%%%%:   79-block  0
+unconditional  0 never executed
+        -:   80:	}
+        -:   81:
+        1:   82:	char *file = cmd[1];
+        -:   83:
+        -:   84:	/* Check file existence */
+        -:   85:	struct stat file_attrib;
+        -:   86:
+        1:   87:	if (stat(file, &file_attrib) == -1) {
+        1:   87-block  0
+call    0 returned 1
+branch  1 taken 0 (fallthrough)
+branch  2 taken 1
+    #####:   88:		fprintf(stderr, "%s: open: %s: %s\n", PROGRAM_NAME, cmd[1],
+call    0 never executed
+    #####:   89:		    strerror(errno));
+    %%%%%:   89-block  0
+call    0 never executed
+    #####:   90:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:   91:	}
+        -:   92:
+        -:   93:	/* Check file type: only directories, symlinks, and regular files
+        -:   94:	 * will be opened */
+        -:   95:
+        1:   96:	char no_open_file = 1, file_type[128];
+        -:   97:	/* Reserve a good amount of bytes for filetype: it cannot be
+        -:   98:		  * known beforehand how many bytes the TRANSLATED string will
+        -:   99:		  * need */
+        -:  100:
+        1:  101:	switch ((file_attrib.st_mode & S_IFMT)) {
+        1:  101-block  0
+branch  0 taken 0
+branch  1 taken 0
+branch  2 taken 0
+branch  3 taken 0
+branch  4 taken 1
+branch  5 taken 0
+branch  6 taken 0
+    #####:  102:	case S_IFBLK:
+        -:  103:		/* Store filetype to compose and print the error message, if
+        -:  104:		 * necessary */
+    #####:  105:		strcpy(file_type, _("block device"));
+    #####:  106:		break;
+    %%%%%:  106-block  0
+unconditional  0 never executed
+        -:  107:
+    #####:  108:	case S_IFCHR:
+    #####:  109:		strcpy(file_type, _("character device"));
+    #####:  110:		break;
+    %%%%%:  110-block  0
+unconditional  0 never executed
+        -:  111:
+    #####:  112:	case S_IFSOCK:
+    #####:  113:		strcpy(file_type, _("socket"));
+    #####:  114:		break;
+    %%%%%:  114-block  0
+unconditional  0 never executed
+        -:  115:
+    #####:  116:	case S_IFIFO:
+    #####:  117:		strcpy(file_type, _("FIFO/pipe"));
+    #####:  118:		break;
+    %%%%%:  118-block  0
+unconditional  0 never executed
+        -:  119:
+        1:  120:	case S_IFDIR:
+        1:  121:		return cd_function(file);
+        1:  121-block  0
+call    0 returned 1
+unconditional  1 taken 1
+        -:  122:
+    #####:  123:	case S_IFREG:
+        -:  124:
+        -:  125:		/* If an archive/compressed file, call archiver() */
+    #####:  126:		if (is_compressed(file, 1) == 0) {
+    %%%%%:  126-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  127:			char *tmp_cmd[] = {"ad", file, NULL};
+    #####:  128:			return archiver(tmp_cmd, 'd');
+    %%%%%:  128-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  129:		}
+        -:  130:
+    #####:  131:		no_open_file = 0;
+    #####:  132:		break;
+    %%%%%:  132-block  0
+unconditional  0 never executed
+        -:  133:
+    #####:  134:	default:
+    #####:  135:		strcpy(file_type, _("unknown file type"));
+    #####:  136:		break;
+    %%%%%:  136-block  0
+unconditional  0 never executed
+        -:  137:	}
+        -:  138:
+        -:  139:	/* If neither directory nor regular file nor symlink (to directory
+        -:  140:	 * or regular file), print the corresponding error message and
+        -:  141:	 * exit */
+    #####:  142:	if (no_open_file) {
+    %%%%%:  142-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  143:		fprintf(stderr, _("%s: %s (%s): Cannot open file. Try "
+    #####:  144:			"'APPLICATION FILENAME'.\n"), PROGRAM_NAME, cmd[1], file_type);
+    %%%%%:  144-block  0
+call    0 never executed
+    #####:  145:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  146:	}
+        -:  147:
+        -:  148:	/* At this point we know the file to be openend is either a regular
+        -:  149:	 * file or a symlink to a regular file. So, just open the file */
+        -:  150:
+    #####:  151:	if (!cmd[2] || (*cmd[2] == '&' && !cmd[2][1])) {
+    %%%%%:  151-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  151-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  151-block  2
+branch  4 never executed
+branch  5 never executed
+        -:  152:
+    #####:  153:		if (opener) {
+    %%%%%:  153-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  154:			char *tmp_cmd[] = {opener, file, NULL};
+        -:  155:
+    #####:  156:			int ret = launch_execve(tmp_cmd,
+    #####:  157:			    strcmp(cmd[args_n], "&") == 0 ? BACKGROUND
+    %%%%%:  157-block  0
+call    0 never executed
+        -:  158:							  : FOREGROUND,
+        -:  159:			    E_NOSTDERR);
+        -:  160:
+    #####:  161:			if (ret != EXIT_SUCCESS)
+branch  0 never executed
+branch  1 never executed
+    #####:  162:				return EXIT_FAILURE;
+    %%%%%:  162-block  0
+unconditional  0 never executed
+        -:  163:
+    #####:  164:			return EXIT_SUCCESS;
+    %%%%%:  164-block  0
+unconditional  0 never executed
+        -:  165:		}
+        -:  166:
+    #####:  167:		else if (!(flags & FILE_CMD_OK)) {
+    %%%%%:  167-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  168:			fprintf(stderr, _("%s: file: Command not found. Specify an "
+    %%%%%:  168-block  0
+call    0 never executed
+        -:  169:					"application to open the file\nUsage: "
+        -:  170:					"open ELN/FILENAME [APPLICATION]\n"), PROGRAM_NAME);
+    #####:  171:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  172:		}
+        -:  173:
+        -:  174:		else {
+    #####:  175:			int ret = mime_open(cmd);
+    %%%%%:  175-block  0
+call    0 never executed
+        -:  176:
+        -:  177:			/* The return value of mime_open could be zero
+        -:  178:			 * (EXIT_SUCCESS), if success, one (EXIT_FAILURE) if error
+        -:  179:			 * (in which case the following error message should be
+        -:  180:			 * printed), and -1 if no access permission, in which case
+        -:  181:			 * no error message should be printed, since the
+        -:  182:			 * corresponding message is printed by mime_open itself */
+    #####:  183:			if (ret == EXIT_FAILURE) {
+branch  0 never executed
+branch  1 never executed
+    #####:  184:				fputs("Add a new entry to the mimelist file ('mime "
+    %%%%%:  184-block  0
+call    0 never executed
+        -:  185:				      "edit' or F6) or run 'open FILE APPLICATION'\n", stderr);
+    #####:  186:				return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  187:			}
+        -:  188:
+    #####:  189:			return EXIT_SUCCESS;
+    %%%%%:  189-block  0
+unconditional  0 never executed
+        -:  190:		}
+        -:  191:	}
+        -:  192:
+        -:  193:	/* If some application was specified to open the file */
+    #####:  194:	char *tmp_cmd[] = {cmd[2], file, NULL};
+        -:  195:
+    #####:  196:	int ret = launch_execve(tmp_cmd, (cmd[args_n]
+    %%%%%:  196-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  196-block  1
+unconditional  2 never executed
+    %%%%%:  196-block  2
+unconditional  3 never executed
+    %%%%%:  196-block  3
+call    4 never executed
+    #####:  197:	&& strcmp(cmd[args_n], "&") == 0) ? BACKGROUND : FOREGROUND, E_NOSTDERR);
+    %%%%%:  197-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  198:
+    #####:  199:	if (ret != EXIT_SUCCESS)
+branch  0 never executed
+branch  1 never executed
+    #####:  200:		return EXIT_FAILURE;
+    %%%%%:  200-block  0
+unconditional  0 never executed
+        -:  201:
+    #####:  202:	return EXIT_SUCCESS;
+    %%%%%:  202-block  0
+unconditional  0 never executed
+        -:  203:}
+        -:  204:
+        -:  205:/* Relink symlink to new path */
+        -:  206:int
+function edit_link called 0 returned 0% blocks executed 0%
+    #####:  207:edit_link(char *link)
+        -:  208:{
+    #####:  209:	if (!link || !*link)
+    %%%%%:  209-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  209-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  210:		return EXIT_FAILURE;
+    %%%%%:  210-block  0
+unconditional  0 never executed
+        -:  211:
+        -:  212:	/* Dequote the filename, if necessary */
+    #####:  213:	if (strchr(link, '\\')) {
+    %%%%%:  213-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  214:		char *tmp = dequote_str(link, 0);
+    %%%%%:  214-block  0
+call    0 never executed
+        -:  215:
+    #####:  216:		if (!tmp) {
+branch  0 never executed
+branch  1 never executed
+    #####:  217:			fprintf(stderr, _("%s: %s: Error dequoting file\n"),
+    %%%%%:  217-block  0
+call    0 never executed
+        -:  218:			    PROGRAM_NAME, link);
+    #####:  219:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  220:		}
+        -:  221:
+    #####:  222:		strcpy(link, tmp);
+    #####:  223:		free(tmp);
+    %%%%%:  223-block  0
+unconditional  0 never executed
+        -:  224:	}
+        -:  225:
+        -:  226:	/* Check we have a valid symbolic link */
+        -:  227:	struct stat file_attrib;
+        -:  228:
+    #####:  229:	if (lstat(link, &file_attrib) == -1) {
+    %%%%%:  229-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  230:		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, link,
+call    0 never executed
+    #####:  231:		    strerror(errno));
+    %%%%%:  231-block  0
+call    0 never executed
+    #####:  232:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  233:	}
+        -:  234:
+    #####:  235:	if ((file_attrib.st_mode & S_IFMT) != S_IFLNK) {
+    %%%%%:  235-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  236:		fprintf(stderr, _("%s: %s: Not a symbolic link\n"),
+    %%%%%:  236-block  0
+call    0 never executed
+        -:  237:		    PROGRAM_NAME, link);
+    #####:  238:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  239:	}
+        -:  240:
+        -:  241:	/* Get file pointed to by symlink and report to the user */
+    #####:  242:	char *real_path = realpath(link, NULL);
+    %%%%%:  242-block  0
+call    0 never executed
+        -:  243:
+    #####:  244:	if (!real_path)
+branch  0 never executed
+branch  1 never executed
+    #####:  245:		printf(_("%s%s%s currently pointing to nowhere (broken link)\n"),
+    %%%%%:  245-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  246:		    or_c, link, df_c);
+        -:  247:	else {
+    #####:  248:		printf(_("%s%s%s currently pointing to "), ln_c, link, df_c);
+    %%%%%:  248-block  0
+call    0 never executed
+    #####:  249:		colors_list(real_path, NO_ELN, NO_PAD, PRINT_NEWLINE);
+call    0 never executed
+    #####:  250:		free(real_path);
+    #####:  251:		real_path = (char *)NULL;
+unconditional  0 never executed
+        -:  252:	}
+        -:  253:
+    #####:  254:	char *new_path = (char *)NULL;
+        -:  255:
+        -:  256:	/* Enable autocd and auto-open (in case they are not already
+        -:  257:	 * enabled) to allow TAB completion for ELN's */
+    #####:  258:	int autocd_status = autocd, auto_open_status = auto_open;
+    #####:  259:	autocd = auto_open = 1;
+        -:  260:
+    #####:  261:	while (!new_path) {
+    %%%%%:  261-block  0
+unconditional  0 never executed
+    %%%%%:  261-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  262:		new_path = rl_no_hist(_("New path ('q' to quit): "));
+    %%%%%:  262-block  0
+call    0 never executed
+        -:  263:
+    #####:  264:		if (!new_path)
+branch  0 never executed
+branch  1 never executed
+    #####:  265:			continue;
+    %%%%%:  265-block  0
+unconditional  0 never executed
+        -:  266:
+    #####:  267:		if (!*new_path) {
+    %%%%%:  267-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  268:			free(new_path);
+    #####:  269:			new_path = (char *)NULL;
+    #####:  270:			continue;
+    %%%%%:  270-block  0
+unconditional  0 never executed
+        -:  271:		}
+        -:  272:
+    #####:  273:		if (*new_path == 'q' && !new_path[1]) {
+    %%%%%:  273-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  273-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  274:			free(new_path);
+    #####:  275:			return EXIT_SUCCESS;
+    %%%%%:  275-block  0
+unconditional  0 never executed
+        -:  276:		}
+        -:  277:	}
+        -:  278:
+        -:  279:	/* Set autocd and auto-open to their original values */
+    #####:  280:	autocd = autocd_status;
+    #####:  281:	auto_open = auto_open_status;
+        -:  282:
+        -:  283:	/* If an ELN, replace by the corresponding filename */
+    #####:  284:	if (is_number(new_path)) {
+    %%%%%:  284-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  285:		int i_new_path = atoi(new_path) - 1;
+    #####:  286:		if (file_info[i_new_path].name) {
+    %%%%%:  286-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  287:			new_path = (char *)xrealloc(new_path,
+    #####:  288:			    (strlen(file_info[i_new_path].name) + 1) * sizeof(char));
+    %%%%%:  288-block  0
+call    0 never executed
+    #####:  289:			strcpy(new_path, file_info[i_new_path].name);
+unconditional  0 never executed
+        -:  290:		}
+        -:  291:	}
+        -:  292:
+        -:  293:	/* Remove terminating space. TAB completion puts a final space
+        -:  294:	 * after file names */
+    #####:  295:	size_t path_len = strlen(new_path);
+    #####:  296:	if (new_path[path_len - 1] == ' ')
+    %%%%%:  296-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  297:		new_path[path_len - 1] = '\0';
+    %%%%%:  297-block  0
+unconditional  0 never executed
+        -:  298:
+        -:  299:	/* Dequote new path, if needed */
+    #####:  300:	if (strchr(new_path, '\\')) {
+    %%%%%:  300-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  301:		char *tmp = dequote_str(new_path, 0);
+    %%%%%:  301-block  0
+call    0 never executed
+        -:  302:
+    #####:  303:		if (!tmp) {
+branch  0 never executed
+branch  1 never executed
+    #####:  304:			fprintf(stderr, _("%s: %s: Error dequoting file\n"),
+    %%%%%:  304-block  0
+call    0 never executed
+        -:  305:			    PROGRAM_NAME, new_path);
+    #####:  306:			free(new_path);
+    #####:  307:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  308:		}
+        -:  309:
+    #####:  310:		strcpy(new_path, tmp);
+    #####:  311:		free(tmp);
+    %%%%%:  311-block  0
+unconditional  0 never executed
+        -:  312:	}
+        -:  313:
+        -:  314:	/* Check new_path existence and warn the user if it does not
+        -:  315:	 * exist */
+    #####:  316:	if (lstat(new_path, &file_attrib) == -1) {
+    %%%%%:  316-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+        -:  317:
+    #####:  318:		printf("'%s': %s\n", new_path, strerror(errno));
+    %%%%%:  318-block  0
+call    0 never executed
+call    1 never executed
+    #####:  319:		char *answer = (char *)NULL;
+    #####:  320:		while (!answer) {
+unconditional  0 never executed
+    %%%%%:  320-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:  321:			answer = rl_no_hist(_("Relink as a broken symbolic link? [y/n] "));
+    %%%%%:  321-block  0
+call    0 never executed
+        -:  322:
+    #####:  323:			if (!answer)
+branch  0 never executed
+branch  1 never executed
+    #####:  324:				continue;
+    %%%%%:  324-block  0
+unconditional  0 never executed
+        -:  325:
+    #####:  326:			if (!*answer) {
+    %%%%%:  326-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  327:				free(answer);
+    #####:  328:				answer = (char *)NULL;
+    #####:  329:				continue;
+    %%%%%:  329-block  0
+unconditional  0 never executed
+        -:  330:			}
+        -:  331:
+    #####:  332:			if (*answer != 'y' && *answer != 'n') {
+    %%%%%:  332-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  332-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  333:				free(answer);
+    #####:  334:				answer = (char *)NULL;
+    #####:  335:				continue;
+    %%%%%:  335-block  0
+unconditional  0 never executed
+        -:  336:			}
+        -:  337:
+    #####:  338:			if (answer[1]) {
+    %%%%%:  338-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  339:				free(answer);
+    #####:  340:				answer = (char *)NULL;
+    #####:  341:				continue;
+    %%%%%:  341-block  0
+unconditional  0 never executed
+        -:  342:			}
+        -:  343:
+    #####:  344:			if (*answer == 'y') {
+    %%%%%:  344-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  345:				free(answer);
+    #####:  346:				break;
+    %%%%%:  346-block  0
+unconditional  0 never executed
+        -:  347:			}
+        -:  348:
+        -:  349:			else {
+    #####:  350:				free(answer);
+    #####:  351:				free(new_path);
+    #####:  352:				return EXIT_SUCCESS;
+    %%%%%:  352-block  0
+unconditional  0 never executed
+        -:  353:			}
+        -:  354:		}
+        -:  355:	}
+        -:  356:
+        -:  357:	/* Finally, relink the symlink to new_path */
+    #####:  358:	char *cmd[] = {"ln", "-sfn", new_path, link, NULL};
+    #####:  359:	if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+    %%%%%:  359-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  360:		free(new_path);
+    #####:  361:		return EXIT_FAILURE;
+    %%%%%:  361-block  0
+unconditional  0 never executed
+        -:  362:	}
+        -:  363:
+    #####:  364:	real_path = realpath(link, NULL);
+    %%%%%:  364-block  0
+call    0 never executed
+        -:  365:
+    #####:  366:	printf(_("%s%s%s successfully relinked to "), real_path ? ln_c
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  366-block  0
+unconditional  2 never executed
+    %%%%%:  366-block  1
+unconditional  3 never executed
+    %%%%%:  366-block  2
+call    4 never executed
+        -:  367:												: or_c, link, df_c);
+    #####:  368:	colors_list(new_path, NO_ELN, NO_PAD, PRINT_NEWLINE);
+call    0 never executed
+        -:  369:
+    #####:  370:	free(new_path);
+        -:  371:
+    #####:  372:	if (real_path)
+branch  0 never executed
+branch  1 never executed
+    #####:  373:		free(real_path);
+    %%%%%:  373-block  0
+unconditional  0 never executed
+        -:  374:
+    #####:  375:	return EXIT_SUCCESS;
+    %%%%%:  375-block  0
+unconditional  0 never executed
+        -:  376:}
+        -:  377:
+        -:  378:int
+function copy_function called 0 returned 0% blocks executed 0%
+    #####:  379:copy_function(char **comm)
+        -:  380:{
+    #####:  381:	log_function(comm);
+    %%%%%:  381-block  0
+call    0 never executed
+        -:  382:
+    #####:  383:	if (!is_sel)
+branch  0 never executed
+branch  1 never executed
+    #####:  384:		return run_and_refresh(comm);
+    %%%%%:  384-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  385:
+    #####:  386:	char *tmp_cmd = (char *)NULL;
+    #####:  387:	size_t total_len = 0, i = 0;
+        -:  388:
+    #####:  389:	for (i = 0; i <= args_n; i++)
+    %%%%%:  389-block  0
+unconditional  0 never executed
+    %%%%%:  389-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  390:		total_len += strlen(comm[i]);
+    %%%%%:  390-block  0
+unconditional  0 never executed
+        -:  391:
+    #####:  392:	tmp_cmd = (char *)xcalloc(total_len + (i + 1) + 2, sizeof(char));
+    %%%%%:  392-block  0
+call    0 never executed
+        -:  393:
+    #####:  394:	for (i = 0; i <= args_n; i++) {
+unconditional  0 never executed
+    %%%%%:  394-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:  395:		strcat(tmp_cmd, comm[i]);
+    #####:  396:		strcat(tmp_cmd, " ");
+    %%%%%:  396-block  0
+unconditional  0 never executed
+        -:  397:	}
+        -:  398:
+    #####:  399:	if (sel_is_last)
+    %%%%%:  399-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  400:		strcat(tmp_cmd, ".");
+    %%%%%:  400-block  0
+unconditional  0 never executed
+        -:  401:
+    #####:  402:	int ret = 0;
+    #####:  403:	ret = launch_execle(tmp_cmd);
+    %%%%%:  403-block  0
+call    0 never executed
+    #####:  404:	free(tmp_cmd);
+        -:  405:
+    #####:  406:	if (ret != EXIT_SUCCESS)
+branch  0 never executed
+branch  1 never executed
+    #####:  407:		return EXIT_FAILURE;
+    %%%%%:  407-block  0
+unconditional  0 never executed
+        -:  408:
+    #####:  409:	if (copy_n_rename) { /* pp */
+    %%%%%:  409-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  410:		char **tmp = (char **)xnmalloc(sel_n + 3, sizeof(char *));
+    %%%%%:  410-block  0
+call    0 never executed
+    #####:  411:		tmp[0] = savestring("br", 2);
+call    0 never executed
+        -:  412:
+        -:  413:		size_t j;
+    #####:  414:		for (j = 0; j < sel_n; j++) {
+unconditional  0 never executed
+    %%%%%:  414-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:  415:			size_t arg_len = strlen(sel_elements[j]);
+        -:  416:
+    #####:  417:			if (sel_elements[j][arg_len - 1] == '/')
+    %%%%%:  417-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  418:				sel_elements[j][arg_len - 1] = '\0';
+    %%%%%:  418-block  0
+unconditional  0 never executed
+        -:  419:
+    #####:  420:			if (*comm[args_n] == '~') {
+    %%%%%:  420-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  421:				char *exp_dest = tilde_expand(comm[args_n]);
+    %%%%%:  421-block  0
+call    0 never executed
+    #####:  422:				comm[args_n] = xrealloc(comm[args_n],
+    #####:  423:				    (strlen(exp_dest) + 1) * sizeof(char));
+call    0 never executed
+    #####:  424:				strcpy(comm[args_n], exp_dest);
+    #####:  425:				free(exp_dest);
+unconditional  0 never executed
+        -:  426:			}
+        -:  427:
+    #####:  428:			size_t dest_len = strlen(comm[args_n]);
+    #####:  429:			if (comm[args_n][dest_len - 1] == '/') {
+    %%%%%:  429-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  430:				comm[args_n][dest_len - 1] = '\0';
+    %%%%%:  430-block  0
+unconditional  0 never executed
+        -:  431:			}
+        -:  432:
+        -:  433:			char dest[PATH_MAX];
+    #####:  434:			strcpy(dest, (sel_is_last || strcmp(comm[args_n], ".") == 0)
+    %%%%%:  434-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  434-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  435:					 ? ws[cur_ws].path
+    %%%%%:  435-block  0
+unconditional  0 never executed
+    #####:  436:					 : comm[args_n]);
+    %%%%%:  436-block  0
+unconditional  0 never executed
+        -:  437:
+    #####:  438:			char *ret_val = strrchr(sel_elements[j], '/');
+        -:  439:
+    #####:  440:			char *tmp_str = (char *)xnmalloc(strlen(dest)
+    #####:  441:								+ strlen(ret_val + 1) + 2, sizeof(char));
+    %%%%%:  441-block  0
+call    0 never executed
+        -:  442:
+    #####:  443:			sprintf(tmp_str, "%s/%s", dest, ret_val + 1);
+        -:  444:
+    #####:  445:			tmp[j + 1] = savestring(tmp_str, strlen(tmp_str));
+call    0 never executed
+    #####:  446:			free(tmp_str);
+unconditional  0 never executed
+        -:  447:		}
+        -:  448:
+    #####:  449:		tmp[j + 1] = (char *)NULL;
+        -:  450:
+    #####:  451:		bulk_rename(tmp);
+    %%%%%:  451-block  0
+call    0 never executed
+        -:  452:
+    #####:  453:		for (i = 0; tmp[i]; i++)
+unconditional  0 never executed
+    %%%%%:  453-block  0
+branch  1 never executed
+branch  2 never executed
+    #####:  454:			free(tmp[i]);
+    %%%%%:  454-block  0
+unconditional  0 never executed
+        -:  455:
+    #####:  456:		free(tmp);
+        -:  457:
+    #####:  458:		copy_n_rename = 0;
+        -:  459:
+    #####:  460:		return EXIT_SUCCESS;
+    %%%%%:  460-block  0
+unconditional  0 never executed
+        -:  461:	}
+        -:  462:
+        -:  463:	/* If 'mv sel' and command is successful deselect everything,
+        -:  464:	 * since sel files are note there anymore */
+    #####:  465:	if (*comm[0] == 'm' && comm[0][1] == 'v'
+    %%%%%:  465-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  465-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  466:	&& (!comm[0][2] || comm[0][2] == ' ')) {
+    %%%%%:  466-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  466-block  1
+branch  2 never executed
+branch  3 never executed
+        -:  467:
+    #####:  468:		for (i = 0; i < sel_n; i++)
+    %%%%%:  468-block  0
+unconditional  0 never executed
+    %%%%%:  468-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  469:			free(sel_elements[i]);
+    %%%%%:  469-block  0
+unconditional  0 never executed
+        -:  470:
+    #####:  471:		sel_n = 0;
+    #####:  472:		save_sel();
+    %%%%%:  472-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  473:	}
+        -:  474:
+    #####:  475:	if (cd_lists_on_the_fly) {
+    %%%%%:  475-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  476:		free_dirlist();
+    %%%%%:  476-block  0
+call    0 never executed
+    #####:  477:		list_dir();
+call    0 never executed
+unconditional  1 never executed
+        -:  478:	}
+        -:  479:
+    #####:  480:	return EXIT_SUCCESS;
+    %%%%%:  480-block  0
+unconditional  0 never executed
+        -:  481:}
+        -:  482:
+        -:  483:int
+function remove_file called 0 returned 0% blocks executed 0%
+    #####:  484:remove_file(char **args)
+        -:  485:{
+    #####:  486:	int cwd = 0, exit_status = EXIT_SUCCESS;
+        -:  487:
+    #####:  488:	char **rm_cmd = (char **)xnmalloc(args_n + 4, sizeof(char *));
+    %%%%%:  488-block  0
+call    0 never executed
+    #####:  489:	int i, j = 3, dirs = 0;
+        -:  490:
+    #####:  491:	for (i = 1; args[i]; i++) {
+unconditional  0 never executed
+    %%%%%:  491-block  0
+unconditional  1 never executed
+    %%%%%:  491-block  1
+branch  2 never executed
+branch  3 never executed
+        -:  492:
+        -:  493:		/* Check if at least one file is in the current directory. If not,
+        -:  494:		 * there is no need to refresh the screen */
+    #####:  495:		if (!cwd) {
+    %%%%%:  495-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  496:			char *ret = strchr(args[i], '/');
+        -:  497:			/* If there's no slash, or if slash is the last char and
+        -:  498:			 * the file is not root "/", we have a file in CWD */
+    #####:  499:			if (!ret || (!*(ret + 1) && ret != args[i]))
+    %%%%%:  499-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  499-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  499-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  500:				cwd = 1;
+    %%%%%:  500-block  0
+unconditional  0 never executed
+        -:  501:		}
+        -:  502:
+    #####:  503:		char *tmp = (char *)NULL;
+    #####:  504:		if (strchr(args[i], '\\')) {
+    %%%%%:  504-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  505:			tmp = dequote_str(args[i], 0);
+    %%%%%:  505-block  0
+call    0 never executed
+        -:  506:
+    #####:  507:			if (tmp) {
+branch  0 never executed
+branch  1 never executed
+        -:  508:				/* Start storing filenames in 3: 0 is for 'rm', and 1
+        -:  509:				 * and 2 for parameters, including end of parameters (--) */
+    #####:  510:				rm_cmd[j++] = savestring(tmp, strlen(tmp));
+    %%%%%:  510-block  0
+call    0 never executed
+    #####:  511:				free(tmp);
+unconditional  0 never executed
+        -:  512:			} else {
+    #####:  513:				fprintf(stderr, "%s: %s: Error dequoting filename\n",
+    #####:  514:				    PROGRAM_NAME, args[i]);
+    %%%%%:  514-block  0
+call    0 never executed
+    #####:  515:				continue;
+unconditional  0 never executed
+        -:  516:			}
+        -:  517:		}
+        -:  518:
+        -:  519:		else
+    #####:  520:			rm_cmd[j++] = savestring(args[i], strlen(args[i]));
+    %%%%%:  520-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  521:
+        -:  522:		struct stat attr;
+    #####:  523:		if (!dirs && lstat(rm_cmd[j - 1], &attr) != -1
+    %%%%%:  523-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  523-block  1
+call    2 never executed
+branch  3 never executed
+branch  4 never executed
+    #####:  524:		&& (attr.st_mode & S_IFMT) == S_IFDIR)
+    %%%%%:  524-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  525:			dirs = 1;
+    %%%%%:  525-block  0
+unconditional  0 never executed
+        -:  526:	}
+        -:  527:
+    #####:  528:	rm_cmd[j] = (char *)NULL;
+        -:  529:
+    #####:  530:	rm_cmd[0] = savestring("rm", 2);
+    %%%%%:  530-block  0
+call    0 never executed
+    #####:  531:	if (dirs)
+branch  0 never executed
+branch  1 never executed
+    #####:  532:		rm_cmd[1] = savestring("-dIr", 4);
+    %%%%%:  532-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  533:	else
+    #####:  534:		rm_cmd[1] = savestring("-I", 2);
+    %%%%%:  534-block  0
+call    0 never executed
+unconditional  1 never executed
+    #####:  535:	rm_cmd[2] = savestring("--", 2);
+    %%%%%:  535-block  0
+call    0 never executed
+        -:  536:
+    #####:  537:	if (launch_execve(rm_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  538:		exit_status = EXIT_FAILURE;
+    %%%%%:  538-block  0
+unconditional  0 never executed
+        -:  539:	else {
+    #####:  540:		if (cwd && cd_lists_on_the_fly && strcmp(args[1], "--help") != 0
+    %%%%%:  540-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  540-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  540-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  541:		&& strcmp(args[1], "--version") != 0) {
+    %%%%%:  541-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  542:			free_dirlist();
+    %%%%%:  542-block  0
+call    0 never executed
+    #####:  543:			exit_status = list_dir();
+call    0 never executed
+unconditional  1 never executed
+        -:  544:		}
+        -:  545:	}
+        -:  546:
+    #####:  547:	for (i = 0; rm_cmd[i]; i++)
+    %%%%%:  547-block  0
+unconditional  0 never executed
+    %%%%%:  547-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  548:		free(rm_cmd[i]);
+    %%%%%:  548-block  0
+unconditional  0 never executed
+        -:  549:
+    #####:  550:	free(rm_cmd);
+        -:  551:
+    #####:  552:	return exit_status;
+    %%%%%:  552-block  0
+unconditional  0 never executed
+        -:  553:}
+        -:  554:
+        -:  555:/* Rename a bulk of files (ARGS) at once. Takes files to be renamed
+        -:  556: * as arguments, and returns zero on success and one on error. The
+        -:  557: * procedude is quite simple: filenames to be renamed are copied into
+        -:  558: * a temporary file, which is opened via the mime function and shown
+        -:  559: * to the user to modify it. Once the filenames have been modified and
+        -:  560: * saved, modifications are printed on the screen and the user is
+        -:  561: * asked whether to perform the actual bulk renaming (via mv) or not.
+        -:  562: * I took this bulk rename method, just because it is quite simple and
+        -:  563: * KISS, from the fff filemanager. So, thanks fff! BTW, this method
+        -:  564: * is also implemented by ranger and nnn */
+        -:  565:int
+function bulk_rename called 0 returned 0% blocks executed 0%
+    #####:  566:bulk_rename(char **args)
+        -:  567:{
+    #####:  568:	if (!args[1])
+    %%%%%:  568-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  569:		return EXIT_FAILURE;
+    %%%%%:  569-block  0
+unconditional  0 never executed
+        -:  570:
+    #####:  571:	int exit_status = EXIT_SUCCESS;
+        -:  572:
+    #####:  573:	char BULK_FILE[PATH_MAX] = "";
+    #####:  574:	if (xargs.stealth_mode == 1)
+    %%%%%:  574-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  575:		sprintf(BULK_FILE, "/tmp/.clifm_bulk_rename");
+    %%%%%:  575-block  0
+unconditional  0 never executed
+        -:  576:	else
+    #####:  577:		sprintf(BULK_FILE, "%s/.bulk_rename", TMP_DIR);
+    %%%%%:  577-block  0
+unconditional  0 never executed
+        -:  578:
+        -:  579:	FILE *bulk_fp;
+        -:  580:
+    #####:  581:	bulk_fp = fopen(BULK_FILE, "w+");
+    %%%%%:  581-block  0
+call    0 never executed
+    #####:  582:	if (!bulk_fp) {
+branch  0 never executed
+branch  1 never executed
+    #####:  583:		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", BULK_FILE, strerror(errno));
+    %%%%%:  583-block  0
+call    0 never executed
+call    1 never executed
+    #####:  584:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  585:	}
+        -:  586:
+    #####:  587:	size_t i, arg_total = 0;
+        -:  588:
+        -:  589:	/* Copy all files to be renamed to the bulk file */
+    #####:  590:	for (i = 1; args[i]; i++) {
+    %%%%%:  590-block  0
+unconditional  0 never executed
+    %%%%%:  590-block  1
+unconditional  1 never executed
+    %%%%%:  590-block  2
+branch  2 never executed
+branch  3 never executed
+        -:  591:
+        -:  592:		/* Dequote filename, if necessary */
+    #####:  593:		if (strchr(args[i], '\\')) {
+    %%%%%:  593-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  594:			char *deq_file = dequote_str(args[i], 0);
+    %%%%%:  594-block  0
+call    0 never executed
+        -:  595:
+    #####:  596:			if (!deq_file) {
+branch  0 never executed
+branch  1 never executed
+    #####:  597:				fprintf(stderr, _("bulk: %s: Error dequoting "
+        -:  598:						  "filename\n"),
+    #####:  599:				    args[i]);
+    %%%%%:  599-block  0
+call    0 never executed
+    #####:  600:				continue;
+unconditional  0 never executed
+        -:  601:			}
+        -:  602:
+    #####:  603:			strcpy(args[i], deq_file);
+    #####:  604:			free(deq_file);
+    %%%%%:  604-block  0
+unconditional  0 never executed
+        -:  605:		}
+        -:  606:
+    #####:  607:		fprintf(bulk_fp, "%s\n", args[i]);
+    %%%%%:  607-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  608:	}
+        -:  609:
+    #####:  610:	arg_total = i;
+        -:  611:
+    #####:  612:	fclose(bulk_fp);
+    %%%%%:  612-block  0
+call    0 never executed
+        -:  613:
+        -:  614:	/* Store the last modification time of the bulk file. This time
+        -:  615:	 * will be later compared to the modification time of the same
+        -:  616:	 * file after shown to the user */
+        -:  617:	struct stat file_attrib;
+    #####:  618:	stat(BULK_FILE, &file_attrib);
+call    0 never executed
+    #####:  619:	time_t mtime_bfr = (time_t)file_attrib.st_mtime;
+        -:  620:
+        -:  621:	/* Open the bulk file via the mime function */
+    #####:  622:	char *cmd[] = {"mm", BULK_FILE, NULL};
+    #####:  623:	mime_open(cmd);
+call    0 never executed
+        -:  624:
+        -:  625:	/* Compare the new modification time to the stored one: if they
+        -:  626:	 * match, nothing was modified */
+    #####:  627:	stat(BULK_FILE, &file_attrib);
+call    0 never executed
+        -:  628:
+    #####:  629:	if (mtime_bfr == (time_t)file_attrib.st_mtime) {
+branch  0 never executed
+branch  1 never executed
+        -:  630:
+    #####:  631:		puts(_("bulk: Nothing to do"));
+    %%%%%:  631-block  0
+call    0 never executed
+        -:  632:
+    #####:  633:		if (unlink(BULK_FILE) == -1) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  634:			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+call    0 never executed
+    #####:  635:			    BULK_FILE, strerror(errno));
+    %%%%%:  635-block  0
+call    0 never executed
+    #####:  636:			exit_status = EXIT_FAILURE;
+unconditional  0 never executed
+        -:  637:		}
+        -:  638:
+    #####:  639:		return exit_status;
+    %%%%%:  639-block  0
+unconditional  0 never executed
+        -:  640:	}
+        -:  641:
+    #####:  642:	bulk_fp = fopen(BULK_FILE, "r");
+    %%%%%:  642-block  0
+call    0 never executed
+        -:  643:
+    #####:  644:	if (!bulk_fp) {
+branch  0 never executed
+branch  1 never executed
+    #####:  645:		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", BULK_FILE,
+call    0 never executed
+    #####:  646:		    strerror(errno));
+    %%%%%:  646-block  0
+call    0 never executed
+    #####:  647:		return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  648:	}
+        -:  649:
+        -:  650:	/* Go back to the beginning of the bulk file */
+    #####:  651:	fseek(bulk_fp, 0, SEEK_SET);
+    %%%%%:  651-block  0
+call    0 never executed
+        -:  652:
+        -:  653:	/* Make sure there are as many lines in the bulk file as files
+        -:  654:	 * to be renamed */
+    #####:  655:	size_t file_total = 1;
+        -:  656:	char tmp_line[256];
+        -:  657:
+    #####:  658:	while (fgets(tmp_line, (int)sizeof(tmp_line), bulk_fp))
+unconditional  0 never executed
+    %%%%%:  658-block  0
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+    #####:  659:		file_total++;
+    %%%%%:  659-block  0
+unconditional  0 never executed
+        -:  660:
+    #####:  661:	if (arg_total != file_total) {
+    %%%%%:  661-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  662:
+    #####:  663:		fputs(_("bulk: Line mismatch in rename file\n"), stderr);
+    %%%%%:  663-block  0
+call    0 never executed
+        -:  664:
+    #####:  665:		fclose(bulk_fp);
+call    0 never executed
+        -:  666:
+    #####:  667:		if (unlink(BULK_FILE) == -1)
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  668:			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+call    0 never executed
+unconditional  1 never executed
+    #####:  669:			    BULK_FILE, strerror(errno));
+    %%%%%:  669-block  0
+call    0 never executed
+        -:  670:
+    #####:  671:		return EXIT_FAILURE;
+    %%%%%:  671-block  0
+unconditional  0 never executed
+        -:  672:	}
+        -:  673:
+        -:  674:	/* Go back to the beginning of the bulk file, again */
+    #####:  675:	fseek(bulk_fp, 0L, SEEK_SET);
+    %%%%%:  675-block  0
+call    0 never executed
+        -:  676:
+    #####:  677:	size_t line_size = 0;
+    #####:  678:	char *line = (char *)NULL;
+    #####:  679:	ssize_t line_len = 0;
+    #####:  680:	int modified = 0;
+        -:  681:
+    #####:  682:	i = 1;
+        -:  683:
+        -:  684:	/* Print what would be done */
+    #####:  685:	while ((line_len = getline(&line, &line_size, bulk_fp)) > 0) {
+unconditional  0 never executed
+    %%%%%:  685-block  0
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+        -:  686:
+    #####:  687:		if (line[line_len - 1] == '\n')
+    %%%%%:  687-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  688:			line[line_len - 1] = '\0';
+    %%%%%:  688-block  0
+unconditional  0 never executed
+        -:  689:
+    #####:  690:		if (strcmp(args[i], line) != 0) {
+    %%%%%:  690-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  691:			printf("%s %s->%s %s\n", args[i], mi_c, df_c, line);
+    %%%%%:  691-block  0
+call    0 never executed
+    #####:  692:			modified++;
+unconditional  0 never executed
+        -:  693:		}
+        -:  694:
+    #####:  695:		i++;
+    %%%%%:  695-block  0
+unconditional  0 never executed
+        -:  696:	}
+        -:  697:
+        -:  698:	/* If no filename was modified */
+    #####:  699:	if (!modified) {
+    %%%%%:  699-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  700:		puts(_("bulk: Nothing to do"));
+    %%%%%:  700-block  0
+call    0 never executed
+        -:  701:
+    #####:  702:		if (unlink(BULK_FILE) == -1) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  703:			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+call    0 never executed
+    #####:  704:			    BULK_FILE, strerror(errno));
+    %%%%%:  704-block  0
+call    0 never executed
+    #####:  705:			exit_status = EXIT_FAILURE;
+unconditional  0 never executed
+        -:  706:		}
+        -:  707:
+    #####:  708:		free(line);
+    #####:  709:		fclose(bulk_fp);
+    %%%%%:  709-block  0
+call    0 never executed
+        -:  710:
+    #####:  711:		return exit_status;
+unconditional  0 never executed
+        -:  712:	}
+        -:  713:
+        -:  714:	/* Ask the user for confirmation */
+    #####:  715:	char *answer = (char *)NULL;
+        -:  716:
+    #####:  717:	while (!answer) {
+    %%%%%:  717-block  0
+unconditional  0 never executed
+    %%%%%:  717-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  718:		answer = readline(_("Continue? [y/N] "));
+    %%%%%:  718-block  0
+call    0 never executed
+        -:  719:
+    #####:  720:		if (strlen(answer) > 1) {
+branch  0 never executed
+branch  1 never executed
+    #####:  721:			free(answer);
+    #####:  722:			answer = (char *)NULL;
+    #####:  723:			continue;
+    %%%%%:  723-block  0
+unconditional  0 never executed
+        -:  724:		}
+        -:  725:
+    #####:  726:		switch (*answer) {
+    %%%%%:  726-block  0
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  727:		case 'y': /* fallthrough */
+        -:  728:		case 'Y':
+    #####:  729:			break;
+    %%%%%:  729-block  0
+unconditional  0 never executed
+        -:  730:
+    #####:  731:		case 'n': /* fallthrough */
+        -:  732:		case 'N': /* fallthrough */
+        -:  733:		case '\0':
+    #####:  734:			free(answer);
+    #####:  735:			free(line);
+    #####:  736:			fclose(bulk_fp);
+    %%%%%:  736-block  0
+call    0 never executed
+    #####:  737:			return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  738:
+    #####:  739:		default:
+    #####:  740:			free(answer);
+    #####:  741:			answer = (char *)NULL;
+    #####:  742:			break;
+    %%%%%:  742-block  0
+unconditional  0 never executed
+        -:  743:		}
+        -:  744:	}
+        -:  745:
+    #####:  746:	free(answer);
+        -:  747:
+        -:  748:	/* Once again */
+    #####:  749:	fseek(bulk_fp, 0L, SEEK_SET);
+    %%%%%:  749-block  0
+call    0 never executed
+        -:  750:
+    #####:  751:	i = 1;
+        -:  752:
+        -:  753:	/* Compose the mv commands and execute them */
+    #####:  754:	while ((line_len = getline(&line, &line_size, bulk_fp)) > 0) {
+unconditional  0 never executed
+    %%%%%:  754-block  0
+call    1 never executed
+branch  2 never executed
+branch  3 never executed
+        -:  755:
+    #####:  756:		if (line[line_len - 1] == '\n')
+    %%%%%:  756-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  757:			line[line_len - 1] = '\0';
+    %%%%%:  757-block  0
+unconditional  0 never executed
+        -:  758:
+    #####:  759:		if (strcmp(args[i], line) != 0) {
+    %%%%%:  759-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  760:			char *tmp_cmd[] = {"mv", args[i], line, NULL};
+        -:  761:
+    #####:  762:			if (launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS)
+    %%%%%:  762-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  763:				exit_status = EXIT_FAILURE;
+    %%%%%:  763-block  0
+unconditional  0 never executed
+        -:  764:		}
+        -:  765:
+    #####:  766:		i++;
+    %%%%%:  766-block  0
+unconditional  0 never executed
+        -:  767:	}
+        -:  768:
+    #####:  769:	free(line);
+        -:  770:
+    #####:  771:	fclose(bulk_fp);
+    %%%%%:  771-block  0
+call    0 never executed
+        -:  772:
+    #####:  773:	if (unlink(BULK_FILE) == -1) {
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  774:		_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+call    0 never executed
+    #####:  775:		    BULK_FILE, strerror(errno));
+    %%%%%:  775-block  0
+call    0 never executed
+    #####:  776:		exit_status = EXIT_FAILURE;
+unconditional  0 never executed
+        -:  777:	}
+        -:  778:
+    #####:  779:	if (cd_lists_on_the_fly) {
+    %%%%%:  779-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  780:		free_dirlist();
+    %%%%%:  780-block  0
+call    0 never executed
+    #####:  781:		if (list_dir() != EXIT_SUCCESS)
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  782:			exit_status = EXIT_FAILURE;
+    %%%%%:  782-block  0
+unconditional  0 never executed
+        -:  783:	}
+        -:  784:
+    #####:  785:	return exit_status;
+    %%%%%:  785-block  0
+unconditional  0 never executed
+        -:  786:}
+        -:  787:
+        -:  788:/* Export files in CWD (if FILENAMES is NULL), or files in FILENAMES,
+        -:  789: * into a temporary file. Return the address of this empt file if
+        -:  790: * success (it must be freed) or NULL in case of error */
+function export called 0 returned 0% blocks executed 0%
+    #####:  791:char *export(char **filenames, int open)
+        -:  792:{
+    #####:  793:	char *rand_ext = gen_rand_str(6);
+    %%%%%:  793-block  0
+call    0 never executed
+        -:  794:
+    #####:  795:	if (!rand_ext)
+branch  0 never executed
+branch  1 never executed
+    #####:  796:		return (char *)NULL;
+    %%%%%:  796-block  0
+unconditional  0 never executed
+        -:  797:
+    #####:  798:	char *tmp_file = (char *)xnmalloc(strlen(TMP_DIR) + 14, sizeof(char));
+    %%%%%:  798-block  0
+call    0 never executed
+    #####:  799:	sprintf(tmp_file, "%s/.clifm%s", TMP_DIR, rand_ext);
+    #####:  800:	free(rand_ext);
+        -:  801:
+    #####:  802:	FILE *fp = fopen(tmp_file, "w");
+call    0 never executed
+        -:  803:
+    #####:  804:	if (!fp) {
+branch  0 never executed
+branch  1 never executed
+    #####:  805:		free(tmp_file);
+    #####:  806:		return (char *)NULL;
+    %%%%%:  806-block  0
+unconditional  0 never executed
+        -:  807:	}
+        -:  808:
+        -:  809:	size_t i;
+        -:  810:
+        -:  811:	/* If no argument, export files in CWD */
+    #####:  812:	if (!filenames[1]) {
+    %%%%%:  812-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  813:		for (i = 0; file_info[i].name; i++)
+    %%%%%:  813-block  0
+unconditional  0 never executed
+unconditional  1 never executed
+    %%%%%:  813-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  814:			fprintf(fp, "%s\n", file_info[i].name);
+    %%%%%:  814-block  0
+call    0 never executed
+        -:  815:	}
+        -:  816:
+        -:  817:	else {
+    #####:  818:		for (i = 1; filenames[i]; i++) {
+    %%%%%:  818-block  0
+unconditional  0 never executed
+    %%%%%:  818-block  1
+unconditional  1 never executed
+    %%%%%:  818-block  2
+branch  2 never executed
+branch  3 never executed
+    #####:  819:			if (*filenames[i] == '.' && (!filenames[i][1] || (filenames[i][1] == '.' && !filenames[i][2])))
+    %%%%%:  819-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  819-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  819-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%:  819-block  3
+branch  6 never executed
+branch  7 never executed
+    #####:  820:				continue;
+    %%%%%:  820-block  0
+unconditional  0 never executed
+        -:  821:
+    #####:  822:			fprintf(fp, "%s\n", filenames[i]);
+    %%%%%:  822-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  823:		}
+        -:  824:	}
+        -:  825:
+    #####:  826:	fclose(fp);
+    %%%%%:  826-block  0
+call    0 never executed
+        -:  827:
+    #####:  828:	if (!open)
+branch  0 never executed
+branch  1 never executed
+    #####:  829:		return tmp_file;
+    %%%%%:  829-block  0
+unconditional  0 never executed
+        -:  830:
+    #####:  831:	char *cmd[] = {"mime", tmp_file, NULL};
+        -:  832:
+    #####:  833:	int ret = mime_open(cmd);
+    %%%%%:  833-block  0
+call    0 never executed
+        -:  834:
+    #####:  835:	if (ret == EXIT_SUCCESS)
+branch  0 never executed
+branch  1 never executed
+    #####:  836:		return tmp_file;
+    %%%%%:  836-block  0
+unconditional  0 never executed
+        -:  837:
+        -:  838:	else {
+    #####:  839:		free(tmp_file);
+    #####:  840:		return (char *)NULL;
+    %%%%%:  840-block  0
+unconditional  0 never executed
+        -:  841:	}
+        -:  842:}
+        -:  843:
+        -:  844:int
+function batch_link called 0 returned 0% blocks executed 0%
+    #####:  845:batch_link(char **args)
+        -:  846:{
+    #####:  847:	if (!args)
+    %%%%%:  847-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  848:		return EXIT_FAILURE;
+    %%%%%:  848-block  0
+unconditional  0 never executed
+        -:  849:
+    #####:  850:	if (!args[1] || (*args[1] == '-' && strcmp(args[1], "--help") == 0)) {
+    %%%%%:  850-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  850-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  850-block  2
+branch  4 never executed
+branch  5 never executed
+    #####:  851:		puts(_("Usage: bl [FILE(s)]"));
+    %%%%%:  851-block  0
+call    0 never executed
+    #####:  852:		return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  853:	}
+        -:  854:
+    #####:  855:	char *suffix = (char *)NULL;
+    #####:  856:	while (!suffix) {
+    %%%%%:  856-block  0
+unconditional  0 never executed
+    %%%%%:  856-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  857:		suffix = rl_no_hist(_("Enter links suffix ('n' for none): "));
+    %%%%%:  857-block  0
+call    0 never executed
+        -:  858:
+    #####:  859:		if (!suffix)
+branch  0 never executed
+branch  1 never executed
+    #####:  860:			continue;
+    %%%%%:  860-block  0
+unconditional  0 never executed
+        -:  861:
+    #####:  862:		if (!*suffix) {
+    %%%%%:  862-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  863:			free(suffix);
+    #####:  864:			continue;
+    %%%%%:  864-block  0
+unconditional  0 never executed
+        -:  865:		}
+        -:  866:	}
+        -:  867:
+        -:  868:	size_t i;
+        -:  869:
+    #####:  870:	int exit_status = EXIT_SUCCESS;
+        -:  871:	char tmp[NAME_MAX];
+        -:  872:
+    #####:  873:	for (i = 1; args[i]; i++) {
+    %%%%%:  873-block  0
+unconditional  0 never executed
+    %%%%%:  873-block  1
+unconditional  1 never executed
+    %%%%%:  873-block  2
+branch  2 never executed
+branch  3 never executed
+    #####:  874:		char *linkname = (char *)NULL;
+        -:  875:
+    #####:  876:		if (*suffix == 'n' && !suffix[1])
+    %%%%%:  876-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  876-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  877:			linkname = args[i];
+    %%%%%:  877-block  0
+unconditional  0 never executed
+        -:  878:
+        -:  879:		else {
+    #####:  880:			snprintf(tmp, NAME_MAX, "%s%s", args[i], suffix);
+    #####:  881:			linkname = tmp;
+    %%%%%:  881-block  0
+unconditional  0 never executed
+        -:  882:		}
+        -:  883:
+    #####:  884:		char *ptr = strrchr(linkname, '/');
+        -:  885:
+    #####:  886:		if (symlink(args[i], ptr ? ++ptr : linkname) == -1) {
+    %%%%%:  886-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  886-block  1
+unconditional  2 never executed
+    %%%%%:  886-block  2
+unconditional  3 never executed
+    %%%%%:  886-block  3
+call    4 never executed
+branch  5 never executed
+branch  6 never executed
+    #####:  887:			exit_status = EXIT_FAILURE;
+    #####:  888:			fprintf(stderr, _("%s: %s: Cannot create symlink: %s\n"),
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  888-block  0
+unconditional  2 never executed
+    %%%%%:  888-block  1
+unconditional  3 never executed
+    %%%%%:  888-block  2
+call    4 never executed
+unconditional  5 never executed
+    #####:  889:			    PROGRAM_NAME, ptr ? ptr : linkname, strerror(errno));
+    %%%%%:  889-block  0
+call    0 never executed
+        -:  890:		}
+        -:  891:	}
+        -:  892:
+    #####:  893:	if (exit_status == EXIT_SUCCESS && cd_lists_on_the_fly) {
+    %%%%%:  893-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  893-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  894:		free_dirlist();
+    %%%%%:  894-block  0
+call    0 never executed
+        -:  895:
+    #####:  896:		if (list_dir() != EXIT_SUCCESS)
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  897:			exit_status = EXIT_FAILURE;
+    %%%%%:  897-block  0
+unconditional  0 never executed
+        -:  898:	}
+        -:  899:
+    #####:  900:	free(suffix);
+    #####:  901:	return exit_status;
+    %%%%%:  901-block  0
+unconditional  0 never executed
+        -:  902:}

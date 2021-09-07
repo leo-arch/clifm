@@ -1,0 +1,1825 @@
+        -:    0:Source:search.c
+        -:    1:/* search.c -- functions for the search system */
+        -:    2:
+        -:    3:/*
+        -:    4: * This file is part of CliFM
+        -:    5: * 
+        -:    6: * Copyright (C) 2016-2021, L. Abramovich <johndoe.arch@outlook.com>
+        -:    7: * All rights reserved.
+        -:    8:
+        -:    9: * CliFM is free software; you can redistribute it and/or modify
+        -:   10: * it under the terms of the GNU General Public License as published by
+        -:   11: * the Free Software Foundation; either version 2 of the License, or
+        -:   12: * (at your option) any later version.
+        -:   13: *
+        -:   14: * CliFM is distributed in the hope that it will be useful,
+        -:   15: * but WITHOUT ANY WARRANTY; without even the implied warranty of
+        -:   16: * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        -:   17: * GNU General Public License for more details.
+        -:   18: *
+        -:   19: * You should have received a copy of the GNU General Public License
+        -:   20: * along with this program; if not, write to the Free Software
+        -:   21: * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+        -:   22: * MA 02110-1301, USA.
+        -:   23:*/
+        -:   24:
+        -:   25:#include "helpers.h"
+        -:   26:
+        -:   27:#include <dirent.h>
+        -:   28:#include <errno.h>
+        -:   29:#include <fcntl.h>
+        -:   30:#include <regex.h>
+        -:   31:#include <stdio.h>
+        -:   32:#include <string.h>
+        -:   33:#include <sys/ioctl.h>
+        -:   34:#include <sys/stat.h>
+        -:   35:#include <unistd.h>
+        -:   36:
+        -:   37:#include "aux.h"
+        -:   38:#include "checks.h"
+        -:   39:#include "colors.h"
+        -:   40:#include "exec.h"
+        -:   41:#include "glob.h"
+        -:   42:#include "navigation.h"
+        -:   43:#include "sort.h"
+        -:   44:
+        -:   45:/* List matching filenames in the specified directory */
+        -:   46:int
+function search_glob called 0 returned 0% blocks executed 0%
+    #####:   47:search_glob(char **comm, int invert)
+        -:   48:{
+    #####:   49:	if (!comm || !comm[0])
+    %%%%%:   49-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   49-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:   50:		return EXIT_FAILURE;
+    %%%%%:   50-block  0
+unconditional  0 never executed
+        -:   51:
+    #####:   52:	char *search_str = (char *)NULL, *search_path = (char *)NULL;
+    #####:   53:	mode_t file_type = 0;
+        -:   54:	struct stat file_attrib;
+        -:   55:
+        -:   56:	/* If there are two arguments, the one starting with '-' is the
+        -:   57:	 * filetype and the other is the path */
+    #####:   58:	if (comm[1] && comm[2]) {
+    %%%%%:   58-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   58-block  1
+branch  2 never executed
+branch  3 never executed
+        -:   59:
+    #####:   60:		if (comm[1][0] == '-') {
+    %%%%%:   60-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   61:			file_type = (mode_t)comm[1][1];
+    #####:   62:			search_path = comm[2];
+    %%%%%:   62-block  0
+unconditional  0 never executed
+        -:   63:		}
+        -:   64:
+    #####:   65:		else if (comm[2][0] == '-') {
+    %%%%%:   65-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   66:			file_type = (mode_t)comm[2][1];
+    #####:   67:			search_path = comm[1];
+    %%%%%:   67-block  0
+unconditional  0 never executed
+        -:   68:		}
+        -:   69:
+        -:   70:		else
+    #####:   71:			search_path = comm[1];
+    %%%%%:   71-block  0
+unconditional  0 never executed
+        -:   72:	}
+        -:   73:
+        -:   74:	/* If just one argument, '-' indicates filetype. Else, we have a
+        -:   75:	 * path */
+    #####:   76:	else if (comm[1]) {
+    %%%%%:   76-block  0
+branch  0 never executed
+branch  1 never executed
+        -:   77:
+    #####:   78:		if (comm[1][0] == '-')
+    %%%%%:   78-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:   79:			file_type = (mode_t)comm[1][1];
+    %%%%%:   79-block  0
+unconditional  0 never executed
+        -:   80:		else
+    #####:   81:			search_path = comm[1];
+    %%%%%:   81-block  0
+unconditional  0 never executed
+        -:   82:	}
+        -:   83:
+        -:   84:	/* If no arguments, search_path will be NULL and file_type zero */
+        -:   85:
+    #####:   86:	int recursive = 0;
+        -:   87:
+    #####:   88:	if (file_type) {
+    %%%%%:   88-block  0
+branch  0 never executed
+branch  1 never executed
+        -:   89:
+        -:   90:		/* Convert filetype into a macro that can be decoded by stat().
+        -:   91:		 * If file type is specified, matches will be checked against
+        -:   92:		 * this value */
+    #####:   93:		switch (file_type) {
+    %%%%%:   93-block  0
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+branch  6 never executed
+branch  7 never executed
+branch  8 never executed
+    #####:   94:		case 'd':
+    #####:   95:			file_type = invert ? DT_DIR : S_IFDIR;
+    %%%%%:   95-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   95-block  1
+unconditional  2 never executed
+    %%%%%:   95-block  2
+unconditional  3 never executed
+    #####:   96:			break;
+    %%%%%:   96-block  0
+unconditional  0 never executed
+    #####:   97:		case 'r':
+    #####:   98:			file_type = invert ? DT_REG : S_IFREG;
+    %%%%%:   98-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:   98-block  1
+unconditional  2 never executed
+    %%%%%:   98-block  2
+unconditional  3 never executed
+    #####:   99:			break;
+    %%%%%:   99-block  0
+unconditional  0 never executed
+    #####:  100:		case 'l':
+    #####:  101:			file_type = invert ? DT_LNK : S_IFLNK;
+    %%%%%:  101-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  101-block  1
+unconditional  2 never executed
+    %%%%%:  101-block  2
+unconditional  3 never executed
+    #####:  102:			break;
+    %%%%%:  102-block  0
+unconditional  0 never executed
+    #####:  103:		case 's':
+    #####:  104:			file_type = invert ? DT_SOCK : S_IFSOCK;
+    %%%%%:  104-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  104-block  1
+unconditional  2 never executed
+    %%%%%:  104-block  2
+unconditional  3 never executed
+    #####:  105:			break;
+    %%%%%:  105-block  0
+unconditional  0 never executed
+    #####:  106:		case 'f':
+    #####:  107:			file_type = invert ? DT_FIFO : S_IFIFO;
+    %%%%%:  107-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  107-block  1
+unconditional  2 never executed
+    %%%%%:  107-block  2
+unconditional  3 never executed
+    #####:  108:			break;
+    %%%%%:  108-block  0
+unconditional  0 never executed
+    #####:  109:		case 'b':
+    #####:  110:			file_type = invert ? DT_BLK : S_IFBLK;
+    %%%%%:  110-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  110-block  1
+unconditional  2 never executed
+    %%%%%:  110-block  2
+unconditional  3 never executed
+    #####:  111:			break;
+    %%%%%:  111-block  0
+unconditional  0 never executed
+    #####:  112:		case 'c':
+    #####:  113:			file_type = invert ? DT_CHR : S_IFCHR;
+    %%%%%:  113-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  113-block  1
+unconditional  2 never executed
+    %%%%%:  113-block  2
+unconditional  3 never executed
+    #####:  114:			break;
+    %%%%%:  114-block  0
+unconditional  0 never executed
+    #####:  115:		case 'x':
+    #####:  116:			recursive = 1;
+    #####:  117:			break;
+    %%%%%:  117-block  0
+unconditional  0 never executed
+        -:  118:
+    #####:  119:		default:
+    #####:  120:			fprintf(stderr, _("%s: '%c': aUnrecognized filetype\n"),
+    #####:  121:			    PROGRAM_NAME, (char)file_type);
+    %%%%%:  121-block  0
+call    0 never executed
+    #####:  122:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  123:		}
+        -:  124:	}
+        -:  125:
+    #####:  126:	if (recursive) {
+    %%%%%:  126-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  127:		char *cmd[] = {"find", (search_path && *search_path) ? search_path
+    %%%%%:  127-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  128:					: ".", "-name", comm[0] + 1, NULL};
+    %%%%%:  128-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  128-block  1
+unconditional  2 never executed
+    %%%%%:  128-block  2
+unconditional  3 never executed
+    #####:  129:		launch_execve(cmd, FOREGROUND, E_NOFLAG);
+    %%%%%:  129-block  0
+call    0 never executed
+    #####:  130:		return EXIT_SUCCESS;
+unconditional  0 never executed
+        -:  131:	}
+        -:  132:
+        -:  133:	/* If we have a path ("/str /path"), chdir into it, since
+        -:  134:	 * glob() works on CWD */
+    #####:  135:	if (search_path && *search_path) {
+    %%%%%:  135-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  135-block  1
+branch  2 never executed
+branch  3 never executed
+        -:  136:
+        -:  137:		/* Deescape the search path, if necessary */
+    #####:  138:		if (strchr(search_path, '\\')) {
+    %%%%%:  138-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  139:			char *deq_dir = dequote_str(search_path, 0);
+    %%%%%:  139-block  0
+call    0 never executed
+        -:  140:
+    #####:  141:			if (!deq_dir) {
+branch  0 never executed
+branch  1 never executed
+    #####:  142:				fprintf(stderr, _("%s: %s: Error dequoting filename\n"),
+    #####:  143:				    PROGRAM_NAME, comm[1]);
+    %%%%%:  143-block  0
+call    0 never executed
+    #####:  144:				return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  145:			}
+        -:  146:
+    #####:  147:			strcpy(search_path, deq_dir);
+    #####:  148:			free(deq_dir);
+    %%%%%:  148-block  0
+unconditional  0 never executed
+        -:  149:		}
+        -:  150:
+    #####:  151:		size_t path_len = strlen(search_path);
+    #####:  152:		if (search_path[path_len - 1] == '/')
+    %%%%%:  152-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  153:			search_path[path_len - 1] = '\0';
+    %%%%%:  153-block  0
+unconditional  0 never executed
+        -:  154:
+        -:  155:		/* If search is current directory */
+    #####:  156:		if ((*search_path == '.' && !search_path[1]) ||
+    %%%%%:  156-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  156-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  157:		    (search_path[1] == ws[cur_ws].path[1]
+    %%%%%:  157-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  158:		    && strcmp(search_path, ws[cur_ws].path) == 0))
+    %%%%%:  158-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  159:			search_path = (char *)NULL;
+    %%%%%:  159-block  0
+unconditional  0 never executed
+        -:  160:
+    #####:  161:		else if (xchdir(search_path, NO_TITLE) == -1) {
+    %%%%%:  161-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  162:			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, search_path,
+call    0 never executed
+    #####:  163:			    strerror(errno));
+    %%%%%:  163-block  0
+call    0 never executed
+    #####:  164:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  165:		}
+        -:  166:	}
+        -:  167:
+        -:  168:	int i;
+        -:  169:
+    #####:  170:	char *tmp = comm[0];
+        -:  171:
+    #####:  172:	if (invert)
+    %%%%%:  172-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  173:		tmp++;
+    %%%%%:  173-block  0
+unconditional  0 never executed
+        -:  174:
+        -:  175:	/* Search for globbing char */
+    #####:  176:	int glob_char_found = 0;
+    #####:  177:	for (i = 1; tmp[i]; i++) {
+    %%%%%:  177-block  0
+unconditional  0 never executed
+    %%%%%:  177-block  1
+unconditional  1 never executed
+    %%%%%:  177-block  2
+branch  2 never executed
+branch  3 never executed
+    #####:  178:		if (tmp[i] == '*' || tmp[i] == '?' || tmp[i] == '[' || tmp[i] == '{'
+    %%%%%:  178-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  178-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  178-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%:  178-block  3
+branch  6 never executed
+branch  7 never executed
+        -:  179:		    /* Consider regex chars as well: we don't want this "r$"
+        -:  180:		 * to become this "*r$*" */
+    #####:  181:		    || tmp[i] == '|' || tmp[i] == '^' || tmp[i] == '+' || tmp[i] == '$'
+    %%%%%:  181-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  181-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  181-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%:  181-block  3
+branch  6 never executed
+branch  7 never executed
+    #####:  182:		    || tmp[i] == '.') {
+    %%%%%:  182-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  183:			glob_char_found = 1;
+    #####:  184:			break;
+    %%%%%:  184-block  0
+unconditional  0 never executed
+        -:  185:		}
+        -:  186:	}
+        -:  187:
+        -:  188:	/* If search string is just "STR" (no glob chars), change it
+        -:  189:	 * to "*STR*" */
+    #####:  190:	size_t search_str_len = 0;
+        -:  191:
+    #####:  192:	if (!glob_char_found) {
+    %%%%%:  192-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  193:		search_str_len = strlen(comm[0]);
+        -:  194:
+    #####:  195:		comm[0] = (char *)xrealloc(comm[0], (search_str_len + 2) *
+    %%%%%:  195-block  0
+call    0 never executed
+        -:  196:							sizeof(char));
+    #####:  197:		tmp = comm[0];
+    #####:  198:		if (invert) {
+branch  0 never executed
+branch  1 never executed
+    #####:  199:			++tmp;
+    #####:  200:			search_str_len = strlen(tmp);
+    %%%%%:  200-block  0
+unconditional  0 never executed
+        -:  201:		}
+        -:  202:
+    #####:  203:		tmp[0] = '*';
+    #####:  204:		tmp[search_str_len] = '*';
+    #####:  205:		tmp[search_str_len + 1] = '\0';
+    #####:  206:		search_str = tmp;
+    %%%%%:  206-block  0
+unconditional  0 never executed
+        -:  207:	}
+        -:  208:
+        -:  209:	else
+    #####:  210:		search_str = tmp + 1;
+    %%%%%:  210-block  0
+unconditional  0 never executed
+        -:  211:
+        -:  212:	/* Get matches, if any */
+        -:  213:	glob_t globbed_files;
+    #####:  214:	int ret = glob(search_str, GLOB_BRACE, NULL, &globbed_files);
+    %%%%%:  214-block  0
+call    0 never executed
+        -:  215:
+    #####:  216:	if (ret != 0) {
+branch  0 never executed
+branch  1 never executed
+    #####:  217:		puts(_("Glob: No matches found. Trying regex..."));
+    %%%%%:  217-block  0
+call    0 never executed
+        -:  218:
+    #####:  219:		globfree(&globbed_files);
+call    0 never executed
+        -:  220:
+    #####:  221:		if (search_path) {
+branch  0 never executed
+branch  1 never executed
+        -:  222:			/* Go back to the directory we came from */
+    #####:  223:			if (xchdir(ws[cur_ws].path, NO_TITLE) == -1)
+    %%%%%:  223-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  224:				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+    #####:  225:				    ws[cur_ws].path, strerror(errno));
+    %%%%%:  225-block  0
+call    0 never executed
+call    1 never executed
+unconditional  2 never executed
+        -:  226:		}
+        -:  227:
+    #####:  228:		return EXIT_FAILURE;
+    %%%%%:  228-block  0
+unconditional  0 never executed
+        -:  229:	}
+        -:  230:
+        -:  231:	/* We have matches */
+    #####:  232:	int last_column = 0, scandir_files = 0, found = 0, columns_n = 0;
+    #####:  233:	size_t flongest = 0;
+        -:  234:
+        -:  235:	/* We need to store pointers to matching filenames in array of
+        -:  236:	 * pointers, just as the filename length (to construct the
+        -:  237:	 * columned output), and, if searching in CWD, its index (ELN)
+        -:  238:	 * in the dirlist array as well */
+    #####:  239:	char **pfiles = (char **)NULL;
+    #####:  240:	int *eln = (int *)0;
+    #####:  241:	size_t *files_len = (size_t *)0;
+    #####:  242:	struct dirent **ent = (struct dirent **)NULL;
+        -:  243:
+    #####:  244:	if (invert) {
+    %%%%%:  244-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  245:		if (!search_path) {
+    %%%%%:  245-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  246:			int k;
+        -:  247:
+    #####:  248:			pfiles = (char **)xnmalloc(files + 1, sizeof(char *));
+    %%%%%:  248-block  0
+call    0 never executed
+    #####:  249:			eln = (int *)xnmalloc(files + 1, sizeof(int));
+call    0 never executed
+    #####:  250:			files_len = (size_t *)xnmalloc(files + 1, sizeof(size_t));
+call    0 never executed
+        -:  251:
+    #####:  252:			for (k = 0; file_info[k].name; k++) {
+unconditional  0 never executed
+    %%%%%:  252-block  0
+unconditional  1 never executed
+    %%%%%:  252-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  253:				int l, f = 0;
+        -:  254:
+    #####:  255:				for (l = 0; globbed_files.gl_pathv[l]; l++) {
+    %%%%%:  255-block  0
+unconditional  0 never executed
+    %%%%%:  255-block  1
+unconditional  1 never executed
+    %%%%%:  255-block  2
+branch  2 never executed
+branch  3 never executed
+    #####:  256:					if (*globbed_files.gl_pathv[l] == *file_info[k].name
+    %%%%%:  256-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  257:					&& strcmp(globbed_files.gl_pathv[l], file_info[k].name) == 0) {
+    %%%%%:  257-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  258:						f = 1;
+    #####:  259:						break;
+    %%%%%:  259-block  0
+unconditional  0 never executed
+        -:  260:					}
+        -:  261:				}
+        -:  262:
+    #####:  263:				if (!f) {
+    %%%%%:  263-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  264:
+    #####:  265:					if (file_type && file_info[k].type != file_type)
+    %%%%%:  265-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  265-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  266:						continue;
+    %%%%%:  266-block  0
+unconditional  0 never executed
+        -:  267:
+    #####:  268:					eln[found] = (int)(k + 1);
+    #####:  269:					files_len[found] = file_info[k].len + file_info[k].eln_n + 1;
+    #####:  270:					if (files_len[found] > flongest)
+    %%%%%:  270-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  271:						flongest = files_len[found];
+    %%%%%:  271-block  0
+unconditional  0 never executed
+        -:  272:
+    #####:  273:					pfiles[found++] = file_info[k].name;
+    %%%%%:  273-block  0
+unconditional  0 never executed
+        -:  274:				}
+        -:  275:			}
+        -:  276:		}
+        -:  277:
+        -:  278:		else {
+    #####:  279:			scandir_files = scandir(search_path, &ent, skip_files,
+    %%%%%:  279-block  0
+call    0 never executed
+        -:  280:			    xalphasort);
+        -:  281:
+    #####:  282:			if (scandir_files != -1) {
+branch  0 never executed
+branch  1 never executed
+        -:  283:
+    #####:  284:				pfiles = (char **)xnmalloc((size_t)scandir_files + 1,
+    %%%%%:  284-block  0
+call    0 never executed
+        -:  285:				    sizeof(char *));
+    #####:  286:				eln = (int *)xnmalloc((size_t)scandir_files + 1,
+call    0 never executed
+        -:  287:				    sizeof(int));
+    #####:  288:				files_len = (size_t *)xnmalloc((size_t)scandir_files + 1,
+call    0 never executed
+        -:  289:				    sizeof(size_t));
+        -:  290:
+        -:  291:				int k, l;
+        -:  292:
+    #####:  293:				for (k = 0; k < scandir_files; k++) {
+unconditional  0 never executed
+    %%%%%:  293-block  0
+unconditional  1 never executed
+    %%%%%:  293-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  294:					int f = 0;
+        -:  295:
+    #####:  296:					for (l = 0; globbed_files.gl_pathv[l]; l++) {
+    %%%%%:  296-block  0
+unconditional  0 never executed
+    %%%%%:  296-block  1
+unconditional  1 never executed
+    %%%%%:  296-block  2
+branch  2 never executed
+branch  3 never executed
+    #####:  297:						if (*ent[k]->d_name == *globbed_files.gl_pathv[l]
+    %%%%%:  297-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  298:						&& strcmp(ent[k]->d_name, globbed_files.gl_pathv[l]) == 0) {
+    %%%%%:  298-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  299:							f = 1;
+    #####:  300:							break;
+    %%%%%:  300-block  0
+unconditional  0 never executed
+        -:  301:						}
+        -:  302:					}
+        -:  303:
+    #####:  304:					if (!f) {
+    %%%%%:  304-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  305:
+    #####:  306:						if (file_type && ent[k]->d_type != file_type)
+    %%%%%:  306-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  306-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  307:							continue;
+    %%%%%:  307-block  0
+unconditional  0 never executed
+        -:  308:
+    #####:  309:						eln[found] = -1;
+    #####:  310:						files_len[found] = unicode
+    #####:  311:								       ? wc_xstrlen(ent[k]->d_name)
+    %%%%%:  311-block  0
+call    0 never executed
+unconditional  1 never executed
+    #####:  312:								       : strlen(ent[k]->d_name);
+    %%%%%:  312-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  312-block  1
+unconditional  2 never executed
+        -:  313:
+    #####:  314:						if (files_len[found] > flongest)
+    %%%%%:  314-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  315:							flongest = files_len[found];
+    %%%%%:  315-block  0
+unconditional  0 never executed
+        -:  316:
+    #####:  317:						pfiles[found++] = ent[k]->d_name;
+    %%%%%:  317-block  0
+unconditional  0 never executed
+        -:  318:					}
+        -:  319:				}
+        -:  320:			}
+        -:  321:		}
+        -:  322:	}
+        -:  323:
+        -:  324:	else { /* No invert search */
+        -:  325:
+    #####:  326:		pfiles = (char **)xnmalloc(globbed_files.gl_pathc + 1,
+    %%%%%:  326-block  0
+call    0 never executed
+        -:  327:		    sizeof(char *));
+    #####:  328:		eln = (int *)xnmalloc(globbed_files.gl_pathc + 1, sizeof(int));
+call    0 never executed
+    #####:  329:		files_len = (size_t *)xnmalloc(globbed_files.gl_pathc + 1, sizeof(size_t));
+call    0 never executed
+        -:  330:
+    #####:  331:		for (i = 0; globbed_files.gl_pathv[i]; i++) {
+unconditional  0 never executed
+    %%%%%:  331-block  0
+unconditional  1 never executed
+    %%%%%:  331-block  1
+branch  2 never executed
+branch  3 never executed
+        -:  332:
+    #####:  333:			if (*globbed_files.gl_pathv[i] == '.'
+    %%%%%:  333-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  334:			&& (!globbed_files.gl_pathv[i][1]
+    %%%%%:  334-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  335:			|| (globbed_files.gl_pathv[i][1] == '.'
+    %%%%%:  335-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  336:			&& !globbed_files.gl_pathv[i][2])))
+    %%%%%:  336-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  337:				continue;
+    %%%%%:  337-block  0
+unconditional  0 never executed
+        -:  338:
+    #####:  339:			if (file_type) {
+    %%%%%:  339-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  340:
+        -:  341:				/* Simply skip all files not matching file_type */
+    #####:  342:				if (lstat(globbed_files.gl_pathv[i], &file_attrib) == -1)
+    %%%%%:  342-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  343:					continue;
+    %%%%%:  343-block  0
+unconditional  0 never executed
+        -:  344:
+    #####:  345:				if ((file_attrib.st_mode & S_IFMT) != file_type)
+    %%%%%:  345-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  346:					continue;
+    %%%%%:  346-block  0
+unconditional  0 never executed
+        -:  347:			}
+        -:  348:
+    #####:  349:			pfiles[found] = globbed_files.gl_pathv[i];
+        -:  350:
+        -:  351:			/* Get the longest filename in the list */
+        -:  352:
+        -:  353:			/* If not searching in CWD, we only need to know the file's
+        -:  354:			 * length (no ELN) */
+    #####:  355:			if (search_path) {
+    %%%%%:  355-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  356:
+        -:  357:				/* This will be passed to colors_list(): -1 means no ELN */
+    #####:  358:				eln[found] = -1;
+        -:  359:
+    #####:  360:				files_len[found] = unicode ? wc_xstrlen(pfiles[found])
+    %%%%%:  360-block  0
+call    0 never executed
+unconditional  1 never executed
+    #####:  361:							   : strlen(pfiles[found]);
+    %%%%%:  361-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  361-block  1
+unconditional  2 never executed
+        -:  362:
+    #####:  363:				if (files_len[found] > flongest)
+    %%%%%:  363-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  364:					flongest = files_len[found];
+    %%%%%:  364-block  0
+unconditional  0 never executed
+        -:  365:
+    #####:  366:				found++;
+    %%%%%:  366-block  0
+unconditional  0 never executed
+        -:  367:			}
+        -:  368:
+        -:  369:			/* If searching in CWD, take into account the file's ELN
+        -:  370:			 * when calculating its legnth */
+        -:  371:			else {
+        -:  372:				size_t j;
+        -:  373:
+    #####:  374:				for (j = 0; file_info[j].name; j++) {
+    %%%%%:  374-block  0
+unconditional  0 never executed
+    %%%%%:  374-block  1
+unconditional  1 never executed
+    %%%%%:  374-block  2
+branch  2 never executed
+branch  3 never executed
+        -:  375:
+    #####:  376:					if (*pfiles[found] != *file_info[j].name
+    %%%%%:  376-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  377:					|| strcmp(pfiles[found], file_info[j].name) != 0)
+    %%%%%:  377-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  378:						continue;
+    %%%%%:  378-block  0
+unconditional  0 never executed
+        -:  379:
+    #####:  380:					eln[found] = (int)(j + 1);
+        -:  381:
+    #####:  382:					files_len[found] = file_info[j].len + file_info[j].eln_n + 1;
+        -:  383:
+    #####:  384:					if (files_len[found] > flongest)
+    %%%%%:  384-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  385:						flongest = files_len[found];
+    %%%%%:  385-block  0
+unconditional  0 never executed
+        -:  386:				}
+        -:  387:
+    #####:  388:				found++;
+    %%%%%:  388-block  0
+unconditional  0 never executed
+        -:  389:			}
+        -:  390:		}
+        -:  391:	}
+        -:  392:
+        -:  393:	/* Print the results using colors and columns */
+    #####:  394:	if (found) {
+    %%%%%:  394-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  395:
+        -:  396:		struct winsize w;
+    #####:  397:		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    %%%%%:  397-block  0
+call    0 never executed
+    #####:  398:		unsigned short tcols = w.ws_col;
+        -:  399:
+    #####:  400:		if (flongest <= 0 || flongest > tcols)
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  400-block  0
+branch  2 never executed
+branch  3 never executed
+    #####:  401:			columns_n = 1;
+    %%%%%:  401-block  0
+unconditional  0 never executed
+        -:  402:
+        -:  403:		else
+    #####:  404:			columns_n = (int)(tcols / (flongest + 1));
+    %%%%%:  404-block  0
+unconditional  0 never executed
+        -:  405:
+    #####:  406:		if (columns_n > found)
+    %%%%%:  406-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  407:			columns_n = found;
+    %%%%%:  407-block  0
+unconditional  0 never executed
+        -:  408:
+    #####:  409:		for (i = 0; i < found; i++) {
+    %%%%%:  409-block  0
+unconditional  0 never executed
+    %%%%%:  409-block  1
+unconditional  1 never executed
+    %%%%%:  409-block  2
+branch  2 never executed
+branch  3 never executed
+        -:  410:
+    #####:  411:			if (!pfiles[i])
+    %%%%%:  411-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  412:				continue;
+    %%%%%:  412-block  0
+unconditional  0 never executed
+        -:  413:
+    #####:  414:			if ((i + 1) % columns_n == 0)
+    %%%%%:  414-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  415:				last_column = 1;
+    %%%%%:  415-block  0
+unconditional  0 never executed
+        -:  416:			else
+    #####:  417:				last_column = 0;
+    %%%%%:  417-block  0
+unconditional  0 never executed
+        -:  418:
+    #####:  419:			colors_list(pfiles[i], (eln[i] && eln[i] != -1) ? eln[i] : 0,
+    %%%%%:  419-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  419-block  1
+unconditional  2 never executed
+    %%%%%:  419-block  2
+unconditional  3 never executed
+    %%%%%:  419-block  3
+branch  4 never executed
+branch  5 never executed
+    %%%%%:  419-block  4
+unconditional  6 never executed
+    %%%%%:  419-block  5
+branch  7 never executed
+branch  8 never executed
+    %%%%%:  419-block  6
+branch  9 never executed
+branch 10 never executed
+    %%%%%:  419-block  7
+unconditional 11 never executed
+    %%%%%:  419-block  8
+unconditional 12 never executed
+    %%%%%:  419-block  9
+call   13 never executed
+unconditional 14 never executed
+    #####:  420:			    (last_column || i == (found - 1)) ? 0 :
+    %%%%%:  420-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  421:			    (int)(flongest - files_len[i]) + 1,
+    %%%%%:  421-block  0
+unconditional  0 never executed
+    #####:  422:			    (last_column || i == found - 1) ? 1 : 0);
+    %%%%%:  422-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  423:			/* Second argument to colors_list() is:
+        -:  424:			 * 0: Do not print any ELN
+        -:  425:			 * Positive number: Print positive number as ELN
+        -:  426:			 * -1: Print "?" instead of an ELN */
+        -:  427:		}
+        -:  428:
+    #####:  429:		printf(_("Matches found: %d\n"), found);
+    %%%%%:  429-block  0
+call    0 never executed
+        -:  430:	}
+        -:  431:
+        -:  432:	/*  else
+        -:  433:		printf(_("%s: No matches found\n"), PROGRAM_NAME); */
+        -:  434:
+        -:  435:	/* Free stuff */
+    #####:  436:	if (invert && search_path) {
+    %%%%%:  436-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  436-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  437:		i = scandir_files;
+    #####:  438:		while (--i >= 0)
+    %%%%%:  438-block  0
+unconditional  0 never executed
+    %%%%%:  438-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  439:			free(ent[i]);
+    %%%%%:  439-block  0
+unconditional  0 never executed
+    #####:  440:		free(ent);
+    %%%%%:  440-block  0
+unconditional  0 never executed
+        -:  441:	}
+        -:  442:
+    #####:  443:	free(eln);
+    #####:  444:	free(files_len);
+    #####:  445:	free(pfiles);
+    #####:  446:	globfree(&globbed_files);
+    %%%%%:  446-block  0
+call    0 never executed
+        -:  447:
+        -:  448:	/* If needed, go back to the directory we came from */
+    #####:  449:	if (search_path) {
+branch  0 never executed
+branch  1 never executed
+    #####:  450:		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
+    %%%%%:  450-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  451:			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+    #####:  452:			    ws[cur_ws].path, strerror(errno));
+    %%%%%:  452-block  0
+call    0 never executed
+call    1 never executed
+    #####:  453:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  454:		}
+        -:  455:	}
+        -:  456:
+    #####:  457:	if (!found)
+    %%%%%:  457-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  458:		return EXIT_FAILURE;
+    %%%%%:  458-block  0
+unconditional  0 never executed
+        -:  459:
+    #####:  460:	return EXIT_SUCCESS;
+    %%%%%:  460-block  0
+unconditional  0 never executed
+        -:  461:}
+        -:  462:
+        -:  463:/* List matching (or not marching, if inverse is set to 1) filenames
+        -:  464: * in the specified directory */
+        -:  465:int
+function search_regex called 0 returned 0% blocks executed 0%
+    #####:  466:search_regex(char **comm, int invert)
+        -:  467:{
+    #####:  468:	if (!comm || !comm[0])
+    %%%%%:  468-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  468-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  469:		return EXIT_FAILURE;
+    %%%%%:  469-block  0
+unconditional  0 never executed
+        -:  470:
+    #####:  471:	char *search_str = (char *)NULL, *search_path = (char *)NULL;
+    #####:  472:	mode_t file_type = 0;
+        -:  473:
+        -:  474:	/* If there are two arguments, the one starting with '-' is the
+        -:  475:	 * filetype and the other is the path */
+    #####:  476:	if (comm[1] && comm[2]) {
+    %%%%%:  476-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  476-block  1
+branch  2 never executed
+branch  3 never executed
+        -:  477:
+    #####:  478:		if (*comm[1] == '-') {
+    %%%%%:  478-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  479:			file_type = (mode_t) * (comm[1] + 1);
+    #####:  480:			search_path = comm[2];
+    %%%%%:  480-block  0
+unconditional  0 never executed
+        -:  481:		}
+        -:  482:
+    #####:  483:		else if (*comm[2] == '-') {
+    %%%%%:  483-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  484:			file_type = (mode_t) * (comm[2] + 1);
+    #####:  485:			search_path = comm[1];
+    %%%%%:  485-block  0
+unconditional  0 never executed
+        -:  486:		}
+        -:  487:
+        -:  488:		else
+    #####:  489:			search_path = comm[1];
+    %%%%%:  489-block  0
+unconditional  0 never executed
+        -:  490:	}
+        -:  491:
+        -:  492:	/* If just one argument, '-' indicates filetype. Else, we have a
+        -:  493:	 * path */
+    #####:  494:	else if (comm[1]) {
+    %%%%%:  494-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  495:		if (*comm[1] == '-')
+    %%%%%:  495-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  496:			file_type = (mode_t) * (comm[1] + 1);
+    %%%%%:  496-block  0
+unconditional  0 never executed
+        -:  497:		else
+    #####:  498:			search_path = comm[1];
+    %%%%%:  498-block  0
+unconditional  0 never executed
+        -:  499:	}
+        -:  500:
+        -:  501:	/* If no arguments, search_path will be NULL and file_type zero */
+        -:  502:
+    #####:  503:	if (file_type) {
+    %%%%%:  503-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  504:
+        -:  505:		/* If file type is specified, matches will be checked against
+        -:  506:		 * this value */
+    #####:  507:		switch (file_type) {
+    %%%%%:  507-block  0
+branch  0 never executed
+branch  1 never executed
+branch  2 never executed
+branch  3 never executed
+branch  4 never executed
+branch  5 never executed
+branch  6 never executed
+branch  7 never executed
+    #####:  508:		case 'd':
+    #####:  509:			file_type = DT_DIR;
+    #####:  510:			break;
+    %%%%%:  510-block  0
+unconditional  0 never executed
+    #####:  511:		case 'r':
+    #####:  512:			file_type = DT_REG;
+    #####:  513:			break;
+    %%%%%:  513-block  0
+unconditional  0 never executed
+    #####:  514:		case 'l':
+    #####:  515:			file_type = DT_LNK;
+    #####:  516:			break;
+    %%%%%:  516-block  0
+unconditional  0 never executed
+    #####:  517:		case 's':
+    #####:  518:			file_type = DT_SOCK;
+    #####:  519:			break;
+    %%%%%:  519-block  0
+unconditional  0 never executed
+    #####:  520:		case 'f':
+    #####:  521:			file_type = DT_FIFO;
+    #####:  522:			break;
+    %%%%%:  522-block  0
+unconditional  0 never executed
+    #####:  523:		case 'b':
+    #####:  524:			file_type = DT_BLK;
+    #####:  525:			break;
+    %%%%%:  525-block  0
+unconditional  0 never executed
+    #####:  526:		case 'c':
+    #####:  527:			file_type = DT_CHR;
+    #####:  528:			break;
+    %%%%%:  528-block  0
+unconditional  0 never executed
+        -:  529:
+    #####:  530:		default:
+    #####:  531:			fprintf(stderr, _("%s: '%c': Unrecognized filetype\n"),
+    #####:  532:			    PROGRAM_NAME, (char)file_type);
+    %%%%%:  532-block  0
+call    0 never executed
+    #####:  533:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  534:		}
+        -:  535:	}
+        -:  536:
+    #####:  537:	struct dirent **reg_dirlist = (struct dirent **)NULL;
+    #####:  538:	int tmp_files = 0;
+        -:  539:
+        -:  540:	/* If we have a path ("/str /path"), chdir into it, since
+        -:  541:	 * regex() works on CWD */
+    #####:  542:	if (search_path && *search_path) {
+    %%%%%:  542-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  542-block  1
+branch  2 never executed
+branch  3 never executed
+        -:  543:
+        -:  544:		/* Deescape the search path, if necessary */
+    #####:  545:		if (strchr(search_path, '\\')) {
+    %%%%%:  545-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  546:			char *deq_dir = dequote_str(search_path, 0);
+    %%%%%:  546-block  0
+call    0 never executed
+        -:  547:
+    #####:  548:			if (!deq_dir) {
+branch  0 never executed
+branch  1 never executed
+    #####:  549:				fprintf(stderr, _("%s: %s: Error dequoting filename\n"),
+    #####:  550:				    PROGRAM_NAME, comm[1]);
+    %%%%%:  550-block  0
+call    0 never executed
+    #####:  551:				return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  552:			}
+        -:  553:
+    #####:  554:			strcpy(search_path, deq_dir);
+    #####:  555:			free(deq_dir);
+    %%%%%:  555-block  0
+unconditional  0 never executed
+        -:  556:		}
+        -:  557:
+    #####:  558:		size_t path_len = strlen(search_path);
+    #####:  559:		if (search_path[path_len - 1] == '/')
+    %%%%%:  559-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  560:			search_path[path_len - 1] = '\0';
+    %%%%%:  560-block  0
+unconditional  0 never executed
+        -:  561:
+    #####:  562:		if ((*search_path == '.' && !search_path[1])
+    %%%%%:  562-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  562-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  563:		|| (search_path[1] == ws[cur_ws].path[1]
+    %%%%%:  563-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  564:		&& strcmp(search_path, ws[cur_ws].path) == 0))
+    %%%%%:  564-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  565:			search_path = (char *)NULL;
+    %%%%%:  565-block  0
+unconditional  0 never executed
+        -:  566:
+    #####:  567:		if (search_path && *search_path) {
+    %%%%%:  567-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  567-block  1
+branch  2 never executed
+branch  3 never executed
+    #####:  568:			if (xchdir(search_path, NO_TITLE) == -1) {
+    %%%%%:  568-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  569:				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+call    0 never executed
+    #####:  570:				    search_path, strerror(errno));
+    %%%%%:  570-block  0
+call    0 never executed
+    #####:  571:				return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  572:			}
+        -:  573:
+    #####:  574:			tmp_files = scandir(".", &reg_dirlist, skip_files, xalphasort);
+    %%%%%:  574-block  0
+call    0 never executed
+        -:  575:
+        -:  576:			/*      tmp_files = scandir(".", &reg_dirlist, skip_files,
+        -:  577:							sort == 0 ? NULL : sort == 1 ? m_alphasort
+        -:  578:							: sort == 2 ? size_sort : sort == 3
+        -:  579:							? atime_sort : sort == 4 ? btime_sort
+        -:  580:							: sort == 5 ? ctime_sort : sort == 6
+        -:  581:							? mtime_sort : sort == 7 ? m_versionsort
+        -:  582:							: sort == 8 ? ext_sort : inode_sort); */
+        -:  583:
+    #####:  584:			if (tmp_files == -1) {
+branch  0 never executed
+branch  1 never executed
+    #####:  585:				fprintf(stderr, "scandir: %s: %s\n", search_path,
+call    0 never executed
+    #####:  586:				    strerror(errno));
+    %%%%%:  586-block  0
+call    0 never executed
+        -:  587:
+    #####:  588:				if (xchdir(ws[cur_ws].path, NO_TITLE) == -1)
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  589:					fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+    #####:  590:					    ws[cur_ws].path, strerror(errno));
+    %%%%%:  590-block  0
+call    0 never executed
+call    1 never executed
+unconditional  2 never executed
+        -:  591:
+    #####:  592:				return EXIT_FAILURE;
+    %%%%%:  592-block  0
+unconditional  0 never executed
+        -:  593:			}
+        -:  594:		}
+        -:  595:	}
+        -:  596:
+        -:  597:	size_t i;
+        -:  598:
+        -:  599:	/* Search for regex expression */
+    #####:  600:	int regex_found = check_regex(comm[0] + 1);
+    %%%%%:  600-block  0
+call    0 never executed
+        -:  601:
+        -:  602:	/* If search string is just "STR" (no regex chars), change it
+        -:  603:	 * to ".*STR.*" */
+    #####:  604:	if (regex_found == EXIT_FAILURE) {
+branch  0 never executed
+branch  1 never executed
+    #####:  605:		size_t search_str_len = strlen(comm[0]);
+        -:  606:
+    #####:  607:		comm[0] = (char *)xrealloc(comm[0], (search_str_len + 5) *
+    %%%%%:  607-block  0
+call    0 never executed
+        -:  608:							sizeof(char));
+        -:  609:
+    #####:  610:		char *tmp_str = (char *)xnmalloc(search_str_len + 1, sizeof(char));
+call    0 never executed
+        -:  611:
+    #####:  612:		strcpy(tmp_str, comm[0] + (invert ? 2 : 1));
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  612-block  0
+unconditional  2 never executed
+    %%%%%:  612-block  1
+unconditional  3 never executed
+        -:  613:
+    #####:  614:		*comm[0] = '.';
+    #####:  615:		*(comm[0] + 1) = '*';
+    #####:  616:		*(comm[0] + 2) = '\0';
+    #####:  617:		strcat(comm[0], tmp_str);
+    #####:  618:		free(tmp_str);
+    #####:  619:		*(comm[0] + search_str_len + 1) = '.';
+    #####:  620:		*(comm[0] + search_str_len + 2) = '*';
+    #####:  621:		*(comm[0] + search_str_len + 3) = '\0';
+    #####:  622:		search_str = comm[0];
+    %%%%%:  622-block  0
+unconditional  0 never executed
+        -:  623:	}
+        -:  624:
+        -:  625:	else
+    #####:  626:		search_str = comm[0] + (invert ? 2 : 1);
+    %%%%%:  626-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  626-block  1
+unconditional  2 never executed
+    %%%%%:  626-block  2
+unconditional  3 never executed
+    %%%%%:  626-block  3
+unconditional  4 never executed
+        -:  627:
+        -:  628:	/* Get matches, if any, using regular expressions */
+        -:  629:	regex_t regex_files;
+    #####:  630:	int ret = regcomp(&regex_files, search_str, REG_NOSUB | REG_EXTENDED);
+    %%%%%:  630-block  0
+call    0 never executed
+        -:  631:
+    #####:  632:	if (ret != EXIT_SUCCESS) {
+branch  0 never executed
+branch  1 never executed
+    #####:  633:		fprintf(stderr, _("'%s': Invalid regular expression\n"), search_str);
+    %%%%%:  633-block  0
+call    0 never executed
+        -:  634:
+    #####:  635:		regfree(&regex_files);
+call    0 never executed
+        -:  636:
+    #####:  637:		if (search_path) {
+branch  0 never executed
+branch  1 never executed
+    #####:  638:			for (i = 0; i < (size_t)tmp_files; i++)
+    %%%%%:  638-block  0
+unconditional  0 never executed
+    %%%%%:  638-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  639:				free(reg_dirlist[i]);
+    %%%%%:  639-block  0
+unconditional  0 never executed
+        -:  640:
+    #####:  641:			free(reg_dirlist);
+        -:  642:
+    #####:  643:			if (xchdir(ws[cur_ws].path, NO_TITLE) == -1)
+    %%%%%:  643-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  644:				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+    #####:  645:				    ws[cur_ws].path, strerror(errno));
+    %%%%%:  645-block  0
+call    0 never executed
+call    1 never executed
+unconditional  2 never executed
+        -:  646:		}
+        -:  647:
+    #####:  648:		return EXIT_FAILURE;
+    %%%%%:  648-block  0
+unconditional  0 never executed
+        -:  649:	}
+        -:  650:
+    #####:  651:	size_t found = 0;
+    #####:  652:	int *regex_index = (int *)xnmalloc((search_path ? (size_t)tmp_files
+    %%%%%:  652-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  652-block  1
+unconditional  2 never executed
+    %%%%%:  652-block  2
+call    3 never executed
+    #####:  653:							: files) +
+    %%%%%:  653-block  0
+unconditional  0 never executed
+        -:  654:					       1,
+        -:  655:	    sizeof(int));
+        -:  656:
+    #####:  657:	for (i = 0; i < (search_path ? (size_t)tmp_files : files); i++) {
+unconditional  0 never executed
+    %%%%%:  657-block  0
+unconditional  1 never executed
+    %%%%%:  657-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  657-block  2
+unconditional  4 never executed
+    %%%%%:  657-block  3
+unconditional  5 never executed
+    %%%%%:  657-block  4
+branch  6 never executed
+branch  7 never executed
+    #####:  658:		if (regexec(&regex_files, (search_path ? reg_dirlist[i]->d_name
+    %%%%%:  658-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  658-block  1
+unconditional  2 never executed
+    %%%%%:  658-block  2
+call    3 never executed
+branch  4 never executed
+branch  5 never executed
+    #####:  659:		: file_info[i].name), 0, NULL, 0) == EXIT_SUCCESS) {
+    %%%%%:  659-block  0
+unconditional  0 never executed
+    #####:  660:			if (!invert)
+    %%%%%:  660-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  661:				regex_index[found++] = (int)i;
+    %%%%%:  661-block  0
+unconditional  0 never executed
+    #####:  662:		} else if (invert)
+    %%%%%:  662-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  663:			regex_index[found++] = (int)i;
+    %%%%%:  663-block  0
+unconditional  0 never executed
+        -:  664:	}
+        -:  665:
+    #####:  666:	regfree(&regex_files);
+    %%%%%:  666-block  0
+call    0 never executed
+        -:  667:
+    #####:  668:	if (!found) {
+branch  0 never executed
+branch  1 never executed
+    #####:  669:		fprintf(stderr, _("No matches found\n"));
+    %%%%%:  669-block  0
+call    0 never executed
+    #####:  670:		free(regex_index);
+        -:  671:
+    #####:  672:		if (search_path) {
+branch  0 never executed
+branch  1 never executed
+        -:  673:
+    #####:  674:			int j = tmp_files;
+    #####:  675:			while (--j >= 0)
+    %%%%%:  675-block  0
+unconditional  0 never executed
+    %%%%%:  675-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  676:				free(reg_dirlist[j]);
+    %%%%%:  676-block  0
+unconditional  0 never executed
+        -:  677:
+    #####:  678:			free(reg_dirlist);
+        -:  679:
+    #####:  680:			if (xchdir(ws[cur_ws].path, NO_TITLE) == -1)
+    %%%%%:  680-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  681:				fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+    #####:  682:				    ws[cur_ws].path, strerror(errno));
+    %%%%%:  682-block  0
+call    0 never executed
+call    1 never executed
+unconditional  2 never executed
+        -:  683:		}
+        -:  684:
+    #####:  685:		return EXIT_FAILURE;
+    %%%%%:  685-block  0
+unconditional  0 never executed
+        -:  686:	}
+        -:  687:
+        -:  688:	/* We have matches */
+    #####:  689:	int last_column = 0;
+    #####:  690:	size_t flongest = 0, total_cols = 0, type_ok = 0;
+        -:  691:
+    #####:  692:	size_t *files_len = (size_t *)xnmalloc(found + 1, sizeof(size_t));
+    %%%%%:  692-block  0
+call    0 never executed
+    #####:  693:	int *match_type = (int *)xnmalloc(found + 1, sizeof(int));
+call    0 never executed
+        -:  694:
+        -:  695:	/* Get the longest filename in the list */
+    #####:  696:	int j = (int)found;
+    #####:  697:	while (--j >= 0) {
+unconditional  0 never executed
+    %%%%%:  697-block  0
+branch  1 never executed
+branch  2 never executed
+        -:  698:
+        -:  699:		/* Simply skip all files not matching file_type */
+    #####:  700:		if (file_type) {
+    %%%%%:  700-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  701:
+    #####:  702:			match_type[j] = 0;
+        -:  703:
+    #####:  704:			if (search_path) {
+    %%%%%:  704-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  705:				if (reg_dirlist[regex_index[j]]->d_type != file_type)
+    %%%%%:  705-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  706:					continue;
+    %%%%%:  706-block  0
+unconditional  0 never executed
+        -:  707:			}
+        -:  708:
+    #####:  709:			else if (file_info[regex_index[j]].type != file_type)
+    %%%%%:  709-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  710:				continue;
+    %%%%%:  710-block  0
+unconditional  0 never executed
+        -:  711:		}
+        -:  712:
+        -:  713:		/* Amount of non-filtered files */
+    #####:  714:		type_ok++;
+        -:  715:		/* Index of each non-filtered files */
+    #####:  716:		match_type[j] = 1;
+        -:  717:
+        -:  718:		/* If not searching in CWD, we only need to know the file's
+        -:  719:		 * length (no ELN) */
+    #####:  720:		if (search_path) {
+    %%%%%:  720-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  721:			files_len[j] = unicode ? wc_xstrlen(
+    #####:  722:							reg_dirlist[regex_index[j]]->d_name)
+    %%%%%:  722-block  0
+call    0 never executed
+unconditional  1 never executed
+    #####:  723:							: strlen(reg_dirlist[regex_index[j]]->d_name);
+    %%%%%:  723-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  723-block  1
+unconditional  2 never executed
+        -:  724:
+    #####:  725:			if (files_len[j] > flongest)
+    %%%%%:  725-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  726:				flongest = files_len[j];
+    %%%%%:  726-block  0
+unconditional  0 never executed
+        -:  727:		}
+        -:  728:
+        -:  729:		/* If searching in CWD, take into account the file's ELN
+        -:  730:		 * when calculating its legnth */
+        -:  731:		else {
+    #####:  732:			files_len[j] = file_info[regex_index[j]].len
+    #####:  733:							+ (size_t)DIGINUM(regex_index[j] + 1) + 1;
+    %%%%%:  733-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  733-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  733-block  2
+branch  4 never executed
+branch  5 never executed
+    %%%%%:  733-block  3
+branch  6 never executed
+branch  7 never executed
+    %%%%%:  733-block  4
+branch  8 never executed
+branch  9 never executed
+    %%%%%:  733-block  5
+branch 10 never executed
+branch 11 never executed
+    %%%%%:  733-block  6
+branch 12 never executed
+branch 13 never executed
+    %%%%%:  733-block  7
+branch 14 never executed
+branch 15 never executed
+    %%%%%:  733-block  8
+branch 16 never executed
+branch 17 never executed
+    %%%%%:  733-block  9
+unconditional 18 never executed
+    %%%%%:  733-block 10
+unconditional 19 never executed
+    %%%%%:  733-block 11
+unconditional 20 never executed
+    %%%%%:  733-block 12
+unconditional 21 never executed
+    %%%%%:  733-block 13
+unconditional 22 never executed
+    %%%%%:  733-block 14
+unconditional 23 never executed
+    %%%%%:  733-block 15
+unconditional 24 never executed
+    %%%%%:  733-block 16
+unconditional 25 never executed
+    %%%%%:  733-block 17
+unconditional 26 never executed
+    %%%%%:  733-block 18
+unconditional 27 never executed
+    %%%%%:  733-block 19
+unconditional 28 never executed
+    %%%%%:  733-block 20
+unconditional 29 never executed
+    %%%%%:  733-block 21
+unconditional 30 never executed
+    %%%%%:  733-block 22
+unconditional 31 never executed
+    %%%%%:  733-block 23
+unconditional 32 never executed
+    %%%%%:  733-block 24
+unconditional 33 never executed
+    %%%%%:  733-block 25
+unconditional 34 never executed
+    %%%%%:  733-block 26
+unconditional 35 never executed
+        -:  734:
+    #####:  735:			if (files_len[j] > flongest)
+    %%%%%:  735-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  736:				flongest = files_len[j];
+    %%%%%:  736-block  0
+unconditional  0 never executed
+        -:  737:		}
+        -:  738:	}
+        -:  739:
+    #####:  740:	if (type_ok) {
+    %%%%%:  740-block  0
+branch  0 never executed
+branch  1 never executed
+        -:  741:
+        -:  742:		struct winsize w;
+    #####:  743:		ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    %%%%%:  743-block  0
+call    0 never executed
+    #####:  744:		unsigned short terminal_cols = w.ws_col;
+        -:  745:
+    #####:  746:		if (flongest <= 0 || flongest > terminal_cols)
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  746-block  0
+branch  2 never executed
+branch  3 never executed
+    #####:  747:			total_cols = 1;
+    %%%%%:  747-block  0
+unconditional  0 never executed
+        -:  748:		else
+    #####:  749:			total_cols = (size_t)terminal_cols / (flongest + 1);
+    %%%%%:  749-block  0
+unconditional  0 never executed
+        -:  750:
+    #####:  751:		if (total_cols > type_ok)
+    %%%%%:  751-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  752:			total_cols = type_ok;
+    %%%%%:  752-block  0
+unconditional  0 never executed
+        -:  753:
+        -:  754:		/* cur_col: Current columns number */
+    #####:  755:		size_t cur_col = 0, counter = 0;
+        -:  756:
+    #####:  757:		for (i = 0; i < found; i++) {
+    %%%%%:  757-block  0
+unconditional  0 never executed
+    %%%%%:  757-block  1
+unconditional  1 never executed
+    %%%%%:  757-block  2
+branch  2 never executed
+branch  3 never executed
+        -:  758:
+    #####:  759:			if (match_type[i] == 0)
+    %%%%%:  759-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  760:				continue;
+    %%%%%:  760-block  0
+unconditional  0 never executed
+        -:  761:
+        -:  762:			/* Print the results using colors and columns */
+    #####:  763:			cur_col++;
+        -:  764:
+        -:  765:			/* If the current file is in the last column or is the last
+        -:  766:			 * listed file, we need to print no pad and a newline char.
+        -:  767:			 * Else, print the corresponding pad, to equate the longest
+        -:  768:			 * file length, and no newline char */
+    #####:  769:			if (cur_col == total_cols) {
+    %%%%%:  769-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  770:				last_column = 1;
+    #####:  771:				cur_col = 0;
+    %%%%%:  771-block  0
+unconditional  0 never executed
+        -:  772:			} else
+    #####:  773:				last_column = 0;
+    %%%%%:  773-block  0
+unconditional  0 never executed
+        -:  774:
+        -:  775:			/* Counter: Current amount of non-filtered files: if
+        -:  776:			 * COUNTER equals TYPE_OK (total amount of non-filtered
+        -:  777:			 * files), we have the last file to be printed */
+    #####:  778:			counter++;
+        -:  779:
+    #####:  780:			colors_list(search_path ? reg_dirlist[regex_index[i]]->d_name
+    %%%%%:  780-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  780-block  1
+branch  2 never executed
+branch  3 never executed
+    %%%%%:  780-block  2
+unconditional  4 never executed
+    %%%%%:  780-block  3
+unconditional  5 never executed
+    %%%%%:  780-block  4
+branch  6 never executed
+branch  7 never executed
+    %%%%%:  780-block  5
+unconditional  8 never executed
+    %%%%%:  780-block  6
+branch  9 never executed
+branch 10 never executed
+    %%%%%:  780-block  7
+unconditional 11 never executed
+    %%%%%:  780-block  8
+branch 12 never executed
+branch 13 never executed
+    %%%%%:  780-block  9
+unconditional 14 never executed
+    %%%%%:  780-block 10
+call   15 never executed
+unconditional 16 never executed
+    #####:  781:					: file_info[regex_index[i]].name, search_path ? NO_ELN
+    %%%%%:  781-block  0
+unconditional  0 never executed
+    #####:  782:					: regex_index[i] + 1, (last_column || counter == type_ok)
+    %%%%%:  782-block  0
+branch  0 never executed
+branch  1 never executed
+    %%%%%:  782-block  1
+unconditional  2 never executed
+    #####:  783:					? NO_PAD : (int)(flongest - files_len[i]) + 1,
+    %%%%%:  783-block  0
+unconditional  0 never executed
+        -:  784:					(last_column || counter == type_ok) ? PRINT_NEWLINE
+        -:  785:					: NO_NEWLINE);
+        -:  786:		}
+        -:  787:
+    #####:  788:		printf(_("Matches found: %zu\n"), counter);
+    %%%%%:  788-block  0
+call    0 never executed
+        -:  789:	}
+        -:  790:
+        -:  791:	else
+    #####:  792:		fputs(_("No matches found\n"), stderr);
+    %%%%%:  792-block  0
+call    0 never executed
+unconditional  1 never executed
+        -:  793:
+        -:  794:	/* Free stuff */
+    #####:  795:	free(files_len);
+    #####:  796:	free(match_type);
+    #####:  797:	free(regex_index);
+    #####:  798:	regfree(&regex_files);
+    %%%%%:  798-block  0
+call    0 never executed
+        -:  799:
+        -:  800:	/* If needed, go back to the directory we came from */
+    #####:  801:	if (search_path) {
+branch  0 never executed
+branch  1 never executed
+    #####:  802:		j = tmp_files;
+    #####:  803:		while (--j >= 0)
+    %%%%%:  803-block  0
+unconditional  0 never executed
+    %%%%%:  803-block  1
+branch  1 never executed
+branch  2 never executed
+    #####:  804:			free(reg_dirlist[j]);
+    %%%%%:  804-block  0
+unconditional  0 never executed
+        -:  805:
+    #####:  806:		free(reg_dirlist);
+        -:  807:
+    #####:  808:		if (xchdir(ws[cur_ws].path, NO_TITLE) == -1) {
+    %%%%%:  808-block  0
+call    0 never executed
+branch  1 never executed
+branch  2 never executed
+    #####:  809:			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME,
+    #####:  810:			    ws[cur_ws].path, strerror(errno));
+    %%%%%:  810-block  0
+call    0 never executed
+call    1 never executed
+    #####:  811:			return EXIT_FAILURE;
+unconditional  0 never executed
+        -:  812:		}
+        -:  813:	}
+        -:  814:
+    #####:  815:	if (type_ok)
+    %%%%%:  815-block  0
+branch  0 never executed
+branch  1 never executed
+    #####:  816:		return EXIT_SUCCESS;
+    %%%%%:  816-block  0
+unconditional  0 never executed
+        -:  817:
+    #####:  818:	return EXIT_FAILURE;
+    %%%%%:  818-block  0
+unconditional  0 never executed
+        -:  819:}
