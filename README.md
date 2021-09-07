@@ -46,14 +46,14 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 ---
 
 ## Table of contents
-* [Why?](#why)
-* [Description](#description)
-* [Installing CliFM](#installing-clifm)
-* [First steps](#first-steps)
-* [Support](#support)
-* [License](#license)
-* [Contributing](#contributing)
-* [Community](#community)
+*  [Why?](#why)
+*  [Description](#description)
+*  [Installing CliFM](#installing-clifm)
+*  [First steps](#first-steps)
+*  [Support](#support)
+*  [License](#license)
+*  [Contributing](#contributing)
+*  [Community](#community)
 
 ---
 
@@ -87,57 +87,57 @@ _<sup>1</sup>_ <i>For a detailed explanation and comparison between these concep
 
 Features beyond common file operations, such as copy, move, remove, etc.:
 
-* [Really CLI-based](https://github.com/leo-arch/clifm/wiki/Introduction#main-design-and-goals). No GUI nor TUI (or curses) at all, just a command-line. It can run thereby on the kernel built-in console and even on a SSH or any other remote session.
-* Memory footprint below 5 MiB and a disk usage of 500 KiB. Incredibly lightweight and fast even on really old hardware. See the [performance section](https://github.com/leo-arch/clifm/wiki/Performance).
-* The use of [short (and even one-character) commands](https://github.com/leo-arch/clifm/wiki/Introduction#commands-short-summary), and [entry list numbers (ELN's)](https://github.com/leo-arch/clifm/wiki/Common-Operations) for file names. 
-* [Bookmarks](https://github.com/leo-arch/clifm/wiki/Common-Operations#bookmarks).
-* [Files selection](https://github.com/leo-arch/clifm/wiki/Common-Operations#selection) (supports both glob and regular expressions and works even across multiple instances of the program).
-* [_Lira_, a built-in resource opener](https://github.com/leo-arch/clifm/wiki/Specifics#resource-opener) (supports regular expressions and is able to discern between GUI and non-GUI environments).
-* [Files search](https://github.com/leo-arch/clifm/wiki/Common-Operations#searching) (supports both glob and regular expressions).
-* [A built-in Freedesktop-compliant trash system](https://github.com/leo-arch/clifm/wiki/Common-Operations#trashing-files).
-* [Extended color codes](https://github.com/leo-arch/clifm/wiki/Customization#colors) for file-types and -extensions.
-* [Files counter](https://github.com/leo-arch/clifm/wiki/Introduction#interface) for directories and symlinks to directories.
-* Directory history map to keep in sight previous, current, and next entries in the directory history list.
-* [Plugins](https://github.com/leo-arch/clifm/wiki/Advanced#plugins).
+*  [Really CLI-based](https://github.com/leo-arch/clifm/wiki/Introduction#main-design-and-goals). No GUI nor TUI (or curses) at all, just a command-line. It can run thereby on the kernel built-in console and even on a SSH or any other remote session.
+*  Memory footprint below 5 MiB and a disk usage of 500 KiB. Incredibly lightweight and fast even on really old hardware. See the [performance section](https://github.com/leo-arch/clifm/wiki/Performance).
+*  The use of [short (and even one-character) commands](https://github.com/leo-arch/clifm/wiki/Introduction#commands-short-summary), and [entry list numbers (ELN's)](https://github.com/leo-arch/clifm/wiki/Common-Operations) for file names. 
+*  [Bookmarks](https://github.com/leo-arch/clifm/wiki/Common-Operations#bookmarks).
+*  [Files selection](https://github.com/leo-arch/clifm/wiki/Common-Operations#selection) (supports both glob and regular expressions and works even across multiple instances of the program).
+*  [_Lira_, a built-in resource opener](https://github.com/leo-arch/clifm/wiki/Specifics#resource-opener) (supports regular expressions and is able to discern between GUI and non-GUI environments).
+*  [Files search](https://github.com/leo-arch/clifm/wiki/Common-Operations#searching) (supports both glob and regular expressions).
+*  [A built-in Freedesktop-compliant trash system](https://github.com/leo-arch/clifm/wiki/Common-Operations#trashing-files).
+*  [Extended color codes](https://github.com/leo-arch/clifm/wiki/Customization#colors) for file-types and -extensions.
+*  [Files counter](https://github.com/leo-arch/clifm/wiki/Introduction#interface) for directories and symlinks to directories.
+*  Directory history map to keep in sight previous, current, and next entries in the directory history list.
+*  [Plugins](https://github.com/leo-arch/clifm/wiki/Advanced#plugins).
 * [Files preview](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) (via _BFG_, a native file previewer, but including support for [Ranger's scope.sh](https://github.com/ranger/ranger/blob/master/ranger/data/scope.sh) and [pistol](https://github.com/doronbehar/pistol) as well).
-* [Stealth mode](https://github.com/leo-arch/clifm/wiki/Advanced#stealth-mode): Leave no trace on the host system. No file is read, no file is written.
-* [_Kangaroo_](https://github.com/leo-arch/clifm/wiki/Specifics#kangaroos-frecency-algorithm), a built-in directory jumper function similar to [autojump](https://github.com/wting/autojump), [z.lua](https://github.com/skywind3000/z.lua), and [zoxide](https://github.com/ajeetdsouza/zoxide).
-* [Batch links](https://github.com/leo-arch/clifm/wiki/Introduction#bl-elnfile--n).
-* [Icons support](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk) :smirk:.
+*  [Stealth mode](https://github.com/leo-arch/clifm/wiki/Advanced#stealth-mode): Leave no trace on the host system. No file is read, no file is written.
+*  [_Kangaroo_](https://github.com/leo-arch/clifm/wiki/Specifics#kangaroos-frecency-algorithm), a built-in directory jumper function similar to [autojump](https://github.com/wting/autojump), [z.lua](https://github.com/skywind3000/z.lua), and [zoxide](https://github.com/ajeetdsouza/zoxide).
+*  [Batch links](https://github.com/leo-arch/clifm/wiki/Introduction#bl-elnfile--n).
+*  [Icons support](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk) :smirk:.
 * Unicode suppport.
-* [Tab-completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions).
-* Bash-like quoting system.
-* [Directory](https://github.com/leo-arch/clifm/wiki/Introduction#b-back-h-hist-clear-eln) and [commands](https://github.com/leo-arch/clifm/wiki/Introduction/#commands-history) history.
-* Shell commands execution.
-* [Glob and regular expressions](https://github.com/leo-arch/clifm/wiki/Advanced#wildcards-and-regex) (including inverse matching).
-* [Aliases](https://github.com/leo-arch/clifm/wiki/Customization#aliases).
-* [Logs](https://github.com/leo-arch/clifm/wiki/Introduction#log-clear-on-off-status).
-* [Prompt and profile commands](https://github.com/leo-arch/clifm/wiki/Customization#profile-and-prompt-commands) (run commands with each new prompt or at program startup).
-* [Bash-like prompt customization](https://github.com/leo-arch/clifm/wiki/Customization#the-prompt).
-* Sequential and conditional commands execution .
-* [User profiles](https://github.com/leo-arch/clifm/wiki/Specifics#profiles).
-* [Customizable keyboard shortcuts](https://github.com/leo-arch/clifm/wiki/Customization#keybindings).
-* [_Mas_, a built-in pager](https://github.com/leo-arch/clifm/wiki/Introduction#pg-pager-on-off-status) for files listing.
-* [Eleven sorting methods](https://github.com/leo-arch/clifm/wiki/Introduction#st-sort-method-rev).
-* [Bulk renaming](https://github.com/leo-arch/clifm/wiki/Advanced#bulk-rename).
-* [Archiving and compression](https://github.com/leo-arch/clifm/wiki/Advanced#archives) support (including Zstandard and ISO 9660).
-* [Auto-cd](https://github.com/leo-arch/clifm/wiki/Introduction#acd-autocd-on-off-status) and [auto-open](https://github.com/leo-arch/clifm/wiki/Introduction#ao-auto-open-on-off-status).
-* [Symlinks editor](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r).
-* Disk usage.
-* [CD on quit](https://github.com/leo-arch/clifm/wiki/Advanced#cd-on-quit) and [file picker](https://github.com/leo-arch/clifm/wiki/Advanced#file-picker) functions.
-* Read and list files from [STDIN (standard input)](https://github.com/leo-arch/clifm/wiki/Advanced#standard-input).
-* [Files filter](https://github.com/leo-arch/clifm/wiki/Advanced#files-filters).
-* [Up to eight workspaces](https://github.com/leo-arch/clifm/wiki/Specifics#workspaces).
-* [Fused parameters for ELN's](https://github.com/leo-arch/clifm/wiki/Introduction#fused-parameters).
-* [Advanced Copy](https://github.com/jarun/advcpmv) support (just `cp` and `mv` with a nice progress bar).
-* [Light mode](https://github.com/leo-arch/clifm/wiki/Specifics#speed-and-performance) (just in case it is not fast enough for you).
-* [Color schemes](https://github.com/leo-arch/clifm/wiki/Customization#colors).
-* [Four customizable keybindings for custom plugins](https://github.com/leo-arch/clifm/wiki/Customization#keybindings).
-* [Fastback function](https://github.com/leo-arch/clifm/wiki/Introduction#fastback-function).
-* [Git integration](https://github.com/leo-arch/clifm/wiki/Advanced#git-integration).
-* [Remote file systems management](https://github.com/leo-arch/clifm/wiki/Introduction#net-name-edit-m-mount-name-u-unmount-name).
-* [Compile features in/out](https://github.com/leo-arch/clifm/blob/master/src/README.md#compiling-features-inout).
-* _[Gemini](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)_, a Fish-like auto-suggestions system.
+*  [Tab-completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions).
+*  Bash-like quoting system.
+*  [Directory](https://github.com/leo-arch/clifm/wiki/Introduction#b-back-h-hist-clear-eln) and [commands](https://github.com/leo-arch/clifm/wiki/Introduction/#commands-history) history.
+*  Shell commands execution.
+*  [Glob and regular expressions](https://github.com/leo-arch/clifm/wiki/Advanced#wildcards-and-regex) (including inverse matching).
+*  [Aliases](https://github.com/leo-arch/clifm/wiki/Customization#aliases).
+*  [Logs](https://github.com/leo-arch/clifm/wiki/Introduction#log-clear-on-off-status).
+*  [Prompt and profile commands](https://github.com/leo-arch/clifm/wiki/Customization#profile-and-prompt-commands) (run commands with each new prompt or at program startup).
+*  [Bash-like prompt customization](https://github.com/leo-arch/clifm/wiki/Customization#the-prompt).
+*  Sequential and conditional commands execution .
+*  [User profiles](https://github.com/leo-arch/clifm/wiki/Specifics#profiles).
+*  [Customizable keyboard shortcuts](https://github.com/leo-arch/clifm/wiki/Customization#keybindings).
+*  [_Mas_, a built-in pager](https://github.com/leo-arch/clifm/wiki/Introduction#pg-pager-on-off-status) for files listing.
+*  [Eleven sorting methods](https://github.com/leo-arch/clifm/wiki/Introduction#st-sort-method-rev).
+*  [Bulk renaming](https://github.com/leo-arch/clifm/wiki/Advanced#bulk-rename).
+*  [Archiving and compression](https://github.com/leo-arch/clifm/wiki/Advanced#archives) support (including Zstandard and ISO 9660).
+*  [Auto-cd](https://github.com/leo-arch/clifm/wiki/Introduction#acd-autocd-on-off-status) and [auto-open](https://github.com/leo-arch/clifm/wiki/Introduction#ao-auto-open-on-off-status).
+*  [Symlinks editor](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r).
+*  Disk usage.
+*  [CD on quit](https://github.com/leo-arch/clifm/wiki/Advanced#cd-on-quit) and [file picker](https://github.com/leo-arch/clifm/wiki/Advanced#file-picker) functions.
+*  Read and list files from [STDIN (standard input)](https://github.com/leo-arch/clifm/wiki/Advanced#standard-input).
+*  [Files filter](https://github.com/leo-arch/clifm/wiki/Advanced#files-filters).
+*  [Up to eight workspaces](https://github.com/leo-arch/clifm/wiki/Specifics#workspaces).
+*  [Fused parameters for ELN's](https://github.com/leo-arch/clifm/wiki/Introduction#fused-parameters).
+*  [Advanced Copy](https://github.com/jarun/advcpmv) support (just `cp` and `mv` with a nice progress bar).
+*  [Light mode](https://github.com/leo-arch/clifm/wiki/Specifics#speed-and-performance) (just in case it is not fast enough for you).
+*  [Color schemes](https://github.com/leo-arch/clifm/wiki/Customization#colors).
+*  [Four customizable keybindings for custom plugins](https://github.com/leo-arch/clifm/wiki/Customization#keybindings).
+*  [Fastback function](https://github.com/leo-arch/clifm/wiki/Introduction#fastback-function).
+*  [Git integration](https://github.com/leo-arch/clifm/wiki/Advanced#git-integration).
+*  [Remote file systems management](https://github.com/leo-arch/clifm/wiki/Introduction#net-name-edit-m-mount-name-u-unmount-name).
+*  [Compile features in/out](https://github.com/leo-arch/clifm/blob/master/src/README.md#compiling-features-inout).
+*  _[Gemini](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)_, a Fish-like auto-suggestions system.
 
 <h4 align="center"><br><i>Gemini in action</i></h4>
 <p align="center"><img src="images/suggestions.gif"></a></p>
