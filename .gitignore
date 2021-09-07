@@ -2,9 +2,9 @@
 clifm
 
 # Gcov files
-*.gcov
-*.gcda
-*.gcno
+src/*.gcov
+src/*.gcda
+src/*.gcno
 
 # Misc
 TODO/
