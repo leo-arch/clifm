@@ -3,7 +3,7 @@
 **NOTE**: To keep a consintent style, run `clang-format` over all source files, including header files, using the `_clang-format` file (in `/src`) as the formatting model:
 
 ```sh
-$ clang-format -i -style=file *.[hc]
+clang-format -i -style=file *.[hc]
 ```
 
 This command will reformat all C source and header files (`*.[hc]`) in place (`-i`) using the `_clang-format` file as model (`-style=file`).
@@ -76,10 +76,12 @@ Spacing: Write easily readable code. Generally, use blank lines between code blo
 
 Max line legnth: `80 characters/columns`. If an statement exceeds this number, split it into multiple lines as follows:
 
-	if (condition)
-		printk(KERN_WARNING "Warning this is a long printk with "
-							"3 parameters a: %u b: %u "
-							"c: %u \n", a, b, c);
+```c
+if (condition)
+	printk(KERN_WARNING "Warning this is a long printk with "
+						"3 parameters a: %u b: %u "
+						"c: %u \n", a, b, c);
+```
 
 Make sure blank/empty lines do not contains TABS or spaces. In the same way, remove ending TABS and spaces.
 
@@ -143,9 +145,9 @@ CliFM source code consists of multiple C source files, being `main.c` the starti
 **A)** Initialization stuff, like loading config files (see `config.c`), command line options (parsed by the `external_arguments()` function, in `init.c`), readline and keybindings initialization (see `readline.c` and `keybindings.c`), bookmarks, workspaces, history, and the like.
 
 **B)** Once everything is correctly initialized, an infinite loop, structured as a basic shell, takes place:
- 1) Take input
- 2) Parse input
- 3) Execute command
+1)  Take input
+2)  Parse input
+3)  Execute command
  And take more input...
 
 **C)** The last step above (3) calls the `exec_cmd()` function (`in exec.c`) to find out what needs to be done based on the user's input. The structure of the `exec_cmd` function is a big if-else chain: if the command is internal, that is, one of CliFM's built-in commands, the corresponding function will be called and executed; if not, if it is rather an external command, it will be executed by the system shell (via `launch_execle()`, also in `exec.c`).
@@ -181,30 +183,30 @@ Suggestions: `suggestions.c` and `keybinds.c` (see the `rl_accept_suggestion` fu
 
 CliFM is compiled using `(g)cc` (`clang` and `tcc` work as well) as follows:
 
-1) _Linux_:
+1)  _Linux_:
 ```sh
 gcc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -lreadline -lcap -lacl -lmagic
 ```
 
-2) _FreeBSD_:
+2)  _FreeBSD_:
 
 ```sh
 gcc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -lreadline -lintl -lmagic
 ```
 
-3) _NetBSD_:
+3)  _NetBSD_:
 
 ```sh
 gcc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -I/usr/pkg/include -L/usr/pkg/lib -Wl,-R/usr/pkg/lib -lintl -lreadline -lmagic
 ```
 
-4) _OpenBSD_:
+4)  _OpenBSD_:
 
 ```sh
 cc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -I/usr/local/include -L/usr/local/lib -lereadline -lintl -lmagic
 ```
 
-5) _Haiku_:
+5)  _Haiku_:
 
 ```sh
 gcc -o clifm *.c -lreadline -lintl -lmagic
@@ -241,8 +243,8 @@ clang ... -D_BE_POSIX -D_NO_ICONS ...
 | `_NO_TRASH` | Disable trash support |
 
 <sup>1</sup> Only two features are lost:
-1) Files birth time: We get this information via [statx(2)](https://man7.org/linux/man-pages/man2/statx.2.html), which is Linux specific.
-2) Version sort: We use here [versionsort](https://man7.org/linux/man-pages/man3/scandir.3.html), a GNU extension.
+1)  Files birth time: We get this information via [statx(2)](https://man7.org/linux/man-pages/man2/statx.2.html), which is Linux specific.
+2)  Version sort: We use here [versionsort](https://man7.org/linux/man-pages/man3/scandir.3.html), a GNU extension.
 
 <sup>2</sup> Without `libmagic`, querying files MIME type implies grabing the output of the [file(1)](https://www.man7.org/linux/man-pages/man1/file.1.html) command, which of course is not as optimal as directly querying the `libmagic` database itself (we need to run the command, redirect its output to a file, open the file, read it, close it, and then delete it). Though perhaps unnoticiable, this is an important difference.
 
