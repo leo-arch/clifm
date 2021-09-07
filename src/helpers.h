@@ -178,6 +178,10 @@ extern int watch;
 #define SET_TITLE 1
 #define NO_TITLE 0
 
+/* Macros for cd_function */
+#define CD_PRINT_ERROR 1
+#define CD_NO_PRINT_ERROR 0
+
 /* Macros for the count_dir function. CPOP tells the function to only
  * check if a given directory is populated (it has at least 3 files) */
 #define CPOP 1
@@ -851,6 +855,7 @@ extern size_t
     aliases_n,
     args_n,
     bm_n,
+	cdpath_n,
     cschemes_n,
     current_hist_n,
     eln_as_file_n,
@@ -928,6 +933,7 @@ extern char
     **argv_bk,
     **bin_commands,
     **bookmark_names,
+    **cdpaths,
     **color_schemes,
     **ext_colors,
     **history,

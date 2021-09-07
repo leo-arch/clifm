@@ -569,7 +569,7 @@ mime_open(char **args)
 
 		struct stat a;
 		if (lstat(file_path, &a) == 0 && (a.st_mode & S_IFMT) == S_IFDIR) {
-			int _exit_status = cd_function(file_path);
+			int _exit_status = cd_function(file_path, CD_PRINT_ERROR);
 			free(file_path);
 			return _exit_status;
 		}

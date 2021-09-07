@@ -31,6 +31,7 @@ int get_last_path(void);
 void check_options(void);
 int load_dirhist(void);
 size_t get_path_env(void);
+size_t get_cdpath(void);
 void get_prompt_cmds(void);
 int get_sel_files(void);
 void init_shell(void);

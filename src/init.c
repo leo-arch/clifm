@@ -1565,6 +1565,41 @@ get_sel_files(void)
 	return EXIT_SUCCESS;
 }
 
+size_t
+get_cdpath(void)
+{
+	char *p = getenv("CDPATH");
+	if (!p || !*p)
+		return 0;
+
+	char *t = savestring(p, strlen(p));
+
+	/* Get each path in CDPATH */
+	size_t i, n = 0, len = 0;
+	for (i = 0; t[i]; i++) {
+		/* Store path in CDPATH in a tmp buffer */
+		char buf[PATH_MAX];
+		while (t[i] && t[i] != ':')
+			buf[len++] = t[i++];
+		buf[len] = '\0';
+
+		/* Make room in cdpaths for a new path */
+		cdpaths = (char **)xrealloc(cdpaths, (n + 2) * sizeof(char *));
+
+		/* Dump the buffer into the global cdpaths array */
+		cdpaths[n++] = savestring(buf, len);
+
+		len = 0;
+		if (!t[i])
+			break;
+	}
+
+	cdpaths[n] = (char *)NULL;
+
+	free(t);
+	return n;
+}
+
 /* Store all paths in the PATH environment variable into a globally
  * declared array (paths) */
 size_t
@@ -1583,6 +1618,8 @@ get_path_env(void)
 	}
 #else
 	char *ptr = getenv("PATH");
+	if (!ptr || !*ptr)
+		return 0;
 	path_tmp = savestring(ptr, strlen(ptr));
 #endif
 

@@ -191,6 +191,7 @@ size_t
     aliases_n = 0,
     args_n = 0,
     bm_n = 0,
+	cdpath_n = 0,
     cschemes_n = 0,
     current_hist_n = 0,
     eln_as_file_n = 0,
@@ -265,6 +266,7 @@ char
     **argv_bk = (char **)NULL,
     **bin_commands = (char **)NULL,
     **bookmark_names = (char **)NULL,
+    **cdpaths = (char **)NULL,
     **color_schemes = (char **)NULL,
     **ext_colors = (char **)NULL,
     **history = (char **)NULL,
@@ -625,7 +627,8 @@ main(int argc, char *argv[])
 	/* Get paths from PATH environment variable. These paths will be
 	 * used later by get_path_programs (for the autocomplete function)
 	 * and get_cmd_path() */
-	path_n = (size_t)get_path_env();
+	path_n = get_path_env();
+	cdpath_n = get_cdpath();
 
 	init_workspaces();
 

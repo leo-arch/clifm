@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 #include "aux.h"
 #include "checks.h"
@@ -136,21 +137,51 @@ xchdir(const char *dir, const int set_title)
 	return ret;
 }
 
+static char *
+check_cdpath(char *name)
+{
+	if (cdpath_n == 0 || !name || !*name)
+		return (char *)NULL;
+
+	size_t i;
+	char t[PATH_MAX];
+	char *p = (char *)NULL;
+	struct stat attr;
+	for (i = 0; cdpaths[i]; i++) {
+		size_t len = strlen(cdpaths[i]);
+		if (cdpaths[i][len - 1] == '/')
+			snprintf(t, PATH_MAX, "%s%s", cdpaths[i], name);
+		else
+			snprintf(t, PATH_MAX, "%s/%s", cdpaths[i], name);
+		if (stat(t, &attr) != -1 && (attr.st_mode & S_IFMT) == S_IFDIR) {
+			p = (char *)xnmalloc(strlen(t) + 1, sizeof(char));
+			strcpy(p, t);
+			break;
+		}
+	}
+
+	return p;
+}
+
 /* Change CliFM working directory to NEW_PATH */
 int
-cd_function(char *new_path)
+cd_function(char *new_path, const int print_error)
 {
 	/* If no argument, change to home */
 	if (!new_path || !*new_path) {
 		if (!user.home) {
-			fprintf(stderr, _("%s: cd: Home directory not found\n"),
-			    PROGRAM_NAME);
+			if (print_error) {
+				fprintf(stderr, _("%s: cd: Home directory not found\n"),
+					PROGRAM_NAME);
+			}
 			return EXIT_FAILURE;
 		}
 
 		if (xchdir(user.home, SET_TITLE) != EXIT_SUCCESS) {
-			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
-			    user.home, strerror(errno));
+			if (print_error) {
+				fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
+					user.home, strerror(errno));
+			}
 			return EXIT_FAILURE;
 		}
 
@@ -170,23 +201,30 @@ cd_function(char *new_path)
 			}
 		}
 
-		char *real_path = realpath(new_path, NULL);
-		if (!real_path) {
-			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
-			    new_path, strerror(errno));
+		char *p = check_cdpath(new_path);
+		char *q = realpath(p ? p : new_path, NULL);
+		if (!q) {
+			if (print_error) {
+				fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
+					p ? p : new_path, strerror(errno));
+			}
+			free(p);
 			return EXIT_FAILURE;
 		}
+		free(p);
 
-		if (xchdir(real_path, SET_TITLE) != EXIT_SUCCESS) {
-			fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
-			    real_path, strerror(errno));
-			free(real_path);
+		if (xchdir(q, SET_TITLE) != EXIT_SUCCESS) {
+			if (print_error) {
+				fprintf(stderr, "%s: cd: %s: %s\n", PROGRAM_NAME,
+					q, strerror(errno));
+			}
+			free(q);
 			return EXIT_FAILURE;
 		}
 
 		free(ws[cur_ws].path);
-		ws[cur_ws].path = savestring(real_path, strlen(real_path));
-		free(real_path);
+		ws[cur_ws].path = savestring(q, strlen(q));
+		free(q);
 	}
 
 	int exit_status = EXIT_SUCCESS;

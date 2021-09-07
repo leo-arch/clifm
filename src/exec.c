@@ -393,6 +393,12 @@ exec_cmd(char **comm)
 		if (tmp[tmp_len - 1] == '/')
 			tmp[tmp_len - 1] = '\0';
 
+		if (autocd && cdpath_n
+		&& cd_function(comm[0], CD_NO_PRINT_ERROR) == EXIT_SUCCESS) {
+			free(deq_str);
+			return EXIT_SUCCESS;
+		}
+
 		int i = (int)files;
 		while (--i >= 0) {
 			if (*tmp != *file_info[i].name)
@@ -404,9 +410,10 @@ exec_cmd(char **comm)
 			free(deq_str);
 			deq_str = (char *)NULL;
 
-			if (autocd && (file_info[i].type == DT_DIR || file_info[i].dir == 1)) {
-				return (exit_code = cd_function(comm[0]));
-			} else if (auto_open && (file_info[i].type == DT_REG
+			if (autocd && (file_info[i].type == DT_DIR || file_info[i].dir == 1))
+				return (exit_code = cd_function(comm[0], CD_PRINT_ERROR));
+
+			if (auto_open && (file_info[i].type == DT_REG
 			|| file_info[i].type == DT_LNK)) {
 				char *cmd[] = {"open", comm[0],
 				    comm[1] ? comm[1] : NULL, NULL};
@@ -429,11 +436,11 @@ exec_cmd(char **comm)
 	/*          ############### CD ##################     */
 	if (*comm[0] == 'c' && comm[0][1] == 'd' && !comm[0][2]) {
 		if (!comm[1])
-			exit_code = cd_function(NULL);
+			exit_code = cd_function(NULL, CD_PRINT_ERROR);
 		else if (*comm[1] == '-' && strcmp(comm[1], "--help") == 0)
 			puts(_(CD_USAGE));
 		else
-			exit_code = cd_function(comm[1]);
+			exit_code = cd_function(comm[1], CD_PRINT_ERROR);
 		return exit_code;
 	}
 
@@ -1504,12 +1511,15 @@ exec_cmd(char **comm)
 				 * #     AUTOCD & AUTO-OPEN (2)   #
 				 * ############################### */
 
+		if (autocd && cdpath_n
+		&& cd_function(comm[0], CD_NO_PRINT_ERROR) == EXIT_SUCCESS)
+			return (exit_code = EXIT_SUCCESS);
+
 		struct stat file_attrib;
 		if (stat(comm[0], &file_attrib) == 0) {
 			if ((file_attrib.st_mode & S_IFMT) == S_IFDIR) {
-
 				if (autocd)
-					return (exit_code = cd_function(comm[0]));
+					return (exit_code = cd_function(comm[0], CD_PRINT_ERROR));
 
 				fprintf(stderr, _("%s: %s: Is a directory\n"),
 						PROGRAM_NAME, comm[0]);

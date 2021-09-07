@@ -1216,6 +1216,13 @@ free_stuff(void)
 		free(paths);
 	}
 
+	if (cdpaths) {
+		i = (int)cdpath_n;
+		while (--i >= 0)
+			free(cdpaths[i]);
+		free(cdpaths);
+	}
+
 	if (history) {
 		i = (int)current_hist_n;
 		while (--i >= 0)

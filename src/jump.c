@@ -411,7 +411,7 @@ dirjump(char **args, int mode)
 
 		if (!is_number(args[1])) {
 			if (mode == NO_SUG_JUMP)
-				return cd_function(args[1]);
+				return cd_function(args[1], CD_PRINT_ERROR);
 			else
 				return EXIT_FAILURE;
 		} else {
@@ -426,7 +426,7 @@ dirjump(char **args, int mode)
 			}
 
 			if (mode == NO_SUG_JUMP)
-				return cd_function(jump_db[int_order - 1].path);
+				return cd_function(jump_db[int_order - 1].path, CD_PRINT_ERROR);
 			return save_suggestion(jump_db[int_order - 1].path);
 		}
 	}
@@ -435,7 +435,7 @@ dirjump(char **args, int mode)
 	struct stat attr;
 	if (args[1] && !args[2] && lstat(args[1], &attr) != -1) {
 		if (mode == NO_SUG_JUMP)
-			return cd_function(args[1]);
+			return cd_function(args[1], CD_PRINT_ERROR);
 		return save_suggestion(args[1]);
 	}
 
@@ -653,7 +653,7 @@ dirjump(char **args, int mode)
 		exit_status = EXIT_FAILURE;
 	} else if (jump_opt != JLIST) {
 		if (mode == NO_SUG_JUMP)
-			exit_status = cd_function(matches[best_ranked]);
+			exit_status = cd_function(matches[best_ranked], CD_PRINT_ERROR);
 		else
 			exit_status = save_suggestion(matches[best_ranked]);
 	}

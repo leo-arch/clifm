@@ -391,7 +391,7 @@ open_function(char **cmd)
 	case S_IFCHR: strcpy(file_type, _("character device")); break;
 	case S_IFSOCK: strcpy(file_type, _("socket")); break;
 	case S_IFIFO: strcpy(file_type, _("FIFO/pipe")); break;
-	case S_IFDIR: return cd_function(file);
+	case S_IFDIR: return cd_function(file, CD_PRINT_ERROR);
 	case S_IFREG:
 #ifndef _NO_ARCHIVING
 		/* If an archive/compressed file, call archiver() */
