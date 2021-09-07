@@ -88,7 +88,7 @@ _<sup>1</sup>_ <i>For a detailed explanation and comparison between these concep
 Features beyond common file operations, such as copy, move, remove, etc.:
 
 *   [Really CLI-based](https://github.com/leo-arch/clifm/wiki/Introduction#main-design-and-goals). No GUI nor TUI (or curses) at all, just a command-line. It can run thereby on the kernel built-in console and even on a SSH or any other remote session.
-*  Memory footprint below 5 MiB and a disk usage of 500 KiB. Incredibly lightweight and fast even on really old hardware. See the [performance section](https://github.com/leo-arch/clifm/wiki/Performance).
+*   Memory footprint below 5 MiB and a disk usage of 500 KiB. Incredibly lightweight and fast even on really old hardware. See the [performance section](https://github.com/leo-arch/clifm/wiki/Performance).
 *   The use of [short (and even one-character) commands](https://github.com/leo-arch/clifm/wiki/Introduction#commands-short-summary), and [entry list numbers (ELN's)](https://github.com/leo-arch/clifm/wiki/Common-Operations) for file names. 
 *   [Bookmarks](https://github.com/leo-arch/clifm/wiki/Common-Operations#bookmarks).
 *   [Files selection](https://github.com/leo-arch/clifm/wiki/Common-Operations#selection) (supports both glob and regular expressions and works even across multiple instances of the program).
@@ -99,7 +99,7 @@ Features beyond common file operations, such as copy, move, remove, etc.:
 *   [Files counter](https://github.com/leo-arch/clifm/wiki/Introduction#interface) for directories and symlinks to directories.
 *   Directory history map to keep in sight previous, current, and next entries in the directory history list.
 *   [Plugins](https://github.com/leo-arch/clifm/wiki/Advanced#plugins).
-*  [Files preview](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) (via _BFG_, a native file previewer, but including support for [Ranger's scope.sh](https://github.com/ranger/ranger/blob/master/ranger/data/scope.sh) and [pistol](https://github.com/doronbehar/pistol) as well).
+*   [Files preview](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) (via _BFG_, a native file previewer, but including support for [Ranger's scope.sh](https://github.com/ranger/ranger/blob/master/ranger/data/scope.sh) and [pistol](https://github.com/doronbehar/pistol) as well).
 *   [Stealth mode](https://github.com/leo-arch/clifm/wiki/Advanced#stealth-mode): Leave no trace on the host system. No file is read, no file is written.
 *   [_Kangaroo_](https://github.com/leo-arch/clifm/wiki/Specifics#kangaroos-frecency-algorithm), a built-in directory jumper function similar to [autojump](https://github.com/wting/autojump), [z.lua](https://github.com/skywind3000/z.lua), and [zoxide](https://github.com/ajeetdsouza/zoxide).
 *   [Batch links](https://github.com/leo-arch/clifm/wiki/Introduction#bl-elnfile--n).
@@ -114,7 +114,7 @@ Features beyond common file operations, such as copy, move, remove, etc.:
 *   [Logs](https://github.com/leo-arch/clifm/wiki/Introduction#log-clear-on-off-status).
 *   [Prompt and profile commands](https://github.com/leo-arch/clifm/wiki/Customization#profile-and-prompt-commands) (run commands with each new prompt or at program startup).
 *   [Bash-like prompt customization](https://github.com/leo-arch/clifm/wiki/Customization#the-prompt).
-*  Sequential and conditional commands execution .
+*   Sequential and conditional commands execution .
 *   [User profiles](https://github.com/leo-arch/clifm/wiki/Specifics#profiles).
 *   [Customizable keyboard shortcuts](https://github.com/leo-arch/clifm/wiki/Customization#keybindings).
 *   [_Mas_, a built-in pager](https://github.com/leo-arch/clifm/wiki/Introduction#pg-pager-on-off-status) for files listing.
