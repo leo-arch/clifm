@@ -73,7 +73,7 @@ The command-line is still there, never hidden.
 
 Besides 5 MiB RAM and 500 KiB disk space, willingness to try something different is all you need.
 
-### Should all terminal file managers be TUI file managers? No.
+### Should all terminal file managers be TUI file managers? No\.
 
 ---
 _<sup>1</sup>_ <i>For a detailed explanation and comparison between these concepts see the [resources page](https://github.com/leo-arch/clifm/wiki/Resources#gui-tui-and-cli) and the [introductory page](https://github.com/leo-arch/clifm/wiki/Introduction#what-is-clifm) of the Wiki</i>.
