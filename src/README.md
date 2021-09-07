@@ -183,30 +183,30 @@ Suggestions: `suggestions.c` and `keybinds.c` (see the `rl_accept_suggestion` fu
 
 CliFM is compiled using `(g)cc` (`clang` and `tcc` work as well) as follows:
 
-1) _Linux_:
+1)  _Linux_:
 ```sh
 gcc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -lreadline -lcap -lacl -lmagic
 ```
 
-2) _FreeBSD_:
+2)  _FreeBSD_:
 
 ```sh
 gcc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -lreadline -lintl -lmagic
 ```
 
-3) _NetBSD_:
+3)  _NetBSD_:
 
 ```sh
 gcc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -I/usr/pkg/include -L/usr/pkg/lib -Wl,-R/usr/pkg/lib -lintl -lreadline -lmagic
 ```
 
-4) _OpenBSD_:
+4)  _OpenBSD_:
 
 ```sh
 cc -O3 -s -fstack-protector-strong -march=native -Wall -o clifm *.c -I/usr/local/include -L/usr/local/lib -lereadline -lintl -lmagic
 ```
 
-5) _Haiku_:
+5)  _Haiku_:
 
 ```sh
 gcc -o clifm *.c -lreadline -lintl -lmagic
@@ -243,8 +243,8 @@ clang ... -D_BE_POSIX -D_NO_ICONS ...
 | `_NO_TRASH` | Disable trash support |
 
 <sup>1</sup> Only two features are lost:
-1) Files birth time: We get this information via [statx(2)](https://man7.org/linux/man-pages/man2/statx.2.html), which is Linux specific.
-2) Version sort: We use here [versionsort](https://man7.org/linux/man-pages/man3/scandir.3.html), a GNU extension.
+1)  Files birth time: We get this information via [statx(2)](https://man7.org/linux/man-pages/man2/statx.2.html), which is Linux specific.
+2)  Version sort: We use here [versionsort](https://man7.org/linux/man-pages/man3/scandir.3.html), a GNU extension.
 
 <sup>2</sup> Without `libmagic`, querying files MIME type implies grabing the output of the [file(1)](https://www.man7.org/linux/man-pages/man1/file.1.html) command, which of course is not as optimal as directly querying the `libmagic` database itself (we need to run the command, redirect its output to a file, open the file, read it, close it, and then delete it). Though perhaps unnoticiable, this is an important difference.
 
