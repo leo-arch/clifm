@@ -364,7 +364,6 @@ xrealloc(void *ptr, size_t size)
 	void *new_ptr = realloc(ptr, size);
 
 	if (!new_ptr) {
-		free(ptr);
 		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
 				PROGRAM_NAME, __func__, size);
 		exit(EXIT_FAILURE);
