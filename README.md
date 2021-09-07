@@ -57,7 +57,7 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 
 ---
 
-## Why?
+## Why\?
 
 Why another file manager? I can. \
 In a free world, a free community finds alternatives central to freedom, and moreover, a place to learn.
