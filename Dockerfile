@@ -23,7 +23,7 @@ FROM archlinux:latest
 RUN curl -fsSL "https://repo.archlinuxcn.org/x86_64/glibc-linux4-2.33-4-x86_64.pkg.tar.zst" | bsdtar -C / -xvf - && \
 pacman -Syu --noconfirm git make gcc && \
 mkdir build && \
-cd build && git clone https://github.com/leo-arch/clifm && \
+git clone https://github.com/leo-arch/clifm.git build && \
 cd clifm && make && make install
 
 #ENTRYPOINT ["/bin/sh", "-c", "clifm"]
