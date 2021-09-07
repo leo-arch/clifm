@@ -2,6 +2,7 @@
 clifm
 
 # Gcov files
+*.gcov
 *.gcda
 *.gcno
 
