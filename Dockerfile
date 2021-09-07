@@ -24,7 +24,7 @@ RUN curl -fsSL "https://repo.archlinuxcn.org/x86_64/glibc-linux4-2.33-4-x86_64.p
 pacman -Syu --noconfirm git make gcc && \
 mkdir build && \
 git clone https://github.com/leo-arch/clifm.git build && \
-cd clifm && make && make install
+make -f clifm/Makefile install
 
 #ENTRYPOINT ["/bin/sh", "-c", "clifm"]
 # Replace "myapp" above with your binary
@@ -39,3 +39,5 @@ USER root
 
 # Default arguments for your app (remove if you have none):
 #CMD ["-x", "--cwd-in-title"]
+
+USER guest
