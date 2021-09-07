@@ -393,7 +393,7 @@ exec_cmd(char **comm)
 		if (tmp[tmp_len - 1] == '/')
 			tmp[tmp_len - 1] = '\0';
 
-		if (autocd && cdpath_n
+		if (autocd && cdpath_n && !comm[1]
 		&& cd_function(comm[0], CD_NO_PRINT_ERROR) == EXIT_SUCCESS) {
 			free(deq_str);
 			return EXIT_SUCCESS;
@@ -1511,7 +1511,7 @@ exec_cmd(char **comm)
 				 * #     AUTOCD & AUTO-OPEN (2)   #
 				 * ############################### */
 
-		if (autocd && cdpath_n
+		if (autocd && cdpath_n && !comm[1]
 		&& cd_function(comm[0], CD_NO_PRINT_ERROR) == EXIT_SUCCESS)
 			return (exit_code = EXIT_SUCCESS);
 

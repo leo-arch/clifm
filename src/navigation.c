@@ -143,6 +143,10 @@ check_cdpath(char *name)
 	if (cdpath_n == 0 || !name || !*name)
 		return (char *)NULL;
 
+	if (*name == '/' || (*name == '.' && name[1] == '/')
+	|| (*name == '.' && name[1] == '.' && name[2] == '/'))
+		return (char *)NULL;
+
 	size_t i;
 	char t[PATH_MAX];
 	char *p = (char *)NULL;

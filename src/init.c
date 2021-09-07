@@ -360,7 +360,11 @@ get_user(void)
 
 	tmp_user.uid = pw->pw_uid;
 	tmp_user.gid = pw->pw_gid;
-	tmp_user.home = savestring(pw->pw_dir, strlen(pw->pw_dir));
+	char *p = getenv("HOME");
+	if (!p)
+		tmp_user.home = savestring(pw->pw_dir, strlen(pw->pw_dir));
+	else
+		tmp_user.home = savestring(p, strlen(p));
 	tmp_user.name = savestring(pw->pw_name, strlen(pw->pw_name));
 	tmp_user.shell = savestring(pw->pw_shell, strlen(pw->pw_shell));
 
