@@ -771,6 +771,13 @@ remove_file(char **args)
 	}
 #endif
 
+	if (is_sel && exit_status == EXIT_SUCCESS) {
+		for (i = 0; i < (int)sel_n; i++)
+			free(sel_elements[i]);
+		sel_n = 0;
+		save_sel();	
+	}
+
 	for (i = 0; rm_cmd[i]; i++)
 		free(rm_cmd[i]);
 	free(rm_cmd);
