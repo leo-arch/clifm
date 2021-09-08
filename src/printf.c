@@ -125,10 +125,10 @@ typedef void (*out_fct_type)(char character, void* buffer, size_t idx, size_t ma
 
 
 // wrapper (used as buffer) for output function type
-typedef struct {
-  void  (*fct)(char character, void* arg);
-  void* arg;
-} out_fct_wrap_type;
+//typedef struct {
+//  void  (*fct)(char character, void* arg);
+//  void* arg;
+//} out_fct_wrap_type;
 
 
 // internal null output
