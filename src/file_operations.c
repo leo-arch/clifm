@@ -51,6 +51,16 @@
 #include "selection.h"
 #include "messages.h"
 
+static void
+clear_selbox(void)
+{
+	size_t i;
+	for (i = 0; i < sel_n; i++)
+		free(sel_elements[i]);
+	sel_n = 0;
+	save_sel();	
+}
+
 /* Open a file via OPENER, if set, or via LIRA. If not compiled with
  * Lira support, fallback to open (Haiku), or xdg-open. Returns zero
  * on success and one on failure */
@@ -681,12 +691,8 @@ copy_function(char **comm)
 	/* If 'mv sel' and command is successful deselect everything,
 	 * since sel files are note there anymore */
 	if (*comm[0] == 'm' && comm[0][1] == 'v'
-	&& (!comm[0][2] || comm[0][2] == ' ')) {
-		for (i = 0; i < sel_n; i++)
-			free(sel_elements[i]);
-		sel_n = 0;
-		save_sel();
-	}
+	&& (!comm[0][2] || comm[0][2] == ' '))
+		clear_selbox();
 
 #ifdef __HAIKU__
 	if (cd_lists_on_the_fly) {
@@ -771,12 +777,8 @@ remove_file(char **args)
 	}
 #endif
 
-	if (is_sel && exit_status == EXIT_SUCCESS) {
-		for (i = 0; i < (int)sel_n; i++)
-			free(sel_elements[i]);
-		sel_n = 0;
-		save_sel();	
-	}
+	if (is_sel && exit_status == EXIT_SUCCESS)
+		clear_selbox();
 
 	for (i = 0; rm_cmd[i]; i++)
 		free(rm_cmd[i]);
