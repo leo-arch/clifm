@@ -300,6 +300,22 @@ get_ext_icon(const char *restrict ext, int n)
 }
 #endif /* _NO_ICONS */
 
+
+static inline mode_t
+get_file_type(mode_t m)
+{
+	switch (m & S_IFMT) {
+	case S_IFBLK: return DT_BLK;
+	case S_IFCHR: return DT_CHR;
+	case S_IFDIR: return DT_DIR;
+	case S_IFIFO: return DT_FIFO;
+	case S_IFLNK: return DT_LNK;
+	case S_IFREG: return DT_REG;
+	case S_IFSOCK: return DT_SOCK;
+	default: return DT_UNKNOWN;
+	}
+}
+
 /* List files in the current working directory (global variable 'path').
  * Unlike list_dir(), however, this function uses no color and runs
  * neither stat() nor count_dir(), which makes it quite faster. Return
@@ -410,7 +426,8 @@ list_dir_light(void)
 
 		/* ################  */
 #if !defined(_DIRENT_HAVE_D_TYPE)
-		switch (attr.st_mode & S_IFMT) {
+		file_info[n].type = get_file_type(attr.st_mode);
+/*		switch (attr.st_mode & S_IFMT) {
 		case S_IFBLK: file_info[n].type = DT_BLK; break;
 		case S_IFCHR: file_info[n].type = DT_CHR; break;
 		case S_IFDIR: file_info[n].type = DT_DIR; break;
@@ -419,13 +436,23 @@ list_dir_light(void)
 		case S_IFREG: file_info[n].type = DT_REG; break;
 		case S_IFSOCK: file_info[n].type = DT_SOCK; break;
 		default: file_info[n].type = DT_UNKNOWN; break;
-		}
+		} */
 		file_info[n].dir = (file_info[n].type == DT_DIR) ? 1 : 0;
 		file_info[n].symlink = (file_info[n].type == DT_LNK) ? 1 : 0;
 #else
-		file_info[n].dir = (ent->d_type == DT_DIR) ? 1 : 0;
-		file_info[n].symlink = (ent->d_type == DT_LNK) ? 1 : 0;
-		file_info[n].type = ent->d_type;
+		/* If type is unknown, we might be facing a file system not
+		 * supporting d_type, for example, loop devices. In this case,
+		 * try falling back to stat(3) */
+		if (ent->d_type == DT_UNKNOWN) {
+			struct stat a;
+			if (lstat(ename, &a) == -1)
+				continue;
+			file_info[n].type = get_file_type(a.st_mode);
+		} else {
+			file_info[n].type = ent->d_type;
+		}
+		file_info[n].dir = (file_info[n].type == DT_DIR) ? 1 : 0;
+		file_info[n].symlink = (file_info[n].type == DT_LNK) ? 1 : 0;
 #endif /* !_DIRENT_HAVE_D_TYPE */
 		file_info[n].inode = ent->d_ino;
 		file_info[n].linkn = 1;
