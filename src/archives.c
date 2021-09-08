@@ -936,10 +936,8 @@ archiver(char **args, char mode)
 			/* Create mountpoint */
 			char *mountpoint = (char *)NULL;
 			if (xargs.stealth_mode == 1) {
-				mountpoint = (char *)xnmalloc(strlen(args[i]) + 19,
-				    sizeof(char));
-				sprintf(mountpoint, "/tmp/clifm-mounts/%s",
-				    args[i]);
+				mountpoint = (char *)xnmalloc(strlen(args[i]) + 19, sizeof(char));
+				sprintf(mountpoint, "/tmp/clifm-mounts/%s", args[i]);
 			} else {
 				mountpoint = (char *)xnmalloc(strlen(config_dir) + strlen(args[i]) + 9, sizeof(char));
 				sprintf(mountpoint, "%s/mounts/%s", config_dir, args[i]);
@@ -974,7 +972,7 @@ archiver(char **args, char mode)
 			}
 
 			free(ws[cur_ws].path);
-			ws[cur_ws].path = (char *)xcalloc(strlen(mountpoint) + 1,
+			ws[cur_ws].path = (char *)xnmalloc(strlen(mountpoint) + 1,
 			    sizeof(char));
 			strcpy(ws[cur_ws].path, mountpoint);
 			free(mountpoint);

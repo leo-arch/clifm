@@ -63,6 +63,13 @@
 #include "icons.h"
 #endif
 
+#ifdef _PALAND_PRINTF
+#include "printf.h"
+#define xprintf printf_
+#else
+#define xprintf printf
+#endif
+
 static void
 print_sort_method(void)
 {
@@ -514,7 +521,7 @@ list_dir_light(void)
 
 			if (!long_view && classify) {
 				if (file_info[i].dir)
-					total_len += 2;
+					total_len++;
 
 				if (file_info[i].filesn > 0 && files_counter)
 					total_len += DIGINUM(file_info[i].filesn);
@@ -523,12 +530,12 @@ list_dir_light(void)
 					switch (file_info[i].type) {
 					case DT_REG:
 						if (file_info[i].exec)
-							total_len += 1;
+							total_len++;
 						break;
 					case DT_LNK:  /* fallthrough */
 					case DT_SOCK: /* fallthrough */
 					case DT_FIFO: /* fallthrough */
-					case DT_UNKNOWN: total_len += 1; break;
+					case DT_UNKNOWN: total_len++; break;
 					}
 				}
 			}
@@ -652,6 +659,9 @@ list_dir_light(void)
 
 	int last_column = 0;
 
+/*	char *line_buf = (char *)xcalloc(term_cols * 10, sizeof(char));
+	size_t line_sz = 0; */
+
 	/* Get possible amount of columns for the dirlist screen */
 	if (!columned) {
 		columns_n = 1;
@@ -764,36 +774,44 @@ list_dir_light(void)
 					file_info[i].icon_color = file_info[i].color;
 
 				if (no_eln) {
-					printf("%s%s %s%s%s", file_info[i].icon_color,
+					xprintf("%s%s %s%s%s", file_info[i].icon_color,
 					    file_info[i].icon, file_info[i].color,
 					    file_info[i].name, df_c);
 				} else {
-					printf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
+					xprintf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
 					    file_info[i].icon_color, file_info[i].icon,
 					    file_info[i].color, file_info[i].name, df_c);
 				}
 			} else {
 				if (no_eln) {
-					printf("%s%s%s", file_info[i].color,
+					xprintf("%s%s%s", file_info[i].color,
 					    file_info[i].name, df_c);
 				} else {
-					printf("%s%d%s %s%s%s", el_c, i + 1, df_c,
+					xprintf("%s%d%s %s%s%s", el_c, i + 1, df_c,
 					    file_info[i].color, file_info[i].name, df_c);
+/*					line_sz += (size_t)sprintf(line_buf + line_sz,
+						"%s%d%s %s%s%s", el_c, i + 1, df_c,
+					    file_info[i].color, file_info[i].name, df_c); */
 				}
 			}
 #else
 			if (no_eln) {
-				printf("%s%s%s", file_info[i].color, file_info[i].name, df_c);
+				xprintf("%s%s%s", file_info[i].color, file_info[i].name, df_c);
 			} else {
-				printf("%s%d%s %s%s%s", el_c, i + 1, df_c,
+				xprintf("%s%d%s %s%s%s", el_c, i + 1, df_c,
 				    file_info[i].color, file_info[i].name, df_c);
 			}
 #endif /* !_NO_ICONS */
 
 			if (file_info[i].dir && classify) {
-				fputs(" /", stdout);
-				if (file_info[i].filesn > 0 && files_counter)
+//				*(line_buf + line_sz++) = '/';
+				putchar('/');
+				if (file_info[i].filesn > 0 && files_counter) {
 					fputs(xitoa(file_info[i].filesn), stdout);
+/*					char *fc = xitoa(file_info[i].filesn);
+					strcat(line_buf + line_sz, xitoa(file_info[i].filesn));
+					line_sz += strlen(fc); */
+				}
 			}
 		}
 
@@ -802,28 +820,28 @@ list_dir_light(void)
 #ifndef _NO_ICONS
 			if (icons) {
 				if (no_eln)
-					printf("%s %s", file_info[i].icon, file_info[i].name);
+					xprintf("%s %s", file_info[i].icon, file_info[i].name);
 				else
-					printf("%s%d%s %s %s", el_c, i + 1, df_c,
+					xprintf("%s%d%s %s %s", el_c, i + 1, df_c,
 					    file_info[i].icon, file_info[i].name);
 			} else {
 				if (no_eln)
 					fputs(file_info[i].name, stdout);
 				else
-					printf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
+					xprintf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
 			}
 #else
 			if (no_eln)
 				fputs(file_info[i].name, stdout);
 			else
-				printf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
+				xprintf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
 #endif /* !_NO_ICONS */
 
 			if (classify) {
 				switch (file_info[i].type) {
 				case DT_DIR:
 					ind_char = 0;
-					fputs(" /", stdout);
+					putchar('/');
 					if (file_info[i].filesn > 0 && files_counter)
 						fputs(xitoa(file_info[i].filesn), stdout);
 					break;
@@ -847,24 +865,33 @@ list_dir_light(void)
 						+ (int)file_info[i].len + (ind_char ? 1 : 0);
 			if (classify) {
 				if (file_info[i].dir)
-					cur_len += 2;
+					cur_len++;
 				if (file_info[i].filesn > 0 && files_counter
 				&& file_info[i].ruser)
 					cur_len += DIGINUM((int)file_info[i].filesn);
 			}
 
 			int diff = (int)longest - cur_len;
-			printf("\x1b[%dC", diff + 1);
-/*			register int j;
-			for (j = diff + 1; j--;)
-				putchar(' '); */
+//			xprintf("\x1b[%dC", diff + 1);
+			register int j;
+			for (j = diff + 1; j--;) {
+				putchar(' ');
+//				*(line_buf + line_sz++) = ' '; 
+			}
 		} else {
+/*			*(line_buf + line_sz++) = '\n';
+			fputs(line_buf, stdout);
+			memset(line_buf, '\0', line_sz);
+			line_sz = 0; */
 			putchar('\n');
+			
 		}
 	}
 
 	if (!last_column)
 		putchar('\n');
+
+//	free(line_buf);
 
 END:
 	/* Unhide the cursor */
@@ -1014,13 +1041,11 @@ list_dir(void)
 		if (!show_hidden && *ename == '.')
 			continue;
 
-		fstatat(fd, ename, &attr, AT_SYMLINK_NOFOLLOW);
+		int stat_ok = 1;
+		if (fstatat(fd, ename, &attr, AT_SYMLINK_NOFOLLOW) == -1)
+			stat_ok = 0;
 
-#if !defined(_DIRENT_HAVE_D_TYPE)
-		if (only_dirs && (attr.st_mode & S_IFMT) == S_IFDIR)
-#else
-		if (only_dirs && ent->d_type != DT_DIR)
-#endif
+		if (only_dirs && (attr.st_mode & S_IFMT) != S_IFDIR)
 			continue;
 
 		if (count > ENTRY_N) {
@@ -1040,24 +1065,22 @@ list_dir(void)
 
 		file_info[n].exec = 0;
 
-#if !defined(_DIRENT_HAVE_D_TYPE)
-		switch (attr.st_mode & S_IFMT) {
-		case S_IFBLK: file_info[n].type = DT_BLK; break;
-		case S_IFCHR: file_info[n].type = DT_CHR; break;
-		case S_IFDIR: file_info[n].type = DT_DIR; break;
-		case S_IFIFO: file_info[n].type = DT_FIFO; break;
-		case S_IFLNK: file_info[n].type = DT_LNK; break;
-		case S_IFREG: file_info[n].type = DT_REG; break;
-		case S_IFSOCK: file_info[n].type = DT_SOCK; break;
-		default: file_info[n].type = DT_UNKNOWN; break;
+		if (stat_ok) {
+			switch (attr.st_mode & S_IFMT) {
+			case S_IFBLK: file_info[n].type = DT_BLK; break;
+			case S_IFCHR: file_info[n].type = DT_CHR; break;
+			case S_IFDIR: file_info[n].type = DT_DIR; break;
+			case S_IFIFO: file_info[n].type = DT_FIFO; break;
+			case S_IFLNK: file_info[n].type = DT_LNK; break;
+			case S_IFREG: file_info[n].type = DT_REG; break;
+			case S_IFSOCK: file_info[n].type = DT_SOCK; break;
+			default: file_info[n].type = DT_UNKNOWN; break;
+			}
+		} else {
+			file_info[n].type = DT_UNKNOWN;
 		}
 		file_info[n].dir = (file_info[n].type == DT_DIR) ? 1 : 0;
 		file_info[n].symlink = (file_info[n].type == DT_LNK) ? 1 : 0;
-#else
-		file_info[n].dir = (ent->d_type == DT_DIR) ? 1 : 0;
-		file_info[n].symlink = (ent->d_type == DT_LNK) ? 1 : 0;
-		file_info[n].type = ent->d_type;
-#endif /* _DIRENT_HAVE_D_TYPE */
 
 		file_info[n].inode = ent->d_ino;
 		file_info[n].linkn = attr.st_nlink;
@@ -1068,16 +1091,6 @@ list_dir(void)
 		file_info[n].mode = attr.st_mode;
 		if (long_view)
 			file_info[n].ltime = (time_t)attr.st_mtim.tv_sec;
-
-/*		if (long_view) {
-			file_info[n].uid = attr.st_uid;
-			file_info[n].gid = attr.st_gid;
-			file_info[n].ltime = (time_t)attr.st_mtim.tv_sec;
-			file_info[n].mode = attr.st_mode;
-		} else if (sort == SOWN || sort == SGRP) {
-			file_info[n].uid = attr.st_uid;
-			file_info[n].gid = attr.st_gid;
-		} */
 
 		file_info[n].color = (char *)NULL;
 		file_info[n].ext_color = (char *)NULL;
@@ -1571,28 +1584,28 @@ list_dir(void)
 #ifndef _NO_ICONS
 			if (icons) {
 				if (no_eln) {
-					printf("%s%s %s%s%s", file_info[i].icon_color,
+					xprintf("%s%s %s%s%s", file_info[i].icon_color,
 					    file_info[i].icon, file_info[i].color,
 					    file_info[i].name, df_c);
 				} else {
-					printf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
+					xprintf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
 					    file_info[i].icon_color, file_info[i].icon,
 					    file_info[i].color, file_info[i].name, df_c);
 				}
 			} else {
 				if (no_eln) {
-					printf("%s%s%s", file_info[i].color,
+					xprintf("%s%s%s", file_info[i].color,
 					    file_info[i].name, df_c);
 				} else {
-					printf("%s%d%s %s%s%s", el_c, i + 1, df_c,
-					    file_info[i].color, file_info[i].name, df_c);
+					xprintf("%s%d%s %s%s%s", el_c, i + 1, df_c,
+						file_info[i].color, file_info[i].name, df_c);
 				}
 			}
 #else
 			if (no_eln) {
-				printf("%s%s%s", file_info[i].color, file_info[i].name, df_c);
+				xprintf("%s%s%s", file_info[i].color, file_info[i].name, df_c);
 			} else {
-				printf("%s%d%s %s%s%s", el_c, i + 1, df_c,
+				xprintf("%s%d%s %s%s%s", el_c, i + 1, df_c,
 				    file_info[i].color, file_info[i].name, df_c);
 			}
 #endif /* !_NO_ICONS */
@@ -1621,15 +1634,15 @@ list_dir(void)
 #ifndef _NO_ICONS
 			if (icons) {
 				if (no_eln)
-					printf("%s %s", file_info[i].icon, file_info[i].name);
+					xprintf("%s %s", file_info[i].icon, file_info[i].name);
 				else
-					printf("%s%d%s %s %s", el_c, i + 1, df_c,
+					xprintf("%s%d%s %s %s", el_c, i + 1, df_c,
 					    file_info[i].icon, file_info[i].name);
 			} else {
 				if (no_eln) {
 					fputs(file_info[i].name, stdout);
 				} else {
-					printf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
+					xprintf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
 					/*                  fputs(el_c, stdout);
 					fputs(xitoa(i + 1), stdout);
 					fputs(df_c, stdout);
@@ -1641,7 +1654,7 @@ list_dir(void)
 			if (no_eln) {
 				fputs(file_info[i].name, stdout);
 			} else {
-				printf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
+				xprintf("%s%d%s %s", el_c, i + 1, df_c, file_info[i].name);
 			}
 #endif /* !_NO_ICONS */
 
@@ -1696,7 +1709,7 @@ list_dir(void)
 
 			int diff = (int)longest - cur_len;
 			/* Move the cursor %d columns to the right */
-			printf("\x1b[%dC", diff + 1);
+			xprintf("\x1b[%dC", diff + 1);
 /*			register int j;
 			for (j = diff + 1; j--;)
 				putchar(' '); */
