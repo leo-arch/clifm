@@ -44,6 +44,16 @@
 char len_buf[CMD_LEN_MAX] __attribute__((aligned));
 #endif
 
+size_t
+xstrlen(const char *restrict s)
+{
+#if !defined(__GLIBC__)
+	return strlen(s); // NOLINT
+#else
+	return (size_t)((char *)rawmemchr(s, '\0') - s); // NOLINT
+#endif
+}
+
 /* Taken from NNN's source code: very clever */
 size_t
 xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
