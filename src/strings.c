@@ -44,6 +44,17 @@
 char len_buf[CMD_LEN_MAX] __attribute__((aligned));
 #endif
 
+#define MAX_STR_SZ 4096
+
+
+/* Just a strlen that sets a read limit in case of non-null terminated
+ * string */
+size_t inline
+xstrnlen(const char *restrict s)
+{
+	return (size_t)((char *)memchr(s, '\0', MAX_STR_SZ) - s);
+}
+
 /* Taken from NNN's source code: very clever */
 size_t
 xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
