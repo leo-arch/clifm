@@ -697,6 +697,19 @@ load_actions(void)
 	return EXIT_SUCCESS;
 }
 
+static inline void
+reset_remotes_values(const size_t i)
+{
+	remotes[i].name = (char *)NULL;
+	remotes[i].desc = (char *)NULL;
+	remotes[i].mountpoint = (char *)NULL;
+	remotes[i].mount_cmd = (char *)NULL;
+	remotes[i].unmount_cmd = (char *)NULL;
+	remotes[i].auto_unmount = 0;
+	remotes[i].auto_mount = 0;
+	remotes[i].mounted = 0;
+}
+
 /* Load remotes information from FILE */
 int
 load_remotes(void)
@@ -713,14 +726,7 @@ load_remotes(void)
 
 	size_t n = 0;
 	remotes = (struct remote_t *)xnmalloc(n + 1, sizeof(struct remote_t));
-	remotes[n].name = (char *)NULL;
-	remotes[n].desc = (char *)NULL;
-	remotes[n].mountpoint = (char *)NULL;
-	remotes[n].mount_cmd = (char *)NULL;
-	remotes[n].unmount_cmd = (char *)NULL;
-	remotes[n].auto_unmount = 0;
-	remotes[n].auto_mount = 0;
-	remotes[n].mounted = 0;
+	reset_remotes_values(n);
 
 	size_t line_sz = 0;
 	char *line = (char *)NULL;
@@ -733,15 +739,7 @@ load_remotes(void)
 				n++;
 			remotes = (struct remote_t *)xrealloc(
 					remotes, (n + 2) * sizeof(struct remote_t));
-
-			remotes[n].name = (char *)NULL;
-			remotes[n].desc = (char *)NULL;
-			remotes[n].mountpoint = (char *)NULL;
-			remotes[n].mount_cmd = (char *)NULL;
-			remotes[n].unmount_cmd = (char *)NULL;
-			remotes[n].auto_unmount = 0;
-			remotes[n].auto_mount = 0;
-			remotes[n].mounted = 0;
+			reset_remotes_values(n);
 
 			char *name = strbtw(line, '[', ']');
 			if (!name)

@@ -52,10 +52,7 @@
 static char *
 get_app(const char *mime, const char *ext)
 {
-	if (!mime)
-		return (char *)NULL;
-
-	if (!mime_file || !*mime_file)
+	if (!mime || !mime_file || !*mime_file)
 		return (char *)NULL;
 
 	FILE *defs_fp = fopen(mime_file, "r");
@@ -67,8 +64,8 @@ get_app(const char *mime, const char *ext)
 
 	int found = 0, cmd_ok = 0;
 	size_t line_size = 0;
-	char *line = (char *)NULL, *app = (char *)NULL;
-/*	ssize_t line_len = 0; */
+	char *line = (char *)NULL,
+		 *app = (char *)NULL;
 
 	while (getline(&line, &line_size, defs_fp) > 0) {
 		found = mime_match = 0; /* Global variable to tell mime_open()
@@ -135,38 +132,23 @@ get_app(const char *mime, const char *ext)
 				/* If app contains spaces, the command to check is
 				 * the string before the first space */
 				char *ret = strchr(app, ' ');
-				if (ret) {
+				if (ret)
 					*ret = '\0';
-					if (*app == '~') {
-						file_path = tilde_expand(app);
-						if (access(file_path, X_OK) != 0) {
-							free(file_path);
-							file_path = (char *)NULL;
-						}
-					} else if (*app == '/') {
-						if (access(app, X_OK) == 0) {
-							file_path = app;
-						}
-					} else {
-						file_path = get_cmd_path(app);
+				if (*app == '~') {
+					file_path = tilde_expand(app);
+					if (access(file_path, X_OK) != 0) {
+						free(file_path);
+						file_path = (char *)NULL;
 					}
-					*ret = ' ';
+				} else if (*app == '/') {
+					if (access(app, X_OK) == 0) {
+						file_path = app;
+					}
 				} else {
-					if (*app == '~') {
-						file_path = tilde_expand(app);
-						if (access(file_path, X_OK) != 0) {
-							free(file_path);
-							file_path = (char *)NULL;
-						}
-					}
-					else if (*app == '/') {
-						if (access(app, X_OK) == 0) {
-							file_path = app;
-						}
-					} else {
-						file_path = get_cmd_path(app);
-					}
+					file_path = get_cmd_path(app);
 				}
+				if (ret)
+					*ret = ' ';
 
 				if (file_path) {
 					/* If the app exists, break the loops and
