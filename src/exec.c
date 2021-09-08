@@ -1506,7 +1506,6 @@ exec_cmd(char **comm)
 	}
 
 	else {
-
 				/* ###############################
 				 * #     AUTOCD & AUTO-OPEN (2)   #
 				 * ############################### */
@@ -1572,7 +1571,7 @@ exec_cmd(char **comm)
 		if (*comm[0] == *argv_bk[0] && strcmp(comm[0], argv_bk[0]) == 0) {
 			fprintf(stderr, "%s: Nested instances are not allowed\n",
 			    PROGRAM_NAME);
-			return EXIT_FAILURE;
+			return (exit_code = EXIT_FAILURE);
 		}
 
 		/*
