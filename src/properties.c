@@ -238,7 +238,7 @@ get_properties(char *filename, const int dsize)
 		free(linkname);
 	} else { /* Broken link */
 		char link[PATH_MAX] = "";
-		ssize_t ret = readlink(filename, link, PATH_MAX);
+		ssize_t ret = readlinkat(AT_FDCWD, filename, link, PATH_MAX);
 
 		if (ret) {
 			printf(_("%s%s%s -> %s (broken link)\n"), color, filename,
