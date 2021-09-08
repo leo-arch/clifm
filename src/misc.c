@@ -1076,31 +1076,6 @@ list_mountpoints(void)
 	return exit_status;
 }
 
-/* Store pinned directory for the next session */
-void
-save_pinned_dir(void)
-{
-	if (pinned_dir && config_ok) {
-
-		char *pin_file = (char *)xnmalloc(strlen(config_dir) + 7,
-		    sizeof(char));
-		sprintf(pin_file, "%s/.pin", config_dir);
-
-		FILE *fp = fopen(pin_file, "w");
-		if (!fp) {
-			fprintf(stderr, _("%s: Error storing pinned "
-					"directory\n"), PROGRAM_NAME);
-		} else {
-			fprintf(fp, "%s", pinned_dir);
-			fclose(fp);
-		}
-
-		free(pin_file);
-	}
-
-	return;
-}
-
 int
 free_remotes(int exit)
 {
@@ -1139,10 +1114,8 @@ free_stuff(void)
 	close(kq);
 #endif
 
-	if (xargs.stealth_mode != 1) {
-		save_pinned_dir();
+	if (xargs.stealth_mode != 1)
 		save_jumpdb();
-	}
 
 	save_dirhist();
 
@@ -1497,6 +1470,29 @@ FREE_N_EXIT:
 	return;
 }
 
+/* Save pinned in a file */
+static int
+save_pinned_dir(void)
+{
+	if (!pinned_dir || !config_ok)
+		return EXIT_FAILURE;
+
+	char *pin_file = (char *)xnmalloc(strlen(config_dir) + 7, sizeof(char));
+	sprintf(pin_file, "%s/.pin", config_dir);
+
+	FILE *fp = fopen(pin_file, "w");
+	if (!fp) {
+		fprintf(stderr, _("%s: Error storing pinned directory\n"), PROGRAM_NAME);
+	} else {
+		fprintf(fp, "%s", pinned_dir);
+		fclose(fp);
+	}
+
+	free(pin_file);
+
+	return EXIT_SUCCESS;
+}
+
 int
 pin_directory(char *dir)
 {
@@ -1518,7 +1514,6 @@ pin_directory(char *dir)
 	if (*dir == '/') {
 		pinned_dir = savestring(dir, strlen(dir));
 	} else { /* If relative path */
-
 		if (strcmp(ws[cur_ws].path, "/") == 0) {
 			pinned_dir = (char *)xnmalloc(strlen(dir) + 2, sizeof(char));
 			sprintf(pinned_dir, "/%s", dir);
@@ -1529,6 +1524,14 @@ pin_directory(char *dir)
 		}
 	}
 
+	if (xargs.stealth_mode == 1 || save_pinned_dir() == EXIT_SUCCESS)
+		goto END;
+
+	free(pinned_dir);
+	pinned_dir = (char *)NULL;
+	return EXIT_FAILURE;
+
+END:
 	printf(_("%s: Succesfully pinned '%s'\n"), PROGRAM_NAME, dir);
 	return EXIT_SUCCESS;
 }
@@ -1545,7 +1548,6 @@ unpin_dir(void)
 		int cmd_error = 0;
 		char *pin_file = (char *)xnmalloc(strlen(config_dir) + 7, sizeof(char));
 		sprintf(pin_file, "%s/.pin", config_dir);
-
 		if (unlink(pin_file) == -1) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, pin_file,
 			    strerror(errno));
@@ -1837,6 +1839,7 @@ help_function(void)
  M-k, S-Right: Change to next visited directory\n\
  M-o: Lock terminal\n\
  M-p: Change to pinned directory\n\
+ M-v: Toggle prepend sudo\n\
  M-1: Switch to workspace 1\n\
  M-2: Switch to workspace 2\n\
  M-3: Switch to workspace 3\n\
