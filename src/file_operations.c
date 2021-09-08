@@ -104,10 +104,19 @@ xchmod(const char *file, mode_t mode)
 
 	log_function(NULL);
 
-	if (chmod(file, mode) == -1) {
+	int fd = open(file, O_WRONLY);
+	if (fd == -1) {
 		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
 		return EXIT_FAILURE;
 	}
+
+	if (fchmod(fd, mode) == -1) {
+		close(fd);
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, file, strerror(errno));
+		return EXIT_FAILURE;
+	}
+
+	close(fd);
 
 	return EXIT_SUCCESS;
 }
