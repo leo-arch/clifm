@@ -1761,7 +1761,7 @@ load_pinned_dir(void)
 void
 get_path_programs(void)
 {
-	int i, j, l = 0, total_cmd = 0;
+	int i, l = 0, total_cmd = 0;
 	int *cmd_n = (int *)0;
 	struct dirent ***commands_bin = (struct dirent ***)NULL;
 
@@ -1835,7 +1835,7 @@ get_path_programs(void)
 			if (!cmd_n[i] || cmd_n[i] <= 0)
 				continue;
 
-			j = cmd_n[i];
+			int j = cmd_n[i];
 			while (--j >= 0) {
 				bin_commands[l++] = savestring(commands_bin[i][j]->d_name,
 					strlen(commands_bin[i][j]->d_name));
