@@ -975,17 +975,6 @@ Colors are specified using the same format used by \fBdircolors(1)\fR and the LS
 .TP
 The following codes are used for different interface elements:
 .sp
- \fBSyntax highlighting\fR
- hb = brackets: () {} []
- hc = comments: #comment
- he = expansion operators: * ~
- hn = numbers (including ELN's)
- hp = command parameters: -p --parameter
- hq = quoted strings: "str" 'str'
- hr = redirection operator: >
- hs = commands separator: | & ;
- hv = variables names (environment and internal)
-
  \fBSuggestions\fR
  sh = commands history suggestions
  sf = ELN's, bookmarks, file and directory names suggestions
@@ -1339,7 +1328,7 @@ The two most time consuming features are:
 
  \fB1)\fR The files counter, used to print the amount of files contained by listed directories. Disabling this option produces a nice performance boost.
 
- \fB2)\fR In default mode, \fBfstatat\fR(3) and \fBaccess\fR(3) are used to gather information about listed files. Since these functions, especially when executed hundreds (and even thousands) of times, are quite time consuming, the \fIlight mode\fR was implemented as an alternative listing process omitting all calls to them. When running in light mode, however, only basic file classification is performed, namely, those provided by the \fId_type\fR field of a dirent struct (see \fBreaddir\fR(3)).
+ \fB2)\fR In default mode, \fBfstatat\fR(3) and \fBaccess\fR(3) are used to gather information about listed files. Since these functions, especially when executed hundreds (and even thousands) of times, are quite time consuming, the \fIlight mode\fR was implemented as an alternative listing process omitting all calls to them. When running in light mode, however, only basic file classification is performed, namely, that provided by the \fId_type\fR field of a dirent struct (see \fBreaddir\fR(3)). Bear in mind, nonetheless, that in case of a DT_UNKNOWN value, CliFM will fall back to \fBstat\fR(3) to get basic file classification: we might be facing a file system not returning the \fId_type\fR value, for example, loop devices.
 .sp
 Besides these two features, a few more things can be disabled to get some extra speed (though perhaps unnoticeable): icons (if enabled), columns, colors, and, if already running without colors, file type indicators. Because listing lots of files could be expensive and time consuming, you can also try to limit the amount of files printed for each visited directory (see the \fImf\fR command above).
 .sp
