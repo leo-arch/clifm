@@ -290,6 +290,169 @@ launch_execve(char **cmd, int bg, int xflags)
 	return EXIT_FAILURE;
 }
 
+static int
+run_shell_cmd(char **comm)
+{
+	int exit_status = EXIT_SUCCESS;
+
+	/* LOG EXTERNAL COMMANDS
+	* 'no_log' will be true when running profile or prompt commands */
+	if (!no_log)
+		exit_status = log_function(comm);
+
+	/* PREVENT UNGRACEFUL EXIT */
+	/* Prevent the user from killing the program via the 'kill',
+	 * 'pkill' or 'killall' commands, from within CliFM itself.
+	 * Otherwise, the program will be forcefully terminated without
+	 * freeing allocated memory */
+	if ((*comm[0] == 'k' || *comm[0] == 'p') && (strcmp(comm[0], "kill") == 0
+	|| strcmp(comm[0], "killall") == 0 || strcmp(comm[0], "pkill") == 0)) {
+		size_t i;
+		for (i = 1; i <= args_n; i++) {
+			if ((strcmp(comm[0], "kill") == 0 && atoi(comm[i]) == (int)own_pid)
+			|| ((strcmp(comm[0], "killall") == 0 || strcmp(comm[0], "pkill") == 0)
+			&& strcmp(comm[i], argv_bk[0]) == 0)) {
+				fprintf(stderr, _("%s: To gracefully quit enter 'quit'\n"),
+						PROGRAM_NAME);
+				return EXIT_FAILURE;
+			}
+		}
+	}
+
+	/* CHECK WHETHER SHELL COMMANDS ARE ALLOWED */
+	if (!ext_cmd_ok) {
+		fprintf(stderr, _("%s: External commands are not allowed. "
+				  "Run 'ext on' to enable them.\n"), PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	if (*comm[0] == *argv_bk[0] && strcmp(comm[0], argv_bk[0]) == 0) {
+		fprintf(stderr, "%s: Nested instances are not allowed\n",
+		    PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	/*
+	 * By making precede the command by a colon or a semicolon, the
+	 * user can BYPASS CliFM parsing, expansions, and checks to be
+	 * executed DIRECTLY by the system shell (execle). For example:
+	 * if the amount of files listed on the screen (ELN's) is larger
+	 * or equal than 644 and the user tries to issue this command:
+	 * "chmod 644 filename", CLIFM will take 644 to be an ELN, and
+	 * will thereby try to expand it into the corresponding file name,
+	 * which is not what the user wants. To prevent this, simply run
+	 * the command as follows: ";chmod 644 filename" */
+
+	if (*comm[0] == ':' || *comm[0] == ';') {
+		/* Remove the colon from the beginning of the first argument,
+		 * that is, move the pointer to the next (second) position */
+		char *comm_tmp = savestring(comm[0] + 1, strlen(comm[0] + 1));
+		/* If string == ":" or ";" */
+		if (!comm_tmp || !*comm_tmp) {
+			fprintf(stderr, _("%s: '%c': Syntax error\n"),
+			    PROGRAM_NAME, *comm[0]);
+			if (comm_tmp)
+				free(comm_tmp);
+			return EXIT_FAILURE;
+		} else {
+			strcpy(comm[0], comm_tmp);
+			free(comm_tmp);
+		}
+	}
+
+	/* #### RUN THE SHELL COMMAND #### */
+
+	/* Store the command and each argument into a single array to be
+	 * executed by execle() using the system shell (/bin/sh -c) */
+	char *ext_cmd = (char *)NULL;
+	size_t ext_cmd_len = strlen(comm[0]);
+	ext_cmd = (char *)xnmalloc(ext_cmd_len + 1, sizeof(char));
+	strcpy(ext_cmd, comm[0]);
+
+	size_t i;
+	if (args_n) { /* This will be false in case of ";cmd" or ":cmd" */
+		for (i = 1; i <= args_n; i++) {
+			ext_cmd_len += strlen(comm[i]) + 1;
+			ext_cmd = (char *)xrealloc(ext_cmd, (ext_cmd_len + 1) * sizeof(char));
+			strcat(ext_cmd, " ");
+			strcat(ext_cmd, comm[i]);
+		}
+	}
+
+	/* Append final ampersand if background */
+	if (bg_proc) {
+		ext_cmd = (char *)xrealloc(ext_cmd, (ext_cmd_len + 2) * sizeof(char));
+		ext_cmd[ext_cmd_len] = '&';
+		ext_cmd[ext_cmd_len + 1] = '\0';
+	}
+
+	/* Since we modified LS_COLORS, store its current value and unset
+	 * it. Some shell commands use LS_COLORS to display their outputs
+	 * ("ls -l", for example, use the "no" value to print file
+	 * properties). So, we unset it to prevent wrong color output
+	 * for external commands. The disadvantage of this procedure is
+	 * that if the user uses a customized LS_COLORS, unsetting it
+	 * set its value to default, and the customization is lost. */
+
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+	char *my_ls_colors = (char *)NULL, *p = (char *)NULL;
+	/* For some reason, when running on FreeBSD Valgrind complains
+	 * about overlapping source and destiny in setenv() if I just
+	 * copy the address returned by getenv() instead of the string
+	 * itself. Not sure why, but this makes the error go away */
+	p = getenv("LS_COLORS");
+	my_ls_colors = (char *)xnmalloc(strlen(p) + 1, sizeof(char *));
+	strcpy(my_ls_colors, p);
+	p = (char *)NULL;
+
+#else
+	static char *my_ls_colors = (char *)NULL;
+	my_ls_colors = getenv("LS_COLORS");
+#endif
+
+	if (ls_colors_bk && *ls_colors_bk != '\0')
+		setenv("LS_COLORS", ls_colors_bk, 1);
+	else
+		unsetenv("LS_COLORS");
+
+	if (launch_execle(ext_cmd) != EXIT_SUCCESS)
+		exit_status = EXIT_FAILURE;
+	free(ext_cmd);
+
+	/* Restore LS_COLORS value to use CliFM colors */
+	setenv("LS_COLORS", my_ls_colors, 1);
+
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+	free(my_ls_colors);
+#endif
+
+	/* Reload the list of available commands in PATH for TAB completion.
+	 * Why? If this list is not updated, whenever some new program is
+	 * installed, renamed, or removed from some of the paths in PATH
+	 * while in CliFM, this latter needs to be restarted in order
+	 * to be able to recognize the new program for TAB completion */
+
+	int j;
+	if (bin_commands) {
+		j = (int)path_progsn;
+		while (--j >= 0)
+			free(bin_commands[j]);
+		free(bin_commands);
+		bin_commands = (char **)NULL;
+	}
+
+	if (paths) {
+		j = (int)path_n;
+		while (--j >= 0)
+			free(paths[j]);
+	}
+
+	path_n = (size_t)get_path_env();
+	get_path_programs();
+
+	return exit_status;
+}
+
 /* Take the command entered by the user, already splitted into substrings
  * by parse_input_str(), and call the corresponding function. Return zero
  * in case of success and one in case of error */
@@ -1540,158 +1703,9 @@ exec_cmd(char **comm)
 	 * #                EXTERNAL/SHELL COMMANDS           #
 	 * ####################################################*/
 
-		/* LOG EXTERNAL COMMANDS
-		* 'no_log' will be true when running profile or prompt commands */
-		if (!no_log)
-			exit_code = log_function(comm);
-
-		/* PREVENT UNGRACEFUL EXIT */
-		/* Prevent the user from killing the program via the 'kill',
-		 * 'pkill' or 'killall' commands, from within CliFM itself.
-		 * Otherwise, the program will be forcefully terminated without
-		 * freeing allocated memory */
-		if ((*comm[0] == 'k' || *comm[0] == 'p') && (strcmp(comm[0], "kill") == 0 || strcmp(comm[0], "killall") == 0 || strcmp(comm[0], "pkill") == 0)) {
-			size_t i;
-			for (i = 1; i <= args_n; i++) {
-				if ((strcmp(comm[0], "kill") == 0 && atoi(comm[i]) == (int)own_pid) || ((strcmp(comm[0], "killall") == 0 || strcmp(comm[0], "pkill") == 0) && strcmp(comm[i], argv_bk[0]) == 0)) {
-					fprintf(stderr, _("%s: To gracefully quit enter 'quit'\n"),
-							PROGRAM_NAME);
-					return (exit_code = EXIT_FAILURE);
-				}
-			}
-		}
-
-		/* CHECK WHETHER EXTERNAL COMMANDS ARE ALLOWED */
-		if (!ext_cmd_ok) {
-			fprintf(stderr, _("%s: External commands are not allowed. "
-					  "Run 'ext on' to enable them.\n"), PROGRAM_NAME);
-			return (exit_code = EXIT_FAILURE);
-		}
-
-		if (*comm[0] == *argv_bk[0] && strcmp(comm[0], argv_bk[0]) == 0) {
-			fprintf(stderr, "%s: Nested instances are not allowed\n",
-			    PROGRAM_NAME);
-			return (exit_code = EXIT_FAILURE);
-		}
-
-		/*
-		 * By making precede the command by a colon or a semicolon, the
-		 * user can BYPASS CliFM parsing, expansions, and checks to be
-		 * executed DIRECTLY by the system shell (execle). For example:
-		 * if the amount of files listed on the screen (ELN's) is larger
-		 * or equal than 644 and the user tries to issue this command:
-		 * "chmod 644 filename", CLIFM will take 644 to be an ELN, and
-		 * will thereby try to expand it into the corresponding file name,
-		 * which is not what the user wants. To prevent this, simply run
-		 * the command as follows: ";chmod 644 filename" */
-
-		if (*comm[0] == ':' || *comm[0] == ';') {
-			/* Remove the colon from the beginning of the first argument,
-			 * that is, move the pointer to the next (second) position */
-			char *comm_tmp = savestring(comm[0] + 1, strlen(comm[0] + 1));
-			/* If string == ":" or ";" */
-			if (!comm_tmp || !*comm_tmp) {
-				fprintf(stderr, _("%s: '%c': Syntax error\n"),
-				    PROGRAM_NAME, *comm[0]);
-				exit_code = EXIT_FAILURE;
-				if (comm_tmp)
-					free(comm_tmp);
-				return EXIT_FAILURE;
-			} else {
-				strcpy(comm[0], comm_tmp);
-				free(comm_tmp);
-			}
-		}
-
-		/* #### RUN THE EXTERNAL COMMAND #### */
-
-		/* Store the command and each argument into a single array to be
-		 * executed by execle() using the system shell (/bin/sh -c) */
-		char *ext_cmd = (char *)NULL;
-		size_t ext_cmd_len = strlen(comm[0]);
-		ext_cmd = (char *)xnmalloc(ext_cmd_len + 1, sizeof(char));
-		strcpy(ext_cmd, comm[0]);
-
-		register size_t i;
-		if (args_n) { /* This will be false in case of ";cmd" or ":cmd" */
-			for (i = 1; i <= args_n; i++) {
-				ext_cmd_len += strlen(comm[i]) + 1;
-				ext_cmd = (char *)xrealloc(ext_cmd, (ext_cmd_len + 1) * sizeof(char));
-				strcat(ext_cmd, " ");
-				strcat(ext_cmd, comm[i]);
-			}
-		}
-
-		/* Append final ampersand if background */
-		if (bg_proc) {
-			ext_cmd = (char *)xrealloc(ext_cmd, (ext_cmd_len + 2) * sizeof(char));
-			ext_cmd[ext_cmd_len] = '&';
-			ext_cmd[ext_cmd_len + 1] = '\0';
-		}
-
-		/* Since we modified LS_COLORS, store its current value and unset
-		 * it. Some shell commands use LS_COLORS to display their outputs
-		 * ("ls -l", for example, use the "no" value to print file
-		 * properties). So, we unset it to prevent wrong color output
-		 * for external commands. The disadvantage of this procedure is
-		 * that if the user uses a customized LS_COLORS, unsetting it
-		 * set its value to default, and the customization is lost. */
-
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
-		char *my_ls_colors = (char *)NULL, *p = (char *)NULL;
-		/* For some reason, when running on FreeBSD Valgrind complains
-		 * about overlapping source and destiny in setenv() if I just
-		 * copy the address returned by getenv() instead of the string
-		 * itself. Not sure why, but this makes the error go away */
-		p = getenv("LS_COLORS");
-		my_ls_colors = (char *)xnmalloc(strlen(p) + 1, sizeof(char *));
-		strcpy(my_ls_colors, p);
-		p = (char *)NULL;
-
-#else
-		static char *my_ls_colors = (char *)NULL;
-		my_ls_colors = getenv("LS_COLORS");
-#endif
-
-		if (ls_colors_bk && *ls_colors_bk != '\0')
-			setenv("LS_COLORS", ls_colors_bk, 1);
-		else
-			unsetenv("LS_COLORS");
-
-		if (launch_execle(ext_cmd) != EXIT_SUCCESS)
-			exit_code = EXIT_FAILURE;
-		free(ext_cmd);
-
-		/* Restore LS_COLORS value to use CliFM colors */
-		setenv("LS_COLORS", my_ls_colors, 1);
-
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
-		free(my_ls_colors);
-#endif
-
-		/* Reload the list of available commands in PATH for TAB completion.
-		 * Why? If this list is not updated, whenever some new program is
-		 * installed, renamed, or removed from some of the paths in PATH
-		 * while in CliFM, this latter needs to be restarted in order
-		 * to be able to recognize the new program for TAB completion */
-
-		int j;
-		if (bin_commands) {
-			j = (int)path_progsn;
-			while (--j >= 0)
-				free(bin_commands[j]);
-			free(bin_commands);
-			bin_commands = (char **)NULL;
-		}
-
-		if (paths) {
-			j = (int)path_n;
-			while (--j >= 0)
-				free(paths[j]);
-		}
-
-		path_n = (size_t)get_path_env();
-		get_path_programs();
+		exit_code = run_shell_cmd(comm);
+		if (exit_code == EXIT_FAILURE)
+			return EXIT_FAILURE;
 	}
 
 CHECK_EVENTS:
