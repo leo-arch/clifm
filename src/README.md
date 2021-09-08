@@ -146,7 +146,9 @@ CliFM source code consists of multiple C source files, being `main.c` the starti
 
 **B)** Once everything is correctly initialized, an infinite loop, structured as a basic shell, takes place:
 1)  Take input
+
 2)  Parse input
+
 3)  Execute command
  And take more input...
 
