@@ -342,48 +342,33 @@ run_shell_cmd(char **comm)
 	 * will thereby try to expand it into the corresponding file name,
 	 * which is not what the user wants. To prevent this, simply run
 	 * the command as follows: ";chmod 644 filename" */
-
-	if (*comm[0] == ':' || *comm[0] == ';') {
-		/* Remove the colon from the beginning of the first argument,
-		 * that is, move the pointer to the next (second) position */
-		char *comm_tmp = savestring(comm[0] + 1, strlen(comm[0] + 1));
-		/* If string == ":" or ";" */
-		if (!comm_tmp || !*comm_tmp) {
-			fprintf(stderr, _("%s: '%c': Syntax error\n"),
-			    PROGRAM_NAME, *comm[0]);
-			if (comm_tmp)
-				free(comm_tmp);
-			return EXIT_FAILURE;
-		} else {
-			strcpy(comm[0], comm_tmp);
-			free(comm_tmp);
-		}
-	}
+	char *first = comm[0]; 
+	if (*comm[0] == ':' || *comm[0] == ';')
+		first++;
 
 	/* #### RUN THE SHELL COMMAND #### */
 
 	/* Store the command and each argument into a single array to be
 	 * executed by execle() using the system shell (/bin/sh -c) */
-	char *ext_cmd = (char *)NULL;
-	size_t ext_cmd_len = strlen(comm[0]);
-	ext_cmd = (char *)xnmalloc(ext_cmd_len + 1, sizeof(char));
-	strcpy(ext_cmd, comm[0]);
+	char *cmd = (char *)NULL;
+	size_t len = strlen(first) + 2;
+	cmd = (char *)xnmalloc(len + (bg_proc ? 2 : 0), sizeof(char));
+	strcpy(cmd, first);
 
 	size_t i;
-	if (args_n) { /* This will be false in case of ";cmd" or ":cmd" */
-		for (i = 1; i <= args_n; i++) {
-			ext_cmd_len += strlen(comm[i]) + 1;
-			ext_cmd = (char *)xrealloc(ext_cmd, (ext_cmd_len + 1) * sizeof(char));
-			strcat(ext_cmd, " ");
-			strcat(ext_cmd, comm[i]);
-		}
+	for (i = 1; comm[i]; i++) {
+		cmd[len - 2] = ' ';
+		cmd[len - 1] = '\0';
+		len += strlen(comm[i]) + 1;
+		cmd = (char *)xrealloc(cmd, (len + 2 + (bg_proc ? 2 : 0))
+				* sizeof(char));
+		strcat(cmd, comm[i]);
 	}
 
-	/* Append final ampersand if background */
+	/* Append final ampersand if backgrounded */
 	if (bg_proc) {
-		ext_cmd = (char *)xrealloc(ext_cmd, (ext_cmd_len + 2) * sizeof(char));
-		ext_cmd[ext_cmd_len] = '&';
-		ext_cmd[ext_cmd_len + 1] = '\0';
+		cmd[len - 2] = '&';
+		cmd[len - 1] = '\0';
 	}
 
 	/* Since we modified LS_COLORS, store its current value and unset
@@ -415,9 +400,9 @@ run_shell_cmd(char **comm)
 	else
 		unsetenv("LS_COLORS");
 
-	if (launch_execle(ext_cmd) != EXIT_SUCCESS)
+	if (launch_execle(cmd) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE;
-	free(ext_cmd);
+	free(cmd);
 
 	/* Restore LS_COLORS value to use CliFM colors */
 	setenv("LS_COLORS", my_ls_colors, 1);
@@ -431,7 +416,6 @@ run_shell_cmd(char **comm)
 	 * installed, renamed, or removed from some of the paths in PATH
 	 * while in CliFM, this latter needs to be restarted in order
 	 * to be able to recognize the new program for TAB completion */
-
 	int j;
 	if (bin_commands) {
 		j = (int)path_progsn;
