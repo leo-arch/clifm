@@ -1,10 +1,6 @@
 name: Codecov
 on:
-  pull_request:
-    branches: [ master ]
   workflow_dispatch:
-  schedule:
-    - cron: '22 7 * * 5'
 jobs:
   run:
     runs-on: ubuntu-latest
