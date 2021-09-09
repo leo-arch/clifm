@@ -976,6 +976,25 @@ rl_suggestions(const unsigned char c)
 		 * # 		  1) Filter input			#
 		 * ######################################*/
 
+	/* Disable suggestions while in vi command mode and reenable them
+	 * when changing back to insert mode */
+	if (rl_editing_mode == 0) {
+		if (rl_readline_state & RL_STATE_VICMDONCE) {
+			if (c == 'i') {
+				rl_readline_state &= (unsigned long)~RL_STATE_VICMDONCE;
+			} else if (suggestion.printed) {
+				clear_suggestion();
+				free(suggestion_buf);
+				suggestion_buf = (char *)NULL;
+				goto FAIL;
+			} else {
+				goto FAIL;
+			}
+		}
+	}
+
+//	rl_readline_state &= ~RL_STATE_VICMDONCE
+
 	/* Skip escape sequences, mostly arrow keys */
 	if (rl_readline_state & RL_STATE_MOREINPUT) {
 		if (c == '~') {
