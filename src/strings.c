@@ -647,7 +647,7 @@ split_str(const char *str)
 	}
 }
 
-/* Return 1 if STR contains only numbers of a range of number, and zero
+/* Return 1 if STR contains only numbers of a range of numbers, and zero
  * if not */
 static int
 check_fused_param(const char *str)
@@ -694,76 +694,44 @@ split_fusedcmd(char *str)
 	 * needs to be splitted */
 	char *buf = (char *)xnmalloc(((strlen(str) * 2) + 2), sizeof(char));
 
-	char *p = str, *pp = str;
-	char *q = buf;
-	char *s = (char *)NULL;
-	size_t word_n = 1;
 	size_t c = 0;
-
+	char *p = str, *pp = str, *b = buf;
+	char *s = (char *)NULL;
+	size_t words = 1;
 	while (*p) {
 		switch(*p) {
-		case ' ':
-			/* We only allow splitting for first command word */
+		case ' ': /* We only allow splitting for first command word */
 			s = p; /* Pointer to last space */
 			if (c && *(p - 1) != ' ' && *(p - 1) != '|'
 			&& *(p - 1) != '&' && *(p - 1) != ';')
-				word_n++;
+				words++;
+			if (*(p + 1))
+				pp = p + 1;
 			break;
-		case '|': /* fallthrough */
-		case '&': /* fallthrough */
-		case ';': word_n = 1; break;
+		case '&': // fallthrough
+		case '|': // fallthrough
+		case ';':
+			words = 1;
+			if (*(p + 1))
+				pp = p + 1;
+			break;
 		default: break;
 		}
-
-		/* Transform "cmdeln" into "cmd eln" */
-		if (check_fused_param(p)) {
-			/* If a number, move from last to next space/nul looking for
-			 * a slash. If found, do nothing */
-			if (s) {
-				if (word_n > 1) {
-					*(q++) = *(p++);
-					continue;
-				}
-
-				int _cont = 0;
-				char *ss = s + 1;
-				while (*ss && *ss != ' ') {
-					if (*ss == '/') {
-						_cont = 1;
-						break;
-					}
-					ss++;
-				}
-				if (_cont) {
-					*(q++) = *(p++);
-					continue;
-				}
+		if (words == 1 && c && *p >= '0' && *p <= '9'
+		&& (*(p - 1) < '0' || *(p - 1) > '9')) {
+			if (check_fused_param(p)) {
+				char t = *p;
+				*p = '\0';
+				if (is_internal_c(pp))
+					*(b++) = ' ';
+				*p = t;
 			}
-
-			char tmp = *p;
-			*p = '\0';
-
-			if (!is_internal_c(pp)) {
-				*p = tmp;
-				*(q++) = *(p++);
-				continue;
-			}
-
-			*p = tmp;
-			*(q++) = ' ';
-			*(q++) = *(p++);
 		}
-
-		else {
-			if (*p == ' ' && *(p + 1))
-				pp = p + 1;
-			*(q++) = *(p++);
-		}
-
+		*(b++) = *(p++);
 		c++;
 	}
 
-	*q = '\0';
+	*b = '\0';
 
 	/* Readjust the buffer size */
 	size_t len = strlen(buf);

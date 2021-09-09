@@ -353,7 +353,7 @@ run_shell_cmd(char **comm)
 	char *cmd = (char *)NULL;
 	size_t len = strlen(first) + 2;
 	cmd = (char *)xnmalloc(len + (bg_proc ? 2 : 0), sizeof(char));
-	strcpy(cmd, first);
+	strncpy(cmd, first, len);
 
 	size_t i;
 	for (i = 1; comm[i]; i++) {
@@ -362,7 +362,7 @@ run_shell_cmd(char **comm)
 		len += strlen(comm[i]) + 1;
 		cmd = (char *)xrealloc(cmd, (len + 2 + (bg_proc ? 2 : 0))
 				* sizeof(char));
-		strcat(cmd, comm[i]);
+		strncat(cmd, comm[i], len);
 	}
 
 	/* Append final ampersand if backgrounded */
