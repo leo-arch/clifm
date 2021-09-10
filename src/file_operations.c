@@ -839,11 +839,16 @@ bulk_rename(char **args)
 
 	int exit_status = EXIT_SUCCESS;
 
+	char *rand_ext = gen_rand_str(6);
+	if (!rand_ext)
+		return EXIT_FAILURE;
+
 	char bulk_file[PATH_MAX];
 	if (xargs.stealth_mode == 1)
-		sprintf(bulk_file, "/tmp/.clifm_bulk_rename");
+		snprintf(bulk_file, PATH_MAX - 1, "/tmp/.clifm.bulkrename.%s", rand_ext);
 	else
-		sprintf(bulk_file, "%s/.bulk_rename", tmp_dir);
+		snprintf(bulk_file, PATH_MAX - 1, "%s/.bulkrename.%s", tmp_dir, rand_ext);
+	free(rand_ext);
 
 	int fd;
 	FILE *fp = open_fstream_w(bulk_file, &fd);
@@ -888,8 +893,16 @@ bulk_rename(char **args)
 	time_t mtime_bfr = (time_t)attr.st_mtime;
 
 	/* Open the bulk file */
-	if (open_file(bulk_file) != EXIT_SUCCESS)
+	if (open_file(bulk_file) != EXIT_SUCCESS) {
+		fprintf(stderr, _("bulk: %s\n"), strerror(errno));
+		if (unlinkat(fd, bulk_file, 0) == -1) {
+			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
+			    bulk_file, strerror(errno));
+			exit_status = EXIT_FAILURE;
+		}
+		close_fstream(fp, fd);
 		return EXIT_FAILURE;
+	}
 
 	/* Compare the new modification time to the stored one: if they
 	 * match, nothing was modified */
@@ -1045,7 +1058,8 @@ char *export(char **filenames, int open)
 	sprintf(tmp_file, "%s/.clifm%s", tmp_dir, rand_ext);
 	free(rand_ext);
 
-	FILE *fp = fopen(tmp_file, "w");
+	int fd;
+	FILE *fp = open_fstream_w(tmp_file, &fd);
 	if (!fp) {
 		free(tmp_file);
 		return (char *)NULL;
@@ -1065,7 +1079,7 @@ char *export(char **filenames, int open)
 		}
 	}
 
-	fclose(fp);
+	close_fstream(fp, fd);
 
 	if (!open)
 		return tmp_file;
