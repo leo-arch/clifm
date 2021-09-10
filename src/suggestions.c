@@ -993,8 +993,6 @@ rl_suggestions(const unsigned char c)
 		}
 	}
 
-//	rl_readline_state &= ~RL_STATE_VICMDONCE
-
 	/* Skip escape sequences, mostly arrow keys */
 	if (rl_readline_state & RL_STATE_MOREINPUT) {
 		if (c == '~') {

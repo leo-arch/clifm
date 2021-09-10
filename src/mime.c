@@ -55,6 +55,13 @@ get_app(const char *mime, const char *ext)
 	if (!mime || !mime_file || !*mime_file)
 		return (char *)NULL;
 
+	/* Directories are always opened by CliFM itself */
+	if (*mime == 'i' && strcmp(mime, "inode/directory") == 0) {
+		char *p = savestring("clifm", 5);
+		mime_match = 1;
+		return p;
+	}
+
 	FILE *defs_fp = fopen(mime_file, "r");
 	if (!defs_fp) {
 		fprintf(stderr, _("%s: %s: Error opening file\n"),
@@ -175,13 +182,10 @@ get_app(const char *mime, const char *ext)
 	free(line);
 	fclose(defs_fp);
 
-	if (found) {
-		if (app)
-			return app;
-	} else {
-		if (app)
-			free(app);
-	}
+	if (found)
+		return app;
+	else
+		free(app);
 
 	return (char *)NULL;
 }
@@ -226,16 +230,16 @@ get_mime(char *file)
 	if (!rand_ext)
 		return (char *)NULL;
 
-	char MIME_TMP_FILE[PATH_MAX] = "";
-	sprintf(MIME_TMP_FILE, "%s/mime.%s", TMP_DIR, rand_ext);
+	char mime_tmp_file[PATH_MAX] = "";
+	sprintf(mime_tmp_file, "%s/mime.%s", tmp_dir, rand_ext);
 	free(rand_ext);
 
-	if (access(MIME_TMP_FILE, F_OK) == 0)
-		unlink(MIME_TMP_FILE);
+	if (access(mime_tmp_file, F_OK) == 0)
+		unlink(mime_tmp_file);
 
-	FILE *file_fp = fopen(MIME_TMP_FILE, "w");
+	FILE *file_fp = fopen(mime_tmp_file, "w");
 	if (!file_fp) {
-		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, MIME_TMP_FILE,
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, mime_tmp_file,
 		    strerror(errno));
 		return (char *)NULL;
 	}
@@ -280,12 +284,12 @@ get_mime(char *file)
 	if (ret != EXIT_SUCCESS)
 		return (char *)NULL;
 
-	if (access(MIME_TMP_FILE, F_OK) != 0)
+	if (access(mime_tmp_file, F_OK) != 0)
 		return (char *)NULL;
 
-	file_fp = fopen(MIME_TMP_FILE, "r");
+	file_fp = fopen(mime_tmp_file, "r");
 	if (!file_fp) {
-		unlink(MIME_TMP_FILE);
+		unlink(mime_tmp_file);
 		return (char *)NULL;
 	}
 
@@ -294,7 +298,7 @@ get_mime(char *file)
 	char line[255] = "";
 	if (fgets(line, (int)sizeof(line), file_fp) == NULL) {
 		fclose(file_fp);
-		unlink(MIME_TMP_FILE);
+		unlink(mime_tmp_file);
 		return (char *)NULL;
 	}
 	char *tmp = strrchr(line, ' ');
@@ -306,7 +310,7 @@ get_mime(char *file)
 	}
 
 	fclose(file_fp);
-	unlink(MIME_TMP_FILE);
+	unlink(mime_tmp_file);
 	return mime_type;
 }
 #endif /* !_NO_MAGIC */
@@ -325,7 +329,7 @@ mime_import(char *file)
 	/* If not in X, exit) */
 	if (!(flags & GUI)) {
 		fprintf(stderr, _("%s: Nothing was imported. No graphical "
-						"environment found\n"), PROGRAM_NAME);
+				"environment found\n"), PROGRAM_NAME);
 		return (-1);
 	}
 
@@ -481,15 +485,17 @@ mime_open(char **args)
 		}
 	}
 
+#ifdef _NO_MAGIC
 	/* Check the existence of the 'file' command. */
-/*	char *file_path_tmp = (char *)NULL;
+	char *file_path_tmp = (char *)NULL;
 	if ((file_path_tmp = get_cmd_path("file")) == NULL) {
 		fprintf(stderr, _("%s: file: Command not found\n"), PROGRAM_NAME);
 		return EXIT_FAILURE;
 	}
 
 	free(file_path_tmp);
-	file_path_tmp = (char *)NULL; */
+	file_path_tmp = (char *)NULL;
+#endif /* _NO_MAGIC */
 
 	char *file_path = (char *)NULL,
 		 *deq_file = (char *)NULL;
@@ -546,7 +552,7 @@ mime_open(char **args)
 		if (!file_path) {
 			fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, args[1],
 			    strerror(errno));
-			return -1;
+			return (-1);
 		}
 
 		struct stat a;
@@ -565,7 +571,7 @@ mime_open(char **args)
 			 * exit code of mime_open is EXIT_FAILURE, and since we
 			 * don't want that message in this case, return -1 instead
 			 * to prevent that message from being printed */
-			return -1;
+			return (-1);
 		}
 
 		file_index = 1;
@@ -626,9 +632,7 @@ mime_open(char **args)
 
 				free(file_path);
 				free(mime);
-
-				if (ext)
-					free(ext);
+				free(ext);
 
 				return exit_status;
 			} else {
@@ -643,9 +647,7 @@ mime_open(char **args)
 
 		free(file_path);
 		free(mime);
-
-		if (ext)
-			free(ext);
+		free(ext);
 
 		return EXIT_FAILURE;
 	}
@@ -662,17 +664,13 @@ mime_open(char **args)
 		free(file_path);
 		free(mime);
 		free(app);
-
-		if (ext)
-			free(ext);
+		free(ext);
 
 		return EXIT_SUCCESS;
 	}
 
 	free(mime);
-
-	if (ext)
-		free(ext);
+	free(ext);
 
 	/* If not info, open the file with the associated application */
 
