@@ -326,14 +326,15 @@ get_link_ref(const char *link)
 		return (-1);
 
 	char *linkname = realpath(link, (char *)NULL);
-	if (linkname) {
-		struct stat file_attrib;
-		stat(linkname, &file_attrib);
-		free(linkname);
-		return (int)(file_attrib.st_mode & S_IFMT);
-	}
+	if (!linkname)
+		return (-1);
 
-	return (-1);
+	struct stat attr;
+	int ret = stat(linkname, &attr);
+	free(linkname);
+	if (ret == -1)
+		return (-1);
+	return (int)(attr.st_mode & S_IFMT);
 }
 
 /* Transform an integer (N) into a string of chars

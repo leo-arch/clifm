@@ -24,6 +24,13 @@
 
 #pragma once
 
+/* Macros for open_function */
+#define OPEN_BLK 0
+#define OPEN_CHR 1
+#define OPEN_SOCK 2
+#define OPEN_FIFO 3
+#define OPEN_UNK 4
+
 /* file_operations.c */
 int batch_link(char **args);
 char *export(char **filenames, int open);

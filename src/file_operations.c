@@ -389,7 +389,7 @@ open_function(char **cmd)
 
 	/* Check file existence */
 	struct stat attr;
-	if (stat(file, &attr) == -1) {
+	if (lstat(file, &attr) == -1) {
 		fprintf(stderr, "%s: open: %s: %s\n", PROGRAM_NAME, cmd[1],
 		    strerror(errno));
 		return EXIT_FAILURE;
@@ -398,19 +398,43 @@ open_function(char **cmd)
 	/* Check file type: only directories, symlinks, and regular files
 	 * will be opened */
 
-	char no_open_file = 1, file_type[128];
-	/* Reserve a good amount of bytes for file type: it cannot be
-		  * known beforehand how many bytes the TRANSLATED string will
-		  * need */
+	char no_open_file = 1;
+	char *file_type = (char *)NULL;
+	char *types[] = {
+		"block device",
+		"character device",
+		"socket",
+		"FIFO/pipe",
+		"unknown file type",
+		NULL};
 
 	switch ((attr.st_mode & S_IFMT)) {
 		/* Store file type to compose and print the error message, if
 		 * necessary */
-	case S_IFBLK: strcpy(file_type, _("block device")); break;
-	case S_IFCHR: strcpy(file_type, _("character device")); break;
-	case S_IFSOCK: strcpy(file_type, _("socket")); break;
-	case S_IFIFO: strcpy(file_type, _("FIFO/pipe")); break;
+	case S_IFBLK: file_type = types[OPEN_BLK]; break;
+	case S_IFCHR: file_type = types[OPEN_CHR]; break;
+	case S_IFSOCK: file_type = types[OPEN_SOCK]; break;
+	case S_IFIFO: file_type = types[OPEN_FIFO]; break;
 	case S_IFDIR: return cd_function(file, CD_PRINT_ERROR);
+	case S_IFLNK: {
+		int ret = get_link_ref(file);
+		if (ret == -1) {
+			fprintf(stderr, _("%s: %s: Broken symbolic link\n"),
+					PROGRAM_NAME, file);
+			return EXIT_FAILURE;
+		} else if (ret == S_IFDIR) {
+			return cd_function(file, CD_PRINT_ERROR);
+		} else if (ret != S_IFREG) {
+			switch (ret) {
+			case S_IFBLK: file_type = types[OPEN_BLK]; break;
+			case S_IFCHR: file_type = types[OPEN_CHR]; break;
+			case S_IFSOCK: file_type = types[OPEN_SOCK]; break;
+			case S_IFIFO: file_type = types[OPEN_FIFO]; break;
+			default: file_type = types[OPEN_UNK]; break;
+			}
+		}
+		}
+		/* fallthrough */
 	case S_IFREG:
 #ifndef _NO_ARCHIVING
 		/* If an archive/compressed file, call archiver() */
@@ -423,7 +447,7 @@ open_function(char **cmd)
 		break;
 
 	default:
-		strcpy(file_type, _("unknown file type"));
+		file_type = types[OPEN_UNK];
 		break;
 	}
 
@@ -431,8 +455,8 @@ open_function(char **cmd)
 	 * or regular file), print the corresponding error message and
 	 * exit */
 	if (no_open_file) {
-		fprintf(stderr, _("%s: %s (%s): Cannot open file. Try "
-			"'APPLICATION FILENAME'.\n"), PROGRAM_NAME, cmd[1], file_type);
+		fprintf(stderr, _("%s: %s (%s): Cannot open file\nTry "
+			"'APPLICATION FILENAME'\n"), PROGRAM_NAME, cmd[1], file_type);
 		return EXIT_FAILURE;
 	}
 
