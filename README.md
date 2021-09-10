@@ -95,7 +95,6 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - [Short (and even one-character) commands](https://github.com/leo-arch/clifm/wiki/Introduction#commands-short-summary), and [entry list numbers (ELN's)](https://github.com/leo-arch/clifm/wiki/Common-Operations) for file names. 
   - [Extended color codes](https://github.com/leo-arch/clifm/wiki/Customization#colors) for file-types and -extensions.
   - [Files counter](https://github.com/leo-arch/clifm/wiki/Introduction#interface) for directories and symlinks to directories.
-
 - Navigation and file operations
   - [Bookmarks](https://github.com/leo-arch/clifm/wiki/Common-Operations#bookmarks).
   - [Files selection](https://github.com/leo-arch/clifm/wiki/Common-Operations#selection) (supports both glob and regular expressions and works even across multiple instances of the program).
@@ -113,7 +112,6 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - [Archiving and compression](https://github.com/leo-arch/clifm/wiki/Advanced#archives) support (including Zstandard and ISO 9660).
   - [Symlinks editor](https://github.com/leo-arch/clifm/wiki/Introduction#c-l-e-edit-m-md-r).
   - Directory history map to keep in sight previous, current, and next entries in the directory history list.
-
 - Shell
   - _[Gemini](https://github.com/leo-arch/clifm/wiki/Specifics#auto-suggestions)_, a Fish-like auto-suggestions system.
   - [Tab-completion](https://github.com/leo-arch/clifm/wiki/Specifics#expansions-completions-and-suggestions).
@@ -125,12 +123,10 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - [Aliases](https://github.com/leo-arch/clifm/wiki/Customization#aliases).
   - [Logs](https://github.com/leo-arch/clifm/wiki/Introduction#log-clear-on-off-status).
   - [Prompt and profile commands](https://github.com/leo-arch/clifm/wiki/Customization#profile-and-prompt-commands) (run commands with each new prompt or at program startup).
-
 - 3 Modes
   - Normal
   - [Stealth mode](https://github.com/leo-arch/clifm/wiki/Specifics#stealth-mode): Leave no trace on the host system. No file is read, no file is written.
   - [Light mode](https://github.com/leo-arch/clifm/wiki/Specifics#light-mode) (just in case it is not fast enough for you).
-
 - Customization
   - [User profiles](https://github.com/leo-arch/clifm/wiki/Specifics#profiles).
   - [Customizable keyboard shortcuts](https://github.com/leo-arch/clifm/wiki/Customization#keybindings).
@@ -138,7 +134,6 @@ Besides common file operations such as copy, move, remove, etc., _CliFM_ provide
   - [Bash-like prompt customization](https://github.com/leo-arch/clifm/wiki/Customization#the-prompt).
   - [Four customizable keybindings for custom plugins](https://github.com/leo-arch/clifm/wiki/Customization#keybindings).
   - [Compile features in/out](https://github.com/leo-arch/clifm/blob/master/src/README.md#compiling-features-inout).
-
 - Misc
   - [Plugins](https://github.com/leo-arch/clifm/wiki/Advanced#plugins).
   - [Files preview](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) (via _BFG_, a native file previewer, but including support for [Ranger's scope.sh](https://github.com/ranger/ranger/blob/master/ranger/data/scope.sh) and [pistol](https://github.com/doronbehar/pistol) as well).
