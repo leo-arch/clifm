@@ -898,7 +898,6 @@ bulk_rename(char **args)
 		if (unlinkat(fd, bulk_file, 0) == -1) {
 			_err('e', PRINT_PROMPT, "%s: '%s': %s\n", PROGRAM_NAME,
 			    bulk_file, strerror(errno));
-			exit_status = EXIT_FAILURE;
 		}
 		close_fstream(fp, fd);
 		return EXIT_FAILURE;
