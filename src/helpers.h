@@ -481,6 +481,8 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define FALLBACK_OPENER "xdg-open"
 #endif
 
+#define TMP_FILENAME ".clifmXXXXXX"
+
 #define itoa xitoa /* itoa does not exist in some OS's */
 
 #ifndef _NO_GETTEXT

@@ -567,20 +567,11 @@ check_file_size(char *file, int max)
 	/* Set the file pointer to the beginning of the log file */
 	fseek(fp, 0, SEEK_SET);
 
-	/* Create a temp file to store only newest logs */
-	char *rand_ext = gen_rand_str(6);
-	if (!rand_ext) {
-		close_fstream(fp, fd);
-		return;
-	}
-
 	char *tmp = (char *)xnmalloc(strlen(config_dir) + 12, sizeof(char));
-	sprintf(tmp, "%s/log.%s", config_dir, rand_ext);
-	free(rand_ext);
+	sprintf(tmp, "%s/log.XXXXXX", config_dir);
 
-	int fdd;
-	FILE *fpp = open_fstream_w(tmp, &fdd);
-	if (!fpp) {
+	int fdd = mkstemp(tmp);
+	if (fdd == -1) {
 		fprintf(stderr, "log: %s: %s", tmp, strerror(errno));
 		close_fstream(fp, fd);
 		free(tmp);
@@ -594,13 +585,13 @@ check_file_size(char *file, int max)
 	while (getline(&line, &line_size, fp) > 0) {
 		/* Delete old entries = copy only new ones */
 		if (i++ >= n - (max - 1))
-			fprintf(fpp, "%s", line);
+			dprintf(fdd, "%s", line);
 	}
 
 	free(line);
 	unlinkat(fd, file, 0);
 	renameat(fdd, tmp, fd, file);
-	close_fstream(fpp, fdd);
+	close(fdd);
 	close_fstream(fp, fd);
 	free(tmp);
 

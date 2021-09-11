@@ -310,15 +310,15 @@ check_iso(char *file)
 
 	free(t);
 #else
-	char iso_tmp_file[PATH_MAX] = "";
+	char iso_tmp_file[PATH_MAX];
 	char *rand_ext = gen_rand_str(6);
 	if (!rand_ext)
 		return (-1);
 
 	if (xargs.stealth_mode == 1)
-		sprintf(iso_tmp_file, "/tmp/clifm-archiver.%s", rand_ext);
+		sprintf(iso_tmp_file, "/tmp/.clifm%s", rand_ext);
 	else
-		sprintf(iso_tmp_file, "%s/archiver.%s", tmp_dir, rand_ext);
+		sprintf(iso_tmp_file, "%s/.clifm%s", tmp_dir, rand_ext);
 	free(rand_ext);
 
 	int fd;
@@ -440,9 +440,9 @@ is_compressed(char *file, int test_iso)
 
 	char archiver_tmp_file[PATH_MAX];
 	if (xargs.stealth_mode == 1)
-		sprintf(archiver_tmp_file, "/tmp/clifm-archiver.%s", rand_ext);
+		sprintf(archiver_tmp_file, "/tmp/.clifm%s", rand_ext);
 	else
-		sprintf(archiver_tmp_file, "%s/archiver.%s", tmp_dir, rand_ext);
+		sprintf(archiver_tmp_file, "%s/.clifm%s", tmp_dir, rand_ext);
 	free(rand_ext);
 
 	int fd;
@@ -452,9 +452,6 @@ is_compressed(char *file, int test_iso)
 		    archiver_tmp_file, strerror(errno));
 		return (-1);
 	}
-
-/*	if (access(archiver_tmp_file, F_OK) == 0)
-		unlinkat(fd, archiver_tmp_file, 0); */
 
 	FILE *fpp = fopen("/dev/null", "w");
 	if (!fpp) {

@@ -839,21 +839,15 @@ bulk_rename(char **args)
 
 	int exit_status = EXIT_SUCCESS;
 
-	char *rand_ext = gen_rand_str(6);
-	if (!rand_ext)
-		return EXIT_FAILURE;
-
 	char bulk_file[PATH_MAX];
 	if (xargs.stealth_mode == 1)
-		snprintf(bulk_file, PATH_MAX - 1, "/tmp/.clifm.bulkrename.%s", rand_ext);
+		snprintf(bulk_file, PATH_MAX - 1, "/tmp/%s", TMP_FILENAME);
 	else
-		snprintf(bulk_file, PATH_MAX - 1, "%s/.bulkrename.%s", tmp_dir, rand_ext);
-	free(rand_ext);
+		snprintf(bulk_file, PATH_MAX - 1, "%s/%s", tmp_dir, TMP_FILENAME);
 
-	int fd;
-	FILE *fp = open_fstream_w(bulk_file, &fd);
-	if (!fp) {
-		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", bulk_file, strerror(errno));
+	int fd = mkstemp(bulk_file);
+	if (fd == -1) {
+		_err('e', PRINT_PROMPT, "bulk: %s: %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
 	}
 
@@ -873,13 +867,13 @@ bulk_rename(char **args)
 			free(deq_file);
 		}
 
-		fprintf(fp, "%s\n", args[i]);
+		dprintf(fd, "%s\n", args[i]);
 	}
 
 	arg_total = i;
-	close_fstream(fp, fd);
+	close(fd);
 
-	fp = open_fstream_r(bulk_file, &fd);
+	FILE *fp = open_fstream_r(bulk_file, &fd);
 	if (!fp) {
 		_err('e', PRINT_PROMPT, "bulk: '%s': %s\n", bulk_file, strerror(errno));
 		return EXIT_FAILURE;
@@ -1049,36 +1043,31 @@ bulk_rename(char **args)
  * success (it must be freed) or NULL in case of error */
 char *export(char **filenames, int open)
 {
-	char *rand_ext = gen_rand_str(6);
-	if (!rand_ext)
-		return (char *)NULL;
-
 	char *tmp_file = (char *)xnmalloc(strlen(tmp_dir) + 14, sizeof(char));
-	sprintf(tmp_file, "%s/.clifm%s", tmp_dir, rand_ext);
-	free(rand_ext);
+	sprintf(tmp_file, "%s/%s", tmp_dir, TMP_FILENAME);
 
-	int fd;
-	FILE *fp = open_fstream_w(tmp_file, &fd);
-	if (!fp) {
+	int fd = mkstemp(tmp_file);
+	if (fd == -1) {
+		fprintf(stderr, "%s: %s: %s\n", PROGRAM_NAME, tmp_file, strerror(errno));
 		free(tmp_file);
 		return (char *)NULL;
 	}
-
+	
 	size_t i;
 
 	/* If no argument, export files in CWD */
 	if (!filenames[1]) {
 		for (i = 0; file_info[i].name; i++)
-			fprintf(fp, "%s\n", file_info[i].name);
+			dprintf(fd, "%s\n", file_info[i].name);
 	} else {
 		for (i = 1; filenames[i]; i++) {
 			if (*filenames[i] == '.' && (!filenames[i][1] || (filenames[i][1] == '.' && !filenames[i][2])))
 				continue;
-			fprintf(fp, "%s\n", filenames[i]);
+			dprintf(fd, "%s\n", filenames[i]);
 		}
 	}
 
-	close_fstream(fp, fd);
+	close(fd);
 
 	if (!open)
 		return tmp_file;

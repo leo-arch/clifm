@@ -1379,10 +1379,10 @@ handle_stdin()
 
 	if (tmp_dir) {
 		stdin_tmp_dir = (char *)xnmalloc(strlen(tmp_dir) + 14, sizeof(char));
-		sprintf(stdin_tmp_dir, "%s/clifm.%s", tmp_dir, rand_ext);
+		sprintf(stdin_tmp_dir, "%s/.clifm%s", tmp_dir, rand_ext);
 	} else {
 		stdin_tmp_dir = (char *)xnmalloc(18, sizeof(char));
-		sprintf(stdin_tmp_dir, "/tmp/clifm.%s", rand_ext);
+		sprintf(stdin_tmp_dir, "/tmp/.clifm%s", rand_ext);
 	}
 
 	free(rand_ext);
