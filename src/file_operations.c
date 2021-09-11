@@ -290,10 +290,33 @@ create_file(char **cmd)
 			}
 		}
 
+		/* If the file already exists, create it as file.new */
+		struct stat a;
+		if (lstat(cmd[i], &a) == 0) {
+			int end_slash = 0;
+			char old_name[PATH_MAX];
+			strcpy(old_name, cmd[i]); 
+
+			size_t len = strlen(cmd[i]);
+			if (cmd[i][len - 1] == '/') {
+				cmd[i][len - 1] = '\0';
+				end_slash = 1;
+			}
+
+			cmd[i] = (char *)xrealloc(cmd[i], (len + 5) * sizeof(char));
+			if (end_slash)
+				strcat(cmd[i], ".new/");
+			else
+				strcat(cmd[i], ".new");
+
+			_err('n', PRINT_PROMPT, _("%s: %s: File already exists. "
+			"File created as %s\n"), PROGRAM_NAME, old_name, cmd[i]);
+		}
+
 #ifdef __HAIKU__
-		/* If at least one filename lacks a slash (or it is the last char,
-		 * in which case we have a directory in CWD), we are creating a
-		 * file in CWD, and thereby we need to update the screen */
+		/* If at least one filename lacks a slash (or it is the only and
+		 * last char, in which case we have a directory in CWD), we are
+		 * creating a file in CWD, and thereby we need to update the screen */
 		char *ret = strrchr(cmd[i], '/');
 		if (!ret || !*(ret + 1))
 			file_in_cwd = 1;
