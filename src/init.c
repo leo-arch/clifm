@@ -1048,8 +1048,7 @@ external_arguments(int argc, char **argv)
 							PROGRAM_NAME);
 					exit(EXIT_SUCCESS);
 				}
-				tmp_dir = (char *)xnmalloc(P_tmpdir_len + 1, sizeof(char));
-				strcpy(tmp_dir, P_tmpdir);
+				tmp_dir = savestring(P_tmpdir, P_tmpdir_len);
 				mime_file = (char *)xnmalloc(PATH_MAX, sizeof(char));
 				snprintf(mime_file, PATH_MAX,
 				    "%s/.config/clifm/profiles/%s/mimelist.cfm",
