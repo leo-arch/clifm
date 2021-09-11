@@ -1042,12 +1042,18 @@ external_arguments(int argc, char **argv)
 			}
 
 			if ((attr.st_mode & S_IFMT) != S_IFDIR) {
-				tmp_dir = (char *)xnmalloc(5, sizeof(char));
-				strcpy(tmp_dir, "/tmp");
+				char *d = getenv("HOME");
+				if (!d) {
+					fprintf(stderr, "%s: Could not retrieve the home directory\n",
+							PROGRAM_NAME);
+					exit(EXIT_SUCCESS);
+				}
+				tmp_dir = (char *)xnmalloc(P_tmpdir_len + 1, sizeof(char));
+				strcpy(tmp_dir, P_tmpdir);
 				mime_file = (char *)xnmalloc(PATH_MAX, sizeof(char));
 				snprintf(mime_file, PATH_MAX,
 				    "%s/.config/clifm/profiles/%s/mimelist.cfm",
-				    getenv("HOME"), alt_profile ? alt_profile : "default");
+				    d, alt_profile ? alt_profile : "default");
 				int ret = open_file(optarg);
 				exit(ret);
 			}
@@ -1247,8 +1253,8 @@ external_arguments(int argc, char **argv)
 		}
 
 		if ((attr.st_mode & S_IFMT) != S_IFDIR) {
-			tmp_dir = (char *)xnmalloc(5, sizeof(char));
-			strcpy(tmp_dir, "/tmp");
+			tmp_dir = (char *)xnmalloc(P_tmpdir_len + 1, sizeof(char));
+			strcpy(tmp_dir, P_tmpdir);
 			mime_file = (char *)xnmalloc(PATH_MAX, sizeof(char));
 			snprintf(mime_file, PATH_MAX,
 			    "%s/.config/clifm/profiles/%s/mimelist.cfm",

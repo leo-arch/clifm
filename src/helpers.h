@@ -869,6 +869,7 @@ extern size_t
     kbinds_n,
     longest,
     msgs_n,
+	P_tmpdir_len,
     path_n,
     path_progsn,
     prompt_cmds_n,

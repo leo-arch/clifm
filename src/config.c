@@ -450,7 +450,7 @@ create_tmp_files(void)
 	 * to create files in here, but only the file's owner can remove
 	 * or modify them */
 	size_t user_len = strlen(user.name);
-	tmp_dir = (char *)xnmalloc(pnl_len + user_len + 7, sizeof(char));
+	tmp_dir = (char *)xnmalloc(pnl_len + user_len + P_tmpdir_len + 3, sizeof(char));
 	snprintf(tmp_dir, pnl_len + 6, "%s/%s", P_tmpdir, PNL);
 
 	struct stat attr;
@@ -467,7 +467,7 @@ create_tmp_files(void)
 	 * restrictive permissions (700), since only the corresponding user
 	 * must be able to read and/or modify this list */
 
-	snprintf(tmp_dir, pnl_len + user_len + 7, "/tmp/%s/%s", PNL, user.name);
+	snprintf(tmp_dir, pnl_len + user_len + P_tmpdir_len + 3, "%s/%s/%s", P_tmpdir, PNL, user.name);
 	if (stat(tmp_dir, &attr) == -1) {
 		char *md_cmd2[] = {"mkdir", "-pm700", tmp_dir, NULL};
 		if (launch_execve(md_cmd2, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {

@@ -201,6 +201,7 @@ size_t
     kbinds_n = 0,
     longest = 0,
     msgs_n = 0,
+	P_tmpdir_len = 0,
     path_n = 0,
     path_progsn = 0,
     prompt_cmds_n = 0,
@@ -629,7 +630,7 @@ main(int argc, char *argv[])
 	 * and get_cmd_path() */
 	path_n = get_path_env();
 	cdpath_n = get_cdpath();
-
+	P_tmpdir_len = strlen(P_tmpdir);
 	init_workspaces();
 
 	/* Set all external arguments flags to uninitialized state */

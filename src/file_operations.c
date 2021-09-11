@@ -841,7 +841,7 @@ bulk_rename(char **args)
 
 	char bulk_file[PATH_MAX];
 	if (xargs.stealth_mode == 1)
-		snprintf(bulk_file, PATH_MAX - 1, "/tmp/%s", TMP_FILENAME);
+		snprintf(bulk_file, PATH_MAX - 1, "%s/%s", P_tmpdir, TMP_FILENAME);
 	else
 		snprintf(bulk_file, PATH_MAX - 1, "%s/%s", tmp_dir, TMP_FILENAME);
 

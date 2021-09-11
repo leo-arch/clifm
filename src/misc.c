@@ -1381,8 +1381,8 @@ handle_stdin()
 		stdin_tmp_dir = (char *)xnmalloc(strlen(tmp_dir) + 14, sizeof(char));
 		sprintf(stdin_tmp_dir, "%s/.clifm%s", tmp_dir, rand_ext);
 	} else {
-		stdin_tmp_dir = (char *)xnmalloc(18, sizeof(char));
-		sprintf(stdin_tmp_dir, "/tmp/.clifm%s", rand_ext);
+		stdin_tmp_dir = (char *)xnmalloc(P_tmpdir_len + 14, sizeof(char));
+		sprintf(stdin_tmp_dir, "%s/.clifm%s", P_tmpdir, rand_ext);
 	}
 
 	free(rand_ext);
