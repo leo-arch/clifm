@@ -449,17 +449,15 @@ create_tmp_files(void)
 	 * writable with the sticky bit set), so that every user is able
 	 * to create files in here, but only the file's owner can remove
 	 * or modify them */
-
 	size_t user_len = strlen(user.name);
 	tmp_dir = (char *)xnmalloc(pnl_len + user_len + 7, sizeof(char));
-	snprintf(tmp_dir, pnl_len + 6, "/tmp/%s", PNL);
+	snprintf(tmp_dir, pnl_len + 6, "%s/%s", P_tmpdir, PNL);
 
-	struct stat file_attrib;
-	if (stat(tmp_dir, &file_attrib) == -1) {
-		char *md_cmd[] = {"mkdir", "-pm1777", tmp_dir, NULL};
-		if (launch_execve(md_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-			_err('e', PRINT_PROMPT, _("%s: '%s': Error creating temporary "
-					"directory\n"), PROGRAM_NAME, tmp_dir);
+	struct stat attr;
+	if (stat(tmp_dir, &attr) == -1) {
+		if (xmkdir(tmp_dir, S_IRWXU | S_IRWXG | S_IRWXO | S_ISVTX) == EXIT_FAILURE) {
+			_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, tmp_dir,
+				strerror(errno));
 		}
 	}
 
@@ -470,10 +468,10 @@ create_tmp_files(void)
 	 * must be able to read and/or modify this list */
 
 	snprintf(tmp_dir, pnl_len + user_len + 7, "/tmp/%s/%s", PNL, user.name);
-
-	if (stat(tmp_dir, &file_attrib) == -1) {
+	if (stat(tmp_dir, &attr) == -1) {
 		char *md_cmd2[] = {"mkdir", "-pm700", tmp_dir, NULL};
 		if (launch_execve(md_cmd2, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+/*		if (xmkdir(tmp_dir, S_IRWXU) == EXIT_FAILURE) { */
 			selfile_ok = 0;
 			_err('e', PRINT_PROMPT, _("%s: '%s': Error creating temporary "
 					"directory\n"), PROGRAM_NAME, tmp_dir);
@@ -532,14 +530,11 @@ define_config_file_names(void)
 		/* If $XDG_CONFIG_HOME is set, use it for the config file.
 		 * Else, fall back to $HOME/.config */
 		char *xdg_config_home = getenv("XDG_CONFIG_HOME");
-
 		if (xdg_config_home) {
 			size_t xdg_config_home_len = strlen(xdg_config_home);
-
 			config_dir_gral = (char *)xnmalloc(xdg_config_home_len + pnl_len
 												+ 2, sizeof(char));
 			sprintf(config_dir_gral, "%s/%s", xdg_config_home, PNL);
-
 			xdg_config_home = (char *)NULL;
 		} else {
 			config_dir_gral = (char *)xnmalloc(user.home_len + pnl_len + 11,
@@ -1145,7 +1140,7 @@ create_config_files(void)
 				 * #################### */
 
 	/* If the config directory doesn't exist, create it */
-	/* Use the GNU mkdir to let it handle parent directories */
+	/* Use the mkdir(1) to let it handle parent directories */
 	if (stat(config_dir, &attr) == -1) {
 		char *tmp_cmd[] = {"mkdir", "-p", config_dir, NULL};
 		if (launch_execve(tmp_cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
@@ -1206,8 +1201,9 @@ create_config_files(void)
 				 * ##################### */
 
 	if (stat(colors_dir, &attr) == -1) {
-		char *cmd[] = {"mkdir", colors_dir, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+/*		char *cmd[] = {"mkdir", colors_dir, NULL};
+		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) { */
+		if (xmkdir(colors_dir, S_IRWXU) == EXIT_FAILURE) {
 			_err('w', PRINT_PROMPT, _("%s: mkdir: Error creating colors "
 				"directory. Using the default color scheme\n"),
 			    PROGRAM_NAME);
@@ -1222,8 +1218,9 @@ create_config_files(void)
 				 * #####################*/
 
 	if (stat(plugins_dir, &attr) == -1) {
-		char *cmd[] = {"mkdir", plugins_dir, NULL};
-		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
+/*		char *cmd[] = {"mkdir", plugins_dir, NULL};
+		if (launch_execve(cmd, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) { */
+		if (xmkdir(plugins_dir, S_IRWXU) == EXIT_FAILURE) {
 			_err('e', PRINT_PROMPT, _("%s: mkdir: Error creating plugins "
 				"directory. The actions function is disabled\n"),
 			    PROGRAM_NAME);

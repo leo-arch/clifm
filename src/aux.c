@@ -39,6 +39,18 @@
 #include "exec.h"
 #include "misc.h"
 
+/* Create directory DIR with permissions set to MODE */
+int
+xmkdir(char *dir, mode_t mode)
+{
+	mode_t old_mask = umask(0);
+	int ret = mkdirat(AT_FDCWD, dir, mode);
+	umask(old_mask);
+	if (ret == -1)
+		return EXIT_FAILURE;
+	return EXIT_SUCCESS;
+}
+
 /* Open a file for read only. Return a file stream associated to a file
  * descriptor (FD) for the file named NAME */
 FILE *
@@ -408,16 +420,16 @@ char
 xgetchar(void)
 {
 	struct termios oldt, newt;
-	char ch;
+	char c;
 
 	tcgetattr(STDIN_FILENO, &oldt);
 	newt = oldt;
 	newt.c_lflag &= (tcflag_t)~(ICANON | ECHO);
 	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-	ch = (char)getchar();
+	c = (char)getchar();
 	tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 
-	return ch;
+	return c;
 }
 
 /* The following four functions (from_hex, to_hex, url_encode, and

@@ -48,3 +48,5 @@ char *xitoa(int n);
 FILE *open_fstream_r(char *name, int *fd);
 FILE *open_fstream_w(char *name, int *fd);
 void close_fstream(FILE *fp, int fd);
+int xmkdir(char *dir, mode_t mode);
+
