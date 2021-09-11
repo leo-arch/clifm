@@ -284,31 +284,30 @@ dir_size(char *dir)
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
 	close(stdout_bk);
 
-	if (access(file, F_OK) == -1)
-		return (-1);
-
-	off_t retval = -1;
 	FILE *fp = open_fstream_r(file, &fd);
-	if (fp) {
-		/* I only need here the first field of the line, which is a
-		 * file size and could only take a few bytes, so that 32
-		 * bytes is more than enough */
-		char line[32] = "";
-		if (fgets(line, (int)sizeof(line), fp) == NULL) {
-			close_fstream(fp, fd);
-			unlink(file);
-			return (-1);
-		}
-
-		char *file_size = strbfr(line, '\t');
-		if (file_size) {
-			retval = (off_t)atoll(file_size);
-			free(file_size);
-		}
-
-		close_fstream(fp, fd);
+	if (!fp) {
+		unlink(file);
+		return (-1);
 	}
 
+	off_t retval = -1;
+	/* I only need here the first field of the line, which is a
+	 * file size and could only take a few bytes, so that 32
+	 * bytes is more than enough */
+	char line[32] = "";
+	if (fgets(line, (int)sizeof(line), fp) == NULL) {
+		close_fstream(fp, fd);
+		unlink(file);
+		return (-1);
+	}
+
+	char *p = strchr(line, '\t');
+	if (p && p != line) {
+		*p = '\0';
+		retval = (off_t)atoll(line);
+	}
+
+	close_fstream(fp, fd);
 	unlink(file);
 	return retval;
 }
