@@ -847,6 +847,25 @@ load_remotes(void)
 	return EXIT_SUCCESS;
 }
 
+static void
+open_reg_exit(char *filename)
+{
+	char *homedir = getenv("HOME");
+	if (!homedir) {
+		fprintf(stderr, "%s: Could not retrieve the home directory\n",
+				PROGRAM_NAME);
+		exit(EXIT_FAILURE);
+	}
+	tmp_dir = savestring(P_tmpdir, P_tmpdir_len);
+	size_t mime_file_len = strlen(homedir) + (alt_profile
+					? strlen(alt_profile) : 7) + 38;
+	mime_file = (char *)xnmalloc(mime_file_len, sizeof(char));
+	sprintf(mime_file, "%s/.config/clifm/profiles/%s/mimelist.cfm",
+			homedir, alt_profile ? alt_profile : "default");
+	int ret = open_file(filename);
+	exit(ret);
+}
+
 /* Evaluate external arguments, if any, and change initial variables to
  * its corresponding value */
 void
@@ -1042,23 +1061,11 @@ external_arguments(int argc, char **argv)
 			}
 
 			if ((attr.st_mode & S_IFMT) != S_IFDIR) {
-				char *d = getenv("HOME");
-				if (!d) {
-					fprintf(stderr, "%s: Could not retrieve the home directory\n",
-							PROGRAM_NAME);
-					exit(EXIT_SUCCESS);
-				}
-				tmp_dir = savestring(P_tmpdir, P_tmpdir_len);
-				mime_file = (char *)xnmalloc(PATH_MAX, sizeof(char));
-				snprintf(mime_file, PATH_MAX,
-				    "%s/.config/clifm/profiles/%s/mimelist.cfm",
-				    d, alt_profile ? alt_profile : "default");
-				int ret = open_file(optarg);
-				exit(ret);
+				open_reg_exit(optarg);
+			} else {
+				printf(_("%s: %s: Is a directory\n"), PROGRAM_NAME, optarg);
+				exit(EXIT_FAILURE);
 			}
-
-			printf(_("%s: %s: Is a directory\n"), PROGRAM_NAME, optarg);
-			exit(EXIT_FAILURE);
 
 			/*			flags |= START_PATH;
 			path_value = optarg;
@@ -1251,16 +1258,8 @@ external_arguments(int argc, char **argv)
 			exit(EXIT_FAILURE);
 		}
 
-		if ((attr.st_mode & S_IFMT) != S_IFDIR) {
-			tmp_dir = (char *)xnmalloc(P_tmpdir_len + 1, sizeof(char));
-			strcpy(tmp_dir, P_tmpdir);
-			mime_file = (char *)xnmalloc(PATH_MAX, sizeof(char));
-			snprintf(mime_file, PATH_MAX,
-			    "%s/.config/clifm/profiles/%s/mimelist.cfm",
-			    getenv("HOME"), alt_profile ? alt_profile : "default");
-			int ret = open_file(argv[i]);
-			exit(ret);
-		}
+		if ((attr.st_mode & S_IFMT) != S_IFDIR)
+			open_reg_exit(argv[i]);
 
 		flags |= START_PATH;
 		path_value = argv[i];
@@ -1531,7 +1530,7 @@ init_shell(void)
 int
 get_sel_files(void)
 {
-	if (!selfile_ok || !config_ok)
+	if (!selfile_ok || !config_ok || !sel_file)
 		return EXIT_FAILURE;
 
 	/* First, clear the sel array, in case it was already used */

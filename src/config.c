@@ -437,6 +437,9 @@ create_actions_file(char *file)
 void
 create_tmp_files(void)
 {
+	if (xargs.stealth_mode == 1)
+		return;
+
 	if (!user.name)
 		return;
 
@@ -450,31 +453,31 @@ create_tmp_files(void)
 	 * to create files in here, but only the file's owner can remove
 	 * or modify them */
 	size_t user_len = strlen(user.name);
-	tmp_dir = (char *)xnmalloc(pnl_len + user_len + P_tmpdir_len + 3, sizeof(char));
-	snprintf(tmp_dir, pnl_len + 6, "%s/%s", P_tmpdir, PNL);
+	tmp_dir = (char *)xnmalloc(P_tmpdir_len + pnl_len + user_len + 3, sizeof(char));
+	sprintf(tmp_dir, "%s/%s", P_tmpdir, PNL);
+	/* P_tmpdir is defined in stdio.h and it's value is usually /tmp */
 
+	int tmp_root_ok = 1;
 	struct stat attr;
-	if (stat(tmp_dir, &attr) == -1) {
-		if (xmkdir(tmp_dir, S_IRWXU | S_IRWXG | S_IRWXO | S_ISVTX) == EXIT_FAILURE) {
-			_err('e', PRINT_PROMPT, "%s: %s: %s\n", PROGRAM_NAME, tmp_dir,
-				strerror(errno));
-		}
-	}
+	/* Create /tmp */
+	if (stat(P_tmpdir, &attr) == -1)
+		if (xmkdir(P_tmpdir, S_IRWXU | S_IRWXG | S_IRWXO | S_ISVTX) == EXIT_FAILURE)
+			tmp_root_ok = 0;
+	/* Create /tmp/clifm */
+	if (stat(tmp_dir, &attr) == -1)
+		xmkdir(tmp_dir, S_IRWXU | S_IRWXG | S_IRWXO | S_ISVTX);
 
 	/* Once the parent directory exists, create the user's directory to
 	 * store the list of selected files:
 	 * TMP_DIR/clifm/username/.selbox_PROFILE. I use here very
 	 * restrictive permissions (700), since only the corresponding user
 	 * must be able to read and/or modify this list */
-
-	snprintf(tmp_dir, pnl_len + user_len + P_tmpdir_len + 3, "%s/%s/%s", P_tmpdir, PNL, user.name);
+	sprintf(tmp_dir, "%s/%s/%s", P_tmpdir, PNL, user.name);
 	if (stat(tmp_dir, &attr) == -1) {
-		char *md_cmd2[] = {"mkdir", "-pm700", tmp_dir, NULL};
-		if (launch_execve(md_cmd2, FOREGROUND, E_NOFLAG) != EXIT_SUCCESS) {
-/*		if (xmkdir(tmp_dir, S_IRWXU) == EXIT_FAILURE) { */
+		if (xmkdir(tmp_dir, S_IRWXU) == EXIT_FAILURE) {
 			selfile_ok = 0;
-			_err('e', PRINT_PROMPT, _("%s: '%s': Error creating temporary "
-					"directory\n"), PROGRAM_NAME, tmp_dir);
+			_err('e', PRINT_PROMPT, _("%s: %s: %s\n"), PROGRAM_NAME,
+				tmp_dir, strerror(errno));
 		}
 	}
 
@@ -482,38 +485,48 @@ create_tmp_files(void)
 	else if (access(tmp_dir, W_OK) == -1) {
 		if (!sel_file) {
 			selfile_ok = 0;
-			_err('w', PRINT_PROMPT, "%s: '%s': Directory not writable. Selected "
+			_err('w', PRINT_PROMPT, "%s: %s: Directory not writable. Selected "
 				"files will be lost after program exit\n",
 			    PROGRAM_NAME, tmp_dir);
 		}
 	}
 
-	/* If the config directory isn't available, define an alternative
-	 * selection file in /tmp */
-	if (!sel_file && xargs.stealth_mode != 1) {
-		size_t tmp_dir_len = strlen(tmp_dir);
+	/* sel_file should has been set before by set_sel_file(). If not set,
+	 * we do not have access to the config dir */
+	if (sel_file)
+		return;
 
-		if (!share_selbox) {
-			size_t prof_len = 0;
-
-			if (alt_profile)
-				prof_len = strlen(alt_profile);
-			else
-				prof_len = 7; /* Lenght of "default" */
-
-			sel_file = (char *)xnmalloc(tmp_dir_len + prof_len + 9,
-			    sizeof(char));
-			sprintf(sel_file, "%s/selbox_%s", tmp_dir,
-			    (alt_profile) ? alt_profile : "default");
-		} else {
-			sel_file = (char *)xnmalloc(tmp_dir_len + 8, sizeof(char));
-			sprintf(sel_file, "%s/selbox", tmp_dir);
-		}
-
-		_err('w', PRINT_PROMPT, _("%s: '%s': Using a temporary directory for "
-					  "the Selection Box. Selected files won't be persistent accros "
-					  "reboots"), PROGRAM_NAME, tmp_dir);
+	/*"We will write a temporary selfile in /tmp. Check if this latter is
+	 * available */
+	if (!tmp_root_ok) {
+		_err('w', PRINT_PROMPT, "%s: Could not create the selections file.\n"
+			"Selected files will be lost after program exit\n",
+		    PROGRAM_NAME, tmp_dir);
+		return;
 	}
+
+	/* If the config directory isn't available, define an alternative
+	 * selection file in /tmp (if available) */
+	if (!share_selbox) {
+		size_t prof_len = 0;
+
+		if (alt_profile)
+			prof_len = strlen(alt_profile);
+		else
+			prof_len = 7; /* Lenght of "default" */
+
+		sel_file = (char *)xnmalloc(P_tmpdir_len + prof_len + 9,
+		    sizeof(char));
+		sprintf(sel_file, "%s/selbox_%s", P_tmpdir,
+		    (alt_profile) ? alt_profile : "default");
+	} else {
+		sel_file = (char *)xnmalloc(P_tmpdir_len + 8, sizeof(char));
+		sprintf(sel_file, "%s/selbox", P_tmpdir);
+	}
+
+	_err('w', PRINT_PROMPT, _("%s: '%s': Using a temporary directory for "
+		"the Selection Box. Selected files won't be persistent across "
+		"reboots"), PROGRAM_NAME, tmp_dir);
 }
 
 static void

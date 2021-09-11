@@ -264,8 +264,8 @@ get_size_unit(off_t size)
 off_t
 dir_size(char *dir)
 {
-	if (!dir)
-		return -1;
+	if (!dir || !*dir)
+		return (-1);
 
 	char file[PATH_MAX];
 	sprintf(file, "%s/duXXXXXX", P_tmpdir);
@@ -284,33 +284,32 @@ dir_size(char *dir)
 	dup2(stdout_bk, STDOUT_FILENO); /* Restore original stdout */
 	close(stdout_bk);
 
+	if (access(file, F_OK) == -1)
+		return (-1);
+
 	off_t retval = -1;
-
-	if (access(file, F_OK) == 0) {
-		FILE *fp = open_fstream_r(file, &fd);
-		if (fp) {
-			/* I only need here the first field of the line, which is a
-			 * file size and could only take a few bytes, so that 32
-			 * bytes is more than enough */
-			char line[32] = "";
-			if (fgets(line, (int)sizeof(line), fp) == NULL) {
-				close_fstream(fp, fd);
-				unlink(file);
-				return (-1);
-			}
-
-			char *file_size = strbfr(line, '\t');
-			if (file_size) {
-				retval = (off_t)atoll(file_size);
-				free(file_size);
-			}
-
+	FILE *fp = open_fstream_r(file, &fd);
+	if (fp) {
+		/* I only need here the first field of the line, which is a
+		 * file size and could only take a few bytes, so that 32
+		 * bytes is more than enough */
+		char line[32] = "";
+		if (fgets(line, (int)sizeof(line), fp) == NULL) {
 			close_fstream(fp, fd);
+			unlink(file);
+			return (-1);
 		}
 
-		unlink(file);
+		char *file_size = strbfr(line, '\t');
+		if (file_size) {
+			retval = (off_t)atoll(file_size);
+			free(file_size);
+		}
+
+		close_fstream(fp, fd);
 	}
 
+	unlink(file);
 	return retval;
 }
 

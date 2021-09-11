@@ -312,11 +312,11 @@ check_iso(char *file)
 
 	free(t);
 #else
-	char iso_tmp_file[PATH_MAX];
 	char *rand_ext = gen_rand_str(6);
 	if (!rand_ext)
 		return (-1);
 
+	char iso_tmp_file[PATH_MAX];
 	if (xargs.stealth_mode == 1)
 		sprintf(iso_tmp_file, "%s/.clifm%s", P_tmpdir, rand_ext);
 	else

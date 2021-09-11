@@ -60,7 +60,7 @@
 int
 save_sel(void)
 {
-	if (!selfile_ok || !config_ok)
+	if (!selfile_ok || !config_ok || !sel_file)
 		return EXIT_FAILURE;
 
 	if (sel_n == 0) {
@@ -73,9 +73,9 @@ save_sel(void)
 		}
 	}
 
-	FILE *sel_fp = fopen(sel_file, "w");
-
-	if (!sel_fp) {
+	int fd;
+	FILE *fp = open_fstream_w(sel_file, &fd);
+	if (!fp) {
 		_err(0, NOPRINT_PROMPT, "%s: sel: %s: %s\n", PROGRAM_NAME,
 		    sel_file, strerror(errno));
 		return EXIT_FAILURE;
@@ -83,11 +83,11 @@ save_sel(void)
 
 	size_t i;
 	for (i = 0; i < sel_n; i++) {
-		fputs(sel_elements[i], sel_fp);
-		fputc('\n', sel_fp);
+		fputs(sel_elements[i], fp);
+		fputc('\n', fp);
 	}
 
-	fclose(sel_fp);
+	close_fstream(fp, fd);
 	return EXIT_SUCCESS;
 }
 
@@ -609,7 +609,7 @@ sel_function(char **args)
 	}
 
 	if (new_sel > 0 && xargs.stealth_mode != 1) {
-		if (save_sel() != EXIT_SUCCESS) {
+		if (sel_file && save_sel() != EXIT_SUCCESS) {
 			_err('e', PRINT_PROMPT, _("%s: Error writing selected files "
 				"to the selections file\n"), PROGRAM_NAME);
 		}
