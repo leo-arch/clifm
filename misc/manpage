@@ -274,7 +274,7 @@ enable program logs
 expand bookmark names into the corresponding bookmark paths and enable TAB completion for bookmark names as well. If the bookmark is, .e.g. mybookmark=/my/path, "mybo" will be completed as "mybookmark", which will be interpreted then as "/my/path".
 .TP
 .B \-\-icons
-enable icons. Suitable fonts are provided by the \fBicons-in-terminal\fR project.
+enable icons. Depends on the \fBicons-in-terminal\fR project.
 .TP
 .B \-\-icons\-use\-file\-color
 instead of an specific color, icons take the color of the corresponding file name (specified either via file type or via file extension). Useful when building custom color schemes. This option implies \fB--icons\fR.
