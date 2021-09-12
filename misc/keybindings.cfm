@@ -51,11 +51,11 @@ parent-dir4:\e[1;2A
 # Alt-e
 home-dir:\M-e
 # Home key (rxvt)
-home-dir2:\e[7~
+#home-dir2:\e[7~
 # Home key (xterm)
-home-dir3:\e[H
+#home-dir3:\e[H
 # Home key (Emacs term)
-home-dir4:\e[1~
+#home-dir4:\e[1~
 
 # Alt-r
 root-dir:\M-r
