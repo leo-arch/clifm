@@ -44,6 +44,7 @@ args=(
 	'--case-sens-path-comp[do not ignore case when completing file names]'
 	'--cd-on-quit[write last visited path to $XDG_CONFIG_HOME/clifm/.last to be accessed later by a shell funtion]'
 	'--color-scheme=[set color scheme]:color:->colorschemes'
+	'--control-d-exits[exit by pressing Control-d]'
 	'--cwd-in-title[print current directory in the terminal window title]'
 	'--disk-usage[show disk usage (free/total) for the filesystem to which the current directory belongs]'
 	'--enable-logs[enable program logs]'

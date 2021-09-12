@@ -76,6 +76,7 @@ _clifm ()
         --case-sens-path-comp
         --cd-on-quit
         --color-scheme
+        --control-d-exits
         --cwd-in-title
         --disk-usage
         --enable-logs
