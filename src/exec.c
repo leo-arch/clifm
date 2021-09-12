@@ -1633,22 +1633,16 @@ exec_cmd(char **comm)
 	}
 
 	/* #### QUIT #### */
-	else if ((*comm[0] == 'q' && !comm[0][1]) || strcmp(comm[0], "quit") == 0
-	|| strcmp(comm[0], "exit") == 0) {
+	else if ((*comm[0] == 'q' && (!comm[0][1] || strcmp(comm[0], "quit") == 0))
+	|| (*comm[0] == 'e' && strcmp(comm[0], "exit") == 0)
+	|| (*comm[0] == 'Q' && !comm[0][1])) {
 		/* Free everything and exit */
+		if (*comm[0] == 'Q')
+			cd_on_quit = 1;
 		int i = (int)args_n + 1;
 		while (--i >= 0)
 			free(comm[i]);
 		free(comm);
-		exit(exit_code);
-	}
-
-	else if (*comm[0] == 'Q' && !comm[0][1]) {
-		int i = (int)args_n + 1;
-		while (--i >= 0)
-			free(comm[i]);
-		free(comm);
-		cd_on_quit = 1;
 		exit(exit_code);
 	}
 
@@ -1661,18 +1655,18 @@ exec_cmd(char **comm)
 		&& cd_function(comm[0], CD_NO_PRINT_ERROR) == EXIT_SUCCESS)
 			return (exit_code = EXIT_SUCCESS);
 
-		struct stat file_attrib;
-		if (stat(comm[0], &file_attrib) == 0) {
-			if ((file_attrib.st_mode & S_IFMT) == S_IFDIR) {
+		struct stat attr;
+		if (stat(comm[0], &attr) == 0) {
+			if ((attr.st_mode & S_IFMT) == S_IFDIR) {
 				if (autocd)
 					return (exit_code = cd_function(comm[0], CD_PRINT_ERROR));
 
 				fprintf(stderr, _("%s: %s: Is a directory\n"),
 						PROGRAM_NAME, comm[0]);
 				return (exit_code = EXIT_FAILURE);
-			} else if (auto_open && (file_attrib.st_mode & S_IFMT) == S_IFREG) {
+			} else if (auto_open && (attr.st_mode & S_IFMT) == S_IFREG) {
 				/* Make sure we have not an executable file */
-				if (!(file_attrib.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))) {
+				if (!(attr.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))) {
 					char *cmd[] = {"open", comm[0], (args_n >= 1) ? comm[1]
 						: NULL, (args_n >= 2) ? comm[2] : NULL, NULL};
 					args_n++;
@@ -1687,8 +1681,7 @@ exec_cmd(char **comm)
 	 * #                EXTERNAL/SHELL COMMANDS           #
 	 * ####################################################*/
 
-		exit_code = run_shell_cmd(comm);
-		if (exit_code == EXIT_FAILURE)
+		if ((exit_code = run_shell_cmd(comm)) == EXIT_FAILURE)
 			return EXIT_FAILURE;
 	}
 

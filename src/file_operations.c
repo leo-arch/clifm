@@ -293,24 +293,24 @@ create_file(char **cmd)
 		/* If the file already exists, create it as file.new */
 		struct stat a;
 		if (lstat(cmd[i], &a) == 0) {
-			int end_slash = 0;
+			int dir = 0;
 			char old_name[PATH_MAX];
 			strcpy(old_name, cmd[i]); 
 
 			size_t len = strlen(cmd[i]);
 			if (cmd[i][len - 1] == '/') {
 				cmd[i][len - 1] = '\0';
-				end_slash = 1;
+				dir = 1;
 			}
 
 			cmd[i] = (char *)xrealloc(cmd[i], (len + 5) * sizeof(char));
-			if (end_slash)
+			if (dir)
 				strcat(cmd[i], ".new/");
 			else
 				strcat(cmd[i], ".new");
 
-			_err('n', PRINT_PROMPT, _("%s: %s: File already exists. "
-			"File created as %s\n"), PROGRAM_NAME, old_name, cmd[i]);
+			_err(0, PRINT_PROMPT, _("%s: %s: File already exists. "
+			"Trying with '%s' instead\n"), PROGRAM_NAME, old_name, cmd[i]);
 		}
 
 #ifdef __HAIKU__
