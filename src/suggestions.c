@@ -1105,10 +1105,9 @@ rl_suggestions(const unsigned char c)
 		s = -1;
 	if (rl_point != rl_end && c != _ESC) {
 		if (rl_point < s) {
-			if (suggestion.printed) {
+			if (suggestion.printed)
 				remove_suggestion_not_end();
-				goto FAIL;
-			}
+			goto FAIL;
 		}
 		char text[2];
 		text[0] = (char)c;
@@ -1479,7 +1478,7 @@ SUCCESS:
 	}
 	free(last_word);
 	if (inserted_c)
-		return -1;
+		return (-1);
 	return EXIT_SUCCESS;
 
 FAIL:
@@ -1488,7 +1487,7 @@ FAIL:
 	free(suggestion_buf);
 	suggestion_buf = (char *)NULL;
 	if (inserted_c)
-		return -1;
+		return (-1);
 	return EXIT_FAILURE;
 }
 
