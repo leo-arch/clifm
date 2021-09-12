@@ -71,7 +71,7 @@ Search for files, copy, rename, and trash some of them, but, at the same time, u
 Those familiar with the command-line will find in a file manager based on it a desirable _addition_ to its functionality. \
 The command-line is still there, never hidden.
 
-As Kernighan and Pike stated once, "The power of a system comes more from the relationships among programs than from the programs themselves."<sup>2</sup> In other words, the power of Unix comes not from the TUI, even less from the GUI, but from the shell, from the command line. Therefore, a file manager entirely based on the command line is no doubt a desirable way of managing files in a Unix environment.
+As Kernighan and Pike stated once, "The power of a system comes more from the relationships among programs than from the programs themselves."<sup>2</sup> In other words, **the power of Unix comes not from the TUI, even less from the GUI, but from the shell, from the command line**. Therefore, a file manager entirely based on the command line is no doubt an advantageous way of managing files in a Unix environment.
 
 Besides 5 MiB RAM and 500 KiB disk space, willingness to try something different is all you need.
 
