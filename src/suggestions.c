@@ -190,6 +190,16 @@ clear_suggestion(void)
 	suggestion.printed = 0;
 }
 
+static void
+remove_suggestion_not_end(void)
+{
+	printf("\x1b[%dC", rl_end - rl_point);
+	fflush(stdout);
+	clear_suggestion();
+	printf("\x1b[%dD", rl_end - rl_point);
+	fflush(stdout);
+}
+
 /* Clear the line, print the suggestion (STR) at OFFSET in COLOR, and
  * move the cursor back to the original position.
  * OFFSET marks the point in STR that is already typed: the suggestion
@@ -256,7 +266,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 
 	if (baej) {
 		/* Move the cursor two columns to the right and print "> " */
-		printf("\x1b[2C");
+		fputs("\x1b[2C", stdout);
 		printf("%s> \x1b[0m", mi_c);
 	}
 
@@ -948,16 +958,6 @@ check_variables(const char *str, const size_t len)
 		return 1;
 
 	return 0;
-}
-
-static void
-remove_suggestion_not_end(void)
-{
-	printf("\x1b[%dC", rl_end - rl_point);
-	fflush(stdout);
-	clear_suggestion();
-	printf("\x1b[%dD", rl_end - rl_point);
-	fflush(stdout);
 }
 
 /* Check for available suggestions. Returns zero if true, one if not,

@@ -1315,11 +1315,11 @@ free_stuff(void)
 void
 set_signals_to_ignore(void)
 {
-	/*  signal(SIGINT, signal_handler); C-c */
+	/* signal(SIGINT, signal_handler); C-c */
 	signal(SIGINT, SIG_IGN);  /* C-c */
 	signal(SIGQUIT, SIG_IGN); /* C-\ */
 	signal(SIGTSTP, SIG_IGN); /* C-z */
-	/*  signal(SIGTERM, SIG_IGN);
+	/* signal(SIGTERM, SIG_IGN);
 	signal(SIGTTIN, SIG_IGN);
 	signal(SIGTTOU, SIG_IGN); */
 }

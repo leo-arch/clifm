@@ -949,6 +949,7 @@ external_arguments(int argc, char **argv)
 	    {"no-file-cap", no_argument, 0, 38},
 	    {"no-file-ext", no_argument, 0, 39},
 	    {"no-follow-symlink", no_argument, 0, 40},
+		{"control-d-exits", no_argument, 0, 41},
 	    {0, 0, 0, 0}};
 
 	/* Increment whenever a new (only) long option is added */
@@ -1081,6 +1082,7 @@ external_arguments(int argc, char **argv)
 		case 38: xargs.check_cap = check_cap = 0; break;
 		case 39: xargs.check_ext = check_ext = 0; break;
 		case 40: xargs.follow_symlinks = follow_symlinks = 0; break;
+		case 41: xargs.control_d_exits = control_d_exits = 1; break;
 
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
@@ -1436,6 +1438,7 @@ unset_xargs(void)
 	xargs.clear_screen = UNSET;
 	xargs.color_scheme = UNSET;
 	xargs.config = UNSET;
+	xargs.control_d_exits = UNSET;
 	xargs.cwd_in_title = UNSET;
 	xargs.dirmap = UNSET;
 	xargs.disk_usage = UNSET;
@@ -2004,6 +2007,9 @@ check_options(void)
 	/* Do no override command line options */
 	if (xargs.cwd_in_title == UNSET)
 		xargs.cwd_in_title = DEF_CWD_IN_TITLE;
+
+	if (xargs.control_d_exits == UNSET)
+		control_d_exits = DEF_CONTROL_D_EXITS;
 
 	if (cp_cmd == UNSET)
 		cp_cmd = DEF_CP_CMD;

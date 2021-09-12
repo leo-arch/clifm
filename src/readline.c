@@ -438,6 +438,8 @@ my_rl_getc(FILE *stream)
 	while(1) {
 		result = (int)read(fileno(stream), &c, sizeof(unsigned char));
 		if (result == sizeof(unsigned char)) {
+			if (control_d_exits && c == 4) /* Ctrl-d */
+				rl_quit(0, 0);
 /*#ifndef _NO_HIGHLIGHT
 			if (highlight)
 				rl_highlight(c);

@@ -28,3 +28,4 @@
 void readline_kbinds(void);
 int kbinds_function(char **args);
 int load_keybinds(void);
+int rl_quit(int count, int key);

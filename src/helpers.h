@@ -351,6 +351,7 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define DEF_CLEAR_SCREEN 1
 #define DEF_COLOR_SCHEME "default"
 #define DEF_COLORS 1
+#define DEF_CONTROL_D_EXITS 0
 #define DEF_CP_CMD CP_CP
 #define DEF_CUR_WS 0
 #define DEF_CWD_IN_TITLE 0
@@ -660,6 +661,7 @@ struct param {
 	int check_ext;
 	int classify;
 	int color_scheme;
+	int control_d_exits;
 	int expand_bookmarks;
 	int ext;
 	int ffirst;
@@ -780,6 +782,7 @@ extern int
     colorize,
     columned,
     config_ok,
+	control_d_exits,
     copy_n_rename,
     cp_cmd,
     cur_ws,

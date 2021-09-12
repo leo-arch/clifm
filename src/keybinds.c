@@ -973,7 +973,7 @@ rl_paste_sel(int count, int key)
 	return EXIT_SUCCESS;
 }
 
-static int
+int
 rl_quit(int count, int key)
 {
 	UNUSED(count); UNUSED(key);
