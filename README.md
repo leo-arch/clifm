@@ -46,7 +46,7 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 ---
 
 ## Table of contents
-*   [Rationale](#rationale)
+*   [Why?](#why)
 *   [Features](#features)
 *   [Installing _CliFM_](#installing-clifm)
 *   [First steps](#first-steps)
@@ -57,7 +57,7 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 
 ---
 
-## Rationale
+## Why?
 
 Why another file manager? I can. \
 In a free world, a free community finds alternatives central to freedom, and moreover, a place to learn.
@@ -71,12 +71,16 @@ Search for files, copy, rename, and trash some of them, but, at the same time, u
 Those familiar with the command-line will find in a file manager based on it a desirable _addition_ to its functionality. \
 The command-line is still there, never hidden.
 
+As Kernighan and Pike stated once, "The power of a system comes more from the relationships among programs than from the programs themselves."<sup>2</sup> In other words, **the power of Unix comes not from the TUI, even less from the GUI, but from the shell, from the command line**. Therefore, a file manager entirely based on the command line is no doubt an advantageous way of managing files in a Unix environment.
+
 Besides 5 MiB RAM and 500 KiB disk space, willingness to try something different is all you need.
 
 ### Should all terminal file managers be TUI file managers? No
 
 ---
-_<sup>1</sup>_ <i>For a detailed explanation and comparison between these concepts see the [resources page](https://github.com/leo-arch/clifm/wiki/Resources#gui-tui-and-cli) and the [introductory page](https://github.com/leo-arch/clifm/wiki/Introduction#what-is-clifm) of the Wiki</i>.
+<sup>1</sup> <i>For a detailed explanation and comparison between these concepts see the [resources page](https://github.com/leo-arch/clifm/wiki/Resources#gui-tui-and-cli) and the [introductory page](https://github.com/leo-arch/clifm/wiki/Introduction#what-is-clifm) of the Wiki</i>.
+
+<sup>2</sup> _The Unix Programming Environment_, Prentice-Hall, 1984, p. viii. Cf. pp. 71, 100, and 170 as well. You can also take a look a [this excellent article](http://etutorials.org/linux+systems/red+hat/chapter+13.+advanced+shell+usage+and+shell+scripts/13.1+the+power+of+the+unix+shell/).
 
 ---
 
