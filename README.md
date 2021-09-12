@@ -80,7 +80,7 @@ Besides 5 MiB RAM and 500 KiB disk space, willingness to try something different
 ---
 <sup>1</sup> <i>For a detailed explanation and comparison between these concepts see the [resources page](https://github.com/leo-arch/clifm/wiki/Resources#gui-tui-and-cli) and the [introductory page](https://github.com/leo-arch/clifm/wiki/Introduction#what-is-clifm) of the Wiki</i>.
 
-<sup>2</sup> _The Unix Programming Environment_, Prentice-Hall, 1984, p. viii. Cf. pp. 71, 100, and 170 as well.
+<sup>2</sup> _The Unix Programming Environment_, Prentice-Hall, 1984, p. viii. Cf. pp. 71, 100, and 170 as well. You can also take a look a [this excellent article](http://etutorials.org/linux+systems/red+hat/chapter+13.+advanced+shell+usage+and+shell+scripts/13.1+the+power+of+the+unix+shell/).
 
 ---
 
