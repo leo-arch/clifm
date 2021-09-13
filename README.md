@@ -4,7 +4,7 @@
 	</a>
 </p>
 <h1 align="center">CliFM</h1>
-<h2 align="center">The command line file manager for the terminal</h2>
+<h2 align="center">The Command Line File Manager</h2>
 <h3 align="center">Fast, extensible, lightweight | Written in C</h3>
 <h3 align="center">Linux, FreeBSD, NetBSD, OpenBSD, Haiku | x86, ARM</h3>
 <h4 align="center"><a
@@ -57,23 +57,22 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 
 ## Why?
 
-Why another file manager? I can. \
-In a free world, a free community finds alternatives central to freedom, and moreover, a place to learn.
+Why another file manager? Simply put, because in a world full of TUI file managers, a CLI file manager simply deserves to exist.
 
-Whatever needs to be done, do it in the simplest possible way: [KISS](https://en.wikipedia.org/wiki/KISS_principle) is a desired trait of a file manager for the terminal. No GUI, no TUI, but just a shell-like, **C**ommand **L**ine **I**nterface **F**ile **M**anager.
+No GUI, no TUI, but just a shell-like, **C**ommand **L**ine **I**nterface **F**ile **M**anager. This is the main feature and strength of _ClIFM_.
 
-Unlike most terminal file managers out there, _CliFM_ replaces the traditional TUI interface (also known as curses or text-menu based interface) by a simple command-line interface.<sup>1</sup> It is a file manager, but also **a shell extension**.
+Unlike most terminal file managers out there, indeed, _CliFM_ replaces the traditional TUI interface (also known as curses or text-menu based interface) by a simple command-line interface.<sup>1</sup> In this sense, it is a file manager, for sure, but also **a shell extension**.
 
 Search for files, copy, rename, and trash some of them, but, at the same time, update/upgrade your system, add some cronjob, stop a service, and run nano (or vi, or emacs, if you like).
 
-Those familiar with the command-line will find in a file manager based on it a desirable _addition_ to its functionality. \
-The command-line is still there, never hidden.
+Those familiar with the command-line will find in a file manager based on it a desirable _extension_ of its functionality. \
+And this because of a simple reason: the command-line is still there, never hidden.
 
 As Kernighan and Pike stated once, "The power of a system comes more from the relationships among programs than from the programs themselves."<sup>2</sup> In other words, **the power of Unix comes not from the TUI, even less from the GUI, but from the shell, from the command line**. Therefore, a file manager entirely based on the command line is no doubt an advantageous way of managing files in a Unix environment.
 
-Besides 5 MiB RAM and 500 KiB disk space, willingness to try something different is all you need.
+Besides 5 MiB of RAM and 500 KiB of disk space, willingness to try something different is all you need.
 
-### Should all terminal file managers be TUI file managers? No
+### Should all terminal file managers be TUI-based file managers? No.
 
 ---
 <sup>1</sup> <i>For a detailed explanation and comparison between these concepts see the [resources page](https://github.com/leo-arch/clifm/wiki/Resources#gui-tui-and-cli) and the [introductory page](https://github.com/leo-arch/clifm/wiki/Introduction#what-is-clifm) of the Wiki</i>.
