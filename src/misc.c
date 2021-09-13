@@ -1676,6 +1676,7 @@ help_function(void)
 \n              $XDG_CONFIG_HOME/clifm/.last to be accessed\
 \n              later by a shell funtion. See the manpage\
 \n     --color-scheme=NAME\t use color scheme NAME\
+\n     --control-d-exits\t use Control-d to exit from CliFM\
 \n     --cwd-in-title\t\t print current directory in terminal \
 \n              window title\
 \n     --disk-usage\t\t show disk usage (free/total) for the\
