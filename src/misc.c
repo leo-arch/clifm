@@ -637,6 +637,7 @@ alias_import(char *file)
 				continue;
 			}
 
+			*(tmp - 1) = '\0';
 			/* If alias already exists, skip it too */
 			int exists = 0;
 
@@ -647,6 +648,8 @@ alias_import(char *file)
 				}
 			}
 
+			*(tmp - 1) = '=';
+
 			if (!exists) {
 				if (first) {
 					first = 0;
@@ -655,7 +658,7 @@ alias_import(char *file)
 
 				alias_imported++;
 
-				/* Write the new alias into CLiFM config file */
+				/* Write the new alias into CliFM's config file */
 				fputs(line, config_fp);
 			} else {
 				fprintf(stderr, _("%s: Alias already exists\n"),
