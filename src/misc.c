@@ -623,11 +623,16 @@ alias_import(char *file)
 			char *p = line + 6; /* p points now to the beginning of the
 			alias name (because "alias " == 6) */
 
-			/* Only accept single quoted aliases commands */
 			char *tmp = strchr(p, '=');
-			if (!tmp)
+			if (!tmp) {
+				free(alias_name);
 				continue;
-			if (*(++tmp) != '\'') {
+			}
+			if (!*(++tmp)) {
+				free(alias_name);
+				continue;
+			}
+			if (*tmp != '\'' && *tmp != '"') {
 				free(alias_name);
 				continue;
 			}
@@ -636,9 +641,7 @@ alias_import(char *file)
 			int exists = 0;
 
 			for (i = 0; i < aliases_n; i++) {
-				int alias_len = strcntchr(aliases[i], '=');
-				if (alias_len != -1 && strncmp(aliases[i], p,
-								(size_t)alias_len + 1) == 0) {
+				if (*p == *aliases[i].name && strcmp(aliases[i].name, p) == 0) {
 					exists = 1;
 					break;
 				}
@@ -1217,6 +1220,13 @@ free_stuff(void)
 		free(old_pwd);
 	}
 
+	i = (int)aliases_n;
+	while (--i >= 0) {
+		free(aliases[i].name);
+		free(aliases[i].cmd);
+	}
+	free(aliases);
+
 	i = (int)kbinds_n;
 	while (--i >= 0) {
 		free(kbinds[i].function);
@@ -1237,11 +1247,6 @@ free_stuff(void)
 		free(usr_actions[i].value);
 	}
 	free(usr_actions);
-
-	i = (int)aliases_n;
-	while (--i >= 0)
-		free(aliases[i]);
-	free(aliases);
 
 	i = (int)prompt_cmds_n;
 	while (--i >= 0)

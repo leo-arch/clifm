@@ -825,28 +825,19 @@ check_aliases(const char *str, const size_t len)
 
 	int i = (int)aliases_n;
 	while (--i >= 0) {
-		if (!aliases[i])
+		if (!aliases[i].name)
 			continue;
-		char *p = aliases[i];
+		char *p = aliases[i].name;
 		if (TOUPPER(*p) != TOUPPER(*str))
 			continue;
 		if ((case_sens_path_comp ? strncmp(p, str, len)
 		: strncasecmp(p, str, len)) != 0)
 			continue;
-		char *ret = strchr(p, '=');
-		if (!*(++ret))
+		if (!aliases[i].cmd || !*aliases[i].cmd)
 			continue;
-		if (!*(++ret))
-			continue;
-		size_t str_len = strlen(ret);
-		if (ret[str_len - 1] == '\n') {
-			ret[str_len - 1] = '\0';
-			str_len--;
-		}
-		if (ret[str_len - 1] == '\'' || ret[str_len - 1] == '"')
-			ret[str_len - 1] = '\0';
+
 		suggestion.type = ALIAS_SUG;
-		print_suggestion(ret, 1, color);
+		print_suggestion(aliases[i].cmd, 1, color);
 		return 1;
 	}
 

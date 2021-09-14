@@ -59,8 +59,6 @@
 
 /* Globals */
 
-
-
 struct usrvar_t *usr_var = (struct usrvar_t *)NULL;
 struct actions_t *usr_actions = (struct actions_t *)NULL;
 struct ws_t *ws = (struct ws_t *)NULL;
@@ -69,6 +67,7 @@ struct jump_t *jump_db = (struct jump_t *)NULL;
 struct bookmarks_t *bookmarks = (struct bookmarks_t *)NULL;
 struct fileinfo *file_info = (struct fileinfo *)NULL;
 struct remote_t *remotes = (struct remote_t *)NULL;
+struct alias_t *aliases = (struct alias_t *)NULL;
 #ifndef _NO_SUGGESTIONS
 struct suggestions_t suggestion;
 #endif
@@ -263,8 +262,6 @@ char
 #endif
     *usr_cscheme = (char *)NULL,
     *user_home = (char *)NULL,
-
-    **aliases = (char **)NULL,
     **argv_bk = (char **)NULL,
     **bin_commands = (char **)NULL,
     **bookmark_names = (char **)NULL,

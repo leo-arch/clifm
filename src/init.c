@@ -1814,13 +1814,8 @@ get_path_programs(void)
 	if (aliases_n) {
 		i = (int)aliases_n;
 		while (--i >= 0) {
-			int index = strcntchr(aliases[i], '=');
-			if (index != -1) {
-				bin_commands[l] = (char *)xnmalloc((size_t)index + 1,
-				    sizeof(char));
-				xstrsncpy(bin_commands[l], aliases[i], (size_t)index);
-				bin_commands[l++][index] = '\0';
-			}
+			bin_commands[l++] = savestring(aliases[i].name,
+				strlen(aliases[i].name));
 		}
 	}
 
@@ -1872,12 +1867,17 @@ get_aliases(void)
 		return;
 	}
 
+
+	/* Free the aliases struct array */
 	if (aliases_n) {
 		int i = (int)aliases_n;
-		while (--i >= 0)
-			free(aliases[i]);
+		while (--i >= 0) {
+			free(aliases[i].name);
+			free(aliases[i].cmd);
+		}
+
 		free(aliases);
-		aliases = (char **)NULL;
+		aliases = (struct alias_t *)xnmalloc(1, sizeof(struct alias_t));
 		aliases_n = 0;
 	}
 
@@ -1886,14 +1886,21 @@ get_aliases(void)
 
 	while (getline(&line, &line_size, fp) > 0) {
 		if (*line == 'a' && strncmp(line, "alias ", 6) == 0) {
-			char *alias_line = strchr(line, ' ');
-			if (alias_line) {
-				alias_line++;
-				aliases = (char **)xrealloc(aliases, (aliases_n + 1)
-							* sizeof(char *));
-				aliases[aliases_n++] = savestring(alias_line,
-							strlen(alias_line));
-			}
+			char *s = strchr(line, ' ');
+			if (!s || !*(++s))
+				continue;
+			char *p = strchr(s, '=');
+			if (!p || !*(p + 1))
+				continue;
+			*(p++) = '\0';
+
+			aliases = (struct alias_t *)xrealloc(aliases, (aliases_n + 1)
+						* sizeof(struct alias_t));
+			aliases[aliases_n].name = savestring(s, strlen(s));
+			if (*p == '\'')
+				aliases[aliases_n++].cmd = strbtw(p, '\'', '\'');
+			else if (*p == '"')
+				aliases[aliases_n++].cmd = strbtw(p, '"', '"');
 		}
 	}
 

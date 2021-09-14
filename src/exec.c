@@ -1484,7 +1484,7 @@ exec_cmd(char **comm)
 		if (aliases_n) {
 			size_t i;
 			for (i = 0; i < aliases_n; i++)
-				printf("%s", aliases[i]);
+				printf("%s %s->%s %s\n", aliases[i].name, mi_c, df_c, aliases[i].cmd);
 		}
 		return EXIT_SUCCESS;
 	}

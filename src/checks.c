@@ -452,39 +452,20 @@ check_for_alias(char **args)
 	if (!aliases_n || !aliases || !args)
 		return (char **)NULL;
 
-	char *aliased_cmd = (char *)NULL;
-	size_t cmd_len = strlen(args[0]);
-	char tmp_cmd[PATH_MAX * 2 + 1];
-	snprintf(tmp_cmd, sizeof(tmp_cmd), "%s=", args[0]);
-
 	register int i = (int)aliases_n;
+
 	while (--i >= 0) {
-
-		if (!aliases[i])
-			continue;
-		/* Look for this string: "command=", in the aliases file */
-		/* If a match is found */
-
-		if (*aliases[i] != *args[0] ||
-		    strncmp(tmp_cmd, aliases[i], cmd_len + 1) != 0)
+		if (!aliases[i].name || !aliases[i].cmd || !*aliases[i].name
+		|| !*aliases[i].cmd)
 			continue;
 
-		/* Get the aliased command */
-		aliased_cmd = strbtw(aliases[i], '\'', '\'');
-
-		if (!aliased_cmd)
-			return (char **)NULL;
-
-		if (!*aliased_cmd) { /* zero length */
-			free(aliased_cmd);
-			return (char **)NULL;
-		}
+		if (*aliases[i].name != *args[0] || strcmp(args[0], aliases[i].name) != 0)
+			continue;
 
 		args_n = 0; /* Reset args_n to be used by parse_input_str() */
 
 		/* Parse the aliased cmd */
-		char **alias_comm = parse_input_str(aliased_cmd);
-		free(aliased_cmd);
+		char **alias_comm = parse_input_str(aliases[i].cmd);
 
 		if (!alias_comm) {
 			args_n = 0;
@@ -492,8 +473,7 @@ check_for_alias(char **args)
 			return (char **)NULL;
 		}
 
-		register size_t j;
-
+		size_t j;
 		/* Add input parameters, if any, to alias_comm */
 		if (args[1]) {
 			for (j = 1; args[j]; j++) {
@@ -511,7 +491,6 @@ check_for_alias(char **args)
 		for (j = 0; args[j]; j++)
 			free(args[j]);
 		free(args);
-
 		return alias_comm;
 	}
 

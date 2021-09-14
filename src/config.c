@@ -2392,17 +2392,21 @@ reload_config(void)
 		free(jump_db);
 		jump_db = (struct jump_t *)NULL;
 	}
-
 	jump_n = 0;
+
 	i = (int)aliases_n;
-	while (--i >= 0)
-		free(aliases[i]);
+	while (--i >= 0) {
+		free(aliases[i].name);
+		free(aliases[i].cmd);
+	}
+	free(aliases);
+	aliases = (struct alias_t *)NULL;
+	aliases_n = 0;
 
 	i = (int)prompt_cmds_n;
 	while (--i >= 0)
 		free(prompt_cmds[i]);
 
-	aliases_n = 0;
 	dirhist_total_index = 0;
 	prompt_cmds_n = 0;
 

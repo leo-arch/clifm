@@ -609,6 +609,13 @@ struct bookmarks_t {
 
 extern struct bookmarks_t *bookmarks;
 
+struct alias_t {
+	char *name;
+	char *cmd;
+};
+
+extern struct alias_t *aliases;
+
 /* Struct to store file information */
 struct fileinfo {
 	char *color;
@@ -941,7 +948,6 @@ extern char
     *usr_cscheme,
     *user_home,
 
-    **aliases,
     **argv_bk,
     **bin_commands,
     **bookmark_names,
