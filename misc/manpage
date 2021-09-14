@@ -891,12 +891,12 @@ NetBSD (wsvt25) and OpenBSD (vt220) kernel consoles: Key sequences involving the
  On NetBSD:
  Add the metaesc flag to your current encoding in /etc/wscons.conf. Example: encoding us.metaesc
  You might need to reboot the machine for changes to take effect.
-
-
 .TP
-Konsole: Shift+left and Shift+right are not bound by default, so that you need to bind them manually. Go to Settings -> Edit current profile -> Keyboard -> Default (Xfree4), and add these values:
+Konsole: If Shift+left and Shift+right are not already bound to any function, you need to bind them manually. Go to Settings -> Edit current profile -> Keyboard -> Default (Xfree4), and add these values:
  Left+Shift	\\E[1;2D
  Right+Shift	\\E[1;2C
+.sp
+If they are already bound, by contrast, you only need to unbound them. Go to "Settings -> Configure keyboard shortcuts", click on the corresponding keybinding, and set it to "Custom (none)").
 .TP
 Terminology/Yakuake: Shift+left and Shift+right are already bound to other functions, so that you only need to unbind them or rebind the corresponding functions to different key sequences.
 .TP
