@@ -992,10 +992,16 @@ bulk_rename(char **args)
 	char *answer = (char *)NULL;
 	while (!answer) {
 		answer = rl_no_hist(_("Continue? [y/N] "));
-		if (strlen(answer) > 1) {
+		if (answer && *answer && strlen(answer) > 1) {
 			free(answer);
 			answer = (char *)NULL;
 			continue;
+		}
+
+		if (!answer) {
+			free(line);
+			close_fstream(fp, fd);
+			return EXIT_SUCCESS;
 		}
 
 		switch (*answer) {
