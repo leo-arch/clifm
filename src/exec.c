@@ -1485,6 +1485,8 @@ exec_cmd(char **comm)
 			size_t i;
 			for (i = 0; i < aliases_n; i++)
 				printf("%s %s->%s %s\n", aliases[i].name, mi_c, df_c, aliases[i].cmd);
+		} else {
+			printf("%s: No aliases found\n", PROGRAM_NAME);
 		}
 		return EXIT_SUCCESS;
 	}
