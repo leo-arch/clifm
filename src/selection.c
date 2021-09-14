@@ -51,6 +51,8 @@
 #include "selection.h"
 #include "sort.h"
 #include "messages.h"
+#include "file_operations.h"
+#include "init.h"
 
 /* Save selected elements into a tmp file. Returns 1 if success and 0
  * if error. This function allows the user to work with multiple
@@ -73,8 +75,7 @@ save_sel(void)
 		}
 	}
 
-	int fd;
-	FILE *fp = open_fstream_w(sel_file, &fd);
+	FILE *fp = fopen(sel_file, "w");
 	if (!fp) {
 		_err(0, NOPRINT_PROMPT, "%s: sel: %s: %s\n", PROGRAM_NAME,
 		    sel_file, strerror(errno));
@@ -87,7 +88,7 @@ save_sel(void)
 		fputc('\n', fp);
 	}
 
-	close_fstream(fp, fd);
+	fclose(fp);
 	return EXIT_SUCCESS;
 }
 
@@ -729,6 +730,38 @@ show_sel_files(void)
 		pager = 1;
 }
 
+static int
+edit_selfile(void)
+{
+	if (!sel_file || !*sel_file || sel_n == 0)
+		return EXIT_FAILURE;
+
+	struct stat attr;
+	if (stat(sel_file, &attr) == -1)
+		goto ERROR;
+
+	time_t mtime_bfr = (time_t)attr.st_mtime;
+
+	if (open_file(sel_file) != EXIT_SUCCESS) {
+		fprintf(stderr, "%s: Could not open the selections file\n", PROGRAM_NAME);
+		return EXIT_FAILURE;
+	}
+
+	/* Compare the new modification time to the stored one: if they
+	 * match, nothing was modified */
+	if (stat(sel_file, &attr) == -1)
+		goto ERROR;
+
+	if (mtime_bfr == (time_t)attr.st_mtime)
+		return EXIT_SUCCESS;
+
+	return get_sel_files();
+
+ERROR:
+	fprintf(stderr, "sel: %s: %s\n", sel_file, strerror(errno));
+	return EXIT_FAILURE;
+}
+
 int
 deselect(char **comm)
 {
@@ -740,7 +773,6 @@ deselect(char **comm)
 
 		if (sel_n > 0) {
 			int i = (int)sel_n;
-
 			while (--i >= 0)
 				free(sel_elements[i]);
 
@@ -778,7 +810,8 @@ deselect(char **comm)
 	printf(_("\n%s%sTotal size%s: %s\n"), df_c, BOLD, df_c, human_size);
 	free(human_size);
 
-	printf(_("\n%sEnter '%c' to quit.\n"), df_c, 'q');
+	printf(_("\n%sEnter 'q' to quit or 'e' to edit the selections file\n"), df_c);
+
 	size_t desel_n = 0;
 	char *line = NULL, **desel_elements = (char **)NULL;
 
@@ -798,13 +831,19 @@ deselect(char **comm)
 	while (--i >= 0) { /* Validation */
 		/* If not a number */
 		if (!is_number(desel_elements[i])) {
-			if (strcmp(desel_elements[i], "q") == 0) {
+			if (*desel_elements[i] == 'e' && !desel_elements[i][1]) {
+				i = (int)desel_n;
+				while (--i >= 0)
+					free(desel_elements[i]);
+				free(desel_elements);
+				return edit_selfile();
+			} else if (*desel_elements[i] == 'q' && !desel_elements[i][1]) {
 				i = (int)desel_n;
 				while (--i >= 0)
 					free(desel_elements[i]);
 				free(desel_elements);
 				return EXIT_SUCCESS;
-			} else if (strcmp(desel_elements[i], "*") == 0) {
+			} else if (*desel_elements[i] == '*' && !desel_elements[i][1]) {
 				/* Clear the sel array */
 				i = (int)sel_n;
 				while (--i >= 0)
@@ -832,7 +871,7 @@ deselect(char **comm)
 
 				return exit_status;
 			} else {
-				printf(_("desel: '%s': Invalid element\n"), desel_elements[i]);
+				printf(_("desel: '%s': Invalid entry\n"), desel_elements[i]);
 				int j = (int)desel_n;
 				while (--j >= 0)
 					free(desel_elements[j]);
@@ -860,8 +899,8 @@ deselect(char **comm)
 	 * array (desel_path). I need to do this because after the first
 	 * rearragement of the sel array, that is, after the removal of the
 	 * first element, the index of the next elements changed, and cannot
-	 * thereby be found by their index. The only way to find them is to
-	 * compare string by string */
+	 * thereby be found by their index. The only way to find them is
+	 * comparing string by string */
 	char **desel_path = (char **)NULL;
 	desel_path = (char **)xnmalloc(desel_n, sizeof(char *));
 

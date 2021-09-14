@@ -80,7 +80,7 @@ open_fstream_w(char *name, int *fd)
 	if (!name || !*name)
 		return (FILE *)NULL;
 
-	*fd = open(name, O_WRONLY | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
+	*fd = open(name, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
 	if (*fd == -1)
 		return (FILE *)NULL;
 
