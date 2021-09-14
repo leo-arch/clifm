@@ -520,7 +520,9 @@ If \fBrsync\fR(1) is found, it will be used as follows: 'rsync -aczvAXHS --progr
 toggle the files counter function on/off.
 .TP
 .B ds, desel \fR[*, a, all]
-deselect one or more selected elements. You can also deselect all selected elements at once by passing '*', 'a' or 'all' to the function.
+deselect one or more selected files. The user is prompted to either mark selected files to be deselected or to edit the selections file (entering 'e') via a text editor to manually deselect files.
+.sp
+You can also deselect all selected entries at once by passing \fI*\fR, \fIa\fR or \fIall\fR parameters to the function. Ex: \fIds *\fR
 .TP
 .B edit \fR[reset] [APPLICATION]
 edit the main configuration file (F10 key is also available). If an application is specified, it will be used to open the configuration file. Use the 'reset' option to generate a fresh configuration file and create a backup copy of the old one (named clifmrc.YYYYMMDD@HH:MM:SS).
