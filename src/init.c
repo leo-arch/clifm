@@ -1894,6 +1894,19 @@ get_aliases(void)
 				continue;
 			*(p++) = '\0';
 
+			/* Skip duplicated aliases names */
+			int i = (int)aliases_n, exists = 0;
+			while (--i >= 0) {
+				if (!aliases[i].name)
+					continue;
+				if (*s == *aliases[i].name && strcmp(s, aliases[i].name) == 0) {
+					exists = 1;
+					break;
+				}
+			}
+			if (exists)
+				continue;
+
 			aliases = (struct alias_t *)xrealloc(aliases, (aliases_n + 1)
 						* sizeof(struct alias_t));
 			aliases[aliases_n].name = savestring(s, strlen(s));
