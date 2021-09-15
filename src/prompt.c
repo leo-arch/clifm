@@ -69,11 +69,16 @@ decode_prompt(const char *line)
 			switch (c) {
 
 			case 'z': /* Exit status of last executed command */
-				temp = (char *)xnmalloc(3, sizeof(char));
+				temp = (char *)xnmalloc(strlen(xitoa(exit_code)) + 19,
+						sizeof(char));
+				sprintf(temp, "\001%s\002%d\001%s\002",
+						(exit_code == 0) ? _GREEN : _RED, exit_code, df_c);
+				goto add_string;
+/*				temp = (char *)xnmalloc(3, sizeof(char));
 				temp[0] = ':';
 				temp[1] = (exit_code) ? '(' : ')';
 				temp[2] = '\0';
-				goto add_string;
+				goto add_string; */
 
 /*			case 'x': // Hex numbers
 			{

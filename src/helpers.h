@@ -198,6 +198,7 @@ extern int watch;
 /* A few colors */
 #define GRAY "\x1b[1;30m"
 #define _RED "\x1b[1;31m"
+#define _GREEN "\x1b[0;32m"
 #define D_CYAN "\x1b[0;36m"
 #define BOLD "\x1b[1m"
 #define NC "\x1b[0m"
