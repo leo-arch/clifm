@@ -941,6 +941,7 @@ Pager=%s\n\n\
 MaxHistory=%d\n\
 MaxDirhist=%d\n\
 MaxLog=%d\n\
+Icons=%s\n\
 DiskUsage=%s\n\n"
 
 		"# If set to true, always print the list of selected files. Since this\n\
@@ -986,6 +987,7 @@ RlEditMode=%d\n\n"
 		DEF_MAX_HIST,
 		DEF_MAX_DIRHIST,
 		DEF_MAX_LOG,
+		DEF_ICONS == 1 ? "true" : "false",
 		DEF_DISK_USAGE == 1 ? "true" : "false",
 		DEF_PRINTSEL == 1 ? "true" : "false",
 		DEF_MAXPRINTSEL,
@@ -1605,7 +1607,21 @@ read_config(void)
 			else if (strncmp(opt_str, "false", 5) == 0)
 				highlight = 0;
 		}
-#endif
+#endif /* !_NO_HIGHLIGHT */
+
+#ifndef _NO_ICONS
+		else if (xargs.icons == UNSET && *line == 'I'
+		&& strncmp(line, "Icons=", 6) == 0) {
+			char opt_str[MAX_BOOL] = "";
+			ret = sscanf(line, "Icons=%5s\n", opt_str);
+			if (ret == -1)
+				continue;
+			if (strncmp(opt_str, "true", 4) == 0)
+				icons = 1;
+			else if (strncmp(opt_str, "false", 5) == 0)
+				icons = 0;
+		}
+#endif /* !_NO_ICONS */
 
 		else if (xargs.light == UNSET && *line == 'L'
 		&& strncmp(line, "LightMode=", 10) == 0) {
@@ -2172,6 +2188,9 @@ reset_variables(void)
 	follow_symlinks = UNSET;
 #ifndef _NO_HIGHLIGHT
 	highlight = UNSET;
+#endif
+#ifndef _NO_ICONS
+	icons = UNSET;
 #endif
 	light_mode = UNSET;
 	list_folders_first = UNSET;

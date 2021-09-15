@@ -2074,6 +2074,15 @@ check_options(void)
 	}
 #endif
 
+#ifndef _NO_ICONS
+	if (icons == UNSET) {
+		if (xargs.icons == UNSET)
+			icons = DEF_ICONS;
+		else
+			icons = xargs.icons;
+	}
+#endif
+
 #ifndef _NO_SUGGESTIONS
 	if (suggestions == UNSET) {
 		if (xargs.suggestions == UNSET)

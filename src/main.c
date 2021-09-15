@@ -126,7 +126,7 @@ int
 	highlight = UNSET,
     home_ok = 1,
 #ifndef _NO_ICONS
-    icons = 0,
+    icons = UNSET,
 #endif
     internal_cmd = 0,
     is_sel = 0,
