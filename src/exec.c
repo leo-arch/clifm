@@ -165,11 +165,18 @@ run_in_background(pid_t pid)
 int
 launch_execle(const char *cmd)
 {
-	if (!cmd)
+	if (!cmd || !*cmd)
 		return EXNULLERR;
 
-	/* Reenable SIGCHLD, in case it was disabled. Otherwise, waitpid won't
-	 * be able to catch error codes coming from the child */
+	int ret = system(cmd);
+	if (WIFEXITED(ret) && !WEXITSTATUS(ret))
+		return EXIT_SUCCESS;
+	if (WIFEXITED(ret) && WEXITSTATUS(ret))
+		return WEXITSTATUS(ret);
+	return EXCRASHERR;
+/*
+	// Reenable SIGCHLD, in case it was disabled. Otherwise, waitpid won't
+	// be able to catch error codes coming from the child
 	signal(SIGCHLD, SIG_DFL);
 
 	int status;
@@ -178,14 +185,14 @@ launch_execle(const char *cmd)
 		fprintf(stderr, "%s: fork: %s\n", PROGRAM_NAME, strerror(errno));
 		return EXFORKERR;
 	} else if (pid == 0) {
-		/* Reenable signals only for the child, in case they were
-		 * disabled for the parent */
+		// Reenable signals only for the child, in case they were
+		// disabled for the parent
 		signal(SIGHUP, SIG_DFL);
 		signal(SIGINT, SIG_DFL);
 		signal(SIGQUIT, SIG_DFL);
 		signal(SIGTERM, SIG_DFL);
 
-		/* Get shell base name */
+		// Get shell base name
 		char *name = strrchr(user.shell, '/');
 
 		execl(user.shell, name ? name + 1 : user.shell, "-c", cmd, NULL);
@@ -193,35 +200,35 @@ launch_execle(const char *cmd)
 		    strerror(errno));
 		_exit(errno);
 	}
-	/* Get command status */
+	// Get command status
 	else {
-		/* The parent process calls waitpid() on the child */
+		// The parent process calls waitpid() on the child
 		if (waitpid(pid, &status, 0) > 0) {
 			if (WIFEXITED(status) && !WEXITSTATUS(status)) {
-				/* The program terminated normally and executed
-				 * successfully */
+				// The program terminated normally and executed
+				// successfully
 				return EXIT_SUCCESS;
 			} else if (WIFEXITED(status) && WEXITSTATUS(status)) {
-				/* Either "command not found" (WEXITSTATUS(status) == 127),
-				 * "permission denied" (not executable) (WEXITSTATUS(status) ==
-				 * 126) or the program terminated normally, but returned a
-				 * non-zero status. These exit codes will be handled by the
-				 * system shell itself, since we're using here execle() */
+				// Either "command not found" (WEXITSTATUS(status) == 127),
+				// "permission denied" (not executable) (WEXITSTATUS(status) ==
+				// 126) or the program terminated normally, but returned a
+				// non-zero status. These exit codes will be handled by the
+				// system shell itself, since we're using here execle()
 				return WEXITSTATUS(status);
 			} else {
-				/* The program didn't terminate normally */
+				// The program didn't terminate normally
 				return EXCRASHERR;
 			}
 		} else {
-			/* Waitpid() failed */
+			// Waitpid() failed
 			fprintf(stderr, "%s: waitpid: %s\n", PROGRAM_NAME,
 			    strerror(errno));
 			return errno;
 		}
 	}
 
-	/* Never reached */
-	return EXIT_FAILURE;
+	// Never reached
+	return EXIT_FAILURE; */
 }
 
 /* Execute a command and return the corresponding exit status. The exit
@@ -400,8 +407,9 @@ run_shell_cmd(char **comm)
 	else
 		unsetenv("LS_COLORS");
 
-	if (launch_execle(cmd) != EXIT_SUCCESS)
-		exit_status = EXIT_FAILURE;
+/*	if (launch_execle(cmd) != EXIT_SUCCESS)
+		exit_status = EXIT_FAILURE; */
+	exit_status = launch_execle(cmd);
 	free(cmd);
 
 	/* Restore LS_COLORS value to use CliFM colors */
