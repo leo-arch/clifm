@@ -1058,7 +1058,7 @@ CliFM's prompt is built from the \fIPrompt\fR line in the configuration file fol
 .TP
 \\p: A mix of the two above, it abbreviates the current working directory only if longer than PathMax (a value defined in the configuration file).
 .TP
-\\z: Exit code of the last executed command. It prints ":)" if success and ":(" in case of error
+\\z: Exit code of the last executed command. Green in case of success and bold red in case of error
 .TP
 \\$ '#', if the effective user ID is 0, and '$' otherwise
 .TP
@@ -1071,7 +1071,7 @@ CliFM's prompt is built from the \fIPrompt\fR line in the configuration file fol
 \\]: End a sequence of non\-printing characters
 
 .TP
-By default, for example, CliFM's prompt line is this: \fB[\\[\\e[0;36m\\]\\S\\[\\e[0m\\]]\\l \\A \\u:\\H \\[\\e[0;36m\\]\\w\\n\\[\\e[0m\\]\\z\\[\\e[0;34m\\] \\$ \\[\\e[0m\\]\fR, which once decoded should be something like this: 
+By default, for example, CliFM's prompt line is this: \fB[\\[\\e[0;36m\\]\\S\\[\\e[0m\\]]\\l \\A \\u:\\H \\[\\e[0;36m\\]\\w\\n\\[\\e[0m\\](\\z)\\[\\e[0;34m\\] \\$ \\[\\e[0m\\]\fR, which once decoded should be something like this: 
 
  [1] 13:45 user:hostname /my/path
  :) $
