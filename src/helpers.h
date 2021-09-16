@@ -408,7 +408,7 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define MAX_WS 8
 
 #define DEFAULT_PROMPT "\\[\\e[0m\\][\\[\\e[0;36m\\]\\S\\[\\e[0m\\]]\\l \
-\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\](\\z)\\[\\e[0;34m\\] \
+\\A \\u:\\H \\[\\e[00;36m\\]\\w\\n\\[\\e[0m\\]<\\z>\\[\\e[0;34m\\] \
 \\$\\[\\e[0m\\] "
 
 #define DEFAULT_TERM_CMD "xterm -e"
