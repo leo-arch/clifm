@@ -300,12 +300,10 @@ launch_execve(char **cmd, int bg, int xflags)
 static int
 run_shell_cmd(char **comm)
 {
-	int exit_status = EXIT_SUCCESS;
-
 	/* LOG EXTERNAL COMMANDS
 	* 'no_log' will be true when running profile or prompt commands */
 	if (!no_log)
-		exit_status = log_function(comm);
+		log_function(comm);
 
 	/* PREVENT UNGRACEFUL EXIT */
 	/* Prevent the user from killing the program via the 'kill',
@@ -409,7 +407,7 @@ run_shell_cmd(char **comm)
 
 /*	if (launch_execle(cmd) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE; */
-	exit_status = launch_execle(cmd);
+	int exit_status = launch_execle(cmd);
 	free(cmd);
 
 	/* Restore LS_COLORS value to use CliFM colors */
