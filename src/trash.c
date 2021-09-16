@@ -354,7 +354,8 @@ trash_element(const char *suffix, struct tm *tm, char *file)
 	 * (original_filename_len + 1 (dot) + suffix_len) won't be longer
 	 * than NAME_MAX */
 	size_t filename_len = strlen(filename), suffix_len = strlen(suffix);
-	int size = (int)(filename_len + suffix_len + 1) - NAME_MAX;
+	int size = (int)(filename_len + suffix_len + 11) - NAME_MAX;
+	/* len = filename.suffix.trashinfo */
 
 	if (size > 0) {
 		/* If SIZE is a positive value, that is, the trashed file name
