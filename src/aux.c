@@ -188,18 +188,17 @@ int
 count_dir(const char *dir, int pop)
 {
 	if (!dir)
-		return -1;
+		return (-1);
 
 	DIR *p;
 	if ((p = opendir(dir)) == NULL) {
 		if (errno == ENOMEM)
 			exit(EXIT_FAILURE);
 		else
-			return -1;
+			return (-1);
 	}
 
 	int c = 0;
-//	struct dirent *ent;
 
 	while (readdir(p)) {
 		c++;
@@ -365,43 +364,43 @@ xitoa(int n)
 void *
 xrealloc(void *ptr, size_t size)
 {
-	void *new_ptr = realloc(ptr, size);
+	void *p = realloc(ptr, size);
 
-	if (!new_ptr) {
+	if (!p) {
 		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
 				PROGRAM_NAME, __func__, size);
 		exit(EXIT_FAILURE);
 	}
 
-	return new_ptr;
+	return p;
 }
 
 void *
 xcalloc(size_t nmemb, size_t size)
 {
-	void *new_ptr = calloc(nmemb, size);
+	void *p = calloc(nmemb, size);
 
-	if (!new_ptr) {
+	if (!p) {
 		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
 				PROGRAM_NAME, __func__, nmemb * size);
 		exit(EXIT_FAILURE);
 	}
 
-	return new_ptr;
+	return p;
 }
 
 void *
 xnmalloc(size_t nmemb, size_t size)
 {
-	void *new_ptr = malloc(nmemb * size);
+	void *p = malloc(nmemb * size);
 
-	if (!new_ptr) {
+	if (!p) {
 		_err(0, NOPRINT_PROMPT, _("%s: %s failed to allocate %zu bytes\n"),
 				PROGRAM_NAME, __func__, nmemb * size);
 		exit(EXIT_FAILURE);
 	}
 
-	return new_ptr;
+	return p;
 }
 
 /* Unlike getchar this does not wait for newline('\n')
@@ -447,20 +446,13 @@ to_hex(char c)
 char *
 url_encode(char *str)
 {
-	if (!str || *str == '\0')
+	if (!str || !*str)
 		return (char *)NULL;
 
-	char *p;
-	p = (char *)calloc((strlen(str) * 3) + 1, sizeof(char));
+	char *buf = (char *)xnmalloc((strlen(str) * 3) + 1, sizeof(char));
 	/* The max lenght of our buffer is 3 times the length of STR plus
 	 * 1 extra byte for the null byte terminator: each char in STR will
 	 * be, if encoded, %XX (3 chars) */
-	if (!p)
-		return (char *)NULL;
-
-	char *buf;
-	buf = p;
-	p = (char *)NULL;
 
 	/* Copies of STR and BUF pointers to be able
 	 * to increase and/or decrease them without loosing the original
@@ -472,7 +464,7 @@ url_encode(char *str)
 	for (; *pstr; pstr++) {
 		if (isalnum(*pstr) || *pstr == '-' || *pstr == '_' || *pstr == '.'
 		|| *pstr == '~' || *pstr == '/') {
-			/* Do not encode the above chars */
+			/* Do not encode any of the above chars */
 			*pbuf++ = *pstr;
 		} else {
 			/* Encode char to URL format. Example: space char to %20 */
@@ -482,6 +474,7 @@ url_encode(char *str)
 		}
 	}
 
+	*pbuf = '\0';
 	return buf;
 }
 
@@ -489,20 +482,12 @@ url_encode(char *str)
 char *
 url_decode(char *str)
 {
-	if (!str || str[0] == '\0')
+	if (!str || !*str)
 		return (char *)NULL;
 
-	char *p = (char *)NULL;
-	p = (char *)calloc(strlen(str) + 1, sizeof(char));
+	char *buf = (char *)xnmalloc(strlen(str) + 1, sizeof(char));
 	/* The decoded string will be at most as long as the encoded
 	 * string */
-
-	if (!p)
-		return (char *)NULL;
-
-	char *buf;
-	buf = p;
-	p = (char *)NULL;
 
 	char *pstr, *pbuf;
 	pstr = str;
@@ -520,6 +505,7 @@ url_decode(char *str)
 		}
 	}
 
+	*pbuf = '\0';
 	return buf;
 }
 
@@ -529,8 +515,8 @@ url_decode(char *str)
 int
 read_octal(char *str)
 {
-	if (!str)
-		return -1;
+	if (!str || !*str)
+		return (-1);
 
 	int n = atoi(str);
 	int num = n;
