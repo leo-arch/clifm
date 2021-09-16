@@ -267,7 +267,7 @@ dir_size(char *dir)
 		return (-1);
 
 	char file[PATH_MAX];
-	sprintf(file, "%s/duXXXXXX", P_tmpdir);
+	snprintf(file, PATH_MAX, "%s/duXXXXXX", P_tmpdir);
 
 	int fd = mkstemp(file);
 	if (fd == -1)
@@ -293,7 +293,7 @@ dir_size(char *dir)
 	/* I only need here the first field of the line, which is a
 	 * file size and could only take a few bytes, so that 32
 	 * bytes is more than enough */
-	char line[32] = "";
+	char line[32];
 	if (fgets(line, (int)sizeof(line), fp) == NULL) {
 		close_fstream(fp, fd);
 		unlink(file);
