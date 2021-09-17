@@ -65,8 +65,7 @@ Unlike most terminal file managers out there, indeed, _CliFM_ replaces the input
 
 If working with the command-line, your workflow is not affected at all, but just enriched with file management functionalities: automatic fles listing, files selection, bookmarks, directory jumper, directory history, auto-cd and auto-open, bulk rename, and a trash system, among other features. In this sense, _CliFM_ is certainly a file manager, but also **a shell extension**: search for files, copy, rename, and trash some of them, but, at the same time, update/upgrade your system, add some cronjob, stop a service, and run nano (or vi, or emacs, if you like).
 
-Briefly stated, those familiar with the command-line will find in a file manager based on it a desirable _extension_ of its functionality. \
-And this because of a simple reason: the command-line is still there, never hidden.
+Briefly stated, those familiar with the command-line will find in a file manager based on it a desirable _extension_ of its functionality. And this because of a simple reason: the command-line is still there, never hidden.
 
 As Kernighan and Pike stated once, "The power of a system comes more from the relationships among programs than from the programs themselves."<sup>2</sup> In other words, **the power of Unix comes from the shell, from the command line**. Therefore, a file manager entirely based on the command line is no doubt an advantageous way of managing files in a Unix environment.
 
