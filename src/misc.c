@@ -86,18 +86,25 @@ read_inotify(void)
 		if (event->mask & IN_CREATE) {
 /*			puts("IN_CREATE"); */
 			struct stat a;
-			if (stat(event->name, &a) != 0)
+			if (event->len && stat(event->name, &a) != 0) {
 				/* The file was created, but doesn't exist anymore */
 				ignore_event = 1;
+			}
 		}
+
+		/* A file was renamed */
+		if (event->mask & IN_MOVE)
+			ignore_event = 0;
+
 		if (event->mask & IN_DELETE) {
 /*			puts("IN_DELETE"); */
 			struct stat a;
-			if (stat(event->name, &a) == 0)
-				/* The file was removed, but is still there */
+			if (event->len && stat(event->name, &a) == 0)
+				/* The file was removed, but is still there (recreated) */
 				ignore_event = 1;
 		}
-/*		if (event->mask & IN_DELETE_SELF)
+/*
+		if (event->mask & IN_DELETE_SELF)
 			puts("IN_DELETE_SELF");
 		if (event->mask & IN_MOVE_SELF)
 			puts("IN_MOVE_SELF");
@@ -105,9 +112,8 @@ read_inotify(void)
 			puts("IN_MOVED_FROM");
 		if (event->mask & IN_MOVED_TO)
 			puts("IN_MOVED_TO");
-		if (event->mask & IN_IGNORED) {
-			puts("IN_IGNORED");
-		} */
+		if (event->mask & IN_IGNORED)
+			puts("IN_IGNORED"); */
 
 		if (!ignore_event && (event->mask & INOTIFY_MASK))
 			refresh = 1;
