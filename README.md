@@ -59,16 +59,15 @@ Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Di
 
 Why another file manager? Simply put, because in a world full of TUI file managers, a CLI file manager simply deserves to exist.
 
-No GUI, no TUI, but just a shell-like, **C**ommand **L**ine **I**nterface **F**ile **M**anager. This is the main feature and strength of _ClIFM_.
+_CliFM_ is a **C**ommand **L**ine **I**nterface **F**ile **M**anager: all input and interaction is performed via commands. This is its main feature and strength.
 
-Unlike most terminal file managers out there, indeed, _CliFM_ replaces the traditional TUI interface (also known as curses or text-menu based interface) by a simple command-line interface.<sup>1</sup> In this sense, it is a file manager, for sure, but also **a shell extension**.
+Unlike most terminal file managers out there, indeed, _CliFM_ replaces the input/interaction method of the traditional TUI interface (also known as curses or text-menu based interface, mostly driven by arrow keys and keyboard shortcuts) by the command-line, that is to say, a command-interpreter or a shell.<sup>1</sup>.
 
-Search for files, copy, rename, and trash some of them, but, at the same time, update/upgrade your system, add some cronjob, stop a service, and run nano (or vi, or emacs, if you like).
+If working with the command-line, your workflow is not affected at all, but just enriched with file management functionalities: automatic fles listing, files selection, bookmarks, directory jumper, directory history, auto-cd and auto-open, bulk rename, and a trash system, among other features. In this sense, _CliFM_ is certainly a file manager, but also **a shell extension**: search for files, copy, rename, and trash some of them, but, at the same time, update/upgrade your system, add some cronjob, stop a service, and run nano (or vi, or emacs, if you like).
 
-Those familiar with the command-line will find in a file manager based on it a desirable _extension_ of its functionality. \
-And this because of a simple reason: the command-line is still there, never hidden.
+Briefly stated, those familiar with the command-line will find in a file manager based on it a desirable _extension_ of its functionality. And this because of a simple reason: the command-line is still there, never hidden.
 
-As Kernighan and Pike stated once, "The power of a system comes more from the relationships among programs than from the programs themselves."<sup>2</sup> In other words, **the power of Unix comes not from the TUI, even less from the GUI, but from the shell, from the command line**. Therefore, a file manager entirely based on the command line is no doubt an advantageous way of managing files in a Unix environment.
+As Kernighan and Pike stated once, "The power of a system comes more from the relationships among programs than from the programs themselves."<sup>2</sup> In other words, **the power of Unix comes from the shell, from the command line**. Therefore, a file manager entirely based on the command line is no doubt an advantageous way of managing files in a Unix environment.
 
 Besides 5 MiB of RAM and 500 KiB of disk space, willingness to try something different is all you need.
 
