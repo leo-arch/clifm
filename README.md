@@ -80,10 +80,10 @@ Besides 5 MiB of RAM and 500 KiB of disk space, willingness to try something dif
 
 ---
 
-## Features
-
 <h4 align="center">CliFM's interface</h4>
 <p align="center"><img src="images/clifm_interface2.png"></p>
+
+## Features
 
 <details>
 <summary>Click here to expand</summary>
