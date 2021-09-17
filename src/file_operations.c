@@ -669,6 +669,12 @@ copy_function(char **comm)
 {
 	log_function(NULL);
 
+	if (*comm[0] == 'm' && comm[1]) {
+		size_t len = strlen(comm[1]);
+		if (comm[1][len - 1] == '/')
+			comm[1][len - 1] = '\0';
+	}
+
 	if (!is_sel)
 		return run_and_refresh(comm);
 

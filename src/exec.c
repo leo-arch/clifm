@@ -72,22 +72,22 @@ char **_comm = (char **)NULL;
 
 /* Run a command via execle() and refresh the screen in case of success */
 int
-run_and_refresh(char **comm)
+run_and_refresh(char **cmd)
 {
-	if (!comm)
+	if (!cmd)
 		return EXIT_FAILURE;
 
-	log_function(comm);
+	log_function(cmd);
 
 	size_t i = 0, total_len = 0;
 	for (i = 0; i <= args_n; i++)
-		total_len += strlen(comm[i]);
+		total_len += strlen(cmd[i]);
 
 	char *tmp_cmd = (char *)NULL;
 	tmp_cmd = (char *)xcalloc(total_len + (i + 1) + 1, sizeof(char));
 
 	for (i = 0; i <= args_n; i++) {
-		strcat(tmp_cmd, comm[i]);
+		strcat(tmp_cmd, cmd[i]);
 		strcat(tmp_cmd, " ");
 	}
 
@@ -99,8 +99,8 @@ run_and_refresh(char **comm)
 	/* Error messages will be printed by launch_execve() itself */
 
 	/* If 'rm sel' and command is successful, deselect everything */
-	if (is_sel && *comm[0] == 'r' && comm[0][1] == 'm' && (!comm[0][2]
-	|| comm[0][2] == ' ')) {
+	if (is_sel && *cmd[0] == 'r' && cmd[0][1] == 'm' && (!cmd[0][2]
+	|| cmd[0][2] == ' ')) {
 		int j = (int)sel_n;
 		while (--j >= 0)
 			free(sel_elements[j]);
@@ -109,8 +109,8 @@ run_and_refresh(char **comm)
 	}
 
 #ifdef __HAIKU__
-	if (cd_lists_on_the_fly && strcmp(comm[1], "--help") != 0
-	&& strcmp(comm[1], "--version") != 0) {
+	if (cd_lists_on_the_fly && strcmp(cmd[1], "--help") != 0
+	&& strcmp(cmd[1], "--version") != 0) {
 		free_dirlist();
 		list_dir();
 	}
