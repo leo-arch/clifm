@@ -67,8 +67,6 @@ If working with the command-line, your workflow is not affected at all, but just
 
 Briefly stated, those familiar with the command-line will find in a file manager based on it a desirable _extension_ of its functionality. And this because of a simple reason: the command-line is still there, never hidden.
 
-As Kernighan and Pike stated once, "The power of a system comes more from the relationships among programs than from the programs themselves."<sup>2</sup> In other words, **the power of Unix comes from the shell, from the command line**. Therefore, a file manager entirely based on the command line is no doubt an advantageous way of managing files in a Unix environment.
-
 Besides 5 MiB of RAM and 500 KiB of disk space, willingness to try something different is all you need.
 
 ### Should all terminal file managers be TUI-based file managers? No.
