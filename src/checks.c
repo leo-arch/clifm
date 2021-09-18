@@ -311,21 +311,22 @@ int
 is_internal(const char *cmd)
 {
 	const char *int_cmds[] = {
+	    "ac", "ad",
+	    "bm", "bookmarks",
+	    "bl", "le",
+	    "br", "bulk",
 	    "cd",
-	    "o", "open",
-	    "s", "sel",
-	    "p", "pr", "prop",
-	    "r",
-	    "t", "tr", "trash",
+		"d", "dup",
+	    "exp", "export",
+	    "jc", "jp",
 	    "mm", "mime",
 	    "n", "new",
-	    "bm", "bookmarks",
-	    "br", "bulk",
-	    "ac", "ad",
-	    "exp", "export",
+	    "o", "open",
+	    "p", "pr", "prop",
 	    "pin",
-	    "jc", "jp",
-	    "bl", "le",
+	    "r",
+	    "s", "sel",
+	    "t", "tr", "trash",
 	    "te",
 	    NULL};
 
