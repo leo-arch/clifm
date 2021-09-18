@@ -31,17 +31,6 @@ href="https://software.opensuse.org//download.html?project=home%3Aarchcrack&pack
 </p>
 
 ---
-<details>
-<summary>Watch me fly!</summary>
-
-<h3 align="center"><br><i>Did I say it's fast?</i></h3>
-<p align="center"><a href="https://mega.nz/embed/J8hEkCZZ#fGp0JtcDvFIWKmTc4cOp0iMrWRlbqs99THg8F7EmQWI"><img src="images/vid_thumb.png"></a></p>
-
-Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Dikiciyan) \
-**Note**: Icons and files preview depend on third-party software. Consult the [icons](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk) and [files preview](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) sections.
-</details>
-
----
 
 ## Table of contents
 *   [Why?](#why)
@@ -78,6 +67,19 @@ Besides 5 MiB of RAM and 500 KiB of disk space, willingness to try something dif
 
 <h4 align="center">CliFM's interface</h4>
 <p align="center"><img src="images/clifm_interface2.png"></p>
+
+<details>
+<summary>Watch me fly!</summary>
+
+<h3 align="center"><br><i>Did I say it's fast?</i></h3>
+<p align="center"><a href="https://mega.nz/embed/J8hEkCZZ#fGp0JtcDvFIWKmTc4cOp0iMrWRlbqs99THg8F7EmQWI"><img src="images/vid_thumb.png"></a></p>
+
+Music: "Quad Machine", by [Sonic Mayhem](https://en.wikipedia.org/wiki/Sascha_Dikiciyan) \
+**Note**: Icons and files preview depend on third-party software. Consult the [icons](https://github.com/leo-arch/clifm/wiki/Advanced#icons-smirk) and [files preview](https://github.com/leo-arch/clifm/wiki/Advanced#files-preview) sections.
+
+</details>
+
+
 
 ## Features
 
