@@ -1405,16 +1405,33 @@ rl_suggestions(const unsigned char c)
 		if (printed) {
 			suggestion.offset = 0;
 			goto SUCCESS;
-		}/* else {
-			rl_delete_text(0, rl_end);
-			rl_end = rl_point = 0; 
-			cur_color = nf_c;
+		} /*else {
+			static int wrong = 0;
+			if (wrong)
+				goto FAIL;
+			wrong = 1;
+//			int bk = rl_point;
 			fputs("\x1b[0;31m", stdout);
-			fflush(stdout);
-			last_word[w_len - 1] = '\0';
+			rl_point = 0;
+			rl_delete_text(0, rl_end);
+//			rl_point = rl_end = 0;
+//			printf("\x1b[%zuD", w_len);
+//			fputs("\x1b[0;31m", stdout);
+//			printf("\x1b[%zuC", w_len);
 			rl_insert_text(last_word);
+//			rl_point = bk;
+			inserted_c = 1;
+//			rl_point = bk;
+//			rl_redisplay();
+//			rl_point = bk;
+//			rl_end = rl_point = 0; 
+//			cur_color = nf_c;
+//			fputs("\x1b[0;31m", stdout);
+//			fflush(stdout);
+//			last_word[w_len - 1] = '\0';
+//			rl_insert_text(last_word);
 //			printed = 1;
-			goto FAIL; 
+			goto FAIL;
 		} */
 	}
 

@@ -316,6 +316,45 @@ get_file_type(mode_t m)
 	}
 }
 
+static int
+post_listing(DIR *dir, const int close_dir, const int reset_pager)
+{
+	/* Unhide the cursor */
+	fputs("\x1b[?25h", stdout);
+
+	if (close_dir && closedir(dir) == -1)
+		return EXIT_FAILURE;
+
+	if (xargs.list_and_quit == 1)
+		exit(exit_code);
+
+	if (reset_pager)
+		pager = 1;
+
+	if (max_files != UNSET && (int)files > max_files)
+		printf("%d/%zu\n", max_files, files);
+
+	/* Print a dividing line between the files list and the prompt */
+	print_div_line();
+
+	if (dirhist_map) {
+		/* Print current, previous, and next entries */
+		print_dirhist_map();
+		print_div_line();
+	}
+
+	if (disk_usage)
+		print_disk_usage();
+
+	if (sort_switch)
+		print_sort_method();
+
+	if (print_selfiles && sel_n > 0)
+		_print_selfiles(term_rows);
+
+	return EXIT_SUCCESS;
+}
+
 /* List files in the current working directory (global variable 'path').
  * Unlike list_dir(), however, this function uses no color and runs
  * neither stat() nor count_dir(), which makes it quite faster. Return
@@ -899,12 +938,12 @@ list_dir_light(void)
 			}
 
 			int diff = (int)longest - cur_len;
-//			xprintf("\x1b[%dC", diff + 1);
-			register int j;
+			xprintf("\x1b[%dC", diff + 1);
+/*			register int j;
 			for (j = diff + 1; j--;) {
-				putchar(' ');
+				putchar(' '); */
 //				*(line_buf + line_sz++) = ' '; 
-			}
+//			}
 		} else {
 /*			*(line_buf + line_sz++) = '\n';
 			fputs(line_buf, stdout);
@@ -921,49 +960,14 @@ list_dir_light(void)
 //	free(line_buf);
 
 END:
-	/* Unhide the cursor */
-	fputs("\x1b[?25h", stdout);
-
-	if (close_dir && closedir(dir) == -1)
-		return EXIT_FAILURE;
-
-	if (xargs.list_and_quit == 1)
-		exit(exit_code);
-
-	if (reset_pager)
-		pager = 1;
-
-	if (max_files != UNSET && (int)files > max_files)
-		printf("%d/%zu\n", max_files, files);
-
-	/* Print a dividing line between the files list and the
-	 * prompt */
-	print_div_line();
-
-	if (dirhist_map) {
-		/* Print current, previous, and next entries */
-		print_dirhist_map();
-		print_div_line();
-	}
-
-	if (disk_usage)
-		print_disk_usage();
-
-	if (sort_switch)
-		print_sort_method();
-
-	if (print_selfiles && sel_n > 0)
-		_print_selfiles(term_rows);
-
-	/* Unhide the cursor */
-	fputs("\x1b[?25h", stdout);
+	exit_code = post_listing(dir, close_dir, reset_pager);
 
 #ifdef _LIST_SPEED
 	clock_t end = clock();
 	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC);
 #endif
 
-	return EXIT_SUCCESS;
+	return exit_code;
 }
 
 /* List files in the current working directory. Uses file type colors
@@ -1753,45 +1757,14 @@ list_dir(void)
 				 * ######################### */
 
 END:
-	/* Unhide the cursor */
-	fputs("\x1b[?25h", stdout);
-
-	if (close_dir && closedir(dir) == -1)
-		return EXIT_FAILURE;
-
-	if (xargs.list_and_quit == 1)
-		exit(exit_code);
-
-	if (reset_pager)
-		pager = 1;
-
-	if (max_files != UNSET && (int)files > max_files)
-		printf("%d/%zu\n", max_files, files);
-
-	/* Print a dividing line between the files list and the
-	 * prompt */
-	print_div_line();
-
-	if (dirhist_map) {
-		/* Print current, previous, and next entries */
-		print_dirhist_map();
-		print_div_line();
-	}
-
-	if (disk_usage)
-		print_disk_usage();
-
-	if (sort_switch)
-		print_sort_method();
-
-	if (print_selfiles && sel_n > 0)
-		_print_selfiles(term_rows);
+	exit_code = post_listing(dir, close_dir, reset_pager);
 
 #ifdef _LIST_SPEED
 	clock_t end = clock();
 	printf("list_dir time: %f\n", (double)(end-start)/CLOCKS_PER_SEC);
 #endif
-	return EXIT_SUCCESS;
+
+	return exit_code;
 }
 
 void
