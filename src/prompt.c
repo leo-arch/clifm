@@ -69,7 +69,7 @@ decode_prompt(const char *line)
 			switch (c) {
 
 			case 'z': /* Exit status of last executed command */
-				temp = (char *)xnmalloc(strlen(xitoa(exit_code)) + 19,
+				temp = (char *)xnmalloc(strlen(xitoa(exit_code)) + 12 + MAX_COLOR,
 						sizeof(char));
 				sprintf(temp, "\001%s\002%d\001%s\002",
 						(exit_code == 0) ? _GREEN : _RED, exit_code, df_c);
