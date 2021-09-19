@@ -1527,11 +1527,15 @@ read_config(void)
 		else if (*line == 'D' && strncmp(line, "DividingLineChar=", 17) == 0) {
 			char *opt = strchr(line, '=');
 			if (!opt || !*opt || !*(++opt)) {
-				div_line_char[0] = DEF_DIV_LINE_CHAR;
-				div_line_char[1] = '\0';
+				div_line_char[0] = '\0';
+//				div_line_char[0] = DEF_DIV_LINE_CHAR;
+//				div_line_char[1] = '\0';
 			} else {
 				char *tmp = remove_quotes(opt);
-				xstrsncpy(div_line_char, tmp ? tmp : opt, NAME_MAX);
+				if (tmp)
+					xstrsncpy(div_line_char, tmp, NAME_MAX);
+				else
+					div_line_char[0] = '\0';
 			}
 		}
 

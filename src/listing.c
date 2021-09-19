@@ -144,6 +144,11 @@ print_sort_method(void)
 static void
 print_div_line(void)
 {
+	if (!*div_line_char) {
+		putchar('\n');
+		return;
+	}
+
 	fputs(dl_c, stdout);
 
 	size_t len = wc_xstrlen(div_line_char);
