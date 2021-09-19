@@ -1117,12 +1117,11 @@ rl_suggestions(const unsigned char c)
 	&& *(last_space - 1) == '\\')
 		last_space = (char *)NULL;
 
-	static int wrong_cmd = 0;
+//	static int wrong_cmd = 0;
 
 	/* Reset the wrong cmd flag whenver we have a new word or a new line */
-	if (last_space || rl_end == 0)
-		wrong_cmd = 0;
-		
+//	if (last_space || rl_end == 0)
+//		wrong_cmd = 0;
 
 	/* We need a copy of the complete line */
 	full_line = (char *)xnmalloc(buflen + 2, sizeof(char));
@@ -1412,22 +1411,26 @@ rl_suggestions(const unsigned char c)
 		if (printed) {
 			suggestion.offset = 0;
 			goto SUCCESS;
-		} else {
+		} /*else {
 			free(full_line);
 			full_line = (char *)NULL;
-			/* We have a non-existent command name. Let's change the string
-			 * color. Do this only once */
-			if (wrong_cmd)
+			// We have a non-existent command name. Let's change the string
+			// color. Do this only once
+			if (wrong_cmd || c == ' ')
 				goto FAIL;
+//			if (c == ' ')
+//				goto SUCCESS;
 			wrong_cmd = 1;
+//			int bk = rl_point;
 			rl_delete_text(0, rl_end);
 			rl_point = rl_end = 0;
 			rl_redisplay();
 			fputs("\x1b[1;31m", stdout);
 			rl_insert_text(last_word);
+//			rl_point = bk + 1;
 			inserted_c = 1;
 			goto FAIL;
-		}
+		} */
 	}
 
 	/* No suggestion found */
@@ -1468,6 +1471,19 @@ rl_suggestions(const unsigned char c)
 
 SUCCESS:
 	free(full_line);
+/*	if (wrong_cmd) {
+		wrong_cmd = 0;
+		if (c != _ESC && !last_space) {
+//			int bk = rl_point;
+			rl_delete_text(0, rl_end);
+			rl_point = rl_end = 0;
+			rl_redisplay();
+			fputs(df_c, stdout);
+			rl_insert_text(last_word);
+//			rl_point = bk;
+			inserted_c = 1;
+		}
+	} */
 	if (printed) {
 		suggestion.printed = 1;
 		/* Restore color */
