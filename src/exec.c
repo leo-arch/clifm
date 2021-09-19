@@ -830,11 +830,13 @@ exec_cmd(char **comm)
 
 			/* Make sure the symlink source is always an absolute path */
 			if (comm[1] && *comm[1] != '/' && *comm[1] != '~') {
-				char tmp[NAME_MAX];
-				xstrsncpy(tmp, comm[1], NAME_MAX);
-				comm[1] = (char *)xrealloc(comm[1], (strlen(tmp)
+				size_t len = strlen(comm[1]);
+				char *tmp = (char *)xnmalloc(len + 1, sizeof(char));
+				xstrsncpy(tmp, comm[1], len);
+				comm[1] = (char *)xrealloc(comm[1], (len
 							+ strlen(ws[cur_ws].path) + 2) * sizeof(char));
 				sprintf(comm[1], "%s/%s", ws[cur_ws].path, tmp);
+				free(tmp);
 			}
 		} else if (*comm[0] == 'r' && !comm[0][1]) {
 			exit_code = remove_file(comm);
