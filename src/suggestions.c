@@ -1111,12 +1111,18 @@ rl_suggestions(const unsigned char c)
 	}
 
 	size_t buflen = (size_t)rl_end;
-/*	size_t buflen = strlen(rl_line_buffer); */
 	suggestion.full_line_len = buflen + 1;
 	char *last_space = strrchr(rl_line_buffer, ' ');
 	if (last_space && last_space != rl_line_buffer
 	&& *(last_space - 1) == '\\')
 		last_space = (char *)NULL;
+
+	static int wrong_cmd = 0;
+
+	/* Reset the wrong cmd flag whenver we have a new word or a new line */
+	if (last_space || rl_end == 0)
+		wrong_cmd = 0;
+		
 
 	/* We need a copy of the complete line */
 	full_line = (char *)xnmalloc(buflen + 2, sizeof(char));
@@ -1399,40 +1405,29 @@ rl_suggestions(const unsigned char c)
 
 	/* 3.f) Check commands in PATH and CliFM internals commands, but
 	 * only for the first word */
+	
 	if (!last_space) {
 		size_t w_len = strlen(last_word);
 		printed = check_cmds(last_word, w_len);
 		if (printed) {
 			suggestion.offset = 0;
 			goto SUCCESS;
-		} /*else {
-			static int wrong = 0;
-			if (wrong)
+		} else {
+			free(full_line);
+			full_line = (char *)NULL;
+			/* We have a non-existent command name. Let's change the string
+			 * color. Do this only once */
+			if (wrong_cmd)
 				goto FAIL;
-			wrong = 1;
-//			int bk = rl_point;
-			fputs("\x1b[0;31m", stdout);
-			rl_point = 0;
+			wrong_cmd = 1;
 			rl_delete_text(0, rl_end);
-//			rl_point = rl_end = 0;
-//			printf("\x1b[%zuD", w_len);
-//			fputs("\x1b[0;31m", stdout);
-//			printf("\x1b[%zuC", w_len);
+			rl_point = rl_end = 0;
+			rl_redisplay();
+			fputs("\x1b[1;31m", stdout);
 			rl_insert_text(last_word);
-//			rl_point = bk;
 			inserted_c = 1;
-//			rl_point = bk;
-//			rl_redisplay();
-//			rl_point = bk;
-//			rl_end = rl_point = 0; 
-//			cur_color = nf_c;
-//			fputs("\x1b[0;31m", stdout);
-//			fflush(stdout);
-//			last_word[w_len - 1] = '\0';
-//			rl_insert_text(last_word);
-//			printed = 1;
 			goto FAIL;
-		} */
+		}
 	}
 
 	/* No suggestion found */
