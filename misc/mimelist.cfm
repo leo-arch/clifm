@@ -33,8 +33,8 @@ X:^text/html$=surf;vimprobable;vimprobable2;qutebrowser;dwb;jumanji;luakit;uzbl;
 
 # Text
 #X:^text/x-(c|shellscript|perl|script.python|makefile|fortran|java-source|javascript|pascal)$=geany
-X:(^text/.*|application/json|inode/x-empty)=nano;vim;vi;emacs;ed;leafpad;mousepad;kate;gedit;pluma
-!X:(^text/.*|application/json|inode/x-empty)=nano;vim;vi;emacs;ed
+X:(^text/.*|application/json|inode/x-empty)=micro;nano;vim;vi;emacs;ed;leafpad;mousepad;kate;gedit;pluma
+!X:(^text/.*|application/json|inode/x-empty)=micro;nano;vim;vi;emacs;ed
 
 # Office documents
 X:^application/.*(open|office)document.*=libreoffice;soffice;ooffice
