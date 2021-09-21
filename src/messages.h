@@ -43,7 +43,7 @@
 #define DUP_USAGE "Duplicate files\nUsage: d, dup SOURCE [DEST]"
 #define EDIT_USAGE "Edit the main configuration file\nUsage: edit [reset] [APPLICATION]"
 #define EXT_USAGE "Turn the use of external commands on-off\nUsage: ext [on, off, status]"
-#define EXPORT_USAGE "Export files to a temporary file\nUsage: exp, export [FILE(s)]"
+#define EXPORT_USAGE "Export files to a temporary file\nUsage: exp [FILE(s)]"
 #define FC_USAGE "Turn the files counter for directories on-off\nUsage: fc, filescounter [on, off, status]"
 #define FF_USAGE "Set show folders first on-off\nUsage: ff, folders-first [on, off, status]"
 #define FILTER_USAGE "Set a filter for the files list\nUsage: ft, filter [unset] [REGEX]"

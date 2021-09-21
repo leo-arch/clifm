@@ -1788,7 +1788,7 @@ help_function(void)
  d, dup SOURCE [DEST]\n\
  ds, desel [*, a, all]\n\
  edit [APPLICATION] [reset]\n\
- exp, export [ELN/FILE ...]\n\
+ exp [ELN/FILE ...]\n\
  ext [on, off, status]\n\
  f, forth [h, hist] [clear] [!ELN]\n\
  fc, filescounter [on, off, status]\n\

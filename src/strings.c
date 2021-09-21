@@ -687,7 +687,7 @@ is_internal_f(const char *restrict cmd)
 	    "c", "cp",
 	    "cd",
 		"d", "dup",
-	    "exp", "export",
+	    "exp",
 	    "l", "ln", "le",
 	    "m", "mv",
 	    "md", "mkdir",
