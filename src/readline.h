@@ -28,3 +28,4 @@ int initialize_readline(void);
 char **my_rl_completion(const char *text, int start, int end);
 char *rl_no_hist(const char *prompt);
 int is_quote_char(const char c);
+void rl_highlight(const unsigned char c);

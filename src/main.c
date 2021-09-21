@@ -535,6 +535,7 @@ char
 	hr_c[MAX_COLOR],		/* Redirection: > */
 	hs_c[MAX_COLOR],		/* Process separators: | & ; */
 	hv_c[MAX_COLOR],		/* Variables: $ */
+	hw_c[MAX_COLOR],		/* Wrong, non-existent command name */
 
     /* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */

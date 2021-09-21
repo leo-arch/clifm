@@ -306,6 +306,7 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define DEF_HR_C "\x1b[00;31m"
 #define DEF_HS_C "\x1b[00;32m"
 #define DEF_HV_C "\x1b[00;32m"
+#define DEF_HW_C "\x1b[00;31m"
 
 #define DLFC "\x1b[0K" /* Delete line from cursor */
 #define CNL "\x1b[1E" /* Move the cursor to beginning next line*/
@@ -1035,6 +1036,7 @@ extern char
 	hr_c[MAX_COLOR],		/* Redirection > */
 	hs_c[MAX_COLOR],		/* Process separators | & ; */
 	hv_c[MAX_COLOR],		/* Variables $ */
+	hw_c[MAX_COLOR],		/* Wrong, non-existent command name $ */
 
     /* Colors used in the prompt, so that \001 and \002 needs to
 	 * be added. This is why MAX_COLOR + 2 */

@@ -345,6 +345,33 @@ rl_create_file(int count, int key)
 	return run_kb_cmd("n");
 }
 
+static void
+my_insert_text(char *text)
+{
+	if (!text || !*text)
+		return;
+
+#ifndef _NO_HIGHLIGHT
+	if (highlight) {
+		char *t = text;
+		fputs(df_c, stdout);
+		int i;
+		for (i = 0; t[i]; i++) {
+			rl_highlight((unsigned char)t[i]);
+			char q[2];
+			q[0] = t[i];
+			q[1] = '\0';
+			rl_insert_text(q);
+			if (!accept_first_word)
+				rl_redisplay();
+		}
+	} else
+#endif
+	{
+		rl_insert_text(text);
+	}
+}
+
 #ifndef _NO_SUGGESTIONS
 static int
 rl_accept_suggestion(int count, int key)
@@ -358,7 +385,7 @@ rl_accept_suggestion(int count, int key)
 		return EXIT_SUCCESS;
 	}
 
-	fputs(df_c, stdout);
+//	fputs(df_c, stdout);
 	
 	/* Only accept the current suggestion if the cursor is at the end
 	 * of the line typed so far */
@@ -455,7 +482,7 @@ rl_accept_suggestion(int count, int key)
 			rl_insert_text(tmp);
 			free(tmp);
 		} else {
-			rl_insert_text(suggestion_buf);
+			my_insert_text(suggestion_buf);
 		}
 		if (suggestion.filetype != DT_DIR)
 			rl_stuff_char(' ');
@@ -466,21 +493,23 @@ rl_accept_suggestion(int count, int key)
 	case FIRST_WORD: /* fallthrough */
 	case JCMD_SUG_NOACD: /* fallthrough */
 	case HIST_SUG:
-		rl_insert_text(suggestion_buf);
+		my_insert_text(suggestion_buf);
 		break;
 
 	case VAR_SUG:
+
 /*
 #ifndef _NO_HIGHLIGHT
 		if (highlight)
 			fputs(hv_c, stdout);
 #endif */
-		rl_insert_text(suggestion_buf);
+
+		my_insert_text(suggestion_buf);
 		rl_stuff_char(' ');
 		break;
 
 	default:
-		rl_insert_text(suggestion_buf);
+		my_insert_text(suggestion_buf);
 		rl_stuff_char(' ');
 		break;
 	}

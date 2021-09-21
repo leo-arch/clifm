@@ -1528,8 +1528,6 @@ read_config(void)
 			char *opt = strchr(line, '=');
 			if (!opt || !*opt || !*(++opt)) {
 				div_line_char[0] = '\0';
-//				div_line_char[0] = DEF_DIV_LINE_CHAR;
-//				div_line_char[1] = '\0';
 			} else {
 				char *tmp = remove_quotes(opt);
 				if (tmp)

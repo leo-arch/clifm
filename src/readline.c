@@ -62,19 +62,18 @@ typedef char *rl_cpvfunc_t;
 int freebsd_sc_console = 0;
 #endif /* __FreeBSD__ */
 
-/*
 #ifndef _NO_HIGHLIGHT
+/* Macros for single and double quotes */
 #define _SINGLE 0
 #define _DOUBLE 1
 
 static char *
 get_cur_color(const int point)
 {
-	int m = point;
+	int m = point; /* POINT is here rl_point */
 	int sep = -1, sp = -1, t = -1;
 	char *c = (char *)NULL;
 	m--;
-
 
 	while (m >= 0) {
 		switch(rl_line_buffer[m]) {
@@ -87,6 +86,9 @@ get_cur_color(const int point)
 		case '-': c = hp_c; t = m; break;
 		case '#': c = hc_c; t = m; break;
 		case '$': c = hv_c; t = m; break;
+		case '(': // fallthrough
+		case '[': // fallthrough
+		case '{': c = hb_c; t = m; break;
 		default: c = df_c; break;
 		}
 
@@ -95,6 +97,23 @@ get_cur_color(const int point)
 
 		--m;
 	}
+
+/*	int n = 0;
+	while (n < m) {
+		if (n > sp && n > sep) {
+			switch(rl_line_buffer[n]) {
+			case '\'': // fallthrough
+			case '"': return hq_c;
+			case '(': // fallthrough
+			case '[': // fallthrough
+			case '{': return hb_c;
+			case '#': return hc_c;
+			default: break;
+			}
+		}
+
+		n++;
+	} */
 
 	if (t != -1) {
 		if (c == hc_c || c == hq_c) {
@@ -114,10 +133,15 @@ get_cur_color(const int point)
 }
 
 static char *
-get_highlight_color(const char c, const size_t *qn, const int point)
+get_highlight_color(const unsigned char c, const size_t *qn, const int point)
 {
-	if (c >= '0' && c <= '9')
-		return hn_c;
+	if (c >= '0' && c <= '9' && cur_color != hq_c && cur_color != hc_c
+	&& cur_color != hb_c) {
+		// Colorize numbers only if first word or previous char is space
+		if (rl_line_buffer[point ? point - 1 : 0] == ' ' || rl_end == 0)
+			return hn_c;
+		return (char *)NULL;
+	}
 
 	char *cl = cur_color;
 	char *p = (char *)NULL;
@@ -133,10 +157,13 @@ get_highlight_color(const char c, const size_t *qn, const int point)
 
 	case '#': p = hc_c; break;
 	case '~': // fallthrough
+	case '-':
+		if (rl_line_buffer[point ? point - 1 : 0] == ' ')
+			p = (c == '~' ? he_c : hp_c);
+		break;
 	case '*': p = he_c; break;
-	case '-': p = hp_c; break;
 
-	case '\'':
+	case '\'': // fallthrough
 	case '"':
 		if ((qn[(c == '\'' ? _SINGLE : _DOUBLE)] + 1) % 2 == 0) {
 			open_quote = 0;
@@ -172,8 +199,8 @@ get_highlight_color(const char c, const size_t *qn, const int point)
 	return p;
 }
 
-static void
-rl_highlight(const char c)
+void
+rl_highlight(const unsigned char c)
 {
 	if (rl_readline_state & RL_STATE_MOREINPUT)
 		return;
@@ -184,6 +211,57 @@ rl_highlight(const char c)
 	if (rl_end == 1 && (c == BS || c == 127)) {
 		cur_color = df_c;
 		return;
+	}
+
+/*	if (rl_end == 0 || rl_line_buffer[rl_end ? rl_end - 1 : 0] == ' ') {
+		if (c == '/') {
+			cur_color = sf_c;
+			fputs(sf_c, stdout);
+			return;
+		}
+		int i = (int)files;
+		while (--i >= 0) {
+			if (c == *file_info[i].name) {
+				cur_color = sf_c;
+				fputs(sf_c, stdout);
+				return;
+			}
+		}
+	}
+
+	if (cur_color == sf_c && c == ' ') {
+		cur_color = df_c;
+		fputs("\x1b[0m", stdout);
+		fputs(df_c, stdout);
+		return;
+	} */
+
+	// Restore default color
+	switch(rl_line_buffer[rl_end ? rl_end - 1 : 0]) {
+	case ' ': // fallthrough
+	case ')': // fallthrough
+	case '}': // fallthrough
+	case ']': // fallthrough
+	case '|': // fallthrough
+	case '*': // fallthrough
+	case ';': // fallthrough
+	case '&': // fallthrough
+	case '>':
+		if (rl_point == rl_end && cur_color != hc_c && cur_color != hq_c) {
+			fputs(df_c, stdout);
+			cur_color = df_c;
+		}
+		break;
+	default: break;
+	}
+
+	if ((c < '0' || c > '9') && cur_color == hn_c) {
+		fputs(df_c, stdout);
+		cur_color = df_c;
+	} else if ((c == BS || c == 127)
+	&& rl_line_buffer[rl_end ? rl_end - 1 : 0] == '#') {
+		fputs(df_c, stdout);
+		cur_color = df_c;
 	}
 
 	int m = rl_point;
@@ -204,9 +282,10 @@ rl_highlight(const char c)
 	rl_point = 0;
 
 	for (rl_point = 0; p[rl_point]; rl_point++)
-		cl = get_highlight_color(p[rl_point], qn, bk);
+		cl = get_highlight_color((unsigned char)p[rl_point], qn, bk);
 
-	cl = get_highlight_color(c, qn, bk);
+	if (cl != hc_c && cl != hb_c)
+		cl = get_highlight_color(c, qn, bk);
 
 	rl_point = bk;
 
@@ -215,211 +294,14 @@ rl_highlight(const char c)
 	|| (c == '"' && qn[_DOUBLE] % 2 != 0))
 		skip = 1;
 
-	if (!skip && cl) {
+	if (!skip && cl && cl != cur_color) {
 		cur_color = cl;
 		fputs(cl, stdout);
 	}
 
 	return;
-} */
-
-/*
-static void
-rl_highlight(const char ch)
-{
-	char *c = cur_color;
-	static int skip = 0, open_quote = 0;
-	int d = 0;
-
-	if (rl_readline_state & RL_STATE_MOREINPUT)
-		return;
-
-	if (ch < 32 && ch != BS && ch != ENTER)
-		return;
-
-	if (rl_point == rl_end) {
-		if (ch >= '0' && ch <= '9') {
-			fputs(hn_c, stdout);
-			fflush(stdout);
-			cur_color = hn_c;
-			return;
-		}
-
-		switch(ch) {
-		case '(': // fallthrough
-		case ')': // fallthrough
-		case '[': // fallthrough
-		case ']': // fallthrough
-		case '{': // fallthrough
-		case '}': c = hb_c;  skip = 0; d = 2; break;
-
-		case '#': c = hc_c; d = 1; skip = 0; break;
-
-		case '-': c = hp_c; d = 1; skip = 0; break;
-
-		case '"': // fallthrough
-		case '\'':
-			c = hq_c;
-			size_t n = 0;
-			char *p = rl_line_buffer;
-			while (*p) {
-				if (*p == ch)
-					n++;
-				p++;
-			}
-			if (++n % 2 != 0) { // Opening quote
-				// Keep color until closing quote is entered
-				skip = 0;
-				d = 1;
-				open_quote = 1;
-			} else { // Closing quote
-				// Reset to default color
-				c = df_c;
-				skip = 1;
-				d = 2;
-				open_quote = 0;
-			}
-			break;
-
-		case '~': // fallthrough
-		case '*': c = he_c;  skip = 0; d = 2; break;
-
-		case '$': c = hv_c; d = 1; skip = 0; break;
-
-		case '>': c = hr_c; skip = 0; d = 2; break;
-
-		case '&': // fallthrough
-		case ';': // fallthrough
-		case '|': c = hs_c; skip = 0; d = 2; break;
-
-		case ENTER: c = df_c; skip = 0; break;
-		case ' ':
-			if (!open_quote && c != hc_c) {
-				c = df_c;
-				skip = 0;
-			}
-			break;
-		default:
-			if (c != hv_c && !open_quote)
-				c = df_c;
-			break;
-		}
-
-		if (rl_end == 1 && (ch == BS || ch == 127))
-			c = df_c;
-
-		goto END;
-	}
-
-	int m = rl_point;
-	int separator = -1;
-	int t = -1;
-	size_t q_count[2] = {0}, single = 0, _double = 1;
-	skip = 0;
-	m--;
-
-	while (m >= 0) {
-		if (rl_line_buffer[m] == '\'')
-			q_count[single]++;
-		if (rl_line_buffer[m] == '"')
-			q_count[_double]++;
-		--m;
-	}
-
-	m = rl_point;
-	if (rl_line_buffer[m] != '"' && rl_line_buffer[m] != '\'')
-		--m;
-	while (m >= 0) {
-		switch(rl_line_buffer[m]) {
-		case ' ': separator = m; break;
-
-		case '&': // fallthrough
-		case ';': // fallthrough
-		case '|': d = 1; c = df_c; break;
-
-		case '#': c = hc_c; d = 1; t = m; break;
-		case '\'':
-			if (q_count[single] % 2 != 0) {
-				c = hq_c;
-				d = 1;
-				t = m;
-			}
-			break;
-		case '"':
-			if (q_count[_double] % 2 != 0) {
-				c = hq_c;
-				d = 1;
-				t = m;
-			}
-			break;
-		case '$': c = hv_c; d = 1; t = m; break;
-		case '-': c = hp_c; d = 1; t = m; break;
-		default: c = df_c; break;
-		}
-		--m;
-
-		if (d && c != hc_c && c != hq_c && separator > t) {
-			c = df_c;
-			continue;
-		}
-
-		if (d)
-			break;
-	}
-
-	if (rl_end == 1 && (ch == BS || ch == 127))
-		c = df_c;
-
-	if (t != -1)
-		goto END;
-
-	d = 0;
-	switch(ch) {
-	case '0': // fallthrough
-	case '1': // fallthrough
-	case '2': // fallthrough
-	case '3': // fallthrough
-	case '4': // fallthrough
-	case '5': // fallthrough
-	case '6': // fallthrough
-	case '7': // fallthrough
-	case '8': // fallthrough
-	case '9': c = hn_c;  skip = 0; d = 2; break;
-	case ' ': return;
-	case '(': // fallthrough
-	case ')': // fallthrough
-	case '[': // fallthrough
-	case ']': // fallthrough
-	case '{': // fallthrough
-	case '}': c = hb_c;  skip = 0; d = 2; break;
-	case '~': // fallthrough
-	case '*': c = he_c;  skip = 0; d = 2; break;
-	case '>': c = hr_c; skip = 0; d = 2; break;
-	case '&': // fallthrough
-	case ';': // fallthrough
-	case '|': c = hs_c; skip = 0; d = 2; break;
-	}
-
-	if (rl_end == 1 && (ch == BS || ch == 127))
-		c = df_c;
-
-END:
-	if (!skip) {
-		fputs(c, stdout);
-		fflush(stdout);
-	}
-
-	if (d == 1) {
-		skip = 1;
-	} else if (d == 2) {
-		skip = 0;
-		c = df_c;
-	}
-
-	cur_color = c;
-	return;
 }
-#endif */
+#endif
 
 /* This function is automatically called by readline() to handle input.
  * Taken from Bash 1.14.7 and modified to fit our needs. Used
@@ -440,10 +322,10 @@ my_rl_getc(FILE *stream)
 		if (result == sizeof(unsigned char)) {
 			if (control_d_exits && c == 4) /* Ctrl-d */
 				rl_quit(0, 0);
-/*#ifndef _NO_HIGHLIGHT
+#ifndef _NO_HIGHLIGHT
 			if (highlight)
 				rl_highlight(c);
-#endif // _NO_HIGHLIGHT */
+#endif // !_NO_HIGHLIGHT
 
 #ifndef _NO_SUGGESTIONS
 			if (suggestions) {

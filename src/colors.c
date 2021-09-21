@@ -635,6 +635,7 @@ set_colors(const char *colorscheme, int env)
 		*hr_c = '\0';
 		*hs_c = '\0';
 		*hv_c = '\0';
+		*hw_c = '\0';
 		*sh_c = '\0';
 		*sf_c = '\0';
 		*sc_c = '\0';
@@ -785,6 +786,14 @@ set_colors(const char *colorscheme, int env)
 					*hv_c = '\0';
 				else
 					snprintf(hv_c, MAX_COLOR - 1, "\x1b[%sm",
+							colors[i] + 3);
+			}
+
+			else if (*colors[i] == 'h' && strncmp(colors[i], "hw=", 3) == 0) {
+				if (!is_color_code(colors[i] + 3))
+					*hw_c = '\0';
+				else
+					snprintf(hw_c, MAX_COLOR - 1, "\x1b[%sm",
 							colors[i] + 3);
 			}
 
@@ -1001,7 +1010,8 @@ set_colors(const char *colorscheme, int env)
 			&& filecolors[i + 1] == 'q') || (filecolors[i] == 'h'
 			&& filecolors[i + 1] == 'r') || (filecolors[i] == 'h'
 			&& filecolors[i + 1] == 's') || (filecolors[i] == 'h'
-			&& filecolors[i + 1] == 'v')) && filecolors[i + 2] == '=') {
+			&& filecolors[i + 1] == 'v') || (filecolors[i] == 'h'
+			&& filecolors[i + 1] == 'w')) && filecolors[i + 2] == '=') {
 
 				/* If one of the above is found, move to the next
 				 * color code */
@@ -1302,6 +1312,8 @@ set_colors(const char *colorscheme, int env)
 		strcpy(hs_c, DEF_HS_C);
 	if (!*hv_c)
 		strcpy(hv_c, DEF_HV_C);
+	if (!*hw_c)
+		strcpy(hw_c, DEF_HW_C);
 
 	if (!*sh_c)
 		strcpy(sh_c, DEF_SH_C);
