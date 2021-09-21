@@ -158,6 +158,8 @@ FAIL:
 	return EXIT_FAILURE;
 }
 
+/* Change the color of the word _LAST_WORD, at offset OFFSET, to COLOR
+ * in the current input string */
 static void
 change_word_color(const char *_last_word, const int offset, const char *color)
 {
@@ -237,7 +239,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 		offset = strlen(last_word) - (size_t)rl_point;
 		inserted_c = 1;
 	}
-#endif
+#endif /* !_NO_HIGHLIGHT */
 
 	free(suggestion_buf);
 	suggestion_buf = (char *)NULL;
@@ -1059,10 +1061,10 @@ rl_suggestions(const unsigned char c)
 
 	/* Skip backspace, Enter, and TAB keys */
 	switch(c) {
-		case '|': // fallthrough
-		case ';': // fallthrough
-		case '&': // fallthrough
-		case '>': // fallthrough
+		case '|': /* fallthrough */
+		case ';': /* fallthrough */
+		case '&': /* fallthrough */
+		case '>': /* fallthrough */
 		case SPACE: wrong_cmd = 0; break;
 
 		case DELETE: /* fallthrough */
@@ -1455,8 +1457,8 @@ rl_suggestions(const unsigned char c)
 		&& *last_word != '\'' && *last_word != '"') {
 			free(full_line);
 			full_line = (char *)NULL;
-			// We have a non-existent command name. Let's change the string
-			// color. Do this only once
+			/* We have a non-existent command name. Let's change the string
+			 * color. Do this only once */
 			if (wrong_cmd || c == ' ')
 				goto FAIL;
 			wrong_cmd = 1;
@@ -1464,7 +1466,7 @@ rl_suggestions(const unsigned char c)
 			inserted_c = 1;
 			goto FAIL;
 		}
-#endif // !_NO_HIGHLIGHT
+#endif /* !_NO_HIGHLIGHT */
 	}
 
 	/* No suggestion found */

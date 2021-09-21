@@ -345,6 +345,8 @@ rl_create_file(int count, int key)
 	return run_kb_cmd("n");
 }
 
+/* Insert the accepted suggestion into the current input line
+ * (highlighting words and special chars if syntax highlighting is enabled) */
 static void
 my_insert_text(char *text)
 {
@@ -385,8 +387,6 @@ rl_accept_suggestion(int count, int key)
 		return EXIT_SUCCESS;
 	}
 
-//	fputs(df_c, stdout);
-	
 	/* Only accept the current suggestion if the cursor is at the end
 	 * of the line typed so far */
 	if (!suggestions || rl_point != rl_end || !suggestion_buf) {
@@ -452,12 +452,6 @@ rl_accept_suggestion(int count, int key)
 	|| suggestion.type == JCMD_SUG || suggestion.type == JCMD_SUG_NOACD))
 		clear_suggestion();
 
-/*
-#ifndef _NO_HIGHLIGHT
-	if (*suggestion_buf == '#')
-		fputs(hc_c, stdout);
-#endif */
-
 	switch(suggestion.type) {
 
 	case JCMD_SUG: /* fallthrough */
@@ -497,12 +491,6 @@ rl_accept_suggestion(int count, int key)
 		break;
 
 	case VAR_SUG:
-
-/*
-#ifndef _NO_HIGHLIGHT
-		if (highlight)
-			fputs(hv_c, stdout);
-#endif */
 
 		my_insert_text(suggestion_buf);
 		rl_stuff_char(' ');
