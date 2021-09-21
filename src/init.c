@@ -950,6 +950,7 @@ external_arguments(int argc, char **argv)
 	    {"no-file-ext", no_argument, 0, 39},
 	    {"no-follow-symlink", no_argument, 0, 40},
 		{"control-d-exits", no_argument, 0, 41},
+		{"int-vars", no_argument, 0, 42},
 	    {0, 0, 0, 0}};
 
 	/* Increment whenever a new (only) long option is added */
@@ -1083,6 +1084,7 @@ external_arguments(int argc, char **argv)
 		case 39: xargs.check_ext = check_ext = 0; break;
 		case 40: xargs.follow_symlinks = follow_symlinks = 0; break;
 		case 41: xargs.control_d_exits = control_d_exits = 1; break;
+		case 42: xargs.int_vars = int_vars = 1; break;
 
 		case 'a':
 			flags &= ~HIDDEN; /* Remove HIDDEN from 'flags' */
@@ -1455,6 +1457,7 @@ unset_xargs(void)
 	xargs.icons = UNSET;
 	xargs.icons_use_file_color = UNSET;
 #endif
+	xargs.int_vars = UNSET;
 	xargs.light = UNSET;
 	xargs.list_and_quit = UNSET;
 	xargs.logs = UNSET;
@@ -2097,6 +2100,13 @@ check_options(void)
 	if (suggest_filetype_color == UNSET)
 		suggest_filetype_color = DEF_SUG_FILETYPE_COLOR;
 #endif
+
+	if (int_vars == UNSET) {
+		if (xargs.int_vars == UNSET)
+			int_vars = DEF_INT_VARS;
+		else
+			int_vars = xargs.int_vars;
+	}
 
 	if (print_selfiles == UNSET) {
 		if (xargs.printsel == UNSET)

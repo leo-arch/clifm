@@ -366,6 +366,7 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define DEF_FOLLOW_SYMLINKS 1
 #define DEF_HIGHLIGHT 0
 #define DEF_ICONS 0
+#define DEF_INT_VARS 0
 #define DEF_LIGHT_MODE 0
 #define DEF_LIST_FOLDERS_FIRST 1
 #define DEF_LOGS_ENABLED 0
@@ -685,6 +686,7 @@ struct param {
 	int icons;
 #endif
 	int icons_use_file_color;
+	int int_vars;
 	int list_and_quit;
 	int light;
 	int logs;
@@ -811,6 +813,7 @@ extern int
 #ifndef _NO_ICONS
     icons,
 #endif
+	int_vars,
     internal_cmd,
     is_sel,
     kb_shortcut,

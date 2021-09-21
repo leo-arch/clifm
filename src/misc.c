@@ -1703,6 +1703,7 @@ help_function(void)
 \n              available\
 \n     --icons\t\t\t enable icons\
 \n     --icons-use-file-color\t icons color follows file color\
+\n     --int-vars\t\t\t enable internal variables\
 \n     --list-and-quit\t\t list files and quit. It may be used\
 \n              in conjunction with -p\
 \n     --max-dirhist\t\t maximum number of visited directories to \
@@ -1723,6 +1724,7 @@ help_function(void)
 \n              directories\
 \n     --no-colors\t\t disable file type colors for files listing \
 \n     --no-columns\t\t disable columned files listing\
+\n     --no-eln\t\t\t do not print ELN's\
 \n     --no-file-cap\t\t do not check files capabilities when\
 \n              listing files\
 \n     --no-file-ext\t\t do not check files extension when\

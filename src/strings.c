@@ -784,13 +784,27 @@ check_shell_functions(char *str)
 	if (!str || !*str)
 		return 0;
 
+	if (!int_vars) {
+		char *s = strchr(str, ' ');
+		char *e = strchr(str, '=');
+		if (!s && e)
+			return 1;
+		if (s && e && e < s)
+			return 1;
+	}
+
 	char *funcs[] = {
 		"for ", "for(",
 		"while ", "while(",
 		"until ", "until(",
 		"if ", "if(",
-		"[",
+		"[ ", "test ",
 		"case ", "case(",
+		"echo ", "printf ",
+		"declare ",
+		"(( ",
+		"set ",
+		"source", ". ",
 		NULL
 	};
 
@@ -1410,27 +1424,29 @@ parse_input_str(char *str)
 		 * #   2.g) USER DEFINED VARIABLES EXPANSION   #
 		 * #############################################*/
 
-		if (substr[i][0] == '$' && substr[i][1] != '(' && substr[i][1] != '{') {
-			char *var_name = strchr(substr[i], '$');
-			if (var_name && *(++var_name)) {
-				int j = (int)usrvar_n;
-				while (--j >= 0) {
-					if (*var_name == *usr_var[j].name
-					&& strcmp(var_name, usr_var[j].name) == 0) {
-						substr[i] = (char *)xrealloc(substr[i],
-						    (strlen(usr_var[j].value) + 1) * sizeof(char));
-						strcpy(substr[i], usr_var[j].value);
-						break;
+		if (int_vars) {
+			if (substr[i][0] == '$' && substr[i][1] != '(' && substr[i][1] != '{') {
+				char *var_name = strchr(substr[i], '$');
+				if (var_name && *(++var_name)) {
+					int j = (int)usrvar_n;
+					while (--j >= 0) {
+						if (*var_name == *usr_var[j].name
+						&& strcmp(var_name, usr_var[j].name) == 0) {
+							substr[i] = (char *)xrealloc(substr[i],
+								(strlen(usr_var[j].value) + 1) * sizeof(char));
+							strcpy(substr[i], usr_var[j].value);
+							break;
+						}
 					}
+				} else {
+					fprintf(stderr, _("%s: %s: Error getting variable name\n"),
+							PROGRAM_NAME, substr[i]);
+					size_t j;
+					for (j = 0; j <= args_n; j++)
+						free(substr[j]);
+					free(substr);
+					return (char **)NULL;
 				}
-			} else {
-				fprintf(stderr, _("%s: %s: Error getting variable name\n"),
-						PROGRAM_NAME, substr[i]);
-				size_t j;
-				for (j = 0; j <= args_n; j++)
-					free(substr[j]);
-				free(substr);
-				return (char **)NULL;
 			}
 		}
 

@@ -2194,6 +2194,7 @@ reset_variables(void)
 #ifndef _NO_ICONS
 	icons = UNSET;
 #endif
+	int_vars = UNSET;
 	light_mode = UNSET;
 	list_folders_first = UNSET;
 	logs_enabled = UNSET;
