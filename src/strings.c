@@ -778,6 +778,32 @@ split_fusedcmd(char *str)
 	return buf;
 }
 
+static int
+check_shell_functions(char *str)
+{
+	if (!str || !*str)
+		return 0;
+
+	char *funcs[] = {
+		"for ", "for(",
+		"while ", "while(",
+		"until ", "until(",
+		"if ", "if(",
+		"[",
+		"case ", "case(",
+		NULL
+	};
+
+	size_t i;
+	for (i = 0; funcs[i]; i++) {
+		size_t f_len = strlen(funcs[i]);
+		if (*str == *funcs[i] && strncmp(str, funcs[i], f_len) == 0)
+			return 1;
+	}
+
+	return 0;
+}
+
 /*
  * This function is one of the keys of CliFM. It will perform a series of
  * actions:
@@ -843,6 +869,8 @@ parse_input_str(char *str)
 	 * expansion is made: the command is send to the system shell as
 	 * is. */
 	if (*str == ';' || *str == ':')
+		send_shell = 1;
+	else if (check_shell_functions(str))
 		send_shell = 1;
 
 	if (!send_shell) {
