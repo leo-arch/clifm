@@ -1159,6 +1159,8 @@ rl_suggestions(const unsigned char c)
 	&& *(last_space - 1) == '\\')
 		last_space = (char *)NULL;
 
+
+
 #ifndef _NO_HIGHLIGT
 	/* Reset the wrong cmd flag whenver we have a new word or a new line */
 	if (rl_end == 0 || c == '\n')
@@ -1205,6 +1207,12 @@ rl_suggestions(const unsigned char c)
 		else
 			sprintf(last_word, "%s%c", rl_line_buffer, c);
 	}
+
+/*	if (!last_space && c == ' ' && is_internal_c(rl_line_buffer)) {
+		change_word_color(last_word, last_word_offset, sx_c);
+		inserted_c = 1;
+		cur_color = sx_c;
+	} */
 
 		/* ######################################
 		 * #	  3) Search for suggestions		#
@@ -1260,7 +1268,6 @@ rl_suggestions(const unsigned char c)
 				goto SUCCESS;
 			} else {
 				free(full_line);
-				full_line = (char *)NULL;
 				goto FAIL;
 			}
 		}
@@ -1302,7 +1309,6 @@ rl_suggestions(const unsigned char c)
 				goto SUCCESS;
 			} else {
 				free(full_line);
-				full_line = (char *)NULL;
 				goto FAIL;
 			}
 		}
@@ -1444,7 +1450,6 @@ rl_suggestions(const unsigned char c)
 
 	/* 3.f) Check commands in PATH and CliFM internals commands, but
 	 * only for the first word */
-	
 	if (!last_space) {
 		size_t w_len = strlen(last_word);
 		printed = check_cmds(last_word, w_len);
@@ -1456,7 +1461,8 @@ rl_suggestions(const unsigned char c)
 		else if (highlight && *last_word != '#' && *last_word != '$'
 		&& *last_word != '\'' && *last_word != '"') {
 			free(full_line);
-			full_line = (char *)NULL;
+			if (suggestion.printed)
+				clear_suggestion();
 			/* We have a non-existent command name. Let's change the string
 			 * color. Do this only once */
 			if (wrong_cmd || c == ' ')
