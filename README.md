@@ -52,9 +52,7 @@ Unlike most terminal file managers out there, indeed, _CliFM_ replaces the tradi
 
 If working with the command-line, your workflow is not affected at all, but just enriched with file management functionalities: automatic fles listing, files selection, bookmarks, directory jumper, directory history, auto-cd and auto-open, bulk rename, and a trash system, among [other features](#features). In this sense, _CliFM_ is certainly a file manager, but also a shell extension.
 
-Briefly put, the command-line is always already there, never hidden.
-
-Besides 5 MiB of RAM and 500 KiB of disk space, willingness to try something different is all you need.
+Briefly put, with _CliFM_ the command-line is always already there, never hidden.
 
 ---
 <sup>1</sup> <i>For a detailed explanation consult the [introductory section](https://github.com/leo-arch/clifm/wiki/Introduction#what-is-clifm) of the Wiki. For more information about these concepts (CLI and TUI) see the [resources page](https://github.com/leo-arch/clifm/wiki/Resources#gui-tui-and-cli) </i>.
