@@ -1073,7 +1073,7 @@ exec_cmd(char **comm)
 	|| strcmp(comm[0], "keybinds") == 0))
 		return (exit_code = kbinds_function(comm));
 
-	else if (*comm[0] == 'e' && (strcmp(comm[0], "exp") == 0) {
+	else if (*comm[0] == 'e' && strcmp(comm[0], "exp") == 0) {
 		if (comm[1] && *comm[1] == '-' && strcmp(comm[1], "--help") == 0) {
 			puts(_(EXPORT_USAGE));
 			return EXIT_SUCCESS;
