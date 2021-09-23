@@ -63,6 +63,19 @@
 
 #ifdef LINUX_INOTIFY
 void
+reset_inotify(void)
+{
+	if (inotify_wd >= 0) {
+		inotify_rm_watch(inotify_fd, inotify_wd);
+		inotify_wd = -1;
+		watch = 0;
+	}
+	inotify_wd = inotify_add_watch(inotify_fd, ws[cur_ws].path, INOTIFY_MASK);
+	if (inotify_wd > 0)
+		watch = 1;
+}
+
+void
 read_inotify(void)
 {
 	int i;
@@ -124,14 +137,7 @@ read_inotify(void)
 		list_dir();
 	} else {
 		/* Reset the inotify watch list */
-		if (inotify_wd >= 0) {
-			inotify_rm_watch(inotify_fd, inotify_wd);
-			inotify_wd = -1;
-			watch = 0;
-		}
-		inotify_wd = inotify_add_watch(inotify_fd, ws[cur_ws].path, INOTIFY_MASK);
-		if (inotify_wd > 0)
-			watch = 1;
+		reset_inotify();
 	}
 
 	return;
