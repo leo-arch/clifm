@@ -61,6 +61,10 @@ typedef char *rl_cpvfunc_t;
 #include "suggestions.h"
 #endif
 
+#ifndef _NO_HIGHLIGHT
+#include "highlight.h"
+#endif
+
 int accept_first_word = 0;
 
 int
