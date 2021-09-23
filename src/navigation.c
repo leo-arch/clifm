@@ -297,21 +297,26 @@ fastback(const char *str)
 	return q;
 }
 
+void
+print_dirhist(void)
+{
+	int i;
+	for (i = 0; i < dirhist_total_index; i++) {
+		if (!old_pwd[i] || *old_pwd[i] == _ESC)
+			continue;
+		if (i == dirhist_cur_index)
+			printf("  %d  %s%s%s\n", i + 1, dh_c, old_pwd[i], df_c);
+		else
+			printf("  %d  %s\n", i + 1, old_pwd[i]);
+	}
+}
+
 static int
 surf_hist(char **comm)
 {
 	if (*comm[1] == 'h' && (strcmp(comm[1], "h") == 0
 	|| strcmp(comm[1], "hist") == 0)) {
-		/* Print the list of already visited directories */
-		int i;
-		for (i = 0; i < dirhist_total_index; i++) {
-			if (!old_pwd[i] || *old_pwd[i] == _ESC)
-				continue;
-			if (i == dirhist_cur_index)
-				printf("  %d  %s%s%s\n", i + 1, dh_c, old_pwd[i], df_c);
-			else
-				printf("  %d  %s\n", i + 1, old_pwd[i]);
-		}
+		print_dirhist();
 		return EXIT_SUCCESS;
 	}
 

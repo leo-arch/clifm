@@ -656,15 +656,7 @@ exec_cmd(char **comm)
 
 	else if ((*comm[0] == 'b' && comm[0][1] == 'h' && !comm[0][2])
 	|| (*comm[0] == 'f' && comm[0][1] == 'h' && !comm[0][2])) {
-		int i;
-		for (i = 0; i < dirhist_total_index; i++) {
-			if (!old_pwd[i] || *old_pwd[i] == _ESC)
-				continue;
-			if (i == dirhist_cur_index)
-				printf("  %d  %s%s%s\n", i + 1, dh_c, old_pwd[i], df_c);
-			else
-				printf("  %d  %s\n", i + 1, old_pwd[i]);
-		}
+		print_dirhist();
 		return EXIT_SUCCESS;
 	}
 
