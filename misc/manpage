@@ -13,7 +13,7 @@ CLIFM \- The KISS file manager
 .sp
 \fB2.\fR Description
 .sp
-\fB3.\fR Rationale
+\fB3.\fR Features
 .sp
 \fB4.\fR Positional parameters
 .sp
@@ -60,8 +60,15 @@ A convenient way of getting full information about CliFM commands is via the '\f
 .sp
 For a quick introduction jump to the \fBEXAMPLES\fR section at the bottom of this document.
 
-.SH 2. DESCRIPTION
-CliFM is a completely text\-based, \fBshell\-like\fR and non-curses file manager for the terminal able to perform all the basic operations you may expect from any other FM. However, its most distinguishing characteristics are:
+.SH 3. DESCRIPTION
+CliFM is a \fBC\fRommand \fBL\fRine \fBI\fRnterface \fBF\fRile \fBM\fRanager. This is its main feature and strength: all input and interacion is performed via commands typed in a prompt.
+.sp
+Unlike most terminal file managers out there, indeed, CliFM replaces the traditional TUI interface (also known as curses or text-menu based interface) by a simple command-line interface. In this sense, it is a file manager, but also \fBa shell extension\fR: search for files, copy, rename, and trash some of them, but, at the same time, update/upgrade your system, add some cronjob, stop a service, and run nano (or vi, or emacs, if you like).
+.sp
+Simply put, with CliFM the command-line is still there, never hidden, but enriched with file management oriented functionalities.
+
+.SH 3. Features
+CliFM is a completely text\-based, \fBshell\-like\fR file manager for the terminal able to perform all the basic operations you may expect from any other FM. However, its most distinguishing characteristics are:
 .sp
   \fBa)\fR An extensive and customizable list of \fBcolor codes\fR to easily identify file types and extensions.
 .sp
@@ -136,17 +143,6 @@ List of CliFM features:
   39) Fastback function
   40) Remote file systems management
   41) \fIGemini\fR, a Fish-like auto-suggestions system
-
-.SH 3. RATIONALE
-Why another file manager? Simply put, because in a world full of TUI file managers, a CLI file manager simply deserves to exist. No GUI, no TUI, but just a shell-like, \fBC\fRommand \fBL\fRine \fBI\fRnterface \fBF\fRile \fBM\fRanager. This is the main feature and strength of ClIFM.
-.sp
-Unlike most terminal file managers out there, indeed, CliFM replaces the traditional TUI interface (also known as curses or text-menu based interface) by a simple command-line interface. In this sense, it is a file manager, for sure, but also \fBa shell extension\fR: search for files, copy, rename, and trash some of them, but, at the same time, update/upgrade your system, add some cronjob, stop a service, and run nano (or vi, or emacs, if you like).
-.sp
-For those familiar with the command-line, a file manager based on it is no doubt a desirable extension of its functionality. And this because of a simple reason: the command-line is still there, never hidden, but enriched with file management oriented functionalities.
-.sp
-As Kernighan and Pike stated once, "The power of a system comes more from the relationships among programs than from the programs themselves." (1984:viii) In other words, \fBthe power of Unix comes not from the TUI, even less from the GUI, but from the shell, from the command line\fR. Therefore, \fBa file manager entirely based on the command line is no doubt an advantageous way of managing files in a Unix environment\fR.
-.sp
-Should all terminal file managers be TUI-based file managers? The answer is a plain "no".
 
 .SH 4. POSITIONAL PARAMETERS
 If the first non-option parameter is a directory, CliFM will start in this directory. Otherwise, if not a directory, it will open the file via the default associated application and exit (working thus as a stand-alone resource opener).
@@ -398,7 +394,7 @@ The quick search function also supports invert search: prepend the exclamation m
 To perform a recursive search use the -x parameter, and, optionally, a search path (DIR). The search will be performed using \fIfind\fR as follows: 'find DIR -name PATTERN'. If no search path is provided, the search is executed starting in the current directory. Otherwise, the search starts in DIR.
 .TP
 .B ;\fR[CMD], \fB:\fR[CMD]
-If no CMD, run the default shell (see below the \fIshell\fR command) in the current working directory. If CMD is specified, skip all CliFM expansions (see the \fBBUILT\-IN EXPANSIONS\fR section below) and run the input string (CMD) as is via the default system shell.
+If no CMD, run the system shell in the current working directory. If CMD is specified, skip all CliFM expansions (see the \fBBUILT\-IN EXPANSIONS\fR section below) and run the input string (CMD) as is via the default system shell.
 .TP
 .B ac, ad \fRELN/FILE ... n
 archive/compress and dearchive/decompress one or multiple files and/or directories. The archiver function brings two modes: \fIac\fR, to generate archives or compressed files, and \fIad\fR, to decompress or dearchive files, either just listing, extracting, recompressing, or mounting their content. In this latter case, the mountpoint used automatically is \fI$HOME/.config/clifm/PROFILE/mounts/ARCHIVE_NAME\fR.
@@ -706,9 +702,6 @@ The Selection Box is accessible to different instances of the program, provided 
 .TP
 .B sb, selbox
 show the elements currently contained in the Selection Box.
-.TP
-.B shell \fR[SHELL]
-print the current default shell for CliFM or set SHELL as the new default shell. 
 .TP
 .B splash
 show the splash screen.
