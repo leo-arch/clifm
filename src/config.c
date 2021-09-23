@@ -849,7 +849,7 @@ SuggestionStrategy=%s\n\n"
 # file type color (set via the color scheme file).\n\
 SuggestFiletypeColor=%s\n\n"
 
-//"SyntaxHighlighting=%s\n\n"
+/*"SyntaxHighlighting=%s\n\n" */
 
 	    "# If set to true, expand bookmark names into the corresponding bookmark\n\
 # path: if the bookmark is \"name=/path\", \"name\" will be interpreted\n\
@@ -882,7 +882,7 @@ LightMode=%s\n\n",
 		DEF_SUGGESTIONS == 1 ? "true" : "false",
 		DEF_SUG_STRATEGY,
 		DEF_SUG_FILETYPE_COLOR == 1 ? "true" : "false",
-//		DEF_HIGHLIGHT == 1 ? "true" : "false",
+/*		DEF_HIGHLIGHT == 1 ? "true" : "false", */
 		DEF_EXPAND_BOOKMARKS == 1 ? "true" : "false",
 		DEF_LIGHT_MODE == 1 ? "true" : "false"
 		);
