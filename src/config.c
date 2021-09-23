@@ -1791,7 +1791,9 @@ read_config(void)
 		else if (*line == 'P' && strncmp(line, "Prompt=", 7) == 0) {
 			if (encoded_prompt)
 				free(encoded_prompt);
-			encoded_prompt = straft(line, '=');
+			char *p = strchr(line, '=');
+			if (p && *(++p))
+				encoded_prompt = savestring(p, strlen(p));
 		}
 
 		else if (*line == 'P' && strncmp(line, "PromptStyle=", 12) == 0) {

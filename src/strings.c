@@ -177,6 +177,7 @@ strcntchrlst(const char *str, const char c)
 
 /* Returns the string after the first appearance of a given char, or
  * returns NULL if C is not found in STR or C is the last char in STR. */
+/*
 char *
 straft(char *str, const char c)
 {
@@ -193,7 +194,7 @@ straft(char *str, const char c)
 		p++;
 	}
 
-	/* If C was not found or there is nothing after C */
+	// If C was not found or there is nothing after C
 	if (!q || !*(q + 1))
 		return (char *)NULL;
 
@@ -204,7 +205,7 @@ straft(char *str, const char c)
 
 	strcpy(buf, q + 1);
 	return buf;
-}
+} */
 
 /* Returns the string after the last appearance of a given char, or
  * NULL if no match */
@@ -1848,8 +1849,10 @@ expand_range(char *str, int listdir)
 		return (int *)NULL;
 	}
 
-	char *second = (char *)NULL;
-	second = straft(str, '-');
+	char *p = strchr(str, '-');
+	if (!p || !*(++p))
+		return (int *)NULL;
+	char *second = savestring(p, strlen(p));
 
 	if (!second) {
 		free(first);
@@ -2013,7 +2016,10 @@ get_substr(char *str, const char ifs)
 				if (!first)
 					break;
 
-				char *second = straft(substr[i], '-');
+				char *q = strchr(substr[i], '-');
+				if (!q || !*(++q))
+					break;
+				char *second = savestring(q, strlen(q));
 				if (!second) {
 					free(first);
 					break;

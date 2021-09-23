@@ -674,8 +674,12 @@ untrash_element(char *file)
 	memset(line, '\0', PATH_MAX + 6);
 
 	while (fgets(line, (int)sizeof(line), info_fp)) {
-		if (strncmp(line, "Path=", 5) == 0)
-			orig_path = straft(line, '=');
+		if (strncmp(line, "Path=", 5) == 0) {
+			char *p = strchr(line, '=');
+			if (!p || !*(++p))
+				break;
+			orig_path = savestring(p, strlen(p));
+		}
 	}
 
 	fclose(info_fp);

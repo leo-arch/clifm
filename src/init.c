@@ -1624,7 +1624,10 @@ get_path_env(void)
 #if __linux__
 	for (i = 0; __environ[i]; i++) {
 		if (*__environ[i] == 'P' && strncmp(__environ[i], "PATH", 4) == 0) {
-			path_tmp = straft(__environ[i], '=');
+			char *p = strchr(__environ[i], '=');
+			if (!p || !*(++p))
+				return 0;
+			path_tmp = savestring(p, strlen(p));
 			break;
 		}
 	}
