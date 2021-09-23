@@ -360,7 +360,7 @@ const char *internal_cmds[] = {
     "reload",
     "sel",
     "selbox",
-    "shell",
+//    "shell",
     "sort",
     "splash",
     "tips",

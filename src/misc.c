@@ -1821,7 +1821,6 @@ help_function(void)
  rl, reload\n\
  s, sel ELN/FILE... [[!]PATTERN] [-FILETYPE] [:PATH]\n\
  sb, selbox\n\
- shell [SHELL]\n\
  splash\n\
  st, sort [METHOD] [rev]\n\
  t, tr, trash [ELN/FILE ... n] [ls, list] [clear] [del, rm]\n\

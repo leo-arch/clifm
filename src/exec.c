@@ -1499,7 +1499,7 @@ exec_cmd(char **comm)
 	}
 
 	/* #### SHELL #### */
-	else if (*comm[0] == 's' && strcmp(comm[0], "shell") == 0) {
+/*	else if (*comm[0] == 's' && strcmp(comm[0], "shell") == 0) {
 		if (!comm[1]) {
 			if (user.shell)
 				printf("%s: shell: %s\n", PROGRAM_NAME, user.shell);
@@ -1511,7 +1511,7 @@ exec_cmd(char **comm)
 		} else {
 			return (exit_code = set_shell(comm[1]));
 		}
-	}
+	} */
 
 	/* #### EDIT #### */
 	else if (*comm[0] == 'e' && strcmp(comm[0], "edit") == 0)
