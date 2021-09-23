@@ -849,7 +849,7 @@ SuggestionStrategy=%s\n\n"
 # file type color (set via the color scheme file).\n\
 SuggestFiletypeColor=%s\n\n"
 
-"SyntaxHighlighting=%s\n\n"
+//"SyntaxHighlighting=%s\n\n"
 
 	    "# If set to true, expand bookmark names into the corresponding bookmark\n\
 # path: if the bookmark is \"name=/path\", \"name\" will be interpreted\n\
@@ -882,7 +882,7 @@ LightMode=%s\n\n",
 		DEF_SUGGESTIONS == 1 ? "true" : "false",
 		DEF_SUG_STRATEGY,
 		DEF_SUG_FILETYPE_COLOR == 1 ? "true" : "false",
-		DEF_HIGHLIGHT == 1 ? "true" : "false",
+//		DEF_HIGHLIGHT == 1 ? "true" : "false",
 		DEF_EXPAND_BOOKMARKS == 1 ? "true" : "false",
 		DEF_LIGHT_MODE == 1 ? "true" : "false"
 		);
@@ -903,10 +903,6 @@ ShareSelbox=%s\n\n"
 	    "# Choose the resource opener to open files with their default associated\n\
 # application. If not set, 'lira', CLiFM's built-in opener, is used.\n\
 Opener=\n\n"
-
-	    "# Set the shell to be used when running external commands. Defaults to the\n\
-# user's shell as specified in '/etc/passwd'.\n\
-SystemShell=\n\n"
 
 	    "# Only used when opening a directory via a new CliFM instance (with the 'x'\n\
 # command), this option specifies the command to be used to launch a\n\

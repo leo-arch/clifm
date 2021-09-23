@@ -1101,7 +1101,7 @@ rl_suggestions(const unsigned char c)
 			goto FAIL; */
 
 		case BS:
-//			xbackspace();
+/*			xbackspace(); */
 			if (suggestion.printed && suggestion_buf) {
 				if (rl_point != rl_end)
 					remove_suggestion_not_end();
