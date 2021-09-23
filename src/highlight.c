@@ -109,7 +109,8 @@ get_highlight_color(const unsigned char c, const size_t *qn, const int point)
 	if (c >= '0' && c <= '9' && cur_color != hq_c && cur_color != hc_c
 	&& cur_color != hb_c) {
 		// Colorize numbers only if first word or previous char is space
-		if (rl_line_buffer[point ? point - 1 : 0] == ' ' || rl_end == 0)
+		if (rl_line_buffer[point ? point - 1 : 0] == ' '
+		|| rl_line_buffer[point ? point - 1 : 0] == '-' || rl_end == 0)
 			return hn_c;
 		return (char *)NULL;
 	}
