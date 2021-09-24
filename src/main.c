@@ -195,6 +195,7 @@ size_t
 	cdpath_n = 0,
     cschemes_n = 0,
     current_hist_n = 0,
+	curhistindex = 0,
     eln_as_file_n = 0,
     ext_colors_n = 0,
     files = 0,

@@ -1367,13 +1367,102 @@ rl_onlydirs(int count, int key)
 	return exit_status;
 }
 
-/*static int
-rl_test(int count, int key)
+static void
+print_highlight_string(char *s)
 {
-	UNUSED(count); UNUSED(key);
-	printf("test\n");
-	return EXIT_SUCCESS;
-} */
+	size_t i;
+	rl_delete_text(0, rl_end);
+	rl_point = rl_end = 0;
+	fputs(df_c, stdout);
+	for (i = 0; s[i]; i++) {
+		rl_highlight((unsigned char)s[i]);
+		char q[2];
+		q[0] = s[i];
+		q[1] = '\0';
+		rl_insert_text(q);
+		rl_redisplay();
+	}
+}
+
+static int
+rl_cmdhist(int count, int key)
+{
+	UNUSED(count);
+
+	int p = (int)curhistindex;
+
+	/* If cursor is at the beginning of the line */
+	if (rl_point == 0) {
+		if (key == 65) {
+			if (--p < 0)
+				return EXIT_FAILURE;
+		} else if (key == 66) {
+			if (++p >= (int)current_hist_n)
+				return EXIT_FAILURE;
+		} else {
+			return EXIT_FAILURE;
+		}
+
+		if (!history[p])
+			return EXIT_FAILURE;
+
+		curhistindex = (size_t)p;
+#ifndef _NO_HIGHLIGHT
+		if (highlight)
+			print_highlight_string(history[p]);
+		else
+#endif
+		{
+			rl_replace_line(history[p], 1);
+		}
+
+		rl_point = 0;
+		return EXIT_SUCCESS;
+	}
+
+	/* If cursor is not at the beginning of the line */
+	int found = 0;
+	if (key == 65) {
+		if (--p < 0)
+			return EXIT_FAILURE;
+		while (p >= 0 && history[p]) {
+			if (strncmp(rl_line_buffer, history[p], (size_t)rl_point) == 0) {
+				found = 1;
+				break;
+			}
+			p--;
+		}
+	} else if (key == 66) {
+		if (++p >= (int)current_hist_n)
+			return EXIT_FAILURE;
+		while (history[p]) {
+			if (strncmp(rl_line_buffer, history[p], (size_t)rl_point) == 0) {
+				found = 1;
+				break;
+			}
+			p++;
+		}
+	} else {
+		return EXIT_FAILURE;
+	}
+
+	if (found) {
+		curhistindex = (size_t)p;
+		int bk = rl_point;
+#ifndef _NO_HIGHLIGHT
+		if (highlight)
+			print_highlight_string(history[p]);
+		else
+#endif
+		{
+			rl_replace_line(history[p], 1);
+		}
+		rl_point = bk;
+		return EXIT_SUCCESS;
+	}
+
+	return EXIT_FAILURE;
+}
 
 /*
 void
@@ -1578,6 +1667,8 @@ readline_kbinds(void)
 		rl_bind_keyseq("\\e[24~", rl_quit);
 	}
 
+	rl_bind_keyseq("\x1b[A", rl_cmdhist);
+	rl_bind_keyseq("\x1b[B", rl_cmdhist);
 /*	char *term = getenv("TERM");
 	tgetent(NULL, term);
 	char *_right_arrow = tgetstr("nd", NULL);

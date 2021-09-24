@@ -139,8 +139,7 @@ init_history(void)
 		/* If the size condition is not included, and in case of a zero
 		 * size file, read_history() produces malloc errors */
 		/* Recover history from the history file */
-		read_history(hist_file); /* This line adds more leaks to
-																readline */
+		read_history(hist_file); /* This line adds more leaks to readline */
 		/* Limit the size of the history file to max_hist lines */
 		history_truncate_file(hist_file, max_hist);
 	} else {

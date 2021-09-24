@@ -575,6 +575,7 @@ get_history(void)
 		history[current_hist_n++] = savestring(line_buff, (size_t)line_len);
 	}
 
+	curhistindex = current_hist_n ? current_hist_n - 1 : 0;
 	history[current_hist_n] = (char *)NULL;
 	free(line_buff);
 	fclose(hist_fp);

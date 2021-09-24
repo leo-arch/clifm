@@ -882,6 +882,7 @@ extern size_t
 	cdpath_n,
     cschemes_n,
     current_hist_n,
+    curhistindex,
     eln_as_file_n,
     ext_colors_n,
     files,

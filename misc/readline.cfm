@@ -70,7 +70,7 @@ $if mode=emacs
 "\C-zZ": do-lowercase-version
 
 # History completion based on prefix
-"\e[A": history-search-backward
-"\e[B": history-search-forward
+#"\e[A": history-search-backward
+#"\e[B": history-search-forward
 
 $endif
