@@ -41,6 +41,11 @@
 #endif
 #endif
 
+/* Setting GLOB_BRACE to ZERO which disables support for GLOB_BRACE if not available on current platform */
+#ifndef GLOB_BRACE
+    #define GLOB_BRACE 0
+#endif
+
 /* Support large files on ARM or 32-bit machines */
 #if defined(__arm__) || defined(__i386__)
 #define _FILE_OFFSET_BITS 64
