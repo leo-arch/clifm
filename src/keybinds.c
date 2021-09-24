@@ -828,6 +828,7 @@ rl_clear_line(int count, int key)
 		suggestion_buf = (char *)NULL;
 	}
 #endif
+	curhistindex = current_hist_n;
 	rl_point = 0;
 	rl_delete_text(rl_point, rl_end);
 	rl_end = 0;
@@ -1367,6 +1368,7 @@ rl_onlydirs(int count, int key)
 	return exit_status;
 }
 
+#ifndef _NO_HIGHLIGHT
 static void
 print_highlight_string(char *s)
 {
@@ -1383,6 +1385,7 @@ print_highlight_string(char *s)
 		rl_redisplay();
 	}
 }
+#endif
 
 static int
 rl_cmdhist(int count, int key)
