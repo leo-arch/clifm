@@ -62,6 +62,10 @@ typedef char *rl_cpvfunc_t;
 #include "highlight.h"
 #endif
 
+#if !defined(S_IFREG) || !defined(S_IFDIR)
+#include <sys/stat.h>
+#endif
+
 #if !defined(_NO_SUGGESTIONS) && defined(__FreeBSD__)
 int freebsd_sc_console = 0;
 #endif /* __FreeBSD__ */

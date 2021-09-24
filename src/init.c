@@ -1619,23 +1619,10 @@ get_path_env(void)
 	size_t i = 0;
 	/* Get the value of the PATH env variable */
 	char *path_tmp = (char *)NULL;
-
-#if __linux__
-	for (i = 0; __environ[i]; i++) {
-		if (*__environ[i] == 'P' && strncmp(__environ[i], "PATH", 4) == 0) {
-			char *p = strchr(__environ[i], '=');
-			if (!p || !*(++p))
-				return 0;
-			path_tmp = savestring(p, strlen(p));
-			break;
-		}
-	}
-#else
 	char *ptr = getenv("PATH");
 	if (!ptr || !*ptr)
 		return 0;
 	path_tmp = savestring(ptr, strlen(ptr));
-#endif
 
 	if (!path_tmp)
 		return 0;
