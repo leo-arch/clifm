@@ -330,6 +330,8 @@ decode_prompt(const char *line)
 				temp[1] = (char)c;
 
 			add_string:
+				if (!temp)
+					break;
 				if (c)
 					line++;
 				result_len += strlen(temp);

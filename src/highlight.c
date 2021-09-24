@@ -120,6 +120,7 @@ get_highlight_color(const unsigned char c, const size_t *qn, const int point)
 	static int open_quote = 0;
 
 	switch(c) {
+//	case '/': p = hv_c; break;
 	case '{': // fallthrough
 	case '}': // fallthrough
 	case '(': // fallthrough
@@ -210,6 +211,7 @@ rl_highlight(const unsigned char c)
 
 	// Restore default color
 	switch(rl_line_buffer[rl_end ? rl_end - 1 : 0]) {
+//	case '/': // fallthrough
 	case ' ': // fallthrough
 	case ')': // fallthrough
 	case '}': // fallthrough
