@@ -60,7 +60,7 @@
 #define LE_USAGE "Edit a symbolic link\nUsage: le SYMLINK"
 #define LM_USAGE "Set light mode on-off\nUsage: lm [on, off]"
 #define LOG_USAGE "List or clear CliFM logs\nUsage: log [clear]"
-#define MF_USAGE "Limit the amount of files listed on the screen to NUM\nUsage: mf [NUM]"
+#define MF_USAGE "Limit the amount of files listed on the screen to NUM (-1 for no limit)\nUsage: mf [NUM]"
 #define MIME_USAGE "Set default opening applications based on MIME types\nUsage: mm, mime [info ELN/FILENAME] [edit] [import]"
 #define MSG_USAGE "List available CliFM messages\nUsage: messages, msg [clear]"
 #define MOUNPOINTS_USAGE "List and change to a mountpoint\nUsage: mp, mountpoints"
