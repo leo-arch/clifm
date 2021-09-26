@@ -1074,7 +1074,9 @@ external_arguments(int argc, char **argv)
 		} break;
 
 		case 34: xargs.printsel = 1; break;
+#ifndef _NO_SUGGESTIONS
 		case 35: xargs.suggestions = suggestions = 0; break;
+#endif
 		case 36: xargs.autojump = autojump = 0; break;
 #ifndef _NO_HIGHLIGHT
 		case 37: xargs.highlight = highlight = 1; break;

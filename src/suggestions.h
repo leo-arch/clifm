@@ -27,6 +27,7 @@
 void clear_suggestion(void);
 int rl_suggestions(const unsigned char c);
 void free_suggestion(void);
+void remove_suggestion_not_end(void);
 /*
 int enable_raw_mode(int fd);
 int disable_raw_mode(int fd);

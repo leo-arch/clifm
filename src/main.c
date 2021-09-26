@@ -71,6 +71,7 @@ struct alias_t *aliases = (struct alias_t *)NULL;
 #ifndef _NO_SUGGESTIONS
 struct suggestions_t suggestion;
 #endif
+
 /* pmsg holds the current program message type */
 enum prog_msg pmsg = NOMSG;
 struct param xargs;
@@ -108,6 +109,7 @@ int
 	check_ext = UNSET,
     classify = UNSET,
     clear_screen = UNSET,
+	cmdhist_flag = 0,
     colorize = UNSET,
     columned = UNSET,
     config_ok = 1,
@@ -168,6 +170,11 @@ int
 #endif
     unicode = UNSET,
     welcome_message = UNSET;
+
+#ifndef _NO_HIGHLIGHT
+int wrong_cmd = 0;
+int wrong_cmd_line = 0;
+#endif
 
 int
     argc_bk = 0,

@@ -349,6 +349,7 @@ rl_create_file(int count, int key)
 	return run_kb_cmd("n");
 }
 
+#ifndef _NO_SUGGESTIONS
 /* Insert the accepted suggestion into the current input line
  * (highlighting words and special chars if syntax highlighting is enabled) */
 static void
@@ -359,6 +360,11 @@ my_insert_text(char *text)
 
 #ifndef _NO_HIGHLIGHT
 	if (highlight) {
+		/* Hide the cursor to minimize flickering */
+		fputs("\x1b[?25l", stdout);
+		/* Set text color to default */
+		fputs(df_c, stdout);
+		cur_color = df_c;
 		char *t = text;
 		fputs(df_c, stdout);
 		int i;
@@ -371,6 +377,7 @@ my_insert_text(char *text)
 			if (!accept_first_word)
 				rl_redisplay();
 		}
+		fputs("\x1b[?25h", stdout);		
 	} else
 #endif
 	{
@@ -378,7 +385,6 @@ my_insert_text(char *text)
 	}
 }
 
-#ifndef _NO_SUGGESTIONS
 static int
 rl_accept_suggestion(int count, int key)
 {
@@ -1392,16 +1398,29 @@ rl_cmdhist(int count, int key)
 {
 	UNUSED(count);
 
+#ifndef _NO_SUGGESTIONS
+	if (suggestion_buf) {
+		free(suggestion_buf);
+		suggestion_buf = (char *)NULL;
+	}
+#endif
+
 	int p = (int)curhistindex;
 
-	/* If cursor is at the beginning of the line */
-	if (rl_point == 0) {
+	/* If the cursor is at the beginning of the line */
+	if (rl_point == 0 || cmdhist_flag == 1) {
+		cmdhist_flag = 1;
 		if (key == 65) {
 			if (--p < 0)
 				return EXIT_FAILURE;
 		} else if (key == 66) {
-			if (++p >= (int)current_hist_n)
-				return EXIT_FAILURE;
+			if (rl_end == 0)
+				return EXIT_SUCCESS;
+			if (++p >= (int)current_hist_n) {
+				--p;
+				rl_replace_line("", 1);
+				return EXIT_SUCCESS;
+			}
 		} else {
 			return EXIT_FAILURE;
 		}
@@ -1410,6 +1429,8 @@ rl_cmdhist(int count, int key)
 			return EXIT_FAILURE;
 
 		curhistindex = (size_t)p;
+
+		fputs("\x1b[?25l", stdout);
 #ifndef _NO_HIGHLIGHT
 		if (highlight)
 			print_highlight_string(history[p]);
@@ -1419,7 +1440,10 @@ rl_cmdhist(int count, int key)
 			rl_replace_line(history[p], 1);
 		}
 
-		rl_point = 0;
+		fputs("\x1b[?25h", stdout);
+		rl_point = rl_end;
+		cur_color = df_c;
+		fputs(df_c, stdout);
 		return EXIT_SUCCESS;
 	}
 
@@ -1450,6 +1474,7 @@ rl_cmdhist(int count, int key)
 	}
 
 	if (found) {
+		fputs("\x1b[?25l", stdout);
 		curhistindex = (size_t)p;
 		int bk = rl_point;
 #ifndef _NO_HIGHLIGHT
@@ -1460,7 +1485,11 @@ rl_cmdhist(int count, int key)
 		{
 			rl_replace_line(history[p], 1);
 		}
+
+		fputs("\x1b[?25h", stdout);
 		rl_point = bk;
+		cur_color = df_c;
+		fputs(df_c, stdout);
 		return EXIT_SUCCESS;
 	}
 

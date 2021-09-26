@@ -796,6 +796,7 @@ extern int
 	check_ext,
     classify,
     clear_screen,
+	cmdhist_flag,
     colorize,
     columned,
     config_ok,
@@ -858,6 +859,11 @@ extern int
 #endif
     unicode,
     welcome_message;
+
+#ifndef _NO_HIGHLIGHT
+extern int wrong_cmd;
+extern int wrong_cmd_line;
+#endif
 
 extern int
     argc_bk,

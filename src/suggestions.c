@@ -48,7 +48,6 @@ typedef char *rl_cpvfunc_t;
 #include <readline/readline.h>
 #endif
 
-#include "suggestions.h"
 #include "aux.h"
 #include "checks.h"
 #include "colors.h"
@@ -58,10 +57,10 @@ typedef char *rl_cpvfunc_t;
 static int free_color = 0;
 char *last_word = (char *)NULL;
 int last_word_offset = 0;
-int inserted_c = 0;
-#ifndef _NO_HIGHLIGHT
-int wrong_cmd = 0;
-#endif
+//int inserted_c = 0;
+//#ifndef _NO_HIGHLIGHT
+//int wrong_cmd = 0;
+//#endif
 
 /* The following three functions were taken from
  * https://github.com/antirez/linenoise/blob/master/linenoise.c
@@ -158,20 +157,24 @@ FAIL:
 	return EXIT_FAILURE;
 }
 
+#ifndef _NO_HIGHLIGHT
 /* Change the color of the word _LAST_WORD, at offset OFFSET, to COLOR
  * in the current input string */
 static void
 change_word_color(const char *_last_word, const int offset, const char *color)
 {
 	int bk = rl_point;
-	int end = (rl_end == rl_point ? 1 : 0);
+//	int end = (rl_end == rl_point ? 1 : 0);
+//	printf("'offset:%d'", offset);
+//	fflush(stdout);
 	rl_delete_text(offset, rl_end);
 	rl_point = rl_end = offset;
 	rl_redisplay();
 	fputs(color, stdout);
 	rl_insert_text(_last_word);
-	rl_point = bk + (end ? 1 : 0);
+	rl_point = bk;// + (end ? 1 : 0);
 }
+#endif
 
 /* This function is only used before running a keybind command. We don't
  * want the suggestion buffer after running a keybind */
@@ -211,7 +214,7 @@ clear_suggestion(void)
 	suggestion.printed = 0;
 }
 
-static void
+void
 remove_suggestion_not_end(void)
 {
 	printf("\x1b[%dC", rl_end - rl_point);
@@ -237,7 +240,6 @@ print_suggestion(const char *str, size_t offset, const char *color)
 		change_word_color(last_word, last_word_offset, df_c);
 		cur_color = df_c;
 		offset = strlen(last_word) - (size_t)rl_point;
-		inserted_c = 1;
 	}
 #endif /* !_NO_HIGHLIGHT */
 
@@ -283,7 +285,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 
 	/* Store the suggestion in a buffer to be used later by the
 	 * rl_accept_suggestion function (keybinds.c) */
-	suggestion_buf = xnmalloc(strlen(str) + 1, sizeof(char));
+	suggestion_buf = (char *)xnmalloc(strlen(str) + 1, sizeof(char));
 	strcpy(suggestion_buf, str);
 
 	/* Erase everything after the current cursor position */
@@ -304,7 +306,6 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	}
 
 	/* Print the suggestion */
-//	printf("%s%s%s", color, str + offset - (offset ? 1 : 0), df_c);
 	printf("%s%s", color, str + offset - (offset ? 1 : 0));
 	fflush(stdout);
 
@@ -1021,164 +1022,12 @@ xbackspace()
 int
 rl_suggestions(const unsigned char c)
 {
-	char *full_line = (char *)NULL;
 	int printed = 0;
-	inserted_c = 0;
 	last_word_offset = 0;
 /*	static int msg_area = 0; */
 
-		/* ######################################
-		 * # 		  1) Filter input			#
-		 * ######################################*/
-
-	/* Disable suggestions while in vi command mode and reenable them
-	 * when changing back to insert mode */
-	if (rl_editing_mode == 0) {
-		if (rl_readline_state & RL_STATE_VICMDONCE) {
-			if (c == 'i') {
-				rl_readline_state &= (unsigned long)~RL_STATE_VICMDONCE;
-			} else if (suggestion.printed) {
-				clear_suggestion();
-				free(suggestion_buf);
-				suggestion_buf = (char *)NULL;
-				goto FAIL;
-			} else {
-				goto FAIL;
-			}
-		}
-	}
-
-	/* Skip escape sequences, mostly arrow keys */
-	if (rl_readline_state & RL_STATE_MOREINPUT) {
-		if (c == '~') {
-			if (rl_point != rl_end && suggestion.printed) {
-				/* This should be the delete key */
-				remove_suggestion_not_end();
-				goto FAIL;
-			} else if (suggestion.printed) {
-				clear_suggestion();
-				free(suggestion_buf);
-				suggestion_buf = (char *)NULL;
-			}
-		}
-		/* Handle history events. If a suggestion has been printed and
-		 * a history event is triggered (usually via the Up and Down arrow
-		 * keys), the suggestion buffer won't be freed. Let's do it
-		 * here */
-		else if ((c == 'A' || c == 'B') && suggestion_buf) {
-			clear_suggestion();
-			goto FAIL;
-		}
-		if (suggestion_buf) {
-			printed = 1;
-			goto SUCCESS;
-		}
-		goto FAIL;
-	}
-
-	/* Skip control characters (0 - 31) except backspace (8), tab(9),
-	 * enter (13), and escape (27) */
-	if (c < 32 && c != BS && c != _TAB && c != ENTER && c != _ESC) {
-		if (suggestion_buf) {
-			printed = 1;
-			goto SUCCESS;
-		} else {
-			goto FAIL;
-		}
-	}
-
-	/* Skip backspace, Enter, and TAB keys */
-	switch(c) {
-		case '|': /* fallthrough */
-		case ';': /* fallthrough */
-		case '&': /* fallthrough */
-		case '>': /* fallthrough */
-		case SPACE: wrong_cmd = 0; break;
-
-		case DELETE: /* fallthrough */
-/*			if (rl_point != rl_end && suggestion.printed)
-				clear_suggestion();
-			goto FAIL; */
-
-		case BS:
-/*			xbackspace(); */
-			if (suggestion.printed && suggestion_buf) {
-				if (rl_point != rl_end)
-					remove_suggestion_not_end();
-				else
-					clear_suggestion();
-			}
-			goto FAIL;
-
-		case ENTER:
-			if (suggestion.printed && suggestion_buf)
-				clear_suggestion();
-			goto FAIL;
-/*		case SPACE:
-			if (msg_area) {
-				rl_restore_prompt();
-				rl_clear_message();
-				msg_area = 0;
-				if (c == ENTER)
-					goto FAIL;
-				break;
-			} else {
-				if (c == ENTER)
-					goto FAIL;
-				break;
-			} */
-
-		case _ESC:
-			if (suggestion.printed)
-				printed = 1;
-			goto SUCCESS;
-
-		case _TAB:
-			if (suggestion.printed) {
-				if (suggestion.nlines < 2 && suggestion.type != ELN_SUG
-				&& suggestion.type != BOOKMARK_SUG
-				&& suggestion.type != ALIAS_SUG
-				&& suggestion.type != JCMD_SUG) {
-					printed = 1;
-				} else {
-					clear_suggestion();
-					goto FAIL;
-				}
-			}
-			goto SUCCESS;
-
-		default: break;
-	}
-
-		/* ######################################
-		 * #	2) Handle last entered char		#
-		 * ######################################*/
-
-	/* If not at the end of line, insert C in the current cursor
-	 * position. Else, append it to current readline buffer to
-	 * correctly find matches: at this point (rl_getc), readline has
-	 * not appended this char to rl_line_buffer yet, so that we must
-	 * do it manually.
-	 * Line editing is only allowed for the last word */
-	int s = strcntchrlst(rl_line_buffer, ' ');
-	/* Do not take into account final spaces */
-	if (s >= 0 && !rl_line_buffer[s + 1])
-		s = -1;
-	if (rl_point != rl_end && c != _ESC) {
-		if (rl_point < s) {
-			if (suggestion.printed)
-				remove_suggestion_not_end();
-			goto FAIL;
-		}
-		char text[2];
-		text[0] = (char)c;
-		text[1] = '\0';
-		rl_insert_text(text);
-		/* This flag is used to tell my_rl_getc not to append C to the
-		 * line buffer (rl_line_buffer), since it was already inserted
-		 * here */
-		inserted_c = 1;
-	}
+	if (rl_end == 0 || rl_point == 0)
+		return EXIT_SUCCESS;
 
 	size_t buflen = (size_t)rl_end;
 	suggestion.full_line_len = buflen + 1;
@@ -1187,20 +1036,14 @@ rl_suggestions(const unsigned char c)
 	&& *(last_space - 1) == '\\')
 		last_space = (char *)NULL;
 
-
-
-#ifndef _NO_HIGHLIGT
-	/* Reset the wrong cmd flag whenver we have a new word or a new line */
+#ifndef _NO_HIGHLIGHT
+	/* Reset the wrong cmd flag whenever we have a new word or a new line */
 	if (rl_end == 0 || c == '\n')
-		wrong_cmd = 0;
-#endif
+		wrong_cmd = wrong_cmd_line = 0;
+#endif  /* !_NO_HIGHLIGHT */
 
 	/* We need a copy of the complete line */
-	full_line = (char *)xnmalloc(buflen + 2, sizeof(char));
-	if (inserted_c)
-		strcpy(full_line, rl_line_buffer);
-	else
-		sprintf(full_line, "%s%c", rl_line_buffer, c);
+	char *full_line = rl_line_buffer;
 
 	/* And a copy of the last entered word as well */
 	if (last_space) {
@@ -1215,25 +1058,14 @@ rl_suggestions(const unsigned char c)
 		if (*(++last_space)) {
 			buflen--;
 			last_word = (char *)xrealloc(last_word, (buflen + 2) * sizeof(char));
-			if (inserted_c)
-				strcpy(last_word, last_space);
-			else
-				sprintf(last_word, "%s%c", last_space, c);
+			strcpy(last_word, last_space);
 		} else {
 			last_word = (char *)xrealloc(last_word, 2 * sizeof(char));
-			if (inserted_c) {
-				*last_word = '\0';
-			} else {
-				*last_word = (char)c;
-				last_word[1] = '\0';
-			}
+			*last_word = '\0';
 		}
 	} else {
 		last_word = (char *)xrealloc(last_word, (buflen + 2) * sizeof(char));
-		if (inserted_c)
-			strcpy(last_word, rl_line_buffer);
-		else
-			sprintf(last_word, "%s%c", rl_line_buffer, c);
+		strcpy(last_word, rl_line_buffer);
 	}
 
 /*	if (!last_space && c == ' ' && is_internal_c(rl_line_buffer)) {
@@ -1243,7 +1075,7 @@ rl_suggestions(const unsigned char c)
 	} */
 
 		/* ######################################
-		 * #	  3) Search for suggestions		#
+		 * #	    Search for suggestions		#
 		 * ######################################*/
 
 	char *lb = rl_line_buffer;
@@ -1295,7 +1127,6 @@ rl_suggestions(const unsigned char c)
 			if (printed) {
 				goto SUCCESS;
 			} else {
-				free(full_line);
 				goto FAIL;
 			}
 		}
@@ -1336,7 +1167,6 @@ rl_suggestions(const unsigned char c)
 			if (printed) {
 				goto SUCCESS;
 			} else {
-				free(full_line);
 				goto FAIL;
 			}
 		}
@@ -1485,19 +1315,18 @@ rl_suggestions(const unsigned char c)
 			suggestion.offset = 0;
 			goto SUCCESS;
 		}
-#ifndef _NO_HIGHLIGT
+#ifndef _NO_HIGHLIGHT
 		/* We have a non-existent command name. Let's change the string
 		 * color. Do this only once */
 		else if (highlight && *last_word != '#' && *last_word != '$'
 		&& *last_word != '\'' && *last_word != '"') {
-			free(full_line);
 			if (suggestion.printed)
 				clear_suggestion();
 			if (wrong_cmd || c == ' ')
 				goto FAIL;
-			wrong_cmd = 1;
+			wrong_cmd = wrong_cmd_line = 1;
 			change_word_color(last_word, last_word_offset, hw_c);
-			inserted_c = 1;
+			cur_color = hw_c;
 			goto FAIL;
 		}
 #endif /* !_NO_HIGHLIGHT */
@@ -1530,7 +1359,6 @@ rl_suggestions(const unsigned char c)
 	if (suggestion.printed) {
 		if (!strchr(last_word, '\x1b')) {
 			clear_suggestion();
-			free(full_line);
 			goto FAIL;
 		} else {
 			/* Go to SUCCESS to avoid removing the suggestion buffer */
@@ -1540,7 +1368,6 @@ rl_suggestions(const unsigned char c)
 	}
 
 SUCCESS:
-	free(full_line);
 	if (printed) {
 		suggestion.printed = 1;
 		/* Restore color */
@@ -1554,8 +1381,6 @@ SUCCESS:
 	}
 	free(last_word);
 	last_word = (char *)NULL;
-	if (inserted_c)
-		return (-1);
 	return EXIT_SUCCESS;
 
 FAIL:
@@ -1564,9 +1389,8 @@ FAIL:
 	last_word = (char *)NULL;
 	free(suggestion_buf);
 	suggestion_buf = (char *)NULL;
-	if (inserted_c)
-		return (-1);
 	return EXIT_FAILURE;
 }
-
-#endif /* !_NO_SUGGESTIONS */
+#else
+int __exclude_me;
+#endif

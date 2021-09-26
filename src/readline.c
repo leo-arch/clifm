@@ -54,6 +54,7 @@ typedef char *rl_cpvfunc_t;
 #include "keybinds.h"
 #include "navigation.h"
 #include "readline.h"
+
 #ifndef _NO_SUGGESTIONS
 #include "suggestions.h"
 #endif
@@ -69,6 +70,214 @@ typedef char *rl_cpvfunc_t;
 #if !defined(_NO_SUGGESTIONS) && defined(__FreeBSD__)
 int freebsd_sc_console = 0;
 #endif /* __FreeBSD__ */
+
+/* Backspace implementation */
+static void
+xbackspace()
+{
+	if (rl_point != rl_end) {
+		if (rl_point) {
+			int bk = rl_point - 1;
+			while (bk < rl_end) {
+				rl_line_buffer[bk] = rl_line_buffer[bk + 1];
+				bk++;
+			}
+			rl_point--;
+			rl_end--;
+		}
+#ifndef _NO_SUGGESTIONS
+		if (suggestion.printed && suggestion_buf)
+			remove_suggestion_not_end();
+#endif /* !_NO_SUGGESTIONS */
+	} else {
+#ifndef _NO_SUGGESTIONS
+		if (suggestion.printed && suggestion_buf)
+			clear_suggestion();
+#endif /* !_NO_SUGGESTIONS */
+		if (rl_end) {
+			rl_line_buffer[rl_end - 1] = '\0';
+			rl_point--;
+			rl_end--;
+		}
+	}
+}
+
+static int
+rl_exclude_input(unsigned char c)
+{
+	/* Disable suggestions while in vi command mode and reenable them
+	 * when changing back to insert mode */
+	if (rl_editing_mode == 0) {
+		if (rl_readline_state & RL_STATE_VICMDONCE) {
+			if (c == 'i') {
+				rl_readline_state &= (unsigned long)~RL_STATE_VICMDONCE;
+#ifndef _NO_SUGGESTIONS
+			} else if (suggestion.printed) {
+				clear_suggestion();
+				free(suggestion_buf);
+				suggestion_buf = (char *)NULL;
+				return 1;
+#endif /* !_NO_SUGGESTIONS */
+			} else {
+				return 1;
+			}
+		}
+	}
+
+	/* Skip escape sequences, mostly arrow keys */
+	if (rl_readline_state & RL_STATE_MOREINPUT) {
+		if (c == '~') {
+#ifndef _NO_SUGGESTIONS
+			if (rl_point != rl_end && suggestion.printed) {
+				/* This should be the delete key */
+				remove_suggestion_not_end();
+				return 1;
+			} else if (suggestion.printed) {
+				clear_suggestion();
+				free(suggestion_buf);
+				suggestion_buf = (char *)NULL;
+			}
+#endif /* !_NO_SUGGESTIONS */
+		}
+		/* Handle history events. If a suggestion has been printed and
+		 * a history event is triggered (usually via the Up and Down arrow
+		 * keys), the suggestion buffer won't be freed. Let's do it
+		 * here */
+#ifndef _NO_SUGGESTIONS
+		else if ((c == 'A' || c == 'B') && suggestion_buf)
+			clear_suggestion();
+#endif /* !_NO_SUGGESTIONS */
+
+		else if  (c == 'C' || c == 'D')
+			cmdhist_flag = 0;
+		return 1;
+	}
+
+	/* Skip control characters (0 - 31) except backspace (8), tab(9),
+	 * enter (13), and escape (27) */
+	if (c < 32 && c != BS && c != _TAB && c != ENTER && c != _ESC)
+		return 1;
+
+	if (c != _ESC)
+		cmdhist_flag = 0;
+
+	/* Skip backspace, Enter, and TAB keys */
+	switch(c) {
+		case DELETE: /* fallthrough */
+/*			if (rl_point != rl_end && suggestion.printed)
+				clear_suggestion();
+			goto FAIL; */
+
+		case BS:
+			xbackspace();
+			if (rl_end == 0 && cur_color != df_c) {
+				cur_color = df_c;
+				fputs(df_c, stdout);
+			}
+#ifndef _NO_SUGGESTIONS
+			if (suggestion.printed && suggestion_buf) {
+				if (rl_point != rl_end)
+					remove_suggestion_not_end();
+				else
+					clear_suggestion();
+			}
+#endif /* !_NO_SUGGESTIONS */
+			return 0;
+
+		case ENTER:
+#ifndef _NO_SUGGESTIONS
+			if (suggestion.printed && suggestion_buf)
+				clear_suggestion();
+#endif /* !_NO_SUGGESTIONS */
+			cur_color = df_c;
+			fputs(df_c, stdout);
+			return 1;
+
+		case _ESC:
+			return 1;
+
+		case _TAB:
+#ifndef _NO_SUGGESTIONS
+			if (suggestion.printed) {
+				if (suggestion.nlines >= 2 || suggestion.type == ELN_SUG
+				|| suggestion.type == BOOKMARK_SUG
+				|| suggestion.type == ALIAS_SUG
+				|| suggestion.type == JCMD_SUG) {
+					clear_suggestion();
+					return 1;
+				}
+			}
+#endif /* !_NO_SUGGESTIONS */
+			return 1;
+
+		default: break;
+	}
+
+#ifndef _NO_SUGGESTIONS
+	int s = strcntchrlst(rl_line_buffer, ' ');
+	/* Do not take into account final spaces */
+	if (s >= 0 && !rl_line_buffer[s + 1])
+		s = -1;
+	if (rl_point != rl_end && c != _ESC) {
+		if (rl_point < s) {
+			if (suggestion.printed)
+				remove_suggestion_not_end();
+		}
+	}
+#endif /* !_NO_SUGGESTIONS */
+
+#ifndef _NO_HIGHLIGHT
+	if (highlight) {
+		if (rl_point == rl_end)
+			rl_highlight(c);
+	}
+#endif /* !_NO_HIGHLIGHT */
+
+	char text[2];
+	text[0] = (char)c;
+	text[1] = '\0';
+	rl_insert_text(text);
+
+#ifndef _NO_HIGHLIGHT
+	if (!highlight || rl_point == rl_end)
+		return 0;
+
+	int bk = rl_point;
+	char *ss = rl_copy_text(0, rl_end);
+	rl_delete_text(0, rl_end);
+	rl_point = rl_end = 0;
+	/* Hide the cursor to minimize flickering */
+	fputs("\x1b[?25l", stdout);
+	/* Set text color to default */
+	fputs(df_c, stdout);
+	cur_color = df_c;
+
+	int sp = strcntchr(ss, ' ');
+	/* Loop through each char in the input line and colorize it */
+	size_t i = 0;
+	for (;ss[i]; i++) {
+		/* Let's keep the color of wrong commands */
+		if (wrong_cmd_line && (int)i < sp) {
+			cur_color = hw_c;
+			fputs(hw_c, stdout);
+		} else {
+			rl_highlight((unsigned char)ss[i]);
+		}
+		char t[2];
+		t[0] = (char)ss[i];
+		t[1] = '\0';
+		rl_insert_text(t);
+		rl_redisplay();
+	}
+
+	/* Unhide the cursor */
+	fputs("\x1b[?25h", stdout);
+	free(ss);
+	rl_point = bk;
+#endif
+
+	return 0;
+}
 
 /* This function is automatically called by readline() to handle input.
  * Taken from Bash 1.14.7 and modified to fit our needs. Used
@@ -89,10 +298,10 @@ my_rl_getc(FILE *stream)
 		if (result == sizeof(unsigned char)) {
 			if (control_d_exits && c == 4) /* Ctrl-d */
 				rl_quit(0, 0);
-#ifndef _NO_HIGHLIGHT
-			if (highlight)
-				rl_highlight(c);
-#endif // !_NO_HIGHLIGHT
+
+			/* Syntax highlighting is made from here */
+			if (rl_exclude_input(c))
+				return c;
 
 #ifndef _NO_SUGGESTIONS
 			if (suggestions) {
@@ -105,24 +314,17 @@ my_rl_getc(FILE *stream)
 			 * console (vt). The escape code to retrieve the current cursor
 			 * position doesn't seem to work. Switching the console to 'sc'
 			 * solves the issue */
-				if (flags & GUI) {
-					if (rl_suggestions(c) == -1) {
-						rl_redisplay();
-						continue;
-					}
-				} else if (freebsd_sc_console && rl_suggestions(c) == -1) {
-					rl_redisplay();
-					continue;
-				}
+				if (flags & GUI)
+					rl_suggestions(c);
+				else if (freebsd_sc_console)
+					rl_suggestions(c);
 #else
-				if (rl_suggestions(c) == -1) {
-					rl_redisplay();
-					continue;
-				}
+				rl_suggestions(c);
 #endif /* __FreeBSD__ */
 			}
-#endif /* _NO_SUGGESTIONS */
-			return (c);
+#endif /* !_NO_SUGGESTIONS */
+			rl_redisplay();
+			continue;
 		}
 		/* If zero characters are returned, then the file that we are
 		reading from is empty!  Return EOF in that case. */
@@ -151,7 +353,7 @@ my_rl_getc(FILE *stream)
 			if ((xflags = fcntl(fileno(stream), F_GETFL, 0)) < 0)
 				return (EOF);
 			if (xflags & O_NONBLOCK) {
-//				xflags &= ~O_NONBLOCK;
+/*				xflags &= ~O_NONBLOCK; */
 				fcntl(fileno(stream), F_SETFL, flags);
 				continue;
 			}

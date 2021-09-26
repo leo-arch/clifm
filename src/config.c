@@ -1369,6 +1369,7 @@ read_config(void)
 				auto_open = 0;
 		}
 
+#ifndef _NO_SUGGESTIONS
 		else if (xargs.suggestions == UNSET && *line == 'A'
 		&& strncmp(line, "AutoSuggestions=", 16) == 0) {
 			char opt_str[MAX_BOOL] = "";
@@ -1380,6 +1381,7 @@ read_config(void)
 			else if (strncmp(opt_str, "false", 5) == 0)
 				suggestions = 0;
 		}
+#endif
 
 		else if (xargs.case_sens_dirjump == UNSET && *line == 'C'
 		&& strncmp(line, "CaseSensitiveDirJump=", 21) == 0) {
