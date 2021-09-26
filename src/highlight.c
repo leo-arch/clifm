@@ -113,7 +113,10 @@ rl_highlight(unsigned char c)
 	case ';': cl = hs_c; break;
 	case '>': cl = hr_c; break;
 	case '$': cl = hv_c; break;
-	case '-': cl = hp_c; break;
+	case '-':
+		if (prev == SPACE)
+			cl = hp_c;
+		break;
 	case '#': cl = hc_c; break;
 	default:
 		if (cur_color != hq_c && cur_color != hb_c && cur_color != hc_c
