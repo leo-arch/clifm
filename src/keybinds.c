@@ -1417,7 +1417,6 @@ rl_cmdhist(int count, int key)
 			if (rl_end == 0)
 				return EXIT_SUCCESS;
 			if (++p >= (int)current_hist_n) {
-				--p;
 				rl_replace_line("", 1);
 				return EXIT_SUCCESS;
 			}
