@@ -41,7 +41,10 @@ typedef char *rl_cpvfunc_t;
 void
 rl_highlight(unsigned char c)
 {
-	if (rl_end == 0 && rl_point == 0 && c == BS) {
+	char prev = rl_line_buffer[rl_end ? rl_end - 1 : 0];
+
+	if ((rl_end == 0 && rl_point == 0 && c == BS)
+	|| prev == '\\') {
 		cur_color = df_c;
 		fputs(df_c, stdout);
 		return;
@@ -58,7 +61,6 @@ rl_highlight(unsigned char c)
 	if (!sp)
 		wrong_cmd_line = 0;
 
-	char prev = rl_line_buffer[rl_end ? rl_end - 1 : 0];
 	if (c >= '0' && c <= '9' && (prev == ' ' || prev == '-'
 	|| cur_color == hn_c || rl_end == 0)) {
 		cur_color = hn_c;
@@ -100,6 +102,7 @@ rl_highlight(unsigned char c)
 		break;
 	case '\'': /* fallthrough */
 	case '"': cl = hq_c; break;
+	case '\\': /* fallthrough */
 	case ENTER: cl = df_c; break;
 	case '~': /* fallthrough */
 	case '*': cl = he_c; break;
