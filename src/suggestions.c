@@ -1399,5 +1399,5 @@ FAIL:
 	return EXIT_FAILURE;
 }
 #else
-int __exclude_me;
+void *__skip_me;
 #endif

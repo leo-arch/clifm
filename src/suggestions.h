@@ -28,14 +28,3 @@ void clear_suggestion(void);
 int rl_suggestions(const unsigned char c);
 void free_suggestion(void);
 void remove_suggestion_not_end(void);
-/*
-int enable_raw_mode(int fd);
-int disable_raw_mode(int fd);
-int get_cursor_position(int ifd, int ofd);
-void print_suggestion(const char *str, size_t offset, const char *color);
-int check_completions(const char *str, const size_t len, const char c);
-int check_filenames(const char *str, const size_t len, const char c, const int first_word);
-int check_history(const char *str, const size_t len);
-int check_cmds(const char *str, const size_t len);
-int check_jumpdb(const char *str, const size_t len);
-int check_int_params(const char *str, const size_t len); */
