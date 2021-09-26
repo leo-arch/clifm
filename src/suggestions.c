@@ -1068,10 +1068,17 @@ rl_suggestions(const unsigned char c)
 		strcpy(last_word, rl_line_buffer);
 	}
 
-/*	if (!last_space && c == ' ' && is_internal_c(rl_line_buffer)) {
-		change_word_color(last_word, last_word_offset, sx_c);
-		inserted_c = 1;
-		cur_color = sx_c;
+/*	if (c == ' ') {
+		rl_line_buffer[rl_end - 1] = '\0';
+		if (is_internal_c(rl_line_buffer)) {
+			rl_line_buffer[rl_end - 1] = ' ';
+			printf("'b'");
+			change_word_color(last_word, 0, sx_c);
+//			sleep(1);
+			cur_color = sx_c;
+		} else {
+			rl_line_buffer[rl_end - 1] = ' ';
+		}
 	} */
 
 		/* ######################################

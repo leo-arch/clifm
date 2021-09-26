@@ -43,8 +43,9 @@ rl_highlight(unsigned char c)
 {
 	char prev = rl_line_buffer[rl_end ? rl_end - 1 : 0];
 
-	if ((rl_end == 0 && c == BS)
-	|| prev == '\\') {
+	if ((rl_end == 0 && c == BS) || prev == '\\') {
+		if (prev == '\\')
+			return;
 		cur_color = df_c;
 		fputs(df_c, stdout);
 		return;
@@ -86,18 +87,19 @@ rl_highlight(unsigned char c)
 	case ']': /* fallthrough */
 	case '}': cl = df_c; break;
 	case '\'':
-		if (qn[_SINGLE] % 2 == 0)
+		if (cur_color == hq_c && qn[_SINGLE] % 2 == 0)
 			cl = df_c;
 		break;
 	case '"':
-		if (qn[_DOUBLE] % 2 == 0)
+		if (cur_color == hq_c && qn[_DOUBLE] % 2 == 0)
 			cl = df_c;
 		break;
+	default: break;
 	}
 
 	switch(c) {
 	case ' ':
-		if (cur_color != hq_c && cur_color != hc_c && cur_color != hb_c)
+		if (cur_color != hq_c && cur_color != hc_c /*&& cur_color != hb_c */)
 			cl = df_c;
 		break;
 	case '\'': /* fallthrough */
@@ -118,15 +120,23 @@ rl_highlight(unsigned char c)
 	case '>': cl = hr_c; break;
 	case '$': cl = hv_c; break;
 	case '-':
-		if (prev == SPACE)
+		if (prev == ' ')
 			cl = hp_c;
 		break;
 	case '#': cl = hc_c; break;
 	default:
-		if (cur_color != hq_c && cur_color != hb_c && cur_color != hc_c
+		if (cur_color != hq_c && /*cur_color != hb_c &&*/ cur_color != hc_c
 		&& cur_color != hv_c && cur_color != hp_c)
 			cl = df_c;
 		break;
+	}
+
+	if (cur_color == hq_c) {
+		if (qn[_SINGLE] % 2 != 0) {
+			return;
+		}else if (qn[_DOUBLE] % 2 != 0) {
+			return;
+		}
 	}
 
 	if (cl && cl != cur_color) {
