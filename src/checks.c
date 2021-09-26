@@ -265,7 +265,6 @@ is_internal_c(const char *restrict cmd)
 	    "rl", "reload",
 	    "s", "sel",
 	    "sb", "selbox",
-	    "shell",
 	    "splash",
 	    "st", "sort",
 	    "t", "tr", "trash",
