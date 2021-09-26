@@ -113,6 +113,7 @@ rl_highlight(unsigned char c)
 	case '{': /* fallthrough */
 	case '}': cl = hb_c; break;
 	case '|': /* fallthrough */
+	case '&': /* fallthrough */
 	case ';': cl = hs_c; break;
 	case '>': cl = hr_c; break;
 	case '$': cl = hv_c; break;
