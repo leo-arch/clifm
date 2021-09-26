@@ -43,7 +43,7 @@ rl_highlight(unsigned char c)
 {
 	char prev = rl_line_buffer[rl_end ? rl_end - 1 : 0];
 
-	if ((rl_end == 0 && rl_point == 0 && c == BS)
+	if ((rl_end == 0 && c == BS)
 	|| prev == '\\') {
 		cur_color = df_c;
 		fputs(df_c, stdout);
@@ -61,7 +61,7 @@ rl_highlight(unsigned char c)
 	if (!sp)
 		wrong_cmd_line = 0;
 
-	if (c >= '0' && c <= '9' && (prev == ' ' || prev == '-'
+	if (c >= '0' && c <= '9' && (prev == ' '
 	|| cur_color == hn_c || rl_end == 0)) {
 		cur_color = hn_c;
 		fputs(hn_c, stdout);
@@ -84,7 +84,7 @@ rl_highlight(unsigned char c)
 	switch(rl_line_buffer[rl_end ? rl_end - 1 : 0]) {
 	case ')': /* fallthrough */
 	case ']': /* fallthrough */
-	case '}': cl =  df_c; break;
+	case '}': cl = df_c; break;
 	case '\'':
 		if (qn[_SINGLE] % 2 == 0)
 			cl = df_c;
