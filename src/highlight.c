@@ -101,6 +101,7 @@ rl_highlight(unsigned char c)
 	case '\'': /* fallthrough */
 	case '"': cl = hq_c; break;
 	case ENTER: cl = df_c; break;
+	case '~': /* fallthrough */
 	case '*': cl = he_c; break;
 	case '(': /* fallthrough */
 	case ')': /* fallthrough */
