@@ -229,7 +229,7 @@ rl_exclude_input(unsigned char c)
 #ifndef _NO_HIGHLIGHT
 	if (highlight) {
 		if (rl_point == rl_end)
-			rl_highlight(c);
+			rl_highlight(c, SET_COLOR);
 	}
 #endif /* !_NO_HIGHLIGHT */
 
@@ -242,38 +242,7 @@ rl_exclude_input(unsigned char c)
 	if (!highlight || rl_point == rl_end)
 		return 0;
 
-	int bk = rl_point;
-	char *ss = rl_copy_text(0, rl_end);
-	rl_delete_text(0, rl_end);
-	rl_point = rl_end = 0;
-	/* Hide the cursor to minimize flickering */
-	fputs("\x1b[?25l", stdout);
-	/* Set text color to default */
-	fputs(df_c, stdout);
-	cur_color = df_c;
-
-	int sp = strcntchr(ss, ' ');
-	/* Loop through each char in the input line and colorize it */
-	size_t i = 0;
-	for (;ss[i]; i++) {
-		/* Let's keep the color of wrong commands */
-		if (wrong_cmd_line && (int)i < sp) {
-			cur_color = hw_c;
-			fputs(hw_c, stdout);
-		} else {
-			rl_highlight((unsigned char)ss[i]);
-		}
-		char t[2];
-		t[0] = (char)ss[i];
-		t[1] = '\0';
-		rl_insert_text(t);
-		rl_redisplay();
-	}
-
-	/* Unhide the cursor */
-	fputs("\x1b[?25h", stdout);
-	free(ss);
-	rl_point = bk;
+	recolorize_line();
 #endif
 
 	return 0;

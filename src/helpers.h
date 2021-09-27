@@ -479,6 +479,10 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define SUG_JUMP 0
 #define NO_SUG_JUMP 1
 
+/* Macros for the rl_highlight function */
+#define SET_COLOR 1
+#define INFORM_COLOR 0
+
 #define FALLBACK_SHELL "/bin/sh"
 
 #ifdef __APPLE__

@@ -36,40 +36,40 @@ typedef char *rl_cpvfunc_t;
 #define _SINGLE 0
 #define _DOUBLE 1
 
-/* Get the appropriate color for C and print the color. This function is
- * used to colorize input, history entries, and accepted suggestions */
-void
-rl_highlight(unsigned char c)
+/* Get the appropriate color for C and print the color (returning a null
+ * pointer) if SET_COLOR is set to 1; otherwise, just return a pointer
+ * to the corresponding color. This function is used to colorize input,
+ * history entries, and accepted suggestions */
+char *
+rl_highlight(unsigned char c, const int flag)
 {
+	char *cl = (char *)NULL;
 	char prev = rl_line_buffer[rl_end ? rl_end - 1 : 0];
 
 	if ((rl_end == 0 && c == BS) || prev == '\\') {
 		if (prev == '\\')
-			return;
-		cur_color = df_c;
-		fputs(df_c, stdout);
-		return;
+			goto END;
+		cl = df_c;
+		goto END;
 	}
 
 	if (cur_color == hc_c)
-		return;
+		goto END;
 
 	char *sp = strchr(rl_line_buffer, ' ');
 
 	if (cur_color == hw_c && !sp)
-		return;
+		goto END;
 
 	if (!sp)
 		wrong_cmd_line = 0;
 
 	if (c >= '0' && c <= '9' && (prev == ' '
 	|| cur_color == hn_c || rl_end == 0)) {
-		cur_color = hn_c;
-		fputs(hn_c, stdout);
-		return;
+		cl = hn_c;
+		goto END;
 	}
 
-	char *cl = (char *)NULL;
 	int m = rl_point;
 	size_t qn[2] = {0};
 	m--;
@@ -132,15 +132,76 @@ rl_highlight(unsigned char c)
 	}
 
 	if (cur_color == hq_c) {
-		if (qn[_SINGLE] % 2 != 0) {
-			return;
-		}else if (qn[_DOUBLE] % 2 != 0) {
-			return;
-		}
+		if (qn[_SINGLE] % 2 != 0)
+			cl = (char *)NULL;
+		else if (qn[_DOUBLE] % 2 != 0)
+			cl = (char *)NULL;
 	}
 
-	if (cl && cl != cur_color) {
-		cur_color = cl;
-		fputs(cl, stdout);
+END:
+	if (flag == SET_COLOR) {
+		if (cl && cl != cur_color) {
+			cur_color = cl;
+			fputs(cl, stdout);
+		}
+		return (char *)NULL;
 	}
+
+	if (!cl)
+		return cur_color;
+	return cl;
+}
+
+/* Recolorize current input line starting from rl_point */
+void
+recolorize_line(void)
+{
+	// Hide the cursor to minimize flickering
+	fputs("\x1b[?25l", stdout);
+
+	// Set text color to default
+	cur_color = df_c;
+	fputs(df_c, stdout);
+
+	// Get the current color up to the current cursor position
+	size_t i = 0;
+	char *cl = (char *)NULL;
+	for (; i < (size_t)rl_point; i++) {
+		cl = rl_highlight((unsigned char)rl_line_buffer[i], INFORM_COLOR);
+		if (cl)
+			cur_color = cl;
+	}
+
+	if (cl)
+		fputs(cl, stdout);
+
+	int sp = strcntchr(rl_line_buffer, ' ');
+	int bk = rl_point - 1;
+	char *ss = rl_copy_text(bk, rl_end);
+	rl_delete_text(bk, rl_end);
+	rl_point = rl_end = bk;
+
+	// Loop through each char from cursor position onward and colorize it
+	i = 0;
+	for (;ss[i]; i++) {
+		// Let's keep the color of wrong commands
+		if (wrong_cmd_line && rl_point < sp) {
+			cur_color = hw_c;
+			fputs(hw_c, stdout);
+		} else {
+			rl_highlight((unsigned char)ss[i], SET_COLOR);
+		}
+
+		// Redisplay the current char with the appropriate color
+		char t[2];
+		t[0] = (char)ss[i];
+		t[1] = '\0';
+		rl_insert_text(t);
+		rl_redisplay();
+	}
+
+	// Unhide the cursor
+	fputs("\x1b[?25h", stdout);
+	free(ss);
+	rl_point = ++bk;
 }

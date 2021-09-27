@@ -23,4 +23,5 @@
 */
 
 #pragma once
-void rl_highlight(const unsigned char c);
+char *rl_highlight(const unsigned char c, const int flag);
+void recolorize_line(void);
