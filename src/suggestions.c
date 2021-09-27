@@ -167,12 +167,14 @@ change_word_color(const char *_last_word, const int offset, const char *color)
 //	int end = (rl_end == rl_point ? 1 : 0);
 //	printf("'offset:%d'", offset);
 //	fflush(stdout);
+	fputs("\x1b[?25l", stdout);
 	rl_delete_text(offset, rl_end);
 	rl_point = rl_end = offset;
 	rl_redisplay();
 	fputs(color, stdout);
 	rl_insert_text(_last_word);
 	rl_point = bk;// + (end ? 1 : 0);
+	fputs("\x1b[?25h", stdout);
 }
 #endif
 
