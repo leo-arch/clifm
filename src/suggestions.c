@@ -988,34 +988,6 @@ check_variables(const char *str, const size_t len)
 	return 0;
 }
 
-/* Backspace implementation */
-static void
-xbackspace()
-{
-	inserted_c = 1;
-	if (rl_point != rl_end) {
-		if (rl_point) {
-			int bk = rl_point - 1;
-			while (bk < rl_end) {
-				rl_line_buffer[bk] = rl_line_buffer[bk + 1];
-				bk++;
-			}
-			rl_point--;
-			rl_end--;
-		}
-		if (suggestion.printed && suggestion_buf)
-			remove_suggestion_not_end();
-	} else {
-		if (rl_end) {
-			rl_line_buffer[rl_point - 1] = '\0';
-			rl_point--;
-			rl_end--;
-		}
-		if (suggestion.printed && suggestion_buf)
-			clear_suggestion();
-	}
-}
-
 /* Check for available suggestions. Returns zero if true, one if not,
  * and -1 if C was inserted before the end of the current line.
  * If a suggestion is found, it will be printed by print_suggestion() */
