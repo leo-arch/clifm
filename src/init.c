@@ -1032,6 +1032,9 @@ external_arguments(int argc, char **argv)
 		case 27:
 			xargs.no_colors = 1;
 			colorize = 0;
+#ifndef _NO_HIGHLIGHT
+			xargs.highlight = highlight = 0;
+#endif
 			break;
 
 		case 28:

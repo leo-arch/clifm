@@ -1,4 +1,4 @@
-/* readline.h */
+/* tabcomp.h -- functions to perform TAB completion */
 
 /*
  * This file is part of CliFM
@@ -24,8 +24,4 @@
 
 #pragma once
 
-int initialize_readline(void);
-char **my_rl_completion(const char *text, int start, int end);
-char *rl_no_hist(const char *prompt);
-int is_quote_char(const char c);
-int tab_complete(int mode);
+int tab_complete(int what_to_do);

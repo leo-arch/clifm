@@ -26,9 +26,9 @@
 
 #include "helpers.h"
 
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+//#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #include <sys/stat.h>
-#endif
+//#endif
 #include <dirent.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -55,6 +55,8 @@ typedef char *rl_cpvfunc_t;
 #include "navigation.h"
 #include "readline.h"
 
+#include "tabcomp.h"
+
 #ifndef _NO_SUGGESTIONS
 #include "suggestions.h"
 #endif
@@ -70,6 +72,24 @@ typedef char *rl_cpvfunc_t;
 #if !defined(_NO_SUGGESTIONS) && defined(__FreeBSD__)
 int freebsd_sc_console = 0;
 #endif /* __FreeBSD__ */
+
+/* Delete key implementation */
+static void
+xdelete()
+{
+#ifndef _NO_SUGGESTIONS
+	if (suggestion.printed && suggestion_buf)
+		remove_suggestion_not_end();
+#endif // !_NO_SUGGESTIONS
+
+	int bk = rl_point;
+	while (bk < rl_end) {
+		rl_line_buffer[bk] = rl_line_buffer[bk + 1];
+		bk++;
+	}
+
+	rl_end--;
+}
 
 /* Backspace implementation */
 static void
@@ -131,14 +151,20 @@ rl_exclude_input(unsigned char c)
 			if (rl_point != rl_end && suggestion.printed) {
 				/* This should be the delete key */
 				remove_suggestion_not_end();
-				return 1;
 			} else if (suggestion.printed) {
 				clear_suggestion();
 				free(suggestion_buf);
 				suggestion_buf = (char *)NULL;
 			}
+			return 1;
 #endif /* !_NO_SUGGESTIONS */
 		}
+
+		else if (c == '3' && rl_point != rl_end) {
+			xdelete();
+			return 0;
+		}
+
 		/* Handle history events. If a suggestion has been printed and
 		 * a history event is triggered (usually via the Up and Down arrow
 		 * keys), the suggestion buffer won't be freed. Let's do it
@@ -150,6 +176,7 @@ rl_exclude_input(unsigned char c)
 
 		else if  (c == 'C' || c == 'D')
 			cmdhist_flag = 0;
+
 		return 1;
 	}
 
@@ -863,6 +890,7 @@ my_rl_path_completion(const char *text, int state)
 
 	/* We have a match */
 	else {
+		cur_comp_type = TCMP_PATH;
 		char *temp = (char *)NULL;
 
 		/* dirname && (strcmp(dirname, ".") != 0) */
@@ -1255,6 +1283,7 @@ char **
 my_rl_completion(const char *text, int start, int end)
 {
 	char **matches = (char **)NULL;
+	cur_comp_type = TCMP_NONE;
 
 	if (start == 0) { /* Only for the first word entered in the prompt */
 		/* Commands completion */

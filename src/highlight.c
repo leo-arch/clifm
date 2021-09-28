@@ -103,6 +103,7 @@ rl_highlight(unsigned char c, const int flag)
 			cl = df_c;
 		break;
 	case '\'': /* fallthrough */
+	case '/': cl = hd_c; break;
 	case '"': cl = hq_c; break;
 	case '\\': /* fallthrough */
 	case ENTER: cl = df_c; break;

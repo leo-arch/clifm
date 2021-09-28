@@ -1498,6 +1498,18 @@ rl_cmdhist(int count, int key)
 	return EXIT_FAILURE;
 }
 
+static int
+rl_tab_comp(int count, int key)
+{
+	if (suggestion.printed && suggestion_buf)
+		clear_suggestion();
+
+	UNUSED(count); UNUSED(key);
+
+	tab_complete('!');
+	return EXIT_SUCCESS;
+}
+
 /*
 void
 add_func_to_rl(void)
@@ -1703,6 +1715,8 @@ readline_kbinds(void)
 
 	rl_bind_keyseq("\x1b[A", rl_cmdhist);
 	rl_bind_keyseq("\x1b[B", rl_cmdhist);
+
+	rl_bind_key('\t', rl_tab_comp);
 /*	char *term = getenv("TERM");
 	tgetent(NULL, term);
 	char *_right_arrow = tgetstr("nd", NULL);

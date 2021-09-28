@@ -74,6 +74,7 @@ struct suggestions_t suggestion;
 
 /* pmsg holds the current program message type */
 enum prog_msg pmsg = NOMSG;
+enum comp_type cur_comp_type = TCMP_NONE;
 struct param xargs;
 unsigned short term_cols;
 
@@ -574,6 +575,7 @@ char
 	/* Syntax highlighting */
 	hb_c[MAX_COLOR],		/* Brackets: () [] {} */
 	hc_c[MAX_COLOR],		/* Comments */
+	hd_c[MAX_COLOR],		/* Paths (slashes) */
 	he_c[MAX_COLOR],		/* Expansion operators: * ~ */
 	hn_c[MAX_COLOR],		/* Numbers */
 	hp_c[MAX_COLOR],		/* Parameters: - */

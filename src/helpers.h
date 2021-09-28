@@ -304,6 +304,7 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 
 #define DEF_HB_C "\x1b[00;36m"
 #define DEF_HC_C "\x1b[02;31m"
+#define DEF_HD_C "\x1b[00;36m"
 #define DEF_HE_C "\x1b[00;36m"
 #define DEF_HN_C "\x1b[00;32m"
 #define DEF_HP_C "\x1b[02;36m"
@@ -768,6 +769,9 @@ enum prog_msg {
 	NOTICE = 4
 };
 
+/* pmsg holds the current program message type */
+extern enum prog_msg pmsg;
+
 /* Enumeration for the dirjump function options */
 enum jump {
 	NONE = 0,
@@ -777,8 +781,21 @@ enum jump {
 	JLIST = 8
 };
 
-/* pmsg holds the current program message type */
-extern enum prog_msg pmsg;
+enum comp_type {
+	TCMP_BOOKMARK = 0,
+	TCMP_CMD = 1,
+	TCMP_CSCHEME = 2,
+	TCMP_ELN = 3,
+	TCMP_JUMP = 4,
+	TCMP_NET = 5,
+	TCMP_NONE = 6,
+	TCMP_PATH = 7,
+	TCMP_PROF = 8,
+	TCMP_SORT = 9
+};
+
+extern enum comp_type cur_comp_type;
+
 extern struct termios orig_termios;
 
 extern int
@@ -1048,6 +1065,7 @@ extern char
 	/* Syntax highlighting */
 	hb_c[MAX_COLOR],		/* Brackets () [] {} */
 	hc_c[MAX_COLOR],		/* Comments */
+	hd_c[MAX_COLOR],		/* Paths (slashes) */
 	he_c[MAX_COLOR],		/* Expansion operators: * ~ */
 	hn_c[MAX_COLOR],		/* Numbers */
 	hp_c[MAX_COLOR],		/* Parameters: - */

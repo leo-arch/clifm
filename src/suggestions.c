@@ -164,16 +164,13 @@ static void
 change_word_color(const char *_last_word, const int offset, const char *color)
 {
 	int bk = rl_point;
-//	int end = (rl_end == rl_point ? 1 : 0);
-//	printf("'offset:%d'", offset);
-//	fflush(stdout);
 	fputs("\x1b[?25l", stdout);
 	rl_delete_text(offset, rl_end);
 	rl_point = rl_end = offset;
 	rl_redisplay();
 	fputs(color, stdout);
 	rl_insert_text(_last_word);
-	rl_point = bk;// + (end ? 1 : 0);
+	rl_point = bk;
 	fputs("\x1b[?25h", stdout);
 }
 #endif
@@ -675,7 +672,6 @@ check_jumpdb(const char *str, const size_t len)
 		color = di_c;
 	else
 		color = sf_c;
-
 	int i = (int)jump_n;
 	while (--i >= 0) {
 		if (!jump_db[i].path || TOUPPER(*str) != TOUPPER(*jump_db[i].path))
@@ -1042,6 +1038,8 @@ rl_suggestions(const unsigned char c)
 	/* Reset the wrong cmd flag whenever we have a new word or a new line */
 	if (rl_end == 0 || c == '\n')
 		wrong_cmd = wrong_cmd_line = 0;
+	if (c == ' ')
+		wrong_cmd = 0;
 #endif  /* !_NO_HIGHLIGHT */
 
 	/* We need a copy of the complete line */
