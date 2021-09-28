@@ -158,7 +158,7 @@ rl_exclude_input(unsigned char c)
 
 		else if (c == '3' && rl_point != rl_end) {
 			xdelete();
-			return 0;
+			goto RECOLORIZE;
 		}
 
 		/* Handle history events. If a suggestion has been printed and
@@ -197,7 +197,7 @@ rl_exclude_input(unsigned char c)
 				cur_color = df_c;
 				fputs(df_c, stdout);
 			}
-			return 0;
+			goto RECOLORIZE;
 
 		case ENTER:
 #ifndef _NO_SUGGESTIONS
@@ -253,6 +253,7 @@ rl_exclude_input(unsigned char c)
 	text[1] = '\0';
 	rl_insert_text(text);
 
+RECOLORIZE:
 #ifndef _NO_HIGHLIGHT
 	if (!highlight || rl_point == rl_end)
 		return 0;
