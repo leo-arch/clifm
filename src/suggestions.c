@@ -1024,8 +1024,13 @@ rl_suggestions(const unsigned char c)
 	last_word_offset = 0;
 /*	static int msg_area = 0; */
 
-	if (rl_end == 0 || rl_point == 0)
+	if (rl_end == 0 || rl_point == 0) {
+		if (suggestion_buf) {
+			free(suggestion_buf);
+			suggestion_buf = (char *)NULL;
+		}
 		return EXIT_SUCCESS;
+	}
 
 	size_t buflen = (size_t)rl_end;
 	suggestion.full_line_len = buflen + 1;
