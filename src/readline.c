@@ -108,12 +108,12 @@ xbackspace()
 #ifndef _NO_SUGGESTIONS
 		if (suggestion.printed && suggestion_buf)
 			remove_suggestion_not_end();
-#endif /* !_NO_SUGGESTIONS */
+#endif // !_NO_SUGGESTIONS
 	} else {
 #ifndef _NO_SUGGESTIONS
 		if (suggestion.printed && suggestion_buf)
 			clear_suggestion();
-#endif /* !_NO_SUGGESTIONS */
+#endif // !_NO_SUGGESTIONS
 		if (rl_end) {
 			rl_line_buffer[rl_end - 1] = '\0';
 			rl_point--;
@@ -134,8 +134,6 @@ rl_exclude_input(unsigned char c)
 #ifndef _NO_SUGGESTIONS
 			} else if (suggestion.printed) {
 				clear_suggestion();
-				free(suggestion_buf);
-				suggestion_buf = (char *)NULL;
 				return 1;
 #endif /* !_NO_SUGGESTIONS */
 			} else {
@@ -153,8 +151,6 @@ rl_exclude_input(unsigned char c)
 				remove_suggestion_not_end();
 			} else if (suggestion.printed) {
 				clear_suggestion();
-				free(suggestion_buf);
-				suggestion_buf = (char *)NULL;
 			}
 			return 1;
 #endif /* !_NO_SUGGESTIONS */
@@ -201,14 +197,6 @@ rl_exclude_input(unsigned char c)
 				cur_color = df_c;
 				fputs(df_c, stdout);
 			}
-#ifndef _NO_SUGGESTIONS
-			if (suggestion.printed && suggestion_buf) {
-				if (rl_point != rl_end)
-					remove_suggestion_not_end();
-				else
-					clear_suggestion();
-			}
-#endif /* !_NO_SUGGESTIONS */
 			return 0;
 
 		case ENTER:

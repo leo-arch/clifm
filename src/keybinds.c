@@ -412,7 +412,7 @@ rl_accept_suggestion(int count, int key)
 	 * slash or space */
 	char *s = (char *)NULL, _s = 0;
 	int slash = 0;
-	if (accept_first_word) {
+	if (accept_first_word && suggestion_buf) {
 		size_t i = 0;
 		char *p = suggestion_buf + (rl_point - suggestion.offset);
 		/* Skip leading spaces */

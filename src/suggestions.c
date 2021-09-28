@@ -211,6 +211,8 @@ clear_suggestion(void)
 	}
 
 	suggestion.printed = 0;
+	free(suggestion_buf);
+	suggestion_buf = (char *)NULL;
 }
 
 void
@@ -987,7 +989,7 @@ check_variables(const char *str, const size_t len)
 }
 
 /* Backspace implementation */
-/*static void
+static void
 xbackspace()
 {
 	inserted_c = 1;
@@ -1012,7 +1014,7 @@ xbackspace()
 		if (suggestion.printed && suggestion_buf)
 			clear_suggestion();
 	}
-} */
+}
 
 /* Check for available suggestions. Returns zero if true, one if not,
  * and -1 if C was inserted before the end of the current line.
