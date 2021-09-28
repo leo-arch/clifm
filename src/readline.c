@@ -134,6 +134,8 @@ rl_exclude_input(unsigned char c)
 #ifndef _NO_SUGGESTIONS
 			} else if (suggestion.printed) {
 				clear_suggestion();
+				free(suggestion_buf);
+				suggestion_buf = (char *)NULL;
 				return 1;
 #endif /* !_NO_SUGGESTIONS */
 			} else {
@@ -151,6 +153,8 @@ rl_exclude_input(unsigned char c)
 				remove_suggestion_not_end();
 			} else if (suggestion.printed) {
 				clear_suggestion();
+				free(suggestion_buf);
+				suggestion_buf = (char *)NULL;
 			}
 			return 1;
 #endif /* !_NO_SUGGESTIONS */

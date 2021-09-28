@@ -211,8 +211,6 @@ clear_suggestion(void)
 	}
 
 	suggestion.printed = 0;
-	free(suggestion_buf);
-	suggestion_buf = (char *)NULL;
 }
 
 void
