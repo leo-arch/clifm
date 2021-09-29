@@ -247,8 +247,14 @@ rl_exclude_input(unsigned char c)
 
 #ifndef _NO_HIGHLIGHT
 	if (highlight) {
-		if (rl_point == rl_end)
-			rl_highlight(c, SET_COLOR);
+		if (rl_point == rl_end) {
+			char *p = (char *)xnmalloc(strlen(rl_line_buffer) + 2, sizeof(char));
+			strcpy(p, rl_line_buffer);
+			*(p + rl_end) = (char)c;
+			*(p + rl_end + 1) = '\0';
+			rl_highlight(p, (size_t)rl_point, SET_COLOR);
+			free(p);
+		}
 	}
 #endif /* !_NO_HIGHLIGHT */
 

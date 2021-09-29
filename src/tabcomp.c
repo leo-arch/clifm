@@ -452,7 +452,7 @@ after_usual_completion:
 					char *cc = cur_color;
 					fputs("\x1b[?25l", stdout);
 					for (k = 0; replacement[k]; k++) {
-						rl_highlight((unsigned char)replacement[k], SET_COLOR);
+						rl_highlight(replacement, k, SET_COLOR);
 						char t[2];
 						t[0] = (char)replacement[k];
 						t[1] = '\0';
@@ -696,7 +696,7 @@ after_usual_completion:
 						wc = 0;
 
 					if (!wc)
-						rl_highlight((unsigned char)ss[k], SET_COLOR);
+						rl_highlight(ss, (size_t)k, SET_COLOR);
 
 					char t[2];
 					t[0] = (char)ss[k];

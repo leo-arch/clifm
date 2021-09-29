@@ -41,10 +41,12 @@ typedef char *rl_cpvfunc_t;
  * to the corresponding color. This function is used to colorize input,
  * history entries, and accepted suggestions */
 char *
-rl_highlight(unsigned char c, const int flag)
+rl_highlight(const char *str, const size_t pos, const int flag)
 {
 	char *cl = (char *)NULL;
-	char prev = rl_line_buffer[rl_end ? rl_end - 1 : 0];
+	// PREV is -1 when there is no previous char (STR[POS] is the first)
+	char prev = pos ? str[pos - 1] : -1;
+	char c = str[pos];
 
 	if ((rl_end == 0 && c == BS) || prev == '\\') {
 		if (prev == '\\')
@@ -56,7 +58,7 @@ rl_highlight(unsigned char c, const int flag)
 	if (cur_color == hc_c)
 		goto END;
 
-	char *sp = strchr(rl_line_buffer, ' ');
+	char *sp = strchr(str, ' ');
 
 	if (cur_color == hw_c && !sp)
 		goto END;
@@ -70,31 +72,34 @@ rl_highlight(unsigned char c, const int flag)
 		goto END;
 	}
 
-	int m = rl_point;
+	int m = 0;
 	size_t qn[2] = {0};
-	m--;
+	--m;
 
 	while (m >= 0) {
-		if (rl_line_buffer[m] == '\'')
+		if (str[m] == '\'')
 			qn[_SINGLE]++;
-		else if (rl_line_buffer[m] == '"')
+		else if (str[m] == '"') {
 			qn[_DOUBLE]++;
+		}
 		--m;
 	}
 
-	switch(rl_line_buffer[rl_end ? rl_end - 1 : 0]) {
-	case ')': /* fallthrough */
-	case ']': /* fallthrough */
-	case '}': cl = df_c; break;
-	case '\'':
-		if (cur_color == hq_c && qn[_SINGLE] % 2 == 0)
-			cl = df_c;
-		break;
-	case '"':
-		if (cur_color == hq_c && qn[_DOUBLE] % 2 == 0)
-			cl = df_c;
-		break;
-	default: break;
+	if (prev != -1) {
+		switch(prev) {
+		case ')': /* fallthrough */
+		case ']': /* fallthrough */
+		case '}': cl = df_c; break;
+		case '\'':
+			if (cur_color == hq_c && qn[_SINGLE] % 2 == 0)
+				cl = df_c;
+			break;
+		case '"':
+			if (cur_color == hq_c && qn[_DOUBLE] % 2 == 0)
+				cl = df_c;
+			break;
+		default: break;
+		}
 	}
 
 	switch(c) {
@@ -121,8 +126,10 @@ rl_highlight(unsigned char c, const int flag)
 	case '>': cl = hr_c; break;
 	case '$': cl = hv_c; break;
 	case '-':
-		if (prev == ' ')
+		if (prev == ' ' || prev == -1) {
+//			printf("'a'");
 			cl = hp_c;
+		}
 		break;
 	case '#': cl = hc_c; break;
 	default:
@@ -168,17 +175,20 @@ recolorize_line(void)
 	size_t i = 0;
 	char *cl = (char *)NULL;
 	for (; i < (size_t)rl_point; i++) {
-		cl = rl_highlight((unsigned char)rl_line_buffer[i], INFORM_COLOR);
+		cl = rl_highlight(rl_line_buffer, i, INFORM_COLOR);
 		if (cl)
 			cur_color = cl;
+//		printf("'%s[%zu]a:%c'\n", cl, i, rl_line_buffer[i]);
 	}
 
 	if (cl)
 		fputs(cl, stdout);
+//	printf("'cc'\n");
 
 	int sp = strcntchr(rl_line_buffer, ' ');
-	int bk = rl_point - 1;
+	int bk = rl_point;
 	char *ss = rl_copy_text(bk, rl_end);
+//	printf("'b:%s'\n", ss);
 	rl_delete_text(bk, rl_end);
 	rl_point = rl_end = bk;
 
@@ -190,9 +200,9 @@ recolorize_line(void)
 			cur_color = hw_c;
 			fputs(hw_c, stdout);
 		} else {
-			rl_highlight((unsigned char)ss[i], SET_COLOR);
+			rl_highlight(ss, i, SET_COLOR);
 		}
-
+//		printf("'%c'\n", ss[i]);
 		// Redisplay the current char with the appropriate color
 		char t[2];
 		t[0] = (char)ss[i];
@@ -204,5 +214,5 @@ recolorize_line(void)
 	// Unhide the cursor
 	fputs("\x1b[?25h", stdout);
 	free(ss);
-	rl_point = ++bk;
+	rl_point = bk;
 }

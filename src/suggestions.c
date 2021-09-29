@@ -300,12 +300,12 @@ print_suggestion(const char *str, size_t offset, const char *color)
 
 	if (baej) {
 		/* Move the cursor two columns to the right and print "> " */
-		fputs("\x1b[2C", stdout);
-		printf("%s> \x1b[0m", mi_c);
+//		fputs("\x1b[1C", stdout);
+		printf("\x1b[2C%s> \x1b[0m", mi_c);
 	}
-
 	/* Print the suggestion */
 	printf("%s%s", color, str + offset - (offset ? 1 : 0));
+//	printf("%s%s", color, str + offset);
 	fflush(stdout);
 
 	/* Update the row number, if needed */
@@ -996,13 +996,33 @@ rl_suggestions(const unsigned char c)
 	last_word_offset = 0;
 /*	static int msg_area = 0; */
 
+//	free(suggestion_buf);
+//	suggestion_buf = (char *)NULL;
+
 	if (rl_end == 0 || rl_point == 0) {
-		if (suggestion_buf) {
-			free(suggestion_buf);
-			suggestion_buf = (char *)NULL;
-		}
+		free(suggestion_buf);
+		suggestion_buf = (char *)NULL;
 		return EXIT_SUCCESS;
 	}
+
+	/* If we are not at the end of the input string, make sure we are
+	 * at the last word: we only suggest stuff for the last entered
+	 * word */
+/*	int lw = 1;
+	if (rl_point != rl_end) {
+		char *p = strchr(rl_line_buffer + rl_point, ' ');
+		if (p) {
+			while (*(++p)) {
+				if (*p != ' ') {
+					lw = 0;
+					break;
+				}
+			}
+		}
+	}
+
+	if (!lw)
+		return EXIT_SUCCESS; */
 
 	size_t buflen = (size_t)rl_end;
 	suggestion.full_line_len = buflen + 1;

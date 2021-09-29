@@ -367,9 +367,9 @@ my_insert_text(char *text)
 		cur_color = df_c;
 		char *t = text;
 		fputs(df_c, stdout);
-		int i;
+		size_t i;
 		for (i = 0; t[i]; i++) {
-			rl_highlight((unsigned char)t[i], SET_COLOR);
+			rl_highlight(t, i, SET_COLOR);
 			char q[2];
 			q[0] = t[i];
 			q[1] = '\0';
@@ -1386,7 +1386,7 @@ print_highlight_string(char *s)
 	rl_point = rl_end = 0;
 	fputs(df_c, stdout);
 	for (i = 0; s[i]; i++) {
-		rl_highlight((unsigned char)s[i], SET_COLOR);
+		rl_highlight(s, i, SET_COLOR);
 		char q[2];
 		q[0] = s[i];
 		q[1] = '\0';
