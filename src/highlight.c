@@ -36,6 +36,25 @@ typedef char *rl_cpvfunc_t;
 #define _SINGLE 0
 #define _DOUBLE 1
 
+/* Change the color of the word _LAST_WORD, at offset OFFSET, to COLOR
+ * in the current input string */
+void
+change_word_color(const char *_last_word, const int offset, const char *color)
+{
+	UNUSED(_last_word);
+	int bk = rl_point;
+	fputs("\x1b[?25l", stdout);
+	char *p = rl_copy_text(0, rl_end);
+	rl_delete_text(offset, rl_end);
+	rl_point = rl_end = offset;
+	rl_redisplay();
+	fputs(color, stdout);
+	rl_insert_text(p);
+	free(p);
+	rl_point = bk;
+	fputs("\x1b[?25h", stdout);
+}
+
 /* Get the appropriate color for C and print the color (returning a null
  * pointer) if SET_COLOR is set to 1; otherwise, just return a pointer
  * to the corresponding color. This function is used to colorize input,
@@ -45,8 +64,13 @@ rl_highlight(const char *str, const size_t pos, const int flag)
 {
 	char *cl = (char *)NULL;
 	// PREV is -1 when there is no previous char (STR[POS] is the first)
-	char prev = pos ? str[pos - 1] : -1;
-	char c = str[pos];
+	char prev = pos ? str[pos - 1] : 0;
+	char c = *(str + pos);
+
+//	printf("'%zu:%zu' ", pos, strlen(str));
+//	size_t len = strlen(str);
+//	if (flag == SET_COLOR)
+//		printf("'%c:%c(%zu:%zu:%d):%s'\n", c, prev, pos, len, rl_end, str);
 
 	if ((rl_end == 0 && c == BS) || prev == '\\') {
 		if (prev == '\\')
@@ -58,8 +82,7 @@ rl_highlight(const char *str, const size_t pos, const int flag)
 	if (cur_color == hc_c)
 		goto END;
 
-	char *sp = strchr(str, ' ');
-
+	char *sp = strchr(rl_line_buffer, ' ');
 	if (cur_color == hw_c && !sp)
 		goto END;
 
@@ -72,20 +95,20 @@ rl_highlight(const char *str, const size_t pos, const int flag)
 		goto END;
 	}
 
-	int m = 0;
+	int m = rl_point;
 	size_t qn[2] = {0};
 	--m;
 
 	while (m >= 0) {
-		if (str[m] == '\'')
+		if (rl_line_buffer[m] == '\'')
 			qn[_SINGLE]++;
-		else if (str[m] == '"') {
+		else if (rl_line_buffer[m] == '"') {
 			qn[_DOUBLE]++;
 		}
 		--m;
 	}
 
-	if (prev != -1) {
+	if (prev != 0) {
 		switch(prev) {
 		case ')': /* fallthrough */
 		case ']': /* fallthrough */
@@ -126,8 +149,7 @@ rl_highlight(const char *str, const size_t pos, const int flag)
 	case '>': cl = hr_c; break;
 	case '$': cl = hv_c; break;
 	case '-':
-		if (prev == ' ' || prev == -1) {
-//			printf("'a'");
+		if (prev == ' ' || prev == 0) {
 			cl = hp_c;
 		}
 		break;
@@ -168,8 +190,14 @@ recolorize_line(void)
 	fputs("\x1b[?25l", stdout);
 
 	// Set text color to default
+//	if (cur_color != df_c && cur_color != hw_c) {
 	cur_color = df_c;
 	fputs(df_c, stdout);
+//	}
+
+	int bk = rl_point;
+	if (rl_point && rl_point != rl_end)
+		rl_point--;
 
 	// Get the current color up to the current cursor position
 	size_t i = 0;
@@ -178,31 +206,32 @@ recolorize_line(void)
 		cl = rl_highlight(rl_line_buffer, i, INFORM_COLOR);
 		if (cl)
 			cur_color = cl;
-//		printf("'%s[%zu]a:%c'\n", cl, i, rl_line_buffer[i]);
 	}
 
 	if (cl)
 		fputs(cl, stdout);
-//	printf("'cc'\n");
 
-	int sp = strcntchr(rl_line_buffer, ' ');
-	int bk = rl_point;
-	char *ss = rl_copy_text(bk, rl_end);
-//	printf("'b:%s'\n", ss);
-	rl_delete_text(bk, rl_end);
-	rl_point = rl_end = bk;
+	if (rl_point == 0) {
+		fputs("\x1b[?25h", stdout);
+		return;
+	}
+
+	int point = rl_point;
+	char *ss = rl_copy_text(rl_point - 1, rl_end);
+	rl_delete_text(rl_point, rl_end);
+	rl_point = rl_end = point;
 
 	// Loop through each char from cursor position onward and colorize it
-	i = 0;
+	i = 1;
 	for (;ss[i]; i++) {
 		// Let's keep the color of wrong commands
-		if (wrong_cmd_line && rl_point < sp) {
+/*		if (wrong_cmd_line && (sp < 0 || (int)i < sp)) {
 			cur_color = hw_c;
 			fputs(hw_c, stdout);
-		} else {
+		} else { */
 			rl_highlight(ss, i, SET_COLOR);
-		}
-//		printf("'%c'\n", ss[i]);
+			
+//		}
 		// Redisplay the current char with the appropriate color
 		char t[2];
 		t[0] = (char)ss[i];

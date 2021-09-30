@@ -465,6 +465,10 @@ nm=01;32:bm=01;36:sh=02;35:sf=04;36;sc=02;31:sx=02;32:"
 #define E_NOSTDERR (1 << 3)
 #define E_MUTE (E_NOSTDOUT | E_NOSTDERR)
 
+/* Macros for the clear_suggestion function */
+#define CS_FREEBUF 1
+#define CS_KEEPBUF 0
+
 /* Macros for the xmagic function */
 #define MIME_TYPE 1
 #define TEXT_DESC 0

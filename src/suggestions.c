@@ -54,6 +54,10 @@ typedef char *rl_cpvfunc_t;
 #include "jump.h"
 #include "readline.h"
 
+#ifndef _NO_HIGHLIGHT
+#include "highlight.h"
+#endif
+
 static int free_color = 0;
 char *last_word = (char *)NULL;
 int last_word_offset = 0;
@@ -160,7 +164,7 @@ FAIL:
 #ifndef _NO_HIGHLIGHT
 /* Change the color of the word _LAST_WORD, at offset OFFSET, to COLOR
  * in the current input string */
-static void
+/*static void
 change_word_color(const char *_last_word, const int offset, const char *color)
 {
 	int bk = rl_point;
@@ -172,7 +176,7 @@ change_word_color(const char *_last_word, const int offset, const char *color)
 	rl_insert_text(_last_word);
 	rl_point = bk;
 	fputs("\x1b[?25h", stdout);
-}
+} */
 #endif
 
 /* This function is only used before running a keybind command. We don't
@@ -187,7 +191,7 @@ free_suggestion(void)
 }
 
 void
-clear_suggestion(void)
+clear_suggestion(const int free_sug)
 {
 	/* Delete everything in the current line starting from the current
 	 * cursor position */
@@ -211,6 +215,10 @@ clear_suggestion(void)
 	}
 
 	suggestion.printed = 0;
+	if (free_sug) {
+		free(suggestion_buf);
+		suggestion_buf = (char *)NULL;
+	}
 }
 
 void
@@ -218,7 +226,7 @@ remove_suggestion_not_end(void)
 {
 	printf("\x1b[%dC", rl_end - rl_point);
 	fflush(stdout);
-	clear_suggestion();
+	clear_suggestion(CS_FREEBUF);
 	printf("\x1b[%dD", rl_end - rl_point);
 	fflush(stdout);
 }
@@ -231,19 +239,16 @@ static void
 print_suggestion(const char *str, size_t offset, const char *color)
 {
 	if (suggestion.printed)
-		clear_suggestion();
+		clear_suggestion(CS_FREEBUF);
 
 #ifndef _NO_HIGHLIGHT
-	if (highlight && wrong_cmd) {
+/*	if (highlight && wrong_cmd) {
 		wrong_cmd = 0;
 		change_word_color(last_word, last_word_offset, df_c);
 		cur_color = df_c;
 		offset = strlen(last_word) - (size_t)rl_point;
-	}
+	} */
 #endif /* !_NO_HIGHLIGHT */
-
-	free(suggestion_buf);
-	suggestion_buf = (char *)NULL;
 
 	/* Store cursor position in two global variables: currow and curcol */
 	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
@@ -305,7 +310,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	}
 	/* Print the suggestion */
 	printf("%s%s", color, str + offset - (offset ? 1 : 0));
-//	printf("%s%s", color, str + offset);
+//	printf("%s%s", color, str + offset - (offset ? 1 : 0));
 	fflush(stdout);
 
 	/* Update the row number, if needed */
@@ -637,7 +642,7 @@ check_history(const char *str, const size_t len)
 	return 0;
 }
 
-static int
+int
 check_cmds(const char *str, const size_t len)
 {
 	int i = (int)path_progsn;
@@ -881,7 +886,7 @@ static int
 check_jcmd(char *line)
 {
 	if (suggestion_buf)
-		clear_suggestion();
+		clear_suggestion(CS_FREEBUF);
 
 	/* Split line into an array of substrings */
 	char **substr = get_substr(line, ' ');
@@ -1319,13 +1324,14 @@ rl_suggestions(const unsigned char c)
 			suggestion.offset = 0;
 			goto SUCCESS;
 		}
+/*
 #ifndef _NO_HIGHLIGHT
-		/* We have a non-existent command name. Let's change the string
-		 * color. Do this only once */
+		// We have a non-existent command name. Let's change the string
+		// color. Do this only once
 		else if (highlight && *last_word != '#' && *last_word != '$'
 		&& *last_word != '\'' && *last_word != '"') {
 			if (suggestion.printed)
-				clear_suggestion();
+				clear_suggestion(1);
 			if (wrong_cmd || c == ' ')
 				goto FAIL;
 			wrong_cmd = wrong_cmd_line = 1;
@@ -1333,7 +1339,7 @@ rl_suggestions(const unsigned char c)
 			cur_color = hw_c;
 			goto FAIL;
 		}
-#endif /* !_NO_HIGHLIGHT */
+#endif // !_NO_HIGHLIGHT */
 	}
 
 	/* No suggestion found */
@@ -1362,7 +1368,7 @@ rl_suggestions(const unsigned char c)
 	 * the suggestion if moving thought the text via the arrow keys */
 	if (suggestion.printed) {
 		if (!strchr(last_word, '\x1b')) {
-			clear_suggestion();
+			clear_suggestion(CS_FREEBUF);
 			goto FAIL;
 		} else {
 			/* Go to SUCCESS to avoid removing the suggestion buffer */

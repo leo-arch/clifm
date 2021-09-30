@@ -111,8 +111,8 @@ xbackspace()
 #endif // !_NO_SUGGESTIONS
 	} else {
 #ifndef _NO_SUGGESTIONS
-		if (suggestion.printed && suggestion_buf)
-			clear_suggestion();
+		if (suggestion_buf)
+			clear_suggestion(CS_FREEBUF);
 #endif // !_NO_SUGGESTIONS
 		if (rl_end) {
 			rl_line_buffer[rl_end - 1] = '\0';
@@ -133,9 +133,7 @@ rl_exclude_input(unsigned char c)
 				rl_readline_state &= (unsigned long)~RL_STATE_VICMDONCE;
 #ifndef _NO_SUGGESTIONS
 			} else if (suggestion.printed) {
-				clear_suggestion();
-				free(suggestion_buf);
-				suggestion_buf = (char *)NULL;
+				clear_suggestion(CS_FREEBUF);
 				return 1;
 #endif /* !_NO_SUGGESTIONS */
 			} else {
@@ -148,21 +146,19 @@ rl_exclude_input(unsigned char c)
 	if (rl_readline_state & RL_STATE_MOREINPUT) {
 		if (c == '~') {
 #ifndef _NO_SUGGESTIONS
-			if (rl_point != rl_end && suggestion.printed) {
+			if (rl_point != rl_end && suggestion.printed)
 				/* This should be the delete key */
 				remove_suggestion_not_end();
-			} else if (suggestion.printed) {
-				clear_suggestion();
-				free(suggestion_buf);
-				suggestion_buf = (char *)NULL;
-			}
+			else if (suggestion.printed)
+				clear_suggestion(CS_FREEBUF);
 			return 1;
 #endif /* !_NO_SUGGESTIONS */
 		}
 
 		else if (c == '3' && rl_point != rl_end) {
 			xdelete();
-			goto RECOLORIZE;
+			return 2;
+			goto END;
 		}
 
 		/* Handle history events. If a suggestion has been printed and
@@ -171,7 +167,7 @@ rl_exclude_input(unsigned char c)
 		 * here */
 #ifndef _NO_SUGGESTIONS
 		else if ((c == 'A' || c == 'B') && suggestion_buf)
-			clear_suggestion();
+			clear_suggestion(CS_FREEBUF);
 #endif /* !_NO_SUGGESTIONS */
 
 		else if  (c == 'C' || c == 'D')
@@ -192,7 +188,7 @@ rl_exclude_input(unsigned char c)
 	switch(c) {
 		case DELETE: /* fallthrough */
 /*			if (rl_point != rl_end && suggestion.printed)
-				clear_suggestion();
+				clear_suggestion(CS_FREEBUF);
 			goto FAIL; */
 
 		case BS:
@@ -201,12 +197,13 @@ rl_exclude_input(unsigned char c)
 				cur_color = df_c;
 				fputs(df_c, stdout);
 			}
-			goto RECOLORIZE;
+			return 2;
+//			goto END;
 
 		case ENTER:
 #ifndef _NO_SUGGESTIONS
 			if (suggestion.printed && suggestion_buf)
-				clear_suggestion();
+				clear_suggestion(CS_FREEBUF);
 #endif /* !_NO_SUGGESTIONS */
 			cur_color = df_c;
 			fputs(df_c, stdout);
@@ -222,7 +219,7 @@ rl_exclude_input(unsigned char c)
 				|| suggestion.type == BOOKMARK_SUG
 				|| suggestion.type == ALIAS_SUG
 				|| suggestion.type == JCMD_SUG) {
-					clear_suggestion();
+					clear_suggestion(CS_FREEBUF);
 					return 1;
 				}
 			}
@@ -232,8 +229,16 @@ rl_exclude_input(unsigned char c)
 		default: break;
 	}
 
+	char text[2];
+	text[0] = (char)c;
+	text[1] = '\0';
+	rl_insert_text(text);
+
+	int s;
+
+END:
 #ifndef _NO_SUGGESTIONS
-	int s = strcntchrlst(rl_line_buffer, ' ');
+	s = strcntchrlst(rl_line_buffer, ' ');
 	/* Do not take into account final spaces */
 	if (s >= 0 && !rl_line_buffer[s + 1])
 		s = -1;
@@ -243,34 +248,40 @@ rl_exclude_input(unsigned char c)
 				remove_suggestion_not_end();
 		}
 	}
-#endif /* !_NO_SUGGESTIONS */
 
-#ifndef _NO_HIGHLIGHT
-	if (highlight) {
-		if (rl_point == rl_end) {
-			char *p = (char *)xnmalloc(strlen(rl_line_buffer) + 2, sizeof(char));
-			strcpy(p, rl_line_buffer);
-			*(p + rl_end) = (char)c;
-			*(p + rl_end + 1) = '\0';
-			rl_highlight(p, (size_t)rl_point, SET_COLOR);
-			free(p);
+/*	if (s == -1 && suggestions) {
+		if (check_cmds(rl_line_buffer, (size_t)rl_end)) {
+			suggestion.offset = 0;
+			if (cur_color == hw_c) {
+				change_word_color(rl_line_buffer, 0, df_c);
+				cur_color = df_c;
+			}
+			// return 2 to skip the suggestions function
+			return 2;
 		}
-	}
-#endif /* !_NO_HIGHLIGHT */
-
-	char text[2];
-	text[0] = (char)c;
-	text[1] = '\0';
-	rl_insert_text(text);
-
-RECOLORIZE:
 #ifndef _NO_HIGHLIGHT
-	if (!highlight || rl_point == rl_end)
+		// We have a non-existent command name. Let's change the string
+		// color. Do this only once
+		else if (highlight && *rl_line_buffer != '#' && *rl_line_buffer != '$'
+		&& *rl_line_buffer != '\'' && *rl_line_buffer != '"') {
+			if (suggestion.printed)
+				clear_suggestion(CS_FREEBUF);
+
+			wrong_cmd = wrong_cmd_line = 1;
+			change_word_color(rl_line_buffer, 0, hw_c);
+			cur_color = hw_c;
+			return 0;
+		}
+#endif // _NO_HIGHLIGHT
+	} */
+#endif // _NO_SUGGESTIONS
+
+#ifndef _NO_HIGHLIGHT
+	if (!highlight /*|| rl_point == rl_end*/)
 		return 0;
 
 	recolorize_line();
 #endif
-
 	return 0;
 }
 
@@ -295,11 +306,12 @@ my_rl_getc(FILE *stream)
 				rl_quit(0, 0);
 
 			/* Syntax highlighting is made from here */
-			if (rl_exclude_input(c))
+			int ret = rl_exclude_input(c);
+			if (ret == 1)
 				return c;
 
 #ifndef _NO_SUGGESTIONS
-			if (suggestions) {
+			if (ret != 2 && suggestions) {
 				/* rl_suggestions returns -1 is C was inserted before
 				 * the end of the current line, in which case we don't
 				 * want to return it here (otherwise, it would be added
@@ -1128,7 +1140,7 @@ filenames_gen_eln(const char *text, int state)
 		&& strcmp(name, file_info[num_text - 1].name) == 0) {
 #ifndef _NO_SUGGESTIONS
 			if (suggestion_buf)
-				clear_suggestion();
+				clear_suggestion(CS_FREEBUF);
 #endif
 			return strdup(name);
 		}

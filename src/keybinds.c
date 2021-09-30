@@ -333,9 +333,7 @@ rl_prepend_sudo(int count, int key)
 	if (suggestion.offset == 0 && suggestion_buf) {
 		int r = rl_point;
 		rl_point = rl_end;
-		clear_suggestion();
-		free(suggestion_buf);
-		suggestion_buf = (char *)NULL;
+		clear_suggestion(CS_FREEBUF);
 		rl_point = r;
 	}
 #endif
@@ -366,7 +364,6 @@ my_insert_text(char *text)
 		fputs(df_c, stdout);
 		cur_color = df_c;
 		char *t = text;
-		fputs(df_c, stdout);
 		size_t i;
 		for (i = 0; t[i]; i++) {
 			rl_highlight(t, i, SET_COLOR);
@@ -374,6 +371,13 @@ my_insert_text(char *text)
 			q[0] = t[i];
 			q[1] = '\0';
 			rl_insert_text(q);
+			/* rl_redisplay remove the suggestion from the current line,
+			 * but we need to keep the suggestion when accepting only
+			 * the first suggested word.
+			 * However, since we need to call rl_redisplay to make
+			 * color changes effective, colors are not correctly displayed
+			 * when accepting first suggested word. We need a workaround
+			 * to fix this */
 			if (!accept_first_word)
 				rl_redisplay();
 		}
@@ -463,7 +467,7 @@ rl_accept_suggestion(int count, int key)
 	if (!accept_first_word && (suggestion.type == BOOKMARK_SUG
 	|| suggestion.type == ALIAS_SUG || suggestion.type == ELN_SUG
 	|| suggestion.type == JCMD_SUG || suggestion.type == JCMD_SUG_NOACD))
-		clear_suggestion();
+		clear_suggestion(CS_KEEPBUF);
 
 	switch(suggestion.type) {
 
@@ -830,11 +834,9 @@ rl_clear_line(int count, int key)
 	fputs(cur_color, stdout);
 
 	if (suggestion_buf) {
-		clear_suggestion();
+		clear_suggestion(CS_FREEBUF);
 		suggestion.printed = 0;
 		suggestion.nlines = 0;
-		free(suggestion_buf);
-		suggestion_buf = (char *)NULL;
 	}
 #endif
 	curhistindex = current_hist_n;
@@ -1502,7 +1504,7 @@ static int
 rl_tab_comp(int count, int key)
 {
 	if (suggestion.printed && suggestion_buf)
-		clear_suggestion();
+		clear_suggestion(CS_FREEBUF);
 
 	UNUSED(count); UNUSED(key);
 
