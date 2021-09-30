@@ -39,7 +39,7 @@ static int
 stat_char(char *filename)
 {
 	struct stat attr;
-	int c, r;
+	int r;
 
 #if defined(S_ISLNK)
 	r = lstat(filename, &attr);
@@ -50,7 +50,7 @@ stat_char(char *filename)
 	if (r == -1)
 		return 0;
 
-	c = 0;
+	int c = 0;
 	if (S_ISDIR(attr.st_mode))
 		c = '/';
 #if defined(S_ISLNK)
@@ -106,9 +106,7 @@ get_y_or_n(void)
 static int
 print_filename(char *to_print, char *full_pathname)
 {
-	char *s, c, *new_full_pathname;
-	int extension_char = 0;
-	size_t slen, tlen;
+	char *s;
 
 	if (colorize && cur_comp_type == TCMP_PATH) {
 		colors_list(to_print, 0, 0, 0);
@@ -118,23 +116,24 @@ print_filename(char *to_print, char *full_pathname)
 		}
 	}
 
-	int rl_visible_stats = 0;
+	int rl_visible_stats = 1;
 	if (rl_filename_completion_desired && rl_visible_stats) {
       /* If to_print != full_pathname, to_print is the basename of the
 	 path passed.  In this case, we try to expand the directory
 	 name before checking for the stat character. */
+		int extension_char = 0;
 		if (to_print != full_pathname) {
 		/* Terminate the directory name. */
-			c = to_print[-1];
+			char c = to_print[-1];
 			to_print[-1] = '\0';
 
 			s = tilde_expand(full_pathname);
 			if (rl_directory_completion_hook)
 				(*rl_directory_completion_hook) (&s);
 
-			slen = strlen(s);
-			tlen = strlen(to_print);
-			new_full_pathname = (char *)xnmalloc(slen + tlen + 2, sizeof(char));
+			size_t slen = strlen(s);
+			size_t tlen = strlen(to_print);
+			char *new_full_pathname = (char *)xnmalloc(slen + tlen + 2, sizeof(char));
 			strcpy(new_full_pathname, s);
 			new_full_pathname[slen] = '/';
 			strcpy(new_full_pathname + slen + 1, to_print);
