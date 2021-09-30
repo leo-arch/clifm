@@ -87,10 +87,8 @@ compare_strings(const void *s1, const void *s2)
 int
 get_y_or_n(void)
 {
-	int c;
-
 	for (;;) {
-		c = fgetc(stdin);
+		int c = fgetc(stdin);
 		if (c == 'y' || c == 'Y' || c == ' ')
 			return (1);
 		 if (c == 'n' || c == 'N' || c == RUBOUT) {
