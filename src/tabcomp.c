@@ -632,11 +632,16 @@ after_usual_completion:
 
 			char *p = (char *)NULL;
 			if (cur_comp_type == TCMP_PATH) {
-				p = strrchr(matches[1], '/');
+				p = strrchr(matches[0], '/');
 				if (p) {
-					*p = '\0';
-					xchdir(matches[1], NO_TITLE);
-					*p = '/';
+					if (!*(p + 1) && p == matches[0]) {
+						/* We have the root dir */
+						xchdir(matches[0], NO_TITLE);
+					} else {
+						*p = '\0';
+						xchdir(matches[0], NO_TITLE);
+						*p = '/';
+					}
 				}
 			}
 
