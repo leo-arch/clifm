@@ -158,7 +158,7 @@ rl_exclude_input(unsigned char c)
 		else if (c == '3' && rl_point != rl_end) {
 			xdelete();
 			return 2;
-			goto END;
+//			goto END;
 		}
 
 		/* Handle history events. If a suggestion has been printed and
@@ -236,7 +236,7 @@ rl_exclude_input(unsigned char c)
 
 	int s;
 
-END:
+//END:
 #ifndef _NO_SUGGESTIONS
 	s = strcntchrlst(rl_line_buffer, ' ');
 	/* Do not take into account final spaces */

@@ -211,18 +211,18 @@ recolorize_line(void)
 	if (cl)
 		fputs(cl, stdout);
 
-	if (rl_point == 0) {
+	if (rl_point == 0 && rl_end == 0) {
 		fputs("\x1b[?25h", stdout);
 		return;
 	}
 
 	int point = rl_point;
-	char *ss = rl_copy_text(rl_point - 1, rl_end);
+	char *ss = rl_copy_text(rl_point? rl_point - 1 : 0, rl_end);
 	rl_delete_text(rl_point, rl_end);
 	rl_point = rl_end = point;
 
 	// Loop through each char from cursor position onward and colorize it
-	i = 1;
+	i = rl_point ? 1 : 0;
 	for (;ss[i]; i++) {
 		// Let's keep the color of wrong commands
 /*		if (wrong_cmd_line && (sp < 0 || (int)i < sp)) {
