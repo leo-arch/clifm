@@ -90,7 +90,7 @@ rl_highlight(const char *str, const size_t pos, const int flag)
 		wrong_cmd_line = 0;
 
 	if (c >= '0' && c <= '9' && (prev == ' '
-	|| cur_color == hn_c || rl_end == 0)) {
+	|| cur_color == hn_c || rl_end == 1)) {
 		cl = hn_c;
 		goto END;
 	}
@@ -170,6 +170,7 @@ rl_highlight(const char *str, const size_t pos, const int flag)
 
 END:
 	if (flag == SET_COLOR) {
+		if (cl)
 		if (cl && cl != cur_color) {
 			cur_color = cl;
 			fputs(cl, stdout);
@@ -190,10 +191,10 @@ recolorize_line(void)
 	fputs("\x1b[?25l", stdout);
 
 	// Set text color to default
-//	if (cur_color != df_c && cur_color != hw_c) {
-	cur_color = df_c;
-	fputs(df_c, stdout);
-//	}
+	if (cur_color != df_c && cur_color != hw_c && cur_color != hn_c) {
+		cur_color = df_c;
+		fputs(df_c, stdout);
+	}
 
 	int bk = rl_point;
 	if (rl_point && rl_point != rl_end)
@@ -223,14 +224,14 @@ recolorize_line(void)
 
 	// Loop through each char from cursor position onward and colorize it
 	i = rl_point ? 1 : 0;
+//	printf("'%zu:%s'\n", i, ss);
 	for (;ss[i]; i++) {
 		// Let's keep the color of wrong commands
 /*		if (wrong_cmd_line && (sp < 0 || (int)i < sp)) {
 			cur_color = hw_c;
 			fputs(hw_c, stdout);
 		} else { */
-			rl_highlight(ss, i, SET_COLOR);
-			
+			rl_highlight(ss, i, SET_COLOR);	
 //		}
 		// Redisplay the current char with the appropriate color
 		char t[2];
