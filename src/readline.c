@@ -125,6 +125,8 @@ xbackspace()
 static int
 rl_exclude_input(unsigned char c)
 {
+	int _del = 0;
+
 	/* Disable suggestions while in vi command mode and reenable them
 	 * when changing back to insert mode */
 	if (rl_editing_mode == 0) {
@@ -157,8 +159,9 @@ rl_exclude_input(unsigned char c)
 
 		else if (c == '3' && rl_point != rl_end) {
 			xdelete();
-			return 2;
-//			goto END;
+			_del = 1;
+//			return 2;
+			goto END;
 		}
 
 		/* Handle history events. If a suggestion has been printed and
@@ -197,8 +200,9 @@ rl_exclude_input(unsigned char c)
 				cur_color = df_c;
 				fputs(df_c, stdout);
 			}
-			return 2;
-//			goto END;
+//			return 2;
+			_del = 1;
+			goto END;
 
 		case ENTER:
 #ifndef _NO_SUGGESTIONS
@@ -236,7 +240,7 @@ rl_exclude_input(unsigned char c)
 
 	int s;
 
-//END:
+END:
 #ifndef _NO_SUGGESTIONS
 	s = strcntchrlst(rl_line_buffer, ' ');
 	/* Do not take into account final spaces */
@@ -277,11 +281,16 @@ rl_exclude_input(unsigned char c)
 #endif // _NO_SUGGESTIONS
 
 #ifndef _NO_HIGHLIGHT
-	if (!highlight /*|| rl_point == rl_end*/)
+	if (!highlight /*|| rl_point == rl_end*/) {
+		if (_del)
+			return 2;
 		return 0;
+	}
 
 	recolorize_line();
 #endif
+	if (_del)
+		return 2;
 	return 0;
 }
 
