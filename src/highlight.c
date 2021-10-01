@@ -32,6 +32,8 @@ typedef char *rl_cpvfunc_t;
 #include <readline/readline.h>
 #endif
 
+#include "strings.h"
+
 /* Macros for single and double quotes */
 #define _SINGLE 0
 #define _DOUBLE 1
@@ -60,7 +62,7 @@ change_word_color(const char *_last_word, const int offset, const char *color)
  * to the corresponding color. This function is used to colorize input,
  * history entries, and accepted suggestions */
 char *
-rl_highlight(const char *str, const size_t pos, const int flag)
+rl_highlight(char *str, const size_t pos, const int flag)
 {
 	char *cl = (char *)NULL;
 	// PREV is -1 when there is no previous char (STR[POS] is the first)
@@ -89,10 +91,20 @@ rl_highlight(const char *str, const size_t pos, const int flag)
 	if (!sp)
 		wrong_cmd_line = 0;
 
-	if (c >= '0' && c <= '9' && (prev == ' '
-	|| cur_color == hn_c || rl_end == 1)) {
-		cl = hn_c;
-		goto END;
+	if (c >= '0' && c <= '9') {
+		if (prev == ' ' || cur_color == hn_c || rl_end == 1) {
+			cl = hn_c;
+			goto END;
+		} else {
+			char cc = c;
+			*(str + pos) = '\0';
+			int ret = is_internal_f(str);
+			*(str + pos) = cc;
+			if (ret) {
+				cl = hn_c;
+				goto END;
+			}
+		}
 	}
 
 	int m = rl_point;

@@ -678,7 +678,7 @@ check_fused_param(const char *str)
 
 /* Check CMD against a list of internal commands taking ELN's or numbers
  * as parameters. Used by split_fusedcmd() */
-static int
+int
 is_internal_f(const char *restrict cmd)
 {
 	const char *int_cmds[] = {
