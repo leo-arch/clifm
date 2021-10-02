@@ -192,7 +192,6 @@ rl_highlight(char *str, const size_t pos, const int flag)
 
 END:
 	if (flag == SET_COLOR) {
-		if (cl)
 		if (cl && cl != cur_color) {
 			cur_color = cl;
 			fputs(cl, stdout);
