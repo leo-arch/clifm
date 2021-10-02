@@ -112,17 +112,22 @@ rl_highlight(char *str, const size_t pos, const int flag)
 		}
 	}
 
-	int m = rl_point;
 	size_t qn[2] = {0};
-	--m;
-
-	while (m >= 0) {
-		if (rl_line_buffer[m] == '\'')
+	size_t m = 0;
+	for (; rl_line_buffer[m] && m < (size_t)rl_point; m++) {
+		if (rl_line_buffer[m] == '\'') {
+			if (qn[_DOUBLE] == 1)
+				continue;
 			qn[_SINGLE]++;
-		else if (rl_line_buffer[m] == '"') {
+			if (qn[_SINGLE] > 2)
+				qn[_SINGLE] = 1;
+		} else if (rl_line_buffer[m] == '"') {
+			if (qn[_SINGLE] == 1)
+				continue;
 			qn[_DOUBLE]++;
+			if (qn[_DOUBLE] > 2)
+				qn[_DOUBLE] = 1;
 		}
-		--m;
 	}
 
 	if (prev != 0) {
@@ -131,11 +136,11 @@ rl_highlight(char *str, const size_t pos, const int flag)
 		case ']': /* fallthrough */
 		case '}': cl = df_c; break;
 		case '\'':
-			if (cur_color == hq_c && qn[_SINGLE] % 2 == 0)
+			if (cur_color == hq_c && qn[_SINGLE] == 2)
 				cl = df_c;
 			break;
 		case '"':
-			if (cur_color == hq_c && qn[_DOUBLE] % 2 == 0)
+			if (cur_color == hq_c && qn[_DOUBLE] == 2)
 				cl = df_c;
 			break;
 		default: break;
@@ -147,8 +152,8 @@ rl_highlight(char *str, const size_t pos, const int flag)
 		if (cur_color != hq_c && cur_color != hc_c /*&& cur_color != hb_c */)
 			cl = df_c;
 		break;
-	case '\'': /* fallthrough */
 	case '/': cl = hd_c; break;
+	case '\'': /* fallthrough */
 	case '"': cl = hq_c; break;
 	case '\\': /* fallthrough */
 	case ENTER: cl = df_c; break;
@@ -179,9 +184,9 @@ rl_highlight(char *str, const size_t pos, const int flag)
 	}
 
 	if (cur_color == hq_c) {
-		if (qn[_SINGLE] % 2 != 0)
+		if (qn[_SINGLE] == 1)
 			cl = (char *)NULL;
-		else if (qn[_DOUBLE] % 2 != 0)
+		else if (qn[_DOUBLE] == 1)
 			cl = (char *)NULL;
 	}
 
