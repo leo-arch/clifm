@@ -305,12 +305,10 @@ print_suggestion(const char *str, size_t offset, const char *color)
 
 	if (baej) {
 		/* Move the cursor two columns to the right and print "> " */
-//		fputs("\x1b[1C", stdout);
 		printf("\x1b[2C%s> \x1b[0m", mi_c);
 	}
 	/* Print the suggestion */
 	printf("%s%s", color, str + offset - (offset ? 1 : 0));
-//	printf("%s%s", color, str + offset - (offset ? 1 : 0));
 	fflush(stdout);
 
 	/* Update the row number, if needed */

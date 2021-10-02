@@ -371,7 +371,7 @@ my_insert_text(char *text)
 			q[0] = t[i];
 			q[1] = '\0';
 			rl_insert_text(q);
-			/* rl_redisplay remove the suggestion from the current line,
+			/* rl_redisplay removes the suggestion from the current line,
 			 * but we need to keep the suggestion when accepting only
 			 * the first suggested word.
 			 * However, since we need to call rl_redisplay to make

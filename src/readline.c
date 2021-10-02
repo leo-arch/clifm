@@ -125,6 +125,7 @@ xbackspace()
 static int
 rl_exclude_input(unsigned char c)
 {
+	/* If del or backspace, highlight, but do not suggest */
 	int _del = 0;
 
 	/* Disable suggestions while in vi command mode and reenable them
