@@ -114,7 +114,7 @@ rl_highlight(char *str, const size_t pos, const int flag)
 
 	size_t qn[2] = {0};
 	size_t m = 0;
-	for (; rl_line_buffer[m] && m < (size_t)rl_point; m++) {
+	for (; m < (size_t)rl_point; m++) {
 		if (rl_line_buffer[m] == '\'') {
 			if (qn[_DOUBLE] == 1)
 				continue;
