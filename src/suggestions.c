@@ -235,12 +235,11 @@ remove_suggestion_not_end(void)
  * move the cursor back to the original position.
  * OFFSET marks the point in STR that is already typed: the suggestion
  * will be printed starting from this point */
-static void
+void
 print_suggestion(const char *str, size_t offset, const char *color)
 {
-	if (suggestion.printed)
+	if (suggestion.printed && str != suggestion_buf)
 		clear_suggestion(CS_FREEBUF);
-
 #ifndef _NO_HIGHLIGHT
 /*	if (highlight && wrong_cmd) {
 		wrong_cmd = 0;
@@ -250,17 +249,17 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	} */
 #endif /* !_NO_HIGHLIGHT */
 
+	 if (offset > strlen(str))
+		return;
+
 	/* Store cursor position in two global variables: currow and curcol */
 	get_cursor_position(STDIN_FILENO, STDOUT_FILENO);
 
 	/* Do not print suggestions bigger than what the current terminal
 	 * window size can hold */
-	 if (offset > strlen(str))
-		return;
 	size_t suggestion_len = wc_xstrlen(str + offset);
 	if ((int)suggestion_len > (term_cols * term_rows) - curcol)
 		return;
-
 	size_t cuc = (size_t)curcol; /* Current cursor column position*/
 	int baej = 0; /* Bookmark, alias, ELN, or jump */
 
@@ -287,10 +286,14 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	if (slines > (size_t)term_rows)
 		return;
 
-	/* Store the suggestion in a buffer to be used later by the
-	 * rl_accept_suggestion function (keybinds.c) */
-	suggestion_buf = (char *)xnmalloc(strlen(str) + 1, sizeof(char));
-	strcpy(suggestion_buf, str);
+	/* In some cases (accepting first suggested word), we might want to
+	 * reprint the suggestion buffer, in which case it is already stored */
+	if (str != suggestion_buf) {
+		/* Store the suggestion in a buffer to be used later by the
+		 * rl_accept_suggestion function (keybinds.c) */
+		suggestion_buf = (char *)xnmalloc(strlen(str) + 1, sizeof(char));
+		strcpy(suggestion_buf, str);
+	}
 
 	/* Erase everything after the current cursor position */
 	if (write(STDOUT_FILENO, DLFC, DLFC_LEN) <= 0) {}
@@ -331,6 +334,9 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	 * (plus the suggestion's length) to be able to correctly
 	 * remove it later (via the clear_suggestion function) */
 	suggestion.nlines = slines;
+	/* Let's keep a record of the suggestion color in case we need to
+	 * reprint it */
+	suggestion.color = (char *)color;
 	return;
 }
 

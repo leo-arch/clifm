@@ -757,6 +757,7 @@ struct suggestions_t {
     int printed;
 	int type;
     int offset;
+	char *color;
 	size_t full_line_len;
 	size_t nlines;
 };

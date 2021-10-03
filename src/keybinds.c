@@ -351,8 +351,9 @@ rl_create_file(int count, int key)
 /* Insert the accepted suggestion into the current input line
  * (highlighting words and special chars if syntax highlighting is enabled) */
 static void
-my_insert_text(char *text)
+my_insert_text(char *text, char *s, const char _s)
 {
+	UNUSED(s); UNUSED(_s);
 	if (!text || !*text)
 		return;
 
@@ -365,21 +366,31 @@ my_insert_text(char *text)
 		cur_color = df_c;
 		char *t = text;
 		size_t i;
+
+		char *p = strchr(t, '/');
+
 		for (i = 0; t[i]; i++) {
 			rl_highlight(t, i, SET_COLOR);
 			char q[2];
 			q[0] = t[i];
 			q[1] = '\0';
 			rl_insert_text(q);
-			/* rl_redisplay removes the suggestion from the current line,
-			 * but we need to keep the suggestion when accepting only
-			 * the first suggested word.
-			 * However, since we need to call rl_redisplay to make
-			 * color changes effective, colors are not correctly displayed
-			 * when accepting first suggested word. We need a workaround
-			 * to fix this */
-			if (!accept_first_word)
+
+			if (!accept_first_word || p)
 				rl_redisplay();
+		}
+		if (p && s) {
+			/* 1) rl_redisplay removes the suggestion from the current line
+			 * 2) We need rl_redisplay to correctly print highlighting colors
+			 * 3) We need to keep the suggestion when accepting only
+			 * the first suggested word.
+			 * In other words, if we correctly print colors, we lose the
+			 * suggestion.
+			 * As a workaround, let's reprint the suggestion */
+			size_t slen = strlen(suggestion_buf);
+			*s = _s;
+			print_suggestion(suggestion_buf, slen + 1, suggestion.color);
+			*s = '\0';
 		}
 		fputs("\x1b[?25h", stdout);		
 	} else
@@ -493,7 +504,7 @@ rl_accept_suggestion(int count, int key)
 			rl_insert_text(tmp);
 			free(tmp);
 		} else {
-			my_insert_text(suggestion_buf);
+			my_insert_text(suggestion_buf, NULL, 0);
 		}
 		if (suggestion.filetype != DT_DIR)
 			rl_stuff_char(' ');
@@ -501,20 +512,20 @@ rl_accept_suggestion(int count, int key)
 		}
 		break;
 
-	case FIRST_WORD: /* fallthrough */
+	case FIRST_WORD:
+		my_insert_text(suggestion_buf, s, _s); break;
 	case JCMD_SUG_NOACD: /* fallthrough */
 	case HIST_SUG:
-		my_insert_text(suggestion_buf);
-		break;
+		my_insert_text(suggestion_buf, NULL, 0); break;
 
 	case VAR_SUG:
 
-		my_insert_text(suggestion_buf);
+		my_insert_text(suggestion_buf, NULL, 0);
 		rl_stuff_char(' ');
 		break;
 
 	default:
-		my_insert_text(suggestion_buf);
+		my_insert_text(suggestion_buf, NULL, 0);
 		rl_stuff_char(' ');
 		break;
 	}
