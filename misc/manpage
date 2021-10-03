@@ -143,6 +143,7 @@ List of CliFM features:
   39) Fastback function
   40) Remote file systems management
   41) \fIGemini\fR, a Fish-like auto-suggestions system
+  42) Syntax highlighting
 
 .SH 4. POSITIONAL PARAMETERS
 If the first non-option parameter is a directory, CliFM will start in this directory. Otherwise, if not a directory, it will open the file via the default associated application and exit (working thus as a stand-alone resource opener).
@@ -270,6 +271,9 @@ enable program logs
 .TP
 .B \-\-expand\-bookmarks
 expand bookmark names into the corresponding bookmark paths and enable TAB completion for bookmark names as well. If the bookmark is, .e.g. mybookmark=/my/path, "mybo" will be completed as "mybookmark", which will be interpreted then as "/my/path".
+.TP
+.B \-\-highlight
+enable syntax highlighting. To customize highlighting colors see the \fBCOLORS\fR section below
 .TP
 .B \-\-icons
 enable icons. Depends on the \fBicons-in-terminal\fR project.
@@ -944,7 +948,9 @@ CliFM provides four customizable keybindings for custom plugins. The procedure f
 
 .SH 9. COLOR CODES
 .TP
-Colors are specified using the same format used by \fBdircolors(1)\fR and the LS_COLORS environment variable, namely, a colon separated list of codes with this general format: filetype=color. This is the list of \fBfile type codes\fR:
+All color codes are specified in the corresponding color scheme file (by default \fI~/.config/clifm/colors/default.cfm\fR). You can edit this file pressing \fBF8\fR or entering \fIcs edit\fR.
+.TP
+Colors are specified using the same format used by \fBdircolors(1)\fR and the \fBLS_COLORS\fR environment variable, namely, a colon separated list of codes with this general format: filetype=color. This is the list of \fBfile type codes\fR (you'll find them in the \fIFiletypeColors\fR section of the current color scheme file):
 .sp
  di = directory
  ed = empty directory
@@ -972,13 +978,25 @@ Colors are specified using the same format used by \fBdircolors(1)\fR and the LS
  uf = unaccessible files (\fBfstatat\fR(3) error)
 
 .TP
-The following codes are used for different interface elements:
+The following codes are used for different interface elements (in the \fIInterfaceColors\fR section of the current color scheme file):
 .sp
  \fBSuggestions\fR
  sh = commands history suggestions
  sf = ELN's, bookmarks, file and directory names suggestions
  sc = aliases and command names suggestions
  sx = suggestions for internal commands and parameters
+
+ \fBSyntax highlighting\fR
+ hb = brackets '()[]{}'
+ hc = comments (lines starting with '#')
+ hd = slashes
+ he = expansion chars '~*'
+ hn = numbers
+ hp = option parameters (starting with '-')
+ hq = quoted strings (both single and double quotes)
+ hr = process redirection (>)
+ hs = process separators (; & |)
+ hv = variable names (starting with '$')
 
  \fBDefault Prompt\fR
  li = selected files
