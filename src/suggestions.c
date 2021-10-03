@@ -238,6 +238,9 @@ remove_suggestion_not_end(void)
 void
 print_suggestion(const char *str, size_t offset, const char *color)
 {
+	if (!str || !*str)
+		return;
+
 	if (suggestion.printed && str != suggestion_buf)
 		clear_suggestion(CS_FREEBUF);
 #ifndef _NO_HIGHLIGHT
@@ -249,7 +252,7 @@ print_suggestion(const char *str, size_t offset, const char *color)
 	} */
 #endif /* !_NO_HIGHLIGHT */
 
-	 if (offset > strlen(str))
+	if (offset > strlen(str))
 		return;
 
 	/* Store cursor position in two global variables: currow and curcol */

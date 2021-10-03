@@ -353,7 +353,6 @@ rl_create_file(int count, int key)
 static void
 my_insert_text(char *text, char *s, const char _s)
 {
-	UNUSED(s); UNUSED(_s);
 	if (!text || !*text)
 		return;
 
@@ -367,8 +366,6 @@ my_insert_text(char *text, char *s, const char _s)
 		char *t = text;
 		size_t i;
 
-		char *p = strchr(t, '/');
-
 		for (i = 0; t[i]; i++) {
 			rl_highlight(t, i, SET_COLOR);
 			char q[2];
@@ -376,10 +373,10 @@ my_insert_text(char *text, char *s, const char _s)
 			q[1] = '\0';
 			rl_insert_text(q);
 
-			if (!accept_first_word || p)
-				rl_redisplay();
+			rl_redisplay();
 		}
-		if (p && s) {
+
+		if (s) {
 			/* 1) rl_redisplay removes the suggestion from the current line
 			 * 2) We need rl_redisplay to correctly print highlighting colors
 			 * 3) We need to keep the suggestion when accepting only
@@ -388,10 +385,11 @@ my_insert_text(char *text, char *s, const char _s)
 			 * suggestion.
 			 * As a workaround, let's reprint the suggestion */
 			size_t slen = strlen(suggestion_buf);
-			*s = _s;
+			*s = _s ? _s : ' ';
 			print_suggestion(suggestion_buf, slen + 1, suggestion.color);
 			*s = '\0';
 		}
+
 		fputs("\x1b[?25h", stdout);		
 	} else
 #endif
@@ -469,6 +467,7 @@ rl_accept_suggestion(int count, int key)
 				suggestion.type = NO_SUG;
 /*			clear_suggestion(); */
 			accept_first_word = 0;
+			s = (char *)NULL;
 		}
 	}
 
