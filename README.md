@@ -148,6 +148,8 @@ For a detailed explanation of each of these features, follow the corresponding l
 To enjoy of any of the features tagged as NEW, clone this repository and install the program via the Makefile. Follow the instructions below.
 </details>
 
+**NEW**: [Syntax highlighting](https://github.com/leo-arch/clifm/wiki/Specifics#syntax-highlighting). Try it running _CliFM_ wiht the `--highlight` command line option.
+
 ---
 
 ## Installing _CliFM_
