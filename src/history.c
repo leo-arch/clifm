@@ -408,7 +408,7 @@ run_history_cmd(const char *cmd)
 	if (is_number(cmd)) {
 		int num = atoi(cmd);
 
-		if (num <= 0 || num >= (int)current_hist_n) {
+		if (num <= 0 || num > (int)current_hist_n) {
 			fprintf(stderr, _("%s: !%d: event not found\n"), PROGRAM_NAME, num);
 			return EXIT_FAILURE;
 		}
