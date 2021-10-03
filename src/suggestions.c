@@ -1020,7 +1020,7 @@ rl_suggestions(const unsigned char c)
 	/* If we are not at the end of the input string, make sure we are
 	 * at the last word: we only suggest stuff for the last entered
 	 * word */
-/*	int lw = 1;
+	int lw = 1;
 	if (rl_point != rl_end) {
 		char *p = strchr(rl_line_buffer + rl_point, ' ');
 		if (p) {
@@ -1034,7 +1034,7 @@ rl_suggestions(const unsigned char c)
 	}
 
 	if (!lw)
-		return EXIT_SUCCESS; */
+		return EXIT_SUCCESS;
 
 	size_t buflen = (size_t)rl_end;
 	suggestion.full_line_len = buflen + 1;
