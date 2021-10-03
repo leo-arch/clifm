@@ -366,17 +366,57 @@ my_insert_text(char *text, char *s, const char _s)
 		char *t = text;
 		size_t i;
 
+		/* We only need to redisplay first suggested word if it contains
+		 * a highlighting char and it is not preceded by a space */
+		int redisplay = 0;
+		if (accept_first_word) {
+			for (i = 0; t[i]; i++) {
+				if (t[i] >= '0' && t[i] <= '9') {
+					if (!i || t[i - 1] != ' ') {
+						redisplay = 1;
+						break;
+					}
+				}
+				switch(t[i]) {
+				case '/': /* fallthrough */
+				case '"': /* fallthrough */
+				case '\'': /* fallthrough */
+				case '&': /* fallthrough */
+				case '|': /* fallthrough */
+				case ';': /* fallthrough */
+				case '>': /* fallthrough */
+				case '(': /* fallthrough */
+				case '[': /* fallthrough */
+				case '{': /* fallthrough */
+				case ')': /* fallthrough */
+				case ']': /* fallthrough */
+				case '}': /* fallthrough */
+				case '$': /* fallthrough */
+				case '-': /* fallthrough */
+				case '~': /* fallthrough */
+				case '*': /* fallthrough */
+				case '#':
+					if (!i || t[i - 1] != ' ')
+						redisplay = 1;
+					break;
+				default: break;
+				}
+				if (redisplay)
+					break;
+			}
+		}
+
 		for (i = 0; t[i]; i++) {
 			rl_highlight(t, i, SET_COLOR);
 			char q[2];
 			q[0] = t[i];
 			q[1] = '\0';
 			rl_insert_text(q);
-
-			rl_redisplay();
+			if (!accept_first_word || redisplay)
+				rl_redisplay();
 		}
 
-		if (s) {
+		if (s && redisplay) {
 			/* 1) rl_redisplay removes the suggestion from the current line
 			 * 2) We need rl_redisplay to correctly print highlighting colors
 			 * 3) We need to keep the suggestion when accepting only
@@ -465,7 +505,6 @@ rl_accept_suggestion(int count, int key)
 			if (suggestion_buf[len - 1] != '/'
 			&& suggestion_buf[len - 1] != ' ')
 				suggestion.type = NO_SUG;
-/*			clear_suggestion(); */
 			accept_first_word = 0;
 			s = (char *)NULL;
 		}
