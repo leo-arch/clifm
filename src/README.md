@@ -120,7 +120,7 @@ xstrsncpy(buf, src, PATH_MAX);
 
 **Note**: Both `xstrsncpy` and `xnmalloc` are safe implementations of `strcpy(3)` and `malloc(3)` respectively and are provided by CliFM itself.
 
-These are just a few examples. There are plenty of resources out there on how to write good code.
+These are just a few examples. There are plenty of resources out there on how to write secure code.
 
 **2)** Manual memory management is another of the greatest (dis)advantages of C. Use a tool like `valgrind` to make sure your code is not leaking memory. Free `malloc`'ed memory as soon as you don't need it any more.
 
@@ -178,6 +178,8 @@ Interface: `listing.c`
 Directory jumper: `jump.c`
 
 Suggestions: `suggestions.c` and `keybinds.c` (see the `rl_accept_suggestion` function)
+
+Syntax highlighting: `highlight.c` (see also `readline.c` and `keybinds.c`)
 
 ## 5) Compilation
 
@@ -238,6 +240,7 @@ clang ... -D_BE_POSIX -D_NO_ICONS ...
 | `_TOURBIN_QSORT` | Use Alexey Tourbin faster [qsort implementation](https://github.com/svpv/qsort) instead of [qsort(3)](https://www.man7.org/linux/man-pages/man3/qsort.3.html) |
 | `_NO_ARCHIVING` | Disable archiving support |
 | `_NO_GETTEXT` | Disable translations support (via `gettext`) |
+| `_NO_HIGHLIGHT`| Disable syntax highlighting support |
 | `_NO_ICONS` | Disable icons support |
 | `_NO_LIRA` | Disable [Lira](https://github.com/leo-arch/clifm/wiki/Specifics#resource-opener) support |
 | `_NO_MAGIC` | Allow compilation without `libmagic` dependency<sup>2</sup> |
