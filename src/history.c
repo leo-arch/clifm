@@ -363,6 +363,37 @@ history_function(char **comm)
 	return EXIT_SUCCESS;
 }
 
+static int
+exec_hist_cmd(char **cmd)
+{
+	int i;
+	int exit_status = EXIT_SUCCESS;
+
+	char **alias_cmd = check_for_alias(cmd);
+	if (alias_cmd) {
+		/* If an alias is found, check_for_alias frees CMD and
+		 * returns alias_cmd in its place to be executed by
+		 * exec_cmd() */
+
+		if (exec_cmd(alias_cmd) != 0)
+			exit_status = EXIT_FAILURE;
+
+		for (i = 0; alias_cmd[i]; i++)
+			free(alias_cmd[i]);
+		free(alias_cmd);
+		alias_cmd = (char **)NULL;
+	} else {
+		if (exec_cmd(cmd) != 0)
+			exit_status = EXIT_FAILURE;
+
+		for (i = 0; cmd[i]; i++)
+			free(cmd[i]);
+		free(cmd);
+	}
+
+	return exit_status;
+}
+
 /* Takes as argument the history cmd less the first exclamation mark.
  * Example: if exec_cmd() gets "!-10" it pass to this function "-10",
  * that is, comm + 1 */
@@ -372,6 +403,7 @@ run_history_cmd(const char *cmd)
 	/* If "!n" */
 	int exit_status = EXIT_SUCCESS;
 	size_t i;
+	size_t old_args = args_n;
 
 	if (is_number(cmd)) {
 		int num = atoi(cmd);
@@ -380,8 +412,6 @@ run_history_cmd(const char *cmd)
 			fprintf(stderr, _("%s: !%d: event not found\n"), PROGRAM_NAME, num);
 			return EXIT_FAILURE;
 		}
-
-		size_t old_args = args_n;
 
 		if (record_cmd(history[num - 1]))
 			add_to_cmdhist(history[num - 1]);
@@ -393,35 +423,13 @@ run_history_cmd(const char *cmd)
 			return EXIT_FAILURE;
 		}
 
-		char **alias_cmd = check_for_alias(cmd_hist);
-		if (alias_cmd) {
-			/* If an alias is found, the function frees cmd_hist
-			 * and returns alias_cmd in its place to be executed
-			 * by exec_cmd() */
-
-			if (exec_cmd(alias_cmd) != 0)
-				exit_status = EXIT_FAILURE;
-
-			for (i = 0; alias_cmd[i]; i++)
-				free(alias_cmd[i]);
-			free(alias_cmd);
-			alias_cmd = (char **)NULL;
-		} else {
-			if (exec_cmd(cmd_hist) != 0)
-				exit_status = EXIT_FAILURE;
-
-			for (i = 0; cmd_hist[i]; i++)
-				free(cmd_hist[i]);
-			free(cmd_hist);
-		}
-
+		exit_status = exec_hist_cmd(cmd_hist);
 		args_n = old_args;
 		return exit_status;
 	}
 
 	/* If "!!", execute the last command */
 	if (*cmd == '!' && !cmd[1]) {
-		size_t old_args = args_n;
 
 		if (record_cmd(history[current_hist_n - 1]))
 			add_to_cmdhist(history[current_hist_n - 1]);
@@ -433,25 +441,7 @@ run_history_cmd(const char *cmd)
 			return EXIT_FAILURE;
 		}
 
-		char **alias_cmd = check_for_alias(cmd_hist);
-		if (alias_cmd) {
-			if (exec_cmd(alias_cmd) != 0)
-				exit_status = EXIT_FAILURE;
-
-			for (i = 0; alias_cmd[i]; i++)
-				free(alias_cmd[i]);
-			free(alias_cmd);
-
-			alias_cmd = (char **)NULL;
-		} else {
-			if (exec_cmd(cmd_hist) != 0)
-				exit_status = EXIT_FAILURE;
-
-			for (i = 0; cmd_hist[i]; i++)
-				free(cmd_hist[i]);
-			free(cmd_hist);
-		}
-
+		exit_status = exec_hist_cmd(cmd_hist);
 		args_n = old_args;
 		return exit_status;
 	}
@@ -466,26 +456,9 @@ run_history_cmd(const char *cmd)
 			return EXIT_FAILURE;
 		}
 
-		size_t old_args = args_n;
 		char **cmd_hist = parse_input_str(history[current_hist_n - (size_t)acmd - 1]);
 		if (cmd_hist) {
-			char **alias_cmd = check_for_alias(cmd_hist);
-			if (alias_cmd) {
-				if (exec_cmd(alias_cmd) != 0)
-					exit_status = EXIT_FAILURE;
-
-				for (i = 0; alias_cmd[i]; i++)
-					free(alias_cmd[i]);
-				free(alias_cmd);
-				alias_cmd = (char **)NULL;
-			} else {
-				if (exec_cmd(cmd_hist) != 0)
-					exit_status = EXIT_FAILURE;
-
-				for (i = 0; cmd_hist[i]; i++)
-					free(cmd_hist[i]);
-				free(cmd_hist);
-			}
+			exit_status = exec_hist_cmd(cmd_hist);
 
 			if (record_cmd(history[current_hist_n - (size_t)acmd - 1]))
 				add_to_cmdhist(history[current_hist_n - (size_t)acmd - 1]);
@@ -501,9 +474,9 @@ run_history_cmd(const char *cmd)
 		return EXIT_FAILURE;
 	}
 
+	/* If !STRING */
 	if ((*cmd >= 'a' && *cmd <= 'z') || (*cmd >= 'A' && *cmd <= 'Z')) {
-		size_t len = strlen(cmd),
-				old_args = args_n;
+		size_t len = strlen(cmd);
 
 		for (i = 0; history[i]; i++) {
 			if (*cmd == *history[i] && strncmp(cmd, history[i], len) == 0) {
@@ -511,24 +484,7 @@ run_history_cmd(const char *cmd)
 				if (!cmd_hist)
 					continue;
 
-				char **alias_cmd = check_for_alias(cmd_hist);
-				if (alias_cmd) {
-					if (exec_cmd(alias_cmd) != EXIT_SUCCESS)
-						exit_status = EXIT_FAILURE;
-
-					for (i = 0; alias_cmd[i]; i++)
-						free(alias_cmd[i]);
-					free(alias_cmd);
-					alias_cmd = (char **)NULL;
-				} else {
-					if (exec_cmd(cmd_hist) != EXIT_SUCCESS)
-						exit_status = EXIT_FAILURE;
-
-					for (i = 0; cmd_hist[i]; i++)
-						free(cmd_hist[i]);
-					free(cmd_hist);
-				}
-
+				exit_status = exec_hist_cmd(cmd_hist);
 				args_n = old_args;
 				return exit_status;
 			}
