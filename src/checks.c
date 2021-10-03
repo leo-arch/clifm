@@ -204,11 +204,30 @@ is_number(const char *restrict str)
 	return 1;
 }
 
+/* Returns 1 if CMD is found in CMDS_LIST and zero otherwise */
+static int
+found_cmd(char **cmds_list, int list_size, char *cmd)
+{
+	int found = 0;
+	int i = list_size;
+
+	while (--i >= 0) {
+		if (*cmd == *cmds_list[i] && strcmp(cmd, cmds_list[i]) == 0) {
+			found = 1;
+			break;
+		}
+	}
+
+	if (found)
+		return 1;
+	return 0;
+}
+
 /* Check CMD against a list of internal commands */
 int
-is_internal_c(const char *restrict cmd)
+is_internal_c(char *restrict cmd)
 {
-	const char *int_cmds[] = {
+	char *int_cmds[] = {
 	    "?", "help",
 	    "ac", "ad",
 	    "acd", "autocd",
@@ -280,10 +299,13 @@ is_internal_c(const char *restrict cmd)
 	    "x", "X",
 	    NULL};
 
-	int found = 0;
+		
+//	int found = 0;
 	int i = (int)(sizeof(int_cmds) / sizeof(char *)) - 1;
+	if (found_cmd(int_cmds, i, cmd))
+		return 1;
 
-	while (--i >= 0) {
+/*	while (--i >= 0) {
 		if (*cmd == *int_cmds[i] && strcmp(cmd, int_cmds[i]) == 0) {
 			found = 1;
 			break;
@@ -291,7 +313,7 @@ is_internal_c(const char *restrict cmd)
 	}
 
 	if (found)
-		return 1;
+		return 1; */
 
 	/* Check for the search and history functions as well */
 	else if ((*cmd == '/' && access(cmd, F_OK) != 0) || (*cmd == '!'
@@ -307,9 +329,9 @@ is_internal_c(const char *restrict cmd)
  * tilde, and so on. Only internal commands dealing with file names
  * should be checked here */
 int
-is_internal(const char *cmd)
+is_internal(char *restrict cmd)
 {
-	const char *int_cmds[] = {
+	char *int_cmds[] = {
 	    "ac", "ad",
 	    "bm", "bookmarks",
 	    "bl", "le",
@@ -329,10 +351,12 @@ is_internal(const char *cmd)
 	    "te",
 	    NULL};
 
-	int found = 0;
+//	int found = 0;
 	int i = (int)(sizeof(int_cmds) / sizeof(char *)) - 1;
+	if (found_cmd(int_cmds, i, cmd))
+		return 1;
 
-	while (--i >= 0) {
+/*	while (--i >= 0) {
 		if (*cmd == *int_cmds[i] && strcmp(cmd, int_cmds[i]) == 0) {
 			found = 1;
 			break;
@@ -340,7 +364,7 @@ is_internal(const char *cmd)
 	}
 
 	if (found)
-		return 1;
+		return 1; */
 
 	/* Check for the search function as well */
 	else if (*cmd == '/' && access(cmd, F_OK) != 0)
