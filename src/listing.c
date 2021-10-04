@@ -759,6 +759,9 @@ list_dir_light(void)
 
 		if (colorize) {
 			ind_char = 0;
+			char *end_color = df_c;
+			if (file_info[i].dir)
+				end_color = dc_c;
 #ifndef _NO_ICONS
 			if (icons) {
 				if (xargs.icons_use_file_color == 1)
@@ -767,19 +770,19 @@ list_dir_light(void)
 				if (no_eln) {
 					xprintf("%s%s %s%s%s", file_info[i].icon_color,
 					    file_info[i].icon, file_info[i].color,
-					    file_info[i].name, df_c);
+					    file_info[i].name, end_color);
 				} else {
 					xprintf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
 					    file_info[i].icon_color, file_info[i].icon,
-					    file_info[i].color, file_info[i].name, df_c);
+					    file_info[i].color, file_info[i].name, end_color);
 				}
 			} else {
 				if (no_eln) {
 					xprintf("%s%s%s", file_info[i].color,
-					    file_info[i].name, df_c);
+					    file_info[i].name, end_color);
 				} else {
 					xprintf("%s%d%s %s%s%s", el_c, i + 1, df_c,
-					    file_info[i].color, file_info[i].name, df_c);
+					    file_info[i].color, file_info[i].name, end_color);
 /*					line_sz += (size_t)sprintf(line_buf + line_sz,
 						"%s%d%s %s%s%s", el_c, i + 1, df_c,
 					    file_info[i].color, file_info[i].name, df_c); */
@@ -787,10 +790,10 @@ list_dir_light(void)
 			}
 #else
 			if (no_eln) {
-				xprintf("%s%s%s", file_info[i].color, file_info[i].name, df_c);
+				xprintf("%s%s%s", file_info[i].color, file_info[i].name, end_color);
 			} else {
 				xprintf("%s%d%s %s%s%s", el_c, i + 1, df_c,
-				    file_info[i].color, file_info[i].name, df_c);
+				    file_info[i].color, file_info[i].name, end_color);
 			}
 #endif /* !_NO_ICONS */
 
@@ -1531,32 +1534,35 @@ list_dir(void)
 
 		if (colorize) {
 			ind_char = 0;
+			char *end_color = df_c;
+			if (file_info[i].dir)
+				end_color = dc_c;
 #ifndef _NO_ICONS
 			if (icons) {
 				if (no_eln) {
 					xprintf("%s%s %s%s%s", file_info[i].icon_color,
 					    file_info[i].icon, file_info[i].color,
-					    file_info[i].name, df_c);
+					    file_info[i].name, end_color);
 				} else {
 					xprintf("%s%d%s %s%s %s%s%s", el_c, i + 1, df_c,
 					    file_info[i].icon_color, file_info[i].icon,
-					    file_info[i].color, file_info[i].name, df_c);
+					    file_info[i].color, file_info[i].name, end_color);
 				}
 			} else {
 				if (no_eln) {
 					xprintf("%s%s%s", file_info[i].color,
-					    file_info[i].name, df_c);
+					    file_info[i].name, end_color);
 				} else {
 					xprintf("%s%d%s %s%s%s", el_c, i + 1, df_c,
-						file_info[i].color, file_info[i].name, df_c);
+						file_info[i].color, file_info[i].name, end_color);
 				}
 			}
 #else
 			if (no_eln) {
-				xprintf("%s%s%s", file_info[i].color, file_info[i].name, df_c);
+				xprintf("%s%s%s", file_info[i].color, file_info[i].name, end_color);
 			} else {
 				xprintf("%s%d%s %s%s%s", el_c, i + 1, df_c,
-				    file_info[i].color, file_info[i].name, df_c);
+				    file_info[i].color, file_info[i].name, end_color);
 			}
 #endif /* !_NO_ICONS */
 
@@ -1571,7 +1577,7 @@ list_dir(void)
 
 				case DT_LNK:
 					if (file_info[i].dir)
-					putchar('/');
+						putchar('/');
 					if (file_info[i].filesn > 0 && files_counter)
 						fputs(xitoa(file_info[i].filesn), stdout);
 					break;
