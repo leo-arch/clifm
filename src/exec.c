@@ -375,21 +375,21 @@ run_shell_cmd(char **comm)
 		cmd[len - 2] = '&';
 		cmd[len - 1] = '\0';
 	}
-
-	/* Since we modified LS_COLORS, store its current value and unset
-	 * it. Some shell commands use LS_COLORS to display their outputs
-	 * ("ls -l", for example, use the "no" value to print file
-	 * properties). So, we unset it to prevent wrong color output
-	 * for external commands. The disadvantage of this procedure is
-	 * that if the user uses a customized LS_COLORS, unsetting it
-	 * set its value to default, and the customization is lost. */
+/*
+	// Since we modified LS_COLORS, store its current value and unset
+	// it. Some shell commands use LS_COLORS to display their outputs
+	// ("ls -l", for example, use the "no" value to print file
+	// properties). So, we unset it to prevent wrong color output
+	// for external commands. The disadvantage of this procedure is
+	// that if the user uses a customized LS_COLORS, unsetting it
+	// set its value to default, and the customization is lost.
 
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 	char *my_ls_colors = (char *)NULL, *p = (char *)NULL;
-	/* For some reason, when running on FreeBSD Valgrind complains
-	 * about overlapping source and destiny in setenv() if I just
-	 * copy the address returned by getenv() instead of the string
-	 * itself. Not sure why, but this makes the error go away */
+	// For some reason, when running on FreeBSD Valgrind complains
+	// about overlapping source and destiny in setenv() if I just
+	// copy the address returned by getenv() instead of the string
+	// itself. Not sure why, but this makes the error go away
 	p = getenv("LS_COLORS");
 	my_ls_colors = (char *)xnmalloc(strlen(p) + 1, sizeof(char *));
 	strcpy(my_ls_colors, p);
@@ -403,7 +403,7 @@ run_shell_cmd(char **comm)
 	if (ls_colors_bk && *ls_colors_bk != '\0')
 		setenv("LS_COLORS", ls_colors_bk, 1);
 	else
-		unsetenv("LS_COLORS");
+		unsetenv("LS_COLORS"); */
 
 /*	if (launch_execle(cmd) != EXIT_SUCCESS)
 		exit_status = EXIT_FAILURE; */
@@ -411,11 +411,11 @@ run_shell_cmd(char **comm)
 	free(cmd);
 
 	/* Restore LS_COLORS value to use CliFM colors */
-	setenv("LS_COLORS", my_ls_colors, 1);
+/*	setenv("LS_COLORS", my_ls_colors, 1);
 
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 	free(my_ls_colors);
-#endif
+#endif */
 
 	/* Reload the list of available commands in PATH for TAB completion.
 	 * Why? If this list is not updated, whenever some new program is
