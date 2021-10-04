@@ -361,25 +361,6 @@ set_filetype_colors(char **colors, const size_t words)
 			else
 				snprintf(di_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-/*		} else if (*colors[i] == 'd' && strncmp(colors[i], "df=", 3) == 0) {
-			if (!is_color_code(colors[i] + 3))
-				*df_c = '\0';
-			else
-				snprintf(df_c, MAX_COLOR - 1, "\x1b[%s;49m",
-						colors[i] + 3);
-
-		} else if (*colors[i] == 'd' && strncmp(colors[i], "dc=", 3) == 0) {
-			if (!is_color_code(colors[i] + 3))
-				*dc_c = '\0';
-			else
-				snprintf(dc_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
-
-		} else if (*colors[i] == 'd' && strncmp(colors[i], "dh=", 3) == 0) {
-			if (!is_color_code(colors[i] + 3))
-				*dh_c = '\0';
-			else
-				snprintf(dh_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3); */
-
 		} else if (*colors[i] == 'n' && strncmp(colors[i], "nd=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*nd_c = '\0';

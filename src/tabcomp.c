@@ -114,8 +114,8 @@ print_filename(char *to_print, char *full_pathname)
 		}
 	}
 
-	int rl_visible_stats = 1;
-	if (rl_filename_completion_desired && rl_visible_stats) {
+//	int rl_visible_stats = 1;
+	if (rl_filename_completion_desired && !colorize) {
       /* If to_print != full_pathname, to_print is the basename of the
 	 path passed.  In this case, we try to expand the directory
 	 name before checking for the stat character. */
@@ -629,22 +629,30 @@ after_usual_completion:
 
 			char *p = (char *)NULL;
 			if (cur_comp_type == TCMP_PATH) {
-				p = strrchr(matches[0], '/');
-				if (p) {
-					if (p == matches[0]) {
-						if (*(p + 1)) {
-							char pp = *(p + 1);
-							*(p + 1) = '\0';
-							xchdir(matches[0], NO_TITLE);
-							*(p + 1) = pp;
+				if (*matches[0] == '~') {
+					char *exp_path = tilde_expand(matches[0]);
+					if (exp_path) {
+						xchdir(exp_path, NO_TITLE);
+						free(exp_path);
+					}
+				} else {
+					p = strrchr(matches[0], '/');
+					if (p) {
+						if (p == matches[0]) {
+							if (*(p + 1)) {
+								char pp = *(p + 1);
+								*(p + 1) = '\0';
+								xchdir(matches[0], NO_TITLE);
+								*(p + 1) = pp;
+							} else {
+								/* We have the root dir */
+								xchdir(matches[0], NO_TITLE);
+							}
 						} else {
-							/* We have the root dir */
+							*p = '\0';
 							xchdir(matches[0], NO_TITLE);
+							*p = '/';
 						}
-					} else {
-						*p = '\0';
-						xchdir(matches[0], NO_TITLE);
-						*p = '/';
 					}
 				}
 			}
