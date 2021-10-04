@@ -101,6 +101,22 @@ close_fstream(FILE *fp, int fd)
 	close(fd);
 }
 
+/* Transform S_IFXXX (MODE) into DT_XXX constant */
+mode_t
+get_dt(const mode_t mode)
+{
+	switch (mode & S_IFMT) {
+	case S_IFBLK: return DT_BLK;
+	case S_IFCHR: return DT_CHR;
+	case S_IFDIR: return DT_DIR;
+	case S_IFIFO: return DT_FIFO;
+	case S_IFLNK: return DT_LNK;
+	case S_IFREG: return DT_REG;
+	case S_IFSOCK: return DT_SOCK;
+	default: return DT_UNKNOWN;
+	}
+}
+
 /*
 static int
 hex2int(char *str)

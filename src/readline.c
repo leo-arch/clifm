@@ -675,16 +675,7 @@ my_rl_path_completion(const char *text, int state)
 			continue;
 		}
 
-		switch (attr.st_mode & S_IFMT) {
-		case S_IFBLK: type = DT_BLK; break;
-		case S_IFCHR: type = DT_CHR; break;
-		case S_IFDIR: type = DT_DIR; break;
-		case S_IFIFO: type = DT_FIFO; break;
-		case S_IFLNK: type = DT_LNK; break;
-		case S_IFREG: type = DT_REG; break;
-		case S_IFSOCK: type = DT_SOCK; break;
-		default: type = DT_UNKNOWN; break;
-		}
+		type = get_dt(attr.st_mode);
 #else
 		type = ent->d_type;
 #endif /* !_DIRENT_HAVE_D_TYPE */

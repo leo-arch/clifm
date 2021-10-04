@@ -195,24 +195,17 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 				struct stat attr;
 				if (lstat(ent[i]->d_name, &attr) == -1)
 					continue;
-				switch (attr.st_mode & S_IFMT) {
-				case S_IFBLK: type = DT_BLK; break;
-				case S_IFCHR: type = DT_CHR; break;
-				case S_IFDIR: type = DT_DIR; break;
-				case S_IFIFO: type = DT_FIFO; break;
-				case S_IFLNK: type = DT_LNK; break;
-				case S_IFREG: type = DT_REG; break;
-				case S_IFSOCK: type = DT_SOCK; break;
-				default: type = DT_UNKNOWN; break;
-				}
+				type = get_dt(attr.st_mode);
 				if (filetype && type != filetype)
 #else
 				if (filetype && ent[i]->d_type != filetype)
 #endif
 					continue;
 
-				int j = (int)gbuf.gl_pathc;
-				while (--j >= 0) {
+//				int j = (int)gbuf.gl_pathc;
+//				while (--j >= 0) {
+				size_t j;
+				for (j = 0; j < gbuf.gl_pathc; j++) {
 					if (*ent[i]->d_name == *gbuf.gl_pathv[j]
 					&& strcmp(ent[i]->d_name, gbuf.gl_pathv[j]) == 0)
 						break;
@@ -229,7 +222,6 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 		    sizeof(char *));
 		mode_t t = 0;
 		if (filetype) {
-
 			switch (filetype) {
 			case DT_DIR: t = S_IFDIR; break;
 			case DT_REG: t = S_IFREG; break;

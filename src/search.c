@@ -93,31 +93,14 @@ search_glob(char **comm, int invert)
 		 * If file type is specified, matches will be checked against
 		 * this value */
 		switch (file_type) {
-		case 'd':
-			file_type = invert ? DT_DIR : S_IFDIR;
-			break;
-		case 'r':
-			file_type = invert ? DT_REG : S_IFREG;
-			break;
-		case 'l':
-			file_type = invert ? DT_LNK : S_IFLNK;
-			break;
-		case 's':
-			file_type = invert ? DT_SOCK : S_IFSOCK;
-			break;
-		case 'f':
-			file_type = invert ? DT_FIFO : S_IFIFO;
-			break;
-		case 'b':
-			file_type = invert ? DT_BLK : S_IFBLK;
-			break;
-		case 'c':
-			file_type = invert ? DT_CHR : S_IFCHR;
-			break;
-		case 'x':
-			recursive = 1;
-			break;
-
+		case 'd': file_type = invert ? DT_DIR : S_IFDIR; break;
+		case 'r': file_type = invert ? DT_REG : S_IFREG; break;
+		case 'l': file_type = invert ? DT_LNK : S_IFLNK; break;
+		case 's': file_type = invert ? DT_SOCK : S_IFSOCK; break;
+		case 'f': file_type = invert ? DT_FIFO : S_IFIFO; break;
+		case 'b': file_type = invert ? DT_BLK : S_IFBLK; break;
+		case 'c': file_type = invert ? DT_CHR : S_IFCHR; break;
+		case 'x': recursive = 1; break;
 		default:
 			fprintf(stderr, _("%s: '%c': Unrecognized file type\n"),
 			    PROGRAM_NAME, (char)file_type);
@@ -135,7 +118,6 @@ search_glob(char **comm, int invert)
 	/* If we have a path ("/str /path"), chdir into it, since
 	 * glob() works on CWD */
 	if (search_path && *search_path) {
-
 		/* Deescape the search path, if necessary */
 		if (strchr(search_path, '\\')) {
 			char *deq_dir = dequote_str(search_path, 0);
@@ -167,7 +149,6 @@ search_glob(char **comm, int invert)
 	}
 
 	int i;
-
 	char *tmp = comm[0];
 
 	if (invert)
@@ -204,10 +185,9 @@ search_glob(char **comm, int invert)
 		tmp[search_str_len] = '*';
 		tmp[search_str_len + 1] = '\0';
 		search_str = tmp;
-	}
-
-	else
+	} else {
 		search_str = tmp + 1;
+	}
 
 	/* Get matches, if any */
 	glob_t globbed_files;
@@ -246,7 +226,6 @@ search_glob(char **comm, int invert)
 	if (invert) {
 		if (!search_path) {
 			int k;
-
 			pfiles = (char **)xnmalloc(files + 1, sizeof(char *));
 			eln = (int *)xnmalloc(files + 1, sizeof(int));
 			files_len = (size_t *)xnmalloc(files + 1, sizeof(size_t));
@@ -263,7 +242,6 @@ search_glob(char **comm, int invert)
 				}
 
 				if (!f) {
-
 					if (file_type && file_info[k].type != file_type)
 						continue;
 
@@ -276,14 +254,11 @@ search_glob(char **comm, int invert)
 					pfiles[found++] = file_info[k].name;
 				}
 			}
-		}
-
-		else {
+		} else {
 			scandir_files = scandir(search_path, &ent, skip_files,
 			    xalphasort);
 
 			if (scandir_files != -1) {
-
 				pfiles = (char **)xnmalloc((size_t)scandir_files + 1,
 				    sizeof(char *));
 				eln = (int *)xnmalloc((size_t)scandir_files + 1,
@@ -305,23 +280,12 @@ search_glob(char **comm, int invert)
 					}
 
 					if (!f) {
-
 #if !defined(_DIRENT_HAVE_D_TYPE)
 						struct stat attr;
 						mode_t type;
 						if (lstat(ent[k]->d_name, &attr) == -1)
 							continue;
-						switch (attr.st_mode & S_IFMT) {
-						case S_IFBLK: type = DT_BLK; break;
-						case S_IFCHR: type = DT_CHR; break;
-						case S_IFDIR: type = DT_DIR; break;
-						case S_IFIFO: type = DT_FIFO; break;
-						case S_IFLNK: type = DT_LNK; break;
-						case S_IFREG: type = DT_REG; break;
-						case S_IFSOCK: type = DT_SOCK; break;
-						default: type = DT_UNKNOWN; break;
-						}
-
+						type = get_dt(attr.st_mode);
 						if (file_type && type != file_type)
 #else
 						if (file_type && ent[k]->d_type != file_type)
@@ -351,7 +315,6 @@ search_glob(char **comm, int invert)
 		files_len = (size_t *)xnmalloc(globbed_files.gl_pathc + 1, sizeof(size_t));
 
 		for (i = 0; globbed_files.gl_pathv[i]; i++) {
-
 			if (*globbed_files.gl_pathv[i] == '.'
 			&& (!globbed_files.gl_pathv[i][1]
 			|| (globbed_files.gl_pathv[i][1] == '.'
@@ -359,11 +322,9 @@ search_glob(char **comm, int invert)
 				continue;
 
 			if (file_type) {
-
 				/* Simply skip all files not matching file_type */
 				if (lstat(globbed_files.gl_pathv[i], &file_attrib) == -1)
 					continue;
-
 				if ((file_attrib.st_mode & S_IFMT) != file_type)
 					continue;
 			}
@@ -371,14 +332,11 @@ search_glob(char **comm, int invert)
 			pfiles[found] = globbed_files.gl_pathv[i];
 
 			/* Get the longest file name in the list */
-
 			/* If not searching in CWD, we only need to know the file's
 			 * length (no ELN) */
 			if (search_path) {
-
 				/* This will be passed to colors_list(): -1 means no ELN */
 				eln[found] = -1;
-
 				files_len[found] = unicode ? wc_xstrlen(pfiles[found])
 							   : strlen(pfiles[found]);
 
@@ -386,13 +344,10 @@ search_glob(char **comm, int invert)
 					flongest = files_len[found];
 
 				found++;
-			}
-
-			/* If searching in CWD, take into account the file's ELN
-			 * when calculating its legnth */
-			else {
+			} else {
+				/* If searching in CWD, take into account the file's ELN
+				 * when calculating its legnth */
 				size_t j;
-
 				for (j = 0; file_info[j].name; j++) {
 
 					if (*pfiles[found] != *file_info[j].name
@@ -400,7 +355,6 @@ search_glob(char **comm, int invert)
 						continue;
 
 					eln[found] = (int)(j + 1);
-
 					files_len[found] = file_info[j].len
 							+ (size_t)file_info[j].eln_n + 1;
 
@@ -415,7 +369,6 @@ search_glob(char **comm, int invert)
 
 	/* Print the results using colors and columns */
 	if (found) {
-
 		int columns_n = 0,
 			last_column = 0;
 
@@ -432,7 +385,6 @@ search_glob(char **comm, int invert)
 			columns_n = found;
 
 		for (i = 0; i < found; i++) {
-
 			if (!pfiles[i])
 				continue;
 
@@ -481,7 +433,6 @@ search_glob(char **comm, int invert)
 
 	if (!found)
 		return EXIT_FAILURE;
-
 	return EXIT_SUCCESS;
 }
 
