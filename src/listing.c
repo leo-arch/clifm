@@ -70,72 +70,6 @@
 #define xprintf printf
 #endif
 
-static void
-print_sort_method(void)
-{
-	printf(_("%s->%s Sorted by: "), mi_c, df_c);
-
-	switch (sort) {
-	case SNONE:
-		puts(_("none"));
-		break;
-	case SNAME:
-		printf(_("name %s\n"), (sort_reverse) ? "[rev]" : "");
-		break;
-	case SSIZE:
-		printf(_("size %s\n"), (sort_reverse) ? "[rev]" : "");
-		break;
-	case SATIME:
-		printf(_("atime %s\n"), (sort_reverse) ? "[rev]" : "");
-		break;
-	case SBTIME:
-#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
-		printf(_("btime %s\n"), (sort_reverse) ? "[rev]" : "");
-#else
-		printf(_("btime (not available: using 'ctime') %s\n"),
-		    (sort_reverse) ? "[rev]" : "");
-#endif
-		break;
-	case SCTIME:
-		printf(_("ctime %s\n"), (sort_reverse) ? "[rev]" : "");
-		break;
-	case SMTIME:
-		printf(_("mtime %s\n"), (sort_reverse) ? "[rev]" : "");
-		break;
-#if __FreeBSD__ || __NetBSD__ || __OpenBSD__ || _BE_POSIX
-	case SVER:
-		printf(_("version (not available: using 'name') %s\n"),
-		    (sort_reverse) ? "[rev]" : "");
-#else
-	case SVER:
-		printf(_("version %s\n"), (sort_reverse) ? "[rev]" : "");
-#endif
-		break;
-	case SEXT:
-		printf(_("extension %s\n"), (sort_reverse) ? "[rev]" : "");
-		break;
-	case SINO:
-		printf(_("inode %s\n"), (sort_reverse) ? "[rev]" : "");
-		break;
-	case SOWN:
-		if (light_mode) {
-			printf(_("owner (not available: using 'name') %s\n"),
-			    (sort_reverse) ? "[rev]" : "");
-		} else {
-			printf(_("owner %s\n"), (sort_reverse) ? "[rev]" : "");
-		}
-		break;
-	case SGRP:
-		if (light_mode) {
-			printf(_("group (not available: using 'name') %s\n"),
-			    (sort_reverse) ? "[rev]" : "");
-		} else {
-			printf(_("group %s\n"), (sort_reverse) ? "[rev]" : "");
-		}
-		break;
-	}
-}
-
 /* Print the line divinding files and prompt using DIV_LINE_CHAR. If
  * DIV_LINE_CHAR takes more than two columns to be printed (ASCII chars
  * take only one, but unicode chars could take two), print exactly the
@@ -305,7 +239,6 @@ get_ext_icon(const char *restrict ext, int n)
 }
 #endif /* _NO_ICONS */
 
-
 static inline mode_t
 get_file_type(mode_t m)
 {
@@ -351,8 +284,10 @@ post_listing(DIR *dir, const int close_dir, const int reset_pager)
 	if (disk_usage)
 		print_disk_usage();
 
-	if (sort_switch)
+	if (sort_switch) {
+		printf(_("%s->%s Sorted by: "), mi_c, df_c);
 		print_sort_method();
+	}
 
 	if (print_selfiles && sel_n > 0)
 		_print_selfiles(term_rows);

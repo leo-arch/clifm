@@ -36,7 +36,7 @@
 
 #include "checks.h"
 #include "listing.h"
-#include "messages.h"
+//#include "messages.h"
 
 int
 skip_nonexec(const struct dirent *ent)
@@ -251,6 +251,80 @@ xalphasort(const struct dirent **a, const struct dirent **b)
 	return (ret - (ret * 2));
 }
 
+void
+print_sort_method(void)
+{
+	switch (sort) {
+	case SNONE:	puts(_("none")); break;
+
+	case SNAME:
+		printf(_("name %s\n"), (sort_reverse) ? "[rev]" : "");
+		break;
+
+	case SSIZE:
+		printf(_("size %s\n"), (sort_reverse) ? "[rev]" : "");
+		break;
+
+	case SATIME:
+		printf(_("atime %s\n"), (sort_reverse) ? "[rev]" : "");
+		break;
+
+	case SBTIME:
+#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
+		printf(_("btime %s\n"), (sort_reverse) ? "[rev]" : "");
+#else
+		printf(_("btime (not available: using 'ctime') %s\n"),
+		    (sort_reverse) ? "[rev]" : "");
+#endif
+		break;
+
+	case SCTIME:
+		printf(_("ctime %s\n"), (sort_reverse) ? "[rev]" : "");
+		break;
+
+	case SMTIME:
+		printf(_("mtime %s\n"), (sort_reverse) ? "[rev]" : "");
+		break;
+
+	case SVER:
+#if __FreeBSD__ || __NetBSD__ || __OpenBSD__ || _BE_POSIX
+		printf(_("version (not available: using 'name') %s\n"),
+		    (sort_reverse) ? "[rev]" : "");
+#else
+		printf(_("version %s\n"), (sort_reverse) ? "[rev]" : "");
+#endif
+		break;
+
+	case SEXT:
+		printf(_("extension %s\n"), (sort_reverse) ? "[rev]" : "");
+		break;
+
+	case SINO:
+		printf(_("inode %s\n"), (sort_reverse) ? "[rev]" : "");
+		break;
+
+	case SOWN:
+		if (light_mode) {
+			printf(_("owner (not available: using 'name') %s\n"),
+			    (sort_reverse) ? "[rev]" : "");
+		} else {
+			printf(_("owner %s\n"), (sort_reverse) ? "[rev]" : "");
+		}
+		break;
+
+	case SGRP:
+		if (light_mode) {
+			printf(_("group (not available: using 'name') %s\n"),
+			    (sort_reverse) ? "[rev]" : "");
+		} else {
+			printf(_("group %s\n"), (sort_reverse) ? "[rev]" : "");
+		}
+		break;
+
+	default: fputs("unknown sorting method\n", stdout);
+	}
+}
+
 int
 sort_function(char **arg)
 {
@@ -258,62 +332,13 @@ sort_function(char **arg)
 
 	/* No argument: Just print current sorting method */
 	if (!arg[1]) {
-
-		printf(_("Sorting method: "));
-
-		switch (sort) {
-		case SNONE:
-			printf(_("none %s\n"), (sort_reverse) ? "[rev]" : "");
-			break;
-		case SNAME:
-			printf(_("name %s\n"), (sort_reverse) ? "[rev]" : "");
-			break;
-		case SSIZE:
-			printf(_("size %s\n"), (sort_reverse) ? "[rev]" : "");
-			break;
-		case SATIME:
-			printf(_("atime %s\n"), (sort_reverse) ? "[rev]" : "");
-			break;
-		case SBTIME:
-#if defined(HAVE_ST_BIRTHTIME) || defined(__BSD_VISIBLE) || defined(_STATX)
-			printf(_("btime %s\n"), (sort_reverse) ? "[rev]" : "");
-#else
-			printf(_("ctime %s\n"), (sort_reverse) ? "[rev]" : "");
-#endif
-			break;
-		case SCTIME:
-			printf(_("ctime %s\n"), (sort_reverse) ? "[rev]" : "");
-			break;
-		case SMTIME:
-			printf(_("mtime %s\n"), (sort_reverse) ? "[rev]" : "");
-			break;
-		case SVER:
-#if __FreeBSD__ || __NetBSD__ || __OpenBSD__ || _BE_POSIX
-			printf(_("name %s\n"), (sort_reverse) ? "[rev]" : "");
-#else
-			printf(_("version %s\n"), (sort_reverse) ? "[rev]" : "");
-#endif
-			break;
-		case SEXT:
-			printf(_("extension %s\n"), (sort_reverse) ? "[rev]" : "");
-			break;
-		case SINO:
-			printf(_("inode %s\n"), (sort_reverse) ? "[rev]" : "");
-			break;
-		case SOWN:
-			printf(_("owner %s\n"), (sort_reverse) ? "[rev]" : "");
-			break;
-		case SGRP:
-			printf(_("group %s\n"), (sort_reverse) ? "[rev]" : "");
-			break;
-		}
-
+		fputs(_("Sorting method: "), stdout);
+		print_sort_method();
 		return EXIT_SUCCESS;
 	}
 
 	/* Argument is alphanumerical string */
 	if (!is_number(arg[1])) {
-
 		struct sort_t {
 			const char *name;
 			int num;
@@ -344,7 +369,6 @@ sort_function(char **arg)
 		}
 
 		if (strcmp(arg[1], "rev") == 0) {
-
 			if (sort_reverse)
 				sort_reverse = 0;
 			else
@@ -393,7 +417,6 @@ sort_function(char **arg)
 	/* If arg1 is a number but is not in the range 0-SORT_TYPES,
 	 * error */
 	fprintf(stderr, "%s\n", _(SORT_USAGE));
-
 	return EXIT_FAILURE;
 }
 

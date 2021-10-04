@@ -702,15 +702,11 @@ my_rl_path_completion(const char *text, int state)
 
 					if (ret == S_IFDIR)
 						match = 1;
-
 					break;
 
-				case DT_DIR:
-					match = 1;
-					break;
+				case DT_DIR: match = 1; break;
 
-				default:
-					break;
+				default: break;
 				}
 			}
 

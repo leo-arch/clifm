@@ -101,8 +101,8 @@ close_fstream(FILE *fp, int fd)
 	close(fd);
 }
 
-/* Transform S_IFXXX (MODE) into DT_XXX constant */
-mode_t
+/* Transform S_IFXXX (MODE) into the corresponding DT_XXX constant */
+inline mode_t
 get_dt(const mode_t mode)
 {
 	switch (mode & S_IFMT) {
