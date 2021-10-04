@@ -1069,6 +1069,25 @@ rl_quit(int count, int key)
 	return EXIT_SUCCESS;
 }
 
+/* Get current profile and total amount of profiles and store this info
+ * in pointers CUR and TOTAL */
+static void
+get_cur_prof(int *cur, int *total)
+{
+	int i;
+	for (i = 0; profile_names[i]; i++) {
+		(*total)++;
+
+		if (!alt_profile) {
+			if (*profile_names[i] == 'd'
+			&& strcmp(profile_names[i], "default") == 0)
+				*cur = i;
+		} else if (*alt_profile == *profile_names[i]
+			&& strcmp(alt_profile, profile_names[i]) == 0)
+				*cur = i;
+	}
+}
+
 static int
 rl_previous_profile(int count, int key)
 {
@@ -1079,22 +1098,8 @@ rl_previous_profile(int count, int key)
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
 #endif
-	int prev_prof, i, cur_prof = -1, total_profs = 0;
-	for (i = 0; profile_names[i]; i++) {
-		total_profs++;
-
-		if (!alt_profile) {
-			if (*profile_names[i] == 'd'
-			&& strcmp(profile_names[i], "default") == 0) {
-				cur_prof = i;
-			}
-		} else {
-			if (*alt_profile == *profile_names[i]
-			&& strcmp(alt_profile, profile_names[i]) == 0) {
-				cur_prof = i;
-			}
-		}
-	}
+	int prev_prof, cur_prof = -1, total_profs = 0;
+	get_cur_prof(&cur_prof, &total_profs);
 
 	if (cur_prof == -1 || !profile_names[cur_prof])
 		return EXIT_FAILURE;
@@ -1130,22 +1135,8 @@ rl_next_profile(int count, int key)
 	if (suggestion.printed && suggestion_buf)
 		free_suggestion();
 #endif
-	int next_prof, i, cur_prof = -1, total_profs = 0;
-	for (i = 0; profile_names[i]; i++) {
-		total_profs++;
-
-		if (!alt_profile) {
-			if (*profile_names[i] == 'd'
-			&& strcmp(profile_names[i], "default") == 0) {
-				cur_prof = i;
-			}
-		} else {
-			if (*alt_profile == *profile_names[i]
-			&& strcmp(alt_profile, profile_names[i]) == 0) {
-				cur_prof = i;
-			}
-		}
-	}
+	int next_prof, cur_prof = -1, total_profs = 0;
+	get_cur_prof(&cur_prof, &total_profs);
 
 	if (cur_prof == -1 || !profile_names[cur_prof])
 		return EXIT_FAILURE;
