@@ -361,7 +361,7 @@ set_filetype_colors(char **colors, const size_t words)
 			else
 				snprintf(di_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
 
-		} else if (*colors[i] == 'd' && strncmp(colors[i], "df=", 3) == 0) {
+/*		} else if (*colors[i] == 'd' && strncmp(colors[i], "df=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*df_c = '\0';
 			else
@@ -378,7 +378,8 @@ set_filetype_colors(char **colors, const size_t words)
 			if (!is_color_code(colors[i] + 3))
 				*dh_c = '\0';
 			else
-				snprintf(dh_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3);
+				snprintf(dh_c, MAX_COLOR - 1, "\x1b[%sm", colors[i] + 3); */
+
 		} else if (*colors[i] == 'n' && strncmp(colors[i], "nd=", 3) == 0) {
 			if (!is_color_code(colors[i] + 3))
 				*nd_c = '\0';
@@ -521,8 +522,8 @@ set_filetype_colors(char **colors, const size_t words)
 		free(colors[i]);
 	}
 
-	free(colors);
-	colors = (char **)NULL;
+//	free(colors);
+//	colors = (char **)NULL;
 }
 
 static void
@@ -770,8 +771,8 @@ set_iface_colors(char **colors, const size_t words)
 		free(colors[i]);
 	}
 
-	free(colors);
-	colors = (char **)NULL;
+//	free(colors);
+//	colors = (char **)NULL;
 }
 
 static void
@@ -1304,6 +1305,8 @@ set_colors(const char *colorscheme, int env)
 		}
 
 		set_iface_colors(colors, words);
+		free(colors);
+		colors = (char **)NULL;
 		/* Set the color variables */
 /*		int i = (int)words;
 		while (--i >= 0) {
@@ -1699,6 +1702,8 @@ set_colors(const char *colorscheme, int env)
 
 		/* Set the color variables */
 		set_filetype_colors(colors, words);
+		free(colors);
+		colors = (char **)NULL;
 /*		int i = (int)words;
 		while (--i >= 0) {
 			if (*colors[i] == 'd' && strncmp(colors[i], "di=", 3) == 0) {
