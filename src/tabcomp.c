@@ -84,7 +84,7 @@ compare_strings(const void *s1, const void *s2)
 }
 
 /* The user must press "y" or "n". Non-zero return means "y" pressed. */
-int
+static int
 get_y_or_n(void)
 {
 	for (;;) {
@@ -186,7 +186,7 @@ rl_strpbrk(char *s1, char *s2)
 			}
 		}
 	}
-	return ((char *)NULL);
+	return (char *)NULL;
 }
 
 /* Complete the word at or before point.
@@ -197,7 +197,7 @@ rl_strpbrk(char *s1, char *s2)
    `!' means to do standard completion, and list all possible completions
    if there is more than one. */
 /* This function is taken from an old bash release (1.14.7) and modified
- * to fir our needs */
+ * to fit our needs */
 int
 tab_complete(int what_to_do)
 {
@@ -631,9 +631,16 @@ after_usual_completion:
 			if (cur_comp_type == TCMP_PATH) {
 				p = strrchr(matches[0], '/');
 				if (p) {
-					if (!*(p + 1) && p == matches[0]) {
-						/* We have the root dir */
-						xchdir(matches[0], NO_TITLE);
+					if (p == matches[0]) {
+						if (*(p + 1)) {
+							char pp = *(p + 1);
+							*(p + 1) = '\0';
+							xchdir(matches[0], NO_TITLE);
+							*(p + 1) = pp;
+						} else {
+							/* We have the root dir */
+							xchdir(matches[0], NO_TITLE);
+						}
 					} else {
 						*p = '\0';
 						xchdir(matches[0], NO_TITLE);
