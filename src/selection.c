@@ -202,16 +202,14 @@ sel_glob(char *str, const char *sel_path, mode_t filetype)
 #endif
 					continue;
 
-//				int j = (int)gbuf.gl_pathc;
-//				while (--j >= 0) {
-				size_t j;
-				for (j = 0; j < gbuf.gl_pathc; j++) {
+				int j = (int)gbuf.gl_pathc;
+				while (--j >= 0) {
 					if (*ent[i]->d_name == *gbuf.gl_pathv[j]
 					&& strcmp(ent[i]->d_name, gbuf.gl_pathv[j]) == 0)
 						break;
 				}
 
-				if (!gbuf.gl_pathv[j])
+				if (j == -1)
 					matches[k++] = ent[i]->d_name;
 			}
 		}
